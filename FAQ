@@ -43,7 +43,8 @@ TABLE OF CONTENTS
    I get an error when trying to set a negative value - why?
    How do I send traps and notifications?
    How do I handle traps and notifications?
-    The ucdShutdown trap OID received by my manager is wrong. Why?
+   My traphandler script doesn't work when run like this - why not?
+   The ucdShutdown trap OID received by my manager is wrong. Why?
    How do I use SNMPv3?
    How big can an SNMP request (or reply) be?
    How can I monitor my systems (disk, memory, etc)?
@@ -973,7 +974,34 @@ How do I handle traps and notifications?
 
   There's a tutorial with more details on the web site at
 	http://www.net-snmp.org/tutorial/commands/snmptrap.html
-  
+ 
+
+
+My traphandler script doesn't work when run like this - why not?
+---------------------------------------------------------------
+
+    If a traphandler script works fine when run manually from the
+  command line, but generates an error when triggered by an incoming
+  notification, then this is probably down to one of two likely causes.
+
+    Firstly, the interactive shell environment may not be precisely
+  the same as that for programs executed by the snmptrapd daemon.
+  In particular, it's quite possible that the PATH environmental
+  variable may not include all the additional directories that are
+  commonly set up for a personal login configuration.  To avoid this
+  problem (particularly for traphandler shell scripts), it's worth
+  giving the full path to all programs used within the script.
+
+    Secondly, the snmptrapd daemon may not always recognise the
+  appropriate interpreter to use for a particular trap handler.
+  If this is the case, then you can specify this interpreter
+  explicitly as part of the trap handle directive:
+
+	traphandle default /usr/bin/perl /usr/local/bin/log_it
+
+  Note that in this case, it's almost certain that you'll also
+  need to give the full path to the traphandle script (as shown)
+
 
 
 The ucdShutdown trap OID received by my manager is wrong. Why?
