@@ -177,6 +177,7 @@ print "Done.\n";
 #============================================
 sub loadMib {
     my $mib = shift;
+    my $i;
     my $depth = shift;
     $depth = $depth + 1;
     my $name = $mib->{'label'};
@@ -188,8 +189,8 @@ sub loadMib {
 	$subid = $mib->{'objectID'};
 	$subid =~ s/$fulloid\.//;
 	$subid =~ s/\./,/g;
-	if (!defined($variables{$mib->{'type'}})) {
-	    print STDERR "unknown type:  $mib->{type} for $mib->{label}\n";
+	if (!defined($variables{$mib->{'type'}})  && !defined($mib->{'indexes'})) {
+	    print STDERR "unknown type:  $mib->{type} for $mib->{label} $mib->{'access'}\n";
 	    print STDERR "unknown type:  no information generated for $mib->{label}\n";
 	} else {
 	    foreach $i (@process) {
@@ -198,6 +199,13 @@ sub loadMib {
 		my $result = (eval "\"$variables{$i}{'code'}\"");
 		$variables{$i}{'processed'} .= "$result\n";
 		$variables{$vroutine}{$i}{'processed'} .= "$result\n";
+	    }
+	}
+	if (defined($mib->{'indexes'})) {
+	    print "indexes: ", join(", ",@{$mib->{'indexes'}}),"\n";
+	    $variables{$vroutine}{'indexes'} = $mib->{'indexes'};
+	    foreach $i (@{$mib->{'indexes'}}) {
+		$variables{$vroutine}{$i}{'isanindex'} = 1;
 	    }
 	}
     }
@@ -290,4 +298,12 @@ sub evalstr {
 	$str = "\"$str\"";  # surround by quotes.
 #    }
     eval ($str);            # should return a string, with variables expanded
+}
+
+sub evalrstr {
+    my $rstr = shift;
+#    if ($str !~ /^\"/) {
+#	$$rstr = "\"" . $$rstr . "\"";  # surround by quotes.
+#    }
+    eval ("\"$$rstr\"");            # should return a string, with variables expanded
 }
