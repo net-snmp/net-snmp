@@ -197,13 +197,16 @@ What's the difference between UCD-SNMP and Net-SNMP?
   workload more evenly.  The change of name simply reflects this move,
   which was the last remaining link with UC Davis.
 
-    The 4.2.1 release will be the last version under the UCD banner.
-  Future releases will be made under the name 'net-snmp'.  At some point,
-  we are planning to review and rework the underlying code base, to
-  improve the readability and maintainability of the package.
-  This will probably result in some changes to the API, though we will
-  attempt to retain some form of backwards compatability as far as
-  possible, and clearly mark anything that has changed.
+    The 4.2 line is the last release line that will use the ucd-snmp name.
+  4.2.1 and any subsequent ucd-snmp releases will be bug-fixes only.
+  All further developments will be released under the net-snmp name.
+  
+    At some point, we are planning to review and rework the underlying
+  code base, to improve the readability and maintainability of the
+  package.  This will probably result in some changes to the API,
+  though we will attempt to retain some form of backwards
+  compatability as far as possible, and clearly mark anything that has
+  changed.
 
 
 
