@@ -105,10 +105,10 @@ typedef long	fd_mask;
 
 int main __P((int, char **));
 int Print = 0;
+int Syslog = 0;
 int Event = 0;
 char *Command = NULL;
 
-int Syslog = 0;
 /*
  * These definitions handle 4.2 systems without additional syslog facilities.
  */
@@ -221,6 +221,7 @@ snmp_clone_pdu2(pdu, command)
 
     /* clone the pdu */
     newpdu = (struct snmp_pdu *)malloc(sizeof(struct snmp_pdu));
+    if (newpdu == NULL) return NULL;
     memmove(newpdu, pdu, sizeof(struct snmp_pdu));
     newpdu->variables = NULL;
     newpdu->command = command;
@@ -345,7 +346,7 @@ int snmp_input(op, session, reqid, pdu, magic)
 	if (pdu->command == SNMP_MSG_TRAP){
 	    host = gethostbyaddr ((char *)&pdu->agent_addr.sin_addr,
 				  sizeof (pdu->agent_addr.sin_addr), AF_INET);
-	    if (Print){
+	    if (Print) {
 		time (&timer);
 		tm = localtime (&timer);
                 printf("%.4d-%.2d-%.2d %.2d:%.2d:%.2d %s [%s] %s:\n",
@@ -374,8 +375,9 @@ int snmp_input(op, session, reqid, pdu, magic)
 		    printf ("\t");
 		    print_variable(vars->name, vars->name_length, vars);
 		}
+		printf("\n");
 	    }
-	    if (Syslog){
+	    if (Syslog) {
 	    	varbufidx=0;
 	    	varbuf[varbufidx++]=','; varbuf[varbufidx++]=' ';
 	    	varbuf[varbufidx]='\0';
@@ -388,9 +390,6 @@ int snmp_input(op, session, reqid, pdu, magic)
 	        	varbuf[varbufidx++]=',';
 	        	varbuf[varbufidx++]=' ';
 	        	varbuf[varbufidx]='\0';
-	    	}
-	    	if ( varbufidx == 2 ) {
-			varbufidx -= 2; varbuf[varbufidx]='\0';
 	    	}
 	    	if ( varbufidx ) {
 			varbufidx -= 2; varbuf[varbufidx]='\0';
@@ -405,13 +404,13 @@ int snmp_input(op, session, reqid, pdu, magic)
 
 		    syslog(LOG_WARNING, "%s: %s Trap (%s) Uptime: %s%s",
 		       inet_ntoa(pdu->agent_addr.sin_addr),
-		       trap_description(pdu->trap_type),strrchr(oid_buf, '.')+1,
-		       uptime_string(pdu->time, buf),varbuf);
+		       trap_description(pdu->trap_type), strrchr(oid_buf, '.')+1,
+		       uptime_string(pdu->time, buf), varbuf);
 		} else {
 		    syslog(LOG_WARNING, "%s: %s Trap (%ld) Uptime: %s%s",
 		       inet_ntoa(pdu->agent_addr.sin_addr),
 		       trap_description(pdu->trap_type), pdu->specific_type,
-		       uptime_string(pdu->time, buf),varbuf);
+		       uptime_string(pdu->time, buf), varbuf);
 		}
 	    }
             if (Command) {
@@ -470,8 +469,7 @@ int snmp_input(op, session, reqid, pdu, magic)
 		   || pdu->command == SNMP_MSG_INFORM){
 	    host = gethostbyaddr ((char *)&pdu->address.sin_addr,
 				  sizeof (pdu->address.sin_addr), AF_INET);
-	    if (Print){
-		printf("-------------------------------  Notification  -------------------------------\n");
+	    if (Print) {
 		time (&timer);
 		tm = localtime (&timer);
                 printf("%.4d-%.2d-%.2d %.2d:%.2d:%.2d %s [%s]:\n",
@@ -479,8 +477,11 @@ int snmp_input(op, session, reqid, pdu, magic)
 		       tm->tm_hour, tm->tm_min, tm->tm_sec,
                        host ? host->h_name : inet_ntoa(pdu->address.sin_addr),
                        inet_ntoa(pdu->address.sin_addr));
-		for(vars = pdu->variables; vars; vars = vars->next_variable)
+		for (vars = pdu->variables; vars; vars = vars->next_variable) {
+		    printf("\t");
 		    print_variable(vars->name, vars->name_length, vars);
+		}
+		printf("\n");
 	    }
 	    if (Event) {
 		event_input(pdu->variables);
@@ -523,7 +524,7 @@ int snmp_input(op, session, reqid, pdu, magic)
               }
             }
 	    if (pdu->command == SNMP_MSG_INFORM){
-		if (!(reply = snmp_clone_pdu2(pdu, SNMP_MSG_GET))){
+		if (!(reply = snmp_clone_pdu2(pdu, SNMP_MSG_RESPONSE))){
 		    fprintf(stderr, "Couldn't clone PDU for response\n");
 		    return 1;
 		}
@@ -599,6 +600,28 @@ main(argc, argv)
 		    }
 		    Command = argv[arg];
 		    break;
+		case 'm':
+		    if (argv[arg][2] != 0)
+			setenv("MIBS",&argv[arg][2], 1);
+		    else if (++arg < argc)
+			setenv("MIBS",argv[arg], 1);
+		    else {
+			fprintf(stderr,"Need MIBS after -m flag.\n");
+			usage();
+			exit(1);
+		    }
+		    break;
+		case 'M':
+		    if (argv[arg][2] != 0)
+			setenv("MIBDIRS",&argv[arg][2], 1);
+		    else if (++arg < argc)
+			setenv("MIBDIRS",argv[arg], 1);
+		    else {
+			fprintf(stderr,"Need MIBDIRS after -M flag.\n");
+			usage();
+			exit(1);
+		    }
+		    break;
 		case 'P':
 		    Print++;
 		    break;
@@ -609,8 +632,8 @@ main(argc, argv)
 		    Syslog++;
 		    break;
                 case 'f':
-                  dofork = 0;
-                  break;
+		    dofork = 0;
+		    break;
 		case 'l':
 		    arg++;
 		    switch(argv[arg][0]) {
@@ -655,6 +678,7 @@ main(argc, argv)
     }
 
     init_mib();
+    if (!Print) Syslog = 1;
 
     myaddr = get_myaddr();
     srclen = dstlen = contextlen = MAX_NAME_LEN;

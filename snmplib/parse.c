@@ -1058,7 +1058,7 @@ static void do_linkup(mp, np)
 	 * All modules implicitly import
 	 *   the roots of the tree
 	 */
-    dump_module_list();
+    if (snmp_get_do_debugging() > 1) dump_module_list();
     DEBUGP("Processing IMPORTS for module %s\n", mp->name);
     if ( mp->no_imports == 0 ) {
 	mp->no_imports = NUMBER_OF_ROOT_NODES;
@@ -1070,7 +1070,7 @@ static void do_linkup(mp, np)
 	 */
     init_node_hash( np );
     for ( i=0, mip=mp->imports ; i < mp->no_imports ; ++i, ++mip ) {
-	DEBUGP ("Processing import: %s\n", mip->label);
+	DEBUGP ("  Processing import: %s\n", mip->label);
 	if (get_tc_index( mip->label, mip->modid ) != -1)
 	    continue;
 	tp = find_tree_node( mip->label, mip->modid );
@@ -2263,7 +2263,7 @@ read_module_internal (name )
 		return MODULE_LOAD_FAILED;
 	    }
 	    mp->no_imports=0;		/* Note that we've read the file */
- 	    File = mp->file;
+	    File = mp->file;
 	    Line = 1;
 		/*
 		 * Parse the file
@@ -2278,7 +2278,7 @@ read_module_internal (name )
 }
 
 void
-adopt_orphans()
+adopt_orphans __P((void))
 {
     struct node *np, *onp;
     struct tree *tp;
@@ -2358,6 +2358,7 @@ new_module (name , file)
 	}
 
 	/* Add this module to the list */
+    DEBUGP("  Module %s is in %s\n", name, file);
     mp = (struct module *) xmalloc(sizeof(struct module));
     mp->name = xstrdup(name);
     mp->file = xstrdup(file);
@@ -2392,7 +2393,7 @@ parse(fp, root)
     int state = BETWEEN_MIBS;
     struct node *np, *nnp;
 
-    if (mib_warnings) fprintf (stderr, "Parsing mib file:  %s...\n", File);
+    DEBUGP ("Parsing file:  %s...\n", File);
 
     np = root;
     if (np != NULL) {
@@ -2463,7 +2464,7 @@ parse(fp, root)
                 return NULL;
             }
             state = IN_MIB;
-            if (mib_warnings) fprintf (stderr, "Parsing MIB: %s\n", name);
+            DEBUGP ("Parsing MIB: %s\n", name);
             current_module = which_module( name );
             if ( current_module == -1 ) {
 		new_module(name, File);
@@ -2729,9 +2730,9 @@ add_mibdir( dirname )
     int count = 0;
     struct stat dir_stat, idx_stat;
 
-    stat(dirname, &dir_stat);
+    DEBUGP("Scanning directory %s\n", dirname);
     sprintf(token, "%s/%s", dirname, ".index");
-    if (stat (token, &idx_stat) == 0) {
+    if (stat (token, &idx_stat) == 0 && stat(dirname, &dir_stat) == 0) {
 	if (dir_stat.st_mtime < idx_stat.st_mtime) {
 	    DEBUGP("The index is good\n");
 	    if ((ip = fopen(token, "r")) != NULL) {
@@ -2765,13 +2766,12 @@ add_mibdir( dirname )
                         perror(tmpstr);
 			continue;
                     }
-                    DEBUGP("Adding %s...", tmpstr);
+                    DEBUGP("Checking file: %s...\n", tmpstr);
                     Line = 1;
                     File = tmpstr;
                     get_token( fp, token, MAXTOKEN);
                     new_module(token, tmpstr);
                     count++;
-                    DEBUGP("done\n");
                     fclose (fp);
 		    if (ip) fprintf(ip, "%s %s\n", token, file->d_name);
                 }
@@ -2797,16 +2797,17 @@ read_mib(filename)
     char token[MAXTOKEN];
 
     fp = fopen(filename, "r");
-    if (fp == NULL)
+    if (fp == NULL) {
+	perror(filename);
         return NULL;
+    }
     Line = 1;
     File = filename;
-    DEBUGP("Parsing %s...", filename);
+    DEBUGP("Parsing file: %s...\n", filename);
     get_token( fp, token, MAXTOKEN);
     fclose(fp);
     new_module(token, filename);
     (void) read_module(token);
-    DEBUGP("Done\n");
 
     return tree_head;
 }

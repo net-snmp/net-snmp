@@ -57,6 +57,7 @@ SOFTWARE.
 #include "parse.h"
 #include "mib.h"
 #include "snmp.h"
+#include "../snmplib/system.h"
 
 #include "version.h"
 
@@ -66,7 +67,7 @@ void
 usage __P((void))
 {
   fprintf(stderr,
-	  "usage: snmptranslate [-V|-p|-a] [-w|-W] [-R] [-m <MIBS>] [-M <MIBDIRS] [-n] [-d] [-f|-s|-S] [<objectID>]\n\n");
+	  "usage: snmptranslate [-V|-p|-a] [-w|-W] [-R] [-D] [-m <MIBS>] [-M <MIBDIRS] [-n] [-d] [-f|-s|-S] [<objectID>]\n\n");
   fprintf(stderr,
           "  -V\t\tPrint snmptranslate version then exit.\n");
   fprintf(stderr,
@@ -75,6 +76,8 @@ usage __P((void))
           "  -a\t\tPrint MIB ascii symbol table.\n");
   fprintf(stderr,
           "  -m <MIBS>\tuse MIBS list instead of the default mib list.\n");
+  fprintf(stderr,
+	  "  -D\t\tenable snmplib debugging messages\n");
   fprintf(stderr,
           "  -M <MIBDIRS>\tuse MIBDIRS as the location to look for mibs.\n");
   fprintf(stderr,
@@ -177,6 +180,9 @@ main(argc, argv)
                   exit(1);
                 }
                 break;
+	      case 'D':
+		snmp_set_do_debugging(1);
+		break;
               case 'V':
                 fprintf(stderr,"UCD-snmp version: %s\n", VersionInfo);
                 exit(0);

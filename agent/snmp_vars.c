@@ -87,12 +87,16 @@ PERFORMANCE OF THIS SOFTWARE.
 #define  MIN(a,b)                     (((a) < (b)) ? (a) : (b)) 
 #endif
 
-int compare_tree __P((oid *, int, oid *, int));
+static int compare_tree __P((oid *, int, oid *, int));
 extern struct subtree subtrees_old[];
 
-u_char *search_subtree_vars __P((struct subtree *, oid *, int *, u_char *, int *, u_short *, int, int (**write) __P((int, u_char *, u_char, int, u_char *, oid *, int)), struct packet_info *, int *));
+static u_char *search_subtree_vars __P((struct subtree *, oid *, int *, u_char *, int *, u_short *, int, int (**write) __P((int, u_char *, u_char, int, u_char *, oid *, int)), struct packet_info *, int *));
+
 struct subtree *find_subtree_next __P((oid *, int, struct subtree *));
-u_char	*search_subtree __P((struct subtree *, oid *, int *, u_char *, int *, u_short *, int, int (**write) __P((int, u_char *, u_char, int, u_char *, oid *, int)), struct packet_info *, int *));
+
+static u_char	*search_subtree __P((struct subtree *, oid *, int *, u_char *, int *, u_short *, int, int (**write) __P((int, u_char *, u_char, int, u_char *, oid *, int)), struct packet_info *, int *));
+
+static int in_a_view __P((oid *, int *, struct packet_info *, struct variable *));
 
 int subtree_size;
 int subtree_malloc_size;
@@ -353,7 +357,7 @@ free_subtree(st)
 /* in_a_view: determines if a given packet_info is allowed to see a
    given name/namelen OID pointer */
 
-int
+static int
 in_a_view(name, namelen, pi, cvp)
   struct packet_info *pi;   /* IN - relevant auth info re PDU */
   struct variable	*cvp; /* IN - relevant auth info re mib module */
@@ -400,7 +404,7 @@ in_a_view(name, namelen, pi, cvp)
  */
 static  int 		found;
 
-u_char	*
+static u_char *
 search_subtree_vars(tp, name, namelen, type, len, acl, exact, write_method, pi,
 	   noSuchObject)
     struct subtree *tp;
@@ -500,7 +504,7 @@ search_subtree_vars(tp, name, namelen, type, len, acl, exact, write_method, pi,
 	    return NULL;
 }
 
-u_char	*
+static u_char *
 search_subtree(sub_tp, name, namelen, type, len, acl, exact, write_method, pi,
 	   noSuchObject)
     struct subtree *sub_tp;
@@ -764,7 +768,7 @@ compare(name1, len1, name2, len2)
     return 0;	/* both strings are equal */
 }
 
-int
+static int
 compare_tree(name1, len1, name2, len2)
     register oid	    *name1, *name2;
     register int	    len1, len2;

@@ -8,6 +8,10 @@
 #include <config.h>
 #if STDC_HEADERS
 #include <stdlib.h>
+#include <string.h>
+#endif
+#if HAVE_UNISTD_H
+#include <unistd.h>
 #endif
 #include <sys/param.h>
 #include <sys/types.h>
@@ -64,17 +68,6 @@
 #endif
 #if HAVE_IOCTLS_H
 #include <ioctls.h>
-#endif
-#if STDC_HEADERS
-#include <string.h>
-#include <stdlib.h>
-#else
-#if HAVE_STDLIB_H
-#include <stdlib.h>
-#endif
-#endif
-#if HAVE_UNISTD_H
-#include <unistd.h>
 #endif
 #if TIME_WITH_SYS_TIME
 # include <sys/time.h>

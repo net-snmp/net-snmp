@@ -5,7 +5,7 @@
 .SH NAME
 snmpd - daemon to respond to SNMP request packets.
 .SH SYNOPSIS
-.B "snmpd [-a] [-V] [-d] [-q] [-D] [-p port] [-f] [-l logfile] [-L] [-c file] [-C]"
+.B "snmpd [-v] [-a] [-V] [-d] [-q] [-D] [-p port] [-f] [-l logfile] [-L] [-c file] [-C]"
 .SH DESCRIPTION
 .B snmpd
 is a SNMP agent which binds to a port and awaits requests from
@@ -15,6 +15,8 @@ requested opperation(s) and returns the information to the sender.
 .SH OPTIONS
 .RS
 .TP 6
+.B -v
+Print version information for the agent, and exit.
 .B -a
 Dumps the addresses the agent corresponds with to stderr or logfile.
 .TP
@@ -72,29 +74,35 @@ default) is allowed read-only access and the second ("private" by
 default) is allowed write access as well.  The 3-5th community strings
 are read-only as well.
 .IP
-In addition to these two configuration files in DATADIR/snmp and/or
-LIBDIR/snmp, the agent will read any files with the names snmpd.conf
-and snmpd.local.conf in a colon sepereated path specified in the
+In addition to these two configuration files in DATADIR/snmp, the
+agent will read any files with the names snmpd.conf and
+snmpd.local.conf in a colon separated path specified in the
 SNMPCONFPATH environmental variable.
-.TP 
+.TP
 .B DATADIR/snmp/mibs/
 The agent will also load all files in this directory as mibs also.  It
 will not, however, load any file that begins with a '.' or decend into
 subdirectories.
 .B 
+.TP
+.B DATADIR/snmp/party.conf
+Defines the classic SNMP V2 parties.
+.TP
+.B DATADIR/snmp/view.conf
+Defines which parties defined in the 
+.B party.conf
+have access to which parts of the mib.
+.TP
+.B DATADIR/snmp/context.conf
+Maps names to numerical view contexts.
+.TP
+.B DATADIR/snmp/acl.conf
+Defines the classic SNMP V2 action types usable by two communicating parties.
 .RE
 .PP
 See the associated manual pages for information on the content of
 these files.
 .SH FILES
-DATADIR/snmpd.conf
-.br
-DATADIR/snmpd.local.conf
-.br
-LIBDIR/snmpd.conf
-.br
-LIBDIR/snmpd.local.conf
-.br
 DATADIR/snmp/snmpd.conf
 .br
 DATADIR/snmp/party.conf
@@ -107,7 +115,11 @@ DATADIR/snmp/acl.conf
 .SH SEE ALSO
 (in recomended reading order)
 .PP
-snmpd.conf(5)
+snmpd.conf(5),
+party.conf(5),
+view.conf(5),
+context.conf(5),
+acl.conf(5)
 .\" Local Variables:
 .\"  mode: nroff
 .\" End:

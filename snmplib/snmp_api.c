@@ -242,7 +242,7 @@ struct timeval Now;
 struct snmp_pdu *SavedPdu = NULL;
 struct internal_variable_list *SavedVars = NULL;
 
-static int snmp_dump_packet = 0;
+int snmp_dump_packet = 0;
 
 static void free_request_list __P((struct request_list *));
 void shift_array __P((u_char *, int, int));
@@ -614,7 +614,7 @@ snmp_build(session, pdu, packet, out_length)
        upto the PDU sequence
        (note that actual length of message will be inserted later) */
     h0 = packet;
-    switch (session->version) {
+    switch (pdu->version) {
     case SNMP_VERSION_1:
     case SNMP_VERSION_2c:
         /* Save current location and build SEQUENCE tag and length
@@ -767,7 +767,7 @@ snmp_build(session, pdu, packet, out_length)
                        cp - h1e);
 
     /* insert the actual length of the message sequence */        
-    switch (session->version) {
+    switch (pdu->version) {
     case SNMP_VERSION_1:
     case SNMP_VERSION_2c:
         asn_build_sequence(packet, &length,
@@ -821,6 +821,7 @@ snmp_parse(session, pdu, data, length)
     int community_length = COMMUNITY_MAX_LEN;
     struct internal_variable_list *vp = NULL;
     oid objid[MAX_NAME_LEN];
+    char err[128];
 
     /* get the message tag */
     len = length;
@@ -909,20 +910,26 @@ snmp_parse(session, pdu, data, length)
         /* request id */
 	data = asn_parse_int(data, &length, &type, &pdu->reqid,
 			     sizeof(pdu->reqid));
-	if (data == NULL)
+	if (data == NULL) {
+	    ERROR_MSG(strcat(strcpy(err, "parsing request-id: "), snmp_detail));
 	    return -1;
+	}
 
         /* error status (getbulk non-repeaters) */
 	data = asn_parse_int(data, &length, &type, &pdu->errstat,
 			     sizeof(pdu->errstat));
-	if (data == NULL)
+	if (data == NULL) {
+	    ERROR_MSG(strcat(strcpy(err, "parsing error status: "), snmp_detail));
 	    return -1;
+	}
 
         /* error index (getbulk max-repetitions) */
 	data = asn_parse_int(data, &length, &type, &pdu->errindex,
 			     sizeof(pdu->errindex));
-	if (data == NULL)
+	if (data == NULL) {
+	    ERROR_MSG(strcat(strcpy(err, "parsing error index: "), snmp_detail));
 	    return -1;
+	}
     } else {
         /* an SNMPv1 trap PDU */
 
@@ -1113,7 +1120,7 @@ snmp_send(session, pdu)
     struct snmp_session *session;
     struct snmp_pdu	*pdu;
 {
-  return snmp_async_send(session, pdu, NULL, NULL);
+    return snmp_async_send(session, pdu, NULL, NULL);
 }
 
 /*
@@ -1167,6 +1174,8 @@ snmp_async_send(session, pdu, callback, cb_data)
 	    return 0;
         }
         pdu->version = session->version;
+    } else if (session->version == SNMP_DEFAULT_VERSION) {
+	/* It's OK */
     } else if (pdu->version != session->version) {
         snmp_errno = SNMPERR_BAD_VERSION;
         return 0;
@@ -1188,11 +1197,11 @@ snmp_async_send(session, pdu, callback, cb_data)
         if (pdu->command == SNMP_MSG_RESPONSE)
             /* don't expect a response */
             expect_response = 0;
-    } else if ((pdu->command == SNMP_MSG_INFORM) ||
-               (pdu->command == SNMP_MSG_TRAP2)) {
+    } else if (pdu->command == SNMP_MSG_INFORM ||
+               pdu->command == SNMP_MSG_TRAP2) {
         /* not supported in SNMPv1 and SNMPsec */
-	if ((session->version == SNMP_VERSION_1) ||
-                (session->version == SNMP_VERSION_sec)) {
+	if (pdu->version == SNMP_VERSION_1 ||
+                pdu->version == SNMP_VERSION_sec) {
 	    snmp_errno = SNMPERR_V2_IN_V1;
 	    return 0;
 	}
@@ -1204,12 +1213,11 @@ snmp_async_send(session, pdu, callback, cb_data)
 	if (pdu->errindex == SNMP_DEFAULT_ERRINDEX)
 	    pdu->errindex = 0;
         if (pdu->command == SNMP_MSG_TRAP2)
-            /* don't expect a response */
             expect_response = 0;
     } else if (pdu->command == SNMP_MSG_GETBULK) {
         /* not supported in SNMPv1 and SNMPsec */
-	if ((session->version == SNMP_VERSION_1) ||
-                (session->version == SNMP_VERSION_sec)) {
+	if (pdu->version == SNMP_VERSION_1 ||
+                pdu->version == SNMP_VERSION_sec) {
 	    snmp_errno = SNMPERR_V1_IN_V2;
 	    return 0;
 	}
@@ -1222,8 +1230,8 @@ snmp_async_send(session, pdu, callback, cb_data)
 	}
 	    
     } else if (pdu->command == SNMP_MSG_TRAP) {
-        if ((session->version != SNMP_VERSION_1) &&
-            (session->version != SNMP_VERSION_sec)) {
+        if (pdu->version != SNMP_VERSION_1 &&
+            pdu->version != SNMP_VERSION_sec) {
           snmp_errno = SNMPERR_V2_IN_V1;
           return 0;
         }
@@ -1264,7 +1272,7 @@ snmp_async_send(session, pdu, callback, cb_data)
      */
 
     /* setup administrative fields based on version */
-    switch (session->version) {
+    switch (pdu->version) {
     case SNMP_VERSION_1:
     case SNMP_VERSION_2c:
 	if (pdu->community_len == 0){
@@ -1326,7 +1334,7 @@ snmp_async_send(session, pdu, callback, cb_data)
 	return 0;
     }
     if (snmp_dump_packet){
-	printf("\nsending %d bytes to %s:%hd:\n", length,
+	printf("\nsending %d bytes to %s:%hu:\n", length,
 	       inet_ntoa(pdu->address.sin_addr), ntohs(pdu->address.sin_port));
 	xdump(packet, length, "");
         printf("\n");
@@ -1473,7 +1481,7 @@ snmp_read(fdset)
 		continue;
 	    }
 	    if (snmp_dump_packet){
-		printf("\nreceived %d bytes from %s:%hd:\n", length,
+		printf("\nreceived %d bytes from %s:%hu:\n", length,
 		       inet_ntoa(from.sin_addr), ntohs(from.sin_port));
 		xdump(packet, length, "");
                 printf("\n");
@@ -1488,7 +1496,7 @@ snmp_read(fdset)
 	    memset (pdu, 0, sizeof(*pdu));
 	    pdu->address = from;
 	    if (snmp_parse(sp, (struct internal_snmp_pdu *)pdu, packet, length) != SNMP_ERR_NOERROR){
-		fprintf(stderr, "Unrecognizable or unauthentic packet received\n");
+		fprintf(stderr, "Unrecognizable or unauthentic packet received (%s)\n", snmp_detail);
 		snmp_free_internal_pdu(pdu);
 		return;
 	    }
@@ -1498,7 +1506,7 @@ snmp_read(fdset)
 		    if (rp->request_id == pdu->reqid){
 			if (rp->callback) callback = rp->callback;
 			if (rp->cb_data) magic = rp->cb_data;
-		        if (callback(RECEIVED_MESSAGE, sp, pdu->reqid,
+		        if (callback == NULL || callback(RECEIVED_MESSAGE, sp, pdu->reqid,
 					 pdu, magic) == 1){
 			    /* successful, so delete request */
 			    if (isp->requests == rp){
@@ -1676,7 +1684,8 @@ snmp_timeout __P((void))
 		    callback = (rp->callback ? rp->callback : sp->callback);
 		    magic = (rp->cb_data ? rp->cb_data : sp->callback_magic);
 		    /* No more chances, delete this entry */
-		    callback(TIMED_OUT, sp, rp->pdu->reqid, rp->pdu, magic);
+		    if (callback)
+			callback(TIMED_OUT, sp, rp->pdu->reqid, rp->pdu, magic);
 		    if (orp == NULL){
 			isp->requests = rp->next_request;
 			if (isp->requestsEnd == rp)
@@ -1697,12 +1706,13 @@ snmp_timeout __P((void))
 		    /* retransmit this pdu */
 		    rp->retries++;
 		    if (snmp_build(sp, rp->pdu, packet, &length) < 0){
-			fprintf(stderr, "Error re-building packet\n");
+			fprintf(stderr, "Error re-building packet (%s)\n",
+				snmp_detail);
 			/* this should never happen */
 			abort();
 		    }
 		    if (snmp_dump_packet){
-			printf("\nsending %d bytes to %s:%hd:\n", length,
+			printf("\nsending %d bytes to %s:%hu:\n", length,
 			       inet_ntoa(rp->pdu->address.sin_addr), ntohs(rp->pdu->address.sin_port));
 			xdump(packet, length, "");
 			printf("\n");

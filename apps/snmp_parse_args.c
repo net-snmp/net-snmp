@@ -238,7 +238,6 @@ snmp_parse_args(argc, argv, session)
       case 'V':
         fprintf(stderr,"UCD-snmp version: %s\n", VersionInfo);
         exit(0);
-        break;
 
       case 'v':
         if (argv[arg][2] != 0)

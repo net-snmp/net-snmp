@@ -567,7 +567,8 @@ parse_var_op_list(data, length, out_data, out_length, index, pi, action)
 	    else {
 		char buf [256];
 		sprint_objid(buf, var_name, var_name_len);
-		DEBUGP("%s --  OID Doesn't exist or access is denied\n", buf);
+		DEBUGP("%s(%s) --  OID Doesn't exist or access is denied\n",
+                       exact ? "GET" : "GETNEXT", buf);
 	    }
 	    return SNMP_ERR_NOSUCHNAME; 
 	}
