@@ -209,7 +209,7 @@ READ, WRITE and NOTIFY specifies the view to be used for the corresponding
 access.
 For v1 or v2c access, LEVEL will be noauth, and CONTEXT will be empty.
 .IP "view NAME TYPE SUBTREE [MASK]"
-The defines the named view. TYPE is either \fIincluded\fR or \fIexcluded\fR.
+This defines the named view. TYPE is either \fIincluded\fR or \fIexcluded\fR.
 MASK is a list of hex octets, separated by '.' or ':'.  The MASK
 defaults to "ff" if not specified.
 .IP
