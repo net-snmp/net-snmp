@@ -353,7 +353,12 @@ _copy_pdu_vars(struct snmp_pdu *pdu,  /* source PDU */
         var = var->next_variable;
     }
     /* Error if bad errindex or if target PDU has no variables copied */
-    if ((drop_err && (ii < pdu->errindex)) || copied == 0){
+    if ((drop_err && (ii < pdu->errindex))
+#if 0
+        || copied == 0 /* null variables are allowed for v3 engineid
+                          probes, so clone it anyway. -- Wes */
+#endif
+      ) {
         snmp_free_pdu(newpdu); return 0;
     }
     return newpdu;

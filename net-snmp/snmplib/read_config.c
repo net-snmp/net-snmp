@@ -413,7 +413,7 @@ read_premib_configs (void)
 void
 read_config_files (int when)
 {
-  int i;
+  int i, j;
   char configfile[300];
   char *envconfpath, *homepath;
   char *cptr1, *cptr2;
@@ -421,6 +421,7 @@ read_config_files (int when)
 
   struct config_files *ctmp = config_files;
   struct config_line *ltmp;
+  struct stat statbuf;
   
   if (when == PREMIB_CONFIG)
     free_config();
@@ -451,6 +452,31 @@ read_config_files (int when)
         i = 0;
       else
         *cptr1 = 0;
+      /*
+       * for proper persistent storage retrival, we need to read old backup
+       * copies of the previous storage files.  If the application in
+       * question has died without the proper call to snmp_clean_persistent,
+       * then we read all the configuration files we can, starting with
+       * the oldest first.
+       */
+      if (strncmp(cptr2, PERSISTENT_DIRECTORY,
+                  strlen(PERSISTENT_DIRECTORY)) == 0 ||
+          (getenv("SNMP_PERSISTENT_FILE") != NULL &&
+           strncmp(cptr2, getenv("SNMP_PERSISTENT_FILE"),
+                   strlen(getenv("SNMP_PERSISTENT_FILE"))) == 0)) {
+        /* limit this to the known storage directory only */
+        for(j=0; j <= MAX_PERSISTENT_BACKUPS; j++) {
+          sprintf(configfile,"%s/%s.%d.conf",cptr2, ctmp->fileHeader, j);
+          if (stat(configfile, &statbuf) != 0) {
+            /* file not there, continue */
+            break;
+          } else {
+            /* backup exists, read it */
+            DEBUGMSGTL(("read_config_files","old config file found: %s, parsing\n", configfile));
+            read_config (configfile, ltmp, when);
+          }
+        }
+      }
       sprintf(configfile,"%s/%s.conf",cptr2, ctmp->fileHeader);
       read_config (configfile, ltmp, when);
       sprintf(configfile,"%s/%s.local.conf",cptr2, ctmp->fileHeader);
@@ -493,7 +519,7 @@ void read_config_print_usage(const char *lead)
  *      
  * 
  * Append line to a file named either ENV(SNMP_PERSISTENT_FILE) or
- *   "<PERSISTENT_DIRECTORY>/<type>.persistent.conf".
+ *   "<PERSISTENT_DIRECTORY>/<type>.conf".
  * Add a trailing newline to the stored file if necessary.
  *
  * Intended for use by applications to store permenant configuration 
@@ -542,16 +568,60 @@ read_config_store(const char *type, const char *line)
 
 
 /*******************************************************************-o-******
+ * snmp_save_persistent
+ *
+ * Parameters:
+ *	*type
+ *      
+ *
+ * Save the file "<PERSISTENT_DIRECTORY>/<type>.conf" into a backup copy
+ * called "<PERSISTENT_DIRECTORY>/<type>.%d.conf", which %d is an
+ * incrementing number on each call, but less than MAX_PERSISTENT_BACKUPS.
+ *
+ * Should be called just before all persistent information is supposed to be
+ * written to move aside the existing persistent cache.
+ * snmp_clean_persistent should then be called afterward all data has been
+ * saved to remove these backup files.
+ *
+ * Note: on an rename error, the files are removed rather than saved.
+ *
+ */
+void
+snmp_save_persistent(const char *type)
+{
+  char file[512], fileold[512];
+  struct stat statbuf;
+  int j;
+
+  DEBUGMSGTL(("snmp_save_persistent","saving %s files...\n", type));
+  sprintf(file,"%s/%s.conf", PERSISTENT_DIRECTORY, type);
+  if (stat(file, &statbuf) == 0) {
+    for(j=0; j <= MAX_PERSISTENT_BACKUPS; j++) {
+      sprintf(fileold,"%s/%s.%d.conf", PERSISTENT_DIRECTORY, type, j);
+      if (stat(fileold, &statbuf) != 0) {
+        DEBUGMSGTL(("snmp_save_persistent"," saving old config file: %s -> %s.\n", file, fileold));
+        if (rename(file, fileold)) {
+          unlink(file);/* moving it failed, try nuking it, as leaving
+                          it around is very bad. */
+        }
+        break;
+      }
+    }
+  }
+}
+
+
+/*******************************************************************-o-******
  * snmp_clean_persistent
  *
  * Parameters:
  *	*type
  *      
  *
- * Unlink a file called "<PERSISTENT_DIRECTORY>/<type>.conf".
+ * Unlink all backup files called "<PERSISTENT_DIRECTORY>/<type>.%d.conf".
  *
- * Should be called just before all persistent information is supposed to be
- * written to clean out the existing persistent cache.
+ * Should be called just after we successfull dumped the last of the
+ * persistent data, to remove the backup copies of previous storage dumps.
  *
  * XXX  Worth overwriting with random bytes first?  This would
  *	ensure that the data is destroyed, even a buffer containing the
@@ -563,15 +633,21 @@ snmp_clean_persistent(const char *type)
 {
   char file[512], fileold[512];
   struct stat statbuf;
+  int j;
 
+  DEBUGMSGTL(("snmp_clean_persistent","cleaning %s files...\n", type));
   sprintf(file,"%s/%s.conf",PERSISTENT_DIRECTORY,type);
   if (stat(file, &statbuf) == 0) {
-    sprintf(fileold,"%s/%s.conf.old",PERSISTENT_DIRECTORY,type);
-    if (rename(file, fileold)) {
-      unlink(file);/* failed, try nuking it */
+    for(j=0; j <= MAX_PERSISTENT_BACKUPS; j++) {
+      sprintf(file,"%s/%s.%d.conf", PERSISTENT_DIRECTORY, type, j);
+      if (stat(file, &statbuf) == 0) {
+        DEBUGMSGTL(("snmp_clean_persistent"," removing old config file: %s\n", file));
+        unlink(file);
+      }
     }
   }
 }
+  
 
 
 
