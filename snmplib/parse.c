@@ -214,13 +214,10 @@ struct tok tokens[] = {
 
 struct tok	*buckets[HASHSIZE];
 
-static void do_subtree(struct tree *root, struct node **nodes);
-static int get_token(register FILE *fp, register char *token, int maxtlen);
-static int parseQuoteString(register FILE *fp, register char *token, int maxtlen);
-static int tossObjectIdentifier(register FILE *fp);
-
-
-
+static void do_subtree();
+static int get_token();
+static int parseQuoteString();
+static int tossObjectIdentifier();
 
 static
 hash_init()
@@ -460,7 +457,7 @@ build_tree(nodes)
  * Find all the children of root in the list of nodes.  Link them into the
  * tree and out of the nodes list.
  */
-static
+static void
 do_subtree(root, nodes)
     struct tree *root;
     struct node **nodes;
