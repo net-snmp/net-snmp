@@ -807,7 +807,7 @@ u_char *var_vacm_access(struct variable *vp,
     char groupName[VACMSTRINGLEN];
     char contextPrefix[VACMSTRINGLEN];
     oid *op;
-    unsigned long len;
+    unsigned long len, i = 0;
     char *cp;
     int cmp;
 
@@ -860,10 +860,11 @@ u_char *var_vacm_access(struct variable *vp,
 	    if (len > VACM_MAX_STRING)
 	        return 0;
 	    cp = groupName;
-	    while (len-- >= 0) {
-                if (*op > 255)
+	    for (i = 0; i <= len; i++) {
+                if (*op > 255) {
 		    return 0; /* illegal value */
-		*cp++ = (char) *op++;
+		}
+		*cp++ = (char)*op++;
 	    }
 	    *cp = 0;
 	}
@@ -873,10 +874,11 @@ u_char *var_vacm_access(struct variable *vp,
 	    if (len > VACM_MAX_STRING)
 	        return 0;
 	    cp = contextPrefix;
-	    while (len-- >= 0) {
-                if (*op > 255)
+	    for (i = 0; i <= len; i++) {
+                if (*op > 255) {
 		    return 0; /* illegal value */
-		*cp++ = (char) *op++;
+		}
+		*cp++ = (char)*op++;
 	    }
 	    *cp = 0;
 	}
@@ -1006,7 +1008,7 @@ u_char *var_vacm_view(struct variable *vp,
     oid subtree[MAX_OID_LEN];
     size_t subtreeLen = 0;
     oid *op, *op1;
-    unsigned long len;
+    unsigned long len = 0, i = 0;
     char *cp;
     int cmp,cmp2;
 
@@ -1058,10 +1060,11 @@ u_char *var_vacm_view(struct variable *vp,
 	    if (len > VACM_MAX_STRING)
 	        return 0;
 	    cp = viewName;
-	    while (len-- >= 0 && op < name + *length) {
-                if (*op > 255)
-		    return 0; 
-		*cp++ = (char) *op++;
+	    for (i = 0; i <= len && op < name + *length; i++) {
+                if (*op > 255) {
+		    return 0;
+		}
+		*cp++ = (char)*op++;
 	    }
 	    *cp = 0;
 	}
@@ -1071,7 +1074,7 @@ u_char *var_vacm_view(struct variable *vp,
 	    op1 = subtree;
 	    *op1++ = len;
 	    subtreeLen++;
-	    while (len-- >= 0 && op < name + *length) {
+	    for (i = 0; i <= len && op < name + *length; i++) {
 		*op1++ = *op++;
 		subtreeLen++;
 	    }
