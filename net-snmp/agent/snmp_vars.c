@@ -788,7 +788,8 @@ getStatPtr(name, namelen, type, len, acl, exact, write_method, pi,
     }
     *write_method = NULL;
     for (y = 0, tp = find_extensible(subtrees,name,*namelen,exact);
-         y < sizeof(subtrees)/sizeof(struct subtree); tp++, y++){
+         tp->namelen != -1 && y < sizeof(subtrees)/sizeof(struct subtree);
+         tp++, y++){
 	treeresult = compare_tree(name, *namelen, tp->name, (int)tp->namelen);
 	/* if exact and treerresult == 0
 	   if next  and treeresult <= 0 */

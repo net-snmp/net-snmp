@@ -36,7 +36,7 @@ unsigned char *var_wes_shell(vp, name, length, exact, var_len, write_method)
   if (!checkmib(vp,name,length,exact,var_len,write_method,newname,numextens))
     return(NULL);
 
-  if (exten = get_exten_instance(extens,newname[8],numextens)) {
+  if (exten = get_exten_instance(extens,newname[8])) {
     switch (vp->magic) {
       case MIBINDEX:
         long_ret = newname[8];
@@ -85,7 +85,7 @@ fixExecError(action, var_val, var_val_type, var_val_len, statP, name, name_len)
   static struct extensible ex;
   FILE *file;
 
-  if (exten = get_exten_instance(extens,name[8],numextens)) {
+  if (exten = get_exten_instance(extens,name[8])) {
     if (var_val_type != INTEGER) {
       printf("Wrong type != int\n");
       return SNMP_ERR_WRONGTYPE;
@@ -136,8 +136,8 @@ unsigned char *var_wes_relocatable(vp, name, length, exact, var_len, write_metho
   print_mib_oid(name,*length);
   printf("  / %d\n",vp->magic); */
   
-  for(i=0; i<= numrelocs; i++) {
-    exten = get_exten_instance(relocs,i,numrelocs);
+  for(i=1; i<= numrelocs; i++) {
+    exten = get_exten_instance(relocs,i);
     if (exten->miblen != 0){
       memcpy(myvp.name,exten->miboid,exten->miblen*sizeof(int));
       memcpy(tname,name,*length*sizeof(int));
@@ -224,10 +224,10 @@ struct subtree *find_extensible(tp,tname,tnamelen,exact)
   struct variable myvp;
   int var_len;
   oid newname[30], name[30];
-  static struct subtree mysubtree[1];
+  static struct subtree mysubtree[2];
 
   for(i=1; i<= numrelocs; i++) {
-    exten = get_exten_instance(relocs,i,numrelocs);
+    exten = get_exten_instance(relocs,i);
     if (exten->miblen != 0){
       memcpy(myvp.name,exten->miboid,exten->miblen*sizeof(int));
       memcpy(name,tname,tnamelen*sizeof(int));
@@ -247,6 +247,7 @@ struct subtree *find_extensible(tp,tname,tnamelen,exact)
   mysubtree[0].variables_len =
     sizeof(wes_relocatable_variables)/sizeof(*wes_relocatable_variables);
   mysubtree[0].variables_width = sizeof(*wes_relocatable_variables);
+  mysubtree[1].namelen=-1;
   return(mysubtree);
 }
 
