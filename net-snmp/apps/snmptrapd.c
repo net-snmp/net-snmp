@@ -457,7 +457,7 @@ int snmp_input(int op,
 	    int trapOidLen = pdu->enterprise_length;
 
 	    if (!ds_get_boolean(DS_APPLICATION_ID, DS_APP_NUMERIC_IP)) {
-	      host = gethostbyaddr(pdu->agent_addr, 4, AF_INET);
+	      host = gethostbyaddr((char *)pdu->agent_addr, 4, AF_INET);
 	    }
 	    if (pdu->trap_type == SNMP_TRAP_ENTERPRISESPECIFIC) {
 		memcpy(trapOid, pdu->enterprise, sizeof(oid)*trapOidLen);

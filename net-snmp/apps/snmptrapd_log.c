@@ -565,7 +565,7 @@ static void handle_ip_fmt (char * bfr,
   case CHR_AGENT_NAME:
     /*  Try to resolve the agent_addr field as a hostname; fall back
 	to numerical address.  */
-    host = gethostbyaddr(pdu->agent_addr, 4, AF_INET);
+    host = gethostbyaddr((char *)pdu->agent_addr, 4, AF_INET);
     if (host != NULL) {
       sprintf(safe_bfr, "%s", host->h_name);
     } else {
@@ -1009,7 +1009,7 @@ unsigned long format_plain_trap (char * bfr,
   str_append (bfr, &tail, len, safe_bfr);
 
   /*  Get info about the sender.  */
-  host = gethostbyaddr(pdu->agent_addr, 4, AF_INET);
+  host = gethostbyaddr((char *)pdu->agent_addr, 4, AF_INET);
   if (host != (struct hostent *)NULL) {
     str_append(bfr, &tail, len, host->h_name);
   } else {
