@@ -523,60 +523,46 @@ write_usmUserCloneFrom(
    oid      *name,
    size_t   name_len)
 {
-  /* variables we may use later */
-  static oid objid[USM_LENGTH_OID_MAX], *oidptr;
   struct usmUser *uptr, *cloneFrom;
-  size_t size;
   
-  if (var_val_type != ASN_OBJECT_ID){
-      DEBUGMSGTL(("usmUser","write to usmUserCloneFrom not ASN_OBJECT_ID\n"));
-      return SNMP_ERR_WRONGTYPE;
+  if (action == RESERVE1) {
+      if (var_val_type != ASN_OBJECT_ID) {
+	  DEBUGMSGTL(("usmUser",
+		      "write to usmUserCloneFrom not ASN_OBJECT_ID\n"));
+	  return SNMP_ERR_WRONGTYPE;
+      }
+      if (var_val_len > USM_LENGTH_OID_MAX * sizeof(oid) ||
+	  var_val_len % sizeof(oid) != 0) {
+	  DEBUGMSGTL(("usmUser","write to usmUserCloneFrom: bad length\n"));
+	  return SNMP_ERR_WRONGLENGTH;
+      }
+  } else if (action == RESERVE2) {
+      if ((uptr = usm_parse_user(name, name_len)) == NULL) {
+	  /*  We don't allow creations here.  */
+	  return SNMP_ERR_INCONSISTENTNAME;
+      }
+
+      /*  Has the user already been cloned?  If so, writes to this variable
+	  are defined to have no effect and to produce no error.  */
+      if (uptr->cloneFrom != NULL) {
+	  return SNMP_ERR_NOERROR;
+      }
+
+      cloneFrom = usm_parse_user((oid *)var_val, var_val_len/sizeof(oid));
+      if (cloneFrom == NULL || cloneFrom->userStatus != SNMP_ROW_ACTIVE) {
+	  return SNMP_ERR_INCONSISTENTNAME;
+      }
+      uptr->cloneFrom = snmp_duplicate_objid((oid *)var_val, 
+					     var_val_len/sizeof(oid));
+      usm_cloneFrom_user(cloneFrom, uptr);
+
+      if (usmStatusCheck(uptr) && uptr->userStatus == SNMP_ROW_NOTREADY) {
+	  uptr->userStatus = SNMP_ROW_NOTINSERVICE;
+      }
   }
-  if (var_val_len > sizeof(objid)){
-      DEBUGMSGTL(("usmUser","write to usmUserCloneFrom: bad length\n"));
-      return SNMP_ERR_WRONGLENGTH;
-  }
-  if (action == COMMIT){
-    /* parse the clonefrom objid */
-    size = var_val_len/sizeof(oid);
-    memcpy(objid, var_val, var_val_len);
-
-    if ((uptr = usm_parse_user(name, name_len)) == NULL) 
-      /* We don't allow creations here */
-      return SNMP_ERR_INCONSISTENTNAME;
-
-    /* have the user already been cloned?  If so, second cloning is
-       not allowed, but does not generate an error */
-    if (uptr->cloneFrom)
-      return SNMP_ERR_NOERROR;
-
-    /* does the cloneFrom user exist? */
-    if ((cloneFrom = usm_parse_user(objid, size)) == NULL)
-      /* We don't allow creations here */
-      return SNMP_ERR_INCONSISTENTNAME;
-
-    /* is it active */
-    if (cloneFrom->userStatus != RS_ACTIVE)
-      return SNMP_ERR_INCONSISTENTNAME;
-
-    /* set the cloneFrom OID */
-    if ((oidptr = snmp_duplicate_objid(objid, size/sizeof(oid))) == NULL)
-      return SNMP_ERR_GENERR;
-
-    /* do the actual cloning */
-
-    if (uptr->cloneFrom)
-      free(uptr->cloneFrom);
-    uptr->cloneFrom = oidptr;
-
-    usm_cloneFrom_user(cloneFrom, uptr);
-    
-  }  /* endif: action == COMMIT */
 
   return SNMP_ERR_NOERROR;
-
-
-}  /* end write_usmUserCloneFrom() */
+}
 
 /*******************************************************************-o-******
  * write_usmUserAuthProtocol
@@ -608,48 +594,99 @@ write_usmUserAuthProtocol(
    oid      *name,
    size_t   name_len)
 {
-  /* variables we may use later */
-  static oid objid[USM_LENGTH_OID_MAX];
   static oid *optr;
+  static size_t olen;
+  static int resetOnFail;
   struct usmUser *uptr;
-  size_t size;
 
-  if (var_val_type != ASN_OBJECT_ID){
-      DEBUGMSGTL(("usmUser","write to usmUserAuthProtocol not ASN_OBJECT_ID\n"));
-      return SNMP_ERR_WRONGTYPE;
-  }
-  if (var_val_len > sizeof(objid)){
-      DEBUGMSGTL(("usmUser","write to usmUserAuthProtocol: bad length\n"));
-      return SNMP_ERR_WRONGLENGTH;
-  }
-  if (action == COMMIT){
-      size = var_val_len/sizeof(oid);
-      memcpy(objid, var_val, var_val_len);
-
-      /* don't allow creations here */
-      if ((uptr = usm_parse_user(name, name_len)) == NULL)
-        return SNMP_ERR_NOSUCHNAME;
-
-      /* check the objid for validity */
-      /* only allow sets to perform a change to usmNoAuthProtocol */
-      if (snmp_oid_compare(objid, size, usmNoAuthProtocol,
-                  sizeof(usmNoAuthProtocol)/sizeof(oid)) != 0)
-        return SNMP_ERR_INCONSISTENTVALUE;
-      
-      /* if the priv protocol is not usmNoPrivProtocol, we can't change */
-      if (snmp_oid_compare(uptr->privProtocol, uptr->privProtocolLen, usmNoPrivProtocol,
-                  sizeof(usmNoPrivProtocol)/sizeof(oid)) != 0)
-        return SNMP_ERR_INCONSISTENTVALUE;
-
-      /* finally, we can do it */
-      optr = uptr->authProtocol;
-      if ((uptr->authProtocol = snmp_duplicate_objid(objid, size))
-          == NULL) {
-        uptr->authProtocol = optr;
-        return SNMP_ERR_GENERR;
+  if (action == RESERVE1) {
+      resetOnFail = 0;
+      if (var_val_type != ASN_OBJECT_ID) {
+	  DEBUGMSGTL(("usmUser",
+		      "write to usmUserAuthProtocol not ASN_OBJECT_ID\n"));
+	  return SNMP_ERR_WRONGTYPE;
       }
-      free(optr);
-      uptr->authProtocolLen = size;
+      if (var_val_len > USM_LENGTH_OID_MAX * sizeof(oid) || 
+	  var_val_len % sizeof(oid) != 0) {
+	  DEBUGMSGTL(("usmUser","write to usmUserAuthProtocol: bad length\n"));
+	  return SNMP_ERR_WRONGLENGTH;
+      }
+  } else if (action == RESERVE2) {
+      if ((uptr = usm_parse_user(name, name_len)) == NULL) {
+	  return SNMP_ERR_INCONSISTENTNAME;
+      }
+
+      if (uptr->userStatus == RS_ACTIVE || uptr->userStatus == RS_NOTREADY ||
+	  uptr->userStatus == RS_NOTINSERVICE) {
+	  /*  The authProtocol is already set.  It is only legal to CHANGE it
+	      to usmNoAuthProtocol...  */
+	  if (snmp_oid_compare((oid *)var_val, var_val_len/sizeof(oid),
+	      usmNoAuthProtocol, sizeof(usmNoAuthProtocol)/sizeof(oid)) == 0) {
+	      /*  ... and then only if the privProtocol is equal to
+		  usmNoPrivProtocol.  */
+	      if (snmp_oid_compare(uptr->privProtocol, uptr->privProtocolLen,
+	      usmNoPrivProtocol, sizeof(usmNoPrivProtocol)/sizeof(oid)) != 0) {
+		  return SNMP_ERR_INCONSISTENTVALUE;
+	      }
+	      optr = uptr->authProtocol;
+	      olen = uptr->authProtocolLen;
+	      resetOnFail = 1;
+	      uptr->authProtocol = snmp_duplicate_objid((oid *)var_val,
+						     var_val_len/sizeof(oid));
+	      if (uptr->authProtocol == NULL) {
+		  return SNMP_ERR_RESOURCEUNAVAILABLE;
+	      }
+	      uptr->authProtocolLen = var_val_len/sizeof(oid);
+	  } else if (snmp_oid_compare((oid *)var_val, var_val_len/sizeof(oid),
+			    uptr->authProtocol, uptr->authProtocolLen) == 0) {
+	      /*  But it's also okay to set it to the same thing as it
+		  currently is.  */
+	      return SNMP_ERR_NOERROR;
+	  } else {
+	      return SNMP_ERR_INCONSISTENTVALUE;
+	  }
+      } else {
+	  /*  This row is under creation.  It's okay to set
+	      usmUserAuthProtocol to any valid authProtocol but it will be
+	      overwritten when usmUserCloneFrom is set (so don't write it if
+	      that has already been set).  */
+
+	  if (snmp_oid_compare((oid *)var_val, var_val_len/sizeof(oid),
+			       usmNoAuthProtocol, 
+			       sizeof(usmNoAuthProtocol)/sizeof(oid)) == 0 ||
+	      snmp_oid_compare((oid *)var_val, var_val_len/sizeof(oid),
+			       usmHMACMD5AuthProtocol, 
+			  sizeof(usmHMACMD5AuthProtocol)/sizeof(oid)) == 0 ||
+	      snmp_oid_compare((oid *)var_val, var_val_len/sizeof(oid),
+			       usmHMACSHA1AuthProtocol, 
+			   sizeof(usmHMACSHA1AuthProtocol)/sizeof(oid)) == 0) {
+	      if (uptr->cloneFrom != NULL) {
+		  optr = uptr->authProtocol;
+		  olen = uptr->authProtocolLen;
+		  resetOnFail = 1;
+		  uptr->authProtocol = snmp_duplicate_objid((oid *)var_val,
+						     var_val_len/sizeof(oid));
+		  if (uptr->authProtocol == NULL) {
+		      return SNMP_ERR_RESOURCEUNAVAILABLE;
+		  }
+		  uptr->authProtocolLen = var_val_len/sizeof(oid);
+	      }
+	  } else {
+	      /*  Unknown authentication protocol.  */
+	      return SNMP_ERR_WRONGVALUE;
+	  }
+      }
+  } else if (action == COMMIT) {
+      SNMP_FREE(optr);
+      optr = NULL;
+  } else if (action == FREE || action == UNDO) {
+       if ((uptr = usm_parse_user(name, name_len)) != NULL) {
+	   if (resetOnFail) {
+	       SNMP_FREE(uptr->authProtocol);
+	       uptr->authProtocol    = optr;
+	       uptr->authProtocolLen = olen;
+	   }
+      }     
   }
   return SNMP_ERR_NOERROR;
 }  /* end write_usmUserAuthProtocol() */
@@ -692,50 +729,95 @@ write_usmUserAuthKeyChange(
    oid      *name,
    size_t   name_len)
 {
-  static unsigned char   string[SNMP_MAXBUF_SMALL];
-  struct usmUser        *uptr;
-  unsigned char          buf[SNMP_MAXBUF_SMALL];
-  size_t                 buflen = SNMP_MAXBUF_SMALL;
-
-  char                  fnAuthKey[]    = "write_usmUserAuthKeyChange",
-                        fnOwnAuthKey[] = "write_usmUserOwnAuthKeyChange",
-                        *fname;
+  struct usmUser *uptr;
+  unsigned char buf[SNMP_MAXBUF_SMALL];
+  size_t buflen = SNMP_MAXBUF_SMALL;
+  const char fnAuthKey[] = "write_usmUserAuthKeyChange";
+  const char fnOwnAuthKey[] = "write_usmUserOwnAuthKeyChange";
+  const char *fname;
+  static unsigned char *oldkey;
+  static size_t oldkeylen;
+  static int resetOnFail;
   
-  if (name[USM_MIB_LENGTH-1] == 6)
-    fname = fnAuthKey;
-  else
-    fname = fnOwnAuthKey;
+  if (name[USM_MIB_LENGTH-1] == 6) {
+      fname = fnAuthKey;
+  } else {
+      fname = fnOwnAuthKey;
+  }
   
-  if (var_val_type != ASN_OCTET_STR) {
-    DEBUGMSGTL(("usmUser","write to %s not ASN_OCTET_STR\n", fname));
-    return SNMP_ERR_WRONGTYPE;
-  }
+  if (action == RESERVE1) {
+      resetOnFail = 0;
+      if (var_val_type != ASN_OCTET_STR) {
+	  DEBUGMSGTL(("usmUser","write to %s not ASN_OCTET_STR\n", fname));
+	  return SNMP_ERR_WRONGTYPE;
+      }
+      if (var_val_len == 0) {
+	  return SNMP_ERR_WRONGLENGTH;
+      }
+  } else if (action == RESERVE2) {
+      if ((uptr = usm_parse_user(name, name_len)) == NULL) {
+	  return SNMP_ERR_INCONSISTENTNAME;
+      } else {
+	  if (snmp_oid_compare(uptr->authProtocol, uptr->authProtocolLen,
+			     usmHMACMD5AuthProtocol,
+			     sizeof(usmHMACMD5AuthProtocol)/sizeof(oid))==0){
+	      if (var_val_len !=0 && var_val_len != 32) {
+		  return SNMP_ERR_WRONGLENGTH;
+	      }
+	  } else if (snmp_oid_compare(uptr->authProtocol,uptr->authProtocolLen,
+			     usmHMACSHA1AuthProtocol,
+			     sizeof(usmHMACSHA1AuthProtocol)/sizeof(oid))==0){ 
+	      if (var_val_len != 0 && var_val_len != 40) {
+		  return SNMP_ERR_WRONGLENGTH;
+	      }
+	  }
+      }
+  } else if (action == ACTION) {
+      if ((uptr = usm_parse_user(name, name_len)) == NULL) {
+	  return SNMP_ERR_INCONSISTENTNAME;
+      }
+      if (uptr->cloneFrom == NULL) {
+	  return SNMP_ERR_INCONSISTENTNAME;
+      }
+      if (snmp_oid_compare(uptr->authProtocol, uptr->authProtocolLen,
+	     usmNoAuthProtocol, sizeof(usmNoAuthProtocol)/sizeof(oid)) == 0) {
+	  /*  "When the value of the corresponding usmUserAuthProtocol is
+	      usmNoAuthProtocol, then a set is successful, but effectively
+	      is a no-op."  */
+	  DEBUGMSGTL(("usmUser", "%s: noAuthProtocol keyChange... success!\n",
+		      fname));
+	  return SNMP_ERR_NOERROR;
+      }
 
-  if (var_val_len > sizeof(string)) {
-    DEBUGMSGTL(("usmUser","write to %s: bad length\n", fname));
-    return SNMP_ERR_WRONGLENGTH;
-  }
+      /*  Change the key.  */
+      DEBUGMSGTL(("usmUser", "%s: changing auth key for user %s\n", 
+		  fname, uptr->secName));
 
-  if (action == COMMIT) {
-    /* don't allow creations here */
-    if ((uptr = usm_parse_user(name, name_len)) == NULL) {
-      return SNMP_ERR_NOSUCHNAME;
-    }
-
-    /* Change the key. */
-    DEBUGMSGTL(("usmUser","%s: changing auth key for user %s\n", fname, uptr->secName));
-
-    if (decode_keychange(uptr->authProtocol, uptr->authProtocolLen,
-                         uptr->authKey, uptr->authKeyLen,
-                         var_val, var_val_len,
-                         buf, &buflen) != SNMPERR_SUCCESS) {
-      DEBUGMSGTL(("usmUser","%s: ... failed\n", fname));
-        return SNMP_ERR_GENERR;
-    }
-    DEBUGMSGTL(("usmUser","%s: ... succeeded\n", fname));
-    SNMP_FREE(uptr->authKey);
-    memdup(&uptr->authKey, buf, buflen);
-    uptr->authKeyLen = buflen;
+      if (decode_keychange(uptr->authProtocol, uptr->authProtocolLen,
+			   uptr->authKey, uptr->authKeyLen,
+			   var_val, var_val_len,
+			   buf, &buflen) != SNMPERR_SUCCESS) {
+	  DEBUGMSGTL(("usmUser","%s: ... failed\n", fname));
+	  return SNMP_ERR_GENERR;
+      }
+      DEBUGMSGTL(("usmUser", "%s: ... succeeded\n", fname));
+      resetOnFail = 1;
+      oldkey    = uptr->authKey;
+      oldkeylen = uptr->authKeyLen;
+      memdup(&uptr->authKey, buf, buflen);
+      if (uptr->authKey == NULL) {
+	  return SNMP_ERR_RESOURCEUNAVAILABLE;
+      }
+      uptr->authKeyLen = buflen;
+  } else if (action == COMMIT) {
+      SNMP_FREE(oldkey);
+      oldkey = NULL;
+  } else if (action == UNDO) {
+      if ((uptr = usm_parse_user(name, name_len)) != NULL && resetOnFail) {
+	  SNMP_FREE(uptr->authKey);
+	  uptr->authKey    = oldkey;
+	  uptr->authKeyLen = oldkeylen;
+      }
   }
 
   return SNMP_ERR_NOERROR;
@@ -751,44 +833,99 @@ write_usmUserPrivProtocol(
    oid      *name,
    size_t   name_len)
 {
-  /* variables we may use later */
-  static oid objid[USM_LENGTH_OID_MAX];
   static oid *optr;
+  static size_t olen;
+  static int resetOnFail;
   struct usmUser *uptr;
-  size_t size;
 
-  if (var_val_type != ASN_OBJECT_ID){
-      DEBUGMSGTL(("usmUser","write to usmUserPrivProtocol not ASN_OBJECT_ID\n"));
-      return SNMP_ERR_WRONGTYPE;
-  }
-  if (var_val_len > sizeof(objid)){
-      DEBUGMSGTL(("usmUser","write to usmUserPrivProtocol: bad length\n"));
-      return SNMP_ERR_WRONGLENGTH;
-  }
-  if (action == COMMIT){
-      size = var_val_len/sizeof(oid);
-      memcpy(objid, var_val, var_val_len);
-
-      /* don't allow creations here */
-      if ((uptr = usm_parse_user(name, name_len)) == NULL)
-        return SNMP_ERR_NOSUCHNAME;
-
-      /* check the objid for validity */
-      /* only allow sets to perform a change to usmNoPrivProtocol */
-      if (snmp_oid_compare(objid, size, usmNoPrivProtocol,
-                  sizeof(usmNoPrivProtocol)/sizeof(oid)) != 0)
-        return SNMP_ERR_INCONSISTENTVALUE;
-      
-      /* finally, we can do it */
-      optr = uptr->privProtocol;
-      if ((uptr->privProtocol = snmp_duplicate_objid(objid, size))
-          == NULL) {
-        uptr->privProtocol = optr;
-        return SNMP_ERR_GENERR;
+  if (action == RESERVE1) {
+      resetOnFail = 0;
+      if (var_val_type != ASN_OBJECT_ID) {
+	  DEBUGMSGTL(("usmUser",
+		      "write to usmUserPrivProtocol not ASN_OBJECT_ID\n"));
+	  return SNMP_ERR_WRONGTYPE;
       }
-      free(optr);
-      uptr->privProtocolLen = size;
+      if (var_val_len > USM_LENGTH_OID_MAX * sizeof(oid) || 
+	  var_val_len % sizeof(oid) != 0) {
+	  DEBUGMSGTL(("usmUser","write to usmUserPrivProtocol: bad length\n"));
+	  return SNMP_ERR_WRONGLENGTH;
+      }
+  } else if (action == RESERVE2) {
+      if ((uptr = usm_parse_user(name, name_len)) == NULL) {
+	  return SNMP_ERR_INCONSISTENTNAME;
+      }
+
+      if (uptr->userStatus == RS_ACTIVE || uptr->userStatus == RS_NOTREADY ||
+	  uptr->userStatus == RS_NOTINSERVICE) {
+	  /*  The privProtocol is already set.  It is only legal to CHANGE it
+	      to usmNoPrivProtocol.  */
+	  if (snmp_oid_compare((oid *)var_val, var_val_len/sizeof(oid),
+	     usmNoPrivProtocol, sizeof(usmNoPrivProtocol)/sizeof(oid)) == 0) {
+	      resetOnFail = 1;
+	      optr = uptr->privProtocol;
+	      olen = uptr->privProtocolLen;
+	      uptr->privProtocol = snmp_duplicate_objid((oid *)var_val,
+						     var_val_len/sizeof(oid));
+	      if (uptr->privProtocol == NULL) {
+		  return SNMP_ERR_RESOURCEUNAVAILABLE;
+	      }
+	      uptr->privProtocolLen = var_val_len/sizeof(oid);
+	  } else if (snmp_oid_compare((oid *)var_val, var_val_len/sizeof(oid),
+			    uptr->privProtocol, uptr->privProtocolLen) == 0) {
+	      /*  But it's also okay to set it to the same thing as it
+		  currently is.  */
+	      return SNMP_ERR_NOERROR;
+	  } else {
+	      return SNMP_ERR_INCONSISTENTVALUE;
+	  }
+      } else {
+	  /*  This row is under creation.  It's okay to set
+	      usmUserPrivProtocol to any valid privProtocol with the proviso
+	      that if usmUserAuthProtocol is set to usmNoAuthProtocol, it may
+	      only be set to usmNoPrivProtocol.  The value will be overwritten
+	      when usmUserCloneFrom is set (so don't write it if that has
+	      already been set).  */
+	  if (snmp_oid_compare(uptr->authProtocol, uptr->authProtocolLen,
+			       usmNoAuthProtocol, 
+			       sizeof(usmNoAuthProtocol)/sizeof(oid)) == 0) {
+	      if (snmp_oid_compare((oid *)var_val, var_val_len/sizeof(oid),
+			       usmNoPrivProtocol,
+			       sizeof(usmNoPrivProtocol)/sizeof(oid)) != 0) {
+		  return SNMP_ERR_INCONSISTENTVALUE;
+	      }
+	  } else {
+	      if (snmp_oid_compare((oid *)var_val, var_val_len/sizeof(oid),
+			       usmNoPrivProtocol,
+			       sizeof(usmNoPrivProtocol)/sizeof(oid)) != 0 &&
+		  snmp_oid_compare((oid *)var_val, var_val_len/sizeof(oid),
+			       usmDESPrivProtocol,
+			       sizeof(usmDESPrivProtocol)/sizeof(oid) != 0)) {
+		  return SNMP_ERR_WRONGVALUE;
+	      }
+	  }
+	  resetOnFail = 1;
+	  optr = uptr->privProtocol;
+	  olen = uptr->privProtocolLen;
+	  uptr->privProtocol = snmp_duplicate_objid((oid *)var_val,
+						    var_val_len/sizeof(oid));
+	  if (uptr->privProtocol == NULL) {
+	      return SNMP_ERR_RESOURCEUNAVAILABLE;
+	  }
+	  uptr->privProtocolLen = var_val_len/sizeof(oid);
+      }
+  } else if (action == COMMIT) {
+      SNMP_FREE(optr);
+      optr = NULL;
+  } else if (action == FREE || action == UNDO) {
+      if ((uptr = usm_parse_user(name, name_len)) != NULL) {
+	  if (resetOnFail) {
+	      SNMP_FREE(uptr->privProtocol);
+	      uptr->privProtocol    = optr;
+	      uptr->privProtocolLen = olen;
+	  }
+      }
   }
+
   return SNMP_ERR_NOERROR;
 }  /* end write_usmUserPrivProtocol() */
 
@@ -811,50 +948,89 @@ write_usmUserPrivKeyChange(
    oid      *name,
    size_t   name_len)
 {
-  static unsigned char   string[SNMP_MAXBUF_SMALL];
-  struct usmUser        *uptr;
-  unsigned char          buf[SNMP_MAXBUF_SMALL];
-  size_t                 buflen = SNMP_MAXBUF_SMALL;
-
-  char                  fnPrivKey[]    = "write_usmUserPrivKeyChange",
-                        fnOwnPrivKey[] = "write_usmUserOwnPrivKeyChange",
-                        *fname;
+  struct usmUser *uptr;
+  unsigned char buf[SNMP_MAXBUF_SMALL];
+  size_t buflen = SNMP_MAXBUF_SMALL;
+  const char fnPrivKey[]    = "write_usmUserPrivKeyChange";
+  const char fnOwnPrivKey[] = "write_usmUserOwnPrivKeyChange";
+  const char *fname;
+  static unsigned char *oldkey;
+  static size_t oldkeylen;
+  static int resetOnFail;
   
-  if (name[USM_MIB_LENGTH-1] == 9)
-    fname = fnPrivKey;
-  else
-    fname = fnOwnPrivKey;
-  
-  if (var_val_type != ASN_OCTET_STR) {
-    DEBUGMSGTL(("usmUser","write to %s not ASN_OCTET_STR\n", fname));
-    return SNMP_ERR_WRONGTYPE;
+  if (name[USM_MIB_LENGTH-1] == 9) {
+      fname = fnPrivKey;
+  } else {
+      fname = fnOwnPrivKey;
   }
 
-  if (var_val_len > sizeof(string)) {
-    DEBUGMSGTL(("usmUser","write to %s: bad length\n", fname));
-    return SNMP_ERR_WRONGLENGTH;
-  }
+  if (action == RESERVE1) {
+      resetOnFail = 0;
+      if (var_val_type != ASN_OCTET_STR) {
+	  DEBUGMSGTL(("usmUser","write to %s not ASN_OCTET_STR\n", fname));
+	  return SNMP_ERR_WRONGTYPE;
+      }
+      if (var_val_len == 0) {
+	  return SNMP_ERR_WRONGLENGTH;
+      }
+  } else if (action == RESERVE2) {
+      if ((uptr = usm_parse_user(name, name_len)) == NULL) {
+	  return SNMP_ERR_INCONSISTENTNAME;
+      } else {
+	  if (snmp_oid_compare(uptr->privProtocol, uptr->privProtocolLen,
+			     usmDESPrivProtocol,
+			     sizeof(usmDESPrivProtocol)/sizeof(oid))==0) {
+	      if (var_val_len !=0 && var_val_len != 32) {
+		  return SNMP_ERR_WRONGLENGTH;
+	      }
+	  }
+      }
+  } else if (action == ACTION) {
+      if ((uptr = usm_parse_user(name, name_len)) == NULL) {
+	  return SNMP_ERR_INCONSISTENTNAME;
+      }
+      if (uptr->cloneFrom == NULL) {
+	  return SNMP_ERR_INCONSISTENTNAME;
+      }
+      if (snmp_oid_compare(uptr->privProtocol, uptr->privProtocolLen,
+	     usmNoPrivProtocol, sizeof(usmNoPrivProtocol)/sizeof(oid)) == 0) {
+	  /*  "When the value of the corresponding usmUserPrivProtocol is
+	      usmNoPrivProtocol, then a set is successful, but effectively
+	      is a no-op."  */
+	  DEBUGMSGTL(("usmUser", "%s: noPrivProtocol keyChange... success!\n",
+		      fname));
+	  return SNMP_ERR_NOERROR;
+      }
 
-  if (action == COMMIT) {
-    /* don't allow creations here */
-    if ((uptr = usm_parse_user(name, name_len)) == NULL) {
-      return SNMP_ERR_NOSUCHNAME;
-    }
+      /* Change the key. */
+      DEBUGMSGTL(("usmUser", "%s: changing priv key for user %s\n",
+		  fname, uptr->secName));
 
-    /* Change the key. */
-    DEBUGMSGTL(("usmUser","%s: changing priv key for user %s\n", fname, uptr->secName));
-
-    if (decode_keychange(uptr->authProtocol, uptr->authProtocolLen,
-                         uptr->privKey, uptr->privKeyLen,
-                         var_val, var_val_len,
-                         buf, &buflen) != SNMPERR_SUCCESS) {
-      DEBUGMSGTL(("usmUser","%s: ... failed\n", fname));
-        return SNMP_ERR_GENERR;
-    }
-    DEBUGMSGTL(("usmUser","%s: ... succeeded\n", fname));
-    SNMP_FREE(uptr->privKey);
-    memdup(&uptr->privKey, buf, buflen);
-    uptr->privKeyLen = buflen;
+      if (decode_keychange(uptr->authProtocol, uptr->authProtocolLen,
+			   uptr->privKey, uptr->privKeyLen,
+			   var_val, var_val_len,
+			   buf, &buflen) != SNMPERR_SUCCESS) {
+	  DEBUGMSGTL(("usmUser", "%s: ... failed\n", fname));
+	  return SNMP_ERR_GENERR;
+      }
+      DEBUGMSGTL(("usmUser", "%s: ... succeeded\n", fname));
+      resetOnFail = 1;
+      oldkey    = uptr->privKey;
+      oldkeylen = uptr->privKeyLen;
+      memdup(&uptr->privKey, buf, buflen);
+      if (uptr->privKey == NULL) {
+	  return SNMP_ERR_RESOURCEUNAVAILABLE;
+      }
+      uptr->privKeyLen = buflen;
+  } else if (action == COMMIT) {
+      SNMP_FREE(oldkey);
+      oldkey = NULL;
+  } else if (action == UNDO) {
+      if ((uptr = usm_parse_user(name, name_len)) != NULL && resetOnFail) {
+	  SNMP_FREE(uptr->privKey);
+	  uptr->privKey    = oldkey;
+	  uptr->privKeyLen = oldkeylen;
+      }
   }
 
   return SNMP_ERR_NOERROR;
@@ -870,16 +1046,13 @@ write_usmUserPublic(
    oid      *name,
    size_t   name_len)
 {
-  /* variables we may use later */
-  static unsigned char string[SNMP_MAXBUF];
-
-  struct usmUser *uptr;
+  struct usmUser *uptr = NULL;
 
   if (var_val_type != ASN_OCTET_STR){
       DEBUGMSGTL(("usmUser","write to usmUserPublic not ASN_OCTET_STR\n"));
       return SNMP_ERR_WRONGTYPE;
   }
-  if (var_val_len > sizeof(string)){
+  if (var_val_len < 0 || var_val_len > 32) {
       DEBUGMSGTL(("usmUser","write to usmUserPublic: bad length\n"));
       return SNMP_ERR_WRONGLENGTH;
   }
@@ -912,33 +1085,90 @@ write_usmUserStorageType(
    oid      *name,
    size_t   name_len)
 {
-  /* variables we may use later */
-  static long long_ret;
+  long long_ret = *((long *)var_val);
+  static long oldValue;
   struct usmUser *uptr;
+  static int resetOnFail;
   
-  if (var_val_type != ASN_INTEGER){
-      DEBUGMSGTL(("usmUser","write to usmUserStorageType not ASN_INTEGER\n"));
-      return SNMP_ERR_WRONGTYPE;
-  }
-  if (var_val_len > sizeof(long_ret)){
-      DEBUGMSGTL(("usmUser","write to usmUserStorageType: bad length\n"));
-      return SNMP_ERR_WRONGLENGTH;
-  }
-  if (action == COMMIT){
-      /* don't allow creations here */
-      if ((uptr = usm_parse_user(name, name_len)) == NULL) {
-        return SNMP_ERR_NOSUCHNAME;
+  if (action == RESERVE1) {
+      resetOnFail = 0;
+      if (var_val_type != ASN_INTEGER) {
+	  DEBUGMSGTL(("usmUser", 
+		      "write to usmUserStorageType not ASN_INTEGER\n"));
+	  return SNMP_ERR_WRONGTYPE;
       }
-      long_ret = *((long *) var_val);
+      if (var_val_len != sizeof(long)) {
+	  DEBUGMSGTL(("usmUser", "write to usmUserStorageType: bad length\n"));
+	  return SNMP_ERR_WRONGLENGTH;
+      }
+      if (long_ret < 1 || long_ret > 5) {
+	  return SNMP_ERR_WRONGVALUE;
+      }
+  } else if (action == RESERVE2) {
+      if ((uptr = usm_parse_user(name, name_len)) == NULL) {
+        return SNMP_ERR_INCONSISTENTNAME;
+      }
       if ((long_ret == ST_VOLATILE || long_ret == ST_NONVOLATILE) &&
           (uptr->userStorageType == ST_VOLATILE ||
-           uptr->userStorageType == ST_NONVOLATILE))
-        uptr->userStorageType = long_ret;
-      else
-        return SNMP_ERR_INCONSISTENTVALUE;
+           uptr->userStorageType == ST_NONVOLATILE)) {
+	  oldValue = uptr->userStorageType;
+	  uptr->userStorageType = long_ret;
+	  resetOnFail = 1;
+      } else {
+	  /*  From RFC2574:
+
+	      "Note that any user who employs authentication or privacy must
+	      allow its secret(s) to be updated and thus cannot be 'readOnly'.
+	       
+	      If an initial set operation tries to set the value to 'readOnly'
+	      for a user who employs authentication or privacy, then an
+	      'inconsistentValue' error must be returned.  Note that if the
+	      value has been previously set (implicit or explicit) to any
+	      value, then the rules as defined in the StorageType Textual
+	      Convention apply.  */
+	  DEBUGMSGTL(("usmUser", "long_ret %d uptr->st %d uptr->status %d\n",
+		      long_ret, uptr->userStorageType, uptr->userStatus));
+
+	  if (long_ret == ST_READONLY &&
+	      uptr->userStorageType != ST_READONLY &&
+	      (uptr->userStatus == RS_ACTIVE ||
+	       uptr->userStatus == RS_NOTINSERVICE)) {
+	      return SNMP_ERR_WRONGVALUE;
+	  } else if (long_ret == ST_READONLY &&
+	      (snmp_oid_compare(uptr->privProtocol, uptr->privProtocolLen,
+			       usmNoPrivProtocol, 
+			       sizeof(usmNoPrivProtocol)/sizeof(oid)) != 0 ||
+	      snmp_oid_compare(uptr->authProtocol, uptr->authProtocolLen,
+			       usmNoAuthProtocol,
+			       sizeof(usmNoAuthProtocol)/sizeof(oid)) != 0)) {
+	      return SNMP_ERR_INCONSISTENTVALUE;
+	  } else {
+	      return SNMP_ERR_WRONGVALUE;
+	  }
+      }
+  } else if (action == UNDO || action == FREE) {
+      if ((uptr = usm_parse_user(name, name_len)) != NULL && resetOnFail) {
+	  uptr->userStorageType = oldValue;
+      }
   }
   return SNMP_ERR_NOERROR;
 }  /* end write_usmUserStorageType() */
+
+/*  Return 1 if enough objects have been set up to transition rowStatus to
+    notInService(2) or active(1).  */
+
+int
+usmStatusCheck(struct usmUser *uptr)
+{
+    if (uptr == NULL) {
+	return 0;
+    } else {
+	if (uptr->cloneFrom == NULL) {
+	    return 0;
+	}
+    }
+    return 1;
+}
 
 /*******************************************************************-o-******
  * write_usmUserStatus
@@ -976,24 +1206,142 @@ write_usmUserStatus(
   size_t engineIDLen;
   char *newName;
   size_t nameLen;
-  struct usmUser *uptr;
+  struct usmUser *uptr = NULL;
 
-  if (var_val_type != ASN_INTEGER){
-      DEBUGMSGTL(("usmUser","write to usmUserStatus not ASN_INTEGER\n"));
-      return SNMP_ERR_WRONGTYPE;
-  }
-  if (var_val_len > sizeof(long_ret)){
-      DEBUGMSGTL(("usmUser","write to usmUserStatus: bad length\n"));
-      return SNMP_ERR_WRONGLENGTH;
-  }
-  if (action == COMMIT){
-    long_ret = *((long *) var_val);
+  if (action == RESERVE1) {
+      if (var_val_type != ASN_INTEGER) {
+	  DEBUGMSGTL(("usmUser","write to usmUserStatus not ASN_INTEGER\n"));
+	  return SNMP_ERR_WRONGTYPE;
+      }
+      if (var_val_len != sizeof(long_ret)) {
+	  DEBUGMSGTL(("usmUser","write to usmUserStatus: bad length\n"));
+	  return SNMP_ERR_WRONGLENGTH;
+      }
+      long_ret = *((long *) var_val);
+      if (long_ret == RS_NOTREADY || long_ret < 1 || long_ret > 6) {
+	  return SNMP_ERR_WRONGVALUE;
+      }
 
-    /* ditch illegal values now */
-    /* notReady can not be used, but the return error code is not mentioned */
-    if (long_ret == RS_NOTREADY || long_ret < 1 || long_ret > 6)
-      return SNMP_ERR_INCONSISTENTVALUE;
-    
+      /*  See if we can parse the oid for engineID/name first.  */
+      if (usm_parse_oid(&name[USM_MIB_LENGTH], name_len-USM_MIB_LENGTH,
+		     &engineID, &engineIDLen, (u_char **)&newName, &nameLen)) {
+	  return SNMP_ERR_INCONSISTENTNAME;
+      }
+
+      if (engineIDLen < 5 || engineIDLen > 32 || nameLen < 1 || nameLen > 32) {
+	  SNMP_FREE(engineID);
+	  SNMP_FREE(newName);
+	  return SNMP_ERR_NOCREATION;
+      }
+
+      /*  Now see if a user already exists with these index values. */
+      uptr = usm_get_user(engineID, engineIDLen, newName);
+      
+      if (uptr != NULL) {
+	  if (long_ret == RS_CREATEANDGO || long_ret == RS_CREATEANDWAIT) {
+	      SNMP_FREE(engineID);
+	      SNMP_FREE(newName);
+	      long_ret = RS_NOTREADY;
+	      return SNMP_ERR_INCONSISTENTVALUE;
+	  }
+	  SNMP_FREE(engineID);
+	  SNMP_FREE(newName);
+      } else {
+	  if (long_ret == RS_ACTIVE || long_ret == RS_NOTINSERVICE) {
+	      SNMP_FREE(engineID);
+	      SNMP_FREE(newName);
+	      return SNMP_ERR_INCONSISTENTVALUE;
+	  }
+	  if (long_ret == RS_CREATEANDGO || long_ret == RS_CREATEANDWAIT) {
+	      if ((uptr = usm_create_user()) == NULL) {
+		  SNMP_FREE(engineID);
+		  SNMP_FREE(newName);
+		  return SNMP_ERR_RESOURCEUNAVAILABLE;
+	      }
+	      uptr->engineID = engineID;
+	      uptr->name     = newName;
+	      uptr->secName  = strdup(uptr->name);
+	      if (uptr->secName == NULL) {
+		  usm_free_user(uptr);
+		  return SNMP_ERR_RESOURCEUNAVAILABLE;
+	      }
+	      uptr->engineIDLen = engineIDLen;
+	      
+	      /*  Set status to createAndGo or createAndWait so we can tell
+		  that this row is under creation.  */
+
+	      uptr->userStatus = long_ret;
+	      
+	      /*  Add to the list of users (we will take it off again
+		  later if something goes wrong).  */
+
+	      usm_add_user(uptr);
+	  } else {
+	      SNMP_FREE(engineID);
+	      SNMP_FREE(newName);
+	  }
+      }
+  } else if (action == ACTION) {
+      usm_parse_oid(&name[USM_MIB_LENGTH], name_len-USM_MIB_LENGTH,
+		    &engineID, &engineIDLen, (u_char **)&newName, &nameLen);
+      uptr = usm_get_user(engineID, engineIDLen, newName);
+      SNMP_FREE(engineID);
+      SNMP_FREE(newName);
+
+      if (uptr != NULL) {
+	  if (long_ret == RS_CREATEANDGO || long_ret == RS_ACTIVE) {
+	      if (usmStatusCheck(uptr)) {
+		  uptr->userStatus = RS_ACTIVE;
+	      } else {
+		  SNMP_FREE(engineID);
+		  SNMP_FREE(newName);
+		  return SNMP_ERR_INCONSISTENTVALUE;
+	      }
+	  } else if (long_ret == RS_CREATEANDWAIT) {
+	      if (usmStatusCheck(uptr)) {
+		  uptr->userStatus = RS_NOTINSERVICE;
+	      } else {
+		  uptr->userStatus = RS_NOTREADY;
+	      }
+	  } else if (long_ret == RS_NOTINSERVICE) {
+	      if (uptr->userStatus == RS_ACTIVE || 
+		  uptr->userStatus == RS_NOTINSERVICE) {
+		  uptr->userStatus = RS_NOTINSERVICE;
+	      } else {
+		  return SNMP_ERR_INCONSISTENTVALUE;
+	      }
+	  }
+      }
+  } else if (action == COMMIT) {
+      usm_parse_oid(&name[USM_MIB_LENGTH], name_len-USM_MIB_LENGTH,
+		    &engineID, &engineIDLen, (u_char **)&newName, &nameLen);
+      uptr = usm_get_user(engineID, engineIDLen, newName);
+      SNMP_FREE(engineID);
+      SNMP_FREE(newName);
+ 
+      if (uptr != NULL) {
+	  if (long_ret == RS_DESTROY) {
+	      usm_remove_user(uptr);
+	      usm_free_user(uptr);
+	  }
+      }
+  } else if (action == UNDO || action == FREE) {
+      usm_parse_oid(&name[USM_MIB_LENGTH], name_len-USM_MIB_LENGTH,
+		    &engineID, &engineIDLen, (u_char **)&newName, &nameLen);
+      uptr = usm_get_user(engineID, engineIDLen, newName);
+      SNMP_FREE(engineID);
+      SNMP_FREE(newName);
+      
+      if (long_ret == RS_CREATEANDGO || long_ret == RS_CREATEANDWAIT) {
+	  usm_remove_user(uptr);
+	  usm_free_user(uptr);
+      }
+  }
+  
+  return SNMP_ERR_NOERROR;
+}
+#if 0
+
     /* see if we can parse the oid for engineID/name first */
     if (usm_parse_oid(&name[USM_MIB_LENGTH], name_len-USM_MIB_LENGTH,
                       &engineID, &engineIDLen, (u_char **)&newName, &nameLen))
@@ -1077,4 +1425,4 @@ write_usmUserStatus(
   return SNMP_ERR_NOERROR;
 
 }  /* end write_usmUserStatus() */
-
+#endif
