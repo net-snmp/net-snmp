@@ -7,6 +7,7 @@
 
 #include "../common_header.h"
 #include "system.h"
+#include "util_funcs.h"
 
 
 	/*********************
@@ -34,6 +35,28 @@ int header_system __P((struct variable *,oid *, int *, int, int *, int (**write)
 	 *  Initialisation & common implementation functions
 	 *
 	 *********************/
+
+void init_system()
+{
+  struct extensible extmp;
+
+  /* set default values of system stuff */
+  sprintf(extmp.command,"%s -a",UNAMEPROG);
+  /* setup defaults */
+  extmp.type = EXECPROC;
+  extmp.next = NULL;
+  exec_command(&extmp);
+  strncpy(version_descr,extmp.output, 128);
+  version_descr[strlen(version_descr)-1] = 0; /* chomp new line */
+
+  sprintf(extmp.command,"%s -n",UNAMEPROG);
+  /* setup defaults */
+  extmp.type = EXECPROC;
+  extmp.next = NULL;
+  exec_command(&extmp);
+  strncpy(sysName,extmp.output, 128);
+  sysName[strlen(sysName)-1] = 0; /* chomp new line */
+}
 
 #define MATCH_FAILED	1
 #define MATCH_SUCCEEDED	0
