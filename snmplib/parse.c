@@ -2242,11 +2242,10 @@ read_module_internal (name )
 			onp = orphan_nodes = nbuckets[i];
 		    nbuckets[i] = NULL;
 		    while (onp) {
-		        fprintf (stderr, "Unlinked OID in %s: %s ::= { %s %ld }\n",
-				name, onp->label, onp->parent, onp->subid);
 			np = onp;
 			onp = onp->next;
 		    }
+
 		}
 
 	    return MODULE_LOADED_OK;
@@ -2254,6 +2253,54 @@ read_module_internal (name )
 
     fprintf(stderr, "Module %s not found\n", name);
     return MODULE_NOT_FOUND;
+}
+
+void
+adopt_orphans()
+{
+    struct node *np, *onp;
+    struct tree *tp;
+    int i, adopted;
+
+    if ( !orphan_nodes )
+	return;
+    init_node_hash(orphan_nodes);
+    orphan_nodes = NULL;
+
+    while (1) {
+	adopted = 0;
+	for ( i = 0; i < NHASHSIZE; i++)
+	    if ( nbuckets[i] ) {
+	        for ( np = nbuckets[i] ; np!= NULL ; np=np->next )
+	            tp = find_tree_node( np->parent, -1 );
+	            if ( tp ) {
+		        do_subtree( tp, &np );
+		        adopted = 1;
+	            }
+	    }
+	if ( adopted == 0 )
+	    break;
+    }
+
+	/*
+	 * Report on outstanding orphans
+	 *    and link them back into the orphan list
+	 */
+    for (i = 0; i < NHASHSIZE; i++)
+	if ( nbuckets[i] ) {
+	    if ( orphan_nodes )
+		onp = np->next = nbuckets[i];
+	    else
+		onp = orphan_nodes = nbuckets[i];
+	    nbuckets[i] = NULL;
+	    while (onp) {
+        	fprintf (stderr, "Unlinked OID in %s: %s ::= { %s %ld }\n",
+		    module_name(onp->modid), onp->label,
+				 onp->parent, onp->subid);
+		np = onp;
+		onp = onp->next;
+	    }
+	}
 }
 
 struct tree *
@@ -2740,6 +2787,7 @@ read_all_mibs()
     for ( mp=module_head ; mp ; mp=mp->next )
 	if ( mp->no_imports == -1 )
             read_module( mp->name );
+    adopt_orphans();
 
     return tree_head;
 }
