@@ -55,7 +55,7 @@ read_view_database(filename)
     int viewIndex;
     oid viewSubtree[64];
     int viewSubtreeLen;
-    int status;
+    int status = 0;
     u_long byte;
     u_char mask[16], *ucp;
     int maskLen;
@@ -115,7 +115,7 @@ read_view_database(filename)
 	} else {
 	    ucp = mask;
 	    for(cp = buf4; *cp; cp += 2, ucp++){
-		if (sscanf(cp, "%2x", &byte) != 1)
+		if (sscanf(cp, "%2lx", &byte) != 1)
 		    error_exit("Bad parse", linenumber, filename);
 		*ucp = byte;
 	    }
@@ -130,7 +130,7 @@ read_view_database(filename)
 	vwp->viewMaskLen = maskLen;
 	vwp->viewStorageType = 2; /* volatile */
 	vwp->viewStatus = VIEWACTIVE;
-	bcopy(mask, vwp->viewMask, maskLen);
+	memcpy(vwp->viewMask, mask, maskLen);
 #define VIEWCOMPLETE_MASK              0x3F
 	/* all collumns - from view_vars.c XXX */
 	vwp->viewBitMask = VIEWCOMPLETE_MASK;

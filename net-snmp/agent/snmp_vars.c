@@ -295,7 +295,7 @@ getStatPtr(name, namelen, type, len, acl, exact, write_method, pi,
 #endif
 
     if (!exact){
-	bcopy(name, save, *namelen * sizeof(oid));
+	memcpy(save, name, *namelen * sizeof(oid));
 	savelen = *namelen;
     }
     *write_method = NULL;
@@ -314,8 +314,7 @@ getStatPtr(name, namelen, type, len, acl, exact, write_method, pi,
 	    /* the following is part of the setup for the compatability
 	       structure below that has been moved out of the main loop.
 	     */
-	    bcopy((char *)tp->name, (char *)cvp->name,
-		  tp->namelen * sizeof(oid));
+	    memcpy(cvp->name, tp->name, tp->namelen * sizeof(oid));
 
 	    for(x = 0, vp = tp->variables; x < tp->variables_len;
 		vp =(struct variable *)((char *)vp +tp->variables_width), x++){
@@ -335,8 +334,8 @@ getStatPtr(name, namelen, type, len, acl, exact, write_method, pi,
 		       compatability with var_* functions written previously.
 		     */
                   if (vp->namelen)
-                    bcopy((char *)vp->name, (char *)(cvp->name + tp->namelen),
-			  vp->namelen * sizeof(oid));
+                    memcpy((cvp->name + tp->namelen),
+			  vp->name, vp->namelen * sizeof(oid));
 		    cvp->namelen = tp->namelen + vp->namelen;
 		    cvp->type = vp->type;
 		    cvp->magic = vp->magic;
@@ -398,7 +397,7 @@ getStatPtr(name, namelen, type, len, acl, exact, write_method, pi,
 #endif
       )) {
 	if (!access && !exact){
-	    bcopy(save, name, savelen * sizeof(oid));
+	    memcpy(name, save, savelen * sizeof(oid));
 	    *namelen = savelen;
 	}
 	if (found)
