@@ -103,7 +103,6 @@ int             allow_severity = LOG_INFO;
 int             deny_severity = LOG_WARNING;
 #endif
 
-#define NETSNMP_DS_APP_NUMERIC_IP  8    /* must not conflict with agent's DS booleans */
 /*
  * #define NETSNMP_DS_APP_DONT_LOG 9 defined in notification_log.h 
  */

@@ -590,7 +590,7 @@ realloc_handle_ip_fmt(u_char ** buf, size_t * buf_len, size_t * out_len,
       */
 {
     struct in_addr *agent_inaddr = (struct in_addr *) pdu->agent_addr;
-    struct hostent *host;       /* corresponding host name */
+    struct hostent *host = NULL;       /* corresponding host name */
     char            fmt_cmd = options->cmd;     /* what we're formatting */
     u_char         *temp_buf = NULL;
     size_t          temp_buf_len = 64, temp_out_len = 0;
@@ -621,7 +621,10 @@ realloc_handle_ip_fmt(u_char ** buf, size_t * buf_len, size_t * out_len,
          * Try to resolve the agent_addr field as a hostname; fall back
          * to numerical address.  
          */
-        host = gethostbyaddr((char *) pdu->agent_addr, 4, AF_INET);
+        if (!netsnmp_ds_get_boolean(NETSNMP_DS_APPLICATION_ID, 
+                                    NETSNMP_DS_APP_NUMERIC_IP)) {
+            host = gethostbyaddr((char *) pdu->agent_addr, 4, AF_INET);
+        }
         if (host != NULL) {
             if (!snmp_strcat(&temp_buf, &temp_buf_len, &temp_out_len, 1,
                              host->h_name)) {
@@ -700,9 +703,12 @@ realloc_handle_ip_fmt(u_char ** buf, size_t * buf_len, size_t * out_len,
             if (addr != NULL
                 && pdu->transport_data_length ==
                 sizeof(struct sockaddr_in)) {
-                host =
-                    gethostbyaddr((char *) &(addr->sin_addr),
-                                  sizeof(struct in_addr), AF_INET);
+                if (!netsnmp_ds_get_boolean(NETSNMP_DS_APPLICATION_ID, 
+                                            NETSNMP_DS_APP_NUMERIC_IP)) {
+                    host =
+                        gethostbyaddr((char *) &(addr->sin_addr),
+                                      sizeof(struct in_addr), AF_INET);
+                }
                 if (host != NULL) {
                     if (!snmp_strcat
                         (&temp_buf, &temp_buf_len, &temp_out_len, 1,
@@ -1259,7 +1265,7 @@ realloc_format_plain_trap(u_char ** buf, size_t * buf_len,
     struct tm      *now_parsed; /* time in struct format */
     char            safe_bfr[200];      /* holds other strings */
     struct in_addr *agent_inaddr = (struct in_addr *) pdu->agent_addr;
-    struct hostent *host;       /* host name */
+    struct hostent *host = NULL;       /* host name */
     netsnmp_variable_list *vars;        /* variables assoc with trap */
 
     if (buf == NULL) {
@@ -1286,7 +1292,10 @@ realloc_format_plain_trap(u_char ** buf, size_t * buf_len,
     /*
      * Get info about the sender.  
      */
-    host = gethostbyaddr((char *) pdu->agent_addr, 4, AF_INET);
+    if (!netsnmp_ds_get_boolean(NETSNMP_DS_APPLICATION_ID, 
+                                NETSNMP_DS_APP_NUMERIC_IP)) {
+        host = gethostbyaddr((char *) pdu->agent_addr, 4, AF_INET);
+    }
     if (host != (struct hostent *) NULL) {
         if (!snmp_strcat
             (buf, buf_len, out_len, allow_realloc,
