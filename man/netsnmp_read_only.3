@@ -1,4 +1,4 @@
-.TH "read_only: make your handler read_only automatically" 3 "2 Aug 2002" "net-snmp" \" -*- nroff -*-
+.TH "read_only: make your handler read_only automatically" 3 "27 Aug 2002" "net-snmp" \" -*- nroff -*-
 .ad l
 .nh
 .SH NAME
@@ -31,17 +31,8 @@ Inserting it into your handler chain will ensure you're never asked to perform a
 returns a read_only handler that can be injected into a given handler chain.
 .PP
 Definition at line 32 of file read_only.c.
-.PP
-Referenced by netsnmp_init_read_only_helper(), and netsnmp_register_read_only_table_data().
-.PP
 .SS "void netsnmp_init_read_only_helper (void)"
 .PP
 initializes the read_only helper which then registers a read_only handler as a run-time injectable handler for configuration file use.
 .PP
 Definition at line 71 of file read_only.c.
-.SS "int netsnmp_read_only_helper (netsnmp_mib_handler * handler, netsnmp_handler_registration * reginfo, netsnmp_agent_request_info * reqinfo, netsnmp_request_info * requests)"
-.PP
-.PP
-For internal use only.
-.PP
-Definition at line 39 of file read_only.c.
