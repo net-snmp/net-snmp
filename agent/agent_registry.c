@@ -31,8 +31,6 @@
 #include "snmpd.h"
 #include "mibgroup/struct.h"
 
-#define DEFAULT_MIB_PRIORITY		127
-#define UCD_REG_FLAG_SPLIT_REGISTRATION 0x1
 
 struct subtree *subtrees;
 
