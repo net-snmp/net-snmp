@@ -24,7 +24,6 @@ ipFwAccTable OBJECT-TYPE
 	STATUS mandatory
 	DESCRIPTION
 		"A table with the accounting rules of the IP firewall"
-	INDEX { ipFwAccIndex }
 	::= { ucdExperimental 1 }
 
 ipFwAccEntry OBJECT-TYPE
@@ -106,7 +105,7 @@ ipFwAccDstNetMask OBJECT-TYPE
 	::= { ipFwAccEntry 5 }
 
 ipFwAccViaName OBJECT-TYPE
-	SYNTAX DisplayString
+	SYNTAX DisplayString (SIZE(1..64))
 	ACCESS read-only
 	STATUS mandatory
 	DESCRIPTION
