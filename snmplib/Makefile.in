@@ -80,10 +80,10 @@ depend:
 
 nosysdepend:
 	makedepend $(CPPFLAGS) *.c
-	perl -n -i.bak -e ' if (/^# DO NOT DELETE THIS LINE/) {$$doit=1;} if ($$doit == 1) {s#/usr/(include|lib)/[^\s]+##g ; print if (! /^[\w]+\.o:\s*$$/);} else {print;}' Makefile
+	perl -n -i.bak $(top_srcdir)/makenosysdepend.pl Makefile
 
 makefileindepend: nosysdepend
-	perl -e ' rename("Makefile.in","Makefile.in.bak"); open(F,"Makefile.in.bak"); open(G,"Makefile"); open(O,">Makefile.in"); $$_ = <F>; while(!/^# DO NOT DELETE THIS LINE/) { print O $$_; $$_ = <F>; } print O $$_; $$_ = <G>; while(!/^# DO NOT DELETE THIS LINE/) { $$_ = <G>; } while (<G>) {print O $$_;} '
+	perl $(top_srcdir)/makefileindepend.pl
 
 # DO NOT DELETE THIS LINE -- make depend depends on it.
 
@@ -105,33 +105,8 @@ int64.o: ../s/generic.h ../m/generic.h
 int64.o: asn1.h int64.h
 keytools.o: ../config.h ../mib_module_config.h ../s/linux.h ../s/sysv.h
 keytools.o: ../s/generic.h ../m/generic.h 
-keytools.o: asn1.h snmp_api.h /usr/local/ssl/include/openssl/hmac.h
-keytools.o: /usr/local/ssl/include/openssl/evp.h
-keytools.o: /usr/local/ssl/include/openssl/md2.h
-keytools.o: /usr/local/ssl/include/openssl/opensslconf.h
-keytools.o: /usr/local/ssl/include/openssl/md5.h
-keytools.o: /usr/local/ssl/include/openssl/sha.h
-keytools.o: /usr/local/ssl/include/openssl/ripemd.h
-keytools.o: /usr/local/ssl/include/openssl/des.h
-keytools.o: /usr/local/ssl/include/openssl/e_os2.h
-keytools.o: /usr/local/ssl/include/openssl/rc4.h
-keytools.o: /usr/local/ssl/include/openssl/rc2.h
-keytools.o: /usr/local/ssl/include/openssl/rc5.h
-keytools.o: /usr/local/ssl/include/openssl/blowfish.h
-keytools.o: /usr/local/ssl/include/openssl/cast.h
-keytools.o: /usr/local/ssl/include/openssl/idea.h
-keytools.o: /usr/local/ssl/include/openssl/mdc2.h
-keytools.o: /usr/local/ssl/include/openssl/rsa.h
-keytools.o: /usr/local/ssl/include/openssl/bn.h
-keytools.o: /usr/local/ssl/include/openssl/crypto.h
-keytools.o: /usr/local/ssl/include/openssl/stack.h
-keytools.o: /usr/local/ssl/include/openssl/opensslv.h
-keytools.o: /usr/local/ssl/include/openssl/dsa.h
-keytools.o: /usr/local/ssl/include/openssl/dh.h
-keytools.o: /usr/local/ssl/include/openssl/objects.h
-keytools.o: /usr/local/ssl/include/openssl/bio.h
-keytools.o: /usr/local/ssl/include/openssl/asn1.h
-keytools.o: /usr/local/ssl/include/openssl/safestack.h scapi.h keytools.h
+keytools.o: asn1.h snmp_api.h 
+keytools.o:  scapi.h keytools.h
 keytools.o: tools.h snmp_debug.h snmp_logging.h 
 keytools.o:  transform_oids.h
 lcd_time.o: ../config.h ../mib_module_config.h ../s/linux.h ../s/sysv.h
@@ -167,34 +142,6 @@ scapi.o:   asn1.h tools.h
 scapi.o: snmp_api.h snmpusm.h keytools.h snmp_debug.h scapi.h callback.h
 scapi.o: snmp_impl.h 
 scapi.o:  system.h transform_oids.h
-scapi.o: /usr/local/ssl/include/openssl/hmac.h
-scapi.o: /usr/local/ssl/include/openssl/evp.h
-scapi.o: /usr/local/ssl/include/openssl/md2.h
-scapi.o: /usr/local/ssl/include/openssl/opensslconf.h
-scapi.o: /usr/local/ssl/include/openssl/md5.h
-scapi.o: /usr/local/ssl/include/openssl/sha.h
-scapi.o: /usr/local/ssl/include/openssl/ripemd.h
-scapi.o: /usr/local/ssl/include/openssl/des.h
-scapi.o: /usr/local/ssl/include/openssl/e_os2.h
-scapi.o: /usr/local/ssl/include/openssl/rc4.h
-scapi.o: /usr/local/ssl/include/openssl/rc2.h
-scapi.o: /usr/local/ssl/include/openssl/rc5.h
-scapi.o: /usr/local/ssl/include/openssl/blowfish.h
-scapi.o: /usr/local/ssl/include/openssl/cast.h
-scapi.o: /usr/local/ssl/include/openssl/idea.h
-scapi.o: /usr/local/ssl/include/openssl/mdc2.h
-scapi.o: /usr/local/ssl/include/openssl/rsa.h
-scapi.o: /usr/local/ssl/include/openssl/bn.h
-scapi.o: /usr/local/ssl/include/openssl/crypto.h
-scapi.o: /usr/local/ssl/include/openssl/stack.h
-scapi.o: /usr/local/ssl/include/openssl/opensslv.h
-scapi.o: /usr/local/ssl/include/openssl/dsa.h
-scapi.o: /usr/local/ssl/include/openssl/dh.h
-scapi.o: /usr/local/ssl/include/openssl/objects.h
-scapi.o: /usr/local/ssl/include/openssl/bio.h
-scapi.o: /usr/local/ssl/include/openssl/asn1.h
-scapi.o: /usr/local/ssl/include/openssl/safestack.h
-scapi.o: /usr/local/ssl/include/openssl/rand.h
 snmp.o: ../config.h ../mib_module_config.h ../s/linux.h ../s/sysv.h
 snmp.o: ../s/generic.h ../m/generic.h 
 snmp.o:  asn1.h snmp.h snmp_api.h snmp_impl.h
