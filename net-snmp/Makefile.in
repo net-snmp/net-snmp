@@ -38,8 +38,16 @@ UCDPERSISTENT_DIRECTORY=@UCDPERSISTENT_DIRECTORY@
 # yes, order matters here.  default_store must occur before anything else
 PERLMODULES=default_store SNMP ASN OID agent
 
+#
+# targets
+#
 all:    sedscript EXAMPLE.conf standardall net-snmp-config-x @PERLTARGS@ 
 
+start-flag:
+	@touch build-in-progress-flag
+
+end-flag:
+	@rm -f build-in-progress-flag > /dev/null 2>&1 
 
 #
 # local build rules
