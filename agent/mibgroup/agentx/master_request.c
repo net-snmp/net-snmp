@@ -73,6 +73,16 @@ struct ax_variable_list {
 };
 
 void
+free_agentx_varlist(struct ax_variable_list *vlist)
+{
+    if ( !vlist )
+	return;
+    //    if ( vlist->variables )
+    //free ( vlist->variables );
+    free ( vlist );
+}
+
+void
 free_agentx_request(struct request_list *req, int free_cback)
 {
     if ( !req )
@@ -85,20 +95,17 @@ free_agentx_request(struct request_list *req, int free_cback)
      *	from one pass to the next.
      */
 
-    if ( req->cb_data && free_cback )
-	free ( req->cb_data );
+    if ( req->cb_data && free_cback ) {
+	free_agentx_varlist((struct ax_variable_list *)req->cb_data);
+    }
 
     free ( req );
 }
 
 void
-free_agentx_varlist(struct ax_variable_list *vlist)
+fully_free_agentx_request(struct request_list *req)
 {
-    if ( !vlist )
-	return;
-    if ( vlist->variables )
-	free ( vlist->variables );
-    free ( vlist );
+    free_agentx_request(req, 1);
 }
 
 	/*
@@ -140,10 +147,9 @@ handle_agentx_response( int operation,
     struct ax_variable_list *ax_vlist = (struct ax_variable_list *)magic;
     struct variable_list *vbp, *next;
     struct agent_snmp_session *asp  =  ax_vlist->asp;
-    struct snmp_session *ax_session;
     struct request_list *req, *oldreq;
     int  free_cback = 1;
-    int i, type, index;
+    int i, type, index, r = 0;
     int oldstatus;
     struct subtree          *retry_sub;
     char buf[SPRINT_MAX_LEN];
@@ -153,7 +159,7 @@ handle_agentx_response( int operation,
     switch(operation) {
     case SNMP_CALLBACK_OP_TIMED_OUT: {
 	void *s = snmp_sess_pointer(session);
-	DEBUGMSGTL(("agentx/master", "timeout on session %08p; "));
+	DEBUGMSGTL(("agentx/master", "timeout on session %08p\n", session));
 
 	/*  This is a bit sledgehammer because the other sessions on this
 	    transport may be okay (e.g. some thread in the subagent has
@@ -174,22 +180,23 @@ handle_agentx_response( int operation,
 	} else {
 	    DEBUGMSGTL(("agentx/master", "NULL sess_pointer??\n"));
 	}
-
 	pdu->errstat  = SNMP_ERR_GENERR;
 	pdu->errindex = 0;
-	if (oldreq != NULL) {
-	    DEBUGMSGTL(("agentx/master", "free old request at %08p\n",oldreq));
-	    free_agentx_request(oldreq, 1);
-	}
-	if (asp != NULL) {
-	    DEBUGMSGTL(("agentx/master", "free agent session at %08p\n", asp));
-	    free_agent_snmp_session(asp);
-	}
+	free_agent_snmp_session_by_session(asp->session,
+					   fully_free_agentx_request);
+	free_agentx_request(oldreq, 1);
 	return 0;
     }
 
     case SNMP_CALLBACK_OP_DISCONNECT:
     case SNMP_CALLBACK_OP_SEND_FAILED:
+	if (operation == SNMP_CALLBACK_OP_DISCONNECT) {
+	    DEBUGMSGTL(("agentx/master", "disconnect on session %08p\n",
+			session));
+	} else {
+	    DEBUGMSGTL(("agentx/master", "send failed on session %08p\n",
+			session));
+	}
 	close_agentx_session(session, -1);
 	pdu->errstat  = SNMP_ERR_GENERR;
 	pdu->errindex = 0;
@@ -214,6 +221,7 @@ handle_agentx_response( int operation,
 		 *  If the request failed, locate the
 		 *    original index of the variable resonsible
 		 */
+	DEBUGMSGTL(("agentx/master","handle_agentx_response() FAILURE\n"));
 	if ( pdu->errindex != 0 && pdu->errindex < ax_vlist->num_vars )
 	    asp->index = ax_vlist->variables[pdu->errindex-1]->index;
         else
@@ -330,8 +338,10 @@ handle_agentx_response( int operation,
 				req->callback, req->cb_data);
 		req->pdu = NULL;
 	    }
+	    r++;
 	}
     }
+    DEBUGMSGTL(("agentx/master","OUTSTANDING: %d\n", r));
 
 finish:
 			 /*
@@ -367,19 +377,15 @@ get_agentx_request(struct agent_snmp_session *asp,
     struct snmp_pdu         *pdu;
     struct ax_variable_list *vlist;
     struct subtree      *sub;
-    int			    new_size;
+    int			    new_size, r = 0;
 
+    DEBUGMSGTL(("agentx/master", "get_agentx_request(%08p, %08p, %d, %08p)\n",
+		asp, ax_session, transID, vbp));
     DEBUGMSGTL(("agentx/master", "processing "));
     DEBUGMSGOID(("agentx/master", vbp->name, vbp->name_length));
     DEBUGMSG(("agentx/master", "\n"));
 
     sub = find_subtree_previous(vbp->name, vbp->name_length, NULL);
-
-    if (sub != NULL) {
-	DEBUGMSGTL(("agentx/master", "subtree found: "));
-	DEBUGMSGOID(("agentx/master", sub->name, sub->namelen));
-	DEBUGMSG(("agentx/master", "\n"));
-    }
 
     for (req = asp->outstanding_requests; req != NULL; req=req->next_request) {
 	if (req->message_id == transID && req->session == ax_session) {
@@ -420,7 +426,10 @@ get_agentx_request(struct agent_snmp_session *asp,
 	    }
 	    return req;
 	}
+	r++;
     }
+    DEBUGMSGTL(("agentx/master", "%d outstanding requests\n", r));
+
 
 		/*
 		 * No existing request found, so create a new one
