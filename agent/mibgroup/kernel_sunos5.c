@@ -165,7 +165,6 @@ extern "C" {
 int getKstatInt(const char *classname, const char *statname,
 		const char *varname, int *value)
 {
-    kstat_ctl_t *ksc;
     kstat_t *ks;
     kid_t kid;
     kstat_named_t *named;
@@ -175,18 +174,27 @@ int getKstatInt(const char *classname, const char *statname,
         kstat_fd = kstat_open();
         if (kstat_fd == 0) {
             snmp_log(LOG_ERR, "kstat_open(): failed\n");
+	    goto Return;
         }
     }
-    if ((ksc = kstat_fd) == NULL)
-    {
-        goto Return;
+    ks = kstat_lookup (kstat_fd, classname, -1, statname);
+    if (ks == NULL) {
+	DEBUGMSGTL(("kernel_sunos5", "cannot find kstat %s %s\n",
+		    classname, statname));
+      	goto Return;
     }
-    ks = kstat_lookup (ksc, classname, -1, statname);
-    if (ks == NULL) goto Return;
-    kid = kstat_read (ksc, ks, NULL);
-    if (kid == -1) goto Return;
+    kid = kstat_read (kstat_fd, ks, NULL);
+    if (kid == -1) {
+	DEBUGMSGTL(("kernel_sunos5", "cannot read kstat %s %s\n",
+		    classname, statname));
+	goto Return;
+    }
     named = kstat_data_lookup(ks, varname);
-    if (named == NULL) goto Return;
+    if (named == NULL) {
+	DEBUGMSGTL(("kernel_sunos5", "cannot lookup kstat %s %s %s\n",
+		    classname, statname, varname));
+	goto Return;
+    }
 
     ret = 1;	/* maybe successful */
     switch (named->data_type) {
@@ -227,15 +235,57 @@ Return:
     return ret;
 }
 
+int getKstatRaw(const char *classname, const char *statname,
+		size_t len, void *buf)
+{
+    kstat_t *ks;
+    kid_t kid;
+    int ret = 0;  /* fail unless ... */
+
+    if (kstat_fd == 0) {
+        kstat_fd = kstat_open();
+        if (kstat_fd == 0) {
+            snmp_log(LOG_ERR, "kstat_open(): failed\n");
+	    goto Return;
+        }
+    }
+    ks = kstat_lookup (kstat_fd, classname, -1, statname);
+    if (ks == NULL) {
+	DEBUGMSGTL(("kernel_sunos5", "cannot find kstat %s %s\n",
+		    classname, statname));
+	goto Return;
+    }
+    if (ks->ks_type != KSTAT_TYPE_RAW) {
+	DEBUGMSGTL(("kernel_sunos5", "not raw type kstat %s %s: type %d\n",
+		    classname, statname, ks->ks_type));
+	goto Return;
+    }
+    kid = kstat_read (kstat_fd, ks, NULL);
+    if (kid == -1) {
+	DEBUGMSGTL(("kernel_sunos5", "cannot read kstat %s %s\n",
+		    classname, statname));
+	goto Return;
+    }
+    if (ks->ks_data_size != len) {
+	DEBUGMSGTL(("kernel_sunos5", "wrong kstat length %s %s: %d != %d\n",
+		    classname, statname, ks->ks_data_size, len));
+	goto Return;
+    }
+    memcpy(buf, ks->ks_data, len);
+    ret = 1;	/* maybe successful */
+
+Return:
+    return ret;
+}
+
 int
 getKstat(const char *statname, const char *varname, void *value)
 {
-  kstat_ctl_t   *ksc;
   kstat_t	*ks, *kstat_data;
   kstat_named_t *d;
   size_t	i, instance;
   char		module_name[64];
-  int		ret;
+  int		ret = -10;
   u_longlong_t	val;		/* The largest value */
   void		*v;
 
@@ -244,16 +294,12 @@ getKstat(const char *statname, const char *varname, void *value)
   else
     v = value;
 
-    if (kstat_fd == 0) {
-        kstat_fd = kstat_open();
-        if (kstat_fd == 0) {
+  if (kstat_fd == 0) {
+      kstat_fd = kstat_open();
+      if (kstat_fd == 0) {
           snmp_log(LOG_ERR, "kstat_open(): failed\n");
-        }
-    }
-  if ((ksc = kstat_fd) == NULL)
-  {
-    ret = -10;
-    goto Return;		/* kstat errors */
+	  goto Return;
+      }
   }
   if (statname == NULL || varname == NULL) {
     ret = -20;
@@ -261,11 +307,12 @@ getKstat(const char *statname, const char *varname, void *value)
   }
   /* First, get "kstat_headers" statistics. It should
      contain all available modules. */
-  if ((ks = kstat_lookup(ksc, "unix", 0, "kstat_headers")) == NULL) {
-    ret = -10;
+  if ((ks = kstat_lookup(kstat_fd, "unix", 0, "kstat_headers")) == NULL) {
+    DEBUGMSGTL(("kernel_sunos5", "cannot lookup kstat %s %s\n",
+		"unix", "kstat_headers"));
     goto Return;		/* kstat errors */
   }
-  if (kstat_read(ksc, ks, NULL) <= 0) {
+  if (kstat_read(kstat_fd, ks, NULL) <= 0) {
     ret = -10;
     goto Return;		/* kstat errors */
   }
@@ -289,11 +336,13 @@ getKstat(const char *statname, const char *varname, void *value)
     goto Return;		/* Not found */
   }
   /* Get the named statistics */
-  if ((ks = kstat_lookup(ksc, module_name, instance, statname)) == NULL) {
+  if ((ks = kstat_lookup(kstat_fd, module_name, instance, statname)) == NULL) {
+    DEBUGMSGTL(("kernel_sunos5", "cannot lookup kstat %s %s\n",
+		module_name, statname));
     ret = -10;
     goto Return;		/* kstat errors */
   }
-  if (kstat_read(ksc, ks, NULL) <= 0) {
+  if (kstat_read(kstat_fd, ks, NULL) <= 0) {
     ret = -10;
     goto Return;		/* kstat errors */
   }
