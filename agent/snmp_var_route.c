@@ -414,6 +414,9 @@ static Route_Scan_Reload()
 	    rtalloc = 100;
 	}
 
+        /* reset the routing table size to zero -- was a CMU memory leak */
+        rtsize = 0;
+
 	for (table=N_RTHOST; table<=N_RTNET; table++) {
 
 	    KNLookup(N_RTHASHSIZE, (char *)&hashsize, sizeof(hashsize));
@@ -464,6 +467,7 @@ static Route_Scan_Reload()
 		    rtsize++;
 		}
 	    }
+            free(routehash);
 	}
 	/*
 	 *  Sort it!
@@ -506,8 +510,10 @@ static Route_Scan_Reload()
           rtalloc = 100;
 	}
 
+        /* reset the routing table size to zero -- was a CMU memory leak */
+        rtsize = 0;
+        
 	for (table=N_RTHOST; table<=N_RTNET; table++) {
-
 
 #ifdef sunV3
 	    hashsize = RTHASHSIZ;
@@ -561,6 +567,7 @@ static Route_Scan_Reload()
 		    rtsize++;
 		}
 	    }
+            free(routehash);
 	}
 	/*
 	 *  Sort it!
