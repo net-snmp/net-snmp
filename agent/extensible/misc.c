@@ -41,18 +41,18 @@ struct myproc *get_proc_instance(proc,inst)
   int i;
   
   if (proc == NULL) return(NULL);
-  for (i=1;i != inst && i < numprocs && proc != NULL; i++) proc = proc->next;
+  for (i=1;i != inst && proc != NULL; i++) proc = proc->next;
   return(proc);
 }
 
-struct extensible *get_exten_instance(exten,inst,max)
-     int inst,max;
+struct extensible *get_exten_instance(exten,inst)
+     int inst;
      struct extensible *exten;
 {
   int i;
   
   if (exten == NULL) return(NULL);
-  for (i=1;i != inst && i < max && exten != NULL; i++) exten = exten->next;
+  for (i=1;i != inst && exten != NULL; i++) exten = exten->next;
   return(exten);
 }
 
