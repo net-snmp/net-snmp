@@ -44,8 +44,6 @@ netsnmp_release_if_top(netsnmp_container *cont)
 void
 netsnmp_container_init_list(void)
 {
-    container_type *ct;
-    
     if (NULL != containers)
         return;
 
@@ -160,16 +158,6 @@ netsnmp_container_get(const char *type)
     return NULL;
 }
 
-int
-netsnmp_container_get_noalloc(const char *type, netsnmp_container *mem)
-{
-    netsnmp_factory *f = netsnmp_container_get_factory(type);
-    if (f)
-        return f->produce_noalloc(mem);
-
-    return FACTORY_NOTFOUND;
-}
-
 /*------------------------------------------------------------------
  */
 netsnmp_container *
@@ -180,16 +168,6 @@ netsnmp_container_find(const char *type)
         return f->produce();
 
     return NULL;
-}
-
-int
-netsnmp_container_find_noalloc(const char *type, netsnmp_container *mem)
-{
-    netsnmp_factory *f = netsnmp_container_find_factory(type);
-    if (f)
-        return f->produce_noalloc(mem);
-
-    return FACTORY_NOTFOUND;
 }
 
 /*------------------------------------------------------------------
