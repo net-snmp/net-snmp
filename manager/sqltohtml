@@ -42,11 +42,7 @@ $query = new CGI;
 #===========================================================================
 # Start HTML.
 #===========================================================================
-my $tq = $query->self_url;
-$tq =~ s/\?.*//;
 print "Content-type:  text/html\n\n<body bgcolor=\"#ffffff\">\n";
-print "<a href=\"$tq\">[TOP]</a>\n";
-print "<h3>user: <a href=\"$tq?userprefs=1\">$remuser</a></h3>\n";
 
 if ($dispinfo = $query->param('displayinfo')) {
     makemibtable($dispinfo);
@@ -114,6 +110,18 @@ if (defined($query->param('userprefs'))) {
     Exit(0);
 }
 
+if (defined($query->param('summarizegroup'))) {
+    print "<title>group summary: $group</title>\n";
+    summarizeerrors("where groupname = '$group'");
+    Exit(0);
+}
+
+if (defined($host) && defined($query->param('summarizehost'))) {
+    print "<title>host summary: $host</title>\n";
+    summarizeerrors("where groupname = '$group' and host = '$host'");
+    Exit(0);
+}
+
 if (defined($query->param('setupgroupsubmit')) && 
     isadmin()) {
     setupgroupsubmit($group);
@@ -145,13 +153,14 @@ if (!defined($host)) {
 				},
 		 '-beginhook', 
 		 sub { 
+		     my $q = $query->self_url;
 		     my($junk, $data) = @_;
 		     if (!defined($data)) {
 			 print "<td></td>";
 			 return;
 		     }
 		     if (checkhost($data->{'host'})) {
-			 print "<td><img src=$redimage></td>\n";
+			 print "<td><a href=\"" . addtoken($q,"group=$group&summarizehost=1&host=$data->{host}") . "\"><img border=0 src=$redimage></a></td>\n";
 		     } else {
 			 print "<td><img src=$greenimage></td>\n";
 		     }
@@ -166,7 +175,7 @@ if (!defined($host)) {
 } else {
     showhost($host);
 }
-$dbh->disconnect();
+Exit(0);
 
 # add a token to a url string.  Use either a ? or an & depending on
 # existence of ?.
@@ -175,6 +184,35 @@ sub addtoken {
     my $token = shift;
     return "$url&$token" if ($url =~ /\?/);
     return "$url?$token";
+}
+
+sub summarizeerrors {
+    my $clause = shift;
+    print "<table $tableparms><tr><td>host</td><td>table</td><td>description</td></tr>\n";
+    my $cursor = 
+	getcursor("SELECT * FROM hosttables $clause");
+
+    while (  $row = $cursor->fetchrow_hashref ) {
+	my $exprs = getcursor("SELECT * FROM errorexpressions where (tablename = '$row->{tablename}')");
+	
+	while (  $expr = $exprs->fetchrow_hashref ) {
+	    my $errors = getcursor("select * from $row->{tablename} where $expr->{expression} and host = '$row->{host}'");
+	    while (  $error = $errors->fetchrow_hashref ) {
+		print "<tr><td>$row->{host}</td><td>$row->{tablename}</td><td>$expr->{returnfield}: $error->{$expr->{returnfield}}</td></tr>";
+	    }
+	}
+    }
+    print "</table>";
+}
+
+sub getcursor {
+    my $cmd = shift;
+    my $cursor;
+    ( $cursor = $dbh->prepare( $cmd ))
+	or die "\nnot ok: $DBI::errstr\n";
+    ( $cursor->execute )
+	or print( "\tnot ok: $DBI::errstr\n" );
+    return $cursor;
 }
 
 # sort things by mib location, or hard coded order.
@@ -576,6 +614,15 @@ sub setupusersubmit {
 }
 
 sub Exit {
+    my $tq = $query->self_url;
+    $tq =~ s/\?.*//;
+    print "<hr>\n";
+    print "<a href=\"$tq\">[TOP]</a>\n";
+    print "<a href=\"$tq?userprefs=1\">[options]</a>\n";
+    if (defined($group)) {
+	print "<a href=\"$tq?group=$group\">[group: $group]</a>\n";
+	print "<a href=\"$tq?group=$group&summarizegroup=1\">[summarize $group]</a>\n";
+    }
     $dbh->disconnect() if (defined($dbh));
     exit shift;
 }
