@@ -85,7 +85,7 @@ netsnmp_scalar_group_helper_handler(netsnmp_mib_handler *handler,
      * save rootoid, since we'll replace it before calling next handler,
      * and need to restore it afterwards.
      */
-    memcpy(root_tmp, reginfo->rootoid, reginfo->rootoid_len + 2 * sizeof(oid));
+    memcpy(root_tmp, reginfo->rootoid, reginfo->rootoid_len * sizeof(oid));
     root_tmp[reginfo->rootoid_len + 1] = 0;
     root_save = reginfo->rootoid;
 
