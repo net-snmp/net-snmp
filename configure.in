@@ -311,6 +311,14 @@ AC_ARG_ENABLE(mib-config-checking,
                                   warning and continue.],
     with_mib_cfg_checks="yes",with_mib_cfg_checks="no")
 
+AC_ARG_ENABLE(mfd-rewrites,
+[  --enable-mfd-reqrites          Use new MFD reqrites of mib modules,
+                                  where available. (default is to use
+                                  original mib module code).])
+if test "x$enable_mfd_rewrites" = "xyes"; then
+   AC_DEFINE(NETSNMP_ENABLE_MFD_REWRITES)
+fi
+
 askedpkcs=no
 AC_ARG_WITH(pkcs,
 [  --with-pkcs=PATH             Look for pkcs11 in PATH/lib.],
@@ -1402,7 +1410,9 @@ AC_MSG_RESULT([$new_module_list.])
 AC_MSG_CACHE_ADD(Agent MIB code:            $new_module_list)
 
 MODULECPP="$CPP -I${srcdir}/include -I${srcdir}/agent/mibgroup"
-AC_MSG_CHECKING([for and configuring mib modules pieces to use])
+if test "x$enable_mfd_rewrites" = "xyes"; then
+  MODULECPP="$MODULECPP -DNETSNMP_ENABLE_MFD_REWRITES"
+fi
 changequote(, )
 
 #---------------------
@@ -1626,6 +1636,9 @@ module_list_c=`echo "$module_list_code " | sed 's/\([^ ]\) /\1.c /g'`
 mibgroup_list_o=`echo " $module_list_o " | sed 's@ \([^ ]*\)\.o@ mibgroup/\1.o @g'`
 mibgroup_list_lo=`echo " $module_list_lo " | sed 's@ \([^ ]*\)\.lo@ mibgroup/\1.lo @g'`
 changequote([, ])
+if test "x$with_mib_cfg_checks" = "xyes"; then
+  AC_MSG_CACHE_ADD([Agent Module list: $module_list_code])
+fi
 MODULE_LIST=$module_list_code
 AC_SUBST(MODULE_LIST)
 AC_SUBST(module_list_c)
