@@ -1,3 +1,5 @@
+.pure
+.purify
 *.lo
 .gdb.auto.init
 .gdbinit
