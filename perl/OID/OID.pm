@@ -26,6 +26,10 @@ sub length {
     return $_[0]->{'oidptr'}->length();
 }
 
+sub get_indexes {
+    return $_[0]->{'oidptr'}->get_indexes();
+}
+
 sub append {
     my $this = shift;
     my $str = shift;

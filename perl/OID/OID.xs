@@ -41,6 +41,138 @@ nso_newarrayptr(oid *name, size_t name_len)
     return RETVAL;
 }
 
+static int __sprint_num_objid _((char *, oid *, int));
+
+/* stolen from SNMP.xs.  Ug, this needs merging to snmplib */
+/* XXX: this is only here because snmplib forces quotes around the
+   data and won't return real binary data or a numeric string.  Every
+   app must do its own switch() to get around it.  Ug. */
+#define USE_BASIC 0
+#define USE_ENUMS 1
+#define USE_SPRINT_VALUE 2
+static int
+__snprint_value (buf, buf_len, var, tp, type, flag)
+char * buf;
+size_t buf_len;
+netsnmp_variable_list * var;
+struct tree * tp;
+int type;
+int flag;
+{
+   int len = 0;
+   u_char* ip;
+   struct enum_list *ep;
+
+
+   buf[0] = '\0';
+   if (flag == USE_SPRINT_VALUE) {
+	snprint_value(buf, buf_len, var->name, var->name_length, var);
+	len = strlen(buf);
+   } else {
+     switch (var->type) {
+        case ASN_INTEGER:
+           if (flag == USE_ENUMS) {
+              for(ep = tp->enums; ep; ep = ep->next) {
+                 if (ep->value == *var->val.integer) {
+                    strcpy(buf, ep->label);
+                    len = strlen(buf);
+                    break;
+                 }
+              }
+           }
+           if (!len) {
+              sprintf(buf,"%ld", *var->val.integer);
+              len = strlen(buf);
+           }
+           break;
+
+        case ASN_GAUGE:
+        case ASN_COUNTER:
+        case ASN_TIMETICKS:
+        case ASN_UINTEGER:
+           sprintf(buf,"%lu", (unsigned long) *var->val.integer);
+           len = strlen(buf);
+           break;
+
+        case ASN_OCTET_STR:
+        case ASN_OPAQUE:
+           memcpy(buf, (char*)var->val.string, var->val_len);
+           len = var->val_len;
+           break;
+
+        case ASN_IPADDRESS:
+          ip = (u_char*)var->val.string;
+          sprintf(buf, "%d.%d.%d.%d", ip[0], ip[1], ip[2], ip[3]);
+          len = strlen(buf);
+          break;
+
+        case ASN_NULL:
+           break;
+
+        case ASN_OBJECT_ID:
+          __sprint_num_objid(buf, (oid *)(var->val.objid),
+                             var->val_len/sizeof(oid));
+          len = strlen(buf);
+          break;
+
+	case SNMP_ENDOFMIBVIEW:
+          sprintf(buf,"%s", "ENDOFMIBVIEW");
+	  break;
+	case SNMP_NOSUCHOBJECT:
+	  sprintf(buf,"%s", "NOSUCHOBJECT");
+	  break;
+	case SNMP_NOSUCHINSTANCE:
+	  sprintf(buf,"%s", "NOSUCHINSTANCE");
+	  break;
+
+        case ASN_COUNTER64:
+          printU64(buf,(struct counter64 *)var->val.counter64);
+          len = strlen(buf);
+          break;
+
+        case ASN_BIT_STR:
+            snprint_bitstring(buf, sizeof(buf), var, NULL, NULL, NULL);
+            len = strlen(buf);
+            break;
+
+        case ASN_NSAP:
+        default:
+           warn("snprint_value: asn type not handled %d\n",var->type);
+     }
+   }
+   return(len);
+}
+
+static int
+__sprint_num_objid (buf, objid, len)
+char *buf;
+oid *objid;
+int len;
+{
+   int i;
+   buf[0] = '\0';
+   for (i=0; i < len; i++) {
+	sprintf(buf,".%lu",*objid++);
+	buf += strlen(buf);
+   }
+   return SNMPERR_SUCCESS;
+}
+
+static int
+__tp_sprint_num_objid (buf, tp)
+char *buf;
+struct tree *tp;
+{
+   oid newname[MAX_OID_LEN], *op;
+   /* code taken from get_node in snmp_client.c */
+   for (op = newname + MAX_OID_LEN - 1; op >= newname; op--) {
+      *op = tp->subid;
+      tp = tp->parent;
+      if (tp == NULL) break;
+   }
+   return __sprint_num_objid(buf, op, newname + MAX_OID_LEN - op);
+}
+
 MODULE = NetSNMP::OID		PACKAGE = NetSNMP::OID		PREFIX=nso_
 
 netsnmp_oid *
@@ -51,7 +183,7 @@ nso_newptr(initstring)
         RETVAL->name = RETVAL->namebuf;
         RETVAL->len = sizeof(RETVAL->namebuf)/sizeof(RETVAL->namebuf[0]);
         if (!snmp_parse_oid(initstring, (oid *) RETVAL->name, &RETVAL->len)) {
-            fprintf(stderr, "Can't parse: %s\n", initstring);
+/*             fprintf(stderr, "Can't parse: %s\n", initstring); */
             RETVAL->len = 0;
             RETVAL = NULL;
         }
@@ -118,6 +250,88 @@ nsop_to_array(oid1)
         for(i=0; i < oid1->len; i++) {
             PUSHs(sv_2mortal(newSVnv(oid1->name[i])));
         }
+
+SV *
+nsop_get_indexes(oid1)
+        netsnmp_oid *oid1;
+    INIT:
+        int i, nodecount;
+        struct tree    *tp, *tpe, *tpnode, *indexnode;
+        struct index_list *index;
+        netsnmp_variable_list vbdata;
+        u_char         *buf = NULL;
+        size_t          buf_len = 256, out_len = 0;
+        oid name[MAX_OID_LEN];
+        size_t name_len = MAX_OID_LEN;
+        oid *oidp;
+        size_t oidp_len;
+        AV *myret;
+
+    CODE:
+        {
+            memset(&vbdata, 0, sizeof(vbdata));
+            if (NULL == (tp = get_tree(oid1->name, oid1->len,
+                                       get_tree_head()))) {
+                return;
+            }
+                
+            if ((buf = (u_char *) calloc(buf_len, 1)) == NULL) {
+                return;
+            }
+
+            nodecount = 0;
+            for(tpnode = tp; tpnode; tpnode = tpnode->parent) {
+                nodecount++;
+                if (nodecount == 2)
+                    tpe = tpnode;
+                if (nodecount == 3 &&
+                    (strlen(tpnode->label) < 6 ||
+                     strcmp(tpnode->label + strlen(tpnode->label) - 5,
+                           "Table")))
+                    /* we're not within a table.  bad logic, little choice */
+                    return;
+            }
+            
+            i = 0;
+            for(index = tpe->indexes; index; index = index->next) {
+                i++;
+            }
+
+            myret = (AV *) sv_2mortal((SV *) newAV());
+
+            oidp = oid1->name + nodecount;
+            oidp_len = oid1->len - nodecount;
+
+            for(index = tpe->indexes; index; index = index->next) {
+                /* XXX: NOT efficient! */
+                name_len = MAX_OID_LEN;
+                if (!snmp_parse_oid(index->ilabel, name, &name_len) ||
+                    (NULL ==
+                     (indexnode = get_tree(name, name_len,
+                                           get_tree_head())))) {
+                    return;             /* xxx mem leak */
+                }
+                vbdata.type = mib_to_asn_type(indexnode->type);
+                if (vbdata.type == (u_char) -1)
+                    return; /* XXX: not good.  half populated stack? */
+                /* possible memory leak: vbdata.data should be freed later */
+                if (parse_one_oid_index(&oidp, &oidp_len, &vbdata, 0)
+                    != SNMPERR_SUCCESS)
+                    return;
+                out_len = 0;
+                __snprint_value (buf, buf_len, &vbdata, indexnode,
+                                 vbdata.type, 0);
+/*
+                sprint_realloc_value(&buf, &buf_len, &out_len,
+                                     1, name, name_len, &vbdata);
+*/
+
+                av_push(myret, newSVpv(buf, out_len));
+            }
+            RETVAL = newRV((SV *)myret);
+        }
+    OUTPUT:
+        RETVAL
 
 void
 nsop_append(oid1, string)
