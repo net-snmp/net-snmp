@@ -69,7 +69,7 @@ int netsnmp_register_table(netsnmp_handler_registration *reginfo,
 int netsnmp_table_build_oid(netsnmp_handler_registration *reginfo,
                     netsnmp_request_info *reqinfo,
                     netsnmp_table_request_info *table_info);
-int netsnmp_netsnmp_table_build_oid_from_index(netsnmp_handler_registration *reginfo,
+int netsnmp_table_build_oid_from_index(netsnmp_handler_registration *reginfo,
                                netsnmp_request_info *reqinfo,
                                netsnmp_table_request_info *table_info);
 int netsnmp_table_build_result(netsnmp_handler_registration *reginfo,
@@ -84,12 +84,12 @@ unsigned int netsnmp_closest_column(unsigned int current, netsnmp_column_info *v
 
 Netsnmp_Node_Handler table_helper_handler;
 
-#define netsnmp_netsnmp_table_helper_add_index(tinfo, type) snmp_varlist_add_variable(&tinfo->indexes, NULL, 0, (u_char)type, NULL, 0);
+#define netsnmp_table_helper_add_index(tinfo, type) snmp_varlist_add_variable(&tinfo->indexes, NULL, 0, (u_char)type, NULL, 0);
 
 #if HAVE_STDARG_H
-void netsnmp_netsnmp_netsnmp_netsnmp_table_helper_add_indexes(netsnmp_table_registration_info *tinfo, ...);
+void netsnmp_table_helper_add_indexes(netsnmp_table_registration_info *tinfo, ...);
 #else
-void netsnmp_netsnmp_netsnmp_netsnmp_table_helper_add_indexes(va_alist);
+void netsnmp_table_helper_add_indexes(va_alist);
 #endif
 
 int

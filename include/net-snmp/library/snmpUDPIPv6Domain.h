@@ -14,7 +14,7 @@ netsnmp_transport	*snmp_udp6_transport	(struct sockaddr_in6 *addr,
     written to *addr.  Returns 1 if the conversion was successful, or 0 if it
     failed.  */
 
-int		 snmp_sockaddr_in6	(struct sockaddr_in6 *addr,
+int		 netsnmp_sockaddr_in6	(struct sockaddr_in6 *addr,
 					 const char *peername,
 					 int remote_port);
 

@@ -12,14 +12,14 @@
 #include <net-snmp/library/snmp_transport.h>
 #include <net-snmp/library/asn1.h>
 
-const oid ucdSnmpAal5PvcDomain[9];  /* = { UCDAVIS_MIB, 251, 3 }; */
+const oid netsnmp_ucdSnmpAal5PvcDomain[9];  /* = { UCDAVIS_MIB, 251, 3 }; */
 
-netsnmp_transport		*snmp_aal5pvc_transport	(struct sockaddr_atmpvc *addr,
+netsnmp_transport		*netsnmp_aal5pvc_transport	(struct sockaddr_atmpvc *addr,
 						 int local);
 
 /*  "Constructor" for transport domain object.  */
 
-void			 snmp_aal5pvc_ctor	(void);
+void			 netsnmp_aal5pvc_ctor	(void);
 
 #endif/*SNMP_TRANSPORT_AAL5PVC_DOMAIN*/
 

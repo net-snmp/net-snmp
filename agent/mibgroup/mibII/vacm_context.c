@@ -89,13 +89,13 @@ init_vacm_context(void) {
     if (!table_info || !iinfo)
         return;
 
-    netsnmp_netsnmp_table_helper_add_index(table_info, ASN_OCTET_STR)
+    netsnmp_table_helper_add_index(table_info, ASN_OCTET_STR)
     table_info->min_column = 1;
     table_info->max_column = 1;
     iinfo->get_first_data_point = get_first_context;
     iinfo->get_next_data_point = get_next_context;
     iinfo->table_reginfo = table_info;
-    netsnmp_netsnmp_register_table_iterator(my_handler, iinfo);
+    netsnmp_register_table_iterator(my_handler, iinfo);
 }
 
 /*

@@ -73,7 +73,7 @@ init_testhandler(void) {
 
     table_info = SNMP_MALLOC_TYPEDEF(netsnmp_table_registration_info);
 
-    netsnmp_netsnmp_netsnmp_netsnmp_table_helper_add_indexes(table_info, ASN_INTEGER, ASN_INTEGER, 0);
+    netsnmp_table_helper_add_indexes(table_info, ASN_INTEGER, ASN_INTEGER, 0);
     table_info->min_column = 3;
     table_info->max_column = 3;
     netsnmp_register_table(my_test, table_info);
@@ -92,19 +92,19 @@ init_testhandler(void) {
     netsnmp_table_data_add_index(table, ASN_OCTET_STR);
 
     /* 1 partridge in a pear tree */
-    row = netsnmp_netsnmp_create_table_data_row();
+    row = netsnmp_create_table_data_row();
     ind1 = 1;
-    netsnmp_netsnmp_table_row_add_index(row, ASN_INTEGER, &ind1, sizeof(ind1));
-    netsnmp_netsnmp_table_row_add_index(row, ASN_OCTET_STR, "partridge",\
+    netsnmp_table_row_add_index(row, ASN_INTEGER, &ind1, sizeof(ind1));
+    netsnmp_table_row_add_index(row, ASN_OCTET_STR, "partridge",\
                         strlen("partridge"));
     row->data = (void *) "pear tree";
     netsnmp_table_data_add_row(table, row);
 
     /* 2 turtle doves */
-    row = netsnmp_netsnmp_create_table_data_row();
+    row = netsnmp_create_table_data_row();
     ind1 = 2;
-    netsnmp_netsnmp_table_row_add_index(row, ASN_INTEGER, &ind1, sizeof(ind1));
-    netsnmp_netsnmp_table_row_add_index(row, ASN_OCTET_STR, "turtle",\
+    netsnmp_table_row_add_index(row, ASN_INTEGER, &ind1, sizeof(ind1));
+    netsnmp_table_row_add_index(row, ASN_OCTET_STR, "turtle",\
                         strlen("turtle"));
     row->data = (void *) "doves";
     netsnmp_table_data_add_row(table, row);
@@ -113,7 +113,7 @@ init_testhandler(void) {
        automatically parsed column and index information */
     table_info = SNMP_MALLOC_TYPEDEF(netsnmp_table_registration_info);
 
-    netsnmp_netsnmp_netsnmp_netsnmp_table_helper_add_indexes(table_info, ASN_INTEGER, ASN_OCTET_STR, 0);
+    netsnmp_table_helper_add_indexes(table_info, ASN_INTEGER, ASN_OCTET_STR, 0);
     table_info->min_column = 3;
     table_info->max_column = 3;
 
@@ -139,7 +139,7 @@ init_testhandler(void) {
     
     /* set up what a row "should" look like */
     netsnmp_table_dataset_add_index(table_set, ASN_OCTET_STR);
-    netsnmp_netsnmp_table_set_multi_add_default_row(table_set,
+    netsnmp_table_set_multi_add_default_row(table_set,
                                     2, ASN_OCTET_STR, 1,
                                     3, ASN_OCTET_STR, 1);
 
@@ -151,8 +151,8 @@ init_testhandler(void) {
                             table_set, NULL);
 
     /* add the data, for the first row */
-    row = netsnmp_netsnmp_create_table_data_row();
-    netsnmp_netsnmp_table_row_add_index(row, ASN_OCTET_STR, "snmpv3",\
+    row = netsnmp_create_table_data_row();
+    netsnmp_table_row_add_index(row, ASN_OCTET_STR, "snmpv3",\
                         strlen("snmpv3"));
     netsnmp_set_row_column(row, 2, ASN_OCTET_STR, "Russ Mundy", strlen("Russ Mundy"));
     netsnmp_mark_row_column_writable(row, 2, 1); /* make writable */
@@ -162,8 +162,8 @@ init_testhandler(void) {
     netsnmp_table_dataset_add_row(table_set, row);
 
     /* add the data, for the second row */
-    row = netsnmp_netsnmp_create_table_data_row();
-    netsnmp_netsnmp_table_row_add_index(row, ASN_OCTET_STR, "snmpconf",\
+    row = netsnmp_create_table_data_row();
+    netsnmp_table_row_add_index(row, ASN_OCTET_STR, "snmpconf",\
                         strlen("snmpconf"));
     netsnmp_set_row_column(row, 2, ASN_OCTET_STR, "David Partain",
                    strlen("David Partain"));

@@ -149,7 +149,7 @@ void init_mteTriggerTable(void) {
 
   /* open a 'callback' session to the main agent */
     if (mte_callback_sess == NULL) {
-	mte_callback_sess = snmp_callback_open(callback_master_num,
+	mte_callback_sess = netsnmp_callback_open(callback_master_num,
                                                NULL,
                                                NULL, NULL);
 	DEBUGMSGTL(("mteTriggerTable", "created callback session = %08x\n",

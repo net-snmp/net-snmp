@@ -716,7 +716,7 @@ main(int argc, char *argv[])
 #ifdef WIN32
     agent_status = AGENT_RUNNING;
 #endif
-    netsnmp_snmp_addrcache_initialise();
+    netsnmp_addrcache_initialise();
 
     /*  Forever monitor the dest_port for incoming PDUs.  */
     DEBUGMSGTL(("snmpd/main", "We're up.  Starting to process data.\n"));

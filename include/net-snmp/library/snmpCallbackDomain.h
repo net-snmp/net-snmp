@@ -3,32 +3,32 @@
 
 #include <net-snmp/library/snmp_transport.h>
 
-typedef struct callback_pass_s {
+typedef struct netsnmp_callback_pass_s {
    int return_transport_num;
    struct snmp_pdu *pdu;
-   struct callback_pass_s *next;
-} callback_pass;
+   struct netsnmp_callback_pass_s *next;
+} netsnmp_callback_pass;
 
-typedef struct callback_info_s {
+typedef struct netsnmp_callback_info_s {
    int linkedto;
    void *parent_data;
-   callback_pass *data;
+   netsnmp_callback_pass *data;
    int callback_num;
    int pipefds[2];
-} callback_info;
+} netsnmp_callback_info;
 
-netsnmp_transport		*snmp_callback_transport (int);
-int snmp_callback_hook_parse(struct snmp_session *sp,
+netsnmp_transport		*netsnmp_callback_transport (int);
+int netsnmp_callback_hook_parse(struct snmp_session *sp,
                              struct snmp_pdu *pdu,
                              u_char *packetptr,
                              size_t len);
-int snmp_callback_hook_build(struct snmp_session *sp,
+int netsnmp_callback_hook_build(struct snmp_session *sp,
                              struct snmp_pdu *pdu,
                              u_char *ptk, size_t *len);
-int snmp_callback_check_packet(u_char *pkt, size_t len);
-struct snmp_pdu *snmp_callback_create_pdu(netsnmp_transport *transport,
+int netsnmp_callback_check_packet(u_char *pkt, size_t len);
+struct snmp_pdu *netsnmp_callback_create_pdu(netsnmp_transport *transport,
                                           void *opaque, size_t olength);
-struct snmp_session *snmp_callback_open(int attach_to,
+struct snmp_session *netsnmp_callback_open(int attach_to,
                                         int (*return_func)(int op, struct snmp_session *session,
                                                            int reqid, struct snmp_pdu *pdu,
                                                            void *magic),

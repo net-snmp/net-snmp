@@ -49,7 +49,7 @@ netsnmp_get_table_iterator_handler(netsnmp_iterator_info *iinfo) {
     
 /** registers a table after attaching it to a table_iterator helper */
 int
-netsnmp_netsnmp_register_table_iterator(netsnmp_handler_registration *reginfo,
+netsnmp_register_table_iterator(netsnmp_handler_registration *reginfo,
                         netsnmp_iterator_info *iinfo) {
     netsnmp_inject_handler(reginfo, netsnmp_get_table_iterator_handler(iinfo));
 #ifndef NOT_SERIALIZED
