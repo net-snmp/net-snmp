@@ -50,7 +50,7 @@ static int callback_count = 0;
 
 typedef struct callback_hack_s {
    void *orig_transport_data;
-   struct snmp_pdu *pdu;
+   netsnmp_pdu *pdu;
 } callback_hack;
 
 typedef struct callback_queue_s {
@@ -177,7 +177,7 @@ int		snmp_callback_send	(netsnmp_transport *t, void *buf, int size,
     /* extract the pdu from the hacked buffer */
     netsnmp_transport *other_side;
     callback_hack *ch = (callback_hack *) *opaque;
-    struct snmp_pdu *pdu = ch->pdu;
+    netsnmp_pdu *pdu = ch->pdu;
     *opaque = ch->orig_transport_data;
     free(ch);
 
@@ -316,8 +316,8 @@ netsnmp_transport		*netsnmp_callback_transport   (int to)
 }
 
 int
-netsnmp_callback_hook_parse(struct snmp_session *sp,
-                         struct snmp_pdu *pdu,
+netsnmp_callback_hook_parse(netsnmp_session *sp,
+                         netsnmp_pdu *pdu,
                          u_char *packetptr,
                          size_t len) 
 {
@@ -331,8 +331,8 @@ netsnmp_callback_hook_parse(struct snmp_session *sp,
 }
 
 int
-netsnmp_callback_hook_build(struct snmp_session *sp,
-                         struct snmp_pdu *pdu,
+netsnmp_callback_hook_build(netsnmp_session *sp,
+                         netsnmp_pdu *pdu,
                          u_char *ptk, size_t *len) 
 {
     /* very gross hack, as this is passed later to the transport_send
@@ -353,11 +353,11 @@ netsnmp_callback_check_packet(u_char *pkt, size_t len)
     return 1;
 }
 
-struct snmp_pdu *
+netsnmp_pdu *
 netsnmp_callback_create_pdu(netsnmp_transport *transport,
                          void *opaque, size_t olength) 
 {
-    struct snmp_pdu *pdu;
+    netsnmp_pdu *pdu;
     netsnmp_callback_pass *cp =
         callback_pop_queue(((netsnmp_callback_info *) transport->data)->callback_num);
     if (!cp)
@@ -371,18 +371,18 @@ netsnmp_callback_create_pdu(netsnmp_transport *transport,
     return pdu;
 }
 
-struct snmp_session *
+netsnmp_session *
 netsnmp_callback_open(int attach_to,
-                   int (*return_func)(int op, struct snmp_session *session,
-                                      int reqid, struct snmp_pdu *pdu,
+                   int (*return_func)(int op, netsnmp_session *session,
+                                      int reqid, netsnmp_pdu *pdu,
                                       void *magic),
-                   int (*fpre_parse) (struct snmp_session *,
+                   int (*fpre_parse) (netsnmp_session *,
                                       struct netsnmp_transport_s *,
                                       void *, int),
-                   int (*fpost_parse)(struct snmp_session *,
-                                      struct snmp_pdu *, int))
+                   int (*fpost_parse)(netsnmp_session *,
+                                      netsnmp_pdu *, int))
 {
-    struct snmp_session callback_sess, *callback_ss;
+    netsnmp_session callback_sess, *callback_ss;
     netsnmp_transport *callback_tr;
 
     callback_tr = netsnmp_callback_transport(attach_to);

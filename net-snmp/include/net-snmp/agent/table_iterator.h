@@ -8,13 +8,13 @@ extern "C" {
 
 struct netsnmp_iterator_info_s;
     
-typedef struct variable_list * (Netsnmp_First_Data_Point)(void **loop_context,
+typedef netsnmp_variable_list * (Netsnmp_First_Data_Point)(void **loop_context,
                                                 void **data_context,
-                                                struct variable_list *,
+                                                netsnmp_variable_list *,
                                                 struct netsnmp_iterator_info_s *);
-typedef struct variable_list * (Netsnmp_Next_Data_Point)(void **loop_context,
+typedef netsnmp_variable_list * (Netsnmp_Next_Data_Point)(void **loop_context,
                                                void **data_context,
-                                               struct variable_list *,
+                                               netsnmp_variable_list *,
                                                struct netsnmp_iterator_info_s *);
 typedef void *                 (Netsnmp_Make_Data_Context)(void *loop_context,
                                                  struct netsnmp_iterator_info_s *);

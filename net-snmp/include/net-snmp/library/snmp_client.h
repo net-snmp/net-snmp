@@ -43,40 +43,40 @@ struct synch_state {
 #define STAT_ERROR	1
 #define STAT_TIMEOUT 2
     int reqid;
-    struct snmp_pdu *pdu;
+    netsnmp_pdu *pdu;
 };
 
-int snmp_set_var_value(struct variable_list *, const u_char *, size_t);
-int snmp_set_var_objid (struct variable_list *vp,
+int snmp_set_var_value(netsnmp_variable_list *, const u_char *, size_t);
+int snmp_set_var_objid (netsnmp_variable_list *vp,
                     const oid *objid, size_t name_length);
-int snmp_set_var_typed_value(struct variable_list *newvar, u_char type,
+int snmp_set_var_typed_value(netsnmp_variable_list *newvar, u_char type,
                              const u_char *val_str, size_t val_len);
-void snmp_replace_var_types(struct variable_list *vbl, int old_type,
+void snmp_replace_var_types(netsnmp_variable_list *vbl, int old_type,
                             int new_type);
-void snmp_reset_var_buffers( struct variable_list * var );
-void snmp_reset_var_types(struct variable_list *vbl, int new_type);
-int count_varbinds( struct variable_list *var_ptr );
-int count_varbinds_of_type( struct variable_list *var_ptr, int type );
-struct variable_list *find_varbind_of_type( struct variable_list *var_ptr,
+void snmp_reset_var_buffers( netsnmp_variable_list * var );
+void snmp_reset_var_types(netsnmp_variable_list *vbl, int new_type);
+int count_varbinds( netsnmp_variable_list *var_ptr );
+int count_varbinds_of_type( netsnmp_variable_list *var_ptr, int type );
+netsnmp_variable_list *find_varbind_of_type( netsnmp_variable_list *var_ptr,
                                             int type );
 
-struct variable_list* snmp_add_null_var (struct snmp_pdu *, oid *, size_t);
-struct snmp_pdu	*snmp_pdu_create (int);
-struct snmp_pdu *snmp_fix_pdu (struct snmp_pdu *, int);
-struct snmp_pdu *snmp_clone_pdu (struct snmp_pdu *);
-struct snmp_pdu *snmp_split_pdu (struct snmp_pdu *, int skipCount,
+netsnmp_variable_list* snmp_add_null_var (netsnmp_pdu *, oid *, size_t);
+netsnmp_pdu	*snmp_pdu_create (int);
+netsnmp_pdu *snmp_fix_pdu (netsnmp_pdu *, int);
+netsnmp_pdu *snmp_clone_pdu (netsnmp_pdu *);
+netsnmp_pdu *snmp_split_pdu (netsnmp_pdu *, int skipCount,
                                  int copyCount);
 
-unsigned long snmp_varbind_len(struct snmp_pdu * pdu);
-int snmp_clone_var(struct variable_list *, struct variable_list *);
-struct variable_list *snmp_clone_varbind(struct variable_list *);
+unsigned long snmp_varbind_len(netsnmp_pdu * pdu);
+int snmp_clone_var(netsnmp_variable_list *, netsnmp_variable_list *);
+netsnmp_variable_list *snmp_clone_varbind(netsnmp_variable_list *);
 const char *snmp_errstring (int);
-int snmp_synch_response (struct snmp_session *, struct snmp_pdu *, struct snmp_pdu **);
-int snmp_synch_response_cb (struct snmp_session *, struct snmp_pdu *, struct snmp_pdu **, snmp_callback);
+int snmp_synch_response (netsnmp_session *, netsnmp_pdu *, netsnmp_pdu **);
+int snmp_synch_response_cb (netsnmp_session *, netsnmp_pdu *, netsnmp_pdu **, snmp_callback);
 int snmp_clone_mem(void **, void *, unsigned);
 
 /* single session API - see snmp_api.h for full details */
-int snmp_sess_synch_response (void *, struct snmp_pdu *, struct snmp_pdu **);
+int snmp_sess_synch_response (void *, netsnmp_pdu *, netsnmp_pdu **);
  
 #ifdef __cplusplus
 }

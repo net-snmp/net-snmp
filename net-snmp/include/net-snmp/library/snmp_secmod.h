@@ -25,8 +25,8 @@ struct snmp_secmod_outgoing_params {
    u_char **wholeMsg;
    size_t  *wholeMsgLen;
    size_t  *wholeMsgOffset;
-   struct snmp_pdu *pdu;           /* IN - the pdu getting encoded            */
-   struct snmp_session *session;   /* IN - session sending the message        */
+   netsnmp_pdu *pdu;           /* IN - the pdu getting encoded            */
+   netsnmp_session *session;   /* IN - session sending the message        */
 };
 
 struct snmp_secmod_incoming_params {
@@ -52,8 +52,8 @@ struct snmp_secmod_incoming_params {
 
    size_t  *maxSizeResponse;       /* OUT    - Max size of Response PDU.      */
    void   **secStateRef;           /* OUT    - Ref to security state.         */
-   struct snmp_session *sess;      /* IN     - session which got the message  */
-   struct snmp_pdu *pdu;           /* IN     - the pdu getting parsed         */
+   netsnmp_session *sess;      /* IN     - session which got the message  */
+   netsnmp_pdu *pdu;           /* IN     - the pdu getting parsed         */
    u_char msg_flags;	           /* IN     - v3 Message flags.              */
 };
 
@@ -63,9 +63,9 @@ struct snmp_secmod_incoming_params {
  */
 
 /* free's a given security module's data; called at unregistration time */
-typedef int (SecmodSessionCallback)(struct snmp_session *);
-typedef int (SecmodPduCallback) (struct snmp_pdu *);
-typedef int (Secmod2PduCallback) (struct snmp_pdu *, struct snmp_pdu *);
+typedef int (SecmodSessionCallback)(netsnmp_session *);
+typedef int (SecmodPduCallback) (netsnmp_pdu *);
+typedef int (Secmod2PduCallback) (netsnmp_pdu *, netsnmp_pdu *);
 typedef int (SecmodOutMsg)(struct snmp_secmod_outgoing_params *);
 typedef int (SecmodInMsg)(struct snmp_secmod_incoming_params *);
 typedef void (SecmodFreeState) (void *);

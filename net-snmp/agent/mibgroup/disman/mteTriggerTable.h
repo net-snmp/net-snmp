@@ -195,8 +195,8 @@ void parse_mteTriggerTable(const char *, char *);
 void parse_simple_monitor(const char *, char *);
 void parse_default_monitors(const char *, char *);
 SNMPCallback store_mteTriggerTable;
-struct snmp_pdu *mte_get_response(struct mteTriggerTable_data *,
-                                  struct snmp_pdu *);
+netsnmp_pdu *mte_get_response(struct mteTriggerTable_data *,
+                                  netsnmp_pdu *);
 
 
 WriteMethod write_mteTriggerComment;

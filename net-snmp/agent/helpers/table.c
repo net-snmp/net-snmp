@@ -121,7 +121,7 @@ table_helper_handler(netsnmp_mib_handler * handler,
     int             status = SNMP_ERR_NOERROR, need_processing = 0;
     oid            *tmp_name;
     netsnmp_table_request_info *tbl_req_info;
-    struct variable_list *vb;
+    netsnmp_variable_list *vb;
 
     tbl_info = (netsnmp_table_registration_info *) handler->myvoid;
 
@@ -164,7 +164,7 @@ table_helper_handler(netsnmp_mib_handler * handler,
      */
 
     for (request = requests; request; request = request->next) {
-        struct variable_list *var = request->requestvb;
+        netsnmp_variable_list *var = request->requestvb;
 
         DEBUGMSGOID(("verbose:table", var->name, var->name_length));
         DEBUGMSG(("verbose:table", "\n"));
@@ -459,7 +459,7 @@ netsnmp_table_build_result(netsnmp_handler_registration * reginfo,
                    u_char * result, size_t result_len)
 {
 
-    struct variable_list *var;
+    netsnmp_variable_list *var;
 
     if (!reqinfo || !table_info)
         return SNMPERR_GENERR;
@@ -489,7 +489,7 @@ netsnmp_table_build_oid(netsnmp_handler_registration * reginfo,
                 netsnmp_request_info * reqinfo, netsnmp_table_request_info * table_info)
 {
     oid             tmpoid[MAX_OID_LEN];
-    struct variable_list *var;
+    netsnmp_variable_list *var;
 
     if (!reginfo || !reqinfo || !table_info)
         return SNMPERR_GENERR;
@@ -515,7 +515,7 @@ netsnmp_table_build_oid_from_index(netsnmp_handler_registration * reginfo,
                            netsnmp_table_request_info * table_info)
 {
     oid             tmpoid[MAX_OID_LEN];
-    struct variable_list *var;
+    netsnmp_variable_list *var;
     int             len;
 
     if (!reginfo || !reqinfo || !table_info)
@@ -563,8 +563,8 @@ int
 netsnmp_check_getnext_reply(netsnmp_request_info * request,
                     oid * prefix,
                     size_t prefix_len,
-                    struct variable_list *newvar,
-                    struct variable_list **outvar)
+                    netsnmp_variable_list *newvar,
+                    netsnmp_variable_list **outvar)
 {
     static oid      myname[MAX_OID_LEN];
     static int      myname_len;

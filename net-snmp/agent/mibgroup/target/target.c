@@ -18,10 +18,10 @@
 
 #define MAX_TAGS 128
 
-struct snmp_session *
+netsnmp_session *
 get_target_sessions(char *taglist, TargetFilterFunction *filterfunct,
                     void *filterArg) {
-    struct snmp_session *ret = NULL, thissess;
+    netsnmp_session *ret = NULL, thissess;
     struct targetAddrTable_struct *targaddrs;
     char buf[SPRINT_MAX_LEN];
     char tags[MAX_TAGS][SPRINT_MAX_LEN], *cp;

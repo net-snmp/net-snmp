@@ -1,12 +1,12 @@
 extern int aflag, nflag;
 extern int print_errors;
 extern char *intrface;
-extern struct snmp_session *Session;
+extern netsnmp_session *Session;
 
 char *routename (struct in_addr);
 char *netname (struct in_addr, u_long);
 const char *plural (int);
-struct variable_list *getvarbyname (struct snmp_session *, oid *, size_t);
+netsnmp_variable_list *getvarbyname (netsnmp_session *, oid *, size_t);
 
 void intpr (int);
 void intpro (int);

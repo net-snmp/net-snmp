@@ -66,10 +66,10 @@
 static krb5_context kcontext = NULL;
 static krb5_rcache rcache = NULL;
 
-static int ksm_session_init(struct snmp_session *);
+static int ksm_session_init(netsnmp_session *);
 static void ksm_free_state_ref(void *);
-static int ksm_free_pdu(struct snmp_pdu *);
-static int ksm_clone_pdu(struct snmp_pdu *, struct snmp_pdu *);
+static int ksm_free_pdu(netsnmp_pdu *);
+static int ksm_clone_pdu(netsnmp_pdu *, netsnmp_pdu *);
 
 static int ksm_insert_cache(long, krb5_auth_context, u_char *, size_t);
 static void ksm_decrement_ref_count(long);
@@ -273,7 +273,7 @@ ksm_increment_ref_count(long msgid)
  */
 
 static int
-ksm_session_init(struct snmp_session *sess)
+ksm_session_init(netsnmp_session *sess)
 {
     DEBUGMSGTL(("ksm", "KSM: Reached our session initialization callback\n"));
 
@@ -304,7 +304,7 @@ ksm_free_state_ref(void *ptr)
  */
 
 static int
-ksm_free_pdu(struct snmp_pdu *pdu)
+ksm_free_pdu(netsnmp_pdu *pdu)
 {
     ksm_decrement_ref_count(pdu->msgid);
 
@@ -319,7 +319,7 @@ ksm_free_pdu(struct snmp_pdu *pdu)
  */
 
 static int
-ksm_clone_pdu(struct snmp_pdu *pdu, struct snmp_pdu *pdu2)
+ksm_clone_pdu(netsnmp_pdu *pdu, netsnmp_pdu *pdu2)
 {
     ksm_increment_ref_count(pdu->msgid);
 

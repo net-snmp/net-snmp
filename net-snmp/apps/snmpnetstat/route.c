@@ -121,8 +121,8 @@ void
 routepr(void)
 {
 	struct route_entry route, *rp = &route;
-	struct snmp_pdu *request, *response;
-	struct variable_list *vp;
+	netsnmp_pdu *request, *response;
+	netsnmp_variable_list *vp;
 	char name[16], *flags;
 	oid *instance, type;
 	int toloopback, status;
@@ -261,8 +261,8 @@ struct iflist {
 void
 get_ifname(char *name, int ifIndex)
 {
-    struct snmp_pdu *pdu, *response;
-    struct variable_list *vp;
+    netsnmp_pdu *pdu, *response;
+    netsnmp_variable_list *vp;
     struct iflist *ip;
     oid varname[MAX_OID_LEN];
     int status;
@@ -443,7 +443,7 @@ netname(struct in_addr in,
 void
 rt_stats(void)
 {
-	struct variable_list *var;
+	netsnmp_variable_list *var;
 
 	printf("routing:\n");
 	var = getvarbyname(Session, oid_ipnoroutes, sizeof(oid_ipnoroutes) / sizeof(oid));
@@ -459,17 +459,17 @@ rt_stats(void)
 /*
  * Request a variable with a GET REQUEST message on the given
  * session.  If the variable is found, a
- * pointer to a struct variable_list object will be returned.
+ * pointer to a netsnmp_variable_list object will be returned.
  * Otherwise, NULL is returned.  The caller must free the returned
  * variable_list object when done with it.
  */
-struct variable_list *
-getvarbyname(struct snmp_session *sp,
+netsnmp_variable_list *
+getvarbyname(netsnmp_session *sp,
 	     oid *name,
 	     size_t len)
 {
-    struct snmp_pdu *request, *response;
-    struct variable_list *var = NULL, *vp;
+    netsnmp_pdu *request, *response;
+    netsnmp_variable_list *var = NULL, *vp;
     int status;
 
     request = snmp_pdu_create(SNMP_MSG_GET);

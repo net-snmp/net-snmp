@@ -40,7 +40,7 @@ typedef struct netsnmp_column_info_t {
 } netsnmp_column_info;
 
 typedef struct _netsnmp_table_registration_info {
-   struct variable_list *indexes; /* list of varbinds with only 'type' set */
+   netsnmp_variable_list *indexes; /* list of varbinds with only 'type' set */
    unsigned int number_indexes;   /* calculated automatically */
 
   /* the minimum and maximum columns numbers. If there are columns
@@ -57,7 +57,7 @@ typedef struct _netsnmp_table_registration_info {
 typedef struct _netsnmp_table_request_info {
    unsigned int colnum;            /* 0 if OID not long enough */
    unsigned int number_indexes;    /* 0 if failure to parse any */
-   struct variable_list *indexes; /* contents freed by helper upon exit */
+   netsnmp_variable_list *indexes; /* contents freed by helper upon exit */
   oid index_oid[MAX_OID_LEN];
   size_t index_oid_len;
   netsnmp_table_registration_info *reg_info;
@@ -95,8 +95,8 @@ void netsnmp_table_helper_add_indexes(va_alist);
 int
 netsnmp_check_getnext_reply(netsnmp_request_info *request, oid *prefix,
                     size_t prefix_len,
-                    struct variable_list *newvar,
-                    struct variable_list **outvar);
+                    netsnmp_variable_list *newvar,
+                    netsnmp_variable_list **outvar);
 
 netsnmp_table_request_info *netsnmp_extract_table_info(netsnmp_request_info *);
 

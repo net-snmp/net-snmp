@@ -103,7 +103,7 @@ void init_snmpNotifyFilterProfileTable(void) {
  */
 int
 snmpNotifyFilterProfileTable_add(struct snmpNotifyFilterProfileTable_data *thedata) {
-  struct variable_list *vars = NULL;
+  netsnmp_variable_list *vars = NULL;
 
 
   DEBUGMSGTL(("snmpNotifyFilterProfileTable", "adding data...  "));
@@ -417,7 +417,7 @@ write_snmpNotifyFilterProfileRowStatus(int      action,
   size_t newlen=name_len - (sizeof(snmpNotifyFilterProfileTable_variables_oid)/sizeof(oid) + 3 - 1);
   static int old_value;
   int set_value;
-  struct variable_list *vars;
+  netsnmp_variable_list *vars;
   struct header_complex_index *hciptr;
 
 
@@ -588,7 +588,7 @@ write_snmpNotifyFilterProfileRowStatus(int      action,
 char *
 get_FilterName(char *targetName, size_t targetName_len,
                size_t *profileName_len) {
-    struct variable_list *vars = NULL;
+    netsnmp_variable_list *vars = NULL;
     struct snmpNotifyFilterProfileTable_data *data;
     
     /* put requested info into var structure */

@@ -54,7 +54,7 @@ typedef u_char *(FindVarMethod)(struct variable *vp,
 
 /* Function pointer called by the master agent for setting up subagent requests */
 typedef int (AddVarMethod)(netsnmp_agent_session *asp,
-        struct variable_list     *vbp);
+        netsnmp_variable_list     *vbp);
 
 struct nlist;
 

@@ -19,12 +19,12 @@ void *header_complex(struct header_complex_index *datalist, struct variable *vp,
                      oid *name, size_t *length, int exact, size_t *var_len,
                      WriteMethod **write_method);
 
-int header_complex_generate_varoid(struct variable_list *var);
+int header_complex_generate_varoid(netsnmp_variable_list *var);
 int header_complex_parse_oid(oid *oidIndex, size_t oidLen,
-                             struct variable_list *data);
+                             netsnmp_variable_list *data);
 void header_complex_generate_oid(oid *name, size_t *length, oid *prefix,
                                  size_t prefix_len,
-                                 struct variable_list *data);
+                                 netsnmp_variable_list *data);
 void header_complex_free_all(struct header_complex_index *thestuff,
                              HeaderComplexCleaner *cleaner);
 void header_complex_free_entry(struct header_complex_index *theentry,
@@ -34,13 +34,13 @@ void *header_complex_extract_entry(struct header_complex_index **thetop,
 struct header_complex_index *header_complex_find_entry(struct header_complex_index *thestuff, void *entry);
 
 void *header_complex_get(struct header_complex_index *datalist,
-                         struct variable_list *index);
+                         netsnmp_variable_list *index);
 void *header_complex_get_from_oid(struct header_complex_index *datalist,
                                   oid *searchfor, size_t searchfdor_len);
 
 struct header_complex_index *
   header_complex_add_data(struct header_complex_index **thedata,
-                          struct variable_list *var, void *data);
+                          netsnmp_variable_list *var, void *data);
 
 /* Note: newoid is copied/cloned for you */
 struct header_complex_index *

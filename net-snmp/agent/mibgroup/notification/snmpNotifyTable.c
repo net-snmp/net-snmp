@@ -72,8 +72,8 @@ int
 send_notifications(int major, int minor, void *serverarg, void *clientarg) {
     struct header_complex_index *hptr;
     struct snmpNotifyTable_data *nptr;
-    struct snmp_session *sess, *sptr;
-    struct snmp_pdu *template_pdu = (struct snmp_pdu *) serverarg;
+    netsnmp_session *sess, *sptr;
+    netsnmp_pdu *template_pdu = (netsnmp_pdu *) serverarg;
     
     DEBUGMSGTL(("send_notifications","starting: pdu=%x, vars=%x\n",
                 template_pdu, template_pdu->variables));
@@ -119,7 +119,7 @@ notifyTable_register_notifications(int major, int minor,
     char buf[SNMP_MAXBUF_SMALL];
     netsnmp_transport *t = NULL;
     struct agent_add_trap_args *args = (struct agent_add_trap_args *)serverarg;
-    struct snmp_session *ss;
+    netsnmp_session *ss;
 
     if (!args || !(args->ss)) {
         return (0);
@@ -277,7 +277,7 @@ void init_snmpNotifyTable(void) {
  */
 int
 snmpNotifyTable_add(struct snmpNotifyTable_data *thedata) {
-  struct variable_list *vars = NULL;
+  netsnmp_variable_list *vars = NULL;
 
 
   DEBUGMSGTL(("snmpNotifyTable", "adding data...  "));
@@ -676,7 +676,7 @@ write_snmpNotifyRowStatus(int      action,
   size_t newlen=name_len - (sizeof(snmpNotifyTable_variables_oid)/sizeof(oid) + 3 - 1);
   static int old_value;
   int set_value = *((long *) var_val);
-  static struct variable_list *vars, *vp;
+  static netsnmp_variable_list *vars, *vp;
   struct header_complex_index *hciptr;
 
 

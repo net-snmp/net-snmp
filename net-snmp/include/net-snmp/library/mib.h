@@ -129,48 +129,48 @@ struct tree *get_tree_head (void);
 void  set_function (struct tree *);
 
 int parse_one_oid_index(oid **oidStart, size_t *oidLen,
-			struct variable_list *data, int complete);
-int parse_oid_indexes(oid *oidIndex, size_t oidLen,struct variable_list *data);
+			netsnmp_variable_list *data, int complete);
+int parse_oid_indexes(oid *oidIndex, size_t oidLen,netsnmp_variable_list *data);
 int build_oid_noalloc(oid *in, size_t in_len, size_t *out_len,
 		      oid *prefix, size_t prefix_len,
-		      struct variable_list *indexes);
+		      netsnmp_variable_list *indexes);
 int build_oid(oid **out, size_t *out_len, oid *prefix, size_t prefix_len,
-              struct variable_list *indexes);
-int build_oid_segment(struct variable_list *var);
+              netsnmp_variable_list *indexes);
+int build_oid_segment(netsnmp_variable_list *var);
     
 
 void print_variable		(const oid *objid, size_t objidlen, 
-				 struct variable_list *variable);
+				 netsnmp_variable_list *variable);
 
 void fprint_variable		(FILE *fp,
 				 const oid *objid, size_t objidlen,
-				 struct variable_list *variable);
+				 netsnmp_variable_list *variable);
 
 int snprint_variable		(char *buf, size_t buf_len,
 				 const oid *objid, size_t objidlen,
-				 struct variable_list *variable);
+				 netsnmp_variable_list *variable);
 
 int sprint_realloc_variable	(u_char **buf, size_t *buf_len,
 				 size_t *out_len, int allow_realloc,
 				 const oid *objid, size_t objidlen,
-				 struct variable_list *variable);
+				 netsnmp_variable_list *variable);
 
 
 void print_value		(const oid *objid, size_t objidlen,
-				 struct variable_list *variable);
+				 netsnmp_variable_list *variable);
 
 void fprint_value		(FILE *fp,
 				 const oid *objid, size_t objidlen,
-				 struct variable_list *variable);
+				 netsnmp_variable_list *variable);
 
 int snprint_value		(char *buf, size_t buf_len,
 				 const oid *objid, size_t objidlen,
-				 struct variable_list *variable);
+				 netsnmp_variable_list *variable);
 
 int sprint_realloc_value	(u_char **buf, size_t *buf_len,
 				 size_t *out_len, int allow_realloc,
 				 const oid *objid, size_t objidlen,
-				 struct variable_list *variable);
+				 netsnmp_variable_list *variable);
 
 
 void print_objid		(const oid *objid, size_t objidlen);
@@ -188,7 +188,7 @@ int sprint_realloc_objid	(u_char **buf, size_t *buf_len,
 
 int sprint_realloc_by_type	(u_char **buf, size_t *buf_len,
 				 size_t *out_len, int allow_realloc,
-				 struct variable_list *var,
+				 netsnmp_variable_list *var,
 				 struct enum_list *enums,
 				 const char *hint, const char *units);
 
@@ -202,22 +202,22 @@ int sprint_realloc_asciistring	(u_char **buf, size_t *buf_len,
 
 int sprint_realloc_octet_string (u_char **buf, size_t *buf_len,
 				 size_t *out_len, int allow_realloc,
-				 struct variable_list *, struct enum_list *,
+				 netsnmp_variable_list *, struct enum_list *,
 				 const char *, const char *);
 
 int sprint_realloc_opaque	(u_char **buf, size_t *buf_len,
 				 size_t *out_len, int allow_realloc,
-				 struct variable_list *, struct enum_list *,
+				 netsnmp_variable_list *, struct enum_list *,
 				 const char *, const char *);
 
 int sprint_realloc_object_identifier(u_char **buf, size_t *buf_len,
 				 size_t *out_len, int allow_realloc,
-				 struct variable_list *, struct enum_list *,
+				 netsnmp_variable_list *, struct enum_list *,
 				 const char *, const char *);
 
 int sprint_realloc_timeticks	(u_char **buf, size_t *buf_len,
 				 size_t *out_len, int allow_realloc,
-				 struct variable_list *, struct enum_list *,
+				 netsnmp_variable_list *, struct enum_list *,
 				 const char *, const char *);
 
 int sprint_realloc_hinted_integer(u_char **buf, size_t *buf_len,
@@ -226,68 +226,68 @@ int sprint_realloc_hinted_integer(u_char **buf, size_t *buf_len,
 
 int sprint_realloc_integer	(u_char **buf, size_t *buf_len,
 				 size_t *out_len, int allow_realloc,
-				 struct variable_list *, struct enum_list *,
+				 netsnmp_variable_list *, struct enum_list *,
 				 const char *, const char *);
 
 int sprint_realloc_uinteger	(u_char **buf, size_t *buf_len,
 				 size_t *out_len, int allow_realloc,
-				 struct variable_list *, struct enum_list *,
+				 netsnmp_variable_list *, struct enum_list *,
 				 const char *, const char *);
 
 int sprint_realloc_gauge	(u_char **buf, size_t *buf_len,
 				 size_t *out_len, int allow_realloc,
-				 struct variable_list *, struct enum_list *,
+				 netsnmp_variable_list *, struct enum_list *,
 				 const char *, const char *);
 
 int sprint_realloc_counter	(u_char **buf, size_t *buf_len,
 				 size_t *out_len, int allow_realloc,
-				 struct variable_list *, struct enum_list *,
+				 netsnmp_variable_list *, struct enum_list *,
 				 const char *, const char *);
 
 int sprint_realloc_networkaddress(u_char **buf, size_t *buf_len,
 				 size_t *out_len, int allow_realloc,
-				 struct variable_list *, struct enum_list *,
+				 netsnmp_variable_list *, struct enum_list *,
 				 const char *, const char *);
 
 int sprint_realloc_ipaddress	(u_char **buf, size_t *buf_len,
 				 size_t *out_len, int allow_realloc,
-				 struct variable_list *, struct enum_list *,
+				 netsnmp_variable_list *, struct enum_list *,
 				 const char *, const char *);
 
 int sprint_realloc_null 	(u_char **buf, size_t *buf_len,
 				 size_t *out_len, int allow_realloc,
-				 struct variable_list *, struct enum_list *,
+				 netsnmp_variable_list *, struct enum_list *,
 				 const char *, const char *);
 
 int sprint_realloc_bitstring	(u_char **buf, size_t *buf_len,
 				 size_t *out_len, int allow_realloc,
-				 struct variable_list *, struct enum_list *,
+				 netsnmp_variable_list *, struct enum_list *,
 				 const char *, const char *);
 
 int sprint_realloc_nsapaddress	(u_char **buf, size_t *buf_len,
 				 size_t *out_len, int allow_realloc,
-				 struct variable_list *, struct enum_list *,
+				 netsnmp_variable_list *, struct enum_list *,
 				 const char *, const char *);
 
 int sprint_realloc_counter64	(u_char **buf, size_t *buf_len,
 				 size_t *out_len, int allow_realloc,
-				 struct variable_list *, struct enum_list *,
+				 netsnmp_variable_list *, struct enum_list *,
 				 const char *, const char *);
 
 int sprint_realloc_badtype	(u_char **buf, size_t *buf_len,
 				 size_t *out_len, int allow_realloc,
-				 struct variable_list *, struct enum_list *,
+				 netsnmp_variable_list *, struct enum_list *,
 				 const char *, const char *);
 
 #ifdef OPAQUE_SPECIAL_TYPES
 int sprint_realloc_float	(u_char **buf, size_t *buf_len,
 				 size_t *out_len, int allow_realloc,
-				 struct variable_list *, struct enum_list *,
+				 netsnmp_variable_list *, struct enum_list *,
 				 const char *, const char *);
 
 int sprint_realloc_double	(u_char **buf, size_t *buf_len,
 				 size_t *out_len, int allow_realloc,
-				 struct variable_list *, struct enum_list *,
+				 netsnmp_variable_list *, struct enum_list *,
 				 const char *, const char *);
 #endif
 

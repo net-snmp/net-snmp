@@ -40,7 +40,7 @@ void   init_mteObjectsTable(void);
 FindVarMethod var_mteObjectsTable;
 void parse_mteObjectsTable(const char *, char *);
 SNMPCallback store_mteObjectsTable;
-void mte_add_objects(struct variable_list *, struct mteTriggerTable_data *,
+void mte_add_objects(netsnmp_variable_list *, struct mteTriggerTable_data *,
                      const char *, const char *, oid *, size_t);
 int mte_add_object_to_table(const char *owner, const char *objname,
                             oid *oidname, size_t oidname_len, int iswild);

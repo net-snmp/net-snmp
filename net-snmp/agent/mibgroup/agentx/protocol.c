@@ -347,7 +347,7 @@ agentx_realloc_build_float(u_char **buf, size_t *buf_len, size_t *out_len,
 int
 agentx_realloc_build_varbind(u_char **buf, size_t *buf_len, size_t *out_len,
 			     int allow_realloc,
-			     struct variable_list *vp, int network_order)
+			     netsnmp_variable_list *vp, int network_order)
 {
   DEBUGDUMPHEADER("send", "VarBind");
   DEBUGDUMPHEADER("send", "type");
@@ -522,7 +522,7 @@ agentx_realloc_build_varbind(u_char **buf, size_t *buf_len, size_t *out_len,
 int
 agentx_realloc_build_header(u_char **buf, size_t *buf_len, size_t *out_len,
 			    int allow_realloc,
-			    struct snmp_pdu *pdu)
+			    netsnmp_pdu *pdu)
 {
   size_t ilen = *out_len;
   const int network_order = pdu->flags & AGENTX_FLAGS_NETWORK_BYTE_ORDER;
@@ -608,11 +608,11 @@ agentx_realloc_build_header(u_char **buf, size_t *buf_len, size_t *out_len,
 static int
 _agentx_realloc_build(u_char **buf, size_t *buf_len, size_t *out_len,
 		      int allow_realloc,
-		      struct snmp_session *session,
-		      struct snmp_pdu *pdu)
+		      netsnmp_session *session,
+		      netsnmp_pdu *pdu)
 {
   size_t ilen = *out_len, range_offset = 0, prefix_offset = 0;
-  struct variable_list *vp;
+  netsnmp_variable_list *vp;
   int inc, i = 0;
   const int network_order = pdu->flags & AGENTX_FLAGS_NETWORK_BYTE_ORDER;
   
@@ -914,7 +914,7 @@ _agentx_realloc_build(u_char **buf, size_t *buf_len, size_t *out_len,
 }
 
 int
-agentx_realloc_build(struct snmp_session *session, struct snmp_pdu *pdu,
+agentx_realloc_build(netsnmp_session *session, netsnmp_pdu *pdu,
 		     u_char **buf, size_t *buf_len, size_t *out_len)
 		     
 {
@@ -1303,7 +1303,7 @@ agentx_parse_varbind( u_char *data, size_t *length, int *type,
  *    "running out of room" is indeed an error.
  */
 u_char *
-agentx_parse_header(struct snmp_pdu *pdu, u_char *data, size_t *length)
+agentx_parse_header(netsnmp_pdu *pdu, u_char *data, size_t *length)
 {
      register u_char *bufp = data;
      size_t payload;
@@ -1373,7 +1373,7 @@ agentx_parse_header(struct snmp_pdu *pdu, u_char *data, size_t *length)
 
 
 int
-agentx_parse(struct snmp_session *session, struct snmp_pdu *pdu, u_char *data, size_t len)
+agentx_parse(netsnmp_session *session, netsnmp_pdu *pdu, u_char *data, size_t len)
 {
      register u_char *bufp = data;
      u_char buffer[BUFSIZ];
@@ -1390,7 +1390,7 @@ agentx_parse(struct snmp_session *session, struct snmp_pdu *pdu, u_char *data, s
 
      if ( pdu == NULL ) {
 		/* Dump the packet in a formatted style */
-	pdu = (struct snmp_pdu *)malloc( sizeof( struct snmp_pdu ));
+	pdu = (netsnmp_pdu *)malloc( sizeof( netsnmp_pdu ));
 	free( pdu );
 	return(0);
      }
@@ -1700,15 +1700,15 @@ agentx_parse(struct snmp_session *session, struct snmp_pdu *pdu, u_char *data, s
 
 #ifdef TESTING
 
-testit( struct snmp_pdu *pdu1)
+testit( netsnmp_pdu *pdu1)
 {
      char packet1[BUFSIZ];
      char packet2[BUFSIZ];
      int len1, len2;
-     struct snmp_pdu pdu2;
-     struct snmp_session sess;
+     netsnmp_pdu pdu2;
+     netsnmp_session sess;
 
-     memset( &pdu2, 0, sizeof(struct snmp_pdu));
+     memset( &pdu2, 0, sizeof(netsnmp_pdu));
      memset( packet1, 0, BUFSIZ );
      memset( packet2, 0, BUFSIZ );
      
@@ -1760,7 +1760,7 @@ testit( struct snmp_pdu *pdu1)
 
 main ()
 {
-     struct snmp_pdu pdu1;
+     netsnmp_pdu pdu1;
      oid oid_buf[] = { 1, 3, 6, 1, 2, 1, 10 };
      oid oid_buf2[] = { 1, 3, 6, 1, 2, 1, 20 };
      oid null_oid[] = { 0, 0 };
@@ -1770,7 +1770,7 @@ main ()
      
 	/* Create an example AgentX pdu structure */
 
-     memset( &pdu1, 0, sizeof(struct snmp_pdu));
+     memset( &pdu1, 0, sizeof(netsnmp_pdu));
      pdu1.command = AGENTX_MSG_TESTSET;
      pdu1.flags  =  0;
      pdu1.sessid = 16;

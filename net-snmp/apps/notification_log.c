@@ -318,7 +318,7 @@ init_notification_log(void)
 u_long default_num = 0;
 
 void
-log_notification(struct hostent *host, struct snmp_pdu *pdu,
+log_notification(struct hostent *host, netsnmp_pdu *pdu,
                  netsnmp_transport *transport) 
 {
     long tmpl;
@@ -327,7 +327,7 @@ log_notification(struct hostent *host, struct snmp_pdu *pdu,
 
     static oid snmptrapoid[] = {1,3,6,1,6,3,1,1,4,1,0};
     size_t snmptrapoid_len = OID_LENGTH(snmptrapoid);
-    struct variable_list *vptr;
+    netsnmp_variable_list *vptr;
     u_char *logdate;
     size_t logdate_size;
     time_t timetnow;

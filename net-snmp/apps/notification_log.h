@@ -10,7 +10,7 @@ Netsnmp_Node_Handler     nlmLogTable_handler;
 Netsnmp_Node_Handler     nlmLogVariableTable_handler;
 
 void
-log_notification(struct hostent *host, struct snmp_pdu *pdu,
+log_notification(struct hostent *host, netsnmp_pdu *pdu,
                  netsnmp_transport *transport);
 
 

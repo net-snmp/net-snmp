@@ -37,7 +37,7 @@
 
 void real_init_master(void)
 {
-    struct snmp_session sess, *session;
+    netsnmp_session sess, *session;
 
     if ( ds_get_boolean(DS_APPLICATION_ID, DS_AGENT_ROLE) != MASTER_AGENT )
 	return;
@@ -82,7 +82,7 @@ void real_init_master(void)
     }
 
     if ( session == NULL ) {
-      /* diagnose snmp_open errors with the input struct snmp_session pointer */
+      /* diagnose snmp_open errors with the input netsnmp_session pointer */
 	snmp_sess_perror("real_init_master", &sess);
 	if (!ds_get_boolean(DS_APPLICATION_ID, DS_AGENT_NO_ROOT_ACCESS))
 	    exit(1);
@@ -97,16 +97,16 @@ void real_init_master(void)
 	 */
 int
 agentx_got_response(int operation,
-		    struct snmp_session *session,
+		    netsnmp_session *session,
 		    int reqid,
-		    struct snmp_pdu *pdu,
+		    netsnmp_pdu *pdu,
 		    void *magic)
 {
     netsnmp_delegated_cache *cache = (netsnmp_delegated_cache *) magic;
     int i, ret;
     netsnmp_request_info *requests, *request;
-    struct variable_list *var;
-    struct snmp_session *ax_session;
+    netsnmp_variable_list *var;
+    netsnmp_session *ax_session;
 
     cache = netsnmp_handler_check_cache(cache);
     if (!cache) {
@@ -117,7 +117,7 @@ agentx_got_response(int operation,
     requests = cache->requests;
 
     switch (operation) {
-    case SNMP_CALLBACK_OP_TIMED_OUT: {
+    case NETSNMP_CALLBACK_OP_TIMED_OUT: {
 	void *s = snmp_sess_pointer(session);
 	DEBUGMSGTL(("agentx/master", "timeout on session %08p\n", session));
 
@@ -142,15 +142,15 @@ agentx_got_response(int operation,
 	netsnmp_handler_mark_requests_as_delegated(requests, REQUEST_IS_NOT_DELEGATED);
 	netsnmp_set_request_error(cache->reqinfo, requests, /* XXXWWW: should be index=0 */
 			  SNMP_ERR_GENERR);
-	ax_session = (struct snmp_session *) cache->localinfo;
+	ax_session = (netsnmp_session *) cache->localinfo;
 	netsnmp_free_agent_snmp_session_by_session(ax_session, NULL);
 	netsnmp_free_delegated_cache(cache);
 	return 0;
     }
 
-    case SNMP_CALLBACK_OP_DISCONNECT:
-    case SNMP_CALLBACK_OP_SEND_FAILED:
-	if (operation == SNMP_CALLBACK_OP_DISCONNECT) {
+    case NETSNMP_CALLBACK_OP_DISCONNECT:
+    case NETSNMP_CALLBACK_OP_SEND_FAILED:
+	if (operation == NETSNMP_CALLBACK_OP_DISCONNECT) {
 	    DEBUGMSGTL(("agentx/master", "disconnect on session %08p\n",
 			session));
 	} else {
@@ -164,7 +164,7 @@ agentx_got_response(int operation,
 	netsnmp_free_delegated_cache(cache);
 	return 0;
 
-    case SNMP_CALLBACK_OP_RECEIVED_MESSAGE:
+    case NETSNMP_CALLBACK_OP_RECEIVED_MESSAGE:
 	/* This session is alive */
 	CLEAR_SNMP_STRIKE_FLAGS( session->flags );
 	break;
@@ -268,9 +268,9 @@ agentx_master_handler(
     netsnmp_agent_request_info        *reqinfo,
     netsnmp_request_info              *requests)
 {
-    struct snmp_session *ax_session = (struct snmp_session *)handler->myvoid;
+    netsnmp_session *ax_session = (netsnmp_session *)handler->myvoid;
     netsnmp_request_info        *request = requests;
-    struct snmp_pdu     *pdu;
+    netsnmp_pdu     *pdu;
 
     DEBUGMSGTL(("agentx/master", "agentx master handler starting, mode = 0x%02x\n",
                 reqinfo->mode));

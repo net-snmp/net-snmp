@@ -25,7 +25,7 @@ void vacm_parse_simple (const char *, char *);
 
 SNMPCallback vacm_in_view_callback;
 
-int vacm_in_view (struct snmp_pdu *, oid *, size_t);
+int vacm_in_view (netsnmp_pdu *, oid *, size_t);
 
 extern FindVarMethod var_vacm_sec2group;
 extern FindVarMethod var_vacm_access;

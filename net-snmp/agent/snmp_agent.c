@@ -121,9 +121,9 @@ netsnmp_agent_session *agent_delegated_list = NULL;
 
 
 static void dump_var(oid *, size_t, int, void *, size_t);
-int netsnmp_agent_check_packet(struct snmp_session*, struct netsnmp_transport_s *,
+int netsnmp_agent_check_packet(netsnmp_session*, struct netsnmp_transport_s *,
 		      void *, int);
-int netsnmp_agent_check_parse(struct snmp_session*, struct snmp_pdu*, int);
+int netsnmp_agent_check_parse(netsnmp_session*, netsnmp_pdu*, int);
 void delete_subnetsnmp_tree_cache(netsnmp_agent_session  *asp);
 int handle_pdu(netsnmp_agent_session  *asp);
 int wrap_up_request(netsnmp_agent_session *asp, int status);
@@ -134,7 +134,7 @@ int handle_set_loop(netsnmp_agent_session  *asp);
 typedef struct agent_set_cache_s {
    /* match on these 2 */
    int			  transID;
-   struct snmp_session   *sess;
+   netsnmp_session   *sess;
 
    /* store this info */
    netsnmp_tree_cache *treecache;
@@ -324,7 +324,7 @@ void netsnmp_addrcache_age(void)
  */
 
 int
-netsnmp_agent_check_packet(struct snmp_session *session, netsnmp_transport *transport,
+netsnmp_agent_check_packet(netsnmp_session *session, netsnmp_transport *transport,
 		  void *transport_data, int transport_data_length)
 {
   char *addr_string = NULL;
@@ -409,13 +409,13 @@ netsnmp_agent_check_packet(struct snmp_session *session, netsnmp_transport *tran
 }
 
 
-int netsnmp_agent_check_parse(struct snmp_session *session, struct snmp_pdu *pdu,
+int netsnmp_agent_check_parse(netsnmp_session *session, netsnmp_pdu *pdu,
 		     int result)
 {
   if (result == 0) {
     if (ds_get_boolean(DS_APPLICATION_ID, DS_AGENT_VERBOSE) &&
 	snmp_get_do_logging()) {
-      struct variable_list *var_ptr;
+      netsnmp_variable_list *var_ptr;
 	    
       switch (pdu->command) {
       case SNMP_MSG_GET:
@@ -491,7 +491,7 @@ int netsnmp_agent_check_parse(struct snmp_session *session, struct snmp_pdu *pdu
 /*  I don't understand what this is for at the moment.  AFAICS as long as it
     gets set and points at a session, that's fine.  ???  */
 
-struct snmp_session *main_session = NULL;
+netsnmp_session *main_session = NULL;
 
 
 
@@ -501,7 +501,7 @@ struct snmp_session *main_session = NULL;
 
 int	netsnmp_register_agent_nsap	(netsnmp_transport *t)
 {
-  struct snmp_session *s, *sp = NULL;
+  netsnmp_session *s, *sp = NULL;
   agent_nsap *a = NULL, *n = NULL, **prevNext = &agent_nsap_list;
   int handle = 0;
   void *isp = NULL;
@@ -516,12 +516,12 @@ int	netsnmp_register_agent_nsap	(netsnmp_transport *t)
   if (n == NULL) {
     return -1;
   }
-  s = (struct snmp_session *)malloc(sizeof(struct snmp_session));
+  s = (netsnmp_session *)malloc(sizeof(netsnmp_session));
   if (s == NULL) {
     free(n);
     return -1;
   }
-  memset(s, 0, sizeof(struct snmp_session));
+  memset(s, 0, sizeof(netsnmp_session));
   snmp_sess_init(s);
 
   /*  Set up the session appropriately for an agent.  */
@@ -724,7 +724,7 @@ init_master_agent(void)
 
 
 netsnmp_agent_session *
-init_agent_snmp_session(struct snmp_session *session, struct snmp_pdu *pdu)
+init_agent_snmp_session(netsnmp_session *session, netsnmp_pdu *pdu)
 {
     netsnmp_agent_session *asp = (netsnmp_agent_session *)
 	                          calloc(1, sizeof(netsnmp_agent_session));
@@ -797,7 +797,7 @@ check_for_delegated(netsnmp_agent_session *asp) {
 int
 wrap_up_request(netsnmp_agent_session *asp, int status)
 {
-    struct variable_list *var_ptr;
+    netsnmp_variable_list *var_ptr;
     int i, n = 0, r = 0;
 
     /* some stuff needs to be saved in special subagent cases */
@@ -1002,8 +1002,8 @@ netsnmp_remove_and_free_agent_snmp_session(netsnmp_agent_session *asp)
 }
 
 void
-netsnmp_free_agent_snmp_session_by_session(struct snmp_session *sess,
-				   void (*free_request)(struct request_list *))
+netsnmp_free_agent_snmp_session_by_session(netsnmp_session *sess,
+				   void (*free_request)(netsnmp_request_list *))
 {
     netsnmp_agent_session *a, *next, **prevNext = &agent_session_list;
 
@@ -1023,15 +1023,15 @@ netsnmp_free_agent_snmp_session_by_session(struct snmp_session *sess,
 
 /** handles an incoming SNMP packet into the agent */
 int
-handle_snmp_packet(int op, struct snmp_session *session, int reqid,
-                   struct snmp_pdu *pdu, void *magic)
+handle_snmp_packet(int op, netsnmp_session *session, int reqid,
+                   netsnmp_pdu *pdu, void *magic)
 {
     netsnmp_agent_session  *asp;
     int status, access_ret;
-    struct variable_list *var_ptr;
+    netsnmp_variable_list *var_ptr;
 
     /*  We only support receiving here.  */
-    if (op != SNMP_CALLBACK_OP_RECEIVED_MESSAGE) {
+    if (op != NETSNMP_CALLBACK_OP_RECEIVED_MESSAGE) {
 	return 1;
     }
     
@@ -1118,7 +1118,7 @@ handle_snmp_packet(int op, struct snmp_session *session, int reqid,
 
 netsnmp_request_info *
 add_varbind_to_cache(netsnmp_agent_session  *asp, int vbcount,
-                     struct variable_list *varbind_ptr, struct subtree *tp)
+                     netsnmp_variable_list *varbind_ptr, struct subtree *tp)
 {
     netsnmp_request_info *request = NULL;
     int cacheid;
@@ -1238,7 +1238,7 @@ check_acm(netsnmp_agent_session  *asp, u_char type) {
     int i;
     netsnmp_request_info *request;
     int ret = 0;
-    struct variable_list *vb;
+    netsnmp_variable_list *vb;
     
     for(i = 0; i <= asp->treecache_num; i++) {
         for(request = asp->treecache[i].requests_begin;
@@ -1263,7 +1263,7 @@ check_acm(netsnmp_agent_session  *asp, u_char type) {
 int
 create_subnetsnmp_tree_cache(netsnmp_agent_session  *asp) {
     struct subtree *tp;
-    struct variable_list *varbind_ptr, *vbsave, *vbptr, **prevNext;
+    netsnmp_variable_list *varbind_ptr, *vbsave, *vbptr, **prevNext;
     int view;
     int vbcount = 0;
     int bulkcount = 0, bulkrep = 0;
@@ -1300,7 +1300,7 @@ create_subnetsnmp_tree_cache(netsnmp_agent_session  *asp) {
 	  asp->bulkcache = NULL;
 	} else {
 	    asp->bulkcache =
-		(struct variable_list **)malloc(asp->pdu->errindex * r *
+		(netsnmp_variable_list **)malloc(asp->pdu->errindex * r *
 						sizeof(struct varbind_list*));
 	}
 	DEBUGMSGTL(("snmp_agent", "GETBULK N = %d, M = %d, R = %d\n",
@@ -1711,7 +1711,7 @@ check_getnext_results(netsnmp_agent_session  *asp) {
 int
 handle_getnext_loop(netsnmp_agent_session  *asp) {
     int status;
-    struct variable_list *var_ptr;
+    netsnmp_variable_list *var_ptr;
 
     /* loop */
     while (1) {
@@ -1862,7 +1862,7 @@ int
 handle_pdu(netsnmp_agent_session  *asp)
 {
     int status, inclusives = 0;
-    struct variable_list *v = NULL;
+    netsnmp_variable_list *v = NULL;
 
     /* for illegal requests, mark all nodes as ASN_NULL */
     switch(asp->pdu->command) {

@@ -315,7 +315,7 @@ sprint_realloc_asciistring(u_char **buf, size_t *buf_len, size_t *out_len,
 int
 sprint_realloc_octet_string(u_char **buf, size_t *buf_len, size_t *out_len,
 			    int allow_realloc,
-			    struct variable_list *var,
+			    netsnmp_variable_list *var,
 			    struct enum_list *enums,
 			    const char *hint,
 			    const char *units)
@@ -509,7 +509,7 @@ sprint_realloc_octet_string(u_char **buf, size_t *buf_len, size_t *out_len,
 int
 sprint_realloc_float(u_char **buf, size_t *buf_len,
 		      size_t *out_len, int allow_realloc,
-		     struct variable_list *var,
+		     netsnmp_variable_list *var,
 		     struct enum_list *enums,
 		     const char *hint,
 		     const char *units)
@@ -552,7 +552,7 @@ sprint_realloc_float(u_char **buf, size_t *buf_len,
 int
 sprint_realloc_double(u_char **buf, size_t *buf_len,
 		      size_t *out_len, int allow_realloc,
-		       struct variable_list *var,
+		       netsnmp_variable_list *var,
 		       struct enum_list *enums,
 		       const char *hint,
 		       const char *units)
@@ -596,7 +596,7 @@ sprint_realloc_double(u_char **buf, size_t *buf_len,
 int
 sprint_realloc_counter64(u_char **buf, size_t *buf_len, size_t *out_len,
 			 int allow_realloc,
-			 struct variable_list *var,
+			 netsnmp_variable_list *var,
 			 struct enum_list *enums,
 			 const char *hint,
 			 const char *units)
@@ -676,7 +676,7 @@ sprint_realloc_counter64(u_char **buf, size_t *buf_len, size_t *out_len,
 int
 sprint_realloc_opaque(u_char **buf, size_t *buf_len,
 		      size_t *out_len, int allow_realloc,
-		      struct variable_list *var,
+		      netsnmp_variable_list *var,
 		      struct enum_list *enums,
 		      const char *hint,
 		      const char *units)
@@ -743,7 +743,7 @@ sprint_realloc_opaque(u_char **buf, size_t *buf_len,
 int
 sprint_realloc_object_identifier(u_char **buf, size_t *buf_len,
 				 size_t *out_len, int allow_realloc,
-				 struct variable_list *var,
+				 netsnmp_variable_list *var,
 				 struct enum_list *enums,
 				 const char *hint,
 				 const char *units)
@@ -784,7 +784,7 @@ sprint_realloc_object_identifier(u_char **buf, size_t *buf_len,
 int
 sprint_realloc_timeticks(u_char **buf, size_t *buf_len, size_t *out_len,
 			 int allow_realloc,
-			 struct variable_list *var,
+			 netsnmp_variable_list *var,
 			 struct enum_list *enums,
 			 const char *hint,
 			 const char *units)
@@ -880,7 +880,7 @@ sprint_realloc_hinted_integer (u_char **buf, size_t *buf_len, size_t *out_len,
 int
 sprint_realloc_integer(u_char **buf, size_t *buf_len, size_t *out_len,
 		       int allow_realloc,
-		       struct variable_list *var,
+		       netsnmp_variable_list *var,
 		       struct enum_list *enums,
 		       const char *hint,
 		       const char *units)
@@ -943,7 +943,7 @@ sprint_realloc_integer(u_char **buf, size_t *buf_len, size_t *out_len,
 int
 sprint_realloc_uinteger(u_char **buf, size_t *buf_len, size_t *out_len,
 			int allow_realloc,
-			struct variable_list *var,
+			netsnmp_variable_list *var,
 			struct enum_list *enums,
 			const char *hint,
 			const char *units)
@@ -1007,7 +1007,7 @@ sprint_realloc_uinteger(u_char **buf, size_t *buf_len, size_t *out_len,
 int
 sprint_realloc_gauge(u_char **buf, size_t *buf_len, size_t *out_len,
 		     int allow_realloc,
-		     struct variable_list *var,
+		     netsnmp_variable_list *var,
 		     struct enum_list *enums,
 		     const char *hint,
 		     const char *units)
@@ -1052,7 +1052,7 @@ sprint_realloc_gauge(u_char **buf, size_t *buf_len, size_t *out_len,
 int
 sprint_realloc_counter(u_char **buf, size_t *buf_len, size_t *out_len,
 		       int allow_realloc,
-		       struct variable_list *var,
+		       netsnmp_variable_list *var,
 		       struct enum_list *enums,
 		       const char *hint,
 		       const char *units)
@@ -1089,7 +1089,7 @@ sprint_realloc_counter(u_char **buf, size_t *buf_len, size_t *out_len,
 int
 sprint_realloc_networkaddress(u_char **buf, size_t *buf_len, size_t *out_len,
 			      int allow_realloc,
-			      struct variable_list *var,
+			      netsnmp_variable_list *var,
 			      struct enum_list *enums,
 			      const char *hint,
 			      const char *units)
@@ -1133,7 +1133,7 @@ sprint_realloc_networkaddress(u_char **buf, size_t *buf_len, size_t *out_len,
 int
 sprint_realloc_ipaddress(u_char **buf, size_t *buf_len, size_t *out_len,
 			 int allow_realloc,
-			 struct variable_list *var,
+			 netsnmp_variable_list *var,
 			 struct enum_list *enums,
 			 const char *hint,
 			 const char *units)
@@ -1169,7 +1169,7 @@ sprint_realloc_ipaddress(u_char **buf, size_t *buf_len, size_t *out_len,
 int
 sprint_realloc_null(u_char **buf, size_t *buf_len, size_t *out_len,
 		    int allow_realloc,
-		    struct variable_list *var,
+		    netsnmp_variable_list *var,
 		    struct enum_list *enums,
 		    const char *hint,
 		    const char *units)
@@ -1191,7 +1191,7 @@ sprint_realloc_null(u_char **buf, size_t *buf_len, size_t *out_len,
 int
 sprint_realloc_bitstring(u_char **buf, size_t *buf_len, size_t *out_len,
 			   int allow_realloc,
-			  struct variable_list *var,
+			  netsnmp_variable_list *var,
 			  struct enum_list *enums,
 			  const char *hint,
 			  const char *units)
@@ -1271,7 +1271,7 @@ sprint_realloc_bitstring(u_char **buf, size_t *buf_len, size_t *out_len,
 int
 sprint_realloc_nsapaddress(u_char **buf, size_t *buf_len, size_t *out_len,
 			   int allow_realloc,
-			   struct variable_list *var,
+			   netsnmp_variable_list *var,
 			   struct enum_list *enums,
 			   const char *hint,
 			   const char *units)
@@ -1300,7 +1300,7 @@ sprint_realloc_nsapaddress(u_char **buf, size_t *buf_len, size_t *out_len,
 int
 sprint_realloc_badtype(u_char **buf, size_t *buf_len, size_t *out_len,
 		       int allow_realloc,
-		       struct variable_list *var,
+		       netsnmp_variable_list *var,
 		       struct enum_list *enums,
 		       const char *hint,
 		       const char *units)
@@ -1313,7 +1313,7 @@ sprint_realloc_badtype(u_char **buf, size_t *buf_len, size_t *out_len,
 int
 sprint_realloc_by_type(u_char **buf, size_t *buf_len, size_t *out_len,
 		       int allow_realloc,
-		       struct variable_list *var,
+		       netsnmp_variable_list *var,
 		       struct enum_list *enums,
 		       const char *hint,
 		       const char *units)
@@ -2055,7 +2055,7 @@ int
 sprint_realloc_variable(u_char **buf, size_t *buf_len,
 			size_t *out_len, int allow_realloc,
 			const oid *objid, size_t objidlen,
-			struct variable_list *variable)
+			netsnmp_variable_list *variable)
 {
     struct tree *subtree = tree_head;
     int buf_overflow = 0;
@@ -2110,7 +2110,7 @@ sprint_realloc_variable(u_char **buf, size_t *buf_len,
 int
 snprint_variable(char *buf, size_t buf_len,
 		 const oid *objid, size_t objidlen,
-		 struct variable_list *variable)
+		 netsnmp_variable_list *variable)
 {
   size_t out_len = 0;
 
@@ -2126,7 +2126,7 @@ snprint_variable(char *buf, size_t buf_len,
 void
 print_variable(const oid *objid,
 	       size_t objidlen,
-	       struct variable_list *variable)
+	       netsnmp_variable_list *variable)
 {
     fprint_variable(stdout, objid, objidlen, variable);
 }
@@ -2135,7 +2135,7 @@ void
 fprint_variable(FILE *f,
 		const oid *objid,
 		size_t objidlen,
-		struct variable_list *variable)
+		netsnmp_variable_list *variable)
 {
   u_char *buf = NULL;
   size_t buf_len = 256, out_len = 0;
@@ -2159,7 +2159,7 @@ int
 sprint_realloc_value(u_char **buf, size_t *buf_len,
 		     size_t *out_len, int allow_realloc,
 		     const oid *objid, size_t objidlen,
-		     struct variable_list *variable)
+		     netsnmp_variable_list *variable)
 {
   struct tree *subtree = tree_head;
 
@@ -2189,7 +2189,7 @@ sprint_realloc_value(u_char **buf, size_t *buf_len,
 int
 snprint_value(char *buf, size_t buf_len,
 	      const oid *objid, size_t objidlen,
-	      struct variable_list *variable)
+	      netsnmp_variable_list *variable)
 {
   size_t out_len = 0;
 
@@ -2204,7 +2204,7 @@ snprint_value(char *buf, size_t buf_len,
 void
 print_value(const oid *objid,
 	    size_t objidlen,
-	    struct variable_list *variable)
+	    netsnmp_variable_list *variable)
 {
   fprint_value(stdout, objid, objidlen, variable);
 }
@@ -2213,7 +2213,7 @@ void
 fprint_value(FILE *f,
 	     const oid *objid,
 	     size_t objidlen,
-	     struct variable_list *variable)
+	     netsnmp_variable_list *variable)
 {
   u_char *buf = NULL;
   size_t buf_len = 256, out_len = 0;
@@ -2281,7 +2281,7 @@ dump_oid_to_string(const oid *objid,
 /* takes the value in VAR and turns it into an OID segment in VAR->NAME */
 /* returns SNMPERR_SUCCESS or SNMPERR_GENERR */
 int
-build_oid_segment(struct variable_list *var) {
+build_oid_segment(netsnmp_variable_list *var) {
   int i;
   
   switch(var->type) {
@@ -2357,9 +2357,9 @@ build_oid_segment(struct variable_list *var) {
       
 int build_oid_noalloc(oid *in, size_t in_len, size_t *out_len,
 											oid *prefix, size_t prefix_len,
-											struct variable_list *indexes)
+											netsnmp_variable_list *indexes)
 {
-	struct variable_list *var;
+	netsnmp_variable_list *var;
   
 	if (prefix) {
 		if (in_len < prefix_len)
@@ -2389,7 +2389,7 @@ int build_oid_noalloc(oid *in, size_t in_len, size_t *out_len,
 
 int build_oid(oid **out, size_t *out_len,
               oid *prefix, size_t prefix_len,
-              struct variable_list *indexes)
+              netsnmp_variable_list *indexes)
 {
 	oid tmpout[MAX_OID_LEN];
   
@@ -2411,9 +2411,9 @@ int build_oid(oid **out, size_t *out_len,
 */
 
 int parse_oid_indexes(oid *oidIndex, size_t oidLen,
-                      struct variable_list *data)
+                      netsnmp_variable_list *data)
 {
-  struct variable_list *var = data;
+  netsnmp_variable_list *var = data;
   
   while(var && oidLen > 0) {
 
@@ -2430,9 +2430,9 @@ int parse_oid_indexes(oid *oidIndex, size_t oidLen,
 
 
 int parse_one_oid_index(oid **oidStart, size_t *oidLen,
-                      struct variable_list *data, int complete)
+                      netsnmp_variable_list *data, int complete)
 {
-  struct variable_list *var = data;
+  netsnmp_variable_list *var = data;
   oid tmpout[MAX_OID_LEN];
   unsigned int i;
   unsigned int uitmp;
@@ -2715,7 +2715,7 @@ _get_realloc_symbol(const oid *objid, size_t objidlen,
 	switch(tp->type) {
 	case TYPE_OCTETSTR:
 	    if (extended_index && tp->hint) {
-	    	struct variable_list var;
+	    	netsnmp_variable_list var;
 		u_char buffer[1024];
 		int i;
 
@@ -3600,7 +3600,7 @@ main(int argc, char* argv[])
     oid objid[MAX_OID_LEN];
     int objidlen = MAX_OID_LEN;
     int count;
-    struct variable_list variable;
+    netsnmp_variable_list variable;
 
     init_mib();
     if (argc < 2)

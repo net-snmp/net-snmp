@@ -98,7 +98,7 @@ static int mainloop_finish = 0;
 /* why does ucd-snmp redefine sockaddr_in ??? */
 #define SIN_ADDR(snmp_addr) (((struct sockaddr_in *) &(snmp_addr))->sin_addr)
 
-typedef struct snmp_session SnmpSession;
+typedef netsnmp_session SnmpSession;
 typedef struct tree SnmpMibNode;
 typedef struct snmp_xs_cb_data {
     SV* perl_cb;
@@ -113,7 +113,7 @@ static int __is_leaf _((struct tree*));
 static int __translate_appl_type _((char*));
 static int __translate_asn_type _((int));
 static int __snprint_value _((char *, size_t,
-                              struct variable_list*, struct tree *,
+                              netsnmp_variable_list*, struct tree *,
                              int, int));
 static int __sprint_num_objid _((char *, oid *, int));
 static int __scan_num_objid _((char *, oid *, int *));
@@ -125,14 +125,14 @@ static SnmpMibNode * __get_next_mib_node _((SnmpMibNode *));
 static struct tree * __oid2tp _((oid*, int, struct tree *, int*));
 static struct tree * __tag2oid _((char *, char *, oid  *, int  *, int *, int));
 static int __concat_oid_str _((oid *, int *, char *));
-static int __add_var_val_str _((struct snmp_pdu *, oid *, int, char *,
+static int __add_var_val_str _((netsnmp_pdu *, oid *, int, char *,
                                  int, int));
-static int __send_sync_pdu _((struct snmp_session *, struct snmp_pdu *,
-                              struct snmp_pdu **, int , SV *, SV *, SV *));
-static int __snmp_xs_cb __P((int, struct snmp_session *, int,
-                             struct snmp_pdu *, void *));
-static int __callback_wrapper __P((int, struct snmp_session *, int,
-	                             struct snmp_pdu *, void *));
+static int __send_sync_pdu _((netsnmp_session *, netsnmp_pdu *,
+                              netsnmp_pdu **, int , SV *, SV *, SV *));
+static int __snmp_xs_cb __P((int, netsnmp_session *, int,
+                             netsnmp_pdu *, void *));
+static int __callback_wrapper __P((int, netsnmp_session *, int,
+	                             netsnmp_pdu *, void *));
 static SV* __push_cb_args2 _((SV * sv, SV * esv, SV * tsv));
 #define __push_cb_args(a,b) __push_cb_args2(a,b,NULL)
 static int __call_callback _((SV * sv, int flags));
@@ -178,12 +178,12 @@ typedef struct walk_context {
 } walk_context;
 
 /* Prototypes for bulkwalk support functions. */
-static struct snmp_pdu *_bulkwalk_send_pdu _((walk_context *context));
+static netsnmp_pdu *_bulkwalk_send_pdu _((walk_context *context));
 static int _bulkwalk_done     _((walk_context *context));
-static int _bulkwalk_recv_pdu _((walk_context *context, struct snmp_pdu *pdu));
+static int _bulkwalk_recv_pdu _((walk_context *context, netsnmp_pdu *pdu));
 static int _bulkwalk_finish   _((walk_context *context, int okay));
 static int _bulkwalk_async_cb _((int op, SnmpSession *ss, int reqid,
-				     struct snmp_pdu *pdu, void *context_ptr));
+				     netsnmp_pdu *pdu, void *context_ptr));
 
 /* Structure to hold valid context sessions. */
 struct valid_contexts {
@@ -417,7 +417,7 @@ static int
 __snprint_value (buf, buf_len, var, tp, type, flag)
 char * buf;
 size_t buf_len;
-struct variable_list * var;
+netsnmp_variable_list * var;
 struct tree * tp;
 int type;
 int flag;
@@ -926,28 +926,28 @@ char * soid_str;
  */
 static int
 __add_var_val_str(pdu, name, name_length, val, len, type)
-    struct snmp_pdu *pdu;
+    netsnmp_pdu *pdu;
     oid *name;
     int name_length;
     char * val;
     int len;
     int type;
 {
-    struct variable_list *vars;
+    netsnmp_variable_list *vars;
     oid oidbuf[MAX_OID_LEN];
     int ret = SUCCESS;
     struct tree *tp;
 
     if (pdu->variables == NULL){
 	pdu->variables = vars =
-           (struct variable_list *)calloc(1,sizeof(struct variable_list));
+           (netsnmp_variable_list *)calloc(1,sizeof(netsnmp_variable_list));
     } else {
 	for(vars = pdu->variables;
             vars->next_variable;
             vars = vars->next_variable)
 	    /*EXIT*/;
 	vars->next_variable =
-           (struct variable_list *)calloc(1,sizeof(struct variable_list));
+           (netsnmp_variable_list *)calloc(1,sizeof(netsnmp_variable_list));
 	vars = vars->next_variable;
     }
 
@@ -1036,9 +1036,9 @@ OCT:
 static int
 __send_sync_pdu(ss, pdu, response, retry_nosuch,
 	        err_str_sv, err_num_sv, err_ind_sv)
-struct snmp_session *ss;
-struct snmp_pdu *pdu;
-struct snmp_pdu **response;
+netsnmp_session *ss;
+netsnmp_pdu *pdu;
+netsnmp_pdu **response;
 int retry_nosuch;
 SV * err_str_sv;
 SV * err_num_sv;
@@ -1113,9 +1113,9 @@ retry:
 static int
 __callback_wrapper (op, ss, reqid, pdu, cb_data)
 int op;
-struct snmp_session *ss;
+netsnmp_session *ss;
 int reqid;
-struct snmp_pdu *pdu;
+netsnmp_pdu *pdu;
 void *cb_data;
 {
   /* we should probably just increment the reference counter... */
@@ -1127,9 +1127,9 @@ void *cb_data;
 static int
 __snmp_xs_cb (op, ss, reqid, pdu, cb_data)
 int op;
-struct snmp_session *ss;
+netsnmp_session *ss;
 int reqid;
-struct snmp_pdu *pdu;
+netsnmp_pdu *pdu;
 void *cb_data;
 {
   SV *varlist_ref;
@@ -1138,7 +1138,7 @@ void *cb_data;
   AV *varbind;
   SV *traplist_ref;
   AV *traplist;
-  struct variable_list *vars;
+  netsnmp_variable_list *vars;
   struct tree *tp;
   int len;
   oid *oid_arr;
@@ -1153,7 +1153,7 @@ void *cb_data;
   char *cp;
   int getlabel_flag = NO_FLAGS;
   int sprintval_flag = USE_BASIC;
-  struct snmp_pdu *reply_pdu;
+  netsnmp_pdu *reply_pdu;
   int old_numeric, old_printfull;
   netsnmp_transport *transport = NULL;
 
@@ -1176,7 +1176,7 @@ void *cb_data;
   varlist_ref = &sv_undef;	/* Prevent unintialized use below. */
 
   switch (op) {
-  case SNMP_CALLBACK_OP_RECEIVED_MESSAGE:
+  case NETSNMP_CALLBACK_OP_RECEIVED_MESSAGE:
     traplist_ref = NULL;
     switch (pdu->command) {
     case SNMP_MSG_INFORM:
@@ -1275,7 +1275,7 @@ void *cb_data;
     } /* switch pdu->command */
     break;
 
-  case SNMP_CALLBACK_OP_TIMED_OUT:
+  case NETSNMP_CALLBACK_OP_TIMED_OUT:
     varlist_ref = &sv_undef;
     break;
   default:;
@@ -1534,7 +1534,7 @@ static int
 _bulkwalk_async_cb(int		op,
 		  SnmpSession	*ss,
 		  int 		reqid,
-		  struct snmp_pdu *pdu,
+		  netsnmp_pdu *pdu,
 		  void		*context_ptr)
 {
    walk_context *context;
@@ -1580,7 +1580,7 @@ _bulkwalk_async_cb(int		op,
    err_num_svp = hv_fetch((HV*)SvRV(context->sess_ref), "ErrorNum", 8, 1);
 
    switch (op) {
-      case SNMP_CALLBACK_OP_RECEIVED_MESSAGE:
+      case NETSNMP_CALLBACK_OP_RECEIVED_MESSAGE:
       {
 	 DBPRT(1,( "Received message for reqid 0x%08X ...\n", reqid));
 
@@ -1613,7 +1613,7 @@ _bulkwalk_async_cb(int		op,
 	 break;
       }
 
-      case SNMP_CALLBACK_OP_TIMED_OUT:
+      case NETSNMP_CALLBACK_OP_TIMED_OUT:
       {
 	 DBPRT(1,( "\n*** Timeout for reqid 0x%08X\n\n", reqid));
 
@@ -1662,11 +1662,11 @@ _bulkwalk_async_cb(int		op,
    return 1;
 }
 
-static struct snmp_pdu *
+static netsnmp_pdu *
 _bulkwalk_send_pdu(walk_context *context)
 {
-   struct snmp_pdu *pdu = NULL;
-   struct snmp_pdu *response = NULL;
+   netsnmp_pdu *pdu = NULL;
+   netsnmp_pdu *response = NULL;
    struct bulktbl  *bt_entry;
    int	nvars = 0;
    int	reqid;
@@ -1685,7 +1685,7 @@ _bulkwalk_send_pdu(walk_context *context)
    */
 
    SV **sess_ptr_sv = hv_fetch((HV*)SvRV(context->sess_ref), "SessPtr", 7, 1);
-   struct snmp_session *ss = (SnmpSession *)SvIV((SV*)SvRV(*sess_ptr_sv));
+   netsnmp_session *ss = (SnmpSession *)SvIV((SV*)SvRV(*sess_ptr_sv));
    SV **err_str_svp = hv_fetch((HV*)SvRV(context->sess_ref), "ErrorStr", 8, 1);
    SV **err_num_svp = hv_fetch((HV*)SvRV(context->sess_ref), "ErrorNum", 8, 1);
    SV **err_ind_svp = hv_fetch((HV*)SvRV(context->sess_ref), "ErrorInd", 8, 1);
@@ -1755,7 +1755,7 @@ _bulkwalk_send_pdu(walk_context *context)
       ** we sent in this request.  Note that this is not a valid SNMP PDU,
       ** but that's because a response has not yet been received.
       */
-      return (struct snmp_pdu *)reqid;
+      return (netsnmp_pdu *)reqid;
    }
 
    /* This code is for synchronous mode support.
@@ -1795,9 +1795,9 @@ _bulkwalk_send_pdu(walk_context *context)
 ** Note that the caller is expected to free the pdu.
 */
 static int
-_bulkwalk_recv_pdu(walk_context *context, struct snmp_pdu *pdu)
+_bulkwalk_recv_pdu(walk_context *context, netsnmp_pdu *pdu)
 {
-   struct variable_list *vars;
+   netsnmp_variable_list *vars;
    struct tree	*tp;
    char		type_str[MAX_TYPE_NAME_LEN];
    char		str_buf[STR_BUF_SIZE];
@@ -1814,7 +1814,7 @@ _bulkwalk_recv_pdu(walk_context *context, struct snmp_pdu *pdu)
    AV		*varbind;
    SV		*rv;
    SV **sess_ptr_sv = hv_fetch((HV*)SvRV(context->sess_ref), "SessPtr", 7, 1);
-   struct snmp_session *ss = (SnmpSession *)SvIV((SV*)SvRV(*sess_ptr_sv));
+   netsnmp_session *ss = (SnmpSession *)SvIV((SV*)SvRV(*sess_ptr_sv));
    SV **err_str_svp = hv_fetch((HV*)SvRV(context->sess_ref), "ErrorStr", 8, 1);
    SV **err_num_svp = hv_fetch((HV*)SvRV(context->sess_ref), "ErrorNum", 8, 1);
    SV **err_ind_svp = hv_fetch((HV*)SvRV(context->sess_ref), "ErrorInd", 8, 1);
@@ -2289,9 +2289,9 @@ int arg;
     errno = 0;
     switch (*name) {
     case 'R':
-	if (strEQ(name, "SNMP_CALLBACK_OP_RECEIVED_MESSAGE"))
-#ifdef SNMP_CALLBACK_OP_RECEIVED_MESSAGE
-	    return SNMP_CALLBACK_OP_RECEIVED_MESSAGE;
+	if (strEQ(name, "NETSNMP_CALLBACK_OP_RECEIVED_MESSAGE"))
+#ifdef NETSNMP_CALLBACK_OP_RECEIVED_MESSAGE
+	    return NETSNMP_CALLBACK_OP_RECEIVED_MESSAGE;
 #else
 	    goto not_there;
 #endif
@@ -2401,9 +2401,9 @@ int arg;
 #endif
 	break;
     case 'T':
-	if (strEQ(name, "SNMP_CALLBACK_OP_TIMED_OUT"))
-#ifdef SNMP_CALLBACK_OP_TIMED_OUT
-	    return SNMP_CALLBACK_OP_TIMED_OUT;
+	if (strEQ(name, "NETSNMP_CALLBACK_OP_TIMED_OUT"))
+#ifdef NETSNMP_CALLBACK_OP_TIMED_OUT
+	    return NETSNMP_CALLBACK_OP_TIMED_OUT;
 #else
 	    goto not_there;
 #endif
@@ -2775,9 +2775,9 @@ snmp_set(sess_ref, varlist_ref, perl_callback)
 	   I32 varlist_ind;
 	   I32 varbind_len;
            SnmpSession *ss;
-           struct snmp_pdu *pdu, *response;
-           struct variable_list *vars;
-           struct variable_list *last_vars;
+           netsnmp_pdu *pdu, *response;
+           netsnmp_variable_list *vars;
+           netsnmp_variable_list *last_vars;
            struct tree *tp;
 	   oid *oid_arr;
 	   int oid_arr_len = MAX_OID_LEN;
@@ -2920,7 +2920,7 @@ snmp_catch(sess_ref, perl_callback)
         SV *    perl_callback
 	PPCODE:
 	{
-	   struct snmp_session *ss;
+	   netsnmp_session *ss;
            SV **sess_ptr_sv;
            SV **err_str_svp;
            SV **err_num_svp;
@@ -2970,10 +2970,10 @@ snmp_get(sess_ref, retry_nosuch, varlist_ref, perl_callback)
            I32 varlist_len;
            I32 varlist_ind;
            I32 varbind_len;
-           struct snmp_session *ss;
-           struct snmp_pdu *pdu, *response;
-           struct variable_list *vars;
-           struct variable_list *last_vars;
+           netsnmp_session *ss;
+           netsnmp_pdu *pdu, *response;
+           netsnmp_variable_list *vars;
+           netsnmp_variable_list *last_vars;
            struct tree *tp;
            int len;
            oid *oid_arr;
@@ -3124,10 +3124,10 @@ snmp_getnext(sess_ref, varlist_ref, perl_callback)
            I32 varlist_len;
            I32 varlist_ind;
            I32 varbind_len;
-           struct snmp_session *ss;
-           struct snmp_pdu *pdu, *response;
-           struct variable_list *vars;
-           struct variable_list *last_vars;
+           netsnmp_session *ss;
+           netsnmp_pdu *pdu, *response;
+           netsnmp_variable_list *vars;
+           netsnmp_variable_list *last_vars;
            struct tree *tp;
            int len;
 	   oid *oid_arr;
@@ -3314,10 +3314,10 @@ snmp_getbulk(sess_ref, nonrepeaters, maxrepetitions, varlist_ref, perl_callback)
 	   I32 varlist_len;
 	   I32 varlist_ind;
 	   I32 varbind_len;
-           struct snmp_session *ss;
-           struct snmp_pdu *pdu, *response;
-           struct variable_list *vars;
-           struct variable_list *last_vars;
+           netsnmp_session *ss;
+           netsnmp_pdu *pdu, *response;
+           netsnmp_variable_list *vars;
+           netsnmp_variable_list *last_vars;
            struct tree *tp;
            int len;
 	   oid *oid_arr;
@@ -3517,8 +3517,8 @@ snmp_bulkwalk(sess_ref, nonrepeaters, maxrepetitions, varlist_ref,perl_callback)
            AV *varbind;
 	   I32 varlist_len;
 	   I32 varlist_ind;
-           struct snmp_session *ss;
-           struct snmp_pdu *pdu = NULL;
+           netsnmp_session *ss;
+           netsnmp_pdu *pdu = NULL;
 	   oid oid_arr[MAX_OID_LEN];
 	   int oid_arr_len;
            SV **sess_ptr_sv;
@@ -3827,10 +3827,10 @@ snmp_trapV1(sess_ref,enterprise,agent,generic,specific,uptime,varlist_ref)
 	   I32 varlist_ind;
 	   I32 varbind_len;
            SnmpSession *ss;
-           struct snmp_pdu *pdu = NULL;
-           struct snmp_pdu *response;
-           struct variable_list *vars;
-           struct variable_list *last_vars;
+           netsnmp_pdu *pdu = NULL;
+           netsnmp_pdu *response;
+           netsnmp_variable_list *vars;
+           netsnmp_variable_list *last_vars;
            struct tree *tp;
 	   oid *oid_arr;
 	   int oid_arr_len = MAX_OID_LEN;
@@ -3971,10 +3971,10 @@ snmp_trapV2(sess_ref,uptime,trap_oid,varlist_ref)
 	   I32 varlist_ind;
 	   I32 varbind_len;
            SnmpSession *ss;
-           struct snmp_pdu *pdu = NULL;
-           struct snmp_pdu *response;
-           struct variable_list *vars;
-           struct variable_list *last_vars;
+           netsnmp_pdu *pdu = NULL;
+           netsnmp_pdu *response;
+           netsnmp_variable_list *vars;
+           netsnmp_variable_list *last_vars;
            struct tree *tp;
 	   oid *oid_arr;
 	   int oid_arr_len = MAX_OID_LEN;
@@ -4112,10 +4112,10 @@ snmp_inform(sess_ref,uptime,trap_oid,varlist_ref,perl_callback)
 	   I32 varlist_ind;
 	   I32 varbind_len;
            SnmpSession *ss;
-           struct snmp_pdu *pdu = NULL;
-           struct snmp_pdu *response;
-           struct variable_list *vars;
-           struct variable_list *last_vars;
+           netsnmp_pdu *pdu = NULL;
+           netsnmp_pdu *response;
+           netsnmp_variable_list *vars;
+           netsnmp_variable_list *last_vars;
            struct tree *tp;
 	   oid *oid_arr;
 	   int oid_arr_len = MAX_OID_LEN;

@@ -198,7 +198,7 @@ u_char		return_buf[256]; /* nee 64 */
 #endif
 
 struct timeval	starttime;
-struct snmp_session *callback_master_sess;
+netsnmp_session *callback_master_sess;
 int callback_master_num;
 
 /* init_agent() returns non-zero on error */

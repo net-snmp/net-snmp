@@ -114,7 +114,7 @@ struct hrStorageTable {
    u_long  hrStorageUsed;
 };
 
-int add(struct snmp_pdu *pdu, const char *mibnodename,
+int add(netsnmp_pdu *pdu, const char *mibnodename,
         oid *index, size_t indexlen) {
     oid base[MAX_OID_LEN];
     size_t base_length = MAX_OID_LEN;
@@ -139,12 +139,12 @@ int add(struct snmp_pdu *pdu, const char *mibnodename,
     return base_length;
 }
 
-struct variable_list *
-collect(struct snmp_session *ss, struct snmp_pdu *pdu,
+netsnmp_variable_list *
+collect(netsnmp_session *ss, netsnmp_pdu *pdu,
         oid *base, size_t base_length) {
-    struct snmp_pdu *response;
+    netsnmp_pdu *response;
     int running = 1;
-    struct variable_list *saved = NULL, **vlpp = &saved;
+    netsnmp_variable_list *saved = NULL, **vlpp = &saved;
     int status;
 
     while(running) {
@@ -180,14 +180,14 @@ collect(struct snmp_session *ss, struct snmp_pdu *pdu,
 
 int main(int argc, char *argv[])
 {
-    struct snmp_session session, *ss;
-    struct snmp_pdu *pdu;
-    struct snmp_pdu *response;
+    netsnmp_session session, *ss;
+    netsnmp_pdu *pdu;
+    netsnmp_pdu *response;
     int arg;
     oid base[MAX_OID_LEN];
     size_t base_length;
     int status;
-    struct variable_list *saved = NULL, *vlp = saved, *vlp2;
+    netsnmp_variable_list *saved = NULL, *vlp = saved, *vlp2;
     int count = 0;
     
     /* get the common command line arguments */
@@ -208,7 +208,7 @@ int main(int argc, char *argv[])
      */
     ss = snmp_open(&session);
     if (ss == NULL){
-      /* diagnose snmp_open errors with the input struct snmp_session pointer */
+      /* diagnose snmp_open errors with the input netsnmp_session pointer */
       snmp_sess_perror("snmpget", &session);
       SOCK_CLEANUP;
       exit(1);
