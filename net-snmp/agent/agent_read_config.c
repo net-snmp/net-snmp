@@ -59,7 +59,7 @@
 #endif
 #elif HAVE_WINSOCK_H
 #include <winsock.h>
-#endif 
+#endif
 #if HAVE_SYS_STREAM_H
 #include <sys/stream.h>
 #endif
@@ -108,159 +108,172 @@
 #include <net-snmp/agent/table_dataset.h>
 #include "mib_module_includes.h"
 
-char dontReadConfigFiles;
-char *optconfigfile;
+char            dontReadConfigFiles;
+char           *optconfigfile;
 
 #ifdef HAVE_UNISTD_H
-void snmpd_set_agent_user(const char *token, char *cptr)
+void
+snmpd_set_agent_user(const char *token, char *cptr)
 {
 #if defined(HAVE_GETPWNAM) && defined(HAVE_PWD_H)
-struct passwd *info;
+    struct passwd  *info;
 #endif
- 
+
     if (cptr[0] == '#') {
-        char *ecp;
-	int uid;
-	uid = strtoul(cptr+1, &ecp, 10);
-	if (*ecp != 0) config_perror("Bad number");
-	else ds_set_int(DS_APPLICATION_ID, DS_AGENT_USERID, uid);
+        char           *ecp;
+        int             uid;
+        uid = strtoul(cptr + 1, &ecp, 10);
+        if (*ecp != 0)
+            config_perror("Bad number");
+        else
+            ds_set_int(DS_APPLICATION_ID, DS_AGENT_USERID, uid);
     }
 #if defined(HAVE_GETPWNAM) && defined(HAVE_PWD_H)
     else if ((info = getpwnam(cptr)) != NULL) {
         ds_set_int(DS_APPLICATION_ID, DS_AGENT_USERID, info->pw_uid);
-    }
-    else config_perror("User not found in passwd database");
+    } else
+        config_perror("User not found in passwd database");
 #endif
 }
 
-void snmpd_set_agent_group(const char *token, char *cptr)
+void
+snmpd_set_agent_group(const char *token, char *cptr)
 {
 #if defined(HAVE_GETGRNAM) && defined(HAVE_GRP_H)
-struct group *info;
+    struct group   *info;
 #endif
- 
+
     if (cptr[0] == '#') {
-    	char *ecp;
-	int gid = strtoul(cptr+1, &ecp, 10);
-	if (*ecp != 0) config_perror("Bad number");
-        else ds_set_int(DS_APPLICATION_ID, DS_AGENT_GROUPID, gid);
+        char           *ecp;
+        int             gid = strtoul(cptr + 1, &ecp, 10);
+        if (*ecp != 0)
+            config_perror("Bad number");
+        else
+            ds_set_int(DS_APPLICATION_ID, DS_AGENT_GROUPID, gid);
     }
 #if defined(HAVE_GETGRNAM) && defined(HAVE_GRP_H)
     else if ((info = getgrnam(cptr)) != NULL) {
         ds_set_int(DS_APPLICATION_ID, DS_AGENT_GROUPID, info->gr_gid);
-    }
-    else config_perror("Group not found in group database");
+    } else
+        config_perror("Group not found in group database");
 #endif
 }
 #endif
 
-void snmpd_set_agent_address(const char *token, char *cptr)
+void
+snmpd_set_agent_address(const char *token, char *cptr)
 {
-    char buf[SPRINT_MAX_LEN];
-    char *ptr;
+    char            buf[SPRINT_MAX_LEN];
+    char           *ptr;
 
-    /* has something been specified before? */
+    /*
+     * has something been specified before? 
+     */
     ptr = ds_get_string(DS_APPLICATION_ID, DS_AGENT_PORTS);
 
     if (ptr)
-	/* append to the older specification string */
-	sprintf(buf,"%s,%s", ptr, cptr);
+        /*
+         * append to the older specification string 
+         */
+        sprintf(buf, "%s,%s", ptr, cptr);
     else
-	strcpy(buf,cptr);
+        strcpy(buf, cptr);
 
-    DEBUGMSGTL(("snmpd_ports","port spec: %s\n", buf));
+    DEBUGMSGTL(("snmpd_ports", "port spec: %s\n", buf));
     ds_set_string(DS_APPLICATION_ID, DS_AGENT_PORTS, buf);
 
 }
 
-void init_agent_read_config (const char *app)
+void
+init_agent_read_config(const char *app)
 {
-  if ( app != NULL )
-      ds_set_string(DS_LIBRARY_ID, DS_LIB_APPTYPE, app);
-  else
-      app = ds_get_string(DS_LIBRARY_ID, DS_LIB_APPTYPE);
-  
-  register_app_config_handler("authtrapenable",
-                          snmpd_parse_config_authtrap, NULL,
-                          "1 | 2\t\t(1 = enable, 2 = disable)");
-  register_app_config_handler("pauthtrapenable",
-			  snmpd_parse_config_authtrap, NULL, NULL);
+    if (app != NULL)
+        ds_set_string(DS_LIBRARY_ID, DS_LIB_APPTYPE, app);
+    else
+        app = ds_get_string(DS_LIBRARY_ID, DS_LIB_APPTYPE);
+
+    register_app_config_handler("authtrapenable",
+                                snmpd_parse_config_authtrap, NULL,
+                                "1 | 2\t\t(1 = enable, 2 = disable)");
+    register_app_config_handler("pauthtrapenable",
+                                snmpd_parse_config_authtrap, NULL, NULL);
 
 
-  if ( ds_get_boolean(DS_APPLICATION_ID, DS_AGENT_ROLE) == MASTER_AGENT ) {
-      register_app_config_handler("trapsink",
-                          snmpd_parse_config_trapsink, snmpd_free_trapsinks,
-                          "host [community] [port]");
-      register_app_config_handler("trap2sink",
-                          snmpd_parse_config_trap2sink, NULL,
-                          "host [community] [port]");
-      register_app_config_handler("informsink",
-                          snmpd_parse_config_informsink, NULL,
-                          "host [community] [port]");
-      register_app_config_handler("trapsess",
-                          snmpd_parse_config_trapsess, NULL,
-                          "[snmpcmdargs] host");
-  }
-  register_app_config_handler("trapcommunity",
-                          snmpd_parse_config_trapcommunity,
-                          snmpd_free_trapcommunity,
-                          "community-string");
+    if (ds_get_boolean(DS_APPLICATION_ID, DS_AGENT_ROLE) == MASTER_AGENT) {
+        register_app_config_handler("trapsink",
+                                    snmpd_parse_config_trapsink,
+                                    snmpd_free_trapsinks,
+                                    "host [community] [port]");
+        register_app_config_handler("trap2sink",
+                                    snmpd_parse_config_trap2sink, NULL,
+                                    "host [community] [port]");
+        register_app_config_handler("informsink",
+                                    snmpd_parse_config_informsink, NULL,
+                                    "host [community] [port]");
+        register_app_config_handler("trapsess",
+                                    snmpd_parse_config_trapsess, NULL,
+                                    "[snmpcmdargs] host");
+    }
+    register_app_config_handler("trapcommunity",
+                                snmpd_parse_config_trapcommunity,
+                                snmpd_free_trapcommunity,
+                                "community-string");
 #ifdef HAVE_UNISTD_H
-  register_app_config_handler("agentuser",
-                          snmpd_set_agent_user, NULL,
-                          "userid");
-  register_app_config_handler("agentgroup",
-                          snmpd_set_agent_group, NULL,
-                          "groupid");
+    register_app_config_handler("agentuser",
+                                snmpd_set_agent_user, NULL, "userid");
+    register_app_config_handler("agentgroup",
+                                snmpd_set_agent_group, NULL, "groupid");
 #endif
-  register_app_config_handler("agentaddress",
-                          snmpd_set_agent_address, NULL,
-                          "SNMP bind address");
-  register_app_config_handler("table",
-                              netsnmp_config_parse_table_set, NULL, "tableoid");
-  register_app_config_handler("add_row",
-                              netsnmp_config_parse_add_row, NULL,
-                              "indexes... values...");
-  ds_register_config(ASN_BOOLEAN, app, "quit",
-                     DS_APPLICATION_ID, DS_AGENT_QUIT_IMMEDIATELY);
-  netsnmp_init_handler_conf();
-  
+    register_app_config_handler("agentaddress",
+                                snmpd_set_agent_address, NULL,
+                                "SNMP bind address");
+    register_app_config_handler("table",
+                                netsnmp_config_parse_table_set, NULL,
+                                "tableoid");
+    register_app_config_handler("add_row", netsnmp_config_parse_add_row,
+                                NULL, "indexes... values...");
+    ds_register_config(ASN_BOOLEAN, app, "quit", DS_APPLICATION_ID,
+                       DS_AGENT_QUIT_IMMEDIATELY);
+    netsnmp_init_handler_conf();
+
 #include "mib_module_dot_conf.h"
 #ifdef TESTING
-  print_config_handlers();
+    print_config_handlers();
 #endif
 }
 
-void update_config(void)
+void
+update_config(void)
 {
-  snmp_call_callbacks(SNMP_CALLBACK_APPLICATION,
-                      SNMPD_CALLBACK_PRE_UPDATE_CONFIG, NULL);
-  free_config();
-  read_configs();
+    snmp_call_callbacks(SNMP_CALLBACK_APPLICATION,
+                        SNMPD_CALLBACK_PRE_UPDATE_CONFIG, NULL);
+    free_config();
+    read_configs();
 }
 
 
 void
 snmpd_register_config_handler(const char *token,
-			      void (*parser) (const char *, char *),
-			      void (*releaser) (void),
-			      const char *help)
+                              void (*parser) (const char *, char *),
+                              void (*releaser) (void), const char *help)
 {
-  DEBUGMSGTL(("snmpd_register_app_config_handler",
-              "registering .conf token for \"%s\"\n", token));
-  register_app_config_handler(token, parser, releaser, help);
+    DEBUGMSGTL(("snmpd_register_app_config_handler",
+                "registering .conf token for \"%s\"\n", token));
+    register_app_config_handler(token, parser, releaser, help);
 }
 
 void
 snmpd_unregister_config_handler(const char *token)
 {
-  unregister_app_config_handler(token);
+    unregister_app_config_handler(token);
 }
 
-/* this function is intended for use by mib-modules to store permenant
-   configuration information generated by sets or persistent counters */
+/*
+ * this function is intended for use by mib-modules to store permenant
+ * configuration information generated by sets or persistent counters 
+ */
 void
 snmpd_store_config(const char *line)
 {
-  read_app_config_store(line);
+    read_app_config_store(line);
 }

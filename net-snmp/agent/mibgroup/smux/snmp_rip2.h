@@ -7,8 +7,8 @@
 
 config_require(smux/smux)
 
-extern FindVarMethod var_rip2;;
-void init_snmp_rip2( void );
+     extern FindVarMethod var_rip2;;
+     void            init_snmp_rip2(void);
 
 
 #define RIP2GLOBALROUTECHANGES  0
@@ -34,4 +34,4 @@ void init_snmp_rip2( void );
 #define RIP2PEERRCVBADPKTS      20
 #define RIP2PEERRCVBADROUTES    21
 
-#endif /* _MIBGROUP_SNMP_RIP2_H */
+#endif                          /* _MIBGROUP_SNMP_RIP2_H */

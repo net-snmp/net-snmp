@@ -75,29 +75,31 @@ SOFTWARE.
 #define DS_WALK_PRINT_STATISTICS	2
 #define DS_WALK_DONT_CHECK_LEXICOGRAPHIC	3
 
-oid objid_mib[] = {1, 3, 6, 1, 2, 1};
-int numprinted = 0;
+oid             objid_mib[] = { 1, 3, 6, 1, 2, 1 };
+int             numprinted = 0;
 
 void
 usage(void)
 {
-  fprintf(stderr, "USAGE: snmpwalk ");
-  snmp_parse_args_usage(stderr);
-  fprintf(stderr, " [OID]\n\n");
-  snmp_parse_args_descriptions(stderr);
-  fprintf(stderr, "  -C APPOPTS\t\tSet various application specific behaviours:\n");
-  fprintf(stderr,"\t\t\t  p:  print the number of variables found\n");
-  fprintf(stderr,"\t\t\t  i:  include given OID in the search range\n");
-  fprintf(stderr,"\t\t\t  c:  do not check returned OIDs are increasing\n");
+    fprintf(stderr, "USAGE: snmpwalk ");
+    snmp_parse_args_usage(stderr);
+    fprintf(stderr, " [OID]\n\n");
+    snmp_parse_args_descriptions(stderr);
+    fprintf(stderr,
+            "  -C APPOPTS\t\tSet various application specific behaviours:\n");
+    fprintf(stderr, "\t\t\t  p:  print the number of variables found\n");
+    fprintf(stderr, "\t\t\t  i:  include given OID in the search range\n");
+    fprintf(stderr,
+            "\t\t\t  c:  do not check returned OIDs are increasing\n");
 }
 
 void
-snmp_get_and_print(netsnmp_session *ss, oid *theoid, size_t theoid_len)
+snmp_get_and_print(netsnmp_session * ss, oid * theoid, size_t theoid_len)
 {
-    netsnmp_pdu *pdu, *response;
+    netsnmp_pdu    *pdu, *response;
     netsnmp_variable_list *vars;
-    int status;
-    
+    int             status;
+
     pdu = snmp_pdu_create(SNMP_MSG_GET);
     snmp_add_null_var(pdu, theoid, theoid_len);
 
@@ -118,59 +120,63 @@ optProc(int argc, char *const *argv, int opt)
 {
     switch (opt) {
     case 'C':
-	while (*optarg) {
-	    switch (*optarg++) {
-	    case 'i':
-		ds_toggle_boolean(DS_APPLICATION_ID,
-				  DS_WALK_INCLUDE_REQUESTED);
-		break;
+        while (*optarg) {
+            switch (*optarg++) {
+            case 'i':
+                ds_toggle_boolean(DS_APPLICATION_ID,
+                                  DS_WALK_INCLUDE_REQUESTED);
+                break;
 
-	    case 'p':
-		ds_toggle_boolean(DS_APPLICATION_ID,
-				  DS_WALK_PRINT_STATISTICS);
-		break;
+            case 'p':
+                ds_toggle_boolean(DS_APPLICATION_ID,
+                                  DS_WALK_PRINT_STATISTICS);
+                break;
 
-	    case 'c':
-		ds_toggle_boolean(DS_APPLICATION_ID,
-				  DS_WALK_DONT_CHECK_LEXICOGRAPHIC);
-		break;
-	    default:
-		fprintf(stderr, "Unknown flag passed to -C: %c\n", optarg[-1]);
-		exit(1);
-	    }
-	}
-	break;
+            case 'c':
+                ds_toggle_boolean(DS_APPLICATION_ID,
+                                  DS_WALK_DONT_CHECK_LEXICOGRAPHIC);
+                break;
+            default:
+                fprintf(stderr, "Unknown flag passed to -C: %c\n",
+                        optarg[-1]);
+                exit(1);
+            }
+        }
+        break;
     }
 }
 
 int
 main(int argc, char *argv[])
 {
-    netsnmp_session  session, *ss;
-    netsnmp_pdu *pdu, *response;
+    netsnmp_session session, *ss;
+    netsnmp_pdu    *pdu, *response;
     netsnmp_variable_list *vars;
-    int    arg;
-    oid    name[MAX_OID_LEN];
-    size_t name_length;
-    oid    root[MAX_OID_LEN];
-    size_t rootlen;
-    int    count;
-    int    running;
-    int    status;
-    int    check;
-    int    exitval = 0;
+    int             arg;
+    oid             name[MAX_OID_LEN];
+    size_t          name_length;
+    oid             root[MAX_OID_LEN];
+    size_t          rootlen;
+    int             count;
+    int             running;
+    int             status;
+    int             check;
+    int             exitval = 0;
 
     ds_register_config(ASN_BOOLEAN, "snmpwalk", "includeRequested",
                        DS_APPLICATION_ID, DS_WALK_INCLUDE_REQUESTED);
     ds_register_config(ASN_BOOLEAN, "snmpwalk", "printStatistics",
                        DS_APPLICATION_ID, DS_WALK_PRINT_STATISTICS);
     ds_register_config(ASN_BOOLEAN, "snmpwalk", "dontCheckOrdering",
-                       DS_APPLICATION_ID, DS_WALK_DONT_CHECK_LEXICOGRAPHIC);
+                       DS_APPLICATION_ID,
+                       DS_WALK_DONT_CHECK_LEXICOGRAPHIC);
 
-    /* get the common command line arguments */
+    /*
+     * get the common command line arguments 
+     */
     switch (arg = snmp_parse_args(argc, argv, &session, "C:", optProc)) {
     case -2:
-    	exit(0);
+        exit(0);
     case -1:
         usage();
         exit(1);
@@ -178,121 +184,157 @@ main(int argc, char *argv[])
         break;
     }
 
-    /* get the initial object and subtree */
+    /*
+     * get the initial object and subtree 
+     */
     if (arg < argc) {
-      /* specified on the command line */
-      rootlen = MAX_OID_LEN;
-      if (snmp_parse_oid(argv[arg], root, &rootlen) == NULL) {
-        snmp_perror(argv[arg]);
-        exit(1);
-      }
+        /*
+         * specified on the command line 
+         */
+        rootlen = MAX_OID_LEN;
+        if (snmp_parse_oid(argv[arg], root, &rootlen) == NULL) {
+            snmp_perror(argv[arg]);
+            exit(1);
+        }
     } else {
-      /* use default value */
-      memmove(root, objid_mib, sizeof(objid_mib));
-      rootlen = sizeof(objid_mib) / sizeof(oid);
+        /*
+         * use default value 
+         */
+        memmove(root, objid_mib, sizeof(objid_mib));
+        rootlen = sizeof(objid_mib) / sizeof(oid);
     }
 
     SOCK_STARTUP;
 
-    /* open an SNMP session */
+    /*
+     * open an SNMP session 
+     */
     ss = snmp_open(&session);
-    if (ss == NULL){
-      /* diagnose snmp_open errors with the input netsnmp_session pointer */
-      snmp_sess_perror("snmpwalk", &session);
-      SOCK_CLEANUP;
-      exit(1);
+    if (ss == NULL) {
+        /*
+         * diagnose snmp_open errors with the input netsnmp_session pointer 
+         */
+        snmp_sess_perror("snmpwalk", &session);
+        SOCK_CLEANUP;
+        exit(1);
     }
 
-    /* get first object to start walk */
+    /*
+     * get first object to start walk 
+     */
     memmove(name, root, rootlen * sizeof(oid));
     name_length = rootlen;
 
     running = 1;
 
     check =
-        !ds_get_boolean(DS_APPLICATION_ID, DS_WALK_DONT_CHECK_LEXICOGRAPHIC);
+        !ds_get_boolean(DS_APPLICATION_ID,
+                        DS_WALK_DONT_CHECK_LEXICOGRAPHIC);
     if (ds_get_boolean(DS_APPLICATION_ID, DS_WALK_INCLUDE_REQUESTED)) {
         snmp_get_and_print(ss, root, rootlen);
     }
-    
-    while(running){
-      /* create PDU for GETNEXT request and add object name to request */
-      pdu = snmp_pdu_create(SNMP_MSG_GETNEXT);
-      snmp_add_null_var(pdu, name, name_length);
 
-      /* do the request */
-      status = snmp_synch_response(ss, pdu, &response);
-      if (status == STAT_SUCCESS){
-        if (response->errstat == SNMP_ERR_NOERROR){
-          /* check resulting variables */
-          for(vars = response->variables; vars; vars = vars->next_variable){
-            if ((vars->name_length < rootlen) ||
-                (memcmp(root, vars->name, rootlen * sizeof(oid))!=0)) {
-              /* not part of this subtree */
-              running = 0;
-              continue;
+    while (running) {
+        /*
+         * create PDU for GETNEXT request and add object name to request 
+         */
+        pdu = snmp_pdu_create(SNMP_MSG_GETNEXT);
+        snmp_add_null_var(pdu, name, name_length);
+
+        /*
+         * do the request 
+         */
+        status = snmp_synch_response(ss, pdu, &response);
+        if (status == STAT_SUCCESS) {
+            if (response->errstat == SNMP_ERR_NOERROR) {
+                /*
+                 * check resulting variables 
+                 */
+                for (vars = response->variables; vars;
+                     vars = vars->next_variable) {
+                    if ((vars->name_length < rootlen)
+                        || (memcmp(root, vars->name, rootlen * sizeof(oid))
+                            != 0)) {
+                        /*
+                         * not part of this subtree 
+                         */
+                        running = 0;
+                        continue;
+                    }
+                    numprinted++;
+                    print_variable(vars->name, vars->name_length, vars);
+                    if ((vars->type != SNMP_ENDOFMIBVIEW) &&
+                        (vars->type != SNMP_NOSUCHOBJECT) &&
+                        (vars->type != SNMP_NOSUCHINSTANCE)) {
+                        /*
+                         * not an exception value 
+                         */
+                        if (check
+                            && snmp_oid_compare(name, name_length,
+                                                vars->name,
+                                                vars->name_length) >= 0) {
+                            fprintf(stderr, "Error: OID not increasing: ");
+                            fprint_objid(stderr, name, name_length);
+                            fprintf(stderr, " >= ");
+                            fprint_objid(stderr, vars->name,
+                                         vars->name_length);
+                            fprintf(stderr, "\n");
+                            running = 0;
+                            exitval = 1;
+                        }
+                        memmove((char *) name, (char *) vars->name,
+                                vars->name_length * sizeof(oid));
+                        name_length = vars->name_length;
+                    } else
+                        /*
+                         * an exception value, so stop 
+                         */
+                        running = 0;
+                }
+            } else {
+                /*
+                 * error in response, print it 
+                 */
+                running = 0;
+                if (response->errstat == SNMP_ERR_NOSUCHNAME) {
+                    printf("End of MIB\n");
+                } else {
+                    fprintf(stderr, "Error in packet.\nReason: %s\n",
+                            snmp_errstring(response->errstat));
+                    if (response->errindex != 0) {
+                        fprintf(stderr, "Failed object: ");
+                        for (count = 1, vars = response->variables;
+                             vars && count != response->errindex;
+                             vars = vars->next_variable, count++)
+                            /*EMPTY*/;
+                        if (vars)
+                            fprint_objid(stderr, vars->name,
+                                         vars->name_length);
+                        fprintf(stderr, "\n");
+                    }
+                    exitval = 2;
+                }
             }
-            numprinted++;
-            print_variable(vars->name, vars->name_length, vars);
-            if ((vars->type != SNMP_ENDOFMIBVIEW) &&
-                (vars->type != SNMP_NOSUCHOBJECT) &&
-                (vars->type != SNMP_NOSUCHINSTANCE)){
-              /* not an exception value */
-	      if (check && snmp_oid_compare(name, name_length, vars->name,
-	      				    vars->name_length) >= 0) {
-		fprintf(stderr, "Error: OID not increasing: ");
-		fprint_objid(stderr, name, name_length);
-		fprintf(stderr, " >= ");
-		fprint_objid(stderr, vars->name, vars->name_length);
-		fprintf(stderr, "\n");
-	        running = 0;
-		exitval = 1;
-	      }
-              memmove((char *)name, (char *)vars->name,
-              vars->name_length * sizeof(oid));
-              name_length = vars->name_length;
-            } else
-              /* an exception value, so stop */
-              running = 0;
-          }
-        } else {
-          /* error in response, print it */
-          running = 0;
-          if (response->errstat == SNMP_ERR_NOSUCHNAME){
-            printf("End of MIB\n");
-          } else {
-            fprintf(stderr, "Error in packet.\nReason: %s\n",
-		    snmp_errstring(response->errstat));
-            if (response->errindex != 0){
-              fprintf(stderr, "Failed object: ");
-              for(count = 1, vars = response->variables;
-                    vars && count != response->errindex;
-                    vars = vars->next_variable, count++)
-                /*EMPTY*/;
-              if (vars)
-                fprint_objid(stderr, vars->name, vars->name_length);
-              fprintf(stderr, "\n");
-            }
-	    exitval = 2;
-          }
+        } else if (status == STAT_TIMEOUT) {
+            fprintf(stderr, "Timeout: No Response from %s\n",
+                    session.peername);
+            running = 0;
+            exitval = 1;
+        } else {                /* status == STAT_ERROR */
+            snmp_sess_perror("snmpwalk", ss);
+            running = 0;
+            exitval = 1;
         }
-      } else if (status == STAT_TIMEOUT){
-        fprintf(stderr, "Timeout: No Response from %s\n", session.peername);
-        running = 0;
-	exitval = 1;
-      } else {    /* status == STAT_ERROR */
-        snmp_sess_perror("snmpwalk", ss);
-        running = 0;
-	exitval = 1;
-      }
-      if (response)
-        snmp_free_pdu(response);
+        if (response)
+            snmp_free_pdu(response);
     }
 
     if (numprinted == 0 && status == STAT_SUCCESS) {
-        /* no printed successful results, which may mean we were
-           pointed at an only existing instance.  Attempt a GET, just
-           for get measure. */
+        /*
+         * no printed successful results, which may mean we were
+         * pointed at an only existing instance.  Attempt a GET, just
+         * for get measure. 
+         */
         snmp_get_and_print(ss, root, rootlen);
     }
     snmp_close(ss);

@@ -13,7 +13,9 @@
 #define MBPOOL_SYMBOL	"mbpool"
 #define MCLPOOL_SYMBOL	"mclpool"
 
-/* inp_next symbol */
+/*
+ * inp_next symbol 
+ */
 #undef INP_NEXT_SYMBOL
 #define INP_NEXT_SYMBOL inp_queue.cqe_next
 #undef INP_PREV_SYMBOL
@@ -26,8 +28,12 @@
 # define netbsd1 1
 #endif
 
-/* fixups for broken AC_CHECK_IFNET_FOR() */
-/* Remove when fixed in configure.in */
+/*
+ * fixups for broken AC_CHECK_IFNET_FOR() 
+ */
+/*
+ * Remove when fixed in configure.in 
+ */
 #undef STRUCT_IFNET_HAS_IF_BAUDRATE
 #define STRUCT_IFNET_HAS_IF_BAUDRATE 1
 #undef STRUCT_IFNET_HAS_IF_TYPE
@@ -44,4 +50,3 @@
 #define STRUCT_IFNET_HAS_IF_IBYTES 1
 #undef STRUCT_IFNET_HAS_IF_OBYTES
 #define STRUCT_IFNET_HAS_IF_OBYTES 1
-

@@ -32,8 +32,10 @@ PERFORMANCE OF THIS SOFTWARE.
  * (jbray@origin-at.co.uk) 1997
  */
 
-/* XXXWWW merge todo: incl/excl range changes in differences between
-   1.194 and 1.199 */
+/*
+ * XXXWWW merge todo: incl/excl range changes in differences between
+ * 1.194 and 1.199 
+ */
 
 #include <net-snmp/net-snmp-config.h>
 #if HAVE_STRING_H
@@ -121,27 +123,28 @@ PERFORMANCE OF THIS SOFTWARE.
 #include "mib_module_includes.h"
 
 #ifndef  MIN
-#define  MIN(a,b)                     (((a) < (b)) ? (a) : (b)) 
+#define  MIN(a,b)                     (((a) < (b)) ? (a) : (b))
 #endif
 
-/* mib clients are passed a pointer to a oid buffer.  Some mib clients
- * (namely, those first noticed in mibII/vacm.c) modify this oid buffer
- * before they determine if they really need to send results back out
- * using it.  If the master agent determined that the client was not the
- * right one to talk with, it will use the same oid buffer to pass to the
- * rest of the clients, which may not longer be valid.  This should be
- * fixed in all clients rather than the master.  However, its not a
- * particularily easy bug to track down so this saves debugging time at
- * the expense of a few memcpy's.
+/*
+ * mib clients are passed a pointer to a oid buffer.  Some mib clients
+ * * (namely, those first noticed in mibII/vacm.c) modify this oid buffer
+ * * before they determine if they really need to send results back out
+ * * using it.  If the master agent determined that the client was not the
+ * * right one to talk with, it will use the same oid buffer to pass to the
+ * * rest of the clients, which may not longer be valid.  This should be
+ * * fixed in all clients rather than the master.  However, its not a
+ * * particularily easy bug to track down so this saves debugging time at
+ * * the expense of a few memcpy's.
  */
 #define MIB_CLIENTS_ARE_EVIL 1
- 
+
 extern struct subtree *subtrees;
-int subtree_size;
-int subtree_malloc_size;
+int             subtree_size;
+int             subtree_malloc_size;
 
 /*
- *	Each variable name is placed in the variable table, without the
+ *      Each variable name is placed in the variable table, without the
  * terminating substring that determines the instance of the variable.  When
  * a string is found that is lexicographicly preceded by the input string,
  * the function for that entry is called to find the method of access of the
@@ -153,11 +156,11 @@ int subtree_malloc_size;
  *
  * u_char *
  * findVar(name, length, exact, var_len, write_method)
- * oid	    *name;	    IN/OUT - input name requested, output name found
- * int	    length;	    IN/OUT - number of sub-ids in the in and out oid's
- * int	    exact;	    IN - TRUE if an exact match was requested.
- * int	    len;	    OUT - length of variable or 0 if function returned.
- * int	    write_method;   OUT - pointer to function to set variable,
+ * oid      *name;          IN/OUT - input name requested, output name found
+ * int      length;         IN/OUT - number of sub-ids in the in and out oid's
+ * int      exact;          IN - TRUE if an exact match was requested.
+ * int      len;            OUT - length of variable or 0 if function returned.
+ * int      write_method;   OUT - pointer to function to set variable,
  *                                otherwise 0
  *
  *     The writeVar function is returned to handle row addition or complex
@@ -181,87 +184,98 @@ int subtree_malloc_size;
  * is thus provided to free those resources reserved in the first two passes.
  * 
  * writeVar(action, var_val, var_val_type, var_val_len, statP, name, name_len)
- * int	    action;	    IN - RESERVE1, RESERVE2, COMMIT, or FREE
- * u_char   *var_val;	    IN - input or output buffer space
+ * int      action;         IN - RESERVE1, RESERVE2, COMMIT, or FREE
+ * u_char   *var_val;       IN - input or output buffer space
  * u_char   var_val_type;   IN - type of input buffer
- * int	    var_val_len;    IN - input and output buffer len
- * u_char   *statP;	    IN - pointer to local statistic
+ * int      var_val_len;    IN - input and output buffer len
+ * u_char   *statP;         IN - pointer to local statistic
  * oid      *name           IN - pointer to name requested
  * int      name_len        IN - number of sub-ids in the name
  */
 
-long		long_return;
+long            long_return;
 #ifndef ibm032
-u_char		return_buf[258];  
+u_char          return_buf[258];
 #else
-u_char		return_buf[256]; /* nee 64 */
+u_char          return_buf[256];        /* nee 64 */
 #endif
 
-struct timeval	starttime;
+struct timeval  starttime;
 netsnmp_session *callback_master_sess;
-int callback_master_num;
+int             callback_master_num;
 
-/* init_agent() returns non-zero on error */
+/*
+ * init_agent() returns non-zero on error 
+ */
 int
-init_agent (const char *app)
+init_agent(const char *app)
 {
-  int r = 0;
+    int             r = 0;
 
-  /* get current time (ie, the time the agent started) */
-  gettimeofday(&starttime, NULL);
-  starttime.tv_sec--;
-  starttime.tv_usec += 1000000L;
+    /*
+     * get current time (ie, the time the agent started) 
+     */
+    gettimeofday(&starttime, NULL);
+    starttime.tv_sec--;
+    starttime.tv_usec += 1000000L;
 
-  /* we handle alarm signals ourselves in the select loop */
-  ds_set_boolean(DS_LIBRARY_ID, DS_LIB_ALARM_DONT_USE_SIG, 1);
+    /*
+     * we handle alarm signals ourselves in the select loop 
+     */
+    ds_set_boolean(DS_LIBRARY_ID, DS_LIB_ALARM_DONT_USE_SIG, 1);
 
 #ifdef CAN_USE_NLIST
-  init_kmem("/dev/kmem");
+    init_kmem("/dev/kmem");
 #endif
 
-  setup_tree();
+    setup_tree();
 
-  init_agent_read_config(app);
+    init_agent_read_config(app);
 
 #ifdef TESTING
-  auto_nlist_print_tree(-2, 0);
+    auto_nlist_print_tree(-2, 0);
 #endif
 
-  /* always register a callback transport for internal use */
-  callback_master_sess = netsnmp_callback_open(0, handle_snmp_packet,
-                                            netsnmp_agent_check_packet,
-                                            netsnmp_agent_check_parse);
-  if (callback_master_sess)
-      callback_master_num = callback_master_sess->local_port;
-  else
-      callback_master_num = -1;
+    /*
+     * always register a callback transport for internal use 
+     */
+    callback_master_sess = netsnmp_callback_open(0, handle_snmp_packet,
+                                                 netsnmp_agent_check_packet,
+                                                 netsnmp_agent_check_parse);
+    if (callback_master_sess)
+        callback_master_num = callback_master_sess->local_port;
+    else
+        callback_master_num = -1;
 
-  netsnmp_init_helpers();
-  init_traps();
+    netsnmp_init_helpers();
+    init_traps();
 
-  /* initialize agentx subagent if necessary. */
+    /*
+     * initialize agentx subagent if necessary. 
+     */
 #ifdef USING_AGENTX_SUBAGENT_MODULE
-  if (ds_get_boolean(DS_APPLICATION_ID, DS_AGENT_ROLE) == SUB_AGENT) {
-    r = subagent_pre_init();
-    init_subagent();
-  }
+    if (ds_get_boolean(DS_APPLICATION_ID, DS_AGENT_ROLE) == SUB_AGENT) {
+        r = subagent_pre_init();
+        init_subagent();
+    }
 #endif
 
-  /*  Register configuration tokens from transport modules.  */
+    /*
+     * Register configuration tokens from transport modules.  
+     */
 #ifdef SNMP_TRANSPORT_UDP_DOMAIN
-  netsnmp_udp_agent_config_tokens_register();
+    netsnmp_udp_agent_config_tokens_register();
 #endif
 #ifdef SNMP_TRANSPORT_UDPIPV6_DOMAIN
-  netsnmp_udp6_agent_config_tokens_register();
+    netsnmp_udp6_agent_config_tokens_register();
 #endif
 
 #ifdef NETSNMP_EMBEDDED_PERL
-  init_perl();
+    init_perl();
 #endif
 
-  return r;
-}  /* end init_agent() */
+    return r;
+}                               /* end init_agent() */
 
-oid nullOid[] = {0,0};
-int nullOidLen = sizeof(nullOid);
-
+oid             nullOid[] = { 0, 0 };
+int             nullOidLen = sizeof(nullOid);

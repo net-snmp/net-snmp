@@ -5,15 +5,15 @@
 /*
  * function declarations 
  */
-void init_notification_log(void);
-Netsnmp_Node_Handler     nlmLogTable_handler;
-Netsnmp_Node_Handler     nlmLogVariableTable_handler;
+void            init_notification_log(void);
+Netsnmp_Node_Handler nlmLogTable_handler;
+Netsnmp_Node_Handler nlmLogVariableTable_handler;
 
 void
-log_notification(struct hostent *host, netsnmp_pdu *pdu,
-                 netsnmp_transport *transport);
+                log_notification(struct hostent *host, netsnmp_pdu *pdu,
+                                 netsnmp_transport *transport);
 
-#define DS_APP_DONT_LOG    9 /* must match notification_log. */
+#define DS_APP_DONT_LOG    9    /* must match notification_log. */
 
 /*
  * column number definitions for table nlmLogTable 
@@ -44,4 +44,4 @@ log_notification(struct hostent *host, netsnmp_pdu *pdu,
 #define COLUMN_NLMLOGVARIABLECOUNTER64VAL		11
 #define COLUMN_NLMLOGVARIABLEOPAQUEVAL		12
 
-#endif /* NOTIFICATION_LOG_H */
+#endif                          /* NOTIFICATION_LOG_H */

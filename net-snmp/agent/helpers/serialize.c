@@ -31,43 +31,55 @@
  *  handler chain.  
  */
 netsnmp_mib_handler *
-netsnmp_get_serialize_handler(void) {
-    return netsnmp_create_handler("serialize", netsnmp_serialize_helper_handler);
+netsnmp_get_serialize_handler(void)
+{
+    return netsnmp_create_handler("serialize",
+                                  netsnmp_serialize_helper_handler);
 }
 
 /** functionally the same as calling netsnmp_register_handler() but also
  * injects a serialize handler at the same time for you. */
 int
-netsnmp_register_serialize(netsnmp_handler_registration *reginfo) {
+netsnmp_register_serialize(netsnmp_handler_registration *reginfo)
+{
     netsnmp_inject_handler(reginfo, netsnmp_get_serialize_handler());
     return netsnmp_register_handler(reginfo);
 }
 
 /** Implements the serial handler */
 int
-netsnmp_serialize_helper_handler(
-    netsnmp_mib_handler               *handler,
-    netsnmp_handler_registration      *reginfo,
-    netsnmp_agent_request_info        *reqinfo,
-    netsnmp_request_info              *requests) {
+netsnmp_serialize_helper_handler(netsnmp_mib_handler *handler,
+                                 netsnmp_handler_registration *reginfo,
+                                 netsnmp_agent_request_info *reqinfo,
+                                 netsnmp_request_info *requests)
+{
 
-    netsnmp_request_info              *request, *requesttmp;
+    netsnmp_request_info *request, *requesttmp;
 
     DEBUGMSGTL(("helper:serialize", "Got request\n"));
-    /* loop through requests */
-    for(request = requests; request; request = request->next) {
-        int ret;
+    /*
+     * loop through requests 
+     */
+    for (request = requests; request; request = request->next) {
+        int             ret;
 
-        /* store next pointer and delete it */
+        /*
+         * store next pointer and delete it 
+         */
         requesttmp = request->next;
         request->next = NULL;
 
-        /* call the next handler */
-        ret = netsnmp_call_next_handler(handler, reginfo, reqinfo, request);
+        /*
+         * call the next handler 
+         */
+        ret =
+            netsnmp_call_next_handler(handler, reginfo, reqinfo, request);
 
-        /* restore original next pointer */
+        /*
+         * restore original next pointer 
+         */
         request->next = requesttmp;
-        
+
         if (ret != SNMP_ERR_NOERROR)
             return ret;
     }
@@ -81,7 +93,8 @@ netsnmp_serialize_helper_handler(
  *  use.
  */
 void
-netsnmp_init_serialize(void) 
+netsnmp_init_serialize(void)
 {
-    netsnmp_register_handler_by_name("serialize", netsnmp_get_serialize_handler());
+    netsnmp_register_handler_by_name("serialize",
+                                     netsnmp_get_serialize_handler());
 }

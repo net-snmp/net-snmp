@@ -3,4 +3,4 @@
 
 Netsnmp_Node_Handler override_handler;
 
-#endif /* OVERRIDE_H */
+#endif                          /* OVERRIDE_H */

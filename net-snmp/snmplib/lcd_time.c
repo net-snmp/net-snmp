@@ -1,8 +1,8 @@
 /*
  * lcd_time.c
  *
- * XXX	Should etimelist entries with <0,0> time tuples be timed out?
- * XXX	Need a routine to free the memory?  (Perhaps at shutdown?)
+ * XXX  Should etimelist entries with <0,0> time tuples be timed out?
+ * XXX  Need a routine to free the memory?  (Perhaps at shutdown?)
  */
 
 #include <net-snmp/net-snmp-config.h>
@@ -42,7 +42,7 @@
 #include <dmalloc.h>
 #endif
 
-#include <net-snmp/types.h>	
+#include <net-snmp/types.h>
 #include <net-snmp/output_api.h>
 #include <net-snmp/utilities.h>
 
@@ -92,74 +92,73 @@ static Enginetime etimelist[ETIMELIST_SIZE];
  *            this is another matter.
  */
 int
-get_enginetime(	u_char	*engineID,	
-		u_int	 engineID_len,
-		u_int	*engineboot,
-		u_int	*engine_time,
-		u_int   authenticated)
+get_enginetime(u_char * engineID,
+               u_int engineID_len,
+               u_int * engineboot,
+               u_int * engine_time, u_int authenticated)
 {
-	int		rval	 = SNMPERR_SUCCESS;
-	time_t		timediff = 0;
-	Enginetime	e	 = NULL;
+    int             rval = SNMPERR_SUCCESS;
+    time_t          timediff = 0;
+    Enginetime      e = NULL;
 
 
 
-	/*
-	 * Sanity check.
-	 */
-	if ( !engine_time || !engineboot ) {
-		QUITFUN(SNMPERR_GENERR, get_enginetime_quit);
-	}
+    /*
+     * Sanity check.
+     */
+    if (!engine_time || !engineboot) {
+        QUITFUN(SNMPERR_GENERR, get_enginetime_quit);
+    }
 
 
-	/*
-	 * Compute estimated current engine_time tuple at engineID if
-	 * a record is cached for it.
-	 */
-	*engine_time = *engineboot = 0;
+    /*
+     * Compute estimated current engine_time tuple at engineID if
+     * a record is cached for it.
+     */
+    *engine_time = *engineboot = 0;
 
-	if ( !engineID || (engineID_len<=0) ) {
-		QUITFUN(SNMPERR_GENERR, get_enginetime_quit);
-	}
+    if (!engineID || (engineID_len <= 0)) {
+        QUITFUN(SNMPERR_GENERR, get_enginetime_quit);
+    }
 
-	if ( !(e = search_enginetime_list(engineID, engineID_len)) ) {
-		QUITFUN(SNMPERR_GENERR, get_enginetime_quit);
-	}
-
+    if (!(e = search_enginetime_list(engineID, engineID_len))) {
+        QUITFUN(SNMPERR_GENERR, get_enginetime_quit);
+    }
 #ifdef LCD_TIME_SYNC_OPT
-        if (!authenticated || e->authenticatedFlag) {
-#endif	
-	*engine_time = e->engineTime;
-	*engineboot = e->engineBoot;
+    if (!authenticated || e->authenticatedFlag) {
+#endif
+        *engine_time = e->engineTime;
+        *engineboot = e->engineBoot;
 
-	timediff = time(NULL) - e->lastReceivedEngineTime;
-#ifdef LCD_TIME_SYNC_OPT	
+        timediff = time(NULL) - e->lastReceivedEngineTime;
+#ifdef LCD_TIME_SYNC_OPT
+    }
+#endif
+
+    if (timediff > (int) (ENGINETIME_MAX - *engine_time)) {
+        *engine_time = (timediff - (ENGINETIME_MAX - *engine_time));
+
+        /*
+         * FIX -- move this check up... should not change anything
+         * * if engineboot is already locked.  ???
+         */
+        if (*engineboot < ENGINEBOOT_MAX) {
+            *engineboot += 1;
         }
-#endif	
 
-	if ( timediff > (int)(ENGINETIME_MAX - *engine_time) ) {
-		*engine_time = (timediff - (ENGINETIME_MAX - *engine_time));
+    } else {
+        *engine_time += timediff;
+    }
 
-		/* FIX -- move this check up... should not change anything
-		 * if engineboot is already locked.  ???
-		 */
-		if (*engineboot < ENGINEBOOT_MAX) {
-			*engineboot += 1;
-		}
+    DEBUGMSGTL(("lcd_get_enginetime", "engineID "));
+    DEBUGMSGHEX(("lcd_get_enginetime", engineID, engineID_len));
+    DEBUGMSG(("lcd_get_enginetime", ": boots=%d, time=%d\n", *engineboot,
+              *engine_time));
 
-	} else {
-		*engine_time += timediff;
-	}
+  get_enginetime_quit:
+    return rval;
 
-        DEBUGMSGTL(("lcd_get_enginetime", "engineID "));
-        DEBUGMSGHEX(("lcd_get_enginetime", engineID, engineID_len));
-        DEBUGMSG(("lcd_get_enginetime", ": boots=%d, time=%d\n", *engineboot,
-                  *engine_time));
-
-get_enginetime_quit:
-	return rval;
-
-}  /* end get_enginetime() */
+}                               /* end get_enginetime() */
 
 /*******************************************************************-o-******
  * get_enginetime
@@ -187,75 +186,74 @@ get_enginetime_quit:
  *            this is another matter.
  */
 int
-get_enginetime_ex(	u_char	*engineID,	
-		u_int	 engineID_len,
-		u_int	*engineboot,
-		u_int	*engine_time,
-		u_int	*last_engine_time,
-		u_int   authenticated)
+get_enginetime_ex(u_char * engineID,
+                  u_int engineID_len,
+                  u_int * engineboot,
+                  u_int * engine_time,
+                  u_int * last_engine_time, u_int authenticated)
 {
-	int		rval	 = SNMPERR_SUCCESS;
-	time_t		timediff = 0;
-	Enginetime	e	 = NULL;
+    int             rval = SNMPERR_SUCCESS;
+    time_t          timediff = 0;
+    Enginetime      e = NULL;
 
 
 
-	/*
-	 * Sanity check.
-	 */
-	if ( !engine_time || !engineboot || !last_engine_time) {
-		QUITFUN(SNMPERR_GENERR, get_enginetime_ex_quit);
-	}
+    /*
+     * Sanity check.
+     */
+    if (!engine_time || !engineboot || !last_engine_time) {
+        QUITFUN(SNMPERR_GENERR, get_enginetime_ex_quit);
+    }
 
 
-	/*
-	 * Compute estimated current engine_time tuple at engineID if
-	 * a record is cached for it.
-	 */
-	*last_engine_time = *engine_time = *engineboot = 0;
+    /*
+     * Compute estimated current engine_time tuple at engineID if
+     * a record is cached for it.
+     */
+    *last_engine_time = *engine_time = *engineboot = 0;
 
-	if ( !engineID || (engineID_len<=0) ) {
-		QUITFUN(SNMPERR_GENERR, get_enginetime_ex_quit);
-	}
+    if (!engineID || (engineID_len <= 0)) {
+        QUITFUN(SNMPERR_GENERR, get_enginetime_ex_quit);
+    }
 
-	if ( !(e = search_enginetime_list(engineID, engineID_len)) ) {
-		QUITFUN(SNMPERR_GENERR, get_enginetime_ex_quit);
-	}
-
+    if (!(e = search_enginetime_list(engineID, engineID_len))) {
+        QUITFUN(SNMPERR_GENERR, get_enginetime_ex_quit);
+    }
 #ifdef LCD_TIME_SYNC_OPT
-        if (!authenticated || e->authenticatedFlag) {
-#endif	
-	*last_engine_time = *engine_time = e->engineTime;
-	*engineboot = e->engineBoot;
+    if (!authenticated || e->authenticatedFlag) {
+#endif
+        *last_engine_time = *engine_time = e->engineTime;
+        *engineboot = e->engineBoot;
 
-	timediff = time(NULL) - e->lastReceivedEngineTime;
-#ifdef LCD_TIME_SYNC_OPT	
+        timediff = time(NULL) - e->lastReceivedEngineTime;
+#ifdef LCD_TIME_SYNC_OPT
+    }
+#endif
+
+    if (timediff > (int) (ENGINETIME_MAX - *engine_time)) {
+        *engine_time = (timediff - (ENGINETIME_MAX - *engine_time));
+
+        /*
+         * FIX -- move this check up... should not change anything
+         * * if engineboot is already locked.  ???
+         */
+        if (*engineboot < ENGINEBOOT_MAX) {
+            *engineboot += 1;
         }
-#endif	
 
-	if ( timediff > (int)(ENGINETIME_MAX - *engine_time) ) {
-		*engine_time = (timediff - (ENGINETIME_MAX - *engine_time));
+    } else {
+        *engine_time += timediff;
+    }
 
-		/* FIX -- move this check up... should not change anything
-		 * if engineboot is already locked.  ???
-		 */
-		if (*engineboot < ENGINEBOOT_MAX) {
-			*engineboot += 1;
-		}
+    DEBUGMSGTL(("lcd_get_enginetime_ex", "engineID "));
+    DEBUGMSGHEX(("lcd_get_enginetime_ex", engineID, engineID_len));
+    DEBUGMSG(("lcd_get_enginetime_ex", ": boots=%d, time=%d\n",
+              *engineboot, *engine_time));
 
-	} else {
-		*engine_time += timediff;
-	}
+  get_enginetime_ex_quit:
+    return rval;
 
-        DEBUGMSGTL(("lcd_get_enginetime_ex", "engineID "));
-        DEBUGMSGHEX(("lcd_get_enginetime_ex", engineID, engineID_len));
-        DEBUGMSG(("lcd_get_enginetime_ex", ": boots=%d, time=%d\n", *engineboot,
-                  *engine_time));
-
-get_enginetime_ex_quit:
-	return rval;
-
-}  /* end get_enginetime_ex() */
+}                               /* end get_enginetime_ex() */
 
 
 
@@ -284,71 +282,66 @@ get_enginetime_ex_quit:
  * XXX	"Current time within the local engine" == time(NULL)...
  */
 int
-set_enginetime(	u_char	*engineID,
-		u_int	 engineID_len,
-		u_int	 engineboot,
-		u_int  	 engine_time,
-		u_int    authenticated)
+set_enginetime(u_char * engineID,
+               u_int engineID_len,
+               u_int engineboot, u_int engine_time, u_int authenticated)
 {
-	int		rval = SNMPERR_SUCCESS,
-			iindex;
-	Enginetime	e = NULL;
+    int             rval = SNMPERR_SUCCESS, iindex;
+    Enginetime      e = NULL;
 
 
 
-	/*
-	 * Sanity check.
-	 */
-	if ( !engineID || (engineID_len <= 0) ) {
-		return rval;
-	}
+    /*
+     * Sanity check.
+     */
+    if (!engineID || (engineID_len <= 0)) {
+        return rval;
+    }
 
 
-	/*
-	 * Store the given <engine_time, engineboot> tuple in the record
-	 * for engineID.  Create a new record if necessary.
-	 */
-	if ( !(e = search_enginetime_list(engineID, engineID_len)) )
-	{
-		if ( (iindex = hash_engineID(engineID, engineID_len)) < 0 )
-		{
-			QUITFUN(SNMPERR_GENERR, set_enginetime_quit);
-		}
-
-		e = (Enginetime) calloc(1,sizeof(*e));
-
-		e->next = etimelist[iindex];
-		etimelist[iindex] = e;
-
-		e->engineID = (u_char *) calloc(1,engineID_len);
-		memcpy(e->engineID, engineID, engineID_len);
-
-		e->engineID_len = engineID_len;
-	}
-#ifdef LCD_TIME_SYNC_OPT	
-	if (authenticated || !e->authenticatedFlag) {
-	  e->authenticatedFlag = authenticated;
-#else
-	if (authenticated) {
-#endif
-	  e->engineTime		  = engine_time;
-	  e->engineBoot		  = engineboot;
-	  e->lastReceivedEngineTime = time(NULL);
+    /*
+     * Store the given <engine_time, engineboot> tuple in the record
+     * for engineID.  Create a new record if necessary.
+     */
+    if (!(e = search_enginetime_list(engineID, engineID_len))) {
+        if ((iindex = hash_engineID(engineID, engineID_len)) < 0) {
+            QUITFUN(SNMPERR_GENERR, set_enginetime_quit);
         }
 
-	e = NULL;	/* Indicates a successful update. */
+        e = (Enginetime) calloc(1, sizeof(*e));
 
-        DEBUGMSGTL(("lcd_set_enginetime", "engineID "));
-        DEBUGMSGHEX(("lcd_set_enginetime", engineID, engineID_len));
-        DEBUGMSG(("lcd_set_enginetime", ": boots=%d, time=%d\n", engineboot,
-                  engine_time));
+        e->next = etimelist[iindex];
+        etimelist[iindex] = e;
 
-set_enginetime_quit:
-	SNMP_FREE(e);
+        e->engineID = (u_char *) calloc(1, engineID_len);
+        memcpy(e->engineID, engineID, engineID_len);
 
-	return rval;
+        e->engineID_len = engineID_len;
+    }
+#ifdef LCD_TIME_SYNC_OPT
+    if (authenticated || !e->authenticatedFlag) {
+        e->authenticatedFlag = authenticated;
+#else
+    if (authenticated) {
+#endif
+        e->engineTime = engine_time;
+        e->engineBoot = engineboot;
+        e->lastReceivedEngineTime = time(NULL);
+    }
 
-}  /* end set_enginetime() */
+    e = NULL;                   /* Indicates a successful update. */
+
+    DEBUGMSGTL(("lcd_set_enginetime", "engineID "));
+    DEBUGMSGHEX(("lcd_set_enginetime", engineID, engineID_len));
+    DEBUGMSG(("lcd_set_enginetime", ": boots=%d, time=%d\n", engineboot,
+              engine_time));
+
+  set_enginetime_quit:
+    SNMP_FREE(e);
+
+    return rval;
+
+}                               /* end set_enginetime() */
 
 
 
@@ -370,43 +363,41 @@ set_enginetime_quit:
  * ASSUMES that no engineID will have more than one record in the list.
  */
 Enginetime
-search_enginetime_list(u_char *engineID, u_int engineID_len)
+search_enginetime_list(u_char * engineID, u_int engineID_len)
 {
-	int		rval = SNMPERR_SUCCESS;
-	Enginetime	e    = NULL;
+    int             rval = SNMPERR_SUCCESS;
+    Enginetime      e = NULL;
 
 
-	/*
-	 * Sanity check.
-	 */
-	if ( !engineID || (engineID_len<=0) ) {
-		QUITFUN(SNMPERR_GENERR, search_enginetime_list_quit);
-	}
+    /*
+     * Sanity check.
+     */
+    if (!engineID || (engineID_len <= 0)) {
+        QUITFUN(SNMPERR_GENERR, search_enginetime_list_quit);
+    }
 
 
-	/*
-	 * Find the entry for engineID if there be one.
-	 */
-	rval = hash_engineID(engineID, engineID_len);
-	if (rval < 0) {
-		QUITFUN(SNMPERR_GENERR, search_enginetime_list_quit);
-	}
-	e = etimelist[rval];
+    /*
+     * Find the entry for engineID if there be one.
+     */
+    rval = hash_engineID(engineID, engineID_len);
+    if (rval < 0) {
+        QUITFUN(SNMPERR_GENERR, search_enginetime_list_quit);
+    }
+    e = etimelist[rval];
 
-	for ( /*EMPTY*/; e; e = e->next )
-	{
-		if ( (engineID_len == e->engineID_len)
-			&& !memcmp(e->engineID, engineID, engineID_len) )
-		{
-			break;
-		}
-	}
-	
+    for ( /*EMPTY*/; e; e = e->next) {
+        if ((engineID_len == e->engineID_len)
+            && !memcmp(e->engineID, engineID, engineID_len)) {
+            break;
+        }
+    }
 
-search_enginetime_list_quit:
-	return e;
 
-}  /* end search_enginetime_list() */
+  search_enginetime_list_quit:
+    return e;
+
+}                               /* end search_enginetime_list() */
 
 
 
@@ -430,45 +421,43 @@ search_enginetime_list_quit:
  *
  */
 int
-hash_engineID(u_char *engineID, u_int engineID_len)
+hash_engineID(u_char * engineID, u_int engineID_len)
 {
-	int		 rval		= SNMPERR_GENERR;
-	size_t		 buf_len	= SNMP_MAXBUF;
-	u_int		 additive	= 0;
-	u_char		*bufp,
-			 buf[SNMP_MAXBUF];
-	void		*context = NULL;
+    int             rval = SNMPERR_GENERR;
+    size_t          buf_len = SNMP_MAXBUF;
+    u_int           additive = 0;
+    u_char         *bufp, buf[SNMP_MAXBUF];
+    void           *context = NULL;
 
 
 
-	/*
-	 * Sanity check.
-	 */
-	if ( !engineID || (engineID_len <= 0) ) {
-		QUITFUN(SNMPERR_GENERR, hash_engineID_quit);
-	}
+    /*
+     * Sanity check.
+     */
+    if (!engineID || (engineID_len <= 0)) {
+        QUITFUN(SNMPERR_GENERR, hash_engineID_quit);
+    }
 
 
-	/*
-	 * Hash engineID into a list index.
-	 */
-        rval = sc_hash(usmHMACMD5AuthProtocol,
-                       sizeof(usmHMACMD5AuthProtocol)/sizeof(oid),
-                       engineID, engineID_len,
-                       buf, &buf_len);
-	QUITFUN(rval, hash_engineID_quit);
-        
-	for ( bufp = buf; (bufp-buf) < (int)buf_len; bufp += 4 ) {
-		additive += (u_int) *bufp;
-	}
+    /*
+     * Hash engineID into a list index.
+     */
+    rval = sc_hash(usmHMACMD5AuthProtocol,
+                   sizeof(usmHMACMD5AuthProtocol) / sizeof(oid),
+                   engineID, engineID_len, buf, &buf_len);
+    QUITFUN(rval, hash_engineID_quit);
 
-hash_engineID_quit:
-	SNMP_FREE(context);
-	memset(buf, 0, SNMP_MAXBUF);
+    for (bufp = buf; (bufp - buf) < (int) buf_len; bufp += 4) {
+        additive += (u_int) * bufp;
+    }
 
-	return (rval < 0) ? rval : (additive % ETIMELIST_SIZE);
+  hash_engineID_quit:
+    SNMP_FREE(context);
+    memset(buf, 0, SNMP_MAXBUF);
 
-}  /* end hash_engineID() */
+    return (rval < 0) ? rval : (additive % ETIMELIST_SIZE);
+
+}                               /* end hash_engineID() */
 
 
 
@@ -484,40 +473,37 @@ hash_engineID_quit:
 void
 dump_etimelist_entry(Enginetime e, int count)
 {
-	u_int	 buflen;
-	char	 tabs[SNMP_MAXBUF],
-		*t = tabs, 
-		*s;
+    u_int           buflen;
+    char            tabs[SNMP_MAXBUF], *t = tabs, *s;
 
 
 
-	count += 1;
-	while (count--) {
-		t += sprintf(t, "  ");
-	}
+    count += 1;
+    while (count--) {
+        t += sprintf(t, "  ");
+    }
 
 
-	buflen = e->engineID_len;
+    buflen = e->engineID_len;
 #ifdef SNMP_TESTING_CODE
-	if ( !(s = dump_snmpEngineID(e->engineID, &buflen)) ) {
+    if (!(s = dump_snmpEngineID(e->engineID, &buflen))) {
 #endif
-		binary_to_hex(e->engineID, e->engineID_len, &s);
+        binary_to_hex(e->engineID, e->engineID_len, &s);
 #ifdef SNMP_TESTING_CODE
-	}
+    }
 #endif
 
-	DEBUGMSGTL(("dump_etimelist", "%s\n",tabs));
-	DEBUGMSGTL(("dump_etimelist", "%s%s (len=%d) <%d,%d>\n", tabs,
-                    s, e->engineID_len,
-                    e->engineTime, e->engineBoot));
-	DEBUGMSGTL(("dump_etimelist", "%s%ld (%ld) -- %s", tabs,
-                    e->lastReceivedEngineTime,
-                    time(NULL) - e->lastReceivedEngineTime,
-                    ctime(&e->lastReceivedEngineTime)));
+    DEBUGMSGTL(("dump_etimelist", "%s\n", tabs));
+    DEBUGMSGTL(("dump_etimelist", "%s%s (len=%d) <%d,%d>\n", tabs,
+                s, e->engineID_len, e->engineTime, e->engineBoot));
+    DEBUGMSGTL(("dump_etimelist", "%s%ld (%ld) -- %s", tabs,
+                e->lastReceivedEngineTime,
+                time(NULL) - e->lastReceivedEngineTime,
+                ctime(&e->lastReceivedEngineTime)));
 
-	SNMP_FREE(s);
+    SNMP_FREE(s);
 
-}  /* end dump_etimelist_entry() */
+}                               /* end dump_etimelist_entry() */
 
 
 
@@ -528,31 +514,30 @@ dump_etimelist_entry(Enginetime e, int count)
 void
 dump_etimelist(void)
 {
-	int		iindex = -1,
-			count = 0;
-	Enginetime	e;
+    int             iindex = -1, count = 0;
+    Enginetime      e;
 
 
 
-	DEBUGMSGTL(("dump_etimelist", "\n"));
+    DEBUGMSGTL(("dump_etimelist", "\n"));
 
-	while (++iindex < ETIMELIST_SIZE) {
-		DEBUGMSG(("dump_etimelist", "[%d]", iindex));
+    while (++iindex < ETIMELIST_SIZE) {
+        DEBUGMSG(("dump_etimelist", "[%d]", iindex));
 
-		count = 0;
-		e = etimelist[iindex];
+        count = 0;
+        e = etimelist[iindex];
 
-		while (e) {
-			dump_etimelist_entry(e, count++);
-			e = e->next;
-		}
+        while (e) {
+            dump_etimelist_entry(e, count++);
+            e = e->next;
+        }
 
-		if (count > 0) {
-			DEBUGMSG(("dump_etimelist", "\n"));
-		}
-	}  /* endwhile */
+        if (count > 0) {
+            DEBUGMSG(("dump_etimelist", "\n"));
+        }
+    }                           /* endwhile */
 
-	DEBUGMSG(("dump_etimelist", "\n"));
+    DEBUGMSG(("dump_etimelist", "\n"));
 
-}  /* end dump_etimelist() */
-#endif /* SNMP_TESTING_CODE */
+}                               /* end dump_etimelist() */
+#endif                          /* SNMP_TESTING_CODE */

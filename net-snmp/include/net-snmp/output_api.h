@@ -26,4 +26,4 @@
 #define ERROR_MSG(string)	snmp_set_detail(string)
 #endif
 
-#endif /* NET_SNMP_LOGGING_API_H */
+#endif                          /* NET_SNMP_LOGGING_API_H */

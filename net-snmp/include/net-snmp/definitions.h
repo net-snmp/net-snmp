@@ -5,7 +5,7 @@
      *  Defined constants, and other similar enumerations.
      */
 
-#define MAX_OID_LEN	    128	/* max subid's in an oid */
+#define MAX_OID_LEN	    128 /* max subid's in an oid */
 
 
     /*
@@ -18,12 +18,14 @@
      *  to allow application writers to adopt the new header file names.
      */
 
-#include <net-snmp/types.h>	/* for oid */
+#include <net-snmp/types.h>     /* for oid */
 #include <net-snmp/library/snmp_api.h>
 #include <net-snmp/library/asn1.h>
 #include <net-snmp/library/snmp_impl.h>
 #include <net-snmp/library/snmp.h>
 #include <net-snmp/library/snmp-tc.h>
-/* #include <net-snmp/library/libsnmp.h> */
+/*
+ * #include <net-snmp/library/libsnmp.h> 
+ */
 
-#endif /* NET_SNMP_DEFINITIONS_H */
+#endif                          /* NET_SNMP_DEFINITIONS_H */

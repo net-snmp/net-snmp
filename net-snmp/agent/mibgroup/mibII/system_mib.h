@@ -7,15 +7,17 @@
 
 config_require(util_funcs)
 
-extern char version_descr[];
+     extern char     version_descr[];
 
-void init_system_mib (void);
-extern FindVarMethod var_system;
+     void            init_system_mib(void);
+     extern FindVarMethod var_system;
 
-/* config file parsing routines */
-void system_parse_config_sysloc  (const char *, char *);
-void system_parse_config_syscon  (const char *, char *);
-void system_parse_config_sysname (const char *, char *);
+/*
+ * config file parsing routines 
+ */
+     void            system_parse_config_sysloc(const char *, char *);
+     void            system_parse_config_syscon(const char *, char *);
+     void            system_parse_config_sysname(const char *, char *);
 
 #define	VERSION_DESCR		1
 #define	VERSIONID		2
@@ -26,4 +28,4 @@ void system_parse_config_sysname (const char *, char *);
 #define SYSSERVICES		7
 #define SYSORLASTCHANGE		8
 
-#endif /* _MIBGROUP_SYSTEM_MIB_H */
+#endif                          /* _MIBGROUP_SYSTEM_MIB_H */

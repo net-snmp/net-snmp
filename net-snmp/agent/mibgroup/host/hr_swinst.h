@@ -5,8 +5,8 @@
 #ifndef _MIBGROUP_HRSWINST_H
 #define _MIBGROUP_HRSWINST_H
 
-extern void	init_hr_swinst (void);
+extern void     init_hr_swinst(void);
 extern FindVarMethod var_hrswinst;
 
 
-#endif /* _MIBGROUP_HRSWINST_H */
+#endif                          /* _MIBGROUP_HRSWINST_H */

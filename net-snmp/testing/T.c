@@ -1,15 +1,15 @@
 /*
  * T.c
  *
- * Expected SUCCESSes for all tests:	FIX [+ FIX ...]
- *					(List number of lines containing the
- *					 string "SUCCESS" that are expected
- *					 to be printed to stdout.)
+ * Expected SUCCESSes for all tests:    FIX [+ FIX ...]
+ *                                      (List number of lines containing the
+ *                                       string "SUCCESS" that are expected
+ *                                       to be printed to stdout.)
  *
  * Returns:
- *	Number of FAILUREs.
+ *      Number of FAILUREs.
  *
- * FIX	Short test description/table of contents.	SUCCESSes: FIX
+ * FIX  Short test description/table of contents.       SUCCESSes: FIX
  */
 
 #include <net-snmp/net-snmp-config.h>
@@ -20,9 +20,11 @@
 #include <stdlib.h>
 #endif
 
-/* #include ... */
+/*
+ * #include ... 
+ */
 
-extern char     *optarg;
+extern char    *optarg;
 extern int      optind, optopt, opterr;
 
 
@@ -30,13 +32,12 @@ extern int      optind, optopt, opterr;
 /*
  * Globals, &c...
  */
-char *local_progname;
+char           *local_progname;
 
 #define USAGE	"Usage: %s [-h][-aS]"
 #define OPTIONLIST	"ahS"
 
-int	doalltests	= 0,
-	dosomething	= 0;
+int             doalltests = 0, dosomething = 0;
 
 #define	ALLOPTIONS	(doalltests + dosomething)
 
@@ -68,9 +69,9 @@ int	doalltests	= 0,
 /*
  * Prototypes.
  */
-void	usage(FILE *ofp);
+void            usage(FILE * ofp);
 
-int	test_dosomething(void);
+int             test_dosomething(void);
 
 
 
@@ -78,83 +79,87 @@ int	test_dosomething(void);
 int
 main(int argc, char **argv)
 {
-	int		 rval		= SNMPERR_SUCCESS,
-			 failcount	= 0;
-	char		 ch;
+    int             rval = SNMPERR_SUCCESS, failcount = 0;
+    char            ch;
 
-	local_progname = argv[0];
+    local_progname = argv[0];
 
-EM(-1);	/* */
+    EM(-1);                     /* */
 
-	/*
-	 * Parse.
-	 */
-	while ( (ch = getopt(argc, argv, OPTIONLIST)) != EOF )
-	{
-		switch(ch) {
-		case 'a':	doalltests = 1;		break;
-		case 'S':	dosomething = 1;	break;
-		case 'h':
-			rval = 0;
-		default:
-			usage(stdout);
-			exit(rval);
-		}
+    /*
+     * Parse.
+     */
+    while ((ch = getopt(argc, argv, OPTIONLIST)) != EOF) {
+        switch (ch) {
+        case 'a':
+            doalltests = 1;
+            break;
+        case 'S':
+            dosomething = 1;
+            break;
+        case 'h':
+            rval = 0;
+        default:
+            usage(stdout);
+            exit(rval);
+        }
 
-		argc -= 1; argv += 1;
-                if (optarg) { argc -= 1; argv += 1; optarg = NULL; }
-		optind = 1;
-	}  /* endwhile getopt */
+        argc -= 1;
+        argv += 1;
+        if (optarg) {
+            argc -= 1;
+            argv += 1;
+            optarg = NULL;
+        }
+        optind = 1;
+    }                           /* endwhile getopt */
 
-	if ((argc > 1)) {
-		usage(stdout);
-		exit(1000);
+    if ((argc > 1)) {
+        usage(stdout);
+        exit(1000);
 
-	} else if ( ALLOPTIONS != 1 ) {
-		usage(stdout);
-		exit(1000);
-	}
-
-
-	/*
-	 * Test stuff.
-	 */
-	if (dosomething || doalltests) {
-		failcount += test_dosomething();
-	}
+    } else if (ALLOPTIONS != 1) {
+        usage(stdout);
+        exit(1000);
+    }
 
 
-	/*
-	 * Cleanup.
-	 */
-	return failcount;
+    /*
+     * Test stuff.
+     */
+    if (dosomething || doalltests) {
+        failcount += test_dosomething();
+    }
 
-} /* end main() */
+
+    /*
+     * Cleanup.
+     */
+    return failcount;
+
+}                               /* end main() */
 
 
 
 
 
 void
-usage(FILE *ofp)
+usage(FILE * ofp)
 {
-	fprintf(ofp,
+    fprintf(ofp,
+            USAGE
+            "" NL
+            "	-a		All tests." NL
+            "	-S		Test something." NL
+            "	-h		Help." NL "" NL, local_progname);
 
-	USAGE								
-	""						NL
-	"	-a		All tests."		NL
-	"	-S		Test something."	NL
-	"	-h		Help."			NL
-	""						NL
-		, local_progname);
-
-}  /* end usage() */
+}                               /* end usage() */
 
 
 
 
 #ifdef EXAMPLE
-#endif /* EXAMPLE */
+#endif                          /* EXAMPLE */
 /*******************************************************************-o-******
  * test_dosomething
  *
@@ -167,14 +172,11 @@ usage(FILE *ofp)
 int
 test_dosomething(void)
 {
-	int		rval = SNMPERR_SUCCESS,
-			failcount = 0;
+    int             rval = SNMPERR_SUCCESS, failcount = 0;
 
-EM0(1, "UNIMPLEMENTED");	/* EM(1); /* */
+    EM0(1, "UNIMPLEMENTED");    /* EM(1); /* */
 
-test_dosomething_quit:
-	return failcount;
+  test_dosomething_quit:
+    return failcount;
 
-}  /* end test_dosomething() */
-
-
+}                               /* end test_dosomething() */

@@ -2,13 +2,13 @@
 #define _LIBSNMP_H_
 
 #ifdef __cplusplus
-extern "C" {
+extern          "C" {
 #endif
 
-/*
- * Definitions for the Simple Network Management Protocol (RFC 1067).
- *
- */
+    /*
+     * Definitions for the Simple Network Management Protocol (RFC 1067).
+     *
+     */
 /**********************************************************************
  *
  *           Copyright 1998 by Carnegie Mellon University
@@ -95,14 +95,14 @@ extern "C" {
 #include <ucd-snmp/int64.h>
 #include <ucd-snmp/version.h>
 
-#define Version version  /* netsnmp_session member */
+#define Version version         /* netsnmp_session member */
 
 #define SMI_NOSUCHOBJECT      SNMP_NOSUCHOBJECT
 #define SMI_NOSUCHINSTANCE    SNMP_NOSUCHINSTANCE
-#define SMI_ENDOFMIBVIEW      SNMP_ENDOFMIBVIEW 
+#define SMI_ENDOFMIBVIEW      SNMP_ENDOFMIBVIEW
 
 
-#else /* !UCD_SNMP_LIBRARY */
+#else                           /* !UCD_SNMP_LIBRARY */
 
 #include <sys/types.h>
 #ifndef WIN32
@@ -134,7 +134,9 @@ extern "C" {
 #include <snmp/parse.h>
 #include <snmp/snmp_compat.h>
 
-/* Load UC-Davis differential */
+    /*
+     * Load UC-Davis differential 
+     */
 
 #define SNMP_MSG_GET GET_REQ_MSG
 #define SNMP_MSG_GETNEXT GETNEXT_REQ_MSG
@@ -150,7 +152,7 @@ extern "C" {
 #define SNMP_ENDOFMIBVIEW    SMI_ENDOFMIBVIEW
 
 #define ASN_IPADDRESS   (ASN_APPLICATION | 0)
-#define ASN_UNSIGNED    (ASN_APPLICATION | 2)  /* RFC 1902 - same as GAUGE */
+#define ASN_UNSIGNED    (ASN_APPLICATION | 2)   /* RFC 1902 - same as GAUGE */
 #define ASN_TIMETICKS   (ASN_APPLICATION | 3)
 
 #define snmp_perror(X) perror(X)
@@ -162,7 +164,7 @@ extern "C" {
 
 #define VersionInfo snmp_Version
 #define get_node read_objid
-#define version Version  /* netsnmp_session member */
+#define version Version         /* netsnmp_session member */
 
 #define SNMP_VERSION_2c SNMP_VERSION_2
 #define SNMP_VERSION_2p 129
@@ -170,10 +172,9 @@ extern "C" {
 #define SOCK_STARTUP winsock_startup()
 #define SOCK_CLEANUP winsock_cleanup()
 
-#endif /* !UCD_SNMP_LIBRARY */
+#endif                          /* !UCD_SNMP_LIBRARY */
 
 #ifdef __cplusplus
 }
 #endif
-
-#endif /* _LIBSNMP_H_ */
+#endif                          /* _LIBSNMP_H_ */

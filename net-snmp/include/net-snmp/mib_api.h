@@ -25,4 +25,4 @@
 #include <net-snmp/library/oid_stash.h>
 #include <net-snmp/library/ucd_compat.h>
 
-#endif /* NET_SNMP_MIB_API_H */
+#endif                          /* NET_SNMP_MIB_API_H */

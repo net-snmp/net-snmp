@@ -5,14 +5,14 @@
 #include <stdlib.h>
 #include <sys/types.h>
 
-#include <net-snmp/types.h>	
+#include <net-snmp/types.h>
 #include <net-snmp/utilities.h>
 
 #include <net-snmp/library/snmp_api.h>
 #include <net-snmp/library/oid_stash.h>
 
 netsnmp_oid_stash_node *
-netsnmp_oid_stash_create_sized_node(size_t mysize) 
+netsnmp_oid_stash_create_sized_node(size_t mysize)
 {
     netsnmp_oid_stash_node *ret;
     ret = SNMP_MALLOC_TYPEDEF(netsnmp_oid_stash_node);
@@ -27,9 +27,8 @@ netsnmp_oid_stash_create_sized_node(size_t mysize)
     return ret;
 }
 
-inline
-netsnmp_oid_stash_node *
-netsnmp_oid_stash_create_node(void) 
+inline netsnmp_oid_stash_node *
+netsnmp_oid_stash_create_node(void)
 {
     return netsnmp_oid_stash_create_sized_node(OID_STASH_CHILDREN_SIZE);
 }
@@ -42,46 +41,55 @@ netsnmp_oid_stash_create_node(void)
  */
 int
 netsnmp_oid_stash_add_data(netsnmp_oid_stash_node **root,
-                   oid *lookup, size_t lookup_len, void *mydata) 
+                           oid * lookup, size_t lookup_len, void *mydata)
 {
     netsnmp_oid_stash_node *curnode, *tmpp, *loopp;
-    unsigned int i;
+    unsigned int    i;
 
     if (!root || !lookup || lookup_len == 0)
         return SNMPERR_GENERR;
-    
+
     if (!*root)
         *root = netsnmp_oid_stash_create_node();
     if (!*root)
         return SNMPERR_MALLOC;
-    for(curnode = *root, i = 0; i < lookup_len; i++) {
+    for (curnode = *root, i = 0; i < lookup_len; i++) {
         tmpp = curnode->children[lookup[i] % curnode->children_size];
         if (!tmpp) {
-            /* node child in array at all */
+            /*
+             * node child in array at all 
+             */
             tmpp = curnode->children[lookup[i] % curnode->children_size] =
                 netsnmp_oid_stash_create_node();
             tmpp->value = lookup[i];
         } else {
-            for(loopp = tmpp; loopp; loopp = loopp->next_sibling) {
+            for (loopp = tmpp; loopp; loopp = loopp->next_sibling) {
                 if (loopp->value == lookup[i])
                     break;
             }
             if (loopp) {
                 tmpp = loopp;
             } else {
-                /* none exists.  Create it */
+                /*
+                 * none exists.  Create it 
+                 */
                 loopp = netsnmp_oid_stash_create_node();
                 loopp->value = lookup[i];
                 loopp->next_sibling = tmpp;
                 tmpp->prev_sibling = loopp;
-                curnode->children[lookup[i] % curnode->children_size] = loopp;
+                curnode->children[lookup[i] % curnode->children_size] =
+                    loopp;
                 tmpp = loopp;
             }
-            /* tmpp now points to the proper node */
+            /*
+             * tmpp now points to the proper node 
+             */
         }
         curnode = tmpp;
     }
-    /* tmpp now points to the exact match */
+    /*
+     * tmpp now points to the exact match 
+     */
     if (curnode->thedata)
         return SNMPERR_GENERR;
     tmpp->thedata = mydata;
@@ -92,19 +100,19 @@ netsnmp_oid_stash_add_data(netsnmp_oid_stash_node **root,
  */
 netsnmp_oid_stash_node *
 netsnmp_oid_stash_get_node(netsnmp_oid_stash_node *root,
-                   oid *lookup, size_t lookup_len) 
+                           oid * lookup, size_t lookup_len)
 {
     netsnmp_oid_stash_node *curnode, *tmpp, *loopp;
-    unsigned int i;
-    
+    unsigned int    i;
+
     if (!root)
         return NULL;
-    for(curnode = root, i = 0; i < lookup_len; i++) {
+    for (curnode = root, i = 0; i < lookup_len; i++) {
         tmpp = curnode->children[lookup[i] % curnode->children_size];
         if (!tmpp) {
             return NULL;
         } else {
-            for(loopp = tmpp; loopp; loopp = loopp->next_sibling) {
+            for (loopp = tmpp; loopp; loopp = loopp->next_sibling) {
                 if (loopp->value == lookup[i])
                     break;
             }
@@ -121,35 +129,34 @@ netsnmp_oid_stash_get_node(netsnmp_oid_stash_node *root,
 
 /** returns a data pointer associated with a given OID.
  */
-void *
+void           *
 netsnmp_oid_stash_get_data(netsnmp_oid_stash_node *root,
-                   oid *lookup, size_t lookup_len) 
+                           oid * lookup, size_t lookup_len)
 {
     netsnmp_oid_stash_node *ret;
     ret = netsnmp_oid_stash_get_node(root, lookup, lookup_len);
-    if (ret) 
+    if (ret)
         return ret->thedata;
     return NULL;
 }
 
 void
-oid_stash_dump(netsnmp_oid_stash_node *root, char *prefix) 
+oid_stash_dump(netsnmp_oid_stash_node *root, char *prefix)
 {
-    char myprefix[MAX_OID_LEN * 4];
+    char            myprefix[MAX_OID_LEN * 4];
     netsnmp_oid_stash_node *tmpp;
-    int prefix_len = strlen(prefix) + 1; /* actually it's +2 */
-    unsigned int i;
-    
+    int             prefix_len = strlen(prefix) + 1;    /* actually it's +2 */
+    unsigned int    i;
+
     memset(myprefix, ' ', MAX_OID_LEN * 4);
     myprefix[prefix_len] = '\0';
 
-    for(i = 0; i < root->children_size; i++) {
+    for (i = 0; i < root->children_size; i++) {
         if (root->children[i]) {
-            for(tmpp = root->children[i]; tmpp; tmpp = tmpp->next_sibling) {
+            for (tmpp = root->children[i]; tmpp; tmpp = tmpp->next_sibling) {
                 printf("%s%ld@%d:\n", prefix, tmpp->value, i);
                 oid_stash_dump(tmpp, myprefix);
             }
         }
     }
 }
-

@@ -65,11 +65,11 @@
 #define MNTTYPE_NTFS	"ntfs"
 #endif
 #endif
-#endif /* freebsd3 */
+#endif                          /* freebsd3 */
 
 #define HRFS_MONOTONICALLY_INCREASING
 
-	/*********************
+        /*********************
 	 *
 	 *  Kernel & interface information,
 	 *   and internal forward declarations
@@ -78,8 +78,8 @@
 
 #ifdef solaris2
 
-struct mnttab  HRFS_entry_struct;
-struct mnttab *HRFS_entry = &HRFS_entry_struct;
+struct mnttab   HRFS_entry_struct;
+struct mnttab  *HRFS_entry = &HRFS_entry_struct;
 #define	HRFS_name	mnt_special
 #define	HRFS_mount	mnt_mountp
 #define	HRFS_type	mnt_fstype
@@ -87,8 +87,8 @@ struct mnttab *HRFS_entry = &HRFS_entry_struct;
 
 #elif defined(HAVE_GETFSSTAT)
 static struct statfs *fsstats = 0;
-static int fscount;
-struct statfs *HRFS_entry;
+static int      fscount;
+struct statfs  *HRFS_entry;
 #define HRFS_statfs	statfs
 #ifdef MFSNAMELEN
 #define HRFS_type	f_fstypename
@@ -100,7 +100,7 @@ struct statfs *HRFS_entry;
 
 #elif defined(dynix)
 
-struct mntent *HRFS_entry;
+struct mntent  *HRFS_entry;
 #define	HRFS_name	mnt_fsname
 #define	HRFS_mount	mnt_dir
 #define	HRFS_type	mnt_type
@@ -108,7 +108,7 @@ struct mntent *HRFS_entry;
 
 #else
 
-struct mntent *HRFS_entry;
+struct mntent  *HRFS_entry;
 #define	HRFS_name	mnt_fsname
 #define	HRFS_mount	mnt_dir
 #define	HRFS_type	mnt_type
@@ -120,13 +120,14 @@ struct mntent *HRFS_entry;
 #define	PART_DUMP	1
 
 
-extern void  Init_HR_FileSys (void);
-extern int   Get_Next_HR_FileSys (void);
-char *cook_device (char *);
-static u_char * when_dumped ( char* filesys, int level, size_t* length );
-int header_hrfilesys (struct variable *,oid *, size_t *, int, size_t *, WriteMethod **);
+extern void     Init_HR_FileSys(void);
+extern int      Get_Next_HR_FileSys(void);
+char           *cook_device(char *);
+static u_char  *when_dumped(char *filesys, int level, size_t * length);
+int             header_hrfilesys(struct variable *, oid *, size_t *, int,
+                                 size_t *, WriteMethod **);
 
-	/*********************
+        /*********************
 	 *
 	 *  Initialisation & common implementation functions
 	 *
@@ -143,509 +144,543 @@ int header_hrfilesys (struct variable *,oid *, size_t *, int, size_t *, WriteMet
 #define HRFSYS_PARTDUMP		9
 
 struct variable4 hrfsys_variables[] = {
-    { HRFSYS_INDEX,     ASN_INTEGER, RONLY, var_hrfilesys, 2, {1,1}},
-    { HRFSYS_MOUNT,      ASN_OCTET_STR, RONLY, var_hrfilesys, 2, {1,2}},
-    { HRFSYS_RMOUNT,     ASN_OCTET_STR, RONLY, var_hrfilesys, 2, {1,3}},
-    { HRFSYS_TYPE,    ASN_OBJECT_ID, RONLY, var_hrfilesys, 2, {1,4}},
-    { HRFSYS_ACCESS,    ASN_INTEGER, RONLY, var_hrfilesys, 2, {1,5}},
-    { HRFSYS_BOOT,      ASN_INTEGER, RONLY, var_hrfilesys, 2, {1,6}},
-    { HRFSYS_STOREIDX,  ASN_INTEGER, RONLY, var_hrfilesys, 2, {1,7}},
-    { HRFSYS_FULLDUMP,   ASN_OCTET_STR, RONLY, var_hrfilesys, 2, {1,8}},
-    { HRFSYS_PARTDUMP,   ASN_OCTET_STR, RONLY, var_hrfilesys, 2, {1,9}},
+    {HRFSYS_INDEX, ASN_INTEGER, RONLY, var_hrfilesys, 2, {1, 1}},
+    {HRFSYS_MOUNT, ASN_OCTET_STR, RONLY, var_hrfilesys, 2, {1, 2}},
+    {HRFSYS_RMOUNT, ASN_OCTET_STR, RONLY, var_hrfilesys, 2, {1, 3}},
+    {HRFSYS_TYPE, ASN_OBJECT_ID, RONLY, var_hrfilesys, 2, {1, 4}},
+    {HRFSYS_ACCESS, ASN_INTEGER, RONLY, var_hrfilesys, 2, {1, 5}},
+    {HRFSYS_BOOT, ASN_INTEGER, RONLY, var_hrfilesys, 2, {1, 6}},
+    {HRFSYS_STOREIDX, ASN_INTEGER, RONLY, var_hrfilesys, 2, {1, 7}},
+    {HRFSYS_FULLDUMP, ASN_OCTET_STR, RONLY, var_hrfilesys, 2, {1, 8}},
+    {HRFSYS_PARTDUMP, ASN_OCTET_STR, RONLY, var_hrfilesys, 2, {1, 9}},
 };
-oid hrfsys_variables_oid[] = { 1,3,6,1,2,1,25,3,8 };
+oid             hrfsys_variables_oid[] = { 1, 3, 6, 1, 2, 1, 25, 3, 8 };
 
-void init_hr_filesys(void)
+void
+init_hr_filesys(void)
 {
-    REGISTER_MIB("host/hr_filesys", hrfsys_variables, variable4, hrfsys_variables_oid);
+    REGISTER_MIB("host/hr_filesys", hrfsys_variables, variable4,
+                 hrfsys_variables_oid);
 }
 
 /*
-  header_hrfilesys(...
-  Arguments:
-  vp	  IN      - pointer to variable entry that points here
-  name    IN/OUT  - IN/name requested, OUT/name found
-  length  IN/OUT  - length of IN/OUT oid's 
-  exact   IN      - TRUE if an exact match was requested
-  var_len OUT     - length of variable or 0 if function returned
-  write_method
-  
-*/
+ * header_hrfilesys(...
+ * Arguments:
+ * vp     IN      - pointer to variable entry that points here
+ * name    IN/OUT  - IN/name requested, OUT/name found
+ * length  IN/OUT  - length of IN/OUT oid's 
+ * exact   IN      - TRUE if an exact match was requested
+ * var_len OUT     - length of variable or 0 if function returned
+ * write_method
+ * 
+ */
 
 int
 header_hrfilesys(struct variable *vp,
-		 oid *name,
-		 size_t *length,
-		 int exact,
-		 size_t *var_len,
-		 WriteMethod **write_method)
+                 oid * name,
+                 size_t * length,
+                 int exact, size_t * var_len, WriteMethod ** write_method)
 {
 #define HRFSYS_ENTRY_NAME_LENGTH	11
-    oid newname[MAX_OID_LEN];
-    int fsys_idx, LowIndex=-1;
-    int result;
+    oid             newname[MAX_OID_LEN];
+    int             fsys_idx, LowIndex = -1;
+    int             result;
 
     DEBUGMSGTL(("host/hr_filesys", "var_hrfilesys: "));
     DEBUGMSGOID(("host/hr_filesys", name, *length));
-    DEBUGMSG(("host/hr_filesys"," %d\n", exact));
-    
-    memcpy( (char *)newname,(char *)vp->name, vp->namelen * sizeof(oid));
-	/* Find "next" file system entry */
+    DEBUGMSG(("host/hr_filesys", " %d\n", exact));
+
+    memcpy((char *) newname, (char *) vp->name, vp->namelen * sizeof(oid));
+    /*
+     * Find "next" file system entry 
+     */
 
     Init_HR_FileSys();
-    for ( ;; ) {
+    for (;;) {
         fsys_idx = Get_Next_HR_FileSys();
-        if ( fsys_idx == -1 )
-	    break;
-	newname[HRFSYS_ENTRY_NAME_LENGTH] = fsys_idx;
+        if (fsys_idx == -1)
+            break;
+        newname[HRFSYS_ENTRY_NAME_LENGTH] = fsys_idx;
         result = snmp_oid_compare(name, *length, newname, vp->namelen + 1);
         if (exact && (result == 0)) {
-	    LowIndex = fsys_idx;
+            LowIndex = fsys_idx;
             break;
-	}
+        }
         if ((!exact && (result < 0)) &&
-		(LowIndex == -1 || fsys_idx < LowIndex )) {
-	    LowIndex = fsys_idx;
+            (LowIndex == -1 || fsys_idx < LowIndex)) {
+            LowIndex = fsys_idx;
 #ifdef HRFS_MONOTONICALLY_INCREASING
-	    break;
+            break;
 #endif
-	}
+        }
     }
 
-    if ( LowIndex == -1 ) {
+    if (LowIndex == -1) {
         DEBUGMSGTL(("host/hr_filesys", "... index out of range\n"));
-        return(MATCH_FAILED);
+        return (MATCH_FAILED);
     }
 
-    memcpy( (char *)name,(char *)newname, (vp->namelen + 1) * sizeof(oid));
+    memcpy((char *) name, (char *) newname,
+           (vp->namelen + 1) * sizeof(oid));
     *length = vp->namelen + 1;
     *write_method = 0;
-    *var_len = sizeof(long);	/* default to 'long' results */
+    *var_len = sizeof(long);    /* default to 'long' results */
 
     DEBUGMSGTL(("host/hr_filesys", "... get filesys stats "));
     DEBUGMSGOID(("host/hr_filesys", name, *length));
-    DEBUGMSG(("host/hr_filesys","\n"));
+    DEBUGMSG(("host/hr_filesys", "\n"));
 
     return LowIndex;
 }
 
 
-oid fsys_type_id[] = { 1,3,6,1,2,1, 25, 3, 9, 1 };		/* hrFSOther */
-int fsys_type_len = sizeof(fsys_type_id)/sizeof(fsys_type_id[0]);
+oid             fsys_type_id[] = { 1, 3, 6, 1, 2, 1, 25, 3, 9, 1 };     /* hrFSOther */
+int             fsys_type_len =
+    sizeof(fsys_type_id) / sizeof(fsys_type_id[0]);
 
-	/*********************
+        /*********************
 	 *
 	 *  System specific implementation functions
 	 *
 	 *********************/
 
 
-u_char *
+u_char         *
 var_hrfilesys(struct variable *vp,
-	      oid *name,
-	      size_t *length,
-	      int exact,
-	      size_t *var_len,
-	      WriteMethod **write_method)
+              oid * name,
+              size_t * length,
+              int exact, size_t * var_len, WriteMethod ** write_method)
 {
-    int  fsys_idx;
-    static char string[100];
-    char *mnt_type;
+    int             fsys_idx;
+    static char     string[100];
+    char           *mnt_type;
 
-    fsys_idx = header_hrfilesys(vp, name, length, exact, var_len, write_method);
-    if ( fsys_idx == MATCH_FAILED )
-	return NULL;
-        
+    fsys_idx =
+        header_hrfilesys(vp, name, length, exact, var_len, write_method);
+    if (fsys_idx == MATCH_FAILED)
+        return NULL;
 
-    switch (vp->magic){
-	case HRFSYS_INDEX:
-	    long_return = fsys_idx;
-	    return (u_char *)&long_return;
-	case HRFSYS_MOUNT:
-	    sprintf(string, HRFS_entry->HRFS_mount);
-	    *var_len = strlen(string);
-	    return (u_char *) string;
-	case HRFSYS_RMOUNT:
+
+    switch (vp->magic) {
+    case HRFSYS_INDEX:
+        long_return = fsys_idx;
+        return (u_char *) & long_return;
+    case HRFSYS_MOUNT:
+        sprintf(string, HRFS_entry->HRFS_mount);
+        *var_len = strlen(string);
+        return (u_char *) string;
+    case HRFSYS_RMOUNT:
 #if HAVE_GETFSSTAT
 #if defined(MFSNAMELEN)
-	    if (!strcmp(HRFS_entry->HRFS_type, MOUNT_NFS))
+        if (!strcmp(HRFS_entry->HRFS_type, MOUNT_NFS))
 #else
-	    if (HRFS_entry->HRFS_type == MOUNT_NFS)
+        if (HRFS_entry->HRFS_type == MOUNT_NFS)
 #endif
 #elif defined(MNTTYPE_NFS)
-	    if (!strcmp( HRFS_entry->HRFS_type, MNTTYPE_NFS))
+        if (!strcmp(HRFS_entry->HRFS_type, MNTTYPE_NFS))
 #else
-	    if (0)
+        if (0)
 #endif
-	        sprintf(string, HRFS_entry->HRFS_name);
-	    else
-		string[0] = '\0';
-	    *var_len = strlen(string);
-	    return (u_char *) string;
+            sprintf(string, HRFS_entry->HRFS_name);
+        else
+            string[0] = '\0';
+        *var_len = strlen(string);
+        return (u_char *) string;
 
-	case HRFSYS_TYPE:
-			/*
-			 * Not sufficient to identity the file
-			 *   type precisely, but it's a start.
-			 */
+    case HRFSYS_TYPE:
+        /*
+         * Not sufficient to identity the file
+         *   type precisely, but it's a start.
+         */
 #if HAVE_GETFSSTAT && !defined(MFSNAMELEN)
-	    switch (HRFS_entry->HRFS_type) {
-	    case MOUNT_UFS: fsys_type_id[fsys_type_len-1] = 3; break;
-	    case MOUNT_NFS: fsys_type_id[fsys_type_len-1] = 14; break;
-	    case MOUNT_MFS: fsys_type_id[fsys_type_len-1] = 8; break;
-	    case MOUNT_MSDOS: fsys_type_id[fsys_type_len-1] = 5; break;
-	    case MOUNT_LFS: fsys_type_id[fsys_type_len-1] = 1; break;
-	    case MOUNT_LOFS: fsys_type_id[fsys_type_len-1] = 1; break;
-	    case MOUNT_FDESC: fsys_type_id[fsys_type_len-1] = 1; break;
-	    case MOUNT_PORTAL: fsys_type_id[fsys_type_len-1] = 1; break;
-	    case MOUNT_NULL: fsys_type_id[fsys_type_len-1] = 1; break;
-	    case MOUNT_UMAP: fsys_type_id[fsys_type_len-1] = 1; break;
-	    case MOUNT_KERNFS: fsys_type_id[fsys_type_len-1] = 1; break;
-	    case MOUNT_PROCFS: fsys_type_id[fsys_type_len-1] = 1; break;
-	    case MOUNT_AFS: fsys_type_id[fsys_type_len-1] = 16; break;
-	    case MOUNT_CD9660: fsys_type_id[fsys_type_len-1] = 12; break;
-	    case MOUNT_UNION: fsys_type_id[fsys_type_len-1] = 1; break;
-	    case MOUNT_DEVFS: fsys_type_id[fsys_type_len-1] = 1; break;
+        switch (HRFS_entry->HRFS_type) {
+        case MOUNT_UFS:
+            fsys_type_id[fsys_type_len - 1] = 3;
+            break;
+        case MOUNT_NFS:
+            fsys_type_id[fsys_type_len - 1] = 14;
+            break;
+        case MOUNT_MFS:
+            fsys_type_id[fsys_type_len - 1] = 8;
+            break;
+        case MOUNT_MSDOS:
+            fsys_type_id[fsys_type_len - 1] = 5;
+            break;
+        case MOUNT_LFS:
+            fsys_type_id[fsys_type_len - 1] = 1;
+            break;
+        case MOUNT_LOFS:
+            fsys_type_id[fsys_type_len - 1] = 1;
+            break;
+        case MOUNT_FDESC:
+            fsys_type_id[fsys_type_len - 1] = 1;
+            break;
+        case MOUNT_PORTAL:
+            fsys_type_id[fsys_type_len - 1] = 1;
+            break;
+        case MOUNT_NULL:
+            fsys_type_id[fsys_type_len - 1] = 1;
+            break;
+        case MOUNT_UMAP:
+            fsys_type_id[fsys_type_len - 1] = 1;
+            break;
+        case MOUNT_KERNFS:
+            fsys_type_id[fsys_type_len - 1] = 1;
+            break;
+        case MOUNT_PROCFS:
+            fsys_type_id[fsys_type_len - 1] = 1;
+            break;
+        case MOUNT_AFS:
+            fsys_type_id[fsys_type_len - 1] = 16;
+            break;
+        case MOUNT_CD9660:
+            fsys_type_id[fsys_type_len - 1] = 12;
+            break;
+        case MOUNT_UNION:
+            fsys_type_id[fsys_type_len - 1] = 1;
+            break;
+        case MOUNT_DEVFS:
+            fsys_type_id[fsys_type_len - 1] = 1;
+            break;
 #ifdef MOUNT_EXT2FS
-	    case MOUNT_EXT2FS: fsys_type_id[fsys_type_len-1] = 23; break;
+        case MOUNT_EXT2FS:
+            fsys_type_id[fsys_type_len - 1] = 23;
+            break;
 #endif
 #ifdef MOUNT_TFS
-	    case MOUNT_TFS: fsys_type_id[fsys_type_len-1] = 15; break;
+        case MOUNT_TFS:
+            fsys_type_id[fsys_type_len - 1] = 15;
+            break;
 #endif
-	    }
+        }
 #else
-	    mnt_type = HRFS_entry->HRFS_type;
-	    if ( mnt_type == NULL )
-			fsys_type_id[fsys_type_len-1] = 2;	/* unknown */
+        mnt_type = HRFS_entry->HRFS_type;
+        if (mnt_type == NULL)
+            fsys_type_id[fsys_type_len - 1] = 2;        /* unknown */
 #ifdef MNTTYPE_HFS
-	    else if (!strcmp( mnt_type, MNTTYPE_HFS))
+        else if (!strcmp(mnt_type, MNTTYPE_HFS))
 #ifdef BerkelyFS
-			fsys_type_id[fsys_type_len-1] = 3;
-#else /* SysV */
-			fsys_type_id[fsys_type_len-1] = 4;
+            fsys_type_id[fsys_type_len - 1] = 3;
+#else                           /* SysV */
+            fsys_type_id[fsys_type_len - 1] = 4;
 #endif
 #endif
 #ifdef MNTTYPE_UFS
-	    else if (!strcmp( mnt_type, MNTTYPE_UFS))
+        else if (!strcmp(mnt_type, MNTTYPE_UFS))
 #if defined(BerkelyFS) && !defined(MNTTYPE_HFS)
-			fsys_type_id[fsys_type_len-1] = 3;
-#else /* SysV */
-			fsys_type_id[fsys_type_len-1] = 4;	/* or 3? XXX */
+            fsys_type_id[fsys_type_len - 1] = 3;
+#else                           /* SysV */
+            fsys_type_id[fsys_type_len - 1] = 4;        /* or 3? XXX */
 #endif
 #endif
 #ifdef MNTTYPE_SYSV
-	    else if (!strcmp( mnt_type, MNTTYPE_SYSV))
-			fsys_type_id[fsys_type_len-1] = 4;
+        else if (!strcmp(mnt_type, MNTTYPE_SYSV))
+            fsys_type_id[fsys_type_len - 1] = 4;
 #endif
 #ifdef MNTTYPE_PC
-	    else if (!strcmp( mnt_type, MNTTYPE_PC))
-			fsys_type_id[fsys_type_len-1] = 5;
+        else if (!strcmp(mnt_type, MNTTYPE_PC))
+            fsys_type_id[fsys_type_len - 1] = 5;
 #endif
 #ifdef MNTTYPE_MSDOS
-	    else if (!strcmp( mnt_type, MNTTYPE_MSDOS))
-			fsys_type_id[fsys_type_len-1] = 5;
+        else if (!strcmp(mnt_type, MNTTYPE_MSDOS))
+            fsys_type_id[fsys_type_len - 1] = 5;
 #endif
 #ifdef MNTTYPE_CDFS
-	    else if (!strcmp( mnt_type, MNTTYPE_CDFS))
+        else if (!strcmp(mnt_type, MNTTYPE_CDFS))
 #ifdef RockRidge
-			fsys_type_id[fsys_type_len-1] = 13;
-#else /* ISO 9660 */
-			fsys_type_id[fsys_type_len-1] = 12;
+            fsys_type_id[fsys_type_len - 1] = 13;
+#else                           /* ISO 9660 */
+            fsys_type_id[fsys_type_len - 1] = 12;
 #endif
 #endif
 #ifdef MNTTYPE_ISO9660
-	    else if (!strcmp( mnt_type, MNTTYPE_ISO9660))
-			fsys_type_id[fsys_type_len-1] = 12;
+        else if (!strcmp(mnt_type, MNTTYPE_ISO9660))
+            fsys_type_id[fsys_type_len - 1] = 12;
 #endif
 #ifdef MNTTYPE_NFS
-	    else if (!strcmp( mnt_type, MNTTYPE_NFS))
-			fsys_type_id[fsys_type_len-1] = 14;
+        else if (!strcmp(mnt_type, MNTTYPE_NFS))
+            fsys_type_id[fsys_type_len - 1] = 14;
 #endif
 #ifdef MNTTYPE_NFS3
-	    else if (!strcmp( mnt_type, MNTTYPE_NFS3))
-			fsys_type_id[fsys_type_len-1] = 14;
+        else if (!strcmp(mnt_type, MNTTYPE_NFS3))
+            fsys_type_id[fsys_type_len - 1] = 14;
 #endif
 #ifdef MNTTYPE_MFS
-	    else if (!strcmp( mnt_type, MNTTYPE_MFS))
-			fsys_type_id[fsys_type_len-1] = 8;
+        else if (!strcmp(mnt_type, MNTTYPE_MFS))
+            fsys_type_id[fsys_type_len - 1] = 8;
 #endif
 #ifdef MNTTYPE_EXT2FS
-	    else if (!strcmp( mnt_type, MNTTYPE_EXT2FS))
-			fsys_type_id[fsys_type_len-1] = 23;
+        else if (!strcmp(mnt_type, MNTTYPE_EXT2FS))
+            fsys_type_id[fsys_type_len - 1] = 23;
 #endif
 #ifdef MNTTYPE_NTFS
-	    else if (!strcmp( mnt_type, MNTTYPE_NTFS))
-			fsys_type_id[fsys_type_len-1] = 9;
+        else if (!strcmp(mnt_type, MNTTYPE_NTFS))
+            fsys_type_id[fsys_type_len - 1] = 9;
 #endif
 #ifdef MNTTYPE_EXT2FS
-	    else if (!strcmp( mnt_type, MNTTYPE_EXT2FS))
-			fsys_type_id[fsys_type_len-1] = 23;
+        else if (!strcmp(mnt_type, MNTTYPE_EXT2FS))
+            fsys_type_id[fsys_type_len - 1] = 23;
 #endif
 #ifdef MNTTYPE_NTFS
-	    else if (!strcmp( mnt_type, MNTTYPE_NTFS))
-			fsys_type_id[fsys_type_len-1] = 9;
+        else if (!strcmp(mnt_type, MNTTYPE_NTFS))
+            fsys_type_id[fsys_type_len - 1] = 9;
 #endif
-	    else
-			fsys_type_id[fsys_type_len-1] = 1;	/* Other */
-#endif /* HAVE_GETFSSTAT */
+        else
+            fsys_type_id[fsys_type_len - 1] = 1;        /* Other */
+#endif                          /* HAVE_GETFSSTAT */
 
-            *var_len = sizeof(fsys_type_id);
-	    return (u_char *)fsys_type_id;
+        *var_len = sizeof(fsys_type_id);
+        return (u_char *) fsys_type_id;
 
-	case HRFSYS_ACCESS:
+    case HRFSYS_ACCESS:
 #if HAVE_GETFSSTAT
-	    long_return = HRFS_entry->f_flags & MNT_RDONLY ? 2 : 1;
+        long_return = HRFS_entry->f_flags & MNT_RDONLY ? 2 : 1;
 #elif defined(cygwin)
-	    long_return = 1;
+        long_return = 1;
 #else
-	    if ( hasmntopt( HRFS_entry, "ro" ) != NULL )
-	        long_return = 2;	/* Read Only */
-	    else
-	        long_return = 1;	/* Read-Write */
+        if (hasmntopt(HRFS_entry, "ro") != NULL)
+            long_return = 2;    /* Read Only */
+        else
+            long_return = 1;    /* Read-Write */
 #endif
-	    return (u_char *)&long_return;
-	case HRFSYS_BOOT:
-          if (
-		    HRFS_entry->HRFS_mount[0] == '/' &&
-		    HRFS_entry->HRFS_mount[1] == 0
-            )
-              long_return = 1;		/* root is probably bootable! */
-	    else
-		long_return = 2;		/* others probably aren't */
-	    return (u_char *)&long_return;
-	case HRFSYS_STOREIDX:
-	    long_return = fsys_idx;		/* Use the same indices */
-	    return (u_char *)&long_return;
-	case HRFSYS_FULLDUMP:
-	    return when_dumped( HRFS_entry->HRFS_name, FULL_DUMP, var_len );
-	case HRFSYS_PARTDUMP:
-	    return when_dumped( HRFS_entry->HRFS_name, PART_DUMP, var_len );
-	default:
-	    DEBUGMSGTL(("snmpd", "unknown sub-id %d in var_hrfilesys\n", vp->magic));
+        return (u_char *) & long_return;
+    case HRFSYS_BOOT:
+        if (HRFS_entry->HRFS_mount[0] == '/' &&
+            HRFS_entry->HRFS_mount[1] == 0)
+            long_return = 1;    /* root is probably bootable! */
+        else
+            long_return = 2;    /* others probably aren't */
+        return (u_char *) & long_return;
+    case HRFSYS_STOREIDX:
+        long_return = fsys_idx; /* Use the same indices */
+        return (u_char *) & long_return;
+    case HRFSYS_FULLDUMP:
+        return when_dumped(HRFS_entry->HRFS_name, FULL_DUMP, var_len);
+    case HRFSYS_PARTDUMP:
+        return when_dumped(HRFS_entry->HRFS_name, PART_DUMP, var_len);
+    default:
+        DEBUGMSGTL(("snmpd", "unknown sub-id %d in var_hrfilesys\n",
+                    vp->magic));
     }
     return NULL;
 }
 
 
-	/*********************
+        /*********************
 	 *
 	 *  Internal implementation functions
 	 *
 	 *********************/
 
-static int HRFS_index;
+static int      HRFS_index;
 #ifndef HAVE_GETFSSTAT
-static FILE *fp;
+static FILE    *fp;
 #endif
 
 void
-Init_HR_FileSys (void)
+Init_HR_FileSys(void)
 {
 #if HAVE_GETFSSTAT
     fscount = getfsstat(NULL, 0, MNT_NOWAIT);
     if (fsstats)
-      free((char *)fsstats);
+        free((char *) fsstats);
     fsstats = NULL;
-    fsstats = malloc(fscount*sizeof(*fsstats));
-    getfsstat(fsstats, fscount*sizeof(*fsstats), MNT_NOWAIT);
+    fsstats = malloc(fscount * sizeof(*fsstats));
+    getfsstat(fsstats, fscount * sizeof(*fsstats), MNT_NOWAIT);
     HRFS_index = 0;
 #else
-   HRFS_index = 1;
-   if ( fp != NULL )
-	fclose(fp);
-   fp = fopen( ETC_MNTTAB, "r");
+    HRFS_index = 1;
+    if (fp != NULL)
+        fclose(fp);
+    fp = fopen(ETC_MNTTAB, "r");
 #endif
 }
 
-const char *HRFS_ignores[] = {
+const char     *HRFS_ignores[] = {
 #ifdef MNTTYPE_IGNORE
-	MNTTYPE_IGNORE,
+    MNTTYPE_IGNORE,
 #endif
 #ifdef MNTTYPE_SWAP
-	MNTTYPE_SWAP,
+    MNTTYPE_SWAP,
 #endif
 #ifdef MNTTYPE_PROC
-	MNTTYPE_PROC,
+    MNTTYPE_PROC,
 #endif
-	"autofs",
-	0
+    "autofs",
+    0
 };
 
 int
-Get_Next_HR_FileSys (void)
+Get_Next_HR_FileSys(void)
 {
 #if HAVE_GETFSSTAT
-    if (HRFS_index >= fscount) return -1;
-    HRFS_entry = fsstats+HRFS_index;
+    if (HRFS_index >= fscount)
+        return -1;
+    HRFS_entry = fsstats + HRFS_index;
     return ++HRFS_index;
 #else
-    const char **cpp;
-		/*
-		 * XXX - According to RFC 1514, hrFSIndex must
-		 *   "remain constant at least from one re-initialization
-		 *    of the agent to the next re-initialization."
-		 *
-		 *  This simple-minded counter doesn't handle filesystems
-		 *    being un-mounted and re-mounted.
-		 *  Options for fixing this include:
-		 *       - keeping a history of previous indices used
-		 *       - calculating the index from filesystem
-		 *		specific information
-		 *
-		 *  Note: this index is also used as hrStorageIndex
-		 *     which is assumed to be less than HRS_TYPE_FS_MAX
-		 *     This assumption may well be broken if the second
-		 *     option above is followed.  Consider indexing the
-		 *     non-filesystem-based storage entries first in this
-		 *     case, and assume hrStorageIndex > HRS_TYPE_FS_MIN
-		 *     (for file-system based storage entries)
-		 *
-		 *  But at least this gets us started.
-		 */
+    const char    **cpp;
+    /*
+     * XXX - According to RFC 1514, hrFSIndex must
+     *   "remain constant at least from one re-initialization
+     *    of the agent to the next re-initialization."
+     *
+     *  This simple-minded counter doesn't handle filesystems
+     *    being un-mounted and re-mounted.
+     *  Options for fixing this include:
+     *       - keeping a history of previous indices used
+     *       - calculating the index from filesystem
+     *              specific information
+     *
+     *  Note: this index is also used as hrStorageIndex
+     *     which is assumed to be less than HRS_TYPE_FS_MAX
+     *     This assumption may well be broken if the second
+     *     option above is followed.  Consider indexing the
+     *     non-filesystem-based storage entries first in this
+     *     case, and assume hrStorageIndex > HRS_TYPE_FS_MIN
+     *     (for file-system based storage entries)
+     *
+     *  But at least this gets us started.
+     */
 
-    if ( fp == NULL )
-	return -1;
+    if (fp == NULL)
+        return -1;
 
 #ifdef solaris2
-    if (getmntent( fp, HRFS_entry) != 0)
-	return -1;
+    if (getmntent(fp, HRFS_entry) != 0)
+        return -1;
 #else
-    HRFS_entry = getmntent( fp );
-    if ( HRFS_entry == NULL )
-	return -1;
-#endif /* solaris2 */
+    HRFS_entry = getmntent(fp);
+    if (HRFS_entry == NULL)
+        return -1;
+#endif                          /* solaris2 */
 
-    for ( cpp = HRFS_ignores ; *cpp != NULL ; ++cpp )
-	if ( !strcmp( HRFS_entry->HRFS_type, *cpp ))
-	    return Get_Next_HR_FileSys();
+    for (cpp = HRFS_ignores; *cpp != NULL; ++cpp)
+        if (!strcmp(HRFS_entry->HRFS_type, *cpp))
+            return Get_Next_HR_FileSys();
 
     return HRFS_index++;
-#endif /* HAVE_GETFSSTAT */
+#endif                          /* HAVE_GETFSSTAT */
 }
 
 void
-End_HR_FileSys (void)
+End_HR_FileSys(void)
 {
 #ifdef HAVE_GETFSSTAT
     if (fsstats)
-      free((char *)fsstats);
+        free((char *) fsstats);
     fsstats = NULL;
 #else
-    if ( fp != NULL )
-	fclose(fp);
+    if (fp != NULL)
+        fclose(fp);
     fp = NULL;
 #endif
 }
 
 
-static u_char *
-when_dumped(char *filesys, 
-	    int level, 
-	    size_t *length)
+static u_char  *
+when_dumped(char *filesys, int level, size_t * length)
 {
-    time_t dumpdate = 0, tmp;
-    FILE *dump_fp;
-    char line[100];
-    char *cp1, *cp2, *cp3;
+    time_t          dumpdate = 0, tmp;
+    FILE           *dump_fp;
+    char            line[100];
+    char           *cp1, *cp2, *cp3;
 
-		/*
-		 * Look for the relevent entries in /etc/dumpdates
-		 *
-		 * This is complicated by the fact that disks are
-		 *   mounted using block devices, but dumps are
-		 *   done via the raw character devices.
-		 * Thus the device names in /etc/dumpdates and
-		 *   /etc/mnttab don't match.
-		 *   These comparisons are therefore made using the
-		 *   final portion of the device name only.
-		 */
+    /*
+     * Look for the relevent entries in /etc/dumpdates
+     *
+     * This is complicated by the fact that disks are
+     *   mounted using block devices, but dumps are
+     *   done via the raw character devices.
+     * Thus the device names in /etc/dumpdates and
+     *   /etc/mnttab don't match.
+     *   These comparisons are therefore made using the
+     *   final portion of the device name only.
+     */
 
-    if ( *filesys == '\0' )		/* No filesystem name? */
-	return date_n_time (NULL, length);
-    cp1=strrchr( filesys, '/' );	/* Find the last element of the current FS */
+    if (*filesys == '\0')       /* No filesystem name? */
+        return date_n_time(NULL, length);
+    cp1 = strrchr(filesys, '/');        /* Find the last element of the current FS */
 
-    if ( cp1 == NULL )
+    if (cp1 == NULL)
         cp1 = filesys;
-    
-    if ((dump_fp = fopen("/etc/dumpdates", "r")) == NULL )
-	return date_n_time (NULL, length);
 
-    while ( fgets( line, sizeof(line), dump_fp ) != NULL ) {
-        cp2=strchr( line, ' ' );	/* Start by looking at the device name only */
-	if ( cp2!=NULL ) {
-	    *cp2 = '\0';
-	    cp3=strrchr( line, '/' );  /* and find the last element */
-            if ( cp3 == NULL )
+    if ((dump_fp = fopen("/etc/dumpdates", "r")) == NULL)
+        return date_n_time(NULL, length);
+
+    while (fgets(line, sizeof(line), dump_fp) != NULL) {
+        cp2 = strchr(line, ' ');        /* Start by looking at the device name only */
+        if (cp2 != NULL) {
+            *cp2 = '\0';
+            cp3 = strrchr(line, '/');   /* and find the last element */
+            if (cp3 == NULL)
                 cp3 = line;
 
-	    if ( strcmp( cp1, cp3 ) != 0 )	/* Wrong FS */
-		continue;
+            if (strcmp(cp1, cp3) != 0)  /* Wrong FS */
+                continue;
 
-	    ++cp2;
-	    while (isspace(*cp2))
-		++cp2;			/* Now find the dump level */
+            ++cp2;
+            while (isspace(*cp2))
+                ++cp2;          /* Now find the dump level */
 
-	    if ( level == FULL_DUMP ) {
-		if ( *(cp2++) != '0' )
-		    continue;		/* Not interested in partial dumps */
-		while (isspace(*cp2))
-		    ++cp2;
+            if (level == FULL_DUMP) {
+                if (*(cp2++) != '0')
+                    continue;   /* Not interested in partial dumps */
+                while (isspace(*cp2))
+                    ++cp2;
 
-		dumpdate = ctime_to_timet( cp2 );
-		fclose( dump_fp );
-		return date_n_time (&dumpdate, length);
-	    }
-	    else {	/* Partial Dump */
-		if ( *(cp2++) == '0' )
-		    continue;		/* Not interested in full dumps */
-		while (isspace(*cp2))
-		    ++cp2;
+                dumpdate = ctime_to_timet(cp2);
+                fclose(dump_fp);
+                return date_n_time(&dumpdate, length);
+            } else {            /* Partial Dump */
+                if (*(cp2++) == '0')
+                    continue;   /* Not interested in full dumps */
+                while (isspace(*cp2))
+                    ++cp2;
 
-		tmp = ctime_to_timet( cp2 );
-		if ( tmp > dumpdate )
-		    dumpdate=tmp;	/* Remember the 'latest' partial dump */
-	    }
-	}
+                tmp = ctime_to_timet(cp2);
+                if (tmp > dumpdate)
+                    dumpdate = tmp;     /* Remember the 'latest' partial dump */
+            }
+        }
     }
 
     fclose(dump_fp);
 
-    return date_n_time (&dumpdate, length);
+    return date_n_time(&dumpdate, length);
 }
 
 
 #define RAW_DEVICE_PREFIX	"/dev/rdsk"
 #define COOKED_DEVICE_PREFIX	"/dev/dsk"
 
-char *
+char           *
 cook_device(char *dev)
 {
-    static char cooked_dev[MAXPATHLEN];
+    static char     cooked_dev[MAXPATHLEN];
 
-    if ( !strncmp( dev, RAW_DEVICE_PREFIX, strlen(RAW_DEVICE_PREFIX))) {
-	strcpy( cooked_dev, COOKED_DEVICE_PREFIX );
-	strcat( cooked_dev, dev+strlen(RAW_DEVICE_PREFIX) );
-    }
-    else
-	strcpy( cooked_dev, dev );
+    if (!strncmp(dev, RAW_DEVICE_PREFIX, strlen(RAW_DEVICE_PREFIX))) {
+        strcpy(cooked_dev, COOKED_DEVICE_PREFIX);
+        strcat(cooked_dev, dev + strlen(RAW_DEVICE_PREFIX));
+    } else
+        strcpy(cooked_dev, dev);
 
-    return( cooked_dev );
+    return (cooked_dev);
 }
 
 
 int
 Get_FSIndex(char *dev)
 {
-    int iindex;
+    int             iindex;
 
     Init_HR_FileSys();
 
-    while ((iindex=Get_Next_HR_FileSys()) != -1 )
-	if (!strcmp( HRFS_entry->HRFS_name,  cook_device(dev)))
-	{
-	    End_HR_FileSys();
-	    return iindex;
-	}
+    while ((iindex = Get_Next_HR_FileSys()) != -1)
+        if (!strcmp(HRFS_entry->HRFS_name, cook_device(dev))) {
+            End_HR_FileSys();
+            return iindex;
+        }
 
     End_HR_FileSys();
     return 0;
@@ -658,16 +693,15 @@ Get_FSSize(char *dev)
 
     Init_HR_FileSys();
 
-    while (Get_Next_HR_FileSys() != -1 )
-	if (!strcmp( HRFS_entry->HRFS_name,  cook_device(dev)))
-	{
-	    End_HR_FileSys();
+    while (Get_Next_HR_FileSys() != -1)
+        if (!strcmp(HRFS_entry->HRFS_name, cook_device(dev))) {
+            End_HR_FileSys();
 
-	    if (HRFS_statfs( HRFS_entry->HRFS_mount, &statfs_buf) != -1 )
-	        return (statfs_buf.f_blocks*statfs_buf.f_bsize)/1024;
-	    else
-		return -1;
-	}
+            if (HRFS_statfs(HRFS_entry->HRFS_mount, &statfs_buf) != -1)
+                return (statfs_buf.f_blocks * statfs_buf.f_bsize) / 1024;
+            else
+                return -1;
+        }
 
     End_HR_FileSys();
     return 0;

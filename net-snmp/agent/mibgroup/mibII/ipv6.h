@@ -7,27 +7,25 @@
 #define _MIBGROUP_IPV6_H
 
 #ifdef linux
-struct ip6_mib{
-	unsigned long	Ipv6DefaultHopLimit;
-	unsigned long	Ipv6Forwarding;
+struct ip6_mib {
+    unsigned long   Ipv6DefaultHopLimit;
+    unsigned long   Ipv6Forwarding;
 };
 #endif
 
 config_require(mibII/interfaces mibII/at mibII/var_route mibII/route_write)
 config_add_mib(IPV6-ICMP-MIB:IPV6-MIB:IPV6-TCP-MIB:IPV6-UDP-MIB)
 config_arch_require(solaris2, kernel_sunos5)
-
 #include "var_route.h"
 #include "route_write.h"
-
-extern void	init_ipv6 (void);
+extern void     init_ipv6(void);
 extern FindVarMethod var_ipv6;
 extern FindVarMethod var_ifv6Entry;
 extern FindVarMethod var_icmpv6Entry;
 extern FindVarMethod var_udp6;
 extern FindVarMethod var_tcp6;
 
-#include "at.h"		/* for var_atEntry() */
+#include "at.h"                 /* for var_atEntry() */
 
 #define IPV6FORWARDING		1
 #define IPV6DEFAULTHOPLIMIT	2
@@ -143,4 +141,4 @@ extern FindVarMethod var_tcp6;
 #define IPV6TCPIFINDEX		5
 #define IPV6TCPCONNSTATE	6
 
-#endif /* _MIBGROUP_IPV6_H */
+#endif                          /* _MIBGROUP_IPV6_H */

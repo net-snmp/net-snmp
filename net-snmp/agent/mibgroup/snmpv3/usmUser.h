@@ -1,4 +1,4 @@
-/* 
+/*
  * usmUser.h
  *
  */
@@ -8,17 +8,22 @@
 
 #include <net-snmp/library/snmpusm.h>
 
-/* <...prefix>.<engineID_length>.<engineID>.<user_name_length>.<user_name>
-   = 1 + 32 + 1 + 32 */
+/*
+ * <...prefix>.<engineID_length>.<engineID>.<user_name_length>.<user_name>
+ * = 1 + 32 + 1 + 32 
+ */
 #define USM_LENGTH_OID_MAX	66
 
-/* we use header_generic and checkmib from the util_funcs module */
+/*
+ * we use header_generic and checkmib from the util_funcs module 
+ */
 
 config_require(util_funcs)
 config_add_mib(SNMP-USER-BASED-SM-MIB)
 
-/* Magic number definitions: */
-
+    /*
+     * Magic number definitions: 
+     */
 #define   USMUSERSPINLOCK       1
 #define   USMUSERSECURITYNAME   2
 #define   USMUSERCLONEFROM      3
@@ -31,28 +36,31 @@ config_add_mib(SNMP-USER-BASED-SM-MIB)
 #define   USMUSERPUBLIC         10
 #define   USMUSERSTORAGETYPE    11
 #define   USMUSERSTATUS         12
+    /*
+     * function definitions 
+     */
+     extern void     init_usmUser(void);
+     extern FindVarMethod var_usmUser;
 
-/* function definitions */
+     void            shutdown_usmUser(void);
+     int             store_usmUser(int majorID, int minorID,
+                                   void *serverarg, void *clientarg);
+     oid            *usm_generate_OID(oid * prefix, size_t prefixLen,
+                                      struct usmUser *uptr,
+                                      size_t * length);
+     int             usm_parse_oid(oid * oidIndex, size_t oidLen,
+                                   unsigned char **engineID,
+                                   size_t * engineIDLen,
+                                   unsigned char **name, size_t * nameLen);
 
-extern void   init_usmUser(void);
-extern FindVarMethod var_usmUser;
+     WriteMethod     write_usmUserSpinLock;
+     WriteMethod     write_usmUserCloneFrom;
+     WriteMethod     write_usmUserAuthProtocol;
+     WriteMethod     write_usmUserAuthKeyChange;
+     WriteMethod     write_usmUserPrivProtocol;
+     WriteMethod     write_usmUserPrivKeyChange;
+     WriteMethod     write_usmUserPublic;
+     WriteMethod     write_usmUserStorageType;
+     WriteMethod     write_usmUserStatus;
 
-void shutdown_usmUser(void);
-int store_usmUser(int majorID, int minorID, void *serverarg, void *clientarg);
-oid *usm_generate_OID(oid *prefix, size_t prefixLen, struct usmUser *uptr,
-                  size_t *length);
-int usm_parse_oid(oid *oidIndex, size_t oidLen,
-              unsigned char **engineID, size_t *engineIDLen,
-              unsigned char **name, size_t *nameLen);
-
-WriteMethod write_usmUserSpinLock;
-WriteMethod write_usmUserCloneFrom;
-WriteMethod write_usmUserAuthProtocol;
-WriteMethod write_usmUserAuthKeyChange;
-WriteMethod write_usmUserPrivProtocol;
-WriteMethod write_usmUserPrivKeyChange;
-WriteMethod write_usmUserPublic;
-WriteMethod write_usmUserStorageType;
-WriteMethod write_usmUserStatus;
-
-#endif /* _MIBGROUP_USMUSER_H */
+#endif                          /* _MIBGROUP_USMUSER_H */

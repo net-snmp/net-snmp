@@ -7,6 +7,6 @@
 
 #include "mibdefs.h"
 
-void init_vmstat_freebsd2(void);
+void            init_vmstat_freebsd2(void);
 
-#endif /* _MIBGROUP_VMSTAT_FREEBSD2_H */
+#endif                          /* _MIBGROUP_VMSTAT_FREEBSD2_H */

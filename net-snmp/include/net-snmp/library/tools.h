@@ -6,14 +6,14 @@
 #define _TOOLS_H
 
 #ifdef __cplusplus
-extern "C" {
+extern          "C" {
 #endif
 
 
 
-/* 
- * General acros and constants.
- */
+    /*
+     * General acros and constants.
+     */
 #ifdef WIN32
 #  define SNMP_MAXPATH MAX_PATH
 #else
@@ -42,7 +42,9 @@ extern "C" {
 
 #define SNMP_FREE(s)		if (s) { free((void *)s); s=NULL; }
 
-					/* XXX Not optimal everywhere. */
+    /*
+     * XXX Not optimal everywhere. 
+     */
 #define SNMP_MALLOC_STRUCT(s)   (struct s *) calloc(1, sizeof(struct s))
 #define SNMP_MALLOC_TYPEDEF(td)  (td *) calloc(1, sizeof(td))
 #define SNMP_ZERO(s,l)		if (s) memset(s, 0, l);
@@ -66,28 +68,28 @@ extern "C" {
 #define TRUE  1
 #endif
 
-/*
- * QUIT the FUNction:
- *	e	Error code variable
- *	l	Label to goto to cleanup and get out of the function.
- *
- * XXX	It would be nice if the label could be constructed by the
- *	preprocessor in context.  Limited to a single error return value.
- *	Temporary hack at best.
- */
+    /*
+     * QUIT the FUNction:
+     *      e       Error code variable
+     *      l       Label to goto to cleanup and get out of the function.
+     *
+     * XXX  It would be nice if the label could be constructed by the
+     *      preprocessor in context.  Limited to a single error return value.
+     *      Temporary hack at best.
+     */
 #define QUITFUN(e, l)			\
 	if ( (e) != SNMPERR_SUCCESS) {	\
 		rval = SNMPERR_GENERR;	\
 		goto l ;		\
 	}
 
-/*
- * DIFFTIMEVAL
- *	Set <diff> to the difference between <now> (current) and <then> (past).
- *
- * ASSUMES that all inputs are (struct timeval)'s.
- * Cf. system.c:calculate_time_diff().
- */
+    /*
+     * DIFFTIMEVAL
+     *      Set <diff> to the difference between <now> (current) and <then> (past).
+     *
+     * ASSUMES that all inputs are (struct timeval)'s.
+     * Cf. system.c:calculate_time_diff().
+     */
 #define DIFFTIMEVAL(now, then, diff) 			\
 {							\
 	now.tv_sec--;					\
@@ -101,62 +103,69 @@ extern "C" {
 }
 
 
-/*
- * ISTRANSFORM
- * ASSUMES the minimum length for ttype and toid.
- */
+    /*
+     * ISTRANSFORM
+     * ASSUMES the minimum length for ttype and toid.
+     */
 #define USM_LENGTH_OID_TRANSFORM	10
 
 #define ISTRANSFORM(ttype, toid)					\
 	!snmp_oid_compare(ttype, USM_LENGTH_OID_TRANSFORM,		\
 		usm ## toid ## Protocol, USM_LENGTH_OID_TRANSFORM)
 
-#define ENGINETIME_MAX	2147483647	/* ((2^31)-1) */
-#define ENGINEBOOT_MAX	2147483647	/* ((2^31)-1) */
+#define ENGINETIME_MAX	2147483647      /* ((2^31)-1) */
+#define ENGINEBOOT_MAX	2147483647      /* ((2^31)-1) */
 
 
 
 
-/* 
- * Prototypes.
- */
+    /*
+     * Prototypes.
+     */
 
-int	snmp_realloc(u_char **buf, size_t *buf_len);
+    int             snmp_realloc(u_char ** buf, size_t * buf_len);
 
-void	free_zero (void *buf, size_t size);
+    void            free_zero(void *buf, size_t size);
 
-u_char *malloc_random (size_t *size);
-u_char *malloc_zero (size_t size);
-int     memdup (u_char **to, const u_char *from, size_t size);
+    u_char         *malloc_random(size_t * size);
+    u_char         *malloc_zero(size_t size);
+    int             memdup(u_char ** to, const u_char * from, size_t size);
 
-u_int	binary_to_hex (const u_char *input, size_t len, char **output);
-int	hex_to_binary2 (const u_char *input, size_t len, char **output);
+    u_int           binary_to_hex(const u_char * input, size_t len,
+                                  char **output);
+    int             hex_to_binary2(const u_char * input, size_t len,
+                                   char **output);
 
-int snmp_decimal_to_binary (u_char **buf, size_t *buf_len, size_t *out_len,
-			    int allow_realloc, const char *decimal);
-int snmp_hex_to_binary	   (u_char **buf, size_t *buf_len, size_t *out_len,
-			    int allow_realloc, const char *hex);
-int snmp_strcat		   (u_char **buf, size_t *buf_len, size_t *out_len,
-			    int allow_realloc, const u_char *s);
-char *netsnmp_strdup_and_null(u_char *from, size_t from_len) ;
+    int             snmp_decimal_to_binary(u_char ** buf, size_t * buf_len,
+                                           size_t * out_len,
+                                           int allow_realloc,
+                                           const char *decimal);
+    int             snmp_hex_to_binary(u_char ** buf, size_t * buf_len,
+                                       size_t * out_len, int allow_realloc,
+                                       const char *hex);
+    int             snmp_strcat(u_char ** buf, size_t * buf_len,
+                                size_t * out_len, int allow_realloc,
+                                const u_char * s);
+    char           *netsnmp_strdup_and_null(u_char * from,
+                                            size_t from_len);
 
-void	dump_chunk (const char *debugtoken, const char *title, const u_char *buf, int size);
-char   *dump_snmpEngineID (const u_char *buf, size_t *buflen);
+    void            dump_chunk(const char *debugtoken, const char *title,
+                               const u_char * buf, int size);
+    char           *dump_snmpEngineID(const u_char * buf, size_t * buflen);
 
-typedef void * marker_t;
-marker_t atime_newMarker(void);
-void atime_setMarker(marker_t pm);
-long atime_diff( marker_t first, marker_t second );
-u_long uatime_diff( marker_t first, marker_t second ); /* 1/1000th sec */
-u_long uatime_hdiff( marker_t first, marker_t second ); /* 1/100th sec */
-int atime_ready( marker_t pm, int deltaT);
-int uatime_ready( marker_t pm, unsigned int deltaT);
+    typedef void   *marker_t;
+    marker_t        atime_newMarker(void);
+    void            atime_setMarker(marker_t pm);
+    long            atime_diff(marker_t first, marker_t second);
+    u_long          uatime_diff(marker_t first, marker_t second);       /* 1/1000th sec */
+    u_long          uatime_hdiff(marker_t first, marker_t second);      /* 1/100th sec */
+    int             atime_ready(marker_t pm, int deltaT);
+    int             uatime_ready(marker_t pm, unsigned int deltaT);
 
-int marker_tticks( marker_t pm );
-int timeval_tticks( struct timeval *tv );
+    int             marker_tticks(marker_t pm);
+    int             timeval_tticks(struct timeval *tv);
 
 #ifdef __cplusplus
 }
 #endif
-
-#endif /* _TOOLS_H */
+#endif                          /* _TOOLS_H */

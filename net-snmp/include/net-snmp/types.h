@@ -5,7 +5,9 @@
      *  Definitions of data structures, used within the library API.
      */
 
-			/* For 'timeval' */
+                        /*
+                         * For 'timeval' 
+                         */
 #if TIME_WITH_SYS_TIME
 # ifdef WIN32
 #  include <sys/timeb.h>
@@ -26,12 +28,12 @@
 #include <winsock.h>
 #endif
 
-#ifndef MAX_SUBID	/* temporary - duplicate definition protection */
+#ifndef MAX_SUBID               /* temporary - duplicate definition protection */
 #ifndef EIGHTBIT_SUBIDS
-typedef u_long	oid;
+typedef u_long  oid;
 #define MAX_SUBID   0xFFFFFFFF
 #else
-typedef u_char	oid;
+typedef u_char  oid;
 #define MAX_SUBID   0xFF
 #endif
 #endif
@@ -49,6 +51,8 @@ typedef u_char	oid;
 
 #include <net-snmp/definitions.h>
 #include <net-snmp/library/snmp_api.h>
-/* #include <net-snmp/library/libsnmp.h> */
+/*
+ * #include <net-snmp/library/libsnmp.h> 
+ */
 
-#endif /* NET_SNMP_TYPES_H */
+#endif                          /* NET_SNMP_TYPES_H */

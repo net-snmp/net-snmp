@@ -10,10 +10,10 @@
  */
 void            init_nsModuleTable(void);
 void            initialize_table_nsModuleTable(void);
-Netsnmp_Node_Handler     nsModuleTable_handler;
+Netsnmp_Node_Handler nsModuleTable_handler;
 
-Netsnmp_First_Data_Point  nsModuleTable_get_first_data_point;
-Netsnmp_Next_Data_Point   nsModuleTable_get_next_data_point;
+Netsnmp_First_Data_Point nsModuleTable_get_first_data_point;
+Netsnmp_Next_Data_Point nsModuleTable_get_next_data_point;
 
 /*
  * column number definitions for table nsModuleTable 

@@ -20,9 +20,10 @@
 #include <dmalloc.h>
 #endif
 
-static void table_helper_cleanup(netsnmp_agent_request_info * reqinfo,
-                                 netsnmp_request_info * request, int status);
-static void table_data_free_func(void *data);
+static void     table_helper_cleanup(netsnmp_agent_request_info *reqinfo,
+                                     netsnmp_request_info *request,
+                                     int status);
+static void     table_data_free_func(void *data);
 
 /** @defgroup table table: Helps you implement a table.
  *  @ingroup handler
@@ -52,10 +53,10 @@ static void table_data_free_func(void *data);
  *  chain.  When the handler gets called, it'll do processing and
  *  store it's information into the request->parent_data structure.
  */
-netsnmp_mib_handler    *
-netsnmp_get_table_handler(netsnmp_table_registration_info * tabreq)
+netsnmp_mib_handler *
+netsnmp_get_table_handler(netsnmp_table_registration_info *tabreq)
 {
-    netsnmp_mib_handler    *ret = NULL;
+    netsnmp_mib_handler *ret = NULL;
 
     if (!tabreq) {
         snmp_log(LOG_INFO, "netsnmp_get_table_handler(NULL) called\n");
@@ -76,8 +77,8 @@ netsnmp_get_table_handler(netsnmp_table_registration_info * tabreq)
  *  netsnmp_register_handler() to register the table into the agent.
  */
 int
-netsnmp_register_table(netsnmp_handler_registration * reginfo,
-               netsnmp_table_registration_info * tabreq)
+netsnmp_register_table(netsnmp_handler_registration *reginfo,
+                       netsnmp_table_registration_info *tabreq)
 {
     netsnmp_inject_handler(reginfo, netsnmp_get_table_handler(tabreq));
     return netsnmp_register_handler(reginfo);
@@ -89,7 +90,7 @@ netsnmp_register_table(netsnmp_handler_registration * reginfo,
  *  index values and the column number.
  */
 inline netsnmp_table_request_info *
-netsnmp_extract_table_info(netsnmp_request_info * request)
+netsnmp_extract_table_info(netsnmp_request_info *request)
 {
     return (netsnmp_table_request_info *)
         netsnmp_request_get_list_data(request, TABLE_HANDLER_NAME);
@@ -98,7 +99,7 @@ netsnmp_extract_table_info(netsnmp_request_info * request)
 /** extracts the registered netsnmp_table_registration_info object from a
  *  netsnmp_handler_registration object */
 netsnmp_table_registration_info *
-netsnmp_find_table_registration_info(netsnmp_handler_registration * reginfo)
+netsnmp_find_table_registration_info(netsnmp_handler_registration *reginfo)
 {
     return (netsnmp_table_registration_info *)
         netsnmp_find_handler_data_by_name(reginfo, TABLE_HANDLER_NAME);
@@ -106,12 +107,13 @@ netsnmp_find_table_registration_info(netsnmp_handler_registration * reginfo)
 
 /** implements the table helper handler */
 int
-table_helper_handler(netsnmp_mib_handler * handler,
-                     netsnmp_handler_registration * reginfo,
-                     netsnmp_agent_request_info * reqinfo, netsnmp_request_info * requests)
+table_helper_handler(netsnmp_mib_handler *handler,
+                     netsnmp_handler_registration *reginfo,
+                     netsnmp_agent_request_info *reqinfo,
+                     netsnmp_request_info *requests)
 {
 
-    netsnmp_request_info   *request;
+    netsnmp_request_info *request;
 
     netsnmp_table_registration_info *tbl_info;
     int             oid_index_pos = reginfo->rootoid_len + 2;
@@ -147,9 +149,10 @@ table_helper_handler(netsnmp_mib_handler * handler,
      * at a time... those handlers should not save data by their handler_name
      * in the netsnmp_agent_request_info. 
      */
-    if (netsnmp_agent_get_list_data(reqinfo,handler->next->handler_name)) {
+    if (netsnmp_agent_get_list_data(reqinfo, handler->next->handler_name)) {
         if (MODE_IS_SET(reqinfo->mode)) {
-            return netsnmp_call_next_handler(handler, reginfo, reqinfo, requests);
+            return netsnmp_call_next_handler(handler, reginfo, reqinfo,
+                                             requests);
         } else {
 #ifndef WIN32
 #pragma warning "XXX-rks: memory leak. add cleanup handler?"
@@ -179,10 +182,13 @@ table_helper_handler(netsnmp_mib_handler * handler,
          * this should probably be handled further up 
          */
         if ((reqinfo->mode == MODE_GET) && (var->type != ASN_NULL)) {
-          /* valid request if ASN_NULL */
+            /*
+             * valid request if ASN_NULL 
+             */
             DEBUGMSGTL(("helper:table",
                         "  GET var type is not ASN_NULL\n"));
-            netsnmp_set_request_error(reqinfo, request, SNMP_ERR_WRONGTYPE);
+            netsnmp_set_request_error(reqinfo, request,
+                                      SNMP_ERR_WRONGTYPE);
             continue;
         }
 
@@ -256,25 +262,25 @@ table_helper_handler(netsnmp_mib_handler * handler,
         tbl_req_info->indexes = snmp_clone_varbind(tbl_info->indexes);
         tbl_req_info->number_indexes = 0;       /* none yet */
         netsnmp_request_add_list_data(request,
-                                      netsnmp_create_data_list(TABLE_HANDLER_NAME,
-                                                               (void *) tbl_req_info,
-                                                               table_data_free_func));
+                                      netsnmp_create_data_list
+                                      (TABLE_HANDLER_NAME,
+                                       (void *) tbl_req_info,
+                                       table_data_free_func));
 
         if (var->name_length > oid_column_pos) {
             if (var->name[oid_column_pos] < tbl_info->min_column) {
-                if(reqinfo->mode == MODE_GETNEXT) {
+                if (reqinfo->mode == MODE_GETNEXT) {
                     /*
                      * fix column, truncate useless index info 
                      */
                     var->name_length = oid_column_pos;
                     tbl_req_info->colnum = tbl_info->min_column;
-                }
-                else
+                } else
                     out_of_range = 1;
             } else if (var->name[oid_column_pos] > tbl_info->max_column)
                 out_of_range = 1;
 
-            if(out_of_range) {
+            if (out_of_range) {
                 /*
                  * this is out of range...  remove from requests, free
                  * memory 
@@ -296,7 +302,7 @@ table_helper_handler(netsnmp_mib_handler * handler,
             else if (tbl_info->valid_columns) {
                 tbl_req_info->colnum =
                     netsnmp_closest_column(var->name[oid_column_pos],
-                                   tbl_info->valid_columns);
+                                           tbl_info->valid_columns);
                 if (tbl_req_info->colnum == 0)
                     continue;
                 if (tbl_req_info->colnum != var->name[oid_column_pos]) {
@@ -356,8 +362,8 @@ table_helper_handler(netsnmp_mib_handler * handler,
                  */
                 if (reqinfo->mode != MODE_GETNEXT) {
                     table_helper_cleanup(reqinfo, requests,
-					 SNMP_ERR_NOSUCHNAME);
-		    cleaned_up = 1;
+                                         SNMP_ERR_NOSUCHNAME);
+                    cleaned_up = 1;
                 }
                 tmp_len = 0;
                 tmp_name = (oid *) & tmp_len;
@@ -387,38 +393,39 @@ table_helper_handler(netsnmp_mib_handler * handler,
         }                       /** for loop */
 
         DEBUGIF("helper:table") {
-	  if (!cleaned_up) {
-	    unsigned int    count;
-	    u_char *buf = NULL;
-	    size_t buf_len = 0, out_len = 0;
-	    DEBUGMSGTL(("helper:table", "  column: %d, indexes: %d",
-			tbl_req_info->colnum, tbl_req_info->number_indexes));
-	    for (vb = tbl_req_info->indexes, count = 0;
-		 vb && count < tbl_info->number_indexes;
-		 count++, vb = vb->next_variable) {
-	      out_len = 0;
-	      if (sprint_realloc_by_type(&buf, &buf_len, &out_len, 1,
-					 vb, 0, 0, 0)) {
-		DEBUGMSG(("helper:table",
-			  "   index: type=%d(%02x), value=%s",
-			  vb->type, vb->type, buf));
-	      } else {
-		if (buf != NULL) {
-		  DEBUGMSG(("helper:table",
-			    "   index: type=%d(%02x), value=%s [TRUNCATED]",
-			    vb->type, vb->type, buf));
-		} else {
-		  DEBUGMSG(("helper:table",
-			    "   index: type=%d(%02x), value=[NIL] [TRUNCATED]",
-			    vb->type, vb->type));
-		}
-	      }
-	    }
-	    if (buf != NULL) {
-	      free(buf);
-	    }
-	    DEBUGMSG(("helper:table", "\n"));
-	  }
+            if (!cleaned_up) {
+                unsigned int    count;
+                u_char         *buf = NULL;
+                size_t          buf_len = 0, out_len = 0;
+                DEBUGMSGTL(("helper:table", "  column: %d, indexes: %d",
+                            tbl_req_info->colnum,
+                            tbl_req_info->number_indexes));
+                for (vb = tbl_req_info->indexes, count = 0;
+                     vb && count < tbl_info->number_indexes;
+                     count++, vb = vb->next_variable) {
+                    out_len = 0;
+                    if (sprint_realloc_by_type(&buf, &buf_len, &out_len, 1,
+                                               vb, 0, 0, 0)) {
+                        DEBUGMSG(("helper:table",
+                                  "   index: type=%d(%02x), value=%s",
+                                  vb->type, vb->type, buf));
+                    } else {
+                        if (buf != NULL) {
+                            DEBUGMSG(("helper:table",
+                                      "   index: type=%d(%02x), value=%s [TRUNCATED]",
+                                      vb->type, vb->type, buf));
+                        } else {
+                            DEBUGMSG(("helper:table",
+                                      "   index: type=%d(%02x), value=[NIL] [TRUNCATED]",
+                                      vb->type, vb->type));
+                        }
+                    }
+                }
+                if (buf != NULL) {
+                    free(buf);
+                }
+                DEBUGMSG(("helper:table", "\n"));
+            }
         }
 
 
@@ -441,7 +448,8 @@ table_helper_handler(netsnmp_mib_handler * handler,
      * * call our child access function 
      */
     if (need_processing)
-        status = netsnmp_call_next_handler(handler, reginfo, reqinfo, requests);
+        status =
+            netsnmp_call_next_handler(handler, reginfo, reqinfo, requests);
 
     return status;
 }
@@ -453,10 +461,10 @@ table_helper_handler(netsnmp_mib_handler * handler,
  *  returning varbind.
  */
 int
-netsnmp_table_build_result(netsnmp_handler_registration * reginfo,
-                   netsnmp_request_info * reqinfo,
-                   netsnmp_table_request_info * table_info, u_char type,
-                   u_char * result, size_t result_len)
+netsnmp_table_build_result(netsnmp_handler_registration *reginfo,
+                           netsnmp_request_info *reqinfo,
+                           netsnmp_table_request_info *table_info,
+                           u_char type, u_char * result, size_t result_len)
 {
 
     netsnmp_variable_list *var;
@@ -470,7 +478,8 @@ netsnmp_table_build_result(netsnmp_handler_registration * reginfo,
         free(var->name);
     var->name = NULL;
 
-    if (netsnmp_table_build_oid(reginfo, reqinfo, table_info) != SNMPERR_SUCCESS)
+    if (netsnmp_table_build_oid(reginfo, reqinfo, table_info) !=
+        SNMPERR_SUCCESS)
         return SNMPERR_GENERR;
 
     snmp_set_var_typed_value(var, type, result, result_len);
@@ -478,15 +487,16 @@ netsnmp_table_build_result(netsnmp_handler_registration * reginfo,
     return SNMPERR_SUCCESS;
 }
 
-  
+
 /** given a registration info object, a request object and the table
  *  info object it builds the request->requestvb->name oid from the
  *  index values and column information found in the table_info
  *  object.
  */
 int
-netsnmp_table_build_oid(netsnmp_handler_registration * reginfo,
-                netsnmp_request_info * reqinfo, netsnmp_table_request_info * table_info)
+netsnmp_table_build_oid(netsnmp_handler_registration *reginfo,
+                        netsnmp_request_info *reqinfo,
+                        netsnmp_table_request_info *table_info)
 {
     oid             tmpoid[MAX_OID_LEN];
     netsnmp_variable_list *var;
@@ -510,9 +520,9 @@ netsnmp_table_build_oid(netsnmp_handler_registration * reginfo,
 /** Builds an oid from index information.
  */
 int
-netsnmp_table_build_oid_from_index(netsnmp_handler_registration * reginfo,
-                           netsnmp_request_info * reqinfo,
-                           netsnmp_table_request_info * table_info)
+netsnmp_table_build_oid_from_index(netsnmp_handler_registration *reginfo,
+                                   netsnmp_request_info *reqinfo,
+                                   netsnmp_table_request_info *table_info)
 {
     oid             tmpoid[MAX_OID_LEN];
     netsnmp_variable_list *var;
@@ -537,7 +547,7 @@ netsnmp_table_build_oid_from_index(netsnmp_handler_registration * reginfo,
 
 /** parses an OID into table indexses */
 int
-netsnmp_update_variable_list_from_index(netsnmp_table_request_info * tri)
+netsnmp_update_variable_list_from_index(netsnmp_table_request_info *tri)
 {
     return parse_oid_indexes(tri->index_oid, tri->index_oid_len,
                              tri->indexes);
@@ -545,7 +555,7 @@ netsnmp_update_variable_list_from_index(netsnmp_table_request_info * tri)
 
 /** builds an oid given a set of indexes. */
 int
-netsnmp_update_indexes_from_variable_list(netsnmp_table_request_info * tri)
+netsnmp_update_indexes_from_variable_list(netsnmp_table_request_info *tri)
 {
     return build_oid_noalloc(tri->index_oid, sizeof(tri->index_oid),
                              &tri->index_oid_len, NULL, 0, tri->indexes);
@@ -560,11 +570,11 @@ netsnmp_update_indexes_from_variable_list(netsnmp_table_request_info * tri)
  * returns 0 if not. 
  */
 int
-netsnmp_check_getnext_reply(netsnmp_request_info * request,
-                    oid * prefix,
-                    size_t prefix_len,
-                    netsnmp_variable_list *newvar,
-                    netsnmp_variable_list **outvar)
+netsnmp_check_getnext_reply(netsnmp_request_info *request,
+                            oid * prefix,
+                            size_t prefix_len,
+                            netsnmp_variable_list * newvar,
+                            netsnmp_variable_list ** outvar)
 {
     static oid      myname[MAX_OID_LEN];
     static int      myname_len;
@@ -577,8 +587,8 @@ netsnmp_check_getnext_reply(netsnmp_request_info * request,
     if ((!(*outvar) || snmp_oid_compare(myname + prefix_len,
                                         myname_len - prefix_len,
                                         (*outvar)->name + prefix_len,
-                                        (*outvar)->name_length - prefix_len) <
-         0)) {
+                                        (*outvar)->name_length -
+                                        prefix_len) < 0)) {
         /*
          * and greater than the requested oid 
          */
@@ -600,7 +610,9 @@ netsnmp_check_getnext_reply(netsnmp_request_info * request,
 
 /** @} */
 
-/* internal routines */
+/*
+ * internal routines 
+ */
 void
 table_data_free_func(void *data)
 {
@@ -614,8 +626,8 @@ table_data_free_func(void *data)
 
 
 static void
-table_helper_cleanup(netsnmp_agent_request_info * reqinfo, netsnmp_request_info * request,
-                     int status)
+table_helper_cleanup(netsnmp_agent_request_info *reqinfo,
+                     netsnmp_request_info *request, int status)
 {
     netsnmp_set_request_error(reqinfo, request, status);
     netsnmp_free_request_data_sets(request);
@@ -624,13 +636,14 @@ table_helper_cleanup(netsnmp_agent_request_info * reqinfo, netsnmp_request_info 
 
 
 unsigned int
-netsnmp_closest_column(unsigned int current, netsnmp_column_info * valid_columns)
+netsnmp_closest_column(unsigned int current,
+                       netsnmp_column_info *valid_columns)
 {
     unsigned int    closest = 0;
     char            done = 0;
     char            idx;
 
-    if(valid_columns == NULL)
+    if (valid_columns == NULL)
         return 0;
 
     do {
@@ -682,54 +695,58 @@ netsnmp_closest_column(unsigned int current, netsnmp_column_info * valid_columns
 
 void
 #if HAVE_STDARG_H
-netsnmp_table_helper_add_indexes(netsnmp_table_registration_info *tinfo, ...)
+netsnmp_table_helper_add_indexes(netsnmp_table_registration_info *tinfo,
+                                 ...)
 #else
 netsnmp_table_helper_add_indexes(va_alist)
-  va_dcl
+     va_dcl
 #endif
 {
-  va_list debugargs;
-  int type;
-  
+    va_list         debugargs;
+    int             type;
+
 #if HAVE_STDARG_H
-  va_start(debugargs,tinfo);
+    va_start(debugargs, tinfo);
 #else
-  netsnmp_table_registration_info *tinfo;
-  
-  va_start(debugargs);
-  tinfo = va_arg(debugargs, table_info *);
+    netsnmp_table_registration_info *tinfo;
+
+    va_start(debugargs);
+    tinfo = va_arg(debugargs, table_info *);
 #endif
 
-  while((type = va_arg(debugargs, int)) != 0) {
-      netsnmp_table_helper_add_index(tinfo, type);
-  }
+    while ((type = va_arg(debugargs, int)) != 0) {
+        netsnmp_table_helper_add_index(tinfo, type);
+    }
 
-  va_end(debugargs);
+    va_end(debugargs);
 }
 
 /** returns a row-wide place to store data in.
     @todo This function will likely change to add free pointer functions. */
 netsnmp_oid_stash_node **
 netsnmp_table_get_or_create_row_stash(netsnmp_agent_request_info *reqinfo,
-                                      const u_char *storage_name) 
+                                      const u_char * storage_name)
 {
     netsnmp_oid_stash_node **stashp = NULL;
     stashp = (netsnmp_oid_stash_node **)
         netsnmp_agent_get_list_data(reqinfo, storage_name);
 
     if (!stashp) {
-        /* hasn't be created yet.  we create it here. */
+        /*
+         * hasn't be created yet.  we create it here. 
+         */
         stashp = SNMP_MALLOC_TYPEDEF(netsnmp_oid_stash_node *);
 
         if (!stashp)
-            return NULL; /* ack. out of mem */
-        
+            return NULL;        /* ack. out of mem */
+
         netsnmp_agent_add_list_data(reqinfo,
-                                    /* XXX: free: wrong */
+                                    /*
+                                     * XXX: free: wrong 
+                                     */
                                     netsnmp_create_data_list(storage_name,
                                                              stashp,
                                                              free));
     }
     return stashp;
 }
-

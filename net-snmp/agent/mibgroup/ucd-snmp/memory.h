@@ -7,12 +7,14 @@
 
 #include "mibdefs.h"
 
-int getswap (int);
-void	init_memory (void);
+int             getswap(int);
+void            init_memory(void);
 
-/* config file parsing routines */
-void memory_parse_config (const char *, char *);
-void memory_free_config (void);
+/*
+ * config file parsing routines 
+ */
+void            memory_parse_config(const char *, char *);
+void            memory_free_config(void);
 
 #define MEMTOTALSWAP 3
 #define MEMAVAILSWAP 4
@@ -29,4 +31,4 @@ void memory_free_config (void);
 #define MEMCACHED 15
 #define MEMSWAPERROR 16
 
-#endif /* _MIBGROUP_MEMORY_H */
+#endif                          /* _MIBGROUP_MEMORY_H */

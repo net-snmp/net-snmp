@@ -40,25 +40,27 @@
 
 
 #if HAVE_KVM_H
-kvm_t *kd;
+kvm_t          *kd;
 
 void
 init_kmem(const char *file)
 {
 #if HAVE_KVM_OPENFILES
-    char err[4096];
+    char            err[4096];
     kd = kvm_openfiles(NULL, NULL, NULL, O_RDONLY, err);
-    if (kd == NULL && !ds_get_boolean(DS_APPLICATION_ID, DS_AGENT_NO_ROOT_ACCESS)) {
-	snmp_log(LOG_CRIT, "init_kmem: kvm_openfiles failed: %s\n", err);
-	exit(1);
+    if (kd == NULL
+        && !ds_get_boolean(DS_APPLICATION_ID, DS_AGENT_NO_ROOT_ACCESS)) {
+        snmp_log(LOG_CRIT, "init_kmem: kvm_openfiles failed: %s\n", err);
+        exit(1);
     }
 #else
     kd = kvm_open(NULL, NULL, NULL, O_RDONLY, NULL);
     if (!kd && !ds_get_boolean(DS_APPLICATION_ID, DS_AGENT_NO_ROOT_ACCESS)) {
-	snmp_log(LOG_CRIT, "init_kmem: kvm_open failed: %s\n", strerror(errno));
-	exit(1);
+        snmp_log(LOG_CRIT, "init_kmem: kvm_open failed: %s\n",
+                 strerror(errno));
+        exit(1);
     }
-#endif	/* HAVE_KVM_OPENFILES */
+#endif                          /* HAVE_KVM_OPENFILES */
 }
 
 
@@ -74,55 +76,57 @@ init_kmem(const char *file)
 
 
 int
-klookup(unsigned long off,
-	char   *target,
-	int     siz)
+klookup(unsigned long off, char *target, int siz)
 {
-    int result;
-    if (kd == NULL) return 0;
+    int             result;
+    if (kd == NULL)
+        return 0;
     result = kvm_read(kd, off, target, siz);
     if (result != siz) {
 #if HAVE_KVM_OPENFILES
- snmp_log(LOG_ERR,"kvm_read(*, %lx, %p, %d) = %d: %s\n", off, target, siz,
-		result, kvm_geterr(kd));
+        snmp_log(LOG_ERR, "kvm_read(*, %lx, %p, %d) = %d: %s\n", off,
+                 target, siz, result, kvm_geterr(kd));
 #else
- snmp_log(LOG_ERR,"kvm_read(*, %lx, %p, %d) = %d: ", off, target, siz,
-		result);
-	snmp_log_perror("klookup");
+        snmp_log(LOG_ERR, "kvm_read(*, %lx, %p, %d) = %d: ", off, target,
+                 siz, result);
+        snmp_log_perror("klookup");
 #endif
-	return 0;
+        return 0;
     }
     return 1;
 }
 
-#else /* HAVE_KVM_H */
+#else                           /* HAVE_KVM_H */
 
-static off_t klseek (off_t);
-static int klread (char *, int);
-int swap, mem, kmem;
+static off_t    klseek(off_t);
+static int      klread(char *, int);
+int             swap, mem, kmem;
 
 void
 init_kmem(const char *file)
 {
-  kmem = open(file, O_RDONLY);
-  if (kmem < 0 && !ds_get_boolean(DS_APPLICATION_ID, DS_AGENT_NO_ROOT_ACCESS)){
-    snmp_log_perror(file);
-    exit(1);
-  }
-  fcntl(kmem,F_SETFD,1);
-  mem = open("/dev/mem",O_RDONLY);    
-  if (mem < 0 && !ds_get_boolean(DS_APPLICATION_ID, DS_AGENT_NO_ROOT_ACCESS)){
-    snmp_log_perror("/dev/mem");
-    exit(1);
-  }
-  fcntl(mem,F_SETFD,1);
+    kmem = open(file, O_RDONLY);
+    if (kmem < 0
+        && !ds_get_boolean(DS_APPLICATION_ID, DS_AGENT_NO_ROOT_ACCESS)) {
+        snmp_log_perror(file);
+        exit(1);
+    }
+    fcntl(kmem, F_SETFD, 1);
+    mem = open("/dev/mem", O_RDONLY);
+    if (mem < 0
+        && !ds_get_boolean(DS_APPLICATION_ID, DS_AGENT_NO_ROOT_ACCESS)) {
+        snmp_log_perror("/dev/mem");
+        exit(1);
+    }
+    fcntl(mem, F_SETFD, 1);
 #ifdef DMEM_LOC
-  swap = open(DMEM_LOC,O_RDONLY);
-  if (swap < 0 && !ds_get_boolean(DS_APPLICATION_ID, DS_AGENT_NO_ROOT_ACCESS)){
-    snmp_log_perror(DMEM_LOC);
-    exit(1);
-  }
-  fcntl(swap,F_SETFD,1);
+    swap = open(DMEM_LOC, O_RDONLY);
+    if (swap < 0
+        && !ds_get_boolean(DS_APPLICATION_ID, DS_AGENT_NO_ROOT_ACCESS)) {
+        snmp_log_perror(DMEM_LOC);
+        exit(1);
+    }
+    fcntl(swap, F_SETFD, 1);
 #endif
 }
 
@@ -130,10 +134,10 @@ init_kmem(const char *file)
 /*
  *  Seek into the kernel for a value.
  */
-static off_t
+static          off_t
 klseek(off_t base)
 {
-  return (lseek(kmem, (off_t)base, SEEK_SET));
+    return (lseek(kmem, (off_t) base, SEEK_SET));
 }
 
 
@@ -141,10 +145,9 @@ klseek(off_t base)
  *  Read from the kernel 
  */
 static int
-klread(char *buf,
-       int buflen)
+klread(char *buf, int buflen)
 {
-  return (read(kmem, buf, buflen));
+    return (read(kmem, buf, buflen));
 }
 
 
@@ -160,37 +163,38 @@ klread(char *buf,
 
 
 int
-klookup(unsigned long off,
-	char   *target,
-	int     siz)
+klookup(unsigned long off, char *target, int siz)
 {
-  long retsiz;
+    long            retsiz;
 
-  if (kmem < 0) return 0;
+    if (kmem < 0)
+        return 0;
 
-  if ((retsiz = klseek((off_t) off)) != off) {
-    snmp_log(LOG_ERR, "klookup(%lx, %p, %d): ", off, target, siz);
-    snmp_log_perror("klseek");
+    if ((retsiz = klseek((off_t) off)) != off) {
+        snmp_log(LOG_ERR, "klookup(%lx, %p, %d): ", off, target, siz);
+        snmp_log_perror("klseek");
 #ifdef EXIT_ON_BAD_KLREAD
-    exit(1);
+        exit(1);
 #endif
-    return (0);
-  }
-  if ((retsiz = klread(target, siz)) != siz ) {
-    if (snmp_get_do_debugging()) {
-    /* these happen too often on too many architectures to print them
-       unless we're in debugging mode. People get very full log files. */
-      snmp_log(LOG_ERR, "klookup(%lx, %p, %d): ", off, target, siz);
-      snmp_log_perror("klread");
+        return (0);
     }
+    if ((retsiz = klread(target, siz)) != siz) {
+        if (snmp_get_do_debugging()) {
+            /*
+             * these happen too often on too many architectures to print them
+             * unless we're in debugging mode. People get very full log files. 
+             */
+            snmp_log(LOG_ERR, "klookup(%lx, %p, %d): ", off, target, siz);
+            snmp_log_perror("klread");
+        }
 #ifdef EXIT_ON_BAD_KLREAD
-    exit(1);
+        exit(1);
 #endif
-    return(0);
-  }
-  return (1);
+        return (0);
+    }
+    return (1);
 }
 
-#endif /* HAVE_KVM_H */
+#endif                          /* HAVE_KVM_H */
 
-#endif /* CAN_USE_NLIST */
+#endif                          /* CAN_USE_NLIST */

@@ -7,8 +7,8 @@
 
 config_require(smux/smux)
 
-extern FindVarMethod var_ospf;
-extern void init_snmp_ospf( void );
+     extern FindVarMethod var_ospf;
+     extern void     init_snmp_ospf(void);
 
 
 #define ospfRouterId		0
@@ -120,4 +120,4 @@ extern void init_snmp_ospf( void );
 #define ospfAreaAggregateStatus		106
 #define ospfAreaAggregateEffect		107
 
-#endif /* _MIBGROUP_SNMP_OSPF_H */
+#endif                          /* _MIBGROUP_SNMP_OSPF_H */

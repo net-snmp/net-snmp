@@ -21,4 +21,4 @@
 #include <net-snmp/library/snmp_client.h>
 #include <net-snmp/library/mib.h>
 
-#endif /* NET_SNMP_VARBIND_API_H */
+#endif                          /* NET_SNMP_VARBIND_API_H */

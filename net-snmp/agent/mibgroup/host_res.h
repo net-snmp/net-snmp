@@ -1,6 +1,6 @@
 /*
  *  Host Resources
- *	Device index manipulation data
+ *      Device index manipulation data
  */
 
 #ifdef HAVE_STDLIB_H
@@ -36,9 +36,13 @@
 #include <netinet/in_var.h>
 #endif
 
-/* #include "snmp_vars.linux.h" */
+/*
+ * #include "snmp_vars.linux.h" 
+ */
 
-		/* Deliberately set to the same values as hrDeviceTypes */
+                /*
+                 * Deliberately set to the same values as hrDeviceTypes 
+                 */
 #define	HRDEV_OTHER	1
 #define	HRDEV_UNKNOWN	2
 #define	HRDEV_PROC	3
@@ -58,23 +62,23 @@
 #define	HRDEV_VMEM	20
 #define	HRDEV_NVMEM	21
 
-#define	HRDEV_TYPE_MAX	22	/* one greater than largest device type */
+#define	HRDEV_TYPE_MAX	22      /* one greater than largest device type */
 #define	HRDEV_TYPE_SHIFT  8
 #define	HRDEV_TYPE_MASK 0xff
 
-typedef	void (*PFV) (void);
-typedef	int  (*PFI) (int);
-typedef	int  (*PFIV) (void);
-typedef	const char* (*PFS) (int);
-typedef	oid* (*PFO) (int, size_t *);
+typedef void    (*PFV) (void);
+typedef int     (*PFI) (int);
+typedef int     (*PFIV) (void);
+typedef const char *(*PFS) (int);
+typedef oid    *(*PFO) (int, size_t *);
 
-extern PFV init_device[];	/* Routines for stepping through devices */
-extern PFIV next_device[];
-extern PFV save_device[];
-extern int dev_idx_inc[];	/* Flag - are indices returned in strictly
-					increasing order */
+extern PFV      init_device[];  /* Routines for stepping through devices */
+extern PFIV     next_device[];
+extern PFV      save_device[];
+extern int      dev_idx_inc[];  /* Flag - are indices returned in strictly
+                                 * increasing order */
 
-extern PFS device_descr[];	/* Return data for a particular device */
-extern PFO device_prodid[];
-extern PFI device_status[];
-extern PFI device_errors[];
+extern PFS      device_descr[]; /* Return data for a particular device */
+extern PFO      device_prodid[];
+extern PFI      device_status[];
+extern PFI      device_errors[];

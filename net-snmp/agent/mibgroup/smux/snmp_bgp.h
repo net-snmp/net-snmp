@@ -7,8 +7,8 @@
 
 config_require(smux/smux)
 
-extern FindVarMethod var_bgp;
-extern void init_snmp_bgp( void );
+     extern FindVarMethod var_bgp;
+     extern void     init_snmp_bgp(void);
 
 
 #define BGPVERSION			0
@@ -35,4 +35,4 @@ extern void init_snmp_bgp( void );
 #define BGPPATHATTRNEXTHOP		21
 #define BGPPATHATTRINTERASMETRIC	22
 
-#endif /* _MIBGROUP_SNMP_BGP_H */
+#endif                          /* _MIBGROUP_SNMP_BGP_H */

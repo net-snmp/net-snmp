@@ -19,10 +19,10 @@
 
 #include "kernel_linux.h"
 
-struct ip_mib	cached_ip_mib;
-struct icmp_mib	cached_icmp_mib;
-struct tcp_mib	cached_tcp_mib;
-struct udp_mib	cached_udp_mib;
+struct ip_mib   cached_ip_mib;
+struct icmp_mib cached_icmp_mib;
+struct tcp_mib  cached_tcp_mib;
+struct udp_mib  cached_udp_mib;
 
 #define IP_STATS_LINE	"Ip: %lu %lu %lu %lu %lu %lu %lu %lu %lu %lu %lu %lu %lu %lu %lu %lu %lu %lu %lu"
 #define ICMP_STATS_LINE	"Icmp: %lu %lu %lu %lu %lu %lu %lu %lu %lu %lu %lu %lu %lu %lu %lu %lu %lu %lu %lu %lu %lu %lu %lu %lu %lu %lu"
@@ -40,168 +40,168 @@ struct udp_mib	cached_udp_mib;
 #ifndef LINUX_STATS_CACHE_TIMEOUT
 #define LINUX_STATS_CACHE_TIMEOUT	MIB_STATS_CACHE_TIMEOUT
 #endif
-marker_t linux_mibII_stats_cache_marker = NULL;
+marker_t        linux_mibII_stats_cache_marker = NULL;
 
 int
-linux_read_mibII_stats ( void )
+linux_read_mibII_stats(void)
 {
-    FILE *in = fopen ("/proc/net/snmp", "r");
-    char line [1024];
+    FILE           *in = fopen("/proc/net/snmp", "r");
+    char            line[1024];
 
-    if (! in) {
-	free (linux_mibII_stats_cache_marker);
-	linux_mibII_stats_cache_marker = NULL;
-	return -1;
+    if (!in) {
+        free(linux_mibII_stats_cache_marker);
+        linux_mibII_stats_cache_marker = NULL;
+        return -1;
     }
 
     if (linux_mibII_stats_cache_marker &&
-	(!atime_ready( linux_mibII_stats_cache_marker, LINUX_STATS_CACHE_TIMEOUT*1000 ))) {
-	fclose( in );
-	return 0;
+        (!atime_ready
+         (linux_mibII_stats_cache_marker,
+          LINUX_STATS_CACHE_TIMEOUT * 1000))) {
+        fclose(in);
+        return 0;
     }
 
-    if (linux_mibII_stats_cache_marker )
-	atime_setMarker( linux_mibII_stats_cache_marker );
+    if (linux_mibII_stats_cache_marker)
+        atime_setMarker(linux_mibII_stats_cache_marker);
     else
-	linux_mibII_stats_cache_marker = atime_newMarker();
+        linux_mibII_stats_cache_marker = atime_newMarker();
 
 
-    while (line == fgets (line, sizeof(line), in)) {
-	if (!strncmp( line, IP_STATS_LINE, IP_STATS_PREFIX_LEN )) {
-	    sscanf  ( line, IP_STATS_LINE,
-				&cached_ip_mib.ipForwarding,
-				&cached_ip_mib.ipDefaultTTL,
-				&cached_ip_mib.ipInReceives,
-				&cached_ip_mib.ipInHdrErrors,
-				&cached_ip_mib.ipInAddrErrors,
-				&cached_ip_mib.ipForwDatagrams,
-				&cached_ip_mib.ipInUnknownProtos,
-				&cached_ip_mib.ipInDiscards,
-				&cached_ip_mib.ipInDelivers,
-				&cached_ip_mib.ipOutRequests,
-				&cached_ip_mib.ipOutDiscards,
-				&cached_ip_mib.ipOutNoRoutes,
-				&cached_ip_mib.ipReasmTimeout,
-				&cached_ip_mib.ipReasmReqds,
-				&cached_ip_mib.ipReasmOKs,
-				&cached_ip_mib.ipReasmFails,
-				&cached_ip_mib.ipFragOKs,
-				&cached_ip_mib.ipFragFails,
-				&cached_ip_mib.ipFragCreates);
-	    cached_ip_mib.ipRoutingDiscards = 0;	/* XXX */
-	}
-	else if (!strncmp( line, ICMP_STATS_LINE, ICMP_STATS_PREFIX_LEN )) {
-	    sscanf ( line, ICMP_STATS_LINE,
-				&cached_icmp_mib.icmpInMsgs,
-				&cached_icmp_mib.icmpInErrors,
-				&cached_icmp_mib.icmpInDestUnreachs,
-				&cached_icmp_mib.icmpInTimeExcds,
-				&cached_icmp_mib.icmpInParmProbs,
-				&cached_icmp_mib.icmpInSrcQuenchs,
-				&cached_icmp_mib.icmpInRedirects,
-				&cached_icmp_mib.icmpInEchos,
-				&cached_icmp_mib.icmpInEchoReps,
-				&cached_icmp_mib.icmpInTimestamps,
-				&cached_icmp_mib.icmpInTimestampReps,
-				&cached_icmp_mib.icmpInAddrMasks,
-				&cached_icmp_mib.icmpInAddrMaskReps,
-				&cached_icmp_mib.icmpOutMsgs,
-				&cached_icmp_mib.icmpOutErrors,
-				&cached_icmp_mib.icmpOutDestUnreachs,
-				&cached_icmp_mib.icmpOutTimeExcds,
-				&cached_icmp_mib.icmpOutParmProbs,
-				&cached_icmp_mib.icmpOutSrcQuenchs,
-				&cached_icmp_mib.icmpOutRedirects,
-				&cached_icmp_mib.icmpOutEchos,
-				&cached_icmp_mib.icmpOutEchoReps,
-				&cached_icmp_mib.icmpOutTimestamps,
-				&cached_icmp_mib.icmpOutTimestampReps,
-				&cached_icmp_mib.icmpOutAddrMasks,
-				&cached_icmp_mib.icmpOutAddrMaskReps);
-	}
-	else if (!strncmp( line, TCP_STATS_LINE, TCP_STATS_PREFIX_LEN )) {
-	    int ret = sscanf ( line, TCP_STATS_LINE,
-				&cached_tcp_mib.tcpRtoAlgorithm,
-				&cached_tcp_mib.tcpRtoMin,
-				&cached_tcp_mib.tcpRtoMax,
-				&cached_tcp_mib.tcpMaxConn,
-				&cached_tcp_mib.tcpActiveOpens,
-				&cached_tcp_mib.tcpPassiveOpens,
-				&cached_tcp_mib.tcpAttemptFails,
-				&cached_tcp_mib.tcpEstabResets,
-				&cached_tcp_mib.tcpCurrEstab,
-				&cached_tcp_mib.tcpInSegs,
-				&cached_tcp_mib.tcpOutSegs,
-				&cached_tcp_mib.tcpRetransSegs,
-				&cached_tcp_mib.tcpInErrs,
-				&cached_tcp_mib.tcpOutRsts);
-	    cached_tcp_mib.tcpInErrsValid = (ret > 12) ? 1 : 0;
-	    cached_tcp_mib.tcpOutRstsValid = (ret > 13) ? 1 : 0;
-	}
-	else if (!strncmp( line, UDP_STATS_LINE, UDP_STATS_PREFIX_LEN )) {
-	    sscanf ( line, UDP_STATS_LINE,
-				&cached_udp_mib.udpInDatagrams,
-				&cached_udp_mib.udpNoPorts,
-				&cached_udp_mib.udpInErrors,
-				&cached_udp_mib.udpOutDatagrams);
-	}
+    while (line == fgets(line, sizeof(line), in)) {
+        if (!strncmp(line, IP_STATS_LINE, IP_STATS_PREFIX_LEN)) {
+            sscanf(line, IP_STATS_LINE,
+                   &cached_ip_mib.ipForwarding,
+                   &cached_ip_mib.ipDefaultTTL,
+                   &cached_ip_mib.ipInReceives,
+                   &cached_ip_mib.ipInHdrErrors,
+                   &cached_ip_mib.ipInAddrErrors,
+                   &cached_ip_mib.ipForwDatagrams,
+                   &cached_ip_mib.ipInUnknownProtos,
+                   &cached_ip_mib.ipInDiscards,
+                   &cached_ip_mib.ipInDelivers,
+                   &cached_ip_mib.ipOutRequests,
+                   &cached_ip_mib.ipOutDiscards,
+                   &cached_ip_mib.ipOutNoRoutes,
+                   &cached_ip_mib.ipReasmTimeout,
+                   &cached_ip_mib.ipReasmReqds,
+                   &cached_ip_mib.ipReasmOKs,
+                   &cached_ip_mib.ipReasmFails,
+                   &cached_ip_mib.ipFragOKs,
+                   &cached_ip_mib.ipFragFails,
+                   &cached_ip_mib.ipFragCreates);
+            cached_ip_mib.ipRoutingDiscards = 0;        /* XXX */
+        } else if (!strncmp(line, ICMP_STATS_LINE, ICMP_STATS_PREFIX_LEN)) {
+            sscanf(line, ICMP_STATS_LINE,
+                   &cached_icmp_mib.icmpInMsgs,
+                   &cached_icmp_mib.icmpInErrors,
+                   &cached_icmp_mib.icmpInDestUnreachs,
+                   &cached_icmp_mib.icmpInTimeExcds,
+                   &cached_icmp_mib.icmpInParmProbs,
+                   &cached_icmp_mib.icmpInSrcQuenchs,
+                   &cached_icmp_mib.icmpInRedirects,
+                   &cached_icmp_mib.icmpInEchos,
+                   &cached_icmp_mib.icmpInEchoReps,
+                   &cached_icmp_mib.icmpInTimestamps,
+                   &cached_icmp_mib.icmpInTimestampReps,
+                   &cached_icmp_mib.icmpInAddrMasks,
+                   &cached_icmp_mib.icmpInAddrMaskReps,
+                   &cached_icmp_mib.icmpOutMsgs,
+                   &cached_icmp_mib.icmpOutErrors,
+                   &cached_icmp_mib.icmpOutDestUnreachs,
+                   &cached_icmp_mib.icmpOutTimeExcds,
+                   &cached_icmp_mib.icmpOutParmProbs,
+                   &cached_icmp_mib.icmpOutSrcQuenchs,
+                   &cached_icmp_mib.icmpOutRedirects,
+                   &cached_icmp_mib.icmpOutEchos,
+                   &cached_icmp_mib.icmpOutEchoReps,
+                   &cached_icmp_mib.icmpOutTimestamps,
+                   &cached_icmp_mib.icmpOutTimestampReps,
+                   &cached_icmp_mib.icmpOutAddrMasks,
+                   &cached_icmp_mib.icmpOutAddrMaskReps);
+        } else if (!strncmp(line, TCP_STATS_LINE, TCP_STATS_PREFIX_LEN)) {
+            int             ret = sscanf(line, TCP_STATS_LINE,
+                                         &cached_tcp_mib.tcpRtoAlgorithm,
+                                         &cached_tcp_mib.tcpRtoMin,
+                                         &cached_tcp_mib.tcpRtoMax,
+                                         &cached_tcp_mib.tcpMaxConn,
+                                         &cached_tcp_mib.tcpActiveOpens,
+                                         &cached_tcp_mib.tcpPassiveOpens,
+                                         &cached_tcp_mib.tcpAttemptFails,
+                                         &cached_tcp_mib.tcpEstabResets,
+                                         &cached_tcp_mib.tcpCurrEstab,
+                                         &cached_tcp_mib.tcpInSegs,
+                                         &cached_tcp_mib.tcpOutSegs,
+                                         &cached_tcp_mib.tcpRetransSegs,
+                                         &cached_tcp_mib.tcpInErrs,
+                                         &cached_tcp_mib.tcpOutRsts);
+            cached_tcp_mib.tcpInErrsValid = (ret > 12) ? 1 : 0;
+            cached_tcp_mib.tcpOutRstsValid = (ret > 13) ? 1 : 0;
+        } else if (!strncmp(line, UDP_STATS_LINE, UDP_STATS_PREFIX_LEN)) {
+            sscanf(line, UDP_STATS_LINE,
+                   &cached_udp_mib.udpInDatagrams,
+                   &cached_udp_mib.udpNoPorts,
+                   &cached_udp_mib.udpInErrors,
+                   &cached_udp_mib.udpOutDatagrams);
+        }
     }
-    fclose (in);
+    fclose(in);
 
-	/*
-	 * Tweak illegal values:
-	 *
-	 * valid values for ipForwarding are 1 == yup, 2 == nope
-	 * a 0 is forbidden, so patch:
-	 */
-    if (! cached_ip_mib.ipForwarding)
-	cached_ip_mib.ipForwarding = 2;
+    /*
+     * Tweak illegal values:
+     *
+     * valid values for ipForwarding are 1 == yup, 2 == nope
+     * a 0 is forbidden, so patch:
+     */
+    if (!cached_ip_mib.ipForwarding)
+        cached_ip_mib.ipForwarding = 2;
 
-	/*
-	 * 0 is illegal for tcpRtoAlgorithm
-	 * so assume `other' algorithm:
-	 */
-    if (! cached_tcp_mib.tcpRtoAlgorithm)
-	cached_tcp_mib.tcpRtoAlgorithm = 1;
+    /*
+     * 0 is illegal for tcpRtoAlgorithm
+     * so assume `other' algorithm:
+     */
+    if (!cached_tcp_mib.tcpRtoAlgorithm)
+        cached_tcp_mib.tcpRtoAlgorithm = 1;
     return 0;
 }
 
 int
-linux_read_ip_stat (struct ip_mib *ipstat)
+linux_read_ip_stat(struct ip_mib *ipstat)
 {
-    memset ((char *) ipstat,(0), sizeof (*ipstat));
+    memset((char *) ipstat, (0), sizeof(*ipstat));
     if (linux_read_mibII_stats() == -1)
-	return -1;
-    memcpy( (char*)ipstat, (char*)&cached_ip_mib, sizeof (*ipstat));
+        return -1;
+    memcpy((char *) ipstat, (char *) &cached_ip_mib, sizeof(*ipstat));
     return 0;
 }
 
 int
-linux_read_icmp_stat (struct icmp_mib *icmpstat)
+linux_read_icmp_stat(struct icmp_mib *icmpstat)
 {
-    memset ((char *) icmpstat,(0), sizeof (*icmpstat));
+    memset((char *) icmpstat, (0), sizeof(*icmpstat));
     if (linux_read_mibII_stats() == -1)
-	return -1;
-    memcpy( (char*)icmpstat, (char*)&cached_icmp_mib, sizeof (*icmpstat));
+        return -1;
+    memcpy((char *) icmpstat, (char *) &cached_icmp_mib,
+           sizeof(*icmpstat));
     return 0;
 }
 
 int
-linux_read_tcp_stat (struct tcp_mib *tcpstat)
+linux_read_tcp_stat(struct tcp_mib *tcpstat)
 {
-    memset ((char *) tcpstat,(0), sizeof (*tcpstat));
+    memset((char *) tcpstat, (0), sizeof(*tcpstat));
     if (linux_read_mibII_stats() == -1)
-	return -1;
-    memcpy( (char*)tcpstat, (char*)&cached_tcp_mib, sizeof (*tcpstat));
+        return -1;
+    memcpy((char *) tcpstat, (char *) &cached_tcp_mib, sizeof(*tcpstat));
     return 0;
 }
 
 int
-linux_read_udp_stat (struct udp_mib *udpstat)
+linux_read_udp_stat(struct udp_mib *udpstat)
 {
-    memset ((char *) udpstat,(0), sizeof (*udpstat));
+    memset((char *) udpstat, (0), sizeof(*udpstat));
     if (linux_read_mibII_stats() == -1)
-	return -1;
-    memcpy( (char*)udpstat, (char*)&cached_udp_mib, sizeof (*udpstat));
+        return -1;
+    memcpy((char *) udpstat, (char *) &cached_udp_mib, sizeof(*udpstat));
     return 0;
 }

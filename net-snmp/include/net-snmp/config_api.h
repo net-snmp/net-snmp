@@ -22,9 +22,9 @@
 #include <net-snmp/library/read_config.h>
 #include <net-snmp/library/default_store.h>
 
-#include <stdio.h>	/* for FILE definition */
+#include <stdio.h>              /* for FILE definition */
 #include <net-snmp/library/snmp_parse_args.h>
 #include <net-snmp/library/snmp_enum.h>
 #include <net-snmp/library/vacm.h>
 
-#endif /* NET_SNMP_CONFIG_API_H */
+#endif                          /* NET_SNMP_CONFIG_API_H */

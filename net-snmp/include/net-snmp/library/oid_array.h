@@ -73,13 +73,15 @@ extern          "C" {
         void           *data;
     } netsnmp_oid_array_header_wrapper;
 
-    typedef void    (Netsnmp_For_Each) (netsnmp_oid_array_header *, void *context);
+    typedef void    (Netsnmp_For_Each) (netsnmp_oid_array_header *,
+                                        void *context);
 
     /*
      * compare two entries. Nothing fancy, just a wrapper around
      * snmp_oid_compare.
      */
-    int             netsnmp_array_compare(const void *lhs, const void *rhs);
+    int             netsnmp_array_compare(const void *lhs,
+                                          const void *rhs);
 
     /*
      * initialize an oid array which will contain data.
@@ -119,13 +121,14 @@ extern          "C" {
      * Note: caller is responsible for calling free() on the
      * pointer returned by this function.
      */
-    void          **netsnmp_get_oid_data_subset(oid_array a, void *key, int * len);
+    void          **netsnmp_get_oid_data_subset(oid_array a, void *key,
+                                                int *len);
 
     /*
      * find the number of entries in the array
      *
      */
-    int            netsnmp_get_oid_data_count(oid_array a);
+    int             netsnmp_get_oid_data_count(oid_array a);
 
     /*
      * remove an entry
@@ -133,7 +136,8 @@ extern          "C" {
      * if save is not null, the entry will be copied to the address
      * save points at.
      */
-    int             netsnmp_remove_oid_data(oid_array a, void *key, void *save);
+    int             netsnmp_remove_oid_data(oid_array a, void *key,
+                                            void *save);
 
     /*
      * release memory used by a table.
@@ -153,8 +157,9 @@ extern          "C" {
      * If sort = 1, entries will be in sorted order. Otherwise
      * the order is not defined.
      */
-    void            netsnmp_for_each_oid_data(oid_array a, Netsnmp_For_Each *,
-                                      void *context, int sort);
+    void            netsnmp_for_each_oid_data(oid_array a,
+                                              Netsnmp_For_Each *,
+                                              void *context, int sort);
 
     /*
      * get internal pointer to array (DANGER WILL ROBINSON!)
@@ -168,7 +173,8 @@ extern          "C" {
      * the table will be sorted. If sort is not set, the order is
      * not defined.
      */
-    void           *netsnmp_retrieve_oid_array(oid_array a, int *size, int sort);
+    void           *netsnmp_retrieve_oid_array(oid_array a, int *size,
+                                               int sort);
 
 #ifdef __cplusplus
 }

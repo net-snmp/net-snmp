@@ -45,11 +45,15 @@ typedef struct oid_array_table_s {
 int
 netsnmp_array_compare(const void *lhs, const void *rhs)
 {
-    
-    return snmp_oid_compare((*(const netsnmp_oid_array_header **) lhs)->idx,
-                            (*(const netsnmp_oid_array_header **) lhs)->idx_len,
-                            (*(const netsnmp_oid_array_header **) rhs)->idx,
-                            (*(const netsnmp_oid_array_header **) rhs)->idx_len);
+
+    return snmp_oid_compare((*(const netsnmp_oid_array_header **) lhs)->
+                            idx,
+                            (*(const netsnmp_oid_array_header **) lhs)->
+                            idx_len,
+                            (*(const netsnmp_oid_array_header **) rhs)->
+                            idx,
+                            (*(const netsnmp_oid_array_header **) rhs)->
+                            idx_len);
 }
 
 static int
@@ -59,7 +63,7 @@ Sort_Array(oid_array_table * table)
         /*
          * Sort the table 
          */
-        if(table->count>1)
+        if (table->count > 1)
             qsort(TABLE_START(table), table->count, table->data_size,
                   netsnmp_array_compare);
         table->dirty = 0;
@@ -69,7 +73,8 @@ Sort_Array(oid_array_table * table)
 }
 
 static int
-binary_search(netsnmp_oid_array_header * val, oid_array_table * t, int exact)
+binary_search(netsnmp_oid_array_header *val, oid_array_table * t,
+              int exact)
 {
     int             len = t->count;
     int             half;
@@ -87,7 +92,8 @@ binary_search(netsnmp_oid_array_header * val, oid_array_table * t, int exact)
         half = len >> 1;
         middle = first;
         middle += half;
-        if ((result = netsnmp_array_compare(TABLE_INDEX(t, middle), &val)) < 0) {
+        if ((result =
+             netsnmp_array_compare(TABLE_INDEX(t, middle), &val)) < 0) {
             first = middle;
             ++first;
             len = len - half - 1;
@@ -96,8 +102,8 @@ binary_search(netsnmp_oid_array_header * val, oid_array_table * t, int exact)
     }
 
     if (exact) {
-        if( (first == t->count) ||
-            netsnmp_array_compare(TABLE_INDEX(t, first), &val) != 0 )
+        if ((first == t->count) ||
+            netsnmp_array_compare(TABLE_INDEX(t, first), &val) != 0)
             return -1;
         return first;
     }
@@ -179,10 +185,10 @@ netsnmp_Get_oid_data(oid_array a, void *key, int exact)
 }
 
 int
-netsnmp_Replace_oid_data(oid_array a, void *entry )
+netsnmp_Replace_oid_data(oid_array a, void *entry)
 {
     oid_array_table *t = (oid_array_table *) a;
-    void            *new_data;
+    void           *new_data;
     int             index = 0;
 
     /*
@@ -200,7 +206,8 @@ netsnmp_Replace_oid_data(oid_array a, void *entry )
     /*
      * search
      */
-    if ((index = binary_search((netsnmp_oid_array_header*)&entry, t, 1)) == -1)
+    if ((index =
+         binary_search((netsnmp_oid_array_header *) &entry, t, 1)) == -1)
         return 0;
 
     new_data = TABLE_INDEX(t, index);
@@ -210,10 +217,10 @@ netsnmp_Replace_oid_data(oid_array a, void *entry )
 }
 
 int
-netsnmp_Remove_oid_data(oid_array a, void *key, void *save )
+netsnmp_Remove_oid_data(oid_array a, void *key, void *save)
 {
     oid_array_table *t = (oid_array_table *) a;
-    void            *new_data, *old_data;
+    void           *new_data, *old_data;
     int             index = 0;
 
     /*
@@ -238,26 +245,27 @@ netsnmp_Remove_oid_data(oid_array a, void *key, void *save )
      * find old data and save it, if ptr provided
      */
     old_data = TABLE_INDEX(t, index);
-    if(save)
+    if (save)
         memcpy(save, old_data, t->data_size);
 
     /*
      * if entry was last item, just decrement count
      */
     --t->count;
-    if(index != t->count) {
+    if (index != t->count) {
         /*
          * otherwise, shift array down
          */
-        new_data = TABLE_INDEX(t, index+1);
-        memcpy(old_data, new_data, t->data_size * (t->count - index) );
+        new_data = TABLE_INDEX(t, index + 1);
+        memcpy(old_data, new_data, t->data_size * (t->count - index));
     }
 
     return 0;
 }
 
 void
-netsnmp_For_each_oid_data(oid_array a, Netsnmp_For_Each * fe, void * context, int sort)
+netsnmp_For_each_oid_data(oid_array a, Netsnmp_For_Each * fe,
+                          void *context, int sort)
 {
     int             i;
     oid_array_table *t = (oid_array_table *) a;
@@ -328,15 +336,20 @@ netsnmp_Retrieve_oid_array(oid_array t, int *max_idx, int sort)
 static int
 array_ncompare(const void *lhs, const void *rhs)
 {
-  return snmp_oid_ncompare((*(const netsnmp_oid_array_header **) lhs)->idx,
-                           (*(const netsnmp_oid_array_header **) lhs)->idx_len,
-                           (*(const netsnmp_oid_array_header **) rhs)->idx,
-                           (*(const netsnmp_oid_array_header **) rhs)->idx_len,
-                           (*(const netsnmp_oid_array_header **) rhs)->idx_len);
+    return snmp_oid_ncompare((*(const netsnmp_oid_array_header **) lhs)->
+                             idx,
+                             (*(const netsnmp_oid_array_header **) lhs)->
+                             idx_len,
+                             (*(const netsnmp_oid_array_header **) rhs)->
+                             idx,
+                             (*(const netsnmp_oid_array_header **) rhs)->
+                             idx_len,
+                             (*(const netsnmp_oid_array_header **) rhs)->
+                             idx_len);
 }
 
 static int
-binary_search_for_start(netsnmp_oid_array_header * val, oid_array_table * t)
+binary_search_for_start(netsnmp_oid_array_header *val, oid_array_table * t)
 {
     int             len = t->count;
     int             half;
@@ -362,18 +375,18 @@ binary_search_for_start(netsnmp_oid_array_header * val, oid_array_table * t)
             len = half;
     }
 
-    if( (first >= t->count) ||
-        array_ncompare(TABLE_INDEX(t, first), &val) != 0 )  
-      return -1;
+    if ((first >= t->count) ||
+        array_ncompare(TABLE_INDEX(t, first), &val) != 0)
+        return -1;
 
     return first;
 }
 
-void           **
+void          **
 netsnmp_Get_oid_data_subset(oid_array a, void *key, int *len)
 {
     oid_array_table *t = (oid_array_table *) a;
-    void            **subset;
+    void          **subset;
     int             start, end, i;
 
     /*
@@ -392,18 +405,18 @@ netsnmp_Get_oid_data_subset(oid_array a, void *key, int *len)
      * find matching items
      */
     start = end = binary_search_for_start(key, t);
-    if(start == -1)
-      return 0;
-    
-    for( i = start + 1; i < t->count; ++i ) {
-      if( 0 != array_ncompare(TABLE_INDEX(t, i), &key) )
-        break;
-      ++end;
+    if (start == -1)
+        return 0;
+
+    for (i = start + 1; i < t->count; ++i) {
+        if (0 != array_ncompare(TABLE_INDEX(t, i), &key))
+            break;
+        ++end;
     }
 
     *len = end - start + 1;
-    subset = malloc( (*len) * t->data_size );
-    memcpy( subset, TABLE_INDEX(t, start), t->data_size * (*len));
+    subset = malloc((*len) * t->data_size);
+    memcpy(subset, TABLE_INDEX(t, start), t->data_size * (*len));
 
     return subset;
 }

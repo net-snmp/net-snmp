@@ -5,15 +5,17 @@
 #ifndef _MIBGROUP_DISK_H
 #define _MIBGROUP_DISK_H
 
-void init_disk(void);
+void            init_disk(void);
 
 config_require(util_funcs)
 
-extern FindVarMethod var_extensible_disk;
+     extern FindVarMethod var_extensible_disk;
 
-/* config file parsing routines */
-void disk_free_config (void);
-void disk_parse_config (const char *, char *);
+/*
+ * config file parsing routines 
+ */
+     void            disk_free_config(void);
+     void            disk_parse_config(const char *, char *);
 
 #include "mibdefs.h"
 
@@ -26,12 +28,11 @@ void disk_parse_config (const char *, char *);
 #define DISKPERCENT 9
 #define DISKPERCENTNODE 10
 
-struct diskpart
-{
-   char device[STRMAX];
-   char path[STRMAX];
-   int minimumspace;
-   int minpercent;
-};
+     struct diskpart {
+         char            device[STRMAX];
+         char            path[STRMAX];
+         int             minimumspace;
+         int             minpercent;
+     };
 
-#endif /* _MIBGROUP_DISK_H */
+#endif                          /* _MIBGROUP_DISK_H */

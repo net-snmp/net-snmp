@@ -5,8 +5,8 @@
 #ifndef _MIBGROUP_HPUX_H
 #define _MIBGROUP_HPUX_H
 
-FindVarMethod var_hp;
-WriteMethod writeHP;
+FindVarMethod   var_hp;
+WriteMethod     writeHP;
 
 
 #define TRAPAGENT 128.120.57.92
@@ -18,4 +18,4 @@ WriteMethod writeHP;
 #define HPSTATUS 6
 #define HPTRAP 101
 
-#endif /* _MIBGROUP_HPUX_H */
+#endif                          /* _MIBGROUP_HPUX_H */
