@@ -479,6 +479,9 @@ SOFTWARE.
     void            print_oid_report_enable_suffix(void);
     void            print_oid_report_enable_symbolic(void);
 
+    const char     *parse_octet_hint(const char *hint, const char *value,
+	                             unsigned char **new_val, int *new_val_len);
+
     void            clear_tree_flags(register struct tree *tp);
 
     char           *snmp_out_toggle_options(char *);

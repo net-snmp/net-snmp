@@ -77,7 +77,7 @@ Display a brief usage message and then exit.
 Display a list of configuration file directives understood by the
 command and then exit.
 .TP
-.BI -I " brR"
+.BI -I " brRh"
 Specifies input parsing options. See 
 .B INPUT OPTIONS 
 below.
@@ -500,6 +500,16 @@ flag disables this check.  This flag is mostly useful when you are
 testing an agent.  For normal operation it is useful to get your
 requests checked before they are sent to the remote agent (the
 diagnostic that the library can provide is also much more precise).
+.TP
+.B -Ih
+By default, the library will use DISPLAY-HINT information when assigning values.
+This flag disables this behaviour. The result is that in stead of
+.br
+snmpset localhost HOST-RESOURCES-MIB::hrSystemDate.0 = 2002-12-10,2:4:6.8
+.br
+you will have to write
+.br
+snmpset localhost HOST-RESOURCES-MIB::hrSystemData.0 x "07 D2 0C 0A 02 04 06 08"
 .SH "RANDOM ACCESS MIBS"
 In previous releases of the UCD-SNMP package (and if using the
 .B -Iu

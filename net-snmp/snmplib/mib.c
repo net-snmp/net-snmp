@@ -2189,6 +2189,9 @@ snmp_in_toggle_options(char *options)
         case 'r':
             netsnmp_ds_toggle_boolean(NETSNMP_DS_LIBRARY_ID, NETSNMP_DS_LIB_DONT_CHECK_RANGE);
             break;
+        case 'h':
+            netsnmp_ds_toggle_boolean(NETSNMP_DS_LIBRARY_ID, NETSNMP_DS_LIB_NO_DISPLAY_HINT);
+            break;
         case 'u':
             netsnmp_ds_toggle_boolean(NETSNMP_DS_LIBRARY_ID, NETSNMP_DS_LIB_READ_UCD_STYLE_OID);
             break;
@@ -2215,6 +2218,7 @@ snmp_in_toggle_options_usage(const char *lead, FILE * outf)
     fprintf(outf, "%sr:  do not check values for range/type legality\n",
             lead);
     fprintf(outf, "%sR:  do random access to OID labels\n", lead);
+    fprintf(outf, "%sh:  don't apply DISPLAY-HINTs\n", lead);
     fprintf(outf,
             "%su:  top-level OIDs must have '.' prefix (UCD-style)\n",
             lead);
@@ -4469,6 +4473,38 @@ node_to_oid(struct tree *tp, oid * objid, size_t * objidlen)
     return (numids);
 }
 
+/*
+ * Replace \x with x stop at eos_marker
+ * return NULL if eos_marker not found
+ */
+static char *_apply_escapes(char *src, char eos_marker)
+{
+    char *dst;
+    int backslash = 0;
+    
+    dst = src;
+    while (*src) {
+	if (backslash) {
+	    backslash = 0;
+	    *dst++ = *src;
+	} else {
+	    if (eos_marker == *src) break;
+	    if ('\\' == *src) {
+		backslash = 1;
+	    } else {
+		*dst++ = *src;
+	    }
+	}
+	src++;
+    }
+    if (!*src) {
+	/* never found eos_marker */
+	return NULL;
+    } else {
+	*dst = 0;
+	return src;
+    }
+}
 
 static int
 _add_strings_to_oid(struct tree *tp, char *cp,
@@ -4483,6 +4519,7 @@ _add_strings_to_oid(struct tree *tp, char *cp,
     int             len = -1, pos = -1;
     int             check =
         !netsnmp_ds_get_boolean(NETSNMP_DS_LIBRARY_ID, NETSNMP_DS_LIB_DONT_CHECK_RANGE);
+    int             do_hint = !netsnmp_ds_get_boolean(NETSNMP_DS_LIBRARY_ID, NETSNMP_DS_LIB_NO_DISPLAY_HINT);
 
     while (cp && tp && tp->child_list) {
         fcp = cp;
@@ -4631,36 +4668,61 @@ _add_strings_to_oid(struct tree *tp, char *cp,
                     return 0;
                 }
 
-                while (*cp && *cp != doingquote) {
-                    if (*objidlen >= maxlen)
-                        goto bad_id;
-                    objid[*objidlen] = *cp++;
-                    (*objidlen)++;
-                    pos++;
-                }
-                if (!*cp)
-                    goto bad_id;
-                cp2 = cp + 1;
+		cp2 = _apply_escapes(cp, doingquote);
+		if (!cp2) goto bad_id;
+		else {
+		    unsigned char *new_val;
+		    int new_val_len;
+		    int parsed_hint = 0;
+		    const char *parsed_value;
+
+		    if (do_hint && tp->hint) {
+			parsed_value = parse_octet_hint(tp->hint, cp,
+			                                &new_val, &new_val_len);
+			parsed_hint = parsed_value == NULL;
+		    }
+		    if (parsed_hint) {
+			int i;
+			for (i = 0; i < new_val_len; i++) {
+			    if (*objidlen >= maxlen) goto bad_id;
+			    objid[ *objidlen ] = new_val[i];
+			    (*objidlen)++;
+			    pos++;
+			}
+			free(new_val);
+		    } else {
+			while(*cp) {
+			    if (*objidlen >= maxlen) goto bad_id;
+			    objid[ *objidlen ] = *cp++;
+			    (*objidlen)++;
+			    pos++;
+			}
+		    }
+		}
+		
+		cp2++;
                 if (!*cp2)
                     cp2 = NULL;
                 else if (*cp2 != '.')
                     goto bad_id;
                 else
                     cp2++;
-                if (len == -1) {
-                    struct range_list *rp = tp->ranges;
-                    int             ok = 0;
-                    while (rp && !ok)
-                        if (rp->low <= pos && pos <= rp->high)
-                            ok = 1;
-                        else
-                            rp = rp->next;
-                    if (!ok)
+		if (check) {
+                    if (len == -1) {
+                        struct range_list *rp = tp->ranges;
+                        int             ok = 0;
+                        while (rp && !ok)
+                            if (rp->low <= pos && pos <= rp->high)
+                                ok = 1;
+                            else
+                                rp = rp->next;
+                        if (!ok)
+                            goto bad_id;
+                        if (!in_dices->isimplied)
+                            objid[len_index] = pos;
+                    } else if (pos != len)
                         goto bad_id;
-                    if (!in_dices->isimplied)
-                        objid[len_index] = pos;
-                } else if (pos != len)
-                    goto bad_id;
+		}
             } else {
                 if (!in_dices->isimplied && len == -1) {
                     fcp = cp;
@@ -5146,6 +5208,278 @@ snmp_parse_oid(const char *argv, oid * root, size_t * rootlen)
     }
     return NULL;
 }
+
+/*
+ * Use DISPLAY-HINT to parse a value into an octet string.
+ *
+ * note that "1d1d", "11" could have come from an octet string that
+ * looked like { 1, 1 } or an octet string that looked like { 11 }
+ * because of this, it's doubtful that anyone would use such a display
+ * string. Therefore, the parser ignores this case.
+ */
+
+struct parse_hints {
+    int length;
+    int repeat;
+    int format;
+    int separator;
+    int terminator;
+    unsigned char *result;
+    int result_max;
+    int result_len;
+};
+
+static void parse_hints_reset(struct parse_hints *ph)
+{
+    ph->length = 0;
+    ph->repeat = 0;
+    ph->format = 0;
+    ph->separator = 0;
+    ph->terminator = 0;
+}
+
+static void parse_hints_ctor(struct parse_hints *ph)
+{
+    parse_hints_reset(ph);
+    ph->result = NULL;
+    ph->result_max = 0;
+    ph->result_len = 0;
+}
+
+static int parse_hints_add_result_octet(struct parse_hints *ph, unsigned char octet)
+{
+    if (!(ph->result_len < ph->result_max)) {
+	ph->result_max = ph->result_len + 32;
+	if (!ph->result) {
+	    ph->result = (unsigned char *)malloc(ph->result_max);
+	} else {
+	    ph->result = (unsigned char *)realloc(ph->result, ph->result_max);
+	}
+    }
+    
+    if (!ph->result) {
+	return 0;		/* failed */
+    }
+
+    ph->result[ph->result_len++] = octet;
+    return 1;			/* success */
+}
+
+static int parse_hints_parse(struct parse_hints *ph, const char **v_in_out)
+{
+    const char *v = *v_in_out;
+    char *nv;
+    int base;
+    int repeats = 0;
+    int repeat_fixup = ph->result_len;
+    
+    if (ph->repeat) {
+	if (!parse_hints_add_result_octet(ph, 0)) {
+	    return 0;
+	}
+    }
+    do {
+	base = 0;
+	switch (ph->format) {
+	case 'x': base += 6;	/* fall through */
+	case 'd': base += 2;	/* fall through */
+	case 'o': base += 8;	/* fall through */
+	    {
+		int i;
+		unsigned long number = strtol(v, &nv, base);
+		if (nv == v) return 0;
+		v = nv;
+		for (i = 0; i < ph->length; i++) {
+		    int shift = 8 * (ph->length - 1 - i);
+		    if (!parse_hints_add_result_octet(ph, (number >> shift) & 0xFF)) {
+			return 0; /* failed */
+		    }
+		}
+	    }
+	    break;
+
+	case 'a':
+	    {
+		int i;
+		    
+		for (i = 0; i < ph->length && *v; i++) {
+		    if (!parse_hints_add_result_octet(ph, *v++)) {
+			return 0;	/* failed */
+		    }
+		}
+	    }
+	    break;
+	}
+
+	repeats++;
+
+	if (ph->separator && *v) {
+	    if (*v == ph->separator) {
+		v++;
+	    } else {
+		return 0;		/* failed */
+	    }
+	}
+
+	if (ph->terminator) {
+	    if (*v == ph->terminator) {
+		v++;
+		break;
+	    }
+	}
+    } while (ph->repeat && *v);
+    if (ph->repeat) {
+	ph->result[repeat_fixup] = repeats;
+    }
+
+    *v_in_out = v;
+    return 1;
+}
+
+static void parse_hints_length_add_digit(struct parse_hints *ph, int digit)
+{
+    ph->length *= 10;
+    ph->length += digit - '0';
+}
+
+const char *parse_octet_hint(const char *hint, const char *value, unsigned char **new_val, int *new_val_len)
+{
+    const char *h = hint;
+    const char *v = value;
+    struct parse_hints ph;
+    int retval = 1;
+    /* See RFC 1443 */
+    enum {
+	HINT_1_2,
+	HINT_2_3,
+	HINT_1_2_4,
+	HINT_1_2_5,
+    } state = HINT_1_2;
+
+    parse_hints_ctor(&ph);
+    while (*h && *v && retval) {
+	switch (state) {
+	case HINT_1_2:
+	    if ('*' == *h) {
+		ph.repeat = 1;
+		state = HINT_2_3;
+	    } else if (isdigit(*h)) {
+		parse_hints_length_add_digit(&ph, *h);
+		state = HINT_2_3;
+	    } else {
+		return v;	/* failed */
+	    }
+	    break;
+
+	case HINT_2_3:
+	    if (isdigit(*h)) {
+		parse_hints_length_add_digit(&ph, *h);
+		/* state = HINT_2_3 */
+	    } else if ('x' == *h || 'd' == *h || 'o' == *h || 'a' == *h) {
+		ph.format = *h;
+		state = HINT_1_2_4;
+	    } else {
+		return v;	/* failed */
+	    }
+	    break;
+
+	case HINT_1_2_4:
+	    if ('*' == *h) {
+		retval = parse_hints_parse(&ph, &v);
+		parse_hints_reset(&ph);
+		
+		ph.repeat = 1;
+		state = HINT_2_3;
+	    } else if (isdigit(*h)) {
+		retval = parse_hints_parse(&ph, &v);
+		parse_hints_reset(&ph);
+		
+		parse_hints_length_add_digit(&ph, *h);
+		state = HINT_2_3;
+	    } else {
+		ph.separator = *h;
+		state = HINT_1_2_5;
+	    }
+	    break;
+
+	case HINT_1_2_5:
+	    if ('*' == *h) {
+		retval = parse_hints_parse(&ph, &v);
+		parse_hints_reset(&ph);
+		
+		ph.repeat = 1;
+		state = HINT_2_3;
+	    } else if (isdigit(*h)) {
+		retval = parse_hints_parse(&ph, &v);
+		parse_hints_reset(&ph);
+		
+		parse_hints_length_add_digit(&ph, *h);
+		state = HINT_2_3;
+	    } else {
+		ph.terminator = *h;
+
+		retval = parse_hints_parse(&ph, &v);
+		parse_hints_reset(&ph);
+
+		state = HINT_1_2;
+	    }
+	    break;
+	}
+	h++;
+    }
+    while (*v && retval) {
+	retval = parse_hints_parse(&ph, &v);
+    }
+    if (retval) {
+	*new_val = ph.result;
+	*new_val_len = ph.result_len;
+    } else {
+	if (ph.result) {
+	    free(ph.result);
+	}
+	*new_val = NULL;
+	*new_val_len = 0;
+    }
+    return retval ? NULL : v;
+}
+
+#ifdef test_display_hint
+
+int main(int argc, const char **argv)
+{
+    const char *hint;
+    const char *value;
+    unsigned char *new_val;
+    int new_val_len;
+    char *r;
+    
+    if (argc < 3) {
+	fprintf(stderr, "usage: dh <hint> <value>\n");
+	exit(2);
+    }
+    hint = argv[1];
+    value = argv[2];
+    r = parse_octet_hint(hint, value, &new_val, &new_val_len);
+    printf("{\"%s\", \"%s\"}: \n\t", hint, value);
+    if (r) {
+        *r = 0;
+    	printf("returned failed\n");
+	printf("value syntax error at: %s\n", value);
+    }
+    else {
+	int i;
+	printf("returned success\n");
+	for (i = 0; i < new_val_len; i++) {
+	    int c = new_val[i] & 0xFF;
+	    printf("%02X(%c) ", c, isprint(c) ? c : ' ');
+	}
+	free(new_val);
+    }
+    printf("\n");
+    exit(0);
+}
+
+#endif /* test_display_hint */
 
 u_char
 mib_to_asn_type(int mib_type)
