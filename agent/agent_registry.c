@@ -254,29 +254,34 @@ load_subtree( struct subtree *new_sub )
 
 
 int
-register_mib_priority(const char *moduleName,
+register_mib_range(const char *moduleName,
 	     struct variable *var,
 	     size_t varsize,
 	     size_t numvars,
 	     oid *mibloc,
 	     size_t mibloclen,
 	     int priority,
+	     int range_subid,
+	     oid range_ubound,
 	     struct snmp_session *ss)
 {
-  struct subtree *subtree;
+  struct subtree *subtree, *sub2;
   char c_oid[SPRINT_MAX_LEN];
-  int res;
+  int res, i;
   struct register_parameters reg_parms;
   
   subtree = (struct subtree *) malloc(sizeof(struct subtree));
   if ( subtree == NULL )
-    return -1;
+    return MIB_REGISTRATION_FAILED;
   memset(subtree, 0, sizeof(struct subtree));
 
   sprint_objid(c_oid, mibloc, mibloclen);
   DEBUGMSGTL(("register_mib", "registering \"%s\" at %s\n",
               moduleName, c_oid));
     
+	/*
+	 * Create the new subtree node being registered
+	 */
   memcpy(subtree->name, mibloc, mibloclen*sizeof(oid));
   subtree->namelen = (u_char) mibloclen;
   memcpy(subtree->start, mibloc, mibloclen*sizeof(oid));
@@ -295,13 +300,54 @@ register_mib_priority(const char *moduleName,
   subtree->session = ss;
   res = load_subtree(subtree);
 
+	/*
+	 * If registering a range,
+	 *   use the first subtree as a template
+	 *   for the rest of the range
+	 */
+  if (( res == MIB_REGISTERED_OK ) && ( range_subid != 0 )) {
+    for ( i = mibloc[range_subid-1] +1 ; i < range_ubound ; i++ ) {
+	sub2 = (struct subtree *) malloc(sizeof(struct subtree));
+	if ( sub2 == NULL ) {
+	    unregister_mib_range( mibloc, mibloclen, priority,
+				  range_subid, range_ubound);
+	    return MIB_REGISTRATION_FAILED;
+	}
+	memcpy( sub2, subtree, sizeof(struct subtree));
+	sub2->start[range_subid-1] = i;
+	sub2->end[  range_subid-1] = i;		/* XXX - ???? */
+	res = load_subtree(sub2);
+	if ( res != MIB_REGISTERED_OK ) {
+	    unregister_mib_range( mibloc, mibloclen, priority,
+				  range_subid, range_ubound);
+	    return MIB_REGISTRATION_FAILED;
+	}
+    }
+  }
+
+
   reg_parms.name = mibloc;
   reg_parms.namelen = mibloclen;
   reg_parms.priority = priority;
+  reg_parms.range_subid  = range_subid;
+  reg_parms.range_ubound = range_ubound;
   snmp_call_callbacks(SNMP_CALLBACK_APPLICATION, SNMPD_CALLBACK_REGISTER_OID,
                       &reg_parms);
 
   return res;
+}
+
+int
+register_mib_priority(const char *moduleName,
+	     struct variable *var,
+	     size_t varsize,
+	     size_t numvars,
+	     oid *mibloc,
+	     size_t mibloclen,
+	     int priority)
+{
+  return register_mib_range( moduleName, var, varsize, numvars,
+				mibloc, mibloclen, priority, 0, 0, NULL );
 }
 
 int
@@ -313,7 +359,7 @@ register_mib(const char *moduleName,
 	     size_t mibloclen)
 {
   return register_mib_priority( moduleName, var, varsize, numvars,
-				mibloc, mibloclen, DEFAULT_MIB_PRIORITY, NULL );
+				mibloc, mibloclen, DEFAULT_MIB_PRIORITY );
 }
 
 
@@ -345,7 +391,8 @@ unload_subtree( struct subtree *sub, struct subtree *prev)
 }
 
 int
-unregister_mib_priority( oid *name, size_t len, int priority)
+unregister_mib_range( oid *name, size_t len, int priority,
+	     		int range_subid, oid range_ubound)
 {
   struct subtree *list, *myptr;
   struct subtree *prev, *child;             /* loop through children */
@@ -373,6 +420,8 @@ unregister_mib_priority( oid *name, size_t len, int priority)
 		 *	nature of the way such splits work, the first
 		 * 	subtree 'slice' that doesn't refer to the given
 		 *	name marks the end of the original region.
+		 *
+		 *  This should also serve to register ranges.
 		 */
 
   for ( list = myptr->next ; list != NULL ; list=list->next ) {
@@ -395,10 +444,18 @@ unregister_mib_priority( oid *name, size_t len, int priority)
   reg_parms.name = name;
   reg_parms.namelen = len;
   reg_parms.priority = priority;
+  reg_parms.range_subid  = range_subid;
+  reg_parms.range_ubound = range_ubound;
   snmp_call_callbacks(SNMP_CALLBACK_APPLICATION, SNMPD_CALLBACK_UNREGISTER_OID,
                       &reg_parms);
 
   return MIB_UNREGISTERED_OK;
+}
+
+int
+unregister_mib_priority(oid *name, size_t len, int priority)
+{
+  return unregister_mib_range( name, len, priority, 0, 0 );
 }
 
 int
