@@ -34,7 +34,7 @@ unsigned char *var_extensible_pass(vp, name, length, exact, var_len, write_metho
 {
 
   oid newname[30];
-  int count, result,i, j, rtest=0, fd, newlen;
+  int count, result,i, j, rtest=0, fd, newlen, last;
   register int interface;
   struct myproc *proc;
   static long long_ret;
@@ -51,7 +51,10 @@ unsigned char *var_extensible_pass(vp, name, length, exact, var_len, write_metho
   long_ret = *length;
   for(i=1; i<= numpassthrus; i++) {
     passthru = get_exten_instance(passthrus,i);
-    for(j=0,rtest=0; j < passthru->miblen && !rtest; j++) {
+    last = passthru->miblen;
+    if (passthru->miblen > *length)
+      last = *length;
+    for(j=0,rtest=0; j < last && !rtest; j++) {
       if (name[j] != passthru->miboid[j]) {
         if (name[j] < passthru->miboid[j])
           rtest = -1;
@@ -62,10 +65,12 @@ unsigned char *var_extensible_pass(vp, name, length, exact, var_len, write_metho
     print_mib_oid(passthru->miboid,passthru->miblen);
     DEBUGP1(" (%d)",passthru->miblen);
     DEBUGP1(": %d\n",rtest);
-    if ((exact && rtest == 0 && *length >= passthru->miblen) ||
-        (!exact && rtest <= 0)) {
+    if ((exact && rtest == 0) || (!exact && rtest <= 0)) {
       /* setup args */
-      sprint_mib_oid(buf, name, *length);
+      if (passthru->miblen >= *length || rtest < 0)
+        sprint_mib_oid(buf, passthru->miboid, passthru->miblen);
+      else 
+        sprint_mib_oid(buf, name, *length);
       if (exact)
         sprintf(passthru->command,"%s -g %s",passthru->name,buf);
       else
@@ -175,7 +180,7 @@ setPass(action, var_val, var_val_type, var_val_len, statP, name, name_len)
    oid      *name;
    int      name_len;
 {
-  int i, j, rtest, tmplen=1000;
+  int i, j, rtest, tmplen=1000, last;
   char cmdline[300];
   struct extensible *passthru;
 
@@ -188,7 +193,10 @@ setPass(action, var_val, var_val_type, var_val_len, statP, name, name_len)
   if (action == COMMIT) {
     for(i=1; i<= numpassthrus; i++) {
       passthru = get_exten_instance(passthrus,i);
-      for(j=0,rtest=0; j < passthru->miblen && !rtest; j++) {
+      last = passthru->miblen;
+      if (passthru->miblen > name_len)
+        last = name_len;
+      for(j=0,rtest=0; j < last && !rtest; j++) {
         if (name[j] != passthru->miboid[j]) {
           if (name[j] < passthru->miboid[j])
             rtest = -1;
@@ -199,9 +207,12 @@ setPass(action, var_val, var_val_type, var_val_len, statP, name, name_len)
       print_mib_oid(passthru->miboid,passthru->miblen);
       DEBUGP1(" (%d)",passthru->miblen);
       DEBUGP1(": %d\n",rtest);
-      if (rtest == 0 && name_len >= passthru->miblen) {
+      if (rtest <= 0) {
         /* setup args */
-        sprint_mib_oid(buf, name, name_len);
+        if (passthru->miblen >= name_len || rtest < 0)
+          sprint_mib_oid(buf, passthru->miboid, passthru->miblen);
+        else 
+          sprint_mib_oid(buf, name, name_len
         sprintf(passthru->command,"%s -s %s ",passthru->name,buf);
         switch(var_val_type) {
           case INTEGER:
