@@ -194,11 +194,10 @@ snmp_vlog (int priority, const char *format, va_list ap)
 
   length=vsnprintf(buffer, LOGLENGTH, format, ap);
 #else
-
   length=vsprintf(buffer, format, ap);
 #endif
 
-  if (length < 0 ) {
+  if ((length == 0) || (length == -1)) {
     snmp_log_string(LOG_ERR, "Could not format log-string\n");
     return(-1);
   }
@@ -233,7 +232,7 @@ int
 #if HAVE_STDARG_H
 snmp_log (int priority, const char *format, ...)
 #else
-snmp_log (int priority, va_alist)
+snmp_log (va_alist)
   va_dcl
 #endif
 {
@@ -242,8 +241,11 @@ snmp_log (int priority, va_alist)
 #if HAVE_STDARG_H
   va_start(ap, format);
 #else
+  int priority;
   const char *format;
   va_start(ap);
+
+  priority = va_arg(ap, int);
   format = va_arg(ap, const char *);
 #endif
   ret=snmp_vlog(priority, format, ap);
