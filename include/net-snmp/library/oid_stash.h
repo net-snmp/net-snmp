@@ -34,10 +34,19 @@ extern          "C" {
         void           *thedata;
     } netsnmp_oid_stash_node;
 
+    typedef struct netsnmp_oid_stash_save_info_s {
+       const char *token;
+       netsnmp_oid_stash_node **root;
+       NetSNMPStashDump *dumpfn;
+    } netsnmp_oid_stash_save_info;
+
     int             netsnmp_oid_stash_add_data(netsnmp_oid_stash_node
                                                **root, oid * lookup,
                                                size_t lookup_len,
                                                void *mydata);
+    SNMPCallback netsnmp_oid_stash_store_all;
+
+
     netsnmp_oid_stash_node
         *netsnmp_oid_stash_get_node(netsnmp_oid_stash_node *root,
                                     oid * lookup, size_t lookup_len);
