@@ -42,6 +42,7 @@ INCLUDESUBDIRHEADERS=README \
 	snmp.h \
 	snmp_alarm.h \
 	snmp_api.h \
+	snmp_assert.h \
 	snmp_client.h \
 	snmp_debug.h \
 	snmp_impl.h \
