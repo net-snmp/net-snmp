@@ -6224,8 +6224,8 @@ snmp_add_var(netsnmp_pdu *pdu,
     const char     *cp;
     char           *ecp;
     int             result = SNMPERR_SUCCESS;
-    int             check =
-        !netsnmp_ds_get_boolean(NETSNMP_DS_LIBRARY_ID, NETSNMP_DS_LIB_DONT_CHECK_RANGE);
+    int             check = !netsnmp_ds_get_boolean(NETSNMP_DS_LIBRARY_ID,
+					     NETSNMP_DS_LIB_DONT_CHECK_RANGE);
     u_char         *buf = NULL;
     const u_char   *buf_ptr = NULL;
     size_t          buf_len = 0, value_len = 0, tint;
@@ -6566,8 +6566,11 @@ snmp_add_var(netsnmp_pdu *pdu,
 
     default:
         result = SNMPERR_VAR_TYPE;
-        sprintf((char *) buf, "%c", type);
-        snmp_set_detail((char *) buf);
+	buf = calloc(1, 4);
+	if (buf != NULL) {
+	    sprintf((char *)buf, "\"%c\"", type);
+	    snmp_set_detail((char *)buf);
+	}
         break;
     }
 
