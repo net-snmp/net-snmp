@@ -28,7 +28,7 @@
 #include "struct.h"
 #include "util_funcs.h"
 
-#if defined(HAVE_DLFCN_H) && defined(HAVE_DLOPEN)
+#if defined(HAVE_DLFCN_H) && ( defined(HAVE_DLOPEN) || defined(HAVE_LIBDL) )
 
 #include <dlfcn.h>
 #include "dlmod.h"
