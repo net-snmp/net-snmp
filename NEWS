@@ -9,6 +9,10 @@ the ChangeLog file for a more detailed listing of changes/bug fixes.
    snmptrapd:
      - allow a non-default AgentX socket
 
+    mib2c:
+      - mib2c.mfd.conf now generates code for persistence row storage
+
+
 *5.2*
  New:
     For the security parnoid (like Wes):
