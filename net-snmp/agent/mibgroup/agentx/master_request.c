@@ -515,7 +515,7 @@ get_agentx_request(struct agent_snmp_session *asp,
 	case SNMP_MSG_GETBULK:
 		if (sub->flags & FULLY_QUALIFIED_INSTANCE) {
 		    DEBUGMSGTL(("agentx/master","-> getnext/bulk [FQI -> get]\n"));
-		    pdu->command = AGENTX_MSG_GET;
+		    pdu->command = AGENTX_MSG_GETNEXT;
 		} else {
 		    DEBUGMSGTL(("agentx/master","-> getnext/bulk\n"));
 		    pdu->command = AGENTX_MSG_GETNEXT;
@@ -651,7 +651,7 @@ agentx_add_request( struct agent_snmp_session *asp,
     } else {
 	DEBUGMSGOID(("agentx/master", sub->end, sub->end_len));
         snmp_pdu_add_variable(request->pdu,
-			      vbp->name, vbp->name_length, ASN_PRIV_EXCL_RANGE,
+			      vbp->name, vbp->name_length, ASN_PRIV_INCL_RANGE,
 			      (u_char*)sub->end, sub->end_len*sizeof(oid));
     }
     DEBUGMSG(("agentx/master", "\n"));
