@@ -505,7 +505,7 @@ handle_snmp_packet(int operation, struct snmp_session *session, int reqid,
 		case SNMP_ERR_RESOURCEUNAVAILABLE:
 		case SNMP_ERR_COMMITFAILED:
 		case SNMP_ERR_UNDOFAILED:
-			status = SNMP_ERR_BADVALUE;
+			status = SNMP_ERR_GENERR;
 			break;
 	    }
 	}
