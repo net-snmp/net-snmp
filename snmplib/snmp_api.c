@@ -722,14 +722,12 @@ snmp_parse(session, pdu, data, length)
     if (data == NULL)
 	return -1;
 
-    if (((srcp = party_getEntry(pdu->srcParty, pdu->srcPartyLen)) == NULL)
-        || ((dstp = party_getEntry(pdu->dstParty, pdu->dstPartyLen)) == NULL)
-        || ((cxp = context_getEntry(pdu->context, pdu->contextLen)) == NULL))
-      return -1;
-
     if (version == SNMP_SECURITY_1
-	&& !has_access(msg_type, srcp->partyIndex, dstp->partyIndex,
-                    cxp->contextIndex))
+	&& (((srcp = party_getEntry(pdu->srcParty, pdu->srcPartyLen)) == NULL)
+        || ((dstp = party_getEntry(pdu->dstParty, pdu->dstPartyLen)) == NULL)
+        || ((cxp = context_getEntry(pdu->context, pdu->contextLen)) == NULL)
+        || !has_access(msg_type, srcp->partyIndex, dstp->partyIndex,
+                       cxp->contextIndex)))
 	return -1;
 
     pdu->command = msg_type;
