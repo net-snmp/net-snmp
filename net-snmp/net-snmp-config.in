@@ -158,26 +158,38 @@ else
 
     --compile-subagent)
       shift
-      if test "x$1" != "x"; then
-        outname=$1
-        shift
-      fi
-      if test "$1" = "--norm" ; then
-        norm=1
-	shift
-      fi
-      if test "$1" = "--cflags" ; then
-        shift
-	cflags=$1
-	echo "setting extra cflags: $cflags"
-	shift
-      fi
-      if test "$1" = "--ldflags" ; then
-        shift
-	ldflags=$1
-	echo "setting extra ldflags: $ldflags"
-	shift
-      fi
+      while test "x$done" = "x" -a "x$1" != "x" ; do
+	case $1 in
+            --norm)
+	        norm=1
+	        shift
+		;;
+            --cflags)
+	        shift
+	        cflags=$1
+	        echo "setting extra cflags: $cflags"
+	        shift
+		;;
+            --ldflags)
+	        shift
+	        ldflags=$1
+	        echo "setting extra ldflags: $ldflags"
+	        shift
+		;;
+ 	    --*)
+		echo "unknown suboption to --compile-subagent: $1"
+		exit 1
+		;;
+	    *)
+                if test "x$outname" = "x"; then
+                  outname=$1
+                  shift
+                else
+	          done=1
+                fi
+		;;
+	esac
+      done
       tmpfile=netsnmptmp.$$.c
       if test -f $tmpfile; then
 	echo "Ack.  Can't create $tmpfile: already exists"
