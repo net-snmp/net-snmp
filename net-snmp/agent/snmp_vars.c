@@ -253,7 +253,7 @@ init_snmp()
   }
   init_kmem("/dev/kmem"); 
   init_routes();
-  init_wes();
+  init_extensible();
 }
 
 #define CMUMIB 1, 3, 6, 1, 4, 1, 3
@@ -644,35 +644,35 @@ struct variable2 eventnotifytab_variables[] = {
         {EVENTNOTIFYTABSTATUS, INTEGER, RWRITE, var_eventnotifytab, 1, {4 }},
 };
 
-#include "wes/mibdefs.h"
-#include "wes/wes.h"
-#include "wes/wes_vars.h"
+#include "extensible/mibdefs.h"
+#include "../config.h"
+#include "extensible/snmp_vars.h"
 struct subtree subtrees[] = {
-  {{WESMIB, PROCMIBNUM}, 7, (struct variable *)wes_proc_variables,
-   sizeof(wes_proc_variables)/sizeof(*wes_proc_variables),
-   sizeof(*wes_proc_variables)},
-  {{WESMIB, SHELLMIBNUM}, 7, (struct variable *)wes_extensible_variables,
-   sizeof(wes_extensible_variables)/sizeof(*wes_extensible_variables),
-   sizeof(*wes_extensible_variables)},
+  {{EXTENSIBLEMIB, PROCMIBNUM}, 7, (struct variable *)extensible_proc_variables,
+   sizeof(extensible_proc_variables)/sizeof(*extensible_proc_variables),
+   sizeof(*extensible_proc_variables)},
+  {{EXTENSIBLEMIB, SHELLMIBNUM}, 7, (struct variable *)extensible_extensible_variables,
+   sizeof(extensible_extensible_variables)/sizeof(*extensible_extensible_variables),
+   sizeof(*extensible_extensible_variables)},
 #ifdef hpux
-  {{WESMIB, MEMMIBNUM}, 7, (struct variable *)wes_mem_variables,
-   sizeof(wes_mem_variables)/sizeof(*wes_mem_variables),
-   sizeof(*wes_mem_variables)},
+  {{EXTENSIBLEMIB, MEMMIBNUM}, 7, (struct variable *)extensible_mem_variables,
+   sizeof(extensible_mem_variables)/sizeof(*extensible_mem_variables),
+   sizeof(*extensible_mem_variables)},
 #endif
-  {{WESMIB, LOCKDMIBNUM}, 7, (struct variable *)wes_lockd_variables,
-   sizeof(wes_lockd_variables)/sizeof(*wes_lockd_variables),
-   sizeof(*wes_lockd_variables)},
+  {{EXTENSIBLEMIB, LOCKDMIBNUM}, 7, (struct variable *)extensible_lockd_variables,
+   sizeof(extensible_lockd_variables)/sizeof(*extensible_lockd_variables),
+   sizeof(*extensible_lockd_variables)},
 #if defined(hpux) || defined(ultrix)
-  {{WESMIB, DISKMIBNUM}, 7, (struct variable *)wes_disk_variables,
-   sizeof(wes_disk_variables)/sizeof(*wes_disk_variables),
-   sizeof(*wes_disk_variables)},
+  {{EXTENSIBLEMIB, DISKMIBNUM}, 7, (struct variable *)extensible_disk_variables,
+   sizeof(extensible_disk_variables)/sizeof(*extensible_disk_variables),
+   sizeof(*extensible_disk_variables)},
 #endif
-  {{WESMIB, LOADAVEMIBNUM}, 7, (struct variable *)wes_loadave_variables,
-   sizeof(wes_loadave_variables)/sizeof(*wes_loadave_variables),
-   sizeof(*wes_loadave_variables)},
-  {{WESMIB, VERSIONMIBNUM}, 7, (struct variable *)wes_version_variables,
-   sizeof(wes_version_variables)/sizeof(*wes_version_variables),
-   sizeof(*wes_version_variables)},
+  {{EXTENSIBLEMIB, LOADAVEMIBNUM}, 7, (struct variable *)extensible_loadave_variables,
+   sizeof(extensible_loadave_variables)/sizeof(*extensible_loadave_variables),
+   sizeof(*extensible_loadave_variables)},
+  {{EXTENSIBLEMIB, VERSIONMIBNUM}, 7, (struct variable *)extensible_version_variables,
+   sizeof(extensible_version_variables)/sizeof(*extensible_version_variables),
+   sizeof(*extensible_version_variables)},
     {{MIB, 1}, 7, (struct variable *)system_variables,
 	 sizeof(system_variables)/sizeof(*system_variables),
 	 sizeof(*system_variables)},
@@ -694,12 +694,12 @@ struct subtree subtrees[] = {
     {{MIB, 7}, 7, (struct variable *)udp_variables,
 	 sizeof(udp_variables)/sizeof(*udp_variables),
 	 sizeof(*udp_variables)},
-  {{1,3,6,1,4,1,11,2,13,1,2,1},12,(struct variable *)wes_hptrap_variables,
-   sizeof(wes_hptrap_variables)/sizeof(*wes_hptrap_variables),
-   sizeof(*wes_hptrap_variables)},
-  {{1,3,6,1,4,1,11,2,13,2},10,(struct variable *)wes_hp_variables,
-   sizeof(wes_hp_variables)/sizeof(*wes_hp_variables),
-   sizeof(*wes_hp_variables)},
+  {{1,3,6,1,4,1,11,2,13,1,2,1},12,(struct variable *)extensible_hptrap_variables,
+   sizeof(extensible_hptrap_variables)/sizeof(*extensible_hptrap_variables),
+   sizeof(*extensible_hptrap_variables)},
+  {{1,3,6,1,4,1,11,2,13,2},10,(struct variable *)extensible_hp_variables,
+   sizeof(extensible_hp_variables)/sizeof(*extensible_hp_variables),
+   sizeof(*extensible_hp_variables)},
 #ifdef testing
     {{HOSTTIMETAB}, 10, (struct variable *)hosttimetab_variables,
 	 sizeof(hosttimetab_variables) / sizeof(*hosttimetab_variables),
