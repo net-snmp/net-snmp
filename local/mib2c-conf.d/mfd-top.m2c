@@ -31,11 +31,13 @@
 #include <net-snmp/library/asn1.h>
 
 /* other required module components */
+    /* *INDENT-OFF*  */
 config_require(${name}_interface);
 config_require(${name}_data_access);
 @if $m2c_create_fewer_files != 1@
 config_require(${name}_data_get);
 config_require(${name}_data_set);
+    /* *INDENT-ON*  */
 
 /* OID and column number definitions for $context */
 #include "${name}_oids.h"
@@ -43,6 +45,7 @@ config_require(${name}_data_set);
 /* enum definions */
 #include "${name}_enums.h"
 @else@
+    /* *INDENT-ON*  */
 
 /* OID, column number and enum definions for $context */
 #include "${name}_constants.h"
@@ -181,8 +184,10 @@ extern int ${context}_oid_size;
 #define MFD_SKIP                 SNMP_NOSUCHINSTANCE
 #define MFD_ERROR                SNMP_ERR_GENERR
 #define MFD_RESOURCE_UNAVAILABLE SNMP_ERR_RESOURCEUNAVAILABLE
-#define MFD_INCONSISTENT_VALUE   SNMP_ERR_INCONSISTENTVALUE
-#define MFD_BAD_VALUE            SNMP_ERR_BADVALUE
+#define MFD_NOT_VALID_NOW        SNMP_ERR_INCONSISTENTVALUE
+#define MFD_NOT_VALID_EVER       SNMP_ERR_WRONGVALUE
+#define MFD_CANNOT_CREATE_NOW    SNMP_ERR_INCONSISTENTNAME
+#define MFD_CANNOT_CREATE_EVER   SNMP_ERR_NOCREATION
 #define MFD_END_OF_DATA          SNMP_ENDOFMIBVIEW
 #endif
 @if $m2c_mark_boundary == 1@
