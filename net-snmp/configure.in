@@ -849,7 +849,7 @@ for i in $new_transport_list; do
     transport_src="snmp"$i"Domain.c"
     transport_hdr="snmp"$i"Domain.h"
     rel_transport_src="snmplib/"$transport_src
-    rel_transport_hdr="snmplib/"$transport_hdr
+    rel_transport_hdr="include/net-snmp/library/"$transport_hdr
     if test -f "$srcdir/$rel_transport_src"; then
       transport_result_list="$transport_result_list $i"
       transport_src_list="$transport_src $transport_src_list"
@@ -896,6 +896,9 @@ if test ! -d include/net-snmp; then
 fi
 if test ! -d include/net-snmp/agent; then
   mkdir include/net-snmp/agent
+fi
+if test ! -d include/net-snmp/library; then
+  mkdir include/net-snmp/library
 fi
 if test ! -d include/ucd-snmp; then
   mkdir include/ucd-snmp
