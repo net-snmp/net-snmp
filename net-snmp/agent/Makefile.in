@@ -125,7 +125,7 @@ agent_index.lo: mibgroup/host/hr_other.h mibgroup/host/hr_partition.h
 agent_index.lo: mibgroup/host/hr_print.h mibgroup/host/hr_proc.h
 agent_index.lo: mibgroup/host/hr_storage.h mibgroup/host/hr_swinst.h
 agent_index.lo: mibgroup/host/hr_swrun.h mibgroup/host/hr_system.h
-agent_index.lo: mibgroup/host/hr_utils.h mibgroup/mibdefs.h mibgroup/mibII/at.h
+agent_index.lo: mibgroup/ mibgroup/mibdefs.h mibgroup/mibII/at.h
 agent_index.lo: mibgroup/mibII.h mibgroup/mibII/icmp.h
 agent_index.lo: mibgroup/mibII/interfaces.h mibgroup/mibII/ipAddr.h
 agent_index.lo: mibgroup/mibII/ip.h mibgroup/mibII/kernel_linux.h
@@ -219,7 +219,7 @@ agent_read_config.lo: mibgroup/host/hr_network.h mibgroup/host/hr_other.h
 agent_read_config.lo: mibgroup/host/hr_partition.h mibgroup/host/hr_print.h
 agent_read_config.lo: mibgroup/host/hr_proc.h mibgroup/host/hr_storage.h
 agent_read_config.lo: mibgroup/host/hr_swinst.h mibgroup/host/hr_swrun.h
-agent_read_config.lo: mibgroup/host/hr_system.h mibgroup/host/hr_utils.h
+agent_read_config.lo: mibgroup/host/hr_system.h mibgroup/
 agent_read_config.lo: mibgroup/mibdefs.h mibgroup/mibII/at.h mibgroup/mibII.h
 agent_read_config.lo: mibgroup/mibII/icmp.h mibgroup/mibII/interfaces.h
 agent_read_config.lo: mibgroup/mibII/ipAddr.h mibgroup/mibII/ip.h
@@ -273,7 +273,7 @@ agent_registry.lo: mibgroup/host/hr_other.h mibgroup/host/hr_partition.h
 agent_registry.lo: mibgroup/host/hr_print.h mibgroup/host/hr_proc.h
 agent_registry.lo: mibgroup/host/hr_storage.h mibgroup/host/hr_swinst.h
 agent_registry.lo: mibgroup/host/hr_swrun.h mibgroup/host/hr_system.h
-agent_registry.lo: mibgroup/host/hr_utils.h mibgroup/mibdefs.h
+agent_registry.lo: mibgroup/ mibgroup/mibdefs.h
 agent_registry.lo: mibgroup/mibII/at.h mibgroup/mibII.h mibgroup/mibII/icmp.h
 agent_registry.lo: mibgroup/mibII/interfaces.h mibgroup/mibII/ipAddr.h
 agent_registry.lo: mibgroup/mibII/ip.h mibgroup/mibII/kernel_linux.h
@@ -343,7 +343,7 @@ mib_modules.lo: mibgroup/host/hr_other.h mibgroup/host/hr_partition.h
 mib_modules.lo: mibgroup/host/hr_print.h mibgroup/host/hr_proc.h
 mib_modules.lo: mibgroup/host/hr_storage.h mibgroup/host/hr_swinst.h
 mib_modules.lo: mibgroup/host/hr_swrun.h mibgroup/host/hr_system.h
-mib_modules.lo: mibgroup/host/hr_utils.h mibgroup/mibdefs.h mibgroup/mibII/at.h
+mib_modules.lo: mibgroup/ mibgroup/mibdefs.h mibgroup/mibII/at.h
 mib_modules.lo: mibgroup/mibII.h mibgroup/mibII/icmp.h
 mib_modules.lo: mibgroup/mibII/interfaces.h mibgroup/mibII/ipAddr.h
 mib_modules.lo: mibgroup/mibII/ip.h mibgroup/mibII/kernel_linux.h
@@ -523,7 +523,7 @@ snmp_vars.lo: mibgroup/host/hr_other.h mibgroup/host/hr_partition.h
 snmp_vars.lo: mibgroup/host/hr_print.h mibgroup/host/hr_proc.h
 snmp_vars.lo: mibgroup/host/hr_storage.h mibgroup/host/hr_swinst.h
 snmp_vars.lo: mibgroup/host/hr_swrun.h mibgroup/host/hr_system.h
-snmp_vars.lo: mibgroup/host/hr_utils.h mibgroup/mibdefs.h mibgroup/mibII/at.h
+snmp_vars.lo: mibgroup/ mibgroup/mibdefs.h mibgroup/mibII/at.h
 snmp_vars.lo: mibgroup/mibII.h mibgroup/mibII/icmp.h
 snmp_vars.lo: mibgroup/mibII/interfaces.h mibgroup/mibII/ipAddr.h
 snmp_vars.lo: mibgroup/mibII/ip.h mibgroup/mibII/kernel_linux.h
