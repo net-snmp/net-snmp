@@ -58,10 +58,16 @@ second ("private" by default) is allowed write access as well.  The
 .TP
 .B PREFIX/lib/snmp/mib.txt
 Defines the mib it should use.
-The location of the
+The location of this
 .B mib.txt 
 file may by overridden at run time be setting the enviornmental variable
 .B MIBFILE.
+.TP 
+.B PREFIX/lib/snmp/mibs/
+The agent will also load all files in this directory as mibs also.  It
+will not, however, load any file that begins with a '.' or decend into
+subdirectories.
+.B 
 .TP
 .B PREFIX/lib/snmp/party.conf
 Defines the classic SNMP V2 parties.
