@@ -73,6 +73,14 @@ do this.
 .TP
 .B -Cp
 Upon completion of the walk, print the number of variables found.
+.TP
+.B -Ct
+Upon completion of the walk, print the total wall-clock time it took
+to collect the data (in seconds).  Note that the timer is started just
+before the beginning of the data request series and stopped just after
+it finishes.  Most importantly, this means that it does not include
+snmp library initialization, shutdown, argument processing, and any
+other overhead.
 .PP
 In addition to these options,
 .B snmpwalk
