@@ -55,17 +55,9 @@
 #include "agent_callbacks.h"
 #include "tools.h"
 #include "snmp_logging.h"
+#include "callback.h"
 
 #include "mib_module_config.h"
-
-#ifdef USING_NOTIFICATION_SNMPNOTIFYTABLE_MODULE
-#include "snmp_vars.h"
-#include "snmp-tc.h"
-#include "target/snmpTargetAddrEntry.h"
-#include "target/snmpTargetParamsEntry.h"
-#include "notification/snmpNotifyTable.h"
-#endif
-
 
 struct trap_sink {
     struct snmp_session	*sesp;
@@ -133,115 +125,32 @@ static void free_trap_session (struct trap_sink *sp)
 
 int add_trap_session( struct snmp_session *ss, int pdutype, int confirm, int version )
 {
-#ifdef USING_NOTIFICATION_SNMPNOTIFYTABLE_MODULE
-#define MAX_ENTRIES 1024
-    struct targetAddrTable_struct *ptr;
-    struct targetParamTable_struct *pptr;
-    struct snmpNotifyTable_data *nptr;
-    int i;
-    char buf[SNMP_MAXBUF_SMALL];
-    oid udpdomain[] = { 1,3,6,1,6,1,1 };
-    int udpdomainlen = sizeof(udpdomain)/sizeof(oid);
-#ifdef HAVE_GETHOSTBYNAME
-    struct hostent *hp;
-#endif
-
-    if (!ss)
-        return (0);
-
-        for(i=0; i < MAX_ENTRIES; i++) {
-            sprintf(buf, "internal%d", i);
-            if (get_addrForName(buf) == NULL && get_paramEntry(buf) == NULL)
-                break;
-        }
-        if (i == MAX_ENTRIES) {
-            snmp_sess_close(ss);
-            return(0);
-        }
-
-        /* address */
-        ptr = snmpTargetAddrTable_create();
-        ptr->name = strdup(buf);
-        memcpy(ptr->tDomain, udpdomain, udpdomainlen*sizeof(oid));
-        ptr->tDomainLen = udpdomainlen;
-
-#ifdef HAVE_GETHOSTBYNAME
-        hp = gethostbyname(ss->peername);
-        if (hp != NULL){
-            /* XXX: fix for other domain types */
-            ptr->tAddressLen = hp->h_length + 2;
-            ptr->tAddress = malloc(ptr->tAddressLen);
-            memmove(ptr->tAddress, hp->h_addr, hp->h_length);
-            ptr->tAddress[hp->h_length] = (ss->remote_port & 0xff00) >> 8;
-            ptr->tAddress[hp->h_length+1] = (ss->remote_port & 0xff);
-        } else {
-#endif /* HAVE_GETHOSTBYNAME */
-            ptr->tAddressLen = 6;
-            ptr->tAddress = calloc(1, ptr->tAddressLen);
-#ifdef HAVE_GETHOSTBYNAME
-        }
-#endif /* HAVE_GETHOSTBYNAME */
-        ptr->timeout = ss->timeout/1000;
-        ptr->retryCount = ss->retries;
-        ptr->tagList = strdup(ptr->name);
-        ptr->params = strdup(ptr->name);
-        ptr->storageType = ST_READONLY;
-        ptr->rowStatus = RS_ACTIVE;
-        ptr->sess = ss;
-        DEBUGMSGTL(("trapsess", "adding to trap table\n"));
-        snmpTargetAddrTable_add(ptr);
-
-        /* param */
-        pptr = snmpTargetParamTable_create();
-        pptr->paramName = strdup(buf);
-        pptr->mpModel = ss->version;
-        if (ss->version == SNMP_VERSION_3) {
-            pptr->secModel = ss->securityModel;
-            pptr->secLevel = ss->securityLevel;
-            memdup((void *) &pptr->secName, (void *) ss->securityName,
-                   ss->securityNameLen+1);
-	    pptr->secName[ss->securityNameLen] = 0;
-        } else {
-            pptr->secModel = ss->version == SNMP_VERSION_1 ?
-	      			SNMP_SEC_MODEL_SNMPv1 : SNMP_SEC_MODEL_SNMPv2c;
-            pptr->secLevel = SNMP_SEC_LEVEL_NOAUTH;
-            pptr->secName = NULL;
-            if (ss->community && (ss->community_len > 0)) {
-                memdup((void *) &pptr->secName, (void *) ss->community,
-                   ss->community_len+1);
-		pptr->secName[ss->community_len] = 0;
-	    }
-        }
-        pptr->storageType = ST_READONLY;
-        pptr->rowStatus = RS_ACTIVE;
-        snmpTargetParamTable_add(pptr);
-            
-        /* notify table */
-        nptr = SNMP_MALLOC_STRUCT(snmpNotifyTable_data);
-        nptr->snmpNotifyName = strdup(buf);
-        nptr->snmpNotifyNameLen = strlen(buf);
-        nptr->snmpNotifyTag = strdup(buf);
-        nptr->snmpNotifyTagLen = strlen(buf);
-        nptr->snmpNotifyCommand = pdutype;
-        nptr->snmpNotifyType = confirm ?
-            SNMPNOTIFYTYPE_TRAP : SNMPNOTIFYTYPE_INFORM;
-        nptr->snmpNotifyStorageType = ST_READONLY;
-        nptr->snmpNotifyRowStatus = RS_ACTIVE;
-
-        snmpNotifyTable_add(nptr);
-#else /* ! USING_NOTIFICATION_SNMPNOTIFYTABLE_MODULE */
-    struct trap_sink *new_sink;
+    if (snmp_callback_available(SNMP_CALLBACK_APPLICATION,
+                                SNMPD_CALLBACK_REGISTER_NOTIFICATIONS) ==
+        SNMPERR_SUCCESS) {
+        /* something else wants to handle notification registrations */
+        struct agent_add_trap_args args;
+        DEBUGMSGTL(("add_trap_session","adding callback trap sink\n"));
+        args.ss = ss;
+        args.confirm = confirm;
+        snmp_call_callbacks(SNMP_CALLBACK_APPLICATION,
+                       SNMPD_CALLBACK_REGISTER_NOTIFICATIONS,
+                       (void *) &args);
+    } else {
+        /* no other support exists, handle it ourselves. */
+        struct trap_sink *new_sink;
     
-    new_sink = (struct trap_sink *) malloc (sizeof (*new_sink));
-    if ( new_sink == NULL )
-	return 0;
+        DEBUGMSGTL(("add_trap_session","adding internal trap sink\n"));
+        new_sink = (struct trap_sink *) malloc (sizeof (*new_sink));
+        if ( new_sink == NULL )
+            return 0;
 
-    new_sink->sesp    = ss;
-    new_sink->pdutype = pdutype;
-    new_sink->version = version;
-    new_sink->next    = sinks;
-    sinks = new_sink;
-#endif
+        new_sink->sesp    = ss;
+        new_sink->pdutype = pdutype;
+        new_sink->version = version;
+        new_sink->next    = sinks;
+        sinks = new_sink;
+    }
     return 1;
 }
 
