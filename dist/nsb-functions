@@ -184,11 +184,11 @@ nsb-config-all()
    echo $ngc_src/configure  --with-defaults \
       "--with-mib-modules=$NSB_FINAL_MODULES" \
       "--with-transports=$NSB_DIST_TRANSPORTS $NSB_EXTRA_TRANSPORTS" \
-       $NSB_PERL --enable-shared
+       $NSB_PERL --enable-shared --with-libwrap
    $ngc_src/configure  --with-defaults \
       "--with-mib-modules=$NSB_FINAL_MODULES" \
       "--with-transports=$NSB_DIST_TRANSPORTS $NSB_EXTRA_TRANSPORTS" \
-      $NSB_PERL --enable-shared
+      $NSB_PERL --enable-shared --with-libwrap
    ngc_rc=$?
    if [ $ngc_rc -ne 0 ];then
       nsb-abort "Error during configure all (rc=$ngc_rc)"
