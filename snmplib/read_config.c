@@ -76,7 +76,7 @@
 #include "read_config.h"
 #include "tools.h"
 
-int config_errors;
+static int config_errors;
 
 struct config_files *config_files = NULL;
 
@@ -489,6 +489,8 @@ read_config_files (int when)
   struct config_files *ctmp = config_files;
   struct config_line *ltmp;
   struct stat statbuf;
+
+  config_errors = 0;
   
   if (when == PREMIB_CONFIG)
     free_config();
@@ -556,7 +558,7 @@ read_config_files (int when)
   }
   
   if (config_errors) {
-    snmp_log(LOG_ERR, "ucd-snmp: %d errors in config file\n", config_errors);
+    snmp_log(LOG_ERR, "ucd-snmp: %d error(s) in config file(s)\n", config_errors);
 /*    exit(1); */
   }
 }
@@ -745,13 +747,13 @@ snmp_clean_persistent(const char *type)
    line number of a .conf file and increments the error count. */
 void config_perror(const char *string)
 {
-  config_pwarn(string);
+  snmp_log(LOG_ERR, "%s: line %d: Error: %s\n", curfilename, linecount, string);
   config_errors++;
 }
 
 void config_pwarn(const char *string)
 {
-  snmp_log(LOG_WARNING, "%s: line %d: %s\n", curfilename, linecount, string);
+  snmp_log(LOG_WARNING, "%s: line %d: Warning: %s\n", curfilename, linecount, string);
 }
 
 /* skip all white spaces and return 1 if found something either end of
