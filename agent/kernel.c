@@ -16,12 +16,18 @@
 #if HAVE_FCNTL_H
 #include <fcntl.h>
 #endif
+
 #include "asn1.h"
 #include "snmp_impl.h"
+
+#include "kernel.h"
 
 #ifndef NULL
 #define NULL 0
 #endif
+
+off_t klseek __P((off_t));
+int klread __P((char *, int));
 
 static int kmem;
 int swap, mem;

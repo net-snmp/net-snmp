@@ -8,7 +8,6 @@
 struct variable;
 
 u_char	*var_snmp __P((struct variable *, oid *, int *, int, int *, int (**write) __P((int, u_char *, u_char, int, u_char *, oid *, int)) ));
-int	header_snmp __P((struct variable *, oid *, int *, int, int *, int (**write) __P((int, u_char *, u_char, int, u_char *, oid *, int)) ));
 int	write_snmp __P((int, u_char *, u_char, int, u_char *, oid *, int));
 
 extern int snmp_inpkts;			/*  1 - current */

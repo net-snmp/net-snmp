@@ -1,10 +1,15 @@
 #include <config.h>
 
-#if STDC_HEADERS
-#include <string.h>
+#if HAVE_STDLIB_H
+#include <stdlib.h>
+#endif
+#if HAVE_UNISTD_H
+#include <unistd.h>
 #endif
 #if HAVE_STRINGS_H
 #include <strings.h>
+#else
+#include <string.h>
 #endif
 #include <sys/types.h>
 #include <sys/socket.h>
@@ -17,12 +22,6 @@
 #endif
 #if HAVE_SYS_SYSCTL_H
 #include <sys/sysctl.h>
-#endif
-#if HAVE_STDLIB_H
-#include <stdlib.h>
-#endif
-#if HAVE_UNISTD_H
-#include <unistd.h>
 #endif
 #if HAVE_NET_IF_TYPES_H
 #include <net/if_types.h>

@@ -65,7 +65,6 @@ u_short  flags;
     struct sockaddr_in     gateway;
     int                    s;
     RTENTRY  route;
-    int  ret;
 
     s = socket(AF_INET, SOCK_RAW, 0);
     if (s<0) {
@@ -83,8 +82,8 @@ u_short  flags;
     gateway.sin_family        = AF_INET;
     gateway.sin_addr.s_addr   = htonl(gwip);
 
-    bcopy((char*) &dst, (char *) &route.rt_dst, sizeof(struct  sockaddr_in));
-    bcopy((char*) &gateway, (char *) &route.rt_gateway, sizeof(struct  sockaddr_in));
+    memcpy(&route.rt_dst, &dst, sizeof(struct sockaddr_in));
+    memcpy(&route.rt_gateway, &gateway, sizeof(struct sockaddr_in));
 
     route.rt_flags = flags;
 #ifndef RTENTRY_4_4
@@ -108,7 +107,6 @@ u_short  flags;
     struct sockaddr_in     gateway;
     int                    s;
     RTENTRY  route;
-    int  ret;
 
     s = socket(AF_INET, SOCK_RAW, 0);
     if (s<0) {
@@ -126,8 +124,8 @@ u_short  flags;
     gateway.sin_family        = AF_INET;
     gateway.sin_addr.s_addr   = htonl(gwip);
 
-    bcopy((char*) &dst, (char *) &route.rt_dst, sizeof(struct  sockaddr_in));
-    bcopy((char*) &gateway, (char *) &route.rt_gateway, sizeof(struct  sockaddr_in));
+    memcpy(&route.rt_dst, &dst, sizeof(struct  sockaddr_in));
+    memcpy(&route.rt_gateway, &gateway, sizeof(struct  sockaddr_in));
 
     route.rt_flags = flags;
 #ifndef RTENTRY_4_4
@@ -223,7 +221,6 @@ struct rtent  *newCacheRTE()
 int delCacheRTE(dst)
 u_long dst;
 {
-    int i;
     struct  rtent  *rt;
 
     rt = findCacheRTE(dst);

@@ -34,9 +34,9 @@ SOFTWARE.
 #include <config.h>
 
 #if STDC_HEADERS
-#include <string.h>
 #include <stdlib.h>
 #include <unistd.h>
+#include <string.h>
 #endif
 
 #include <stdio.h>
@@ -204,6 +204,7 @@ routepr()
 			break;
 		}
 	    }
+	    snmp_free_pdu(response);
 	    if (!(rp->set_destination && rp->set_gateway
 		&& rp->set_type && rp->set_interface)){
 		    if (request)
@@ -276,8 +277,9 @@ get_ifname(name, index)
     status = snmp_synch_response(Session, pdu, &response);
     if (status == STAT_SUCCESS && response->errstat == SNMP_ERR_NOERROR){
 	vp = response->variables;
-      memmove(ip->name, vp->val.string, vp->val_len);
+        memmove(ip->name, vp->val.string, vp->val_len);
 	ip->name[vp->val_len] = '\0';
+	snmp_free_pdu(response);
     } else {
 	sprintf(ip->name, "if%d", index);
     }    
@@ -438,6 +440,7 @@ rt_stats __P((void))
 	if (var){
 	    printf("\t%lu destination%s found unreachable\n",
 		*var->val.integer, plural((int)*var->val.integer));
+	    snmp_free_var(var);
 	} else {
 	    printf("\tCouldn't get ipOutNoRoutes variable\n");
 	}

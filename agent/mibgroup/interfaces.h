@@ -11,7 +11,7 @@ struct ifnet;
 int Interface_Scan_Get_Count __P((void));
 int Interface_Index_By_Name __P((char *, int));
 void Interface_Scan_Init __P((void));
-#ifdef sunV3
+#if defined(sunV3) || defined(linux)
 int Interface_Scan_Next __P((short *, char *, struct ifnet *));
 #else
 int Interface_Scan_Next __P((short *, char *, struct ifnet *, struct in_ifaddr *));

@@ -43,10 +43,11 @@ static struct nlist ip_nl[] = {
 };
 #endif
 
-
 #ifdef linux
 static void linux_read_ip_stat __P((struct ip_mib *));
 #endif
+
+static int header_ip __P((struct variable*, oid *, int *, int, int *, int (**write) __P((int, u_char *, u_char, int, u_char *, oid *, int)) ));
 
 	/*********************
 	 *
@@ -67,7 +68,7 @@ void init_ip()
 #define MATCH_FAILED	1
 #define MATCH_SUCCEEDED	0
 
-int
+static int
 header_ip(vp, name, length, exact, var_len, write_method)
     register struct variable *vp;    /* IN - pointer to variable entry that points here */
     oid     *name;	    /* IN/OUT - input name requested, output name found */
@@ -336,7 +337,7 @@ var_ipAddrEntry(vp, name, length, exact, var_len, write_method)
     u_char		    *cp;
     int			    lowinterface=0;
     short                   interface;
-#ifndef sunV3
+#if !(defined(linux) || defined(sunV3))
     static struct in_ifaddr in_ifaddr, lowin_ifaddr;
 #endif
     static struct ifnet ifnet, lowin_ifnet;
@@ -352,12 +353,12 @@ var_ipAddrEntry(vp, name, length, exact, var_len, write_method)
 #endif
     for (;;) {
 
-#ifdef sunV3
-	if (Interface_Scan_Next(&interface, (char *)0, &ifnet) == 0) break;
+#if defined(linux) || defined(sunV3)
+	if (Interface_Scan_Next(&interface, NULL, &ifnet) == 0) break;
 	cp = (u_char *)&(((struct sockaddr_in *) &(ifnet.if_addr))->sin_addr.s_addr);
 #else
 #ifndef freebsd2
-	if (Interface_Scan_Next(&interface, (char *)0, &ifnet, &in_ifaddr) == 0) break;
+	if (Interface_Scan_Next(&interface, NULL, &ifnet, &in_ifaddr) == 0) break;
 #else
       if (Address_Scan_Next(&interface, &in_ifaddr) == 0) break;
 #endif
@@ -379,7 +380,7 @@ var_ipAddrEntry(vp, name, length, exact, var_len, write_method)
 	    if (compare(current, 14, name, *length) == 0){
 		bcopy((char *)current, (char *)lowest, 14 * sizeof(oid));
 		lowinterface = interface;
-#ifdef sunV3
+#if defined(linux) || defined(sunV3)
 		lowin_ifnet = ifnet;
 #else
 		lowin_ifaddr = in_ifaddr;
@@ -394,7 +395,7 @@ var_ipAddrEntry(vp, name, length, exact, var_len, write_method)
 		 * previous lowest, save this one as the "next" one.
 		 */
 		lowinterface = interface;
-#ifdef sunV3
+#if defined(linux) || defined(sunV3)
 		lowin_ifnet = ifnet;
 #else
 		lowin_ifaddr = in_ifaddr;
@@ -411,7 +412,7 @@ var_ipAddrEntry(vp, name, length, exact, var_len, write_method)
     *var_len = sizeof(long_return);
     switch(vp->magic){
 	case IPADADDR:
-#ifdef sunV3
+#if defined(linux) || defined(sunV3)
             return(u_char *) &((struct sockaddr_in *) &lowin_ifnet.if_addr)->sin_addr.s_addr;
 #else
 	    return(u_char *) &((struct sockaddr_in *) &lowin_ifaddr.ia_addr)->sin_addr.s_addr;
@@ -422,7 +423,7 @@ var_ipAddrEntry(vp, name, length, exact, var_len, write_method)
 	case IPADNETMASK:
 #ifndef sunV3
 #ifdef linux
-            return &((struct sockaddr_in *)&lowin_ifner.ia_subnetmask)->sin_addr.s_addr;
+            return (u_char *)&((struct sockaddr_in *)&lowin_ifnet.ia_subnetmask)->sin_addr.s_addr;
 #else
 	    long_return = ntohl(lowin_ifaddr.ia_subnetmask);
 	    return(u_char *) &long_return;
@@ -430,7 +431,7 @@ var_ipAddrEntry(vp, name, length, exact, var_len, write_method)
 #endif
 	case IPADBCASTADDR:
 	    
-#ifdef sunV3
+#if defined(linux) || defined(sunV3)
 	    long_return = ntohl(((struct sockaddr_in *) &lowin_ifnet.ifu_broadaddr)->sin_addr.s_addr) & 1;
 #else
           long_return = ntohl(((struct sockaddr_in *) &lowin_ifaddr.ia_broadaddr)->sin_addr.s_addr) & 1;

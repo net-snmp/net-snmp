@@ -37,9 +37,12 @@ static struct nlist udp_nl[] = {
 };
 #endif
 
+static int header_udp __P((struct variable *, oid *, int *, int, int *, int (**write) __P((int, u_char *, u_char, int, u_char *, oid *, int)) ));
 
+#ifndef solaris2
 static void UDP_Scan_Init __P((void));
 static int UDP_Scan_Next __P((struct inpcb *));
+#endif
 #ifdef linux
 static void linux_read_udp_stat __P((struct udp_mib *));
 #endif
@@ -62,7 +65,7 @@ void	init_udp( )
 #define MATCH_FAILED	1
 #define MATCH_SUCCEEDED	0
 
-int
+static int
 header_udp(vp, name, length, exact, var_len, write_method)
     register struct variable *vp;    /* IN - pointer to variable entry that points here */
     oid     *name;	    /* IN/OUT - input name requested, output name found */
@@ -373,10 +376,12 @@ var_udpEntry(vp, name, length, exact, var_len, write_method)
 	 *
 	 *********************/
 
-static struct inpcb udp_inpcb, *udp_prev;
 #ifdef linux
 static struct inpcb *udp_inpcb_list;
 #endif
+
+#ifndef solaris2
+static struct inpcb udp_inpcb, *udp_prev;
 
 static void UDP_Scan_Init()
 {
@@ -498,6 +503,7 @@ struct inpcb *RetInPcb;
 #endif linux
 	return(1);	/* "OK" */
 }
+#endif /* solaris2 */
 
 #ifdef linux
 

@@ -173,7 +173,7 @@ snmp_clone_pdu2(pdu, command)
     /* clone the pdu */
     newpdu = (struct snmp_pdu *)malloc(sizeof(struct snmp_pdu));
     memmove(newpdu, pdu, sizeof(struct snmp_pdu));
-    newpdu->variables = 0;
+    newpdu->variables = NULL;
     newpdu->command = command;
     newpdu->reqid = pdu->reqid;
     newpdu->errstat = SNMP_DEFAULT_ERRSTAT;
@@ -190,7 +190,7 @@ snmp_clone_pdu2(pdu, command)
 	newvar->val.string = (u_char *)malloc(var->val_len);
 	memmove(newvar->val.string, var->val.string, var->val_len);
     }
-    newvar->next_variable = 0;
+    newvar->next_variable = NULL;
 
     while(var->next_variable){
 	var = var->next_variable;

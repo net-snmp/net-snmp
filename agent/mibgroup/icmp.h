@@ -7,7 +7,6 @@
 
 extern void	init_icmp __P((void));
 extern u_char	*var_icmp __P((struct variable *, oid *, int *, int, int *, int (**write) __P((int, u_char *, u_char, int, u_char*, oid *, int)) ));
-extern int	header_icmp __P((struct variable *, oid *, int *, int, int *, int (**write) __P((int, u_char *, u_char, int, u_char*, oid *, int)) ));
 
 #define ICMPINMSGS	     0
 #define ICMPINERRORS	     1

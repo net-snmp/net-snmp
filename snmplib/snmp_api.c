@@ -799,7 +799,6 @@ snmp_parse(session, pdu, data, length)
 	}
 	vp->next_variable = NULL;
 	vp->val.string = NULL;
-	vp->name = NULL;
 	vp->name_length = MAX_NAME_LEN;
 	vp->name = vp->name_loc;
 	vp->usedBuf = FALSE;
@@ -1076,6 +1075,18 @@ snmp_send(session, pdu)
 	rp->expire = tv;
     }
     return pdu->reqid;
+}
+
+/*
+ * Frees the variable and any malloc'd data associated with it.
+ */
+void
+snmp_free_var(var)
+    struct variable_list *var;
+{
+    if (var->name) free((char *)var->name);
+    if (var->val.string) free((char *)var->val.string);
+    free((char *)var);
 }
 
 /*

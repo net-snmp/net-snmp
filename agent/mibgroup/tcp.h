@@ -5,9 +5,16 @@
 #ifndef _MIBGROUP_TCP_H
 #define _MIBGROUP_TCP_H
 
+#ifndef solaris2
+#ifndef linux
+extern int TCP_Count_Connections __P((void));
+#endif
+extern  void TCP_Scan_Init __P((void));
+extern  int TCP_Scan_Next __P((int *, struct inpcb *));
+#endif
+
 extern void	init_tcp __P((void));
 extern u_char	*var_tcp __P((struct variable *, oid *, int *, int, int *, int (**write) __P((int, u_char *, u_char, int, u_char *, oid *, int)) ));
-extern int	header_tcp __P((struct variable *, oid *, int *, int, int *, int (**write) __P((int, u_char *, u_char, int, u_char *, oid *, int)) ));
 extern u_char	*var_tcpEntry __P((struct variable *, oid *, int *, int, int *, int (**write) __P((int, u_char *, u_char, int, u_char *, oid *, int)) ));
 
 
