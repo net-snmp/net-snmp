@@ -143,7 +143,7 @@ struct snmp_session {
 	/*
 	 * Protocol-version independent fields
 	 */
-    int	    version;
+    u_long  version;
     int	    retries;	/* Number of retries before timeout. */
     long    timeout;    /* Number of uS until first timeout, then exponential backoff */
     u_long  flags;
