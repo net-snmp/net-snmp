@@ -294,22 +294,22 @@ exec .EXTENSIBLEDOTMIB.50 shelltest /bin/sh /tmp/shtest
 # Example:  (see the script for details)
 #
 
-pass .EXTENSIBLEDOTMIB.60 /bin/sh PREFIX/local/passtest
+pass .EXTENSIBLEDOTMIB.255 /bin/sh PREFIX/local/passtest
 
-# % snmpwalk localhost public .EXTENSIBLEDOTMIB.60
-# local.60.1 = "life the universe and everything"
-# local.60.2.1 = 42
-# local.60.2.2 = OID: 42.42.42
-# local.60.3 = Timeticks: (363136200) 42 days, 0:42:42
-# local.60.4 = IpAddress: 127.0.0.1
-# local.60.5 = 42
-# local.60.6 = Gauge: 42
+# % snmpwalk localhost public .EXTENSIBLEDOTMIB.255
+# local.255.1 = "life the universe and everything"
+# local.255.2.1 = 42
+# local.255.2.2 = OID: 42.42.42
+# local.255.3 = Timeticks: (363136200) 42 days, 0:42:42
+# local.255.4 = IpAddress: 127.0.0.1
+# local.255.5 = 42
+# local.255.6 = Gauge: 42
 #
-# % snmpget localhost public .EXTENSIBLEDOTMIB.60.5
-# local.60.5 = 42
+# % snmpget localhost public .EXTENSIBLEDOTMIB.255.5
+# local.255.5 = 42
 #
-# % snmpset localhost private .EXTENSIBLEDOTMIB.60.1 s "New string"
-# local.60.1 = "New string"
+# % snmpset localhost private .EXTENSIBLEDOTMIB.255.1 s "New string"
+# local.255.1 = "New string"
 #
 # Note:  For snmpset requests you must use the 'private' community
 #        name, or else community number 2 as defined in the snmpd.conf
