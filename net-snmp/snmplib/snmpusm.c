@@ -64,11 +64,11 @@
 #include <net-snmp/library/snmp_secmod.h>
 #include <net-snmp/library/snmpusm.h>
 
-static oid usmNoAuthProtocol[10]		= { 1,3,6,1,6,3,10,1,1,1 };
-static oid usmHMACMD5AuthProtocol[10]	= { 1,3,6,1,6,3,10,1,1,2 };
-static oid usmHMACSHA1AuthProtocol[10]	= { 1,3,6,1,6,3,10,1,1,3 };
-static oid usmNoPrivProtocol[10]		= { 1,3,6,1,6,3,10,1,2,1 };
-static oid usmDESPrivProtocol[10]	= { 1,3,6,1,6,3,10,1,2,2 };
+oid usmNoAuthProtocol[10]		= { 1,3,6,1,6,3,10,1,1,1 };
+oid usmHMACMD5AuthProtocol[10]	= { 1,3,6,1,6,3,10,1,1,2 };
+oid usmHMACSHA1AuthProtocol[10]	= { 1,3,6,1,6,3,10,1,1,3 };
+oid usmNoPrivProtocol[10]		= { 1,3,6,1,6,3,10,1,2,1 };
+oid usmDESPrivProtocol[10]	= { 1,3,6,1,6,3,10,1,2,2 };
 
 static u_int    dummy_etime, dummy_eboot;	/* For ISENGINEKNOWN(). */
 
