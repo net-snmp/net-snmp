@@ -9,22 +9,11 @@
 
 config_require(util_funcs)
 config_require(mibII/vacm_context)
+config_require(mibII/vacm_conf)
 config_add_mib(SNMP-VIEW-BASED-ACM-MIB)
 config_add_mib(SNMP-COMMUNITY-MIB)
 
      void            init_vacm_vars(void);
-     void            vacm_free_group(void);
-     void            vacm_free_access(void);
-     void            vacm_free_view(void);
-     void            vacm_parse_group(const char *, char *);
-     void            vacm_parse_access(const char *, char *);
-     void            vacm_parse_view(const char *, char *);
-     void            vacm_parse_simple(const char *, char *);
-
-     SNMPCallback    vacm_in_view_callback;
-     SNMPCallback    vacm_warn_if_not_configured;
-
-     int             vacm_in_view(netsnmp_pdu *, oid *, size_t, int);
 
      extern FindVarMethod var_vacm_sec2group;
      extern FindVarMethod var_vacm_access;
