@@ -466,62 +466,65 @@ static struct enum_list  * copy_enums(struct enum_list *);
 
 static u_int compute_match(const char *search_base, const char *key);
 
-void snmp_mib_toggle_options_usage(const char *lead, FILE *outf) {
-  fprintf(outf, "%sMIBOPTS values:\n", lead);
-  fprintf(outf, "%s    u: %sallow the usage of underlines in mib symbols.\n",
+void
+snmp_mib_toggle_options_usage(const char *lead, FILE *outf)
+{
+  fprintf(outf, "%su:  %sallow the use of underlines in MIB symbols\n",
           lead, ((ds_get_boolean(DS_LIBRARY_ID, DS_LIB_MIB_PARSE_LABEL))?"dis":""));
-  fprintf(outf, "%s    c: %sallow the usage of \"--\" to terminate comments.\n",
+  fprintf(outf, "%sc:  %sallow the use of \"--\" to terminate comments\n",
           lead, ((ds_get_boolean(DS_LIBRARY_ID, DS_LIB_MIB_COMMENT_TERM))?"":"dis"));
-  fprintf(outf, "%s    d: %ssave the descriptions of the mib objects.\n",
-          lead, ((ds_get_boolean(DS_LIBRARY_ID, DS_LIB_SAVE_MIB_DESCRS))?"don't ":""));
-  fprintf(outf, "%s    e: Disable mib errors of MIB symbols conflicts\n",
+  fprintf(outf, "%sd:  %ssave the DESCRIPTIONs of the MIB objects\n",
+          lead, ((ds_get_boolean(DS_LIBRARY_ID, DS_LIB_SAVE_MIB_DESCRS))?"do not ":""));
+  fprintf(outf, "%se:  disable errors when MIB symbols conflict\n",
           lead);
-  fprintf(outf, "%s    w: Enable mib warnings of MIB symbols conflicts\n",
+  fprintf(outf, "%sw:  enable warnings when MIB symbols conflict\n",
           lead);
-  fprintf(outf, "%s    W: Enable detailed warnings of MIB symbols conflicts\n",
+  fprintf(outf, "%sW:  enable detailed warnings when MIB symbols conflict\n",
           lead);
-  fprintf(outf, "%s    R: Replace MIB symbols from latest module\n",
+  fprintf(outf, "%sR:  replace MIB symbols from latest module\n",
           lead);
 }
 
-char *snmp_mib_toggle_options(char *options) {
+char *
+snmp_mib_toggle_options(char *options)
+{
   if (options) {
-    while(*options) {
-      switch(*options) {
-        case 'u':
-          ds_set_boolean(DS_LIBRARY_ID, DS_LIB_MIB_PARSE_LABEL, !ds_get_boolean(DS_LIBRARY_ID, DS_LIB_MIB_PARSE_LABEL));
-          break;
+      while(*options) {
+	  switch(*options) {
+	  case 'u':
+	      ds_set_boolean(DS_LIBRARY_ID, DS_LIB_MIB_PARSE_LABEL, !ds_get_boolean(DS_LIBRARY_ID, DS_LIB_MIB_PARSE_LABEL));
+	      break;
 
-        case 'c':
-          ds_toggle_boolean(DS_LIBRARY_ID, DS_LIB_MIB_COMMENT_TERM);
-          break;
+	  case 'c':
+	      ds_toggle_boolean(DS_LIBRARY_ID, DS_LIB_MIB_COMMENT_TERM);
+	      break;
 
-        case 'e':
-          ds_toggle_boolean(DS_LIBRARY_ID, DS_LIB_MIB_ERRORS);
-          break;
+	  case 'e':
+	      ds_toggle_boolean(DS_LIBRARY_ID, DS_LIB_MIB_ERRORS);
+	      break;
 
-        case 'w':
-          ds_set_int(DS_LIBRARY_ID, DS_LIB_MIB_WARNINGS, 1);
-          break;
+	  case 'w':
+	      ds_set_int(DS_LIBRARY_ID, DS_LIB_MIB_WARNINGS, 1);
+	      break;
 
-        case 'W':
-          ds_set_int(DS_LIBRARY_ID, DS_LIB_MIB_WARNINGS, 2);
-          break;
+	  case 'W':
+	      ds_set_int(DS_LIBRARY_ID, DS_LIB_MIB_WARNINGS, 2);
+	      break;
 
-        case 'd':
-          ds_toggle_boolean(DS_LIBRARY_ID, DS_LIB_SAVE_MIB_DESCRS);
-          break;
+	  case 'd':
+	      ds_toggle_boolean(DS_LIBRARY_ID, DS_LIB_SAVE_MIB_DESCRS);
+	      break;
 
-        case 'R':
-          ds_toggle_boolean(DS_LIBRARY_ID, DS_LIB_MIB_REPLACE);
-          break;
+	  case 'R':
+	      ds_toggle_boolean(DS_LIBRARY_ID, DS_LIB_MIB_REPLACE);
+	      break;
 
-        default:
-          /* return at the unknown option */
-          return options;
+	  default:
+	      /* return at the unknown option */
+	      return options;
+	  }
+	  options++;
       }
-      options++;
-    }
   }
   return NULL;
 }
