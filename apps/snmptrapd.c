@@ -369,7 +369,6 @@ main(argc, argv)
     int local_port = 0, port_flag = 0;
     char *config_file = NULL;
     struct config_module *dp;
-    int sd;
     struct sockaddr_in me;
     char ctmp[300];
 
@@ -480,8 +479,6 @@ main(argc, argv)
     while(1){
 	numfds = 0;
 	FD_ZERO(&fdset);
-	numfds = sd + 1;
-	FD_SET(sd, &fdset);
 	block = 0;
 	tvp = &timeout;
 	timerclear(tvp);
