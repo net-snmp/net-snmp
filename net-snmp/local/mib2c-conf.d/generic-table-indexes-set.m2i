@@ -53,13 +53,13 @@ ${context}_indexes_set_tbl_idx(${context}_mib_index *tbl_idx$gtis_tmp)
 ## table indexes are not allocated pointers, so do not allow realloc here
 @eval $m2c_node_realloc = 0@ // fail
     /* $m2c_node_summary */
-@   if $m2c_node_needlength == 1@
-     $m2c_ctx_lhs = sizeof($m2c_ctx_lh);
-@   end@
 @   eval $m2c_ctx_lh = "tbl_idx->$node"@
 @   eval $m2c_ctx_lhs = "tbl_idx->${node}_len"@
 @   eval $m2c_ctx_rh = "$m2c_node_param_val_name"@
 @   eval $m2c_ctx_rhs = "$m2c_node_param_val_lname"@
+@   if $m2c_node_needlength == 1@
+     $m2c_ctx_lhs = sizeof($m2c_ctx_lh);
+@   end@
 ## also, assume mapping already done
 @   include generic-ctx-get.m2i@
 ##@   include generic-value-map.m2i@
