@@ -584,7 +584,7 @@ void read_config_print_usage(const char *lead)
                          ltmp->config_token, ltmp->help);
             else
                 snmp_log(LOG_INFO, "%s%s%-15s [NO HELP]\n", lead, lead,
-                         ltmp->config_token, ltmp->help);
+                         ltmp->config_token);
         }
     }
   }
