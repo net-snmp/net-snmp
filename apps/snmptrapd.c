@@ -403,6 +403,13 @@ pre_parse(netsnmp_session * session, netsnmp_transport *transport,
     }
 
     if (addr_string != NULL) {
+        if( addr_string[0] == '[' ) { /* fix up ipv6 addr */
+            int i;
+            for( i = 1; addr_string[i] != ']'; i++ ) {
+                addr_string[i-1] =  addr_string[i];
+            }
+            addr_string[i-1] = '\0';
+        }
         if (hosts_ctl("snmptrapd", STRING_UNKNOWN, 
 		      addr_string, STRING_UNKNOWN) == 0) {
             free(addr_string);

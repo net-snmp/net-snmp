@@ -118,19 +118,19 @@ int             deny_severity = LOG_WARNING;
 #endif
 
 #define SNMP_ADDRCACHE_SIZE 10
+#define SNMP_ADDRCACHE_MAXAGE 300 /* in seconds */
 
 enum { SNMP_ADDRCACHE_UNUSED = 0,
-       SNMP_ADDRCACHE_USED = 1,
-       SNMP_ADDRCACHE_OLD = 2
+       SNMP_ADDRCACHE_USED = 1
 };
 
 struct addrCache {
     char           *addr;
     int             status;
+    struct timeval lastHit;
 };
 
 static struct addrCache addrCache[SNMP_ADDRCACHE_SIZE];
-int             lastAddrAge = 0;
 int             log_addresses = 0;
 
 
@@ -623,29 +623,134 @@ netsnmp_addrcache_initialise(void)
 }
 
 
+/*
+ * Adds a new entry to the cache of addresses that
+ * have recently made connections to the agent.
+ * Returns 0 if the entry already exists (but updates
+ * the entry with a new timestamp) and 1 if the
+ * entry did not previously exist.
+ *
+ * Implements a simple LRU cache replacement
+ * policy. Uses a linear search, which should be
+ * okay, as long as SNMP_ADDRCACHE_SIZE remains
+ * relatively small.
+ *
+ * @retval 0 : updated existing entry
+ * @retval 1 : added new entry
+ */
+int
+netsnmp_addrcache_add(const char *addr)
+{
+    int oldest = -1; /* Index of the oldest cache entry */
+    int unused = -1; /* Index of the first free cache entry */
+    int i; /* Looping variable */
+    int rc = -1;
+    struct timeval now; /* What time is it now? */
+    struct timeval aged; /* Oldest allowable cache entry */
+    
+    /*
+     * First get the current and oldest allowable timestamps
+     */
+    gettimeofday(&now, (struct timezone*) NULL);
+    aged.tv_sec = now.tv_sec - SNMP_ADDRCACHE_MAXAGE;
+    aged.tv_usec = now.tv_usec;
+    
+    /*
+     * Now look for a place to put this thing
+     */
+    for(i = 0; i < SNMP_ADDRCACHE_SIZE; i++) {
+        if (addrCache[i].status == SNMP_ADDRCACHE_UNUSED) { /* If unused */
+            /*
+             * remember this location, in case addr isn't in the cache
+             */
+            if (unused < 0)
+                unused = i;
+        }
+        else { /* If used */
+            if ((NULL != addr) && (strcmp(addrCache[i].addr, addr) == 0)) {
+                /*
+                 * found a match
+                 */
+                memcpy(&addrCache[i].lastHit, &now, sizeof(struct timeval));
+                if (timercmp(&addrCache[i].lastHit, &aged, <))
+		    rc = 1; /* should have expired, so is new */
+		else
+		    rc = 0; /* not expired, so is existing entry */
+                break;
+            }
+            else {
+                /*
+                 * Used, but not this address. check if it's stale.
+                 */
+                if (timercmp(&addrCache[i].lastHit, &aged, <)) {
+                    /*
+                     * Stale, reuse
+                     */
+                    SNMP_FREE(addrCache[i].addr);
+                    addrCache[i].status = SNMP_ADDRCACHE_UNUSED;
+                    /*
+                     * remember this location, in case addr isn't in the cache
+                     */
+		    if (unused < 0)
+                        unused = i;
+                }
+	        else {
+                    /*
+                     * Still fresh, but a candidate for LRU replacement
+                     */
+                    if (oldest < 0)
+                        oldest = i;
+                    else if (timercmp(&addrCache[i].lastHit,
+                                      &addrCache[oldest].lastHit, <))
+                        oldest = i;
+                } /* fresh */
+            } /* used, no match */
+        } /* used */
+    } /* for loop */
+    
+    if ((-1 == rc) && (NULL != addr)) {
+        /*
+         * We didn't find the entry in the cache
+         */
+        if (unused >= 0) {
+            /*
+             * If we have a slot free anyway, use it
+             */
+            addrCache[unused].addr = strdup(addr);
+            addrCache[unused].status = SNMP_ADDRCACHE_USED;
+            memcpy(&addrCache[unused].lastHit, &now, sizeof(struct timeval));
+        }
+        else { /* Otherwise, replace oldest entry */
+            if (netsnmp_ds_get_boolean(NETSNMP_DS_APPLICATION_ID,
+                                       NETSNMP_DS_AGENT_VERBOSE))
+                snmp_log(LOG_INFO, "Purging address from address cache: %s",
+                         addrCache[oldest].addr);
+            
+            free(addrCache[oldest].addr);
+            addrCache[oldest].addr = strdup(addr);
+            memcpy(&addrCache[oldest].lastHit, &now, sizeof(struct timeval));
+        }
+        rc = 1;
+    }
+    if ((log_addresses && (1 == rc)) ||
+        netsnmp_ds_get_boolean(NETSNMP_DS_APPLICATION_ID,
+                               NETSNMP_DS_AGENT_VERBOSE)) {
+        snmp_log(LOG_INFO, "Received SNMP packet(s) from %s\n", addr);
+    }
+    
+    return rc;
+}
 
 /*
  * Age the entries in the address cache.  
+ *
+ * backwards compatability; not used anywhere
  */
 
 void
 netsnmp_addrcache_age(void)
 {
-    int             i = 0;
-
-    lastAddrAge = 0;
-    for (i = 0; i < SNMP_ADDRCACHE_SIZE; i++) {
-        if (addrCache[i].status == SNMP_ADDRCACHE_OLD) {
-            addrCache[i].status = SNMP_ADDRCACHE_UNUSED;
-            if (addrCache[i].addr != NULL) {
-                SNMP_FREE(addrCache[i].addr);
-                addrCache[i].addr = NULL;
-            }
-        }
-        if (addrCache[i].status == SNMP_ADDRCACHE_USED) {
-            addrCache[i].status = SNMP_ADDRCACHE_OLD;
-        }
-    }
+    (void)netsnmp_addrcache_add(NULL);
 }
 
 /*******************************************************************-o-******
@@ -670,7 +775,6 @@ netsnmp_agent_check_packet(netsnmp_session * session,
                            void *transport_data, int transport_data_length)
 {
     char           *addr_string = NULL;
-    int             i = 0;
 
     /*
      * Log the message and/or dump the message.
@@ -690,6 +794,12 @@ netsnmp_agent_check_packet(netsnmp_session * session,
 #ifdef  USE_LIBWRAP
     if (addr_string != NULL) {
       if ( strncmp(addr_string, "callback", 8) != 0 ) {
+          if( addr_string[0] == '[' ) { /* fix up ipv6 addr */
+              for( i = 1; addr_string[i] != ']'; i++ ) {
+                  addr_string[i-1] =  addr_string[i];
+              }
+              addr_string[i-1] = '\0';
+          }
         if (hosts_ctl("snmpd", STRING_UNKNOWN, addr_string, STRING_UNKNOWN)) {
             snmp_log(allow_severity, "Connection from %s\n", addr_string);
         } else {
@@ -712,53 +822,8 @@ netsnmp_agent_check_packet(netsnmp_session * session,
 
     snmp_increment_statistic(STAT_SNMPINPKTS);
 
-    if (log_addresses || netsnmp_ds_get_boolean(NETSNMP_DS_APPLICATION_ID, 
-						NETSNMP_DS_AGENT_VERBOSE)) {
-        for (i = 0; i < SNMP_ADDRCACHE_SIZE; i++) {
-            if ((addrCache[i].status != SNMP_ADDRCACHE_UNUSED) &&
-                (strcmp(addrCache[i].addr, addr_string) == 0)) {
-                break;
-            }
-        }
-
-        if (i >= SNMP_ADDRCACHE_SIZE ||
-	    netsnmp_ds_get_boolean(NETSNMP_DS_APPLICATION_ID, 
-				   NETSNMP_DS_AGENT_VERBOSE)) {
-            /*
-             * Address wasn't in the cache, so log the packet...  
-             */
-            snmp_log(LOG_INFO, "Received SNMP packet(s) from %s\n",
-                     addr_string);
-            /*
-             * ...and try to cache the address.  
-             */
-            for (i = 0; i < SNMP_ADDRCACHE_SIZE; i++) {
-                if (addrCache[i].status == SNMP_ADDRCACHE_UNUSED) {
-                    if (addrCache[i].addr != NULL) {
-                        SNMP_FREE(addrCache[i].addr);
-                    }
-                    addrCache[i].addr = addr_string;
-                    addrCache[i].status = SNMP_ADDRCACHE_USED;
-                    addr_string = NULL; /* Don't free this 'temporary' string
-                                         * since it's now part of the cache */
-                    break;
-                }
-            }
-            if (i >= SNMP_ADDRCACHE_SIZE) {
-                /*
-                 * We didn't find a free slot to cache the address.  Perhaps
-                 * we should be using an LRU replacement policy here or
-                 * something.  Oh well.
-                 */
-                DEBUGMSGTL(("netsnmp_agent_check_packet",
-                            "cache overrun"));
-            }
-        } else {
-            addrCache[i].status = SNMP_ADDRCACHE_USED;
-        }
-    }
-
     if (addr_string != NULL) {
+        netsnmp_addrcache_add(addr_string);
         SNMP_FREE(addr_string);
         addr_string = NULL;
     }
