@@ -630,6 +630,9 @@ init_wes() {
     disks[i].minimumspace = -1;
   }
 
+  procwatch = NULL;   /* initialize to NULL */
+  extens = NULL;
+
   /* read config file(s) */
   /* read the config files */
   read_config (CONFIGFILE,&procwatch,&numprocs,&extens,&numextens,&minimumswap,disks,&numdisks);
