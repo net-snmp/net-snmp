@@ -130,9 +130,6 @@
 /* testing code sections. */
 #undef SNMP_TESTING_CODE 
 
-/* If you don't have root access don't exit upon kmem errors */
-#undef NO_ROOT_ACCESS
-
 /* If you don't want the agent to report on variables it doesn't have data for */
 #undef NO_DUMMY_VALUES
 

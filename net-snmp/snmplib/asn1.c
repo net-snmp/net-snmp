@@ -587,11 +587,12 @@ asn_parse_header(u_char	*data,
     }
     *type = *bufp;
     bufp = asn_parse_length(bufp + 1, &asn_length);
+    if (_asn_parse_length_check("parse header", bufp, data, asn_length, *datalength))
+	return NULL;
+
     DEBUGDUMPSETUP("dump_recv", data, (bufp-data));
     DEBUGMSG(("dump_recv", "  ASN Header: 0x%.2X, len = %d (0x%X)\n", *data,
               asn_length, asn_length));
-    if (_asn_parse_length_check("parse header", bufp, data, asn_length, *datalength))
-	return NULL;
 
 #ifdef OPAQUE_SPECIAL_TYPES
 

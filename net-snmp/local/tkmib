@@ -1,5 +1,4 @@
-#!/usr/local/bin/perl
-#!/usr/local/bin/perl -w
+#!/usr/bin/perl55 -w
 
 require 5;
 

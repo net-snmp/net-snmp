@@ -35,7 +35,7 @@ header_complex_generate_varoid(struct variable_list *var) {
       case ASN_OPAQUE:
       case ASN_OCTET_STR:
         var->name_length = var->val_len+1;
-        var->name = (oid *) malloc(sizeof(oid) * var->val_len + 1);
+        var->name = (oid *) malloc(sizeof(oid) * (var->val_len + 1));
         if (var->name == NULL)
             return SNMPERR_GENERR;
         var->name[0] = var->val_len;

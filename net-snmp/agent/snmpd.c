@@ -218,6 +218,7 @@ static void usage(char *prog)
 	printf("-q\t\tPrint information in a more parsable format (quick-print)\n");
 	printf("-D\t\tTurn on debugging output\n");
 	printf("-p NUM\t\tRun on port NUM instead of the default:  161\n");
+	printf("-x SOCKADDR\tBind AgentX to this address\n");
 	printf("-c CONFFILE\tRead CONFFILE as a configuration file.\n");
 	printf("-C\t\tDon't read the default configuration files.\n");
 	printf("-L\t\tPrint warnings/messages to stdout/err\n");
@@ -311,10 +312,6 @@ main(int argc, char *argv[])
 	strcpy(logfile, LOGFILE);
 #endif
 
-#ifdef NO_ROOT_ACCESS
-        /* default to no */
-        ds_set_boolean(DS_APPLICATION_ID, DS_AGENT_NO_ROOT_ACCESS, 1);
-#endif
 
 	/*
 	 * usage: snmpd
@@ -382,9 +379,15 @@ main(int argc, char *argv[])
                     usage(argv[0]);
                   break;
 
+                case 'x':
+                  if (++arg == argc)
+                    usage(argv[0]);
+                  ds_set_string(DS_APPLICATION_ID, DS_AGENT_X_SOCKET, argv[arg]);
+                  break;
+
 		case 'r':
-                    ds_toggle_boolean(DS_APPLICATION_ID,
-                                      DS_AGENT_NO_ROOT_ACCESS);
+                    ds_set_boolean(DS_APPLICATION_ID,
+                                      DS_AGENT_NO_ROOT_ACCESS, 1);
 		    break;
 
                 case 'P':
@@ -517,10 +520,13 @@ main(int argc, char *argv[])
     if (pid_file != NULL) {
       if ((PID = fopen(pid_file, "w")) == NULL) {
         snmp_log_perror("fopen");
-        exit(1);
+        if (!ds_get_boolean(DS_APPLICATION_ID, DS_AGENT_NO_ROOT_ACCESS))
+          exit(1);
       }
-      fprintf(PID, "%d\n", (int)getpid());
-      fclose(PID);
+      else {
+        fprintf(PID, "%d\n", (int)getpid());
+        fclose(PID);
+      }
     }
 #endif
 
@@ -532,9 +538,11 @@ main(int argc, char *argv[])
     /* start library */
     init_snmp("snmpd");
 
-    init_master_agent( dest_port,
+    ret = init_master_agent( dest_port,
                        snmp_check_packet,
                        snmp_check_parse );
+	if( ret != 0 )
+		Exit(1); /* Exit logs exit val for us */
 
 #ifdef SIGTERM
     signal(SIGTERM, SnmpdShutDown);
@@ -557,14 +565,16 @@ main(int argc, char *argv[])
 		DEBUGMSGTL(("snmpd", "Changing gid to %d.\n", gid));
 		if (setgid(gid)==-1) {
 			snmp_log_perror("setgid failed");
-			exit(1);
+        		if (!ds_get_boolean(DS_APPLICATION_ID, DS_AGENT_NO_ROOT_ACCESS))
+			  exit(1);
 		}
 	}
 	if (uid) {
 		DEBUGMSGTL(("snmpd", "Changing uid to %d.\n", uid));
 		if(setuid(uid)==-1) {
 			snmp_log_perror("setuid failed");
-			exit(1);
+        		if (!ds_get_boolean(DS_APPLICATION_ID, DS_AGENT_NO_ROOT_ACCESS))
+			  exit(1);
 		}
 	}
 #endif

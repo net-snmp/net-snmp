@@ -571,7 +571,7 @@ in_a_view(oid		  *name,      /* IN - name of var, OUT - name matched */
 
   /* check for v1 and counter64s, since snmpv1 doesn't support it */
   if (pdu->version == SNMP_VERSION_1 && type == ASN_COUNTER64)
-    return 1;
+    return 5;
   switch (pdu->version) {
   case SNMP_VERSION_1:
   case SNMP_VERSION_2c:

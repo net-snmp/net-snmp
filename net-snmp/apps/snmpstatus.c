@@ -69,6 +69,8 @@ SOFTWARE.
 #include <arpa/inet.h>
 #endif
 
+#include <getopt.h>
+
 #include "asn1.h"
 #include "snmp_api.h"
 #include "snmp_impl.h"
@@ -78,6 +80,7 @@ SOFTWARE.
 #include "system.h"
 #include "tools.h"
 #include "snmp_parse_args.h"
+#include "default_store.h"
 
 oid	objid_sysDescr[] = {1, 3, 6, 1, 2, 1, 1, 1, 0};
 size_t	length_sysDescr = sizeof(objid_sysDescr)/sizeof(oid);
@@ -98,13 +101,31 @@ size_t	length_ipInReceives = sizeof(objid_ipInReceives)/sizeof(oid);
 oid	objid_ipOutRequests[] = {1, 3, 6, 1, 2, 1, 4, 10, 0};
 size_t	length_ipOutRequests = sizeof(objid_ipOutRequests)/sizeof(oid);
 
+#define DS_APP_DONT_FIX_PDUS 0
+
+static void optProc(int argc, char *const *argv, int opt)
+{
+    switch (opt) {
+        case 'C':
+            while (*optarg) {
+                switch (*optarg++) {
+                    case 'f':
+                        ds_toggle_boolean(DS_APPLICATION_ID, DS_APP_DONT_FIX_PDUS);
+                        break;
+                }
+            }
+            break;
+    }
+}
 
 void usage(void)
 {
-  fprintf(stderr,"Usage: snmpstatus ");
+  fprintf(stderr,"Usage: snmpstatus [-Cf]");
   snmp_parse_args_usage(stderr);
   fprintf(stderr,"\n\n");
   snmp_parse_args_descriptions(stderr);
+  fprintf(stderr, "snmpstatus specific options\n");
+  fprintf(stderr, "  -Cf\t\tDon't fix errors and retry the request.\n");
 }
 
 
@@ -125,7 +146,7 @@ int main(int argc, char *argv[])
     int count;
 
     /* get the common command line arguments */
-    snmp_parse_args(argc, argv, &session, NULL, NULL);
+    snmp_parse_args(argc, argv, &session, "C:", &optProc);
 
     SOCK_STARTUP;
 
@@ -185,11 +206,13 @@ retry:
         }
 
         /* retry if the errored variable was successfully removed */
-        pdu = snmp_fix_pdu(response, SNMP_MSG_GET);
-        snmp_free_pdu(response);
-	response = NULL;
-        if (pdu != NULL)
-          goto retry;
+        if (!ds_get_boolean(DS_APPLICATION_ID, DS_APP_DONT_FIX_PDUS)) {
+            pdu = snmp_fix_pdu(response, SNMP_MSG_GET);
+            snmp_free_pdu(response);
+            response = NULL;
+            if (pdu != NULL)
+                goto retry;
+        }
       }
     } else if (status == STAT_TIMEOUT){
       fprintf(stderr,"Timeout: No Response from %s\n", session.peername);

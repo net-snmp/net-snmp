@@ -182,9 +182,6 @@
 /* testing code sections. */
 #undef SNMP_TESTING_CODE 
 
-/* If you don't have root access don't exit upon kmem errors */
-#undef NO_ROOT_ACCESS
-
 /* If you don't want the agent to report on variables it doesn't have data for */
 #undef NO_DUMMY_VALUES
 
@@ -217,6 +214,9 @@
 /* Define if you have the getloadavg function.  */
 #undef HAVE_GETLOADAVG
 
+/* Define if you have the getpagesize function.  */
+#undef HAVE_GETPAGESIZE
+
 /* Define if you have the getpid function.  */
 #undef HAVE_GETPID
 
@@ -231,6 +231,9 @@
 
 /* Define if you have the index function.  */
 #undef HAVE_INDEX
+
+/* Define if you have the knlist function.  */
+#undef HAVE_KNLIST
 
 /* Define if you have the kvm_getprocs function.  */
 #undef HAVE_KVM_GETPROCS
@@ -438,6 +441,9 @@
 
 /* Define if you have the <netinet/ip.h> header file.  */
 #undef HAVE_NETINET_IP_H
+
+/* Define if you have the <netinet/ip6.h> header file.  */
+#undef HAVE_NETINET_IP6_H
 
 /* Define if you have the <netinet/ip_var.h> header file.  */
 #undef HAVE_NETINET_IP_VAR_H

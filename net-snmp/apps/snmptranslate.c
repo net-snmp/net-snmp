@@ -27,6 +27,8 @@ ARISING OUT OF OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS
 SOFTWARE.
 ******************************************************************/
 
+#define DEPRECATED_CLI_OPTIONS
+
 #include <config.h>
 
 #if HAVE_STDLIB_H
@@ -84,6 +86,8 @@ void usage(void)
   fprintf(stderr,
           "  -M <MIBDIRS>\tuse MIBDIRS as the location to look for mibs.\n");
   fprintf(stderr,
+	  "  -w <width>\twidth of tree print output\n");
+  fprintf(stderr,
           "  -T <TRANSOPTS> Print one or more MIB symbol reports.\n");
   fprintf(stderr,
           "  \t\tTRANSOPTS values:\n");
@@ -119,13 +123,18 @@ int main(int argc, char *argv[])
     int description = 0;
     int print = 0;
     int find_all = 0;
+    int width = 1000000;
     char n_opt[] = "n";
     
     /*
      * usage: snmptranslate name
      */
     snmp_out_toggle_options(n_opt);
+#ifndef DEPRECATED_CLI_OPTIONS
     while ((arg = getopt(argc, argv, "VhndrRwWptafsSm:M:D:P:T:O:I:")) != EOF){
+#else
+    while ((arg = getopt(argc, argv, "Vhm:M:w:D:P:T:O:I:")) != EOF){
+#endif
 	switch(arg) {
 	case 'h':
 	    usage();
@@ -187,6 +196,15 @@ int main(int argc, char *argv[])
         case 'M':
             setenv("MIBDIRS", optarg, 1);
             break;
+#ifdef DEPRECATED_CLI_OPTIONS
+	case 'w':
+	    width = atoi(optarg);
+	    if (width <= 0) {
+		fprintf(stderr, "Invalid width specification: %s\n", optarg);
+		exit (1);
+	    }
+	    break;
+#endif
 	case 'D':
             debug_register_tokens(optarg);
 	    snmp_set_do_debugging(1);
@@ -279,7 +297,7 @@ int main(int argc, char *argv[])
 	    usage();
 	    exit(1);
         case 1:
-            print_mib_tree (stdout, get_tree_head());
+            print_mib_tree (stdout, get_tree_head(), width);
             break;
         case 2:
             print_ascii_dump (stdout);
@@ -323,7 +341,7 @@ int main(int argc, char *argv[])
         if (print == 1) {
             struct tree *tp;
             tp = get_tree(name, name_length, get_tree_head());
-            print_mib_tree (stdout, tp);
+            print_mib_tree (stdout, tp, width);
         } else {
             print_objid(name, name_length);
             if (description){

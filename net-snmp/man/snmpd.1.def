@@ -5,7 +5,7 @@
 .SH NAME
 snmpd - daemon to respond to SNMP request packets.
 .SH SYNOPSIS
-.B "snmpd [-v] [-a] [-V] [-d] [-q] [-D] [-p port] [-f] [-l logfile] [-L] [-c file] [-C] [-r]"
+.B "snmpd [-v] [-a] [-V] [-d] [-q] [-D] [-p port] [-x agentx-socket] [-f] [-l logfile] [-L] [-c file] [-C] [-r]"
 .SH DESCRIPTION
 .B snmpd
 is a SNMP agent which binds to a port and awaits requests from
@@ -37,6 +37,18 @@ Turn on debugging output
 Opens on 
 .I port
 instead of the default SNMP agent port, 161.
+.TP
+.B -x agentx-socket
+Listens for AgentX connections on the specified socket
+rather than the default '/var/agentx/master'.
+The socket can either be a Unix domain socket path,
+or the address of a network interface.
+If a network address of the form
+.B inet-addr:port
+is given, then the agent will listen on the port specified.
+If a network address of the form
+.B inet-addr
+is given, then the agent will listen on the default AgentX port, 705.
 .TP
 .B -f
 Don't fork() from the calling shell.

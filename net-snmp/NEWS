@@ -1,6 +1,29 @@
 This file contains major changes in released revisions.  Please read
 the ChangeLog file for a more detailed listing of changes/bug fixes.
 
+*4.1.2*
+ Fixes:
+    - Host resources fixes for FreeBSD and NetBSD
+    - ucd-snmp memory/vmstat fixes for FreeBSD-3
+    - configure --enable-ipv6 fixes
+    - AIX fix (use knlist)
+    - fix init_master_agent calling exit
+    - bad free in subagent.c
+    - dont let a agentx subagent be a smux master
+    - ucd-snmp/loadave fix for AIX
+    - fix doing a set on a pass variable
+    - snmptable fixes
+    - snmpnetstat fixes for v2c exceptions
+    - man page fixes
+
+ Features:
+    - Some UnixWare 5 configuration support
+    - configure --enable-mini-agent --without-openssl
+    - snmptrapd -n
+    - snmp_log callbacks
+    - noTokenWarnings and noRangeCheck in snmp.conf
+    - using a counter type in snmpset/snmptrap
+
 *4.1.1*
  Fixes:
     - Better agent handling of unauthorized requests.

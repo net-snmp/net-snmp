@@ -44,7 +44,7 @@ void init_versioninfo(void)
     {VERCDATE, ASN_OCTET_STR, RONLY, var_extensible_version, 1, {VERCDATE}},
     {VERIDENT, ASN_OCTET_STR, RONLY, var_extensible_version, 1, {VERIDENT}},
     {VERCONFIG, ASN_OCTET_STR, RONLY, var_extensible_version, 1, {VERCONFIG}},
-    {VERCLEARCACHE, ASN_INTEGER, RONLY, var_extensible_version, 1, {VERCLEARCACHE}},
+    {VERCLEARCACHE, ASN_INTEGER, RWRITE, var_extensible_version, 1, {VERCLEARCACHE}},
     {VERUPDATECONFIG, ASN_INTEGER, RWRITE, var_extensible_version, 1, {VERUPDATECONFIG}},
     {VERRESTARTAGENT, ASN_INTEGER, RWRITE, var_extensible_version, 1, {VERRESTARTAGENT}},
     {VERDEBUGGING, ASN_INTEGER, RWRITE, var_extensible_version, 1, {VERDEBUGGING}}
@@ -100,7 +100,7 @@ u_char *var_extensible_version(struct variable *vp,
       curtime = time(NULL);
       cptr = ctime(&curtime);
       sprintf(errmsg,cptr);
-      *var_len = strlen(errmsg);
+      *var_len = strlen(errmsg)-1;
       return((u_char *) errmsg);
     case VERIDENT:
       sprintf(errmsg,"$Id$");

@@ -14,7 +14,7 @@
 /* default location to look for mibs to load using the above tokens
    and/or those in the MIBS envrionment variable*/
 
-#define DEFAULT_MIBDIRS "\\USR\\MIBS"
+#define DEFAULT_MIBDIRS "/USR/MIBS"
 
 /* default mib files to load, specified by path. */
 
@@ -106,9 +106,9 @@
    byte first (like Motorola and SPARC, unlike Intel and VAX).  */
 #undef WORDS_BIGENDIAN
 
-#define SNMPLIBPATH "\\USR\\LIB"
-#define SNMPSHAREPATH "\\USR"
-#define SNMPCONFPATH "\\USR"
+#define SNMPLIBPATH "/USR/LIB"
+#define SNMPSHAREPATH "/USR/SHARE/SNMP"
+#define SNMPCONFPATH "/USR"
 
 /* SNMPPATH contains (more) important files */
 
@@ -122,7 +122,7 @@
 /* PERSISTENT_DIRECTORY: If defined, the library is capabile of saving
    persisant information to this directory in the form of configuration
    lines: PERSISTENT_DIRECTORY/NAME.persistent.conf */
-#define PERSISTENT_DIRECTORY "\\USR\\SNMP"
+#define PERSISTENT_DIRECTORY "/USR/SNMP/PERSIST"
 
 #define MAX_PERSISTENT_BACKUPS 10
 /* default system contact */

@@ -132,6 +132,8 @@ agent_check_and_process(int block) {
   int fakeblock=0;
   
   tvp =  &timeout;
+  tvp->tv_sec  = 0;
+  tvp->tv_usec = 0;
 
   numfds = 0;
   FD_ZERO(&fdset);
@@ -184,7 +186,7 @@ agent_check_and_process(int block) {
 		for Index Allocation use initially. */
 struct snmp_session *main_session;
 
-void
+int
 init_master_agent(int dest_port, 
                   int (*pre_parse) (struct snmp_session *, snmp_ipaddr),
                   int (*post_parse) (struct snmp_session *, struct snmp_pdu *,int))
@@ -192,9 +194,9 @@ init_master_agent(int dest_port,
     struct snmp_session sess, *session;
 
     if ( ds_get_boolean(DS_APPLICATION_ID, DS_AGENT_ROLE) != MASTER_AGENT )
-	return;
+	return 0; /* no error if ! MASTER_AGENT */
 
-    DEBUGMSGTL(("snmpd","installing master agent on port %d", dest_port));
+    DEBUGMSGTL(("snmpd","installing master agent on port %d\n", dest_port));
 
     snmp_sess_init( &sess );
     
@@ -211,9 +213,10 @@ init_master_agent(int dest_port,
     if ( session == NULL ) {
       /* diagnose snmp_open errors with the input struct snmp_session pointer */
 	snmp_sess_perror("init_master_agent", &sess);
-	exit(1);
+		return 1;
     }
     main_session = session;
+	return 0;
 }
 
 struct agent_snmp_session  *
@@ -274,9 +277,9 @@ handle_snmp_packet(int operation, struct snmp_session *session, int reqid,
     if (asp->outstanding_requests != NULL)
 	return 1;
 
-    if ((status = check_access(pdu)) != 0) {
+    if ( check_access(pdu) != 0) {
         /* access control setup is incorrect */
-       send_easy_trap(SNMP_TRAP_AUTHFAIL, 0);
+	send_easy_trap(SNMP_TRAP_AUTHFAIL, 0);
         if (asp->pdu->version != SNMP_VERSION_1 && asp->pdu->version != SNMP_VERSION_2c) {
             asp->pdu->errstat = SNMP_ERR_AUTHORIZATIONERROR;
             asp->pdu->command = SNMP_MSG_RESPONSE;
@@ -434,17 +437,20 @@ handle_snmp_packet(int operation, struct snmp_session *session, int reqid,
 	if ( asp->mode == COMMIT ) {
 	    status = handle_next_pass( asp );
 
-	    if ( status != SNMP_ERR_NOERROR )
-	        asp->mode = FINISHED_FAILURE;	/* or UNDO ? */
+	    if ( status != SNMP_ERR_NOERROR ) {
+		status    = SNMP_ERR_COMMITFAILED;
+	        asp->mode = FINISHED_FAILURE;
+	    }
 	    else
-	        asp->mode = FINISHED_SUCCESS;	/* or FREE ? */
+	        asp->mode = FINISHED_SUCCESS;
 
 	    if ( asp->outstanding_requests != NULL )
 		return 1;
 	}
 
 	if ( asp->mode == UNDO ) {
-	    status = handle_next_pass( asp );
+	    if (handle_next_pass( asp ) != SNMP_ERR_NOERROR )
+		status = SNMP_ERR_UNDOFAILED;
 
 	    asp->mode = FINISHED_FAILURE;
 	    break;
@@ -471,20 +477,77 @@ handle_snmp_packet(int operation, struct snmp_session *session, int reqid,
 	free( asp );
 	return 0;
     }
-	
-    
-	
+
     if ( asp->outstanding_requests != NULL ) {
 	asp->status = status;
 	asp->next = agent_session_list;
 	agent_session_list = asp;
     }
     else {
+		/*
+		 * May need to "dumb down" a SET error status for a
+		 *  v1 query.  See RFC2576 - section 4.3
+		 */
+	if (( asp->pdu->command == SNMP_MSG_SET ) &&
+	    ( asp->pdu->version == SNMP_VERSION_1 )) {
+	    switch ( status ) {
+		case SNMP_ERR_WRONGVALUE:
+		case SNMP_ERR_WRONGENCODING:
+		case SNMP_ERR_WRONGTYPE:
+		case SNMP_ERR_WRONGLENGTH:
+		case SNMP_ERR_INCONSISTENTVALUE:
+			status = SNMP_ERR_BADVALUE;
+			break;
+		case SNMP_ERR_NOACCESS:
+		case SNMP_ERR_NOTWRITABLE:
+		case SNMP_ERR_NOCREATION:
+		case SNMP_ERR_INCONSISTENTNAME:
+		case SNMP_ERR_AUTHORIZATIONERROR:
+			status = SNMP_ERR_NOSUCHNAME;
+			break;
+		case SNMP_ERR_RESOURCEUNAVAILABLE:
+		case SNMP_ERR_COMMITFAILED:
+		case SNMP_ERR_UNDOFAILED:
+			status = SNMP_ERR_GENERR;
+			break;
+	    }
+	}
+		/*
+		 * Similarly we may need to "dumb down" v2 exception
+		 *  types to throw an error for a v1 query.
+		 *  See RFC2576 - section 4.1.2.3
+		 */
+	if (( asp->pdu->command != SNMP_MSG_SET ) &&
+	    ( asp->pdu->version == SNMP_VERSION_1 )) {
+		for ( var_ptr = asp->pdu->variables, i=0 ;
+			var_ptr != NULL ;
+			var_ptr = var_ptr->next_variable, i++ ) {
+		    switch ( var_ptr->type ) {
+			case SNMP_NOSUCHOBJECT:
+			case SNMP_NOSUCHINSTANCE:
+			case SNMP_ENDOFMIBVIEW:
+			case ASN_COUNTER64:
+				status = SNMP_ERR_NOSUCHNAME;
+				asp->pdu->errindex=i;
+				break;
+		    }
+		}
+	}
 	if ( status == SNMP_ERR_NOERROR ) {
 	    snmp_increment_statistic_by(
 		(asp->pdu->command == SNMP_MSG_SET ?
 			STAT_SNMPINTOTALSETVARS : STAT_SNMPINTOTALREQVARS ),
 	    	count_varbinds( asp->pdu ));
+	}
+	else {
+		/*
+		 * Use a copy of the original request
+		 *   to report failures.
+		 */
+	    i = asp->pdu->errindex;
+	    snmp_free_pdu( asp->pdu );
+	    asp->pdu = snmp_clone_pdu( pdu );
+	    asp->pdu->errindex = i;
 	}
 	asp->pdu->command = SNMP_MSG_RESPONSE;
 	asp->pdu->errstat = status;
@@ -517,10 +580,10 @@ handle_next_pass(struct agent_snmp_session  *asp)
 
 		    snmp_async_send( req_p->session,  req_p->pdu,
 				      req_p->callback, req_p->cb_data );
-		    asp->pdu = snmp_clone_pdu( pdu );
-		    asp->pdu->variables = pdu->variables;
-		    pdu->variables = NULL;
 		}
+		asp->pdu = snmp_clone_pdu( pdu );
+		asp->pdu->variables = pdu->variables;
+		pdu->variables = NULL;
 	    }
 	    else {
 	    	/* discard outstanding requests */
@@ -547,7 +610,7 @@ handle_var_list(struct agent_snmp_session  *asp)
     u_short acl;
     WriteMethod *write_method;
     AddVarMethod *add_method;
-    int	    noSuchObject;
+    int	    noSuchObject = TRUE;
     int     count, view;
     
     count = 0;
@@ -582,6 +645,13 @@ statp_loop:
 		    asp->pdu->errindex = count;
 		    return SNMP_ERR_NOSUCHNAME;
 		}
+		else if (asp->rw == WRITE) {
+		    asp->pdu->errstat =
+			( noSuchObject	? SNMP_ERR_NOTWRITABLE
+					: SNMP_ERR_NOCREATION );
+		    asp->pdu->errindex = count;
+		    return asp->pdu->errstat;
+		}
 		else
 		    varbind_ptr->type = statType;
 	}
@@ -614,6 +684,7 @@ statp_loop:
 	    }
 	    asp->pdu->errstat = statType;
 	    asp->pdu->errindex = count;
+	    send_easy_trap(SNMP_TRAP_AUTHFAIL, 0);
 	    return statType;
         }
 	else {

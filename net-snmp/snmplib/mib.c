@@ -190,8 +190,9 @@ void sprint_hexstring(char *buf,
 	sprintf(buf, "%02X %02X %02X %02X %02X %02X %02X %02X ", cp[0], cp[1], cp[2], cp[3], cp[4], cp[5], cp[6], cp[7]);
 	buf += strlen(buf);
 	cp += 8;
-	sprintf(buf, "%02X %02X %02X %02X %02X %02X %02X %02X\n", cp[0], cp[1], cp[2], cp[3], cp[4], cp[5], cp[6], cp[7]);
+	sprintf(buf, "%02X %02X %02X %02X %02X %02X %02X %02X", cp[0], cp[1], cp[2], cp[3], cp[4], cp[5], cp[6], cp[7]);
 	buf += strlen(buf);
+	if (len > 16) { *buf++ = '\n'; *buf = 0; }
 	cp += 8;
     }
     for(; len > 0; len--){
@@ -738,8 +739,8 @@ sprint_bitstring(char *buf,
 	*buf++ = '"';
 	*buf = '\0';
     } else {
-	cp = var->val.bitstring + 1;
-	for(len = 0; len < (int)var->val_len - 1; len++){
+	cp = var->val.bitstring;
+	for(len = 0; len < (int)var->val_len; len++){
 	    for(bit = 0; bit < 8; bit++){
 		if (*cp & (0x80 >> bit)){
 		    enum_string = NULL;
@@ -756,8 +757,8 @@ sprint_bitstring(char *buf,
 		    buf += strlen(buf);
 		}
 	    }
+	    cp ++;
 	}
-	cp ++;
     }
 }
 
@@ -876,6 +877,9 @@ sprint_by_type(char *buf,
 	    break;
 	case ASN_OCTET_STR:
 	    sprint_octet_string(buf, var, enums, hint, units);
+	    break;
+	case ASN_BIT_STR:
+	    sprint_bitstring(buf, var, enums, hint, units);
 	    break;
 	case ASN_OPAQUE:
 	    sprint_opaque(buf, var, enums, hint, units);
@@ -1076,15 +1080,15 @@ register_mib_handlers (void)
     ds_register_premib(ASN_BOOLEAN, "snmp","mibReplaceWithLatest",
                        DS_LIBRARY_ID, DS_LIB_MIB_REPLACE);
 
-    ds_register_premib(ASN_BOOLEAN, "snmp","printNumericEnums",
+    ds_register_config(ASN_BOOLEAN, "snmp","printNumericEnums",
                        DS_LIBRARY_ID, DS_LIB_PRINT_NUMERIC_ENUM);
-    ds_register_premib(ASN_BOOLEAN, "snmp","printNumericOids",
+    ds_register_config(ASN_BOOLEAN, "snmp","printNumericOids",
                        DS_LIBRARY_ID, DS_LIB_PRINT_NUMERIC_OIDS);
-    ds_register_premib(ASN_BOOLEAN, "snmp","dontBreakdownOids",
+    ds_register_config(ASN_BOOLEAN, "snmp","dontBreakdownOids",
                        DS_LIBRARY_ID, DS_LIB_DONT_BREAKDOWN_OIDS);
-    ds_register_premib(ASN_BOOLEAN, "snmp","quickPrinting",
+    ds_register_config(ASN_BOOLEAN, "snmp","quickPrinting",
                        DS_LIBRARY_ID, DS_LIB_QUICK_PRINT);
-    ds_register_premib(ASN_INTEGER, "snmp","suffixPrinting",
+    ds_register_config(ASN_INTEGER, "snmp","suffixPrinting",
                        DS_LIBRARY_ID, DS_LIB_PRINT_SUFFIX_ONLY);
     
     /* setup the default parser configurations, as specified by configure */
@@ -1906,6 +1910,7 @@ fprint_description(FILE *f,
 		break;
 	    }
 	}
+	if (subtree == 0) break;
 	objid++; objidlen--; subtree = subtree->child_list;
 	if (subtree == 0) break;
     }

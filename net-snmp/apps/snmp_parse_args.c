@@ -97,10 +97,10 @@ snmp_parse_args_descriptions(FILE *outf)
   fprintf(outf, "  -H\t\tDisplay configuration file directives understood.\n");
   fprintf(outf, "  -V\t\tdisplay version number.\n");
   fprintf(outf, "  -v 1|2c|3\tspecifies snmp version to use.\n");
-  fprintf(outf, "  Version 1 or 2c specific\n");
+  fprintf(outf, "SNMP Version 1 or 2c specific\n");
   fprintf(outf, "  -c <c>\tset the community name (v1 or v2c)\n");
-  fprintf(outf, "  Version 3 specific\n");
-  fprintf(outf, "  -Z <B> <T>\tset the destination engine boots/time for v3 requests.\n");
+  fprintf(outf, "SNMP Version 3 specific\n");
+  fprintf(outf, "  -Z <B,T>\tset the destination engine boots/time for v3 requests.\n");
   fprintf(outf, "  -e <E>\tsecurity engine ID (e.g., 800000020109840301).\n");
   fprintf(outf, "  -E <E>\tcontext engine ID (e.g., 800000020109840301).\n");
   fprintf(outf, "  -n <N>\tcontext name (e.g., bridge1).\n");
@@ -110,16 +110,16 @@ snmp_parse_args_descriptions(FILE *outf)
   fprintf(outf, "  -A <P>\tauthentication protocol pass phrase.\n");
   fprintf(outf, "  -x <X>\tprivacy protocol (DES).\n");
   fprintf(outf, "  -X <P>\tprivacy protocol pass phrase\n");
-  fprintf(outf, "  General communication options\n");
+  fprintf(outf, "General communication options\n");
   fprintf(outf, "  -p <P>\tuse port P instead of the default port.\n");
   fprintf(outf, "  -T <LAYER>\tuse LAYER for the network layer.\n");
   fprintf(outf, "\t\t\t(UDP or TCP).\n");
   fprintf(outf, "  -t <T>\tset the request timeout to T.\n");
   fprintf(outf, "  -r <R>\tset the number of retries to R.\n");
-  fprintf(outf, "  Debugging\n");
+  fprintf(outf, "Debugging\n");
   fprintf(outf, "  -d\t\tdump input/output packets.\n");
   fprintf(outf, "  -D all | <TOKEN[,TOKEN,...]> \tturn on debugging output for the specified TOKENs.\n");
-  fprintf(outf, "  General options\n");
+  fprintf(outf, "General options\n");
   fprintf(outf, "  -m all | <MIBS>\tuse MIBS list instead of the default mib list.\n");
   fprintf(outf, "  -M <MIBDIRS>\tuse MIBDIRS as the location to look for mibs.\n");
   fprintf(outf, "  -P <MIBOPTS>\tToggle various defaults controlling mib parsing:\n");
@@ -151,7 +151,10 @@ snmp_parse_args(int argc,
 
   /* initialize session to default values */
   snmp_sess_init( session );
-  strcpy(Opts, "VhHm:M:fsSqRO:I:P:D:dv:p:r:t:c:Z:e:E:n:u:l:x:X:a:A:T:");
+  strcpy(Opts, "VhHm:M:O:I:P:D:dv:p:r:t:c:Z:e:E:n:u:l:x:X:a:A:T:");
+#ifndef DEPRECATED_CLI_OPTIONS
+  strcat(Opts, "fsSqR");
+#endif
   if (localOpts) strcat(Opts, localOpts);
 
   /* get the options */
@@ -219,7 +222,7 @@ snmp_parse_args(int argc,
       case 'I':
         cp = snmp_in_toggle_options(optarg);
         if (cp != NULL) {
-          fprintf(stderr,"Unknown output option passed to -I: %c.\n", *cp);
+          fprintf(stderr,"Unknown input option passed to -I: %c.\n", *cp);
           usage();
           exit(1);
         }
@@ -308,8 +311,12 @@ snmp_parse_args(int argc,
           usage();
           exit(1);
         }
-        if ((++optind<argc) && isdigit(argv[optind][0]))
-          session->engineTime = strtoul(argv[optind], NULL, 10);
+        cp = strchr(optarg,',');
+        if (cp && *(++cp) && isdigit(*cp))
+          session->engineTime = strtoul(cp, NULL, 10);
+		/* Handle previous '-Z boot time' syntax */
+	else if ((optind<argc) && isdigit(argv[optind][0]))
+	  session->engineTime = strtoul(argv[optind], NULL, 10);
         else {
           fprintf(stderr,"Need engine time value after -Z flag.\n");
           usage();
@@ -350,14 +357,14 @@ snmp_parse_args(int argc,
         break;
 
       case 'l':
-        if (!strcmp(optarg,"noAuthNoPriv") || !strcmp(optarg,"1") ||
-            !strcmp(optarg,"nanp")) {
+        if (!strcasecmp(optarg,"noAuthNoPriv") || !strcmp(optarg,"1") ||
+            !strcasecmp(optarg,"nanp")) {
           session->securityLevel = SNMP_SEC_LEVEL_NOAUTH;
-        } else if (!strcmp(optarg,"authNoPriv") || !strcmp(optarg,"2") ||
-            !strcmp(optarg,"anp")) {
+        } else if (!strcasecmp(optarg,"authNoPriv") || !strcmp(optarg,"2") ||
+            !strcasecmp(optarg,"anp")) {
           session->securityLevel = SNMP_SEC_LEVEL_AUTHNOPRIV;
-        } else if (!strcmp(optarg,"authPriv") || !strcmp(optarg,"3") ||
-            !strcmp(optarg,"ap")) {
+        } else if (!strcasecmp(optarg,"authPriv") || !strcmp(optarg,"3") ||
+            !strcasecmp(optarg,"ap")) {
           session->securityLevel = SNMP_SEC_LEVEL_AUTHPRIV;
         } else {
           fprintf(stderr,"Invalid security level specified after -l flag: %s\n", optarg);
@@ -368,10 +375,10 @@ snmp_parse_args(int argc,
         break;
 
       case 'a':
-        if (!strcmp(optarg,"MD5")) {
+        if (!strcasecmp(optarg,"MD5")) {
           session->securityAuthProto = usmHMACMD5AuthProtocol;
           session->securityAuthProtoLen = USM_AUTH_PROTO_MD5_LEN;
-        } else if (!strcmp(optarg,"SHA")) {
+        } else if (!strcasecmp(optarg,"SHA")) {
           session->securityAuthProto = usmHMACSHA1AuthProtocol;
           session->securityAuthProtoLen = USM_AUTH_PROTO_SHA_LEN;
         } else {
@@ -382,7 +389,7 @@ snmp_parse_args(int argc,
         break;
 
       case 'x':
-        if (!strcmp(optarg,"DES")) {
+        if (!strcasecmp(optarg,"DES")) {
           session->securityPrivProto = usmDESPrivProtocol;
           session->securityPrivProtoLen = USM_PRIV_PROTO_DES_LEN;
         } else {

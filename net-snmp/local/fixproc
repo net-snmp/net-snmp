@@ -1,4 +1,4 @@
-#!/usr/local/bin/perl
+#!/usr/bin/perl
 # 
 # fixproc [-min n] [-max n] [-check | -kill | -restart | -exist | -fix] proc ...
 # 

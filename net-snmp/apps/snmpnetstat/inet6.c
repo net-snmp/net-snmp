@@ -463,12 +463,12 @@ udp_stats(void)
     while (count--){
 	*udpentry = sp->entry;
 	var = getvarbyname(Session, varname, varname_len);
-	if (var){
+	if (var && var->val.integer){
 	    putchar('\t');
 	    printf(sp->description, *var->val.integer, plural((int)*var->val.integer));
 	    putchar('\n');
-	    snmp_free_var(var);
 	}
+	if (var) snmp_free_var(var);
 	sp++;
     }
 
@@ -494,12 +494,12 @@ tcp_stats(void)
     while (count--){
 	*tcpentry = sp->entry;
 	var = getvarbyname(Session, varname, varname_len);
-	if (var){
+	if (var && var->val.integer){
 	    putchar('\t');
 	    printf(sp->description, *var->val.integer, plural((int)*var->val.integer));
 	    putchar('\n');
-	    snmp_free_var(var);
 	}
+	if (var) snmp_free_var(var);
 	sp++;
     }
 
@@ -525,12 +525,12 @@ ip_stats(void)
     while (count--){
 	*ipentry = sp->entry;
 	var = getvarbyname(Session, varname, varname_len);
-	if (var){
+	if (var && var->val.integer){
 	    putchar('\t');
 	    printf(sp->description, *var->val.integer, plural((int)*var->val.integer));
 	    putchar('\n');
-	    snmp_free_var(var);
 	}
+	if (var) snmp_free_var(var);
 	sp++;
     }
 
@@ -557,12 +557,12 @@ icmp_stats(void)
     while (count--){
 	*icmpentry = sp->entry;
 	var = getvarbyname(Session, varname, varname_len);
-	if (var){
+	if (var && var->val.integer){
 	    putchar('\t');
 	    printf(sp->description, *var->val.integer, plural((int)*var->val.integer));
 	    putchar('\n');
-	    snmp_free_var(var);
 	}
+	if (var) snmp_free_var(var);
 	sp++;
     }
 
@@ -572,7 +572,7 @@ icmp_stats(void)
     while (count--){
 	*icmpentry = sp->entry;
 	var = getvarbyname(Session, varname, varname_len);
-	if (var && *var->val.integer != 0){
+	if (var && var->val.integer && *var->val.integer != 0){
 	    if (first){
 		printf("\tOutput Histogram:\n");
 		first = 0;
@@ -591,7 +591,7 @@ icmp_stats(void)
     while (count--){
 	*icmpentry = sp->entry;
 	var = getvarbyname(Session, varname, varname_len);
-	if (var && *var->val.integer != 0){
+	if (var && var->val.integer && *var->val.integer != 0){
 	    if (first){
 		printf("\tInput Histogram:\n");
 		first = 0;

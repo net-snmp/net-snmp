@@ -33,6 +33,7 @@ persistentdir	= @PERSISTENT_DIRECTORY@
 INSTALL		= @INSTALL@
 SED		= @SED@
 RANLIB		= @RANLIB@
+LN_S		= @LN_S@
 
 #
 # Compiler arguments

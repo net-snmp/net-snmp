@@ -49,6 +49,7 @@
 #include "read_config.h"
 #include "tools.h"
 #include "agent_trap.h"
+#include "callback.h"
 #define u_char unsigned char
 #define u_short unsigned short
 

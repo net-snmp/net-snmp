@@ -3,18 +3,6 @@ Microsoft Developer Studio Workspace File, Format Version 5.00
 
 ###############################################################################
 
-Project: "encode_keychange"=.\encode_keychange\encode_keychange.dsp - Package Owner=<4>
-
-Package=<5>
-{{{
-}}}
-
-Package=<4>
-{{{
-}}}
-
-###############################################################################
-
 Project: "libagent"=.\libagent\libagent.dsp - Package Owner=<4>
 
 Package=<5>
@@ -244,6 +232,18 @@ Package=<4>
 ###############################################################################
 
 Project: "snmpwalk"=.\snmpwalk\snmpwalk.dsp - Package Owner=<4>
+
+Package=<5>
+{{{
+}}}
+
+Package=<4>
+{{{
+}}}
+
+###############################################################################
+
+Project: "encode_keychange"=.\encode_keychange\encode_keychange.dsp - Package Owner=<4>
 
 Package=<5>
 {{{

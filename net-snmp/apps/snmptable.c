@@ -108,7 +108,24 @@ static size_t name_length;
 static oid root[MAX_OID_LEN];
 static size_t rootlen;
 static int localdebug;
+
+
 static int nonsequential = 1;
+
+#ifdef COMMENT
+Related to the use of the "nonsequential" [-C] flag:
+
+The -C option should NOT be used. It gives you the old, problematic
+behaviour of pre-4.1. Forget about it. It is just there as a safe-
+guard in case a problem shows up.
+
+You could get away with
+ snmptable -C host community table
+
+but again, -C should be forgotten.
+
+#endif
+
 
 void get_field_names (char *);
 void get_table_entries( struct snmp_session *ss );
@@ -117,24 +134,54 @@ void print_table (void);
 static void optProc(int argc, char *const *argv, int opt)
 {
     switch (opt) {
+      case 'C':
+		/* Handle new '-C' command-specific meta-options */
+	while (*optarg) {
+          switch (*optarg++) {
+          case 'w':
+	    if ( argv[optind] )
+               max_width = atoi(argv[optind]);
+            if (max_width == 0) {
+               fprintf(stderr, "Bad -Cw option: %s\n", argv[optind]);
+               usage();
+            }
+	    optind++;
+            break;
+          case 'f':
+            field_separator = argv[optind];
+            if ( !field_separator ) {
+               fprintf(stderr, "Bad -Cf option: %s\n", argv[optind]);
+               usage();
+            }
+	    optind++;
+            break;
+          case 'h':
+            headers_only = 1;
+            break;
+          case 'H':
+            no_headers = 1;
+            break;
+          case 'C':
+            nonsequential = 0;
+            break;
+          case 'b':
+            brief = 1;
+            break;
+          case 'i':
+            show_index = 1;
+            break;
+	  default:
+	    fprintf(stderr, "Bad option after -C: %c\n", optarg[-1]);
+	    usage();
+          }
+       }
+       break;
     case 'w':
       max_width = atoi(optarg);
       if (max_width == 0) {
 	fprintf(stderr, "Bad -w option: %s\n", optarg);
 	usage();
       }
-      break;
-    case 'f':
-      field_separator = optarg;
-      break;
-    case 'h':
-      headers_only = 1;
-      break;
-    case 'H':
-      no_headers = 1;
-      break;
-    case 'C':
-      nonsequential = 0;
       break;
     case 'b':
       brief = 1;
@@ -151,10 +198,12 @@ void usage(void)
   snmp_parse_args_usage(stdout);
   fprintf(stdout," <objectID>\n\n");
   snmp_parse_args_descriptions(stdout);
-  fprintf(stdout,"  -w <W>\tprint table in parts of W characters width\n");
-  fprintf(stdout,"  -f <F>\tprint an F delimited table\n");
-  fprintf(stdout,"  -b\t\tbrief field names\n");
-  fprintf(stdout,"  -i\t\tprint index value\n");
+  fprintf(stdout,"  -Cw <W>\tprint table in parts of W characters width\n");
+  fprintf(stdout,"  -Cf <F>\tprint an F delimited table\n");
+  fprintf(stdout,"  -Cb\t\tbrief field names\n");
+  fprintf(stdout,"  -Ci\t\tprint index value\n");
+  fprintf(stdout,"  -Ch\t\tprint only the column headers\n");
+  fprintf(stdout,"  -CH\t\tprint no column headers\n");
   exit(1);
 }
 
@@ -167,7 +216,7 @@ int main(int argc, char *argv[])
   snmp_set_quick_print(1);
 
   /* get the common command line arguments */
-  snmp_parse_args(argc, argv, &session, "w:f:ChHbi", optProc);
+  snmp_parse_args(argc, argv, &session, "w:C:bi", optProc);
 
   /* get the initial object and subtree */
   /* specified on the command line */
@@ -206,12 +255,13 @@ int main(int argc, char *argv[])
     exit(1);
   }
 
-  if (headers_only == 0) get_table_entries(ss);
+  if (!headers_only) get_table_entries(ss);
 
   snmp_close(ss);
   SOCK_CLEANUP;
 
-  print_table();
+  if (entries || headers_only) print_table();
+  else printf("%s: No entries\n", table_name);
 
   return 0;
 }
@@ -223,7 +273,7 @@ void print_table (void)
   char string_buf[SPRINT_MAX_LEN];
   char *index_fmt = NULL;
 
-  if (!no_headers) printf("SNMP table: %s\n\n", table_name);
+  if (!no_headers && !headers_only) printf("SNMP table: %s\n\n", table_name);
 
   for (field = 0; field < fields; field++) {
     if (field_separator == NULL)
@@ -289,6 +339,9 @@ void get_field_names( char* tblname )
   else
     root[rootlen++] = 1;
 
+  sprint_objid(string_buf, root, rootlen-1);
+  table_name = strdup(string_buf);
+
   fields = 0;
   while (going) {
     fields++;
@@ -330,16 +383,16 @@ void get_field_names( char* tblname )
   name_p = strrchr(string_buf, '.');
   if (!name_p) name_p = strrchr(string_buf, ':');
   if (name_p) *name_p = 0;
-  table_name = strdup(string_buf);
-  if (brief) {
+  if (brief && fields > 1) {
     char *f1, *f2;
-    int common = 128;
+    int common = strlen(column[0].label);
     int field;
     for (field = 1; field < fields; field++) {
       f1 = column[field-1].label;
       f2 = column[field].label;
       while (*f1++ == *f2++ && *f1) ;
-      if (f2 - column[field].label < common) common = f2 - column[field].label - 1;
+      if (f2 - column[field].label < common)
+	common = f2 - column[field].label - 1;
     }
     if (common) {
       for (field = 0; field < fields; field++) {
@@ -359,7 +412,7 @@ void get_table_entries( struct snmp_session *ss )
   int   status;
   int   i;
   int   col;
-  char  string_buf[SPRINT_MAX_LEN];
+  char  string_buf[SPRINT_MAX_LEN], *cp;
   char  *name_p = NULL;
   char  **dp;
   int end_of_table = 0;
@@ -411,8 +464,10 @@ void get_table_entries( struct snmp_session *ss )
 	  col++;
 	  name[rootlen] = column[col].subid;
 	  if (localdebug) sprint_variable(string_buf, vars->name, vars->name_length, vars);
-	  if( (vars->name_length < name_length) || ((int)vars->name[rootlen] != column[col].subid) ||
-	      memcmp(name, vars->name, name_length * sizeof(oid)) != 0) {
+	  if( (vars->name_length < name_length) ||
+              ((int)vars->name[rootlen] != column[col].subid) ||
+	      memcmp(name, vars->name, name_length * sizeof(oid)) != 0 ||
+              vars->type == SNMP_ENDOFMIBVIEW) {
 	    /* not part of this subtree */
 	    if (localdebug) printf("%s => ignored\n", string_buf);
 	    continue;
@@ -426,8 +481,19 @@ void get_table_entries( struct snmp_session *ss )
 	    memcpy(name, vars->name, name_length*sizeof(oid));
 	    sprint_objid(string_buf, vars->name, vars->name_length); 
 	    i = vars->name_length - rootlen + 1;
-	    name_p = string_buf + strlen(table_name)+1;
 	    if (localdebug || show_index ) {
+	      switch (snmp_get_suffix_only()) {
+	      case 2:
+		name_p = strrchr(string_buf, ':');
+		break;
+	      case 1:
+		name_p = string_buf;
+		break;
+	      case 0:
+	        name_p = string_buf + strlen(table_name)+1;
+		name_p = strchr(name_p, '.')+1;
+		break;
+	      }
 	      name_p = strchr(name_p, '.')+1;
 	    }
 	    if (localdebug) printf("Index: %s\n", name_p);
@@ -440,6 +506,7 @@ void get_table_entries( struct snmp_session *ss )
 	  
 	  if (localdebug) printf("%s => taken\n", string_buf);
 	  sprint_value(string_buf, vars->name, vars->name_length, vars);
+	  for (cp = string_buf; *cp; cp++) if (*cp == '\n') *cp = ' ';
 	  dp[col] = strdup(string_buf);
 	  i = strlen(string_buf);
 	  if (i > column[col].width) column[col].width = i;

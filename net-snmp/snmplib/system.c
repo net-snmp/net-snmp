@@ -543,11 +543,14 @@ int strncasecmp(const char *s1, const char *s2, size_t nch)
     if (!s2)
         return (1);
 
-    for (ii=0; (ii < nch) && (*s1 != '\0')
-         && (*s2 != '\0'); ii++, *s1++, *s2++)
+    for (ii = 0; (ii < nch) && *s1 && *s2; ii++, s1++, s2++)
     {
         res = (int) (tolower(*s1) - tolower(*s2));
         if (res != 0) break;
+    }
+
+    if ( ii == nch ) {
+        s1--; s2--;
     }
 
     if (! *s1) {

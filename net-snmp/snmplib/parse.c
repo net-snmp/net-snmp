@@ -1873,30 +1873,21 @@ parse_objecttype(FILE *fp,
         case UINTEGER32:
         case COUNTER:
         case GAUGE:
-            if (nexttype == LEFTBRACKET) {
-                /* if there is an enumeration list, parse it */
-                np->enums = parse_enumlist(fp, &np->enums);
-                nexttype = get_token(fp, nexttoken, MAXTOKEN);
-            } else if (nexttype == LEFTPAREN){
-		np->ranges = parse_ranges(fp, &np->ranges);
-                nexttype = get_token(fp, nexttoken, MAXTOKEN);
-            }
-            break;
         case BITSTRING:
+        case LABEL:
             if (nexttype == LEFTBRACKET) {
                 /* if there is an enumeration list, parse it */
                 np->enums = parse_enumlist(fp, &np->enums);
                 nexttype = get_token(fp, nexttoken, MAXTOKEN);
             } else if (nexttype == LEFTPAREN){
-                /* ignore the "constrained integer" for now */
+                /* if there is a range list, parse it */
 		np->ranges = parse_ranges(fp, &np->ranges);
-		nexttype = get_token (fp, nexttoken, MAXTOKEN);
+                nexttype = get_token(fp, nexttoken, MAXTOKEN);
             }
             break;
-        case LABEL:
         case OCTETSTR:
         case KW_OPAQUE:
-            /* ignore the "constrained octet string" for now */
+            /* parse any SIZE specification */
             if (nexttype == LEFTPAREN) {
                 nexttype = get_token(fp, nexttoken, MAXTOKEN);
                 if (nexttype == SIZE) {
@@ -1911,7 +1902,7 @@ parse_objecttype(FILE *fp,
                         }
                     }
                 }
-                print_error("Bad syntax", token, type);
+                print_error("Bad SIZE syntax", token, type);
                 free_node(np);
                 return NULL;
             }
@@ -2858,8 +2849,21 @@ parse(FILE *fp,
         case ENDOFFILE:
             continue;
         default:
-            print_error(token, "is a reserved word", type);
-            break;         /* see if we can parse the rest of the file */
+	    strcpy(name, token);
+	    type = get_token(fp, token, MAXTOKEN);
+	    nnp = NULL;
+	    if (type == MACRO) {
+		nnp = parse_macro(fp, name);
+		if (nnp == NULL){
+		    print_error("Bad parse of MACRO", NULL, type);
+		    /*return NULL;*/
+		}
+		free_node(nnp); /* IGNORE */
+		nnp = NULL;
+	    }
+	    else
+		print_error(name, "is a reserved word", lasttype);
+            continue;         /* see if we can parse the rest of the file */
         }
         strcpy(name, token);
         type = get_token(fp, token, MAXTOKEN);
@@ -3533,7 +3537,7 @@ find_module(int mid)
 static char leave_indent[256];
 static int leave_was_simple;
 
-static void print_mib_leaves(FILE *f, struct tree *tp)
+static void print_mib_leaves(FILE *f, struct tree *tp, int width)
 { struct tree *ntp;
   char *ip = leave_indent+strlen(leave_indent)-1;
   char last_ipch = *ip;
@@ -3556,7 +3560,9 @@ static void print_mib_leaves(FILE *f, struct tree *tp)
     switch (tp->type) {
     case TYPE_OBJID:		typ = "ObjID    "; break;
     case TYPE_OCTETSTR:		typ = "String   "; size = 1; break;
-    case TYPE_INTEGER:		typ = "Integer  "; break;
+    case TYPE_INTEGER:
+		if (tp->enums)	typ = "EnumVal  ";
+		else		typ = "Integer  "; break;
     case TYPE_NETADDR:		typ = "NetAddr  "; break;
     case TYPE_IPADDR:		typ = "IpAddr   "; break;
     case TYPE_COUNTER:		typ = "Counter  "; break;
@@ -3570,7 +3576,6 @@ static void print_mib_leaves(FILE *f, struct tree *tp)
     case TYPE_UINTEGER:		typ = "UInteger "; break;
     default:			typ = "         "; break;
     }
-    if (tp->enums)		typ = "EnumVal  ";
     fprintf(f, "%s-- %s %s %s(%ld)\n", leave_indent, acc, typ, tp->label, tp->subid);
     *ip = last_ipch;
     if (tp->tc_index >= 0)
@@ -3578,10 +3583,19 @@ static void print_mib_leaves(FILE *f, struct tree *tp)
 	      tclist[tp->tc_index].descriptor);
     if (tp->enums) {
       struct enum_list *ep = tp->enums;
+      int cpos = 0, cmax = width - strlen(leave_indent) - 16;
       fprintf(f, "%s        Values: ", leave_indent);
       while (ep) {
+	char buf[80];
+	int bufw;
 	if (ep != tp->enums) fprintf(f, ", ");
-	fprintf(f, "%s(%d)", ep->label, ep->value);
+	sprintf(buf, "%s(%d)", ep->label, ep->value);
+	cpos += (bufw = strlen(buf) + 2);
+	if (cpos >= cmax) {
+	  fprintf(f, "\n%s                ", leave_indent);
+	  cpos = bufw;
+	}
+	fprintf(f, "%s", buf);
 	ep = ep->next;
       }
       fprintf(f, "\n");
@@ -3625,7 +3639,7 @@ static void print_mib_leaves(FILE *f, struct tree *tp)
 	if (!leave_was_simple || lp->tp->type == 0)
 	  fprintf(f, "%s\n", leave_indent);
 	if (i == count) ip[3] = ' ';
-	print_mib_leaves(f, lp->tp);
+	print_mib_leaves(f, lp->tp, width);
       }
       free(leaves);
       leave_was_simple = 0;
@@ -3634,12 +3648,12 @@ static void print_mib_leaves(FILE *f, struct tree *tp)
   ip[1] = 0;
 }
 
-void print_mib_tree(FILE *f, struct tree *tp)
+void print_mib_tree(FILE *f, struct tree *tp, int width)
 {
   leave_indent[0] = ' ';
   leave_indent[1] = 0;
   leave_was_simple = 1;
-  print_mib_leaves(f, tp);
+  print_mib_leaves(f, tp, width);
 }
 
 

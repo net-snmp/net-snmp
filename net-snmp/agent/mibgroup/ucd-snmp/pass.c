@@ -73,7 +73,10 @@ int bin2asc(char *p, size_t n)
         buffer[i] = p[i];
         if (!isprint(p[i])) flag = 1;
     }
-    if (flag == 0) return n;
+    if (flag == 0) {
+	p[n] = 0;
+	return n;
+    }
     for (i = 0; i < (int)n; i++) {
         sprintf(p, "%02x ", (unsigned char)(buffer[i] & 0xff));
         p += 3;
@@ -375,9 +378,8 @@ setPass(int action,
           break;
         case ASN_OCTET_STR:
           itmp = sizeof(buf2);
-          memset(buf2,(0),itmp);
           memcpy(buf2, var_val, var_val_len);
-          if (bin2asc(buf2, itmp) == (int)itmp)
+          if (bin2asc(buf2, var_val_len) == (int)itmp)
               sprintf(buf,"string %s",buf2);
           else
               sprintf(buf,"octet %s",buf2);

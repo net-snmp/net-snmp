@@ -41,7 +41,7 @@
 
 
 #if HAVE_KVM_H
-static kvm_t *kd;
+kvm_t *kd;
 
 void
 init_kmem(const char *file)

@@ -172,8 +172,6 @@ register_config_handler(const char *type_param,
     (*ltmp)->config_token	 = strdup(token);
     if (help != NULL)
       (*ltmp)->help = strdup(help);
-    else
-      (*ltmp)->help = strdup("");
 
   }
 
@@ -227,7 +225,7 @@ unregister_config_handler(const char *type_param,
     /* found it at the top of the list */
     (*ctmp)->start = (*ltmp)->next;
     free((*ltmp)->config_token);
-    free((*ltmp)->help);
+    SNMP_FREE((*ltmp)->help);
     free(*ltmp);
     return;
   }
@@ -236,7 +234,7 @@ unregister_config_handler(const char *type_param,
   }
   if (*ltmp == NULL) {
     free((*ltmp)->config_token);
-    free((*ltmp)->help);
+    SNMP_FREE((*ltmp)->help);
     ltmp2 = (*ltmp)->next->next;
     free((*ltmp)->next);
     (*ltmp)->next = ltmp2;
@@ -362,7 +360,8 @@ void read_config(const char *filename,
                 done = 1;
               }
             }
-            if (!done && when != PREMIB_CONFIG) {
+            if (!done && when != PREMIB_CONFIG &&
+                !ds_get_boolean(DS_LIBRARY_ID, DS_LIB_NO_TOKEN_WARNINGS)) {
               sprintf(tmpbuf,"Unknown token: %s.", token);
               config_pwarn(tmpbuf);
             }
@@ -549,8 +548,9 @@ void read_config_print_usage(const char *lead)
     snmp_log(LOG_INFO, "%sIn %s.conf and %s.local.conf:\n", lead, ctmp->fileHeader,
             ctmp->fileHeader);
     for(ltmp = ctmp->start; ltmp != NULL; ltmp = ltmp->next) {
-      snmp_log(LOG_INFO, "%s%s%-15s %s\n", lead, lead, ltmp->config_token,
-              ltmp->help);
+      if (ltmp->help != NULL)
+        snmp_log(LOG_INFO, "%s%s%-15s %s\n", lead, lead, ltmp->config_token,
+                 ltmp->help);
     }
   }
 }

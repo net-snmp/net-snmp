@@ -26,7 +26,7 @@ test:   all
 	( cd testing; $(MAKE) test )
 
 sedscript: sedscript.in config.h $(srcdir)/agent/mibgroup/mibdefs.h
-	$(CPP) -DPREFIX=$(prefix) -DLIBDIR=$(libdir) -DDATADIR=$(datadir) $(srcdir)/sedscript.in | sed 's/REMOVEME//g;s# */#/#g;s/ *#/#/g;s#/ *#/#g;' | egrep '^s[/#]' > sedscript
+	$(CPP) -DPREFIX=$(prefix) -DLIBDIR=$(libdir) -DDATADIR=$(datadir) $(srcdir)/sedscript.in | egrep '^s[/#]' | sed 's/REMOVEME//g;s# */#/#g;s/ *#/#/g;s#/ *#/#g;s/# g/#g/;' > sedscript
 
 
 ucd-snmp-config.h: config.h

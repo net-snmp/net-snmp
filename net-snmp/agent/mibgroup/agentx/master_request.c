@@ -46,20 +46,45 @@
 #include "var_struct.h"
 #include "mibII/sysORTable.h"
 
-#define MAX_VARS	64
+#define VARLIST_ITERATION	10
 
 struct ax_variable_list {
     struct agent_snmp_session	*asp;
     int				num_vars;
+    int				max_vars;
 #ifdef ONE_IDEA
     {
 	struct variable_list    *entry;
 	int		        index;
     }				variables[MAX_VARS];
 #else
-    struct variable_list*        variables[MAX_VARS];
+		/* Placeholder for dynamically-resized list of variables */
+    struct variable_list*        variables[1];
 #endif
 };
+
+	/*
+	 * Remove the specified request from
+	 *  the list of outstanding requests
+	 */
+int
+remove_outstanding_request( struct agent_snmp_session *asp, int reqid )
+{
+    struct request_list     *req, *prev;
+    for (req = asp->outstanding_requests, prev=NULL ;
+			req != NULL ;
+			prev = req , req = req->next_request ) {
+	if ( req->request_id == reqid) {
+	    if ( prev )
+		prev->next_request = req->next_request;
+	    else
+		asp->outstanding_requests = req->next_request;
+	    free( req );
+	    return 0;
+	}
+    }
+    return 1;
+}
 
 	/*
 	 * Handle the response from an AgentX subagent,
@@ -82,7 +107,7 @@ handle_agentx_response( int operation,
     int j;
     char buf[SPRINT_MAX_LEN];
 
-    asp->outstanding_requests = NULL;
+    remove_outstanding_request( asp, pdu->reqid );
 
     retry_vlist = NULL;
     vb_retry    = NULL;
@@ -207,19 +232,38 @@ get_agentx_request(struct agent_snmp_session *asp,
     struct request_list     *req;
     struct snmp_pdu         *pdu;
     struct ax_variable_list *vlist;
+    int			    new_size;
 
     DEBUGMSGTL(("agentx/master","processing request...\n"));
 
     for (req = asp->outstanding_requests ; req != NULL ; req = req->next_request ) {
-	if ( req->message_id == transID)
+	if ( req->message_id == transID && req->session == ax_session) {
+		/*
+		 * Check if there's room in this request for another variable.
+		 * If not, then expand it by 'VARLIST_ITERATION' variables.
+		 */
+	    vlist = (struct ax_variable_list *)req->cb_data;
+	    if ( vlist->num_vars > vlist->max_vars ) {		/* i.e. full */
+		DEBUGMSGTL(("agentx/master", "increasing ax_variable list...\n"));
+		new_size = sizeof(struct ax_variable_list) +
+		    (vlist->max_vars + VARLIST_ITERATION) * sizeof(struct variable_list);
+		vlist = (struct ax_variable_list *)realloc(vlist, new_size);
+		if ( !vlist )
+		    break;
+		vlist->max_vars += VARLIST_ITERATION;
+		req->cb_data = (void *)vlist;
+	    }
 	    return req;
+	}
     }
 
 		/*
 		 * No existing request found, so create a new one
 		 */
     req   = (struct request_list     *)calloc( 1, sizeof(struct request_list));
-    vlist = (struct ax_variable_list *)calloc( 1, sizeof(struct ax_variable_list));
+    new_size = sizeof(struct ax_variable_list) +
+		VARLIST_ITERATION * sizeof(struct variable_list);
+    vlist = (struct ax_variable_list *)calloc( 1, new_size);
     pdu   = snmp_pdu_create( 0 );
     if ( req == NULL || pdu == NULL || vlist == NULL ) {
 	free( pdu );
@@ -321,6 +365,7 @@ agentx_add_request( struct agent_snmp_session *asp,
 
     ax_session = get_session_for_oid( vbp->name, vbp->name_length );
     sessid = ax_session->sessid;
+		/* WHat if this returns NULL ? */
     if ( ax_session->flags & SNMP_FLAGS_SUBSESSION )
 	ax_session = ax_session->subsession;
     request    = get_agentx_request( asp, ax_session, pdu->transid );
@@ -338,8 +383,8 @@ agentx_add_request( struct agent_snmp_session *asp,
     else {
 	sub = find_subtree_previous( vbp->name, vbp->name_length, NULL );
         snmp_pdu_add_variable( request->pdu,
-			   vbp->name, vbp->name_length, ASN_PRIV_INCL_RANGE,
-			   (u_char*)sub->name, sub->namelen);
+			   vbp->name, vbp->name_length, ASN_PRIV_EXCL_RANGE,
+			   (u_char*)sub->end, sub->end_len);
     }
 
     return AGENTX_ERR_NOERROR;

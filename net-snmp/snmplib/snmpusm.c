@@ -60,6 +60,8 @@
 #include "snmp-tc.h"
 #include "lcd_time.h"
 #include "scapi.h"
+#include "callback.h"
+#include "default_store.h"
 #include "snmpusm.h"
 
 #include "transform_oids.h"
@@ -2431,6 +2433,24 @@ usm_create_initial_user(const char *name, oid *authProtocol, size_t authProtocol
   return newUser;
 }
 
+/* this is a callback that can store all known users based on a
+   previously registered application ID */
+int
+usm_store_users(int majorID, int minorID, void *serverarg, void *clientarg)
+{
+  /* figure out our application name */
+  char *appname = (char *) clientarg;
+  if (appname == NULL)
+      appname = ds_get_string(DS_LIBRARY_ID, DS_LIB_APPTYPE);
+
+  /* save the user base */
+  usm_save_users("usmUser", appname);
+
+  /* never fails */
+  return SNMPERR_SUCCESS;
+}
+
+
 /* usm_save_users(): saves a list of users to the persistent cache */
 void
 usm_save_users(const char *token, const char *type)
@@ -2506,6 +2526,13 @@ usm_read_user(char *line)
   line = skip_token(line);
   line = read_config_read_octet_string(line, &user->engineID,
                                        &user->engineIDLen);
+
+  /* set the lcd entry for this engineID to the minimum boots/time
+     values so that its a known engineid and won't return a report pdu.
+     This is mostly important when receiving v3 traps so that the usm
+     will at least continue processing them. */
+  set_enginetime(user->engineID, user->engineIDLen, 1, 0, 0);
+
   line = read_config_read_octet_string(line, (u_char **)&user->name,
                                        &len);
   line = read_config_read_octet_string(line, (u_char **)&user->secName,

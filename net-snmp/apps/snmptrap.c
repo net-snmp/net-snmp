@@ -79,15 +79,17 @@ SOFTWARE.
 #include "snmp_impl.h"
 #include "system.h"
 #include "snmp_parse_args.h"
+#include "snmpv3.h"
 
 oid objid_enterprise[] = {1, 3, 6, 1, 4, 1, 3, 1, 1};
 oid objid_sysdescr[]   = {1, 3, 6, 1, 2, 1, 1, 1, 0};
 oid objid_sysuptime[]  = {1, 3, 6, 1, 2, 1, 1, 3, 0};
 oid objid_snmptrap[]   = {1, 3, 6, 1, 6, 3, 1, 1, 4, 1, 0};
+int inform = 0;
 
 void usage(void)
 {
-    fprintf(stderr,"Usage: snmptrap ");
+    fprintf(stderr,"Usage: %s ", inform ? "snmpinform" : "snmptrap");
     snmp_parse_args_usage(stderr);
     fprintf(stderr," [<trap parameters> ...]\n\n");
     snmp_parse_args_descriptions(stderr);
@@ -132,12 +134,15 @@ int main(int argc, char *argv[])
     oid name[MAX_OID_LEN];
     size_t name_length;
     int	arg;
-    int status, inform = 0;
+    int status;
     char *trap = NULL, *specific = NULL, *description = NULL, *agent = NULL;
+    char *prognam;
 
-    /*
-     * usage: snmptrap gateway-name trap-type specific-type device-description [ -a agent-addr ]
-     */
+    prognam = strrchr(argv[0], '/');
+    if (prognam) prognam++;
+    else prognam = argv[0];
+
+    if (strcmp(prognam, "snmpinform") == 0) inform = 1;
     arg = snmp_parse_args(argc, argv, &session, NULL, NULL);
 
     SOCK_STARTUP;
@@ -146,6 +151,50 @@ int main(int argc, char *argv[])
     session.callback_magic = NULL;
     if (session.remote_port == SNMP_DEFAULT_REMPORT)
 	session.remote_port = SNMP_TRAP_PORT;
+
+    if (session.version == SNMP_VERSION_3 && !inform) {
+        /* for traps, we use ourselves as the authoritative engine
+           which is really stupid since command line apps don't have a
+           notion of a persistent engine.  Hence, our boots and time
+           values are probably always really wacked with respect to what
+           a manager would like to see.
+
+           The following should be enough to:
+
+           1) prevent the library from doing discovery for engineid & time.
+           2) use our engineid instead of the remote engineid for
+              authoritative & privacy related operations.
+           3) The remote engine must be configured with users for our engineID.
+
+           -- Wes */
+
+        /* setup the engineID based on IP addr.  Need a different
+           algorthim here.  This will cause problems with agents on the
+           same machine sending traps. */
+        setup_engineID(NULL, NULL);
+
+        /* pick our own engineID */
+        if (session.securityEngineIDLen == 0 ||
+            session.securityEngineID == NULL) {
+            session.securityEngineID =
+                snmpv3_generate_engineID(&session.securityEngineIDLen);
+        }
+        if (session.contextEngineIDLen == 0 ||
+            session.contextEngineID == NULL) {
+            session.contextEngineID =
+                snmpv3_generate_engineID(&session.contextEngineIDLen);
+        }
+
+        /* set boots and time, which will cause problems if this
+           machine ever reboots and a remote trap receiver has cached our
+           boots and time...  I'll cause a not-in-time-window report to
+           be sent back to this machine. */
+        if (session.engineBoots == 0)
+            session.engineBoots = 1;
+        if (session.engineTime == 0)             /* not really correct, */
+            session.engineTime = get_uptime();   /* but it'll work. Sort of. */
+    }
+
     ss = snmp_open(&session);
     if (ss == NULL){
       /* diagnose snmp_open errors with the input struct snmp_session pointer */
@@ -155,6 +204,10 @@ int main(int argc, char *argv[])
     }
 
     if (session.version == SNMP_VERSION_1) {
+	if (inform) {
+	    fprintf(stderr, "Cannot send INFORM as SNMPv1 PDU\n");
+	    exit(1);
+	}
 	pdu = snmp_pdu_create(SNMP_MSG_TRAP);
 	pduIp = (struct sockaddr_in *)&pdu->agent_addr;
 	if (arg == argc) {
@@ -223,13 +276,7 @@ int main(int argc, char *argv[])
     else {
 	long sysuptime;
 	char csysuptime [20];
-	char *prognam;
 
-	prognam = strrchr(argv[0], '/');
-	if (prognam) prognam++;
-	else prognam = argv[0];
-
-	if (strcmp(prognam, "snmpinform") == 0) inform = 1;
 	pdu = snmp_pdu_create(inform ? SNMP_MSG_INFORM : SNMP_MSG_TRAP2);
 	if (arg == argc) {
 	    fprintf(stderr, "Missing up-time parameter\n");

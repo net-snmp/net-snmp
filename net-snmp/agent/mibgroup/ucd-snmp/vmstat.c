@@ -143,9 +143,10 @@ void init_vmstat(void)
 #define BUFFSIZE 1024
 static char buff[BUFFSIZE];
 
-void getstat(unsigned *cuse, unsigned *cice, unsigned *csys,unsigned long *cide,
-             unsigned *pin, unsigned *pout, unsigned *swpin, unsigned *swpout,
-             unsigned *itot, unsigned *i1, unsigned *ct) 
+void getstat(unsigned long *cuse, unsigned long *cice, unsigned long *csys,
+	     unsigned long *cide, unsigned *pin, unsigned *pout,
+	     unsigned *swpin, unsigned *swpout, unsigned *itot, unsigned *i1,
+	     unsigned *ct) 
 {
   int statfd;
 
@@ -157,7 +158,7 @@ void getstat(unsigned *cuse, unsigned *cice, unsigned *csys,unsigned long *cide,
     *itot = 0; 
     *i1 = 1;   /* ensure assert below will fail if the sscanf bombs */
     b = strstr(buff, "cpu ");
-    sscanf(b, "cpu  %u %u %u %lu", cuse, cice, csys, cide);
+    sscanf(b, "cpu  %lu %lu %lu %lu", cuse, cice, csys, cide);
     b = strstr(buff, "page ");
     sscanf(b, "page %u %u", pin, pout);
     b = strstr(buff, "swap ");
@@ -179,9 +180,8 @@ enum vmstat_index { swapin = 0,    swapout,
 
 unsigned vmstat (int iindex) 
 {
-  unsigned int cpu_use[2], cpu_nic[2], cpu_sys[2];
-  unsigned int duse,dsys,didl,ddiv,divo2;
-  unsigned long cpu_idl[2];
+  unsigned long cpu_use[2], cpu_nic[2], cpu_sys[2], cpu_idl[2];
+  double duse,dsys,didl,ddiv,divo2;
   unsigned int pgpgin[2], pgpgout[2], pswpin[2], pswpout[2];
   unsigned int inter[2],ticks[2],ctxt[2];
   unsigned int hz;
@@ -191,7 +191,7 @@ unsigned vmstat (int iindex)
           inter,ticks,ctxt);
   duse= *(cpu_use)+ *(cpu_nic);
   dsys= *(cpu_sys);
-  didl= (*(cpu_idl))%UINT_MAX;
+  didl= (*(cpu_idl));
   ddiv= (duse+dsys+didl);
   hz=sysconf(_SC_CLK_TCK); /* get ticks/s from system */
   divo2= ddiv/2;
@@ -209,11 +209,11 @@ unsigned vmstat (int iindex)
   } else if (iindex == syscontext) {
     return (*(ctxt)*hz+divo2)/ddiv;
   } else if (iindex == cpuuser) {
-    return (100*duse+divo2)/ddiv;
+    return (100*duse/ddiv);
   } else if (iindex == cpusystem) {
-    return (100*dsys+divo2)/ddiv;
+    return (100*dsys/ddiv);
   } else if (iindex == cpuidle) {
-    return (100*didl+divo2)/ddiv;
+    return (100*didl/ddiv);
   } else {
     return -1;
   }

@@ -5,6 +5,7 @@
 
 #include <config.h>
 
+#include "mibincl.h"
 #include "host.h"
 #include "host_res.h"
 #include "hr_system.h"

@@ -4,3 +4,8 @@
 
 #undef IFADDR_SYMBOL
 #define IFADDR_SYMBOL "in_ifaddrhead"
+
+#undef PROC_SYMBOL
+#undef NPROC_SYMBOL
+
+#undef TOTAL_MEMORY_SYMBOL

@@ -120,9 +120,9 @@ PERFORMANCE OF THIS SOFTWARE.
 #endif
 #if HAVE_KVM_OPENFILES
 #include <fcntl.h>
+#endif
 #if HAVE_KVM_H
 #include <kvm.h>
-#endif
 #endif
 
 #if HAVE_STRING_H

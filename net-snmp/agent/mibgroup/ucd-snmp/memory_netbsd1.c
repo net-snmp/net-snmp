@@ -1,9 +1,8 @@
 /*
- * memory_freebsd2.c
+ * memory_netbsd1.c
  */
 
 #include <config.h>
-
 
 /* Ripped from /usr/scr/usr.bin/vmstat/vmstat.c (covering all bases) */
 #include <sys/param.h>
@@ -21,6 +20,7 @@
 #include <sys/vmmeter.h>
  
 #include <vm/vm_param.h>
+#include <uvm/uvm_extern.h>
  
 #include <time.h>
 #include <nlist.h>
@@ -44,10 +44,6 @@
 
 #include "memory.h"
 
-/* nlist symbols */
-#define SUM_SYMBOL      "cnt"
-#define BUFSPACE_SYMBOL "bufspace"
-
 /* Default swap warning limit (kb) */
 #define DEFAULTMINIMUMSWAP 16000
 
@@ -59,7 +55,7 @@ quad_t swapTotal;
 quad_t swapUsed;
 quad_t swapFree;
 
-void init_memory_freebsd2(void) 
+void init_memory_netbsd1(void) 
 {
   
   struct variable2 extensible_mem_variables[] = {
@@ -105,98 +101,6 @@ void memory_free_config (void)
   minimumswap = DEFAULTMINIMUMSWAP;
 }
 
-#ifndef freebsd4
-/* Executes swapinfo and parses last line */
-/* This is just way too ugly ;) */
-
-void swapmode(void)
-{
-  struct extensible ext;
-  int fd;
-  FILE *file;
-
-  strcpy(ext.command, "/usr/sbin/swapinfo -k");
-
-  if ( (fd = get_exec_output(&ext)) )
-  {
-      file = fdopen(fd,"r");
-
-      while (fgets(ext.output,STRMAX,file) != NULL);
-      
-      fclose(file);
-      wait_on_exec(&ext);
-
-      sscanf(ext.output, "%*s%*d%qd%qd", &swapUsed, &swapFree);
-
-      swapTotal = swapUsed + swapFree;
-  }
-}
-#else
-/*
- * swapmode is based on a program called swapinfo written
- * by Kevin Lahey <kml@rokkaku.atl.ga.us>.
- */
-
-#include <sys/conf.h>
-
-#define NSWDEV_SYMBOL     "nswdev"
-#define DMMAX_SYMBOL      "dmmax"
-#define SWDEVT_SYMBOL     "swdevt"
-
-void swapmode(void)
-{
-    char *header;
-    int hlen, nswdev, dmmax;
-    int i, idiv, n;
-    struct swdevt *sw;
-    long blocksize;
-    static kvm_t *kd = NULL;
-    struct kvm_swap kswap[16];
-
-    if (kd == NULL)
-	kd = kvm_openfiles(NULL, NULL, NULL, O_RDONLY, NULL);
-
-    auto_nlist(NSWDEV_SYMBOL, (char *)&nswdev, sizeof (nswdev));
-    auto_nlist(DMMAX_SYMBOL, (char *)&dmmax, sizeof (dmmax));
-
-    sw = (struct swdevt *)malloc(nswdev * sizeof(*sw));
-    if (sw == NULL) return;
-
-    auto_nlist(SWDEVT_SYMBOL, (char *)sw, nswdev * sizeof(*sw));
-
-    n = kvm_getswapinfo(
-        kd,
-        kswap,
-        sizeof(kswap)/sizeof(kswap[0]),
-        0
-    );
-
-    swapUsed = swapTotal = swapFree = 0;
-    /* Count up free swap space. */
-    for (i = 0; i < n; ++i)
-        swapFree += kswap[i].ksw_total - kswap[i].ksw_used;
-
-    /* Count up total swap space */
-    for (i = 0; i < n; i++) 
-	    swapTotal += kswap[i].ksw_total;
-    
-    /* Calculate used swap space */
-    swapUsed = swapTotal - swapFree;
-
-    /* Convert to kb */
-    header = getbsize(&hlen, &blocksize);
-    idiv = blocksize / 512;
-
-    if (idiv > 0) {
-        swapTotal /= idiv;
-        swapUsed /= idiv;
-        swapFree /= idiv;
-    }
-
-    free(sw); 
-}
-#endif
-
 
 /*
   var_extensible_mem(...
@@ -220,7 +124,9 @@ unsigned char *var_extensible_mem(struct variable *vp,
     static long long_ret;
     static char errmsg[300];
 
-    static struct vmmeter mem;
+    static struct uvmexp uvmexp;
+    int uvmexp_size = sizeof(uvmexp);
+    int uvmexp_mib[] = { CTL_VM, VM_UVMEXP };
     static struct vmtotal total;
     size_t total_size = sizeof (total);
     int total_mib[] = { CTL_VM, VM_METER };
@@ -229,29 +135,20 @@ unsigned char *var_extensible_mem(struct variable *vp,
     size_t phys_mem_size = sizeof(phys_mem);
     int phys_mem_mib[] = { CTL_HW, HW_USERMEM };
 
-    long bufspace;
- 
     if (header_generic(vp,name,length,exact,var_len,write_method))
 	return(NULL);
 
     /* Memory info */
-    auto_nlist(SUM_SYMBOL, (char *)&mem, sizeof (mem));
+    sysctl(uvmexp_mib, 2, &uvmexp, &uvmexp_size, NULL, 0);
     sysctl(total_mib, 2, &total, &total_size, NULL, 0);
-
-    /* Swap info */
-    swapmode();
-    /* getSwap(); */
 
     /* Physical memory */
     sysctl(phys_mem_mib, 2, &phys_mem, &phys_mem_size, NULL, 0);
 
-    /* Buffer space */
-    auto_nlist(BUFSPACE_SYMBOL, (char *)&bufspace, sizeof (bufspace));
-
     long_ret = 0;  /* set to 0 as default */
 
 /* Page-to-kb macro */
-#define ptok(p) ((p) * (mem.v_page_size >> 10))
+#define ptok(p) ((p) * (uvmexp.pagesize >> 10))
 
     switch (vp->magic) {
     case MIBINDEX:
@@ -262,16 +159,16 @@ unsigned char *var_extensible_mem(struct variable *vp,
 	*var_len = strlen(errmsg);
 	return((u_char *) (errmsg));
     case MEMTOTALSWAP:
-	long_ret = swapTotal;
+	long_ret = ptok(uvmexp.swpages);
 	return((u_char *) (&long_ret));
     case MEMAVAILSWAP: /* FREE swap memory */
-	long_ret = swapFree;
+	long_ret = ptok(uvmexp.swpages-uvmexp.swpginuse);
 	return((u_char *) (&long_ret));
     case MEMTOTALREAL:
 	long_ret = phys_mem >> 10;
 	return((u_char *) (&long_ret));
     case MEMAVAILREAL: /* FREE real memory */
-	long_ret = ptok(mem.v_free_count);
+	long_ret = ptok(uvmexp.free);
 	return((u_char *) (&long_ret));
 
 /* these are not implemented */
@@ -292,17 +189,11 @@ unsigned char *var_extensible_mem(struct variable *vp,
 	long_ret = minimumswap;
 	return((u_char *) (&long_ret));
     case MEMSHARED:
-	long_ret = ptok(total.t_vmshr + 
-			total.t_avmshr + 
-			total.t_rmshr + 
-			total.t_armshr);
 	return((u_char *) (&long_ret));
     case MEMBUFFER:
-	long_ret = bufspace >> 10;
-	return((u_char *) (&long_ret));
+	return NULL;
     case MEMCACHED:
-	long_ret = ptok(mem.v_cache_count);
-	return((u_char *) (&long_ret));
+	return NULL;
     case ERRORFLAG:
 	long_ret = (swapFree > minimumswap)?0:1;
 	return((u_char *) (&long_ret));

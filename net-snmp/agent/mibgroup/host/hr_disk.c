@@ -155,9 +155,12 @@ void init_hr_disk(void)
     Add_HR_Disk_entry ("/dev/wd1s%c%c", '1', '4', '\0', 'a', 'h');
     Add_HR_Disk_entry ("/dev/sd0s%c%c", '1', '4', '\0', 'a', 'h');
     Add_HR_Disk_entry ("/dev/sd1s%c%c", '1', '4', '\0', 'a', 'h');
-#elif defined(freebsd2) || defined(netbsd1)
+#elif defined(freebsd2)
     Add_HR_Disk_entry ("/dev/wd%c%c", '0', '3', '\0', 'a', 'h');
     Add_HR_Disk_entry ("/dev/sd%c%c", '0', '3', '\0', 'a', 'h');
+#elif defined(netbsd1)
+    Add_HR_Disk_entry ("/dev/wd%c%c", '0', '3', 'c', 'a', 'h');
+    Add_HR_Disk_entry ("/dev/sd%c%c", '0', '3', 'c', 'a', 'h');
 #endif
 
     device_descr[ HRDEV_DISK ] = describe_disk;	

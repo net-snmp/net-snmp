@@ -193,9 +193,9 @@ void init_hr_storage (void)
 #elif defined(PAGE_SIZE)
     pagesize = PAGE_SIZE;
 #else
-  #ifndef linux
+#  ifndef linux
     pagesize = PAGESIZE;
-  #endif
+#  endif
 #endif
 #endif	/* USE_SYSCTL */
 #ifdef TOTAL_MEMORY_SYMBOL
@@ -484,9 +484,7 @@ var_hrstore(struct variable *vp,
 			break;
 #else
 		case HRS_TYPE_MEM:
-			auto_nlist(PHYSMEM_SYMBOL, (char *)&physmem,
-                                   sizeof (int));
-			long_return = physmem * (pagesize / 1024);
+			long_return = physmem;
 			break;
 		case HRS_TYPE_SWAP:
 #if NO_DUMMY_VALUES
