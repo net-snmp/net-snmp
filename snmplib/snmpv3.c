@@ -44,12 +44,12 @@
 #       include <stdlib.h>
 #endif
 
-/* Stuff needed for getLinuxNicHwAddress(...) */
-#ifdef linux
-#	include <netinet/in.h>
+/* Stuff needed for getHwAddress(...) */
+#ifdef HAVE_SYS_IOCTL_H
 #	include <sys/ioctl.h>
+#endif
+#ifdef HAVE_NET_IF_H
 #	include <net/if.h>
-#	include <netinet/in.h>
 #endif
 
 #if HAVE_DMALLOC_H
@@ -253,7 +253,7 @@ setup_engineID(u_char **eidp, const char *text)
     case ENGINEID_TYPE_TEXT:
       len += strlen(text);	/* 5 leading bytes+text. No NULL char */
       break;
-#ifdef linux
+#if defined(IFHWADDRLEN) && defined(SIOCGIFHWADDR)
     case ENGINEID_TYPE_MACADDR: /* MAC address */
       len += 6;   /* + 6 bytes for MAC address */
       break;
@@ -265,6 +265,7 @@ setup_engineID(u_char **eidp, const char *text)
       len += 16; /* + 16 byte IPV6 address */
       break;
     default:
+      snmp_log(LOG_ERR, "Unknown EngineID type requested for setup.  Using IPv4.\n");
       localEngineIDType=ENGINEID_TYPE_IPV4; /* make into IPV4 */
       len += 4;		/* + 4 byte IPv4 address */
       break;
@@ -299,17 +300,17 @@ setup_engineID(u_char **eidp, const char *text)
       break;
 #endif
 #endif
-#ifdef linux
+#if defined(IFHWADDRLEN) && defined(SIOCGIFHWADDR)
     case ENGINEID_TYPE_MACADDR:
       bufp[4] = ENGINEID_TYPE_MACADDR;
       /* use default NIC if none provided */
       if ( NULL == engineIDNic )
       {
-	x=getLinuxNicHwAddress(DEFAULT_NIC,&bufp[5]);
+	x=getHwAddress(DEFAULT_NIC,&bufp[5]);
       }
       else
       {
-	x=getLinuxNicHwAddress(engineIDNic,&bufp[5]);
+	x=getHwAddress(engineIDNic,&bufp[5]);
       }
       if ( 0 != x)
       /* function failed fill MAC address with zeros */
@@ -532,13 +533,13 @@ engineIDType_conf(const char *word, char *cptr)
 	case ENGINEID_TYPE_IPV6: /* IPv6 */
 	  /* IPV? is always good */
 	  break;
-#ifdef linux
+#if defined(IFHWADDRLEN) && defined(SIOCGIFHWADDR)
 	case ENGINEID_TYPE_MACADDR: /* MAC address */
 	  break;
 #endif
 	default:
 	/* unsupported one chosen */
-	  DEBUGMSGTL(("snmpv3","Unsupported enginedIDType: %d\n",engineIDType));
+          config_perror("Unsupported enginedIDType, forcing IPv4");
 	  engineIDType=ENGINEID_TYPE_IPV4;
       }
     DEBUGMSGTL(("snmpv3","engineIDType: %d\n",engineIDType));
@@ -547,7 +548,7 @@ engineIDType_conf(const char *word, char *cptr)
   }
   else
   {
-    DEBUGMSGTL(("snmpv3","NOT setting engineIDType, engineID already set\n"));
+      config_perror("NOT setting engineIDType, engineID already set");
   }
 }
 
@@ -906,11 +907,11 @@ snmpv3_local_snmpEngineTime(void)
 
 
 /* Code only for Linux systems */
-#ifdef linux
-static int getLinuxNicHwAddress(
+#if defined(IFHWADDRLEN) && defined(SIOCGIFHWADDR)
+static int getHwAddress(
 	const char * networkDevice, /* e.g. "eth0", "eth1" */
 	char * addressOut)	    /* return address. Len=IFHWADDRLEN */
-/*  getLinuxNicHwAddress(...)
+/*  getHwAddress(...)
  *
  *  This function will return a Network Interfaces Card's Hardware
  *  address (aka MAC address).
