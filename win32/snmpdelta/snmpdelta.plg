@@ -1,0 +1,28 @@
+--------------------Configuration: snmpdelta - Win32 Release--------------------
+Begining build with project "C:\usr\local\builds\ucd-snmp-3.5.1.pre2\win32\snmpdelta\snmpdelta.dsp", at root.
+Active configuration is Win32 (x86) Console Application (based on Win32 (x86) Console Application)
+
+Project's tools are:
+			"32-bit C/C++ Compiler for 80x86" with flags "/nologo /MD /W3 /GX /O2 /I "." /I ".." /I "..\..\snmplib" /I "..\.." /D "WIN32" /D "NDEBUG" /D "_CONSOLE" /D "_MBCS" /Fp"Release/snmpdelta.pch" /YX /Fo"Release/" /Fd"Release/" /FD /c "
+			"Win32 Resource Compiler" with flags "/l 0x409 /d "NDEBUG" "
+			"Browser Database Maker" with flags "/nologo /o"Release/snmpdelta.bsc" "
+			"COFF Linker for 80x86" with flags "libsnmp.lib wsock32.lib msvcrt.lib kernel32.lib user32.lib oldnames.lib /nologo /subsystem:console /incremental:no /pdb:"Release/snmpdelta.pdb" /machine:I386 /nodefaultlib /out:"../bin/snmpdelta.exe" /libpath:"..\lib" "
+			"Custom Build" with flags ""
+			"<Component 0xa>" with flags ""
+
+Creating temp file "c:\windows\TEMP\RSP7231.TMP" with contents </nologo /MD /W3 /GX /O2 /I "." /I ".." /I "..\..\snmplib" /I "..\.." /D "WIN32" /D "NDEBUG" /D "_CONSOLE" /D "_MBCS" /Fp"Release/snmpdelta.pch" /YX /Fo"Release/" /Fd"Release/" /FD /c 
+"C:\usr\local\builds\ucd-snmp-3.5.1.pre2\apps\snmpdelta.c"
+>
+Creating command line "cl.exe @c:\windows\TEMP\RSP7231.TMP" 
+Creating temp file "c:\windows\TEMP\RSP7232.TMP" with contents <libsnmp.lib wsock32.lib msvcrt.lib kernel32.lib user32.lib oldnames.lib /nologo /subsystem:console /incremental:no /pdb:"Release/snmpdelta.pdb" /machine:I386 /nodefaultlib /out:"../bin/snmpdelta.exe" /libpath:"..\lib" 
+".\Release\snmp_parse_args.obj"
+".\Release\snmpdelta.obj">
+Creating command line "link.exe @c:\windows\TEMP\RSP7232.TMP" 
+Compiling...
+snmpdelta.c
+C:\usr\local\builds\ucd-snmp-3.5.1.pre2\apps\snmpdelta.c(527) : warning C4244: '=' : conversion from 'unsigned int ' to 'float ', possible loss of data
+Linking...
+
+
+
+snmpdelta.exe - 0 error(s), 1 warning(s)
