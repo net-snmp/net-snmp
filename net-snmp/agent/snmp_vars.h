@@ -53,6 +53,9 @@ struct agent_snmp_session;
 typedef int (AddVarMethod)(struct agent_snmp_session *asp,
         struct variable_list     *vbp);
 
+extern u_char *getStatPtr (oid *, size_t *, u_char *, size_t *,
+	u_short *, int, WriteMethod **write_method, struct snmp_pdu *, int *);
+
 struct nlist;
 
 extern long long_return;
