@@ -31,8 +31,13 @@
 #include <inet/mib2.h>
 #endif
 
-#include "read_config.h"
 #include "system.h"
+#include "parse.h"
+#include "asn1.h"
+#include "mib.h"
+#include "snmp_api.h"
+
+#include "read_config.h"
 
 int config_errors;
 
@@ -86,7 +91,7 @@ register_config_handler(type, token, parser, releaser)
 void
 unregister_config_handler(type, token)
   char *type;
-  char *token
+  char *token;
 {
   struct config_files **ctmp = &config_files;
   struct config_line **ltmp, *ltmp2;
@@ -113,7 +118,7 @@ unregister_config_handler(type, token)
     free(*ltmp);
     return;
   }
-  while (*ltmp->next != NULL && strcmp((*ltmp)->next->config_token,token)) {
+  while ((*ltmp)->next != NULL && strcmp((*ltmp)->next->config_token,token)) {
     ltmp = &((*ltmp)->next);
   }
   if (*ltmp == NULL) {

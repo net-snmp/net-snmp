@@ -32,7 +32,4 @@ void register_config_handler __P((char *, char *,
                                   void (*releaser) (void)));
 void unregister_config_handler __P((char *, char *));
 
-  char *type;
-  char *token
-
 #endif /* READ_CONFIG_H */
