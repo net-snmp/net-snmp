@@ -404,6 +404,7 @@ sprint_realloc_octet_string(u_char ** buf, size_t * buf_len,
     const char     *saved_hint = hint;
     int             hex = 0, x = 0;
     u_char         *cp;
+    int             output_format;
 
     if ((var->type != ASN_OCTET_STR) && 
         (!netsnmp_ds_get_boolean(NETSNMP_DS_LIBRARY_ID, NETSNMP_DS_LIB_QUICKE_PRINT))) {
@@ -566,11 +567,27 @@ sprint_realloc_octet_string(u_char ** buf, size_t * buf_len,
         return 1;
     }
 
-    hex = 0;
-    for (cp = var->val.string, x = 0; x < (int) var->val_len; x++, cp++) {
-        if (!(isprint(*cp) || isspace(*cp))) {
-            hex = 1;
+    output_format = netsnmp_ds_get_int(NETSNMP_DS_LIBRARY_ID, NETSNMP_DS_LIB_STRING_OUTPUT_FORMAT);
+    if (0 == output_format) {
+        output_format = NETSNMP_STRING_OUTPUT_GUESS;
+    }
+    switch (output_format) {
+    case NETSNMP_STRING_OUTPUT_GUESS:
+        hex = 0;
+        for (cp = var->val.string, x = 0; x < (int) var->val_len; x++, cp++) {
+            if (!(isprint(*cp) || isspace(*cp))) {
+                hex = 1;
+            }
         }
+        break;
+
+    case NETSNMP_STRING_OUTPUT_ASCII:
+        hex = 0;
+        break;
+
+    case NETSNMP_STRING_OUTPUT_HEX:
+        hex = 1;
+        break;
     }
 
     if (var->val_len == 0) {
@@ -2066,6 +2083,10 @@ snmp_out_toggle_options(char *options)
 {
     while (*options) {
         switch (*options++) {
+        case 'a':
+            netsnmp_ds_set_int(NETSNMP_DS_LIBRARY_ID, NETSNMP_DS_LIB_STRING_OUTPUT_FORMAT,
+                                                      NETSNMP_STRING_OUTPUT_ASCII);
+            break;
         case 'n':
             netsnmp_ds_set_int(NETSNMP_DS_LIBRARY_ID, NETSNMP_DS_LIB_OID_OUTPUT_FORMAT,
                                                       NETSNMP_OID_OUTPUT_NUMERIC);
@@ -2117,6 +2138,10 @@ snmp_out_toggle_options(char *options)
         case 'T':
             netsnmp_ds_toggle_boolean(NETSNMP_DS_LIBRARY_ID, NETSNMP_DS_LIB_PRINT_HEX_TEXT);
             break;
+        case 'x':
+            netsnmp_ds_set_int(NETSNMP_DS_LIBRARY_ID, NETSNMP_DS_LIB_STRING_OUTPUT_FORMAT,
+                                                      NETSNMP_STRING_OUTPUT_HEX);
+            break;
         default:
             return options - 1;
         }
@@ -2127,6 +2152,7 @@ snmp_out_toggle_options(char *options)
 void
 snmp_out_toggle_options_usage(const char *lead, FILE * outf)
 {
+    fprintf(outf, "%sa:  print all strings in ascii format\n", lead);
     fprintf(outf, "%sb:  do not break OID indexes down\n", lead);
     fprintf(outf, "%se:  print enums numerically\n", lead);
     fprintf(outf, "%sE:  escape quotes in string indices\n", lead);
@@ -2144,6 +2170,7 @@ snmp_out_toggle_options_usage(const char *lead, FILE * outf)
     fprintf(outf, "%su:  print OIDs using UCD-style prefix suppression\n",
             lead);
     fprintf(outf, "%sv:  print values only (not OID = value)\n", lead);
+    fprintf(outf, "%sx:  print all strings in hex format\n", lead);
     fprintf(outf, "%sX:  extended index format\n", lead);
 }
 
