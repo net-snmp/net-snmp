@@ -16,3 +16,6 @@
 #undef UDPSTAT_SYMBOL
 
 #define _KMEMUSER
+
+/* don't define _KERNEL before including sys/unistd.h */
+#define IFNET_NEEDS_KERNEL_LATE 
