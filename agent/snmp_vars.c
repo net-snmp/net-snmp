@@ -293,20 +293,23 @@ search_subtree_vars(struct subtree *tp,
     size_t		savelen = 0;
 #endif
 
-	    if ( tp->variables == NULL )
-		return NULL;
+            if (tp->variables == NULL) {
+		 DEBUGMSGTL(("snmp_vars", "tp->vars == NULL\n"));
+		 return NULL;
+	    }
 
 	    result = compare_tree(name, *namelen, tp->start, tp->start_len);
 	    suffixlen = *namelen - tp->namelen;
 	    suffix = name + tp->namelen;
+
 	    /* the following is part of the setup for the compatability
 	       structure below that has been moved out of the main loop.
 	     */
 	    memcpy(cvp->name, tp->name, tp->namelen * sizeof(oid));
-
 	    *noSuchObject = TRUE;	/* In case of null variables_len */
 	    for(x = 0, vp = tp->variables; x < tp->variables_len;
 		vp =(struct variable *)((char *)vp +tp->variables_width), x++){
+
 		/* if exact and ALWAYS
 		   if next  and result >= 0 */
                 /* and if vp->namelen != 0   -- Wes */
@@ -322,9 +325,10 @@ search_subtree_vars(struct subtree *tp,
 		    /* builds an old (long) style variable structure to retain
 		       compatability with var_* functions written previously.
 		     */
-                  if (vp->namelen)
-                    memcpy((cvp->name + tp->namelen),
-			  vp->name, vp->namelen * sizeof(oid));
+		    if (vp->namelen > 0) {
+			memcpy((cvp->name + tp->namelen), vp->name,
+			       vp->namelen * sizeof(oid));
+		    }
 		    cvp->namelen = tp->namelen + vp->namelen;
 		    cvp->type = vp->type;
 		    cvp->magic = vp->magic;
@@ -341,9 +345,9 @@ search_subtree_vars(struct subtree *tp,
 
 		gaga:
 		    access = (*(vp->findVar))(cvp, name, namelen, exact,
-						  len, write_method);
-	    	    DEBUGMSGTL(("snmp_vars", "Returned %s\n",
-				(access==NULL) ? "(null)" : "something" ));
+					      len, write_method);
+	    	    DEBUGMSGTL(("snmp_vars", "Returned %s (%08p)\n",
+				(access==NULL)?"(null)":"something", access));
 
 			/*
 			 * Check that the answer is acceptable.
@@ -353,8 +357,8 @@ search_subtree_vars(struct subtree *tp,
 			 *  case it turns out to be valid, but for now
 			 *  we'll simply discard it.
 			 */
-		    if ( access && snmp_oid_compare(name, *namelen,
-						    tp->end, tp->end_len) > 0) {
+		    if (access && snmp_oid_compare(name, *namelen,
+						   tp->end, tp->end_len) > 0) {
 			memcpy(name, tp->end, tp->end_len);
 			access = 0;
 		    }
@@ -450,8 +454,16 @@ getStatPtr(
     DEBUGMSG(("snmp_vars"," ...\n"));
 
     tp = find_subtree(name, *namelen, NULL);
+
+    if ((tp != NULL) && (tp->flags & FULLY_QUALIFIED_INSTANCE) && (!exact)) {
+	/*  There is no point in trying to do a getNext operation at this
+	    node, because it covers exactly one instance.  Therfore, find the
+	    next node.  This arises in AgentX row registrations (only).  */
+	DEBUGMSGTL(("snmp_vars", "fully-qualified instance && !exact\n"));
+	tp = find_subtree_next(name, *namelen, tp);
+    }
     
-    while ( search_return == NULL && tp != NULL ) {
+    while (search_return == NULL && tp != NULL) {
 	DEBUGMSGTL(("snmp_vars", "Trying tree: "));
 	DEBUGMSGOID(("snmp_vars", tp->name, tp->namelen));
 	DEBUGMSG(("snmp_vars"," ...\n"));
