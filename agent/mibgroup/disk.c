@@ -120,7 +120,14 @@ unsigned char *var_extensible_disk(vp, name, length, exact, var_len, write_metho
   static char errmsg[300];
 
 #if defined(HAVE_STATVFS) || defined(HAVE_STATFS)
+#ifdef STAT_STATFS_FS_DATA
+  struct fs_data fsd;
+  struct {
+    u_int f_blocks, f_bfree, f_bavail;
+  } vfs;
+#else
   struct statvfs vfs;
+#endif
 #else
 #if HAVE_FSTAB_H
   int file;
@@ -150,11 +157,20 @@ unsigned char *var_extensible_disk(vp, name, length, exact, var_len, write_metho
       return((u_char *) (&long_ret));
   }
 #if defined(HAVE_SYS_STATVFS_H) || defined(HAVE_STATFS)
+#ifdef STAT_STATFS_FS_DATA
+  if (statvfs (disks[disknum].path, &fsd) == -1) {
+#else
   if (statvfs (disks[disknum].path, &vfs) == -1) {
+#endif
     fprintf(stderr,"Couldn't open device %s\n",disks[disknum].device);
     setPerrorstatus("statvfs dev/disk");
     return NULL;
   }
+#ifdef STAT_STATFS_FS_DATA
+  vfs.f_blocks = fsd.fd_btot;
+  vfs.f_bfree  = fsd.fd_bfree;
+  vfs.f_bavail = fsd.fd_bfreen;
+#endif
 #if defined(HAVE_ODS)
   vfs.f_blocks = vfs.f_spare[0];
   vfs.f_bfree  = vfs.f_spare[1];

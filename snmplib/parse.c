@@ -588,6 +588,7 @@ print_subtree(f, tree, count)
     }
 }
 
+void
 print_ascii_dump_tree(f, tree, count)
     FILE *f;
     struct tree *tree;

@@ -137,10 +137,12 @@ unsigned char *var_extensible_loadave(vp, name, length, exact, var_len, write_me
 #ifdef HAVE_SYS_FIXPOINT_H
   fix favenrun[3];
 #endif
+#if defined(ultrix) || defined(sun) || defined(__alpha)
 #if defined(sun) || defined(__alpha)
   long favenrun[3];
-  int i;
 #define FIX_TO_DBL(_IN) (((double) _IN)/((double) FSCALE))
+#endif
+  int i;
 #endif
   double avenrun[3];
   
