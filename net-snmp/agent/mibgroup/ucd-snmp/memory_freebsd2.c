@@ -150,11 +150,9 @@ void swapmode(void)
 
 void swapmode(void)
 {
-    char *header;
-    int hlen, nswdev, dmmax;
-    int i, idiv, n;
+    int nswdev, dmmax, pagesize;
+    int i, n;
     struct swdevt *sw;
-    long blocksize;
     static kvm_t *kd = NULL;
     struct kvm_swap kswap[16];
 
@@ -189,14 +187,11 @@ void swapmode(void)
     swapUsed = swapTotal - swapFree;
 
     /* Convert to kb */
-    header = getbsize(&hlen, &blocksize);
-    idiv = blocksize / 512;
+    pagesize = getpagesize() / 1024;
 
-    if (idiv > 0) {
-        swapTotal /= idiv;
-        swapUsed /= idiv;
-        swapFree /= idiv;
-    }
+    swapTotal *= pagesize;
+    swapUsed  *= pagesize;
+    swapFree  *= pagesize;
 
     free(sw); 
 }
