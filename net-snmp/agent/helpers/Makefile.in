@@ -8,6 +8,7 @@ OBJS =  all_helpers.o \
 	read_only.o \
 	instance.o \
 	null.o \
+	debug_handler.o \
 	old_api.o \
 	serialize.o \
 	table_array.o \
@@ -21,6 +22,7 @@ LOBJS = all_helpers.lo \
 	read_only.lo \
 	instance.lo \
 	null.lo \
+	debug_handler.lo \
 	old_api.lo \
 	serialize.lo \
 	table_array.lo \
@@ -34,6 +36,7 @@ SRCS =  all_helpers.c \
 	read_only.c \
 	instance.c \
 	null.c \
+	debug_handler.c \
 	old_api.c \
 	serialize.c \
 	table_array.c \
@@ -46,6 +49,7 @@ INSTALLHEADERS=all_helpers.h \
 	instance.h \
         multiplexer.h \
         null.h \
+        debug.h \
         old_api.h \
         read_only.h \
         serialize.h \
