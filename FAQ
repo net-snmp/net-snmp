@@ -1467,7 +1467,7 @@ What's the difference between AgentX, SMUX and proxied SNMP?
   extension mechanism.  The UCD agent can be used in both master and subagent
   roles, and the agent library can also be used to embed an AgentX subagent
   within another application.
-    See the file 'agent/mibgroup/agentx/README.agentx' for details.
+    See the file 'README.agentx' for details.
 
   Note that support for the SMUX and AgentX extension mechanisms are
   not configured in by default.  You will need to run configure with
