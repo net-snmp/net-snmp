@@ -273,7 +273,17 @@ save_set_cache(netsnmp_agent_session *asp)
      */
     asp->treecache = NULL;
     asp->reqinfo->agent_data = NULL;
-    asp->pdu->variables = NULL;
+    //
+    // xxx-rks: THINK ABOUT THIS BEFORE RELEASING 5.2
+    //
+    // this NULL was checked in version 1.190 to fix a double
+    // free. However, that introduced a memory leak. So I'm
+    // taking it out to find the source of the double free.
+    // If it hasn't been found by release time, we may want to
+    // consider restoring it, as a leak is better than a crash!
+    //
+    //asp->pdu->variables = NULL;
+    //
     asp->requests = NULL;
 
     ptr->next = Sets;
@@ -315,15 +325,24 @@ get_set_cache(netsnmp_agent_session *asp)
              * yyy-rks: investigate when/why sometimes they match,
              * sometimes they don't.
              */
-            DEBUGMSGTL(("verbose:asp", "asp %p reqinfo %p restored from cache\n",
-                        asp, asp->reqinfo));
             if(asp->requests->agent_req_info != asp->reqinfo) {
-                netsnmp_request_info *tmp = asp->requests;
+                /*
+                 * - one don't match case: agentx subagents. prev asp & reqinfo
+                 *   freed, request reqinfo ptrs not cleared.
+                 */
                 DEBUGMSGTL(("verbose:asp",
                             "  reqinfo %p doesn't match cached reqinfo %p\n",
                             asp->reqinfo, asp->requests->agent_req_info));
+                netsnmp_request_info *tmp = asp->requests;
                 for(; tmp; tmp = tmp->next)
                     tmp->agent_req_info = asp->reqinfo;
+            } else {
+                /*
+                 * - match case: ?
+                 */
+                DEBUGMSGTL(("verbose:asp",
+                            "  reqinfo %p matches cached reqinfo %p\n",
+                            asp->reqinfo, asp->requests->agent_req_info));
             }
 
             SNMP_FREE(ptr);
@@ -1020,6 +1039,7 @@ init_master_agent(void)
         real_init_master();
 #endif
 #ifdef USING_SMUX_MODULE
+    if(should_init("smux"))
     real_init_smux();
 #endif
 
@@ -1774,6 +1794,8 @@ netsnmp_add_varbind_to_cache(netsnmp_agent_session *asp, int vbcount,
         if (request->parent_data) {
             netsnmp_free_request_data_sets(request);
         }
+        DEBUGMSGTL(("verbose:asp", "asp %p reqinfo %p assigned to request\n",
+                    asp, asp->reqinfo));
 
         /*
          * for non-SET modes, set the type to NULL 
@@ -2222,7 +2244,7 @@ netsnmp_check_requests_status(netsnmp_agent_session *asp,
      * find any errors marked in the requests 
      */
     while (requests) {
-        if(requests->agent_req_info == asp->reqinfo) {
+        if(requests->agent_req_info != asp->reqinfo) {
             DEBUGMSGTL(("verbose:asp",
                         "**reqinfo %p doesn't match cached reqinfo %p\n",
                         asp->reqinfo, asp->requests->agent_req_info));
@@ -2267,9 +2289,19 @@ handle_var_requests(netsnmp_agent_session *asp)
      * now, have the subtrees in the cache go search for their results 
      */
     for (i = 0; i <= asp->treecache_num; i++) {
-        reginfo = asp->treecache[i].subtree->reginfo;
-        status = netsnmp_call_handlers(reginfo, asp->reqinfo,
-                                       asp->treecache[i].requests_begin);
+        /*
+         * don't call handlers w/null reginfo.
+         * - when is this? sub agent disconnected while request processing?
+         * - should this case encompass more of this subroutine?
+         *   - does check_request_status make send if handlers weren't called?
+         */
+        if(NULL != asp->treecache[i].subtree->reginfo) {
+            reginfo = asp->treecache[i].subtree->reginfo;
+            status = netsnmp_call_handlers(reginfo, asp->reqinfo,
+                                           asp->treecache[i].requests_begin);
+        }
+        else
+            status = SNMP_ERR_GENERR;
 
         /*
          * find any errors marked in the requests.  For later parts of
@@ -2808,7 +2840,7 @@ netsnmp_handle_request(netsnmp_agent_session *asp, int status)
 
             /*
              * if there are delegated requests, we must wait for them
-             * to finishd.
+             * to finish.
              */
             if (agent_delegated_list) {
                 DEBUGMSGTL(("snmp_agent", "SET request queued while "
