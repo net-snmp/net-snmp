@@ -1475,11 +1475,13 @@ usm_check_and_update_timeliness(
 	else
 	{
 		u_int	theirBoots,
-			theirTime;
+			theirTime,
+			theirLastTime;
 		u_int	time_difference;
 
-		if ( get_enginetime(	secEngineID,	secEngineIDLen,
+		if ( get_enginetime_ex(	secEngineID,	secEngineIDLen,
 					&theirBoots,	&theirTime,
+					&theirLastTime,
 					TRUE)
 							!= SNMPERR_SUCCESS)
 		{
@@ -1511,7 +1513,7 @@ usm_check_and_update_timeliness(
 		 * Boots is ok, see if the boots is the same but the time
 		 * is old.
 		 */
-		if (theirBoots == boots_uint && theirTime > time_uint)
+		if (theirBoots == boots_uint && time_uint < theirLastTime)
 		{
 			if(time_difference > USM_TIME_WINDOW)
 			{
