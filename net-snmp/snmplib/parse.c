@@ -86,6 +86,7 @@ SOFTWARE.
 #include "mib.h"
 #include "snmp_api.h"
 #include "snmp_debug.h"
+#include "snmp_logging.h"
 #include "default_store.h"
 
 /*
@@ -1016,7 +1017,7 @@ merge_anon_children(struct tree *tp1,
                 }
 		else if ( !label_compare( child1->label, child2->label) ) {
 	            if (ds_get_int(DS_LIBRARY_ID, DS_LIB_MIB_WARNINGS))
-		        fprintf (stderr, "Warning: %s.%ld is both %s and %s (%s)\n",
+		        snmp_log(LOG_WARNING, "Warning: %s.%ld is both %s and %s (%s)\n",
 			        tp2->label, child1->subid,
                                 child1->label, child2->label, File);
                     continue;
@@ -1129,7 +1130,7 @@ do_subtree(struct tree *root,
                 anon_tp = tp;	/* Need to merge these two trees later */
             }
 	    else if (ds_get_int(DS_LIBRARY_ID, DS_LIB_MIB_WARNINGS))
-		fprintf (stderr, "Warning: %s.%ld is both %s and %s (%s)\n",
+		snmp_log(LOG_WARNING, "Warning: %s.%ld is both %s and %s (%s)\n",
 			root->label, np->subid, tp->label, np->label, File);
 	}
         tp = (struct tree *) xcalloc(1, sizeof(struct tree));
@@ -1195,8 +1196,9 @@ do_subtree(struct tree *root,
             else {
                 /* Uh?  One of these two should have been anonymous! */
 	        if (ds_get_int(DS_LIBRARY_ID, DS_LIB_MIB_WARNINGS))
-		    fprintf (stderr, "Warning: expected anonymous node (either %s or %s) in %s\n",
-			tp->label, anon_tp->label, File);
+		    snmp_log(LOG_WARNING,
+                             "Warning: expected anonymous node (either %s or %s) in %s\n",
+                             tp->label, anon_tp->label, File);
             }
 		/*
 		 * The new node is no longer needed
@@ -1249,8 +1251,8 @@ static void do_linkup(struct module *mp,
 	tp = find_tree_node( mip->label, mip->modid );
 	if (!tp) {
 	    if (mip->modid != -1)
-		fprintf(stderr, "Did not find '%s' in module %s (%s)\n",
-			mip->label, module_name(mip->modid, modbuf), File);
+		snmp_log(LOG_WARNING, "Did not find '%s' in module %s (%s)\n",
+                         mip->label, module_name(mip->modid, modbuf), File);
 	    continue;
 	}
 	do_subtree( tp, &np );
@@ -1277,8 +1279,9 @@ static void do_linkup(struct module *mp,
 	    nbuckets[i] = NULL;
 	    while (onp) {
 		if (ds_get_int(DS_LIBRARY_ID, DS_LIB_MIB_WARNINGS))
-		    fprintf (stderr, "Unlinked OID in %s: %s ::= { %s %ld }\n",
-			    mp->name, onp->label, onp->parent, onp->subid);
+		    snmp_log(LOG_WARNING,
+                             "Unlinked OID in %s: %s ::= { %s %ld }\n",
+                             mp->name, onp->label, onp->parent, onp->subid);
 		np = onp;
 		onp = onp->next;
 	    }
@@ -2342,8 +2345,9 @@ read_module_replacements(const char *name)
     for ( mcp=module_map_head ; mcp; mcp=mcp->next ) {
 	if ( !label_compare( mcp->old_module, name )) {
 	    if (ds_get_int(DS_LIBRARY_ID, DS_LIB_MIB_WARNINGS))
-		fprintf (stderr, "Loading replacement module %s for %s (%s)\n",
-			mcp->new_module, name, File);
+		snmp_log(LOG_WARNING,
+                         "Loading replacement module %s for %s (%s)\n",
+                         mcp->new_module, name, File);
 	    (void)read_module( mcp->new_module );
 	    return;
 	}
@@ -2375,8 +2379,9 @@ read_import_replacements(const char *old_module_name,
 	   ) {
 
 	    if (ds_get_int(DS_LIBRARY_ID, DS_LIB_MIB_WARNINGS))
-	        fprintf (stderr, "Importing %s from replacement module %s instead of %s (%s)\n",
-			identifier->label, mcp->new_module, old_module_name, File);
+	        snmp_log(LOG_WARNING,
+                         "Importing %s from replacement module %s instead of %s (%s)\n",
+                         identifier->label, mcp->new_module, old_module_name, File);
 	    (void)read_module( mcp->new_module );
 	    identifier->modid = which_module(mcp->new_module);
 	    return;	/* finished! */
@@ -2428,7 +2433,7 @@ read_module_internal (const char *name)
 	}
 
     if (ds_get_int(DS_LIBRARY_ID, DS_LIB_MIB_WARNINGS) > 1)
-	fprintf(stderr, "Module %s not found\n", name);
+	snmp_log(LOG_WARNING, "Module %s not found\n", name);
     return MODULE_NOT_FOUND;
 }
 
@@ -2472,9 +2477,10 @@ adopt_orphans (void)
 	    nbuckets[i] = NULL;
 	    while (onp) {
         	char modbuf[256];
-        	fprintf (stderr, "Unlinked OID in %s: %s ::= { %s %ld }\n",
-        	    module_name(onp->modid, modbuf),
-        	    onp->label, onp->parent, onp->subid);
+        	snmp_log (LOG_WARNING,
+                          "Unlinked OID in %s: %s ::= { %s %ld }\n",
+                          module_name(onp->modid, modbuf),
+                          onp->label, onp->parent, onp->subid);
 
 		np = onp;
 		onp = onp->next;
@@ -2503,8 +2509,9 @@ new_module (const char *name,
 			/* Not the same file */
 	    if (label_compare(mp->file, file)) {
 		if (ds_get_int(DS_LIBRARY_ID, DS_LIB_MIB_WARNINGS))
-		    fprintf(stderr, "Warning: Module %s in both %s and %s\n",
-			    name, mp->file, file);
+		    snmp_log(LOG_WARNING,
+                             "Warning: Module %s in both %s and %s\n",
+                             name, mp->file, file);
 
 			/* Use the new one in preference */
 		free(mp->file);
