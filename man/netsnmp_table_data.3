@@ -1,4 +1,4 @@
-.TH "table_data: Helps you implement a table with datamatted storage." 3 "17 Feb 2004" "net-snmp" \" -*- nroff -*-
+.TH "table_data: Helps you implement a table with datamatted storage." 3 "15 Mar 2004" "net-snmp" \" -*- nroff -*-
 .ad l
 .nh
 .SH NAME
@@ -101,7 +101,7 @@ It can be used to store a list of rows, where a row consists of the indexes to t
 .PP
 creates and returns a pointer to table data set
 .PP
-Definition at line 525 of file table_data.c.
+Definition at line 529 of file table_data.c.
 .PP
 References SNMP_MALLOC_TYPEDEF.
 .PP
@@ -114,7 +114,7 @@ creates and returns a pointer to table data set
 .in +1c
 \fBdata_set.c\fP.
 .PP
-Definition at line 535 of file table_data.c.
+Definition at line 539 of file table_data.c.
 .PP
 References SNMP_MALLOC_TYPEDEF.
 .PP
@@ -123,7 +123,7 @@ Referenced by netsnmp_table_data_set_create_row_from_defaults().
 .PP
 extracts the row being accessed passed from the table_data helper
 .PP
-Definition at line 543 of file table_data.c.
+Definition at line 547 of file table_data.c.
 .PP
 References netsnmp_request_get_list_data().
 .PP
@@ -132,7 +132,7 @@ Referenced by netsnmp_extract_table_row_data(), and netsnmp_table_data_set_helpe
 .PP
 extracts the data from the row being accessed passed from the table_data helper
 .PP
-Definition at line 552 of file table_data.c.
+Definition at line 556 of file table_data.c.
 .PP
 References netsnmp_extract_table_row().
 .PP
@@ -179,7 +179,7 @@ Referenced by netsnmp_table_data_replace_row(), and netsnmp_table_dataset_add_ro
 .PP
 builds a result given a row, a varbind to set and the data
 .PP
-Definition at line 564 of file table_data.c.
+Definition at line 568 of file table_data.c.
 .PP
 References netsnmp_agent_request_info_s::mode, netsnmp_request_info_s::requestvb, netsnmp_handler_registration_s::rootoid, netsnmp_handler_registration_s::rootoid_len, and snmp_set_var_typed_value().
 .PP
@@ -190,7 +190,7 @@ clones a data row.
 .PP
 DOES NOT CLONE THE CONTAINED DATA. 
 .PP
-Definition at line 598 of file table_data.c.
+Definition at line 602 of file table_data.c.
 .PP
 References memdup().
 .PP

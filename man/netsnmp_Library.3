@@ -1,4 +1,4 @@
-.TH "Library" 3 "17 Feb 2004" "net-snmp" \" -*- nroff -*-
+.TH "Library" 3 "15 Mar 2004" "net-snmp" \" -*- nroff -*-
 .ad l
 .nh
 .SH NAME
@@ -73,7 +73,7 @@ Library \-
 .ti -1c
 .RI "void \fBsnmp_shutdown\fP (const char *type)"
 .br
-.RI "\fIShuts down the agent, saving any needed persistent storage, and appropriate clean up.\fP"
+.RI "\fIShuts down the application, saving any needed persistent storage, and appropriate clean up.\fP"
 .ti -1c
 .RI "int \fBsnmp_oid_compare\fP (const oid *in_name1, size_t len1, const oid *in_name2, size_t len2)"
 .br
@@ -177,7 +177,7 @@ Returns non-zero on failure and zero on success.
 .in +1c
 \fBinit_snmp\fP 
 .PP
-Definition at line 251 of file snmp_vars.c.
+Definition at line 263 of file snmp_vars.c.
 .PP
 References netsnmp_ds_set_boolean(), netsnmp_init_helpers(), and starttime.
 .SS "void init_snmp (const char * type)"
@@ -226,7 +226,7 @@ length of the second OID (in segments, not bytes)
 .in +1c
 0 if they are equal, 1 if they are not. 
 .PP
-Definition at line 6102 of file snmp_api.c.
+Definition at line 6109 of file snmp_api.c.
 .PP
 Referenced by netsnmp_old_api_helper(), and unregister_mib_context().
 .SS "int netsnmp_oid_find_prefix (const oid * in_name1, size_t len1, const oid * in_name2, size_t len2)"
@@ -252,7 +252,7 @@ Length of the second oid.
 .in +1c
 length of largest common index of commonality. 1 = first, 0 if none * or -1 on error. 
 .PP
-Definition at line 6158 of file snmp_api.c.
+Definition at line 6165 of file snmp_api.c.
 .PP
 References SNMP_MIN.
 .SS "int netsnmp_oid_is_subtree (const oid * in_name1, size_t len1, const oid * in_name2, size_t len2)"
@@ -280,7 +280,7 @@ length of the second OID (in segments, not bytes)
 .in +1c
 0 if one is a common prefix of the other. 
 .PP
-Definition at line 6138 of file snmp_api.c.
+Definition at line 6145 of file snmp_api.c.
 .SS "int snmp_oid_compare (const oid * in_name1, size_t len1, const oid * in_name2, size_t len2)"
 .PP
 lexicographical compare two object identifiers.
@@ -291,7 +291,7 @@ Caution: this method is called often by command responder applications (ie, agen
 .in +1c
 -1 if name1 < name2, 0 if name1 = name2, 1 if name1 > name2 
 .PP
-Definition at line 6034 of file snmp_api.c.
+Definition at line 6041 of file snmp_api.c.
 .PP
 Referenced by check_getnext_results(), netsnmp_check_getnext_reply(), netsnmp_insert_iterator_context(), netsnmp_row_merge_helper_handler(), netsnmp_table_data_add_row(), netsnmp_table_data_get_from_oid(), netsnmp_table_data_helper_handler(), netsnmp_table_iterator_helper_handler(), snmp_oidtree_compare(), and table_helper_handler().
 .SS "int snmp_oidtree_compare (const oid * in_name1, size_t len1, const oid * in_name2, size_t len2)"
@@ -317,12 +317,12 @@ length of the second OID (in segments, not bytes)
 .in +1c
 0 if they are equal, 1 if in_name1 is > in_name2, or -1 if <. 
 .PP
-Definition at line 6083 of file snmp_api.c.
+Definition at line 6090 of file snmp_api.c.
 .PP
 References snmp_oid_compare().
 .SS "void snmp_shutdown (const char * type)"
 .PP
-Shuts down the agent, saving any needed persistent storage, and appropriate clean up.
+Shuts down the application, saving any needed persistent storage, and appropriate clean up.
 .PP
 \fBParameters: \fP
 .in +1c
@@ -334,7 +334,7 @@ Label for the config file 'type' used
 .in +1c
 void 
 .PP
-Definition at line 837 of file snmp_api.c.
+Definition at line 836 of file snmp_api.c.
 .PP
 References shutdown_mib(), snmp_alarm_unregister_all(), and snmp_call_callbacks().
 .SH "VARIABLE DOCUMENTATION"
@@ -343,6 +343,6 @@ References shutdown_mib(), snmp_alarm_unregister_all(), and snmp_call_callbacks(
 .PP
 paranoid sanity checks
 .PP
-Definition at line 215 of file snmp_vars.c.
+Definition at line 227 of file snmp_vars.c.
 .PP
 Referenced by init_agent().

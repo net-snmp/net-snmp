@@ -1,4 +1,4 @@
-.TH "mode_end_call: at the end of a series of requests, call another handler hook." 3 "17 Feb 2004" "net-snmp" \" -*- nroff -*-
+.TH "mode_end_call: at the end of a series of requests, call another handler hook." 3 "15 Mar 2004" "net-snmp" \" -*- nroff -*-
 .ad l
 .nh
 .SH NAME
@@ -39,7 +39,7 @@ The callback list for the handler to make use of.
 .in +1c
 An injectable Net-SNMP handler. 
 .PP
-Definition at line 38 of file mode_end_call.c.
+Definition at line 48 of file mode_end_call.c.
 .PP
 References netsnmp_mib_handler_s::myvoid, and netsnmp_create_handler().
 .SS "netsnmp_mode_handler_list* netsnmp_mode_end_call_add_mode_callback (netsnmp_mode_handler_list * endlist, int mode, \fBnetsnmp_mib_handler\fP * callbackh)"
@@ -62,6 +62,6 @@ the netsnmp_mib_handler callback to call.
 .in +1c
 the new registration information list upon success. 
 .PP
-Definition at line 58 of file mode_end_call.c.
+Definition at line 68 of file mode_end_call.c.
 .PP
 References SNMP_MALLOC_TYPEDEF.

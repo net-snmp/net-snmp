@@ -1,4 +1,4 @@
-.TH "parsing various configuration files at run time" 3 "17 Feb 2004" "net-snmp" \" -*- nroff -*-
+.TH "parsing various configuration files at run time" 3 "15 Mar 2004" "net-snmp" \" -*- nroff -*-
 .ad l
 .nh
 .SH NAME
@@ -91,7 +91,7 @@ is the length of an asn oid or octet/bit string, not required for the asn intege
 .in +1c
 the next token in the configuration line. NULL if none left or if an unknown type. 
 .PP
-Definition at line 1643 of file read_config.c.
+Definition at line 1650 of file read_config.c.
 .PP
 Referenced by netsnmp_read_data_callback().
 .SS "void read_config_store (const char * type, const char * line)"
@@ -113,7 +113,7 @@ is the configuration line written to the application name's configuration file
 .in +1c
 void 
 .PP
-Definition at line 1117 of file read_config.c.
+Definition at line 1124 of file read_config.c.
 .PP
 References snmp_log().
 .PP
@@ -156,7 +156,7 @@ is the length of the pre-allocated storeto buffer, not required for the asn inte
 .in +1c
 character pointer to the end of the line. NULL if an unknown type. 
 .PP
-Definition at line 1770 of file read_config.c.
+Definition at line 1777 of file read_config.c.
 .SS "struct config_line* register_config_handler (const char * type_param, const char * token, void(* parser)(const char *, char *), void(* releaser)(void), const char * help)"
 .PP
 register_config_handler registers handlers for certain tokens specified in certain types of files.

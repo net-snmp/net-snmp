@@ -1,4 +1,4 @@
-.TH "Memory Utility Routines" 3 "17 Feb 2004" "net-snmp" \" -*- nroff -*-
+.TH "Memory Utility Routines" 3 "15 Mar 2004" "net-snmp" \" -*- nroff -*-
 .ad l
 .nh
 .SH NAME
@@ -174,7 +174,7 @@ Referenced by netsnmp_oid_find_prefix(), netsnmp_register_table_data_set(), and 
 .PP
 Returns the difference (in msec) between the two markers.
 .PP
-Definition at line 701 of file tools.c.
+Definition at line 745 of file tools.c.
 .PP
 Referenced by atime_ready(), and marker_tticks().
 .SS "marker_t atime_newMarker (void)"
@@ -183,14 +183,14 @@ create a new time marker.
 .PP
 NOTE: Caller must free time marker when no longer needed. 
 .PP
-Definition at line 677 of file tools.c.
+Definition at line 721 of file tools.c.
 .PP
 Referenced by atime_ready(), marker_tticks(), netsnmp_cache_helper_handler(), netsnmp_stash_cache_update(), and uatime_ready().
 .SS "int atime_ready (marker_t pm, int deltaT)"
 .PP
 Test: Has (marked time plus delta) exceeded current time (in msec) ? Returns 0 if test fails or cannot be tested (no marker).
 .PP
-Definition at line 756 of file tools.c.
+Definition at line 800 of file tools.c.
 .PP
 References atime_diff(), and atime_newMarker().
 .PP
@@ -199,7 +199,7 @@ Referenced by netsnmp_cache_helper_handler(), netsnmp_stash_cache_update(), and 
 .PP
 set a time marker.
 .PP
-Definition at line 688 of file tools.c.
+Definition at line 732 of file tools.c.
 .PP
 Referenced by netsnmp_cache_helper_handler(), and netsnmp_stash_cache_update().
 .SS "u_int binary_to_hex (const u_char * input, size_t len, char ** output)"
@@ -222,7 +222,7 @@ NULL terminated string equivalent in hex.
 .in +1c
 olen Length of output string not including NULL terminator.FIX Is there already one of these in the UCD SNMP codebase? The old one should be used, or this one should be moved to snmplib/snmp_api.c. 
 .PP
-Definition at line 243 of file tools.c.
+Definition at line 287 of file tools.c.
 .SS "void free_zero (void * buf, size_t size)"
 .PP
 zeros memory before freeing it.
@@ -236,7 +236,7 @@ Pointer at bytes to free.
 \fB\fIsize\fP\fP
 Number of bytes in buf. 
 .PP
-Definition at line 141 of file tools.c.
+Definition at line 185 of file tools.c.
 .PP
 Referenced by hex_to_binary2(), and malloc_random().
 .SS "int hex_to_binary2 (const u_char * input, size_t len, char ** output)"
@@ -261,7 +261,7 @@ SNMPERR_GENERR on failure, otherwise length of allocated string.Input of an odd 
 .PP
 FIX Another version of 'hex-to-binary' which takes odd length input strings. It also allocates the memory to hold the binary data. Should be integrated with the official hex_to_binary() function. 
 .PP
-Definition at line 280 of file tools.c.
+Definition at line 324 of file tools.c.
 .PP
 References free_zero().
 .SS "u_char* malloc_random (size_t * size)"
@@ -280,14 +280,14 @@ Number of bytes to malloc() and fill with random bytes.
 .in +1c
 a malloced buffer 
 .PP
-Definition at line 161 of file tools.c.
+Definition at line 205 of file tools.c.
 .PP
 References free_zero().
 .SS "int marker_tticks (marker_t pm)"
 .PP
 Return the number of timeTicks since the given marker.
 .PP
-Definition at line 804 of file tools.c.
+Definition at line 848 of file tools.c.
 .PP
 References atime_diff(), and atime_newMarker().
 .SS "int memdup (u_char ** to, const u_char * from, size_t size)"
@@ -316,14 +316,14 @@ SNMPERR_SUCCESS on success, SNMPERR_GENERR on failure.
 .in +1c
 \fBdelayed_instance.c\fP.
 .PP
-Definition at line 192 of file tools.c.
+Definition at line 236 of file tools.c.
 .PP
 Referenced by netsnmp_create_handler_registration(), netsnmp_handler_registration_dup(), netsnmp_register_old_api(), netsnmp_set_row_column(), netsnmp_table_data_clone_row(), netsnmp_table_data_set_clone_row(), and netsnmp_table_set_add_default_row().
 .SS "char* netsnmp_strdup_and_null (const u_char * from, size_t from_len)"
 .PP
 copies a (possible) unterminated string of a given length into a new buffer and null terminates it as well (new buffer MAY be one byte longer to account for this
 .PP
-Definition at line 211 of file tools.c.
+Definition at line 255 of file tools.c.
 .PP
 Referenced by netsnmp_table_data_set_helper_handler().
 .SS "int snmp_realloc (u_char ** buf, size_t * buf_len)"
@@ -341,25 +341,25 @@ pointer to a buffer pointer
 \fB\fIbuf_len\fP\fP
 pointer to current size of buffer in bytes 
 .PP
-Definition at line 71 of file tools.c.
+Definition at line 115 of file tools.c.
 .PP
 Referenced by sprint_realloc_asciistring(), sprint_realloc_hexstring(), sprint_realloc_ipaddress(), sprint_realloc_networkaddress(), and sprint_realloc_octet_string().
 .SS "u_long uatime_diff (marker_t first, marker_t second)"
 .PP
 Returns the difference (in u_long msec) between the two markers.
 .PP
-Definition at line 718 of file tools.c.
+Definition at line 762 of file tools.c.
 .PP
 Referenced by uatime_ready().
 .SS "u_long uatime_hdiff (marker_t first, marker_t second)"
 .PP
 Returns the difference (in u_long 1/100th secs) between the two markers (functionally this is what sysUpTime needs).
 .PP
-Definition at line 736 of file tools.c.
+Definition at line 780 of file tools.c.
 .SS "int uatime_ready (marker_t pm, unsigned int deltaT)"
 .PP
 Test: Has (marked time plus delta) exceeded current time (in msec) ? Returns 0 if test fails or cannot be tested (no marker).
 .PP
-Definition at line 778 of file tools.c.
+Definition at line 822 of file tools.c.
 .PP
 References atime_newMarker(), and uatime_diff().
