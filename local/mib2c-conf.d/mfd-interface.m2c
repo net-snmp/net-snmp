@@ -554,7 +554,7 @@ _mfd_${context}_post_request(netsnmp_mib_handler *handler,
                              netsnmp_request_info *requests)
 {
     ${context}_rowreq_ctx *rowreq_ctx;
-    int rc;
+    int rc, packet_rc;
 
     DEBUGMSGTL(("internal:${context}:_mfd_${context}_post_request",
                 "called\n"));
@@ -565,8 +565,8 @@ _mfd_${context}_post_request(netsnmp_mib_handler *handler,
         return SNMP_ERR_NOERROR;
     }
     
-    rc = ${context}_post_request(${context}_if_ctx.user_ctx,
-                                     agtreq_info->asp->status);
+    packet_rc = netsnmp_check_all_requests_error(agtreq_info->asp, 0);
+    rc = ${context}_post_request(${context}_if_ctx.user_ctx,packet_rc);
     if (MFD_SUCCESS != rc) {
         /*
          * nothing we can do about it but log it
@@ -1637,7 +1637,7 @@ _${context}_container_row_save(
      * column values, 12 bytes [11 for oid + 1 for ':'] per
      * column are added).
      */
-        /** TODO: add storage for external index(s)! */
+        /** xxx: add storage for external index(s)! */
 #define MAX_ROW_SIZE (sizeof(row_token) + 1 +  \
 @   if $ext_index != 0@
 @   end@
