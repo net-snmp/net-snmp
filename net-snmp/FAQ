@@ -34,6 +34,7 @@ TABLE OF CONTENTS
    How does the agent fetch the value of a variable from the system?
    What is the Official Slogan of the ucd-snmp-coders list?
  PROBLEMS
+   How come ever since version 3.2 my mib files are no longer read?
    What's this about a "party database", when I try to send a query?
    Why can't I see values in the UCDavis 'extensible' tree?
    Why can't I see values in the <INSERT ENTERPRISE HERE> tree?
@@ -407,6 +408,23 @@ What is the Official Slogan of the ucd-snmp-coders list?
 
 PROBLEMS
 ========
+
+Why aren't my mib files read in any more?
+-----------------------------------------
+
+  As from version 3.2, the parser has been re-written.  One effect of
+  this is that only a specified set of MIB modules are read in by
+  default.  This list can be amended by using environmental variables.
+    The value of the environmental variable 'MIBS' will be taken as a
+  list of MIB module names to be read in from the mib directory (which
+  can itself be set using the environmental variable 'MIBDIRS')
+  Additional MIB files can be specified using the environmental
+  variable 'MIBFILES'.
+    Any MIB module required by those listed will also be loaded (as
+  long as it can be found), without needing to be explicitly
+  mentioned.
+
+  See the 'mib_api(3)' man page for more details.
 
 What's this about a "party database", when I try to send a query?
 ----------------------------------------------------------------
