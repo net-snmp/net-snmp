@@ -70,8 +70,10 @@ if (open(CMD, "<t/snmptest.cmd")) {
 if ($^O !~ /win32/i) {
   if ($snmpd_cmd) {
     if (-r $snmpd_cmd and -x $snmpd_cmd) {
-#      print STDERR "running: $snmpd_cmd -r -l t/snmptest.log -C -c t/snmptest.conf -P t/snmpd.pid $agent_port > /dev/null 2>&1\n";
-      system "$snmpd_cmd -r -l t/snmptest.log -C -c t/snmptest.conf -P t/snmpd.pid $agent_port > /dev/null 2>&1";
+      $basedir = `pwd`;
+      chomp $basedir;
+      #print STDERR "running: $snmpd_cmd -r -l t/snmptest.log -C -c $basedir/t/snmptest.conf -P $basedir/t/snmpd.pid/t/snmpd.pid $agent_port > /dev/null 2>&1\n";
+      system "$snmpd_cmd -r -l t/snmptest.log -C -c $basedir/t/snmptest.conf -P $basedir/t/snmpd.pid $agent_port > /dev/null 2>&1";
     } else {
       warn("Couldn't run snmpd\n");
     }
