@@ -166,7 +166,7 @@ main(argc, argv)
   if (optind+1 == argc) {
     /* specified on the command line */
     rootlen = MAX_NAME_LEN;
-    if (!read_objid(argv[optind], root, &rootlen)){
+    if (!snmp_parse_oid(argv[optind], root, &rootlen)){
       fprintf(stderr, "Invalid object identifier: %s\n", argv[optind]);
       exit(1);
     }
