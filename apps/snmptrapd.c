@@ -330,7 +330,7 @@ usage(void)
 #ifdef WIN32SERVICE
     fprintf(stderr, "  -register\t\tregister as a Windows service\n");
     fprintf(stderr, "  \t\t\t  (followed by the startup parameter list)\n");
-    fprintf(stderr, "  \t\t\t  Note that not all parameters are relevant when running as a service\n");
+    fprintf(stderr, "  \t\t\t  Note that some parameters are not relevant when running as a service\n");
 #endif
     fprintf(stderr, "  -t\t\t\tPrevent traps from being logged to syslog\n");
 #ifdef WIN32SERVICE
@@ -548,7 +548,7 @@ parse_config_outputOption(const char *token, char *cptr)
 
 /*******************************************************************-o-******
  * main - Non Windows
- * SnmpTrapdMain - Windows to support windows serivce
+ * SnmpTrapdMain - Windows to support windows service
  *
  * Parameters:
  *	 argc
@@ -1206,7 +1206,7 @@ main(int argc, char *argv[])
 /*
  * Read the configuration files. Implemented as a signal handler so that
  * receipt of SIGHUP will cause configuration to be re-read when the
- * trap deamon is running detatched from the console.
+ * trap daemon is running detatched from the console.
  *
  */
 void
@@ -1236,8 +1236,8 @@ getdtablesize(void)
 * main function for Windows
 * Parse command line arguments for startup options,
 * to start as service or console mode application in windows.
-* Invokes appropriate startup funcitons depending on the 
-* parameters passesd
+* Invokes appropriate startup functions depending on the 
+* parameters passed
 *************************************************************/
 int
     __cdecl
@@ -1291,10 +1291,7 @@ _tmain(int argc, TCHAR * argv[])
         break;
     default:
         /*
-         * Run Net-Snmpd in console mode 
-         */
-        /*
-         * Invoke SnmpDeamonMain with input arguments 
+         * Run in console mode 
          */
         return SnmpTrapdMain(argc, argv);
         break;
@@ -1302,7 +1299,7 @@ _tmain(int argc, TCHAR * argv[])
 }
 
 /*
- * To stop Snmp Trap Receiver deamon 
+ * To stop Snmp Trap Receiver daemon
  * This portion is still not working
  */
 void
@@ -1322,4 +1319,4 @@ StopSnmpTrapd(void)
     }
 }
 
-#endif/*WIN32SERVICE*/
+#endif /*WIN32SERVICE*/
