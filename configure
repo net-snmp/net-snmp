@@ -34,7 +34,7 @@ ac_help="$ac_help
 ac_help="$ac_help
   --with-mibs=\"item1:item2:\"      Default mib IDs to load.
                                     (Default: SNMPv2-SMI:SNMPv2-TC:SNMPv2-MIB:
-                                              SNMPv2-CONF:UCD-SNMP-MIB)"
+                                           SNMPv2-MIB:RFC1213-MIB:UCD-SNMP-MIB)"
 ac_help="$ac_help
   --with-mibfiles=\"file1:file2\"   Default mib files to load.
                                     (Default:  none.  uses IDs above instead.)"
