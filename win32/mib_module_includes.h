@@ -70,6 +70,7 @@
 #include "mibgroup/ucd-snmp/disk.h"
 #include "mibgroup/ucd-snmp/loadave.h"
 #include "mibgroup/ucd-snmp/extensible.h"
+#include "mibgroup/agent/extend.h"
 #include "mibgroup/ucd-snmp/errormib.h"
 #include "mibgroup/ucd-snmp/file.h"
 #include "mibgroup/ucd-snmp/dlmod.h"

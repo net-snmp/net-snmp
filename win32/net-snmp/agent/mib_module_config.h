@@ -2,31 +2,9 @@
 
 #ifndef MIB_MODULE_CONFIG_H
 #define MIB_MODULE_CONFIG_H
-/*
- * Module configuration and control starts here.
- *
- * Some of the defines herein are used to control
- * groups of modules.  The ones that have "CFG"
- * are used especially to control the include files
- * seen in mib_module_includes.h, and the init entries
- * which are invoked in mib_module_inits.h.
- *
- * To disable a group, uncomment the associated define.
- *
- * USING_UCD_SNMP_MODULE
- * USING_AGENTX_MODULE
- * USING_HOST_MODULE
- * USING_RMON_MODULE
- * USING_DISMAN_EVENT_MIB_MODULE
- * USING_SMUX_MODULE
- */
-
 
 /* Define if compiling with the mibII module files.  */
 #define USING_MIBII_MODULE 1
- 
-/* CFG Define if compiling with the ucd_snmp module files.  */
-#define USING_UCD_SNMP_MODULE 1
  
 /* Define if compiling with the snmpv3mibs module files.  */
 #define USING_SNMPV3MIBS_MODULE 1
@@ -46,32 +24,14 @@
 /* Define if compiling with the agent_mibs module files.  */
 #define USING_AGENT_MIBS_MODULE 1
  
-/* CFG Define if compiling with the agentx module files.  */
-#define USING_AGENTX_MODULE 1
- 
 /* Define if compiling with the agent_mibs module files.  */
 #define USING_AGENT_MIBS_MODULE 1
  
 /* Define if compiling with the utilities module files.  */
 #define USING_UTILITIES_MODULE 1
- 
-/* CFG Define if compiling with the host module files.  */
-/* #undef USING_HOST_MODULE */
- 
-/* CFG Define if compiling with the Rmon module files.  */
-/* #undef USING_RMON_MODULE */
 
-/* CFG Define if compiling with the disman/event-mib module files.  */
-#define USING_DISMAN_EVENT_MIB_MODULE 1
-
-/* CFG Define if compiling with the smux module files.  */
-/* #undef USING_SMUX_MODULE */
-
-
-#ifndef WIN32
 /* Define if compiling with the mibII/ipv6 module files.  */
-#define USING_MIBII_IPV6_MODULE 1
-#endif
+/* #undef USING_MIBII_IPV6_MODULE */
  
 /* Define if compiling with the mibII/system_mib module files.  */
 #define USING_MIBII_SYSTEM_MIB_MODULE 1
@@ -135,6 +95,9 @@
  
 /* Define if compiling with the ucd-snmp/extensible module files.  */
 #define USING_UCD_SNMP_EXTENSIBLE_MODULE 1
+ 
+/* Define if compiling with the agent/extend module files.  */
+#define USING_AGENT_EXTEND_MODULE 1
  
 /* Define if compiling with the ucd-snmp/errormib module files.  */
 #define USING_UCD_SNMP_ERRORMIB_MODULE 1
@@ -329,38 +292,9 @@
 /* Define if compiling with the mibII/vacm_context module files.  */
 #define USING_MIBII_VACM_CONTEXT_MODULE 1
  
-/* Define if compiling with the mibII/vacm_conf module files.  */
-#define USING_MIBII_VACM_CONF_MODULE 1
- 
-/* Define if compiling with the utilities/execute module files.  */
-#define USING_UTILITIES_EXECUTE_MODULE 1
- 
 /* Define if compiling with the header_complex module files.  */
 #define USING_HEADER_COMPLEX_MODULE 1
  
-
-#ifdef USING_AGENTX_MODULE
-
-/* Define if compiling with the agentx/master module files.  */
-#define USING_AGENTX_MASTER_MODULE 1
- 
-/* Define if compiling with the agentx/subagent module files.  */
-#define USING_AGENTX_SUBAGENT_MODULE 1
- 
-/* Define if compiling with the agentx/protocol module files.  */
-#define USING_AGENTX_PROTOCOL_MODULE 1
- 
-/* Define if compiling with the agentx/client module files.  */
-#define USING_AGENTX_CLIENT_MODULE 1
- 
-/* Define if compiling with the agentx/master_admin module files.  */
-#define USING_AGENTX_MASTER_ADMIN_MODULE 1
- 
-/* Define if compiling with the agentx/agentx_config module files.  */
-#define USING_AGENTX_AGENTX_CONFIG_MODULE 1
- 
-#endif /* USING_AGENTX_MODULE */
-
 
 #endif /* MIB_MODULE_CONFIG_H */
  

@@ -33,6 +33,9 @@ if (! (-d $ENV{MSVCDir})) {
   exit;
 }
 
+# Set to not search for non-existent ".dep" files
+$ENV{NO_EXTERNAL_DEPS}="1";
+
 # Set PATH environment variable so Perl make tests can locate the DLL
 $ENV{MIBDIRS}="$current_pwd\\bin;$ENV{MIBDIRS}";
 
