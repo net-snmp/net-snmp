@@ -1,0 +1,370 @@
+#!/usr/local/bin/perl5
+
+#defaults
+$mibident=".2";
+$miberrflag=".100";
+$miberrmsg=".101";
+$mibfix=".102";
+$mibheadsht=".1.3.6.1.4";
+$mibheadall="$mibheadsht.10";
+$mibclearcache="$mibheadall.100.10";
+@miblist=(".1",".3",".4",".6");
+@fixitlist=(".1",".3");
+$errlog="/net/tyfon/1/OV/log/ece-log";
+$andlog=0;
+$snmppath="/usr/local/etc";
+$eraseline="                                                                           \r";
+$fixit=-1;  # this should be 0 not -1, but is necissary till getc(STDIN) works
+
+$display = $ENV{'DISPLAY'};
+
+#
+#  Mib Package:  Each mib has a mib number attached and can check/fix itself;
+#
+
+package Mib;
+
+sub new {
+    my $tmp = shift;
+    my $self = {};
+    $self->{'HostId'} = shift;
+    $self->{'Host'} = $self->{'HostId'}->{'Name'};
+    $self->{'Mib'} = shift;
+    $self->{'Frame'} = shift;
+    bless $self;
+}
+
+sub getmibnum {
+    my $self = shift;
+    return ($self->{'Mib'});
+}
+
+sub check {
+    my $self = shift;
+    my $tmp = [];
+    if (! $::display) {
+	printf "%sChecking %s: %s\r", $::eraseline,$self->{'Host'},
+	$self->{'Mib'};
+    }
+    open(OUT,"$::snmppath/snmpwalk -v 1 $self->{'Host'} public $self->{'Mib'}$::miberrflag|");
+    while (<OUT>) {
+	($result) = /= ([0-9]+)/;
+	if ($result > 0)
+	{
+	    ($mibloc) = /\.([0-9]+) /;
+	    push(@{$tmp},FixProblem::new("",$self->{'HostId'}, $self->{'Mib'},
+					 $mibloc,$self->{'Frame'}));
+	    if (! $::display) {
+		printf("%s%-8.8s  %-12.12s  %2d -- %-37.37s",$::eraseline,
+		       $self->{'Host'}, $procname,$result,$errmsg);
+		$tmp->[0]->fix($mibloc);     # fix now if curses
+		shift @{$tmp};
+	    }
+	}
+    }
+    close(OUT);
+    return($tmp);
+}
+
+#
+#  Problem Package: A problem comes into existence when found.  It may
+#  or may not know how to fix itself (Problem/FixProblem).
+#
+
+package Problem;
+
+sub new{
+    my $tmp = shift;
+    my $hostId = shift;
+    my $mib = shift;
+    my $self = new Mib ($hostId,$mib);
+    $self->{'MibLocation'} = shift;
+    $tmp = shift;
+    $self->{'Frame'} = Frame::new($tmp);
+    main::tkpack($self->{'Frame'});
+    $_ = `$::snmppath/snmpget -v 1 $self->{'Host'} public $self->{'Mib'}$::mibident.$self->{'MibLocation'}`;
+    ($self->{'ErrName'}) = /\"([^\"]*)\"/;
+    $_ = `$::snmppath/snmpget -v 1 $self->{'Host'} public $self->{'Mib'}$::miberrmsg.$self->{'MibLocation'}`;
+    ($self->{'ErrMsg'}) = /\"([^\"]*)\"/;
+    if ($::display) {
+	$self->{'Desc'} = Label::new($self->{'Frame'},
+				     "-text" => sprintf("%-12.12s %-42.42s",$self->{'ErrName'},$self->{'ErrMsg'}));
+	$self->{'FixButton'} = Button::new($self->{'Frame'},"-text" => "Fix",
+					   "-slave" => $self,"-method"=>\&fix);
+	$self->{'TmpButton'} = Button::new($self->{'Frame'},"-text" => "Del",
+					   "-slave" => $self,"-method"=>\&deleteme);
+      main::tkpack($self->{'Desc'},$self->{'FixButton'},$self->{'TmpButton'},
+		     "-fill" => "x","-expand" => 1,"-side"=>"left");
+    }
+    bless $self;
+    return $self;
+}
+
+sub check {
+    my $self = shift;
+    $_ = `$::snmppath/snmpget -v 1 $self->{'Host'} public $self->{'Mib'}$::miberrflag.$self->{'MibLocation'}`;
+    ($result) = /= ([0-9]+)/;
+    return $result;
+}
+
+sub fix {
+# Don't fix and/or unable to
+}
+
+sub deleteme {
+    my $self = shift;
+    $self->{'HostId'}->deleteProb($self);
+}
+
+sub deleteself {
+    my $self = shift;
+    if ($::display) {
+      main::tkpack("forget",$self->{'Frame'},$self{'FixButton'},$self{'TmpButton'},$self{'Desc'});
+    }
+}
+
+package FixProblem;
+
+@ISA = qw( Problem );
+
+sub new {
+    my $tmp = shift;
+    my $hostId = shift;
+    my $mib = shift;
+    my $mibloc = shift;
+    my $frame = shift;
+    my $self = new Problem ($hostId,$mib,$mibloc,$frame);
+    $_ = $mib;
+    ($mymib) = /\.([0-9]+)$/;
+    if (grep(/$mymib/,@::fixitlist) && $::fixit >= 0) {
+	bless $self;		# Make it a FixProblem or else return Problem
+    }
+    if ($::display) {
+      main::tkpack("forget",$self->{'FixButton'});
+	$self->{'FixButton'} = Button::new($self->{'Frame'},"-text" => "Fix",
+					   "-slave" => $self,"-method"=>\&fix);
+	main::tkpack($self->{'FixButton'},
+		     "-fill" => "x","-expand" => 1,"-side"=>"left");
+    }
+    return $self;
+}
+
+sub fix {
+    my $self = shift;
+    my $mibloc = shift;
+    if ($::display) {
+      main::setstatus(sprintf("Fixing %s:  %s",
+			      $self->{'Host'}, $self->{'ErrName'}));
+    } 
+    else {
+	printf(" / Fixing...\b\b\b\b\b\b\b\b\b");
+    }
+    system("snmpset -v 1 $self->{'Host'} public $self->{'Mib'}$::mibfix.$self->{'MibLocation'} integer 1 > /dev/null 2>&1");
+    system("snmpset -v 1 $self->{'Host'} public $::mibclearcache integer 1 > /dev/null 2>&1");
+    if ($::display) {
+	main::setstatus("Sleeping");
+    }
+    else {
+	printf("Sleeping\b\b\b\b\b\b\b\b");
+    }
+    sleep(2);
+    if ($::display) {
+	main::setstatus("Checking");
+    }
+    else {
+	printf("Checking\b\b\b\b\b\b\b\b");
+    }
+    if ($self->check() != 0) {
+	if (! $::display) {
+	    printf("*failed*  \n");
+	} else {
+	    main::setmsg("Failed to fix $self->{'ErrName'} on $self->{'Host'}");
+	}
+    }
+    else {
+	if ($::display) {
+	    $self->{'HostId'}->deleteProb($self);
+	    main::setmsg("Fixed $self->{'ErrName'} on $self->{'Host'}");
+	} 
+	else {
+	    printf("Fixed     \n");
+	}
+    }
+  main::setstatus("Idle");
+}
+
+#
+#  Host Package:  Each object is a host which can check itself and display
+#                 the results
+#
+package Host;
+
+sub new {
+    my $self = {};
+    my $tmp = shift;
+    $self->{'Name'} = shift;
+    $self->{'Mibs'} = [];
+    $self->{'Problems'} = [];
+    if ($::display) {
+	$self->{'MainFrame'} = Frame::new($::HostFrame,"-relief" => "sunken",
+					  "-borderwidth" => 2);
+	$self->{'ProbFrame'} = Frame::new($self->{'MainFrame'});
+	$self->{'hostlabel'} = Button::new($self->{'MainFrame'},
+					   "-text" => sprintf("%-9.9s",
+							     $self->{'Name'}),
+					   "-slave"=>$self,"-method"=>\&check);
+	main::tkpack($self->{'hostlabel'},$self->{'ProbFrame'},
+		     "-side" => "left","-ipadx" => 2,"-padx" => 2,"-pady" =>2);
+	main::tkpack($self->{'MainFrame'},"-padx" => 2,"-pady" =>2, 
+		     "-fill" => "x", "-expand" => 1);
+    } 
+    my $i = 0;
+    foreach $mibx ( @::miblist ) {
+	    push(@{$self->{'Mibs'}},
+		 new Mib ($self,"$::mibheadall$mibx",
+			  $self->{'ProbFrame'}));
+    }
+    bless $self->{'Mibs'};
+    bless $self
+}
+
+sub check {
+    my $self = shift;
+    $self->deleteProbs();
+    foreach $i (@{$self->{'Mibs'}}) {
+	main::setstatus("Checking $self->{'Name'}:  " . $i->getmibnum());
+	push (@{$self->{'Problems'}},$i->check());
+    }
+  main::setstatus("Idle");
+}
+
+sub deleteProbs {
+    my $self = shift;
+    foreach $i (@{$self->{'Problems'}}) {
+	$self->deleteProb($self);
+    }
+}
+
+sub deleteProb {
+    my $self = shift;
+    my $child = shift;
+    for ($i=0;$i <= $#self->{'Problems'};$i++) {
+	if ($self->{'Problems'}->[$i]->{'Mib'} == $child->{'Mib'} && 
+	    $self->{'Problems'}->[$i]->{'MibLocation'} == 
+	    $child->{'MibLocation'}) {
+	    splice(@{$self->{'Problems'}},$i);
+	    $child->deleteself();
+	    #last;
+	}
+    }
+}
+
+package main;
+
+#
+# Read arguments
+#
+
+if ($#ARGV != -1) {
+    while ($_ = $ARGV[0], /^-/) {
+	shift;
+	/^-a/ && ($andlog = 1);
+	/^-n/ && ($fixit = -1);
+	/^-y/ && ($fixit = 1);
+	/^-x/ && ($display = 0);
+    }
+}
+
+#
+# If necessary check the ece-log file for problems
+#
+
+if ($andlog || $#ARGV == -1) {
+    open(LOG,$errlog);
+    while (<LOG>) {
+	@fields = split;
+	@tmp = grep(/$fields[0]/,@ARGV);
+	if ($#tmp == -1 && $fields[1] ne "down") {
+	    $ARGV[$#ARGV + 1] = $fields[0];
+	}
+    }
+    close(LOG);
+}
+
+#
+# Check all the found hosts 
+#
+
+if ($display) {
+    use Tk;
+    $top = tkinit;
+    $HostFrame = Frame::new($top);
+    $statusBar = Frame::new($top,"-relief" => "raised","-borderwidth" => 2);
+    $status = Label::new($statusBar,"-text" => "initializing","-anchor" =>"e");
+    $statusl = Label::new($statusBar,"-text" => "Status:  ", "-anchor" => "w");
+    $msgBar = Frame::new($top,"-relief" => "raised","-borderwidth" => 2);
+    $msg = Label::new($msgBar,"-text" => "","-anchor" =>"e");
+    $msgl = Label::new($msgBar,"-text" => "Note:  ", "-anchor" => "w");
+    
+    tkpack($statusl, $status, "-fill" => "x", "-expand" => 1, "-side" => "left");
+    tkpack($msgl, $msg, "-fill" => "x", "-expand" => 1, "-side" => "left");
+    tkpack($statusBar, $msgBar, "-fill" => "x", "-expand" => 1);
+    tkpack($HostFrame,"-fill" => "x","-expand" => 1);
+    $botFrame = Frame::new($top);
+    $QuitBut = Button::new($botFrame,"-text" => "Quit", "-method" => \&quit);
+    $entryhost = "";
+    $NewHost = Entry::new($botFrame,"-textvariable" => $entryhost,"-width"=>20,
+			  "-relief" => "sunken");
+    tkbind($NewHost,"<Return>",sub { newHost($entryhost)});
+    $BotLabel = Label::new($botFrame,"-text" => "Check New Host:  ",
+			    "-anchor" => "e");
+    tkpack($botFrame,"-fill" => "x", "-expand" => 1);
+    tkpack($QuitBut,"-side" => "left","-padx" => 4,"-pady" => 2,"-ipadx" => 2,
+	   "-ipady" => 2);
+    tkpack($BotLabel,"-fill" => "x","-expand" => 1,"-side"=>"left");
+    tkpack($NewHost,"-side"=>"right");
+    update;
+    foreach $host ( @ARGV ) {
+	$chost[$#chost+1] = new Host ($host);
+	update;
+	$chost[$#chost]->check;
+    }
+    $status->configure("-text" => "Idle");
+    tkmainloop;
+}
+else {
+    select(STDOUT);
+    $| = 1;
+    foreach $host ( @ARGV ) {
+	$chost[$#chost+1] = new Host ($host);
+	$chost[$#chost]->check;
+    }
+    printf("$eraseline");
+}
+
+sub newHost {
+    my $name = shift;
+    push(@chost,Host::new("",$name));
+    update;
+    $chost[$#chost]->check;
+}
+
+sub setstatus {
+    my $arg = shift;
+    if ($display) {
+	$status->configure("-text" => $arg);
+	update;
+    }
+}
+
+sub setmsg {
+    my $arg = shift;
+    if ($display) {
+	$msg->configure("-text" => $arg);
+	update;
+    }
+}
+
+sub quit {
+    exit();
+}
