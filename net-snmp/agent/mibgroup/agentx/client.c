@@ -91,7 +91,7 @@ agentx_synch_input(int op,
           starttime.tv_sec  = now.tv_sec  - diff.tv_sec;
           starttime.tv_usec = now.tv_usec - diff.tv_usec;
           if ( starttime.tv_usec > 1000000L ) {
-              starttime.tv_sec -= 1000000L;
+              starttime.tv_usec -= 1000000L;
               starttime.tv_sec++;
           }
 	}
