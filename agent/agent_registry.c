@@ -1068,14 +1068,6 @@ int
 in_a_view(oid *name, size_t *namelen, netsnmp_pdu *pdu, int type)
 {
     struct view_parameters view_parms;
-    view_parms.pdu = pdu;
-    view_parms.name = name;
-    if (namelen != NULL) {
-        view_parms.namelen = *namelen;
-    } else {
-        view_parms.namelen = 0;
-    }
-    view_parms.errorcode = 0;
 
     if (pdu->flags & UCD_MSG_FLAG_ALWAYS_IN_VIEW) {
 	/* Enable bypassing of view-based access control */
@@ -1089,6 +1081,16 @@ in_a_view(oid *name, size_t *namelen, netsnmp_pdu *pdu, int type)
         return VACM_NOTINVIEW;
     }
 
+    view_parms.pdu = pdu;
+    view_parms.name = name;
+    if (namelen != NULL) {
+        view_parms.namelen = *namelen;
+    } else {
+        view_parms.namelen = 0;
+    }
+    view_parms.errorcode = 0;
+    view_parms.check_subtree = 0;
+
     switch (pdu->version) {
     case SNMP_VERSION_1:
     case SNMP_VERSION_2c:
@@ -1101,8 +1103,9 @@ in_a_view(oid *name, size_t *namelen, netsnmp_pdu *pdu, int type)
 }
 
 /*
- * in_a_view: determines if a given snmp_pdu is ever going to be allowed to do
- * anynthing or if it's not going to ever be authenticated. 
+ * check_acces: determines if a given snmp_pdu is ever going to be
+ * allowed to do anynthing or if it's not going to ever be
+ * authenticated.
  */
 int
 check_access(netsnmp_pdu *pdu)
@@ -1112,6 +1115,7 @@ check_access(netsnmp_pdu *pdu)
     view_parms.name = 0;
     view_parms.namelen = 0;
     view_parms.errorcode = 0;
+    view_parms.check_subtree = 0;
 
     if (pdu->flags & UCD_MSG_FLAG_ALWAYS_IN_VIEW) {
 	/* Enable bypassing of view-based access control */
@@ -1124,6 +1128,39 @@ check_access(netsnmp_pdu *pdu)
     case SNMP_VERSION_3:
         snmp_call_callbacks(SNMP_CALLBACK_APPLICATION,
                             SNMPD_CALLBACK_ACM_CHECK_INITIAL, &view_parms);
+        return view_parms.errorcode;
+    }
+    return 1;
+}
+
+/** checks to see if everything within a
+ *  given subtree is either: in view, not in view, or possibly both.
+ *  If the entire subtree is not-in-view we can use this information to
+ *  skip calling the sub-handlers entirely.
+ *  @returns 0 if entire subtree is accessible, 5 if not and 7 if
+ *  portions are both.  1 on error (illegal pdu version).
+ */
+int
+netsnmp_acm_check_subtree(netsnmp_pdu *pdu, oid *name, size_t namelen)
+{                               /* IN - pdu being checked */
+    struct view_parameters view_parms;
+    view_parms.pdu = pdu;
+    view_parms.name = name;
+    view_parms.namelen = namelen;
+    view_parms.errorcode = 0;
+    view_parms.check_subtree = 1;
+
+    if (pdu->flags & UCD_MSG_FLAG_ALWAYS_IN_VIEW) {
+	/* Enable bypassing of view-based access control */
+        return 0;
+    }
+
+    switch (pdu->version) {
+    case SNMP_VERSION_1:
+    case SNMP_VERSION_2c:
+    case SNMP_VERSION_3:
+        snmp_call_callbacks(SNMP_CALLBACK_APPLICATION,
+                            SNMPD_CALLBACK_ACM_CHECK_SUBTREE, &view_parms);
         return view_parms.errorcode;
     }
     return 1;
@@ -1265,7 +1302,7 @@ netsnmp_subtree *
 netsnmp_subtree_find_prev(oid *name, size_t len, netsnmp_subtree *subtree,
 			  const char *context_name)
 {
-    lookup_cache *lookup_cache;
+    lookup_cache *lookup_cache = NULL;
     netsnmp_subtree *myptr = NULL, *previous = NULL;
     int cmp = 1;
 

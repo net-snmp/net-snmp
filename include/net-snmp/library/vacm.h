@@ -18,6 +18,7 @@ extern          "C" {
 #define VACM_NOVIEW        4
 #define VACM_NOTINVIEW     5
 #define VACM_NOSUCHCONTEXT 6
+#define VACM_SUBTREE_UNKNOWN 7
 
 #define SECURITYMODEL	1
 #define SECURITYNAME	2
@@ -96,6 +97,9 @@ extern          "C" {
     void            vacm_destroyViewEntry(const char *, oid *, size_t);
     void            vacm_destroyAllViewEntries(void);
 
+#define VACM_MODE_FIND                0
+#define VACM_MODE_IGNORE_MASK         1
+#define VACM_MODE_CHECK_SUBTREE       2
     struct vacm_viewEntry *vacm_getViewEntry(const char *, oid *, size_t,
                                              int);
     /*

@@ -163,6 +163,9 @@ init_vacm_vars(void)
     snmp_register_callback(SNMP_CALLBACK_APPLICATION,
                            SNMPD_CALLBACK_ACM_CHECK_INITIAL,
                            vacm_in_view_callback, NULL);
+    snmp_register_callback(SNMP_CALLBACK_APPLICATION,
+                           SNMPD_CALLBACK_ACM_CHECK_SUBTREE,
+                           vacm_in_view_callback, NULL);
     snmp_register_callback(SNMP_CALLBACK_LIBRARY,
                            SNMP_CALLBACK_POST_READ_CONFIG,
                            vacm_warn_if_not_configured, NULL);
@@ -640,7 +643,7 @@ vacm_in_view_callback(int majorID, int minorID, void *serverarg,
     if (view_parms == NULL)
         return 1;
     retval = vacm_in_view(view_parms->pdu, view_parms->name,
-                          view_parms->namelen);
+                          view_parms->namelen, view_parms->check_subtree);
     if (retval != 0)
         view_parms->errorcode = retval;
     return retval;
@@ -654,6 +657,7 @@ vacm_in_view_callback(int majorID, int minorID, void *serverarg,
  *	*pdu
  *	*name
  *	 namelen
+ *       check_subtree
  *      
  * Returns:
  *	0	On success.
@@ -663,12 +667,15 @@ vacm_in_view_callback(int majorID, int minorID, void *serverarg,
  *	4	Missing view
  *	5	Not in view
  *      6       No Such Context
+ *      7       When testing an entire subtree, UNKNOWN (ie, the entire
+ *              subtree has both allowed and disallowed portions)
  *
  * Debug output listed as follows:
  *	<securityName> <groupName> <viewName> <viewType>
  */
 int
-vacm_in_view(netsnmp_pdu *pdu, oid * name, size_t namelen)
+vacm_in_view(netsnmp_pdu *pdu, oid * name, size_t namelen,
+             int check_subtree)
 {
     struct vacm_accessEntry *ap;
     struct vacm_groupEntry *gp;
@@ -843,7 +850,18 @@ vacm_in_view(netsnmp_pdu *pdu, oid * name, size_t namelen)
     }
     DEBUGMSG(("mibII/vacm_vars", ", vn=%s", vn));
 
-    vp = vacm_getViewEntry(vn, name, namelen, 0);
+    vp = vacm_getViewEntry(vn, name, namelen,
+                           (check_subtree) ? VACM_MODE_CHECK_SUBTREE :
+                           VACM_MODE_FIND);
+    if (check_subtree) {
+        if (!vp) {
+            return VACM_SUBTREE_UNKNOWN;
+        }
+        if (vp->viewType == SNMP_VIEW_EXCLUDED) {
+            return VACM_NOTINVIEW;
+        }
+        return VACM_SUCCESS;
+    }
     if (vp == NULL) {
         DEBUGMSG(("mibII/vacm_vars", "\n"));
         return 4;
@@ -1258,7 +1276,8 @@ var_vacm_view(struct variable * vp,
                 return NULL;
             }
 
-            gp = vacm_getViewEntry(viewName, subtree, subtreeLen, 1);
+            gp = vacm_getViewEntry(viewName, subtree, subtreeLen,
+                                   VACM_MODE_IGNORE_MASK);
             if (gp != NULL) {
                 if (gp->viewSubtreeLen != subtreeLen) {
                     gp = NULL;
@@ -2295,7 +2314,8 @@ view_parse_viewEntry(oid * name, size_t name_len)
         return NULL;
 
     vptr =
-        vacm_getViewEntry(newViewName, newViewSubtree, viewSubtreeLen, 1);
+        vacm_getViewEntry(newViewName, newViewSubtree, viewSubtreeLen,
+                          VACM_MODE_IGNORE_MASK);
     free(newViewName);
     free(newViewSubtree);
 
@@ -2351,7 +2371,7 @@ write_vacmViewStatus(int action,
          */
         vptr =
             vacm_getViewEntry(newViewName, newViewSubtree, viewSubtreeLen,
-                              1);
+                              VACM_MODE_IGNORE_MASK);
 
         if (vptr != NULL) {
             if (long_ret == RS_CREATEANDGO || long_ret == RS_CREATEANDWAIT) {
@@ -2396,7 +2416,7 @@ write_vacmViewStatus(int action,
 
         vptr =
             vacm_getViewEntry(newViewName, newViewSubtree, viewSubtreeLen,
-                              1);
+                              VACM_MODE_IGNORE_MASK);
 
         if (vptr != NULL) {
             if (long_ret == RS_CREATEANDGO || long_ret == RS_ACTIVE) {
@@ -2422,7 +2442,7 @@ write_vacmViewStatus(int action,
 
         vptr =
             vacm_getViewEntry(newViewName, newViewSubtree, viewSubtreeLen,
-                              1);
+                              VACM_MODE_IGNORE_MASK);
 
         if (vptr != NULL) {
             if (long_ret == RS_DESTROY) {
@@ -2440,7 +2460,7 @@ write_vacmViewStatus(int action,
                            (oid **) & newViewSubtree, &viewSubtreeLen);
 
             vptr = vacm_getViewEntry(newViewName, newViewSubtree,
-                                     viewSubtreeLen, 1);
+                                     viewSubtreeLen, VACM_MODE_IGNORE_MASK);
 
             if (vptr != NULL) {
                 vacm_destroyViewEntry(newViewName, newViewSubtree,

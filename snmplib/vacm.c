@@ -294,11 +294,12 @@ vacm_parse_config_group(const char *token, char *line)
 
 struct vacm_viewEntry *
 vacm_getViewEntry(const char *viewName,
-                  oid * viewSubtree, size_t viewSubtreeLen, int ignoreMask)
+                  oid * viewSubtree, size_t viewSubtreeLen, int mode)
 {
     struct vacm_viewEntry *vp, *vpret = NULL;
     char            view[VACMSTRINGLEN];
     int             found, glen;
+    int count=0;
 
     glen = (int) strlen(viewName);
     if (glen < 0 || glen >= VACM_MAX_STRING)
@@ -312,7 +313,7 @@ vacm_getViewEntry(const char *viewName,
             int             oidpos;
             found = 1;
 
-            if (!ignoreMask) {
+            if (mode != VACM_MODE_IGNORE_MASK) {  /* check the mask */
                 for (oidpos = 0;
                      found && oidpos < (int) vp->viewSubtreeLen - 1;
                      oidpos++) {
@@ -334,19 +335,26 @@ vacm_getViewEntry(const char *viewName,
                  * the previous or (equal and lexicographically greater
                  * than the previous). 
                  */
-                if (vpret == NULL
-                    || vp->viewSubtreeLen > vpret->viewSubtreeLen
-                    || (vp->viewSubtreeLen == vpret->viewSubtreeLen
-                        && snmp_oid_compare(vp->viewSubtree + 1,
-                                            vp->viewSubtreeLen - 1,
-                                            vpret->viewSubtree + 1,
-                                            vpret->viewSubtreeLen - 1) >
-                        0))
+                count++;
+                if (mode == VACM_MODE_CHECK_SUBTREE) {
                     vpret = vp;
+                } else if (vpret == NULL
+                           || vp->viewSubtreeLen > vpret->viewSubtreeLen
+                           || (vp->viewSubtreeLen == vpret->viewSubtreeLen
+                               && snmp_oid_compare(vp->viewSubtree + 1,
+                                                   vp->viewSubtreeLen - 1,
+                                                   vpret->viewSubtree + 1,
+                                                   vpret->viewSubtreeLen - 1) >
+                               0)) {
+                    vpret = vp;
+                }
             }
         }
     }
     DEBUGMSGTL(("vacm:getView", ", %s\n", (vpret) ? "found" : "none"));
+    if (mode == VACM_MODE_CHECK_SUBTREE && count > 1) {
+        return NULL;
+    }
     return vpret;
 }
 
