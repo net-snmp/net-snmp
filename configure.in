@@ -1179,7 +1179,7 @@ if test $cross_compiling = yes; then
   if test $with_endianness = "big"; then
     AC_DEFINE(WORDS_BIGENDIAN)
   elif test -z $with_endianness; then
-    AC_MSG_ERROR([You are cross-compiling, but you have not specified the target's endianness]);
+    AC_MSG_ERROR([You are cross-compiling, but you have not specified the target's endianness])
   fi
 else
   if test $with_endianness; then
