@@ -54,6 +54,10 @@
 
 #include <net-snmp/agent/mib_module_config.h>
 
+#ifdef USING_AGENTX_PROTOCOL_MODULE
+#include "agentx/protocol.h"
+#endif
+
 struct trap_sink {
     netsnmp_session *sesp;
     struct trap_sink *next;
@@ -688,6 +692,7 @@ netsnmp_send_traps(int trap, int specific,
         if (sink->version == SNMP_VERSION_1) {
             send_trap_to_sess(sink->sesp, template_v1pdu);
         } else {
+            template_v2pdu->command = sink->pdutype;
             send_trap_to_sess(sink->sesp, template_v2pdu);
         }
     }
@@ -721,6 +726,8 @@ void
 send_trap_to_sess(netsnmp_session * sess, netsnmp_pdu *template_pdu)
 {
     netsnmp_pdu    *pdu;
+    netsnmp_pdu    *response;
+    int            result;
 
     if (!sess || !template_pdu)
         return;
@@ -729,15 +736,24 @@ send_trap_to_sess(netsnmp_session * sess, netsnmp_pdu *template_pdu)
                 template_pdu->command, sess->version));
 
     if (sess->version == SNMP_VERSION_1 &&
-        (template_pdu->command == SNMP_MSG_TRAP2 ||
-         template_pdu->command == SNMP_MSG_INFORM))
+        (template_pdu->command != SNMP_MSG_TRAP))
         return;                 /* Skip v1 sinks for v2 only traps */
     template_pdu->version = sess->version;
     pdu = snmp_clone_pdu(template_pdu);
     pdu->sessid = sess->sessid; /* AgentX only ? */
-    if (snmp_send(sess, pdu) == 0) {
+
+    if ( template_pdu->command == SNMP_MSG_INFORM
+#ifdef USING_AGENTX_PROTOCOL_MODULE
+         || template_pdu->command == AGENTX_MSG_NOTIFY
+#endif
+       ) {
+        result = snmp_synch_response(sess, pdu, &response);
+        result = !result;	/* XXX - different return code :-( */
+    } else
+        result = snmp_send(sess, pdu);
+    if (result == 0) {
         snmp_sess_perror("snmpd: send_trap", sess);
-        snmp_free_pdu(pdu);
+        /* snmp_free_pdu(pdu); */
     } else {
         snmp_increment_statistic(STAT_SNMPOUTTRAPS);
         snmp_increment_statistic(STAT_SNMPOUTPKTS);
