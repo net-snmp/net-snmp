@@ -75,6 +75,7 @@ TABLE OF CONTENTS
    Why aren't my mib files read in any more?
    I'm getting answers, but they're all numbers. Why?
    The parser doesn't handle comments properly. Why not?
+   How do I replace MIB values with new ones ?
    How can I get more information about these MIB file problems?
    What's this about "too many imported symbols"?
    How do I compile with 'gcc' instead of 'cc'?
@@ -1465,6 +1466,48 @@ The parser doesn't handle comments properly. Why not?
   this is not strictly legal, and the offending MIB file should really be
   corrected.
 
+
+How do I replace MIB values with new ones ?
+------------------------------------------------------------
+
+  The UCD parser generally takes the first definition it sees for each
+  object in the MIB hierarchy.   Even if you specify your file to be read
+  first, if the IMPORTS clauses reference a MIB with competing objects,
+  those objects will be parsed first !
+
+  When specifying the Replace MIB command-line option (-PR), the parser
+  will use definitions sourced from the most recent MIB file.
+  The parser will replace MIB objects when the sub-identifier and name match.
+
+  Caution: Using Replace MIB, there is NO guarantee that the resulting
+  MIB tree will be correct.  Other MIB objects matching the name but
+  not the sub-identifier will persist.  Sub-hierarchies may be reparented.
+  In particular, random access searching [see man 1 snmpcmd]
+  may give unexpected result.
+  The Replace MIB option is experimental, buyer beware, carpe diem, etc.
+
+  Here are a few considerations to help you obtain good results.
+  These hold true even if you never use the Replace MIB feature.
+  Your suggestions for improvement are welcomed.
+
+    1. The parser searches the specified directories and attempt
+       to parse every file whose path does not begin with "." (period).
+       Remove (or rename) older MIB files from these directories.
+       Rename "README" to ".README" , etc.
+
+    2. Hint: the parser's module list is in LIFO order. You may see better
+       results if the directory with the most correct MIB files is
+       specified last in the MIBDIRS environment.
+
+    3. Constrain the parser to not read in default MIB files by setting
+       the MIBS environment to the environment separator character
+       [semi-colon on win32, colon everywhere else].
+
+    4. The MIBFILES environment can specify the path of the new MIB file.
+
+  If you grok programmer-speak, invoke snmp_set_mib_parse_replace_objects
+  to enable or disable the Replace MIB feature, then invoke read_mib
+  specifying the MIB file name.  Then disable Replace MIB feature.
 
 
 How can I get more information about these MIB file problems?
