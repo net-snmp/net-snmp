@@ -460,14 +460,16 @@ netsnmp_cache_helper_handler(netsnmp_mib_handler * handler,
          */
         netsnmp_cache_check_and_reload(cache);
         netsnmp_cache_reqinfo_insert(cache, reqinfo, reginfo->handlerName);
-        break;
+        /* next handler called automatically - 'AUTO_NEXT' */
+        return SNMP_ERR_NOERROR;
 
     case MODE_SET_RESERVE2:
     case MODE_SET_FREE:
     case MODE_SET_ACTION:
     case MODE_SET_UNDO:
         netsnmp_assert(netsnmp_cache_is_valid(reqinfo, reginfo->handlerName));
-        break;
+        /* next handler called automatically - 'AUTO_NEXT' */
+        return SNMP_ERR_NOERROR;
 
         /*
          * A (successful) SET request wouldn't typically trigger a reload of
@@ -480,14 +482,18 @@ netsnmp_cache_helper_handler(netsnmp_mib_handler * handler,
             cache->free_cache(cache, cache->magic);
             cache->valid = 0;
         }
-        break;
+        /* next handler called automatically - 'AUTO_NEXT' */
+        return SNMP_ERR_NOERROR;
 
     default:
         snmp_log(LOG_WARNING, "cache_handler: Unrecognised mode (%d)\n",
                  reqinfo->mode);
+        netsnmp_set_all_requests_error(reqinfo, requests,
+                                       SNMP_ERR_GENERR);
+        return SNMP_ERR_GENERR;
     }
-
-    return SNMP_ERR_NOERROR;
+    netsnmp_set_all_requests_error(reqinfo, requests, SNMP_ERR_GENERR);
+    return SNMP_ERR_GENERR;     /* should never get here */
 }
 
 static void
