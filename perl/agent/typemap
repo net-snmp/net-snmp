@@ -1,4 +1,4 @@
 TYPEMAP
-handler_registration *					T_PTROBJ
-request_info *						T_PTROBJ
+netsnmp_handler_registration *				T_PTROBJ
+netsnmp_request_info *					T_PTROBJ
 const char *						T_PV
