@@ -1,5 +1,8 @@
 /* config.h:  a general config file */
 
+/* Define IN_UCD_SNMP_SOURCE if compiling inside the ucd-snmp source tree */
+#define IN_UCD_SNMP_SOURCE 1
+
 /* Our assigned enterprise number */
 #define ENTERPRISE_NUMBER 2021
 

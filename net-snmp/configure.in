@@ -97,7 +97,7 @@ AC_ARG_WITH(opaque-special-types,
 
 AC_ARG_WITH(mibdirs,
 [  --with-mibdirs=\"dir1:dir2:\"     Default directories to look for mibs.
-                                    (Default: DATADIR/snmp/mibs)],
+                                    (Default: $HOME/.snmp/mibs:DATADIR/snmp/mibs)],
     [DEFAULT_MIBDIRS="$with_mibdirs"
     AC_DEFINE_UNQUOTED(DEFAULT_MIBDIRS,"$with_mibdirs")])
 
@@ -408,7 +408,7 @@ done
 AC_DEFINE_UNQUOTED(SNMPSHAREPATH,"$SNMPSHAREPATH")
 
 if test "x$DEFAULT_MIBDIRS" = "x"; then
-  AC_DEFINE_UNQUOTED(DEFAULT_MIBDIRS,"$SNMPSHAREPATH/mibs")
+  AC_DEFINE_UNQUOTED(DEFAULT_MIBDIRS,"\$HOME/.snmp/mibs:$SNMPSHAREPATH/mibs")
 fi
 
 SNMPCONFPATH=""
