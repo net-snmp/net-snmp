@@ -24,6 +24,7 @@ EXPORTS
 	asn_build_bitstring
 	asn_parse_unsigned_int64
 	asn_build_unsigned_int64
+	mib_to_asn_type
 	MDbegin
 	MDupdate
 	print_mib
@@ -100,7 +101,9 @@ EXPORTS
 	snmp_clone_pdu
 	snmp_clone_mem
 	snmp_set_var_value
+	snmp_set_var_typed_value
 	snmp_set_var_objid
+	snmp_replace_var_types
 	snmp_api_errstring
 	snmp_errstring
 	snmp_set_detail
@@ -149,6 +152,8 @@ EXPORTS
 	read_config_store
 	read_config_read_octet_string
 	read_config_save_octet_string
+	read_config_read_memory
+	read_config_read_objid
 	free_config
 	skip_white
 	skip_not_white
@@ -165,6 +170,8 @@ EXPORTS
 	debugmsg_hex
 	debugmsg_hextli
 	debugmsgtoken
+	debugmsg_var
+	debugmsg_oidrange
 	debug_register_tokens
 	generate_Ku
 	uptime_string
@@ -172,6 +179,7 @@ EXPORTS
 	dump_chunk
 	init_callbacks
 	snmp_register_callback
+	snmp_unregister_callback
 	snmp_call_callbacks
 	snmp_count_callbacks
 	snmp_callback_available
@@ -233,6 +241,7 @@ EXPORTS
 	config_perror
 	config_pwarn
 	copy_word
+	copy_nword
 	calculate_time_diff
 	vacm_is_configured
 	vacm_createGroupEntry
@@ -277,16 +286,61 @@ EXPORTS
 	atime_newMarker
 	atime_setMarker
 	atime_ready
+	snmp_strcat
 	fprint_variable
 	sprint_realloc_objid
-	snmp_strcat
+	sprint_realloc_asciistring
 	sprint_realloc_variable
+	sprint_realloc_value
+	sprint_realloc_by_type
 	snmp_realloc
       netsnmp_config
       netsnmp_config_remember
       snmp_hex_to_binary
       snmpv3_options
+      netsnmp_get_version
+      snmp_sess_transport
+      snmp_sess_pointer
+      snmp_decimal_to_binary
+	snmp_alarm_register
+	snmp_alarm_unregister
+      date_n_time
+	snmp_disable_log
+	snmp_enable_syslog_ident
+	netsnmp_sess_log_error
+	snmp_add
+	handle_long_opt
+	netsnmp_transport_free
+	netsnmp_tdomain_transport
+	netsnmp_tdomain_transport_oid
+	netsnmp_tdomain_support
+	netsnmpUDPDomain
+	netsnmp_snmpTCPDomain
+	netsnmp_create_data_list
+	netsnmp_add_list_data
+	netsnmp_get_list_data
+	netsnmp_free_list_data
+	netsnmp_free_all_list_data
+	netsnmp_oid_stash_add_data
+	netsnmp_oid_stash_get_data
+	build_oid
+	build_oid_noalloc
+	parse_one_oid_index
+	parse_oid_indexes
+	count_varbinds
+	count_varbinds_of_type
+	se_find_label_in_slist
+	se_find_value_in_slist
+	se_add_pair_to_slist
+	snmp_parse_args
+	netsnmp_callback_open
+	netsnmp_udp_agent_config_tokens_register
+	netsnmp_udp_parse_security
+	netsnmp_udp_getSecName
+	find_sec_mod
+	NetSnmpVersionInfo
 	Mib                     DATA
 	tree_head               DATA
 	snmp_errno              DATA
+;	NetSnmpVersionInfo      DATA
 
