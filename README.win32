@@ -316,11 +316,38 @@ Run win32\install-net-snmp.bat to install the programs on this computer.
 
 Some users may have better results compiling other packages that use
 the installed header files by removing the "mode_t" definition from
-net-snmp-config.h file under the INSTALL_BASE file hierarchy.
+net-snmp-config.h file in the installed directories.
 
+## sample output from install-net-snmp.bat
 
-Installing is complete.  You may want to create a compressed
-archive of the \usr hierarchy.
+NOTE: Directory already exist messages are normal. If you are
+      not building with OpenSSL, then DLL not found messages
+      are normal.
+
+C:\net-snmp-5.1.1>    win32\install-net-snmp
+Remember to run this script from the base of the source directory.
+Creating "c:\Program Files\Net-SNMP" sub-directories
+A subdirectory or file c:\Program Files\Net-SNMP already exists.
+A subdirectory or file c:\Program Files\Net-SNMP\bin already exists.
+A subdirectory or file c:\Program Files\Net-SNMP\conf already exists.
+A subdirectory or file c:\Program Files\Net-SNMP\lib already exists.
+A subdirectory or file c:\Program Files\Net-SNMP\mibs already exists.
+A subdirectory or file c:\Program Files\Net-SNMP\include already exists.
+A subdirectory or file c:\Program Files\Net-SNMP\include\net-snmp already exists
+.
+A subdirectory or file c:\Program Files\Net-SNMP\include\ucd-snmp already exists
+.
+Copying MIB files to "c:\Program Files\Net-SNMP"\mibs
+Copying compiled programs to "c:\Program Files\Net-SNMP"\bin
+Copying link libraries to "c:\Program Files\Net-SNMP"\lib
+Copying header files to "c:\Program Files\Net-SNMP"\include
+Deleting debugging files from "c:\Program Files\Net-SNMP"
+Copying DLL files to "c:\Program Files\Net-SNMP"
+The system cannot find the file specified.
+Done copying files to "c:\Program Files\Net-SNMP"
+C:\net-snmp-5.1.1>
+
+## END sample output from install-net-snmp.bat
 
 
 ***************************************************************************
