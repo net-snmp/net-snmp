@@ -106,3 +106,12 @@
 #ifdef USING_AGENTX_MODULE
   if (should_init("agentx_config")) init_agentx_config();
 #endif
+
+#ifdef USING_EXAMPLES_EXAMPLE_MODULE
+  if (should_init("example")) init_example();
+#endif
+
+#ifdef USING_EXAMPLES_UCDDEMOPUBLIC_MODULE
+  if (should_init("ucdDemoPublic")) init_ucdDemoPublic();
+#endif
+
