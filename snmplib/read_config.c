@@ -242,6 +242,25 @@ unregister_app_config_handler(const char *token)
   unregister_config_handler( NULL, token );
 }
 
+void 
+unregister_all_config_handlers()
+{
+  struct config_files *ctmp, *save;
+  struct config_line *ltmp;
+
+  /* Keep using config_files until there are no more! */
+  for (ctmp = config_files; ctmp;) {
+      for (ltmp = ctmp->start; ltmp; ltmp = ctmp->start) {
+          unregister_config_handler (ctmp->fileHeader, ltmp->config_token);
+      }
+      free (ctmp->fileHeader);
+      save = ctmp->next;
+      free (ctmp);
+      ctmp = save;
+      config_files = save;
+  }
+}
+
 #ifdef TESTING
 void print_config_handlers (void)
 {

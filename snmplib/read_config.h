@@ -67,6 +67,7 @@ struct config_line *register_app_premib_handler (const char *,
                                              const char *);
 void unregister_config_handler (const char *, const char *);
 void unregister_app_config_handler (const char *);
+void unregister_all_config_handlers(void);
 void read_config_print_usage(const char *lead);
 char *read_config_save_octet_string(char *saveto, u_char *str, size_t len);
 char *read_config_read_octet_string(char *readfrom, u_char **str, size_t *len);

@@ -274,6 +274,7 @@ void print_ascii_dump (FILE *);
 int read_objid (const char *, oid *, size_t *);
 void register_mib_handlers (void);
 void init_mib (void);
+void shutdown_mib (void);
 void print_variable (oid *, size_t, struct variable_list *);
 void fprint_variable (FILE *, oid *, size_t, struct variable_list *);
 void sprint_variable (char *, oid *, size_t, struct variable_list *);

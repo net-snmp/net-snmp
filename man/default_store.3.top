@@ -17,6 +17,7 @@ int ds_register_config(u_char type, const char *ftype, const char *token,
                        int storeid, int which);
 int ds_register_premib(u_char type, const char *ftype, const char *token,
                        int storeid, int which);
+void ds_shutdown(void);
 .fi
 .SH DESCRIPTION
 The purpose of the default storage is three-fold:

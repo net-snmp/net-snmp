@@ -211,6 +211,7 @@ struct tree *read_module (const char *);
 struct tree *read_mib (const char *);
 struct tree *read_all_mibs (void);
 int unload_module(const char *name);
+void unload_all_mibs(void);
 void init_mib_internals (void);
 int  add_mibdir (const char *);
 void add_module_replacement (const char *, const char *, const char *, int);
