@@ -415,8 +415,8 @@ void snmp_mib_toggle_options_usage(char *lead, FILE *outf) {
           lead, ((mib_parse_label)?"dis":""));
   fprintf(outf, "%s    c: %sallow the usage of \"--\" to terminate comments.\n",
           lead, ((mib_comment_term)?"dis":""));
-  fprintf(outf, "%s    d: %s save the descriptions of the mib objects.\n",
-          lead, ((save_mib_descriptions)?"don't":""));
+  fprintf(outf, "%s    d: %ssave the descriptions of the mib objects.\n",
+          lead, ((save_mib_descriptions)?"don't ":""));
   fprintf(outf, "%s    w: Enable mib warnings of MIB symbols conflicts\n",
           lead);
   fprintf(outf, "%s    W: Enable detailed warnings of MIB symbols conflicts\n",
