@@ -36,7 +36,6 @@ gethostbyaddr().
 .br
 .IP IPADDRESS
 The IP address of the host that sent the trap.
-.br
 .IP VARBINDS
 A list of variable bindings that describe the trap and the variables
 enclosed in it.  The first token on the line, up until the space, in
@@ -47,8 +46,16 @@ possible exception of the last one, are the variable bindings
 contained within the trap.  For SNMPv1 traps, the very last OID will
 be the ...snmpTrap.snmpTrapEnterprise OID and its value.  Essentially, 
 SNMPv1 traps have been converted to the SNMPv2 trap PDU type by the
-method described in the SNMPv1/SNMPv2 coexistence document, for which
-I forget the appropriate RFC number.
+method described in the SNMPv1/SNMPv2/SNMPv3 coexistence document (RFC2576).
+.br
+.IP Example:
+A traptoemail script has been included in the net-snmp package that
+can be used as a trap handle directive:
+.br
+.RS
+.P
+traphandle /usr/bin/perl BINDIR/traptoemail -s mysmtp.somewhere.com -f admin@somewhere.com me@somewhere.com
+.RE
 .RE
 .IP "createUser username (MD5|SHA) authpassphrase [DES]"
 See the snmpd.conf manual page for a description of how to create
