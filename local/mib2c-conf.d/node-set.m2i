@@ -29,6 +29,11 @@
  * expressed in the mib syntax (for example, a requirement that
  * is detailed in the description for an object).
  *
+@if ("$m2c_data_context" ne "generated") && ($m2c_node_needlength == 1)@
+ * Since you aren't using a generated data context, you also need to
+ * check the length, to make sure you don't overflow your storage space.
+ *
+@end@
  * You should check that the requested change between the undo value and the
  * new value is legal (ie, the transistion from one value to another
  * is legal).
@@ -46,6 +51,9 @@
  *
  * The following checks have already been done for you:
  *    The syntax is $node.type
+@if ("$m2c_data_context" eq "generated") && ($m2c_node_needlength == 1)@
+ *    The length is < sizeof($m2c_data_item$node).
+@end@
 @if $node.enums == 1@
  *    The value is one of $m2c_evals
 @elsif $node.ranges == 1@
@@ -179,10 +187,9 @@ ${node}_set( ${context}_rowreq_ctx *rowreq_ctx, $m2c_node_param_val )
 
 @    if $m2c_node_skip_mapping != 1@
 @        include generic-value-map-reverse.m2i@
-@    end@
-@    if ($node.enums != 1) || ("$node.perltype" ne "BITS")@
+@    else@
 @        include generic-ctx-set.m2i@
-@    end@ # ! enums & bits
+@    end@
 @end@ # no syntax include
     return MFD_SUCCESS;
 } /* ${node}_set */
