@@ -15,7 +15,7 @@ the ChangeLog file for a more detailed listing of changes/bug fixes.
 
  New:
     - dynamic library support:  configure with --enable-shared.
-    - the beginnings of of Perl/Tk/SNMP mib browser (see local/tkmib).
+    - the beginnings of a Perl/Tk/SNMP mib browser: tkmib
     - all applications support -R for random oid-name lookups.
     - default mib list changes when you add or remove agent mib-groups.
     - debugging in the agent can be turned on and off using snmpsets.
