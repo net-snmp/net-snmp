@@ -237,6 +237,9 @@
 /* Define if you have the <io.h> header file.  */
 #undef HAVE_IO_H
 
+/* Define if you have the <ioctls.h> header file.  */
+#undef HAVE_IOCTLS_H
+
 /* Define if you have the <kstat.h> header file.  */
 #undef HAVE_KSTAT_H
 
