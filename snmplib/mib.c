@@ -1242,13 +1242,13 @@ int read_objid(const char *input,
 	*out_len = 0;
 	return(0);
     }
-    if ((*out_len =
+    if ((int)(*out_len =
 	 parse_subtree(root, input, output, out_len)) <= 0)
     {
 	SET_SNMP_ERROR(*out_len);
 	return (0);
     }
-    *out_len += output - op;
+    (*out_len) += output - op;
 
     return (1);
 }
@@ -1284,14 +1284,16 @@ parse_subtree(struct tree *subtree,
 	 * Read the number, then try to find it in the subtree.
 	 */
 	while (isdigit(*input)) {
+	    *to++ = *input;
 	    subid *= 10;
 	    subid += *input++ - '0';
 	}
+	*to = '\0';
+
 	for (tp = subtree; tp; tp = tp->next_peer) {
 	    if (tp->subid == subid)
 		goto found;
 	}
-	tp = NULL;
     }
     else {
 	/*
@@ -1312,14 +1314,14 @@ parse_subtree(struct tree *subtree,
 		goto found;
 	    }
 	}
+    }
 
-	/*
-	 * If we didn't find the entry, punt...
-	 */
-	if (tp == NULL) {
-	    snmp_set_detail(buf);
-	    return (SNMPERR_BAD_SUBID);
-	}
+    /*
+     * If we didn't find the entry, punt...
+     */
+    if (tp == NULL) {
+	snmp_set_detail(buf);
+	return (SNMPERR_BAD_SUBID);
     }
 
 found:
@@ -1328,18 +1330,21 @@ found:
 	return (SNMPERR_MAX_SUBID);
     }
 
-    if ((*out_len)-- <= 0){
+    if ((int)*out_len <= 0){
 	return (SNMPERR_LONG_OID);
     }
+
+    (*out_len)--;
     *output++ = subid;
 
     if (*input != '.')
 	return (1);
+
     *out_len = parse_subtree(tp ? tp->child_list : NULL,
                              ++input, output, out_len);
-    if (*out_len <= 0)
+    if ((int)*out_len <= 0)
 	return (*out_len);
-    return (++*out_len);
+    return (++(*out_len));
 }
 
 char *
