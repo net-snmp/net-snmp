@@ -5,7 +5,7 @@
 #ifndef _MIBGROUP_HRDEVICE_H
 #define _MIBGROUP_HRDEVICE_H
 
-extern void	init_hrdevice();
+extern void	init_hr_device();
 extern u_char	*var_hrdevice();
 
 

@@ -5,7 +5,7 @@
 #ifndef _MIBGROUP_HRSWINST_H
 #define _MIBGROUP_HRSWINST_H
 
-extern void	init_hrswinst();
+extern void	init_hr_swinst();
 extern u_char	*var_hrswinst();
 
 

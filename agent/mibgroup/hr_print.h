@@ -5,7 +5,7 @@
 #ifndef _MIBGROUP_HRPRINT_H
 #define _MIBGROUP_HRPRINT_H
 
-extern void	init_hrprint();
+extern void	init_hr_print();
 extern u_char	*var_hrprint();
 
 

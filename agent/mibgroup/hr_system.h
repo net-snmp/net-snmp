@@ -5,7 +5,7 @@
 #ifndef _MIBGROUP_HRSYSTEM_H
 #define _MIBGROUP_HRSYSTEM_H
 
-extern void	init_hrsys();
+extern void	init_hr_system();
 extern u_char	*var_hrsys();
 
 
