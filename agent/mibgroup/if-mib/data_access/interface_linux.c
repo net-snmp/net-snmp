@@ -17,9 +17,20 @@
 #endif
 
 #include <net-snmp/data_access/interface.h>
+#include "if-mib/data_access/interface.h"
 #include "interface_ioctl.h"
 
-static unsigned int _get_if_speed(int fd, netsnmp_interface_entry *entry);
+unsigned int
+netsnmp_access_interface_linux_get_if_speed(int fd, const char *name);
+
+void
+netsnmp_access_interface_arch_init(void)
+{
+    /*
+     * nothing to do
+     */
+}
+
 
 /*
  *
@@ -45,7 +56,7 @@ netsnmp_access_interface_container_arch_load(netsnmp_container* container,
     unsigned long long snd_pkt, snd_oct, snd_err, snd_drop, coll;
     netsnmp_interface_entry *entry = NULL;
 
-    DEBUGMSGTL(("access:interface", "ifcontainer_arch_load (flags %p)\n",
+    DEBUGMSGTL(("access:interface:container:arch", "load (flags %p)\n",
                 load_flags));
 
     if (NULL == container) {
@@ -261,6 +272,8 @@ netsnmp_access_interface_container_arch_load(netsnmp_container* container,
 
         netsnmp_access_interface_ioctl_flags_get(fd, entry);
 
+        netsnmp_access_interface_ioctl_mtu_get(fd, entry);
+
         /*
          * Zero speed means link problem.
          * -i'm not sure this is always true...
@@ -286,6 +299,24 @@ netsnmp_access_interface_container_arch_load(netsnmp_container* container,
     close(fd);
     return 0;
 }
+
+int
+netsnmp_arch_set_admin_status(netsnmp_interface_entry * entry,
+                              int ifAdminStatus_val)
+{
+    int and_complement;
+    
+    DEBUGMSGTL(("access:interface:arch", "set_admin_status\n"));
+
+    if(IFADMINSTATUS_UP == ifAdminStatus_val)
+        and_complement = 0; /* |= */
+    else
+        and_complement = 1; /* &= */
+
+    return netsnmp_access_interface_ioctl_flags_set(-1, entry,
+                                                    IFF_UP, and_complement);
+}
+
 
 /**
  * Determines network interface speed.
