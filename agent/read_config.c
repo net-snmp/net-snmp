@@ -80,6 +80,8 @@ void read_config(filename)
   if ((ifile = fopen(filename, "r")) == NULL) {
     fprintf(stderr, "snmpd: %s: %s\n", filename, strerror(errno));
     return;
+  } else {
+    DEBUGP("snmpd: Reading configuration %s\n", filename);
   }
 
   while (fgets(line, STRMAX, ifile) != NULL) 
