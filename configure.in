@@ -301,6 +301,8 @@ AC_CHECK_IFNET_FOR(if_noproto,IF_NOPROTO)
 AC_CHECK_IFNET_FOR(if_omcasts,IF_OMCASTS)
 AC_CHECK_IFNET_FOR(if_xname,IF_XNAME,no)
 AC_CHECK_IFNET_FOR(if_lastchange.tv_sec,IF_LASTCHANGE_TV_SEC)
+AC_CHECK_IFNET_FOR(if_obytes,IF_OBYTES)
+AC_CHECK_IFNET_FOR(if_ibytes,IF_IBYTES)
 
 AC_CACHE_CHECK(if you have run configure before, ac_cv_have_warned,
 [
