@@ -687,7 +687,13 @@
  *    static NETSNMP_INLINE function(int parm) { return parm -1; }
  *
  */
-#define NETSNMP_ENABLE_INLINE 1
+#undef NETSNMP_BROKEN_INLINE
+#ifdef NETSNMP_BROKEN_INLINE
+#   define NETSNMP_ENABLE_INLINE 0
+#else
+#   define NETSNMP_ENABLE_INLINE 1
+#endif
+#endif
 
 #include SYSTEM_INCLUDE_FILE
 #include MACHINE_INCLUDE_FILE
