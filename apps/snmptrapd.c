@@ -23,18 +23,35 @@ WHETHER IN AN ACTION OF CONTRACT, NEGLIGENCE OR OTHER TORTIOUS ACTION,
 ARISING OUT OF OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS
 SOFTWARE.
 ******************************************************************/
+#include <config.h>
+
 #include <sys/types.h>
 #include <sys/socket.h>
-#ifdef sun
+#if HAVE_SYS_SOCKIO_H
 #include <sys/sockio.h>
 #endif
+#if HAVE_NETINET_IN_H
 #include <netinet/in.h>
+#endif
 #include <stdio.h>
-#include <sys/time.h>
+#if TIME_WITH_SYS_TIME
+# include <sys/time.h>
+# include <time.h>
+#else
+# if HAVE_SYS_TIME_H
+#  include <sys/time.h>
+# else
+#  include <time.h>
+# endif
+#endif
 #include <sys/param.h>
 #include <errno.h>
+#if HAVE_SYSLOG_H
 #include <syslog.h>
+#endif
+#if HAVE_SYS_IOCTL_H
 #include <sys/ioctl.h>
+#endif
 #include <net/if.h>
 
 #include "snmp.h"

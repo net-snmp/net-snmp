@@ -31,10 +31,10 @@ SOFTWARE.
  * is provided ``as is'' without express or implied warranty.
  */
 
-#ifdef SVR4
+#include <config.h>
+
+#if STDC_HEADERS
 #include <string.h>
-#else
-#include <strings.h>
 #endif
 
 #include <stdio.h>
@@ -42,7 +42,9 @@ SOFTWARE.
 #include <sys/param.h>
 #include <sys/socket.h>
 
+#if HAVE_NETINET_IN_H
 #include <netinet/in.h>
+#endif
 
 #include <netdb.h>
 

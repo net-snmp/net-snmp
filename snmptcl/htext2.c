@@ -47,11 +47,16 @@
  *
  */
 
+#include <config.h>
+
 #include <stdio.h>
+#if STDC_HEADERS
 #include <stdlib.h>
+#endif
+#if STDC_HEADERS
 #include <string.h>
+#endif
 #include <errno.h>
-#include <stdlib.h>
 #include <tcl.h>
 #include <tk.h>
 #include <X11/Xutil.h>

@@ -2,13 +2,11 @@
 # May need an ANSI compiler for extensible.c depending on whether or
 # not SECURITYEXCEPTIONS is defined in config.h 
 
-# HPUX compliers (and most others)
-CC = cc
-CFLAGS=-g
+CFLAGS=@CFLAGS@
+CPPFLAGS=@CPPFLAGS@ -I../.. -I../../snmplib
+LDFLAGS=@LDFLAGS@
 
-# gcc compilers (recomended)
-#CC = gcc
-#CFLAGS=-g
+CC = @CC@ $(CPPFLAGS)
 
 OBJS = misc.o read_config.o extensible.o hpmibs.o proc.o exec.o versioninfo.o 
 SRCS = misc.c read_config.c extensible.c hpmibs.c proc.c exec.c versioninfo.c 
@@ -20,14 +18,6 @@ TAGS: $(SRCS)
 
 clean:
 	rm -f *.o
-
-extensible.o: ../../config.h extensible.c struct.h mibdefs.h mibincl.h
-hpmibs.o: ../../config.h struct.h hpmibs.c mibdefs.h mibincl.h
-read_config.o: read_config.c struct.h ../../config.h
-misc.o: misc.c struct.h ../../config.h
-versioninfo.o: mibdefs.h mibincl.h ../../config.h struct.h versioninfo.c
-proc.o: ../../config.h struct.h mibdefs.h mibincl.h proc.c
-exec.o: ../../config.h struct.h mibdefs.h mibincl.h exec.c
 
 # Warning:  ugly make hack
 tmp.make:
@@ -41,3 +31,36 @@ tmp.make:
 	close(X);' ;\
 	mv -f tmp.make versioninfo.c ;\
 	fi
+
+depend: 
+	makedepend $(CPPFLAGS) *.c
+	perl -n -i.bak -e ' if (/^# DO NOT DELETE THIS LINE/) {$$doit=1;} if ($$doit == 1) {s#/usr/include/[^\s]+##g ; print if (! /^\w+\.o:\s*$$/);} else {print;}' Makefile
+
+# DO NOT DELETE THIS LINE -- make depend depends on it.
+
+exec.o: ../../config.h ../../agent/extensible/struct.h mibincl.h
+exec.o:  ../../snmplib/asn1.h
+exec.o: ../../snmplib/snmp_impl.h ../snmp_vars.h ../var_struct.h
+exec.o: ../../snmplib/snmp.h mibdefs.h
+extensible.o: ../../config.h ../../agent/extensible/struct.h
+extensible.o:   mibincl.h
+extensible.o:  ../../snmplib/asn1.h
+extensible.o: ../../snmplib/snmp_impl.h ../snmp_vars.h ../var_struct.h
+extensible.o: ../../snmplib/snmp.h mibdefs.h
+hpmibs.o: ../../config.h ../../agent/extensible/struct.h
+hpmibs.o:  mibincl.h 
+hpmibs.o: ../../snmplib/asn1.h ../../snmplib/snmp_impl.h ../snmp_vars.h
+hpmibs.o: ../var_struct.h ../../snmplib/snmp.h mibdefs.h
+misc.o: ../../config.h ../../agent/extensible/struct.h 
+misc.o:  mibincl.h ../../snmplib/asn1.h
+misc.o: ../../snmplib/snmp_impl.h ../snmp_vars.h ../var_struct.h
+misc.o: ../../snmplib/snmp.h
+proc.o: ../../config.h ../../agent/extensible/struct.h mibincl.h
+proc.o:  ../../snmplib/asn1.h
+proc.o: ../../snmplib/snmp_impl.h ../snmp_vars.h ../var_struct.h
+proc.o: ../../snmplib/snmp.h mibdefs.h
+read_config.o: ../../config.h ../../agent/extensible/struct.h
+versioninfo.o: ../../config.h ../../agent/extensible/struct.h
+versioninfo.o:  mibdefs.h mibincl.h
+versioninfo.o: ../../snmplib/asn1.h ../../snmplib/snmp_impl.h ../snmp_vars.h
+versioninfo.o: ../var_struct.h ../../snmplib/snmp.h

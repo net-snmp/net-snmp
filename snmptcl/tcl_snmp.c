@@ -7,11 +7,24 @@
  * 920324 0.02
  */
 
+#include <config.h>
+
 #include <stdio.h>
 #include <malloc.h>
 #include <sys/types.h>
-#include <sys/time.h>
+#if TIME_WITH_SYS_TIME
+# include <sys/time.h>
+# include <time.h>
+#else
+# if HAVE_SYS_TIME_H
+#  include <sys/time.h>
+# else
+#  include <time.h>
+# endif
+#endif
+#if HAVE_NETINET_IN_H
 #include <netinet/in.h>
+#endif
 #include <netdb.h>
 
 

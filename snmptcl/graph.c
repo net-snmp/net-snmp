@@ -53,18 +53,29 @@
  *
  * 8) Account for roundoff error when calculating bar widths
  */
+
+#include <config.h>
+
 #include <stdio.h>
+#if STDC_HEADERS
 #include <stdlib.h>
+#endif
+#if STDC_HEADERS
 #include <string.h>
+#endif
 #include <math.h>
 #ifndef HUGE_VAL
+#if HAVE_LIMITS_H
 #include <limits.h>
 #endif
-#ifndef NO_ALLOCA
+#endif
+#ifdef HAVE_ALLOCA_H
 #include <alloca.h>
 #endif
 
+#if STDC_HEADERS
 #include <stdlib.h>
+#endif
 #include <tk.h>
 #include <tclHash.h>
 #include <X11/Xutil.h>
@@ -4080,8 +4091,16 @@ PSFont(f, dpy, fontPtr)
 
 #define MM_PER_INCH 25.4
 
-#include <time.h>
-#include <sys/time.h>
+#if TIME_WITH_SYS_TIME
+# include <sys/time.h>
+# include <time.h>
+#else
+# if HAVE_SYS_TIME_H
+#  include <sys/time.h>
+# else
+#  include <time.h>
+# endif
+#endif
 
 static void
 PSPreamble(graphPtr, options)

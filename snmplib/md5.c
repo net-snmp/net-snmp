@@ -34,16 +34,14 @@
 ** in each word are reversed).  If this is undesired a call to MDreverse(X) can
 ** reverse the bytes of X back into order after each call to MDupdate.
 */
-#define TRUE  1
-#define FALSE 0
-#if defined(hpux) || defined(SYSV) || defined(sun)
-#define LOWBYTEFIRST FALSE
-#else
-#define LOWBYTEFIRST TRUE
-#endif
+
+/* code uses WORDS_BIGENDIAN defined by configure now  -- WH 9/27/95 */
 
 /* Compile-time includes 
 */
+
+#include <config.h>
+
 #include <stdio.h>
 #include <sys/types.h>
 #include "md5.h"
@@ -146,8 +144,8 @@ MDblock(MDp,X)
 MDptr MDp;
 unsigned int *X;
 { 
-  register unsigned int tmp, A, B, C, D;
-#if LOWBYTEFIRST == FALSE
+  register unsigned int tmp, A, B, C, D;  /* hpux sysv sun */
+#ifdef WORDS_BIGENDIAN
   MDreverse(X);
 #endif
   A = MDp->buffer[0];

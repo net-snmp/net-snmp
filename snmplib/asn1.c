@@ -28,13 +28,17 @@ WHETHER IN AN ACTION OF CONTRACT, NEGLIGENCE OR OTHER TORTIOUS ACTION,
 ARISING OUT OF OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS
 SOFTWARE.
 ******************************************************************/
+#include <config.h>
+
 #ifdef KINETICS
 #include "gw.h"
 #endif
 
 #if (defined(unix) && !defined(KINETICS))
 #include <sys/types.h>
+#if HAVE_NETINET_IN_H
 #include <netinet/in.h>
+#endif
 #endif
 
 #ifdef vms

@@ -3,10 +3,17 @@
  *  13 Jun 91  wsak (wk0x@andrew) added mips support
  */
 
+#include <config.h>
+
 #include <sys/types.h>
+#if HAVE_UNISTD_H
+#include <unistd.h>
+#endif
 #include <stdio.h>
 #include <errno.h>
+#if HAVE_FCNTL_H
 #include <fcntl.h>
+#endif
 #include "asn1.h"
 #include "snmp_impl.h"
 
@@ -34,15 +41,11 @@ init_kmem(file)
     exit(1);
   }
   fcntl(mem,F_SETFD,1);
-#ifndef __alpha
-#ifdef hpux
-  swap = open("/dev/dmem",O_RDONLY);
-#else
-  swap = open("/dev/drum",0);
-#endif
+#ifdef DMEM_LOC
+  swap = open(DMEM_LOC,O_RDONLY);
   if (swap < 0){
-    fprintf(stderr, "cannot open ");
-    perror("/dev/drum");
+    fprintf(stderr, "cannot open %s\n",DMEM_LOC);
+    perror(DMEM_LOC);
     exit(1);
   }
   fcntl(swap,F_SETFD,1);

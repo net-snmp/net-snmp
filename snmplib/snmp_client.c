@@ -23,16 +23,25 @@ WHETHER IN AN ACTION OF CONTRACT, NEGLIGENCE OR OTHER TORTIOUS ACTION,
 ARISING OUT OF OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS
 SOFTWARE.
 ******************************************************************/
+#include <config.h>
+
 #include <sys/types.h>
+#if TIME_WITH_SYS_TIME
+# include <sys/time.h>
+# include <time.h>
+#else
+# if HAVE_SYS_TIME_H
+#  include <sys/time.h>
+# else
+#  include <time.h>
+# endif
+#endif
 #include <sys/param.h>
 #include <stdio.h>
-#include <netinet/in.h>
-#include <sys/time.h>
-#include <errno.h>
-#ifdef hpux
-/* needed for htonl funcs */
+#if HAVE_NETINET_IN_H
 #include <netinet/in.h>
 #endif
+#include <errno.h>
 
 #include "asn1.h"
 #include "snmp.h"
@@ -43,8 +52,6 @@ SOFTWARE.
 #include "context.h"
 #include "view.h"
 #include "acl.h"
-
-#include "../config.h"
 
 #ifndef BSD4_3
 #define BSD4_2

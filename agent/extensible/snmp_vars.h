@@ -1,6 +1,8 @@
 u_char *var_extensible_shell();
 u_char *var_extensible_relocatable();
+#if HAVE_FSTAB_H
 u_char *var_extensible_disk();
+#endif
 u_char *var_extensible_version();
 u_char *var_extensible_hp();
 u_char *var_extensible_lockd_test();
@@ -45,7 +47,6 @@ struct variable2 extensible_lockd_variables[] = {
 #endif
 
 #ifdef MEMMIBNUM
-#ifdef hpux
 struct variable2 extensible_mem_variables[] = {
   {MIBINDEX, INTEGER, RONLY, var_extensible_mem,1,{MIBINDEX}},
   {ERRORNAME, STRING, RONLY, var_extensible_mem, 1, {ERRORNAME }},
@@ -62,9 +63,8 @@ struct variable2 extensible_mem_variables[] = {
   {ERRORMSG, STRING, RONLY, var_extensible_mem, 1, {ERRORMSG }}
 };
 #endif
-#endif
 
-#ifdef DISKMIBNUM
+#if DISKMIBNUM && HAVE_FSTAB_H
 struct variable2 extensible_disk_variables[] = {
   {MIBINDEX, INTEGER, RONLY, var_extensible_disk, 1, {MIBINDEX}},
   {ERRORNAME, STRING, RONLY, var_extensible_disk, 1, {ERRORNAME}},

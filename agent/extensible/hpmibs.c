@@ -1,3 +1,7 @@
+/* HP specific stuff that OpenView recognizes */
+
+#include <config.h>
+
 #ifdef hpux
 #include <signal.h>
 #include <nlist.h>
@@ -8,7 +12,6 @@
 
 #include "mibincl.h"
 #include "mibdefs.h"
-#include "../../config.h"
 
 #define TRAPAGENT 128.120.57.92
 
@@ -25,7 +28,7 @@ int writeHP(action, var_val, var_val_type, var_val_len, statP, name, name_len)
   return SNMP_ERR_NOERROR;
 }
 
-  unsigned char *var_extensible_hp(vp, name, length, exact, var_len, write_method)
+unsigned char *var_extensible_hp(vp, name, length, exact, var_len, write_method)
     register struct variable *vp;
 /* IN - pointer to variable entry that points here */
     register oid	*name;
