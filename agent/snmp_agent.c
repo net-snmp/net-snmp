@@ -76,6 +76,7 @@ SOFTWARE.
 
 #ifdef USE_LIBWRAP
 #include <tcpd.h>
+#include <syslog.h>
 int             allow_severity = LOG_INFO;
 int             deny_severity = LOG_WARNING;
 #endif
