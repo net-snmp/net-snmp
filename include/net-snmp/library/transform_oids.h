@@ -21,7 +21,7 @@ extern oid      usmDESPrivProtocol[10]; /* == { 1,3,6,1,6,3,10,1,2,2 }; */
 #endif
 
 /* XXX: OIDs not defined yet */
-extern oid      usmAESPrivProtocol[10]; /* == { 1,3,6,1,6,3,10,1,2,4 };
+extern oid      usmAESPrivProtocol[10]; /* == { 1,3,6,1,6,3,10,1,2,4 }; */
 extern oid      *usmAES128PrivProtocol; /* backwards compat */
 
 #define USM_AUTH_PROTO_NOAUTH_LEN 10
