@@ -15,6 +15,7 @@
 #include <unistd.h>
 #endif
 #include <ctype.h>
+#include <sys/types.h>
 #if HAVE_NETINET_IN_H
 #include <netinet/in.h>
 #endif

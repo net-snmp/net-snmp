@@ -11,6 +11,7 @@
 #endif
 #include <math.h>
 #include <ctype.h>
+#include <sys/types.h>
 #if HAVE_NETINET_IN_H
 #include <netinet/in.h>
 #endif
@@ -261,7 +262,6 @@ static int getstruct __P((off_t, char *, off_t, int));
 extern int kmem, mem, swap;
 
 /* #include <sys/param.h> */
-/* #include <sys/types.h> */
 #include <sys/user.h>
 #include <sys/proc.h>
 /* #include <sys/tty.h> */
