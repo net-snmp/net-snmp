@@ -215,13 +215,9 @@ snmp_vlog (int priority, const char *format, va_list ap)
 {
   char buffer[LOGLENGTH];
   int length;
-#if HAVE_VSNPRINTF
   char *dynamic;
 
   length=vsnprintf(buffer, LOGLENGTH, format, ap);
-#else
-  length=vsprintf(buffer, format, ap);
-#endif
 
   if (length == 0) 
     return(0);		/* Empty string */
@@ -236,7 +232,6 @@ snmp_vlog (int priority, const char *format, va_list ap)
     return(0);
   }
 
-#if HAVE_VSNPRINTF
   dynamic=malloc(length+1);
   if (dynamic==NULL) {
     snmp_log_string(LOG_ERR, "Could not allocate memory for log-message\n");
@@ -247,13 +242,7 @@ snmp_vlog (int priority, const char *format, va_list ap)
   vsnprintf(dynamic, length+1, format, ap);
   snmp_log_string(priority, dynamic);
   free(dynamic);
-  return(0);
-
-#else
-  snmp_log_string(priority, buffer);
-  snmp_log_string(LOG_ERR, "Log-message too long!\n");
-  return(-3);
-#endif
+  return 0;
 }
 
 
