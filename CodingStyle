@@ -7,7 +7,7 @@ Indentation:
 
 We've adopted the following indent style:
 
-   indent -orig -nbc -bap
+   indent -orig -nbc -bap -nut
 
 If possible, please run all new code submitted to the project through
 the above command.  However, if sending a patch, please do *not* send
@@ -35,6 +35,7 @@ Briefly, here's a description of the style:
 		variable declarations lined up, and start in column 16
 		Procedure return type on a separate line to the procedure name
 		Four character basic and continuation line indent
+                No tabs used in the file, always use 8 spaces instead.
 		Continuation paramters lined up with opening parenthesis
 
 ----------------------------------------------------------------------
