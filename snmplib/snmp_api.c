@@ -112,6 +112,9 @@ static void init_snmp_session (void);
  * Globals.
  */
 #define PACKET_LENGTH	(8 * 1024)
+#ifndef SNMP_STREAM_QUEUE_LEN
+#define SNMP_STREAM_QUEUE_LEN  5
+#endif
 
 #ifndef BSD4_3
 #define BSD4_2
@@ -921,7 +924,13 @@ snmp_sess_open(struct snmp_session *in_session)
     }
 
     /* Set up connections */
-    sd = socket(isp->me.sa_family, SOCK_DGRAM, 0);
+    if ( session->flags & SNMP_FLAGS_STREAM_SOCKET ) {
+        if ( session->local_port != 0 )
+            session->flags |= SNMP_FLAGS_LISTENING;
+        sd = socket(isp->me.sa_family, SOCK_STREAM, 0);
+    }
+    else
+        sd = socket(isp->me.sa_family, SOCK_DGRAM, 0);
     if (sd < 0){
 	snmp_errno = SNMPERR_NO_SOCKET;
 	in_session->s_snmp_errno = SNMPERR_NO_SOCKET;
@@ -942,6 +951,11 @@ snmp_sess_open(struct snmp_session *in_session)
 	setsockopt(sd, SOL_SOCKET, SO_BSDCOMPAT, &one, sizeof(one));
     }
 #endif /* SO_BSDCOMPAT */
+
+    if (!(( session->flags & SNMP_FLAGS_STREAM_SOCKET ) &&
+        ( isp->me.sa_family == AF_UNIX ) &&
+        ( session->local_port == 0 ))) {
+		/* Client Unix-domain stream sockets don't need to 'bind' */
     if (bind(sd, (struct sockaddr *)&isp->me, sizeof(isp->me)) != 0){
 	snmp_errno = SNMPERR_BAD_LOCPORT;
 	in_session->s_snmp_errno = SNMPERR_BAD_LOCPORT;
@@ -949,6 +963,32 @@ snmp_sess_open(struct snmp_session *in_session)
 	snmp_set_detail(strerror(errno));
 	snmp_sess_close(slp);
 	return 0;
+        }
+    }
+
+    if ( session->flags & SNMP_FLAGS_STREAM_SOCKET ) {
+        if ( session->local_port == 0 ) {	/* Client session */
+
+            if ( connect( sd, (struct sockaddr *)&(isp->addr),
+                               sizeof(isp->addr)) != 0 ) {
+	        snmp_errno = SNMPERR_BAD_LOCPORT;
+	        in_session->s_snmp_errno = SNMPERR_BAD_LOCPORT;
+	        in_session->s_errno = errno;
+	        snmp_set_detail(strerror(errno));
+	        snmp_sess_close(slp);
+	        return 0;
+            }
+        } else {				/* Server session */
+
+            if ( listen( sd, SNMP_STREAM_QUEUE_LEN ) != 0 ) {
+	        snmp_errno = SNMPERR_BAD_LOCPORT;
+	        in_session->s_snmp_errno = SNMPERR_BAD_LOCPORT;
+	        in_session->s_errno = errno;
+	        snmp_set_detail(strerror(errno));
+	        snmp_sess_close(slp);
+	        return 0;
+            }
+        }
     }
 
     /* if we are opening a V3 session and we don't know engineID
@@ -2642,6 +2682,7 @@ snmp_sess_async_send(void *sessp,
     struct sockaddr_in *pduIp = (struct sockaddr_in *)&(pdu->address);
     struct timeval tv;
     int expect_response = 1;
+    int result;
 
     session = slp->session; isp = slp->internal;
     session->s_snmp_errno = 0;
@@ -2918,8 +2959,12 @@ snmp_sess_async_send(void *sessp,
     }
 
     /* send the message */
-    if (sendto(isp->sd, (char *)packet, length, 0,
-	       (struct sockaddr *)&pdu->address, sizeof(pdu->address)) < 0){
+    if ( session->flags & SNMP_FLAGS_STREAM_SOCKET )
+        result = send(isp->sd, (char *)packet, length, 0);
+    else
+        result = sendto(isp->sd, (char *)packet, length, 0,
+	       (struct sockaddr *)&pdu->address, sizeof(pdu->address));
+    if ( result < 0){
 	snmp_errno = SNMPERR_BAD_SENDTO;
 	session->s_snmp_errno = SNMPERR_BAD_SENDTO;
 	session->s_errno = errno;
@@ -3036,7 +3081,7 @@ void
 snmp_sess_read(void *sessp,
 	       fd_set *fdset)
 {
-    struct session_list *slp = (struct session_list*)sessp;
+    struct session_list *slp = (struct session_list*)sessp, *new_slp;
     struct snmp_session *sp;
     struct snmp_internal_session *isp;
     u_char packet[PACKET_LENGTH];
@@ -3049,6 +3094,7 @@ snmp_sess_read(void *sessp,
     snmp_callback callback;
     void *magic;
     int ret;
+    int new_sd, addrlen;
 
     if (!(FD_ISSET(slp->internal->sd, fdset)))
         return;
@@ -3058,9 +3104,46 @@ snmp_sess_read(void *sessp,
     sp->s_errno = 0;
     callback = sp->callback;
     magic = sp->callback_magic;
+
+    if ( sp->flags & SNMP_FLAGS_STREAM_SOCKET ) {
+        if ( sp->flags & SNMP_FLAGS_LISTENING ) {
+		/*
+		 * Accept the new stream based connection,
+		 * and create a new session for it.
+		 */
+            new_sd = accept(isp->sd, (struct sockaddr *)&(isp->addr), &addrlen);
+            if ( new_sd == -1 ) {
+	        snmp_errno = SNMPERR_BAD_RECVFROM;
+	        sp->s_snmp_errno = SNMPERR_BAD_RECVFROM;
+	        sp->s_errno = errno;
+	        snmp_set_detail(strerror(errno));
+	        return;
+            }
+
+            new_slp = snmp_sess_copy( sp );
+            if ( new_slp == NULL )
+                return;
+            new_slp->next = slp->next;
+            slp->next     = new_slp;
+
+            sp  = new_slp->session;
+            isp = new_slp->internal;
+            isp->sd = new_sd;
+            memcpy((u_char *)&(isp->me),
+                   (u_char *)&(slp->internal->me),
+                   sizeof(slp->internal->me));
+            isp->addr.sa_family = isp->me.sa_family;
+            sp->flags &= (~SNMP_FLAGS_LISTENING);
+        }
+        memcpy((u_char *)&from, (u_char *)&(isp->addr), sizeof( isp->addr ));
+    }
+    else
+        memset(&from, 0, sizeof(from));
     fromlength = sizeof from;
-    memset(&from, 0, sizeof(from));
-    length = recvfrom(isp->sd, (char *)packet, PACKET_LENGTH, 0,
+    if ( sp->flags & SNMP_FLAGS_STREAM_SOCKET )
+        length = recv(isp->sd, (char *)packet, PACKET_LENGTH, 0);
+    else
+        length = recvfrom(isp->sd, (char *)packet, PACKET_LENGTH, 0,
 		      (struct sockaddr *)&from, &fromlength);
     if (length == -1) {
 	snmp_errno = SNMPERR_BAD_RECVFROM;
@@ -3068,6 +3151,17 @@ snmp_sess_read(void *sessp,
 	sp->s_errno = errno;
 	snmp_set_detail(strerror(errno));
 	return;
+    }
+
+		/* Remote end closed connection */
+    if ((length == 0) && (sp->flags & SNMP_FLAGS_STREAM_SOCKET )) {
+        isp->sd = -1;	/* Mark session for deletion */
+
+		/* Don't unlink the server listening socket prematurely */
+        if (( isp->me.sa_family == AF_UNIX ) &&
+           !( sp->flags & SNMP_FLAGS_LISTENING ))
+                  isp->me.sa_family = AF_UNSPEC;
+        return;
     }
     if (snmp_dump_packet){
 	printf("\nReceived %d bytes from %s:%hu\n", length,
@@ -3342,6 +3436,7 @@ snmp_resend_request(struct session_list *slp, struct request_list *rp,
   struct snmp_internal_session *isp;
   struct sockaddr_in *pduIp;
   struct timeval now;
+  int result;
 
   sp = slp->session; isp = slp->internal;
 
@@ -3363,9 +3458,13 @@ snmp_resend_request(struct session_list *slp, struct request_list *rp,
     printf("\n");
   }
 
-  if (sendto(isp->sd, (char *)packet, length, 0,
+  if ( sp->flags & SNMP_FLAGS_STREAM_SOCKET )
+    result = send(isp->sd, (char *)packet, length, 0);
+  else
+    result = sendto(isp->sd, (char *)packet, length, 0,
 	     (struct sockaddr *)&rp->pdu->address,
-	     sizeof(rp->pdu->address)) < 0){
+	     sizeof(rp->pdu->address));
+  if ( result < 0){
     snmp_errno = SNMPERR_BAD_SENDTO;
     sp->s_snmp_errno = SNMPERR_BAD_SENDTO;
     sp->s_errno = errno;

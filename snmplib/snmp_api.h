@@ -136,6 +136,7 @@ struct snmp_session {
     /* Pointer to data that the callback function may consider important */
     void    *callback_magic;
     int	    version;
+    u_char  flags;
     oid	    *srcParty;
     size_t  srcPartyLen;
     oid	    *dstParty;
@@ -210,6 +211,9 @@ extern void snmp_set_detail (const char *);
 #define REPORT_usmStatsDecryptionErrors_NUM 6
 
 #define SNMP_DETAIL_SIZE        512
+
+#define SNMP_FLAGS_STREAM_SOCKET   0x80
+#define SNMP_FLAGS_LISTENING       0x40     /* Server stream sockets only */
 
 /*
  * Error return values.
