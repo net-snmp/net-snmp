@@ -12,6 +12,7 @@ CPP		= @CPP@ 					        \
 		-DDONT_INC_STRUCTS -DBINDIR=$(bindir) 		        \
 		$(EXTRACPPFLAGS)
 
+# XXX: net-snmp-config.h is built
 INSTALLHEADERS=net-snmp-config.h version.h
 INCLUDESUBDIR=system
 INCLUDESUBDIRHEADERS= aix.h bsd.h bsdi3.h bsdi4.h bsdi.h cygwin.h darwin.h \
@@ -28,7 +29,7 @@ INSTALLUCDHEADERS=ucd-snmp-config.h version.h mib_module_config.h
 #
 PERLMODULES=SNMP ASN default_store agent
 
-all:    sedscript EXAMPLE.conf standardall @PERLTARGS@ 
+all:    sedscript EXAMPLE.conf standardall @PERLTARGS@ net-snmp-config-x
 
 
 #
@@ -42,6 +43,9 @@ EXAMPLE.conf: sedscript EXAMPLE.conf.def
 
 docs: doxygen.conf
 	doxygen doxygen.conf
+
+net-snmp-config-x:
+	chmod a+x net-snmp-config
 
 #
 # test targets
@@ -156,5 +160,5 @@ dist: version tag tar
 FAQ.html:
 	local/FAQ2HTML FAQ
 
-.PHONY: docs testdirs test TAGS
+.PHONY: docs testdirs test TAGS net-snmp-config-x
 # note: tags and docs are phony to force rebulding
