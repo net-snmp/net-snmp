@@ -777,7 +777,7 @@ struct subtree subtrees_old[] = {
    sizeof(extensible_lockd_variables)/sizeof(*extensible_lockd_variables),
    sizeof(*extensible_lockd_variables)},
 #endif
-#if defined(USEDISKMIB) && HAVE_FSTAB_H
+#if defined(USEDISKMIB) && (HAVE_FSTAB_H || HAVE_STATVFS_H)
   {{EXTENSIBLEMIB, DISKMIBNUM}, EXTENSIBLENUM+1, (struct variable *)extensible_disk_variables,
    sizeof(extensible_disk_variables)/sizeof(*extensible_disk_variables),
    sizeof(*extensible_disk_variables)},
@@ -885,7 +885,7 @@ getStatPtr(name, namelen, type, len, acl, exact, write_method, pi,
     *write_method = NULL;
     for (y = 0, tp = subtrees; y < (subtree_old_size() + numrelocs + numpassthrus); tp++, y++){
 	treeresult = compare_tree(name, *namelen, tp->name, (int)tp->namelen);
-	/* if exact and treerresult == 0
+	/* if exact and treeresult == 0
 	   if next  and treeresult <= 0 */
 	if (treeresult == 0 || (!exact && treeresult < 0)){
 	    result = treeresult;
@@ -1751,12 +1751,23 @@ typedef struct if_ip {
 static int
 AT_Cmp(void *addr, void *ep)
 { mib2_ipNetToMediaEntry_t *mp = (mib2_ipNetToMediaEntry_t *) ep;
+  int ret = -1;
+#ifdef DODEBUG
+  printf ("......... AT_Cmp %lx<>%lx %d<>%d (%.5s)\n",
+	  mp->ipNetToMediaNetAddress, ((if_ip_t *)addr)->ipAddr,
+	  ((if_ip_t*)addr)->ifIdx,Interface_Index_By_Name (mp->ipNetToMediaIfIndex.o_bytes, mp->ipNetToMediaIfIndex.o_length),
+	  mp->ipNetToMediaIfIndex.o_bytes);
+#endif
   if (mp->ipNetToMediaNetAddress != ((if_ip_t *)addr)->ipAddr)
-    return 1;
+    ret = 1;
   else if (((if_ip_t*)addr)->ifIdx !=
       Interface_Index_By_Name (mp->ipNetToMediaIfIndex.o_bytes, mp->ipNetToMediaIfIndex.o_length))
-	return 1;
-  else return 0;
+	ret = 1;
+  else ret = 0;
+#ifdef DODEBUG
+  printf ("......... AT_Cmp returns %d\n", ret);
+#endif
+  return ret;
 }
 
 u_char *
@@ -1788,9 +1799,10 @@ var_atEntry(struct variable *vp, oid *name, int *length, int exact,
     /* fill in object part of name for current (less sizeof instance part) */
 
 #ifdef DODEBUG
-    sprint_objid (c_oid, name, *length);
+    sprint_objid (c_oid, vp->name, vp->namelen);
     printf ("var_atEntry: %s %d\n", c_oid, exact);
 #endif
+    memset (&Lowentry, 0, sizeof (Lowentry));
     bcopy((char *)vp->name, (char *)current, (int)vp->namelen * sizeof(oid));
     if (*length == AT_NAME_LENGTH) /* Assume that the input name is the lowest */
       bcopy((char *)name, (char *)lowest, AT_NAME_LENGTH * sizeof(oid));
@@ -2235,6 +2247,7 @@ var_ipAddrEntry(vp, name, length, exact, var_len, write_method)
     sprint_objid (c_oid, name, *length);
     printf ("var_ipAddrEntry: %s %d\n", c_oid, exact);
 #endif
+    memset (&Lowentry, 0, sizeof (Lowentry));
     bcopy((char *)vp->name, (char *)current, (int)vp->namelen * sizeof(oid));
     if (*length == IP_ADDRNAME_LENGTH) /* Assume that the input name is the lowest */
       bcopy((char *)name, (char *)lowest, IP_ADDRNAME_LENGTH * sizeof(oid));
@@ -2897,6 +2910,7 @@ int     (**write_method)(); /* OUT - pointer to function to set variable, otherw
     req_e  		req_type;
     int			Found = 0;
     
+    memset (&Lowentry, 0, sizeof (Lowentry));
     bcopy((char *)vp->name, (char *)newname, (int)vp->namelen * sizeof(oid));
     if (*length == TCP_CONN_LENGTH) /* Assume that the input name is the lowest */
       bcopy((char *)name, (char *)lowest, TCP_CONN_LENGTH * sizeof(oid));

@@ -324,10 +324,7 @@ getMibstat(mibgroup_e grid,  void *resp, int entrysize,
       cachep->cache_last_found = 0;
     cache_valid = (time(NULL) - cachep->cache_time) > cachep->cache_ttl ? 0 : 1;
 #ifdef DODEBUG
-	cachep->cache_last_found = 0;
     printf ("... cache_valid %d time %ld ttl %d now %ld\n",
-    if (req_type != GET_NEXT)
-	cachep->cache_last_found = 0;
             cache_valid, cachep->cache_time, cachep->cache_ttl, time (NULL));
 #endif
     if (cache_valid) {
@@ -389,6 +386,9 @@ getMibstat(mibgroup_e grid,  void *resp, int entrysize,
     } else
 	ret = 1;		/* Not found */
  Return:
+#ifdef DODEBUG
+    printf ("... getMibstat returns %d\n", ret);
+#endif
     return (ret);
 }
 
@@ -480,6 +480,10 @@ getmib(int groupname, int subgroupname, void *statbuf, size_t size, int entrysiz
   struct 	opthdr *req;
   found_e	result = FOUND;
 
+#ifdef DODEBUG
+  printf ("...... getmib (%d, %d, ...)\n", groupname, subgroupname);
+#endif
+
   /* Open the stream driver and push all MIB-related modules */
 
   if (sd == -1) {		/* First time */
@@ -499,6 +503,9 @@ getmib(int groupname, int subgroupname, void *statbuf, size_t size, int entrysiz
       ret = -1;
       goto Return;
     }
+#ifdef DODEBUG
+    printf ("...... modules pushed OK\n");
+#endif
   }
 
   /* First, use bigger buffer, to accelerate skipping
@@ -601,6 +608,9 @@ getmib(int groupname, int subgroupname, void *statbuf, size_t size, int entrysiz
   }
  Return:
   (void)ioctl(sd, I_FLUSH, FLUSHRW);
+#ifdef DODEBUG
+  printf ("...... getmib returns %d\n", ret);
+#endif
   return(ret);
 }
 

@@ -1,6 +1,6 @@
 u_char *var_extensible_shell();
 u_char *var_extensible_relocatable();
-#if HAVE_FSTAB_H
+#if HAVE_FSTAB_H || HAVE_STATVFS_H
 u_char *var_extensible_disk();
 #endif
 u_char *var_extensible_version();
@@ -64,7 +64,7 @@ struct variable2 extensible_mem_variables[] = {
 };
 #endif
 
-#if defined(USEDISKMIB) && HAVE_FSTAB_H
+#if defined(USEDISKMIB) && (HAVE_FSTAB_H || HAVE_STATVFS_H)
 struct variable2 extensible_disk_variables[] = {
   {MIBINDEX, INTEGER, RONLY, var_extensible_disk, 1, {MIBINDEX}},
   {ERRORNAME, STRING, RONLY, var_extensible_disk, 1, {ERRORNAME}},
