@@ -61,15 +61,7 @@ netsnmp_register_old_api(const char *moduleName,
                          const char *context, int timeout, int flags)
 {
 
-    netsnmp_old_api_info *old_info =
-        SNMP_MALLOC_TYPEDEF(netsnmp_old_api_info);
     unsigned int    i;
-
-    old_info->var = var;
-    old_info->varsize = varsize;
-    old_info->numvars = numvars;
-    old_info->ss = ss;
-    old_info->flags = flags;
 
     /*
      * register all subtree nodes 
@@ -110,7 +102,6 @@ netsnmp_register_old_api(const char *moduleName,
             SNMP_FREE(vp);
         }
     }
-    SNMP_FREE(old_info);
     return SNMPERR_SUCCESS;
 }
 
