@@ -122,6 +122,7 @@ EXPORTS
 	view_createEntry
  	get_tc_descriptor
 	setenv
+	find_module
  	snmp_async_send
 	Mib			DATA
 	tree_head		DATA
