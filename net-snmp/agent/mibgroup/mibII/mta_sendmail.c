@@ -201,10 +201,29 @@ static struct variable3 mta_variables[] = {
 #define MNAMELEN         20     /* maximum length of mailernames (copied from the sendmail sources) */
 #define STAT_VERSION_8_9  2     /* version of sendmail V8.9.x statistics files (copied from the sendmail sources) */
 #define STAT_VERSION_8_10 3     /* version of sendmail V8.10.x statistics files (copied from the sendmail sources) */
+#define STAT_VERSION_8_12_QUAR 4     /* version of sendmail V8.12.x statistics files using -D_FFR_QUARANTINE (commercial and edge-living opensource*/
 #define STAT_MAGIC  0x1B1DE     /* magic value to identify statistics files from sendmail V8.9.x or higher (copied from the sendmail sources) */
     /*
      * structure of sendmail.st file from sendmail V8.10.x (copied from the sendmail sources) 
      */
+
+struct statisticsV8_12_QUAR {
+    int             stat_magic; /* magic number */
+    int             stat_version;       /* stat file version */
+    time_t          stat_itime; /* file initialization time */
+    short           stat_size;  /* size of this structure */
+    long            stat_cf;    /* # from connections */
+    long            stat_ct;    /* # to connections */
+    long            stat_cr;    /* # rejected connections */
+    long            stat_nf[MAXMAILERS];        /* # msgs from each mailer */
+    long            stat_bf[MAXMAILERS];        /* kbytes from each mailer */
+    long            stat_nt[MAXMAILERS];        /* # msgs to each mailer */
+    long            stat_bt[MAXMAILERS];        /* kbytes to each mailer */
+    long            stat_nr[MAXMAILERS];        /* # rejects by each mailer */
+    long            stat_nd[MAXMAILERS];        /* # discards by each mailer */
+    long            stat_nq[MAXMAILERS];        /* # quarantines by each mailer*/
+};
+
     struct statisticsV8_10 {
     int             stat_magic; /* magic number */
     int             stat_version;       /* stat file version */
@@ -219,6 +238,7 @@ static struct variable3 mta_variables[] = {
     long            stat_bt[MAXMAILERS];        /* kbytes to each mailer */
     long            stat_nr[MAXMAILERS];        /* # rejects by each mailer */
     long            stat_nd[MAXMAILERS];        /* # discards by each mailer */
+
 };
 
 /*
@@ -290,7 +310,7 @@ static long    *stat_nr;        /* pointer to stat_nr array within the statistic
 static long    *stat_nd;        /* pointer to stat_nd array within the statistics structure,
                                  * only valid for statistics files from sendmail >=V8.9.0    */
 static int      stats_size;     /* size of statistics structure */
-static long     stats[sizeof(struct statisticsV8_10) / sizeof(long) + 1];       /* buffer for statistics structure */
+static long     stats[sizeof(struct statisticsV8_12_QUAR) / sizeof(long) + 1];       /* buffer for statistics structure */
 static time_t   lastreadstats;  /* time stats file has been read */
 static long     applindex = 1;  /* ApplIndex value for OIDs */
 static long     stat_cache_time = 5;    /* time (in seconds) to wait before reading stats file again */
@@ -406,7 +426,25 @@ open_sendmailst(BOOL config)
     filelen = read(sendmailst_fh, (void *) &stats, sizeof stats);
 
     if (((struct statisticsV8_10 *) stats)->stat_magic == STAT_MAGIC) {
-        if (((struct statisticsV8_10 *) stats)->stat_version ==
+
+        if (((struct statisticsV8_12_QUAR *) stats)->stat_version ==
+            STAT_VERSION_8_12_QUAR
+            && ((struct statisticsV8_12_QUAR *) stats)->stat_size ==
+            sizeof(struct statisticsV8_12_QUAR)
+            && filelen == sizeof(struct statisticsV8_12_QUAR)) {
+            DEBUGMSGTL(("mibII/mta_sendmail.c:open_sendmailst",
+                        "looks like file \"%s\" has been created by sendmail V8.10.0 or newer\n",
+                        sendmailst_fn));
+            stat_nf = (((struct statisticsV8_12_QUAR *) stats)->stat_nf);
+            stat_bf = (((struct statisticsV8_12_QUAR *) stats)->stat_bf);
+            stat_nt = (((struct statisticsV8_12_QUAR *) stats)->stat_nt);
+            stat_bt = (((struct statisticsV8_12_QUAR *) stats)->stat_bt);
+            stat_nr = (((struct statisticsV8_12_QUAR *) stats)->stat_nr);
+            stat_nd = (((struct statisticsV8_12_QUAR *) stats)->stat_nd);
+            stats_size = sizeof(struct statisticsV8_12_QUAR);
+        } else
+
+		 if (((struct statisticsV8_10 *) stats)->stat_version ==
             STAT_VERSION_8_10
             && ((struct statisticsV8_10 *) stats)->stat_size ==
             sizeof(struct statisticsV8_10)
@@ -421,6 +459,7 @@ open_sendmailst(BOOL config)
             stat_nr = (((struct statisticsV8_10 *) stats)->stat_nr);
             stat_nd = (((struct statisticsV8_10 *) stats)->stat_nd);
             stats_size = sizeof(struct statisticsV8_10);
+
         } else if (((struct statisticsV8_9 *) stats)->stat_version ==
                    STAT_VERSION_8_9
                    && ((struct statisticsV8_9 *) stats)->stat_size ==
@@ -932,8 +971,9 @@ read_sendmailcf(BOOL config)
                 /*
                  * skip to next , 
                  */
-                while (*p && *p != ',')
+                while (*p && *p != ',') {
                     p++;
+                }
             }
 
             /*
