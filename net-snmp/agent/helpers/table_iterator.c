@@ -125,7 +125,7 @@ netsnmp_register_table_iterator(netsnmp_handler_registration *reginfo,
 }
 
 /** extracts the table_iterator specific data from a request */
-inline void    *
+NETSNMP_INLINE void    *
 netsnmp_extract_iterator_context(netsnmp_request_info *request)
 {
     return netsnmp_request_get_list_data(request, TABLE_ITERATOR_NAME);
