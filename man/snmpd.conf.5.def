@@ -432,6 +432,51 @@ communities are allowed write access are controlled by the RWRITE
 definition in the snmplib/snmp_impl.h source file.
 .RE
 .RE
+.IP
+Example (in snmpd.conf):
+.IP
+pass .1.3.6.1.4.1.2021.255 /path/to/local/passtest
+.RE
+.IP "pass_persist MIBOID EXEC"
+Passes entire control of MIBOID to the EXEC program.  
+Similar to pass, but the EXEC program continues to run after the initial
+request is answered.
+.IP
+Upon initialization, EXEC is passed the string "PING\\n" in stdin,
+and it should respond by printing "PONG\\n" to stdout.
+.IP
+For get and getnext requests, EXEC program is passed two lines,
+the command (get or getnext) and the mib OID.  It should return
+three lines, the mib OID, the TYPE of value returned,
+the VALUE corresponding with the returned TYPE.
+.IP
+For example, if the value for .1.3.6.1.4.100 was requested, the following
+2 lines would be passed in to stdin:
+.br
+.RS
+  get
+.br
+  .1.3.6.1.4.100  
+.RE
+.IP
+To return the value, say, 42, the script would write to stdout:
+.br
+.RS
+  .1.3.6.1.4.100
+.br
+  integer
+.br
+  42
+.RE
+.IP
+To indicate that the script is unable to comply with the request due
+to an end-of-mib condition or an invalid request, print "NONE\\n" to
+stdout.
+.IP
+Example (in snmpd.conf):
+.IP
+pass_persist .1.3.6.1.4.1.2021.255 /path/to/local/pass_persisttest
+.RE
 .SH "EXAMPLE"
 See the EXAMPLE.CONF file in the top level source directory for a more
 detailed example of how the above information is used in real
