@@ -1457,16 +1457,15 @@ snmp_sess_close(void *sessp)
     snmp_transport *transport;
     struct snmp_internal_session *isp;
     struct snmp_session *sesp;
+    struct snmp_secmod_def *sptr;
 
     if (slp == NULL) {
 	return 0;
     }
 
-    transport = slp->transport; slp->transport = 0;
-
-    if (transport) {
-      transport->f_close(transport);
-      snmp_transport_free(transport);
+    if ((sptr = find_sec_mod(pdu->securityModel)) != NULL &&
+        sptr->free_session != NULL) {
+        (*sptr->free_session)(sessp);
     }
 
     isp = slp->internal; slp->internal = 0;
@@ -1486,6 +1485,13 @@ snmp_sess_close(void *sessp)
       }
 
       free((char *)isp);
+    }
+
+    transport = slp->transport; slp->transport = 0;
+
+    if (transport) {
+      transport->f_close(transport);
+      snmp_transport_free(transport);
     }
 
     sesp = slp->session; slp->session = 0;
@@ -3991,8 +3997,14 @@ void snmp_free_varbind(struct variable_list *var)
 void
 snmp_free_pdu(struct snmp_pdu *pdu)
 {
+    struct snmp_secmod_def *sptr;
+    
     if (!pdu) return;
 
+    if ((sptr = find_sec_mod(pdu->securityModel)) != NULL &&
+        sptr->free_pdu != NULL) {
+        (*sptr->free_pdu)(pdu);
+    }
     snmp_free_varbind(pdu->variables);
     SNMP_FREE(pdu->enterprise);
     SNMP_FREE(pdu->community);
