@@ -165,7 +165,7 @@ nsb-make()
    nsb_make_OUTPUT=nsb-make-$target.$DATE
    nsb-info "Making $target... (log is $nsb_make_OUTPUT)"
    make touchit 2>&1 | tee $nsb_make_OUTPUT
-   make $target 2>&1 | tee -a $nsb_make_OUTPUT
+   make $target $parms 2>&1 | tee -a $nsb_make_OUTPUT
 
    nsb-info "Checking for errors..."
    egrep "Error|FAIL|warn|No |exists" $nsb_make_OUTPUT \
