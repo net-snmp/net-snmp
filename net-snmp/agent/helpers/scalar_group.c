@@ -33,11 +33,15 @@ netsnmp_get_scalar_group_handler(oid first, oid last)
                                   netsnmp_scalar_group_helper_handler);
     if (ret) {
         sgroup = SNMP_MALLOC_TYPEDEF(netsnmp_scalar_group);
-        if (sgroup) {
+        if (NULL == sgroup) {
+            netsnmp_handler_free(ret);
+            ret = NULL;
+        }
+        else {
 	    sgroup->lbound = first;
 	    sgroup->ubound = last;
+            ret->myvoid = (void *)sgroup;
 	}
-	ret->myvoid = (void *)sgroup;
     }
     return ret;
 }
@@ -46,11 +50,6 @@ int
 netsnmp_register_scalar_group(netsnmp_handler_registration *reginfo,
                               oid first, oid last)
 {
-    reginfo->rootoid = realloc(reginfo->rootoid,
-                              (reginfo->rootoid_len+2) * sizeof(oid) );
-    reginfo->rootoid[ reginfo->rootoid_len   ] = 0;
-    reginfo->rootoid[ reginfo->rootoid_len+1 ] = 0;
-
     netsnmp_inject_handler(reginfo, netsnmp_get_instance_handler());
     netsnmp_inject_handler(reginfo, netsnmp_get_scalar_handler());
     netsnmp_inject_handler(reginfo, netsnmp_get_scalar_group_handler(first, last));
@@ -69,7 +68,7 @@ netsnmp_scalar_group_helper_handler(netsnmp_mib_handler *handler,
     netsnmp_scalar_group *sgroup = (netsnmp_scalar_group *)handler->myvoid;
     int             ret, cmp;
     int             namelen;
-    oid             subid;
+    oid             subid, root_tmp[MAX_OID_LEN], *root_save;
 
     DEBUGMSGTL(("helper:scalar_group", "Got request:\n"));
     namelen = SNMP_MIN(requests->requestvb->name_length,
@@ -77,9 +76,18 @@ netsnmp_scalar_group_helper_handler(netsnmp_mib_handler *handler,
     cmp = snmp_oid_compare(requests->requestvb->name, namelen,
                            reginfo->rootoid, reginfo->rootoid_len);
 
-    DEBUGMSGTL(( "helper:scalar_group", "  oid:", cmp));
+    DEBUGMSGTL(( "helper:scalar_group", "  cmp=%d, oid:", cmp));
     DEBUGMSGOID(("helper:scalar_group", var->name, var->name_length));
     DEBUGMSG((   "helper:scalar_group", "\n"));
+
+    /*
+     * copy root oid to root_tmp, set instance to 0. (subid set later on)
+     * save rootoid, since we'll replace it before calling next handler,
+     * and need to restore it afterwards.
+     */
+    memcpy(root_tmp, reginfo->rootoid, reginfo->rootoid_len + 2 * sizeof(oid));
+    root_tmp[reginfo->rootoid_len + 1] = 0;
+    root_save = reginfo->rootoid;
 
     ret = SNMP_ERR_NOCREATION;
     switch (reqinfo->mode) {
@@ -123,9 +131,11 @@ netsnmp_scalar_group_helper_handler(netsnmp_mib_handler *handler,
                 netsnmp_set_request_error(reqinfo, requests, ret);
                 return SNMP_ERR_NOERROR;
 	    }
-            reginfo->rootoid[reginfo->rootoid_len++] = subid;
+            root_tmp[reginfo->rootoid_len++] = subid;
+            reginfo->rootoid = root_tmp;
             ret = netsnmp_call_next_handler(handler, reginfo, reqinfo,
                                             requests);
+            reginfo->rootoid = root_save;
             reginfo->rootoid_len--;
             return ret;
         }
@@ -153,7 +163,8 @@ netsnmp_scalar_group_helper_handler(netsnmp_mib_handler *handler,
 	if (subid > sgroup->ubound)
             return SNMP_ERR_NOERROR;
         
-        reginfo->rootoid[reginfo->rootoid_len++] = subid;
+        root_tmp[reginfo->rootoid_len++] = subid;
+        reginfo->rootoid = root_tmp;
         ret = netsnmp_call_next_handler(handler, reginfo, reqinfo,
                                             requests);
         /*
@@ -168,6 +179,7 @@ netsnmp_scalar_group_helper_handler(netsnmp_mib_handler *handler,
             requests->requestvb->name[reginfo->rootoid_len-1] = ++subid;
             requests->requestvb->type = ASN_PRIV_RETRY;
         }
+        reginfo->rootoid = root_save;
         reginfo->rootoid_len--;
         return ret;
     }
