@@ -43,9 +43,6 @@
 /* define if you are using the MD5 code ...*/
 #undef USE_INTERNAL_MD5
 
-/* ... or define this if you're using openssl support */
-#undef USE_OPENSSL
-
 /* add in recent CMU library extensions (not complete) */
 #undef CMU_COMPATIBLE
 
@@ -194,6 +191,9 @@
 /* If you don't have root access don't exit upon kmem errors */
 #undef NO_ROOT_ACCESS
 
+/* If we don't want to use kmem. */
+#undef NO_KMEM_USAGE
+
 /* If you don't want the agent to report on variables it doesn't have data for */
 #undef NO_DUMMY_VALUES
 
@@ -204,6 +204,9 @@
 /* Define if the TCP timer constants in <netinet/tcp_timer.h>
    depend on the integer variable `hz'.  [FreeBSD 4.x] */
 #undef TCPTV_NEEDS_HZ
+
+/* Define if you have the AES_cfb128_encrypt function.  */
+#undef HAVE_AES_CFB128_ENCRYPT
 
 /* Define if you have the bcopy function.  */
 #undef HAVE_BCOPY
@@ -568,6 +571,12 @@
 /* Define if you have the <nlist.h> header file.  */
 #undef HAVE_NLIST_H
 
+/* Define if you have the <openssl/aes.h> header file.  */
+#undef HAVE_OPENSSL_AES_H
+
+/* Define if you have the <openssl/des.h> header file.  */
+#undef HAVE_OPENSSL_DES_H
+
 /* Define if you have the <openssl/evp.h> header file.  */
 #undef HAVE_OPENSSL_EVP_H
 
@@ -926,6 +935,9 @@
 /* vfsstat.f_files */
 #undef STRUCT_STATVFS_HAS_F_FILES
 
+/* des_ks_struct.weak_key */
+#undef STRUCT_DES_KS_STRUCT_HAS_WEAK_KEY
+
 /* ifnet needs to have _KERNEL defined */
 #undef IFNET_NEEDS_KERNEL
 
@@ -1168,6 +1180,11 @@
 #endif
 #endif
 
+/* If you have openssl 0.9.7 or above, you likely have AES support. */
+#undef USE_OPENSSL
+#if defined(USE_OPENSSL) && defined(HAVE_OPENSSL_AES_H) && defined(HAVE_AES_CFB128_ENCRYPT)
+#define HAVE_AES 1
+#endif
 
 /* define random functions */
 
@@ -1268,7 +1285,7 @@
 #include SYSTEM_INCLUDE_FILE
 #include MACHINE_INCLUDE_FILE
 
-#if defined(HAVE_NLIST) && defined(STRUCT_NLIST_HAS_N_VALUE) && !defined(DONT_USE_NLIST)
+#if defined(HAVE_NLIST) && defined(STRUCT_NLIST_HAS_N_VALUE) && !defined(NO_KMEM_USAGE)
 #define CAN_USE_NLIST
 #endif
 
