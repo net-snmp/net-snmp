@@ -406,7 +406,7 @@ ip_handler(netsnmp_mib_handler          *handler,
          * ipstat.ips_noroute is also incorrect.
          */
         netsnmp_set_request_error(reqinfo, request, SNMP_NOSUCHOBJECT);
-        return NULL;
+        continue;
     case IPREASMTIMEOUT:
         ret_value = IPFRAGTTL;
         type = ASN_INTEGER;
