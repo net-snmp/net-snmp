@@ -25,13 +25,15 @@ typedef struct data_set_cache_s {
 } data_set_cache;
 
 #define STATE_ACTION   1
-#define STATE_COMMITED 2
+#define STATE_COMMIT   2
 #define STATE_UNDO     3
 #define STATE_FREE     4
+
 typedef struct newrow_stash_s {
    netsnmp_table_row *newrow;
    int state;
    int created;
+   int deleted;
 } newrow_stash;
 
 /** @defgroup table_dataset table_dataset: Helps you implement a table with automatted storage.
@@ -436,10 +438,12 @@ netsnmp_table_data_set_helper_handler(
                 }
           done:
                 if (data && data->data.voidp)
-                    netsnmp_table_data_build_result(reginfo, reqinfo, request, row,
-                                            table_info->colnum,
-                                            data->type,
-                                            data->data.voidp, data->data_len);
+                    netsnmp_table_data_build_result(reginfo, reqinfo, request,
+                                                    row,
+                                                    table_info->colnum,
+                                                    data->type,
+                                                    data->data.voidp,
+                                                    data->data_len);
                 else {
                     /* deal with holes by going to the next data set
                        in the row or possibly onward to new columns */
@@ -480,7 +484,23 @@ netsnmp_table_data_set_helper_handler(
                 break;
 
             case MODE_SET_RESERVE2:
+                if (datatable->rowstatus_column == table_info->colnum) {
+                    switch(*(request->requestvb->val.integer)) {
+                        case RS_ACTIVE:
+                        case RS_NOTINSERVICE:
+                        case RS_NOTREADY:
+                            /* XXX: check legality */
+                            if (!data) {
+                                netsnmp_set_request_error(reqinfo, request,
+                                                          SNMP_ERR_INCONSISTENTVALUE);
+                                continue;
+                            }
+                            break;
+                    }
+                }
+
                 /* modify row and set new value */
+                SNMP_FREE(data->data.string);
                 memdup(&data->data.string, request->requestvb->val.string,
                        request->requestvb->val_len);
                 if (!data->data.string) {
@@ -488,6 +508,24 @@ netsnmp_table_data_set_helper_handler(
                                               SNMP_ERR_RESOURCEUNAVAILABLE);
                 }
                 data->data_len = request->requestvb->val_len;
+
+                if (datatable->rowstatus_column == table_info->colnum) {
+                    switch(*(request->requestvb->val.integer)) {
+                        case RS_CREATEANDGO:
+                            /* XXX: check legality */
+                            *(data->data.integer) = RS_ACTIVE;
+                            break;
+
+                        case RS_CREATEANDWAIT:
+                            /* XXX: check legality */
+                            *(data->data.integer) = RS_NOTINSERVICE;
+                            break;
+
+                        case RS_DESTROY:
+                            newrowstash->deleted = 1;
+                            break;
+                    }
+                }
                 break;
 
             case MODE_SET_ACTION:
@@ -495,11 +533,15 @@ netsnmp_table_data_set_helper_handler(
                 /* install the new row.  Do this only *once* per row */
                 if (newrowstash->state != STATE_ACTION) {
                     newrowstash->state = STATE_ACTION;
-                    if (newrowstash->created)
+                    if (newrowstash->deleted) {
+                        if (row)
+                            netsnmp_table_dataset_remove_row(datatable, row);
+                    } else if (newrowstash->created) {
                         netsnmp_table_dataset_add_row(datatable, newrow);
-                    else
+                    } else {
                         netsnmp_table_dataset_replace_row(datatable,
                                                           row, newrow);
+                    }
                 }
                 break;
                 
@@ -507,23 +549,34 @@ netsnmp_table_data_set_helper_handler(
                 /* extract the new row, replace with the old or delete */
                 if (newrowstash->state != STATE_UNDO) {
                     newrowstash->state = STATE_UNDO;
-                    if (newrowstash->created)
-                        netsnmp_table_dataset_delete_row(datatable, newrow);
-                    else
+                    if (newrowstash->deleted) {
+                        if (row)
+                            netsnmp_table_dataset_remove_and_delete_row(datatable, row);
+                    } else if (newrowstash->created) {
+                            netsnmp_table_dataset_add_row(datatable, row);
+                    } else {
                         netsnmp_table_dataset_replace_row(datatable,
                                                           newrow, row);
+                    }
                 }
-                /* XXXWWW: free new row */
-                
+                netsnmp_table_dataset_delete_row(newrow);
                 break;
 
             case MODE_SET_COMMIT:
-                /* XXXWWW: free replaced row */
+                if (newrowstash->state != STATE_COMMIT) {
+                    newrowstash->state = STATE_COMMIT;
+                    netsnmp_table_dataset_delete_row(row);
+                    if (newrowstash->deleted) {
+                        netsnmp_table_dataset_delete_row(newrow);
+                    }
+                }
                 break;
 
             case MODE_SET_FREE:
-                /* hmmm....  */
-                /* nothing to do */
+                if (newrowstash->state != STATE_FREE) {
+                    newrowstash->state = STATE_FREE;
+                    netsnmp_table_dataset_delete_row(newrow);
+                }
                 break;
         }
     }
@@ -708,23 +761,64 @@ netsnmp_table_dataset_replace_row(netsnmp_table_data_set *table,
     netsnmp_table_data_replace_row(table->table, origrow, newrow);
 }
 
-/** deletes a row (and all it's data) from a dataset table */
+/** deletes a single dataset table data.
+ *  returns the (possibly still good) next pointer of the deleted data object.
+ */
+inline netsnmp_table_data_set_storage *
+netsnmp_table_dataset_delete_data(netsnmp_table_data_set_storage *data) 
+{
+    netsnmp_table_data_set_storage *nextPtr = NULL;
+    if (data) {
+        nextPtr = data->next;
+        SNMP_FREE(data->data.voidp);
+    }
+    SNMP_FREE(data);
+    return nextPtr;
+}
+
+/* deletes all the data from this node and beyond in the linked list */
 inline void
-netsnmp_table_dataset_delete_row(netsnmp_table_data_set *table,
+netsnmp_table_dataset_delete_all_data(netsnmp_table_data_set_storage *data)
+{
+    
+    while(data) {
+        data = netsnmp_table_dataset_delete_data(data);
+    }
+}
+
+/* deletes all the data from this node and beyond in the linked list */
+inline void
+netsnmp_table_dataset_delete_row(netsnmp_table_row *row)
+{
+    netsnmp_table_data_set_storage *data;
+
+    if (!row)
+        return;
+    
+    data = netsnmp_table_data_delete_row(row);
+    netsnmp_table_dataset_delete_all_data(data);
+}
+
+/** removes a row from the table, but doesn't delete/free anything */
+inline void
+netsnmp_table_dataset_remove_row(netsnmp_table_data_set *table,
                                  netsnmp_table_row *row)
 {
     
-    netsnmp_table_data_set_storage *datatmp;
+    netsnmp_table_data_remove_and_delete_row(table->table, row);
+}
+
+/** removes a row from the table and then deletes it (and all it's data) */
+inline void
+netsnmp_table_dataset_remove_and_delete_row(netsnmp_table_data_set *table,
+                                            netsnmp_table_row *row)
+{
+    
     netsnmp_table_data_set_storage *data =
         (netsnmp_table_data_set_storage *)
-        netsnmp_table_data_delete_row(table->table, row);
+        netsnmp_table_data_remove_and_delete_row(table->table, row);
 
-    while(data) {
-        SNMP_FREE(data->data.voidp);
-        datatmp = data->next;
-        free(data);
-        data = datatmp;
-    }
+    netsnmp_table_dataset_delete_all_data(data);
 }
 
 /** adds multiple data column definitions to each row.  Functionally,
