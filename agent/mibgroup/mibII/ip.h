@@ -17,7 +17,9 @@ config_arch_require(linux, mibII/kernel_linux)
 extern void	init_ip (void);
 extern FindVarMethod var_ip;
 
+#ifdef USING_MIBII_AT_MODULE
 #include "at.h"		/* for var_atEntry() */
+#endif
 
 
 #define IPFORWARDING	0
