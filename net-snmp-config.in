@@ -6,13 +6,22 @@
 # link against the net-snmp libraries and hence must know about any
 # other libraries that must be linked in as well.
 
+prefix=@prefix@
+exec_prefix=@exec_prefix@
+NSC_LDFLAGS="@LDFLAGS@"
+NSC_LIBDIR=-L@libdir@
+NSC_LIBS="@LIBS@"
+NSC_AGENTLIBS="@AGENTLIBS@"
+NSC_PREFIX=@prefix@
+NSC_EXEC_PREFIC=@exec_prefix@
+NSC_SRCDIR=@srcdir@
+NSC_BASE_SUBAGENT_LIBS="-lnetsnmpagent -lnetsnmphelpers -lnetsnmp"
 NSC_BASE_AGENT_LIBS="-lnetsnmpagent -lnetsnmpmibs -lnetsnmphelpers -lnetsnmp"
+NSC_SRC_LIBDIRS="agent/.libs snmplib/.libs agent/helpers/.libs"
 
 if test "x$1" = "x"; then
   usage="yes"
 else
-  exec_prefix=@exec_prefix@
-  prefix=@exec_prefix@
   case $1 in
     --debug-tokens)
       echo "find NET-SNMP-SOURCE-DIR -name \"*.c\" -print | xargs grep DEBUGMSGT | grep \\\" | cut -f 2 -d\\\" | sort -u"
@@ -26,32 +35,69 @@ else
     --snmpd-module-list)
       echo @MODULE_LIST@
       ;;
+    #################################################### compile
     --base-cflags)
       echo @CFLAGS@ @CPPFLAGS@ -I@includedir@
       ;;
     --cflags)
       echo @CFLAGS@ @DEVFLAGS@ @CPPFLAGS@ -I. -I@includedir@
       ;;
-    --agent-libs)
-      # use this one == --netsnmp-agent-libs + --external-libs
-      echo @LDFLAGS@ -L@libdir@ $NSC_BASE_AGENT_LIBS @AGENTLIBS@
+    --srcdir)
+      echo $NSC_SRCDIR
       ;;
+    #################################################### linking
+    --lib-dir)
+      echo $NSC_LIBDIR
+      ;;
+    --ldflags)
+      echo $NSC_LDFLAGS
+      ;;
+    --build-lib-dirs)
+      shift
+      build_dir=$1
+      if test "x$build_dir" = "x" ; then
+         echo "You must specify a build directory."
+         exit 1
+      fi
+      # make sure we are in a build dir
+      if ! test -d $build_dir/snmplib/.libs ; then
+         echo "$build_dir does not appear to be a build directory."
+         exit 1
+      fi
+      for dir in $NSC_SRC_LIBDIRS; do
+          result="$result -L$build_dir/$dir"
+      done
+      echo $result
+      ;;
+    #################################################### client lib
     --libs)
       # use this one == --netsnmp-libs + --external-libs
-      echo @LDFLAGS@ -L@libdir@ -lnetsnmp @LIBS@
-      ;;
-    --external-libs)
-      echo @LDFLAGS@ @LIBS@
-      ;;
-    --external-agent-libs)
-      echo @LDFLAGS@ @AGENTLIBS@
+      echo $NSC_LDFLAGS $NSC_LIBDIR -lnetsnmp $NSC_LIBS
       ;;
     --netsnmp-libs)
-      echo -L@libdir@ -lnetsnmp
+      echo $NSC_LIBDIR -lnetsnmp
+      ;;
+    --external-libs)
+      echo $NSC_LDFLAGS $NSC_LIBS
+      ;;
+    #################################################### agent lib
+    --base-agent-libs)
+      echo $NSC_BASE_AGENT_LIBS
+      ;;
+    --base-subagent-libs)
+      echo $NSC_BASE_SUBAGENT_LIBS
+      ;;
+    --agent-libs)
+      # use this one == --netsnmp-agent-libs + --external-libs
+      echo $NSC_LDFLAGS $NSC_LIBDIR $NSC_BASE_AGENT_LIBS $NSC_AGENTLIBS
       ;;
     --netsnmp-agent-libs)
-      echo -L@libdir@ $NSC_BASE_AGENT_LIBS
+      echo $NSC_LIBDIR $NSC_BASE_AGENT_LIBS
       ;;
+    --external-agent-libs)
+      echo $NSC_LDFLAGS $NSC_AGENTLIBS
+      ;;
+    ####################################################
     --version)
       echo @VERSION@
       ;;
@@ -59,10 +105,10 @@ else
       usage="yes"
       ;;
     --prefix)
-      echo @prefix@
+      echo $NSC_PREFIX
       ;;
     --exec-prefix)
-      echo @exec_prefix@
+      echo $NSC_EXEC_PREFIX
       ;;
     --create-snmpv3-user)
       if @PSCMD@ | egrep ' snmpd *$' > /dev/null 2>&1 ; then
@@ -322,8 +368,7 @@ EOF
         echo "Ack.  Can't create $tmpfile."
 	exit 1
       fi
-      prefix=@prefix@
-      cmd="@CC@ $cflags @CFLAGS@ @DEVFLAGS@ -I. -I@includedir@ -o $outname $tmpfile $cfiles @LDFLAGS@ -L@exec_prefix@/lib -lnetsnmpagent -lnetsnmphelpers -lnetsnmpmibs -lnetsnmp @AGENTLIBS@ $ldflags"
+      cmd="@CC@ $cflags @CFLAGS@ @DEVFLAGS@ -I. -I@includedir@ -o $outname $tmpfile $cfiles $NSC_LDFLAGS -L$NSC_EXEC_PREFIX/lib -lnetsnmpagent -lnetsnmphelpers -lnetsnmpmibs -lnetsnmp $NSC_AGENTLIBS $ldflags"
       echo "running: $cmd"
       `$cmd`
       if test "x$norm" != "x1" ; then
@@ -364,16 +409,28 @@ if test "x$usage" = "xyes"; then
   echo "  building external SNMP applications:"
   echo ""
   echo "    --base-cflags     lists additional compilation flags needed"
-  echo "                      for external applications (excludes -I. and"
-  echo "                      extra developer warning flags, if any)"
   echo "    --cflags          lists additional compilation flags needed"
+  echo "                      (includes -I. and extra developer warning flags)"
+  echo ""
+  echo "  These options produce the various link flags needed when"
+  echo "  building external SNMP applications:"
+  echo ""
   echo "    --libs            lists libraries needed for building applications"
   echo "    --agent-libs      lists libraries needed for building subagents"
   echo ""
-  echo "    --netsnmp-libs        lists netsnmp specific libraries"
-  echo "    --external-libs       lists libraries needed by netsnmp libs"
-  echo "    --netsnmp-agent-libs  lists netsnmp specific agent libraries"
-  echo "    --external-agent-libs lists libraries needed by netsnmp libs"
+  echo "  These options produce various link flags broken down into parts."
+  echo "  (Most of the time the simple options above should be used.)"
+  echo ""
+  echo "    --libdir              path to netsnmp libraries"
+  echo ""
+  echo "    --base-agent-libs     netsnmp specific agent libraries"
+  echo ""
+  echo "    --netsnmp-libs        netsnmp specific libraries (with path)"
+  echo "    --netsnmp-agent-libs  netsnmp specific agent libraries (with path)"
+  echo ""
+  echo "    --ldflags             link flags for external libraries"
+  echo "    --external-libs       external libraries needed by netsnmp libs"
+  echo "    --external-agent-libs external libraries needed by netsnmp agent libs"
   echo ""
   echo "  Automatted subagent building (produces an OUTPUTNAME binary file):"
   echo "  [this feature has not been tested very well yet.  use at your risk.]"
