@@ -215,7 +215,6 @@ var_lmSensorsTable(struct variable *vp,
 {
     static long     long_ret;
     static unsigned char string[SPRINT_MAX_LEN];
-    int             i;  /* generates a variable not used error message in Solaris - that's OK */
 
     int             s_index;
     int             s_type = -1;
@@ -313,7 +312,7 @@ sensor_init(void)
     if (!fp)
         return 1;
 
-    if (res = sensors_init(fp))
+    if ((res = sensors_init(fp)))
         return 2;
 
     _sensor_load(t); /* I'll let the linux people decide whether they want to load right away */
@@ -962,10 +961,10 @@ else{
     for (i = 0; i < N_TYPES; i++)
         sensor_array[i].n = 0;
 
-    while (chip = sensors_get_detected_chips(&chip_nr)) {
+    while ((chip = sensors_get_detected_chips(&chip_nr))) {
 	int             a = 0;
 	int             b = 0;
-        while (data = sensors_get_all_features(*chip, &a, &b)) {
+        while ((data = sensors_get_all_features(*chip, &a, &b))) {
             char           *label = NULL;
             double          val;
 
