@@ -2,9 +2,8 @@
 
 /* this is not good enough before freebsd3! */
 #undef HAVE_NET_IF_MIB_H
-#ifdef _PATH_UTMP
-#define UTMP_FILE _PATH_UTMP
-#else
+#ifndef _PATH_UTMP
+#undef UTMP_FILE
 #define UTMP_FILE "/var/run/utmp"
 #endif
 #undef PROC_SYMBOL
