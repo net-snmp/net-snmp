@@ -124,9 +124,11 @@ snmp_parse_args_descriptions(FILE * outf)
             "  -m MIB[:...]\t\tload given list of MIBs (ALL loads everything)\n");
     fprintf(outf,
             "  -M DIR[:...]\t\tlook in given list of directories for MIBs\n");
+#ifndef DISABLE_MIB_LOADING
     fprintf(outf,
             "  -P MIBOPTS\t\tToggle various defaults controlling MIB parsing:\n");
     snmp_mib_toggle_options_usage("\t\t\t  ", outf);
+#endif
     fprintf(outf,
             "  -O OUTOPTS\t\tToggle various defaults controlling output display:\n");
     snmp_out_toggle_options_usage("\t\t\t  ", outf);
@@ -237,6 +239,7 @@ snmp_parse_args(int argc,
             netsnmp_config_remember(optarg);
             break;
 
+#ifndef DISABLE_MIB_LOADING
         case 'm':
             setenv("MIBS", optarg, 1);
             break;
@@ -244,6 +247,7 @@ snmp_parse_args(int argc,
         case 'M':
             netsnmp_set_mib_directory(optarg);
             break;
+#endif /* DISABLE_MIB_LOADING */
 
         case 'O':
             cp = snmp_out_toggle_options(optarg);
@@ -263,6 +267,7 @@ snmp_parse_args(int argc,
             }
             break;
 
+#ifndef DISABLE_MIB_LOADING
         case 'P':
             cp = snmp_mib_toggle_options(optarg);
             if (cp != NULL) {
@@ -271,6 +276,7 @@ snmp_parse_args(int argc,
                 return (-1);
             }
             break;
+#endif /* DISABLE_MIB_LOADING */
 
         case 'D':
             debug_register_tokens(optarg);

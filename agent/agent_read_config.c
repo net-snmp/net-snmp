@@ -241,11 +241,6 @@ init_agent_read_config(const char *app)
     register_app_config_handler("agentaddress",
                                 snmpd_set_agent_address, NULL,
                                 "SNMP bind address");
-    register_app_config_handler("table",
-                                netsnmp_config_parse_table_set, NULL,
-                                "tableoid");
-    register_app_config_handler("add_row", netsnmp_config_parse_add_row,
-                                NULL, "indexes... values...");
     netsnmp_ds_register_config(ASN_BOOLEAN, app, "quit", 
 			       NETSNMP_DS_APPLICATION_ID,
 			       NETSNMP_DS_AGENT_QUIT_IMMEDIATELY);

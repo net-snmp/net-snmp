@@ -40,6 +40,8 @@ SOFTWARE.
 ******************************************************************/
 #include <net-snmp/net-snmp-config.h>
 
+#ifndef DISABLE_MIB_LOADING
+
 #include <stdio.h>
 #if HAVE_STDLIB_H
 #include <stdlib.h>
@@ -5276,3 +5278,5 @@ tree_from_node(struct tree *tp, struct node *np)
 
     set_function(tp);
 }
+
+#endif /* DISABLE_MIB_LOADING */

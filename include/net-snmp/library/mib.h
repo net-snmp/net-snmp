@@ -167,7 +167,12 @@ SOFTWARE.
                                             netsnmp_variable_list *
                                             variable);
 
-    struct tree    *netsnmp_sprint_realloc_objid_tree(u_char ** buf,
+#ifndef DISABLE_MIB_LOADING
+    struct tree    *
+#else
+    void
+#endif
+                    netsnmp_sprint_realloc_objid_tree(u_char ** buf,
                                                       size_t * buf_len,
                                                       size_t * out_len,
                                                       int allow_realloc,
