@@ -62,8 +62,45 @@ SOFTWARE.
 #include "snmp_api.h"
 #include "snmp_impl.h" /* to define ERROR_MSG */
 
+u_char	*asn_parse_int (u_char *data, size_t *datalength, u_char *type, long *intp, size_t intsize){
+  return(asn_dparse_int(        data, datalength, type, intp, intsize, PARSE_PACKET ));
+}
+u_char	*asn_parse_unsigned_int (u_char *data, size_t *datalength, u_char *type, u_long *intp, size_t intsize){
+  return(asn_dparse_unsigned_int(        data, datalength, type, intp, intsize, PARSE_PACKET ));
+}
+u_char	*asn_parse_string (u_char *data, size_t *datalength, u_char *type, u_char *string, size_t *strlength){
+  return(asn_dparse_string(        data, datalength, type, string, strlength,   PARSE_PACKET ));
+}
+u_char	*asn_parse_header (u_char *data, size_t *datalength, u_char *type){
+  return(asn_dparse_header(        data, datalength, type,                      PARSE_PACKET ));
+}
+u_char	*asn_parse_length (u_char *data, u_long *length){
+  return(asn_dparse_length(        data, length,                                PARSE_PACKET ));
+}
+u_char	*asn_parse_objid (u_char *data, size_t *datalength, u_char *type, oid *objid, size_t *objidlength){
+  return(asn_dparse_objid(        data, datalength, type,    objid, objidlength, PARSE_PACKET ));
+}
+u_char	*asn_parse_null  (u_char *data, size_t *datalength, u_char *type){
+  return(asn_dparse_null (        data, datalength, type,                       PARSE_PACKET ));
+}
+u_char	*asn_parse_float (u_char *data, size_t *datalength, u_char *type, float *floatp, size_t floatsize){
+  return(asn_dparse_float(        data, datalength, type,   floatp, floatsize,  PARSE_PACKET ));
+}
+u_char	*asn_parse_double (u_char *data, size_t *datalength, u_char *type, double *doublep, size_t doublesize){
+  return(asn_dparse_double(        data, datalength, type, doublep, doublesize, PARSE_PACKET ));
+}
+u_char	*asn_parse_bitstring      (u_char *data, size_t *datalength, u_char *type, u_char *string, size_t *strlength){
+  return(asn_dparse_bitstring     (        data, datalength, type, string, strlength, PARSE_PACKET ));
+}
+u_char	*asn_parse_unsigned_int64 (u_char *data, size_t *datalength, u_char *type, struct counter64 *cp, size_t countersize){
+  return(asn_dparse_unsigned_int64(        data, datalength, type, cp, countersize,   PARSE_PACKET ));
+}
+u_char	*asn_parse_signed_int64   (u_char *data, size_t *datalength, u_char *type, struct counter64 *cp, size_t countersize){
+  return(asn_dparse_signed_int64  (        data, datalength, type, cp, countersize,   PARSE_PACKET ));
+}
+
 /*
- * asn_parse_int - pulls a long out of an ASN int type.
+ * asn_dparse_int - pulls a long out of an ASN int type.
  *  On entry, datalength is input as the number of valid bytes following
  *   "data".  On exit, it is returned as the number of valid bytes
  *   following the end of this object.
@@ -72,7 +109,7 @@ SOFTWARE.
  *   of this object (i.e. the start of the next object).
  *  Returns NULL on any error.
 
-  u_char * asn_parse_int(
+  u_char * asn_dparse_int(
       u_char     *data         IN - pointer to start of object
       int        *datalength   IN/OUT - number of valid bytes left in buffer
       u_char     *type         OUT - asn type of object
@@ -81,11 +118,12 @@ SOFTWARE.
 */
 
 u_char *
-asn_parse_int(u_char *data,
+asn_dparse_int(u_char *data,
 	      size_t *datalength,
 	      u_char *type,
 	      long *intp,
-	      size_t intsize)
+	      size_t intsize,
+	      int action)
 {
 /*
  * ASN.1 integer ::= 0x02 asnlength byte {byte}*
@@ -93,13 +131,16 @@ asn_parse_int(u_char *data,
     register u_char *bufp = data;
     u_long	    asn_length;
     register long   value = 0;
+    int i;
 
     if (intsize != sizeof (long)){
 	ERROR_MSG("not long");
 	return NULL;
     }
+    if ( action == DUMP_PACKET )
+	printf("ASN Integer\t %.2x", *bufp);
     *type = *bufp++;
-    bufp = asn_parse_length(bufp, &asn_length);
+    bufp = asn_dparse_length(bufp, &asn_length, action);
     if (bufp == NULL){
 	ERROR_MSG("bad length");
 	return NULL;
@@ -115,15 +156,26 @@ asn_parse_int(u_char *data,
     *datalength -= (int)asn_length + (bufp - data);
     if (*bufp & 0x80)
 	value = -1; /* integer is negative */
+
+    if ( action == DUMP_PACKET ) {
+        printf("\t");
+	for ( i = 0 ; i < asn_length ; i++ )
+	     printf(" %.2x", *(bufp+i));
+    }
+
     while(asn_length--)
 	value = (value << 8) | *bufp++;
+
+    if ( action == DUMP_PACKET )
+	printf("\t = %d\n", value);
+
     *intp = value;
     return bufp;
 }
 
 
 /*
- * asn_parse_unsigned_int - pulls an unsigned long out of an ASN int type.
+ * asn_dparse_unsigned_int - pulls an unsigned long out of an ASN int type.
  *  On entry, datalength is input as the number of valid bytes following
  *   "data".  On exit, it is returned as the number of valid bytes
  *   following the end of this object.
@@ -132,7 +184,7 @@ asn_parse_int(u_char *data,
  *   of this object (i.e. the start of the next object).
  *  Returns NULL on any error.
 
-  u_char * asn_parse_unsigned_int(
+  u_char * asn_dparse_unsigned_int(
       u_char     *data         IN - pointer to start of object
       int        *datalength   IN/OUT - number of valid bytes left in buffer
       u_char     *type         OUT - asn type of object
@@ -140,11 +192,12 @@ asn_parse_int(u_char *data,
       int         intsize      IN - size of output buffer
  */
 u_char *
-asn_parse_unsigned_int(u_char *data,
+asn_dparse_unsigned_int(u_char *data,
 		       size_t *datalength,
 		       u_char *type,
 		       u_long *intp,
-		       size_t intsize)
+		       size_t intsize,
+	      int action)
 {
 /*
  * ASN.1 integer ::= 0x02 asnlength byte {byte}*
@@ -152,13 +205,16 @@ asn_parse_unsigned_int(u_char *data,
     register u_char *bufp = data;
     u_long	    asn_length;
     register u_long value = 0;
+    int i;
 
     if (intsize != sizeof (long)){
 	ERROR_MSG("not long");
 	return NULL;
     }
+    if ( action == DUMP_PACKET )
+	printf("ASN UInteger\t %.2x", *bufp);
     *type = *bufp++;
-    bufp = asn_parse_length(bufp, &asn_length);
+    bufp = asn_dparse_length(bufp, &asn_length, action);
     if (bufp == NULL){
 	ERROR_MSG("bad length");
 	return NULL;
@@ -175,8 +231,19 @@ asn_parse_unsigned_int(u_char *data,
     *datalength -= (int)asn_length + (bufp - data);
     if (*bufp & 0x80)
 	value = ~value; /* integer is negative */
+
+    if ( action == DUMP_PACKET ) {
+	printf("\t");
+	for ( i = 0 ; i < asn_length ; i++ )
+	     printf(" %.2x", *(bufp+i));
+    }
+
     while(asn_length--)
 	value = (value << 8) | *bufp++;
+
+    if ( action == DUMP_PACKET )
+	printf("\t = %d\n", value);
+
     *intp = value;
     return bufp;
 }
@@ -320,7 +387,7 @@ asn_build_unsigned_int(u_char *data,
 
 
 /*
- * asn_parse_string - pulls an octet string out of an ASN octet string type.
+ * asn_dparse_string - pulls an octet string out of an ASN octet string type.
  *  On entry, datalength is input as the number of valid bytes following
  *   "data".  On exit, it is returned as the number of valid bytes
  *   following the beginning of the next object.
@@ -331,7 +398,7 @@ asn_build_unsigned_int(u_char *data,
  *   of this object (i.e. the start of the next object).
  *  Returns NULL on any error.
  *
- * u_char * asn_parse_string(
+ * u_char * asn_dparse_string(
  *     u_char     *data         IN - pointer to start of object
  *     int        *datalength   IN/OUT - number of valid bytes left in buffer
  *     u_char     *type         OUT - asn type of object
@@ -344,17 +411,21 @@ asn_build_unsigned_int(u_char *data,
  * cmpdstring		::= 0x24 asnlength string {string}*
  */
 u_char *
-asn_parse_string(u_char *data,
+asn_dparse_string(u_char *data,
 		 size_t *datalength,
 		 u_char *type,
 		 u_char *string,
-		 size_t *strlength)
+		 size_t *strlength,
+	      int action)
 {
     u_char *bufp = data;
     u_long  asn_length;
+    int i;
 
+    if ( action == DUMP_PACKET )
+	printf("ASN String\t %.2x", *bufp);
     *type = *bufp++;
-    bufp = asn_parse_length(bufp, &asn_length);
+    bufp = asn_dparse_length(bufp, &asn_length, action);
     if (bufp == NULL)
 	return NULL;
     if ((asn_length + (bufp - data)) > (u_long)(*datalength)){
@@ -365,6 +436,18 @@ asn_parse_string(u_char *data,
 	ERROR_MSG("I don't support such long strings");
 	return NULL;
     }
+
+    if ( action == DUMP_PACKET ) {
+	if ( asn_length != 0 )
+	    printf("\t");
+	for ( i = 0 ; i < asn_length ; i++ )
+	     printf(" %.2x", *(bufp+i));
+	printf("\t = %c", '"');
+	for ( i = 0 ; i < asn_length ; i++ )
+	     printf(" %c", *(bufp+i));
+	printf("%c\n", '"');
+    }
+
     memmove(string, bufp, asn_length);
     *strlength = (int)asn_length;
     *datalength -= (int)asn_length + (bufp - data);
@@ -421,7 +504,7 @@ asn_build_string(u_char *data,
 
 
 /*
- * asn_parse_header - interprets the ID and length of the current object.
+ * asn_dparse_header - interprets the ID and length of the current object.
  *  On entry, datalength is input as the number of valid bytes following
  *   "data".  On exit, it is returned as the number of valid bytes
  *   in this object following the id and length.
@@ -429,15 +512,16 @@ asn_build_string(u_char *data,
  *  Returns a pointer to the first byte of the contents of this object.
  *  Returns NULL on any error.
 
-  u_char * asn_parse_header(
+  u_char * asn_dparse_header(
       u_char     *data         IN - pointer to start of object
       int        *datalength   IN/OUT - number of valid bytes left in buffer
       u_char     *type         OUT - asn type of object
  */
 u_char *
-asn_parse_header(u_char	*data,
+asn_dparse_header(u_char	*data,
 		 size_t *datalength,
-		 u_char	*type)
+		 u_char	*type,
+	      int action)
 {
     register u_char *bufp = data;
     register int    header_len;
@@ -448,8 +532,10 @@ asn_parse_header(u_char	*data,
 	ERROR_MSG("can't process ID >= 30");
 	return NULL;
     }
+    if ( action == DUMP_PACKET )
+	printf("ASN Header\t %.2x", *bufp);
     *type = *bufp;
-    bufp = asn_parse_length(bufp + 1, &asn_length);
+    bufp = asn_dparse_length(bufp + 1, &asn_length, action);
     if (bufp == NULL)
 	return NULL;
     header_len = bufp - data;
@@ -461,6 +547,9 @@ asn_parse_header(u_char	*data,
 
     if ((*type == ASN_OPAQUE) &&
         (*bufp == ASN_OPAQUE_TAG1)) {
+      if ( action == DUMP_PACKET )
+	printf("\tOpaque %.2x %.2x\n", *bufp, *(bufp+1));
+
       /* check if 64-but counter */
       switch(*(bufp+1)) {
         case ASN_OPAQUE_COUNTER64:
@@ -477,7 +566,7 @@ asn_parse_header(u_char	*data,
           return bufp;
       }
       /* value is encoded as special format */
-      bufp = asn_parse_length(bufp + 2, &asn_length);
+      bufp = asn_dparse_length(bufp + 2, &asn_length, action);
       if (bufp == NULL)
         return NULL;
       header_len = bufp - data;
@@ -492,7 +581,7 @@ asn_parse_header(u_char	*data,
 
     return bufp;
 
-}  /* end asn_parse_header() */
+}  /* end asn_dparse_header() */
 
 
 
@@ -567,22 +656,27 @@ asn_build_sequence(u_char *data,
 }
 
 /*
- * asn_parse_length - interprets the length of the current object.
+ * asn_dparse_length - interprets the length of the current object.
  *  On exit, length contains the value of this length field.
  *
  *  Returns a pointer to the first byte after this length
  *  field (aka: the start of the data field).
  *  Returns NULL on any error.
 
-  u_char * asn_parse_length(
+  u_char * asn_dparse_length(
       u_char     *data         IN - pointer to start of length field
       u_long     *length       OUT - value of length field
  */
 u_char *
-asn_parse_length(u_char  *data,
-		 u_long  *length)
+asn_dparse_length(u_char  *data,
+		 u_long  *length,
+	      int action)
 {
     register u_char lengthbyte = *data;
+    int i;
+
+    if ( action == DUMP_PACKET )
+	printf(" %.2x", *data);
 
     if (lengthbyte & ASN_LONG_LEN){
 	lengthbyte &= ~ASN_LONG_LEN;	/* turn MSb off */
@@ -595,9 +689,20 @@ asn_parse_length(u_char  *data,
 	    return NULL;
 	}
 	*length = 0;  /* protect against short lengths */
+
+    if ( action == DUMP_PACKET ) {
+	printf("\t");
+	for ( i = 0 ; i < lengthbyte ; i++ )
+	     printf(" %.2x", *(data+1+i));
+    }
+
 	memmove(length, data + 1, lengthbyte);
 	*length = ntohl(*length);
 	*length >>= (8 * ((sizeof(u_long)) - lengthbyte));
+
+        if ( action == DUMP_PACKET )
+	    printf("\t = Length %d\n", *length);
+
 	return data + lengthbyte + 1;
     } else { /* short asnlength */
 	*length = (long)lengthbyte;
@@ -648,7 +753,7 @@ asn_build_length(u_char *data,
 }
 
 /*
- * asn_parse_objid - pulls an object indentifier out of an ASN object identifier type.
+ * asn_dparse_objid - pulls an object indentifier out of an ASN object identifier type.
  *  On entry, datalength is input as the number of valid bytes following
  *   "data".  On exit, it is returned as the number of valid bytes
  *   following the beginning of the next object.
@@ -659,7 +764,7 @@ asn_build_length(u_char *data,
  *   of this object (i.e. the start of the next object).
  *  Returns NULL on any error.
 
-  u_char * asn_parse_objid(
+  u_char * asn_dparse_objid(
       u_char     *data         IN - pointer to start of object
       int        *datalength   IN/OUT - number of valid bytes left in buffer
       u_char     *type         OUT - asn type of object
@@ -667,11 +772,12 @@ asn_build_length(u_char *data,
       int        *objidlength  IN/OUT - number of sub-id's in objid
  */
 u_char *
-asn_parse_objid(u_char *data,
+asn_dparse_objid(u_char *data,
 		size_t *datalength,
 		u_char *type,	
 		oid *objid,
-		size_t *objidlength)
+		size_t *objidlength,
+	      int action)
 {
 /*
  * ASN.1 objid ::= 0x06 asnlength subidentifier {subidentifier}*
@@ -684,9 +790,12 @@ asn_parse_objid(u_char *data,
     register u_long subidentifier;
     register long   length;
     u_long	    asn_length;
+    int i;
 
+    if ( action == DUMP_PACKET )
+	printf("ASN Object ID\t %.2x", *bufp);
     *type = *bufp++;
-    bufp = asn_parse_length(bufp, &asn_length);
+    bufp = asn_dparse_length(bufp, &asn_length, action);
     if (bufp == NULL)
 	return NULL;
     if ((asn_length + (bufp - data)) > (u_long)(*datalength)){
@@ -701,6 +810,14 @@ asn_parse_objid(u_char *data,
 
     length = asn_length;
     (*objidlength)--;	/* account for expansion of first byte */
+
+    if ( action == DUMP_PACKET ) {
+	printf("\t");
+	for ( i = 0 ; i < asn_length ; i++ )
+	     printf(" %.2x", *(bufp+i));
+	printf("\n");
+    }
+
     while (length > 0 && (*objidlength)-- > 0){
 	subidentifier = 0;
 	do {	/* shift and add in low order 7 bits */
@@ -871,7 +988,7 @@ asn_build_objid(u_char *data,
 }
 
 /*
- * asn_parse_null - Interprets an ASN null type.
+ * asn_dparse_null - Interprets an ASN null type.
  *  On entry, datalength is input as the number of valid bytes following
  *   "data".  On exit, it is returned as the number of valid bytes
  *   following the beginning of the next object.
@@ -880,15 +997,16 @@ asn_build_objid(u_char *data,
  *   of this object (i.e. the start of the next object).
  *  Returns NULL on any error.
 
-  u_char * asn_parse_null(
+  u_char * asn_dparse_null(
       u_char     *data         IN - pointer to start of object
       int        *datalength   IN/OUT - number of valid bytes left in buffer
       u_char     *type         OUT - asn type of object
  */
 u_char *
-asn_parse_null(u_char *data,
+asn_dparse_null(u_char *data,
 	       size_t *datalength,
-	       u_char *type)
+	       u_char *type,
+	      int action)
 {
 /*
  * ASN.1 null ::= 0x05 0x00
@@ -896,8 +1014,10 @@ asn_parse_null(u_char *data,
     register u_char   *bufp = data;
     u_long	    asn_length;
 
+    if ( action == DUMP_PACKET )
+	printf("ASN NULL\t %.2x", *bufp);
     *type = *bufp++;
-    bufp = asn_parse_length(bufp, &asn_length);
+    bufp = asn_dparse_length(bufp, &asn_length, action);
     if (bufp == NULL)
 	return NULL;
     if (asn_length != 0){
@@ -936,7 +1056,7 @@ asn_build_null(u_char *data,
 }
 
 /*
- * asn_parse_bitstring - pulls a bitstring out of an ASN bitstring type.
+ * asn_dparse_bitstring - pulls a bitstring out of an ASN bitstring type.
  *  On entry, datalength is input as the number of valid bytes following
  *   "data".  On exit, it is returned as the number of valid bytes
  *   following the beginning of the next object.
@@ -947,7 +1067,7 @@ asn_build_null(u_char *data,
  *   of this object (i.e. the start of the next object).
  *  Returns NULL on any error.
 
-  u_char * asn_parse_bitstring(
+  u_char * asn_dparse_bitstring(
       u_char     *data         IN - pointer to start of object
       size_t     *datalength   IN/OUT - number of valid bytes left in buffer
       u_char     *type         OUT - asn type of object
@@ -955,20 +1075,24 @@ asn_build_null(u_char *data,
       size_t     *strlength    IN/OUT - size of output buffer
  */
 u_char *
-asn_parse_bitstring(u_char *data,
+asn_dparse_bitstring(u_char *data,
 		    size_t *datalength,
 		    u_char *type,
 		    u_char *string,
-		    size_t *strlength)
+		    size_t *strlength,
+	      int action)
 {
 /*
  * bitstring ::= 0x03 asnlength unused {byte}*
  */
     register u_char *bufp = data;
     u_long	    asn_length;
+    int i;
 
+    if ( action == DUMP_PACKET )
+	printf("ASN Bitstring\t %.2x", *bufp);
     *type = *bufp++;
-    bufp = asn_parse_length(bufp, &asn_length);
+    bufp = asn_dparse_length(bufp, &asn_length, action);
     if (bufp == NULL)
 	return NULL;
     if ((asn_length + (bufp - data)) > (u_long)(*datalength)){
@@ -987,6 +1111,14 @@ asn_parse_bitstring(u_char *data,
 	ERROR_MSG("Invalid bitstring");
 	return NULL;
     }
+
+    if ( action == DUMP_PACKET ) {
+	printf("\t");
+	for ( i = 0 ; i < asn_length ; i++ )
+	     printf(" %.2x", *(bufp+i));
+	printf("\n");
+    }
+
     memmove(string, bufp, asn_length);
     *strlength = (int)asn_length;
     *datalength -= (int)asn_length + (bufp - data);
@@ -1038,7 +1170,7 @@ asn_build_bitstring(u_char *data,
 
 
 /*
- * asn_parse_unsigned_int64 - pulls a 64 bit unsigned long out of an ASN int
+ * asn_dparse_unsigned_int64 - pulls a 64 bit unsigned long out of an ASN int
  * type.
  *  On entry, datalength is input as the number of valid bytes following
  *   "data".  On exit, it is returned as the number of valid bytes
@@ -1048,7 +1180,7 @@ asn_build_bitstring(u_char *data,
  *   of this object (i.e. the start of the next object).
  *  Returns NULL on any error.
 
-  u_char * asn_parse_unsigned_int64(
+  u_char * asn_dparse_unsigned_int64(
       u_char     *data         IN - pointer to start of object
       int        *datalength   IN/OUT - number of valid bytes left in buffer
       u_char     *type         OUT - asn type of object
@@ -1056,11 +1188,12 @@ asn_build_bitstring(u_char *data,
       int         countersize  IN - size of output buffer
  */
 u_char *
-asn_parse_unsigned_int64(u_char *data,
+asn_dparse_unsigned_int64(u_char *data,
 			 size_t *datalength,
 			 u_char *type, 
 			 struct counter64 *cp,
-			 size_t countersize)
+			 size_t countersize,
+	      int action)
 {
 /*
  * ASN.1 integer ::= 0x02 asnlength byte {byte}*
@@ -1069,13 +1202,16 @@ asn_parse_unsigned_int64(u_char *data,
     u_long	    asn_length;
     register u_long low = 0, high = 0;
     int intsize = 4;
+    int i;
     
     if (countersize != sizeof(struct counter64)){
 	ERROR_MSG("not right size");
 	return NULL;
     }
+    if ( action == DUMP_PACKET )
+	printf("ASN UInt64\t %.2x", *bufp);
     *type = *bufp++;
-    bufp = asn_parse_length(bufp, &asn_length);
+    bufp = asn_dparse_length(bufp, &asn_length, action);
     if (bufp == NULL){
 	ERROR_MSG("bad length");
 	return NULL;
@@ -1091,10 +1227,13 @@ asn_parse_unsigned_int64(u_char *data,
 	    (*bufp == ASN_OPAQUE_TAG1) &&
 	    ((*(bufp+1) == ASN_OPAQUE_COUNTER64) ||
              (*(bufp+1) == ASN_OPAQUE_U64))) {
+      if ( action == DUMP_PACKET )
+	printf("\tOpaque %.2x %.2x\n", *bufp, *(bufp+1));
+
 	/* change type to Counter64 or U64 */
         *type = *(bufp+1);
         /* value is encoded as special format */
-	bufp = asn_parse_length(bufp + 2, &asn_length);
+	bufp = asn_dparse_length(bufp + 2, &asn_length, action);
         if (bufp == NULL)
             return NULL;
         if ((int)(asn_length + (bufp - data)) > *datalength){
@@ -1113,10 +1252,22 @@ asn_parse_unsigned_int64(u_char *data,
 	low = ~low; /* integer is negative */
 	high = ~high;
     }
+
+    if ( action == DUMP_PACKET ) {
+	printf("\t");
+	for ( i = 0 ; i < asn_length ; i++ )
+	     printf(" %.2x", *(bufp+i));
+    }
+
     while(asn_length--){
 	high = (high << 8) | ((low & 0xFF000000) >> 24);
 	low = (low << 8) | *bufp++;
     }
+
+    if ( action == DUMP_PACKET ) {
+	printf("\t = %d %d\n", high, low );
+    }
+
     cp->low = low;
     cp->high = high;
     return bufp;
@@ -1245,7 +1396,7 @@ asn_build_unsigned_int64(u_char *data,
 
 /*
 
-  u_char * asn_parse_signed_int64(
+  u_char * asn_dparse_signed_int64(
       u_char     *data         IN - pointer to start of object
       int        *datalength   IN/OUT - number of valid bytes left in buffer
       u_char     *type         OUT - asn type of object
@@ -1254,23 +1405,27 @@ asn_build_unsigned_int64(u_char *data,
  */
 
 u_char *
-asn_parse_signed_int64(u_char *data,
+asn_dparse_signed_int64(u_char *data,
 		       size_t *datalength,
 		       u_char *type,
 		       struct counter64 *cp,
-		       size_t countersize)
+		       size_t countersize,
+	      int action)
 {
   register u_char *bufp = data;
   u_long	    asn_length;
   register u_int low = 0, high = 0;
   int intsize = 4;
+  int i;
     
   if (countersize != sizeof(struct counter64)){
     ERROR_MSG("not right size");
     return NULL;
   }
+    if ( action == DUMP_PACKET )
+	printf("ASN Int64\t %.2x", *bufp);
   *type = *bufp++;
-  bufp = asn_parse_length(bufp, &asn_length);
+  bufp = asn_dparse_length(bufp, &asn_length, action);
   if (bufp == NULL){
     ERROR_MSG("bad length");
     return NULL;
@@ -1283,10 +1438,13 @@ asn_parse_signed_int64(u_char *data,
       (asn_length <= ASN_OPAQUE_COUNTER64_MX_BER_LEN) &&
       (*bufp == ASN_OPAQUE_TAG1) &&
        (*(bufp+1) == ASN_OPAQUE_I64)) {
+      if ( action == DUMP_PACKET )
+	printf("\tOpaque %.2x %.2x\n", *bufp, *(bufp+1));
+
     /* change type to Int64 */
     *type = *(bufp+1);
     /* value is encoded as special format */
-    bufp = asn_parse_length(bufp + 2, &asn_length);
+    bufp = asn_dparse_length(bufp + 2, &asn_length, action);
     if (bufp == NULL)
       return NULL;
     if ((int)(asn_length + (bufp - data)) > *datalength){
@@ -1309,10 +1467,22 @@ asn_parse_signed_int64(u_char *data,
     low = ~low; /* integer is negative */
     high = ~high;
   }
+
+  if ( action == DUMP_PACKET ) {
+	printf("\t");
+	for ( i = 0 ; i < asn_length ; i++ )
+	     printf(" %.2x", *(bufp+i));
+  }
+
   while(asn_length--){
     high = (high << 8) | ((low & 0xFF000000) >> 24);
     low = (low << 8) | *bufp++;
   }
+
+  if ( action == DUMP_PACKET ) {
+	printf("\t = %d %d\n", high, low );
+  }
+
   cp->low = low;
   cp->high = high;
   return bufp;
@@ -1390,7 +1560,7 @@ asn_build_signed_int64(u_char *data,
 }
 
 /*
- * asn_parse_float - pulls a single precision floating-point out of an opaque type.
+ * asn_dparse_float - pulls a single precision floating-point out of an opaque type.
  *
  *  On entry, datalength is input as the number of valid bytes following
  *   "data".  On exit, it is returned as the number of valid bytes
@@ -1400,7 +1570,7 @@ asn_build_signed_int64(u_char *data,
  *   of this object (i.e. the start of the next object).
  *  Returns NULL on any error.
 
-  u_char * asn_parse_float(
+  u_char * asn_dparse_float(
       u_char     *data         IN - pointer to start of object
       int        *datalength   IN/OUT - number of valid bytes left in buffer
       u_char     *type         OUT - asn type of object
@@ -1408,11 +1578,12 @@ asn_build_signed_int64(u_char *data,
       int         floatsize    IN - size of output buffer
  */
 u_char *
-asn_parse_float(u_char *data,
+asn_dparse_float(u_char *data,
 		size_t *datalength,
 		u_char *type,
 		float *floatp,
-		size_t floatsize)
+		size_t floatsize,
+	      int action)
 {
     register u_char *bufp = data;
     u_long	    asn_length;
@@ -1421,13 +1592,16 @@ asn_parse_float(u_char *data,
 	long   longVal;
 	u_char c[sizeof(float)];
     } fu;
+    int i;
 
     if (floatsize != sizeof(float)){
 	ERROR_MSG("not right size");
 	return NULL;
     }
+    if ( action == DUMP_PACKET )
+	printf("ASN Float\t %.2x", *bufp);
     *type = *bufp++;
-    bufp = asn_parse_length(bufp, &asn_length);
+    bufp = asn_dparse_length(bufp, &asn_length, action);
     if (bufp == NULL){
 	ERROR_MSG("bad length");
 	return NULL;
@@ -1441,8 +1615,11 @@ asn_parse_float(u_char *data,
             (asn_length == ASN_OPAQUE_FLOAT_BER_LEN) &&
 	    (*bufp == ASN_OPAQUE_TAG1) &&
 	    (*(bufp+1) == ASN_OPAQUE_FLOAT)) {
+      if ( action == DUMP_PACKET )
+	printf("\tOpaque %.2x %.2x\n", *bufp, *(bufp+1));
+
         /* value is encoded as special format */
-	bufp = asn_parse_length(bufp + 2, &asn_length);
+	bufp = asn_dparse_length(bufp + 2, &asn_length, action);
         if (bufp == NULL)
             return NULL;
         if ((int)(asn_length + (bufp - data)) > *datalength){
@@ -1462,6 +1639,13 @@ asn_parse_float(u_char *data,
 
    /* correct for endian differences */
     fu.longVal = ntohl(fu.longVal);	
+
+    if ( action == DUMP_PACKET ) {
+	printf("\t");
+	for ( i = 0 ; i < asn_length ; i++ )
+	     printf(" %.2x", *(bufp+i));
+	printf("\t = %f\n", fu.longVal);
+    }
 
     *floatp =  fu.floatVal;
 
@@ -1531,7 +1715,7 @@ asn_build_float(u_char *data,
 
 /*
 
-  u_char * asn_parse_double(
+  u_char * asn_dparse_double(
       u_char     *data         IN - pointer to start of object
       int        *datalength   IN/OUT - number of valid bytes left in buffer
       u_char     *type         OUT - asn type of object
@@ -1539,11 +1723,12 @@ asn_build_float(u_char *data,
       int         doublesize   IN - size of output buffer
  */
 u_char *
-asn_parse_double(u_char *data,
+asn_dparse_double(u_char *data,
 		 size_t *datalength,
 		 u_char *type,
 		 double *doublep,
-		 size_t doublesize)
+		 size_t doublesize,
+	      int action)
 {
     register u_char *bufp = data;
     u_long	    asn_length;
@@ -1553,14 +1738,17 @@ asn_parse_double(u_char *data,
         int    intVal[2];
 	u_char c[sizeof(double)];
     } fu;
+    int i;
     
 
     if (doublesize != sizeof(double)){
 	ERROR_MSG("not right size");
 	return NULL;
     }
+    if ( action == DUMP_PACKET )
+	printf("ASN Double\t %.2x", *bufp);
     *type = *bufp++;
-    bufp = asn_parse_length(bufp, &asn_length);
+    bufp = asn_dparse_length(bufp, &asn_length, action);
     if (bufp == NULL){
 	ERROR_MSG("bad length");
 	return NULL;
@@ -1574,8 +1762,11 @@ asn_parse_double(u_char *data,
             (asn_length == ASN_OPAQUE_DOUBLE_BER_LEN) &&
 	    (*bufp == ASN_OPAQUE_TAG1) &&
 	    (*(bufp+1) == ASN_OPAQUE_DOUBLE)) {
+      if ( action == DUMP_PACKET )
+	printf("\tOpaque %.2x %.2x\n", *bufp, *(bufp+1));
+
         /* value is encoded as special format */
-	bufp = asn_parse_length(bufp + 2, &asn_length);
+	bufp = asn_dparse_length(bufp + 2, &asn_length, action);
         if (bufp == NULL)
             return NULL;
         if ((int)(asn_length + (bufp - data)) > *datalength){
@@ -1599,6 +1790,14 @@ asn_parse_double(u_char *data,
     fu.intVal[0] = ntohl(fu.intVal[1]);
     fu.intVal[1] = tmp;
     	
+
+    if ( action == DUMP_PACKET ) {
+	printf("\t");
+	for ( i = 0 ; i < asn_length ; i++ )
+	     printf(" %.2x", *(bufp+i));
+	printf("\t = %f\n", fu.doubleVal);
+    }
+
     *doublep =  fu.doubleVal;
 
     return bufp;

@@ -285,6 +285,8 @@ u_char * cmu_snmp_parse (struct snmp_session *session,
 
 char *uptime_string (u_long, char *);
 void xdump (const u_char *, size_t, const char *);
+u_char *snmp_dparse_var_op (u_char *, oid *, size_t *, u_char *, size_t *,
+                               u_char **, size_t *, int);
 u_char *snmp_parse_var_op (u_char *, oid *, size_t *, u_char *, size_t *,
                                u_char **, size_t *);
 u_char *snmp_build_var_op (u_char *, oid *, size_t *, u_char, size_t, u_char *,

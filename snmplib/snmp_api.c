@@ -110,6 +110,8 @@ SOFTWARE.
 #include "snmp_alarm.h"
 #include "default_store.h"
 
+#include "agentx.h"
+
 static void init_snmp_session (void);
 #include "transform_oids.h"
 
@@ -2157,12 +2159,20 @@ snmp_parse_version (u_char *data, size_t length)
   return version;
 }
 
+
 int
-snmpv3_parse(
+snmpv3_parse( struct snmp_pdu *pdu, u_char *data, size_t *length, u_char **after_header)
+{
+    return(snmpv3_dparse( pdu, data, length, after_header, PARSE_PACKET));
+}
+
+int
+snmpv3_dparse(
      struct snmp_pdu	 *pdu,
      u_char 		 *data,
      size_t 		 *length,
-     u_char 		**after_header)
+     u_char 		**after_header,
+     int                  action)
 {
   u_char	 type, msg_flags;
   long		 ver, msg_max_size, msg_sec_model;
@@ -2184,7 +2194,7 @@ snmpv3_parse(
 
   /* message is an ASN.1 SEQUENCE
    */
-  data = asn_parse_header(data, length, &type);
+  data = asn_dparse_header(data, length, &type, action);
   if (data == NULL){
     ERROR_MSG("bad header");
     snmp_increment_statistic(STAT_SNMPINASNPARSEERRS);
@@ -2198,7 +2208,7 @@ snmpv3_parse(
 
   /* parse msgVersion
    */
-  data = asn_parse_int(data, length, &type, &ver, sizeof(ver));
+  data = asn_dparse_int(data, length, &type, &ver, sizeof(ver), action);
   if (data == NULL){
     ERROR_MSG("bad parse of version");
     snmp_increment_statistic(STAT_SNMPINASNPARSEERRS);
@@ -2210,7 +2220,7 @@ snmpv3_parse(
    */
   cp	  = data;
   asn_len = *length;
-  data	  = asn_parse_header(data, &asn_len, &type);
+  data	  = asn_dparse_header(data, &asn_len, &type, action);
   if (data == NULL){
     ERROR_MSG("bad header");
     snmp_increment_statistic(STAT_SNMPINASNPARSEERRS);
@@ -2224,7 +2234,7 @@ snmpv3_parse(
   *length -= data - cp;  /* subtract off the length of the header */
 
   /* msgID */
-  data = asn_parse_int(data, length, &type, &pdu->msgid, sizeof(pdu->msgid));
+  data = asn_dparse_int(data, length, &type, &pdu->msgid, sizeof(pdu->msgid), action);
   if (data == NULL) {
     ERROR_MSG("error parsing msgID");
     snmp_increment_statistic(STAT_SNMPINASNPARSEERRS);
@@ -2232,8 +2242,8 @@ snmpv3_parse(
   }
 
   /* msgMaxSize */
-  data = asn_parse_int(data, length, &type, &msg_max_size,
-		       sizeof(msg_max_size));
+  data = asn_dparse_int(data, length, &type, &msg_max_size,
+		       sizeof(msg_max_size), action);
   if (data == NULL) {
     ERROR_MSG("error parsing msgMaxSize");
     snmp_increment_statistic(STAT_SNMPINASNPARSEERRS);
@@ -2242,7 +2252,7 @@ snmpv3_parse(
 
   /* msgFlags */
   tmp_buf_len = SNMP_MAX_MSG_SIZE;
-  data = asn_parse_string(data, length, &type, tmp_buf, &tmp_buf_len);
+  data = asn_dparse_string(data, length, &type, tmp_buf, &tmp_buf_len, action);
   if (data == NULL || tmp_buf_len != 1) {
     ERROR_MSG("error parsing msgFlags");
     snmp_increment_statistic(STAT_SNMPINASNPARSEERRS);
@@ -2255,8 +2265,8 @@ snmpv3_parse(
     pdu->flags &= (~SNMP_MSG_FLAG_RPRT_BIT);
 
   /* msgSecurityModel */
-  data = asn_parse_int(data, length, &type, &msg_sec_model,
-		       sizeof(msg_sec_model));
+  data = asn_dparse_int(data, length, &type, &msg_sec_model,
+		       sizeof(msg_sec_model), action);
   if (data == NULL) {
     ERROR_MSG("error parsing msgSecurityModel");
     snmp_increment_statistic(STAT_SNMPINASNPARSEERRS);
@@ -2304,13 +2314,13 @@ snmpv3_parse(
 			       &pdu->securityStateRef);
 
   if (ret_val != USM_ERR_NO_ERROR) {
-    snmpv3_scopedPDU_parse(pdu, cp, &pdu_buf_len);
+    snmpv3_scopedPDU_dparse(pdu, cp, &pdu_buf_len, action);
     return ret_val;
   }
   
   /* parse plaintext ScopedPDU sequence */
   *length = pdu_buf_len;
-  data = snmpv3_scopedPDU_parse(pdu, cp, length);
+  data = snmpv3_scopedPDU_dparse(pdu, cp, length, action);
   if (data == NULL) {
     snmp_increment_statistic(STAT_SNMPINASNPARSEERRS);
     return SNMPERR_ASN_PARSE_ERR;
@@ -2323,7 +2333,7 @@ snmpv3_parse(
     *after_header	 = data;
   }
 
-  ret = snmp_pdu_parse(pdu, data, length);
+  ret = snmp_pdu_dparse(pdu, data, length, action);
 
   if (after_header != NULL)
     *length = tmp_buf_len;
@@ -2491,6 +2501,15 @@ snmp_parse(struct snmp_session *session,
     u_char community[COMMUNITY_MAX_LEN];
     size_t community_length = COMMUNITY_MAX_LEN;
     int result = -1;
+    int action = PARSE_PACKET;
+
+    if ( pdu == NULL ) {
+	action = DUMP_PACKET;
+	printf("\n");
+	pdu = (struct snmp_pdu *)malloc(sizeof( struct snmp_pdu ));
+	memset( pdu, 0, sizeof( struct snmp_pdu ));
+		/* XXX: memory leak */
+    }
 
     snmp_errno = SNMPERR_BAD_PARSE;
     session->s_snmp_errno = SNMPERR_BAD_PARSE;
@@ -2506,9 +2525,9 @@ snmp_parse(struct snmp_session *session,
         DEBUGMSGTL(("snmp_api","Parsing SNMPv%d message...\n", (1 + pdu->version)));
 
 	/* authenticates message and returns length if valid */
-	data = snmp_comstr_parse(data, &length,
+	data = snmp_comstr_dparse(data, &length,
                                  community, &community_length,
-			         &pdu->version);
+			         &pdu->version, action);
 	if (data == NULL)
 	    return -1;
         if (pdu->version != session->version &&
@@ -2534,7 +2553,7 @@ snmp_parse(struct snmp_session *session,
 	    if (data == NULL)
 		return 0; /* COMMENT OR CHANGE YYXX not an error ? */
 	}
-	result = snmp_pdu_parse(pdu, data, &length);
+	result = snmp_pdu_dparse(pdu, data, &length, action);
         break;
 
     case SNMP_VERSION_2p:
@@ -2557,15 +2576,15 @@ snmp_parse(struct snmp_session *session,
 	pdu->securityModel = SNMP_SEC_MODEL_SNMPv2p;
 
 	/* authenticates message and returns length if valid */
-	data = snmp_party_parse(data, &length, pdu,
-				FIRST_PASS | LAST_PASS);
+	data = snmp_party_dparse(data, &length, pdu,
+				FIRST_PASS | LAST_PASS, action);
 
 	result = snmp_pdu_parse(pdu, data, &length);
         break;
 #endif /* USE_V2PARTY_PROTOCOL */
 
     case SNMP_VERSION_3:
-      result = snmpv3_parse(pdu, data, &length, NULL);
+      result = snmpv3_dparse(pdu, data, &length, NULL, action);
       if (!result) {
 	DEBUGMSGTL(("snmp_parse",
                    "Parsed SNMPv3 message (secName:%s, secLevel:%s).\n",
@@ -2607,6 +2626,8 @@ snmp_parse(struct snmp_session *session,
         break;
     }
 
+    if ( action == DUMP_PACKET )
+	free( pdu );
     if (result == 0) {
       snmp_errno = 0;
       session->s_snmp_errno = 0;
@@ -2617,6 +2638,11 @@ snmp_parse(struct snmp_session *session,
 
 int
 snmp_pdu_parse(struct snmp_pdu *pdu, u_char  *data, size_t *length) {
+   return(snmp_pdu_dparse(pdu, data, length, PARSE_PACKET));
+}
+
+int
+snmp_pdu_dparse(struct snmp_pdu *pdu, u_char  *data, size_t *length, int action) {
   u_char  type;
   u_char  msg_type;
   u_char  *var_val;
@@ -2631,7 +2657,7 @@ snmp_pdu_parse(struct snmp_pdu *pdu, u_char  *data, size_t *length) {
   badtype = 0;
 
   /* Get the PDU type */
-  data = asn_parse_header(data, length, &msg_type);
+  data = asn_dparse_header(data, length, &msg_type, action);
   if (data == NULL)
     return -1;
   pdu->command = msg_type;
@@ -2642,8 +2668,8 @@ snmp_pdu_parse(struct snmp_pdu *pdu, u_char  *data, size_t *length) {
 	case SNMP_MSG_TRAP:
     /* enterprise */
     pdu->enterprise_length = MAX_OID_LEN;
-    data = asn_parse_objid(data, length, &type, objid,
-			   &pdu->enterprise_length);
+    data = asn_dparse_objid(data, length, &type, objid,
+			   &pdu->enterprise_length, action);
     if (data == NULL)
       return -1;
     pdu->enterprise = (oid *)malloc(pdu->enterprise_length * sizeof(oid));
@@ -2651,26 +2677,26 @@ snmp_pdu_parse(struct snmp_pdu *pdu, u_char  *data, size_t *length) {
 
     /* agent-addr */
     four = 4;
-    data = asn_parse_string(data, length, &type,
+    data = asn_dparse_string(data, length, &type,
 			    (u_char *)&pduIp->sin_addr.s_addr,
-			    &four);
+			    &four, action);
     if (data == NULL)
       return -1;
 
     /* generic trap */
-    data = asn_parse_int(data, length, &type, (long *)&pdu->trap_type,
-			 sizeof(pdu->trap_type));
+    data = asn_dparse_int(data, length, &type, (long *)&pdu->trap_type,
+			 sizeof(pdu->trap_type), action);
     if (data == NULL)
       return -1;
     /* specific trap */
-    data = asn_parse_int(data, length, &type, (long *)&pdu->specific_type,
-			 sizeof(pdu->specific_type));
+    data = asn_dparse_int(data, length, &type, (long *)&pdu->specific_type,
+			 sizeof(pdu->specific_type), action);
     if (data == NULL)
       return -1;
 
     /* timestamp  */
-    data = asn_parse_unsigned_int(data, length, &type, &pdu->time,
-				  sizeof(pdu->time));
+    data = asn_dparse_unsigned_int(data, length, &type, &pdu->time,
+				  sizeof(pdu->time), action);
     if (data == NULL)
       return -1;
 
@@ -2685,24 +2711,24 @@ snmp_pdu_parse(struct snmp_pdu *pdu, u_char  *data, size_t *length) {
     /* PDU is not an SNMPv1 TRAP */
 
     /* request id */
-    data = asn_parse_int(data, length, &type, &pdu->reqid,
-			 sizeof(pdu->reqid));
+    data = asn_dparse_int(data, length, &type, &pdu->reqid,
+			 sizeof(pdu->reqid), action);
     if (data == NULL) {
       ERROR_MSG(strcat(strcpy(err, "parsing request-id: "), snmp_detail));
       return -1;
     }
 
     /* error status (getbulk non-repeaters) */
-    data = asn_parse_int(data, length, &type, &pdu->errstat,
-			 sizeof(pdu->errstat));
+    data = asn_dparse_int(data, length, &type, &pdu->errstat,
+			 sizeof(pdu->errstat), action);
     if (data == NULL) {
       ERROR_MSG(strcat(strcpy(err, "parsing error status: "), snmp_detail));
       return -1;
     }
 
     /* error index (getbulk max-repetitions) */
-    data = asn_parse_int(data, length, &type, &pdu->errindex,
-			 sizeof(pdu->errindex));
+    data = asn_dparse_int(data, length, &type, &pdu->errindex,
+			 sizeof(pdu->errindex), action);
     if (data == NULL) {
       ERROR_MSG(strcat(strcpy(err, "parsing error index: "), snmp_detail));
       return -1;
@@ -2710,7 +2736,7 @@ snmp_pdu_parse(struct snmp_pdu *pdu, u_char  *data, size_t *length) {
   }
 
   /* get header for variable-bindings sequence */
-  data = asn_parse_header(data, length, &type);
+  data = asn_dparse_header(data, length, &type, action);
   if (data == NULL)
     return -1;
   if (type != (u_char)(ASN_SEQUENCE | ASN_CONSTRUCTOR))
@@ -2734,8 +2760,8 @@ snmp_pdu_parse(struct snmp_pdu *pdu, u_char  *data, size_t *length) {
     vp->val.string = NULL;
     vp->name_length = MAX_OID_LEN;
     vp->name = 0;
-    data = snmp_parse_var_op(data, objid, &vp->name_length, &vp->type,
-			     &vp->val_len, &var_val, length);
+    data = snmp_dparse_var_op(data, objid, &vp->name_length, &vp->type,
+			     &vp->val_len, &var_val, length, action);
     if (data == NULL)
       return -1;
     if (snmp_set_var_objid(vp, objid, vp->name_length))
@@ -2746,9 +2772,9 @@ snmp_pdu_parse(struct snmp_pdu *pdu, u_char  *data, size_t *length) {
     case ASN_INTEGER:
       vp->val.integer = (long *)vp->buf;
       vp->val_len = sizeof(long);
-      asn_parse_int(var_val, &len, &vp->type,
+      asn_dparse_int(var_val, &len, &vp->type,
 		    (long *)vp->val.integer,
-		    sizeof(vp->val.integer));
+		    sizeof(vp->val.integer), action);
       break;
     case ASN_COUNTER:
     case ASN_GAUGE:
@@ -2756,9 +2782,9 @@ snmp_pdu_parse(struct snmp_pdu *pdu, u_char  *data, size_t *length) {
     case ASN_UINTEGER:
       vp->val.integer = (long *)vp->buf;
       vp->val_len = sizeof(u_long);
-      asn_parse_unsigned_int(var_val, &len, &vp->type,
+      asn_dparse_unsigned_int(var_val, &len, &vp->type,
 			     (u_long *)vp->val.integer,
-			     sizeof(vp->val.integer));
+			     sizeof(vp->val.integer), action);
       break;
 #ifdef OPAQUE_SPECIAL_TYPES
     case ASN_OPAQUE_COUNTER64:
@@ -2767,31 +2793,31 @@ snmp_pdu_parse(struct snmp_pdu *pdu, u_char  *data, size_t *length) {
     case ASN_COUNTER64:
       vp->val.counter64 = (struct counter64 *)vp->buf;
       vp->val_len = sizeof(struct counter64);
-      asn_parse_unsigned_int64(var_val, &len, &vp->type,
+      asn_dparse_unsigned_int64(var_val, &len, &vp->type,
 			       (struct counter64 *)vp->val.counter64,
-			       sizeof(*vp->val.counter64));
+			       sizeof(*vp->val.counter64), action);
       break;
 #ifdef OPAQUE_SPECIAL_TYPES
     case ASN_OPAQUE_FLOAT:
       vp->val.floatVal = (float *)vp->buf;
       vp->val_len = sizeof(float);
-      asn_parse_float(var_val, &len, &vp->type,
+      asn_dparse_float(var_val, &len, &vp->type,
 		      vp->val.floatVal,
-		      vp->val_len);
+		      vp->val_len, action);
       break;
     case ASN_OPAQUE_DOUBLE:
       vp->val.doubleVal = (double *)vp->buf;
       vp->val_len = sizeof(double);
-      asn_parse_double(var_val, &len, &vp->type,
+      asn_dparse_double(var_val, &len, &vp->type,
 		       vp->val.doubleVal,
-		       vp->val_len);
+		       vp->val_len, action);
       break;
     case ASN_OPAQUE_I64:
       vp->val.counter64 = (struct counter64 *)vp->buf;
       vp->val_len = sizeof(struct counter64);
-      asn_parse_signed_int64(var_val, &len, &vp->type,
+      asn_dparse_signed_int64(var_val, &len, &vp->type,
 			     (struct counter64 *)vp->val.counter64,
-			     sizeof(*vp->val.counter64));
+			     sizeof(*vp->val.counter64), action);
 
       break;
 #endif /* OPAQUE_SPECIAL_TYPES */
@@ -2804,12 +2830,12 @@ snmp_pdu_parse(struct snmp_pdu *pdu, u_char  *data, size_t *length) {
         } else {
           vp->val.string = (u_char *)malloc((unsigned)vp->val_len);
         }
-        asn_parse_string(var_val, &len, &vp->type, vp->val.string,
-                         &vp->val_len);
+        asn_dparse_string(var_val, &len, &vp->type, vp->val.string,
+                         &vp->val_len, action);
         break;
       case ASN_OBJECT_ID:
         vp->val_len = MAX_OID_LEN;
-        asn_parse_objid(var_val, &len, &vp->type, objid, &vp->val_len);
+        asn_dparse_objid(var_val, &len, &vp->type, objid, &vp->val_len, action);
         vp->val_len *= sizeof(oid);
         vp->val.objid = (oid *)malloc((unsigned)vp->val_len);
         memmove(vp->val.objid, objid, vp->val_len);
@@ -2821,8 +2847,8 @@ snmp_pdu_parse(struct snmp_pdu *pdu, u_char  *data, size_t *length) {
         break;
       case ASN_BIT_STR:
         vp->val.bitstring = (u_char *)malloc(vp->val_len);
-        asn_parse_bitstring(var_val, &len, &vp->type,
-                            vp->val.bitstring, &vp->val_len);
+        asn_dparse_bitstring(var_val, &len, &vp->type,
+                            vp->val.bitstring, &vp->val_len, action);
         break;
       default:
         fprintf(stderr,"bad type returned (%x)\n", vp->type);
@@ -2840,9 +2866,15 @@ snmp_pdu_parse(struct snmp_pdu *pdu, u_char  *data, size_t *length) {
    returns pointer to begining of PDU or NULL on error.
 */
 u_char *
-snmpv3_scopedPDU_parse(struct snmp_pdu *pdu,
+snmpv3_scopedPDU_parse(struct snmp_pdu *pdu, u_char  *cp, size_t  *length)
+{
+    return(snmpv3_scopedPDU_dparse(pdu, cp, length, PARSE_PACKET));
+}
+u_char *
+snmpv3_scopedPDU_dparse(struct snmp_pdu *pdu,
 			u_char  *cp,
-			size_t  *length)
+			size_t  *length,
+			int action)
 {
   u_char  tmp_buf[SNMP_MAX_MSG_SIZE];
   size_t  tmp_buf_len;
@@ -2852,7 +2884,7 @@ snmpv3_scopedPDU_parse(struct snmp_pdu *pdu,
 
   pdu->command = 0; /* initialize so we know if it got parsed */
   asn_len = *length;
-  data = asn_parse_header(cp, &asn_len, &type);
+  data = asn_dparse_header(cp, &asn_len, &type, action);
   if (data == NULL){
     ERROR_MSG("bad plaintext scopedPDU header");
     return NULL;
@@ -2864,8 +2896,8 @@ snmpv3_scopedPDU_parse(struct snmp_pdu *pdu,
   *length -= data - cp;
 
   /* contextEngineID from scopedPdu  */
-  data = asn_parse_string(data, length, &type, pdu->contextEngineID, 
-			  &pdu->contextEngineIDLen);
+  data = asn_dparse_string(data, length, &type, pdu->contextEngineID, 
+			  &pdu->contextEngineIDLen, action);
   if (data == NULL) {
     ERROR_MSG("error parsing contextEngineID from scopedPdu");
     return NULL;
@@ -2884,7 +2916,7 @@ snmpv3_scopedPDU_parse(struct snmp_pdu *pdu,
   /* parse contextName from scopedPdu
    */
   tmp_buf_len = SNMP_MAX_CONTEXT_SIZE;
-  data = asn_parse_string(data, length, &type, tmp_buf, &tmp_buf_len);
+  data = asn_dparse_string(data, length, &type, tmp_buf, &tmp_buf_len, action);
   if (data == NULL) {
     ERROR_MSG("error parsing contextName from scopedPdu");
     return NULL;
@@ -2901,7 +2933,7 @@ snmpv3_scopedPDU_parse(struct snmp_pdu *pdu,
 
   /* Get the PDU type */
   asn_len = *length;
-  cp = asn_parse_header(data, &asn_len, &type);
+  cp = asn_dparse_header(data, &asn_len, &type, action);
   if (cp == NULL)
     return NULL;
 
@@ -3032,6 +3064,10 @@ snmp_sess_async_send(void *sessp,
 	printf("\nSending %u bytes to %s:%hu\n", length,
 	       inet_ntoa(pduIp->sin_addr), ntohs(pduIp->sin_port));
 	xdump(packet, length, "");
+	if ( isp->hook_parse )
+	    isp->hook_parse( session, NULL, packet, length );
+	else
+	    snmp_parse( session, NULL, packet, length );
         printf("\n");
     }
 
@@ -3241,10 +3277,15 @@ snmp_sess_read(void *sessp,
                   isp->me.sa_family = AF_UNSPEC;
         return;
     }
+
     if (ds_get_boolean(DS_LIBRARY_ID, DS_LIB_DUMP_PACKET)){
 	printf("\nReceived %d bytes from %s:%hu\n", length,
 	       inet_ntoa(fromIp->sin_addr), ntohs(fromIp->sin_port));
 	xdump(packet, length, "");
+	if ( isp->hook_parse )
+	    isp->hook_parse( sp, NULL, packet, length );
+	else
+	    snmp_parse( sp, NULL, packet, length );
         printf("\n");
         if ( isp->hook_pre ) {
           if ( isp->hook_pre( sp, from ) == 0 )
@@ -3530,6 +3571,10 @@ snmp_resend_request(struct session_list *slp, struct request_list *rp,
     printf("\nResending %d bytes to %s:%hu\n", length,
 	   inet_ntoa(pduIp->sin_addr), ntohs(pduIp->sin_port));
     xdump(packet, length, "");
+    if ( isp->hook_parse )
+	isp->hook_parse( sp, NULL, packet, length );
+    else
+	snmp_parse( sp, NULL, packet, length );
     printf("\n");
   }
 

@@ -560,11 +560,14 @@ int snmp_oid_compare (const oid *, size_t, const oid *, size_t);
 void init_snmp (const char *);
 u_char *snmp_pdu_build (struct snmp_pdu *, u_char *, size_t *);
 int snmpv3_parse(struct snmp_pdu *, u_char *, size_t *, u_char  **);
+int snmpv3_dparse(struct snmp_pdu *, u_char *, size_t *, u_char  **, int);
 int snmpv3_packet_build(struct snmp_pdu *pdu, u_char *packet, size_t *out_length, u_char *pdu_data, size_t pdu_data_len);
 int snmpv3_make_report(struct snmp_pdu *pdu, int error);
 int snmpv3_get_report_type(struct snmp_pdu *pdu);
 int snmp_pdu_parse(struct snmp_pdu *pdu, u_char *data, size_t *length);
+int snmp_pdu_dparse(struct snmp_pdu *pdu, u_char *data, size_t *length, int);
 u_char* snmpv3_scopedPDU_parse(struct snmp_pdu *pdu, u_char *cp, size_t *length);
+u_char* snmpv3_scopedPDU_dparse(struct snmp_pdu *pdu, u_char *cp, size_t *length, int);
 void set_pre_parse( struct snmp_session *sp, int (*hook) (struct snmp_session *, snmp_ipaddr) );
 /*void set_pre_parse(struct snmp_session *, int* (struct snmp_session *, snmp_ipaddr);*/
 void set_parse(struct snmp_session *, int (*hook) (struct snmp_session *, struct snmp_pdu *, u_char *, size_t));
