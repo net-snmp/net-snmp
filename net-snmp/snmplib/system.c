@@ -604,6 +604,9 @@ int setenv(const char *name,
     if (cp == NULL) return -1;
     sprintf(cp, "%s=%s", name, value);
     ret = putenv(cp);
+#ifdef WIN32
+	free(cp);
+#endif
     return ret;
 }
 #endif /* HAVE_SETENV */
