@@ -140,14 +140,7 @@ ${context}_cache_load(netsnmp_container *container)
 {
     ${context}_rowreq_ctx *rowreq_ctx;
     size_t                 count = 0;
-@if $m2c_include_examples == 1@
-    
-    /*
-     * this example code is based on a data source that is a
-     * text file to be read and parsed.
-     */
-    FILE *filep;
-    char line[MAX_LINE_SIZE];
+
     /*
      * temporary storage for index values
      */
@@ -165,6 +158,15 @@ ${context}_cache_load(netsnmp_container *container)
 @    end@ # needlength
 @    include node-storage.m2i@
 @  end@ // foreach
+
+@if $m2c_include_examples == 1@
+    
+    /*
+     * this example code is based on a data source that is a
+     * text file to be read and parsed.
+     */
+    FILE *filep;
+    char line[MAX_LINE_SIZE];
 @end@ // examples
 
     DEBUGMSGTL(("verbose:${context}:${context}_cache_load","called\n"));
