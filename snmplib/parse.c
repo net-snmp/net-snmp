@@ -52,6 +52,7 @@ struct tc {	/* textual conventions */
 
 
 int Line = 1;
+int save_mib_descriptions = 0;
 
 #define SYNTAX_MASK	0x80
 /* types of tokens
@@ -562,7 +563,7 @@ getoid(fp, oid,  length)
 
     if ((type = get_token(fp, token,MAXTOKEN)) != LEFTBRACKET){
 	print_error("Expected \"{\"", token, type);
-	return NULL;
+	return 0;
     }
     type = get_token(fp, token,MAXTOKEN);
     for(count = 0; count < length; count++, oid++){
@@ -572,7 +573,7 @@ getoid(fp, oid,  length)
 	    return count;
 	} else if (type != LABEL && type != NUMBER){
 	    print_error("Not valid for object identifier", token, type);
-	    return NULL;
+	    return 0;
 	}
 	if (type == LABEL){
 	    /* this entry has a label */
@@ -586,11 +587,11 @@ getoid(fp, oid,  length)
 		    oid->subid = atoi(token);
 		    if ((type = get_token(fp, token,MAXTOKEN)) != RIGHTPAREN){
 			print_error("Unexpected a closing parenthesis", token, type);
-			return NULL;
+			return 0;
 		    }
 		} else {
 		    print_error("Expected a number", token, type);
-		    return NULL;
+		    return 0;
 		}
 	    } else {
 		continue;
@@ -612,7 +613,7 @@ free_tree(Tree)
 {
     if (Tree == NULL)
     {
-	return NULL;
+	return;
     }
 
     if (Tree->enums)
@@ -1167,10 +1168,10 @@ parse_objecttype(fp, name)
 #ifdef TEST
 printf("Description== \"%.50s\"\n", quoted_string_buffer);
 #endif
-#ifdef USE_DESCRIPTION
-	  np->description = quoted_string_buffer;
-	  quoted_string_buffer = (char *)malloc(MAXQUOTESTR);
-#endif
+          if (save_mib_descriptions) {
+	      np->description = quoted_string_buffer;
+	      quoted_string_buffer = (char *)malloc(MAXQUOTESTR);
+	  }
           break;
 
 	case REFERENCE:
@@ -1267,10 +1268,10 @@ parse_objectgroup(fp, name)
 #ifdef TEST
 printf("Description== \"%.50s\"\n", quoted_string_buffer);
 #endif
-#ifdef USE_DESCRIPTION
-	  np->description = quoted_string_buffer;
-	  quoted_string_buffer = (char *)malloc(MAXQUOTESTR);
-#endif
+          if (save_mib_descriptions) {
+	      np->description = quoted_string_buffer;
+	      quoted_string_buffer = (char *)malloc(MAXQUOTESTR);
+          }
           break;
 
         default:
@@ -1340,10 +1341,10 @@ parse_notificationDefinition(fp, name)
 #ifdef TEST
 printf("Description== \"%.50s\"\n", quoted_string_buffer);
 #endif
-#ifdef USE_DESCRIPTION
-	  np->description = quoted_string_buffer;
-	  quoted_string_buffer = (char *)malloc(MAXQUOTESTR);
-#endif
+          if (save_mib_descriptions) {
+	      np->description = quoted_string_buffer;
+	      quoted_string_buffer = (char *)malloc(MAXQUOTESTR);
+          }
           break;
 
         default:
@@ -1414,10 +1415,10 @@ parse_trapDefinition(fp, name)
 #ifdef TEST
                 printf("Description== \"%.50s\"\n", quoted_string_buffer);
 #endif
-#ifdef USE_DESCRIPTION
-		np->description = quoted_string_buffer;
-		quoted_string_buffer = (char *)malloc(MAXQUOTESTR);
-#endif
+                if (save_mib_descriptions) {
+		    np->description = quoted_string_buffer;
+		    quoted_string_buffer = (char *)malloc(MAXQUOTESTR);
+                }
 		break;
 	    case ENTERPRISE:
 		type = get_token(fp, quoted_string_buffer, MAXQUOTESTR);
@@ -2029,7 +2030,7 @@ parseQuoteString(fp, token,maxtlen)
       ch = getc(fp);
     }
 
-    return NULL;
+    return 0;
 }
 
 /*
@@ -2046,7 +2047,7 @@ tossObjectIdentifier(fp)
     type = get_token(fp, token, MAXTOKEN);
     
     if (type != LEFTBRACKET)
-	return NULL;
+	return 0;
     while (type != RIGHTBRACKET && type != ENDOFFILE)
     {
 	type = get_token(fp, token, MAXTOKEN);
@@ -2055,5 +2056,5 @@ tossObjectIdentifier(fp)
     if (type == RIGHTBRACKET)
 	return OBJID;
     else
-	return NULL;
+	return 0;
 }
