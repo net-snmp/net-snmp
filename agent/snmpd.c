@@ -113,6 +113,7 @@ typedef long    fd_mask;
 #include "mibgroup/struct.h"
 #include "mibgroup/util_funcs.h"
 #include "snmp_debug.h"
+#include "mib_modules.h"
 
 #include "snmpusm.h"
 #include "tools.h"
@@ -472,6 +473,8 @@ main(int argc, char *argv[])
     }
 
     init_agent();		/* do what we need to do first. */
+    init_mib_modules();
+    
 
     /* start library */
     init_snmp("snmpd");
