@@ -157,9 +157,9 @@ main(int argc, char *argv[])
         usage();
         exit(1);
     }
-    if ((argc - arg) > 3*MAX_COMMANDLINE_OIDS) {
+    if ((argc - arg) > 3*SNMP_MAX_CMDLINE_OIDS) {
         fprintf(stderr, "Too many assignments specified. ");
-        fprintf(stderr, "Only %d allowed in one request.\n", MAX_COMMANDLINE_OIDS);
+        fprintf(stderr, "Only %d allowed in one request.\n", SNMP_MAX_CMDLINE_OIDS);
         usage();
         exit(1);
     }
