@@ -190,6 +190,9 @@ struct snmp_session {
 
     /* security module specific */
     void    *securityInfo;
+
+   /* use as you want data */
+    void    *myvoid;
 };
 
 /*
