@@ -148,7 +148,6 @@ run_alarms(void) {
 
   /* loop through everything we have repeatedly looking for the next
      thing to call until all events are finally in the future again */
-  DEBUGMSGTL(("snmp_alarm_run_alarms","looking for alarms to run...\n"));
   while(done == 0) {
     sa_ptr = sa_find_next();
     if (sa_ptr == NULL)
@@ -169,7 +168,6 @@ run_alarms(void) {
       done = 1;
     }
   }
-  DEBUGMSGTL(("snmp_alarm_run_alarms","Done.\n"));
 }
 
 
