@@ -4,6 +4,8 @@
 
 HEADER that the agent responds properly to a kill -HUP
 
+SKIPIFNOT HAVE_SIGNAL
+
 #
 # Begin test
 #
