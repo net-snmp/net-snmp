@@ -18,9 +18,9 @@
 #else /* !IN_UCD_SNMP_SOURCE */
 
 
-#include <ucd-snmp/ucd-snmp-config.h>
+#include <net-snmp/net-snmp-config.h>
 #include <ucd-snmp/ucd-snmp-includes.h>
-#include <ucd-snmp/ucd-snmp-agent-includes.h>
+#include <net-snmp/agent/net-snmp-agent-includes.h>
 
 
 #endif /* !IN_UCD_SNMP_SOURCE */
