@@ -100,6 +100,9 @@ extern          "C" {
     netsnmp_table_data_set_storage
         *netsnmp_table_data_set_find_column(netsnmp_table_data_set_storage
                                             *, unsigned int);
+    netsnmp_table_data_set_storage
+       *netsnmp_extract_table_data_set_column(netsnmp_request_info *,
+                                              unsigned int);
     int            
         netsnmp_register_table_data_set(netsnmp_handler_registration *,
                                         netsnmp_table_data_set *,
