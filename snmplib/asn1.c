@@ -2195,8 +2195,8 @@ asn_realloc_rbuild_length(u_char ** pkt, size_t * pkt_len,
         if (((*pkt_len - *offset) < 1)
             && !(r && asn_realloc(pkt, pkt_len))) {
             snprintf(ebuf, sizeof(ebuf),
-                    "%s: bad length < 1 :%lu, %ld", errpre,
-                    *pkt_len - *offset, (unsigned long)length);
+                    "%s: bad length < 1 :%ld, %lu", errpre,
+                    (long)(*pkt_len - *offset), (unsigned long)length);
             ebuf[ sizeof(ebuf)-1 ] = 0;
             ERROR_MSG(ebuf);
             return 0;
@@ -2208,7 +2208,7 @@ asn_realloc_rbuild_length(u_char ** pkt, size_t * pkt_len,
                 && !(r && asn_realloc(pkt, pkt_len))) {
                 snprintf(ebuf, sizeof(ebuf),
                         "%s: bad length < 1 :%ld, %lu", errpre,
-                        *pkt_len - *offset, (unsigned long)length);
+                        (long)(*pkt_len - *offset), (unsigned long)length);
                 ebuf[ sizeof(ebuf)-1 ] = 0;
                 ERROR_MSG(ebuf);
                 return 0;
@@ -2221,7 +2221,7 @@ asn_realloc_rbuild_length(u_char ** pkt, size_t * pkt_len,
             if (!(r && asn_realloc(pkt, pkt_len))) {
                 snprintf(ebuf, sizeof(ebuf),
                         "%s: bad length < 1 :%ld, %lu", errpre,
-                        *pkt_len - *offset, (unsigned long)length);
+                        (long)(*pkt_len - *offset), (unsigned long)length);
                 ebuf[ sizeof(ebuf)-1 ] = 0;
                 ERROR_MSG(ebuf);
                 return 0;
@@ -2248,7 +2248,7 @@ asn_realloc_rbuild_header(u_char ** pkt, size_t * pkt_len,
             && !(r && asn_realloc(pkt, pkt_len))) {
             snprintf(ebuf, sizeof(ebuf),
                     "bad header length < 1 :%ld, %lu",
-                    *pkt_len - *offset, (unsigned long)length);
+                    (long)(*pkt_len - *offset), (unsigned long)length);
             ebuf[ sizeof(ebuf)-1 ] = 0;
             ERROR_MSG(ebuf);
             return 0;
