@@ -9058,7 +9058,8 @@
 ./ucd-snmp/lmSensors.lo: ../../include/net-snmp/agent/table_dataset.h
 ./ucd-snmp/lmSensors.lo: ../../include/net-snmp/agent/table_iterator.h
 ./ucd-snmp/lmSensors.lo: ../../include/net-snmp/agent/mib_module_config.h
-./ucd-snmp/lmSensors.lo: util_funcs.h struct.h ./ucd-snmp/lmSensors.h
+./ucd-snmp/lmSensors.lo: util_funcs.h struct.h 
+./ucd-snmp/lmSensors.lo: ./ucd-snmp/lmSensors.h
 ./ucd-snmp/loadave.lo: ../../include/net-snmp/net-snmp-config.h
 ./ucd-snmp/loadave.lo: ../../include/net-snmp/system/linux.h
 ./ucd-snmp/loadave.lo: ../../include/net-snmp/system/sysv.h
