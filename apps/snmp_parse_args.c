@@ -132,7 +132,7 @@ snmp_parse_args(int argc,
   char *Apsz = NULL;
   char *Xpsz = NULL;
   u_char buf[BUF_SIZE];
-  size_t bsize;
+  int bsize;
 
   /* initialize session to default values */
   snmp_sess_init( session );
@@ -286,7 +286,7 @@ snmp_parse_args(int argc,
           exit(1);
         }
 	if ((bsize = hex_to_binary(psz,buf)) <= 0) {
-          fprintf(stderr,"Need engine ID value after -e flag. \n");
+          fprintf(stderr,"Bad engine ID value after -e flag. \n");
           usage();
           exit(1);
 	}
@@ -306,7 +306,7 @@ snmp_parse_args(int argc,
           exit(1);
         }
 	if ((bsize = hex_to_binary(psz,buf)) <= 0) {
-          fprintf(stderr,"Need engine ID value after -E flag. \n");
+          fprintf(stderr,"Bad engine ID value after -E flag. \n");
           usage();
           exit(1);
 	}
