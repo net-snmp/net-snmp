@@ -1,0 +1,95 @@
+.TH SNMPD.CONF 1 "21 Feb 1996"
+.ds )H U.C. Davis, ECE Dept.
+.ds ]W V3.0.1
+.UC 4
+.SH NAME
+snmpd.conf       - configuration file for the ucd-snmp SNMP agent.
+snmpd.local.conf - an optional second configuration file
+.SH DESCRIPTION
+.C snmpd.conf
+and 
+.C snmpd.local.conf
+are the configuration files which define how the ucd-smnp SNMP agent
+operates.  These files may contain any of the directives found in the
+DIRECTIVES section below.  The information pertaining to the
+configuration of the agent is reported in the EXTENSIBLE-MIB, as
+defined by the EXTENSIBLE-MIB section below.
+.SH EXTENSIBLE-MIB
+.PP
+The ucd-snmp SNMP agent reports its information through queries to the
+EXTENSIBLEDOTMIB section of the mib tree.  This section of the mib
+tree is divided up as follows:
+.IP "(This section of the manual unfinished.)"
+.SH DIRECTIVES
+.IP "proc NAME"
+.IP "proc NAME MAX"
+.IP "proc NAME MAX MIN"
+Checks to see if the NAME'd processes are running on the agent's
+machine.  An error flag (1) and a description message are then passed
+to the EXTENSIBLEDOTMIB.PROCMIBNUM.ERRORFLAG and
+EXTENSIBLEDOTMIB.PROCMIBNUM.ERRORMSG mib tables (respectively) if the
+NAME'd program is not found in the process table as reported by PSCMD.
+.IP
+If MAX and MIN are not specified, MAX is assumed to be 
+.C inf
+and MIN is assumed to be 1.
+.IP
+if MIN is not specified, it is assumed to be 0.
+.IP "exec NAME PROG ARGS"
+.IP "exec MIBNUM NAME PROG ARGS"
+If MIBNUM is not specified, the agent executes the named PROG with arguments
+of ARGS and returns the exit status and STDOUT output of the program to
+queries of the the EXTENSIBLEDOTMIB.SHELLMIBNUM.ERRORFLAG and
+EXTENSIBLEDOTMIB.SHELLMIBNUM.ERRORMSG mib tables (respectively).  All
+STDOUT output beyound the first line is silently truncated.
+.IP
+If MIBNUM is specified, it acts as above but returns the exit status
+to MIBNUM.ERRORFLAG.0 and the entrire STDOUT output to the table
+MIBNUM.ERRORMSG in the mib tree.  In this case, the MIBNUM.ERRORMSG mib
+contains the entire STDOUT output, one mib table entry per line of output.
+.IP
+Note: the MIBNUM must be specified in dotted-interger notation and can
+not be specified as ".iso.org.dod.internet..." (should instead be .1.3.6.1...).
+.IP
+Note: the agent caches the exit status and STDOUT of the executed
+program for 30 seconds after the initial query.  This is to increase
+speed and maintain consistancy of information for consecutive queries.
+The cache can be flushed by a snmp-set request of integer(1) to
+EXTENSIBLEDOTMIB.VERSIONMIBNUM.VERCLEARCACHE.
+.IP "disk PATH"
+.IP "disk PATH MINSPACE"
+Checks the named disks mount at PATH for available disk space.  If the
+diskspace is less than MINSPACE (kB) if specified, or
+DEFDISKMINIMUMSPACE (kB) if not specified, the associated entry in the
+EXTENSIBLEDOTMIB.DISKMIBNUM.ERRORFLAG mib table will be set to (1) and
+a descriptive error message will be returned to queries of
+EXTENSIBLEDOTMIB.DISKMIBNUM.ERRORMSG.
+.IP "load MAX1"
+.IP "load MAX1 MAX5"
+.IP "load MAX1 MAX5 MAX15"
+Checks the load average of the machine and returns an error flag (1),
+and an text-string error message
+to queries of EXTENSIBLEDOTMIB.LOADAVEMIBNUM.ERRORFLAG and
+EXTENSIBLEDOTMIB.LOADAVEMIBNUM.ERRORMSG (respectively) when the
+1-minute, 5-minute, or 15-minute averages excede the associated
+maximum values.  If any of the MAX1, MAX5, or MAX15 values are
+unspecified, they default to a value of DEFMAXLOADAVE.
+.IP "community N STRING"
+Sets the community string in slot N to be STRING.  N must be less than
+or equal to the hard coded value of NUM_COMMUNITIES.  The default
+NUM_COMMUNITIES names are set in the source code of the agent in the
+file "agent/snmp_agent.c".
+.SH "ERRORS"
+.PP
+Any errors in obtaining the above information are reported via the
+EXTENSIBLEDOTMIB.ERRORMIBNUM.ERRORFLAG flag and the
+EXTENSIBLEDOTMIB.LOADAVEMIBNUM.ERRORMSG text-string description.
+.SH "RE-READING snmpd.conf"
+The ucd-snmp agent can be forced to re-read its configuration file.
+It can be told to do so by one of two ways:
+.IP 1.
+An snmpset of integer(1) to EXTENSIBLEDOTMIB.VERSIONMIBNUM.VERUPDATECONFIG.
+.IP 2.
+A "kill -HUP" signal sent to the snmpd agent process.
+.SH "SEE ALSO"
+snmpd(1).
