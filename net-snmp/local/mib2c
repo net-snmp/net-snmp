@@ -180,6 +180,9 @@ sub process_vars {
     $it =~ s/\$(\w+)\.(noaccess)/(($SNMP::MIB{$vars{$1}}{access} =~ \/(NoAccess)\/)?1:0)/eg;
     $it =~ s/\$(\w+)\.(objectID|label|subID|access|status|syntax)/$SNMP::MIB{$vars{$1}}{$2}/g;
     $it =~ s/\$(\w+)\.(decl)/$perltodecl{$SNMP::MIB{$vars{$1}}{type}}/g;
+    $it =~ s/\$(\w+)\.(iscolumn)/($SNMP::MIB{$vars{$1}}{'parent'}{'label'} =~ \/Entry$\/) ? 1 : 0/eg;
+    $it =~ s/\$(\w+)\.(isscalar)/($SNMP::MIB{$vars{$1}}{'parent'}{'label'} !~ \/Entry$\/) ? 1 : 0/eg;
+    $it =~ s/\$(\w+)\.(parent)/$SNMP::MIB{$vars{$1}}{'parent'}{'label'}/g;
     # normal variable substitions
     $it =~ s/\$\{(\w+)\}/$vars{$1}/g;
     $it =~ s/\$(\w+)/$vars{$1}/g;
