@@ -1272,14 +1272,20 @@ asn_build_bitstring(u_char *data,
  * ASN.1 bit string ::= 0x03 asnlength unused {byte}*
  */
     static const char *errpre = "build bitstring";
-    if (_asn_bitstring_check(errpre, strlength, *string))
+    if (_asn_bitstring_check(errpre, strlength, ((string) ? *string : 0)))
 	return NULL;
 
     data = asn_build_header(data, datalength, type, strlength);
     if (_asn_build_header_check(errpre,data,*datalength,strlength))
 	return NULL;
 
-    memmove(data, string, strlength);
+    if (strlength > 0 && string)
+        memmove(data, string, strlength);
+    else if (strlength > 0 && !string) {
+	ERROR_MSG("no string passed into asn_build_bitstring\n");
+        return NULL;
+    }
+    
     *datalength -= strlength;
     DEBUGDUMPSETUP("send", data, strlength);
     DEBUGMSG(("dumpv_send", "  Bitstring: "));
