@@ -62,6 +62,7 @@
 #include "scapi.h"
 #include "callback.h"
 #include "default_store.h"
+#include "snmp_secmod.h"
 #include "snmpusm.h"
 
 #include "transform_oids.h"
@@ -626,7 +627,22 @@ usm_set_salt (	u_char		*iv,
 }  /* end usm_set_salt() */
 
 
-
+int
+usm_secmod_generate_out_msg(struct snmp_secmod_outgoing_params *parms) {
+    if (!parms)
+        return SNMPERR_GENERR;
+    
+    return usm_generate_out_msg(parms->msgProcModel,
+                                parms->globalData, parms->globalDataLen,
+                                parms->maxMsgSize, parms->secModel,
+                                parms->secEngineID, parms->secEngineIDLen,
+                                parms->secName, parms->secNameLen,
+                                parms->secLevel,
+                                parms->scopedPdu, parms->scopedPduLen,
+                                parms->secStateRef,
+                                parms->secParams, parms->secParamsLen,
+                                parms->wholeMsg, parms->wholeMsgLen);
+}
 
 /*******************************************************************-o-******
  * usm_generate_out_msg
@@ -1155,6 +1171,22 @@ usm_generate_out_msg (
 }  /* end usm_generate_out_msg() */
 
 #ifdef USE_REVERSE_ASNENCODING
+int
+usm_secmod_rgenerate_out_msg(struct snmp_secmod_outgoing_params *parms) {
+    if (!parms)
+        return SNMPERR_GENERR;
+    
+    return usm_rgenerate_out_msg(parms->msgProcModel,
+                                parms->globalData, parms->globalDataLen,
+                                parms->maxMsgSize, parms->secModel,
+                                parms->secEngineID, parms->secEngineIDLen,
+                                parms->secName, parms->secNameLen,
+                                parms->secLevel,
+                                parms->scopedPdu, parms->scopedPduLen,
+                                parms->secStateRef,
+                                *(parms->wholeMsg), parms->wholeMsgLen);
+}
+
 int
 usm_rgenerate_out_msg (
      int      msgProcModel,	/* (UNUSED) */
@@ -2009,6 +2041,30 @@ usm_check_and_update_timeliness(
 
 
 
+int
+usm_secmod_process_in_msg (struct snmp_secmod_incoming_params *parms) {
+    if (!parms)
+        return SNMPERR_GENERR;
+       
+    return usm_process_in_msg(
+        parms->msgProcModel,
+        parms->maxMsgSize,
+        parms->secParams,
+        parms->secModel,
+        parms->secLevel,
+        parms->wholeMsg,
+        parms->wholeMsgLen,
+        parms->secEngineID,
+        parms->secEngineIDLen,
+        parms->secName,
+        parms->secNameLen,
+        parms->scopedPdu,
+        parms->scopedPduLen,
+        parms->maxSizeResponse,
+        parms->secStateRef,
+        parms->sess,
+        parms->msg_flags);
+}
 
 /*******************************************************************-o-******
  * usm_process_in_msg
@@ -2408,6 +2464,19 @@ usm_process_in_msg (
 
 void
 init_usm(void) {
+  struct snmp_secmod_def *def;
+
+  sc_init(); /* initalize scapi code */
+
+  /* register ourselves as a security service */
+  def = SNMP_MALLOC_STRUCT(snmp_secmod_def);
+  /* XXX: def->init_sess_secmod move stuff from snmp_api.c */
+  def->reverse_encode_out = usm_secmod_rgenerate_out_msg;
+  def->forward_encode_out = usm_secmod_generate_out_msg;
+  def->decode_in = usm_secmod_process_in_msg;
+  def->free_state_ref = usm_free_usmStateReference;
+  register_sec_mod(USM_SEC_MODEL_NUMBER, "usm", def);
+
   snmp_register_callback(SNMP_CALLBACK_LIBRARY,
                          SNMP_CALLBACK_POST_PREMIB_READ_CONFIG,
                          init_usm_post_config, NULL);

@@ -126,6 +126,7 @@ typedef long    fd_mask;
 #include "snmp_debug.h"
 #include "mib_modules.h"
 
+#include "snmp_secmod.h"
 #include "snmpusm.h"
 #include "tools.h"
 #include "lcd_time.h"

@@ -60,6 +60,7 @@ extern "C" {
 #define DS_LIB_OPTIONALCONFIG  5
 #define DS_LIB_APPTYPE         6
 #define DS_LIB_COMMUNITY       7
+#define DS_LIB_SECMODEL        8
 
 /* end storage definitions */
 
