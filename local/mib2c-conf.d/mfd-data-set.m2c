@@ -30,26 +30,26 @@
 @    include details-table.m2i@
 @    foreach $node externalindex@
 @        include m2c_setup_node.m2i@
-    int ${table}_${node}_check_index( ${context}_ctx *ctx );
+    int ${table}_${node}_check_index( ${context}_rowreq_ctx *rowreq_ctx );
 @    end@ # foreach externalindex
 @    foreach $node internalindex@
 @        include m2c_setup_node.m2i@
-int ${node}_check_index( ${context}_ctx *ctx );
+int ${node}_check_index( ${context}_rowreq_ctx *rowreq_ctx );
 @    end@ # foreach internalindex
 int ${context}_validate_index( ${context}_registration_ptr ${context}_reg,
-                               ${context}_ctx *ctx );
+                               ${context}_rowreq_ctx *rowreq_ctx );
 
 @    foreach $node nonindex@
 @        include m2c_setup_node.m2i@
-int ${node}_check_value( ${context}_ctx *ctx, $m2c_node_param_val);
-int ${node}_undo_setup( ${context}_ctx *ctx );
-int ${node}_set( ${context}_ctx *ctx, $m2c_node_param_val );
-int ${node}_undo( ${context}_ctx *ctx );
+int ${node}_check_value( ${context}_rowreq_ctx *rowreq_ctx, $m2c_node_param_val);
+int ${node}_undo_setup( ${context}_rowreq_ctx *rowreq_ctx );
+int ${node}_set( ${context}_rowreq_ctx *rowreq_ctx, $m2c_node_param_val );
+int ${node}_undo( ${context}_rowreq_ctx *rowreq_ctx );
 
 @    end@ # foreach nonindex
 
 @end@
-int ${context}_check_dependencies(${context}_ctx *ctx);
+int ${context}_check_dependencies(${context}_rowreq_ctx *ctx);
 
 @eval $m2c_save = "$name"@
 @eval $name = "${name}_DATA_SET"
@@ -95,13 +95,13 @@ int ${context}_check_dependencies(${context}_ctx *ctx);
  *         MFD_BAD_VALUE : the incoming value is NOT legal
  */
 int
-${table}_${node}_check_index( ${context}_ctx *ctx )
+${table}_${node}_check_index( ${context}_rowreq_ctx *rowreq_ctx )
 {
-    netsnmp_assert(NULL != ctx);
+    netsnmp_assert(NULL != rowreq_ctx);
 
     /*
      * TODO:
-     * check that index value in the table context (ctx)
+     * check that index value in the table context (rowreq_ctx)
      * for the external index $node is legal
      */
 
@@ -127,13 +127,13 @@ ${table}_${node}_check_index( ${context}_ctx *ctx )
  *         MFD_BAD_VALUE : the incoming value is NOT legal
  */
 int
-${node}_check_index( ${context}_ctx *ctx )
+${node}_check_index( ${context}_rowreq_ctx *rowreq_ctx )
 {
-    netsnmp_assert(NULL != ctx);
+    netsnmp_assert(NULL != rowreq_ctx);
 
     /*
      * TODO:
-     * check that index value in the table context (ctx)
+     * check that index value in the table context (rowreq_ctx)
      * for $node is legal
      */
 

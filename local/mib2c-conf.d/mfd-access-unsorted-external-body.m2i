@@ -11,8 +11,8 @@
 ##
 static int
 ${table}_loop_read_and_update_index( $mfd_aue_param_decl,
-                                ${table}_ref_loop *loop_ref,
-                                ${table}_ref_ctx *ctx_ref);
+                                ${context}_ref_loop_ctx *loop_ctx_ref,
+                                ${context}_ref_rowreq_ctx *rowreq_ctx_ref);
 
 /**
  * unsorted-external overview
@@ -84,31 +84,31 @@ $example_end
  *  the data. The loop context that is initialized here will be passed to
  *  ${table}_loop_get_first and ${table}_loop_get_next.
  *
- *  Set the loop context variable loop_ref->itr_ctx so that the iteration
+ *  Set the loop context variable loop_ctx_ref->loop_ctx so that the iteration
  *  functions (get_first and get_next) can locate the apropriate data
  *  context.
  *
  * More Details
  * ------------
  * @param $mfd_aue_param_cmt
- * @param loop_ref  Pointer to your loop reference.
+ * @param loop_ctx_ref  Pointer to your loop reference.
  *
  * @return MFD_SUCCESS     : success.
  *         MFD_END_OF_DATA : an empty data set.
  *         MFD_ERROR       : other error.
  */
 int
-${table}_loop_init_context( $mfd_aue_param_decl, ${table}_ref_loop *loop_ref)
+${table}_loop_init_context( $mfd_aue_param_decl, ${context}_ref_loop_ctx *loop_ctx_ref)
 {
     DEBUGTRACE;
 
-    netsnmp_assert(loop_ref);
+    netsnmp_assert(loop_ctx_ref);
     
     /*
      * allocate memory for new structure
      */
-    loop_ref->itr_ctx = SNMP_MALLOC_TYPEDEF(${table}_loop_context);
-    if(NULL == loop_ref->itr_ctx)
+    loop_ctx_ref->loop_ctx = SNMP_MALLOC_TYPEDEF(${table}_loop_context);
+    if(NULL == loop_ctx_ref->loop_ctx)
         return MFD_ERROR;
 
     /*
@@ -120,17 +120,17 @@ $example_start
     /*
      * allocate a context to use
      */
-    loop_ref->itr_ctx->ctx = ${context}_allocate_ctx();
-    if(NULL == loop_ref->itr_ctx->ctx) {
-        SNMP_FREE(loop_ref->itr_ctx);
+    loop_ctx_ref->loop_ctx->rowreq_ctx = ${context}_allocate_rowreq_ctx();
+    if(NULL == loop_ctx_ref->loop_ctx->rowreq_ctx) {
+        SNMP_FREE(loop_ctx_ref->loop_ctx);
         return MFD_ERROR; /* xxx-rks: resource unavailable? */
     }
 
     /*
      * open our data file.
      */
-    loop_ref->itr_ctx->filep = fopen("/etc/dummy.conf", "r");
-    if(NULL ==  loop_ref->itr_ctx->filep) {
+    loop_ctx_ref->loop_ctx->filep = fopen("/etc/dummy.conf", "r");
+    if(NULL ==  loop_ctx_ref->loop_ctx->filep) {
         return MFD_ERROR; /* xxx-rks: resource unavailable? */
     }
 
@@ -162,54 +162,54 @@ $example_end
  *  (In fact, if your data is already ordered in the same order as the
  *  SNMP indexes, you shouldn't be using the unsorted-access code).
  *
- *  This function should update the table index (ctx_ref->ctx->tbl_idx)
- *  values for the raw data (ctx_ref->ctx->data).
+ *  This function should update the table index (rowreq_ctx_ref->rowreq_ctx->tbl_idx)
+ *  values for the raw data (rowreq_ctx_ref->rowreq_ctx->data).
  *
  * More Details
  * ------------
  *  If there is currently no data available, return MFD_END_OF_DATA.
- *  Otherwise, you should set ctx_ref->ctx and it's indexes.
+ *  Otherwise, you should set rowreq_ctx_ref->rowreq_ctx and it's indexes.
  *
- *  ctx_ref->ctx will be NULL. You should allocate a new context
+ *  rowreq_ctx_ref->rowreq_ctx will be NULL. You should allocate a new context
  *  for this loop. [Alternatively, you could allocate one in
  *  ${table}_loop_init_context, save it in your
- *  ${table}_ref_loop, and use it here.]
+ *  ${context}_ref_loop_ctx, and use it here.]
  *
  *  Once you have your context pointer, you should set the index (or indexes)
- *  in ctx_ref->ctx->tbl_idx to the appropriate value for this row. [If you
- *  use your loop_ref cleverly, you might be able to put this work in
+ *  in rowreq_ctx_ref->rowreq_ctx->tbl_idx to the appropriate value for this row. [If you
+ *  use your loop_ctx_ref cleverly, you might be able to put this work in
  *  ${table}_loop_get_next, and simply call that function.]
  *
  * @param $mfd_aue_param_cmt
- * @param loop_ref  Pointer to your loop reference.
- * @param ctx_ref  Pointer to a context reference.
+ * @param loop_ctx_ref  Pointer to your loop reference.
+ * @param rowreq_ctx_ref  Pointer to a context reference.
  *
  * @return MFD_SUCCESS     : success.
  *         MFD_END_OF_DATA : no data available
  *         MFD_ERROR       : error.
  */
 int
-${table}_loop_get_first( $mfd_aue_param_decl, ${table}_ref_loop *loop_ref,
-                    ${table}_ref_ctx *ctx_ref)
+${table}_loop_get_first( $mfd_aue_param_decl, ${context}_ref_loop_ctx *loop_ctx_ref,
+                    ${context}_ref_rowreq_ctx *rowreq_ctx_ref)
 {
     DEBUGTRACE;
 
-    netsnmp_assert(loop_ref && loop_ref->itr_ctx);
-    netsnmp_assert(ctx_ref);
+    netsnmp_assert(loop_ctx_ref && loop_ctx_ref->loop_ctx);
+    netsnmp_assert(rowreq_ctx_ref);
         
 @if $m2c_include_examples == 1@
 $example_start
     /*
      * check for end of data
      */
-    if(NULL == loop_ref->itr_ctx->filep)
+    if(NULL == loop_ctx_ref->loop_ctx->filep)
         return MFD_END_OF_DATA;
 
 /*
  * do actual read of data in update_index, since get and get_next do
  * the same thing...
  */
-    return ${table}_loop_read_and_update_index($mfd_aue_param, loop_ref, ctx_ref);
+    return ${table}_loop_read_and_update_index($mfd_aue_param, loop_ctx_ref, rowreq_ctx_ref);
 $example_end
 @else@
     return MFD_SUCCESS;
@@ -232,30 +232,30 @@ $example_end
  *
  * More Details
  * ------------
- * ctx_ref->ctx will have been set in ${table}_loop_get_first.
+ * rowreq_ctx_ref->rowreq_ctx will have been set in ${table}_loop_get_first.
  *
  * If there is currently no data available, return MFD_END_OF_DATA.
- * Otherwise, you should set the indexes in ctx_ref->ctx->tbl_idx.
+ * Otherwise, you should set the indexes in rowreq_ctx_ref->rowreq_ctx->tbl_idx.
  *
- * You should set the index (or indexes) in ctx_ref->ctx->tbl_idx to the
+ * You should set the index (or indexes) in rowreq_ctx_ref->rowreq_ctx->tbl_idx to the
  * appropriate value for this row.
  *
  * @param $mfd_aue_param_cmt
- * @param loop_ref  Pointer to your loop reference.
- * @param ctx_ref  Pointer to a context reference.
+ * @param loop_ctx_ref  Pointer to your loop reference.
+ * @param rowreq_ctx_ref  Pointer to a context reference.
  *
  * @return MFD_SUCCESS     : success.
  *         MFD_END_OF_DATA : no more data available
  *         MFD_ERROR       : error.
  */
 int
-${table}_loop_get_next( $mfd_aue_param_decl, ${table}_ref_loop *loop_ref,
-                        ${table}_ref_ctx *ctx_ref)
+${table}_loop_get_next( $mfd_aue_param_decl, ${context}_ref_loop_ctx *loop_ctx_ref,
+                        ${context}_ref_rowreq_ctx *rowreq_ctx_ref)
 {
     DEBUGTRACE;
 
-    netsnmp_assert(loop_ref && loop_ref->itr_ctx);
-    netsnmp_assert(ctx_ref);
+    netsnmp_assert(loop_ctx_ref && loop_ctx_ref->loop_ctx);
+    netsnmp_assert(rowreq_ctx_ref);
     
     
 @if $m2c_include_examples == 1@
@@ -263,14 +263,14 @@ $example_start
     /*
      * check for end of data
      */
-    if(NULL == loop_ref->itr_ctx->filep)
+    if(NULL == loop_ctx_ref->loop_ctx->filep)
         return MFD_END_OF_DATA;
 
 /*
  * do actual read of data in update_index, since get and get_next do
  * the same thing...
  */
-    return ${table}_loop_read_and_update_index($mfd_aue_param, loop_ref, ctx_ref);
+    return ${table}_loop_read_and_update_index($mfd_aue_param, loop_ctx_ref, rowreq_ctx_ref);
 $example_end
 @else@
     return MFD_SUCCESS;
@@ -312,36 +312,38 @@ $example_end
  *
 @   end@
  * @param $mfd_aue_param_cmt
- * @param loop_ref  Reference to current loop context.
- * @param loop_save Reference to a loop context for saving the current position
- *                  If reuse is not set or loop_save->itr_ctx is NULL, allocate
+ * @param loop_ctx_ref  Reference to current loop context.
+ * @param save_loop_ctx_ref Reference to a loop context for saving the current
+ *                  position. If reuse is not set or
+ *                  save_loop_ctx_ref->loop_ctx is NULL, allocate
  *                  a new one. If reuse is set, you may reuse  the existing
- *                  itr_ctx.
- * @param reuse     Indicates if an existing loop_save->itr_ctx may be reused.
+ *                  loop_ctx.
+ * @param reuse     Indicates if an existing save_loop_ctx_ref->loop_ctx
+ *                  may be reused.
  *
  * @return MFD_SUCCESS : success.
  *         MFD_ERROR   : error.
  */
 int
 ${table}_loop_save_position($mfd_aue_param_decl,
-                       ${table}_ref_loop *loop_ref,
-                       ${table}_ref_loop *loop_save,
+                       ${context}_ref_loop_ctx *loop_ctx_ref,
+                       ${context}_ref_loop_ctx *save_loop_ctx_ref,
                        int reuse)
 {
     DEBUGTRACE;
 
-    netsnmp_assert(loop_ref && loop_save);
+    netsnmp_assert(loop_ctx_ref && save_loop_ctx_ref);
 
     /*
      * TODO:
      * 1) allocate new loop context, unless you can reuse a previous pointer.
-     * 2) save information for the position of loop_ref in loop_save.
+     * 2) save information for the position of loop_ctx_ref in save_loop_ctx_ref.
      */
 @if $m2c_include_examples == 1@
 $example_start
-    if((0 == reuse) || (NULL == loop_save->itr_ctx))
-        loop_save->itr_ctx = SNMP_MALLOC_TYPEDEF(${table}_loop_context);
-    if(NULL == loop_save->itr_ctx) {
+    if((0 == reuse) || (NULL == save_loop_ctx_ref->loop_ctx))
+        save_loop_ctx_ref->loop_ctx = SNMP_MALLOC_TYPEDEF(${table}_loop_context);
+    if(NULL == save_loop_ctx_ref->loop_ctx) {
         snmp_log(LOG_ERR, "could not allocate memory\n");
         return MFD_ERROR;
     }
@@ -350,16 +352,16 @@ $example_start
      * if you can reuse a previously saved contex, just swap
      * it out with the loop iterator
      */
-    if(reuse && loop_save->itr_ctx->ctx) {
-        ${context}_ctx * tmp_ctx = loop_save->itr_ctx->ctx;
-        loop_save->itr_ctx->ctx = loop_ref->itr_ctx->ctx;
-        loop_ref->itr_ctx->ctx = tmp_ctx;
+    if(reuse && save_loop_ctx_ref->loop_ctx->rowreq_ctx) {
+        ${context}_rowreq_ctx * tmp_rowreq_ctx = save_loop_ctx_ref->loop_ctx->rowreq_ctx;
+        save_loop_ctx_ref->loop_ctx->rowreq_ctx = loop_ctx_ref->loop_ctx->rowreq_ctx;
+        loop_ctx_ref->loop_ctx->rowreq_ctx = tmp_rowreq_ctx;
     }
     else {
         /*
          * take the current pointer
          */
-        loop_save->itr_ctx->ctx = loop_ref->itr_ctx->ctx;
+        save_loop_ctx_ref->loop_ctx->rowreq_ctx = loop_ctx_ref->loop_ctx->rowreq_ctx;
         
         /*
          * allocate a new context to replace the one you took.
@@ -369,9 +371,9 @@ $example_start
          * the current offset for writing back new values... but we are
          * trying to keep this example simple.)
          */
-        loop_ref->itr_ctx->ctx = ${context}_allocate_ctx();
-        if(NULL == loop_ref->itr_ctx->ctx) {
-            SNMP_FREE(loop_ref->itr_ctx);
+        loop_ctx_ref->loop_ctx->rowreq_ctx = ${context}_allocate_rowreq_ctx();
+        if(NULL == loop_ctx_ref->loop_ctx->rowreq_ctx) {
+            SNMP_FREE(loop_ctx_ref->loop_ctx);
             return MFD_ERROR; /* xxx-rks: resource unavailable? */
         }
     }
@@ -382,8 +384,8 @@ $example_start
 @elsif $m2c_data_transient == 1@ # short term
     /** semi-TRANSIENT data: will copy data when index found */
     /** have to save line to do that */
-    memcpy(loop_save->itr_ctx->line, loop_ref->itr_ctx->line,
-           sizeof(loop_ref->itr_ctx->line));
+    memcpy(save_loop_ctx_ref->loop_ctx->line, loop_ctx_ref->loop_ctx->line,
+           sizeof(loop_ctx_ref->loop_ctx->line));
 @elsif $m2c_data_transient == 2@ # copy immediately
     /*
      * TRANSIENT data: you are using a buffer in the loop ctx,
@@ -398,8 +400,8 @@ $example_start
 @      include m2c_setup_node.m2i@
     /*
      * TODO:
-     * set ctx_ref->${m2c_data_item}$node
-     *     from loop_ref->line
+     * set rowreq_ctx_ref->${m2c_data_item}$node
+     *     from loop_ctx_ref->line
      */
 @   end@
 @end@
@@ -422,30 +424,30 @@ $example_end
  * More Details
  * ------------
  * @param $mfd_aue_param_cmt
- * @param loop_ref pointer to your loop reference.
- * @param ctx_ref pointer to a context reference.
+ * @param loop_ctx_ref pointer to your loop reference.
+ * @param rowreq_ctx_ref pointer to a context reference.
  */
 int
-${table}_loop_get_data( $mfd_aue_param_decl, ${table}_ref_loop *loop_ref,
-                           ${table}_ref_ctx *ctx_ref)
+${table}_loop_get_data( $mfd_aue_param_decl, ${context}_ref_loop_ctx *loop_ctx_ref,
+                           ${context}_ref_rowreq_ctx *rowreq_ctx_ref)
 {
     DEBUGTRACE;
 
-    netsnmp_assert((NULL != loop_ref) && (NULL != loop_ref->itr_ctx));
-    netsnmp_assert(NULL != ctx_ref);
-    netsnmp_assert(NULL != ctx_ref->ctx);
+    netsnmp_assert((NULL != loop_ctx_ref) && (NULL != loop_ctx_ref->loop_ctx));
+    netsnmp_assert(NULL != rowreq_ctx_ref);
+    netsnmp_assert(NULL != rowreq_ctx_ref->rowreq_ctx);
 
     /*
      * TODO:
-     * get data for data context in table context (ctx_ref->ctx)
+     * get data for data context in table context (rowreq_ctx_ref->rowreq_ctx)
      */
 @if $m2c_include_examples == 1@
 $example_start
     /*
      * take table context from loop context
      */
-    ctx_ref->ctx = loop_ref->itr_ctx->ctx;
-    loop_ref->itr_ctx->ctx = NULL;
+    rowreq_ctx_ref->rowreq_ctx = loop_ctx_ref->loop_ctx->rowreq_ctx;
+    loop_ctx_ref->loop_ctx->rowreq_ctx = NULL;
     
     /*
      * copy data to the data context
@@ -454,7 +456,7 @@ $example_start
 @      include m2c_setup_node.m2i@
     /*
      * TODO:
-     * set ctx_ref->${m2c_data_item}$node
+     * set rowreq_ctx_ref->${m2c_data_item}$node
      *     from your loop context.
      */
 @   end@
@@ -477,38 +479,38 @@ $example_end
  * More Details
  * ------------
  * @param $mfd_aue_param_cmt
- * @param loop_ref  Pointer to your loop reference.
+ * @param loop_ctx_ref  Pointer to your loop reference.
  *
  * @return MFD_SUCCESS : success.
  *         MFD_ERROR   : error.
  */
 int
-${table}_loop_cleanup_context( $mfd_aue_param_decl, ${table}_ref_loop *loop_ref)
+${table}_loop_cleanup_context( $mfd_aue_param_decl, ${context}_ref_loop_ctx *loop_ctx_ref)
 {
     DEBUGTRACE;
     
-    netsnmp_assert(loop_ref);
+    netsnmp_assert(loop_ctx_ref);
     
 @if $m2c_include_examples == 1@
 $example_start
-    if(!loop_ref->itr_ctx)
+    if(!loop_ctx_ref->loop_ctx)
         return MFD_ERROR;
 
-if(loop_ref->itr_ctx->ctx)
-    ${context}_release_ctx(loop_ref->itr_ctx->ctx);
+if(loop_ctx_ref->loop_ctx->rowreq_ctx)
+    ${context}_release_rowreq_ctx(loop_ctx_ref->loop_ctx->rowreq_ctx);
  
     /*
      * close file
      */
-    if(loop_ref->itr_ctx->filep)
-        fclose(loop_ref->itr_ctx->filep);
+    if(loop_ctx_ref->loop_ctx->filep)
+        fclose(loop_ctx_ref->loop_ctx->filep);
     
 $example_end
 @end@
     /*
      * free loop context
      */
-    free(loop_ref->itr_ctx);
+    free(loop_ctx_ref->loop_ctx);
     
     return MFD_SUCCESS;
 }
@@ -532,8 +534,8 @@ $example_start
  */
 static int
 ${table}_loop_read_and_update_index( $mfd_aue_param_decl,
-                       ${table}_ref_loop *loop_ref,
-                       ${table}_ref_ctx *ctx_ref)
+                       ${context}_ref_loop_ctx *loop_ctx_ref,
+                       ${context}_ref_rowreq_ctx *rowreq_ctx_ref)
 {
     int rc;
 
@@ -545,26 +547,26 @@ ${table}_loop_read_and_update_index( $mfd_aue_param_decl,
     
     /*
      * mfd wrappers just need the index for now.
-     * reuse ctx.tbl_idx.
+     * reuse rowreq_ctx.tbl_idx.
      */
-    ctx_ref->ctx = loop_ref->itr_ctx->ctx;
+    rowreq_ctx_ref->rowreq_ctx = loop_ctx_ref->loop_ctx->rowreq_ctx;
 
     /*
      * get a line (skip blank lines)
      */
     do {
-        if (!fgets(loop_ref->itr_ctx->line, sizeof(loop_ref->itr_ctx->line),
-                   loop_ref->itr_ctx->filep)) {
+        if (!fgets(loop_ctx_ref->loop_ctx->line, sizeof(loop_ctx_ref->loop_ctx->line),
+                   loop_ctx_ref->loop_ctx->filep)) {
             /* we're done */
-            fclose(loop_ref->itr_ctx->filep);
-            loop_ref->itr_ctx->filep = NULL;
+            fclose(loop_ctx_ref->loop_ctx->filep);
+            loop_ctx_ref->loop_ctx->filep = NULL;
         }
-    } while (loop_ref->itr_ctx->filep && loop_ref->itr_ctx->line[0] == '\n');
+    } while (loop_ctx_ref->loop_ctx->filep && loop_ctx_ref->loop_ctx->line[0] == '\n');
 
     /*
      * check for end of data
      */
-    if(NULL == loop_ref->itr_ctx->filep)
+    if(NULL == loop_ctx_ref->loop_ctx->filep)
         return MFD_END_OF_DATA;
 
              
@@ -572,7 +574,7 @@ ${table}_loop_read_and_update_index( $mfd_aue_param_decl,
 @    include m2c_setup_node.m2i@
     /*
      * TODO:
-     * parse loop_ref->line to set ctx_ref->tbl_idx->$node
+     * parse loop_ctx_ref->line to set rowreq_ctx_ref->tbl_idx->$node
      */
 @end@
 @end@

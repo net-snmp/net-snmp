@@ -244,8 +244,8 @@ ${table} README
     This variable contains the structure name to typedef for the
     ${table}_data.
 
-    This typedef is used in the primary context structure for the table,
-    ${table}_ctx.
+    This typedef is used in the row request context structure for the table,
+    ${table}_rowreq_ctx.
 
     The typedef in the primary table context will be used for the data and
     undo structure types. This structure should contain all the data
@@ -282,8 +282,8 @@ ${table} README
     to the table context, override this value and two additional functions
     will be generated:
 
-      ${context}_ctx_init
-      ${context}_ctx_cleanup
+      ${context}_rowreq_ctx_init
+      ${context}_rowreq_ctx_cleanup
 
     Syntax: @eval $m2c_data_init = 1@
 

@@ -33,8 +33,8 @@
 void _${table}_initialize_interface(${context}_registration_ptr user_ctx,
                                     u_long flags);
 
-${table}_ctx * ${table}_allocate_ctx(void);
-void ${table}_release_ctx(${table}_ctx *ctx);
+${context}_rowreq_ctx * ${table}_allocate_rowreq_ctx(void);
+void ${table}_release_rowreq_ctx(${context}_rowreq_ctx *rowreq_ctx);
 @    if ("$m2c_data_context" eq "generated") && ($m2c_data_allocate == 1)@
 static ${context}_data *${context}_allocate_data(void);
 
@@ -85,25 +85,25 @@ NETSNMP_STATIC_INLINE int _mfd_${table}_pre_request( ${context}_interface_ctx *i
                        netsnmp_data_list *data_list, u_long id);
 NETSNMP_STATIC_INLINE int _mfd_${table}_post_request( ${context}_interface_ctx *if_ctx,
                        netsnmp_data_list *data_list, u_long id);
-NETSNMP_STATIC_INLINE int _mfd_${context}_object_lookup($mfd_base_params, ${table}_ctx * ctx);
-NETSNMP_STATIC_INLINE int _mfd_${context}_get_values($mfd_base_params, ${table}_ctx * ctx);
+NETSNMP_STATIC_INLINE int _mfd_${context}_object_lookup($mfd_base_params, ${context}_rowreq_ctx * rowreq_ctx);
+NETSNMP_STATIC_INLINE int _mfd_${context}_get_values($mfd_base_params, ${context}_rowreq_ctx * rowreq_ctx);
 @   if $m2c_table_settable@
-NETSNMP_STATIC_INLINE int _mfd_${context}_check_objects($mfd_base_params, ${table}_ctx * ctx);
-NETSNMP_STATIC_INLINE int _mfd_${context}_undo_setup($mfd_base_params, ${table}_ctx * ctx);
-NETSNMP_STATIC_INLINE int _mfd_${context}_set_values($mfd_base_params, ${table}_ctx * ctx);
-NETSNMP_STATIC_INLINE int _mfd_${context}_undo_values($mfd_base_params, ${table}_ctx * ctx);
-NETSNMP_STATIC_INLINE int _mfd_${context}_commit($mfd_base_params, ${table}_ctx * ctx);
+NETSNMP_STATIC_INLINE int _mfd_${context}_check_objects($mfd_base_params, ${context}_rowreq_ctx * rowreq_ctx);
+NETSNMP_STATIC_INLINE int _mfd_${context}_undo_setup($mfd_base_params, ${context}_rowreq_ctx * rowreq_ctx);
+NETSNMP_STATIC_INLINE int _mfd_${context}_set_values($mfd_base_params, ${context}_rowreq_ctx * rowreq_ctx);
+NETSNMP_STATIC_INLINE int _mfd_${context}_undo_values($mfd_base_params, ${context}_rowreq_ctx * rowreq_ctx);
+NETSNMP_STATIC_INLINE int _mfd_${context}_commit($mfd_base_params, ${context}_rowreq_ctx * rowreq_ctx);
 @      if $m2c_irreversible_commit == 1@
-NETSNMP_STATIC_INLINE int _mfd_${context}_irreversible_commit($mfd_base_params, ${table}_ctx * ctx);
+NETSNMP_STATIC_INLINE int _mfd_${context}_irreversible_commit($mfd_base_params, ${context}_rowreq_ctx * rowreq_ctx);
 @      end@
 @      if $m2c_table_dependencies == 1@
-NETSNMP_STATIC_INLINE int _mfd_${context}_check_dependencies($mfd_base_params, ${table}_ctx * ctx);
+NETSNMP_STATIC_INLINE int _mfd_${context}_check_dependencies($mfd_base_params, ${context}_rowreq_ctx * rowreq_ctx);
 @      end@
 
-NETSNMP_STATIC_INLINE int _${context}_undo_column( ${context}_ctx *ctx,
+NETSNMP_STATIC_INLINE int _${context}_undo_column( ${context}_rowreq_ctx *rowreq_ctx,
                                                    netsnmp_variable_list *var, int column );
 @if $m2c_table_row_creation == 1@
-NETSNMP_STATIC_INLINE int _${context}_check_indexes(${table}_ctx * ctx);
+NETSNMP_STATIC_INLINE int _${context}_check_indexes(${context}_rowreq_ctx * rowreq_ctx);
 @end@
 
 @   end@ # writable
@@ -246,22 +246,22 @@ _${table}_initialize_interface(${context}_registration_ptr reg_ptr,  u_long flag
 @    end@
 ########################################################################
 /* *********************************************************************
- * allocate resources for a ${table}_ctx
+ * allocate resources for a ${context}_rowreq_ctx
  */
-${table}_ctx *
-${table}_allocate_ctx(void)
+${context}_rowreq_ctx *
+${table}_allocate_rowreq_ctx(void)
 {
-    ${table}_ctx *ctx = SNMP_MALLOC_TYPEDEF(${table}_ctx);
+    ${context}_rowreq_ctx *rowreq_ctx = SNMP_MALLOC_TYPEDEF(${context}_rowreq_ctx);
 
     DEBUGTRACE;
 
-    if(NULL == ctx) {
+    if(NULL == rowreq_ctx) {
         snmp_log(LOG_ERR,"Couldn't allocate memory for a "
-                 "${table}_ctx.\n");
+                 "${context}_rowreq_ctx.\n");
     }
 @if $m2c_data_allocate == 1@
-    else if (NULL == (ctx->data = ${table}_allocate_data())) {
-        SNMP_FREE(ctx);
+    else if (NULL == (rowreq_ctx->data = ${table}_allocate_data())) {
+        SNMP_FREE(rowreq_ctx);
     }
 
     /*
@@ -269,51 +269,51 @@ ${table}_allocate_ctx(void)
      */
 @end@
 
-    ctx->oid_idx.oids = ctx->oid_tmp;
+    rowreq_ctx->oid_idx.oids = rowreq_ctx->oid_tmp;
 
-    ctx->request_mode = 0;
-ctx->${context}_data_list = NULL;
-ctx->${context}_reg = ${context}_if_ctx.user_ctx;
+    rowreq_ctx->request_mode = 0;
+rowreq_ctx->${context}_data_list = NULL;
+rowreq_ctx->${context}_reg = ${context}_if_ctx.user_ctx;
 
 @if $m2c_data_init == 1@
-    if(SNMPERR_SUCCESS != ${context}_ctx_init(ctx)) {
-       ${table}_release_ctx(if_ctx, ctx);
-       ctx = NULL;
+    if(SNMPERR_SUCCESS != ${context}_rowreq_ctx_init(rowreq_ctx)) {
+       ${table}_release_rowreq_ctx(if_ctx, rowreq_ctx);
+       rowreq_ctx = NULL;
     }
 @end@
 
-    return ctx;
+    return rowreq_ctx;
 }
 
 /*
- * release resources for a ${table}_ctx
+ * release resources for a ${context}_rowreq_ctx
  */
 void
-${table}_release_ctx(${table}_ctx *ctx)
+${table}_release_rowreq_ctx(${context}_rowreq_ctx *rowreq_ctx)
 {
     DEBUGTRACE;
 
-    netsnmp_assert(NULL != ctx);
+    netsnmp_assert(NULL != rowreq_ctx);
     
 @if $m2c_data_init == 1@
-    ${context}_ctx_cleanupx(ctx);
+    ${context}_rowreq_ctx_cleanupx(rowreq_ctx);
 @end@
 
 @if $m2c_data_allocate == 1@
-    if(ctx->data)
-        ${table}_release_data(ctx->data);
+    if(rowreq_ctx->data)
+        ${table}_release_data(rowreq_ctx->data);
  
-     if(ctx->undo) 
-         ${table}_release_data(ctx->undo);
+     if(rowreq_ctx->undo) 
+         ${table}_release_data(rowreq_ctx->undo);
 @end@ 
 
     /*
      * free index oid pointer
      */
-    if(ctx->oid_idx.oids != ctx->oid_tmp)
-        free(ctx->oid_idx.oids);
+    if(rowreq_ctx->oid_idx.oids != rowreq_ctx->oid_tmp)
+        free(rowreq_ctx->oid_idx.oids);
 
-    SNMP_FREE(ctx);
+    SNMP_FREE(rowreq_ctx);
 }
 
 ########################################################################
@@ -353,7 +353,7 @@ _mfd_${table}_post_request( ${context}_interface_ctx *if_ctx,
  * wrapper
  */
 static int
-_mfd_${context}_object_lookup( $mfd_base_params, ${table}_ctx * ctx)
+_mfd_${context}_object_lookup( $mfd_base_params, ${context}_rowreq_ctx * rowreq_ctx)
 {
     int rc = MFD_SUCCESS;
     
@@ -365,7 +365,7 @@ _mfd_${context}_object_lookup( $mfd_base_params, ${table}_ctx * ctx)
     ${context}_interface_ctx *if_ctx =
                   (${context}_interface_ctx *)pdu_ctx->mfd_user_ctx;
 
-    if(NULL == ctx) {
+    if(NULL == rowreq_ctx) {
 @   if $m2c_table_row_creation == 1@
         /*
          * xxx-rks:
@@ -373,7 +373,7 @@ _mfd_${context}_object_lookup( $mfd_base_params, ${table}_ctx * ctx)
          *   row creation flag check?
          *   create temporary context?
          */
-        rc = _${context}_check_indexes(ctx);
+        rc = _${context}_check_indexes(rowreq_ctx);
 @   else@
         rc = MFD_ERROR;
 @   end@
@@ -396,13 +396,13 @@ _mfd_${context}_object_lookup( $mfd_base_params, ${table}_ctx * ctx)
              * xxx-rks: this is silly. we set the vb in index2oid to set oid,
              * to set the vb here, which is used to set the vb oid. sheesh.
              */
-            if(ctx->oid_idx.len > (sizeof(tri->index_oid) / sizeof(oid))) {
+            if(rowreq_ctx->oid_idx.len > (sizeof(tri->index_oid) / sizeof(oid))) {
                 snmp_log(LOG_ERR,"truncated oid length\n");
-                ctx->oid_idx.len = sizeof(tri->index_oid) / sizeof(oid);
+                rowreq_ctx->oid_idx.len = sizeof(tri->index_oid) / sizeof(oid);
             }
-            memcpy(tri->index_oid, ctx->oid_idx.oids,
-                   ctx->oid_idx.len * sizeof(oid));
-            tri->index_oid_len = ctx->oid_idx.len;
+            memcpy(tri->index_oid, rowreq_ctx->oid_idx.oids,
+                   rowreq_ctx->oid_idx.len * sizeof(oid));
+            tri->index_oid_len = rowreq_ctx->oid_idx.len;
             netsnmp_update_variable_list_from_index(tri);
             netsnmp_assert(requests->subtree && requests->subtree->reginfo);
             netsnmp_table_build_oid(requests->subtree->reginfo, requests, tri);
@@ -412,17 +412,17 @@ _mfd_${context}_object_lookup( $mfd_base_params, ${table}_ctx * ctx)
         /*
          * set up registration pointer for user
          */
-        ctx->${context}_reg = if_ctx->user_ctx;
+        rowreq_ctx->${context}_reg = if_ctx->user_ctx;
 
         /*
          * save mode
          */
-        ctx->request_mode = pdu_ctx->request_mode;
+        rowreq_ctx->request_mode = pdu_ctx->request_mode;
 
         /*
          * set up data list for user
          */
-        ctx->${context}_data_list = pdu_ctx->mfd_data_list;
+        rowreq_ctx->${context}_data_list = pdu_ctx->mfd_data_list;
 
     }
 
@@ -440,7 +440,7 @@ _mfd_${context}_object_lookup( $mfd_base_params, ${table}_ctx * ctx)
  * Retrieve the value for a particular column
  */
 NETSNMP_STATIC_INLINE int
-_${context}_get_column( ${context}_ctx *ctx,
+_${context}_get_column( ${context}_rowreq_ctx *rowreq_ctx,
                        netsnmp_variable_list *var, int column )
 {
     int rc = SNMPERR_SUCCESS;
@@ -448,7 +448,7 @@ _${context}_get_column( ${context}_ctx *ctx,
     DEBUGTRACE;
 
 
-    netsnmp_assert(NULL != ctx);
+    netsnmp_assert(NULL != rowreq_ctx);
 
     switch(column) {
 @   foreach $node internalindex@
@@ -462,15 +462,15 @@ _${context}_get_column( ${context}_ctx *ctx,
     /*
      * NOTE: val_len is in bytes, ${node}_len might not be
      */
-        if (var->val_len < (ctx->tbl_idx.${node}_len *
-                            sizeof(ctx->tbl_idx.${node}[0]))) {
-           var->val.string = malloc(ctx->tbl_idx.${node}_len *
-                                    sizeof(ctx->tbl_idx.${node}[0]));
+        if (var->val_len < (rowreq_ctx->tbl_idx.${node}_len *
+                            sizeof(rowreq_ctx->tbl_idx.${node}[0]))) {
+           var->val.string = malloc(rowreq_ctx->tbl_idx.${node}_len *
+                                    sizeof(rowreq_ctx->tbl_idx.${node}[0]));
         }
-        var->val_len = ctx->tbl_idx.${node}_len * sizeof(ctx->tbl_idx.${node}[0]);
-        memcpy( var->val.string, ctx->tbl_idx.$node, var->val_len );
+        var->val_len = rowreq_ctx->tbl_idx.${node}_len * sizeof(rowreq_ctx->tbl_idx.${node}[0]);
+        memcpy( var->val.string, rowreq_ctx->tbl_idx.$node, var->val_len );
 @         else@
-        (*var->val.integer) = ctx->tbl_idx.$node;
+        (*var->val.integer) = rowreq_ctx->tbl_idx.$node;
 @         end@
         break;
 @      end@ ## accessible
@@ -482,7 +482,7 @@ _${context}_get_column( ${context}_ctx *ctx,
     /* $m2c_node_summary */
     case COLUMN_$node.uc:
     var->type = $node.type;
-rc = ${node}_get(ctx, $m2c_node_var_ref );
+rc = ${node}_get(rowreq_ctx, $m2c_node_var_ref );
         break;
  @      end@ # accessible
 @   end@ # for each column
@@ -495,7 +495,7 @@ rc = ${node}_get(ctx, $m2c_node_var_ref );
 ########################################################################
 ##
 int
-_mfd_${table}_get_values($mfd_base_params, ${table}_ctx * ctx)
+_mfd_${table}_get_values($mfd_base_params, ${context}_rowreq_ctx * rowreq_ctx)
 {
     netsnmp_table_request_info * tri;
     u_char                     * old_string;
@@ -504,7 +504,7 @@ _mfd_${table}_get_values($mfd_base_params, ${table}_ctx * ctx)
 
     DEBUGTRACE;
 
-    netsnmp_assert(NULL != ctx);
+    netsnmp_assert(NULL != rowreq_ctx);
     
     for(;requests; requests = requests->next) {
         /*
@@ -524,7 +524,7 @@ _mfd_${table}_get_values($mfd_base_params, ${table}_ctx * ctx)
         if(NULL == tri)
             continue;
         
-        rc = _${table}_get_column(ctx, requests->requestvb, tri->colnum);
+        rc = _${table}_get_column(rowreq_ctx, requests->requestvb, tri->colnum);
         if(rc) {
             if(MFD_SKIP == rc) {
                 requests->requestvb->type = ASN_PRIV_RETRY;
@@ -577,14 +577,14 @@ _mfd_${table}_get_values($mfd_base_params, ${table}_ctx * ctx)
  * Check the syntax for a particular column
  */
 NETSNMP_STATIC_INLINE int
-_${context}_check_column( ${context}_ctx *ctx,
+_${context}_check_column( ${context}_rowreq_ctx *rowreq_ctx,
                          netsnmp_variable_list *var, int column )
 {
     int rc = SNMPERR_SUCCESS;
     
     DEBUGTRACE;
 
-    netsnmp_assert(NULL != ctx);
+    netsnmp_assert(NULL != rowreq_ctx);
 
     switch(column) {
 @   foreach $node internalindex@
@@ -607,7 +607,7 @@ _${context}_check_column( ${context}_ctx *ctx,
     case COLUMN_$node.uc:
 @      include node-varbind-validate.m2i@
     if(SNMPERR_SUCCESS == rc) {
-        rc = ${node}_check_value( ctx, $m2c_node_var_val );
+        rc = ${node}_check_value( rowreq_ctx, $m2c_node_var_val );
         if(rc)
         rc = SNMP_ERR_BADVALUE;
     }
@@ -624,14 +624,14 @@ _${context}_check_column( ${context}_ctx *ctx,
 
 ##----------------------------------------------------------------------
 int
-_mfd_${context}_check_objects($mfd_base_params, ${table}_ctx * ctx)
+_mfd_${context}_check_objects($mfd_base_params, ${context}_rowreq_ctx * rowreq_ctx)
 {
     netsnmp_table_request_info * tri;
     int                          rc;
 
     DEBUGTRACE;
 
-    netsnmp_assert(NULL != ctx);
+    netsnmp_assert(NULL != rowreq_ctx);
     
     for(;requests; requests = requests->next) {
 
@@ -642,7 +642,7 @@ _mfd_${context}_check_objects($mfd_base_params, ${table}_ctx * ctx)
         if(NULL == tri)
             continue;
 
-        rc = _${table}_check_column(ctx, requests->requestvb, tri->colnum);
+        rc = _${table}_check_column(rowreq_ctx, requests->requestvb, tri->colnum);
         if(rc) {
             netsnmp_request_set_error(requests, rc);
             break;
@@ -656,17 +656,17 @@ _mfd_${context}_check_objects($mfd_base_params, ${table}_ctx * ctx)
 ##----------------------------------------------------------------------
 @if $m2c_table_row_creation == 1@
 NETSNMP_STATIC_INLINE int
-_${context}_check_indexes(${table}_ctx * ctx)
+_${context}_check_indexes(${context}_rowreq_ctx * rowreq_ctx)
 {
     netsnmp_table_request_info * tri;
     int                          rc;
 
     DEBUGTRACE;
 
-    netsnmp_assert(NULL != ctx);
+    netsnmp_assert(NULL != rowreq_ctx);
 
     /*
-     * xxx-rks: extract indexes from oid and set them in ctx.
+     * xxx-rks: extract indexes from oid and set them in rowreq_ctx.
      *          or has that already been done??
      */
 
@@ -679,7 +679,7 @@ _${context}_check_indexes(${table}_ctx * ctx)
 @      include m2c_setup_node.m2i@
 
     /* (INDEX) $m2c_node_summary */
-    rc = ${table}_${node}_check_index( ctx );
+    rc = ${table}_${node}_check_index( rowreq_ctx );
     if(SNMPERR_SUCCESS != rc)
         return rc;
 @   end@ # for each nonindex
@@ -689,7 +689,7 @@ _${context}_check_indexes(${table}_ctx * ctx)
 @      include m2c_setup_node.m2i@
 
     /* (INDEX) $m2c_node_summary */
-        rc = ${node}_check_index( ctx );
+        rc = ${node}_check_index( rowreq_ctx );
        if(SNMPERR_SUCCESS != rc)
            return rc;
 @   end@ # for each internalindex
@@ -698,7 +698,7 @@ _${context}_check_indexes(${table}_ctx * ctx)
      * if individual parts look ok, check them as a whole
      */
     if(!rc)
-        rc = ${context}_validate_index( ctx->${context}_reg, ctx );
+        rc = ${context}_validate_index( rowreq_ctx->${context}_reg, rowreq_ctx );
     
     return rc;
 }
@@ -715,13 +715,13 @@ _${context}_check_indexes(${table}_ctx * ctx)
  * Set the value for a particular column
  */
 NETSNMP_STATIC_INLINE int
-_mfd_${context}_check_dependencies($mfd_base_params, ${table}_ctx * ctx)
+_mfd_${context}_check_dependencies($mfd_base_params, ${context}_rowreq_ctx * rowreq_ctx)
 {
     DEBUGTRACE;
 
-    netsnmp_assert(NULL != ctx);
+    netsnmp_assert(NULL != rowreq_ctx);
 
-    return ${context}_check_dependencies(ctx);
+    return ${context}_check_dependencies(rowreq_ctx);
 }
 
 @end@ dependencies
@@ -736,14 +736,14 @@ _mfd_${context}_check_dependencies($mfd_base_params, ${table}_ctx * ctx)
  * Setup up context with information needed to undo a set request.
  */
 NETSNMP_STATIC_INLINE int
-${context}_undo_setup( ${context}_ctx *ctx )
+${context}_undo_setup( ${context}_rowreq_ctx *rowreq_ctx )
 {
     int rc;
 
     DEBUGTRACE;
 
     /** we should have a non-NULL pointer */
-    netsnmp_assert( NULL != ctx );
+    netsnmp_assert( NULL != rowreq_ctx );
 
     /*
      * copy data to undo
@@ -771,21 +771,21 @@ $example_end
  * undo the value for a particular column
  */
 int
-_mfd_${context}_undo_setup($mfd_base_params, ${table}_ctx * ctx)
+_mfd_${context}_undo_setup($mfd_base_params, ${context}_rowreq_ctx * rowreq_ctx)
 {
-    netsnmp_assert(NULL != ctx);
+    netsnmp_assert(NULL != rowreq_ctx);
 @if $m2c_data_allocate == 1@
     /*
      * allocate context, if needed
      */
-    ctx->undo = ${context}_allocate_data();
-    if(NULL == ctx->data) {
+    rowreq_ctx->undo = ${context}_allocate_data();
+    if(NULL == rowreq_ctx->data) {
         /** msg already logged */
         return SNMP_ERR_RESOURCEUNAVAILABLE;
     }
 
 @end@
-    return ${context}_undo_setup(ctx);
+    return ${context}_undo_setup(rowreq_ctx);
 }
 
 /*----------------------------------------------------------------------
@@ -797,14 +797,14 @@ _mfd_${context}_undo_setup($mfd_base_params, ${table}_ctx * ctx)
  * Set the value for a particular column
  */
 NETSNMP_STATIC_INLINE int
-_${context}_set_column( ${context}_ctx *ctx,
+_${context}_set_column( ${context}_rowreq_ctx *rowreq_ctx,
                        netsnmp_variable_list *var, int column )
 {
     int rc = SNMPERR_SUCCESS;
     
     DEBUGTRACE;
 
-    netsnmp_assert(NULL != ctx);
+    netsnmp_assert(NULL != rowreq_ctx);
 
     switch(column) {
 @   foreach $node nonindex@
@@ -813,7 +813,7 @@ _${context}_set_column( ${context}_ctx *ctx,
 
     /* $m2c_node_summary */
     case COLUMN_$node.uc:
-        rc = ${node}_set(ctx, $m2c_node_var_val );
+        rc = ${node}_set(rowreq_ctx, $m2c_node_var_val );
         break;
  @      end@ # settable
 @   end@ # for each column
@@ -826,14 +826,14 @@ _${context}_set_column( ${context}_ctx *ctx,
 ########################################################################
 ##
 int
-_mfd_${table}_set_values($mfd_base_params, ${table}_ctx * ctx)
+_mfd_${table}_set_values($mfd_base_params, ${context}_rowreq_ctx * rowreq_ctx)
 {
     netsnmp_table_request_info * tri;
     int                          rc = SNMP_ERR_NOERROR;
 
     DEBUGTRACE;
 
-    netsnmp_assert(NULL != ctx);
+    netsnmp_assert(NULL != rowreq_ctx);
     
     for(;requests; requests = requests->next) {
         /*
@@ -843,7 +843,7 @@ _mfd_${table}_set_values($mfd_base_params, ${table}_ctx * ctx)
         if(NULL == tri)
             continue;
         
-        _${table}_set_column(ctx, requests->requestvb, tri->colnum);
+        _${table}_set_column(rowreq_ctx, requests->requestvb, tri->colnum);
 
     } /* for results */
 
@@ -860,10 +860,10 @@ _mfd_${table}_set_values($mfd_base_params, ${table}_ctx * ctx)
  * commit the value for a particular column
  */
 int
-_mfd_${context}_commit($mfd_base_params, ${table}_ctx * ctx)
+_mfd_${context}_commit($mfd_base_params, ${context}_rowreq_ctx * rowreq_ctx)
 {
-    netsnmp_assert(NULL != ctx);
-    return ${context}_commit(ctx);
+    netsnmp_assert(NULL != rowreq_ctx);
+    return ${context}_commit(rowreq_ctx);
 }
 
 /*----------------------------------------------------------------------
@@ -876,14 +876,14 @@ _mfd_${context}_commit($mfd_base_params, ${table}_ctx * ctx)
  * undo the value for a particular column
  */
 NETSNMP_STATIC_INLINE int
-_${context}_undo_column( ${context}_ctx *ctx,
+_${context}_undo_column( ${context}_rowreq_ctx *rowreq_ctx,
                        netsnmp_variable_list *var, int column )
 {
     int rc = SNMPERR_SUCCESS;
     
     DEBUGTRACE;
 
-    netsnmp_assert(NULL != ctx);
+    netsnmp_assert(NULL != rowreq_ctx);
 
     switch(column) {
 @   foreach $node nonindex@
@@ -892,7 +892,7 @@ _${context}_undo_column( ${context}_ctx *ctx,
 
     /* $m2c_node_summary */
     case COLUMN_$node.uc:
-        rc = ${node}_undo(ctx);
+        rc = ${node}_undo(rowreq_ctx);
         break;
  @      end@ # settable
 @   end@ # for each column
@@ -905,14 +905,14 @@ _${context}_undo_column( ${context}_ctx *ctx,
 ########################################################################
 ##
 int
-_mfd_${context}_undo_values($mfd_base_params, ${table}_ctx * ctx)
+_mfd_${context}_undo_values($mfd_base_params, ${context}_rowreq_ctx * rowreq_ctx)
 {
     netsnmp_table_request_info * tri;
     int                          rc = SNMP_ERR_NOERROR;
 
     DEBUGTRACE;
 
-    netsnmp_assert(NULL != ctx);
+    netsnmp_assert(NULL != rowreq_ctx);
     
     for(;requests; requests = requests->next) {
         /*
@@ -922,7 +922,7 @@ _mfd_${context}_undo_values($mfd_base_params, ${table}_ctx * ctx)
         if(NULL == tri)
             continue;
         
-        _${context}_undo_column(ctx, requests->requestvb, tri->colnum);
+        _${context}_undo_column(rowreq_ctx, requests->requestvb, tri->colnum);
 
     } /* for results */
 
@@ -940,10 +940,10 @@ _mfd_${context}_undo_values($mfd_base_params, ${table}_ctx * ctx)
  * commit irreversible actions
  */
 int
-_mfd_${context}_irreversible_commit($mfd_base_params, ${table}_ctx * ctx)
+_mfd_${context}_irreversible_commit($mfd_base_params, ${context}_rowreq_ctx * rowreq_ctx)
 {
-    netsnmp_assert(NULL != ctx);
-    return ${context}_irreversible_commit(ctx);
+    netsnmp_assert(NULL != rowreq_ctx);
+    return ${context}_irreversible_commit(rowreq_ctx);
 }
 
 @end@

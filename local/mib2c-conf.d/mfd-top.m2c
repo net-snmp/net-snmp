@@ -76,11 +76,11 @@ typedef ${context}_data ${context}_undo_data;
 @    include generic-table-indexes.m2i@
 
 /* *********************************************************************
- * context
+ * Row request context
  * When your functions are called, you will be passed a
- * ${context}_ctx pointer.
+ * ${context}_rowreq_ctx pointer.
  */
-typedef struct ${context}_ctx_s {
+typedef struct ${context}_rowreq_ctx_s {
 
     /** this must be first for container compare to work */
     netsnmp_index        oid_idx;
@@ -108,11 +108,11 @@ typedef struct ${context}_ctx_s {
      */
     netsnmp_data_list             *${context}_data_list;
 
-} ${context}_ctx;
+} ${context}_rowreq_ctx;
 
-typedef struct ${table}_ref_ctx_s {
-    ${table}_ctx *ctx;
-} ${table}_ref_ctx;
+typedef struct ${table}_ref_rowreq_ctx_s {
+    ${context}_rowreq_ctx *rowreq_ctx;
+} ${table}_ref_rowreq_ctx;
 
 /* *********************************************************************
  * function prototypes
@@ -124,8 +124,8 @@ typedef struct ${table}_ref_ctx_s {
                         netsnmp_data_list *data_list, u_long id);
 
 @   if $m2c_data_init == 1@
-    int ${context}_init_ctx(${context}_ctx *ctx);
-    void ${context}_cleanup_ctx(${context}_ctx *ctx);
+    int ${context}_init_rowreq_ctx(${context}_rowreq_ctx *rowreq_ctx);
+    void ${context}_cleanup_rowreq_ctx(${context}_rowreq_ctx *rowreq_ctx);
 @   end@
 @    if "$m2c_data_context" ne "generated"@
 @        if $m2c_data_allocate == 1@
@@ -135,11 +135,11 @@ typedef struct ${table}_ref_ctx_s {
 @   end@
 @   if $m2c_table_settable@
 @      if $m2c_table_dependencies == 1@
-    int ${table}_check_dependencies(${table}_ctx * ctx); 
+    int ${table}_check_dependencies(${context}_rowreq_ctx * rowreq_ctx); 
 @      end@ 
-    int ${context}_commit(${table}_ctx * ctx);
+    int ${context}_commit(${context}_rowreq_ctx * rowreq_ctx);
 @      if $m2c_irreversible_commit == 1@
-    int ${context}_irreversible_commit(${table}_ctx * ctx);
+    int ${context}_irreversible_commit(${context}_rowreq_ctx * rowreq_ctx);
 @      end@
 @   end@ # writable
 
@@ -225,7 +225,7 @@ initialize_table_$table(void)
  * @return MFD_SUCCESS : no errors
  *        !MFD_SUCCESS : error (context allocate will fail)
  */
-int ${context}_ctx_init(${context}_ctx *ctx)
+int ${context}_rowreq_ctx_init(${context}_rowreq_ctx *rowreq_ctx)
 {
     /*
      * TODO:
@@ -239,7 +239,7 @@ int ${context}_ctx_init(${context}_ctx *ctx)
  * extra context cleanup
  *
  */
-void ${context}_ctx_cleanup(${context}_ctx *ctx)
+void ${context}_rowreq_ctx_cleanup(${context}_rowreq_ctx *rowreq_ctx)
 {
     /*
      * TODO:
