@@ -233,6 +233,9 @@
 /* Define if you have the <sys/mbuf.h> header file.  */
 #undef HAVE_SYS_MBUF_H
 
+/* Define if you have the <sys/mnttab.h> header file.  */
+#undef HAVE_SYS_MNTTAB_H
+
 /* Define if you have the <sys/ndir.h> header file.  */
 #undef HAVE_SYS_NDIR_H
 
