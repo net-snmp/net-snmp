@@ -62,7 +62,9 @@
 #include "struct.h"
 #include "util_funcs.h"
 #include "../../snmplib/system.h"
-#include "values.h"
+#if HAVE_LIMITS_H
+#include "limits.h"
+#endif
 #ifdef USING_UCD_SNMP_ERRORMIB_MODULE
 #include "ucd-snmp/errormib.h"
 #else
@@ -418,7 +420,7 @@ print_mib_oid(oid name[],
 	      size_t len)
 {
   char *buffer;
-  buffer=malloc((floor(log(MAXINT))+1)*len);
+  buffer=malloc((floor(log(INT_MAX))+1)*len);
   if (!buffer) {
     snmp_log(LOG_ERR, "Malloc failed - out of memory?");
     return;
