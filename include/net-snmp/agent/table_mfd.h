@@ -17,7 +17,6 @@ extern          "C" {
      * forward declares
      */
     struct netsnmp_mfd_registration_s;
-    typedef struct netsnmp_mfd_registration_s netsnmp_mfd_registration;
     struct netsnmp_request_group;
 
     /* Legend: (test) [optional] <required>
@@ -72,10 +71,13 @@ extern          "C" {
     /*
      * typedef
      */
+    typedef struct netsnmp_mfd_registration_s netsnmp_mfd_registration;
+
     typedef int (Netsnmp_MFD_Organize_Op)(netsnmp_mfd_registration *reg,
                                           u_long id);
     typedef int (Netsnmp_MFD_Request_Op)(netsnmp_mfd_registration *reg,
-                                         netsnmp_request_group *rg);
+                                         netsnmp_request_info *requests,
+                                         void *requests_parent);
 
     /*
      * structures 
