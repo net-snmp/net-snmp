@@ -130,6 +130,7 @@ int main(int argc, char *argv[])
     int description = 0;
     int random_access = 0;
     int print = 0;
+    int find_best = 0;
     
     /*
      * usage: snmptranslate name
@@ -140,6 +141,9 @@ int main(int argc, char *argv[])
 	      case 'h':
 		usage();
                 exit(1);
+	      case 'b':
+                find_best = 1;
+                break;
 	      case 'n':
 		tosymbolic = 1;
 		break;	     
@@ -294,12 +298,22 @@ int main(int argc, char *argv[])
 	    fprintf(stderr, "Unknown object identifier: %s\n", current_name);
 	    exit(2);
 	}
+    } else if (find_best) {
+        u_int result;
+        struct tree *tp = find_best_tree_node(current_name, 0, &result);
+        if (!tp) {
+            printf("Unable to find a matching object identifier for \"%s\"\n",
+                   current_name);
+            exit(1);
+        }
+        get_node(tp->label, name, &name_length);
     } else {
 	if (!read_objid(current_name, name, &name_length)){
 	    fprintf(stderr, "Invalid object identifier: %s\n", current_name);
 	    exit(2);
 	}
     }
+    
 
     if (print == 1) {
         struct tree *tp;
