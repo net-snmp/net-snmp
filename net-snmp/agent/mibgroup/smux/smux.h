@@ -17,7 +17,7 @@
 #define OSPFMIB  4
 #define SMUXMIBS 5 /* one greater */
 
-#define SMUXPORT 199
+#define SMUXPORT 167
 
 #define SMUXMAXPKTSIZE 1500
 #define SMUXMAXSTRLEN  256
@@ -33,7 +33,7 @@
 #define SMUX_GETRSP     (ASN_CONTEXT | ASN_CONSTRUCTOR | 2)
 
 extern int init_smux __P((void));
-extern void smux_select __P((struct timeval *tvp));
+extern void smux_accept __P((int));
 extern u_char *smux_snmp_process __P((int, oid *, int *, int *));
 extern int smux_process __P((int));
 
