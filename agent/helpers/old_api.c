@@ -259,7 +259,6 @@ old_api_helper(mib_handler               *handler,
         switch(reqinfo->mode) {
             case MODE_GET:
             case MODE_GETNEXT:
-            case MODE_GETBULK:   /* WWW */
             case MODE_SET_RESERVE1:
                 /* Actually call the old mib-module function */
                 if (vp && vp->findVar)
@@ -291,8 +290,8 @@ old_api_helper(mib_handler               *handler,
                         if (snmp_oid_compare(requests->requestvb->name,
                                              requests->requestvb->name_length,
                                              save, savelen) != 0) {
-                            snmp_log(LOG_WARNING, "evil_client: %s\n",
-                                     reginfo->handlerName);
+                            DEBUGMSGTL(("old_api", "evil_client: %s\n",
+                                        reginfo->handlerName));
                             memcpy(requests->requestvb->name, save,
                                    savelen*sizeof(oid));
                             requests->requestvb->name_length = savelen;
