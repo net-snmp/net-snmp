@@ -490,7 +490,7 @@ var_ifEntry(struct variable *vp,
 {
   int interface;
   struct if_msghdr if_msg;
-  char if_name[100];
+  static char if_name[100];
   struct small_ifaddr sifa;
   char * cp;
 
