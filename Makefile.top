@@ -50,16 +50,26 @@ EXEEXT		= @EXEEXT@
 
 # Misc Compiling Stuff
 CC	        = @CC@
-# version number is prefixed by a 0 for a better shared library version number
-#
-# ok, use libtool proper versioning:
-LIBCURRENT  = 6
-LIBREVISION = 0
-LIBAGE      = 1
 
-# generally, LIBCURRENT should stay the same unless major changes occur.
-# Increment REVISION every release.  
-# Increment AGE if new stuff is available.
+# ok, use libtool versioning, but not quite the way they recommend.
+# The shared library version number will be:
+#
+#   (CURRENT-AGE).AGE.REVISION
+#
+# *** THIS MEANS YOU MAY NEED TO DECREMENT CURRENT FOR A NEW RELEASE ***
+#
+# examples:
+#   C.A.R   library name
+#  -------  ---------------
+#   5.0.9   libxxx.so.5.0.9
+#   6.1.2   libxxx.so.5.1.2
+#   7.2.8   libxxx.so.5.2.8
+#   6.0.0   libxxx.so.6.0.0
+# 
+LIBCURRENT  = 7
+LIBAGE      = 2
+LIBREVISION = 0
+
 LIB_LD_CMD      = $(LIBTOOL) --mode=link $(CC) $(CFLAGS) -rpath $(libdir) -version-info $(LIBCURRENT):$(LIBREVISION):$(LIBAGE) -o
 LIB_EXTENSION   = la
 LIB_VERSION     =
