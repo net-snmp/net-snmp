@@ -145,29 +145,6 @@ struct snmp_internal_session {
     int (*hook_post) ( struct snmp_session*, struct snmp_pdu*, int );
 };
 
-struct internal_variable_list {
-    struct variable_list *next_variable;    /* NULL for last variable */
-    oid     *name;  /* Object identifier of variable */
-    int     name_length;    /* number of subid's in name */
-    u_char  type;   /* ASN type of variable */
-    union { /* value of variable */
-        long    *integer;
-        u_char  *string;
-        oid     *objid;
-        u_char  *bitstring;
-        struct counter64 *counter64;
-#ifdef OPAQUE_SPECIAL_TYPES
-	float   *floatVal;
-	double  *doubleVal;
-#endif /* OPAQUE_SPECIAL_TYPES */
-    } val;
-    int     val_len;
-    oid name_loc[MAX_OID_LEN];
-    u_char buf[32];
-    int usedBuf;
-};
-
-
 /*
  * The list of active/open sessions.
  */
@@ -1059,12 +1036,6 @@ create_user_from_session(struct snmp_session *session)
 
 }  /* end create_user_from_session() */
 
-void snmp_free(void * cp)
-{
-    if (cp)
-	free((char *)cp);
-}
-
 /*
  * Close the input session.  Frees all data allocated for the session,
  * dequeues any pending requests, and closes any sockets allocated for
@@ -1098,7 +1069,6 @@ snmp_sess_close(void *sessp)
 	while(rp){
 	    orp = rp;
 	    rp = rp->next_request;
-	    if (orp->pdu)
 		snmp_free_pdu(orp->pdu);
 	    free((char *)orp);
 	}
@@ -1108,21 +1078,21 @@ snmp_sess_close(void *sessp)
 
     sesp = slp->session; slp->session = 0;
     if (sesp) {
-	snmp_free((char *)sesp->context);
-	snmp_free((char *)sesp->dstParty);
-	snmp_free((char *)sesp->srcParty);
-	snmp_free((char *)sesp->peername);
-	snmp_free((char *)sesp->community);
-        snmp_free((char *)sesp->contextEngineID);
-        snmp_free((char *)sesp->contextName);
-        snmp_free((char *)sesp->securityEngineID);
-        snmp_free((char *)sesp->securityName);
-        snmp_free((char *)sesp->securityAuthProto);
-        snmp_free((char *)sesp->securityPrivProto);
-        snmp_free((char *)sesp);
+        SNMP_FREE(sesp->context);
+        SNMP_FREE(sesp->dstParty);
+        SNMP_FREE(sesp->srcParty);
+        SNMP_FREE(sesp->peername);
+        SNMP_FREE(sesp->community);
+        SNMP_FREE(sesp->contextEngineID);
+        SNMP_FREE(sesp->contextName);
+        SNMP_FREE(sesp->securityEngineID);
+        SNMP_FREE(sesp->securityName);
+        SNMP_FREE(sesp->securityAuthProto);
+        SNMP_FREE(sesp->securityPrivProto);
+        free((char *)sesp);
     }
 
-    snmp_free((char *)slp);
+    free((char *)slp);
 
     return 1;
 }
@@ -2001,9 +1971,9 @@ snmpv3_make_report(struct snmp_pdu *pdu, int error)
   snmp_free_varbind(pdu->variables);	/* free the current varbind */
 
   pdu->variables	= NULL;
-  snmp_free(pdu->securityEngineID);
+  SNMP_FREE(pdu->securityEngineID);
   pdu->securityEngineID	= snmpv3_generate_engineID(&pdu->securityEngineIDLen);
-  snmp_free(pdu->contextEngineID);
+  SNMP_FREE(pdu->contextEngineID);
   pdu->contextEngineID	= snmpv3_generate_engineID(&pdu->contextEngineIDLen);
   pdu->command		= SNMP_MSG_REPORT;
   pdu->errstat		= 0;
@@ -2099,7 +2069,7 @@ snmp_parse(struct snmp_session *session,
     struct packet_info pkt, *pi = &pkt;
     u_char community[COMMUNITY_MAX_LEN];
     int community_length = COMMUNITY_MAX_LEN;
-    int result;
+    int result = -1;
 
     snmp_errno = SNMPERR_BAD_PARSE;
     session->s_snmp_errno = SNMPERR_BAD_PARSE;
@@ -2128,7 +2098,7 @@ snmp_parse(struct snmp_session *session,
 	pdu->securityLevel = SNMP_SEC_LEVEL_NOAUTH;
 	pdu->securityModel = (pdu->version == SNMP_VERSION_1) ?
           SNMP_SEC_MODEL_SNMPv1 : SNMP_SEC_MODEL_SNMPv2c;
-	snmp_free(pdu->community);
+	SNMP_FREE(pdu->community);
 	pdu->community_len = 0;
 	pdu->community = (u_char *)0;
 	if (community_length) {
@@ -2320,29 +2290,33 @@ snmp_pdu_parse(struct snmp_pdu *pdu, u_char  *data, int *length) {
 
     /* get each varBind sequence */
   while((int)*length > 0){
-    if (vp == NULL){
-      vp = (struct variable_list *)malloc(sizeof(struct variable_list));
-      pdu->variables = (struct variable_list *)vp;
-    } else {
-      vp->next_variable = (struct variable_list *)malloc(sizeof(struct variable_list));
-      vp = (struct variable_list *)vp->next_variable;
+    struct variable_list *vptemp;
+    vptemp = (struct variable_list *)malloc(sizeof(*vptemp));
+    if (0 == vptemp) {
+        return -1;
     }
+    if (0 == vp){
+        pdu->variables = vptemp;
+    } else {
+        vp->next_variable = vptemp;
+    }
+    vp = vptemp;
 
     vp->next_variable = NULL;
     vp->val.string = NULL;
     vp->name_length = MAX_OID_LEN;
-    vp->name = vp->name_loc;
-    vp->usedBuf = FALSE;
-    data = snmp_parse_var_op(data, vp->name, &vp->name_length, &vp->type,
+    vp->name = 0;
+    data = snmp_parse_var_op(data, objid, &vp->name_length, &vp->type,
 			     &vp->val_len, &var_val, (int *)length);
     if (data == NULL)
       return -1;
+    if (snmp_set_var_objid(vp, objid, vp->name_length))
+        return -1;
 
     len = PACKET_LENGTH;
     switch((short)vp->type){
     case ASN_INTEGER:
       vp->val.integer = (long *)vp->buf;
-      vp->usedBuf = TRUE;
       vp->val_len = sizeof(long);
       asn_parse_int(var_val, &len, &vp->type,
 		    (long *)vp->val.integer,
@@ -2353,7 +2327,6 @@ snmp_pdu_parse(struct snmp_pdu *pdu, u_char  *data, int *length) {
     case ASN_TIMETICKS:
     case ASN_UINTEGER:
       vp->val.integer = (long *)vp->buf;
-      vp->usedBuf = TRUE;
       vp->val_len = sizeof(u_long);
       asn_parse_unsigned_int(var_val, &len, &vp->type,
 			     (u_long *)vp->val.integer,
@@ -2365,7 +2338,6 @@ snmp_pdu_parse(struct snmp_pdu *pdu, u_char  *data, int *length) {
 #endif /* OPAQUE_SPECIAL_TYPES */
     case ASN_COUNTER64:
       vp->val.counter64 = (struct counter64 *)vp->buf;
-      vp->usedBuf = TRUE;
       vp->val_len = sizeof(struct counter64);
       asn_parse_unsigned_int64(var_val, &len, &vp->type,
 			       (struct counter64 *)vp->val.counter64,
@@ -2374,7 +2346,6 @@ snmp_pdu_parse(struct snmp_pdu *pdu, u_char  *data, int *length) {
 #ifdef OPAQUE_SPECIAL_TYPES
     case ASN_OPAQUE_FLOAT:
       vp->val.floatVal = (float *)vp->buf;
-      vp->usedBuf = TRUE;
       vp->val_len = sizeof(float);
       asn_parse_float(var_val, &len, &vp->type,
 		      vp->val.floatVal,
@@ -2382,7 +2353,6 @@ snmp_pdu_parse(struct snmp_pdu *pdu, u_char  *data, int *length) {
       break;
     case ASN_OPAQUE_DOUBLE:
       vp->val.doubleVal = (double *)vp->buf;
-      vp->usedBuf = TRUE;
       vp->val_len = sizeof(double);
       asn_parse_double(var_val, &len, &vp->type,
 		       vp->val.doubleVal,
@@ -2390,7 +2360,6 @@ snmp_pdu_parse(struct snmp_pdu *pdu, u_char  *data, int *length) {
       break;
     case ASN_OPAQUE_I64:
       vp->val.counter64 = (struct counter64 *)vp->buf;
-      vp->usedBuf = TRUE;
       vp->val_len = sizeof(struct counter64);
       asn_parse_signed_int64(var_val, &len, &vp->type,
 			     (struct counter64 *)vp->val.counter64,
@@ -2404,7 +2373,6 @@ snmp_pdu_parse(struct snmp_pdu *pdu, u_char  *data, int *length) {
       case ASN_NSAP:
         if (vp->val_len < sizeof(vp->buf)){
           vp->val.string = (u_char *)vp->buf;
-          vp->usedBuf = TRUE;
         } else {
           vp->val.string = (u_char *)malloc((unsigned)vp->val_len);
         }
@@ -2436,7 +2404,6 @@ snmp_pdu_parse(struct snmp_pdu *pdu, u_char  *data, int *length) {
   }
   return badtype;
 }
-
 
 /* snmp v3 utility function to parse into the scopedPdu. stores contextName
    and contextEngineID in pdu struct. Also stores pdu->command (handy for 
@@ -2722,14 +2689,14 @@ snmp_sess_async_send(void *sessp,
 #else /* !NO_ZEROLENGTH_COMMUNITY */
 	/* copy session community exactly to pdu community */
 	    if (0 == session->community_len) {
-		snmp_free(pdu->community); pdu->community = 0;
+		SNMP_FREE(pdu->community); pdu->community = 0;
 	    }
 	    else if (pdu->community_len == session->community_len) {
 		memmove(pdu->community, session->community,
 			    session->community_len);
 	    }
 	    else {
-	    snmp_free(pdu->community);
+	    SNMP_FREE(pdu->community);
 	    pdu->community = (u_char *)malloc(session->community_len);
 	    memmove(pdu->community, session->community,
                         session->community_len);
@@ -2925,8 +2892,10 @@ snmp_free_var(struct variable_list *var)
 {
     if (!var) return;
 
-    if (var->name) free((char *)var->name);
-    if (var->val.string) free((char *)var->val.string);
+    if (var->name != var->name_loc)
+        SNMP_FREE(var->name);
+    if (var->val.string != var->buf)
+        SNMP_FREE(var->val.string);
 
     free((char *)var);
 }
@@ -2935,10 +2904,8 @@ void snmp_free_varbind(struct variable_list *var)
 {
   struct variable_list *ptr;
   while(var) {
-    if (var->name) free((char *)var->name);
-    if (var->val.string) free((char *)var->val.string);
     ptr = var->next_variable;
-    free((char *)var);
+    snmp_free_var(var);
     var = ptr;
   }
 }
@@ -2949,33 +2916,22 @@ void snmp_free_varbind(struct variable_list *var)
 void
 snmp_free_pdu(struct snmp_pdu *pdu)
 {
-    struct variable_list *vp, *ovp;
-
     if (!pdu) return;
 
-    vp = pdu->variables;
-    while(vp){
-	if (vp->name && vp->name != vp->name_loc)
-	    SNMP_FREE((char *)vp->name);
-	if (vp->val.string && vp->val.string != vp->buf)
-	    SNMP_FREE((char *)vp->val.string);
-	ovp = vp;
-	vp = vp->next_variable;
-	free((char *)ovp);
-    }
-    snmp_free(pdu->enterprise);
-    snmp_free(pdu->community);
-    snmp_free(pdu->contextEngineID);
-    snmp_free(pdu->securityEngineID);
-    snmp_free(pdu->contextName);
-    snmp_free(pdu->securityName);
-    if (pdu->srcParty && pdu->srcParty != pdu->srcPartyBuf) 
-      free((char *)pdu->srcParty);
-    if (pdu->dstParty && pdu->dstParty != pdu->dstPartyBuf) 
-      free((char *)pdu->dstParty);
-    if (pdu->context && pdu->context != pdu->contextBuf) 
-      free((char *)pdu->context);
-    SNMP_FREE((char *)pdu);
+    snmp_free_varbind(pdu->variables);
+    SNMP_FREE(pdu->enterprise);
+    SNMP_FREE(pdu->community);
+    SNMP_FREE(pdu->contextEngineID);
+    SNMP_FREE(pdu->securityEngineID);
+    SNMP_FREE(pdu->contextName);
+    SNMP_FREE(pdu->securityName);
+    if (pdu->srcParty != pdu->srcPartyBuf) 
+      SNMP_FREE(pdu->srcParty);
+    if (pdu->dstParty != pdu->dstPartyBuf) 
+      SNMP_FREE(pdu->dstParty);
+    if (pdu->context != pdu->contextBuf) 
+      SNMP_FREE(pdu->context);
+    free((char *)pdu);
 }
 
 /*
@@ -3048,7 +3004,7 @@ snmp_sess_read(void *sessp,
     ret = snmp_parse(sp, pdu, packet, length);
     if ( isp->hook_post ) {
       if ( isp->hook_post( sp, pdu, ret ) == 0 ) {
-	snmp_free_pdu(pdu);
+        snmp_free_pdu(pdu);
         return;
       }
     }
@@ -3439,31 +3395,35 @@ snmp_varlist_add_variable(struct variable_list **varlist,
 		      u_char *value,
 		      int len)
 {
-    struct variable_list *vars;
+    struct variable_list *vars, *vtmp;
+    int largeval = 1;
 
     if (varlist == NULL)
       return NULL;
+
+    vtmp = (struct variable_list *)malloc(sizeof(struct variable_list));
+    if (vtmp == NULL)
+      return NULL;
     
     if (*varlist == NULL){
-      *varlist = vars =
-            (struct variable_list *)malloc(sizeof(struct variable_list));
+      *varlist = vars = vtmp;
     } else {
       for(vars = *varlist;
             vars->next_variable;
             vars = vars->next_variable)
         ;
 
-      vars->next_variable =
-            (struct variable_list *)malloc(sizeof(struct variable_list));
+      vars->next_variable = vtmp;
       vars = vars->next_variable;
     }
 
-    vars->next_variable = NULL;
-    if (name != NULL) {
-      vars->name = (oid *)malloc(name_length * sizeof(oid));
-      memmove(vars->name, name, name_length * sizeof(oid));
+    vars->next_variable = 0; vars->name = 0; vars->val.string = 0;
+
+    /* use built-in storage for smaller values */
+    if (len <= sizeof(vars->buf)) {
+        vars->val.string = (u_char *)vars->buf;
+        largeval = 0;
     }
-    vars->name_length = name_length;
 
     vars->type = type;
     vars->val_len = len;
@@ -3473,18 +3433,23 @@ snmp_varlist_add_variable(struct variable_list **varlist,
       case ASN_TIMETICKS:
       case ASN_IPADDRESS:
       case ASN_COUNTER:
-        vars->val.integer = (long *)malloc(sizeof(long));
         memmove(vars->val.integer, value, vars->val_len);
         vars->val_len = sizeof(long);
         break;
 
       case ASN_OBJECT_ID:
-        vars->val.objid = (oid *)malloc(vars->val_len);
+        if (largeval) {
+            vars->val.objid = (oid *)malloc(vars->val_len);
+        }
         memmove(vars->val.objid, value, vars->val_len);
         break;
 
       case ASN_OCTET_STR:
-        vars->val.string = (u_char *)malloc(vars->val_len);
+      case ASN_OPAQUE:
+      case ASN_NSAP:
+        if (largeval) {
+            vars->val.string = (u_char *)malloc(vars->val_len);
+        }
         memmove(vars->val.string, value, vars->val_len);
         break;
 
@@ -3496,29 +3461,34 @@ snmp_varlist_add_variable(struct variable_list **varlist,
 #ifdef OPAQUE_SPECIAL_TYPES
       case ASN_OPAQUE_U64:
       case ASN_OPAQUE_I64:
-        vars->val.counter64 =
-          (struct counter64 *) malloc(sizeof(struct counter64));
+        vars->val_len = sizeof(struct counter64);
         memmove(vars->val.counter64, value, vars->val_len);
         break;
 
       case ASN_OPAQUE_FLOAT:
-        vars->val.floatVal = (float *) malloc(sizeof(float));
+        vars->val_len = sizeof(float);
         memmove(vars->val.floatVal, value, vars->val_len);
         break;
-
+      
       case ASN_OPAQUE_DOUBLE:
-        vars->val.doubleVal = (double *) malloc(sizeof(double));
+        vars->val_len = sizeof(double);
         memmove(vars->val.doubleVal, value, vars->val_len);
 
 #endif /* OPAQUE_SPECIAL_TYPES */
-
+      
       default:
         snmp_set_detail("Internal error in type switching\n");
         snmp_errno = SNMPERR_BAD_PARSE; /* XX SNMP_BAD_ENCODE */
+        snmp_free_var(vars);
         return (0);
     }
 
-    return (vars);
+    if (snmp_set_var_objid(vars, name, name_length)) {
+        snmp_free_var(vars);
+        return (0);
+    }
+
+	return vars;
 }
 
 int
@@ -3614,7 +3584,7 @@ snmp_add_var(struct snmp_pdu *pdu,
         break;
 
       case 'o':
-        tint = sizeof(buf);
+        tint = sizeof(buf) / sizeof(oid);
         read_objid(value, (oid *)buf, &tint);
         snmp_pdu_add_variable(pdu, name, name_length, ASN_OBJECT_ID, buf,
                               sizeof(oid)*tint);

@@ -57,6 +57,8 @@ struct variable_list* snmp_add_null_var (struct snmp_pdu *, oid *, int);
 struct snmp_pdu	*snmp_pdu_create (int);
 struct snmp_pdu *snmp_fix_pdu (struct snmp_pdu *, int);
 struct snmp_pdu *snmp_clone_pdu (struct snmp_pdu *);
+int snmp_set_var_objid (struct variable_list *, const oid *, int);
+int snmp_set_var_value (struct variable_list *, char *, int);
 char *snmp_errstring (int);
 void snmp_synch_reset (struct snmp_session *);
 void snmp_synch_setup (struct snmp_session *);
