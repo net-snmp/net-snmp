@@ -53,11 +53,11 @@ unsigned char *var_extensible_relocatable();
 
 extern struct myproc *procwatch;         /* moved to proc.c */
 extern int numprocs;                     /* ditto */
-extern struct exstensible *extens;       /* In exec.c */
-extern struct exstensible *relocs;       /* In exec.c */
+extern struct extensible *extens;       /* In exec.c */
+extern struct extensible *relocs;       /* In exec.c */
 extern int numextens;                    /* ditto */
 extern int numrelocs;                    /* ditto */
-extern struct exstensible *passthrus;    /* In pass.c */
+extern struct extensible *passthrus;    /* In pass.c */
 extern int numpassthrus;                 /* ditto */
 
 int minimumswap;
@@ -801,13 +801,24 @@ void setup_tree()
 
 }
 
+int pass_compare(a, b)
+  void *a, *b;
+{
+  struct extensible **ap, **bp;
+  ap = (struct extensible **) a;
+  bp = (struct extensible **) b;
+
+  return compare((*ap)->miboid,(*ap)->miblen,(*bp)->miboid,(*bp)->miblen);
+}
+
 RETSIGTYPE update_config(a)
 int a;
 {
   extern struct subtree *subtrees;
   int i;
   char configfile[300];
-  
+  struct extensible **etmp, *ptmp;
+
   free_config(&procwatch,&extens,&relocs,&passthrus);
   numprocs = numextens = numrelocs = numpassthrus = 0;
   /* restore defaults */
@@ -826,6 +837,25 @@ int a;
   sprintf(configfile,"%s/snmpd.local.conf",SNMPLIBPATH);
   read_config (configfile,&procwatch,&numprocs,&relocs,&numrelocs,&passthrus,&numpassthrus,&extens,&numextens,&minimumswap,disks,&numdisks,maxload);
 
+  /* argggg -- pasthrus must be sorted */
+  if (numpassthrus > 0) {
+    etmp = (struct extensible **)
+      malloc(((sizeof(struct extensible *)) * numpassthrus));
+    for(i=0,ptmp = (struct extensible *) passthrus;
+        i < numpassthrus && ptmp != 0;
+        i++, ptmp = ptmp->next)
+      etmp[i] = ptmp;
+    qsort(etmp, numpassthrus, sizeof(struct extensible *),pass_compare);
+    passthrus = (struct extensible *) etmp[0];
+    ptmp = (struct extensible *) etmp[0];
+    
+    for(i=0; i < numpassthrus-1; i++) {
+      ptmp->next = etmp[i+1];
+      ptmp = ptmp->next;
+    }
+    ptmp->next = NULL;
+  }
+
   if (subtrees)
     free(subtrees);
   setup_tree();
@@ -833,34 +863,14 @@ int a;
   signal(SIGHUP,update_config);
 }
 
-
 init_extensible() {
   
   struct extensible extmp;
   int ret,pagesize,i;
   char configfile[300];
 
-  minimumswap = DEFAULTMINIMUMSWAP;
-  for (i=0; i<=2;i++)
-    maxload[i] = DEFMAXLOADAVE;
-  numdisks = 0;
-  for(i=0;i<MAXDISKS;i++) {           /* init/erase disk db */
-    disks[i].device[0] = NULL;
-    disks[i].path[0] = NULL;
-    disks[i].minimumspace = -1;
-  }
-
-  procwatch = NULL;   /* initialize to NULL */
-  extens = NULL;
-  relocs = NULL;
-  passthrus = NULL;
-
-  /* read config file(s) */
   /* read the config files */
-  sprintf(configfile,"%s/snmpd.conf",SNMPLIBPATH);
-  read_config (configfile,&procwatch,&numprocs,&relocs,&numrelocs,&passthrus,&numpassthrus,&extens,&numextens,&minimumswap,disks,&numdisks,maxload);
-  sprintf(configfile,"%s/snmpd.local.conf",SNMPLIBPATH);
-  read_config (configfile,&procwatch,&numprocs,&relocs,&numrelocs,&passthrus,&numpassthrus,&extens,&numextens,&minimumswap,disks,&numdisks,maxload);
+  update_config(0);
   
   /* set default values of system stuff */
   strcpy(extmp.command,"/bin/uname -a");
@@ -909,7 +919,5 @@ init_extensible() {
   }
   pageshift -= 10;
 #endif
-
-  setup_tree();
 }
 
