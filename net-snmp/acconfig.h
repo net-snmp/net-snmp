@@ -77,6 +77,9 @@
 
 @TOP@
 
+/* define if you are embedding perl in the main agent */
+#undef NETSNMP_EMBEDDED_PERL
+
 /* define the system type include file here */
 #define SYSTEM_INCLUDE_FILE <net-snmp/system/generic.h>
 

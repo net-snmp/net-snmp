@@ -20,7 +20,10 @@ INSTALLUCDHEADERS=ucd-snmp-config.h $(srcdir)/version.h mib_module_config.h
 INSTALLHEADERS=include/net-snmp/net-snmp-config.h $(srcdir)/version.h mib_module_config.h
 INSTALLSCRIPTS=net-snmp-config
 
-all:	sedscript EXAMPLE.conf subdirs
+# perl specific
+PERLMODULES=SNMP ASN default_store agent
+
+all:	sedscript EXAMPLE.conf subdirs @PERLTARGS@
 
 test:   all
 	( cd testing; $(MAKE) test )
@@ -84,9 +87,13 @@ makefileindepend:
 	cd agent; $(MAKE) makefileindepend
 	cd testing; $(MAKE) makefileindepend
 
+perlmodules:
+	for i in $(PERLMODULES); do \
+           (cd perl/$$i ; perl Makefile.PL INC=-I../../include INST_LIB=../blib/lib INST_ARCHLIB=../blib/arch; $(MAKE)) \
+	done
 
 clean:
-	for i in $(SUBDIRS) $(TESTDIRS); do \
+	for i in $(PERLMODULES) $(SUBDIRS) $(TESTDIRS); do \
         ( cd $$i ; $(MAKE) clean ) ; \
 	done
 	rm -f EXAMPLE.conf sedscript ucd-snmp.txt
