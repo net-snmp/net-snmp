@@ -12,8 +12,7 @@ CPP		= @CPP@ 					        \
 		-DDONT_INC_STRUCTS -DBINDIR=$(bindir) 		        \
 		$(EXTRACPPFLAGS)
 
-# XXX: net-snmp-config.h is built
-INSTALLHEADERS=net-snmp-config.h version.h
+INSTALLHEADERS=version.h
 INCLUDESUBDIR=system
 INCLUDESUBDIRHEADERS= aix.h bsd.h bsdi3.h bsdi4.h bsdi.h cygwin.h darwin.h \
 	dynix.h freebsd2.h freebsd3.h freebsd4.h freebsd.h generic.h hpux.h \
@@ -21,6 +20,7 @@ INCLUDESUBDIRHEADERS= aix.h bsd.h bsdi3.h bsdi4.h bsdi.h cygwin.h darwin.h \
 	solaris2.8.h solaris.h sunos.h svr5.h sysv.h ultrix4.h
 INCLUDESUBDIR2=machine
 INCLUDESUBDIRHEADERS2=generic.h
+INSTALLBUILTHEADERS=include/net-snmp/net-snmp-config.h
 INSTALLBINSCRIPTS=net-snmp-config
 INSTALLUCDHEADERS=ucd-snmp-config.h version.h mib_module_config.h
 
