@@ -4667,7 +4667,7 @@ snmp_mib_node_FETCH(tp_ref, key)
 	{
 	   char c = *key;
 	   char str_buf[STR_BUF_SIZE];
-           SnmpMibNode *tp = NULL;
+           SnmpMibNode *tp = NULL, *tptmp = NULL;
            struct index_list *ip;
            struct enum_list *ep;
            struct range_list *rp;
@@ -4678,6 +4678,7 @@ snmp_mib_node_FETCH(tp_ref, key)
            HV *mib_hv, *enum_hv, *range_hv;
            AV *index_av, *varbind_av, *ranges_av;
            MAGIC *mg = NULL;
+           DLL_IMPORT extern struct tree *tree_head;
 
            if (SvROK(tp_ref)) tp = (SnmpMibNode*)SvIV((SV*)SvRV(tp_ref));
 
@@ -4762,7 +4763,12 @@ snmp_mib_node_FETCH(tp_ref, key)
               case 'i': /* indexes */
                  if (strncmp("indexes", key, strlen(key))) break;
                  index_av = newAV();
-                 for(ip=tp->indexes; ip != NULL; ip = ip->next) {
+                 if (tp->augments) {
+                     tptmp = find_best_tree_node(tp->augments, tree_head, NULL);
+                 } else {
+                     tptmp = tp;
+                 }
+                 for(ip=tptmp->indexes; ip != NULL; ip = ip->next) {
                     av_push(index_av,newSVpv((ip->ilabel),strlen(ip->ilabel)));
                  }
                 sv_setsv(ST(0), newRV((SV*)index_av));
