@@ -3,3 +3,4 @@ Makefile
 *.lo
 *.la
 snmpsm_init.h
+test_binary_array
