@@ -2087,21 +2087,22 @@ snmp_out_toggle_options(char *options)
             netsnmp_ds_set_int(NETSNMP_DS_LIBRARY_ID, NETSNMP_DS_LIB_STRING_OUTPUT_FORMAT,
                                                       NETSNMP_STRING_OUTPUT_ASCII);
             break;
-        case 'n':
-            netsnmp_ds_set_int(NETSNMP_DS_LIBRARY_ID, NETSNMP_DS_LIB_OID_OUTPUT_FORMAT,
-                                                      NETSNMP_OID_OUTPUT_NUMERIC);
+        case 'b':
+            netsnmp_ds_toggle_boolean(NETSNMP_DS_LIBRARY_ID, NETSNMP_DS_LIB_DONT_BREAKDOWN_OIDS);
             break;
         case 'e':
             netsnmp_ds_toggle_boolean(NETSNMP_DS_LIBRARY_ID, NETSNMP_DS_LIB_PRINT_NUMERIC_ENUM);
             break;
-        case 'b':
-            netsnmp_ds_toggle_boolean(NETSNMP_DS_LIBRARY_ID, NETSNMP_DS_LIB_DONT_BREAKDOWN_OIDS);
-            break;
         case 'E':
             netsnmp_ds_toggle_boolean(NETSNMP_DS_LIBRARY_ID, NETSNMP_DS_LIB_ESCAPE_QUOTES);
             break;
-        case 'X':
-            netsnmp_ds_toggle_boolean(NETSNMP_DS_LIBRARY_ID, NETSNMP_DS_LIB_EXTENDED_INDEX);
+        case 'f':
+            netsnmp_ds_set_int(NETSNMP_DS_LIBRARY_ID, NETSNMP_DS_LIB_OID_OUTPUT_FORMAT,
+                                                      NETSNMP_OID_OUTPUT_FULL);
+            break;
+        case 'n':
+            netsnmp_ds_set_int(NETSNMP_DS_LIBRARY_ID, NETSNMP_DS_LIB_OID_OUTPUT_FORMAT,
+                                                      NETSNMP_OID_OUTPUT_NUMERIC);
             break;
         case 'q':
             netsnmp_ds_toggle_boolean(NETSNMP_DS_LIBRARY_ID, NETSNMP_DS_LIB_QUICK_PRINT);
@@ -2109,23 +2110,6 @@ snmp_out_toggle_options(char *options)
         case 'Q':
             netsnmp_ds_set_boolean(NETSNMP_DS_LIBRARY_ID, NETSNMP_DS_LIB_QUICKE_PRINT, 1);
             netsnmp_ds_toggle_boolean(NETSNMP_DS_LIBRARY_ID, NETSNMP_DS_LIB_QUICK_PRINT);
-            break;
-        case 'f':
-            netsnmp_ds_set_int(NETSNMP_DS_LIBRARY_ID, NETSNMP_DS_LIB_OID_OUTPUT_FORMAT,
-                                                      NETSNMP_OID_OUTPUT_FULL);
-            break;
-        case 't':
-            netsnmp_ds_toggle_boolean(NETSNMP_DS_LIBRARY_ID, NETSNMP_DS_LIB_NUMERIC_TIMETICKS);
-            break;
-        case 'u':
-            netsnmp_ds_set_int(NETSNMP_DS_LIBRARY_ID, NETSNMP_DS_LIB_OID_OUTPUT_FORMAT,
-                                                      NETSNMP_OID_OUTPUT_UCD);
-            break;
-        case 'v':
-            netsnmp_ds_toggle_boolean(NETSNMP_DS_LIBRARY_ID, NETSNMP_DS_LIB_PRINT_BARE_VALUE);
-            break;
-        case 'U':
-            netsnmp_ds_toggle_boolean(NETSNMP_DS_LIBRARY_ID, NETSNMP_DS_LIB_DONT_PRINT_UNITS);
             break;
         case 's':
             netsnmp_ds_set_int(NETSNMP_DS_LIBRARY_ID, NETSNMP_DS_LIB_OID_OUTPUT_FORMAT,
@@ -2135,12 +2119,28 @@ snmp_out_toggle_options(char *options)
             netsnmp_ds_set_int(NETSNMP_DS_LIBRARY_ID, NETSNMP_DS_LIB_OID_OUTPUT_FORMAT,
                                                       NETSNMP_OID_OUTPUT_MODULE);
             break;
+        case 't':
+            netsnmp_ds_toggle_boolean(NETSNMP_DS_LIBRARY_ID, NETSNMP_DS_LIB_NUMERIC_TIMETICKS);
+            break;
         case 'T':
             netsnmp_ds_toggle_boolean(NETSNMP_DS_LIBRARY_ID, NETSNMP_DS_LIB_PRINT_HEX_TEXT);
+            break;
+        case 'u':
+            netsnmp_ds_set_int(NETSNMP_DS_LIBRARY_ID, NETSNMP_DS_LIB_OID_OUTPUT_FORMAT,
+                                                      NETSNMP_OID_OUTPUT_UCD);
+            break;
+        case 'U':
+            netsnmp_ds_toggle_boolean(NETSNMP_DS_LIBRARY_ID, NETSNMP_DS_LIB_DONT_PRINT_UNITS);
+            break;
+        case 'v':
+            netsnmp_ds_toggle_boolean(NETSNMP_DS_LIBRARY_ID, NETSNMP_DS_LIB_PRINT_BARE_VALUE);
             break;
         case 'x':
             netsnmp_ds_set_int(NETSNMP_DS_LIBRARY_ID, NETSNMP_DS_LIB_STRING_OUTPUT_FORMAT,
                                                       NETSNMP_STRING_OUTPUT_HEX);
+            break;
+        case 'X':
+            netsnmp_ds_toggle_boolean(NETSNMP_DS_LIBRARY_ID, NETSNMP_DS_LIB_EXTENDED_INDEX);
             break;
         default:
             return options - 1;
@@ -2169,6 +2169,7 @@ snmp_out_toggle_options_usage(const char *lead, FILE * outf)
             lead);
     fprintf(outf, "%su:  print OIDs using UCD-style prefix suppression\n",
             lead);
+    fprintf(outf, "%sU:  don't print units\n", lead);
     fprintf(outf, "%sv:  print values only (not OID = value)\n", lead);
     fprintf(outf, "%sx:  print all strings in hex format\n", lead);
     fprintf(outf, "%sX:  extended index format\n", lead);
@@ -2179,11 +2180,11 @@ snmp_in_toggle_options(char *options)
 {
     while (*options) {
         switch (*options++) {
-        case 'R':
-            netsnmp_ds_toggle_boolean(NETSNMP_DS_LIBRARY_ID, NETSNMP_DS_LIB_RANDOM_ACCESS);
-            break;
         case 'b':
             netsnmp_ds_toggle_boolean(NETSNMP_DS_LIBRARY_ID, NETSNMP_DS_LIB_REGEX_ACCESS);
+            break;
+        case 'R':
+            netsnmp_ds_toggle_boolean(NETSNMP_DS_LIBRARY_ID, NETSNMP_DS_LIB_RANDOM_ACCESS);
             break;
         case 'r':
             netsnmp_ds_toggle_boolean(NETSNMP_DS_LIBRARY_ID, NETSNMP_DS_LIB_DONT_CHECK_RANGE);
@@ -5168,7 +5169,7 @@ mib_to_asn_type(int mib_type)
         return ASN_COUNTER;
 
     case TYPE_GAUGE:
-        return ASN_COUNTER;
+        return ASN_GAUGE;
 
     case TYPE_TIMETICKS:
         return ASN_TIMETICKS;
