@@ -523,17 +523,20 @@ int
 subagent_pre_init( void )
 {
     DEBUGMSGTL(("agentx/subagent","initializing....\n"));
-    if ( ds_get_boolean(DS_APPLICATION_ID, DS_AGENT_ROLE) != SUB_AGENT )
-	return 0;
-
-    if (subagent_open_master_session() != 0)
-        return -1;
 
     /* set up callbacks to initiate master agent pings for this session */
     ds_register_config(ASN_INTEGER,
                        ds_get_string(DS_LIBRARY_ID, DS_LIB_APPTYPE),
                        "agentxPingInterval",
                        DS_APPLICATION_ID, DS_AGENT_AGENTX_PING_INTERVAL);
+
+
+    if ( ds_get_boolean(DS_APPLICATION_ID, DS_AGENT_ROLE) != SUB_AGENT )
+	return 0;
+
+    if (subagent_open_master_session() != 0)
+        return -1;
+
 
     DEBUGMSGTL(("agentx/subagent","initializing....  DONE\n"));
     
