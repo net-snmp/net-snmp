@@ -1,7 +1,5 @@
 /*- This is a -*- C -*- compatible header file
  *
- * RCS $Id$
- *
  * Generic public interface for SUNOS5_INSTRUMENTATION
  *
  * This file contains manifest constants (#defines), macros, enumerations,
@@ -141,6 +139,7 @@ extern "C" {
   int	getMibstat(mibgroup_e grid, void *resp, size_t entrysize,
 		   req_e req_type, int (*comp)(void *, void *), void *arg);
   int	Get_everything(void *, void *);
+  int	getKstatInt(char *classname, char *statname, char *varname, int *value);
 
 #ifdef _STDC_COMPAT
 #ifdef __cplusplus

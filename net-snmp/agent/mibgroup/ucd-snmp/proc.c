@@ -342,10 +342,6 @@ int sh_count_procs(char *procname)
 
 #define	NPROCS		32		/* number of proces to read at once */
 
-static struct user *getuser (struct proc *);
-static int getword (off_t);
-static int getstruct (off_t, char *, off_t, int);
-
 extern int kmem, mem, swap;
 
 #include <sys/user.h>
@@ -356,6 +352,10 @@ extern int kmem, mem, swap;
 #ifdef HAVE_NLIST_H
 #include <nlist.h>
 #endif
+
+static struct user *getuser (struct proc *);
+static int getword (off_t);
+static int getstruct (off_t, char *, off_t, int);
 
 static struct nlist proc_nl[] = {
 	{ "_nproc" },
@@ -426,7 +426,7 @@ sh_count_procs(char *procname)
 	}
 }
 
-#define	SW_UADDR	dtob(getword(dmap.dm_ptdaddr))
+#define	SW_UADDR	dtob(getword((off_t)dmap.dm_ptdaddr))
 #define	SW_UBYTES	sizeof(struct user)
 
 #define	SKRD(file, src, dst, size)			\
@@ -449,7 +449,7 @@ getuser(struct proc *aproc)
 	 * from the swap device.
 	 */
 	if ((aproc->p_sched & SLOAD) == 0) {
-		if (!getstruct((off_t)aproc->p_smap, "aproc->p_smap", &dmap,
+		if (!getstruct((off_t)aproc->p_smap, "aproc->p_smap", (off_t)&dmap,
 		    sizeof(dmap))) {
 			/* warnx("can't read dmap for pid %d from %s", aproc->p_pid,
 			    _PATH_DRUM); */
@@ -514,8 +514,7 @@ getstruct(off_t loc,
 #include <fcntl.h>
 #include <dirent.h>
 
-#define _STRUCTURED_PROC 1
-#include <sys/procfs.h>
+#include <procfs.h>
 
 /*
  * Gets process information from /proc/.../psinfo
@@ -537,7 +536,7 @@ sh_count_procs(char *procname)
     if (!strcmp(ent->d_name,"..") || !strcmp(ent->d_name,"."))
       continue;
 
-    snprintf(fbuf,64,"/proc/%s/psinfo",ent->d_name);
+    snprintf(fbuf,sizeof fbuf,"/proc/%s/psinfo",ent->d_name);
     if ((fd = open(fbuf,O_RDONLY)) < 0)  { /* Continue or return error? */
       closedir(dir);
       return -1;

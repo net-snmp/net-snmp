@@ -81,8 +81,10 @@ snmp_alarm_unregister(unsigned int clientreg) {
   if (thealarms == NULL)
     return;
 
-  if (alrm->clientreg == thealarms->clientreg)
+  if (clientreg == thealarms->clientreg) {
+    alrm = thealarms;
     thealarms = alrm->next;
+  }
   else {
     for(sa_ptr = thealarms;
         sa_ptr != NULL && sa_ptr->next->clientreg != alrm->clientreg;
@@ -162,7 +164,7 @@ set_an_alarm(void) {
     DEBUGMSGTL(("snmp_alarm_set_an_alarm","setting an alarm for %d seconds from now\n",nexttime));
     signal(SIGALRM, alarm_handler);
   } else {
-    DEBUGMSGTL(("snmp_alarm_set_an_alarm","no alarms found to handle\n",nexttime));
+    DEBUGMSGTL(("snmp_alarm_set_an_alarm","no alarms found to handle\n"));
   }
 }
 

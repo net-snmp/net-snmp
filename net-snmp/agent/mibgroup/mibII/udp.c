@@ -536,7 +536,9 @@ static struct inpcb *udp_inpcb_list;
 
 #ifndef solaris2
 static struct inpcb udp_inpcb, *udp_prev;
-
+#ifdef PCB_TABLE
+static struct inpcb *udp_head, *udp_next;
+#endif
 #if defined(CAN_USE_SYSCTL) && defined(UDPCTL_PCBLIST)
 static char *udpcb_buf = NULL;
 static struct xinpgen *xig = NULL;
@@ -546,10 +548,19 @@ static struct xinpgen *xig = NULL;
 static void UDP_Scan_Init(void)
 {
 #if !defined(CAN_USE_SYSCTL) || !defined(UDPCTL_PCBLIST)
+#ifdef PCB_TABLE
+    struct inpcbtable table;
+#endif
 #ifndef linux
+#ifdef PCB_TABLE
+    auto_nlist(UDB_SYMBOL, (char *)&table, sizeof(table));
+    udp_next = table.inpt_queue.cqh_first;
+    udp_head = udp_prev = (struct inpcb *)&((struct inpcbtable *)auto_nlist_value(UDB_SYMBOL))->inpt_queue.cqh_first;
+#else
     auto_nlist(UDB_SYMBOL, (char *)&udp_inpcb, sizeof(udp_inpcb));
 #if !(defined(freebsd2) || defined(netbsd1) || defined(openbsd2))
     udp_prev = (struct inpcb *) auto_nlist_value(UDB_SYMBOL);
+#endif
 #endif
 #else /* linux */
     FILE *in;
@@ -655,18 +666,26 @@ static int UDP_Scan_Next(struct inpcb *RetInPcb)
 	register struct inpcb *next;
 
 #ifndef linux
+#ifdef PCB_TABLE
+	if (udp_next == udp_head) return 0;
+#else
 	if ((udp_inpcb.INP_NEXT_SYMBOL == NULL) ||
 	    (udp_inpcb.INP_NEXT_SYMBOL ==
              (struct inpcb *) auto_nlist_value(UDB_SYMBOL))) {
 	    return(0);	    /* "EOF" */
 	}
+#endif
 
+#ifdef PCB_TABLE
+	klookup((unsigned long)udp_next, (char *)&udp_inpcb, sizeof(udp_inpcb));	udp_next = udp_inpcb.inp_queue.cqe_next;
+#else
         next = udp_inpcb.INP_NEXT_SYMBOL;
 
 	klookup((unsigned long)next, (char *)&udp_inpcb, sizeof (udp_inpcb));
 #if !(defined(netbsd1) || defined(freebsd2) || defined(linux) || defined(openbsd2))
 	if (udp_inpcb.INP_PREV_SYMBOL != udp_prev)	   /* ??? */
           return(-1); /* "FAILURE" */
+#endif
 #endif
 	*RetInPcb = udp_inpcb;
 #if !(defined(netbsd1) || defined(freebsd2) || defined(openbsd2))

@@ -1215,7 +1215,8 @@ int read_objid(const char *input,
 
     if (root == NULL){
 	snmp_errno = SNMPERR_NOMIB;
-	return 0;
+	*out_len = 0;
+	return(0);
     }
     if ((*out_len =
 	 parse_subtree(root, input, output, out_len)) == 0)
