@@ -265,7 +265,7 @@ snmp_open(session)
     u_char *cp;
     oid *op;
     int sd;
-    u_long addr;
+    in_addr_t addr;
     struct sockaddr_in	me;
     struct hostent *hp;
     static struct servent *servp = NULL;
