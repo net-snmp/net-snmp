@@ -50,7 +50,9 @@
 #ifdef _I_DEFINED_KERNEL
 #undef _KERNEL
 #endif
+#if HAVE_NETINET_IN_SYSTM_H
 #include <netinet/in_systm.h>
+#endif
 #include <netinet/ip.h>
 
 #include <netinet/ip_icmp.h>
@@ -200,7 +202,7 @@ header_icmp(struct variable *vp,
 
 #ifndef solaris2
 #ifndef linux
-#ifdef HAVE_SYS_TCPIPSTATS_H
+#if HAVE_SYS_TCPIPSTATS_H
 
 u_char *
 var_icmp(struct variable *vp,
