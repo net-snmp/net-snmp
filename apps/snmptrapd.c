@@ -894,7 +894,12 @@ int main(int argc, char *argv[])
 #endif
 
         case 'c':
-            ds_set_string(DS_LIBRARY_ID, DS_LIB_OPTIONALCONFIG, optarg);
+            if (optarg != NULL)
+                ds_set_string(DS_LIBRARY_ID, DS_LIB_OPTIONALCONFIG, optarg);
+	    else {
+                usage();
+                exit(1);
+	    }
             break;
 
         case 'C':
