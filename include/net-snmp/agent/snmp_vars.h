@@ -86,6 +86,8 @@ PERFORMANCE OF THIS SOFTWARE.
     int             init_agent(const char *);
 
 #ifndef _AGENT_REGISTRY_H
+#include <net-snmp/agent/agent_handler.h>
+#include <net-snmp/agent/var_struct.h>
 #include <net-snmp/agent/agent_registry.h>
 #endif
 

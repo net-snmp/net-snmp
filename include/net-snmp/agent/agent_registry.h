@@ -22,92 +22,110 @@ extern          "C" {
     /*
      * the structure of parameters passed to registered ACM modules 
      */
-    struct view_parameters {
-        netsnmp_pdu    *pdu;
-        oid            *name;
-        size_t          namelen;
-        int             errorcode;      /* do not change unless you're
-                                         * specifying an error,
-                                         * as it starts in a success state. */
-    };
+struct view_parameters {
+    netsnmp_pdu    *pdu;
+    oid            *name;
+    size_t          namelen;
+    int             errorcode;		/*  Do not change unless you're
+					    specifying an error, as it starts
+					    in a success state.  */
+};
 
-    struct register_parameters {
-        oid            *name;
-        size_t          namelen;
-        int             priority;
-        int             range_subid;
-        oid             range_ubound;
-        int             timeout;
-        u_char          flags;
-    };
+struct register_parameters {
+    oid            *name;
+    size_t          namelen;
+    int             priority;
+    int             range_subid;
+    oid             range_ubound;
+    int             timeout;
+    u_char          flags;
+};
+
+typedef struct subtree_context_cache_s {
+    char				*context_name;
+    struct netsnmp_subtree_s		*first_subtree;
+    struct subtree_context_cache_s	*next;
+} subtree_context_cache;
+
+
+
+void             setup_tree		  (void);
+
+netsnmp_subtree *netsnmp_subtree_find	  (oid *, size_t, netsnmp_subtree *,
+					   const char *context_name);
+
+netsnmp_subtree *netsnmp_subtree_find_next(oid *, size_t, netsnmp_subtree *,
+					   const char *context_name);
+
+netsnmp_subtree *netsnmp_subtree_find_prev(oid *, size_t,netsnmp_subtree *,
+					   const char *context_name);
+
+netsnmp_subtree *netsnmp_subtree_find_first(const char *context_name);
+
+netsnmp_session *get_session_for_oid	   (oid *, size_t, 
+					    const char *context_name);
+
+subtree_context_cache *get_top_context_cache(void);
 
 #define MIB_REGISTERED_OK		 0
 #define MIB_DUPLICATE_REGISTRATION	-1
 #define MIB_REGISTRATION_FAILED		-2
-
 #define MIB_UNREGISTERED_OK		 0
 #define MIB_NO_SUCH_REGISTRATION	-1
 #define MIB_UNREGISTRATION_FAILED	-2
-
 #define DEFAULT_MIB_PRIORITY		127
 
+int             register_mib		   (const char *, struct variable *,
+					    size_t, size_t, oid *, size_t);
 
-    void            setup_tree(void);
-    struct subtree *find_subtree(oid *, size_t, struct subtree *,
-                                 const char *context_name);
-    struct subtree *find_subtree_next(oid *, size_t, struct subtree *,
-                                      const char *context_name);
-    struct subtree *find_subtree_previous(oid *, size_t, struct subtree *,
-                                          const char *context_name);
-    netsnmp_session *get_session_for_oid(oid *, size_t,
-                                         const char *context_name);
+int             register_mib_priority	   (const char *, struct variable *,
+					    size_t, size_t, oid *, size_t,
+					    int);
 
-    int             register_mib(const char *, struct variable *, size_t,
-                                 size_t, oid *, size_t);
-    int             register_mib_priority(const char *, struct variable *,
-                                          size_t, size_t, oid *, size_t,
-                                          int);
-    int             register_mib_range(const char *, struct variable *,
-                                       size_t, size_t, oid *, size_t, int,
-                                       int, oid, netsnmp_session *);
-    int             register_mib_context(const char *, struct variable *,
-                                         size_t, size_t, oid *, size_t,
-                                         int, int, oid, netsnmp_session *,
-                                         const char *, int, int);
-    int             netsnmp_register_mib_table_row(const char *,
-                                                   struct variable *,
-                                                   size_t, size_t, oid *,
-                                                   size_t, int, int,
-                                                   netsnmp_session *,
-                                                   const char *, int, int);
-    int             unregister_mib(oid *, size_t);
-    int             unregister_mib_priority(oid *, size_t, int);
-    int             unregister_mib_range(oid *, size_t, int, int, oid);
-    int             unregister_mib_context(oid *, size_t, int, int, oid,
-                                           const char *);
-    void            unregister_mibs_by_session(netsnmp_session *);
-    int             unregister_mib_table_row(oid * mibloc,
-                                             size_t mibloclen,
-                                             int priority, int var_subid,
-                                             oid range_ubound,
-                                             const char *context);
+int             register_mib_range	   (const char *, struct variable *,
+					    size_t, size_t, oid *, size_t, 
+					    int, int, oid, netsnmp_session *);
 
-    struct subtree *free_subtree(struct subtree *);
-    int             compare_tree(const oid *, size_t, const oid *, size_t);
-    int             in_a_view(oid *, size_t *, netsnmp_pdu *, int);
-    int             check_access(netsnmp_pdu *pdu);
-    void            register_mib_reattach(void);
-    void            register_mib_detach(void);
+int		register_mib_context	   (const char *, struct variable *,
+					    size_t, size_t, oid *, size_t,
+					    int, int, oid, netsnmp_session *,
+					    const char *, int, int);
 
-    /*
-     * REGISTER_MIB(): This macro simply loads register_mib with less pain:
-     * 
-     * descr:   A short description of the mib group being loaded.
-     * var:     The variable structure to load.
-     * vartype: The variable structure used to define it (variable2, variable4, ...)
-     * theoid:  A *initialized* *exact length* oid pointer.
-     * (sizeof(theoid) *must* return the number of elements!) 
-     */
+int	netsnmp_register_mib_table_row	   (const char *, struct variable *,
+					    size_t, size_t, oid *, size_t, 
+					    int, int, netsnmp_session *,
+					    const char *, int, int);
+
+int		unregister_mib		   (oid *, size_t);
+
+int             unregister_mib_priority	   (oid *, size_t, int);
+int             unregister_mib_range	   (oid *, size_t, int, int, oid);
+int             unregister_mib_context	   (oid *, size_t, int, int, oid,
+					    const char *);
+void            unregister_mibs_by_session (netsnmp_session *);
+int             unregister_mib_table_row   (oid *mibloc, size_t mibloclen,
+					    int priority, int var_subid,
+					    oid range_ubound,
+					    const char *context);
+
+int             compare_tree		   (const oid *, size_t, 
+					    const oid *, size_t);
+int             in_a_view		   (oid *, size_t *, 
+					    netsnmp_pdu *, int);
+int             check_access		   (netsnmp_pdu *pdu);
+void            register_mib_reattach	   (void);
+void            register_mib_detach	   (void);
+
+/*
+ * REGISTER_MIB(): This macro simply loads register_mib with less pain:
+ * 
+ * descr:   A short description of the mib group being loaded.
+ * var:     The variable structure to load.
+ * vartype: The variable structure used to define it (variable[2, 4, ...])
+ * theoid:  An *initialized* *exact length* oid pointer.
+ *          (sizeof(theoid) *must* return the number of elements!) 
+ */
+
 #define REGISTER_MIB(descr, var, vartype, theoid)                      \
   if (register_mib(descr, (struct variable *) var, sizeof(struct vartype), \
                sizeof(var)/sizeof(struct vartype),                     \
@@ -115,79 +133,59 @@ extern          "C" {
 	DEBUGMSGTL(("register_mib", "%s registration failed\n", descr));
 
 
-#define NUM_EXTERNAL_FDS 32
 
+#define NUM_EXTERNAL_FDS 32
 #define FD_REGISTERED_OK		 0
 #define FD_REGISTRATION_FAILED		-2
-
 #define FD_UNREGISTERED_OK		 0
 #define FD_NO_SUCH_REGISTRATION		-1
 
-    extern int      external_readfd[NUM_EXTERNAL_FDS], external_readfdlen;
-    extern int      external_writefd[NUM_EXTERNAL_FDS],
-        external_writefdlen;
-    extern int      external_exceptfd[NUM_EXTERNAL_FDS],
-        external_exceptfdlen;
+extern int      external_readfd[NUM_EXTERNAL_FDS],   external_readfdlen;
+extern int      external_writefd[NUM_EXTERNAL_FDS],  external_writefdlen;
+extern int      external_exceptfd[NUM_EXTERNAL_FDS], external_exceptfdlen;
 
-    extern void     (*external_readfdfunc[NUM_EXTERNAL_FDS]) (int, void *);
-    extern void     (*external_writefdfunc[NUM_EXTERNAL_FDS]) (int,
-                                                               void *);
-    extern void     (*external_exceptfdfunc[NUM_EXTERNAL_FDS]) (int,
-                                                                void *);
+extern void     (*external_readfdfunc[NUM_EXTERNAL_FDS])   (int, void *);
+extern void     (*external_writefdfunc[NUM_EXTERNAL_FDS])  (int, void *);
+extern void     (*external_exceptfdfunc[NUM_EXTERNAL_FDS]) (int, void *);
 
-    extern void    *external_readfd_data[NUM_EXTERNAL_FDS];
-    extern void    *external_writefd_data[NUM_EXTERNAL_FDS];
-    extern void    *external_exceptfd_data[NUM_EXTERNAL_FDS];
+extern void    *external_readfd_data[NUM_EXTERNAL_FDS];
+extern void    *external_writefd_data[NUM_EXTERNAL_FDS];
+extern void    *external_exceptfd_data[NUM_EXTERNAL_FDS];
 
-    int             register_readfd(int, void (*func) (int, void *),
-                                    void *);
-    int             register_writefd(int, void (*func) (int, void *),
-                                     void *);
-    int             register_exceptfd(int, void (*func) (int, void *),
-                                      void *);
-    int             unregister_readfd(int);
-    int             unregister_writefd(int);
-    int             unregister_exceptfd(int);
+int             register_readfd(int, void (*func)(int, void *),   void *);
+int             register_writefd(int, void (*func)(int, void *),  void *);
+int             register_exceptfd(int, void (*func)(int, void *), void *);
+int             unregister_readfd(int);
+int             unregister_writefd(int);
+int             unregister_exceptfd(int);
 
 
-#define SIG_REGISTERED_OK		 0
-#define SIG_REGISTRATION_FAILED		-2
-
-#define SIG_UNREGISTERED_OK		 0
 
 #define NUM_EXTERNAL_SIGS 32
+#define SIG_REGISTERED_OK		 0
+#define SIG_REGISTRATION_FAILED		-2
+#define SIG_UNREGISTERED_OK		 0
 
-    extern int      external_signal_scheduled[NUM_EXTERNAL_SIGS];
-    extern void     (*external_signal_handler[NUM_EXTERNAL_SIGS]) (int);
+extern int      external_signal_scheduled[NUM_EXTERNAL_SIGS];
+extern void     (*external_signal_handler[NUM_EXTERNAL_SIGS])(int);
 
-    int             register_signal(int, void (*func) (int));
-    int             unregister_signal(int);
+int             register_signal(int, void (*func)(int));
+int             unregister_signal(int);
 
-    /*
-     * translates a context name into a subtree structure pointer 
-     */
 
-    typedef struct subtree_context_cache_s {
-        char           *context_name;
-        struct subtree *first_subtree;
-        struct subtree_context_cache_s *next;
-    } subtree_context_cache;
 
-    struct subtree *find_first_subtree(const char *context_name);
-    subtree_context_cache *get_top_context_cache(void);
+/*
+ * internal API.  Don't use this.  Use netsnmp_register_handler instead 
+ */
 
-    /*
-     * internal API.  Don't use this.  Use netsnmp_register_handler instead 
-     */
-    struct netsnmp_handler_registration_s;
+struct netsnmp_handler_registration_s;
 
-    int             netsnmp_register_mib(const char *, struct variable *,
-                                         size_t, size_t, oid *, size_t,
-                                         int, int, oid, netsnmp_session *,
-                                         const char *, int, int,
-                                         struct
-                                         netsnmp_handler_registration_s *,
-                                         int);
+int             netsnmp_register_mib(const char *, struct variable *,
+				     size_t, size_t, oid *, size_t,
+				     int, int, oid, netsnmp_session *,
+				     const char *, int, int,
+				     struct netsnmp_handler_registration_s *,
+				     int);
 
 #ifdef __cplusplus
 };
