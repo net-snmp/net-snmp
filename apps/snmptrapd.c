@@ -123,6 +123,7 @@ typedef long    fd_mask;
 #endif
 
 char           *logfile = 0;
+int             Log = 0;
 int             Print = 0;
 int             Syslog = 0;
 int             SyslogTrap = 0;
@@ -260,7 +261,7 @@ usage(void)
     fprintf(stderr, "\tWeb:      http://www.net-snmp.org/\n");
     fprintf(stderr, "\tEmail:    net-snmp-coders@lists.sourceforge.net\n");
     fprintf(stderr, "\n");
-    fprintf(stderr, "  -a\t\t\tignore authentication failture traps\n");
+    fprintf(stderr, "  -a\t\t\tignore authentication failure traps\n");
     fprintf(stderr, "  -c FILE\t\tread FILE as a configuration file\n");
     fprintf(stderr,
             "  -C\t\t\tdo not read the default configuration files\n");
@@ -280,19 +281,23 @@ usage(void)
             "  -M DIRLIST\t\tuse DIRLIST as the list of locations\n\t\t\t  to look for MIBs\n");
     fprintf(stderr,
             "  -n\t\t\tuse numeric addresses instead of attempting\n\t\t\t  hostname lookups (no DNS)\n");
-    fprintf(stderr, "  -o FILE\t\toutput to FILE\n");
-    fprintf(stderr, "  -P\t\t\tprint to standard error\n");
-    fprintf(stderr, "  -s\t\t\tlog to syslog\n");
-    fprintf(stderr,
-            "  -S d|i|0-7\t\tset syslog facility to LOG_DAEMON (d), LOG_INFO (i)\n\t\t\t  or LOG_LOCAL[0-7] (default LOG_DAEMON)\n");
 #if HAVE_GETPID
-    fprintf(stderr, "  -t\t\t\tPrevent traps from being logged to syslog\n");
-	fprintf(stderr, "  -u FILE\t\tstore process id in FILE\n");
+    fprintf(stderr, "  -p FILE\t\tstore process id in FILE\n");
 #endif
+    fprintf(stderr, "  -t\t\t\tPrevent traps from being logged to syslog\n");
     fprintf(stderr, "  -v, --version\t\tdisplay version information\n");
     fprintf(stderr,
             "  -O <OUTOPTS>\t\ttoggle options controlling output display\n");
     snmp_out_toggle_options_usage("\t\t\t", stderr);
+    fprintf(stderr,
+            "  -L <LOGOPTS>\t\ttoggle options controlling where to log to\n");
+    snmp_log_options_usage("\t\t\t", stderr);
+    fprintf(stderr, "\n  Deprecated options:\n");
+    fprintf(stderr, "  -o FILE\t\tuse -Lf <FILE> instead\n");
+    fprintf(stderr, "  -P\t\t\tuse -Le  instead\n");
+    fprintf(stderr, "  -s\t\t\tuse -Lsd instead\n");
+    fprintf(stderr, "  -S d|i|0-7\t\tuse -Ls <facility> instead\n");
+    fprintf(stderr, "  -u FILE\t\tuse -p <FILE> instead\n");
 }
 
 static void
@@ -459,7 +464,7 @@ main(int argc, char *argv[])
      * Add some options if they are available.  
      */
 #if HAVE_GETPID
-    strcat(options, "u:");
+    strcat(options, "p:u:");
 #endif
 
     /*
@@ -537,11 +542,10 @@ main(int argc, char *argv[])
             read_config_print_usage("  ");
             exit(0);
 
-        case 'l':
-	    fprintf(stderr,
-		    "Warning: -l option is deprecated; use -S instead\n");
-	    depmsg = 1;
 	case 'S':
+            fprintf(stderr,
+                    "Warning: -S option is deprecated; use -Ls <facility> instead\n");
+            depmsg = 1;
             if (optarg != NULL) {
                 switch (*optarg) {
                 case 'd':
@@ -612,6 +616,8 @@ main(int argc, char *argv[])
             break;
 
         case 'o':
+            fprintf(stderr,
+                    "Warning: -o option is deprecated; use -Lf <file> instead\n");
             Print++;
             if (optarg != NULL) {
                 logfile = optarg;
@@ -637,15 +643,21 @@ main(int argc, char *argv[])
                 usage();
                 exit(1);
             }
+            Log++;
             break;
 
         case 'P':
+            fprintf(stderr,
+                    "Warning: -P option is deprecated; use -f -Le instead\n");
             dofork = 0;
             snmp_enable_stderrlog();
             Print++;
             break;
 
         case 's':
+            fprintf(stderr,
+                    "Warning: -s option is deprecated; use -Lsd instead\n");
+            depmsg = 1;
             Syslog++;
             break;
 
@@ -656,6 +668,9 @@ main(int argc, char *argv[])
 
 #if HAVE_GETPID
         case 'u':
+            fprintf(stderr,
+                    "Warning: -u option is deprecated; use -p instead\n");
+        case 'p':
             if (optarg != NULL) {
                 pid_file = optarg;
             } else {
@@ -664,7 +679,6 @@ main(int argc, char *argv[])
             }
             break;
 #endif
-            break;
 
         case 'v':
             version();
@@ -709,7 +723,7 @@ main(int argc, char *argv[])
      * return value from these registration calls.
      * Don't try this at home, children!
      */
-    if (!Print) {
+    if (!Log && !Print) {
         Syslog = 1;
         netsnmp_add_global_traphandler(NETSNMPTRAPD_PRE_HANDLER, syslog_handler);
     } else {
@@ -839,10 +853,10 @@ main(int argc, char *argv[])
         snmp_enable_syslog_ident("snmptrapd", Facility);
         snmp_log(LOG_INFO, "Starting snmptrapd %s\n", netsnmp_get_version());
 	if (depmsg) {
-	    snmp_log(LOG_WARNING, "-l option is deprecated; use -S instead\n");
+	    snmp_log(LOG_WARNING, "-s and -S options are deprecated; use -Ls <facility> instead\n");
 	}
     }
-    if (Print) {
+    if (Print || Log) {
         struct tm      *tm;
         time_t          timer;
         time(&timer);
