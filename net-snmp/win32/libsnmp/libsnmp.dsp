@@ -90,11 +90,19 @@ SOURCE=..\..\snmplib\callback.c
 # End Source File
 # Begin Source File
 
+SOURCE=..\..\snmplib\cmu_compat.c
+# End Source File
+# Begin Source File
+
 SOURCE=..\..\snmplib\data_list.c
 # End Source File
 # Begin Source File
 
 SOURCE=..\..\snmplib\default_store.c
+# End Source File
+# Begin Source File
+
+SOURCE=..\..\snmplib\getopt.c
 # End Source File
 # Begin Source File
 
@@ -122,6 +130,14 @@ SOURCE=..\..\snmplib\mt_support.c
 # End Source File
 # Begin Source File
 
+SOURCE=..\..\snmplib\oid_array.c
+# End Source File
+# Begin Source File
+
+SOURCE=..\..\snmplib\oid_stash.c
+# End Source File
+# Begin Source File
+
 SOURCE=..\..\snmplib\parse.c
 # End Source File
 # Begin Source File
@@ -131,6 +147,10 @@ SOURCE=..\..\snmplib\read_config.c
 # Begin Source File
 
 SOURCE=..\..\snmplib\scapi.c
+# End Source File
+# Begin Source File
+
+SOURCE="..\..\snmplib\snmp-tc.c"
 # End Source File
 # Begin Source File
 
@@ -166,11 +186,19 @@ SOURCE=..\..\snmplib\snmp_logging.c
 # End Source File
 # Begin Source File
 
+SOURCE=..\..\snmplib\snmp_parse_args.c
+# End Source File
+# Begin Source File
+
 SOURCE=..\..\snmplib\snmp_secmod.c
 # End Source File
 # Begin Source File
 
 SOURCE=..\..\snmplib\snmp_transport.c
+# End Source File
+# Begin Source File
+
+SOURCE=..\..\snmplib\snmp_version.c
 # End Source File
 # Begin Source File
 
@@ -199,6 +227,10 @@ SOURCE=..\..\snmplib\system.c
 # Begin Source File
 
 SOURCE=..\..\snmplib\tools.c
+# End Source File
+# Begin Source File
+
+SOURCE=..\..\snmplib\ucd_compat.c
 # End Source File
 # Begin Source File
 

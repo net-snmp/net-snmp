@@ -102,6 +102,10 @@ SOURCE=..\..\snmplib\default_store.c
 # End Source File
 # Begin Source File
 
+SOURCE=..\..\snmplib\getopt.c
+# End Source File
+# Begin Source File
+
 SOURCE=..\..\snmplib\int64.c
 # End Source File
 # Begin Source File
@@ -178,6 +182,10 @@ SOURCE=..\..\snmplib\snmp_transport.c
 # End Source File
 # Begin Source File
 
+SOURCE=..\..\snmplib\snmpTCPDomain.c
+# End Source File
+# Begin Source File
+
 SOURCE=..\..\snmplib\snmpUDPDomain.c
 # End Source File
 # Begin Source File
@@ -195,6 +203,10 @@ SOURCE=..\..\snmplib\system.c
 # Begin Source File
 
 SOURCE=..\..\snmplib\tools.c
+# End Source File
+# Begin Source File
+
+SOURCE=..\..\snmplib\ucd_compat.c
 # End Source File
 # Begin Source File
 
