@@ -50,13 +50,13 @@ netsnmp_access_interface_container_init(u_int flags)
      * create the containers. one indexed by ifIndex, the other
      * indexed by ifName.
      */
-    container1 = netsnmp_container_find("ifTable:table_container");
+    container1 = netsnmp_container_find("access_interface:table_container");
     if (NULL == container1)
         return NULL;
 
     if (flags & NETSNMP_ACCESS_INTERFACE_INIT_ADDL_IDX_BY_NAME) {
         netsnmp_container *container2 =
-            netsnmp_container_find("ifTable_by_name:ifTable:table_container");
+            netsnmp_container_find("access_interface_by_name:access_interface:table_container");
         if (NULL == container2)
             return NULL;
 
