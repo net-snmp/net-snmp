@@ -19,7 +19,7 @@
 .\" ARISING OUT OF OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS
 .\" SOFTWARE.
 .\" ******************************************************************/
-.TH SNMPTRAPD 8 "10 Jan 2004" VVERSIONINFO "Net-SNMP"
+.TH SNMPTRAPD 8 "15 Jan 2004" VVERSIONINFO "Net-SNMP"
 .UC 4
 .SH NAME
 snmptrapd - Receive and log SNMP trap messages.
@@ -269,8 +269,8 @@ or by a comma and a blank if the alternate form is requested
 See also %V
 .TP
 .B %V
-specifies the variable-bindings separator. This takes just a single
-character as argument (possibly escaped by \\)
+specifies the variable-bindings separator. This takes a sequence of
+characters, up to the next % (to embed a % in the string, use \\%)
 .RE
 .PP
 In addition to these values, you may also specify an optional field

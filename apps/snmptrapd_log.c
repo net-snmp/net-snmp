@@ -112,7 +112,7 @@ typedef struct {
     int             leading_zeroes;     /* if true, display with leading zeroes */
 } options_type;
 
-char            separator[3];
+char            separator[32];
 
 /*
  * These symbols define the characters that the parser recognizes.
@@ -1235,7 +1235,10 @@ realloc_handle_backslash(u_char ** buf, size_t * buf_len, size_t * out_len,
                            (const u_char *) "\\");
     case '?':
         return snmp_strcat(buf, buf_len, out_len, allow_realloc,
-                           (const u_char *) "\?");
+                           (const u_char *) "?");
+    case '%':
+        return snmp_strcat(buf, buf_len, out_len, allow_realloc,
+                           (const u_char *) "%");
     case '\'':
         return snmp_strcat(buf, buf_len, out_len, allow_realloc,
                            (const u_char *) "\'");
@@ -1563,27 +1566,30 @@ realloc_format_trap(u_char ** buf, size_t * buf_len, size_t * out_len,
              * Parse the separator character
              * XXX - Possibly need to handle quoted strings ??
              */
-            if (next_chr == '\\') {
-                /*
-                 * Handle backslash interpretation
-                 * Print to "separator" string rather than the output buffer
-                 *    (a bit of a hack, but it should work!)
-                 */
-                size_t i, j;
-		char *sep = separator;
-                i = sizeof(separator);
-                j = 0;
-                memset(separator, 0, i);
-                next_chr = format_str[++fmt_idx];
-                if (!realloc_handle_backslash
-                    ((u_char **)&sep, &i, &j, 0, next_chr)) {
-                    return 0;
-                }
-            } else {
-                separator[0] = next_chr;
-            }
-            separator[1] = (options.alt_format ? ' ': '\0');
-            state = PARSE_NORMAL;
+	    {   char *sep = separator;
+		size_t i, j;
+		i = sizeof(separator);
+		j = 0;
+		memset(separator, 0, i);
+		while (j < i && next_chr && next_chr != CHR_FMT_DELIM) {
+		    if (next_chr == '\\') {
+			/*
+			 * Handle backslash interpretation
+			 * Print to "separator" string rather than the output buffer
+			 *    (a bit of a hack, but it should work!)
+			 */
+			next_chr = format_str[++fmt_idx];
+			if (!realloc_handle_backslash
+			    ((u_char **)&sep, &i, &j, 0, next_chr)) {
+			    return 0;
+			}
+		    } else {
+			separator[j++] = next_chr;
+		    }
+		    next_chr = format_str[++fmt_idx];
+		}
+	    }
+            state = PARSE_IN_FORMAT;
             break;
 
         case PARSE_BACKSLASH:
