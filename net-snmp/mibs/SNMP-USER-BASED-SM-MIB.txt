@@ -12,10 +12,10 @@ IMPORTS
     snmpAuthProtocols, snmpPrivProtocols  FROM SNMP-FRAMEWORK-MIB;
 
 snmpUsmMIB MODULE-IDENTITY
-    LAST-UPDATED "9809290000Z"            -- 29 Sep 1998, midnight
+    LAST-UPDATED "9901200000Z"            -- 20 Jan 1999, midnight
     ORGANIZATION "SNMPv3 Working Group"
-    CONTACT-INFO "WG-email:   snmpv3@tis.com
-                  Subscribe:  majordomo@tis.com
+    CONTACT-INFO "WG-email:   snmpv3@lists.tislabs.com
+                  Subscribe:  majordomo@lists.tislabs.com
                               In msg body:  subscribe snmpv3
 
                   Chair:      Russ Mundy
@@ -23,7 +23,7 @@ snmpUsmMIB MODULE-IDENTITY
                   postal:     3060 Washington Rd
                               Glenwood MD 21738
                               USA
-                  email:      mundy@tis.com
+                  email:      mundy@tislabs.com
                   phone:      +1-301-854-6889
 
                   Co-editor   Uri Blumenthal
@@ -46,9 +46,9 @@ snmpUsmMIB MODULE-IDENTITY
                   SNMP User-based Security Model.
                  "
 --  Revision history
-    LAST-UPDATED "9809290000Z"            -- 29 Sep 1998, midnight
-                                          -- RFC-Editor assigns RFCxxxx
-    DESCRIPTION  "Clarifications, published as RFCxxxx"
+
+    REVISION     "9901200000Z"            -- 20 Jan 1999, midnight
+    DESCRIPTION  "Clarifications, published as RFC2574"
 
     REVISION     "9711200000Z"            -- 20 Nov 1997, midnight
     DESCRIPTION  "Initial version, published as RFC2274"
@@ -116,6 +116,10 @@ usmDESPrivProtocol OBJECT-IDENTITY
                  "
     ::= { snmpPrivProtocols 2 }
 
+
+-- Textual Conventions ***********************************************
+
+
 KeyChange ::=     TEXTUAL-CONVENTION
    STATUS         current
    DESCRIPTION
@@ -145,7 +149,7 @@ KeyChange ::=     TEXTUAL-CONVENTION
           20 octets and L - of 20 octets. Other protocols may define
           other sizes, as deemed appropriate.
 
-          When a requestor wants to change the old key K to a new
+          When a requester wants to change the old key K to a new
           key keyNew on a remote entity, the 'random' component is
           obtained from either a true random generator, or from a
           pseudorandom generator, and the 'delta' component is
@@ -188,8 +192,7 @@ KeyChange ::=     TEXTUAL-CONVENTION
 
           The 'random' and 'delta' components are then concatenated as
           described above, and the resulting octet string is sent to
-          the receipient as the new value of an instance of this
-          object.
+          the recipient as the new value of an instance of this object.
 
           At the receiver side, when an instance of this object is set
           to a new value, then a new value of K is computed as follows:
@@ -200,8 +203,8 @@ KeyChange ::=     TEXTUAL-CONVENTION
              octets, then:
               - the random component is appended to the value of the
                 temporary variable, and the result is input to the
-                the hash algorithm H to produce a digest value, and
-                the temporary variable is set to this digest value;
+                hash algorithm H to produce a digest value, and the
+                temporary variable is set to this digest value;
               - the value of the temporary variable is XOR-ed with
                 the first (next) L-octets (16 octets in case of MD5)
                 of the delta component to produce the first (next)
@@ -237,7 +240,6 @@ KeyChange ::=     TEXTUAL-CONVENTION
           Note that the keyOld and keyNew are the localized keys.
 
           Note that it is probably wise that when an SNMP entity sends
-
           a SetRequest to change a key, that it keeps a copy of the old
           key until it has confirmed that the key change actually
           succeeded.
@@ -377,7 +379,7 @@ usmUserTable     OBJECT-TYPE
                    11) GET(usmUserPulic) and check it has randomValue2.
                        If not, repeat steps 9-11.
 
-                 If the new user will never use authenticion:
+                 If the new user will never use authentication:
 
                    12) SET(usmUserAuthProtocol=usmNoAuthProtocol)
 
@@ -603,10 +605,10 @@ usmUserAuthKeyChange OBJECT-TYPE
                  If you do not get a response, then you can issue a
                  GET(usmUserPublic) and check if the value is equal
                  to the randomValue you did send in the SET. If so, then
-                 the keychange succeeded and the new key is active
+                 the key change succeeded and the new key is active
                  (probably the response got lost). If not, then the SET
-                 reuest probably never reached the target and so you can
-                 start over with the procedure above.
+                 request probably never reached the target and so you
+                 can start over with the procedure above.
                 "
     DEFVAL      { ''H }    -- the empty string
     ::= { usmUserEntry 6 }
@@ -734,6 +736,7 @@ usmUserOwnPrivKeyChange OBJECT-TYPE
                  public, since it will only allow a user to change
                  his own secret privacy key (privKey).
                  Note that this can only be done once the row is active.
+
                  When a set is received and the usmUserName of the
                  requester is not the same as the umsUserName that
                  indexes the row which is targeted by this operation,
@@ -814,12 +817,15 @@ usmUserStatus    OBJECT-TYPE
                  employs privacy, cannot be made active until the
                  usmUserPrivKeyChange has been set.
 
-                 The  RowStatus TC [RFC1903] requires that this
+                 The RowStatus TC [RFC2579] requires that this
                  DESCRIPTION clause states under which circumstances
                  other objects in this row can be modified:
 
                  The value of this object has no effect on whether
-                 other objects in this conceptual row can be modified.
+                 other objects in this conceptual row can be modified,
+                 except for usmUserOwnAuthKeyChange and
+                 usmUserOwnPrivKeyChange. For these 2 objects, the
+                 value of usmUserStatus MUST be active.
                 "
     ::= { usmUserEntry 13 }
 
