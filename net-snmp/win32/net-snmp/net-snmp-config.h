@@ -18,7 +18,7 @@ extern "C" {
 #define DEFAULT_MIBS "IP-MIB;IF-MIB;TCP-MIB;UDP-MIB;SNMPv2-MIB;RFC1213-MIB;UCD-SNMP-MIB;UCD-DEMO-MIB;SNMP-TARGET-MIB;SNMP-VIEW-BASED-ACM-MIB;SNMP-COMMUNITY-MIB;UCD-DLMOD-MIB;SNMP-FRAMEWORK-MIB;SNMP-MPD-MIB;SNMP-USER-BASED-SM-MIB;SNMP-NOTIFICATION-MIB;SNMPv2-TM"
 
 
-#define INSTALL_BASE "c:/progra~1/Net-SNMP"
+#define INSTALL_BASE "c:/Program Files/Net-SNMP"
 
 /* default location to look for mibs to load using the above tokens
    and/or those in the MIBS envrionment variable*/
