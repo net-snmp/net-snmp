@@ -1,0 +1,294 @@
+#!/bin/bash
+#
+# $Id$
+#
+# script to merge custom code into updated mib2c code
+#
+#----- example .mib2c-updaterc -----
+## use my cvs version of mib2c-conf.d
+#if [ -z "$MIB2C_DIR" ]; then
+#        export MIB2C_DIR=~/snmp/local/mib2c-conf.d:~/snmp/local
+#fi
+#
+## pick up my cvs version of mib2c
+#export PATH=~/snmp/local:$PATH
+#
+#UPDATE_OID=ipAddressTable
+#UPDATE_CONF=mib2c.mfd.conf
+#UPDATE_MIB2C_OPTS=
+#UPDATE_NOPROBE=1
+#----- example .mib2c-updaterc -----
+
+#----------------------------------------------------------------------
+#
+debug()
+{
+    if [ $UPDATE_DEBUG -ge 1 ]; then
+        echo $1
+    fi
+}
+
+error()
+{
+    echo "ERROR: $@" > /dev/stderr
+}
+
+die()
+{
+    error "$@"
+    exit 99
+}
+
+safecd()
+{
+    cd $1
+    if [ $? -ne 0 ]; then
+        die "changing to directory $1 from $PWD failed!"
+    fi
+}
+
+#----------------------------------------------------------------------
+#
+check_setup()
+{
+    rc=1
+    for d in orig new curr merged patch backup backup/curr backup/orig
+    do
+        if [ ! -d $d ]; then
+            echo "Creating missing directory $d"
+            mkdir $d
+            if [ $? -ne 0 ]; then
+                error "Could not create directory $d"
+                rc=0
+            fi
+        fi
+    done
+
+    if [ -z "$UPDATE_OID" ]; then
+        error "Environment variable missing! Set UPDATE_OID in .mib2c-updaterc"
+        rc=0
+    fi
+
+    if [ -z "$UPDATE_CONF" ]; then
+        error "Environment variable missing! Set UPDATE_CONF in .mib2c-updaterc"
+        rc=0
+    fi
+
+#    if [ -z "$UPDATE_" ]; then
+#        error "Environment variable missing! Set UPDATE_ in .mib2c-updaterc"
+#        rc=0
+#    fi
+
+    if [[ $rc -eq 0 && $UPDATE_NOPROBE -ne 1 ]]; then
+        mib2c -c unknown  > /dev/null 2>&1
+        if [ $? -eq 0 ]; then
+            error "WARNING: mib2c returns 0 on error conditions!"
+            rc=0
+        fi
+    fi
+
+    return $rc
+}
+
+#----------------------------------------------------------------------
+#
+do_diff()
+{
+    # u | c unified | context
+    # r     recursive
+    # b     ignore blank lines
+    # w     ignore white space
+    # p     Show which C function each change is in.
+    # d     smaller changes
+    #    --exclude='*Makefile' 
+    diff -crp -C 5 \
+        --exclude='default-*' --exclude='*.orig' --exclude='*.rej' \
+        --exclude='*~' --exclude='*.bak' --exclude='.#*' \
+        --exclude='*.o' --exclude='*.lo' --exclude='*.a' --exclude='*.la' \
+        --new-file $1 $2 > $3
+    local rc=$?
+    if [ $rc -eq 0 ]; then
+        rm -f $3
+    fi
+    return $rc
+}
+
+#----------------------------------------------------------------------
+#
+do_cp()
+{
+    src=$1
+    dest=$2
+    if [ ! -d $dest ]; then
+        die "$dest is not a directory"
+    fi
+    shift 2
+    start=$PWD
+    cd $src
+    if [ "$PWD" != "$start/$src" ]; then
+        die "cd $src did not work ($PWD != $start/$src)"
+    fi
+    files=`ls *$UPDATE_OID* 2>/dev/null| egrep "(file|m2d|txt|\.c|\.h)$"`
+    if [ -z "$files" ]; then
+       echo "   no files to copy from $src"
+    else
+#       echo "cp $src($files) ../$dest"
+       cp $files ../$dest
+       if [ $? -ne 0 ]; then
+           die "error while copying files from $src to $dest"
+       fi
+    fi
+    cd -
+    if [ "$PWD" != "$start" ]; then
+        die "cd - did not work ($PWD != $start)"
+    fi
+}
+
+#----------------------------------------------------------------------
+#
+save_diff()
+{
+    echo "Creating patch for your custom code..."
+    cnt=`ls curr 2>/dev/null | grep -v "^default-" | wc -l`
+    if [ $cnt -eq 0 ]; then
+        echo "   no custom code!"
+        return
+    fi
+
+    do_diff orig/ curr/ patch/custom.$UPDATE_DATE
+    if [ $? -eq 0 ]; then
+        echo "   no custom code changes found."
+        exit 0
+    fi
+}
+
+#----------------------------------------------------------------------
+#
+gen_code()
+{
+    files=`ls default-* 2>/dev/null `
+    if [ ! -z "$files" ]; then
+       mv $files curr/ 
+    fi
+
+    safecd curr
+    files=`ls default-* 2>/dev/null `
+    if [ ! -z "$files" ]; then
+       cp $files ../new/
+    fi
+    safecd -
+
+    safecd new
+    files=`ls *$UPDATE_OID* 2>/dev/null | grep -v "^default-"`
+    if [ ! -z "$files" ]; then
+       rm -f $files > /dev/null 2>&1 
+    fi
+    echo "mib2c -c $UPDATE_CONF $UPDATE_MIB2C_OPTS $UPDATE_OID"
+    mib2c -c $UPDATE_CONF $UPDATE_MIB2C_OPTS $UPDATE_OID
+    if [ $? -ne 0 ]; then
+        die "bad rc $rc from mib2 while generation new code."
+    fi
+    safecd -
+}
+
+#----------------------------------------------------------------------
+#
+check_new()
+{
+    echo "Checking for updates to generated code..."
+    do_diff orig/ new/ patch/generated.$UPDATE_DATE
+    if [ $? -eq 0 ]; then
+        echo "Generated code has not changed."
+        safecd patch
+        files=`ls *.$UPDATE_DATE 2>/dev/null `
+        if [ ! -z "$files" ]; then
+           rm $files
+        fi
+        exit 0
+    fi
+}
+
+#----------------------------------------------------------------------
+#
+merge_code()
+{
+    files=`ls merged/* 2>/dev/null `
+    if [ ! -z "$files" ]; then
+       rm merged/*
+    fi
+    do_cp new merged
+
+    if [ -f patch/custom.$UPDATE_DATE ]; then
+       touch .M2C-UPDATE-MERGE-FAILED
+       echo "Patching new generated code..."
+       patch -N -d merged -p1 -i ../patch/custom.$UPDATE_DATE
+       if [ $? -ne 0 ]; then
+           error "Could not apply custom code patch to new generated code"
+           die   "You must fix the problem in merged, and then re-run mib2c-update."
+       fi
+       rm .M2C-UPDATE-MERGE-FAILED
+    fi
+}
+
+copy_merged()
+{
+    echo "Backing up curr..."
+    do_cp curr backup/curr/
+    echo "Copying merged code to curr..."
+    do_cp merged curr/
+
+    echo "Backing up orig..."
+    do_cp orig backup/orig/
+    echo "Copying new code to orig..."
+    do_cp new orig/
+}
+
+#----------------------------------------------------------------------
+UPDATE_NOPROBE=0
+
+if [ -f .mib2c-updaterc ]; then
+    . .mib2c-updaterc
+fi
+
+check_setup
+if [ $? -ne 1 ]; then
+    exit 1
+fi
+
+UPDATE_DATE=`date "+%F_%R"`
+echo "Starting regneration of $UPDATE_OID using $UPDATE_CONF at $UPDATE_DATE..."
+
+if [ -f .M2C-UPDATE-MERGE-FAILED ]; then
+    echo "It appears that the last run of mib2c-update was not able to merge"
+    echo "your changes automatically. Do you want to:"
+    echo
+    while : ; do
+        echo "[c)opy merged files to curr]"
+        echo "[r)e-run from scratch]"
+        echo "[q)uit]"
+        echo "(c|r|q) ?"
+        read ans
+        if [ "x$ans" == "xr" ]; then
+            rm .M2C-UPDATE-MERGE-FAILED
+            break
+        elif [ "x$ans" == "xc" ]; then
+            echo "Have you have manually merged all the"
+            echo "changes into the merged directory?"
+            echo "(y|n)"
+            read ans
+            if [ "x$ans" != "xy" ]; then
+                echo "Ok. Try again after you've done that."
+                exit 1
+            fi
+            rm .M2C-UPDATE-MERGE-FAILED
+            copy_merged
+            exit 0
+        fi
+    done
+fi
+
+save_diff
+gen_code
+check_new
+merge_code
+copy_merged
