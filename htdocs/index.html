@@ -11,30 +11,35 @@
   <p><b>S</b>imple <b>N</b>etwork <b>M</b>anagement <b>P</b>rotocol (<b>SNMP</b>) is a widely used protocol for monitoring the health and welfare of network equipment (eg. routers), computer equipment and even devices like UPSs. Net-SNMP is a suite of applications used to implement <a href="http://www.ietf.org/rfc/rfc1157.txt">SNMP v1</a>, <a href="http://www.ietf.org/rfc/rfc1901.txt">SNMP v2c</a> and <a href="http://www.ietf.org/rfc/rfc2571.txt">SNMP v3</a> using both IPv4 and IPv6.  The suite includes:</p>
 
   <ul>
-    <li>Command-line applications to:</li>
+    <li>Command-line applications to:
     <ul>
       <li>retrieve information from an SNMP-capable device,
-       either using single requests (<a href="/docs/man/snmpget.html">snmpget</a>, <a href="/docs/man/snmpgetnext.html">snmpgetnext</a>),
-       or multiple requests (<a href="/docs/man/snmpwalk.html">snmpwalk</a>, <a href="/docs/man/snmptable.html">snmptable</a>, <a href="/docs/man/snmpdelta.html">snmpdelta</a>).</li>
-       <li>manipulate configuration information on an SNMP-capable device 
-       (<a href="/docs/man/snmpset.html">snmpset</a>).</li>
-       <li>retrieve a fixed collection of information from an SNMP-capable
-       device (<a href="/docs/man/snmpdf.html">snmpdf</a>, <a href="/docs/man/snmpnetstat.html">snmpnetstat</a>, <a href="/docs/man/snmpstatus.html">snmpstatus</a>).</li>
-       <li>convert between numerical and textual forms of MIB OIDs,
-       and display MIB content and structure (<a href="/docs/man/snmptranslate.html">snmptranslate</a>).</li>
-     </ul>
-     <li>A graphical MIB browser (<a href="/images/tkmib.jpg">tkmib</a>), using Tk/perl.</li>
-     <li>A daemon application for receiving SNMP notifications (<a href="/docs/man/snmptrapd.html">snmptrapd</a>).  
-     Selected notifications can be logged (to syslog, the NT Event Log, or
-     a plain text file), forwarded to another SNMP management system, or
-     passed to an external application.</li>
-     <li>An extensible agent for responding to SNMP queries for management
-     information (<a href="/docs/man/snmpd.html">snmpd</a>).  This includes built-in support for a wide range
-     of MIB information modules, and can be extended using dynamically
-     loaded modules, external scripts and commands, and both the SNMP
-     multiplexing (<a href="http://www.ietf.org/rfc/rfc1227.txt">SMUX</a>) and Agent Extensibility (<a href="http://www.ietf.org/rfc/rfc2741.txt">AgentX</a>) protocols.</li>
-     <li>A library for developing new SNMP applications, with both C and perl APIs.</li>
-   </ul>
+      either using single requests (<a href="/docs/man/snmpget.html">snmpget</a>, 
+      <a href="/docs/man/snmpgetnext.html">snmpgetnext</a>),
+      or multiple requests (<a href="/docs/man/snmpwalk.html">snmpwalk</a>, 
+      <a href="/docs/man/snmptable.html">snmptable</a>, <a href="/docs/man/snmpdelta.html">snmpdelta</a>).</li>
+      <li>manipulate configuration information on an SNMP-capable device 
+      (<a href="/docs/man/snmpset.html">snmpset</a>).</li>
+      <li>retrieve a fixed collection of information from an SNMP-capable
+      device (<a href="/docs/man/snmpdf.html">snmpdf</a>, 
+      <a href="/docs/man/snmpnetstat.html">snmpnetstat</a>, 
+      <a href="/docs/man/snmpstatus.html">snmpstatus</a>).</li>
+      <li>convert between numerical and textual forms of MIB OIDs,
+      and display MIB content and structure (<a href="/docs/man/snmptranslate.html">snmptranslate</a>).</li>
+    </ul>
+    </li>
+    <li>A graphical MIB browser (<a href="/images/tkmib.jpg">tkmib</a>), using Tk/perl.</li>
+    <li>A daemon application for receiving SNMP notifications (<a href="/docs/man/snmptrapd.html">snmptrapd</a>).  
+    Selected notifications can be logged (to syslog, the NT Event Log, or
+    a plain text file), forwarded to another SNMP management system, or
+    passed to an external application.</li>
+    <li>An extensible agent for responding to SNMP queries for management
+    information (<a href="/docs/man/snmpd.html">snmpd</a>).  This includes built-in support for a wide range
+    of MIB information modules, and can be extended using dynamically
+    loaded modules, external scripts and commands, and both the SNMP
+    multiplexing (<a href="http://www.ietf.org/rfc/rfc1227.txt">SMUX</a>) and Agent Extensibility (<a href="http://www.ietf.org/rfc/rfc2741.txt">AgentX</a>) protocols.</li>
+    <li>A library for developing new SNMP applications, with both C and perl APIs.</li>
+  </ul>
 
   <p>Net-SNMP is available for many Unix and Unix like operating systems and also for Windows. Note: Functionality can vary
   depending on the operating system.  Please see the <a href="/docs/readmefiles.html">README files</a> for information specific to your platform.</p>
