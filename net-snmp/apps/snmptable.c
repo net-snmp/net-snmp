@@ -182,7 +182,9 @@ static void optProc(int argc, char *const *argv, int opt)
           }
        }
        break;
+#ifndef DEPRECATED_CLI_OPTIONS
     case 'w':
+      fprintf(stderr, "Warning: -w option is deprecated - use -Cw\n");
       max_width = atoi(optarg);
       if (max_width == 0) {
 	fprintf(stderr, "Bad -w option: %s\n", optarg);
@@ -190,11 +192,14 @@ static void optProc(int argc, char *const *argv, int opt)
       }
       break;
     case 'b':
+      fprintf(stderr, "Warning: -b option is deprecated - use -Cb\n");
       brief = 1;
       break;
     case 'i':
+      fprintf(stderr, "Warning: -i option is deprecated - use -Ci\n");
       show_index = 1;
       break;
+#endif
     }
 }
 
@@ -214,6 +219,19 @@ void usage(void)
   exit(1);
 }
 
+void
+reverse_fields(void)
+{
+  struct column tmp;
+  int i;
+
+  for (i = 0; i < fields / 2; i++) {
+    memcpy(&tmp, &(column[i]), sizeof(struct column));
+    memcpy(&(column[i]), &(column[fields - 1 - i]), sizeof(struct column));
+    memcpy(&(column[fields - 1 - i]), &tmp, sizeof(struct column));
+  }
+}
+
 int main(int argc, char *argv[])
 {
   struct snmp_session session, *ss;
@@ -223,7 +241,11 @@ int main(int argc, char *argv[])
   snmp_set_quick_print(1);
 
   /* get the common command line arguments */
+#ifndef DEPRECATED_CLI_OPTIONS
   switch (snmp_parse_args(argc, argv, &session, "w:C:bi", optProc)) {
+#else
+  switch (snmp_parse_args(argc, argv, &session, "C:", optProc)) {
+#endif
   case  -2:
     exit(0);
   case -1:
@@ -259,6 +281,7 @@ int main(int argc, char *argv[])
     tblname = NULL;
 
   get_field_names( tblname );
+  reverse_fields();
 
   /* open an SNMP session */
   SOCK_STARTUP;
@@ -374,6 +397,9 @@ void get_field_names( char* tblname )
       if (tbl->access == MIB_ACCESS_NOACCESS) {
 	fields--;
 	tbl = tbl->next_peer;
+	if (!tbl) {
+	  going = 0;
+	}
 	continue;
       }
       root[ rootlen ] = tbl->subid;

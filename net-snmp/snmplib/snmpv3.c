@@ -94,7 +94,9 @@ static size_t	 defaultAuthTypeLen	= 0;
 static oid	*defaultPrivType	= NULL;
 static size_t	 defaultPrivTypeLen	= 0;
 
+#if defined(IFHWADDRLEN) && defined(SIOCGIFHWADDR)
 static int getHwAddress(const char * networkDevice, char * addressOut);
+#endif
 
 void
 snmpv3_authtype_conf(const char *word, char *cptr)
@@ -102,7 +104,7 @@ snmpv3_authtype_conf(const char *word, char *cptr)
   if (strcasecmp(cptr,"MD5") == 0)
     defaultAuthType = usmHMACMD5AuthProtocol;
   else if (strcasecmp(cptr,"SHA") == 0)
-    defaultAuthType = usmHMACMD5AuthProtocol;
+    defaultAuthType = usmHMACSHA1AuthProtocol;
   else
     config_perror("Unknown authentication type");
   defaultAuthTypeLen = USM_LENGTH_OID_TRANSFORM;
@@ -702,6 +704,8 @@ void
 init_snmpv3(const char *type) {
 
   gettimeofday(&snmpv3starttime, NULL);
+
+  if (!type) type = "__snmpapp__";
 
   /* we need to be called back later */
   snmp_register_callback(SNMP_CALLBACK_LIBRARY, SNMP_CALLBACK_POST_READ_CONFIG,

@@ -1,9 +1,9 @@
       Frequently Asked Questions (FAQ) for the UCD/Net SNMP package
       =============================================================
 		       FAQ Author: Dave Shield
-		        ucd-snmp Version: 4.2
-		ucd-snmp Project Author: Wes Hardaker
-		Email: net-snmp-coders@lists.sourceforge.net
+		       ucd-snmp Version: 4.2.4.pre2
+	    net-snmp/ucd-snmp Project Leader: Wes Hardaker
+	     Email: net-snmp-coders@lists.sourceforge.net
 
 TABLE OF CONTENTS
 =================
@@ -32,7 +32,8 @@ TABLE OF CONTENTS
    Why can't I see values in the <INSERT ENTERPRISE HERE> tree?
    Requests always seem to timeout, and don't give me anything back.  Why?
    I can see the system group, but nothing else.  Why?
-   Requesting an object fails with "sub-identifier not found"  Why?
+   Requesting an object fails with "Unknown Object Identifier"  Why?
+   Why do I get "noSuchName" when asking for "sysUpTime" (or similar)?
    Why do I sometimes get "End of MIB" when walking a tree, and sometimes not?
    I cannot set any variables in the MIB.
    Variables seem to disappear when I try to set them.  Why?
@@ -58,6 +59,7 @@ TABLE OF CONTENTS
    Where can I get the perl SNMP package?
    How do I install the Perl SNMP module?
    But compiling this fails! Why?
+   Compiling the perl module works OK, but 'make test' fails. Why?
    I'm trying to use mib2c (or tkmib) and it can't locate SNMP.pm?
    I'm trying to use mib2c (or tkmib) and it can't load SNMP.so?
    I'm trying to use tkmib and it can't locate Tk.pm?
@@ -68,6 +70,8 @@ TABLE OF CONTENTS
    How do I add a MIB to the agent?
    What's the difference between 'exec', 'sh' and 'pass'?
    What's the difference between AgentX, SMUX and proxied SNMP?
+   Which should I use?
+   How can I combine two copies of the 'mib2' tree from separate subagents?
    What traps are sent by the agent?
    When I run the agent it runs and then quits without staying around. Why?
    How can I stop other people getting at my agent?
@@ -77,7 +81,7 @@ TABLE OF CONTENTS
    How do I configure SNMPv3 users?
    The 'createUser' line disappears when I start the agent.  Why?
    What's the difference between /var/ucd-snmp and /usr/local/share/snmp?
-   My new version is ignoring the old snmpd.conf file. Why?
+   My new agent is ignoring the old snmpd.conf file. Why?
    Why am I getting "Connection refused"?
    I'm getting errors about "bad security model" - why?
    I'm getting errors about "bad prefix match parameter" - why?
@@ -99,6 +103,7 @@ TABLE OF CONTENTS
    How do I write C code to integrate with the agent?
    How does the agent fetch the value of a variable from the system?
    I've created a new module with 'mib2c' but it doesn't work.  Why not?
+   Where should I put the files produced by 'mib2c'?
    Mib2c only handles a single table in my MIB. How can I fix this?
    Mib2c complains about a missing "mib reference" - what does this mean?
    How can I get the agent to generate a trap (or inform)?
@@ -134,21 +139,22 @@ What is it?
 Where can I get it?
 ------------------
 
-WWW:
   Download:
-    - http://download.sourceforge.net/net-snmp/
+    - http://www.net-snmp.org/download/
+    - ftp://ftp.net-snmp.org/pub/sourceforge/net-snmp/ucd-snmp.tar.gz
   Web page:
-    - http://www.netsnmp.org/
-  Project page:
-    - http://sourceforge.net/projects/net-snmp/
+    - http://www.net-snmp.org/
+  Sourceforge Project page:
+    - http://www.net-snmp.org/project/
+  Mirrors:
+    - US:          ftp://ftp.freesnmp.com/mirrors/net-snmp/
+    - Bulgaria:    http://rtfm.uni-svishtov.bg/net-snmp/
+    - Japan:       ftp://ftp.ayamura.org/pub/net-snmp/
+    - Germany:     ftp://ftp.mpg.goe.ni.schule.de/pub/internet/net-snmp/
+    - Switzerland: ftp://sunsite.cnlab-switch.ch:/mirror/net-snmp/
 
-FTP:
-  - ftp://ucd-snmp.ucdavis.edu/ucd-snmp.tar.gz
-  - ftp://sunsite.cnlab-switch.ch:/mirror/ucd-snmp/ucd-snmp.tar.gz
-  - ftp://ftp.win.ne.jp/pub/network/snmp/ucd-snmp/ucd-snmp.tar.gz
-  - ftp://ftp.chg.ru/pub/networking/management/snmp/ucd-snmp/ucd-snmp.tar.gz
-  - ftp://mirror.aarnet.edu.au/pub/ucd-snmp/ucd-snmp.tar.gz
-  - ftp://archive.logicnet.ro/mirrors/ucd-snmp.ucdavis.edu/
+  The old ucd-snmp.ucdavis.edu web site and ftp server is now
+  offline and should not be accessed any longer.
 
 
 What documentation is available?
@@ -161,12 +167,12 @@ What documentation is available?
 	EXAMPLE.conf
 	man pages for the individual tools, files and the API
 	A guide for extending the agent
-	A Tutorial at http://www.netsnmp.org/tutorial/
+	A Tutorial at http://www.net-snmp.org/tutorial/
 
       Most of this documentation (plus archives of the mailing lists)
 	 is also available on our web page:
 
-        	http://www.netsnmp.org/
+        	http://www.net-snmp.org/
 
 
 
@@ -191,11 +197,16 @@ What's the difference between UCD-SNMP and Net-SNMP?
   workload more evenly.  The change of name simply reflects this move,
   which was the last remaining link with UC Davis.
 
-    The 4.2 release will be the last version under the UCD banner.
-  Future releases will be made under the name 'net-snmp'.   The code
-  base will remain more or less the same, though we may take advantage
-  of the change of name to restructure the code somewhat.  Any changes
-  in API will be clearly marked, and kept to a minimum.
+    The 4.2 line is the last release line that will use the ucd-snmp name.
+  4.2.1 and any subsequent ucd-snmp releases will be bug-fixes only.
+  All further developments will be released under the net-snmp name.
+  
+    At some point, we are planning to review and rework the underlying
+  code base, to improve the readability and maintainability of the
+  package.  This will probably result in some changes to the API,
+  though we will attempt to retain some form of backwards
+  compatibility as far as possible, and clearly mark anything that has
+  changed.
 
 
 
@@ -205,17 +216,19 @@ What operating systems does it run on?
   Both the applications and the agent have been reported as running
   (at least in part) on the following operating systems:
 
-	* HP-UX (9.01 to 10.20)
-	* Ultrix (4.2 to 4.5)
-	* Solaris (2.3 to 2.8) and SunOS (4.1.2 to 4.1.4)
+	* HP-UX (10.20 to 9.01 and 11.0 -- see README.hpux11)
+	* Ultrix (4.5 to 4.2)
+	* Solaris (2.8 to 2.3) and SunOS (4.1.4 to 4.1.2)
 	* OSF (4.0, 3.2)
 	* NetBSD (1.5alpha to 1.0)
 	* FreeBSD (4.1 to 2.2)
 	* BSDi (4.0.1 to 2.1)
-	* Linux (kernels 2.2 to 1.3)
+	* Linux (kernels 2.4 to 1.3)
         * AIX (4.1.5, 3.2.5)
         * OpenBSD (2.8, 2.6)
         * Irix (6.5 to 5.1)
+	* OS X (10.1.1 and 10.1.2)
+	* Dynix/PTX 4.4
 
   See the next question but one for the status of Windows support.
 
@@ -254,14 +267,13 @@ Does it run on Windows?
 ----------------------
 
   The basic suite should compile and run on Win32 platforms.
-  This includes the library and command-line tools (apart perhaps
-  from 'snmpdtrapd').
+  This includes the library and command-line tools.
 
-    The basic architecture of the agent builds, but the MIB-II
-  (and other) modules do not (which rather negates the point!).
-  Note that the UCD pass-through extensions do not work under Windows.
+    The basic architecture of the agent builds, including the MIB-II
+  module, but other MIB modules may not.  Note that the UCD
+  pass-through extensions do not work under Windows. 
 
-  Volunteers to assist in implementing Windows versions of these
+  Volunteers to assist in implementing Windows versions of the other
   modules are likely to welcomed with open arms :-)
 
     Further details of Windows support (currently Visual C++ and
@@ -277,8 +289,8 @@ How do I find out about new releases?
   	net-snmp-announce@lists.sourceforge.net
 
   To be added to (or removed from) this list, visit
-  http://lists.sourceforge.net/mailman/listinfo/net-snmp-announce.  Or
-  you can send a message to the address
+  http://www.net-snmp.org/lists/net-snmp-announce/.  Or you can send a
+  message to the address
   'net-snmp-announce-request@lists.sourceforge.net' with a subject
   line of 'subscribe' (or 'unsubscribe' as appropriate).
 
@@ -288,7 +300,7 @@ How do I find out about new releases?
 
   Patches to fix known problems are also made available via the web site:
 
-        http://sourceforge.net/patch/?group_id=12694
+        http://www.net-snmp.org/patches/
 
 
 
@@ -300,39 +312,48 @@ How can I find out what other people are doing?
   	net-snmp-users@lists.sourceforge.net
 
   To be added to (or removed from) this list, visit
-  http://lists.sourceforge.net/mailman/listinfo/net-snmp-users.  Or
-  you can send a message to the address
-  'net-snmp-users-request@lists.sourceforge.net' with a subject line
-  of 'subscribe' (or 'unsubscribe' as appropriate).
+  http://www.net-snmp.org/lists/net-snmp-users.  Or you can send a
+  message to the address 'net-snmp-users-request@lists.sourceforge.net'
+  with a subject line of 'subscribe' (or 'unsubscribe' as appropriate).
 
   To find out what the developers are doing, and to help them out, please
   read the PORTING file enclosed with the package.
 
+  There is also an net-snmp IRC channel set up on the openprojects.net
+  IRC chat servers (see http://www.openprojects.net/ for getting
+  started with irc).  Multiple core developers hang out there on a
+  regular basis.
 
 
 How do I submit a patch or bug report?
 -------------------------------------
 
   All bug reports should be submitted to the bug database through the
-  interface found at http://sourceforge.net/bugs/?group_id=12694.  Be
+  interface found at http://www.net-snmp.org/bugs/.  Be
   sure to include the version of the package that you've been working
   with, the output of the command 'uname -a', the precise command that
   triggers the problem and a copy of the output it produces.
 
     All patches should be submitted to the patch manager at
-  http://sourceforge.net/patch/?group_id=12694.  If possible, submit a
+  http://www.net-snmp.org/patches/.  If possible, submit a
   bug report describing the patch as well (referencing it by its patch
   number) since patch manager doesn't contain a decent description
   field.
 
-    There is also a support database at
-  http://sourceforge.net/patch/?group_id=12694 where "I need help
-  with" questions can be submitted.  Be advised that the people
-  answering these kinds of questions are doing so out of the goodness
-  of their hearts, as this is an otherwise unsupported package.
+    Questions about using the package should be directed at the
+  net-snmp-users@lists.sourceforge.net mailing list.  Be advised that
+  the people answering these kinds of questions are doing so out of
+  the goodness of their hearts, as this is an otherwise unsupported
+  package.  Please also be advised that posting notes using a html
+  based mailer only annoys people, and posting notes more than once
+  ("no one answered this so I'm posting it again") only annoys them
+  even more.  As long as you stay away from those two no-no's, we're a
+  rather friendly bunch.
 
-    You can also mail the net-snmp-users@lists.sourceforge.net list
-  with your questions and see if anyone there can help you.
+    There is also an net-snmp IRC channel set up on the openprojects.net
+  IRC chat servers (see http://www.openprojects.net/ for getting
+  started with irc).  Multiple core developers hang out there on a
+  regular basis.
 
     We can't promise to be able to solve the problem, but we'll
   certainly try and help.  Please *don't* mail both the coders
@@ -489,7 +510,7 @@ How do I add a MIB?
 How do I add a MIB to the tools?
 -------------------------------
 
-  In essence,
+  Firstly,
 
 	cp MY-MIB.txt /usr/local/share/snmp/mibs
 
@@ -507,14 +528,17 @@ How do I add a MIB to the tools?
 
         echo "mibs +MY-MIB" >> $HOME/.snmp/snmp.conf
 
+  Note that you need *both* steps.
   The first command copies the file defining the new MIB to a
   expected location for MIB files.  This defaults to
   /usr/local/share/snmp/mibs (or PREFIX/share/snmp/mibs if the the
   suite was installed into a different base location).  Some
   ready-packaged distributions (such as Linux RPM packages) may look
   for MIB files in a different location, such as /etc/snmp/mibs - put
-  the new file in this dirctory instead.  It will also look for mibs
-  in your personal $HOME/.snmp/mibs directory.
+  the new file in this directory instead.  This makes it available for
+  everyone on the system.
+  The tools will also look for mibs in your personal $HOME/.snmp/mibs
+  directory, but this will only work for you.
 
   The second command tells the tools to load in this new MIB file as well
   as the default set.   Note that the tools do *not* load every MIB found
@@ -553,12 +577,14 @@ Why can't I see values in the <INSERT ENTERPRISE HERE> tree?
 	snmpwalk localhost public ucdavis
  
   Or, of course, you can walk a selected portion of an enterprise subtree
-  by specifying the appropraite starting point - e.g:
+  by specifying the appropriate starting point - e.g:
 
 	snmpwalk localhost public ucdavis.version
   
   If you still can't see any information, keep reading.  The next few
   questions will probably help you.
+
+
 
 Requests always seem to timeout, and don't give me anything back.  Why?
 ----------------------------------------------------------------------
@@ -577,6 +603,13 @@ Requests always seem to timeout, and don't give me anything back.  Why?
   is not recognised, then the agent will simply not respond.
     See the next question, or the question on access control in the AGENT
   section for more details.
+
+    Another possibility is TCP wrapper settings.  See the question
+
+	Why am I getting "Connection refused"?
+
+   for more details of this.   (Don't worry that the symptoms aren't
+   correct - it may still be relevant)
 
 
 
@@ -606,14 +639,20 @@ I can see the system group, but nothing else.  Why?
 
   As a quick fix, you might create a new snmpd.conf configuration file
   that gives you the access control you need.  Run snmpconf -g
-  basic_setup and follow its instructions.
+  basic_setup and follow its instructions.  Alternatively, add a
+  line
+	rocommunity public
+                           to your snmpd.conf file, and restart.
+  See the FAQ entries on access control for more details.
 
-Requesting an object fails with "sub-identifier not found"  Why?
----------------------------------------------------------------
+
+
+Requesting an object fails with "Unknown Object Identifier"  Why?
+----------------------------------------------------------------
 
   If a "general" snmpwalk shows the entry, but asking for it more
-  specifically gives a "sub-identifier not found:" error, then that's
-  probably a slightly different problem.
+  specifically gives a "sub-identifier not found:" or "Unknown Object
+  Identifier" error, then that's a slightly different problem.
 
     Firstly, make sure that you're asking for the object by the right name.
   Object descriptors are case-sensitive, so asking for 'sysuptime' will
@@ -633,15 +672,44 @@ Requesting an object fails with "sub-identifier not found"  Why?
   
 	snmpget myhost public system.sysUpTime.0
 
-  These earler versions oF the tools may take a command-line option '-R'
+  These earlier versions of the tools may take a command-line option '-R'
   or '-IR' (depending on vintage) to invoke this "random-access" mode.
-  All (reasonably-recent) versions of the tools accept the syntax
+  Note that snmptranslate still requires "random-access" to be specified
+  explicitly - all other command tools now use this mode by defaults.
+
+  All versions of the tools accept the syntax
 
 	snmpget myhost public RFC1213-MIB:sysUpTime.0
 
-  to denote a particular object in a specific MIB module.   Note that
-  this uses the name of the *module*, not the name of the file.  See
-  the first question in this section for more details.
+  to denote a particular object in a specific MIB module.  Note that this
+  uses the name of the *module*, not the name of the file.  See the second
+  question in this section for the distinction.
+
+
+
+Why do I get "noSuchName" when asking for "sysUpTime" (or similar)?
+------------------------------------------------------------------
+
+  There are a number of possible causes of this (scattered throughout
+  this FAQ, so keep reading!).   But one of the most likely snares for
+  the unwary is forgetting the instance subidentifier for 'non-table'
+  objects.  If you walk the 'system' tree, you'll notice that all the
+  results (apart from the sysORTable), have a '.0' at the end of the OID.
+  This is the "instance sub-identifier" - which *must* be included for
+  a GET request.
+     Compare the following:
+
+	$ snmpget localhost public sysUpTime
+	Error in packet
+	Reason: (noSuchName) There is no such variable name in this MIB.
+	This name doesn't exist: system.sysUpTime
+	$ snmpget localhost public sysUpTime.0
+	system.sysUpTime.0 = Timeticks: (69189271) 8 days, 0:11:32.71
+
+  This is a little less obscure when using SNMPv2c or v3 requests:
+
+	$ snmpget -v 2c localhost public sysUpTime
+	system.sysUpTime = No Such Instance currently exists
 
 
 
@@ -680,17 +748,21 @@ I cannot set any variables in the MIB.
   Of those that can in principle be changed, not all have been implemented
   as such in this agent.
 
-  Even if the SET support has been provided, the agent must be configured
-  to allow this level of access.  The example configuration file shipped
-  with the basic distribution only allows write access for the local host
-  itself (and a suitabre community name must be configured first).
+  Even if SET support has been implemented, the agent may not be configured
+  to allow write access to this object.
+
+  The example configuration file shipped with the basic distribution only
+  allows write access for the local host itself (and a suitable community
+  name must be configured first).
     Ready-installed distributions (such as those shipped with Linux) tend
-  to be configured with read-only access to a portion of the mib tree. More
-  general access, including SET support, needs to be configured explicitly.
-  See the access-control entries in the AGENT section for more details.
+  to be configured with read-only access to part of the mib tree (typically
+  just the system group) and no write access at all.
+
+  To change this, you will need to set up the agent's access control
+  configuration.  See the AGENT section for more details.
 
     Note that neither the community string "public" nor "private" can be
-  used to set veriables in a typical default configuration.
+  used to set variables in a typical default configuration.
 
 
 
@@ -724,8 +796,10 @@ Variables seem to disappear when I try to set them.  Why?
   but you can't perform that particular operation (i.e. changing it).
     Similarly, the SNMPv2 error 'notWritable' means "not writeable in
   this particular case" rather than "not writeable under any circumstances".
-  It may be that a different invocation (such as using a different community
-  name, or an authenticated SNMPv3 request) might be successful.
+
+  If you are sure that the object is writeable (and has been implemented
+  as such), then you probably need to look at the agent access control.
+  See the AGENT section for more details.
 
 
 
@@ -757,8 +831,8 @@ How do I send traps and notifications?
   The following examples generate the generic trap 'coldStart' and a
   (dummy) enterprise specific trap '99' respectively:
 
-	snmptrap -v 1 localhost public "" "" 0 0  ""
-	snmptrap -v 1 localhost public "" "" 6 99 ""
+	snmptrap -v 1 -c public localhost "" "" 0 0  ""
+	snmptrap -v 1 -c public localhost "" "" 6 99 ""
   
   The empty parameters "" will use suitable defaults for the relevant 
   values (enterprise OID, address of sender and current sysuptime).
@@ -766,21 +840,21 @@ How do I send traps and notifications?
     An SNMPv2 or SNMPv3 notification (either trap or inform) takes
   the OID of the trap to send:
 
-	snmptrap -v 2c localhost public UCD-SNMP-MIB::ucdStart
-	snmptrap -v 2c localhost public .1.3.6.1.4.1.2021.251.1
+	snmptrap -v 2c -c public localhost "" UCD-SNMP-MIB::ucdStart
+	snmptrap -v 2c -c public localhost "" .1.3.6.1.4.1.2021.251.1
 
   (These two are equivalent ways of specifying the same trap).
 
   Any of these commands can be followed by one or more varbinds,
   using the same (OID/type/value) syntax as for 'snmpset':
 
-	snmptrap -v 2c localhost public ucdStart sysContact.0 s "Dave"
+	snmptrap -v 2c -c public localhost "" ucdStart sysContact.0 s "Dave"
 
   Generating traps from within the agent is covered in the AGENT and
   CODING sections.
 
   You should also read the snmptrap tutorial at
-  http://www.netsnmp.org/tutorial/commands/snmptrap.html
+	http://www.net-snmp.org/tutorial/commands/snmptrap.html
   which will help you understand everything you need to know about traps.
 
 
@@ -806,12 +880,16 @@ How do I handle traps and notifications?
 	traphandle .1.3.6.1.4.1.2021.251.2  page_me down
 	traphandle default                  log_it
 
+  where 'page_me' and 'log_it' are the command to be run.  (You probably
+  need to specify full pathnames, to ensure that the commands will be
+  found.  They're just short here for readability).
+
   Note that the first entry uses the OID corresponding to the SNMPv1
   'coldStart' trap.  See the co-existence RFC (RFC 2576) for details
   of mapping SNMPv1 traps to SNMPv2 OIDs.
 
-    There's a tutorial with more details on the web site
-    (http://www.netsnmp.org/tutorial/commands/snmptrap.html).
+  There's a tutorial with more details on the web site at
+	http://www.net-snmp.org/tutorial/commands/snmptrap.html
   
 
 
@@ -855,7 +933,7 @@ How big can an SNMP request (or reply) be?
 -----------------------------------------
 
     The protocol definition specifies a "minimum maximum" packet size
-  (484 bytes for UDP), which all systems much support, but does not
+  (484 bytes for UDP), which all systems must support, but does not
   attempt to define an upper bound for this maximum size.  This is left
   to each individual implementation.
 
@@ -866,7 +944,7 @@ How big can an SNMP request (or reply) be?
   sent, as well as the corresponding OIDs.
 
     As a rule of thumb, sending 400 integer-valued varbinds seems to
-  work OK, while 300 string-valued varbinds triggers the problem.
+  work OK, while 300 string-valued varbinds triggers an overrun.
 
 
 
@@ -882,12 +960,16 @@ How can I monitor my systems (disk, memory, etc)?
   purpose.  Two of the most widely used are MRTG (http://www.mrtg.org/)
   and Cricket (http://cricket.sourceforge.net/).  There are details of
   how to set up Cricket to monitor some of the UCD extensions at
-  http://www.afn.org/~jam/software/cricket/   If anyone has something
-  similar for MRTG, please let us know.
+  http://www.afn.org/~jam/software/cricket/
+
+     We have also set up a page that describes in detail how MRTG
+  can be set up to monitor disk, memory and cpu activity at
+  http://www.net-snmp.org/tutorial/mrtg/index.html
 
     The net-snmp package contains a web based manager itself that
   runs on top of a mysql database, but it is extremely beta in
   nature.  See the manager/README file for details.
+
 
 
 Applications complain about entries in your example 'snmp.conf' file.  Why?
@@ -899,6 +981,8 @@ Applications complain about entries in your example 'snmp.conf' file.  Why?
   applicable to all applications (via the SNMP library).
     Rename (or merge) the 'snmp.conf' file to 'snmpd.conf', and this should
   fix the problem.
+    Note that there is no example snmp.conf shipped with the standard
+  distribution.
 
 
 
@@ -909,7 +993,7 @@ OK, what should I put in snmp.conf?
   applications, to avoid having to specify them every time.  Examples
   include the SNMPv3 settings mentioned above, defaults for which MIBs
   to load and where from, and the default SNMP version, port and
-  community string to use.
+  (if appropriate) the community string to use.
 
     Some of these (such as the MIB file location), might belong in a
   shared snmp.conf file (typically /usr/local/share/snmp/snmp.conf) to
@@ -917,12 +1001,12 @@ OK, what should I put in snmp.conf?
   security settings), are more likely to refer to a particular user, and
   should go in a personal snmp.conf file (typically $HOME/.snmp/snmp.conf).
 
-    Note that the UCD package does not usually come with an example
-  snmp.conf file.  See 'snmpget -H' and/or the snmp.conf(5) man page
-  for more details.
+    Note that the UCD package does not come with an example snmp.conf file.
+  See 'snmpget -H' and/or the snmp.conf(5) man page for more details.
 
     You can also use the "snmpconf" command to help you generate your
   snmp.conf configuration file (just run it and answer its questions).
+
 
 
 PERL
@@ -975,12 +1059,30 @@ But compiling this fails! Why?
 
 
 
+Compiling the perl module works OK, but 'make test' fails. Why?
+--------------------------------------------------------------
+
+  That's difficult to answer in general.
+  Some of the perl tests are rather picky, so this may simply be
+  some minor inconsistency between your precise setup, and the
+  expectations of the test environment.
+
+    Check that you are working with the perl distribution that matches
+  the SNMP libraries (use the 'perl/SNMP' in preference to CPAN), and
+  that you have installed the main libraries successfully (uninstall
+  any old versions if you're having trouble).
+
+    If all this looks OK, and if most of the tests pass, then it's
+  probably safe to run 'make install' anyway.   Probably.
+
+
+
 I'm trying to use mib2c (or tkmib) and it can't locate SNMP.pm?
 ------------------------------------------------------------
 
   That's probably because the SNMP perl module hasn't been installed.
   It's not part of the standard perl distribution, nor is it installed
-  by default in RedHat linux (for example).
+  by default in RedHat Linux (for example).
     You'll need to install it.  See the previous two questions.
 
 
@@ -1042,11 +1144,10 @@ the first two characters of the filename.  What's happening?
 Why aren't my mib files being read in?
 -------------------------------------
 
-    The most likely cause is that the UCD library only loads a subset
-  of MIB files by default.  This list is set at when the suite is first
-  configured and compiled, and basically corresponds to the list of
-  modules that the agent supports.  (This is a simplification, but is
-  a reasonable first approximation).
+    The UCD library only loads a subset of MIB files by default.  This
+  list is set at when the suite is first configured and compiled, and
+  basically corresponds to the list of modules that the agent supports.
+  (This is a simplification, but is a reasonable first approximation).
 
     You can override this by using the command-line option '-m', the
   environmental variable 'MIBS' or the snmp.conf directive 'mibs'.
@@ -1065,8 +1166,8 @@ Why aren't my mib files being read in?
   or the snmp.conf directive 'mibdirs'.
 
     Note that this may very well affect you if you've installed a
-  new version of the suite, replacing one provided by the supplier
-  (which typically would use a more 'central' location).
+  new version of the suite manually, replacing one provided by the
+  supplier (which typically would use a more 'central' location).
 
 
     Finally, are you sure that you've installed the MIB files?
@@ -1096,7 +1197,7 @@ What does "Cannot find module (XXX-MIB)" mean?
 ---------------------------------------------
 
     This is similar to the previous questions.   In this case, it's
-  stating that it can't find the specified module - either becuase
+  stating that it can't find the specified module - either because
   it's not installed properly, or the name used is subtly wrong.
 
     If it's just one or two modules that are not being found, check
@@ -1138,13 +1239,14 @@ The parser doesn't handle comments properly. Why not?
   corrected.
 
 
+
 How do I replace MIB values with new ones?
 -----------------------------------------
 
   The UCD parser generally takes the first definition it sees for each
   object in the MIB hierarchy.   Even if you specify your file to be read
   first, if the IMPORTS clauses reference a MIB with competing objects,
-  those objects will be parsed first !
+  those objects will be parsed first.
 
   When specifying the Replace MIB command-line option (-PR), the parser
   will use definitions sourced from the most recent MIB file.
@@ -1173,13 +1275,18 @@ How do I replace MIB values with new ones?
     3. Constrain the parser to not read in default MIB files by setting
        the MIBS environment to the environment separator character
        [semi-colon on win32, colon everywhere else].
+       Setting this to "" may also have the same effect.
 
     4. The MIBFILES environment can specify the path of the new MIB file.
 
-  If you grok programmer-speak, invoke :
-  ds_set_boolean(DS_LIBRARY_ID, DS_LIB_MIB_REPLACE, 1 | 0)
-  to enable or disable the Replace MIB feature, then invoke read_mib
-  specifying the MIB file name.  Then disable Replace MIB feature.
+  Within a program, the call
+	ds_set_boolean(DS_LIBRARY_ID, DS_LIB_MIB_REPLACE, 1 | 0)
+  will enable or disable the Replace MIB feature respectively.
+  If you're having problems loading a particular MIB file, this
+  call can be used to disable this feature, before using read_mib() to
+  load the required file, and then re-enabling the Replace MIB feature.
+  (or vice versa, as appropriate).
+
 
 
 How can I get more information about these MIB file problems?
@@ -1201,11 +1308,11 @@ How can I get more information about these MIB file problems?
 	-T   provides sub-options for various views of these entries
 
   There are other '-P' options to control various aspects of MIB parsing.
-  See the 'snmptranslate(1)' and 'snmpcmd(1)' man pages for more details.
+  See the 'snmptranslate(1)' and 'snmpcmd(1)' man pages for more details,
+  or the tutorial at
+	http://www.net-snmp.org/tutorial/commands/snmptranslate.html
 
-  (see the
-  http://www.netsnmp.org/tutorial/commands/snmptranslate.html
-  web page as well)
+
 
 What's this about "too many imported symbols"?
 ---------------------------------------------
@@ -1216,7 +1323,7 @@ What's this about "too many imported symbols"?
     There are two circumstances in which this can result in the
   error message shown above.
 
-    Firstly, if the MIB file refers to an unususally large number
+    Firstly, if the MIB file refers to an unusually large number
   of external identifiers.  Handling this case requires a (trivial)
   patch to the parsing code.  Contact the coders list for advice.
      (This is extremely rare - the only example that
@@ -1251,21 +1358,21 @@ What MIBs are supported?
 What protocols are supported?
 ----------------------------
 
-  The agent supports all three versions of SNMP (v1, v2c and v3), over both
-  UDP and TCP transports, as well as a SMUX (RFC 1227) master agent, and
-  AgentX (RFC 2257 ) in both master and subagent roles.
-  support.
+  The agent supports all three current versions of SNMP (v1, v2c and v3),
+  over both UDP and TCP transports, as well as a SMUX (RFC 1227) master
+  agent, and AgentX (RFC 2257 ) in both master and subagent roles.
+
 
 
 How do I configure the agent?
 ----------------------------
 
-  Read the snmpd.conf manual page for full details on how to do this.
+  That depends on what you want it to do.  See the snmpd.conf(5) manual
+  page for the possibilities.
 
   You can also run the "snmpconf" perl script to help you create this
-  file.
+  file.  Start off with 'snmpconf -g basic_setup' to get you going.
 
-  You might start off with snmpconf -g basic_setup to get you going.
 
 
 How do I add a MIB to the agent?
@@ -1273,12 +1380,13 @@ How do I add a MIB to the agent?
 How do I add functionality?
 --------------------------
 
-  Unfortunately, adding a file to the MIB directory does not automatically
-  extend the functionality of the agent to include this MIB.  (Would that
-  life were so simple).  In fact, the agent makes little or no use of
-  these files, and will work quite happily without them.
-  All the information about the syntax and scope of the variables supported
-  is hardwired into the implementation of the agent.
+  While simply adding a file to the MIB directory (and possibly tweaking
+  the list of MIBs to load) is sufficient for the tools, unfortunately
+  extending the functionality of the agent to include this is not so simple.
+  In fact, the agent makes little or no use of these files, and will work
+  quite happily without them.  All the information about the syntax and
+  scope of the variables supported is hardwired into the implementation
+  of the agent.
 
   There are a number of alternative ways to add functionality for a new
   MIB to the agent.
@@ -1311,8 +1419,8 @@ How do I add functionality?
   the main agent - either statically compiled in, or dynamically loaded.
   This is covered further in the next section.
 
-    Note that there is effectively no difference between 'pass-through'
-  MIB support, subagents and modules implemented within the main agent
+    Note that there is no visible difference between 'pass-through'
+  MIB support, subagents, and modules implemented within the main agent
   itself. Tools querying the agent will see a single MIB structure.
  
 
@@ -1323,7 +1431,7 @@ What's the difference between 'exec', 'sh' and 'pass'?
     'exec' will fork off the specified command and return the exit status
   and/or the output.  Arguments are passed directly to the command.
 
-    'sh' is similar, but invokes a shell to run the command.
+    'sh' is similar, but invokes a shell to run the command line given.
   This means that quoted arguments will be recognised as such, and also
   allows redirection, and other similar shell interpretation.
 
@@ -1336,7 +1444,7 @@ What's the difference between 'exec', 'sh' and 'pass'?
     'pass' is a more general mechanism for extending the agent, and the
   command given will be invoked for any request within the specific MIB
   subtree.  Details of precisely how this command will be called in
-  various circumstances is given in the 'snmpd.conf(8)' man page.
+  various circumstances is given in the 'snmpd.conf(5)' man page.
 
     'pass-persist' is similar, but the command will continue running
   even once the initial request has been answered.
@@ -1355,13 +1463,13 @@ What's the difference between AgentX, SMUX and proxied SNMP?
   relate to how data is represented, and the mechanisms for communication
   between master and subagents.
 
-    SMUX and proxy SNMP both essentially use the same SNMP packet format.
-  The main difference is probably that a proxy SNMP subagent need not be
-  aware that it is acting in such a role.  It typically listens on a
-  non-standard port, and simply receives requests as usual, forwarded from
-  the master agent.  The main issue to be aware of is that such requests
-  will usually appear to come from the local host, and this may affect how
-  the access control mechanisms need to be set up.
+    SMUX and proxy SNMP both essentially use the standard SNMP packet format.
+  The main difference is that a proxy SNMP subagent need not be aware that
+  it is acting in such a role.  It typically listens on a non-standard port,
+  and simply receives requests as usual, forwarded from the master agent. 
+  The main issue to be aware of is that such requests will usually appear
+  to come from the local host, and this may affect how the access control
+  mechanisms need to be set up.
 
     SMUX uses a similar packet format, but the subagent "registers" with
   the master agent, providing a suitable password.  The UCD agent includes
@@ -1376,15 +1484,90 @@ What's the difference between AgentX, SMUX and proxied SNMP?
   extension mechanism.  The UCD agent can be used in both master and subagent
   roles, and the agent library can also be used to embed an AgentX subagent
   within another application.
-    See the file 'agent/mibgroup/agentx/README' for details.
+    See the file 'README.agentx' for details.
 
-  Note that support for the SMUX and AgentX extension mechanisms are
-  not configured in by default.  You will need to run configure with
-  the option
+  Note that support for SMUX is not configured in by default.  You will
+  need to run configure with the option
 
-		--with-mib-modules=agentx,smux
+		--with-mib-modules=smux
 
-  (or whichever of these you wish to support).
+  Starting from release 4.2.1, AgentX support is now included by default,
+  but needs to be explicitly activated in the master agent.  Do this by
+  adding the line
+
+		master agentx
+
+  to the snmpd.conf file before starting the agent.  Note that AgentX
+  support is still experimental, and should not be used on production
+  systems.  See README.agentx for details.
+
+
+
+Which should I use?
+------------------
+
+  That's a difficult question.
+
+  Comparing the three protocols, SNMP was not originally designed
+  as an internal subagent-communication protocol, and there are
+  certain architectural limitations to SMUX, which were addressed
+  as part of the design of AgentX.  These include such aspects as
+  reliable handling of SET requests (particularly in the face of
+  failures), a common value for sysUpTime, and a mechanism for
+  sharing tables across multiple subagents.
+    So from a purely functional point of view, AgentX is the most
+  appropriate choice for subagent communication.
+
+    However, the UCD AgentX implementation (while significantly
+  more mature than it has been), is still not complete or without
+  known problems.  It's probably sufficiently stable for normal
+  day-to-day use, but isn't really ready for use in mission-critical
+  systems.
+    The proxy-SNMP support is also still experimental, and hasn't
+  received the same level of active use that the AgentX code has.
+  So it's uncertain quite how reliable this code might be.
+    The SMUX support is the most mature of the three, so is probably
+  the safest choice.  But it is no longer being actively maintained,
+  as the original author has moved on, and the current developers
+  don't use this facility.  If it meets your needs, then fine - but
+  we can't promise to fix bugs.  (Of course, if you can supply a
+  fix, then we'll update the code accordingly).  And this is only
+  available as a master agent anyway.  This package does not include
+  a SMUX subagent toolkit.
+
+    This decision will probably be dictated by external considerations
+  (i.e. the other agents you need to combine with).  Ideally, you
+  should be looking towards AgentX, but this is not always possible.
+
+    Note that as far as individual MIB modules are concerned, the
+  protocol used to transport the request is more or less irrelevant.
+  The same information is being requested (or set) each time, so
+  a MIB module ought to be protocol-independent.  This was one of
+  the design aims of the AgentX support, and the exact same module
+  code can be included as part of a pure-SNMP master agent, or an
+  AgentX subagent, with no modifications needed.
+    (This could also be extended to implement a SMUX subagent,
+  simply by providing a suitable driving architecture round the
+  common variable-handling code.  But don't hold your breath).
+
+
+
+How can I combine two copies of the 'mib2' tree from separate subagents?
+-----------------------------------------------------------------------
+
+  At the moment, you can't.  Sorry about that.
+
+  Ideally, this ought to be possible by using the community string or
+  the SNMPv3 context to distinguish between parallel MIB trees.  But
+  support for this has not been implemented in the UCD agent.  (Though
+  it is planned).
+    Probably the only way to handle this at the moment, is to tweak
+  one of the subagents to use a different set of (non-standard) OID
+  assignments - perhaps by relocating the whole of the subtree to
+  another (private) OID.
+
+    We realise that this is not ideal, but it's the best we can offer
+  at the moment.
 
 
 
@@ -1395,8 +1578,9 @@ What traps are sent by the agent?
   UCD-specific trap 'ucdShutdown' when it stops.  It can also be configured
   to send an 'authenticationFailure(4)' trap when it receives an SNMPv1
   request using an unknown community name.  It does not currently generate
-  'warmStart(1)' traps on being re-configured, though this would be fairly
-  simple to add.
+  either 'coldStart(0)' or 'warmStart(1)' traps on being re-configured,
+  though this would be fairly simple to add.  (The main difficulty would
+  be determining whether the configuration had changed or not).
 
     The agent does not send 'linkUp' or 'linkDown' traps.  Generating such
   traps would be simple enough, but the difficulty is in recognising when
@@ -1419,7 +1603,7 @@ What traps are sent by the agent?
 When I run the agent it runs and then quits without staying around. Why?
 -----------------------------------------------------------------------
 
-  The first question is, are you certain that this is what is happening?
+  Firstly, are you certain that this is what is happening?
 
   The normal operation of the agent is to 'fork' itself into the
   background, detaching itself so that it will continue running even
@@ -1434,14 +1618,15 @@ When I run the agent it runs and then quits without staying around. Why?
 
   On the other hand, if 'ps' shows that the agent is not running, then
   this is an error, and probably show that something went wrong in
-  starting the agent up.  Check the agent log file for any error messages.
+  starting the agent up.  Check the agent log file for any error messages,
+  or run it with '-f -L' and see what it reports.
 
 
 
 How can I stop other people getting at my agent?
 -----------------------------------------------
 
-  First question - are you concerned with read access or write access?
+  Firstly, are you concerned with read access or write access?
 
   As far as changing things on the agent is concerned, there is very
   little that can actually be altered (see the answer to " I cannot set
@@ -1487,21 +1672,30 @@ How can I listen on just one particular interface?
 
 		snmpd -p 161@127.0.0.1 -p 161@10.0.0.1
 
-    The AgentX port option ('-X') works in much the same way.
+  The AgentX port option ('-x') works in much the same way.  Unfortunately,
+  this uses a slightly different syntax to specify interface and port
+  number ( "-x 705:10.0.0.1" - with a ':' rather than '@').
 
 
-  
+
 How do I configure access control?
 ---------------------------------
 
-    The simplest way is to use the configure directives 'rocommunity'
-  and 'rwcommunity'.   These specify the community names to use for
-  read-only and read-write access to the whole of the supported MIB
-  tree (though they can also be restricted to particular subtrees,
-  and/or specific request sources).
-    Similarly, the configure directives 'rouser' and 'rwuser' can be
-  used to allow the specified SNMPv3-authenticated users access to
-  all or part of the MIB tree.
+    The simplest way is to use the configure directives:
+
+		rocommunity public
+		rwcommunity private
+
+  These specify the community names to accept for read-only and
+  read-write access to the whole of the supported MIB tree.
+  (Obviously you can change these community strings to match
+  your requirements - which is a particularly good idea in the
+  case of 'rwcommunity'!)
+
+    These can also be restricted to particular subtrees, and/or request
+  sources.  Similarly, the configure directives 'rouser' and 'rwuser'
+  can be used to allow the specified SNMPv3-authenticated users access
+  to all or part of the MIB tree.  See 'snmpd.conf(5)'.
 
     These are effectively wrappers round the core access control
   mechanisms.  This uses four directives 'com2sec', 'group', 'view'
@@ -1647,11 +1841,12 @@ The 'createUser' line disappears when I start the agent.  Why?
     That's deliberate.   The agent removes the (human-readable) 'createUser'
   directive, and replaces it with an equivalent 'usmUser'.  This
   contains the same information, but in a form that's only meaningful
-  internally.  This means that the password is not longer available in
-  a readable form.  Additionally, the password has been converted to a
-  key that can only be used to access the local machine.  If someone
+  internally.  This means that the password is not longer stored in
+  a human-readable form.  Additionally, the password has been converted
+  to a key that can only be used to access the local machine.  If someone
   stole the new usmUser line on this machine, they could not use that
   information to access any of your other agents.
+
 
 
 What's the difference between /var/ucd-snmp and /usr/local/share/snmp?
@@ -1668,18 +1863,18 @@ What's the difference between /var/ucd-snmp and /usr/local/share/snmp?
 
 
 
-My new version is ignoring the old snmpd.conf file. Why?
--------------------------------------------------------
+My new agent is ignoring the old snmpd.conf file. Why?
+-----------------------------------------------------
 
-    The most likely explanation is that the new version of the agent is looking
-  in a different location than the previous version was.  This is commonly
+    The most likely explanation is that the new version of the agent is
+  looking in a different location than the previous one.  This is commonly
   experienced when replacing a ready-installed version (e.g. from a Linux
-  distribution), with the current release, installed from the source.
+  distribution), with the current release installed from the source.
 
-    The default location for the snmpd.conf file with the basic distribution
-  is /usr/local/share/snmp.  Ready-installed versions often look for the
-  file as /etc/snmpd.conf.  Try moving the old config file to the new
-  location, and restart the agent.
+    The default location for this file with the basic distribution is
+  /usr/local/share/snmp/snmpd.conf (or PREFIX/share/snmp/snmpd.conf).
+  Ready-installed versions often look for the file as /etc/snmpd.conf.
+  Try moving the old config file to the new location, and restart the agent.
 
 
 
@@ -1738,6 +1933,7 @@ Why can't I see values in the UCDavis 'extensible' or 'disk' trees?
   section of the snmpd.conf file.
 
 
+
 Why can't I see values in the UCDavis 'memory' or 'vmstat' trees?
 ----------------------------------------------------------------
 
@@ -1755,7 +1951,7 @@ What do the CPU statistics mean - is this the load average?
   Unfortunately, the original definition of the various CPU statistics
   was a little vague.  It referred to a "percentage", without specifying
   what period this should be calculated over.  It was therefore
-  implemented slightly differently on the different architectures.
+  implemented slightly differently on different architectures.
 
     The 4.2 release includes "raw counters", which can be used to
   calculate the percentage usage over any desired period.  This is
@@ -1799,7 +1995,7 @@ The speed/type of my network interfaces is wrong - how can I fix it?
   speed of a particular interface.  This is particularly useful for
   fast-ethernet, or dial-up interfaces, where the speed cannot be
   guessed from the name.
-    See the snmpd.conf man page for details.
+    See the snmpd.conf(5) man page for details.
   
 
 
@@ -1828,6 +2024,7 @@ What does "klread:  bad address" mean?
 		for that architecture.  Try and identify which
 		OID is generating the error, and contact the
 		list 'net-snmp-coders@lists.sourceforge.net'
+		Remember to tell us what architecture you have!
 
 
 
@@ -1843,7 +2040,8 @@ What does "nlist err:  wombat not found" (or similar) mean?
     This error only occurs if you have used the flag
   '--enable-debugging' as part of the initial configuration.
   Reconfigure the agent with '--disable-debugging' and these
-  messages will disappear.
+  messages will disappear.  (It won't fix the underlying problem,
+  but at least you won't be nagged about it).
 
 
 
@@ -1988,6 +2186,29 @@ I've created a new module with 'mib2c' but it doesn't work.  Why not?
 
 
 
+Where should I put the files produced by 'mib2c'?
+------------------------------------------------
+
+  If you're using the main source tree to compile your new module, then
+  put these two files (mymib.[ch]) in the directory 'agent/mibgroup'.
+  You should then re-run configure to add in your new module
+  ("configure --with-mib-modules=mymib") and recompile.
+
+    If you've got a number of new modules to add, it might be
+  sensible to put them all into a single subdirectory of 'mibgroup'.
+  Then create a header file, listing the individual components.
+  This might look something like:
+
+		config_require(mymib/myObjects)
+		config_require(mymib/myTable)
+		config_require(mymib/myOtherTable)
+
+  If this was saved as the file 'mymib.h', then the same configure
+  line given above, would pull in all three modules.  See the
+  current contents of 'agent/mibgroup' for examples of this.
+
+
+
 Mib2c only handles a single table in my MIB. How can I fix this?
 ---------------------------------------------------------------
 
@@ -2068,7 +2289,7 @@ How can I get the agent to generate a trap (or inform)?
 I'm getting an error "autoheader: not found" - what's wrong?
 -----------------------------------------------------------
 
-    This usually apears when compiling the current development source
+    This usually appears when compiling the current development source
   version, obtained via CVS.  Unfortunately, the timestamps on some of
   the configure files are such that make assumes (mistakenly) that the
   configure script needs to be re-generated.
@@ -2117,7 +2338,7 @@ What ASN.1 parser is used?
   and the parser is usually bundled into the library 'libsnmp.a'
 
     Note that the parser attempts to be fairly forgiving of some common
-  errors and incompatabilities in MIB files.  The UCD tools accepting a
+  errors and incompatibilities in MIB files.  The UCD tools accepting a
   MIB file without complaint does not imply that the MIB is strictly
   correct.
     Certain MIBs (most notably those from Cisco) may need some amendments

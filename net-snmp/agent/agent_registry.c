@@ -35,6 +35,9 @@
 #  include <time.h>
 # endif
 #endif
+#if HAVE_NETINET_IN_H
+#include <netinet/in.h>
+#endif
 
 #if HAVE_DMALLOC_H
 #include <dmalloc.h>
@@ -277,8 +280,10 @@ load_subtree( struct subtree *new_sub )
 	    		new2 = split_subtree( new_sub,
 					tree1->end, tree1->end_len);
 			res = load_subtree( new_sub );
-			if ( res != MIB_REGISTERED_OK )
+			if ( res != MIB_REGISTERED_OK ) {
+			    free_subtree(new2);
 			    return res;
+			}
 			return load_subtree( new2 );
 
 	 }
@@ -361,8 +366,10 @@ register_mib_context(const char *moduleName,
 	    return MIB_REGISTRATION_FAILED;
 	}
     }
+  } else if (res == MIB_DUPLICATE_REGISTRATION ||
+	     res == MIB_REGISTRATION_FAILED) {
+      free_subtree(subtree);
   }
-
 
   reg_parms.name = mibloc;
   reg_parms.namelen = mibloclen;
@@ -370,6 +377,10 @@ register_mib_context(const char *moduleName,
   reg_parms.range_subid  = range_subid;
   reg_parms.range_ubound = range_ubound;
   reg_parms.timeout = timeout;
+
+  /*  Should this really be called if the registration hasn't actually 
+      succeeded?  */
+
   snmp_call_callbacks(SNMP_CALLBACK_APPLICATION, SNMPD_CALLBACK_REGISTER_OID,
                       &reg_parms);
 
@@ -907,7 +918,7 @@ void (* external_signal_handler[NUM_EXTERNAL_SIGS])(int);
  *       below for every single that might be handled by register_signal().
  */
 
-void agent_SIGCHLD_handler(int sig)
+RETSIGTYPE agent_SIGCHLD_handler(int sig)
 {
   external_signal_scheduled[SIGCHLD]++;
 #ifndef HAVE_SIGACTION
@@ -915,7 +926,7 @@ void agent_SIGCHLD_handler(int sig)
    * a signal handler is reset once it gets called. Ensure that it
    * remains active.
    */
-  signal(SIGCHLD, (void *)agent_SIGCHLD_handler);
+  signal(SIGCHLD, agent_SIGCHLD_handler);
 #endif
 }
 

@@ -273,7 +273,6 @@ extern void snmp_set_detail (const char *);
 #define SNMP_MAX_MSG_V3_HDRS       (4+3+4+7+7+3+7+16) /* fudge factor=16 */
 #define SNMP_MAX_ENG_SIZE          32
 #define SNMP_MAX_SEC_NAME_SIZE     256
-#define SNMP_MAX_SEC_NAME_SIZE     256
 #define SNMP_MAX_CONTEXT_SIZE      256
 #define SNMP_SEC_PARAM_BUF_SIZE    256
 

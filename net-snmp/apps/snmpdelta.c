@@ -87,10 +87,9 @@
 #include "default_store.h"
 
 #define MAX_ARGS 256
+#define DS_APP_DONT_FIX_PDUS 0
     
 const char *SumFile = "Sum";
-char *Argv[MAX_ARGS];
-int Argc;
 
 /* Information about the handled variables */
 struct varInfo {
@@ -109,44 +108,90 @@ struct varInfo {
   int spoiled;
 };
 
+struct varInfo varinfo[128];
+int current_name = 0;
+int period = 1;
+int deltat = 0, timestamp = 0, fileout = 0, dosum = 0, printmax = 0;
+int keepSeconds = 0, peaks = 0;
+int tableForm = 0;
+int varbindsPerPacket = 60;
 
-#define DS_APP_DONT_FIX_PDUS 0
+void processFileArgs(char *fileName);
+
+void usage (void) 
+{
+  fprintf(stderr, "Usage: snmpdelta [-Cf] [-CF commandFile] [-Cl] [-CL SumFileName]\n\t[-Cs] [-Ck] [-Ct] [-CS] [-Cv vars/pkt] [-Cp period]\n\t[-CP peaks] ");
+  snmp_parse_args_usage(stderr);
+  fprintf(stderr, " oid [oid ...]\n");
+  snmp_parse_args_descriptions(stderr);
+  fprintf(stderr, "snmpdelta specific options\n");
+  fprintf(stderr, "  -Cf\t\tDon't fix errors and retry the request.\n");
+  fprintf(stderr, "  -Cl\t\twrite configuration to file\n");
+  fprintf(stderr, "  -CF config\tload configuration from file\n");
+  fprintf(stderr, "  -Cp period\tspecifies the poll period\n");
+  fprintf(stderr, "  -CP peaks\treporting period in poll periods\n");
+  fprintf(stderr, "  -Cv vars/pkt\tnumber of variables per packet\n");
+  fprintf(stderr, "  -Ck\t\tkeep seconds in output time\n");
+  fprintf(stderr, "  -Cm\t\tshow max values\n");
+  fprintf(stderr, "  -CS\t\tlog to a sum file\n");
+  fprintf(stderr, "  -Cs\t\tshow timestamps\n");
+  fprintf(stderr, "  -Ct\t\tget timing from agent\n");
+  fprintf(stderr, "  -CT\t\tprint output in tabular form\n");
+  fprintf(stderr, "  -CL sumfile\tspecifies the sum file name\n");
+}
 
 static void optProc(int argc, char *const *argv, int opt)
 {
     switch (opt) {
-        case 'C':
-            while (*optarg) {
-                switch (*optarg++) {
-                    case 'f':
-                        ds_toggle_boolean(DS_APPLICATION_ID, DS_APP_DONT_FIX_PDUS);
-                        break;
-                }
-            }
-            break;
+    case 'C':
+	while (*optarg) {
+	    switch ((opt = *optarg++)) {
+	    case 'f':
+		ds_toggle_boolean(DS_APPLICATION_ID, DS_APP_DONT_FIX_PDUS);
+		break;
+	    case 'p':
+		period = atoi(argv[optind++]);
+		break;
+	    case 'P':
+		peaks = atoi(argv[optind++]);
+		break;
+	    case 'v':
+		varbindsPerPacket = atoi(argv[optind++]);
+		break;
+	    case 't':
+		deltat = 1;
+		break;
+	    case 's':
+		timestamp = 1;
+		break;
+	    case 'S':
+		dosum = 1;
+		break;
+	    case 'm':
+		printmax = 1;
+		break;
+	    case 'F':
+		processFileArgs(argv[optind++]);
+		break;
+	    case 'l':
+		fileout = 1;
+		break;
+	    case 'L':
+		SumFile = argv[optind++];
+		break;
+	    case 'k':
+		keepSeconds = 1;
+		break;
+	    case 'T':
+		tableForm = 1;
+		break;
+	    default:
+		fprintf(stderr, "Bad -C options: %c\n", opt);
+		exit(1);
+	    }
+	}
+	break;
     }
-}
-
-void usage (void) 
-{
-  fprintf(stderr, "Usage:\nsnmpdelta ");
-  snmp_parse_args_usage(stderr);
-  fprintf(stderr, "[-Cf] [-f commandFile]\n[-l] [-L SumFileName] [-s] [-k] [-t] [-S] [-v vars/pkt]\n [-p period] [-P peaks] oid [oid ...]\n");
-  snmp_parse_args_descriptions(stderr);
-  fprintf(stderr, "snmpdelta specific options\n");
-  fprintf(stderr, "\t\t-Cf\t\tDon't fix errors and retry the request.\n");
-  fprintf(stderr, "  -l\t\twrite configuration to file\n");
-  fprintf(stderr, "  -f config\tload configuration from file\n");
-  fprintf(stderr, "  -p period\tspecifies the poll period\n");
-  fprintf(stderr, "  -P peaks\treporting period in poll periods\n");
-  fprintf(stderr, "  -v vars/pkt\tnumber of variables per packet\n");
-  fprintf(stderr, "  -k\t\tkeep seconds in output time\n");
-  fprintf(stderr, "  -m\t\tshow max values\n");
-  fprintf(stderr, "  -S\t\tlog to a sum file\n");
-  fprintf(stderr, "  -s\t\tshow timestamps\n");
-  fprintf(stderr, "  -t\t\tget timing from agent\n");
-  fprintf(stderr, "  -T\t\tprint output in tabular form\n");
-  fprintf(stderr, "  -L sumfile\tspecifies the sum file name\n");
 }
 
 int wait_for_peak_start(int period, int peak)
@@ -193,7 +238,7 @@ void print_log(char *file, char *message)
 void sprint_descriptor(char *buffer,
 		       struct varInfo *vip)
 {
-  char buf[SPRINT_MAX_LEN], *cp;
+  char buf[SPRINT_MAX_LEN] = { 0 }, *cp;
 
   sprint_objid(buf, vip->info_oid, vip->oidlen);
   for(cp = buf; *cp; cp++)
@@ -217,7 +262,7 @@ void sprint_descriptor(char *buffer,
 void processFileArgs(char *fileName)
 {
   FILE *fp;
-  char buf[260], *cp;
+  char buf[260] = { 0 }, *cp;
   int blank, linenumber = 0;
 
   fp = fopen(fileName, "r");
@@ -240,9 +285,8 @@ void processFileArgs(char *fileName)
       }
     if (blank)
       continue;
-    Argv[Argc] = (char *)malloc(strlen(buf)); /* ignore newline */
     buf[strlen(buf) - 1] = 0;
-    strcpy(Argv[Argc++], buf);
+    varinfo[current_name++].name = strdup(buf);
   }
   fclose(fp);
   return;
@@ -309,27 +353,22 @@ int main(int argc, char *argv[])
   int	arg;
   char *gateway;
 
-  int	count, current_name = 0;
-  struct varInfo varinfo[128], *vip;
+  int	count;
+  struct varInfo *vip;
   u_int value=0;
   struct counter64 c64value;
   float printvalue;
-  int period = 1;
-  int deltat = 0, timestamp = 0, fileout = 0, dosum = 0, printmax = 0;
-  int keepSeconds = 0, peaks = 0;
-  int tableForm = 0;
   time_t last_time = 0;
   time_t this_time;
   time_t delta_time;
   int sum; /* what the heck is this for, its never used? */
-  char filename[128];
+  char filename[128] = { 0 };
   struct timeval tv;
   struct tm tm;
-  char timestring[64], valueStr[64], maxStr[64], peakStr[64];
-  char outstr[256];
+  char timestring[64] = { 0 }, valueStr[64] = { 0 }, maxStr[64] = { 0 };
+  char outstr[256] = { 0 }, peakStr[64] = { 0 };
   int status;
   int begin, end, last_end;
-  int varbindsPerPacket = 60;
   int print = 1;
   int exit_code = 0;
     
@@ -345,68 +384,8 @@ int main(int argc, char *argv[])
   
   gateway = session.peername;
 
-  /*
-   * usage: snmpdelta gateway-name community-name [-f commandFile] [-l]
-   * [-v vars/pkt] [-s] [-t] [-S] [-p period] [-P peaks] [-k]
-   * [-L SumFileName] variable list ..
-   */
-
-  Argc = 0;
-  for(; arg < argc; arg++){
-    if (argv[arg][0] == '-'){
-      switch(argv[arg][1]){
-      case 'd':
-	snmp_set_dump_packet(1);
-	break;
-      case 'p':
-	period = atoi(argv[++arg]);
-	break;
-      case 'P':
-	peaks = atoi(argv[++arg]);
-	break;
-      case 'v':
-	varbindsPerPacket = atoi(argv[++arg]);
-	break;
-      case 't':
-	deltat = 1;
-	break;
-      case 's':
-	timestamp = 1;
-	break;
-      case 'S':
-	dosum = 1;
-	break;
-      case 'm':
-	printmax = 1;
-	break;
-      case 'f':
-	processFileArgs(argv[++arg]);
-	break;
-      case 'l':
-	fileout = 1;
-	break;
-      case 'L':
-	SumFile = argv[++arg];
-	break;
-      case 'k':
-	keepSeconds = 1;
-	break;
-      case 'T':
-	tableForm = 1;
-	break;
-      default:
-	fprintf(stderr, "Invalid option: -%c\n", argv[arg][1]);
-	usage();
-	exit(1);
-	break;
-      }
-    } else {
-      Argv[Argc++] = strdup(argv[arg]);
-    }
-  }
-
-  for (arg = 0; arg < Argc; arg++)
-    varinfo[current_name++].name = Argv[arg];
+  for (; optind < argc; optind++)
+    varinfo[current_name++].name = argv[optind];
 
   if (current_name == 0){
     usage();
@@ -524,7 +503,7 @@ int main(int argc, char *argv[])
 	    vip->type = vars->type;
             if (vars->type == ASN_COUNTER64) {
               u64Subtract(vars->val.counter64, &vip->c64value, &c64value);
-              memcpy(&vip->c64value, &vars->val.counter64,
+              memcpy(&vip->c64value, vars->val.counter64,
                      sizeof(struct counter64));
             } else {
               value = *(vars->val.integer) - vip->value;
@@ -548,11 +527,12 @@ int main(int argc, char *argv[])
           }
 
 	  if (tableForm) {
-	    if (count == begin) sprintf(outstr, "%s", timestring+1);
-	    else outstr[0] = 0;
-	  }
-	  else
+	    if (count == begin) {
+	      sprintf(outstr, "%s", timestring+1);
+	    }
+	  } else {
 	    sprintf(outstr, "%s %s", timestring, vip->descriptor);
+	  }
 
 	  if (deltat || tableForm){
             if (vip->type == ASN_COUNTER64) {
@@ -566,7 +546,10 @@ int main(int argc, char *argv[])
 	  } else {
 	    printvalue = (float)value;
 	    sprintf(valueStr, " /%d sec: ", period);
-            printU64(valueStr+strlen(valueStr), &c64value);
+	    if (vip->type == ASN_COUNTER64)
+	      printU64(valueStr+strlen(valueStr), &c64value);
+	    else
+	      sprintf(valueStr+strlen(valueStr), "%u", value);
 	  }
 
 	  if (!peaks){

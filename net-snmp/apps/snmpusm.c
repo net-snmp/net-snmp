@@ -167,8 +167,7 @@ static void optProc(int argc, char *const *argv, int opt)
 
                     default:
                         fprintf(stderr,
-                                "Unknown flag passed to -C: %c\n", *optarg);
-                        usage();
+                                "Unknown flag passed to -C: %c\n", optarg[-1]);
                         exit(1);
                 }
             }

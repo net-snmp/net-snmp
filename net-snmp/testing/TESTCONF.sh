@@ -52,7 +52,10 @@ fi
 
 # Set up temporary directory
 if [ "x$SNMP_TMPDIR" = "x" -a "x$SNMP_HEADERONLY" != "xyes" ]; then
-    SNMP_TMPDIR="/tmp/snmp-test-$$"
+    if [ "x$testnum" = "x" ] ; then
+        testnum=1
+    fi
+    SNMP_TMPDIR="/tmp/snmp-test-$testnum-$$"
     export SNMP_TMPDIR
     if [ -d $SNMP_TMPDIR ]; then
 	echo "$0: ERROR: $SNMP_TMPDIR already existed."

@@ -19,12 +19,21 @@
 .\" ARISING OUT OF OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS
 .\" SOFTWARE.
 .\" ******************************************************************/
-.TH SNMPTRANSLATE 1 "30 May 2000"
+.TH SNMPTRANSLATE 1 "21 Jun 2001"
 .UC 4
 .SH NAME
 snmptranslate - translate SNMP objects into more useful information
 .SH SYNOPSIS
-snmptranslate [-h] [-V] [-I INOPTS] [-O OUTOPTS] [-P MIBOPTS] [-T TRANSOPTS] objectID
+snmptranslate [-h] 
+[-V] 
+[-D <TOKEN[,TOKEN,...]>]
+[-I <INOPTS>] 
+[-O <OUTOPTS>] 
+[-P <MIBOPTS>] 
+[-T <TRANSOPTS>] 
+[-m <mibs>]
+[-M <mibdirs>]
+objectID
 .SH DESCRIPTION
 Snmptranslate is an application that translates an SNMP object (SMI value or
 symbolic form) into another form of information.  With no other options, an
@@ -38,16 +47,19 @@ Print help message
 .B \-V
 Print version message and exit
 .TP
-.B \-I INOPTS
+.B \-D <TOKEN[,TOKEN,...]>
+Enable debugging output.  See the \fIsnmpcmd\fR man page for more information.
+.TP
+.B \-I <INOPTS>
 See the \fIsnmpcmd\fR man page for a description of the OID input options
 .TP
-.B \-O OUTOPTS
+.B \-O <OUTOPTS>
 See the \fIsnmpcmd\fR man page for a description of the OID output options
 .TP
-.B \-P MIBOPTS
+.B \-P <MIBOPTS>
 See the \fIsnmpcmd\fR man page for a description of the MIB parsing options
 .TP
-.B \-T TRANSOPTS
+.B \-T <TRANSOPTS>
 Translate an SNMP object to its symbolic form. The following TRANSOPTS
 are available:
 .TP
@@ -232,4 +244,4 @@ will produce the following dump
               sysUpTime(3) type=8
 .fi
 .SH "SEE ALSO"
-variables(5), RFC 1155, RFC 1156, RFC 1157, SNMP Security Internet Drafts
+snmpcmd(1), variables(5), RFC 2578-2580.

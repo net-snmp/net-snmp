@@ -202,7 +202,5 @@ inet_lnaof(struct in_addr in)
 	return (0x000000ff & i);
 }
 
-#else
-static int module_dummy = 0;
 #endif /* WIN32 or cygwin */
 

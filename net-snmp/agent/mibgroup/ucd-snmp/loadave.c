@@ -114,6 +114,9 @@
 #if HAVE_WINSOCK_H
 #include <winsock.h>
 #endif
+#ifdef dynix
+#include <sys/mc_vmparam.h>
+#endif
 
 #include "mibincl.h"
 #include "struct.h"
@@ -189,9 +192,9 @@ int try_getloadavg(double *r_ave, size_t s_ave)
 #ifdef HAVE_SYS_FIXPOINT_H
   fix favenrun[3];
 #endif
-#if defined(ultrix) || defined(sun) || defined(__alpha)
+#if (defined(ultrix) || defined(sun) || defined(__alpha)) || defined(dynix)
   int i;
-#if defined(sun) || defined(__alpha)
+#if (defined(sun) || defined(__alpha)) || defined(dynix)
   long favenrun[3];
   if (s_ave > 3) /* bounds check */
     return (-1); 
@@ -215,7 +218,7 @@ int try_getloadavg(double *r_ave, size_t s_ave)
     fscanf(in, "%lf %lf %lf", pave, (pave + 1), (pave + 2));
     fclose(in);
   }
-#elif defined(ultrix) || defined(sun) || defined(__alpha)
+#elif defined(ultrix) || defined(sun) || defined(__alpha) || defined(dynix)
   if (auto_nlist(LOADAVE_SYMBOL,(char *) favenrun, sizeof(favenrun)) == 0)
     return(-1);
   for(i=0;i<s_ave;i++)

@@ -89,6 +89,7 @@ struct sockaddr_in smux_sa;
 struct counter64 smux_counter64;
 oid smux_objid[MAX_OID_LEN];
 u_char smux_str[SMUXMAXSTRLEN];
+int smux_listen_sd;
 
 static struct timeval smux_rcv_timeout;
 static u_long smux_reqid;
@@ -124,7 +125,7 @@ static int nauths, npeers = 0;
 
 struct variable2 smux_variables[] = {
   /* bogus entry, as in pass.c */
-  {MIBINDEX, ASN_PRIV_DELEGATED, RWRITE, var_smux, 0, {MIBINDEX}},
+  {MIBINDEX, ASN_INTEGER, RWRITE, var_smux, 0, {MIBINDEX}},
 };
 
 
@@ -164,8 +165,14 @@ smux_parse_peer_auth(const char *token, char *cptr)
 	cptr = skip_white(cptr);
 
         /* password */
-        if (cptr)
-          strcpy(aptr->sa_passwd, cptr);
+        if (cptr) {
+	    if (strlen(cptr) > SMUXMAXSTRLEN - 1) {
+		config_perror("password (third token) is too long");
+		free((char *)aptr);
+		return;
+	    }
+	    strcpy(aptr->sa_passwd, cptr);
+	}
         
 	Auths[nauths++] = aptr;
 }
@@ -179,6 +186,7 @@ smux_free_peer_auth(void)
 		free(Auths[i]);
 		Auths[i] = NULL;
 	}
+	nauths = 0;
 }
 
 void
@@ -266,8 +274,7 @@ var_smux(struct variable *vp,
 	u_char *valptr, val_type;
 	smux_reg *rptr;
 
-	*write_method = NULL;
-
+	*write_method = var_smux_write; 
 	/* search the active registration list */
 	for (rptr = ActiveRegs; rptr; rptr = rptr->sr_next) {
 		if (!compare_tree(vp->name, vp->namelen, rptr->sr_name,
@@ -279,7 +286,6 @@ var_smux(struct variable *vp,
 	else if (exact && (*length < rptr->sr_name_len))
 		return NULL;
 
-	*write_method = var_smux_write; 
 	valptr = smux_snmp_process(exact, name, length,
 	    var_len, &val_type, rptr->sr_fd);
 
@@ -1579,7 +1585,7 @@ smux_trap_process(u_char *rsp, size_t *len)
 	}
 
 	/* parse the variable bindings */
-	do {
+	while (ptr && *len) {
 
 		/* get the objid and the asn1 coded value */
 		var_name_len = MAX_OID_LEN;
@@ -1683,7 +1689,7 @@ smux_trap_process(u_char *rsp, size_t *len)
 		snmptrap_ptr->type = vartype;
 		snmptrap_ptr->next_variable = NULL;
 
-	} while ((ptr!=NULL)&&(*len));
+	}
 
 	/* send the traps */
 	send_enterprise_trap_vars(trap, specific, (oid *)&sa_enterpriseoid, sa_enterpriseoid_len, snmptrap_head);
