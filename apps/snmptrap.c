@@ -84,17 +84,14 @@ SOFTWARE.
 #include "snmp.h"
 #include "party.h"
 #include "system.h"
-#include "version.h"
+#include "snmp_parse_args.h"
 
-extern int  errno;
 int main __P((int, char **));
 int ascii_to_binary __P((u_char *, u_char *));
 int hex_to_binary __P((u_char *, u_char *));
 int snmp_input __P((int, struct snmp_session *, int, struct snmp_pdu *, void *));
-u_long parse_address __P((char *));
+in_addr_t parse_address __P((char *));
 void snmp_add_var __P((struct snmp_pdu *, oid *, int, char, char *));
-
-#define NUM_NETWORKS	16   /* max number of interfaces to check */
 
 oid objid_enterprise[] = {1, 3, 6, 1, 4, 1, 3, 1, 1};
 oid objid_sysdescr[]   = {1, 3, 6, 1, 2, 1, 1, 1, 0};
@@ -104,10 +101,13 @@ oid objid_snmptrap[]   = {1, 3, 6, 1, 6, 3, 1, 1, 4, 1, 0};
 void
 usage __P((void))
 {
-    fprintf(stderr, "usage:\n");
-    fprintf(stderr, "snmptrap -v 1 manager community enterprise-oid agent trap-type specific-type uptime [ var ]...\n");
-    fprintf(stderr, "or\n");
-    fprintf(stderr, "snmptrap [-v 2] gateway srcParty dstParty [ var ] ...\n");
+    fprintf(stderr,"Usage:\n  snmptrap ");
+    snmp_parse_args_usage(stderr);
+    fprintf(stderr," [<trap parameters> ...]\n\n");
+    snmp_parse_args_descriptions(stderr);
+    fprintf(stderr, "  -v 1 trap parameters:\n\t enterprise-oid agent trap-type specific-type uptime [ var ]...\n");
+    fprintf(stderr, "  or\n");
+    fprintf(stderr, "  -v 2 trap parameters:\n\t uptime trapoid [ var ] ...\n");
 }
 
 int snmp_input(operation, session, reqid, pdu, magic)
@@ -120,7 +120,7 @@ int snmp_input(operation, session, reqid, pdu, magic)
   return 1;
 }
 
-u_long parse_address(address)
+in_addr_t parse_address(address)
     char *address;
 {
     in_addr_t addr;
@@ -132,7 +132,7 @@ u_long parse_address(address)
     hp = gethostbyname(address);
     if (hp == NULL){
 	fprintf(stderr, "unknown host: %s\n", address);
-	return 0;
+	exit(1);
     } else {
 	memcpy(&saddr.sin_addr, hp->h_addr, hp->h_length);
 	return saddr.sin_addr.s_addr;
@@ -220,7 +220,7 @@ snmp_add_var(pdu, name, name_length, type, value)
 	    vars->val_len = sizeof(long);
 	    break;
 	default:
-	    fprintf(stderr, "Internal error in type switching: %c\n", type);
+	    fprintf(stderr, "Bad object type: %c\n", type);
 	    exit(1);
     }
 }
@@ -293,159 +293,38 @@ main(argc, argv)
     oid name[MAX_NAME_LEN];
     int name_length;
     int	arg;
-    int dest_port = SNMP_TRAP_PORT;
-    char *gateway = NULL;
-    char *community = NULL;
     char *trap = NULL, *specific = NULL, *description = NULL, *agent = NULL;
-    int version = 2;
-    oid src[MAX_NAME_LEN], dst[MAX_NAME_LEN], context[MAX_NAME_LEN];
-    int srclen = 0, dstlen = 0, contextlen = 0;
-    struct partyEntry *pp;
-    char ctmp[300];
-    int trivialSNMPv2 = FALSE;
 
     /*
      * usage: snmptrap gateway-name srcParty dstParty trap-type specific-type device-description [ -a agent-addr ]
      */
     init_mib();
-    for(arg = 1; arg < argc; arg++){
-	if (argv[arg][0] == '-'){
-	    switch(argv[arg][1]){
-		case 'V':
-                  fprintf(stderr,"UCD-snmp version: %s\n", VersionInfo);
-                  exit(0);
-                  break;
-		case 'a':
-		    agent = argv[++arg];
-		    break;
-		case 'd':
-		    snmp_set_dump_packet(1);
-		    break;
-		case 'p':
-		    dest_port = atoi (argv[++arg]);
-		    break;
-		case 'v':
-		    version = atoi(argv[++arg]);
-		    if (version < 1 || version > 2) {
-			fprintf (stderr, "invalid version: %s\n", argv [arg]);
-			usage ();
-			exit (1);
-		    }
-		    break;
-		default:
-		    fprintf(stderr, "invalid option: -%c\n", argv[arg][1]);
-		    usage ();
-		    exit (1);
-		    break;
-	    }
-	    continue;
-	}
-	if (gateway == NULL){
-	    gateway = argv[arg];
-	} else if (version == 1 && community == NULL){
-	    community = argv[arg];
-	} else if (version == 2 && srclen == 0 && !trivialSNMPv2){
-	    sprintf(ctmp, "%s/party.conf", SNMPLIBPATH);
-	    if (read_party_database(ctmp) != 0){
-		fprintf(stderr,
-			"Couldn't read party database from %s\n", ctmp);
-		exit(0);
-	    }
-            if (!strcasecmp(argv[arg], "noauth"))
-                trivialSNMPv2 = TRUE;
-	    else {
-		party_scanInit();
-		for(pp = party_scanNext(); pp; pp = party_scanNext()){
-		    if (!strcasecmp(pp->partyName, argv[arg])){
-			srclen = pp->partyIdentityLen;
-			memcpy(src, pp->partyIdentity, srclen * sizeof(oid));
-			break;
-		    }
-		}
-		if (!pp){
-		    srclen = MAX_NAME_LEN;
-		    if (!read_objid(argv[arg], src, &srclen)){
-			fprintf(stderr, "Invalid source party: %s\n", argv[arg]);
-			srclen = 0;
-			usage();
-			exit (1);
-		    }
-		}
-            }
-	} else if (version == 2 && dstlen == 0 && !trivialSNMPv2){
-	    dstlen = MAX_NAME_LEN;
-	    party_scanInit();
-	    for(pp = party_scanNext(); pp; pp = party_scanNext()){
-		if (!strcasecmp(pp->partyName, argv[arg])){
-		    dstlen = pp->partyIdentityLen;
-		    memcpy(dst, pp->partyIdentity, dstlen * sizeof(oid));
-		    break;
-		}
-	    }
-	    if (!pp){
-		if (!read_objid(argv[arg], dst, &dstlen)){
-		    fprintf(stderr, "Invalid destination party: %s\n", argv[arg]);
-		    dstlen = 0;
-		    usage ();
-		    exit (1);
-		}
-	    }
-	} else if (trap == NULL){
-	    trap = argv[arg];
-	    break;
-	}
-    }
-
-    if (trap == NULL) {
-	usage ();
-	exit (1);
-    }
+    arg = snmp_parse_args(argc, argv, &session);
  
-    if (trivialSNMPv2){
-        u_long destAddr = parse_address (gateway);;
-        srclen = dstlen = contextlen = MAX_NAME_LEN;
-        ms_party_init(destAddr, src, &srclen, dst, &dstlen,
-                      context, &contextlen);
-    }
-
-    memset (&session, 0, sizeof(struct snmp_session));
-    session.peername = gateway;
-    if (version == 1 ){
-	session.version = SNMP_VERSION_1;
-	session.community = (u_char *) community;
-	session.community_len = strlen(community);
-    } else if (version == 1 || version == 2){
-	session.version = SNMP_VERSION_2p;
-        session.srcParty = src;
-        session.srcPartyLen = srclen;
-        session.dstParty = dst;
-        session.dstPartyLen = dstlen;
-	session.context = context;
-	session.contextLen = contextlen;
-    }
-    session.retries = SNMP_DEFAULT_RETRIES;
-    session.timeout = SNMP_DEFAULT_TIMEOUT;
-    session.authenticator = NULL;
     session.callback = snmp_input;
     session.callback_magic = NULL;
-    session.remote_port = dest_port;
     ss = snmp_open(&session);
     if (ss == NULL){
         snmp_perror("snmptrap: Couldn't open snmp");
 	exit(1);
     }
 
-    if (version == 1) {
+    if (session.version == SNMP_VERSION_1) {
 	pdu = snmp_pdu_create(TRP_REQ_MSG);
-	if (*trap == 0) {
-          pdu->enterprise = (oid *)malloc(sizeof (objid_enterprise));
-          memcpy(pdu->enterprise, objid_enterprise, sizeof(objid_enterprise));
-          pdu->enterprise_length = sizeof(objid_enterprise)/sizeof (oid);
+	if (arg == argc) {
+	    fprintf(stderr, "No enterprise oid\n");
+	    usage();
+	    exit(1);
+	}
+	if (argv[arg][0] == 0) {
+	    pdu->enterprise = (oid *)malloc(sizeof (objid_enterprise));
+	    memcpy(pdu->enterprise, objid_enterprise, sizeof(objid_enterprise));
+	    pdu->enterprise_length = sizeof(objid_enterprise)/sizeof (oid);
 	}
 	else {
 	    name_length = MAX_NAME_LEN;
-	    if (!read_objid (trap, name, &name_length)) {
-		fprintf (stderr, "invalid interprise id: %s\n", trap);
+	    if (!read_objid (argv[arg], name, &name_length)) {
+		fprintf (stderr, "Invalid enterprise id: %s\n", argv[arg]);
 		usage ();
 		exit (1);
 	    }
@@ -487,13 +366,18 @@ main(argc, argv)
 	    pdu->time = get_uptime();
 	else
 	    pdu->time = atol (description);
-	arg++;
     }
     else {
 	long sysuptime;
 	char csysuptime [20];
 
 	pdu = snmp_pdu_create(TRP2_REQ_MSG);
+	if (arg == argc) {
+	    fprintf(stderr, "Missing up-time parameter\n");
+	    usage();
+	    exit(1);
+	}
+	trap = argv[arg];
 	if (*trap == 0) {
 	    sysuptime = get_uptime ();
 	    sprintf (csysuptime, "%ld", sysuptime);
@@ -508,8 +392,8 @@ main(argc, argv)
 	}
 	snmp_add_var (pdu, objid_snmptrap, sizeof (objid_snmptrap)/sizeof(oid),
 		      'o', argv [arg]);
-	arg++;
     }
+    arg++;
 
     while (arg < argc) {
 	arg += 3;
@@ -517,9 +401,8 @@ main(argc, argv)
 	name_length = MAX_NAME_LEN;
 	if (!read_objid (argv [arg-3], name, &name_length)) {
 	    fprintf (stderr, "Invalid object identifier: %s\n", argv [arg-3]);
-	    continue;
+	    exit(1);
 	}
-
 	snmp_add_var (pdu, name, name_length, argv [arg-2][0], argv [arg-1]);
     }
 

@@ -165,7 +165,6 @@ snmp_parse_args(argc, argv, session)
 
       case 'c':
         clock_flag++;
-        srcclock = atoi(argv[++arg]);
         if (isdigit(argv[arg][2]))
           srcclock = (u_long)(atol(&(argv[arg][2])));
         else if ((++arg<argc) && isdigit(argv[arg][0]))
