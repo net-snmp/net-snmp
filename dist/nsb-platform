@@ -1,0 +1,21 @@
+#!/bin/bash
+#
+# $Id$
+# Author: Robert Story <rstory@freesnmp.com>
+#
+########################################################################
+########################################################################
+
+if [ -f nsb-functions ];then
+   source nsb-functions
+elif [ -f $HOME/bin/nsb-functions ]; then
+   source $HOME/bin/nsb-functions
+else
+   echo "Cannot find nsb-functions"
+   exit 1
+fi
+
+########################################################################
+########################################################################
+
+nsb-sysname
