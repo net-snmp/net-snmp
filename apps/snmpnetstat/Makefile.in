@@ -63,30 +63,32 @@ makefileindepend: nosysdepend
 
 # DO NOT DELETE THIS LINE -- make depend depends on it.
 
-if.o: ../../config.h ../../mib_module_config.h ../../s/linux.h ../../s/sysv.h
+if.o: ../../config.h ../../mib_module_config.h ../../s/hpux.h ../../s/sysv.h
 if.o: ../../s/generic.h ../../m/generic.h 
 if.o:   main.h
 if.o: ./../../snmplib/asn1.h ./../../snmplib/snmp.h
 if.o: ./../../snmplib/snmp_api.h ./../../snmplib/snmp_impl.h
 if.o: ./../../snmplib/snmp_client.h ./../../snmplib/mib.h
 if.o: ./../../snmplib/snmp_debug.h ../../snmplib/system.h netstat.h
-inet.o: ../../config.h ../../mib_module_config.h ../../s/linux.h
+inet.o: ../../config.h ../../mib_module_config.h ../../s/hpux.h
 inet.o: ../../s/sysv.h ../../s/generic.h ../../m/generic.h
 inet.o:   main.h
 inet.o: ./../../snmplib/asn1.h ./../../snmplib/snmp_api.h
 inet.o: ./../../snmplib/snmp_impl.h ./../../snmplib/snmp_client.h
 inet.o: ./../../snmplib/mib.h ./../../snmplib/snmp.h netstat.h
-main.o: ../../config.h ../../mib_module_config.h ../../s/linux.h
+main.o: ../../config.h ../../mib_module_config.h ../../s/hpux.h
 main.o: ../../s/sysv.h ../../s/generic.h ../../m/generic.h
-main.o:  ./../../snmplib/asn1.h ./../../snmplib/mib.h
-main.o: ./../../snmplib/snmp.h ./../../snmplib/snmp_api.h
-main.o: ./../../snmplib/snmp_impl.h ./../../snmplib/snmp_client.h
-main.o: ./../../snmplib/party.h ./../../snmplib/context.h
-main.o: ./../../snmplib/view.h ./../../snmplib/acl.h ../../version.h
-main.o: netstat.h
-route.o: ../../config.h ../../mib_module_config.h ../../s/linux.h
+main.o: ./../../snmplib/asn1.h ./../../snmplib/mib.h ./../../snmplib/snmp.h
+main.o: ./../../snmplib/snmp_api.h ./../../snmplib/snmp_impl.h
+main.o: ./../../snmplib/snmp_client.h ./../../snmplib/party.h
+main.o: ./../../snmplib/context.h ./../../snmplib/view.h
+main.o: ./../../snmplib/acl.h ../../version.h ./../../snmplib/snmp_debug.h
+main.o: ./../../snmplib/system.h netstat.h
+route.o: ../../config.h ../../mib_module_config.h ../../s/hpux.h
 route.o: ../../s/sysv.h ../../s/generic.h ../../m/generic.h
 route.o:  main.h ./../../snmplib/asn1.h
 route.o: ./../../snmplib/snmp.h ./../../snmplib/snmp_api.h
 route.o: ./../../snmplib/snmp_impl.h ./../../snmplib/snmp_client.h
 route.o: ./../../snmplib/mib.h netstat.h
+winstub.o: ../../config.h ../../mib_module_config.h ../../s/hpux.h
+winstub.o: ../../s/sysv.h ../../s/generic.h ../../m/generic.h
