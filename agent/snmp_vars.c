@@ -84,6 +84,7 @@ PERFORMANCE OF THIS SOFTWARE.
 #include "mibgroup/struct.h"
 #include "mibgroup/mib_module_includes.h"
 #include "read_config.h"
+#include "snmp_vars.h"
 #include "agent_read_config.h"
 #include "mib_module_config.h"
 #if USING_MIBII_VACM_VARS_MODULE
@@ -97,13 +98,6 @@ PERFORMANCE OF THIS SOFTWARE.
 #ifndef  MIN
 #define  MIN(a,b)                     (((a) < (b)) ? (a) : (b)) 
 #endif
-
-static u_char *search_subtree_vars (struct subtree *, oid *, size_t *,
-	u_char *, size_t *, u_short *, int, WriteMethod **write_method,
-	struct snmp_pdu *, int *);
-static u_char *search_subtree (struct subtree *, oid *, size_t *,
-	u_char *, size_t *, u_short *, int, WriteMethod **write_method,
-	struct snmp_pdu *, int *);
 
 extern struct subtree *subtrees;
 int subtree_size;
@@ -364,201 +358,6 @@ search_subtree_vars(struct subtree *tp,
 	    return NULL;
 }
 
-/* search_subtree
-   arguments:
-   sub_tp
-   name	     IN - name of var, OUT - name matched 
-   namelen   IN -number of sub-ids in name, OUT - subid-is in matched name 
-   type	     OUT - type of matched variable 
-   len	     OUT - length of matched variable 
-   acl       OUT - access control list 
-   exact     IN - TRUE if exact match wanted 
-   write_method
-   pi        IN - relevant auth info re PDU 
-   noSuchObject
-*/
-
-static u_char *
-search_subtree(
-      struct subtree *sub_tp,
-    oid		*name,	    /* IN - name of var, OUT - name matched */
-    size_t	*namelen,   /* IN -number of sub-ids in name,
-                               OUT - subid-is in matched name */
-    u_char	*type,	    /* OUT - type of matched variable */
-    size_t	*len,	    /* OUT - length of matched variable */
-    u_short	*acl,	    /* OUT - access control list */
-    int		exact,	    /* IN - TRUE if exact match wanted */
-    WriteMethod **write_method,
-    struct snmp_pdu *pdu,   /* IN - relevant auth info re PDU */
-    int		*noSuchObject)
-{
-    struct subtree *tp;
-
-    u_char *this_return, *child_return;
-    oid     this_name[MAX_OID_LEN];
-    oid     child_name[MAX_OID_LEN];
-    size_t  this_namelen, child_namelen;
-    u_char  this_type,    child_type;
-    size_t  this_len,     child_len,    compare_len;
-    u_short this_acl,     child_acl;
-    int     this_NoObj,   child_NoObj;
-/*    WriteMethod  **this_write; */
-/*    WriteMethod  **child_write; */
-
-    if ( sub_tp == NULL )
-	return NULL;
-
-    tp = sub_tp->children;
-
-		/*
-		 * Consider the simple cases first:
-		 */
-			/* No children, so use local info only */
-    if ( tp == NULL )
-	return( search_subtree_vars( sub_tp, name, namelen,
-		type, len, acl, exact, write_method, pdu, noSuchObject));
-
-    while ( tp != NULL ) {
-	compare_len = MIN( tp->namelen, *namelen );
-	if ( snmp_oid_compare(tp->name, compare_len, name, compare_len) >= 0 )
-	    break;
-	tp = tp->next;
-    }
-
-			/* No relevant children, so as above */
-    if ( tp == NULL )
-	return( search_subtree_vars( sub_tp, name, namelen,
-                                     type, len, acl, exact, write_method,
-                                     pdu, noSuchObject));
-
-			/* No local info, so children or nothing */
-    if ( sub_tp->variables == NULL ) {
-	while ( tp != NULL ) {
-	    child_return = search_subtree( tp, name, namelen,
-                                           type, len, acl, exact,
-                                           write_method, pdu, noSuchObject);
-	    if ( child_return != NULL || (exact && write_method != NULL))
-		return child_return;
-	    else
-		tp = tp->next;
-	}
-	return NULL;	/* Nothing left */
-    }
-
-
-		/*
-		 *   This leaves the situation where both
-		 * the current node, and children could
-		 * potentially answer the query.
-		 *   We need to ask both, and compare answers.
-		 */
-
-			/* First set up copies of the name requested,
-				so one query doesn't affect the other */
-	memcpy(this_name, name, *namelen * sizeof(oid));
-	this_namelen = *namelen;
-	memcpy(child_name, name, *namelen * sizeof(oid));
-	child_namelen = *namelen;
-
-			/* Ask the current node */
-	this_return = search_subtree_vars( sub_tp,
-		this_name, &this_namelen,
-		&this_type, &this_len, &this_acl, exact,
-		write_method, pdu, &this_NoObj);
-
-			/* This answer is the best we'll get, so use it */
-	if ( this_return != NULL &&
-	     ( exact ||
-	       snmp_oid_compare( this_name, this_namelen, tp->name, tp->namelen) < 0 )) {
-		*namelen = this_namelen;
-		memcpy(name, this_name, *namelen * sizeof(oid));
-		*type = this_type;
-		*len  = this_len;
-		*acl  = this_acl;
-	/*	*write_method = *this_write;	*/
-		*noSuchObject = this_NoObj;
-		return this_return;
-	}
-
-			/* Ask the children until we get an answer */
-	child_return=NULL;
-	while ( child_return == NULL) {
-	    child_return = search_subtree( tp,
-		child_name, &child_namelen,
-		&child_type, &child_len, &child_acl, exact,
-		write_method, pdu, &child_NoObj);
-	    tp = tp->next;
-
-			/* Only one possibly relevant subtree */
-	    if ( exact || tp == NULL  ||
-			/* or 'this' answer is better than remaining children */
-		( this_return != NULL && child_return == NULL &&
-		  snmp_oid_compare( tp->name, tp->namelen, this_name, this_namelen) > 0 ))
-			break;
-	}
-
-			/* If one answer is still NULL, use the other .. */
-	if ( this_return == NULL && child_return == NULL ) {
-		return NULL;
-	}
-	else if ( this_return == NULL ) {
-		*namelen = child_namelen;
-		memcpy(name, child_name, *namelen * sizeof(oid));
-		*type = child_type;
-		*len  = child_len;
-		*acl  = child_acl;
-	/*	*write_method = child_write;	*/
-		*noSuchObject = child_NoObj;
-		return child_return;
-	}
-	else if ( child_return == NULL ) {
-		*namelen = this_namelen;
-		memcpy(name, this_name, *namelen * sizeof(oid));
-		*type = this_type;
-		*len  = this_len;
-		*acl  = this_acl;
-	/*	*write_method = this_write;	*/
-		*noSuchObject = this_NoObj;
-		return this_return;
-	}
-			/* else use the minimum of the two (non-NULL) answers */
-	else
-	if ( snmp_oid_compare( this_name, this_namelen,
-		      child_name, child_namelen) > 0 ) {
-		*namelen = child_namelen;
-		memcpy(name, child_name, *namelen * sizeof(oid));
-		*type = child_type;
-		*len  = child_len;
-		*acl  = child_acl;
-	/*	*write_method = child_write;	*/
-		*noSuchObject = child_NoObj;
-		return child_return;
-	}
-	else {
-		*namelen = this_namelen;
-		memcpy(name, this_name, *namelen * sizeof(oid));
-		*type = this_type;
-		*len  = this_len;
-		*acl  = this_acl;
-	/*	*write_method = this_write;	*/
-		*noSuchObject = this_NoObj;
-		return this_return;
-	}
-}
-
-/* getStatPtr(...
-   arguments:
-   name	     IN - name of var, OUT - name matched 
-   namelen   IN -number of sub-ids in name, OUT - subid-is in matched name 
-   type	     OUT - type of matched variable 
-   len	     OUT - length of matched variable 
-   acl       OUT - access control list 
-   exact     IN - TRUE if exact match wanted 
-   write_method
-   pi        IN - relevant auth info re PDU 
-   noSuchObject
-*/
-
 u_char *
 getStatPtr(
     oid		*name,	    /* IN - name of var, OUT - name matched */
@@ -572,7 +371,7 @@ getStatPtr(
     struct snmp_pdu *pdu,   /* IN - relevant auth info re PDU */
     int		*noSuchObject)
 {
-    struct subtree	*tp;
+    struct subtree	*tp, *prev;
     oid			save[MAX_OID_LEN];
     size_t		savelen = 0;
     u_char              result_type;
@@ -586,12 +385,28 @@ getStatPtr(
 	savelen = *namelen;
     }
     *write_method = NULL;
-    for (tp = subtrees; tp != NULL ; tp = tp->next ) {
-	search_return = search_subtree( tp, name, namelen, &result_type,
+    for (tp = subtrees, prev=NULL; tp != NULL ; prev=tp, tp = tp->next ) {
+      if ( snmp_oid_compare( tp->name, tp->namelen, name, *namelen ) >= 0 )
+          break;
+    }
+    if ( tp != NULL && prev != NULL &
+       snmp_oid_compare( tp->name, tp->namelen, name, *namelen ) > 0 )
+              tp = prev;
+/*
+    tp = find_subtree_previous(name, *namelen, NULL);
+    if ( tp->next &&
+         snmp_oid_compare( tp->next->name, tp->next->namelen,
+			   name, *namelen ) == 0 )
+	tp = tp->next;
+*/
+ 
+    while ( search_return == NULL && tp != NULL ) {
+	search_return = search_subtree_vars( tp, name, namelen, &result_type,
                                         len, &result_acl, exact, write_method,
                                         pdu, noSuchObject);
 	if ( search_return != NULL || (*write_method != NULL && exact))
 	    break;
+	tp = tp->next;
     }
     if ( tp == NULL ) {
 	if (!search_return && !exact){
@@ -608,25 +423,4 @@ getStatPtr(
     *acl =  result_acl;
     return search_return;
 }
-
-/*
-{
-  *write_method = NULL;
-  for(tp = first; tp < end; tp = next){
-      if ((in matches tp) or (in < tp)){
-	  inlen -= tp->length;
-	  for(vp = tp->vp; vp < end; vp = next){
-	      if ((in < vp) || (exact && (in == vp))){
-		  cobble up compatable vp;
-		  call findvar;
-		  if (it returns nonzero)
-		      break both loops;
-	      }
-	      if (exact && (in < vp)) ???
-		  return NULL;
-	  }
-      }      
-  }
-}
-*/
 
