@@ -41,10 +41,8 @@ auto_nlist_value(string)
       it = *ptr;
     else if (cmp < 0) {
       ptr = &((*ptr)->left);
-      DEBUGP("auto_nlist:  Its a jump to the left: %s\n",string);
     } else {
       ptr = &((*ptr)->right);
-      DEBUGP("auto_nlist:  And a step to the righhhhhttt...: %s\n",string);
     }
   }
   if (*ptr == 0) {
