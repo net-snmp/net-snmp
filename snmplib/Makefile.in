@@ -196,7 +196,7 @@ snmpv3.o: transform_oids.h
 system.o: ../config.h ../mib_module_config.h ../s/linux.h ../s/sysv.h
 system.o: ../s/generic.h ../m/generic.h 
 system.o: ./getopt.h  
-system.o:  asn1.h snmp_api.h system.h
+system.o:  asn1.h snmp_api.h system.h snmp_logging.h
 testmib.o: ../config.h ../mib_module_config.h ../s/linux.h ../s/sysv.h
 testmib.o: ../s/generic.h ../m/generic.h 
 testmib.o:  asn1.h mib.h
@@ -205,8 +205,8 @@ testutil.o: ../s/generic.h ../m/generic.h
 testutil.o:  default_store.h
 tools.o: ../config.h ../mib_module_config.h ../s/linux.h ../s/sysv.h
 tools.o: ../s/generic.h ../m/generic.h 
-tools.o:  asn1.h snmp_api.h snmp_debug.h tools.h
-tools.o: mib.h scapi.h
+tools.o:  asn1.h system.h snmp_api.h snmp_debug.h
+tools.o: tools.h mib.h scapi.h
 vacm.o: ../config.h ../mib_module_config.h ../s/linux.h ../s/sysv.h
 vacm.o: ../s/generic.h ../m/generic.h 
 vacm.o:   ./getopt.h
