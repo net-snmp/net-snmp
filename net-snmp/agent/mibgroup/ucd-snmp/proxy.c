@@ -35,7 +35,7 @@ proxy_parse_config(const char *token, char *line) {
     DEBUGMSGTL(("proxy_config","entering\n"));
 
     /* create the argv[] like array */
-    strcpy(args[0], "snmpd-proxy"); /* bogus entry for getopt() */
+    strcpy(argv[0] = args[0], "snmpd-proxy"); /* bogus entry for getopt() */
     for(argn = 1, cp = line; cp && argn < MAX_ARGS;
         cp = copy_word(cp, argv[argn] = args[argn++])) {
     }
