@@ -76,9 +76,10 @@ oid objid_mib[] = {1, 3, 6, 1, 2, 1};
 void
 usage __P((void))
 {
-    fprintf(stderr, "Usage: snmpbulkwalk -v 1 [-q] hostname community [objectID]      or:\n");
-    fprintf(stderr, "Usage: snmpbulkwalk [-v 2] [-q] hostname noAuth [objectID]       or:\n");
-    fprintf(stderr, "Usage: snmpbulkwalk [-v 2] [-q] hostname srcParty dstParty context [objectID]\n");
+  fprintf(stderr,"Usage:\n  snmpbulkwalk ");
+  snmp_parse_args_usage(stderr);
+  fprintf(stderr," [objectID]\n\n");
+  snmp_parse_args_descriptions(stderr);
 }
 
 int

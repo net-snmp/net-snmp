@@ -79,12 +79,13 @@ int hex_to_binary __P((u_char *, u_char *));
 void
 usage __P((void))
 {
-    fprintf(stderr, "Usage: snmpset -v 1 [-q] hostname community [objectID type value]+    or:\n");
-    fprintf(stderr, "Usage: snmpset [-v 2] [-q] hostname noAuth [objectID type value]+     or:\n");
-    fprintf(stderr, "Usage: snmpset [-v 2] [-q] hostname srcParty dstParty context [oID type val]+\n");
-    fprintf(stderr, "\twhere type is one of: i, s, x, d, n, o, t, a\n");
-    fprintf(stderr, "\t\ti: INTEGER, s: STRING, x: HEX STRING, d: DECIMAL STRING\n");
-    fprintf(stderr, "\t\tn: NULLOBJ, o: OBJID, t: TIMETICKS, a: IPADDRESS\n");
+  fprintf(stderr,"Usage:\n  snmpset ");
+  snmp_parse_args_usage(stderr);
+  fprintf(stderr," [objectID type value ...]\n\n");
+  snmp_parse_args_descriptions(stderr);
+  fprintf(stderr, "  type\t\tone of:\ti, s, x, d, n, o, t, a\n");
+  fprintf(stderr, "  \t\t  i: INTEGER, s: STRING, x: HEX STRING, d: DECIMAL STRING\n");
+  fprintf(stderr, "  \t\t  n: NULLOBJ, o: OBJID, t: TIMETICKS, a: IPADDRESS\n");
 }
 
 int

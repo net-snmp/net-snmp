@@ -45,6 +45,28 @@
 #include "acl.h"
 #include "snmp_parse_args.h"
 
+void
+snmp_parse_args_usage(outf)
+  FILE *outf;
+{
+  fprintf(outf, "[-v 1|2|2h] [-h] [-d] [-q] [-p P] [-t T] [-r R] [-c S D] hostname <community|srcParty dstParty context>");
+}
+
+void
+snmp_parse_args_descriptions(outf)
+  FILE *outf;
+{
+  fprintf(outf, "  -v 1|2|2h\tspecifies snmp version to transmit.\n");
+  fprintf(outf, "  -h\t\tthis help message.\n");
+  fprintf(outf, "  -d\t\tdump input/output packets.\n");
+  fprintf(outf, "  -q\t\tquick print output for easier parsing ability.\n");
+  fprintf(outf, "  -p P\t\tuse port P instead of the default port.\n");
+  fprintf(outf, "  -t T\t\tset the request timeout to T.\n");
+  fprintf(outf, "  -r R\t\tset the number of retries to R.\n");
+  fprintf(outf, "  -c S D\tset the source/destination clocks for v2h requests.\n");
+}
+
+
 int
 snmp_parse_args(argc, argv, session)
   int argc;
@@ -106,6 +128,11 @@ snmp_parse_args(argc, argv, session)
           exit(1);
         }
         break;
+      case 'h':
+        usage();
+        exit(1);
+        break;
+          
       default:
         /* printf("invalid option: -%c\n", argv[arg][1]); */
         break;
