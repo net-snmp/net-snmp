@@ -322,7 +322,8 @@ var_usmUser(
           if (result == 0) {
             /* found an exact match.  Need the next one for !exact */
             uptr = nptr->next;
-          } else if (result == 1) {
+            break;
+          } else if (result == -1) {
             uptr = nptr;
           }
         }

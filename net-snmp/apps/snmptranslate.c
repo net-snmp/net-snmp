@@ -82,7 +82,9 @@ void usage(void)
   fprintf(stderr,
           "  -m <MIBS>\tuse MIBS list instead of the default mib list.\n");
   fprintf(stderr,
-	  "  -D\t\tenable snmplib debugging messages\n");
+	  "  -D <TOKEN[,TOKEN,...]>\n\t\tEnable snmplib debugging messages.");
+  fprintf(stderr,
+	  " See snmpcmd(1) man page \n\t\tfor more information.\n" );
   fprintf(stderr,
           "  -M <MIBDIRS>\tuse MIBDIRS as the location to look for mibs.\n");
   fprintf(stderr,
@@ -91,6 +93,8 @@ void usage(void)
           "  -T <TRANSOPTS> Print one or more MIB symbol reports.\n");
   fprintf(stderr,
           "  \t\tTRANSOPTS values:\n");
+  fprintf(stderr,
+          "  \t\t    B: Print all matching objects for a regex search.\n");
   fprintf(stderr,
           "  \t\t    d: Print full details of the given OID.\n");
   fprintf(stderr,
@@ -191,10 +195,10 @@ int main(int argc, char *argv[])
 #endif /* DEPRECATED_CLI_OPTIONS */
 
         case 'm':
-            setenv("MIBS", optarg, 1);
+            snmp_setenv("MIBS", optarg, 1);
             break;
         case 'M':
-            setenv("MIBDIRS", optarg, 1);
+            snmp_setenv("MIBDIRS", optarg, 1);
             break;
 #ifdef DEPRECATED_CLI_OPTIONS
 	case 'w':

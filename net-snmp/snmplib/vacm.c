@@ -255,8 +255,9 @@ vacm_parse_config_group(const char *token, char *line)
 
 struct vacm_viewEntry *
 vacm_getViewEntry(const char *viewName,
-	      oid *viewSubtree,
-		  size_t viewSubtreeLen)
+		  oid *viewSubtree,
+		  size_t viewSubtreeLen,
+		  int ignoreMask)
 {
     struct vacm_viewEntry *vp, *vpret = NULL;
     char view[VACMSTRINGLEN];
@@ -269,20 +270,24 @@ vacm_getViewEntry(const char *viewName,
     strcpy(view+1, viewName);
     for(vp = viewList; vp; vp = vp->next){
         if (!memcmp(view, vp->viewName,glen+1)
-	    && viewSubtreeLen >= vp->viewSubtreeLen) {
+	    && viewSubtreeLen >= (vp->viewSubtreeLen-1)) {
 	    int mask = 0x80, maskpos = 0;
 	    int oidpos;
             found = 1;
-	    for (oidpos = 0; found && oidpos < (int)vp->viewSubtreeLen; oidpos++) {
-		if ((vp->viewMask[maskpos] & mask) != 0) {
-		    if (viewSubtree[oidpos] != vp->viewSubtree[oidpos])
-                        found = 0;
+
+	    if (!ignoreMask) {
+		for (oidpos = 0; found && oidpos < (int)vp->viewSubtreeLen-1;
+		     oidpos++) {
+		    if ((vp->viewMask[maskpos] & mask) != 0) {
+			if (viewSubtree[oidpos] != vp->viewSubtree[oidpos+1])
+			    found = 0;
+		    }
+		    if (mask == 1) {
+			mask = 0x80;
+			maskpos++;
+		    }
+		    else mask >>= 1;
 		}
-		if (mask == 1) {
-		    mask = 0x80;
-		    maskpos++;
-		}
-		else mask >>= 1;
 	    }
             if (found) {
               /* match successful, keep this node if its longer than
@@ -290,9 +295,9 @@ vacm_getViewEntry(const char *viewName,
                  than the previous). */
               if (vpret == NULL || vp->viewSubtreeLen > vpret->viewSubtreeLen ||
                   (vp->viewSubtreeLen == vpret->viewSubtreeLen &&
-                   snmp_oid_compare(vp->viewSubtree, vp->viewSubtreeLen,
-                                    vpret->viewSubtree,
-                                    vpret->viewSubtreeLen) > 0))
+                   snmp_oid_compare(vp->viewSubtree+1, vp->viewSubtreeLen-1,
+                                    vpret->viewSubtree+1,
+                                    vpret->viewSubtreeLen-1) > 0))
                 vpret = vp;
             }
 	}
@@ -662,5 +667,14 @@ store_vacm(int majorID, int minorID, void *serverarg, void *clientarg)
   /* save the VACM MIB */
   vacm_save("vacm",appname);
   return SNMPERR_SUCCESS;
+}
+
+/* returns 1 if vacm has *any* configuration entries in it (regardless
+   of weather or not there is enough to make a decision based on it),
+   else return 0 */
+int vacm_is_configured(void) {
+    if (viewList == NULL && accessList == NULL && groupList == NULL)
+        return 0;
+    return 1;
 }
 

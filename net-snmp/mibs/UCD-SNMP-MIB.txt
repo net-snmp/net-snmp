@@ -30,29 +30,33 @@ UCD-SNMP-MIB DEFINITIONS ::= BEGIN
 
 IMPORTS
     OBJECT-TYPE, NOTIFICATION-TYPE, MODULE-IDENTITY,
-    Integer32, Opaque, enterprises
+    Integer32, Opaque, enterprises, Counter32
         FROM SNMPv2-SMI
 
     TEXTUAL-CONVENTION, DisplayString, TruthValue
 	FROM SNMPv2-TC;
 
 ucdavis MODULE-IDENTITY
-    LAST-UPDATED "9912090000Z"
+    LAST-UPDATED "200101170000Z"
     ORGANIZATION "University of California, Davis"
     CONTACT-INFO    
-	 "The ucd-snmp-coders mailing list is the best place
-	 to write for public questions about the ucd-snmp
-	 project: ucd-snmp-coders@ucd-snmp.ucdavis.edu
+	"This mib is no longer being maintained by the University of
+	 California and is now in life-support-mode and being
+	 maintained by the net-snmp project.  The best place to write
+	 for public questions about the net-snmp-coders mailing list
+	 at net-snmp-coders@lists.sourceforge.net.
 
-         Primary Author: Wes Hardaker
+         postal:   Wes Hardaker
+                   P.O. Box 382
+                   Davis CA  95617
 
-         postal:    IT-DCAS
-                    UCDavis
-                    Davis CA  95616
-         phone:     +1 530 754-7571
-         email:     wjhardaker@ucdavis.edu"
+         email:    net-snmp-coders@lists.sourceforge.net
+        "
     DESCRIPTION
 	"This file defines the private UCD SNMP MIB extensions."
+    REVISION	 "200101170000Z"
+    DESCRIPTION
+	"Added raw CPU and IO counters."
     REVISION	 "9912090000Z"
     DESCRIPTION
 	"SMIv2 version converted from older MIB definitions."
@@ -67,6 +71,7 @@ ucdavis MODULE-IDENTITY
 --   systemStats      OBJECT IDENTIFIER ::= { ucdavis  11 }
 --   ucdDemoMIB       OBJECT IDENTIFIER ::= { ucdavis  14 } - UCD-DEMO-MIB
 --   fileTable        OBJECT IDENTIFIER ::= { ucdavis  15 }
+--   logmatch         OBJECT IDENTIFIER ::= { ucdavis  15 }
 --   version          OBJECT IDENTIFIER ::= { ucdavis 100 }
 --   snmperrs         OBJECT IDENTIFIER ::= { ucdavis 101 }
 --   mibRegistryTable OBJECT IDENTIFIER ::= { ucdavis 102 }
@@ -90,6 +95,7 @@ ucdExperimental       OBJECT IDENTIFIER ::= { ucdavis 13 }
 --   wavelan          OBJECT IDENTIFIER ::= { ucdExperimental  3 } - WL-MIB
 --   ucdDlmodMIB      OBJECT IDENTIFIER ::= { ucdExperimental 14 } - UCD-DLMOD-MIB
 --   ucdDiskIOMIB     OBJECT IDENTIFIER ::= { ucdExperimental 15 } - UCD-DISKIO-MIB
+--   lmSensors        OBJECT IDENTIFIER ::= { ucdExperimental 16 } - LM-SENSORS-MIB
 
 
 -- These are the returned values of the agent type.
@@ -97,18 +103,41 @@ ucdExperimental       OBJECT IDENTIFIER ::= { ucdavis 13 }
 
 ucdSnmpAgent      OBJECT IDENTIFIER ::= { ucdavis 250 }
 hpux9             OBJECT IDENTIFIER ::= { ucdSnmpAgent 1 }
-hpux10            OBJECT IDENTIFIER ::= { ucdSnmpAgent 6 }
 sunos4            OBJECT IDENTIFIER ::= { ucdSnmpAgent 2 }
 solaris           OBJECT IDENTIFIER ::= { ucdSnmpAgent 3 }
 osf               OBJECT IDENTIFIER ::= { ucdSnmpAgent 4 }
 ultrix            OBJECT IDENTIFIER ::= { ucdSnmpAgent 5 }
+hpux10            OBJECT IDENTIFIER ::= { ucdSnmpAgent 6 }
 netbsd1           OBJECT IDENTIFIER ::= { ucdSnmpAgent 7 }
 freebsd           OBJECT IDENTIFIER ::= { ucdSnmpAgent 8 }
 irix              OBJECT IDENTIFIER ::= { ucdSnmpAgent 9 }
 linux             OBJECT IDENTIFIER ::= { ucdSnmpAgent 10 }
 bsdi              OBJECT IDENTIFIER ::= { ucdSnmpAgent 11 }
 openbsd           OBJECT IDENTIFIER ::= { ucdSnmpAgent 12 }
+win32		  OBJECT IDENTIFIER ::= { ucdSnmpAgent 13 } -- unlucky
+hpux11            OBJECT IDENTIFIER ::= { ucdSnmpAgent 14 }
 unknown           OBJECT IDENTIFIER ::= { ucdSnmpAgent 255 }
+
+
+-- Object identifiers for the non-standard transports that UCD/Net-SNMP
+-- supports.  Note that snmpTCPDomain is the subject of Internet Draft
+-- draft-irtf-nmrg-snmp-tcp-04.txt, which defines the OID
+-- .iso.org.dod.internet.experimental.nmrg.nmrgSnmpDomains.snmpTCPDomain
+-- (.1.3.6.1.3.91.1.1) for the SNMP over TCP over IPv4 transport domain.
+-- This draft (or its successor) is available from the Network Management
+-- Research Group web page at http://www.ibr.cs.tu-bs.de/projects/nmrg/
+--
+-- The NMRG OID for snmpTCPDomain is currently used by the code, but in case
+-- this is thought to be a Bad Idea, we define a private transport domain here
+-- that we could use instead.  The Unix domain, AAL5 PVC domain and
+-- the IPv6 domains are also defined privately here (for now).
+
+ucdDomains		OBJECT IDENTIFIER ::= { ucdavis 251 }
+ucdSnmpTCPDomain	OBJECT IDENTIFIER ::= { ucdDomains 1 }
+ucdSnmpUnixDomain	OBJECT IDENTIFIER ::= { ucdDomains 2 }
+ucdSnmpAAL5PVCDomain	OBJECT IDENTIFIER ::= { ucdDomains 3 }
+ucdSnmpUDPIPv6Domain	OBJECT IDENTIFIER ::= { ucdDomains 4 }
+ucdSnmpTCPIPv6Domain	OBJECT IDENTIFIER ::= { ucdDomains 5 }
 
 --
 -- Define the Float Textual Convention
@@ -984,6 +1013,9 @@ ssCpuIdle OBJECT-TYPE
 	"percentages of idle CPU time."
     ::= { systemStats 11 }
 
+-- The agent only implements those of the following counters that the
+-- kernel supports! Don't expect all to be present.
+
 ssCpuRawUser OBJECT-TYPE
     SYNTAX      Counter32
     MAX-ACCESS  read-only
@@ -1015,6 +1047,62 @@ ssCpuRawIdle OBJECT-TYPE
     DESCRIPTION
         "idle CPU time."
     ::= { systemStats 53 }
+
+ssCpuRawWait OBJECT-TYPE
+    SYNTAX      Counter32
+    MAX-ACCESS  read-only
+    STATUS      current
+    DESCRIPTION
+        "iowait CPU time. This is primarily a SysV thingie"
+    ::= { systemStats 54 }
+
+ssCpuRawKernel OBJECT-TYPE
+    SYNTAX      Counter32
+    MAX-ACCESS  read-only
+    STATUS      current
+    DESCRIPTION
+        "kernel CPU time."
+    ::= { systemStats 55 }
+
+ssCpuRawInterrupt OBJECT-TYPE
+    SYNTAX      Counter32
+    MAX-ACCESS  read-only
+    STATUS      current
+    DESCRIPTION
+        "interruptlevel CPU time. This is primarily a BSD thingie"
+    ::= { systemStats 56 }
+
+ssIORawSent OBJECT-TYPE
+    SYNTAX      Counter32
+    MAX-ACCESS  read-only
+    STATUS      current
+    DESCRIPTION
+        "Number of requests sent to a block device"
+    ::= { systemStats 57 }
+
+ssIORawReceived OBJECT-TYPE
+    SYNTAX      Counter32
+    MAX-ACCESS  read-only
+    STATUS      current
+    DESCRIPTION
+        "Number of interrupts processed"
+    ::= { systemStats 58 }
+
+ssRawInterrupts OBJECT-TYPE
+    SYNTAX      Counter32
+    MAX-ACCESS  read-only
+    STATUS      current
+    DESCRIPTION
+        "Number of requests received from a block device"
+    ::= { systemStats 59 }
+
+ssRawContexts OBJECT-TYPE
+    SYNTAX      Counter32
+    MAX-ACCESS  read-only
+    STATUS      current
+    DESCRIPTION
+        "Number of context switches"
+    ::= { systemStats 60 }
 
 -- possibly used in the future:
 --
@@ -1097,6 +1185,7 @@ fileName OBJECT-TYPE
 
 fileSize OBJECT-TYPE
     SYNTAX	Integer32
+    UNITS       "kB"
     MAX-ACCESS	read-only
     STATUS	current
     DESCRIPTION
@@ -1105,6 +1194,7 @@ fileSize OBJECT-TYPE
 
 fileMax	OBJECT-TYPE
     SYNTAX	Integer32
+    UNITS       "kB"
     MAX-ACCESS	read-only
     STATUS	current
     DESCRIPTION
@@ -1126,5 +1216,169 @@ fileErrorMsg OBJECT-TYPE
     DESCRIPTION
 	"Filesize error message"
     ::= { fileEntry 101 }
+
+logMatch OBJECT IDENTIFIER ::= { ucdavis 16 }
+
+logMatchMaxEntries OBJECT-TYPE
+	SYNTAX Integer32
+	MAX-ACCESS read-only
+	STATUS current
+	DESCRIPTION
+		"The maximum number of logmatch entries
+		this snmpd daemon can support."
+	::= { logMatch 1 }
+
+logMatchTable OBJECT-TYPE
+	SYNTAX SEQUENCE OF LogMatchEntry
+	MAX-ACCESS not-accessible
+	STATUS current
+	DESCRIPTION
+		"Table of monitored files."
+	::= { logMatch 2 }
+
+logMatchEntry OBJECT-TYPE
+	SYNTAX LogMatchEntry
+	MAX-ACCESS not-accessible
+	STATUS current
+	DESCRIPTION
+		"Entry of file"
+	INDEX { logMatchIndex }
+	::= { logMatchTable 1 }
+
+LogMatchEntry ::=
+	SEQUENCE { 
+		logMatchIndex
+			Integer32,
+		logMatchName
+			DisplayString,
+		logMatchFilename
+			DisplayString,
+		logMatchRegEx
+			DisplayString,
+		logMatchGlobalCounter
+			Counter32,
+		logMatchGlobalCount
+			Integer32,
+		logMatchCurrentCounter
+			Counter32,
+		logMatchCurrentCount
+			Integer32,
+		logMatchCounter
+			Counter32,
+		logMatchCount
+			Integer32,
+		logMatchCycle
+			Integer32,
+		logMatchErrorFlag
+			TruthValue,
+		logMatchRegExCompilation
+			DisplayString
+	 }
+
+logMatchIndex OBJECT-TYPE
+	SYNTAX Integer32 (1..2147483647)
+	MAX-ACCESS read-only
+	STATUS current
+	DESCRIPTION
+		"Index of logmatch"
+	::= { logMatchEntry 1 }
+
+logMatchName OBJECT-TYPE
+	SYNTAX DisplayString
+	MAX-ACCESS read-only
+	STATUS current
+	DESCRIPTION
+		"logmatch instance name"
+	::= { logMatchEntry 2 }
+
+logMatchFilename OBJECT-TYPE
+	SYNTAX DisplayString
+	MAX-ACCESS read-only
+	STATUS current
+	DESCRIPTION
+		"filename to be logmatched"
+	::= { logMatchEntry 3 }
+
+logMatchRegEx OBJECT-TYPE
+	SYNTAX DisplayString
+	MAX-ACCESS read-only
+	STATUS current
+	DESCRIPTION
+		"regular expression"
+	::= { logMatchEntry 4 }
+
+logMatchGlobalCounter OBJECT-TYPE
+	SYNTAX Counter32
+	MAX-ACCESS read-only
+	STATUS current
+	DESCRIPTION
+		"global count of matches"
+	::= { logMatchEntry 5 }
+
+logMatchGlobalCount OBJECT-TYPE
+	SYNTAX Integer32
+	MAX-ACCESS read-only
+	STATUS current
+	DESCRIPTION
+		"Description."
+	::= { logMatchEntry 6 }
+
+logMatchCurrentCounter OBJECT-TYPE
+	SYNTAX Counter32
+	MAX-ACCESS read-only
+	STATUS current
+	DESCRIPTION
+		"Regex match counter. This counter will
+		be reset with each logfile rotation."
+	::= { logMatchEntry 7 }
+
+logMatchCurrentCount OBJECT-TYPE
+	SYNTAX Integer32
+	MAX-ACCESS read-only
+	STATUS current
+	DESCRIPTION
+		"Description."
+	::= { logMatchEntry 8 }
+
+logMatchCounter OBJECT-TYPE
+	SYNTAX Counter32
+	MAX-ACCESS read-only
+	STATUS current
+	DESCRIPTION
+		"Regex match counter. This counter will
+		be reset with each read"
+	::= { logMatchEntry 9 }
+
+logMatchCount OBJECT-TYPE
+	SYNTAX Integer32
+	MAX-ACCESS read-only
+	STATUS current
+	DESCRIPTION
+		"Description."
+	::= { logMatchEntry 10 }
+
+logMatchCycle OBJECT-TYPE
+	SYNTAX Integer32
+	MAX-ACCESS read-only
+	STATUS current
+	DESCRIPTION
+		"time between updates (if not queried) in seconds"
+	::= { logMatchEntry 11 }
+
+logMatchErrorFlag OBJECT-TYPE
+	SYNTAX TruthValue
+	MAX-ACCESS read-only
+	STATUS current
+	DESCRIPTION
+		"errorflag: is this line configured correctly?"
+	::= { logMatchEntry 100 }
+
+logMatchRegExCompilation OBJECT-TYPE
+	SYNTAX DisplayString
+	MAX-ACCESS read-only
+	STATUS current
+	DESCRIPTION
+		"message of regex precompilation"
+	::= { logMatchEntry 101 }
 
 END

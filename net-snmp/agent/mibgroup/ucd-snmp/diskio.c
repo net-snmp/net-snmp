@@ -22,6 +22,9 @@
 /* include our .h file */
 #include "diskio.h"
 
+/* parse config file */
+#include "agent_read_config.h"
+
 #define CACHE_TIMEOUT 10
 static time_t cache_time=0;
 
@@ -43,7 +46,13 @@ static int cache_disknr=-1;
 #include <sys/diskstats.h>
 #endif /* bsdi */
 
-	/*********************
+#if defined (freebsd4) || defined(freebsd5)
+#include <sys/dkstat.h>
+#include <devstat.h>
+#endif /* freebsd */
+
+
+         /*********************
 	 *
 	 *  Initialisation & common implementation functions
 	 *
@@ -132,7 +141,7 @@ int get_disk(int disknr) {
 
 u_char	*
 var_diskio(struct variable *vp,
-	    oid *name,
+	   oid *name,
 	    size_t *length,
 	    int exact,
 	    size_t *var_len,
@@ -288,3 +297,85 @@ var_diskio(struct variable * vp,
   return NULL;
 }
 #endif /* bsdi */
+
+#if defined(freebsd4) || defined(freebsd5)
+static int ndisk;
+static struct statinfo *stat;
+
+static int
+getstats(void)
+{
+  time_t now;
+
+  now = time(NULL);
+  if (cache_time + CACHE_TIMEOUT > now) {
+    return 0;
+  }
+  if (stat == NULL) {
+    stat = (struct statinfo*)malloc(sizeof(struct statinfo));
+    stat->dinfo = (struct devinfo*)malloc(sizeof(struct devinfo));
+  }
+  memset(stat->dinfo, 0, sizeof(struct devinfo));
+
+  if ((getdevs(stat)) == -1){
+	fprintf (stderr,"Can't get devices:%s\n", devstat_errbuf);
+  	return 1;
+  }
+  ndisk=stat->dinfo->numdevs;
+  cache_time = now;
+  return 0;
+}
+
+u_char *
+var_diskio(struct variable * vp,
+	   oid * name,
+	   size_t * length,
+	   int exact,
+	   size_t * var_len,
+	   WriteMethod ** write_method)
+{
+  static long long_ret;
+  unsigned int indx;
+
+  if (getstats() == 1){
+    return NULL;
+  } 
+
+
+ if (header_simple_table(vp, name, length, exact, var_len, write_method, ndisk))
+    {
+	return NULL;
+    }
+
+  indx = (unsigned int) (name[*length - 1] - 1);
+
+  if (indx >= ndisk)
+    return NULL;
+
+  switch (vp->magic) {
+    case DISKIO_INDEX:
+      long_ret = (long) indx+1;;
+      return (u_char *) &long_ret;
+    case DISKIO_DEVICE:
+      *var_len = strlen(stat->dinfo->devices[indx].device_name);
+      return (u_char *) stat->dinfo->devices[indx].device_name;
+    case DISKIO_NREAD:
+      long_ret = (signed long) stat->dinfo->devices[indx].bytes_read;
+      return (u_char *) & long_ret;
+    case DISKIO_NWRITTEN:
+      long_ret = (signed long) stat->dinfo->devices[indx].bytes_written;
+      return (u_char *) & long_ret;
+    case DISKIO_READS:
+      long_ret = (signed long) stat->dinfo->devices[indx].num_reads;
+      return (u_char *) & long_ret;
+    case DISKIO_WRITES:
+      long_ret = (signed long) stat->dinfo->devices[indx].num_writes;
+      return (u_char *) & long_ret;
+
+    default:
+      ERROR_MSG("diskio.c: don't know how to handle this request.");
+  }
+  return NULL;
+}
+#endif /* freebsd4 */
+
