@@ -581,6 +581,9 @@ main(int argc, char *argv[])
     signal(SIGPIPE, SIG_IGN);	/* 'Inline' failure of wayward readers */
 #endif
 
+    /* store persistent data immediately in case we crash later */
+    snmp_store("snmpd");
+
     /* send coldstart trap via snmptrap(1) if possible */
     send_easy_trap (0, 0);
         
