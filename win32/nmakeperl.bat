@@ -20,11 +20,11 @@ REM perl Makefile.PL CAPI=TRUE -NET-SNMP-IN-SOURCE=TRUE
 
 echo Make the Perl SNMP modules.
 nmake /nologo > nmake.out
-echo If errors are seen stop here and review nmake.out.
+echo If errors are seen stop here and review perl\nmake.out.
 pause
 
 echo Test the Perl SNMP modules.
 nmake /nologo test > nmaketest.out 2>&1
-echo If no errors are seen, review test results in nmaketest.out.
+echo If no errors are seen, review test results in perl\nmaketest.out.
 
 cd ..
