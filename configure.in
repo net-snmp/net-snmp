@@ -1291,6 +1291,12 @@ AC_CHECK_HEADERS(netinet/ip6.h netinet6/in6_var.h netinet6/in6_pcb.h netinet6/ip
 dnl DYNAMIC MODULE SUPPORT
 AC_CHECK_HEADERS(dlfcn.h)
 
+dnl RPM subdirectory path (sigh)
+AC_CHECK_HEADERS(rpmio.h,, [
+   AC_CHECK_HEADERS(rpm/rpmio.h, CFLAGS="-I/usr/include/rpm $CFLAGS")
+])
+
+
 dnl OpenBSD 2.6 needs netinet/in.h before netinet/in_pcb.h
 AC_MSG_CHECKING([for netinet/in_pcb.h])
 AC_CACHE_VAL(cv_have_netinet_in_pcb_h,
