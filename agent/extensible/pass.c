@@ -151,6 +151,7 @@ unsigned char *var_extensible_pass(vp, name, length, exact, var_len, write_metho
   return(NULL);
 }
 
+int
 setPass(action, var_val, var_val_type, var_val_len, statP, name, name_len)
    int      action;
    u_char   *var_val;
@@ -170,83 +171,88 @@ setPass(action, var_val, var_val_type, var_val_len, statP, name, name_len)
   static int itmp;
   static oid objid[30];
   
-  if (action == COMMIT) {
-    for(i=1; i<= numpassthrus; i++) {
-      passthru = get_exten_instance(passthrus,i);
-      last = passthru->miblen;
-      if (passthru->miblen > name_len)
-        last = name_len;
-      for(j=0,rtest=0; j < last && !rtest; j++) {
-        if (name[j] != passthru->miboid[j]) {
-          if (name[j] < passthru->miboid[j])
-            rtest = -1;
-          else
-            rtest = 1;
-        }
-      }
-      if (rtest <= 0) {
-        /* setup args */
-        if (passthru->miblen >= name_len || rtest < 0)
-          sprint_mib_oid(buf, passthru->miboid, passthru->miblen);
-        else 
-          sprint_mib_oid(buf, name, name_len);
-        sprintf(passthru->command,"%s -s %s ",passthru->name,buf);
-        switch(var_val_type) {
-          case INTEGER:
-          case COUNTER:
-          case GAUGE:
-          case TIMETICKS:
-            asn_parse_int(var_val,&tmplen,&var_val_type, &tmp,
-                          sizeof(tmp));
-            switch (var_val_type) {
-              case INTEGER:
-                sprintf(buf,"integer %d",tmp);
-                break;
-              case COUNTER:
-                sprintf(buf,"counter %d",tmp);
-                break;
-              case GAUGE:
-                sprintf(buf,"gauge %d",tmp);
-                break;
-              case TIMETICKS:
-                sprintf(buf,"timeticks %d",tmp);
-                break;
-            }
-            break;
-          case IPADDRESS:
-            asn_parse_unsigned_int(var_val,&tmplen,&var_val_type, &utmp,
-                          sizeof(utmp));
-            sprintf(buf,"ipaddress %d.%d.%d.%d",
-                    ((utmp & 0xff000000) >> (8*3)),
-                    ((utmp & 0xff0000) >> (8*2)),
-                    ((utmp & 0xff00) >> (8)),
-                    ((utmp & 0xff)));
-            break;
-          case STRING:
-            itmp = sizeof(buf);
-            bzero(buf2,itmp);
-            asn_parse_string(var_val,&tmplen,&var_val_type,buf2,&itmp);
-            sprintf(buf,"string %s",buf2);
-            break;
-          case OBJID:
-            itmp = sizeof(objid);
-            asn_parse_objid(var_val,&tmplen,&var_val_type,objid,&itmp);
-            sprint_mib_oid(buf2, objid, itmp);
-            sprintf(buf,"objectid \"%s\"",buf2);
-            break;
-        }
-        strcat(passthru->command,buf);
-        DEBUGP1("pass-running:  %s\n",passthru->command);
-        exec_command(passthru);
-        if (!strncasecmp(passthru->output,"not-writable",12)) {
-          return SNMP_ERR_NOTWRITABLE;
-        } else if (!strncasecmp(passthru->output,"wrong-type",10)) {
-          return SNMP_ERR_WRONGTYPE;
-        }
-        return SNMP_ERR_NOERROR;
+  for(i=1; i<= numpassthrus; i++) {
+    passthru = get_exten_instance(passthrus,i);
+    last = passthru->miblen;
+    if (passthru->miblen > name_len)
+      last = name_len;
+    for(j=0,rtest=0; j < last && !rtest; j++) {
+      if (name[j] != passthru->miboid[j]) {
+        if (name[j] < passthru->miboid[j])
+          rtest = -1;
+        else
+          rtest = 1;
       }
     }
+    if (rtest <= 0) {
+      if (action != COMMIT)
+        return SNMP_ERR_NOERROR;
+      /* setup args */
+      if (passthru->miblen >= name_len || rtest < 0)
+        sprint_mib_oid(buf, passthru->miboid, passthru->miblen);
+      else 
+        sprint_mib_oid(buf, name, name_len);
+      sprintf(passthru->command,"%s -s %s ",passthru->name,buf);
+      switch(var_val_type) {
+        case INTEGER:
+        case COUNTER:
+        case GAUGE:
+        case TIMETICKS:
+          asn_parse_int(var_val,&tmplen,&var_val_type, &tmp,
+                        sizeof(tmp));
+          switch (var_val_type) {
+            case INTEGER:
+              sprintf(buf,"integer %d",tmp);
+              break;
+            case COUNTER:
+              sprintf(buf,"counter %d",tmp);
+              break;
+            case GAUGE:
+              sprintf(buf,"gauge %d",tmp);
+              break;
+            case TIMETICKS:
+              sprintf(buf,"timeticks %d",tmp);
+              break;
+          }
+          break;
+        case IPADDRESS:
+          asn_parse_unsigned_int(var_val,&tmplen,&var_val_type, &utmp,
+                                 sizeof(utmp));
+          sprintf(buf,"ipaddress %d.%d.%d.%d",
+                  ((utmp & 0xff000000) >> (8*3)),
+                  ((utmp & 0xff0000) >> (8*2)),
+                  ((utmp & 0xff00) >> (8)),
+                  ((utmp & 0xff)));
+          break;
+        case STRING:
+          itmp = sizeof(buf);
+          bzero(buf2,itmp);
+          asn_parse_string(var_val,&tmplen,&var_val_type,buf2,&itmp);
+          sprintf(buf,"string %s",buf2);
+          break;
+        case OBJID:
+          itmp = sizeof(objid);
+          asn_parse_objid(var_val,&tmplen,&var_val_type,objid,&itmp);
+          sprint_mib_oid(buf2, objid, itmp);
+          sprintf(buf,"objectid \"%s\"",buf2);
+          break;
+      }
+      strcat(passthru->command,buf);
+      DEBUGP1("pass-running:  %s\n",passthru->command);
+      exec_command(passthru);
+      if (!strncasecmp(passthru->output,"not-writable",11)) {
+        return SNMP_ERR_NOTWRITABLE;
+      } else if (!strncasecmp(passthru->output,"wrong-type",9)) {
+        return SNMP_ERR_WRONGTYPE;
+      } 
+      return SNMP_ERR_NOERROR;
+    }
   }
+#ifdef DODEBUG
+  sprint_mib_oid(buf2,name,name_len);
+  DEBUGP1("pass-notfound:  %s\n",buf2);
+#endif
+  return SNMP_ERR_NOSUCHNAME;
 }
   
 #endif  /* USEPASSMIB */
