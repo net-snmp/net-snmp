@@ -207,12 +207,7 @@ THANKS
   The following people have contributed various patches and
   improvements.  To them we owe our deepest thanks (and you do too!):
 
-  Original Author & Project Leader:
-
     Wes Hardaker <hardaker@users.sourceforge.net>
-
-  Major Contributors:  (in no particular order)
-
     Dan A. Dickey <ddickey@transition.com>
     Dave Shield <D.T.Shield@csc.liv.ac.uk>
     Giovanni S. Marzot <gmarzot@nortelnetworks.com>
@@ -269,6 +264,7 @@ THANKS
     Jeff Cours <jeff@ultradns.com>
     Karl Schilke <karl_schilke@eli.net>
     John Naylon <jbpn@cambridgebroadband.com>
+    Ken Hornstein <kenh@cmf.nrl.navy.mil>
 
   We've probably forgotten people on this list.  Let us know if you've
   contributed code and we've left you out.
