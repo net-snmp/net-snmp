@@ -653,7 +653,7 @@ snmp_ttyecho(const int fd, const int echo)
  *
  * Parameters:
  *	*prompt		(May be NULL.)
- *	 visible	TRUE means echo back user input.
+ *	 bvisible	TRUE means echo back user input.
  *      
  * Returns:
  *	Pointer to newly allocated, null terminated string containing
@@ -667,7 +667,7 @@ snmp_ttyecho(const int fd, const int echo)
  * FIX	Put HAVE_GETPASS in autoconf.
  */
 char *
-snmp_getpassphrase(const char *prompt, int visible)
+snmp_getpassphrase(const char *prompt, int bvisible)
 {
 	int		 ti = 0;
 	size_t		 len;
@@ -689,13 +689,13 @@ snmp_getpassphrase(const char *prompt, int visible)
 
 	fputs( (prompt) ? prompt : "", ofp );
 
-	if ( !visible ) {
+	if ( !bvisible ) {
 		ti = snmp_ttyecho(0, 0);
 	}
 	
 	fgets(buffer, sizeof(buffer), stdin);
 
-	if ( !visible ) {
+	if ( !bvisible ) {
 		ti = snmp_ttyecho(0, ti);
 		fputs( "\n", ofp );
 	}

@@ -1235,9 +1235,9 @@ Interface_Scan_Init (void)
     int a, b, c, d, e, i, fd;
     extern conf_if_list *if_list;
     conf_if_list *if_ptr;
-    char *scan_line_2_2="%[^:]: %*d %d %d %*d %*d %*d %*d %*d %*d %d %d %*d %*d %d";
-    char *scan_line_2_0="%[^:]: %d %d %*d %*d %*d %d %d %*d %*d %d";
-    char *scan_line_to_use;
+    const char *scan_line_2_2="%[^:]: %*d %d %d %*d %*d %*d %*d %*d %*d %d %d %*d %*d %d";
+    const char *scan_line_2_0="%[^:]: %d %d %*d %*d %*d %d %d %*d %*d %d";
+    const char *scan_line_to_use;
     
 #endif  
 
