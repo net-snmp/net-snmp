@@ -42,7 +42,8 @@ extern          "C" {
     void            snmp_disable_calllog(void);
     void            snmp_disable_log(void);
     void            snmp_enable_syslog(void);
-    void            snmp_enable_syslog_ident(const char *ident);
+    void            snmp_enable_syslog_ident(const char *ident,
+                                             const char *facility);
     void            snmp_enable_filelog(const char *logfilename,
                                         int dont_zero_log);
     void            snmp_enable_stderrlog(void);
