@@ -25,7 +25,7 @@ else
       echo @MODULE_LIST@
       ;;
     --cflags)
-      echo @CFLAGS@ -I. -I@includedir@
+      echo @CFLAGS@ @CPPFLAGS@ -I. -I@includedir@
       ;;
     --agent-libs)
       # use this one == --netsnmp-agent-libs + --external-libs
@@ -325,4 +325,5 @@ if test "x$usage" = "xyes"; then
   echo "    --configure-options   Display original configure arguments"
   echo "    --snmpd-module-list   Display the modules compiled into the agent"
   echo ""
+  exit
 fi  
