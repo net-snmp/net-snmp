@@ -1021,9 +1021,7 @@ ifInNUcastPkts_get(ifTable_rowreq_ctx * rowreq_ctx,
      * TODO:
      * update, replace or delete, if needed.
      */
-#warning "provide calculate in ifentry (some platforms may have actual counter)"
-    (*ifInNUcastPkts_val_ptr) = rowreq_ctx->data.ifentry->stats.imcast.low +
-        rowreq_ctx->data.ifentry->stats.ibcast.low;
+    (*ifInNUcastPkts_val_ptr) = rowreq_ctx->data.ifInNUcastPkts;
 
     return MFD_SUCCESS;
 }
@@ -1399,9 +1397,7 @@ ifOutNUcastPkts_get(ifTable_rowreq_ctx * rowreq_ctx,
      * TODO:
      * update, replace or delete, if needed.
      */
-#warning "provide calculate in ifentry (some platforms may have actual counter)"
-    (*ifOutNUcastPkts_val_ptr) = rowreq_ctx->data.ifentry->stats.omcast.low +
-        rowreq_ctx->data.ifentry->stats.obcast.low;
+    (*ifOutNUcastPkts_val_ptr) = rowreq_ctx->data.ifentry->stats.onucast;
 
     return MFD_SUCCESS;
 }
