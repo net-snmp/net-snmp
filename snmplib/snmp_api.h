@@ -253,6 +253,8 @@ void snmp_free_pdu (struct snmp_pdu *);
 
 void snmp_free_var (struct variable_list *);
 
+void snmp_free(void *);
+
 /*
  * int snmp_select_info(numfds, fdset, timeout, block)
  * int *numfds;
@@ -339,7 +341,7 @@ int snmp_get_suffix_only (void);
 int snmp_get_errno (void);
 int snmp_oid_compare (const oid *, int, const oid *, int);
 void init_snmp (void);
-void snmp_pdu_add_variable (struct snmp_pdu *, oid *, int, u_char, u_char *, int);
+struct variable_list * snmp_pdu_add_variable (struct snmp_pdu *, oid *, int, u_char, u_char *, int);
 int hex_to_binary (u_char *, u_char *);
 int ascii_to_binary (u_char *, u_char *);
 int snmp_add_var (struct snmp_pdu *, oid*, int, char, char *);
