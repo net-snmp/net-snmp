@@ -62,3 +62,69 @@ Finally, thanks to Phong Vo and AT&T Labs for a fast, robust and
 portable package that solves this headache very neatly.
 
 -SEan <burke_sp@pacbell.net>
+
+Solaris 8 ships with a version of PERL compiled using sun's cc.  
+
+This causes a problem when attempting to compile net-snmp with the
+new PERL functionality ie.
+
+./configure --with-mib-modules="host disman/event-mib ucd-snmp/diskio" --enable-shared --enable-embedded-perl
+
+because during the PERL section of the compile, it attempts to do so using the methodology used to
+compile the original PERL, not what you're currently using.  This can be discovered by typing
+
+perl -V
+
+and it says (among other things)
+
+  Compiler:
+    cc='cc'
+
+and you don't have the full version of Sun's C compiler on your system, it's going to break.
+
+If you have downloaded the PERL on www.sunfreeware.com, it is compiled with some extra flags
+that cause the net-snmp compile to break.  Given that the PERL provided with Solaris 8 (5.005_03)
+is rather stale, upgrading may be to your advantage.
+
+Download the current stable release of PERL
+
+http://www.cpan.org/src/stable.tar.gz and gunzip and untar.  
+
+When doing the PERL ./Configure, accept most of the defaults, except
+for the following:
+
+Use which C compiler? [cc]  gcc
+
+(it tends to default to cc even if not installed)
+
+Any additional gcc flags? [-fno-strict-aliasing -I/usr/local/include]
+
+(if there are any additional flags, especially relating to 64 offsets, remove these)
+
+What command should be used to create dynamic libraries? [cc] gcc
+
+Any special flags to pass to gcc to create a dynamically loaded library?
+[-G -L/usr/local/lib]
+
+(There shouldn't be anything extra here (see above))
+
+Any special flags to pass to gcc to use dynamic linking? [none] 
+
+(There shouldn't be anything extra here either (see above))
+
+What is your domain name? [.foo.com] 
+
+(it may guess wrong)
+
+What pager is used on your system? [/bin/less] /usr/bin/more
+
+(It wants less even if it's not installed)
+
+It will prompt you for make depend, then do:
+
+make
+make test
+make install
+perl -V
+
+if everything looks all right, do the net-snmp ./configure (don't forget to make clean if necessary)
