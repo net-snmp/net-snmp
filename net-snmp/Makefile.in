@@ -7,6 +7,7 @@ prefix = @prefix@
 exec_prefix = @exec_prefix@
 bindir = @bindir@
 libdir = @libdir@
+datadir = @datadir@
 snmplibdir = $(datadir)/snmp
 mibdir = $(snmplibdir)/mibs
 
