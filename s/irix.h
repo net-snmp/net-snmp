@@ -24,3 +24,8 @@
 /* configure fails to detect these properly because they're broken headers */
 #define HAVE_NETINET_TCP_H 1
 #define HAVE_NETINET_IP_H 1
+
+/* don't use this on irix */
+#undef HAVE_ARPA_INET_H
+
+#define STREAM_NEEDS_KERNEL_ISLANDS
