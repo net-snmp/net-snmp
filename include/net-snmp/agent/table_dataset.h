@@ -24,7 +24,7 @@ typedef struct table_data_set_storage_s {
 
    /* info about it? */
    char writable;
-   int type;
+   u_char type;
    Value_Change_Ok *change_ok_fn;
 
    /* data actually stored */
@@ -56,13 +56,13 @@ NodeHandler table_data_set_helper_handler;
 int table_set_add_default_row(table_data_set *, unsigned int, int, int);
 /* to set, add column, type, (writable) ? 1 : 0, ... */
 #if HAVE_STDARG_H
-int table_set_multi_add_default_row(table_data_set *, ...);
+void table_set_multi_add_default_row(table_data_set *, ...);
 #else
 void table_set_multi_add_default_row(va_alist);
 #endif
 int set_row_column(table_row *, unsigned int, int, const char *, size_t);
 table_data_set_storage *table_data_set_find_column(table_data_set_storage *,
-                                                   int);
+                                                   unsigned int);
 int register_table_data_set(handler_registration *, table_data_set *,
                             table_registration_info *);
 mib_handler *get_table_data_set_handler(table_data_set *);
@@ -71,7 +71,7 @@ int mark_row_column_writable(table_row *row, int column, int writable);
 inline table_data_set *extract_table_data_set(request_info *request);
 void config_parse_table_set(const char *token, char *line);
 void config_parse_add_row(const char *token, char *line);
-inline void table_dataset_add_index(table_data_set *table, int type);
+inline void table_dataset_add_index(table_data_set *table, u_char type);
 inline void table_dataset_add_row(table_data_set *table, table_row *row);
     
 #ifdef __cplusplus

@@ -4966,7 +4966,7 @@ snmp_parse_oid(const char *argv,
   return NULL;
 }
 
-int
+u_char
 mib_to_asn_type(int mib_type) 
 {
     switch(mib_type) {

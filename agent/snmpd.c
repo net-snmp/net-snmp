@@ -276,7 +276,7 @@ version(void)
 	RETSIGTYPE
 SnmpdShutDown(int a)
 {
-        extern struct snmp_session main_session;
+        extern struct snmp_session *main_session;
 	running = 0;
 #ifdef WIN32
 	/*

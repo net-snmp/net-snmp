@@ -100,7 +100,7 @@ register_table_data_set(handler_registration *reginfo, table_data_set *data_set,
    the start of the storage set list.
 */
 table_data_set_storage *
-table_data_set_find_column(table_data_set_storage *start, int column) 
+table_data_set_find_column(table_data_set_storage *start, unsigned int column) 
 {
     while(start && start->column != column)
         start = start->next;
@@ -379,7 +379,7 @@ config_parse_table_set(const char *token, char *line)
     struct index_list *index;
     unsigned int mincol = 0xffffff, maxcol = 0;
     data_set_tables *tables;
-    int type;
+    u_char type;
     
     /* instatiate a fake table based on MIB information */
     if (!snmp_parse_oid(line, table_name, &table_name_length) ||
@@ -517,7 +517,7 @@ config_parse_add_row(const char *token, char *line)
     table_data_add_row(tables->table_set->table, row);
 }
 
-inline void table_dataset_add_index(table_data_set *table, int type) 
+inline void table_dataset_add_index(table_data_set *table, u_char type) 
 {
     table_data_add_index(table->table, type);
 }
@@ -527,10 +527,11 @@ inline void table_dataset_add_row(table_data_set *table, table_row *row)
     table_data_add_row(table->table, row);
 }
 
+void
 #if HAVE_STDARG_H
-int table_set_multi_add_default_row(table_data_set *tset, ...)
+table_set_multi_add_default_row(table_data_set *tset, ...)
 #else
-void table_set_multi_add_default_row(va_dcl)
+table_set_multi_add_default_row(va_dcl)
   va_dcl
 #endif
 {

@@ -27,7 +27,7 @@ struct snmp_enum_list {
 #define SE_OK            0
 #define SE_NOMEM         1
 #define SE_ALREADY_THERE 2
-#define SE_DNE           (-(0xfffffffe))
+#define SE_DNE           -2
 
 int init_snmp_enum(void);
 struct snmp_enum_list *se_find_list(unsigned int major, unsigned int minor);
