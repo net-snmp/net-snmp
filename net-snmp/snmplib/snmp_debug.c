@@ -36,15 +36,10 @@
 #include <net-snmp/library/snmp_api.h>
 
 static int      dodebug = SNMP_ALWAYS_DEBUG;
-static int      debug_num_tokens = 0;
+int             debug_num_tokens = 0;
 static int      debug_print_everything = 0;
 
-typedef struct token_dscr {
-    char *token_name;
-    char  enabled;
-} token_descr_t;
-
-static struct token_dscr dbg_tokens[MAX_DEBUG_TOKENS];
+netsnmp_token_descr dbg_tokens[MAX_DEBUG_TOKENS];
 
 /*
  * indent debugging:  provide a space padded section to return an indent for 

@@ -236,6 +236,19 @@ extern          "C" {
     int             snmp_get_do_debugging(void);
     int             debug_is_token_registered(const char *token);
 
+/*
+ * internal:
+ * You probably shouldn't be using this information unless the word
+ * "expert" applies to you.  I know it looks tempting.
+ */
+typedef struct netsnmp_token_descr_s {
+    char *token_name;
+    char  enabled;
+} netsnmp_token_descr;
+
+extern int                 debug_num_tokens;
+extern netsnmp_token_descr dbg_tokens[MAX_DEBUG_TOKENS];
+    
 #ifdef __cplusplus
 }
 #endif
