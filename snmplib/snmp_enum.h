@@ -39,9 +39,9 @@ char *se_find_label(unsigned int major, unsigned int minor, int value);
 int se_add_pair(unsigned int major, unsigned int minor, char *label, int value);
 
 /* operates directly on a possibly external list */
-char * se_find_label_in_slist(char *listname, int value);
-int se_find_value_in_slist(char *listname, char *label);
-int se_add_pair_to_slist(char *listname, char *label, int value);
+char * se_find_label_in_slist(const char *listname, int value);
+int se_find_value_in_slist(const char *listname, char *label);
+int se_add_pair_to_slist(const char *listname, char *label, int value);
 
 /* finds a list of enums in a list of enum structs associated by a name. */
 /* not as fast as the above routines, since two lists must be traversed. */
