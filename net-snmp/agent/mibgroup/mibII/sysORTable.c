@@ -115,38 +115,37 @@ var_sysORTable(struct variable *vp,
 		size_t *var_len,
 		WriteMethod **write_method)
 {
-  int i;
-  struct sysORTable *ptr;
+  unsigned long i = 0;
+  struct sysORTable *ptr = table;
 
   if (header_simple_table(vp, name, length, exact, var_len, write_method, numEntries))
     return NULL;
 
-  DEBUGMSGTL(("mibII/sysORTable", "sysORTable -- "));
-  for(i = 1, ptr=table; ptr != NULL && i < (int)name[*length-1];
-      ptr = ptr->next, i++) {
-    DEBUGMSGTL(("mibII/sysORTable", "sysORTable -- %d != %d\n",i,name[*length-1]));
+  for (i = 1; ptr != NULL && i < name[*length-1]; ptr = ptr->next, i++) {
+    DEBUGMSGTL(("mibII/sysORTable", "sysORTable -- %lu != %lu\n",
+		i, name[*length - 1]));
   }
   if (ptr == NULL) {
-    DEBUGMSGTL(("mibII/sysORTable", "sysORTable -- no match: %d\n",i));
+    DEBUGMSGTL(("mibII/sysORTable", "sysORTable -- no match: %lu\n",i));
     return NULL;
   }
-  DEBUGMSGTL(("mibII/sysORTable", "sysORTable -- match: %d\n",i));
+  DEBUGMSGTL(("mibII/sysORTable", "sysORTable -- match: %lu\n", i));
   
-  switch (vp->magic){
-    case SYSORTABLEID:
-      *var_len = ptr->OR_oidlen*sizeof(ptr->OR_oid[0]);
-      return (u_char *) ptr->OR_oid;
+  switch (vp->magic) {
+  case SYSORTABLEID:
+    *var_len = ptr->OR_oidlen*sizeof(ptr->OR_oid[0]);
+    return (u_char *)ptr->OR_oid;
 
-    case SYSORTABLEDESCR:
-      *var_len = strlen(ptr->OR_descr);
-      return (u_char *) ptr->OR_descr;
+  case SYSORTABLEDESCR:
+    *var_len = strlen(ptr->OR_descr);
+    return (u_char *)ptr->OR_descr;
+      
+  case SYSORTABLEUPTIME:
+    long_return = timeval_uptime(&ptr->OR_uptime);
+    return (u_char *)&long_return;
 
-    case SYSORTABLEUPTIME:
-      long_return = timeval_uptime( &ptr->OR_uptime );
-      return ((u_char *) &long_return);
-
-    default:
-      DEBUGMSGTL(("snmpd", "unknown sub-id %d in var_sysORTable\n", vp->magic));
+  default:
+    DEBUGMSGTL(("snmpd", "unknown sub-id %d in var_sysORTable\n", vp->magic));
   }
   return NULL;
 }
