@@ -167,7 +167,7 @@ struct module_compatability {
 #define TYPE_COUNTER64      11
 #define TYPE_BITSTRING      12
 #define TYPE_NSAPADDRESS    13
-#define TYPE_UINTEGER32     14
+#define TYPE_UINTEGER       14
 #define TYPE_UNSIGNED32     15
 #define TYPE_INTEGER32      16
 
