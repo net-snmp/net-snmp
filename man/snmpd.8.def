@@ -22,7 +22,8 @@ Append to the log file rather than truncating it.
 .B "-c" \fIFILE
 Read 
 .I FILE
-as a configuration file.
+as a configuration file
+(or a comma-separated list of configuration files).
 .TP
 .B -C
 Do not read any configuration files except the ones optionally specified by the 
