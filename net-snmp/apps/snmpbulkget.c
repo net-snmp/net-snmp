@@ -59,6 +59,7 @@ SOFTWARE.
 #include <sys/select.h>
 #endif
 #include <stdio.h>
+#include <ctype.h>
 #if HAVE_WINSOCK_H
 #include <winsock.h>
 #endif
@@ -79,23 +80,13 @@ SOFTWARE.
 #include "snmp_parse_args.h"
 
 oid objid_mib[] = {1, 3, 6, 1, 2, 1};
-int max_repetitions = 100;
+int max_repetitions = 10;
 int non_repeaters = 0;
 struct nameStruct {
   oid name[MAX_OID_LEN];
   size_t name_len;
 } *name, *namep;
 int names;
-
-void optProc(int argc, char *const *argv, int opt)
-{
-  switch (opt) {
-  case 'B':
-    non_repeaters = atoi(optarg);
-    max_repetitions = atoi(argv[optind++]);
-    break;
-  }
-}
 
 void
 usage (void)
@@ -104,8 +95,47 @@ usage (void)
   snmp_parse_args_usage(stderr);
   fprintf(stderr," [<objectID>]\n\n");
   snmp_parse_args_descriptions(stderr);
-  fprintf(stderr,"  -B <nonrep> <rep>\tfirst <nonrep> objects are non-repeaters\n");
-  fprintf(stderr,"\t\t\tmaximum <rep> repetitions over the remainder\n");
+  fprintf(stderr, "  -C <APPOPTS>  Set various application specific behaviours:\n");
+  fprintf(stderr, "\t\t  APPOPTS values:\n");
+  fprintf(stderr,"\t\t      n<NUM>:  set non-repeaters to <NUM>\n");
+  fprintf(stderr,"\t\t      r<NUM>:  set max-repeaters to <NUM>\n");
+}
+
+static
+void optProc(int argc, char *const *argv, int opt)
+{
+    char *endptr = NULL;
+
+    switch (opt) {
+    case 'C':
+	while (*optarg) {
+	    switch (*optarg++) {
+	    case 'n':
+	    case 'r':
+		if (*(optarg - 1) == 'r') {
+		    max_repetitions = strtol(optarg, &endptr, 0);
+		} else {
+		    non_repeaters   = strtol(optarg, &endptr, 0);
+		}
+
+		if (endptr == optarg) {
+		    /*  No number given -- error.  */
+		    usage();
+		    exit(1);
+		} else {
+		    optarg = endptr;
+		    if (isspace(*optarg)) {
+			return;
+		    }
+		}
+		break;
+
+	    default:
+		fprintf(stderr, "Unknown flag passed to -C: %c\n", optarg[-1]);
+		exit(1);
+	    }
+	}
+    }
 }
 
 int main(int argc, char  *argv[])
@@ -121,7 +151,7 @@ int main(int argc, char  *argv[])
     int  exitval = 0;
 
     /* get the common command line arguments */
-    switch (arg = snmp_parse_args(argc, argv, &session, "B:", optProc)) {
+    switch (arg = snmp_parse_args(argc, argv, &session, "C:", optProc)) {
     case -2:
 	exit(0);
     case -1:
