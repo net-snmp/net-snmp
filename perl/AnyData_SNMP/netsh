@@ -219,13 +219,6 @@ sub netsh {
     return if ($stmt =~ /^\s*\#/);
     my ($name, $args) = ($stmt =~ /^(\w+)\s*(.*)$/);
 
-    #eval
-    if ($name eq "eval") {
-	$stmt =~ s/^eval//;
-	eval $stmt;
-	return;
-    }
-
     #define alias
 #    print "doing [$multi_alias]: $stmt\n";
     if ($name eq "alias" || $multi_alias) {
@@ -272,6 +265,21 @@ sub netsh {
 	return;
     }
 
+    #eval
+    if ($name eq "eval") {
+	eval $args;
+	return;
+    }
+
+    #eval just vars
+    if ($name eq "evalvars") {
+#	print "args1:",$args,"\n";
+	$args =~ s/\$(\w+)/$$1/eg;
+#	print "args2:",$args,"\n";
+	netsh($args);
+	return;
+    }
+
     #eval aliases
     while (exists $aliases{$name}) {
 #	print "modified: $stmt -> ";
@@ -310,6 +318,10 @@ sub netsh {
 
     my $subfn;
 
+    if ($stmt =~ /^eval (.*)/) {
+	eval $1;
+    }
+
     if ($stmt =~ s/^printf\s+(\".*\")\s*(.*)/$2/) {
 	if ($2 eq "") {
 	    print eval $1;
@@ -340,10 +352,6 @@ sub netsh {
 	    print $table->render();
 	}
 	return;
-    }
-
-    if ($stmt =~ /^eval (.*)/) {
-	eval $1;
     }
 
     if ($stmt =~ /^source\s+(.*)/) {
