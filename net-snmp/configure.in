@@ -92,7 +92,7 @@ dnl AC_CHECK_LIB(Xt, main)
 dnl Replace `main' with a function in -ldes:
 dnl AC_CHECK_LIB(des, main)
 dnl Replace `main' with a function in -lelf:
-dnl AC_CHECK_LIB(elf, main)
+AC_CHECK_LIB(elf, main)
 dnl Replace `main' with a function in -lm:
 AC_CHECK_LIB(m, asin)
 dnl Replace `main' with a function in -lnsl:
@@ -105,6 +105,17 @@ dnl Replace `main' with a function in -lsocket:
 AC_CHECK_LIB(socket, getservbyname)
 dnl Replace `main' with a function in -lsocket:
 AC_CHECK_LIB(ucb, bzero)
+
+dnl more solaris specialities
+dnl if libucb does not define bzero and I am solaris, add -DSVR4 to CFLAGS
+case "$target_os" in
+  solaris2*) 
+  if test "X$HAVE_LIBUCB" = "X"; then
+    CFLAGS = "$CFLAGS -DSVR4"
+  fi ;;
+esac
+
+
 dnl Replace `main' with a function in -ltcl:
 dnl AC_CHECK_LIB(tcl, main)
 dnl Replace `main' with a function in -ltk:
@@ -165,6 +176,7 @@ AC_FUNC_MEMCMP
 AC_TYPE_SIGNAL
 AC_CHECK_FUNCS(gethostname gettimeofday select socket strtol)
 
+AC_MSG_CHECKING(if you have run configure before)
 AC_CACHE_VAL(ac_cv_have_warned,
 [
 cat << EOF
@@ -185,7 +197,9 @@ EOF
 
 read tmpinput
 ac_cv_have_warned="yes"
+echo $ac_n "disabling above prompt for future runs...  $ac_c"
 ])
+AC_MSG_RESULT($ac_cv_have_warned)
 
 ME=`whoami`
 if test -f /etc/resolv.conf; then
