@@ -19,11 +19,11 @@
 #define NEED_USMDH_FUNCTIONS
 #include "usmDHUserKeyTable.h"
 
-DH *
+DH             *
 usmDHGetUserDHptr(struct usmUser *user, int for_auth_key)
 {
-    DH *dh, *dh_params;
-    void **theptr;
+    DH             *dh, *dh_params;
+    void          **theptr;
 
     if (user == NULL)
         return NULL;
@@ -32,9 +32,11 @@ usmDHGetUserDHptr(struct usmUser *user, int for_auth_key)
         theptr = &user->usmDHUserAuthKeyChange;
     else
         theptr = &user->usmDHUserPrivKeyChange;
-    
+
     if (!*theptr) {
-        /* copy the system parameters to the local ones */
+        /*
+         * copy the system parameters to the local ones 
+         */
         dh = DH_new();
         if (!dh)
             return NULL;
@@ -48,7 +50,7 @@ usmDHGetUserDHptr(struct usmUser *user, int for_auth_key)
         DH_generate_key(dh);
         *theptr = dh;
     } else {
-        dh = (DH *) *theptr;
+        dh = (DH *) * theptr;
     }
     return dh;
 }
@@ -57,8 +59,8 @@ int
 usmDHGetUserKeyChange(struct usmUser *user, int for_auth_key,
                       char **keyobj, size_t *keyobj_len)
 {
-    DH *dh;
-    
+    DH             *dh;
+
     dh = usmDHGetUserDHptr(user, for_auth_key);
 
     if (!dh) {
@@ -66,10 +68,9 @@ usmDHGetUserKeyChange(struct usmUser *user, int for_auth_key,
                  user, for_auth_key);
         return MFD_ERROR;
     }
-    
+
     *keyobj_len = BN_num_bytes(dh->pub_key);
-    *keyobj =
-        malloc(*keyobj_len);
+    *keyobj = malloc(*keyobj_len);
     BN_bn2bin(dh->pub_key, *keyobj);
 
     return MFD_SUCCESS;
@@ -126,8 +127,8 @@ usmDHUserKeyTable_allocate_data(void)
     /*
      * not real user, not in a list. mark for testing
      */
-    rtn->next = (struct usmUser*)-1;
-    rtn->prev = (struct usmUser*)-1;
+    rtn->next = (struct usmUser *) -1;
+    rtn->prev = (struct usmUser *) -1;
 
     return rtn;
 }                               /* usmDHUserKeyTable_allocate_data */
@@ -145,8 +146,8 @@ usmDHUserKeyTable_release_data(usmDHUserKeyTable_data * data)
     DEBUGMSGTL(("verbose:usmDHUserKeyTable:usmDHUserKeyTable_release_data",
                 "called\n"));
 
-    netsnmp_assert(user->next == (struct usmUser*)-1);
-    netsnmp_assert(user->prev == (struct usmUser*)-1);
+    netsnmp_assert(user->next == (struct usmUser *) -1);
+    netsnmp_assert(user->prev == (struct usmUser *) -1);
 
     /*
      * TODO:202:r: |-> release memory for the usmDHUserKeyTable data context.
@@ -345,7 +346,7 @@ usmDHUserAuthKeyChange_get(usmDHUserKeyTable_rowreq_ctx * rowreq_ctx,
         !*usmDHUserAuthKeyChange_val_ptr_ptr) {
         return MFD_ERROR;
     }
-    
+
     return usmDHGetUserKeyChange(rowreq_ctx->data, 1,
                                  usmDHUserAuthKeyChange_val_ptr_ptr,
                                  usmDHUserAuthKeyChange_val_ptr_len_ptr);
@@ -431,7 +432,7 @@ usmDHUserOwnAuthKeyChange_get(usmDHUserKeyTable_rowreq_ctx * rowreq_ctx,
         !*usmDHUserOwnAuthKeyChange_val_ptr_ptr) {
         return MFD_ERROR;
     }
-    
+
     return usmDHGetUserKeyChange(rowreq_ctx->data, 1,
                                  usmDHUserOwnAuthKeyChange_val_ptr_ptr,
                                  usmDHUserOwnAuthKeyChange_val_ptr_len_ptr);
@@ -516,7 +517,7 @@ usmDHUserPrivKeyChange_get(usmDHUserKeyTable_rowreq_ctx * rowreq_ctx,
         !*usmDHUserPrivKeyChange_val_ptr_ptr) {
         return MFD_ERROR;
     }
-  
+
     return usmDHGetUserKeyChange(rowreq_ctx->data, 0,
                                  usmDHUserPrivKeyChange_val_ptr_ptr,
                                  usmDHUserPrivKeyChange_val_ptr_len_ptr);

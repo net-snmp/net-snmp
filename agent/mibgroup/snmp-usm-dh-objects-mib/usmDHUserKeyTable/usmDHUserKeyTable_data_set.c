@@ -24,11 +24,13 @@ int
 usmDHUserCheckValue(struct usmUser *user, int for_auth_key,
                     char *val, size_t val_len)
 {
-    /* The set value must be composed of 2 parts, the first being the
-       current value */
-    char *current_value;
-    size_t current_value_len;
-    
+    /*
+     * The set value must be composed of 2 parts, the first being the
+     * current value 
+     */
+    char           *current_value;
+    size_t          current_value_len;
+
     DEBUGMSGTL(("verbose:usmDHUserKeyTable:usmDHUserCheckValue",
                 "called\n"));
     usmDHGetUserKeyChange(user, for_auth_key,
@@ -41,7 +43,7 @@ usmDHUserCheckValue(struct usmUser *user, int for_auth_key,
         return MFD_NOT_VALID_NOW;
 
     if (memcmp(current_value, val, current_value_len) != 0)
-        return SNMP_ERR_WRONGVALUE;  /* mandated error string */
+        return SNMP_ERR_WRONGVALUE;     /* mandated error string */
 
     return MFD_SUCCESS;
 }
@@ -50,32 +52,35 @@ int
 usmDHSetKey(struct usmUser *user, int for_auth_key,
             char *val, size_t val_len)
 {
-    DH *dh;
-    BIGNUM *other_pub;
-    char *key;
-    size_t key_len;
+    DH             *dh;
+    BIGNUM         *other_pub;
+    char           *key;
+    size_t          key_len;
 
-    DEBUGMSGTL(("verbose:usmDHUserKeyTable:usmDHSetKey",
-                "called\n"));
-    /* XXX: mem leaks on errors abound */
+    DEBUGMSGTL(("verbose:usmDHUserKeyTable:usmDHSetKey", "called\n"));
+    /*
+     * XXX: mem leaks on errors abound 
+     */
 
     dh = usmDHGetUserDHptr(user, for_auth_key);
     if (!dh)
         return MFD_ERROR;
 
-    other_pub = BN_bin2bn(val + val_len/2, val_len/2, NULL);
+    other_pub = BN_bin2bn(val + val_len / 2, val_len / 2, NULL);
     if (!other_pub)
         return MFD_ERROR;
-    
-    /* Set the new key for a user */
+
+    /*
+     * Set the new key for a user 
+     */
     key_len = DH_size(dh);
     key = malloc(DH_size(dh));
     if (!key)
         return MFD_ERROR;
-    
+
     if (DH_compute_key(key, other_pub, dh)) {
-        u_char **replkey;
-        size_t replkey_size;
+        u_char        **replkey;
+        size_t          replkey_size;
 
         if (for_auth_key) {
             replkey_size = user->authKeyLen;
@@ -85,11 +90,15 @@ usmDHSetKey(struct usmUser *user, int for_auth_key,
             replkey = &user->privKey;
         }
 
-        /* is it large enough? */
+        /*
+         * is it large enough? 
+         */
         if (key_len < replkey_size)
             return MFD_ERROR;
-        
-        /* copy right most bits, per the object requirements */
+
+        /*
+         * copy right most bits, per the object requirements 
+         */
         SNMP_FREE(*replkey);
         memdup(replkey, key + key_len - replkey_size, replkey_size);
 
@@ -282,9 +291,9 @@ usmDHUserKeyTable_commit(usmDHUserKeyTable_rowreq_ctx * rowreq_ctx)
     DEBUGMSGTL(("verbose:usmDHUserKeyTable:usmDHUserKeyTable_commit",
                 "called\n"));
 
-        /*
+    /*
      * nothing to do; we wait for the irreversible commit
-         */
+     */
     return MFD_SUCCESS;
 }                               /* usmDHUserKeyTable_commit */
 
@@ -353,17 +362,21 @@ usmDHUserKeyTable_irreversible_commit(usmDHUserKeyTable_rowreq_ctx *
      */
     user = rowreq_ctx->data;
     flags = rowreq_ctx->column_set_flags;
-    
+
     if (flags & FLAG_USMDHUSERAUTHKEYCHANGE ||
         flags & FLAG_USMDHUSEROWNAUTHKEYCHANGE) {
-        /* free the keychange objects so they reset to new values */
+        /*
+         * free the keychange objects so they reset to new values 
+         */
         DH_free(user->usmDHUserAuthKeyChange);
         user->usmDHUserAuthKeyChange = NULL;
     }
-     
+
     if (flags & FLAG_USMDHUSERPRIVKEYCHANGE ||
         flags & FLAG_USMDHUSEROWNPRIVKEYCHANGE) {
-         /* free the keychange objects so they reset to new values */
+        /*
+         * free the keychange objects so they reset to new values 
+         */
         DH_free(user->usmDHUserPrivKeyChange);
         user->usmDHUserPrivKeyChange = NULL;
     }
@@ -603,7 +616,7 @@ usmDHUserAuthKeyChange_set(usmDHUserKeyTable_rowreq_ctx * rowreq_ctx,
      * set usmDHUserAuthKeyChange value in rowreq_ctx->data
      */
     usmDHSetKey(rowreq_ctx->data, 1,
-           usmDHUserAuthKeyChange_val_ptr,
+                usmDHUserAuthKeyChange_val_ptr,
                 usmDHUserAuthKeyChange_val_ptr_len);
 
     return MFD_SUCCESS;
@@ -707,10 +720,8 @@ The object used to change the agents own Authentication Key
  */
 int
 usmDHUserOwnAuthKeyChange_check_value(usmDHUserKeyTable_rowreq_ctx *
-                                      rowreq_ctx,
-                                      char
-                                      *usmDHUserOwnAuthKeyChange_val_ptr,
-                                      size_t
+                                      rowreq_ctx, char
+                                      *usmDHUserOwnAuthKeyChange_val_ptr, size_t
                                       usmDHUserOwnAuthKeyChange_val_ptr_len)
 {
     DEBUGMSGTL(("verbose:usmDHUserKeyTable:usmDHUserOwnAuthKeyChange_check_value", "called\n"));
@@ -795,7 +806,7 @@ usmDHUserOwnAuthKeyChange_set(usmDHUserKeyTable_rowreq_ctx * rowreq_ctx,
      * set usmDHUserOwnAuthKeyChange value in rowreq_ctx->data
      */
     return usmDHUserAuthKeyChange_set(rowreq_ctx,
-           usmDHUserOwnAuthKeyChange_val_ptr,
+                                      usmDHUserOwnAuthKeyChange_val_ptr,
                                       usmDHUserOwnAuthKeyChange_val_ptr_len);
 }                               /* usmDHUserOwnAuthKeyChange_set */
 
@@ -983,7 +994,7 @@ usmDHUserPrivKeyChange_set(usmDHUserKeyTable_rowreq_ctx * rowreq_ctx,
      * set usmDHUserPrivKeyChange value in rowreq_ctx->data
      */
     usmDHSetKey(rowreq_ctx->data, 0,
-           usmDHUserPrivKeyChange_val_ptr,
+                usmDHUserPrivKeyChange_val_ptr,
                 usmDHUserPrivKeyChange_val_ptr_len);
 
     return MFD_SUCCESS;
@@ -1088,10 +1099,8 @@ The object used to change the agent's own Privacy Key using a
  */
 int
 usmDHUserOwnPrivKeyChange_check_value(usmDHUserKeyTable_rowreq_ctx *
-                                      rowreq_ctx,
-                                      char
-                                      *usmDHUserOwnPrivKeyChange_val_ptr,
-                                      size_t
+                                      rowreq_ctx, char
+                                      *usmDHUserOwnPrivKeyChange_val_ptr, size_t
                                       usmDHUserOwnPrivKeyChange_val_ptr_len)
 {
     DEBUGMSGTL(("verbose:usmDHUserKeyTable:usmDHUserOwnPrivKeyChange_check_value", "called\n"));
@@ -1176,7 +1185,7 @@ usmDHUserOwnPrivKeyChange_set(usmDHUserKeyTable_rowreq_ctx * rowreq_ctx,
      * set usmDHUserOwnPrivKeyChange value in rowreq_ctx->data
      */
     return usmDHUserPrivKeyChange_set(rowreq_ctx,
-           usmDHUserOwnPrivKeyChange_val_ptr,
+                                      usmDHUserOwnPrivKeyChange_val_ptr,
                                       usmDHUserOwnPrivKeyChange_val_ptr_len);
 }                               /* usmDHUserOwnPrivKeyChange_set */
 
@@ -1239,7 +1248,7 @@ usmDHUserKeyTable_check_dependencies(usmDHUserKeyTable_rowreq_ctx *
      * check that all new value are legal and consistent with each other
      */
     flags = rowreq_ctx->column_set_flags;
-    
+
     if (flags & FLAG_USMDHUSERAUTHKEYCHANGE &&
         flags & FLAG_USMDHUSEROWNAUTHKEYCHANGE) {
         return MFD_ERROR;
@@ -1249,7 +1258,7 @@ usmDHUserKeyTable_check_dependencies(usmDHUserKeyTable_rowreq_ctx *
         flags & FLAG_USMDHUSEROWNPRIVKEYCHANGE) {
         return MFD_ERROR;
     }
-    
+
     return rc;
 }                               /* usmDHUserKeyTable_check_dependencies */
 
