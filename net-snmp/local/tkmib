@@ -2,6 +2,7 @@
 
 require Tk::Table;
 require Tk::HList;
+require Tk::FileSelect;
 
 $host = 'localhost';
 $community = 'public';
@@ -24,6 +25,34 @@ my $tmpbd = 3;
 
 $top = MainWindow->new();
 $top->title("tkmib");
+
+#Menus
+$MenuFrame = $top->Frame(-relief => "raised",-borderwidth => 2);
+$MenuFrame->pack(-fill => "x",-expand => 1);
+$FileMenuBut = $MenuFrame->Menubutton(-text => "File",
+				      -menuitems =>
+      [[Button => "Save Output", -command => [\&saveOutput]],
+       [Button => "Quit",        -command => [\&exit]]
+       ])->pack(-side => 'left');
+
+$MibMenuBut = $MenuFrame->Menubutton(-text => "Mib",
+				      -menuitems =>
+      [[Button => "Load a New Mib File", -command => [\&loadNewMibFile]],
+       ])->pack(-side => 'left');
+
+$OptMenuBut = $MenuFrame->Menubutton(-text => "Options",
+				     -menuitems =>
+      [[Cascade => "~Display"]
+       ])->pack(-side => 'left');
+        
+$tmp = $OptMenuBut->cget(-menu);
+$OptMenuWidgets = $tmp->entrycget("Display", -menu);
+
+# $OptMenuBut->cascade(-label => 'sub');
+#$sub1 = $OptMenuBut->Optionmenu(-text => 'options', -options => ['hehe',["hi", "there"]]);
+#$sub1->pack();
+# $OptMenuBut->entryconfigure('sub', -menu => $sub1);
+
 $hlist=$top->Scrolled(qw(HList -itemtype imagetext -browsecmd main::showInfo
 			 -command main::showChildren -width 80 -height 15));
 $hlist->pack(-side => 'top', -expand => 1, -fill => 'both');
@@ -36,23 +65,19 @@ $mibOID->pack(-side => 'left');
 $mibTextOID = $sFrame->Label(-text => '');
 $mibTextOID->pack(-side => 'right');
 
-my $tmpFrame=$top->Frame(-relief => 'raised', -borderwidth => $tmpbd);
-$tmpFrame->pack(-side => 'top', -fill =>'x');
-my $f1 = $tmpFrame->Frame(-relief => 'raised', -borderwidth => $tmpbd);
-$f1->pack(-side => 'left', -fill => 'y');
-my $f2 = $tmpFrame->Frame();
-$f2->pack(-side => 'left', -fill => 'both');
+$dispFrame=$top->Frame(-relief => 'raised', -borderwidth => $tmpbd);
+#$dispFrame->pack(-side => 'top', -fill =>'x');
+$dispFrame->pack(-side => 'top', -fill =>'x');
+# my $f1 = $dispFrame->Frame(-relief => 'raised', -borderwidth => $tmpbd);
+# $f1->pack(-side => 'left', -fill => 'y');
+# my $f2 = $dispFrame->Frame();
+# $f2->pack(-side => 'left', -fill => 'both');
 for($i=0;$i<= $#displayInfo;$i++) {
-    $f1->Label(-text => $displayInfo[$i], 
-	       -anchor => 'w', -borderwidth => $tmpbd)
-	->pack(-fill => 'x', -side => 'top');
-    $dpyInfo[$i] = "";
-    $f2->Entry(-textvariable => \$dpyInfo[$i], -width => 80, 
-	       -relief => 'flat', -borderwidth => $tmpbd)
-	->pack(-fill => 'x', -side => 'top');
+    createRow($i);
+    optionalWidget($i,$OptMenuWidgets);
 }
     
-$tmpFrame=$top->Frame(-relief => 'raised', -borderwidth => $tmpbd);
+my $tmpFrame=$top->Frame(-relief => 'raised', -borderwidth => $tmpbd);
 $tmpFrame->pack(-side => 'top', -fill =>'x');
 $tmpFrame->Label(-text => 'Description:', -anchor => 'w')->pack(-side => 'top',
 								-fill => 'x');
@@ -93,10 +118,10 @@ MainLoop();
 
 sub snmpsetup {
     my $oid = $hlist->selectionGet();
-    my $tag = SNMP::translateObj($oid,0);
+    my $tag = SNMP::translateObj($oid);
     my $sess = new SNMP::Session(DestHost => $host, Community => $community,
-				 UseLongNames => 1);
-    my $var = new SNMP::Varbind([$tag]);
+				 UseLongNames => 1, Timeout => 5000000);
+    my $var = new SNMP::Varbind([$oid]);
     initText();
     return ($oid, $sess, $var);
 }
@@ -143,7 +168,9 @@ sub snmpgetnext {
     (my $oid, my $sess, my $var) = snmpsetup();
     $status->configure(-text => "get next:  $host $community $oid");
     $top->update();
+#    print "var: " . $var->tag . "\n";
     my $val = $sess->getnext($var);
+#    print "var: " . $var->tag . "\n";
     if ($sess->{ErrorStr}) {
 	$status->configure(-text => $sess->{ErrorStr});
     } else {
@@ -227,7 +254,7 @@ sub updateGraph() {
     $status->configure(-text => "collecting data:  $host $community $graphoid");
     my $oid = $graphoid;
     my $tag = SNMP::translateObj($graphoid,0);
-    my $var = new SNMP::Varbind([$tag]);
+    my $var = new SNMP::Varbind([$oid]);
     $graphsess->{ErrorStr} = "";    
     while (!$graphsess->{ErrorStr}) {
 	my $val = $graphsess->getnext($var);
@@ -336,4 +363,44 @@ sub showChildren {
 	}
     }
     $status->configure(-text => "");
+}
+
+sub optionalWidget {
+    my $num = shift;
+    my $menu = shift;
+    my $state = 1;
+    $menu->checkbutton(-label => $displayInfo[$num], 
+		       -variable => \$state,
+		       -command => [\&toggleWidgetShown, $num]);
+}
+
+sub createRow {
+    my $i = shift;
+    $dispFrame->Label(-text => $displayInfo[$i], 
+		     -anchor => 'w', -borderwidth => $tmpbd)
+	->grid(-column => 0, -row => $i, -sticky => 'w');
+    $dpyInfo[$i] = "" if (!defined($dpyInfo[$i]));
+    my $ent = $dispFrame->Entry(-textvariable => \$dpyInfo[$i], -width => 80, 
+		      -relief => 'flat', -borderwidth => $tmpbd);
+    $ent->grid(-column => 1, -row => $i, -sticky => 'w');
+}
+
+sub toggleWidgetShown {
+    my $self = shift;
+    my @widgets = $dispFrame->gridSlaves(-row => $self);
+    my $i;
+    if ($#widgets >= 0) {
+	for($i = 0; $i <= $#widgets; $i++) {
+	    $widgets[$i]->gridForget;
+	    $widgets[$i]->destroy();
+	}
+    } else {
+	createRow($self);
+    }
+}
+
+sub loadNewMibFile {
+    my $sel = $top->FileSelect();
+    my $file = $sel->Show();
+    SNMP::addMibFiles($file);
 }
