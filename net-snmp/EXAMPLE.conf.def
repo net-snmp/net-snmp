@@ -359,14 +359,28 @@ syscontact Me <me@somewhere.org>
 # - allow read/write access to everything only from the local host
 #   (community = private).
 
+#
+# To allow write access to the 'system' subgroup from the local network
+#  with the community string "sysadmin":
+#
+#	-  amend the "source" address in the com2sec section
+#		to match your local network address
+#	-  uncomment the "access admin" line below
+#
+# You are also strongly advised to change the community string
+#   to something other than "sysadmin"
+
 #       sec.name  source          community
 com2sec local     localhost       private
 com2sec mynet     192.168.17.0/24 public
+com2sec myadmin   192.168.17.0/24 sysadmin
 com2sec public    default         public
 
 #             sec.model  sec.name
 group mygroup v1         mynet
 group mygroup v2c        mynet
+group admin   v1         myadmin
+group admin   v2c        myadmin
 group local   any        local
 group public  any        public
 
@@ -375,7 +389,8 @@ view all    included  .1                               80
 view system included  system                           fe
 view mib2   included  .iso.org.dod.internet.mgmt.mib-2 fc
 
-#              context sec.model sec.level prefix read   write not
-access mygroup ""      any       noauth    0      mib2   none  none
-access public  ""      any       noauth    0      system none  none
-access local   ""      any       noauth    0      all    all   all
+#              context sec.model sec.level prefix read   write  not
+access mygroup ""      any       noauth    0      mib2   none   none
+#access admin  ""      any       noauth    0      mib2   system none
+access public  ""      any       noauth    0      system none   none
+access local   ""      any       noauth    0      all    all    all

@@ -963,10 +963,14 @@ I cannot set any variables in the MIB.
   general contact information.
     
   With the distribution as shipped, the community name "private" must
-  be used to set these values.  This can be changed by setting the
-  second community string (via the snmpd.conf entry "community 2 newstring").
-  Note that the (first) community string "public" can *not* be used
-  to set variables.
+  be used to set these values, and this can only be done from the local
+  host (i.e. the same system that the agent is running on).
+    This can be changed using the access control commands, which appear
+  at the end of the example config file.  For example, to allow write
+  access to the 'system' group from the local subnet, with the community
+  string "sysadmin", follow the instructions at the end of this example file.
+
+    Note that the community string "public" can *not* be used to set variables.
   
 
 
