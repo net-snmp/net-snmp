@@ -1,10 +1,53 @@
 This file contains major changes in released revisions.  Please read
 the ChangeLog file for a more detailed listing of changes/bug fixes.
 
+*4.2.2*
+ Security Bug Fixes:
+    - A few security bugs have been found and fixed. No known exploits
+      have been released to date. However, users are encouraged to
+      upgrade to the 4.2.2 release as soon as possible.
+ 
+ Bug fixes:
+    - many misc bug fixes.
+    - misc documentation corrections.
+    - updated libtool to 1.4.  This fixes a couple of platforms (eg, NetBSD).
+
+ Ports:
+    - mibII support for win32
+    - It should compile and work on MacOS X (Darwin)
+    - udpTable supported on solaris.
+    - win32 borland compiler supported (see win32/config.h.borland)
+
+ New:
+    - tkmib supports SETs and saving of configuration data.
+    - snmpwalk detects out of order OIDs being returned from an agent.
+    - snmpset accepts the '=' sign for a datatype if the mib is
+      available to extract the datatype from instead.
+
+*4.2.1*
+ Administrative:
+    - The http://www.net-snmp.org/ web site and domain name is now active.
+    - Copyright statement for changes beyond 4.2 is now a true BSD license.
+      (see the COPYING file for details)
+
+ Major Bug fixes:
+    - AgentX master agent no longer crashes when a subagent disconnects.
+    - counter64 encoding fixed.
+    - oids with large numbers embedded in them should work properly (again).
+    - Fixed behavior of agent_check_and_process() and alarms.
+    - mib2c handles more variable types.
+    - traps/informs are sent properly from agentx subagents.
+    - many many more bug fixes have gone into this release.
+
+ New:
+    - The snmpconf configuration file editor can create snmptrapd.conf files.
+    - AgentX support is compiled in by default, but must be configured now.
+      (Add "master on" to your snmpd.conf file to enable agentx support)
+
 *4.2*
 
  Administrative:
-    - project services moved to http://sourceforge.net/projects/net-snmp.
+    - project services moved to http://www.net-snmp.org/project/
 
  Features:
     - Packets sequences are now shorter when possible, reducing packet sizes.

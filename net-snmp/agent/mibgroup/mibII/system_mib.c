@@ -90,7 +90,9 @@ void system_parse_config_sysloc(const char *token,
 {
   char tmpbuf[1024];
   
-  if (strlen(cptr) < sizeof(sysLocation)) {
+  if (strcmp(cptr,"\"\"") == 0) {
+      sysContact[0] = '\0';
+  } else if (strlen(cptr) < sizeof(sysLocation)) {
     strcpy(sysLocation,cptr);
   } else {
     sprintf(tmpbuf, "syslocation token too long (must be < %d):\n\t%s",
@@ -110,7 +112,9 @@ void system_parse_config_syscon(const char *token,
 {
   char tmpbuf[1024];
 
-  if (strlen(cptr) < sizeof(sysContact)) {
+  if (strcmp(cptr,"\"\"") == 0) {
+      sysContact[0] = '\0';
+  } else if (strlen(cptr) < sizeof(sysContact)) {
     strcpy(sysContact,cptr);
   } else {
     sprintf(tmpbuf, "syscontact token too long (must be < %d):\n\t%s",
@@ -177,6 +181,7 @@ void init_system_mib(void)
 #ifdef HAVE_UNAME
   strncpy(sysName,utsName.nodename,sizeof(sysName));
 #else
+#if HAVE_EXECV
   sprintf(extmp.command,"%s -n",UNAMEPROG);
   /* setup defaults */
   extmp.type = EXECPROC;
@@ -184,6 +189,9 @@ void init_system_mib(void)
   exec_command(&extmp);
   strncpy(sysName,extmp.output, sizeof(sysName));
   sysName[strlen(sysName)-1] = 0; /* chomp new line */
+#else
+  strcpy(sysName, "unknown" );
+#endif /* HAVE_EXECV */
 #endif /* HAVE_UNAME */
 #endif /* HAVE_GETHOSTNAME */
 
