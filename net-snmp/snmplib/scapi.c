@@ -600,15 +600,9 @@ sc_encrypt(const oid * privtype, size_t privtypelen,
         properlength_iv = BYTESIZE(SNMP_TRANS_PRIVLEN_1DES_IV);
         pad_size = properlength;
 #ifdef HAVE_AES
-    } else if (ISTRANSFORM(privtype, AES128Priv)) {
-        properlength = BYTESIZE(SNMP_TRANS_PRIVLEN_AES128);
-        properlength_iv = BYTESIZE(SNMP_TRANS_PRIVLEN_AES128_IV);
-    } else if (ISTRANSFORM(privtype, AES192Priv)) {
-        properlength = BYTESIZE(SNMP_TRANS_PRIVLEN_AES192);
-        properlength_iv = BYTESIZE(SNMP_TRANS_PRIVLEN_AES192_IV);
-    } else if (ISTRANSFORM(privtype, AES256Priv)) {
-        properlength = BYTESIZE(SNMP_TRANS_PRIVLEN_AES256);
-        properlength_iv = BYTESIZE(SNMP_TRANS_PRIVLEN_AES256_IV);
+    } else if (ISTRANSFORM(privtype, AESPriv)) {
+        properlength = BYTESIZE(SNMP_TRANS_PRIVLEN_AES);
+        properlength_iv = BYTESIZE(SNMP_TRANS_PRIVLEN_AES_IV);
 #endif
     } else {
         QUITFUN(SNMPERR_GENERR, sc_encrypt_quit);
@@ -658,9 +652,7 @@ sc_encrypt(const oid * privtype, size_t privtypelen,
         }
     }
 #ifdef HAVE_AES
-    else if (ISTRANSFORM(privtype, AES128Priv) ||
-             ISTRANSFORM(privtype, AES192Priv) ||
-             ISTRANSFORM(privtype, AES256Priv)) {
+    else if (ISTRANSFORM(privtype, AESPriv)) {
         (void) AES_set_encrypt_key(key, properlength*8, &aes_key);
 
         memcpy(my_iv, iv, ivlen);
@@ -798,15 +790,9 @@ sc_decrypt(const oid * privtype, size_t privtypelen,
         properlength = BYTESIZE(SNMP_TRANS_PRIVLEN_1DES);
         properlength_iv = BYTESIZE(SNMP_TRANS_PRIVLEN_1DES_IV);
 #ifdef HAVE_AES
-    } else if (ISTRANSFORM(privtype, AES128Priv)) {
-        properlength = BYTESIZE(SNMP_TRANS_PRIVLEN_AES128);
-        properlength_iv = BYTESIZE(SNMP_TRANS_PRIVLEN_AES128_IV);
-    } else if (ISTRANSFORM(privtype, AES192Priv)) {
-        properlength = BYTESIZE(SNMP_TRANS_PRIVLEN_AES192);
-        properlength_iv = BYTESIZE(SNMP_TRANS_PRIVLEN_AES192_IV);
-    } else if (ISTRANSFORM(privtype, AES256Priv)) {
-        properlength = BYTESIZE(SNMP_TRANS_PRIVLEN_AES256);
-        properlength_iv = BYTESIZE(SNMP_TRANS_PRIVLEN_AES256_IV);
+    } else if (ISTRANSFORM(privtype, AESPriv)) {
+        properlength = BYTESIZE(SNMP_TRANS_PRIVLEN_AES);
+        properlength_iv = BYTESIZE(SNMP_TRANS_PRIVLEN_AES_IV);
 #endif
     } else {
         QUITFUN(SNMPERR_GENERR, sc_decrypt_quit);
@@ -827,9 +813,7 @@ sc_decrypt(const oid * privtype, size_t privtypelen,
         *ptlen = ctlen;
     }
 #ifdef HAVE_AES
-    else if (ISTRANSFORM(privtype, AES128Priv) ||
-             ISTRANSFORM(privtype, AES192Priv) ||
-             ISTRANSFORM(privtype, AES256Priv)) {
+    else if (ISTRANSFORM(privtype, AESPriv)) {
         (void) AES_set_encrypt_key(key, properlength*8, &aes_key);
 
         memcpy(my_iv, iv, ivlen);
