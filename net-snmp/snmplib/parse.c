@@ -352,6 +352,8 @@ static void free_node (struct node *);
 static void build_translation_table (void);
 static void init_tree_roots (void);
 static void merge_anon_children (struct tree *, struct tree *);
+static void unlink_tbucket(struct tree *);
+static void unlink_tree(struct tree *);
 static int getoid (FILE *, struct subid_s *, int);
 static struct node *parse_objectid (FILE *, char *);
 static int get_tc (const char *, int, int *, struct enum_list **, struct range_list **, char **);
@@ -582,6 +584,32 @@ alloc_node(int modid)
     return np;
 }
 
+static void unlink_tbucket(struct tree *tp)
+{
+    int hash = NBUCKET(name_hash(tp->label));
+    struct tree *otp = NULL, *ntp = tbuckets[hash];
+
+    while (ntp && ntp != tp) {
+	otp = ntp; ntp = ntp->next;
+    }
+    if (!ntp) snmp_log(LOG_EMERG, "Can't find %s in tbuckets\n", tp->label);
+    else if (otp) otp->next = ntp->next;
+    else tbuckets[hash] = tp->next;
+}
+
+static void unlink_tree(struct tree *tp)
+{
+    struct tree *otp = NULL, *ntp = tp->parent->child_list;
+
+    while (ntp && ntp != tp) {
+	otp = ntp; ntp = ntp->next_peer;
+    }
+    if (!ntp) snmp_log(LOG_EMERG, "Can't find %s in %s's children\n",
+	tp->label, tp->parent->label);
+    else if (otp) otp->next_peer = ntp->next_peer;
+    else tp->parent->child_list = tp->next_peer;
+}
+
 static void
 free_partial_tree(struct tree *tp, int keep_label)
 {
@@ -599,18 +627,20 @@ free_partial_tree(struct tree *tp, int keep_label)
     SNMP_FREE(tp->description);
 }
 
+/*
+ * free a tree node. Note: the node must already have been unlinked
+ * from the tree when calling this routine
+ */
 static void
 free_tree(struct tree *Tree)
 {
-    if (Tree == NULL)
-    {
+    if (!Tree)
         return;
-    }
 
+    unlink_tbucket(Tree);
+    free_partial_tree (Tree, FALSE);
     if (Tree->number_modules > 1 )
         free((char*)Tree->module_list);
-
-    free_partial_tree (Tree, FALSE);
     free ((char*)Tree);
 }
 
@@ -1014,8 +1044,8 @@ merge_anon_children(struct tree *tp1,
                     child1->child_list = NULL;
                     previous = child1;		/* Finished with 'child1' */
                     child1 = child1->next_peer;
-                    /* free_tree( previous ); */
-                    break;
+                    free_tree( previous );
+                    goto next;
                 }
 
 		else if ( !strncmp( child2->label, ANON, ANON_LEN)) {
@@ -1025,17 +1055,17 @@ merge_anon_children(struct tree *tp1,
                          previous->next_peer = child2->next_peer;
                     else
                          tp2->child_list = child2->next_peer;
-                    /* free_tree(child2); */
+                    free_tree(child2);
 
                     previous = child1;		/* Move 'child1' to 'tp2' */
                     child1 = child1->next_peer;
                     previous->next_peer = tp2->child_list;
                     tp2->child_list = previous;
                     for ( previous = tp2->child_list ;
-                          previous->next_peer ;
+                          previous ;
                           previous = previous->next_peer )
                                 previous->parent = tp2;
-                    break;
+                    goto next;
                 }
 		else if ( !label_compare( child1->label, child2->label) ) {
 	            if (ds_get_int(DS_LIBRARY_ID, DS_LIB_MIB_WARNINGS))
@@ -1060,15 +1090,15 @@ merge_anon_children(struct tree *tp1,
                     else
                         child2->child_list = child1->child_list;
                     for ( previous = child1->child_list ;
-                          previous->next_peer ;
+                          previous ;
                           previous = previous->next_peer )
-                                  previous->parent = tp2;
+                                  previous->parent = child2;
                     child1->child_list = NULL;
 
                     previous = child1;		/* Finished with 'child1' */
                     child1 = child1->next_peer;
-                    /* free_tree( previous ); */
-                    break;
+                    free_tree( previous );
+                    goto next;
                 }
             }
         }
@@ -1077,11 +1107,12 @@ merge_anon_children(struct tree *tp1,
 		 */
         if ( child1 ) {
             previous = child1;
-            child1->parent = tp2;
             child1 = child1->next_peer;
+            previous->parent = tp2;
             previous->next_peer = tp2->child_list;
             tp2->child_list = previous;
         }
+next:
     }
 }
 
@@ -1128,6 +1159,7 @@ do_subtree(struct tree *root,
      * Take each element in the child list and place it into the tree.
      */
     for(np = child_list; np; np = np->next){
+	anon_tp = NULL;
         tp = root->child_list;
         while (tp)
             if (tp->subid == np->subid) break;
@@ -1183,27 +1215,58 @@ do_subtree(struct tree *root,
 			 *  so merge it with the existing one.
 			 */
                 merge_anon_children( tp, anon_tp );
+
+		/* unlink and destroy tp */
+		unlink_tree(tp);
+		unlink_tbucket(tp);
+		free(tp);
             }
             else if (!strncmp( anon_tp->label, ANON, ANON_LEN)) {
+		struct tree *ntp;
 			/*
 			 * The old node was anonymous,
 			 *  so merge it with the existing one,
 			 *  and fill in the full information.
 			 */
                 merge_anon_children( anon_tp, tp );
+
+		/* unlink anon_tp from the hash */
+		unlink_tbucket(anon_tp);
+
+		/* get rid of old contents of anon_tp */
                 free_partial_tree(anon_tp, FALSE);
-                anon_tp->label = tp->label;  tp->label=NULL;
-                anon_tp->child_list = tp->child_list;  tp->child_list=NULL;
+
+		/* put in the current information */
+                anon_tp->label = tp->label;
+                anon_tp->child_list = tp->child_list;
                 anon_tp->modid = tp->modid;
                 anon_tp->tc_index = tp->tc_index;
                 anon_tp->type = tp->type;
-                anon_tp->enums = tp->enums;  tp->enums=NULL;
-                anon_tp->indexes = tp->indexes;  tp->indexes=NULL;
-                anon_tp->ranges = tp->ranges;  tp->ranges=NULL;
-                anon_tp->hint = tp->hint;  tp->hint=NULL;
-                anon_tp->units = tp->units;  tp->units = NULL;
-                anon_tp->description = tp->description;  tp->description=NULL;
+                anon_tp->enums = tp->enums;
+                anon_tp->indexes = tp->indexes;
+                anon_tp->ranges = tp->ranges;
+                anon_tp->hint = tp->hint;
+                anon_tp->units = tp->units;
+                anon_tp->description = tp->description;
+		anon_tp->parent = tp->parent;
                 set_function(anon_tp);
+
+		/* update parent pointer in moved children */
+		ntp = anon_tp->child_list;
+		while (ntp) {
+		    ntp->parent = anon_tp;
+		    ntp = ntp->next_peer;
+		}
+
+		/* hash in anon_tp in its new place */
+		hash = NBUCKET(name_hash(anon_tp->label));
+		anon_tp->next = tbuckets[hash];
+		tbuckets[hash] = anon_tp;
+
+		/* unlink and destroy tp */
+		unlink_tbucket(tp);
+		unlink_tree(tp);
+		free(tp);
             }
             else {
                 /* Uh?  One of these two should have been anonymous! */
@@ -1212,13 +1275,6 @@ do_subtree(struct tree *root,
                              "Warning: expected anonymous node (either %s or %s) in %s\n",
                              tp->label, anon_tp->label, File);
             }
-		/*
-		 * The new node is no longer needed
-		 *  so unlink and discard it.
-		 */
-            root->child_list = tp->next_peer;
-            tbuckets[hash] = tp->next;
-            free_tree( tp );
             anon_tp = NULL;
         }
     }
