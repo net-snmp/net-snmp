@@ -249,6 +249,37 @@ struct tok tokens[] = {
     { NULL }
 };
 
+struct module_compatability *module_map_head;
+struct module_compatability module_map[] = {
+	{"RFC1065-SMI",	"RFC1155-SMI",	NULL,	0},
+	{"RFC1066-MIB",	"RFC1156-MIB",	NULL,	0},
+				/* 'mib' -> 'mib-2' */
+	{"RFC1156-MIB",	"RFC1158-MIB",	NULL,	0},
+				/* 'snmpEnableAuthTraps' -> 'snmpEnableAuthenTraps' */
+	{"RFC1158-MIB",	"RFC1213-MIB",	NULL,	0},
+				/* 'nullOID' -> 'zeroDotZero' */
+	{"RFC1155-SMI",	"SNMPv2-SMI",	NULL,	0},
+	{"RFC1213-MIB",	"SNMPv2-SMI",	"mib-2", 0},
+	{"RFC1213-MIB",	"SNMPv2-MIB",	"sys",	3},
+	{"RFC1213-MIB",	"IF-MIB",	"if",	2},
+	{"RFC1213-MIB",	"IP-MIB",	"ip",	2},
+	{"RFC1213-MIB",	"IP-MIB",	"icmp",	4},
+	{"RFC1213-MIB",	"TCP-MIB",	"tcp",	3},
+	{"RFC1213-MIB",	"UDP-MIB",	"udp",	3},
+	{"RFC1213-MIB",	"SNMPv2-SMI",	"tranmission", 0},
+	{"RFC1213-MIB",	"SNMPv2-MIB",	"snmp",	4},
+	{"RFC1271-MIB",	"RMON-MIB",	NULL,	0},
+	{"RFC1286-MIB",	"SOURCE-ROUTING-MIB",	"dot1dSr", 7},
+	{"RFC1286-MIB",	"BRIDGE-MIB",	NULL,	0},
+	{"RFC1316-MIB",	"CHARACTER-MIB", NULL,	0},
+};
+#define MODULE_NOT_FOUND	0
+#define MODULE_LOADED_OK	1
+#define MODULE_ALREADY_LOADED	2
+/* #define MODULE_LOAD_FAILED	3 	*/
+#define MODULE_LOAD_FAILED	MODULE_NOT_FOUND
+
+
 #define HASHSIZE        32
 #define BUCKET(x)       (x & (HASHSIZE-1))
 
@@ -305,6 +336,8 @@ static struct node *parse_moduleIdentity __P((FILE *, char *));
 static        void  parse_imports __P((FILE *));
 static struct node *parse __P((FILE *, struct node *));
 struct tree *find_node __P((char *, struct tree*)); /* backwards compatability */
+static void read_module_replacements __P((char *));
+static void read_import_replacements __P((char *, char *));
 
        int  which_module __P((char *));		/* used by 'mib.c' */
 struct tree *find_tree_node __P((char *, int));	/* used by mib.c */
@@ -330,7 +363,8 @@ void
 init_mib_internals __P((void))
 {
     register struct tok *tp;
-    register int        b;
+    register int        b, i;
+    int			max_modc;
 
 	/*
 	 * Set up hash list of pre-defined tokens
@@ -347,6 +381,13 @@ init_mib_internals __P((void))
 	/*
 	 * Initialise other internal structures
 	 */
+
+    max_modc = sizeof(module_map)/sizeof(struct module_compatability);
+    for ( i=0 ; i < max_modc-1 ; ++i )
+	module_map[i].next = &(module_map[i+1]);
+    module_map[max_modc].next = NULL;
+    module_map_head = module_map;
+
     memset(nbuckets, 0, sizeof(nbuckets));
     memset(tbuckets, 0, sizeof(tbuckets));
     memset(tclist, 0, MAXTC * sizeof(struct tc));
@@ -1863,7 +1904,7 @@ parse_imports(fp)
     struct module *mp;
 
     int import_count=0;		/* Total number of imported descriptors */
-    int i=0;			/* index of first import from each module */
+    int i=0, old_i;		/* index of first import from each module */
 
     type = get_token(fp, token, MAXTOKEN);
 
@@ -1886,7 +1927,7 @@ parse_imports(fp)
             }
 	    this_module = which_module(token);
 
-	    for ( ; i<import_count ; ++i)
+	    for ( old_i=i ; i<import_count ; ++i)
 		import_list[i].modid = this_module;
 
 	    old_current_module = current_module;	/* Save state */
@@ -1899,7 +1940,11 @@ parse_imports(fp)
 		/*
 		 * Recursively read any pre-requisite modules
 		 */
-	    (void) read_module(token);
+	    if  (read_module_internal(token) == MODULE_NOT_FOUND ) {
+		for ( ; old_i<import_count ; ++old_i ) {
+		    read_import_replacements( token, import_list[old_i].label);
+		}
+	    }
 
 	    current_module = old_current_module;	/* Restore state */
 	    last = old_last;
@@ -1971,12 +2016,91 @@ module_name ( modid )
 }
 
 /*
+ *  Backwards compatability
+ *  Read newer modules that replace the one specified:-
+ *	either all of them (read_module_replacements),
+ *	or those relating to a specified identifier (read_import_replacements)
+ *	plus an interface to add new replacement requirements
+ */
+void
+add_module_replacement( old, new, tag, len)
+    char *old;
+    char *new;
+    char *tag;
+    int len;
+{
+    struct module_compatability *mcp;
+
+    mcp =  Malloc(sizeof( struct module_compatability));
+
+    mcp->old_module = Strdup( old );
+    mcp->new_module = Strdup( new );
+    mcp->tag	    = Strdup( tag );
+    mcp->tag_len = len;
+
+    mcp->next    = module_map_head;
+    module_map_head = mcp;
+}
+
+static void
+read_module_replacements( name )
+    char *name;
+{
+    struct module_compatability *mcp;
+
+    for ( mcp=module_map_head ; mcp; mcp=mcp->next ) {
+      if ( !strcmp( mcp->old_module, name )) {
+	if (mib_warnings)
+	    fprintf (stderr, "Loading replacement module %s\n", mcp->new_module);
+	(void)read_module( mcp->new_module );
+      }
+    }
+}
+
+static void
+read_import_replacements( module_name, node_identifier )
+    char *module_name;
+    char *node_identifier;
+{
+    struct module_compatability *mcp;
+
+	/*
+	 * Look for matches first
+	 */
+    for ( mcp=module_map_head ; mcp; mcp=mcp->next ) {
+      if ( !strcmp( mcp->old_module, module_name )) {
+
+	if (	/* exact match */
+	  	  ( mcp->tag_len==0 &&
+		    !strcmp( mcp->tag, node_identifier )) ||
+		/* prefix match */
+	          ( mcp->tag_len!=0 && 
+		    !strncmp( mcp->tag, node_identifier, mcp->tag_len ))
+	   ) {
+
+	    if (mib_warnings)
+	        fprintf (stderr, "Loading replacement module %s (for %s)\n",
+			mcp->new_module, node_identifier);
+	    (void)read_module( mcp->new_module );
+	    return;	/* finished! */
+        }
+      }
+    }
+
+	/*
+	 * If no exact match, load everything releant
+	 */
+    read_module_replacements( module_name );
+}
+
+
+/*
  *  Read in the named module
  *	Returns the root of the whole tree
  *	(by analogy with 'read_mib')
  */
-struct tree *
-read_module (name )
+int
+read_module_internal (name )
     char *name;
 {
     struct module *mp;
@@ -1993,11 +2117,11 @@ read_module (name )
 	if ( !strcmp(mp->name, name)) {
 	    if ( mp->no_imports != -1 ) {
 		DEBUGP1("Module %s already loaded\n", name);
-		return tree_head;
+		return MODULE_ALREADY_LOADED;
 	    }
 	    if ((fp = fopen(mp->file, "r")) == NULL) {
 		perror(mp->file);
-		return tree_head;
+		return MODULE_LOAD_FAILED;
 	    }
 	    mp->no_imports=0;		/* Note that we've read the file */
 	    strcpy(File, mp->file);
@@ -2042,7 +2166,7 @@ read_module (name )
 		 *   add them to the list of orphans
 		 */
 	    
-	    if (!orphan_nodes) return tree_head;
+	    if (!orphan_nodes) return MODULE_LOADED_OK;
 	    for ( np = orphan_nodes ; np->next ; np = np->next )
 		;	/* find the end of the orphan list */
 	    for (i = 0; i < NHASHSIZE; i++)
@@ -2058,10 +2182,19 @@ read_module (name )
 			;
 		}
 
-	    return tree_head;
+	    return MODULE_LOADED_OK;
 	}
 
     fprintf(stderr, "Module %s not found\n", name);
+    return MODULE_NOT_FOUND;
+}
+
+struct tree *
+read_module(name )
+    char *name;
+{
+    if ( read_module_internal(name) == MODULE_NOT_FOUND )
+	read_module_replacements( name );
     return tree_head;
 }
 
