@@ -253,7 +253,7 @@ var_smux(struct variable *vp,
 
 	/* search the active registration list */
 	for (rptr = ActiveRegs; rptr; rptr = rptr->sr_next) {
-		if (!compare_tree(name, *length, rptr->sr_name,
+		if (!compare_tree(vp->name, vp->namelen, rptr->sr_name,
 		    rptr->sr_name_len))
 			break;
 	}
