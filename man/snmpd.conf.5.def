@@ -451,23 +451,38 @@ In addition to the arguments listed there, the special argument
 instead of unacknowledged traps (this requires that you also specify a 
 version number of v2c or v3 as well).
 .SH "PROXY SUPPORT"
-.IP "proxy [SNMPCMD ARGS] HOST OID [REMOTEOID]"
-.B Warning:
-This functionality is at beta level support.
+.IP "proxy [-Cn CONTEXTNAME] [SNMPCMD ARGS] HOST OID [REMOTEOID]"
 .IP
 This token specifies that any incoming requests under OID should be
-proxied on to HOST instead.  Optionally, relocate the local OID tree
-to the new location at the REMOTEOID.  To authenticate to HOST you
-should use the appropriate set of
+proxied on to another HOST instead.  If a CONTEXTNAME is specified, it
+assigns the proxied tree to a particular context name within the local
+agent.  This is the proper way to query multiple agents through a
+single proxy.  Assign each remote agent to a different context name.
+Then you can use "snmpwalk -n contextname1" to walk one remote proxied
+agent and "snmpwalk -n contextname2" to walk another, assuming you are
+using SNMPv3 to talk to the proxy (snmpv1 and snmpv2c context mappings
+aren't currently supported but might be in the future).  Optionally,
+relocate the local OID tree to the new location at the REMOTEOID.  To
+authenticate to HOST you should use the appropriate set of
 .I "SNMPCMD ARGS."
 See the
 .I snmpcmd(1)
 manual page for details.
 .IP
 Examples:
+.RS
 .IP
+.nf
+# assigns the entire mib tree on remotehost1 to the context of the
+# same name:
+proxy -Cn remotehost1 -v 1 -c public remotehost1 .1.3
+# ditto, but for remotehost 2
+proxy -Cn remotehost2 -v 1 -c public remotehost2 .1.3
+# proxies only the ucdavis enterprises tree to the remote host using snmpv1
 proxy -v 1 -c public remotehost .1.3.6.1.4.1.2021
-.IP
+# uses v3 to access remotehost and converts the remote .1.3.6.1.2.1.1
+# oid to local .1.3.6.1.3.10 oid (another way to access mulitple hosts
+# without using contexts)
 proxy -v 3 -l noAuthNoPriv -u user remotehost .1.3.6.1.3.10 .1.3.6.1.2.1.1
 .SH "PASS-THROUGH CONTROL"
 .IP "pass MIBOID EXEC"
