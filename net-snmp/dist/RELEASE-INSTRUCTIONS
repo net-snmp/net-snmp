@@ -35,7 +35,10 @@ TESTING:
       modules.  I frequently find some in the lesser developer-used
       modules, like Rmon, etc.  Something like:
 
-      ./configure  '--with-mib-modules=host examples examples/example testhandler smux Rmon disman/event-mib' '--with-transports=UDPIPv6 TCPIPv6 IPX' --enable-embedded-perl --enable-shared
+      ./configure  '--with-mib-modules=host examples examples/example    \
+                              testhandler smux Rmon disman/event-mib'    \
+                   '--with-transports=UDPIPv6 TCPIPv6 IPX'               \
+                   --enable-embedded-perl --enable-shared
 
   1) Change the libtool version information in Makefile.top.  This may
      could be automated in the future, but libtool doesn't like you to
@@ -100,7 +103,9 @@ RELEASING:
            Don't do what I do all the time and accidentally include
            modules that don't exist in the source tree.  I suggest:
 
-           ./configure  '--with-mib-modules=host examples examples/example testhandler smux Rmon disman/event-mib' '--with-transports=UDPIPv6 TCPIPv6 IPX'
+           ./configure  '--with-transports=UDPIPv6 TCPIPv6 IPX'            \
+                        '--with-mib-modules=host examples examples/example \
+                                    testhandler smux Rmon disman/event-mib' 
 
 
 	b) run "make distdepend"
@@ -175,7 +180,7 @@ RELEASING:
         d) Removes some non-distributed files.  It also touches the
            configure files in the correct order so autoconf isn't
            auto-run by people who have extracted the tar file.
-        d) Runs tar xzf ...
+        e) Runs tar xzf ...
 
   7) At this point the sources are tagged.  If you need to make any
      changes, do so *before* you publish the tar ball to the web site.
@@ -243,11 +248,13 @@ CREATING BINARY DISTRIBUTIONS
        disman/event-mib
        smux
 
-  3) use --with-defaults --with-syscontact="Unknown" --with-syslocation="Unknown"
+  3) use --with-defaults --with-syscontact="Unknown" 
+     --with-syslocation="Unknown"
 
   4) when running make install, do it like:
 
-       make install prefix=/some/path/to/home/ARCH/usr/local exec_prefix=/some/path/to/home/ARCH/usr/local
+       make install prefix=/some/path/to/home/ARCH/usr/local \
+            exec_prefix=/some/path/to/home/ARCH/usr/local
     
   5) Tar it up:
 
