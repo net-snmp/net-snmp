@@ -91,7 +91,7 @@ Copy win32\lib\%progVer%\*.*   %INSTALL_BASE%\lib > NUL:
 echo Copying header files to %INSTALL_BASE%\include
 xcopy /E /Y include\net-snmp\*.h %INSTALL_BASE%\include\net-snmp > NUL:
 xcopy /E /Y include\ucd-snmp\*.h %INSTALL_BASE%\include\ucd-snmp > NUL:
-xcopy /E /Y win32\net-snmp\*.h %INSTALL_BASE%\include\net-snmp > NUL:
+xcopy /E /Y win32\net-snmp\*.* %INSTALL_BASE%\include\net-snmp > NUL:
 
 REM
 REM If built with OpenSSL, we need the DLL library, too.

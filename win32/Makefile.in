@@ -427,6 +427,7 @@ install ::
         @-mkdir $(PREFIX_DOS)\temp > NUL:
         @-mkdir $(PREFIX_DOS)\include > NUL:
         @-mkdir $(PREFIX_DOS)\include\net-snmp > NUL:
+        @-mkdir $(PREFIX_DOS)\include\net-snmp\agent > NUL:
 
 	@-echo Copying MIB files to $(PREFIX_DOS)\share\snmp\mibs
         @-Copy mibs\*.txt $(PREFIX_DOS)\share\snmp\mibs > NUL:
@@ -442,6 +443,7 @@ install ::
 
 	@-echo Copying header files to $(PREFIX_DOS)\include
         @-copy win32\net-snmp\*.h $(PREFIX_DOS)\include\net-snmp > NUL:
+        @-copy win32\net-snmp\agent\*.h $(PREFIX_DOS)\include\net-snmp\agent > NUL:
 
 	@-echo Copying DLL files to $(PREFIX_DOS)
         @-Copy win32\bin\$(CFG)\*.dll $(PREFIX_DOS)\bin > NUL:
