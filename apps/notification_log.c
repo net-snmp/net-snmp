@@ -1,6 +1,10 @@
 #include <config.h>
-
+#if HAVE_NETINET_IN_H
 #include <netinet/in.h>
+#endif
+#if HAVE_NETDB_H
+#include <netdb.h>
+#endif
 
 #include "mibincl.h"
 #include "snmp_transport.h"
@@ -347,6 +351,7 @@ log_notification(struct hostent *host, struct snmp_pdu *pdu,
     if (transport &&
         transport->domain == snmpUDPDomain) {
         /* lame way to check for the udp domain */
+        /*  no, it is the correct way to do it -- jbpn */
         struct sockaddr_in *addr =
             (struct sockaddr_in *)pdu->transport_data;
         if (addr) {
