@@ -47,7 +47,9 @@
 #include "agent_trap.h"
 #include "snmp_debug.h"
 #include "mib_module_config.h"
+#ifdef USING_MIBII_SYSORTABLE_MODULE
 #include "mibII/sysORTable.h"
+#endif
 #include "system.h"
 
 
@@ -368,6 +370,7 @@ agentx_registration_callback(int majorID, int minorID, void *serverarg,
 }
 
 
+#ifdef USING_MIBII_SYSORTABLE_MODULE
 int
 agentx_sysOR_callback(int majorID, int minorID, void *serverarg,
                          void *clientarg) {
@@ -384,6 +387,7 @@ agentx_sysOR_callback(int majorID, int minorID, void *serverarg,
     return agentx_remove_agentcaps(agentx_ss,
 		    reg_parms->name, reg_parms->namelen);
 }
+#endif
 
 
 static int
@@ -461,12 +465,14 @@ subagent_pre_init( void )
     snmp_register_callback(SNMP_CALLBACK_APPLICATION,
                            SNMPD_CALLBACK_UNREGISTER_OID,
                            agentx_registration_callback, main_session);
+#ifdef USING_MIBII_SYSORTABLE_MODULE
     snmp_register_callback(SNMP_CALLBACK_APPLICATION,
                            SNMPD_CALLBACK_REG_SYSOR,
                            agentx_sysOR_callback, main_session);
     snmp_register_callback(SNMP_CALLBACK_APPLICATION,
                            SNMPD_CALLBACK_UNREG_SYSOR,
                            agentx_sysOR_callback, main_session);
+#endif
     DEBUGMSGTL(("agentx/subagent","initializing....  DONE\n"));
 }
 
