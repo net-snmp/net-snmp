@@ -271,13 +271,14 @@ ${context}_undo_cleanup( ${context}_rowreq_ctx *rowreq_ctx)
  * this commit will not fail.
  *
  * Should you need different behavior depending on which columns were
- * set, rowreq_ctx->set_flags will indicate which writeable columns were
+ * set, rowreq_ctx->column_set_flags will indicate which writeable columns were
  * set. The definitions for the FLAG_* bits can be found in
 @if $m2c_create_fewer_files != 1@
  * ${context}_oids.h.
 @else@
  * ${context}.h.
 @end@
+ * A new row will have the MFD_ROW_CREATED bit set in rowreq_flags.
  *
  * @param ${context}_rowreq_ctx
  *        Pointer to the users context.
@@ -299,8 +300,8 @@ ${context}_commit( ${context}_rowreq_ctx *rowreq_ctx)
     /*
      * save flags, then clear until we actually do something
      */
-    save_flags = rowreq_ctx->set_flags;
-    rowreq_ctx->set_flags = 0;
+    save_flags = rowreq_ctx->column_set_flags;
+    rowreq_ctx->column_set_flags = 0;
 
     /*
      * TODO:
@@ -319,7 +320,7 @@ ${context}_commit( ${context}_rowreq_ctx *rowreq_ctx)
             /*
              * set flag, in case we need to undo
              */
-            rowreq_ctx->set_flags |= FLAG_$node.uc;
+            rowreq_ctx->column_set_flags |= FLAG_$node.uc;
        }
     }
 
@@ -337,13 +338,14 @@ ${context}_commit( ${context}_rowreq_ctx *rowreq_ctx)
  * undo commit new values.
  *
  * Should you need different behavior depending on which columns were
- * set, rowreq_ctx->set_flags will indicate which writeable columns were
+ * set, rowreq_ctx->column_set_flags will indicate which writeable columns were
  * set. The definitions for the FLAG_* bits can be found in
 @if $m2c_create_fewer_files != 1@
  * ${context}_oids.h.
 @else@
  * ${context}.h.
 @end@
+ * A new row will have the MFD_ROW_CREATED bit set in rowreq_flags.
  *
  * @param ${context}_rowreq_ctx
  *        Pointer to the users context.
