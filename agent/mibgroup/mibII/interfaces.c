@@ -34,9 +34,12 @@
 #endif
 #if HAVE_SYS_SOCKET_H
 #include <sys/socket.h>
+#endif
+#if HAVE_SYS_STREAM_H
+#include <sys/stream.h>
+#endif
 #if HAVE_SYS_SOCKETVAR_H
 #include <sys/socketvar.h>
-#endif
 #endif
 
 #if TIME_WITH_SYS_TIME
@@ -69,9 +72,6 @@
 #endif
 #ifdef _I_DEFINED_KERNEL
 #undef _KERNEL
-#endif
-#if HAVE_SYS_STREAM_H
-#include <sys/stream.h>
 #endif
 #if HAVE_NET_ROUTE_H
 #include <net/route.h>
