@@ -72,6 +72,7 @@ SOFTWARE.
 #include "int64.h"
 #include "system.h"
 #include "read_config.h"
+#include "snmp_debug.h"
 
 static void sprint_by_type (char *, struct variable_list *, struct enum_list *, char *, char *);
 static int parse_subtree (struct tree *, char *, oid *, int *);

@@ -337,30 +337,20 @@ int snmp_get_full_objid (void);
 void snmp_set_suffix_only (int);
 int snmp_get_suffix_only (void);
 int snmp_get_errno (void);
-void snmp_set_do_debugging (int);
-int snmp_get_do_debugging (void);
 int snmp_oid_compare (oid *, int, oid *, int);
 void init_snmp (void);
 void snmp_pdu_add_variable (struct snmp_pdu *, oid *, int, u_char, u_char *, int);
 int hex_to_binary (u_char *, u_char *);
 int ascii_to_binary (u_char *, u_char *);
 int snmp_add_var (struct snmp_pdu *, oid*, int, char, char *);
+
+/* provided for backwards compatability.  Don't use these functions.
+   See snmp_debug.h and snmp_debug.c instead.
+*/
 void DEBUGP(const char *, ...);
-void debugmsg(const char *token, const char *format, ...);
-void debugmsgtoken(const char *token, const char *format, ...);
-void debugmsg_oid(char *token, oid *theoid, int len);
 void DEBUGPOID(oid *, int);
-
-#define DEBUGMSG(x)    debugmsg x;
-#define DEBUGMSGT(x)   debugmsgtoken x; debugmsg x;
-#define DEBUGTRACE     DEBUGMSGT(("trace","%s(): %s, %d\n",__FUNCTION__,\
-                                 __FILE__,__LINE__));
-#define DEBUGMSGL(x)   DEBUGTRACE; debugmsg x;
-#define DEBUGMSGTL(x)  DEBUGTRACE; debugmsgtoken x; debugmsg x;
-#define DEBUGL(x)      DEBUGTRACE; debugmsg x;
-
-#define DEBUGMSGOID(x)    debugmsg_oid x;
-
+void snmp_set_do_debugging (int);
+int snmp_get_do_debugging (void);
 
 #ifdef CMU_COMPATIBLE
 extern int snmp_dump_packet;

@@ -59,6 +59,7 @@
 #include "parse.h"
 #include "system.h"
 #include "snmp_api.h"
+#include "snmp_debug.h"
 
 #include "read_config.h"
 

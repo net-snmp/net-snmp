@@ -60,6 +60,7 @@ SOFTWARE.
 #include "snmp_impl.h"
 #include "snmp_client.h"
 #include "mib.h"
+#include "snmp_debug.h"
 #include "../../snmplib/system.h"
 
 #include "netstat.h"
