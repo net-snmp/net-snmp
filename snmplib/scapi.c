@@ -49,7 +49,7 @@
 #include "snmp_impl.h"
 #include "system.h"
 #include "mib.h"
-
+#include "snmp_logging.h"
 #include "transform_oids.h"
 
 #ifdef USE_OPENSSL
