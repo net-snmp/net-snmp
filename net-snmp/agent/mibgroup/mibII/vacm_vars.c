@@ -119,6 +119,9 @@ init_vacm_vars (void)
 
 static struct vacm_securityEntry *securityFirst =0, *securityLast =0;
 
+#define EXAMPLE_NETWORK		"NETWORK"
+#define EXAMPLE_COMMUNITY	"COMMUNITY"
+
 void vacm_parse_security (char *token, 
 			  char *param)
 {
@@ -141,10 +144,18 @@ void vacm_parse_security (char *token,
 	config_perror("missing SOURCE parameter");
 	return;
     }
+    if ( !strncmp( source, EXAMPLE_NETWORK, strlen(EXAMPLE_NETWORK)) ) {
+	config_perror("Example config NETWORK not properly configured");
+	return;		/* or exit(1); */
+    }
     community = strtok(NULL, "\t\n ");
     if (!community) {
 	config_perror("missing COMMUNITY parameter");
 	return;
+    }
+    if ( !strncmp( community, EXAMPLE_COMMUNITY, strlen(EXAMPLE_COMMUNITY)) ) {
+	config_perror("Example config COMMUNITY not properly configured");
+	return;		/* or exit(1); */
     }
     srcIp   = (struct sockaddr_in*)&(se.sourceIp);
     srcMask = (struct sockaddr_in*)&(se.sourceMask);
