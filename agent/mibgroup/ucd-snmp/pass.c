@@ -251,7 +251,7 @@ u_char *var_extensible_pass(struct variable *vp,
       passthru->command[ sizeof(passthru->command)-1 ] = 0;
       DEBUGMSGTL(("ucd-snmp/pass", "pass-running:  %s\n",passthru->command));
       /* valid call.  Exec and get output */
-      if ((fd = get_exec_output(passthru))) { 
+      if ((fd = get_exec_output(passthru)) != -1) { 
         file = fdopen(fd,"r");
         if (fgets(buf,sizeof(buf),file) == NULL) {
 	  /* to enable creation*/

@@ -403,7 +403,7 @@ static long getswap(int rettype)
      I can't figure out how to read it out of the kernel directly
      -- Wes */
   strcpy(ex.command,"/usr/sbin/swapinfo -r");
-  if ((fd = get_exec_output(&ex))) {
+  if ((fd = get_exec_output(&ex)) != -1) {
     file = fdopen(fd,"r");
     for (i=1;i <= 2 && fgets(ex.output,sizeof(ex.output),file) != NULL; i++);
     if (fgets(ex.output,sizeof(ex.output),file) != NULL) {
@@ -607,7 +607,7 @@ unsigned char *var_extensible_mem(struct variable *vp,
     case ERRORMSG:
       long_ret = getswap(SWAPGETLEFT);
       if ((long_ret > minimumswap)?0:1)
-        sprintf(errmsg,"Running out of swap space (%d)",getswap(SWAPGETLEFT));
+        sprintf(errmsg,"Running out of swap space (%ld)",getswap(SWAPGETLEFT));
       else
         errmsg[0] = 0;
       *var_len = strlen(errmsg);

@@ -129,7 +129,7 @@ void swapmode(void)
 
   strcpy(ext.command, "/usr/sbin/swapinfo -k");
 
-  if ( (fd = get_exec_output(&ext)) )
+  if ( (fd = get_exec_output(&ext)) != -1 )
   {
       file = fdopen(fd,"r");
 
