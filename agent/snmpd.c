@@ -196,10 +196,12 @@ extern char  dontReadConfigFiles;
 
 #define NUM_SOCKETS	32
 
+#ifdef USING_SD_HANDLERS
 static int	  sdlist[NUM_SOCKETS],
 		  sdlen = 0;
 static int	  portlist[NUM_SOCKETS];
 int		(*sd_handlers[NUM_SOCKETS]) (int);
+#endif
 
 /*
  * Prototypes.
@@ -848,7 +850,7 @@ main(int argc, char *argv[])
 static int
 receive(void)
 {
-    int numfds, ii;
+    int numfds;
     fd_set fdset;
     struct timeval	timeout, *tvp = &timeout;
     struct timeval	sched,   *svp = &sched,

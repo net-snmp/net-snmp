@@ -380,7 +380,7 @@ usm_calc_offsets (
 	int     secNameLen,
 	int     scopedPduLen,	/* An BER encoded sequence. */
 	long    engineboots,	/* XXX (asn1.c works in long, not int.) */
-	long    enginetime,	/* XXX (asn1.c works in long, not int.) */
+	long    engine_time,	/* XXX (asn1.c works in long, not int.) */
 
 	int    *theTotalLength,	 /* globalDataLen + msgSecurityP. + msgData */
 	int    *authParamsOffset,/* Distance to auth bytes.                 */
@@ -429,7 +429,7 @@ EM(-1);
 	}
 
 	if ( (engTmlen = asn_predict_length (ASN_INTEGER,
-				(u_char*)&enginetime,sizeof(long))) == -1 )
+				(u_char*)&engine_time,sizeof(long))) == -1 )
 	{
 		return -1;
 	}
@@ -1144,22 +1144,20 @@ EM(-1);
  *	incoming buffer.
  */
 int
-usm_parse_security_parameters (secParams, remaining, secEngineID,
-		    secEngineIDLen, boots_uint, time_uint, secName, secNameLen,
-		    signature, signature_length, salt, salt_length, data_ptr)
-	u_char  *secParams;
-	u_int    remaining;
-	u_char  *secEngineID;
-	int     *secEngineIDLen;
-	u_int   *boots_uint;
-	u_int   *time_uint;
-	u_char  *secName;
-	int     *secNameLen;
-	u_char  *signature;
-	u_int   *signature_length;
-	u_char  *salt;
-	u_int   *salt_length;
-	u_char **data_ptr;
+usm_parse_security_parameters (
+	u_char  *secParams,
+	u_int    remaining,
+	u_char  *secEngineID,
+	int     *secEngineIDLen,
+	u_int   *boots_uint,
+	u_int   *time_uint,
+	u_char  *secName,
+	int     *secNameLen,
+	u_char  *signature,
+	u_int   *signature_length,
+	u_char  *salt,
+	u_int   *salt_length,
+	u_char **data_ptr)
 {
 	u_char  *parse_ptr = secParams;
 	u_char  *value_ptr;
@@ -1278,7 +1276,7 @@ EM(-1);
 
 	/* FIX -- doesn't this also indicate a buffer overrun?
 	 */
-	if (origNameLen < *secNameLen + 1)
+	if ((int)origNameLen < *secNameLen + 1)
 	{
 		/* RETURN parse error, but it's really a parameter error */
 		return -1;
@@ -1852,7 +1850,7 @@ EM(-1);
                  * XOR the salt with the last (iv_length) bytes
                  * of the priv_key to obtain the IV.
                  */
-                for (i = 0; i < iv_length; i++)
+                for (i = 0; i < (int)iv_length; i++)
                   iv[i] = salt[i] ^ user->privKey[iv_length + i];
                 
 		if (sc_decrypt (
@@ -2059,13 +2057,13 @@ usm_get_user(char *engineID, int engineIDLen, char *name)
 
 struct usmUser *
 usm_get_user_from_list(char *engineID, int engineIDLen,
-                       char *name, struct usmUser *userList, int use_default)
+                       char *name, struct usmUser *puserList, int use_default)
 {
   struct usmUser *ptr;
   char *noName = "";
   if (name == NULL)
     name = noName;
-  for (ptr = userList; ptr != NULL; ptr = ptr->next) {
+  for (ptr = puserList; ptr != NULL; ptr = ptr->next) {
     if (!strcmp(ptr->name, name) &&
         ptr->engineIDLen == engineIDLen &&
         ((ptr->engineID == NULL && engineID == NULL) ||
@@ -2105,13 +2103,13 @@ usm_add_user(struct usmUser *user)
 
 struct usmUser *
 usm_add_user_to_list(struct usmUser *user,
-                                     struct usmUser *userList)
+                                     struct usmUser *puserList)
 {
   struct usmUser *nptr, *pptr;
 
-  /* loop through userList till we find the proper, sorted place to
+  /* loop through puserList till we find the proper, sorted place to
      insert the new user */
-  for (nptr = userList, pptr = NULL; nptr != NULL;
+  for (nptr = puserList, pptr = NULL; nptr != NULL;
        pptr = nptr, nptr = nptr->next) {
     if (nptr->engineIDLen > user->engineIDLen)
       break;
@@ -2178,16 +2176,16 @@ usm_remove_user(struct usmUser *user)
 
 struct usmUser *
 usm_remove_user_from_list(struct usmUser *user,
-                                          struct usmUser **userList)
+                                          struct usmUser **ppuserList)
 {
   struct usmUser *nptr, *pptr;
 
   /* NULL pointers aren't allowed */
-  if (userList == NULL)
+  if (ppuserList == NULL)
     return NULL;
 
   /* find the user in the list */
-  for (nptr = *userList, pptr = NULL; nptr != NULL;
+  for (nptr = *ppuserList, pptr = NULL; nptr != NULL;
        pptr = nptr, nptr = nptr->next) {
     if (nptr == user)
       break;
@@ -2205,10 +2203,10 @@ usm_remove_user_from_list(struct usmUser *user,
     /* user didn't exit */
     return NULL;
   }
-  if (nptr == *userList) /* we're the head of the list, need to change
+  if (nptr == *ppuserList) /* we're the head of the list, need to change
                             the head to the next user */
-    *userList = nptr->next;
-  return *userList;
+    *ppuserList = nptr->next;
+  return *ppuserList;
 }  /* end usm_remove_user_from_list() */
 
 
@@ -2418,11 +2416,11 @@ usm_save_users(char *token, char *type)
 }
 
 void
-usm_save_users_from_list(struct usmUser *userList, char *token,
+usm_save_users_from_list(struct usmUser *puserList, char *token,
                               char *type)
 {
   struct usmUser *uptr;
-  for (uptr = userList; uptr != NULL; uptr = uptr->next) {
+  for (uptr = puserList; uptr != NULL; uptr = uptr->next) {
     if (uptr->userStorageType == ST_NONVOLATILE)
       usm_save_user(uptr, token, type);
   }
@@ -2629,6 +2627,9 @@ usm_set_user_password(struct usmUser *user, char *token, char *line)
     key = &user->privKey;
     keyLen = &user->privKeyLen;
     type = 2;
+  } else {
+    /* no old key, or token was not recognized */
+    return;
   }
 
   if (*key) {

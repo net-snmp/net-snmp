@@ -52,6 +52,7 @@ static u_int snmp_debug =	DF(ON) | DF(EM)		/* */
 #define _EM_LEVEL	0
 #define _EM_FD		stderr
 
+#ifdef  HAVE_CPP_UNDERBAR_FUNCTION_DEFINED
 #define em_printClause(em, printfargs)					\
 {									\
 	if (ISDF(EM) && (_EM_LEVEL <= em)) {				\
@@ -61,6 +62,17 @@ static u_int snmp_debug =	DF(ON) | DF(EM)		/* */
 		fflush(_EM_FD);						\
 	}								\
 };
+#else
+#define em_printClause(em, printfargs)					\
+{									\
+	if (ISDF(EM) && (_EM_LEVEL <= em)) {				\
+		fprintf(_EM_FD, "EM (%d).  ", __LINE__);\
+		fprintf printfargs ;					\
+		fprintf(_EM_FD, "\n");					\
+		fflush(_EM_FD);						\
+	}								\
+};
+#endif
 
 #define EM(em)			  em_printClause(em, (_EM_FD, " "));
 #define EM0(em, fmt)		  em_printClause(em, (_EM_FD, fmt));

@@ -183,6 +183,7 @@ rmonGetValue(oid *srcParty,
     memcpy(bigVar, variable, variableLen * sizeof(oid));
     bigVarLen = variableLen;
     
+// XXX function expects pdu !!
     var = getStatPtr(bigVar, &bigVarLen, &type, &len, &acl, 1, &write_method, pi,
 		     &noSuchObject);
     if (var == NULL) {

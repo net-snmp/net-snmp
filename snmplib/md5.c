@@ -49,6 +49,10 @@
 #else
 #include <strings.h>
 #endif
+#if HAVE_WINSOCK_H
+#include <winsock.h>
+#endif
+
 #include "md5.h"
 
 /* Compile-time declarations of MD5 ``magic constants''.

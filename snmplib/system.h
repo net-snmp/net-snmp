@@ -72,8 +72,13 @@ void DEBUGP (const char *, ...);
 void DEBUGP (va_alist);
 #endif
 
+#ifdef  HAVE_CPP_UNDERBAR_FUNCTION_DEFINED
 #define DEBUGPL(x)	\
 	    DEBUGP("%s():%s,%d: ",__FUNCTION__,__FILE__,__LINE__); DEBUGP x ;
+#else
+#define DEBUGPL(x)	\
+	    DEBUGP("():%s,%d: ",__FILE__,__LINE__); DEBUGP x ;
+#endif
 
 #ifndef HAVE_STRDUP
 char *strdup (char *);
