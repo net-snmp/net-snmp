@@ -457,7 +457,7 @@ int create_v1_trap_session (sink, com)
     new_sink->ses.peername = strdup(sink);
     new_sink->ses.version = SNMP_VERSION_1;
     if (com) {
-        new_sink->ses.community = strdup (com);
+        new_sink->ses.community = (u_char *)strdup (com);
         new_sink->ses.community_len = strlen (com);
     }
     new_sink->ses.remote_port = SNMP_TRAP_PORT;
@@ -586,7 +586,7 @@ main(argc, argv)
     int	arg,i;
     int sd, sdlist[32], portlist[32], sdlen = 0, index;
     struct sockaddr_in	me;
-    int port_flag = 0, ret;
+    int ret;
     u_short dest_port = 161;
     struct partyEntry *pp;
     in_addr_t myaddr;
@@ -609,7 +609,8 @@ main(argc, argv)
 	if (argv[arg][0] == '-'){
 	    switch(argv[arg][1]){
                 case 'c':
-                    optconfigfile = strdup(argv[++arg]);
+		    if (++arg == argc) usage(argv[0]);
+                    optconfigfile = strdup(argv[arg]);
                     break;
                 case 'C':
                     dontReadConfigFiles = 1;
@@ -625,8 +626,9 @@ main(argc, argv)
 		    snmp_set_do_debugging(1);
 		    break;
                 case 'p':
-                    port_flag++;
-                    dest_port = atoi(argv[++arg]);
+		    if (++arg == argc) usage(argv[0]);
+                    dest_port = atoi(argv[arg]);
+		    if (dest_port <= 0) usage(argv[0]);
                     break;
 		case 'a':
 		    log_addresses++;
@@ -638,7 +640,8 @@ main(argc, argv)
 		    dont_fork = 1;
 		    break;
                 case 'l':
-                    strcpy(logfile,argv[++arg]);
+		    if (++arg == argc) usage(argv[0]);
+                    strcpy(logfile,argv[arg]);
                     break;
                 case 'L':
                     logfile[0] = 0;
