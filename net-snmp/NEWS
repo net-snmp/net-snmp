@@ -1,6 +1,25 @@
 This file contains major changes in released revisions.  Please read
 the ChangeLog file for a more detailed listing of changes/bug fixes.
 
+*5.0.pre1 (alpha release)*
+ New:
+    - Much of the agent internals were completely rewritten and sports
+      a new module API to make your life easier.  See the
+      agent/mibgroup/testhandler.c file for example code that makes
+      use of some of the new functionality.
+    - All the tools can speak over many different transport layers
+      now, including UDP/TCP (ipv4 and ipv6), AAL5pvc, and IPX.  See
+      ./configure --help for details on enabling them.
+      Note: the -p and -T flags to all the applications have been
+      removed.  Use hostname strings like "tcp:localhost:9999"
+      instead.  See the snmpcmd manual page for details.
+    - snmptrapd now acts as an agentx subagent and implements portions
+      of the NOTIFICATION-LOG-MIB.
+    - kerberos authenticated and encrypted SNMPv3 is now possible.
+      See ./configure --help for details on enabling the ksm security module.
+    - The AgentX subagent protocol implementation has many new
+      features and fixes.
+
 *4.2.3*
  New:
     - sysLocation, sysContact, sysName and snmpEnableAuthenTraps are
