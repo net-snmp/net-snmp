@@ -293,6 +293,7 @@ var_ipRouteEntry(struct variable *vp,
 #ifdef hpux11
 static int      rtsize = 0;
 static mib_ipRouteEnt *rt = (mib_ipRouteEnt *) 0;
+static void     Route_Scan_Reload(void);
 #elif !defined(solaris2)
 static RTENTRY **rthead = 0;
 static int      rtsize = 0, rtallocate = 0;
