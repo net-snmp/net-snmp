@@ -9,7 +9,6 @@ extern u_char	*var_registry __P((struct variable *, oid *, int *, int, int *, in
 
 #define	REGISTRYINDEX		1
 #define	REGISTRYNAME		2
-#define	REGISTRYOID		3
 
 #ifdef IN_SNMP_VARS_C
 
