@@ -32,12 +32,9 @@
    privacy support. */
 #define SCAPI_AUTHPRIV 1 
  
-/* define if you are using the v2party MD5 code */
+/* define if you are using the internal MD5 code */
 #define USE_INTERNAL_MD5 1 
  
-/* comment the next line if you do not want SNMPv2 party-based auth. */
-#define USE_V2PARTY_PROTOCOL 1
-
 /* add in recent CMU library extensions (not complete) */
 #define CMU_COMPATIBLE 1
 
