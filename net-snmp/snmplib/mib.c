@@ -1233,7 +1233,7 @@ int read_objid(const char *input,
     }
 
     if (root == NULL){
-	snmp_errno = SNMPERR_NOMIB;
+	snmp_errno = SNMPERR_NOMIB; /*MTCRITICAL_RESOURCE*/
 	*out_len = 0;
 	return(0);
     }
@@ -1302,7 +1302,7 @@ parse_subtree(struct tree *subtree,
 	 * If we didn't find the entry, punt...
 	 */
 	if (tp == NULL) {
-	    snmp_errno = SNMPERR_BAD_SUBID;
+	    snmp_errno = SNMPERR_BAD_SUBID; /*MTCRITICAL_RESOURCE*/
 	    snmp_set_detail(buf);
 	    return (0);
 	}
@@ -1310,13 +1310,13 @@ parse_subtree(struct tree *subtree,
 
 found:
     if(subid > (u_long)MAX_SUBID){
-	snmp_errno = SNMPERR_MAX_SUBID;
+	snmp_errno = SNMPERR_MAX_SUBID; /*MTCRITICAL_RESOURCE*/
 	snmp_set_detail(buf);
 	return (0);
     }
 
     if ((*out_len)-- <= 0){
-	snmp_errno = SNMPERR_LONG_OID;
+	snmp_errno = SNMPERR_LONG_OID; /*MTCRITICAL_RESOURCE*/
 	return (0);
     }
     *output++ = subid;

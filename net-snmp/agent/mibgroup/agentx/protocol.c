@@ -264,8 +264,9 @@ agentx_build_header(struct snmp_pdu *pdu, u_char *bufp, size_t *out_length)
     return bufp;
 }
 
-int
-agentx_build(struct snmp_session        *session,
+
+static int
+_agentx_build(struct snmp_session        *session,
              struct snmp_pdu            *pdu,
              register u_char            *packet,
              size_t                        *out_length)
@@ -276,8 +277,8 @@ agentx_build(struct snmp_session        *session,
      struct variable_list *vp;
      int inc;
      
-     session->s_snmp_errno = SNMPERR_BAD_ASN1_BUILD;
-     snmp_errno = SNMPERR_BAD_ASN1_BUILD;
+    session->s_snmp_errno = 0;
+    session->s_errno = 0;
      
 		/* Build the header (and context if appropriate) */
      if ( *out_length < 20 )
@@ -450,7 +451,6 @@ agentx_build(struct snmp_session        *session,
 
 	default:
 	    session->s_snmp_errno = SNMPERR_UNKNOWN_PDU;
-	    snmp_errno = SNMPERR_UNKNOWN_PDU;
 	    return -1;
      }
      
@@ -460,9 +460,22 @@ agentx_build(struct snmp_session        *session,
      agentx_build_int( packet+16, (bufp-packet)-20,
 				pdu->flags &  AGENTX_FLAGS_NETWORK_BYTE_ORDER);
      *out_length = bufp-packet;
-     session->s_snmp_errno = 0;
-     snmp_errno = 0;
      return 0;
+}
+
+int
+agentx_build(struct snmp_session        *session,
+             struct snmp_pdu            *pdu,
+             register u_char            *packet,
+             size_t                        *out_length)
+{
+    int rc;
+    rc = _agentx_build(session,pdu,packet,out_length);
+    if (rc) {
+        if (0 == session->s_snmp_errno)
+            session->s_snmp_errno = SNMPERR_BAD_ASN1_BUILD;
+    }
+    return (rc);
 }
 
 	/***********************
