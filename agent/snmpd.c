@@ -443,6 +443,7 @@ main(int argc, char *argv[])
                   if (++arg == argc)
                     usage(argv[0]);
                   pid_file = argv[arg];
+		  break;
 
                 case 'a':
 		  log_addresses++;
