@@ -109,38 +109,38 @@ PERFORMANCE OF THIS SOFTWARE.
 #include <net/if.h>
 #include <net/route.h>
 #include <netinet/in_systm.h>
-#if NETINET_IN_VAR_H
+#if HAVE_NETINET_IN_VAR_H
 #include <netinet/in_var.h>
 #endif
 #include <netinet/ip.h>
-#if NETINET_IN_PCB_H
+#if HAVE_NETINET_IN_PCB_H
 #include <netinet/in_pcb.h>
 #endif
-#if NETINET_IF_ETHER_H
+#if HAVE_NETINET_IF_ETHER_H
 #include <netinet/if_ether.h>
 #endif
-#if NETINET_IP_VAR_H
+#if HAVE_NETINET_IP_VAR_H
 #include <netinet/ip_var.h>
 #endif
 #include <netinet/tcp.h>
-#if NETINET_TCP_TIMER_H
+#if HAVE_NETINET_TCP_TIMER_H
 #include <netinet/tcp_timer.h>
 #endif
 #ifdef HAVE_NETINET_TCPIP_H
 # include <netinet/tcpip.h>
 #endif
-#if NETINET_TCP_VAR_H
+#if HAVE_NETINET_TCP_VAR_H
 #include <netinet/tcp_var.h>
 #endif
-#if NETINET_TCP_FSM_H
+#if HAVE_NETINET_TCP_FSM_H
 #include <netinet/tcp_fsm.h>
 #endif
 #include <netinet/udp.h>
-#if NETINET_UDP_VAR_H
+#if HAVE_NETINET_UDP_VAR_H
 #include <netinet/udp_var.h>
 #endif
 #include <netinet/ip_icmp.h>
-#if NETINET_ICMP_VAR_H
+#if HAVE_NETINET_ICMP_VAR_H
 #include <netinet/icmp_var.h>
 #endif
 #include <nlist.h>
