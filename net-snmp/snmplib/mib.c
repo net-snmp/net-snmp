@@ -2081,6 +2081,9 @@ snmp_out_toggle_options(char *options)
         case 'v':
             netsnmp_ds_toggle_boolean(NETSNMP_DS_LIBRARY_ID, NETSNMP_DS_LIB_PRINT_BARE_VALUE);
             break;
+        case 'U':
+            netsnmp_ds_toggle_boolean(NETSNMP_DS_LIBRARY_ID, NETSNMP_DS_LIB_DONT_PRINT_UNITS);
+            break;
         case 's':
             netsnmp_ds_set_int(NETSNMP_DS_LIBRARY_ID, NETSNMP_DS_LIB_OID_OUTPUT_FORMAT,
                                                       NETSNMP_OID_OUTPUT_SUFFIX);
@@ -2220,6 +2223,8 @@ register_mib_handlers(void)
                        NETSNMP_DS_LIBRARY_ID, NETSNMP_DS_LIB_PRINT_HEX_TEXT);
     netsnmp_ds_register_premib(ASN_BOOLEAN, "snmp", "printValueOnly",
                        NETSNMP_DS_LIBRARY_ID, NETSNMP_DS_LIB_PRINT_BARE_VALUE);
+    netsnmp_ds_register_premib(ASN_BOOLEAN, "snmp", "dontPrintUnits",
+                       NETSNMP_DS_LIBRARY_ID, NETSNMP_DS_LIB_DONT_PRINT_UNITS);
 
 }
 
@@ -2925,16 +2930,20 @@ sprint_realloc_variable(u_char ** buf, size_t * buf_len,
                            (const u_char *)
                            "No more variables left in this MIB View (It is past the end of the MIB tree)");
     } else if (subtree) {
+        const char *units = NULL;
+        if (!netsnmp_get_boolean(NETSNMP_DS_LIBRARY_ID, NETSNMP_DS_LIB_DONT_PRINT_UNITS)) {
+            units = subtree->units;
+        }
         if (subtree->printomat) {
             return (*subtree->printomat) (buf, buf_len, out_len,
                                           allow_realloc, variable,
                                           subtree->enums, subtree->hint,
-                                          subtree->units);
+                                          units);
         } else {
             return sprint_realloc_by_type(buf, buf_len, out_len,
                                           allow_realloc, variable,
                                           subtree->enums, subtree->hint,
-                                          subtree->units);
+                                          units);
         }
     } else {
         /*
@@ -3027,17 +3036,21 @@ sprint_realloc_value(u_char ** buf, size_t * buf_len,
                            (const u_char *)
                            "No more variables left in this MIB View (It is past the end of the MIB tree)");
     } else {
+        const char *units = NULL;
         subtree = get_tree(objid, objidlen, subtree);
+        if (subtree && !netsnmp_get_boolean(NETSNMP_DS_LIBRARY_ID, NETSNMP_DS_LIB_DONT_PRINT_UNITS)) {
+            units = subtree->units;
+        }
         if (subtree && subtree->printomat) {
             return (*subtree->printomat) (buf, buf_len, out_len,
                                           allow_realloc, variable,
                                           subtree->enums, subtree->hint,
-                                          subtree->units);
+                                          units);
         } else {
             return sprint_realloc_by_type(buf, buf_len, out_len,
                                           allow_realloc, variable,
                                           subtree->enums, subtree->hint,
-                                          subtree->units);
+                                          units);
         }
     }
 }
