@@ -351,3 +351,12 @@ setPass(action, var_val, var_val_type, var_val_len, statP, name, name_len)
   }
   return SNMP_ERR_NOSUCHNAME;
 }
+
+int pass_compare(a, b)
+  void *a, *b;
+{
+  struct extensible **ap, **bp;
+  ap = (struct extensible **) a;
+  bp = (struct extensible **) b;
+  return compare((*ap)->miboid,(*ap)->miblen,(*bp)->miboid,(*bp)->miblen);
+}
