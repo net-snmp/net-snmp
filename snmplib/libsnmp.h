@@ -98,7 +98,14 @@
 #include <ucd-snmp/acl.h>
 #endif /* USE_V2PARTY_PROTOCOL */
 
-#else
+#define Version version  /* struct snmp_session member */
+
+#define SMI_NOSUCHOBJECT      SNMP_NOSUCHOBJECT
+#define SMI_NOSUCHINSTANCE    SNMP_NOSUCHINSTANCE
+#define SMI_ENDOFMIBVIEW      SNMP_ENDOFMIBVIEW 
+
+
+#else /* !UCD_SNMP_LIBRARY */
 
 #include <sys/types.h>
 #ifndef WIN32
