@@ -336,20 +336,25 @@ snmp_check_packet(struct snmp_session *session, snmp_transport *transport,
     addr_string = transport->f_fmtaddr(transport, transport_data,
 				       transport_data_length);
     /*  Don't forget to free() it.  */
-  } else {
-    /*  Don't know how to format the address for logging.  */
-    addr_string = strdup("<UNKNOWN>");
   }
 
 #ifdef  USE_LIBWRAP
-  if (hosts_ctl("snmpd", addr_string, addr_string, STRING_UNKNOWN)) {
-    snmp_log(allow_severity, "Connection from %s\n", addr_string);
-  } else {
-    snmp_log(deny_severity, "Connection from %s REFUSED\n", addr_string);
-    if (addr_string != NULL) {
+  if (addr_string != NULL) {
+    if (hosts_ctl("snmpd", STRING_UNKNOWN, addr_string, STRING_UNKNOWN)) {
+      snmp_log(allow_severity, "Connection from %s\n", addr_string);
+    } else {
+      snmp_log(deny_severity, "Connection from %s REFUSED\n", addr_string);
       free(addr_string);
+      return 0;
     }
-    return 0;
+  } else {
+    if (hosts_ctl("snmp", STRING_UNKNOWN, STRING_UNKNOWN, STRING_UNKNOWN)) {
+      snmp_log(allow_severity, "Connection from <UNKNOWN>\n");
+      addr_string = strdup("<UNKNOWN>");
+    } else {
+      snmp_log(deny_severity, "Connection from <UNKNOWN> REFUSED\n");
+      return 0;
+    }
   }
 #endif/*USE_LIBWRAP*/
 
