@@ -19,6 +19,9 @@
 #include <sys/utsname.h>
 #endif
 #endif
+#if HAVE_NETINET_IN_H
+#include <netinet/in.h>
+#endif
 
 #include "system.h"
 #include "struct.h"

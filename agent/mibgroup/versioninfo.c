@@ -10,6 +10,9 @@
 #  include <time.h>
 # endif
 #endif
+#if HAVE_NETINET_IN_H
+#include <netinet/in.h>
+#endif
 
 #include "mibincl.h"
 #include "struct.h"
