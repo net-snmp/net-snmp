@@ -62,25 +62,28 @@ examples/wombat.o: ../../config.h ../../mib_module_config.h ../../s/hpux.h
 examples/wombat.o: ../../s/sysv.h ../../s/generic.h ../../m/generic.h
 examples/wombat.o:  
 examples/wombat.o:  mibincl.h 
-examples/wombat.o:  ../../snmplib/asn1.h
-examples/wombat.o: ../../snmplib/snmp_api.h ../../snmplib/snmp_impl.h
-examples/wombat.o: ../snmp_vars.h ../var_struct.h ../../snmplib/snmp.h
-examples/wombat.o: ../../snmplib/mib.h ../../snmplib/snmp_debug.h
-examples/wombat.o: ../agent_read_config.h ./../auto_nlist.h examples/wombat.h
+examples/wombat.o:  
+examples/wombat.o:  
+examples/wombat.o: ../../snmplib/asn1.h ../../snmplib/snmp_api.h
+examples/wombat.o: ../../snmplib/snmp_impl.h ../snmp_vars.h ../var_struct.h
+examples/wombat.o: ../../snmplib/snmp.h ../../snmplib/mib.h
+examples/wombat.o: ../../snmplib/snmp_debug.h ../agent_read_config.h
+examples/wombat.o: ./../auto_nlist.h util_funcs.h struct.h examples/wombat.h
 mibII/system_mib.o: ../../config.h ../../mib_module_config.h ../../s/hpux.h
 mibII/system_mib.o: ../../s/sysv.h ../../s/generic.h ../../m/generic.h
 mibII/system_mib.o:  
 mibII/system_mib.o:  mibincl.h 
 mibII/system_mib.o:  
-mibII/system_mib.o:  ../../snmplib/asn1.h
-mibII/system_mib.o: ../../snmplib/snmp_api.h ../../snmplib/snmp_impl.h
-mibII/system_mib.o: ../snmp_vars.h ../var_struct.h ../../snmplib/snmp.h
-mibII/system_mib.o: ../../snmplib/mib.h ../../snmplib/snmp_debug.h
-mibII/system_mib.o: ../agent_read_config.h 
 mibII/system_mib.o:  
-mibII/system_mib.o:  mibII/system_mib.h struct.h
-mibII/system_mib.o: util_funcs.h struct.h ./../../snmplib/read_config.h
-mibII/system_mib.o: ./../agent_read_config.h ../../snmplib/system.h
+mibII/system_mib.o:  
+mibII/system_mib.o: ../../snmplib/asn1.h ../../snmplib/snmp_api.h
+mibII/system_mib.o: ../../snmplib/snmp_impl.h ../snmp_vars.h ../var_struct.h
+mibII/system_mib.o: ../../snmplib/snmp.h ../../snmplib/mib.h
+mibII/system_mib.o: ../../snmplib/snmp_debug.h ../agent_read_config.h
+mibII/system_mib.o:  
+mibII/system_mib.o: mibII/system_mib.h struct.h util_funcs.h struct.h
+mibII/system_mib.o: ./../../snmplib/read_config.h ./../agent_read_config.h
+mibII/system_mib.o: ../../snmplib/system.h
 mibII/sysORTable.o: ../../config.h ../../mib_module_config.h ../../s/hpux.h
 mibII/sysORTable.o: ../../s/sysv.h ../../s/generic.h ../../m/generic.h
 mibII/sysORTable.o:  
@@ -157,11 +160,13 @@ mibII/snmp_mib.o: ../../config.h ../../mib_module_config.h ../../s/hpux.h
 mibII/snmp_mib.o: ../../s/sysv.h ../../s/generic.h ../../m/generic.h
 mibII/snmp_mib.o:  
 mibII/snmp_mib.o:  
-mibII/snmp_mib.o: mibincl.h  ../../snmplib/asn1.h
-mibII/snmp_mib.o: ../../snmplib/snmp_api.h ../../snmplib/snmp_impl.h
-mibII/snmp_mib.o: ../snmp_vars.h ../var_struct.h ../../snmplib/snmp.h
-mibII/snmp_mib.o: ../../snmplib/mib.h ../../snmplib/snmp_debug.h
-mibII/snmp_mib.o: ../agent_read_config.h ../../snmplib/system.h
+mibII/snmp_mib.o: mibincl.h  
+mibII/snmp_mib.o:  
+mibII/snmp_mib.o: ../../snmplib/asn1.h ../../snmplib/snmp_api.h
+mibII/snmp_mib.o: ../../snmplib/snmp_impl.h ../snmp_vars.h ../var_struct.h
+mibII/snmp_mib.o: ../../snmplib/snmp.h ../../snmplib/mib.h
+mibII/snmp_mib.o: ../../snmplib/snmp_debug.h ../agent_read_config.h
+mibII/snmp_mib.o: util_funcs.h struct.h ../../snmplib/system.h
 mibII/snmp_mib.o: mibII/snmp_mib.h
 mibII/tcp.o: ../../config.h ../../mib_module_config.h ../../s/hpux.h
 mibII/tcp.o: ../../s/sysv.h ../../s/generic.h ../../m/generic.h
@@ -194,9 +199,9 @@ mibII/tcp.o: ../agent_read_config.h ../../snmplib/system.h
 mibII/tcp.o:  
 mibII/tcp.o:  
 mibII/tcp.o:  
-mibII/tcp.o:  ./../auto_nlist.h
-mibII/tcp.o:  
-mibII/tcp.o: mibII/tcp.h
+mibII/tcp.o:  util_funcs.h struct.h
+mibII/tcp.o: ./../auto_nlist.h 
+mibII/tcp.o:  mibII/tcp.h
 mibII/icmp.o: ../../mib_module_config.h ../../config.h ../../s/hpux.h
 mibII/icmp.o: ../../s/sysv.h ../../s/generic.h ../../m/generic.h
 mibII/icmp.o:  
@@ -222,8 +227,9 @@ mibII/icmp.o:  ../../snmplib/asn1.h
 mibII/icmp.o: ../../snmplib/snmp_api.h ../../snmplib/snmp_impl.h
 mibII/icmp.o: ../snmp_vars.h ../var_struct.h ../../snmplib/snmp.h
 mibII/icmp.o: ../../snmplib/mib.h ../../snmplib/snmp_debug.h
-mibII/icmp.o: ../agent_read_config.h ./../auto_nlist.h 
-mibII/icmp.o:  mibII/icmp.h
+mibII/icmp.o: ../agent_read_config.h util_funcs.h struct.h ./../auto_nlist.h
+mibII/icmp.o:  
+mibII/icmp.o: mibII/icmp.h
 mibII/ip.o: ../../mib_module_config.h ../../config.h ../../s/hpux.h
 mibII/ip.o: ../../s/sysv.h ../../s/generic.h ../../m/generic.h
 mibII/ip.o:  
@@ -247,11 +253,11 @@ mibII/ip.o:
 mibII/ip.o:   ./../kernel.h
 mibII/ip.o: ../../snmplib/system.h ./../../snmplib/asn1.h
 mibII/ip.o: ./../../snmplib/snmp_debug.h mibincl.h 
-mibII/ip.o: ../../snmplib/asn1.h ../../snmplib/snmp_api.h
+mibII/ip.o:  ../../snmplib/asn1.h ../../snmplib/snmp_api.h
 mibII/ip.o: ../../snmplib/snmp_impl.h ../snmp_vars.h ../var_struct.h
 mibII/ip.o: ../../snmplib/snmp.h ../../snmplib/mib.h
-mibII/ip.o: ../../snmplib/snmp_debug.h ../agent_read_config.h
-mibII/ip.o: ./../auto_nlist.h  
+mibII/ip.o: ../../snmplib/snmp_debug.h ../agent_read_config.h util_funcs.h
+mibII/ip.o: struct.h ./../auto_nlist.h 
 mibII/ip.o:  mibII/ip.h mibII/var_route.h
 mibII/ip.o: mibII/route_write.h mibII/at.h mibII/interfaces.h
 mibII/udp.o: ../../mib_module_config.h ../../config.h ../../s/hpux.h
@@ -282,8 +288,9 @@ mibII/udp.o:  ../../snmplib/asn1.h
 mibII/udp.o: ../../snmplib/snmp_api.h ../../snmplib/snmp_impl.h
 mibII/udp.o: ../snmp_vars.h ../var_struct.h ../../snmplib/snmp.h
 mibII/udp.o: ../../snmplib/mib.h ../../snmplib/snmp_debug.h
-mibII/udp.o: ../agent_read_config.h ./../auto_nlist.h 
-mibII/udp.o:  mibII/udp.h
+mibII/udp.o: ../agent_read_config.h util_funcs.h struct.h ./../auto_nlist.h
+mibII/udp.o:  
+mibII/udp.o: mibII/udp.h
 mibII/vacm_vars.o: ../../config.h ../../mib_module_config.h ../../s/hpux.h
 mibII/vacm_vars.o: ../../s/sysv.h ../../s/generic.h ../../m/generic.h
 mibII/vacm_vars.o:  
@@ -292,15 +299,15 @@ mibII/vacm_vars.o:
 mibII/vacm_vars.o:  
 mibII/vacm_vars.o:  
 mibII/vacm_vars.o:  
-mibII/vacm_vars.o:  mibincl.h ../../snmplib/asn1.h
-mibII/vacm_vars.o: ../../snmplib/snmp_api.h ../../snmplib/snmp_impl.h
-mibII/vacm_vars.o: ../snmp_vars.h ../var_struct.h ../../snmplib/snmp.h
-mibII/vacm_vars.o: ../../snmplib/mib.h ../../snmplib/snmp_debug.h
-mibII/vacm_vars.o: ../agent_read_config.h ./../../snmplib/read_config.h
-mibII/vacm_vars.o: ./../agent_read_config.h ../../snmplib/system.h
-mibII/vacm_vars.o: ./../../snmplib/vacm.h mibII/vacm_vars.h
-mibII/vacm_vars.o: ../../mib_module_config.h 
+mibII/vacm_vars.o:  mibincl.h 
 mibII/vacm_vars.o:  
+mibII/vacm_vars.o: ../../snmplib/asn1.h ../../snmplib/snmp_api.h
+mibII/vacm_vars.o: ../../snmplib/snmp_impl.h ../snmp_vars.h ../var_struct.h
+mibII/vacm_vars.o: ../../snmplib/snmp.h ../../snmplib/mib.h
+mibII/vacm_vars.o: ../../snmplib/snmp_debug.h ../agent_read_config.h
+mibII/vacm_vars.o: ./../../snmplib/read_config.h ./../agent_read_config.h
+mibII/vacm_vars.o: ../../snmplib/system.h ./../../snmplib/vacm.h
+mibII/vacm_vars.o: mibII/vacm_vars.h ../../mib_module_config.h
 mibII/vacm_vars.o: mibII/sysORTable.h
 ucd-snmp/memory.o: ../../config.h ../../mib_module_config.h ../../s/hpux.h
 ucd-snmp/memory.o: ../../s/sysv.h ../../s/generic.h ../../m/generic.h
@@ -343,6 +350,7 @@ ucd-snmp/hpux.o:
 ucd-snmp/hpux.o:  
 ucd-snmp/hpux.o:  
 ucd-snmp/hpux.o: mibincl.h  
+ucd-snmp/hpux.o:  
 ucd-snmp/hpux.o: ../../snmplib/asn1.h ../../snmplib/snmp_api.h
 ucd-snmp/hpux.o: ../../snmplib/snmp_impl.h ../snmp_vars.h ../var_struct.h
 ucd-snmp/hpux.o: ../../snmplib/snmp.h ../../snmplib/mib.h
@@ -534,10 +542,12 @@ ucd-snmp/registry.o: ../../s/sysv.h ../../s/generic.h ../../m/generic.h
 ucd-snmp/registry.o:  
 ucd-snmp/registry.o:  
 ucd-snmp/registry.o:  mibincl.h 
-ucd-snmp/registry.o: ../../snmplib/asn1.h ../../snmplib/snmp_api.h
-ucd-snmp/registry.o: ../../snmplib/snmp_impl.h ../snmp_vars.h ../var_struct.h
-ucd-snmp/registry.o: ../../snmplib/snmp.h ../../snmplib/mib.h
-ucd-snmp/registry.o: ../../snmplib/snmp_debug.h ../agent_read_config.h
+ucd-snmp/registry.o:  
+ucd-snmp/registry.o:  ../../snmplib/asn1.h
+ucd-snmp/registry.o: ../../snmplib/snmp_api.h ../../snmplib/snmp_impl.h
+ucd-snmp/registry.o: ../snmp_vars.h ../var_struct.h ../../snmplib/snmp.h
+ucd-snmp/registry.o: ../../snmplib/mib.h ../../snmplib/snmp_debug.h
+ucd-snmp/registry.o: ../agent_read_config.h util_funcs.h struct.h
 ucd-snmp/registry.o: ucd-snmp/registry.h ../../snmplib/system.h
 ucd-snmp/file.o: ../../config.h ../../mib_module_config.h ../../s/hpux.h
 ucd-snmp/file.o: ../../s/sysv.h ../../s/generic.h ../../m/generic.h
@@ -653,9 +663,10 @@ host/hr_system.o:
 host/hr_system.o:  
 host/hr_system.o:  
 host/hr_system.o:  
-host/hr_system.o: host/hr_system.h host/hr_utils.h ./../auto_nlist.h
-host/hr_system.o: ../../snmplib/system.h 
+host/hr_system.o: util_funcs.h struct.h host/hr_system.h host/hr_utils.h
+host/hr_system.o: ./../auto_nlist.h ../../snmplib/system.h
 host/hr_system.o:  
+host/hr_system.o: 
 host/hr_system.o:  
 host/hr_system.o:  
 host/hr_storage.o: ../../config.h ../../mib_module_config.h ../../s/hpux.h
@@ -683,10 +694,11 @@ host/hr_storage.o:
 host/hr_storage.o: 
 host/hr_storage.o:  
 host/hr_storage.o:  
-host/hr_storage.o:  host/hr_storage.h
-host/hr_storage.o: host/hr_filesys.h ./../auto_nlist.h 
+host/hr_storage.o:  util_funcs.h struct.h
+host/hr_storage.o: host/hr_storage.h host/hr_filesys.h ./../auto_nlist.h
 host/hr_storage.o:  
-host/hr_storage.o:  ../../snmplib/system.h
+host/hr_storage.o:  
+host/hr_storage.o: ../../snmplib/system.h
 host/hr_device.o: ../../config.h ../../mib_module_config.h ../../s/hpux.h
 host/hr_device.o: ../../s/sysv.h ../../s/generic.h ../../m/generic.h
 host/hr_device.o:  host_res.h 
@@ -706,7 +718,8 @@ host/hr_device.o:
 host/hr_device.o:  
 host/hr_device.o:  
 host/hr_device.o:  
-host/hr_device.o:  host/hr_device.h
+host/hr_device.o:  util_funcs.h struct.h
+host/hr_device.o: host/hr_device.h
 host/hr_other.o: ../../config.h ../../mib_module_config.h ../../s/hpux.h
 host/hr_other.o: ../../s/sysv.h ../../s/generic.h ../../m/generic.h
 host/hr_other.o: host_res.h  
@@ -747,7 +760,8 @@ host/hr_proc.o:
 host/hr_proc.o:  
 host/hr_proc.o:  
 host/hr_proc.o:  
-host/hr_proc.o: host/hr_proc.h ./../auto_nlist.h ./../agent_read_config.h
+host/hr_proc.o: util_funcs.h struct.h host/hr_proc.h ./../auto_nlist.h
+host/hr_proc.o: ./../agent_read_config.h ucd-snmp/loadave.h mibdefs.h
 host/hr_network.o: ../../config.h ../../mib_module_config.h ../../s/hpux.h
 host/hr_network.o: ../../s/sysv.h ../../s/generic.h ../../m/generic.h
 host/hr_network.o: host_res.h 
@@ -767,8 +781,8 @@ host/hr_network.o:
 host/hr_network.o:  
 host/hr_network.o:  
 host/hr_network.o:  
-host/hr_network.o:  mibII/interfaces.h
-host/hr_network.o: host/hr_network.h
+host/hr_network.o:  util_funcs.h struct.h
+host/hr_network.o: mibII/interfaces.h host/hr_network.h
 host/hr_print.o: ../../config.h ../../mib_module_config.h ../../s/hpux.h
 host/hr_print.o: ../../s/sysv.h ../../s/generic.h ../../m/generic.h
 host/hr_print.o: host_res.h  
@@ -788,7 +802,7 @@ host/hr_print.o:
 host/hr_print.o:  
 host/hr_print.o:  
 host/hr_print.o:  
-host/hr_print.o: host/hr_print.h
+host/hr_print.o: util_funcs.h struct.h host/hr_print.h
 host/hr_disk.o: ../../config.h ../../mib_module_config.h ../../s/hpux.h
 host/hr_disk.o: ../../s/sysv.h ../../s/generic.h ../../m/generic.h host_res.h
 host/hr_disk.o:  
@@ -808,11 +822,11 @@ host/hr_disk.o:
 host/hr_disk.o:  
 host/hr_disk.o:  
 host/hr_disk.o:  
-host/hr_disk.o: host/hr_disk.h  
+host/hr_disk.o: util_funcs.h struct.h host/hr_disk.h 
 host/hr_disk.o:  
 host/hr_disk.o:  
 host/hr_disk.o:  
-host/hr_disk.o: 
+host/hr_disk.o:  
 host/hr_partition.o: ../../config.h ../../mib_module_config.h ../../s/hpux.h
 host/hr_partition.o: ../../s/sysv.h ../../s/generic.h ../../m/generic.h
 host/hr_partition.o:  
@@ -835,8 +849,9 @@ host/hr_partition.o:
 host/hr_partition.o:  
 host/hr_partition.o:  
 host/hr_partition.o:  
-host/hr_partition.o:  host/hr_partition.h
-host/hr_partition.o: host/hr_filesys.h host/hr_disk.h 
+host/hr_partition.o:  util_funcs.h struct.h
+host/hr_partition.o: host/hr_partition.h host/hr_filesys.h host/hr_disk.h
+host/hr_partition.o: 
 host/hr_filesys.o: ../../config.h ../../mib_module_config.h ../../s/hpux.h
 host/hr_filesys.o: ../../s/sysv.h ../../s/generic.h ../../m/generic.h
 host/hr_filesys.o: host_res.h 
@@ -856,8 +871,8 @@ host/hr_filesys.o:
 host/hr_filesys.o:  
 host/hr_filesys.o:  
 host/hr_filesys.o:  
-host/hr_filesys.o:  host/hr_filesys.h
-host/hr_filesys.o: host/hr_utils.h 
+host/hr_filesys.o:  util_funcs.h struct.h
+host/hr_filesys.o: host/hr_filesys.h host/hr_utils.h 
 host/hr_filesys.o:  
 host/hr_filesys.o: 
 host/hr_filesys.o: 
@@ -883,8 +898,9 @@ host/hr_swrun.o:
 host/hr_swrun.o:  
 host/hr_swrun.o:  
 host/hr_swrun.o:  
-host/hr_swrun.o: host/hr_swrun.h ./../auto_nlist.h 
+host/hr_swrun.o: util_funcs.h struct.h host/hr_swrun.h ./../auto_nlist.h
 host/hr_swrun.o:  
+host/hr_swrun.o: 
 host/hr_swrun.o:  
 host/hr_swrun.o:  
 host/hr_swrun.o:  
@@ -915,9 +931,10 @@ host/hr_swinst.o:
 host/hr_swinst.o:  
 host/hr_swinst.o:  
 host/hr_swinst.o:  
-host/hr_swinst.o: host/hr_swinst.h host/hr_utils.h 
+host/hr_swinst.o: util_funcs.h struct.h host/hr_swinst.h host/hr_utils.h
 host/hr_swinst.o:  
 host/hr_swinst.o:  
+host/hr_swinst.o: 
 host/hr_utils.o: ../../config.h ../../mib_module_config.h ../../s/hpux.h
 host/hr_utils.o: ../../s/sysv.h ../../s/generic.h ../../m/generic.h
 host/hr_utils.o:  
@@ -964,9 +981,11 @@ target/snmpTargetAddrEntry.o: ../../s/hpux.h ../../s/sysv.h ../../s/generic.h
 target/snmpTargetAddrEntry.o: ../../m/generic.h 
 target/snmpTargetAddrEntry.o: 
 target/snmpTargetAddrEntry.o:  
-target/snmpTargetAddrEntry.o:  mibincl.h
-target/snmpTargetAddrEntry.o:  
+target/snmpTargetAddrEntry.o: mibincl.h 
 target/snmpTargetAddrEntry.o: 
+target/snmpTargetAddrEntry.o: 
+target/snmpTargetAddrEntry.o: 
+target/snmpTargetAddrEntry.o:  
 target/snmpTargetAddrEntry.o:  ../../snmplib/asn1.h
 target/snmpTargetAddrEntry.o: ../../snmplib/snmp_api.h
 target/snmpTargetAddrEntry.o: ../../snmplib/snmp_impl.h ../snmp_vars.h
@@ -985,6 +1004,8 @@ target/snmpTargetParamsEntry.o:  mibincl.h
 target/snmpTargetParamsEntry.o:  
 target/snmpTargetParamsEntry.o: 
 target/snmpTargetParamsEntry.o: 
+target/snmpTargetParamsEntry.o: 
+target/snmpTargetParamsEntry.o:  
 target/snmpTargetParamsEntry.o: ../../snmplib/asn1.h ../../snmplib/snmp_api.h
 target/snmpTargetParamsEntry.o: ../../snmplib/snmp_impl.h ../snmp_vars.h
 target/snmpTargetParamsEntry.o: ../var_struct.h ../../snmplib/snmp.h
