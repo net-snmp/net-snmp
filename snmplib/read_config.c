@@ -741,7 +741,7 @@ read_config_store(const char *type, const char *line)
                file);
   }
   if ((fout = fopen(filep, "a")) != NULL) {
-    fprintf(fout,line);
+    fprintf(fout, "%s", line);
     if (line[strlen(line)] != '\n')
       fprintf(fout,"\n");
     DEBUGMSGTL(("read_config","storing: %s\n",line));
