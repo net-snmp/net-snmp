@@ -178,7 +178,9 @@ What documentation is available?
 	EXAMPLE.conf
 	man pages for the individual tools, files and the API
 	A guide for extending the agent
-	A Tutorial at http://www.net-snmp.org/tutorial/
+	Tutorials for both ucd-snmp v4 and net-snmp v5
+           at  http://www.net-snmp.org/tutorial/
+           and http://www.net-snmp.org/tutorial-5/ respectively
 
       Most of this documentation (plus archives of the mailing lists)
 	 is also available on our web page:
