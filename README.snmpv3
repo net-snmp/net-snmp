@@ -21,11 +21,12 @@ authenticated requests only here):
   view all    included  .1                               80
   access local   ""      any       auth    0      all    all   all
 
-As long as we're here, lets add:
+Note: these entries should only exist while you'red doing setup!
+
+As long as we're here, lets add (which will be needed on a more
+permanent basis):
 
   group local   any        wes
-
-Note: these entries should only exist while you'red doing setup!
 
 Also, you need to set the initial user's password in your snmpd.conf
 file.  Again, this entry shouldn't exist after you create your first
@@ -41,35 +42,20 @@ used here):
 
   userSetAuthPass templateMD5 * initial_MD5_pass
 
-Note: passwords must be 8 characters minimum in length.
+Note: passwords (passphrases really) must be 8 characters minimum in length.
 
 Start the agent.
 
-Unfortunately, you need to specify the EngineID on the command line of 
-snmpusm still (it should be able to figure this out from a probe,
-sigh).  Fix me.
+Create a new user, here named "wes" using the user "initial" to do it.
+"wes" is cloned from templateMD5 in the process, so he inherits that
+users pasword.:
 
-  ./snmpwalk -v 3 -u initial -n none -l authNoPriv -a MD5 -A setup_password localhost snmpEngineID
-  .iso.org.dod.internet.snmpV2.snmpModules.snmpFrameworkMIB.snmpFrameworkMIBObjects.snmpEngine.snmpEngineID.0 =  Hex: 80 00 07 E5 01 A8 96 BE 01 
+  snmpusm -v 3 -u initial -n none -l authNoPriv -a MD5 -A setup_password localhost create wes templateMD5
 
-Therefore, the EngineID=800007e501a896be01 
+The above should have created the user "wes" with the same password as
+the templateMD5 user.  So then, you need to change his password using:
 
-Create a new user, here named "wes" using "initial".  He's cloned from 
-templateMD5 in the process, so he inherits that users pasword.:
-
-snmpusm -e 800007e501a896be01 -E 800007e501a896be01 -v 3 -u initial -n none -l authNoPriv -a MD5 -A setup_password localhost create wes templateMD5
-
-Now, unfortunately, this used to work and recent changes have made it
-either stop working or segfault, depending on how many times I run it.
-Both the app and the agent have segfaulted on me.  Sometimes...  I
-haven't figured out what's going wrong in my few minutes of poking
-around.
-
-However, the above should have created the user "wes" with the same
-password as the templateMD5 user.  So then, you need to change his
-password using:
-
-snmpusm -e 800007e501a896be01 -E 800007e501a896be01 -v 3 -u wes -n none -l authNoPriv -a MD5 -A initial_MD5_pass localhost passwd -O initial_MD5_pass -N new_passphrase -a
+  snmpusm -v 3 -u wes -n none -l authNoPriv -a MD5 -A initial_MD5_pass localhost passwd -O initial_MD5_pass -N new_passphrase -a
 
 See, wasn't that easy?
 
@@ -77,13 +63,15 @@ Now, test it:
 
   snmpget -v 3 -u wes -n none -l authNoPriv -a MD5 -A new_passphrase localhost sysUpTime.0
 
-Now, go remove the vacm entries for initial and you have a valid user 'wes'
-that you can use for future transactions instead of initial.
+Now, go remove the vacm "group" snmpd.conf entry for the "initial"
+user and you have a valid user 'wes' that you can use for future
+transactions instead of initial.
 
-The information is all stored in /var/ucd-snmp/snmpd.conf, in the form
-of configuration lines, when the agent is shut down.  Note that I
-think this file is currently world readable, which is very very wrong
-and we need to change this in snmplib/read_config.c.
+The information about the newly created user is stored in
+/var/ucd-snmp/snmpd.conf, in the form of configuration lines, when the
+agent is shut down so that it is usable in next run in the future.
+Note that I think this file is currently world readable, which is very
+very wrong and we need to change this in snmplib/read_config.c.
 
 Also note that the passkeys stored in /var/ucd-snmp/snmpd.conf are
 locked to a given engineID, which by default is based off of your IPv4 
