@@ -1,6 +1,11 @@
 #include <config.h>
 
 #ifdef CAN_USE_NLIST
+#if HAVE_STRING_H
+#include <string.h>
+#else
+#include <strings.h>
+#endif
 
 #if HAVE_STDLIB_H
 #include <stdlib.h>
@@ -218,4 +223,9 @@ auto_nlist_print_tree(int indent,
   }
 }
 #endif
+#else /* !CAN_USE_NLIST */
+int
+auto_nlist_noop(void) {
+    return 0;
+}
 #endif /* CAN_USE_NLIST */
