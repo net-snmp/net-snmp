@@ -131,7 +131,7 @@ pass_persist_parse_config(const char *token, char *cptr)
     /*
      * argggg -- pasthrus must be sorted 
      */
-    if (numpersistpassthrus > 0) {
+    if (numpersistpassthrus > 1) {
         etmp = (struct extensible **)
             malloc(((sizeof(struct extensible *)) * numpersistpassthrus));
         if (etmp == NULL)
@@ -360,7 +360,6 @@ setPassPersist(int action,
     char            buf[SNMP_MAXBUF], buf2[SNMP_MAXBUF];
     long            tmp;
     unsigned long   utmp;
-    int             itmp;
 
     /*
      * Make sure that our basic pipe structure is malloced 
@@ -417,7 +416,6 @@ setPassPersist(int action,
                         (int) ((utmp & 0xff)));
                 break;
             case ASN_OCTET_STR:
-                itmp = sizeof(buf2);
                 memcpy(buf2, var_val, var_val_len);
                 if (var_val_len == 0)
                     sprintf(buf, "string \"\"\n");
