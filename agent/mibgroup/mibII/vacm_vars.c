@@ -479,9 +479,16 @@ int vacm_in_view (struct snmp_pdu *pdu,
 
     if (pdu->version == SNMP_VERSION_1 || pdu->version == SNMP_VERSION_2c) {
 	if (snmp_get_do_debugging()) {
-	    char * buf = malloc(1+ pdu->community_len);
-	    memcpy(buf, pdu->community, pdu->community_len);
-	    buf[pdu->community_len] = '\0';
+            char *buf;
+            if (pdu->community) {
+                buf = malloc(1+ pdu->community_len);
+                memcpy(buf, pdu->community, pdu->community_len);
+                buf[pdu->community_len] = '\0';
+            } else {
+                DEBUGMSGTL(("mibII/vacm_vars", "NULL community"));
+                buf = strdup("NULL");
+            }
+            
 	    DEBUGMSGTL(("mibII/vacm_vars", "vacm_in_view: ver=%d, source=%.8x, community=%s\n", pdu->version, pduIp->sin_addr.s_addr, buf));
 	    free (buf);
 	}
