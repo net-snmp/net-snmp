@@ -277,8 +277,8 @@ netsnmp_tcp_transport(struct sockaddr_in *addr, int local)
             return NULL;
         }
         memcpy(t->local, (u_char *) & (addr->sin_addr.s_addr), 4);
-        t->local[4] = (addr->sin_port & 0xff00) >> 8;
-        t->local[5] = (addr->sin_port & 0x00ff) >> 0;
+        t->local[4] = (htons(addr->sin_port) & 0xff00) >> 8;
+        t->local[5] = (htons(addr->sin_port) & 0x00ff) >> 0;
         t->local_length = 6;
 
         /*
@@ -329,8 +329,8 @@ netsnmp_tcp_transport(struct sockaddr_in *addr, int local)
             return NULL;
         }
         memcpy(t->remote, (u_char *) & (addr->sin_addr.s_addr), 4);
-        t->remote[4] = (addr->sin_port & 0xff00) >> 8;
-        t->remote[5] = (addr->sin_port & 0x00ff) >> 0;
+        t->remote[4] = (htons(addr->sin_port) & 0xff00) >> 8;
+        t->remote[5] = (htons(addr->sin_port) & 0x00ff) >> 0;
         t->remote_length = 6;
 
         /*
@@ -389,7 +389,7 @@ netsnmp_tcp_create_ostring(const u_char * o, size_t o_len, int local)
     if (o_len == 6) {
         addr.sin_family = AF_INET;
         memcpy((u_char *) & (addr.sin_addr.s_addr), o, 4);
-        addr.sin_port = (o[4] << 8) + o[5];
+        addr.sin_port = ntohs((o[4] << 8) + o[5]);
         return netsnmp_tcp_transport(&addr, local);
     }
     return NULL;
