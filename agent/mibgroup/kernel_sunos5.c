@@ -902,7 +902,7 @@ getif(mib2_ifEntry_t *ifbuf, size_t size, req_e req_type,
 	ifp->ifType = 1;
 	ifp->ifSpeed = 0;
 
-	if ((getKstat(ifrp->ifr_name, "ifspeed", &ifp->ifSpeed) == 0) &&
+	if ((getKstatInt(NULL,ifrp->ifr_name, "ifspeed", &ifp->ifSpeed) == 0) &&
 	    (ifp->ifSpeed != 0)) {
 	    /*
 	     * check for SunOS patch with half implemented ifSpeed 
@@ -910,7 +910,7 @@ getif(mib2_ifEntry_t *ifbuf, size_t size, req_e req_type,
 	    if (ifp->ifSpeed < 10000) {
                     ifp->ifSpeed *= 1000000;
 	    }
-	} else if (getKstat(ifrp->ifr_name, "ifSpeed", &ifp->ifSpeed) == 0) {
+	} else if (getKstatInt(NULL,ifrp->ifr_name, "ifSpeed", &ifp->ifSpeed) == 0) {
 	    /*
 	     * this is good 
 	     */
@@ -974,44 +974,44 @@ getif(mib2_ifEntry_t *ifbuf, size_t size, req_e req_type,
 	if (!strchr(ifrp->ifr_name, ':')) {
 	    Counter l_tmp;
 
-	    if (getKstat(ifrp->ifr_name, "ipackets", &ifp->ifInUcastPkts) < 0){
+	    if (getKstatInt(NULL,ifrp->ifr_name, "ipackets", &ifp->ifInUcastPkts) < 0){
 		ret = -1;
 		goto Return;
 	    }
             
-	    if (getKstat(ifrp->ifr_name, "rbytes", &ifp->ifInOctets) < 0) {
+	    if (getKstatInt(NULL,ifrp->ifr_name, "rbytes", &ifp->ifInOctets) < 0) {
                     ifp->ifInOctets = ifp->ifInUcastPkts * 308; /* XXX */
 	    }
             
-	    if (getKstat(ifrp->ifr_name, "opackets",&ifp->ifOutUcastPkts) < 0){
+	    if (getKstatInt(NULL,ifrp->ifr_name, "opackets",&ifp->ifOutUcastPkts) < 0){
 		ret = -1;
 		goto Return;
 	    }
             
-	    if (getKstat(ifrp->ifr_name, "obytes", &ifp->ifOutOctets) < 0) {
+	    if (getKstatInt(NULL,ifrp->ifr_name, "obytes", &ifp->ifOutOctets) < 0) {
 		ifp->ifOutOctets = ifp->ifOutUcastPkts * 308;       /* XXX */
 	    }
 
 	    if (ifp->ifType == 24)  /* Loopback */
 		continue;
 
-	    if (getKstat(ifrp->ifr_name, "ierrors", &ifp->ifInErrors) < 0) {
+	    if (getKstatInt(NULL,ifrp->ifr_name, "ierrors", &ifp->ifInErrors) < 0) {
 		ret = -1;
 		goto Return;
 	    }
 
-	    if (getKstat(ifrp->ifr_name, "oerrors", &ifp->ifOutErrors) < 0) {
+	    if (getKstatInt(NULL,ifrp->ifr_name, "oerrors", &ifp->ifOutErrors) < 0) {
 		ret = -1;
 		goto Return;
 	    }
 
-	    if (getKstat(ifrp->ifr_name, "brdcstrcv",&ifp->ifInNUcastPkts)==0&&
-		getKstat(ifrp->ifr_name, "multircv", &l_tmp) == 0) {
+	    if (getKstatInt(NULL,ifrp->ifr_name, "brdcstrcv",&ifp->ifInNUcastPkts)==0&&
+		getKstatInt(NULL,ifrp->ifr_name, "multircv", &l_tmp) == 0) {
 		ifp->ifInNUcastPkts += l_tmp;
 	    }
 
-	    if (getKstat(ifrp->ifr_name,"brdcstxmt",&ifp->ifOutNUcastPkts)==0&&
-		getKstat(ifrp->ifr_name, "multixmt", &l_tmp) == 0) {
+	    if (getKstatInt(NULL,ifrp->ifr_name,"brdcstxmt",&ifp->ifOutNUcastPkts)==0&&
+		getKstatInt(NULL,ifrp->ifr_name, "multixmt", &l_tmp) == 0) {
 		ifp->ifOutNUcastPkts += l_tmp;
 	    }
 	}
