@@ -188,6 +188,16 @@ snmp_synch_input(int op,
             state->status = STAT_SUCCESS;
             session->s_snmp_errno = SNMPERR_SUCCESS;
         }
+        else {
+            char msg_buf[50];
+            state->status = STAT_ERROR;
+            session->s_snmp_errno = SNMPERR_PROTOCOL;
+            SET_SNMP_ERROR(SNMPERR_PROTOCOL);
+            snprintf(msg_buf, sizeof(msg_buf), "Expected RESPONSE-PDU but got %s-PDU",
+                     snmp_pdu_type(pdu->command));
+            snmp_set_detail(msg_buf);
+            return 0;
+        }
     } else if (op == NETSNMP_CALLBACK_OP_TIMED_OUT) {
         state->pdu = NULL;
         state->status = STAT_TIMEOUT;
