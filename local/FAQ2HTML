@@ -4,11 +4,10 @@ $TOCHEADER=" TABLE OF CONTENTS";
 
 open(O, ">FAQ.html");
 print O "<body bgcolor=\"#ffffff\" background=\"ucd-snmp-bg3.gif\">
-<title>UCD-SNMP FAQ</title>
+<title>NET-SNMP FAQ</title>
 <div align=center>
-<h1>Frequently Asked Questions (FAQ) for the UCD SNMP package</h1>
-FAQ Author: Dave Shield<br>
-net-snmp Project Author: Wes Hardaker<br>
+<h1>Frequently Asked Questions (FAQ) for the Net-SNMP package</h1>
+FAQ Maintainer: Dave Shield<br>
 Email: <a href=\"mailto:net-snmp-coders\@lists.sourceforge.net\">net-snmp-coders\@list.sourceforge.net</a><br>
 </div>
 <hr>
