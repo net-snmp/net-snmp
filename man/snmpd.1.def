@@ -5,7 +5,7 @@
 .SH NAME
 snmpd - daemon to respond to SNMP request packets.
 .SH SYNOPSIS
-.B "snmpd [-v] [-a] [-V] [-d] [-q] [-D] [-p port] [-f] [-l logfile] [-L] [-c file] [-C]"
+.B "snmpd [-v] [-a] [-V] [-d] [-q] [-D] [-p port] [-f] [-l logfile] [-L] [-c file] [-C] [-r]"
 .SH DESCRIPTION
 .B snmpd
 is a SNMP agent which binds to a port and awaits requests from
@@ -61,6 +61,10 @@ as a configuration file.
 Don't read any configuration files except the one optionally specified by the 
 .B -c 
 option.
+.TP
+.B -r
+Don't require root access to run the demon.  Specifically, don't exit
+when you can't open files like /dev/kmem, etc...
 .RE
 .SH CONFIGURATION FILES
 .PP

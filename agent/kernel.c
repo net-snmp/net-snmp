@@ -46,17 +46,15 @@ init_kmem(const char *file)
     kd = kvm_openfiles(NULL, NULL, NULL, O_RDONLY, err);
     if (kd == NULL) {
 	snmp_log(LOG_CRIT, "init_kmem: kvm_openfiles failed: %s\n", err);
-#ifndef NO_ROOT_ACCESS
-	exit(1);
-#endif
+        if (!ds_get_boolean(DS_APPLICATION_ID, DS_AGENT_NO_ROOT_ACCESS))
+          exit(1);
     }
 #else
     kd = kvm_open(NULL, NULL, NULL, O_RDONLY, NULL);
     if (!kd) {
 	snmp_log(LOG_CRIT, "init_kmem: kvm_open failed with errno %d\n", errno);
-#ifndef NO_ROOT_ACCESS
-	exit(1);
-#endif
+        if (!ds_get_boolean(DS_APPLICATION_ID, DS_AGENT_NO_ROOT_ACCESS))
+          exit(1);
     }
 #endif	/* HAVE_KVM_OPENFILES */
 }
@@ -107,26 +105,23 @@ init_kmem(const char *file)
   kmem = open(file, O_RDONLY);
   if (kmem < 0){
     snmp_log_perror(file);
-#ifndef NO_ROOT_ACCESS
-    exit(1);
-#endif
+    if (!ds_get_boolean(DS_APPLICATION_ID, DS_AGENT_NO_ROOT_ACCESS))
+      exit(1);
   }
   fcntl(kmem,F_SETFD,1);
   mem = open("/dev/mem",O_RDONLY);    
   if (mem < 0){
     snmp_log_perror("/dev/mem");
-#ifndef NO_ROOT_ACCESS
-    exit(1);
-#endif
+    if (!ds_get_boolean(DS_APPLICATION_ID, DS_AGENT_NO_ROOT_ACCESS))
+      exit(1);
   }
   fcntl(mem,F_SETFD,1);
 #ifdef DMEM_LOC
   swap = open(DMEM_LOC,O_RDONLY);
   if (swap < 0){
     snmp_log_perror(DMEM_LOC);
-#ifndef NO_ROOT_ACCESS
-    exit(1);
-#endif
+    if (!ds_get_boolean(DS_APPLICATION_ID, DS_AGENT_NO_ROOT_ACCESS))
+      exit(1);
   }
   fcntl(swap,F_SETFD,1);
 #endif
