@@ -808,6 +808,7 @@ main(int argc, char *argv[])
       fclose(PID);
     }
 
+    snmp_debug_init();
     init_master_agent( dest_port );
 
     usm_set_reportErrorOnUnknownID(1);
