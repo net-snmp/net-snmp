@@ -271,6 +271,7 @@ struct tok tokens[] = {
     { "NOTIFICATION-GROUP", sizeof ("NOTIFICATION-GROUP")-1, NOTIFTYPE },
     { "DISPLAY-HINT", sizeof ("DISPLAY-HINT")-1, DISPLAYHINT },
     { "FROM", sizeof ("FROM")-1, FROM },
+    { "AGENT-CAPABILITIES", sizeof ("AGENT-CAPABILITIES")-1, CAPABILITIES },
     { NULL }
 };
 
@@ -369,6 +370,7 @@ static struct node *parse_objectgroup (FILE *, char *);
 static struct node *parse_notificationDefinition (FILE *, char *);
 static struct node *parse_trapDefinition (FILE *, char *);
 static struct node *parse_compliance (FILE *, char *);
+static struct node *parse_capabilities(FILE *, char *);
 static struct node *parse_moduleIdentity (FILE *, char *);
 static        void  parse_imports (FILE *);
 static struct node *parse (FILE *, struct node *);
@@ -2993,7 +2995,7 @@ read_mib(const char *filename)
         return NULL;
     }
     Line = 1;
-    File = (char *)filename;
+    File = filename;
     DEBUGMSGTL(("parse-mibs", "Parsing file: %s...\n", filename));
     get_token( fp, token, MAXTOKEN);
     fclose(fp);
