@@ -7,6 +7,20 @@
 #include <ctype.h>
 #include <stdio.h>
 #include <sys/types.h>
+#if TIME_WITH_SYS_TIME
+# ifdef WIN32
+#  include <sys/timeb.h>
+# else
+#  include <sys/time.h>
+# endif
+# include <time.h>
+#else
+# if HAVE_SYS_TIME_H
+#  include <sys/time.h> 
+# else
+#  include <time.h>
+# endif
+#endif
 #ifdef HAVE_SYS_SOCKET_H
 #include <sys/socket.h>
 #endif
@@ -491,3 +505,51 @@ dump_snmpEngineID_quit:
 #undef eb
 }  /* end dump_snmpEngineID() */
 #endif /* SNMP_TESTING_CODE */
+
+
+/*
+ * create a new time marker.
+ * NOTE: Caller must free time marker when no longer needed.
+ */
+marker_t atime_newMarker(void)
+{
+  marker_t pm = (marker_t)calloc(1,sizeof(struct timeval));
+  gettimeofday((struct timeval *)pm, 0);
+  return pm;
+}
+
+/*
+ * set a time marker.
+ */
+void atime_setMarker(marker_t pm)
+{
+  struct timeval tx;
+  time_t tnow;
+
+  if (! pm) return;
+
+  gettimeofday((struct timeval *)pm, 0);
+}
+
+/*
+ * Test: Has (marked time plus delta) exceeded current time ?
+ * Returns 0 if test fails or cannot be tested (no marker).
+ */
+int atime_ready( marker_t pm, int deltaT)
+{
+  struct timeval txdelta, txnow;
+  if (! pm) return 0;
+
+  memcpy((void *)&txdelta, pm, sizeof(txdelta));
+  while (deltaT > 1000) {
+     txdelta.tv_sec ++;
+     deltaT -= 1000;
+  }
+  txdelta.tv_usec = (deltaT * 1000) + txdelta.tv_usec;
+
+  gettimeofday(&txnow, 0);
+  if (timercmp(&txnow, &txdelta, <))
+        return 0;
+
+  return 1;
+}
