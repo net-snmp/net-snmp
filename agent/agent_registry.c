@@ -74,14 +74,14 @@ netsnmp_subtree_free(netsnmp_subtree *a)
   if (a != NULL) {
     if (a->variables != NULL && netsnmp_oid_equals(a->name_a, a->namelen, 
 					     a->start_a, a->start_len) == 0) {
-      free(a->variables);
+      SNMP_FREE(a->variables);
     }
     SNMP_FREE(a->name_a);
     SNMP_FREE(a->start_a);
     SNMP_FREE(a->end_a);
     SNMP_FREE(a->label_a);
     netsnmp_handler_registration_free(a->reginfo);
-    free(a);
+    SNMP_FREE(a);
   }
 }
 
@@ -280,17 +280,17 @@ netsnmp_subtree_split(netsnmp_subtree *current, oid name[], int name_len)
     tmp_b = snmp_duplicate_objid(name, name_len);
     if (tmp_b == NULL) {
 	netsnmp_subtree_free(new_sub);
-	free(tmp_a);
+	SNMP_FREE(tmp_a);
 	return NULL;
     }
 
     if (current->end_a != NULL) {
-	free(current->end_a);
+	SNMP_FREE(current->end_a);
     }
     current->end_a = tmp_a;
     current->end_len = name_len;
     if (new_sub->start_a != NULL) {
-	free(new_sub->start_a);
+	SNMP_FREE(new_sub->start_a);
     }
     new_sub->start_a = tmp_b;
     new_sub->start_len = name_len;
@@ -1596,13 +1596,13 @@ dump_registry(void)
     }
 
     if (s != NULL) {
-        free(s);
+        SNMP_FREE(s);
     }
     if (e != NULL) {
-        free(e);
+        SNMP_FREE(e);
     }
     if (v != NULL) {
-        free(v);
+        SNMP_FREE(v);
     }
 
     dump_idx_registry();

@@ -568,7 +568,7 @@ netsnmp_sess_log_error(int priority,
     char           *err;
     snmp_error(ss, NULL, NULL, &err);
     snmp_log(priority, "%s: %s\n", prog_string, err);
-    free(err);
+    SNMP_FREE(err);
 }
 
 /*
@@ -2402,7 +2402,7 @@ snmpv3_packet_realloc_rbuild(u_char ** pkt, size_t * pkt_len,
     rc = snmpv3_header_realloc_rbuild(&hdrbuf, &hdrbuf_len, &hdr_offset,
                                       session, pdu);
     if (rc == 0) {
-        free(hdrbuf);
+        SNMP_FREE(hdrbuf);
         return -1;
     }
     hdr = hdrbuf + hdrbuf_len - hdr_offset;
@@ -2452,7 +2452,7 @@ snmpv3_packet_realloc_rbuild(u_char ** pkt, size_t * pkt_len,
     }
 
     DEBUGINDENTLESS();
-    free(hdrbuf);
+    SNMP_FREE(hdrbuf);
     return rc;
 }                               /* end snmpv3_packet_realloc_rbuild() */
 #endif                          /* USE_REVERSE_ASNENCODING */
@@ -3622,7 +3622,7 @@ snmpv3_parse(netsnmp_pdu *pdu,
         }
 
         if (mallocbuf) {
-            free(mallocbuf);
+            SNMP_FREE(mallocbuf);
         }
         if (pdu->securityStateRef != NULL) {
             if (sptr && sptr->pdu_free_state_ref) {
@@ -3643,7 +3643,7 @@ snmpv3_parse(netsnmp_pdu *pdu,
         snmp_increment_statistic(STAT_SNMPINASNPARSEERRS);
         DEBUGINDENTADD(-4);
         if (mallocbuf) {
-            free(mallocbuf);
+            SNMP_FREE(mallocbuf);
         }
         if (pdu->securityStateRef != NULL) {
             if (sptr && sptr->pdu_free_state_ref) {
@@ -3674,7 +3674,7 @@ snmpv3_parse(netsnmp_pdu *pdu,
         ERROR_MSG("error parsing PDU");
         snmp_increment_statistic(STAT_SNMPINASNPARSEERRS);
         if (mallocbuf) {
-            free(mallocbuf);
+            SNMP_FREE(mallocbuf);
         }
         if (pdu->securityStateRef != NULL) {
             if (sptr && sptr->pdu_free_state_ref) {
@@ -3686,7 +3686,7 @@ snmpv3_parse(netsnmp_pdu *pdu,
     }
 
     if (mallocbuf) {
-        free(mallocbuf);
+        SNMP_FREE(mallocbuf);
     }
     return SNMPERR_SUCCESS;
 }                               /* end snmpv3_parse() */
@@ -4515,7 +4515,7 @@ _sess_async_send(void *sessp,
     if (pdu->version == SNMP_DEFAULT_VERSION) {
         if (session->version == SNMP_DEFAULT_VERSION) {
             session->s_snmp_errno = SNMPERR_BAD_VERSION;
-            free(pktbuf);
+            SNMP_FREE(pktbuf);
             return 0;
         }
         pdu->version = session->version;
@@ -4528,7 +4528,7 @@ _sess_async_send(void *sessp,
          * ENHANCE: we should support multi-lingual sessions  
          */
         session->s_snmp_errno = SNMPERR_BAD_VERSION;
-        free(pktbuf);
+        SNMP_FREE(pktbuf);
         return 0;
     }
 
@@ -4563,7 +4563,7 @@ _sess_async_send(void *sessp,
 
     if (result < 0) {
         DEBUGMSGTL(("sess_async_send", "encoding failure\n"));
-        free(pktbuf);
+        SNMP_FREE(pktbuf);
         return 0;
     }
 
@@ -4577,7 +4577,7 @@ _sess_async_send(void *sessp,
                     "length of packet (%lu) exceeds session maximum (%lu)\n",
                     length, session->sndMsgMaxSize));
         session->s_snmp_errno = SNMPERR_TOO_LONG;
-        free(pktbuf);
+        SNMP_FREE(pktbuf);
         return 0;
     }
 
@@ -4591,7 +4591,7 @@ _sess_async_send(void *sessp,
                     "length of packet (%lu) exceeds transport maximum (%lu)\n",
                     length, transport->msgMaxSize));
         session->s_snmp_errno = SNMPERR_TOO_LONG;
-        free(pktbuf);
+        SNMP_FREE(pktbuf);
         return 0;
     }
 
@@ -4603,7 +4603,7 @@ _sess_async_send(void *sessp,
             if (dest_txt != NULL) {
                 snmp_log(LOG_DEBUG, "\nSending %u bytes to %s\n", length,
                          dest_txt);
-                free(dest_txt);
+                SNMP_FREE(dest_txt);
             } else {
                 snmp_log(LOG_DEBUG, "\nSending %u bytes to <UNKNOWN>\n",
                          length);
@@ -4620,7 +4620,7 @@ _sess_async_send(void *sessp,
                                &(pdu->transport_data),
                                &(pdu->transport_data_length));
 
-    free(pktbuf);
+    SNMP_FREE(pktbuf);
 
     if (result < 0) {
         session->s_snmp_errno = SNMPERR_BAD_SENDTO;
@@ -4830,7 +4830,7 @@ _sess_process_packet(void *sessp, netsnmp_session * sp,
       if (addrtxt != NULL) {
 	snmp_log(LOG_DEBUG, "\nReceived %d bytes from %s\n",
 		 length, addrtxt);
-	free(addrtxt);
+	SNMP_FREE(addrtxt);
       } else {
 	snmp_log(LOG_DEBUG, "\nReceived %d bytes from <UNKNOWN>\n",
 		 length);
@@ -4847,7 +4847,7 @@ _sess_process_packet(void *sessp, netsnmp_session * sp,
     if (isp->hook_pre(sp, transport, opaque, olength) == 0) {
       DEBUGMSGTL(("sess_process_packet", "pre-parse fail\n"));
       if (opaque != NULL) {
-	free(opaque);
+	SNMP_FREE(opaque);
       }
       return -1;
     }
@@ -4861,7 +4861,7 @@ _sess_process_packet(void *sessp, netsnmp_session * sp,
   if (pdu == NULL) {
     snmp_log(LOG_ERR, "pdu failed to be created\n");
     if (opaque != NULL) {
-      free(opaque);
+      SNMP_FREE(opaque);
     }
     return -1;
   }
@@ -5269,9 +5269,9 @@ _sess_read(void *sessp, fd_set * fdset)
         sp->s_snmp_errno = SNMPERR_BAD_RECVFROM;
         sp->s_errno = errno;
         snmp_set_detail(strerror(errno));
-        free(rxbuf);
+        SNMP_FREE(rxbuf);
         if (opaque != NULL) {
-            free(opaque);
+            SNMP_FREE(opaque);
         }
         return -1;
     }
@@ -5294,10 +5294,10 @@ _sess_read(void *sessp, fd_set * fdset)
          */
         DEBUGMSGTL(("sess_read", "fd %d closed\n", transport->sock));
         transport->f_close(transport);
-        free(rxbuf);
+        SNMP_FREE(rxbuf);
         isp->packet = NULL;
         if (opaque != NULL) {
-            free(opaque);
+            SNMP_FREE(opaque);
         }
         return -1;
     }
@@ -5338,7 +5338,7 @@ _sess_read(void *sessp, fd_set * fdset)
 		DEBUGMSGTL(("sess_read", "fd %d closed\n", transport->sock));
                 transport->f_close(transport);
                 if (opaque != NULL) {
-                    free(opaque);
+                    SNMP_FREE(opaque);
                 }
                 return -1;
             }
@@ -5352,7 +5352,7 @@ _sess_read(void *sessp, fd_set * fdset)
                             "pkt not complete (need %d got %d so far)\n",
                             pdulen, isp->packet_len));
                 if (opaque != NULL) {
-                    free(opaque);
+                    SNMP_FREE(opaque);
                 }
                 return 0;
             }
@@ -5403,7 +5403,7 @@ _sess_read(void *sessp, fd_set * fdset)
 	    pointer itself.  */
 
 	if (opaque != NULL) {
-	    free(opaque);
+	    SNMP_FREE(opaque);
 	}
 
         if (isp->packet_len >= MAXIMUM_PACKET_SIZE) {
@@ -5422,7 +5422,7 @@ _sess_read(void *sessp, fd_set * fdset)
              * time.  We can free() the buffer now to keep the memory
              * footprint down.
              */
-            free(isp->packet);
+            SNMP_FREE(isp->packet);
             isp->packet = NULL;
             isp->packet_size = 0;
             isp->packet_len = 0;
@@ -5456,7 +5456,7 @@ _sess_read(void *sessp, fd_set * fdset)
     } else {
         rc = _sess_process_packet(sessp, sp, isp, transport, opaque,
                                   olength, rxbuf, length);
-        free(rxbuf);
+        SNMP_FREE(rxbuf);
         return rc;
     }
 }
@@ -5763,7 +5763,7 @@ snmp_resend_request(struct session_list *slp, netsnmp_request_list *rp,
          */
         DEBUGMSGTL(("sess_resend", "encoding failure\n"));
         if (pktbuf != NULL) {
-            free(pktbuf);
+            SNMP_FREE(pktbuf);
         }
         return -1;
     }
@@ -5777,7 +5777,7 @@ snmp_resend_request(struct session_list *slp, netsnmp_request_list *rp,
             if (string != NULL) {
                 snmp_log(LOG_DEBUG, "\nResending %d bytes to %s\n", length,
                          string);
-                free(string);
+                SNMP_FREE(string);
             } else {
                 snmp_log(LOG_DEBUG, "\nResending %d bytes to <UNKNOWN>\n",
                          length);
@@ -5796,7 +5796,7 @@ snmp_resend_request(struct session_list *slp, netsnmp_request_list *rp,
      */
 
     if (pktbuf != NULL) {
-        free(pktbuf);
+        SNMP_FREE(pktbuf);
         pktbuf = packet = NULL;
     }
 
@@ -6550,7 +6550,7 @@ snmp_add_var(netsnmp_pdu *pdu,
                 snmp_pdu_add_variable(pdu, name, name_length,
                                       ASN_OCTET_STR, hintptr, itmp);
             }
-            free(hintptr);
+            SNMP_FREE(hintptr);
             hintptr = buf;
             break;
         }
@@ -6631,8 +6631,8 @@ snmp_add_var(netsnmp_pdu *pdu,
 #endif /* DISABLE_MIB_LOADING */
                     result = SNMPERR_BAD_NAME;
                     snmp_set_detail(cp);
-                    free(buf);
-		    free(vp);
+                    SNMP_FREE(buf);
+		    SNMP_FREE(vp);
                     goto out;
 #ifndef DISABLE_MIB_LOADING
                 }
@@ -6651,7 +6651,7 @@ snmp_add_var(netsnmp_pdu *pdu,
             buf[ix] |= bit;
 	    
         }
-	free(vp);
+	SNMP_FREE(vp);
         snmp_pdu_add_variable(pdu, name, name_length, ASN_OCTET_STR,
                               buf, tint);
         break;

@@ -189,7 +189,7 @@ netsnmp_free_cachemap(netsnmp_cachemap *cache_store)
     while (cache_store) {
         tmpp = cache_store;
         cache_store = cache_store->next;
-        free(tmpp);
+        SNMP_FREE(tmpp);
     }
 }
 
@@ -286,7 +286,7 @@ get_set_cache(netsnmp_agent_session *asp)
                     asp->reqinfo->agent_data = ptr->agent_data;
                 }
             }
-            free(ptr);
+            SNMP_FREE(ptr);
             return SNMP_ERR_NOERROR;
         }
         prev = ptr;
@@ -399,7 +399,7 @@ netsnmp_addrcache_age(void)
         if (addrCache[i].status == SNMP_ADDRCACHE_OLD) {
             addrCache[i].status = SNMP_ADDRCACHE_UNUSED;
             if (addrCache[i].addr != NULL) {
-                free(addrCache[i].addr);
+                SNMP_FREE(addrCache[i].addr);
                 addrCache[i].addr = NULL;
             }
         }
@@ -455,7 +455,7 @@ netsnmp_agent_check_packet(netsnmp_session * session,
         } else {
             snmp_log(deny_severity, "Connection from %s REFUSED\n",
                      addr_string);
-            free(addr_string);
+            SNMP_FREE(addr_string);
             return 0;
         }
     } else {
@@ -494,7 +494,7 @@ netsnmp_agent_check_packet(netsnmp_session * session,
             for (i = 0; i < SNMP_ADDRCACHE_SIZE; i++) {
                 if (addrCache[i].status == SNMP_ADDRCACHE_UNUSED) {
                     if (addrCache[i].addr != NULL) {
-                        free(addrCache[i].addr);
+                        SNMP_FREE(addrCache[i].addr);
                     }
                     addrCache[i].addr = addr_string;
                     addrCache[i].status = SNMP_ADDRCACHE_USED;
@@ -518,7 +518,7 @@ netsnmp_agent_check_packet(netsnmp_session * session,
     }
 
     if (addr_string != NULL) {
-        free(addr_string);
+        SNMP_FREE(addr_string);
         addr_string = NULL;
     }
     return 1;
@@ -610,7 +610,7 @@ netsnmp_agent_check_parse(netsnmp_session * session, netsnmp_pdu *pdu,
                     } else {
                         snmp_log(LOG_DEBUG, "    -- %s\n", c_oid);
                     }
-                    free(c_oid);
+                    SNMP_FREE(c_oid);
                 }
             }
         }
@@ -662,7 +662,7 @@ netsnmp_register_agent_nsap(netsnmp_transport *t)
     }
     s = (netsnmp_session *) malloc(sizeof(netsnmp_session));
     if (s == NULL) {
-        free(n);
+        SNMP_FREE(n);
         return -1;
     }
     memset(s, 0, sizeof(netsnmp_session));
@@ -682,15 +682,15 @@ netsnmp_register_agent_nsap(netsnmp_transport *t)
     sp = snmp_add(s, t, netsnmp_agent_check_packet,
                   netsnmp_agent_check_parse);
     if (sp == NULL) {
-        free(s);
-        free(n);
+        SNMP_FREE(s);
+        SNMP_FREE(n);
         return -1;
     }
 
     isp = snmp_sess_pointer(sp);
     if (isp == NULL) {          /*  over-cautious  */
-        free(s);
-        free(n);
+        SNMP_FREE(s);
+        SNMP_FREE(n);
         return -1;
     }
 
@@ -711,11 +711,11 @@ netsnmp_register_agent_nsap(netsnmp_transport *t)
         n->handle = handle + 1;
         n->next = a;
         *prevNext = n;
-        free(s);
+        SNMP_FREE(s);
         return n->handle;
     } else {
-        free(s);
-        free(n);
+        SNMP_FREE(s);
+        SNMP_FREE(n);
         return -1;
     }
 }
@@ -741,7 +741,7 @@ netsnmp_deregister_agent_nsap(int handle)
         /*
          * The above free()s the transport and session pointers.  
          */
-        free(a);
+        SNMP_FREE(a);
     }
 
     /*
@@ -950,10 +950,10 @@ free_agent_snmp_session(netsnmp_agent_session *asp)
     if (asp->reqinfo)
         netsnmp_free_agent_request_info(asp->reqinfo);
     if (asp->treecache) {
-        free(asp->treecache);
+        SNMP_FREE(asp->treecache);
     }
     if (asp->bulkcache) {
-        free(asp->bulkcache);
+        SNMP_FREE(asp->bulkcache);
     }
     if (asp->requests) {
         int             i;
@@ -962,13 +962,13 @@ free_agent_snmp_session(netsnmp_agent_session *asp)
         }
     }
     if (asp->requests) {
-        free(asp->requests);
+        SNMP_FREE(asp->requests);
     }
     if (asp->cache_store) {
         netsnmp_free_cachemap(asp->cache_store);
         asp->cache_store = NULL;
     }
-    free(asp);
+    SNMP_FREE(asp);
 }
 
 int
@@ -1908,7 +1908,7 @@ netsnmp_reassign_requests(netsnmp_agent_session *asp)
                                               asp->requests[i].requestvb,
                                               asp->requests[i].subtree->next)) {
                 if (old_treecache != NULL) {
-                    free(old_treecache);
+                    SNMP_FREE(old_treecache);
                     old_treecache = NULL;
                 }
             }
@@ -1921,7 +1921,7 @@ netsnmp_reassign_requests(netsnmp_agent_session *asp)
                                               asp->requests[i].requestvb,
                                               asp->requests[i].subtree)) {
                 if (old_treecache != NULL) {
-                    free(old_treecache);
+                    SNMP_FREE(old_treecache);
                     old_treecache = NULL;
                 }
             }
@@ -1929,7 +1929,7 @@ netsnmp_reassign_requests(netsnmp_agent_session *asp)
     }
 
     if (old_treecache != NULL) {
-        free(old_treecache);
+        SNMP_FREE(old_treecache);
     }
     return SNMP_ERR_NOERROR;
 }
@@ -2955,6 +2955,6 @@ netsnmp_free_agent_request_info(netsnmp_agent_request_info *ari)
         if (ari->agent_data) {
             netsnmp_free_all_list_data(ari->agent_data);
 	}
-        free(ari);
+        SNMP_FREE(ari);
     }
 }

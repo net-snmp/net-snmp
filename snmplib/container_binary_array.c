@@ -334,7 +334,7 @@ netsnmp_binary_array_insert(netsnmp_container *c, const void *entry)
 
         if (t->data) {
             memcpy(new_data, t->data, t->max_size * t->data_size);
-            free(t->data);
+            SNMP_FREE(t->data);
         }
         t->data = new_data;
         t->max_size = new_max;
@@ -544,7 +544,7 @@ netsnmp_container_get_binary_array(void)
     }
 
     if (0 != netsnmp_container_get_binary_array_noalloc(c)) {
-        free(c);
+        SNMP_FREE(c);
         return NULL;
     }
         

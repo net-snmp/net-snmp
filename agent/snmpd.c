@@ -740,7 +740,7 @@ main(int argc, char *argv[])
                 sprintf(astring, "%s,%s", c, argv[i]);
                 netsnmp_ds_set_string(NETSNMP_DS_APPLICATION_ID, 
 				      NETSNMP_DS_AGENT_PORTS, astring);
-                free(astring);
+                SNMP_FREE(astring);
             } else {
                 netsnmp_ds_set_string(NETSNMP_DS_APPLICATION_ID, 
 				      NETSNMP_DS_AGENT_PORTS, argv[i]);
