@@ -2359,7 +2359,7 @@ parse_objecttype(FILE * fp, char *name)
         type = get_token(fp, token, MAXTOKEN);
         if (type != IDENTIFIER) {
             print_error("Expected IDENTIFIER", token, type);
-            free(np);
+            free_node(np);
             return NULL;
         }
         type = OBJID;
@@ -5193,6 +5193,9 @@ merge_parse_objectid(struct node *np, FILE * fp, char *name)
         np->subid = nnp->subid;
         np->modid = nnp->modid;
         np->parent = nnp->parent;
+	if (nnp->filename != NULL) {
+	  free(nnp->filename);
+	}
         free(nnp);
 
         if (ncount) {
