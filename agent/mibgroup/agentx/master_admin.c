@@ -4,6 +4,11 @@
 #include "config.h"
 
 #include <sys/types.h>
+#ifdef HAVE_STRING
+#include <string.h>
+#else
+#include <strings.h>
+#endif
 #ifdef HAVE_STDLIB_H
 #include <stdlib.h>
 #endif
@@ -29,9 +34,11 @@
 #include "snmp_agent.h"
 #include "snmp_vars.h"
 #include "var_struct.h"
+#include "agent_registry.h"
 #include "mibII/sysORTable.h"
 
 extern struct variable2 agentx_varlist[];
+extern struct timeval   starttime;
 
 struct snmp_session *
 find_agentx_session( struct snmp_session *session, int sessid)
@@ -50,6 +57,7 @@ int
 open_agentx_session(struct snmp_session *session, struct snmp_pdu *pdu)
 {
     struct snmp_session *sp;
+    struct timeval now;
 
     sp = malloc( sizeof( struct snmp_session ));
     if ( sp == NULL ) {
@@ -58,7 +66,25 @@ open_agentx_session(struct snmp_session *session, struct snmp_pdu *pdu)
     }
 
     memcpy( sp, session, sizeof(struct snmp_session));    
-    sp->sessid     = getNextSessID();
+    sp->sessid     = snmp_get_next_sessid();
+    sp->version    = pdu->version;
+    sp->timeout    = pdu->time;
+
+	/*
+	 * This next bit utilises unused SNMPv3 fields
+	 *   to store the subagent OID and description.
+	 * This really ought to use AgentX-specific fields,
+	 *   but it hardly seems worth it for a one-off use.
+	 *
+	 * But I'm willing to be persuaded otherwise....
+	 */
+    sp->securityAuthProto =
+	snmp_duplicate_objid(pdu->variables->name, pdu->variables->name_length);
+    sp->securityAuthProtoLen = pdu->variables->name_length;
+    sp->securityName = strdup( pdu->variables->val.string );
+    gettimeofday(&now, NULL);
+    sp->engineTime = calculate_time_diff( &now, &starttime );
+
     sp->subsession = session;			/* link back to head */
     sp->flags     |= SNMP_FLAGS_SUBSESSION;
     sp->next       = session->subsession;
@@ -74,10 +100,8 @@ close_agentx_session(struct snmp_session *session, int sessid)
     
     for ( sp = session->subsession ; sp != NULL ; prev = sp, sp = sp->next ) {
         if ( sp->sessid == sessid ) {
-	    /* 
-	    * TODO:	Unregister any MIB regions,
-	    *		indexes or sysOR entries from this session
-	    */
+
+	    unregister_mibs_by_session( sp );
 	    if ( prev )
 	        prev->next = sp->next;
 	    else
@@ -104,21 +128,22 @@ register_agentx_list(struct snmp_session *session, struct snmp_pdu *pdu)
 
     sprintf(buf, "AgentX subagent %ld", sp->sessid );
     		 /*
-		* TODO: registration priority, timeout, etc
+		* TODO: registration timeout
+		*	registration context
 		*	Range registration
 		*/ 
     switch (register_mib(buf, (struct variable *)agentx_varlist,
 			 sizeof(agentx_varlist[0]), 1,
 			 pdu->variables->name, pdu->variables->name_length)) {
-       case -1:		return AGENTX_ERR_REQUEST_DENIED;
-       case -2:		return AGENTX_ERR_DUPLICATE_REGISTRATION;
-    }
-    sub = find_subtree_previous( pdu->variables->name,
-				 pdu->variables->name_length, NULL );
 
-    if ( sub != NULL )
-        sub->session = sp;
-    return AGENTX_ERR_NOERROR;
+	case MIB_REGISTERED_OK:
+				return AGENTX_ERR_NOERROR;
+	case MIB_DUPLICATE_REGISTRATION:
+				return AGENTX_ERR_DUPLICATE_REGISTRATION;
+	case MIB_REGISTRATION_FAILED:
+	default:
+				return AGENTX_ERR_REQUEST_DENIED;
+    }
 }
 
 int
@@ -131,14 +156,18 @@ unregister_agentx_list(struct snmp_session *session, struct snmp_pdu *pdu)
         return AGENTX_ERR_NOT_OPEN;
 
     		 /*
-		* TODO: registration priority, timeout, etc
-		*	Range registration
+		* TODO: Range unregistration
 		*/ 
-    if (unregister_mib(pdu->variables->name,
-    		       pdu->variables->name_length) < 0 )
-	return AGENTX_ERR_UNKNOWN_REGISTRATION;
-    else
-        return AGENTX_ERR_NOERROR;
+    switch (unregister_mib_priority(pdu->variables->name,
+    		       pdu->variables->name_length,
+		       pdu->priority)) {
+	case MIB_UNREGISTERED_OK:
+				return AGENTX_ERR_NOERROR;
+	case MIB_NO_SUCH_REGISTRATION:
+				return AGENTX_ERR_UNKNOWN_REGISTRATION;
+	case MIB_UNREGISTRATION_FAILED:
+	default:
+				return AGENTX_ERR_REQUEST_DENIED;
 }
 
 int
@@ -180,6 +209,7 @@ handle_master_agentx_packet(int operation,
 			    void *magic)
 {
     struct agent_snmp_session  *asp;
+    struct timeval now;
     
     if ( magic )
         asp = (struct agent_snmp_session *)magic;
@@ -232,6 +262,8 @@ handle_master_agentx_packet(int operation,
     }
     
     if ( asp->outstanding_requests == NULL ) {
+        gettimeofday(&now, NULL);
+	asp->pdu->time    = calculate_time_diff( &now, &starttime );
         asp->pdu->command = AGENTX_MSG_RESPONSE;
 	asp->pdu->errstat = asp->status;
 	snmp_send( asp->session, asp->pdu );

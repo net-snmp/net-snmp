@@ -43,10 +43,14 @@
 #include "snmp_client.h"
 #include "snmp.h"
 #include "snmp_debug.h"
+#include "snmp_vars.h"
+#include "agent_registry.h"
 
 #include "agentx/protocol.h"
+#include "agentx/client.h"
 
 static oid null_oid[] = {0, 0};
+extern struct timevale starttime;
 
 	/*
 	 * AgentX handling utility routines
@@ -63,6 +67,7 @@ agentx_synch_input(int op,
 			void *magic)
 {
     struct synch_state *state = (struct synch_state *)magic;
+    struct timeval now, diff;
 
     if ( reqid != state->reqid )
 	return 0;
@@ -74,6 +79,21 @@ agentx_synch_input(int op,
 	    state->pdu		= snmp_clone_pdu(pdu);
 	    state->status	= STAT_SUCCESS;
 	    session->s_snmp_errno = SNMPERR_SUCCESS;
+
+		/*
+		 * Synchronise sysUpTime with the master agent
+		 */
+          gettimeofday( &now, NULL );
+          now.tv_sec--;
+          now.tv_usec += 1000000L;
+          diff.tv_sec  = pdu->time/100;
+          diff.tv_usec = (pdu->time - (diff.tv_sec * 100)) * 10000;
+          starttime.tv_sec  = now.tv_sec  - diff.tv_sec;
+          starttime.tv_usec = now.tv_usec - diff.tv_usec;
+          if ( starttime.tv_usec > 1000000L ) {
+              starttime.tv_sec -= 1000000L;
+              starttime.tv_sec++;
+          }
 	}
     }
     else if (op == TIMED_OUT){
@@ -102,6 +122,8 @@ int
 agentx_open_session( struct snmp_session *ss )
 {
     struct snmp_pdu *pdu, *response;
+    extern oid version_id[];
+    extern oid version_id_len;
 
     DEBUGMSGTL(("agentx/subagent","opening session \n"));
     if (! IS_AGENTX_VERSION( ss->version ))
@@ -111,7 +133,7 @@ agentx_open_session( struct snmp_session *ss )
     if ( pdu == NULL )
 	return 0;
     pdu->time = 0;
-    snmp_add_var( pdu, null_oid, 2, 's', "UCD AgentX sub-agent");
+    snmp_add_var( pdu, version_id, version_id_len, 's', "UCD AgentX sub-agent");
 
     if ( agentx_synch_response(ss, pdu, &response) != STAT_SUCCESS )
 	return 0;
@@ -128,7 +150,7 @@ agentx_open_session( struct snmp_session *ss )
 }
 
 int
-agentx_close_session( struct snmp_session *ss )
+agentx_close_session( struct snmp_session *ss, int why )
 {
     struct snmp_pdu *pdu, *response;
     DEBUGMSGTL(("agentx/subagent","closing session\n"));
@@ -140,7 +162,8 @@ agentx_close_session( struct snmp_session *ss )
     if ( pdu == NULL )
 	return 0;
     pdu->time = 0;
-    snmp_add_var( pdu, null_oid, 2, 's', "UCD AgentX sub-agent");
+    pdu->errstat = why;
+    pdu->sessid  = ss->sessid;
 
     (void) agentx_synch_response(ss, pdu, &response);
     snmp_free_pdu(response);
@@ -163,6 +186,7 @@ agentx_register( struct snmp_session *ss, oid start[], size_t startlen)
     if ( pdu == NULL )
 	return 0;
     pdu->time = 0;
+    pdu->priority = DEFAULT_MIB_PRIORITY;
     pdu->sessid = ss->sessid;
     snmp_add_null_var( pdu, start, startlen);
 
@@ -184,7 +208,7 @@ agentx_register( struct snmp_session *ss, oid start[], size_t startlen)
 }
 
 int
-agentx_unregister( struct snmp_session *ss, oid start[], size_t startlen)
+agentx_unregister_priority( struct snmp_session *ss, oid start[], size_t startlen, int priority)
 {
     struct snmp_pdu *pdu, *response;
 
@@ -198,6 +222,7 @@ agentx_unregister( struct snmp_session *ss, oid start[], size_t startlen)
     if ( pdu == NULL )
 	return 0;
     pdu->time = 0;
+    pdu->priority = priority;
     pdu->sessid = ss->sessid;
     snmp_add_null_var( pdu, start, startlen);
 
@@ -212,6 +237,12 @@ agentx_unregister( struct snmp_session *ss, oid start[], size_t startlen)
     snmp_free_pdu(response);
     DEBUGMSGTL(("agentx/subagent","unregistered\n"));
     return 1;
+}
+
+int
+agentx_unregister( struct snmp_session *ss, oid start[], size_t startlen)
+{
+    agentx_unregister_priority( ss, start, startlen, DEFAULT_MIB_PRIORITY);
 }
 
 int

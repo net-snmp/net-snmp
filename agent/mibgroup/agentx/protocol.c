@@ -244,10 +244,10 @@ agentx_build_header(struct snmp_pdu *pdu, u_char *bufp, size_t *out_length)
     agentx_build_int( bufp, pdu->sessid, pdu->flags & AGENTX_FLAGS_NETWORK_BYTE_ORDER );
     *out_length -=4;
     bufp        +=4;
-    agentx_build_int( bufp, pdu->reqid,  pdu->flags & AGENTX_FLAGS_NETWORK_BYTE_ORDER );
+    agentx_build_int( bufp, pdu->transid,  pdu->flags & AGENTX_FLAGS_NETWORK_BYTE_ORDER );
     *out_length -=4;
     bufp        +=4;
-    agentx_build_int( bufp, pdu->msgid,  pdu->flags & AGENTX_FLAGS_NETWORK_BYTE_ORDER );
+    agentx_build_int( bufp, pdu->reqid,  pdu->flags & AGENTX_FLAGS_NETWORK_BYTE_ORDER );
     *out_length -=4;
     bufp        +=4;
     agentx_build_int( bufp, 0, 0 );  /* dummy payload length */
@@ -806,13 +806,13 @@ agentx_parse_header(struct snmp_pdu *pdu, u_char *data, size_t *length)
      bufp += 4;
 
      DEBUGDUMPHEADER("dump_recv", "Parsing AgentX Transaction ID\n");
-     pdu->reqid = agentx_parse_int( bufp,
+     pdu->transid = agentx_parse_int( bufp,
 				pdu->flags & AGENTX_FLAGS_NETWORK_BYTE_ORDER );
      DEBUGINDENTLESS();
      bufp += 4;
 
      DEBUGDUMPHEADER("dump_recv", "Parsing AgentX Packet ID\n");
-     pdu->msgid = agentx_parse_int( bufp,
+     pdu->reqid = agentx_parse_int( bufp,
 				pdu->flags & AGENTX_FLAGS_NETWORK_BYTE_ORDER );
      DEBUGINDENTLESS();
      bufp += 4;
@@ -1647,8 +1647,8 @@ main ()
      pdu1.command = AGENTX_MSG_TESTSET;
      pdu1.flags  =  0;
      pdu1.sessid = 16;
-     pdu1.reqid  = 24;
-     pdu1.msgid  = 132;
+     pdu1.transid  = 24;
+     pdu1.reqid  = 132;
      
      pdu1.time   = 10;
      pdu1.non_repeaters   = 3;
@@ -1659,7 +1659,7 @@ main ()
      snmp_pdu_add_variable( &pdu1, oid_buf, sizeof(oid_buf)/sizeof(oid),
 				ASN_OBJECT_ID, (char *)oid_buf2, sizeof(oid_buf2));
      snmp_pdu_add_variable( &pdu1, oid_buf, sizeof(oid_buf)/sizeof(oid),
-				ASN_INTEGER, (char *)&pdu1.msgid, sizeof(pdu1.msgid));
+				ASN_INTEGER, (char *)&pdu1.reqid, sizeof(pdu1.reqid));
      snmp_pdu_add_variable( &pdu1, oid_buf, sizeof(oid_buf)/sizeof(oid),
 				ASN_OCTET_STR, (char *)string, strlen(string));
 
