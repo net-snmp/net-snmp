@@ -228,7 +228,7 @@ void initialize_table_$table(void);
 void
 init_$name(void)
 {
-    DEBUGTRACE;
+    DEBUGMSGTL(("verbose:$name:init_$name","called\n"));
 
   /* here we initialize all the tables we're planning on supporting */
   @foreach $table table@
@@ -252,7 +252,7 @@ initialize_table_$table(void)
     ${context}_registration_ptr user_context;
     u_long flags;
 
-    DEBUGTRACE;
+    DEBUGMSGTL(("verbose:$table:initialize_table_$table","called\n"));
 
     /*
      * if you'd like to pass in a pointer to some data for this
@@ -327,7 +327,7 @@ void ${context}_rowreq_ctx_cleanup(${context}_rowreq_ctx *rowreq_ctx)
 int
 ${context}_pre_request(${context}_registration_ptr user_context)
 {
-    DEBUGTRACE;
+    DEBUGMSGTL(("verbose:${context}_pre_request","called\n"));
 
     /*
      * TODO:
@@ -347,7 +347,7 @@ ${context}_pre_request(${context}_registration_ptr user_context)
 int
 ${context}_post_request(${context}_registration_ptr user_context)
 {
-    DEBUGTRACE;
+    DEBUGMSGTL(("verbose:${context}_post_request","called\n"));
 
     /*
      * TODO:
