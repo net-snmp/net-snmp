@@ -76,9 +76,14 @@ SOFTWARE.
 #include "snmp.h"
 #include "snmp_impl.h"
 #include "system.h"
+#include "default_store.h"
 #include "snmp_parse_args.h"
 
+#define DS_WALK_INCLUDE_REQUESTED 1
+#define DS_WALK_PRINT_STATISTICS  2
+
 oid objid_mib[] = {1, 3, 6, 1, 2, 1};
+int numprinted = 0;
 
 void usage(void)
 {
@@ -86,6 +91,57 @@ void usage(void)
   snmp_parse_args_usage(stderr);
   fprintf(stderr," [<objectID>]\n\n");
   snmp_parse_args_descriptions(stderr);
+  fprintf(stderr, "  -C <APPOPTS>  Toggle various application specific behaviour:\n");
+  fprintf(stderr, "\t\t  APPOPTS values:\n");
+  fprintf(stderr,"\t\t      p: Print the number of variables found.\n");
+  fprintf(stderr,"\t\t      i: Include the requested OID in the search range.\n");
+}
+
+void
+snmp_get_and_print(struct snmp_session *ss, oid *theoid, size_t theoid_len) {
+    struct snmp_pdu *pdu, *response;
+    struct variable_list *vars;
+    int status;
+    
+    pdu = snmp_pdu_create(SNMP_MSG_GETNEXT);
+    snmp_add_null_var(pdu, theoid, theoid_len);
+
+    status = snmp_synch_response(ss, pdu, &response);
+    if (status == STAT_SUCCESS && response->errstat == SNMP_ERR_NOERROR) {
+        for(vars = response->variables; vars; vars = vars->next_variable) {
+            numprinted++;
+            print_variable(vars->name, vars->name_length, vars);
+        }
+    }
+    if (response)
+        snmp_free_pdu(response);
+}
+
+static void optProc(int argc, char *const *argv, int opt)
+{
+    switch (opt) {
+        case 'C':
+            while (*optarg) {
+                switch (*optarg++) {
+                    case 'i':
+                        ds_toggle_boolean(DS_APPLICATION_ID,
+                                          DS_WALK_INCLUDE_REQUESTED);
+                        break;
+
+                    case 'p':
+                        ds_toggle_boolean(DS_APPLICATION_ID,
+                                          DS_WALK_PRINT_STATISTICS);
+                        break;
+
+                    default:
+                        fprintf(stderr,
+                                "Unknown flag passed to -C: %c\n", *optarg);
+                        usage();
+                        exit(1);
+                }
+            }
+            break;
+    }
 }
 
 int main(int argc, char *argv[])
@@ -102,8 +158,13 @@ int main(int argc, char *argv[])
     int    running;
     int    status;
 
+    ds_register_config(ASN_BOOLEAN, "snmpwalk", "includeRequested",
+                       DS_APPLICATION_ID, DS_WALK_INCLUDE_REQUESTED);
+    ds_register_config(ASN_BOOLEAN, "snmpwalk", "printStatistics",
+                       DS_APPLICATION_ID, DS_WALK_PRINT_STATISTICS);
+
     /* get the common command line arguments */
-    arg = snmp_parse_args(argc, argv, &session, NULL, NULL);
+    arg = snmp_parse_args(argc, argv, &session, "C:", optProc);
 
     /* get the initial object and subtree */
     if (arg < argc) {
@@ -134,7 +195,12 @@ int main(int argc, char *argv[])
     memmove(name, root, rootlen * sizeof(oid));
     name_length = rootlen;
 
-    running = 1;
+    running = -1;
+
+    if (ds_get_boolean(DS_APPLICATION_ID, DS_WALK_INCLUDE_REQUESTED)) {
+        snmp_get_and_print(ss, root, rootlen);
+    }
+    
     while(running){
       /* create PDU for GETNEXT request and add object name to request */
       pdu = snmp_pdu_create(SNMP_MSG_GETNEXT);
@@ -152,6 +218,7 @@ int main(int argc, char *argv[])
               running = 0;
               continue;
             }
+            numprinted++;
             print_variable(vars->name, vars->name_length, vars);
             if ((vars->type != SNMP_ENDOFMIBVIEW) &&
                 (vars->type != SNMP_NOSUCHOBJECT) &&
@@ -194,7 +261,18 @@ int main(int argc, char *argv[])
       if (response)
         snmp_free_pdu(response);
     }
+
+    if (numprinted == 0 && status == STAT_SUCCESS) {
+        /* no printed successful results, which may mean we were
+           pointed at an only existing instance.  Attempt a GET, just
+           for get measure. */
+        snmp_get_and_print(ss, root, rootlen);
+    }
     snmp_close(ss);
+
+    if (ds_get_boolean(DS_APPLICATION_ID, DS_WALK_PRINT_STATISTICS)) {
+        printf("Variables found: %d\n", numprinted);
+    }
 
     SOCK_CLEANUP;
     return 0;
