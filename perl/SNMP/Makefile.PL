@@ -1,6 +1,7 @@
 use ExtUtils::MakeMaker;
 require 5;
 use Config;
+use Getopt::Long;
 
 # See lib/ExtUtils/MakeMaker.pm for details of how to influence
 # the contents of the Makefile that is written.
@@ -31,9 +32,11 @@ sub InitMakeParams {
 	$snmp_link_lib = 'snmp';
 	$sep = '/';
     }
-    my $inc_path1 = "${sep}usr${sep}local${sep}include";
+    $prefix="${sep}usr${sep}local";
+    GetOptions("prefix=s" => \$prefix);
+    my $inc_path1 = "${prefix}${sep}include";
     my $inc_path2 = "${sep}usr${sep}include";
-    my $lib_path1 = "${sep}usr${sep}local${sep}lib";
+    my $lib_path1 = "${prefix}${sep}lib";
     my $lib_path2 = "${sep}usr${sep}lib";
 
     my @IncludeFiles = qw[ucd-snmp/ucd-snmp-config.h
