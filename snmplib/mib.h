@@ -278,6 +278,16 @@ void shutdown_mib (void);
 void print_variable (oid *, size_t, struct variable_list *);
 void fprint_variable (FILE *, oid *, size_t, struct variable_list *);
 void sprint_variable (char *, oid *, size_t, struct variable_list *);
+
+int sprint_realloc_variable(u_char **buf, size_t *buf_len,
+			    size_t *out_len, int allow_realloc,
+			    oid *objid, size_t objidlen,
+			    struct variable_list *variable);
+
+int sprint_realloc_objid   (u_char **buf, size_t *buf_len,
+			    size_t *out_len, int allow_realloc, 
+			    oid *objid, size_t objidlen);
+
 void print_value (oid *, size_t, struct variable_list *);
 void fprint_value (FILE *, oid *, size_t, struct variable_list *);
 void sprint_value (char *, oid *, size_t, struct variable_list *);
