@@ -27,3 +27,70 @@ depend:
 	perl -n -i.bak -e ' if (/^# DO NOT DELETE THIS LINE/) {$$doit=1;} if ($$doit == 1) {s#/usr/include/[^\s]+##g ; print if (! /^\w+\.o:\s*$$/);} else {print;}' Makefile
 
 # DO NOT DELETE THIS LINE -- make depend depends on it.
+
+at.o: ../common_header.h ../../config.h ../../agent/extensible/struct.h
+at.o: ./../../snmplib/asn1.h snmp.h ./../../snmplib/snmp_impl.h
+at.o:  ./../../snmplib/mib.h ../snmp_vars.h
+at.o: ../mibgroup/system.h ../var_struct.h ../mibgroup/interfaces.h
+at.o: ../mibgroup/ip.h at.h ip.h ../mibgroup/icmp.h ../mibgroup/tcp.h
+at.o: ../mibgroup/udp.h ../mibgroup/snmp.h ../m2m.h ../snmp_vars_m2m.h
+at.o: ../snmp_vars.linux.h ../alarm.h ../event.h ../var_struct.h
+icmp.o: ../common_header.h ../../config.h ../../agent/extensible/struct.h
+icmp.o: ./../../snmplib/asn1.h snmp.h ./../../snmplib/snmp_impl.h
+icmp.o:  ./../../snmplib/mib.h ../snmp_vars.h
+icmp.o: ../mibgroup/system.h ../var_struct.h ../mibgroup/interfaces.h
+icmp.o: ../mibgroup/ip.h at.h ip.h ../mibgroup/icmp.h ../mibgroup/tcp.h
+icmp.o: ../mibgroup/udp.h ../mibgroup/snmp.h ../m2m.h ../snmp_vars_m2m.h
+icmp.o: ../snmp_vars.linux.h ../alarm.h ../event.h ../var_struct.h icmp.h
+interfaces.o: ../common_header.h ../../config.h
+interfaces.o: ../../agent/extensible/struct.h 
+interfaces.o:  ./../../snmplib/asn1.h snmp.h
+interfaces.o: ./../../snmplib/snmp_impl.h 
+interfaces.o: ./../../snmplib/mib.h ../snmp_vars.h ../mibgroup/system.h
+interfaces.o: ../var_struct.h ../mibgroup/interfaces.h ../mibgroup/ip.h at.h
+interfaces.o: ip.h ../mibgroup/icmp.h ../mibgroup/tcp.h ../mibgroup/udp.h
+interfaces.o: ../mibgroup/snmp.h ../m2m.h ../snmp_vars_m2m.h
+interfaces.o: ../snmp_vars.linux.h ../alarm.h ../event.h ../var_struct.h
+interfaces.o: interfaces.h
+ip.o: ../common_header.h ../../config.h ../../agent/extensible/struct.h
+ip.o: ./../../snmplib/asn1.h snmp.h ./../../snmplib/snmp_impl.h
+ip.o:  ./../../snmplib/mib.h ../snmp_vars.h
+ip.o: ../mibgroup/system.h ../var_struct.h ../mibgroup/interfaces.h
+ip.o: ../mibgroup/ip.h at.h ip.h ../mibgroup/icmp.h ../mibgroup/tcp.h
+ip.o: ../mibgroup/udp.h ../mibgroup/snmp.h ../m2m.h ../snmp_vars_m2m.h
+ip.o: ../snmp_vars.linux.h ../alarm.h ../event.h ../var_struct.h
+snmp.o: ../common_header.h ../../config.h ../../agent/extensible/struct.h
+snmp.o: ./../../snmplib/asn1.h snmp.h ./../../snmplib/snmp_impl.h
+snmp.o:  ./../../snmplib/mib.h ../snmp_vars.h
+snmp.o: ../mibgroup/system.h ../var_struct.h ../mibgroup/interfaces.h
+snmp.o: ../mibgroup/ip.h at.h ip.h ../mibgroup/icmp.h ../mibgroup/tcp.h
+snmp.o: ../mibgroup/udp.h ../mibgroup/snmp.h ../m2m.h ../snmp_vars_m2m.h
+snmp.o: ../snmp_vars.linux.h ../alarm.h ../event.h ../var_struct.h
+system.o: ../common_header.h ../../config.h ../../agent/extensible/struct.h
+system.o: ./../../snmplib/asn1.h snmp.h ./../../snmplib/snmp_impl.h
+system.o:  ./../../snmplib/mib.h ../snmp_vars.h
+system.o: ../mibgroup/system.h ../var_struct.h ../mibgroup/interfaces.h
+system.o: ../mibgroup/ip.h at.h ip.h ../mibgroup/icmp.h ../mibgroup/tcp.h
+system.o: ../mibgroup/udp.h ../mibgroup/snmp.h ../m2m.h ../snmp_vars_m2m.h
+system.o: ../snmp_vars.linux.h ../alarm.h ../event.h ../var_struct.h system.h
+tcp.o: ../common_header.h ../../config.h ../../agent/extensible/struct.h
+tcp.o: ./../../snmplib/asn1.h snmp.h ./../../snmplib/snmp_impl.h
+tcp.o:  ./../../snmplib/mib.h ../snmp_vars.h
+tcp.o: ../mibgroup/system.h ../var_struct.h ../mibgroup/interfaces.h
+tcp.o: ../mibgroup/ip.h at.h ip.h ../mibgroup/icmp.h ../mibgroup/tcp.h
+tcp.o: ../mibgroup/udp.h ../mibgroup/snmp.h ../m2m.h ../snmp_vars_m2m.h
+tcp.o: ../snmp_vars.linux.h ../alarm.h ../event.h ../var_struct.h tcp.h
+udp.o: ../common_header.h ../../config.h ../../agent/extensible/struct.h
+udp.o: ./../../snmplib/asn1.h snmp.h ./../../snmplib/snmp_impl.h
+udp.o:  ./../../snmplib/mib.h ../snmp_vars.h
+udp.o: ../mibgroup/system.h ../var_struct.h ../mibgroup/interfaces.h
+udp.o: ../mibgroup/ip.h at.h ip.h ../mibgroup/icmp.h ../mibgroup/tcp.h
+udp.o: ../mibgroup/udp.h ../mibgroup/snmp.h ../m2m.h ../snmp_vars_m2m.h
+udp.o: ../snmp_vars.linux.h ../alarm.h ../event.h ../var_struct.h udp.h
+wombat.o: ../common_header.h ../../config.h ../../agent/extensible/struct.h
+wombat.o: ./../../snmplib/asn1.h snmp.h ./../../snmplib/snmp_impl.h
+wombat.o:  ./../../snmplib/mib.h ../snmp_vars.h
+wombat.o: ../mibgroup/system.h ../var_struct.h ../mibgroup/interfaces.h
+wombat.o: ../mibgroup/ip.h at.h ip.h ../mibgroup/icmp.h ../mibgroup/tcp.h
+wombat.o: ../mibgroup/udp.h ../mibgroup/snmp.h ../m2m.h ../snmp_vars_m2m.h
+wombat.o: ../snmp_vars.linux.h ../alarm.h ../event.h ../var_struct.h wombat.h
