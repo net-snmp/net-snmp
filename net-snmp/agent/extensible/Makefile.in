@@ -8,8 +8,11 @@ LDFLAGS=@LDFLAGS@
 
 CC = @CC@ $(CPPFLAGS)
 
-OBJS = misc.o read_config.o extensible.o hpmibs.o proc.o exec.o versioninfo.o 
-SRCS = misc.c read_config.c extensible.c hpmibs.c proc.c exec.c versioninfo.c 
+OBJS = misc.o read_config.o extensible.o hpmibs.o proc.o exec.o \
+       versioninfo.o pass.o
+SRCS = misc.c read_config.c extensible.c hpmibs.c proc.c exec.c \
+       versioninfo.c pass.c
+ 
 
 all: $(OBJS)
 
