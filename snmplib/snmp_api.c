@@ -754,15 +754,15 @@ init_snmp_enums(void)
 
 
 
-/*******************************************************************-o-******
- * init_snmp
+/**
+ * Calls the functions to do config file loading and  mib module parsing
+ * in the correct order.
  *
- * Parameters:
- *      *type   Label for the config file "type" used by calling entity.
+ * @param type label for the config file "type"
  *
- * Call appropriately the functions to do config file loading and
- * mib module parsing in the correct order.
- */
+ * @return void
+ *
+ * @see init_agent
 void
 init_snmp(const char *type)
 {
@@ -823,15 +823,14 @@ snmp_store(const char *type)
 }
 
 
-/*
- * snmp_shutdown(const char *type):
+/**
+ * Shuts down the agent, saving any needed persistent storage, and appropriate
+ * clean up.
+ *
  * 
- * Parameters:
- * *type   Label for the config file "type" used by calling entity.
- * 
- * Does the appropriate shutdown calls for the library, saving
- * persistent data, clean up, etc...
- */
+ * @param type Label for the config file "type" used
+ *
+ * @return void
 void
 snmp_shutdown(const char *type)
 {
