@@ -343,6 +343,15 @@ ${context}_commit( ${context}_rowreq_ctx *rowreq_ctx)
     }
 ##$example_end
 
+@   if $m2c_table_settable@
+    /*
+     * if we successfully commited this row, set the dirty flag.
+     * this is checked in _post_request...
+    if (MFD_SUCCESS == rc) {
+        ${context}_dirty_set( 1 ); /* set table dirty flag */
+    }
+
+@   end@
     return rc;
 } /* ${context}_commit */
 

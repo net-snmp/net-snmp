@@ -52,6 +52,13 @@ ${context}_registration_get( void );
 ${context}_registration *
 ${context}_registration_set( ${context}_registration * new );
 
+int ${context}_container_size( void );
+
+@   if $m2c_table_settable@
+int ${context}_dirty_get( void );
+void ${context}_dirty_set( int status );
+
+@   end@
 @   if $m2c_data_allocate == 1@
 @      eval $m2c_tmp = "${context}_data *"@
 @      if $m2c_data_init == 1@
@@ -123,6 +130,10 @@ typedef struct ${context}_interface_ctx_s {
 
    netsnmp_baby_steps_access_methods access_multiplexer;
 
+@  if $m2c_table_settable@
+    int                               table_dirty;
+
+@  end@
 } ${context}_interface_ctx;
 
 static ${context}_interface_ctx ${context}_if_ctx;
@@ -145,6 +156,29 @@ ${context}_registration_set( ${context}_registration * new )
     return old;
 }
 
+int
+${context}_container_size( void )
+{
+    return CONTAINER_SIZE(${context}_if_ctx.container);
+}
+
+@  if $m2c_table_settable@
+int
+${context}_dirty_get( void )
+{
+    return ${context}_if_ctx.table_dirty;
+}
+
+void
+${context}_dirty_set( int status )
+{
+    DEBUGMSGTL(("${context}:${context}_dirty_set",
+                "called. was %d, now %d\n",
+                ${context}_if_ctx.table_dirty, status;));
+    ${context}_if_ctx.table_dirty = status;
+}
+
+@end@
 /*
  * mfd multiplexer modes
  */
