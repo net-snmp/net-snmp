@@ -84,31 +84,39 @@ int
 netsnmp_access_interface_ioctl_physaddr_get(int fd,
                                             netsnmp_interface_entry *ifentry)
 {
-#define PADDR_LEN 6
     struct ifreq    ifrq;
     int rc = 0;
 
     DEBUGMSGTL(("access:interface:ioctl", "physaddr_get\n"));
 
-    if(ifentry->if_paddr_len != PADDR_LEN) {
+    if((NULL != ifentry->if_paddr) &&
+       (ifentry->if_paddr_len != IFHWADDRLEN)) {
         SNMP_FREE(ifentry->if_paddr);
     }
-    if(NULL == ifentry->if_paddr)
-        ifentry->if_paddr = malloc(PADDR_LEN);
+    if(NULL == ifentry->if_paddr) 
+        ifentry->if_paddr = malloc(IFHWADDRLEN);
 
     if(NULL == ifentry->if_paddr) {
             rc = -4;
     } else {
 
+        /*
+         * NOTE: this ioctl does not guarantee 6 bytes of a physaddr.
+         * In particular, a 'sit0' interface only appears to get back
+         * 4 bytes of sa_data. Uncomment this memset, and suddenly
+         * the sit interface will be 0:0:0:0:?:? where ? is whatever was
+         * in the memory before. Not sure if this memset should be done
+         * for every ioctl, as the rest seem to work ok...
+         */
+        memset(ifrq.ifr_hwaddr.sa_data, (0), IFHWADDRLEN);
+        ifentry->if_paddr_len = IFHWADDRLEN;
         rc = _ioctl_get(fd, SIOCGIFHWADDR, &ifrq, ifentry);
         if (rc < 0) {
-            memset(ifentry->if_paddr, (0), PADDR_LEN);
-            ifentry->if_paddr_len = 0;
-            return rc; /* msg already logged */
+            memset(ifentry->if_paddr, (0), IFHWADDRLEN);
+            rc = -3; /* msg already logged */
         }
         else {
-            ifentry->if_paddr_len = PADDR_LEN;
-            memcpy(ifentry->if_paddr, ifrq.ifr_hwaddr.sa_data, PADDR_LEN);
+            memcpy(ifentry->if_paddr, ifrq.ifr_hwaddr.sa_data, IFHWADDRLEN);
 
             /*
              * does this just work on linux? I hope not!
