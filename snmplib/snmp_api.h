@@ -498,9 +498,9 @@ void snmp_read (fd_set *);
  */
 void snmp_free_pdu (struct snmp_pdu *);
 
-void snmp_free_var (struct variable_list *);
+void snmp_free_var (struct variable_list *); /* frees just this one */
 
-void snmp_free_varbind(struct variable_list *var);
+void snmp_free_varbind(struct variable_list *var); /* frees all in list */
 
 /*
  * int snmp_select_info(numfds, fdset, timeout, block)
