@@ -1,5 +1,5 @@
 --------------------Configuration: snmpget - Win32 Debug--------------------
-Begining build with project "C:\snmp\ucd-snmp\win32\snmpget\snmpget.dsp", at root.
+Begining build with project "C:\ucd-snmp\ucd-snmp\win32\snmpget\snmpget.dsp", at root.
 Active configuration is Win32 (x86) Console Application (based on Win32 (x86) Console Application)
 
 Project's tools are:
@@ -10,7 +10,28 @@ Project's tools are:
 			"Custom Build" with flags ""
 			"<Component 0xa>" with flags ""
 
+Creating temp file "C:\TEMP\RSP34F.tmp" with contents </nologo /MTd /W3 /GX /Zi /Od /I "." /I ".." /I "..\..\snmplib" /I "..\.." /I "..\snmpllib" /D "WIN32" /D "_DEBUG" /D "_CONSOLE" /D "_MBCS" /Fp"Debug/snmpget.pch" /YX /Fo"Debug/" /Fd"Debug/" /FD /c 
+"C:\ucd-snmp\ucd-snmp\apps\snmp_parse_args.c"
+>
+Creating command line "cl.exe @C:\TEMP\RSP34F.tmp" 
+Creating temp file "C:\TEMP\RSP350.tmp" with contents </nologo /MTd /W3 /GX /Zi /Od /I "." /I ".." /I "..\..\snmplib" /I "..\.." /D "WIN32" /D "_DEBUG" /D "_CONSOLE" /D "_MBCS" /Fp"Debug/snmpget.pch" /YX /Fo"Debug/" /Fd"Debug/" /FD /c 
+"C:\ucd-snmp\ucd-snmp\apps\snmpget.c"
+>
+Creating command line "cl.exe @C:\TEMP\RSP350.tmp" 
+Creating temp file "C:\TEMP\RSP351.tmp" with contents <snmp_d.lib wsock32.lib libcmt.lib kernel32.lib user32.lib oldnames.lib /nologo /subsystem:console /incremental:yes /pdb:"Debug/snmpget_d.pdb" /debug /machine:I386 /nodefaultlib /out:"../bin/snmpget_d.exe" /pdbtype:sept /libpath:"../lib" 
+".\Debug\getopt.obj"
+".\Debug\snmp_parse_args.obj"
+".\Debug\snmpget.obj"
+"\ucd-snmp\ucd-snmp\win32\lib\snmp_d.lib"
+"\ucd-snmp\ucd-snmp\win32\lib\libsnmp_d.lib">
+Creating command line "link.exe @C:\TEMP\RSP351.tmp" 
+Compiling...
+snmp_parse_args.c
+Compiling...
+snmpget.c
+C:\ucd-snmp\ucd-snmp\apps\snmpget.c(107) : error C2198: 'snmp_parse_args' : too few actual parameters
+Error executing cl.exe.
 
 
 
-snmpget_d.exe - 0 error(s), 0 warning(s)
+snmpget_d.exe - 1 error(s), 0 warning(s)

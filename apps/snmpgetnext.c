@@ -81,7 +81,7 @@ SOFTWARE.
 
 void usage(void)
 {
-  fprintf(stderr,"Usage:\n  snmpgetnext ");
+  fprintf(stderr,"Usage: snmpgetnext ");
   snmp_parse_args_usage(stderr);
   fprintf(stderr," [<objectID> ...]\n\n");
   snmp_parse_args_descriptions(stderr);
@@ -102,7 +102,7 @@ int main(int argc, char *argv[])
     int   failures = 0;
 
     /* get the common command line arguments */
-    arg = snmp_parse_args(argc, argv, &session);
+    arg = snmp_parse_args(argc, argv, &session, NULL, NULL);
 
     if (arg >= argc) {
       fprintf(stderr, "Missing object name\n");
@@ -179,5 +179,5 @@ retry:
       snmp_free_pdu(response);
     snmp_close(ss);
     SOCK_CLEANUP;
-    exit (0);
+    return 0;
 }

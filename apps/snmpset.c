@@ -83,7 +83,7 @@ int failures = 0;
 
 void usage(void)
 {
-  fprintf(stderr,"Usage:\n  snmpset ");
+  fprintf(stderr,"Usage: snmpset ");
   snmp_parse_args_usage(stderr);
   fprintf(stderr," [<objectID> <type> <value> ...]\n\n");
   snmp_parse_args_descriptions(stderr);
@@ -118,7 +118,7 @@ int main(int argc, char *argv[])
     int status;
 
     /* get the common command line arguments */
-    arg = snmp_parse_args(argc, argv, &session);
+    arg = snmp_parse_args(argc, argv, &session, NULL, NULL);
 
     if (arg >= argc) {
       fprintf(stderr, "Missing object name\n");

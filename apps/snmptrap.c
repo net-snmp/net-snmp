@@ -87,7 +87,7 @@ oid objid_snmptrap[]   = {1, 3, 6, 1, 6, 3, 1, 1, 4, 1, 0};
 
 void usage(void)
 {
-    fprintf(stderr,"Usage:\n  snmptrap ");
+    fprintf(stderr,"Usage: snmptrap ");
     snmp_parse_args_usage(stderr);
     fprintf(stderr," [<trap parameters> ...]\n\n");
     snmp_parse_args_descriptions(stderr);
@@ -134,14 +134,11 @@ int main(int argc, char *argv[])
     int	arg;
     int status, inform = 0;
     char *trap = NULL, *specific = NULL, *description = NULL, *agent = NULL;
-#ifdef _DEBUG_MALLOC_INC
-    unsigned long histid1, histid2, orig_size, current_size;
-#endif
 
     /*
      * usage: snmptrap gateway-name trap-type specific-type device-description [ -a agent-addr ]
      */
-    arg = snmp_parse_args(argc, argv, &session);
+    arg = snmp_parse_args(argc, argv, &session, NULL, NULL);
 
     SOCK_STARTUP;
 
@@ -156,9 +153,6 @@ int main(int argc, char *argv[])
         SOCK_CLEANUP;
         exit(1);
     }
-#ifdef _DEBUG_MALLOC_INC
-    orig_size = malloc_inuse(&histid1);
-#endif
 
     if (session.version == SNMP_VERSION_1) {
 	pdu = snmp_pdu_create(SNMP_MSG_TRAP);

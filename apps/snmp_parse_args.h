@@ -1,5 +1,5 @@
 
-int snmp_parse_args (int, char **, struct snmp_session *);
+int snmp_parse_args (int, char * const *, struct snmp_session *, const char *, void (*)(int));
 void snmp_parse_args_descriptions (FILE *);
 void snmp_parse_args_usage (FILE *);
 void usage (void);
