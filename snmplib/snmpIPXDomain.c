@@ -328,3 +328,16 @@ snmp_transport	*snmp_ipx_create		(const char *string, int local)
     return NULL;
   }
 }
+
+
+
+void		snmp_ipx_ctor			(void)
+{
+  ipxDomain.name        = snmpIPXDomain;
+  ipxDomain.name_length = sizeof(snmpIPXDomain)/sizeof(oid);
+  ipxDomain.f_create	= snmp_ipx_create;
+  ipxDomain.prefix	= calloc(2, sizeof(char *));
+  ipxDomain.prefix[0] 	= "ipx";
+
+  snmp_tdomain_register(&ipxDomain);
+}
