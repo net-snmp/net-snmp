@@ -1762,7 +1762,9 @@ main(int argc, char* argv[])
 void
 print_oid_report (FILE *fp)
 {
-    print_subtree_oid_report (fp, tree_head, 0);
+    struct tree *tp;
+    for (tp = tree_head ; tp ; tp=tp->next_peer)
+        print_subtree_oid_report (fp, tp, 0);
 }
 
 void

@@ -383,7 +383,6 @@ static void read_import_replacements (char *, char *);
 
 static void  new_module  (char *, char *);
 
-static struct tree *get_next_subid (u_long *, struct tree *tree);
 static void print_parent_labeledoid (FILE *, struct tree *);
 static void print_parent_oid (FILE *, struct tree *);
 static void print_parent_label (FILE *, struct tree *);
@@ -419,6 +418,8 @@ void snmp_mib_toggle_options_usage(char *lead, FILE *outf) {
           lead, ((save_mib_descriptions)?"don't ":""));
   fprintf(outf, "%s    l: %sallow underscore in MIB symbols.\n",
           lead, ((save_mib_descriptions)?"don't ":""));
+  fprintf(outf, "%s    l: %sallow underscore in MIB symbols.\n",
+          lead, ((save_mib_descriptions)?"don't ":""));
   fprintf(outf, "%s    w: Enable mib warnings of MIB symbols conflicts\n",
           lead);
   fprintf(outf, "%s    W: Enable detailed warnings of MIB symbols conflicts\n",
@@ -447,6 +448,10 @@ char *snmp_mib_toggle_options(char *options) {
           
         case 'd':
           save_mib_descriptions = !save_mib_descriptions;
+          break;
+          
+        case 'l':
+          mib_parse_label = !mib_parse_label;
           break;
           
         case 'l':
@@ -617,6 +622,7 @@ alloc_node(int modid)
     if (np) {
         np->tc_index = -1;
         np->modid = modid;
+        np->subid = -1;
     }
     return np;
 }
@@ -864,6 +870,7 @@ init_tree_roots()
     tp->modid = base_modid;
     tp->number_modules = 1;
     tp->module_list = &(tp->modid);
+    tp->subid = 0;
     tp->tc_index = -1;
     set_function(tp);		/* from mib.c */
     hash = NBUCKET(name_hash(tp->label));
@@ -877,16 +884,17 @@ init_tree_roots()
     tp = (struct tree *) xcalloc(1, sizeof(struct tree));
     if (tp == NULL) return;
     tp->next_peer = lasttp;
+    tp->label = xstrdup("iso");
     tp->modid = base_modid;
     tp->number_modules = 1;
     tp->module_list = &(tp->modid);
-    tp->label = xstrdup("iso");
     tp->subid = 1;
     tp->tc_index = -1;
     set_function(tp);		/* from mib.c */
     hash = NBUCKET(name_hash(tp->label));
     tp->next = tbuckets[hash];
     tbuckets[hash] = tp;
+    lasttp = tp;
     root_imports[2].label = xstrdup( tp->label );
     root_imports[2].modid = base_modid;
 
@@ -1215,7 +1223,8 @@ static void do_linkup(struct module *mp,
 	 */
 
     if (!np) return;
-    do_subtree( tree_head, &np );
+    for ( tp = tree_head ; tp ; tp=tp->next_peer )
+        do_subtree( tp, &np );
     if (!np) return;
     for ( np = orphan_nodes ; np && np->next ; np = np->next )
 	;	/* find the end of the orphan list */
@@ -2504,6 +2513,7 @@ parse(FILE *fp,
             continue;
         default:
             print_error(token, "is a reserved word", type);
+            break;         /* see if we can parse the rest of the file */
             return NULL;
         }
         strcpy(name, token);
@@ -3027,66 +3037,6 @@ find_module(int mid)
   return NULL;
 }
 
-/*
- * get_next_subid():
- *
- * This function assumes that it's presented the first entry in
- * a linked list of tree objects.
- *
- * This function assumes that no entry will ever have a subid value
- * of zero (0). (Is this true?)
- *
- * This function assumes that no two entries in the same linked list will
- * ever have the same subid value.
- *
- * It will compare the value of the supplied current_subid against
- * the value of the subid value for each of the list entries.
- *
- * It will return the pointer to the entry with the "next highest" subid
- * value.  The contents of the current_subid will be updated to reflect this
- * next highest subid value.
- *
- * On first call, the contents of current_subid should be initialized
- * to 0.
- *
- * This function should be called repeatedly until it returns NULL which
- * indicates that there are no nodes whose subid value exceeds the supplied
- * current_subid value.
- */
-
-static struct tree *
-get_next_subid(u_long *current_subid,
-	       struct tree *tree)
-{
-    struct tree *tp;
-    struct tree *ntp;
-
-    if(!tree)
-    {
-        return(tree);
-    }
-
-    ntp = NULL;
-
-    for(tp = tree; tp; tp = tp->next_peer)
-    {
-        if(tp->subid > *current_subid)
-        {
-            if((!ntp) || (ntp->subid > tp->subid))
-            {
-                ntp = tp;
-            }
-        }
-    }
-
-    if(ntp)
-    {
-        *current_subid = ntp->subid;
-    }
-
-    return(ntp);
-}
-
 static void
 print_parent_labeledoid(FILE *f,
 			struct tree *tp)
@@ -3133,8 +3083,8 @@ print_parent_label(FILE *f,
  * print_subtree_oid_report():
  *
  * This function generates variations on the original print_subtree() report.
- * In this function each child is traversed before its peers are traveresed.
- *
+ * Traverse the tree depth first, from least to greatest sub-identifier.
+ * Warning: this function recurses.
  */
 
 void
@@ -3143,14 +3093,43 @@ print_subtree_oid_report(FILE *f,
 			 int count)
 {
     struct tree *tp;
-    int i;
-    u_long current_subid;
 
     count++;
-    current_subid = 0;
 
-    while((tp = get_next_subid(&current_subid, tree->child_list)))
+    /* sanity check */
+    if(!tree)
     {
+        return;
+    }
+
+    /* initialize: no peers included in the report. */
+    for(tp = tree->child_list; tp; tp = tp->next_peer)
+    {
+        tp->reported = 0;
+    }
+
+    /*
+     * find the not reported peer with the lowest sub-identifier.
+     * if no more, break the loop and cleanup.
+     * set "reported" flag, and create report for this peer.
+     * recurse using the children of this peer, if any.
+     */
+    while (1)
+    {
+        register struct tree *ntp;
+
+        tp = 0;
+        for (ntp = tree->child_list; ntp; ntp = ntp->next_peer)
+        {
+            if (ntp->reported) continue;
+
+            if (!tp || (tp->subid > ntp->subid))
+                tp = ntp;
+        }
+        if (!tp) break;
+
+        tp->reported = 1;
+
         if(print_subtree_oid_report_labeledoid)
         {
             print_parent_labeledoid(f, tp);
@@ -3168,6 +3147,7 @@ print_subtree_oid_report(FILE *f,
         }
         if(print_subtree_oid_report_suffix)
         {
+            int i;
             for(i = 0; i < count; i++)
                 fprintf(f, "  ");
             fprintf(f, "%s(%ld) type=%d", tp->label, tp->subid, tp->type);

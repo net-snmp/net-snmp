@@ -85,6 +85,7 @@ struct tree {
     void (*printer) (char *, struct variable_list *, struct enum_list *,
                          char *, char *);	/* Value printing function */
     char *description;          /* description (a quoted string) */
+    int  reported;              /* 1=report started in print_subtree... */
 };
 
 /*
