@@ -1305,15 +1305,15 @@
 
 #ifndef HAVE_STRCHR
 #ifdef HAVE_INDEX
-# define strchr index
-# define strrchr rindex
+# define strchr(a,b) index(a,b)
+# define strrchr(a,b) rindex(a,b)
 #endif
 #endif
 
 #ifndef HAVE_INDEX
 #ifdef HAVE_STRCHR
-# define index strchr
-# define rindex strrchr
+# define index(a,b) strchr(a,b)
+# define rindex(a,b) strrchr(a,b)
 #endif
 #endif
 
