@@ -412,7 +412,7 @@ tcpTable_next_entry( void **loop_context,
 }
 
 void
-tcpTable_free(void)
+tcpTable_free(netsnmp_cache *cache)
 {
     TCPTABLE_ENTRY_TYPE *p;
     while (tcp_head) {
@@ -501,7 +501,7 @@ tcpTable_load(netsnmp_cache *cache, void *vmagic)
     FILE           *in;
     char            line[256];
 
-    tcpTable_free();
+    tcpTable_free(cache);
 
     if (!(in = fopen("/proc/net/tcp", "r"))) {
         DEBUGMSGTL(("mibII/tcpTable", "Failed to load TCP Table (linux1)\n"));

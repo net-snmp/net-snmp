@@ -725,7 +725,7 @@ tcp_load(netsnmp_cache *cache, void *vmagic)
 
 
 void
-tcp_free(void)
+tcp_free(netsnmp_cache *cache)
 {
     memset(&tcpstat, 0, sizeof(tcpstat));
     tcp_valid = 0;
