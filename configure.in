@@ -281,6 +281,7 @@ AC_CHECK_LIB(m, asin)
 AC_CHECK_LIB(nsl, gethostbyname)
 AC_CHECK_LIB(socket, getservbyname)
 dnl AC_CHECK_LIB(ucb, bzero)
+AC_CHECK_LIB(rpm, rpmdbOpen)
 
 dnl Replace `main' with a function in -lkstat:
 AC_CHECK_LIB(kstat, kstat_lookup)
@@ -312,6 +313,8 @@ dnl AIX needs this for statfs func
 AC_CHECK_HEADERS(sys/statfs.h)
 dnl Dynix
 AC_CHECK_HEADERS(net/route.h)
+dnl for HostRes (HP-UX at least)
+AC_CHECK_HEADERS(sys/diskio.h sys/pstat.h)
 
 dnl Checks for typedefs, structures, and compiler characteristics.
 AC_TYPE_OFF_T
