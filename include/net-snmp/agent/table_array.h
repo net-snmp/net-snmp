@@ -56,8 +56,16 @@ extern          "C" {
        /*
         * actual old and new rows
         */
-        netsnmp_index               *new_row;
-        netsnmp_index               *old_row;
+        netsnmp_index               *existing_row;
+        netsnmp_index               *undo_info;
+
+       /*
+        * flags
+        */
+       char                          row_created;
+       char                          row_deleted;
+       char                          fill1;
+       char                          fill2;
 
        /*
         * requests for this row
@@ -132,20 +140,10 @@ extern          "C" {
 
     Netsnmp_Node_Handler netsnmp_table_array_helper_handler;
 
-    const netsnmp_index
-        *netsnmp_table_array_get_by_index(netsnmp_handler_registration
-                                          *reginfo,
-                                          netsnmp_index *hdr);
-
-    const netsnmp_index
-        **netsnmp_table_array_get_subset(netsnmp_handler_registration
-                                         *reginfo,
-                                         netsnmp_index *hdr,
-                                         int *len);
-    netsnmp_index *
-    netsnmp_table_array_remove_row(netsnmp_handler_registration *reginfo,
-                                   netsnmp_index *hdr);
-
+    int
+    netsnmp_table_array_check_row_status(netsnmp_table_array_callbacks *cb,
+                                         netsnmp_request_group *ag,
+                                         long *rs_new, long *rs_old);
 
 #ifdef __cplusplus
 };
