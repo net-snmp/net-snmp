@@ -1,0 +1,262 @@
+SNMPv2-M2M-MIB DEFINITIONS ::= BEGIN
+
+          IMPORTS
+              MODULE-IDENTITY, OBJECT-TYPE, NOTIFICATION-TYPE,
+              Integer32, Counter32, snmpModules
+                  FROM SNMPv2-SMI
+              DisplayString, InstancePointer, RowStatus, TimeStamp
+                  FROM SNMPv2-TC
+              MODULE-COMPLIANCE, OBJECT-GROUP
+                  FROM SNMPv2-CONF
+              contextIdentity
+                  FROM SNMPv2-PARTY-MIB;
+
+          snmpM2M MODULE-IDENTITY
+              LAST-UPDATED "9304010000Z"
+              ORGANIZATION "IETF SNMPv2 Working Group"
+              CONTACT-INFO
+                      "        Steven Waldbusser
+
+                       Postal: Carnegie Mellon University
+                               4910 Forbes Ave
+                               Pittsburgh, PA  15213
+
+                          Tel: +1 412 268 6628
+                          Fax: +1 412 268 4987
+
+                       E-mail: waldbusser@cmu.edu"
+              DESCRIPTION
+                      "The Manager-to-Manager MIB module."
+              ::= { snmpModules 2 }
+
+          snmpM2MObjects OBJECT IDENTIFIER ::= { snmpM2M 1 }
+
+
+          -- the alarm group
+          --
+          -- a collection of objects allowing the description and
+          -- configuration of threshold alarms from a SNMPv2 entity
+          -- acting in a dual role.
+
+          snmpAlarm      OBJECT IDENTIFIER ::= { snmpM2MObjects 1 }
+
+          -- This Alarm mechanism periodically takes statistical samples
+          -- from variables available via SNMPv2 and compares them to
+          -- thresholds that have been configured.  The alarm table
+          -- stores configuration entries that each define a variable,
+          -- polling period, and threshold parameters.  If a sample is
+          -- found to cross the threshold values, an event is generated.
+          -- Only variables that resolve to an ASN.1 primitive type of
+          -- INTEGER (Integer32, Counter32, Gauge32, TimeTicks,
+          -- Counter64, or UInteger32) may be monitored in this way.
+          --
+          -- This function has a hysteresis mechanism to limit the
+          -- generation of events.  This mechanism generates one event
+          -- as a threshold is crossed in the appropriate direction.  No
+          -- more events are generated for that threshold until the
+          -- opposite threshold is crossed.
+          --
+          -- In the case of sampling a deltaValue, an entity may
+          -- implement this mechanism with more precision if it takes a
+          -- delta sample twice per period, each time comparing the sum
+          -- of the latest two samples to the threshold.  This allows
+          -- the detection of threshold crossings that span the sampling
+          -- boundary.  Note that this does not require any special
+          -- configuration of the threshold value.  It is suggested that
+          -- entities implement this more precise algorithm.
+          --
+
+
+          snmpAlarmNextIndex OBJECT-TYPE
+              SYNTAX     INTEGER (0..65535)
+              MAX-ACCESS read-only
+              STATUS     current
+              DESCRIPTION
+                      "The index number of the next appropriate
+                      unassigned entry in the snmpAlarmTable.  The value
+                      0 indicates that no unassigned entries are
+                      available.
+
+                      A management station should create new entries in
+                      the snmpAlarmTable using this algorithm: first,
+                      issue a management protocol retrieval operation to
+                      determine the value of snmpAlarmNextIndex; and,
+                      second, issue a management protocol set operation
+                      to create an instance of the snmpAlarmStatus
+                      object setting its value to `createAndGo' or
+                      `createAndWait' (as specified in the description
+                      of the RowStatus textual convention)."
+              ::= { snmpAlarm 1 }
+
+          snmpAlarmTable OBJECT-TYPE
+              SYNTAX     SEQUENCE OF SnmpAlarmEntry
+              MAX-ACCESS not-accessible
+              STATUS     current
+              DESCRIPTION
+                      "A list of snmpAlarm entries."
+              ::= { snmpAlarm 2 }
+
+          snmpAlarmEntry OBJECT-TYPE
+              SYNTAX     SnmpAlarmEntry
+              MAX-ACCESS not-accessible
+              STATUS     current
+              DESCRIPTION
+                      "A list of parameters that set up a periodic
+                      sampling query to check for alarm conditions.  The
+                      contextIdentity included in the INDEX clause is
+                      the context to which the sampling queries are
+                      directed."
+              INDEX      { contextIdentity, snmpAlarmIndex }
+              ::= { snmpAlarmTable 1 }
+
+
+          SnmpAlarmEntry ::= SEQUENCE {
+              snmpAlarmIndex                    INTEGER,
+              snmpAlarmVariable                 InstancePointer,
+              snmpAlarmInterval                 Integer32,
+              snmpAlarmSampleType               INTEGER,
+              snmpAlarmValue                    Integer32,
+              snmpAlarmStartupAlarm             INTEGER,
+              snmpAlarmRisingThreshold          Integer32,
+              snmpAlarmFallingThreshold         Integer32,
+              snmpAlarmRisingEventIndex         INTEGER,
+              snmpAlarmFallingEventIndex        INTEGER,
+              snmpAlarmUnavailableEventIndex    INTEGER,
+              snmpAlarmStatus                   RowStatus
+          }
+
+          snmpAlarmIndex OBJECT-TYPE
+              SYNTAX     INTEGER (1..65535)
+              MAX-ACCESS not-accessible
+              STATUS     current
+              DESCRIPTION
+                      "An index that uniquely identifies an entry in the
+                      snmpAlarm table for a particular sampling context.
+                      Each such entry defines a diagnostic sample at a
+                      particular interval for a variable in the
+                      particular context's object resources."
+              ::= { snmpAlarmEntry 1 }
+
+
+          snmpAlarmVariable OBJECT-TYPE
+              SYNTAX     InstancePointer
+              MAX-ACCESS read-create
+              STATUS     current
+              DESCRIPTION
+                      "The object identifier of the particular variable
+                      to be sampled.  Only variables that resolve to an
+                      ASN.1 primitive type of INTEGER (Integer32,
+                      Counter32, Gauge32, TimeTicks, Counter64, or
+                      UInteger32) may be sampled.
+
+                      If it is detected by an error response of
+                      authorizationError, noSuchObject, or
+                      noSuchInstance that the variable name of an
+                      established snmpAlarmEntry is no longer available
+                      in the sampling context, a single
+                      snmpObjectUnavailableAlarm event is generated and
+                      the status of this snmpAlarmEntry is set to
+                      `destroy'.  Likewise, if the syntax of the
+                      variable retrieved by the query is not Integer32,
+                      Counter32, Gauge32, TimeTicks, Counter64, or
+                      UInteger32, the same actions will be taken.
+
+                      If the SNMPv2 entity acting in a dual role detects
+                      that the sampled value can not be obtained due to
+                      lack of response to management queries, it should
+                      either:
+
+                           1) Set the status of this snmpAlarmEntry to
+                           `destroy', if it is determined that further
+                           communication is not possible;
+
+                           or,
+
+                           2) Delete the associated snmpAlarmValue
+                           instance (but not the entire conceptual row),
+                           and continue to attempt to sample the
+                           variable and recreate the associated
+                           snmpAlarmValue instance should communication
+                           be reestablished.
+
+                      An attempt to modify this object will fail with an
+                      `inconsistentValue' error if the associated
+                      snmpAlarmStatus object would be equal to `active'
+                      both before and after the modification attempt."
+
+
+              ::= { snmpAlarmEntry 2 }
+
+          snmpAlarmInterval OBJECT-TYPE
+              SYNTAX     Integer32
+              UNITS      "seconds"
+              MAX-ACCESS read-create
+              STATUS     current
+              DESCRIPTION
+                      "The interval in seconds over which the data is
+                      sampled and compared with the rising and falling
+                      thresholds.  When setting this object and the
+                      sampling type is `deltaValue',  care should be
+                      taken to ensure that the change during this
+                      interval of the variable being sampled will not
+                      exceed the (-2^31...2^31-1) range of the
+                      snmpAlarmValue.
+
+                      An attempt to modify this object will fail with an
+                      `inconsistentValue' error if the associated
+                      snmpAlarmStatus object would be equal to `active'
+                      both before and after the modification attempt."
+              ::= { snmpAlarmEntry 3 }
+
+
+          snmpAlarmSampleType OBJECT-TYPE
+              SYNTAX     INTEGER {
+                             absoluteValue(1),
+                             deltaValue(2)
+                         }
+              MAX-ACCESS read-create
+              STATUS     current
+              DESCRIPTION
+                      "The method of sampling the selected variable and
+                      calculating the value to be compared against the
+                      thresholds.  If the value of this object is
+                      `absoluteValue', the value of the selected
+                      variable at the end of the sampling interval will
+                      be compared directly with both the
+                      snmpAlarmRisingThreshold and the
+                      snmpAlarmFallingThreshold values.  If the value of
+                      this object is `deltaValue', the value of the
+                      selected variable at the end of the sampling
+                      interval will be subtracted from its value at the
+                      end of the previous sampling interval, and the
+                      difference compared with both the
+                      snmpAlarmRisingThreshold and the
+                      snmpAlarmFallingThreshold values.
+
+                      An attempt to modify this object will fail with an
+                      `inconsistentValue' error if the associated
+                      snmpAlarmStatus object would be equal to `active'
+                      both before and after the modification attempt."
+              DEFVAL { deltaValue }
+              ::= { snmpAlarmEntry 4 }
+
+
+          snmpAlarmValue OBJECT-TYPE
+              SYNTAX     Integer32
+              MAX-ACCESS read-only
+              STATUS     current
+              DESCRIPTION
+                      "The value of the statistic during the last
+                      sampling period.  The value during the current
+                      sampling period is not made available until the
+                      period is completed.  If the value of the
+                      statistic does not fit in the signed 32 bit
+                      representation of this object, it should be
+                      truncated in an implementation specific manner.
+
+                      Note that if the associated snmpAlarmSampleType is
+                      set to `deltaValue', the value of this object is
+                      the difference in the sampled variable since the
+                      last sample.
+
+                      This object will be created by the SNMPv2 entity
