@@ -275,14 +275,6 @@ engineID will be configured from STRING.  The default value of the
 engineID is configured with the first IP address found for the
 hostname of the machine.
 .IP "createUser username (MD5|SHA) authpassphrase [DES] [privpassphrase]"
-This directive should be placed into the
-PERSISTENT_DIRECTORY/snmpd.conf file instead of the other normal
-locations.  The reason is that the information is read from the file
-and then the line is removed (eliminating the storage of the master
-password for that user) and replaced with the key that is derived from 
-it.  This key is a localized key, so that if it is stolen it can not
-be used to access other agents.  If the password is stolen, however,
-it can be.
 .IP
 MD5 and SHA are the authentication types to use, but you must have
 built the package with openssl installed in order to use SHA.  The
@@ -297,6 +289,19 @@ Warning: the minimum pass phrase length is 8 characters.
 SNMPv3 users can be created at runtime using the
 .I snmpusm(1)
 command.
+.IP
+Instead of figuring out how to use this directive and where to put it
+(see below), just run "net-snmp-config --create-snmpv3-user" instead,
+which will add one of these lines to the right place.
+.IP
+This directive should be placed into the
+PERSISTENT_DIRECTORY/snmpd.conf file instead of the other normal
+locations.  The reason is that the information is read from the file
+and then the line is removed (eliminating the storage of the master
+password for that user) and replaced with the key that is derived from
+it.  This key is a localized key, so that if it is stolen it can not
+be used to access other agents.  If the password is stolen, however,
+it can be.
 .IP
 .SH SETTING SYSTEM INFORMATION
 .IP "syslocation STRING"
@@ -571,7 +576,115 @@ Example (in snmpd.conf):
 .IP
 pass_persist .1.3.6.1.4.1.2021.255 /path/to/local/pass_persisttest
 .RE
-.SH "EXAMPLE"
+.SH "DISMAN-EVENT-MIB SUPPORT (READ: SENDING TRAPS ON ERRORS)"
+.PP
+Warning: this implementation has not been extensively tested and is
+additionally not known to be entirely complete.  The concepts defined
+here should function appropriately, however, but no promises are made
+at this time.
+.PP
+If your agent was compiled with support for the DISMAN-EVENT-MIB (you
+can enable this by running the net-snmp configure script with the
+--with-mib-modules=disman/event-mib argument) you have support for
+having the agent check its own data at regular intervals and to send
+out traps when certain conditions occur.  Traps are sent when
+expressions are first noticed, not once per evaluation.  Once a test
+expression fires a trap, the test will have to fail again before a new
+trap is sent.  See the DISMAN-EVENT-MIB documentation for more
+details. This can be configured either using the MIB tables themselves
+or by using these special key words:
+.IP "agentSecName NAME"
+The DISMAN-EVENT-MIB support requires a valid user name for which to
+scan your agent with.  This can either be specified using the
+agentSecName token or by explicitly list one on the "monitor" lines
+described below using the -u switch.  Either way, a "rouser" line (or
+equivalent access control settings) must also be specified with the
+same security name name.  If you need an example, just do something
+like this:
+.RS
+.IP
+.nf
+agentSecName internal
+rouser internal
+.fi
+.RE
+.IP
+And everything below should work just fine.
+.IP "monitor [OPTIONS] NAME EXPRESSION"
+This token tells the agent to monitor itself for problems based on
+EXPRESSION.  Expression is a simple expression based on an oid, a
+comparison operator (!=, ==, <, <=, >, >=) and an integer value (see
+the examples below).  NAME is merely an arbitrary name of your
+choosing for administrative purposes only.  OPTIONS include the
+following possibilities:
+.RS
+.IP "-r FREQUENCY"
+Monitors the given expression every FREQUENCY seconds.  The default is
+600 (10 minutes). 
+.IP "-u SECNAME"
+Use the SECNAME security name for scanning the local host.
+Specifically, this SECNAME must then be given access control rights
+via something like the "rouser" snmpd.conf token for this expression
+to be valid at all.  If not specified, it uses the default security
+name specified by the agentsecname snmpd.conf token.  Either the -u
+flag or a valid agentsecname token must be specified (and that name
+must be given proper access control rights via a "rouser" token).
+.IP "-o OID"
+Specifies additional object values to be delivered with in the
+resulting trap in addition to the normal trap objects.  This is useful
+for obtaining other columns in the table for the row that triggered
+the expression.  See the examples below for more details.
+.RE
+.IP
+The following example configuration checks the hrSWRunPerfTable table
+(listing running processes) for any process which is consuming > 10Mb
+of memory.  It performs this check every 600 seconds (the default).
+For every process it finds exceeding the limit, it will end out
+exactly one notification.  In addition to the normal hrSWRunPerfMem
+oid and value sent in the trap, the hrSWRunName object will also be
+sent.  Note that the hrSWRunName object actually occurs in a different
+table, but since the indexes to the two tables are the same this works
+out alright.
+.RS
+.IP
+.nf
+rouser me
+monitor -u me -o sysUpTime.0 -o hrSWRunName "high process memory" hrSWRunPerfMem > 10000
+.RE
+.fi
+.IP
+The above line would produce a trap which, when formated by snmptrapd, would
+look like:
+.RS
+.IP
+.nf
+2002-04-05 13:33:53 localhost.localdomain [udp:127.0.0.1:32931]:
+        sysUpTimeInstance = Timeticks: (1629) 0:00:16.29        snmpTrapOID.0 = OID: mteTriggerFired    mteHotTrigger = high process memory     mteHotTargetName =      mteHotContextName =     mteHotOID = OID: hrSWRunPerfMem.1968    mteHotValue = 28564     hrSWRunName.1968 = "xemacs"
+.RE
+.fi
+.IP
+This shows my xemacs process using 28Mb of resident memory.  Which,
+considering it's xemacs, is not that surprising.
+.IP "defaultMonitors yes"
+By default, the agent and the DISMAN-EVENT-MIB support do nothing
+until configured.  Typically people wish to watch a bunch of tables
+within the UCD-SNMP-MIB which are designed specifically for reporting
+problems.  If the "defaultMonitors yes" line is put into the
+snmpd.conf file (which must be accompanied by an appropriate
+agentSecName line and a rouser line), the following monitoring
+conditions will be installed:
+.RS
+.IP
+.nf
+monitor	-o prNames -o prErrMessage "process table" prErrorFlag != 0
+monitor	-o memErrorName -o memSwapErrorMsg "memory" memSwapError != 0
+monitor	-o extNames -o extOutput "extTable" extResult != 0
+monitor	-o dskPath -o dskErrorMsg "dskTable" dskErrorFlag != 0
+monitor	-o laNames -o laErrMessage  "laTable" laErrorFlag != 0
+monitor	-o fileName -o fileErrorMsg  "fileTable" fileErrorFlag != 0
+.fi
+.RE
+.SH "EXAMPLE CONFIGURATION FILE"
 See the EXAMPLE.CONF file in the top level source directory for a more
 detailed example of how the above information is used in real
 examples.
