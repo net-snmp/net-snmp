@@ -127,17 +127,17 @@ void init_mteTriggerTable(void) {
 
 
   /* place any other initialization junk you need here */
-  se_add_pair_to_slist("mteBooleanOperators", "!=",
+  se_add_pair_to_slist(strdup("mteBooleanOperators"), strdup("!="),
                        MTETRIGGERBOOLEANCOMPARISON_UNEQUAL);
-  se_add_pair_to_slist("mteBooleanOperators", "==",
+  se_add_pair_to_slist(strdup("mteBooleanOperators"), strdup("=="),
                        MTETRIGGERBOOLEANCOMPARISON_EQUAL);
-  se_add_pair_to_slist("mteBooleanOperators", "<",
+  se_add_pair_to_slist(strdup("mteBooleanOperators"), strdup("<"),
                        MTETRIGGERBOOLEANCOMPARISON_LESS);
-  se_add_pair_to_slist("mteBooleanOperators", "<=",
+  se_add_pair_to_slist(strdup("mteBooleanOperators"), strdup("<="),
                        MTETRIGGERBOOLEANCOMPARISON_LESSOREQUAL);
-  se_add_pair_to_slist("mteBooleanOperators", ">",
+  se_add_pair_to_slist(strdup("mteBooleanOperators"), strdup(">"),
                        MTETRIGGERBOOLEANCOMPARISON_GREATER);
-  se_add_pair_to_slist("mteBooleanOperators", ">=",
+  se_add_pair_to_slist(strdup("mteBooleanOperators"), strdup(">="),
                        MTETRIGGERBOOLEANCOMPARISON_GREATEROREQUAL);
 
   DEBUGMSGTL(("mteTriggerTable", "done.\n"));
