@@ -113,6 +113,14 @@ perlinstall:
            fi  \
 	done
 
+perltest:
+	@for i in $(PERLMODULES); do \
+	   (cd perl/$$i ; $(MAKE) test) ; \
+           if test $$? != 0 ; then \
+              exit 1 ; \
+           fi  \
+	done
+
 perlclean:
 	@for i in $(PERLMODULES); do \
 	   ( cd perl/$$i ; $(MAKE) clean ) ; \
