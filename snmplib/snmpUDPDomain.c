@@ -198,7 +198,7 @@ netsnmp_transport		*netsnmp_udp_transport	(struct sockaddr_in *addr,
       and return value, unlike all other OS's.  */
   {
     int one=1;
-    setsockopt(t->sock, SOL_SOCKET, SO_BSDCOMPAT, &one, sizeof(one));
+    setsockopt(t->sock, SOL_SOCKET, SO_BSDCOMPAT, (void*)&one, sizeof(one));
   }
 #endif/*SO_BSDCOMPAT*/
 
@@ -208,14 +208,14 @@ netsnmp_transport		*netsnmp_udp_transport	(struct sockaddr_in *addr,
       plough on regardless.  */
 
 #ifdef  SO_SNDBUF
-  if (setsockopt(t->sock, SOL_SOCKET, SO_SNDBUF, &udpbuf, sizeof(int)) != 0) {
+  if (setsockopt(t->sock, SOL_SOCKET, SO_SNDBUF, (void*)&udpbuf, sizeof(int)) != 0) {
     DEBUGMSGTL(("snmp_udp", "couldn't set SO_SNDBUF to %d bytes: %s\n",
 		udpbuf, strerror(errno)));
   }
 #endif/*SO_SNDBUF*/
 
 #ifdef  SO_RCVBUF
-  if (setsockopt(t->sock, SOL_SOCKET, SO_RCVBUF, &udpbuf, sizeof(int)) != 0) {
+  if (setsockopt(t->sock, SOL_SOCKET, SO_RCVBUF, (void*)&udpbuf, sizeof(int)) != 0) {
     DEBUGMSGTL(("snmp_udp", "couldn't set SO_RCVBUF to %d bytes: %s\n",
 		udpbuf, strerror(errno)));
   }
@@ -552,7 +552,7 @@ void		netsnmp_udp_agent_config_tokens_register	(void)
 
 int		netsnmp_udp_getSecName	(void *opaque, int olength,
 					 const char *community,
-					 int community_len, char **secName)
+					 size_t community_len, char **secName)
 {
   com2SecEntry *c;
   struct sockaddr_in *from = (struct sockaddr_in *)opaque;
