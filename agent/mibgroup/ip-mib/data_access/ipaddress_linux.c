@@ -10,10 +10,19 @@
 #include <net-snmp/agent/net-snmp-agent-includes.h>
 #include <net-snmp/data_access/ipaddress.h>
 
+#include "ip-mib/ipAddressTable/ipAddressTable_constants.h"
+
 #include <errno.h>
 #include <sys/ioctl.h>
 
+#if defined (INET6)
+#include <linux/types.h>
+#include <linux/rtnetlink.h>
+#endif
+
 #include "ipaddress_ioctl.h"
+
+int _load_v6(netsnmp_container *container, int idx_offset);
 
 /**
  *
@@ -60,10 +69,10 @@ _load_v6(netsnmp_container *container, int idx_offset)
     FILE           *in;
     char            line[80], addr[33], if_name[9];
     u_char          *buf;
-    int             if_index, pfx_len, scope, flags, rc, in_len, out_len;
+    int             if_index, pfx_len, scope, flags, rc = 0, in_len, out_len;
     netsnmp_ipaddress_entry *entry;
     
-    assert(NULL != container);
+    netsnmp_assert(NULL != container);
 
 #define PROCFILE "/proc/net/if_inet6"
     if (!(in = fopen(PROCFILE, "r"))) {
@@ -75,7 +84,16 @@ _load_v6(netsnmp_container *container, int idx_offset)
      * address index prefix_len scope status if_name
      */
     while (fgets(line, sizeof(line), in)) {
-        
+        /*
+         * fe800000000000000200e8fffe5b5c93 05 40 20 80 eth0
+         *             A                    D  P  S  F  I
+         * A: address
+         * D: device number
+         * P: prefix len
+         * S: scope (see include/net/ipv6.h, net/ipv6/addrconf.c)
+         * F: flags (see include/linux/rtnetlink.h, net/ipv6/addrconf.c)
+         * I: interface
+         */
         rc = sscanf(line, "%32s %02x %02x %02x %02x %8s\n",
                     addr, &if_index, &pfx_len, &scope, &flags, if_name);
         if( 6 != rc ) {
@@ -110,8 +128,8 @@ _load_v6(netsnmp_container *container, int idx_offset)
 
         entry->ns_ia_index = ++idx_offset;
 
-        /*
-         */
+        entry->ia_flags = flags;
+
 #ifndef NETSNMP_USE_IOCTL_IFINDEX
         /*
          * there is an iotcl to get an ifindex, but I'm not sure that
@@ -119,24 +137,61 @@ _load_v6(netsnmp_container *container, int idx_offset)
          * ifIndex for the mib, so we'll use the netsnmp interface method
          * (which is based on the interface name).
          */
-        entry->if_index = netsnmp_access_interface_index_find(ifrp->ifr_name);
+        entry->if_index = netsnmp_access_interface_index_find(if_name);
 #else
         entry->if_index = if_index;
 #endif
 
-        entry->ia_flags = flags;
+        /*
+          #define IPADDRESSSTATUSTC_PREFERRED  1
+          #define IPADDRESSSTATUSTC_DEPRECATED  2
+          #define IPADDRESSSTATUSTC_INVALID  3
+          #define IPADDRESSSTATUSTC_INACCESSIBLE  4
+          #define IPADDRESSSTATUSTC_UNKNOWN  5
+          #define IPADDRESSSTATUSTC_TENTATIVE  6
+          #define IPADDRESSSTATUSTC_DUPLICATE  7
+        */
+        if(flags & IFA_F_PERMANENT)
+            entry->ia_status = IPADDRESSSTATUSTC_PREFERRED; /* ?? */
+        else if(flags & IFA_F_DEPRECATED)
+            entry->ia_status = IPADDRESSSTATUSTC_DEPRECATED;
+        else if(flags & IFA_F_TENTATIVE)
+            entry->ia_status = IPADDRESSSTATUSTC_TENTATIVE;
+        else {
+            entry->ia_status = IPADDRESSSTATUSTC_UNKNOWN;
+            DEBUGMSGTL(("access:ipaddress:ipv6",
+                        "unknown flags 0x%x\n", flags));
+        }
 
-        entry->ia_type = 1; /* assume unicast? */
+        /*
+         * if it's not multi, it must be uni.
+         *  (an ipv6 address is never broadcast)
+         */
+        if (IN6_IS_ADDR_MULTICAST(entry->ia_address))
+            entry->ia_type = IPADDRESSTYPE_ANYCAST;
+        else
+            entry->ia_type = IPADDRESSTYPE_UNICAST;
+
 
         /** entry->ia_prefix_oid ? */
-
-        /** entry->ia_status = ?; */
 
         /*
          * can we figure out if an address is from DHCP?
          * use manual until then...
+         *
+         *#define IPADDRESSORIGINTC_OTHER  1
+         *#define IPADDRESSORIGINTC_MANUAL  2
+         *#define IPADDRESSORIGINTC_DHCP  4
+         *#define IPADDRESSORIGINTC_LINKLAYER  5
+         *#define IPADDRESSORIGINTC_RANDOM  6
+         *
+         * are 'local' address assigned by link layer??
          */
-        entry->ia_origin = 2; /* 2 = manual */
+        if (IN6_IS_ADDR_LINKLOCAL(entry->ia_address) ||
+            IN6_IS_ADDR_SITELOCAL(entry->ia_address))
+            entry->ia_origin = IPADDRESSORIGINTC_LINKLAYER;
+        else
+            entry->ia_origin = IPADDRESSORIGINTC_MANUAL;
 
         // xxx-rks: what can we do with scope?
 
