@@ -146,19 +146,22 @@ int main(int argc, char *argv[])
     int allprotos = 1;
     char *community = NULL;
     struct snmp_session session;
-    char ctmp[128];
     int dest_port = SNMP_PORT;
     int clock_flag = 0;
     u_long	srcclock = 0, dstclock = 0;
     int version = SNMP_VERSION_1;
+    size_t srclen = 0, dstlen = 0, contextlen = 0;
+    int trivialSNMPv2 = FALSE;
+    int arg;
+#ifdef USE_V2PARTY_PROTOCOL
+    char ctmp[128];
     struct partyEntry *pp;
     struct contextEntry *cxp;
     oid src[MAX_OID_LEN], dst[MAX_OID_LEN], context[MAX_OID_LEN];
-    size_t srclen = 0, dstlen = 0, contextlen = 0;
-    int trivialSNMPv2 = FALSE;
     struct hostent *hp;
     in_addr_t destAddr;
-    int arg;
+#endif
+
 #ifdef _DEBUG_MALLOC_INC
     unsigned long histid1, histid2, orig_size, current_size;
 #endif

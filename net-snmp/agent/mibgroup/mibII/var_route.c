@@ -1632,24 +1632,7 @@ get_address (const void * _ap, int addresses, int wanted)
 	}
       else if (bitmask & addresses)
 	{
-	  unsigned length = 1;
-	  switch (ap->sa_family)
-	    {
-	    case AF_UNIX:
-	      length = sizeof (struct sockaddr_un);
-	      break;
-	    case AF_LINK:
-#ifdef _MAX_SA_LEN
-	      length = _MAX_SA_LEN;
-#else
-	      length = sizeof (struct sockaddr_dl);
-#endif
-	      break;
-	    case AF_INET:
-	    default:
-	      length = sizeof (struct sockaddr_in);
-	      break;
-	    }
+	  unsigned length = (unsigned)snmp_socket_length(ap->sa_family);
 	  while (length % sizeof (long) != 0)
 	    ++length;
 	  ap = (const struct sockaddr *) ((const char *) ap + length);
