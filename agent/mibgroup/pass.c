@@ -61,7 +61,7 @@ void pass_parse_config(word,cptr)
     for(tcptr=cptr; *tcptr != 0 && *tcptr != '#' && *tcptr != ';';
         tcptr++);
     strncpy((*ppass)->command,cptr,tcptr-cptr);
-    (*ppass)->command[tcptr-cptr-1] = 0;
+    (*ppass)->command[tcptr-cptr] = 0;
   }
   strcpy((*ppass)->name, (*ppass)->command);
   (*ppass)->next = NULL;
