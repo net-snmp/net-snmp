@@ -17,6 +17,7 @@
 #include "snmpTargetParamsEntry.h"
 #include "target.h"
 #include "snmp-tc.h"
+#include "snmp_transport.h"
 
 #define MAX_TAGS 128
 
@@ -28,8 +29,6 @@ get_target_sessions(char *taglist, TargetFilterFunction *filterfunct,
     char buf[SPRINT_MAX_LEN], smbuf[64];
     char tags[MAX_TAGS][SPRINT_MAX_LEN], *cp;
     int numtags = 0, i;
-    oid udpdomain[] = { 1,3,6,1,6,1,1 };
-    int udpdomainlen = sizeof(udpdomain)/sizeof(oid);
     static struct targetParamTable_struct *param;
     
     DEBUGMSGTL(("target_sessions","looking for: %s\n", taglist));
@@ -51,10 +50,8 @@ get_target_sessions(char *taglist, TargetFilterFunction *filterfunct,
             continue;
         }
 
-
-        if (snmp_oid_compare(udpdomain, udpdomainlen,
-                             targaddrs->tDomain,
-                             targaddrs->tDomainLen) != 0) {
+	if (snmp_tdomain_support(targaddrs->tDomain, targaddrs->tDomainLen,
+				 NULL, NULL) == 0) {
             snmp_log(LOG_ERR,
                      "unsupported domain for target address table entry %s\n",
                      targaddrs->name);
