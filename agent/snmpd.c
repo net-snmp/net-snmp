@@ -1,7 +1,7 @@
 /*
  * snmpd.c
  */
-/** @defgroup agent The snmp agent
+/** @defgroup agent The Net-SNMP agent
  * The snmp agent responds to SNMP queries from management stations
  */
 /*
