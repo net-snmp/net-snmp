@@ -201,9 +201,10 @@ u_char          return_buf[256];        /* nee 64 */
 
 struct timeval  starttime;
 
+int             callback_master_num = -1;
+
 #ifdef SNMP_TRANSPORT_CALLBACK_DOMAIN
 netsnmp_session *callback_master_sess = NULL;
-int             callback_master_num = -1;
 
 static void
 _init_agent_callback_transport(void)
