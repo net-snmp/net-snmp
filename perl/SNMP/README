@@ -20,7 +20,7 @@ Introduction:
 This is a Perl5 extension module which provides a full featured SNMPv3
 protocol operation API. An interface to the MIB module parse-tree is
 also provided.  The SNMP module internals rely on the UCD SNMPv3
-library (ucd-snmp-4.x libsnmp). For information on the UCD SNMP
+library (ucd-snmp-4.1.0 libsnmp). For information on the UCD SNMP
 library see the documentation provided with the UCD SNMP distribution
 or the ucd-snmp project web page: http://ucd-snmp.ucdavis.edu
 
@@ -33,10 +33,9 @@ Availability:
 
 The most recent release of the Perl5 SNMP module can be found at the
 following FTP site (as well as the usual perl archives, CPAN):
-ftp://ftp-east.baynetworks.com/netman/snmp/perl5/SNMP.tar.gz
+ftp://ftp-east.baynetworks.com/netman/snmp/perl5
 
-The most recent release of the UCD SNMPv3(ucd-snmp-4.x) Libray can be
-found at:
+The most recent release of the UCD SNMPv3 Libray can be found at:
 ftp://ucd-snmp.ucdavis.edu
 
 Contact:
@@ -55,14 +54,19 @@ Supported Platforms:
 
 Release Notes:
 
-SNMP module version 3.1.0b1 is being developed against UCD SNMP
-CVS *latest* snapshot. see http://ucd-snmp.ucdavis.edu for details.
+SNMP module version 3.1.0 is being developed against UCD SNMPv3
+ucd-snmp-4.1.0. see http://ucd-snmp.ucdavis.edu for details.
 Compatibility with earlier or later versions of ucd-snmp is not
 guaranteed due to the dynamic nature of open software development :).
 
-the latest stable release is SNMP-1.8.2 and ucd-snmp-3.6.2.
+the previous stable release is SNMP-1.8.2 and ucd-snmp-3.6.2.
 
 Yes, I skipped some versions, do not be alarmed.
+
+KNOWN BUGS:
+
+the new quoted OCTETSTR instance identifiers returned by get_symbol
+are not compatible with the perl/SNMP module (__get_label_iid)
 
 Installation:
 
@@ -244,7 +248,7 @@ methods:
                                                              # always last
  or v2 format
  trap(oid, uptime, <vars>)
-    $sess->trap(trapoid => 'snmpRisingAlarm',
+    $sess->trap(oid => 'snmpRisingAlarm',
                 uptime => 1234,
                 [[ifIndex, 1, 1],[sysLocation, 0, "here"]]); # optional vars
                                                              # always last
@@ -325,7 +329,7 @@ will be undef.
 
 SNMP package variables and functions:
 
- $SNMP::VERSION       - the current version specifier (e.g., 3.0)
+ $SNMP::VERSION       - the current version specifier (e.g., 3.1.0)
 
  $SNMP::auto_init_mib - default '1', set to 0 to disable automatic reading
                         of the MIB upon session creation. set to non-zero
@@ -555,7 +559,7 @@ the fact that I have more time to work on it than in the past.
 History:
 
 Bugs fixed and changes in 3.1.0
-1) update to ucd-snmp-4.1.x
+1) update to ucd-snmp-4.1.0
 
 2) support much of SNMPv3
 
@@ -572,7 +576,7 @@ not destruct until after async callback completes
 6) pass protocol errors to callbacks
 
 7) added lower level async API so SNMP events can be integrated with
-arbitrary event loop (Event.pm?) - Thanks Jef
+arbitrary event loop (Event.pm?) - thanks Jef
 
 8) Major enhancement to 'make test' - thanks Sri
 
