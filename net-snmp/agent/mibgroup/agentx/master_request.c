@@ -146,10 +146,23 @@ handle_agentx_response( int operation,
 			snmp_close( ax_session );
 		    }
 		}
-
 		pdu->errstat  = SNMP_ERR_GENERR;
 		pdu->errindex = 0;
+		if (asp->pdu->command != SNMP_MSG_SET)
+		    asp->mode = RESERVE2;
 		break;
+
+	case SEND_FAILED:
+		if ( SET_SNMP_STRIKE_FLAGS( session->flags )) {
+		    (void) close_agentx_session(session, -1 );
+		}
+		pdu->errstat  = SNMP_ERR_GENERR;
+		pdu->errindex = 0;
+		if (asp->pdu->command != SNMP_MSG_SET)
+		    asp->mode = RESERVE2;
+		break;
+
+
 	case RECEIVED_MESSAGE:
 		/* This session is alive */
 		CLEAR_SNMP_STRIKE_FLAGS( session->flags );
