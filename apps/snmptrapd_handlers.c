@@ -78,6 +78,42 @@ snmptrapd_parse_traphandle(const char *token, char *line)
 
 
 static void
+parse_forward(const char *token, char *line)
+{
+    char            buf[STRINGMAX];
+    oid             obuf[MAX_OID_LEN];
+    int             olen = MAX_OID_LEN;
+    char           *cptr;
+    netsnmp_trapd_handler *traph;
+
+    cptr = copy_nword(line, buf, sizeof(buf));
+    DEBUGMSGTL(("read_config:forward", "registering forward for: "));
+    if (!strcmp(buf, "default")) {
+        DEBUGMSG(("read_config:forward", "default"));
+        traph = netsnmp_add_default_traphandler( forward_handler );
+    } else {
+
+        if (!read_objid(buf, obuf, &olen)) {
+            char            buf1[STRINGMAX];
+            snprintf(buf1,  sizeof(buf1),
+                    "Bad trap OID in traphandle directive: %s", buf);
+            buf1[ sizeof(buf1)-1 ] = 0;
+            config_perror(buf1);
+            return;
+        }
+        DEBUGMSGOID(("read_config:forward", obuf, olen));
+        traph = netsnmp_add_traphandler( forward_handler, obuf, olen );
+    }
+
+    DEBUGMSG(("read_config:forward", "\n"));
+
+    if (traph) {
+        traph->token = strdup(cptr);
+    }
+}
+
+
+static void
 parse_format(const char *token, char *line)
 {
     char *cp;
@@ -169,7 +205,10 @@ snmptrapd_register_configs( void )
     register_config_handler("snmptrapd", "format2",
                             parse_trap2_fmt, free_trap2_fmt, "format");
     register_config_handler("snmptrapd", "format",
-                            parse_format, free_trap2_fmt, "[print{,1,2}|syslog{,1,2}] format");
+                            parse_format, NULL,
+			    "[print{,1,2}|syslog{,1,2}] format");
+    register_config_handler("snmptrapd", "forward",
+                            parse_forward, NULL, "destination");
 }
 
 
@@ -648,10 +687,24 @@ int   forward_handler( netsnmp_pdu           *pdu,
                        netsnmp_transport     *transport,
                        netsnmp_trapd_handler *handler)
 {
-    /*
-     * XXX - Still To Do!
-     */
-    DEBUGMSGTL(( "snmptrapd", "forward_handler\n"));
+    netsnmp_session session, *ss;
+    netsnmp_pdu *pdu2;
+
+    DEBUGMSGTL(( "snmptrapd", "forward_handler (%s)\n", handler->token));
+
+    snmp_sess_init( &session );
+    session.peername = handler->token;
+    session.version  = pdu->version;
+    ss = snmp_open( &session );
+
+    pdu2 = snmp_clone_pdu(pdu);
+    if (pdu2->transport_data) {
+        free(pdu2->transport_data);
+        pdu2->transport_data        = NULL;
+        pdu2->transport_data_length = 0;
+    }
+    snmp_send( ss, pdu2 );
+    snmp_close( ss );
     return 0;
 }
 
