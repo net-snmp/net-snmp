@@ -1,7 +1,7 @@
 .TH SNMPD.CONF 5 "08 Feb 2002" VVERSIONINFO "Net-SNMP"
 .UC 4
 .SH NAME
-DATADIR/snmp/snmpd.conf - configuration file for the Net-SNMP SNMP agent.
+SYSCONFDIR/snmp/snmpd.conf - configuration file for the Net-SNMP SNMP agent.
 .SH DESCRIPTION
 .B snmpd.conf
 is the configuration file which defines how the Net-SNMP SNMP agent
@@ -345,7 +345,7 @@ listening addresses instead of the default behaviour, which is to
 listen on UDP port 161 on all IPv4 interfaces.  See the section 
 .B LISTENING ADDRESSES
 in the
-.I snmpd(1)
+.I snmpd(8)
 manual page for more information about the format of listening
 addresses.  For example, specifying
 .I "agentaddress 161,tcp:161,localhost:9161"
@@ -726,6 +726,11 @@ the examples below).  NAME is merely an arbitrary name of your
 choosing for administrative purposes only.  OPTIONS include the
 following possibilities:
 .RS
+.IP "-t"
+Use a threshold monitor instead of a boolean monitor.  This means that
+expression should be a low and high value.  If the given OID passes
+beyond the high value, a rising alarm will triggered.  A falling alarm
+will then be triggered after it falls below the low value.
 .IP "-r FREQUENCY"
 Monitors the given expression every FREQUENCY seconds.  The default is
 600 (10 minutes). 
@@ -773,6 +778,14 @@ look like:
 .IP
 This shows my xemacs process using 28Mb of resident memory.  Which,
 considering it's xemacs, is not that surprising.
+.IP
+Threshold example:
+.RS
+.nf
+.IP
+monitor -t -r 15 -o prNames -o prErrMessage "process table" prErrorFlag 0 1
+.fi
+.RE
 .IP "defaultMonitors yes"
 By default, the agent and the DISMAN-EVENT-MIB support do nothing
 until configured.  Typically people wish to watch a bunch of tables
@@ -834,9 +847,9 @@ An snmpset of integer(1) to UCD-SNMP-MIB::versionUpdateConfig.0
 .IP 2.
 A "kill -HUP" signal sent to the snmpd agent process.
 .SH "FILES"
-DATADIR/snmp/snmpd.conf
+SYSCONFDIR/snmp/snmpd.conf
 .SH "SEE ALSO"
-snmpconf(1), snmpusm(1), snmp.conf(5), snmp_config(5), snmpd(1), EXAMPLE.conf, read_config(3).
+snmpconf(1), snmpusm(1), snmp.conf(5), snmp_config(5), snmpd(8), EXAMPLE.conf, read_config(3).
 .\" Local Variables:
 .\"  mode: nroff
 .\" End:
