@@ -76,7 +76,7 @@ static struct nlist hrstore_nl[] = {
 #define N_PHYSMEM     0
 #define N_MEMTOTAL    1
 #define N_MBUFSTAT    2
-#if !defined(hpux) && !defined(solaris2)
+#if !defined(hpux) && !defined(solaris2) && !defined(__sgi)
         { "_physmem"},
         { "_total"},
         { "_mbstat"},

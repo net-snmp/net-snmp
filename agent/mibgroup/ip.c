@@ -22,7 +22,7 @@ static struct nlist ip_nl[] = {
 #define N_IPFORWARDING	1
 #define N_TCP_TTL	2
 #define N_HP_IPMIB	3
-#if !defined(hpux) && !defined(solaris2)
+#if !defined(hpux) && !defined(solaris2) && !defined(__sgi)
 	{ "_ipstat"},
 #ifdef sun
 	{ "_ip_forwarding" },
@@ -30,11 +30,15 @@ static struct nlist ip_nl[] = {
 	{ "_ipforwarding" },
 #endif
 	{ "_tcp_ttl"},
-#else  /* hpux or solaris */
+#else  /* hpux or solaris or __sgi */
 	{ "ipstat"},  
 	{ "ipforwarding" },
 #ifndef hpux
-	{ "tcpDefaultTTL"},
+#ifdef __sgi
+	{ "tcp_ttl"},
+#else /* not __sgi */
+ 	{ "tcpDefaultTTL"},
+#endif /* not __sgi */
 #else
 	{ "ipDefaultTTL"},
 	{ "MIB_ipcounter" },
@@ -112,6 +116,7 @@ header_ip(vp, name, length, exact, var_len, write_method)
 
 #ifndef solaris2
 #ifndef linux
+#ifndef HAVE_SYS_TCPIPSTATS_H
 
 u_char *
 var_ip(vp, name, length, exact, var_len, write_method)
@@ -266,6 +271,126 @@ var_ip(vp, name, length, exact, var_len, write_method)
     }
 }
 
+#else /* HAVE_SYS_TCPIPSTATS_H */
+
+u_char *
+var_ip(vp, name, length, exact, var_len, write_method)
+    register struct variable *vp;
+    oid     *name;
+    int     *length;
+    int     exact;
+    int     *var_len;
+    int     (**write_method) __P((int, u_char *, u_char, int, u_char *, oid *, int));
+{
+    static struct kna tcpipstats;
+    int i;
+
+    if (header_icmp(vp, name, length, exact, var_len, write_method) == MATCH_FAILED )
+	return NULL;
+
+    /*
+     *	Get the IP statistics from the kernel...
+     */
+    if (sysmp (MP_SAGET, MPSA_TCPIPSTATS, &tcpipstats, sizeof tcpipstats) == -1) {
+	perror ("sysmp(MP_SAGET)(MPSA_TCPIPSTATS)");
+    }
+#define ipstat tcpipstats.ipstat
+
+    switch (vp->magic){
+	case IPFORWARDING:
+#if defined(HAVE_SYS_SYSCTL_H) && defined(CTL_NET)
+	  {
+	    int name[] = { CTL_NET, PF_INET, IPPROTO_IP, IPCTL_FORWARDING };
+	    int result;
+	    size_t result_size = sizeof (int);
+
+	    if (sysctl (name, sizeof (name) / sizeof (int),
+			&result, &result_size,
+			0, 0) == -1)
+	      {
+		fprintf (stderr, "sysctl(CTL_NET,PF_NET,IPPROTO_IP,IPCTL_FORWARDING)\n");
+	      }
+	    else
+	      {
+		if (result) {
+		  long_return = 1;		/* GATEWAY */
+		} else {
+		  long_return = 2;	    /* HOST    */
+		}
+	      }
+	  }
+#else /* not (HAVE_SYS_SYSCTL_H && CTL_NET) */
+#ifndef sparc	  
+	    KNLookup(ip_nl,  N_IPFORWARDING, (char *) &i, sizeof(i));
+	    fflush(stderr);
+	    if (i) {
+		long_return = 1;		/* GATEWAY */
+	    } else {
+		long_return = 2;	    /* HOST    */
+	    }
+#else /* sparc */
+	    long_return = 0;
+#endif /* sparc */
+#endif /* not (HAVE_SYS_SYSCTL_H && CTL_NET) */
+
+	    return (u_char *) &long_return;
+	case IPDEFAULTTTL:
+	    /*
+	     *	Allow for a kernel w/o TCP.
+	     */
+	    if (ip_nl[N_TCP_TTL].n_value) {
+		KNLookup(ip_nl,  N_TCP_TTL, (char *) &long_return, sizeof(long_return));
+	    } else long_return = 60;	    /* XXX */
+	    return (u_char *) &long_return;
+	case IPINRECEIVES:
+	    return (u_char *) &ipstat.ips_total;
+	case IPINHDRERRORS:
+	    long_return = ipstat.ips_badsum + ipstat.ips_tooshort +
+			  ipstat.ips_toosmall + ipstat.ips_badhlen +
+			  ipstat.ips_badlen;
+	    return (u_char *) &long_return;
+	case IPINADDRERRORS:
+	  return (u_char *) &ipstat.ips_cantforward;
+	case IPFORWDATAGRAMS:
+	  return (u_char *) &ipstat.ips_forward;
+	case IPINUNKNOWNPROTOS:
+	    return (u_char *) &ipstat.ips_noproto;
+	case IPINDISCARDS:
+	  return (u_char *) &ipstat.ips_fragdropped;
+	case IPINDELIVERS:
+	  return (u_char *) &ipstat.ips_delivered;
+	case IPOUTREQUESTS:
+	    return (u_char *) &ipstat.ips_localout;
+	case IPOUTDISCARDS:
+	    return (u_char *) &ipstat.ips_odropped;
+	case IPOUTNOROUTES:
+	    return (u_char *) &ipstat.ips_noroute;
+	case IPREASMTIMEOUT:
+	    return (u_char *) &ipstat.ips_fragtimeout;
+	case IPREASMREQDS:
+	    return (u_char *) &ipstat.ips_fragments;
+	case IPREASMOKS:
+	    return (u_char *) &ipstat.ips_reassembled;
+	case IPREASMFAILS:
+	    long_return = ipstat.ips_fragdropped + ipstat.ips_fragtimeout;
+	    return (u_char *) &long_return;
+	case IPFRAGOKS:
+	    long_return = ipstat.ips_fragments
+	      - (ipstat.ips_fragdropped + ipstat.ips_fragtimeout);
+	    return (u_char *) &long_return;
+	case IPFRAGFAILS:
+	    long_return = 0;
+	    return (u_char *) &long_return;
+	case IPFRAGCREATES:
+	    return (u_char *) &ipstat.ips_ofragments;
+	case IPROUTEDISCARDS:
+	    return (u_char *) &ipstat.ips_noroute;
+	default:
+	    ERROR_MSG("");
+    }
+}
+
+#endif /* HAVE_SYS_TCPIPSTATS_H */
 
 #else /* linux */    
 

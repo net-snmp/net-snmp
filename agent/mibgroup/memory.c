@@ -200,7 +200,7 @@ unsigned memswap(int index)
 #define NL_PHYSMEM 5
 
 static struct nlist memory_nl[] = {
-#if !defined(hpux) && !defined(solaris2)
+#if !defined(hpux) && !defined(solaris2) && !defined(__sgi)
   { "_total"},
   { "_swdevt"},
   { "_fswdevt"},

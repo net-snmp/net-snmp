@@ -104,7 +104,7 @@ double maxload[3];
 #ifndef linux
 static struct nlist loadave_nl[] = {
 #define NL_AVENRUN 0
-#if !defined(hpux) && !defined(solaris2)
+#if !defined(hpux) && !defined(solaris2) && !defined(__sgi)
   { "_avenrun"},
 #else
   { "avenrun"},
