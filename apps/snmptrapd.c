@@ -59,7 +59,6 @@ SOFTWARE.
 #include <sys/select.h>
 #endif
 #include <sys/param.h>
-#include <errno.h>
 #if HAVE_SYSLOG_H
 #include <syslog.h>
 #endif
@@ -101,7 +100,6 @@ typedef long	fd_mask;
 #endif
 
 int main __P((int, char **));
-extern int  errno;
 int Print = 0;
 int Event = 0;
 int Syslog = 0;
@@ -330,6 +328,16 @@ int snmp_input(op, session, reqid, pdu, magic)
 		   || pdu->command == INFORM_REQ_MSG){
 	    if (Print){
 		printf("-------------------------------  Notification  -------------------------------\n");
+		time (&timer);
+		tm = localtime (&timer);
+                host = gethostbyaddr ((char *)&pdu->address.sin_addr,
+                                      sizeof (pdu->address.sin_addr),
+                                      AF_INET);
+                printf("%.4d-%.2d-%.2d %.2d:%.2d:%.2d %s [%s]:\n",
+		       tm->tm_year+1900, tm->tm_mon+1, tm->tm_mday,
+		       tm->tm_hour, tm->tm_min, tm->tm_sec,
+                       host ? host->h_name : inet_ntoa(pdu->address.sin_addr),
+                       inet_ntoa(pdu->address.sin_addr));
 		for(vars = pdu->variables; vars; vars = vars->next_variable)
 		    print_variable(vars->name, vars->name_length, vars);
 	    }
@@ -358,7 +366,7 @@ int snmp_input(op, session, reqid, pdu, magic)
 
 void usage __P((void))
 {
-    fprintf(stderr,"Usage: snmptrapd [-v 1] [-V] [-q] [-P #] [-p] [-s] [-e] [-d]\n");
+    fprintf(stderr,"Usage: snmptrapd [-V] [-q] [-p #] [-P] [-s] [-e] [-d]\n");
 }
 
 
@@ -372,19 +380,15 @@ main(argc, argv)
     int count, numfds, block;
     fd_set fdset;
     struct timeval timeout, *tvp;
-    int version = 2;
-    u_long myaddr;
+    in_addr_t myaddr;
     oid src[MAX_NAME_LEN], dst[MAX_NAME_LEN], context[MAX_NAME_LEN];
     int srclen, dstlen, contextlen;
     int local_port = SNMP_TRAP_PORT;
-    char *config_file = NULL;
     char ctmp[300];
 
     setvbuf (stdout, NULL, _IOLBF, BUFSIZ);
-    init_syslog();
-    init_mib();
     /*
-     * usage: snmptrapd [-v 1] [-q] [-P #] [-p] [-s] [-d]
+     * usage: snmptrapd [-v 1] [-q] [-p #] [-P] [-s] [-d] [-e]
      */
     for(arg = 1; arg < argc; arg++){
 	if (argv[arg][0] == '-'){
@@ -393,24 +397,20 @@ main(argc, argv)
                   fprintf(stderr,"UCD-snmp version: %s\n", VersionInfo);
                   exit(0);
                   break;
-	        case 'c':
-		    /* config file name */
-		    if (++arg >= argc) {
-			fprintf(stderr,"-c: no config file name\n");
-			break;
-		    }
-		    config_file = argv[arg];
-		    break;
 		case 'd':
 		    snmp_set_dump_packet(1);
 		    break;
 		case 'q':
 		    snmp_set_quick_print(1);
 		    break;
-                case 'P':
-                    local_port = atoi(argv[++arg]);
+                case 'p':
+		    if (++arg == argc) {
+			usage();
+			exit(1);
+		    }
+                    local_port = atoi(argv[arg]);
                     break;
-		case 'p':
+		case 'P':
 		    Print++;
 		    break;
 		case 'e':
@@ -419,15 +419,6 @@ main(argc, argv)
 		case 's':
 		    Syslog++;
 		    break;
-                case 'v':
-                    version = atoi(argv[++arg]);
-                    if (version < 1 || version > 2){
-                        fprintf(stderr, "Invalid version\n");
-
-                        fprintf(stderr,"Usage: snmptrapd [-v 1] [-q] [-P #] [-p] [-s] [-e] [-d]\n");
-                        exit(1);
-                    }
-                    break;
 		default:
 		    fprintf(stderr,"invalid option: -%c\n", argv[arg][1]);
 		    usage();
@@ -442,39 +433,35 @@ main(argc, argv)
 	}
     }
 
+    if (Syslog) init_syslog();
+    init_mib();
+
     myaddr = get_myaddr();
     srclen = dstlen = contextlen = MAX_NAME_LEN;
-    ms_party_init(myaddr, src, &srclen, dst, &dstlen,
-		  context, &contextlen);
+    ms_party_init(myaddr, src, &srclen, dst, &dstlen, context, &contextlen);
 
-    if (version == 2){
-	sprintf(ctmp,"%s/party.conf",SNMPLIBPATH);
-	if (read_party_database(ctmp) != 0){
-	    fprintf(stderr, "Couldn't read party database from %s\n",ctmp);
-	    exit(1);
-	}
-	sprintf(ctmp,"%s/context.conf",SNMPLIBPATH);
-	if (read_context_database(ctmp) != 0){
-	    fprintf(stderr, "Couldn't read context database from %s\n",ctmp);
-	    exit(1);
-	}
-	sprintf(ctmp,"%s/acl.conf",SNMPLIBPATH);
-	if (read_acl_database(ctmp) != 0){
-	    fprintf(stderr,
-		    "Couldn't read access control database from %s\n",ctmp);
-	    exit(1);
-	}
+    sprintf(ctmp,"%s/party.conf",SNMPLIBPATH);
+    if (read_party_database(ctmp) != 0){
+	fprintf(stderr, "Couldn't read party database from %s\n",ctmp);
+	exit(1);
+    }
+    sprintf(ctmp,"%s/context.conf",SNMPLIBPATH);
+    if (read_context_database(ctmp) != 0){
+	fprintf(stderr, "Couldn't read context database from %s\n",ctmp);
+	exit(1);
+    }
+    sprintf(ctmp,"%s/acl.conf",SNMPLIBPATH);
+    if (read_acl_database(ctmp) != 0){
+	fprintf(stderr,
+		"Couldn't read access control database from %s\n",ctmp);
+	exit(1);
     }
 
     memset(&session, 0, sizeof(struct snmp_session));
     session.peername = NULL;
-    if (version == 1){
-        session.version = SNMP_VERSION_1;
-    } else if (version == 2){
-        session.version = SNMP_VERSION_2p;
-	session.srcPartyLen = 0;
-	session.dstPartyLen = 0;
-    }
+    session.version = SNMP_DEFAULT_VERSION;
+    session.srcPartyLen = 0;
+    session.dstPartyLen = 0;
     session.retries = SNMP_DEFAULT_RETRIES;
     session.timeout = SNMP_DEFAULT_TIMEOUT;
     session.authenticator = NULL;
@@ -506,11 +493,7 @@ main(argc, argv)
 		snmp_timeout();
 		break;
 	    case -1:
-		if (errno == EINTR){
-		    continue;
-		} else {
-		    perror("select");
-		}
+	        perror("select");
 		return 1;
 	    default:
 		fprintf(stderr, "select returned %d\n", count);

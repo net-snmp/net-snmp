@@ -59,7 +59,6 @@ SOFTWARE.
 #if HAVE_ARPA_INET_H
 #include <arpa/inet.h>
 #endif
-#include <errno.h>
 
 #include "asn1.h"
 #include "snmp_impl.h"
@@ -77,7 +76,6 @@ int main __P((int, char **));
 int ascii_to_binary __P((u_char *, u_char *));
 int hex_to_binary __P((u_char *, u_char *));
 
-extern int  errno;
 int command = GET_REQ_MSG;
 
 int input_variable __P((struct variable_list *));
