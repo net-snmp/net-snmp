@@ -62,7 +62,7 @@
 #include <sys/ioctl.h>
 #endif
 
-#include "../../../snmplib/system.h"
+#include "system.h"
 #include "asn1.h"
 #include "mibincl.h"
 #include "mib.h"
@@ -75,6 +75,9 @@
 #include "var_struct.h"
 #include "util_funcs.h"
 #include "mibdefs.h"
+#include "default_store.h"
+#include "ds_agent.h"
+#include "snmpd.h"
 
 long smux_long;
 u_long smux_ulong;
@@ -82,8 +85,6 @@ struct sockaddr_in smux_sa;
 struct counter64 smux_counter64;
 oid smux_objid[MAX_OID_LEN];
 u_char smux_str[SMUXMAXSTRLEN];
-
-extern int smux_listen_sd;
 
 static struct timeval smux_rcv_timeout;
 static u_long smux_reqid;
@@ -182,6 +183,11 @@ init_smux(void)
 
 	struct sockaddr_in lo_socket;
 	int one = 1;
+
+	if (ds_get_boolean(DS_APPLICATION_ID, DS_AGENT_ROLE) == SUB_AGENT) {
+		smux_listen_sd = -1;
+		return;
+	}
 
         snmpd_register_config_handler("smuxpeer", smux_parse_peer_auth,
                                       smux_free_peer_auth,
