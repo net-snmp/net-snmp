@@ -1014,44 +1014,6 @@ check_access(struct snmp_pdu *pdu)      /* IN - pdu being checked */
   return 1;
 }
 
-/* lexicographical compare two object identifiers.
- * Returns -1 if name1 < name2,
- *          0 if name1 = name2, or name1 matches name2 for length of name2
- *          1 if name1 > name2
- *
- * Note: snmp_oid_compare checks len2 before last return.
- */
-int
-compare_tree(const oid *in_name1,
-	     size_t len1, 
-	     const oid *in_name2, 
-	     size_t len2)
-{
-    register int len, res;
-    register const oid * name1 = in_name1;
-    register const oid * name2 = in_name2;
-
-    /* len = minimum of len1 and len2 */
-    if (len1 < len2)
-	len = len1;
-    else
-	len = len2;
-    /* find first non-matching OID */
-    while(len-- > 0){
-	res = *(name1++) - *(name2++);
-	if (res < 0)
-	    return -1;
-	if (res > 0)
-	    return 1;
-    }
-    /* both OIDs equal up to length of shorter OID */
-    if (len1 < len2)
-	return -1;
-
-    /* name1 matches name2 for length of name2, or they are equal */
-    return 0;
-}
-
 struct subtree *find_subtree_previous(oid *name,
                                       size_t len,
                                       struct subtree *subtree,
