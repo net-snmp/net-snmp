@@ -17,13 +17,12 @@ extern          "C" {
  * @{
  */
 #include <net-snmp/library/asn1.h>
-
-#include "if-mib/dal-if.h"
+#include <net-snmp/data_access/interface.h>
 
     /*
      * other required module components 
      */
-    config_require(if-mib/dal-if);
+    config_require(if-mib/data_access/interface);
     config_require(if-mib/ifXTable/ifXTable_interface);
     config_require(if-mib/ifXTable/ifXTable_data_access);
     config_exclude(mibII/interfaces);
@@ -67,7 +66,7 @@ extern          "C" {
     /*
      * data context
      */
-    typedef netsnmp_ifentry *ifXTable_data;
+    typedef netsnmp_interface_entry *ifXTable_data;
 
 
     /*
