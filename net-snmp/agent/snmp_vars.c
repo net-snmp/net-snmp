@@ -393,24 +393,7 @@ getStatPtr(
 	savelen = *namelen;
     }
     *write_method = NULL;
-    for (tp = subtrees, prev=NULL; tp != NULL ; prev=tp, tp = tp->next ) {
-      if ( snmp_oid_compare( tp->name, tp->namelen, name, *namelen ) >= 0 )
-          break;
-    }
-    if ( tp != NULL && prev != NULL &&
-       snmp_oid_compare( tp->name, tp->namelen, name, *namelen ) > 0 )
-              tp = prev;
-    if ( tp == NULL && prev != NULL )
-      tp = prev;
-         
-/*
-    tp = find_subtree_previous(name, *namelen, NULL);
-    if ( tp->next &&
-         snmp_oid_compare( tp->next->name, tp->next->namelen,
-			   name, *namelen ) == 0 )
-	tp = tp->next;
-*/
- 
+    tp = find_subtree(name, *namelen, NULL);
     while ( search_return == NULL && tp != NULL ) {
 	search_return = search_subtree_vars( tp, name, namelen, &result_type,
                                         len, &result_acl, exact, write_method,

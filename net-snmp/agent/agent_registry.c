@@ -174,52 +174,210 @@ merge_trees( struct subtree *existing, struct subtree *new_tree )
 }
 
 
-int
-load_subtree (struct subtree *new_subtree)
+	/*
+	 *  Split the subtree into two at the specified point,
+	 *    returning the new (second) subtree
+	 */
+struct subtree *
+split_subtree(struct subtree *current, oid name[], int name_len )
 {
-    struct subtree *next_tree = subtrees;
-    struct subtree *previous = NULL;
+    struct subtree *new_sub, *ptr;
+    int i;
+    char *cp;
 
-    new_subtree->flags &= ~(UCD_REG_FLAG_SPLIT_REGISTRATION);
-    previous = find_subtree_previous(new_subtree->name, new_subtree->namelen, subtrees);
-    if (previous) {
-	if ((snmp_oid_compare(new_subtree->name, new_subtree->namelen, 
-			      previous->name, previous->namelen) == 0)
-	    && (strlen(previous->label) > 0 ))
-			return -2;		/* Duplicate registration */
-	next_tree = previous->next;
+    if ( snmp_oid_compare(name, name_len,
+			  current->end, current->end_len) > 0 )
+	return NULL;	/* Split comes after the end of this subtree */
+
+    new_sub = (struct subtree *)malloc(sizeof(struct subtree));
+    if ( new_sub == NULL )
+	return NULL;
+    memcpy(new_sub, current, sizeof(struct subtree));
+
+	/* Set up the point of division */
+    memcpy(current->end,   name, name_len*sizeof(oid));
+    memcpy(new_sub->start, name, name_len*sizeof(oid));
+    current->end_len   = name_len;
+    new_sub->start_len = name_len;
+
+	/*
+	 * Split the variables between the two new subtrees
+	 */
+    i = current->variables_len;
+    current->variables_len = 0;
+
+    for ( ; i > 0 ; i-- ) {
+		/* Note that the variable "name" field omits
+		   the prefix common to the whole registration,
+		   hence the strange comparison here */
+	if ( snmp_oid_compare( new_sub->variables[0].name,
+			       new_sub->variables[0].namelen,
+			       name     + current->namelen, 
+			       name_len - current->namelen ) >= 0 )
+	    break;	/* All following variables belong to the second subtree */
+
+	current->variables_len++;
+	new_sub->variables_len--;
+	cp = (char *)new_sub->variables;
+	new_sub->variables = (struct variable *)(cp + new_sub->variables_width);
     }
-    else
-	next_tree = subtrees;
 
+	/* Propogate this split down through any children */
+    if ( current->children )
+	new_sub->children = split_subtree(current->children, name, name_len);
+
+	/* Retain the correct linking of the list */
+    for ( ptr = current ; ptr != NULL ; ptr=ptr->children )
+          ptr->next = new_sub;
+    for ( ptr = new_sub ; ptr != NULL ; ptr=ptr->children )
+          ptr->prev = current;
+    for ( ptr = new_sub->next ; ptr != NULL ; ptr=ptr->children )
+          ptr->prev = new_sub;
+
+    return new_sub;
+}
+
+int
+load_subtree( struct subtree *new_sub )
+{
+    struct subtree *tree1, *tree2, *new2;
+    struct subtree *prev, *next;
+
+    if ( new_sub == NULL )
+	return 1;
 
 		/*
-		 * Three possibilities:
-		 *   a) the new registration is a subtree of an existing one
-		 *   b) an existing registration is a subtree of the new one
-		 *   a) the new registration does not overlap
+		 * Find the subtree that contains the start of 
+		 *  the new subtree (if any)...
 		 */
-    if ( previous && (previous->namelen < new_subtree->namelen)
-		  && (is_parent(previous->name, previous->namelen, new_subtree->name))) {
-	merge_trees( previous, new_subtree );
-    }
-    else if ( next_tree && (next_tree->namelen < new_subtree->namelen)
-		  && (is_parent(new_subtree->name, new_subtree->namelen, next_tree->name))) {
-	merge_trees( new_subtree, next_tree );
-    }
-    else {
-	if (previous) {
-	    while(previous) {
-	        previous->next = new_subtree;
-	        previous = previous->children;
-	    }
+    tree1 = find_subtree( new_sub->start, new_sub->start_len, NULL );
+		/*
+		 * ...and the subtree that follows the new one
+		 *	(NULL implies this is the final region covered)
+		 */  
+    if ( tree1 == NULL )
+        tree2 = find_subtree_next( new_sub->start, new_sub->start_len, NULL );
+    else
+	tree2 = tree1->next;
+
+
+	/*
+	 * Handle new subtrees that start in virgin territory.
+	 */
+    if ( tree1 == NULL ) {
+	new2 = NULL;
+		/* Is there any overlap with later subtrees ? */
+	if ( tree2 && snmp_oid_compare( new_sub->end, new_sub->end_len,
+					tree2->start, tree2->start_len ) > 0 )
+	    new2 = split_subtree( new_sub, tree2->start, tree2->start_len );
+
+		/*
+		 * Link the new subtree (less any overlapping region)
+		 *  with the list of existing registrations
+		 */
+	if ( tree2 ) {
+	    new_sub->prev = tree2->prev;
+	    tree2->prev       = new_sub;
 	}
 	else
-	    subtrees = new_subtree;
-	new_subtree->next = next_tree;
+	    new_sub->prev = find_subtree_previous( new_sub->start, new_sub->start_len, NULL );
+
+	if ( new_sub->prev )
+	    new_sub->prev->next = new_sub;
+	else
+	    subtrees = new_sub;
+
+	new_sub->next     = tree2;
+
+		/*
+		 * If there was any overlap,
+		 *  recurse to merge in the overlapping region
+		 *  (including anything that may follow the overlap)
+		 */
+	if ( new2 )
+	    load_subtree( new2 );
+    }
+
+    else {
+	/*
+	 *  If the new subtree starts *within* an existing registration
+	 *    (rather than at the same point as it), then split the
+	 *    existing subtree at this point.
+	 */
+	if ( snmp_oid_compare( new_sub->start, new_sub->start_len, 
+			       tree1->start,   tree1->start_len) != 0 )
+	    tree1 = split_subtree( tree1, new_sub->start, new_sub->start_len);
+
+	/*  Now consider the end of this existing subtree:
+	 *	If it matches the new subtree precisely,
+	 *	  simply merge the new one into the list of children
+	 *	If it includes the whole of the new subtree,
+	 *	  split it at the appropriate point, and merge again
+	 *
+	 *	If the new subtree extends beyond this existing region,
+	 *	  split it, and recurse to merge the two parts.
+	 */
+
+	 switch ( snmp_oid_compare( new_sub->end, new_sub->end_len, 
+				    tree1->end,   tree1->end_len))  {
+
+		case -1:	/* Existing subtree contains new one */
+			(void) split_subtree( tree1,
+					new_sub->end, new_sub->end_len);
+			/* Fall Through */
+
+		case  0:	/* The two trees match precisely */
+			/*
+			 * Note: This is the only point where the original
+			 *	 registration OID ("name") is used
+			 */
+			prev = NULL;
+			next = tree1;
+			while ( next && next->namelen > new_sub->namelen ) {
+				prev = next;
+				next = next->children;
+			}
+			while ( next && next->namelen == new_sub->namelen &&
+					next->priority < new_sub->priority ) {
+				prev = next;
+				next = next->children;
+			}
+
+			if ( prev ) {
+			    new_sub->children = next;
+			    prev->children    = new_sub;
+			    new_sub->prev = prev->prev;
+			    new_sub->next = prev->next;
+			}
+			else {
+			    new_sub->children = next;
+			    new_sub->prev = next->prev;
+			    new_sub->next = next->next;
+
+			    for ( next = new_sub->next ;
+			    	  next != NULL ;
+				  next = next->children )
+					next->prev = new_sub;
+
+			    for ( prev = new_sub->prev ;
+			    	  prev != NULL ;
+				  prev = prev->children )
+					prev->next = new_sub;
+			}
+			break;
+
+		case  1:	/* New subtree contains the existing one */
+	    		new2 = split_subtree( new_sub,
+					tree1->end, tree1->end_len);
+			load_subtree( new_sub );
+			load_subtree( new2 );
+
+	 }
+
     }
     return 0;
 }
+
 
 int
 register_mib_priority(const char *moduleName,
@@ -245,12 +403,19 @@ register_mib_priority(const char *moduleName,
               moduleName, c_oid));
     
   memcpy(subtree->name, mibloc, mibloclen*sizeof(oid));
-  memcpy(subtree->label, moduleName, strlen(moduleName)+1);
   subtree->namelen = (u_char) mibloclen;
-  subtree->variables = (struct variable *) malloc(varsize*numvars);
-  memcpy(subtree->variables, var, numvars*varsize);
-  subtree->variables_len = numvars;
-  subtree->variables_width = varsize;
+  memcpy(subtree->start, mibloc, mibloclen*sizeof(oid));
+  subtree->start_len = (u_char) mibloclen;
+  memcpy(subtree->end, mibloc, mibloclen*sizeof(oid));
+  subtree->end[ mibloclen-1 ]++;	/* XXX - or use 'variables' info ? */
+  subtree->end_len = (u_char) mibloclen;
+  memcpy(subtree->label, moduleName, strlen(moduleName)+1);
+  if ( var ) {
+    subtree->variables = (struct variable *) malloc(varsize*numvars);
+    memcpy(subtree->variables, var, numvars*varsize);
+    subtree->variables_len = numvars;
+    subtree->variables_width = varsize;
+  }
   subtree->priority = priority;
   res = load_subtree(subtree);
 
@@ -441,7 +606,7 @@ struct subtree *find_subtree_previous(oid *name,
 	myptr = subtrees;	/* look through everything */
 
   for( ; myptr != NULL; previous = myptr, myptr = myptr->next) {
-    if (snmp_oid_compare(name, len, myptr->name, myptr->namelen) < 0)
+    if (snmp_oid_compare(name, len, myptr->start, myptr->start_len) < 0)
       return previous;
   }
   return previous;
@@ -456,11 +621,11 @@ struct subtree *find_subtree_next(oid *name,
   myptr = find_subtree_previous(name, len, subtree);
   if ( myptr != NULL ) {
      myptr = myptr->next;
-     while ( myptr && myptr->variables == NULL )
+     while ( myptr && (myptr->variables == NULL || myptr->variables_len == 0) )
          myptr = myptr->next;
      return myptr;
   }
-  else if ( snmp_oid_compare(name, len, subtree->name, subtree->namelen) < 0)
+  else if (subtree && snmp_oid_compare(name, len, subtree->start, subtree->start_len) < 0)
      return subtree;
   else
      return NULL;
@@ -473,7 +638,7 @@ struct subtree *find_subtree(oid *name,
   struct subtree *myptr;
 
   myptr = find_subtree_previous(name, len, subtree);
-  if (snmp_oid_compare(name, len, myptr->name, myptr->namelen) == 0)
+  if (myptr && snmp_oid_compare(name, len, myptr->end, myptr->end_len) < 0)
 	return myptr;
 
   return NULL;
@@ -504,13 +669,12 @@ static struct subtree root_subtrees[] = {
 
 void setup_tree (void)
 {
-  extern struct subtree *subtrees;
-    
-  if ( subtrees == NULL ) {
-	subtrees =             &(root_subtrees[0]);
-	subtrees->next =       &(root_subtrees[1]);
-	subtrees->next->next = &(root_subtrees[2]);
-  }
+  register_mib("", NULL, 0, 0,
+	root_subtrees[0].name,  root_subtrees[0].namelen);
+  register_mib("", NULL, 0, 0,
+	root_subtrees[1].name,  root_subtrees[1].namelen);
+  register_mib("", NULL, 0, 0,
+	root_subtrees[2].name,  root_subtrees[2].namelen);
 
   /* Support for 'static' subtrees (subtrees_old) has now been dropped */
 
@@ -521,13 +685,15 @@ void setup_tree (void)
 void dump_registry( void )
 {
     struct subtree *myptr, *myptr2;
-    char c_oid[SPRINT_MAX_LEN];
+    char start_oid[SPRINT_MAX_LEN];
+    char end_oid[SPRINT_MAX_LEN];
 
     for( myptr = subtrees ; myptr != NULL; myptr = myptr->next) {
-	sprint_objid(c_oid, myptr->name, myptr->namelen);
-	printf("%c %s %c\n",
+	sprint_objid(start_oid, myptr->start, myptr->start_len);
+	sprint_objid(end_oid, myptr->end, myptr->end_len);
+	printf("%c %s - %s %c\n",
 		( myptr->variables ? ' ' : '(' ),
-		  c_oid,
+		  start_oid, end_oid,
 		( myptr->variables ? ' ' : ')' ));
 	for( myptr2 = myptr ; myptr2 != NULL; myptr2 = myptr2->children) {
 	    if ( myptr2->label && myptr2->label[0] )
