@@ -62,9 +62,11 @@ com2sec mynetwork NETWORK/24      COMMUNITY
 
 #             	sec.model  sec.name
 group MyRWGroup	v1         local
-group MyROGroup v1         mynetwork
 group MyRWGroup	v2c        local
+group MyRWGroup	usm        local
+group MyROGroup v1         mynetwork
 group MyROGroup v2c        mynetwork
+group MyROGroup usm        mynetwork
 
 ####
 # Third, create a view for us to let the groups have rights to:
