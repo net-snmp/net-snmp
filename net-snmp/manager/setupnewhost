@@ -6,7 +6,7 @@ $dbname = 'snmp';                 # mySQL Database name
 $doit = 1;
 
 sub usage {
-    print "$0 [-H host] [-u user] [-p password] [-v] [-h] [-n] [-d] [-t table1:table2:...] HOSTS\n";
+    print "$0 [-H host] [-u user] [-p password] [-v] [-h] [-n] [-d] [-t table1:table2:...] GROUP HOSTS\n";
     exit 0;
 }
 
@@ -27,9 +27,13 @@ while ($#ARGV > -1 && $ARGV[0] =~ /^-/) {
     }
 }
 
+$group = shift;
+
+die "no group specified" if (!defined($group));
+
 ( $dbh = DBI->connect("DBI:mysql:database=$dbname;host=$hostname", $user, $pass))
     or die "\tConnect not ok: $DBI::errstr\n";
-$handle = $dbh->prepare("insert into hosttables(host, tablename, keephistory) values(?, ?, 0)");
+$handle = $dbh->prepare("insert into hosttables(host, groupname, tablename, keephistory) values(?, '$group', ?, 0)");
 
 foreach $i (@ARGV) {
     foreach $j (@tables) {
