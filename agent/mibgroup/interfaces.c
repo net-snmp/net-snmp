@@ -1365,7 +1365,7 @@ struct ifnet *Retifnet;
 
 #else
 
-#if defined(netbsd1) || defined(freebsd3)
+#if defined(netbsd1) || defined(freebsd3) || defined(openbsd2)
 #define ia_next ia_list.tqe_next
 #define if_next if_list.tqe_next
 #endif
@@ -1388,7 +1388,7 @@ struct in_ifaddr *Retin_ifaddr;
 	     */
 	    klookup((unsigned long)ifnetaddr, (char *)&ifnet, sizeof ifnet);
 #if STRUCT_IFNET_HAS_IF_XNAME
-#ifdef netbsd1
+#if defined(netbsd1) || defined(openbsd2)
             strncpy(saveName, ifnet.if_xname, sizeof saveName);
 #else
 	    klookup((unsigned long)ifnet.if_xname, (char *)saveName, sizeof saveName);
@@ -1420,7 +1420,7 @@ struct in_ifaddr *Retin_ifaddr;
 		    ia = in_ifaddr.ia_next;
 		}
 
-#if !defined(netbsd1) && !defined(freebsd2) && !defined(STRUCT_IFNET_HAS_IF_ADDRLIST)
+#if !defined(netbsd1) && !defined(freebsd2) && !defined(openbsd2) && !defined(STRUCT_IFNET_HAS_IF_ADDRLIST)
 		ifnet.if_addrlist = (struct ifaddr *)ia;     /* WRONG DATA TYPE; ONLY A FLAG */
 #endif
 /*		ifnet.if_addrlist = (struct ifaddr *)&ia->ia_ifa;   */  /* WRONG DATA TYPE; ONLY A FLAG */
@@ -1513,13 +1513,13 @@ int Index;
 u_char *EtherAddr;
 {
 	short i;
-#if !(defined(linux) || defined(netbsd1) || defined(bsdi2))
+#if !(defined(linux) || defined(netbsd1) || defined(bsdi2) || defined(openbsd2))
 	struct arpcom arpcom;
 #else /* is linux or netbsd1 */
 	struct arpcom {
 	  char ac_enaddr[6];
 	} arpcom;
-#if defined(netbsd1) || defined(bsdi2)
+#if defined(netbsd1) || defined(bsdi2) || defined(openbsd2)
         struct sockaddr_dl sadl;
         struct ifaddr ifaddr;
         u_long ifaddraddr;
@@ -1554,11 +1554,11 @@ u_char *EtherAddr;
 	 *  contains the ethernet address.
 	 */
 #ifndef linux
-#if !(defined(netbsd1) || defined(bsdi2))
+#if !(defined(netbsd1) || defined(bsdi2) || defined(openbsd2))
       klookup((unsigned long)saveifnetaddr, (char *)&arpcom, sizeof arpcom);
-#else  /* netbsd1 or bsdi2 */
+#else  /* netbsd1 or bsdi2 or openbsd2 */
 
-#ifdef netbsd1
+#if defined(netbsd1) || defined(openbsd2)
 #define if_addrlist if_addrlist.tqh_first
 #define ifa_next    ifa_list.tqe_next
 #endif
@@ -1577,7 +1577,7 @@ u_char *EtherAddr;
           }
           ifaddraddr = (unsigned long)ifaddr.ifa_next;
         }
-#endif /* netbsd1 or bsdi2 */
+#endif /* netbsd1 or bsdi2 or openbsd2 */
 
 #else /* linux */
 	memcpy(arpcom.ac_enaddr, saveifnetaddr->if_hwaddr, 6);

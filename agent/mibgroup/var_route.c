@@ -900,7 +900,7 @@ struct radix_node *pt;
     if (rt.rt_ifp != 0) {
       klookup((unsigned long)rt.rt_ifp, (char *)&ifnet, sizeof (ifnet));
 #if STRUCT_IFNET_HAS_IF_XNAME
-#ifdef netbsd1
+#if defined(netbsd1) || defined(openbsd2)
       strncpy(name, ifnet.if_xname, sizeof name);
 #else
       klookup((unsigned long)ifnet.if_xname, name, sizeof name);
