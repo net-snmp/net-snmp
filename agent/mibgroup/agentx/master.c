@@ -324,7 +324,7 @@ agentx_master_handler(
     pdu->version     = AGENTX_VERSION_1;
     pdu->reqid       = snmp_get_next_transid();
     pdu->transid     = reqinfo->asp->pdu->transid;
-    pdu->sessid      = ax_session->sessid;
+    pdu->sessid      = ax_session->subsession->sessid;
 
     while (request) {
 
@@ -344,6 +344,7 @@ agentx_master_handler(
 		DEBUGMSG(("agentx/master", ")\n"));
 		nptr = request->subtree->start;
 		nlen = request->subtree->start_len;
+		request->inclusive = 1;
 	    }
 
 	    if (request->inclusive) {
@@ -356,6 +357,7 @@ agentx_master_handler(
 		snmp_pdu_add_variable(pdu, nptr, nlen, ASN_PRIV_INCL_RANGE,
 				      (u_char *)request->range_end,
 				      request->range_end_len * sizeof(oid));
+		request->inclusive = 0;
 	    } else {
 		DEBUGMSGTL(("agentx/master", "EXCLUSIVE varbind "));
 		DEBUGMSGOID(("agentx/master", nptr, nlen));
