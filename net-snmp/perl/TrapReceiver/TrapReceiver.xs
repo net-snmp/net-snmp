@@ -7,6 +7,7 @@
 
 #include <net-snmp/net-snmp-config.h>
 #include <net-snmp/net-snmp-includes.h>
+#include <net-snmp/agent/net-snmp-agent-includes.h>
 
 #include <perl_snmptrapd.h>
 
@@ -52,7 +53,7 @@ int   perl_trapd_handler( netsnmp_pdu           *pdu,
 
     pcallback = cb_data->perl_cb;
 
-
+  {
     dSP;
     ENTER;
     SAVETMPS;
@@ -159,6 +160,7 @@ int   perl_trapd_handler( netsnmp_pdu           *pdu,
     PUTBACK;
     FREETMPS;
     LEAVE;
+  }
     return NETSNMPTRAPD_HANDLER_OK;
 }
 
