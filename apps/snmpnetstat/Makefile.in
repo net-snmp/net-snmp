@@ -36,9 +36,9 @@ INSTALL = @INSTALL@
 
 CC = @CC@ $(CPPFLAGS)
 
-LIBS=	-lsnmp @LIBS@
-LDFLAGS=@LDFLAGS@ -L../../snmplib
 USELIBS=../../snmplib/libsnmp.a
+LIBS=	$(USELIBS) @LIBS@
+LDFLAGS=@LDFLAGS@
 SRCS=	inet.c if.c main.c route.c 
 OBJS=	inet.o if.o main.o route.o
 TARG= snmpnetstat
