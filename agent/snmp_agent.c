@@ -233,6 +233,7 @@ typedef struct agent_set_cache_s {
 
     int             vbcount;
     netsnmp_request_info *requests;
+    netsnmp_variable_list *saved_vars;
     netsnmp_data_list *agent_data;
 
     /*
@@ -255,6 +256,9 @@ save_set_cache(netsnmp_agent_session *asp)
     if (ptr == NULL)
         return NULL;
 
+    DEBUGMSGTL(("verbose:asp", "asp %p reqinfo %p saved in cache (mode %d)\n",
+                asp, asp->reqinfo, asp->pdu->command));
+
     /*
      * Save the important information 
      */
@@ -265,6 +269,7 @@ save_set_cache(netsnmp_agent_session *asp)
     ptr->treecache_num = asp->treecache_num;
     ptr->agent_data = asp->reqinfo->agent_data;
     ptr->requests = asp->requests;
+    ptr->saved_vars = asp->pdu->variables; /* requests contains pointers to variables */
     ptr->vbcount = asp->vbcount;
 
     /*
@@ -302,9 +307,45 @@ get_set_cache(netsnmp_agent_session *asp)
             asp->treecache = ptr->treecache;
             asp->treecache_len = ptr->treecache_len;
             asp->treecache_num = ptr->treecache_num;
-            asp->requests = ptr->requests;
-            asp->vbcount = ptr->vbcount;
 
+            /*
+             * Free previously allocated requests before overwriting by
+             * cached ones, otherwise memory leaks!
+             */
+            if (asp->requests) {
+                /*
+                 * I don't think this case should ever happen. Please email
+                 * the net-snmp-coders@lists.sourceforge.net if you have
+                 * a test case that hits this assert. -- rstory
+                 */
+                int i;
+                netsnmp_assert(NULL == asp->requests); /* see note above */
+                for (i = 0; i < asp->vbcount; i++) {
+                    netsnmp_free_request_data_sets(&asp->requests[i]);
+                }
+                free(asp->requests);
+            }
+
+            /*
+             * If we replace asp->requests with the info from the set cache,
+             * we should replace asp->pdu->variables also with the cached
+             * info, as asp->requests contains pointers to them.  And we
+             * should also free the current asp->pdu->variables list...
+             */
+            if (ptr->saved_vars) {
+                if (asp->pdu->variables)
+                    snmp_free_varbind(asp->pdu->variables);
+                asp->pdu->variables = ptr->saved_vars;
+                asp->vbcount = ptr->vbcount;
+            } else {
+                /*
+                 * when would we not have saved variables? someone
+                 * let me know if they hit this assert. -- rstory
+                 */
+                netsnmp_assert(NULL != ptr->saved_vars);
+            }
+            asp->requests = ptr->requests;
+            
             netsnmp_assert(NULL != asp->reqinfo);
             asp->reqinfo->asp = asp;
             asp->reqinfo->agent_data = ptr->agent_data;
@@ -1163,8 +1204,6 @@ free_agent_snmp_session(netsnmp_agent_session *asp)
         for (i = 0; i < asp->vbcount; i++) {
             netsnmp_free_request_data_sets(&asp->requests[i]);
         }
-    }
-    if (asp->requests) {
         SNMP_FREE(asp->requests);
     }
     if (asp->cache_store) {
