@@ -152,6 +152,23 @@ static struct nlist nl[] = {
 
 extern write_rte();
 
+void
+string_append_int (s, val)
+char *s;
+int val;
+{
+    char textVal[16];
+
+    if (val < 10) {
+	*s++ = '0' + val;
+	*s = '\0';
+	return;
+    }
+    sprintf (textVal, "%d", val);
+    strcpy(s, textVal);
+    return;
+}
+
 #ifndef solaris2
 
 #if defined(freebsd2) || defined(netbsd1) || defined(bsdi2)
@@ -539,8 +556,7 @@ struct radix_node *pt;
       klookup( ifnet.if_name, name, 16);
       name[15] = '\0';
       cp = (char *) index(name, '\0');
-      *cp++ = ifnet.if_unit + '0';
-      *cp = '\0';
+      string_append_int (cp, ifnet.if_unit);
 #endif
       Interface_Scan_Init();
       rt.rt_unit = 0;
@@ -656,8 +672,7 @@ static Route_Scan_Reload()
           klookup( ifnet.if_name, name, 16);
           name[15] = '\0';
           cp = (char *) index(name, '\0');
-          *cp++ = ifnet.if_unit + '0';
-          *cp = '\0';
+	  string_append_int (cp, ifnet.if_unit);
 
           Interface_Scan_Init();
           while (Interface_Scan_Next((short *)&rt->rt_unit, temp, 0, 0) != 0) {
@@ -756,8 +771,7 @@ static Route_Scan_Reload()
 			klookup(ifnet.if_name, name, 16);
 			name[15] = '\0';
 			cp = (char *) index(name, '\0');
-			*cp++ = ifnet.if_unit + '0';
-			*cp = '\0';
+			string_append_int (cp, ifnet.if_unit);
 			if (strcmp(name,"lo0") == 0) continue; 
 
 			Interface_Scan_Init();
