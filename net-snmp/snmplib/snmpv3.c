@@ -358,7 +358,11 @@ oldengineID_conf(char *word, char *cptr)
 void
 init_snmpv3(const char *type) {
   gettimeofday(&snmpv3starttime, NULL);
-  setup_engineID(NULL, NULL);
+  if (type && !strcmp(type,"snmpapp")) {
+     setup_engineID(NULL,"__snmpapp__");
+  } else {
+     setup_engineID(NULL, NULL);
+  }
 
   /* initialize submodules */
   init_usm();
