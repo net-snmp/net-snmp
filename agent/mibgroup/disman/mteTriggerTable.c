@@ -25,6 +25,7 @@
 #include "mteTriggerDeltaTable.h"
 #include "mteTriggerExistenceTable.h"
 #include "mteTriggerThresholdTable.h"
+#include "mteObjectsTable.h"
 #include "snmp-tc.h"
 #include "snmp_enum.h"
 
@@ -249,8 +250,6 @@ void
 parse_mteTriggerTable(const char *token, char *line) {
   size_t tmpint;
   struct mteTriggerTable_data *StorageTmp = SNMP_MALLOC_STRUCT(mteTriggerTable_data);
-  char *tmpc;
-
 
   DEBUGMSGTL(("mteTriggerTable", "parsing config...  "));
 
@@ -482,9 +481,10 @@ parse_mteTriggerTable(const char *token, char *line) {
       line = read_config_read_data(ASN_INTEGER, line, &StorageTmp->pdu_securityModel, &tmpint);
       line = read_config_read_data(ASN_INTEGER, line, &StorageTmp->pdu_securityLevel, &tmpint);
 
-      tmpint = sizeof(StorageTmp->pdu_address);
-      tmpc = (char *) &(StorageTmp->pdu_address);
-      line = read_config_read_data(ASN_OCTET_STR, line, &tmpc, &tmpint);
+      /* can be NULL? */
+      line = read_config_read_data(ASN_OCTET_STR, line,
+                                   &(StorageTmp->pdu_transport),
+                                   &StorageTmp->pdu_transportLen);
 
       line = read_config_read_data(ASN_OCTET_STR, line, &StorageTmp->pdu_community, &StorageTmp->pdu_community_len);
       if (StorageTmp->pdu_community == NULL) {
@@ -522,11 +522,8 @@ store_mteTriggerTable(int majorID, int minorID, void *serverarg, void *clientarg
   size_t tmpint;
   struct mteTriggerTable_data *StorageTmp;
   struct header_complex_index *hcindex;
-  char *tmpc;
-
 
   DEBUGMSGTL(("mteTriggerTable", "storing data...  "));
-
 
   for(hcindex=mteTriggerTableStorage; hcindex != NULL; 
       hcindex = hcindex->next) {
@@ -602,9 +599,7 @@ store_mteTriggerTable(int majorID, int minorID, void *serverarg, void *clientarg
         cptr = read_config_store_data(ASN_INTEGER, cptr, &StorageTmp->pdu_version, &tmpint);
         cptr = read_config_store_data(ASN_INTEGER, cptr, &StorageTmp->pdu_securityModel, &tmpint);
         cptr = read_config_store_data(ASN_INTEGER, cptr, &StorageTmp->pdu_securityLevel, &tmpint);
-        tmpint = sizeof(StorageTmp->pdu_address);
-        tmpc = (char *) &(StorageTmp->pdu_address);
-        cptr = read_config_store_data(ASN_OCTET_STR, cptr, &(tmpc), &tmpint);
+        cptr = read_config_store_data(ASN_OCTET_STR, cptr, &StorageTmp->pdu_transport, &StorageTmp->pdu_transportLen);
         cptr = read_config_store_data(ASN_OCTET_STR, cptr, &StorageTmp->pdu_community, &StorageTmp->pdu_community_len);
         cptr = read_config_store_data(ASN_OCTET_STR, cptr, &StorageTmp->pdu_securityName, &StorageTmp->pdu_securityNameLen);
     }
@@ -1801,8 +1796,9 @@ write_mteTriggerEntryStatus(int      action,
                   StorageTmp->pdu_version       = pdu->version;
                   StorageTmp->pdu_securityModel = pdu->securityModel;
                   StorageTmp->pdu_securityLevel = pdu->securityLevel;
-                  memcpy(&StorageTmp->pdu_address, &pdu->address,
-                         sizeof(pdu->address));
+                  memcpy(&StorageTmp->pdu_transport, &pdu->transport_data,
+                         pdu->transport_data_length);
+                  StorageTmp->pdu_transportLen = pdu->transport_data_length;
                   if (pdu->community) {
                       StorageTmp->pdu_community =
                           calloc(1,pdu->community_len+1);
@@ -1844,7 +1840,8 @@ void
 send_mte_trap(struct mteTriggerTable_data *item,
               oid *trap_oid, size_t trap_oid_len,
               oid *name_oid, size_t name_oid_len,
-              long *value, const char *reason) {
+              long *value, const char *objowner, const char *objname,
+              const char *reason) {
     static oid objid_snmptrap[] = { 1,3,6,1,6,3,1,1,4,1,0}; /* snmpTrapIOD.0 */
     static struct variable_list var_trap;
     static struct variable_list mteHotTrigger_var;
@@ -1901,7 +1898,15 @@ send_mte_trap(struct mteTriggerTable_data *item,
     mteHotValue_var.val.integer = value;
     mteHotValue_var.val_len = sizeof(value);
 
-    /* XXX: other objects from trigger and boolean tables */
+    /* add in traps from main table */
+    mte_add_objects(&var_trap, item, item->mteTriggerObjectsOwner,
+                    item->mteTriggerObjects,
+                    name_oid + item->mteTriggerValueIDLen,
+                    name_oid_len - item->mteTriggerValueIDLen);
+    /* add in traps from sub table */
+    mte_add_objects(&var_trap, item, objowner, objname,
+                    name_oid + item->mteTriggerValueIDLen,
+                    name_oid_len - item->mteTriggerValueIDLen);
 
     /* XXX: stuff based on event table */
     DEBUGMSGTL(("mteTriggerTest:send_mte_trap","sending the trap (%s): ", reason));
@@ -1918,15 +1923,85 @@ last_state_clean(void *data) {
     SNMP_FREE(cleanme);
 }
 
+/* retrieves requested info in pdu from the current target */
+struct snmp_pdu *
+mte_get_response(struct mteTriggerTable_data *item, struct snmp_pdu *pdu) {
+    struct agent_snmp_session *asp = NULL;
+    struct snmp_pdu *response = NULL;
+    int status = 0;
+    char buf[SPRINT_MAX_LEN];
+    
+    /* local agent check */
+    pdu->errstat = SNMPERR_SUCCESS;
+    pdu->errindex = 0;
+    pdu->version = item->pdu_version;
+    pdu->securityModel = item->pdu_securityModel;
+    pdu->securityLevel = item->pdu_securityLevel;
+    memdup((u_char **) &pdu->transport_data, (u_char *) &item->pdu_transport,
+           item->pdu_transportLen);
+    pdu->transport_data_length = item->pdu_transportLen;
+    memdup(&pdu->community, item->pdu_community,
+           item->pdu_community_len);
+    pdu->community_len = item->pdu_community_len;
+    memdup((u_char **) &pdu->contextName, item->mteTriggerContextName,
+           item->mteTriggerContextNameLen);
+    pdu->contextNameLen = item->mteTriggerContextNameLen;
+    memdup((u_char **) &pdu->securityName, item->pdu_securityName,
+           item->pdu_securityNameLen);
+    pdu->securityNameLen = item->pdu_securityNameLen;
+    DEBUGMSGTL(("mteTriggerTable","accessing locally as %s\n",
+                item->pdu_securityName));
+        
+    if (item->mteTriggerTargetTagLen == 0) {
+        asp = init_agent_snmp_session(NULL, pdu);
+        if (!asp)
+            return NULL;
+        
+        if (pdu->command == SNMP_MSG_GETNEXT) {
+            /* why can't handle next pass do this for me? */
+            asp->exact = FALSE;
+            asp->mode = RESERVE2;
+        }
+        
+        status = handle_next_pass(asp);
+
+        if (asp->outstanding_requests != NULL) {
+            snmp_log(LOG_ERR, "ack: can't handle subagent reqouests in event mib");
+            free_agent_snmp_session(asp);
+            snmp_free_pdu(pdu);
+            return NULL;
+        }
+
+        if (status != SNMP_ERR_NOERROR) {
+            /* xxx */
+            DEBUGMSGTL(("mteTriggerTable","Error received\n"));
+            free_agent_snmp_session(asp);
+            snmp_free_pdu(pdu);
+            return NULL; /* XXX: proper failure, trap sent, etc */
+        }
+        response = asp->pdu;
+        asp->pdu = NULL;
+        free_agent_snmp_session(asp);
+    } else {
+        /* remote target list */
+        /* XXX */
+    }
+    sprint_variable(buf, response->variables->name,
+                    response->variables->name_length,
+                    response->variables);
+    DEBUGMSGTL(("mteTriggerTable","got a variables: %s\n", buf));
+    snmp_free_pdu(pdu);
+    return response;
+}
+
+
 void
 mte_run_trigger(unsigned int clientreg, void *clientarg) {
 
     struct mteTriggerTable_data *item =
         (struct mteTriggerTable_data *) clientarg;
-    struct agent_snmp_session *asp = NULL;
-    struct snmp_pdu *pdu = NULL;
+    struct snmp_pdu *pdu = NULL, *response = NULL;
     char buf[SPRINT_MAX_LEN];
-    int status = 0;
     int msg_type = SNMP_MSG_GET;
 
     oid *next_oid;
@@ -1942,7 +2017,6 @@ mte_run_trigger(unsigned int clientreg, void *clientarg) {
     }
     DEBUGMSGTL(("mteTriggertable", "Running trigger for %s/%s\n",
                 item->mteOwner, item->mteTriggerName));
-
     
     next_oid = item->mteTriggerValueID;
     next_oid_len = item->mteTriggerValueIDLen;
@@ -1953,82 +2027,37 @@ mte_run_trigger(unsigned int clientreg, void *clientarg) {
     item->hc_storage = NULL;
     do {
         pdu = snmp_pdu_create(msg_type);
-
-        /* local agent check */
-        pdu->errstat = SNMPERR_SUCCESS;
-        pdu->errindex = 0;
-        pdu->version = item->pdu_version;
-        pdu->securityModel = item->pdu_securityModel;
-        pdu->securityLevel = item->pdu_securityLevel;
-        memcpy(&pdu->address, &item->pdu_address, sizeof(pdu->address));
-        memdup(&pdu->community, item->pdu_community,
-               item->pdu_community_len);
-        pdu->community_len = item->pdu_community_len;
-        memdup((u_char **) &pdu->contextName, item->mteTriggerContextName,
-               item->mteTriggerContextNameLen);
-        pdu->contextNameLen = item->mteTriggerContextNameLen;
-        memdup((u_char **) &pdu->securityName, item->pdu_securityName,
-               item->pdu_securityNameLen);
-        pdu->securityNameLen = item->pdu_securityNameLen;
-        DEBUGMSGTL(("mteTriggerTable","accessing locally as %s\n",
-                    item->pdu_securityName));
-        
         snmp_add_null_var(pdu, next_oid, next_oid_len);
-
-        if (item->mteTriggerTargetTagLen == 0) {
-            asp = init_agent_snmp_session(NULL, pdu);
-            if (item->mteTriggerValueIDWildcard ==
-                MTETRIGGERVALUEIDWILDCARD_TRUE) {
-                /* why can't handle next pass do this? */
-                asp->exact = FALSE;
-                asp->mode = RESERVE2;
-            }
-        
-            status = handle_next_pass(asp);
-
-            if (asp->outstanding_requests != NULL) {
-                snmp_log(LOG_ERR, "ack: can't handle subagent reqouests in event mib");
-                free_agent_snmp_session(asp);
-            }
-
-            if (status != SNMP_ERR_NOERROR) {
-                /* xxx */
-                DEBUGMSGTL(("mteTriggerTable","Error received\n"));
-                snmp_free_pdu(pdu);
-                break; /* XXX: proper failure, trap sent, etc */
-            }
-        } else {
-            /* remote target list */
-            /* XXX */
-        }
+        response = mte_get_response(item, pdu);
+        if (!response)
+            break; /* XXX: proper failure */
     
         if (item->mteTriggerValueIDWildcard == MTETRIGGERVALUEIDWILDCARD_TRUE &&
-            ((asp->pdu->variables->type >= SNMP_NOSUCHOBJECT &&
-              asp->pdu->variables->type <= SNMP_ENDOFMIBVIEW) ||
+            ((response->variables->type >= SNMP_NOSUCHOBJECT &&
+              response->variables->type <= SNMP_ENDOFMIBVIEW) ||
              snmp_oid_compare(item->mteTriggerValueID,
                               item->mteTriggerValueIDLen,
-                              asp->pdu->variables->name,
+                              response->variables->name,
                               item->mteTriggerValueIDLen) != 0)) {
-            snmp_free_pdu(pdu);
             DEBUGMSGTL(("mteTriggerTable","DONE, last varbind processed\n", buf));
             break;
         }
 
         /* shorter pointers */
-        next_oid = asp->pdu->variables->name;
-        next_oid_len = asp->pdu->variables->name_length;
+        next_oid = response->variables->name;
+        next_oid_len = response->variables->name_length;
 
         /* clone the value */
-        if (asp->pdu->errstat == SNMPERR_SUCCESS &&
-            asp->pdu->variables->val.integer)
+        if (response->errstat == SNMPERR_SUCCESS &&
+            response->variables->val.integer)
             memdup((unsigned char **) &value,
-                   (unsigned char *) asp->pdu->variables->val.integer,
-                   sizeof(*asp->pdu->variables->val.integer));
+                   (unsigned char *) response->variables->val.integer,
+                   sizeof(*response->variables->val.integer));
         else
             value = NULL;
 
         sprint_variable(buf, next_oid , next_oid_len,
-                        asp->pdu->variables);
+                        response->variables);
         DEBUGMSGTL(("mteTriggerTable","receveived %s\n", buf));
 
         /* see if we have old values for this */
@@ -2058,7 +2087,9 @@ mte_run_trigger(unsigned int clientreg, void *clientarg) {
                 send_mte_trap(item, mteTriggerFired,
                               sizeof(mteTriggerFired)/sizeof(oid),
                               next_oid, next_oid_len,
-                              value, "existence: present");
+                              value, item->mteTriggerExistenceObjectsOwner,
+                              item->mteTriggerExistenceObjects,
+                              "existence: present");
             }
 
             if ((item->mteTriggerExistenceTest[0] &
@@ -2071,7 +2102,9 @@ mte_run_trigger(unsigned int clientreg, void *clientarg) {
                 send_mte_trap(item, mteTriggerFired,
                               sizeof(mteTriggerFired)/sizeof(oid),
                               next_oid, next_oid_len,
-                              value, "existence: changed");
+                              value, item->mteTriggerExistenceObjectsOwner,
+                              item->mteTriggerExistenceObjects,
+                              "existence: changed");
             }
         }
 
@@ -2117,7 +2150,8 @@ mte_run_trigger(unsigned int clientreg, void *clientarg) {
                 send_mte_trap(item, mteTriggerFired,
                               sizeof(mteTriggerFired)/sizeof(oid),
                               next_oid, next_oid_len,
-                              value, "boolean: true");
+                              value, item->mteTriggerBooleanObjectsOwner,
+                              item->mteTriggerBooleanObjects, "boolean: true");
             }
         
             DEBUGMSGTL(("mteTriggerTable",
@@ -2144,7 +2178,9 @@ mte_run_trigger(unsigned int clientreg, void *clientarg) {
                 send_mte_trap(item, mteTriggerRising,
                               sizeof(mteTriggerRising)/sizeof(oid),
                               next_oid, next_oid_len,
-                              value, "threshold: rising");
+                              value, item->mteTriggerThresholdObjectsOwner,
+                              item->mteTriggerThresholdObjects,
+                              "threshold: rising");
             }
             if (((item->started == MTE_STARTED && laststate &&
                   lastthresh == MTE_THRESHOLD_HIGH) ||
@@ -2155,7 +2191,9 @@ mte_run_trigger(unsigned int clientreg, void *clientarg) {
                 send_mte_trap(item, mteTriggerFalling,
                               sizeof(mteTriggerFalling)/sizeof(oid),
                               next_oid, next_oid_len,
-                              value, "threshold: rising");
+                              value, item->mteTriggerThresholdObjectsOwner,
+                              item->mteTriggerThresholdObjects,
+                              "threshold: falling");
             }
 
         }
@@ -2211,8 +2249,10 @@ mte_run_trigger(unsigned int clientreg, void *clientarg) {
             laststate = (struct last_state *) iter->data;
             send_mte_trap(item, mteTriggerFired,
                           sizeof(mteTriggerFired)/sizeof(oid),
-                          iter->name, iter->namelen,
-                          laststate->value, "existence: absent");
+                          iter->name, iter->namelen, laststate->value,
+                          item->mteTriggerExistenceObjectsOwner,
+                          item->mteTriggerExistenceObjects,
+                          "existence: absent");
         }
         header_complex_free_all(item->hc_storage_old, last_state_clean);
         item->hc_storage_old = NULL;

@@ -126,6 +126,9 @@ struct mteTriggerTable_data *StorageTmp = NULL;
     return NULL;
 
 
+  if (!(StorageTmp->mteTriggerTest[0] & MTETRIGGERTEST_THRESHOLD))
+      return NULL;
+
   /* 
    * this is where we do the value assignments for the mib results.
    */

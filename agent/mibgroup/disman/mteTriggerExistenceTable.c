@@ -112,6 +112,8 @@ struct mteTriggerTable_data *StorageTmp = NULL;
                            var_len,write_method)) == NULL)
     return NULL;
 
+  if (!(StorageTmp->mteTriggerTest[0] & MTETRIGGERTEST_EXISTENCE))
+      return NULL;
 
   /* 
    * this is where we do the value assignments for the mib results.
