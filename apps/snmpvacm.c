@@ -409,7 +409,7 @@ main(int argc, char *argv[])
 						  ASN_INTEGER, (u_char *) &longvar, sizeof(longvar));
 	  sec2group_oid(vacmGroupName,&name_length,secModel,argv[arg+1]);						  
 	  snmp_pdu_add_variable(pdu,vacmGroupName,name_length,
-						  ASN_OCTET_STR, argv[arg+2], strlen(argv[arg+2]));
+						  ASN_OCTET_STR, (u_char *)argv[arg+2], strlen(argv[arg+2]));
 	}
 	else if (strcmp(argv[arg],CMD_DELETEACCESS_NAME)==0)
 	  /*
