@@ -28,6 +28,10 @@
 # endif
 #endif
 
+#if HAVE_DMALLOC_H
+#include <dmalloc.h>
+#endif
+
 #include <signal.h>
 #include <errno.h>
 
@@ -37,7 +41,7 @@
 #include "extensible.h"
 #include "util_funcs.h"
 #include "read_config.h"
-#include "../../../snmplib/system.h"
+#include "system.h"
 
 struct extensible *persistpassthrus=NULL;
 int numpersistpassthrus=0;

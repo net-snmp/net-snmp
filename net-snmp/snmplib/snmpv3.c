@@ -44,6 +44,9 @@
 #       include <stdlib.h>
 #endif
 
+#if HAVE_DMALLOC_H
+#include <dmalloc.h>
+#endif
 
 #include "system.h"
 #include "asn1.h"

@@ -15,14 +15,18 @@
 #include <kvm.h>
 #endif
 
+#if HAVE_DMALLOC_H
+#include <dmalloc.h>
+#endif
+
 #include "auto_nlist.h"
 #include "autonlist.h"
 #include "kernel.h"
 #include "../snmplib/system.h"
 
-#include "../snmplib/asn1.h"
-#include "../snmplib/snmp_api.h"
-#include "../snmplib/snmp_debug.h"
+#include "asn1.h"
+#include "snmp_api.h"
+#include "snmp_debug.h"
 #include "snmp_logging.h"
 
 struct autonlist *nlists = 0;

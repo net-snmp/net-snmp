@@ -24,8 +24,12 @@
 #include <strings.h>
 #endif
 
+#if HAVE_DMALLOC_H
+#include <dmalloc.h>
+#endif
+
 #include "../mibincl.h"
-#include "../../../snmplib/system.h"
+#include "system.h"
 #include "sysORTable.h"
 #include "../struct.h"
 #include "../util_funcs.h"

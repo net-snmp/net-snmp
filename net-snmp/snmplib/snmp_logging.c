@@ -42,6 +42,10 @@
 #include <varargs.h>
 #endif
 
+#if HAVE_DMALLOC_H
+#include <dmalloc.h>
+#endif
+
 #ifdef WIN32
 #include <winsock.h>
 #endif

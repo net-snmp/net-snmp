@@ -119,6 +119,10 @@
 #include <sys/tcpipstats.h>
 #endif
 
+#if HAVE_DMALLOC_H
+#include <dmalloc.h>
+#endif
+
 #include "auto_nlist.h"
 
 #ifdef hpux

@@ -27,12 +27,16 @@
 #include <arpa/inet.h>
 #endif
 
+#if HAVE_DMALLOC_H
+#include <dmalloc.h>
+#endif
+
 #include <netdb.h>
 
 #include "mibincl.h"
 #include "read_config.h"
 #include "agent_read_config.h"
-#include "../../../snmplib/system.h"
+#include "system.h"
 #include "vacm.h"
 #include "callback.h"
 #include "agent_registry.h"

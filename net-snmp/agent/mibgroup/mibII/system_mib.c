@@ -33,12 +33,16 @@
 #include <netinet/in.h>
 #endif
 
+#if HAVE_DMALLOC_H
+#include <dmalloc.h>
+#endif
+
 #include "system_mib.h"
 #include "../struct.h"
 #include "../util_funcs.h"
 #include "read_config.h"
 #include "agent_read_config.h"
-#include "../../../snmplib/system.h"
+#include "system.h"
 
 
 	/*********************

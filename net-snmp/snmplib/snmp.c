@@ -37,6 +37,7 @@ SOFTWARE.
 #endif
 
 #include <stdio.h>
+#include <stdlib.h>
 
 #include <sys/types.h>
 #ifdef HAVE_STRING_H
@@ -57,6 +58,10 @@ SOFTWARE.
 #define NULL 0
 #endif
 
+#if HAVE_DMALLOC_H
+#include <dmalloc.h>
+#endif
+
 #ifdef vms
 #include <in.h>
 #endif
@@ -65,7 +70,6 @@ SOFTWARE.
 #include "snmp.h"
 #include "snmp_api.h"
 #include "snmp_impl.h"
-#include <stdlib.h>
 #include "snmp_logging.h"
 #include "mib.h"
 
