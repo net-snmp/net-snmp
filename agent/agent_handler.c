@@ -347,6 +347,27 @@ netsnmp_call_next_handler(netsnmp_mib_handler *current,
     return netsnmp_call_handler(current->next, reginfo, reqinfo, requests);
 }
 
+/** calls the next handler in the chain after the current one with
+   with appropriate NULL checking, etc. */
+inline int
+netsnmp_call_next_handler_one_request(netsnmp_mib_handler *current,
+                                      netsnmp_handler_registration *reginfo,
+                                      netsnmp_agent_request_info *reqinfo,
+                                      netsnmp_request_info *requests)
+{
+    netsnmp_request_info *request;
+    int ret;
+    
+    if (!requests)
+        return NULL;
+
+    request = requests->next;
+    requests->next = NULL;
+    ret = netsnmp_call_handler(current->next, reginfo, reqinfo, requests);
+    requests->next = request;
+    return ret;
+}
+
 /** free's the resourceses associated with a given handler */
 void
 netsnmp_handler_free(netsnmp_mib_handler *handler)

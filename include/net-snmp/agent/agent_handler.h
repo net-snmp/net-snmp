@@ -116,6 +116,11 @@ extern          "C" {
                                               *reqinfo,
                                               netsnmp_request_info
                                               *requests);
+    int             netsnmp_call_next_handler_one_request(netsnmp_mib_handler *current,
+                                                          netsnmp_handler_registration *reginfo,
+                                                          netsnmp_agent_request_info *reqinfo,
+                                                          netsnmp_request_info *requests);
+    
     netsnmp_mib_handler *netsnmp_create_handler(const char *name,
                                                 Netsnmp_Node_Handler *
                                                 handler_access_method);
