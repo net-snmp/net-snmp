@@ -1,0 +1,113 @@
+;	@(#)snmp.def	1.0 10/26/97 (gmarzot@baynetworks.com)
+
+DESCRIPTION     'UCD SNMP Library'
+CODE            SHARED READ EXECUTE
+DATA            SHARED READ WRITE
+EXPORTS
+	acl_destroyEntry
+	acl_getEntry
+	acl_scanInit
+	acl_scanNext
+	acl_createEntry
+	read_acl_database
+	asn_parse_int
+	asn_build_int
+	asn_parse_unsigned_int
+	asn_build_unsigned_int
+	asn_parse_string
+	asn_build_string
+	asn_parse_header
+	asn_build_header
+	asn_build_sequence
+	asn_parse_length
+	asn_build_length
+	asn_parse_objid
+	asn_build_objid
+	asn_parse_null
+	asn_build_null
+	asn_parse_bitstring
+	asn_build_bitstring
+	asn_parse_unsigned_int64
+	asn_build_unsigned_int64
+	context_destroyEntry
+	context_getEntry
+	context_scanInit
+	context_scanNext
+	context_createEntry
+	read_context_database
+	MDbegin
+	MDupdate
+	MDprint
+	print_mib
+	print_ascii_dump
+	read_objid
+	init_mib
+	init_mib_internals
+	print_variable
+	sprint_variable
+	print_value
+	sprint_value
+	print_objid
+	sprint_objid
+	print_description
+	get_module_node
+	get_node
+	find_node
+	read_module
+	read_mib
+	read_all_mibs
+	add_mibdir
+	add_module_replacement
+	print_subtree
+	print_ascii_dump_tree
+	party_getEntry
+	party_scanInit
+	party_scanNext
+	party_createEntry
+	party_destroyEntry
+	read_party_database
+	xdump
+	snmp_parse_var_op
+	snmp_build_var_op
+	opendir
+	readdir
+	closedir
+	gettimeofday
+	winsock_startup
+	winsock_cleanup
+	get_myaddr
+	get_uptime
+	snmp_open
+	snmp_close
+	snmp_send
+	snmp_read
+	snmp_free_pdu
+	snmp_free_var
+	snmp_select_info
+	snmp_timeout
+	snmp_set_dump_packet
+	snmp_get_dump_packet
+	snmp_set_quick_print
+	snmp_get_quick_print
+	snmp_add_null_var
+	snmp_pdu_create
+	snmp_fix_pdu
+	snmp_clone_pdu
+	snmp_errstring
+	snmp_synch_setup
+	snmp_synch_response
+	ms_party_init
+	snmp_comstr_parse
+	snmp_party_parse
+	snmp_party_build
+	has_access
+	view_destroyEntry
+	view_getEntry
+	view_scanInit
+	view_scanNext
+	view_createEntry
+	Mib			DATA
+	tree_head		DATA
+	snmp_errno		DATA
+
+
