@@ -1066,6 +1066,8 @@ snmp_parse(struct snmp_session *session,
 	pdu->srcParty = (oid*)malloc(MAX_OID_LEN * sizeof(oid));
 	pdu->dstParty = (oid*)malloc(MAX_OID_LEN * sizeof(oid));
 	pdu->context  = (oid*)malloc(MAX_OID_LEN * sizeof(oid));
+	if ((!pdu->srcParty) || (!pdu->dstParty) || (!pdu->context))
+	    return -1;
         pdu->srcPartyLen = MAX_OID_LEN;
         pdu->dstPartyLen = MAX_OID_LEN;
         pdu->contextLen  = MAX_OID_LEN;
@@ -1329,9 +1331,9 @@ snmp_sess_send(void *sessp,
  * session defaults.  Add a request corresponding to this pdu to the list
  * of outstanding requests on this session and store callback and data, 
  * then send the pdu.
- * Returns the request id of the generated packet if applicable, otherwise 1.
+ * Returns the request id of the generated packet if applicable, otherwise 0.
  * On any error, 0 is returned.
- * The pdu is freed by snmp_send() unless a failure occured.
+ * The pdu is freed by snmp_send() unless a failure occurred.
  */
 int
 snmp_async_send(struct snmp_session *session,
@@ -1564,7 +1566,7 @@ snmp_sess_async_send(void *sessp,
     default:
         snmp_errno = SNMPERR_BAD_VERSION;
         session->s_snmp_errno = SNMPERR_BAD_VERSION;
-	return -1;
+	return 0;
     }
 
     /* build the message to send */
