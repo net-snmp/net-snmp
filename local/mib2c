@@ -380,8 +380,15 @@ sub process_vars {
 #     skips out of current conditional, then continues to skip to
 #     end for the current foreach clause.
 #   @if expression@
-#      evaluates expression, and if expression is true processes
-#      contained part until appropriate @end@ is reached.
+#     evaluates expression, and if expression is true processes
+#     contained part until appropriate @end@ is reached.
+#   @define NAME@
+#    ... [stuff] ...
+#   @enddefine@
+#     Memorizes "stuff" for later calling as NAME.
+#   @calldefine NAME@
+#     Executes stuff previously memorized as NAME.
+#
 sub skippart {
   my $endcount = 1;
   my $arg = shift;
@@ -389,7 +396,7 @@ sub skippart {
   while ($arg =~ s/-(\w+)\s*//) {
     $rtnelse = 1 if ($1 eq "else");
   }
-  while(<$fh>) {
+  while(get_next_line()) {
     $currentline++;
     $_ = process_vars($_) if ($debug);
     print "$currentfile.$currentline:P$currentlevel:S$endcount.$rtnelse:$_" if ($debug);
@@ -484,6 +491,28 @@ sub process_file {
   %vars = %oldvars if ($keepvars != 1);
 }
 
+sub get_next_line {
+    if ($#process_lines > -1) {
+	return $_ = shift @process_lines;
+    }
+    return $_ = <$fh>;
+}
+
+sub do_tell {
+    my $stash;
+    $stash->{'startpos'} = $fh->tell();
+    $stash->{'startline'} = $currentline;
+    @{$stash->{'lines'}} = @process_lines;
+    return $stash;
+}
+
+sub do_seek {
+    my $stash = shift;
+    $currentline = $stash->{'startline'};
+    $fh->seek($stash->{'startpos'}, 0); # go to top of section.
+    @process_lines = @{$stash->{'lines'}};
+}
+
 sub process {
   my $arg = shift;
   my $elseok = 0;
@@ -500,7 +529,7 @@ sub process {
   if($balanced) {
     $balanced = $currentlevel;
   }
-    while(<$fh>) {
+    while(get_next_line()) {
       $currentline++;
       if ($debug) {
 #        my $line = process_vars($_);
@@ -553,7 +582,20 @@ sub process {
 	    my $spec = process_vars($arg);
             $spec=">$spec";
             open_file($multiple,$spec);
-	} elsif (/\@\s*run (.*)\@/) { #                                    RUN
+	} elsif (/\@\s*define\s*(.*)\@/) { #                              DEFINE
+	    my $it = $1;
+	    while (<$fh>) {
+		last if (/\@\s*enddefine\s*@/);
+		push @{$defines{$it}}, $_;
+	    }
+	} elsif (/\@\s*calldefine\s*(.*)@/) {
+	    if ($#{$defines{$1}} == -1) {
+		warn "called a define of $1 which didn't exist\n";
+		warn "$currentfile:$currentline [$_]\n";
+	    } else {
+		push @process_lines, @{$defines{$1}};
+	    }
+      	} elsif (/\@\s*run (.*)\@/) { #                                    RUN
 	    my $arg = $1;
 	    my ($again) = (0);
 	    while ($arg =~ s/-(\w+)\s+//) {
@@ -664,8 +706,7 @@ sub process {
 	    }
 	} elsif (/\@\s*foreach\s+\$([^\@]+)\s+scalars*\s*\@/) { #      SCALARS
 	    my $var = $1;
-	    my $startpos = $fh->tell();
-            my $startline = $currentline;
+	    my $stash = do_tell();
 	    my $scalar;
 	    my @thekeys = keys(%scalars);
 	    if ($#thekeys == -1) {
@@ -677,8 +718,7 @@ sub process {
 				      new NetSNMP::OID($b) } @thekeys;
 	      }
 	      foreach $scalar (@thekeys) {
-		$fh->seek($startpos, 0); # go to top of section.
-                $currentline = $startline;
+		do_seek($stash);
 		my $oldvar = $vars{$var};
 		$vars{$var} = $scalar;
 		my $oldscalar = $currentscalar;
@@ -693,8 +733,7 @@ sub process {
             m2c_die("foreach did not end with \@end@") if($return ne "end");
 	} elsif (/\@\s*foreach\s+\$([^\@]+)\s+notifications*\s*\@/) {
 	    my $var = $1;
-	    my $startpos = $fh->tell();
-            my $startline = $currentline;
+	    my $stash = do_tell();
 	    my $notify;
 	    my @thekeys = keys(%notifications);
 	    if ($#thekeys == -1) {
@@ -706,8 +745,7 @@ sub process {
 				      new NetSNMP::OID($b) } @thekeys;
 	      }
 	      foreach $notify (@thekeys) {
-		$fh->seek($startpos, 0); # go to top of section.
-                $currentline = $startline;
+		do_seek($stash);
 		my $oldvar = $vars{$var};
 		$vars{$var} = $notify;
 		my $oldnotify = $currentnotify;
@@ -720,16 +758,14 @@ sub process {
             m2c_die("foreach did not end with \@end@") if($return ne "end");
 	  } elsif (/\@\s*foreach\s+\$([^\@]+)\s+varbinds\s*\@/) {
 	    my $var = $1;
-	    my $startpos = $fh->tell();
-            my $startline = $currentline;
+	    my $stash = do_tell();
 	    my $varbind;
 	    if ($#{$notifyvars{$currentnotify}} == -1) {
 	      $return = skippart();
 	    } else {
 	      foreach $varbind (@{$notifyvars{$currentnotify}}) {
 		#		print "looping on $var for $varbind\n";
-		$fh->seek($startpos, 0); # go to top of section.
-                $currentline = $startline;
+		do_seek($stash);
 		my $oldvar = $vars{$var};
 		$vars{$var} = $varbind;
 		my $oldvarbind = $currentvarbind;
@@ -742,8 +778,7 @@ sub process {
             m2c_die("foreach did not end with \@end@") if($return ne "end");
 	  } elsif (/\@\s*foreach\s+\$([^\@]+)\s+tables*\s*\@/) {
 	    my $var = $1;
-	    my $startpos = $fh->tell();
-            my $startline = $currentline;
+	    my $stash = do_tell();
 	    my $table;
 	    my @thekeys = keys(%tables);
 	    if ($#thekeys == -1) {
@@ -755,8 +790,7 @@ sub process {
 				      new NetSNMP::OID($b) } @thekeys;
 	      }
 	      foreach $table (@thekeys) {
-		$fh->seek($startpos, 0); # go to top of section.
-                $currentline = $startline;
+		do_seek($stash);
 		my $oldvar = $vars{$var};
 		$vars{$var} = $table;
 		my $oldtable = $currenttable;
@@ -769,16 +803,14 @@ sub process {
             m2c_die("foreach did not end with \@end@ ($return)") if($return ne "end");
 	  } elsif (/\@\s*foreach\s+\$([^\@]+)\s+(column|index|internalindex|externalindex|nonindex)\s*\@/) {
 	    my ($var, $type) = ($1, $2);
-	    my $startpos = $fh->tell();
-            my $startline = $currentline;
+	    my $stash = do_tell();
 	    my $column;
 	    if ($#{$tables{$currenttable}{$type}} == -1) {
 	      $return = skippart();
 	    } else {
 	      foreach $column (@{$tables{$currenttable}{$type}}) {
 		#		print "looping on $var for $type -> $column\n";
-		$fh->seek($startpos, 0); # go to top of section.
-                $currentline = $startline;
+		do_seek($stash);
 		my $oldvar = $vars{$var};
 		$vars{$var} = $column;
 		my $oldcolumn = $currentcolumn;
@@ -793,8 +825,7 @@ sub process {
             m2c_die("foreach did not end with \@end@") if($return ne "end");
 	  } elsif (/\@\s*foreach\s+\$([^\@]+)\s+\$([^\@]+)\s+range\s+([^\@]+)\@/) {
 	    my ($svar, $evar, $node) = ($1, $2, $3);
-	    my $startpos = $fh->tell();
-            my $startline = $currentline;
+	    my $stash = do_tell();
 	    my $range;
 	    $node = $currentcolumn if (!$node);
 	    my $mibn = $SNMP::MIB{process_vars($node)};
@@ -803,8 +834,7 @@ sub process {
 	    if ($#ranges > -1) {
 		foreach $range (@ranges) {
 		    #		print "looping on $var for $type -> $column\n";
-		    $fh->seek($startpos, 0); # go to top of section.
-                    $currentline = $startline;
+		    do_seek($stash);
 		    my $oldvars = $vars{$svar};
 		    my $oldvare = $vars{$evar};
 		    $vars{$svar} = $range->{'low'};
@@ -819,16 +849,14 @@ sub process {
             m2c_die("foreach did not end with \@end@") if($return ne "end");
 	} elsif (/\@\s*foreach\s+\$([^\@,]+)\s*,*\s+\$([^\@]+)\s+(enums*)\s*\@/) {
 	    my ($varvar, $varval, $type) = ($1, $2, $3);
-	    my $startpos = $fh->tell();
-            my $startline = $currentline;
+	    my $stash = do_tell();
 	    my $enum;
 
 	    my @keys = sort { $SNMP::MIB{$currentvar}{'enums'}{$a} <=>
 				  $SNMP::MIB{$currentvar}{'enums'}{$b} } (keys(%{$SNMP::MIB{$currentvar}{'enums'}}));
 	    if ($#keys > -1) {
 		foreach $enum (@keys) {
-		    $fh->seek($startpos, 0); # go to top of section.
-                    $currentline = $startline;
+		    do_seek($stash);
 		    my $oldvarvar = $vars{$varvar};
 		    my $oldvarval = $vars{$varval};
 		    $vars{$varvar} = $enum;
