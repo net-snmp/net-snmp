@@ -8,8 +8,13 @@
 @end@
 ########################################################################
 ##
+@if "x$mfd_readme_verbose" eq "x"@
+@   include default-mfd-top.m2c@
+@end@
 @if "$m2c_context_name" ne "$table"@
-@    print | +-> Processing table $table@
+@    if $m2c_report_progress == 1@
+@       print | +-> Processing table $table@
+@    end@
 @    eval $m2c_context_name = $table@
 @    eval $context = $table@
 @    eval $m2c_context_item = "rowreq_ctx->"@
@@ -23,6 +28,7 @@
 @    eval $m2c_table_access = "$mfd_default_table_access"@
 @    eval $m2c_data_allocate = $mfd_default_data_allocate@
 @    eval $m2c_data_init = $mfd_default_data_init@
+##// transient: 0:persistent, 1:semi-transient, 2:transient
 @    eval $m2c_data_transient = $mfd_default_data_transient@
 @    eval $m2c_include_examples = $mfd_default_include_examples@
 ##
@@ -108,6 +114,7 @@ $m2c_conf_comment
 $m2c_conf_comment_divider
 $m2c_conf_comment
 $m2c_conf_comment
+$m2c_conf_comment // 0:persistent, 1:semi-transient, 2:transient
 $m2c_conf_comment
 $m2c_conf_comment @eval $@m2c_data_transient = $mfd_default_data_transient@
 $m2c_conf_comment
