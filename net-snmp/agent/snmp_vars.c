@@ -1392,6 +1392,9 @@ var_ifEntry(vp, name, length, exact, var_len, write_method)
 #endif sunV3
     static char Name[16];
     register char *cp;
+#ifdef freebsd2
+    struct timeval now;
+#endif
 
     bcopy((char *)vp->name, (char *)newname, (int)vp->namelen * sizeof(oid));
     /* find "next" interface */
@@ -1485,7 +1488,6 @@ var_ifEntry(vp, name, length, exact, var_len, write_method)
 	    return (u_char *) &long_return;
 	case IFLASTCHANGE:
 #ifdef freebsd2
-          struct timeval now;
 
           if ((ifnet.if_lastchange.tv_sec == 0 ) &&
               (ifnet.if_lastchange.tv_usec == 0))
