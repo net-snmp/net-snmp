@@ -19,6 +19,7 @@ typedef struct netsnmp_extend_s {
     int      flags;
     netsnmp_cache     *cache;
     netsnmp_table_row *row;
+    netsnmp_table_data *dinfo;
     struct netsnmp_extend_s *next;
 } netsnmp_extend;
 
