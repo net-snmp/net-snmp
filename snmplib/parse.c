@@ -447,8 +447,6 @@ static void free_ranges(struct range_list **);
 static void free_enums(struct enum_list **);
 static struct range_list * copy_ranges(struct range_list *);
 static struct enum_list  * copy_enums(struct enum_list *);
-static struct index_list * copy_indexes(struct index_list *);
-static struct varbind_list * copy_varbinds(struct varbind_list *);
 
 /* backwards compatibility wrappers */
 void snmp_set_mib_errors(int err)
@@ -4439,37 +4437,6 @@ copy_ranges (struct range_list *sp)
     if (!*spp) break;
     (*spp)->low = sp->low;
     (*spp)->high = sp->high;
-    spp = &(*spp)->next;
-    sp = sp->next;
-  }
-  return (xp);
-}
-
-static struct index_list *
-copy_indexes (struct index_list *sp)
-{
-  struct index_list *xp = NULL, **spp = &xp;
-
-  while (sp) {
-    *spp = (struct index_list *) calloc(1, sizeof(struct index_list));
-    if (!*spp) break;
-    (*spp)->ilabel = strdup(sp->ilabel);
-    (*spp)->isimplied = sp->isimplied;
-    spp = &(*spp)->next;
-    sp = sp->next;
-  }
-  return (xp);
-}
-
-static struct varbind_list *
-copy_varbinds (struct varbind_list *sp)
-{
-  struct varbind_list *xp = NULL, **spp = &xp;
-
-  while (sp) {
-    *spp = (struct varbind_list *) calloc(1, sizeof(struct varbind_list));
-    if (!*spp) break;
-    (*spp)->vblabel = strdup(sp->vblabel);
     spp = &(*spp)->next;
     sp = sp->next;
   }
