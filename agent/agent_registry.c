@@ -943,7 +943,7 @@ unregister_mib_context(oid * name, size_t len, int priority,
                        const char *context)
 {
     netsnmp_subtree *list, *myptr;
-    netsnmp_subtree *prev, *child;       /* loop through children */
+    netsnmp_subtree *prev, *child, *next; /* loop through children */
     struct register_parameters reg_parms;
     int old_lookup_cache_val = netsnmp_get_lookup_cache_size();
     netsnmp_set_lookup_cache_size(0);
@@ -983,7 +983,8 @@ unregister_mib_context(oid * name, size_t len, int priority,
      *  This should also serve to register ranges.
      */
 
-    for (list = myptr->next; list != NULL; list = list->next) {
+    for (list = myptr->next; list != NULL; list = next) {
+        next = list->next; /* list gets freed sometimes; cache next */
         for (child = list, prev = NULL; child != NULL;
              prev = child, child = child->children) {
             if ((netsnmp_oid_equals(child->name_a, child->namelen,
