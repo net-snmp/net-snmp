@@ -24,10 +24,8 @@ struct variable4 at_variables[] = {
     {ATPHYSADDRESS, STRING, RONLY, var_atEntry, 1, {2}},
     {ATNETADDRESS, IPADDRESS, RONLY, var_atEntry, 1, {3}}
 };
-#define  AT_SUBTREE  { \
-    {MIB, 3, 1, 1}, 9, (struct variable *)at_variables, \
-	 sizeof(at_variables)/sizeof(*at_variables), \
-	 sizeof(*at_variables) }
-#endif
 
+    config_load_mib({MIB.3.1.1}, 9, at_variables)
+
+#endif
 #endif /* _MIBGROUP_AT_H */

@@ -64,12 +64,6 @@ char *snmp_trapcommunity;
 	 *********************/
 
 
-void	init_snmpgroup( )
-{
-/*  init_nlist( system_nl );	NOT USED */
-}
-
-
 #define MATCH_FAILED	1
 #define MATCH_SUCCEEDED	0
 

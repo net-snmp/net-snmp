@@ -25,13 +25,7 @@ OTHER TORTIOUS ACTION, ARISING OUT OF OR IN CONNECTION WITH THE USE OR
 PERFORMANCE OF THIS SOFTWARE.
 ******************************************************************/
 
-#include "mibgroup/system.h"
-#include "mibgroup/interfaces.h"
-#include "mibgroup/ip.h"
-#include "mibgroup/icmp.h"
-#include "mibgroup/tcp.h"
-#include "mibgroup/udp.h"
-#include "mibgroup/snmp.h"
+#include "mibgroup/mib_module_includes.h"
 
 int KNLookup();
 

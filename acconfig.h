@@ -341,7 +341,8 @@
 
 /* Not-to-be-compiled macros for use by configure only */
 #define config_require(x)
-
+#define config_load_mib(x,y,z)
+  
 #ifndef DONT_INC_STRUCTS
 #include "agent/extensible/struct.h"
 #endif

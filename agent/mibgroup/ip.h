@@ -117,10 +117,7 @@ struct variable4 ip_variables[] = {
     {IPMEDIATYPE, INTEGER, RONLY, var_atEntry, 3, {22, 1, 4}},
     {IPROUTEDISCARDS, COUNTER, RONLY, var_ip, 1, {23 }}
 };
-#define  IP_SUBTREE  { \
-    {MIB, 4}, 7, (struct variable *)ip_variables, \
-	 sizeof(ip_variables)/sizeof(*ip_variables), \
-	 sizeof(*ip_variables) }
+    config_load_mib({MIB.4}, 7, ip_variables)
 #endif
 
 #endif /* _MIBGROUP_IP_H */

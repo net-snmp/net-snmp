@@ -5,7 +5,8 @@ VPATH = @srcdir@
 @SET_MAKE@
 
 CFLAGS=@CFLAGS@
-CPPFLAGS=@CPPFLAGS@ -I../.. -I$(srcdir)/../.. -I$(srcdir)/../../snmplib
+CPPFLAGS=@CPPFLAGS@ -I../.. -I$(srcdir)/../.. -I$(srcdir)/../../snmplib \
+	-I$(srcdir)/.. -I..
 LDFLAGS=@LDFLAGS@
 
 CC = @CC@ $(CPPFLAGS)

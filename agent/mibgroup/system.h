@@ -5,7 +5,6 @@
 #ifndef _MIBGROUP_SYSTEM_H
 #define _MIBGROUP_SYSTEM_H
 
-extern void	init_system();
 extern u_char	*var_system();
 
 #define	VERSION_DESCR		1
@@ -31,10 +30,8 @@ struct variable2 system_variables[] = {
     {SYSLOCATION, STRING, RWRITE, var_system, 1, {6}},
     {SYSSERVICES, INTEGER, RONLY, var_system, 1, {7}}
 };
-#define  SYSTEM_SUBTREE  { \
-    { MIB, 1}, 7, (struct variable *)system_variables, \
-	sizeof(system_variables)/sizeof(*system_variables), \
-	sizeof(*system_variables) }
-#endif
 
+config_load_mib({MIB.1}, 7, system_variables)
+
+#endif
 #endif /* _MIBGROUP_SYSTEM_H */

@@ -150,6 +150,7 @@
 #include "snmp.h"
 #include "snmp_impl.h"
 #include "mib.h"
+#include "var_struct.h"
 #include "snmp_vars.h"
 
 #include "m2m.h"
@@ -162,7 +163,6 @@
 #if solaris2
 #include "kernel_sunos5.h"
 #endif
-#include "var_struct.h"
 
 #ifdef hpux
 #undef OBJID

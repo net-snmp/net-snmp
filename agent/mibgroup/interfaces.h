@@ -59,10 +59,8 @@ struct variable4 interfaces_variables[] = {
     {IFOUTQLEN, GAUGE, RONLY, var_ifEntry, 3, {2, 1, 21}},
     {IFSPECIFIC, OBJID, RONLY, var_ifEntry, 3, {2, 1, 22}}
 };
-#define INTERFACES_SUBTREE  { \
-    { MIB, 2}, 7, (struct variable *)interfaces_variables, \
-	sizeof(interfaces_variables)/sizeof(*interfaces_variables), \
-	sizeof(*interfaces_variables) }
+
+config_load_mib({MIB.2}, 7, interfaces_variables)
 #endif
 
 #endif /* _MIBGROUP_INTERFACES_H */
