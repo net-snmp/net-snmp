@@ -1,4 +1,5 @@
 #include <net-snmp/net-snmp-config.h>
+#ifdef SNMP_TRANSPORT_TCPIPV6_DOMAIN
 
 #include <stdio.h>
 #include <sys/types.h>
@@ -433,3 +434,6 @@ netsnmp_tcp6_ctor(void)
 
     netsnmp_tdomain_register(&tcp6Domain);
 }
+
+#endif /* SNMP_TRANSPORT_TCPIPV6_DOMAIN */
+
