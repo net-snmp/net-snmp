@@ -99,9 +99,9 @@ proxy_parse_config(const char *token, char *line)
     SOCK_STARTUP;
     /*
      * usm_set_reportErrorOnUnknownID(0); 
- *//*
- * hack, stupid v3 ASIs. 
- */
+     *
+     * hack, stupid v3 ASIs. 
+     */
     /*
      * XXX: on a side note, we don't really need to be a reference
      * platform any more so the proper thing to do would be to fix
