@@ -1,5 +1,12 @@
 Changes since V3.0.1
 
+hardaker 21 Sep 95 09:27:18
+    (snmplib/md5.c) Forgot to include sys/types.h for u_long definition.
+
+-------------------------------------------------------------------------------
+
+Changes since V3.0.1
+
 hardaker 26 Jul 95 16:31:41
     - Added a new #define: EXIT_ON_BAD_KLREAD to config.h
       If defined, and an error occurs while reading the kernel contents,

@@ -1,6 +1,10 @@
 This file contains major changes in released revisions.  Please read
 the ChangeLog file for a more detailed listing of changes/bug fixes.
 
+*3.0.2.1*
+
+  Compilation bug fix
+
 *3.0.2*
 
   Port to dec-alpha/OSF 3.1
