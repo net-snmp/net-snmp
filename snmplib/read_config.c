@@ -434,6 +434,10 @@ char *copy_word(char *from, char *to)
     }
   }
   *to = 0;
+  while(from && isspace(*from)) {
+    from++;
+  }
+  
   return(from);
 }  /* copy_word */
 
