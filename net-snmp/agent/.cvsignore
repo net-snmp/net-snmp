@@ -1,4 +1,5 @@
 .gdbinit
+.index
 Makefile
 mib.txt
 snmpd

@@ -1,13 +1,14 @@
+.gdbinit
 Makefile
 snmpbulkwalk
+snmpdelta
 snmpget
 snmpgetnext
 snmpset
 snmpstatus
+snmptable
 snmptest
 snmptranslate
 snmptrap
 snmptrapd
 snmpwalk
-snmpdelta
-snmptable
