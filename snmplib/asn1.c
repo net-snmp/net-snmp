@@ -170,11 +170,13 @@ int _asn_bitstring_check(const char * str, u_long asn_length, u_char datum)
 	ERROR_MSG(ebuf);
 	return 1;
     }
+/*
     if (datum > 7){
 	sprintf(ebuf,"%s: datum %d >7: too large", str, (int)(datum));
 	ERROR_MSG(ebuf);
 	return 1;
     }
+*/
     return 0;
 }
 
