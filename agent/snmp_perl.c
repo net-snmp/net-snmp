@@ -77,7 +77,15 @@ do_something_perlish(char *something)
         return;
     }
     DEBUGMSGTL(("perl", "calling perl\n"));
+#ifdef HAVE_EVAL_PV
+    /* newer perl */
     eval_pv(something, TRUE);
+#else
+#ifdef HAVE_PERL_EVAL_PV
+    /* older perl */
+    perl_eval_pv(something, TRUE);
+#endif /* HAVE_PERL_EVAL_PV */
+#endif /* HAVE_EVAL_PV */
     DEBUGMSGTL(("perl", "finished calling perl\n"));
 }
 
