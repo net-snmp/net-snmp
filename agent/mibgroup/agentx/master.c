@@ -62,7 +62,8 @@ void init_master(void)
 		 * Could be a left-over socket (now deleted)
 		 * Try again
 		 */
-        session = snmp_open( &sess );
+        session = snmp_open_ex( &sess, 0, agentx_parse, 0, agentx_build,
+                            agentx_check_packet );
     }
 
     if ( session == NULL ) {
