@@ -86,12 +86,21 @@ int		snmp_tcp_recv	(snmp_transport *t, void *buf, int size,
   } else {
     return -1;
   }
-  if ((*opaque = malloc(t->data_length)) != NULL) {
-    memcpy(*opaque, t->data, t->data_length);
-    *olength = t->data_length;
-  } else {
-    *olength = 0;
+  
+  if (opaque != NULL && olength != NULL) {
+    if (t->data_length > 0) {
+      if ((*opaque = malloc(t->data_length)) != NULL) {
+	memcpy(*opaque, t->data, t->data_length);
+	*olength = t->data_length;
+      } else {
+	*olength = 0;
+      }
+    } else {
+      *opaque  = NULL;
+      *olength = 0;
+    }
   }
+
   return rc;
 }
 
@@ -164,10 +173,13 @@ int		snmp_tcp_accept	(snmp_transport *t)
     DEBUGMSGTL(("snmp_tcp_accept", "accept succeeded (from %s)\n", string));
     free(string);
 
-    /*  Try to make the new socket n0n-blocking.  */
+    /*  Try to make the new socket blocking.  */
 
-    sockflags = fcntl(newsock, F_GETFL, 0);
-    fcntl(newsock, F_SETFL, (sockflags & ~O_NONBLOCK));
+    if ((sockflags = fcntl(newsock, F_GETFL, 0)) >= 0) {
+      fcntl(newsock, F_SETFL, (sockflags & ~O_NONBLOCK));
+    } else {
+      DEBUGMSGTL(("snmp_tcp_accept", "couldn't f_getfl of fd %d\n", newsock));
+    }
 
     return newsock;
   } else {
