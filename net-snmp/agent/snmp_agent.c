@@ -3185,6 +3185,9 @@ handle_pdu(netsnmp_agent_session *asp)
         break;
 
     case SNMP_MSG_SET:
+#ifdef DISABLE_SET_SUPPORT
+        return SNMP_ERR_NOTWRITABLE;
+#else
         /*
          * check access permissions first 
          */
@@ -3193,7 +3196,7 @@ handle_pdu(netsnmp_agent_session *asp)
 
         asp->mode = MODE_SET_BEGIN;
         status = handle_set_loop(asp);
-
+#endif
         break;
 
     case SNMP_MSG_INTERNAL_SET_BEGIN:
