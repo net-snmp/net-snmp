@@ -275,7 +275,7 @@ int main(int argc, char *argv[])
     init_snmp("snmpapp");
     if (current_name == NULL) {
         switch (print) {
-	case 0:
+	default:
 	    usage();
 	    exit(1);
         case 1:
