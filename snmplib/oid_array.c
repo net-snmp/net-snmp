@@ -18,6 +18,9 @@
 #if HAVE_MALLOC_H
 #include <malloc.h>
 #endif
+#ifdef HAVE_SYS_TYPES_H
+#include <sys/types.h>
+#endif
 
 #include "oid_array.h"
 #include "snmp_api.h"
