@@ -28,7 +28,7 @@ else
       echo @CFLAGS@ @CPPFLAGS@ -I@includedir@
       ;;
     --cflags)
-      echo @CFLAGS@ @DEVFLAGS @CPPFLAGS@@ -I. -I@includedir@
+      echo @CFLAGS@ @DEVFLAGS@ @CPPFLAGS@ -I. -I@includedir@
       ;;
     --agent-libs)
       # use this one == --netsnmp-agent-libs + --external-libs
