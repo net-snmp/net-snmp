@@ -6,13 +6,15 @@
 #ifndef _MIBGROUP_IP_H
 #define _MIBGROUP_IP_H
 
-config_require(interfaces)
+config_require(interfaces at var_route route_write)
+
+#include "var_route.h"
+#include "route_write.h"
 
 extern void	init_ip __P((void));
 extern u_char	*var_ip __P((struct variable*, oid *, int *, int, int *, int (**write) __P((int, u_char *, u_char, int, u_char *, oid *, int)) ));
 extern int header_ip __P((struct variable*, oid *, int *, int, int *, int (**write) __P((int, u_char *, u_char, int, u_char *, oid *, int)) ));
 extern u_char	*var_ipAddrEntry __P((struct variable*, oid *, int *, int, int *, int (**write) __P((int, u_char *, u_char, int, u_char *, oid *, int)) ));
-extern u_char	*var_ipRouteEntry __P((struct variable*, oid *, int *, int, int *, int (**write) __P((int, u_char *, u_char, int, u_char *, oid *, int)) ));
 
 #include "at.h"		/* for var_atEntry() */
 

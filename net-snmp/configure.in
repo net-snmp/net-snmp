@@ -40,7 +40,7 @@ AC_MSG_CHECKING(for mib modules to use)
 
 mibdir="agent/mibgroup"
 module_list=""
-new_module_list="at interfaces snmp tcp icmp ip system udp proc versioninfo pass disk loadave extensible $with_mib_modules"
+new_module_list="at interfaces snmp_mib tcp icmp ip system udp proc versioninfo pass disk loadave extensible $with_mib_modules"
 
 dnl Create include file list for snmp_vars.h to use.
 if test ! -d agent; then

@@ -4,7 +4,7 @@
  */
 
 #include "../common_header.h"
-#include "snmp.h"
+#include "snmp_mib.h"
 
 
 	/*********************
