@@ -1,12 +1,25 @@
 This file contains major changes in released revisions.  Please read
 the ChangeLog file for a more detailed listing of changes/bug fixes.
 
+*3.0.2*
+
+  Port to dec-alpha/OSF 3.1
+    - quite a few more CMU bugs found during port.
+
+  (docs/snmpd.1) Beginnings of documentation/man pages.
+
+  (local/snmpcheck) Many changes/improvements.  Still very (usable) Beta.
+
+  (NEWS) Added this file!
+
 *3.0.1*
 
-  2 Command line options added:
+  (agent/snmpd) 
+    2 Command line options added:
     -l LOGFILE       Outputs stderr/out to LOGFILE (overrides config.h def)
     -L               Do NOT write to a log file (overrides config.h)
 
+  (agent/snmpd)
   New built in mib functions:
     MIB.VERSIONMIBNUM.VERUPDATECONFIG (default: .1.3.6.1.4.10.100.11)
        -- set to 'integer:1' to tell the agent to re-read the config file(s).
