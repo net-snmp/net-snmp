@@ -634,7 +634,7 @@ netsnmp_check_getnext_reply(netsnmp_request_info *request,
                             netsnmp_variable_list ** outvar)
 {
     oid      myname[MAX_OID_LEN];
-    int      myname_len;
+    size_t   myname_len;
 
     build_oid_noalloc(myname, MAX_OID_LEN, &myname_len,
                       prefix, prefix_len, newvar);
