@@ -919,8 +919,6 @@ agentx_realloc_build(struct snmp_session *session, struct snmp_pdu *pdu,
 		     u_char **buf, size_t *buf_len, size_t *out_len)
 		     
 {
-  DEBUGMSGTL(("agentx_realloc_build", "blah\n"));
-
   if (session == NULL || buf_len == NULL ||
       out_len == NULL || pdu     == NULL || buf == NULL) {
     return -1;
