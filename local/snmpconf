@@ -32,7 +32,10 @@ $term = new Term::ReadLine 'snmpconf';
 read_config_files($opts{'c'}, \%filetypes);
 debug(Dumper(\%filetypes));
 
-foreach my $i (qw(/usr/local/share/snmp /usr/local/lib/snmp /usr/local/etc .), "$ENV{HOME}/.snmp") {
+#
+# Find existing files to possibly read in.
+#
+foreach my $i (qw(/usr/local/share/snmp /usr/local/etc/snmp .), "$ENV{HOME}/.snmp") {
     debug("searching $i\n");
     foreach my $ft (keys(%filetypes)) {
 	debug("searching for $i/$ft\n");
@@ -43,24 +46,19 @@ foreach my $i (qw(/usr/local/share/snmp /usr/local/lib/snmp /usr/local/etc .), "
     }
 }
 
+#
+# Ask the user if they want them to be read in and read them
+#
 if (keys(%knownfiles)) {
-    print "The following configuration files were found:\n";
-    my $count=1;
-    foreach my $i (sort keys(%knownfiles)) {
-	printf("%2d  $i\n",$count++);
-    }
-    my $ans = get_answer($term,
-			 "Would you like me to read them in?  Their content will be added to the\noutput files created by this session.\nValid answer examples: \"all\", \"none\",\"1,2,5\"\n? ", "^([\\d\\s,]+|all|a|none|n)\$", "all");
-    if ($ans ne "n" || $ans ne "y") {
-	my $count = 0;
-	my @list = split(/\s*,\s*/,$ans);
-	foreach my $i (sort keys(%knownfiles)) {
-	    $count++;
-	    if ($ans eq "all" || $ans eq "a" || grep(/^$count$/,@list)) {
-		debug("reading $i\n");
-		read_config($i, $knownfiles{$i});
-	    }
-	}
+    my @files = display_menu(-head => "The following configuration files were found:\n",
+			     -tail => "Would you like me to read them in?  Their content will be added to the\noutput files created by this session.\nValid answer examples: \"all\", \"none\",\"1,2,5\"\n",
+			     -multiple => 1,
+			     -question => '? ',
+			     -defaultvalue => 'all',
+			     sort keys(%knownfiles));
+    foreach my $i (@files) {
+	debug("reading $i\n");
+	read_config($i, $knownfiles{$i});
     }
 }
 
@@ -83,12 +81,11 @@ if ($#ARGV >= 0) {
     # select file type to operate on.
     #
     while(1) {
-	print "\nSelect file to create:\n";
-	print "  ",join("\n  ",keys(%filetypes)), "\n";
-	print "  [or 'quit']\n";
-	my $line = get_answer($term, "Select file>",
-			      valid_answers(keys(%filetypes),"quit","q"));
-	last if ($line eq "quit" || $line eq "q");
+	my $line = display_menu(-head => "Select file to create:\n",
+				-question => 'Select File>',
+				-otheranswers => ['quit', 'q'],
+				keys(%filetypes));
+	last if ($line eq "q" or $line eq "quit");
 	debug("file selected: $line\n");
 	build_file($term, $line, $filetypes{$line});
     }
@@ -114,19 +111,14 @@ sub build_file {
     $didfile{$filename} = 1;
     my (@lines);
     while(1) {
-	print "\nSelect configuration section for $filename to operate on:\n";
-	for(my $i = 0; $i <= $#{$fileconf}; $i++) {
-	    printf "  %2d:  $fileconf->[$i]{title}[0]\n", $i+1;
-	}
-	print "  [or 'finished']\n";
-	my $line = $term->readline("Select section>");
+	my $line = display_menu(-head => "Select configuration section for $filename to operate on:\n",
+				-otheranswers => ['finished','f'],
+				-question => "Select section>",
+				-numeric => 1,
+				map { $_->{'title'}[0] } @$fileconf);
 
 	return @lines if ($line eq "finished" || $line eq "f");
-	if ($line <= 0 || $line > $#{$fileconf}+1) {
-	    warn "invalid selection: $line [must be 1-".($#{$fileconf}+1)."]\n";
-	} else {
-	    do_section($fileconf->[$line-1]);
-	}
+	do_section($fileconf->[$line-1]);
     }
 }
 
@@ -134,27 +126,16 @@ sub do_section {
     my $confsect = shift;
     my @lines;
     while(1) {
-	print "\nSelect from:\n";
-	my $count=1;
-	foreach my $i (keys(%{$confsect->{'thetokens'}})) {
-	    printf "  %2d:  Add $confsect->{$i}{info}[0]\n", $count++;
-	}
-	print "  [or 'finished']\n";
-	my $line = $term->readline("Select section>");
+	my $line =
+	    display_menu(-head => "Select from:\n",
+			 -otheranswers => ['finished','f'],
+			 -question => 'Select section>',
+			 -descriptions => [map { $confsect->{$_}{info}[0] } 
+					   keys(%{$confsect->{'thetokens'}})],
+			 keys(%{$confsect->{'thetokens'}}));
 	return @lines if ($line eq "finished" || $line eq "f");
-
-	if ($line <= 0 || $line > $count) {
-	    warn "invalid selection: $line [must be 1-".($count-1)."]\n";
-	} else {
-	    foreach my $i (keys(%{$confsect->{'thetokens'}})) {
-		if (--$line == 0) {
-		    do_line($i, $confsect->{$i});
-		    last;
-		}
-	    }
-	}
+	do_line($line, $confsect->{$line});
     }
-    print "operating on $confsect\n";
     return;
 }
 
@@ -206,6 +187,7 @@ sub read_config_files {
     my $dir;
     while(defined($dir = $dh->read)) {
 	next if ($dir =~ /^\./);
+	next if ($dir =~ /CVS/);
 	debug("dir entry: $dir\n");
 	if (-d "$readdir/$dir") {
 	    $filetypes->{$dir} = read_config_items("$readdir/$dir");
@@ -365,6 +347,93 @@ sub read_config {
 	    push @{$tokenmap{$token}{'results'}},$_;
 	} else {
 	    push @unknown,$_;
+	}
+    }
+}
+
+sub display_menu {
+    my %config;
+
+    while ($#_ > -1 && $_[0] =~ /^-/) {
+	my $key = shift;
+	$config{$key} = shift;
+    }
+
+    my $count=1;
+    print $config{'-head'} if ($config{'-head'});
+    my @answers = @_;
+    my @list;
+    if (defined($config{'-descriptions'}) && 
+	ref($config{'-descriptions'}) eq "ARRAY") {
+	@list = @{$config{'-descriptions'}}
+    } else {
+	@list = @_;
+    }
+    foreach my $i (@list) {
+	printf "  %2d:  $i\n", $count++;
+    }
+    if (defined($config{'-otheranswers'})) {
+	if (ref($config{'-otheranswers'}) eq 'ARRAY') {
+	    print "Other options: ", join(",",@{$config{'-otheranswers'}}),"\n";
+	    push @answers, @{$config{'-otheranswers'}};
+	} else {
+	    my $maxlen = 0;
+	    push @answers,keys(%{$config{'-otheranswers'}});
+	    foreach my $i (keys(%{$config{'-otheranswers'}})) {
+		$maxlen = length($i) if (length($i) > $maxlen);
+	    }
+	    foreach my $i (keys(%{$config{'-otheranswers'}})) {
+		printf("  %-" . $maxlen . "s: %s\n", $i, 
+		       $config{'-otheranswers'}{$i});
+	    }
+	}
+    }
+    print $config{'-tail'} if ($config{'-tail'});
+
+    if (defined($config{'-question'})) {
+	while(1) {
+	    my $numexpr;
+	    if ($config{'-multiple'}) {
+		$numexpr = '[\d\s,]+|all|a|none|n';
+	    } else {
+		$numexpr = '\d+';
+	    }
+	    push @answers,"" if ($config{'-defaultvalue'});
+	    $ans = get_answer($term, $config{'-question'},
+			      valid_answers($numexpr,@answers),
+			      $config{'-defaultvalue'});
+
+	    if ($ans =~ /^$numexpr$/) {
+		if ($config{'-multiple'}) {
+		    my @list = split(/\s*,\s*/,$ans);
+		    my @ret;
+		    $count = 0;
+		    foreach my $i (@_) {
+			$count++;
+			if ($ans eq "all" || $ans eq "a" 
+			    || grep(/^$count$/,@list)) {
+			    push @ret, $i;
+			}
+		    }
+		    return @ret;
+		} else {
+		    if ($ans <= 0 || $ans > $#_+1) {
+			warn "invalid selection: $ans [must be 1-" .
+			    ($#_+1) . "]\n";
+		    } else {
+			return $ans if ($config{'-numeric'});
+			$count = 0;
+			foreach my $i (@_) {
+			    $count++;
+			    if ($ans eq $count) {
+				return $i;
+			    }
+			}
+		    }
+		}
+	    } else {
+		return $ans;
+	    }
 	}
     }
 }
