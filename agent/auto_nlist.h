@@ -3,6 +3,7 @@
  */
 
 #ifdef CAN_USE_NLIST
+struct nlist;
 int auto_nlist (const char *, char *, int);
 long auto_nlist_value (const char *);
 int KNLookup (struct nlist *, int, char *, int);
