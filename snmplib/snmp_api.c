@@ -2195,8 +2195,9 @@ snmp_pdu_add_variable(pdu, name, name_length, type, value, len)
 #endif /* OPAQUE_SPECIAL_TYPES */
       
       default:
-        fprintf(stderr, "Internal error in type switching\n");
-        exit(1);
+        snmp_set_detail("Internal error in type switching\n");
+        snmp_errno = SNMP_BAD_PARSE; /* XX SNMP_BAD_ENCODE */
+        return;
     }
 }
 
