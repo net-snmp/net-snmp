@@ -115,6 +115,8 @@ struct mteTriggerTable_data {
    long         pdu_securityLevel;
    void        *pdu_transport;
    size_t       pdu_transportLen;
+   oid	       *pdu_tDomain;
+   size_t	pdu_tDomainLen;
    u_char      *pdu_community;
    size_t       pdu_community_len;
    char        *pdu_contextName;
@@ -166,6 +168,17 @@ struct last_state {
 #define MTE_THRESHOLD_BEGIN  0
 #define MTE_THRESHOLD_HIGH   1
 #define MTE_THRESHOLD_LOW    2
+
+/*  Just the first (MTE-specific) groups of errors defined here;
+    others are numerically equal to the regular SNMP errors.  */
+
+#define MTE_FAILURE_LOCALRESOURCELACK		-1
+#define MTE_FAILURE_BADDESTINATION		-2
+#define MTE_FAILURE_DESTINATIONUNREACHABLE	-3
+#define MTE_FAILURE_NORESPONSE			-4
+#define MTE_FAILURE_BADTYPE			-5
+#define MTE_FAILURE_SAMPLEOVERRUN		-6
+
 
 /* function prototypes */
 
