@@ -91,8 +91,9 @@ vacm_save_view(struct vacm_viewEntry *view, const char *token,
     char           *cptr;
 
     memset(line, 0, sizeof(line));
-    sprintf(line, "%s%s %d %d %d ", token, "View", view->viewStatus,
-            view->viewStorageType, view->viewType);
+    snprintf(line, sizeof(line), "%s%s %d %d %d ", token, "View",
+            view->viewStatus, view->viewStorageType, view->viewType);
+    line[ sizeof(line)-1 ] = 0;
     cptr = &line[strlen(line)]; /* the NULL */
 
     cptr =
@@ -158,9 +159,11 @@ vacm_save_access(struct vacm_accessEntry *access_entry, const char *token,
     char           *cptr;
 
     memset(line, 0, sizeof(line));
-    sprintf(line, "%s%s %d %d %d %d %d ", token, "Access", access_entry->status,
+    snprintf(line, sizeof(line), "%s%s %d %d %d %d %d ",
+            token, "Access", access_entry->status,
             access_entry->storageType, access_entry->securityModel,
             access_entry->securityLevel, access_entry->contextMatch);
+    line[ sizeof(line)-1 ] = 0;
     cptr = &line[strlen(line)]; /* the NULL */
     cptr =
         read_config_save_octet_string(cptr,
@@ -247,8 +250,10 @@ vacm_save_group(struct vacm_groupEntry *group_entry, const char *token,
     char           *cptr;
 
     memset(line, 0, sizeof(line));
-    sprintf(line, "%s%s %d %d %d ", token, "Group", group_entry->status,
+    snprintf(line, sizeof(line), "%s%s %d %d %d ",
+            token, "Group", group_entry->status,
             group_entry->storageType, group_entry->securityModel);
+    line[ sizeof(line)-1 ] = 0;
     cptr = &line[strlen(line)]; /* the NULL */
 
     cptr =

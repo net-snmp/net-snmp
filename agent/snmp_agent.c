@@ -818,7 +818,8 @@ init_master_agent(void)
 				 NETSNMP_DS_AGENT_PORTS);
 
     if (cptr) {
-        sprintf(buf, "%s", cptr);
+        snprintf(buf, sizeof(buf), "%s", cptr);
+        buf[ sizeof(buf)-1 ] = 0;
     } else {
         /*
          * No, so just specify the default port.  

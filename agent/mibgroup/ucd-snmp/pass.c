@@ -192,7 +192,8 @@ pass_parse_config(const char *token, char *cptr)
         strncpy((*ppass)->command, cptr, tcptr - cptr);
         (*ppass)->command[tcptr - cptr] = 0;
     }
-    strcpy((*ppass)->name, (*ppass)->command);
+    strncpy((*ppass)->name, (*ppass)->command, sizeof((*ppass)->name));
+    (*ppass)->name[ sizeof((*ppass)->name)-1 ] = 0;
     (*ppass)->next = NULL;
 
     register_mib("pass", (struct variable *) extensible_passthru_variables,
@@ -270,11 +271,12 @@ var_extensible_pass(struct variable *vp,
             else
                 sprint_mib_oid(buf, name, *length);
             if (exact)
-                sprintf(passthru->command, "%s -g %s", passthru->name,
-                        buf);
+                snprintf(passthru->command, sizeof(passthru->command),
+                         "%s -g %s", passthru->name, buf);
             else
-                sprintf(passthru->command, "%s -n %s", passthru->name,
-                        buf);
+                snprintf(passthru->command, sizeof(passthru->command),
+                         "%s -n %s", passthru->name, buf);
+            passthru->command[ sizeof(passthru->command)-1 ] = 0;
             DEBUGMSGTL(("ucd-snmp/pass", "pass-running:  %s\n",
                         passthru->command));
             /*
@@ -418,7 +420,9 @@ setPass(int action,
                 sprint_mib_oid(buf, passthru->miboid, passthru->miblen);
             else
                 sprint_mib_oid(buf, name, name_len);
-            sprintf(passthru->command, "%s -s %s ", passthru->name, buf);
+            snprintf(passthru->command, sizeof(passthru->command),
+                     "%s -s %s", passthru->name, buf);
+            passthru->command[ sizeof(passthru->command)-1 ] = 0;
             switch (var_val_type) {
             case ASN_INTEGER:
             case ASN_COUNTER:
@@ -455,16 +459,19 @@ setPass(int action,
                 if (var_val_len == 0)
                     sprintf(buf, "string \"\"");
                 else if (bin2asc(buf2, var_val_len) == (int) var_val_len)
-                    sprintf(buf, "string \"%s\"", buf2);
+                    snprintf(buf, sizeof(buf), "string \"%s\"", buf2);
                 else
-                    sprintf(buf, "octet \"%s\"", buf2);
+                    snprintf(buf, sizeof(buf), "octet \"%s\"", buf2);
+                buf[ sizeof(buf)-1 ] = 0;
                 break;
             case ASN_OBJECT_ID:
                 sprint_mib_oid(buf2, (oid *) var_val, var_val_len);
-                sprintf(buf, "objectid \"%s\"", buf2);
+                snprintf(buf, sizeof(buf), "objectid \"%s\"", buf2);
+                buf[ sizeof(buf)-1 ] = 0;
                 break;
             }
-            strcat(passthru->command, buf);
+            strncat(passthru->command, buf, sizeof(passthru->command));
+            passthru->command[ sizeof(passthru->command)-1 ] = 0;
             DEBUGMSGTL(("ucd-snmp/pass", "pass-running:  %s\n",
                         passthru->command));
             exec_command(passthru);

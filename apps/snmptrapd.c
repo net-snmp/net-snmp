@@ -406,7 +406,9 @@ do_external(char *cmd, struct hostent *host,
         } else {
             send_handler_data(file, host, pdu, transport);
             fclose(file);
-            sprintf(command_buf, "%s < %s", cmd, file_buf);
+            snprintf(command_buf, sizeof(command_buf),
+                     "%s < %s", cmd, file_buf);
+            command_buf[ sizeof(command_buf)-1 ] = 0;
             result = system(command_buf);
             if (result == -1)
                 fprintf(stderr, "system: %s: %s\n", command_buf,

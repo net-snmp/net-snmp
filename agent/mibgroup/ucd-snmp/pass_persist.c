@@ -218,9 +218,12 @@ var_extensible_pass_persist(struct variable *vp,
             }
 
             if (exact)
-                sprintf(persistpassthru->command, "get\n%s\n", buf);
+                snprintf(persistpassthru->command,
+                  sizeof(persistpassthru->command), "get\n%s\n", buf);
             else
-                sprintf(persistpassthru->command, "getnext\n%s\n", buf);
+                snprintf(persistpassthru->command,
+                  sizeof(persistpassthru->command), "getnext\n%s\n", buf);
+            persistpassthru->command[ sizeof(persistpassthru->command)-1 ] = 0;
 
             DEBUGMSGTL(("ucd-snmp/pass_persist",
                         "persistpass-sending:\n%s",
@@ -380,7 +383,9 @@ setPassPersist(int action,
                                persistpassthru->miblen);
             else
                 sprint_mib_oid(buf, name, name_len);
-            sprintf(persistpassthru->command, "set\n%s\n ", buf);
+            snprintf(persistpassthru->command,
+                     sizeof(persistpassthru->command), "set\n%s\n", buf);
+            persistpassthru->command[ sizeof(persistpassthru->command)-1 ] = 0;
             switch (var_val_type) {
             case ASN_INTEGER:
             case ASN_COUNTER:
@@ -417,17 +422,22 @@ setPassPersist(int action,
                 if (var_val_len == 0)
                     sprintf(buf, "string \"\"");
                 else if (bin2asc(buf2, var_val_len) == (int) var_val_len)
-                    sprintf(buf, "string \"%s\"", buf2);
+                    snprintf(buf, sizeof(buf), "string \"%s\"", buf2);
                 else
-                    sprintf(buf, "octet \"%s\"", buf2);
+                    snprintf(buf, sizeof(buf), "octet \"%s\"", buf2);
+                buf[ sizeof(buf)-1 ] = 0;
                 break;
             case ASN_OBJECT_ID:
                 sprint_mib_oid(buf2, (oid *) var_val, var_val_len);
-                sprintf(buf, "objectid \"%s\"", buf2);
+                snprintf(buf, sizeof(buf), "objectid \"%s\"", buf2);
+                buf[ sizeof(buf)-1 ] = 0;
                 break;
             }
-            strcat(persistpassthru->command, buf);
-            strcat(persistpassthru->command, "\n");
+            strncat(persistpassthru->command, buf,
+                    sizeof(persistpassthru->command) -
+                    strlen(persistpassthru->command) - 2);
+            persistpassthru->command[ sizeof(persistpassthru->command)-2 ] = '\n';
+            persistpassthru->command[ sizeof(persistpassthru->command)-1 ] = 0;
 
             if (!open_persist_pipe(i, persistpassthru->name)) {
                 return SNMP_ERR_NOTWRITABLE;

@@ -666,17 +666,18 @@ Get_Next_HR_Disk(void)
              * Construct the full device name in "string" 
              */
             if (disk_devices[HRD_type_index].disk_controller != -1) {
-                sprintf(string,
+                snprintf(string, sizeof(string),
                         disk_devices[HRD_type_index].disk_devfull_string,
                         disk_devices[HRD_type_index].disk_controller,
                         disk_devices[HRD_type_index].disk_device_first +
                         HRD_index);
             } else {
-                sprintf(string,
+                snprintf(string, sizeof(string),
                         disk_devices[HRD_type_index].disk_devfull_string,
                         disk_devices[HRD_type_index].disk_device_first +
                         HRD_index);
             }
+            string[ sizeof(string)-1 ] = 0;
 
             DEBUGMSGTL(("host/hr_disk", "Get_Next_HR_Disk: %s (%d/%d)\n",
                         string, HRD_type_index, HRD_index));
@@ -750,19 +751,20 @@ Get_Next_HR_Disk_Partition(char *string, int HRP_index)
      * Construct the partition name in "string" 
      */
     if (disk_devices[HRD_type_index].disk_controller != -1) {
-        sprintf(string,
+        snprintf(string, sizeof(string),
                 disk_devices[HRD_type_index].disk_devpart_string,
                 disk_devices[HRD_type_index].disk_controller,
                 disk_devices[HRD_type_index].disk_device_first + HRD_index,
                 disk_devices[HRD_type_index].disk_partition_first +
                 HRP_index);
     } else {
-        sprintf(string,
+        snprintf(string, sizeof(string),
                 disk_devices[HRD_type_index].disk_devpart_string,
                 disk_devices[HRD_type_index].disk_device_first + HRD_index,
                 disk_devices[HRD_type_index].disk_partition_first +
                 HRP_index);
     }
+    string[ sizeof(string)-1 ] = 0;
 
     DEBUGMSGTL(("host/hr_disk",
                 "Get_Next_HR_Disk_Partition: %s (%d/%d:%d)\n", string,
@@ -798,16 +800,22 @@ static void
 Save_HR_Disk_General(void)
 {
 #ifdef DIOC_DESCRIBE
-    strcpy(HRD_savedModel, HRD_info.model_num);
+    strnncpy(HRD_savedModel, HRD_info.model_num, sizeof(HRD_savedModel)-1);
+    HRD_savedModel[ sizeof(HRD_savedModel)-1 ] = 0;
 #endif
 #ifdef DKIOCINFO
-    strcpy(HRD_savedModel, HRD_info.dki_dname);
+    strncpy(HRD_savedModel, HRD_info.dki_dname, sizeof(HRD_savedModel)-1);
+    HRD_savedModel[ sizeof(HRD_savedModel)-1 ] = 0;
 #endif
 #ifdef HAVE_LINUX_HDREG_H
-    strcpy(HRD_savedModel, (const char *) HRD_info.model);
+    strncpy(HRD_savedModel, (const char *) HRD_info.model,
+                    sizeof(HRD_savedModel)-1);
+    HRD_savedModel[ sizeof(HRD_savedModel)-1 ] = 0;
 #endif
 #ifdef DIOCGDINFO
-    strcpy(HRD_savedModel, dktypenames[HRD_info.d_type]);
+    strncpy(HRD_savedModel, dktypenames[HRD_info.d_type],
+                    sizeof(HRD_savedModel)-1);
+    HRD_savedModel[ sizeof(HRD_savedModel)-1 ] = 0;
 #endif
 }
 
@@ -849,9 +857,12 @@ Query_Disk(int fd, const char *devfull)
         if (result != -1) {
             HRD_info.lba_capacity = h;
             if (HRD_type_index == 1)
-                sprintf(HRD_info.model, "SCSI disk (%s)", devfull);
+                snprintf( HRD_info.model, sizeof(HRD_info.model)-1,
+                         "SCSI disk (%s)", devfull);
             else
-                sprintf(HRD_info.model, "RAID disk (%s)", devfull);
+                snprintf( HRD_info.model, sizeof(HRD_info.model)-1,
+                        "RAID disk (%s)", devfull);
+            HRD_info.model[ sizeof(HRD_info.model)-1 ] = 0;
             HRD_info.config = 0;
         }
     }

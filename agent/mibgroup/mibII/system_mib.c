@@ -332,9 +332,11 @@ init_system_mib(void)
     struct utsname  utsName;
 
     uname(&utsName);
-    sprintf(version_descr, "%s %s %s %s %s", utsName.sysname,
+    snprintf(version_descr, sizeof(version_descr),
+            "%s %s %s %s %s", utsName.sysname,
             utsName.nodename, utsName.release, utsName.version,
             utsName.machine);
+    version_descr[ sizeof(version_descr)-1 ] = 0;
 #else
 #if HAVE_EXECV
     struct extensible extmp;
@@ -350,6 +352,7 @@ init_system_mib(void)
     extmp.next = NULL;
     exec_command(&extmp);
     strncpy(version_descr, extmp.output, sizeof(version_descr));
+    version_descr[sizeof(version_descr) - 1] = 0;
     version_descr[strlen(version_descr) - 1] = 0;       /* chomp new line */
 #else
     strcpy(version_descr, "unknown");

@@ -136,7 +136,8 @@ setPerrorstatus(const char *to)
 {
     char            buf[STRMAX];
 
-    sprintf(buf, "%s:  %s", to, strerror(errno));
+    snprintf(buf, sizeof(buf), "%s:  %s", to, strerror(errno));
+    buf[ sizeof(buf)-1 ] = 0;
     snmp_log_perror(to);
     seterrorstatus(buf, 5);
 }
@@ -146,7 +147,8 @@ seterrorstatus(const char *to, int prior)
 {
     if (errorstatusprior <= prior ||
         (ERRORTIMELENGTH < (time(NULL) - errorstatustime))) {
-        strcpy(errorstring, to);
+        strncpy(errorstring, to, sizeof(errorstring));
+        errorstring[ sizeof(errorstring)-1 ] = 0;
         errorstatusprior = prior;
         errorstatustime = time(NULL);
     }
@@ -226,9 +228,10 @@ var_extensible_errors(struct variable *vp,
             (ERRORTIMELENGTH >= time(NULL) - errorstatustime) ? 1 : 0;
         return ((u_char *) (&long_ret));
     case ERRORMSG:
-        if ((ERRORTIMELENGTH >= time(NULL) - errorstatustime) ? 1 : 0)
-            strcpy(errmsg, errorstring);
-        else
+        if ((ERRORTIMELENGTH >= time(NULL) - errorstatustime) ? 1 : 0) {
+            strncpy(errmsg, errorstring, sizeof(errmsg));
+            errmsg[ sizeof(errmsg)-1 ] = 0;
+        } else
             errmsg[0] = 0;
         *var_len = strlen(errmsg);
         return ((u_char *) errmsg);
