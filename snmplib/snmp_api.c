@@ -988,8 +988,8 @@ _sess_open(struct snmp_session *in_session)
 
                 }
                 if (session->remote_port == SNMP_DEFAULT_REMPORT){
-                    isp_addr->sin_port =
-                      htons(ds_get_int(DS_LIBRARY_ID, DS_LIB_DEFAULT_PORT));
+                    short iport = ds_get_int(DS_LIBRARY_ID, DS_LIB_DEFAULT_PORT);
+                    isp_addr->sin_port = htons(iport);
                 } else {
                     isp_addr->sin_port = htons(session->remote_port);
                 }

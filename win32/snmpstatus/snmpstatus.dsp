@@ -93,7 +93,7 @@ SOURCE=..\..\apps\snmp_parse_args.c
 
 !ELSEIF  "$(CFG)" == "snmpstatus - Win32 Debug"
 
-# ADD CPP /I "..\snmpllib"
+# ADD CPP /I "..\snmplib"
 
 !ENDIF 
 

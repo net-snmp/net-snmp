@@ -3,18 +3,6 @@ Microsoft Developer Studio Workspace File, Format Version 5.00
 
 ###############################################################################
 
-Project: "encode_keychange"="..\apps\encode_keychange\encode_keychange.dsp" - Package Owner=<4>
-
-Package=<5>
-{{{
-}}}
-
-Package=<4>
-{{{
-}}}
-
-###############################################################################
-
 Project: "libsnmp"=".\libsnmp\libsnmp.dsp" - Package Owner=<4>
 
 Package=<5>
@@ -28,6 +16,18 @@ Package=<4>
 ###############################################################################
 
 Project: "libsnmp_dll"=".\libsnmp_dll\libsnmp_dll.dsp" - Package Owner=<4>
+
+Package=<5>
+{{{
+}}}
+
+Package=<4>
+{{{
+}}}
+
+###############################################################################
+
+Project: "encode_keychange"=".\encode_keychange\encode_keychange.dsp" - Package Owner=<4>
 
 Package=<5>
 {{{
@@ -71,12 +71,6 @@ Package=<5>
 
 Package=<4>
 {{{
-    Begin Project Dependency
-    Project_Dep_Name libsnmp
-    End Project Dependency
-    Begin Project Dependency
-    Project_Dep_Name libsnmp_dll
-    End Project Dependency
 }}}
 
 ###############################################################################
@@ -101,12 +95,6 @@ Package=<5>
 
 Package=<4>
 {{{
-    Begin Project Dependency
-    Project_Dep_Name libsnmp
-    End Project Dependency
-    Begin Project Dependency
-    Project_Dep_Name libsnmp_dll
-    End Project Dependency
 }}}
 
 ###############################################################################
@@ -119,12 +107,6 @@ Package=<5>
 
 Package=<4>
 {{{
-    Begin Project Dependency
-    Project_Dep_Name libsnmp
-    End Project Dependency
-    Begin Project Dependency
-    Project_Dep_Name libsnmp_dll
-    End Project Dependency
 }}}
 
 ###############################################################################
@@ -149,12 +131,6 @@ Package=<5>
 
 Package=<4>
 {{{
-    Begin Project Dependency
-    Project_Dep_Name libsnmp
-    End Project Dependency
-    Begin Project Dependency
-    Project_Dep_Name libsnmp_dll
-    End Project Dependency
 }}}
 
 ###############################################################################
@@ -179,12 +155,6 @@ Package=<5>
 
 Package=<4>
 {{{
-    Begin Project Dependency
-    Project_Dep_Name libsnmp
-    End Project Dependency
-    Begin Project Dependency
-    Project_Dep_Name libsnmp_dll
-    End Project Dependency
 }}}
 
 ###############################################################################
@@ -197,12 +167,6 @@ Package=<5>
 
 Package=<4>
 {{{
-    Begin Project Dependency
-    Project_Dep_Name libsnmp
-    End Project Dependency
-    Begin Project Dependency
-    Project_Dep_Name libsnmp_dll
-    End Project Dependency
 }}}
 
 ###############################################################################
