@@ -112,7 +112,7 @@ echo "Content-Description: Version Information" >> ${msg_file}.2
 echo                                     	>> ${msg_file}.2
 echo "ucd-snmp Version:  $VersionInfo"   	>> ${msg_file}.2
 echo $n "System configuration:  $c"            	>> ${msg_file}.2
-uname -mrsv                              	>> ${msg_file}.2
+uname -a                                 	>> ${msg_file}.2
 if [ -f ./config.guess ]
 then
   echo $n "config.guess:  $c"                   >> ${msg_file}.2
