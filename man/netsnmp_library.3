@@ -1,4 +1,4 @@
-.TH "The Net-SNMP library" 3 "10 Jan 2003" "net-snmp" \" -*- nroff -*-
+.TH "The Net-SNMP library" 3 "19 Feb 2003" "net-snmp" \" -*- nroff -*-
 .ad l
 .nh
 .SH NAME
@@ -8,6 +8,9 @@ The Net-SNMP library \-
 .in +1c
 .ti -1c
 .RI "\fBmib parsing and datatype manipulation routines.\fP"
+.br
+.ti -1c
+.RI "\fBMemory Utility Routines\fP"
 .br
 .in -1c
 .SS "Data Structures"
@@ -408,7 +411,7 @@ length of the second OID (in segments, not bytes)
 .in +1c
 0 if they are equal, 1 if they are not. 
 .PP
-Definition at line 6030 of file snmp_api.c.
+Definition at line 6050 of file snmp_api.c.
 .SS "int netsnmp_oid_find_prefix (const oid * in_name1, size_t len1, const oid * in_name2, size_t len2)"
 .PP
 Given two OIDs, determine the common prefix to them both.
@@ -432,7 +435,7 @@ Length of the second oid.
 .in +1c
 length of largest common index of commonality. 1 = first, 0 if none * or -1 on error. 
 .PP
-Definition at line 6086 of file snmp_api.c.
+Definition at line 6106 of file snmp_api.c.
 .SS "int netsnmp_oid_is_subtree (const oid * in_name1, size_t len1, const oid * in_name2, size_t len2)"
 .PP
 Identical to netsnmp_oid_equals, except only the length up to len1 is compared.
@@ -458,7 +461,7 @@ length of the second OID (in segments, not bytes)
 .in +1c
 0 if one is a common prefix of the other. 
 .PP
-Definition at line 6066 of file snmp_api.c.
+Definition at line 6086 of file snmp_api.c.
 .SS "int snmp_oid_compare (const oid * in_name1, size_t len1, const oid * in_name2, size_t len2)"
 .PP
 lexicographical compare two object identifiers.
@@ -469,7 +472,7 @@ Caution: this method is called often by command responder applications (ie, agen
 .in +1c
 -1 if name1 < name2, 0 if name1 = name2, 1 if name1 > name2 
 .PP
-Definition at line 5962 of file snmp_api.c.
+Definition at line 5982 of file snmp_api.c.
 .SS "int snmp_oidtree_compare (const oid * in_name1, size_t len1, const oid * in_name2, size_t len2)"
 .PP
 Compares 2 OIDs to determine if they are equal up until the shortest length.
@@ -493,4 +496,4 @@ length of the second OID (in segments, not bytes)
 .in +1c
 0 if they are equal, 1 if in_name1 is > in_name2, or -1 if <. 
 .PP
-Definition at line 6011 of file snmp_api.c.
+Definition at line 6031 of file snmp_api.c.

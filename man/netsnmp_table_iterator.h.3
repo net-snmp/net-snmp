@@ -1,0 +1,74 @@
+.TH "table_iterator.h" 3 "19 Feb 2003" "net-snmp" \" -*- nroff -*-
+.ad l
+.nh
+.SH NAME
+table_iterator.h \- @addtogorup table_iterator. 
+.SH SYNOPSIS
+.br
+.PP
+.SS "Data Structures"
+
+.in +1c
+.ti -1c
+.RI "struct \fBnetsnmp_iterator_info_s\fP"
+.br
+.in -1c
+.SS "Defines"
+
+.in +1c
+.ti -1c
+.RI "#define \fBTABLE_ITERATOR_NAME\fP   'table_iterator'"
+.br
+.in -1c
+.SS "Typedefs"
+
+.in +1c
+.ti -1c
+.RI "typedef netsnmp_variable_list * \fBNetsnmp_First_Data_Point\fP (void **loop_context, void **data_context, netsnmp_variable_list *, struct netsnmp_iterator_info_s *)"
+.br
+.ti -1c
+.RI "typedef netsnmp_variable_list * \fBNetsnmp_Next_Data_Point\fP (void **loop_context, void **data_context, netsnmp_variable_list *, struct netsnmp_iterator_info_s *)"
+.br
+.ti -1c
+.RI "typedef void * \fBNetsnmp_Make_Data_Context\fP (void *loop_context, struct netsnmp_iterator_info_s *)"
+.br
+.ti -1c
+.RI "typedef netsnmp_iterator_info struct netsnmp_iterator_info_s \fBnetsnmp_iterator_info\fP"
+.br
+.in -1c
+.SS "Functions"
+
+.in +1c
+.ti -1c
+.RI "typedef \fBvoid\fP (Netsnmp_Free_Loop_Context)(void *"
+.br
+.ti -1c
+.RI "netsnmp_mib_handler * \fBnetsnmp_get_table_iterator_handler\fP (netsnmp_iterator_info *iinfo)"
+.br
+.RI "\fIreturns a netsnmp_mib_handler object for the table_iterator helper.\fP"
+.ti -1c
+.RI "int \fBnetsnmp_register_table_iterator\fP (netsnmp_handler_registration *reginfo, netsnmp_iterator_info *iinfo)"
+.br
+.RI "\fIregisters a table after attaching it to a table_iterator helper.\fP"
+.ti -1c
+.RI "void * \fBnetsnmp_extract_iterator_context\fP (netsnmp_request_info *)"
+.br
+.RI "\fIextracts the table_iterator specific data from a request.\fP"
+.in -1c
+.SS "Variables"
+
+.in +1c
+.ti -1c
+.RI "Netsnmp_Node_Handler \fBnetsnmp_table_iterator_helper_handler\fP"
+.br
+.in -1c
+.SH "DETAILED DESCRIPTION"
+.PP 
+@addtogorup table_iterator.
+.PP
+.PP
+.PP
+Definition in file \fBtable_iterator.h\fP.
+.SH "AUTHOR"
+.PP 
+Generated automatically by Doxygen for net-snmp from the source code.
