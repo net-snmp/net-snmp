@@ -123,8 +123,8 @@ extern          "C" {
         */
        uint32_t  ipAddressCreated;      /* sysUpTime */
        uint32_t  ipAddressLastChanged;  /* sysUpTime */
-       int       ipAddressRowStatus;
-       int       ipAddressStorageType;
+       int       ipAddressRowStatus, ipAddressRowStatus_undo;
+       int       ipAddressStorageType, ipAddressStorageType_undo;
 
         /*
          * storage for future expansion
