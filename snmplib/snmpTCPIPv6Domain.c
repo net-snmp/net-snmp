@@ -18,6 +18,15 @@
 #if HAVE_SYS_SOCKET_H
 #include <sys/socket.h>
 #endif
+
+#if HAVE_WINSOCK_H
+    /*
+     * Windows IPv6 support is part of WinSock2 only
+     */
+#include <winsock2.h>
+#include <ws2tcpip.h>
+#endif
+
 #if HAVE_NETINET_IN_H
 #include <netinet/in.h>
 #endif
@@ -288,7 +297,7 @@ netsnmp_tcp6_transport(struct sockaddr_in6 *addr, int local)
          * We should set SO_REUSEADDR too.  
          */
 
-        setsockopt(t->sock, SOL_SOCKET, SO_REUSEADDR, &opt, sizeof(opt));
+        setsockopt(t->sock, SOL_SOCKET, SO_REUSEADDR, (void *)&opt, sizeof(opt));
 
         rc = bind(t->sock, (struct sockaddr *) addr,
 		  sizeof(struct sockaddr_in6));
