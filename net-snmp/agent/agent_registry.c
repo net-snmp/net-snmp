@@ -1238,9 +1238,12 @@ lookup_cache_find(const char *context, oid *name, size_t name_len,
         return NULL;
 
     for(i = 0; i < cptr->thecachecount && i < lookup_cache_size; i++) {
-        cmp = snmp_oid_compare(name, name_len,
-                               cptr->cache[i].previous->start_a,
-                               cptr->cache[i].previous->start_len);
+        if (cptr->cache[i].previous->start_a)
+            cmp = snmp_oid_compare(name, name_len,
+                                   cptr->cache[i].previous->start_a,
+                                   cptr->cache[i].previous->start_len);
+        else
+            cmp = 1;
         if (cmp >= 0) {
             *retcmp = cmp;
             ret = &(cptr->cache[i]);
@@ -1328,7 +1331,8 @@ netsnmp_subtree_find(oid *name, size_t len, netsnmp_subtree *subtree,
     netsnmp_subtree *myptr;
 
     myptr = netsnmp_subtree_find_prev(name, len, subtree, context_name);
-    if (myptr && snmp_oid_compare(name, len, myptr->end_a, myptr->end_len)<0) {
+    if (myptr && myptr->end_a &&
+        snmp_oid_compare(name, len, myptr->end_a, myptr->end_len)<0) {
         return myptr;
     }
 
