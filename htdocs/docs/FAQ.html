@@ -1,7 +1,6 @@
 <!--#set var="section" value="documentation" -->
 <!--#include virtual="/page-top.html" -->
 <!-- CONTENT START -->
-
 <p class="SectionTitle">
 FAQ
 </p>
@@ -84,6 +83,7 @@ Email: <a href="mailto:net-snmp-coders@lists.sourceforge.net">net-snmp-coders@li
 <li> <a href="#What_protocols_are_supported_">What protocols are supported?</a></li>
 <li> <a href="#How_do_I_configure_the_agent_">How do I configure the agent?</a></li>
 <li> <a href="#How_do_I_add_a_MIB_to_the_agent_">How do I add a MIB to the agent?</a></li>
+<li> <a href="#How_do_I_remove_a_MIB_from_the_agent_">How do I remove a MIB from the agent?</a></li>
 <li> <a href="#I_ve_installed_a_new_MIB_file___Why_can_t_I_query_it_">I've installed a new MIB file.  Why can't I query it?</a></li>
 <li> <a href="#What_s_the_difference_between__exec____sh__and__pass__">What's the difference between 'exec', 'sh' and 'pass'?</a></li>
 <li> <a href="#What_s_the_difference_between_AgentX__SMUX_and_proxied_SNMP_">What's the difference between AgentX, SMUX and proxied SNMP?</a></li>
@@ -92,6 +92,7 @@ Email: <a href="mailto:net-snmp-coders@lists.sourceforge.net">net-snmp-coders@li
 <li> <a href="#Can_I_use_AgentX_when_running_under_Windows_">Can I use AgentX when running under Windows?</a></li>
 <li> <a href="#Can_I_use_AgentX__or_an_embedded_SNMP_agent__in_a_threaded_application_">Can I use AgentX (or an embedded SNMP agent) in a threaded application?</a></li>
 <li> <a href="#How_can_I_run_AgentX_with_a_different_socket_address_">How can I run AgentX with a different socket address?</a></li>
+<li> <a href="#How_can_I_turn_off_SMUX_support_">How can I turn off SMUX support?</a></li>
 <li> <a href="#How_can_I_combine_two_copies_of_the__mib___tree_from_separate_subagents_">How can I combine two copies of the 'mib2' tree from separate subagents?</a></li>
 <li> <a href="#What_traps_are_sent_by_the_agent_">What traps are sent by the agent?</a></li>
 <li> <a href="#Where_are_these_traps_sent_to_">Where are these traps sent to?</a></li>
@@ -122,13 +123,17 @@ Email: <a href="mailto:net-snmp-coders@lists.sourceforge.net">net-snmp-coders@li
 <li> <a href="#How_about__Can_t_open__dev_kmem__">How about "Can't open /dev/kmem"?</a></li>
 <li> <a href="#The_agent_is_complaining_about__snmpd_conf____Where_is_this_">The agent is complaining about 'snmpd.conf'.  Where is this?</a></li>
 <li> <a href="#The_system_uptime__sysUpTime__returned_is_wrong_">The system uptime (sysUpTime) returned is wrong!</a></li>
+<li> <a href="#Can_the_agent_run_multi_threaded_">Can the agent run multi-threaded?</a></li>
 </ul><b>COMPILING</b><ul>
 <li> <a href="#How_do_I_compile_with__cc__instead_of__gcc__">How do I compile with 'cc' instead of 'gcc'?</a></li>
 <li> <a href="#But_gcc_doesn_t_compile_it_successfully_on_my_new_Solaris_system__Why_not_">But gcc doesn't compile it successfully on my new Solaris system. Why not?</a></li>
 <li> <a href="#On_RedHat_____or_up_I_get___usr_bin_ld__cannot_find__lelf___Why_">On RedHat 8.0 or up I get "/usr/bin/ld: cannot find -lelf". Why?</a></li>
+<li> <a href="#What_about___lbz___or___lselinux__errors_">What about '-lbz2' or '-lselinux' errors?</a></li>
 <li> <a href="#What_about_a_failed_dependency_on__libcrypto____Where_can_I_get_that_">What about a failed dependency on 'libcrypto'?  Where can I get that?</a></li>
 <li> <a href="#I_m_getting_an_error__autoheader__not_found____what_s_wrong_">I'm getting an error "autoheader: not found" - what's wrong?</a></li>
 <li> <a href="#How_can_I_reduce_the_memory_footprint_">How can I reduce the memory footprint?</a></li>
+<li> <a href="#How_can_I_reduce_the_installation_footprint_or_speed_up_compilation_">How can I reduce the installation footprint or speed up compilation?</a></li>
+<li> <a href="#How_can_I_compile_the_project_to_use_static_linking_">How can I compile the project to use static linking?</a></li>
 <li> <a href="#Why_is_the_project_workspace_empty_under_Visual_C___">Why is the project workspace empty under Visual C++?</a></li>
 <li> <a href="#Why_does__make_test__skip_five_tests_">Why does 'make test' skip five tests?</a></li>
 <li> <a href="#Why_does__make_test__complain_about_a_pid_file_">Why does 'make test' complain about a pid file?</a></li>
@@ -1003,9 +1008,7 @@ Variables seem to disappear when I try to set them.  Why?
 
 
 
-<a name="I_still_can_t_change_sysLocation__though_the_access_settings_allow"></a>
-I still can't change sysLocation, though the access settings allow
-it.  Why not?
+I still can't change sysLocation, though the access settings allow it.  Why not?
 -------------------------------------------------------------------------------
 
     One other possibility for the 'sysLocation' and 'sysContact' objects,
@@ -1917,6 +1920,52 @@ How do I add functionality?
  
 
 
+<a name="How_do_I_remove_a_MIB_from_the_agent_"></a>
+How do I remove a MIB from the agent?
+------------------------------------
+
+  Deleting the text file for a MIB does not affect the agent, other than
+  to prevent it from recognising textual names instead of raw OIDs in the
+  config files. There are three options to prevent the agent returning
+  information from a particular MIB:
+                                                                                
+    1) re-run configure to exclude the given MIB module, rebuild,
+       and reinstall:
+
+	./configure --with-out-mib-module=host   ....
+	make
+	make install
+
+    2) use access control to exclude the mib from the view used to
+       query the agent:
+                                                                                
+                                                                                
+	com2sec public  default public
+
+	group   public  v1      public
+	group   public  v2c     public
+
+	view    ourmib  included  system
+	view    ourmib  included  printmib
+	view    ourmib  excluded  host
+	view    ourmib  included  privatemib
+
+	access  public  "" any noauth exact ourmib none none
+                                                                                
+    3) disable the MIB at runtime
+
+       First you need to figure out which MIB modules are being
+       loaded by getting the agent to report them as they are
+       initialised:
+
+	  snmpd -Dmib_init -H
+
+       Then turn off the ones you don't want:
+
+	  snmpd -I -hr_system,hr_storage,hr_device,hr_other,....
+
+
+
 <a name="I_ve_installed_a_new_MIB_file___Why_can_t_I_query_it_"></a>
 I've installed a new MIB file.  Why can't I query it?
 ----------------------------------------------------
@@ -2149,7 +2198,10 @@ How can I run AgentX with a different socket address?
   option '-x'.  The command
 		"snmpd -x localhost:705 ...."
   would start the agent listening on the TCP port 705 for connections
-  from the local system.
+  from the local system.  Or the same effect can be obtained by adding
+  the line
+		agentxsocket localhost:705
+  to the file snmpd.conf
 
   The main Net-SNMP agent can also be run in a "subagent" mode, and
   this uses the same command-line option to specify a different
@@ -2168,8 +2220,42 @@ How can I run AgentX with a different socket address?
                            NETSNMP_DS_AGENT_X_SOCKET, "localhost:705");
   before the 'init_agent' call.
 
-  However, see the mention of AgentX security (or the lack of it!)
+  The same approach can also be used to listen on a different named
+  socket, using:
+		agentxsocket /tmp/agentx
+		agentxperms 777 777 myuser mygroup
+  or
+		snmpd -x /tmp/agentx ....
+  or
+     netsnmp_ds_set_string(NETSNMP_DS_APPLICATION_ID,
+                           NETSNMP_DS_AGENT_X_SOCKET, "/tmp/agentx");
+  as appropriate.
+  But also see the mention of AgentX security (or the lack of it!)
   in the previous entry.
+
+
+
+<a name="How_can_I_turn_off_SMUX_support_"></a>
+How can I turn off SMUX support?
+-------------------------------
+
+  Unfortunately, it's not currently possible to disable the SMUX
+  initialisation using '-I'.   If it's not possible to recompile
+  from source (having reconfigured without SMUX), the simplest way
+  to disable this functionality is to get the agent to bind to an
+  invalid IP address.
+
+  If you put a line such as
+
+	smuxsocket  1.0.0.0
+
+  in the snmpd.conf file, the agent will whinge at startup,
+  but won't accept any incoming SMUX requests.
+
+  If the agent complains about not recognising the "smuxsocket"
+  token, then you're out of luck.  You'll either have to recompile
+  from source, or use local firewall rules to block connections
+  to port 199.
 
 
 
@@ -2568,16 +2654,34 @@ I don't understand the new access control stuff - what does it mean?
 How do I configure SNMPv3 users?
 -------------------------------
 
-    Create a file /var/ucd-snmp/snmpd.conf file, containing the line
+  There are three ways to configure SNMPv3 users:
+
+  1) Stop the agent, and create a file /var/ucd-snmp/snmpd.conf,
+     containing the line
 
 	createUser {myUser} MD5 {myPassword} DES
 
-  (where {myUser} and {myPassword} are the appropriate values, _without_
-  the braces!).  Then start (or re-start) the snmpd agent.
-  This will create the new user.  See the access control entries above
-  for how to use this, and the file 'README.snmpv3' for more details.
+    (where {myUser} and {myPassword} are the appropriate values,
+    _without_ the braces!).  Then re-start the snmpd agent.
 
-    Note that simply having a 'rouser' or 'rwuser' line does *not*
+  2) Stop the agent, run the command
+
+        net-snmp-config --create-snmpv3-user
+
+     and follow the instructions.  This will create an entry
+     in the /var/ucd-snmp/snmpd.conf file similar to the above.
+     Then re-start the snmpd agent.
+
+  3) Make sure the agent is running, and will respond to a suitable
+     existing SNMPv3 user (with the same Authentication and Encryption
+     protocols as required for the new user).  Then use the 'snmpusm'
+     command to clone this template user, and change the password.
+
+
+  See the access control entries above and the file 'README.snmpv3'
+  for more details about how to use SNMPv3 users,
+
+  Note that simply having a 'rouser' or 'rwuser' line does *not*
   automatically create the corresponding user.  You will need the
   above 'createUser' line (or an equivalent 'usmUser') as well.
 
@@ -2644,21 +2748,38 @@ Why am I getting "Connection refused"?
   (though that's an understandable mistake).  This is the result of
   the TCP wrapper mechanism using the files 'hosts.allow' and 'hosts.deny'
   to control access to the service.  Some distributions may come with
-  this enabled automatically - otherwise you need to select it explicitly
-  by configuring using '--with-libwrap'.
+  this enabled automatically - otherwise you need to explicitly activate
+  this by configuring using '--with-libwrap'.
 
-    The simplest way to avoid this problem is to add the line
+  If TCP wrappers are enabled, and both hosts.allow and hosts.deny are
+  empty, then all requests will be rejected (with "Connection refused").
+  The simplest way to avoid this problem and allow incoming requests is
+  to add the line
 
 		snmpd: ALL
 
-  in the file /etc/hosts.allow (or wherever this file is on your system).
+  to the file /etc/hosts.allow (or wherever this file is on your system).
   Though be aware that doing this removes one level of protection and allows
   anyone to try and query your agent (though the agent's own access control
   mechanisms can still be used to restrict what - if anything - they can see).
 
-  Note that personal firewalls (such as Linux' ipchains or iptables mechanism)
-  may have a similar effect (though typically this won't be logged).
-  See the earlier entry
+  If you do wish to use the TCP wrappers to restrict access, it's sensible
+  to have an explicit entry:
+
+		snmpd: ALL
+
+  in the file /etc/hosts.deny, which makes it crystal clear that access
+  to the SNMP agent has been denied.  This mechanism can also be used to
+  restrict access to specific management hosts, using a hosts.deny entry
+  such as:
+
+		snmpd: ALL EXCEPT 127.
+
+  which will allow connections from localhost, and nothing else.
+
+  Note that personal firewalls (such as Linux' ipchains or iptables
+  mechanism) may have a similar effect (though typically this won't
+  be logged).  See the earlier entry
     Requests always seem to timeout, and don't give me anything back.  Why?
 
 
@@ -2930,6 +3051,49 @@ The system uptime (sysUpTime) returned is wrong!
 
 
 
+<a name="Can_the_agent_run_multi_threaded_"></a>
+Can the agent run multi-threaded?
+--------------------------------
+
+  Short answer - no.
+  Longer answer - not easily.
+
+  Net-SNMP within a single thread of an threaded application is fine,
+  as long as *all* snmp code is kept within the same thread. This lets
+  you add SNMP support to an existing threaded application.
+
+  If you are concerned with the time taken for to process requests for
+  a particular agent, object or subtree, and you want the agent to
+  continue to respond to other requests in the meantime, there are
+  two options.
+
+  The first method is using AgentX sub-agents. If you have several
+  tables, each implemented by a separate subagent, then a single
+  request for entries from each of the tables will be processed
+  in parallel (and the agent will continue to respond to other
+  requests while it waits for the subagents to return the necessary
+  information).  But a request for several objects from the same
+  table will be passed off to the relevant subagent, where it will
+  (normally) be processed serially.
+
+  The second method is to use delegated requests + IPC to another
+  process.  If takes a long time to retrieve a value for a given object,
+  then the object handler could do whatever necessary to start or
+  communicate with another (non-SNMP) process/thread to actually
+  retrieve the value, and mark the request as delegated.
+    The main agent (or subagent) can then receive and process other
+  requests while waiting for the delegated request to finish.
+  Dealing with resource contention is all up to you.
+
+  All of this only applies to the GET family of requests.  A SET
+  request will block until all pending GET requests have finished,
+  and then will not accept new requests until the SET is complete.
+
+  Adding full multi-thread support directly to the agent would be
+  nice.  We just need someone with time/money to do/sponsor the work.
+
+
+
 <a name="COMPILING"></a>
 COMPILING
 =========
@@ -2972,16 +3136,32 @@ But gcc doesn't compile it successfully on my new Solaris system. Why not?
 On RedHat 8.0 or up I get "/usr/bin/ld: cannot find -lelf"?
 ----------------------------------------------------------
 
-  A typical installation of RedHat 8.0 and up doesn't always include the
-  full set of 'libelf' library links.  In order to build Net-SNMP you may
-  need to install the 'elfutils-devel' RPM.
+  A typical installation of RedHat 8.0 and up doesn't always include
+  the full set of 'libelf' library links.  In order to build Net-SNMP
+  you may need to install the 'elfutils-devel' RPM.
 
-  A quick fix is to add the missing symbolic link, using:
+  A alternative quick fix is to add the missing symbolic link, using:
 
     ln -s libelf.so.1 /usr/lib/libelf.so
 
+  (or whatever the correct library is on your system).
   This is typically only needed when you've configured the agent to
   include the Host Resources MIB support ('--with-mib-modules=host').
+
+
+
+<a name="What_about___lbz___or___lselinux__errors_"></a>
+What about '-lbz2' or '-lselinux' errors?
+----------------------------------------
+
+  This is the same basic problem - the relevant development RPMs
+  have not been installed.  You should either install them
+  (bzip2-devel and libselinux-devel respectively), or create
+  any missing symbolic links by hand:
+
+    (cd /usr/lib ; ls -s libbz2* libselinux*)
+    ln -s libbz2.so.1     /usr/lib/libbz2.so
+    ln -s libselinux.so.1 /usr/lib/libselinux.so
 
 
 
@@ -3061,6 +3241,67 @@ How can I reduce the memory footprint?
 
   Once the agent (snmpd) has been linked, you might also try running
   'strip snmpd' to remove un-necessary debug/symbol information.
+
+
+
+<a name="How_can_I_reduce_the_installation_footprint_or_speed_up_compilation_"></a>
+How can I reduce the installation footprint or speed up compilation?
+-------------------------------------------------------------------
+
+  If you are using net-snmp v5.1 or above, then the following
+  configure options may be useful to you:
+                                                                                
+  --disable-agent                 Do not build the agent (snmpd).
+  --disable-applications          Do not build the apps (snmpget, ...).
+  --disable-manuals               Do not install the manuals.
+  --disable-scripts               Do not install the scripts (mib2c, ...).
+  --disable-mibs                  Do not install the mib files.
+  --disable-mib-loading            Do not include code that parses and
+                                   manipulates the mib files.
+
+
+
+<a name="How_can_I_compile_the_project_to_use_static_linking_"></a>
+How can I compile the project to use static linking?
+---------------------------------------------------
+
+  For totally static net-snmp executables, use
+	configure --with-ldflags=-Bstatic
+
+  To compile your application with static libraries (eg for easier
+  debugging), and to link to a non-installed build directory, try the
+  following Makefile fragment:
+                                                                                
+     NETSNMPDIR=/usr/local/build/snmp/full-clean-cvs-V5-1-patches
+     NETSNMPCONFIG=$(NETSNMPDIR)/net-snmp-config
+
+     NETSNMPBASECFLAGS := $(shell $(NETSNMPCONFIG) --base-cflags)
+     NETSNMPINCLUDES := $(shell $(NETSNMPCONFIG) --build-includes $(NETSNMPDIR))
+     # base flags after build/src include, in case it has /usr/local/include
+     NETSNMPCFLAGS=$(NETSNMPINCLUDES) $(NETSNMPBASECFLAGS)
+
+     NETSNMPBASELIBS := $(shell $(NETSNMPCONFIG) --base-agent-libs)
+     NETSNMPEXTLIBS := $(shell $(NETSNMPCONFIG) --external-agent-libs)
+     NETSNMPLIBDIRS := $(shell $(NETSNMPCONFIG) --build-lib-dirs $(NETSNMPDIR))
+     NETSNMPLIBDEPS := $(shell $(NETSNMPCONFIG) --build-lib-deps $(NETSNMPDIR))
+     LIB_DEPS=$(NETSNMPLIBDEPS)
+     LIBS=$(NETSNMPLIBDIRS) -Wl,-Bstatic $(NETSNMPBASELIBS) -Wl,-Bdynamic $(NETSNMPEXTLIBS)
+
+     STRICT_FLAGS = -Wall -Wstrict-prototypes
+     CFLAGS=-I. $(NETSNMPCFLAGS) $(STRICT_FLAGS)
+                                                                                
+  This replaces the standard Makefile section, which will used installed
+  libraries:
+                                                                                
+     NETSNMPCONFIG=net-snmp-config
+                                                                                
+     # uncomment this if you have GNU make
+     #NETSNMPCFLAGS := $(shell $(NETSNMPCONFIG) --base-cflags)
+     #NETSNMPLIBS := $(shell $(NETSNMPCONFIG) --agent-libs)
+     NETSNMPCFLAGS=`$(NETSNMPCONFIG) --base-cflags`
+     NETSNMPLIBS=`$(NETSNMPCONFIG) --agent-libs`
+
+     LIBS=$(NETSNMPLIBS)
 
 
 
@@ -3800,7 +4041,6 @@ What is the Official Slogan of the net-snmp-coders list?
 
 
 </pre>
-
-<br />
 <!-- CONTENT END -->
 <!--#include virtual="/page-bottom.html" -->
+

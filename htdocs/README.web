@@ -53,6 +53,8 @@ Updating Documentation / INSTALL
 Updating Documentation / Man pages
 ----------------------------------
 
+ -cd (source dir)
+ -make sedscript
  -cd (source dir)/man
  -make html
  -find . -name '*.html' | ../local/add-header-footer.pl --section=documentation --body --tidy
@@ -66,6 +68,8 @@ Updating Documentation / MIBS
  -make htmldir
  -find html/. -name '*.html' | ../local/add-header-footer.pl --section=documentation --body
  -cp html/*.html to web site /docs/mibs
+ -cp *.txt to web site /docs/mibs
+ -cp *.inc to web site /docs/mibs
 
 
 Updating Development / API
@@ -74,5 +78,5 @@ Updating Development / API
  -cd (source dir)
  -make docs
  -find docs/html/. -name '*.html' | local/add-header-footer.pl --section=development --body --tidy
-
+ -cp docs/html/*.html to web site /dev/agent
 

@@ -1,8 +1,8 @@
 <!--#set var="section" value="documentation" -->
 <!--#include virtual="/page-top.html" -->
 <!-- CONTENT START -->
-    <h1>group__row__merge</h1>Section: net-snmp (3)<br />
-    Updated: 28 Oct 2004<br />
+    <h1>row_merge: Calls sub handlers with request for one row at a time.</h1>Section: C Library Functions (3)<br />
+    Updated: 24 Nov 2004<br />
     <a href="#index">Index</a> <a href="../index.html">Return to Main Contents</a>
     <hr />
     <a name="lbAB" id="lbAB"> </a>
@@ -40,10 +40,8 @@
     <h2>Detailed Description</h2>
 
     <p>This helper splits a whole bunch of requests into chunks based on the row index that they refer to, and passes all
-    requests for a given row to the lower handlers.</p>
-
-    <p>This is useful for handlers that don't want to process multiple rows at the same time, but are happy to iterate through
-    the request list for a single row. <a name="lbAF" id="lbAF"> </a></p>
+    requests for a given row to the lower handlers. This is useful for handlers that don't want to process multiple rows at the
+    same time, but are happy to iterate through the request list for a single row. <a name="lbAF" id="lbAF"> </a></p>
 
     <h2>Function Documentation</h2>
 
@@ -51,9 +49,8 @@
 
     <h3><b>netsnmp_mib_handler</b>* netsnmp_get_row_merge_handler (int prefix_len)</h3>
 
-    <p>returns a row_merge handler that can be injected into a given handler chain.</p>
-
-    <p>Definition at line 31 of file row_merge.c.</p>
+    <p>returns a row_merge handler that can be injected into a given handler chain. Definition at line 31 of file
+    row_merge.c.</p>
 
     <p>References netsnmp_mib_handler_s::myvoid, netsnmp_create_handler(), and netsnmp_mib_handler.</p>
 
@@ -62,18 +59,14 @@
     <h3>void netsnmp_init_row_merge (void)</h3>
 
     <p>initializes the row_merge helper which then registers a row_merge handler as a run-time injectable handler for
-    configuration file use.</p>
-
-    <p>Definition at line 200 of file row_merge.c.</p>
+    configuration file use. Definition at line 200 of file row_merge.c.</p>
 
     <p>References netsnmp_get_row_merge_handler(), and netsnmp_register_handler_by_name(). <a name="lbAI" id="lbAI"> </a></p>
 
     <h3>int netsnmp_register_row_merge (<b>netsnmp_handler_registration</b> * reginfo)</h3>
 
     <p>functionally the same as calling <b>netsnmp_register_handler()</b> but also injects a row_merge handler at the same time
-    for you.</p>
-
-    <p>Definition at line 45 of file row_merge.c.</p>
+    for you. Definition at line 45 of file row_merge.c.</p>
 
     <p>References netsnmp_get_row_merge_handler(), netsnmp_handler_registration, netsnmp_inject_handler(),
     netsnmp_register_handler(), and netsnmp_handler_registration_s::rootoid_len. <a name="lbAJ" id="lbAJ"> </a></p>
@@ -81,9 +74,7 @@
     <h3>int netsnmp_row_merge_helper_handler (<b>netsnmp_mib_handler</b> * handler, <b>netsnmp_handler_registration</b> *
     reginfo, <b>netsnmp_agent_request_info</b> * reqinfo, <b>netsnmp_request_info</b> * requests)</h3>
 
-    <p>Implements the row_merge handler.</p>
-
-    <p>Definition at line 58 of file row_merge.c.</p>
+    <p>Implements the row_merge handler. Definition at line 58 of file row_merge.c.</p>
 
     <p>References netsnmp_mib_handler_s::myvoid, variable_list::name, variable_list::name_length, netsnmp_call_next_handler(),
     netsnmp_handler_registration, netsnmp_mib_handler, netsnmp_request_info_s::next, netsnmp_request_info_s::processed,
@@ -125,7 +116,7 @@
     </dl>
     <hr />
     This document was created by <a href="http://localhost/cgi-bin/man/man2html">man2html</a>, using the manual pages.<br />
-    Time: 01:51:44 GMT, October 29, 2004
+    Time: 22:24:02 GMT, November 25, 2004
 <!-- CONTENT END -->
 <!--#include virtual="/page-bottom.html" -->
 

@@ -12,7 +12,16 @@ the ChangeLog file for a more detailed listing of changes/bug fixes.
           (This requires you have OpenSSL to support SHA1 and AES instead)
       - Diffie-Helman key negotianion (perfect-forward-secrecy - RFC2786)
           has been implemented in both the agent and "snmpusm".
+      - better support for direct use of localized and master keys
+        (randomly generated keys have more entropy than passwords) See
+        the -3m -3M -3k and -3K options, and the defAuthLocalizedKey,
+        defPrivLocalizedKey, defAuthMasterKey, defPrivMasterKey
+        snmp.conf tokens)
+
+    library:
       - send and receive buffer sizes for UDP/TCP are configurable
+      - .conf file token registration can now search multiple files
+        (separate file names to search by a :.  IE, "snmpd:agentx")
 
     snmptrapd:
       - Embedded perl support for trap handlers (much faster than traphandles).
@@ -27,7 +36,25 @@ the ChangeLog file for a more detailed listing of changes/bug fixes.
       - improved version of "exec" extension directive - "extend":
           supports multi-line output, configurable command input, SET
           handling, a valid relocatable MIB output structure, etc
+      - more flexibility added to netsnmp_cache helper, including periodic
+          refreshing of caches and cache pre-loading.
       - experimental implementation of DisMan Remote Operations MIB groups
+        (remote nslookup, ping, traceroute and expressions via SNMP)
+      - The proxy supports a new -Cc flag which passes the community
+        name through to the other side rather than hard-coding it.
+      - The config_require() and other modules can now be placed
+        inside of CPP directievs (#if, /* ... */) as header files are
+        now passed through CPP processing first.
+      - new config_exclude() macro for excluding certain modules
+      - new config_belongs_in() macro to specify if a chunk of code
+        found by --with-mib-modules belongs in the agent library or
+        the mib module library.
+      - Uses a smaller function stack.
+
+    commands:
+      - snmpusm: A number of key-change improvements
+        (EG, changing localized keys supported, diffie-helman support, ...)
+      - New -Ln option to completely disable logging.
 
     mib2c:
       - a number of new or updated configuration templates:
@@ -36,17 +63,61 @@ the ChangeLog file for a more detailed listing of changes/bug fixes.
         - mib2c.table_data.conf and mib2c.container.conf:
             two new "internal-row" style configs
         - mib2c.mfd.conf: "MIBs for Dummies" (or MFD) - intended to
-            reduce the SNMP knowledge needed to develop MIB modules.
+            reduce the SNMP knowledge needed to develop MIB modules
+            and add flexibility at the same time.  Run "mib2c -S
+            mfd_interactive_setup=1 -c mib2c.mfd.conf OID" and follow
+            its guided instructions to help you tailor its results to
+            meet your needs.
+        - mib2c.genhtml.conf: Generates an easier-to-read HTML view of
+          a MIB tree structure.  (See http://www.Net-SNMP.org/mibs/
+          for example output.)
+      - more node tags available for conf file writers
+      - additional search directories may be set via MIB2C_DIRS env var.
+      - mib2c-update: new utility to help update mib2c generated code
+          when conf file changes.
+      - a mib2c.conf manual page to describe how to write mib2c .conf files.
+      - support for embedded perl code in mib2c.conf files
 
+    documentation:
+      - New README.agent-mibs: an attempt to start documenting what
+          MIBs are implemented in the agent and on what architectures.
+
+    perl:
+      - An improved SNMP::gettable() method.  Uses GETBULK if possible and
+        better GETNEXT requests if not, decodes indexes from OIDs,
+        requests multiple variables at once, ...  ("perldoc SNMP" for details)
+      - A NetSNMP::OID::get_indexes() function to extract index values
+        from an OID.
 
  Ports:
-   - new experimental tables/rewrites for Linux, including:
-       ifTable, ifXTable, inetCidrRouteTable, ipCidrRouteTable,
-       ipAddressTable, ipSystemStatsTable, usmDHParameters,
-       usmDHUserKeyTable, ipNetToPhysicalTable
+   Linux:
+     - new experimental tables/rewrites for Linux, including:
+           ifTable, ifXTable, inetCidrRouteTable, ipCidrRouteTable,
+           ipAddressTable, ipSystemStatsTable, ipNetToPhysicalTable.
+       - Enable these talbles by specifying --enable-mfd-rewrites to configure.
+       - Most of these tables have IPv6 support as well.
+     - ifIndex no longer changes when interfaces are added/removed, and all
+         tables/object wiil now use the same ifIndex for the same interface.
+
+   Solaris:
+     - new experimental support for ucd-snmp/lmSensors MIB module
+
+   Win32:
+     - Support for the MinGW compiler
+     - Support for snmptrapd running as a service
+     - A Win32 specific build and install script
+     - Support for a .exe installer
+       (we'll make binaries available using it)
 
  Fixes:
    - AgentX memory leak on sets
+   - SNMPv3 not-in-time window after 248 days
+   - Agent hang in HOST-RESOURCES MIB
+   - double free on duplicate registration
+   - OIDs with IP Addresses as indexes now print prettier
+   -'Lazy' installation of headers (only install if newer)
+   - allow whitespace in rocommunity/rwcommunity
+   - many miscellaneous bug reports
 
 
 *5.1.2*

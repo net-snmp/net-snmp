@@ -1,8 +1,8 @@
 <!--#set var="section" value="documentation" -->
 <!--#include virtual="/page-top.html" -->
 <!-- CONTENT START -->
-    <h1>group__instance</h1>Section: net-snmp (3)<br />
-    Updated: 28 Oct 2004<br />
+    <h1>instance: process individual MIB instances easily.</h1>Section: C Library Functions (3)<br />
+    Updated: 24 Nov 2004<br />
     <a href="#index">Index</a> <a href="../index.html">Return to Main Contents</a>
     <hr />
     <a name="lbAB" id="lbAB"> </a>
@@ -88,9 +88,7 @@
     <h3><b>netsnmp_mib_handler</b>* netsnmp_get_instance_handler (void)</h3>
 
     <p>Creates an instance helper handler, calls netsnmp_create_handler, which then could be registered, using
-    <b>netsnmp_register_handler()</b>.</p>
-
-    <p><b>Parameters:</b></p>
+    <b>netsnmp_register_handler()</b>. <b>Parameters:</b></p>
 
     <dl compact="compact">
       <dd>
@@ -114,11 +112,10 @@
     <h3>int netsnmp_register_instance (<b>netsnmp_handler_registration</b> * reginfo)</h3>
 
     <p>This function registers an instance helper handler, which is a way of registering an exact OID such that GENEXT requests
-    are handled entirely by the helper.</p>
-
-    <p>First need to inject it into the calling chain of the handler defined by the netsnmp_handler_registration struct, reginfo.
-    The new handler is injected at the top of the list and will be the new handler to be called first. This function also injects
-    a serialize handler before actually calling netsnmp_register_handle, registering reginfo.</p>
+    are handled entirely by the helper. First need to inject it into the calling chain of the handler defined by the
+    netsnmp_handler_registration struct, reginfo. The new handler is injected at the top of the list and will be the new handler
+    to be called first. This function also injects a serialize handler before actually calling netsnmp_register_handle,
+    registering reginfo.</p>
 
     <p><b>Parameters:</b></p>
 
@@ -146,9 +143,7 @@
     <h3>int netsnmp_register_int_instance (const char * name, oid * reg_oid, size_t reg_oid_len, int * it, Netsnmp_Node_Handler *
     subhandler)</h3>
 
-    <p>This function registers an int helper handler to a specified OID.</p>
-
-    <p><b>Parameters:</b></p>
+    <p>This function registers an int helper handler to a specified OID. <b>Parameters:</b></p>
 
     <dl compact="compact">
       <dd><i>name</i> the name used for registration pruposes.<br />
@@ -173,11 +168,10 @@
 
     <h3>int netsnmp_register_read_only_instance (<b>netsnmp_handler_registration</b> * reginfo)</h3>
 
-    <p>This function injects a 'read only' handler into the handler chain prior to serializing/registering the handler.</p>
-
-    <p>The only purpose of this 'read only' handler is to return an appropriate error for any requests passed to it in a SET
-    mode. Inserting it into your handler chain will ensure you're never asked to perform a SET request so you can ignore those
-    error conditions.</p>
+    <p>This function injects a 'read only' handler into the handler chain prior to serializing/registering the handler. The only
+    purpose of this 'read only' handler is to return an appropriate error for any requests passed to it in a SET mode. Inserting
+    it into your handler chain will ensure you're never asked to perform a SET request so you can ignore those error
+    conditions.</p>
 
     <p><b>Parameters:</b></p>
 
@@ -228,7 +222,7 @@
     </dl>
     <hr />
     This document was created by <a href="http://localhost/cgi-bin/man/man2html">man2html</a>, using the manual pages.<br />
-    Time: 01:51:43 GMT, October 29, 2004
+    Time: 22:24:01 GMT, November 25, 2004
 <!-- CONTENT END -->
 <!--#include virtual="/page-bottom.html" -->
 

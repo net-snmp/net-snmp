@@ -1,8 +1,8 @@
 <!--#set var="section" value="documentation" -->
 <!--#include virtual="/page-top.html" -->
 <!-- CONTENT START -->
-    <h1>group__baby__steps</h1>Section: net-snmp (3)<br />
-    Updated: 28 Oct 2004<br />
+    <h1>baby_steps: calls your handler in baby_steps for set processing.</h1>Section: C Library Functions (3)<br />
+    Updated: 24 Nov 2004<br />
     <a href="#index">Index</a> <a href="../index.html">Return to Main Contents</a>
     <hr />
     <a name="lbAB" id="lbAB"> </a>
@@ -28,18 +28,16 @@
 
     <h3><b>netsnmp_mib_handler</b>* netsnmp_baby_steps_access_multiplexer_get (netsnmp_baby_steps_access_methods * am)</h3>
 
-    <p>returns a baby_steps handler that can be injected into a given handler chain.</p>
-
-    <p>Definition at line 338 of file baby_steps.c.</p>
+    <p>returns a baby_steps handler that can be injected into a given handler chain. Definition at line 338 of file
+    baby_steps.c.</p>
 
     <p>References netsnmp_mib_handler_s::flags, netsnmp_mib_handler_s::myvoid, netsnmp_create_handler(), and netsnmp_mib_handler.
     <a name="lbAF" id="lbAF"> </a></p>
 
     <h3><b>netsnmp_mib_handler</b>* netsnmp_baby_steps_handler_get (u_long modes)</h3>
 
-    <p>returns a baby_steps handler that can be injected into a given handler chain.</p>
-
-    <p>Definition at line 61 of file baby_steps.c.</p>
+    <p>returns a baby_steps handler that can be injected into a given handler chain. Definition at line 61 of file
+    baby_steps.c.</p>
 
     <p>References netsnmp_mib_handler_s::myvoid, netsnmp_create_handler(), netsnmp_handler_free(), netsnmp_mib_handler,
     snmp_log(), and SNMP_MALLOC_TYPEDEF.</p>
@@ -49,9 +47,7 @@
     <h3>void netsnmp_baby_steps_handler_init (void)</h3>
 
     <p>initializes the baby_steps helper which then registers a baby_steps handler as a run-time injectable handler for
-    configuration file use.</p>
-
-    <p>Definition at line 321 of file baby_steps.c.</p>
+    configuration file use. Definition at line 321 of file baby_steps.c.</p>
 
     <p>References netsnmp_baby_steps_handler_get(), and netsnmp_register_handler_by_name().</p>
     <hr />
@@ -83,7 +79,7 @@
     </dl>
     <hr />
     This document was created by <a href="http://localhost/cgi-bin/man/man2html">man2html</a>, using the manual pages.<br />
-    Time: 01:51:44 GMT, October 29, 2004
+    Time: 22:24:02 GMT, November 25, 2004
 <!-- CONTENT END -->
 <!--#include virtual="/page-bottom.html" -->
 

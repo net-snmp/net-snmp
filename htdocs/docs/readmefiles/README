@@ -1,4 +1,4 @@
-	       README file for net-snmp Version: 5.2.rc1
+	       README file for net-snmp Version: 5.2
 
 DISCLAIMER
 
@@ -38,6 +38,13 @@ INTRODUCTION
   was renamed from cmu-snmp to ucd-snmp in 1995 and later renamed from
   ucd-snmp to net-snmp in November 2000.
 
+  This README file serves as a starting place to learn about the
+  package, but very little of the documentation is contained within
+  this file.  The FAQ is an excellent place to start as well.
+  Additionally, there are a bunch of README files for specific
+  architectures and specific features.  You might wish to look at some
+  of these other files as well.
+
 SUPPORTED ARCHITECTURES
 
   Please see the FAQ for this information.
@@ -46,6 +53,10 @@ SUPPORTED ARCHITECTURES
   works for you so we can add them to the above list.
 
   Porting:  Please! read the PORTING file.
+
+  Also note that many architecture have architecture specific README
+  files, so you should check to see if there is one appropriate to
+  your platform.
 
 AVAILABILITY
 

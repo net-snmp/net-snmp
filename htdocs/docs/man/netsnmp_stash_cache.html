@@ -1,8 +1,8 @@
 <!--#set var="section" value="documentation" -->
 <!--#include virtual="/page-top.html" -->
 <!-- CONTENT START -->
-    <h1>group__stash__cache</h1>Section: net-snmp (3)<br />
-    Updated: 28 Oct 2004<br />
+    <h1>stash_cache: automatically caches data for certain handlers.</h1>Section: C Library Functions (3)<br />
+    Updated: 24 Nov 2004<br />
     <a href="#index">Index</a> <a href="../index.html">Return to Main Contents</a>
     <hr />
     <a name="lbAB" id="lbAB"> </a>
@@ -34,10 +34,8 @@
     <h2>Detailed Description</h2>
 
     <p>This handler caches data in an optimized way which may aleviate the need for the lower level handlers to perform as much
-    optimization.</p>
-
-    <p>Specifically, somewhere in the lower level handlers must be a handler that supports the MODE_GET_STASH operation. Note
-    that the table_iterator helper supports this. <a name="lbAE" id="lbAE"> </a></p>
+    optimization. Specifically, somewhere in the lower level handlers must be a handler that supports the MODE_GET_STASH
+    operation. Note that the table_iterator helper supports this. <a name="lbAE" id="lbAE"> </a></p>
 
     <h2>Function Documentation</h2>
 
@@ -45,17 +43,14 @@
 
     <h3>netsnmp_oid_stash_node** netsnmp_extract_stash_cache (<b>netsnmp_agent_request_info</b> * reqinfo)</h3>
 
-    <p>extracts a pointer to the stash_cache info from the reqinfo structure.</p>
-
-    <p>Definition at line 64 of file stash_cache.c.</p>
+    <p>extracts a pointer to the stash_cache info from the reqinfo structure. Definition at line 64 of file stash_cache.c.</p>
 
     <p>Referenced by netsnmp_table_iterator_helper_handler(). <a name="lbAG" id="lbAG"> </a></p>
 
     <h3><b>netsnmp_mib_handler</b>* netsnmp_get_stash_cache_handler (void)</h3>
 
-    <p>returns a stash_cache handler that can be injected into a given handler chain.</p>
-
-    <p>Definition at line 42 of file stash_cache.c.</p>
+    <p>returns a stash_cache handler that can be injected into a given handler chain. Definition at line 42 of file
+    stash_cache.c.</p>
 
     <p>References netsnmp_mib_handler_s::myvoid, netsnmp_create_handler(), and netsnmp_mib_handler.</p>
 
@@ -64,9 +59,7 @@
     <h3>void netsnmp_init_stash_cache_helper (void)</h3>
 
     <p>initializes the stash_cache helper which then registers a stash_cache handler as a run-time injectable handler for
-    configuration file use.</p>
-
-    <p>Definition at line 188 of file stash_cache.c.</p>
+    configuration file use. Definition at line 188 of file stash_cache.c.</p>
 
     <p>References netsnmp_get_stash_cache_handler(), and netsnmp_register_handler_by_name().</p>
 
@@ -75,9 +68,7 @@
     <h3>int netsnmp_stash_cache_update (<b>netsnmp_mib_handler</b> * handler, <b>netsnmp_handler_registration</b> * reginfo,
     <b>netsnmp_agent_request_info</b> * reqinfo, <b>netsnmp_request_info</b> * requests, netsnmp_stash_cache_info * cinfo)</h3>
 
-    <p>updates a given cache depending on whether it needs to or not.</p>
-
-    <p>Definition at line 143 of file stash_cache.c.</p>
+    <p>updates a given cache depending on whether it needs to or not. Definition at line 143 of file stash_cache.c.</p>
 
     <p>References atime_newMarker(), atime_ready(), atime_setMarker(), netsnmp_agent_request_info_s::mode,
     netsnmp_call_next_handler(), netsnmp_create_data_list(), netsnmp_handler_registration, netsnmp_mib_handler, and
@@ -117,7 +108,7 @@
     </dl>
     <hr />
     This document was created by <a href="http://localhost/cgi-bin/man/man2html">man2html</a>, using the manual pages.<br />
-    Time: 01:51:44 GMT, October 29, 2004
+    Time: 22:24:02 GMT, November 25, 2004
 <!-- CONTENT END -->
 <!--#include virtual="/page-bottom.html" -->
 

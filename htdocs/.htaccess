@@ -3,10 +3,4 @@ AddType text/html .shtml
 AddHandler server-parsed .shtml
 XBitHack on
 ErrorDocument 404 /error404.html
-<Files *.epl>
-    SetHandler  perl-script
-    PerlHandler Embperl
-    Options     ExecCGI
-</files>
-
 

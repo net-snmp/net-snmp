@@ -7,13 +7,13 @@
     <hr />
     <a name="lbAB" id="lbAB"> </a>
 
-    <h2>NAME</h2>mib2c -- produces template code from mib definitions <a name="lbAC" id="lbAC"> </a>
+    <h2>NAME</h2>mib2c -- generate template code for extending the agent <a name="lbAC" id="lbAC"> </a>
 
     <h2>SYNOPSIS</h2><b>mib2c</b> [-h] -c CONFIGFILE [-I PATH] [-f OUTNAME] [-i][q][-S VAR=VAL] MIBNODE <a name="lbAD" id="lbAD">
     </a>
 
     <h2>DESCRIPTION</h2>The mib2c tool is designed to take a portion of the MIB tree (as defined by a MIB file) and generate the
-    template C code necessary to implement the corresponding MIB module.
+    template C code necessary to implement the relevant management objects within it.
 
     <p>In order to implement a new MIB module, three files are necessary:</p>
 
@@ -25,8 +25,8 @@
     <p>The mib2c tool uses the MIB definition file to produce the two C code files. Thus, mib2c generates a template that you can
     edit to add logic necessary to obtain information from the operating system or application to complete the module.</p>
 
-    <p>MIBNODE is the top level mib node you want to generate code for. You must give mib2c a mib node (e.g., ifTable), not a mib
-    file on the command line. (this is the most common mistake).</p>
+    <p>MIBNODE is the top level mib node you want to generate code for. You must give mib2c a mib node (e.g. ifTable) on the
+    command line, not a mib file. This is the single most common mistake.</p>
 
     <p>The mib2c tool accepts both SMIv1 and SMIv2 MIBs.</p>
 
@@ -219,7 +219,7 @@
     </dl>
     <hr />
     This document was created by <a href="http://localhost/cgi-bin/man/man2html">man2html</a>, using the manual pages.<br />
-    Time: 01:51:43 GMT, October 29, 2004
+    Time: 22:24:00 GMT, November 25, 2004
 <!-- CONTENT END -->
 <!--#include virtual="/page-bottom.html" -->
 

@@ -1,8 +1,8 @@
 <!--#set var="section" value="documentation" -->
 <!--#include virtual="/page-top.html" -->
 <!-- CONTENT START -->
-    <h1>group__library</h1>Section: net-snmp (3)<br />
-    Updated: 28 Oct 2004<br />
+    <h1>The Net-SNMP library</h1>Section: C Library Functions (3)<br />
+    Updated: 24 Nov 2004<br />
     <a href="#index">Index</a> <a href="../index.html">Return to Main Contents</a>
     <hr />
     <a name="lbAB" id="lbAB"> </a>
@@ -12,34 +12,34 @@
     <h3>Modules</h3>
 
     <p><br />
-    group <b>asn1 parsing and datatype manipulation routines.</b><br />
+    group<b>asn1 parsing and datatype manipulation routines.</b><br />
     <br />
-    group <b>A generic callback mechanism</b><br />
+    group<b>A generic callback mechanism</b><br />
     <br />
-    group <b>generic linked-list data handling with a string as a key.</b><br />
+    group<b>generic linked-list data handling with a string as a key.</b><br />
     <br />
-    group <b>storage space for defaults</b><br />
+    group<b>storage space for defaults</b><br />
     <i>The purpose of the default storage is three-fold:.</i></p>
 
     <p><br />
-    group <b>mib parsing and datatype manipulation routines.</b><br />
+    group<b>mib parsing and datatype manipulation routines.</b><br />
     <br />
-    group <b>Store and retrieve data referenced by an OID.</b><br />
+    group<b>Store and retrieve data referenced by an OID.</b><br />
     <i>This is essentially a way of storing data associated with a given OID.</i></p>
 
     <p><br />
-    group <b>parsing various configuration files at run time</b><br />
+    group<b>parsing various configuration files at run time</b><br />
     <i>The read_config related functions are a fairly extensible system of parsing various configuration files at the run
     time.</i></p>
 
     <p><br />
-    group <b>generic library based alarm timers for various parts of an application</b><br />
+    group<b>generic library based alarm timers for various parts of an application</b><br />
     <br />
-    group <b>various PDU processing routines</b><br />
+    group<b>various PDU processing routines</b><br />
     <br />
-    group <b>generic logging for net-snmp</b><br />
+    group<b>generic logging for net-snmp</b><br />
     <br />
-    group <b>Memory Utility Routines</b><br />
+    group<b>Memory Utility Routines</b><br />
     <a name="lbAD" id="lbAD"> </a></p>
 
     <h3>Data Structures</h3>
@@ -71,7 +71,7 @@
     <br />
     #define <b>BSD4_2</b><br />
     <br />
-    #define <b>NFDBITS</b> (sizeof(fd_mask) * NBBY)<br />
+    #define <b>NFDBITS</b> (sizeof(fd_mask) * NBBY) /* bits per mask */<br />
     <br />
     #define <b>FD_SET</b>(n, p) ((p)-&gt;fds_bits[(n)/NFDBITS] |= (1 &lt;&lt; ((n) % NFDBITS)))<br />
     <br />
@@ -304,6 +304,14 @@
     session_list * <b>Sessions</b> = NULL<br />
     <br />
     int <b>snmp_errno</b> = 0<br />
+    <br />
+    long <b>long_return</b><br />
+    <br />
+    u_char <b>return_buf</b> []<br />
+    <br />
+    oid <b>nullOid</b> []<br />
+    <br />
+    int <b>nullOidLen</b><br />
     <a name="lbAI" id="lbAI"> </a></p>
 
     <h2>Define Documentation</h2>
@@ -312,19 +320,22 @@
 
     <h3>#define DEBUGPRINTPDUTYPE(token, type)</h3>
 
-    <p><b>Value:</b></p>
-    <pre>
-switch(type) {       case SNMP_MSG_GET:         DEBUGDUMPSECTION(token, 'PDU-GET');         break;       case SNMP_MSG_GETNEXT:         DEBUGDUMPSECTION(token, 'PDU-GETNEXT');         break;       case SNMP_MSG_RESPONSE:         DEBUGDUMPSECTION(token, 'PDU-RESPONSE');         break;       case SNMP_MSG_SET:         DEBUGDUMPSECTION(token, 'PDU-SET');         break;       case SNMP_MSG_GETBULK:         DEBUGDUMPSECTION(token, 'PDU-GETBULK');         break;       case SNMP_MSG_INFORM:         DEBUGDUMPSECTION(token, 'PDU-INFORM');         break;       case SNMP_MSG_TRAP2:         DEBUGDUMPSECTION(token, 'PDU-TRAP2');         break;       case SNMP_MSG_REPORT:         DEBUGDUMPSECTION(token, 'PDU-REPORT');         break;       default:         DEBUGDUMPSECTION(token, 'PDU-UNKNOWN');         break;     }
-</pre>
+    <p><b>Value:</b>.nf switch(type) {<br />
+          case SNMP_MSG_GET:         DEBUGDUMPSECTION(token, 'PDU-GET');         break;       case SNMP_MSG_GETNEXT:        
+    DEBUGDUMPSECTION(token, 'PDU-GETNEXT');         break;       case SNMP_MSG_RESPONSE:         DEBUGDUMPSECTION(token,
+    'PDU-RESPONSE');         break;       case SNMP_MSG_SET:         DEBUGDUMPSECTION(token, 'PDU-SET');         break;      
+    case SNMP_MSG_GETBULK:         DEBUGDUMPSECTION(token, 'PDU-GETBULK');         break;       case SNMP_MSG_INFORM:        
+    DEBUGDUMPSECTION(token, 'PDU-INFORM');         break;       case SNMP_MSG_TRAP2:         DEBUGDUMPSECTION(token,
+    'PDU-TRAP2');         break;       case SNMP_MSG_REPORT:         DEBUGDUMPSECTION(token, 'PDU-REPORT');         break;      
+    default:         DEBUGDUMPSECTION(token, 'PDU-UNKNOWN');         break;     }</p>
 
-    <p>Definition at line 374 of file snmp_api.c. <a name="lbAK" id="lbAK"> </a></p>
+    <p>Definition at line 375 of file snmp_api.c. <a name="lbAK" id="lbAK"> </a></p>
 
     <h3>#define timercmp(tvp, uvp, cmp)</h3>
 
-    <p><b>Value:</b></p>
-    <pre>
-/* CSTYLED */         ((tvp)-&gt;tv_sec cmp (uvp)-&gt;tv_sec ||         ((tvp)-&gt;tv_sec == (uvp)-&gt;tv_sec &amp;&amp;         /* CSTYLED */         (tvp)-&gt;tv_usec cmp (uvp)-&gt;tv_usec))
-</pre>
+    <p><b>Value:</b>.nf /* CSTYLED */<br />
+            ((tvp)-&gt;tv_sec cmp (uvp)-&gt;tv_sec ||         ((tvp)-&gt;tv_sec == (uvp)-&gt;tv_sec &amp;&amp;         /* CSTYLED
+    */         (tvp)-&gt;tv_usec cmp (uvp)-&gt;tv_usec))</p>
 
     <p>Definition at line 145 of file snmp_api.c. <a name="lbAL" id="lbAL"> </a></p>
 
@@ -334,10 +345,8 @@ switch(type) {       case SNMP_MSG_GET:         DEBUGDUMPSECTION(token, 'PDU-GET
 
     <h3>int init_agent (const char * app)</h3>
 
-    <p>Initialize the agent.</p>
-
-    <p>Calls into init_agent_read_config to set tha app's configuration file in the appropriate default storage space,
-    NETSNMP_DS_LIB_APPTYPE. Need to call init_agent before calling init_snmp.</p>
+    <p>Initialize the agent. Calls into init_agent_read_config to set tha app's configuration file in the appropriate default
+    storage space, NETSNMP_DS_LIB_APPTYPE. Need to call init_agent before calling init_snmp.</p>
 
     <p><b>Parameters:</b></p>
 
@@ -363,9 +372,7 @@ switch(type) {       case SNMP_MSG_GET:         DEBUGDUMPSECTION(token, 'PDU-GET
 
     <h3>void init_snmp (const char * type)</h3>
 
-    <p>Calls the functions to do config file loading and mib module parsing in the correct order.</p>
-
-    <p><b>Parameters:</b></p>
+    <p>Calls the functions to do config file loading and mib module parsing in the correct order. <b>Parameters:</b></p>
 
     <dl compact="compact">
       <dd><i>type</i> label for the config file 'type'</dd>
@@ -383,16 +390,15 @@ switch(type) {       case SNMP_MSG_GET:         DEBUGDUMPSECTION(token, 'PDU-GET
       <dd><b>init_agent</b></dd>
     </dl>
 
-    <p>Definition at line 778 of file snmp_api.c.</p>
+    <p>Definition at line 779 of file snmp_api.c.</p>
 
     <p>References init_mib(). <a name="lbAO" id="lbAO"> </a></p>
 
     <h3>int netsnmp_oid_equals (const oid * in_name1, size_t len1, const oid * in_name2, size_t len2)</h3>
 
-    <p>Compares 2 OIDs to determine if they are exactly equal.</p>
-
-    <p>This should be faster than doing a snmp_oid_compare for different length OIDs, since the length is checked first and if !=
-    returns immediately. Might be very slighly faster if lengths are ==.</p>
+    <p>Compares 2 OIDs to determine if they are exactly equal. This should be faster than doing a snmp_oid_compare for different
+    length OIDs, since the length is checked first and if != returns immediately. Might be very slighly faster if lengths are
+    ==.</p>
 
     <p><b>Parameters:</b></p>
 
@@ -409,16 +415,14 @@ switch(type) {       case SNMP_MSG_GET:         DEBUGDUMPSECTION(token, 'PDU-GET
       <dd>0 if they are equal, 1 if they are not.</dd>
     </dl>
 
-    <p>Definition at line 6212 of file snmp_api.c.</p>
+    <p>Definition at line 6213 of file snmp_api.c.</p>
 
     <p>Referenced by netsnmp_cache_find_by_oid(), netsnmp_old_api_helper(), and unregister_mib_context(). <a name="lbAP" id=
     "lbAP"> </a></p>
 
     <h3>int netsnmp_oid_find_prefix (const oid * in_name1, size_t len1, const oid * in_name2, size_t len2)</h3>
 
-    <p>Given two OIDs, determine the common prefix to them both.</p>
-
-    <p><b>Parameters:</b></p>
+    <p>Given two OIDs, determine the common prefix to them both. <b>Parameters:</b></p>
 
     <dl compact="compact">
       <dd><i>in_name1</i> A pointer to the first oid.<br />
@@ -433,7 +437,7 @@ switch(type) {       case SNMP_MSG_GET:         DEBUGDUMPSECTION(token, 'PDU-GET
       <dd>length of largest common index of commonality. 1 = first, 0 if none * or -1 on error.</dd>
     </dl>
 
-    <p>Definition at line 6268 of file snmp_api.c.</p>
+    <p>Definition at line 6269 of file snmp_api.c.</p>
 
     <p>References SNMP_MIN.</p>
 
@@ -441,9 +445,8 @@ switch(type) {       case SNMP_MSG_GET:         DEBUGDUMPSECTION(token, 'PDU-GET
 
     <h3>int netsnmp_oid_is_subtree (const oid * in_name1, size_t len1, const oid * in_name2, size_t len2)</h3>
 
-    <p>Identical to netsnmp_oid_equals, except only the length up to len1 is compared.</p>
-
-    <p>Functionally, this determines if in_name2 is equal or a subtree of in_name1</p>
+    <p>Identical to netsnmp_oid_equals, except only the length up to len1 is compared. Functionally, this determines if in_name2
+    is equal or a subtree of in_name1</p>
 
     <p><b>Parameters:</b></p>
 
@@ -460,13 +463,12 @@ switch(type) {       case SNMP_MSG_GET:         DEBUGDUMPSECTION(token, 'PDU-GET
       <dd>0 if one is a common prefix of the other.</dd>
     </dl>
 
-    <p>Definition at line 6248 of file snmp_api.c. <a name="lbAR" id="lbAR"> </a></p>
+    <p>Definition at line 6249 of file snmp_api.c. <a name="lbAR" id="lbAR"> </a></p>
 
     <h3>int snmp_oid_compare (const oid * in_name1, size_t len1, const oid * in_name2, size_t len2)</h3>
 
-    <p>lexicographical compare two object identifiers.</p>
-
-    <p>Caution: this method is called often by command responder applications (ie, agent).</p>
+    <p>lexicographical compare two object identifiers. Caution: this method is called often by command responder applications
+    (ie, agent).</p>
 
     <p><b>Returns:</b></p>
 
@@ -474,7 +476,7 @@ switch(type) {       case SNMP_MSG_GET:         DEBUGDUMPSECTION(token, 'PDU-GET
       <dd>-1 if name1 &lt; name2, 0 if name1 = name2, 1 if name1 &gt; name2</dd>
     </dl>
 
-    <p>Definition at line 6144 of file snmp_api.c.</p>
+    <p>Definition at line 6145 of file snmp_api.c.</p>
 
     <p>Referenced by check_getnext_results(), netsnmp_check_getnext_reply(), netsnmp_insert_iterator_context(),
     netsnmp_insert_table_row(), netsnmp_row_merge_helper_handler(), netsnmp_table_data_add_row(),
@@ -483,9 +485,7 @@ switch(type) {       case SNMP_MSG_GET:         DEBUGDUMPSECTION(token, 'PDU-GET
 
     <h3>int snmp_oidtree_compare (const oid * in_name1, size_t len1, const oid * in_name2, size_t len2)</h3>
 
-    <p>Compares 2 OIDs to determine if they are equal up until the shortest length.</p>
-
-    <p><b>Parameters:</b></p>
+    <p>Compares 2 OIDs to determine if they are equal up until the shortest length. <b>Parameters:</b></p>
 
     <dl compact="compact">
       <dd><i>in_name1</i> A pointer to the first oid.<br />
@@ -500,15 +500,13 @@ switch(type) {       case SNMP_MSG_GET:         DEBUGDUMPSECTION(token, 'PDU-GET
       <dd>0 if they are equal, 1 if in_name1 is &gt; in_name2, or -1 if &lt;.</dd>
     </dl>
 
-    <p>Definition at line 6193 of file snmp_api.c.</p>
+    <p>Definition at line 6194 of file snmp_api.c.</p>
 
     <p>References snmp_oid_compare(). <a name="lbAT" id="lbAT"> </a></p>
 
     <h3>void snmp_shutdown (const char * type)</h3>
 
-    <p>Shuts down the application, saving any needed persistent storage, and appropriate clean up.</p>
-
-    <p><b>Parameters:</b></p>
+    <p>Shuts down the application, saving any needed persistent storage, and appropriate clean up. <b>Parameters:</b></p>
 
     <dl compact="compact">
       <dd><i>type</i> Label for the config file 'type' used</dd>
@@ -520,7 +518,7 @@ switch(type) {       case SNMP_MSG_GET:         DEBUGDUMPSECTION(token, 'PDU-GET
       <dd>void</dd>
     </dl>
 
-    <p>Definition at line 846 of file snmp_api.c.</p>
+    <p>Definition at line 847 of file snmp_api.c.</p>
 
     <p>References shutdown_mib(), snmp_alarm_unregister_all(), and snmp_call_callbacks().</p>
     <hr />
@@ -586,7 +584,7 @@ switch(type) {       case SNMP_MSG_GET:         DEBUGDUMPSECTION(token, 'PDU-GET
     </dl>
     <hr />
     This document was created by <a href="http://localhost/cgi-bin/man/man2html">man2html</a>, using the manual pages.<br />
-    Time: 01:51:44 GMT, October 29, 2004
+    Time: 22:24:01 GMT, November 25, 2004
 <!-- CONTENT END -->
 <!--#include virtual="/page-bottom.html" -->
 

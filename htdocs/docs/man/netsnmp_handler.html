@@ -1,8 +1,8 @@
 <!--#set var="section" value="documentation" -->
 <!--#include virtual="/page-top.html" -->
 <!-- CONTENT START -->
-    <h1>group__handler</h1>Section: net-snmp (3)<br />
-    Updated: 28 Oct 2004<br />
+    <h1>Net-SNMP Agent handler and extensibility API</h1>Section: C Library Functions (3)<br />
+    Updated: 24 Nov 2004<br />
     <a href="#index">Index</a> <a href="../index.html">Return to Main Contents</a>
     <hr />
     <a name="lbAB" id="lbAB"> </a>
@@ -16,28 +16,28 @@
     <h3>Modules</h3>
 
     <p><br />
-    group <b>utility_handlers: simplify request processing</b><br />
+    group<b>utility_handlers: simplify request processing</b><br />
     <i>A group of handlers intended to simplify certain aspects of processing a request for a MIB object.</i></p>
 
     <p><br />
-    group <b>leaf_handlers: process individual leaf objects</b><br />
+    group<b>leaf_handlers: process individual leaf objects</b><br />
     <i>A group of handlers to implement individual leaf objects and instances (both scalar objects, and individual objects and
     instances within a table).</i></p>
 
     <p><br />
-    group <b>baby_steps: calls your handler in baby_steps for set processing.</b><br />
+    group<b>baby_steps: calls your handler in baby_steps for set processing.</b><br />
     <br />
-    group <b>old_api: Calls mib module code written in the old style of code.</b><br />
+    group<b>old_api: Calls mib module code written in the old style of code.</b><br />
     <i>This is a backwards compatilibity module that allows code written in the old API to be run under the new handler based
     architecture.</i></p>
 
     <p><br />
-    group <b>stash_cache: automatically caches data for certain handlers.</b><br />
+    group<b>stash_cache: automatically caches data for certain handlers.</b><br />
     <i>This handler caches data in an optimized way which may aleviate the need for the lower level handlers to perform as much
     optimization.</i></p>
 
     <p><br />
-    group <b>table: Helps you implement a table.</b><br />
+    group<b>table: Helps you implement a table.</b><br />
     <i>This handler helps you implement a table by doing some of the processing for you.</i></p>
 
     <p><a name="lbAD" id="lbAD"> </a></p>
@@ -73,13 +73,13 @@
     <br />
     #define <b>MIB_HANDLER_CUSTOM1</b> 0x80000000<br />
     <br />
-    #define <b>HANDLER_CAN_GETANDGETNEXT</b> 0x01<br />
+    #define <b>HANDLER_CAN_GETANDGETNEXT</b> 0x01 /* must be able to do both */<br />
     <br />
-    #define <b>HANDLER_CAN_SET</b> 0x02<br />
+    #define <b>HANDLER_CAN_SET</b> 0x02 /* implies create, too */<br />
     <br />
     #define <b>HANDLER_CAN_GETBULK</b> 0x04<br />
     <br />
-    #define <b>HANDLER_CAN_NOT_CREATE</b> 0x08<br />
+    #define <b>HANDLER_CAN_NOT_CREATE</b> 0x08 /* auto set if ! CAN_SET */<br />
     <br />
     #define <b>HANDLER_CAN_BABY_STEP</b> 0x10<br />
     <br />
@@ -206,10 +206,8 @@
 
     <p>The basic theory goes something like this: In the past, with the original mib module api (which derived from the original
     CMU SNMP code) the underlying mib modules were passed very little information (only the truly most basic information about a
-    request).</p>
-
-    <p>This worked well at the time but in todays world of subagents, device instrumentation, low resource consumption, etc, it
-    just isn't flexible enough. 'handlers' are here to fix all that.</p>
+    request). This worked well at the time but in todays world of subagents, device instrumentation, low resource consumption,
+    etc, it just isn't flexible enough. 'handlers' are here to fix all that.</p>
 
     <p>With the rewrite of the agent internals for the net-snmp 5.0 release, we introduce a modular calling scheme that allows
     agent modules to be written in a very flexible manner, and more importantly allows reuse of code in a decent way (and without
@@ -240,14 +238,12 @@
 
     <h3>struct <b>netsnmp_handler_registration_s</b> <b>netsnmp_handler_registration</b></h3>
 
-    <p>Typedefs the <b>netsnmp_handler_registration_s</b> struct into netsnmp_handler_registration.</p>
-
-    <p>Referenced by netsnmp_cache_handler_register(), netsnmp_cache_helper_handler(), netsnmp_call_handler(),
-    netsnmp_call_next_handler(), netsnmp_call_next_handler_one_request(), netsnmp_create_delegated_cache(),
-    netsnmp_find_handler_by_name(), netsnmp_find_handler_data_by_name(), netsnmp_find_table_array_handler(),
-    netsnmp_find_table_registration_info(), netsnmp_handler_registration_create(), netsnmp_handler_registration_dup(),
-    netsnmp_handler_registration_free(), netsnmp_inject_handler(), netsnmp_inject_handler_before(),
-    netsnmp_multiplexer_helper_handler(), netsnmp_old_api_helper(), netsnmp_register_cache_handler(), netsnmp_register_handler(),
+    <p>Typedefs the <b>netsnmp_handler_registration_s</b> struct into netsnmp_handler_registration. Referenced by
+    netsnmp_cache_helper_handler(), netsnmp_call_handler(), netsnmp_call_next_handler(), netsnmp_call_next_handler_one_request(),
+    netsnmp_create_delegated_cache(), netsnmp_find_handler_by_name(), netsnmp_find_handler_data_by_name(),
+    netsnmp_find_table_array_handler(), netsnmp_find_table_registration_info(), netsnmp_handler_registration_create(),
+    netsnmp_handler_registration_dup(), netsnmp_handler_registration_free(), netsnmp_inject_handler(),
+    netsnmp_inject_handler_before(), netsnmp_multiplexer_helper_handler(), netsnmp_old_api_helper(), netsnmp_register_handler(),
     netsnmp_register_handler_nocallback(), netsnmp_register_instance(), netsnmp_register_int_instance(),
     netsnmp_register_mib_table_row(), netsnmp_register_old_api(), netsnmp_register_read_only_instance(),
     netsnmp_register_read_only_scalar(), netsnmp_register_read_only_table_data(), netsnmp_register_row_merge(),
@@ -261,10 +257,9 @@
 
     <h3>struct <b>netsnmp_mib_handler_s</b> <b>netsnmp_mib_handler</b></h3>
 
-    <p>Typedefs the <b>netsnmp_mib_handler_s</b> struct into netsnmp_mib_handler.</p>
-
-    <p>Referenced by netsnmp_baby_steps_access_multiplexer_get(), netsnmp_baby_steps_handler_get(), netsnmp_cache_handler_get(),
-    netsnmp_cache_handler_register(), netsnmp_cache_helper_handler(), netsnmp_call_handler(), netsnmp_call_next_handler(),
+    <p>Typedefs the <b>netsnmp_mib_handler_s</b> struct into netsnmp_mib_handler. Referenced by
+    netsnmp_baby_steps_access_multiplexer_get(), netsnmp_baby_steps_handler_get(), netsnmp_cache_handler_get(),
+    netsnmp_cache_handler_register(), netsnmp_call_handler(), netsnmp_call_next_handler(),
     netsnmp_call_next_handler_one_request(), netsnmp_container_table_handler_get(), netsnmp_create_delegated_cache(),
     netsnmp_create_handler(), netsnmp_find_handler_by_name(), netsnmp_find_handler_data_by_name(),
     netsnmp_find_table_array_handler(), netsnmp_get_bulk_to_next_handler(), netsnmp_get_cache_handler(),
@@ -285,13 +280,10 @@
     <h3>int netsnmp_call_handler (<b>netsnmp_mib_handler</b> * next_handler, <b>netsnmp_handler_registration</b> * reginfo,
     <b>netsnmp_agent_request_info</b> * reqinfo, <b>netsnmp_request_info</b> * requests)</h3>
 
-    <p>calls a handler with with appropriate NULL checking of arguments, etc.</p>
+    <p>calls a handler with with appropriate NULL checking of arguments, etc. Definition at line 382 of file agent_handler.c.</p>
 
-    <p>Definition at line 382 of file agent_handler.c.</p>
-
-    <p>References netsnmp_mib_handler_s::access_method, netsnmp_mib_handler_s::flags, netsnmp_mib_handler_s::handler_name,
-    netsnmp_agent_request_info_s::mode, netsnmp_handler_registration, netsnmp_mib_handler, netsnmp_mib_handler_s::next, and
-    snmp_log().</p>
+    <p>References netsnmp_mib_handler_s::access_method, netsnmp_mib_handler_s::handler_name, netsnmp_agent_request_info_s::mode,
+    netsnmp_handler_registration, netsnmp_mib_handler, netsnmp_mib_handler_s::next, and snmp_log().</p>
 
     <p>Referenced by netsnmp_call_next_handler(), netsnmp_call_next_handler_one_request(), and
     netsnmp_multiplexer_helper_handler(). <a name="lbAN" id="lbAN"> </a></p>
@@ -299,9 +291,8 @@
     <h3>int netsnmp_call_next_handler (<b>netsnmp_mib_handler</b> * current, <b>netsnmp_handler_registration</b> * reginfo,
     <b>netsnmp_agent_request_info</b> * reqinfo, <b>netsnmp_request_info</b> * requests)</h3>
 
-    <p>calls the next handler in the chain after the current one with with appropriate NULL checking, etc.</p>
-
-    <p>Definition at line 512 of file agent_handler.c.</p>
+    <p>calls the next handler in the chain after the current one with with appropriate NULL checking, etc. Definition at line 512
+    of file agent_handler.c.</p>
 
     <p>References netsnmp_call_handler(), netsnmp_handler_registration, netsnmp_mib_handler, netsnmp_mib_handler_s::next, and
     snmp_log().</p>
@@ -313,18 +304,15 @@
     <h3>int netsnmp_call_next_handler_one_request (<b>netsnmp_mib_handler</b> * current, <b>netsnmp_handler_registration</b> *
     reginfo, <b>netsnmp_agent_request_info</b> * reqinfo, <b>netsnmp_request_info</b> * requests)</h3>
 
-    <p>calls the next handler in the chain after the current one with with appropriate NULL checking, etc.</p>
-
-    <p>Definition at line 534 of file agent_handler.c.</p>
+    <p>calls the next handler in the chain after the current one with with appropriate NULL checking, etc. Definition at line 534
+    of file agent_handler.c.</p>
 
     <p>References netsnmp_call_handler(), netsnmp_handler_registration, netsnmp_mib_handler, netsnmp_mib_handler_s::next,
     netsnmp_request_info_s::next, and snmp_log(). <a name="lbAP" id="lbAP"> </a></p>
 
     <h3>void netsnmp_clear_handler_list (void)</h3>
 
-    <p>clears the entire handler-registration list</p>
-
-    <p>Definition at line 892 of file agent_handler.c.</p>
+    <p>clears the entire handler-registration list Definition at line 892 of file agent_handler.c.</p>
 
     <p>References netsnmp_free_all_list_data(). <a name="lbAQ" id="lbAQ"> </a></p>
 
@@ -332,9 +320,8 @@
     <b>netsnmp_handler_registration</b> * reginfo, <b>netsnmp_agent_request_info</b> * reqinfo, <b>netsnmp_request_info</b> *
     requests, void * localinfo)</h3>
 
-    <p>creates a cache of information which can be saved for future reference.</p>
-
-    <p>Use <b>netsnmp_handler_check_cache()</b> later to make sure it's still valid before referencing it in the future.</p>
+    <p>creates a cache of information which can be saved for future reference. Use <b>netsnmp_handler_check_cache()</b> later to
+    make sure it's still valid before referencing it in the future.</p>
 
     <p><b>Examples:</b> <b>delayed_instance.c</b>.</p>
 
@@ -346,9 +333,8 @@
     <h3><b>netsnmp_mib_handler</b> * netsnmp_create_handler (const char * name, Netsnmp_Node_Handler *
     handler_access_method)</h3>
 
-    <p>creates a netsnmp_mib_handler structure given a name and a access method.</p>
-
-    <p>The returned handler should then be <b>registered.</b></p>
+    <p>creates a netsnmp_mib_handler structure given a name and a access method. The returned handler should then be
+    <b>registered.</b></p>
 
     <p><b>Parameters:</b></p>
 
@@ -391,9 +377,7 @@
     <h3><b>netsnmp_mib_handler</b> * netsnmp_find_handler_by_name (<b>netsnmp_handler_registration</b> * reginfo, const char *
     name)</h3>
 
-    <p>Returns a handler from a chain based on the name.</p>
-
-    <p>Definition at line 825 of file agent_handler.c.</p>
+    <p>Returns a handler from a chain based on the name. Definition at line 825 of file agent_handler.c.</p>
 
     <p>References netsnmp_handler_registration_s::handler, netsnmp_mib_handler_s::handler_name, netsnmp_handler_registration,
     netsnmp_mib_handler, and netsnmp_mib_handler_s::next.</p>
@@ -402,12 +386,9 @@
 
     <h3>void * netsnmp_find_handler_data_by_name (<b>netsnmp_handler_registration</b> * reginfo, const char * name)</h3>
 
-    <p>Returns a handler's void * pointer from a chain based on the name.</p>
-
-    <p>This probably shouldn't be used by the general public as the void * data may change as a handler evolves. Handlers should
-    really advertise some function for you to use instead.</p>
-
-    <p>Definition at line 842 of file agent_handler.c.</p>
+    <p>Returns a handler's void * pointer from a chain based on the name. This probably shouldn't be used by the general public
+    as the void * data may change as a handler evolves. Handlers should really advertise some function for you to use instead.
+    Definition at line 842 of file agent_handler.c.</p>
 
     <p>References netsnmp_mib_handler_s::myvoid, netsnmp_find_handler_by_name(), netsnmp_handler_registration, and
     netsnmp_mib_handler.</p>
@@ -426,17 +407,14 @@
 
     <h3>NETSNMP_INLINE void netsnmp_free_request_data_set (<b>netsnmp_request_info</b> * request)</h3>
 
-    <p>Free the extra data stored in a request.</p>
-
-    <p>Definition at line 807 of file agent_handler.c.</p>
+    <p>Free the extra data stored in a request. Definition at line 807 of file agent_handler.c.</p>
 
     <p>References netsnmp_free_list_data(), and netsnmp_request_info_s::parent_data. <a name="lbAW" id="lbAW"> </a></p>
 
     <h3>NETSNMP_INLINE void netsnmp_free_request_data_sets (<b>netsnmp_request_info</b> * request)</h3>
 
-    <p>Free the extra data stored in a bunch of requests (all data in the chain).</p>
-
-    <p>Definition at line 815 of file agent_handler.c.</p>
+    <p>Free the extra data stored in a bunch of requests (all data in the chain). Definition at line 815 of file
+    agent_handler.c.</p>
 
     <p>References netsnmp_free_all_list_data(), and netsnmp_request_info_s::parent_data.</p>
 
@@ -445,10 +423,8 @@
 
     <h3>NETSNMP_INLINE netsnmp_delegated_cache * netsnmp_handler_check_cache (netsnmp_delegated_cache * dcache)</h3>
 
-    <p>check's a given cache and returns it if it is still valid (ie, the agent still considers it to be an outstanding
-    request.</p>
-
-    <p>Returns NULL if it's no longer valid.</p>
+    <p>check's a given cache and returns it if it is still valid (ie, the agent still considers it to be an outstanding request.
+    Returns NULL if it's no longer valid.</p>
 
     <p><b>Examples:</b> <b>delayed_instance.c</b>.</p>
 
@@ -458,25 +434,20 @@
 
     <h3><b>netsnmp_mib_handler</b> * netsnmp_handler_dup (<b>netsnmp_mib_handler</b> * handler)</h3>
 
-    <p>dulpicates a handler and all subsequent handlers see also _clone_handler</p>
+    <p>dulpicates a handler and all subsequent handlers see also _clone_handler Definition at line 579 of file
+    agent_handler.c.</p>
 
-    <p>Definition at line 579 of file agent_handler.c.</p>
-
-    <p>References netsnmp_mib_handler_s::myvoid, netsnmp_handler_free(), netsnmp_mib_handler, netsnmp_mib_handler_s::next, and
-    netsnmp_mib_handler_s::prev.</p>
+    <p>References netsnmp_mib_handler_s::myvoid, netsnmp_handler_free(), netsnmp_mib_handler, and
+    netsnmp_mib_handler_s::next.</p>
 
     <p>Referenced by netsnmp_handler_registration_dup(). <a name="lbAZ" id="lbAZ"> </a></p>
 
     <h3>void netsnmp_handler_free (<b>netsnmp_mib_handler</b> * handler)</h3>
 
-    <p>free's the resourceses associated with a given handler</p>
-
-    <p>make sure we aren't pointing to ourselves.</p>
+    <p>free's the resourceses associated with a given handler make sure we aren't pointing to ourselves.</p>
 
     <p>XXX : segv here at shutdown if SHUTDOWN_AGENT_CLEANLY defined. About 30 functions down the stack, starting in
-    clear_context() -&gt; clear_subtree()</p>
-
-    <p>Definition at line 557 of file agent_handler.c.</p>
+    clear_context() -&gt; clear_subtree() Definition at line 557 of file agent_handler.c.</p>
 
     <p>References netsnmp_mib_handler_s::handler_name, netsnmp_mib_handler, netsnmp_mib_handler_s::next, and SNMP_FREE.</p>
 
@@ -485,9 +456,7 @@
 
     <h3>void netsnmp_handler_mark_requests_as_delegated (<b>netsnmp_request_info</b> * requests, int isdelegated)</h3>
 
-    <p>marks a list of requests as delegated (or not if isdelegaded = 0)</p>
-
-    <p>Definition at line 735 of file agent_handler.c.</p>
+    <p>marks a list of requests as delegated (or not if isdelegaded = 0) Definition at line 735 of file agent_handler.c.</p>
 
     <p>References netsnmp_request_info_s::delegated, and netsnmp_request_info_s::next. <a name="lbBB" id="lbBB"> </a></p>
 
@@ -495,11 +464,9 @@
     * handler, oid * reg_oid, size_t reg_oid_len, int modes)</h3>
 
     <p>creates a handler registration structure given a name, a access_method function, a registration location oid and the modes
-    the handler supports.</p>
-
-    <p>If modes == 0, then modes will automatically be set to the default value of only HANDLER_CAN_DEFAULT, which is by default
-    read-only GET and GETNEXT requests. A hander which supports sets but not row creation should set us a mode of
-    HANDLER_CAN_SET_ONLY.</p>
+    the handler supports. If modes == 0, then modes will automatically be set to the default value of only HANDLER_CAN_DEFAULT,
+    which is by default read-only GET and GETNEXT requests. A hander which supports sets but not row creation should set us a
+    mode of HANDLER_CAN_SET_ONLY.</p>
 
     <p><b>Note:</b></p>
 
@@ -575,9 +542,7 @@
     <h3><b>netsnmp_handler_registration</b> * netsnmp_handler_registration_dup (<b>netsnmp_handler_registration</b> *
     reginfo)</h3>
 
-    <p>duplicates the handler registration object</p>
-
-    <p>Definition at line 621 of file agent_handler.c.</p>
+    <p>duplicates the handler registration object Definition at line 621 of file agent_handler.c.</p>
 
     <p>References netsnmp_handler_registration_s::contextName, netsnmp_handler_registration_s::handler,
     netsnmp_handler_registration_s::handlerName, memdup(), netsnmp_handler_registration_s::modes, netsnmp_handler_dup(),
@@ -588,9 +553,7 @@
 
     <h3>void netsnmp_handler_registration_free (<b>netsnmp_handler_registration</b> * reginfo)</h3>
 
-    <p>free the resources associated with a handler registration object</p>
-
-    <p>Definition at line 608 of file agent_handler.c.</p>
+    <p>free the resources associated with a handler registration object Definition at line 608 of file agent_handler.c.</p>
 
     <p>References netsnmp_handler_registration_s::contextName, netsnmp_handler_registration_s::handler,
     netsnmp_handler_registration_s::handlerName, netsnmp_handler_free(), netsnmp_handler_registration,
@@ -600,11 +563,9 @@
 
     <h3>int netsnmp_inject_handler (<b>netsnmp_handler_registration</b> * reginfo, <b>netsnmp_mib_handler</b> * handler)</h3>
 
-    <p>inject a new handler into the calling chain of the handlers definedy by the netsnmp_handler_registration pointer.</p>
-
-    <p>The new handler is injected at the top of the list and hence will be the new handler to be called first.</p>
-
-    <p>Definition at line 374 of file agent_handler.c.</p>
+    <p>inject a new handler into the calling chain of the handlers definedy by the netsnmp_handler_registration pointer. The new
+    handler is injected at the top of the list and hence will be the new handler to be called first. Definition at line 374 of
+    file agent_handler.c.</p>
 
     <p>References netsnmp_handler_registration, netsnmp_inject_handler_before(), and netsnmp_mib_handler.</p>
 
@@ -617,12 +578,9 @@
     <h3>int netsnmp_inject_handler_before (<b>netsnmp_handler_registration</b> * reginfo, <b>netsnmp_mib_handler</b> * handler,
     const char * before_what)</h3>
 
-    <p>inject a new handler into the calling chain of the handlers definedy by the netsnmp_handler_registration pointer.</p>
-
-    <p>The new handler is injected after the before_what handler, or if NULL at the top of the list and hence will be the new
-    handler to be called first.</p>
-
-    <p>Definition at line 322 of file agent_handler.c.</p>
+    <p>inject a new handler into the calling chain of the handlers definedy by the netsnmp_handler_registration pointer. The new
+    handler is injected after the before_what handler, or if NULL at the top of the list and hence will be the new handler to be
+    called first. Definition at line 322 of file agent_handler.c.</p>
 
     <p>References netsnmp_handler_registration_s::handler, netsnmp_mib_handler_s::handler_name, netsnmp_handler_registration,
     netsnmp_mib_handler, netsnmp_mib_handler_s::next, netsnmp_mib_handler_s::prev, and snmp_log().</p>
@@ -631,9 +589,8 @@
 
     <h3>int netsnmp_register_handler (<b>netsnmp_handler_registration</b> * reginfo)</h3>
 
-    <p>register a handler, as defined by the netsnmp_handler_registration pointer.</p>
-
-    <p>Definition at line 202 of file agent_handler.c.</p>
+    <p>register a handler, as defined by the netsnmp_handler_registration pointer. Definition at line 202 of file
+    agent_handler.c.</p>
 
     <p>References netsnmp_handler_registration_s::contextName, netsnmp_handler_registration_s::handler,
     netsnmp_mib_handler_s::handler_name, netsnmp_handler_registration_s::handlerName, netsnmp_handler_registration_s::modes,
@@ -648,9 +605,8 @@
 
     <h3>void netsnmp_register_handler_by_name (const char * name, <b>netsnmp_mib_handler</b> * handler)</h3>
 
-    <p>registers a given handler by name so that it can be found easily later.</p>
-
-    <p>Definition at line 880 of file agent_handler.c.</p>
+    <p>registers a given handler by name so that it can be found easily later. Definition at line 880 of file
+    agent_handler.c.</p>
 
     <p>References netsnmp_add_list_data(), netsnmp_create_data_list(), and netsnmp_mib_handler.</p>
 
@@ -660,9 +616,8 @@
 
     <h3>int netsnmp_register_handler_nocallback (<b>netsnmp_handler_registration</b> * reginfo)</h3>
 
-    <p>register a handler, as defined by the netsnmp_handler_registration pointer.</p>
-
-    <p>Definition at line 270 of file agent_handler.c.</p>
+    <p>register a handler, as defined by the netsnmp_handler_registration pointer. Definition at line 270 of file
+    agent_handler.c.</p>
 
     <p>References netsnmp_handler_registration_s::contextName, netsnmp_handler_registration_s::handler,
     netsnmp_mib_handler_s::handler_name, netsnmp_handler_registration_s::modes, netsnmp_handler_registration,
@@ -676,9 +631,7 @@
     <h3>NETSNMP_INLINE void netsnmp_request_add_list_data (<b>netsnmp_request_info</b> * request, <b>netsnmp_data_list</b> *
     node)</h3>
 
-    <p>add data to a request that can be extracted later by submodules</p>
-
-    <p><b>Parameters:</b></p>
+    <p>add data to a request that can be extracted later by submodules <b>Parameters:</b></p>
 
     <dl compact="compact">
       <dd><i>requset</i> the netsnmp request info structure<br />
@@ -703,9 +656,7 @@
 
     <h3>NETSNMP_INLINE void * netsnmp_request_get_list_data (<b>netsnmp_request_info</b> * request, const char * name)</h3>
 
-    <p>extract data from a request that was added previously by a parent module</p>
-
-    <p><b>Parameters:</b></p>
+    <p>extract data from a request that was added previously by a parent module <b>Parameters:</b></p>
 
     <dl compact="compact">
       <dd><i>request</i> the netsnmp request info function<br />
@@ -732,9 +683,7 @@
 
     <h3>NETSNMP_INLINE int netsnmp_request_remove_list_data (<b>netsnmp_request_info</b> * request, const char * name)</h3>
 
-    <p>remove data from a request</p>
-
-    <p><b>Parameters:</b></p>
+    <p>remove data from a request <b>Parameters:</b></p>
 
     <dl compact="compact">
       <dd><i>requset</i> the netsnmp request info structure<br />
@@ -753,9 +702,8 @@
 
     <h3>int netsnmp_unregister_handler (<b>netsnmp_handler_registration</b> * reginfo)</h3>
 
-    <p>unregister a handler, as defined by the netsnmp_handler_registration pointer.</p>
-
-    <p>Definition at line 260 of file agent_handler.c.</p>
+    <p>unregister a handler, as defined by the netsnmp_handler_registration pointer. Definition at line 260 of file
+    agent_handler.c.</p>
 
     <p>References netsnmp_handler_registration_s::contextName, netsnmp_handler_registration,
     netsnmp_handler_registration_s::priority, netsnmp_handler_registration_s::range_subid,
@@ -878,7 +826,7 @@
     </dl>
     <hr />
     This document was created by <a href="http://localhost/cgi-bin/man/man2html">man2html</a>, using the manual pages.<br />
-    Time: 01:51:43 GMT, October 29, 2004
+    Time: 22:24:01 GMT, November 25, 2004
 <!-- CONTENT END -->
 <!--#include virtual="/page-bottom.html" -->
 

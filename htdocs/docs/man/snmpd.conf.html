@@ -10,8 +10,9 @@
     <h2>NAME</h2>/usr/local/etc/snmp/snmpd.conf - configuration file for the Net-SNMP SNMP agent. <a name="lbAC" id="lbAC"> </a>
 
     <h2>DESCRIPTION</h2><b>snmpd.conf</b> is the configuration file which defines how the Net-SNMP SNMP agent operates. These
-    files may contain any of the directives found in the <b>DIRECTIVES</b> section below. This file is not required for the agent
-    to operate and respond to requests. <a name="lbAD" id="lbAD"> </a>
+    files may contain any of the directives found in the <b>DIRECTIVES</b> section below. If this file is not found (or does not
+    contain any access control directives), the agent will run but will not respond to any requests. <a name="lbAD" id="lbAD">
+    </a>
 
     <h2>PLEASE READ FIRST</h2>First, make sure you have read the <i><a href="snmp_config.html">snmp_config</a>(5)</i> manual page
     that describes how the Net-SNMP configuration files operate, where they are located and how they all work together.
@@ -551,9 +552,7 @@ createUser myuser SHA -m 0x0001020304050607080900010203040506070809 AES -m 0x000
 
               <dl compact="compact">
                 <dd>
-                  <dl compact="compact">
-                    <dd>
-                      <pre>
+                  <pre>
 # assigns the entire mib tree on remotehost1 to the context of the
 # same name:
 proxy -Cn remotehost1 -v 1 -c public remotehost1 .1.3
@@ -566,8 +565,6 @@ proxy -v 1 -c public remotehost .1.3.6.1.4.1.2021
 # without using contexts)
 proxy -v 3 -l noAuthNoPriv -u user remotehost .1.3.6.1.3.10 .1.3.6.1.2.1.1
 </pre>
-                    </dd>
-                  </dl>
                 </dd>
               </dl>
             </dd>
@@ -723,32 +720,23 @@ proxy -v 3 -l noAuthNoPriv -u user remotehost .1.3.6.1.3.10 .1.3.6.1.2.1.1
             <dd>Calls perl to evaluate an expression. Normally you'd want to do something like register a function to call when
             an OID is requested, but you can really do anything perl related you want. For example:</dd>
 
-            <dd>
-              <dl compact="compact">
-                <dd>perl print "hello world\n";</dd>
-              </dl>
-            </dd>
+            <dd>perl print "hello world\n";</dd>
 
             <dd>is the most basic hello world example.</dd>
 
-            <dd>The init script by default initializes a $agent variable which is a pointer to a NetSnmp::agent object through
-            which you can register callbacks when a section of the OID tree is hit:</dd>
-
             <dd>
-              <dl compact="compact">
-                <dd>
-                  <pre>
+              The init script by default initializes a $agent variable which is a pointer to a NetSnmp::agent object through
+              which you can register callbacks when a section of the OID tree is hit:
+              <pre>
 perl use Data::Dumper;
 perl sub myroutine  { print "got called: ",Dumper(@_),"\n"; }
 perl $agent-&gt;register('mylink', '.1.3.6.1.8765', \&amp;myroutine);
 </pre>
-                </dd>
-              </dl>
             </dd>
 
-            <dd>Sourcing an external file:</dd>
-
             <dd>
+              Sourcing an external file:
+
               <dl compact="compact">
                 <dd>
                   <pre>
@@ -1095,7 +1083,7 @@ bulk_to_next - If a module registers to handle getbulk support, but
           <hr />
           This document was created by <a href="http://localhost/cgi-bin/man/man2html">man2html</a>, using the manual
           pages.<br />
-          Time: 01:51:45 GMT, October 29, 2004
+          Time: 22:24:02 GMT, November 25, 2004
         </dd>
       </dd>
     </dl>

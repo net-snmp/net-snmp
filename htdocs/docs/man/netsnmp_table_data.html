@@ -1,8 +1,8 @@
 <!--#set var="section" value="documentation" -->
 <!--#include virtual="/page-top.html" -->
 <!-- CONTENT START -->
-    <h1>group__table__data</h1>Section: net-snmp (3)<br />
-    Updated: 28 Oct 2004<br />
+    <h1>table_data: Helps you implement a table with datamatted storage.</h1>Section: C Library Functions (3)<br />
+    Updated: 24 Nov 2004<br />
     <a href="#index">Index</a> <a href="../index.html">Return to Main Contents</a>
     <hr />
     <a name="lbAB" id="lbAB"> </a>
@@ -15,7 +15,7 @@
     <h3>Modules</h3>
 
     <p><br />
-    group <b>table_dataset: Helps you implement a table with automatted storage.</b><br />
+    group<b>table_dataset: Helps you implement a table with automatted storage.</b><br />
     <i>This handler helps you implement a table where all the data is expected to be stored within the agent itself and not in
     some external storage location.</i></p>
 
@@ -77,11 +77,9 @@
     <h2>Detailed Description</h2>
 
     <p>This helper helps you implement a table where all the indexes are expected to be stored within the agent itself and not in
-    some external storage location.</p>
-
-    <p>It can be used to store a list of rows, where a row consists of the indexes to the table and a generic data pointer. You
-    can then implement a subhandler which is passed the exact row definition and data it must return data for or accept data for.
-    Complex GETNEXT handling is greatly simplified in this case. <a name="lbAF" id="lbAF"> </a></p>
+    some external storage location. It can be used to store a list of rows, where a row consists of the indexes to the table and
+    a generic data pointer. You can then implement a subhandler which is passed the exact row definition and data it must return
+    data for or accept data for. Complex GETNEXT handling is greatly simplified in this case. <a name="lbAF" id="lbAF"> </a></p>
 
     <h2>Function Documentation</h2>
 
@@ -89,9 +87,7 @@
 
     <h3>netsnmp_table_data* netsnmp_create_table_data (const char * name)</h3>
 
-    <p>creates and returns a pointer to table data set</p>
-
-    <p>Definition at line 544 of file table_data.c.</p>
+    <p>creates and returns a pointer to table data set Definition at line 544 of file table_data.c.</p>
 
     <p>References SNMP_MALLOC_TYPEDEF.</p>
 
@@ -111,17 +107,13 @@
 
     <h3>netsnmp_table_data* netsnmp_extract_table (<b>netsnmp_request_info</b> * request)</h3>
 
-    <p>extracts the table being accessed passed from the table_data helper</p>
-
-    <p>Definition at line 635 of file table_data.c.</p>
+    <p>extracts the table being accessed passed from the table_data helper Definition at line 635 of file table_data.c.</p>
 
     <p>References netsnmp_request_get_list_data(). <a name="lbAJ" id="lbAJ"> </a></p>
 
     <h3>netsnmp_table_row* netsnmp_extract_table_row (<b>netsnmp_request_info</b> * request)</h3>
 
-    <p>extracts the row being accessed passed from the table_data helper</p>
-
-    <p>Definition at line 627 of file table_data.c.</p>
+    <p>extracts the row being accessed passed from the table_data helper Definition at line 627 of file table_data.c.</p>
 
     <p>References netsnmp_request_get_list_data().</p>
 
@@ -130,19 +122,16 @@
 
     <h3>void* netsnmp_extract_table_row_data (<b>netsnmp_request_info</b> * request)</h3>
 
-    <p>extracts the data from the row being accessed passed from the table_data helper</p>
+    <p>extracts the data from the row being accessed passed from the table_data helper Definition at line 644 of file
+    table_data.c.</p>
 
-    <p>Definition at line 644 of file table_data.c.</p>
-
-    <p>References variable_list::data, and netsnmp_extract_table_row().</p>
+    <p>References netsnmp_extract_table_row().</p>
 
     <p>Referenced by netsnmp_extract_table_data_set_column(). <a name="lbAL" id="lbAL"> </a></p>
 
     <h3><b>netsnmp_mib_handler</b>* netsnmp_get_table_data_handler (netsnmp_table_data * table)</h3>
 
-    <p>Creates a table_data handler and returns it.</p>
-
-    <p>Definition at line 263 of file table_data.c.</p>
+    <p>Creates a table_data handler and returns it. Definition at line 263 of file table_data.c.</p>
 
     <p>References netsnmp_mib_handler_s::flags, netsnmp_mib_handler_s::myvoid, netsnmp_create_handler(), netsnmp_mib_handler, and
     snmp_log().</p>
@@ -151,9 +140,7 @@
 
     <h3>NETSNMP_INLINE void netsnmp_insert_table_row (<b>netsnmp_request_info</b> * request, netsnmp_table_row * row)</h3>
 
-    <p>inserts a newly created table_data row into a request</p>
-
-    <p>Definition at line 562 of file table_data.c.</p>
+    <p>inserts a newly created table_data row into a request Definition at line 562 of file table_data.c.</p>
 
     <p>References netsnmp_table_request_info_s::indexes, netsnmp_create_data_list(), netsnmp_extract_table_info(),
     netsnmp_request_add_list_data(), netsnmp_request_info_s::next, netsnmp_request_info_s::prev, and snmp_oid_compare(). <a name=
@@ -162,9 +149,8 @@
     <h3>int netsnmp_register_read_only_table_data (<b>netsnmp_handler_registration</b> * reginfo, netsnmp_table_data * table,
     <b>netsnmp_table_registration_info</b> * table_info)</h3>
 
-    <p>registers a handler as a read-only data table If table_info != NULL, it registers it as a normal table too.</p>
-
-    <p>Definition at line 297 of file table_data.c.</p>
+    <p>registers a handler as a read-only data table If table_info != NULL, it registers it as a normal table too. Definition at
+    line 297 of file table_data.c.</p>
 
     <p>References netsnmp_get_read_only_handler(), netsnmp_handler_registration, netsnmp_inject_handler(), and
     netsnmp_register_table_data(). <a name="lbAO" id="lbAO"> </a></p>
@@ -172,11 +158,8 @@
     <h3>int netsnmp_register_table_data (<b>netsnmp_handler_registration</b> * reginfo, netsnmp_table_data * table,
     <b>netsnmp_table_registration_info</b> * table_info)</h3>
 
-    <p>registers a handler as a data table.</p>
-
-    <p>If table_info != NULL, it registers it as a normal table too.</p>
-
-    <p>Definition at line 286 of file table_data.c.</p>
+    <p>registers a handler as a data table. If table_info != NULL, it registers it as a normal table too. Definition at line 286
+    of file table_data.c.</p>
 
     <p>References netsnmp_get_table_data_handler(), netsnmp_handler_registration, netsnmp_inject_handler(), and
     netsnmp_register_table().</p>
@@ -186,13 +169,9 @@
 
     <h3>int netsnmp_table_data_add_row (netsnmp_table_data * table, netsnmp_table_row * row)</h3>
 
-    <p>Adds a row of data to a given table (stored in proper lexographical order).</p>
-
-    <p>returns SNMPERR_SUCCESS on successful addition. or SNMPERR_GENERR on failure (E.G., indexes already existed)</p>
-
-    <p>xxx-rks: remove invalid row?</p>
-
-    <p>Definition at line 51 of file table_data.c.</p>
+    <p>Adds a row of data to a given table (stored in proper lexographical order). returns SNMPERR_SUCCESS on successful
+    addition. or SNMPERR_GENERR on failure (E.G., indexes already existed) xxx-rks: remove invalid row? Definition at line 51 of
+    file table_data.c.</p>
 
     <p>References netsnmp_table_data_generate_index_oid(), snmp_log(), and snmp_oid_compare().</p>
 
@@ -202,9 +181,7 @@
     reqinfo, <b>netsnmp_request_info</b> * request, netsnmp_table_row * row, int column, u_char type, u_char * result_data,
     size_t result_data_len)</h3>
 
-    <p>builds a result given a row, a varbind to set and the data</p>
-
-    <p>Definition at line 656 of file table_data.c.</p>
+    <p>builds a result given a row, a varbind to set and the data Definition at line 656 of file table_data.c.</p>
 
     <p>References netsnmp_agent_request_info_s::mode, netsnmp_handler_registration, netsnmp_request_info_s::requestvb,
     netsnmp_handler_registration_s::rootoid, netsnmp_handler_registration_s::rootoid_len, and snmp_set_var_typed_value().</p>
@@ -214,11 +191,7 @@
 
     <h3>netsnmp_table_row* netsnmp_table_data_clone_row (netsnmp_table_row * row)</h3>
 
-    <p>clones a data row.</p>
-
-    <p>DOES NOT CLONE THE CONTAINED DATA.</p>
-
-    <p>Definition at line 690 of file table_data.c.</p>
+    <p>clones a data row. DOES NOT CLONE THE CONTAINED DATA. Definition at line 690 of file table_data.c.</p>
 
     <p>References memdup().</p>
 
@@ -226,11 +199,8 @@
 
     <h3>void* netsnmp_table_data_delete_row (netsnmp_table_row * row)</h3>
 
-    <p>deletes a row's memory.</p>
-
-    <p>returns the void data that it doesn't know how to delete.</p>
-
-    <p>Definition at line 177 of file table_data.c.</p>
+    <p>deletes a row's memory. returns the void data that it doesn't know how to delete. Definition at line 177 of file
+    table_data.c.</p>
 
     <p>References SNMP_FREE.</p>
 
@@ -239,9 +209,7 @@
 
     <h3>void netsnmp_table_data_generate_index_oid (netsnmp_table_row * row)</h3>
 
-    <p>generates the index portion of an table oid from a varlist.</p>
-
-    <p>Definition at line 39 of file table_data.c.</p>
+    <p>generates the index portion of an table oid from a varlist. Definition at line 39 of file table_data.c.</p>
 
     <p>References build_oid().</p>
 
@@ -249,18 +217,14 @@
 
     <h3>netsnmp_table_row* netsnmp_table_data_get (netsnmp_table_data * table, <b>netsnmp_variable_list</b> * indexes)</h3>
 
-    <p>finds the data in 'datalist' stored at 'indexes'</p>
-
-    <p>Definition at line 231 of file table_data.c.</p>
+    <p>finds the data in 'datalist' stored at 'indexes' Definition at line 231 of file table_data.c.</p>
 
     <p>References netsnmp_table_data_get_from_oid(). <a name="lbAV" id="lbAV"> </a></p>
 
     <h3>netsnmp_table_row* netsnmp_table_data_get_from_oid (netsnmp_table_data * table, oid * searchfor, size_t
     searchfor_len)</h3>
 
-    <p>finds the data in 'datalist' stored at the searchfor oid</p>
-
-    <p>Definition at line 245 of file table_data.c.</p>
+    <p>finds the data in 'datalist' stored at the searchfor oid Definition at line 245 of file table_data.c.</p>
 
     <p>References snmp_oid_compare().</p>
 
@@ -269,11 +233,8 @@
     <h3>int netsnmp_table_data_helper_handler (<b>netsnmp_mib_handler</b> * handler, <b>netsnmp_handler_registration</b> *
     reginfo, <b>netsnmp_agent_request_info</b> * reqinfo, <b>netsnmp_request_info</b> * requests)</h3>
 
-    <p>The helper handler that takes care of passing a specific row of data down to the lower handler(s).</p>
-
-    <p>It sets request-&gt;processed if the request should not be handled.</p>
-
-    <p>Definition at line 313 of file table_data.c.</p>
+    <p>The helper handler that takes care of passing a specific row of data down to the lower handler(s). It sets
+    request-&gt;processed if the request should not be handled. Definition at line 313 of file table_data.c.</p>
 
     <p>References netsnmp_table_request_info_s::colnum, netsnmp_mib_handler_s::flags,
     netsnmp_table_registration_info_s::max_column, netsnmp_table_registration_info_s::min_column,
@@ -287,11 +248,8 @@
 
     <h3>void* netsnmp_table_data_remove_and_delete_row (netsnmp_table_data * table, netsnmp_table_row * row)</h3>
 
-    <p>removes and frees a row of data to a given table and returns the void *</p>
-
-    <p>returns the void * data on successful deletion. or NULL on failure (bad arguments)</p>
-
-    <p>Definition at line 206 of file table_data.c.</p>
+    <p>removes and frees a row of data to a given table and returns the void * returns the void * data on successful deletion. or
+    NULL on failure (bad arguments) Definition at line 206 of file table_data.c.</p>
 
     <p>References netsnmp_table_data_delete_row(), and netsnmp_table_data_remove_row().</p>
 
@@ -300,11 +258,8 @@
 
     <h3>netsnmp_table_row* netsnmp_table_data_remove_row (netsnmp_table_data * table, netsnmp_table_row * row)</h3>
 
-    <p>removes a row of data to a given table and returns it (no free's called)</p>
-
-    <p>returns the row pointer itself on successful removing. or NULL on failure (bad arguments)</p>
-
-    <p>Definition at line 155 of file table_data.c.</p>
+    <p>removes a row of data to a given table and returns it (no free's called) returns the row pointer itself on successful
+    removing. or NULL on failure (bad arguments) Definition at line 155 of file table_data.c.</p>
 
     <p>Referenced by netsnmp_table_data_remove_and_delete_row(), and netsnmp_table_data_replace_row(). <a name="lbAZ" id="lbAZ">
     </a></p>
@@ -312,11 +267,7 @@
     <h3>NETSNMP_INLINE void netsnmp_table_data_replace_row (netsnmp_table_data * table, netsnmp_table_row * origrow,
     netsnmp_table_row * newrow)</h3>
 
-    <p>swaps out origrow with newrow.</p>
-
-    <p>This does *not* delete/free anything!</p>
-
-    <p>Definition at line 221 of file table_data.c.</p>
+    <p>swaps out origrow with newrow. This does *not* delete/free anything! Definition at line 221 of file table_data.c.</p>
 
     <p>References netsnmp_table_data_add_row(), and netsnmp_table_data_remove_row().</p>
 
@@ -399,7 +350,7 @@
     </dl>
     <hr />
     This document was created by <a href="http://localhost/cgi-bin/man/man2html">man2html</a>, using the manual pages.<br />
-    Time: 01:51:44 GMT, October 29, 2004
+    Time: 22:24:01 GMT, November 25, 2004
 <!-- CONTENT END -->
 <!--#include virtual="/page-bottom.html" -->
 
