@@ -303,7 +303,7 @@ int getswap(rettype)
 #ifndef hpux10
   strcpy(ex.command,"/etc/swapinfo -h");
 #else
-  strcpy(ex.command,"/etc/swapinfo -r");
+  strcpy(ex.command,"/usr/sbin/swapinfo -r");
 #endif
   if (fd = get_exec_output(&ex)) {
     file = fdopen(fd,"r");
