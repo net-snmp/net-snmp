@@ -1,0 +1,163 @@
+.\* /***********************************************************
+.\" 	Copyright 1988, 1989 by Carnegie Mellon University
+.\" 
+.\"                       All Rights Reserved
+.\" 
+.\" Permission to use, copy, modify, and distribute this software and its 
+.\" documentation for any purpose and without fee is hereby granted, 
+.\" provided that the above copyright notice appear in all copies and that
+.\" both that copyright notice and this permission notice appear in 
+.\" supporting documentation, and that the name of CMU not be
+.\" used in advertising or publicity pertaining to distribution of the
+.\" software without specific, written prior permission.  
+.\" 
+.\" CMU DISCLAIMS ALL WARRANTIES WITH REGARD TO THIS SOFTWARE, INCLUDING
+.\" ALL IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS, IN NO EVENT SHALL
+.\" CMU BE LIABLE FOR ANY SPECIAL, INDIRECT OR CONSEQUENTIAL DAMAGES OR
+.\" ANY DAMAGES WHATSOEVER RESULTING FROM LOSS OF USE, DATA OR PROFITS,
+.\" WHETHER IN AN ACTION OF CONTRACT, NEGLIGENCE OR OTHER TORTIOUS ACTION,
+.\" ARISING OUT OF OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS
+.\" SOFTWARE.
+.\" ******************************************************************/
+.TH SNMPCMD 1 "13 June 1998"
+.UC 4
+.SH NAME
+snmpcmd - commmands to communicate with a network entity using SNMP Requests.
+.SH SYNOPSIS
+snmpcmd
+[-h|-V]
+[-R]
+[-f|-s|-S] [-q]
+[-d] [-D]
+[-m mibs] [-M mibdirs]
+[-r retries] [-t timeout]
+[-p port]
+[-v [ 1 | 2c | 2p ] ]
+[-c srcclock dstclock]
+agent [community | srcparty dstparty context | noauth]
+commandparams
+.SH DESCRIPTION
+This manual page describes the common part of the parameters for
+the SNMP commands:
+.IR snmpget ,
+.IR snmpgetnext ,
+.IR snmpset ,
+.IR snmpbulkwalk ,
+.IR snmpwalk ,
+.IR snmpdelta ,
+.IR snmptable ,
+.IR snmptrap .
+The command line applications uses the SNMP protocol to communicate
+with an SNMP capable network entity, an agent.
+The applications all have some specific options and arguments that
+are specified after the common part specified here.
+.IP "-h"
+prints the applications help message
+.IP "-V"
+prints the applications version string
+.IP "-R"
+requests random access to the MIB symbol table. See RANDOM ACCESS MIB below.
+.IP "-f"
+requests full object identifiers on output.
+.I system.sysDescr.0
+will be printed as
+.I .iso.org.dod.internet.mgmt.mib-2.system.sysDescr.0
+.IP "-s"
+request that object identifiers on output uses "suffix only", that is,
+only the last symbolic part is printed. For example,
+.I interfaces.iftable.ifentry.ifindex.1
+will just show up as
+.I ifindex.1
+.IP "-S"
+request object identifiers with suffix and MIB name.
+.I interfaces.iftable.ifentry.ifindex.1
+will show up as
+.I IF-MIB:ifindex.1
+.IP "-q"
+request a "quick print" output format, that also is easier to
+parse for programs
+.IP "-m mibs"
+specifies a colon separated list of MIB modules to load for this application.
+The special name ALL is used to specify all modules in all directories.
+This overrides the environment variable MIBS.
+.IP "-M mibdirs"
+specifies a colon separated list of directories to search for MIBs.
+This overrides the environment variable MIBDIRS.
+.IP "-d"
+request the application to dump all SNMP packets send and received
+.IP "-D"
+request debugging output
+.IP "-r retries"
+specifies the number of retries to be used in the requests. The default
+is 5
+.IP "-t timeout"
+specifies the timeout between retries. The default is 1
+.IP "-p port"
+specifies the port to communicate with at the agent. The default is 161,
+except for snmptrap, which defaults to 162.
+.IP "-v 1 | 2c | 2p"
+specifies the protocol version to use: 1 (RFC 1155-1157), 2c (RFC 1901-1908)
+or 2p (RFC 1441-1452).
+The default is -v 1
+.IP "-c srcclock dstclock"
+sets the clock values to be used for authenticated SNMP v2p messages
+.PP
+The
+.I hostname
+specification may be either a host name or an internet address
+specified in "dot notation".
+.PP
+The version 1, or version 2c,
+.I community
+specifies the community name for the transaction with the remote system.
+.PP
+The version 2p
+.IR srcParty ,
+.IR dstParty ,
+and
+.I context
+specify the party and context names for the transaction with the remote system, as
+they are defined in PREFIX/share/snmp/party.conf.
+To forgo authentication, use the
+.B noAuth
+keyword instead of specifying party names.
+.PP
+.SH "RANDOM ACCESS MIBS"
+Normally, an object identifier such as system.sysDescr.0 will be lookup
+in a single "wellknown" place, built into the SNMP library (or specified
+by the PREFIX environment variable).
+The standard place is: .iso.org.dod.internet.mgmt.mib-2.
+The identifier may alternatively be a complete object identifier,
+this is designated by a leading "dot".
+To simplify the specification of object identifiers the library supports
+random access to the identifiers in the MIBs. This is requested by the
+-R option to the SNMP applications.
+Using this, system.sysDescr.0 may also be entered as sysDescr.0.
+To search only a single MIB for the identifier (if it appears in more
+than one), specify it as SNMPv2-MIB:sysDescr.0. This notation will
+also make sure that the specified MIB is loaded, i.e. it need not
+be mentioned in the -m option (or MIBS environment variable).
+.PP
+.SH "ENVIRONMENT VARIABLES"
+.IP PREFIX
+The standard prefix for object identifiers. Defaults to .iso.org.dod.internet.mgmt.mib-2
+.IP MIBS
+The list of MIBs to load. Defaults to
+SNMPv2-TC:SNMPv2-MIB:IF-MIB:IP-MIB:TCP-MIB:UDP-MIB:SNMP-VACM-MIB.
+Overridden by the -m option
+.IP MIBDIRS
+The list of directories to search for MIBs. Defaults to PREFIX/share/snmp/mibs.
+Overridden by the -M option
+.IP SUFFIX
+If this variable is set, the applications acts as if the -s option is specified.
+.SH FILES
+.IP PREFIX/share/snmp/snmpd.conf
+Agent configuration file. See snmpd.conf(5)
+.IP PREFIX/share/snmp/party.conf
+.IP PREFIX/share/snmp/context.conf
+.IP PREFIX/share/snmp/view.conf
+.IP PREFIX/share/snmp/acl.conf
+SNMP v2p configuration files. Obsolete.
+.SH "SEE ALSO"
+snmpget(1), snmpgetnext(1), snmpset(1), snmpbulkwalk(1), snmpwalk(1),
+snmptable(1), snmpdelta(1), snmptrap(1).
