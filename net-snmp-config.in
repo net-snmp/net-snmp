@@ -1,5 +1,16 @@
 #!/bin/sh
 
+#
+# Portions of this file are subject to the following copyright(s).  See
+# the Net-SNMP's COPYING file for more details and other copyrights
+# that may apply:
+#
+# Portions of this file are copyrighted by:
+# Copyright Copyright 2003 Sun Microsystems, Inc. All rights reserved.
+# Use is subject to license terms specified in the COPYING file
+# distributed with the Net-SNMP package.
+# 
+
 # this shell script is designed to merely dump the configuration
 # information about how the net-snmp package was compiled.  The
 # information is particularily useful for applications that need to
@@ -75,48 +86,65 @@ else
       Xalgorithm="DES"
       token=rwuser
       shift
-      arg=$1
-      shift
-      while test "x$done" = "x" -a "x$arg" != "x" ; do
-	case $arg in
-	    -A)
-		Aalgorithm=$1
-		shift
-		;;
-	    -X)
-		Xalgorithm=$1
-		shift
-		;;
-	    -a)
-		apassphrase=$1
-		shift
-		;;
-	    -x)
-		xpassphrase=$1
-		shift
-		;;
-	    -ro)
-	        token="rouser"
-		;;
- 	    -*)
-		echo "unknown suboption to --create-snmpv3-user: $arg"
-		exit 1
-		;;
-	    *)
-	        done=1
-		;;
-	esac
-	if test "x$done" = "x" ; then
-          arg=$1
-          shift
-	fi
+      while test "x$done" = "x" -a "x$1" != "x" ; do
+        case $1 in
+            -A)
+                shift
+                if test "x$1" = "x" ; then
+                    echo "You must specify an authentication algorithm"
+                    exit 1
+                fi
+                Aalgorithm=$1
+                shift
+                ;;
+            -X)
+                shift
+                if test "x$1" = "x" ; then
+                    echo "You must specify an encryption algorithm"
+                    exit 1
+                fi
+                Xalgorithm=$1
+                shift
+                ;;
+            -a)
+                shift
+                if test "x$1" = "x" ; then
+                    echo "You must specify an authentication pass phrase"
+                    exit 1
+                fi
+                apassphrase=$1
+                shift
+                ;;
+            -x)
+                shift
+                if test "x$1" = "x" ; then
+                    echo "You must specify an encryption pass phrase"
+                    exit 1
+                fi
+                xpassphrase=$1
+                shift
+                ;;
+            -ro)
+                token="rouser"
+                shift
+                ;;
+            -*)
+                echo "unknown suboption to --create-snmpv3-user: $1"
+                exit 1
+                ;;
+            *)
+                done=1
+                ;;
+        esac
       done
       
-      user=$arg
-      if test "x$user" = "x" ; then
+      if test "x$1" = "x" ; then
           prompt=yes
-	  echo "Enter a SNMPv3 user name to create: "
-	  read user
+          echo "Enter a SNMPv3 user name to create: "
+          read user
+      else
+          user=$1
+          shift
       fi
       if test "x$user" = "x" ; then
           echo "You must specify a user name"
@@ -127,8 +155,6 @@ else
           prompt=yes
 	  echo "Enter authentication pass-phrase: "
 	  read apassphrase
-      else
-	  shift
       fi
       if test "x$apassphrase" = "x" ; then
           echo "You must specify an authentication pass-phrase"
@@ -157,23 +183,46 @@ else
     --compile-subagent)
       shift
       outname=$1
-      shift
-      if test $1 = "--norm" ; then
-        norm=1
-	shift
-      fi
-      if test $1 = "--cflags" ; then
-        shift
-	cflags=$1
-	echo "setting extra cflags: $cflags"
-	shift
-      fi
-      if test $1 = "--ldflags" ; then
-        shift
-	ldflags=$1
-	echo "setting extra ldflags: $ldflags"
-	shift
-      fi
+      while test "x$done" = "x" -a "x$1" != "x" ; do
+	case $1 in
+            --norm)
+	        norm=1
+	        shift
+		;;
+            --cflags)
+	        shift
+	        if test "x$1" = "x" ; then
+	            echo "You must specify the extra cflags"
+	            exit 1
+	        fi
+	        cflags=$1
+	        echo "setting extra cflags: $cflags"
+	        shift
+		;;
+            --ldflags)
+	        shift
+	        if test "x$1" = "x" ; then
+	            echo "You must specify the extra ldflags"
+	            exit 1
+	        fi
+	        ldflags=$1
+	        echo "setting extra ldflags: $ldflags"
+	        shift
+		;;
+ 	    --*)
+		echo "unknown suboption to --compile-subagent: $1"
+		exit 1
+		;;
+	    *)
+                if test "x$outname" = "x"; then
+                  outname=$1
+                  shift
+                else
+	          done=1
+                fi
+		;;
+	esac
+      done
       tmpfile=netsnmptmp.$$.c
       if test -f $tmpfile; then
 	echo "Ack.  Can't create $tmpfile: already exists"
