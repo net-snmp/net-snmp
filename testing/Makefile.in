@@ -29,8 +29,10 @@ misctest:    misctest.o $(PARSEOBJS) $(USELIBS)
 stest:    scapitest.o $(PARSEOBJS) $(USELIBS)
 	${CC} -o $@ scapitest.o $(PARSEOBJS) ${LDFLAGS} ${LIBS} 
 
-clean:
+clean: testclean
 	rm -f *.o core *.core $(TARG)
+
+testclean:
 	rm -fr /tmp/snmp-test*
 
 install: installdirs $(TARG)
