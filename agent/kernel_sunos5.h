@@ -76,6 +76,9 @@ typedef struct mibcache {
     size_t	cache_ttl;	/* Time to live for this element in seconds */
     time_t	cache_time;	/* Time stamp for this element */
     int		cache_flags;	/* Cache state */
+    int		cache_last_found; /* Index of last cache element that was found */
+    void*	cache_comp;	/* Compare routine used to set the cache */
+    void*	cache_arg;	/* Argument for compare routine used to set the cache */
 } mibcache;
 
 /* Mapping between mibgroup_t, mibtable_t and mib2.h defines */
