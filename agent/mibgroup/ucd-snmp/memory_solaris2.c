@@ -138,15 +138,23 @@ var_extensible_mem(struct variable *vp,
         long_ret = minimumswap;
         return ((u_char *) (&long_ret));
     case MEMTOTALREAL:
+#ifdef _SC_PHYS_PAGES
+        long_ret = sysconf(_SC_PHYS_PAGES) * (getpagesize()/1024);
+#else
         ksp1 = kstat_lookup(kstat_fd, "unix", 0, "system_pages");
         kstat_read(kstat_fd, ksp1, 0);
         kn = kstat_data_lookup(ksp1, "physmem");
 
         long_ret = kn->value.ul * (getpagesize() / 1024);
+#endif
         return ((u_char *) (&long_ret));
     case MEMAVAILREAL:
+#ifdef _SC_AVPHYS_PAGES
+        long_ret = sysconf(_SC_AVPHYS_PAGES) * (getpagesize()/1024);
+#else
         long_ret =
             (getTotalFree() - getFreeSwap()) * (getpagesize() / 1024);
+#endif
         return ((u_char *) (&long_ret));
     case MEMTOTALFREE:
         long_ret = getTotalFree() * (getpagesize() / 1024);
