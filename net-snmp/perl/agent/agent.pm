@@ -142,7 +142,7 @@ sub new {
 
 sub register($$$$) {
     my ($self, $name, $oid, $sub) = @_;
-    my $reg = NetSNMP::agent::handler_registration::new($name, $oid, $sub);
+    my $reg = NetSNMP::agent::netsnmp_handler_registration::new($name, $oid, $sub);
     $reg->register() if ($reg);
     return $reg;
 }

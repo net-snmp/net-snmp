@@ -186,10 +186,10 @@ not_there:
 }
 
 int
-handler_wrapper(mib_handler          *handler,
-                handler_registration *reginfo,
-                agent_request_info   *reqinfo,
-                request_info         *requests) 
+handler_wrapper(netsnmp_mib_handler          *handler,
+                netsnmp_handler_registration *reginfo,
+                netsnmp_agent_request_info   *reqinfo,
+                netsnmp_request_info         *requests) 
 {
     u_long intret = 5;
     handler_cb_data *cb_data = (handler_cb_data *) handler->myvoid;
@@ -203,7 +203,7 @@ handler_wrapper(mib_handler          *handler,
         SAVETMPS;
         PUSHMARK(sp);
         rarg = newSViv(0);
-        arg = newSVrv(rarg, "NetSNMP::agent::mib_handler");
+        arg = newSVrv(rarg, "NetSNMP::agent::netsnmp_mib_handler");
         sv_setiv(arg, (int) handler);
         XPUSHs(rarg);
         rarg = newSViv(0);
@@ -211,11 +211,11 @@ handler_wrapper(mib_handler          *handler,
         sv_setiv(arg, (int) reginfo);
         XPUSHs(rarg);
         rarg = newSViv(0);
-        arg = newSVrv(rarg, "NetSNMP::agent::agent_request_info");
+        arg = newSVrv(rarg, "NetSNMP::agent::netsnmp_agent_request_info");
         sv_setiv(arg, (int) reqinfo);
         XPUSHs(rarg);
         rarg = newSViv(0);
-        arg = newSVrv(rarg, "NetSNMP::agent::request_info");
+        arg = newSVrv(rarg, "NetSNMP::agent::netsnmp_request_info");
         sv_setiv(arg, (int) requests);
         XPUSHs(rarg);
         PUTBACK;
@@ -275,9 +275,9 @@ init_master_agent()
 void    
 snmp_enable_stderrlog()    
 
-MODULE = NetSNMP::agent  PACKAGE = NetSNMP::agent::handler_registration  PREFIX = nsahr_
+MODULE = NetSNMP::agent  PACKAGE = NetSNMP::agent::netsnmp_handler_registration  PREFIX = nsahr_
 
-handler_registration *
+netsnmp_handler_registration *
 nsahr_new(name, regoid, perlcallback)
         char *name;
 	char *regoid;
@@ -298,7 +298,7 @@ nsahr_new(name, regoid, perlcallback)
         }
         if (gotit) {
             cb_data = (handler_cb_data *) malloc(sizeof(handler_cb_data));
-            RETVAL = create_handler_registration(name, handler_wrapper,
+            RETVAL = netsnmp_create_handler_registration(name, handler_wrapper,
                                                  myoid, myoid_len,
                                                  HANDLER_CAN_RWRITE);
             cb_data->perl_cb = newSVsv(perlcallback);
@@ -307,23 +307,23 @@ nsahr_new(name, regoid, perlcallback)
     OUTPUT:
         RETVAL
 
-MODULE = NetSNMP::agent  PACKAGE = handler_registrationPtr  PREFIX = nsahr_
+MODULE = NetSNMP::agent  PACKAGE = netsnmp_handler_registrationPtr  PREFIX = nsahr_
 
 void
 nsahr_DESTROY(reginfo)
-	handler_registration *reginfo
+	netsnmp_handler_registration *reginfo
     CODE:
-	snmp_handler_registration_free(reginfo);
+	snmp_netsnmp_handler_registration_free(reginfo);
 
 int
 nsahr_register(reginfo)
-	handler_registration *reginfo
+	netsnmp_handler_registration *reginfo
     CODE:
-	RETVAL = register_handler(reginfo);
+	RETVAL = netsnmp_register_handler(reginfo);
     OUTPUT:
 	RETVAL
 
-MODULE = NetSNMP::agent  PACKAGE = NetSNMP::agent::request_info PREFIX = nari_
+MODULE = NetSNMP::agent  PACKAGE = NetSNMP::agent::netsnmp_request_info PREFIX = nari_
 
 char *
 nari_getOID(me)
@@ -331,9 +331,9 @@ nari_getOID(me)
     PREINIT:
         u_char *oidbuf = NULL;
         size_t ob_len = 0, oo_len = 0;
-        request_info *request;
+        netsnmp_request_info *request;
     CODE:
-        request = (request_info *) SvIV(SvRV(me));
+        request = (netsnmp_request_info *) SvIV(SvRV(me));
 	sprint_realloc_objid(&oidbuf,&ob_len,&oo_len, 1,
 			     request->requestvb->name,
                              request->requestvb->name_length);
@@ -347,9 +347,9 @@ nari_getValue(me)
     PREINIT:
         u_char *oidbuf = NULL;
         size_t ob_len = 0, oo_len = 0;
-        request_info *request;
+        netsnmp_request_info *request;
     CODE:
-        request = (request_info *) SvIV(SvRV(me));
+        request = (netsnmp_request_info *) SvIV(SvRV(me));
 	sprint_realloc_by_type(&oidbuf, &ob_len, &oo_len, 1,
                                request->requestvb, 0, 0, 0);
         RETVAL = oidbuf; /* mem leak */
@@ -360,9 +360,9 @@ int
 nari_getDelegated(me)
         SV *me;
     PREINIT:
-        request_info *request;
+        netsnmp_request_info *request;
     CODE:
-        request = (request_info *) SvIV(SvRV(me));
+        request = (netsnmp_request_info *) SvIV(SvRV(me));
         RETVAL = request->delegated;
     OUTPUT:
         RETVAL
@@ -372,18 +372,18 @@ nari_setDelegated(me, newdelegated)
         SV *me;
         int newdelegated;
     PREINIT:
-        request_info *request;
+        netsnmp_request_info *request;
     CODE:
-        request = (request_info *) SvIV(SvRV(me));
+        request = (netsnmp_request_info *) SvIV(SvRV(me));
         request->delegated = newdelegated;
 
 int
 nari_getProcessed(me)
         SV *me;
     PREINIT:
-        request_info *request;
+        netsnmp_request_info *request;
     CODE:
-        request = (request_info *) SvIV(SvRV(me));
+        request = (netsnmp_request_info *) SvIV(SvRV(me));
         RETVAL = request->processed;
     OUTPUT:
         RETVAL
@@ -393,18 +393,18 @@ nari_setProcessed(me, newprocessed)
         SV *me;
         int newprocessed;
     PREINIT:
-        request_info *request;
+        netsnmp_request_info *request;
     CODE:
-        request = (request_info *) SvIV(SvRV(me));
+        request = (netsnmp_request_info *) SvIV(SvRV(me));
         request->processed = newprocessed;
 
 int
 nari_getStatus(me)
         SV *me;
     PREINIT:
-        request_info *request;
+        netsnmp_request_info *request;
     CODE:
-        request = (request_info *) SvIV(SvRV(me));
+        request = (netsnmp_request_info *) SvIV(SvRV(me));
         RETVAL = request->status;
     OUTPUT:
         RETVAL
@@ -414,18 +414,18 @@ nari_setStatus(me, newstatus)
         SV *me;
         int newstatus;
     PREINIT:
-        request_info *request;
+        netsnmp_request_info *request;
     CODE:
-        request = (request_info *) SvIV(SvRV(me));
+        request = (netsnmp_request_info *) SvIV(SvRV(me));
         request->status = newstatus;
 
 int
 nari_getRepeat(me)
         SV *me;
     PREINIT:
-        request_info *request;
+        netsnmp_request_info *request;
     CODE:
-        request = (request_info *) SvIV(SvRV(me));
+        request = (netsnmp_request_info *) SvIV(SvRV(me));
         RETVAL = request->repeat;
     OUTPUT:
         RETVAL
@@ -435,9 +435,9 @@ nari_setRepeat(me, newrepeat)
         SV *me;
         int newrepeat;
     PREINIT:
-        request_info *request;
+        netsnmp_request_info *request;
     CODE:
-        request = (request_info *) SvIV(SvRV(me));
+        request = (netsnmp_request_info *) SvIV(SvRV(me));
         request->repeat = newrepeat;
 
 int
@@ -448,14 +448,14 @@ nari_setValue(me, type, value)
     PREINIT:
         u_char *oidbuf = NULL;
         size_t ob_len = 0, oo_len = 0;
-        request_info *request;
+        netsnmp_request_info *request;
         u_long utmp;
         struct hostent *hent;
         long ltmp;
 	oid myoid[MAX_OID_LEN];
 	size_t myoid_len;
     CODE:
-        request = (request_info *) SvIV(SvRV(me));
+        request = (netsnmp_request_info *) SvIV(SvRV(me));
         switch(type) {
           case ASN_INTEGER:
               ltmp = strtol(value, NULL, 0);
@@ -488,7 +488,7 @@ nari_setValue(me, type, value)
               if (!snmp_parse_oid(value, myoid, &myoid_len)) {
                   fprintf(stderr, "couldn't parse %s in setOID\n", value);
               } else {
-                  request = (request_info *) SvIV(SvRV(me));
+                  request = (netsnmp_request_info *) SvIV(SvRV(me));
                   snmp_set_var_typed_value(request->requestvb, type,
                                            (u_char *) myoid, myoid_len);
               }
@@ -512,38 +512,38 @@ nari_setOID(me, value)
     PREINIT:
 	oid myoid[MAX_OID_LEN];
 	size_t myoid_len;
-        request_info *request;
+        netsnmp_request_info *request;
     CODE:
 	if (!snmp_parse_oid(value, myoid, &myoid_len)) {
             fprintf(stderr, "couldn't parse %s in setOID\n", value);
         } else {
-            request = (request_info *) SvIV(SvRV(me));
+            request = (netsnmp_request_info *) SvIV(SvRV(me));
             snmp_set_var_objid(request->requestvb, myoid, myoid_len);
         }
 
 
-request_info *
+netsnmp_request_info *
 nari_next(me)
         SV *me;
     PREINIT:
-        request_info *request;
+        netsnmp_request_info *request;
     CODE:
-        request = (request_info *) SvIV(SvRV(me));
+        request = (netsnmp_request_info *) SvIV(SvRV(me));
         if (request)
             request = request->next;
         RETVAL = request;
     OUTPUT:
         RETVAL
 
-MODULE = NetSNMP::agent  PACKAGE = NetSNMP::agent::agent_request_info PREFIX = narqi_
+MODULE = NetSNMP::agent  PACKAGE = NetSNMP::agent::netsnmp_agent_request_info PREFIX = narqi_
 
 int
 narqi_getMode(me)
         SV *me;
     PREINIT:
-        agent_request_info *reqinfo;
+        netsnmp_agent_request_info *reqinfo;
     CODE:
-        reqinfo = (agent_request_info *) SvIV(SvRV(me));
+        reqinfo = (netsnmp_agent_request_info *) SvIV(SvRV(me));
         RETVAL = reqinfo->mode;
     OUTPUT:
         RETVAL
@@ -553,9 +553,9 @@ narqi_setMode(me, newvalue)
         SV *me;
         int newvalue;
     PREINIT:
-        agent_request_info *reqinfo;
+        netsnmp_agent_request_info *reqinfo;
     CODE:
-        reqinfo = (agent_request_info *) SvIV(SvRV(me));
+        reqinfo = (netsnmp_agent_request_info *) SvIV(SvRV(me));
         reqinfo->mode = newvalue;
         
 
