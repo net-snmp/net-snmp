@@ -487,6 +487,7 @@ _init_snmp (void)
     
     struct timeval tv;
     long tmpReqid, tmpMsgid;
+    u_short s_port = SNMP_PORT;
 
     if (Reqid) return;
     Reqid = 1; /* quick set to avoid multiple inits */
@@ -514,16 +515,14 @@ _init_snmp (void)
     Reqid = tmpReqid;
     Msgid = tmpMsgid;
 
-    ds_set_int(DS_LIBRARY_ID, DS_LIB_DEFAULT_PORT, SNMP_PORT);
 #ifdef HAVE_GETSERVBYNAME   
     servp = getservbyname("snmp", "udp");
-    if (servp)
-      /* we have to store it in local byte order, which is now how its
-      returned from the getservbyname function above.*/
-      ds_set_int(DS_LIBRARY_ID, DS_LIB_DEFAULT_PORT, htons(servp->s_port));
-#else /* HAVE_GETSERVBYNAME */
-    ds_set_int(DS_LIBRARY_ID, DS_LIB_DEFAULT_PORT, SNMP_PORT);
-#endif /* HAVE_GETSERVBYNAME */
+    if (servp) {
+      /* store it in host byte order */
+      s_port = ntohs(servp->s_port);
+    }
+#endif
+    ds_set_int(DS_LIBRARY_ID, DS_LIB_DEFAULT_PORT, s_port);
 }
 
 /*
