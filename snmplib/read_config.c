@@ -205,6 +205,10 @@ register_config_handler(const char *type_param,
 
     if (type == NULL) {
         type = netsnmp_ds_get_string(NETSNMP_DS_LIBRARY_ID, 
+				     NETSNMP_DS_LIB_APPTYPES);
+    }
+    if (type == NULL) {
+        type = netsnmp_ds_get_string(NETSNMP_DS_LIBRARY_ID, 
 				     NETSNMP_DS_LIB_APPTYPE);
     }
 
@@ -304,6 +308,10 @@ unregister_config_handler(const char *type_param, const char *token)
     const char     *type = type_param;
     char           *cptr, buf[STRINGMAX];
 
+    if (type == NULL) {
+        type = netsnmp_ds_get_string(NETSNMP_DS_LIBRARY_ID, 
+				     NETSNMP_DS_LIB_APPTYPES);
+    }
     if (type == NULL) {
         type = netsnmp_ds_get_string(NETSNMP_DS_LIBRARY_ID, 
 				     NETSNMP_DS_LIB_APPTYPE);
@@ -799,7 +807,11 @@ read_configs(void)
     char *optional_config = netsnmp_ds_get_string(NETSNMP_DS_LIBRARY_ID, 
 					       NETSNMP_DS_LIB_OPTIONALCONFIG);
     char *type = netsnmp_ds_get_string(NETSNMP_DS_LIBRARY_ID, 
-				       NETSNMP_DS_LIB_APPTYPE);
+				       NETSNMP_DS_LIB_APPTYPES);
+    if (type == NULL) {
+        type = netsnmp_ds_get_string(NETSNMP_DS_LIBRARY_ID, 
+				     NETSNMP_DS_LIB_APPTYPE);
+    }
 
     DEBUGMSGTL(("read_config", "reading normal configuration tokens\n"));
 
