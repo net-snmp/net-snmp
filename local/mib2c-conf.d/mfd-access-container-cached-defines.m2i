@@ -75,6 +75,8 @@ void
 ${table}_container_init(netsnmp_container **container_ptr_ptr,
                         netsnmp_cache *cache)
 {
+    DEBUGTRACE;
+    
     if((NULL == cache) || (NULL == container_ptr_ptr)) {
         snmp_log(LOG_ERR,"bad params to ${table}_container_init\n");
         return;
@@ -272,6 +274,7 @@ $example_end
 void
 ${context}_cache_free(netsnmp_container *container)
 {
+    DEBUGTRACE;
 }
 
 @end@ // m2c_processing_type eq 'c'
