@@ -25,7 +25,7 @@
 #include <machine/param.h>
 #endif
 #if HAVE_SYS_VMMETER_H
-#ifndef bsdi2
+#if !(defined(bsdi2) || defined(netbsd1))
 #include <sys/vmmeter.h>
 #endif
 #endif
@@ -114,12 +114,9 @@ setPerrorstatus(to)
   char *to;
 {
   char buf[STRMAX];
-#if !defined(netbsd1) && !defined(freebsd2)
-  extern char *sys_errlist[];
-#endif
   extern int errno;
   
-  sprintf(buf,"%s:  %s",to,sys_errlist[errno]);
+  sprintf(buf,"%s:  %s",to,strerror(errno));
   perror(to);
   seterrorstatus(buf,5);
 }

@@ -209,17 +209,17 @@ retry:
           }
         }
       } else {
-        printf("Error in packet.\nReason: %s\n",
+        fprintf(stderr, "Error in packet.\nReason: %s\n",
                 snmp_errstring(response->errstat));
         if (response->errstat == SNMP_ERR_NOSUCHNAME){
-          printf("This name doesn't exist: ");
+          fprintf(stderr, "This name doesn't exist: ");
           for(count = 1, vars = response->variables;
                 vars && count != response->errindex;
                 vars = vars->next_variable, count++)
             ;
           if (vars)
-            print_objid(vars->name, vars->name_length);
-          printf("\n");
+            fprint_objid(stderr, vars->name, vars->name_length);
+          fprintf(stderr, "\n");
         }
         if ((pdu = snmp_fix_pdu(response, GET_REQ_MSG)) != NULL)
           goto retry;
@@ -294,17 +294,17 @@ retry:
           if (good_var == 5)
             interfaces++;
         } else {
-          printf("Error in packet.\nReason: %s\n",
+          fprintf(stderr, "Error in packet.\nReason: %s\n",
                   snmp_errstring(response->errstat));
           if (response->errstat == SNMP_ERR_NOSUCHNAME){
-            printf("This name doesn't exist: ");
+            fprintf(stderr, "This name doesn't exist: ");
             for(count = 1, vars = response->variables;
                   vars && count != response->errindex;
                   vars = vars->next_variable, count++)
               ;
             if (vars)
-              print_objid(vars->name, vars->name_length);
-            printf("\n");
+              fprint_objid(stderr, vars->name, vars->name_length);
+            fprintf(stderr, "\n");
           }
         }
       } else if (status == STAT_TIMEOUT){

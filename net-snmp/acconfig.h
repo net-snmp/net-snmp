@@ -406,6 +406,8 @@
 
 #ifdef WIN32
 #define ENV_SEPARATOR ";"
+#define ENV_SEPARATOR_CHAR ';'
 #else
 #define ENV_SEPARATOR ":"
+#define ENV_SEPARATOR_CHAR ':'
 #endif

@@ -679,16 +679,16 @@ asn_build_objid(data, datalength, type, objid, objidlength)
 
     /* calculate the number of bytes needed to store the encoded value */
     for (i = 1, asnlength = 0;;) {
-        if (objid_val < 0x80U) {
+        if (objid_val < (unsigned)0x80) {
             objid_size[i] = 1;
             asnlength += 1;
-        } else if (objid_val < 0x4000U) {
+        } else if (objid_val < (unsigned)0x4000) {
             objid_size[i] = 2;
             asnlength += 2;
-        } else if (objid_val < 0x200000U) {
+        } else if (objid_val < (unsigned)0x200000) {
             objid_size[i] = 3;
             asnlength += 3;
-        } else if (objid_val < 0x10000000U) {
+        } else if (objid_val < (unsigned)0x10000000) {
             objid_size[i] = 4;
             asnlength += 4;
         } else {
