@@ -375,6 +375,9 @@ in_a_view(oid		  *name,      /* IN - name of var, OUT - name matched */
           struct snmp_pdu *pdu,       /* IN - relevant auth info re PDU */
           int	           type)      /* IN - variable type being checked */
 {
+  if (pdu->flags & UCD_MSG_FLAG_ALWAYS_IN_VIEW)
+    return 1;		/* Enable bypassing of view-based access control */
+
   /* check for v1 and counter64s, since snmpv1 doesn't support it */
   if (pdu->version == SNMP_VERSION_1 && type == ASN_COUNTER64)
     return 0;
