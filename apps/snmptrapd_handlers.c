@@ -425,8 +425,8 @@ netsnmp_get_traphandler( oid *trapOid, int trapOidLen ) {
     for (traph = netsnmp_specific_traphandlers;
          traph; traph=traph->nextt ) {
 
-        if ( !snmp_oid_compare(traph->trapoid, traph->trapoid_len,
-                               trapOid, trapOidLen)) {
+        if ( !snmp_oidtree_compare(traph->trapoid, traph->trapoid_len,
+                                   trapOid, trapOidLen)) {
             DEBUGMSGTL(( "snmptrapd", "get_traphandler matched (%x)\n", traph));
 	    return traph;
 	}
