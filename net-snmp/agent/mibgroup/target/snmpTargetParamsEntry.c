@@ -378,43 +378,36 @@ void snmpd_parse_config_targetParams(
   newEntry = snmpTargetParamTable_create();
   
   cptr = copy_word(cptr, buff);
-  cptr = (char *)skip_white(cptr);
   if (snmpTargetParams_addParamName(newEntry, buff) == 0) {
     snmpTargetParamTable_dispose(newEntry);
     return;
   }
   cptr = copy_word(cptr, buff);
-  cptr = (char *)skip_white(cptr);
   if (snmpTargetParams_addMPModel(newEntry, buff) == 0) {
     snmpTargetParamTable_dispose(newEntry);
     return;
   }
   cptr = copy_word(cptr, buff);
-  cptr = (char *)skip_white(cptr);
   if (snmpTargetParams_addSecModel(newEntry, buff) == 0) {
     snmpTargetParamTable_dispose(newEntry);
     return;
   }
   cptr = copy_word(cptr, buff);
-  cptr = (char *)skip_white(cptr);
   if (snmpTargetParams_addSecName(newEntry, buff) == 0) {
     snmpTargetParamTable_dispose(newEntry);
     return;
   }
   cptr = copy_word(cptr, buff);
-  cptr = (char *)skip_white(cptr);
   if (snmpTargetParams_addSecLevel(newEntry, buff) == 0) {
     snmpTargetParamTable_dispose(newEntry);
     return;
   }
   cptr = copy_word(cptr, buff);
-  cptr = (char *)skip_white(cptr);
   if (snmpTargetParams_addStorageType(newEntry, buff) == 0) {
     snmpTargetParamTable_dispose(newEntry);
     return;
   }
   cptr = copy_word(cptr, buff);
-  cptr = (char *)skip_white(cptr);
   if (snmpTargetParams_addRowStatus(newEntry, buff) == 0) {
     snmpTargetParamTable_dispose(newEntry);
     return;
