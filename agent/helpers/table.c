@@ -749,21 +749,33 @@ table_helper_cleanup(netsnmp_agent_request_info *reqinfo,
 }
 
 
+/*
+ * find the closest column to current (which may be current).
+ *
+ * called when a table runs out of rows for column X. This
+ * function is called with current = X + 1, to verify that
+ * X + 1 is a valid column, or find the next closest column if not.
+ *
+ * All list types should be sorted, lowest to highest.
+ */
 unsigned int
 netsnmp_closest_column(unsigned int current,
                        netsnmp_column_info *valid_columns)
 {
     unsigned int    closest = 0;
-    char            done = 0;
     int             idx;
 
     if (valid_columns == NULL)
         return 0;
 
-    for( ; (!done && valid_columns); valid_columns = valid_columns->next) {
+    for( ; valid_columns; valid_columns = valid_columns->next) {
 
         if (valid_columns->isRange) {
-
+            /*
+             * if current < low range, it might be closest.
+             * otherwise, if it's < high range, current is in
+             * the range, and thus is an exact match.
+             */
             if (current < valid_columns->details.range[0]) {
                 if ( (valid_columns->details.range[0] < closest) ||
                      (0 == closest)) {
@@ -776,7 +788,10 @@ netsnmp_closest_column(unsigned int current,
 
         } /* range */
         else {                  /* list */
-
+            /*
+             * if current < first item, no need to iterate over list.
+             * that item is either closest, or not.
+             */
             if (current < valid_columns->details.list[0]) {
                 if ((valid_columns->details.list[0] < closest) ||
                     (0 == closest))
@@ -784,25 +799,28 @@ netsnmp_closest_column(unsigned int current,
                 continue;
             }
 
+            /** if current > last item in list, no need to iterate */
             if (current >
                 valid_columns->details.list[(int)valid_columns->list_count - 1])
                 continue;       /* not in list range. */
 
-            for (idx = 0; idx < (int)valid_columns->list_count; ++idx) {
-                if (current == valid_columns->details.list[idx]) {
-                    closest = current;
-                    done = 1;   /* can not get any closer! */
-                    break;      /* inner for */
-                } else if (current < valid_columns->details.list[idx]) {
-                    if ((valid_columns->details.list[idx] < closest) ||
-                        (0 == closest))
-                        closest = valid_columns->details.list[idx];
-                    break;      /* inner for */
-                } else
-                    break;      /* list should be sorted */
-            }                   /* inner for */
+            /** skip anything less than current*/
+            for (idx = 0; valid_columns->details.list[idx] < current; ++idx)
+                ;
+            
+            /** check for exact match */
+            if (current == valid_columns->details.list[idx]) {
+                closest = current;
+                break;      /* can not get any closer! */
+            }
+            
+            /** list[idx] > current; is it < closest? */
+            if ((valid_columns->details.list[idx] < closest) ||
+                (0 == closest))
+                closest = valid_columns->details.list[idx];
+
         }                       /* list */
-    }                           /* outer for */
+    }                           /* for */
 
     return closest;
 }
