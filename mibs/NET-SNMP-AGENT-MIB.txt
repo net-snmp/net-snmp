@@ -205,7 +205,7 @@ nsNotifyRestart      NOTIFICATION-TYPE
 
 nsModuleGroup  OBJECT-GROUP
     OBJECTS {
-        nsmContextName, nsmRegistrationPoint, nsmRegistrationPriority
+        nsmContextName, nsmRegistrationPoint, nsmRegistrationPriority,
         nsModuleName, nsModuleModes, nsModuleTimeout
     }
     STATUS	current
