@@ -213,6 +213,12 @@ sub process_vars {
 #     repeat iterate over code until @end@ setting $VAR to all known
 #     indexes within a given table.  Obviously this must be called
 #     within a foreach-table clause.
+#   @foreach $LABEL, $VALUE enum@
+#     repeat iterate over code until @end@ setting $LABEL and $VALUE
+#     to the label and values from the enum list.
+#   @foreach $RANGE_START, $RANGE_END range NODE@
+#     repeat iterate over code until @end@ setting $RANGE_START and $RANGE_END
+#     to the legal accepted range set for a given mib NODE.
 #   @eval $VAR = expression@
 #     evaluates expression and assigns the results to $VAR
 #   @perleval STUFF@
@@ -324,7 +330,30 @@ sub process {
 		$currentcolumn = $oldcolumn;
 	      }
 	    }
-	  } elsif (/\@\s*foreach\s+\$([^\@]+)\s+\$([^\@]+)\s+(enums*)\s*\@/) {
+	  } elsif (/\@\s*foreach\s+\$([^\@]+)\s+\$([^\@]+)\s+range\s+([^\@]+)\@/) {
+	    my ($svar, $evar, $node) = ($1, $2, $3);
+	    my $startpos = $fh->tell();
+	    my $range;
+	    $node = $currentcolumn if (!$node);
+	    my $mibn = $SNMP::MIB{process_vars($node)};
+	    die "no such mib node: $node" if (!$mibn);
+	    my @ranges = @{$mibn->{'ranges'}};
+	    if ($#ranges > -1) {
+		foreach $range (@ranges) {
+		    #		print "looping on $var for $type -> $column\n";
+		    $fh->seek($startpos, 0); # go to top of section.
+		    my $oldvars = $vars{$svar};
+		    my $oldvare = $vars{$evar};
+		    $vars{$svar} = $range->{'low'};
+		    $vars{$evar} = $range->{'high'};
+		    process();
+		    $vars{$svar} = $oldvars;
+		    $vars{$evar} = $oldvare;
+		}
+	    } else {
+		skippart();
+	    }
+	} elsif (/\@\s*foreach\s+\$([^\@]+)\s*,*\s+\$([^\@]+)\s+(enums*)\s*\@/) {
 	    my ($varvar, $varval, $type) = ($1, $2, $3);
 	    my $startpos = $fh->tell();
 	    my $enum;
