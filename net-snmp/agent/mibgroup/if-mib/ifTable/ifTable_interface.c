@@ -99,7 +99,7 @@ ifTable_data   *ifTable_allocate_data(void);
 void
 if_mib_container_init(void)
 {
-    static done = 0;
+    static int done = 0;
 
     if (done)
         return;
