@@ -51,9 +51,13 @@ tkmib [-C] [-o OID] [SNMPCMD arguments] [host]
 
 usage() if ($opts{'h'});
 
+# initialize defaults, may be overridden by config file below
 @displayInfo=qw(type access status units hint moduleID enums indexes);
 @saveoptions = ('displayoidas', 'writecolor', 'graphtime', 'graphdelta');
+$displayoidas='full';
 $writecolor = "blue";
+$graphtime=5;
+$graphdelta=1;
 foreach $i (@displayInfo) {
     $displayInfoStates{$i} = 1;
 }
@@ -79,9 +83,6 @@ $session_opts{'Timeout'} = $opts{'t'} if ($opts{'t'});
 $host = shift if ($#ARGV > -1);
 $session_opts{'Community'} = shift if ($#ARGV > -1);
 
-$displayoidas='full';
-$graphtime=5;
-$graphdelta=1;
 @graphcolors=qw(blue red green yellow purple);
 
 # initialize SNMP module
@@ -218,11 +219,6 @@ $tmp = $OptMenuBut->cget(-menu);
 $OptMenuWidgets = $tmp->entrycget("Display", -menu);
 $OptMenuWidgets = $OptMenuWidgets->entrycget("MIB Information", -menu);
 
-# $OptMenuBut->cascade(-label => 'sub');
-#$sub1 = $OptMenuBut->Optionmenu(-text => 'options', -options => ['hehe',["hi", "there"]]);
-#$sub1->pack();
-# $OptMenuBut->entryconfigure('sub', -menu => $sub1);
-
 $hlist=$top->Scrolled(qw(HList -itemtype imagetext -browsecmd main::showInfo
 			 -command main::showChildren -width 80 -height 15));
 $hlist->pack(-side => 'top', -expand => 1, -fill => 'both');
@@ -286,12 +282,6 @@ if (defined($opts{'o'})) {
 }
 
 MainLoop();
-
-sub printit {
-    while($a = shift) {
-	print ": $a\n";
-    }
-}
 
 sub insertresult {
     my $oid = shift;
@@ -366,7 +356,6 @@ sub initCanvas {
 
 sub snmpget {
     (my $oid, my $sess, my $var) = snmpsetup();
-    print "getting:  $host $community $oid\n";
     $status->configure(-text => "getting:  $host $community $oid");
     $top->update();
     my $val = $sess->get($var);
@@ -423,19 +412,13 @@ sub snmpsetmaybebegin {
 
 sub snmpsetbegin_addvar {
     my ($vars, $place, $oid, $val) = @_;
-    print "oid: $oid\n";
     $oid = $OID if ($oid eq "OID");
-#    $oid =~ s/^\.//;
-    print "ref win: " . ref($place) . "\n";
-    print "ref vars: " . ref($vars) . "\n";
-    print "oid: $oid\n";
     my $mib = $SNMP::MIB{"$oid"};
     my $var = new SNMP::Varbind([$oid, '', $val, $mib->{'type'} || 'INTEGER']);
     push @$vars,$var;
     my $frame = $place->Frame();
     $frame->Entry(-textvariable => \$var->[0], -width => 20)->pack(-side => 'left');
     make_enum_button($frame, \$var->[3], qw(OBJECTID OCTETSTR INTEGER NETADDR IPADDR COUNTER COUNTER64 GAUGE UINTEGER TICKS OPAQUE NULL))->pack(-side => 'left');
-    print "enums: " . ref($mib->{'enums'}) . "\n";
     if (ref($mib->{'enums'}) eq HASH && scalar(keys(%{$mib->{'enums'}})) > 0) {
 	make_enum_button($frame, \$var->[2], keys(%{$mib->{'enums'}}))->pack(-side => 'left');
     } else {
@@ -454,11 +437,9 @@ sub snmpsetbegin_ok {
 sub snmpset {
     my $vars = shift;
     (my $oid, my $sess, my $var) = snmpsetup();
-    print "setting:  $host " . Dumper($vars) . "\n";
     $status->configure(-text => "setting:  $host -> " . Dumper($vars) . "\n");
     $top->update();
     my $val = $sess->set($vars);
-    print "$sess->{ErrorStr}\n";
     if ($sess->{ErrorStr}) {
 	$output->insert('end', "Set failed.\nReason:  $sess->{ErrorStr}");
 	$status->configure(-text => $sess->{ErrorStr});
@@ -472,7 +453,6 @@ sub snmpset {
 
 sub snmpgetnext {
     (my $oid, my $sess, my $var) = snmpsetup();
-    print "getnexting:  $host $community $oid\n";
     $status->configure(-text => "get next:  $host $community $oid");
     $top->update();
     my $val = $sess->getnext($var);
@@ -568,7 +548,6 @@ sub snmpgraph {
 
 sub updateGraph() {
     $status->configure(-text => "collecting data:  $host $community $graphoid");
-    print "updating\n";
     my $oid = $graphoid;
     my $tag = SNMP::translateObj($graphoid,0);
     my $var = new SNMP::Varbind([$oid]);
