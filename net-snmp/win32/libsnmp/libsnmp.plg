@@ -1,55 +1,55 @@
---------------------Configuration: libsnmp - Win32 Debug--------------------
-Begining build with project "H:\builds\ucd-snmp-3.4.pre8\win32\libsnmp\libsnmp.dsp", at root.
+--------------------Configuration: libsnmp - Win32 Release--------------------
+Begining build with project "H:\builds\ucd-snmp-3.5\win32\libsnmp\libsnmp.dsp", at root.
 Active configuration is Win32 (x86) Static Library (based on Win32 (x86) Static Library)
 
 Project's tools are:
-			"32-bit C/C++ Compiler for 80x86" with flags "/nologo /MLd /W3 /GX /Z7 /Od /I "." /I ".." /I "..\..\snmplib" /I "..\.." /D "WIN32" /D "_DEBUG" /D "_WINDOWS" /Fp"Debug/libsnmp.pch" /YX /Fo"Debug/" /Fd"Debug/" /FD /c "
-			"Browser Database Maker" with flags "/nologo /o"Debug/libsnmp.bsc" "
+			"32-bit C/C++ Compiler for 80x86" with flags "/nologo /MT /W3 /GX /O2 /I "." /I ".." /I "..\..\snmplib" /I "..\.." /D "WIN32" /D "NDEBUG" /D "_WINDOWS" /Fp"Release/libsnmp.pch" /YX /Fo"Release/" /Fd"Release/" /FD /c "
+			"Browser Database Maker" with flags "/nologo /o"..\lib/libsnmp.bsc" "
 			"Library Manager" with flags "/nologo /out:"..\lib\snmp.lib" "
 			"Custom Build" with flags ""
 			"<Component 0xa>" with flags ""
 
-Creating temp file "C:\WINDOWS\TEMP\RSPA205.TMP" with contents </nologo /MLd /W3 /GX /Z7 /Od /I "." /I ".." /I "..\..\snmplib" /I "..\.." /D "WIN32" /D "_DEBUG" /D "_WINDOWS" /Fp"Debug/libsnmp.pch" /YX /Fo"Debug/" /Fd"Debug/" /FD /c 
-"H:\builds\ucd-snmp-3.4.pre8\snmplib\acl.c"
-"H:\builds\ucd-snmp-3.4.pre8\snmplib\acl_parse.c"
-"H:\builds\ucd-snmp-3.4.pre8\snmplib\asn1.c"
-"H:\builds\ucd-snmp-3.4.pre8\snmplib\context.c"
-"H:\builds\ucd-snmp-3.4.pre8\snmplib\context_parse.c"
-"H:\builds\ucd-snmp-3.4.pre8\snmplib\hpux.c"
-"H:\builds\ucd-snmp-3.4.pre8\snmplib\int64.c"
-"H:\builds\ucd-snmp-3.4.pre8\snmplib\md5.c"
-"H:\builds\ucd-snmp-3.4.pre8\snmplib\mib.c"
-"H:\builds\ucd-snmp-3.4.pre8\snmplib\parse.c"
-"H:\builds\ucd-snmp-3.4.pre8\snmplib\party.c"
-"H:\builds\ucd-snmp-3.4.pre8\snmplib\party_parse.c"
-"H:\builds\ucd-snmp-3.4.pre8\snmplib\snmp.c"
-"H:\builds\ucd-snmp-3.4.pre8\snmplib\snmp_api.c"
-"H:\builds\ucd-snmp-3.4.pre8\snmplib\snmp_auth.c"
-"H:\builds\ucd-snmp-3.4.pre8\snmplib\snmp_client.c"
-"H:\builds\ucd-snmp-3.4.pre8\snmplib\system.c"
-"H:\builds\ucd-snmp-3.4.pre8\snmplib\view.c"
+Creating temp file "C:\WINDOWS\TEMP\RSP4062.TMP" with contents </nologo /MT /W3 /GX /O2 /I "." /I ".." /I "..\..\snmplib" /I "..\.." /D "WIN32" /D "NDEBUG" /D "_WINDOWS" /Fp"Release/libsnmp.pch" /YX /Fo"Release/" /Fd"Release/" /FD /c 
+"H:\builds\ucd-snmp-3.5\snmplib\acl.c"
+"H:\builds\ucd-snmp-3.5\snmplib\acl_parse.c"
+"H:\builds\ucd-snmp-3.5\snmplib\asn1.c"
+"H:\builds\ucd-snmp-3.5\snmplib\context.c"
+"H:\builds\ucd-snmp-3.5\snmplib\context_parse.c"
+"H:\builds\ucd-snmp-3.5\snmplib\hpux.c"
+"H:\builds\ucd-snmp-3.5\snmplib\int64.c"
+"H:\builds\ucd-snmp-3.5\snmplib\md5.c"
+"H:\builds\ucd-snmp-3.5\snmplib\mib.c"
+"H:\builds\ucd-snmp-3.5\snmplib\parse.c"
+"H:\builds\ucd-snmp-3.5\snmplib\party.c"
+"H:\builds\ucd-snmp-3.5\snmplib\party_parse.c"
+"H:\builds\ucd-snmp-3.5\snmplib\snmp.c"
+"H:\builds\ucd-snmp-3.5\snmplib\snmp_api.c"
+"H:\builds\ucd-snmp-3.5\snmplib\snmp_auth.c"
+"H:\builds\ucd-snmp-3.5\snmplib\snmp_client.c"
+"H:\builds\ucd-snmp-3.5\snmplib\system.c"
+"H:\builds\ucd-snmp-3.5\snmplib\view.c"
 >
-Creating command line "cl.exe @C:\WINDOWS\TEMP\RSPA205.TMP" 
-Creating temp file "C:\WINDOWS\TEMP\RSPA206.TMP" with contents </nologo /out:"..\lib\snmp.lib" 
-".\Debug\acl.obj"
-".\Debug\acl_parse.obj"
-".\Debug\asn1.obj"
-".\Debug\context.obj"
-".\Debug\context_parse.obj"
-".\Debug\hpux.obj"
-".\Debug\int64.obj"
-".\Debug\md5.obj"
-".\Debug\mib.obj"
-".\Debug\parse.obj"
-".\Debug\party.obj"
-".\Debug\party_parse.obj"
-".\Debug\snmp.obj"
-".\Debug\snmp_api.obj"
-".\Debug\snmp_auth.obj"
-".\Debug\snmp_client.obj"
-".\Debug\system.obj"
-".\Debug\view.obj">
-Creating command line "link.exe -lib @C:\WINDOWS\TEMP\RSPA206.TMP" 
+Creating command line "cl.exe @C:\WINDOWS\TEMP\RSP4062.TMP" 
+Creating temp file "C:\WINDOWS\TEMP\RSP4063.TMP" with contents </nologo /out:"..\lib\snmp.lib" 
+".\Release\acl.obj"
+".\Release\acl_parse.obj"
+".\Release\asn1.obj"
+".\Release\context.obj"
+".\Release\context_parse.obj"
+".\Release\hpux.obj"
+".\Release\int64.obj"
+".\Release\md5.obj"
+".\Release\mib.obj"
+".\Release\parse.obj"
+".\Release\party.obj"
+".\Release\party_parse.obj"
+".\Release\snmp.obj"
+".\Release\snmp_api.obj"
+".\Release\snmp_auth.obj"
+".\Release\snmp_client.obj"
+".\Release\system.obj"
+".\Release\view.obj">
+Creating command line "link.exe -lib @C:\WINDOWS\TEMP\RSP4063.TMP" 
 Compiling...
 acl.c
 acl_parse.c
@@ -60,6 +60,7 @@ hpux.c
 int64.c
 md5.c
 mib.c
+H:\builds\ucd-snmp-3.5\snmplib\mib.c(1616) : warning C4018: '==' : signed/unsigned mismatch
 parse.c
 party.c
 party_parse.c
@@ -75,4 +76,4 @@ Creating library...
 
 
 
-snmp.lib - 0 error(s), 2 warning(s)
+snmp.lib - 0 error(s), 3 warning(s)
