@@ -1336,7 +1336,6 @@ Interface_Scan_Init (void)
 	*stats++ = 0;
 	strcpy(ifname_buf, ifstart);
 	while (*stats == ' ') stats++;
-	printf("ifname: %s\nstats: %s\n", ifname_buf, stats);
 
 	if ((scan_line_to_use == scan_line_2_2 &&
 	    sscanf (stats, scan_line_to_use, &rec_oct, &rec_pkt, &rec_err, &snd_oct, &snd_pkt, &snd_err, &coll) != 7) ||
@@ -1377,9 +1376,6 @@ Interface_Scan_Init (void)
 	     ptr++) ;
 	nnew->if_unit = strdup(*ptr ? ptr : "0");
 	*ptr = 0;
-
-	sprintf (fullname, "%s%s", nnew->if_name, nnew->if_unit);
-	printf("fullname: %s\n", fullname);
 
 	strcpy (ifrq.ifr_name, ifname);
 	if (ioctl (fd, SIOCGIFADDR, &ifrq) < 0)
