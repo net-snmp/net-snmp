@@ -193,10 +193,29 @@ handle_agentx_packet(int operation, netsnmp_session * session, int reqid,
     ns_subagent_magic *smagic = NULL;
 
     if (operation == NETSNMP_CALLBACK_OP_DISCONNECT) {
+        struct synch_state *state = (struct synch_state *) magic;
         int             period =
-            netsnmp_ds_get_int(NETSNMP_DS_APPLICATION_ID, NETSNMP_DS_AGENT_AGENTX_PING_INTERVAL);
+            netsnmp_ds_get_int(NETSNMP_DS_APPLICATION_ID,
+                               NETSNMP_DS_AGENT_AGENTX_PING_INTERVAL);
         DEBUGMSGTL(("agentx/subagent",
                     "transport disconnect indication\n"));
+
+        /*
+         * deal with existing session. This happend if agentx sends
+         * a message to the master, but the master goes away before
+         * a response is sent. agentx will spin in snmp_synch_response_cb,
+         * waiting for a response. At the very least, the waiting
+         * flag must be set to break that loop. The rest is copied
+         * from disconnect handling in snmp_sync_input.
+         */
+        if(state) {
+            state->waiting = 0;
+            state->pdu = NULL;
+            state->status = STAT_ERROR;
+            session->s_snmp_errno = SNMPERR_ABORT;
+            SET_SNMP_ERROR(SNMPERR_ABORT);
+        }
+
         /*
          * Deregister the ping alarm, if any, and invalidate all other
          * references to this session.  
