@@ -83,6 +83,11 @@
 #include <dmalloc.h>
 #endif
 
+#ifdef hpux11
+#include <sys/mib.h>
+#include <netinet/mib_kern.h>
+#endif	/* hpux11 */
+
 #include "mibincl.h"
 #include "at.h"
 #include "interfaces.h"
@@ -445,6 +450,8 @@ static char *at = 0;
 static struct arphd *at=0;
 static struct arptab *at_ptr, at_entry;
 static struct arpcom  at_com;
+#elif defined(hpux11)
+static mib_ipNetToMediaEnt *at = (mib_ipNetToMediaEnt *)0;
 #else
 static struct arptab *at=0;
 #endif
@@ -454,6 +461,43 @@ static void ARP_Scan_Init (void)
 {
 #ifndef CAN_USE_SYSCTL
 #ifndef linux
+#ifdef hpux11
+
+	int fd;
+	struct nmparms p;
+	int val;
+	unsigned int ulen;
+	int ret;
+
+	if (at) free(at);
+	at = (mib_ipNetToMediaEnt *)0;
+	arptab_size = 0;
+
+	if ((fd = open_mib("/dev/ip", O_RDONLY, 0, NM_ASYNC_OFF)) >= 0) {
+	    p.objid = ID_ipNetToMediaTableNum;
+	    p.buffer = (void *)&val;
+	    ulen = sizeof(int);
+	    p.len = &ulen;
+	    if ((ret = get_mib_info(fd, &p)) == 0)
+		arptab_size = val;
+
+	    if (arptab_size > 0) {
+		ulen = (unsigned)arptab_size * sizeof(mib_ipNetToMediaEnt);
+		at = (mib_ipNetToMediaEnt *)malloc(ulen);
+		p.objid = ID_ipNetToMediaTable;
+		p.buffer = (void *)at;
+		p.len = &ulen;
+		if ((ret = get_mib_info(fd, &p)) < 0)
+		    arptab_size = 0;
+	    }
+
+	    close_mib(fd);
+	}
+
+	arptab_current = 0;
+
+#else	/* hpux11 */
+
 	if (!at) {
 	    auto_nlist(ARPTAB_SIZE_SYMBOL, (char *)&arptab_size, sizeof arptab_size);
 #ifdef STRUCT_ARPHD_HAS_AT_NEXT
@@ -470,7 +514,10 @@ static void ARP_Scan_Init (void)
         auto_nlist(ARPTAB_SYMBOL, (char *)at, arptab_size * sizeof(struct arptab));
 #endif
 	arptab_current = 0;
-#else /* linux */
+
+#endif	/* hpux11 */
+#else	/* linux */
+
 	FILE *in = fopen ("/proc/net/arp", "r");
 	int i, n = 0;
         char line [128];
@@ -518,8 +565,10 @@ static void ARP_Scan_Init (void)
 		at [i].if_index = Interface_Index_By_Name(ifname, strlen(ifname));
 	}
 	fclose (in);
+
 #endif /* linux */
 #else /* CAN_USE_SYSCTL */
+
 	int mib[6];
 	size_t needed;
 
@@ -540,6 +589,7 @@ static void ARP_Scan_Init (void)
 		snmp_log_perror("actual retrieval of routing table");
 	lim = at + needed;
 	rtnext = at;
+
 #endif /* CAN_USE_SYSCTL */
 }
 
@@ -565,10 +615,20 @@ static int ARP_Scan_Next(u_long *IPAddr, char *PhysAddr, u_long *ifType)
 		/* return success */
 		return( 1 );
 	}
-#endif /* linux */
-  return 0; /* we need someone with an irix box to fix this section */
-#else
-#if !defined(ARP_SCAN_FOUR_ARGUMENTS) || defined(hpux)
+#elif defined(hpux11)
+	if (arptab_current < arptab_size) {
+	    /* copy values */
+	    *IPAddr = at[arptab_current].NetAddr;
+	    memcpy(PhysAddr, at[arptab_current].PhysAddr.o_bytes,
+		at[arptab_current].PhysAddr.o_length);
+	    *ifType = at[arptab_current].Type;
+	    *ifIndex = at[arptab_current].IfIndex;
+	    /* increment to point next entry */
+	    arptab_current++;
+	    /* return success */
+	    return (1);
+	}
+#elif !defined(ARP_SCAN_FOUR_ARGUMENTS) || defined(hpux)
 	register struct arptab *atab;
 
 	while (arptab_current < arptab_size) {
@@ -604,7 +664,11 @@ static int ARP_Scan_Next(u_long *IPAddr, char *PhysAddr, u_long *ifType)
 #endif
 	return(1);
 	}
-#else /* !defined(ARP_SCAN_FOUR_ARGUMENTS) || defined(hpux) */
+#endif	/* linux || hpux11 || !ARP_SCAN_FOUR_ARGUMENTS || hpux */
+
+  return 0; /* we need someone with an irix box to fix this section */
+
+#else	/* !CAN_USE_SYSCTL */
 	struct rt_msghdr *rtm;
 	struct sockaddr_inarp *sin;
 	struct sockaddr_dl *sdl;
@@ -622,7 +686,6 @@ static int ARP_Scan_Next(u_long *IPAddr, char *PhysAddr, u_long *ifType)
 			return(1);
 		}
 	}
-#endif /* !defined(ARP_SCAN_FOUR_ARGUMENTS) || defined(hpux) */
 	return(0);	    /* "EOF" */
 #endif /* !CAN_USE_SYSCTL */
 }

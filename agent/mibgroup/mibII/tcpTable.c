@@ -173,14 +173,19 @@ var_tcpEntry(struct variable *vp,
     int i;
     oid newname[MAX_OID_LEN], lowest[MAX_OID_LEN], *op;
     u_char *cp;
+#ifdef hpux11
+    int LowState;
+    static mib_tcpConnEnt tcp, Lowtcp;
+#else
     int State, LowState;
     static struct inpcb inpcb, Lowinpcb;
+#endif
     
     /*
      *	Allow for a kernel w/o TCP
      */
 #ifdef TCPSTAT_SYMBOL
-#ifndef linux
+#if !defined(linux) && !defined(hpux11)
     if (auto_nlist_value(TCPSTAT_SYMBOL) == -1) return(NULL);
 #endif
 #endif
@@ -189,35 +194,59 @@ var_tcpEntry(struct variable *vp,
 	lowest[0] = 9999;
 
 	/* find "next" connection */
+#ifndef hpux11
 Again:
+#endif
 LowState = -1;	    /* Don't have one yet */
 	TCP_Scan_Init();
 	for (;;) {
+#ifdef hpux11
+	    if ((i = TCP_Scan_Next(&tcp)) == 0) break;  /* Done */
+	    cp = (u_char *)&tcp.LocalAddress;
+#else	/* hpux11 */
 	    if ((i = TCP_Scan_Next(&State, &inpcb)) < 0) goto Again;
 	    if (i == 0) break;	    /* Done */
 	    cp = (u_char *)&inpcb.inp_laddr.s_addr;
+#endif	/* hpux11 */
 	    op = newname + 10;
 	    *op++ = *cp++;
 	    *op++ = *cp++;
 	    *op++ = *cp++;
 	    *op++ = *cp++;
 	    
+#ifdef hpux11
+	    newname[14] = (unsigned short)tcp.LocalPort;
+#else
 	    newname[14] = ntohs(inpcb.inp_lport);
+#endif
 
+#ifdef hpux11
+	    cp = (u_char *)&tcp.RemAddress;
+#else
 	    cp = (u_char *)&inpcb.inp_faddr.s_addr;
+#endif
 	    op = newname + 15;
 	    *op++ = *cp++;
 	    *op++ = *cp++;
 	    *op++ = *cp++;
 	    *op++ = *cp++;
 	    
+#ifdef hpux11
+            newname[19] = (unsigned short)tcp.RemPort;
+#else
 	    newname[19] = ntohs(inpcb.inp_fport);
+#endif
 
 	    if (exact){
 		if (snmp_oid_compare(newname, 20, name, *length) == 0){
 		    memcpy( (char *)lowest,(char *)newname, 20 * sizeof(oid));
+#ifdef hpux11
+		    LowState = tcp.State;
+		    Lowtcp = tcp;
+#else	/* hpux11 */
 		    LowState = State;
 		    Lowinpcb = inpcb;
+#endif	/* hpux11 */
 		    break;  /* no need to search further */
 		}
 	    } else {
@@ -228,8 +257,13 @@ LowState = -1;	    /* Don't have one yet */
 		     * previous lowest, save this one as the "next" one.
 		     */
 		    memcpy( (char *)lowest,(char *)newname, 20 * sizeof(oid));
+#ifdef hpux11
+		    LowState = tcp.State;
+		    Lowtcp = tcp;
+#else	/* hpux11 */
 		    LowState = State;
 		    Lowinpcb = inpcb;
+#endif	/* hpux11 */
 		}
 	    }
 	}
@@ -240,22 +274,43 @@ LowState = -1;	    /* Don't have one yet */
 	*var_len = sizeof(long);
 	switch (vp->magic) {
 	    case TCPCONNSTATE: {
+#ifdef hpux11
+		long_return = LowState;
+		return (u_char *) &long_return;
+#else	/* hpux11 */
 #ifndef hpux
 		static int StateMap[]={1, 2, 3, 4, 5, 8, 6, 10, 9, 7, 11};
 #else
               static int StateMap[]={1, 2, 3, -1, 4, 5, 8, 6, 10, 9, 7, 11};
 #endif
 		return (u_char *) &StateMap[LowState];
+#endif	/* hpux11 */
 	    }
 	    case TCPCONNLOCALADDRESS:
+#ifdef hpux11
+		return (u_char *) &Lowtcp.LocalAddress;
+#else
 		return (u_char *) &Lowinpcb.inp_laddr.s_addr;
+#endif
 	    case TCPCONNLOCALPORT:
+#ifdef hpux11
+		long_return = (unsigned short)Lowtcp.LocalPort;
+#else
 		long_return = ntohs(Lowinpcb.inp_lport);
+#endif
 		return (u_char *) &long_return;
 	    case TCPCONNREMADDRESS:
+#ifdef hpux11
+		return (u_char *) &Lowtcp.RemAddress;
+#else
 		return (u_char *) &Lowinpcb.inp_faddr.s_addr;
+#endif
 	    case TCPCONNREMPORT:
+#ifdef hpux11
+		long_return = (unsigned short)Lowtcp.RemPort;
+#else
 		long_return = ntohs(Lowinpcb.inp_fport);
+#endif
 		return (u_char *) &long_return;
 	}
     return NULL;
@@ -372,7 +427,7 @@ var_tcpEntry(struct variable *vp,
 
 
 #ifndef solaris2
-#ifndef linux
+#if !defined(linux) && !defined(hpux11)
 /*
  *	Print INTERNET connections
  */
@@ -439,14 +494,19 @@ Again:	/*
 	}
 	return(Established);
 }
-#endif
+#endif	/* !linux && !hpux11 */
 
+#ifdef hpux11
+static int tcptab_size, tcptab_current;
+static mib_tcpConnEnt *tcp = (mib_tcpConnEnt *)0;
+#else
 static struct inpcb tcp_inpcb, *tcp_prev;
 #ifdef PCB_TABLE
 static struct inpcb *tcp_next, *tcp_head;
 #endif
 #ifdef linux
 static struct inpcb *inpcb_list;
+#endif
 #endif
 
 #if defined(CAN_USE_SYSCTL) && defined(TCPCTL_PCBLIST)
@@ -456,6 +516,43 @@ static struct xinpgen *xig = NULL;
 
 void TCP_Scan_Init (void)
 {
+#ifdef hpux11
+
+    int fd;
+    struct nmparms p;
+    int val;
+    unsigned int ulen;
+    int ret;
+
+    if (tcp) free(tcp);
+    tcp = (mib_tcpConnEnt *)0;
+    tcptab_size = 0;
+
+    if ((fd = open_mib("/dev/ip", O_RDONLY, 0, NM_ASYNC_OFF)) >= 0) {
+	p.objid = ID_tcpConnNumEnt;
+	p.buffer = (void *)&val;
+	ulen = sizeof(int);
+	p.len = &ulen;
+	if ((ret = get_mib_info(fd, &p)) == 0)
+	    tcptab_size = val;
+
+	if (tcptab_size > 0) {
+	    ulen = (unsigned)tcptab_size * sizeof(mib_tcpConnEnt);
+	    tcp = (mib_tcpConnEnt *)malloc(ulen);
+	    p.objid = ID_tcpConnTable;
+	    p.buffer = (void *)tcp;
+	    p.len = &ulen;
+	    if ((ret = get_mib_info(fd, &p)) < 0)
+		tcptab_size = 0;
+	}
+
+	close_mib(fd);
+    }
+
+    tcptab_current = 0;
+
+#else /* hpux11 */
+
 #if !defined(CAN_USE_SYSCTL) || !defined(TCPCTL_PCBLIST)
 #ifdef PCB_TABLE
     struct inpcbtable table;
@@ -572,8 +669,25 @@ void TCP_Scan_Init (void)
 	return;
     }
 #endif /*  !defined(CAN_USE_SYSCTL) || !defined(TCPCTL_PCBLIST) */
+#endif	/* hpux11 */
 }
 
+#ifdef hpux11
+int TCP_Scan_Next(mib_tcpConnEnt *RetTcp)
+{
+    if (tcptab_current < tcptab_size) {
+	/* copy values */
+	*RetTcp = tcp[tcptab_current];
+	/* increment to point to next entry */
+	tcptab_current++;
+	/* return success */
+	return (1);
+    }
+
+    /* return done */
+    return (0);
+}
+#else	/* hpux11 */
 int TCP_Scan_Next(int *State,
 		  struct inpcb *RetInPcb)
 {
@@ -634,6 +748,7 @@ int TCP_Scan_Next(int *State,
 #endif /*  !defined(CAN_USE_SYSCTL) || !defined(TCPCTL_PCBLIST) */
 	return(1);	/* "OK" */
 }
+#endif	/* hpux11 */
 #endif /* solaris2 */
 
 #else /* WIN32 */

@@ -103,6 +103,10 @@
 #endif
 #include <sys/stat.h>
 
+#ifdef hpux11
+#include <sys/pstat.h>
+#endif
+
 #if HAVE_STRING_H
 #include <string.h>
 #else
@@ -196,6 +200,8 @@ void init_hr_storage (void)
 #ifdef USE_SYSCTL
     int mib [2];
     size_t len;
+#elif defined(hpux11)
+    struct pst_static pst_buf;
 #endif
 
 
@@ -210,7 +216,14 @@ void init_hr_storage (void)
     if (sysctl(mib, 2, &pagesize, &len, NULL, 0) == -1)
     	snmp_log_perror("sysctl: pagesize");
     physmem /= pagesize;
-#else	/* USE_SYSCTL */
+#elif defined(hpux11)
+    if (pstat_getstatic(&pst_buf, sizeof(struct pst_static), 1, 0) < 0) {
+	perror("pstat_getstatic");
+    } else {
+	physmem = pst_buf.physical_memory;
+	pagesize = pst_buf.page_size;
+    }
+#else	/* !USE_SYSCTL && !hpux11 */
 #ifdef HAVE_GETPAGESIZE
     pagesize = getpagesize();
 #elif defined(_SC_PAGESIZE)
@@ -429,7 +442,7 @@ var_hrstore(struct variable *vp,
 			auto_nlist(MBPOOL_SYMBOL, (char *)&mbpool, sizeof(mbpool));
 			auto_nlist(MCLPOOL_SYMBOL, (char *)&mclpool, sizeof(mclpool));
 #endif
-#ifndef dynix
+#ifdef MBSTAT_SYMBOL
 			auto_nlist(MBSTAT_SYMBOL, (char *)&mbstat, sizeof (mbstat));
 #endif
 			break;
@@ -541,8 +554,10 @@ var_hrstore(struct variable *vp,
 			    long_return += mbstat.m_mtypes[i];
 #elif defined(MBSTAT_SYMBOL)
 			long_return = mbstat.m_mbufs;
-#else
+#elif defined(NO_DUMMY_VALUES)
 			return NULL;
+#else
+			long_return = 0;
 #endif
 			break;
 #else	/* linux */
@@ -580,8 +595,10 @@ var_hrstore(struct variable *vp,
 				+ (mclpool.pr_nget - mclpool.pr_nput)*mclpool.pr_size;
 #elif defined(MBSTAT_SYMBOL)
 			long_return = mbstat.m_clusters - mbstat.m_clfree;	/* unlikely, but... */
-#else
+#elif defined(NO_DUMMY_VALUES)
 			return NULL;
+#else
+			long_return = 0;
 #endif
 			break;
 #else	/* linux */

@@ -193,6 +193,10 @@ void init_icmp(void)
 #include <windows.h>
 #endif
 
+#ifdef hpux11
+#define ICMP_STAT_STRUCTURE	int
+#endif
+
 #ifdef WIN32
 #include <iphlpapi.h>
 #define ICMP_STAT_STRUCTURE MIB_ICMP
@@ -321,6 +325,37 @@ var_icmp(struct variable *vp,
 	case ICMPOUTADDRMASKREPS:return (u_char *) &icmpstat.icps_outhist[ICMP_MASKREPLY];
 #endif /* USES_TRADITIONAL_ICMPSTAT */
 
+#ifdef hpux11
+	case ICMPINMSGS:
+	case ICMPINERRORS:
+	case ICMPINDESTUNREACHS:
+	case ICMPINTIMEEXCDS:
+	case ICMPINPARMPROBS:
+	case ICMPINSRCQUENCHS:
+	case ICMPINREDIRECTS:
+	case ICMPINECHOS:
+	case ICMPINECHOREPS:
+	case ICMPINTIMESTAMPS:
+	case ICMPINTIMESTAMPREPS:
+	case ICMPINADDRMASKS:
+	case ICMPINADDRMASKREPS:
+	case ICMPOUTMSGS:
+	case ICMPOUTERRORS:
+	case ICMPOUTDESTUNREACHS:
+	case ICMPOUTTIMEEXCDS:
+	case ICMPOUTPARMPROBS:
+	case ICMPOUTSRCQUENCHS:
+	case ICMPOUTREDIRECTS:
+	case ICMPOUTECHOS:
+	case ICMPOUTECHOREPS:
+	case ICMPOUTTIMESTAMPS:
+	case ICMPOUTTIMESTAMPREPS:
+	case ICMPOUTADDRMASKS:
+	case ICMPOUTADDRMASKREPS:
+	    long_return = icmpstat;
+	    return (u_char *)&long_return;
+#endif	/* hpux11 */
+
 #ifdef WIN32
        case ICMPINMSGS:        return (u_char *) &icmpstat.stats.icmpInStats.dwMsgs;
        case ICMPINERRORS:      return (u_char *) &icmpstat.stats.icmpInStats.dwErrors;
@@ -367,6 +402,56 @@ var_icmp(struct variable *vp,
 long
 read_icmp_stat( ICMP_STAT_STRUCTURE *icmpstat, int magic )
 {
+#ifdef hpux11
+    int fd;
+    struct nmparms p;
+    unsigned int ulen;
+    int ret;
+
+    if ((fd = open_mib("/dev/ip", O_RDONLY, 0, NM_ASYNC_OFF)) < 0)
+	return (-1);	/* error */
+
+    switch (magic) {
+	case ICMPINMSGS:	p.objid = ID_icmpInMsgs;		break;
+	case ICMPINERRORS:	p.objid = ID_icmpInErrors;		break;
+	case ICMPINDESTUNREACHS: p.objid = ID_icmpInDestUnreachs;	break;
+	case ICMPINTIMEEXCDS:	p.objid = ID_icmpInTimeExcds;		break;
+	case ICMPINPARMPROBS:	p.objid = ID_icmpInParmProbs;		break;
+	case ICMPINSRCQUENCHS:	p.objid = ID_icmpInSrcQuenchs;		break;
+	case ICMPINREDIRECTS:	p.objid = ID_icmpInRedirects;		break;
+	case ICMPINECHOS:	p.objid = ID_icmpInEchos;		break;
+	case ICMPINECHOREPS:	p.objid = ID_icmpInEchoReps;		break;
+	case ICMPINTIMESTAMPS:	p.objid = ID_icmpInTimestamps;		break;
+	case ICMPINTIMESTAMPREPS: p.objid = ID_icmpInTimestampReps;	break;
+	case ICMPINADDRMASKS:	p.objid = ID_icmpInAddrMasks;		break;
+	case ICMPINADDRMASKREPS: p.objid = ID_icmpInAddrMaskReps;	break;
+	case ICMPOUTMSGS:	p.objid = ID_icmpOutMsgs;		break;
+	case ICMPOUTERRORS:	p.objid = ID_icmpOutErrors;		break;
+	case ICMPOUTDESTUNREACHS: p.objid = ID_icmpOutDestUnreachs;	break;
+	case ICMPOUTTIMEEXCDS:	p.objid = ID_icmpOutTimeExcds;		break;
+	case ICMPOUTPARMPROBS:	p.objid = ID_icmpOutParmProbs;		break;
+	case ICMPOUTSRCQUENCHS:	p.objid = ID_icmpOutSrcQuenchs;		break;
+	case ICMPOUTREDIRECTS:	p.objid = ID_icmpOutRedirects;		break;
+	case ICMPOUTECHOS:	p.objid = ID_icmpOutEchos;		break;
+	case ICMPOUTECHOREPS:	p.objid = ID_icmpOutEchoReps;		break;
+	case ICMPOUTTIMESTAMPS:	p.objid = ID_icmpOutTimestamps;		break;
+	case ICMPOUTTIMESTAMPREPS: p.objid = ID_icmpOutTimestampReps;	break;
+	case ICMPOUTADDRMASKS:	p.objid = ID_icmpOutAddrMasks;		break;
+	case ICMPOUTADDRMASKREPS: p.objid = ID_icmpOutAddrMaskReps;	break;
+	default:
+	    *icmpstat = 0;
+	    close_mib(fd);
+	    return (0);
+    }
+
+    p.buffer = (void *)icmpstat;
+    ulen = sizeof(ICMP_STAT_STRUCTURE);
+    p.len = &ulen;
+    ret = get_mib_info(fd, &p);
+    close_mib(fd);
+
+    return (ret);	/* 0: ok, < 0: error */
+#else	/* hpux11 */
    long ret_value = -1;
 #if (defined(CAN_USE_SYSCTL) && defined(ICMPCTL_STATS))
    static int sname[4] = { CTL_NET, PF_INET, IPPROTO_ICMP, ICMPCTL_STATS };
@@ -413,4 +498,5 @@ read_icmp_stat( ICMP_STAT_STRUCTURE *icmpstat, int magic )
 	icmp_stats_cache_marker = NULL;
     }
     return ret_value;
+#endif	/* hpux11 */
 }

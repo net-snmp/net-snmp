@@ -207,6 +207,10 @@ PERFORMANCE OF THIS SOFTWARE.
 #define  MIN(a,b)                     (((a) < (b)) ? (a) : (b))
 #endif
 
+#ifdef hpux11
+#include <sys/mib.h>
+#include <netinet/mib_kern.h>
+#endif /* hpux */
 
 extern WriteMethod write_rte;
 
@@ -432,10 +436,16 @@ var_ipRouteEntry(struct variable *vp,
 #else /* not USE_SYSCTL_ROUTE_DUMP */
 
 static void Route_Scan_Reload (void);
+
+#ifdef hpux11
+static int rtsize = 0;
+static mib_ipRouteEnt *rt = (mib_ipRouteEnt *)0;
+#else	/* hpux11 */
 static RTENTRY **rthead=0;
 static int rtsize=0, rtallocate=0;
+#endif	/* hpux11 */
 
-#if !(defined(linux) || defined(solaris2))
+#if !(defined(linux) || defined(solaris2) || defined(hpux11))
 #define NUM_ROUTE_SYMBOLS 2
 static char*  route_symbols[] = {
   RTHOST_SYMBOL,
@@ -546,7 +556,7 @@ var_ipRouteEntry(struct variable *vp,
 #if NEED_KLGETSA
     struct sockaddr_in *sa;
 #endif
-#ifndef linux
+#if !defined(linux) && !defined(hpux11)
     struct ifnet     rt_ifnet;
     struct in_ifaddr rt_ifnetaddr;
 #endif
@@ -601,6 +611,8 @@ var_ipRouteEntry(struct variable *vp,
 #if NEED_KLGETSA
 	    sa = klgetsa((struct sockaddr_in *) rthead[RtIndex]->rt_dst);
 	    cp = (u_char *) &(sa->sin_addr.s_addr);
+#elif defined(hpux11)
+	    cp = (u_char *)&rt[RtIndex].Dest;
 #else
 	    cp = (u_char *)&(((struct sockaddr_in *) &(rthead[RtIndex]->rt_dst))->sin_addr.s_addr);
 #endif
@@ -639,29 +651,49 @@ var_ipRouteEntry(struct variable *vp,
 #if NEED_KLGETSA
 	    sa = klgetsa((struct sockaddr_in *) rthead[RtIndex]->rt_dst);
 	    return(u_char *) &(sa->sin_addr.s_addr);
+#elif defined(hpux11)
+	    long_return = rt[RtIndex].Dest;
+	    return (u_char *)&long_return;
 #else
 	    return(u_char *) &((struct sockaddr_in *) &rthead[RtIndex]->rt_dst)->sin_addr.s_addr;
 #endif
 	case IPROUTEIFINDEX:
+#ifdef hpux11
+	    long_return = rt[RtIndex].IfIndex;
+#else
 	    long_return = (u_long)rthead[RtIndex]->rt_unit;
+#endif
 	    return (u_char *)&long_return;
 	case IPROUTEMETRIC1:
+#ifdef hpux11
+	    long_return = rt[RtIndex].Metric1;
+#else
 	    long_return = (rthead[RtIndex]->rt_flags & RTF_GATEWAY) ? 1 : 0;
+#endif
 	    return (u_char *)&long_return;
 	case IPROUTEMETRIC2:
-#if NO_DUMMY_VALUES
+#ifdef hpux11
+	    long_return = rt[RtIndex].Metric2;
+	    return (u_char *)&long_return;
+#elif defined(NO_DUMMY_VALUES)
 	    return NULL;
 #endif
 	    long_return = -1;
 	    return (u_char *)&long_return;
 	case IPROUTEMETRIC3:
-#if NO_DUMMY_VALUES
+#ifdef hpux11
+	    long_return = rt[RtIndex].Metric3;
+	    return (u_char *)&long_return;
+#elif defined(NO_DUMMY_VALUES)
 	    return NULL;
 #endif
 	    long_return = -1;
 	    return (u_char *)&long_return;
 	case IPROUTEMETRIC4:
-#if NO_DUMMY_VALUES
+#ifdef hpux11
+	    long_return = rt[RtIndex].Metric4;
+	    return (u_char *)&long_return;
+#elif defined(NO_DUMMY_VALUES)
 	    return NULL;
 #endif
 	    long_return = -1;
@@ -676,17 +708,31 @@ var_ipRouteEntry(struct variable *vp,
 #if NEED_KLGETSA
 	    sa = klgetsa((struct sockaddr_in *) rthead[RtIndex]->rt_gateway);
 	    return(u_char *) &(sa->sin_addr.s_addr);
+#elif defined(hpux11)
+	    long_return = rt[RtIndex].NextHop;
+	    return (u_char *)&long_return;
 #else
 	    return(u_char *) &((struct sockaddr_in *) &rthead[RtIndex]->rt_gateway)->sin_addr.s_addr;
 #endif /* *bsd */
 	case IPROUTETYPE:
+#ifdef hpux11
+	    long_return = rt[RtIndex].Type;
+#else
 	    long_return = (rthead[RtIndex]->rt_flags & RTF_GATEWAY) ? 4 : 3;
+#endif
 	    return (u_char *)&long_return;
 	case IPROUTEPROTO:
+#ifdef hpux11
+	    long_return = rt[RtIndex].Proto;
+#else
 	    long_return = (rthead[RtIndex]->rt_flags & RTF_DYNAMIC) ? 4 : 2;
+#endif
 	    return (u_char *)&long_return;
 	case IPROUTEAGE:
-#if NO_DUMMY_VALUES
+#ifdef hpux11
+	    long_return = rt[RtIndex].Age;
+	    return (u_char *)&long_return;
+#elif defined(NO_DUMMY_VALUES)
 	    return NULL;
 #endif
 	    long_return = 0;
@@ -699,7 +745,10 @@ var_ipRouteEntry(struct variable *vp,
 	    return NULL;
 #endif
 	    long_return = 0;
-#else /*  NEED_KLGETSA */
+#elif defined(hpux11)
+	    long_return = rt[RtIndex].Mask;
+	    return (u_char *)&long_return;
+#else /* !NEED_KLGETSA && !hpux11 */
 	    if ( ((struct sockaddr_in *) &rthead[RtIndex]->rt_dst)->sin_addr.s_addr == 0 )
 		long_return = 0;	/* Default route */
 	    else {
@@ -868,7 +917,7 @@ static int qsort_compare (const void *, const void *);
 
 #if defined(RTENTRY_4_4) || defined(RTENTRY_RT_NEXT)
 
-#ifdef RTENTRY_4_4
+#if defined(RTENTRY_4_4) && !defined(hpux11)
 void
 load_rtentries(struct radix_node *pt)
 {
@@ -946,10 +995,55 @@ load_rtentries(struct radix_node *pt)
       load_rtentries(node.rn_dupedkey);
   }
 }
-#endif /* RTENTRY_4_4 */
+#endif /* RTENTRY_4_4 && !hpux11 */
 
 static void Route_Scan_Reload (void)
 {
+#ifdef hpux11
+
+    int fd;
+    struct nmparms p;
+    int val;
+    unsigned int ulen;
+    int ret;
+
+    if (rt) free(rt);
+    rt = (mib_ipRouteEnt *)0;
+    rtsize = 0;
+
+    if ((fd = open_mib("/dev/ip", O_RDONLY, 0, NM_ASYNC_OFF)) >= 0) {
+	p.objid = ID_ipRouteNumEnt;
+	p.buffer = (void *)&val;
+	ulen = sizeof(int);
+	p.len = &ulen;
+	if ((ret = get_mib_info(fd, &p)) == 0)
+	    rtsize = val;
+
+	if (rtsize > 0) {
+	    ulen = (unsigned)rtsize * sizeof(mib_ipRouteEnt);
+	    rt = (mib_ipRouteEnt *)malloc(ulen);
+	    p.objid = ID_ipRouteTable;
+	    p.buffer = (void *)rt;
+	    p.len = &ulen;
+	    if ((ret = get_mib_info(fd, &p)) < 0)
+		rtsize = 0;
+	}
+
+	close_mib(fd);
+    }
+
+    /*
+     *  Sort it!
+     */
+    qsort((char *) rt, rtsize, sizeof(rt[0]),
+#ifdef __STDC__
+	(int (*)(const void *, const void *))qsort_compare
+#else
+	qsort_compare
+#endif
+	);
+
+#else   /* hpux11 */
 #if defined(RTENTRY_4_4)
   struct radix_node_head head, *rt_table[AF_MAX+1];
   int i;
@@ -1057,7 +1151,14 @@ static void Route_Scan_Reload (void)
   /*
    *  Sort it!
    */
-  qsort((char *) rthead, rtsize, sizeof(rthead[0]), qsort_compare);
+  qsort((char *) rthead, rtsize, sizeof(rthead[0]), 
+#ifdef __STDC__
+        (int (*)(const void *, const void *))qsort_compare
+#else
+	qsort_compare
+#endif
+	);
+#endif	/* hpux11 */
 }
 
 #else
@@ -1273,6 +1374,21 @@ static void Route_Scan_Reload (void)
 /*
  *	Create a host table
  */
+#ifdef hpux11
+static int qsort_compare(void *v1,
+			 void *v2)
+{
+	mib_ipRouteEnt *r1 = (mib_ipRouteEnt *) v1;
+	mib_ipRouteEnt *r2 = (mib_ipRouteEnt *) v2;
+
+	/*
+	 *	Do the comparison
+	 */
+	if (r1->Dest == r2->Dest) return(0);
+	if (r1->Dest >  r2->Dest) return(1);
+	return(-1);
+}
+#else
 static int qsort_compare(const void *v1,
 			 const void *v2)
 {
@@ -1293,6 +1409,7 @@ static int qsort_compare(const void *v1,
 	if (dst1 > dst2) return(1);
 	return(-1);
 }
+#endif /* hpux11 */
 #endif /* not USE_SYSCTL_ROUTE_DUMP */
 
 #endif /* solaris2 */

@@ -200,6 +200,10 @@ void init_udp(void)
 #define USES_SNMP_DESIGNED_UDPSTAT
 #endif
 
+#ifdef hpux11
+#define UDP_STAT_STRUCTURE	int
+#endif
+
 #ifdef WIN32
 #include <iphlpapi.h>
 #define UDP_STAT_STRUCTURE MIB_UDPSTATS
@@ -334,6 +338,33 @@ read_udp_stat( UDP_STAT_STRUCTURE *udpstat, int magic )
 #ifdef solaris2
     static mib2_ip_t ipstat;
 #endif
+#ifdef hpux11
+    int fd;
+    struct nmparms p;
+    unsigned int ulen;
+
+    if ((fd = open_mib("/dev/ip", O_RDONLY, 0, NM_ASYNC_OFF)) < 0)
+	return (-1);	/* error */
+
+    switch (magic) {
+	case UDPINDATAGRAMS:	p.objid = ID_udpInDatagrams;		break;
+	case UDPNOPORTS:	p.objid = ID_udpNoPorts;		break;
+	case UDPOUTDATAGRAMS:	p.objid = ID_udpOutDatagrams;		break;
+	case UDPINERRORS:	p.objid = ID_udpInErrors;		break;
+	default:
+	    *udpstat = 0;
+	    close_mib(fd);
+	    return (0);
+    }
+
+    p.buffer = (void *)udpstat;
+    ulen = sizeof(UDP_STAT_STRUCTURE);
+    p.len = &ulen;
+    ret_value = get_mib_info(fd, &p);
+    close_mib(fd);
+
+    return (ret_value);	/* 0: ok, < 0: error */
+#else	/* hpux11 */
 
     if (  udp_stats_cache_marker &&
 	(!atime_ready( udp_stats_cache_marker, UDP_STATS_CACHE_TIMEOUT*1000 )))
@@ -386,4 +417,5 @@ read_udp_stat( UDP_STAT_STRUCTURE *udpstat, int magic )
 	udp_stats_cache_marker = NULL;
     }
     return ret_value;
+#endif	/* hpux11 */
 }

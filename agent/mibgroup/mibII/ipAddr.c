@@ -90,10 +90,10 @@
 #include "system.h"
 #include "auto_nlist.h"
 
-#ifdef MIB_IPCOUNTER_SYMBOL
+#if defined(MIB_IPCOUNTER_SYMBOL) || defined(hpux11)
 #include <sys/mib.h>
 #include <netinet/mib_kern.h>
-#endif /* MIB_IPCOUNTER_SYMBOL */
+#endif /* MIB_IPCOUNTER_SYMBOL || hpux11 */
 
 #include "ip.h"
 #include "interfaces.h"
@@ -128,9 +128,13 @@
 #if !defined(CAN_USE_SYSCTL) || !defined(IPCTL_STATS)
 #ifndef solaris2
 
-#ifdef freebsd2
+#if defined(freebsd2) || defined(hpux11)
 static void Address_Scan_Init (void);
+#ifdef freebsd2
 static int Address_Scan_Next (short *, struct in_ifaddr *);
+#else
+static int Address_Scan_Next (short *, mib_ipAdEnt *);
+#endif
 #endif
 
 /*
@@ -165,6 +169,9 @@ var_ipAddrEntry(struct variable *vp,
 #ifndef freebsd2
     short                   interface;
 #endif
+#ifdef hpux11
+    static mib_ipAdEnt      in_ifaddr, lowin_ifaddr;
+#else
     static struct in_ifaddr in_ifaddr;
 #if !defined(linux) && !defined(sunV3)
     static struct in_ifaddr lowin_ifaddr;
@@ -172,30 +179,34 @@ var_ipAddrEntry(struct variable *vp,
     static struct ifnet lowin_ifnet;
 #endif
     static struct ifnet ifnet;
+#endif	/* hpux11 */
 
     /* fill in object part of name for current (less sizeof instance part) */
 
     memcpy( (char *)current,(char *)vp->name, (int)vp->namelen * sizeof(oid));
 
-#ifndef freebsd2
+#if !defined(freebsd2) && !defined(hpux11)
     Interface_Scan_Init();
 #else
     Address_Scan_Init();
 #endif
     for (;;) {
 
-#ifndef freebsd2
+#if !defined(freebsd2) && !defined(hpux11)
 	if (Interface_Scan_Next(&interface, NULL, &ifnet, &in_ifaddr) == 0)
 	    break;
 #ifdef STRUCT_IFNET_HAS_IF_ADDRLIST
 	if ( ifnet.if_addrlist == 0 )
 	    continue;                   /* No address found for interface */
 #endif
-#else
+#else	/* !freebsd2 && !hpux11 */
 	if (Address_Scan_Next(&interface, &in_ifaddr) == 0)
 	    break;
-#endif /* freebsd2 */
-#if defined(linux) || defined(sunV3)
+#endif	/* !freebsd2 && !hpux11 */
+
+#ifdef hpux11
+	cp = (u_char *)&in_ifaddr.Addr;
+#elif defined(linux) || defined(sunV3)
 	cp = (u_char *)&(((struct sockaddr_in *) &(ifnet.if_addr))->sin_addr.s_addr);
 #else
 	cp = (u_char *)&(((struct sockaddr_in *) &(in_ifaddr.ia_addr))->sin_addr.s_addr);
@@ -242,7 +253,10 @@ var_ipAddrEntry(struct variable *vp,
     *var_len = sizeof(long_return);
     switch(vp->magic){
 	case IPADADDR:
-#if defined(linux) || defined(sunV3)
+#ifdef hpux11
+	    long_return = lowin_ifaddr.Addr;
+	    return(u_char *) &long_return;
+#elif defined(linux) || defined(sunV3)
             return(u_char *) &((struct sockaddr_in *) &lowin_ifnet.if_addr)->sin_addr.s_addr;
 #else
 	    return(u_char *) &((struct sockaddr_in *) &lowin_ifaddr.ia_addr)->sin_addr.s_addr;
@@ -251,28 +265,34 @@ var_ipAddrEntry(struct variable *vp,
 	    long_return = lowinterface;
 	    return(u_char *) &long_return;
 	case IPADNETMASK:
-#ifndef sunV3
-#ifdef linux
+#ifdef hpux11
+	    long_return = lowin_ifaddr.NetMask;
+	    return(u_char *) &long_return;
+#elif defined(linux)
             return (u_char *)&((struct sockaddr_in *)&lowin_ifnet.ia_subnetmask)->sin_addr.s_addr;
-#else
+#elif !defined(sunV3)
 	    long_return = lowin_ifaddr.ia_subnetmask;
 	    return(u_char *) &long_return;
 #endif
-#endif
 	case IPADBCASTADDR:
-	    
-#if defined(linux) || defined(sunV3)
+#ifdef hpux11
+	    long_return = lowin_ifaddr.BcastAddr;
+#elif defined(linux) || defined(sunV3)
 	    long_return = ntohl(((struct sockaddr_in *) &lowin_ifnet.ifu_broadaddr)->sin_addr.s_addr) & 1;
 #else
 	    long_return = ntohl(((struct sockaddr_in *) &lowin_ifaddr.ia_broadaddr)->sin_addr.s_addr) & 1;
 #endif
 	    return(u_char *) &long_return;	   
 	case IPADREASMMAX:
-#if NO_DUMMY_VALUES
+#ifdef hpux11
+	    long_return = lowin_ifaddr.ReasmMaxSize;
+	    return(u_char *) &long_return;
+#elif defined(NO_DUMMY_VALUES)
 	    return NULL;
-#endif
+#else
 	    long_return = -1;
 	    return(u_char *) &long_return;
+#endif
 	default:
 	    DEBUGMSGTL(("snmpd", "unknown sub-id %d in var_ipAddrEntry\n", vp->magic));
     }
@@ -329,7 +349,69 @@ struct in_ifaddr *Retin_ifaddr;
       return(0);          /* EOF */
 }
 
-#endif /* freebsd2 */
+#elif defined(hpux11)
+
+static int iptab_size, iptab_current;
+static mib_ipAdEnt *ip = (mib_ipAdEnt *)0;
+
+static void
+Address_Scan_Init (void)
+{         
+    int fd;
+    struct nmparms p; 
+    int val;
+    unsigned int ulen;
+    int ret;
+
+    if (ip) free(ip);
+    ip = (mib_ipAdEnt *)0;
+    iptab_size = 0;
+
+    if ((fd = open_mib("/dev/ip", O_RDONLY, 0, NM_ASYNC_OFF)) >= 0) {
+	p.objid = ID_ipAddrNumEnt;
+	p.buffer = (void *)&val;
+	ulen = sizeof(int);
+	p.len = &ulen;
+	if ((ret = get_mib_info(fd, &p)) == 0)
+	    iptab_size = val;
+
+	if (iptab_size > 0) {
+	    ulen = (unsigned)iptab_size * sizeof(mib_ipAdEnt);
+	    ip = (mib_ipAdEnt *)malloc(ulen);
+	    p.objid = ID_ipAddrTable;
+	    p.buffer = (void *)ip;
+	    p.len = &ulen;
+	    if ((ret = get_mib_info(fd, &p)) < 0)
+		iptab_size = 0;
+	}
+
+	close_mib(fd);
+    }
+
+    iptab_current = 0;
+}
+
+/* NB: Index is the number of the corresponding interface, not of the address */
+static int
+Address_Scan_Next(Index, Retin_ifaddr)
+		  short *Index;
+		  mib_ipAdEnt *Retin_ifaddr;
+{
+    if (iptab_current < iptab_size) {
+	/* copy values */
+	*Index = ip[iptab_current].IfIndex;
+	*Retin_ifaddr = ip[iptab_current];
+	/* increment to point to next entry */
+	iptab_current++;
+	/* return success */
+	return (1);
+    }
+
+    /* return done */
+    return (0);
+}
+
+#endif	/* hpux11 */
 
 #else /* solaris2 */
 
@@ -651,9 +733,10 @@ var_ipAddrEntry(struct variable *vp,
 	case IPADREASMMAX:
 #if NO_DUMMY_VALUES
 		return NULL;
-#endif
+#else
 		long_return = -1;
 		return (u_char *)&long_return;
+#endif
 
 	default:
 		DEBUGMSGTL(("snmpd", "unknown sub-id %d in var_ipAddrEntry\n", vp->magic));

@@ -96,7 +96,7 @@ static struct external_pinfo lowproc;
 #elif !defined(linux)
 static int LowProcIndex;
 #endif
-#ifdef hpux10
+#if defined(hpux10) || defined(hpux11)
 struct pst_status *proc_table;
 struct pst_dynamic pst_dyn;
 #elif HAVE_KVM_GETPROCS
@@ -788,7 +788,7 @@ var_hrswrun(struct variable *vp,
 	    else
 		long_return = 1; /* running */
 #elif !defined(linux)
-#ifdef hpux10
+#if defined(hpux10) || defined(hpux11)
 	    switch ( proc_table[LowProcIndex].pst_stat ) {
 		case PS_STOP:
 	    		long_return = 3;	/* notRunnable */
@@ -1144,7 +1144,7 @@ Init_HR_SWRun (void)
     }
     iwhen = now;
 
-#if defined(hpux10)
+#if defined(hpux10) || defined(hpux11)
     pstat_getdynamic( &pst_dyn, sizeof( struct pst_dynamic ),
 			1, 0 );
     nproc = pst_dyn.psd_activeprocs ;
@@ -1230,7 +1230,7 @@ int
 Get_Next_HR_SWRun (void)
 {
     while ( current_proc_entry < nproc ) {
-#ifdef hpux10
+#if defined(hpux10) || defined(hpux11)
 	return proc_table[current_proc_entry++].pst_pid;
 #elif defined(solaris2)
 	return proc_table[current_proc_entry++];
@@ -1257,13 +1257,13 @@ End_HR_SWRun (void)
 
 int count_processes (void)
 {
-#if !(defined(linux) || defined(cygwin)) || defined(hpux10) || defined(solaris2) || HAVE_KVM_GETPROCS
+#if !(defined(linux) || defined(cygwin)) || defined(hpux10) || defined(hpux11) || defined(solaris2) || HAVE_KVM_GETPROCS
     int i;
 #endif
     int total=0;
 
     Init_HR_SWRun();
-#if defined(hpux10) || HAVE_KVM_GETPROCS || defined(solaris2)
+#if defined(hpux10) || defined(hpux11) || HAVE_KVM_GETPROCS || defined(solaris2)
     total = nproc;
 #else
 #if !defined(linux) && !defined(cygwin) && !defined(dynix)
@@ -1274,7 +1274,7 @@ int count_processes (void)
 #endif
 	    ++total;
     }
-#endif /* !hpux10 */
+#endif	/* !hpux10 && !hpux11 && !HAVE_KVM_GETPROCS && !solaris2 */
     End_HR_SWRun();
     return total;
 }

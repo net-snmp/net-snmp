@@ -318,6 +318,7 @@
 #define BSDIID 11
 #define OPENBSDID 12
 #define WIN32ID 13
+#define HPUX11ID 14
 #define UNKNOWNID 255
 
 #ifdef hpux9
@@ -325,6 +326,9 @@
 #endif
 #ifdef hpux10
 #define OSTYPE HPUX10ID
+#endif
+#ifdef hpux11
+#define OSTYPE HPUX11ID
 #endif
 #ifdef sunos4
 #define OSTYPE SUNOS4ID

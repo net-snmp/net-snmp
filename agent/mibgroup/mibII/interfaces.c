@@ -257,6 +257,7 @@ void init_interfaces(void)
 #endif
 }
 
+#ifdef linux
 /*
  * if_type_from_name
  * Return interface type using the interface name as a clue.
@@ -291,6 +292,7 @@ if_type_from_name( const char *pcch)
     }
     return (1); /* in case search fails */
 }
+#endif
 
 
 typedef struct _conf_if_list {
@@ -753,8 +755,12 @@ int Interface_Scan_Next(short *Index,
 #ifndef HAVE_NET_IF_MIB_H
 
 #ifndef solaris2
+#ifndef hpux11
 static int Interface_Scan_By_Index (int, char *, struct ifnet *, struct in_ifaddr *);
 static int Interface_Get_Ether_By_Index (int, u_char *);
+#else
+static int Interface_Scan_By_Index (int, char *, nmapi_phystat *);
+#endif
 #endif
 
 
@@ -985,26 +991,43 @@ var_ifEntry(struct variable *vp,
 	    size_t *var_len,
 	    WriteMethod **write_method)
 {
+#if defined(hpux11)
+    static nmapi_phystat ifnet;
+#else
     static struct ifnet ifnet;
+#endif
     register int interface;
+#if !defined(hpux11)
     static struct in_ifaddr in_ifaddrVar;
+#endif
+#if defined(hpux11)
+    static char Name[MAX_PHYSADDR_LEN];
+#else
     static char Name[16];
+#endif
     register char *cp;
 #if STRUCT_IFNET_HAS_IF_LASTCHANGE_TV_SEC
           struct timeval now;
 #endif
+#if !defined(hpux11)
     struct nmparms hp_nmparms;
     static mib_ifEntry hp_ifEntry;
     int  hp_fd;
     int  hp_len=sizeof(hp_ifEntry);
+#endif
 
 
     interface = header_ifEntry(vp, name, length, exact, var_len, write_method);
     if ( interface == MATCH_FAILED )
 	return NULL;
 
+#if defined(hpux11)
+    Interface_Scan_By_Index(interface, Name, &ifnet);
+#else
     Interface_Scan_By_Index(interface, Name, &ifnet, &in_ifaddrVar);
+#endif
 
+#if !defined(hpux11)
 	/*
 	 * Additional information about the interfaces is available under
 	 * HP-UX through the network management interface '/dev/netman'
@@ -1022,35 +1045,56 @@ var_ifEntry(struct variable *vp,
           hp_fd = -1;         /* failed */
       }
     }
+#endif
 
     switch (vp->magic){
 	case IFINDEX:
 	    long_return = interface;
 	    return (u_char *) &long_return;
 	case IFDESCR:
+#if defined(hpux11)
+	  cp = ifnet.if_entry.ifDescr;
+#else
 	  if ( hp_fd != -1 )
 	    cp = hp_ifEntry.ifDescr;
 	  else
 	    cp = Name;
+#endif
 	    *var_len = strlen(cp);
 	    return (u_char *)cp;
 	case IFTYPE:
+#if defined(hpux11)
+	    long_return = ifnet.if_entry.ifType;
+#else
 	      if ( hp_fd != -1 )
 		long_return = hp_ifEntry.ifType;
 	      else
 		long_return = 1;	/* OTHER */
+#endif
 	    return (u_char *) &long_return;
 	case IFMTU: {
+#if defined(hpux11)
+	    long_return = (long) ifnet.if_entry.ifMtu;
+#else
 	    long_return = (long) ifnet.if_mtu;
+#endif
 	    return (u_char *) &long_return;
 	}
 	case IFSPEED:
+#if defined(hpux11)
+	    long_return = ifnet.if_entry.ifSpeed;
+#else
 	    if ( hp_fd != -1 )
 		long_return = hp_ifEntry.ifSpeed;
 	    else
 	        long_return = (u_long)  1;	/* OTHER */
+#endif
 	    return (u_char *) &long_return;
 	case IFPHYSADDRESS:
+#if defined(hpux11)
+		*var_len = ifnet.if_entry.ifPhysAddress.o_length;
+		return (u_char *) ifnet.if_entry.ifPhysAddress.o_bytes;
+#else
 		Interface_Get_Ether_By_Index(interface, return_buf);
 		*var_len = 6;
 	        if ((return_buf[0] == 0) && (return_buf[1] == 0) &&
@@ -1058,74 +1102,139 @@ var_ifEntry(struct variable *vp,
 		    (return_buf[4] == 0) && (return_buf[5] == 0))
 		    *var_len = 0;
 		return(u_char *) return_buf;
+#endif
 	case IFADMINSTATUS:
+#if defined(hpux11)
+	    long_return = ifnet.if_entry.ifAdmin;
+#else
 	    long_return = ifnet.if_flags & IFF_UP ? 1 : 2;
+#endif
 	    return (u_char *) &long_return;
 	case IFOPERSTATUS:
+#if defined(hpux11)
+	    long_return = ifnet.if_entry.ifOper;
+#else
 	    long_return = ifnet.if_flags & IFF_RUNNING ? 1 : 2;
+#endif
 	    return (u_char *) &long_return;
 	case IFLASTCHANGE:
+#if defined(hpux11)
+	  long_return = ifnet.if_entry.ifLastChange;
+#else
 	  if ( hp_fd != -1 )
 	    long_return = hp_ifEntry.ifLastChange;
 	  else
           long_return = 0; /* XXX */
+#endif
           return (u_char *) &long_return;
 	case IFINOCTETS:
+#if defined(hpux11)
+	  long_return = ifnet.if_entry.ifInOctets;
+#else
 	  if ( hp_fd != -1 )
 	    long_return = hp_ifEntry.ifInOctets;
 	  else
 	    long_return = (u_long)  ifnet.if_ipackets * 308; /* XXX */
+#endif
 	  return (u_char *) &long_return;
 	case IFINUCASTPKTS:
+#if defined(hpux11)
+	  long_return = ifnet.if_entry.ifInUcastPkts;
+#else
 	  if ( hp_fd != -1 )
 	    long_return = hp_ifEntry.ifInUcastPkts;
 	  else
 	    long_return = (u_long)  ifnet.if_ipackets;
+#endif
 	  return (u_char *) &long_return;
 	case IFINNUCASTPKTS:
+#if defined(hpux11)
+	  long_return = ifnet.if_entry.ifInNUcastPkts;
+#else
 	  if ( hp_fd != -1 )
 	    long_return = hp_ifEntry.ifInNUcastPkts;
 	  else
 	    long_return = (u_long)  0; /* XXX */
+#endif
 	    return (u_char *) &long_return;
 	case IFINDISCARDS:
+#if defined(hpux11)
+	  long_return = ifnet.if_entry.ifInDiscards;
+#else
 	  if ( hp_fd != -1 )
 	    long_return = hp_ifEntry.ifInDiscards;
 	  else
 	    long_return = (u_long)  0; /* XXX */
+#endif
 	    return (u_char *) &long_return;
 	case IFINERRORS:
-	    return (u_char *) &ifnet.if_ierrors;
+#if defined(hpux11)
+	    long_return = ifnet.if_entry.ifInErrors;
+#else
+	    long_return = ifnet.if_ierrors;
+#endif
+	    return (u_char *) &long_return;
 	case IFINUNKNOWNPROTOS:
+#if defined(hpux11)
+	  long_return = ifnet.if_entry.ifInUnknownProtos;
+#else
 	  if ( hp_fd != -1 )
 	    long_return = hp_ifEntry.ifInUnknownProtos;
 	  else
 	    long_return = (u_long)  0; /* XXX */
+#endif
 	    return (u_char *) &long_return;
 	case IFOUTOCTETS:
+#if defined(hpux11)
+	  long_return = ifnet.if_entry.ifOutOctets;
+#else
 	  if ( hp_fd != -1 )
 	    long_return = hp_ifEntry.ifOutOctets;
 	  else
 	    long_return = (u_long)  ifnet.if_opackets * 308; /* XXX */
+#endif
 	    return (u_char *) &long_return;
 	case IFOUTUCASTPKTS:
+#if defined(hpux11)
+	  long_return = ifnet.if_entry.ifOutUcastPkts;
+#else
 	  if ( hp_fd != -1 )
 	    long_return = hp_ifEntry.ifOutUcastPkts;
 	  else
 	    long_return = (u_long)  ifnet.if_opackets;
+#endif
 	    return (u_char *) &long_return;
 	case IFOUTNUCASTPKTS:
+#if defined(hpux11)
+	  long_return = ifnet.if_entry.ifOutNUcastPkts;
+#else
 	  if ( hp_fd != -1 )
 	    long_return = hp_ifEntry.ifOutNUcastPkts;
 	  else
 	    long_return = (u_long)  0; /* XXX */
+#endif
 	    return (u_char *) &long_return;
 	case IFOUTDISCARDS:
-	    return (u_char *) &ifnet.if_snd.ifq_drops;
+#if defined(hpux11)
+	    long_return = ifnet.if_entry.ifOutDiscards;
+#else
+	    long_return = ifnet.if_snd.ifq_drops;
+#endif
+	    return (u_char *) &long_return;
 	case IFOUTERRORS:
-	    return (u_char *) &ifnet.if_oerrors;
+#if defined(hpux11)
+	    long_return = ifnet.if_entry.ifOutErrors;
+#else
+	    long_return = ifnet.if_oerrors;
+#endif
+	    return (u_char *) &long_return;
 	case IFOUTQLEN:
-	    return (u_char *) &ifnet.if_snd.ifq_len;
+#if defined(hpux11)
+	    long_return = ifnet.if_entry.ifOutQlen;
+#else
+	    long_return = ifnet.if_snd.ifq_len;
+#endif
+	    return (u_char *) &long_return;
 	case IFSPECIFIC:
 	    *var_len = nullOidLen;
 	    return (u_char *) nullOid;
@@ -1255,12 +1364,14 @@ var_ifEntry(struct variable *vp,
 
 #ifndef solaris2
 
-#if !defined(sunV3) && !defined(linux)
+#if !defined(sunV3) && !defined(linux) && !defined(hpux11)
 static struct in_ifaddr savein_ifaddr;
 #endif
+#if !defined(hpux11)
 static struct ifnet *ifnetaddr, saveifnet, *saveifnetaddr;
-static int saveIndex=0;
 static char saveName[16];
+#endif
+static int saveIndex=0;
 
 void
 Interface_Scan_Init (void)
@@ -1279,7 +1390,9 @@ Interface_Scan_Init (void)
     
 #endif  
 
+#if !defined(hpux11)
     auto_nlist(IFNET_SYMBOL, (char *)&ifnetaddr, sizeof(ifnetaddr));
+#endif
     saveIndex=0;
 
 #ifdef linux
@@ -1590,12 +1703,49 @@ Interface_Index_By_Name(char *Name,
 #endif
 
 
-#else
+#else	/* sunV3 || linux */
 
 #if defined(netbsd1) || defined(openbsd2)
 #define ia_next ia_list.tqe_next
 #define if_next if_list.tqe_next
 #endif
+
+#if defined(hpux11)
+
+int Interface_Scan_Next(short *Index,
+			char *Name,
+			nmapi_phystat *Retifnet)
+{
+	static nmapi_phystat *if_ptr = (nmapi_phystat *)0;
+	int count = Interface_Scan_Get_Count();
+	unsigned int ulen;
+	int ret;
+
+	if (!if_ptr) {
+	    if (count) 
+		if_ptr = (nmapi_phystat *)malloc(sizeof(nmapi_phystat) * count);
+	    else
+		return (0);	/* EOF */
+	}
+
+	if (saveIndex >= count)
+	    return (0);		/* EOF */
+
+	ulen = (unsigned int)count * sizeof(nmapi_phystat);
+	if ((ret = get_physical_stat(if_ptr, &ulen)) < 0)
+	    return (0);	/* EOF */
+
+	if (Retifnet)
+	    *Retifnet = if_ptr[saveIndex];
+	if (Name)
+	    strcpy(Name, if_ptr[saveIndex].nm_device);
+	saveIndex++;
+	if (Index)
+	    *Index = saveIndex;
+	return (1);	/* DONE */
+}
+
+#else	/* hpux11 */
 
 int Interface_Scan_Next(short *Index,
 			char *Name,
@@ -1669,8 +1819,27 @@ int Interface_Scan_Next(short *Index,
 	return(0);	    /* EOF */
 }
 
+#endif	/* hpux11 */
 
-#endif /* sunV3 */
+#endif	/* sunV3 || linux */
+
+#if defined(hpux11)
+
+static int Interface_Scan_By_Index(int Index,
+				   char *Name,
+				   nmapi_phystat *Retifnet)
+{
+	short i;
+
+	Interface_Scan_Init();
+	while (Interface_Scan_Next(&i, Name, Retifnet)) {
+	    if (i == Index) break;
+	}
+	if (i != Index) return(-1);     /* Error, doesn't exist */
+	return(0);      /* DONE */
+}
+
+#else	/* hpux11 */
 
 static int Interface_Scan_By_Index(int Index,
 				   char *Name,
@@ -1687,8 +1856,36 @@ static int Interface_Scan_By_Index(int Index,
 	return(0);	/* DONE */
 }
 
+#endif	/* hpux11 */
 
 static int Interface_Count=0;
+
+#if defined(hpux11)
+
+static int Interface_Scan_Get_Count (void)
+{
+	if (!Interface_Count) {
+	    int fd;
+	    struct nmparms p;
+	    int val;
+	    unsigned int ulen;
+	    int ret;
+
+	    if ((fd = open_mib("/dev/ip", O_RDONLY, 0, NM_ASYNC_OFF)) >= 0) {
+		p.objid = ID_ifNumber;
+		p.buffer = (void *)&val;
+		ulen = sizeof(int);
+		p.len = &ulen;
+		if ((ret = get_mib_info(fd, &p)) == 0)
+		    Interface_Count = val;
+		close_mib(fd);
+	    }
+	}
+	return(Interface_Count);
+}
+
+#else	/* hpux11 */
+
 static time_t scan_time = 0;
 
 static int Interface_Scan_Get_Count (void)
@@ -1799,7 +1996,9 @@ static int Interface_Get_Ether_By_Index(int Index,
 	return(0);	/* DONE */
 }
 
-#else /* solaris2 */
+#endif	/* hpux11 */
+
+#else	/* solaris2 */
 
 static int Interface_Scan_Get_Count (void)
 {
@@ -2119,7 +2318,7 @@ var_ifEntry(struct variable *vp,
 }
 
 #endif /* HAVE_NET_IF_MIB_H */
-#endif
+#endif /* !USE_SYSCTL_IFLIST */
 
 #else /* WIN32 */
 #include <iphlpapi.h>

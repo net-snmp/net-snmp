@@ -244,6 +244,10 @@ void init_tcp(void)
 #define USES_SNMP_DESIGNED_TCPSTAT
 #endif
 
+#ifdef hpux11
+#define TCP_STAT_STRUCTURE	int
+#endif
+
 #ifdef WIN32
 #include <iphlpapi.h>
 #define TCP_STAT_STRUCTURE     MIB_TCPSTATS
@@ -424,6 +428,44 @@ read_tcp_stat( TCP_STAT_STRUCTURE *tcpstat, int magic )
 #ifdef solaris2
    static mib2_ip_t ipstat;
 #endif
+#ifdef hpux11
+    int fd;
+    struct nmparms p;
+    unsigned int ulen;
+    int ret;
+
+    if ((fd = open_mib("/dev/ip", O_RDONLY, 0, NM_ASYNC_OFF)) < 0)
+	return (-1);	/* error */
+
+    switch (magic) {
+	case TCPRTOALGORITHM:	p.objid = ID_tcpRtoAlgorithm;		break;
+	case TCPRTOMIN:		p.objid = ID_tcpRtoMin;			break;
+	case TCPRTOMAX:		p.objid = ID_tcpRtoMax;			break;
+	case TCPMAXCONN:	p.objid = ID_tcpMaxConn;		break;
+	case TCPACTIVEOPENS:	p.objid = ID_tcpActiveOpens;		break;
+	case TCPPASSIVEOPENS:	p.objid = ID_tcpPassiveOpens;		break;
+	case TCPATTEMPTFAILS:	p.objid = ID_tcpAttemptFails;		break;
+	case TCPESTABRESETS:	p.objid = ID_tcpEstabResets;		break;
+	case TCPCURRESTAB:	p.objid = ID_tcpCurrEstab;		break;
+	case TCPINSEGS:		p.objid = ID_tcpInSegs;			break;
+	case TCPOUTSEGS:	p.objid = ID_tcpOutSegs;		break;
+	case TCPRETRANSSEGS:	p.objid = ID_tcpRetransSegs;		break;
+	case TCPINERRS:		p.objid = ID_tcpInErrs;			break;
+	case TCPOUTRSTS:	p.objid = ID_tcpOutRsts;		break;
+	default:
+	    *tcpstat = 0;
+	    close_mib(fd);
+	    return (0);
+    }
+
+    p.buffer = (void *)tcpstat;
+    ulen = sizeof(TCP_STAT_STRUCTURE);
+    p.len = &ulen;
+    ret_value = get_mib_info(fd, &p);
+    close_mib(fd);
+
+    return (ret_value);	/* 0: ok, < 0: error */
+#else	/* hpux11 */
 
     if (  tcp_stats_cache_marker &&
 	(!atime_ready( tcp_stats_cache_marker, TCP_STATS_CACHE_TIMEOUT*1000 )))
@@ -476,4 +518,5 @@ read_tcp_stat( TCP_STAT_STRUCTURE *tcpstat, int magic )
 	tcp_stats_cache_marker = NULL;
     }
     return ret_value;
+#endif	/* hpux11 */
 }
