@@ -33,6 +33,9 @@ void *header_complex_extract_entry(struct header_complex_index **thetop,
                                    struct header_complex_index *thespot);
 struct header_complex_index *header_complex_find_entry(struct header_complex_index *thestuff, void *entry);
 
+void *header_complex_get(struct header_complex_index *datalist,
+                         struct variable_list *index);
+
 struct header_complex_index *
   header_complex_add_data(struct header_complex_index **thedata,
                           struct variable_list *var, void *data);
