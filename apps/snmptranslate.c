@@ -60,6 +60,14 @@ SOFTWARE.
 
 int main __P((int, char **));
 
+void
+usage __P((void))
+{
+  fprintf(stderr,
+	  "usage: snmptranslate [-h] [-n] [-d] [-R] [-w|-W] [-f|-s|-S] [-p] [-m <MIBS>] [-M <MIDDIRS>] objectID\n");
+  exit(1);
+}
+
 int
 main(argc, argv)
     int	    argc;
@@ -80,6 +88,9 @@ main(argc, argv)
     for(arg = 1; arg < argc; arg++){
 	if (argv[arg][0] == '-'){
 	    switch(argv[arg][1]){
+	      case 'h':
+		usage();
+                exit(1);
 	      case 'n':
 		tosymbolic = 1;
 		break;	     
@@ -114,8 +125,32 @@ main(argc, argv)
 		snmp_set_suffix_only(2);
 		tosymbolic = 1;
 		break;
+              case 'm':
+                if (argv[arg][2] != 0)
+                  setenv("MIBS",&argv[arg][2], 1);
+                else if (++arg < argc)
+                  setenv("MIBS",argv[arg], 1);
+                else {
+                  fprintf(stderr,"Need MIBS after -m flag.\n");
+                  usage();
+                  exit(1);
+                }
+                break;
+              case 'M':
+                if (argv[arg][2] != 0)
+                  setenv("MIBDIRS",&argv[arg][2], 1);
+                else if (++arg < argc)
+                  setenv("MIBDIRS",argv[arg], 1);
+                else {
+                  fprintf(stderr,"Need MIBDIRS after -M flag.\n");
+                  usage();
+                  exit(1);
+                }
+                break;
+
 	      default:
 		fprintf(stderr,"invalid option: -%c\n", argv[arg][1]);
+                usage();
 		break;
 	    }
 	    continue;
