@@ -55,6 +55,9 @@
 #if HAVE_INET_MIB2_H
 #include <inet/mib2.h>
 #endif
+#if HAVE_IOCTLS_H
+#include <ioctls.h>
+#endif
 
 #ifdef solaris2
 #include "kernel_sunos5.h"
