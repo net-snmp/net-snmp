@@ -201,7 +201,8 @@ var_ipAddrEntry(struct variable *vp,
     static struct ifnet lowin_ifnet;
 #if defined(linux)
     static struct in_ifaddr in_ifaddr;
-#endif#endif
+#endif
+#endif
     static struct ifnet ifnet;
 #endif                          /* hpux11 */
 
