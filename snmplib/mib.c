@@ -1185,15 +1185,15 @@ init_mib (void)
 #endif
     }
 
-    DEBUGMSGTL(("init_mib","Seen MIBFILES: Looking in '%s' for mib files ...\n",env_var));
     if ( env_var != 0 ) {
+	DEBUGMSGTL(("init_mib","Seen MIBFILES: Looking in '%s' for mib files ...\n",env_var));
 	entry = strtok( env_var, ENV_SEPARATOR );
 	while ( entry ) {
 	    read_mib(entry);
 	    entry = strtok( NULL, ENV_SEPARATOR);
 	}
+	free(env_var);
     }
-    free(env_var);
     
     prefix = getenv("PREFIX");
     
