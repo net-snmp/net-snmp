@@ -528,6 +528,7 @@ asn_parse_length(data, length)
 	    ERROR_MSG("we can't support data lengths that long");
 	    return NULL;
 	}
+	*length = 0;  /* protect against short lengths */
 	memmove(length, data + 1, (int)lengthbyte);
 	*length = ntohl(*length);
 	*length >>= (8 * ((sizeof(int)) - lengthbyte));
@@ -654,9 +655,12 @@ asn_parse_objid(data, datalength, type, objid, objidlength)
         } else if (subidentifier < 80) {
             objid[0] = 1;
             objid[1] = subidentifier - 40;
-        } else {
+        } else if (subidentifier < 120) {
             objid[0] = 2;
             objid[1] = subidentifier - 80;
+        } else {
+	    objid[1] = (subidentifier % 40);
+	    objid[0] = ((subidentifier - objid[1]) / 40);
         }
     }
 
