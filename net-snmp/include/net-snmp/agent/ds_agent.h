@@ -29,6 +29,8 @@
 #define NETSNMP_DS_AGENT_FLAGS    0     /* session.flags */
 #define NETSNMP_DS_AGENT_USERID   1
 #define NETSNMP_DS_AGENT_GROUPID  2
-#define NETSNMP_DS_AGENT_AGENTX_PING_INTERVAL  3        /* ping master every SECONDS */
+#define NETSNMP_DS_AGENT_AGENTX_PING_INTERVAL 3 /* ping master every SECONDS */
+#define NETSNMP_DS_AGENT_AGENTX_TIMEOUT  4
+#define NETSNMP_DS_AGENT_AGENTX_RETRIES  5
 
 #endif
