@@ -128,6 +128,10 @@ bin2asc(char *p, size_t n)
     int             i, flag = 0;
     char            buffer[SNMP_MAXBUF];
 
+    /* prevent buffer overflow */
+    if ((int)n > (sizeof(buffer) - 1))
+        n = sizeof(buffer) - 1;
+
     for (i = 0; i < (int) n; i++) {
         buffer[i] = p[i];
         if (!isprint(p[i]))
@@ -145,14 +149,12 @@ bin2asc(char *p, size_t n)
     return 3 * n - 1;
 }
 
-
 void
 init_pass(void)
 {
     snmpd_register_config_handler("pass", pass_parse_config,
                                   pass_free_config, "miboid command");
 }
-
 
 void
 pass_parse_config(const char *token, char *cptr)
@@ -203,7 +205,7 @@ pass_parse_config(const char *token, char *cptr)
     /*
      * argggg -- pasthrus must be sorted 
      */
-    if (numpassthrus > 0) {
+    if (numpassthrus > 1) {
         etmp = (struct extensible **)
             malloc(((sizeof(struct extensible *)) * numpassthrus));
         if (etmp == NULL)
@@ -326,10 +328,6 @@ var_extensible_pass(struct variable *vp,
                     *var_len = strlen(buf2);
                     vp->type = ASN_OCTET_STR;
                     return ((unsigned char *) buf2);
-                } else if (!strncasecmp(buf, "opaque", 6)) {
-                    *var_len = asc2bin(buf2);
-                    vp->type = ASN_OPAQUE;
-                    return ((unsigned char *) buf2);
                 } else if (!strncasecmp(buf, "integer", 7)) {
                     *var_len = sizeof(long_ret);
                     long_ret = strtol(buf2, NULL, 10);
@@ -348,6 +346,10 @@ var_extensible_pass(struct variable *vp,
                 } else if (!strncasecmp(buf, "octet", 5)) {
                     *var_len = asc2bin(buf2);
                     vp->type = ASN_OCTET_STR;
+                    return ((unsigned char *) buf2);
+                } else if (!strncasecmp(buf, "opaque", 6)) {
+                    *var_len = asc2bin(buf2);
+                    vp->type = ASN_OPAQUE;
                     return ((unsigned char *) buf2);
                 } else if (!strncasecmp(buf, "gauge", 5)) {
                     *var_len = sizeof(long_ret);
@@ -404,7 +406,6 @@ setPass(int action,
     char            buf[SNMP_MAXBUF], buf2[SNMP_MAXBUF];
     long            tmp;
     unsigned long   utmp;
-    size_t          itmp;
 
     for (i = 1; i <= numpassthrus; i++) {
         passthru = get_exten_instance(passthrus, i);
@@ -454,7 +455,6 @@ setPass(int action,
                         (int) ((utmp & 0xff)));
                 break;
             case ASN_OCTET_STR:
-                itmp = sizeof(buf2);
                 memcpy(buf2, var_val, var_val_len);
                 if (var_val_len == 0)
                     sprintf(buf, "string \"\"\n");
