@@ -1465,8 +1465,21 @@ get_node(name, objid, objidlen)
     oid *objid;
     int *objidlen;
 {
-    return( get_module_node( name, "ANY", objid, objidlen ));
+    char *cp;
 
+    if (( cp=strchr(name, ':')) == NULL )
+	return( get_module_node( name, "ANY", objid, objidlen ));
+    else {
+		/*
+		 *  requested name is of the form
+		 *	"module:subidentifier"
+		 */
+	*cp = '\0';	/* isolate the module name */
+	cp++;		/* cp now point to the subidentifier */
+
+			/* 'cp' and 'name' *do* go that way round! */
+	return( get_module_node( cp, name, objid, objidlen ));
+    }
 }
 
 #ifdef testing
