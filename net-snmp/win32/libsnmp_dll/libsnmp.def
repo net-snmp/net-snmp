@@ -215,6 +215,7 @@ EXPORTS
 	snmp_out_toggle_options
 	snmp_out_toggle_options_usage
 	snmp_oid_compare
+	netsnmp_oid_equals
 	usm_free_user
 	usm_add_user
 	usm_create_initial_user

@@ -21,6 +21,8 @@
 #include "util_funcs.h"
 #include "usmUser.h"
 
+int usmStatusCheck(struct usmUser *uptr);
+
 struct variable4 usmUser_variables[] = {
     {USMUSERSPINLOCK, ASN_INTEGER, RWRITE, var_usmUser, 1, {1}},
     {USMUSERSECURITYNAME, ASN_OCTET_STR, RONLY, var_usmUser, 3, {2, 1, 3}},

@@ -42,7 +42,7 @@ extern          "C" {
 #define MT_LIB_MAXIMUM     6    /* must be one greater than the last one */
 
 
-#ifdef NS_REENTRANT
+#if defined(NS_REENTRANT) || defined(WIN32)
 
 #if HAVE_PTHREAD_H
 #include <pthread.h>

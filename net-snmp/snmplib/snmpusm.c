@@ -2259,8 +2259,11 @@ usm_process_in_msg(int msgProcModel,    /* (UNUSED) */
 {                               /* IN     - v3 Message flags.              */
     size_t          remaining = wholeMsgLen - (u_int)
         ((u_long) * secParams - (u_long) * wholeMsg);
-    u_int           boots_uint, net_boots;
-    u_int           time_uint, net_time;
+    u_int           boots_uint;
+    u_int           time_uint;
+#ifdef HAVE_AES
+    u_int           net_boots, net_time;
+#endif
     u_char          signature[BYTESIZE(USM_MAX_KEYEDHASH_LENGTH)];
     size_t          signature_length = BYTESIZE(USM_MAX_KEYEDHASH_LENGTH);
     u_char          salt[BYTESIZE(USM_MAX_SALT_LENGTH)];
