@@ -45,6 +45,7 @@ SNMP::initMib();
 $configfile="mib2c.conf";
 $debug=0;
 $quiet=0;
+$strict_unk_token = 0;
 $nostats = 0;
 $noindent = 0;
 $currentline = 0;
@@ -437,6 +438,13 @@ sub process {
           else {
             $debug = 0;
           }
+	} elsif (/\@\s*strict token\s+([^\@]+)\@/) { #                  STRICT
+          if ($1 eq "on") {
+            $strict_unk_token = 1;
+          }
+          else {
+            $strict_unk_token = 0;
+          }
 	} elsif (/\@\s*open\s+([^\@]+)\@/) { #                            OPEN
 	    my $arg = $1;
 	    my ($multiple) = (0);
@@ -711,6 +719,7 @@ sub process {
           warn "$currentfile:$currentline contained a line that started with a @ but did not match any mib2c configuration tokens.\n";
           warn "(maybe missing the trailing @?)\n";
           warn "$currentfile:$currentline [$_]\n";
+          die if ($strict_unk_token == 1);
 	}
     }
   $currentlevel--;
