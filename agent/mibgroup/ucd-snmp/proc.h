@@ -15,7 +15,6 @@ int get_ps_output __P((struct extensible *));
 /* config file parsing routines */
 void proc_free_config __P((void));
 void proc_parse_config __P((char *, char *));
-config_parse_dot_conf("proc", proc_parse_config, proc_free_config,"process-name [max-num] [min-num]");
 
 #include "mibdefs.h"
 
@@ -23,20 +22,4 @@ config_parse_dot_conf("proc", proc_parse_config, proc_free_config,"process-name 
 #define PROCMAX 4
 #define PROCCOUNT 5
 
-#ifdef IN_SNMP_VARS_C
-
-struct variable2 extensible_proc_variables[] = {
-  {MIBINDEX, ASN_INTEGER, RONLY, var_extensible_proc, 1, {MIBINDEX}},
-  {ERRORNAME, ASN_OCTET_STR, RONLY, var_extensible_proc, 1, {ERRORNAME}}, 
-    {PROCMIN, ASN_INTEGER, RONLY, var_extensible_proc, 1, {PROCMIN}}, 
-    {PROCMAX, ASN_INTEGER, RONLY, var_extensible_proc, 1, {PROCMAX}},
-    {PROCCOUNT, ASN_INTEGER, RONLY, var_extensible_proc, 1, {PROCCOUNT}},
-    {ERRORFLAG, ASN_INTEGER, RONLY, var_extensible_proc, 1, {ERRORFLAG}},
-    {ERRORMSG, ASN_OCTET_STR, RONLY, var_extensible_proc, 1, {ERRORMSG}},
-  {ERRORFIX, ASN_INTEGER, RWRITE, var_extensible_proc, 1, {ERRORFIX }}
-};
-
-config_load_mib(EXTENSIBLEMIB.PROCMIBNUM.1, EXTENSIBLENUM+2, extensible_proc_variables)
-
-#endif
 #endif /* _MIBGROUP_PROC_H */

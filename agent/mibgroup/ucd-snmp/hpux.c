@@ -13,6 +13,35 @@
 #include "mibincl.h"
 #include "hpux.h"
 
+void int_hpux(void) {
+
+/* define the structure we're going to ask the agent to register our
+   information at */
+  struct variable2 hp_variables[] = {
+    {HPCONF, ASN_INTEGER, RWRITE, var_hp, 1, {HPCONF}},
+    {HPRECONFIG, ASN_INTEGER, RWRITE, var_hp, 1, {HPRECONFIG}},
+    {HPFLAG, ASN_INTEGER, RWRITE, var_hp, 1, {HPFLAG}},
+    {HPLOGMASK, ASN_INTEGER, RWRITE, var_hp, 1, {ERRORFLAG}},
+    {HPSTATUS, ASN_INTEGER, RWRITE, var_hp, 1, {ERRORMSG}}
+  };
+
+  struct variable2 hptrap_variables[] = {
+    {HPTRAP, ASN_IPADDRESS, RWRITE, var_hp, 1, {HPTRAP }},
+  };
+
+/* Define the OID pointer to the top of the mib tree that we're
+   registering underneath */
+  oid hp_variables_oid[] = { 1,3,6,1,4,1,11,2,13,1,2,1 };
+  oid hptrap_variables_oid[] = { 1,3,6,1,4,1,11,2,13,2 };
+
+  /* register ourselves with the agent to handle our mib tree */
+  REGISTER_MIB("mibII/hpux:hp", hp_variables, variable2, hp_variables_oid);
+  REGISTER_MIB("mibII/hpux:hptrap", hptrap_variables, variable2, \
+               hptrap_variables_oid);
+
+}
+
+
 #ifdef RESERVED_FOR_FUTURE_USE
 int writeHP(action, var_val, var_val_type, var_val_len, statP, name, name_len)
    int      action;

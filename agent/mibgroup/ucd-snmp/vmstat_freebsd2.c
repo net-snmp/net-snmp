@@ -48,6 +48,38 @@
 /* CPU percentage */
 #define CPU_PRC         100
 
+void init_vmstat_freebsd2(void) {
+
+  struct variable2 extensible_vmstat_variables[] = {
+    {MIBINDEX, ASN_INTEGER, RONLY, var_extensible_vmstat,1,{MIBINDEX}},
+    {ERRORNAME, ASN_OCTET_STR, RONLY, var_extensible_vmstat, 1, {ERRORNAME }},
+    {SWAPIN, ASN_INTEGER, RONLY, var_extensible_vmstat, 1, {SWAPIN}},
+    {SWAPOUT, ASN_INTEGER, RONLY, var_extensible_vmstat, 1, {SWAPOUT}},
+    {IOSENT, ASN_INTEGER, RONLY, var_extensible_vmstat, 1, {IOSENT}},
+    {IORECEIVE, ASN_INTEGER, RONLY, var_extensible_vmstat, 1, {IORECEIVE}},
+    {SYSINTERRUPTS, ASN_INTEGER, RONLY, var_extensible_vmstat, 1, {SYSINTERRUPTS}},
+    {SYSCONTEXT, ASN_INTEGER, RONLY, var_extensible_vmstat, 1, {SYSCONTEXT}},
+    {CPUUSER, ASN_INTEGER, RONLY, var_extensible_vmstat, 1, {CPUUSER}},
+    {CPUSYSTEM, ASN_INTEGER, RONLY, var_extensible_vmstat, 1, {CPUSYSTEM}},
+    {CPUIDLE, ASN_INTEGER, RONLY, var_extensible_vmstat, 1, {CPUIDLE}},
+/* Future use: */
+/*
+  {ERRORFLAG, ASN_INTEGER, RONLY, var_extensible_vmstat, 1, {ERRORFLAG }},
+  {ERRORMSG, ASN_OCTET_STR, RONLY, var_extensible_vmstat, 1, {ERRORMSG }}
+*/
+  };
+
+  /* Define the OID pointer to the top of the mib tree that we're
+   registering underneath */
+  oid vmstat_variables_oid[] = { EXTENSIBLEMIB,11 };
+
+  /* register ourselves with the agent to handle our mib tree */
+  REGISTER_MIB("ucd-snmp/vmstat", extensibel_vmstat_variables, variable2, \
+               vmstat_variables_oid);
+  
+}
+
+
 long
 getuptime()
 {

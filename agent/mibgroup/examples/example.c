@@ -44,6 +44,54 @@
 
 void	init_example( )
 {
+/* Define a 'variable' structure that is a representation of our mib. */
+
+/* first, we have to pick the variable type.  They are all defined in
+   the var_struct.h file in the agent subdirectory.  I'm picking the
+   variable2 structure since the longest sub-component of the oid I
+   want to load is .2.1 and .2.2 so I need at most 2 spaces in the
+   last entry. */
+
+  struct variable2 example_variables[] = {
+    { EXAMPLESTRING,  ASN_OCTET_STR, RONLY, var_example, 1, {1}},
+    /* Load the first table entry.  arguments:
+       1: EXAMPLESTRING: magic number to pass back to us and used to
+       check against the incoming mib oid requested
+       later.
+       2: STRING: type of value returned.
+       3: RONLY: Its read-only.  We can't use 'snmpset' to set it.
+       4: var_example: The return callback function, defined in example.c
+       5: 1: The length of the next miboid this will be located at
+
+       6: {1}: The sub-oid this table entry is for.  It's appended to
+       the table entry defined later.
+    */
+
+    /* Now do the rest.  The next two are the sub-table, at .2.1 and .2.2: */
+    { EXAMPLEINTEGER,   ASN_INTEGER,   RONLY, var_example, 2, {2,1}},
+    { EXAMPLEOBJECTID,  ASN_OBJECT_ID, RONLY, var_example, 2, {2,2}},
+    { EXAMPLETIMETICKS, ASN_TIMETICKS, RONLY, var_example, 1, {3}},
+    { EXAMPLEIPADDRESS, ASN_IPADDRESS, RONLY, var_example, 1, {4}},
+    { EXAMPLECOUNTER,   ASN_COUNTER,   RONLY, var_example, 1, {5}},
+    { EXAMPLEGAUGE,     ASN_GAUGE,     RONLY, var_example, 1, {6}}
+  };
+
+  /* Define the OID pointer to the top of the mib tree that we're
+   registering underneath. */
+  oid exmample_variables_oid[] = { 1.3.6.1.4.1.2021.254 };
+
+  /* register ourselves with the agent to handle our mib tree
+
+   This is a macro defined in ../../snmp_vars.h.  The arguments are:
+
+   descr:   A short description of the mib group being loaded.
+   var:     The variable structure to load.
+   vartype: The variable structure used to define it (variable2, variable4, ...)
+   theoid:  A *initialized* *exact length* oid pointer.
+            (sizeof(theoid) *must* return the number of elements!)  
+  */
+  REGISTER_MIB("example", example_variables, variable2, example_variables_oid);
+
   /* call auto_nlist to load the nlist symbols.  We
      actually don't need it, so its commented out. */
   /* auto_nlist( "example_symbol" ); */

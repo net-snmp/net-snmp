@@ -53,3 +53,16 @@ void register_mib __P((char *, struct variable *, int , int , oid *, int));
 void unregister_mib __P((oid *, int));
 struct subtree *unregister_mib_tree __P((oid *, int, struct subtree *));
 struct subtree *free_subtree __P((struct subtree *));
+
+/* REGISTER_MIB(): This macro simply loads register_mib with less pain:
+
+   descr:   A short description of the mib group being loaded.
+   var:     The variable structure to load.
+   vartype: The variable structure used to define it (variable2, variable4, ...)
+   theoid:  A *initialized* *exact length* oid pointer.
+            (sizeof(theoid) *must* return the number of elements!) 
+*/
+#define REGISTER_MIB(descr, var, vartype, theoid)                      \
+  register_mib(descr, (struct variable *) var, sizeof(struct vartype), \
+               sizeof(var)/sizeof(struct vartype),                     \
+               theoid, sizeof(theoid)/sizeof(oid));

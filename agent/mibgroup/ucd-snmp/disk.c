@@ -127,6 +127,33 @@
 int numdisks;
 struct diskpart disks[MAXDISKS];
 
+struct variable2 extensible_disk_variables[] = {
+  {MIBINDEX, ASN_INTEGER, RONLY, var_extensible_disk, 1, {MIBINDEX}},
+  {ERRORNAME, ASN_OCTET_STR, RONLY, var_extensible_disk, 1, {ERRORNAME}},
+  {DISKDEVICE, ASN_OCTET_STR, RONLY, var_extensible_disk, 1, {DISKDEVICE}},
+  {DISKMINIMUM, ASN_INTEGER, RONLY, var_extensible_disk, 1, {DISKMINIMUM}},
+  {DISKMINPERCENT, ASN_INTEGER, RONLY, var_extensible_disk, 1, {DISKMINPERCENT}},
+  {DISKTOTAL, ASN_INTEGER, RONLY, var_extensible_disk, 1, {DISKTOTAL}},
+  {DISKAVAIL, ASN_INTEGER, RONLY, var_extensible_disk, 1, {DISKAVAIL}},
+  {DISKUSED, ASN_INTEGER, RONLY, var_extensible_disk, 1, {DISKUSED}},
+  {DISKPERCENT, ASN_INTEGER, RONLY, var_extensible_disk, 1, {DISKPERCENT}},
+  {ERRORFLAG, ASN_INTEGER, RONLY, var_extensible_disk, 1, {ERRORFLAG }},
+  {ERRORMSG, ASN_OCTET_STR, RONLY, var_extensible_disk, 1, {ERRORMSG }}
+};
+
+/* Define the OID pointer to the top of the mib tree that we're
+   registering underneath */
+oid disk_variables_oid[] = { EXTENSIBLEMIB,DISKMIBNUM,1 };
+
+void init_disk(void){
+  /* register ourselves with the agent to handle our mib tree */
+  REGISTER_MIB("mibII/dis", extensible_disk_variables, variable2, \
+               disk_variables_oid);
+
+  snmpd_register_config_handler("disk", disk_parse_config, disk_free_config,
+                                "path [ minspace | minpercent% ]");
+}
+
 void disk_free_config __P((void)) {
   int i;
   

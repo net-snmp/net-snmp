@@ -66,6 +66,22 @@ void calculate_wombat();
 
 void	init_wombat( )
 {
+
+/* define the structure we're going to ask the agent to register our
+   information at */
+  struct variable2 wombat_variables[] = {
+    { WOMBATUPTIME,  ASN_TIMETICKS, RONLY, var_wombat, 1, {1}},
+    { WOMBATCURRENT,   ASN_COUNTER, RONLY, var_wombat, 1, {2}},
+    { WOMBATHIGHWATER, ASN_COUNTER, RONLY, var_wombat, 1, {3}}
+  };
+
+  /* Define the OID pointer to the top of the mib tree that we're
+   registering underneath */
+  oid wombat_variables_oid[] = { 1,3,6,1,2,1,99 };
+
+  /* register ourselves with the agent to handle our mib tree */
+  REGISTER_MIB("wombat", wobmat_variables, variable2, wombat_variables_oid);
+
   /* the auto_nlist routine automatically looks up an nlist symbol in
      the kernel and returns the value.  It does not have to be done in
      the init_wombat() routine, but we've put it here for our

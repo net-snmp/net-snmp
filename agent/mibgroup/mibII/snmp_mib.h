@@ -74,38 +74,4 @@ extern char *snmp_trapcommunity;
 #define SNMPOUTTRAPS		29
 #define SNMPENABLEAUTHENTRAPS	30
 
-#ifdef IN_SNMP_VARS_C
-struct variable2 snmp_variables[] = {
-    {SNMPINPKTS, ASN_COUNTER, RONLY, var_snmp, 1, {1}},
-    {SNMPOUTPKTS, ASN_COUNTER, RONLY, var_snmp, 1, {2}},
-    {SNMPINBADVERSIONS, ASN_COUNTER, RONLY, var_snmp, 1, {3}},
-    {SNMPINBADCOMMUNITYNAMES, ASN_COUNTER, RONLY, var_snmp, 1, {4}},
-    {SNMPINBADCOMMUNITYUSES, ASN_COUNTER, RONLY, var_snmp, 1, {5}},
-    {SNMPINASNPARSEERRORS, ASN_COUNTER, RONLY, var_snmp, 1, {6}},
-    {SNMPINTOOBIGS, ASN_COUNTER, RONLY, var_snmp, 1, {8}},
-    {SNMPINNOSUCHNAMES, ASN_COUNTER, RONLY, var_snmp, 1, {9}},
-    {SNMPINBADVALUES, ASN_COUNTER, RONLY, var_snmp, 1, {10}},
-    {SNMPINREADONLYS, ASN_COUNTER, RONLY, var_snmp, 1, {11}},
-    {SNMPINGENERRS, ASN_COUNTER, RONLY, var_snmp, 1, {12}},
-    {SNMPINTOTALREQVARS, ASN_COUNTER, RONLY, var_snmp, 1, {13}},
-    {SNMPINTOTALSETVARS, ASN_COUNTER, RONLY, var_snmp, 1, {14}},
-    {SNMPINGETREQUESTS, ASN_COUNTER, RONLY, var_snmp, 1, {15}},
-    {SNMPINGETNEXTS, ASN_COUNTER, RONLY, var_snmp, 1, {16}},
-    {SNMPINSETREQUESTS, ASN_COUNTER, RONLY, var_snmp, 1, {17}},
-    {SNMPINGETRESPONSES, ASN_COUNTER, RONLY, var_snmp, 1, {18}},
-    {SNMPINTRAPS, ASN_COUNTER, RONLY, var_snmp, 1, {19}},
-    {SNMPOUTTOOBIGS, ASN_COUNTER, RONLY, var_snmp, 1, {20}},
-    {SNMPOUTNOSUCHNAMES, ASN_COUNTER, RONLY, var_snmp, 1, {21}},
-    {SNMPOUTBADVALUES, ASN_COUNTER, RONLY, var_snmp, 1, {22}},
-    {SNMPOUTGENERRS, ASN_COUNTER, RONLY, var_snmp, 1, {24}},
-    {SNMPOUTGETREQUESTS, ASN_COUNTER, RONLY, var_snmp, 1, {25}},
-    {SNMPOUTGETNEXTS, ASN_COUNTER, RONLY, var_snmp, 1, {26}},
-    {SNMPOUTSETREQUESTS, ASN_COUNTER, RONLY, var_snmp, 1, {27}},
-    {SNMPOUTGETRESPONSES, ASN_COUNTER, RONLY, var_snmp, 1, {28}},
-    {SNMPOUTTRAPS, ASN_COUNTER, RONLY, var_snmp, 1, {29}},
-    {SNMPENABLEAUTHENTRAPS, ASN_INTEGER, RWRITE, var_snmp, 1, {30}}
-};
-config_load_mib(MIB.11, 7, snmp_variables)
-#endif
-
 #endif /* _MIBGROUP_SNMP_H */

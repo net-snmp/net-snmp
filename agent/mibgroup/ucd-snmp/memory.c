@@ -114,6 +114,65 @@ static int pageshift;           /* log base 2 of the pagesize */
 
 #define DEFAULTMINIMUMSWAP 16000  /* kilobytes */
 
+void init_memory()
+{
+#ifndef linux
+  int pagesize;
+ auto_nlist(PHYSMEM_SYMBOL,0,0);
+ auto_nlist(TOTAL_MEMORY_SYMBOL,0,0);
+ auto_nlist(MBSTAT_SYMBOL,0,0);
+ auto_nlist(SWDEVT_SYMBOL,0,0);
+ auto_nlist(FSWDEVT_SYMBOL,0,0);
+ auto_nlist(NSWAPFS_SYMBOL,0,0);
+ auto_nlist(NSWAPDEV_SYMBOL,0,0);
+
+#ifndef bsdi2
+  if (auto_nlist(NSWAPDEV_SYMBOL,(char *) &nswapdev, sizeof(nswapdev)) == 0)
+    return;
+  if (auto_nlist(NSWAPFS_SYMBOL,(char *) &nswapfs, sizeof(nswapfs)) == 0)
+    return;
+#endif
+  pagesize = 1 << PGSHIFT;
+  pageshift = 0;
+  while (pagesize > 1) {
+    pageshift++;
+    pagesize >>= 1;
+  }
+  pageshift -= 10;
+#endif
+
+  struct variable2 extensible_mem_variables[] = {
+    {MIBINDEX, ASN_INTEGER, RONLY, var_extensible_mem,1,{MIBINDEX}},
+    {ERRORNAME, ASN_OCTET_STR, RONLY, var_extensible_mem, 1, {ERRORNAME }},
+    {MEMTOTALSWAP, ASN_INTEGER, RONLY, var_extensible_mem, 1, {MEMTOTALSWAP}},
+    {MEMAVAILSWAP, ASN_INTEGER, RONLY, var_extensible_mem, 1, {MEMAVAILSWAP}},
+    {MEMTOTALREAL, ASN_INTEGER, RONLY, var_extensible_mem, 1, {MEMTOTALREAL}},
+    {MEMAVAILREAL, ASN_INTEGER, RONLY, var_extensible_mem, 1, {MEMAVAILREAL}},
+    {MEMTOTALSWAPTXT, ASN_INTEGER, RONLY, var_extensible_mem, 1, {MEMTOTALSWAPTXT}},
+    {MEMUSEDSWAPTXT, ASN_INTEGER, RONLY, var_extensible_mem, 1, {MEMUSEDSWAPTXT}},
+    {MEMTOTALREALTXT, ASN_INTEGER, RONLY, var_extensible_mem, 1, {MEMTOTALREALTXT}},
+    {MEMUSEDREALTXT, ASN_INTEGER, RONLY, var_extensible_mem, 1, {MEMUSEDREALTXT}},
+    {MEMTOTALFREE, ASN_INTEGER, RONLY, var_extensible_mem, 1, {MEMTOTALFREE}},
+    {MEMSWAPMINIMUM, ASN_INTEGER, RONLY, var_extensible_mem, 1, {MEMSWAPMINIMUM}},
+    {MEMSHARED, ASN_INTEGER, RONLY, var_extensible_mem, 1, {MEMSHARED}},
+    {MEMBUFFER, ASN_INTEGER, RONLY, var_extensible_mem, 1, {MEMBUFFER}},
+    {MEMCACHED, ASN_INTEGER, RONLY, var_extensible_mem, 1, {MEMCACHED}},
+    {ERRORFLAG, ASN_INTEGER, RONLY, var_extensible_mem, 1, {ERRORFLAG }},
+    {ERRORMSG, ASN_OCTET_STR, RONLY, var_extensible_mem, 1, {ERRORMSG }}
+  };
+
+/* Define the OID pointer to the top of the mib tree that we're
+   registering underneath */
+  oid mem_variables_oid[] = { EXTENSIBLEMIB,MEMMIBNUM };
+
+  /* register ourselves with the agent to handle our mib tree */
+  REGISTER_MIB("ucd_snmp/memory", extensible_mem_variables, variable2, \
+               mem_variables_oid);
+
+  snmpd_register_config_handler("swap", memory_parse_config,
+                                memory_free_config,"min-avail");
+}
+
 void memory_parse_config(word, cptr)
   char *word;
   char *cptr;
@@ -202,34 +261,6 @@ unsigned memswap(int index)
 #else
 #define pagetok(size) ((size) << pageshift)
 #endif
-
-void init_memory()
-{
-#ifndef linux
-  int pagesize;
- auto_nlist(PHYSMEM_SYMBOL,0,0);
- auto_nlist(TOTAL_MEMORY_SYMBOL,0,0);
- auto_nlist(MBSTAT_SYMBOL,0,0);
- auto_nlist(SWDEVT_SYMBOL,0,0);
- auto_nlist(FSWDEVT_SYMBOL,0,0);
- auto_nlist(NSWAPFS_SYMBOL,0,0);
- auto_nlist(NSWAPDEV_SYMBOL,0,0);
-
-#ifndef bsdi2
-  if (auto_nlist(NSWAPDEV_SYMBOL,(char *) &nswapdev, sizeof(nswapdev)) == 0)
-    return;
-  if (auto_nlist(NSWAPFS_SYMBOL,(char *) &nswapfs, sizeof(nswapfs)) == 0)
-    return;
-#endif
-  pagesize = 1 << PGSHIFT;
-  pageshift = 0;
-  while (pagesize > 1) {
-    pageshift++;
-    pagesize >>= 1;
-  }
-  pageshift -= 10;
-#endif
-}
 
 #define SWAPGETLEFT 0
 #define SWAPGETTOTAL 1

@@ -16,8 +16,6 @@ struct subtree *find_extensible __P((struct subtree *, oid *, int, int));
 /* config file parsing routines */
 void extensible_free_config __P((void));
 void extensible_parse_config __P((char *, char *));
-config_parse_dot_conf("exec", extensible_parse_config, extensible_free_config, "[miboid] name program arguments")
-config_parse_dot_conf("sh", extensible_parse_config, extensible_free_config,"[miboid] name program-or-script arguments")
 
 #include "mibdefs.h"
 
@@ -25,18 +23,4 @@ config_parse_dot_conf("sh", extensible_parse_config, extensible_free_config,"[mi
 #define SHELLRESULT 6
 #define SHELLOUTPUT 7
 
-#ifdef IN_SNMP_VARS_C
-
-struct variable2 extensible_extensible_variables[] = {
-  {MIBINDEX, ASN_INTEGER, RONLY, var_extensible_shell, 1, {MIBINDEX}},
-  {ERRORNAME, ASN_OCTET_STR, RONLY, var_extensible_shell, 1, {ERRORNAME}}, 
-  {SHELLCOMMAND, ASN_OCTET_STR, RONLY, var_extensible_shell, 1, {SHELLCOMMAND}}, 
-  {ERRORFLAG, ASN_INTEGER, RONLY, var_extensible_shell, 1, {ERRORFLAG}},
-  {ERRORMSG, ASN_OCTET_STR, RONLY, var_extensible_shell, 1, {ERRORMSG}},
-  {ERRORFIX, ASN_INTEGER, RWRITE, var_extensible_shell, 1, {ERRORFIX }}
-};
-
-config_load_mib(EXTENSIBLEMIB.SHELLMIBNUM.1, EXTENSIBLENUM+2, extensible_extensible_variables)
-
-#endif
 #endif /* _MIBGROUP_EXTENSIBLE_H */

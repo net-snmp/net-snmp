@@ -5,6 +5,8 @@
 #ifndef _MIBGROUP_ICMP_H
 #define _MIBGROUP_ICMP_H
 
+config_arch_require(solaris2, kernel_sunos5)
+
 #ifdef linux
 struct icmp_mib
 {
@@ -37,8 +39,6 @@ struct icmp_mib
 };
 #endif
 
-config_arch_require(solaris2, kernel_sunos5)
-
 extern void	init_icmp __P((void));
 extern u_char	*var_icmp __P((struct variable *, oid *, int *, int, int *, int (**write) __P((int, u_char *, u_char, int, u_char*, oid *, int)) ));
 
@@ -68,39 +68,5 @@ extern u_char	*var_icmp __P((struct variable *, oid *, int *, int, int *, int (*
 #define ICMPOUTTIMESTAMPREPS 23
 #define ICMPOUTADDRMASKS    24
 #define ICMPOUTADDRMASKREPS 25
-
-#ifdef IN_SNMP_VARS_C
-
-struct variable2 icmp_variables[] = {
-    {ICMPINMSGS, ASN_COUNTER, RONLY, var_icmp, 1, {1}},
-    {ICMPINERRORS, ASN_COUNTER, RONLY, var_icmp, 1, {2}},
-    {ICMPINDESTUNREACHS, ASN_COUNTER, RONLY, var_icmp, 1, {3}},
-    {ICMPINTIMEEXCDS, ASN_COUNTER, RONLY, var_icmp, 1, {4}},
-    {ICMPINPARMPROBS, ASN_COUNTER, RONLY, var_icmp, 1, {5}},
-    {ICMPINSRCQUENCHS, ASN_COUNTER, RONLY, var_icmp, 1, {6}},
-    {ICMPINREDIRECTS, ASN_COUNTER, RONLY, var_icmp, 1, {7}},
-    {ICMPINECHOS, ASN_COUNTER, RONLY, var_icmp, 1, {8}},
-    {ICMPINECHOREPS, ASN_COUNTER, RONLY, var_icmp, 1, {9}},
-    {ICMPINTIMESTAMPS, ASN_COUNTER, RONLY, var_icmp, 1, {10}},
-    {ICMPINTIMESTAMPREPS, ASN_COUNTER, RONLY, var_icmp, 1, {11}},
-    {ICMPINADDRMASKS, ASN_COUNTER, RONLY, var_icmp, 1, {12}},
-    {ICMPINADDRMASKREPS, ASN_COUNTER, RONLY, var_icmp, 1, {13}},
-    {ICMPOUTMSGS, ASN_COUNTER, RONLY, var_icmp, 1, {14}},
-    {ICMPOUTERRORS, ASN_COUNTER, RONLY, var_icmp, 1, {15}},
-    {ICMPOUTDESTUNREACHS, ASN_COUNTER, RONLY, var_icmp, 1, {16}},
-    {ICMPOUTTIMEEXCDS, ASN_COUNTER, RONLY, var_icmp, 1, {17}},
-    {ICMPOUTPARMPROBS, ASN_COUNTER, RONLY, var_icmp, 1, {18}},
-    {ICMPOUTSRCQUENCHS, ASN_COUNTER, RONLY, var_icmp, 1, {19}},
-    {ICMPOUTREDIRECTS, ASN_COUNTER, RONLY, var_icmp, 1, {20}},
-    {ICMPOUTECHOS, ASN_COUNTER, RONLY, var_icmp, 1, {21}},
-    {ICMPOUTECHOREPS, ASN_COUNTER, RONLY, var_icmp, 1, {22}},
-    {ICMPOUTTIMESTAMPS, ASN_COUNTER, RONLY, var_icmp, 1, {23}},
-    {ICMPOUTTIMESTAMPREPS, ASN_COUNTER, RONLY, var_icmp, 1, {24}},
-    {ICMPOUTADDRMASKS, ASN_COUNTER, RONLY, var_icmp, 1, {25}},
-    {ICMPOUTADDRMASKREPS, ASN_COUNTER, RONLY, var_icmp, 1, {26}}
-};
-
-config_load_mib(MIB.5, 7, icmp_variables)
-#endif
 
 #endif /* _MIBGROUP_ICMP_H */
