@@ -107,6 +107,7 @@ TABLE OF CONTENTS
    Mib2c only handles a single table in my MIB. How can I fix this?
    Mib2c complains about a missing "mib reference" - what does this mean?
    How can I get the agent to generate a trap (or inform)?
+   What if I'm using an AgentX sub-agent instead?
    I'm getting an error "autoheader: not found" - what's wrong?
    Why is the project workspace empty under Visual C++?
    Why are packets requesting the same information larger with UC-Davis SNMP ?
@@ -2292,6 +2293,24 @@ How can I get the agent to generate a trap (or inform)?
 
    (Obviously, this is not complete, but should give you the
    general idea).
+
+
+
+What if I'm using an AgentX sub-agent instead?
+---------------------------------------------
+
+    That doesn't matter - the routines described in 'snmp_trap_api(3)'
+  can still be used, and the subagent will do the Right Thing.
+  
+  One of the original design aims of the AgentX support was that this
+  should be transparent to a MIB module implementer.  The agent-module
+  interface should be independent of the protocol used to receive the
+  original request.  So the exact same MIB module code could be used
+  within a traditional SNMP-only agent, or an AgentX subagent, with no
+  changes needed.
+    In fact, the main agent supplied as part of the package can indeed
+  be run as an SNMP agent or an AgentX subagent, simply based on command
+  line flags (or similar configuration options).
 
 
 
