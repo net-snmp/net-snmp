@@ -2126,7 +2126,7 @@ Interface_Get_Ether_By_Index(int Index, u_char * EtherAddr)
 #endif
 #endif
 
-#if defined(mips) || defined(hpux) || defined(osf4) || defined(osf3)
+#if defined(mips) || defined(hpux) || defined(osf4) || defined(osf3) || defined(osf5)
     memset(arpcom.ac_enaddr, 0, sizeof(arpcom.ac_enaddr));
 #else
     memset(&arpcom.ac_enaddr, 0, sizeof(arpcom.ac_enaddr));

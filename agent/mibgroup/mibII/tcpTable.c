@@ -213,7 +213,12 @@ var_tcpEntry(struct variable *vp,
             goto Again;
         if (i == 0)
             break;              /* Done */
+#if defined(osf5) && defined(IN6_EXTRACT_V4ADDR)
+        cp = (u_char *) IN6_EXTRACT_V4ADDR(&inpcb.inp_laddr);
+#else
         cp = (u_char *) & inpcb.inp_laddr.s_addr;
+#endif /* #if defined(osf5) && defined(IN6_EXTRACT_V4ADDR) */
+
 #endif                          /* hpux11 */
         op = newname + 10;
         *op++ = *cp++;
@@ -230,7 +235,13 @@ var_tcpEntry(struct variable *vp,
 #ifdef hpux11
         cp = (u_char *) & tcp.RemAddress;
 #else
+
+#if defined(osf5) && defined(IN6_EXTRACT_V4ADDR)
+        cp = (u_char *) IN6_EXTRACT_V4ADDR(&inpcb.inp_faddr);
+#else
         cp = (u_char *) & inpcb.inp_faddr.s_addr;
+#endif /* #if defined(osf5) && defined(IN6_EXTRACT_V4ADDR) */
+
 #endif
         op = newname + 15;
         *op++ = *cp++;
@@ -303,7 +314,13 @@ var_tcpEntry(struct variable *vp,
 #ifdef hpux11
         return (u_char *) & Lowtcp.LocalAddress;
 #else
+
+#if defined(osf5) && defined(IN6_EXTRACT_V4ADDR)
+        return (u_char *) IN6_EXTRACT_V4ADDR(&Lowinpcb.inp_laddr);
+#else
         return (u_char *) & Lowinpcb.inp_laddr.s_addr;
+#endif /* #if defined(osf5) && defined(IN6_EXTRACT_V4ADDR) */
+
 #endif
     case TCPCONNLOCALPORT:
 #ifdef hpux11
@@ -316,7 +333,13 @@ var_tcpEntry(struct variable *vp,
 #ifdef hpux11
         return (u_char *) & Lowtcp.RemAddress;
 #else
+
+#if defined(osf5) && defined(IN6_EXTRACT_V4ADDR)
+        return (u_char *) IN6_EXTRACT_V4ADDR(&Lowinpcb.inp_faddr);
+#else
         return (u_char *) & Lowinpcb.inp_faddr.s_addr;
+#endif /* #if defined(osf5) && defined(IN6_EXTRACT_V4ADDR) */
+
 #endif
     case TCPCONNREMPORT:
 #ifdef hpux11
@@ -505,7 +528,12 @@ TCP_Count_Connections(void)
             goto Again;
         }
 #endif                          /*  !(defined(freebsd2) || defined(netbsd1) || defined(openbsd2)) */
+#if defined(IN6_IS_ADDR_UNSPECIFIED)
+        if (IN6_IS_ADDR_UNSPECIFIED(&inpcb.inp_laddr)) {
+#else
         if (inet_lnaof(inpcb.inp_laddr) == INADDR_ANY) {
+#endif /* #if defined(IN6_IS_ADDR_UNSPECIFIED) */
+
 #if !(defined(freebsd2) || defined(netbsd1) || defined(openbsd2))
             prev = next;
 #endif                          /*  !(defined(freebsd2) || defined(netbsd1) || defined(openbsd2)) */
