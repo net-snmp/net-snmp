@@ -247,7 +247,7 @@ extern void dump_registry( void );
 	RETSIGTYPE
 SnmpdDump(int a)
 {
-	dump_registry(();
+	dump_registry();
 	signal(SIGUSR1, SnmpdDump);
 }
 #endif
