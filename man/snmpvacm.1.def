@@ -1,0 +1,118 @@
+.TH SNMPVACM 1 "30 May 2003" VVERSIONINFO "Net-SNMP"
+.UC 4
+.SH NAME
+snmpvacm - creates and maintains View-based Access Control entries on a remote entity.
+.SH SYNOPSIS
+.B snmpvacm
+[COMMON OPTIONS] 
+.B createAccess
+GROUPNAME [CONTEXTPREFIX] SECURITYMODEL SECURITYLEVEL CONTEXTMATCH READVIEWNAME WRITEVIEWNAME NOTIFYVIEWNAME
+.br
+.B snmpvacm
+[COMMON OPTIONS] 
+.B deleteAccess
+GROUPNAME [CONTEXTPREFIX] SECURITYMODEL SECURITYLEVEL
+.br
+.B snmpvacm
+[COMMON OPTIONS]
+.B createSec2Group
+MODEL SECURITYNAME  GROUPNAME
+.br
+.B snmpvacm
+[COMMON OPTIONS]
+.B deleteSec2Group
+MODEL SECURITYNAME
+.br
+.B snmpvacm
+[COMMON OPTIONS]
+.B createView
+[-Ce] NAME SUBTREE MASK
+.br
+.B snmpvacm
+[COMMON OPTIONS]
+.B deleteView
+NAME SUBTREE
+
+.SH DESCRIPTION
+.B snmpvacm
+is an SNMP application that can be used to do simple maintenance on a
+SNMP agent's View-based Control Module (VACM) table.  You can create
+and delete groups of users, MIB views, and the access settings that
+they use.
+.PP
+The SNMPv3 VACM specifications (see RFC2575) defines assorted tables
+to control access to the information supplied by the agent.
+These
+.BR snmpvacm
+commands effectively create or delete rows in the appropriate one of
+these tables, and match the equivalent configure directives
+which are documented in the
+.I snmpd.conf(5)
+man page.
+.PP
+A fuller explanation of how these operate can be found in the project FAQ.
+.SH EXAMPLES
+.PP
+Given a pre-existing user
+.I dave
+(which could be set up using the
+.I snmpusm(1)
+command),
+we could configure full read-write access to the whole OID tree
+using the commands:
+
+.PP
+snmpvacm -v3 localhost createSec2Group 3 RWGroup dave
+.PP
+snmpvacm -v3 localhost createView   all .1 .1
+.PP
+snmpvacm -v3 localhost createAccess  RWGroup 3 1 1 all all none
+.IP
+This creates a new security group named "RWGroup" containing the SNMPv3 user "dave",
+a new view "all" containing the full OID tree based on
+.I .iso(1)
+, and then allows those users in the group "RWGroup" (i.e. "dave")
+both read- and write-access to the view "all" (i.e. the full OID tree)
+when using authenticated SNMPv3 requests.
+
+.IP
+As a second example,
+we could set up read-only access to a portion
+of the OID tree using the commands:
+
+.PP
+snmpvacm -v3 localhost createSec2Group 3 ROGroup wes
+.PP
+snmpvacm -v3 localhost createView   sysView  system system
+.PP
+snmpvacm -v3 localhost createAccess  ROGroup 3 0 1 system none none
+.IP
+This creates a new security group named "ROGroup" containing the (pre-existing)
+user "wes", a new view "sysView" containing just the OID tree based on
+.I .iso(1).org(3).dod(6).inet(1).mgmt(2).mib-2(1).system(1)
+, and then allows those users in the group "ROGroup" (i.e. "wes")
+read-acces, but not write-access to the view "sysView" (i.e. the system group).
+
+.SH "LIMITATIONS"
+
+This utility does not support the configuration of new community strings,
+so is only of use for setting up new access control for SNMPv3 requests.
+It can be used to amend the access settings for existing community strings,
+but not to set up new ones.
+
+.PP
+The use of numeric
+.B createAccess
+parameters is less than convenient.
+These commands do not provide the full flexibility of the
+equivalent config file directives.
+
+.PP
+There is (currently) no equivalent to the one-shot
+configure directives
+.I rouser
+and
+.I rwuser.
+
+.SH "SEE ALSO"
+snmpd.conf(5), snmp.conf(5), RFC 2575, project FAQ
