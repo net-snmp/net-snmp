@@ -100,6 +100,7 @@ static void sprint_badtype __P((char *, struct variable_list *, struct enum_list
 static void sprint_float __P((char *, struct variable_list *, struct enum_list *, char *, char *));
 static void sprint_double __P((char *, struct variable_list *, struct enum_list *, char *, char *));
 #endif
+void print_tree_node __P((FILE *f, struct tree *tp));
 
 extern struct tree *tree_head;
 
@@ -122,7 +123,7 @@ typedef struct _PrefixList {
  * Period is added where needed.  See use of Prefix in this module.
  */
 PrefixList mib_prefixes[] = {
-        { &Standard_Prefix[0] }, /* placeholder for Prefix data */
+	{ &Standard_Prefix[0] }, /* placeholder for Prefix data */
 	{ ".iso.org.dod.internet.mgmt.mib-2" },
 	{ ".iso.org.dod.internet.experimental" },
 	{ ".iso.org.dod.internet.private" },
@@ -1606,6 +1607,14 @@ fprint_description(f, objid, objidlen)
     int     objidlen;   /* number of subidentifiers */
 {
     struct tree *tp = get_tree(objid, objidlen, tree_head);
+	print_tree_node(f, tp);
+}
+
+void
+print_tree_node(f, tp)
+    FILE    *f;
+    struct tree *tp;
+{
     char *cp;
     char str[32];
     if (tp) {
