@@ -20,6 +20,12 @@
 
 @TOP@
 
+/* define the system type include file here */
+#define SYSTEM_INCLUDE_FILE "s/generic.h"
+
+/* define the machine (cpu) type include file here */
+#define MACHINE_INCLUDE_FILE "m/generic.h"
+
 /* SNMPLIBDIR contains important files */
 
 #undef SNMPLIBPATH
@@ -413,3 +419,6 @@
 #define ENV_SEPARATOR_CHAR ':'
 #define _CRTIMP
 #endif
+
+#include SYSTEM_INCLUDE_FILE
+#include MACHINE_INCLUDE_FILE
