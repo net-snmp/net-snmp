@@ -3,7 +3,11 @@
 # requires special handling because of the '*'
 echo 'userSetAuthPass initial * initial_test_pass_auth' >> $SNMP_CONFIG_FILE
 echo 'userSetPrivPass initial * initial_test_pass_priv' >> $SNMP_CONFIG_FILE
+echo 'userSetAuthPass templateMD5 * templateMD5_test_pass_auth' >> $SNMP_CONFIG_FILE
+echo 'userSetPrivPass templateMD5 * templateMD5_test_pass_priv' >> $SNMP_CONFIG_FILE
+
 CONFIGAGENT group   testinitialgroup  usm     initial
+CONFIGAGENT group   testinitialgroup  usm     newtestuser
 CONFIGAGENT view    all     included .1 80
-CONFIGAGENT 'access  testinitialgroup  "" any noauth 0 all all all'
+CONFIGAGENT 'access  testinitialgroup  "" any auth 0 all all all'
 
