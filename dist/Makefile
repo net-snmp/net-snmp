@@ -19,7 +19,7 @@ SHELL = /bin/sh
 NAME = net-snmp
 
 # Define the default RPM release number.
-VERSION = 5.0.3
+VERSION = 5.0.6
 RELEASE = 1
 
 
@@ -85,6 +85,7 @@ $(GZIP_TAR):	$(RPM_BASE)/SOURCES
 #
 RPM_OPTS := \
     --define='_topdir $(PWD)/rpm' \
+    --define='_includedir /usr/include/net-snmp' \
     --define='version $(VER)' \
     --define='release $(REL)' \
     --target $(ARCH)
