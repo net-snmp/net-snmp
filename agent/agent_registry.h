@@ -80,13 +80,17 @@ extern int external_readfd[NUM_EXTERNAL_FDS], external_readfdlen;
 extern int external_writefd[NUM_EXTERNAL_FDS], external_writefdlen;
 extern int external_exceptfd[NUM_EXTERNAL_FDS], external_exceptfdlen;
 
-extern void (* external_readfdfunc[NUM_EXTERNAL_FDS])(int);
-extern void (* external_writefdfunc[NUM_EXTERNAL_FDS])(int);
-extern void (* external_exceptfdfunc[NUM_EXTERNAL_FDS])(int);
+extern void (* external_readfdfunc[NUM_EXTERNAL_FDS])(int, void *);
+extern void (* external_writefdfunc[NUM_EXTERNAL_FDS])(int, void *);
+extern void (* external_exceptfdfunc[NUM_EXTERNAL_FDS])(int, void *);
 
-int register_readfd(int, void (*func)(int));
-int register_writefd(int, void (*func)(int));
-int register_exceptfd(int, void (*func)(int));
+extern void *external_readfd_data[NUM_EXTERNAL_FDS];
+extern void *external_writefd_data[NUM_EXTERNAL_FDS];
+extern void *external_exceptfd_data[NUM_EXTERNAL_FDS];
+
+int register_readfd(int, void (*func)(int, void *), void *);
+int register_writefd(int, void (*func)(int, void *), void *);
+int register_exceptfd(int, void (*func)(int, void *), void *);
 int unregister_readfd(int);
 int unregister_writefd(int);
 int unregister_exceptfd(int);
