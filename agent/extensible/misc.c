@@ -191,7 +191,8 @@ int get_exec_output(ex)
         close(fd[1]);
 /*      ret = fdopen(fd[0],"r"); */
 #ifdef CACHETIME
-        if ((cfd = open(CACHEFILE,O_WRONLY|O_CREAT,0644)) < 0) {
+        unlink(CACHEFILE);
+        if ((cfd = open(CACHEFILE,O_WRONLY|O_TRUNC|O_CREAT,0644)) < 0) {
           perror("open");
           return(NULL);
         }
