@@ -291,9 +291,14 @@ snmp_log_string (int priority, const char *string)
 #endif /* WIN32 */
     
   if (do_log_callback) {
+      int dodebug = snmp_get_do_debugging();
       slm.priority = priority;
       slm.msg = string;
+      if (dodebug) /* turn off debugging inside the callbacks else will loop */
+          snmp_set_do_debugging(0);
       snmp_call_callbacks(SNMP_CALLBACK_LIBRARY, SNMP_CALLBACK_LOGGING, &slm);
+      if (dodebug)
+          snmp_set_do_debugging(dodebug);
   }
 
   if (do_filelogging || do_stderrlogging) {
