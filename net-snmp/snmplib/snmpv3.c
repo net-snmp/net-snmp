@@ -1544,7 +1544,7 @@ snmpv3_local_snmpEngineTime(void)
   unsigned int result;
 
   if (now < snmpv3startClock) {
-      result = UINT_MAX - snmpv3startClock + now;
+      result = UINT_MAX - (snmpv3startClock - now);
   } else {
       result = now - snmpv3startClock;
   }
