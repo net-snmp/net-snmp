@@ -109,7 +109,7 @@ configclean:
 
 
 configure: configure.in aclocal.m4
-	cd ${srcdir} && autoconf
+	cd ${srcdir} && $(AUTOCONF)
 	echo "Please run configure now."
 	sh -c exit 2
 
@@ -118,7 +118,7 @@ configure: configure.in aclocal.m4
 #
 config.h.in: stamp-h.in
 stamp-h.in: configure.in acconfig.h
-	cd ${srcdir} && autoheader
+	cd ${srcdir} && $(AUTOHEADER)
 	echo timestamp > ${srcdir}/stamp-h.in
 
 config.h: stamp-h

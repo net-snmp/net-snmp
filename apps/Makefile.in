@@ -3,6 +3,8 @@
 # snmptrapd, snmptable, snmpset, snmpgetnext, and other utilities.
 #
 
+top_builddir 	= ..
+
 TARG		= snmpget snmpgetnext snmpset snmpusm			\
 			snmpwalk snmpbulkwalk snmptable			\
 			snmptrap snmpbulkget				\
@@ -14,12 +16,13 @@ SUBDIRS		= snmpnetstat
 
 USELIBS		= ../snmplib/libsnmp.$(LIB_EXTENSION)$(LIB_VERSION)
 LOCAL_LIBS	= -L../snmplib 
-LIBS		= $(CC_RUNTIME_ARG) -lsnmp @LIBS@
+#LIBS		= $(CC_RUNTIME_ARG) -lsnmp @LIBS@
+LIBS		= $(USELIBS) @LIBS@
 
 PARSEOBJS	= snmp_parse_args.o
 
 CPPFLAGS	= -I.. -I$(srcdir)/.. -I$(srcdir)/../snmplib @CPPFLAGS@
-CC		= @CC@ $(CPPFLAGS)
+OSUFFIX		= lo
 
 
 all: $(TARG) $(SBINTARG) subdirs
@@ -30,56 +33,57 @@ subdirs:
         ( cd $$i ; $(MAKE) ) ; \
 	done
 
-snmpwalk:    snmpwalk.o $(PARSEOBJS) $(USELIBS)
-	${CC} -o $@ snmpwalk.o $(PARSEOBJS) $(LOCAL_LIBS) ${LDFLAGS} ${LIBS} 
+snmpwalk:    snmpwalk.$(OSUFFIX) $(PARSEOBJS) $(USELIBS)
+	${LIBTOOL} ${CC} -o $@ snmpwalk.$(OSUFFIX) $(PARSEOBJS) $(LOCAL_LIBS) ${LDFLAGS} ${LIBS} 
 
-snmpbulkwalk:    snmpbulkwalk.o $(PARSEOBJS) $(USELIBS)
-	${CC} -o $@ snmpbulkwalk.o $(PARSEOBJS) $(LOCAL_LIBS) ${LDFLAGS} ${LIBS} 
+snmpbulkwalk:    snmpbulkwalk.$(OSUFFIX) $(PARSEOBJS) $(USELIBS)
+	${LIBTOOL} ${CC} -o $@ snmpbulkwalk.$(OSUFFIX) $(PARSEOBJS) $(LOCAL_LIBS) ${LDFLAGS} ${LIBS} 
 
-snmpbulkget:    snmpbulkget.o $(PARSEOBJS) $(USELIBS)
-	${CC} -o $@ snmpbulkget.o $(PARSEOBJS) $(LOCAL_LIBS) ${LDFLAGS} ${LIBS} 
+snmpbulkget:    snmpbulkget.$(OSUFFIX) $(PARSEOBJS) $(USELIBS)
+	${LIBTOOL} ${CC} -o $@ snmpbulkget.$(OSUFFIX) $(PARSEOBJS) $(LOCAL_LIBS) ${LDFLAGS} ${LIBS} 
 
-snmptranslate:    snmptranslate.o $(USELIBS)
-	${CC} -o $@ snmptranslate.o $(LOCAL_LIBS) ${LDFLAGS} ${LIBS} 
+snmptranslate:    snmptranslate.$(OSUFFIX) $(USELIBS)
+	${LIBTOOL} ${CC} -o $@ snmptranslate.$(OSUFFIX) $(LOCAL_LIBS) ${LDFLAGS} ${LIBS} 
 
-snmpstatus:    snmpstatus.o $(PARSEOBJS) $(USELIBS)
-	${CC} -o $@ snmpstatus.o $(PARSEOBJS) $(LOCAL_LIBS) ${LDFLAGS} ${LIBS} 
+snmpstatus:    snmpstatus.$(OSUFFIX) $(PARSEOBJS) $(USELIBS)
+	${LIBTOOL} ${CC} -o $@ snmpstatus.$(OSUFFIX) $(PARSEOBJS) $(LOCAL_LIBS) ${LDFLAGS} ${LIBS} 
 
-snmpget:    snmpget.o $(PARSEOBJS) $(USELIBS)
-	${CC} -o $@ snmpget.o $(PARSEOBJS) $(LOCAL_LIBS) ${LDFLAGS} ${LIBS} 
+snmpget:    snmpget.$(OSUFFIX) $(PARSEOBJS) $(USELIBS)
+	${LIBTOOL} ${CC} -o $@ snmpget.$(OSUFFIX) $(PARSEOBJS) $(LOCAL_LIBS) ${LDFLAGS} ${LIBS} 
 
-snmpdelta:    snmpdelta.o $(PARSEOBJS) $(USELIBS)
-	${CC} -o $@ snmpdelta.o $(PARSEOBJS) $(LOCAL_LIBS) ${LDFLAGS} ${LIBS} 
+snmpdelta:    snmpdelta.$(OSUFFIX) $(PARSEOBJS) $(USELIBS)
+	${LIBTOOL} ${CC} -o $@ snmpdelta.$(OSUFFIX) $(PARSEOBJS) $(LOCAL_LIBS) ${LDFLAGS} ${LIBS} 
 
-snmptable:    snmptable.o $(PARSEOBJS) $(USELIBS)
-	${CC} -o $@ snmptable.o $(PARSEOBJS) $(LOCAL_LIBS) ${LDFLAGS} ${LIBS} 
+snmptable:    snmptable.$(OSUFFIX) $(PARSEOBJS) $(USELIBS)
+	${LIBTOOL} ${CC} -o $@ snmptable.$(OSUFFIX) $(PARSEOBJS) $(LOCAL_LIBS) ${LDFLAGS} ${LIBS} 
 
-snmptest:    snmptest.o $(PARSEOBJS) $(USELIBS)
-	${CC} -o $@ snmptest.o $(PARSEOBJS) $(LOCAL_LIBS) ${LDFLAGS} ${LIBS} 
+snmptest:    snmptest.$(OSUFFIX) $(PARSEOBJS) $(USELIBS)
+	${LIBTOOL} ${CC} -o $@ snmptest.$(OSUFFIX) $(PARSEOBJS) $(LOCAL_LIBS) ${LDFLAGS} ${LIBS} 
 
-snmptrapd:    snmptrapd.o snmptrapd_handlers.o $(USELIBS)
-	${CC} -o $@ snmptrapd.o snmptrapd_handlers.o $(LOCAL_LIBS) ${LDFLAGS} ${LIBS} 
+snmptrapd:    snmptrapd.$(OSUFFIX) snmptrapd_handlers.$(OSUFFIX) $(USELIBS)
+	${LIBTOOL} ${CC} -o $@ snmptrapd.$(OSUFFIX) snmptrapd_handlers.$(OSUFFIX) $(LOCAL_LIBS) ${LDFLAGS} ${LIBS} 
 
-snmptrap:    snmptrap.o $(PARSEOBJS) $(USELIBS)
-	${CC} -o $@ snmptrap.o $(PARSEOBJS) $(LOCAL_LIBS) ${LDFLAGS} ${LIBS} 
+snmptrap:    snmptrap.$(OSUFFIX) $(PARSEOBJS) $(USELIBS)
+	${LIBTOOL} ${CC} -o $@ snmptrap.$(OSUFFIX) $(PARSEOBJS) $(LOCAL_LIBS) ${LDFLAGS} ${LIBS} 
 	rm -f snmpinform
 	$(LN_S) snmptrap snmpinform
 
-snmpset:    snmpset.o $(PARSEOBJS) $(USELIBS)
-	${CC} -o $@ snmpset.o $(PARSEOBJS) $(LOCAL_LIBS) ${LDFLAGS} ${LIBS} 
+snmpset:    snmpset.$(OSUFFIX) $(PARSEOBJS) $(USELIBS)
+	${LIBTOOL} ${CC} -o $@ snmpset.$(OSUFFIX) $(PARSEOBJS) $(LOCAL_LIBS) ${LDFLAGS} ${LIBS} 
 
-snmpusm:    snmpusm.o $(PARSEOBJS) $(USELIBS)
-	${CC} -o $@ snmpusm.o $(PARSEOBJS) $(LOCAL_LIBS) ${LDFLAGS} ${LIBS} 
+snmpusm:    snmpusm.$(OSUFFIX) $(PARSEOBJS) $(USELIBS)
+	${LIBTOOL} ${CC} -o $@ snmpusm.$(OSUFFIX) $(PARSEOBJS) $(LOCAL_LIBS) ${LDFLAGS} ${LIBS} 
 
-snmpgetnext:    snmpgetnext.o $(PARSEOBJS) $(USELIBS)
-	${CC} -o $@ snmpgetnext.o $(PARSEOBJS) $(LOCAL_LIBS) ${LDFLAGS} ${LIBS} 
+snmpgetnext:    snmpgetnext.$(OSUFFIX) $(PARSEOBJS) $(USELIBS)
+	${LIBTOOL} ${CC} -o $@ snmpgetnext.$(OSUFFIX) $(PARSEOBJS) $(LOCAL_LIBS) ${LDFLAGS} ${LIBS} 
 
-encode_keychange:    encode_keychange.o $(PARSEOBJS) $(USELIBS)
-	${CC} -o $@ encode_keychange.o $(PARSEOBJS) $(LOCAL_LIBS) ${LDFLAGS} ${LIBS} 
+encode_keychange:    encode_keychange.$(OSUFFIX) $(PARSEOBJS) $(USELIBS)
+	${LIBTOOL} ${CC} -o $@ encode_keychange.$(OSUFFIX) $(PARSEOBJS) $(LOCAL_LIBS) ${LDFLAGS} ${LIBS} 
 
 
 clean:
-	rm -f *.o $(TARG) $(SBINTARG)
+	rm -f *.o *.lo $(TARG) $(SBINTARG)
+	rm -rf .libs
 	for i in $(SUBDIRS) ; do \
 	( cd $$i ; $(MAKE) clean ) ; \
 	done
