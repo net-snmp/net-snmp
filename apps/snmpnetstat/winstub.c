@@ -4,7 +4,11 @@
 
 #include <config.h>
 
-#if (defined(WIN32) || defined(cygwin))
+#if (defined(WIN32) || defined(cygwin) || defined(aix4))
+
+#ifdef aix4
+#define _NO_PROTO  /* Hack, you say ? */
+#endif
 
 #include <stdio.h>
 #include <sys/types.h>
@@ -28,27 +32,33 @@ static int h_stay_open, s_stay_open, p_stay_open, n_stay_open;
 static FILE *h_fp, *s_fp, *p_fp, *n_fp;
 static char *h_fn, *s_fn, *p_fn, *n_fn;
 
+#ifdef aix4
+#define ROOT_BASE "/etc/"
+#define PROT_FN "protocols"
+#else
 #define ROOT_BASE "\\SYSTEM32\\DRIVERS\\ETC\\"
+#define PROT_FN "protocol"
+#endif
 #define HOST_FN "hosts"
 #define SERV_FN "services"
-#define PROT_FN "protocol"
 #define NETW_FN "networks"
 
 static int pre_env_done = 0;
 static void pre_env(void)
 {
-	char *cproot;
-	char *cp;
+	const char *cproot;
+	const char *cp = "";
 
 	if (pre_env_done) return; pre_env_done = 1;
 	
+#ifndef aix4
 	cp = getenv("SYSTEMROOT");
 	if (cp) {
 		;
 		/* printf ("Root is '%s'\n", cp); */
 	}
 	else cp = "C:\\WINNT";
-
+#endif
 
 	cproot = ROOT_BASE;
 	h_fn = (char *)malloc(3+strlen(cp)+strlen(cproot)+strlen(HOST_FN));
@@ -59,7 +69,6 @@ static void pre_env(void)
 	sprintf(p_fn, "%s%s%s", cp, cproot, PROT_FN);
 	n_fn = (char *)malloc(3+strlen(cp)+strlen(cproot)+strlen(NETW_FN));
 	sprintf(n_fn, "%s%s%s", cp, cproot, NETW_FN);
-	
 }
 
 /* sets can open. ends must close. */
