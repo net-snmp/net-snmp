@@ -1123,6 +1123,7 @@ init_mib (void)
     char *new_mibdirs, *homepath, *cp_home;
 
     if (Mib) return;
+    init_mib_internals();
 
     /* Initialise the MIB directory/ies */
 
