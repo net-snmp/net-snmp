@@ -12,7 +12,9 @@
 #else
 #include <strings.h>
 #endif
-
+#if HAVE_NETDB_H
+#include <netdb.h>
+#endif
 
 /* minimal include directives */
 #include "mibincl.h"
@@ -89,11 +91,134 @@ send_notifications(int major, int minor, void *serverarg, void *clientarg) {
                 send_trap_to_sess(sptr, template_pdu);
             } else if (sptr->version != SNMP_VERSION_1 &&
                        minor == SNMPD_CALLBACK_SEND_TRAP2) {
-                template_pdu->command = nptr->snmpNotifyCommand;
+                if (nptr->snmpNotifyType == SNMPNOTIFYTYPE_INFORM) {
+                    template_pdu->command = SNMP_MSG_INFORM;
+                } else {
+                    template_pdu->command = SNMP_MSG_TRAP2;
+                }
                 send_trap_to_sess(sptr, template_pdu);
             }
         }
     }
+    return 0;
+}
+
+#define MAX_ENTRIES 1024
+
+int
+notifyTable_register_notifications(int major, int minor,
+                                   void *serverarg, void *clientarg) {
+    struct targetAddrTable_struct *ptr;
+    struct targetParamTable_struct *pptr;
+    struct snmpNotifyTable_data *nptr;
+    int i;
+    char buf[SNMP_MAXBUF_SMALL];
+    oid udpdomain[] = { 1,3,6,1,6,1,1 };
+    int udpdomainlen = sizeof(udpdomain)/sizeof(oid);
+#ifdef HAVE_GETHOSTBYNAME
+    struct hostent *hp;
+#endif
+
+    struct agent_add_trap_args *args =
+        (struct agent_add_trap_args *) serverarg;
+    struct snmp_session *ss;
+    int confirm;
+
+    if (!args)
+        return (0);
+
+    ss = args->ss;
+    if (!ss)
+        return (0);
+
+    confirm = args->confirm;
+
+    /* XXX: START move target creation to target code */
+    for(i=0; i < MAX_ENTRIES; i++) {
+        sprintf(buf, "internal%d", i);
+        if (get_addrForName(buf) == NULL && get_paramEntry(buf) == NULL)
+            break;
+    }
+    if (i == MAX_ENTRIES) {
+        snmp_log(LOG_ERR,
+                 "Can't register new trap destination: max limit reached: %d",
+                 MAX_ENTRIES);
+        snmp_sess_close(ss);
+        return(0);
+    }
+
+    /* address */
+    ptr = snmpTargetAddrTable_create();
+    ptr->name = strdup(buf);
+    memcpy(ptr->tDomain, udpdomain, udpdomainlen*sizeof(oid));
+    ptr->tDomainLen = udpdomainlen;
+
+#ifdef HAVE_GETHOSTBYNAME
+    hp = gethostbyname(ss->peername);
+    if (hp != NULL){
+        /* XXX: fix for other domain types */
+        ptr->tAddressLen = hp->h_length + 2;
+        ptr->tAddress = malloc(ptr->tAddressLen);
+        memmove(ptr->tAddress, hp->h_addr, hp->h_length);
+        ptr->tAddress[hp->h_length] = (ss->remote_port & 0xff00) >> 8;
+        ptr->tAddress[hp->h_length+1] = (ss->remote_port & 0xff);
+    } else {
+#endif /* HAVE_GETHOSTBYNAME */
+        ptr->tAddressLen = 6;
+        ptr->tAddress = calloc(1, ptr->tAddressLen);
+#ifdef HAVE_GETHOSTBYNAME
+    }
+#endif /* HAVE_GETHOSTBYNAME */
+    ptr->timeout = ss->timeout/1000;
+    ptr->retryCount = ss->retries;
+    ptr->tagList = strdup(ptr->name);
+    ptr->params = strdup(ptr->name);
+    ptr->storageType = ST_READONLY;
+    ptr->rowStatus = RS_ACTIVE;
+    ptr->sess = ss;
+    DEBUGMSGTL(("trapsess", "adding to trap table\n"));
+    snmpTargetAddrTable_add(ptr);
+
+    /* param */
+    pptr = snmpTargetParamTable_create();
+    pptr->paramName = strdup(buf);
+    pptr->mpModel = ss->version;
+    if (ss->version == SNMP_VERSION_3) {
+        pptr->secModel = ss->securityModel;
+        pptr->secLevel = ss->securityLevel;
+        pptr->secName = (u_char *)malloc(ss->securityNameLen+1);
+        memcpy((void *) pptr->secName, (void *) ss->securityName,
+               ss->securityNameLen);
+        pptr->secName[ss->securityNameLen] = 0;
+    } else {
+        pptr->secModel = ss->version == SNMP_VERSION_1 ?
+            SNMP_SEC_MODEL_SNMPv1 : SNMP_SEC_MODEL_SNMPv2c;
+        pptr->secLevel = SNMP_SEC_LEVEL_NOAUTH;
+        pptr->secName = NULL;
+        if (ss->community && (ss->community_len > 0)) {
+            pptr->secName = (u_char *)malloc(ss->community_len+1);
+            memcpy((void *) pptr->secName, (void *) ss->community,
+                   ss->community_len);
+            pptr->secName[ss->community_len] = 0;
+        }
+    }
+    pptr->storageType = ST_READONLY;
+    pptr->rowStatus = RS_ACTIVE;
+    snmpTargetParamTable_add(pptr);
+    /* XXX: END move target creation to target code */
+            
+    /* notify table */
+    nptr = SNMP_MALLOC_STRUCT(snmpNotifyTable_data);
+    nptr->snmpNotifyName = strdup(buf);
+    nptr->snmpNotifyNameLen = strlen(buf);
+    nptr->snmpNotifyTag = strdup(buf);
+    nptr->snmpNotifyTagLen = strlen(buf);
+    nptr->snmpNotifyType = confirm ?
+        SNMPNOTIFYTYPE_TRAP : SNMPNOTIFYTYPE_INFORM;
+    nptr->snmpNotifyStorageType = ST_READONLY;
+    nptr->snmpNotifyRowStatus = RS_ACTIVE;
+
+    snmpNotifyTable_add(nptr);
     return 0;
 }
 
@@ -124,6 +249,9 @@ void init_snmpNotifyTable(void) {
                          send_notifications, NULL);
   snmp_register_callback(SNMP_CALLBACK_APPLICATION, SNMPD_CALLBACK_SEND_TRAP2,
                          send_notifications, NULL);
+  snmp_register_callback(SNMP_CALLBACK_APPLICATION,
+                         SNMPD_CALLBACK_REGISTER_NOTIFICATIONS,
+                         notifyTable_register_notifications, NULL);
 
   /* place any other initialization junk you need here */
 

@@ -167,6 +167,8 @@ int main(int argc, char *argv[])
     if (prognam) prognam++;
     else prognam = argv[0];
 
+    putenv(strdup("POSIXLY_CORRECT=1"));
+
     if (strcmp(prognam, "snmpinform") == 0) inform = 1;
     switch (arg = snmp_parse_args(argc, argv, &session, "C:", optProc)) {
     case -2:

@@ -174,7 +174,7 @@ int getKstatInt(const char *classname, const char *statname,
     if (kstat_fd == 0) {
         kstat_fd = kstat_open();
         if (kstat_fd == 0) {
-          snmp_log(LOG_ERR, "kstat_open(): failed\n");
+            snmp_log(LOG_ERR, "kstat_open(): failed\n");
         }
     }
     if ((ksc = kstat_fd) == NULL)
@@ -755,41 +755,45 @@ getif(mib2_ifEntry_t *ifbuf, size_t size, req_e req_type,
 	    goto Return;
 	}
 	ifp->ifMtu = ifrp->ifr_metric;
-	ifp->ifSpeed = 10000000; 	/* Best guess */
 	ifp->ifType = 1;
+	ifp->ifSpeed = 0;
+	if (getKstat(ifrp->ifr_name, "ifspeed", &ifp->ifSpeed) == 0 && ifp->ifSpeed != 0) {
+            ifp->ifSpeed *= 1000000;
+        }
 	switch (ifrp->ifr_name[0]) {
 	case 'l': /* le / lo / lane (ATM LAN Emulation) */
-		if (ifrp->ifr_name[1] == 'o') {
-			ifp->ifSpeed = 127000000;
-			ifp->ifType = 24;
-		} else if (ifrp->ifr_name[1] == 'e') {
-			ifp->ifSpeed = 10000000;
-			ifp->ifType = 6;
-		} else if (ifrp->ifr_name[1] == 'a') {
-			ifp->ifSpeed = 155000000;
-			ifp->ifType = 37;
-		}
-		break;
+	    if (ifrp->ifr_name[1] == 'o') {
+		    if (!ifp->ifSpeed) ifp->ifSpeed = 127000000;
+		    ifp->ifType = 24;
+	    } else if (ifrp->ifr_name[1] == 'e') {
+		    if (!ifp->ifSpeed) ifp->ifSpeed = 10000000;
+		    ifp->ifType = 6;
+	    } else if (ifrp->ifr_name[1] == 'a') {
+		    if (!ifp->ifSpeed) ifp->ifSpeed = 155000000;
+		    ifp->ifType = 37;
+	    }
+	    break;
 	case 'h': /* hme */
-		ifp->ifSpeed = 100000000;
-		ifp->ifType = 6;
-		break;
+	case 'b': /* be */
+	    if (!ifp->ifSpeed) ifp->ifSpeed = 100000000;
+	    ifp->ifType = 6;
+	    break;
 	case 'f': /* fa (Fore ATM */
-		ifp->ifSpeed = 155000000;
-		ifp->ifType = 37;
-		break;
+	    if (!ifp->ifSpeed) ifp->ifSpeed = 155000000;
+	    ifp->ifType = 37;
+	    break;
 	case 'q': /* qe (QuadEther) / qa (Fore ATM) / qfe (QuadFastEther) */
-		if (ifrp->ifr_name[1] == 'a') {
-			ifp->ifSpeed = 155000000;
-			ifp->ifType = 37;
-		} else if (ifrp->ifr_name[1] == 'e') {
-			ifp->ifSpeed = 10000000;
-			ifp->ifType = 6;
-		} else if (ifrp->ifr_name[1] == 'f') {
-			ifp->ifSpeed = 100000000;
-			ifp->ifType = 6;
-		}
-		break;
+	    if (ifrp->ifr_name[1] == 'a') {
+		    if (!ifp->ifSpeed) ifp->ifSpeed = 155000000;
+		    ifp->ifType = 37;
+	    } else if (ifrp->ifr_name[1] == 'e') {
+		    if (!ifp->ifSpeed) ifp->ifSpeed = 10000000;
+		    ifp->ifType = 6;
+	    } else if (ifrp->ifr_name[1] == 'f') {
+		    if (!ifp->ifSpeed) ifp->ifSpeed = 100000000;
+		    ifp->ifType = 6;
+	    }
+	    break;
 	}
 	if (!strchr (ifrp->ifr_name, ':')) {
 	    Counter l_tmp;
