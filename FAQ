@@ -41,6 +41,7 @@ TABLE OF CONTENTS
    How do I handle traps and notifications?
    How do I use SNMPv3?
    How big can an SNMP request (or reply) be?
+   How can I monitor my systems (disk, memory, etc)?
    Applications complain about entries in your example 'snmp.conf' file.  Why?
    OK, what should I put in snmp.conf?
  MIBS
@@ -99,6 +100,7 @@ TABLE OF CONTENTS
    I've created a new module with 'mib2c' but it doesn't work.  Why not?
    Mib2c only handles a single table in my MIB. How can I fix this?
    Mib2c complains about a missing "mib reference" - what does this mean?
+   How can I get the agent to generate a trap (or inform)?
    I'm getting an error "autoheader: not found" - what's wrong?
    Why is the project workspace empty under Visual C++?
    Why are packets requesting the same information larger with UC-Davis SNMP ?
@@ -501,7 +503,7 @@ How do I add a MIB to the tools?
   without any MIB files at all, as long as you are prepared to work with
   numeric OIDs throughout.  The MIB files are only used for translating
   between numeric and textual forms for queries and responses.
-    The same holds true for the agent - see the next section for details.
+    The same holds true for the agent - see the AGENT section for details.
 
 
 
@@ -651,7 +653,7 @@ I cannot set any variables in the MIB.
     Ready-installed distributions (such as those shipped with Linux) tend
   to be configured with read-only access to a portion of the mib tree. More
   general access, including SET support, needs to be configured explicitly.
-  See the access-control entry in the AGENT section for more details.
+  See the access-control entries in the AGENT section for more details.
 
     Note that neither the community string "public" nor "private" can be
   used to set veriables in a typical default configuration.
@@ -740,12 +742,8 @@ How do I send traps and notifications?
 
 	snmptrap -v 2c localhost public ucdStart sysContact.0 s "Dave"
 
-  Generating traps from within the agent is covered in the AGENT section.
-
-
-    That depends on whether you need to send traps and notifications to
-  a management station, or receive them from existing agents and handle
-  them in some manner.
+  Generating traps from within the agent is covered in the AGENT and
+  CODING sections.
 
 
 
@@ -771,8 +769,8 @@ How do I handle traps and notifications?
 	traphandle default                  log_it
 
   Note that the first entry uses the OID corresponding to the SNMPv1
-  'coldStart' trap.  See the co-existence RFC for details of mapping
-  SNMPv1 traps to SNMPv2 OIDs.
+  'coldStart' trap.  See the co-existence RFC (RFC 2576) for details
+  of mapping SNMPv1 traps to SNMPv2 OIDs.
 
     There's a tutorial with more details on the web site.
   
@@ -830,6 +828,23 @@ How big can an SNMP request (or reply) be?
 
     As a rule of thumb, sending 400 integer-valued varbinds seems to
   work OK, while 300 string-valued varbinds triggers the problem.
+
+
+
+How can I monitor my systems (disk, memory, etc)?
+------------------------------------------------
+
+    In general, the UCD suite consists of relatively low-level tools,
+  and there is nothing included that is designed for high-level,
+  long-term monitoring of trends in network traffic, disk or memory
+  usage, etc.
+
+    There are a number of packages available that are designed for this
+  purpose.  Two of the most widely used are MRTG (http://www.mrtg.org/)
+  and Cricket (http://cricket.sourceforge.net/).  There are details of
+  how to set up Cricket to monitor some of the UCD extensions at
+  http://www.afn.org/~jam/software/cricket/   If anyone has something
+  similar for MRTG, please let us know.
 
 
 
@@ -1329,7 +1344,7 @@ What traps are sent by the agent?
     The agent does not send 'linkUp' or 'linkDown' traps.  Generating such
   traps would be simple enough, but the difficulty is in recognising when
   they should be generated.  See the question on generating traps in the
-  coding section for more discussion of this.
+  CODING section for more discussion of this.
 
     With all these alerts, the agent also needs to be configured with
   (one or more) destinations to send them to, specifying the type of
@@ -1939,6 +1954,51 @@ Mib2c complains about a missing "mib reference" - what does this mean?
   might be because it hasn't been installed, the name is wrong, or
   (most likely), because it isn't in the default list.  See the MIBS
   section for more details.
+
+
+
+How can I get the agent to generate a trap (or inform)?
+------------------------------------------------------
+
+    Actually generating a trap is reasonably simple - just call one
+  of the utility routines 'send_easy_trap()' or 'send_v2trap' with
+  the relevant information (trap values, or varbind list respectively).
+  See the 'snmp_trap_api(3)' man page for details.
+
+    Determining _when_ to generate the trap is often harder.
+  If the trap is generated in response to some action within the
+  agent, (e.g. as the result of a SET), then this isn't too much
+  of a problem.
+
+    But if the trap is intended to report on a change of status
+  (e.g. a network interface going up or down, or a disk filling up),
+  then actually detecting this is non-trivial.   It's necessary to
+  poll the value(s) on a regular basis, save the results and compare
+  them with the new values the next time round.
+    This can be done using the routines documented in 'snmp_alarm(3)',
+  though unfortunately we don't have any examples of how to do this.
+  Eventually, the intention is to implement the Event MIB (from the
+  Distributed Management working group), which will provide this
+  functionality in a flexible, standardised manner.
+
+    In the meantime, the simplest approach is probably to set up
+  an external program, to poll the agent for the desired values,
+  and generate a trap when values change.  E.g:
+
+		old_value=`snmpget myObject.0`
+		while true
+		do
+		    sleep 60
+		    new_value=`snmpget myObject.0`
+		    if [ $old_value != $new_value ]
+		    then
+			snmptrap .... myObject.0 i $new_value
+		    fi
+		    old_value=$new_value
+		done
+
+   (Obviously, this is not complete, but should give you the
+   general idea).
 
 
 
