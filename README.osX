@@ -1,0 +1,18 @@
+README.osX
+$Id$
+
+This is what I had to do to get it to work for me. Your mileage may vary.
+
+     - Some versions of Apple's cpp doesn't like configure. 
+
+        - run 'gcc_select' to see what version you are using, and
+          'gcc_select -l' to list available versions. I've had success with
+          3.3, selected by running (as root) 'gcc_select 3.3'. (Note: this was
+          on Pather, 10.3.2)
+
+
+When starting the agent, I get an error about nlist not finding icmpstat, but
+the agent runs and returns data.
+
+If this doesn't work for you, or you have fixes for any of the above tables,
+please post to <net-snmp-coders@lists.sourceforge.net>. Thanks!
