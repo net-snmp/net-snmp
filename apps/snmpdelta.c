@@ -564,6 +564,8 @@ main(int argc, char *argv[])
                     if (tableForm) {
                         if (count == begin) {
                             sprintf(outstr, "%s", timestring + 1);
+                        } else {
+                            outstr[0] = '\0';
                         }
                     } else {
                         sprintf(outstr, "%s %s", timestring,
