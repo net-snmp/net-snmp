@@ -504,7 +504,7 @@ inetprint(in, port, proto)
 #ifdef SVR4
 	cp = strchr(line, '\0');
 #else
-	cp = index(line, '\0');
+	cp = (char *) index(line, '\0');
 #endif
 	if (!nflag && port)
 		sp = getservbyport((int)port, proto);
@@ -538,7 +538,7 @@ inetname(in)
 #ifdef SVR4
 		    (cp = strchr(domain, '.')))
 #else
-		    (cp = index(domain, '.')))
+		    (cp = (char *) index(domain, '.')))
 #endif
 			(void) strcpy(domain, cp + 1);
 		else
@@ -560,7 +560,7 @@ inetname(in)
 #ifdef SVR4
 				if ((cp = strchr(hp->h_name, '.')) &&
 #else
-				if ((cp = index(hp->h_name, '.')) &&
+				if ((cp = (char *) index(hp->h_name, '.')) &&
 #endif
 				    !strcmp(cp + 1, domain))
 					*cp = 0;
