@@ -170,7 +170,7 @@ int register_sysORTable(oid *oidin,
 
 #ifdef USING_AGENTX_SUBAGENT_MODULE
   if ( ds_get_boolean(DS_APPLICATION_ID, DS_AGENT_ROLE) == SUB_AGENT )
-     agentx_add_agentcaps( agentx_session, oidin, oidlen, (char *)descr);
+     agentx_add_agentcaps( agentx_session, oidin, oidlen, descr);
 #endif
 
   return 0;

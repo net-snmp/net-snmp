@@ -202,7 +202,7 @@ handle_agentx_packet(int operation, struct snmp_session *session, int reqid,
 
 struct snmp_session *agentx_session;
 
-int
+static int
 subagent_shutdown(int majorID, int minorID, void *serverarg, void *clientarg) {
   struct snmp_session *thesession = (struct snmp_session *) clientarg;
   DEBUGMSGTL(("agentx/subagent","shutting down session....\n"));
