@@ -47,7 +47,7 @@ pkcs_init(void)
 {
     CK_RV          rv;
     CK_ULONG       slotcount;
-    CK_SLOT_ID_PTR pSlotList;
+    CK_SLOT_ID_PTR pSlotList = NULL;
     netsnmp_pkcs_slot_session    *tmp;
     int            i, rval = SNMPERR_SUCCESS;
     /* Initialize pkcs */
