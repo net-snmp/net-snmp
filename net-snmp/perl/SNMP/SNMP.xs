@@ -2900,7 +2900,7 @@ snmp_read_mib(mib_file, force=0)
               }
 	   }
         } else {
-           if (verbose) warn("reading MIB: %s [%s:%s]\n", mib_file, DEFAULT_MIBDIRS, DEFAULT_MIBS);
+           if (verbose) warn("reading MIB: %s\n", mib_file);
            if (strcmp("ALL",mib_file))
               read_mib(mib_file);
            else
