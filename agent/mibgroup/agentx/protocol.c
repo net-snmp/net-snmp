@@ -480,6 +480,17 @@ _agentx_build(struct snmp_session        *session,
 		/* Build the header (and context if appropriate) */
      if ( *out_length < 20 )
 	        return -1;
+
+			/* Various PDU types shouldn't include context information */
+     switch ( pdu->command ) {
+     	case AGENTX_MSG_OPEN:
+     	case AGENTX_MSG_CLOSE:
+	case AGENTX_MSG_RESPONSE:
+	case AGENTX_MSG_COMMITSET:
+	case AGENTX_MSG_UNDOSET:
+	case AGENTX_MSG_CLEANUPSET:
+		pdu->flags &= ~(AGENTX_MSG_FLAG_NON_DEFAULT_CONTEXT);
+     }
      bufp = agentx_build_header( pdu, bufp, out_length );
      if ( bufp == NULL )
      	return -1;
