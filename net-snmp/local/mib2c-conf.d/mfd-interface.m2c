@@ -302,6 +302,13 @@ _${context}_initialize_interface(${context}_registration_ptr reg_ptr,  u_long fl
 
     /*************************************************
      *
+     * inject row_merge helper with prefix rootoid_len + 2 (entry.col)
+     */
+    handler = netsnmp_get_row_merge_handler(reginfo->rootoid_len + 2);
+    netsnmp_inject_handler(reginfo, handler);
+
+    /*************************************************
+     *
      * inject container_table helper
      */
     handler =
@@ -309,13 +316,6 @@ _${context}_initialize_interface(${context}_registration_ptr reg_ptr,  u_long fl
                                             ${context}_if_ctx.container,
                                             TABLE_CONTAINER_KEY_NETSNMP_INDEX);
     netsnmp_inject_handler( reginfo, handler );
-
-    /*************************************************
-     *
-     * inject row_merge helper with prefix rootoid_len + 2 (entry.col)
-     */
-    handler = netsnmp_get_row_merge_handler(reginfo->rootoid_len + 2);
-    netsnmp_inject_handler(reginfo, handler);
 
     /*************************************************
      *
