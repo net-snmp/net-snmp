@@ -467,7 +467,7 @@ static void usage(char *prog)
 static int agentBoots=0;
 
 void
-agentBoots_conf(char *word, 
+agentBoots_conf(char *token, 
 		char *cptr)
 {
   agentBoots = atoi(cptr)+1;
@@ -910,7 +910,7 @@ snmp_input(int op,
     return 1;
 }
     
-void snmpd_parse_config_authtrap(char *word, 
+void snmpd_parse_config_authtrap(char *token, 
 				 char *cptr)
 {
     int i;
@@ -922,7 +922,7 @@ void snmpd_parse_config_authtrap(char *word,
 	snmp_enableauthentraps = i;
 }
 
-void snmpd_parse_config_trapsink(char *word, 
+void snmpd_parse_config_trapsink(char *token, 
 				 char *cptr)
 {
     char tmpbuf[1024];
@@ -933,7 +933,7 @@ void snmpd_parse_config_trapsink(char *word,
     }
 }
 
-void snmpd_parse_config_trap2sink(char *word, 
+void snmpd_parse_config_trap2sink(char *token, 
 				  char *cptr)
 {
     char tmpbuf[1024];
@@ -944,7 +944,7 @@ void snmpd_parse_config_trap2sink(char *word,
     }
 }
 
-void snmpd_parse_config_trapcommunity(char *word, 
+void snmpd_parse_config_trapcommunity(char *token, 
 				      char *cptr)
 {
     if (snmp_trapcommunity) free(snmp_trapcommunity);

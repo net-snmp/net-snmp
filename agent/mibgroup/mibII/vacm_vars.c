@@ -119,7 +119,7 @@ init_vacm_vars (void)
 
 static struct vacm_securityEntry *securityFirst, *securityLast;
 
-void vacm_parse_security (char *word, 
+void vacm_parse_security (char *token, 
 			  char *param)
 {
     char *name, *source, *community, *mask;
@@ -198,7 +198,7 @@ void vacm_free_security (void)
     }
 }
 
-void vacm_parse_group (char *word, 
+void vacm_parse_group (char *token, 
 		       char *param)
 {
     char *group, *model, *security;
@@ -242,7 +242,7 @@ void vacm_free_group (void)
     vacm_destroyAllGroupEntries();
 }
 
-void vacm_parse_access (char *word, char *param)
+void vacm_parse_access (char *token, char *param)
 {
     char *name, *context, *model, *level, *prefix, *pread, *pwrite, *notify;
     int imodel, ilevel;
@@ -290,7 +290,7 @@ void vacm_free_access (void)
     vacm_destroyAllAccessEntries();
 }
 
-void vacm_parse_view (char *word, 
+void vacm_parse_view (char *token, 
 		      char *param)
 {
     char *name, *type, *subtree, *mask;

@@ -172,7 +172,7 @@ void disk_free_config (void)
   }
 }
 
-void disk_parse_config(char *word, char *cptr)
+void disk_parse_config(char *token, char *cptr)
 {
 #if HAVE_GETMNTENT
 #if HAVE_SYS_MNTTAB_H

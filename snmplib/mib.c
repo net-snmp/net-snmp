@@ -955,7 +955,7 @@ static char *confmibdir=NULL;
 static char *confmibs=NULL;
 
 void
-handle_mibdirs_conf(char *word,
+handle_mibdirs_conf(char *token,
 		    char *line)
 {
   if (confmibdir)
@@ -965,7 +965,7 @@ handle_mibdirs_conf(char *word,
 }
 
 void
-handle_mibs_conf(char *word,
+handle_mibs_conf(char *token,
 		 char *line)
 {
   if (confmibs)
@@ -975,7 +975,7 @@ handle_mibs_conf(char *word,
 }
 
 void
-handle_mibfile_conf(char *word,
+handle_mibfile_conf(char *token,
 		    char *line)
 {
   DEBUGMSGTL(("read_config:initmib", "reading mibfile: %s\n", line));

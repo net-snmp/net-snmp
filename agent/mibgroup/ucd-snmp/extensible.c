@@ -143,7 +143,7 @@ void init_extensible(void)
                                 "[miboid] name program-or-script arguments");
 }
 
-void extensible_parse_config(char *word, char* cptr)
+void extensible_parse_config(char *token, char* cptr)
 {
 
   struct extensible **pptmp;
@@ -169,7 +169,7 @@ void extensible_parse_config(char *word, char* cptr)
     pptmp = ppexten;
   }
   /* the rest is pretty much handled the same */
-  if (!strncasecmp(word,"sh",2)) 
+  if (!strncasecmp(token,"sh",2)) 
     (*pptmp)->type = SHPROC;
   else
     (*pptmp)->type = EXECPROC;
@@ -198,7 +198,7 @@ void extensible_parse_config(char *word, char* cptr)
     (*pptmp)->next = NULL;
   }
   if ((*pptmp)->miblen > 0) {
-    register_mib(word, (struct variable *) extensible_relocatable_variables,
+    register_mib(token, (struct variable *) extensible_relocatable_variables,
                  sizeof(struct variable2),
                  6, (*pptmp)->miboid, (*pptmp)->miblen);
   }
