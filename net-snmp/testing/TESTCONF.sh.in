@@ -37,7 +37,7 @@ if [ "x$SNMP_VERBOSE" = "x" ]; then
 fi
 
 if [ "x$MIBDIRS" = "x" ]; then
-    MIBDIRS=@top_srcdir@/mibs
+    MIBDIRS=${SNMP_BASEDIR}/../mibs
     export MIBDIRS
 fi
 
