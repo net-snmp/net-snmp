@@ -489,6 +489,7 @@ parse_config_doNotLogTraps(const char *token, char *cptr)
 void
 parse_config_pidFile(const char *token, char *cptr)
 {
+  free_config_pidFile();
   pid_file = strdup (cptr);
 }
 void
@@ -496,6 +497,7 @@ free_config_pidFile(void)
 {
   if (pid_file)
     free(pid_file);
+  pid_file = NULL;
 }
 
 void
@@ -587,7 +589,7 @@ main(int argc, char *argv[])
                             parse_config_doNotLogTraps, NULL, "(1|yes|true|0|no|false)");
 #if HAVE_GETPID
     register_config_handler("snmptrapd", "pidFile",
-                            parse_config_pidFile, free_config_pidFile, "string");
+                            parse_config_pidFile, NULL, "string");
 #endif
     
     register_config_handler("snmptrapd", "logOption",
@@ -823,7 +825,7 @@ main(int argc, char *argv[])
                     "Warning: -u option is deprecated; use -p instead\n");
         case 'p':
             if (optarg != NULL) {
-                pid_file = optarg;
+                pid_file = parse_config_pidFile(NULL, optarg);
             } else {
                 usage();
                 exit(1);
@@ -1016,6 +1018,7 @@ main(int argc, char *argv[])
         }
         fprintf(PID, "%d\n", (int) getpid());
         fclose(PID);
+        free_config_pidFile();
     }
 #endif
 
