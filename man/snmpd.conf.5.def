@@ -1,33 +1,19 @@
 .TH SNMPD.CONF 1 "21 Feb 1996"
-.ds )H U.C. Davis, ECE Dept.
+.ds )H U.C. Davis
 .ds ]W VVERSIONINFO
 .UC 4
 .SH NAME
-DATADIR/snmp/snmpd.conf
-.br
-       - configuration file for the ucd-snmp SNMP agent.
-.br
-.br
-DATADIR/snmp/snmpd.local.conf 
-.br
-       - an optional second configuration file
+DATADIR/snmp/snmpd.conf - configuration file for the ucd-snmp SNMP agent.
 .SH DESCRIPTION
 .B snmpd.conf
-and 
-.B snmpd.local.conf
-are the configuration files which define how the ucd-smnp SNMP agent
+is the configuration file which defines how the ucd-smnp SNMP agent
 operates.  These files may contain any of the directives found in the
-DIRECTIVES section below.  The information pertaining to the
-configuration of the agent is reported in the EXTENSIBLE-MIB, as
-defined by the EXTENSIBLE-MIB section below.
-.PP
-These files must be found in the DATADIR/snmp directory.  Neither
-of these files are required for the agent to operate and report mib
-entries defined by rfc-1156.
-.SH COMMENTS
-.PP
-Any lines beginning with the character '#' in the configuration files
-are treated as a comment and are not parsed.
+DIRECTIVES section below.  This file is not required for the agent to
+operate and report mib entries.
+.SH PLEASE READ FIRST
+First, make sure you have read the snmp_config(5) manual page that
+describes how the ucd-snmp configuration files opperate, where they
+are located and how they all work together.
 .SH EXTENSIBLE-MIB
 .PP
 The ucd-snmp SNMP agent reports much of its information through
@@ -277,10 +263,8 @@ An snmpset of integer(1) to EXTENSIBLEDOTMIB.VERSIONMIBNUM.VERUPDATECONFIG.
 A "kill -HUP" signal sent to the snmpd agent process.
 .SH "FILES"
 DATADIR/snmp/snmpd.conf
-.br
-DATADIR/snmp/snmpd.local.conf
 .SH "SEE ALSO"
-snmpd(1), EXAMPLE.conf.
+snmp_config(5), snmpd(1), EXAMPLE.conf, read_config(3).
 .\" Local Variables:
 .\"  mode: nroff
 .\" End:
