@@ -1223,6 +1223,7 @@ int read_objid(const char *input,
     struct tree *root = tree_head;
     oid *op = output;
     char buf[SPRINT_MAX_LEN];
+    int ret;
 
     if (*input == '.')
 	input++;
@@ -1242,13 +1243,12 @@ int read_objid(const char *input,
 	*out_len = 0;
 	return(0);
     }
-    if ((int)(*out_len =
-	 parse_subtree(root, input, output, out_len)) <= 0)
+    if ((ret = parse_subtree(root, input, output, out_len)) <= 0)
     {
-	SET_SNMP_ERROR(*out_len);
+	SET_SNMP_ERROR(ret);
 	return (0);
     }
-    (*out_len) += output - op;
+    *out_len = ret;
 
     return (1);
 }
@@ -1270,6 +1270,7 @@ parse_subtree(struct tree *subtree,
     char buf[SPRINT_MAX_LEN], *to = buf;
     u_long subid = 0;
     struct tree *tp;
+    int ret;
 
     /*
      * No empty strings.  Can happen if there is a trailing '.' or two '.'s
@@ -1287,6 +1288,12 @@ parse_subtree(struct tree *subtree,
 	    *to++ = *input;
 	    subid *= 10;
 	    subid += *input++ - '0';
+	}
+	if (*input != '.' && *input != 0) {
+	    while (*input != 0 && *input != '.') *to++ = *input++;
+	    *to = 0;
+	    snmp_set_detail(buf);
+	    return SNMPERR_BAD_SUBID;
 	}
 	*to = '\0';
 
@@ -1314,14 +1321,14 @@ parse_subtree(struct tree *subtree,
 		goto found;
 	    }
 	}
-    }
 
-    /*
-     * If we didn't find the entry, punt...
-     */
-    if (tp == NULL) {
-	snmp_set_detail(buf);
-	return (SNMPERR_BAD_SUBID);
+	/*
+	 * If we didn't find the entry, punt...
+	 */
+	if (tp == NULL) {
+	    snmp_set_detail(buf);
+	    return (SNMPERR_BAD_SUBID);
+	}
     }
 
 found:
@@ -1340,11 +1347,11 @@ found:
     if (*input != '.')
 	return (1);
 
-    *out_len = parse_subtree(tp ? tp->child_list : NULL,
+    ret = parse_subtree(tp ? tp->child_list : NULL,
                              ++input, output, out_len);
-    if ((int)*out_len <= 0)
-	return (*out_len);
-    return (++(*out_len));
+    if (ret <= 0)
+	return (ret);
+    return ret+1;
 }
 
 char *
@@ -1702,7 +1709,7 @@ print_tree_node(FILE *f,
 }
 
 int
-get_module_node(const char *name,
+get_module_node(const char *fname,
 		const char *module,
 		oid *objid,
 		size_t *objidlen)
@@ -1711,6 +1718,7 @@ get_module_node(const char *name,
     struct tree *tp, *tp2;
     oid newname[MAX_OID_LEN], *op;
     char *cp, *cp2;
+    char *name, *oname;
 
     if ( !strcmp(module, "ANY") )
         modid = -1;
@@ -1721,6 +1729,7 @@ get_module_node(const char *name,
     }
 
 		/* Isolate the first component of the name ... */
+    name = oname = strdup(fname);
     cp = strchr( name, '.' );
     if ( cp != NULL ) {
 	*cp = '\0';
@@ -1739,8 +1748,10 @@ get_module_node(const char *name,
 	    if (tp2 == NULL)
 		break;
 	}
-	if (numids > (int)*objidlen)
+	if (numids > (int)*objidlen) {
+	    free(oname);
 	    return 0;
+	}
 	*objidlen = numids;
 	memmove(objid, op, numids * sizeof(oid));
 
@@ -1773,8 +1784,10 @@ get_module_node(const char *name,
 		tp2 = tp2->next_peer;
 	    }
 	    if ( tp2 == NULL ) {
-		if ( subid == -1 )
+		if ( subid == -1 ) {
+		    free(oname);
 		    return 0;
+		}
 				/* pure numeric from now on */
 		objid[ *objidlen ] = subid;
 		(*objidlen)++;
@@ -1783,8 +1796,10 @@ get_module_node(const char *name,
 	    cp = cp2;
 	}
 
+	free(oname);
 	return 1;
     } else {
+	free(oname);
 	return 0;
     }
 }
