@@ -1635,7 +1635,7 @@ snmp_pdu_build (struct snmp_pdu *pdu, u_char *cp, size_t *out_length)
 {
   u_char *h1, *h1e, *h2, *h2e;
   struct variable_list *vp;
-  struct sockaddr_in *pduIp = (struct sockaddr_in *)&(pdu->agent_addr);
+  struct sockaddr_in *pduIp = (struct sockaddr_in *)&(pdu->address);
   size_t length;
 
   length = *out_length;
@@ -2234,7 +2234,7 @@ snmp_pdu_parse(struct snmp_pdu *pdu, u_char  *data, size_t *length) {
   size_t   len;
   size_t   four;
   struct variable_list *vp = NULL;
-  struct sockaddr_in *pduIp = (struct sockaddr_in *)&(pdu->agent_addr);
+  struct sockaddr_in *pduIp = (struct sockaddr_in *)&(pdu->address);
   oid objid[MAX_OID_LEN];
   char err[256];
 

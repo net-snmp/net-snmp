@@ -380,7 +380,6 @@ int snmp_input(int op,
 {
     struct variable_list *vars;
     struct sockaddr_in *pduIp   = (struct sockaddr_in *)&(pdu->address);
-    struct sockaddr_in *agentIp = (struct sockaddr_in *)&(pdu->agent_addr);
     char buf[64], oid_buf [SPRINT_MAX_LEN], *cp;
     struct snmp_pdu *reply;
     struct tm *tm;
@@ -396,16 +395,16 @@ int snmp_input(int op,
                   
     if (op == RECEIVED_MESSAGE){
 	if (pdu->command == SNMP_MSG_TRAP){
-	    host = gethostbyaddr ((char *)&agentIp->sin_addr,
-				  sizeof (agentIp->sin_addr), AF_INET);
+	    host = gethostbyaddr ((char *)&pduIp->sin_addr,
+				  sizeof (pduIp->sin_addr), AF_INET);
 	    if (Print && (pdu->trap_type != SNMP_TRAP_AUTHFAIL || dropauth == 0)) {
 		time (&timer);
 		tm = localtime (&timer);
                 printf("%.4d-%.2d-%.2d %.2d:%.2d:%.2d %s [%s] %s:\n",
 		       tm->tm_year+1900, tm->tm_mon+1, tm->tm_mday,
 		       tm->tm_hour, tm->tm_min, tm->tm_sec,
-                       host ? host->h_name : inet_ntoa(agentIp->sin_addr),
-                       inet_ntoa(agentIp->sin_addr),
+                       host ? host->h_name : inet_ntoa(pduIp->sin_addr),
+                       inet_ntoa(pduIp->sin_addr),
  		       sprint_objid (oid_buf, pdu->enterprise, pdu->enterprise_length));
 		if (pdu->trap_type == SNMP_TRAP_ENTERPRISESPECIFIC) {
 		    oid trapOid[MAX_OID_LEN];
@@ -461,12 +460,12 @@ int snmp_input(int op,
 		    if (cp) cp++;
 		    else cp = oid_buf;
 		    syslog(LOG_WARNING, "%s: %s Trap (%s) Uptime: %s%s",
-		       inet_ntoa(agentIp->sin_addr),
+		       inet_ntoa(pduIp->sin_addr),
 		       trap_description(pdu->trap_type), cp,
 		       uptime_string(pdu->time, buf), varbuf);
 		} else {
 		    syslog(LOG_WARNING, "%s: %s Trap (%ld) Uptime: %s%s",
-		       inet_ntoa(agentIp->sin_addr),
+		       inet_ntoa(pduIp->sin_addr),
 		       trap_description(pdu->trap_type), pdu->specific_type,
 		       uptime_string(pdu->time, buf), varbuf);
 		}

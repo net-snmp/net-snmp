@@ -48,7 +48,7 @@ typedef struct sockaddr  snmp_ipaddr;		/* was struct sockaddr_in */
 struct snmp_pdu {
     int	    version;
 
-    snmp_ipaddr  address;	/* Address of peer */
+    snmp_ipaddr  address;	/* Address of peer or trap destination */
     u_char  *contextEngineID;	/* context snmpEngineID */
     size_t  contextEngineIDLen;  /* Length of contextEngineID */
     char    *contextName;	/* authoritative contextName */
@@ -80,7 +80,6 @@ struct snmp_pdu {
     /* Trap information */
     oid	    *enterprise;/* System OID */
     size_t  enterprise_length;
-    snmp_ipaddr  agent_addr;	/* address of object generating trap */
     long    trap_type;	/* trap type */
     long    specific_type;  /* specific type */
     u_long  time;	/* Uptime */
