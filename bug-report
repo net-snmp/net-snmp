@@ -118,6 +118,10 @@ then
   echo $n "config.guess:  $c"                   >> ${msg_file}.2
   ./config.guess                                >> ${msg_file}.2
 fi
+if [ -f ./config.status ]
+then
+  grep running config.status                    >> ${msg_file}.2
+fi
 echo                                     	>> ${msg_file}.2
 
 #
