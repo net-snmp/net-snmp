@@ -86,7 +86,7 @@ _iterator_get(iterator_info *ii, const void *key)
     netsnmp_ref_void tmp = { NULL };
     netsnmp_ref_void loop_ctx = { NULL };
 
-    DEBUGMSGT(("container_iterator",">%s\n", __FUNCTION__));
+    DEBUGMSGT(("container_iterator",">%s\n", "get"));
     
     if(ii->init_loop_ctx)
         ii->init_loop_ctx(ii->user_ctx, &loop_ctx);
@@ -142,7 +142,7 @@ _iterator_get_next(iterator_info *ii, const void *key)
     netsnmp_ref_void tmp = { NULL };
     netsnmp_ref_void loop_ctx = { NULL };
 
-    DEBUGMSGT(("container_iterator",">%s\n", __FUNCTION__));
+    DEBUGMSGT(("container_iterator",">%s\n", "get_next"));
     
     /*
      * initialize loop context
@@ -288,7 +288,7 @@ _iterator_get_next(iterator_info *ii, const void *key)
 static void
 _iterator_free(iterator_info *ii)
 {
-    DEBUGMSGT(("container_iterator",">%s\n", __FUNCTION__));
+    DEBUGMSGT(("container_iterator",">%s\n", "free"));
     
     if(NULL == ii)
         return;
@@ -302,7 +302,7 @@ _iterator_free(iterator_info *ii)
 static void *
 _iterator_find(iterator_info *ii, const void *data)
 {
-    DEBUGMSGT(("container_iterator",">%s\n", __FUNCTION__));
+    DEBUGMSGT(("container_iterator",">%s\n", "find"));
     
     if((NULL == ii) || (NULL == data))
         return NULL;
@@ -313,7 +313,7 @@ _iterator_find(iterator_info *ii, const void *data)
 static void *
 _iterator_find_next(iterator_info *ii, const void *data)
 {
-    DEBUGMSGT(("container_iterator",">%s\n", __FUNCTION__));
+    DEBUGMSGT(("container_iterator",">%s\n", "find_next"));
     
     if(NULL == ii)
         return NULL;
@@ -324,7 +324,7 @@ _iterator_find_next(iterator_info *ii, const void *data)
 static int
 _iterator_insert(iterator_info *ii, const void *data)
 {
-    DEBUGMSGT(("container_iterator",">%s\n", __FUNCTION__));
+    DEBUGMSGT(("container_iterator",">%s\n", "insert"));
     
     if(NULL == ii)
         return -1;
@@ -338,7 +338,7 @@ _iterator_insert(iterator_info *ii, const void *data)
 static int
 _iterator_remove(iterator_info *ii, const void *data)
 {
-    DEBUGMSGT(("container_iterator",">%s\n", __FUNCTION__));
+    DEBUGMSGT(("container_iterator",">%s\n", "remove"));
     
     if(NULL == ii)
         return -1;
@@ -352,7 +352,7 @@ _iterator_remove(iterator_info *ii, const void *data)
 static int
 _iterator_release(iterator_info *ii, const void *data)
 {
-    DEBUGMSGT(("container_iterator",">%s\n", __FUNCTION__));
+    DEBUGMSGT(("container_iterator",">%s\n", "release"));
     
     if(NULL == ii)
         return -1;
@@ -371,7 +371,7 @@ _iterator_size(iterator_info *ii)
     netsnmp_ref_void loop_ctx = { NULL };
     netsnmp_ref_void tmp = { NULL };
 
-    DEBUGMSGT(("container_iterator",">%s\n", __FUNCTION__));
+    DEBUGMSGT(("container_iterator",">%s\n", "size"));
     
     if(NULL == ii)
         return -1;
@@ -404,7 +404,7 @@ _iterator_for_each(iterator_info *ii, netsnmp_container_obj_func *f,
     netsnmp_ref_void loop_ctx = { NULL };
     netsnmp_ref_void tmp = { NULL };
 
-    DEBUGMSGT(("container_iterator",">%s\n", __FUNCTION__));
+    DEBUGMSGT(("container_iterator",">%s\n", "for_each"));
     
     if(NULL == ii)
         return;
