@@ -165,8 +165,6 @@ init_vmstat(void)
 
 
 #define VMSTAT_FILE "/proc/stat"
-#define BUFFSIZE 4096
-static char     buff[BUFFSIZE];
 
 void
 getstat(unsigned long *cuse, unsigned long *cice, unsigned long *csys,
@@ -175,26 +173,70 @@ getstat(unsigned long *cuse, unsigned long *cice, unsigned long *csys,
         unsigned *ct)
 {
     int             statfd;
+    int             first = 1;
+    static char    *buff = NULL;
+    static int      bsize = 0;
 
     if ((statfd = open(VMSTAT_FILE, O_RDONLY, 0)) != -1) {
         char           *b;
-        buff[BUFFSIZE - 1] = 0; /* ensure null termination in buffer */
-        read(statfd, buff, BUFFSIZE - 1);
+        if (bsize == 0) {
+            bsize = 128;
+            buff = malloc(bsize);
+        }
+        while (read(statfd, buff, bsize) == bsize) {
+            bsize += 256;
+            buff = realloc(buff, bsize);
+            snmp_log(LOG_INFO, "/proc/stat buffer increased to %d\n",
+                     bsize);
+            close(statfd);
+            statfd = open(VMSTAT_FILE, O_RDONLY, 0);
+        }
         close(statfd);
         *itot = 0;
         *i1 = 1;                /* ensure assert below will fail if the sscanf bombs */
         b = strstr(buff, "cpu ");
-        sscanf(b, "cpu  %lu %lu %lu %lu", cuse, cice, csys, cide);
+        if (b)
+            sscanf(b, "cpu  %lu %lu %lu %lu", cuse, cice, csys, cide);
+        else {
+            if (first)
+                snmp_log(LOG_ERR, "No cpu line in /proc/stat\n");
+            *cuse = *cice = *csys = *cide = 0;
+        }
         b = strstr(buff, "page ");
-        sscanf(b, "page %u %u", pin, pout);
+        if (b)
+            sscanf(b, "page %u %u", pin, pout);
+        else {
+            if (first)
+                snmp_log(LOG_ERR, "No page line in /proc/stat\n");
+            *pin = *pout = 0;
+        }
         b = strstr(buff, "swap ");
-        sscanf(b, "swap %u %u", swpin, swpout);
+        if (b)
+            sscanf(b, "swap %u %u", swpin, swpout);
+        else {
+            if (first)
+                snmp_log(LOG_ERR, "No swap line in /proc/stat\n");
+            *swpin = *swpout = 0;
+        }
         b = strstr(buff, "intr ");
-        sscanf(b, "intr %u %u", itot, i1);
+        if (b)
+            sscanf(b, "intr %u %u", itot, i1);
+        else {
+            if (first)
+                snmp_log(LOG_ERR, "No intr line in /proc/stat\n");
+            *itot = 0;
+        }
         b = strstr(buff, "ctxt ");
-        sscanf(b, "ctxt %u", ct);
+        if (b)
+            sscanf(b, "ctxt %u", ct);
+        else {
+            if (first)
+                snmp_log(LOG_ERR, "No ctxt line in /proc/stat\n");
+            *ct = 0;
+        }
+        first = 0;
     } else {
-        snmp_log_perror("/proc/stat");
+        snmp_log_perror(VMSTAT_FILE);
     }
 }
 
