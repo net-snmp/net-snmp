@@ -133,16 +133,16 @@ inetCidrRouteTable_container_init(netsnmp_container ** container_ptr_ptr,
  * check entry for update
  */
 static void
-_snarf_route_entry(netsnmp_route_entry *route_entry,
+_snarf_route_entry(netsnmp_route_entry * route_entry,
                    netsnmp_container * container)
 {
     inetCidrRouteTable_rowreq_ctx *rowreq_ctx;
-    
+
     DEBUGTRACE;
-    
+
     netsnmp_assert(NULL != route_entry);
     netsnmp_assert(NULL != container);
-    
+
     /*
      * per  inetCidrRouteType:
      *
@@ -150,17 +150,17 @@ _snarf_route_entry(netsnmp_route_entry *route_entry,
      * rejection should not be displayed even if the  
      * implementation keeps them stored internally.
      */
-    if (route_entry->rt_type == 0) /* set when route not up */
+    if (route_entry->rt_type == 0)      /* set when route not up */
         return;
-  
+
     /*
      * allocate an row context and set the index(es), then add it to
      * the container
      */
     rowreq_ctx = inetCidrRouteTable_allocate_rowreq_ctx(route_entry);
-    if( (NULL != rowreq_ctx) &&
+    if ((NULL != rowreq_ctx) &&
         (MFD_SUCCESS == inetCidrRouteTable_indexes_set
-         (rowreq_ctx,route_entry->rt_dest_type,
+         (rowreq_ctx, route_entry->rt_dest_type,
           route_entry->rt_dest, route_entry->rt_dest_len,
           route_entry->rt_pfx_len,
           route_entry->rt_policy, route_entry->rt_policy_len,
@@ -168,14 +168,12 @@ _snarf_route_entry(netsnmp_route_entry *route_entry,
           route_entry->rt_nexthop, route_entry->rt_nexthop_len))) {
         CONTAINER_INSERT(container, rowreq_ctx);
         rowreq_ctx->inetCidrRouteStatus = ROWSTATUS_ACTIVE;
-    }
-    else {
-        if(rowreq_ctx) {
+    } else {
+        if (rowreq_ctx) {
             snmp_log(LOG_ERR, "error setting index while loading "
                      "inetCidrRoute cache.\n");
             inetCidrRouteTable_release_rowreq_ctx(rowreq_ctx);
-        }
-        else
+        } else
             netsnmp_access_route_entry_free(route_entry);
     }
 }
@@ -214,7 +212,7 @@ int
 inetCidrRouteTable_cache_load(netsnmp_container * container)
 {
     inetCidrRouteTable_rowreq_ctx *rowreq_ctx;
-    netsnmp_container * route_container;
+    netsnmp_container *route_container;
 
     DEBUGMSGTL(("verbose:inetCidrRouteTable:inetCidrRouteTable_cache_load",
                 "called\n"));
@@ -232,13 +230,13 @@ inetCidrRouteTable_cache_load(netsnmp_container * container)
                                             NETSNMP_ACCESS_ROUTE_LOAD_NOFLAGS);
 
     if (NULL == route_container)
-        return MFD_RESOURCE_UNAVAILABLE; /* msg already logged */
+        return MFD_RESOURCE_UNAVAILABLE;        /* msg already logged */
 
     /*
      * we just got a fresh copy of route data. snarf data
      */
     CONTAINER_FOR_EACH(route_container,
-                       (netsnmp_container_obj_func*)_snarf_route_entry,
+                       (netsnmp_container_obj_func *) _snarf_route_entry,
                        container);
 
     /*
@@ -246,7 +244,7 @@ inetCidrRouteTable_cache_load(netsnmp_container * container)
      * so the dal function doesn't need to clear the container.
      */
     netsnmp_access_route_container_free(route_container,
-                                        NETSNMP_ACCESS_ROUTE_FREE_DONT_CLEAR );
+                                        NETSNMP_ACCESS_ROUTE_FREE_DONT_CLEAR);
 
     DEBUGMSGT(("verbose:inetCidrRouteTable:inetCidrRouteTable_cache_load",
                "%d records\n", CONTAINER_SIZE(container)));
@@ -264,8 +262,12 @@ inetCidrRouteTable_cache_load(netsnmp_container * container)
  *  need to do any processing before that, do it here.
  *
  * @note
- *  The MFD helper will take care of releasing all the
- *  row contexts, so you don't need to worry about that.
+ *  The MFD helper will take care of releasing all the row contexts.
+ *  If you did not pass a data context pointer when allocating
+ *  the rowreq context, the one that was allocated will be deleted.
+ *  If you did pass one in, it will not be deleted and that memory
+ *  is your responsibility.
+ *
  */
 void
 inetCidrRouteTable_cache_free(netsnmp_container * container)
