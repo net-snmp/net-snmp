@@ -332,7 +332,7 @@ How do I add a MIB to the tools?
   operate quite happily without any MIB files at all, as long as
   you are prepared to work with numeric OIDs throughout.
 
-  The tools look in a predefined directory (usually PREFIX/lib/snmp/mibs)
+  The tools look in a predefined directory (usually PREFIX/share/snmp/mibs)
   and regard any file held there as defining a MIB module or modules.
   Adding translation ability for a new MIB moule is simply a
   matter of placing a file defining the MIB in this directory, and
