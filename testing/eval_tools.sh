@@ -265,9 +265,10 @@ WAITFOR() {
     if [ "$1" != "" ] ; then
 	CAN_USLEEP
 	if [ $SNMP_CAN_USLEEP = 1 ] ; then
-	  sleeptime=`expr $SNMP_SLEEP '*' 10`
+	  sleeptime=`expr $SNMP_SLEEP '*' 50`
           SNMP_SLEEP=.1
 	else 
+	  sleeptime=`expr $SNMP_SLEEP '*' 5`
 	  SNMP_SLEEP=1
 	fi
         while [ $sleeptime -gt 0 ] ; do
@@ -371,14 +372,6 @@ STARTPROG() {
     else
       $COMMAND > $LOG_FILE.stdout 2>&1
     fi
-    DELAY
-}
-
-STARTPROGNOSLEEP() {
-    sleepxxx=$SNMP_SLEEP
-    SNMP_SLEEP=0
-    STARTPROG
-    SNMP_SLEEP=$sleepxxx
 }
 
 #------------------------------------ -o-
@@ -391,7 +384,7 @@ STARTAGENT() {
     if [ "x$SNMP_TRANSPORT_SPEC" != "x" ]; then
         PORT_SPEC="$SNMP_TRANSPORT_SPEC:$PORT_SPEC"
     fi
-    STARTPROGNOSLEEP
+    STARTPROG
     WAITFORAGENT "NET-SNMP version"
 }
 
@@ -405,7 +398,7 @@ STARTTRAPD() {
     if [ "x$SNMP_TRANSPORT_SPEC" != "x" ]; then
         PORT_SPEC="$SNMP_TRANSPORT_SPEC:$PORT_SPEC"
     fi
-    STARTPROGNOSLEEP
+    STARTPROG
     WAITFORTRAPD "NET-SNMP version"
 }
 
@@ -422,24 +415,15 @@ STOPPROG() {
           COMMAND="kill -TERM `cat $1`"
         fi
 	echo $COMMAND >> $SNMP_TMPDIR/invoked
-
-	DELAY
 	$COMMAND > /dev/null 2>&1
     fi
-}
-
-STOPPROGNOSLEEP() {
-    sleepxxx=$SNMP_SLEEP
-    SNMP_SLEEP=0
-    STOPPROG "$1"
-    SNMP_SLEEP=$sleepxxx
 }
 
 #------------------------------------ -o-
 #
 STOPAGENT() {
     SAVE_RESULTS
-    STOPPROGNOSLEEP $SNMP_SNMPD_PID_FILE
+    STOPPROG $SNMP_SNMPD_PID_FILE
     if [ "x$OSTYPE" != "xmsys" ]; then
         WAITFORAGENT "shutting down"
     fi
@@ -457,7 +441,7 @@ STOPAGENT() {
 #
 STOPTRAPD() {
     SAVE_RESULTS
-    STOPPROGNOSLEEP $SNMP_SNMPTRAPD_PID_FILE
+    STOPPROG $SNMP_SNMPTRAPD_PID_FILE
     if [ "x$OSTYPE" != "xmsys" ]; then
         WAITFORTRAPD "Stopped"
     fi
