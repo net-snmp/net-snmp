@@ -107,20 +107,32 @@ ok($oidstr->length() == 15);
 # multiple encoded values
 my $newtest = new NetSNMP::OID ("nsModuleName.5.109.121.99.116.120.2.1.3.14");
 
-my $arrayback = $newtest->get_indexes();
-
-ok($#$arrayback == 2 &&
+if ($newtest) {
+  my $arrayback = $newtest->get_indexes();
+  
+  ok($#$arrayback == 2 &&
     $arrayback->[0] eq 'myctx' &&
     $arrayback->[1] eq '.1.3' &&
     $arrayback->[2] eq '14'
   );
-
+}
+else {
+  ok(0);
+}
+  
 # implied string
 $newtest = new NetSNMP::OID ("snmpNotifyRowStatus.105.110.116.101.114.110.97.108.48");
-$arrayback = $newtest->get_indexes();
 
-ok($#$arrayback == 0 &&
+if ($newtest) {
+  $arrayback = $newtest->get_indexes();
+  
+  ok($#$arrayback == 0 &&
     $arrayback->[0] eq 'internal0'
   );
+}
+else {
+  ok(0);
+}
+
 
 
