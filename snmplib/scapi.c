@@ -55,6 +55,8 @@
 #include "keytools.h"
 #include "snmp_debug.h"
 #include "scapi.h"
+#include "callback.h"
+#include "snmp_impl.h"
 
 #include "transform_oids.h"
 
@@ -852,7 +854,9 @@ sc_internal_kmtlookup(	u_int 	 transform,
 		 keyname_len;
 	char	*keyname	 = NULL;
 
-	KMT_ATTRIBUTE	kmt_attribute = { KMT_ATTR_ALG, transform };
+	KMT_ATTRIBUTE	kmt_attr;
+        kmt_attr.type = KMT_ATTR_ALG;
+        kmt_attr.value = (int) transform;
 
 
 
@@ -868,7 +872,7 @@ sc_internal_kmtlookup(	u_int 	 transform,
 	keyname_len = binary_to_hex(key, keylen, &keyname);
 
 	rval = kmt_get_keylist_from_cache(
-				kmtkeylist, keyname, &kmt_attribute, 1);
+				kmtkeylist, keyname, &kmt_attr, 1);
 
 	if (dospecify && rval != KMT_ERR_SUCCESS) {
 		rval = kmt_specify_key(	keyname, properlength * 8,
