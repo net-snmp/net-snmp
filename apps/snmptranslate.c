@@ -113,7 +113,6 @@ int main(int argc, char *argv[])
     int print = 0;
     int find_all = 0;
     int width = 1000000;
-    char n_opt[] = "n";
     
     /*
      * usage: snmptranslate name
