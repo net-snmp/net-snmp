@@ -210,9 +210,38 @@ int snmpTargetAddr_rowStatusCheck(struct targetAddrTable_struct *entry)
 
 /* Init routines */
 
+/* this variable defines function callbacks and type return information 
+   for the snmpTargetAddrEntry mib */
+
+struct variable2 snmpTargetAddrEntry_variables[] = {
+  { SNMPTARGETADDRTDOMAIN,     ASN_OBJECT_ID , RWRITE, 
+    var_snmpTargetAddrEntry, 1, { SNMPTARGETADDRTDOMAINCOLUMN } },
+  { SNMPTARGETADDRTADDRESS,    ASN_OCTET_STR , RWRITE, 
+    var_snmpTargetAddrEntry, 1, { SNMPTARGETADDRTADDRESSCOLUMN } },
+  { SNMPTARGETADDRTIMEOUT,     ASN_INTEGER   , RWRITE, 
+    var_snmpTargetAddrEntry, 1, { SNMPTARGETADDRTIMEOUTCOLUMN } },
+  { SNMPTARGETADDRRETRYCOUNT,  ASN_INTEGER   , RWRITE, 
+    var_snmpTargetAddrEntry, 1, { SNMPTARGETADDRRETRYCOUNTCOLUMN } },
+  { SNMPTARGETADDRTAGLIST,     ASN_OCTET_STR , RWRITE, 
+    var_snmpTargetAddrEntry, 1, {SNMPTARGETADDRTAGLISTCOLUMN } },
+  { SNMPTARGETADDRPARAMS,      ASN_OCTET_STR , RWRITE, 
+    var_snmpTargetAddrEntry, 1, { SNMPTARGETADDRPARAMSCOLUMN } },
+  { SNMPTARGETADDRSTORAGETYPE, ASN_INTEGER   , RWRITE, 
+    var_snmpTargetAddrEntry, 1, { SNMPTARGETADDRSTORAGETYPECOLUMN } },
+  { SNMPTARGETADDRROWSTATUS,   ASN_INTEGER   , RWRITE, 
+    var_snmpTargetAddrEntry, 1, { SNMPTARGETADDRROWSTATUSCOLUMN } },
+
+};
+
+/* now load this mib into the agents mib table */
+oid snmpTargetAddrEntry_variables_oid[] = { 1,3,6,1,6,3,12,1,2,1 };
+
 
 void init_snmpTargetAddrEntry(void) {
   aAddrTable = 0;
+  REGISTER_MIB("target/snmpTargetAddrEntry", snmpTargetAddrEntry_variables,
+			variable2, snmpTargetAddrEntry_variables_oid);
+
   snmpd_register_config_handler("targetAddr", snmpd_parse_config_targetAddr,
 				0, "");
 

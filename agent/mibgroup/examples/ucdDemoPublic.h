@@ -22,24 +22,4 @@ WriteMethod write_ucdDemoResetKeys;
 WriteMethod write_ucdDemoPublicString;
 
 
-/* Only load this structure when this .h file is called in the snmp_vars.c 
-   file in tha agent subdirectory of the source tree */
-
-#ifdef IN_SNMP_VARS_C
-
-/* this variable defines function callbacks and type return information 
-   for the ucdDemoPublic mib */
-
-struct variable2 ucdDemoPublic_variables[] = {
-  { UCDDEMORESETKEYS    , ASN_INTEGER   , RWRITE, var_ucdDemoPublic, 1, { 1 } },
-  { UCDDEMOPUBLICSTRING , ASN_OCTET_STR , RWRITE, var_ucdDemoPublic, 1, { 2 } },
-  { UCDDEMOUSERLIST     , ASN_OCTET_STR , RWRITE, var_ucdDemoPublic, 1, { 3 } },
-  { UCDDEMOPASSPHRASE   , ASN_OCTET_STR , RWRITE, var_ucdDemoPublic, 1, { 4 } },
-
-};
-
-/* now load this mib into the agents mib table */
-config_load_mib(1.3.6.1.4.1.2021.14.1.1, 10, ucdDemoPublic_variables)
-
-#endif /* IN_SNMP_VARS_C */
 #endif /* _MIBGROUP_UCDDEMOPUBLIC_H */
