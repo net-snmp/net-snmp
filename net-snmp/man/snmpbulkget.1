@@ -1,4 +1,4 @@
-.\* /***********************************************************
+.\" /***********************************************************
 .\" 	Copyright 1988, 1989 by Carnegie Mellon University
 .\" 
 .\"                       All Rights Reserved
@@ -19,7 +19,7 @@
 .\" ARISING OUT OF OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS
 .\" SOFTWARE.
 .\" ******************************************************************/
-.TH SNMPBULKGET 1 "12 Nov 1999"
+.TH SNMPBULKGET 1 "23 May 2000"
 .UC 4
 .SH NAME
 snmpbulkget - communicates with a network entity using SNMP BULK Requests.
@@ -35,6 +35,8 @@ where
 specifies the number of input variables that should not repeat, and
 .I rep
 is the maximum number of repetitions of the rest of the variables.
+The default is
+.IR "-B 0 100" .
 .PP
 For example
 .PP

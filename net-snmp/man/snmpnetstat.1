@@ -1,4 +1,4 @@
-.\* /***********************************************************
+.\" /***********************************************************
 .\" 	Copyright 1989 by Carnegie Mellon University
 .\" 
 .\"                       All Rights Reserved
@@ -36,7 +36,7 @@
 .\"
 .\"	@(#)netstat.1	6.8 (Berkeley) 9/20/88
 .\"
-.TH SNMPNETSTAT 1 "18 Dec 1999"
+.TH SNMPNETSTAT 1 "11 May 2000"
 .UC 5
 .SH NAME
 snmpnetstat \- show network status using SNMP
@@ -45,7 +45,7 @@ snmpnetstat -v 1 hostname community [-an]
 .br
 snmpnetstat -v 1 hostname community [-ionrs]
 .br
-snmpnetstat -v 1 hostname community [-p protocol]
+snmpnetstat -v 1 hostname community [-P protocol]
 .br
 snmpnetstat\ -v\ 1 hostname community [\-n] [\-I interface] interval
 .PP
@@ -53,7 +53,7 @@ snmpnetstat [-v 2] hostname noAuth [-an]
 .br
 snmpnetstat [-v 2] hostname noAuth [-ionrs]
 .br
-snmpnetstat [-v 2] hostname noAuth [-p protocol]
+snmpnetstat [-v 2] hostname noAuth [-P protocol]
 .br
 snmpnetstat\ [-v\ 2] hostname noAuth [\-n] [\-I interface] interval
 .SH DESCRIPTION
@@ -111,7 +111,7 @@ interprets addresses and attempts to display them
 symbolically).
 This option may be used with any of the display formats.
 .TP
-.BI \-p " protocol"
+.BI \-P " protocol"
 Show statistics about 
 .IR protocol ,
 which is either a well-known name for a protocol or an alias for it.  Some
