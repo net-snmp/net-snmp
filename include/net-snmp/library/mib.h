@@ -492,6 +492,7 @@ SOFTWARE.
     char           *snmp_out_toggle_options(char *);
     void            snmp_out_toggle_options_usage(const char *, FILE *);
     char           *snmp_in_toggle_options(char *);
+    char           *snmp_in_options(char *, int, char * const *);
     void            snmp_in_toggle_options_usage(const char *, FILE *);
     u_char          mib_to_asn_type(int mib_type);
 

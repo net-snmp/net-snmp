@@ -503,13 +503,23 @@ diagnostic that the library can provide is also much more precise).
 .TP
 .B -Ih
 By default, the library will use DISPLAY-HINT information when assigning values.
-This flag disables this behaviour. The result is that in stead of
+This flag disables this behaviour. The result is that instead of
 .br
 snmpset localhost HOST-RESOURCES-MIB::hrSystemDate.0 = 2002-12-10,2:4:6.8
 .br
 you will have to write
 .br
 snmpset localhost HOST-RESOURCES-MIB::hrSystemData.0 x "07 D2 0C 0A 02 04 06 08"
+.TP
+.B -Is SUFFIX
+Add the specified suffix to each textual OID given on the command line.
+Useful to specify a common index value when you're wanting to retrieve multiple
+objects from the same row of a table.
+.TP
+.B -IS PREFIX
+Add the specified prefix to each textual OID given on the command line.
+Useful to specify an explicit MIB module name for all objects being retrieved
+(or for incurably lazy typists)
 .SH "RANDOM ACCESS MIBS"
 In previous releases of the UCD-SNMP package (and if using the
 .B -Iu
