@@ -34,7 +34,7 @@
 
 #include <net-snmp/library/snmp_api.h>
 
-static struct netsnmp_ds_read_config *netsnmp_ds_configs = NULL;
+static netsnmp_ds_read_config *netsnmp_ds_configs = NULL;
 
 static int   netsnmp_ds_integers[NETSNMP_DS_MAX_IDS][NETSNMP_DS_MAX_SUBIDS];
 static char  netsnmp_ds_booleans[NETSNMP_DS_MAX_IDS][NETSNMP_DS_MAX_SUBIDS/8];
@@ -190,7 +190,7 @@ netsnmp_ds_get_void(int storeid, int which)
 void
 netsnmp_ds_handle_config(const char *token, char *line)
 {
-    struct netsnmp_ds_read_config *drsp;
+    netsnmp_ds_read_config *drsp;
     char            buf[SNMP_MAXBUF];
     char           *value, *endptr;
     int             itmp;
@@ -262,7 +262,7 @@ int
 netsnmp_ds_register_config(u_char type, const char *ftype, const char *token,
 			   int storeid, int which)
 {
-    struct netsnmp_ds_read_config *drsp;
+    netsnmp_ds_read_config *drsp;
 
     if (storeid < 0 || storeid >= NETSNMP_DS_MAX_IDS    || 
 	which   < 0 || which   >= NETSNMP_DS_MAX_SUBIDS || token == NULL) {
@@ -270,11 +270,11 @@ netsnmp_ds_register_config(u_char type, const char *ftype, const char *token,
     }
 
     if (netsnmp_ds_configs == NULL) {
-        netsnmp_ds_configs = SNMP_MALLOC_STRUCT(netsnmp_ds_read_config);
+        netsnmp_ds_configs = SNMP_MALLOC_TYPEDEF(netsnmp_ds_read_config);
         drsp = netsnmp_ds_configs;
     } else {
         for (drsp = netsnmp_ds_configs; drsp->next != NULL; drsp = drsp->next);
-        drsp->next = SNMP_MALLOC_STRUCT(netsnmp_ds_read_config);
+        drsp->next = SNMP_MALLOC_TYPEDEF(netsnmp_ds_read_config);
         drsp = drsp->next;
     }
 
@@ -308,7 +308,7 @@ int
 netsnmp_ds_register_premib(u_char type, const char *ftype, const char *token,
 			   int storeid, int which)
 {
-    struct netsnmp_ds_read_config *drsp;
+    netsnmp_ds_read_config *drsp;
 
     if (storeid < 0 || storeid >= NETSNMP_DS_MAX_IDS    || 
 	which   < 0 || which   >= NETSNMP_DS_MAX_SUBIDS || token == NULL) {
@@ -316,11 +316,11 @@ netsnmp_ds_register_premib(u_char type, const char *ftype, const char *token,
     }
 
     if (netsnmp_ds_configs == NULL) {
-        netsnmp_ds_configs = SNMP_MALLOC_STRUCT(netsnmp_ds_read_config);
+        netsnmp_ds_configs = SNMP_MALLOC_TYPEDEF(netsnmp_ds_read_config);
         drsp = netsnmp_ds_configs;
     } else {
         for (drsp = netsnmp_ds_configs; drsp->next != NULL; drsp = drsp->next);
-        drsp->next = SNMP_MALLOC_STRUCT(netsnmp_ds_read_config);
+        drsp->next = SNMP_MALLOC_TYPEDEF(netsnmp_ds_read_config);
         drsp = drsp->next;
     }
 
@@ -353,7 +353,7 @@ netsnmp_ds_register_premib(u_char type, const char *ftype, const char *token,
 void
 netsnmp_ds_shutdown()
 {
-    struct netsnmp_ds_read_config *drsp;
+    netsnmp_ds_read_config *drsp;
     int             i, j;
 
     for (drsp = netsnmp_ds_configs; drsp; drsp = netsnmp_ds_configs) {
