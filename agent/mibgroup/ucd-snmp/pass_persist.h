@@ -6,6 +6,7 @@
 
 config_require(ucd-snmp/extensible util_funcs)
 
+void init_pass_persist(void);
 extern FindVarMethod var_extensible_pass_persist;
 extern WriteMethod setPassPersist;
 
