@@ -32,7 +32,7 @@
 #define SMUX_GETNEXT    (ASN_CONTEXT | ASN_CONSTRUCTOR | 1)
 #define SMUX_GETRSP     (ASN_CONTEXT | ASN_CONSTRUCTOR | 2)
 
-extern int smux_init();
+extern int init_smux();
 extern int smux_select(struct timeval *tvp);
 extern u_char *smux_snmp_process(int, oid *, int *, int *);
 
