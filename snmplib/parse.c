@@ -39,7 +39,7 @@ ARISING OUT OF OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS
 SOFTWARE.
 ******************************************************************/
 #include <net-snmp/net-snmp-config.h>
-#include <net-snmp/snmp_logging.h>
+
 #include <stdio.h>
 #if HAVE_STDLIB_H
 #include <stdlib.h>
@@ -97,15 +97,14 @@ SOFTWARE.
 #include <dmalloc.h>
 #endif
 
-#include <net-snmp/system.h>
+#include <net-snmp/types.h>	
+#include <net-snmp/output_api.h>
+#include <net-snmp/config_api.h>
+#include <net-snmp/utilities.h>
+
 #include <net-snmp/parse.h>
-#include <net-snmp/asn1.h>
 #include <net-snmp/mib.h>
 #include <net-snmp/snmp_api.h>
-#include <net-snmp/snmp_debug.h>
-#include <net-snmp/snmp_logging.h>
-#include <net-snmp/default_store.h>
-#include <net-snmp/tools.h>
 
 /*
  * This is one element of an object identifier with either an integer

@@ -22,11 +22,12 @@
 #include <dmalloc.h>
 #endif
 
-#include <net-snmp/tools.h>
+#include <net-snmp/types.h>	
+#include <net-snmp/output_api.h>
+#include <net-snmp/utilities.h>
+
 #include <net-snmp/callback.h>
-#include <net-snmp/asn1.h>
 #include <net-snmp/snmp_api.h>
-#include <net-snmp/snmp_debug.h>
 
 static struct snmp_gen_callback *thecallbacks[MAX_CALLBACK_IDS][MAX_CALLBACK_SUBIDS];
 

@@ -75,15 +75,14 @@ SOFTWARE.
 #include <in.h>
 #endif
 
+#include <net-snmp/types.h>	
+#include <net-snmp/output_api.h>
+#include <net-snmp/utilities.h>
+
 #include <net-snmp/asn1.h>
-#include <net-snmp/snmp.h>
 #include <net-snmp/snmp_api.h>
-#include <net-snmp/snmp_impl.h>
 #include <net-snmp/mib.h>
 #include <net-snmp/md5.h>
-#include <net-snmp/system.h>
-#include <net-snmp/tools.h>
-#include <net-snmp/snmp_debug.h>
 #include <net-snmp/scapi.h>
 
 /*

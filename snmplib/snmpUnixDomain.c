@@ -23,11 +23,10 @@
 #include <sys/un.h>
 #endif
 
-#include <net-snmp/asn1.h>
-#include <net-snmp/snmp.h>
-#include <net-snmp/snmp_debug.h>
-#include <net-snmp/snmp_logging.h>
-#include <net-snmp/default_store.h>
+#include <net-snmp/types.h>	
+#include <net-snmp/output_api.h>
+#include <net-snmp/config_api.h>
+
 #include <net-snmp/snmp_transport.h>
 #include <net-snmp/snmpUnixDomain.h>
 

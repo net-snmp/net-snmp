@@ -4,11 +4,11 @@
 
 #include <stdlib.h>
 #include <sys/types.h>
-#include <net-snmp/asn1.h>
-#include <net-snmp/snmp_impl.h>
-#include <net-snmp/snmp.h>
+
+#include <net-snmp/types.h>	
+#include <net-snmp/utilities.h>
+
 #include <net-snmp/snmp_api.h>
-#include <net-snmp/tools.h>
 #include <net-snmp/oid_stash.h>
 
 oid_stash_node *
