@@ -280,24 +280,46 @@ handle_snmp_packet(int operation, struct snmp_session *session, int reqid,
     int status, allDone, i;
     struct variable_list *var_ptr, *var_ptr2;
 
-    asp = malloc( sizeof( struct agent_snmp_session ));
-    asp->start = pdu->variables;
-    asp->end   = pdu->variables;
-    if ( asp->end != NULL )
-	while ( asp->end->next_variable != NULL )
-	    asp->end = asp->end->next_variable;
-    asp->session = session;
-    asp->pdu     = pdu;
-    asp->rw      = READ;
-    asp->exact   = TRUE;
-    asp->outstanding_requests = NULL;
-    asp->next    = NULL;
+    if ( magic == NULL ) {
+        asp = malloc( sizeof( struct agent_snmp_session ));
+        asp->start = pdu->variables;
+        asp->end   = pdu->variables;
+        if ( asp->end != NULL )
+	    while ( asp->end->next_variable != NULL )
+	        asp->end = asp->end->next_variable;
+        asp->session = session;
+        asp->pdu     = pdu;
+        asp->rw      = READ;
+        asp->exact   = TRUE;
+        asp->outstanding_requests = NULL;
+        asp->next    = NULL;
+        asp->mode    = RESERVE1;
+        asp->status  = SNMP_ERR_NOERROR;
+    }
+    else {
+	asp = (struct agent_snmp_session *)magic;
+        status =   asp->status;
+    }
 
+    if (asp->outstanding_requests != NULL)
+	return 1;
 
     switch (pdu->command) {
     case SNMP_MSG_GET:
+	if ( asp->mode != RESERVE1 )
+	    break;			/* Single pass */
         snmp_increment_statistic(STAT_SNMPINGETREQUESTS);
 	status = handle_next_pass( asp );
+	asp->mode = RESERVE2;
+	break;
+
+    case SNMP_MSG_GETNEXT:
+	if ( asp->mode != RESERVE1 )
+	    break;			/* Single pass */
+        snmp_increment_statistic(STAT_SNMPINGETNEXTS);
+	asp->exact   = FALSE;
+	status = handle_next_pass( asp );
+	asp->mode = RESERVE2;
 	break;
 
     case SNMP_MSG_GETBULK:
@@ -310,21 +332,27 @@ handle_snmp_packet(int operation, struct snmp_session *session, int reqid,
 	     * Processing is terminated if all entries in a pass are
 	     * EndOfMib, or the maximum number of repetitions are made.
 	     */
-        snmp_increment_statistic(STAT_SNMPINGETREQUESTS);
-	asp->exact   = FALSE;
-		/*
-		 * Limit max repetitions to something reasonable
-		 *	XXX: We should figure out what will fit somehow...
-		 */
-	if ( asp->pdu->errindex > 100 )
-	    asp->pdu->errindex = 100;
+	if ( asp->mode == RESERVE1 ) {
+            snmp_increment_statistic(STAT_SNMPINGETREQUESTS);
+	    asp->exact   = FALSE;
+		    /*
+		     * Limit max repetitions to something reasonable
+		     *	XXX: We should figure out what will fit somehow...
+		     */
+	    if ( asp->pdu->errindex > 100 )
+	        asp->pdu->errindex = 100;
+    
+	    status = handle_next_pass( asp );	/* First pass */
+	    asp->mode = RESERVE2;
+	    if ( status != SNMP_ERR_NOERROR )
+	        break;
+    
+	    while ( asp->pdu->errstat-- > 0 )	/* Skip non-repeaters */
+	        asp->start = asp->start->next_variable;
 
-	status = handle_next_pass( asp );	/* First pass */
-	if ( status != SNMP_ERR_NOERROR )
-	    break;
-
-	while ( asp->pdu->errstat-- > 0 )	/* Skip non-repeaters */
-	    asp->start = asp->start->next_variable;
+	    if ( asp->outstanding_requests != NULL )
+		return 1;
+	}
 
 	while ( asp->pdu->errindex-- > 0 ) {	/* Process repeaters */
 		/*
@@ -356,13 +384,9 @@ handle_snmp_packet(int operation, struct snmp_session *session, int reqid,
 	    status = handle_next_pass( asp );
 	    if ( status != SNMP_ERR_NOERROR )
 		break;
+	    if ( asp->outstanding_requests != NULL )
+		return 1;
 	}
-	break;
-
-    case SNMP_MSG_GETNEXT:
-        snmp_increment_statistic(STAT_SNMPINGETNEXTS);
-	asp->exact   = FALSE;
-	status = handle_next_pass( asp );
 	break;
 
     case SNMP_MSG_SET:
@@ -379,38 +403,68 @@ handle_snmp_packet(int operation, struct snmp_session *session, int reqid,
 	     * If the fourth pass (or any of the error handling passes)
 	     * return an error, we'd rather not know about it!
 	     */
-        snmp_increment_statistic(STAT_SNMPINSETREQUESTS);
-	asp->rw      = WRITE;
+	if ( asp->mode == RESERVE1 ) {
+            snmp_increment_statistic(STAT_SNMPINSETREQUESTS);
+	    asp->rw      = WRITE;
 
-        asp->mode = RESERVE1;
-	status = handle_next_pass( asp );
+	    status = handle_next_pass( asp );
 
-	if ( status != SNMP_ERR_NOERROR ) {
-	    asp->mode = FREE;
-	    (void) handle_next_pass( asp );
+	    if ( status != SNMP_ERR_NOERROR )
+	        asp->mode = FREE;
+	    else
+	        asp->mode = RESERVE2;
+
+	    if ( asp->outstanding_requests != NULL )
+		return 1;
+	}
+
+	if ( asp->mode == RESERVE2 ) {
+	    status = handle_next_pass( asp );
+
+	    if ( status != SNMP_ERR_NOERROR )
+	        asp->mode = FREE;
+	    else
+	        asp->mode = ACTION;
+
+	    if ( asp->outstanding_requests != NULL )
+		return 1;
+	}
+
+	if ( asp->mode == ACTION ) {
+	    status = handle_next_pass( asp );
+
+	    if ( status != SNMP_ERR_NOERROR )
+	        asp->mode = UNDO;
+	    else
+	        asp->mode = COMMIT;
+
+	    if ( asp->outstanding_requests != NULL )
+		return 1;
+	}
+
+	if ( asp->mode == COMMIT ) {
+	    status = handle_next_pass( asp );
+
+	    if ( status != SNMP_ERR_NOERROR )
+	        asp->mode = FINISHED_FAILURE;	/* or UNDO ? */
+	    else
+	        asp->mode = FINISHED_SUCCESS;	/* or FREE ? */
+
+	    if ( asp->outstanding_requests != NULL )
+		return 1;
+	}
+
+	if ( asp->mode == UNDO ) {
+	    status = handle_next_pass( asp );
+
+	    asp->mode = FINISHED_FAILURE;
 	    break;
 	}
 
-        asp->mode = RESERVE2;
-	status = handle_next_pass( asp );
-
-	if ( status != SNMP_ERR_NOERROR ) {
-	    asp->mode = FREE;
+	if ( asp->mode == FREE ) {
 	    (void) handle_next_pass( asp );
 	    break;
 	}
-
-        asp->mode = ACTION;
-	status = handle_next_pass( asp );
-
-	if ( status != SNMP_ERR_NOERROR ) {
-	    asp->mode = UNDO;
-	    (void) handle_next_pass( asp );
-	    break;
-	}
-
-        asp->mode = COMMIT;
-	status = handle_next_pass( asp );
 
 	break;
 
@@ -432,6 +486,7 @@ handle_snmp_packet(int operation, struct snmp_session *session, int reqid,
     
 	
     if ( asp->outstanding_requests != NULL ) {
+	asp->status = status;
 	asp->next = agent_session_list;
 	agent_session_list = asp;
     }
