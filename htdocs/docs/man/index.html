@@ -3,7 +3,7 @@
 <!-- CONTENT START -->
   <p class="SectionTitle">Man pages</p>
 
-  <h2>SNMP basic application manual pages</h2>
+  <h2>SNMP basic applications</h2>
 
   <table width="100%">
     <tr>
@@ -59,13 +59,11 @@
 
       <td>communicates with a network entity using SNMP requests</td>
     </tr>
+  </table>
 
-    <tr>
-      <td width="30%"><a href="snmptrap.html">snmptrap</a></td>
+  <h2>SNMP "second-level" applications</h2>
 
-      <td>snmptrap, snmpinform - sends an SNMP notification to a manager</td>
-    </tr>
-
+  <table width="100%">
     <tr>
       <td width="30%"><a href="snmptable.html">snmptable</a></td>
 
@@ -97,16 +95,6 @@
     </tr>
 
     <tr>
-      <td width="30%"><a href="mib2c.html">mib2c</a></td>
-
-      <td>- generate template code for extending the agent</td>
-    </tr>
-  </table>
-
-  <h2>Unix replacement tools which make use of SNMP</h2>
-
-  <table width="100%">
-    <tr>
       <td width="30%"><a href="snmpnetstat.html">snmpnetstat</a></td>
 
       <td>display networking status and configuration information from a network entity via SNMP</td>
@@ -116,6 +104,28 @@
       <td width="30%"><a href="snmpdf.html">snmpdf</a></td>
 
       <td>display disk space usage on a network entity via SNMP</td>
+    </tr>
+  </table>
+
+  <h2>Notification manual pages</h2>
+
+  <table width="100%">
+    <tr>
+      <td width="30%"><a href="snmptrap.html">snmptrap</a></td>
+
+      <td>snmptrap, snmpinform - sends an SNMP notification to a manager</td>
+    </tr>
+
+    <tr>
+      <td width="30%"><a href="snmptrapd.html">snmptrapd</a></td>
+
+      <td>Receive and log SNMP trap messages.</td>
+    </tr>
+
+    <tr>
+      <td width="30%"><a href="snmptrapd.conf.html">snmptrapd.conf</a></td>
+
+      <td>/usr/local/etc/snmp/configuration file for the Net-SNMP trap daemon.</td>
     </tr>
   </table>
 
@@ -155,21 +165,17 @@
 
       <td>/usr/local/etc/snmp/configuration file for the Net-SNMP SNMP agent.</td>
     </tr>
-  </table>
 
-  <h2>Notification receiver manual pages</h2>
-
-  <table width="100%">
     <tr>
-      <td width="30%"><a href="snmptrapd.html">snmptrapd</a></td>
+      <td width="30%"><a href="mib2c.html">mib2c</a></td>
 
-      <td>Receive and log SNMP trap messages.</td>
+      <td>- generate template code for extending the agent</td>
     </tr>
 
     <tr>
-      <td width="30%"><a href="snmptrapd.conf.html">snmptrapd.conf</a></td>
+      <td width="30%"><a href="mib2c.conf.html">mib2c.conf</a></td>
 
-      <td>/usr/local/etc/snmp/configuration file for the Net-SNMP trap daemon.</td>
+      <td>- How to write mib2c.conf files to do ANYTHING based on MIB input.</td>
     </tr>
   </table>
 
@@ -237,12 +243,6 @@
 
       <td>debug: print out debugging information about the handler chain being called. - This is a useful module for run-time
       debugging of requests as the pass this handler in a calling chain.</td>
-    </tr>
-
-    <tr>
-      <td width="30%"><a href="netsnmp_deprecated.html">netsnmp_deprecated</a></td>
-
-      <td></td>
     </tr>
   </table>
 
@@ -451,16 +451,6 @@
       <td>mode_end_call: at the end of a series of requests, call another handler hook. - Handlers that want to loop through a
       series of requests and then receive a callback at the end of a particular MODE can use this helper to make this
       possible.</td>
-    </tr>
-  </table>
-
-  <h2>Project files</h2>
-
-  <table width="100%">
-    <tr>
-      <td width="30%"><a href="netsnmp_todo.html">netsnmp_todo</a></td>
-
-      <td></td>
     </tr>
   </table><br />
 <!-- CONTENT END -->
