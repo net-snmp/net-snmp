@@ -1027,7 +1027,7 @@ if test -f /hp-ux -a -f /bin/ksh; then
   else
     echo "yes"	1>&6
     if test "x$1" = "x"; then
-      exec /bin/ksh $0	
+      exec /bin/ksh $0
     else
       exec /bin/ksh $0 "$@"
     fi
@@ -2951,7 +2951,7 @@ if test "x$prefix" = "xNONE"; then
   prefix=/usr/local
 fi
 
-fch=`echo $prefix | cut -b1`
+fch=`echo $prefix | sed 's/\(.\).*/\1/'`
 if test $fch != "/" ; then
    prefix=`pwd`/$prefix
    echo "adjusting prefix to $prefix"
@@ -2961,7 +2961,7 @@ if test "x$exec_prefix" = "xNONE"; then
   exec_prefix=$prefix
 fi
 
-fch=`echo $exec_prefix | cut -b1`
+fch=`echo $exec_prefix | sed 's/\(.\).*/\1/'`
 if test $fch != "/" ; then
    exec_prefix=`pwd`/$exec_prefix
    echo "adjusting exec_prefix to $exec_prefix"
