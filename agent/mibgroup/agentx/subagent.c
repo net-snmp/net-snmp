@@ -42,6 +42,7 @@
 
 #include <net-snmp/net-snmp-includes.h>
 #include <net-snmp/agent/net-snmp-agent-includes.h>
+#include <net-snmp/library/snmp_assert.h>
 
 #include "snmpd.h"
 #include "agentx/protocol.h"
@@ -479,6 +480,7 @@ handle_subagent_set_response(int op, netsnmp_session * session, int reqid,
         pdu->variables = NULL;  /* the variables were added by us */
     }
 
+    netsnmp_assert(retsess != NULL);
     pdu->command = AGENTX_MSG_RESPONSE;
     pdu->version = retsess->version;
 
