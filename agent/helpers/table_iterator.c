@@ -241,6 +241,7 @@ typedef struct ti_cache_info_s {
 static void
 netsnmp_free_ti_cache(void *it) {
     ti_cache_info *beer = it;
+    if (!it) return;
     if (beer->data_context && beer->free_context) {
             (beer->free_context)(beer->data_context, beer->iinfo);
     }
