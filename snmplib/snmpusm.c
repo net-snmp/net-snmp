@@ -131,7 +131,7 @@ struct usmStateReference *
 usm_malloc_usmStateReference(void)
 {
 	struct usmStateReference *retval = (struct usmStateReference *)
-		malloc_zero (sizeof(struct usmStateReference));
+		calloc(1,sizeof(struct usmStateReference));
 
 	return retval;
 }  /* end usm_malloc_usmStateReference() */
@@ -2355,7 +2355,7 @@ usm_create_user(void)
   struct usmUser *newUser;
 
   /* create the new user */
-  newUser = (struct usmUser *) malloc_zero(sizeof(struct usmUser));
+  newUser = (struct usmUser *) calloc(1,sizeof(struct usmUser));
   if (newUser == NULL)
     return NULL;
 

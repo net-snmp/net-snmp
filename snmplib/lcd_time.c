@@ -216,12 +216,12 @@ set_enginetime(	u_char	*engineID,
 			QUITFUN(SNMPERR_GENERR, set_enginetime_quit);
 		}
 
-		e = (Enginetime) SNMP_MALLOC(sizeof(*e));
+		e = (Enginetime) calloc(1,sizeof(*e));
 
 		e->next = etimelist[iindex];
 		etimelist[iindex] = e;
 
-		e->engineID = (u_char *) SNMP_MALLOC(engineID_len);
+		e->engineID = (u_char *) calloc(1,engineID_len);
 		memcpy(e->engineID, engineID, engineID_len);
 
 		e->engineID_len = engineID_len;

@@ -76,7 +76,7 @@ header_complex_parse_oid(oid *oidIndex, size_t oidLen,
       case ASN_COUNTER:
       case ASN_GAUGE:
       case ASN_TIMETICKS:
-        var->val.integer = (long *) SNMP_MALLOC(sizeof(long));
+        var->val.integer = (long *) calloc(1,sizeof(long));
         *var->val.integer = (long) *oidIndex++;
         var->val_len = sizeof(long);
         oidLen--;
@@ -96,7 +96,7 @@ header_complex_parse_oid(oid *oidIndex, size_t oidLen,
         
         /* malloc by size+1 to allow a null to be appended. */
         var->val_len = itmp;
-        var->val.string = (u_char *) SNMP_MALLOC(itmp+1);
+        var->val.string = (u_char *) calloc(1,itmp+1);
 
         for(i = 0; i < itmp; i++)
           var->val.string[i] = (u_char) *oidIndex++;
