@@ -7,7 +7,7 @@
 
 #include <stdio.h>
 
-#ifndef NETSNMP_CONFIG_H
+#ifndef NET_SNMP_CONFIG_H
 #error "Please include <net-snmp/net-snmp-config.h> before this file"
 #endif
 
