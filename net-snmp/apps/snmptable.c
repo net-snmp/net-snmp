@@ -286,11 +286,11 @@ void print_table (void)
   for (field = 0; field < fields; field++) {
     if (field_separator == NULL)
       sprintf(string_buf, "%%%ds", column[field].width+1);
-    else if (field == 0) sprintf(string_buf, "%%s");
+    else if ((field == 0) && !show_index) sprintf(string_buf, "%%s");
     else sprintf(string_buf, "%s%%s", field_separator);
     column[field].fmt = strdup (string_buf);
   }
-  if (show_index) {
+  if (show_index && !no_headers) {
     sprintf(string_buf, "%%%ds", index_width);
     index_fmt = strdup(string_buf);
   }
