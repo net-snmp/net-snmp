@@ -175,7 +175,7 @@ setup_oid(oid * it, size_t * len, u_char * id, size_t idlen,
      */
 }
 
-#ifdef HAVE_OPENSSL_DH_H
+#if defined(HAVE_OPENSSL_DH_H) && defined(HAVE_LIBCRYPTO)
 int
 get_USM_DH_key(netsnmp_variable_list *vars, netsnmp_variable_list *dhvar,
                size_t outkey_len,
@@ -708,7 +708,7 @@ main(int argc, char *argv[])
         snmp_pdu_add_variable(pdu, usmUserStatus, name_length,
                               ASN_INTEGER, (u_char *) & longvar,
                               sizeof(longvar));
-#ifdef HAVE_OPENSSL_DH_H
+#if defined(HAVE_OPENSSL_DH_H) && defined(HAVE_LIBCRYPTO)
     } else if (strcmp(argv[arg], CMD_CHANGEKEY_NAME) == 0) {
         /*
          * change the key of a user if DH is available
