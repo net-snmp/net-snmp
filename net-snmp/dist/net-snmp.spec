@@ -53,6 +53,7 @@ rm -rf $RPM_BUILD_ROOT
 # Remove 'snmpinform' from the temporary directory because it is a
 # symbolic link, which cannot be handled by the rpm installation process.
 %__rm -f $RPM_BUILD_ROOT%{_prefix}/bin/snmpinform
+install -m 755 net-snmp.init.d $RPM_BUILD_ROOT/etc/rc.d/init.d/snmpd
 
 %post
 # ----------------------------------------------------------------------
