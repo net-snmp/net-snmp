@@ -93,7 +93,19 @@ while($#ARGV >= 0) {
 		   TICKS      ASN_TIMETICKS
 		   GAUGE      ASN_GAUGE
 		   OPAQUE     ASN_OPAQUE);
-
+%perltodecl = ("OCTETSTR",  "char",
+	       "INTEGER",  "long",
+	       "INTEGER32",  "long",
+	       "UNSIGNED32", "u_long",
+	       "UINTEGER", "u_long",
+	       "OBJECTID", "oid",
+	       "COUNTER64", "counter64",
+	       "COUNTER", "u_long",
+	       "IPADDR", "u_long",
+	       "BITS", "char",
+	       "TICKS", "u_long",
+	       "GAUGE", "u_long",
+	       "OPAQUE", "char");
 
 my $mibnode = $SNMP::MIB{$oid};
 die "you didn't give me a valid OID to start with" if (!$mibnode);
@@ -149,20 +161,21 @@ sub oidlength {
 #   $var.access        -- node's access type
 #   $var.status        -- node's status
 #   $var.syntax        -- node's syntax
+#   $var.decl          -- C data type
 sub process_vars {
     my $it = shift;
 
     # mib substitutions ($var.type -> $mibnode->{'type'})
     $it =~ s/\$(\w+)\.(uc)/uc($vars{$1})/eg; # make something uppercase
-    $it =~ s/\$(\w+)\.(commaoid)/tocommas($SNMP::MIB{$vars{$1}}{objectID})/eg; # lowercase
-    $it =~ s/\$(\w+)\.(oidlength)/oidlength($SNMP::MIB{$vars{$1}}{objectID})/eg; # lowercase
-    $it =~ s/\$(\w+)\.(perltype)/$SNMP::MIB{$vars{$1}}{type}/g; # lowercase
-    $it =~ s/\$(\w+)\.(type)/$perltoctypes{$SNMP::MIB{$vars{$1}}{$2}}/g; # lowercase
-    $it =~ s/\$(\w+)\.(subid)/$SNMP::MIB{$vars{$1}}{subID}/g; # lowercase
-    $it =~ s/\$(\w+)\.(settable)/(($SNMP::MIB{$vars{$1}}{access} =~ \/(ReadWrite|Create|Writeonly)\/)?1:0)/eg; # lowercase
-    $it =~ s/\$(\w+)\.(noaccess)/(($SNMP::MIB{$vars{$1}}{access} =~ \/(NoAccess)\/)?1:0)/eg; # lowercase
+    $it =~ s/\$(\w+)\.(commaoid)/tocommas($SNMP::MIB{$vars{$1}}{objectID})/eg;
+    $it =~ s/\$(\w+)\.(oidlength)/oidlength($SNMP::MIB{$vars{$1}}{objectID})/eg;
+    $it =~ s/\$(\w+)\.(perltype)/$SNMP::MIB{$vars{$1}}{type}/g;
+    $it =~ s/\$(\w+)\.(type)/$perltoctypes{$SNMP::MIB{$vars{$1}}{$2}}/g;
+    $it =~ s/\$(\w+)\.(subid)/$SNMP::MIB{$vars{$1}}{subID}/g;
+    $it =~ s/\$(\w+)\.(settable)/(($SNMP::MIB{$vars{$1}}{access} =~ \/(ReadWrite|Create|Writeonly)\/)?1:0)/eg;
+    $it =~ s/\$(\w+)\.(noaccess)/(($SNMP::MIB{$vars{$1}}{access} =~ \/(NoAccess)\/)?1:0)/eg;
     $it =~ s/\$(\w+)\.(objectID|label|subID|access|status|syntax)/$SNMP::MIB{$vars{$1}}{$2}/g;
-
+    $it =~ s/\$(\w+)\.(decl)/$SNMP::MIB{$vars{$1}}{type} $perltodecl{$SNMP::MIB{$vars{$1}}{type}}/g;
     # normal variable substitions
     $it =~ s/\$\{(\w+)\}/$vars{$1}/g;
     $it =~ s/\$(\w+)/$vars{$1}/g;
