@@ -3,26 +3,29 @@ the ChangeLog file for a more detailed listing of changes/bug fixes.
 
 *5.2*
  New:
-    For the security parnoid (EG, like Wes):
-      - Insecure versions of SNMP may be completely disable at compile time.
-        (configure using one or both of --disable-snmpv1 --disable-snmpv2c)
+    For the security parnoid (like Wes):
+      - Insecure versions of SNMP may be completely disabled at compile time.
+          (configure using one or both of --disable-snmpv1 --disable-snmpv2c)
       - Less secure versions of SNMPv3 authentication and encryption
-        algorithms may be completely disable at compile time.
-        (configure using one or both of --disable-des --disable-md5)
-        (This requires you have OpenSSL to support SHA1 and AES instead)
-      - Diffie-Helman key negotianion (perfect-forward-secrecy)
-        (RFC2786) has been implemented in both the agent and in snmpusm.
+          algorithms may be completely disabled at compile time.
+          (configure using one or both of --disable-des --disable-md5)
+          (This requires you have OpenSSL to support SHA1 and AES instead)
+      - Diffie-Helman key negotianion (perfect-forward-secrecy - RFC2786)
+          has been implemented in both the agent and "snmpusm".
 
     snmptrapd:
       - Embedded perl support for trap handlers (much faster).
-        (configure --with-embedded-perl and run 'perldoc NetSNMP::TrapReceiver')
-      - the snmptrapd usmUser table can be controlled through SNMP&AgentX
-	(the snmptrapd MIBs are registered under the "snmptrapd" SNMPv3 context)
+          (configure --with-embedded-perl and run 'perldoc NetSNMP::TrapReceiver')
+      - the snmptrapd usmUser table can be controlled through SNMP & AgentX
+	  (the snmptrapd registers MIBs under the "snmptrapd" SNMPv3 context)
 
     agent:
       - community strings can be mapped to individual SNMPv3 contexts
-        (see the snmpd.conf manual on "com2sec").
+          (see the snmpd.conf manual on "com2sec").
       - AgentX should work properly with SNMPv3 contexts now.
+      - improved version of "exec" extension directive - "extend":
+          supports multi-line output, configurable command input, SET
+          handling, a valid relocatable MIB output structure, etc
       - experimental implementation of DisMan Remote Operations MIB groups
 
     mib2c:
@@ -36,9 +39,9 @@ the ChangeLog file for a more detailed listing of changes/bug fixes.
 
  Ports:
    - new experimental tables/rewrites for Linux, including:
-     ifTable, ifXTable, inetCidrRouteTable, ipCidrRouteTable,
-     ipAddressTable, ipSystemStatsTable, usmDHParameters,
-     usmDHUserKeyTable, ipNetToPhysicalTable
+       ifTable, ifXTable, inetCidrRouteTable, ipCidrRouteTable,
+       ipAddressTable, ipSystemStatsTable, usmDHParameters,
+       usmDHUserKeyTable, ipNetToPhysicalTable
 
  Fixes:
    - AgentX memory leak on sets
