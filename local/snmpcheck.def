@@ -530,7 +530,7 @@ sub check {
 	    }
 	}
     } else {
-	hostdown();
+	$self->hostdown();
     }
   main::setstatus("Idle");
     if ($#{$self->{'Problems'}} == -1) {
@@ -600,19 +600,19 @@ package main;
 #
 
 if ($#ARGV != -1) {
-    while ($_ = $ARGV[0], /^-/) {
-	shift;
-	/^-a/ && ($andlog = 1);
-	/^-n/ && ($fixit = -1);
-	/^-y/ && ($fixit = 1);
-	/^-x/ && ($display = 0);
-	/^-p/ && ($pinghost = 1);
-	/^-H/ && ($hidden = 1);
-	/^-V/ && ($loglevel = shift);
-	/^-L/ && ($logwindowatstart = 1);
-	/^-h/ && &display_help(); 
-	/^-f/ && &setmibchecklist(@fixitlist); 
-	/^-d/ && ($dontstart = 1);
+    while ($#ARGV >= 0 && $ARGV[0] =~ /^-/) {
+	$_ = shift;
+	$andlog = 1 if (/^-a/);
+	$dontstart = 1 if (/^-d/);
+	$fixit = -1 if (/^-n/);
+	$fixit = 1 if (/^-y/);
+	$display = 0 if (/^-x/);
+	$pinghost = 1 if (/^-p/);
+	$hidden = 1 if (/^-H/);
+	$loglevel = shift if (/^-V/);
+	$logwindowatstart = 1 if (/^-L/);
+	&display_help() if (/^-h/);
+	&setmibchecklist(@fixitlist) if (/^-f/);
     }
 }
 
@@ -621,7 +621,15 @@ if ($#ARGV != -1) {
 #
 
 if (($andlog || $#ARGV == -1) && !$dontstart) {
-    &scanlog();
+    open(LOG,$errlog);
+    while (<LOG>) {
+	@fields = split;
+	@tmp = grep(/$fields[0]/,@ARGV);
+	if ($#tmp == -1) { #  && $fields[1] ne "down") {
+	    $ARGV[$#ARGV + 1] = $fields[0];
+	}
+    }
+    close(LOG);
 }
 
 #
