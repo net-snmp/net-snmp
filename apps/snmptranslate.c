@@ -82,7 +82,9 @@ void usage(void)
   fprintf(stderr,
           "  -m <MIBS>\tuse MIBS list instead of the default mib list.\n");
   fprintf(stderr,
-	  "  -D\t\tenable snmplib debugging messages\n");
+	  "  -D <TOKEN[,TOKEN,...]>\n\t\tEnable snmplib debugging messages.");
+  fprintf(stderr,
+	  " See snmpcmd(1) man page \n\t\tfor more information.\n" );
   fprintf(stderr,
           "  -M <MIBDIRS>\tuse MIBDIRS as the location to look for mibs.\n");
   fprintf(stderr,
