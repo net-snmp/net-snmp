@@ -320,6 +320,7 @@ done
 
 test_modules="$new_module_list"
 new_module_list=""
+module_list_h=""
 default_mibs=IP-MIB:IF-MIB:TCP-MIB:UDP-MIB:SNMPv2-MIB:RFC1213-MIB
 
 for i in $test_modules
@@ -383,6 +384,7 @@ while test "x$new_module_list" != "x"; do
       fi
       module_list="$module_list $i"
       echo '#include "'"mibgroup/$i.h"'"' >> $mibdir/mib_module_includes.h
+      module_list_h="$module_list_h mibgroup/$i.h"
       if test -f $srcdir/$mibdir/$i.c; then
         module_list_code="$module_list_code $i"
 	if grep init_$i $srcdir/$mibdir/$i.c > /dev/null; then
@@ -408,6 +410,7 @@ module_list_c=`echo "$module_list_code " | sed 's/\([^ ]\) /\1.c /g'`
 mibgroup_list_o=`echo " $module_list_o " | sed 's@ \([^ ]*\)\.o@ mibgroup/\1.o @g'`
 changequote([, ])
 AC_SUBST(module_list_c)
+AC_SUBST(module_list_h)
 AC_SUBST(module_list_o)
 AC_SUBST(mibgroup_list_o)
 AC_SUBST(trap_list_o)
