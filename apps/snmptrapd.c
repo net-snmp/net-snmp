@@ -859,6 +859,7 @@ int main(int argc, char *argv[])
     session->callback = snmp_input;
     session->callback_magic = NULL;
     session->authenticator = NULL;
+    sess.isAuthoritative = SNMP_SESS_UNKNOWNAUTH;
 
     SOCK_STARTUP;
     ss = snmp_open( session );

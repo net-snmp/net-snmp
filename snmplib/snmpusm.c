@@ -1601,7 +1601,8 @@ usm_process_in_msg (
 	size_t  *scopedPduLen,	   /* IN/OUT - Len available, len returned.   */
 
 	size_t  *maxSizeResponse,  /* OUT    - Max size of Response PDU.      */
-	void   **secStateRf,
+	void   **secStateRf,       /* OUT    - Ref to security state.         */
+        struct snmp_session *sess, /* IN     - session which got the message  */
         u_char msg_flags)	   /* IN     - v3 Message flags.              */
 {
 	size_t   remaining = wholeMsgLen
@@ -1702,7 +1703,11 @@ usm_process_in_msg (
 	 * Locate the engine ID record.
 	 * If it is unknown, then either create one or note this as an error.
 	 */
-	if (msg_flags & SNMP_MSG_FLAG_RPRT_BIT)
+	if ((sess && (sess->isAuthoritative == SNMP_SESS_AUTHORITATIVE ||
+                      (sess->isAuthoritative == SNMP_SESS_UNKNOWNAUTH &&
+                       (msg_flags & SNMP_MSG_FLAG_RPRT_BIT)))) ||
+            (!sess && (msg_flags & SNMP_MSG_FLAG_RPRT_BIT)))
+            
 	{
 		if (ISENGINEKNOWN(secEngineID, *secEngineIDLen)==FALSE)
 		{

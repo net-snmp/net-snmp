@@ -254,6 +254,7 @@ init_master_agent(int dest_port,
         sess.callback = handle_snmp_packet;
         sess.authenticator = NULL;
         sess.flags = flags;
+        sess.isAuthoritative = SNMP_SESS_AUTHORITATIVE;
         session = snmp_open_ex( &sess, pre_parse, 0, post_parse, 0, 0 );
 
         if ( session == NULL ) {

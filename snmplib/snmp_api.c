@@ -2307,7 +2307,9 @@ snmpv3_parse(
      struct snmp_pdu	 *pdu,
      u_char 		 *data,
      size_t 		 *length,
-     u_char 		**after_header)
+     u_char 		**after_header,
+     struct snmp_session *sess
+)
 {
   u_char	 type, msg_flags;
   long		 ver, msg_max_size, msg_sec_model;
@@ -2466,7 +2468,7 @@ snmpv3_parse(
 			       pdu->securityName, &pdu->securityNameLen,
 			       &cp,
 			       &pdu_buf_len, &max_size_response,
-			       &pdu->securityStateRef, msg_flags);
+			       &pdu->securityStateRef, sess, msg_flags);
   DEBUGINDENTLESS();
 
   if (ret_val != SNMPERR_SUCCESS) {
@@ -2742,7 +2744,7 @@ _snmp_parse(void * sessp,
         break;
 
     case SNMP_VERSION_3:
-      result = snmpv3_parse(pdu, data, &length, NULL);
+      result = snmpv3_parse(pdu, data, &length, NULL, session);
       DEBUGMSGTL(("snmp_parse",
                    "Parsed SNMPv3 message (secName:%s, secLevel:%s): %s\n",
                    pdu->securityName, usmSecLevelName[pdu->securityLevel],
