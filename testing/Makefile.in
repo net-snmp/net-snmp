@@ -33,7 +33,7 @@ clean: testclean
 	rm -f *.o core *.core $(TARG)
 
 testclean:
-	rm -fr /tmp/snmp-test*
+	-rm -fr /tmp/snmp-test*
 
 install: installdirs $(TARG)
 	@for i in $(TARG) ; \
