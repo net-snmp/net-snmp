@@ -32,6 +32,9 @@ extern          "C" {
     extern int      lastAddrAge;
 
     typedef struct netsnmp_request_info_s {
+       /*
+        * varbind (OID/value) for this request
+        */
         netsnmp_variable_list *requestvb;
 
         /*
@@ -40,19 +43,30 @@ extern          "C" {
          */
         netsnmp_data_list *parent_data;
 
+       /*
+        * pointer to the agent_request_info for this request
+        */
+       struct netsnmp_agent_request_info_s *agent_req_info;
+
         oid            *range_end;      /* don't free, reference to (struct tree)->end */
         size_t          range_end_len;
+
+       /*
+        * flags
+        */
         int             delegated;
         int             processed;
         int             inclusive;
+
         int             status;
         int             index; /* index in original pdu */
  
-       /* get-bulk */
+       /** get-bulk */
         int             repeat;
         int             orig_repeat;
         netsnmp_variable_list *requestvb_start;
 
+       /* internal use */
         struct netsnmp_request_info_s *next;
         struct netsnmp_request_info_s *prev;
         struct netsnmp_subtree_s      *subtree;
@@ -95,7 +109,7 @@ extern          "C" {
 
     typedef struct netsnmp_agent_request_info_s {
         int             mode;
-        netsnmp_pdu    *pdu;    /* pdu contains authinfo, eg */
+/*        netsnmp_pdu    *pdu;    /* pdu contains authinfo, eg */
         struct netsnmp_agent_session_s *asp;    /* may not be needed */
         /*
          * can be used to pass information on a per-pdu basis from a
@@ -172,19 +186,26 @@ extern          "C" {
     void            shutdown_master_agent(void);
     int             agent_check_and_process(int block);
     void            netsnmp_check_outstanding_agent_requests(void);
-    int             netsnmp_set_mode_request_error(int mode,
-                                                   netsnmp_request_info
-                                                   *request,
-                                                   int error_value);
-    int             netsnmp_set_request_error(netsnmp_agent_request_info
-                                              *reqinfo,
-                                              netsnmp_request_info
-                                              *request, int error_value);
+
+    int             netsnmp_request_set_error(netsnmp_request_info *request,
+                                              int error_value);
     int             netsnmp_check_requests_error(netsnmp_request_info *reqs);
     int
         netsnmp_set_all_requests_error(netsnmp_agent_request_info *reqinfo,
                                        netsnmp_request_info *requests,
                                        int error_value);
+    
+    /** deprecated, use netsnmp_request_set_error instead */
+    int             netsnmp_set_request_error(netsnmp_agent_request_info
+                                              *reqinfo,
+                                              netsnmp_request_info
+                                              *request, int error_value);
+    /** deprecated, use netsnmp_request_set_error instead */
+    int             netsnmp_set_mode_request_error(int mode,
+                                                   netsnmp_request_info
+                                                   *request,
+                                                   int error_value);
+
     u_long          netsnmp_marker_uptime(marker_t pm);
     u_long          netsnmp_timeval_uptime(struct timeval *tv);
     u_long          netsnmp_get_agent_uptime(void);
@@ -208,19 +229,20 @@ extern          "C" {
                                                 *t);
     void            netsnmp_deregister_agent_nsap(int handle);
 
-    inline void
+    NETSNMP_INLINE void
         netsnmp_agent_add_list_data(netsnmp_agent_request_info *agent,
                                     netsnmp_data_list *node);
 
-    inline void    *netsnmp_agent_get_list_data(netsnmp_agent_request_info
-                                                *agent, const char *name);
+    NETSNMP_INLINE void *
+            netsnmp_agent_get_list_data(netsnmp_agent_request_info
+                                        *agent, const char *name);
 
-    inline void
+    NETSNMP_INLINE void
             netsnmp_free_agent_data_set(netsnmp_agent_request_info *agent);
 
-    inline void
+    NETSNMP_INLINE void
            netsnmp_free_agent_data_sets(netsnmp_agent_request_info *agent);
-    inline void    
+    NETSNMP_INLINE void    
         netsnmp_free_agent_request_info(netsnmp_agent_request_info *ari);
 
 #ifdef __cplusplus
