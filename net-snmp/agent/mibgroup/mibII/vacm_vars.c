@@ -47,7 +47,6 @@
 #include "agent_registry.h"
 #include "agent_callbacks.h"
 #include "vacm_vars.h"
-#include "mib_module_config.h"
 #ifdef USING_MIBII_SYSORTABLE_MODULE
 #if TIME_WITH_SYS_TIME
 # ifdef WIN32

@@ -3,8 +3,6 @@
  *
  */
 
-#include "mib_module_config.h"
-
 #include <config.h>
 #if HAVE_STRING_H
 #include <string.h>
@@ -88,6 +86,8 @@
 #include <dmalloc.h>
 #endif
 
+#include "mibincl.h"
+
 #ifdef solaris2
 #include "kernel_sunos5.h"
 #else
@@ -98,7 +98,6 @@
 #include "asn1.h"
 #include "snmp_debug.h"
 
-#include "mibincl.h"
 #include "auto_nlist.h"
 
 #ifdef hpux

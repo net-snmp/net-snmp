@@ -3,8 +3,6 @@
  *
  */
 
-#include "mib_module_config.h"
-
 #include <config.h>
 #if defined(IFNET_NEEDS_KERNEL) && !defined(_KERNEL)
 #define _KERNEL 1
@@ -126,11 +124,11 @@
 #include <syslog.h>
 #endif
 
+#include "mibincl.h"
 #include "kernel.h"
 
 #include "../../../snmplib/system.h"
 
-#include "mibincl.h"
 #include "util_funcs.h"
 #include "auto_nlist.h"
 

@@ -465,8 +465,6 @@
 #define config_parse_dot_conf(w,x,y,z)
 #define config_add_mib(x)
   
-#include <mib_module_config.h>
-
 #ifdef WIN32
 #define ENV_SEPARATOR ";"
 #define ENV_SEPARATOR_CHAR ';'

@@ -87,7 +87,6 @@
 #define setPerrorstatus(x) snmp_log_perror(x)
 #endif
 #include "read_config.h"
-#include "mib_module_config.h"
 
 #ifdef EXCACHETIME
 static long cachetime;
