@@ -75,7 +75,7 @@ send_example_notification(unsigned int clientreg, void *clientarg)
     /*
      * here is where we store the variables to be sent in the trap 
      */
-    static netsnmp_variable_list *notification_vars = NULL;
+    netsnmp_variable_list *notification_vars = NULL;
 
     DEBUGMSGTL(("example_notification", "defining the trap\n"));
 
