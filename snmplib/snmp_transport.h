@@ -119,11 +119,6 @@ void		     	snmp_transport_free	(snmp_transport *t);
     domain (e.g. in pdu->tDomain etc.) is written to *out_oid and its length
     to *out_len.  */
 
-int			snmp_transport_support	(const oid *in_oid,
-						 size_t in_len,
-						 const oid **out_oid,
-						 size_t *out_len);
-						 
 int			snmp_tdomain_support	(const oid *in_oid,
 						 size_t in_len,
 						 const oid **out_oid,
