@@ -583,7 +583,7 @@ count_users(void)
     int             total = 0;
 #if HAVE_UTMPX_H
 #define setutent setutxent
-#define pututent pututxent
+#define pututline pututxline
 #define getutent getutxent
 #define endutent endutxent
     struct utmpx   *utmp_p;
