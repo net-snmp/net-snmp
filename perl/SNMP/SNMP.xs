@@ -4970,7 +4970,11 @@ snmp_mib_node_FETCH(tp_ref, key)
                  if (strncmp("indexes", key, strlen(key))) break;
                  index_av = newAV();
                  if (tp->augments) {
+ 	             clear_tree_flags(get_tree_head()); 
                      tptmp = find_best_tree_node(tp->augments, get_tree_head(), NULL);
+                     if (tptmp == NULL) {
+                        tptmp = tp;
+                     }
                  } else {
                      tptmp = tp;
                  }
