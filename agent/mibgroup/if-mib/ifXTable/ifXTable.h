@@ -66,7 +66,7 @@ extern          "C" {
     /*
      * data context
      */
-    typedef netsnmp_interface_entry *ifXTable_data;
+    typedef netsnmp_interface_entry ifXTable_data;
 
 
     /*
@@ -104,8 +104,8 @@ extern          "C" {
 
         ifXTable_mib_index tbl_idx;
 
-        ifXTable_data   data;
-        ifXTable_undo_data undo;
+        ifXTable_data  *data;
+        ifXTable_undo_data *undo;
 
     /** implementor's context pointer provided during registration */
         ifXTable_registration_ptr ifXTable_reg;
@@ -136,6 +136,8 @@ extern          "C" {
     int             ifXTable_post_request(ifXTable_registration_ptr
                                           user_context);
 
+    ifXTable_data  *ifXTable_allocate_data(void);
+    void            ifXTable_release_data(ifXTable_data * data);
 
     int             ifXTable_check_dependencies(ifXTable_rowreq_ctx *
                                                 rowreq_ctx);
