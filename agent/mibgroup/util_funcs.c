@@ -104,20 +104,21 @@ Exit(int var)
 int shell_command(struct extensible *ex)
 {
 #if HAVE_SYSTEM
+  const char *ofname = "/tmp/shoutput";
   char shellline[STRMAX];
   FILE *shellout;
   
-  sprintf(shellline,"%s > /tmp/shoutput",ex->command);
+  sprintf(shellline,"%s > %s",ex->command, ofname);
   ex->result = system(shellline);
   ex->result = WEXITSTATUS(ex->result);
-  shellout = fopen("/tmp/shoutput","r");
-  if((shellout = fopen("/tmp/shoutput","r")) != NULL) {
+  shellout = fopen(ofname,"r");
+  if(shellout != NULL) {
     if (fgets(ex->output,sizeof(ex->output),shellout) == NULL) {
       ex->output[0] = 0;
     }
     fclose(shellout);
   }
-  unlink("/tmp/shoutput");
+  unlink(ofname);
 #else
   ex->output[0] = 0;
   ex->result = 0;
