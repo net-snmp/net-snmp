@@ -25,6 +25,7 @@ SOFTWARE.
 #include <config.h>
 
 #include <stdio.h>
+#include <ctype.h>
 #if HAVE_STDLIB_H
 #include <stdlib.h>
 #endif
@@ -81,8 +82,10 @@ SOFTWARE.
 #include "snmp_api.h"
 #include "snmp_impl.h"
 #include "party.h"
+#include "mib.h"
 #include "context.h"
 #include "system.h"
+#include "int64.h"
 
 #define PACKET_LENGTH	8000
 
@@ -1958,7 +1961,6 @@ snmp_add_var(pdu, name, name_length, type, value)
     int name_length;
     char type, *value;
 {
-    struct variable_list *vars;
     char buf[2048];
     int tint;
     double dtmp;
