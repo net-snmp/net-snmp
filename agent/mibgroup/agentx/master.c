@@ -30,17 +30,6 @@
 #include "ds_agent.h"
 
 
-int
-get_agentx_transID( int reqID, snmp_ipaddr *address )
-{
-	/*
-	 * This needs to distinguish duplicate request ID's
-	 *   from separate adresses or sessions
-	 */
-
-    return reqID;	/* It'll do for now */
-}
-
 void init_master(void)
 {
     struct snmp_session sess, *session;
