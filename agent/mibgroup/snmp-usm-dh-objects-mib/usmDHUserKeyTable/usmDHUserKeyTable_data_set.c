@@ -228,7 +228,6 @@ int
 usmDHUserKeyTable_undo_cleanup(usmDHUserKeyTable_rowreq_ctx * rowreq_ctx)
 {
     int             rc = MFD_SUCCESS;
-    struct usmUser *undouser;
 
     DEBUGMSGTL(("verbose:usmDHUserKeyTable_undo_cleanup", "called\n"));
 
@@ -260,7 +259,6 @@ int
 usmDHUserKeyTable_commit(usmDHUserKeyTable_rowreq_ctx * rowreq_ctx)
 {
     int             rc = MFD_SUCCESS;
-    int             save_flags;
 
     DEBUGMSGTL(("verbose:usmDHUserKeyTable_commit", "called\n"));
 
@@ -291,7 +289,7 @@ usmDHUserKeyTable_irreversable_commit(usmDHUserKeyTable_rowreq_ctx * rowreq_ctx)
     /*
      * save flags, then clear until we actually do something
      */
-    flags = rowreq_ctx->set_flags;
+    flags = rowreq_ctx->column_set_flags;
 
     if (flags & FLAG_USMDHUSERAUTHKEYCHANGE ||
         flags & FLAG_USMDHUSEROWNAUTHKEYCHANGE) {
@@ -1193,7 +1191,7 @@ usmDHUserOwnPrivKeyChange_undo(usmDHUserKeyTable_rowreq_ctx * rowreq_ctx)
     DEBUGMSGTL(("verbose:usmDHUserKeyTable:usmDHUserOwnPrivKeyChange_undo",
                 "called\n"));
 
-    return usmDHUserPrivKeyChange_undo;
+    return usmDHUserPrivKeyChange_undo(rowreq_ctx);
 }
 
 /**
@@ -1229,7 +1227,7 @@ usmDHUserKeyTable_check_dependencies(usmDHUserKeyTable_rowreq_ctx *
      * For example, two columns allocating a percentage of something
      * should add up to 100%.
      */
-    flags = rowreq_ctx->set_flags;
+    flags = rowreq_ctx->column_set_flags;
     
     if (flags & FLAG_USMDHUSERAUTHKEYCHANGE &&
         flags & FLAG_USMDHUSEROWNAUTHKEYCHANGE) {
