@@ -143,7 +143,7 @@ extern          "C" {
                                                rowreq_ctx);
     int             ifTable_commit(ifTable_rowreq_ctx * rowreq_ctx);
 
-    extern oid     *ifTable_oid;
+    extern oid      ifTable_oid[];
     extern int      ifTable_oid_size;
 
 
