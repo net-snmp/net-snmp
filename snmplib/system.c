@@ -710,7 +710,7 @@ get_boottime(void)
 
     len = sizeof(boottime);
 
-    sysctl(mib, 2, &boottime, &len, NULL, NULL);
+    sysctl(mib, 2, &boottime, &len, NULL, 0);
     boottime_csecs = (boottime.tv_sec * 100) + (boottime.tv_usec / 10000);
 #else                           /* CAN_USE_SYSCTL */
     if ((kmem = open("/dev/kmem", 0)) < 0)
