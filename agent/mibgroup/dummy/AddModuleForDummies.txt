@@ -1,0 +1,50 @@
+Adding SNMP Agent in UC Davis code (v3.3.1) - for DUMMIES:
+==========================================================
+
+(NOTE: I have used NetBSD 1.3.
+This document is VERY preliminary and is likely to contain several errors.)
+
+1. Follow ALL installation instructions in the UCD release.
+
+2. In this mail there are 3 files included with this document.
+    They should be
+
+    DUMMY-MIB.txt
+    dummy.c
+    dummy.h
+
+3. Put DUMMY-MIB.txt in /usr/local/share/snmp/mibs/
+
+   Put dummy.c in ucd-snmp-3.3.1/agent/mibgroup/
+	
+   Put dummy.h in ucd-snmp-3.3.1/agent/mibgroup/
+
+4. Now, do 
+
+	'configure --with-mib-modules="dummy" --with-mibs="DUMMY-MIB:SNMPv2-SMI:SNMPv2-TC:SNMPv2-MIB:SNMPv2-MIB:RFC1213-MIB:UCD-SNMP-MIB"
+
+   Watch the output of configure to see that the dummy code is included.
+
+5. Now, do
+
+	make 
+
+   directly under ucd-snmp-3.3.1/
+
+6. Become root and start the agent, for example
+
+	ucd-snmp-3.3.1/agent/snmpd -L
+
+7. Now you are ready to use the management tools and talk to the agent.
+   For example:
+
+	ucd-snmp-3.3.1/apps/snmpwalk -v1 localhost public .1.3.6.1.4.1.dynarc
+
+   This should list the parameters in the DUMMY-MIB.txt.
+
+	(Make sure you are runnning the snmpwalk that was built in step 4 and 5.)
+
+8. Now, go on and edit the mib and the code to your liking. The DUMMY-MIB.txt
+   is really simple. I will soon need more complicated mibs (with row-create),
+   so once I have figured out how the agent should handle that I will add
+   it to this dummy guide. 
