@@ -1,6 +1,15 @@
 This file contains major changes in released revisions.  Please read
 the ChangeLog file for a more detailed listing of changes/bug fixes.
 
+*3.0.7.2*
+
+  Major solaris patches from Niels Baggesen <recnba@mediator.uni-c.dk>. Thanks!
+  Other misc patches
+
+*3.0.7.1*
+
+  Bug fixes.
+
 *3.0.7*
 
   Features:

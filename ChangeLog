@@ -1,8 +1,43 @@
 -------------------------------------------------------------------------------
 
+Changes:  V3.0.7.1 -> V3.0.7.2
+
+Niels Baggesen <recnba@mediator.uni-c.dk> 1 May 96 12:37:35
+    - (many) Fixes for Solaris (2.5) submitted by
+             Niels Baggesen <recnba@mediator.uni-c.dk>:
+        "Some are my own, others are from Yuri Rabover who originally
+         created the patch. Some of this is there to eliminate the
+         dependency on the ucblib compatibility stuff, some is "cosmetic",
+         but it also fixes a serious problem in the agent, where walking
+         the mib tree can loop endlessly if you have multiple network
+         interfaces."
+
+hardaker  1 May 96 13:54:18
+    - (configure*, agent/extensible/{read_config,extenisble}.c):
+      - configurified (new word) some of Niels' changes and the bcopy/memmove stuff.
+
+hardaker  1 May 96 13:55:16
+    - (man/snmpd.1.def,snmpd.conf.5.def) .C -> .B, to increase nroff portability.
+
+hardaker  1 May 96 14:35:23
+    - (agent/route_write.c,agent/extensible/extensible.c):
+      - netbsd1.1B specific fixes: clash with sys_errlist and rt_dst defines.
+
+hardaker  1 May 96 14:37:09
+    - (local/snmpcheck) Tk-b10 fixes.
+
+hardaker  1 May 96 14:37:25
+    - (sedscript.in) forgot NETBSD1ID def.
+
+hardaker  1 May 96 14:56:21
+    - (acconfig.h,agent/extensible/mibdefs.h): removed coments/spaces from defines.
+
+-------------------------------------------------------------------------------
+
 Changes:  V3.0.7 -> V3.0.7.1
 
-
+hardaker 25 Apr 96 12:18:43
+    - (ChangeLog, acconfig.h, config.h.in) Defined DEBUGP if DODEBUG is not defined.
 
 -------------------------------------------------------------------------------
 
@@ -106,7 +141,7 @@ Changes:  V3.0.5 -> V3.0.6
 hardaker 24 Jan 96 16:31:20
     - Returning EXTENSIBLEDOTMIB.AGENTID as the new objectid
 
-hardaker 24 Jan 96 16:33:08
+Dave Shield <D.T.Shield@csc.liv.ac.uk> 24 Jan 96 16:33:08
     - Patch from Dave Shield <D.T.Shield@csc.liv.ac.uk>
       - fixes -p PORT command line option to actually use the requested port.
       - fixes the -l LOGFILE command line option to actually use it.
@@ -186,7 +221,7 @@ hardaker 11 Mar 96 15:40:17
 
     - (README): more clean up and added reference to the ucd-snmp mailing list.
 
-hardaker 11 Mar 96 15:57:20
+Giovanni S. Marzot <gmarzot@baynetworks.com> 11 Mar 96 15:57:20
 
     - (snmplib/snmp_api.c): fixed a timeout bug caused by architectures
       with an unsigned timeval.tv_sec value.
