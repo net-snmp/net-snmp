@@ -249,7 +249,6 @@ proxy_fill_in_session(netsnmp_mib_handler *handler,
 {
     netsnmp_session *session;
     struct simple_proxy *sp;
-    u_char         *sess_community;
 
     sp = (struct simple_proxy *) handler->myvoid;
     if (!sp) {
