@@ -151,38 +151,38 @@ vacm_parse_config_view(const char *token, char *line)
  * vacm_save_access(): saves an access entry to the persistent cache 
  */
 void
-vacm_save_access(struct vacm_accessEntry *access, const char *token,
+vacm_save_access(struct vacm_accessEntry *access_entry, const char *token,
                  const char *type)
 {
     char            line[4096];
     char           *cptr;
 
     memset(line, 0, sizeof(line));
-    sprintf(line, "%s%s %d %d %d %d %d ", token, "Access", access->status,
-            access->storageType, access->securityModel,
-            access->securityLevel, access->contextMatch);
+    sprintf(line, "%s%s %d %d %d %d %d ", token, "Access", access_entry->status,
+            access_entry->storageType, access_entry->securityModel,
+            access_entry->securityLevel, access_entry->contextMatch);
     cptr = &line[strlen(line)]; /* the NULL */
     cptr =
         read_config_save_octet_string(cptr,
-                                      (u_char *) access->groupName + 1,
-                                      access->groupName[0] + 1);
+                                      (u_char *) access_entry->groupName + 1,
+                                      access_entry->groupName[0] + 1);
     *cptr++ = ' ';
     cptr =
         read_config_save_octet_string(cptr,
-                                      (u_char *) access->contextPrefix + 1,
-                                      access->contextPrefix[0] + 1);
+                                      (u_char *) access_entry->contextPrefix + 1,
+                                      access_entry->contextPrefix[0] + 1);
 
     *cptr++ = ' ';
-    cptr = read_config_save_octet_string(cptr, (u_char *) access->readView,
-                                         strlen(access->readView) + 1);
+    cptr = read_config_save_octet_string(cptr, (u_char *) access_entry->readView,
+                                         strlen(access_entry->readView) + 1);
     *cptr++ = ' ';
     cptr =
-        read_config_save_octet_string(cptr, (u_char *) access->writeView,
-                                      strlen(access->writeView) + 1);
+        read_config_save_octet_string(cptr, (u_char *) access_entry->writeView,
+                                      strlen(access_entry->writeView) + 1);
     *cptr++ = ' ';
     cptr =
-        read_config_save_octet_string(cptr, (u_char *) access->notifyView,
-                                      strlen(access->notifyView) + 1);
+        read_config_save_octet_string(cptr, (u_char *) access_entry->notifyView,
+                                      strlen(access_entry->notifyView) + 1);
 
     read_config_store(type, line);
 }
@@ -240,24 +240,24 @@ vacm_parse_config_access(const char *token, char *line)
  * vacm_save_group(): saves a group entry to the persistent cache 
  */
 void
-vacm_save_group(struct vacm_groupEntry *group, const char *token,
+vacm_save_group(struct vacm_groupEntry *group_entry, const char *token,
                 const char *type)
 {
     char            line[4096];
     char           *cptr;
 
     memset(line, 0, sizeof(line));
-    sprintf(line, "%s%s %d %d %d ", token, "Group", group->status,
-            group->storageType, group->securityModel);
+    sprintf(line, "%s%s %d %d %d ", token, "Group", group_entry->status,
+            group_entry->storageType, group_entry->securityModel);
     cptr = &line[strlen(line)]; /* the NULL */
 
     cptr =
         read_config_save_octet_string(cptr,
-                                      (u_char *) group->securityName + 1,
-                                      group->securityName[0] + 1);
+                                      (u_char *) group_entry->securityName + 1,
+                                      group_entry->securityName[0] + 1);
     *cptr++ = ' ';
-    cptr = read_config_save_octet_string(cptr, (u_char *) group->groupName,
-                                         strlen(group->groupName) + 1);
+    cptr = read_config_save_octet_string(cptr, (u_char *) group_entry->groupName,
+                                         strlen(group_entry->groupName) + 1);
 
     read_config_store(type, line);
 }
