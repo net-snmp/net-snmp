@@ -66,6 +66,7 @@
 #include <net-snmp/library/asn1.h>
 #include <net-snmp/library/snmp_api.h>
 #include <net-snmp/library/callback.h>
+#include <net-snmp/library/tools.h>
 #include <net-snmp/library/keytools.h>
 #include <net-snmp/library/snmpv3.h>
 #include <net-snmp/library/lcd_time.h>
@@ -1929,6 +1930,9 @@ usm_parse_security_parameters(u_char * secParams,
 
     *time_uint = (u_int) time_long;
 
+    if (*boots_uint > ENGINEBOOT_MAX || *time_uint > ENGINETIME_MAX) {
+        return -1;
+    }
 
     /*
      * Retrieve the secName.
