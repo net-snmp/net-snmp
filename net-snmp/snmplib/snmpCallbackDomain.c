@@ -379,6 +379,7 @@ snmp_callback_open(int attach_to,
                                 fpre_parse,
                                 snmp_callback_hook_parse, fpost_parse,
                                 snmp_callback_hook_build,
+                                NULL,
                                 snmp_callback_check_packet,
                                 snmp_callback_create_pdu);
     if (callback_ss)
