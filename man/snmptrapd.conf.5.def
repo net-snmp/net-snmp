@@ -1,4 +1,4 @@
-.TH SNMPTRAPD.CONF 5 "27 Jan 2000"
+.TH SNMPTRAPD.CONF 5 "16 Nov 2000"
 .ds )H U.C. Davis
 .ds ]W VVERSIONINFO
 .UC 4
@@ -54,6 +54,14 @@ I forget the appropriate RFC number.
 See the snmpd.conf manual page for a description of how to create
 SNMPv3 users.  It's roughly the same, but the file name changes to
 snmptrapd.conf from snmpd.conf. 
+.RE
+.IP "format1 format"
+The format used to print a SNMPv1 TRAP message. See
+.IR snmptrapd (8)
+for the layout characters available.
+.RE
+.IP "format2 format"
+The format used to print a SNMPv2 TRAP2 or INFORM message.
 .SH NOTES
 .IP o
 The demon blocks on the executing traphandle commands.  (This should
