@@ -162,7 +162,7 @@ int usm_generate_out_msg (int, u_char *, size_t, int, int, u_char *, size_t,
 			      u_char *, size_t *, u_char **, size_t *);
 int usm_rgenerate_out_msg (int, u_char *, size_t, int, int, u_char *, size_t,
                            char *,  size_t, int, u_char *, size_t, void *,
-                           u_char *, size_t *);
+                           u_char **, size_t *, size_t *);
 
 int usm_process_in_msg (int, size_t, u_char *, int, int, u_char *, size_t,
 			    u_char *, size_t *, char *, size_t *, u_char **, size_t *,
