@@ -384,6 +384,9 @@
 /* Define to 1 if you have the `mkstemp' function. */
 #undef HAVE_MKSTEMP
 
+/* Define to 1 if you have the `mktime' function. */
+#undef HAVE_MKTIME
+
 /* Define to 1 if you have the <mntent.h> header file. */
 #undef HAVE_MNTENT_H
 
@@ -618,6 +621,9 @@
 /* Define to 1 if you have the <stdlib.h> header file. */
 #undef HAVE_STDLIB_H
 
+/* Define to 1 if you have the `stime' function. */
+#undef HAVE_STIME
+
 /* Define to 1 if you have the `strcasestr' function. */
 #undef HAVE_STRCASESTR
 
@@ -647,6 +653,9 @@
 
 /* Define to 1 if you have the `strtoul' function. */
 #undef HAVE_STRTOUL
+
+/* Define to 1 if you have the `sysconf' function. */
+#undef HAVE_SYSCONF
 
 /* Define to 1 if you have the <syslog.h> header file. */
 #undef HAVE_SYSLOG_H
@@ -764,6 +773,9 @@
 /* Define to 1 if you have the <sys/tcpipstats.h> header file. */
 #undef HAVE_SYS_TCPIPSTATS_H
 
+/* Define to 1 if you have the <sys/times.h> header file. */
+#undef HAVE_SYS_TIMES_H
+
 /* Define to 1 if you have the <sys/time.h> header file. */
 #undef HAVE_SYS_TIME_H
 
@@ -805,6 +817,9 @@
 
 /* Define to 1 if you have the `tcgetattr' function. */
 #undef HAVE_TCGETATTR
+
+/* Define to 1 if you have the `times' function. */
+#undef HAVE_TIMES
 
 /* Define to 1 if you have the <ufs/ffs/fs.h> header file. */
 #undef HAVE_UFS_FFS_FS_H
