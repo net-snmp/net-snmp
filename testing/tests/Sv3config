@@ -2,7 +2,7 @@
 
 # XXX: auto-switch to a supported protocol instead.
 if test "x$DEFAUTHTYPE" = "x"; then
-    if grep 'define USE_OPENSSL 1' $SNMP_UPDIR/include/net-snmp/net-snmp-config.h $SNMP_UPDIR/include/net-snmp/agent/mib_module_config.h > /dev/null ; then
+    if grep '^#define USE_OPENSSL 1' $SNMP_UPDIR/include/net-snmp/net-snmp-config.h $SNMP_UPDIR/include/net-snmp/agent/mib_module_config.h > /dev/null ; then
 	DEFAUTHTYPE="SHA"
     else
 	    DEFAUTHTYPE="MD5"
@@ -10,7 +10,7 @@ if test "x$DEFAUTHTYPE" = "x"; then
 fi
 
 if test "x$DEFPRIVTYPE" = "x"; then
-    if grep 'define HAVE_AES 1' $SNMP_UPDIR/include/net-snmp/net-snmp-config.h $SNMP_UPDIR/include/net-snmp/agent/mib_module_config.h > /dev/null ; then
+    if grep '^#define HAVE_AES 1' $SNMP_UPDIR/include/net-snmp/net-snmp-config.h $SNMP_UPDIR/include/net-snmp/agent/mib_module_config.h > /dev/null ; then
       DEFPRIVTYPE="AES"
     else
       DEFPRIVTYPE="DES"
