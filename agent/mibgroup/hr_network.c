@@ -145,7 +145,7 @@ var_hrnet(vp, name, length, exact, var_len, write_method)
 	    long_return = net_idx & ((1<<HRDEV_TYPE_SHIFT)-1);
 	    return (u_char *)&long_return;
 	default:
-	    ERROR("");
+	    ERROR_MSG("");
     }
     return NULL;
 }

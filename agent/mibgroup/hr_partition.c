@@ -195,7 +195,7 @@ var_hrpartition(vp, name, length, exact, var_len, write_method)
 	    long_return = Get_FSIndex( HRP_savedName );
 	    return (u_char *)&long_return;
 	default:
-	    ERROR("");
+	    ERROR_MSG("");
     }
     return NULL;
 }
