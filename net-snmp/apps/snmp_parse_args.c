@@ -124,8 +124,10 @@ snmp_parse_args_descriptions(FILE *outf)
   fprintf(outf, "  -R\t\tuse \"random access\" to the mib tree.\n");
   fprintf(outf, "  -P <MIBOPTS>\tToggle various defaults controlling mib parsing:\n");
   snmp_mib_toggle_options_usage("\t\t  ", outf);
-  fprintf(outf, "  -O <OIDOPTS>\tToggle various defaults controlling oid printing:\n");
-  snmp_oid_toggle_options_usage("\t\t  ", outf);
+  fprintf(outf, "  -O <OUTOPTS>\tToggle various defaults controlling output display:\n");
+  snmp_out_toggle_options_usage("\t\t  ", outf);
+  fprintf(outf, "  -I <INOPTS>\tToggle various defaults controlling input parsing:\n");
+  snmp_in_toggle_options_usage("\t\t  ", outf);
   fflush(outf);
 }
 
@@ -149,7 +151,7 @@ snmp_parse_args(int argc,
 
   /* initialize session to default values */
   snmp_sess_init( session );
-  strcpy(Opts, "VhHm:M:fsSqO:P:D:dRv:p:r:t:c:Z:e:E:n:u:l:x:X:a:A:T:");
+  strcpy(Opts, "VhHm:M:fsSqO:I:P:D:dRv:p:r:t:c:Z:e:E:n:u:l:x:X:a:A:T:");
   if (localOpts) strcat(Opts, localOpts);
 
   /* get the options */
@@ -199,9 +201,18 @@ snmp_parse_args(int argc,
 	break;
 
       case 'O':
-        cp = snmp_oid_toggle_options(optarg);
+        cp = snmp_out_toggle_options(optarg);
         if (cp != NULL) {
           fprintf(stderr,"Unknown output option passed to -O: %c.\n", *cp);
+          usage();
+          exit(1);
+        }
+        break;
+
+      case 'I':
+        cp = snmp_in_toggle_options(optarg);
+        if (cp != NULL) {
+          fprintf(stderr,"Unknown output option passed to -I: %c.\n", *cp);
           usage();
           exit(1);
         }
@@ -226,7 +237,7 @@ snmp_parse_args(int argc,
         break;
 
       case 'R':
-	fprintf(stderr, "Warning: -R option is deprecated - use -OR\n");
+	fprintf(stderr, "Warning: -R option is deprecated - use -IR\n");
         snmp_set_random_access(1);
         break;
 
@@ -490,6 +501,10 @@ oid
   size_t savlen = *rootlen;
   if (snmp_get_random_access() || strchr(argv, ':')) {
     if (get_node(argv,root,rootlen)) {
+      return root;
+    }
+  } else if (ds_get_boolean(DS_LIBRARY_ID, DS_LIB_REGEX_ACCESS)) {
+    if (get_wild_node(argv,root,rootlen)) {
       return root;
     }
   } else {

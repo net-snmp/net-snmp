@@ -103,15 +103,17 @@ void usage(void)
           "  \t\t    t: Enable alternately formatted symbolic suffix report.\n");
   fprintf(stderr, "  -P <MIBOPTS>\tToggle various defaults controlling mib parsing:\n");
   snmp_mib_toggle_options_usage("\t\t", stderr);
-  fprintf(stderr, "  -O <OIDOPTS>\tToggle various defaults controlling oid printing:\n");
-  snmp_oid_toggle_options_usage("\t\t", stderr);
+  fprintf(stderr, "  -O <OUTOPTS>\tToggle various defaults controlling output display:\n");
+  snmp_out_toggle_options_usage("\t\t", stderr);
+  fprintf(stderr, "  -I <INOPTS>\tToggle various defaults controlling input parsing:\n");
+  snmp_in_toggle_options_usage("\t\t", stderr);
   exit(1);
 }
 
 int main(int argc, char *argv[])
 {
     int	arg;
-    char *current_name = NULL, *cp;
+    char *current_name = NULL, *cp = NULL;
     oid name[MAX_OID_LEN];
     size_t name_length;
     int description = 0;
@@ -123,8 +125,8 @@ int main(int argc, char *argv[])
     /*
      * usage: snmptranslate name
      */
-    snmp_oid_toggle_options(n_opt);
-    while ((arg = getopt(argc, argv, "VhndRrwWbBpafsSm:M:D:P:tT:O:")) != EOF){
+    snmp_out_toggle_options(n_opt);
+    while ((arg = getopt(argc, argv, "VhndRrwWbBpafsSm:M:D:P:tT:O:I:")) != EOF){
 	switch(arg) {
 	case 'h':
 	    usage();
@@ -132,12 +134,9 @@ int main(int argc, char *argv[])
 	case 'b':
             find_best = 1;
             break;
-	case 'B':
-            find_all = 1;
-            break;
 	case 'n':
 	    fprintf(stderr, "Warning: -n option is deprecated - use -On\n");
-	    snmp_oid_toggle_options(n_opt);
+	    snmp_out_toggle_options(n_opt);
 	    break;	     
 	case 'd':
 	    fprintf(stderr, "Warning: -d option is deprecated - use -Td\n");
@@ -146,7 +145,7 @@ int main(int argc, char *argv[])
 	    break;
 	case 'r':
 	case 'R':
-	    fprintf(stderr, "Warning: -%c option is deprecated - use -OR\n", arg);
+	    fprintf(stderr, "Warning: -%c option is deprecated - use -IR\n", arg);
 	    snmp_set_random_access(1);
 	    break;
         case 'w':
@@ -200,9 +199,17 @@ int main(int argc, char *argv[])
 	    }
 	    break;
 	case 'O':
-	    cp = snmp_oid_toggle_options(optarg);
+	    cp = snmp_out_toggle_options(optarg);
 	    if (cp != NULL) {
 		fprintf(stderr, "Unknown OID option to -O: %c.\n", *cp);
+		usage();
+		exit(1);
+	    }
+	    break;
+	case 'I':
+	    cp = snmp_in_toggle_options(optarg);
+	    if (cp != NULL) {
+		fprintf(stderr, "Unknown OID option to -I: %c.\n", *cp);
 		usage();
 		exit(1);
 	    }
@@ -237,6 +244,9 @@ int main(int argc, char *argv[])
 		    description = 1;
 		    snmp_set_save_descriptions(1);
 		    break;
+		  case 'B':
+                    find_all = 1;
+                    break;
 		  case 'p':
 		    print = 1;
 		    break;
@@ -296,7 +306,7 @@ int main(int argc, char *argv[])
             exit(1);
         }
 	    exit(0);
-    } else if (find_best) {
+    } else if (ds_get_boolean(DS_LIBRARY_ID, DS_LIB_REGEX_ACCESS)) {
         if (0 == get_wild_node(current_name, name, &name_length)) {
             fprintf(stderr, "Unable to find a matching object identifier for \"%s\"\n",
                    current_name);
