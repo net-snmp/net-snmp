@@ -108,6 +108,10 @@ SOFTWARE.
 #include <sys/stat.h>
 #endif
 
+#if defined(hpux10) || defined(hpux11)
+#include <sys/pstat.h>
+#endif
+
 #include "asn1.h"
 #include "snmp_api.h"
 #include "tools.h"
@@ -455,6 +459,9 @@ in_addr_t get_myaddr (void)
 long get_boottime (void)
 {
     static long boottime_csecs = 0;
+#if defined(hpux10) || defined(hpux11)
+    struct pst_static pst_buf;
+#else
     struct timeval boottime;
 #ifdef	CAN_USE_SYSCTL
     int	    mib[2];
@@ -469,12 +476,17 @@ long get_boottime (void)
 #endif
 	    { (char*)"" }
 	};
-#endif
+#endif						/* CAN_USE_SYSCTL */
+#endif						/* hpux10 || hpux11 */
 
 
     if ( boottime_csecs != 0 )
 	return( boottime_csecs );
 
+#if defined(hpux10) || defined(hpux11)
+    pstat_getstatic(&pst_buf, sizeof(struct pst_static), 1, 0);
+    boottime_csecs = pst_buf.boot_time * 100;
+#else
 #ifdef CAN_USE_SYSCTL
     mib[0] = CTL_KERN;
     mib[1] = KERN_BOOTTIME;
@@ -497,6 +509,7 @@ long get_boottime (void)
     close(kmem);
     boottime_csecs = (boottime.tv_sec * 100) + (boottime.tv_usec / 10000);
 #endif						/* CAN_USE_SYSCTL */
+#endif						/* hpux10 || hpux11 */
 
     return( boottime_csecs );
 }
