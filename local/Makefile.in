@@ -17,4 +17,4 @@ snmpcheck: snmpcheck.def ../sedscript
 	$(SED) -f ../sedscript snmpcheck.def > snmpcheck
 
 install:
-	@$(INSTALL) snmpcheck $(snmplibdir) ; echo "install:  installed mib.txt in $(snmplibdir)"
+	@$(INSTALL) snmpcheck $(bindir) ; echo "install:  installed snmpcheck in $(bindir)"
