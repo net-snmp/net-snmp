@@ -1269,7 +1269,7 @@ main(int argc, char *argv[])
 #if HAVE_GETPID
     if (pid_file != NULL) {
         if ((PID = fopen(pid_file, "w")) == NULL) {
-            snmp_log_perror("fopen");
+            snmp_log_perror(pid_file);
             exit(1);
         }
         fprintf(PID, "%d\n", (int) getpid());

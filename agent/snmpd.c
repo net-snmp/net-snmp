@@ -888,7 +888,7 @@ main(int argc, char *argv[])
 #if HAVE_GETPID
     if (pid_file != NULL) {
         if ((PID = fopen(pid_file, "w")) == NULL) {
-            snmp_log_perror("fopen");
+            snmp_log_perror(pid_file);
             if (!netsnmp_ds_get_boolean(NETSNMP_DS_APPLICATION_ID, 
 					NETSNMP_DS_AGENT_NO_ROOT_ACCESS)) {
                 exit(1);
