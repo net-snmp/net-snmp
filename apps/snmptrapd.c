@@ -525,7 +525,7 @@ int snmp_input(int op,
 	    } else {
 	      cp = (char *)oidbuf;
 	    }
-	    syslog(LOG_WARNING, "%s: %s Trap (%s%s) Uptime: %s%s%s",
+	    snmp_log(LOG_WARNING, "%s: %s Trap (%s%s) Uptime: %s%s%s",
 		   inet_ntoa(agentIp->sin_addr),
 		   trap_description(pdu->trap_type), cp,
 		   (otrunc?" [TRUNCATED]":""),
@@ -533,7 +533,7 @@ int snmp_input(int op,
 		   (trunc?" [TRUNCATED]\n":""));
 	    free(oidbuf);
 	  } else {
-	    syslog(LOG_WARNING, "%s: %s Trap (%ld) Uptime: %s%s%s",
+	    snmp_log(LOG_WARNING, "%s: %s Trap (%ld) Uptime: %s%s%s",
 		   inet_ntoa(agentIp->sin_addr),
 		   trap_description(pdu->trap_type),
 		   pdu->specific_type,
@@ -591,7 +591,7 @@ int snmp_input(int op,
 	    host = gethostbyaddr((char *)&pduIp->sin_addr,
 				 sizeof(pduIp->sin_addr), AF_INET);
 	  }
-	  syslog(LOG_WARNING, "%s [%s]: Trap %s%s\n",
+	  snmp_log(LOG_WARNING, "%s [%s]: Trap %s%s\n",
 		 host?host->h_name:inet_ntoa(pduIp->sin_addr),
 		 inet_ntoa(pduIp->sin_addr), rbuf,
 		 (trunc?"[TRUNCATED]":""));
