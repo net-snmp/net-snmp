@@ -740,7 +740,7 @@ init_agent_snmp_session( struct snmp_session *session, struct snmp_pdu *pdu )
     asp->mode    = RESERVE1;
     asp->status  = SNMP_ERR_NOERROR;
     asp->index   = 0;
-    asp->inclusive = 0;
+    asp->oldmode = 0;
 
     asp->start = asp->pdu->variables;
     asp->end   = asp->pdu->variables;
@@ -766,6 +766,9 @@ free_agent_snmp_session(struct agent_snmp_session *asp)
         free_agent_request_info(asp->reqinfo);
     if (asp->treecache) {
         free(asp->treecache);
+    }
+    if (asp->bulkcache) {
+        free(asp->bulkcache);
     }
     if (asp->requests) {
         int i;
@@ -811,6 +814,24 @@ wrap_up_request(struct agent_snmp_session *asp, int status) {
         case SNMP_MSG_INTERNAL_SET_UNDO:
             save_set_cache(asp);
             break;
+    }
+
+    /* if this is a GETBULK response we need to rearrange the varbinds */
+    if (asp->pdu->command == SNMP_MSG_GETBULK) {
+        int repeats = asp->pdu->errindex;
+        int repvarnum = asp->vbcount - asp->pdu->errstat;
+        int j;
+        
+        for(i = 0; i < repvarnum-1; i++) {
+            for(j = 0; j < repeats; j++) {
+                asp->bulkcache[i * repeats + j]->next_variable = 
+                    asp->bulkcache[(i+1) * repeats + j];
+            }
+        }
+        for(j = 0; j < repeats-1; j++) {
+            asp->bulkcache[(repvarnum-1) * repeats + j]->next_variable = 
+                asp->bulkcache[j+1];
+        }
     }
     
     /*
@@ -1036,10 +1057,10 @@ handle_snmp_packet(int op, struct snmp_session *session, int reqid,
     return 1;
 }
 
-int
+request_info *
 add_varbind_to_cache(struct agent_snmp_session  *asp, int vbcount,
                      struct variable_list *varbind_ptr, struct subtree *tp) {
-    request_info *request;
+    request_info *request = NULL;
     int cacheid;
 
     DEBUGMSGTL(("snmp_agent", "add_vb_to_cache(%8p, %d, ", asp, vbcount));
@@ -1056,23 +1077,28 @@ add_varbind_to_cache(struct agent_snmp_session  *asp, int vbcount,
                 break;
                     
             case SNMP_MSG_SET:
-                return SNMP_NOSUCHOBJECT;
-
+                varbind_ptr->type = SNMP_NOSUCHOBJECT;
+                break;
+                
             case SNMP_MSG_GET:
                 varbind_ptr->type = SNMP_NOSUCHOBJECT;
                 break;
 
             default:
-                return SNMPERR_GENERR; /* shouldn't get here */
+                return NULL; /* shouldn't get here */
         }
     } else {
-        /* for non-SET modes, set the type to NULL */
 	DEBUGMSGTL(("snmp_agent", "tp->start "));
 	DEBUGMSGOID(("snmp_agent", tp->start, tp->start_len));
 	DEBUGMSG(("snmp_agent", ", tp->end "));
 	DEBUGMSGOID(("snmp_agent", tp->end, tp->end_len));
 	DEBUGMSG(("snmp_agent", ", \n"));
 
+        /* for non-SET modes, set the type to NULL */
+        if (!MODE_IS_SET(asp->pdu->command))
+            varbind_ptr->type = ASN_NULL;
+
+        /* malloc the request structure */
         request = &(asp->requests[vbcount-1]);
         request->index = vbcount;
         request->delegated = 0;
@@ -1109,7 +1135,7 @@ add_varbind_to_cache(struct agent_snmp_session  *asp, int vbcount,
                                          sizeof(tree_cache) *
                                          asp->treecache_len);
                 if (asp->treecache == NULL)
-                    return SNMP_ERR_GENERR;
+                    return NULL;
             }
             asp->treecache[cacheid].subtree = tp;
             asp->treecache[cacheid].requests_begin = request;
@@ -1138,7 +1164,7 @@ add_varbind_to_cache(struct agent_snmp_session  *asp, int vbcount,
                to handle results for */
         request->requestvb = varbind_ptr;
     }
-    return SNMP_ERR_NOERROR;
+    return request;
 }
 
 /* check the ACM(s) for the results on each of the varbinds.
@@ -1177,10 +1203,12 @@ check_acm(struct agent_snmp_session  *asp, u_char type) {
 int
 create_subtree_cache(struct agent_snmp_session  *asp) {
     struct subtree *tp;
-    struct variable_list *varbind_ptr;
-    int ret;
+    struct variable_list *varbind_ptr, *vbsave, *vbptr;
     int view;
     int vbcount = 0;
+    int bulkskip = asp->pdu->errstat, bulkcount = 0, bulkrep = 0;
+    int i;
+    request_info *request;
 
     if (asp->treecache == NULL &&
         asp->treecache_len == 0) {
@@ -1191,17 +1219,57 @@ create_subtree_cache(struct agent_snmp_session  *asp) {
     }
     asp->treecache_num = -1;
 
-    /* collect varbinds into their registered trees */
+    if (asp->pdu->command == SNMP_MSG_GETBULK) {
+        /* getbulk prep */
+        int count = count_varbinds(asp->start);
+        asp->bulkcache =
+            (struct variable_list **) malloc((count - bulkskip + 1) *
+                                             asp->pdu->errindex *
+                                             sizeof(struct varbind_list*));
+    }
 
-    for(varbind_ptr = asp->start; varbind_ptr;
-        varbind_ptr = varbind_ptr->next_variable) {
+    /* collect varbinds into their registered trees */
+    for(varbind_ptr = asp->start; varbind_ptr; varbind_ptr = vbsave) {
+
+        /* getbulk mess with this pointer, so save it */
+        vbsave = varbind_ptr->next_variable;
+
+        if (asp->pdu->command == SNMP_MSG_GETBULK) {
+            if (bulkskip) {
+                bulkskip--;
+            } else {
+                /* repeate request varbinds on GETBULK.  These will
+                   have to be properly rearranged later though as
+                   responses are supposed to actually be interlaced
+                   with each other.  This is done with the asp->bulkcache. */
+                bulkrep = asp->pdu->errindex-1;
+                if (asp->pdu->errindex) {
+                    vbptr = varbind_ptr;
+                    asp->bulkcache[bulkcount++] = vbptr;
+                    for(i = 1; i < asp->pdu->errindex; i++) {
+                        vbptr->next_variable =
+                            SNMP_MALLOC_STRUCT(variable_list);
+                        /* don't clone the oid as it's got to be
+                           overwwritten anyway */
+                        if (!vbptr->next_variable){
+                            /* XXXWWW: ack!!! */
+                        } else {
+                            vbptr = vbptr->next_variable;
+                            vbptr->type = ASN_NULL;
+                            asp->bulkcache[bulkcount++] = vbptr;
+                        }
+                    }
+                    vbptr->next_variable = vbsave;
+                }
+            }
+        }
 
         /* count the varbinds */
         ++vbcount;
         
         /* find the owning tree */
         tp = find_subtree(varbind_ptr->name, varbind_ptr->name_length, NULL,
-                          asp->pdu->contextName); /* WWW: only v3 pdu's have */
+                          asp->pdu->contextName);
 
         /* check access control */
         switch(asp->pdu->command) {
@@ -1221,14 +1289,18 @@ create_subtree_cache(struct agent_snmp_session  *asp) {
                 break;
 
             case SNMP_MSG_GETNEXT:
+            case SNMP_MSG_GETBULK:
             default:
                 view = VACM_SUCCESS;
-                /* WWW: check VACM here to see if "tp" is even worthwhile */
+                /* XXXWWW: check VACM here to see if "tp" is even worthwhile */
         }
         if (view == VACM_SUCCESS) {
-            ret = add_varbind_to_cache(asp, vbcount, varbind_ptr, tp);
-            if (ret != SNMP_ERR_NOERROR)
-                return ret;
+            request = add_varbind_to_cache(asp, vbcount, varbind_ptr, tp);
+            if (request && asp->pdu->command == SNMP_MSG_GETBULK) {
+                request->repeat = bulkrep;
+            }
+            if (!request)
+                return SNMP_ERR_GENERR;
         }
     }
 
@@ -1242,12 +1314,10 @@ reassign_requests(struct agent_snmp_session  *asp) {
        subtrees, so reassign the rejected ones to the next subtree in
        the chain */
 
-    int i, ret;
-    request_info *request, *lastreq = NULL;
+    int i;
 
     /* get old info */
     tree_cache *old_treecache = asp->treecache;
-    int old_treecache_num = asp->treecache_num;
 
     /* malloc new space */
     asp->treecache =
@@ -1256,19 +1326,29 @@ reassign_requests(struct agent_snmp_session  *asp) {
 
     for(i = 0; i < asp->vbcount; i++) {
         if (asp->requests[i].requestvb->type == ASN_NULL) {
-            ret = add_varbind_to_cache(asp, asp->requests[i].index,
-                                       asp->requests[i].requestvb,
-                                       asp->requests[i].subtree->next);
-            if (ret != SNMP_ERR_NOERROR)
-                return ret;
+            if(!add_varbind_to_cache(asp, asp->requests[i].index,
+                                     asp->requests[i].requestvb,
+                                     asp->requests[i].subtree->next))
+                return SNMP_ERR_GENERR;
         } else if (asp->requests[i].requestvb->type == ASN_PRIV_RETRY) {
             /* re-add the same subtree */
             asp->requests[i].requestvb->type = ASN_NULL;
-            ret = add_varbind_to_cache(asp, asp->requests[i].index,
-                                       asp->requests[i].requestvb,
-                                       asp->requests[i].subtree);
-            if (ret != SNMP_ERR_NOERROR)
-                return ret;
+            if (!add_varbind_to_cache(asp, asp->requests[i].index,
+                                      asp->requests[i].requestvb,
+                                      asp->requests[i].subtree))
+                return SNMP_ERR_GENERR;
+        } else if (asp->reqinfo->mode == MODE_GETBULK &&
+                   asp->requests[i].repeat > 0) {
+            asp->requests[i].repeat--;
+            snmp_set_var_objid(asp->requests[i].requestvb->next_variable,
+                               asp->requests[i].requestvb->name,
+                               asp->requests[i].requestvb->name_length);
+            asp->requests[i].requestvb =
+                asp->requests[i].requestvb->next_variable;
+            if (!add_varbind_to_cache(asp, asp->requests[i].index,
+                                      asp->requests[i].requestvb,
+                                      asp->requests[i].subtree))
+                return SNMP_ERR_GENERR;
         }
     }
 
@@ -1421,6 +1501,7 @@ check_delayed_request(struct agent_snmp_session  *asp) {
     check_all_requests_status(asp); /* update the asp->status */
 
     switch(asp->mode) {
+        case SNMP_MSG_GETBULK:
         case SNMP_MSG_GETNEXT:
             handle_getnext_loop(asp);
             if (check_for_delegated(asp) &&
@@ -1429,10 +1510,6 @@ check_delayed_request(struct agent_snmp_session  *asp) {
                 asp->next = agent_delegated_list;
                 agent_delegated_list = asp;
             }
-            break;
-
-        case SNMP_MSG_GETBULK:
-            /* WWW */
             break;
 
         case MODE_SET_BEGIN:
@@ -1483,7 +1560,7 @@ check_getnext_results(struct agent_snmp_session  *asp) {
 	/*  Special case for doing INCLUSIVE getNext operations in
 	    AgentX subagents.  */
 	DEBUGMSGTL(("snmp_agent","asp->mode == SNMP_MSG_GET in ch_getnext\n"));
-	asp->mode = SNMP_MSG_GETNEXT;
+	asp->mode = asp->oldmode;
 	special = 1;
     }
     
@@ -1528,7 +1605,8 @@ check_getnext_results(struct agent_snmp_session  *asp) {
             }
                             
             if (request->requestvb->type == ASN_NULL ||
-                request->requestvb->type == ASN_PRIV_RETRY)
+                request->requestvb->type == ASN_PRIV_RETRY ||
+                (asp->reqinfo->mode == MODE_GETBULK && request->repeat > 0))
                 count++;
         }
     }
@@ -1542,7 +1620,6 @@ int
 handle_getnext_loop(struct agent_snmp_session  *asp) {
     int status;
     struct variable_list *var_ptr;
-    int count;
 
     /* loop */
     while (1) {
@@ -1740,8 +1817,12 @@ handle_pdu(struct agent_snmp_session  *asp)
             break;
 
         case SNMP_MSG_GETNEXT:
-            /* increment the message type counter */
             snmp_increment_statistic(STAT_SNMPINGETNEXTS);
+            /* fall through */
+	    
+        case SNMP_MSG_GETBULK: /* note: there is no getbulk stat */
+            /* loop through our mib tree till we find an
+               appropriate response to return to the caller. */
 
 	    if (inclusives) {
 		/*  This is a special case for AgentX INCLUSIVE getNext
@@ -1753,11 +1834,11 @@ handle_pdu(struct agent_snmp_session  *asp)
 		    non-INCLUSIVE requests get done as normal.  */
 		
 		DEBUGMSGTL(("snmp_agent", "inclusive range(s) in getNext\n"));
+                asp->oldmode = asp->mode;
 		asp->mode = SNMP_MSG_GET;
 	    }
-	    
-            /* first pass */
 
+            /* first pass */
             status = handle_var_requests(asp);
             if (status != SNMP_ERR_NOERROR) {
                 return status; /* should never really happen */
@@ -1790,14 +1871,6 @@ handle_pdu(struct agent_snmp_session  *asp)
             status = handle_set_loop(asp);
             /* asp related cache is saved in cleanup */
             break;
-
-        case SNMP_MSG_GETBULK:
-	    /*  Same handling is needed as for SNMP_MSG_GETNEXT for INCLUSIVE
-		search ranges, i.e. do a asp->mode = SNMP_MSG_GET first, and
-		then re-do requests that either failed, or weren't inclusive
-		search ranges in the first place.  */
-            break;
-            /* WWW */
 
         case SNMP_MSG_RESPONSE:
             snmp_increment_statistic(STAT_SNMPINGETRESPONSES);

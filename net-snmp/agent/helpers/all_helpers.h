@@ -8,6 +8,7 @@
 #include "old_api.h"
 #include "read_only.h"
 #include "serialize.h"
+#include "bulk_to_next.h"
 /* #include "set_helper.h" */
 #include "table.h"
 #include "table_data.h"
