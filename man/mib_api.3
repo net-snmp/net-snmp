@@ -1,4 +1,4 @@
-.TH MIB_API 3 "07 Aug 2000"
+.TH MIB_API 3 "09 Mar 2002"
 .UC 5
 .SH NAME
 init_mib, add_mibdir, init_mib_internals,
@@ -9,9 +9,10 @@ get_module_node, read_objid
 snmp_set_mib_warnings, snmp_set_save_descriptions,
 shutdown_mib,
 print_mib,
-print_variable, fprint_variable, sprint_variable, sprint_realloc_variable,
-print_value, fprint_value, sprint_value, sprint_realloc_value,
-print_objid, fprint_objid, sprint_objid, sprint_realloc_objid,
+print_variable, fprint_variable, sprint_variable, snprint_variable,
+sprint_realloc_variable,
+print_value, fprint_value, sprint_value, snprint_value, sprint_realloc_value,
+print_objid, fprint_objid, sprint_objid, snprint_objid, sprint_realloc_objid,
 print_description, fprint_description - mib_api functions
 .SH SYNOPSIS
 .B "#include <stdio.h>
@@ -52,6 +53,8 @@ print_description, fprint_description - mib_api functions
 .br
 .B "void sprint_variable( char *buf, oid *objid, size_t objidlen, struct variable_list *variable)
 .br
+.B "int snprint_variable( char *buf, size_t buflen, oid *objid, size_t objidlen, struct variable_list *variable)
+.br
 .B "void sprint_realloc_variable( u_char **buf, size_t *buf_len, size_t *out_len, int allow_realloc, oid *objid, size_t objidlen, struct variable_list *variable)
 .PP
 .B "void print_value( oid *objid, size_t objidlen, struct variable_list *variable)
@@ -60,6 +63,8 @@ print_description, fprint_description - mib_api functions
 .br
 .B "void sprint_value( char *buf, oid *objid, size_t objidlen, struct variable_list *variable)
 .br
+.B "int snprint_value( char *buf, size_t buflen, oid *objid, size_t objidlen, struct variable_list *variable)
+.br
 .B "void sprint_realloc_value( u_char **buf, size_t *buf_len, size_t *out_len, oid *objid, size_t objidlen, struct variable_list *variable)
 .PP
 .B "void print_objid( oid *objid, size_t objidlen);
@@ -67,6 +72,8 @@ print_description, fprint_description - mib_api functions
 .B "void fprint_objid( FILE *f, oid *objid, size_t objidlen);
 .br
 .B "void sprint_objid( char *buf, oid *objid, size_t objidlen);
+.br
+.B "int snprint_objid( char *buf, size_t buflen, oid *objid, size_t objidlen);
 .br
 .B "void sprint_realloc_objid( u_char **buf, size_t *buf_len, size_t *out_len, oid *objid, size_t objidlen);
 .PP
@@ -234,6 +241,11 @@ A related routine
 takes an initial parameter of a string buffer, in which to print this
 information.
 .br
+.I snprint_variable
+takes an initial parameter of a string buffer, in which to print this
+information, and the length of the buffer. It returns the number of characters
+written to the buffer, or -1 if the buffer is too short.
+.br
 .I sprint_realloc_variable
 prints to a specified offset in a string buffer.  The
 .I buf
@@ -265,6 +277,7 @@ is 0 and the output wouldn't fit in the buffer.
 .IR print_value ,
 .IR fprint_value ,
 .IR sprint_value ,
+.IR snprint_value ,
 and
 .I sprint_realloc_value
 do the same as the equivalent
@@ -275,6 +288,7 @@ the corresponding object identifier.
 .IR print_objid ,
 .IR fprint_objid ,
 .IR sprint_objid ,
+.IR snprint_objid ,
 and
 .I sprint_realloc_objid
 .br
