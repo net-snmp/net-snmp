@@ -93,6 +93,9 @@ void usage(void)
     snmp_parse_args_usage(stderr);
     fprintf(stderr," [<trap parameters> ...]\n\n");
     snmp_parse_args_descriptions(stderr);
+    fprintf(stderr, "  -C <APPOPTS>  Toggle various application specific behaviour:\n");
+    fprintf(stderr, "\t\t  APPOPTS values:\n");
+    fprintf(stderr,"\t\t      i: Send an snmp INFORM instead of an snmp TRAP.\n");
     fprintf(stderr, "  -v 1 trap parameters:\n\t enterprise-oid agent trap-type specific-type uptime [ var ]...\n");
     fprintf(stderr, "  or\n");
     fprintf(stderr, "  -v 2 trap parameters:\n\t uptime trapoid [ var ] ...\n");
@@ -126,6 +129,26 @@ in_addr_t parse_address(char *address)
 
 }
 
+static void optProc(int argc, char *const *argv, int opt)
+{
+    switch (opt) {
+        case 'C':
+            while (*optarg) {
+                switch (*optarg++) {
+                    case 'i':
+                        inform = 1;
+                        break;
+                    default:
+                        fprintf(stderr,
+                                "Unknown flag passed to -C: %c\n", *optarg);
+                        usage();
+                        exit(1);
+                }
+            }
+            break;
+    }
+}
+
 int main(int argc, char *argv[])
 {
     struct snmp_session session, *ss;
@@ -144,7 +167,7 @@ int main(int argc, char *argv[])
     else prognam = argv[0];
 
     if (strcmp(prognam, "snmpinform") == 0) inform = 1;
-    switch (arg = snmp_parse_args(argc, argv, &session, NULL, NULL)) {
+    switch (arg = snmp_parse_args(argc, argv, &session, "C:", optProc)) {
     case -2:
     	exit(0);
     case -1:
