@@ -4,6 +4,8 @@
  */
 #include <config.h>
 
+#if defined(HAVE_DLFCN_H) && defined(HAVE_DLOPEN)
+
 #if HAVE_STDLIB_H
 #include <stdlib.h>
 #endif
@@ -30,7 +32,9 @@
 #  include <time.h>
 # endif
 #endif
+#ifdef HAVE_DLFCN_H
 #include <dlfcn.h>
+#endif
 
 #include "mibincl.h"
 #include "struct.h"
@@ -38,6 +42,7 @@
 #include "agent_read_config.h"
 #include "util_funcs.h"
 #include "dlmod.h"
+#include "snmp_debug.h"
 
 static struct dlmod *dlmods = NULL;
 static int          dlmod_next_index = 1;
@@ -589,3 +594,13 @@ write_dlmodStatus(int action,
     }
     return SNMP_ERR_NOERROR;
 }
+
+#else /* no dlopen support */
+
+void 
+init_dlmod (void)
+{
+    DEBUGMSGTL(("dlmod","Dynamic modules not support on this platform\n"));
+}
+
+#endif

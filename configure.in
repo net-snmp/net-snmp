@@ -1016,6 +1016,8 @@ dnl Replace `main' with a function in -lkvm:
 AC_CHECK_LIB(kvm, kvm_read)
 dnl Check for nlist in mld (irix)
 AC_CHECK_LIB(mld, nlist)
+dnl DYNAMIC MODULE SUPPORT
+AC_CHECK_LIB(dl, dlopen)
 dnl Check for security related functions
 if test "x$tryopenssl" != "xno"; then
     AC_CHECK_LIB(crypto, EVP_md5)
@@ -1052,6 +1054,8 @@ dnl SCO
 AC_CHECK_HEADERS(sys/stream.h)
 dnl KAME
 AC_CHECK_HEADERS(netinet/ip6.h netinet6/in6_var.h netinet6/in6_pcb.h netinet6/ip6_var.h netinet6/tcp6.h netinet6/tcp6_fsm.h netinet6/nd6.h netinet6/tcp6_timer.h netinet6/tcp6_var.h)
+dnl DYNAMIC MODULE SUPPORT
+AC_CHECK_HEADERS(dlfcn.h)
 
 dnl OpenBSD 2.6 needs netinet/in.h before netinet/in_pcb.h
 AC_MSG_CHECKING([for netinet/in_pcb.h])
@@ -1175,6 +1179,8 @@ AC_CHECK_FUNCS(tcgetattr)
 AC_CHECK_FUNCS(if_nameindex if_freenameindex)
 dnl solaris checks
 AC_CHECK_FUNCS(getpagesize)
+dnl DYNAMIC MODULE SUPPORT
+AC_CHECK_FUNCS(dlopen)
 
 AC_MSG_CHECKING([for SIOCGIFADDR in sys/ioctl.h])
 AC_CACHE_VAL(cv_sys_ioctl_h_has_SIOCGIFADDR,
