@@ -109,7 +109,9 @@ typedef long    fd_mask;
 #include "var_struct.h"
 #include "mibgroup/struct.h"
 #include "mibgroup/util_funcs.h"
+#include "snmp_vars.h"
 #include "snmp_debug.h"
+#include "agent_read_config.h"
 
 #ifdef USE_LIBWRAP
 #include <syslog.h>
@@ -473,13 +475,10 @@ agentBoots_conf(char *word,
 RETSIGTYPE
 SnmpdShutDown(int a)
 {
-  char line[512];
   /* We've received a sigTERM.  Shutdown by calling mib-module
      functions and sending out a shutdown trap. */
   fprintf(stderr, "Received TERM or STOP signal...  shutting down...\n");
 #include "mib_module_shutdown.h"
-  sprintf(line, "agentBoots %d", agentBoots);
-  snmpd_store_config(line);
   DEBUGMSGTL(("snmpd", "sending shutdown trap\n"));
   SnmpTrapNodeDown(a);
   DEBUGMSGTL(("snmpd", "Bye...\n"));
