@@ -21,8 +21,9 @@ extern          "C" {
     typedef int (Netsnmp_Iterator_Ctx) (void *iterator_ctx,
                                          netsnmp_ref_void* loop_ctx);
     typedef int (Netsnmp_Iterator_Ctx_Dup) (void *iterator_ctx,
-                                        netsnmp_ref_void* loop_ctx,
-                                        netsnmp_ref_void* dup_ctx);
+                                            netsnmp_ref_void* loop_ctx,
+                                            netsnmp_ref_void* dup_ctx,
+                                            int reuse);
     typedef int (Netsnmp_Iterator_Op) (void *iterator_ctx);
     typedef int (Netsnmp_Iterator_Data) (void *iterator_ctx,
                                             const void *data);    
