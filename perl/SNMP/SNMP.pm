@@ -186,6 +186,7 @@ sub translateObj {
 # return longer textual identifiers (e.g., system.sysDescr)
 # if Mib is not loaded and $SNMP::auto_init_mib is enabled Mib will be loaded
 # returns 'undef' upon failure
+   SNMP::init_snmp("perl");
    my $obj = shift;
    my $long_names = shift || $SNMP::use_long_names;
    return undef if not defined $obj;
