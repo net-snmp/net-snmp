@@ -84,29 +84,31 @@ int
 netsnmp_access_interface_ioctl_physaddr_get(int fd,
                                             netsnmp_interface_entry *ifentry)
 {
+#define PADDR_LEN 6
     struct ifreq    ifrq;
     int rc = 0;
 
     DEBUGMSGTL(("access:interface:ioctl", "physaddr_get\n"));
 
-    if(ifentry->if_paddr_len != 6) {
+    if(ifentry->if_paddr_len != PADDR_LEN) {
         SNMP_FREE(ifentry->if_paddr);
     }
     if(NULL == ifentry->if_paddr)
-        ifentry->if_paddr = malloc(6);
+        ifentry->if_paddr = malloc(PADDR_LEN);
 
     if(NULL == ifentry->if_paddr) {
             rc = -4;
     } else {
-        ifentry->if_paddr_len = 6;
 
         rc = _ioctl_get(fd, SIOCGIFHWADDR, &ifrq, ifentry);
         if (rc < 0) {
-            memset(ifentry->if_paddr, (0), 6);
+            memset(ifentry->if_paddr, (0), PADDR_LEN);
+            ifentry->if_paddr_len = 0;
             return rc; /* msg already logged */
         }
         else {
-            memcpy(ifentry->if_paddr, ifrq.ifr_hwaddr.sa_data, 6);
+            ifentry->if_paddr_len = PADDR_LEN;
+            memcpy(ifentry->if_paddr, ifrq.ifr_hwaddr.sa_data, PADDR_LEN);
 
             /*
              * does this just work on linux? I hope not!
@@ -199,10 +201,21 @@ netsnmp_access_interface_ioctl_flags_get(int fd,
         ifentry->flags |= NETSNMP_INTERFACE_FLAGS_HAS_IF_FLAGS;
         ifentry->if_flags = ifrq.ifr_flags;
 
-        if(ifentry->if_flags & IFF_UP)
+        /*
+         * ifOperStatus description:
+         *   If ifAdminStatus is down(2) then ifOperStatus should be down(2).
+         */
+        if(ifentry->if_flags & IFF_UP) {
             ifentry->if_admin_status = IFADMINSTATUS_UP;
-        else
+            if(ifentry->if_flags & IFF_RUNNING)
+                ifentry->if_oper_status = IFOPERSTATUS_UP;
+            else
+                ifentry->if_oper_status = IFOPERSTATUS_DOWN;
+        }
+        else {
             ifentry->if_admin_status = IFADMINSTATUS_DOWN;
+            ifentry->if_oper_status = IFOPERSTATUS_DOWN;
+        }
     }
     
     return rc;
