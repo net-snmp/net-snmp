@@ -316,7 +316,10 @@ netsnmp_transport	       *netsnmp_tdomain_transport	(const char *string, int loc
   } else {
     spec = "udp";
   }
-  *cp = ':';
+  if (cp) {
+      *cp = ':';
+  }
+
   addr = mystring;
   DEBUGMSGTL(("tdomain", "try again with specifier \"%s\" address \"%s\"\n",
 	      spec, addr));
