@@ -167,7 +167,9 @@ var_hrnet(struct variable *vp,
 	 *********************/
 
 
+#ifndef solaris2
 static short		HRN_index;
+#endif
 static char		HRN_name[16];
 static struct ifnet	HRN_ifnet;
 

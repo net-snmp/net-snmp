@@ -5,6 +5,8 @@
 #ifndef _MIBGROUP_REGISTRY_H
 #define _MIBGROUP_REGISTRY_H
 
+void init_registry(void);
+
 extern FindVarMethod var_registry;
 
 #define	REGISTRYINDEX		1

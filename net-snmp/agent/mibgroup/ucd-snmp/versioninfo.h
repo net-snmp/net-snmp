@@ -5,6 +5,8 @@
 #ifndef _MIBGROUP_VERSIONINFO_H
 #define _MIBGROUP_VERSIONINFO_H
 
+void init_versioninfo(void);
+
 extern FindVarMethod var_extensible_version;
 extern WriteMethod update_hook;
 extern WriteMethod debugging_hook;

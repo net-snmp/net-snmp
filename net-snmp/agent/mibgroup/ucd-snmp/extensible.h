@@ -5,6 +5,8 @@
 #ifndef _MIBGROUP_EXTENSIBLE_H
 #define _MIBGROUP_EXTENSIBLE_H
 
+void init_extensible(void);
+
 config_require(util_funcs)
   
 struct extensible *get_exten_instance (struct extensible *, int);
