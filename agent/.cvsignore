@@ -1,3 +1,6 @@
+.pure
+.purify
+.nfs*
 .gdb.auto.init
 .gdbinit
 .index
