@@ -198,7 +198,7 @@ decode_priority( char *optarg, int *pri_max )
 
     if (pri_max && *(optarg+1)=='-') {
         *pri_max = decode_priority( optarg+2, NULL );
-        if (pri_max == -1) return -1;
+        if (*pri_max == -1) return -1;
     }
     return pri_low;
 }
