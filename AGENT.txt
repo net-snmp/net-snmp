@@ -1,21 +1,13 @@
-Note, this is actually the text from a web page, which can be found in 
+Note, this is based on the text from a web page, which can be found in 
 the documentation section of the http://ucd-snmp.ucdavis.edu web page.
 
 Extending the UCD-SNMP agent
+============================
 
-This is a first draft at documenting the procedure for writing code to
-extend the functionality of the UCD-SNMP network management agent.
-
-It is copyright the author, and must not be distributed without explicit
-permission. This is purely because I do not yet regard this as sufficiently
-well checked or polished to be suitable for distribution. However, there is
-a clear need for this sort of information, hence it is being made available
-over the Web as an interim measure.
-
-If you do make use of these documents, please can you contact me regarding
-how useful and accurate (or otherwise) you found the information. The more
-feedback I receive, the faster this guide will reach a presentable state -
-at which point it can be distributed with the main UCD-SNMP package.
+This document describes the procedure for writing code to extend
+the functionality of the UCD-SNMP network management agent.
+We would be very interested in comment and feedback about how useful
+useful you find this description, and ways in which it could be improved.
 
 The information is designed to be read in order - the structure being:
 
@@ -28,9 +20,16 @@ The information is designed to be read in order - the structure being:
   7. The details of more general table based implementations
   8. How to implement SET-able variables
 
-How to write a Mib module
+While the document is intended to be generally self-contained,
+it does occasionally refer to code files shipped with the main UCD
+distribution (in particular the example module), and it may prove
+useful to have these files available for reference.
+
+1. How to write a Mib module
+============================
 
 Introduction
+------------
 
 The design of the UCD SNMP agent has always been shaped by the desire to be
 able to extend its functionality by adding new modules. One of the earliest
@@ -85,14 +84,14 @@ this document, with a number of different meanings.
      termed a MIB module;
    * a self-contained subset of this, implemented as a single unit.
      This is usually termed an implementation module (or simply "a module");
-   * the combination of such subsets usually termed a module group.
+   * the combination of such subsets, usually termed a module group.
 
-Note that the first and third of these are effectively synonymous - the
+Note that the first and third of these are often synonymous - the
 difference being that a MIB module refers to the view from outside the
 agent, regarding this as a seamless whole and hiding the internal
 implementation. A "module group" is used where the internal structure is of
 more relevance, and recognises the fact that the functionality may be
-provided by a number of co-operating units.
+provided by a number of co-operating implementation modules.
 
 Anyway, enough waffle - on with the details: The three files needed are
 
@@ -103,7 +102,8 @@ Anyway, enough waffle - on with the details: The three files needed are
 The next part looks at the MIB definition file, and how this impacts on the
 agent implementation.
 
-The MIB File
+2. The MIB File
+===============
 
 The first file needed is the MIB file that defines the MIB module to be
 implemented.
@@ -137,11 +137,14 @@ on this subject. One book which concentrates on this is
 
 This blatant plug is wholly unrelated to the fact that David Perkins is an
 active member of the development group, and is regarded as our resident
-"protocol guru and policeman". Information on other books covering SNMP and
-Network Management more generally is available on the SimpleWeb site (among
-other places). See the FAQ for more details.
+"protocol guru and policeman". (In fact, this book concentrates on MIB
+files in rather more detail than is appropriate in more general SNMP works).
+Information on other books covering SNMP and Network Management more generally
+is available on the SimpleWeb site (among other places).
+See the FAQ for more details.
 
 Assigned OID numbers
+--------------------
 
 One word of advice - even if you are developing a totally private MIB
 module, you will still need to position this somewhere within the overall
@@ -161,6 +164,7 @@ future, and be a good Net citizen by using a legitimately assigned OID as
 the root of your new MIB.
 
 MIB division
+------------
 
 The next point to consider, whether writing by hand or using mib2c,
 implementing an existing MIB, or writing a new one, is whether and how to
@@ -177,30 +181,34 @@ More complex and diverse modules (such as the Host Resources MIB - RFC 1514)
 are more naturally considered as a number of individual sub-modules.
 Some guidelines to bear in mind when deciding on this division:
 
-   * Individual variables within a particular MIB sub-tree would normally be
-     handled in the same implementation module;
-   * Separate scalar subtrees should normally be in different implementation
+   * A MIB sub-tree consisting purely of scalar objects with a common
+     OID prefix would normally be handled in a single implementation module;
+   * Separate scalar subtrees would normally be in different implementation
      modules;
+   * A table can either be handled within the same implementation module
+     as related scalar objects in the same subtree, or in a separate
+     implementation module;
    * Variables that rely on the same underlying data structure to retrieve
      their values, should probably be in the same implementation module (and
-     conversely, though less so, those that don't shouldn't).
+     conversely, (though less so) those that don't, shouldn't).
 
 As an initial rule of thumb, a good initial division is likely to be
 obtained by treating each table and each scalar sub-tree separately. This
 can be seen in the current agent, where most of the MIB-II modules (RFC
-1213) are implemented separately (see the files under mibgroup/mibII).
-However it is quite acceptable to combine scalar and table handling, though
-they will usually be implemented using separate routines, even if these are
-in the same source file. This is the approach used by mib2c, which
-constructs a single pair of code files, but uses a separate routine for each
-table (and another for all the scalar variables).
-Ultimately, the final consideration (concerning the underlying data) is the
-most important, and should guide the basic division. For example, the Host
-Resources Running Software and Running Software Performance modules, while
-separate in the MIB tree, use the same underlying kernel data and so are
-implemented together.
+1213) are implemented in separate files (see the files under mibgroup/mibII).
+Note that many of these combine scalar and table handling in the same file,
+though they are implemented using separate routines.
+  This is also the approach used by mib2c, which constructs a single pair of
+code files, but uses a separate routine for each table (and another for all
+the scalar variables).
+  Ultimately, the final consideration (concerning the underlying data) is
+the most important, and should guide the basic division. For example, the
+Host Resources Running Software and Running Software Performance modules,
+while separate in the MIB tree, use the same underlying kernel data and so
+are implemented together.
 
 MIB name
+--------
 
 The final requirement at this stage is to choose a name for each
 implementation module. This should be reasonably short, meaningful, unique
@@ -217,26 +225,26 @@ and is really only visible when configuring and compiling the agent.
 
 So much for the MIB file. The next part considers the C header file.
 
-The C code header file
+3. The C code header file
+=========================
 
 If the MIB file is the definition of the module for external network
 management applications (where applications includes network management
 personnel!), then the header file has traditionally served effectively the
 same purpose for the agent itself.
 Recent changes to the recommended code structure has resulted in the header
-file getting increasingly simpler. It now simply contains definitions of the
+file becoming increasingly simpler. It now simply contains definitions of the
 publically visible routines, and can be generated completely by mib2c.
 
 Function prototypes
+-------------------
 
 For those interested in the details of this file (for example, if coding a
 module by hand), then the details of these definitions are as follows. Every
 header file will have the following two function prototype definitions
 
-        void    init_wombat (void);
-        u_char *var_wombat  (
-                struct variable *, oid *, int *, int, int *,
-                WriteMethod **write);
+        extern void          init_example (void);
+        extern FindVarMethod var_example;
 
 If the module includes any tables, or other collections of variables that
 are implemented in separate routines, then this second definition will be
@@ -245,36 +253,81 @@ In addition, if any of the variables can be SET (and it is intended to
 implement them as such), there will be a function prototype definitions for
 each of these, of the form:
 
-        int write_varName ( int, u_char *, u_char, int,
-                                     u_char *, oid * )
+        extern WriteMethod write_varName;
 
-(You don't need to understand these prototypes, just copy them!)
+These prototypes are in fact typedef'ed in <agent/snmp_vars.h>.
 
 Module dependancies
+-------------------
 
 This header file is also used to inform the compilation system of any
 dependancies between this module and any others. There is one utility module
 which is required by almost every module, and this is included using the
 directive
 
-        config_require( util_funcs )
 
 (which is produced automatically by mib2c). This same syntax can be used to
 trigger the inclusion of other related modules. An example of this can be
-seen in mibII/route_write.h which relies on the mibII/ip module.
+seen in mibII/route_write.h which relies on the mibII/ip module, thus:
 
-One use of this directive is to define a module group, so that it can be
-included or excluded from the agent very simply. Examples of this can be
+        config_require( mibII/ip )
+
+One use of this directive is to define a module group, by supplying a header
+file consisting exclusively of such config_require directives.  It can then
+be included or excluded from the agent very simply. Examples of this can be
 seen in mibgroup/mibII.h or mibgroup/host.h, which list the consituent
-sub-modules of the MIB-II and Host Resources respectively.
+sub-modules of the MIB-II and Host Resources MIBs respectively.
+
+MIB file information
+--------------------
+
+Most of the information in this file is (understandably) aimed at the network
+management agent itself.  However, there is one common header file directive
+that is actually intended to affect the utility commands that are included
+within the full distribution:
+
+	config_add_mib( HOST-RESOURCES-MIB )
+
+  This is used to add the MIB file being implemented to the default list of
+MIBs loaded by such commands.  This means that querying the agent will return
+informative names and values, rather than the raw numeric forms that SNMP
+actually works with.  Of course, it is always possible for the utilities
+to specify that this MIB should be loaded anyway.  But specifying this file
+within the module header file is a useful hint that a particular MIB should
+be loaded, without needing to ask for it explicitly.
+  Note that this will only affect the binaries compiled as part of the same
+configuration run.  It will have no effect on pre-installed binaries, or
+those compiled following a different configuration specification.
+
+Magic Numbers
+-------------
+
+The other common element within the header file defines a set of "magic
+numbers" - one for each object within the implementation module. In fact,
+this can equally well appear within the main code file, as part of the
+variable structure (which will be described in the next part).
+  This is the technique used by mib2c, but most handcrafted modules have
+tended to define these as part of the header file, probably for clarity.
+
+  The only necessity is that the names and values are distinct (or more
+precisely, the values are distinct within a single variable handling routine).
+In practise, they tend to be defined using integers incrementing from 1,
+or as the same as the final sub-identifier of the corresponding MIB object
+(or indeed both, as these are frequently themselves successive integers).
+  This is not mandatory, and a counter-example can be seen in the
+example module, where two of the object form a sub-tree, and the corresponding
+magic numbers are based on the final *two* sub-identifiers (to ensure that
+the values are unique).  But this construction is definitely unusual, and
+the majority of modules simply use successive integers.
 
 Header file protection
+----------------------
 
 Normally, the only other contents of the header file will be the
-#ifdef/#endif statements surrounding the whole file. This is used to ensure
-that the header file is only included once by any source code file (or more
-accurately, that there is no effect if it is inadvertantly included a second
-time).
+#ifndef/#define/#endif statements surrounding the whole file. This is used
+to ensure that the header file is only included once by any source code file
+(or more accurately, that there is no effect if it is inadvertantly included
+a second time).
 Again, as with the rest of the header file, this is generated automatically
 by mib2c.
 
@@ -282,7 +335,8 @@ Having finished all the preparatory work (or let mib2c deal with it), the
 next part starts to look at the code file that actually implements the
 module.
 
-Core structure of the implementation code
+4. Core structure of the implementation code
+============================================
 
 The core work of implementing the module is done in the C code file. As
 indicated earlier, much of the detail of this will be dependent on the
@@ -300,6 +354,7 @@ As with the header file, most of this will be generated automatically by
 mib2c.
 
 Standard includes
+-----------------
 
 Certain header files are either compulsory, or required so frequently that
 they should be included as a matter of course. These are as follows:
@@ -311,6 +366,8 @@ they should be included as a matter of course. These are as follows:
   #endif
   #if HAVE_STRING_H
   #include <string.h>
+  #else
+  #include <strings.h>
   #endif
 
   #include <sys/types.h>
@@ -323,82 +380,86 @@ All of these will usually be the first files to be included.
                                         //      configuration controls
   #include "auto_nlist.h"               // structures for a BSD-based
                                         //      kernel using nlist
-  #include "../../../snmplib/system.h"
+  #include "system.h"
 
   #include "name.h"                     // the module-specific header
 
 These conventionally come at the end of the list of includes. In between
 will come all the standard system-provided header files required for the
-particular module being implemented.
+library functions used in the file.
 
 Module definition
+-----------------
 
 Much of the code defining the contents of the MIB has traditionally been
 held in the header file. However, much of this has slowly migrated to the
 code file, and this is now the recommended location for it (as typified by
-the output of mib2cstruct variableN (where N is the length of the longest
-siffix in the table). Thus
+the output of mib2c).
+  The main element of this is a variable structure specifying the details of 
+the objects implemented.  This takes the form of an unconstrained array of
+type struct variableN (where N is the length of the longest suffix in the
+table). Thus
 
-                struct variableN wombat_variables[] = {
-
+                struct variable2 example_variables[] = {
+			<individual entries go here>
                 };
 
-Each entry corresponds to one variable in the MIB tree (or one column in the
+Each entry corresponds to one object in the MIB tree (or one column in the
 case of table entries), and these should be listed in increasing OID order.
 A single entry consists of six fields:
 
-   * a magic number (a #defined integer constant)
-   * a type indicator (from the values listed in )
+   * a magic number (the #defined integer constant described above)
+   * a type indicator (from the values listed in <snmplib/snmp_impl.h>)
    * an access indicator (essentially RWRITE or RONLY)
    * the name of the routine used to handle this entry
    * the length of the OID suffix used, and
    * an array of integers specifying this suffix (more on this in a moment)
 
-Thus a typical variable entry (including the magic number definition) would
-look like:
+Thus a typical variable entry would look like:
 
-        #define WOMBAT_XYZ 3
-        { WOMBAT_XYZ, ASN_OCTET_STR, RONLY, var_wombat, 1, {3}}
+        { EXAMPLESTRING, ASN_OCTET_STR, RONLY, var_example, 1, {1}}
 
-Note that the precise values used for these magic numbers are not important,
-as long as they are distinct. They will usually be incrementing from 1, or
-be defined to be the same as the corresponding MIB value final
-sub-identifier (or indeed both!)
-Note also that in practise, only certain sizes of the structure variableN
+If the magic numbers have not been defined in the header file, then they
+should be defined here, usually comming immediately before the corresponding
+variable entry.  This is the technique used by mib2c.
+
+Note that in practise, only certain sizes of the structure variableN
 are defined (listed in <agent/var_struct.h>), being sufficient to meet the
 common requirements. If your particular module needs a non-supported value,
 the easiest thing is simply to use the next largest value that is supported.
 
-In addition, the module needs to declare the location within the MIB tree
-where it belongs. This is done using a declaration of the form
+The module also needs to declare the location within the MIB tree where
+it should be registered. This is done using a declaration of the form
 
-        oid wombat_variables_oid[] = { 1,3,6,1,x,y,z,.... }
+        oid example_variables_oid[] = { 1,3,6,1,4,1,2021,254 }
 
-where the contents of the array list the object identifier of the root of
+where the contents of the array give the object identifier of the root of
 the module.
 
 Module initialisation
+---------------------
 
 Many modules require some form of initialisation before they can start
 providing the necessary information. This is done by providing a routine
 called init_{name} (where {name} is the name of the module).
-This routine is required, and should at the very least register this module
-with the main agent. In other words, specify the list of variables being
-implemented (from the variableN structure) and declare where these fit into
-the overall MIB tree.
+This routine is theoretically optional, but in practise is required to
+register this module with the main agent at the very least. This specifies
+the list of variables being implemented (from the variableN structure)
+and declare where these fit into the overall MIB tree.
 
 This is done by using the REGISTER_MIB macro, as follows:
 
-        REGISTER_MIB( "wombat",  wombat_variables, variableN,
-                        wombat_variables_oid );
+        REGISTER_MIB( "example",  example_variables, variable2,
+                        example_variables_oid );
 
-where "wombat" is used for identification purposed (and is usually the name
-being used for the module), wombat_variables is the structure defining the
-variables being implemented, variableN is the type used for this structure,
-and wombat_variables_oid is the location of the root.
+where "example" is used for identification purposed (and is usually the name
+being used for the module), example_variables is the structure defining the
+variables being implemented, variable2 is the type used for this structure,
+and example_variables_oid is the location of the root.
 
 In fact, this macro is simply a wrapper round the routine register_mib(),
-but this fact can safely be ignored.
+but the details of this can safely be ignored, unless more control over the
+registration is required.
 
 One common requirement, particularly on older operating systems or for the
 more obscure areas of the system, is to be able to read data directly from
@@ -416,17 +477,19 @@ this point - this call will be reused later when the actual values are
 required). Note that this is probably the first thing described so far which
 isn't provided by mib2c!
 
-Other possibilities for initialisation may include registering the new
-config file handlers (which are documented in the read_config(5) man page),
-and perhaps registering the MIB module (either in whole or in part) in the
-sysOR table.
+Other possibilities for initialisation may include registering config file
+directive handlers (which are documented in the read_config(5) man page), and
+registering the MIB module (either in whole or in part) in the sysOR table.
+The first of these is covered in the example module, and the second in many
+of the other modules within the main UCD distribution.
 
 Variable handling
+-----------------
 
 The other obligatory routine is that which actually handles a request for a
 particular variable instance. This is the routine that appeared in the
-variableN structure in the header file, so while the name is not fixed, it
-should be the same as was used there.
+variableN structure, so while the name is not fixed, it should be the same
+as was used there.
 This routine has six parameters, which will be described in turn.
 
 Four of these parameters are used for passing in information about the
@@ -434,7 +497,7 @@ request, these being:
 
         struct variable *vp;
                 // The entry in the variableN array from the
-                //   header file, for the variable under consideration.
+                //   header file, for the object under consideration.
                 // Note that the name field of this structure has been
                 //   completed into a fully qualified OID, by prepending
                 //   the prefix common to the whole array.
@@ -443,10 +506,10 @@ request, these being:
         int exact;      // A flag to indicate whether this is an exact
                         // request (GET/SET) or an 'inexact' one (GETNEXT)
 
-Four of the parameters (plus the function result) are used to return
-information about the answer (if any). The function returns a pointer to the
-actual data for the variable requested (or NULL if this data is not
-available for any reason). The other result parameters are:
+Four of the parameters are used to return information about the answer.
+The function also returns a pointer to the actual data for the variable
+requested (or NULL if this data is not available for any reason).
+The other result parameters are:
 
         oid *name;      // The OID being returned
         int *length;    // The length of this OID
@@ -460,13 +523,12 @@ being used for both input and output.
 The first thing that this routine needs to do is to validate the request, to
 ensure that it does indeed lie in the range implemented by this particular
 module. This is done in slightly different ways, depending on the style of
-the module, so this will be discussed in more detail later. At the same
-time, it is common to retrieve some of the information needed for answering
-the query.
+the module, so this will be discussed in more detail later.
+  At the same time, it is common to retrieve some of the information needed
+for answering the query.
 
-Then the routine uses the Magic Number field from the vp parameter (i.e.
-from the relevant entry of the headers variableN array) to determine which
-of the possible variables being implemented should be considered. This is
+Then the routine uses the Magic Number field from the vp parameter to determine
+which of the possible variables being implemented is being requested. This is
 done using a switch statement, which should have as many cases as there are
 entries in the variableN array (or more precisely, as many as specify this
 routine as their handler), plus an additional default case to handle an
@@ -478,13 +540,15 @@ separately for each branch, or once at the start, being overridden in
 particular branches if necessary.
 
 In fact, the default validation routines make the assumption that the
-variable is both read-only, and of integer type (which includes COUNTER and
-GAUGE types), and set the return paramaters write_method and var_len
-appropriately. These settings can then be corrected for those cases when
-either or both of these assumptions are wrong. Examples of this can be seen
-in mibII/snmp_mib.c (the case SNMPENABLEAUTHENTRAPS sets the write_method
-parameter) and mibII/interfaces.c (where the case IFDESCR needs to return a
-string, rather than an integer).
+variable is both read-only, and of integer type (which includes the COUNTER
+and GAUGE types among others), and set the return paramaters write_method and
+var_len appropriately. These settings can then be corrected for those cases
+when either or both of these assumptions are wrong. Examples of this can be
+seen in the example module.
+EXAMPLEINTEGER is writeable, so this branch sets the write_method parameter,
+and EXAMPLEOBJECTID is not an integer, so this branch sets the var_len
+parameter.  In the case of EXAMPLESTRING, both assumptions are wrong, so this
+branch needs to set both these parameters explicitly.
 
 Note that because the routine returns a pointer to a static result, a
 suitable variable must be declared somewhere for this. Two global variables
@@ -496,6 +560,7 @@ particular variable routine. This last is the approach adopted by mib2c,
 which defines four such local variables, (long_ret, string, objid and c64).
 
 Mib2c requirements
+------------------
 
 Most of the code described here is generated by mib2c. The main exceptions
 (which therefore need to be provided by the programmer) are
@@ -503,19 +568,21 @@ Most of the code described here is generated by mib2c. The main exceptions
    * Any initialisation, other than the basic registration
      (including kernel data initialisation, config file handling, or sysOR
      registration).
-   * Retrieving the necessary data, and returning it.
+   * Retrieving the necessary data, and setting the appropriate return
+     value correctly.
    * The var_len (and possibly write_method) return parameters for variable
      types that are not recognised by mib2c
+   * The contents of any write routines (see later).
 
 Everything else should be useable as generated.
 
-  ------------------------------------------------------------------------
 This concludes the preliminary walk-through of the general structure of the
 C implementation. To fill in the details, we will need to consider the
 various styles of module separately. The next part will look at scalar (i.e.
 non-table based) modules.
 
-Non-table-based modules
+5. Non-table-based modules
+==========================
 
 Having looked at the general structure of a module implementation, it's now
 time to look at this in more detail. We'll start with the simplest style of
@@ -534,6 +601,7 @@ input from the programmer, to actually return the correct results (rather
 than dummy values).
 
 Request Validation
+------------------
 
 This is done using a standard utility function header_generic. The
 parameters for this are exactly the same as for the main routine, and are
@@ -555,9 +623,9 @@ implementation will typically look like:
     }
 
 Although the utility function can be used as a "black box", it's worth
-looking more closely at exactly what it does (since the tabular modules will
-need to do something fairly similar). It has two (or possibly three)
-separate functions:
+looking more closely at exactly what it does (since the table-handling
+modules will need to do something fairly similar). It has two (or possibly
+three) separate functions:
 
    * checking that the request is valid,
    * setting up the OID for the result,
@@ -593,10 +661,10 @@ two OIDs (together with their respective lengths), and returns -1, 0 or 1
 depending on whether the first OID precedes, matches or follows the second.
 
 In the case of an 'exact' match (i.e. a GET/SET/etc), then the request is
-valid if the two OIDs are identical (snmp_oid_compare returns 0). In the
-case of a GETNEXT (or GETBULK) request, it's valid if the OID being
+only valid if the two OIDs are identical (snmp_oid_compare returns 0). In
+the case of a GETNEXT (or GETBULK) request, it's valid if the OID being
 considered comes after that of the original request (snmp_oid_compare
-returns 1).
+returns -1).
 
 This gives the code fragment
 
@@ -617,14 +685,13 @@ simply compare.
 
 Finally, having determined that the request is valid, this routine must
 update the name and length parameters to return the OID being processed. It
-may also set default values for either or both of the other two return
-parameters.
+also sets default values for the other two return parameters.
 
         memcpy( (char *)name,(char *)newname,
                 ((int)vp->namelen + 1) * sizeof(oid));
         *length = vp->namelen + 1;
         *write_method = 0;              // Non-writeable
-        *var_len = sizeof(long);        // default to long results
+        *var_len = sizeof(long);        // default to integer results
         return(MATCH_SUCCEEDED);
 
 These three code fragments combine to form the full header_generic code
@@ -636,11 +703,12 @@ coded in this style. The code for these are to all intents and purposes
 identical to the header_generic routine described above.
 
 Data Retrieval
+--------------
 
-The other job still outstanding is that of retrieving any necessary data,
-and returning the appropriate answer to the original request. This must be
-done even if mib2c is being used to generate the framework of the
-implementation. As has been indicated earlier, the different cases are
+The other main job of the request handling routine is to retrieve any
+necessary data, and return the appropriate answer to the original request.
+This must be done even if mib2c is being used to generate the framework of
+the implementation. As has been indicated earlier, the different cases are
 handled using a switch statement, with the Magic Number field of the vp
 parameter being used to distinguish between them.
 The data necessary for answering the request can be retrieved for each
@@ -656,28 +724,28 @@ Alternatively, there may be ioctl calls on suitable devices, specific system
 calls, or special files that can be read to provide the necessary
 information.
 
-If the available data provides the requested value immediately, then this
-can be returned directly (as is done with most of the ICMP values).
-Otherwise, if the requested value needs to be calculated by combining two or
+If the available data provides the requested value immediately, then the
+individual branch becomes a simple assignment to the appropriate static
+return variable - either one of the global static variables (e.g. long_return)
+or the local equivalents (such as generated by mib2c).
+Otherwise, the requested value may need to be calculated by combining two or
 more items of data (e.g. IPINHDRERRORS in mibII/ip.c) or by applying a
 mapping or other calculation involving available information (e.g.
-IPFORWARDING from the same group) or just because it feels neater that way
-(e.g. the interfaces group), then it can use the global static variable
-long_return or local equivalents (such as generated bymib2c).
+IPFORWARDING from the same group).
 
 In each of these cases, the routine should return a pointer to the result
 value, casting this to the pseudo-generic (u_char *)
 
-  ------------------------------------------------------------------------
 So much for the scalar case. The next part looks at how to handle simple
 tables.
 
-Simple tables
+6. Simple tables
+================
 
 Having considered the simplest style of module implementation, we now turn
 our attention to the next style - a simple table. The tabular nature of
 these is immediately apparent from the MIB definition file, but the
-qualifier simple deserves a word of explanation.
+qualifier "simple" deserves a word of explanation.
 A simple table, in this context, has four characteristics:
 
   1. It is indexed by a single integer value;
@@ -697,19 +765,21 @@ As with the scalar case, the variable routine needs to provide two basic
 functions - request validation and data retrieval.
 
 Validation
+----------
 
-This is provided by the shared utility routine header_simple_table As with
+This is provided by the shared utility routine header_simple_table. As with
 the scalar header routine, this takes the same parameters as the main
 variable routine, with one addition - the maximum valid index. Mib2c
 generates a dummy token for this, which must be replaced by the appropriate
 value.
 As with the header routine, it also returns an indication of whether the
 request was valid, as well as setting up the return parameters with the
-matching OID information, and defaults for the other two.
+matching OID information, and defaults for var_len and write_method.
 Note that in releases prior to 3.6, this job was performed by the routine
 checkmib. However, the return values of this were the reverse of those for
-generic_header. A version of checkmib is still available for compatability
-purposes, but you are encouraged to use header_simple_table instead.
+generic_header and header_simple_table. A version of checkmib is still
+available for compatability purposes, but you are encouraged to use
+header_simple_table instead.
 
 The basic code fragment (see ucd-snmp/disk.c) is therefore of the form:
 
@@ -734,6 +804,7 @@ maximum valid index). This maximum could also be retrieved via a system
 call, or via a kernel data variable.
 
 Data Retrieval
+--------------
 
 As with the scalar case, the other required function is to retrieve the data
 requested. However, given the definition of a simple table this is simply a
@@ -763,25 +834,27 @@ a list of mounted filesystems. There is an example of this technique in the
 Host Resources implementation.
 
 As with the scalar case, mib2c simply provides placeholder dummy return
-values. It's up to the programmer to fill inthe details.
+values. It's up to the programmer to fill in the details.
 
 The next part concludes the examination of the detailed implementation by
 looking at more general tables.
 
-General Tables
+7. General Tables
+=================
 
 Some table structures are not suitable for the simple table approach, due to
 the failure of one or more of the assumptions listed earlier. Perhaps they
 are indexed by something other than a single integer (such as a 4-octet IP
 address), or the maximum index is not easily determinable (such as the
 interfaces table), or not all indices are valid (running software), or the
-necessary data is not directly available (interfaces again).
+necessary data is not directly accessible (interfaces again).
 In such circumstances, a more general approach is needed. In contrast with
 the two styles already covered, this style of module will commonly combine
 the two functions of request validation and data retrieval. Note that mib2c
 will assume the simple table case, and this will need to be corrected.
 
 General table algorithm
+-----------------------
 
 The basic algorithm is as follows:
 
@@ -809,14 +882,14 @@ pseudo-code:
 
         Init_{Name}_Entry();    // Perform any necessary initialisation
 
-        while (( index = Get_Next_{Name}_Entry() ) != -1 ) {
+        while (( index = Get_Next_{Name}_Entry() ) != EndMarker ) {
                         // This steps through the underlying table,
-                        //   returning the current index, or -1
-                        //   (or some similar end-marker) when all
+                        //   returning the current index,
+                        //   or some suitable end-marker when all
                         //   the entries have been examined.
                         // Note that this routine should also return the
-                        //   data for this entry, either directly, or
-                        //   via some external location
+                        //   data for this entry, either via a parameter
+                        //   or using some external location.
 
             construct OID from vp->name and index
             compare new OID and request
@@ -881,12 +954,13 @@ and mibII/udp.c). Here, the if valid fragment expands to:
         }
 
 The GET match handling is just as we've already seen - is this the requested
-OID or not. The GETNEXT case is more complicated. As well as considering
-whether this is a possible match (using the same test we've already seen),
-we also have to check whether this is a better match than anything we've
-already seen. This is done by comparing the current candidate (newname) with
-the best match found so far (lowest).
-Only if this extra comparison shows that the new OID is earlier than the
+OID or not. If so, save the results and move on to the switch statement.
+  The GETNEXT case is more complicated. As well as considering whether this
+is a possible match (using the same test we've already seen), we also have to
+check whether this is a better match than anything we've already seen. This
+is done by comparing the current candidate (newname) with the best match found
+so far (lowest).
+  Only if this extra comparison shows that the new OID is earlier than the
 saved one, do we need to save both the new OID, and any associated data
 (such as the inpcb block, and state flag). But having found one better
 match, we don't know that there isn't an even better one later on. So we
@@ -906,12 +980,13 @@ problem of understanding how the agent works.
 Finally, the next part discusses how to implement a writable (or SETable)
 object in a MIB module.
 
-How to implement a SETable object
+8. How to implement a SETable object
+====================================
 
 Finally, the only remaining area to cover is that of setting data - the
 handling of SNMPSET. Particular care should be taken here for two reasons.
 
-Firstly, any errors in the earlier sections can have limited affect. The
+Firstly, any errors in the earlier sections can have limited effect. The
 worst that is likely to happen is that the agent will either return invalid
 information, or possibly crash. Either way, this is unlikely to affect the
 operation of the workstation as a whole. If there are problems in the
@@ -919,11 +994,11 @@ writing routine, the results could be catastrophic (particularly if writing
 data directly into kernel memory).
 
 Secondly, this is the least well understood area of the agent, at least by
-the author. There are relatively few variables that are defined as
-READ-WRITE in the relevant MIBs, and even fewer that have actually been
-implemented as such. I'm therefore describing this from a combination of my
-understanding of how SETs ought to work, and what's actually been done by
-others (which do not necessarily coincide).
+the author. There are relatively few variables that are defined as READ-WRITE
+in the relevant MIBs, and even fewer that have actually been implemented as
+such. I'm therefore describing this from a combination of my understanding
+of how SETs ought to work, personal experience of very simple SET handling
+and what's actually been done by others (which do not necessarily coincide).
 
 There are also subtle differences between the setting of simple scalar
 variables (or individual entries within a table), and the creation of a new
@@ -935,6 +1010,7 @@ loss resulting from either following or ignoring the information presented
 here. You coded it - you fix it!
 
 Write routine
+-------------
 
 The heart of SET handling is the write_method parameter from the variable
 handling routine. This is a pointer to the relevant routine for setting the
@@ -957,10 +1033,7 @@ routine.
 
 The second, third and fourth parameters provide information about the new
 desired value, both the type, value and length. This is very similar to the
-way that results are returned from the main variable routine. In fact, this
-routine should also return the resulting value after the SET using these
-parameters. (In most cases this will be the same as the requested value, so
-nothing needs to be done).
+way that results are returned from the main variable routine.
 
 The return value of the routine is simply an indication of whether the
 current stage of the SET was successful or not. We'll come back to this in a
@@ -978,13 +1051,17 @@ This includes (but is not limited to) checking:
 
 There are two parameters remaining to be considered.
 
-The fifth parameter is called statP and is only used when creating a new
-table row. When dealing with scalar values or single elements of tables, you
-can safely ignore this parameter.
+The fifth parameter, statP, is the value that would be returned from a GET
+request on this particular variable. It could be used to check that the
+requested new value is consistent with the current state, but its main use
+is to denote that a new table row is being created.
+In most cases (particularly when dealing with scalar values or single elements
+of tables), you can normally simply ignore this parameter.
 
 Actions
+-------
 
-The final parameter to consider is the first one - action To understand
+The final parameter to consider is the first one - action. To understand
 this, it's necessary to know a bit about how SETs are implemented.
 The design of SNMP calls for all variables in a SET request to be done "as
 if simultaneously" - i.e. they should all succeed or all fail. However, in
@@ -1002,10 +1079,10 @@ parameter.
 
 This is implemented using three basic phases:
 
-RESERVE is used to check the syntax of all the variables provided, and to
-allocate any resources required for performing the SET. After this stage,
-the expectation is that the set ought to succeed, though this is not
-guaranteed.
+RESERVE is used to check the syntax of all the variables provided, that the
+values being set are sensible and consistent, and to allocate any resources
+required for performing the SET. After this stage, the expectation is that
+the set ought to succeed, though this is not guaranteed.
 (In fact, with the UCD agent, this is done in two passes - RESERVE1, and
 RESERVE2, to allow for dependancies between variables).
 
@@ -1019,8 +1096,10 @@ by the action value ACTION. This is used to actually implement the set
 operation. However, this must either be done into temporary (persistent)
 storage, or the previous value stored similarly, in case any of the
 subsequent ACTION calls fail.
+ This can be seen in the example module, where both write routines have
+static 'old' variables, to hold the previous value of the relevant object.
 
-If this does happen (for example due to an apparently valid, but
+If the ACTION phase does fail (for example due to an apparently valid, but
 unacceptable value, or an unforeseen problem), then the list of write
 routines are called again, with the UNDO action. This requires the routine
 to reset the value that was changed to its previous value (assuming it was
@@ -1037,21 +1116,35 @@ all of the fallible code should be done in the ACTION phase, so that it can
 be backed out if necessary.
 
 Table row creation
+------------------
 
-What about creating new rows in a table, I hear you ask. Good Question. It
-is believed that this uses the fifth parameter statP. This is described as
-pointing to "the referenced object". Unfortunately, the author has no
-experience of implementing such tables, doesn't fully understand the code,
-and no-one has explained the mechanism to him.
+What about creating new rows in a table, I hear you ask. Good Question.
+This case can often be detected by the fact that a GET request would have
+failed, and hence the fifth parameter, statP, will be null.  This contrasts
+with changing the values of an element of an existing row, when the statP
+parameter would hold the previous value.
 
-I'd rather not pontificate at length about how to create table rows, without
-a little more inner conviction that what I say might stand a chance of being
-vaguely correct. However, if pushed, I suspect that a null value for statP
-is intended to indicate a new row should be created, while a non-null statP
-would indicate a change to an existing row.
+The details of precisely how to create a new row will clearly depend on the
+underlying format of the table.  However, one implementation strategy would
+be as follows:
 
-But this could be completely wrong. And how you use this parameter is a
-mystery to me. Anyone who has experience of doing this, please get in touch!
+  *  The first column object to be SET would return a null value from the
+	var_name routine.  This null statP parameter would be the signal
+	to create a new temporary instance of the underlying data structure,
+	filled with dummy values.
+  *  Subsequent column objects would return pointers to the appropriate
+	field of this new data structure from the var_name routine,
+	which would then be filled in by the write routine.
+  *  Once all the necessary fields had been SET, the completed temporary
+	instance could be moved into the "standard" structure (or copied,
+	or otherwise used to set things up appropriately).
+
+However, this is purely a theoretical strategy, and has not been tried
+by the author.  No guarantees are given as to whether this would actually
+work.  There are also questions regarding how to handle incomplete
+or overlapping SET requests.
+Anyone who has experience of doing this, please get in touch!
+
   ------------------------------------------------------------------------
 And that's it. Congratulations for getting this far. If you understand
 everything that's been said, then you now know as much as the rest of us
@@ -1062,5 +1155,5 @@ And if you've found this helpful, gifts of money, chocolate, alcohol, and
 above all feedback, would be most appreciated :-)
 
   ------------------------------------------------------------------------
-Copyright 1999 - D.T.Shield. Not to be distributed without the explicit
-permission of the author.
+Copyright 1999, 2000 - D.T.Shield.
+Not to be distributed without the explicit permission of the author.
