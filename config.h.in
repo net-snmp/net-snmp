@@ -267,6 +267,9 @@
 /* Define if you have the <net/if_var.h> header file.  */
 #undef HAVE_NET_IF_VAR_H
 
+/* Define if you have the <net/route.h> header file.  */
+#undef HAVE_NET_ROUTE_H
+
 /* Define if you have the <netinet/icmp_var.h> header file.  */
 #undef HAVE_NETINET_ICMP_VAR_H
 
