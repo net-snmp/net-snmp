@@ -544,9 +544,9 @@ _agentx_build(struct snmp_session        *session,
 	    DEBUGDUMPSETUP("send", bufp-4, 4);
 	    DEBUGMSG(("dumpv_send", "  Timeout:\t%d\n", *(bufp-4) ));
 	    DEBUGPRINTINDENT("dumpv_send");
-	    DEBUGMSG(("dumpv_send", "  Priority:\t%d\n", *(bufp-4) ));
+	    DEBUGMSG(("dumpv_send", "  Priority:\t%d\n", *(bufp-3) ));
 	    DEBUGPRINTINDENT("dumpv_send");
-	    DEBUGMSG(("dumpv_send", "  Range SubID:\t%d\n", *(bufp-4) ));
+	    DEBUGMSG(("dumpv_send", "  Range SubID:\t%d\n", *(bufp-2) ));
 	    DEBUGINDENTLESS();
 	    *out_length -= 4;
 
