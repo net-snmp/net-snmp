@@ -30,7 +30,7 @@ unsigned char *var_extensible_proc(vp, name, length, exact, var_len, write_metho
   int count, result,i, rtest=0;
   register int interface;
   struct myproc *proc;
-  long long_ret;
+  static long long_ret;
   static char errmsg[300];
 
 

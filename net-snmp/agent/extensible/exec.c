@@ -32,8 +32,8 @@ unsigned char *var_extensible_shell(vp, name, length, exact, var_len, write_meth
   oid newname[30];
   int count, result,i, rtest=0;
   register int interface;
-  struct extensible *exten;
-  long long_ret;
+  static struct extensible *exten;
+  static long long_ret;
   char errmsg[300];
 
   if (!checkmib(vp,name,length,exact,var_len,write_method,newname,numextens))
@@ -134,7 +134,7 @@ unsigned char *var_extensible_relocatable(vp, name, length, exact, var_len, writ
   FILE *file;
   register int interface;
   struct extensible *exten;
-  long long_ret;
+  static long long_ret;
   static char errmsg[STRMAX];
   struct variable myvp;
   oid tname[30];
