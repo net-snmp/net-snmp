@@ -41,6 +41,7 @@
 #include "callback.h"
 #include "agent_registry.h"
 #include "agent_callbacks.h"
+#include "agent_trap.h"
 #include "snmp_debug.h"
 #include "mibII/sysORTable.h"
 #include "system.h"
@@ -431,6 +432,9 @@ subagent_pre_init( void )
 	free( agentx_session );
 	exit(1);
     }
+
+    create_trap_session( NULL, NULL, AGENTX_VERSION_1, AGENTX_MSG_NOTIFY );
+
     snmp_register_callback(SNMP_CALLBACK_LIBRARY, SNMP_CALLBACK_SHUTDOWN,
                            subagent_shutdown, agentx_session);
     snmp_register_callback(SNMP_CALLBACK_APPLICATION,
