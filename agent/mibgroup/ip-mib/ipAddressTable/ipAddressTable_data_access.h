@@ -35,7 +35,7 @@ extern          "C" {
      */
 
 
-    int            
+    int
         ipAddressTable_init_data(ipAddressTable_registration_ptr
                                  ipAddressTable_reg);
 

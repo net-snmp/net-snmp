@@ -95,8 +95,8 @@ extern          "C" {
         /*
          * inetNetToMediaNetAddress(3)/InetAddress/ASN_OCTET_STR/char(char)//L/a/w/e/R/d/h
          */
-        /** 128 - 2(other indexes) - oid length(10) = 116 */
-        char            inetNetToMediaNetAddress[116];
+        /** 128 - 2(other indexes) - oid length(10) = 115 */
+        char            inetNetToMediaNetAddress[115];
         size_t          inetNetToMediaNetAddress_len;
 
 
@@ -147,7 +147,8 @@ extern          "C" {
         /*
          * TODO:131:o: |   |-> Add useful data to inetNetToMediaTable rowreq context.
          */
-       int   inetNetToMediaRowStatus, inetNetToMediaRowStatus_undo;
+        int             inetNetToMediaRowStatus,
+            inetNetToMediaRowStatus_undo;
 
         /*
          * storage for future expansion
@@ -164,21 +165,21 @@ extern          "C" {
      *********************************************************************
      * function prototypes
      */
-    int            
+    int
         inetNetToMediaTable_pre_request
         (inetNetToMediaTable_registration_ptr user_context);
-    int            
+    int
         inetNetToMediaTable_post_request
         (inetNetToMediaTable_registration_ptr user_context);
 
     inetNetToMediaTable_data *inetNetToMediaTable_allocate_data(void);
-    void           
-        inetNetToMediaTable_release_data(inetNetToMediaTable_data * data);
+    void
+         inetNetToMediaTable_release_data(inetNetToMediaTable_data * data);
 
-    int            
+    int
         inetNetToMediaTable_check_dependencies
         (inetNetToMediaTable_rowreq_ctx * rowreq_ctx);
-    int            
+    int
         inetNetToMediaTable_commit(inetNetToMediaTable_rowreq_ctx *
                                    rowreq_ctx);
 
@@ -213,14 +214,12 @@ extern          "C" {
      * indexes
      */
 
-    int            
+    int
         inetNetToMediaPhysAddress_get(inetNetToMediaTable_rowreq_ctx *
-                                      rowreq_ctx,
-                                      char
-                                      **inetNetToMediaPhysAddress_val_ptr_ptr,
-                                      size_t
+                                      rowreq_ctx, char
+                                      **inetNetToMediaPhysAddress_val_ptr_ptr, size_t
                                       *inetNetToMediaPhysAddress_val_ptr_len_ptr);
-    int            
+    int
         inetNetToMediaLastUpdated_get(inetNetToMediaTable_rowreq_ctx *
                                       rowreq_ctx,
                                       u_long *
@@ -233,29 +232,28 @@ extern          "C" {
                                             * rowreq_ctx,
                                             u_long *
                                             inetNetToMediaState_val_ptr);
-    int            
+    int
         inetNetToMediaRowStatus_get(inetNetToMediaTable_rowreq_ctx *
                                     rowreq_ctx,
                                     u_long *
                                     inetNetToMediaRowStatus_val_ptr);
 
 
-    int            
+    int
         inetNetToMediaTable_indexes_set_tbl_idx
         (inetNetToMediaTable_mib_index * tbl_idx,
          long inetNetToMediaIfIndex_val,
          u_long inetNetToMediaNetAddressType_val,
          char *inetNetToMediaNetAddress_val_ptr,
          size_t inetNetToMediaNetAddress_val_ptr_len);
-    int            
+    int
         inetNetToMediaTable_indexes_set(inetNetToMediaTable_rowreq_ctx *
                                         rowreq_ctx,
                                         long inetNetToMediaIfIndex_val,
                                         u_long
                                         inetNetToMediaNetAddressType_val,
                                         char
-                                        *inetNetToMediaNetAddress_val_ptr,
-                                        size_t
+                                        *inetNetToMediaNetAddress_val_ptr, size_t
                                         inetNetToMediaNetAddress_val_ptr_len);
 
 
@@ -286,64 +284,62 @@ extern          "C" {
     int             inetNetToMediaNetAddress_check_index(inetNetToMediaTable_rowreq_ctx * rowreq_ctx);  /* internal */
 
 
-    int            
+    int
         inetNetToMediaTable_validate_index
         (inetNetToMediaTable_registration_ptr inetNetToMediaTable_reg,
          inetNetToMediaTable_rowreq_ctx * rowreq_ctx);
-    int            
+    int
         inetNetToMediaTable_undo_setup(inetNetToMediaTable_rowreq_ctx *
                                        rowreq_ctx);
-    int            
+    int
         inetNetToMediaTable_undo_cleanup(inetNetToMediaTable_rowreq_ctx *
                                          rowreq_ctx);
-    int            
+    int
         inetNetToMediaTable_commit(inetNetToMediaTable_rowreq_ctx *
                                    rowreq_ctx);
-    int            
+    int
         inetNetToMediaTable_undo_commit(inetNetToMediaTable_rowreq_ctx *
                                         rowreq_ctx);
 
 
-    int            
+    int
         inetNetToMediaPhysAddress_check_value
         (inetNetToMediaTable_rowreq_ctx * rowreq_ctx,
          char *inetNetToMediaPhysAddress_val_ptr,
          size_t inetNetToMediaPhysAddress_val_ptr_len);
-    int            
+    int
         inetNetToMediaPhysAddress_undo_setup(inetNetToMediaTable_rowreq_ctx
                                              * rowreq_ctx);
-    int            
+    int
         inetNetToMediaPhysAddress_set(inetNetToMediaTable_rowreq_ctx *
-                                      rowreq_ctx,
-                                      char
-                                      *inetNetToMediaPhysAddress_val_ptr,
-                                      size_t
+                                      rowreq_ctx, char
+                                      *inetNetToMediaPhysAddress_val_ptr, size_t
                                       inetNetToMediaPhysAddress_val_ptr_len);
-    int            
+    int
         inetNetToMediaPhysAddress_undo(inetNetToMediaTable_rowreq_ctx *
                                        rowreq_ctx);
 
-    int            
+    int
         inetNetToMediaLastUpdated_check_value
         (inetNetToMediaTable_rowreq_ctx * rowreq_ctx,
          u_long inetNetToMediaLastUpdated_val);
-    int            
+    int
         inetNetToMediaLastUpdated_undo_setup(inetNetToMediaTable_rowreq_ctx
                                              * rowreq_ctx);
-    int            
+    int
         inetNetToMediaLastUpdated_set(inetNetToMediaTable_rowreq_ctx *
                                       rowreq_ctx,
                                       u_long
                                       inetNetToMediaLastUpdated_val);
-    int            
+    int
         inetNetToMediaLastUpdated_undo(inetNetToMediaTable_rowreq_ctx *
                                        rowreq_ctx);
 
-    int            
+    int
         inetNetToMediaType_check_value(inetNetToMediaTable_rowreq_ctx *
                                        rowreq_ctx,
                                        u_long inetNetToMediaType_val);
-    int            
+    int
         inetNetToMediaType_undo_setup(inetNetToMediaTable_rowreq_ctx *
                                       rowreq_ctx);
     int             inetNetToMediaType_set(inetNetToMediaTable_rowreq_ctx *
@@ -352,11 +348,11 @@ extern          "C" {
     int             inetNetToMediaType_undo(inetNetToMediaTable_rowreq_ctx
                                             * rowreq_ctx);
 
-    int            
+    int
         inetNetToMediaState_check_value(inetNetToMediaTable_rowreq_ctx *
                                         rowreq_ctx,
                                         u_long inetNetToMediaState_val);
-    int            
+    int
         inetNetToMediaState_undo_setup(inetNetToMediaTable_rowreq_ctx *
                                        rowreq_ctx);
     int             inetNetToMediaState_set(inetNetToMediaTable_rowreq_ctx
@@ -366,24 +362,24 @@ extern          "C" {
     int             inetNetToMediaState_undo(inetNetToMediaTable_rowreq_ctx
                                              * rowreq_ctx);
 
-    int            
+    int
         inetNetToMediaRowStatus_check_value(inetNetToMediaTable_rowreq_ctx
                                             * rowreq_ctx,
                                             u_long
                                             inetNetToMediaRowStatus_val);
-    int            
+    int
         inetNetToMediaRowStatus_undo_setup(inetNetToMediaTable_rowreq_ctx *
                                            rowreq_ctx);
-    int            
+    int
         inetNetToMediaRowStatus_set(inetNetToMediaTable_rowreq_ctx *
                                     rowreq_ctx,
                                     u_long inetNetToMediaRowStatus_val);
-    int            
+    int
         inetNetToMediaRowStatus_undo(inetNetToMediaTable_rowreq_ctx *
                                      rowreq_ctx);
 
 
-    int            
+    int
         inetNetToMediaTable_check_dependencies
         (inetNetToMediaTable_rowreq_ctx * ctx);
 

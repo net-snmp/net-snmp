@@ -77,10 +77,9 @@ ipAddressTable_init_data(ipAddressTable_registration_ptr
  * check entry for update
  */
 static void
-_clear_times(ipAddressTable_rowreq_ctx *rowreq_ctx, void *magic)
+_clear_times(ipAddressTable_rowreq_ctx * rowreq_ctx, void *magic)
 {
-    rowreq_ctx->ipAddressLastChanged = 
-        rowreq_ctx->ipAddressCreated = 0;
+    rowreq_ctx->ipAddressLastChanged = rowreq_ctx->ipAddressCreated = 0;
 }
 
 /***********************************************************************
@@ -141,7 +140,8 @@ ipAddressTable_container_init(netsnmp_container ** container_ptr_ptr,
     if (NULL != *container_ptr_ptr) {
         ipAddressTable_cache_load(*container_ptr_ptr);
         CONTAINER_FOR_EACH(*container_ptr_ptr,
-                           (netsnmp_container_obj_func*)_clear_times, NULL);
+                           (netsnmp_container_obj_func *) _clear_times,
+                           NULL);
     }
 
     /*
@@ -157,52 +157,50 @@ ipAddressTable_container_init(netsnmp_container ** container_ptr_ptr,
      * basically, turn off all automatic cache handling except autoload.
      */
     cache->flags |=
-        (NETSNMP_CACHE_DONT_AUTO_RELEASE | NETSNMP_CACHE_DONT_FREE_EXPIRED |
-         NETSNMP_CACHE_DONT_FREE_BEFORE_LOAD | NETSNMP_CACHE_AUTO_RELOAD |
-         NETSNMP_CACHE_DONT_INVALIDATE_ON_SET);
+        (NETSNMP_CACHE_DONT_AUTO_RELEASE | NETSNMP_CACHE_DONT_FREE_EXPIRED
+         | NETSNMP_CACHE_DONT_FREE_BEFORE_LOAD | NETSNMP_CACHE_AUTO_RELOAD
+         | NETSNMP_CACHE_DONT_INVALIDATE_ON_SET);
 }                               /* ipAddressTable_container_init */
 
 /**
  * check entry for update
  */
 static void
-_check_entry_for_updates(ipAddressTable_rowreq_ctx *rowreq_ctx,
+_check_entry_for_updates(ipAddressTable_rowreq_ctx * rowreq_ctx,
                          void **magic)
 {
-    netsnmp_container * ipaddress_container = magic[0];
-    netsnmp_container * to_delete = (netsnmp_container *)magic[1];
+    netsnmp_container *ipaddress_container = magic[0];
+    netsnmp_container *to_delete = (netsnmp_container *) magic[1];
 
     /*
      * check for matching entry using secondary index.
      */
     netsnmp_ipaddress_entry *ipaddress_entry =
         CONTAINER_FIND(ipaddress_container, rowreq_ctx->data);
-    if(NULL == ipaddress_entry) {
-        DEBUGMSGTL(("ipAddressTable:access","removing missing entry\n"));
-        
-        if(NULL == to_delete) {
-            magic[1] = to_delete =
-                netsnmp_container_find("lifo");
-            if(NULL == to_delete)
+    if (NULL == ipaddress_entry) {
+        DEBUGMSGTL(("ipAddressTable:access", "removing missing entry\n"));
+
+        if (NULL == to_delete) {
+            magic[1] = to_delete = netsnmp_container_find("lifo");
+            if (NULL == to_delete)
                 snmp_log(LOG_ERR, "couldn't create delete container\n");
         }
         if (NULL != to_delete)
             CONTAINER_INSERT(to_delete, rowreq_ctx);
-    }
-    else {
-        DEBUGMSGTL(("ipAddressTable:access","updating existing entry\n"));
-        
+    } else {
+        DEBUGMSGTL(("ipAddressTable:access", "updating existing entry\n"));
+
         /*
          * Check for changes & update
          */
-        if (netsnmp_access_ipaddress_entry_update(rowreq_ctx->data, 
-                                                  ipaddress_entry) >0)
+        if (netsnmp_access_ipaddress_entry_update(rowreq_ctx->data,
+                                                  ipaddress_entry) > 0)
             rowreq_ctx->ipAddressLastChanged = netsnmp_get_agent_uptime();
-  
+
         /*
          * remove entry from ifcontainer
          */
-        CONTAINER_REMOVE(ipaddress_container,ipaddress_entry);
+        CONTAINER_REMOVE(ipaddress_container, ipaddress_entry);
         netsnmp_access_ipaddress_entry_free(ipaddress_entry);
     }
 }
@@ -211,13 +209,13 @@ _check_entry_for_updates(ipAddressTable_rowreq_ctx *rowreq_ctx,
  * add new entry
  */
 static void
-_add_new_entry(netsnmp_ipaddress_entry *ipaddress_entry,
+_add_new_entry(netsnmp_ipaddress_entry * ipaddress_entry,
                netsnmp_container * container)
 {
     ipAddressTable_rowreq_ctx *rowreq_ctx;
-    
+
     DEBUGMSGTL(("ipAddressTable:access", "creating new entry\n"));
-    
+
     netsnmp_assert(NULL != ipaddress_entry);
     netsnmp_assert(NULL != container);
 
@@ -227,33 +225,32 @@ _add_new_entry(netsnmp_ipaddress_entry *ipaddress_entry,
     rowreq_ctx = ipAddressTable_allocate_rowreq_ctx(ipaddress_entry);
     if ((NULL != rowreq_ctx) &&
         (MFD_SUCCESS ==
-         ipAddressTable_indexes_set(rowreq_ctx,ipaddress_entry->ia_address_len,
+         ipAddressTable_indexes_set(rowreq_ctx,
+                                    ipaddress_entry->ia_address_len,
                                     ipaddress_entry->ia_address,
                                     ipaddress_entry->ia_address_len))) {
         CONTAINER_INSERT(container, rowreq_ctx);
-        rowreq_ctx->ipAddressLastChanged = 
+        rowreq_ctx->ipAddressLastChanged =
             rowreq_ctx->ipAddressCreated = netsnmp_get_agent_uptime();
-    }
-    else {
+    } else {
         if (NULL != rowreq_ctx) {
             snmp_log(LOG_ERR, "error setting index while loading "
                      "ipAddressTable cache.\n");
             ipAddressTable_release_rowreq_ctx(rowreq_ctx);
-        }
-        else {
+        } else {
             snmp_log(LOG_ERR, "memory allocation failed while loading "
                      "ipAddressTable cache.\n");
             netsnmp_access_ipaddress_entry_free(ipaddress_entry);
         }
-  
+
         return;
     }
-    
+
     /*-------------------------------------------------------------------
      * handle data that isn't part of the data_access ipaddress structure
      */
     rowreq_ctx->ipAddressRowStatus = ROWSTATUS_ACTIVE;
-  }
+}
 
 /**
  * load cache data
@@ -290,7 +287,7 @@ ipAddressTable_cache_load(netsnmp_container * container)
 {
     ipAddressTable_rowreq_ctx *rowreq_ctx;
     netsnmp_container *ipaddress_container;
-    void *tmp_ptr[2];
+    void           *tmp_ptr[2];
 
     DEBUGMSGTL(("verbose:ipAddressTable:ipAddressTable_cache_load",
                 "called\n"));
@@ -311,56 +308,57 @@ ipAddressTable_cache_load(netsnmp_container * container)
      */
     tmp_ptr[0] = ipaddress_container->next;
     tmp_ptr[1] = NULL;
-    CONTAINER_FOR_EACH(container,
-                       (netsnmp_container_obj_func*)_check_entry_for_updates,
-                       tmp_ptr);
-    
+    CONTAINER_FOR_EACH(container, (netsnmp_container_obj_func *)
+                       _check_entry_for_updates, tmp_ptr);
+
     /*
      * now add any new interfaces
      */
     CONTAINER_FOR_EACH(ipaddress_container,
-                       (netsnmp_container_obj_func*)_add_new_entry, container);
-    
+                       (netsnmp_container_obj_func *) _add_new_entry,
+                       container);
+
     /*
      * free the container. we've either claimed each entry, or released it,
      * so the access function doesn't need to clear the container.
      */
     netsnmp_access_ipaddress_container_free(ipaddress_container,
-                                            NETSNMP_ACCESS_IPADDRESS_FREE_DONT_CLEAR );
-  
+                                            NETSNMP_ACCESS_IPADDRESS_FREE_DONT_CLEAR);
+
     /*
      * remove deleted addresses from table container
      */
     if (NULL != tmp_ptr[1]) {
-        netsnmp_container *tmp_container = (netsnmp_container *)tmp_ptr[1];
+        netsnmp_container *tmp_container =
+            (netsnmp_container *) tmp_ptr[1];
         ipAddressTable_rowreq_ctx *tmp_ctx;
-        
+
         /*
          * this works because the tmp_container is a linked list,
          * which can be used like a stack...
          */
-        while( CONTAINER_SIZE(tmp_container) ) {
+        while (CONTAINER_SIZE(tmp_container)) {
             /*
              * get from delete list
              */
             tmp_ctx = CONTAINER_FIRST(tmp_container);
-            
+
             /*
              * release context, delete from table container
              */
             CONTAINER_REMOVE(container, tmp_ctx);
             ipAddressTable_release_rowreq_ctx(tmp_ctx);
-            
+
             /*
              * pop off delete list
              */
             CONTAINER_REMOVE(tmp_container, NULL);
         }
     }
-    
+
     DEBUGMSGT(("verbose:ipAddressTable:ipAddressTable_cache_load",
                "%d records\n", CONTAINER_SIZE(container)));
-    
+
     return MFD_SUCCESS;
 }                               /* ipAddressTable_cache_load */
 
@@ -374,8 +372,12 @@ ipAddressTable_cache_load(netsnmp_container * container)
  *  need to do any processing before that, do it here.
  *
  * @note
- *  The MFD helper will take care of releasing all the
- *  row contexts, so you don't need to worry about that.
+ *  The MFD helper will take care of releasing all the row contexts.
+ *  If you did not pass a data context pointer when allocating
+ *  the rowreq context, the one that was allocated will be deleted.
+ *  If you did pass one in, it will not be deleted and that memory
+ *  is your responsibility.
+ *
  */
 void
 ipAddressTable_cache_free(netsnmp_container * container)

@@ -133,12 +133,13 @@ inetNetToMediaTable_container_init(netsnmp_container ** container_ptr_ptr,
  *
  */
 static void
-_snarf_arp_entry(netsnmp_arp_entry *arp_entry, netsnmp_container * container)
+_snarf_arp_entry(netsnmp_arp_entry * arp_entry,
+                 netsnmp_container * container)
 {
     inetNetToMediaTable_rowreq_ctx *rowreq_ctx;
-    
+
     DEBUGTRACE;
-    
+
     netsnmp_assert(NULL != arp_entry);
     netsnmp_assert(NULL != container);
 
@@ -147,21 +148,19 @@ _snarf_arp_entry(netsnmp_arp_entry *arp_entry, netsnmp_container * container)
      * the container
      */
     rowreq_ctx = inetNetToMediaTable_allocate_rowreq_ctx(arp_entry);
-    if((NULL != rowreq_ctx) &&
-       (MFD_SUCCESS == inetNetToMediaTable_indexes_set
-        (rowreq_ctx,rowreq_ctx->data->if_index,
-         rowreq_ctx->data->arp_ipaddress_len,
-         rowreq_ctx->data->arp_ipaddress,
-         rowreq_ctx->data->arp_ipaddress_len))) {
+    if ((NULL != rowreq_ctx) &&
+        (MFD_SUCCESS == inetNetToMediaTable_indexes_set
+         (rowreq_ctx, rowreq_ctx->data->if_index,
+          rowreq_ctx->data->arp_ipaddress_len,
+          rowreq_ctx->data->arp_ipaddress,
+          rowreq_ctx->data->arp_ipaddress_len))) {
         CONTAINER_INSERT(container, rowreq_ctx);
-    }
-    else {
-        if(rowreq_ctx) {
+    } else {
+        if (rowreq_ctx) {
             snmp_log(LOG_ERR, "error setting index while loading "
                      "inetNetToMediaTable cache.\n");
             inetNetToMediaTable_release_rowreq_ctx(rowreq_ctx);
-        }
-        else
+        } else
             netsnmp_access_arp_entry_free(arp_entry);
     }
 }
@@ -213,27 +212,26 @@ inetNetToMediaTable_cache_load(netsnmp_container * container)
     arp_container =
         netsnmp_access_arp_container_load(NULL,
                                           NETSNMP_ACCESS_ARP_LOAD_NOFLAGS);
-    if(NULL == arp_container)
-        return MFD_RESOURCE_UNAVAILABLE; /* msg already logged */
-    
+    if (NULL == arp_container)
+        return MFD_RESOURCE_UNAVAILABLE;        /* msg already logged */
+
     /*
      * we just got a fresh copy of data. snarf data
      */
     CONTAINER_FOR_EACH(arp_container,
-                       (netsnmp_container_obj_func*)_snarf_arp_entry,
+                       (netsnmp_container_obj_func *) _snarf_arp_entry,
                        container);
-    
+
     /*
-      * free the container. we've either claimed each entry, or released it,
-      * so the access function doesn't need to clear the container.
-      */
+     * free the container. we've either claimed each entry, or released it,
+     * so the access function doesn't need to clear the container.
+     */
     netsnmp_access_arp_container_free(arp_container,
-                                      NETSNMP_ACCESS_ARP_FREE_DONT_CLEAR );
-    
-     DEBUGMSGT(("verbose:inetNetToMediaTable:inetNetToMediaTable_cache_load",
-                "%d records\n", CONTAINER_SIZE(container)));
-     
-     return MFD_SUCCESS;
+                                      NETSNMP_ACCESS_ARP_FREE_DONT_CLEAR);
+
+    DEBUGMSGT(("verbose:inetNetToMediaTable:inetNetToMediaTable_cache_load", "%d records\n", CONTAINER_SIZE(container)));
+
+    return MFD_SUCCESS;
 }                               /* inetNetToMediaTable_cache_load */
 
 /**
@@ -246,8 +244,12 @@ inetNetToMediaTable_cache_load(netsnmp_container * container)
  *  need to do any processing before that, do it here.
  *
  * @note
- *  The MFD helper will take care of releasing all the
- *  row contexts, so you don't need to worry about that.
+ *  The MFD helper will take care of releasing all the row contexts.
+ *  If you did not pass a data context pointer when allocating
+ *  the rowreq context, the one that was allocated will be deleted.
+ *  If you did pass one in, it will not be deleted and that memory
+ *  is your responsibility.
+ *
  */
 void
 inetNetToMediaTable_cache_free(netsnmp_container * container)
