@@ -39,9 +39,6 @@ init_delayed_instance(void)
      * delayed handler test
      */
     netsnmp_handler_registration *my_test;
-    my_test = SNMP_MALLOC_TYPEDEF(netsnmp_handler_registration);
-    if (!my_test)
-        return;
 
     my_test =
         netsnmp_create_handler_registration("delayed_instance_example",
