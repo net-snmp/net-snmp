@@ -268,7 +268,21 @@ char *strerror(int err)
 }
 #endif
 
-void snmp_set_dump_packet(int val)
+long
+snmp_get_next_reqid __P((void))
+{
+  return ++Reqid; /*MTCRITICAL_RESOURCE*/
+}
+
+long
+snmp_get_next_msgid __P((void))
+{
+  return ++Msgid; /*MTCRITICAL_RESOURCE*/
+}
+
+void
+snmp_set_dump_packet(val)
+    int val;
 {
     snmp_dump_packet = val;
 }
@@ -2577,10 +2591,7 @@ snmp_sess_async_send(void *sessp,
             (pdu->command == SNMP_MSG_SET)) {
         /* all versions support these PDU types */
         /* initialize defaulted PDU fields */
-	if (pdu->reqid == SNMP_DEFAULT_REQID)
-	{ /*MTCRITICAL_RESOURCE*/
-	    pdu->reqid = ++Reqid;
-	}
+
 	if (pdu->errstat == SNMP_DEFAULT_ERRSTAT)
 	    pdu->errstat = 0;
 	if (pdu->errindex == SNMP_DEFAULT_ERRINDEX)
@@ -2597,11 +2608,6 @@ snmp_sess_async_send(void *sessp,
 	    session->s_snmp_errno = SNMPERR_V2_IN_V1;
 	    return 0;
 	}
-        /* initialize defaulted PDU fields */
-	if (pdu->reqid == SNMP_DEFAULT_REQID)
-	{ /*MTCRITICAL_RESOURCE*/
-	    pdu->reqid = ++Reqid;
-	}
 	if (pdu->errstat == SNMP_DEFAULT_ERRSTAT)
 	    pdu->errstat = 0;
 	if (pdu->errindex == SNMP_DEFAULT_ERRINDEX)
@@ -2615,11 +2621,6 @@ snmp_sess_async_send(void *sessp,
 	    snmp_errno = SNMPERR_V1_IN_V2;
 	    session->s_snmp_errno = SNMPERR_V1_IN_V2;
 	    return 0;
-	}
-        /* initialize defaulted PDU fields */
-	if (pdu->reqid == SNMP_DEFAULT_REQID)
-	{ /*MTCRITICAL_RESOURCE*/
-	    pdu->reqid = ++Reqid;
 	}
 	if ((pdu->max_repetitions < 0) || (pdu->non_repeaters < 0)){
 	    snmp_errno = SNMPERR_BAD_REPETITIONS;
@@ -2746,9 +2747,6 @@ snmp_sess_async_send(void *sessp,
         break;
 #endif /* USE_V2PARTY_PROTOCOL */
     case SNMP_VERSION_3:
-      if (pdu->msgid == SNMP_DEFAULT_MSGID) { /*MTCRITICAL_RESOURCE*/
-	pdu->msgid = ++Msgid;
-      }
       if (pdu->securityEngineIDLen == 0) {
 	if (session->securityEngineIDLen) {
 	  snmpv3_clone_engineID(&pdu->securityEngineID, 
@@ -3248,9 +3246,10 @@ snmp_resend_request(struct session_list *slp, struct request_list *rp,
   sp = slp->session; isp = slp->internal;
 
   if (incr_retries) rp->retries++;
-  if (rp->message_id) {
-    rp->pdu->msgid = rp->message_id = ++Msgid; /* MTCRITICAL_RESOURCE */
-  }
+
+  /* always increment msgId for resent messages */
+  rp->pdu->msgid = rp->message_id = snmp_get_next_msgid();
+
   /* retransmit this pdu */
   if (snmp_build(sp, rp->pdu, packet, &length) < 0){
     /* this should never happen */

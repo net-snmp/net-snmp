@@ -164,8 +164,8 @@ struct request_list {
 #define SNMP_DEFAULT_RETRIES	    -1
 #define SNMP_DEFAULT_TIMEOUT	    -1
 #define SNMP_DEFAULT_REMPORT	    0
-#define SNMP_DEFAULT_REQID	    0
-#define SNMP_DEFAULT_MSGID	    0
+#define SNMP_DEFAULT_REQID	    -1
+#define SNMP_DEFAULT_MSGID	    -1
 #define SNMP_DEFAULT_ERRSTAT	    -1
 #define SNMP_DEFAULT_ERRINDEX	    -1
 #define SNMP_DEFAULT_ADDRESS	    0
@@ -455,6 +455,8 @@ void snmp_timeout (void);
 #define RECEIVED_MESSAGE   1
 #define TIMED_OUT	   2
 
+long snmp_get_next_msgid(void);
+long snmp_get_next_reqid(void);
 void snmp_set_dump_packet (int);
 int snmp_get_dump_packet (void);
 void snmp_set_quick_print (int);

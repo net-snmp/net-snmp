@@ -120,8 +120,8 @@ snmp_pdu_create(int command)
     pdu->address.sin_addr.s_addr = SNMP_DEFAULT_ADDRESS;
     pdu->securityNameLen	 = -1;
     pdu->contextNameLen		 = -1;
-    }
-
+    pdu->reqid                   = snmp_get_next_reqid();
+    pdu->msgid                   = snmp_get_next_msgid();
     return pdu;
 
 }  /* end snmp_pdu_create() */
@@ -369,7 +369,8 @@ snmp_fix_pdu(struct snmp_pdu *pdu, int command)
         return 0; /* no variables. "should not happen" */
     }
     newpdu->command = command;
-    newpdu->reqid = SNMP_DEFAULT_REQID;
+    newpdu->reqid = snmp_get_next_reqid();
+    newpdu->msgid = snmp_get_next_msgid();
     newpdu->errstat = SNMP_DEFAULT_ERRSTAT;
     newpdu->errindex = SNMP_DEFAULT_ERRINDEX;
 

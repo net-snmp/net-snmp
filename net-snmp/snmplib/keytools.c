@@ -79,11 +79,20 @@ generate_Ku(	oid	*hashtype,	u_int  hashtype_len,
 	 * Sanity check.
 	 */
 	if ( !hashtype || !P || !Ku || !kulen
-		|| (pplen < USM_LENGTH_P_MIN) || (*kulen<=0)
+		|| (*kulen<=0)
 		|| (hashtype_len != USM_LENGTH_OID_TRANSFORM) )
 	{
 		QUITFUN(SNMPERR_GENERR, generate_Ku_quit);
 	}
+
+        if (pplen < USM_LENGTH_P_MIN) {
+#ifdef SNMP_TESTING_CODE
+          fprintf(stderr, "Warning: passphrase chosen is below the length requiremnts of the USM.\n");
+#else
+          snmp_set_detail(strdup("Password length too short."));
+          QUITFUN(SNMPERR_GENERR, generate_Ku_quit);
+#endif
+        }
 
 
 	/*
