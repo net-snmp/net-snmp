@@ -55,9 +55,9 @@ init_scalar_int(void)
        you could change the NULL pointer below to a valid handler
        function. */
     netsnmp_register_int_instance("my example int variable",
-                          my_registration_oid,
-                          OID_LENGTH(my_registration_oid),
-                          &example1, NULL);
+                                  my_registration_oid,
+                                  OID_LENGTH(my_registration_oid),
+                                  &example1, NULL);
 
     DEBUGMSGTL(("example_scalar_int","Done initalizing example scalar int\n"));
 }
