@@ -1,5 +1,1141 @@
 -------------------------------------------------------------------------------
 
+Changes: V3.3 -> V3.4
+
+hardaker  1 Dec 97 12:44:24
+    - (*): 3.3.1 branch merged into main development branch.
+
+hardaker  5 Dec 97 08:46:50
+    - (snmp_api.h): Patch from Niels Baggesen:
+      - make trap variables long's not ints for 64bit machines to match
+        asn_build_int functions.
+
+hardaker  5 Dec 97 11:58:52
+    - (apps/*.c): support random access requests on all apps via -R switch.
+
+hardaker  5 Dec 97 14:30:06
+    - (configure, configure.in): warn instead of error for config_require macro's.
+
+hardaker 15 Dec 97 11:08:01
+    - (acconfig.h, config.h.in, configure, configure.in):
+      - new macro to change default MIBS when modules are compiled:
+        config_add_mib().
+
+hardaker 15 Dec 97 11:08:19
+    - (host.h, ucd_snmp.h, v2party.h):
+      - use config_add_mib().
+
+hardaker 15 Dec 97 11:14:18
+    - (at.c, example.c, hr_proc.c, hr_storage.c, hr_swrun.c, hr_system.c,
+      icmp.c, interfaces.c, interfaces.h, ip.c, loadave.c, memory.c,
+      route_write.c, tcp.c, udp.c, var_route.c, wombat.c, common_header.h):
+      - Patch from Simon Leinen to improve irix 6.2 support.
+
+hardaker 15 Dec 97 15:07:26
+    - (UCD-fields, oid_to_sym.in, oid_to_type.in): Patch from TANAKA Takashi:
+      - support more OS types in the ov/ directory files.
+      - mistake:  bsdi was getting defined as irix.
+      - don't core dump on -v without any arguments.
+
+hardaker 15 Dec 97 15:07:59
+    - (UCD-fields, oid_to_sym.in, oid_to_type.in, snmp_parse_args.c, acconfig.h):
+      - Patch from TANAKA Takashi:
+        - support more OS types in the ov/ directory files.
+        - mistake:  bsdi was getting defined as irix.
+        - don't core dump on -v without any arguments.
+
+hardaker 23 Dec 97 11:20:04
+    - (hr_swrun.c): Correct a non-casted malloc.
+
+hardaker 23 Dec 97 11:33:59
+    - (hr_filesys.c): Solaris specific fixes.
+
+hardaker 23 Dec 97 11:35:26
+    - (acconfig.h, config.h.in, sedscript.in): BSDI definition fixes.
+
+hardaker 23 Dec 97 11:41:49
+    - (config.h.in, configure, configure.in): Patch from Johannes Grosen:
+      - fix non-existent nlist.h problems under linux redhat 5.0.
+
+hardaker 23 Dec 97 11:42:28
+    - (mibgroup/*.c, common_header.h): Patch from Johannes Grosen:
+      - fix non-existent nlist.h problems under linux redhat 5.0.
+
+hardaker 23 Dec 97 11:42:39
+    - (snmptrap.c): Patch from Johannes Grosen:
+      - fix non-existent nlist.h problems under linux redhat 5.0.
+
+hardaker 23 Dec 97 11:42:54
+    - (snmplib/system.c): Patch from Johannes Grosen:
+      - fix non-existent nlist.h problems under linux redhat 5.0.
+
+hardaker 23 Dec 97 11:46:08
+    - (hpux.c): #ifdef'ed out unused writeHP function.
+
+hardaker 23 Dec 97 12:32:21
+    - (snmptrapd.c): Patch from Ted Rule:
+      - Use syslog option LOG_PID on startup.
+      - fork if syslog enabled.
+      - Enable logging to other syslog facilities.
+      - print all trap data to a single syslog line.
+
+hardaker 23 Dec 97 12:48:31
+    - (snmptrapd.c):
+      - Change -f flag to -l and make -f no-fork.
+      - fix patch which munged ability to generate both -P and -s simultaneously.
+
+hardaker 23 Dec 97 14:40:36
+    - (README): Add Ted Rule to coders list.
+
+hardaker 23 Dec 97 14:42:47
+    - (*): Turn all debugging routines into library calls that can be
+      turned on and off at run time.
+      - DEBUGP() is now a typical printf style function and is used everywhere.
+      - void snmp_set_do_debugging(int).
+      - int snmp_get_do_debugging().
+
+hardaker 23 Dec 97 14:44:38
+    - (snmpd.1.def, snmptrapd.8): debugging flag additions.
+
+hardaker 23 Dec 97 14:47:08
+    - (at.c, icmp.c, interfaces.c, ip.c, snmp_mib.c, system.c, tcp.c, udp.c):
+      - Patch from Dave Shield to break up common_header.h.
+
+hardaker 23 Dec 97 15:27:54
+    - (at.c, at.h, host_res.h, icmp.h, interfaces.c, interfaces.h, ip.h,
+      tcp.c, tcp.h, udp.c, udp.h, read_config.c, snmp_vars.c):
+      - clean up required headers for linux.
+
+hardaker 23 Dec 97 15:56:18
+    - (versioninfo.c, versioninfo.h): Create a mib variable to set/report
+      if debugging is on or off.
+
+hardaker 23 Dec 97 15:59:03
+    - (UCD-SNMP-MIB.txt): Create a mib variable to set/report if debugging
+      is on or off.
+
+hardaker 23 Dec 97 16:30:47
+    version tag ( 3.4.pre1 )
+
+hardaker 29 Dec 97 09:37:06
+    - (tkmib): First implementation.
+
+hardaker 30 Dec 97 14:00:03
+    - (tkmib):
+      - new command: table to display snmptables as a table.
+      - misc...
+
+hardaker 30 Dec 97 17:01:57
+    - (tkmib): Create a graphing widget.
+
+hardaker  5 Jan 98 13:27:38
+    - (mib_api.3): change "all" to "ALL".
+
+hardaker  5 Jan 98 13:28:00
+    - (mib.c, parse.c, parse.h): add a find_module() routine.
+
+hardaker  5 Jan 98 13:28:22
+    - (snmptranslate.c): put init_mib back in place (opps).
+
+hardaker  5 Jan 98 13:28:42
+    - (TODO): snmpv3
+
+hardaker  5 Jan 98 16:29:39
+    - (asn1.c): Patch from Niels Baggesen:
+      - fix asn1_build_objid.
+
+hardaker  5 Jan 98 17:33:07
+    - (parse.c): swap args to merge_anon_children().
+
+hardaker 12 Jan 98 09:14:54
+    - (parse.c): Patch from Dave Shield:  fix anon_children invalid memory access.
+
+hardaker 12 Jan 98 09:18:50
+    - (mib_api.3, snmp_api.3): Patch from Niels Baggesen:
+      - doc update to reflect moved headers.
+
+hardaker 12 Jan 98 09:19:10
+    - (Makefile.in): Patch from Niels Baggesen: link directly to lib.
+
+hardaker 12 Jan 98 09:19:47
+    - (Makefile.in, snmpbulkwalk.c, snmpdelta.c, snmpget.c, snmpgetnext.c,
+      snmpset.c, snmpstatus.c, snmptable.c, snmptest.c, snmptrap.c,
+      snmptrapd.c, snmpwalk.c): Patch from Niels Baggesen:
+      - remove unused headers.
+      - snmp_perror changes.
+
+hardaker 12 Jan 98 09:21:56
+    - (alarm.c, at.c, context_vars.c, event.c, hr_device.c, hr_filesys.c,
+      hr_partition.c, hr_storage.c, hr_swinst.c, hr_swrun.c, icmp.c,
+      interfaces.c, ip.c, proc.c, system.c, tcp.c, udp.c, var_route.c):
+      Patch from Niels Baggesen:
+      - Fix headers for FreeBSD and NetBSD.
+
+hardaker 12 Jan 98 09:40:36
+    - (FAQ, INSTALL, Makefile.in): Patch from Niels Baggesen:
+      - Documentation update to fix paths from recent changes.
+
+hardaker 12 Jan 98 09:41:38
+    - (read_config.c, snmp_vars.c, snmpd.c): Patch from Niels Baggesen:
+      - header fixes.
+      - snmp_perror usage.
+
+hardaker 12 Jan 98 09:44:51
+    - (asn1.c, mib.c, snmp_api.h, snmp_impl.h, system.h): Patch from Niels
+      Baggesen:
+      - header changes and boolean check corrections.
+
+hardaker 12 Jan 98 09:51:27
+    - (parse.c): Undid anon-children change.
+
+hardaker 12 Jan 98 09:56:14
+    - (kernel_sunos5.c): Patch from Niels Baggesen:
+      - increase buffer size to increase max interfaces reported on Solaris.
+
+hardaker 16 Jan 98 09:44:56
+    - (snmpd.c): Patch from Sheshadri Yagati:
+      - signal a trap (2) when the agent is shut down.
+
+hardaker 21 Jan 98 11:08:39
+    - (COPYING): update.
+
+hardaker 21 Jan 98 11:12:01
+    - (*/Makefile.in, Makefile.top, acconfig.h, config.h.in, configure,
+      configure.in):
+      - begin support for creating and using shared libraries.
+      - all Makefiles now include a Makefile.top for easier future global changes.
+
+hardaker 21 Jan 98 11:12:22
+    - (read_config.c, snmp_agent.c, snmp_vars.c, snmpd.c):
+      - include struct.h explicitly.
+
+hardaker 21 Jan 98 11:12:34
+    - (disk.c, errormib.c, extensible.c, interfaces.c, loadave.c,
+      memory.c, pass.c, proc.c, system.c, util_funcs.c, var_route.c,
+      versioninfo.c):
+      - include struct.h explicitly.
+
+hardaker 21 Jan 98 17:33:24
+    - (Makefile.top, configure, configure.in, */Makefile.in):
+      - Do a better version of shlib support.  Should be useable now at least.
+
+hardaker 21 Jan 98 22:05:44
+    - (acconfig.h, config.h.in, configure, configure.in):
+      - create m/ and s/ directories and use them for supplemental config
+        include files based on the config.guess output.
+
+hardaker 23 Jan 98 08:30:35
+    - (memory.c): Patch from Niels Baggesen:
+      - don't close file descriptor in linux's FILE_TO_BUF macro.
+
+hardaker 23 Jan 98 11:19:12
+    - (generic.h, i386.h, i586.h, i686.h): m/*.h file beginnings.
+
+hardaker 23 Jan 98 11:19:33
+    - (bsd.h, generic.h, linux.h, sysv.h): s/* beginnings.
+
+hardaker 23 Jan 98 16:12:02
+    - (read_config.c, read_config.h, snmp_vars.c, snmp_vars.h,
+      extensible.c, pass.c):
+      - create new functions:
+        - register_subtree()
+        - register_mib()
+        - unregister_mib().
+      - get rid of read_config special stuff for extensibility and put it
+        in their own submodules which now call register_mib().
+
+hardaker 23 Jan 98 16:14:20
+    - (registry.[ch], UCD-SNMP-MIB.txt):
+      - create a new table at ucdavis.103 to display registered mibs.
+
+hardaker 23 Jan 98 16:15:05
+    - (at.c, disk.c, host_res.h, hr_other.h, icmp.c, interfaces.c, ip.c,
+      snmp_mib.c, system.c, tcp.c, ucd_snmp.h, udp.c, versioninfo.c):
+      - #include "snmp_api.h"
+
+hardaker 23 Jan 98 16:34:43
+    - (configure, configure.in, snmp_vars.c, snmp_vars.h, var_struct.h,
+      extensible.c, pass.c, registry.c, registry.h, UCD-SNMP-MIB.txt):
+      - make the mib registry record and display a mib module name as well.
+
+hardaker 30 Jan 98 08:57:54
+    - (configure, configure.in): test for 'ps aux' (redhat 5.0).
+
+hardaker 30 Jan 98 09:01:06
+    - (UCD-SNMP-MIB.txt, memory.c, memory.h): Patch from Luuk de Boer:
+      - report cached, buffer, and shared statistics for linux.
+
+hardaker 30 Jan 98 09:24:19
+    - (read_config.c, snmp_vars.c, var_struct.h): Patch from Dave Shield:
+      - new subtree structure system.
+
+hardaker 30 Jan 98 10:40:26
+    - (pass.c): put pass_comapre here.
+
+hardaker 30 Jan 98 10:41:53
+    - (read_config.c, snmp_vars.c, snmp_vars.h, var_struct.h):
+      - merge Dave's code with mine.  Still a few bugs to work through.
+
+hardaker 30 Jan 98 10:42:17
+    - (registry.c, registry.h): begin munging for new hierarchy.
+
+hardaker 30 Jan 98 10:43:28
+    - (UCD-SNMP-MIB.txt): change module indexing to use oid instead of a numeric.
+
+hardaker 30 Jan 98 10:49:59
+    - (disk.c, host_res.h, pass.c, registry.c, snmp_mib.c, system.c,
+      versioninfo.c, snmp_api.h):
+      - include netinet/in.h for address structure.
+
+hardaker 30 Jan 98 10:55:20
+    version tag ( 3.4.pre2 )
+
+hardaker 30 Jan 98 13:49:56
+    - (README): I can't really have forgotten Simon's name in the list
+      could I?
+
+hardaker 30 Jan 98 13:50:28
+    - (aclocal.m4, configure): define ifnet for linux.
+
+hardaker 30 Jan 98 14:31:58
+    - (acconfig.h, config.h.in, configure, configure.in): check for if_speed.
+
+hardaker 30 Jan 98 14:32:13
+    - (interfaces.c): finish linux problems and use if_speed.
+
+hardaker 30 Jan 98 15:25:02
+    - (snmp_parse_args.c, snmptrap.c): fix default port for snmptrap.
+
+hardaker  2 Feb 98 08:57:41
+    - (configure, configure.in): Patch from John Hawkinson:
+      - fix typo in configure for shared library extension w/o shared libraries.
+
+hardaker  6 Feb 98 13:29:40
+    - (at.c, icmp.c, interfaces.c, ip.c, tcp.c, udp.c): protect against nlist.h
+
+hardaker  6 Feb 98 13:44:44
+    - (hr_disk.c): close() got caught inside an else it shouldn't have due
+      to an ifdef error.
+
+hardaker  6 Feb 98 17:10:53
+    - (Makefile.in, acconfig.h, config.h.in, configure, configure.in,
+      auto_nlist.c, auto_nlist.h, autonlist.h, kernel.c, snmp_vars.c, ip.c):
+      - created a new auto_nlist function and use it in ip.c.
+
+hardaker  6 Feb 98 17:11:25
+    - (generic.h, hpux.h, irix.h, linux.h, solaris.h):
+      - update for auto_nlist symbols.
+
+hardaker  9 Feb 98 11:03:02
+    - (at.c, disk.c, errormib.c, extensible.c, hpux.c, hr_proc.c,
+      hr_storage.c, hr_swrun.c, hr_system.c, icmp.c, interfaces.c, ip.c,
+      kernel_sunos5.c, loadave.c, memory.c, proc.c, tcp.c, udp.c,
+      var_route.c):
+      - use auto_nlist.
+
+hardaker  9 Feb 98 11:03:17
+    - (auto_nlist.h): prototype wrapper.
+
+hardaker  9 Feb 98 11:03:56
+    - (configure, configure.in):
+      - changed --with-shared-libraries to --enable-shared to match other pkgs.
+      - display arguments found for --enable-shared.
+
+hardaker  9 Feb 98 11:04:31
+    - (bsd.h, bsdi.h, freebsd.h, freebsd3.h, generic.h, hpux.h, netbsd.h,
+      solaris.h):
+      - define symbols for auto_nlist to use.
+
+hardaker  9 Feb 98 11:06:53
+    - (snmp_vars.c): Patch from Dave Shield:
+      - fix prototypes on my broken table walking routines.
+
+hardaker  9 Feb 98 11:17:52
+    version tag ( 3.4.pre3 )
+
+hardaker  9 Feb 98 11:18:45
+    - (configure.in): check for ioctls.h
+
+hardaker  9 Feb 98 11:18:59
+    - (interfaces.c):  include ioctls.h if available.
+
+hardaker  9 Feb 98 11:20:00
+    - (config.h.in, configure): check for ioctls.h.
+
+hardaker 11 Feb 98 09:19:33
+    - (generic.h, auto_nlist.c, at.c, hr_proc.c, hr_storage.c, memory.c,
+      tcp.c, udp.c, var_route.c): Patch from Dave Shield:
+      - fix all my typos ;-).
+      - create auto_nlist_value to return the looked-up value.
+
+hardaker 11 Feb 98 09:28:09
+    - (configure, configure.in):
+      - ps aux should define aux not -aux.
+
+hardaker 11 Feb 98 09:28:33
+    - (host_res.h): Patch from Dave Shield:
+      - don't include config.h
+
+hardaker 11 Feb 98 09:28:44
+    - (hr_network.c): Patch from Dave Shield:
+      - solaris fixes.
+
+hardaker 11 Feb 98 09:29:06
+    - (solaris.h): Patch from Dave Shield:
+      - undef IP_FORWARDING_SYMBOL before defining it.
+
+hardaker 11 Feb 98 16:44:13
+    - (configure, configure.in): sed doesn't like [a-z]+ type expressions.
+
+hardaker 13 Feb 98 09:07:31
+    - (FAQ): typo: authtrapsenable -> authtrapenable.
+
+hardaker 17 Feb 98 09:50:43
+    - (snmp_api.c, snmp_api.h):
+      - use snmp_ipaddr instead of ipaddr to avoid hpux conflicts.
+
+hardaker 17 Feb 98 09:53:12
+    - (auto_nlist.c, autonlist.h, snmp_vars.c):
+      - use appropriate mallocs, and NULL initialization of pointers.
+      - malloc the symbol rather than using a fixed length.
+      - insert debugging code.
+      - enable printing of the nlist tree if TESTING is defined.
+
+hardaker 17 Feb 98 09:54:01
+    - (tcp.c, udp.c):
+      - nlist symbol name errors.
+
+hardaker 18 Feb 98 08:06:00
+    - (EXAMPLE.conf.def, vmstat.c, vmstat.h, ucd_snmp.h,
+      UCD-SNMP-MIB.txt): Patch from Luuk de Boer:
+      - implment a vmstat mib group on linux.
+
+hardaker 18 Feb 98 08:15:56
+    - (config.h.in, configure, configure.in): Patch from Simon Leinen:
+      - check for sys/sysmp.h.
+
+hardaker 18 Feb 98 08:16:21
+    - (auto_nlist.c): Patch from Simon Leinen:
+      - fix a debugging statement (missing a variable).
+
+hardaker 18 Feb 98 08:18:05
+    - (at.c, icmp.c, interfaces.c, ip.c, tcp.c, udp.c, irix.h):
+      Patch from Simon Leinen:
+      - port to irix.
+
+hardaker 18 Feb 98 11:45:20
+    - (sedscript.in): define LIBDIR and DATADIR.
+
+hardaker 18 Feb 98 11:46:48
+    - (snmpd.1.def, snmpd.conf.5.def): change to DATADIR from LIBDIR.
+
+hardaker 18 Feb 98 13:31:07
+    - (disk.h, extensible.h, loadave.h, proc.h, UCD-SNMP-MIB.txt):
+      - turn these mibs into real tables.  Required changing the mib though.
+
+hardaker 18 Feb 98 13:34:55
+    - (snmpd.conf.5.def): authtrapsenable -> authtrapenable.
+
+hardaker 18 Feb 98 13:44:13
+    - (at.c, example.c, hpux.c, hr_device.c, hr_disk.c, hr_filesys.c,
+      hr_network.c, hr_partition.c, hr_print.c, hr_proc.c, hr_storage.c,
+      hr_swinst.c, hr_swrun.c, hr_system.c, icmp.c, interfaces.c, ip.c,
+      pass.c, registry.c, smux.c, snmp_mib.c, system.c, tcp.c, udp.c,
+      var_route.c, wombat.c):
+      - all bcopys -> memcpy.
+      - include a few extra headers for DEBUGP statements.
+
+hardaker 18 Feb 98 14:25:53
+    - (acl_vars.c, at.c, context_vars.c, disk.c, host_res.h, hr_disk.c,
+      hr_filesys.c, hr_storage.c, hr_swinst.c, hr_swrun.c, hr_utils.c,
+      icmp.c, interfaces.c, interfaces.h, ip.c, memory.c, mibincl.h,
+      party_vars.c, pass.c, proc.c, registry.c, smux.c, snmp_mib.c,
+      system.c, tcp.c, udp.c, var_route.c, versioninfo.c, view_vars.c,
+      vmstat.c):
+      - massive -Wall and --strict-prototypes checking.
+      - bzero -> memset.
+
+hardaker 18 Feb 98 14:32:05
+    - (read_config.c, snmp_vars.c):
+      - prototyping and --Wall checks.
+
+hardaker 18 Feb 98 14:32:38
+    - (snmp_api.c, snmp_api.h): prototyping checks.
+
+hardaker 18 Feb 98 16:28:51
+    - (openbsd.h): created.
+
+hardaker 18 Feb 98 16:29:58
+    - (acconfig.h, UCD-SNMP-MIB.txt):
+      - removed unneeded stuff.
+      - added openbsd.
+
+hardaker 18 Feb 98 16:30:47
+    - (at.c, proc.c, tcp.c, udp.c, var_route.c, bsd.h, bsdi.h, freebsd.h,
+      generic.h, hpux.h, netbsd.h):
+      - tried to merge some things into s/*.h defines instead.  There is a
+        lot to go still.
+
+hardaker 18 Feb 98 16:33:14
+    - (config.h.in): openbsd defines.
+
+hardaker 18 Feb 98 16:33:43
+    - (*/Makefile.in): make depend.
+
+hardaker 18 Feb 98 16:51:18
+    version tag ( 3.4.pre4 )
+
+hardaker 20 Feb 98 09:19:00
+    - (interfaces.c): Patch from Simon Leinen:
+      - fix include file dependancies on irix with _KERNEL defined.
+
+hardaker 20 Feb 98 11:15:14
+    - (*/Makefile.in): fix make depend to look for and strip /usr/lib/*.
+
+hardaker 25 Feb 98 07:27:09
+    - (read_config.c, snmpd.c): Patch from Niels Baggesen:
+      - fix read_config parser's end of line problems.
+
+hardaker  4 Mar 98 15:49:32
+    - (COPYING): documentation requirement change.
+
+hardaker  6 Mar 98 14:01:52
+    - (Makefile.in, kernel.c, read_config.c, read_config.h, snmp_agent.c,
+      snmp_vars.c, snmpd.c, acl_vars.c, alarm.c, context_vars.c, disk.c,
+      event.c, extensible.c, icmp.c, interfaces.c, ip.c, mibincl.h,
+      party_vars.c, pass.c, proc.c, registry.c, registry.h, route_write.c,
+      snmp_mib.c, system.c, tcp.c, udp.c, vacm_vars.c, vacm_vars.h,
+      var_route.c, versioninfo.c, view_vars.c, snmp_parse_args.c,
+      snmpdelta.c, snmpget.c, snmpgetnext.c, snmpset.c, snmpstatus.c,
+      snmptable.c, snmptest.c, snmptranslate.c, snmptrap.c, snmptrapd.c,
+      if.c, inet.c, route.c, snmpd.conf.5.def, snmptable.1, .index,
+      Makefile.in, SNMP-FRAMEWORK-MIB.txt, SNMP-MPD-MIB.txt,
+      SNMP-NOTIFICATION-MIB.txt, SNMP-PROXY-MIB.txt, SNMP-TARGET-MIB.txt,
+      SNMP-USER-BASED-SM-MIB.txt, SNMP-VIEW-BASED-ACM-MIB.txt,
+      Makefile.in, acl.h, acl_parse.c, asn1.c, context.h, context_parse.c,
+      mib.c, party.h, party_parse.c, snmp.c, snmp.h, snmp_api.c,
+      snmp_auth.c, snmp_client.c, snmp_impl.h, system.c, vacm.c, vacm.h,
+      view.c): Patch from Niels Baggesen:
+      - Implement the SNMPv3 View Based Access Control Model (RFC 2275).
+      - header fixes.
+      - better header-file #define names to include SNMP_, ASN_, etc. prefixes.
+
+hardaker  6 Mar 98 15:47:01
+    - (util_funcs.c):
+      - remove GLOBAL-SECURITY checks.
+
+hardaker  6 Mar 98 15:47:19
+    - (mibII.h): add vacm_vars.
+
+hardaker  6 Mar 98 15:47:40
+    - (host_res.h): move snmp_api.h up above snmp_impl.h.
+
+hardaker  6 Mar 98 15:48:33
+    - (acconfig.h, config.h.in, configure, configure.in):
+      - remove security type prompts.
+
+hardaker  9 Mar 98 17:40:04
+    - (mibII.c, mibII.h, sysORTable.c, sysORTable.h, system.c, v2party.c,
+      vacm_vars.c, vacm_vars.h):
+      - implement sysORTable.
+      - register mibs under it.
+
+hardaker 11 Mar 98 08:06:17
+    - (*/*/*/*): Patch from Niels Baggesen:
+      - fix auto_nlist on preceeding _ architectures.
+      - Change *all* define usage to new SNMP_ and ASN_ prefixes.
+      - leave mib access open if no com2sec statements were found in snmpd.conf.
+
+hardaker 11 Mar 98 09:40:42
+    - (hpux.h, hr_filesys.h, memory.h, snmp_bgp.h, snmp_ospf.h,
+      snmp_rip2.h, sysORTable.h, vmstat.h):
+      - finish converting a few of the files that Niels missed.
+
+hardaker 11 Mar 98 10:30:50
+    - (sysORTable.c, sysORTable.h, system.c, system.h):
+      - fix time values and move sysORLastChanged to the system group.
+
+hardaker 11 Mar 98 12:14:09
+    - (*): Patch from Craig Bevins for OpenBSD
+
+hardaker 11 Mar 98 12:27:01
+    - (interfaces.c, tcp.c, udp.c, var_route.c, var_route.h): Patch from
+      Craig Bevins:
+      - port to OpenBSD.
+
+hardaker 11 Mar 98 12:45:46
+    - (*): patch from Garrett Wollman for FreeBSD.
+
+hardaker 11 Mar 98 12:56:37
+    - (aclocal.m4, config.h.in, configure, configure.in, icmp.c,
+      interfaces.c, ip.c, tcp.c, udp.c, var_route.c): Patch from Garrett
+      Wollman:
+      - freebsd 3 sysctl implementations.
+
+hardaker 11 Mar 98 14:41:11
+    - (read_config.c, read_config.h, snmp_agent.c, snmp_vars.c, snmpd.c,
+      host_res.h, hr_device.c, hr_device.h, hr_disk.c, hr_disk.h,
+      hr_filesys.c, hr_filesys.h, hr_network.c, hr_network.h, hr_other.c,
+      hr_partition.c, hr_partition.h, hr_print.c, hr_print.h, hr_proc.c,
+      hr_proc.h, hr_storage.c, hr_storage.h, hr_swinst.c, hr_swinst.h,
+      hr_swrun.c, hr_swrun.h, hr_system.c, hr_system.h, interfaces.c,
+      ip.c, mibII.c, mibII.h, sysORTable.c, v2party.c, v2party.h,
+      vacm_vars.c, vacm_vars.h):
+      - massive prototyping and --Wall fixes.
+      - fixed things broken by the freebsd patch (only some I'm sure).
+
+hardaker 11 Mar 98 15:42:35
+    - (auto_nlist.c): better debugging printfs
+
+hardaker 11 Mar 98 15:45:22
+    - (hpux.h): switch incorrect arptab symbols.
+
+hardaker 11 Mar 98 15:56:13
+    - (README): name update.
+
+hardaker 11 Mar 98 15:57:16
+    - (*/Makefile.in): depend update.
+
+hardaker 11 Mar 98 17:05:41
+    - (system.c): don't chomp new line on read_config utils.
+
+hardaker 18 Mar 98 09:17:42
+    - (README): changed OV path's to newer release paths.
+
+hardaker 18 Mar 98 13:10:35
+    - (acconfig.h, config.h.in, sedscript.in, UCD-SNMP-MIB.txt):
+      - re-numbering of the new table modules.
+
+hardaker 18 Mar 98 13:26:22
+    - (extensible.c, memory.c, pass.c, proc.c, util_funcs.c, util_funcs.h):
+      - wait for pid after get_exec_output() with new wait_on_exec() function.
+
+hardaker 18 Mar 98 13:56:16
+    - (acconfig.h, config.h.in, configure, configure.in, read_config.c,
+      snmpd.c, snmp_parse_args.c, snmptrapd.c, main.c, mib_api.3,
+      config.h):
+      - SNMPLIBPATH -> SNMPSHAREPATH
+      - a real SNMPLIBPATH
+      - make the agent read .conf files from SNMPSHAREPATH:SNMPLIBPATH.
+
+hardaker 18 Mar 98 14:09:31
+    version tag ( 3.4.pre5 )
+
+hardaker 22 Mar 98 18:13:41
+    - (pass.c, proc.c, vacm_vars.c): Patch from Simon Burge:
+      - move sys/types.h up for ultrix.
+
+hardaker 25 Mar 98 09:15:45
+    - (tcp.c): include tcpip.h for digital unix.
+
+hardaker 25 Mar 98 10:39:13
+    - (read_config.c, read_config.h, snmp_vars.c, registry.c, registry.h):
+      - fix the registry mib to use the new module structure.
+      - create a working find_subtree() and find_subtree_next().
+
+hardaker 25 Mar 98 10:39:50
+    - (acconfig.h, config.h.in): simply don't define CAN_USE_NLIST on linux.
+
+hardaker 25 Mar 98 10:44:06
+    - (snmpd.c, snmp_api.c): Spelling errors from the CMU code fixed.
+
+hardaker 25 Mar 98 10:46:36
+    - (acconfig.h, config.h.in, linux.h): new define: DONT_USE_NLIST.
+
+hardaker 25 Mar 98 10:59:20
+    - (interfaces.c): Patch from Niels Baggesen:
+      - Add an & to arpcom.ac_enaddr in memset.
+
+hardaker 25 Mar 98 12:48:30
+    - (Makefile.in, int64.c, int64.h, mib.c): Code from David T. Perkins:
+      - integrated David's code to print counter64s as integers rather than hex.
+
+hardaker 25 Mar 98 13:07:00
+    - (v2party.c, mibII.c, vacm_vars.c): declair registration variables staticly.
+
+hardaker 25 Mar 98 16:49:56
+    - (hpux.c): fix write_method declaration.
+
+hardaker 26 Mar 98 07:22:30
+    - (*.c): Patch from Niels Baggesen:
+      - misc porting improvements (the bsd groups, sunos, ...).
+      - switch auto_nlists calling order of _ vs non _ lookups.
+      - reverse all string.h/strings.h include possibilities.
+
+hardaker 27 Mar 98 09:20:04
+    - (snmptrapd.c):
+      - Beta version of an extensible trap demon.
+        - -C 'command' on the command line runs the command and feeds it
+          stdin information about the trap.
+        - v1 traps are converted to v2 traps for consistancy of
+          information sent to the scripts.
+
+hardaker 27 Mar 98 11:20:21
+    - (read_config.c, read_config.h):
+      - create config_pwarn() that doesn't increase the error count to
+        prevent exiting.  Used for disks, since some might by process or
+        nfs mounted.
+
+hardaker 27 Mar 98 11:20:54
+    - (disk.c): use config_pwarn() for missing disks.
+
+hardaker 27 Mar 98 11:22:35
+    - (hr_device.c): check device index against maximum (segfault on HPUX).
+
+hardaker 27 Mar 98 16:10:05
+    - (README, config.h.in, configure, configure.in, snmpd.c): Patch from
+      Arthur Hyun:
+      - tcpwrappers support.
+
+hardaker 27 Mar 98 16:23:03
+    - (interfaces.c): Interfaces_Scan_Next needed a 4th (NULL) argument.
+
+hardaker 27 Mar 98 16:23:33
+    - (acconfig.h, config.h.in, configure, configure.in, snmpd.c):
+      - correctly #ifdef out the tcpwrappers patch.
+
+hardaker 27 Mar 98 16:42:13
+    - (INSTALL): document libwrap.
+
+hardaker 27 Mar 98 16:43:06
+    - (snmp_vars.c, snmp_vars.h, interfaces.c, ip.c, registry.c):
+      - prototyping and -Wall fixes.
+
+hardaker  1 Apr 98 09:52:32
+    - (snmp_client.c): enterprise_length is sizeof(oid) dependent.
+
+hardaker  1 Apr 98 13:27:07
+    - (auto_nlist.c):
+      - remove no longer needed debugging statements of tree traversal.
+
+hardaker  1 Apr 98 13:31:29
+    - (NEWS, PORTING): updates for 3.4.
+
+hardaker  1 Apr 98 13:47:55
+    - (FAQ, README): more 3.4 updates.
+
+hardaker  1 Apr 98 13:53:27
+    - (EXAMPLE.conf.def): added vacm example configuration.
+
+hardaker  1 Apr 98 13:54:11
+    - (snmpd.conf.5.def): moved the view example section above the access section.
+
+hardaker  1 Apr 98 14:10:07
+    - (TODO): removed a few things!
+
+hardaker  1 Apr 98 14:11:49
+    - (Makefile.in): make depend.
+
+hardaker  1 Apr 98 14:40:44
+    - (snmp_vars.c, snmp_vars.h): make unregestering of mibs work.
+      - (in most cases :-?)
+
+hardaker  1 Apr 98 14:43:14
+    version tag ( 3.4.pre6 )
+
+hardaker  1 Apr 98 16:35:59
+    - (snmptrapd.c): always send enterprise and trapoid to scripts.
+
+hardaker 20 Apr 98 10:31:08
+    - (snmpd.c): change oid from textual to numeric to allow now mibs to
+      be loaded.
+
+hardaker 20 Apr 98 15:54:29
+    - (host_res.h, hr_disk.c, hr_filesys.c, hr_partition.c, hr_storage.c):
+      - Patch from Dave Shield:
+        - consolidate the system-specific stuff a bit (should make it easier
+          to follow)
+        - Re-structures the Disk searching, in such a way that it can set up
+          via the config file. (which I still need to do)
+        - Speed up disk searching (by caching invalid results - a *major* win!)
+        - Handle partitions sensibly (arther than one per disk)
+        - Improve Solaris support for the Device group
+
+hardaker 20 Apr 98 15:56:50
+    - (config.h.in, configure, configure.in): check for sys/dkio.h
+
+hardaker 20 Apr 98 15:59:12
+    - (hr_filesys.c, hr_swrun.c): Patch from Niels Baggesen:
+      - fix some host resources for solaris.
+
+hardaker 20 Apr 98 16:00:36
+    - (snmpd.c): Patch from Niels Baggesen:
+      - appropriate use of strdup during startup and better flag checking.
+
+hardaker 20 Apr 98 16:00:56
+    - (interfaces.c): Patch from Niels Baggesen:
+      - header moves.
+
+hardaker 20 Apr 98 16:02:12
+    - (ip.c): Patch from Niels Baggesen:
+      - test symbol defines and cleanup.
+
+hardaker 20 Apr 98 16:03:03
+    - (snmptable.c): Patch from Niels Baggesen:
+      - prototyping and other cleanups.
+
+hardaker 20 Apr 98 16:05:00
+    - (snmptrapd.c): Patch from Niels Baggesen:
+      - gethostbyaddr moves up.
+      - include sys/wait.h.
+      - syslog %d -> %ld for long specific_type.
+
+hardaker 20 Apr 98 16:05:34
+    - (vacm_vars.c): Patch from Niels Baggesen:
+      - typecast a pointer.
+
+hardaker 20 Apr 98 16:06:03
+    - (tcp.c, udp.c, var_route.c): Patch from Niels Baggesen:
+      - #ifdef checks on symbols and header movement.
+
+hardaker 20 Apr 98 16:06:21
+    - (solaris.h): Patch from Niels Baggesen:
+      - undefine a bunch of nlist symbols.
+
+hardaker 20 Apr 98 16:07:10
+    - (snmp_client.c): Patch from Niels Baggesen:
+      - needed pointer copies.
+
+hardaker 22 Apr 98 07:49:21
+    - (UCD-SNMP-MIB.txt): changed wording, cleaned up a bit.
+
+hardaker 22 Apr 98 08:35:29
+    - (parse.c): Patch from Niels Baggesen:
+      - parse BITS keywords.
+
+hardaker 24 Apr 98 10:00:06
+    - (acconfig.h, config.h.in): mib oid location updates for ucd-snmp mib.
+
+hardaker 24 Apr 98 10:02:29
+    - (UCD-SNMP-MIB.txt):
+      - renamed labels to be unique from the old definitions.
+      - renumbered again.
+      - commented on the desgin of the mib at the top.
+      - Changed back to SMIv1.
+      - removed lockd section.
+      - removed vmstat section till it gets implemented.
+      - removed sequences of scalers.
+
+hardaker 24 Apr 98 10:22:00
+    - (UCD-SNMP-MIB.txt): the textual descriptions were updated some.
+
+hardaker 24 Apr 98 14:03:26
+    - (UCD-SNMP-MIB.txt): more cleaning and renaming.
+
+hardaker 24 Apr 98 14:32:12
+    - (acconfig.h, config.h.in, configure, configure.in):
+      - check statvfs.h for f_bavail.
+
+hardaker 24 Apr 98 14:33:08
+    - (hr_filesys.c): include sys/param.h to define MAXPATHLEN.
+
+hardaker 24 Apr 98 14:33:24
+    - (hr_partition.c): close file descriptor just opened.
+
+hardaker 24 Apr 98 14:33:58
+    - (disk.c): calculate vfs block size if possible and size > 255 bytes.
+
+hardaker 24 Apr 98 16:31:30
+    - (tcp.c): include netinet/tcpip.h for DU4.0.
+
+hardaker 24 Apr 98 16:32:05
+    - (auto_nlist.c, auto_nlist.h): n_value is a long:
+      - return the value from auto_nlist_value as an unsigned long.
+
+hardaker 24 Apr 98 16:40:45
+    - (var_route.c): watch out for single route loops.
+
+hardaker 27 Apr 98 10:59:19
+    - (Makefile.top): removed unneeded variable.
+
+hardaker 27 Apr 98 11:00:08
+    - (configure, configure.in): define SHLIB_LDCONFIG_CMD as ":" for
+      static library cases.
+
+hardaker 27 Apr 98 11:00:44
+    - (snmpbulkwalk.c, snmpdelta.c, snmpget.c, snmpgetnext.c, snmpset.c,
+      snmpstatus.c, snmptable.c, snmptest.c, snmpwalk.c):
+      - Put the word "Timeout: " in front of the "No Response" errors.
+
+hardaker 27 Apr 98 13:31:10
+    version tag ( 3.4.pre7 )
+
+hardaker 27 Apr 98 16:24:34
+    - (tkmib): bug fixes and new mib menu to load new mibs.
+
+hardaker 27 Apr 98 16:46:28
+    - (tkmib): New mib menu command: load a mib module by ID name.
+
+hardaker 27 Apr 98 16:48:02
+    - (tkmib): bug fixes.
+
+hardaker 29 Apr 98 08:56:44
+    - (snmptable.c): Patch from Niels Baggesen:
+      - fix -H header printing.
+
+hardaker 29 Apr 98 10:26:58
+    - (tcp.c): don't use TCPSTAT_SYMBOL unless defined.
+
+hardaker 29 Apr 98 10:34:12
+    - (example.c, proc.c, var_route.c, wombat.c):
+      - nlist cleanups.
+
+hardaker 29 Apr 98 10:43:04
+    - (example.c, example.h, wombat.c, wombat.h): more clean ups.
+
+hardaker 29 Apr 98 11:31:43
+    - (vmstat.c, vmstat.h): moves, changes, removals, and fixes.
+
+hardaker 29 Apr 98 11:32:01
+    - (UCD-SNMP-MIB.txt): put vmstat back in and renamed to systemStats.
+
+hardaker 29 Apr 98 11:41:58
+    - (tkmib):
+      - display unloaded module error.
+      - don't try to load a file on a cancel.
+
+hardaker  6 May 98 11:22:56
+    - (Makefile.in): install tkmib.
+
+hardaker  6 May 98 14:06:57
+    - (UCD-SNMP-MIB.txt):
+      - added internal table section.
+      - mib number corrections to match the source.
+
+hardaker  6 May 98 14:58:23
+    - (disk.c, errormib.c, example.c, example.h, extensible.c, loadave.c,
+      memory.c, proc.c, sysORTable.c, system.c, util_funcs.c,
+      util_funcs.h, versioninfo.c, vmstat.c):
+      - remove the newname requirement from checkmib().
+      - create header_generic() for simple scalar tests.
+      - use header_generic() in all ucd specific scalar mibs, and example.[ch].
+
+hardaker  6 May 98 21:06:59
+    - (NEWS): minor wording change.
+
+hardaker  6 May 98 21:07:28
+    - (util_funcs.c, util_funcs.h):
+      - new function: calculate_time_diff(t1, t2).
+
+hardaker  6 May 98 21:08:00
+    - (UCD-SNMP-MIB.txt): make bogus index's be 0.
+
+hardaker  6 May 98 21:08:37
+    - (mib2c): created a mib2c template creator.
+
+hardaker  6 May 98 22:28:47
+    - (win32/config.h): update from Joe Marzot.
+
+hardaker  7 May 98 09:05:55
+    - (COPYING): correction for dates.
+
+hardaker  7 May 98 09:07:06
+    - (configure, configure.in): sys/stat inclusion in fs checks.
+
+hardaker  7 May 98 09:07:46
+    - (read_config.c): debug info for config files read.
+
+hardaker  8 May 98 10:57:49
+    - (config*): check for pkglocs.h.
+
+hardaker  8 May 98 11:01:24
+    - (hr_swinst.c, hr_disk.c): Patch from Dave Shields.
+
+hardaker  8 May 98 14:53:36
+    - (disk.c): wording change.
+
+hardaker 11 May 98 08:08:37
+    - (util_funcs.c): blank line removal.
+
+hardaker 11 May 98 08:08:53
+    - (tkmib): optional port number.
+
+hardaker 11 May 98 08:09:58
+    - (mib2c):
+      - counter64s.
+      - consolodation of variable declarations.
+      - more error stings in all files for unknown variable types.
+
+hardaker 11 May 98 08:10:30
+    - (parse.c): opaque's can have a size specifier.
+
+hardaker 11 May 98 08:10:46
+    - (int64.c): add incrByU32().
+
+hardaker 11 May 98 10:29:16
+    - (read_config.c, snmp_vars.h, snmpd.c, snmpd.h, var_struct.h): Patch
+      from Niels Baggesen:
+      - free routines for vacm (to allow -HUP)
+      - free routines for the trapsink directives in snmpd
+
+hardaker 11 May 98 10:30:01
+    - (hr_disk.c, hr_filesys.c, hr_partition.c, vacm_vars.c): Patch from
+      Niels Baggesen:
+      - some prototypes for the hr_*.c files (needs Dave's recent patch)
+        Warning: the proc part still does not work with Solaris!
+
+hardaker 11 May 98 10:30:18
+    - (snmptranslate.c): Patch from Niels Baggesen:
+      - implement the long since announced -H option to snmptable
+
+hardaker 11 May 98 10:30:37
+    - (snmptranslate.1): Patch from Niels Baggesen:
+      - implement the long since announced -H option to snmptable.
+
+hardaker 11 May 98 10:31:33
+    - (SNMPv2-TC.txt): Patch from Niels Baggesen:
+      - this last [parser] may find errors in old MIBs (including the
+        version of SNMPv2-TC that we ship).
+
+hardaker 11 May 98 10:32:27
+    - (UCD-SNMP-MIB.txt): Patch from Niels Baggesen:
+      - Corrections of disk entry capitilazation problems.
+
+hardaker 11 May 98 10:34:38
+    - (mib.c, parse.c, parse.h, snmp_api.h, vacm.c, vacm.h): Patch from
+      Niels Baggesen:
+      - free routines for vacm (to allow -HUP)
+      - fix the parser to report unlinked OIDs. This did reveal an error in a
+        Cisco MIB (CISCO-IPMCAST-MIB) that I had been using (it needs an
+        IMPORTS ciscoExperiment FROM CISCO-SMI)
+        Actually the parser worked ok, except for the missing error messages.
+      - rewrite of the parsers lexical analyser, to correct the errors that
+        Dave Perkins and others have pointed out recently (name::= , DESCRIPTION"
+        and proper handling of -- partial line comments --). Watch out! this last
+        may find errors in old MIBs (including the version of SNMPv2-TC that
+        we ship). My Fore Systems MIBs had errors with this.
+      - implement the long since announced -H option to snmptable
+
+hardaker 12 May 98 10:52:16
+    - (hr_swinst.c): Patch from Dave Shield:
+      - more swinst fixes for rpm modules.
+
+hardaker 12 May 98 10:52:57
+    - (snmptrapd.c): Patch from Dave Shield:
+      - include a getdtablesize() function for hpux9.
+
+hardaker 12 May 98 11:10:42
+    - (NEWS): more updates.
+
+hardaker 12 May 98 11:11:10
+    - (acconfig.h, config.h.in, configure, configure.in):
+      - munge rpm lib check to link with -ldb as well.
+
+hardaker 12 May 98 11:11:32
+    - (disk.c): NULL -> 0.
+
+hardaker 12 May 98 11:45:21
+    - (vmstat.c): correct strings inclusion.
+
+hardaker 12 May 98 11:45:51
+    - (snmp_api.c, system.c):
+      - move debugging code from system.c to snmp_api.c, where it should be.
+
+hardaker 12 May 98 15:14:48
+    - (disk.c, example.c, interfaces.c, loadave.c, memory.c, pass.c,
+      proc.c, util_funcs.h, vmstat.c):
+      - include time.h properly instead of relying on util_funcs.h to do it.
+
+hardaker 12 May 98 15:15:01
+    version tag ( 3.4.pre8 )
+
+hardaker 13 May 98 21:21:22
+    - (int64.c, int64.h, mib.c): make int64.c use counter64's structure.
+
+hardaker 13 May 98 21:21:42
+    - (snmp_vars.c): don't return a counter64 to a snmpv1 request.
+
+hardaker 13 May 98 21:22:09
+    - (ip.c): include net/route.h and syslog.h for bsdi.
+
+hardaker 13 May 98 21:22:17
+    - (memory.c): include sys/param.h for bsdi
+
+hardaker 13 May 98 21:25:39
+    - (mib.c): sprint_by_type() didn't handle counter64's.
+
+hardaker 14 May 98 07:17:34
+    - (memory.c): move sys/param.h up above fs.h headers.
+
+hardaker 14 May 98 08:21:55
+    - (FAQ): new FAQ from Dave Shields.
+
+hardaker 14 May 98 08:22:08
+    - (NEWS): mib2c mentioned.
+
+hardaker 14 May 98 08:25:57
+    - (configure.in, configure): typos.
+
+hardaker 15 May 98 10:13:16
+    - (parse.c): single quote missing module names.
+
+hardaker 15 May 98 10:17:36
+    - (read_config.c, hr_filesys.c, hr_storage.c, hr_swrun.c, hr_system.c,
+      hr_system.h, hr_utils.c, util_funcs.c, var_route.c,
+      snmp_parse_args.c, snmptable.c, snmptranslate.c, snmptranslate.1,
+      bsd.h, solaris.h, sunos.h, int64.h, mib.c, mib.h, parse.c, parse.h):
+      Patch from Niels Baggesen:
+      - snmptranslate supports -R and -r.
+      - miscellaneous warning fixes.
+      - oid searcher always ignores case.
+      - fixed hr_system to compile on SunOS4.
+
+hardaker 15 May 98 10:19:05
+    - (mib.c): Patch from Dave Shield:
+      - provide ability to do random searches specifying a module name to look in.
+
+hardaker 15 May 98 11:17:44
+    - (FAQ, mib.c): Patch from Dave Shield:
+      - handle random lookups with multiple oid segments.
+
+hardaker 15 May 98 11:19:10
+    - (config.h, win32.opt, libsnmp.dsp, libsnmp.plg, libsnmp.def,
+      libsnmp_dll.dsp, libsnmp_dll.plg, snmpbulkwalk.plg, snmpget.plg,
+      snmpgetnext.plg, snmpset.plg, snmpstatus.plg, snmptranslate.plg,
+      snmpwalk.plg): Patch from Joe Marzot:
+      - win32 file updates.
+
+hardaker 18 May 98 11:18:21
+    - (acconfig.h, config.h.in, configure, configure.in):
+      - fix rtentry structure test on re-configures.
+
+hardaker 18 May 98 13:13:18
+    - (hr_swinst.c): protect using the date pointer against NULL settings.
+
+hardaker 18 May 98 15:39:38
+    version tag ( 3.4.pre9 )
+
+hardaker 18 May 98 18:14:19
+    - (int64.c):
+      - include header changes for win32.
+
+hardaker 19 May 98 10:41:14
+    - (at.c): set to do nothing when CAN_USE_SYSCTL.
+
+hardaker 19 May 98 10:41:49
+    - (memory.c): fix swapinfo on hpux10 systems. (/etc/swapinfo -r).
+
+hardaker 20 May 98 07:33:02
+    - (mib.c, parse.c): Patch from Niels Baggesen:
+      - extend random lookups further.
+
+hardaker 20 May 98 07:34:31
+    - (FAQ): Update from Dave Shield.
+
+hardaker 20 May 98 07:36:14
+    - (util_funcs.c): make checmib() use oid not int for newname.
+
+hardaker 20 May 98 07:37:33
+    - (snmp_impl.h): version should be a long.
+
+hardaker 20 May 98 08:25:41
+    - (read_config.c): config_perror() -> config_pwarn() for missing tokens.
+
+hardaker 20 May 98 08:27:06
+    - (*/Makefile.in): make depend.
+	
+-------------------------------------------------------------------------------
+
 Changes: V3.2 -> V3.3
 
 whardake 11 Jun 97 04:53:53
