@@ -86,14 +86,17 @@ fi
 
 BASE_PORT=8765
 MAX_RETRIES=3
-if [ -x /bin/netstat ]; then
+if test -x /bin/netstat ; then
     NETSTAT=/bin/netstat
-elif [ -x /usr/bin/netstat ]; then
+elif test -x /usr/bin/netstat ; then
     NETSTAT=/usr/bin/netstat
 else
     NETSTAT=""
 fi
-if [ -x $NETSTAT ]; then
+if test -x $NETSTAT ; then
+    if test -z "$RANDOM"; then
+        RANDOM=2
+    fi
     while :
     do
         IN_USE=`$NETSTAT -a 2>/dev/null | grep "[\.:]$BASE_PORT "`
