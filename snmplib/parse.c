@@ -886,7 +886,7 @@ build_translation_table()
                 translation_table[count] = TYPE_INTEGER;
                 break;
             case NETADDR:
-                translation_table[count] = TYPE_IPADDR;
+                translation_table[count] = TYPE_NETADDR;
                 break;
             case IPADDR:
                 translation_table[count] = TYPE_IPADDR;
