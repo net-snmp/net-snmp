@@ -108,6 +108,17 @@ void usage __P((void))
   snmp_parse_args_usage(stderr);
   fprintf(stderr, "[-f commandFile]\n[-l] [-L SumFileName] [-s] [-k] [-t] [-S] [-v vars/pkt]\n [-p period] [-P peaks] oid [oid ...]\n");
   snmp_parse_args_descriptions(stderr);
+  fprintf(stderr, "  -l\t\twrite configuration to file\n");
+  fprintf(stderr, "  -f config\tload configuration from file\n");
+  fprintf(stderr, "  -p period\tspecifies the poll period\n");
+  fprintf(stderr, "  -P peaks\treporting period in poll periods\n");
+  fprintf(stderr, "  -k\t\tkeep seconds in output time\n");
+  fprintf(stderr, "  -m\t\tshow max values\n");
+  fprintf(stderr, "  -S\t\tlog to a sum file\n");
+  fprintf(stderr, "  -s\t\tshow timestamps\n");
+  fprintf(stderr, "  -t\t\tget timing from agent\n");
+  fprintf(stderr, "  -T\t\tprint output in tabular form\n");
+  fprintf(stderr, "  -L sumfile\tspecifies the sum file name\n");
 }
 
 int wait_for_peak_start(period, peak)
