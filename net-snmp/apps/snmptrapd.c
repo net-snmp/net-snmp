@@ -115,6 +115,8 @@ typedef long	fd_mask;
 int Print = 0;
 int Syslog = 0;
 int Event = 0;
+int dropauth = 0;
+int running = 1;
 
 /*
  * These definitions handle 4.2 systems without additional syslog facilities.
@@ -392,7 +394,7 @@ int snmp_input(int op,
 	if (pdu->command == SNMP_MSG_TRAP){
 	    host = gethostbyaddr ((char *)&pdu->agent_addr.sin_addr,
 				  sizeof (pdu->agent_addr.sin_addr), AF_INET);
-	    if (Print) {
+	    if (Print && (pdu->trap_type != SNMP_TRAP_AUTHFAIL || dropauth == 0)) {
 		time (&timer);
 		tm = localtime (&timer);
                 printf("%.4d-%.2d-%.2d %.2d:%.2d:%.2d %s [%s] %s:\n",
@@ -423,7 +425,7 @@ int snmp_input(int op,
 		}
                 printf("\n");
 	    }
-	    if (Syslog) {
+	    if (Syslog && (pdu->trap_type != SNMP_TRAP_AUTHFAIL || dropauth == 0)) {
 	    	varbufidx=0;
 	    	varbuf[varbufidx++]=','; varbuf[varbufidx++]=' ';
 	    	varbuf[varbufidx]='\0';
@@ -519,7 +521,12 @@ int snmp_input(int op,
 
 void usage(void)
 {
-    fprintf(stderr,"Usage: snmptrapd [-V] [-q] [-D] [-p #] [-P] [-s] [-f] [-l [d0-7]] [-e] [-d] [-h] [-H]\n");
+    fprintf(stderr,"Usage: snmptrapd [-V] [-q] [-D] [-p #] [-P] [-s] [-f] [-l [d0-7]] [-e] [-d] [-H] [-S] [-a]\n");
+}
+
+RETSIGTYPE term_handler(int sig)
+{
+    running = 0;
 }
 
 
@@ -546,7 +553,7 @@ int main(int argc, char *argv[])
 
     setvbuf (stdout, NULL, _IOLBF, BUFSIZ);
     /*
-     * usage: snmptrapd [-v 1] [-q] [-D] [-p #] [-P] [-s] [-f] [-l [d0-7]] [-d] [-e]
+     * usage: snmptrapd [-q] [-D] [-p #] [-P] [-s] [-f] [-l [d0-7]] [-d] [-e] [-S] [-a]
      */
     for(arg = 1; arg < argc; arg++){
 	if (argv[arg][0] == '-'){
@@ -602,6 +609,12 @@ int main(int argc, char *argv[])
 		    break;
 		case 's':
 		    Syslog++;
+		    break;
+		case 'S':
+		    snmp_set_suffix_only(2);
+		    break;
+		case 'a':
+		    dropauth = 1;
 		    break;
                 case 'f':
 		    dofork = 0;
@@ -689,10 +702,6 @@ int main(int argc, char *argv[])
     if (userListPtr == NULL) /* user already existed */
       usm_free_user(user);
 
-#if 0
-    init_mib();		/* initialize the mib structures */
-#endif
-
     update_config(0);	/* read in config files and register HUP */
     init_usm_post_config();
     init_snmpv3_post_config();
@@ -760,7 +769,7 @@ int main(int argc, char *argv[])
       time_t timer;
       time (&timer);
       tm = localtime (&timer);
-      printf("%.4d-%.2d-%.2d %.2d:%.2d:%.2d UCD-snmp version %s\n",
+      printf("%.4d-%.2d-%.2d %.2d:%.2d:%.2d UCD-snmp version %s Started.\n",
              tm->tm_year+1900, tm->tm_mon+1, tm->tm_mday,
              tm->tm_hour, tm->tm_min, tm->tm_sec,
              VersionInfo);
@@ -795,7 +804,11 @@ int main(int argc, char *argv[])
 	exit(1);
     }
 
-    while(1){
+    signal(SIGTERM, term_handler);
+    signal(SIGHUP, term_handler);
+    signal(SIGINT, term_handler);
+
+    while (running) {
 	numfds = 0;
 	FD_ZERO(&fdset);
 	block = 0;
@@ -815,12 +828,24 @@ int main(int argc, char *argv[])
 		break;
 	    case -1:
 	        perror("select");
-		return 1;
+		running = 0;
 	    default:
 		fprintf(stderr, "select returned %d\n", count);
-		return 1;
+		running = 0;
 	}
     }
+
+    if (Print) {
+	struct tm *tm;
+	time_t timer;
+	time (&timer);
+	tm = localtime (&timer);
+	printf("%.4d-%.2d-%.2d %.2d:%.2d:%.2d UCD-snmp version %s Stopped.\n",
+	       tm->tm_year+1900, tm->tm_mon+1, tm->tm_mday,
+	       tm->tm_hour, tm->tm_min, tm->tm_sec,
+	       VersionInfo);
+    }
+    return 0;
 }
 
 void
