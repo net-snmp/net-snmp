@@ -350,6 +350,7 @@ snmp_synch_response(ss, pdu, response)
 	FD_ZERO(&fdset);
 	block = SNMPBLOCK;
 	tvp = &timeout;
+        tvp->tv_sec = 120;               /* wait max 10 secs */
 	timerclear(tvp);
 	snmp_select_info(&numfds, &fdset, tvp, &block);
 	if (block == 1)
