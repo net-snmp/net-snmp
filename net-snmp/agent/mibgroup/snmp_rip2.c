@@ -66,13 +66,13 @@ var_rip2(vp, name, length, exact, var_len, write_method)
 {
 	u_char *var;
 	int result;
+        char c_oid[MAX_NAME_LEN];
 
-#ifdef DODEBUG
-	printf("[var_rip2] var len %d, oid requested Len %d-",*var_len, *length);
-	print_oid(name, *length);
-	printf("\n");
-#endif
-
+        if (snmp_get_do_debugging()) {
+          sprint_objid (c_oid, name, *length);
+          DEBUGP("[var_rip2] var len %d, oid requested Len %d-%s\n",*var_len, *length,c_oid);
+        }
+        
 	/* 
 	 * Pass on the request to Gated.
 	 * If the request sent out was a get next, check to see if
@@ -98,9 +98,7 @@ var_rip2(vp, name, length, exact, var_len, write_method)
 		         sizeof(max_rip_mib)/sizeof(u_int));
 
 	if (result >= 0) {
-#ifdef DODEBUG
-		printf("Over shot\n");
-#endif
+                DEBUGP("Over shot\n");
 		return NULL;
 	}
 
@@ -108,10 +106,8 @@ var_rip2(vp, name, length, exact, var_len, write_method)
 	result = compare(name, *length, min_rip_mib, 
 			 sizeof(min_rip_mib)/sizeof(u_int));
 	if (exact && (result < 0)) {
-#ifdef DODEBUG
-		printf("Exact but doesn't match length %d, size %d\n",
+		DEBUGP("Exact but doesn't match length %d, size %d\n",
 			*length, sizeof(min_rip_mib));
-#endif
 		return NULL;
 	}
 
@@ -123,11 +119,9 @@ var_rip2(vp, name, length, exact, var_len, write_method)
 	 */
 	var = smux_snmp_process(exact, name, length, var_len);
 
-#ifdef DODEBUG
-	printf("[var_rip2] var len %d, oid obtained Len %d-",*var_len, *length);
-	print_oid(name, *length);
-	printf("\n");
-#endif
+        if (snmp_get_do_debugging()) {
+          DEBUGP("[var_rip2] var len %d, oid obtained Len %d-%s\n",*var_len, *length,c_oid);
+        }
 
 	vp->type = smux_type;
 

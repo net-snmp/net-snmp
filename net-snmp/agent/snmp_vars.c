@@ -131,12 +131,10 @@ init_nlist(nl)
 #endif
   for(ret = 0; nl[ret].n_name != NULL; ret++) {
       if (nl[ret].n_type == 0) {
-#ifdef DODEBUG
-	  DEBUGP1("nlist err:  %s not found\n",nl[ret].n_name);
+	  DEBUGP("nlist err:  %s not found\n",nl[ret].n_name);
       } else {
-	  fprintf(stderr, "nlist: %s 0x%X\n", nl[ret].n_name,
-		  (unsigned int)nl[ret].n_value);
-#endif
+	  DEBUGP("nlist: %s 0x%X\n", nl[ret].n_name,
+                 (unsigned int)nl[ret].n_value);
       }
   }
 #endif

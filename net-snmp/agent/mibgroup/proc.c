@@ -75,10 +75,8 @@ void proc_parse_config(word,cptr)
       (*procp)->max = 0;
       (*procp)->min = 0;
     }
-#ifdef DODEBUG
-  fprintf (stderr,"Read:  %s (%d) (%d)\n",
+  DEBUGP (stderr,"Read:  %s (%d) (%d)\n",
            (*procp)->name, (*procp)->max, (*procp)->min);
-#endif
 }
 
 /* The routine that handles everything */

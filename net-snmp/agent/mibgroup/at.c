@@ -216,21 +216,17 @@ static int
 AT_Cmp(void *addr, void *ep)
 { mib2_ipNetToMediaEntry_t *mp = (mib2_ipNetToMediaEntry_t *) ep;
   int ret = -1;
-#ifdef DODEBUG
-  printf ("......... AT_Cmp %lx<>%lx %d<>%d (%.5s)\n",
+  DODEBUG("......... AT_Cmp %lx<>%lx %d<>%d (%.5s)\n",
 	  mp->ipNetToMediaNetAddress, ((if_ip_t *)addr)->ipAddr,
 	  ((if_ip_t*)addr)->ifIdx,Interface_Index_By_Name (mp->ipNetToMediaIfIndex.o_bytes, mp->ipNetToMediaIfIndex.o_length),
 	  mp->ipNetToMediaIfIndex.o_bytes);
-#endif /*  DODEBUG */
   if (mp->ipNetToMediaNetAddress != ((if_ip_t *)addr)->ipAddr)
     ret = 1;
   else if (((if_ip_t*)addr)->ifIdx !=
       Interface_Index_By_Name (mp->ipNetToMediaIfIndex.o_bytes, mp->ipNetToMediaIfIndex.o_length))
 	ret = 1;
   else ret = 0;
-#ifdef DODEBUG
-  printf ("......... AT_Cmp returns %d\n", ret);
-#endif /*  DODEBUG */
+  DODEBUG ("......... AT_Cmp returns %d\n", ret);
   return ret;
 }
 
@@ -255,16 +251,14 @@ var_atEntry(struct variable *vp, oid *name, int *length, int exact,
     mib2_ipNetToMediaEntry_t entry, Lowentry;
     int		Found = 0;
     req_e	req_type;
-#ifdef DODEBUG
     char	c_oid[1024];
-#endif /* DODEBUG */
 
     /* fill in object part of name for current (less sizeof instance part) */
 
-#ifdef DODEBUG
-    sprint_objid (c_oid, vp->name, vp->namelen);
-    printf ("var_atEntry: %s %d\n", c_oid, exact);
-#endif /* DODEBUG */
+    if (snmp_get_do_debugging()) {
+      sprint_objid (c_oid, vp->name, vp->namelen);
+      DODEBUG("var_atEntry: %s %d\n", c_oid, exact);
+    }
     memset (&Lowentry, 0, sizeof (Lowentry));
     bcopy((char *)vp->name, (char *)current, (int)vp->namelen * sizeof(oid));
     if (*length == AT_NAME_LENGTH) /* Assume that the input name is the lowest */
@@ -305,9 +299,7 @@ var_atEntry(struct variable *vp, oid *name, int *length, int exact,
 	    }
 	}
     }
-#ifdef DODEBUG
-    printf ("... Found = %d\n", Found);
-#endif /* DODEBUG */
+    DODEBUG("... Found = %d\n", Found);
     if (Found == 0)
       return(NULL);
     bcopy((char *)lowest, (char *)name, AT_NAME_LENGTH * sizeof(oid));

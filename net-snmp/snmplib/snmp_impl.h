@@ -120,12 +120,8 @@ struct trapVar {
     struct trapVar *next;  
 };
 
-#ifdef DODEBUG
 /* changed to ERROR_MSG to eliminate conflict with other includes */
 #define ERROR_MSG(string)	snmp_detail = string
-#else
-#define ERROR_MSG(string)
-#endif
 
 /* from snmp.c*/
 extern u_char	sid[];	/* size SID_MAX_LEN */

@@ -104,12 +104,12 @@ header_hrswrun(vp, name, length, exact, var_len, write_method)
 #define HRSWRUN_NAME_LENGTH	9
     oid newname[MAX_NAME_LEN];
     int result;
-#ifdef DODEBUG
     char c_oid[MAX_NAME_LEN];
 
-    sprint_objid (c_oid, name, *length);
-    printf ("var_hrswrun: %s %d\n", c_oid, exact);
-#endif
+    if (snmp_get_do_debugging()) {
+      sprint_objid (c_oid, name, *length);
+      DEBUGP ("var_hrswrun: %s %d\n", c_oid, exact);
+    }
 
     bcopy((char *)vp->name, (char *)newname, (int)vp->namelen * sizeof(oid));
     newname[HRSWRUN_NAME_LENGTH] = 0;
@@ -137,12 +137,12 @@ header_hrswrunEntry(vp, name, length, exact, var_len, write_method)
     oid newname[MAX_NAME_LEN];
     int pid, LowPid=-1;
     int result;
-#ifdef DODEBUG
     char c_oid[MAX_NAME_LEN];
 
-    sprint_objid (c_oid, name, *length);
-    printf ("var_hrswrunEntry: %s %d\n", c_oid, exact);
-#endif
+    if (snmp_get_do_debugging()) {
+      sprint_objid (c_oid, name, *length);
+      DEBUGP ("var_hrswrunEntry: %s %d\n", c_oid, exact);
+    }
 
     bcopy((char *)vp->name, (char *)newname, (int)vp->namelen * sizeof(oid));
 
@@ -152,27 +152,23 @@ header_hrswrunEntry(vp, name, length, exact, var_len, write_method)
     Init_HR_SWRun();
     for ( ;; ) {
         pid = Get_Next_HR_SWRun();
-#ifdef DODEBUG
 #ifndef linux
-        printf ("(index %d (entry #%d) ....", pid, current_proc_entry);
-#endif
+        DEBUGP ("(index %d (entry #%d) ....", pid, current_proc_entry);
 #endif
         if ( pid == -1 )
 	    break;
 	newname[HRSWRUN_ENTRY_NAME_LENGTH] = pid;
-#ifdef DODEBUG
-sprint_objid (c_oid, newname, *length);
-printf ("%s", c_oid);
-#endif
+        if (snmp_get_do_debugging()) {
+          sprint_objid (c_oid, newname, *length);
+          DEBUGP ("%s", c_oid);
+        }
         result = compare(name, *length, newname, (int)vp->namelen + 1);
         if (exact && (result == 0)) {
 	    LowPid = pid;
 #ifndef linux
 	    LowProcIndex = current_proc_entry;
 #endif
-#ifdef DODEBUG
-printf (" saved\n");
-#endif
+DEBUGP (" saved\n");
 	    /* Save process status information */
             break;
 	}
@@ -183,19 +179,13 @@ printf (" saved\n");
 	    LowProcIndex = current_proc_entry;
 #endif
 	    /* Save process status information */
-#ifdef DODEBUG
-printf (" saved");
-#endif
+DEBUGP (" saved");
 	}
-#ifdef DODEBUG
-printf ("\n");
-#endif
+DEBUGP ("\n");
     }
 
     if ( LowPid == -1 ) {
-#ifdef DODEBUG
-        printf ("... index out of range\n");
-#endif
+        DEBUGP ("... index out of range\n");
         return(MATCH_FAILED);
     }
 
@@ -205,10 +195,8 @@ printf ("\n");
     *write_method = 0;
     *var_len = sizeof(long);	/* default to 'long' results */
 
-#ifdef DODEBUG
     sprint_objid (c_oid, name, *length);
-    printf ("... get process stats %s\n", c_oid);
-#endif
+    DEBUGP ("... get process stats %s\n", c_oid);
     return LowPid;
 }
 

@@ -128,9 +128,7 @@ intpr(interval)
 	    fprintf (stderr, "No response when requesting number of interfaces.\n");
 	    return;
 	}
-#ifdef DODEBUG
-	printf ("cfg_nnets = %d\n", cfg_nnets);
-#endif
+	DEBUGP ("cfg_nnets = %d\n", cfg_nnets);
 	printf("%-7.7s %-4.4s %-15.15s %-15.15s %8.8s %5.5s %8.8s %5.5s %5.5s",
 		"Name", "Mtu", "Network", "Address", "Ipkts", "Ierrs",
 		"Opkts", "Oerrs", "Queue");
@@ -162,9 +160,9 @@ intpr(interval)
 		    break;
 		}
 		for (var = response->variables; var; var = var->next_variable) {
-#ifdef DODEBUG
+                  if (snmp_get_do_debugging()) {
 		    print_variable (var->name, var->name_length, var);
-#endif
+                  }
 		    switch (var->name [9]) {
 		    case IFINDEX:
 			ifindex = *var->val.integer;
@@ -218,9 +216,9 @@ intpr(interval)
 		}
 		cur_if = if_table + ifnum - 1;
 		for (var = response->variables; var; var = var->next_variable) {
-#ifdef DODEBUG
+                  if (snmp_get_do_debugging()) {
 		    print_variable (var->name, var->name_length, var);
-#endif
+                  }
 		    switch (var->name [9]) {
 		    case OUTQLEN:
 			cur_if->outqueue = *var->val.integer; break;
@@ -312,9 +310,7 @@ intpro(interval)
 	    fprintf (stderr, "No response when requesting number of interfaces.\n");
 	    return;
 	}
-#ifdef DODEBUG
-	printf ("cfg_nnets = %d\n", cfg_nnets);
-#endif
+	DEBUGP ("cfg_nnets = %d\n", cfg_nnets);
 	printf("%-7.7s %-15.15s %-15.15s %12.12s %12.12s ",
 		"Name", "Network", "Address", "Ioctets", "Ooctets");
 	putchar('\n');
@@ -345,9 +341,9 @@ intpro(interval)
 		    break;
 		}
 		for (var = response->variables; var; var = var->next_variable) {
-#ifdef DODEBUG
+                  if (snmp_get_do_debugging()) {
 		    print_variable (var->name, var->name_length, var);
-#endif
+                  }
 		    switch (var->name [9]) {
 		    case IFINDEX:
 			ifindex = *var->val.integer;
@@ -389,9 +385,9 @@ intpro(interval)
 		}
 		cur_if = if_table + ifnum - 1;
 		for (var = response->variables; var; var = var->next_variable) {
-#ifdef DODEBUG
+                  if (snmp_get_do_debugging()) {
 		    print_variable (var->name, var->name_length, var);
-#endif
+                  }
 		    switch (var->name [9]) {
 		    case OUTQLEN:
 			cur_if->outqueue = *var->val.integer; break;

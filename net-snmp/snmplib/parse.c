@@ -1951,7 +1951,7 @@ parse_imports(fp)
 {
     register int type;
     char token[MAXTOKEN];
-#define MAX_IMPORTS	32
+#define MAX_IMPORTS	256
     struct module_import import_list[MAX_IMPORTS];
     int this_module, old_current_module;
     char old_last;
@@ -2051,7 +2051,7 @@ which_module(name)
 	if ( !strcmp(mp->name, name))
 	    return(mp->modid);
 
-    DEBUGP1("Module %s not found\n", name);
+    DEBUGP("Module %s not found\n", name);
     return(-1);
 }
 
@@ -2066,7 +2066,7 @@ module_name ( modid )
 	if ( mp->modid == modid )
 	    return(mp->name);
 
-    DEBUGP1("Module %d not found\n", modid);
+    DEBUGP("Module %d not found\n", modid);
     cp = (char *) Malloc(10);	/* copes with 1e8 modules! */
     sprintf(cp, "#%d", modid);
     return(cp);
@@ -2175,7 +2175,7 @@ read_module_internal (name )
     for ( mp=module_head ; mp ; mp=mp->next )
 	if ( !strcmp(mp->name, name)) {
 	    if ( mp->no_imports != -1 ) {
-		DEBUGP1("Module %s already loaded\n", name);
+		DEBUGP("Module %s already loaded\n", name);
 		return MODULE_ALREADY_LOADED;
 	    }
 	    if ((fp = fopen(mp->file, "r")) == NULL) {
@@ -2267,7 +2267,7 @@ new_module (name , file)
 
     for ( mp=module_head ; mp ; mp=mp->next )
 	if ( !strcmp(mp->name, name)) {
-	    DEBUGP1("Module %s already noted\n",name);
+	    DEBUGP("Module %s already noted\n",name);
 			/* Not the same file */
 	    if ( strcmp(mp->file, file)) {
                 fprintf(stderr, "Warning: Module %s in both %s and %s\n",
@@ -2675,7 +2675,7 @@ add_mibdir( dirname )
                         perror(tmpstr);
 			continue;
                     }
-                    DEBUGP1("Adding %s...",tmpstr);
+                    DEBUGP("Adding %s...",tmpstr);
                     Line = 1;
                     strcpy(File,tmpstr);
                     get_token( fp, token, MAXTOKEN);
@@ -2711,7 +2711,7 @@ read_mib(filename)
         return NULL;
     Line = 1;
     strcpy(File,filename);
-    DEBUGP1("Parsing %s...",filename);
+    DEBUGP("Parsing %s...",filename);
     get_token( fp, token, MAXTOKEN);
     fclose(fp);
     new_module(token, filename);

@@ -109,9 +109,6 @@ main (argc, argv)
     int   status;
     int   failures = 0;
 
-    /* read in MIB database */
-    init_mib();
-
     /* get the common command line arguments */
     arg = snmp_parse_args(argc, argv, &session);
 

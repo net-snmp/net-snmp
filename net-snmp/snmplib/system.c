@@ -74,6 +74,11 @@ SOFTWARE.
 #if HAVE_SYS_SYSCTL_H
 #include <sys/sysctl.h>
 #endif
+#ifdef __STDC__
+#include <stdarg.h>
+#else
+#include <varargs.h>
+#endif
 #include "system.h"
 
 #define NUM_NETWORKS    32   /* max number of interfaces to check */
@@ -464,3 +469,41 @@ strdup(src)
     return(dst);
 }
 #endif
+
+static int dodebug = DODEBUG;
+
+void
+#ifdef __STDC__
+DEBUGP(const char *first, ...)
+#else
+DEBUGP(va_alist)
+  va_dcl
+#endif
+{
+  va_list args;
+#ifndef __STDC__
+  const char *first;
+  va_start(args);
+  first = va_arg(args, const char *);
+#else
+  va_start(args,first);
+#endif
+
+  if (dodebug)
+    vfprintf(stderr,first,args);
+}
+
+void
+snmp_set_do_debugging(val)
+  int val;
+{
+  dodebug=val;
+}
+
+int
+snmp_get_do_debugging __P((void))
+{
+  return dodebug;
+}
+
+

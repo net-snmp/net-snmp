@@ -55,13 +55,13 @@ header_ifEntry(vp, name, length, exact, var_len, write_method)
     oid newname[MAX_NAME_LEN];
     register int	interface;
     int result, count;
-#ifdef DODEBUG
     char c_oid[1024];
 
-    sprint_objid (c_oid, name, *length);
-    printf ("var_ifEntry: %s %d\n", c_oid, exact);
-#endif
-
+    if (snmp_get_do_debugging()) {
+      sprint_objid (c_oid, name, *length);
+      DEBUGP ("var_ifEntry: %s %d\n", c_oid, exact);
+    }
+    
     bcopy((char *)vp->name, (char *)newname, (int)vp->namelen * sizeof(oid));
     /* find "next" interface */
     count = Interface_Scan_Get_Count();
@@ -72,9 +72,7 @@ header_ifEntry(vp, name, length, exact, var_len, write_method)
 	    break;
     }
     if (interface > count) {
-#ifdef DODEBUG
-	printf ("... index out of range\n");
-#endif
+        DEBUGP ("... index out of range\n");
         return MATCH_FAILED;
     }
 
@@ -84,10 +82,8 @@ header_ifEntry(vp, name, length, exact, var_len, write_method)
     *write_method = 0;
     *var_len = sizeof(long);	/* default to 'long' results */
 
-#ifdef DODEBUG
     sprint_objid (c_oid, name, *length);
-    printf ("... get I/F stats %s\n", c_oid);
-#endif
+    DEBUGP ("... get I/F stats %s\n", c_oid);
 
     return interface;
 };
@@ -104,12 +100,12 @@ header_interfaces(vp, name, length, exact, var_len, write_method)
 #define INTERFACES_NAME_LENGTH	8
   oid newname[MAX_NAME_LEN];
   int result;
-#ifdef DODEBUG
   char c_oid[1024];
 
-  sprint_objid (c_oid, name, *length);
-  printf ("var_interfaces: %s %d\n", c_oid, exact);
-#endif
+  if (snmp_get_do_debugging()) {
+    sprint_objid (c_oid, name, *length);
+    DEBUGP ("var_interfaces: %s %d\n", c_oid, exact);
+  }
 
   bcopy((char *)vp->name, (char *)newname, (int)vp->namelen * sizeof(oid));
   newname[INTERFACES_NAME_LENGTH] = 0;
@@ -222,10 +218,8 @@ Interface_Scan_By_Index (index, if_msg, if_name, sifa)
 	  }
 	  break;
 	default:
-#ifdef DODEBUG
-	  fprintf (stderr, "routing socket: unknown message type %d\n",
+	  DEBUGP (stderr, "routing socket: unknown message type %d\n",
 		   ifp->ifm_type);
-#endif
 	}
     }
   if (have_ifinfo && have_addr)
@@ -478,12 +472,12 @@ header_interfaces(vp, name, length, exact, var_len, write_method)
 #define INTERFACES_NAME_LENGTH	8
     oid newname[MAX_NAME_LEN];
     int result;
-#ifdef DODEBUG
     char c_oid[1024];
 
-    sprint_objid (c_oid, name, *length);
-    printf ("var_interfaces: %s %d\n", c_oid, exact);
-#endif
+    if (snmp_get_do_debugging()) {
+      sprint_objid (c_oid, name, *length);
+      DEBUGP ("var_interfaces: %s %d\n", c_oid, exact);
+    }
 
     bcopy((char *)vp->name, (char *)newname, (int)vp->namelen * sizeof(oid));
     newname[INTERFACES_NAME_LENGTH] = 0;
@@ -513,12 +507,12 @@ header_ifEntry(vp, name, length, exact, var_len, write_method)
     oid newname[MAX_NAME_LEN];
     register int	interface;
     int result, count;
-#ifdef DODEBUG
     char c_oid[1024];
 
-    sprint_objid (c_oid, name, *length);
-    printf ("var_ifEntry: %s %d\n", c_oid, exact);
-#endif
+    if (snmp_get_do_debugging()) {
+      sprint_objid (c_oid, name, *length);
+      DEBUGP ("var_ifEntry: %s %d\n", c_oid, exact);
+    }
 
     bcopy((char *)vp->name, (char *)newname, (int)vp->namelen * sizeof(oid));
     /* find "next" interface */
@@ -530,9 +524,7 @@ header_ifEntry(vp, name, length, exact, var_len, write_method)
 	    break;
     }
     if (interface > count) {
-#ifdef DODEBUG
-	printf ("... index out of range\n");
-#endif
+        DEBUGP ("... index out of range\n");
         return MATCH_FAILED;
     }
 
@@ -542,10 +534,10 @@ header_ifEntry(vp, name, length, exact, var_len, write_method)
     *write_method = 0;
     *var_len = sizeof(long);	/* default to 'long' results */
 
-#ifdef DODEBUG
-    sprint_objid (c_oid, name, *length);
-    printf ("... get I/F stats %s\n", c_oid);
-#endif
+    if (snmp_get_do_debugging()) {
+      sprint_objid (c_oid, name, *length);
+      DEBUGP ("... get I/F stats %s\n", c_oid);
+    }
 
     return interface;
 }
@@ -963,10 +955,8 @@ var_ifEntry(vp, name, length, exact, var_len, write_method)
 static int
 IF_cmp(void *addr, void *ep)
 {
-#ifdef DODEBUG
-    printf ("... IF_cmp %d %d\n", 
+    DEBUGP ("... IF_cmp %d %d\n", 
     ((mib2_ifEntry_t *)ep)->ifIndex, ((mib2_ifEntry_t *)addr)->ifIndex);
-#endif
     if (((mib2_ifEntry_t *)ep)->ifIndex == ((mib2_ifEntry_t *)addr)->ifIndex)
 	return (0);
     else
@@ -992,9 +982,7 @@ var_ifEntry(vp, name, length, exact, var_len, write_method)
 
     if (getMibstat(MIB_INTERFACES, &ifstat, sizeof(mib2_ifEntry_t),
                    GET_EXACT, &IF_cmp, &interface) != 0) {
-#ifdef DODEBUG
-      printf ("... no mib stats\n");
-#endif
+      DEBUGP ("... no mib stats\n");
       return NULL;
     }
     switch (vp->magic){
@@ -1228,17 +1216,17 @@ Interface_Scan_Init()
 
       ifnetaddr = ifnetaddr_list;
 
-#if DODEBUG
-    { struct ifnet *x = ifnetaddr;
-      printf ("* see: known interfaces:");
-      while (x)
-	{
-	  printf (" %s", x->if_name);
-	  x = x->if_next;
-	}
-      printf ("\n");
-    } /* XXX */
-#endif
+      if (snmp_get_do_debugging()) {
+        { struct ifnet *x = ifnetaddr;
+        printf ("* see: known interfaces:");
+        while (x)
+          {
+            printf (" %s", x->if_name);
+            x = x->if_next;
+          }
+        printf ("\n");
+        } /* XXX */
+      }
 
     fclose (devin);
     close (fd);
