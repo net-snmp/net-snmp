@@ -9,7 +9,7 @@ VPATH = @srcdir@
 prefix = @prefix@
 libdir = @libdir@
 sbindir = @sbindir@
-snmplibdir = $(libdir)/snmp
+snmplibdir = $(datadir)/snmp
 
 INSTALL = @INSTALL@
 

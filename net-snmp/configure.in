@@ -98,14 +98,15 @@ esac
 AC_SUBST(EXTRACPPFLAGS)
 AC_MSG_RESULT($EXTRACPPFLAGS)
 
-dnl Set SNMPLIBPATH and SNMPPATH
-SNMPLIBPATH="$libdir/snmp"
-AC_DEFINE_UNQUOTED(SNMPLIBPATH,"$libdir/snmp")
-if test "x$prefix" = "xNONE"; then
-AC_DEFINE_UNQUOTED(SNMPPATH,"$ac_default_prefix")
-else
-AC_DEFINE_UNQUOTED(SNMPPATH,"$prefix")
-fi
+dnl Set SNMPLIBPATH
+
+SNMPLIBPATH=""
+tmpset="$datadir/snmp"
+while test "x$tmpset" != "x$SNMPLIBPATH"; do
+  SNMPLIBPATH="$tmpset"
+  eval tmpset="$tmpset"
+done
+AC_DEFINE_UNQUOTED(SNMPLIBPATH,"$SNMPLIBPATH")
 
 if test "x$DEFAULT_MIBDIRS" = "x"; then
   AC_DEFINE_UNQUOTED(DEFAULT_MIBDIRS,"$SNMPLIBPATH/mibs")
