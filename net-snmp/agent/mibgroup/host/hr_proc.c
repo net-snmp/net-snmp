@@ -135,65 +135,23 @@ var_hrproc(struct variable *vp,
 	   int *var_len,
 	   WriteMethod **write_method)
 {
+extern int try_getloadavg(double *r_ave, size_t s_ave); /* ucd-snmp/loadave.c*/
+
     int  proc_idx;
-#if defined(sun) || defined(__alpha)
-  long   avenrun[3];
-#define FIX_TO_DBL(_IN) (((double) _IN)/((double) FSCALE))
-#else
-  double avenrun[3];
-#endif
- 
+    double avenrun[3];
 
     proc_idx = header_hrproc(vp, name, length, exact, var_len, write_method);
     if ( proc_idx == MATCH_FAILED )
 	return NULL;
-
-#ifdef linux
-  { FILE *in = fopen("/proc/loadavg", "r");
-    if (!in) {
-      fprintf (stderr, "snmpd: cannot open /proc/loadavg\n");
-      return NULL;
-    }
-    fscanf(in, "%lf %lf %lf", &avenrun[0], &avenrun[1], &avenrun[2]);
-    fclose(in);
-  }
-#elif HAVE_GETLOADAVG
-    getloadavg(avenrun, sizeof(avenrun)/sizeof(avenrun[0]));
-#elif defined(LOADAVE_SYMBOL)
-    if (auto_nlist(LOADAVE_SYMBOL, (char*) avenrun, sizeof(avenrun)) == 0 )
+    if (try_getloadavg(&avenrun[0], sizeof(avenrun) / sizeof(avenrun[0])) == -1)
 	return NULL;
-#else
-    return NULL;
-#endif
 
     switch (vp->magic){
 	case HRPROC_ID:
             *var_len = nullOidLen;
 	    return (u_char *) nullOid;
 	case HRPROC_LOAD:
-			/*
-			 * XXX
-			 *   To calculate this, we need to compare
-			 *   successive values of the kernel array
-			 *   '_cp_times', and calculate the resulting
-			 *   percentage changes.
-			 *     This calculation needs to be performed
-			 *   regularly - perhaps as a background process.
-			 *
-			 *   See the source to 'top' for full details.
-			 *
-			 * The linux SNMP HostRes implementation
-			 *   uses 'avenrun[0]*100' as an approximation.
-			 *   This is less than accurate, but has the
-			 *   advantage of being simple to implement!
-			 *
-			 * I'm also assuming a single processor
-			 */
-#if defined(ultrix) || defined(sun) || defined(__alpha)
-            long_return = (long) (FIX_TO_DBL(avenrun[0])*100.0);
-#else
 	    long_return = avenrun[0] * 100;	/* 1 minute average */
-#endif
 	    if ( long_return > 100 )
 		long_return=100;
 	    return (u_char *)&long_return;
