@@ -854,19 +854,22 @@ netsnmp_wrap_up_request(netsnmp_agent_session *asp, int status)
             case SNMP_ERR_WRONGTYPE:
             case SNMP_ERR_WRONGLENGTH:
             case SNMP_ERR_INCONSISTENTVALUE:
-                status = SNMP_ERR_BADVALUE;
+                status      = SNMP_ERR_BADVALUE;
+                asp->status = SNMP_ERR_BADVALUE;
                 break;
             case SNMP_ERR_NOACCESS:
             case SNMP_ERR_NOTWRITABLE:
             case SNMP_ERR_NOCREATION:
             case SNMP_ERR_INCONSISTENTNAME:
             case SNMP_ERR_AUTHORIZATIONERROR:
-                status = SNMP_ERR_NOSUCHNAME;
+                status      = SNMP_ERR_NOSUCHNAME;
+                asp->status = SNMP_ERR_NOSUCHNAME;
                 break;
             case SNMP_ERR_RESOURCEUNAVAILABLE:
             case SNMP_ERR_COMMITFAILED:
             case SNMP_ERR_UNDOFAILED:
-                status = SNMP_ERR_GENERR;
+                status      = SNMP_ERR_GENERR;
+                asp->status = SNMP_ERR_GENERR;
                 break;
         }
     }
@@ -886,7 +889,8 @@ netsnmp_wrap_up_request(netsnmp_agent_session *asp, int status)
                 case SNMP_NOSUCHINSTANCE:
                 case SNMP_ENDOFMIBVIEW:
                 case ASN_COUNTER64:
-                    status = SNMP_ERR_NOSUCHNAME;
+                    status      = SNMP_ERR_NOSUCHNAME;
+                    asp->status = SNMP_ERR_NOSUCHNAME;
                     asp->index=i;
                     break;
             }
@@ -950,7 +954,7 @@ netsnmp_wrap_up_request(netsnmp_agent_session *asp, int status)
     }
     if ( asp->pdu ) {
         asp->pdu->command  = SNMP_MSG_RESPONSE;
-        asp->pdu->errstat  = status;
+        asp->pdu->errstat  = asp->status;
         asp->pdu->errindex = asp->index;
         if (! snmp_send( asp->session, asp->pdu )) {
             snmp_free_pdu(asp->pdu);
