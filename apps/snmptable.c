@@ -105,7 +105,7 @@ static int      use_getbulk = 1;
 static int      max_getbulk = 10;
 
 void            usage(void);
-void            get_field_names(char *);
+void            get_field_names(void);
 void            get_table_entries(netsnmp_session * ss);
 void            getbulk_table_entries(netsnmp_session * ss);
 void            print_table(void);
@@ -253,7 +253,6 @@ int
 main(int argc, char *argv[])
 {
     netsnmp_session session, *ss;
-    char           *tblname;
     int            total_entries = 0;
 
     setvbuf(stdout, NULL, _IOLBF, 1024);
@@ -292,15 +291,8 @@ main(int argc, char *argv[])
     }
     localdebug = netsnmp_ds_get_boolean(NETSNMP_DS_LIBRARY_ID, 
                                         NETSNMP_DS_LIB_DUMP_PACKET);
-    tblname = strrchr(argv[optind], '.');
-    if (!tblname)
-        tblname = strrchr(argv[optind], ':');
-    if (tblname)
-        ++tblname;
-    else
-        tblname = argv[optind];
 
-    get_field_names(tblname);
+    get_field_names();
     reverse_fields();
 
     /*
@@ -461,7 +453,7 @@ print_table(void)
 }
 
 void
-get_field_names(char *tblname)
+get_field_names(void)
 {
     u_char         *buf = NULL, *name_p = NULL;
     size_t          buf_len = 0, out_len = 0;
@@ -471,7 +463,7 @@ get_field_names(char *tblname)
     int             going = 1;
 
 #ifndef DISABLE_MIB_LOADING
-    tbl = find_tree_node(tblname, -1);
+    tbl = get_tree(root, rootlen, get_tree_head());
     if (tbl) {
         tbl = tbl->child_list;
         if (tbl) {
