@@ -16,7 +16,7 @@
 ${context}_data *
 ${context}_allocate_data(void)
 {
-@if $m2c_gda_todo_surpress != 1@
+@if $m2c_gda_todo_suppress != 1@
     /*
      * TODO:201:r: |-> allocate memory for the $context data context.
      */
@@ -46,7 +46,7 @@ ${context}_release_data(${context}_data *data)
 {
     DEBUGMSGTL(("verbose:${context}:${context}_release_data","called\n"));
 
-@if $m2c_gda_todo_supress != 1@
+@if $m2c_gda_todo_suppress != 1@
     /*
      * TODO:202:r: |-> release memory for the $context data context.
      */
@@ -54,7 +54,7 @@ ${context}_release_data(${context}_data *data)
     free(data);
 } /* ${context}_release_data */
 
-@eval $m2c_gda_todo_supress = 0@ # reset
+@eval $m2c_gda_todo_suppress = 0@ # reset
 ##
 ########################################################################
 @if $m2c_mark_boundary == 1@
