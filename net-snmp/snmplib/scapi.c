@@ -554,10 +554,6 @@ sc_encrypt(	oid    *privtype,	size_t privtypelen,
 		QUITFUN(SNMPERR_GENERR, sc_encrypt_quit);
 	}
 
-	else if ( (keylen<properlength) || (ivlen<properlength_iv) ) {
-		QUITFUN(SNMPERR_GENERR, sc_encrypt_quit);
-	}
-
 /* now calculate the padding needed */
 	pad = pad_size - (ptlen % pad_size);
 	if (ptlen + pad > *ctlen) { 
