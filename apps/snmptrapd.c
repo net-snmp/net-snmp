@@ -550,8 +550,8 @@ void usage(void)
   -a        Ignore Authentication Failture traps.\n\
   -m <MIBS>     Use MIBS list instead of the default mib list.\n\
   -M <MIBDIRS>  Use MIBDIRS as the location to look for mibs.\n\
-  -O <OIDOPTS>  Toggle various options controlling OID printing\n");
-  snmp_oid_toggle_options_usage("\t\t  ", stderr);
+  -O <OUTOPTS>  Toggle various options controlling output display\n");
+  snmp_out_toggle_options_usage("\t\t  ", stderr);
 }
 
 RETSIGTYPE term_handler(int sig)
@@ -629,7 +629,7 @@ int main(int argc, char *argv[])
 	    setenv("MIBDIRS", optarg, 1);
 	    break;
 	case 'O':
-	    cp = snmp_oid_toggle_options(optarg);
+	    cp = snmp_out_toggle_options(optarg);
 	    if (cp != NULL) {
 		fprintf(stderr, "Unknow output option passed to -O: %c\n", *cp);
 		usage();

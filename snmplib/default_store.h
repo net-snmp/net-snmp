@@ -33,6 +33,7 @@ extern "C" {
 #define DS_LIB_PRINT_FULL_OID      12 /* print fully qualified oids */
 #define DS_LIB_QUICK_PRINT         13 /* print very brief output for parsing */
 #define DS_LIB_RANDOM_ACCESS	   14 /* random access to oid labels */
+#define DS_LIB_REGEX_ACCESS	   15 /* regex matching to oid labels */
 
 /* library integers */
 #define DS_LIB_MIB_WARNINGS  0
