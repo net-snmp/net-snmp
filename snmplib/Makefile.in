@@ -78,13 +78,16 @@ context_parse.o: ../s/linux.h ../s/generic.h ../m/i686.h ../m/i586.h
 context_parse.o: ../m/i386.h  
 context_parse.o:  asn1.h context.h system.h
 context_parse.o: snmp_api.h snmp_impl.h snmp.h mib.h
+int64.o: ../config.h ../mib_module_config.h 
+int64.o: ../s/linux.h ../s/generic.h ../m/i686.h ../m/i586.h ../m/i386.h
+int64.o: int64.h
 md5.o: ../config.h ../mib_module_config.h 
 md5.o: ../s/linux.h ../s/generic.h ../m/i686.h ../m/i586.h ../m/i386.h
 md5.o:   md5.h
 mib.o: ../config.h ../mib_module_config.h 
 mib.o: ../s/linux.h ../s/generic.h ../m/i686.h ../m/i586.h ../m/i386.h
 mib.o:   asn1.h snmp_api.h mib.h
-mib.o: snmp.h snmp_impl.h parse.h
+mib.o: snmp.h snmp_impl.h parse.h int64.h
 parse.o: ../config.h ../mib_module_config.h 
 parse.o: ../s/linux.h ../s/generic.h ../m/i686.h ../m/i586.h ../m/i386.h
 parse.o:   system.h
@@ -103,8 +106,8 @@ snmp.o:   asn1.h snmp.h
 snmp.o: snmp_api.h snmp_impl.h mib.h
 snmp_api.o: ../config.h ../mib_module_config.h 
 snmp_api.o: ../s/linux.h ../s/generic.h ../m/i686.h ../m/i586.h ../m/i386.h
-snmp_api.o:   asn1.h snmp.h
-snmp_api.o: snmp_api.h snmp_impl.h party.h context.h system.h
+snmp_api.o:  asn1.h snmp.h snmp_api.h snmp_impl.h party.h
+snmp_api.o: context.h system.h
 snmp_auth.o: ../config.h ../mib_module_config.h 
 snmp_auth.o: ../s/linux.h ../s/generic.h ../m/i686.h ../m/i586.h ../m/i386.h
 snmp_auth.o:   asn1.h
@@ -124,4 +127,4 @@ vacm.o: ../s/linux.h ../s/generic.h ../m/i686.h ../m/i586.h ../m/i386.h
 vacm.o:  asn1.h snmp.h snmp_api.h vacm.h
 view.o: ../config.h ../mib_module_config.h 
 view.o: ../s/linux.h ../s/generic.h ../m/i686.h ../m/i586.h ../m/i386.h
-view.o:   asn1.h view.h
+view.o: asn1.h view.h
