@@ -327,14 +327,13 @@ var_atEntry(struct variable *vp,
     mib2_ipNetToMediaEntry_t entry, Lowentry;
     int		Found = 0;
     req_e	req_type;
-    char	c_oid[SPRINT_MAX_LEN];
 
     /* fill in object part of name for current (less sizeof instance part) */
 
-    if (snmp_get_do_debugging()) {
-      sprint_objid (c_oid, vp->name, vp->namelen);
-      DEBUGMSGTL(("mibII/at", "var_atEntry: %s %d\n", c_oid, exact));
-    }
+    DEBUGMSGTL(("mibII/at", "var_atEntry: "));
+    DEBUGMSGOID(("mibII/at", vp->name, vp->namelen));
+    DEBUGMSG(("mibII/at"," %d\n", exact));
+
     memset (&Lowentry, 0, sizeof (Lowentry));
     memcpy( (char *)current,(char *)vp->name, vp->namelen * sizeof(oid));
     lowest[0] = 1024;

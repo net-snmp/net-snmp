@@ -319,14 +319,12 @@ header_ipv6(
     size_t *var_len,	/* OUT - length of variable or 0 if function returned */
     WriteMethod **write_method)
 {
-    oid newname[MAX_NAME_LEN];
+    oid newname[MAX_OID_LEN];
     int result;
-    char c_oid[MAX_NAME_LEN];
 
-    if (snmp_get_do_debugging()) {
-	sprint_objid(c_oid, name, *length);
-	DEBUGP("header_ipv6: %s %d\n", c_oid, exact);
-    }
+    DEBUGMSGTL(("mibII/ipv6", "header_ipv6: "));
+    DEBUGMSGOID(("mibII/ipv6", name, *length));
+    DEBUGMSG(("mibII/ipv6"," %d\n", exact));
 
     memcpy((char *)newname, (char *)vp->name, (int)vp->namelen * sizeof(oid));
     newname[(int)vp->namelen] = 0;
@@ -353,15 +351,13 @@ header_ipv6_scan(
     int from,
     int to)
 {
-    oid newname[MAX_NAME_LEN];
+    oid newname[MAX_OID_LEN];
     int result;
-    char c_oid[MAX_NAME_LEN];
     int i;
 
-    if (snmp_get_do_debugging()) {
-	sprint_objid(c_oid, name, *length);
-	DEBUGP("header_ipv6_scan: %s %d\n", c_oid, exact);
-    }
+    DEBUGMSGTL(("mibII/ipv6", "header_ipv6_scan: "));
+    DEBUGMSGOID(("mibII/ipv6", name, *length));
+    DEBUGMSG(("mibII/ipv6"," %d\n", exact));
 
     memcpy((char *)newname, (char *)vp->name, (int)vp->namelen * sizeof(oid));
     for (i = from; i <= to; i++) {
@@ -1055,10 +1051,9 @@ var_udp6(
     size_t *var_len,
     WriteMethod **write_method)
 {
-    oid newname[MAX_NAME_LEN];
-    oid tmp1[MAX_NAME_LEN], tmp2[MAX_NAME_LEN];
+    oid newname[MAX_OID_LEN];
+    oid tmp1[MAX_OID_LEN], tmp2[MAX_OID_LEN];
     int result;
-    char c_oid[MAX_NAME_LEN];
     int i, j;
     caddr_t p;
     static struct in6pcb in6pcb, udb6;
@@ -1068,10 +1063,9 @@ var_udp6(
     struct xinpgen *xig, *oxig;
 #endif /* defined(__FreeBSD__) && __FreeBSD__ >= 3 */
 
-    if (snmp_get_do_debugging()) {
-	sprint_objid(c_oid, name, *length);
-	DEBUGP("var_udp6: %s %d\n", c_oid, exact);
-    }
+    DEBUGMSGTL(("mibII/ipv6", "var_udp6: "));
+    DEBUGMSGOID(("mibII/ipv6", name, *length));
+    DEBUGMSG(("mibII/ipv6"," %d\n", exact));
 
 #if !(defined(__FreeBSD__) && __FreeBSD__ >= 3)
     if (!auto_nlist("udb6", (char *)&udb6, sizeof(udb6)))
@@ -1120,8 +1114,9 @@ var_udp6(
 	else
 	    newname[j++] = 0;	/*XXX*/
 
-sprint_objid(c_oid, newname, j);
-DEBUGP("var_udp6 new: %d %d %s %d\n", (int)vp->namelen, j, c_oid, exact);
+    DEBUGMSGTL(("mibII/ipv6", "var_udp6 new: %d %d ", (int)vp->namelen, j));
+    DEBUGMSGOID(("mibII/ipv6", newname, j));
+    DEBUGMSG(("mibII/ipv6"," %d\n", exact));
 
 	if (exact) {
 	    result = snmp_oid_compare(name, *length, newname, j);
@@ -1207,10 +1202,9 @@ var_tcp6(
     size_t *var_len,
     WriteMethod **write_method)
 {
-    oid newname[MAX_NAME_LEN];
-    oid tmp1[MAX_NAME_LEN], tmp2[MAX_NAME_LEN];
+    oid newname[MAX_OID_LEN];
+    oid tmp1[MAX_OID_LEN], tmp2[MAX_OID_LEN];
     int result;
-    char c_oid[MAX_NAME_LEN];
     int i, j;
     caddr_t p;
     static struct in6pcb in6pcb, tcb6;
@@ -1238,10 +1232,9 @@ var_tcp6(
 	initialized++;
     }
 
-    if (snmp_get_do_debugging()) {
-	sprint_objid(c_oid, name, *length);
-	DEBUGP("var_tcp6: %s %d\n", c_oid, exact);
-    }
+    DEBUGMSGTL(("mibII/ipv6", "var_tcp6: "));
+    DEBUGMSGOID(("mibII/ipv6", name, *length));
+    DEBUGMSG(("mibII/ipv6"," %d\n", exact));
 
 #if !(defined(__FreeBSD__) && __FreeBSD__ >= 3)
     if (!auto_nlist("tcb6", (char *)&tcb6, sizeof(tcb6)))
@@ -1302,12 +1295,11 @@ var_tcp6(
 	    newname[j++] = 0;	/*XXX*/
 	newname[j++] = tcp6statemap[tcp6cb.t_state];
 
-	if (snmp_get_do_debugging()) {
-	    sprint_objid(c_oid, newname, *length);
-	    DEBUGP("var_tcp6 newname: %s %d\n", c_oid, exact);
-	    sprint_objid(c_oid, name, *length);
-	    DEBUGP("var_tcp6 oldname: %s %d\n", c_oid, exact);
-	}
+    DEBUGMSGTL(("mibII/ipv6", "var_tcp6 newname: "));
+    DEBUGMSGOID(("mibII/ipv6", newname, *length));
+    DEBUGMSG(("mibII/ipv6", "\nvar_tcp6 oldname: "));
+    DEBUGMSGOID(("mibII/ipv6", name, *length));
+    DEBUGMSG(("mibII/ipv6"," %d\n", exact));
 
 #if 1	/* this is very odd but sometimes happen, and cause infinite loop */
 	if (ntohs(in6pcb.in6p_lport) == 0)
@@ -1408,10 +1400,9 @@ var_tcp6(
     size_t *var_len,
     WriteMethod **write_method)
 {
-    oid newname[MAX_NAME_LEN];
-    oid tmp1[MAX_NAME_LEN], tmp2[MAX_NAME_LEN];
+    oid newname[MAX_OID_LEN];
+    oid tmp1[MAX_OID_LEN], tmp2[MAX_OID_LEN];
     int result;
-    char c_oid[MAX_NAME_LEN];
     int i, j;
     caddr_t p;
     static struct in6pcb in6pcb, tcb6;
@@ -1439,10 +1430,9 @@ var_tcp6(
 	initialized++;
     }
 
-    if (snmp_get_do_debugging()) {
-	sprint_objid(c_oid, name, *length);
-	DEBUGP("var_tcp6: %s %d\n", c_oid, exact);
-    }
+    DEBUGMSGTL(("mibII/ipv6", "var_tcp6: "));
+    DEBUGMSGOID(("mibII/ipv6", name, *length));
+    DEBUGMSG(("mibII/ipv6"," %d\n", exact));
 
 #if !(defined(__FreeBSD__) && __FreeBSD__ >= 3)
     if (!auto_nlist("tcb6", (char *)&tcb6, sizeof(tcb6)))
@@ -1504,12 +1494,11 @@ var_tcp6(
 	    newname[j++] = 0;	/*XXX*/
 	newname[j++] = tcpstatemap[tcpcb.t_state];
 
-	if (snmp_get_do_debugging()) {
-	    sprint_objid(c_oid, newname, *length);
-	    DEBUGP("var_tcp6 newname: %s %d\n", c_oid, exact);
-	    sprint_objid(c_oid, name, *length);
-	    DEBUGP("var_tcp6 oldname: %s %d\n", c_oid, exact);
-	}
+    DEBUGMSGTL(("mibII/ipv6", "var_tcp6 newname: "));
+    DEBUGMSGOID(("mibII/ipv6", newname, *length));
+    DEBUGMSG(("mibII/ipv6", "\nvar_tcp6 oldname: "));
+    DEBUGMSGOID(("mibII/ipv6", name, *length));
+    DEBUGMSG(("mibII/ipv6"," %d\n", exact));
 
 #if 1	/* this is very odd but sometimes happen, and cause infinite loop */
 	if (ntohs(in6pcb.in6p_lport) == 0)

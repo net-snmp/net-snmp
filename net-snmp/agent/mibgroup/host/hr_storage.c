@@ -228,12 +228,10 @@ header_hrstore(struct variable *vp,
 #define HRSTORE_NAME_LENGTH	9
     oid newname[MAX_OID_LEN];
     int result;
-    char c_oid[SPRINT_MAX_LEN];
 
-    if (snmp_get_do_debugging()) {
-      sprint_objid (c_oid, name, *length);
-      DEBUGMSGTL(("host/hr_storage", "var_hrstore: %s %d\n", c_oid, exact));
-    }
+    DEBUGMSGTL(("host/hr_storage", "var_hrstore: "));
+    DEBUGMSGOID(("host/hr_storage", name, *length));
+    DEBUGMSG(("host/hr_storage"," %d\n", exact));
 
     memcpy( (char *)newname,(char *)vp->name, vp->namelen * sizeof(oid));
     newname[HRSTORE_NAME_LENGTH] = 0;
@@ -260,12 +258,10 @@ header_hrstoreEntry(struct variable *vp,
     oid newname[MAX_OID_LEN];
     int storage_idx, LowIndex = -1;
     int result;
-    char c_oid[SPRINT_MAX_LEN];
 
-    if (snmp_get_do_debugging()) {
-      sprint_objid (c_oid, name, *length);
-      DEBUGMSGTL(("host/hr_storage", "var_hrstoreEntry: %s %d\n", c_oid, exact));
-    }
+    DEBUGMSGTL(("host/hr_storage", "var_hrstoreEntry: "));
+    DEBUGMSGOID(("host/hr_storage", name, *length));
+    DEBUGMSG(("host/hr_storage"," %d\n", exact));
 
     memcpy( (char *)newname,(char *)vp->name, (int)vp->namelen * sizeof(oid));
 	/* Find "next" storage entry */
@@ -277,10 +273,8 @@ header_hrstoreEntry(struct variable *vp,
         if ( storage_idx == -1 )
 	    break;
 	newname[HRSTORE_ENTRY_NAME_LENGTH] = storage_idx;
-        if (snmp_get_do_debugging()) {
-          sprint_objid (c_oid, newname, *length);
-          DEBUGMSGTL(("host/hr_storage", "%s\n", c_oid));
-        }
+    DEBUGMSGOID(("host/hr_storage", newname, *length));
+    DEBUGMSG(("host/hr_storage","\n"));
         result = snmp_oid_compare(name, *length, newname, vp->namelen + 1);
         if (exact && (result == 0)) {
 	    LowIndex = storage_idx;
@@ -307,10 +301,9 @@ header_hrstoreEntry(struct variable *vp,
     *write_method = 0;
     *var_len = sizeof(long);	/* default to 'long' results */
 
-    if (snmp_get_do_debugging()) {
-      sprint_objid (c_oid, name, *length);
-      DEBUGMSGTL(("host/hr_storage", "... get storage stats %s\n", c_oid));
-    }
+    DEBUGMSGTL(("host/hr_storage", "... get storage stats "));
+    DEBUGMSGOID(("host/hr_storage", name, *length));
+    DEBUGMSG(("host/hr_storage","\n"));
     return LowIndex;
 }
 

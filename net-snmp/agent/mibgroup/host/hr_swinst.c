@@ -166,12 +166,10 @@ header_hrswinst(struct variable *vp,
 #define HRSWINST_NAME_LENGTH	9
     oid newname[MAX_OID_LEN];
     int result;
-    char c_oid[SPRINT_MAX_LEN];
 
-    if (snmp_get_do_debugging()) {
-      sprint_objid (c_oid, name, *length);
-      DEBUGMSGTL(("host/hr_swinst", "var_hrswinst: %s %d\n", c_oid, exact));
-    }
+    DEBUGMSGTL(("host/hr_swinst", "var_hrswinst: "));
+    DEBUGMSGOID(("host/hr_swinst", name, *length));
+    DEBUGMSG(("host/hr_swinst"," %d\n", exact));
 
     memcpy( (char *)newname,(char *)vp->name, vp->namelen * sizeof(oid));
     newname[HRSWINST_NAME_LENGTH] = 0;
@@ -198,12 +196,10 @@ header_hrswInstEntry(struct variable *vp,
     oid newname[MAX_OID_LEN];
     int swinst_idx, LowIndex = -1;
     int result;
-    char c_oid[SPRINT_MAX_LEN];
 
-    if (snmp_get_do_debugging()) {
-      sprint_objid (c_oid, name, *length);
-      DEBUGMSGTL(("host/hr_swinst", "var_hrswInstEntry: %s %d\n", c_oid, exact));
-    }
+    DEBUGMSGTL(("host/hr_swinst", "var_hrswinstEntry: "));
+    DEBUGMSGOID(("host/hr_swinst", name, *length));
+    DEBUGMSG(("host/hr_swinst"," %d\n", exact));
 
     memcpy( (char *)newname,(char *)vp->name, vp->namelen * sizeof(oid));
 	/* Find "next" installed software entry */
@@ -215,10 +211,8 @@ header_hrswInstEntry(struct variable *vp,
         if ( swinst_idx == -1 )
 	    break;
 	newname[HRSWINST_ENTRY_NAME_LENGTH] = swinst_idx;
-        if (snmp_get_do_debugging()) {
-          sprint_objid (c_oid, newname, *length);
-          DEBUGMSGTL(("host/hr_swinst", "%s\n", c_oid));
-        }
+    DEBUGMSGOID(("host/hr_swinst", newname, *length));
+    DEBUGMSG(("host/hr_swinst","\n"));
         result = snmp_oid_compare(name, *length, newname, vp->namelen + 1);
         if (exact && (result == 0)) {
 	    LowIndex = swinst_idx;
@@ -246,10 +240,9 @@ header_hrswInstEntry(struct variable *vp,
     *write_method = 0;
     *var_len = sizeof(long);	/* default to 'long' results */
 
-    if (snmp_get_do_debugging()) {
-      sprint_objid (c_oid, name, *length);
-      DEBUGMSGTL(("host/hr_swinst", "... get installed S/W stats %s\n", c_oid));
-    }
+    DEBUGMSGTL(("host/hr_inst", "... get installed S/W stats "));
+    DEBUGMSGOID(("host/hr_inst", name, *length));
+    DEBUGMSG(("host/hr_inst","\n"));
     return LowIndex;
 }
 
