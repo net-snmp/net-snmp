@@ -340,7 +340,11 @@ tcp_handler(netsnmp_mib_handler          *handler,
         ret_value = tcpstat.tcps_drops;
         break;
     case TCPCURRESTAB:
+#ifdef USING_MIBII_TCPTABLE_MODULE
         ret_value = TCP_Count_Connections();
+#else
+        ret_value = 0;
+#endif
         type = ASN_GAUGE;
         break;
     case TCPINSEGS:
