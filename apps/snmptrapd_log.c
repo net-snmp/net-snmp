@@ -112,6 +112,8 @@ typedef struct {
     int             leading_zeroes;     /* if true, display with leading zeroes */
 } options_type;
 
+char            separator[3];
+
 /*
  * These symbols define the characters that the parser recognizes.
  * The rather odd choice of symbols comes from an attempt to avoid
@@ -148,6 +150,7 @@ typedef enum {
     CHR_TRAP_NUM = 'w',         /* trap number */
     CHR_TRAP_DESC = 'W',        /* trap's description (textual) */
     CHR_TRAP_STYPE = 'q',       /* trap's subtype */
+    CHR_TRAP_VARSEP = 'V',      /* character (or string) to separate variables */
     CHR_TRAP_VARS = 'v'         /* tab-separated list of trap's variables */
 } parse_chr_type;
 
@@ -159,7 +162,8 @@ typedef enum {
     PARSE_BACKSLASH,            /* saw a backslash */
     PARSE_IN_FORMAT,            /* saw a % sign, in a format command */
     PARSE_GET_WIDTH,            /* getting field width */
-    PARSE_GET_PRECISION         /* getting field precision */
+    PARSE_GET_PRECISION,        /* getting field precision */
+    PARSE_GET_SEPARATOR         /* getting field separator */
 } parse_state_type;
 
 /*
@@ -867,6 +871,9 @@ realloc_handle_trap_fmt(u_char ** buf, size_t * buf_len, size_t * out_len,
     char            fmt_cmd = options->cmd;     /* what we're outputting */
     u_char         *temp_buf = NULL;
     size_t          tbuf_len = 64, tout_len = 0;
+    char           *sep = separator;
+    char           *default_sep = "\t";
+    char           *default_alt_sep = ", ";
 
     if ((temp_buf = (u_char *) calloc(tbuf_len, 1)) == NULL) {
         return 0;
@@ -956,17 +963,17 @@ realloc_handle_trap_fmt(u_char ** buf, size_t * buf_len, size_t * out_len,
         /*
          * Write the trap's variables.  
          */
+        if (!sep || !*sep)
+            sep = (options->alt_format ? default_alt_sep : default_sep);
         for (vars = pdu->variables; vars != NULL;
              vars = vars->next_variable) {
-            if (options->alt_format) {
-                if (!snmp_strcat(&temp_buf, &tbuf_len, &tout_len, 1, ", ")) {
-                    if (temp_buf != NULL) {
-                        free(temp_buf);
-                    }
-                    return 0;
-                }
-            } else {
-                if (!snmp_strcat(&temp_buf, &tbuf_len, &tout_len, 1, "\t")) {
+            /*
+             * Print a separator between variables,
+             *   (plus beforehand if the alt format is used)
+             */
+            if (options->alt_format ||
+                vars != pdu->variables ) {
+                if (!snmp_strcat(&temp_buf, &tbuf_len, &tout_len, 1, sep)) {
                     if (temp_buf != NULL) {
                         free(temp_buf);
                     }
@@ -1521,6 +1528,7 @@ realloc_format_trap(u_char ** buf, size_t * buf_len, size_t * out_len,
         return 0;
     }
 
+    memset(separator, 0, sizeof(separator));
     /*
      * Go until we reach the end of the format string:  
      */
@@ -1550,6 +1558,33 @@ realloc_format_trap(u_char ** buf, size_t * buf_len, size_t * out_len,
             }
             break;
 
+        case PARSE_GET_SEPARATOR:
+            /*
+             * Parse the separator character
+             * XXX - Possibly need to handle quoted strings ??
+             */
+            if (next_chr == '\\') {
+                /*
+                 * Handle backslash interpretation
+                 * Print to "separator" string rather than the output buffer
+                 *    (a bit of a hack, but it should work!)
+                 */
+                int i, j;
+                i = sizeof(separator);
+                j = 0;
+                memset(separator, 0, i);
+                next_chr = format_str[++fmt_idx];
+                if (!realloc_handle_backslash
+                    (&separator, &i, &j, 0, next_chr)) {
+                    return 0;
+                }
+            } else {
+                separator[0] = next_chr;
+            }
+            separator[1] = (options.alt_format ? ' ': '\0');
+            state = PARSE_NORMAL;
+            break;
+
         case PARSE_BACKSLASH:
             /*
              * Found a backslash.  
@@ -1574,6 +1609,8 @@ realloc_format_trap(u_char ** buf, size_t * buf_len, size_t * out_len,
                 options.alt_format = TRUE;
             } else if (next_chr == CHR_FIELD_SEP) {
                 state = PARSE_GET_PRECISION;
+            } else if (next_chr == CHR_TRAP_VARSEP) {
+                state = PARSE_GET_SEPARATOR;
             } else if ((next_chr >= '1') && (next_chr <= '9')) {
                 options.width =
                     ((unsigned long) next_chr) - ((unsigned long) '0');
