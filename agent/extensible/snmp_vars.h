@@ -30,7 +30,7 @@ struct variable2 wes_lockd_variables[] = {
     {ERRORMSG, STRING, RONLY, var_wes_lockd_test, 1, {ERRORMSG}}
 };
 
-#ifdef HPUX
+#ifdef hpux
 struct variable2 wes_mem_variables[] = {
   {MIBINDEX, INTEGER, RONLY, var_wes_mem,1,{MIBINDEX}},
   {ERRORNAME, STRING, RONLY, var_wes_mem, 1, {ERRORNAME }},
@@ -48,7 +48,7 @@ struct variable2 wes_mem_variables[] = {
 };
 #endif
 
-#ifdef HPUX
+#ifdef hpux
 struct variable2 wes_disk_variables[] = {
   {MIBINDEX, INTEGER, RONLY, var_wes_disk, 1, {MIBINDEX}},
   {ERRORNAME, STRING, RONLY, var_wes_disk, 1, {ERRORNAME}},

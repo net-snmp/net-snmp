@@ -8,7 +8,7 @@
 #include <sys/vmmeter.h>
 #include <sys/conf.h>
 #include <sys/param.h>
-#ifdef HPUX
+#ifdef hpux
 #include <sys/swap.h>
 #include <sys/fs.h>
 #include <mtab.h>
@@ -217,7 +217,7 @@ unsigned char *var_wes_shell(vp, name, length, exact, var_len, write_method)
   return NULL;
 }
 
-#ifdef HPUX
+#ifdef hpux
 
 #define pagetok(size) ((size) << pageshift)
 #define NL_TOTAL 0
@@ -391,7 +391,7 @@ unsigned char *var_wes_mem(vp, name, length, exact, var_len, write_method)
 static int numdisks;
 struct diskpart disks[MAXDISKS];
 
-#ifdef HPUX
+#ifdef hpux
 
 unsigned char *var_wes_disk(vp, name, length, exact, var_len, write_method)
     register struct variable *vp;
@@ -613,7 +613,7 @@ init_wes() {
   int ret,pagesize,i;
 
   
-#ifdef HPUX
+#ifdef hpux
   strcpy(extmp.command,"/bin/uname -m -n -r -s -v -i");
 #else 
   strcpy(extmp.command,"/bin/uname -m -n -r -s -v");
@@ -647,7 +647,7 @@ init_wes() {
 
   /* nlist stuff */
 
-#ifdef HPUX
+#ifdef hpux
   if ((ret = nlist("/hp-ux",nl)) == -1) {
     ERROR("nlist");
     exit(1);
