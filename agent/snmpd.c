@@ -781,6 +781,7 @@ receive(void)
 	    reconfig = 0;
 	    snmp_log(LOG_INFO, "Reconfiguring daemon\n");
 	    update_config();
+            send_easy_trap (SNMP_TRAP_ENTERPRISESPECIFIC, 3);
         }
 
 	for (i = 0; i < NUM_EXTERNAL_SIGS; i++) {
