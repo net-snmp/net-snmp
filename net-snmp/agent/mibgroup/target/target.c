@@ -26,7 +26,7 @@ get_target_sessions(char *taglist, TargetFilterFunction *filterfunct,
                     void *filterArg) {
     struct snmp_session *ret = NULL, thissess;
     struct targetAddrTable_struct *targaddrs;
-    char buf[SPRINT_MAX_LEN], smbuf[64];
+    char buf[SPRINT_MAX_LEN];
     char tags[MAX_TAGS][SPRINT_MAX_LEN], *cp;
     int numtags = 0, i;
     static struct targetParamTable_struct *param;
@@ -97,30 +97,37 @@ get_target_sessions(char *taglist, TargetFilterFunction *filterfunct,
 
                         /* target session already exists? */
                         if (targaddrs->sess == NULL) {
-
                             /* create an appropriate snmp session and add
-                           it to our return list */
-                            sprintf(smbuf, "%d.%d.%d.%d",
-                                    (int) targaddrs->tAddress[0],
-                                    (int) targaddrs->tAddress[1],
-                                    (int) targaddrs->tAddress[2],
-                                    (int) targaddrs->tAddress[3]);
+			       it to our return list */
+			    snmp_transport *t = NULL;
+
+			    t = snmp_tdomain_transport_oid(targaddrs->tDomain,
+							targaddrs->tDomainLen,
+						        targaddrs->tAddress,
+						        targaddrs->tAddressLen,
+							0);
+			    if (t == NULL) {
+				DEBUGMSGTL(("target_sessions","bad dest \""));
+				DEBUGMSGOID(("target_sessions", targaddrs->tDomain,
+					     targaddrs->tDomainLen));
+				DEBUGMSG(("target_sessions","\", \""));
+				DEBUGMSGHEX(("target_sessions", targaddrs->tAddress,
+					     targaddrs->tAddressLen));
+				DEBUGMSG(("target_sessions","\n"));
+				continue;
+			    } else {
+				char *dst_str = t->f_fmtaddr(t, NULL, 0);
+				if (dst_str != NULL) {
+				    DEBUGMSGTL(("target_sessions","  to: %s\n",
+						dst_str));
+				    free(dst_str);
+				}
+			    }				
                             memset(&thissess,0,sizeof(thissess));
-                            thissess.peername = smbuf;
-                            DEBUGMSGTL(("target_sessions","  to: %s:%d (%d*256+%d)\n",
-                                        smbuf,
-                                        (((unsigned int)
-                                          targaddrs->tAddress[4])*256 +
-                                         (unsigned int) targaddrs->tAddress[5]),
-                                        targaddrs->tAddress[4],
-                                        targaddrs->tAddress[5]));
-                            thissess.remote_port =
-                                ((unsigned int) targaddrs->tAddress[4])*256 +
-                                (unsigned int) targaddrs->tAddress[5];
                             thissess.timeout = (targaddrs->timeout)*1000;
+                            thissess.retries = targaddrs->retryCount;
                             DEBUGMSGTL(("target_sessions","timeout: %d -> %d\n",
                                         targaddrs->timeout, thissess.timeout));
-                            thissess.retries = targaddrs->retryCount;
 
                             if (param->mpModel == SNMP_VERSION_3 &&
                                 param->secModel != 3) {
@@ -128,6 +135,7 @@ get_target_sessions(char *taglist, TargetFilterFunction *filterfunct,
                                          "unsupported model/secmodel combo for target %s\n",
                                          targaddrs->name);
                                 /* XXX: memleak */
+				snmp_transport_free(t);
                                 continue;
                             }
                             thissess.version = param->mpModel;
@@ -143,12 +151,14 @@ get_target_sessions(char *taglist, TargetFilterFunction *filterfunct,
                                     strlen((char *)thissess.community);
                             }
                             
-                            targaddrs->sess = snmp_open(&thissess);
+                            targaddrs->sess = snmp_add(&thissess, t,
+						       NULL, NULL);
                             targaddrs->sessionCreationTime = time(NULL);
                         }
                         if (targaddrs->sess) {
-                            if (ret)
+                            if (ret) {
                                 targaddrs->sess->next = ret;
+			    }
                             ret = targaddrs->sess;
                         } else {
                             snmp_sess_perror("target session", &thissess);
