@@ -12,6 +12,7 @@ hints/solaris.pl
 hints/irix.pl
 t/README
 t/session.t
+t/bulkwalk.t
 t/mib.t
 t/get.t
 t/getnext.t
@@ -24,6 +25,7 @@ t/snmptest.conf
 t/startagent.pl
 examples/async1.pl
 examples/async2.pl
+examples/bulkwalk.pl
 examples/ipforward.pl
 examples/mibtree.pl
 examples/mibwalk.pl
