@@ -2,11 +2,18 @@ This file contains major changes in released revisions.  Please read
 the ChangeLog file for a more detailed listing of changes/bug fixes.
 
 *5.0.pre1 (alpha release)*
+ NOTE WELL: this release is an alpha release and it's possible that
+ things may change before the real release so don't become dependent
+ on new features without first asking the developers if that
+ particular area is fairly stable.
+ 
  New:
     - Much of the agent internals were completely rewritten and sports
       a new module API to make your life easier.  See the
       agent/mibgroup/testhandler.c file for example code that makes
       use of some of the new functionality.
+      (Also see http://www.net-snmp.org/tutorial/new-agent/ which has
+      some incomplete documentation)
     - The agent supports multiple SNMPv3 contexts and mib modules can
       now register themselves under different contexts.  (see the -n
       option in the snmpcmd manual page for details on specifying
