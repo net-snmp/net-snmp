@@ -32,11 +32,11 @@ static struct nlist at_nl[] = {
 #endif
 
 #ifndef solaris2
-static void ARP_Scan_Init __P((void));
+static void ARP_Scan_Init __UCD_P((void));
 #if defined(freebsd2) || defined (netbsd1) || defined (hpux) || defined (bsdi2)
-static int ARP_Scan_Next __P((u_long *, char *, u_long *, u_short *));
+static int ARP_Scan_Next __UCD_P((u_long *, char *, u_long *, u_short *));
 #else
-static int ARP_Scan_Next __P((u_long *, char *, u_long *));
+static int ARP_Scan_Next __UCD_P((u_long *, char *, u_long *));
 #endif
 #endif
 
@@ -64,7 +64,7 @@ var_atEntry(vp, name, length, exact, var_len, write_method)
     register int	    *length;	/* IN/OUT - length of input and output oid's */
     int			    exact;	/* IN - TRUE if an exact match was requested. */
     int			    *var_len;	/* OUT - length of variable or 0 if function returned. */
-    int			    (**write_method) __P((int, u_char *, u_char, int, u_char *, oid *, int));
+    int			    (**write_method) __UCD_P((int, u_char *, u_char, int, u_char *, oid *, int));
 {
     /*
      * Address Translation table object identifier is of form:
@@ -346,7 +346,7 @@ static struct arptab *at=0;
 #endif
 #endif /* CAN_USE_SYSCTL */
 
-static void ARP_Scan_Init __P((void))
+static void ARP_Scan_Init __UCD_P((void))
 {
 #ifndef CAN_USE_SYSCTL
 #ifndef linux

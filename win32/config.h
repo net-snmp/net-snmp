@@ -737,10 +737,10 @@
 #endif
 #endif
 
-#if !(defined( __P) || defined(netbsd1))
+#if !(defined( __UCD_P) || defined(netbsd1))
 #ifdef __STDC__
-#define __P(params) params
+#define __UCD_P(params) params
 #else
-#define __P(params) ()
+#define __UCD_P(params) ()
 #endif /* __STDC__ */
-#endif /* __P */
+#endif /* __UCD_P */

@@ -57,7 +57,7 @@ SOFTWARE.
 #include "mib.h"
 #include "snmp.h"
 
-int main __P((int, char **));
+int main __UCD_P((int, char **));
 
 extern int  errno;
 extern int save_mib_descriptions;

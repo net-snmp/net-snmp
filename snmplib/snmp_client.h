@@ -40,11 +40,11 @@ struct synch_state {
 
 extern struct synch_state snmp_synch_state;
 
-struct variable_list* snmp_add_null_var __P((struct snmp_pdu *, oid *, int));
-struct snmp_pdu	*snmp_pdu_create __P((int));
-struct snmp_pdu *snmp_fix_pdu __P((struct snmp_pdu *, int));
-struct snmp_pdu *snmp_clone_pdu __P((struct snmp_pdu *));
-char *snmp_errstring __P((int));
-void snmp_synch_setup __P((struct snmp_session *));
-int snmp_synch_response __P((struct snmp_session *, struct snmp_pdu *, struct snmp_pdu **));
-int ms_party_init __P((in_addr_t, oid *, int *, oid *, int *, oid *, int *));
+struct variable_list* snmp_add_null_var __UCD_P((struct snmp_pdu *, oid *, int));
+struct snmp_pdu	*snmp_pdu_create __UCD_P((int));
+struct snmp_pdu *snmp_fix_pdu __UCD_P((struct snmp_pdu *, int));
+struct snmp_pdu *snmp_clone_pdu __UCD_P((struct snmp_pdu *));
+char *snmp_errstring __UCD_P((int));
+void snmp_synch_setup __UCD_P((struct snmp_session *));
+int snmp_synch_response __UCD_P((struct snmp_session *, struct snmp_pdu *, struct snmp_pdu **));
+int ms_party_init __UCD_P((in_addr_t, oid *, int *, oid *, int *, oid *, int *));

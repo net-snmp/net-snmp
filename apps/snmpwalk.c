@@ -81,13 +81,13 @@ SOFTWARE.
 #include "system.h"
 #include "snmp_parse_args.h"
 
-void main __P((int, char **));
+void main __UCD_P((int, char **));
 int failures;
 
 oid objid_mib[] = {1, 3, 6, 1, 2, 1};
 
 void
-usage __P((void))
+usage __UCD_P((void))
 {
   fprintf(stderr,"Usage:\n  snmpwalk ");
   snmp_parse_args_usage(stderr);

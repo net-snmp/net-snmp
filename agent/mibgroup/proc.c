@@ -22,7 +22,7 @@
 #include "util_funcs.h"
 #include "read_config.h"
 
-struct myproc *get_proc_instance __P((struct myproc *,int));
+struct myproc *get_proc_instance __UCD_P((struct myproc *,int));
 struct myproc *procwatch = NULL;
 static struct extensible fixproc;
 int numprocs=0;
@@ -30,7 +30,7 @@ int numprocs=0;
 /* Define snmpd.conf reading routines first.  They get called
    automatically by the invocation of a macro in the proc.h file. */
 
-void proc_free_config __P((void)) {
+void proc_free_config __UCD_P((void)) {
   struct myproc *ptmp, *ptmp2;
   
   for (ptmp = procwatch; ptmp != NULL;) {
@@ -90,7 +90,7 @@ unsigned char *var_extensible_proc(vp, name, length, exact, var_len, write_metho
 /* IN - TRUE if an exact match was requested. */
     int			*var_len;
 /* OUT - length of variable or 0 if function returned. */
-    int			(**write_method) __P((int, u_char *,u_char, int, u_char *, oid *, int));
+    int			(**write_method) __UCD_P((int, u_char *,u_char, int, u_char *, oid *, int));
 /* OUT - pointer to function to set variable, otherwise 0 */
 {
 
@@ -250,9 +250,9 @@ int sh_count_procs(procname)
 
 #define	NPROCS		32		/* number of proces to read at once */
 
-static struct user *getuser __P((struct proc *));
-static int getword __P((off_t));
-static int getstruct __P((off_t, char *, off_t, int));
+static struct user *getuser __UCD_P((struct proc *));
+static int getword __UCD_P((off_t));
+static int getstruct __UCD_P((off_t, char *, off_t, int));
 
 extern int kmem, mem, swap;
 

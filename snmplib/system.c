@@ -285,13 +285,13 @@ in_addr_t get_myaddr()
   return((in_addr_t)in_addr.sin_addr.s_addr);
 }
 
-long get_uptime __P((void))
+long get_uptime __UCD_P((void))
 {
     return (0); /* not implemented */
 }
 
 char *
-winsock_startup __P((void))
+winsock_startup __UCD_P((void))
 {
  WORD VersionRequested;
  WSADATA stWSAData;
@@ -313,13 +313,13 @@ winsock_startup __P((void))
  return(NULL);
 }
 
-void winsock_cleanup __P((void))
+void winsock_cleanup __UCD_P((void))
 {
    WSACleanup();
 }
 
 #else
-in_addr_t get_myaddr __P((void))
+in_addr_t get_myaddr __UCD_P((void))
 {
     int sd;
     struct ifconf ifc;
@@ -364,7 +364,7 @@ in_addr_t get_myaddr __P((void))
 /*
  * Returns uptime in centiseconds(!).
  */
-long get_uptime __P((void))
+long get_uptime __UCD_P((void))
 {
 #ifdef bsdlike
     struct timeval boottime, now, diff;

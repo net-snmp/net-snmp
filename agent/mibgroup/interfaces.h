@@ -11,18 +11,18 @@ config_arch_require(solaris2, kernel_sunos5)
 struct in_ifaddr;
 struct ifnet;
 
-int Interface_Scan_Get_Count __P((void));
-int Interface_Index_By_Name __P((char *, int));
-void Interface_Scan_Init __P((void));
+int Interface_Scan_Get_Count __UCD_P((void));
+int Interface_Index_By_Name __UCD_P((char *, int));
+void Interface_Scan_Init __UCD_P((void));
 #if defined(sunV3) || defined(linux)
-int Interface_Scan_Next __P((short *, char *, struct ifnet *));
+int Interface_Scan_Next __UCD_P((short *, char *, struct ifnet *));
 #else
-int Interface_Scan_Next __P((short *, char *, struct ifnet *, struct in_ifaddr *));
+int Interface_Scan_Next __UCD_P((short *, char *, struct ifnet *, struct in_ifaddr *));
 #endif
 
-extern void	init_interfaces __P((void));
-extern u_char	*var_interfaces __P((struct variable *, oid *, int *, int, int *, int (**write) __P((int, u_char *, u_char,int, u_char *, oid *, int)) ));
-extern u_char	*var_ifEntry __P((struct variable *, oid *, int *, int, int *, int (**write) __P((int, u_char *, u_char, int, u_char *, oid *, int)) ));
+extern void	init_interfaces __UCD_P((void));
+extern u_char	*var_interfaces __UCD_P((struct variable *, oid *, int *, int, int *, int (**write) __UCD_P((int, u_char *, u_char,int, u_char *, oid *, int)) ));
+extern u_char	*var_ifEntry __UCD_P((struct variable *, oid *, int *, int, int *, int (**write) __UCD_P((int, u_char *, u_char, int, u_char *, oid *, int)) ));
 
 #define IFNUMBER        0
 #define IFINDEX         1

@@ -91,8 +91,8 @@
 #define Uns(num) num
 #endif /* __STDC__ */
 
-void MDreverse __P((unsigned int *));
-static void MDblock __P((MDptr, unsigned int *));
+void MDreverse __UCD_P((unsigned int *));
+static void MDblock __UCD_P((MDptr, unsigned int *));
 
 /* MDprint(MDp)
 ** Print message digest buffer MDp as 32 hexadecimal digits.

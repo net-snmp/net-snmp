@@ -173,7 +173,7 @@ void extensible_parse_config(word,cptr)
   }
 }
 
-void extensible_free_config __P((void)) {
+void extensible_free_config __UCD_P((void)) {
   struct extensible *etmp, *etmp2;
 
   for (etmp = extens; etmp != NULL;) {
@@ -223,7 +223,7 @@ unsigned char *var_extensible_shell(vp, name, length, exact, var_len, write_meth
 /* IN - TRUE if an exact match was requested. */
     int			*var_len;
 /* OUT - length of variable or 0 if function returned. */
-    int			(**write_method) __P((int, u_char *, u_char, int, u_char *, oid *, int));
+    int			(**write_method) __UCD_P((int, u_char *, u_char, int, u_char *, oid *, int));
 /* OUT - pointer to function to set variable, otherwise 0 */
 {
 
@@ -329,7 +329,7 @@ unsigned char *var_extensible_relocatable(vp, name, length, exact, var_len, writ
 /* IN - TRUE if an exact match was requested. */
     int			*var_len;
 /* OUT - length of variable or 0 if function returned. */
-    int			(**write_method) __P((int, u_char *, u_char, int, u_char *, oid *, int));
+    int			(**write_method) __UCD_P((int, u_char *, u_char, int, u_char *, oid *, int));
 /* OUT - pointer to function to set variable, otherwise 0 */
 {
 

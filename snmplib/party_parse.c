@@ -64,8 +64,8 @@
 static oid noProxy[] = {1, 3, 6, 1, 2, 1, 20, 1, 3, 1};
 #endif
 
-static void error_exit __P((char *, int, char *));
-int update_clock __P((char *, int, u_long));
+static void error_exit __UCD_P((char *, int, char *));
+int update_clock __UCD_P((char *, int, u_long));
 
 static void error_exit(str, linenumber, filename)
     char *str;

@@ -83,13 +83,13 @@ SOFTWARE.
 
 int failures = 0;
 
-void main __P((int, char **));
-void snmp_add_var __P((struct snmp_pdu *, oid*, int, char, char *));
-int ascii_to_binary __P((u_char *, u_char *));
-int hex_to_binary __P((u_char *, u_char *));
+void main __UCD_P((int, char **));
+void snmp_add_var __UCD_P((struct snmp_pdu *, oid*, int, char, char *));
+int ascii_to_binary __UCD_P((u_char *, u_char *));
+int hex_to_binary __UCD_P((u_char *, u_char *));
 
 void
-usage __P((void))
+usage __UCD_P((void))
 {
   fprintf(stderr,"Usage:\n  snmpset ");
   snmp_parse_args_usage(stderr);

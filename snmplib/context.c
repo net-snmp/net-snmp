@@ -74,13 +74,13 @@ context_getEntry(contextID, contextIDLen)
 }
 
 void
-context_scanInit __P((void))
+context_scanInit __UCD_P((void))
 {
   ScanPtr = List;
 }
 
 struct contextEntry *
-context_scanNext __P((void))
+context_scanNext __UCD_P((void))
 {
     struct contextEntry *returnval;
 

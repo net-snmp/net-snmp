@@ -68,7 +68,7 @@ SOFTWARE.
 
 #include "netstat.h"
 
-static char *inetname __P((struct in_addr));
+static char *inetname __UCD_P((struct in_addr));
 
 struct stat_table {
     int	    entry;  /* entry number in table */
@@ -191,7 +191,7 @@ char *tcpstates[] = {
  * protocol (currently only TCP).  For TCP, also give state of connection.
  */
 void
-protopr __P((void))
+protopr __UCD_P((void))
 {
     struct tcpconn_entry *tcpconn = NULL, *tp, *newp;
     struct snmp_pdu *request, *response;
@@ -310,7 +310,7 @@ protopr __P((void))
  * Dump UDP statistics structure.
  */
 void
-udp_stats __P((void))
+udp_stats __UCD_P((void))
 {
     oid varname[MAX_NAME_LEN], *udpentry;
     int varname_len;
@@ -341,7 +341,7 @@ udp_stats __P((void))
  * Dump TCP statistics structure.
  */
 void
-tcp_stats __P((void))
+tcp_stats __UCD_P((void))
 {
     oid varname[MAX_NAME_LEN], *tcpentry;
     int varname_len;
@@ -372,7 +372,7 @@ tcp_stats __P((void))
  * Dump IP statistics structure.
  */
 void
-ip_stats __P((void))
+ip_stats __UCD_P((void))
 {
     oid varname[MAX_NAME_LEN], *ipentry;
     int varname_len;
@@ -403,7 +403,7 @@ ip_stats __P((void))
  * Dump ICMP statistics.
  */
 void
-icmp_stats __P((void))
+icmp_stats __UCD_P((void))
 {
     oid varname[MAX_NAME_LEN], *icmpentry;
     int varname_len;

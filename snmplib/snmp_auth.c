@@ -84,7 +84,7 @@ SOFTWARE.
 #include "system.h"
 #include "snmp_api.h"
 
-static void md5Digest __P((u_char *, int, u_char *));
+static void md5Digest __UCD_P((u_char *, int, u_char *));
 
 /** snmp_comstr_parse - parse the header of a community string-based message
 *                       such as that found in SNMPv1 and SNMPv2c.

@@ -42,7 +42,7 @@ PERFORMANCE OF THIS SOFTWARE.
 #include "party.h"
 #include "context.h"
 
-int compare_tree __P((oid *, int, oid *, int));
+int compare_tree __UCD_P((oid *, int, oid *, int));
 extern struct subtree subtrees_old[];
 
 /*
@@ -141,7 +141,7 @@ init_nlist(nl)
 }
 
 void
-init_snmp __P((void))
+init_snmp __UCD_P((void))
 {
 #ifndef linux
   init_kmem("/dev/kmem"); 
@@ -250,7 +250,7 @@ struct subtree subtrees_old[] = {
 };
 
 #ifdef USING_VIEW_VARS_MODULE
-extern int in_view __P((oid *, int, int));
+extern int in_view __UCD_P((oid *, int, int));
 #endif
 
 int subtree_old_size() {
@@ -276,7 +276,7 @@ getStatPtr(name, namelen, type, len, acl, exact, write_method, pi,
     int		*len;	    /* OUT - length of matched variable */
     u_short	*acl;	    /* OUT - access control list */
     int		exact;	    /* IN - TRUE if exact match wanted */
-    int	       (**write_method) __P((int, u_char *, u_char, int, u_char *, oid *, int));
+    int	       (**write_method) __UCD_P((int, u_char *, u_char, int, u_char *, oid *, int));
     struct packet_info *pi; /* IN - relevant auth info re PDU */
     int		*noSuchObject;
 {
