@@ -1057,16 +1057,20 @@ init_mib (void)
     }
     
     DEBUGMSGTL(("init_mib","Looking for mibs... %s\n",env_var));
-    if (strcmp (env_var, "ALL") == 0) {
-	read_all_mibs();
-    } else {
-	entry = strtok( env_var, ENV_SEPARATOR );
-	while ( entry ) {
-	    read_module(entry);
+    entry = strtok( env_var, ENV_SEPARATOR );
+    while ( entry ) {
+        if (strcmp (entry, "ALL") == 0) {
+            read_all_mibs();
+        }
+        else if (strstr (entry, "/") != 0) {
+            read_mib(entry);
+        }
+        else {
+            read_module(entry);
+        }
 	    entry = strtok( NULL, ENV_SEPARATOR);
-	}
-	adopt_orphans();
     }
+    adopt_orphans();
     free(env_var);
     
     env_var = getenv("MIBFILES");
