@@ -915,6 +915,13 @@ AC_CHECK_HEADER(tcpd.h,
 	CPPFLAGS=${_cppflags} LDFLAGS=${_ldflags}),
     CPPFLAGS=${_cppflags} LDFLAGS=${_ldflags})
 
+dnl Linux RedHat 6.1 won't link libwrap without libnsl
+case $target_os in
+    linux*)
+        AC_CHECK_LIB(nsl, yp_get_default_domain)
+    ;;
+esac
+
 dnl zlib is required for newer versions of rpm
 _cppflags="${CPPFLAGS}"
 _ldflags="${LDFLAGS}"
