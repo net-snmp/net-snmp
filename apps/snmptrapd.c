@@ -1179,7 +1179,7 @@ main(int argc, char *argv[])
 	*sep = 0;
       } 
 
-      transport = netnetsnmp_tdomain_transport(cp, 1, "udp");
+      transport = netsnmp_tdomain_transport(cp, 1, "udp");
       if (transport == NULL) {
 	snmp_log(LOG_ERR, "couldn't open %s -- errno %d (\"%s\")\n",
 		 cp, errno, strerror(errno));

@@ -64,7 +64,7 @@ debug_print_requests(netsnmp_request_info              *requests)
             DEBUGMSGTL(("helper:debug", "        [status = %d]\n",
                         request->status));
         if (request->parent_data) {
-            data_list *lst;
+            netsnmp_data_list *lst;
             DEBUGMSGTL(("helper:debug", "        [parent data ="));
             for(lst = request->parent_data; lst; lst = lst->next) {
                 DEBUGMSG(("helper:debug", " %s", lst->name));

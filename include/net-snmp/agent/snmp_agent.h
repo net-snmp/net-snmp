@@ -32,7 +32,7 @@ typedef struct netsnmp_request_info_s {
 
    /* can be used to pass information on a per-request basis from a
       helper to the later handlers */
-   data_list *parent_data;
+   netsnmp_data_list *parent_data;
 
    oid    *range_end;     /* don't free, reference to (struct tree)->end */
    size_t  range_end_len;
@@ -87,7 +87,7 @@ typedef struct netsnmp_agent_request_info_s {
    struct netsnmp_agent_session_s *asp;       /* may not be needed */
    /* can be used to pass information on a per-pdu basis from a
       helper to the later handlers */
-   data_list *agent_data;
+   netsnmp_data_list *agent_data;
    /* ... */
 } netsnmp_agent_request_info;
 
@@ -157,10 +157,10 @@ int	netsnmp_register_agent_nsap	(struct netsnmp_transport_s *t);
 void	denetsnmp_register_agent_nsap	(int handle);
 
 inline void
-netsnmp_agent_add_list_data(netsnmp_agent_request_info *agent, data_list *node);
+netsnmp_agent_netsnmp_add_list_data(netsnmp_agent_request_info *agent, netsnmp_data_list *node);
 
 inline void *
-netsnmp_agent_get_list_data(netsnmp_agent_request_info *agent, const char *name);
+netsnmp_agent_netsnmp_get_list_data(netsnmp_agent_request_info *agent, const char *name);
 
 inline void
 netsnmp_free_agent_data_set(netsnmp_agent_request_info *agent);

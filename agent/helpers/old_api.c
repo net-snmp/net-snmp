@@ -99,7 +99,7 @@ register_old_api(const char *moduleName,
 
         /* register ourselves in the mib tree */
         if (netsnmp_register_handler(reginfo) != MIB_REGISTERED_OK) {
-	    snmp_netnetsnmp_handler_registration_free(reginfo);
+	    snmp_netsnmp_handler_registration_free(reginfo);
 	    SNMP_FREE(vp);
 	}
     }
@@ -141,7 +141,7 @@ register_mib_table_row(const char *moduleName,
         r->handlerName = strdup(moduleName);
 
 	if (r->handlerName == NULL) {
-	    snmp_netnetsnmp_handler_registration_free(r);
+	    snmp_netsnmp_handler_registration_free(r);
 	    break;
 	}
 
@@ -149,7 +149,7 @@ register_mib_table_row(const char *moduleName,
         r->rootoid = (oid *)malloc(r->rootoid_len * sizeof(oid));
 
         if (r->rootoid == NULL) {
-	    snmp_netnetsnmp_handler_registration_free(r);
+	    snmp_netsnmp_handler_registration_free(r);
 	    rc = MIB_REGISTRATION_FAILED;
 	    break;
 	}
@@ -162,7 +162,7 @@ register_mib_table_row(const char *moduleName,
         r->handler->myvoid = (void *)malloc(varsize);
 	
 	if (r->handler->myvoid == NULL) {
-	    snmp_netnetsnmp_handler_registration_free(r);
+	    snmp_netsnmp_handler_registration_free(r);
 	    rc = MIB_REGISTRATION_FAILED;
 	    break;
 	}
@@ -171,7 +171,7 @@ register_mib_table_row(const char *moduleName,
         r->contextName = (context) ? strdup(context) : NULL;
 
 	if (context != NULL && r->contextName == NULL) {
-	    snmp_netnetsnmp_handler_registration_free(r);
+	    snmp_netsnmp_handler_registration_free(r);
 	    rc = MIB_REGISTRATION_FAILED;
 	    break;
 	}
@@ -185,7 +185,7 @@ register_mib_table_row(const char *moduleName,
         /*  Register this column and row  */
         if ((rc = netsnmp_register_handler_nocallback(r)) != MIB_REGISTERED_OK) {
 	    DEBUGMSGTL(("register_mib_table_row", "register failed %d\n", rc));
-	    snmp_netnetsnmp_handler_registration_free(r);
+	    snmp_netsnmp_handler_registration_free(r);
 	    break;
 	}
 
@@ -313,8 +313,8 @@ old_api_helper(netsnmp_mib_handler               *handler,
                                              SNMP_ERR_RESOURCEUNAVAILABLE);
                 cacheptr->data = access;
                 cacheptr->write_method = write_method;
-                netsnmp_request_add_list_data(requests,
-                                      create_data_list(OLD_API_NAME, cacheptr,
+                netsnmp_request_netsnmp_add_list_data(requests,
+                                      netsnmp_create_netsnmp_data_list(OLD_API_NAME, cacheptr,
                                                        free));
                 /* BBB: fall through for everything that is a set (see AAA) */
                 
@@ -322,7 +322,7 @@ old_api_helper(netsnmp_mib_handler               *handler,
                 /* WWW: explicitly list the SET conditions */
                 /* (the rest of the) SET contions */
                 cacheptr =
-                    (old_api_cache *) netsnmp_request_get_list_data(requests,
+                    (old_api_cache *) netsnmp_request_netsnmp_get_list_data(requests,
                                                             OLD_API_NAME);
 
                 if (cacheptr == NULL || cacheptr->write_method == NULL) {

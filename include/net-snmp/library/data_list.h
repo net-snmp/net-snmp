@@ -1,9 +1,9 @@
 /*
- * data_list.h
+ * netsnmp_data_list.h
  *
  * $Id$
  *
- * External definitions for functions and variables in data_list.c.
+ * External definitions for functions and variables in netsnmp_data_list.c.
  */
 
 #ifndef DATA_LIST_H
@@ -16,24 +16,24 @@ extern "C" {
 #include <net-snmp/library/snmp_impl.h>
 #include <net-snmp/library/tools.h>
 
-typedef void (Free_List_Data)(void *);
+typedef void (Netsnmp_Free_List_Data)(void *);
 
-typedef struct data_list_s {
-   struct data_list_s *next;
+typedef struct netsnmp_data_list_s {
+   struct netsnmp_data_list_s *next;
    char *name;
    void *data;                     /* The pointer to the data passed on. */
-   Free_List_Data *free_func;     /* must know how to free data_list->data */
-} data_list;
+   Netsnmp_Free_List_Data *free_func;     /* must know how to free netsnmp_data_list->data */
+} netsnmp_data_list;
 
 
-inline data_list *create_data_list(const char *, void *,
-                                   Free_List_Data *);
-void add_list_data(data_list **head, data_list *node);
-void *get_list_data(data_list *head, const char *node);
-void free_list_data(data_list *head);  /* single */
-void free_all_list_data(data_list *head); /* multiple */
-int remove_list_node(data_list **realhead, const char *name);
-inline void *get_list_node(data_list *head, const char *name);
+inline netsnmp_data_list *netsnmp_create_netsnmp_data_list(const char *, void *,
+                                   Netsnmp_Free_List_Data *);
+void netsnmp_add_list_data(netsnmp_data_list **head, netsnmp_data_list *node);
+void *netsnmp_get_list_data(netsnmp_data_list *head, const char *node);
+void netsnmp_free_list_data(netsnmp_data_list *head);  /* single */
+void netsnmp_free_all_list_data(netsnmp_data_list *head); /* multiple */
+int netsnmp_remove_list_node(netsnmp_data_list **realhead, const char *name);
+inline void *netsnmp_get_list_node(netsnmp_data_list *head, const char *name);
     
 
 #ifdef __cplusplus
