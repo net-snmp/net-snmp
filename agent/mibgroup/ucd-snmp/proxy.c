@@ -322,6 +322,7 @@ proxy_got_response(int operation, struct snmp_session *sess, int reqid,
                                           SNMP_ERR_GENERR);
                         if (pdu)
                             snmp_free_pdu(pdu);
+                        free_delegated_cache(cache);
                         return 1;
                     }
 
@@ -354,5 +355,6 @@ proxy_got_response(int operation, struct snmp_session *sess, int reqid,
         DEBUGMSGTL(("proxy", "no response received: op = %d\n", operation));
     }
 
+    free_delegated_cache(cache);
     return 1;
 }
