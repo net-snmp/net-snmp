@@ -76,9 +76,6 @@ PERFORMANCE OF THIS SOFTWARE.
 #include "mibincl.h"
 #include "snmpv3.h"
 #include "snmpusm.h"
-/* #include "agentx.h" */
-#include "m2m.h"
-#include "snmp_vars_m2m.h"
 #include "../snmplib/system.h"
 #include "kernel.h"
 #include "snmp_vars.h"
@@ -182,10 +179,10 @@ init_agent (void)
 
 
 
-Export oid nullOid[] = {0,0};
-Export int nullOidLen = sizeof(nullOid)/sizeof(oid);
-Export oid sysUpTimeOid[] = {1,3,6,1,2,1,1,3,0};
-Export int sysUpTimeOidLen = sizeof(sysUpTimeOid)/sizeof(oid);
+oid nullOid[] = {0,0};
+int nullOidLen = sizeof(nullOid)/sizeof(oid);
+oid sysUpTimeOid[] = {1,3,6,1,2,1,1,3,0};
+int sysUpTimeOidLen = sizeof(sysUpTimeOid)/sizeof(oid);
 
 /*
  * getStatPtr - return a pointer to the named variable, as well as it's
