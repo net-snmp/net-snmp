@@ -1,3 +1,13 @@
+/* Portions of this file are subject to the following copyright(s).  See
+ * the Net-SNMP's COPYING file for more details and other copyrights
+ * that may apply:
+ */
+/*
+ * Portions of this file are copyrighted by:
+ * Copyright © 2003 Sun Microsystems, Inc. All rights reserved.
+ * Use is subject to license terms specified in the COPYING file
+ * distributed with the Net-SNMP package.
+ */
 /*
  * snmpusm.c
  *
@@ -2324,6 +2334,19 @@ usm_process_in_msg(int msgProcModel,    /* (UNUSED) */
         return SNMPERR_USM_PARSEERROR;
     }
 
+    /*
+     * RFC 2574 section 8.3.2
+     * 1)  If the privParameters field is not an 8-octet OCTET STRING,
+     * then an error indication (decryptionError) is returned to the
+     * calling module.
+     */
+    if ((secLevel == SNMP_SEC_LEVEL_AUTHPRIV) && (salt_length != 8)) {
+        if (snmp_increment_statistic(STAT_USMSTATSDECRYPTIONERRORS) == 
+            0) {
+            DEBUGMSGTL(("usm", "%s\n", "Failed increment statistic."));
+        }
+        return SNMPERR_USM_DECRYPTIONERROR;
+    }
 
     if (secLevel != SNMP_SEC_LEVEL_AUTHPRIV) {
         /*
