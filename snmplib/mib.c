@@ -1834,8 +1834,11 @@ found:
 	*buf++ = '.';
 	*buf = '\0';
 
-	if (subtree->child_list == NULL)
+	if (subtree->child_list == NULL) {
+	    objidlen--;
+	    objid++;
 	    goto finish_it;
+	}
 	return_tree = _get_symbol(objid + 1, objidlen - 1, subtree->child_list,
 				 buf, in_dices, end_of_known);
     }
