@@ -164,9 +164,11 @@ header_complex_add_data(struct header_complex_index **thedata,
                         struct variable_list *var, void *data) {
   struct header_complex_index *hciptrn, *hciptrp, *ourself;
 
-  if (thedata == NULL)
+  if (thedata == NULL || var == NULL || data == NULL)
     return NULL;
   
+  header_complex_generate_varoid(var);
+
   for(hciptrn = *thedata, hciptrp = NULL;
       hciptrn != NULL;
       hciptrp = hciptrn, hciptrn = hciptrn->next)
