@@ -351,7 +351,8 @@ agentx_registration_callback(int majorID, int minorID, void *serverarg,
     return agentx_register(agentx_ss,
 		    reg_parms->name, reg_parms->namelen,
 		    reg_parms->priority,
-		    reg_parms->range_subid, reg_parms->range_ubound);
+		    reg_parms->range_subid, reg_parms->range_ubound,
+		    reg_parms->timeout);
   else
     return agentx_unregister(agentx_ss,
 		    reg_parms->name, reg_parms->namelen,

@@ -17,6 +17,7 @@ struct register_parameters {
    int     priority;
    int     range_subid;
    oid     range_ubound;
+   int     timeout;
 };
 
 #define MIB_REGISTERED_OK		 0
