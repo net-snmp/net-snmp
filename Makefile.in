@@ -188,7 +188,7 @@ Makefile: Makefile.in config.status Makefile.rules Makefile.top
 
 $(srcdir)/include/net-snmp/net-snmp-config.h.in: stamp-h.in
 $(srcdir)/stamp-h.in: configure.in acconfig.h
-	@if test "x$(NOAUTODEPS)" = "x" -o "x$(AUTOHEADER)" = "x:"; then \
+	@if test "x$(NOAUTODEPS)" = "x" -a "x$(AUTOHEADER)" != "x:"; then \
 	    cd ${srcdir} && LC_COLLATE=C $(AUTOHEADER); \
 	    echo timestamp > ${srcdir}/stamp-h.in; \
 	else \
@@ -205,7 +205,7 @@ stamp-h: include/net-snmp/net-snmp-config.h.in config.status
 	fi
 
 $(srcdir)/configure: configure.in aclocal.m4
-	@if test "x$(NOAUTODEPS)" = "x" -o "x$(AUTOCONF)" = "x:"; then \
+	@if test "x$(NOAUTODEPS)" = "x" -a "x$(AUTOCONF)" != "x:"; then \
 	    cd ${srcdir} && $(AUTOCONF); \
 	    echo "Please run configure now."; \
 	    sh -c exit 2; \
