@@ -1840,13 +1840,13 @@ usm_parse_security_parameters (
 			salt, salt_length)) == NULL )
 	{
 		DEBUGINDENTLESS();
-                /* RETURN parse error */ return -1;
+                /* RETURN parse error */ return -2;
 	}
         DEBUGINDENTLESS();
 
 	if (type_value != (u_char) (ASN_UNIVERSAL|ASN_PRIMITIVE|ASN_OCTET_STR))
 	{
-		/* RETURN parse error */ return -1;
+		/* RETURN parse error */ return -2;
 	}
 
 	return 0;
@@ -2098,7 +2098,7 @@ usm_process_in_msg (
 	u_char  type_value;
 	u_char *end_of_overhead;
 	int     error;
-        int     i;
+        int     i, rc = 0;
 	struct usmStateReference **secStateRef = (struct usmStateReference **)secStateRf;
 
 	struct usmUser *user;
@@ -2123,20 +2123,26 @@ usm_process_in_msg (
 	 * Make sure the *secParms is an OCTET STRING.
 	 * Extract the user name, engine ID, and security level.
 	 */
-	if ( usm_parse_security_parameters (
+	if (( rc = usm_parse_security_parameters (
 		 secParams,		 remaining,
 		 secEngineID,		 secEngineIDLen,
 		&boots_uint,		&time_uint,
 		 secName,		 secNameLen,
 		 signature,		&signature_length,
 		 salt,			&salt_length,
-		 &data_ptr)
-			== -1 )
+		 &data_ptr)) < 0 )
 	{
-		DEBUGMSGTL(("usm","Parsing failed.\n"));
+		DEBUGMSGTL(("usm","Parsing failed (rc=%d).\n", rc));
+		if (rc == -2 ) {
+		    if (snmp_increment_statistic (STAT_USMSTATSDECRYPTIONERRORS)==0)
+		    {
+			DEBUGMSGTL(("usm","%s\n", "Failed to increment USM statistic."));
+		    }
+		    return SNMPERR_USM_DECRYPTIONERROR;
+		}
 		if (snmp_increment_statistic (STAT_SNMPINASNPARSEERRS)==0)
 		{
-			DEBUGMSGTL(("usm","%s\n", "Failed to increment statistic."));
+			DEBUGMSGTL(("usm","%s\n", "Failed to increment ASN statistic."));
 		}
 		return SNMPERR_USM_PARSEERROR;
 	}
@@ -2361,6 +2367,27 @@ usm_process_in_msg (
 			*secStateRef = NULL;
 			return SNMPERR_USM_PARSEERROR;
 		}
+
+                /*
+                 * From RFC2574:
+                 * 
+                 * "Before decryption, the encrypted data length is verified.
+                 * If the length of the OCTET STRING to be decrypted is not
+                 * an integral multiple of 8 octets, the decryption process
+                 * is halted and an appropriate exception noted."  
+                 */
+    
+                if (remaining % 8 != 0) {
+                    DEBUGMSGTL(("usm",
+                                "Ciphertext is %lu bytes, not an integer multiple of 8 (rem %d)\n",
+                                remaining, remaining % 8));
+                    if (snmp_increment_statistic(STAT_USMSTATSDECRYPTIONERRORS) == 0) {
+                        DEBUGMSGTL(("usm", "%s\n", "Failed increment statistic."));
+                    }
+                    usm_free_usmStateReference(*secStateRef);
+                    *secStateRef = NULL;
+                    return SNMPERR_USM_DECRYPTIONERROR;
+                }
 
 		end_of_overhead = value_ptr;
 
