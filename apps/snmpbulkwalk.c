@@ -96,13 +96,13 @@ usage (void)
   snmp_parse_args_usage(stderr);
   fprintf(stderr," [<objectID>]\n\n");
   snmp_parse_args_descriptions(stderr);
-  fprintf(stderr, "  -C <APPOPTS>  Toggle various application specific behaviour:\n");
+  fprintf(stderr, "  -C <APPOPTS>  Set various application specific behaviours:\n");
   fprintf(stderr, "\t\t  APPOPTS values:\n");
-  fprintf(stderr,"\t\t      c: do not check that the returned OIDs are increasing\n");
-  fprintf(stderr,"\t\t      i: include the requested OID in the search range\n");
-  fprintf(stderr,"\t\t      n NUM: set non-repeaters to NUM\n");
-  fprintf(stderr,"\t\t      p: print the number of variables found\n");
-  fprintf(stderr,"\t\t      r NUM: set max-repeaters to NUM\n");
+  fprintf(stderr,"\t\t      c:       do not check that returned OIDs are increasing\n");
+  fprintf(stderr,"\t\t      i:       include given OIDs in the search range\n");
+  fprintf(stderr,"\t\t      n<NUM>:  set non-repeaters to <NUM>\n");
+  fprintf(stderr,"\t\t      p:       print the number of variables found\n");
+  fprintf(stderr,"\t\t      r<NUM>:  set max-repeaters to <NUM>\n");
 }
 
 static void
@@ -172,8 +172,7 @@ void optProc(int argc, char *const *argv, int opt)
 		break;
 
 	    default:
-		fprintf(stderr,
-			"Unknown flag passed to -C: %c\n", optarg[-1]);
+		fprintf(stderr, "Unknown flag passed to -C: %c\n", optarg[-1]);
 		exit(1);
 	    }
 	}
