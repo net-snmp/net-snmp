@@ -11,9 +11,9 @@
 
 #define NETSNMP_NAMEBUF_LEN 128
 typedef struct netsnmp_oid_s {
-    unsigned int        *name;
+    oid                 *name;
     unsigned int         len;
-    unsigned int         namebuf[ NETSNMP_NAMEBUF_LEN ];
+    oid                  namebuf[ NETSNMP_NAMEBUF_LEN ];
 } netsnmp_oid;
 
 static int
@@ -47,6 +47,7 @@ netsnmp_oid *
 nso_newptr(initstring)
     char *initstring
     CODE:
+        init_snmp(NULL);
         RETVAL = SNMP_MALLOC_TYPEDEF(netsnmp_oid);
         RETVAL->name = RETVAL->namebuf;
         RETVAL->len = sizeof(RETVAL->namebuf)/sizeof(RETVAL->namebuf[0]);
