@@ -1,9 +1,9 @@
 #include <config.h>
 
-#ifdef HAVE_STDLIB_H
+#include <stdio.h>
+#if HAVE_STDLIB_H
 #include <stdlib.h>
 #endif
-#include <stdio.h>
 #if HAVE_STRING_H
 #include <string.h>
 #else
@@ -18,12 +18,15 @@
 #else
 #include <varargs.h>
 #endif
+#if HAVE_WINSOCK_H
+#include <winsock.h>
+#endif
 
 #include "asn1.h"
+#include "mib.h"
 #include "snmp_api.h"
 #include "snmp_debug.h"
 #include "snmp_impl.h"
-#include "mib.h"
 
 static int   dodebug = DODEBUG;
 static int   debug_num_tokens=0;
@@ -160,7 +163,6 @@ debugmsgtoken(va_alist)
 
 #ifndef STDC_HEADERS
   const char *token;
-  va_list debugargs;
 
   va_start(debugargs);
   token = va_arg(debugargs, const char *);
