@@ -320,11 +320,17 @@ ${context}_commit( ${context}_rowreq_ctx *rowreq_ctx)
 @          next@
 @      end@
     if (save_flags & FLAG_$node.uc) {
-       save_flags &= ~FLAG_$node.uc; /* clear */
-       rc = TODO_commit_colum(...);
-       if(rc == TODO_success_code) {
+       save_flags &= ~FLAG_$node.uc; /* clear $node */
+       /*
+        * TODO: commit colum $node
+        */
+       rc = -1;
+       if(-1 == rc) {
+           snmp_log(LOG_ERR,"$context column $node commit failed\n");
+       }
+       else {
             /*
-             * set flag, in case we need to undo
+             * set flag, in case we need to undo $node
              */
             rowreq_ctx->column_set_flags |= FLAG_$node.uc;
        }
