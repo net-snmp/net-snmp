@@ -2,8 +2,8 @@
       =============================================================
 		       FAQ Author: Dave Shield
 		        ucd-snmp Version: 5.0.pre2
-		ucd-snmp Project Author: Wes Hardaker
-		Email: net-snmp-coders@lists.sourceforge.net
+	    net-snmp/ucd-snmp Project Leader: Wes Hardaker
+	     Email: net-snmp-coders@lists.sourceforge.net
 
 TABLE OF CONTENTS
 =================
@@ -148,18 +148,15 @@ Where can I get it?
   Sourceforge Project page:
     - http://www.net-snmp.org/project/
   Mirrors:
-    - US:        ftp://ftp.freesnmp.com/mirrors/net-snmp/
-    - Bulgaria:  http://rtfm.uni-svishtov.bg/net-snmp/
-    - Japan:     ftp://ftp.ayamura.org/pub/net-snmp/
-    - Germany:   ftp://ftp.mpg.goe.ni.schule.de/pub/internet/net-snmp/
+    - US:          ftp://ftp.freesnmp.com/mirrors/net-snmp/
+    - Bulgaria:    http://rtfm.uni-svishtov.bg/net-snmp/
+    - Japan:       ftp://ftp.ayamura.org/pub/net-snmp/
+    - Germany:     ftp://ftp.mpg.goe.ni.schule.de/pub/internet/net-snmp/
+    - Switzerland: ftp://sunsite.cnlab-switch.ch:/mirror/net-snmp/
 
-  Mirrors of the older ucd-snmp.ucdavis.edu site:
-    - ftp://ucd-snmp.ucdavis.edu/ucd-snmp.tar.gz
-    - ftp://sunsite.cnlab-switch.ch:/mirror/ucd-snmp/ucd-snmp.tar.gz
-    - ftp://ftp.win.ne.jp/pub/network/snmp/ucd-snmp/ucd-snmp.tar.gz
-    - ftp://ftp.chg.ru/pub/networking/management/snmp/ucd-snmp/ucd-snmp.tar.gz
-    - ftp://mirror.aarnet.edu.au/pub/ucd-snmp/ucd-snmp.tar.gz
-    - ftp://archive.logicnet.ro/mirrors/ucd-snmp.ucdavis.edu/
+  The old ucd-snmp.ucdavis.edu web site and ftp server is now
+  offline and should not be accessed any longer.
+
 
 
 What documentation is available?
@@ -210,7 +207,7 @@ What's the difference between UCD-SNMP and Net-SNMP?
   code base, to improve the readability and maintainability of the
   package.  This will probably result in some changes to the API,
   though we will attempt to retain some form of backwards
-  compatability as far as possible, and clearly mark anything that has
+  compatibility as far as possible, and clearly mark anything that has
   changed.
 
 
@@ -221,17 +218,19 @@ What operating systems does it run on?
   Both the applications and the agent have been reported as running
   (at least in part) on the following operating systems:
 
-	* HP-UX (10.20 to 9.01)
+	* HP-UX (10.20 to 9.01 and 11.0 -- see README.hpux11)
 	* Ultrix (4.5 to 4.2)
 	* Solaris (2.8 to 2.3) and SunOS (4.1.4 to 4.1.2)
 	* OSF (4.0, 3.2)
 	* NetBSD (1.5alpha to 1.0)
 	* FreeBSD (4.1 to 2.2)
 	* BSDi (4.0.1 to 2.1)
-	* Linux (kernels 2.2 to 1.3)
-        * AIX (4.1.5, 3.2.5)
-        * OpenBSD (2.8, 2.6)
-        * Irix (6.5 to 5.1)
+	* Linux (kernels 2.4 to 1.3)
+	* AIX (4.1.5, 3.2.5)
+	* OpenBSD (2.8, 2.6)
+	* Irix (6.5 to 5.1)
+	* OS X (10.1.1 and 10.1.2)
+	* Dynix/PTX 4.4
 
   See the next question but one for the status of Windows support.
 
@@ -270,14 +269,13 @@ Does it run on Windows?
 ----------------------
 
   The basic suite should compile and run on Win32 platforms.
-  This includes the library and command-line tools (apart perhaps
-  from 'snmpdtrapd').
+  This includes the library and command-line tools.
 
-    The basic architecture of the agent builds, but the MIB-II
-  (and other) modules do not (which rather negates the point!).
-  Note that the UCD pass-through extensions do not work under Windows.
+    The basic architecture of the agent builds, including the MIB-II
+  module, but other MIB modules may not.  Note that the UCD pass-through
+  extensions do not work under Windows.
 
-  Volunteers to assist in implementing Windows versions of these
+  Volunteers to assist in implementing Windows versions of the missing
   modules are likely to welcomed with open arms :-)
 
     Further details of Windows support (currently Visual C++ and
@@ -539,7 +537,7 @@ How do I add a MIB to the tools?
   suite was installed into a different base location).  Some
   ready-packaged distributions (such as Linux RPM packages) may look
   for MIB files in a different location, such as /etc/snmp/mibs - put
-  the new file in this dirctory instead.  This makes it available for
+  the new file in this directory instead.  This makes it available for
   everyone on the system.
   The tools will also look for mibs in your personal $HOME/.snmp/mibs
   directory, but this will only work for you.
@@ -581,7 +579,7 @@ Why can't I see values in the <INSERT ENTERPRISE HERE> tree?
 	snmpwalk localhost public ucdavis
  
   Or, of course, you can walk a selected portion of an enterprise subtree
-  by specifying the appropraite starting point - e.g:
+  by specifying the appropriate starting point - e.g:
 
 	snmpwalk localhost public ucdavis.version
   
@@ -676,7 +674,7 @@ Requesting an object fails with "Unknown Object Identifier"  Why?
   
 	snmpget myhost public system.sysUpTime.0
 
-  These earler versions of the tools may take a command-line option '-R'
+  These earlier versions of the tools may take a command-line option '-R'
   or '-IR' (depending on vintage) to invoke this "random-access" mode.
   Note that snmptranslate still requires "random-access" to be specified
   explicitly - all other command tools now use this mode by defaults.
@@ -766,7 +764,7 @@ I cannot set any variables in the MIB.
   configuration.  See the AGENT section for more details.
 
     Note that neither the community string "public" nor "private" can be
-  used to set veriables in a typical default configuration.
+  used to set variables in a typical default configuration.
 
 
 
@@ -1086,7 +1084,7 @@ I'm trying to use mib2c (or tkmib) and it can't locate SNMP.pm?
 
   That's probably because the SNMP perl module hasn't been installed.
   It's not part of the standard perl distribution, nor is it installed
-  by default in RedHat linux (for example).
+  by default in RedHat Linux (for example).
     You'll need to install it.  See the previous two questions.
 
 
@@ -1201,7 +1199,7 @@ What does "Cannot find module (XXX-MIB)" mean?
 ---------------------------------------------
 
     This is similar to the previous questions.   In this case, it's
-  stating that it can't find the specified module - either becuase
+  stating that it can't find the specified module - either because
   it's not installed properly, or the name used is subtly wrong.
 
     If it's just one or two modules that are not being found, check
@@ -1327,7 +1325,7 @@ What's this about "too many imported symbols"?
     There are two circumstances in which this can result in the
   error message shown above.
 
-    Firstly, if the MIB file refers to an unususally large number
+    Firstly, if the MIB file refers to an unusually large number
   of external identifiers.  Handling this case requires a (trivial)
   patch to the parsing code.  Contact the coders list for advice.
      (This is extremely rare - the only example that
@@ -2124,7 +2122,7 @@ How do I compile with 'cc' instead of 'gcc'?
   detected the presence of 'gcc', cached this information, and may still
   try to use this anyway.   In which case, simply remove the 'config.cache'
   file before re-running configure.
-  
+ 
 
 
 But gcc doesn't compile it successfully on my new Solaris system. Why not?
@@ -2317,7 +2315,7 @@ What if I'm using an AgentX sub-agent instead?
 I'm getting an error "autoheader: not found" - what's wrong?
 -----------------------------------------------------------
 
-    This usually apears when compiling the current development source
+    This usually appears when compiling the current development source
   version, obtained via CVS.  Unfortunately, the timestamps on some of
   the configure files are such that make assumes (mistakenly) that the
   configure script needs to be re-generated.
@@ -2366,7 +2364,7 @@ What ASN.1 parser is used?
   and the parser is usually bundled into the library 'libsnmp.a'
 
     Note that the parser attempts to be fairly forgiving of some common
-  errors and incompatabilities in MIB files.  The UCD tools accepting a
+  errors and incompatibilities in MIB files.  The UCD tools accepting a
   MIB file without complaint does not imply that the MIB is strictly
   correct.
     Certain MIBs (most notably those from Cisco) may need some amendments
