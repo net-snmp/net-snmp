@@ -566,8 +566,8 @@ netsnmp_container_get_binary_array_factory(void)
 void
 netsnmp_container_binary_array_init(void)
 {
-    netsnmp_continer_register("binary_array",
-                              netsnmp_container_get_binary_array_factory());
+    netsnmp_container_register("binary_array",
+                               netsnmp_container_get_binary_array_factory());
 }
 
 #ifdef NOT_YET

@@ -128,7 +128,7 @@ CSRCS=	snmp_client.c mib.c parse.c snmp_api.c snmp.c 		\
 	snmp_secmod.c snmp_version.c                            \
 	@security_src_list@ \
 	check_varbind.c container.c container_binary_array.c	\
-	container_null.c containerlist_ssll.c	\
+	container_null.c container_list_ssll.c	\
 	cmu_compat.c ucd_compat.c
 
 OBJS=	$(CSRCS:.c=.o)
