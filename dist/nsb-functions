@@ -7,6 +7,7 @@
 # Utility vars
 #
 NSB_QUIET=0
+NSB_PROMPT=1
 NSB_CLEAN=1
 NSB_SKIP_CONFIG=0
 NSB_VIEW=cat
@@ -26,8 +27,12 @@ nsb-info()
 
 nsb-prompt()
 {
-   echo $@
-   read nsb_prompt_dummy
+   if [ $NSB_PROMPT -eq 1 ]; then
+      echo $@
+      read nsb_prompt_dummy
+   else
+      echo "$@ (PROMPT SKIPPED)"
+   fi
 }
 
 #----------------------------------------------------------------------
@@ -121,7 +126,7 @@ nsb-build()
 
    if [ $NSB_CLEAN -eq 1 ]; then
       nsb-info "Cleaning up..."
-      rm -fR nsb-out-* 2>&1 > /dev/null
+      rm -fR nsb-out-* `pwd`/usr/local 2>&1 > /dev/null
       if [ -f Makefile ]; then
          make distclean
       fi
@@ -138,7 +143,7 @@ nsb-build()
    make 2>&1 test | tee $OUTPUT
 
    nsb-info "Checking for errors..."
-   egrep "Error|FAIL|warning|No rule|exists" $OUTPUT > nsb-out-allerrs.$DATE
+   egrep "Error|FAIL|warn|No |exists" $OUTPUT > nsb-out-allerrs.$DATE
    egrep -v "^/usr" nsb-out-allerrs.$DATE > nsb-out-nerrs.$DATE
    egrep -v "warn" nsb-out-nerrs.$DATE > nsb-out-errs.$DATE
    nsb_rc=$?
