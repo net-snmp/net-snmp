@@ -97,6 +97,9 @@ Equivalent to
 .IP "quickPrinting (1|yes|true|0|no|false)"
 Equivalent to
 .BR -Oq .
+.IP "dontPrintUnits (1|yes|true|0|no|false)"
+Equivalent to
+.BR -OU .
 .IP "printHexText (1|yes|true|0|no|false)"
 Equivalent to
 .BR -OT .
