@@ -16,9 +16,11 @@ PERLSCRIPTS=snmpcheck tkmib mib2c fixproc ipf-mod.pl snmpconf traptoemail
 SCRIPTSMADEFORPERL=snmpcheck.made tkmib.made mib2c.made fixproc.made \
 	ipf-mod.pl.made snmpconf.made traptoemail.made
 PERLPROG=@PERLPROG@
-DATASRCS=mib2c.conf mib2c.iterate.conf mib2c.create-dataset.conf \
+DATASRCS=mib2c.conf mib2c.iterate.conf mib2c.iterate_access.conf \
+	mib2c.create-dataset.conf \
 	mib2c.array-user.conf mib2c.column_enums.conf \
 	mib2c.column_defines.conf mib2c.old-api.conf mib2c.scalar.conf \
+	mib2c.check_values.conf mib2c.access_functions.conf \
 	mib2c.int_watch.conf
 CONFINSTALLDIR=$(snmplibdir)/snmpconf-data
 CONFDATASRC=snmpconf.dir
