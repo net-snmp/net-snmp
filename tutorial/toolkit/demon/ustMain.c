@@ -1,6 +1,14 @@
 #include <ucd-snmp/ucd-snmp-config.h>
 #include <ucd-snmp/ucd-snmp-includes.h>
 #include <ucd-snmp/ucd-snmp-agent-includes.h>
+#include <signal.h>
+
+static int keep_running;
+
+RETSIGTYPE
+stop_server(int a) {
+    keep_running = 0;
+}
 
 main () {
   int agentx_subagent=1; /* change this if you're a master agent */
@@ -27,8 +35,13 @@ main () {
   if (!agentx_subagent)
     init_master_agent(161, NULL, NULL);  /* open port 161 (UDP:snmp) */
 
+  /* In case we recevie a request to stop (kill -TERM or kill -INT) */
+  keep_running = 1;
+  signal(SIGTERM, stop_server);
+  signal(SIGINT, stop_server);
+
   /* you're main loop here... */
-  while(1) {
+  while(keep_running) {
     /* if you use select(), see snmp_select_info() in snmp_api(3) */
     /*     --- OR ---  */
     agent_check_and_process(1); /* 0 == don't block */
@@ -37,3 +50,4 @@ main () {
   /* at shutdown time */
   snmp_shutdown("ustMain");
 }
+
