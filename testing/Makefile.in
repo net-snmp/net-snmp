@@ -2,7 +2,7 @@
 # Makefile for testing
 #
 
-TARG		= etest ktest misctest stest
+#TARG		= etest ktest misctest stest
 
 USELIBS		= ../snmplib/libsnmp.$(SHLIB_EXTENSION)$(SHLIB_VERSION)
 LIBS		= -L../snmplib $(CC_RUNTIME_ARG) -lsnmp @LIBS@
