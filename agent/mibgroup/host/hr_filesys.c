@@ -109,15 +109,21 @@ struct statfs  *HRFS_entry;
 #define HRFS_name	f_mntfromname
 
 #elif defined(dynix)
-
 struct mntent  *HRFS_entry;
 #define	HRFS_name	mnt_fsname
 #define	HRFS_mount	mnt_dir
 #define	HRFS_type	mnt_type
 #define	HRFS_statfs	statvfs
 
-#else
+#elif defined(WIN32)
+struct win_statfs	*HRFS_entry;
+static int		fscount;
+#define HRFS_mount	f_driveletter
+#define	HRFS_name	f_fsid
+#define HRFS_statfs	win_statfs
+#define	HRFS_type	f_type
 
+#else
 struct mntent  *HRFS_entry;
 #define	HRFS_name	mnt_fsname
 #define	HRFS_mount	mnt_dir
@@ -138,7 +144,6 @@ struct mntent  *HRFS_entry;
 
 #define	FULL_DUMP	0
 #define	PART_DUMP	1
-
 
 extern void     Init_HR_FileSys(void);
 extern int      Get_Next_HR_FileSys(void);
