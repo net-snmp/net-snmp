@@ -30,7 +30,7 @@ unsigned char *var_extensible_proc(vp, name, length, exact, var_len, write_metho
   register int interface;
   struct myproc *proc;
   long long_ret;
-  char errmsg[300];
+  u_char errmsg[300];
 
 
   if (!checkmib(vp,name,length,exact,var_len,write_method,newname,numprocs))

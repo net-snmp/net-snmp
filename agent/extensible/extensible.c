@@ -41,6 +41,9 @@ extern int numrelocs;                    /* ditto */
 int minimumswap;
 double maxload[3];
 static int pageshift;           /* log base 2 of the pagesize */
+#ifdef SECURITYEXCEPTIONS
+  static int exceptions[] = SECURITYEXCEPTIONS;
+#endif
 
 int checkmib(vp,name,length,exact,var_len,write_method,newname,max)
     register struct variable *vp;
@@ -53,9 +56,6 @@ int checkmib(vp,name,length,exact,var_len,write_method,newname,max)
     int                 max;
 {
   int i, rtest;
-#ifdef SECURITYEXCEPTIONS
-  int exceptions[] = SECURITYEXCEPTIONS;
-#endif
 
   for(i=0,rtest=0; i < vp->namelen && i < *length && !rtest; i++) {
     if (name[i] != vp->name[i]) {
@@ -592,6 +592,7 @@ setPerrorstatus(to)
   char buf[STRMAX];
   extern char *sys_errlist[];
   
+  perror(to);
   sprintf(buf,"%s: %s",to,sys_errlist[errno]);
   seterrorstatus(to);
 }
@@ -660,7 +661,7 @@ extern struct variable2 extensible_relocatable_variables[];
 extern int compare();
 
 int tree_compare(a, b)
-  const void *a, *b;
+  void *a, *b;
 {
   struct subtree *ap, *bp;
   ap = (struct subtree *) a;

@@ -254,8 +254,9 @@ int get_exec_output(ex)
         close(cfd);
         close(fd[0]);
         /* wait for the child to finish */
-        if (ex->pid && waitpid(ex->pid,&ex->result,0) < 0) {
+        if (ex->pid > 0 && waitpid(ex->pid,&ex->result,0) < 0) {
           setPerrorstatus("waitpid()");
+          return (NULL);
         }
         ex->pid = 0;
         ex->result = WEXITSTATUS(ex->result);
