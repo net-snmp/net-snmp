@@ -330,9 +330,8 @@ sc_hash(const oid * hashtype, size_t hashtypelen, u_char * buf,
         size_t buf_len, u_char * MAC, size_t * MAC_len)
 #if defined(USE_INTERNAL_MD5) || defined(USE_OPENSSL)
 {
-    int             rval = SNMPERR_SUCCESS;
-
 #ifdef USE_OPENSSL
+    int             rval = SNMPERR_SUCCESS;
     EVP_MD         *hash(void);
     HMAC_CTX       *c = NULL;
 #endif

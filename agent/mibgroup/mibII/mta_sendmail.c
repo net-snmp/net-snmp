@@ -114,6 +114,10 @@
     /*
      * prefix for all OIDs 
      */
+
+static FindVarMethod var_mtaEntry;
+static FindVarMethod var_mtaGroupEntry;
+
 static oid      mta_variables_oid[] = { 1, 3, 6, 1, 2, 1, 28 };
 
 /*
@@ -679,7 +683,7 @@ read_sendmailcf(BOOL config)
     FILE           *sendmailcf_fp;
     char            line[500];
     char           *filename;
-    char           *qgname, *p, *q;
+    char           *qgname, *p;
     int             linenr;
     int             linelen;
     int             found_sendmailst = FALSE;
