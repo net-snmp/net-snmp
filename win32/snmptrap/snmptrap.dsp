@@ -88,7 +88,7 @@ SOURCE=..\..\snmplib\getopt.c
 # End Source File
 # Begin Source File
 
-SOURCE=..\..\apps\snmp_parse_args.c
+SOURCE=..\..\snmplib\snmp_parse_args.c
 # End Source File
 # Begin Source File
 

@@ -144,6 +144,8 @@ EXPORTS
 	read_config_print_usage
 	read_config_with_type
 	read_config_store
+	read_config_read_octet_string
+	read_config_save_octet_string
 	free_config
 	skip_white
 	skip_not_white
@@ -224,14 +226,21 @@ EXPORTS
 	copy_word
 	calculate_time_diff
 	vacm_createGroupEntry
+	vacm_destroyGroupEntry
 	vacm_destroyAllGroupEntries
 	vacm_createAccessEntry
+	vacm_destroyAccessEntry
 	vacm_destroyAllAccessEntries
 	vacm_createViewEntry
+	vacm_destroyViewEntry
 	vacm_destroyAllViewEntries
 	vacm_getViewEntry
 	vacm_getGroupEntry
 	vacm_getAccessEntry
+	vacm_parse_config_access
+	vacm_parse_config_group
+	vacm_parse_config_view
+	store_vacm
 	vacm_scanGroupInit
 	vacm_scanGroupNext
 	vacm_scanAccessInit
@@ -249,7 +258,9 @@ EXPORTS
 	snmp_set_random_access
 	snmp_set_suffix_only
 	usm_store_users
-	vacm_is_configured
+	snmp_store
+	atime_diff
+	atime_newMarker
 	Mib                     DATA
 	tree_head               DATA
 	snmp_errno              DATA
