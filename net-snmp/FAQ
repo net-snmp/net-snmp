@@ -40,7 +40,7 @@ TABLE OF CONTENTS
    How come ever since version 3.2 my mib files are no longer read?
    What's this about a "party database", when I try to send a query?
    What's this about "too many imported symbols"?
-   What about "Did not find removed in module SNMPv2-SMI" and similar?
+   What about "Did not find 'removed' in module SNMPv2-SMI" and similar?
    Why can't I see values in the UCDavis 'extensible' tree?
    Why can't I see values in the <INSERT ENTERPRISE HERE> tree?
    I've done that, and I still can't see the values. Why not?
@@ -646,7 +646,7 @@ What's this about "too many imported symbols"?
   
 
 
-What about "Did not find removed in module SNMPv2-SMI" and similar?
+What about "Did not find 'removed' in module SNMPv2-SMI" and similar?
 ------------------------------------------------------------------
 
   This means that you're using the most recent applications without
@@ -760,8 +760,20 @@ I've done that, but I'm *still* getting "sub-identifier not found:" Grrr!
                                                      will fail, while
 		snmpget myhost public system.sysUpTime.0
                                                           will work.
-  There are plans to include this "random access" feature (for unique
-  names at least), but this is not yet available.
+
+    If you are confident that the sub-identifier is unique within the
+  loaded MIB files, you can request direct "random access" using the
+  command flag '-R'.
+		snmpget myhost public -R sysUpTime.0
+  
+    If the sub-identifier is not unique, but you know which module it's
+  in, you can specify this explicitly:
+
+		snmpget myhost public -R RFC1213-MIB:sysUpTime.0
+
+  The behaviour with non-unique sub-identifiers if the module is not
+  specified is "implementation specific" 
+	 (i.e. we reserve the right to change it!)
 
 
 
