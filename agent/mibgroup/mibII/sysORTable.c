@@ -115,22 +115,21 @@ var_sysORTable(struct variable *vp,
 		size_t *var_len,
 		WriteMethod **write_method)
 {
-  int i;
-  struct sysORTable *ptr;
+  unsigned long i;
+  struct sysORTable *ptr = table;
 
   if (header_simple_table(vp, name, length, exact, var_len, write_method, numEntries))
     return NULL;
 
-  DEBUGMSGTL(("mibII/sysORTable", "sysORTable -- "));
   for(i = 1, ptr=table; ptr != NULL && i < (int)name[*length-1];
       ptr = ptr->next, i++) {
-    DEBUGMSGTL(("mibII/sysORTable", "sysORTable -- %d != %d\n",i,name[*length-1]));
+    DEBUGMSGTL(("mibII/sysORTable", "sysORTable -- %lu != %d\n",i,name[*length-1]));
   }
   if (ptr == NULL) {
-    DEBUGMSGTL(("mibII/sysORTable", "sysORTable -- no match: %d\n",i));
+    DEBUGMSGTL(("mibII/sysORTable", "sysORTable -- no match: %lu\n",i));
     return NULL;
   }
-  DEBUGMSGTL(("mibII/sysORTable", "sysORTable -- match: %d\n",i));
+  DEBUGMSGTL(("mibII/sysORTable", "sysORTable -- match: %lu\n",i));
   
   switch (vp->magic){
     case SYSORTABLEID:
