@@ -39,6 +39,7 @@ extern "C" {
 #define DS_LIB_NUMERIC_TIMETICKS   18 /* print timeticks as a number */
 #define DS_LIB_ESCAPE_QUOTES       19 /* shell escape quote marks in oids */
 #define DS_LIB_REVERSE_ENCODE      20 /* encode packets from back to front */
+#define DS_LIB_PRINT_BARE_VALUE	   21 /* just print value (not OID = value) */
 
 /* library integers */
 #define DS_LIB_MIB_WARNINGS  0
