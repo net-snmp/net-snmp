@@ -157,6 +157,10 @@ SOURCE=..\..\agent\helpers\table_array.c
 # End Source File
 # Begin Source File
 
+SOURCE=..\..\agent\helpers\table_container.c
+# End Source File
+# Begin Source File
+
 SOURCE=..\..\agent\helpers\table_data.c
 # End Source File
 # Begin Source File
