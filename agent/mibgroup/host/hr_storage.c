@@ -726,7 +726,11 @@ try_next:
         return (u_char *) & long_return;
     case HRSTORE_FAILS:
         if (store_idx > HRS_TYPE_FIXED_MAX)
+#if NO_DUMMY_VALUES
+	    goto try_next;
+#else
             long_return = 0;
+#endif
         else
             switch (store_idx) {
             case HRS_TYPE_MEM:
