@@ -1,0 +1,4 @@
+TYPEMAP
+handler_registration *					T_PTROBJ
+request_info *						T_PTROBJ
+const char *						T_PV
