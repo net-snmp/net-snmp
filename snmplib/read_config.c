@@ -170,7 +170,7 @@ void read_config_with_type(filename, type)
   if (ctmp)
     read_config(filename, ctmp->start, EITHER_CONFIG);
   else
-    fprintf(stderr, "%s: %s: %s\n", type, filename, strerror(errno));
+    DEBUGP("%s: %s: %s\n", type, filename, strerror(errno));
 }
 
 void read_config(filename, line_handler, when)
