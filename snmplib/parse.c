@@ -856,6 +856,7 @@ free_partial_tree(struct tree *tp, int keep_label)
     SNMP_FREE(tp->hint);
     SNMP_FREE(tp->units);
     SNMP_FREE(tp->description);
+    SNMP_FREE(tp->reference);
     SNMP_FREE(tp->augments);
     SNMP_FREE(tp->defaultValue);
 }
@@ -895,6 +896,8 @@ free_node(struct node *np)
         free(np->units);
     if (np->description)
         free(np->description);
+    if (np->reference)
+        free(np->reference);
     if (np->defaultValue)
         free(np->defaultValue);
     if (np->parent)
@@ -1592,6 +1595,7 @@ do_subtree(struct tree *root, struct node **nodes)
                 anon_tp->hint = tp->hint;
                 anon_tp->units = tp->units;
                 anon_tp->description = tp->description;
+                anon_tp->reference = tp->reference;
                 anon_tp->defaultValue = tp->defaultValue;
                 anon_tp->parent = tp->parent;
 
@@ -2542,6 +2546,7 @@ parse_objecttype(FILE * fp, char *name)
                 free_node(np);
                 return NULL;
             }
+            np->reference = strdup(quoted_string_buffer);
             break;
         case INDEX:
             if (np->augments) {
@@ -2736,6 +2741,7 @@ parse_objectgroup(FILE * fp, char *name, int what, struct objgroup **ol)
             free_node(np);
             return NULL;
         }
+        np->reference = strdup(quoted_string_buffer);
         type = get_token(fp, token, MAXTOKEN);
     }
     if (type != EQUALS)
@@ -2776,6 +2782,15 @@ parse_notificationDefinition(FILE * fp, char *name)
 				       NETSNMP_DS_LIB_SAVE_MIB_DESCRS)) {
                 np->description = strdup(quoted_string_buffer);
             }
+            break;
+        case REFERENCE:
+            type = get_token(fp, quoted_string_buffer, MAXQUOTESTR);
+            if (type != QUOTESTRING) {
+                print_error("Bad REFERENCE", quoted_string_buffer, type);
+                free_node(np);
+                return NULL;
+            }
+            np->reference = strdup(quoted_string_buffer);
             break;
         case OBJECTS:
             np->varbinds = getVarbinds(fp, &np->varbinds);
@@ -2825,6 +2840,16 @@ parse_trapDefinition(FILE * fp, char *name)
 				       NETSNMP_DS_LIB_SAVE_MIB_DESCRS)) {
                 np->description = strdup(quoted_string_buffer);
             }
+            break;
+        case REFERENCE:
+            /* I'm not sure REFERENCEs are legal in smiv1 traps??? */
+            type = get_token(fp, quoted_string_buffer, MAXQUOTESTR);
+            if (type != QUOTESTRING) {
+                print_error("Bad REFERENCE", quoted_string_buffer, type);
+                free_node(np);
+                return NULL;
+            }
+            np->reference = strdup(quoted_string_buffer);
             break;
         case ENTERPRISE:
             type = get_token(fp, token, MAXTOKEN);
@@ -3020,6 +3045,7 @@ parse_compliance(FILE * fp, char *name)
             print_error("Bad REFERENCE", quoted_string_buffer, type);
             goto skip;
         }
+        np->reference = strdup(quoted_string_buffer);
         type = get_token(fp, token, MAXTOKEN);
     }
     if (type != MODULE) {
@@ -3173,6 +3199,7 @@ parse_capabilities(FILE * fp, char *name)
             print_error("Bad REFERENCE", token, type);
             goto skip;
         }
+        np->reference = strdup(token);
         type = get_token(fp, token, type);
     }
     while (type == SUPPORTS) {
@@ -5373,6 +5400,8 @@ tree_from_node(struct tree *tp, struct node *np)
     np->units = NULL;
     tp->description = np->description;
     np->description = NULL;
+    tp->reference = np->reference;
+    np->reference = NULL;
     tp->defaultValue = np->defaultValue;
     np->defaultValue = NULL;
     tp->subid = np->subid;
