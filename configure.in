@@ -126,7 +126,6 @@ fi
 AC_ARG_WITH(dmalloc,
 [  --with-dmalloc=PATH             Use dmalloc library (www.dmalloc.com)],
     if test "x$withval" = "xyes"; then
-      AC_ADD_SEARCH_PATH(/usr/local)
       LIBS="$LIBS -ldmalloc"
       AC_DEFINE(HAVE_DMALLOC_H)
     elif test -d "$withval"; then
