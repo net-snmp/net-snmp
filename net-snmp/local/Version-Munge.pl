@@ -38,12 +38,6 @@ my @exprs = (
 	       repl => 'VersionInfo$1"$VERSION"', 
 	       files => [qw(snmplib/snmp_version.c)]},
 
-	     # configure.in
-	     { type => 'configure',
-	       expr => 'AC_INIT\(\[Net-SNMP\], \[([^\]]+)\]\)',
-	       repl => 'AC_INIT([Net-SNMP], [$VERSION]',
-	       files => [qw(configure.in)]},
-
 	     # documentation files
 	     { type => 'docs',
 	       expr => 'Version: [\.0-9a-zA-Z]+' =>
