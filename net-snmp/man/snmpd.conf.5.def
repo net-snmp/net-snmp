@@ -125,6 +125,12 @@ or equal to the hard coded value of NUM_COMMUNITIES.  The default
 NUM_COMMUNITIES names are set in the source code of the agent in the
 file "agent/snmp_agent.c".  The number N is defined in the "config.h"
 source file.
+.SH SETTING SYSTEM INFORMATION
+.IP "syslocation STRING"
+.IP "syscontact STRING"
+.IP
+Sets the system location and the system contact for the agent.  This
+information is reported by the 'system' table in the mibII tree.
 .SH "PASS-THROUGH CONTROL"
 .IP "pass MIBOID EXEC"
 Passes entire control of MIBOID to the EXEC program.  The EXEC program
