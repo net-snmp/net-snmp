@@ -206,8 +206,8 @@ Note:  Compiling Net-SNMP using MSVC 2003 .NET (MSVC 7.1) will add a
        Search msdn.microsoft.com for msvcr71.dll for more information
        on distributing applications compiled with MSVC 2003 .Net.
 
-OpenSSL is required to support the encryption capabilities in SNMPv3
-and will also support MD5 authentication.
+OpenSSL is required to support the encryption capabilities in SNMPv3,
+or SHA authentication.
 
 Since the MSVC build environment does not natively use "configure" nor "make"
 to generate the various pathnames that the programs require, the header files 
@@ -418,7 +418,7 @@ for network interface layers, and the IP, ICMP, TCP and UDP tables.  This
 workspace requires the Platform SDK to be installed.  Use the win32.dsw 
 workspace if you don't have or don't need these features.
 
-1.  If SNMPv3 encryption capabilities or MD5 authentication is required,
+1.  If SNMPv3 encryption capabilities or SHA authentication is required,
     install the OpenSSL DLL and library file as described in the section 
     'Microsoft Visual C++ - Building with OpenSSL" and then continue with 
     step 2.
@@ -639,8 +639,8 @@ components to an install directory named in the INSTALL_BASE variable.
 ***************************************************************************
 
 OpenSSL is required to support the encryption capabilities in SNMPv3
-(and will also support MD5 authentication).  The win32 version of OpenSSL
-can be built from the sources or you can download a pre-compiled version.
+(or SHA authentication).  The win32 version of OpenSSL can be built
+from the sources or you can download a pre-compiled version.
 
 Building from source:
 =====================
@@ -926,7 +926,7 @@ builds under MinGW with MSyS is available at:
 1.  Build and install GNU regex following the instructions in the 
     regex-0-12-mingw-r2 README.
 
-2.  If SNMPv3 encryption capabilities or MD5 authentication is required,
+2.  If SNMPv3 encryption capabilities or SHA authentication is required,
     install the OpenSSL DLL and library file as described in the section 
     'MinGW - Building with OpenSSL" and then continue with step 3.
 
@@ -972,8 +972,8 @@ builds under MinGW with MSyS is available at:
 ***************************************************************************
 
 OpenSSL is required to support the encryption capabilities in SNMPv3
-(and will also support MD5 authentication).  A pre-compiled MinGW compatible 
-version of OpenSSL is available on the Internet.
+(or SHA authentication).  A pre-compiled MinGW compatible version of
+OpenSSL is available on the Internet.
 
 Follow these steps to install OpenSSL:
 
