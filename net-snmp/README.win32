@@ -24,6 +24,7 @@ Microsoft Visual C++ - Extending the Agent
 GCC on Windows
 Cygwin - Building
 MinGW - Building
+MinGW - Building with OpenSSL
 Configuring Net-SNMP
 How to Register the Net-SNMP Agent as a Windows service
 Notes on SET support for WIN32 ports
@@ -172,6 +173,11 @@ tested separately.
 Both VC++ 6.0 and 7.1 have been tested.  Building with earlier Microsoft
 compiler versions has been dropped and is no longer supported.
 
+Note:  Compiling Net-SNMP using MSVC 2003 .NET (MSVC 7.1) will add a 
+       dependency of MSVCR71.DLL for NETSNMP.DLL and all applications.
+       Search msdn.microsoft.com for msvcr71.dll for more information
+       on distributing applications compiled with MSVC 2003 .Net.
+
 OpenSSL is required to support the encryption capabilities in SNMPv3
 and will also support MD5 authentication.
 
@@ -212,6 +218,7 @@ workspace if you don't have or don't need these features.
     install the OpenSSL DLL and library file as described in the section 
     'Microsoft Visual C++ - Building with OpenSSL" and then continue with 
     step 2.
+
 2.  The default installation path is c:\usr.  This folder will contain all
     the binaries, MIB files, configuration files etc.  To change the location,
     the win32\net-snmp\net-snmp-config.h file needs to be modified by changing
@@ -442,9 +449,19 @@ can be built from the sources.  The sequence of actions are these:
  3. Once the OpenSSL libraries are built, you must copy them to the net-snmp
     source tree:
 
-     Copy libeay32.dll to net-snmp\win32\bin
-     Copy libeay32.exp to net-snmp\win32\lib
-     Copy libeay32.lib to net-snmp\win32\lib
+    a.  Copy the inc32\openssl folder to the include folder of MSVC++
+
+        Example: "C:\Program Files\Microsoft Visual Studio .NET 2003\
+                  Vc7\include\openssl\*.h"
+
+    b.  Copy out32dll\libeay32.lib to the lib folder of MSVC++
+
+        Example: "C:\Program Files\Microsoft Visual Studio .NET 2003\
+                  Vc7\lib\libeay32.lib"
+
+    c.  Copy out32dll\libeay32.dll to your %windir%\system32 folder
+
+        Example: "C:\winnt\system32\libeay32.dll"
 
 
  4. Edit the win32\net-snmp\net-snmp-config.h header file.  Change:
@@ -626,15 +643,62 @@ builds under MinGW with MSyS is available at:
 
         http://www.boedog.com/net-snmp/gnu_regex/regex-0-12-mingw-r2.tar.gz
 
-Build and install GNU regex following the instructions in the README.
+1.  Build and install GNU regex following the instructions in the 
+    regex-0-12-mingw-r2 README.
 
-Configure net-snmp using the configure flag
+2.  If SNMPv3 encryption capabilities or MD5 authentication is required,
+    install the OpenSSL DLL and library file as described in the section 
+    'MinGW - Building with OpenSSL" and then continue with step 3.
 
-	--with-libs="-lregex "
+3.  Determine where you want the programs to be installed.  Currently
+    you must use path segments no longer than 8 characters, and no
+    embedded spaces are allowed. Due to limitations with Makefiles,
+    you must also specify the MIBDIRS default that corresponds to
+    a particular subtree from the base directory.
 
-Run make to compile the package. 
+    Note: All paths use the "/" UNIX pathname delimiter.
+          Also note that embedded spaces will NOT currently work
+          with MinGW configure. Use the DOS 8.3 form of the path,
 
-Run make install to install the package.
+    For example:  Say that you want to install the programs in
+    the directory "C:\Program Files\Net-SNMP".  
+
+    Use BASEDIR=c:/progra~1/Net-SNMP
+
+4.  Configure net-snmp using the configure flags as shown:
+
+	export BASEDIR=c:/progra~1/Net-SNMP
+
+	./configure --prefix="$BASEDIR" \
+		--with-mibdirs="$BASEDIR/share/snmp/mibs" \
+		--with-libs="-lregex "
+
+5.  Run make to compile the package. 
+
+6.  Run make install to install the package.
+
+
+***************************************************************************
+*
+* MinGW - Building with OpenSSL
+*
+***************************************************************************
+
+OpenSSL is required to support the encryption capabilities in SNMPv3
+(and will also support MD5 authentication).  A pre-compiled MinGW compatible 
+version of OpenSSL can be downloaded from:
+
+        http://gnuwin32.sourceforge.net/
+
+ 1. Extract openssl-0.9.7c-lib.zip (developer files) to c:\MinGW to install 
+    the header and library files.
+
+ 2. Extract libeay32.dll from openssl-0.9.7c-bin.zip (binary files) to your
+    %windir%\system32 folder.
+
+        Example: "C:\winnt\system32\libeay32.dll"
+
+ 3. Continue with the section 'MinGW - Building"
 
 
 ***************************************************************************
