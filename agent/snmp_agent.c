@@ -157,6 +157,7 @@ netsnmp_get_local_cachid(netsnmp_cachemap *cache_store, int globalid)
     while (cache_store != NULL) {
         if (cache_store->globalid == globalid)
             return cache_store->cacheid;
+        cache_store = cache_store->next;
     }
     return -1;
 }
