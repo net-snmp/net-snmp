@@ -19,14 +19,13 @@ all: $(SCRIPTSMADEFORPERL)
 
 snmpcheck: $(srcdir)/snmpcheck.def ../sedscript
 	$(SED) -f ../sedscript $(srcdir)/snmpcheck.def > snmpcheck
-	chmod a+x snmpcheck
 
 clean:
 	rm -f snmpcheck $(SCRIPTSMADEFORPERL)
 
 snmpcheck.made: snmpcheck
 	if test "x$(PERLPROG)" != "x"; then \
-	  $(PERLPROG) -p -e 's@^#!.*/perl.*@#!$(PERLPROG)@' ${srcdir}/snmpcheck > snmpcheck.made; \
+	  $(PERLPROG) -p -e 's@^#!.*/perl.*@#!$(PERLPROG)@' snmpcheck > snmpcheck.made; \
 	else \
 	  touch snmpcheck.made; \
         fi
