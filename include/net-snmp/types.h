@@ -86,7 +86,7 @@ typedef u_int in_addr_t;
 
     typedef struct netsnmp_void_array_s {
        size_t  size;
-       void *   array;
+       void * *array;
     } netsnmp_void_array;
 
 #ifdef __cplusplus
