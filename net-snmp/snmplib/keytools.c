@@ -32,6 +32,11 @@
 
 #include "transform_oids.h"
 
+int (*kmt_hash) (
+	const int	  mode,		void  	 **context,
+	const u_int8_t	 *data,		const int  data_len,     
+	u_int8_t	**digest,	int	  *digest_len);
+
 /*******************************************************************-o-******
  * generate_Ku
  *
@@ -393,7 +398,7 @@ encode_keychange(	oid	*hashtype,	u_int  hashtype_len,
 		}
 #endif /* !SNMP_TESTING_CODE */
 
-        tmpbuf = malloc(properlength*2);
+        tmpbuf = (u_char *)malloc(properlength*2);
         memcpy(tmpbuf, oldkey, properlength);
         memcpy(tmpbuf+properlength, kcstring, properlength);
 
@@ -512,7 +517,7 @@ decode_keychange(	oid	*hashtype,	u_int  hashtype_len,
 	 *	. Hash (oldkey | random_bytes) (into newkey),
 	 *	. XOR hash and encoded (second) half of kcstring (into newkey).
 	 */
-        tmpbuf = malloc(properlength*2);
+        tmpbuf = (u_char *)malloc(properlength*2);
         memcpy(tmpbuf, oldkey, properlength);
         memcpy(tmpbuf+properlength, kcstring, properlength);
 

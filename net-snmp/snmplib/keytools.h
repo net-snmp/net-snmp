@@ -34,7 +34,7 @@ extern "C" {
  * FIX	Offer an snmp_hash() function to hide away differences between
  *	this an "internal" MD5 (& whatever else might come...)?
  */
-int (*kmt_hash) (
+extern int (*kmt_hash) (
 	const int	  mode,		void  	 **context,
 	const u_int8_t	 *data,		const int  data_len,     
 	u_int8_t	**digest,	int	  *digest_len);
