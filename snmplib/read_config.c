@@ -397,14 +397,45 @@ char *skip_token(char *ptr)
   return (ptr);
 }
 
-char *copy_word(char *from, char *to)
-     
-{
-  while (*from != 0 && !isspace(*from)) *(to++) = *(from++);
-  *to = 0;
-  return skip_white(from);
-}
+/* copy_word
+   copies the next 'token' from 'from' into 'to'.
+   currently a token is anything seperate by white space
+   or within quotes (double or single) (i.e. "the red rose" 
+   is one token, \"the red rose\" is three tokens)
+   a '\' character will allow a quote character to be treated
+   as a regular character 
+   It returns a pointer to the white space at the end of the token
+   or to 0 if there is no white space at the end.*/
 
+char *copy_word(from, to)
+     char *from, *to;
+{
+  char quote;
+  if ( (*from == '\"') || (*from =='\'') ){
+    quote = *(from++);
+    while ( (*from != quote) && (*from != 0) ) {
+      if ((*from == '\\') && (*(from+1) != 0)) {
+	*to++ = *(from+1);
+	from = from +2;
+      }
+      else  *to++ = *from++;
+    }
+    if (*from == 0) 
+      DEBUGP("copy_word: no end quote found in config string\n");
+    else from++;
+  }
+  else {
+    while (*from != 0 && !isspace(*from)) {
+      if ((*from == '\\') && (*(from+1) != 0)) {
+	*to++ = *(from+1);
+	from = from +2;
+      }
+      else  *to++ = *from++;
+    }
+  }
+  *to = 0;
+  return(from);
+}  /* copy_word */
 
 /* read_config_save_octet_string(): saves an octet string as a length
    followed by a string of hex */
