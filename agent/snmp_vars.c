@@ -192,48 +192,9 @@ u_char		return_buf[256]; /* nee 64 */
 
 struct timeval	starttime;
 
-int
-setup_users(int majorid, int minorid, void *serverarg, void *clientarg) {
-    struct usmUser *user, *userListPtr;
-
-    /* create the initial user */
-    user = usm_create_initial_user("initial", usmHMACMD5AuthProtocol,
-                                   USM_LENGTH_OID_TRANSFORM,
-                                   usmDESPrivProtocol,
-                                   USM_LENGTH_OID_TRANSFORM);
-    userListPtr = usm_add_user(user);
-    if (userListPtr == NULL) /* user already existed */
-      usm_free_user(user);
-
-    /* create the templateMD5 user */
-    user = usm_create_initial_user("templateMD5", usmHMACMD5AuthProtocol,
-                                   USM_LENGTH_OID_TRANSFORM,
-                                   usmDESPrivProtocol,
-                                   USM_LENGTH_OID_TRANSFORM);
-    userListPtr = usm_add_user(user);
-    if (userListPtr == NULL) /* user already existed */
-      usm_free_user(user);
-
-    /* create the templateSHA user */
-    user = usm_create_initial_user("templateSHA", usmHMACSHA1AuthProtocol,
-                                   USM_LENGTH_OID_TRANSFORM,
-                                   usmDESPrivProtocol,
-                                   USM_LENGTH_OID_TRANSFORM);
-    userListPtr = usm_add_user(user);
-    if (userListPtr == NULL) /* user already existed */
-      usm_free_user(user);
-
-    return SNMPERR_SUCCESS;
-}
-
 void
 init_agent (void)
 {
-  /* setup users *after* EngineID has been initialized. */
-  snmp_register_callback(SNMP_CALLBACK_LIBRARY,
-                         SNMP_CALLBACK_POST_PREMIB_READ_CONFIG,
-                         setup_users, NULL);
-
   /* get current time (ie, the time the agent started) */
   gettimeofday(&starttime, NULL);
   starttime.tv_sec--;
