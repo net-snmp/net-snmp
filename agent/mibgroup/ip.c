@@ -6,15 +6,24 @@
 #include "mib_module_config.h"
 
 #include <config.h>
+#if defined(IFNET_NEEDS_KERNEL) && !defined(_KERNEL)
+#define _KERNEL 1
+#define _I_DEFINED_KERNEL
+#endif
 #include <sys/types.h>
 #include <sys/socket.h>
 
 #if HAVE_NETINET_IN_H
 #include <netinet/in.h>
 #endif
-#if defined(IFNET_NEEDS_KERNEL) && !defined(_KERNEL)
-#define _KERNEL 1
-#define _I_DEFINED_KERNEL
+#if HAVE_SYS_SYSCTL_H
+#include <sys/sysctl.h>
+#endif
+#if HAVE_SYS_SYSMP_H
+#include <sys/sysmp.h>
+#endif
+#if HAVE_SYS_TCPIPSTATS_H
+#include <sys/tcpipstats.h>
 #endif
 #include <net/if.h>
 #if HAVE_NET_IF_VAR_H
@@ -24,6 +33,9 @@
 #undef _KERNEL
 #endif
 #include <netinet/in_systm.h>
+#if HAVE_SYS_HASHING_H
+#include <sys/hashing.h>
+#endif
 #if HAVE_NETINET_IN_VAR_H
 #include <netinet/in_var.h>
 #endif
@@ -159,7 +171,9 @@ var_ip(vp, name, length, exact, var_len, write_method)
     /*
      *	Get the IP statistics from the kernel...
      */
+#ifdef IPSTAT_SYMBOL
     auto_nlist(IPSTAT_SYMBOL, (char *)&ipstat, sizeof (ipstat));
+#endif
 #ifdef MIB_IP_COUNTER_SYMBOL
     auto_nlist(MIB_IPCOUNTER_SYMBOL, (char *)&MIB_ipcounter,
                (MIB_ipMAXCTR+1)*sizeof (counter));

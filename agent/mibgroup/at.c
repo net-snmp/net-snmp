@@ -9,15 +9,15 @@
 #if STDC_HEADERS
 #include <stdlib.h>
 #endif
+#if defined(IFNET_NEEDS_KERNEL) && !defined(_KERNEL)
+#define _KERNEL 1
+#define _I_DEFINED_KERNEL
+#endif
 #include <sys/types.h>
 #include <sys/socket.h>
 
 #if HAVE_NETINET_IN_H
 #include <netinet/in.h>
-#endif
-#if defined(IFNET_NEEDS_KERNEL) && !defined(_KERNEL)
-#define _KERNEL 1
-#define _I_DEFINED_KERNEL
 #endif
 #include <net/if.h>
 #if HAVE_NET_IF_VAR_H
