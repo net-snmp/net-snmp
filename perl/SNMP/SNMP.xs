@@ -228,7 +228,8 @@ __libraries_init(char *appname)
     
         netsnmp_ds_set_boolean(NETSNMP_DS_LIBRARY_ID, NETSNMP_DS_LIB_DONT_BREAKDOWN_OIDS, 1);
         netsnmp_ds_set_int(NETSNMP_DS_LIBRARY_ID, NETSNMP_DS_LIB_PRINT_SUFFIX_ONLY, 1);
-
+	netsnmp_ds_set_int(NETSNMP_DS_LIBRARY_ID, NETSNMP_DS_LIB_OID_OUTPUT_FORMAT,
+                                              NETSNMP_OID_OUTPUT_FULL);
         SOCK_STARTUP;
     
     }
@@ -809,6 +810,8 @@ const char *key;
    return MAX_BAD;
 }
 
+/* Convert a tag (string) to an OID array              */
+/* Tag can be either a symbolic name, or an OID string */
 static struct tree *
 __tag2oid(tag, iid, oid_arr, oid_arr_len, type, best_guess)
 char * tag;
@@ -823,38 +826,80 @@ int    best_guess;
    DLL_IMPORT extern struct tree *tree_head;
    oid newname[MAX_OID_LEN], *op;
    int newname_len = 0;
+   const char *cp = NULL;
+   char ch;
+   char *module = NULL;
+
+   char str_buf[STR_BUF_SIZE];
+   str_buf[0] = '\0';
 
    if (type) *type = TYPE_UNKNOWN;
    if (oid_arr_len) *oid_arr_len = 0;
    if (!tag) goto done;
 
-   if (best_guess) {
-      tp = rtp = find_best_tree_node(tag, tree_head, NULL);
-      if (tp) {
-	 if (type) *type = tp->type;
-	 if ((oid_arr == NULL) || (oid_arr_len == NULL)) return rtp;
-	 for (op = newname + MAX_OID_LEN - 1; op >= newname; op--) {
-            *op = tp->subid;
-	    tp = tp->parent;
-	    if (tp == NULL)
-	       break;
-	 }
-	 *oid_arr_len = newname + MAX_OID_LEN - op;
-	 memcpy(oid_arr, op, *oid_arr_len * sizeof(oid));
-      }
-      return(rtp);
-   }
+   /*********************************************************/
+   /* best_guess = 0 - same as no switches (read_objid)     */
+   /*                  if multiple parts, or uses find_node */
+   /*                  if a single leaf                     */
+   /* best_guess = 1 - same as -Ib (get_wild_node)          */
+   /* best_guess = 2 - same as -IR (get_node)               */
+   /*********************************************************/
 
-   if (strchr(tag,'.')) { /* if multi part tag  */
-      if (!__scan_num_objid(tag, newname, &newname_len)) { /* numeric tag */
-         newname_len = MAX_OID_LEN;
-         read_objid(tag, newname, &newname_len); /* long name */
+   /* numeric scalar                (1,2) */
+   /* single symbolic               (1,2) */
+   /* single regex                  (1)   */
+   /* partial full symbolic         (2)   */
+   /* full symbolic                 (2)   */
+   /* module::single symbolic       (2)   */
+   /* module::partial full symbolic (2)   */
+   if (best_guess == 1 || best_guess == 2) { 
+     if (!__scan_num_objid(tag, newname, &newname_len)) { /* make sure it's not a numeric tag */
+       newname_len = MAX_OID_LEN;
+       if (best_guess == 2) {		/* Random search -IR */
+         if (get_node(tag, newname, &newname_len)) {
+	   rtp = tp = get_tree(newname, newname_len, get_tree_head());
+         }
+       }
+       else if (best_guess == 1) {	/* Regex search -Ib */
+	 clear_tree_flags(get_tree_head()); 
+         if (get_wild_node(tag, newname, &newname_len)) {
+	   rtp = tp = get_tree(newname, newname_len, get_tree_head());
+         }
+       }
+     }
+     else {
+       rtp = tp = get_tree(newname, newname_len, get_tree_head());
+     }
+     if (type) *type = (tp ? tp->type : TYPE_UNKNOWN);
+     if ((oid_arr == NULL) || (oid_arr_len == NULL)) return rtp;
+     memcpy(oid_arr,(char*)newname,newname_len*sizeof(oid));
+     *oid_arr_len = newname_len;
+   }
+   
+   /* if best_guess is off and multi part tag or module::tag */
+   /* numeric scalar                                         */
+   /* module::single symbolic                                */
+   /* module::partial full symbolic                          */
+   /* FULL symbolic OID                                      */
+   else if (strchr(tag,'.') || strchr(tag,':')) { 
+     if (!__scan_num_objid(tag, newname, &newname_len)) { /* make sure it's not a numeric tag */
+	newname_len = MAX_OID_LEN;
+	if (read_objid(tag, newname, &newname_len)) {	/* long name */
+	  rtp = tp = get_tree(newname, newname_len, get_tree_head());
+	}
+      }
+      else {
+	rtp = tp = get_tree(newname, newname_len, get_tree_head());
       }
       if (type) *type = (tp ? tp->type : TYPE_UNKNOWN);
       if ((oid_arr == NULL) || (oid_arr_len == NULL)) return rtp;
       memcpy(oid_arr,(char*)newname,newname_len*sizeof(oid));
       *oid_arr_len = newname_len;
-   } else { /* else it is a leaf */
+   }
+   
+   /* else best_guess is off and it is a single leaf */
+   /* single symbolic                                */
+   else { 
       rtp = tp = find_node(tag, Mib);
       if (tp) {
          if (type) *type = tp->type;
@@ -2849,6 +2894,7 @@ snmp_set(sess_ref, varlist_ref, perl_callback)
            int verbose = SvIV(perl_get_sv("SNMP::verbose", 0x01 | 0x04));
            int use_enums;
            struct enum_list *ep;
+           int best_guess;	   
 
            New (0, oid_arr, MAX_OID_LEN, oid);
 
@@ -2863,6 +2909,7 @@ snmp_set(sess_ref, varlist_ref, perl_callback)
               sv_setpv(*err_str_svp, "");
               sv_setiv(*err_num_svp, 0);
               sv_setiv(*err_ind_svp, 0);
+              best_guess = SvIV(*hv_fetch((HV*)SvRV(sess_ref),"BestGuess",9,1));
 
               pdu = snmp_pdu_create(SNMP_MSG_SET);
 
@@ -2875,7 +2922,7 @@ snmp_set(sess_ref, varlist_ref, perl_callback)
                     tag_pv = __av_elem_pv(varbind, VARBIND_TAG_F,NULL);
                     tp=__tag2oid(tag_pv,
                                  __av_elem_pv(varbind, VARBIND_IID_F,NULL),
-                                 oid_arr, &oid_arr_len, &type,0);
+                                 oid_arr, &oid_arr_len, &type, best_guess);
 
                     if (oid_arr_len==0) {
                        if (verbose)
@@ -3046,6 +3093,7 @@ snmp_get(sess_ref, retry_nosuch, varlist_ref, perl_callback)
            int sprintval_flag = USE_BASIC;
            int verbose = SvIV(perl_get_sv("SNMP::verbose", 0x01 | 0x04));
 	   SV *sv_timestamp = NULL;
+           int best_guess;
 
            New (0, oid_arr, MAX_OID_LEN, oid);
 
@@ -3063,8 +3111,9 @@ snmp_get(sess_ref, retry_nosuch, varlist_ref, perl_callback)
                  sprintval_flag = USE_ENUMS;
               if (SvIV(*hv_fetch((HV*)SvRV(sess_ref),"UseSprintValue", 14, 1)))
                  sprintval_flag = USE_SPRINT_VALUE;
+              best_guess = SvIV(*hv_fetch((HV*)SvRV(sess_ref),"BestGuess",9,1));
 
-              pdu = snmp_pdu_create(SNMP_MSG_GET);
+	      pdu = snmp_pdu_create(SNMP_MSG_GET);
 
               varlist = (AV*) SvRV(varlist_ref);
               varlist_len = av_len(varlist);
@@ -3075,7 +3124,7 @@ snmp_get(sess_ref, retry_nosuch, varlist_ref, perl_callback)
                     tag_pv = __av_elem_pv(varbind, VARBIND_TAG_F,NULL);
                     tp = __tag2oid(tag_pv,
                                    __av_elem_pv(varbind, VARBIND_IID_F,NULL),
-                                   oid_arr, &oid_arr_len, NULL,0);
+                                   oid_arr, &oid_arr_len, NULL, best_guess);
 
                     if (oid_arr_len) {
                        snmp_add_null_var(pdu, oid_arr, oid_arr_len);
@@ -3129,7 +3178,7 @@ snmp_get(sess_ref, retry_nosuch, varlist_ref, perl_callback)
 
                     tp=__tag2oid(__av_elem_pv(varbind, VARBIND_TAG_F,NULL),
                                  __av_elem_pv(varbind, VARBIND_IID_F,NULL),
-                                 oid_arr, &oid_arr_len, &type,0);
+                                 oid_arr, &oid_arr_len, &type, best_guess);
 
                     for (vars = last_vars; vars; vars=vars->next_variable) {
 	            if (__oid_cmp(oid_arr, oid_arr_len, vars->name,
@@ -3205,7 +3254,8 @@ snmp_getnext(sess_ref, varlist_ref, perl_callback)
            int verbose = SvIV(perl_get_sv("SNMP::verbose", 0x01 | 0x04));
 	   int old_numeric, old_printfull;	/* Old values of globals */
 	   SV *sv_timestamp = NULL;
-
+           int best_guess;
+	   
            New (0, oid_arr, MAX_OID_LEN, oid);
 
            if (oid_arr && SvROK(sess_ref) && SvROK(varlist_ref)) {
@@ -3224,7 +3274,8 @@ snmp_getnext(sess_ref, varlist_ref, perl_callback)
                  sprintval_flag = USE_ENUMS;
 	      if (SvIV(*hv_fetch((HV*)SvRV(sess_ref),"UseSprintValue", 14, 1)))
                  sprintval_flag = USE_SPRINT_VALUE;
-
+              best_guess = SvIV(*hv_fetch((HV*)SvRV(sess_ref),"BestGuess",9,1));
+	      
               pdu = snmp_pdu_create(SNMP_MSG_GETNEXT);
 
               varlist = (AV*) SvRV(varlist_ref);
@@ -3236,7 +3287,7 @@ snmp_getnext(sess_ref, varlist_ref, perl_callback)
 
                     tp = __tag2oid(__av_elem_pv(varbind, VARBIND_TAG_F, ".0"),
                               __av_elem_pv(varbind, VARBIND_IID_F, NULL),
-                              oid_arr, &oid_arr_len, NULL,0);
+                              oid_arr, &oid_arr_len, NULL, best_guess);
 
       		    if (oid_arr_len) {
   		       snmp_add_null_var(pdu, oid_arr, oid_arr_len);
@@ -3412,8 +3463,9 @@ snmp_getbulk(sess_ref, nonrepeaters, maxrepetitions, varlist_ref, perl_callback)
 	   int old_numeric, old_printfull;	/* Old values of globals */
 	   SV *rv;
 	   SV *sv_timestamp = NULL;
+           int best_guess;
 
-           New (0, oid_arr, MAX_OID_LEN, oid);
+	   New (0, oid_arr, MAX_OID_LEN, oid);
 
            if (oid_arr && SvROK(sess_ref) && SvROK(varlist_ref)) {
 
@@ -3433,7 +3485,8 @@ snmp_getbulk(sess_ref, nonrepeaters, maxrepetitions, varlist_ref, perl_callback)
                  sprintval_flag = USE_ENUMS;
 	      if (SvIV(*hv_fetch((HV*)SvRV(sess_ref),"UseSprintValue", 14, 1)))
                  sprintval_flag = USE_SPRINT_VALUE;
-
+              best_guess = SvIV(*hv_fetch((HV*)SvRV(sess_ref),"BestGuess",9,1));
+	      
               pdu = snmp_pdu_create(SNMP_MSG_GETBULK);
 
 	      pdu->errstat = nonrepeaters;
@@ -3447,7 +3500,7 @@ snmp_getbulk(sess_ref, nonrepeaters, maxrepetitions, varlist_ref, perl_callback)
                     varbind = (AV*) SvRV(*varbind_ref);
                     __tag2oid(__av_elem_pv(varbind, VARBIND_TAG_F, "0"),
                               __av_elem_pv(varbind, VARBIND_IID_F, NULL),
-                              oid_arr, &oid_arr_len, NULL,0);
+                              oid_arr, &oid_arr_len, NULL, best_guess);
 
 
                     if (oid_arr_len) {
@@ -3607,8 +3660,9 @@ snmp_bulkwalk(sess_ref, nonrepeaters, maxrepetitions, varlist_ref,perl_callback)
 	   int i;				/* General purpose iterator  */
 	   int npushed;				/* Number of return arrays   */
 	   int okay;				/* Did bulkwalk complete okay */
+           int best_guess;
 
-           if (!SvROK(sess_ref) || !SvROK(varlist_ref)) {
+	   if (!SvROK(sess_ref) || !SvROK(varlist_ref)) {
 	      if (verbose)
 		 warn("Bad session or varlist reference!\n");
 
@@ -3623,7 +3677,8 @@ snmp_bulkwalk(sess_ref, nonrepeaters, maxrepetitions, varlist_ref,perl_callback)
 	   sv_setpv(*err_str_svp, "");
 	   sv_setiv(*err_num_svp, 0);
 	   sv_setiv(*err_ind_svp, 0);
-
+           best_guess = SvIV(*hv_fetch((HV*)SvRV(sess_ref),"BestGuess",9,1));
+	   
 	   /* Create and initialize a new session context for this bulkwalk.
 	   ** This will be used to carry state between callbacks.
 	   */
@@ -3711,7 +3766,7 @@ snmp_bulkwalk(sess_ref, nonrepeaters, maxrepetitions, varlist_ref,perl_callback)
 	      varbind = (AV*) SvRV(*varbind_ref);
 	      __tag2oid(__av_elem_pv(varbind, VARBIND_TAG_F, "0"),
 			__av_elem_pv(varbind, VARBIND_IID_F, NULL),
-			oid_arr, &oid_arr_len, NULL, 0);
+			oid_arr, &oid_arr_len, NULL, best_guess);
 
 	      if ((oid_arr_len == 0) || (oid_arr_len > MAX_OID_LEN)) {
 		 if (verbose)
@@ -3914,7 +3969,8 @@ snmp_trapV1(sess_ref,enterprise,agent,generic,specific,uptime,varlist_ref)
            int verbose = SvIV(perl_get_sv("SNMP::verbose", 0x01 | 0x04));
            int use_enums = SvIV(*hv_fetch((HV*)SvRV(sess_ref),"UseEnums",8,1));
            struct enum_list *ep;
-
+           int best_guess;
+	   
            New (0, oid_arr, MAX_OID_LEN, oid);
 
            if (oid_arr && SvROK(sess_ref)) {
@@ -3927,7 +3983,8 @@ snmp_trapV1(sess_ref,enterprise,agent,generic,specific,uptime,varlist_ref)
               sv_setpv(*err_str_svp, "");
               sv_setiv(*err_num_svp, 0);
               sv_setiv(*err_ind_svp, 0);
-
+              best_guess = SvIV(*hv_fetch((HV*)SvRV(sess_ref),"BestGuess",9,1));
+	      
               pdu = snmp_pdu_create(SNMP_MSG_TRAP);
 
               if (SvROK(varlist_ref)) {
@@ -3940,7 +3997,7 @@ snmp_trapV1(sess_ref,enterprise,agent,generic,specific,uptime,varlist_ref)
 
                     tp=__tag2oid(__av_elem_pv(varbind, VARBIND_TAG_F, NULL),
                                  __av_elem_pv(varbind, VARBIND_IID_F, NULL),
-                                 oid_arr, &oid_arr_len, &type,0);
+                                 oid_arr, &oid_arr_len, &type, best_guess);
 
                     if (oid_arr_len == 0) {
                        if (verbose)
@@ -3988,7 +4045,7 @@ snmp_trapV1(sess_ref,enterprise,agent,generic,specific,uptime,varlist_ref)
 
 	      pdu->enterprise = (oid *)malloc( MAX_OID_LEN * sizeof(oid));
               tp = __tag2oid(enterprise,NULL, pdu->enterprise,
-                             &pdu->enterprise_length, NULL,0);
+                             &pdu->enterprise_length, NULL, best_guess);
   	      if (pdu->enterprise_length == 0) {
 		  if (verbose) warn("error:trap:invalid enterprise id: %s", enterprise);
                   goto err;
@@ -4051,7 +4108,8 @@ snmp_trapV2(sess_ref,uptime,trap_oid,varlist_ref)
            int verbose = SvIV(perl_get_sv("SNMP::verbose", 0x01 | 0x04));
            int use_enums = SvIV(*hv_fetch((HV*)SvRV(sess_ref),"UseEnums",8,1));
            struct enum_list *ep;
-
+           int best_guess;
+	   
            New (0, oid_arr, MAX_OID_LEN, oid);
 
            if (oid_arr && SvROK(sess_ref) && SvROK(varlist_ref)) {
@@ -4064,7 +4122,8 @@ snmp_trapV2(sess_ref,uptime,trap_oid,varlist_ref)
               sv_setpv(*err_str_svp, "");
               sv_setiv(*err_num_svp, 0);
               sv_setiv(*err_ind_svp, 0);
-
+              best_guess = SvIV(*hv_fetch((HV*)SvRV(sess_ref),"BestGuess",9,1));
+	      
               pdu = snmp_pdu_create(SNMP_MSG_TRAP2);
 
               varlist = (AV*) SvRV(varlist_ref);
@@ -4096,7 +4155,7 @@ snmp_trapV2(sess_ref,uptime,trap_oid,varlist_ref)
 
                     tp=__tag2oid(__av_elem_pv(varbind, VARBIND_TAG_F,NULL),
                                  __av_elem_pv(varbind, VARBIND_IID_F,NULL),
-                                 oid_arr, &oid_arr_len, &type,0);
+                                 oid_arr, &oid_arr_len, &type, best_guess);
 
                     if (oid_arr_len == 0) {
                        if (verbose)
@@ -4188,7 +4247,8 @@ snmp_inform(sess_ref,uptime,trap_oid,varlist_ref,perl_callback)
            int verbose = SvIV(perl_get_sv("SNMP::verbose", 0x01 | 0x04));
            int use_enums = SvIV(*hv_fetch((HV*)SvRV(sess_ref),"UseEnums",8,1));
            struct enum_list *ep;
-
+           int best_guess;
+	   
            New (0, oid_arr, MAX_OID_LEN, oid);
 
            if (oid_arr && SvROK(sess_ref) && SvROK(varlist_ref)) {
@@ -4201,7 +4261,8 @@ snmp_inform(sess_ref,uptime,trap_oid,varlist_ref,perl_callback)
               sv_setpv(*err_str_svp, "");
               sv_setiv(*err_num_svp, 0);
               sv_setiv(*err_ind_svp, 0);
-
+              best_guess = SvIV(*hv_fetch((HV*)SvRV(sess_ref),"BestGuess",9,1));
+	      
               pdu = snmp_pdu_create(SNMP_MSG_INFORM);
 
               varlist = (AV*) SvRV(varlist_ref);
@@ -4233,7 +4294,7 @@ snmp_inform(sess_ref,uptime,trap_oid,varlist_ref,perl_callback)
 
                     tp=__tag2oid(__av_elem_pv(varbind, VARBIND_TAG_F,NULL),
                                  __av_elem_pv(varbind, VARBIND_IID_F,NULL),
-                                 oid_arr, &oid_arr_len, &type,0);
+                                 oid_arr, &oid_arr_len, &type, best_guess);
 
                     if (oid_arr_len == 0) {
                        if (verbose)
@@ -4323,15 +4384,17 @@ done:
 
 
 char *
-snmp_get_type(tag)
+snmp_get_type(tag, best_guess)
 	char *		tag
+        int             best_guess
 	CODE:
 	{
 	   struct tree *tp  = NULL;
 	   static char type_str[MAX_TYPE_NAME_LEN];
            char *ret = NULL;
+           int best_guess;
 
-           if (tag && *tag) tp = __tag2oid(tag, NULL, NULL, NULL, NULL,0);
+           if (tag && *tag) tp = __tag2oid(tag, NULL, NULL, NULL, NULL, best_guess);
            if (tp) __get_type_str(tp->type, ret = type_str);
 	   RETVAL = ret;
 	}
@@ -4349,10 +4412,11 @@ snmp_dump_packet(flag)
 
 
 char *
-snmp_map_enum(tag, val, iflag)
+snmp_map_enum(tag, val, iflag, best_guess)
 	char *		tag
 	char *		val
 	int		iflag
+        int             best_guess
 	CODE:
 	{
 	   struct tree *tp  = NULL;
@@ -4362,7 +4426,7 @@ snmp_map_enum(tag, val, iflag)
 
            RETVAL = NULL;
 
-           if (tag && *tag) tp = __tag2oid(tag, NULL, NULL, NULL, NULL,0);
+           if (tag && *tag) tp = __tag2oid(tag, NULL, NULL, NULL, NULL, best_guess);
 
            if (tp) {
               if (iflag) {
@@ -4391,23 +4455,29 @@ snmp_map_enum(tag, val, iflag)
 #define SNMP_XLATE_MODE_TAG2OID 0
 
 char *
-snmp_translate_obj(var,mode,use_long,auto_init,best_guess)
+snmp_translate_obj(var,mode,use_long,auto_init,best_guess,include_module_name)
 	char *		var
 	int		mode
 	int		use_long
 	int		auto_init
 	int             best_guess
+	int		include_module_name
 	CODE:
 	{
-	   char str_buf[STR_BUF_SIZE];
-	   oid oid_arr[MAX_OID_LEN];
+           char str_buf[STR_BUF_SIZE];
+           char str_buf_temp[STR_BUF_SIZE];
+           oid oid_arr[MAX_OID_LEN];
            int oid_arr_len = MAX_OID_LEN;
            char * label;
            char * iid;
            int status = FAILURE;
            int verbose = SvIV(perl_get_sv("SNMP::verbose", 0x01 | 0x04));
+           struct tree *module_tree = NULL;
+           char modbuf[256];
 
            str_buf[0] = '\0';
+           str_buf_temp[0] = '\0';
+
   	   switch (mode) {
               case SNMP_XLATE_MODE_TAG2OID:
 		if (!__tag2oid(var, NULL, oid_arr, &oid_arr_len, NULL, best_guess)) {
@@ -4419,20 +4489,37 @@ snmp_translate_obj(var,mode,use_long,auto_init,best_guess)
              case SNMP_XLATE_MODE_OID2TAG:
 		oid_arr_len = 0;
 		__concat_oid_str(oid_arr, &oid_arr_len, var);
-		snprint_objid(str_buf, sizeof(str_buf), oid_arr, oid_arr_len);
+		snprint_objid(str_buf_temp, sizeof(str_buf_temp), oid_arr, oid_arr_len);
+
 		if (!use_long) {
                   label = NULL; iid = NULL;
-		  if (((status=__get_label_iid(str_buf,
+		  if (((status=__get_label_iid(str_buf_temp,
 		       &label, &iid, NO_FLAGS)) == SUCCESS)
 		      && label) {
-		     strcpy(str_buf, label);
+		     strcpy(str_buf_temp, label);
 		     if (iid && *iid) {
-		       strcat(str_buf, ".");
-		       strcat(str_buf, iid);
+		       strcat(str_buf_temp, ".");
+		       strcat(str_buf_temp, iid);
 		     }
  	          }
 	        }
-                break;
+		
+		/* Prepend modulename:: if enabled */
+		if (include_module_name) {
+		  module_tree = get_tree (oid_arr, oid_arr_len, get_tree_head());
+		  if (module_tree) {
+		    if (strcmp(module_name(module_tree->modid, modbuf), "#-1") ) {
+		      strcat(str_buf, modbuf);
+		      strcat(str_buf, "::");
+		    }
+		    else {
+		      strcat(str_buf, "UNKNOWN::");
+		    }
+		  }
+		}
+		strcat(str_buf, str_buf_temp);
+
+		break;
              default:
 	       if (verbose) warn("snmp_translate_obj:unknown translation mode: %s\n", mode);
            }

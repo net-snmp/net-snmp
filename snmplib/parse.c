@@ -1207,7 +1207,6 @@ compute_match(const char *search_base, const char *key)
     int             rc;
     regex_t         parsetree;
     regmatch_t      pmatch;
-
     rc = regcomp(&parsetree, key, REG_ICASE | REG_EXTENDED);
     if (rc == 0)
         rc = regexec(&parsetree, search_base, 1, &pmatch, 0);
@@ -1301,7 +1300,6 @@ find_best_tree_node(const char *pattrn, struct tree *tree_top,
                 break;          /* this is the best result we can get */
         }
     }
-
     if (match)
         *match = old_match;
     return (best_so_far);
@@ -4950,10 +4948,28 @@ tossObjectIdentifier(FILE * fp)
         return 0;
 }
 
+/* Find node in any MIB module
+   Used by Perl modules		*/
 struct tree    *
 find_node(const char *name, struct tree *subtree)
 {                               /* Unused */
     return (find_tree_node(name, -1));
+}
+
+/* Find node in specific MIB module
+   Used by Perl modules		*/
+struct tree    *
+find_node2(const char *name, const char *module)
+{                               
+  int modid = -1;
+  if (module) {
+    modid = which_module(module);
+  }
+  if (modid == -1)
+  {
+    return (NULL);
+  }
+  return (find_tree_node(name, modid));
 }
 
 struct module  *
