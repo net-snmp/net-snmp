@@ -171,7 +171,7 @@ void getstat(unsigned *cuse, unsigned *cice, unsigned *csys,unsigned long *cide,
     sscanf(b, "ctxt %u", ct);
   }
   else {
-    log_perror("/proc/stat");
+    snmp_log_perror("/proc/stat");
   }
 }
 

@@ -491,11 +491,11 @@ static void ARP_Scan_Init (void)
 	if (at)
 		free(at);
 	if (sysctl(mib, 6, NULL, &needed, NULL, 0) < 0)
-		log_perror("route-sysctl-estimate");
+		snmp_log_perror("route-sysctl-estimate");
 	if ((at = malloc(needed)) == NULL)
-		log_perror("malloc");
+		snmp_log_perror("malloc");
 	if (sysctl(mib, 6, at, &needed, NULL, 0) < 0)
-		log_perror("actual retrieval of routing table");
+		snmp_log_perror("actual retrieval of routing table");
 	lim = at + needed;
 	rtnext = at;
 #endif /* CAN_USE_SYSCTL */

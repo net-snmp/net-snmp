@@ -730,7 +730,6 @@ main(int argc, char *argv[])
                     init_agent();            /* register our .conf handlers */
                     register_mib_handlers(); /* snmplib .conf handlers */
                     fprintf(stderr, "Configuration directives understood:\n");
-                    enable_stderrlog();
                     read_config_print_usage("  ");
                     exit(0);
                 case 'v':
@@ -790,11 +789,9 @@ main(int argc, char *argv[])
 
     /* Should open logfile and/or syslog based on arguments */
     if (logfile[0])
-      enable_filelog(logfile, dont_zero_log);
-    /* decide to not log stderr after init succeeds */
-      enable_stderrlog();
+      snmp_enable_filelog(logfile, dont_zero_log);
     if (syslog_log)
-      enable_syslog(); 
+      snmp_enable_syslog(); 
 #ifdef BUFSIZ
     setvbuf(stdout, NULL, _IOLBF, BUFSIZ);
 #endif
@@ -808,7 +805,7 @@ main(int argc, char *argv[])
 
     if (pid_file != NULL) {
       if ((PID = fopen(pid_file, "w")) == NULL) {
-        log_perror("fopen");
+        snmp_log_perror("fopen");
         exit(1);
       }
       fprintf(PID, "%d\n", (int)getpid());
@@ -873,14 +870,14 @@ main(int argc, char *argv[])
     if (gid) {
       DEBUGMSGTL(("snmpd", "Changing gid to %d.\n", gid));
       if (setgid(gid)==-1) {
-          log_perror("setgid failed: ");
+          snmp_log_perror("setgid failed: ");
           exit(1);
       }
     }
     if (uid) {
       DEBUGMSGTL(("snmpd", "Changing uid to %d.\n", uid));
       if(setuid(uid)==-1) {
-          log_perror("setuid failed: ");
+          snmp_log_perror("setuid failed: ");
           exit(1);
       }
     }
@@ -888,7 +885,7 @@ main(int argc, char *argv[])
 
     /* honor selection of standard error output */
     if (!stderr_log)
-      disable_stderrlog();
+      snmp_disable_stderrlog();
 
     /* we're up, log our version number */
     snmp_log(LOG_INFO, "UCD-SNMP version %s\n", VersionInfo);
@@ -975,7 +972,7 @@ receive(void)
 		if (errno == EINTR){
 		    continue;
 		} else {
-		    log_perror("select");
+		    snmp_log_perror("select");
 		}
 		return -1;
 	    default:
