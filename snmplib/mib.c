@@ -2638,6 +2638,8 @@ _get_realloc_symbol(const oid *objid, size_t objidlen,
 
     for(; subtree; subtree = subtree->next_peer) {
 	if (*objid == subtree->subid) {
+	  while (subtree->next_peer && subtree->next_peer->subid == *objid)
+	    subtree = subtree->next_peer;
 	  if (subtree->indexes) {
 	    in_dices = subtree->indexes;
 	  } else if (subtree->augments) {
@@ -2979,6 +2981,8 @@ get_tree(const oid *objid,
     return NULL;
 
 found:
+    while (subtree->next_peer && subtree->next_peer->subid == *objid)
+	subtree = subtree->next_peer;
     if (objidlen > 1)
         return_tree = get_tree(objid + 1, objidlen - 1, subtree->child_list);
     if (return_tree != NULL)
@@ -3026,6 +3030,8 @@ fprint_description(FILE *f,
     while (objidlen > 1) {
 	for(; subtree; subtree = subtree->next_peer){
 	    if (*objid == subtree->subid){
+		while (subtree->next_peer && subtree->next_peer->subid == *objid)
+		    subtree = subtree->next_peer;
 		if (strncmp( subtree->label, ANON, ANON_LEN))
 		    sprintf(buf, " %s(%lu)", subtree->label, subtree->subid);
 		else
@@ -3040,9 +3046,8 @@ fprint_description(FILE *f,
 		break;
 	    }
 	}
-	if (subtree == 0) break;
-	objid++; objidlen--; subtree = subtree->child_list;
-	if (subtree == 0) break;
+	objid++; objidlen--;
+	if (subtree) subtree = subtree->child_list;
     }
     fprintf(f, " %lu }\n", *objid);
 }
@@ -3338,6 +3343,8 @@ _add_strings_to_oid(struct tree *tp, char *cp,
 	    subid = tp2->subid;
 	}
 	if (*objidlen >= maxlen) goto bad_id;
+	while (tp2 && tp2->next_peer && tp2->next_peer->subid == subid)
+	    tp2 = tp2->next_peer;
 	objid[ *objidlen ] = subid;
 	(*objidlen)++;
 
