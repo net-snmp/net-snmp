@@ -1,11 +1,9 @@
 TODO list for the ucd-snmp-coders:
 
   snmpv3 support
-  better SNMPv2c support in all apps and the agent.
   Continue to add and improve manual pages/documentation.
   More snmpset'able variables.
   Should be able to set the fix script line in the .conf files per type.
-  Run-time configurable access restrictions for mib tree sections.
   Implement IP routing table manipulation using sysctl() on systems that
     support the route socket (BSD 4.4 and IRIX >= 6.2)
   Implement new IP forwarding table MIB (RFC 2096), at least on systems
