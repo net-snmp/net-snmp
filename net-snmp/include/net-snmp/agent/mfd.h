@@ -74,7 +74,7 @@
  * grow left to right, in case we want to add more user flags later
  */
 #define MFD_ROW_CREATED                0x80000000 /* newly created row */
-
+#define MFD_ROW_DATA_FROM_USER         0x40000000 /* we didn't allocate data */
 
 
 #endif                          /* NETSNMP_MFD_H */
