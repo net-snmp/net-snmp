@@ -14,14 +14,13 @@ OBJS=	snmp_client.o mib.o parse.o snmp_api.o snmp.o \
 	party_parse.o context_parse.o acl_parse.o \
 	system.o vacm.o int64.o read_config.o snmp_debug.o
 
-#all but md5.h, vacm.h, and read_config.h are copied to the installed
+#all but md5.h, vacm.h, libsnmp.h, and read_config.h are copied to the installed
 #include directory
 INSTALLHEADERS=\
 	acl.h \
 	asn1.h \
 	context.h \
 	int64.h \
-	libsnmp.h \
 	mib.h \
 	parse.h \
 	party.h \

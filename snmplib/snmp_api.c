@@ -267,7 +267,7 @@ static int snmp_dump_packet = 0;
 
 void shift_array (u_char *, int, int);
 int snmp_build (struct snmp_session *, struct snmp_pdu *, u_char *, int *);
-static int _snmp_parse (struct snmp_session *, struct internal_snmp_pdu *, u_char *, int);
+static int snmp_parse (struct snmp_session *, struct internal_snmp_pdu *, u_char *, int);
 static void snmp_free_internal_pdu (struct snmp_pdu *);
 
 static void * snmp_sess_pointer (struct snmp_session *);
@@ -1022,7 +1022,7 @@ snmp_build(struct snmp_session *session,
  * are encountered, -1 is returned.  Otherwise, a 0 is returned.
  */
 static int
-_snmp_parse(struct snmp_session *session,
+snmp_parse(struct snmp_session *session,
 	   struct internal_snmp_pdu *pdu,
 	   u_char *data,
 	   int length)
@@ -1787,7 +1787,7 @@ snmp_sess_read(void *sessp,
     pdu = (struct snmp_pdu *)malloc(sizeof(struct internal_snmp_pdu));
     memset (pdu, 0, sizeof(*pdu));
     pdu->address = from;
-    if (_snmp_parse(sp, (struct internal_snmp_pdu *)pdu, packet, length) != SNMP_ERR_NOERROR){
+    if (snmp_parse(sp, (struct internal_snmp_pdu *)pdu, packet, length) != SNMP_ERR_NOERROR){
 	snmp_free_internal_pdu(pdu);
 	return;
     }
