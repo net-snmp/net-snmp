@@ -93,7 +93,7 @@ extern "C" {
 #define SNMPDLMODPATH INSTALL_BASE ## "/lib/dlmod"
 #define SNMPLIBPATH INSTALL_BASE ## "/lib"
 #define SNMPSHAREPATH INSTALL_BASE ## "/share/snmp"
-#define SNMPCONFPATH INSTALL_BASE
+#define SNMPCONFPATH INSTALL_BASE ## "/etc/snmp"
 
 /* LOGFILE:  If defined it closes stdout/err/in and opens this in out/err's
    place.  (stdin is closed so that sh scripts won't wait for it) */
