@@ -564,6 +564,8 @@ AC_CACHE_CHECK(for correct flags to ps, ac_cv_ps_flags,
   ac_cv_ps_flags="-e"
 elif test "`($PSPROG -el 2>&1) | egrep ' (ps) *$' | awk '{print $NF}'`" = "ps" ; then
   ac_cv_ps_flags="-el"
+elif test "`($PSPROG acx 2>&1) | egrep ' (ps) *$' | awk '{print $NF}'`" = "ps" ; then
+  ac_cv_ps_flags="-acx"
 elif test "`($PSPROG -acx 2>&1) | egrep ' (ps) *$' | awk '{print $NF}'`" = "ps" ; then
   ac_cv_ps_flags="-acx"
 elif test "`($PSPROG -o pid,tt,state,time,ucomm 2>&1) | egrep ' ps *$' | awk '{print $NF}'`" = "ps" ; then
