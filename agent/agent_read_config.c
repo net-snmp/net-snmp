@@ -118,7 +118,7 @@ struct passwd *info;
     if (cptr[0] == '#')
         ds_set_int(DS_APPLICATION_ID, DS_AGENT_USERID, atoi(&cptr[1]));
 
-#ifdef if defined(HAVE_GETPWNAM) && defined(HAVE_PWD_H)
+#if defined(HAVE_GETPWNAM) && defined(HAVE_PWD_H)
     if ((info = getpwnam(cptr)) != NULL) {
         ds_set_int(DS_APPLICATION_ID, DS_AGENT_USERID, info->pw_uid);
     }
