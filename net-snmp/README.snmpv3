@@ -1,3 +1,5 @@
+README.snmpv3
+-------------
 How to setup SNMPv3, a very brief document for Dave to elaborate and
 do a better job on since I suck at writing documentation and he
 doesn't ;-) --Wes:
@@ -5,8 +7,11 @@ doesn't ;-) --Wes:
 Note: SHA authentication and DES encryption support is only available
 if you have OpenSSL installed.
 
-CREATING THE FIRST USER:
+Note: encryption support isn't enabled in the binary releases downloadable
+from the net-snmp web site.
 
+CREATING THE FIRST USER:
+------------------------
   First, you need to create a new snmpv3 user and give them rights to
   do things:
 
@@ -36,7 +41,7 @@ CREATING THE FIRST USER:
        [ this should return similar information, but encrypts the transmission ]
 
 CREATING A SECOND USER:
-
+-----------------------
   Start the agent (if you didn't do so above).
 
   You can create as many users as you like using the above method, but
@@ -70,7 +75,9 @@ CREATING A SECOND USER:
 
     snmpget -v 3 -u wes -l authNoPriv -a MD5 -A new_passphrase localhost sysUpTime.0
 
+
 FURTHER STUDIES:
+---------------
 
 Tired of all those command line authentication options?
 ----------------------------------------
