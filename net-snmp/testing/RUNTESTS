@@ -85,7 +85,7 @@ while [ -n "$1" ]; do
 	    ;;
 	-T)
 	    shift
-	    test_nums="$1"
+	    test_nums=`echo $1 | sed 's/,/ /g'`
 	    ;;
 	-a)
 	    test_nums="all"
