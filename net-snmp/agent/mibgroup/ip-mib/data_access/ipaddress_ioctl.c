@@ -12,6 +12,7 @@
 #include <net-snmp/data_access/interface.h>
 
 #include "ip-mib/ipAddressTable/ipAddressTable_constants.h"
+#include "if-mib/data_access/interface_ioctl.h"
 
 #include <errno.h>
 #include <net/if.h>
@@ -209,13 +210,6 @@ _netsnmp_ioctl_ipaddress_container_load_v4(netsnmp_container *container,
         /*
          * get ifindex
          */
-        /*
-         * there is an iotcl to get an ifindex, but I'm not sure that
-         * it has the correct characteristics required to be the actual
-         * ifIndex for the mib, so we'll use the netsnmp interface method
-         * (which is based on the interface name). But first we need to
-         * truncate any alias info.
-         */
         {
             /*
              * I think that Linux and Solaris both use ':' in the
@@ -230,7 +224,8 @@ _netsnmp_ioctl_ipaddress_container_load_v4(netsnmp_container *container,
                 *ptr = 0;
             }
         }
-        entry->if_index = netsnmp_access_interface_index_find(ifrp->ifr_name);
+        entry->if_index =
+            netsnmp_access_interface_ioctl_ifindex_get(sd, ifrp->ifr_name);
         if (0 == entry->if_index) {
             snmp_log(LOG_ERR,"no ifindex found for interface\n");
             netsnmp_access_ipaddress_entry_free(entry);
@@ -303,8 +298,8 @@ _netsnmp_ioctl_ipaddress_container_load_v4(netsnmp_container *container,
 /**
  * find unused alias number
  */
-int
-_netsnmp_ioctl_ipaddress_next_alias(char *if_name)
+static int
+_next_alias(char *if_name)
 {
     int             i, j, k, sd, interfaces = 0, len;
     struct ifconf   ifc;
@@ -418,7 +413,7 @@ _netsnmp_ioctl_ipaddress_set_v4(netsnmp_ipaddress_entry * entry)
         /*
          * search for unused alias
          */
-        alias_idx = _netsnmp_ioctl_ipaddress_next_alias(name);
+        alias_idx = _next_alias(name);
         snprintf(ifrq.ifr_name,sizeof(ifrq.ifr_name), "%s:%d",
                  name, alias_idx);
     }
