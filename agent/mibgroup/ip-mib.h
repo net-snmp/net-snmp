@@ -3,3 +3,4 @@
  */
 
 config_require(ip-mib/ipAddressTable);
+config_require(ip-mib/inetNetToMediaTable);
