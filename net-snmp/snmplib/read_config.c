@@ -831,7 +831,7 @@ char *read_config_read_octet_string(char *readfrom, u_char **str, size_t *len) {
         /* null length string found */
         cptr = NULL;
 
-      } else if (*len > 0 && (str == NULL || (cptr = (u_char *)malloc(*len * sizeof(u_char))) == NULL)) {
+      } else if (*len > 0 && (str == NULL || (cptr = (u_char *)malloc(*len)) == NULL)) {
         return NULL;
       }
       *str = cptr;
@@ -857,7 +857,7 @@ char *read_config_read_octet_string(char *readfrom, u_char **str, size_t *len) {
       *len = strlen(buf);
       /* malloc an extra space to add a null */
       if (*len > 0 && (str == NULL ||
-                       (cptr = (u_char *) malloc((1 + *len) * sizeof(u_char)))
+                       (cptr = (u_char *) malloc(*len + 1))
                        == NULL))
         return NULL;
       *str = cptr;
