@@ -664,8 +664,10 @@ sh_count_procs(char *procname)
     struct dirent  *ent;
     DIR            *dir;
 
-    if (!(dir = opendir("/proc")))
+    if (!(dir = opendir("/proc"))) {
+        snmp_perror("/proc");
         return -1;
+    }
 
     while ((ent = readdir(dir))) {
         if (!strcmp(ent->d_name, "..") || !strcmp(ent->d_name, "."))
@@ -673,12 +675,13 @@ sh_count_procs(char *procname)
 
         snprintf(fbuf, sizeof fbuf, "/proc/%s/psinfo", ent->d_name);
         if ((fd = open(fbuf, O_RDONLY)) < 0) {  /* Continue or return error? */
-            closedir(dir);
-            return -1;
+            snmp_perror(fbuf);
+	    continue;
         }
 
         if (read(fd, (char *) &info, sizeof(struct psinfo)) !=
             sizeof(struct psinfo)) {
+            snmp_perror(fbuf);
             close(fd);
             closedir(dir);
             return -1;
