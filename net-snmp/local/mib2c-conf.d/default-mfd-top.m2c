@@ -11,6 +11,12 @@
 @if "x$mfd_readme_verbose" eq "x"@
 @   eval $mfd_readme_verbose = 1@
 @end@
+@if "x$m2c_create_fewer_files" eq "x"@
+@   eval $m2c_create_fewer_files = 0@
+@end@
+@if "x$m2c_processing_type" eq "x"@
+@   eval $m2c_processing_type = '*'@
+@end@
 @if "x$m2c_code_verbose" eq "x"@
 @   eval $m2c_code_verbose = 0@
 @end@
@@ -29,7 +35,7 @@
 ########################################################################
 ## use temporary values in get routines, or direct pointers?
 @if "x$m2c_get_use_temp" eq "x"@
-@   eval $m2c_get_use_temp = 1@
+@   eval $m2c_get_use_temp = 0@
 @end@
 ##
 ########################################################################
