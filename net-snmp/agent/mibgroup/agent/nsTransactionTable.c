@@ -114,6 +114,7 @@ nsTransactionTable_get_first_data_point(void **my_loop_context,
     snmp_set_var_value(vptr,
                        (u_char *) & agent_delegated_list->pdu->transid,
                        sizeof(agent_delegated_list->pdu->transid));
+
     return put_index_data;
 }
 
@@ -165,7 +166,7 @@ nsTransactionTable_handler(netsnmp_mib_handler *handler,
     netsnmp_variable_list *var;
     netsnmp_agent_session *asp;
 
-    while (requests) {
+    for (; requests; requests = requests->next) {
         var = requests->requestvb;
         if (requests->processed != 0)
             continue;
@@ -205,7 +206,6 @@ nsTransactionTable_handler(netsnmp_mib_handler *handler,
          * been set corresponding to the indexes of the request 
          */
         if (table_info == NULL) {
-            requests = requests->next;
             continue;
         }
 
@@ -238,7 +238,6 @@ nsTransactionTable_handler(netsnmp_mib_handler *handler,
             snmp_log(LOG_ERR,
                      "problem encountered in nsTransactionTable_handler: unsupported mode\n");
         }
-        requests = requests->next;
     }
     return SNMP_ERR_NOERROR;
 }
