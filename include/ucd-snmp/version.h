@@ -1,6 +1,6 @@
 #ifdef UCD_COMPATIBLE
 
-#include <net-snmp/version.h>
+#include <net-snmp/library/version.h>
 
 static const char *VersionInfo=NetSnmpVersionInfo;
 

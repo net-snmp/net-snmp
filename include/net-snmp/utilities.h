@@ -22,26 +22,26 @@
      *  to allow application writers to adopt the new header file names.
      */
 
-#include <net-snmp/snmp_api.h>
-#include <net-snmp/snmp_client.h>
-#include <net-snmp/getopt.h>
+#include <net-snmp/library/snmp_api.h>
+#include <net-snmp/library/snmp_client.h>
+#include <net-snmp/library/getopt.h>
 
 #ifdef HAVE_NETINET_IN_H
 #include <netinet/in.h>			/* for in_addr_t */
 #endif
-#include <net-snmp/system.h>
-#include <net-snmp/tools.h>
-#include <net-snmp/asn1.h>		/* for counter64 */
-#include <net-snmp/int64.h>
+#include <net-snmp/library/system.h>
+#include <net-snmp/library/tools.h>
+#include <net-snmp/library/asn1.h>		/* for counter64 */
+#include <net-snmp/library/int64.h>
 
-#include <net-snmp/mt_support.h>
-#include <net-snmp/snmp_locking.h>
-#include <net-snmp/snmp_alarm.h>
-#include <net-snmp/data_list.h>
-#include <net-snmp/snmp.h>
-#include <net-snmp/snmp_impl.h>
-#include <net-snmp/snmp-tc.h>
+#include <net-snmp/library/mt_support.h>
+#include <net-snmp/library/snmp_locking.h>
+#include <net-snmp/library/snmp_alarm.h>
+#include <net-snmp/library/data_list.h>
+#include <net-snmp/library/snmp.h>
+#include <net-snmp/library/snmp_impl.h>
+#include <net-snmp/library/snmp-tc.h>
 
-#include <net-snmp/version.h>
+#include <net-snmp/library/version.h>
 
 #endif /* NET_SNMP_UTILITIES_H */

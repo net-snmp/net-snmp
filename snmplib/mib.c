@@ -73,12 +73,12 @@ SOFTWARE.
 #include <net-snmp/config_api.h>
 #include <net-snmp/utilities.h>
 
-#include <net-snmp/asn1.h>
-#include <net-snmp/snmp_api.h>
-#include <net-snmp/mib.h>
-#include <net-snmp/parse.h>
-#include <net-snmp/int64.h>
-#include <net-snmp/snmp_client.h>
+#include <net-snmp/library/asn1.h>
+#include <net-snmp/library/snmp_api.h>
+#include <net-snmp/library/mib.h>
+#include <net-snmp/library/parse.h>
+#include <net-snmp/library/int64.h>
+#include <net-snmp/library/snmp_client.h>
 
 static struct tree * _sprint_objid(char *buf,const oid *objid,size_t objidlen);
 

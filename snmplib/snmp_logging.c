@@ -66,7 +66,7 @@
 #include <net-snmp/config_api.h>
 #include <net-snmp/utilities.h>
 
-#include <net-snmp/callback.h>
+#include <net-snmp/library/callback.h>
 #define LOGLENGTH 1024
 
 static int do_syslogging=0;

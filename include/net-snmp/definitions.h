@@ -21,11 +21,11 @@
      */
 
 #include <net-snmp/types.h>	/* for oid */
-#include <net-snmp/snmp_api.h>
-#include <net-snmp/asn1.h>
-#include <net-snmp/snmp_impl.h>
-#include <net-snmp/snmp.h>
-#include <net-snmp/snmp-tc.h>
-/* #include <net-snmp/libsnmp.h> */
+#include <net-snmp/library/snmp_api.h>
+#include <net-snmp/library/asn1.h>
+#include <net-snmp/library/snmp_impl.h>
+#include <net-snmp/library/snmp.h>
+#include <net-snmp/library/snmp-tc.h>
+/* #include <net-snmp/library/libsnmp.h> */
 
 #endif /* NET_SNMP_DEFINITIONS_H */

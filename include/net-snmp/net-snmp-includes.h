@@ -64,7 +64,7 @@
 #include <net-snmp/snmpv3_api.h>
 
 #ifdef CMU_COMPATIBLE
-#include <net-snmp/cmu_compat.h>
+#include <net-snmp/library/cmu_compat.h>
 #endif
 
 #endif /* NET_SNMP_INCLUDES_H */

@@ -32,8 +32,8 @@
 #include <net-snmp/config_api.h>
 #include <net-snmp/utilities.h>
 
-#include <net-snmp/mib.h>
-#include <net-snmp/snmp_api.h>
+#include <net-snmp/library/mib.h>
+#include <net-snmp/library/snmp_api.h>
 
 static int   dodebug = SNMP_ALWAYS_DEBUG;
 static int   debug_num_tokens=0;

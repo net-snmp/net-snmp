@@ -40,16 +40,16 @@
 #include <net-snmp/utilities.h>
 
 #ifdef USE_INTERNAL_MD5
-#include <net-snmp/md5.h>
+#include <net-snmp/library/md5.h>
 #endif
-#include <net-snmp/snmp_api.h>
-#include <net-snmp/callback.h>
-#include <net-snmp/snmp_secmod.h>
-#include <net-snmp/snmpusm.h>
-#include <net-snmp/keytools.h>
-#include <net-snmp/scapi.h>
-#include <net-snmp/mib.h>
-#include <net-snmp/transform_oids.h>
+#include <net-snmp/library/snmp_api.h>
+#include <net-snmp/library/callback.h>
+#include <net-snmp/library/snmp_secmod.h>
+#include <net-snmp/library/snmpusm.h>
+#include <net-snmp/library/keytools.h>
+#include <net-snmp/library/scapi.h>
+#include <net-snmp/library/mib.h>
+#include <net-snmp/library/transform_oids.h>
 
 #ifdef USE_OPENSSL
 #include <openssl/hmac.h>

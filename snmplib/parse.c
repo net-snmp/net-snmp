@@ -102,9 +102,9 @@ SOFTWARE.
 #include <net-snmp/config_api.h>
 #include <net-snmp/utilities.h>
 
-#include <net-snmp/parse.h>
-#include <net-snmp/mib.h>
-#include <net-snmp/snmp_api.h>
+#include <net-snmp/library/parse.h>
+#include <net-snmp/library/mib.h>
+#include <net-snmp/library/snmp_api.h>
 
 /*
  * This is one element of an object identifier with either an integer

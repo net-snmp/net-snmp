@@ -69,10 +69,10 @@ SOFTWARE.
 #include <net-snmp/types.h>	
 #include <net-snmp/output_api.h>
 
-#include <net-snmp/asn1.h>
-#include <net-snmp/snmp.h>	/* for "internal" definitions */
-#include <net-snmp/snmp_api.h>
-#include <net-snmp/mib.h>
+#include <net-snmp/library/asn1.h>
+#include <net-snmp/library/snmp.h>	/* for "internal" definitions */
+#include <net-snmp/library/snmp_api.h>
+#include <net-snmp/library/mib.h>
 
 void
 xdump(const u_char *cp,

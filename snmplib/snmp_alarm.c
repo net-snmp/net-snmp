@@ -42,9 +42,9 @@
 #include <net-snmp/config_api.h>
 #include <net-snmp/utilities.h>
 
-#include <net-snmp/snmp_api.h>
-#include <net-snmp/callback.h>
-#include <net-snmp/snmp_alarm.h>
+#include <net-snmp/library/snmp_api.h>
+#include <net-snmp/library/callback.h>
+#include <net-snmp/library/snmp_alarm.h>
 
 static struct snmp_alarm *thealarms;
 static int start_alarms = 0;

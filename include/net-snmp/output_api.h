@@ -19,9 +19,9 @@
      *  to allow application writers to adopt the new header file names.
      */
 
-#include <net-snmp/snmp_client.h>
-#include <net-snmp/snmp_debug.h>
-#include <net-snmp/snmp_logging.h>
+#include <net-snmp/library/snmp_client.h>
+#include <net-snmp/library/snmp_debug.h>
+#include <net-snmp/library/snmp_logging.h>
 
 #ifndef ERROR_MSG
 #define ERROR_MSG(string)	snmp_set_detail(string)

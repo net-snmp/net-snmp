@@ -15,27 +15,27 @@
 #include <net-snmp/output_api.h>
 #include <net-snmp/utilities.h>
 
-#include <net-snmp/snmp_transport.h>
-#include <net-snmp/snmpUDPDomain.h>
+#include <net-snmp/library/snmp_transport.h>
+#include <net-snmp/library/snmpUDPDomain.h>
 #ifdef SNMP_TRANSPORT_TCP_DOMAIN
-#include <net-snmp/snmpTCPDomain.h>
+#include <net-snmp/library/snmpTCPDomain.h>
 #endif
 #ifdef SNMP_TRANSPORT_IPX_DOMAIN
-#include <net-snmp/snmpIPXDomain.h>
+#include <net-snmp/library/snmpIPXDomain.h>
 #endif
 #ifdef SNMP_TRANSPORT_UNIX_DOMAIN
-#include <net-snmp/snmpUnixDomain.h>
+#include <net-snmp/library/snmpUnixDomain.h>
 #endif
 #ifdef SNMP_TRANSPORT_AAL5PVC_DOMAIN
-#include <net-snmp/snmpAAL5PVCDomain.h>
+#include <net-snmp/library/snmpAAL5PVCDomain.h>
 #endif
 #ifdef SNMP_TRANSPORT_UDPIPV6_DOMAIN
-#include <net-snmp/snmpUDPIPv6Domain.h>
+#include <net-snmp/library/snmpUDPIPv6Domain.h>
 #endif
 #ifdef SNMP_TRANSPORT_TCPIPV6_DOMAIN
-#include <net-snmp/snmpTCPIPv6Domain.h>
+#include <net-snmp/library/snmpTCPIPv6Domain.h>
 #endif
-#include <net-snmp/snmp_api.h>
+#include <net-snmp/library/snmp_api.h>
 
 
 /*  Our list of supported transport domains.  */

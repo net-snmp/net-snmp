@@ -50,8 +50,8 @@
 #include <net-snmp/output_api.h>
 #include <net-snmp/config_api.h>
 
-#include <net-snmp/snmp_api.h>
-#include <net-snmp/vacm.h>
+#include <net-snmp/library/snmp_api.h>
+#include <net-snmp/library/vacm.h>
 
 static struct vacm_viewEntry *viewList = NULL, *viewScanPtr = NULL;
 static struct vacm_accessEntry *accessList = NULL, *accessScanPtr = NULL;

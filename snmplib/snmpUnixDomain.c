@@ -27,8 +27,8 @@
 #include <net-snmp/output_api.h>
 #include <net-snmp/config_api.h>
 
-#include <net-snmp/snmp_transport.h>
-#include <net-snmp/snmpUnixDomain.h>
+#include <net-snmp/library/snmp_transport.h>
+#include <net-snmp/library/snmpUnixDomain.h>
 
 
 #ifndef SNMP_STREAM_QUEUE_LEN
