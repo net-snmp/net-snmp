@@ -164,10 +164,15 @@ netsnmp_container *
 netsnmp_container_find(const char *type)
 {
     netsnmp_factory *f = netsnmp_container_find_factory(type);
-    if (f)
-        return f->produce();
+    netsnmp_container *c = f ? f->produce() : NULL;
 
-    return NULL;
+    /*
+     * provide default compare
+     */
+    if (c && (NULL == c->compare))
+        c->compare = netsnmp_compare_netsnmp_index;
+
+    return c;
 }
 
 /*------------------------------------------------------------------
