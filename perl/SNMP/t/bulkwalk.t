@@ -89,7 +89,7 @@ ok($list[3][0]->type eq "OCTETSTR");		# Description is a string.
 
 # This might fail for some weird (Windows?) systems.  Can be safely ignored.
 $loopback = $list[3][0]->val;
-ok(($loopback eq "lo0") or ($loopback eq "loopback"));
+ok(($loopback =~ /^lo/));
 
 ###############################################################################
 # Attempt to use the bulkwalk method to get only non-repeaters
@@ -196,7 +196,7 @@ sub async_cb1 {
     ok($vbr->type eq "OCTETSTR");
 
     # This might fail for some weird (Windows?) systems.  Can be safely ignored.
-    ok(($vbr->val eq "lo0") or ($vbr->val eq "loopback"));
+    ok(($vbr->val =~ /^lo/));
 
     SNMP::finish();
 }
