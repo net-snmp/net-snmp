@@ -1172,7 +1172,7 @@ find_tree_node(const char *name, int modid)
 
     headtp = tbuckets[NBUCKET(name_hash(name))];
     for (tp = headtp; tp; tp = tp->next) {
-        if (!label_compare(tp->label, name)) {
+        if (tp->label && !label_compare(tp->label, name)) {
 
             if (modid == -1)    /* Any module */
                 return (tp);
