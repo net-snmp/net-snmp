@@ -209,7 +209,7 @@ init_master_agent(int dest_port,
     else if (cptr)
         sprintf(buf,"%s",cptr);
     else
-        sprintf(buf,"%d",dest_port);
+        sprintf(buf,"%d",SNMP_PORT);
 
     DEBUGMSGTL(("snmpd_ports","final port spec: %s\n", buf));
     cptr = strtok(buf, ",");
@@ -671,6 +671,9 @@ handle_next_pass(struct agent_snmp_session  *asp)
 					 req_p->cb_data );
 		    }
 		}
+		asp->pdu = snmp_clone_pdu( pdu );
+		asp->pdu->variables = pdu->variables;
+		pdu->variables = NULL;
 	    }
 	    else {
 	    	/* discard outstanding requests */
