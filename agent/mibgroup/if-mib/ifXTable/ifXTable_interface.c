@@ -394,10 +394,6 @@ ifXTable_allocate_rowreq_ctx(ifXTable_data * data)
 
     rowreq_ctx->oid_idx.oids = rowreq_ctx->oid_tmp;
 
-    rowreq_ctx->ifXTable_data_list = NULL;
-    rowreq_ctx->ifXTable_reg = ifXTable_if_ctx.user_ctx;
-
-
     return rowreq_ctx;
 }
 
@@ -1242,9 +1238,6 @@ _ifXTable_container_init(ifXTable_interface_ctx * if_ctx)
     /*
      * special case: sharing a cache.
      */
-    extern oid             ifTable_oid;
-    extern int             ifTable_oid_size;
-
     if_ctx->cache = netsnmp_cache_find_by_oid(&ifTable_oid, ifTable_oid_size);
     if (NULL != if_ctx->cache) {
         if_ctx->container = (netsnmp_container*)if_ctx->cache->magic;
