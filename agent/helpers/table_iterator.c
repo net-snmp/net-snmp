@@ -401,7 +401,8 @@ netsnmp_table_iterator_helper_handler(netsnmp_mib_handler *handler,
         ret =
             netsnmp_call_next_handler(handler, reginfo, reqinfo, requests);
         if (oldmode == MODE_GETNEXT || oldmode == MODE_GETBULK) {       /* XXX */
-            if (requests->requestvb->type == ASN_NULL) {
+            if (requests->requestvb->type == ASN_NULL ||
+                requests->requestvb->type == SNMP_NOSUCHINSTANCE) {
                 /*
                  * get next skipped this value for this column, we
                  * need to keep searching forward 
