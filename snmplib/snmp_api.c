@@ -4058,6 +4058,9 @@ _sess_read(void *sessp,
             sp->flags &= (~SNMP_FLAGS_LISTENING);
             /* MTR snmp_res_unlock(MT_LIBRARY_ID, MT_LIB_SESSION); */
     } /*END MTCRITICAL_RESOURCE*/
+        /* We're done now we've accepted the connection */
+        memcpy((u_char *)&from, (u_char *)&(isp->addr), sizeof( isp->addr ));
+        return 0;
         }
         memcpy((u_char *)&from, (u_char *)&(isp->addr), sizeof( isp->addr ));
     }
@@ -4084,6 +4087,11 @@ _sess_read(void *sessp,
 		/* Remote end closed connection */
     if ((length == 0 && !isp->newpkt) &&
         (sp->flags & SNMP_FLAGS_STREAM_SOCKET )) {
+#ifdef HAVE_CLOSESOCKET
+        closesocket(isp->sd);
+#else
+        close(isp->sd);
+#endif
         isp->sd = -1;	/* Mark session for deletion */
         /* XXX: its not properly closing... */
 		/* Don't unlink the server listening socket prematurely */
@@ -4121,6 +4129,11 @@ _sess_read(void *sessp,
         if (isp->packet_size+length > MAX_PACKET_LENGTH) {
           /* maximum length exceeded, drop connection */
           snmp_log(LOG_ERR,"Maximum saved packet size exceeded.\n");
+#ifdef HAVE_CLOSESOCKET
+          closesocket(isp->sd);
+#else
+          close(isp->sd);
+#endif
           isp->sd = -1;
           /* Don't unlink the server listening socket prematurely */
           /* XXX: do this?? */
@@ -4152,6 +4165,11 @@ _sess_read(void *sessp,
         if (isp->proper_len > MAX_PACKET_LENGTH) {
           /* illegal length, drop the connection */
           snmp_log(LOG_ERR,"Maximum packet size exceeded in a request.\n");
+#ifdef HAVE_CLOSESOCKET
+          closesocket(isp->sd);
+#else
+          close(isp->sd);
+#endif
           isp->sd = -1;
           /* Don't unlink the server listening socket prematurely */
           /* XXX: do this?? */
