@@ -595,7 +595,7 @@ handle_snmp_packet(int operation, struct snmp_session *session, int reqid,
 		 */
 	if (( asp->pdu->command != SNMP_MSG_SET ) &&
 	    ( asp->pdu->version == SNMP_VERSION_1 )) {
-		for ( var_ptr = asp->pdu->variables, i=0 ;
+		for ( var_ptr = asp->pdu->variables, i=1 ;
 			var_ptr != NULL ;
 			var_ptr = var_ptr->next_variable, i++ ) {
 	    	    switch ( var_ptr->type ) {
