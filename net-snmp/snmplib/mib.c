@@ -3431,7 +3431,7 @@ parse_one_oid_index(oid ** oidStart, size_t * oidLen,
             if ((4 > *oidLen) && (complete == 0))
                 return SNMPERR_GENERR;
             
-            for (i = 0; i < *oidLen; ++i) {
+            for (i = 0; i < 4 && i < *oidLen; ++i) {
                 if (oidIndex[i] > 255) {
                     DEBUGMSGTL(("parse_oid_indexes",
                                 "illegal oid in index: %d\n", oidIndex[0]));
