@@ -21,7 +21,7 @@ $ucdsnmp::manager::greenimage = "/graphics/green.gif";
 $ucdsnmp::manager::tableparms = "border=3 ipad=3 bgcolor=#d0d0d0";
 
 # init the snmp library
-#$SNMP::save_descriptions=1;
+$SNMP::save_descriptions=1;
 #SNMP::init_mib();
 
 %ucdsnmp::manager::myorder = qw(id 0 oidindex 1 host 2 updated 3);
