@@ -358,7 +358,7 @@ sprint_octet_string(char *buf,
 	*buf++ = '"';
 	*buf = '\0';
     }
-    if (hex || ((var->val_len <= 4) && !ds_get_boolean(DS_LIBRARY_ID, DS_LIB_QUICK_PRINT))){
+    if (hex){
 	if (ds_get_boolean(DS_LIBRARY_ID, DS_LIB_QUICK_PRINT)){
 	    *buf++ = '"';
 	    *buf = '\0';
