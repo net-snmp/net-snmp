@@ -13,9 +13,10 @@
 #endif
 
 #define BABY_STEPS_PER_MODE_MAX     4
+#define BSTEP_USE_ORIGINAL          0xffff
 
 static u_short get_mode_map[BABY_STEPS_PER_MODE_MAX] = {
-    MODE_BSTEP_PRE_REQUEST, MODE_BSTEP_OBJECT_LOOKUP, 0xffff, MODE_BSTEP_POST_REQUEST };
+    MODE_BSTEP_PRE_REQUEST, MODE_BSTEP_OBJECT_LOOKUP, BSTEP_USE_ORIGINAL, MODE_BSTEP_POST_REQUEST };
 
 static u_short set_mode_map[SNMP_MSG_INTERNAL_SET_MAX][BABY_STEPS_PER_MODE_MAX] = {
     /*R1*/
@@ -154,14 +155,14 @@ netsnmp_baby_steps_helper(netsnmp_mib_handler *handler,
         /*
          * call handlers for baby step
          */
-        if(0xffff == mode_map_ptr[i]) /** use original mode */
+        if(BSTEP_USE_ORIGINAL == mode_map_ptr[i])
             reqinfo->mode = save_mode;
         else
             reqinfo->mode = mode_map_ptr[i];
         if((BABY_STEPS_PER_MODE_MAX - 1) == i)
             reqinfo->next_mode_ok = BABY_STEP_NONE;
         else {
-            if(0xffff == mode_map_ptr[i+1])
+            if(BSTEP_USE_ORIGINAL == mode_map_ptr[i+1])
                 reqinfo->next_mode_ok = save_mode;
             else
                 reqinfo->next_mode_ok = mode_map_ptr[i+1];
