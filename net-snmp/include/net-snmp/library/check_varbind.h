@@ -10,6 +10,8 @@ extern          "C" {
      * netsnmp_variable_list instance.
      */
 
+    int netsnmp_check_vb_type(netsnmp_variable_list *var, int type);
+
     int netsnmp_check_vb_type_and_size(netsnmp_variable_list *var, int type,
                                        size_t size);
 
