@@ -427,7 +427,7 @@ proxy_got_response(int operation, netsnmp_session * sess, int reqid,
 
         /* fix bulk_to_next operations */
         if (cache->reqinfo->mode == MODE_GETBULK)
-            netsnmp_bulk_to_next_fix_requests(request);
+            netsnmp_bulk_to_next_fix_requests(requests);
         
         /*
          * free the response 
