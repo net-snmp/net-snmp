@@ -12,7 +12,6 @@ TABLE OF CONTENTS
   Disclaimer
   Table Of Contents
   Intro
-  Boring Project History
 * Supported Architectures
   Availability
 * Installation
@@ -35,38 +34,6 @@ INTRO
   and easily.  It is far from the best and most configurable systems;
   but hey: its free.
   
-BORING PROJECT HISTORY
-
-  A while back, we wanted to monitor problems on our network and hosts
-  that were easily noticeable.  Therefore, we needed an extensible
-  agent.  We started with the agent distributed with Ultrix 4.2, but
-  had serious problems with it (there is now way to distinguish
-  between get/getnext requests causing the agent to loop forever).
-  Then we decided to look into the HP extensible agent.  Looked
-  perfect.  Then we saw the price.  Too much for an educational
-  facility (it was ~$1000/host but is now closer to $200/host).  
-
-  We opted for the third route: modifying the CMU code to do the
-  things we wanted.  This gives the added benefit of being free and
-  would be identical on all the architectures we wished to support.
-  This package is a result of that effort.
-
-  We use this agent here to monitor known system problems before they
-  take the machine over.  The agent can be easily configured to
-  monitor the number of a given process running, run external scripts
-  to check and report functional status.  Examples: mountd(s) under
-  Ultrix 4.3 which tend to fork themselves crazy and eventually fill
-  up the process table; On our hp700s, "amd" sometimes stops working,
-  HP VUE hangs and fails to start X, etc.
-
-  We use HP-OpenView to poll the enclosed agent every half an hour
-  looking for these problems.  The problems are then logged in a file,
-  which the programmers monitor using xlbiff.  Additionally, we use
-  the perl/tk 'snmpcheck' script found in the local subdirectory to
-  automatically check and fix these problems.  I don't know how useful
-  this package will be to the outside world, but I thought I'd let you
-  decide that for yourself.
-
 SUPPORTED ARCHITECTURES
 
   It has been know to work on the following architectures:  
