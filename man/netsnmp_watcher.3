@@ -1,48 +1,11 @@
-.TH "watcher: watch a specified variable and process" 3 "28 Oct 2003" "net-snmp" \" -*- nroff -*-
+.TH "watcher: watch a specified variable and process" 3 "13 Nov 2003" "net-snmp" \" -*- nroff -*-
 .ad l
 .nh
 .SH NAME
-watcher: watch a specified variable and process \- it as an instance or scalar object. 
+watcher: watch a specified variable and process \- it as an instance or scalar object 
 More...
-.SS "Functions"
-
-.in +1c
-.ti -1c
-.RI "netsnmp_mib_handler * \fBnetsnmp_get_watcher_handler\fP (void)"
-.br
-.ti -1c
-.RI "netsnmp_watcher_info * \fBnetsnmp_create_watcher_info\fP (void *data, size_t size, u_char type, int flags)"
-.br
-.ti -1c
-.RI "int \fBnetsnmp_register_watched_instance\fP (netsnmp_handler_registration *reginfo, netsnmp_watcher_info *watchinfo)"
-.br
-.ti -1c
-.RI "int \fBnetsnmp_register_watched_scalar\fP (netsnmp_handler_registration *reginfo, netsnmp_watcher_info *watchinfo)"
-.br
-.ti -1c
-.RI "int \fBnetsnmp_watcher_helper_handler\fP (netsnmp_mib_handler *handler, netsnmp_handler_registration *reginfo, netsnmp_agent_request_info *reqinfo, netsnmp_request_info *requests)"
-.br
-.ti -1c
-.RI "netsnmp_mib_handler * \fBnetsnmp_get_watched_timestamp_handler\fP (void)"
-.br
-.ti -1c
-.RI "int \fBnetsnmp_register_watched_timestamp\fP (netsnmp_handler_registration *reginfo, marker_t *timestamp)"
-.br
-.ti -1c
-.RI "int \fBnetsnmp_watched_timestamp_handler\fP (netsnmp_mib_handler *handler, netsnmp_handler_registration *reginfo, netsnmp_agent_request_info *reqinfo, netsnmp_request_info *requests)"
-.br
-.ti -1c
-.RI "netsnmp_mib_handler * \fBnetsnmp_get_watched_spinlock_handler\fP (void)"
-.br
-.ti -1c
-.RI "int \fBnetsnmp_register_watched_spinlock\fP (netsnmp_handler_registration *reginfo, int *spinlock)"
-.br
-.ti -1c
-.RI "int \fBnetsnmp_watched_spinlock_handler\fP (netsnmp_mib_handler *handler, netsnmp_handler_registration *reginfo, netsnmp_agent_request_info *reqinfo, netsnmp_request_info *requests)"
-.br
-.in -1c
 .SH "DETAILED DESCRIPTION"
 .PP 
-it as an instance or scalar object.
+it as an instance or scalar object
 .PP
 

@@ -1,22 +1,9 @@
-.TH "row_merge: Calls sub handlers with request for one row at a time." 3 "28 Oct 2003" "net-snmp" \" -*- nroff -*-
+.TH "row_merge: Calls sub handlers with request for one row at a time." 3 "13 Nov 2003" "net-snmp" \" -*- nroff -*-
 .ad l
 .nh
 .SH NAME
 row_merge: Calls sub handlers with request for one row at a time. \- This helper splits a whole bunch of requests into chunks based on the row index that they refer to, and passes all requests for a given row to the lower handlers. 
 More...
-.SS "Defines"
-
-.in +1c
-.ti -1c
-.RI "#define \fBROW_MERGE_WAITING\fP   0"
-.br
-.ti -1c
-.RI "#define \fBROW_MERGE_ACTIVE\fP   1"
-.br
-.ti -1c
-.RI "#define \fBROW_MERGE_DONE\fP   2"
-.br
-.in -1c
 .SS "Functions"
 
 .in +1c
@@ -27,7 +14,7 @@ More...
 .ti -1c
 .RI "int \fBnetsnmp_register_row_merge\fP (netsnmp_handler_registration *reginfo)"
 .br
-.RI "\fIfunctionally the same as calling \fBnetsnmp_register_handler\fP() but also injects a row_merge handler at the same time for you.\fP"
+.RI "\fIfunctionally the same as calling \fBnetsnmp_register_handler()\fP but also injects a row_merge handler at the same time for you.\fP"
 .ti -1c
 .RI "int \fBnetsnmp_row_merge_helper_handler\fP (netsnmp_mib_handler *handler, netsnmp_handler_registration *reginfo, netsnmp_agent_request_info *reqinfo, netsnmp_request_info *requests)"
 .br
@@ -49,18 +36,30 @@ This is useful for handlers that don't want to process multiple rows at the same
 returns a row_merge handler that can be injected into a given handler chain.
 .PP
 Definition at line 31 of file row_merge.c.
+.PP
+References netsnmp_create_handler(), and netsnmp_row_merge_helper_handler().
+.PP
+Referenced by netsnmp_init_row_merge(), and netsnmp_register_row_merge().
 .SS "void netsnmp_init_row_merge (void)"
 .PP
 initializes the row_merge helper which then registers a row_merge handler as a run-time injectable handler for configuration file use.
 .PP
 Definition at line 188 of file row_merge.c.
+.PP
+References netsnmp_get_row_merge_handler(), and netsnmp_register_handler_by_name().
 .SS "int netsnmp_register_row_merge (netsnmp_handler_registration * reginfo)"
 .PP
-functionally the same as calling \fBnetsnmp_register_handler\fP() but also injects a row_merge handler at the same time for you.
+functionally the same as calling \fBnetsnmp_register_handler()\fP but also injects a row_merge handler at the same time for you.
 .PP
 Definition at line 45 of file row_merge.c.
+.PP
+References netsnmp_get_row_merge_handler(), netsnmp_inject_handler(), and netsnmp_register_handler().
 .SS "int netsnmp_row_merge_helper_handler (netsnmp_mib_handler * handler, netsnmp_handler_registration * reginfo, netsnmp_agent_request_info * reqinfo, netsnmp_request_info * requests)"
 .PP
 Implements the row_merge handler.
 .PP
 Definition at line 58 of file row_merge.c.
+.PP
+References netsnmp_call_next_handler(), and snmp_oid_compare().
+.PP
+Referenced by netsnmp_get_row_merge_handler().
