@@ -6970,7 +6970,7 @@ new_with_transport_list=`echo $with_transports | sed 's/,/ /g;'`
 new_with_out_transport_list=`echo $with_out_transports | sed 's/,/ /g;'`
 
 if test "x$PARTIALTARGETOS" = "xcygwin"; then
-  transport_default_list="UDP TCP"
+  transport_default_list="UDP TCP Callback"
 else
   transport_default_list="UDP TCP Unix Callback"
 fi
