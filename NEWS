@@ -3,7 +3,6 @@ the ChangeLog file for a more detailed listing of changes/bug fixes.
 
 *4.2.3*
  New:
-    - mibII write support for windows
     - sysLocation, sysContact, sysName and snmpEnableAuthenTraps are
       persistent after being set remotely.
     - New "ignoredisk" directive to ignore disks in the host resources mib.
@@ -14,6 +13,10 @@ the ChangeLog file for a more detailed listing of changes/bug fixes.
       aren't available.
     - trap sinks aren't duplicated after a SIGHUP. 
     - misc other fixes.
+
+ Ports:
+    - improved irix support.
+    - more mibII support for windows.
 
 *4.2.2*
  Security Bug Fixes:
