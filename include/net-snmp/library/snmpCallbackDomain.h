@@ -49,6 +49,7 @@ netsnmp_session *netsnmp_callback_open(int attach_to,
                                                            *,
                                                            netsnmp_pdu *,
                                                            int));
+void             netsnmp_clear_callback_list(void);
 
 #ifdef __cplusplus
 }

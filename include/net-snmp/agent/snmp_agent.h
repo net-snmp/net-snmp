@@ -164,6 +164,7 @@ extern          "C" {
     int             getNextSessID(void);
     void            dump_sess_list(void);
     int             init_master_agent(void);
+    void            shutdown_master_agent(void);
     int             agent_check_and_process(int block);
     void            netsnmp_check_outstanding_agent_requests(void);
     int             netsnmp_set_mode_request_error(int mode,

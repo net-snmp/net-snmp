@@ -137,6 +137,7 @@ snmpd_set_agent_user(const char *token, char *cptr)
     } else {
         config_perror("User not found in passwd database");
     }
+    endpwent();
 #endif
 }
 
@@ -164,6 +165,7 @@ snmpd_set_agent_group(const char *token, char *cptr)
     } else {
         config_perror("Group not found in group database");
     }
+    endpwent();
 #endif
 }
 #endif

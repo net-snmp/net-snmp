@@ -140,6 +140,8 @@ int             netsnmp_tdomain_register(netsnmp_tdomain *domain);
     
 int             netsnmp_tdomain_unregister(netsnmp_tdomain *domain);
 
+void            netsnmp_clear_tdomain_list(void);
+
 void            netsnmp_tdomain_init(void);
 
 netsnmp_transport *netsnmp_tdomain_transport(const char *string,

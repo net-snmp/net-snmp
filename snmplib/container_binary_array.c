@@ -175,7 +175,11 @@ void
 netsnmp_binary_array_release(netsnmp_container *c)
 {
     binary_array_table *t = (binary_array_table*)c->private;
-    free(t);
+    if (t->data != NULL) {
+	SNMP_FREE(t->data);
+    }
+    SNMP_FREE(t);
+
 }
 
 size_t

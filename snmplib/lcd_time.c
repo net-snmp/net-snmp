@@ -256,6 +256,26 @@ get_enginetime_ex(u_char * engineID,
 }                               /* end get_enginetime_ex() */
 
 
+void free_enginetime(unsigned char *engineID, size_t engineID_len)
+{
+    Enginetime      e = NULL;
+    int             rval = 0;
+
+    rval = hash_engineID(engineID, engineID_len);
+    if (rval < 0)
+	return;
+
+    e = etimelist[rval];
+
+    while (e != NULL) {
+	etimelist[rval] = e->next;
+	SNMP_FREE(e->engineID);
+	SNMP_FREE(e);
+	e = etimelist[rval];
+    }
+
+}
+
 
 
 /*******************************************************************-o-******

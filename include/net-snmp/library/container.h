@@ -188,6 +188,11 @@ extern "C" {
     void netsnmp_container_init_list(void);
 
     /*
+     * frees the containers 
+     */
+    void netsnmp_clear_container(void);
+
+    /*
      * register a new container factory
      */
     int netsnmp_container_register(const char* name, netsnmp_factory *f);
@@ -304,10 +309,10 @@ extern "C" {
     static inline /* gcc docs recommend static w/inline */
     int CONTAINER_FREE(netsnmp_container *x)
     {
+	int  rc;
         
         if (NULL != x->next) {
             netsnmp_container *tmp = x->next;
-            int                rc;
             while(tmp->next)
                 tmp = tmp->next;
             while(tmp) {
@@ -315,9 +320,18 @@ extern "C" {
                 if (rc)
                     snmp_log(LOG_ERR,"error on subcontainer cfree (%d)\n", rc);
                 tmp = tmp->prev;
+		SNMP_FREE(tmp->next);
             }
         }
-        return x->cfree(x);
+	rc = x->cfree(x);
+	if (rc != 0) {
+	    if (x == containers) {
+		containers = NULL;
+            }
+	    SNMP_FREE(x);
+        }
+
+	return rc;
     }
 #endif
 
