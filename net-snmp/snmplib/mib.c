@@ -1008,9 +1008,12 @@ handle_mibfile_conf(word, line)
 
 void
 register_mib_handlers __P((void)) {
-  register_premib_handler("snmp","mibdirs",handle_mibdirs_conf,NULL);
-  register_premib_handler("snmp","mibs",handle_mibs_conf,NULL);
-  register_config_handler("snmp","mibfile",handle_mibfile_conf,NULL);
+  register_premib_handler("snmp","mibdirs",
+	  (void (*)(char *,char *))handle_mibdirs_conf,NULL);
+  register_premib_handler("snmp","mibs",
+	  (void (*)(char *,char *))handle_mibs_conf,NULL);
+  register_config_handler("snmp","mibfile",
+	  (void (*)(char *,char *))handle_mibfile_conf,NULL);
 }
 
 void
