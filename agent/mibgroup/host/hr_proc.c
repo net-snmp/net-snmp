@@ -9,7 +9,6 @@
 #endif
 
 #include "host_res.h"
-#include "util_funcs.h"
 #include "hr_proc.h"
 #include "auto_nlist.h"
 #include "agent_read_config.h"
@@ -43,9 +42,6 @@ void	init_hr_proc( )
     dev_idx_inc[ HRDEV_PROC ] = 1;
 #endif
 }
-
-
-
 
 /*
   header_hrproc(...

@@ -11,7 +11,6 @@
 #endif
 
 #include "host_res.h"
-#include "util_funcs.h"
 #include "hr_device.h"
 
 	/*********************
@@ -68,10 +67,6 @@ void init_hr_device(void)
 	device_errors[i]=NULL;
     }
 }
-
-
-
-
 
 
 /*

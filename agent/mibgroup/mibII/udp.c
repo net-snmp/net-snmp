@@ -86,7 +86,6 @@
 #include "snmp_debug.h"
 
 #include "mibincl.h"
-#include "util_funcs.h"
 #include "auto_nlist.h"
 
 #ifdef hpux
@@ -151,10 +150,6 @@ void init_udp()
   auto_nlist( UDB_SYMBOL,0,0 );
 #endif
 }
-
-
-
-
 
 /*
   header_udp(...

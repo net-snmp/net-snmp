@@ -37,7 +37,6 @@
 #endif
 
 #include "host_res.h"
-#include "util_funcs.h"
 #include "hr_storage.h"
 #include "hr_filesys.h"
 #include "auto_nlist.h"
@@ -124,9 +123,6 @@ void init_hr_storeage (void)
 #endif
     auto_nlist(MBSTAT_SYMBOL,0,0);
 }
-
-
-
 
 /*
   header_hrstore(...

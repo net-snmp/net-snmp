@@ -6,9 +6,6 @@
 
 #include "struct.h"
 
-#define MATCH_FAILED	-1
-#define MATCH_SUCCEEDED	0
-
 void Exit (int);
 int shell_command (struct extensible *);
 int exec_command (struct extensible *);

@@ -5,9 +5,7 @@
 
 #include <config.h>
 #include "host_res.h"
-#include "util_funcs.h"
 #include "hr_print.h"
-
 
 #define HRPRINT_MONOTONICALLY_INCREASING
 
@@ -43,9 +41,6 @@ void init_hr_print(void)
 
 /*  device_descr[ HRDEV_PRINTER ] = &describe_printer;	*/
 }
-
-
-
 
 /*
   header_hrprint(...

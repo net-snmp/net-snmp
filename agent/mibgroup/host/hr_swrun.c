@@ -11,7 +11,6 @@
 #include <fcntl.h>
 
 #include "host_res.h"
-#include "util_funcs.h"
 #include "hr_swrun.h"
 #include "auto_nlist.h"
 
@@ -95,9 +94,6 @@ void init_hr_swrun(void)
   auto_nlist( NPROC_SYMBOL,0,0 );
 #endif
 }
-
-
-
 
 /*
   header_hrswrun(...
@@ -627,7 +623,7 @@ Init_HR_SWRun (void)
 #elif HAVE_KVM_GETPROCS
     {
 	if (kd == NULL)
-	    kd = kvm_open(NULL, NULL, NULL, O_RDONLY, "kvm_getprocs");
+	kd = kvm_open(NULL, NULL, NULL, O_RDONLY, "kvm_getprocs");
 	proc_table = kvm_getprocs(kd, KERN_PROC_ALL, 0, &nproc);
     }
 #else

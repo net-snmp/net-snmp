@@ -12,7 +12,6 @@
 
 #include "auto_nlist.h"
 
-#include "util_funcs.h"
 #include "wombat.h"
 
 
@@ -108,10 +107,6 @@ void wombat_parse_config(char *token,
 void wombat_free_config (void) 
 {
 }
-
-
-
-
 
 /*
   header_wombat(...

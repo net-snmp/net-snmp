@@ -71,7 +71,6 @@
 #include "snmp_debug.h"
 
 #include "mibincl.h"
-#include "util_funcs.h"
 #include "auto_nlist.h"
 
 #ifdef hpux
@@ -149,9 +148,6 @@ void	init_icmp( )
     auto_nlist( ICMPSTAT_SYMBOL,0,0 );
 #endif
 }
-
-
-
 
 /*
   header_icmp(...
