@@ -264,17 +264,13 @@ _find_next_row(netsnmp_container *c,
     }
 
     /*
-     * no indexes, or below our minimum column? then use first row.
+     * table helper should have made sure we aren't below our minimum column
      */
-    if(tblreq->colnum < tblreq->reg_info->min_column) {
-        snmp_log(LOG_ERR, "WHY IS COLNUM < MIN_COLUMN???\n");
-        netsnmp_assert(0);
-        abort();
-    }
+    netsnmp_assert(tblreq->colnum >= tblreq->reg_info->min_column);
+
     /*
-    if((tblreq->number_indexes == 0) ||
-       (tblreq->colnum < tblreq->reg_info->min_column)) {
-    */
+     * if no indexes then use first row.
+     */
     if(tblreq->number_indexes == 0) {
         row = CONTAINER_FIRST(c);
     } else {
