@@ -180,25 +180,45 @@ touchit:
 	touch stamp-h stamp-h.in
 
 Makefile: Makefile.in config.status Makefile.rules Makefile.top
-	CONFIG_HEADERS= ./config.status
+	@if test "x$(NOAUTODEPS)" = "x"; then \
+	    ./config.status; \
+	else \
+	    echo "WARNING: not running config.status"; \
+	fi
 
 $(srcdir)/include/net-snmp/net-snmp-config.h.in: stamp-h.in
 $(srcdir)/stamp-h.in: configure.in acconfig.h
-	cd ${srcdir} && LC_COLLATE=C $(AUTOHEADER)
-	echo timestamp > ${srcdir}/stamp-h.in
+	@if test "x$(NOAUTODEPS)" = "x"; then \
+	    cd ${srcdir} && LC_COLLATE=C $(AUTOHEADER); \
+	    echo timestamp > ${srcdir}/stamp-h.in; \
+	else \
+	    echo "WARNING: not running $(AUTOHEADER)"; \
+	fi
 
 include/net-snmp/net-snmp-config.h: stamp-h
 stamp-h: include/net-snmp/net-snmp-config.h.in config.status
-	CONFIG_FILES= ./config.status
-	echo timestamp > stamp-h
+	@if test "x$(NOAUTODEPS)" = "x"; then \
+	    ./config.status; \
+	    echo timestamp > stamp-h; \
+	else \
+	    echo "WARNING: not running config.status"; \
+	fi
 
 $(srcdir)/configure: configure.in aclocal.m4
-	cd ${srcdir} && $(AUTOCONF)
-	echo "Please run configure now."
-	sh -c exit 2
+	@if test "x$(NOAUTODEPS)" = "x"; then \
+	    cd ${srcdir} && $(AUTOCONF); \
+	    echo "Please run configure now."; \
+	    sh -c exit 2; \
+	else \
+	    echo "WARNING: not running $(AUTOCONF)"; \
+	fi
 
 config.status: configure
-	./config.status --recheck
+	@if test "x$(NOAUTODEPS)" = "x"; then \
+	    ./config.status --recheck; \
+	else \
+	    echo "WARNING: not running config.status --recheck"; \
+	fi
 
 #
 # Emacs TAGS file
