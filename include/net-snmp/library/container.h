@@ -225,6 +225,10 @@ extern "C" {
     int netsnmp_compare_cstring(const void * lhs, const void * rhs);
     int netsnmp_ncompare_cstring(const void * lhs, const void * rhs);
 
+    /** useful for octet strings */
+    int netsnmp_compare_mem(const char * lhs, size_t lhs_len,
+                            const char * rhs, size_t rhs_len);
+
 
     /*
      * useful macros
@@ -264,7 +268,7 @@ extern "C" {
             while(tmp) {
                 rc2 = tmp->insert(tmp,k);
                 if (rc)
-                    snmp_log(LOG_ERR,"error on subcontainer remove (%d)", rc2);
+                    snmp_log(LOG_ERR,"error on subcontainer insert (%d)", rc2);
                 tmp = tmp->next;
             }
         }
