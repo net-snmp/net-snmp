@@ -156,7 +156,7 @@ CONFIGURATION
   (Net-SNMP.chm) located in the docs directory of the installed package.  Help is also
   available from the web site at http://www.net-snmp.org/#Documentation.
 
-  To run snmpconf, use the following command line.
+  To run snmpconf, use the following command line:
 
      snmpconf -I
 
