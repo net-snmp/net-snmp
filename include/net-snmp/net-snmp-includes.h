@@ -16,6 +16,9 @@
 #include <stdio.h>
 #include <sys/types.h>
 
+#ifdef HAVE_STDLIB_H
+#include <stdlib.h>
+#endif
 #ifdef HAVE_NETINET_IN_H
 #include <netinet/in.h>
 #endif
