@@ -38,6 +38,18 @@ all: subdirs snmpd
 subdirs:
 	cd extensible; $(MAKE)
 
+getkstat: getkstat.o
+	$(CC) $(CFLAGS) -o $@ $? $(LIBS)
+
+getkstat.o: kernel_sunos5.c
+	$(CC) $(CFLAGS) -o $@ -D_GETKSTAT_TEST -DKDEBUG -c $? 
+
+getmibstat: getmibstat.o
+	$(CC) $(CFLAGS) -o $@ $? $(LIBS)
+
+getmibstat.o: kernel_sunos5.c
+	$(CC) $(CFLAGS) -o $@ -D_GETMIBSTAT_TEST -DKDEBUG -c $? 
+
 snmpd:	snmpd.o kernel.o snmp_agent.o snmp_vars.o snmp_var_route.o party_vars.o context_vars.o acl_vars.o view_vars.o view_parse.o alarm.o event.o route_write.o kernel_sunos5.o ${EXTENSIBLEOBJS} ../snmplib/libsnmp.a
 	${CC} -o $@ snmpd.o kernel.o snmp_agent.o snmp_vars.o snmp_var_route.o party_vars.o context_vars.o acl_vars.o view_vars.o view_parse.o alarm.o event.o route_write.o  kernel_sunos5.o ${EXTENSIBLEOBJS} ${LDFLAGS} ${LIBS}  
 

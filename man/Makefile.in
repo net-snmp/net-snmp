@@ -18,7 +18,7 @@ INSTALL = @INSTALL@
 
 SED = @SED@
 
-MAN1 = snmpget.1 snmpset.1 snmpwalk.1 snmpbulkwalk.1 snmpgetnext.1 snmptest.1 snmpd.1 snmpnetstat.1 snmptranslate.1 
+MAN1 = snmpget.1 snmpset.1 snmpwalk.1 snmpbulkwalk.1 snmpgetnext.1 snmptest.1 snmpd.1 snmpnetstat.1 snmptranslate.1 snmpstatus.1
 MAN3 = snmp_api.3
 MAN5 = variables.5 snmpd.conf.5
 MAN8 = snmptrapd.8

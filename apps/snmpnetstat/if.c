@@ -96,9 +96,9 @@ intpr(interval)
 		sidewaysintpr((unsigned)interval);
 		return;
 	}
-	printf("%-11.11s %-5.5s %-11.11s %-15.15s %8.8s %5.5s %8.8s %5.5s",
+	printf("%-11.11s %-5.5s %-11.11s %-15.15s %8.8s %5.5s %8.8s %5.5s %5.5s",
 		"Name", "Mtu", "Network", "Address", "Ipkts", "Ierrs",
-		"Opkts", "Oerrs");
+		"Opkts", "Oerrs", "Colls");
 	putchar('\n');
 	var = getvarbyname(Session, oid_cfg_nnets, sizeof(oid_cfg_nnets) / sizeof(oid));
 	if (var)
@@ -209,7 +209,7 @@ sidewaysintpr(interval)
 	register int line;
 	struct iftot *lastif, *sum, *interesting, ifnow, *now = &ifnow;
 	int oldmask;
-	void catchalarm();
+	RETSIGTYPE catchalarm();
 	struct variable_list *var;
 	oid varname[MAX_NAME_LEN], *instance, *ifentry;
 	int varname_len;
@@ -356,12 +356,11 @@ loop:
 	putchar('\n');
 	fflush(stdout);
 	line++;
-#ifdef SVR4
+#ifdef HAVE_SIGHOLD
 	sighold(SIGALRM);
 	if (! signalled) {
-		sigpause(0);
+		sigpause(SIGALRM);
 	}
-	sigrelse(SIGALRM);
 #else
 	oldmask = sigblock(sigmask(SIGALRM));
 	if (! signalled) {
@@ -381,7 +380,7 @@ loop:
  * Called if an interval expires before sidewaysintpr has completed a loop.
  * Sets a flag to not wait for the alarm.
  */
-void
+RETSIGTYPE
 catchalarm()
 {
 	signalled = YES;
