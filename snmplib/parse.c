@@ -1301,8 +1301,17 @@ do_subtree(struct tree *root,
      */
     for(np = child_list; np; np = np->next){
 	struct tree *otp = NULL;
+	struct tree *xxroot = xroot;
 	anon_tp = NULL;
         tp = xroot->child_list;
+
+	if (np->subid == -1) {
+	    /* name ::= { parent } */
+	    np->subid = xroot->subid;
+	    tp = xroot;
+	    xxroot = xroot->parent;
+	}
+
         while (tp) {
             if (tp->subid == np->subid) break;
             else {
@@ -1341,14 +1350,14 @@ do_subtree(struct tree *root,
 
         tp = (struct tree *) calloc(1, sizeof(struct tree));
         if (tp == NULL) return;
-        tp->parent = xroot;
+        tp->parent = xxroot;
         tp->modid = np->modid;
         tp->number_modules = 1;
         tp->module_list = &(tp->modid);
         tree_from_node(tp, np);
-        tp->next_peer = otp ? otp->next_peer : xroot->child_list;
+        tp->next_peer = otp ? otp->next_peer : xxroot->child_list;
         if (otp) otp->next_peer = tp;
-	else xroot->child_list = tp;
+	else xxroot->child_list = tp;
         hash = NBUCKET(name_hash(tp->label));
         tp->next = tbuckets[hash];
         tbuckets[hash] = tp;
@@ -1674,18 +1683,13 @@ parse_objectid(FILE *fp,
      * Handle  "label OBJECT-IDENTIFIER ::= { subid }"
      */
     if (length == 1) {
-#if 0
         op = loid;
         np = alloc_node(op->modid);
         if (np == NULL) return(NULL);
         np->subid = op->subid;
         np->label = strdup(name);
-        if (op->label) free(op->label);
+	np->parent = op->label;
         return np;
-#else
-	print_error("List too short", NULL, CONTINUE);
-	return NULL;
-#endif
     }
 
     /*
