@@ -5,7 +5,7 @@
 
 #include <config.h>
 
-#ifndef linux
+#ifdef CAN_USE_NLIST
 
 #include <sys/types.h>
 #if HAVE_UNISTD_H
@@ -131,4 +131,4 @@ klookup(off, target, siz)
   return (1);
 }
 
-#endif /* linux */
+#endif /* CAN_USE_NLIST */

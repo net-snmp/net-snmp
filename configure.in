@@ -592,7 +592,7 @@ AC_CHECK_FUNCS(strchr strdup memcpy memmove index bcopy)
 AC_CHECK_FUNCS(signal sigset sigblock sighold strerror)
 AC_CHECK_FUNCS(random lrand48 rand)
 AC_CHECK_FUNCS(getloadavg)
-AC_CHECK_FUNCS(kvm_openfiles)
+AC_CHECK_FUNCS(kvm_openfiles nlist)
 dnl BSDi2 functions differ
 AC_CHECK_FUNCS(statvfs statfs)
 
@@ -885,6 +885,12 @@ AC_CHECK_STRUCT_FOR([
 #include <sys/conf.h>
 #endif
 ],swdevt,sw_nblksenabled)
+
+AC_CHECK_STRUCT_FOR([
+#if HAVE_NLIST_H
+#include <nlist.h>
+#endif
+],nlist,n_value)
 
 dnl attempt to figure out if sysctl is usable
 
