@@ -99,7 +99,7 @@ oid	*transform_type		= NULL;	/* Type of HMAC hash to use.	  */
 /*
  * Prototypes.
  */
-void	usage(FILE *ofp);
+void	usage_to_file(FILE *ofp);
 void	usage_synopsis(FILE *ofp);
 int     get_user_passphrases(void);
 int	snmp_ttyecho(const int fd, const int echo);
@@ -150,7 +150,7 @@ main(int argc, char **argv)
 		case 'h':
 			rval = 0;
 		default:
-			usage(stdout);
+			usage_to_file(stdout);
 			exit(rval);
 		}
 
@@ -161,7 +161,7 @@ main(int argc, char **argv)
 	}  /* endwhile getopt */
 
 	if ((argc > 1)) {
-		usage(stdout);
+		usage_to_file(stdout);
 		exit(1000);
 
 	} else if ( !transform_type_input ) {
@@ -367,7 +367,7 @@ usage_synopsis(FILE *ofp)
 }  /* end usage_synopsis() */
 
 void
-usage(FILE *ofp)
+usage_to_file(FILE *ofp)
 {
 	char	*s;
 
@@ -406,6 +406,15 @@ usage(FILE *ofp)
  */
 
 }  /* end usage() */
+
+
+// this defined for HPUX aCC because the aCC doesn't drop the
+// snmp_parse_args.c functionality if compile with -g, PKY
+
+void usage()
+{
+    usage_to_file(stdout);    
+}
 
 
 

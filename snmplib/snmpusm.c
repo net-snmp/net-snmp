@@ -2624,7 +2624,7 @@ usm_set_password(char *token, char *line)
 void
 usm_set_user_password(struct usmUser *user, char *token, char *line)
 {
-  u_char	 *cp = (u_char *)line;
+  char	 *cp = line;
   u_char	 *engineID = user->engineID;
   size_t	  engineIDLen = user->engineIDLen;
 
@@ -2676,7 +2676,7 @@ usm_set_user_password(struct usmUser *user, char *token, char *line)
     /* convert the password into a key 
      */
     ret = generate_Ku(	user->authProtocol, user->authProtocolLen,
-			cp, strlen((char *)cp),
+			(u_char *)cp, strlen(cp),
 			userKey, &userKeyLen );
   
     if (ret != SNMPERR_SUCCESS) {
