@@ -13,7 +13,6 @@
 #if HAVE_SYS_PARAM_H
 #include <sys/param.h>
 #endif
-#include <sys/socket.h>
 
 #if HAVE_NETINET_IN_H
 #include <netinet/in.h>
