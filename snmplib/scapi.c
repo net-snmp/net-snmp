@@ -360,7 +360,10 @@ sc_hash(const oid * hashtype, size_t hashtypelen, u_char * buf,
     }
     EVP_DigestUpdate(&c->md_ctx, buf, buf_len);
     EVP_DigestFinal(&(c->md_ctx), MAC, MAC_len);
+#ifdef OLD_DES
+    /* openssl 0.9.7 now frees memory in EVP_DigestFinal */
     free(c);
+#endif
     return (rval);
 #else                           /* USE_INTERNAL_MD5 */
 

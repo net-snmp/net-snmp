@@ -20,7 +20,9 @@
 #include <net-snmp/library/snmp_api.h>
 
 #include <net-snmp/library/mib.h>
+#ifndef DISABLE_MIB_LOADING
 #include <net-snmp/library/parse.h>
+#endif
 #include <net-snmp/library/callback.h>
 #include <net-snmp/library/oid_stash.h>
 #include <net-snmp/library/ucd_compat.h>
