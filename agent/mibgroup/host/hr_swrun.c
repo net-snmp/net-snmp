@@ -274,6 +274,7 @@ var_hrswrun(struct variable *vp,
     if (oldpid != pid || proc_buf == NULL) {
 	if (kd == NULL)
 	    kd = kvm_open(NULL, NULL, NULL, O_RDONLY, "hr_swrun");
+	if (kd == NULL) return NULL;
 	if ((proc_buf = kvm_getproc(kd, pid)) == NULL) return NULL;
 	oldpid = pid;
 	when = now;
@@ -591,7 +592,10 @@ Init_HR_SWRun (void)
 			nproc, 0 );
 
 #elif defined(solaris2)
-    auto_nlist(NPROC_SYMBOL, (char *)&nproc, sizeof(int));
+    if (!getKstatInt("system_misc", "nproc", &nproc)) {
+    	current_proc_entry = nproc+1;
+	return;
+    }
     bytes = nproc*sizeof(int);
     if ((proc_table=(int *) realloc(proc_table, bytes)) == NULL ) {
 	current_proc_entry = nproc+1;
@@ -602,6 +606,10 @@ Init_HR_SWRun (void)
 	struct dirent *dp;
 	if (kd == NULL)
 	    kd = kvm_open(NULL, NULL, NULL, O_RDONLY, "hr_swrun");
+	if (kd == NULL) {
+	    current_proc_entry = nproc+1;
+	    return;
+	}
 	f = opendir("/proc");
 	current_proc_entry = 0;
 	while ((dp = readdir(f)) != NULL && current_proc_entry < nproc)

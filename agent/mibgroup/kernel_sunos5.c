@@ -159,6 +159,26 @@ extern "C" {
    interface. :-(*/
 
 
+int getKstatInt(char *statname, char *varname, int *value)
+{
+    kstat_ctl_t *ksc = kstat_open();
+    kstat_t *ks;
+    kid_t kid;
+    kstat_named_t *named;
+    u_long lbolt;
+
+    if (ksc == NULL) return 0;
+    ks = kstat_lookup (ksc, "unix", -1, statname);
+    if (ks == NULL) return 0;
+    kid = kstat_read (ksc, ks, NULL);
+    if (kid == -1) return 0;
+    named = kstat_data_lookup(ks, varname);
+    if (named == NULL) return 0;
+    *value = named->value.ul;
+    kstat_close(ksc);
+    return 1;
+}
+
 int
 getKstat(char *statname, char *varname, void *value)
 {
