@@ -43,7 +43,7 @@ in the format specified in
 .IR variables(5) .
 For example:
 .PP
-snmptest zeus public
+snmptest -c public zeus
 .br
 .BR Variable: " system.sysDescr.0"
 .br

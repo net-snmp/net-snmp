@@ -94,7 +94,7 @@ manual page.
 .SH EXAMPLE
 The command:
 .PP
-snmpbulkwalk -v2c -Os zeus public system
+snmpbulkwalk -v2c -Os -c public zeus system
 .PP
 will retrieve all of the variables under system:
 .PP

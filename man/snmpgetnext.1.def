@@ -38,7 +38,7 @@ remote entity's MIB will be returned.
 .PP
 For example:
 .PP
-snmpgetnext zeus public interfaces.ifTable.ifEntry.ifType.1
+snmpgetnext -c public zeus interfaces.ifTable.ifEntry.ifType.1
 .PP
 will retrieve the variable interfaces.ifTable.ifEntry.ifType.2:
 .PP
