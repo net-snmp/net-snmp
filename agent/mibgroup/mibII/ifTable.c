@@ -57,25 +57,15 @@ init_ifTable(void)
 {
     netsnmp_table_registration_info *table_info;
     netsnmp_handler_registration *reginfo;
-    netsnmp_container *container1, *container2;
+    netsnmp_container *container;
     netsnmp_cache  *cache;
 
     DEBUGMSGTL(("mibII/ifTable", "Initialising Interface Table\n"));
 
-    /*
-     * create the containers. one indexed by ifIndex, the other
-     * indexed by ifName.
-     */
-    container1 = netsnmp_container_find("ifTable:table_container");
-    if (NULL == container1)
-        return;
-    container2 =
-        netsnmp_container_find("ifTable_by_name:ifTable:table_container");
-    if (NULL == container2)
-        return;
-    container2->compare = ifTable_ifentry_compare_name;
-    netsnmp_container_add_index(container1, container2);
-
+     /*
+      * get ifcontainer
+      */
+    container = netsnmp_dal_ifcontainer_init(0);
 
     /*
      * Create the table data structure, and define the indexing....
