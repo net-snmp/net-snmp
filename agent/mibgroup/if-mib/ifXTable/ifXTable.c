@@ -49,7 +49,7 @@ static void     _ifXTable_restore(const char *token, char *buf);
 static int      _ifXTable_save(int majorID, int minorID, void *serverarg,
                                void *clientarg);
 
-extern netsnmp_container * _ifXTable_container_get(void);
+extern netsnmp_container *_ifXTable_container_get(void);
 
 /**
  * Initializes the ifXTable module
@@ -109,12 +109,13 @@ initialize_table_ifXTable(void)
      * call interface initialization code
      */
     _ifXTable_initialize_interface(user_context, flags);
-    netsnmp_assert(NULL!=_ifXTable_container_get());
+    netsnmp_assert(NULL != _ifXTable_container_get());
 
-    register_config_handler(NULL, "ifXTable", _ifXTable_restore, NULL, NULL);
+    register_config_handler(NULL, "ifXTable", _ifXTable_restore, NULL,
+                            NULL);
     rc = snmp_register_callback(SNMP_CALLBACK_LIBRARY,
-                                SNMP_CALLBACK_STORE_DATA,
-                                _ifXTable_save, _ifXTable_container_get());
+                                SNMP_CALLBACK_STORE_DATA, _ifXTable_save,
+                                _ifXTable_container_get());
     if (rc != SNMP_ERR_NOERROR)
         snmp_log(LOG_ERR, "error registering for STORE_DATA callback "
                  "in initialize_table_ifXTable\n");
@@ -352,7 +353,7 @@ int
 ifName_get(ifXTable_rowreq_ctx * rowreq_ctx, char **ifName_val_ptr_ptr,
            size_t *ifName_val_ptr_len_ptr)
 {
-    int tmp_len;
+    int             tmp_len;
    /** we should have a non-NULL pointer and enough storage */
     netsnmp_assert((NULL != ifName_val_ptr_ptr)
                    && (NULL != *ifName_val_ptr_ptr));
@@ -365,7 +366,7 @@ ifName_get(ifXTable_rowreq_ctx * rowreq_ctx, char **ifName_val_ptr_ptr,
 
     /*
      * TODO:231:o: |-> Extract the current value of the ifName data.
-     * set (* ifName_val_ptr_ptr ) and (* ifName_val_ptr_len_ptr ) from rowreq_ctx->data.
+     * set (* ifName_val_ptr_ptr ) and (* ifName_val_ptr_len_ptr ) from rowreq_ctx->data
      */
     /*
      * make sure there is enough space for ifName data
@@ -444,7 +445,7 @@ ifInMulticastPkts_get(ifXTable_rowreq_ctx * rowreq_ctx,
 
     /*
      * TODO:231:o: |-> Extract the current value of the ifInMulticastPkts data.
-     * set (* ifInMulticastPkts_val_ptr ) from rowreq_ctx->data.
+     * set (* ifInMulticastPkts_val_ptr ) from rowreq_ctx->data
      */
     (*ifInMulticastPkts_val_ptr) = rowreq_ctx->data.ifInMulticastPkts;
 
@@ -503,7 +504,7 @@ ifInBroadcastPkts_get(ifXTable_rowreq_ctx * rowreq_ctx,
 
     /*
      * TODO:231:o: |-> Extract the current value of the ifInBroadcastPkts data.
-     * set (* ifInBroadcastPkts_val_ptr ) from rowreq_ctx->data.
+     * set (* ifInBroadcastPkts_val_ptr ) from rowreq_ctx->data
      */
     (*ifInBroadcastPkts_val_ptr) = rowreq_ctx->data.ifInBroadcastPkts;
 
@@ -564,7 +565,7 @@ ifOutMulticastPkts_get(ifXTable_rowreq_ctx * rowreq_ctx,
 
     /*
      * TODO:231:o: |-> Extract the current value of the ifOutMulticastPkts data.
-     * set (* ifOutMulticastPkts_val_ptr ) from rowreq_ctx->data.
+     * set (* ifOutMulticastPkts_val_ptr ) from rowreq_ctx->data
      */
     (*ifOutMulticastPkts_val_ptr) = rowreq_ctx->data.ifOutMulticastPkts;
 
@@ -625,7 +626,7 @@ ifOutBroadcastPkts_get(ifXTable_rowreq_ctx * rowreq_ctx,
 
     /*
      * TODO:231:o: |-> Extract the current value of the ifOutBroadcastPkts data.
-     * set (* ifOutBroadcastPkts_val_ptr ) from rowreq_ctx->data.
+     * set (* ifOutBroadcastPkts_val_ptr ) from rowreq_ctx->data
      */
     (*ifOutBroadcastPkts_val_ptr) = rowreq_ctx->data.ifOutBroadcastPkts;
 
@@ -679,7 +680,7 @@ ifHCInOctets_get(ifXTable_rowreq_ctx * rowreq_ctx,
 
     /*
      * TODO:231:o: |-> copy ifHCInOctets data.
-     * get (* ifHCInOctets_val_ptr ).low and (* ifHCInOctets_val_ptr ).high from rowreq_ctx->data.
+     * get (* ifHCInOctets_val_ptr ).low and (* ifHCInOctets_val_ptr ).high from rowreq_ctx->data
      */
     (*ifHCInOctets_val_ptr).high = rowreq_ctx->data.ifHCInOctets.high;
     (*ifHCInOctets_val_ptr).low = rowreq_ctx->data.ifHCInOctets.low;
@@ -736,7 +737,7 @@ ifHCInUcastPkts_get(ifXTable_rowreq_ctx * rowreq_ctx,
 
     /*
      * TODO:231:o: |-> copy ifHCInUcastPkts data.
-     * get (* ifHCInUcastPkts_val_ptr ).low and (* ifHCInUcastPkts_val_ptr ).high from rowreq_ctx->data.
+     * get (* ifHCInUcastPkts_val_ptr ).low and (* ifHCInUcastPkts_val_ptr ).high from rowreq_ctx->data
      */
     (*ifHCInUcastPkts_val_ptr).high =
         rowreq_ctx->data.ifHCInUcastPkts.high;
@@ -795,7 +796,7 @@ ifHCInMulticastPkts_get(ifXTable_rowreq_ctx * rowreq_ctx,
 
     /*
      * TODO:231:o: |-> copy ifHCInMulticastPkts data.
-     * get (* ifHCInMulticastPkts_val_ptr ).low and (* ifHCInMulticastPkts_val_ptr ).high from rowreq_ctx->data.
+     * get (* ifHCInMulticastPkts_val_ptr ).low and (* ifHCInMulticastPkts_val_ptr ).high from rowreq_ctx->data
      */
     (*ifHCInMulticastPkts_val_ptr).high =
         rowreq_ctx->data.ifHCInMulticastPkts.high;
@@ -854,7 +855,7 @@ ifHCInBroadcastPkts_get(ifXTable_rowreq_ctx * rowreq_ctx,
 
     /*
      * TODO:231:o: |-> copy ifHCInBroadcastPkts data.
-     * get (* ifHCInBroadcastPkts_val_ptr ).low and (* ifHCInBroadcastPkts_val_ptr ).high from rowreq_ctx->data.
+     * get (* ifHCInBroadcastPkts_val_ptr ).low and (* ifHCInBroadcastPkts_val_ptr ).high from rowreq_ctx->data
      */
     (*ifHCInBroadcastPkts_val_ptr).high =
         rowreq_ctx->data.ifHCInBroadcastPkts.high;
@@ -912,7 +913,7 @@ ifHCOutOctets_get(ifXTable_rowreq_ctx * rowreq_ctx,
 
     /*
      * TODO:231:o: |-> copy ifHCOutOctets data.
-     * get (* ifHCOutOctets_val_ptr ).low and (* ifHCOutOctets_val_ptr ).high from rowreq_ctx->data.
+     * get (* ifHCOutOctets_val_ptr ).low and (* ifHCOutOctets_val_ptr ).high from rowreq_ctx->data
      */
     (*ifHCOutOctets_val_ptr).high = rowreq_ctx->data.ifHCOutOctets.high;
     (*ifHCOutOctets_val_ptr).low = rowreq_ctx->data.ifHCOutOctets.low;
@@ -970,7 +971,7 @@ ifHCOutUcastPkts_get(ifXTable_rowreq_ctx * rowreq_ctx,
 
     /*
      * TODO:231:o: |-> copy ifHCOutUcastPkts data.
-     * get (* ifHCOutUcastPkts_val_ptr ).low and (* ifHCOutUcastPkts_val_ptr ).high from rowreq_ctx->data.
+     * get (* ifHCOutUcastPkts_val_ptr ).low and (* ifHCOutUcastPkts_val_ptr ).high from rowreq_ctx->data
      */
     (*ifHCOutUcastPkts_val_ptr).high =
         rowreq_ctx->data.ifHCOutUcastPkts.high;
@@ -1031,7 +1032,7 @@ ifHCOutMulticastPkts_get(ifXTable_rowreq_ctx * rowreq_ctx,
 
     /*
      * TODO:231:o: |-> copy ifHCOutMulticastPkts data.
-     * get (* ifHCOutMulticastPkts_val_ptr ).low and (* ifHCOutMulticastPkts_val_ptr ).high from rowreq_ctx->data.
+     * get (* ifHCOutMulticastPkts_val_ptr ).low and (* ifHCOutMulticastPkts_val_ptr ).high from rowreq_ctx->data
      */
     (*ifHCOutMulticastPkts_val_ptr).high =
         rowreq_ctx->data.ifHCOutMulticastPkts.high;
@@ -1091,7 +1092,7 @@ ifHCOutBroadcastPkts_get(ifXTable_rowreq_ctx * rowreq_ctx,
 
     /*
      * TODO:231:o: |-> copy ifHCOutBroadcastPkts data.
-     * get (* ifHCOutBroadcastPkts_val_ptr ).low and (* ifHCOutBroadcastPkts_val_ptr ).high from rowreq_ctx->data.
+     * get (* ifHCOutBroadcastPkts_val_ptr ).low and (* ifHCOutBroadcastPkts_val_ptr ).high from rowreq_ctx->data
      */
     (*ifHCOutBroadcastPkts_val_ptr).high =
         rowreq_ctx->data.ifHCOutBroadcastPkts.high;
@@ -1155,7 +1156,7 @@ ifLinkUpDownTrapEnable_get(ifXTable_rowreq_ctx * rowreq_ctx,
 
     /*
      * TODO:231:o: |-> Extract the current value of the ifLinkUpDownTrapEnable data.
-     * set (* ifLinkUpDownTrapEnable_val_ptr ) from rowreq_ctx->data.
+     * set (* ifLinkUpDownTrapEnable_val_ptr ) from rowreq_ctx->data
      */
     (*ifLinkUpDownTrapEnable_val_ptr) =
         rowreq_ctx->data.ifLinkUpDownTrapEnable;
@@ -1215,7 +1216,7 @@ ifHighSpeed_get(ifXTable_rowreq_ctx * rowreq_ctx,
 
     /*
      * TODO:231:o: |-> Extract the current value of the ifHighSpeed data.
-     * set (* ifHighSpeed_val_ptr ) from rowreq_ctx->data.
+     * set (* ifHighSpeed_val_ptr ) from rowreq_ctx->data
      */
     (*ifHighSpeed_val_ptr) = rowreq_ctx->data.ifHighSpeed;
 
@@ -1277,7 +1278,7 @@ ifPromiscuousMode_get(ifXTable_rowreq_ctx * rowreq_ctx,
 
     /*
      * TODO:231:o: |-> Extract the current value of the ifPromiscuousMode data.
-     * set (* ifPromiscuousMode_val_ptr ) from rowreq_ctx->data.
+     * set (* ifPromiscuousMode_val_ptr ) from rowreq_ctx->data
      */
     (*ifPromiscuousMode_val_ptr) = rowreq_ctx->data.ifPromiscuousMode;
 
@@ -1332,7 +1333,7 @@ ifConnectorPresent_get(ifXTable_rowreq_ctx * rowreq_ctx,
 
     /*
      * TODO:231:o: |-> Extract the current value of the ifConnectorPresent data.
-     * set (* ifConnectorPresent_val_ptr ) from rowreq_ctx->data.
+     * set (* ifConnectorPresent_val_ptr ) from rowreq_ctx->data
      */
     (*ifConnectorPresent_val_ptr) = rowreq_ctx->data.ifConnectorPresent;
 
@@ -1427,7 +1428,7 @@ ifAlias_get(ifXTable_rowreq_ctx * rowreq_ctx, char **ifAlias_val_ptr_ptr,
 
     /*
      * TODO:231:o: |-> Extract the current value of the ifAlias data.
-     * set (* ifAlias_val_ptr_ptr ) and (* ifAlias_val_ptr_len_ptr ) from rowreq_ctx->data.
+     * set (* ifAlias_val_ptr_ptr ) and (* ifAlias_val_ptr_len_ptr ) from rowreq_ctx->data
      */
     /*
      * make sure there is enough space for ifAlias data
@@ -1506,7 +1507,7 @@ ifCounterDiscontinuityTime_get(ifXTable_rowreq_ctx * rowreq_ctx,
 
     /*
      * TODO:231:o: |-> Extract the current value of the ifCounterDiscontinuityTime data.
-     * set (* ifCounterDiscontinuityTime_val_ptr ) from rowreq_ctx->data.
+     * set (* ifCounterDiscontinuityTime_val_ptr ) from rowreq_ctx->data
      */
     (*ifCounterDiscontinuityTime_val_ptr) =
         rowreq_ctx->data.ifCounterDiscontinuityTime;
@@ -1729,11 +1730,11 @@ ifXTable_commit(ifXTable_rowreq_ctx * rowreq_ctx)
         /*
          * TODO:482:o: |-> commit column ifLinkUpDownTrapEnable.
          */
-            /*
-             * set flag, in case we need to undo ifLinkUpDownTrapEnable
-             */
-            rowreq_ctx->column_set_flags |= FLAG_IFLINKUPDOWNTRAPENABLE;
-        }
+        /*
+         * set flag, in case we need to undo ifLinkUpDownTrapEnable
+         */
+        rowreq_ctx->column_set_flags |= FLAG_IFLINKUPDOWNTRAPENABLE;
+    }
 
     if (save_flags & FLAG_IFPROMISCUOUSMODE) {
         save_flags &= ~FLAG_IFPROMISCUOUSMODE;  /* clear ifPromiscuousMode */
@@ -1759,11 +1760,11 @@ ifXTable_commit(ifXTable_rowreq_ctx * rowreq_ctx)
         /*
          * TODO:482:o: |-> commit column ifAlias.
          */
-            /*
-             * set flag, in case we need to undo ifAlias
-             */
-            rowreq_ctx->column_set_flags |= FLAG_IFALIAS;
-        }
+        /*
+         * set flag, in case we need to undo ifAlias
+         */
+        rowreq_ctx->column_set_flags |= FLAG_IFALIAS;
+    }
 
     if (save_flags) {
         snmp_log(LOG_ERR, "unhandled columns (0x%x) in commit\n",
@@ -1986,7 +1987,7 @@ ifLinkUpDownTrapEnable_set(ifXTable_rowreq_ctx * rowreq_ctx,
 
     /*
      * TODO:461:M: |-> Set ifLinkUpDownTrapEnable value.
-     * set ifLinkUpDownTrapEnable value in rowreq_ctx->data.
+     * set ifLinkUpDownTrapEnable value in rowreq_ctx->data
      */
     rowreq_ctx->data.ifLinkUpDownTrapEnable = ifLinkUpDownTrapEnable_val;
 
@@ -2171,7 +2172,7 @@ ifPromiscuousMode_set(ifXTable_rowreq_ctx * rowreq_ctx,
 
     /*
      * TODO:461:M: |-> Set ifPromiscuousMode value.
-     * set ifPromiscuousMode value in rowreq_ctx->data.
+     * set ifPromiscuousMode value in rowreq_ctx->data
      */
     rowreq_ctx->data.ifPromiscuousMode = ifPromiscuousMode_val;
 
@@ -2374,7 +2375,7 @@ ifAlias_set(ifXTable_rowreq_ctx * rowreq_ctx, char *ifAlias_val_ptr,
 
     /*
      * TODO:461:M: |-> Set ifAlias value.
-     * set ifAlias value in rowreq_ctx->data.
+     * set ifAlias value in rowreq_ctx->data
      */
     memcpy(rowreq_ctx->data.ifAlias, ifAlias_val_ptr,
            ifAlias_val_ptr_len * sizeof(ifAlias_val_ptr[0]));
@@ -2468,12 +2469,11 @@ _ifXTable_row_save(ifXTable_rowreq_ctx * rowreq_ctx, void *type)
      * Octet String: (2 * len) + 2 (2 ASCII chars per byte + "0x")
      * Integers :  12 (ASCII len for smallest negative number)
      */
-    size = sizeof(row_token) + 1 + /* 'ifXTable ' */
-        13 +                       /* ifIndex value + ' ' */
-        13 +                       /* col #, + ':' */
-        rowreq_ctx->data.ifAlias_len +
-        2 +                        /* [0|1] + ' ' */
-        4;                         /* '\n\0' & possible quoting */
+    size = sizeof(row_token) + 1 +      /* 'ifXTable ' */
+        13 +                    /* ifIndex value + ' ' */
+        13 +                    /* col #, + ':' */
+        rowreq_ctx->data.ifAlias_len + 2 +      /* [0|1] + ' ' */
+        4;                      /* '\n\0' & possible quoting */
 
     /*
      * allocate memory for the line
@@ -2549,7 +2549,8 @@ _ifXTable_save(int majorID, int minorID, void *serverarg, void *clientarg)
 }
 
 
-static void     _ifXTable_restore(const char *token, char *buf)
+static void
+_ifXTable_restore(const char *token, char *buf)
 {
     ifXTable_rowreq_ctx *context;
     netsnmp_container *container;
@@ -2557,8 +2558,7 @@ static void     _ifXTable_restore(const char *token, char *buf)
     u_int           col, len;
 
     if (strncmp(token, row_token, sizeof(row_token)) != 0) {
-        snmp_log(LOG_ERR,
-                 "unknown token in _ifXTable_restore\n");
+        snmp_log(LOG_ERR, "unknown token in _ifXTable_restore\n");
         return;
     }
 
@@ -2576,12 +2576,14 @@ static void     _ifXTable_restore(const char *token, char *buf)
     index.oids = NULL;
     buf = read_config_read_objid(buf, &index.oids, &index.len);
     if (NULL == buf) {
-        snmp_log(LOG_ERR, "error reading row index in _ifXTable_restore\n");
+        snmp_log(LOG_ERR,
+                 "error reading row index in _ifXTable_restore\n");
         return;
     }
     context = CONTAINER_FIND(container, &index);
     if (NULL == context) {
-        snmp_log(LOG_ERR, "error finding row index in _ifXTable_restore\n");
+        snmp_log(LOG_ERR,
+                 "error finding row index in _ifXTable_restore\n");
         return;
     }
 
@@ -2602,7 +2604,7 @@ static void     _ifXTable_restore(const char *token, char *buf)
         snmp_log(LOG_ERR, "unexpected format2 in _ifXTable_restore\n");
         return;
     }
-    ++buf;                  /* skip : */
+    ++buf;                      /* skip : */
 
     /*
      * parse value
@@ -2611,7 +2613,7 @@ static void     _ifXTable_restore(const char *token, char *buf)
     context->data.ifAlias_len = sizeof(context->data.ifAlias);
     buf = read_config_read_memory(ASN_OCTET_STR, buf,
                                   (char *) &context->data.ifAlias,
-                                  (size_t *) & context->data.ifAlias_len);
+                                  (size_t *) &context->data.ifAlias_len);
 
     /*
      * extract column, skip ':'
@@ -2622,7 +2624,7 @@ static void     _ifXTable_restore(const char *token, char *buf)
         snmp_log(LOG_ERR, "unexpected format3 in _ifXTable_restore\n");
         return;
     }
-    ++buf;                  /* skip : */
+    ++buf;                      /* skip : */
 
     /*
      * parse value
@@ -2630,8 +2632,8 @@ static void     _ifXTable_restore(const char *token, char *buf)
     DEBUGMSGTL(("ifXTable:restore", "parsing column %d\n", col));
     len = sizeof(context->data.ifLinkUpDownTrapEnable);
     buf = read_config_read_memory(ASN_INTEGER, buf,
-                                  (char *) &context->data.ifLinkUpDownTrapEnable,
-                                  &len);
+                                  (char *) &context->data.
+                                  ifLinkUpDownTrapEnable, &len);
 
     /*
      * if the pointer is NULL and we didn't reach the
