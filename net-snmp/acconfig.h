@@ -123,6 +123,9 @@
 /* Where is the uname command */
 #define UNAMEPROG "/bin/uname"
 
+/* pattern for temporary file names */
+#define NETSNMP_TEMP_FILE_PATTERN "/tmp/snmpdXXXXXX"
+
 /* testing code sections. */
 #undef SNMP_TESTING_CODE 
 
