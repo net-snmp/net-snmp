@@ -8,7 +8,7 @@
 char *find_field();
 char *skip_white();
 
-#ifdef CACHETIME
+#ifdef EXCACHETIME
 static long cachetime;
 #endif
 
@@ -79,7 +79,7 @@ int sh_count_procs(procname)
     }
   fclose(file);
   close(fd);
-#ifndef CACHETIME
+#ifndef EXCACHETIME
   if (ex.pid && waitpid(ex.pid,&ex.result,0) < 0) {
     perror("waitpid():");
   }
@@ -125,7 +125,7 @@ int exec_command(ex)
   }
   fclose(file);
   close(fd);
-#ifndef CACHETIME
+#ifndef EXCACHETIME
   if (ex->pid && waitpid(ex->pid,&ex->result,0) < 0) {
     perror("waitpid():");
   }
@@ -143,23 +143,23 @@ int get_exec_output(ex)
   FILE *ret;
   FILE *tmpout;
   char ctmp[STRMAX], *cptr1, *cptr2, argvs[STRMAX], **argv, **aptr;
-#ifdef CACHETIME
+#ifdef EXCACHETIME
   char cache[MAXCACHESIZE];
   long cachebytes;
-  static long curtime;
+  long curtime;
   static struct extensible excompare;
   static char lastcmd[STRMAX];
   int cfd;
   int lastresult;
 #endif
 
-#ifdef CACHETIME
+#ifdef EXCACHETIME
 #ifdef hpux
   curtime = time();
 #else
   curtime = time(NULL);
 #endif
-  if (curtime > (cachetime + CACHETIME) ||
+  if (curtime > (cachetime + EXCACHETIME) ||
       strcmp(ex->command, lastcmd) != 0) {
     strcpy(lastcmd,ex->command);
     cachetime = curtime;
@@ -208,7 +208,7 @@ int get_exec_output(ex)
       {
         close(fd[1]);
 /*      ret = fdopen(fd[0],"r"); */
-#ifdef CACHETIME
+#ifdef EXCACHETIME
         unlink(CACHEFILE);
         if ((cfd = open(CACHEFILE,O_WRONLY|O_TRUNC|O_CREAT,0644)) < 0) {
           perror("open");
@@ -229,7 +229,7 @@ int get_exec_output(ex)
         return(fd[0]);
 #endif
       }
-#ifdef CACHETIME
+#ifdef EXCACHETIME
   }
   else {
       ex->result = lastresult;
@@ -261,7 +261,7 @@ clear_cache(action, var_val, var_val_type, var_val_len, statP, name, name_len)
   }
   asn_parse_int(var_val,&tmplen,&var_val_type,&tmp,sizeof(int));
   if (tmp == 1 && action == COMMIT) {
-#ifdef CACHETIME
+#ifdef EXCACHETIME
     cachetime = 0;                      /* reset the cache next read */
 #endif 
   } 
