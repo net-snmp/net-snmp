@@ -3,7 +3,7 @@ AC_INIT(agent/mibgroup/extensible.c)
 AC_CONFIG_HEADER(config.h)
 
 AC_ARG_ENABLE(debugging,[  --enable-debugging              Outputs extra debugging information.],AC_DEFINE(DODEBUG))
-AC_ARG_WITH(shared-libraries,[  --with-shared-libraies    Compile and install shared libraries.],with_shared="yes",with_shared="no")
+AC_ARG_ENABLE(shared,[  --enable-shared                 Compile and install shared libraries.],with_shared="yes",with_shared="no")
 AC_ARG_WITH(defaults,[  --with-defaults                 Use defaults for prompted values.],defaults="yes",defaults="no")
 AC_ARG_WITH(root-access,[  --without-root-access           Agent won't require root access.])
 AC_ARG_WITH(sys_contact,[  --with-sys-contact=\"who@where\"  Default system contact.
@@ -259,13 +259,14 @@ else
     SHLIB_LD_CMD="ar cr"
     SHLIB_LDCONFIG_CMD='$(RANLIB)'
 fi
-
 AC_SUBST(CC_RUNTIME_ARG)
 AC_SUBST(SHLIB_CFLAGS)
 AC_SUBST(SHLIB_EXTENSION)
 AC_SUBST(SHLIB_LDCONFIG_CMD)
 AC_SUBST(SHLIB_LD_CMD)
 AC_PROG_RANLIB
+AC_MSG_CHECKING(for how to build the library)
+AC_MSG_RESULT([EXTENISON=$SHLIB_EXTENSION, LD=$SHLIB_LD_CMD, LDCONFIG=$SHLIB_LDCONFIG_CMD, RANLIB=$RANLIB, CCFLAGS=$SHLIB_CFLAGS $CC_RUNTIME_ARG])
 
 dnl
 dnl Do hairy agent module processing.
