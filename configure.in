@@ -28,7 +28,7 @@ AC_AIX
 
 dnl system check
 AC_CANONICAL_SYSTEM
-CFLAGS="$CFLAGS -D`echo $target_os | sed 's/\..*//'`"
+CFLAGS="$CFLAGS -D`echo $target_os | sed 's/[.-_].*//'`"
 
 AC_MSG_CHECKING(for additional cpp flags)
 dnl gcc extra CPPFLAGS
