@@ -71,15 +71,15 @@
 
   A simplified version of the pseudo-code looks like this:
 
-     ${table}_init_loop_ctx(loop)
-     ${table}_get_first(loop,data)
+     ${table}_loop_init_context(loop)
+     ${table}_loop_get_first(loop,data)
      while( no_error ) {
         if( best_match(data, key)
-           ${table}_save_position(loop,pos);
-        ${table}_get_next(loop,data)
+           ${table}_loop_save_position(loop,pos);
+        ${table}_loop_get_next(loop,data)
      }
-     ${table}_get_data(pos,data)
-     ${table}_cleanup_loop_ctx(loop)
+     ${table}_loop_get_data(pos,data)
+     ${table}_loop_cleanup_context(loop)
 ##
 ## end sync
 ##
@@ -90,7 +90,7 @@
 ########################################################################
   Defining context for the loop
   -----------------------------
-    TODO : typedef ${table}_loop_ctx
+    TODO : typedef ${table}_loop_context
     WHERE: ${table}_data_access.h
 
     @if $mfd_readme_verbose != 0@
@@ -121,19 +121,19 @@
 
       Linked list
       -----------
-          typedef list_node ${table}_loop_ctx;
+          typedef list_node ${table}_loop_context;
 
       Array
       -----
-          typedef integer ${table}_loop_ctx;
+          typedef integer ${table}_loop_context;
 
       File
       ----
-          typedef struct ${table}_loop_ctx_s {
+          typedef struct ${table}_loop_context_s {
                char *      file_name;
                FILE *      f;
                char        line[128];
-          } ${table}_loop_ctx;
+          } ${table}_loop_context;
 
   @end@
 
@@ -141,11 +141,11 @@
   Initialization
   --------------
     TODO : Initialization
-    FUNC : ${table}_init_data
+    FUNC : ${table}_loop_init_data
     WHERE: ${table}_data_access.c
 
     @if $mfd_readme_verbose != 0@
-    The ${table}_init_data function will be called during startup to
+    The ${table}_loop_init_data function will be called during startup to
     allow for any initialization needed for the data access routines.
 
     @end@
@@ -154,7 +154,7 @@
   Preparing for the loop
   ----------------------
     TODO : initialize loop context
-    FUNC : ${table}_init_loop_ctx
+    FUNC : ${table}_loop_init_context
     WHERE: ${table}_data_access.c
 
     @if $mfd_readme_verbose != 0@
@@ -165,7 +165,7 @@
 ##
     This function will be called before the start of a new itertion over
     the data. The loop context that is initialized here will be passed to
-    ${table}_get_first and ${table}_get_next.
+    ${table}_loop_get_first and ${table}_loop_get_next.
   
     Set the loop context variable ref->itr_ctx so that the iteration
     functions (get_first and get_next) can locate the apropriate data
@@ -174,7 +174,7 @@
 ## end sync
 ##
 
-    The primary purpose of the init_loop_ctx call  is to initialize
+    The primary purpose of the loop_init_context call  is to initialize
     the loop context data (ref). Here are some simple examples, based on the
     earlier example loop contexts.
 
@@ -190,7 +190,7 @@
 
       File
       ----
-          ref->itr_ctx = SNMP_MALLOC_TYPEDEF(${table}_loop_ctx);
+          ref->itr_ctx = SNMP_MALLOC_TYPEDEF(${table}_loop_context);
           /* error checking here */
           ref->itr_ctx->file_name = (char*) reg->mfd_user_ctx;
           ref->itr_ctx->f = fopen( ref->itr_ctx->file_name, "r+" );
@@ -201,7 +201,7 @@
   The Loop
   --------
     TODO : return raw data
-    FUNC : ${table}_get_first
+    FUNC : ${table}_loop_get_first
     WHERE: ${table}_data_access.c
 
     @if $mfd_readme_verbose != 0@
@@ -220,7 +220,7 @@
     some other existing data, or peforming calculations to derive the data),
     then you should limit yourslef to setting the indexes. Extracting the
     can be put off until the desired row is found See the notes on
-    ${table}_get_data().
+    ${table}_loop_get_data().
 
     Note that this function does not correspond to a SNMP GET pdu, and
     you should return data items in whatever order they are already in.
@@ -251,7 +251,7 @@
     @end@
 
     TODO : return raw data
-    FUNC : ${table}_get_next
+    FUNC : ${table}_loop_get_next
     WHERE: ${table}_data_access.c
 
     @if $mfd_readme_verbose != 0@
@@ -295,7 +295,7 @@
   Updating the Index
   ------------------
     TODO : update index for the raw data
-    FUNC : ${table}_update_idx
+    FUNC : ${table}_loop_update_idx
     WHERE: ${table}_data_access.c
 
     @if $mfd_readme_verbose == 1@
@@ -308,7 +308,7 @@
   Saving a position in the loop
   -----------------------------
     TODO : Saving a position in the loop
-    FUNC : ${table}_save_position
+    FUNC : ${table}_loop_save_position
     WHERE: ${table}_data_access.c
 
     @if $mfd_readme_verbose != 0@
@@ -326,7 +326,7 @@
   
     At the end of the loop, when the best match has been found, the saved
     loop context will be used to get the data for the row by calling
-    ${table}_get_data().
+    ${table}_loop_get_data().
 @if $m2c_data_transient != 0@ # persistent
   
     Since your data is transient, you need to make a copy of it before
@@ -342,7 +342,7 @@
   Returning Data For an Index
   ---------------------------
     TODO : copy transient raw data to generated structure
-    FUNC : ${table}_get_data
+    FUNC : ${table}_loop_get_data
     WHERE: ${table}_data_access.c
 
     @if $mfd_readme_verbose != 0@
@@ -353,7 +353,7 @@
 ##
     At the end of the loop, when the best match has been found, the saved
     loop context will be used to get the data for the row by calling
-    ${table}_get_data().
+    ${table}_loop_get_data().
 ##
 ## end sync
 ##
@@ -364,7 +364,7 @@
   Cleaning up after the loop
   --------------------------
     TODO : release any allocated memory
-    FUNC : ${table}_cleanup_loop_ctx
+    FUNC : ${table}_loop_cleanup_context
     WHERE: ${table}_data_access.c
 
     @if $mfd_readme_verbose != 0@
@@ -378,7 +378,7 @@
 ##
 ## end sync
 ##
-    The primary purpose of the cleanup_loop_ctx call is to release any memory
+    The purpose of the loop_cleanup_context call is to release any memory
     allocated for the loop context data. Here are some simple examples, based
     on the earlier example loop contexts.
 
