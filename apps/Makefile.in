@@ -40,7 +40,10 @@ USELIBS		= ../snmplib/libnetsnmp.$(LIB_EXTENSION)$(LIB_VERSION)
 USETRAPLIBS	= ../agent/libnetsnmpagent.$(LIB_EXTENSION)$(LIB_VERSION) ../agent/libnetsnmpmibs.$(LIB_EXTENSION)$(LIB_VERSION) ../agent/helpers/libnetsnmphelpers.$(LIB_EXTENSION)$(LIB_VERSION) $(USELIBS)
 LOCAL_LIBS	= -L../snmplib -L../agent -L../agent/helpers
 LIBS		= $(USELIBS) @LIBS@
-TRAPLIBS	= $(USETRAPLIBS) @AGENTLIBS@
+TRAPDWITHAGENT  = $(USETRAPLIBS) @AGENTLIBS@
+TRAPDWITHOUTAGENT = 
+# this will be set by configure to one of the above 2 lines
+TRAPLIBS	= @TRAPLIBS@
 
 CPPFLAGS	= -I$(top_srcdir)/include -I../include \
 		  -I.. -I$(srcdir)/.. -I$(srcdir)/../snmplib \
