@@ -388,5 +388,7 @@ EXPORTS
 	netsnmp_get_list_node
 	netsnmp_remove_loghandler
 	netsnmp_register_loghandler
-;	logh_head				DATA
+	get_logh_head
+	dbg_tokens				DATA
+	debug_num_tokens		DATA
 
