@@ -31,6 +31,8 @@ typedef struct ${context}_mib_index_s {
         /** 128 - $m2c_gi_others(other indexes) - oid length($node.oidlength) = $m2c_node_maxlen */
 @        end@
 @        eval $m2c_gi_len = $m2c_gi_len + $m2c_node_maxlen + 1@
+@    elsif "$node.type" eq "ASN_IPADDRESS"@
+@        eval $m2c_gi_len = $m2c_gi_len + 4@
 @    else@
 @        eval $m2c_gi_len = $m2c_gi_len + 1@
 @    end@ # needlength
@@ -52,8 +54,8 @@ typedef struct ${context}_mib_index_s {
 @        if $m2c_gi_len > 126@
 @            eval $m2c_gi_len = 126 - $context.oidlength@
 @        end@
-@    else@
-@        eval $m2c_gi_len = count_indexes($context)@
+##@    else@
+##@        eval $m2c_gi_len = count_indexes($context)@
 @    end@
 */
 #define MAX_${context}_IDX_LEN     $m2c_gi_len
