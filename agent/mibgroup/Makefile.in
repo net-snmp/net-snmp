@@ -10,10 +10,9 @@ LDFLAGS=@LDFLAGS@
 
 CC = @CC@ $(CPPFLAGS)
 
-OBJS = system.o interfaces.o at.o ip.o icmp.o tcp.o udp.o snmp.o
-SRCS = system.c interfaces.c at.c ip.c icmp.c tcp.c udp.c snmp.c
+OBJS = @module_list_o@
+SRCS = @module_list_c@
  
-
 all: $(OBJS)
 
 TAGS: $(SRCS)
