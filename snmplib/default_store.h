@@ -9,10 +9,14 @@ extern "C" {
 #define DS_MAX_IDS 3
 #define DS_MAX_SUBIDS 10
 
+/* begin storage definitions */
+/* These definitions correspond with the "storid" argument to the API */
 #define DS_LIBRARY_ID     0
 #define DS_APPLICATION_ID 1
 #define DS_TOKEN_ID       2
 
+/* These definitions correspond with the "which" argument to the API,
+   when the storeid argument is DS_LIBRARY_ID */
 /* library booleans */
 #define DS_LIB_MIB_ERRORS          0
 #define DS_LIB_SAVE_MIB_DESCRS     1
@@ -37,6 +41,7 @@ extern "C" {
 #define DS_LIB_OPTIONALCONFIG  5
 #define DS_LIB_APPTYPE         6
 
+/* end storage definitions */
 
 struct ds_read_config {
    u_char type;
