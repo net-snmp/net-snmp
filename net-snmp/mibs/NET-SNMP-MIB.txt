@@ -29,12 +29,12 @@ netSnmp MODULE-IDENTITY
 --
 
 netSnmpObjects              OBJECT IDENTIFIER ::= {netSnmp 1}
-netSnmpExamples             OBJECT IDENTIFIER ::= {netSnmp 2}
+-- netSnmpExamples             OBJECT IDENTIFIER ::= {netSnmp 2}
 netSnmpEnumerations         OBJECT IDENTIFIER ::= {netSnmp 3}
 netSnmpModuleIDs            OBJECT IDENTIFIER ::= {netSnmpEnumerations 1}
 netSnmpAgentOIDs            OBJECT IDENTIFIER ::= {netSnmpEnumerations 2}
 netSnmpDomains              OBJECT IDENTIFIER ::= {netSnmpEnumerations 3}
-netSnmpExperimental         OBJECT IDENTIFIER ::= {netSnmp 999}
+netSnmpExperimental         OBJECT IDENTIFIER ::= {netSnmp 9999}
 
 
 --
