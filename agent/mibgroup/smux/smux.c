@@ -63,6 +63,7 @@
 #include "snmp_api.h"
 #include "snmp_impl.h"
 #include "smux.h"
+#include "snmp_debug.h"
 
 long smux_long;
 u_long smux_ulong;
