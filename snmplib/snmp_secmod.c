@@ -83,14 +83,11 @@ register_sec_mod(int secmod, const char *modname,
 int
 unregister_sec_mod(int secmod) {
     struct snmp_secmod_list *sptr, *lptr;
-    SecmodFree *releaseme;
     
     for(sptr = registered_services, lptr = NULL; sptr;
         lptr = sptr, sptr = sptr->next) {
         if (sptr->securityModel == secmod) {
             lptr->next = sptr->next;
-            releaseme = sptr->secDef->free_secmod;
-            (*releaseme)(sptr->secDef);
             free(sptr);
             return SNMPERR_SUCCESS;
         }
