@@ -1679,6 +1679,7 @@ int Interface_Scan_Get_Count (void)
 	if (!Interface_Count || (time_now > scan_time + 60)) {
             scan_time = time_now;
 	    Interface_Scan_Init();
+	    Interface_Count = 0;
 	    while (Interface_Scan_Next(NULL, NULL, NULL, NULL) != 0) {
 		Interface_Count++;
 	    }
