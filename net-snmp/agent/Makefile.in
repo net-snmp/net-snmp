@@ -40,6 +40,7 @@ BROKEINSTALL= \
 	mibgroup/util_funcs.h \
 	mibgroup/mibincl.h \
 	mibgroup/ucd-snmp/dlmod.h \
+	mibgroup/utilities/execute.h \
 	mibgroup/header_complex.h
 
 INSTALLUCDHEADERS= \
