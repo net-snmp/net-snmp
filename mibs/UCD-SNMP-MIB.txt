@@ -21,6 +21,7 @@ ucdavis          OBJECT IDENTIFIER ::= { enterprises 2021 }
 -- lockd          OBJECT IDENTIFIER ::= { ucdavis 5 }
 -- disk           OBJECT IDENTIFIER ::= { ucdavis 6 }
 -- load           OBJECT IDENTIFIER ::= { ucdavis 7 }
+-- vmstat         OBJECT IDENTIFIER ::= { ucdavis 8 }
 -- version        OBJECT IDENTIFIER ::= { ucdavis 100 }
 -- snmperrs       OBJECT IDENTIFIER ::= { ucdavis 101 }
 -- mibRegistryTable    OBJECT IDENTIFIER ::= { ucdavis 102 }
@@ -580,6 +581,137 @@ loadaveErrMessage OBJECT-TYPE
 	DESCRIPTION
 		"An error message describing the problem (if one exists)."
 	::= { loadaves 101 }
+
+vmstat OBJECT-TYPE
+	SYNTAX Vmstat
+	ACCESS not-accessible
+	STATUS mandatory
+	DESCRIPTION
+		"Paging, block IO and cpu information."
+	INDEX { vmstatIndex }
+	::= { ucdavis 8 }
+
+
+Vmstat ::= SEQUENCE {
+   vmstatIndex  INTEGER,
+   vmstatErrorName  DisplayString,
+   vmstatSwapin  INTEGER,
+   vmstatSwapout  INTEGER,
+   vmstatIosent  INTEGER,
+   vmstatIoreceive  INTEGER,
+   vmstatsysinterrupts  INTEGER,
+   vmstatsyscontext  INTEGER,
+   vmstatcpuuser  INTEGER,
+   vmstatcpusystem  INTEGER,
+   vmstatcpuidle  INTEGER,
+   vmstatErrorFlag  INTEGER,
+   vmstatErrMessage  DisplayString
+}
+
+vmstatIndex OBJECT-TYPE
+	SYNTAX INTEGER
+	ACCESS read-only
+	STATUS mandatory
+	DESCRIPTION
+		"Reference Index for each observed vmstat."
+	::= { vmstat 1 }
+
+vmstatErrorName OBJECT-TYPE
+	SYNTAX DisplayString (SIZE (0..255))
+	ACCESS read-only
+	STATUS mandatory
+	DESCRIPTION
+		"The list of vmstat names we're Counting."
+	::= { vmstat 2 }
+
+vmstatSwapin OBJECT-TYPE
+	SYNTAX INTEGER
+	ACCESS read-only
+	STATUS mandatory
+	DESCRIPTION
+		"Amount of memory swapped in from disk (kB/s)."
+	::= { vmstat 3 }
+
+vmstatSwapout OBJECT-TYPE
+	SYNTAX INTEGER
+	ACCESS read-only
+	STATUS mandatory
+	DESCRIPTION
+		"Amount of memory swapped to disk (kB/s)."
+	::= { vmstat 4 }
+
+vmstatIosent OBJECT-TYPE
+	SYNTAX INTEGER
+	ACCESS read-only
+	STATUS mandatory
+	DESCRIPTION
+		"Blocks sent to a block device (blocks/s)."
+	::= { vmstat 5 }
+
+vmstatIoreceive OBJECT-TYPE
+	SYNTAX INTEGER
+	ACCESS read-only
+	STATUS mandatory
+	DESCRIPTION
+		"Blocks received from a block device (blocks/s)."
+	::= { vmstat 6 }
+
+vmstatsysinterrupts OBJECT-TYPE
+	SYNTAX INTEGER
+	ACCESS read-only
+	STATUS mandatory
+	DESCRIPTION
+		"The number of interrupts per second, including the clock."
+	::= { vmstat 7 }
+
+vmstatsyscontext OBJECT-TYPE
+	SYNTAX INTEGER
+	ACCESS read-only
+	STATUS mandatory
+	DESCRIPTION
+		"The number of context switches per second."
+	::= { vmstat 8 }
+
+vmstatcpuuser OBJECT-TYPE
+	SYNTAX INTEGER
+	ACCESS read-only
+	STATUS mandatory
+	DESCRIPTION
+		"percentages of user CPU time."
+	::= { vmstat 9 }
+
+vmstatcpusystem OBJECT-TYPE
+	SYNTAX INTEGER
+	ACCESS read-only
+	STATUS mandatory
+	DESCRIPTION
+		"percentages of system CPU time."
+	::= { vmstat 10 }
+
+vmstatcpuidle OBJECT-TYPE
+	SYNTAX INTEGER
+	ACCESS read-only
+	STATUS mandatory
+	DESCRIPTION
+		"percentages of idle CPU time."
+	::= { vmstat 11 }
+
+vmstatErrorFlag OBJECT-TYPE
+        SYNTAX INTEGER
+        ACCESS read-only
+        STATUS mandatory
+        DESCRIPTION
+                "Error flag."
+        ::= { vmstat 100 }
+
+vmstatErrMessage OBJECT-TYPE
+     SYNTAX  DisplayString
+     ACCESS  read-only
+     STATUS  mandatory
+     DESCRIPTION  
+          "Error message describing the errorflag condition"
+     ::= { vmstat 101 } 
+
 
 version	OBJECT-TYPE
 	SYNTAX Version
