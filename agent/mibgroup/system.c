@@ -34,6 +34,8 @@ char sysLocation[128] = SYS_LOC;
 oid version_id[] = {EXTENSIBLEMIB,AGENTID,OSTYPE};
 int version_id_len = sizeof(version_id)/sizeof(version_id[0]);
 
+struct timeval starttime;
+
 int writeVersion __P((int, u_char *,u_char, int, u_char *,oid*, int));
 int writeSystem __P((int, u_char *,u_char, int, u_char *,oid*, int));
 int header_system __P((struct variable *,oid *, int *, int, int *, int (**write) __P((int, u_char *, u_char, int, u_char *,oid *,int)) ));
@@ -81,6 +83,11 @@ void init_system()
   sysName[strlen(sysName)-1] = 0; /* chomp new line */
 #endif /* HAVE_UNAME */
 #endif /* HAVE_GETHOSTNAME */
+
+  gettimeofday(&starttime, 0);
+  starttime.tv_sec--;
+  starttime.tv_usec += 1000000L;
+
 }
 
 #define MATCH_FAILED	1
@@ -134,6 +141,9 @@ var_system(vp, name, length, exact, var_len, write_method)
     int     *var_len;
     int     (**write_method) __P((int, u_char *,u_char, int, u_char *,oid*, int));
 {
+
+  struct timeval now, diff;
+
     if (header_system(vp, name, length, exact, var_len, write_method) == MATCH_FAILED )
 	return NULL;
 
@@ -146,8 +156,17 @@ var_system(vp, name, length, exact, var_len, write_method)
             *var_len = sizeof(version_id);
             return (u_char *)version_id;
         case UPTIME:
-            long_return = (u_long)  get_uptime();
-            return (u_char *)&long_return;
+              gettimeofday(&now, 0);
+              now.tv_sec--;
+              now.tv_usec += 1000000L;
+              diff.tv_sec = now.tv_sec - starttime.tv_sec;
+              diff.tv_usec = now.tv_usec - starttime.tv_usec;
+              if (diff.tv_usec > 1000000L){
+                diff.tv_usec -= 1000000L;
+                diff.tv_sec++;
+              }
+              long_return = ((diff.tv_sec * 100) + (diff.tv_usec / 10000));
+              return ((u_char *) &long_return);
         case SYSCONTACT:
             *var_len = strlen(sysContact);
             *write_method = writeSystem;
