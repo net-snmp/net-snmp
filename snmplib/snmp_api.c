@@ -3318,8 +3318,12 @@ snmp_sess_timeout(void *sessp)
         if ((timercmp(&rp->expire, &now, <))){
     	/* this timer has expired */
     	if (rp->retries >= sp->retries){
-    	    callback = (rp->callback ? rp->callback : sp->callback);
-    	    magic = (rp->cb_data ? rp->cb_data : sp->callback_magic);
+	    callback = sp->callback;
+	    magic = sp->callback_magic;
+	    if (rp->callback) {
+              callback = rp->callback;
+	      magic = rp->cb_data;
+	    }
     	    /* No more chances, delete this entry */
     	    if (callback)
 		callback(TIMED_OUT, sp, rp->pdu->reqid, rp->pdu, magic);
