@@ -3818,7 +3818,7 @@ static u_int statistics[MAX_STATS];
 u_int
 snmp_increment_statistic(int which)
 {
-  if (which >= 0 && which <= MAX_STATS) {
+  if (which >= 0 && which < MAX_STATS) {
     statistics[which]++;
     return statistics[which];
   }
@@ -3828,7 +3828,7 @@ snmp_increment_statistic(int which)
 u_int
 snmp_increment_statistic_by(int which, int count)
 {
-  if (which >= 0 && which <= MAX_STATS) {
+  if (which >= 0 && which < MAX_STATS) {
     statistics[which] += count;
     return statistics[which];
   }
@@ -3838,7 +3838,7 @@ snmp_increment_statistic_by(int which, int count)
 u_int
 snmp_get_statistic(int which)
 {
-  if (which >= 0 && which <= MAX_STATS)
+  if (which >= 0 && which < MAX_STATS)
     return statistics[which];
   return 0;
 }
