@@ -13,7 +13,7 @@ HEADER SNMPv2c getnext of system.sysUpTime
 
 STARTAGENT
 
-CAPTURE "snmpgetnext $SNMP_SNMPD_PORT -v 2c localhost testcommunity system.sysUpTime"
+CAPTURE "snmpgetnext $SNMP_FLAGS -v 2c localhost testcommunity system.sysUpTime"
 
 STOPAGENT
 
