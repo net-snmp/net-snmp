@@ -439,8 +439,9 @@ void
 shutdown_snmpTargetParamsEntry(void)
 {
   struct targetParamTable_struct *curr_struct;
-  char line[1024], *tcptr;
+  char line[1024];
 
+  strcpy(line, "");
   if ( (curr_struct = aPTable) != 0) {
     while (curr_struct != 0) {
       if ( (curr_struct->storageType == SNMP_STORAGE_NONVOLATILE || 
@@ -448,13 +449,11 @@ shutdown_snmpTargetParamsEntry(void)
 	                        &&
 	   (curr_struct->rowStatus == SNMP_ROW_ACTIVE ||
 	    curr_struct->rowStatus == SNMP_ROW_NOTINSERVICE) ) {
-	tcptr = line;
-	tcptr += sprintf(tcptr, "targetParams %s %i %i %s %i %i %i\n",
+	sprintf(&line[strlen(line)], "targetParams %s %i %i %s %i %i %i\n",
 			 curr_struct->paramName, curr_struct->mpModel,
 			 curr_struct->secModel,  curr_struct->secName,
 			 curr_struct->secLevel,  curr_struct->storageType,
 			 curr_struct->rowStatus  );
-        *tcptr = '\0';
 
 	/* store to file */
 	snmpd_store_config(line);
