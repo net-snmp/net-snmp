@@ -694,7 +694,8 @@ tcpTable_load(netsnmp_cache *cache, void *vmagic)
         if (nnew->state == 5 /* established */ ||
             nnew->state == 8 /*  closeWait  */ )
             tcp_estab++;
-        memcpy(&(nnew->pcb), ((struct xinpcb *) xig)->xt_inp, sizeof(struct inpcb));
+        memcpy(&(nnew->pcb), &(((struct xinpcb *) xig)->xt_inp),
+                           sizeof(struct inpcb));
 
 	nnew->inp_next = tcp_head;
 	tcp_head   = nnew;
@@ -717,13 +718,13 @@ tcpTable_load(netsnmp_cache *cache, void *vmagic)
 {
     struct inpcbtable table;
     struct inpcb   *entry;
-    struct tcpcb   *tcpcb;
+    struct tcpcb    tcpcb;
     netsnmp_inpcb  *nnew;
     int      StateMap[] = { 1, 2, 3, 4, 5, 8, 6, 10, 9, 7, 11 };
 
     tcpTable_free();
 
-    if (!auto_nlist(TCB_SYMBOL, (char *) &table, sizeof(table))) {
+    if (!auto_nlist(TCP_SYMBOL, (char *) &table, sizeof(table))) {
         DEBUGMSGTL(("mibII/tcpTable", "Failed to read inpcbtable\n"));
         return -1;
     }
