@@ -1272,14 +1272,14 @@ static void Route_Scan_Reload (void)
 static int qsort_compare(const void *v1,
 			 const void *v2)
 {
-	RTENTRY **r1 = (RTENTRY **) v1;
-	RTENTRY **r2 = (RTENTRY **) v2;
+	const RTENTRY **r1 = (const RTENTRY **) v1;
+	const RTENTRY **r2 = (const RTENTRY **) v2;
 #if NEED_KLGETSA
-	register u_long dst1 = ntohl(klgetsa((struct sockaddr_in *)(*r1)->rt_dst)->sin_addr.s_addr);
-	register u_long dst2 = ntohl(klgetsa((struct sockaddr_in *)(*r2)->rt_dst)->sin_addr.s_addr);
+	register u_long dst1 = ntohl(klgetsa((const struct sockaddr_in *)(*r1)->rt_dst)->sin_addr.s_addr);
+	register u_long dst2 = ntohl(klgetsa((const struct sockaddr_in *)(*r2)->rt_dst)->sin_addr.s_addr);
 #else
-	register u_long dst1 = ntohl(((struct sockaddr_in *) &((*r1)->rt_dst))->sin_addr.s_addr);
-	register u_long dst2 = ntohl(((struct sockaddr_in *) &((*r2)->rt_dst))->sin_addr.s_addr);
+	register u_long dst1 = ntohl(((const struct sockaddr_in *) &((*r1)->rt_dst))->sin_addr.s_addr);
+	register u_long dst2 = ntohl(((const struct sockaddr_in *) &((*r2)->rt_dst))->sin_addr.s_addr);
 #endif /* NEED_KLGETSA */
 
 	/*
