@@ -1,4 +1,4 @@
-#!/usr/local/bin/perl
+#!/usr/bin/perl
 
 foreach $i (qw(snmplib/Makefile agent/Makefile agent/mibgroup/Makefile apps/Makefile apps/snmpnetstat/Makefile)) {
     print STDERR "processing $i... ";
