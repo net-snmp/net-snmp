@@ -1233,9 +1233,6 @@ receive(void)
                 svp->tv_usec -= ONE_SEC;
                 svp->tv_sec++;
             }
-            if (log_addresses && lastAddrAge++ > 600) {
-                netsnmp_addrcache_age();
-            }
         }
 
         /*
