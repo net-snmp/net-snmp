@@ -36,7 +36,7 @@ while ($#ARGV > -1) {
 #===========================================================================
 # Get host records from database and process
 
-( $cursor = $dbh->prepare( "SELECT * FROM hosts" ) )
+( $cursor = $dbh->prepare( "SELECT distinct host FROM hosttables" ) )
     or die "\nnot ok: $DBI::errstr\n";
 ( $cursor->execute )
     or print( "\tnot ok: $DBI::errstr\n" );
@@ -44,9 +44,17 @@ while ($#ARGV > -1) {
 while (  $hostrow = $cursor->fetchrow_hashref ) {
 
     #set up the session
-    my $host = $hostrow->{'name'};
+    my $host = $hostrow->{'host'};
     print " starting $host\n" if ($verbose);
-    my $sess = new SNMP::Session (  DestHost => $host, Community => $hostrow->{'community'}, Timeout => 5000000 );
+    my $x = $dbh->prepare("select community from hosts where name = '$host'");
+    my $y = $x->execute();
+    my $comm = "public";
+    print "$host...$y\n";
+    if (defined($y) && "$y" ne "0E0") {
+	$comm =  ${$x->fetchrow_hashref}{'community'};
+    }
+    print STDERR "$host: $comm\n";
+    my $sess = new SNMP::Session (  DestHost => $host, Community => $comm, Timeout => 5000000 );
 
     # get a list of tables we want to store
     $cmd = "SELECT * FROM hosttables where (host = '$host')";

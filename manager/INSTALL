@@ -29,12 +29,19 @@ SETTING UP THE MYSQL DATABASES
                         name varchar(16), 
                         community varchar(32));
     create table hosttables (id integer auto_increment primary key, 
-                       host varchar(16), tablename varchar(64), 
+                       host varchar(16), tablename varchar(64),
+		       groupname varchar(32),
                        keephistory integer(2));
     create table usergroups (id integer auto_increment primary key, 
                        user varchar(16),
                        groupname varchar(32),
 		       isadmin enum('N','Y') default 'N');
+    create table userprefs (id integer auto_increment primary key, 
+                            user varchar(16),
+                            groupname varchar(32),
+                            tablename varchar(64),
+                            columnname varchar(64),
+                            displayit enum('N','Y') default 'Y');
     create table hostgroups (id integer auto_increment primary key, 
                              host varchar(16), 
                              groupname varchar(32));
