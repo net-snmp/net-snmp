@@ -151,31 +151,39 @@ snmp_synch_input(int op,
     struct synch_state *state = (struct synch_state *)magic;
     int rpt_type;
 
-    if (reqid != state->reqid && pdu->command != SNMP_MSG_REPORT)
-	return 0;
+    if (reqid != state->reqid && pdu && pdu->command != SNMP_MSG_REPORT) {
+        return 0;
+    }
 
     state->waiting = 0;
+
     if (op == SNMP_CALLBACK_OP_RECEIVED_MESSAGE) {
-      if (pdu->command == SNMP_MSG_REPORT) {
-	rpt_type = snmpv3_get_report_type(pdu);
-	if (SNMPV3_IGNORE_UNAUTH_REPORTS || 
-	    rpt_type == SNMPERR_NOT_IN_TIME_WINDOW) 
-	  state->waiting = 1;
+	if (pdu->command == SNMP_MSG_REPORT) {
+	    rpt_type = snmpv3_get_report_type(pdu);
+	    if (SNMPV3_IGNORE_UNAUTH_REPORTS ||
+		rpt_type == SNMPERR_NOT_IN_TIME_WINDOW) {
+		state->waiting = 1;
+	    }
+	    state->pdu = NULL;
+	    state->status = STAT_ERROR;
+	    session->s_snmp_errno = rpt_type;
+	    SET_SNMP_ERROR(rpt_type);
+	} else if (pdu->command == SNMP_MSG_RESPONSE) {
+	    /* clone the pdu to return to snmp_synch_response */
+	    state->pdu = snmp_clone_pdu(pdu);
+	    state->status = STAT_SUCCESS;
+	    session->s_snmp_errno = SNMPERR_SUCCESS;
+	}
+    } else if (op == SNMP_CALLBACK_OP_TIMED_OUT) {
+	state->pdu = NULL;
+	state->status = STAT_TIMEOUT;
+	session->s_snmp_errno = SNMPERR_TIMEOUT;
+        SET_SNMP_ERROR(SNMPERR_TIMEOUT);
+    } else if (op == SNMP_CALLBACK_OP_DISCONNECT) {
 	state->pdu = NULL;
 	state->status = STAT_ERROR;
-	session->s_snmp_errno = rpt_type;
-        SET_SNMP_ERROR(rpt_type);
-      } else if (pdu->command == SNMP_MSG_RESPONSE) {
-	/* clone the pdu to return to snmp_synch_response */
-	state->pdu = snmp_clone_pdu(pdu);
-	state->status = STAT_SUCCESS;
-	session->s_snmp_errno = SNMPERR_SUCCESS;
-      }
-    } else if (op == SNMP_CALLBACK_OP_TIMED_OUT){
-	state->pdu		 = NULL;
-	state->status		 = STAT_TIMEOUT;
-	session->s_snmp_errno	 = SNMPERR_TIMEOUT;
-        SET_SNMP_ERROR(SNMPERR_TIMEOUT);
+	session->s_snmp_errno = SNMPERR_ABORT;
+        SET_SNMP_ERROR(SNMPERR_ABORT);
     }
 
     return 1;
