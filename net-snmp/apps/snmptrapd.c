@@ -1099,10 +1099,12 @@ main(int argc, char *argv[])
     init_agent("snmptrapd");
 
     /* initialize local modules */
+    if (agentx_subagent) {
 #ifdef USING_AGENTX_SUBAGENT_MODULE
-    init_subagent();
+        init_subagent();
 #endif
-    init_notification_log();
+        init_notification_log();
+    }
 
     /* Initialize the world. Create initial user */
     init_snmp("snmptrapd");
