@@ -84,7 +84,7 @@ or 3 (RFC 2571-2574)
 The default is -v 1
 .IP "-P wWecduR"
 specifies MIB parsing options. See MIB PARSING OPTIONS below.
-.IP "-O nEebqfsSvX"
+.IP "-O nEebqfsSvXT"
 specifies output printing options. See OUTPUT OPTIONS below.
 .IP "-I Rb"
 specifies input parsing options. See INPUT OPTIONS below.
@@ -261,6 +261,9 @@ This modifies the output of index oids, to look more "program like".
 If you take an entry from the IPV6-MIB::ipv6RouteTable, it is indexed with
 an IPv6 address and two integers, and if you are used to IPv6 addresses
 you will know that decimal oids are not the preferred notation. Compare
+.IP -OT
+If hexadecimal code is printed, this will also print any printable
+characters after the hexadecimal codes.
 .br
 $ snmpgetnext -OS host IPV6-MIB:ipv6RouteTable
 .br
