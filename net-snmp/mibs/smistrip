@@ -67,9 +67,9 @@ do_strip () {
     }
 
     # a blank line - suppress multiple
-    /^[ \t]*$/ {
+    /^[ \t\r]*$/ {
         if (collect)
-	    if (line[n-1] != "" && line[n-1] !~ /,[ \t]*$/) line[n++] = ""    
+	    if (line[n-1] != "" && line[n-1] !~ /,[ \t\r]*$/) line[n++] = ""    
 	next
     }
 
@@ -89,7 +89,7 @@ do_strip () {
     }
 
     # end of module
-    /^[ \t]*END[ \t]*$/ {
+    /^[ \t]*END[ \t\r]*$/ {
 	if (macro)
 	    macro = 0
 	else if (length(single) == 0 || match(":"single":", ":"module":")) {

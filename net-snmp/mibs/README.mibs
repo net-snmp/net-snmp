@@ -20,8 +20,8 @@ as I am located in Denmark, use the RFC mirror at NORDUnet. You may change
 that at the top of Makefile.mib.
 
 Makefile.mib also holds rules that will collect all the current IETF MIB
-definitions, using the lists in rfclist.nr and ianalist.nr. To get them
-all, use
+definitions, using the lists in rfclist and ianalist. To get them all,
+use
 	make -f Makefile.mib allmibs
 
 Note, that there are a few fatal syntactic errors in some of the RFC
@@ -36,6 +36,6 @@ sources:
 - various misspellings
 
 DISCLAIMER: The patches provided here for the IETF standard MIB files
-are in not endorsed by anyone, and I don't guarantee that they bring
-them accordance with what the authors intended. All I will promise, is
-that the MIB files can be parsed.
+are not endorsed by anyone, and I don't guarantee that they bring them
+accordance with what the authors intended. All I will promise, is that
+the MIB files can be parsed.
