@@ -145,7 +145,7 @@ inet_pton4(src, dst, pton)
 		for (;;) {
 			if (isdigit(c)) {
 				digit = c - '0';
-				if (digit >= base)
+				if ((int)digit >= base)
 					break;
 				val = (val * base) + digit;
 				c = *++src;
