@@ -5,7 +5,7 @@
  * Author:       Patrick Hess  <phess@hds.com>
  */
 
-#include "generic.h"
+#include <net-snmp/system/generic.h>
 
 /*
  * from s/sysv.h 

@@ -2,7 +2,7 @@
  * used to minimally build SCO UnixWare 7.1.0 using CCS 3.2 compiler - YMMV 
  */
 
-#include "generic.h"
+#include <net-snmp/system/generic.h>
 
 /*
  * using CCS "cc", "configure" does not find this item 
