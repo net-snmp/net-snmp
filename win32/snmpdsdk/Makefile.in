@@ -83,7 +83,7 @@ BSC32_FLAGS=/nologo /o"$(INTDIR)\snmpd.bsc"
 BSC32_SBRS= \
 	
 LINK32=link.exe
-LINK32_FLAGS=$(OPENSSL) netsnmp.lib netsnmpagent.lib netsnmpmibs.lib netsnmphelpers.lib advapi32.lib wsock32.lib kernel32.lib user32.lib iphlpapi.lib /nologo /subsystem:console /pdb:none /machine:I386 /out:"..\bin\$(OUTDIR)/snmpd.exe" /libpath:"../lib/release" 
+LINK32_FLAGS=$(OPENSSL) netsnmp.lib netsnmpagent.lib netsnmpmibs.lib netsnmphelpers.lib advapi32.lib ws2_32.lib kernel32.lib user32.lib iphlpapi.lib /nologo /subsystem:console /pdb:none /machine:I386 /out:"..\bin\$(OUTDIR)/snmpd.exe" /libpath:"../lib/release" 
 LINK32_OBJS= \
 	"$(INTDIR)\auto_nlist.obj" \
 	"$(INTDIR)\kernel.obj" \
@@ -179,7 +179,7 @@ BSC32_SBRS= \
 <<
 
 LINK32=link.exe
-LINK32_FLAGS=$(OPENSSL) netsnmp.lib netsnmpagent.lib netsnmpmibs.lib netsnmphelpers.lib advapi32.lib wsock32.lib kernel32.lib user32.lib iphlpapi.lib /nologo /subsystem:console /incremental:no /pdb:"$(INTDIR)\snmpd.pdb" /debug /machine:I386 /out:"..\bin\$(OUTDIR)/snmpd.exe" /pdbtype:sept /libpath:"../lib/debug" 
+LINK32_FLAGS=$(OPENSSL) netsnmp.lib netsnmpagent.lib netsnmpmibs.lib netsnmphelpers.lib advapi32.lib ws2_32.lib kernel32.lib user32.lib iphlpapi.lib /nologo /subsystem:console /incremental:no /pdb:"$(INTDIR)\snmpd.pdb" /debug /machine:I386 /out:"..\bin\$(OUTDIR)/snmpd.exe" /pdbtype:sept /libpath:"../lib/debug" 
 LINK32_OBJS= \
 	"$(INTDIR)\auto_nlist.obj" \
 	"$(INTDIR)\kernel.obj" \
