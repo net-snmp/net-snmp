@@ -585,7 +585,11 @@ var_hrswrun(struct variable * vp,
         string[ sizeof(string)-1 ] = 0;
 #endif
 #elif HAVE_KVM_GETPROCS
+    #if defined(freebsd5)
+        strcpy(string, proc_table[LowProcIndex].ki_comm);
+    #else
         strcpy(string, proc_table[LowProcIndex].kp_proc.p_comm);
+    #endif
 #elif defined(linux)
         sprintf(string, "/proc/%d/status", pid);
         if ((fp = fopen(string, "r")) == NULL)
@@ -690,7 +694,11 @@ var_hrswrun(struct variable * vp,
         *cp1 = 0;
 #endif
 #elif HAVE_KVM_GETPROCS
+    #if defined(freebsd5)
+        strcpy(string, proc_table[LowProcIndex].ki_comm);
+    #else
         strcpy(string, proc_table[LowProcIndex].kp_proc.p_comm);
+    #endif
 #elif defined(linux)
         sprintf(string, "/proc/%d/cmdline", pid);
         if ((fp = fopen(string, "r")) == NULL)
@@ -881,7 +889,11 @@ var_hrswrun(struct variable * vp,
         }
 #else
 #if HAVE_KVM_GETPROCS
+    #if defined(freebsd5)
+        switch (proc_table[LowProcIndex].ki_stat) {
+    #else
         switch (proc_table[LowProcIndex].kp_proc.p_stat) {
+    #endif
 #elif defined(dynix)
         switch (lowpsinfo.pr_state) {
 #elif defined(solaris2)
@@ -976,9 +988,13 @@ var_hrswrun(struct variable * vp,
         long_return = proc_buf->p_utime * 100 + proc_buf->p_stime * 100;
 #endif
 #elif HAVE_KVM_GETPROCS
+    #if defined(freebsd5)
+        long_return = proc_table[LowProcIndex].ki_runtime / 100000;
+    #else
         long_return = proc_table[LowProcIndex].kp_proc.p_uticks +
             proc_table[LowProcIndex].kp_proc.p_sticks +
             proc_table[LowProcIndex].kp_proc.p_iticks;
+    #endif
 #elif defined(linux)
         sprintf(string, "/proc/%d/stat", pid);
         if ((fp = fopen(string, "r")) == NULL)
@@ -1049,7 +1065,11 @@ var_hrswrun(struct variable * vp,
 #elif HAVE_KVM_GETPROCS
 #if defined(freebsd3) && !defined(darwin)
         long_return =
+    #if defined(freebsd5)
+            proc_table[LowProcIndex].ki_size / 1024;
+    #else
             proc_table[LowProcIndex].kp_eproc.e_vm.vm_map.size / 1024;
+    #endif
 #else
         long_return = proc_table[LowProcIndex].kp_eproc.e_vm.vm_tsize +
             proc_table[LowProcIndex].kp_eproc.e_vm.vm_ssize +
@@ -1329,8 +1349,13 @@ Get_Next_HR_SWRun(void)
 #elif defined(solaris2)
         return proc_table[current_proc_entry++];
 #elif HAVE_KVM_GETPROCS
+    #if defined(freebsd5)
+        if (proc_table[current_proc_entry].ki_stat != 0)
+            return proc_table[current_proc_entry++].ki_pid;
+    #else
         if (proc_table[current_proc_entry].kp_proc.p_stat != 0)
             return proc_table[current_proc_entry++].kp_proc.p_pid;
+    #endif
 #else
         if (proc_table[current_proc_entry].p_stat != 0)
             return proc_table[current_proc_entry++].p_pid;
