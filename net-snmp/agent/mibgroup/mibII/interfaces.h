@@ -8,6 +8,12 @@
 config_require(util_funcs)
 config_require(if-mib/data_access/interface)
 config_arch_require(solaris2, kernel_sunos5)
+/*
+ * need get_address in var_route for some platforms (USE_SYSCTL_IFLIST).
+ * Not sure if that can be translated into a config_arch_require, so be
+ * indiscriminate for now.
+ */
+config_require(mibII/var_route)
 
 #ifdef hpux11
 #include <sys/mib.h>
