@@ -1089,10 +1089,8 @@ done
 # Do hairy agent module processing.
 #
 if test "x$transport_callback_disabled" = "xyes"; then
-        changequote([, ])
         AC_MSG_WARN(Disabling Callback transport will disable AgentX support.)
         AC_MSG_WARN(Disabling Callback transport will disable disman/mteTriggerTable support.)
-        changequote(, )
         new_with_out_mib_modules="agentx disman/mteTriggerTable $new_with_out_mib_modules"
 fi
 AC_MSG_CHECKING([for and configuring mib modules to use])
