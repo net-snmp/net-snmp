@@ -30,7 +30,8 @@
             if (ROWSTATUS_CREATEANDGO ==  ${m2c_data_item}$node) {
                 if (rowreq_ctx->column_set_flags != $context.uc_REQUIRED_COLS) {
                     DEBUGMSGTL(("${context}",
-                                "required columns missing\n"));
+                                "required columns missing (0x%0x != 0x%0x)\n",
+                                rowreq_ctx->column_set_flags, $context.uc_REQUIRED_COLS));
                     return MFD_CANNOT_CREATE_NOW;
                 }
             }
