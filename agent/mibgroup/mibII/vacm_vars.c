@@ -1394,9 +1394,7 @@ write_vacmSecurityToGroupStatus(int      action,
             oid      *name,
             size_t   name_len)
 {
-
-  /* variables we may use later */
-    long long_ret = *((long *)var_val);
+    static long long_ret;
     int model;
     char *newName;
     size_t nameLen;
@@ -1409,6 +1407,7 @@ write_vacmSecurityToGroupStatus(int      action,
 	if (var_val_len != sizeof(long_ret)){
 	    return SNMP_ERR_WRONGLENGTH;
 	}
+	long_ret = *((long *)var_val);
 	if (long_ret == RS_NOTREADY || long_ret < 1 || long_ret > 6) {
 	    return SNMP_ERR_WRONGVALUE;
 	}
@@ -1432,6 +1431,7 @@ write_vacmSecurityToGroupStatus(int      action,
 	if (geptr != NULL) {
 	    if (long_ret == RS_CREATEANDGO || long_ret == RS_CREATEANDWAIT) {
 		free(newName);
+		long_ret = RS_NOTREADY;
 		return SNMP_ERR_INCONSISTENTVALUE;
 	    }
 	} else {
@@ -1646,7 +1646,7 @@ write_vacmAccessStatus(int      action,
             oid      *name,
             size_t   name_len)
 {
-  long long_ret = *((long *) var_val);
+  static long long_ret;
   int model, level;
   char *newGroupName, *newContextPrefix;
   size_t groupNameLen, contextPrefixLen;
@@ -1659,6 +1659,7 @@ write_vacmAccessStatus(int      action,
       if (var_val_len != sizeof(long_ret)) {
 	  return SNMP_ERR_WRONGLENGTH;
       }
+      long_ret  = *((long *) var_val);
       if (long_ret == RS_NOTREADY || long_ret < 1 || long_ret > 6) {
 	  return SNMP_ERR_WRONGVALUE;
       }
@@ -2085,7 +2086,7 @@ write_vacmViewStatus(int      action,
             oid      *name,
             size_t   name_len)
 {
-  long long_ret = *((long *) var_val);
+  static long long_ret;
   char *newViewName;
   oid *newViewSubtree;
   size_t viewNameLen,viewSubtreeLen;
@@ -2099,6 +2100,7 @@ write_vacmViewStatus(int      action,
       if (var_val_len != sizeof(long_ret)) {
 	  return SNMP_ERR_WRONGLENGTH;
       }
+      long_ret = *((long *) var_val);
       if (long_ret == RS_NOTREADY || long_ret < 1 || long_ret > 6) {
 	  return SNMP_ERR_WRONGVALUE;
       }
@@ -2123,6 +2125,7 @@ write_vacmViewStatus(int      action,
 	    if (long_ret == RS_CREATEANDGO || long_ret == RS_CREATEANDWAIT) {
 		free(newViewName);
 		free(newViewSubtree);
+		long_ret = RS_NOTREADY;
 		return SNMP_ERR_INCONSISTENTVALUE;
 	    }
       } else {
