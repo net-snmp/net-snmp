@@ -52,11 +52,11 @@ tkmib [-C] [-o OID] [SNMPCMD arguments] [host]
 usage() if ($opts{'h'});
 
 @displayInfo=qw(type access status units hint moduleID enums indexes);
-foreach my $i (@displayInfo) {
+@saveoptions = ('displayoidas', 'writecolor', 'graphtime', 'graphdelta');
+foreach $i (@displayInfo) {
     $displayInfoStates{$i} = 1;
 }
 
-my @saveoptions = ('displayoidas', 'writecolor', 'graphtime', 'graphdelta');
 
 # source config file
 do $opts{'C'} if ($opts{'C'} && -f $opts{'C'});
@@ -130,6 +130,7 @@ $OptMenuBut = $MenuFrame->Menubutton(-pady => $tmpbd, -padx => $tmpbd, -text => 
 				     -menuitems =>
       [[Cascade => "~Display", -menuitems =>
 	[
+	 [Cascade => "~MIB Information"],
 	 [Cascade => "~OID Display", -menuitems =>
 	  [
 	   [Radiobutton => 'full', -variable => \$displayoidas],
@@ -215,6 +216,7 @@ $OptMenuBut = $MenuFrame->Menubutton(-pady => $tmpbd, -padx => $tmpbd, -text => 
         
 $tmp = $OptMenuBut->cget(-menu);
 $OptMenuWidgets = $tmp->entrycget("Display", -menu);
+$OptMenuWidgets = $OptMenuWidgets->entrycget("MIB Information", -menu);
 
 # $OptMenuBut->cascade(-label => 'sub');
 #$sub1 = $OptMenuBut->Optionmenu(-text => 'options', -options => ['hehe',["hi", "there"]]);
@@ -236,8 +238,8 @@ $mibTextOID->pack(-side => 'right');
 $dispFrame=$top->Frame(-relief => 'raised', -borderwidth => $tmpbd);
 $dispFrame->pack(-side => 'top', -fill =>'x');
 for($i=0;$i<= $#displayInfo;$i++) {
-    createRow($i);
-    optionalWidget($i,$OptMenuWidgets, \$displayInfoStates{$i});
+    createRow($i) if ($displayInfoStates{$displayInfo[$i]});
+    optionalWidget($i,$OptMenuWidgets, \$displayInfoStates{$displayInfo[$i]});
 }
     
 $descrFrame=$top->Frame(-relief => 'raised', -borderwidth => $tmpbd);
@@ -759,32 +761,38 @@ sub optionalWidget {
     my $var = shift;
     $menu->checkbutton(-label => $displayInfo[$num], 
 		       -variable => $var,
-		       -command => [\&toggleWidgetShown, $num]);
+		       -command => [\&toggleWidgetShown, $num, $var]);
 }
 
 sub createRow {
     my $i = shift;
-    $dispFrame->Label(-pady => $tmpbd, -padx => $tmpbd, -text => $displayInfo[$i], 
-		     -anchor => 'w', -borderwidth => $tmpbd)
-	->grid(-ipady => $tmpbd, -ipadx => $tmpbd, -column => ($i%2)*2, -row => int($i/2), -sticky => 'w');
+    if (!$displayLabels[$i]) {
+	$displayLabels[$i] = $dispFrame->Label(-pady => $tmpbd, -padx => $tmpbd,
+					       -text => $displayInfo[$i], 
+					       -anchor => 'w',
+					       -borderwidth => $tmpbd);
+    }
+    if (!$displayEntries[$i]) {
+	$displayEntries[$i] = $dispFrame->Entry(-textvariable => \$dpyInfo[$i],
+						-width => 40, -relief => 'flat',
+						-borderwidth => $tmpbd);
+    }
+    $displayLabels[$i]->grid(-ipady => $tmpbd, -ipadx => $tmpbd,
+			     -column => ($i%2)*2, -row => int($i/2),
+			     -sticky => 'w');
     $dpyInfo[$i] = "" if (!defined($dpyInfo[$i]));
-    my $ent = $dispFrame->Entry(-textvariable => \$dpyInfo[$i], -width => 40, 
-		      -relief => 'flat', -borderwidth => $tmpbd);
-    $ent->grid(-ipady => $tmpbd, -ipadx => $tmpbd, -column => ($i%2)*2 + 1, -row => int($i/2), -sticky => 'w');
+    $displayEntries[$i]->grid(-ipady => $tmpbd, -ipadx => $tmpbd, -column => ($i%2)*2 + 1, -row => int($i/2), -sticky => 'w');
 }
 
 sub toggleWidgetShown {
-    my $self = shift;
-    my @widgets = $dispFrame->gridSlaves(-row => $self);
-    my $i;
-    if ($#widgets >= 0) {
-	for($i = 0; $i <= $#widgets; $i++) {
-	    $widgets[$i]->gridForget;
-	    $widgets[$i]->destroy();
-	}
+    my ($num, $var) = @_;
+    if ($$var) {
+	createRow($num);
     } else {
-	createRow($self);
+	$displayLabels[$num]->gridForget();
+	$displayEntries[$num]->gridForget()
     }
+#    my @widgets = $dispFrame->gridSlaves(-row => $num);
 }
 
 sub loadNewMibFile {
@@ -915,11 +923,8 @@ sub save_options {
 	return;
     }
     umask $umask;
-    $status->configure(-text => "saving options to $opts{C}");
     print O Data::Dumper->Dump([\%session_opts], [qw(*session_opts)]);
-    foreach my $i (@displayInfo) {
-	print O '$displayInfoStates{' . $i . '} = ' . "\"$displayInfoStates{$i}\";\n";
-    }
+    print O Data::Dumper->Dump([\%displayInfoStates], [qw(*displayInfoStates)]);
     foreach my $var (@saveoptions) {
 	print O Data::Dumper->Dump([$$var], [$var]);
     }
