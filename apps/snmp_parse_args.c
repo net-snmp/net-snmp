@@ -151,7 +151,10 @@ snmp_parse_args(int argc,
 
   /* initialize session to default values */
   snmp_sess_init( session );
-  strcpy(Opts, "VhHm:M:fsSqRO:I:P:D:dv:p:r:t:c:Z:e:E:n:u:l:x:X:a:A:T:");
+  strcpy(Opts, "VhHm:M:O:I:P:D:dv:p:r:t:c:Z:e:E:n:u:l:x:X:a:A:T:");
+#ifndef DEPRECATED_CLI_OPTIONS
+  strcat(Opts, "fsSqR");
+#endif
   if (localOpts) strcat(Opts, localOpts);
 
   /* get the options */
