@@ -27,19 +27,7 @@ snmp_sess_send, snmp_sess_async_send,
 snmp_sess_select_info, snmp_sess_read,
 snmp_sess_timeout, snmp_sess_close, snmp_sess_error - session functions
 .SH SYNOPSIS
-#include <sys/types>
-.br
-#include <netinet/in.h>
-.br
-#include <sys/time.h>
-.br
-#include <ucd-snmp/snmp.h>
-.br
-#include <ucd-snmp/snmp_impl.h>
-.br
-#include <ucd-snmp/asn1.h>
-.br
-#include <ucd-snmp/snmp_api.h>
+#include <net-snmp/session_api.h>
 .PP
 void snmp_sess_init ( struct snmp_session * );
 .PP
