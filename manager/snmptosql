@@ -70,31 +70,32 @@ nexthost: while (  $hostrow = $cursor->fetchrow_hashref ) {
     next if ($somehosts && !defined($dohost{$host}));
 
     #set up the session
-    print " starting $host\n" if ($verbose);
+    print STDERR " starting $host\n" if ($verbose);
     my $x = $dbh->prepare("select groupname from hostgroups where host = '$host'");
     my $y = $x->execute();
-    my $group;
+    my $group = ${$x->fetchrow_hashref}{'groupname'};
     my @args = ('authgroup','default');
-    print "$host...$y\n" if ($verbose);
+    print STDERR "$host...$y\n" if ($verbose);
     if (defined($y) && "$y" ne "0E0") {
-        push @args,'authgroup',${$x->fetchrow_hashref}{'groupname'};
+        push @args,'authgroup',$group;
     }
     push @args,'authhost',$host;
     print STDERR "$host: $group\n" if ($verbose);
 
+    print STDERR "authvals: ", join(", ", @args), "\n" if ($verbose);
     my %authvals = getValues($dbh, @args);
     if ($verbose) {
-	print "parms for $host:";
+	print STDERR "parms for $host:";
 	foreach my $i (keys(%authvals)) {
-	    print "$i => $authvals{$i}, ";
+	    print STDERR "$i => $authvals{$i}, ";
 	}
-	print "\n";
+	print STDERR "\n";
     }
 
     my $sess = new SNMP::Session (  DestHost => $host, 
 				    UseSprintValue => 1,
 				    %authvals );
-    print "Sess ($host): $sess, ref=" . ref($sess). "\n" if ($verbose);
+    print STDERR "Sess ($host): $sess, ref=" . ref($sess). "\n" if ($verbose);
     if (ref ($sess) ne "SNMP::Session") {
 #	print STDERR "ack: \$sess not a SNMP::Session for $host ($!)\n";
 	hosterror("$host");
@@ -104,18 +105,24 @@ nexthost: while (  $hostrow = $cursor->fetchrow_hashref ) {
 
     # get a list of tables we want to store
     $cmd = "SELECT * FROM hosttables where (host = '$host')";
-    print " $cmd\n" if ($verbose);
+    print STDERR " $cmd\n" if ($verbose);
     ( $tblh = $dbh->prepare( $cmd ) )
-	or die "\nnot ok: $DBI::errstr\n";
+	or warn "\nnot ok: $DBI::errstr\n";
     ( $tblh->execute )
 	or print( "\tnot ok: $DBI::errstr\n" );
 
     while (  $tablelist = $tblh->fetchrow_hashref ) {
-	print "starting table $tablelist->{'tablename'}\n" if ($verbose);
+	print STDERR "starting table $tablelist->{'tablename'}\n" if ($verbose);
 	my $mib = $SNMP::MIB{SNMP::translateObj($tablelist->{'tablename'})};
-	die "mib node $tablelist->{'tablename'} doesn't exist" if (!$mib);
+	if (!$mib) {
+	    warn "mib node $tablelist->{'tablename'} doesn't exist";
+	    next;
+	}
 	my $children = $$mib{'children'};
-	die "children of $mib->{label} don't exist\n" if ($#{$children} == -1);
+	if ($#{$children} == -1) {
+	    warn "children of $mib->{label} don't exist\n";
+	    next;
+	}
 
 	# create the table in our database if it doesn't exist.
 	setuptable($dbh, $tablelist->{tablename}, $delete);
@@ -127,18 +134,18 @@ nexthost: while (  $hostrow = $cursor->fetchrow_hashref ) {
 	    new SNMP::Varbind([SNMP::translateObj($tablelist->{'tablename'})]);
 	my $void = SNMP::translateObj($tablelist->{'tablename'});
 	my $val = $sess->getnext($var);
-	print "init err: $sess->{'ErrorStr'}\n" if ($verbose);
+	print STDERR "init err: $sess->{'ErrorStr'}\n" if ($verbose);
 	if ($sess->{'ErrorStr'} =~ /Timeout/) {
-	    print "$host timed out\n" if ($verbose);
+	    print STDERR "$host timed out\n" if ($verbose);
 	    hosterror($host);
 	    next nexthost;
 	}
 	$initlabel = "";
-	print " starting $tablelist->{tablename}\n" if ($verbose);
+	print STDERR " starting $tablelist->{tablename}\n" if ($verbose);
 	my %tbl_ids;
 	while (1) {
 	    my $varlabel = $var->[$SNMP::Varbind::tag_f];
-	    print "last $host " . SNMP::translateObj($varlabel) . ": $void\n" if ($verbose && SNMP::translateObj($varlabel) !~ /^$void/);
+	    print STDERR "last $host " . SNMP::translateObj($varlabel) . ": $void\n" if ($verbose && SNMP::translateObj($varlabel) !~ /^$void/);
 
 	    last if (SNMP::translateObj($varlabel) !~ /^$void/);
 	    $varlabel = SNMP::translateObj($var->[$SNMP::Varbind::tag_f]) if ($varlabel =~ /^[\.0-9]+$/);
@@ -146,13 +153,13 @@ nexthost: while (  $hostrow = $cursor->fetchrow_hashref ) {
 
 	    my $val = $sess->getnext($var);
 	    if ($sess->{'ErrorStr'} =~ /Timeout/) {
-		print "$host timed out\n" if ($verbose);
+		print STDERR "$host timed out\n" if ($verbose);
 		hosterror($host);
 		next nexthost;
 	    }
 	    last if ($sess->{'ErrorStr'});
 	    my $id = $var->[$SNMP::Varbind::iid_f];
-	    print "$initlabel = $varlabel\n" if ($verbose);
+	    print STDERR "$initlabel = $varlabel\n" if ($verbose);
 	    last if ($varlabel ne $initlabel);
 	    my %vals;
 	    $tbl_ids{$id} = 1;
@@ -171,7 +178,7 @@ nexthost: while (  $hostrow = $cursor->fetchrow_hashref ) {
 		checkrowforerrors($tablelist->{'tablename'}, $host, $id);
 	    $dbh->do("delete from $tablelist->{tablename} where ( host = '$host'  and oidindex = '$id')");
 	    $res = $dbh->do("select * from $tablelist->{'tablename'} where ( host = '$host' and oidindex = '$id')");
-	    print "  result: $res/$\n" if ($verbose);
+	    print STDERR "  result: $res/$\n" if ($verbose);
 	    if ($res ne "0E0") {
 		$cmd = "update $tablelist->{'tablename'} set ";
 		foreach $h (keys(%vals)) {
@@ -185,18 +192,21 @@ nexthost: while (  $hostrow = $cursor->fetchrow_hashref ) {
 			join("', '",values(%vals)). "')";
 	    }
 
-	    print "  $cmd\n" if ($verbose);
+	    print STDERR "  $cmd\n" if ($verbose);
 	    $dbh->do("$cmd")
-		or die "\nnot ok: $DBI::errstr\n" if ($doit);
+		or warn "\nnot ok: $cmd => $DBI::errstr\n" if ($doit);
 
-	    if ($tablelist->{'keephistory'} == 1) {
+	    if ($tablelist->{'keephistory'}) {
 		$cmd = "insert into $tablelist->{'tablename'}hist (host, oidindex, " 
 		    . join(", ",keys(%vals))
 		    . ") values('$host', '$id', '"
 		    . join("', '",values(%vals)). "')";
-		print "  $cmd\n" if ($verbose);
+		print STDERR "  $cmd\n" if ($verbose);
 		$dbh->do("$cmd")
-		    or die "\nnot ok: $DBI::errstr\n" if ($doit);
+		    or warn "\nnot ok: $cmd -> $DBI::errstr\n" if ($doit);
+		
+		# delete the data beyond the number of days requested.
+		$dbh->do("delete from $tablelist->{'tablename'}hist where (unix_timestamp()-unix_timestamp(updated)) > $tablelist->{'keephistory'}*24*60*60") orr warn STDERR "\nnot ok: $DBI::errstr\n" if ($doit);
 	    }
 
 	    my $newerr = 
@@ -209,23 +219,23 @@ nexthost: while (  $hostrow = $cursor->fetchrow_hashref ) {
 	my $curs = getcursor("select oidindex from $tablelist->{tablename} where host = '$host'");
 	my $row;
 	while ($row = $curs->fetchrow_hashref) {
-	    print "  $row->{oidindex}\n" if ($verbose);
+	    print STDERR "  $row->{oidindex}\n" if ($verbose);
 	    if (!defined($tbl_ids{$row->{oidindex}})) {
 		$dbh->do("delete from $tablelist->{tablename} where oidindex = '$row->{oidindex}'");
-		print "deleting: $host $tablelist->{tablename} $row->{oidindex}\n" if ($verbose);
+		print STDERR "deleting: $host $tablelist->{tablename} $row->{oidindex}\n" if ($verbose);
 	    }
 	}
-	print "  done with $tablelist->{tablename}\n" if ($verbose);
+	print STDERR "  done with $tablelist->{tablename}\n" if ($verbose);
     } # table loop
 
     if (isbadhost($host)) {
 	# let them out, they're no longer being bad.
-	print "deleting: delete from hosterrors where host = '$host'\n" if ($verbose);
+	print STDERR "deleting: delete from hosterrors where host = '$host'\n" if ($verbose);
 	$dbh->do("delete from hosterrors where host = '$host'");
 	mailusers("$host responding again", "$host responding again",
 		  getoncallforhost($host));
     }
-    print "  done with $host\n" if ($verbose);
+    print STDERR "  done with $host\n" if ($verbose);
 } # host loop
 
 # disconnect
@@ -246,35 +256,38 @@ sub setuptable {
 
     my $mib = $SNMP::MIB{SNMP::translateObj($mibnode)};
     my $children = $$mib{'children'};
-    die "$mib has no chlidren" if (ref($children) ne "ARRAY");
+    if (ref($children) ne "ARRAY") {
+	warn "$mib has no chlidren";
+	return;
+    }
     my ($cmd, $j);
 
     if ($delete) {
 	$cmd = "drop table if exists $mib->{label}";
-	print "cmd: $cmd\n" if ($verbose);
+	print STDERR "cmd: $cmd\n" if ($verbose);
 	$dbh->do($cmd)
-	    or die "\nnot ok: $DBI::errstr\n" if ($doit);
+	    or warn "\nnot ok: $cmd -> $DBI::errstr\n" if ($doit);
     } elsif (($ret = $dbh->do("show tables like '$mib->{label}$suffix'")) ne "0E0") {
 	# the table already exists
 	return;
     }
 
-    print "show tables like $mib->{label}$suffix: $ret\n" if($verbose);
-    print " creating table for $mibnode ($mib->{label}$suffix)\n" if ($verbose);
+    print STDERR "show tables like $mib->{label}$suffix: $ret\n" if($verbose);
+    print STDERR " creating table for $mibnode ($mib->{label}$suffix)\n" if ($verbose);
     
     $cmd = "create table $mib->{label}$suffix (id integer auto_increment primary key, host varchar(16), oidindex varchar(254)";
     foreach $j (@$children) {
 	if (!defined($conversions{$j->{type}})) {
-	    print "no conversion for ". $j->{type} . "!\n";
+	    print STDERR "no conversion for ". $j->{type} . "!\n";
 	    return;
 	}
 	$cmd .= ", $j->{label} $conversions{$j->{type}}";
     }
     $cmd .= ", updated timestamp)";
 
-    print "cmd: $cmd\n" if ($verbose);
+    print STDERR "cmd: $cmd\n" if ($verbose);
     $dbh->do("$cmd")
-	or die "\nnot ok: $DBI::errstr\n" if ($doit);
+	or warn "\nnot ok: $cmd -> $DBI::errstr\n" if ($doit);
 
 }
 
@@ -303,11 +316,11 @@ sub getoncall {
 		     ($dayscon{$two[0]} <= $now[6] || 
 		      $dayscon{$two[1]} >= $now[6]))))) {
 		  # we hit a valid day range
-		  print "    hit it $row->{'email'} $now[6]\t($i)\t$row->{'days'}\n"
+		  print STDERR "    hit it $row->{'email'} $now[6]\t($i)\t$row->{'days'}\n"
 		      if ($verbose);
 		  $people{$row->{'email'}} = $row->{'email'};
 	      } else {
-		  print "not hit it $row->{'email'} $now[6]\t($i)\t$row->{'days'}\n"
+		  print STDERR "not hit it $row->{'email'} $now[6]\t($i)\t$row->{'days'}\n"
 		      if ($verbose);
 	      }	      
 	  }
@@ -324,7 +337,7 @@ sub getoncallforhost {
 sub getcursor {
     my $cmd = shift;
     my $cursor;
-    print "cmd: $cmd\n" if ($verbose);
+    print STDERR "cmd: $cmd\n" if ($verbose);
     ( $cursor = $dbh->prepare( $cmd ))
 	or die "\nnot ok: $DBI::errstr\n";
     ( $cursor->execute )
@@ -342,7 +355,7 @@ sub checkrowforerrors {
     while (  $expr = $exprs->fetchrow_hashref ) {
 	my $errors = getcursor("select * from $table where $expr->{expression} and host = '$host' and oidindex = '$id'");
 	while (  $error = $errors->fetchrow_hashref ) {
-	    print "$host: $expr->{returnfield} = $error->{$expr->{returnfield}}\n" if ($verbose);
+	    print STDERR "$host: $expr->{returnfield} = $error->{$expr->{returnfield}}\n" if ($verbose);
 	    return {'retval', 1,
 		    'errfield', $expr->{'returnfield'},
 		    'errvalue', $error->{$expr->{'returnfield'}}};
@@ -388,7 +401,7 @@ sub mailusers {
     $smtpsock->datasend("$msg\n");
     $smtpsock->dataend();
     $smtpsock->quit;
-    print "mailed ",join(",",@people)," with $msg, $subject ($!)\n" if ($verbose);
+    print STDERR "mailed ",join(",",@people)," with $msg, $subject ($!)\n" if ($verbose);
 }
 
 sub hosterror {
