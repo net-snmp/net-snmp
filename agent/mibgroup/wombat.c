@@ -23,10 +23,10 @@
  *  what's really caused our invocation.
  *
  *  The subtree structure only identifies Types.  In the case of Get,
- *  if the oid is a scalar, we just check to see if the length is
- *  right and the instance identifier is 0.  If the oid is a table, we
- *  validate the index.  This routine could be modified to deal with
- *  a single routine handling a sequence or other data structures, but
+ *  we just check to see if the length is right and the request
+ *  matches something we can answer to.  If the oid is a table, we
+ *  validate the index.  This routine could be modified to deal with a
+ *  single routine handling a sequence or other data structures, but
  *  you're probably reinventing the wheel if you do (the subtree
  *  structure should be used to reduce those cases down to a scalar or
  *  a table).
@@ -38,8 +38,7 @@
  *
  *  If the incoming request is too short, convert it to the first valid
  *  oid.  If it's too long, match as far as possible, and then convert
- *  it to the next valid oid.
- */
+ *  it to the next valid oid.  */
 
 	/*********************
 	 *
