@@ -29,6 +29,10 @@
 #include <winsock.h>
 #endif
 
+#if HAVE_NETINET_IN_H
+#include <netinet/in.h>		/* For definition of in_addr_t */
+#endif
+
 #ifdef __cplusplus
 extern "C" {
 #endif
