@@ -244,18 +244,19 @@ snmp_clone_mem(void ** dstPtr, void * srcPtr, unsigned len)
 
 
 /*
- * Creates (allocates and copies) a clone of the input PDU.
- * If drop_err is set, drop any variable associated with errindex.
+ * Creates and allocates a clone of the input PDU,
+ * but does NOT copy the variables.
+ * This function should be used with another function,
+ * such as _copy_pdu_vars.
  *
- * Returns cloned PDU if successful, or 0 if failure.
+ * Returns a pointer to the cloned PDU if successful.
+ * Returns 0 if failure.
  */
 static
 struct snmp_pdu *
-locl_clone_pdu(struct snmp_pdu *pdu, int drop_err)
+_clone_pdu_header(struct snmp_pdu *pdu)
 {
-    struct variable_list *var, *newvar, *oldvar;
     struct snmp_pdu *newpdu;
-    int ii, copied;
 
     newpdu = (struct snmp_pdu *)malloc(sizeof(struct snmp_pdu));
     if (!newpdu) return 0;
@@ -283,12 +284,50 @@ locl_clone_pdu(struct snmp_pdu *pdu, int drop_err)
     {
         snmp_free_pdu(newpdu); return 0;
     }
+    return newpdu;
+}
+
+
+/*
+ * Copy some or all variables from source PDU to target PDU.
+ * This function consolidates many of the needs of PDU variables:
+ * Clone PDU : copy all the variables.
+ * Split PDU : skip over some variables to copy other variables.
+ * Fix PDU   : remove variable associated with error index.
+ *
+ * Designed to work with _clone_pdu_header.
+ *
+ * If drop_err is set, drop any variable associated with errindex.
+ * If skip_count is set, skip the number of variable in pdu's list.
+ * While copy_count is greater than zero, copy pdu variables to newpdu.
+ *
+ * If an error occurs, newpdu is freed and pointer is set to 0.
+ *
+ * Returns a pointer to the cloned PDU if successful.
+ * Returns 0 if failure.
+ */
+static
+struct snmp_pdu *
+_copy_pdu_vars(struct snmp_pdu *pdu,  /* source PDU */
+        struct snmp_pdu *newpdu,      /* target PDU */
+        int drop_err,                 /* !=0 drop errored variable */
+        int skip_count,               /* !=0 number of variables to skip */
+        int copy_count)               /* !=0 number of variables to copy */
+{
+    struct variable_list *var, *newvar, *oldvar;
+    int ii, copied;
+
+    if (!newpdu) return 0;            /* where is PDU to copy to ? */
 
     var = pdu->variables;
+    while (var && (skip_count-- > 0)) /* skip over pdu variables */
+        var = var->next_variable;
+
     oldvar = 0; ii = 0; copied = 0;
     if (pdu->flags & UCD_MSG_FLAG_FORCE_PDU_COPY)
 	copied = 1;	/* We're interested in 'empty' responses too */
-    while (var) {
+    while (var && (copy_count-- > 0))
+    {
         /* errindex starts from 1. If drop_err, skip the errored variable */
         if (drop_err && (++ii == pdu->errindex)) {
             var = var->next_variable; continue;
@@ -309,17 +348,71 @@ locl_clone_pdu(struct snmp_pdu *pdu, int drop_err)
 
         var = var->next_variable;
     }
+    /* Error if bad errindex or if target PDU has no variables copied */
     if ((drop_err && (ii < pdu->errindex)) || copied == 0){
         snmp_free_pdu(newpdu); return 0;
     }
     return newpdu;
 }
 
+
+/*
+ * Creates (allocates and copies) a clone of the input PDU.
+ * If drop_err is set, don't copy any variable associated with errindex.
+ * This function is called by snmp_clone_pdu and snmp_fix_pdu.
+ *
+ * Returns a pointer to the cloned PDU if successful.
+ * Returns 0 if failure.
+ */
+static
+struct snmp_pdu *
+_clone_pdu(struct snmp_pdu *pdu, int drop_err)
+{
+    struct snmp_pdu *newpdu;
+    newpdu = _clone_pdu_header(pdu);
+    newpdu = _copy_pdu_vars(pdu, newpdu,
+	    drop_err,
+	    0, 10000);  /* skip none, copy all */
+
+    return newpdu;
+}
+
+
+/*
+ * This function will clone a PDU including all of its variables.
+ *
+ * Returns a pointer to the cloned PDU if successful.
+ * Returns 0 if failure
+ */
 struct snmp_pdu *
 snmp_clone_pdu(struct snmp_pdu *pdu)
 {
-    return locl_clone_pdu(pdu, 0); /* copies all variables */
+    return _clone_pdu(pdu, 0); /* copies all variables */
 }
+
+
+/*
+ * This function will clone a PDU including some of its variables.
+ *
+ * If skip_count is not zero, it defines the number of variables to skip.
+ * If copy_count is not zero, it defines the number of variables to copy.
+ *
+ * Returns a pointer to the cloned PDU if successful.
+ * Returns 0 if failure.
+ */
+struct snmp_pdu *
+snmp_split_pdu(struct snmp_pdu *pdu, int skip_count, int copy_count)
+{
+    struct snmp_pdu *newpdu;
+    newpdu = _clone_pdu_header(pdu);
+    newpdu = _copy_pdu_vars(pdu, newpdu,
+	    0,         /* don't drop any variables */
+	    skip_count,
+            copy_count);
+
+    return newpdu;
+}
+
 
 /*
  * If there was an error in the input pdu, creates a clone of the pdu
@@ -345,7 +438,7 @@ snmp_fix_pdu(struct snmp_pdu *pdu, int command)
             return 0; /* pre-condition tests fail */
     }
 
-    newpdu = locl_clone_pdu(pdu, 1); /* copies all except errored variable */
+    newpdu = _clone_pdu(pdu, 1); /* copies all except errored variable */
     if (!newpdu)
         return 0;
     if (!newpdu->variables) {
@@ -359,6 +452,24 @@ snmp_fix_pdu(struct snmp_pdu *pdu, int command)
     newpdu->errindex = SNMP_DEFAULT_ERRINDEX;
 
     return newpdu;
+}
+
+
+/*
+ * Returns the number of variables bound to a PDU structure
+ */
+unsigned long
+snmp_varbind_len(struct snmp_pdu * pdu)
+{
+    register struct variable_list *vars;
+    unsigned long retVal = 0;
+    if (pdu)
+      for (vars = pdu->variables; vars; vars = vars->next_variable)
+      {    
+        retVal++;
+      }
+    
+    return retVal;
 }
 
 /*
