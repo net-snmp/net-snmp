@@ -453,6 +453,8 @@ process_get_requests(netsnmp_handler_registration *reginfo,
                  * but still allow it a chance to hit another handler?
                  */
                 DEBUGMSGTL(("table_array:get", "no row found\n"));
+                netsnmp_set_request_error(agtreq_info, current,
+                                          SNMP_ENDOFMIBVIEW);
                 continue;
             }
 
