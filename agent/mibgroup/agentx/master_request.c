@@ -27,6 +27,10 @@
 # endif
 #endif
 
+#if HAVE_DMALLOC_H
+#include <dmalloc.h>
+#endif
+
 #define SNMP_NEED_REQUEST_LIST
 #include "asn1.h"
 #include "mib.h"
@@ -38,15 +42,14 @@
 #include "ds_agent.h"
 #include "default_store.h"
 
-#include "agentx/protocol.h"
-#include "agentx/client.h"
-#include "agentx/master.h"
+#include "protocol.h"
+#include "client.h"
+#include "master.h"
+#include "master_admin.h"
 #include "snmp_agent.h"
 #include "snmp_vars.h"
 #include "var_struct.h"
 #include "mibII/sysORTable.h"
-
-extern int close_agentx_session(struct snmp_session *session, int sessid);
 
 #define VARLIST_ITERATION	10
 
@@ -74,7 +77,7 @@ free_agentx_request(struct request_list *req, int free_cback)
     if ( req->cb_data && free_cback )
 	free ( req->cb_data );
 
-     free ( req );
+    free ( req );
 }
 
 void
@@ -84,7 +87,7 @@ free_agentx_varlist(struct ax_variable_list *vlist)
 	return;
     if ( vlist->variables )
 	free ( vlist->variables );
-     free ( vlist );
+    free ( vlist );
 }
 
 	/*

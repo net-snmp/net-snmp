@@ -26,6 +26,10 @@
 #include <netinet/in.h>
 #endif
 
+#if HAVE_DMALLOC_H
+#include <dmalloc.h>
+#endif
+
 #include "asn1.h"
 #include "snmp_api.h"
 #include "snmp_client.h"
@@ -52,7 +56,6 @@ struct snmp_session *
 find_agentx_session( struct snmp_session *session, int sessid)
 {
     struct snmp_session *sp;
-    
     for ( sp = session->subsession ; sp != NULL ; sp = sp->next ) {
         if ( sp->sessid == sessid )
 	    return sp;
@@ -67,6 +70,7 @@ open_agentx_session(struct snmp_session *session, struct snmp_pdu *pdu)
     struct snmp_session *sp;
     struct timeval now;
 
+    DEBUGMSGTL(("agentx:open_agentx_session","open %p\n", session));
     sp = (struct snmp_session *)malloc( sizeof( struct snmp_session ));
     if ( sp == NULL ) {
         session->s_snmp_errno = AGENTX_ERR_OPEN_FAILED;
@@ -97,6 +101,7 @@ open_agentx_session(struct snmp_session *session, struct snmp_pdu *pdu)
     sp->flags     |= SNMP_FLAGS_SUBSESSION;
     sp->next       = session->subsession;
     session->subsession = sp;
+    DEBUGMSGTL(("agentx:open_agentx_session","opened %p = %d\n", sp, sp->sessid));
 
     return sp->sessid;
 }
@@ -106,6 +111,7 @@ close_agentx_session(struct snmp_session *session, int sessid)
 {
     struct snmp_session *sp, *prev = NULL;
     
+    DEBUGMSGTL(("agentx:close_agentx_session","close %p, %d\n", session, sessid));
     if ( sessid == -1 ) {
 	unregister_mibs_by_session( session );
 	unregister_index_by_session( session );
@@ -113,7 +119,7 @@ close_agentx_session(struct snmp_session *session, int sessid)
 
 	return AGENTX_ERR_NOERROR;
     }
-    else
+
     for ( sp = session->subsession ; sp != NULL ; prev = sp, sp = sp->next ) {
         if ( sp->sessid == sessid ) {
 
