@@ -24,7 +24,7 @@ INSTALLBINPROGS	= snmpget$(EXEEXT) 			\
 		snmptest$(EXEEXT)			\
 		encode_keychange$(EXEEXT) 		\
 		snmpdf$(EXEEXT) 			\
-		snmpvacm$(EXEEXT)			\
+		snmpvacm$(EXEEXT)
 
 INSTALLSBINPROGS = snmptrapd$(EXEEXT)
 
