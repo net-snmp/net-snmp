@@ -539,6 +539,13 @@ vacm_parse_simple(const char *token, char *confline)
         DEBUGMSGTL((token, "passing: %s %s\n", "com2sec", line));
         netsnmp_udp_parse_security("com2sec", line);
 
+#ifdef SNMP_TRANSPORT_UNIX_DOMAIN
+        snprintf(line, sizeof(line), "%s %s",
+                 secname, community);
+        line[ sizeof(line)-1 ] = 0;
+        DEBUGMSGTL((token, "passing: %s %s\n", "com2secunix", line));
+        netsnmp_unix_parse_security("com2secunix", line);
+#endif
         /*
          * sec->group mapping 
          */
@@ -771,6 +778,15 @@ vacm_in_view(netsnmp_pdu *pdu, oid * name, size_t namelen,
                 }
             }
 #endif
+#ifdef SNMP_TRANSPORT_UNIX_DOMAIN
+        } else if (pdu->tDomain == netsnmp_UnixDomain){
+            if (!netsnmp_unix_getSecName(pdu->transport_data,
+                                        pdu->transport_data_length,
+                                        (char *) pdu->community,
+                                        pdu->community_len, &sn)) {
+					sn = NULL;
+				  }
+#endif	
         } else {
             /*
              * Map other <community, transport-address> pairs to security names
