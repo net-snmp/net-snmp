@@ -2323,8 +2323,6 @@ netsnmp_fixup_mib_directory()
                                       strlen(homepath)+1);
             if (new_mibpath) {
                 *ptr_home = 0; /* null out the spot where we stop copying */
-                fprintf(stderr, "%s%s%s\n", mibpath, homepath,
-                      ptr_home + strlen("$HOME"));
                 sprintf(new_mibpath, "%s%s%s", mibpath, homepath,
                       ptr_home + strlen("$HOME"));
                 /* swap in the new value and repeat */
