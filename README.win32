@@ -16,6 +16,7 @@ Installing Platform SDK
 Building with MS VC++
 Building with OpenSSL with MS VC++
 Installing from MS VC++ build
+How To build the Perl SNMP modules using MSVC
 Extending the Agent with MS VC++
 How to Register Net-SNMP Agent as a Windows service
 Building with Cygwin
@@ -347,6 +348,51 @@ Done copying files to "c:\Program Files\Net-SNMP"
 C:\net-snmp-5.1.1>
 
 ## END sample output from install-net-snmp.bat
+
+
+***************************************************************************
+*
+* How To build the Perl SNMP modules using MSVC
+*
+***************************************************************************
+
+Prerequisites 
+
+b. Install ActivePerl in C:\Perl .   Unless you need the advanced features
+   of Perl 5.8, consider that Perl 5.6 is better supported in some circles.
+
+1. Open the Net-SNMP source, goto the win32 sub-directory.
+   NOTE: Make sure that you did NOT previous build in this directory,
+   as for instance, for Cygwin or for Mingw.  The reason for this is to
+   avoid reading header files specific to those platforms, which would cause
+   MSVC to fail compiling the modules.
+
+2. Review the "Building with MS VC++" section of this document, then
+   make sure that nmakeperl.bat agrees with install-net-snmp.bat to
+   locate the ".lib" products from the MSVC build, which would be
+   deposited into the SNMPLIBPATH directory.
+
+   If the libraries are in their installed location, you may proceed
+   to step 5 in this procedure.
+
+3. Build Net-SNMP using win32.dsw or win32sdk.dsw
+   Close the workspace and exit Visual Studio.
+
+4. Open a command prompt window using "cmd.exe".
+   Go to the Net-SNMP source base directory.
+   Invoke win32\install-net-snmp to install the built programs.
+
+5. Set the environment PATH to locate "nmake", "cl", and "link".
+   Visual Studio installs a VCVARS32.BAT for this purpose.
+
+6. Invoke the nmakeperl.bat to build the Perl SNMP modules.
+   If you see errors, review the "nmake.out" file first.  If no errors there,
+   then the modules built correctly, but the tests did not rigourously
+   prove the mettle of the modules.  Review "nmaketest.out".  If the
+   first three sections mostly pass, the modules are well formed.
+
+7. The final step is to invoke "nmake install".  If no errors occurred,
+   then the SNMP modules are available for use by your Perl programs.
 
 
 ***************************************************************************
