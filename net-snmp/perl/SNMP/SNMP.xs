@@ -135,7 +135,7 @@ static int __send_sync_pdu _((struct snmp_session *, struct snmp_pdu *,
                               struct snmp_pdu **, int , SV *, SV *, SV *));
 static int __snmp_xs_cb __P((int, struct snmp_session *, int,
                              struct snmp_pdu *, void *));
-static int __push_cb_args _((SV ** svp, SV * esv));
+static SV* __push_cb_args _((SV * sv, SV * esv));
 static int __call_callback _((SV * sv, int flags));
 static char* __av_elem_pv _((AV * av, I32 key, char *dflt));
 
@@ -1009,7 +1009,7 @@ void *cb_data;
   default:;
   } /* switch op */
   sv_2mortal(cb);
-  __push_cb_args(&cb,
+  cb = __push_cb_args(cb,
                  (SvTRUE(varlist_ref) ? sv_2mortal(varlist_ref):varlist_ref));
   __call_callback(cb, G_DISCARD);
 
@@ -1019,12 +1019,11 @@ void *cb_data;
   return 1;
 }
 
-static int
-__push_cb_args(svp,esv)
-SV **svp;
+static SV *
+__push_cb_args(sv,esv)
+SV *sv;
 SV *esv;
 {
-   SV *sv = *svp;
    dSP;
    if (SvTYPE(SvRV(sv)) != SVt_PVCV) sv = SvRV(sv);
 
@@ -1051,9 +1050,8 @@ SV *esv;
       }
    }
    if (esv) XPUSHs(sv_mortalcopy(esv));
-   *svp = sv;
    PUTBACK;
-   return SUCCESS;
+   return sv;
 }
 
 static int
@@ -2809,6 +2807,7 @@ snmp_main_loop(timeout_sec,timeout_usec,perl_callback)
         struct timeval ctimeout, *ctvp;
         struct timeval interval, *itvp;
         int block;
+	SV *cb;
 	itvp = &interval;
 	itvp->tv_sec = timeout_sec;
 	itvp->tv_usec = timeout_usec;
@@ -2846,8 +2845,8 @@ snmp_main_loop(timeout_sec,timeout_usec,perl_callback)
                        ENTER;
                        SAVETMPS;
                        /* sv_2mortal(perl_callback); */
-                       __push_cb_args(&perl_callback, NULL);
-                       __call_callback(perl_callback, G_DISCARD);
+                       cb = __push_cb_args(perl_callback, NULL);
+                       __call_callback(cb, G_DISCARD);
                        FREETMPS;
                        LEAVE;
                        ctvp->tv_sec = -1;
