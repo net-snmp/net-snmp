@@ -78,7 +78,7 @@
 #define VARBIND_TYPE_F 3
 
 #define TYPE_UNKNOWN 0
-#define MAX_TYPE_NAME_LEN 16
+#define MAX_TYPE_NAME_LEN 32
 #define STR_BUF_SIZE (MAX_TYPE_NAME_LEN * MAX_OID_LEN)
 #define ENG_ID_BUF_SIZE 32
 
@@ -3754,6 +3754,8 @@ snmp_getbulk(sess_ref, nonrepeaters, maxrepetitions, varlist_ref, perl_callback)
                     *str_buf = '.';
                     *(str_buf+1) = '\0';
                     out_len = 0;
+                    buf_over = 0;
+                    str_bufp = str_buf;
                     tp = netsnmp_sprint_realloc_objid_tree(&str_bufp, &str_buf_len,
                                                            &out_len, 0, &buf_over,
                                                            vars->name,vars->name_length);
