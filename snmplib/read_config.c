@@ -60,6 +60,7 @@
 #include "system.h"
 #include "snmp_api.h"
 #include "snmp_debug.h"
+#include "snmp_impl.h"
 
 #include "read_config.h"
 
@@ -293,7 +294,7 @@ read_config_files (int when)
   char configfile[300];
   char *envconfpath, *homepath;
   char *cptr1, *cptr2;
-  char defaultPath[1024];
+  char defaultPath[SPRINT_MAX_LEN];
 
   struct config_files *ctmp = config_files;
   struct config_line *ltmp;
