@@ -1,3 +1,14 @@
+/* Portions of this file are subject to the following copyright(s).  See
+ * the Net-SNMP's COPYING file for more details and other copyrights
+ * that may apply:
+ */
+/*
+ * Portions of this file are copyrighted by:
+ * Copyright © 2003 Sun Microsystems, Inc. All rights reserved.
+ * Use is subject to license terms specified in the COPYING file
+ * distributed with the Net-SNMP package.
+ */
+
 /*
  * vacm.c
  *
@@ -389,7 +400,6 @@ vacm_checkSubtree(const char *viewName,
     struct vacm_viewEntry *vp, *vpShorter = NULL, *vpLonger = NULL;
     char            view[VACMSTRINGLEN];
     int             found, glen;
-    int count=0;
 
     glen = (int) strlen(viewName);
     if (glen < 0 || glen >= VACM_MAX_STRING)
@@ -850,11 +860,11 @@ vacm_createAccessEntry(const char *groupName,
             break;
         if (cmp < 0)
             goto next;
-        if (lp->securityModel > securityModel)
-            break;
         if (lp->securityModel < securityModel)
+            break;
+        if (lp->securityModel > securityModel)
             goto next;
-        if (lp->securityLevel > securityLevel)
+        if (lp->securityLevel < securityLevel)
             break;
       next:
         op = lp;
