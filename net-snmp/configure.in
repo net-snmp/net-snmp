@@ -1189,8 +1189,9 @@ fi
 
 dnl Checks for libraries.
 dnl AC_CHECK_LIB(des, main)
-AC_CHECK_LIB(elf, nlist)
 AC_CHECK_LIB(m, asin)
+dnl nlist is needed for uptime on some sytems in the generic library
+AC_CHECK_LIB(elf, nlist)
 
 dnl On some platforms (Irix) libnsl and libsocket should not be used.
 AC_CHECK_FUNC(gethostbyname, AC_DEFINE(HAVE_GETHOSTBYNAME),
@@ -1200,7 +1201,24 @@ AC_CHECK_FUNC(getservbyname, AC_DEFINE(HAVE_GETSERVBYNAME),
 	AC_CHECK_LIB(socket, getservbyname, AC_DEFINE(HAVE_GETSERVBYNAME)
 	LIBS="${LIBS} -lsocket"))
 
-dnl AC_CHECK_LIB(ucb, bzero)
+dnl Replace `main' with a function in -lkstat:
+AC_CHECK_LIB(kstat, kstat_lookup)
+dnl Check for nlist in mld (irix)
+AC_CHECK_LIB(mld, nlist)
+
+dnl Check for security related functions
+if test "x$tryopenssl" != "xno"; then
+    if test "x$tryrsaref" != "xno"; then
+         AC_CHECK_LIB(rsaref, RSAPrivateDecrypt)
+         AC_CHECK_LIB(RSAglue, RSA_PKCS1_RSAref)
+    fi
+
+    AC_CHECK_LIB(crypto, EVP_md5)
+fi
+
+dnl Check for libraries that the agent needs
+dnl saving old libraries
+NONAGENTLIBS=$LIBS
 
 dnl check for tcp wrapper support
 _cppflags="${CPPFLAGS}"
@@ -1316,24 +1334,14 @@ if test x$ac_cv_lib_rpm_rpmdbOpen = xno; then
 fi
 
 
-dnl Replace `main' with a function in -lkstat:
-AC_CHECK_LIB(kstat, kstat_lookup)
 dnl Replace `main' with a function in -lkvm:
 AC_CHECK_LIB(kvm, kvm_read)
-dnl Check for nlist in mld (irix)
-AC_CHECK_LIB(mld, nlist)
 dnl DYNAMIC MODULE SUPPORT
 AC_CHECK_LIB(dl, dlopen)
 
-dnl Check for security related functions
-if test "x$tryopenssl" != "xno"; then
-    if test "x$tryrsaref" != "xno"; then
-         AC_CHECK_LIB(rsaref, RSAPrivateDecrypt)
-         AC_CHECK_LIB(RSAglue, RSA_PKCS1_RSAref)
-    fi
-
-    AC_CHECK_LIB(crypto, EVP_md5)
-fi
+dnl reset libs
+AGENTLIBS=$LIBS
+LIBS=$NONAGENTLIBS
 
 dnl Checks for header files.
 AC_HEADER_STDC
@@ -1363,7 +1371,8 @@ AC_CHECK_HEADERS(sys/dkio.h sys/diskio.h sys/pstat.h linux/hdreg.h pkglocs.h)
 dnl for HostRes (Solaris 2.x at least)
 AC_CHECK_HEADERS(pkginfo.h,
     AC_CHECK_LIB(adm, pkginfo, AC_DEFINE(HAVE_PKGINFO)
-    LIBS="${LIBS} -ladm"))
+    LIBS="${LIBS} -ladm"
+    AGENTLIBS="${AGENTLIBS} -ladm"))
 dnl WIN32
 AC_CHECK_HEADERS(winsock.h io.h)
 dnl SCO
@@ -2175,6 +2184,11 @@ if test "x$ac_cv_TCPTV_NEEDS_HZ" = "xyes"; then
 fi
 
 dnl
+dnl define the agent libraries variable
+dnl
+AC_SUBST(AGENTLIBS)
+
+dnl
 dnl Prompt for various bits of user information
 dnl
 
@@ -2287,6 +2301,7 @@ AC_OUTPUT([
  man/Makefile:Makefile.top:man/Makefile.in
  ov/Makefile:Makefile.top:ov/Makefile.in
  mibs/Makefile:Makefile.top:mibs/Makefile.in
+ net-snmp-config:net-snmp-config.in
 ], echo timestamp > stamp-h)
 
 dnl Local Variables:
