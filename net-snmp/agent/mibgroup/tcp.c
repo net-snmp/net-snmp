@@ -332,9 +332,13 @@ var_tcp(vp, name, length, exact, var_len, write_method)
      *	Allow for a kernel w/o TCP
      */
 #ifndef linux
+#ifndef TCPSTAT_SYMBOL
+    return NULL;
+#else
     if (auto_nlist_value(TCPSTAT_SYMBOL) == -1) return(NULL);
 #endif
-
+#endif
+    
 	if (header_tcp(vp, name, length, exact, var_len, write_method) == MATCH_FAILED )
 	    return NULL;
 
