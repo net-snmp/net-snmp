@@ -24,7 +24,9 @@
 ########################################################################
 ##
 ########################################################################
-@    include parent-set.m2i@
+@    if $m2c_data_allocate eq "yes" && $m2c_data_context ne "generated"@
+@        include parent-set.m2i@
+@    end@
 @    if $m2c_table_dependencies == 1@
 @        include parent-dependencies.m2i@
 @    end@
