@@ -581,8 +581,8 @@ u_char *snmp_pdu_rbuild (struct snmp_pdu *, u_char *, size_t *);
 #endif
 int snmpv3_parse(struct snmp_pdu *, u_char *, size_t *, u_char  **, struct snmp_session *);
 int snmpv3_dparse(struct snmp_pdu *, u_char *, size_t *, u_char  **, int);
-int snmpv3_packet_build(struct snmp_pdu *pdu, u_char *packet, size_t *out_length, u_char *pdu_data, size_t pdu_data_len);
-int snmpv3_packet_rbuild(struct snmp_pdu *pdu, u_char *packet, size_t *out_length, u_char *pdu_data, size_t pdu_data_len);
+int snmpv3_packet_build(struct snmp_session *, struct snmp_pdu *pdu, u_char *packet, size_t *out_length, u_char *pdu_data, size_t pdu_data_len);
+int snmpv3_packet_rbuild(struct snmp_session *, struct snmp_pdu *pdu, u_char *packet, size_t *out_length, u_char *pdu_data, size_t pdu_data_len);
 int snmpv3_make_report(struct snmp_pdu *pdu, int error);
 int snmpv3_get_report_type(struct snmp_pdu *pdu);
 int snmp_pdu_parse(struct snmp_pdu *pdu, u_char *data, size_t *length);
