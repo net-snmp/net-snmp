@@ -48,6 +48,9 @@
 static struct snmp_gen_callback
                *thecallbacks[MAX_CALLBACK_IDS][MAX_CALLBACK_SUBIDS];
 
+static int _lock = 0;
+
+
 /*
  * the chicken. or the egg.  You pick. 
  */
@@ -119,8 +122,14 @@ netsnmp_register_callback(int major, int minor, SNMPCallback * new_callback,
     if (major >= MAX_CALLBACK_IDS || minor >= MAX_CALLBACK_SUBIDS) {
         return SNMPERR_GENERR;
     }
+    if(++_lock > 1) {
+        snmp_log(LOG_WARNING,
+                 "netsnmp_register_callback called while callbacks _locked\n");
+        netsnmp_assert(1==_lock);
+    }
 
     if ((newscp = SNMP_MALLOC_STRUCT(snmp_gen_callback)) == NULL) {
+        --_lock;
         return SNMPERR_GENERR;
     } else {
         newscp->priority = priority;
@@ -141,6 +150,7 @@ netsnmp_register_callback(int major, int minor, SNMPCallback * new_callback,
 
         DEBUGMSGTL(("callback", "registered (%d,%d) at %p with priority %d\n",
                     major, minor, newscp, priority));
+        --_lock;
         return SNMPERR_SUCCESS;
     }
 }
@@ -172,6 +182,12 @@ snmp_call_callbacks(int major, int minor, void *caller_arg)
         return SNMPERR_GENERR;
     }
 
+    if(++_lock > 1) {
+        snmp_log(LOG_WARNING,
+                 "snmp_call_callbacks called while callbacks _locked\n");
+        netsnmp_assert(1==_lock);
+    }
+
     DEBUGMSGTL(("callback", "START calling callbacks for maj=%d min=%d\n",
                 major, minor));
 
@@ -179,6 +195,12 @@ snmp_call_callbacks(int major, int minor, void *caller_arg)
      * for each registered callback of type major and minor 
      */
     for (scp = thecallbacks[major][minor]; scp != NULL; scp = scp->next) {
+
+        /*
+         * skip unregistered callbacks
+         */
+        if(NULL == scp->sc_callback)
+            continue;
 
         DEBUGMSGTL(("callback", "calling a callback for maj=%d min=%d\n",
                     major, minor));
@@ -195,6 +217,7 @@ snmp_call_callbacks(int major, int minor, void *caller_arg)
                 "END calling callbacks for maj=%d min=%d (%d called)\n",
                 major, minor, count));
 
+    --_lock;
     return SNMPERR_SUCCESS;
 }
 
@@ -263,14 +286,25 @@ snmp_unregister_callback(int major, int minor, SNMPCallback * target,
     struct snmp_gen_callback **prevNext = &(thecallbacks[major][minor]);
     int             count = 0;
 
+    if(++_lock > 1) {
+        snmp_log(LOG_WARNING,
+                 "snmp_unregister_callback called while callbacks _locked\n");
+        //netsnmp_assert(1==_lock);
+    }
     while (scp != NULL) {
         if ((scp->sc_callback == target) &&
             (!matchargs || (scp->sc_client_arg == arg))) {
             DEBUGMSGTL(("callback", "unregistering (%d,%d) at %p\n", major,
                         minor, scp));
-            *prevNext = scp->next;
-            SNMP_FREE(scp);
-            scp = *prevNext;
+            if(_lock == 1) {
+                *prevNext = scp->next;
+                SNMP_FREE(scp);
+                scp = *prevNext;
+            }
+            else {
+                scp->sc_callback = NULL;
+                /** set cleanup flag? */
+            }
             count++;
         } else {
             prevNext = &(scp->next);
@@ -278,6 +312,7 @@ snmp_unregister_callback(int major, int minor, SNMPCallback * target,
         }
     }
 
+    --_lock;
     return count;
 }
 
@@ -287,13 +322,18 @@ clear_callback(void)
     unsigned int i = 0, j = 0; 
     struct snmp_gen_callback *scp = NULL, *next = NULL;
 
+    if(++_lock > 1) {
+        snmp_log(LOG_WARNING,
+                 "clear_callback called while callbacks _locked\n");
+        netsnmp_assert(1==_lock);
+    }
     DEBUGMSGTL(("callback", "clear callback\n"));
     for (i = 0; i < MAX_CALLBACK_IDS; i++) {
 	for (j = 0; j < MAX_CALLBACK_SUBIDS; j++) {
 	    scp = thecallbacks[i][j]; 
 	    while (scp != NULL) {
 		next = scp->next;
-		if (scp->sc_client_arg != NULL)
+		if ((NULL != scp->sc_callback) && (scp->sc_client_arg != NULL))
 		    SNMP_FREE(scp->sc_client_arg);
 		SNMP_FREE(scp);
 		scp = next;
@@ -301,6 +341,7 @@ clear_callback(void)
 	    thecallbacks[i][j] = NULL;
 	}
     }
+    --_lock;
 }
 
 struct snmp_gen_callback *
