@@ -2086,11 +2086,11 @@ asn_rbuild_int (u_char *data,
     integer = *intp;
 
     if (((*datalength)--) < 1) return NULL;
-    *data-- = integer & 0xff;
+    *data-- = (u_char)integer;
     integer >>= 8;
     while (integer != testvalue) {
         if (((*datalength)--) < 1) return NULL;
-        *data-- = integer & 0xff;
+        *data-- = (u_char)integer;
         integer >>= 8;
     }
     if ((*(data+1) & 0x80) != (testvalue & 0x80)) {
@@ -2162,11 +2162,11 @@ asn_rbuild_unsigned_int (u_char *data,
     integer = *intp;
 
     if (((*datalength)--) < 1) return NULL;
-    *data-- = integer & 0xff;
+    *data-- = (u_char)integer;
     integer >>= 8;
     while (integer != 0) {
         if (((*datalength)--) < 1) return NULL;
-        *data-- = integer & 0xff;
+        *data-- = (u_char)integer;
         integer >>= 8;
     }
     if ((*(data+1) & 0x80) != (0 & 0x80)) {
@@ -2286,7 +2286,7 @@ asn_rbuild_objid (u_char *data,
     } else if (objidlength == 1) {
         /* encode the first value */
         if ((*datalength)-- < 1) return NULL;
-        *data-- = objid[0];
+        *data-- = (u_char)objid[0];
     } else {
         for(i = objidlength; i > 2; i--) {
             tmpint = objid[i-1];
@@ -2307,7 +2307,7 @@ asn_rbuild_objid (u_char *data,
 	    return NULL;
 	}
         if ((*datalength)-- < 1) return NULL;
-	*data-- = (op[0] * 40) + op[1];
+	*data-- = (u_char)((op[0] * 40) + op[1]);
     }
     
     tmpint = initdatap-data;
@@ -2364,13 +2364,13 @@ u_char	*asn_rbuild_unsigned_int64 (u_char *data,
   
   /* encode the low 4 bytes first */
   if (((*datalength)--) < 1) return NULL;
-  *data-- = low & 0xff;
+  *data-- = (u_char)low;
   low >>= 8;
   count = 1;
   while (low != 0) {
       count++;
       if (((*datalength)--) < 1) return NULL;
-      *data-- = low & 0xff;
+      *data-- = (u_char)low;
       low >>= 8;
   }
 
@@ -2384,11 +2384,11 @@ u_char	*asn_rbuild_unsigned_int64 (u_char *data,
 
       /* do high byte */
       if (((*datalength)--) < 1) return NULL;
-      *data-- = high & 0xff;
+      *data-- = (u_char)high;
       high >>= 8;
       while (high != 0) {
           if (((*datalength)--) < 1) return NULL;
-          *data-- = high & 0xff;
+          *data-- = (u_char)high;
           high >>= 8;
       }
   }
@@ -2477,13 +2477,13 @@ u_char	*asn_rbuild_signed_int64 (u_char *data,
   
   /* encode the low 4 bytes first */
   if (((*datalength)--) < 1) return NULL;
-  *data-- = low & 0xff;
+  *data-- = (u_char)low;
   low >>= 8;
   count = 1;
-  while (low != testvalue) {
+  while ((int)low != testvalue) {
       count++;
       if (((*datalength)--) < 1) return NULL;
-      *data-- = low & 0xff;
+      *data-- = (u_char)low;
       low >>= 8;
   }
 
@@ -2497,11 +2497,11 @@ u_char	*asn_rbuild_signed_int64 (u_char *data,
 
       /* do high byte */
       if (((*datalength)--) < 1) return NULL;
-      *data-- = high & 0xff;
+      *data-- = (u_char)high;
       high >>= 8;
-      while (high != testvalue) {
+      while ((int)high != testvalue) {
           if (((*datalength)--) < 1) return NULL;
-          *data-- = high & 0xff;
+          *data-- = (u_char)high;
           high >>= 8;
       }
   }

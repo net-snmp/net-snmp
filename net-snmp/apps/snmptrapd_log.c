@@ -151,6 +151,7 @@ typedef enum {
   CHR_PDU_IP     = 'b',       /* PDU's IP address */
   CHR_PDU_NAME   = 'B',       /* PDU's host name if available */
   CHR_PDU_ENT    = 'N',       /* PDU's enterprise string */
+  CHR_PDU_WRAP	 = 'P',       /* PDU's wrapper info (community, security) */
   CHR_TRAP_NUM   = 'w',       /* trap number */
   CHR_TRAP_DESC  = 'W',       /* trap's description (textual) */
   CHR_TRAP_STYPE = 'q',       /* trap's subtype */
@@ -240,6 +241,7 @@ typedef enum {
 			  || is_agent_cmd (chr)     \
 			  || is_pdu_ip_cmd (chr)    \
                           || ((chr) == CHR_PDU_ENT) \
+                          || ((chr) == CHR_PDU_WRAP) \
 			  || is_trap_cmd (chr)) ? TRUE : FALSE)
      /*
       * Function:
@@ -432,7 +434,7 @@ static void handle_time_fmt (char * bfr,
   /* handle output in Unix time format */
   if (fmt_cmd == CHR_CUR_TIME)
     sprintf (safe_bfr, "%ld", (long) time_val);
-  else if ((fmt_cmd == CHR_UP_TIME) && !options->alt_format)
+  else if (fmt_cmd == CHR_UP_TIME && !options->alt_format)
     sprintf (safe_bfr, "%ld", (long) time_val);
   else if (fmt_cmd == CHR_UP_TIME) {
     int centisecs, seconds, minutes, hours, days;
@@ -780,6 +782,70 @@ static void handle_trap_fmt (char * bfr,
   return;
 }
 
+static void handle_wrap_fmt(char *bfr, unsigned long *tail, unsigned long len,
+  			   struct snmp_pdu *pdu)
+{
+#define LCL_SAFE_LEN 200
+  char                   sprint_bfr[SPRINT_MAX_LEN]; /* string-building bfr */
+  char                   safe_bfr[LCL_SAFE_LEN]; /* string-building bfr */
+  unsigned long          safe_tail = 0;             /* end of safe buffer */
+  char *                 cp;
+  int                    i;
+  
+  switch (pdu->command) {
+  case SNMP_MSG_TRAP:
+      str_append (safe_bfr, &safe_tail, LCL_SAFE_LEN, "TRAP");
+      break;
+  case SNMP_MSG_TRAP2:
+      str_append (safe_bfr, &safe_tail, LCL_SAFE_LEN, "TRAP2");
+      break;
+  case SNMP_MSG_INFORM:
+      str_append (safe_bfr, &safe_tail, LCL_SAFE_LEN, "INFORM");
+      break;
+  }
+  str_append(safe_bfr, &safe_tail, LCL_SAFE_LEN, ", SNMP v");
+  switch (pdu->version) {
+  case SNMP_VERSION_1:
+      str_append (safe_bfr, &safe_tail, LCL_SAFE_LEN, "1");
+      break;
+  case SNMP_VERSION_2c:
+      str_append (safe_bfr, &safe_tail, LCL_SAFE_LEN, "2c");
+      break;
+  case SNMP_VERSION_3:
+      str_append (safe_bfr, &safe_tail, LCL_SAFE_LEN, "3");
+      break;
+  }
+  switch (pdu->version) {
+  case SNMP_VERSION_1:
+  case SNMP_VERSION_2c:
+      str_append(safe_bfr, &safe_tail, LCL_SAFE_LEN, ", Community ");
+      cp = sprint_bfr;
+      for (i = 0; i < (int)pdu->community_len; i++)
+          if (isprint(pdu->community[i])) *cp++ = pdu->community[i];
+	  else *cp++ = '.';
+      *cp = 0;
+      str_append(safe_bfr, &safe_tail, LCL_SAFE_LEN, sprint_bfr);
+      break;
+  case SNMP_VERSION_3:
+      str_append(safe_bfr, &safe_tail, LCL_SAFE_LEN, ", User ");
+      cp = sprint_bfr;
+      for (i = 0; i < (int)pdu->securityNameLen; i++)
+          if (isprint(pdu->securityName[i])) *cp++ = pdu->securityName[i];
+	  else *cp++ = '.';
+      *cp = 0;
+      str_append(safe_bfr, &safe_tail, LCL_SAFE_LEN, sprint_bfr);
+      str_append(safe_bfr, &safe_tail, LCL_SAFE_LEN, ", Context ");
+      cp = sprint_bfr;
+      for (i = 0; i < (int)pdu->contextNameLen; i++)
+          if (isprint(pdu->contextName[i])) *cp++ = pdu->contextName[i];
+	  else *cp++ = '.';
+      *cp = 0;
+      str_append(safe_bfr, &safe_tail, LCL_SAFE_LEN, sprint_bfr);
+      break;
+  }
+  str_append (bfr, tail, len, safe_bfr);
+}
+
 static void dispatch_format_cmd (char * bfr,
 				 unsigned long * tail,
 				 unsigned long len,
@@ -811,6 +877,8 @@ static void dispatch_format_cmd (char * bfr,
     handle_trap_fmt (bfr, tail, len, options, pdu);
   else if (fmt_cmd == CHR_PDU_ENT)
     handle_ent_fmt (bfr, tail, len, options, pdu);
+  else if (fmt_cmd == CHR_PDU_WRAP)
+    handle_wrap_fmt (bfr, tail, len, pdu);
 
   /* unknown command */
   else {
@@ -960,14 +1028,17 @@ unsigned long format_plain_trap (char * bfr,
     free(tstr);
   }
 
-  /* append enterprise information and end the line */
-  str_append (bfr, &tail, len, " ");
+  /* add security wrapper information */
+  handle_wrap_fmt(bfr, &tail, len, pdu);
+  str_append(bfr, &tail, len, "\n");
+
+  /* add enterprise information */
+  str_append (bfr, &tail, len, "\t");
   sprint_objid (sprint_bfr, pdu->enterprise, pdu->enterprise_length);
   str_append (bfr, &tail, len, sprint_bfr);
-  str_append (bfr, &tail, len, "\n");
 
   /* handle enterprise specific traps */
-  str_append (bfr, &tail, len, "\t");
+  str_append (bfr, &tail, len, " ");
   str_append (bfr, &tail, len, trap_description (pdu->trap_type));
   str_append (bfr, &tail, len, " Trap (");
   if (pdu->trap_type == SNMP_TRAP_ENTERPRISESPECIFIC) {
@@ -1155,6 +1226,8 @@ unsigned long format_trap (char * bfr,
 	}
 	else if (is_fmt_cmd (next_chr)) {
 	  options.cmd = next_chr;
+	  if (options.width < options.precision)
+	    options.width = options.precision;
 	  dispatch_format_cmd (bfr, &tail, len, &options, pdu, transport);
 	  state = PARSE_NORMAL;
 	}

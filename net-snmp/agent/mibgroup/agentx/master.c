@@ -3,6 +3,7 @@
  */
 #include "config.h"
 
+#include <stdio.h>
 #include <sys/types.h>
 #ifdef HAVE_STDLIB_H
 #include <stdlib.h>
@@ -12,10 +13,16 @@
 #else
 #include <strings.h>
 #endif
-#include <sys/errno.h>
 #if HAVE_NETINET_IN_H
 #include <netinet/in.h>
 #endif
+#if HAVE_WINSOCK_H
+#include <winsock.h>
+#endif
+#if HAVE_SYS_SOCKET_H
+#include <sys/socket.h>
+#endif
+#include <errno.h>
 
 #if HAVE_DMALLOC_H
 #include <dmalloc.h>

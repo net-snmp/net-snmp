@@ -1791,7 +1791,7 @@ _get_symbol(oid *objid,
 		}
 		if (numids > objidlen)
 		    goto finish_it;
-		for (i = 0; i < numids; i++) buffer[i] = objid[i];
+		for (i = 0; i < (int)numids; i++) buffer[i] = (u_char)objid[i];
 		var.type = ASN_OCTET_STR;
 		var.val.string = buffer;
 		var.val_len = numids;
@@ -2782,6 +2782,37 @@ char *uptime_string(u_long timeticks, char *buf)
 #endif
     strcpy(buf, tbuf);
     return buf;
+}
+
+oid
+*snmp_parse_oid(const char *argv,
+		oid *root,
+		size_t *rootlen)
+{
+  size_t savlen = *rootlen;
+  if (snmp_get_random_access() || strchr(argv, ':')) {
+    if (get_node(argv,root,rootlen)) {
+      return root;
+    }
+  } else if (ds_get_boolean(DS_LIBRARY_ID, DS_LIB_REGEX_ACCESS)) {
+    if (get_wild_node(argv,root,rootlen)) {
+      return root;
+    }
+  } else {
+    if (read_objid(argv,root,rootlen)) {
+      return root;
+    }
+    *rootlen = savlen;
+    if (get_node(argv,root,rootlen)) {
+      return root;
+    }
+    *rootlen = savlen;
+    DEBUGMSGTL(("parse_oid","wildly parsing\n"));
+    if (get_wild_node(argv,root,rootlen)) {
+      return root;
+    }
+  }
+  return NULL;
 }
 
 #ifdef CMU_COMPATIBLE
