@@ -207,7 +207,7 @@ void print_table __P((void))
   char string_buf[1024];
   char *index_fmt = NULL;
 
-  printf("SNMP table: %s\n\n", table_name);
+  if (!no_headers) printf("SNMP table: %s\n\n", table_name);
 
   for (field = 0; field < fields; field++) {
     if (field_separator == NULL)
@@ -223,7 +223,8 @@ void print_table __P((void))
 
   while (last_field != fields) {
     part++;
-    if (part != 1) printf("\nSNMP table %s, part %d\n\n", table_name, part);
+    if (part != 1 && !no_headers)
+      printf("\nSNMP table %s, part %d\n\n", table_name, part);
     first_field = last_field;
     dp = data;
     if (show_index) {
@@ -235,10 +236,10 @@ void print_table __P((void))
     for (field = first_field; field < fields; field++) {
       width += column[field].width+1;
       if (field != first_field && width > max_width && max_width != 0) break;
-      printf(column[field].fmt, column[field].label);
+      if (!no_headers) printf(column[field].fmt, column[field].label);
     }
     last_field = field;
-    printf("\n");
+    if (!no_headers) printf("\n");
     for (entry = 0; entry < entries; entry++) {
       if (show_index) printf(index_fmt, indices[entry]);
       for (field = first_field; field < last_field; field++) {
