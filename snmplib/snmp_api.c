@@ -811,8 +811,8 @@ snmp_parse(session, pdu, data, length)
     u_char  *var_val;
     long    version;
     int	    len, four;
-    u_char community[128];
-    int community_length = 128;
+    u_char community[COMMUNITY_MAX_LEN];
+    int community_length = COMMUNITY_MAX_LEN;
     struct internal_variable_list *vp = NULL;
     oid objid[MAX_NAME_LEN];
 
