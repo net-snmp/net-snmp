@@ -53,7 +53,7 @@ netsnmp_access_interface_container_arch_load(netsnmp_container* container,
     uintmax_t       snd_pkt, snd_oct, snd_err, snd_drop, coll;
     const char     *scan_line_2_2 =
         "%"   SCNuMAX " %"  SCNuMAX " %"  SCNuMAX " %"  SCNuMAX
-        " %*" SCNuMAX " %*" SCNuMAX " %*" SCNuMAX " %*" SCNuMAX
+        " %*" SCNuMAX " %*" SCNuMAX " %*" SCNuMAX " %"  SCNuMAX
         " %"  SCNuMAX " %"  SCNuMAX " %"  SCNuMAX " %"  SCNuMAX
         " %*" SCNuMAX " %"  SCNuMAX;
     const char     *scan_line_2_0 =
@@ -64,7 +64,7 @@ netsnmp_access_interface_container_arch_load(netsnmp_container* container,
     unsigned long   rec_pkt, rec_oct, rec_err, rec_drop, rec_mcast;
     unsigned long   snd_pkt, snd_oct, snd_err, snd_drop, coll;
     const char     *scan_line_2_2 =
-        "%lu %lu %lu %lu %*lu %*lu %*lu %*lu %lu %lu %lu %lu %*lu %lu";
+        "%lu %lu %lu %lu %*lu %*lu %*lu %lu %lu %lu %lu %lu %*lu %lu";
     const char     *scan_line_2_0 =
         "%lu %lu %*lu %*lu %*lu %lu %lu %*lu %*lu %lu";
 #endif
