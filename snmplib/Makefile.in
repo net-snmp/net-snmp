@@ -45,12 +45,21 @@ INCLUDESUBDIRHEADERS=README \
 	snmp_logging.h \
 	snmp_parse_args.h \
 	snmp-tc.h \
-	snmpusm.h \
 	snmpv3.h \
 	system.h \
 	tools.h \
 	transform_oids.h \
 	winservice.h \
+        cmu_compat.h \
+        getopt.h \
+        lcd_time.h \
+        mt_support.h \
+        oid_stash.h \
+        snmp_enum.h \
+        snmp_locking.h \
+        snmp_secmod.h \
+        ucd_compat.h \
+        vacm.h \
 	snmp_transport.h \
 	@transport_hdr_list@ \
 	@security_hdr_list@
