@@ -228,7 +228,7 @@ static void usage(char *prog)
 	printf("  -h, --help\t\tdisplay this usage message\n");
 	printf("  -H\t\t\tdisplay configuration file directives understood\n");
 	printf("  -I [-]INITLIST\tlist of mib modules to initialize (or not)\n");
-	printf("\t\t\t  (run snmpd with -Dinit_mib for a list)\n");
+	printf("\t\t\t  (run snmpd with -Dmib_init for a list)\n");
 	printf("  -l FILE\t\tprint warnings/messages to FILE\n");
 #ifdef LOGFILE
 	printf("\t\t\t  (by default FILE=%s)\n", LOGFILE);
