@@ -31,11 +31,11 @@
 
 #include "mibincl.h"
 #include "read_config.h"
-#include "../../snmplib/system.h"
+#include "../../../snmplib/system.h"
 #include "vacm.h"
 #include "vacm_vars.h"
 #include "../../mib_module_config.h"
-#ifdef USING_SYSORTABLE_MODULE
+#ifdef USING_MIBII_SYSORTABLE_MODULE
 #if TIME_WITH_SYS_TIME
 # include <sys/time.h>
 # include <time.h>
@@ -51,7 +51,7 @@
 
 void
 init_vacm_vars __P((void)) {
-#ifdef USING_SYSORTABLE_MODULE
+#ifdef USING_MIBII_SYSORTABLE_MODULE
   static oid reg[] = {1,3,6,1,6,3,13};
   register_sysORTable(reg,7,"View-based Access Control Model for SNMP.");
 #endif

@@ -29,7 +29,7 @@
 #include "mibincl.h"
 #include "struct.h"
 #include "proc.h"
-#ifdef USING_ERRORMIB_MODULE
+#ifdef USING_UCD_SNMP_ERRORMIB_MODULE
 #include "errormib.h"
 #else
 #define setPerrorstatus(x) perror(x)
@@ -37,7 +37,7 @@
 #include "util_funcs.h"
 #include "read_config.h"
 #include "mib_module_config.h"
-#include "../../snmplib/system.h"
+#include "../../../snmplib/system.h"
 
 struct myproc *get_proc_instance __P((struct myproc *,int));
 struct myproc *procwatch = NULL;
@@ -501,7 +501,7 @@ int sh_count_procs(procname)
         if (!strcmp(line,procname)) ret++;
       }
     if (ftell(file) < 2) {
-#ifdef USING_ERRORMIB_MODULE
+#ifdef USING_UCD_SNMP_ERRORMIB_MODULE
       seterrorstatus("process list unreasonable short (mem?)",2);
 #endif
       ret = -1;

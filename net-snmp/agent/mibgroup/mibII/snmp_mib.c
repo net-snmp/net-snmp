@@ -9,8 +9,8 @@
 #include <netinet/in.h>
 #endif
 
-#include "mibincl.h"
-#include "../../snmplib/system.h"
+#include "../mibincl.h"
+#include "../../../snmplib/system.h"
 
 /* #include "../common_header.h" */
 #include "snmp_mib.h"

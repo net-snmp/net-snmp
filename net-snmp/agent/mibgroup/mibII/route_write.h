@@ -5,7 +5,7 @@
 #ifndef _MIBGROUP_ROUTE_WRITE_H
 #define _MIBGROUP_ROUTE_WRITE_H
 
-config_require(ip)
+config_require(mibII/ip)
 
 int addRoute __P((u_long, u_long, u_long, u_short));
 int delRoute __P((u_long, u_long, u_long, u_short));

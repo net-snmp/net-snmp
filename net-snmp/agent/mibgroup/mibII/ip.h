@@ -31,7 +31,7 @@ struct ip_mib
 };
 #endif
 
-config_require(interfaces at var_route route_write)
+config_require(mibII/interfaces mibII/at mibII/var_route mibII/route_write)
 config_arch_require(solaris2, kernel_sunos5)
 
 #include "var_route.h"

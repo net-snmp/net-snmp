@@ -55,7 +55,7 @@
 #ifdef solaris2
 #include "kernel_sunos5.h"
 #endif
-#include "../../snmplib/system.h"
+#include "../../../snmplib/system.h"
 
 #include "mibincl.h"
 #include "auto_nlist.h"

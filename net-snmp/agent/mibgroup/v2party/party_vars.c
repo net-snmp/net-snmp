@@ -32,7 +32,7 @@
 #include "snmp_api.h"
 #include "snmp_impl.h"
 #include "snmp_vars.h"
-#include "../../snmplib/system.h"
+#include "../../../snmplib/system.h"
 
 #include "acl.h"
 #include "view.h"

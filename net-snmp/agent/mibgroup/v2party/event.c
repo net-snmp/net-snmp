@@ -67,7 +67,7 @@
 #include "event.h"
 #include "party.h"
 #include "snmp_client.h"	
-#include "../../snmplib/system.h"
+#include "../../../snmplib/system.h"
 
 static struct eventEntry *eventTab = NULL;
 static struct eventNotifyEntry *eventNotifyTab = NULL;

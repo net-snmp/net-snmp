@@ -64,7 +64,7 @@
 #include <strings.h>
 #endif
 
-#include "../../snmplib/system.h"
+#include "../../../snmplib/system.h"
 
 #define HRSTORE_MONOTONICALLY_INCREASING
 

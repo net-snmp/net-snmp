@@ -14,7 +14,7 @@
 
 #include "mibincl.h"
 #include "registry.h"
-#include "../../snmplib/system.h"
+#include "../../../snmplib/system.h"
 
 	/*********************
 	 *

@@ -117,12 +117,12 @@
 #include "read_config.h"
 #include "mib_module_config.h"
 #include "auto_nlist.h"
-#if USING_ERRORMIB_MODULE
+#if USING_UCD_SNMP_ERRORMIB_MODULE
 #include "errormib.h"
 #else
 #define setPerrorstatus(x) perror(x)
 #endif
-#include "../../snmplib/system.h"
+#include "../../../snmplib/system.h"
 
 int numdisks;
 struct diskpart disks[MAXDISKS];
