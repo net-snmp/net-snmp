@@ -75,7 +75,7 @@ else
       echo $NSC_SRCDIR
       ;;
     #################################################### linking
-    --lib-dir)
+    --libdir|--lib-dir)
       echo $NSC_LIBDIR
       ;;
     --ldflags)
