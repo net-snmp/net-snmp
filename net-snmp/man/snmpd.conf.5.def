@@ -161,6 +161,12 @@ To enable AgentX support in the SNMP master agent, put the following
 line in your snmpd.conf file:
 .IP "master agentx"
 See README.agentx for further details.
+.P
+You can also put the following in your subagent.conf file (where
+"subagent" is the name you used in your init_snmp("subagent") api call:
+.IP "agentPingInterval NUM"
+This makes the subagent try and reconnect every NUM seconds to the
+master if it ever becomes (or starts) disconnected.
 .SH SMUX SUB-AGENTS
 To enable and SMUX based sub-agent, such as
 .IR gated ,
