@@ -13,5 +13,6 @@ struct simple_proxy {
 
 extern FindVarMethod var_simple_proxy;
 void proxy_parse_config (const char *, char *);
+void init_proxy(void);
 
 #endif /* UCD_SNMP_PROXY_H */
