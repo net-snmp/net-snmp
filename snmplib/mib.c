@@ -276,7 +276,7 @@ sprint_timeticks(buf, var, enums)
 	return;
     }
     if (!quick_print){
-	sprintf(buf, "Timeticks: (%d) ", *(u_long *)(var->val.integer));
+	sprintf(buf, "Timeticks: (%lu) ", *(u_long *)(var->val.integer));
 	buf += strlen(buf);
     }
     sprintf(buf, "%s", uptimeString(*(u_long *)(var->val.integer), timebuf));
