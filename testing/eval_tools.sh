@@ -273,6 +273,7 @@ WAITFOR() {
           DELAY
           sleeptime=`expr $sleeptime - 1`
         done
+        SNMP_SLEEP=$oldsleeptime
     else
         if [ $SNMP_SLEEP -ne 0 ] ; then
 	    sleep $SNMP_SLEEP
