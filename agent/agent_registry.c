@@ -898,7 +898,7 @@ void (* external_signal_handler[NUM_EXTERNAL_SIGS])(int);
  *       below for every single that might be handled by register_signal().
  */
 
-void agent_SIGCHLD_handler(void)
+void agent_SIGCHLD_handler(int sig)
 {
   external_signal_scheduled[SIGCHLD]++;
 #ifndef HAVE_SIGACTION

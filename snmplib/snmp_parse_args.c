@@ -481,7 +481,7 @@ snmp_parse_args(int argc,
 }
 
 oid
-*snmp_parse_oid(char *argv,
+*snmp_parse_oid(const char *argv,
 		oid *root,
 		size_t *rootlen)
 {

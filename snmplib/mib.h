@@ -292,7 +292,7 @@ struct tree *get_tree (oid *, size_t, struct tree *);
 struct tree *get_tree_head (void);
 void  set_function (struct tree *);
 void sprint_hexstring (char *, const u_char *, size_t);
-void sprint_asciistring(char *buf, u_char *cp, size_t len);
+void sprint_asciistring(char *buf, const u_char *cp, size_t len);
 
 void print_oid_report (FILE *);
 void print_oid_report_enable_labeledoid (void);
