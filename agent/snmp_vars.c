@@ -238,6 +238,7 @@ extern init_kmem(char *file);
 extern init_routes(void);
 extern init_extensible(void);
 extern int klookup(unsigned long off, char *target, int siz);
+extern void string_append_int ();
 
 void Interface_Scan_Init(void);
 int Interface_Scan_Next(short *Index, char *Name, struct ifnet *Retifnet,
@@ -3839,8 +3840,7 @@ struct ifnet *Retifnet;
 
  	    saveName[15] = '\0';
 	    cp = index(saveName, '\0');
-	    *cp++ = ifnet.if_unit + '0';
-	    *cp = '\0';
+	    string_append_int (cp, ifnet.if_unit);
 	    if (1 || strcmp(saveName,"lo0") != 0) {  /* XXX */
 
 		if (Index)
@@ -3894,8 +3894,7 @@ struct in_ifaddr *Retin_ifaddr;
 
 	    saveName[15] = '\0';
 	    cp = index(saveName, '\0');
-	    *cp++ = ifnet.if_unit + '0';
-	    *cp = '\0';
+	    string_append_int (cp, ifnet.if_unit);
 #endif
 	    if (1 || strcmp(saveName,"lo0") != 0) {  /* XXX */
 		/*
