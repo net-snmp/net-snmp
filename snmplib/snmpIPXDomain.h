@@ -18,4 +18,8 @@ snmp_transport		*snmp_ipx_transport	(struct sockaddr_ipx *addr,
 int			 snmp_sockaddr_ipx	(struct sockaddr_ipx *addr,
 						 const char *peername);
 
+/*  "Constructor" for transport domain object.  */
+
+void		snmp_ipx_ctor		(void);
+
 #endif/*_SNMPIPXDOMAIN_H*/
