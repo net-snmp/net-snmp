@@ -134,7 +134,7 @@ struct module_compatability {
 #define ACCESS_CREATE      48
 
 #define STATUS_MANDATORY   23
-#define STATUS_KW_OPTIONAL 24
+#define STATUS_OPTIONAL    24
 #define STATUS_OBSOLETE    25
 #define STATUS_DEPRECATED  39
 
