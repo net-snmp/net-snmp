@@ -182,6 +182,9 @@
 /* Define if you have the select function.  */
 #undef HAVE_SELECT
 
+/* Define if you have the setenv function.  */
+#undef HAVE_SETENV
+
 /* Define if you have the setmntent function.  */
 #undef HAVE_SETMNTENT
 
