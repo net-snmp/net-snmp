@@ -819,6 +819,10 @@ write_snmpTargetAddrTDomain(
 	      memcpy((u_char *)target->tDomain, (u_char *)old_oid,
 		                                  (old_oid_len * sizeof(oid)));
 	      target->tDomainLen = old_oid_len;
+	      if (target->rowStatus == SNMP_ROW_NOTINSERVICE &&
+		  snmpTargetAddr_rowStatusCheck(target) == 0) {
+		  target->rowStatus = SNMP_ROW_NOTREADY;
+	      }
 	  }
       }
   }
