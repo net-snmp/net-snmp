@@ -6,13 +6,13 @@
 @end@
 ########################################################################
 ##
+@open ${name}_Makefile@
 @ifconf ${name}_Makefile.m2m@
 @   include ${name}_Makefile.m2m@
 @else@
-@open ${name}_Makefile@
 CC=gcc
 
-NETSNMPDIR=
+NETSNMPDIR=$mfd_netsnmp_dir
 
    #
    # if a specific path was specified for net-snmp, use it. otherwise
@@ -22,18 +22,17 @@ NETSNMPDIR=
       NETSNMPCONFIG=$(NETSNMPDIR)/net-snmp-config
 
       NETSNMPBASECFLAGS := $(shell $(NETSNMPCONFIG) --base-cflags)
-      NETSNMPCFLAGS += -I$(NETSNMPDIR)/include -I$(NETSNMPDIR)
-      NETSNMPCFLAGS += -I$(NETSNMPDIR)/snmplib
+      NETSNMPSOURCE := $(shell $(NETSNMPCONFIG) --srcdir)
+      NETSNMPCFLAGS += -I$(NETSNMPSOURCE)/include -I$(NETSNMPSOURCE)
       # base flags after src include, in case it has /usr/local/include
       NETSNMPCFLAGS += $(NETSNMPBASECFLAGS)
 
-      NETSNMPBASELIBS := $(shell $(NETSNMPCONFIG) --netsnmp-agent-libs)
+      NETSNMPBASELIBS := $(shell $(NETSNMPCONFIG) --base-agent-libs)
       NETSNMPEXTLIBS := $(shell $(NETSNMPCONFIG) --external-agent-libs)
-      LIB_DEPS += $(NETSNMPDIR)/libs/libnetsnmpagent.a \
-                  $(NETSNMPDIR)/libs/libnetsnmpmibs.a \
-                  $(NETSNMPDIR)/libs/libnetsnmphelpers.a \
-                  $(NETSNMPDIR)/libs/libnetsnmp.a
-      LIBS += -L$(NETSNMPDIR)/libs
+      NETSNMPLIBDIRS := $(shell $(NETSNMPCONFIG) --build-lib-dirs $NETSNMPDIR)
+      NETSNMPLIBDEPS := $(shell $(NETSNMPCONFIG) --build-lib-deps $NETSNMPDIR)
+      LIB_DEPS += $(NETSNMPLIBDEPS)
+      LIBS += $(NETSNMPLIBDIRS)
       LIBS += -Wl,-Bstatic $(NETSNMPBASELIBS) -Wl,-Bdynamic $(NETSNMPEXTLIBS)
    else
       NETSNMPCONFIG=/usr/local/bin/net-snmp-config
@@ -69,7 +68,7 @@ all: $(TARGETS)
 
 $(TARGETS): $(LIB_DEPS)
 
-$(OBJS): ${name}_Makefile
+$(SRCS:.c=.deps): ${name}_Makefile
 
 ${name}: $(OBJS) ${name}_Makefile
 	$(CC) -o ${name} $(OBJS) $(LIBS)
@@ -77,13 +76,13 @@ ${name}: $(OBJS) ${name}_Makefile
 clean:
 	rm $(OBJS) $(TARGETS)
 
-%.d : %.c
+%.deps : %.c
 	@echo "Generating makefile $@ ..."
 	@set -e; $(CC) -M $(COPTS) $(CFLAGS) $(CPPFLAGS) $< \
 	| sed 's/\($*\)\.o[ :]*/\1.o $@ : /g' > $@; \
 	[ -s $@ ] || $(RM) $(RMFLAGS) $@
 
-include $(SRCS:.c=.d)
+include $(SRCS:.c=.deps)
 
 @end@
 ########################################################################
