@@ -206,7 +206,7 @@ static void usage(char *prog)
 	printf("\n");
 	printf("\n\tVersion:  %s\n",VersionInfo);
 	printf("\tAuthor:   Wes Hardaker\n");
-	printf("\tEmail:    ucd-snmp-coders@ucd-snmp.ucdavis.edu\n");
+	printf("\tEmail:    net-snmp-coders@lists.sourceforge.net\n");
 	printf("\n-h\t\tThis usage message.\n");
 	printf("-H\t\tDisplay configuration file directives understood.\n");
 	printf("-v\t\tVersion information.\n");
