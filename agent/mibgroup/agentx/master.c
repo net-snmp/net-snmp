@@ -243,6 +243,19 @@ agentx_got_response(int operation,
     return 1;
 }
 
+/*
+ *
+ * AgentX State diagram.  [mode] = internal mode it's mapped from:
+ *
+ * TESTSET -success-> COMMIT -success-> CLEANUP
+ * [RESERVE1]         [ACTION]          [COMMIT]
+ *    |                 |
+ *    |                 \--failure-> UNDO
+ *    |                              [UNDO]
+ *    |
+ *     --failure-> CLEANUP
+ *                 [FREE]
+ */
 int
 agentx_master_handler(
     mib_handler               *handler,
