@@ -157,7 +157,7 @@ init_smux (void)
 		return SMUXNOTOK;
 	}
 
-	if(listen(smux_sd, SOMAXCONN) == -1)) {
+	if(listen(smux_sd, SOMAXCONN) == -1) {
 		perror("[init_smux] listen failed");
 		close(smux_sd);
 		return SMUXNOTOK;
@@ -226,7 +226,6 @@ smux_accept(int sd)
 	if (FD_ISSET(gated_sd, &rfds) && FD_ISSET(gated_sd, &sfds)) {
 		smux_process(gated_sd);
 	}
-  }
 }
 
 
