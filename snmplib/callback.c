@@ -43,39 +43,31 @@ init_callbacks(void) {
 
 int
 snmp_register_callback(int major, int minor, SNMPCallback *new_callback,
-                       void *arg) {
-
-  struct snmp_gen_callback *scp;
+                       void *arg)
+{
+  struct snmp_gen_callback  *newscp = NULL, *scp = NULL;
+  struct snmp_gen_callback **prevNext = &(thecallbacks[major][minor]);
   
   if (major >= MAX_CALLBACK_IDS || minor >= MAX_CALLBACK_SUBIDS) {
     return SNMPERR_GENERR;
   }
-  
-  if (thecallbacks[major][minor] != NULL) {
-    /* get to the end of the list */
-    for(scp = thecallbacks[major][minor]; scp->next != NULL; scp = scp->next);
 
-    /* mallocate a new entry */
-    scp->next = SNMP_MALLOC_STRUCT(snmp_gen_callback);
-    scp = scp->next;
-  } else {
-    /* mallocate a new entry */
-    scp = SNMP_MALLOC_STRUCT(snmp_gen_callback);
-
-    /* make the new node the head */
-    thecallbacks[major][minor] = scp;
-  }
-
-  if (scp == NULL)
+  if ((newscp = SNMP_MALLOC_STRUCT(snmp_gen_callback)) == NULL) {
     return SNMPERR_GENERR;
+  } else {
+    newscp->sc_client_arg      = arg;
+    newscp->sc_callback        = new_callback;	
+    newscp->next               = NULL;
+    
+    for (scp = thecallbacks[major][minor]; scp != NULL; scp = scp->next) {
+      prevNext = &(scp->next);
+    }
 
-  scp->sc_client_arg = arg;
-  scp->sc_callback = new_callback;
+    *prevNext = newscp;
 
-  DEBUGMSGTL(("callback","registered callback for maj=%d min=%d\n",
-              major, minor));
-
-  return SNMPERR_SUCCESS;
+    DEBUGMSGTL(("callback", "registered (%d,%d) at %p\n", major,minor,newscp));
+    return SNMPERR_SUCCESS;
+  }
 }
 
 int
@@ -138,34 +130,28 @@ snmp_callback_available(int major, int minor) {
 }
 
 int
-snmp_unregister_callback(int major, int minor, SNMPCallback *new_callback,
-                         void *arg, int matchargs) {
-    struct snmp_gen_callback *scp, *last = NULL, *freeit = NULL;
-    int count = 0;
+snmp_unregister_callback(int major, int minor, SNMPCallback *target,
+                         void *arg, int matchargs)
+{
+  struct snmp_gen_callback  *scp = thecallbacks[major][minor];
+  struct snmp_gen_callback **prevNext = &(thecallbacks[major][minor]);
+  int count = 0;
     
-    /* for each registered callback of type major and minor */
-    for(scp = thecallbacks[major][minor]; scp != NULL; scp = scp->next) {
-        /* free it */
-        if (freeit)
-            SNMP_FREE(freeit);
-        /* remove the requested one */
-        if (scp->sc_callback == new_callback &&
-            (!matchargs || scp->sc_client_arg == arg)) {
-
-            DEBUGMSGTL(("callback","unregistering a callback maj=%d min=%d\n",
-                        major, minor));
-            /* match found, remove it */
-            if (last)
-                last->next = scp->next;
-            else
-                thecallbacks[major][minor] = scp->next;
-            count++;
-            freeit = scp;
-        }
+  while (scp != NULL) {
+    if ((scp->sc_callback == target) && 
+	(!matchargs || (scp->sc_client_arg == arg))) {
+      DEBUGMSGTL(("callback","unregistering (%d,%d) at %p\n",major,minor,scp));
+      *prevNext = scp->next;
+      SNMP_FREE(scp);
+      scp = *prevNext;
+      count++;
+    } else {
+      prevNext = &(scp->next);
+      scp = scp->next;
     }
-    if (freeit)
-        SNMP_FREE(freeit);
-    return count;
+  }
+
+  return count;
 }
 
             
