@@ -429,8 +429,13 @@ extern int init_mib_internals();
   loading and mib module parsing in the correct order.
 */
 
+static int done_init = 0;  /* prevent double init's */
+
 void
 init_snmp __P((void)) {
+  if (done_init)
+    return;
+  done_init = 1;
   register_mib_handlers();
   read_premib_configs();
   init_mib();
