@@ -62,18 +62,54 @@
 	 *
 	 *********************/
 
+/*
+ * Reorganize the global data into a single static structure.
+ *
+ *	Old			New
+ *======================================================
+ *	HRSW_directory		swi->swi_directory
+ *	HRSW_name[100]		swi->swi_name[PATH_MAX]
+ *	HRSW_index		swi->swi_index
+ *
+ *				swi->swi_dbpath		(RPM only)
+ *				swi->swi_maxrec		(RPM only)
+ *				swi->swi_nrec		(RPM only)
+ *				swi->swi_recs		(RPM only)
+ *	rpm_db			swi->swi_rpmdb		(RPM only)
+ *				swi->swi_h		(RPM only)
+ *				swi->swi_prevx		(RPM only)
+ *
+ *	dp			swi->swi_dp
+ *	de_p			swi->swi_dep
+ */
+typedef struct {
+    const char *swi_directory;
+    char	swi_name[PATH_MAX];	/* XXX longest file name */
+    int		swi_index;
+
+#ifdef	HAVE_LIBRPM
+    const char *swi_dbpath;
+
+    time_t	swi_timestamp;		/* modify time on database */
+    int		swi_maxrec;		/* no. of allocations */
+    int		swi_nrec;		/* no. of valid offsets */
+    int *	swi_recs;		/* db record offsets */
+    rpmdb	swi_rpmdb;
+    Header	swi_h;
+    int		swi_prevx;
+#else
+    DIR	* swi_dp;
+    struct dirent * swi_dep;
+#endif
+ 
+} SWI_t;
+
+static SWI_t _myswi = { NULL, NULL, 0 };	/* XXX static for now */
+
 int header_hrswinst (struct variable *,oid *, size_t *, int, size_t *, WriteMethod **);
 int header_hrswInstEntry (struct variable *,oid *, size_t *, int, size_t *, WriteMethod **);
 
-const  char *HRSW_directory = NULL;
-
 extern struct timeval starttime;
-
-#ifdef HAVE_LIBRPM
-static rpmdb	rpm_db = NULL;
-#else
-static char HRSW_name[100];
-#endif
 
 	/*********************
 	 *
@@ -83,7 +119,15 @@ static char HRSW_name[100];
 extern void  Init_HR_SWInst (void);
 extern int   Get_Next_HR_SWInst (void);
 extern void  End_HR_SWInst (void);
-extern void  Save_HR_SW_info (void);
+extern void  Save_HR_SW_info (int ix);
+
+#ifdef HAVE_LIBRPM
+static void	Mark_HRSW_token		(void);
+static void	Release_HRSW_token	(void);
+#else
+#define	Mark_HRSW_token()
+#define	Release_HRSW_token()
+#endif
 
 
 #define	HRSWINST_CHANGE		1
@@ -106,39 +150,48 @@ struct variable4 hrswinst_variables[] = {
 oid hrswinst_variables_oid[] = { 1,3,6,1,2,1,25,6 };
 
 
+#ifdef PKGLOC	/* Description from HRSW_dir/.../pkginfo: DESC= */
+#define	_PATH_HRSW_directory	PKGLOC
+#endif
+#ifdef hpux9	/* Description from HRSW_dir/.../index:   fd: */
+#define	_PATH_HRSW_directory	"/system"
+#endif
+#ifdef hpux10	/* Description from HRSW_dir/.../pfiles/INDEX: title */
+#define	_PATH_HRSW_directory	"/var/adm/sw/products"
+#endif
+#ifdef freebsd2
+#define	_PATH_HRSW_directory	"/var/db/pkg"
+#endif
+
 void init_hr_swinst(void)
 {
+    SWI_t *swi = &_myswi;	/* XXX static for now */
+
 	/* Read settings from config file,
 	    or take system-specific defaults */
 
-    if ( HRSW_directory == NULL ) {
-#ifdef PKGLOC
-	HRSW_directory = PKGLOC;
-			/* Description from HRSW_dir/.../pkginfo: DESC= */
-#endif
-#ifdef hpux9
-	HRSW_directory = "/system";
-			/* Description from HRSW_dir/.../index:   fd: */
-#endif
-#ifdef hpux10
-	HRSW_directory = "/var/adm/sw/products";
-			/* Description from HRSW_dir/.../pfiles/INDEX: title */
-#endif
-#ifdef freebsd2
-	HRSW_directory = "/var/db/pkg";
-#endif
+#ifdef HAVE_LIBRPM
+    if (swi->swi_directory == NULL) {
+	char path[PATH_MAX];
 
-#if (defined(HAVE_LIBRPM) || defined(HAVE_RPMGETPATH))
+    /* XXX distinguish between rpm-2.5.x and rpm-2.9x */
 #ifdef HAVE_RPMGETPATH
 	rpmReadConfigFiles(NULL, NULL);
+	swi->swi_dbpath = rpmGetPath("%{_dbpath}", NULL);
 #else
-	rpmReadConfigFiles( NULL, NULL, NULL, 0);
+	rpmReadConfigFiles(NULL, NULL, NULL, 0);
+	swi->swi_dbpath = rpmGetVar(RPMVAR_DBPATH);
 #endif
-#endif
+	if (swi->swi_directory != NULL)
+	    free((void *)swi->swi_directory);
+	sprintf(path, "%s/packages.rpm", swi->swi_dbpath);
+	swi->swi_directory = strdup(path);
     }
-
-#ifndef HAVE_LIBRPM
-    strcpy(HRSW_name, "[installed name]");	/* default name */
+#else
+    if (swi->swi_directory == NULL) {
+	swi->swi_directory = _PATH_HRSW_directory;
+    }
+    strcpy(swi->swi_name, "[installed name]");	/* default name */
 #endif
 
     REGISTER_MIB("host/hr_swinst", hrswinst_variables, variable4, hrswinst_variables_oid);
@@ -205,31 +258,31 @@ header_hrswInstEntry(struct variable *vp,
 	/* Find "next" installed software entry */
 
     Init_HR_SWInst();
-    for ( ;; ) {
-        swinst_idx = Get_Next_HR_SWInst();
+    while((swinst_idx = Get_Next_HR_SWInst()) != -1) {
         DEBUGMSG(("host/hr_swinst", "(index %d ....", swinst_idx));
-        if ( swinst_idx == -1 )
-	    break;
+
 	newname[HRSWINST_ENTRY_NAME_LENGTH] = swinst_idx;
     DEBUGMSGOID(("host/hr_swinst", newname, *length));
     DEBUGMSG(("host/hr_swinst","\n"));
         result = snmp_oid_compare(name, *length, newname, vp->namelen + 1);
         if (exact && (result == 0)) {
 	    LowIndex = swinst_idx;
-	    Save_HR_SW_info();
+	    Save_HR_SW_info(LowIndex);
             break;
 	}
 	if ((!exact && (result < 0)) &&
 		( LowIndex == -1 || swinst_idx < LowIndex )) {
 	    LowIndex = swinst_idx;
-	    Save_HR_SW_info();
+	    Save_HR_SW_info(LowIndex);
 #ifdef HRSWINST_MONOTONICALLY_INCREASING
             break;
 #endif
 	}
     }
 
+    Mark_HRSW_token();
     End_HR_SWInst();
+
     if ( LowIndex == -1 ) {
         DEBUGMSGTL(("host/hr_swinst", "... index out of range\n"));
         return(MATCH_FAILED);
@@ -261,18 +314,11 @@ var_hrswinst(struct variable *vp,
 	     size_t *var_len,
 	     WriteMethod **write_method)
 {
+    SWI_t *swi = &_myswi;	/* XXX static for now */
     int sw_idx=0;
-    static char string[256];
+    static char string[PATH_MAX];
     u_char *ret = NULL;
     struct stat stat_buf;
-#ifdef HAVE_LIBRPM
-    Header h = NULL;
-	if (rpm_db == NULL) {
-	    Init_HR_SWInst();
-	    if (rpm_db == NULL)
-		return NULL;
-	}
-#endif
 
     if ( vp->magic < HRSWINST_INDEX ) {
         if (header_hrswinst(vp, name, length, exact, var_len, write_method) == MATCH_FAILED )
@@ -283,30 +329,15 @@ var_hrswinst(struct variable *vp,
         sw_idx = header_hrswInstEntry(vp, name, length, exact, var_len, write_method);
         if ( sw_idx == MATCH_FAILED )
 	    return NULL;
-        
-#ifdef HAVE_LIBRPM
-	h = rpmdbGetRecord( rpm_db, sw_idx );
-	if ( h == NULL )
-	    return NULL;
-#endif
     }
 
     switch (vp->magic){
 	case HRSWINST_CHANGE:
 	case HRSWINST_UPDATE:
 	    string[0] = '\0';
-#if (defined(HAVE_LIBRPM) || defined(HAVE_RPMGETPATH))
-	    /* RPM versions pre 2.9 use rpmGetVar to get the database path
-	       RPM version 2.9 and higher use the rpmGetPath for the. */
-#ifdef HAVE_RPMGETPATH
-	    sprintf(string, "%s/packages.rpm", rpmGetPath("%{_dbpath}",NULL));
-#else
-	    sprintf(string, "%s/packages.rpm", rpmGetVar(RPMVAR_DBPATH));
-#endif
-#else
-	    if ( HRSW_directory )
-		strcpy( string, HRSW_directory);
-#endif
+
+	    if (swi->swi_directory != NULL)
+		strcpy(string, swi->swi_directory);
 
 	    if ( *string ) {
 		stat( string, &stat_buf );
@@ -330,20 +361,10 @@ var_hrswinst(struct variable *vp,
 	    break;
 	case HRSWINST_NAME:
 	{
-#ifdef HAVE_LIBRPM
-	    char *cp;
-	    int type;
-	    string[0] = '\0';
-	    if (headerGetEntry(h, RPMTAG_NAME, &type, (void **) &cp, NULL) && cp != NULL) {
-		strcpy(string, cp);
-		if(type == RPM_STRING_ARRAY_TYPE || type == RPM_I18NSTRING_TYPE)
-		    free(cp);
-	    }
-#else
-	    sprintf(string, HRSW_name);
+	    strncpy(string, swi->swi_name, sizeof(string)-1);
 			/* This will be unchanged from the initial "null"
-			   value, if HRSW_directory is not defined */
-#endif
+			   value, if swi->swi_name is not defined */
+	    string[sizeof(string)-1] = '\0';
 	    *var_len = strlen(string);
 	    ret = (u_char *) string;
 	}   break;
@@ -359,7 +380,7 @@ var_hrswinst(struct variable *vp,
 	{
 #ifdef HAVE_LIBRPM
 	    int_32 *rpm_data;
-	    headerGetEntry(h, RPMTAG_INSTALLTIME, NULL, (void **) &rpm_data, NULL);
+	    headerGetEntry(swi->swi_h, RPMTAG_INSTALLTIME, NULL, (void **) &rpm_data, NULL);
             if (rpm_data != NULL) {
               time_t installTime = *rpm_data;
               ret = date_n_time(&installTime, var_len);
@@ -367,8 +388,8 @@ var_hrswinst(struct variable *vp,
               ret = date_n_time(0, var_len);
             }
 #else
-	    if ( HRSW_directory ) {
-		sprintf(string, "%s/%s", HRSW_directory, HRSW_name);
+	    if (swi->swi_directory != NULL) {
+		sprintf(string, "%s/%s", swi->swi_directory, swi->swi_name);
 		stat( string, &stat_buf );
 		ret = date_n_time(&stat_buf.st_mtime, var_len);
 	    } else {
@@ -386,10 +407,7 @@ var_hrswinst(struct variable *vp,
 	    ret = NULL;
 	    break;
     }
-#ifdef HAVE_LIBRPM
-    if (h)
-	headerFree(h);
-#endif
+    Release_HRSW_token();
     return ret;
 }
 
@@ -400,60 +418,89 @@ var_hrswinst(struct variable *vp,
 	 *
 	 *********************/
 
-static int HRSW_index;
+#ifdef	HAVE_LIBRPM
+static void
+Check_HRSW_cache(void *xxx)
+{
+    SWI_t *swi = (SWI_t *)xxx;
+    int offset;
+    int ix;
 
-#ifndef HAVE_LIBRPM
-static DIR *dp = NULL;
-static struct dirent *de_p;
-#endif
+    /* Make sure cache is up-to-date */
+    if (swi->swi_recs != NULL) {
+	struct stat sb;
+	lstat(swi->swi_directory, &sb);
+	if (swi->swi_timestamp == sb.st_mtime)
+	    return;
+	swi->swi_timestamp = sb.st_mtime;
+    }
 
+    /* Get header offsets */
+    ix = 0;
+    for(offset = rpmdbFirstRecNum(swi->swi_rpmdb), ix = 0;
+	offset != 0;
+	offset = rpmdbNextRecNum(swi->swi_rpmdb, offset), ix++)
+    {
+	if (ix >= swi->swi_maxrec) {
+	    swi->swi_maxrec += 256;
+	    if (swi->swi_recs == NULL) {
+		swi->swi_recs = (int *) malloc(swi->swi_maxrec * sizeof(int));
+	    } else {
+		swi->swi_recs = (int *) realloc(swi->swi_recs, swi->swi_maxrec * sizeof(int));
+	    }
+	}
+	swi->swi_recs[ix] = offset;
+    }
+    swi->swi_nrec = ix;
+}
+#endif	/* HAVE_LIBRPM */
 
 void
 Init_HR_SWInst (void)
 {
-    HRSW_index = 0;
+    SWI_t *swi = &_myswi;	/* XXX static for now */
+    swi->swi_index = 0;
 
 #ifdef HAVE_LIBRPM
-    if (rpm_db != NULL)
+    if (swi->swi_rpmdb != NULL)
 	return;
-    if (rpmdbOpen( "", &rpm_db, O_RDONLY, 0644) != 0 )
-	HRSW_index = -1;
+    if (rpmdbOpen("", &swi->swi_rpmdb, O_RDONLY, 0644) != 0 )
+	swi->swi_index = -1;
+    Check_HRSW_cache(swi);
 #else
-    if ( HRSW_directory ) {
-        if ( dp != NULL ) {
-            closedir( dp );
-            dp = NULL;
+    if (swi->swi_directory != NULL) {
+        if (swi->swi_dp != NULL) {
+            closedir(swi->swi_dp);
+            swi->swi_dp = NULL;
         }
-        if ((dp = opendir(HRSW_directory)) == NULL )
-            HRSW_index = -1;
-    }
-    else
-	HRSW_index = -1;
+        if ((swi->swi_dp = opendir(swi->swi_directory)) == NULL)
+            swi->swi_index = -1;
+    } else
+	swi->swi_index = -1;
 #endif
 }
 
 int
 Get_Next_HR_SWInst (void)
 {
-    if (HRSW_index == -1)
+    SWI_t *swi = &_myswi;	/* XXX static for now */
+
+    if (swi->swi_index == -1)
 	return -1;
 
 #ifdef HAVE_LIBRPM
-    HRSW_index = ((HRSW_index == 0) ? rpmdbFirstRecNum(rpm_db)
-				    : rpmdbNextRecNum(rpm_db, HRSW_index));
-    if (HRSW_index == 0)
-	return -1;	/* failed */
-    else
-	return HRSW_index;
+    /* XXX Watchout: index starts with 1 */
+    if (0 <= swi->swi_index && swi->swi_index < swi->swi_nrec)
+	return ++swi->swi_index;
 #else
-    if ( HRSW_directory ) {
-	while (( de_p = readdir( dp )) != NULL ) {
-	    if( de_p->d_name[0] == '.' )
+    if (swi->swi_directory != NULL) {
+	while (( swi->swi_dep = readdir( swi->swi_dp )) != NULL ) {
+	    if( swi->swi_dep->d_name[0] == '.' )
 		continue;
 
 		/* Ought to check for "properly-formed" entry */
 
-	    return ++HRSW_index;
+	    return ++swi->swi_index;
 	}
     }
 #endif
@@ -462,19 +509,65 @@ Get_Next_HR_SWInst (void)
 }
 
 void
-Save_HR_SW_info (void)
+Save_HR_SW_info (int ix)
 {
-#ifndef HAVE_LIBRPM
-    sprintf(  HRSW_name, de_p->d_name );
+    SWI_t *swi = &_myswi;	/* XXX static for now */
+
+#ifdef HAVE_LIBRPM
+    /* XXX Watchout: ix starts with 1 */
+    if (1 <= ix && ix <= swi->swi_nrec && ix != swi->swi_prevx) {
+	int offset;
+	Header h;
+	char *n, *v, *r;
+
+	offset = swi->swi_recs[ix-1];
+	h = rpmdbGetRecord(swi->swi_rpmdb, offset);
+	if (h == NULL)
+	    return;
+	if (swi->swi_h != NULL)
+	    headerFree(swi->swi_h);
+	swi->swi_h = h;
+	swi->swi_prevx = ix;
+
+	headerGetEntry(swi->swi_h, RPMTAG_NAME, NULL, (void **) &n, NULL);
+	headerGetEntry(swi->swi_h, RPMTAG_VERSION, NULL, (void **) &v, NULL);
+	headerGetEntry(swi->swi_h, RPMTAG_RELEASE, NULL, (void **) &r, NULL);
+	sprintf(swi->swi_name, "%s-%s-%s", n, v, r);
+    }
+#else
+    sprintf(sw->swi_name, swi->swi_dep->d_name);
 #endif
 }
+
+#ifdef	HAVE_LIBRPM
+void
+Mark_HRSW_token(void)
+{
+}
+
+void
+Release_HRSW_token(void)
+{
+    SWI_t *swi = &_myswi;	/* XXX static for now */
+    if (swi != NULL && swi->swi_h) {
+	headerFree(swi->swi_h);
+	swi->swi_h = NULL;
+	swi->swi_prevx = -1;
+    }
+}
+#endif	/* HAVE_LIBRPM */
 
 void
 End_HR_SWInst (void)
 {
-#ifndef HAVE_LIBRPM
-   if ( dp != NULL )
-	closedir( dp );
-   dp = NULL;
+    SWI_t *swi = &_myswi;	/* XXX static for now */
+
+#ifdef HAVE_LIBRPM
+    rpmdbClose(swi->swi_rpmdb);		/* or only on finishing ? */
+    swi->swi_rpmdb = NULL;
+#else
+   if ( swi->swi_dp != NULL )
+	closedir( swi->swi_dp );
+   swi->swi_dp = NULL;
 #endif
 }
