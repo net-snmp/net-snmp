@@ -69,7 +69,6 @@ else
 fi
 
 dnl Checks for programs.
-AC_CHECK_PROGS(CC,cc gcc c89 shlicc2,cc)
 AC_PROG_CC
 AC_PROG_CPP
 AC_PROG_INSTALL
