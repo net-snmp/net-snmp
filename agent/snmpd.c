@@ -37,6 +37,9 @@
  */
 #include <net-snmp/net-snmp-config.h>
 
+#if HAVE_IO_H
+#include <io.h>
+#endif
 #include <stdio.h>
 #include <errno.h>
 #if HAVE_STRING_H
