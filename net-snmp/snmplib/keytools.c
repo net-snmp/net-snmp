@@ -78,8 +78,8 @@ int (*kmt_hash) (
  */
 int
 generate_Ku(	oid	*hashtype,	u_int  hashtype_len,
-		u_char	*P,		u_int  pplen,
-		u_char	*Ku,		u_int *kulen)
+		u_char	*P,		size_t  pplen,
+		u_char	*Ku,		size_t *kulen)
 #if defined(HAVE_LIBKMT) || defined(USE_INTERNAL_MD5)
 {
 	int		 rval   = SNMPERR_SUCCESS,
@@ -228,9 +228,9 @@ _KEYTOOLS_NOT_AVAILABLE
  */
 int
 generate_kul(	oid	*hashtype,	u_int  hashtype_len,
-		u_char	*engineID,	u_int  engineID_len,
-		u_char	*Ku,		u_int  ku_len,
-		u_char	*Kul,		u_int *kul_len)
+		u_char	*engineID,	size_t  engineID_len,
+		u_char	*Ku,		size_t  ku_len,
+		u_char	*Kul,		size_t *kul_len)
 #if defined(HAVE_LIBKMT) || defined(USE_INTERNAL_MD5)
 {
 	int		 rval    = SNMPERR_SUCCESS;
@@ -339,14 +339,14 @@ _KEYTOOLS_NOT_AVAILABLE
  */
 int
 encode_keychange(	oid	*hashtype,	u_int  hashtype_len,
-			u_char	*oldkey,	u_int  oldkey_len,
-			u_char	*newkey,	u_int  newkey_len,
-			u_char	*kcstring,	u_int *kcstring_len)
+			u_char	*oldkey,	size_t  oldkey_len,
+			u_char	*newkey,	size_t  newkey_len,
+			u_char	*kcstring,	size_t *kcstring_len)
 #if defined(HAVE_LIBKMT) || defined(USE_INTERNAL_MD5)
 {
 	int		 rval    = SNMPERR_SUCCESS;
 	size_t		 properlength;
-        u_int            nbytes  = 0;
+        size_t            nbytes  = 0;
 
         u_char          *tmpbuf = NULL;
 	void		*context = NULL;
@@ -470,9 +470,9 @@ _KEYTOOLS_NOT_AVAILABLE
 /* XXX:  if the newkey is not long enough, it should be freed and remalloced */
 int
 decode_keychange(	oid	*hashtype,	u_int  hashtype_len,
-			u_char	*oldkey,	u_int  oldkey_len,
-			u_char	*kcstring,	u_int  kcstring_len,
-			u_char	*newkey,	u_int *newkey_len)
+			u_char	*oldkey,	size_t  oldkey_len,
+			u_char	*kcstring,	size_t  kcstring_len,
+			u_char	*newkey,	size_t *newkey_len)
 #if defined(HAVE_LIBKMT) || defined(USE_INTERNAL_MD5)
 {
 	int		 rval    = SNMPERR_SUCCESS;

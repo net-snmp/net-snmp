@@ -8,6 +8,9 @@
 #if HAVE_NETINET_IN_H
 #include <netinet/in.h>
 #endif
+#if HAVE_STDLIB_H
+#include <stdlib.h>
+#endif
 #if HAVE_STRING_H
 #include <string.h>
 #else
@@ -23,6 +26,7 @@
 #include "tools.h"
 #include "read_config.h"
 #include "default_store.h"
+#include "read_config.h"
 
 struct ds_read_config *ds_configs = NULL;
 
