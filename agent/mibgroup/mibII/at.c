@@ -162,7 +162,7 @@ var_atEntry(struct variable *vp,
     oid			    lowest[16];
     oid			    current[16];
     static char		    PhysAddr[6], LowPhysAddr[6];
-    u_long		    Addr, LowAddr;
+    u_long		    Addr, LowAddr, foundone;
 #ifdef ARP_SCAN_FOUR_ARGUMENTS
     u_short		    ifIndex, lowIfIndex = 0;
 #endif/* ARP_SCAN_FOUR_ARGUMENTS */
@@ -180,7 +180,8 @@ var_atEntry(struct variable *vp,
 	oid_length = 15;
     }
 
-    LowAddr = -1;      /* Don't have one yet */
+    LowAddr = 0;      /* Don't have one yet */
+    foundone = 0;
     ARP_Scan_Init();
     for (;;) {
 #ifdef ARP_SCAN_FOUR_ARGUMENTS
@@ -218,6 +219,7 @@ var_atEntry(struct variable *vp,
 	    if (snmp_oid_compare(current, oid_length, name, *length) == 0){
 		memcpy( (char *)lowest,(char *)current, oid_length * sizeof(oid));
 		LowAddr = Addr;
+                foundone = 1;
 #ifdef ARP_SCAN_FOUR_ARGUMENTS
 		lowIfIndex = ifIndex;
 #endif /*  ARP_SCAN_FOUR_ARGUMENTS */
@@ -227,13 +229,14 @@ var_atEntry(struct variable *vp,
 	    }
 	} else {
 	    if ((snmp_oid_compare(current, oid_length, name, *length) > 0) &&
-		 ((LowAddr == -1) || (snmp_oid_compare(current, oid_length, lowest, oid_length) < 0))){
+		 ((foundone == 0) || (snmp_oid_compare(current, oid_length, lowest, oid_length) < 0))){
 		/*
 		 * if new one is greater than input and closer to input than
 		 * previous lowest, save this one as the "next" one.
 		 */
 		memcpy( (char *)lowest,(char *)current, oid_length * sizeof(oid));
 		LowAddr = Addr;
+                foundone = 1;
 #ifdef ARP_SCAN_FOUR_ARGUMENTS
 		lowIfIndex = ifIndex;
 #endif /*  ARP_SCAN_FOUR_ARGUMENTS */
@@ -242,7 +245,7 @@ var_atEntry(struct variable *vp,
 	    }
 	}
     }
-    if (LowAddr == -1)
+    if (foundone == 0)
 	return(NULL);
 
     memcpy( (char *)name,(char *)lowest, oid_length * sizeof(oid));
