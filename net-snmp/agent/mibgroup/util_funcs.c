@@ -433,9 +433,6 @@ sprint_mib_oid(char *buf,
   }
 }
 
-#define MATCH_FAILED	1
-#define MATCH_SUCCEEDED	0
-
 int header_simple_table(struct variable *vp, oid *name, int *length,
                         int exact, int *var_len,
                         WriteMethod **write_method, int max)
