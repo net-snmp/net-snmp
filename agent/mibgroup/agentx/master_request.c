@@ -62,6 +62,29 @@ struct ax_variable_list {
 };
 
 	/*
+	 * Remove the specified request from
+	 *  the list of outstanding requests
+	 */
+int
+remove_outstanding_request( struct agent_snmp_session *asp, int reqid )
+{
+    struct request_list     *req, *prev;
+    for (req = asp->outstanding_requests, prev=NULL ;
+			req != NULL ;
+			prev = req , req = req->next_request ) {
+	if ( req->request_id == reqid) {
+	    if ( prev )
+		prev->next_request = req->next_request;
+	    else
+		asp->outstanding_requests = req->next_request;
+	    free( req );
+	    return 0;
+	}
+    }
+    return 1;
+}
+
+	/*
 	 * Handle the response from an AgentX subagent,
 	 *   merging the answers back into the original query
 	 */
@@ -82,7 +105,7 @@ handle_agentx_response( int operation,
     int j;
     char buf[SPRINT_MAX_LEN];
 
-    asp->outstanding_requests = NULL;
+    remove_outstanding_request( asp, pdu->reqid );
 
     retry_vlist = NULL;
     vb_retry    = NULL;
@@ -211,7 +234,7 @@ get_agentx_request(struct agent_snmp_session *asp,
     DEBUGMSGTL(("agentx/master","processing request...\n"));
 
     for (req = asp->outstanding_requests ; req != NULL ; req = req->next_request ) {
-	if ( req->message_id == transID)
+	if ( req->message_id == transID && req->session == ax_session)
 	    return req;
     }
 
