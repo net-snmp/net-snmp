@@ -75,6 +75,7 @@ SOFTWARE.
 #define NETSNMP_DS_WALK_PRINT_STATISTICS	        2
 #define NETSNMP_DS_WALK_DONT_CHECK_LEXICOGRAPHIC	3
 #define NETSNMP_DS_WALK_TIME_RESULTS     	        4
+#define NETSNMP_DS_WALK_DONT_GET_REQUESTED	        5
 
 oid             objid_mib[] = { 1, 3, 6, 1, 2, 1 };
 int             numprinted = 0;
@@ -90,6 +91,7 @@ usage(void)
             "  -C APPOPTS\t\tSet various application specific behaviours:\n");
     fprintf(stderr, "\t\t\t  p:  print the number of variables found\n");
     fprintf(stderr, "\t\t\t  i:  include given OID in the search range\n");
+    fprintf(stderr, "\t\t\t  I:  don't include the given OID, even if no results are returned\n");
     fprintf(stderr,
             "\t\t\t  c:  do not check returned OIDs are increasing\n");
     fprintf(stderr,
@@ -128,6 +130,11 @@ optProc(int argc, char *const *argv, int opt)
             case 'i':
                 netsnmp_ds_toggle_boolean(NETSNMP_DS_APPLICATION_ID,
 					  NETSNMP_DS_WALK_INCLUDE_REQUESTED);
+                break;
+
+            case 'I':
+                netsnmp_ds_toggle_boolean(NETSNMP_DS_APPLICATION_ID,
+					  NETSNMP_DS_WALK_DONT_GET_REQUESTED);
                 break;
 
             case 'p':
@@ -176,6 +183,10 @@ main(int argc, char *argv[])
     netsnmp_ds_register_config(ASN_BOOLEAN, "snmpwalk", "includeRequested",
 			       NETSNMP_DS_APPLICATION_ID, 
 			       NETSNMP_DS_WALK_INCLUDE_REQUESTED);
+
+    netsnmp_ds_register_config(ASN_BOOLEAN, "snmpwalk", "excludeRequested",
+			       NETSNMP_DS_APPLICATION_ID, 
+			       NETSNMP_DS_WALK_DONT_GET_REQUESTED);
 
     netsnmp_ds_register_config(ASN_BOOLEAN, "snmpwalk", "printStatistics",
 			       NETSNMP_DS_APPLICATION_ID, 
@@ -359,7 +370,9 @@ main(int argc, char *argv[])
          * pointed at an only existing instance.  Attempt a GET, just
          * for get measure. 
          */
-        snmp_get_and_print(ss, root, rootlen);
+        if (!netsnmp_ds_get_boolean(NETSNMP_DS_APPLICATION_ID, NETSNMP_DS_WALK_DONT_GET_REQUESTED)) {
+            snmp_get_and_print(ss, root, rootlen);
+        }
     }
     snmp_close(ss);
 

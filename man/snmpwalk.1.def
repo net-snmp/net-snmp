@@ -40,7 +40,9 @@ Each variable name is given in the format specified in
 .PP
 If no OID argument is present,
 .B snmpwalk
-will search MIB-2.
+will search the subtree rooted at SNMPv2-SMI::mib-2
+(including any MIB object values from other MIB modules,
+that are defined as lying within this subtree).
 If the network entity has an error processing the request packet, an
 error packet will be returned and a message will be shown, helping to
 pinpoint why the request was malformed.
@@ -60,16 +62,24 @@ to loop indefinitely.  By default,
 tries to detect this behavior and warns you when it hits an agent
 acting illegally.  Use
 .B -Cc
-to turn off this behaviour.
+to turn off this check.
 .TP
 .B -Ci
 Include the given OID in the search range.  Normally
 .B snmpwalk
 uses GETNEXT requests starting with the OID you specified and returns
-all results in the MIB tree after that OID.  Sometimes, you may wish
-to include the OID specified on the command line in the printed
+all results in the MIB subtree rooted at that OID.  Sometimes, you may
+wish to include the OID specified on the command line in the printed
 results if it is a valid OID in the tree itself.  This option lets you
-do this.
+do this explicitly.
+.TP
+.B -CI
+In fact, the given OID will be retrieved automatically if the main
+subtree walk returns no useable values.  This allows a walk of a
+single instance to behave as generally expected, and return the
+specified instance value.
+This option turns off this final GET request, so a walk of a
+single instance will return nothing.
 .TP
 .B -Cp
 Upon completion of the walk, print the number of variables found.
