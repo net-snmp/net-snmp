@@ -308,7 +308,7 @@ var_udp(vp, name, length, exact, var_len, write_method)
      */
 
     auto_nlist(UDPSTAT_SYMBOL, (char *)&udpstat, sizeof (udpstat));
-    auto_nlist(UDPMIB_SYMBOL, (char *)&MIB_udpcounter,
+    auto_nlist(MIB_UDPCOUNTER_SYMBOL, (char *)&MIB_udpcounter,
 	(MIB_udpMAXCTR+1)*sizeof (counter));
 
     switch (vp->magic){

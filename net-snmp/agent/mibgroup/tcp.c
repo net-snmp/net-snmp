@@ -327,7 +327,7 @@ var_tcp(vp, name, length, exact, var_len, write_method)
 #ifndef linux
 	auto_nlist(TCPSTAT_SYMBOL, (char *)&tcpstat, sizeof (tcpstat));
 #ifdef MIB_TCPCOUNTER_SYMBOL
-	auto_nlist(TCPMIB_SYMBOL, (char *)&MIB_tcpcounter,
+	auto_nlist(MIB_TCPCOUNTER_SYMBOL, (char *)&MIB_tcpcounter,
                    (MIB_tcpMAXCTR+1)*sizeof (counter));
 #endif
 #else /* linux */
