@@ -85,6 +85,9 @@ extern int numrelocs;                    /* ditto */
 extern struct extensible *passthrus;    /* In pass.c */
 extern int numpassthrus;                 /* ditto */
 
+char *optconfigfile;
+char dontReadConfigFiles;
+
 int minimumswap;
 double maxload[3];
 #ifdef USEMEMMIB
@@ -880,6 +883,8 @@ int a;
   int i;
   char configfile[300];
   struct extensible **etmp, *ptmp;
+  char *envconfpath;
+  char *cptr1, *cptr2;
 
   free_config(&procwatch,&extens,&relocs,&passthrus);
   numprocs = numextens = numrelocs = numpassthrus = 0;
@@ -893,11 +898,41 @@ int a;
     disks[i].path[0] = NULL;
     disks[i].minimumspace = -1;
   }
-  /* read the config files */
-  sprintf(configfile,"%s/snmpd.conf",SNMPLIBPATH);
-  read_config (configfile,&procwatch,&numprocs,&relocs,&numrelocs,&passthrus,&numpassthrus,&extens,&numextens,&minimumswap,disks,&numdisks,maxload);
-  sprintf(configfile,"%s/snmpd.local.conf",SNMPLIBPATH);
-  read_config (configfile,&procwatch,&numprocs,&relocs,&numrelocs,&passthrus,&numpassthrus,&extens,&numextens,&minimumswap,disks,&numdisks,maxload);
+
+  if (!dontReadConfigFiles) {  /* don't read if -C present on command line */
+    /* read the config files */
+    sprintf(configfile,"%s/snmpd.conf",SNMPLIBPATH);
+    read_config (configfile,&procwatch,&numprocs,&relocs,&numrelocs,&passthrus,&numpassthrus,&extens,&numextens,&minimumswap,disks,&numdisks,maxload);
+    sprintf(configfile,"%s/snmpd.local.conf",SNMPLIBPATH);
+    read_config (configfile,&procwatch,&numprocs,&relocs,&numrelocs,&passthrus,&numpassthrus,&extens,&numextens,&minimumswap,disks,&numdisks,maxload);
+
+    if (envconfpath = getenv("SNMPCONFPATH")) {
+      envconfpath = strdup(envconfpath);  /* prevent actually writting in env */
+      cptr1 = cptr2 = envconfpath;
+      i = 1;
+      while (i && *cptr2 != NULL) {
+        while(*cptr1 != NULL && *cptr1 != ':')
+          cptr1++;
+        if (*cptr1 == NULL)
+          i = 0;
+        else
+          *cptr1 = NULL;
+        sprintf(configfile,"%s/snmpd.conf",cptr2);
+        read_config (configfile,&procwatch,&numprocs,&relocs,&numrelocs,&passthrus,&numpassthrus,&extens,&numextens,&minimumswap,disks,&numdisks,maxload);
+        sprintf(configfile,"%s/snmpd.local.conf",cptr2);
+        read_config (configfile,&procwatch,&numprocs,&relocs,&numrelocs,&passthrus,&numpassthrus,&extens,&numextens,&minimumswap,disks,&numdisks,maxload);
+        cptr2 = ++cptr1;
+      }
+      free(envconfpath);
+    }
+  }
+  
+  /* read all optional config files */
+  /* last is -c from command line */
+  /* always read this one even if -C is present (ie both -c and -C) */
+  if (optconfigfile != NULL) {
+    read_config (optconfigfile,&procwatch,&numprocs,&relocs,&numrelocs,&passthrus,&numpassthrus,&extens,&numextens,&minimumswap,disks,&numdisks,maxload);
+  }
 
   /* argggg -- pasthrus must be sorted */
   if (numpassthrus > 0) {
