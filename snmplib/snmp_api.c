@@ -112,7 +112,9 @@ SOFTWARE.
 #include "snmp_logging.h"
 #include "default_store.h"
 
-static void init_snmp_session (void);
+#include "mt_support.h"
+
+static void _init_snmp (void);
 #include "transform_oids.h"
 #ifndef timercmp
 #define	timercmp(tvp, uvp, cmp) \
@@ -262,9 +264,10 @@ static const char * usmSecLevelName[] =
  *
  */
 /*MTCRITICAL_RESOURCE*/
-struct session_list	*Sessions	 = NULL;
-long			 Reqid		 = 0;
-long			 Msgid		 = 0;
+/* use token in comments to individually protect these resources */
+struct session_list	*Sessions	 = NULL; /* MT_SESSION */
+static long		 Reqid		 = 0;    /* MT_REQUESTID */
+static long		 Msgid		 = 0;    /* MT_MESSAGEID */
 int              snmp_errno  = 0;
 /*END MTCRITICAL_RESOURCE*/
 
@@ -290,7 +293,6 @@ static int snmpv3_build_probe_pdu (struct snmp_pdu **);
 static int snmpv3_build (struct snmp_session *, struct snmp_pdu *, 
 			     u_char *, size_t *);
 static int snmp_parse_version (u_char *, size_t);
-static void * snmp_sess_pointer (struct snmp_session *);
 static int snmp_resend_request (struct session_list *slp, 
 				struct request_list *rp, 
 				int incr_retries);
@@ -306,16 +308,29 @@ const char *strerror(int err)
 }
 #endif
 
+
 long
 snmp_get_next_reqid (void)
-{
-  return ++Reqid; /*MTCRITICAL_RESOURCE*/
+{ 
+    long retVal;
+    snmp_res_lock(MT_REQUESTID);
+    retVal = 1 + Reqid; /*MTCRITICAL_RESOURCE*/
+    if (!retVal) retVal = 2;
+    Reqid = retVal;
+    snmp_res_unlock(MT_REQUESTID);
+    return retVal;
 }
 
 long
 snmp_get_next_msgid (void)
 {
-  return ++Msgid; /*MTCRITICAL_RESOURCE*/
+    long retVal;
+    snmp_res_lock(MT_MESSAGEID);
+    retVal = 1 + Msgid; /*MTCRITICAL_RESOURCE*/
+    if (!retVal) retVal = 2;
+    Msgid = retVal;
+    snmp_res_unlock(MT_MESSAGEID);
+    return retVal;
 }
 
 void
@@ -430,34 +445,50 @@ snmp_sess_perror(const char *prog_string, struct snmp_session *ss) {
 
 
 /*
+ * Primordial SNMP library initialization.
+ * Initializes mutex locks.
+ * Invokes minimum required initialization for displaying MIB objects.
  * Gets initial request ID for all transactions,
  * and finds which port SNMP over UDP uses.
  * SNMP over AppleTalk or IPX is not currently supported.
+ *
+ * Warning: no debug messages here.
  */
 static void
-init_snmp_session (void)
+_init_snmp (void)
 {
 #ifdef  HAVE_GETSERVBYNAME
     struct servent *servp;
 #endif
     
     struct timeval tv;
+    long tmpReqid, tmpMsgid;
 
     if (Reqid) return;
-    Reqid = 1;
+    Reqid = 1; /* quick set to avoid multiple inits */
+
+    snmp_res_init();	/* initialize the mt locking structures */
+    init_mib_internals();
 
     gettimeofday(&tv,(struct timezone *)0);
     /*Now = tv;*/
 
+    /* get pseudo-random values for request ID and message ID */
+    /* don't allow zero value to repeat init */
 #ifdef SVR4
     srand48(tv.tv_sec ^ tv.tv_usec);
-    Reqid = lrand48();
-    Msgid = lrand48();
+    tmpReqid = lrand48();
+    tmpMsgid = lrand48();
 #else
     srandom(tv.tv_sec ^ tv.tv_usec);
-    Reqid = random();
-    Msgid = random();
+    tmpReqid = random();
+    tmpMsgid = random();
 #endif
+
+    if (tmpReqid == 0) tmpReqid = 1;
+    if (tmpMsgid == 0) tmpMsgid = 1;
+    Reqid = tmpReqid;
+    Msgid = tmpMsgid;
 
     default_s_port = htons(SNMP_PORT);
 #ifdef HAVE_GETSERVBYNAME   
@@ -477,8 +508,7 @@ init_snmp_session (void)
 void
 snmp_sess_init(struct snmp_session *session)
 {
-    init_snmp_session();
-    init_mib_internals();
+    _init_snmp();
 
     /* initialize session to default values */
 
@@ -514,7 +544,10 @@ init_snmp(const char *type)
   if (done_init) {
     return;
   }
+  
   done_init = 1;
+
+  _init_snmp();
 
 /* set our current locale properly to initialize isprint() type functions */
 #ifdef HAVE_SETLOCALE
@@ -535,8 +568,6 @@ init_snmp(const char *type)
   init_mib();
 
   read_configs();
-
-  init_snmp_session();
 
 }  /* end init_snmp() */
 
@@ -578,8 +609,10 @@ snmp_open(struct snmp_session *session)
     if (!slp) return NULL;
 
     { /*MTCRITICAL_RESOURCE*/
+	snmp_res_lock(MT_SESSION);
 	slp->next = Sessions;
 	Sessions = slp;
+	snmp_res_unlock(MT_SESSION);
     }
     return (slp->session);
 }
@@ -851,7 +884,7 @@ _sess_open(struct snmp_session *in_session)
     in_session->s_errno = 0;
 
     if (Reqid == 0)
-      init_snmp_session();
+      _init_snmp();
 
     if ((slp = snmp_sess_copy( in_session )) == NULL )
         return( NULL );
@@ -1251,6 +1284,7 @@ snmp_close(struct snmp_session *session)
     struct session_list *slp = NULL, *oslp = NULL;
 
     { /*MTCRITICAL_RESOURCE*/
+	snmp_res_lock(MT_SESSION);
     if (Sessions->session == session){	/* If first entry */
 	slp = Sessions;
 	Sessions = slp->next;
@@ -1264,8 +1298,8 @@ snmp_close(struct snmp_session *session)
 	    oslp = slp;
 	}
     }
+	snmp_res_unlock(MT_SESSION);
     } /*END MTCRITICAL_RESOURCE*/
-
     if (slp == NULL){
 	return 0;
     }
@@ -1699,48 +1733,56 @@ snmpv3_packet_build(struct snmp_pdu *pdu, u_char *packet, size_t *out_length,
 void
 set_pre_parse( struct snmp_session *sp, int (*hook) (struct snmp_session *, snmp_ipaddr) ) {
     struct session_list *slp;
+    snmp_res_lock(MT_SESSION);
     for(slp = Sessions; slp; slp = slp->next){
 	if  (slp->session == sp ) {
 	    slp->internal->hook_pre = hook;
-	    return;
+	    break;
 	}
     }
+    snmp_res_unlock(MT_SESSION);
 }
 
 void
 set_parse( struct snmp_session *sp,
 		int (*hook) (struct snmp_session *, struct snmp_pdu *, u_char *, size_t)) {
     struct session_list *slp;
+    snmp_res_lock(MT_SESSION);
     for(slp = Sessions; slp; slp = slp->next){
 	if  (slp->session == sp ) {
 	    slp->internal->hook_parse = hook;
-	    return;
+	    break;
 	}
     }
+    snmp_res_unlock(MT_SESSION);
 }
 
 void
 set_post_parse( struct snmp_session *sp,
                 int (*hook) ( struct snmp_session*, struct snmp_pdu *, int) ) {
     struct session_list *slp;
+    snmp_res_lock(MT_SESSION);
     for(slp = Sessions; slp; slp = slp->next){
 	if  (slp->session == sp ) {
 	    slp->internal->hook_post = hook;
-	    return;
+	    break;
 	}
     }
+    snmp_res_unlock(MT_SESSION);
 }
 
 void
 set_build( struct snmp_session *sp,
 		int (*hook) (struct snmp_session *, struct snmp_pdu *, u_char *, size_t *)) {
     struct session_list *slp;
+    snmp_res_lock(MT_SESSION);
     for(slp = Sessions; slp; slp = slp->next){
 	if  (slp->session == sp ) {
 	    slp->internal->hook_build = hook;
-	    return;
+	    break;
 	}
     }
+    snmp_res_unlock(MT_SESSION);
 }
 
 
@@ -3012,6 +3054,7 @@ _sess_async_send(void *sessp,
 	}
 	memset(rp, 0, sizeof(struct request_list));
 	/* XX isp needs lock iff multiple threads can handle this session */
+	snmp_res_lock(MT_SESSION);  /* XX lock should be per session ! */
 	if (isp->requestsEnd){
 	    rp->next_request = isp->requestsEnd->next_request;
 	    isp->requestsEnd->next_request = rp;
@@ -3021,6 +3064,7 @@ _sess_async_send(void *sessp,
 	    isp->requests = rp;
 	    isp->requestsEnd = rp;
 	}
+	snmp_res_unlock(MT_SESSION); /* XX lock should be per session ! */
 	rp->pdu = pdu;
 	rp->request_id = pdu->reqid;
 	rp->message_id = pdu->msgid;
@@ -3034,8 +3078,11 @@ _sess_async_send(void *sessp,
 	tv.tv_usec %= 1000000L;
 	rp->expire = tv;
     }
+#if COMMENT
+XXX enable next two lines when problems with make test are resolved.
     else
         snmp_free_pdu(pdu);  /* free v1 or v2 TRAP PDU */
+#endif
 
     return reqid;
 }
@@ -3119,14 +3166,17 @@ void
 snmp_read(fd_set *fdset)
 {
     struct session_list *slp;
-
+    snmp_res_lock(MT_SESSION);
     for(slp = Sessions; slp; slp = slp->next){
         snmp_sess_read((void *)slp, fdset);
     }
+    snmp_res_unlock(MT_SESSION);
 }
 
 /* Same as snmp_read, but works just one session. */
 /* returns 0 if success, -1 if fail */
+/* MTR: can't lock here and at snmp_read */
+/* Beware recursive send maybe inside snmp_read callback function. */
 int
 _sess_read(void *sessp,
 	       fd_set *fdset)
@@ -3178,6 +3228,7 @@ _sess_read(void *sessp,
                 return -1;
     { /*MTCRITICAL_RESOURCE*/
 	/* indirectly accesses the Sessions list */
+            /* MTR snmp_res_lock(MT_SESSION); */
             new_slp->next = slp->next;
             slp->next     = new_slp;
 
@@ -3189,6 +3240,7 @@ _sess_read(void *sessp,
             isp->sd = new_sd;
             isp->addr.sa_family = isp->me.sa_family;
             sp->flags &= (~SNMP_FLAGS_LISTENING);
+            /* MTR snmp_res_unlock(MT_SESSION); */
     } /*END MTCRITICAL_RESOURCE*/
         }
         memcpy((u_char *)&from, (u_char *)&(isp->addr), sizeof( isp->addr ));
@@ -3269,9 +3321,11 @@ _sess_read(void *sessp,
 	  callback = sp->callback;
 	  magic = sp->callback_magic;
 	  if (rp->callback) {
-              callback = rp->callback;
+	      callback = rp->callback;
 	      magic = rp->cb_data;
 	  }
+
+	  /* MTR snmp_res_lock(MT_SESSION);  ?* XX lock should be per session ! */
 	  if (callback == NULL || 
 	      callback(RECEIVED_MESSAGE,sp,pdu->reqid,pdu,magic) == 1){
 	    if (pdu->command == SNMP_MSG_REPORT) {
@@ -3317,11 +3371,16 @@ _sess_read(void *sessp,
 	       same reqid */
 	    break;
 	  }
+	  /* MTR snmp_res_unlock(MT_SESSION);  ?* XX lock should be per session ! */
 	}
     } else {
 	if (sp->callback)
+	{
+            /* MTR snmp_res_lock(MT_SESSION); */
 	    sp->callback(RECEIVED_MESSAGE, sp, pdu->reqid, pdu,
 		     sp->callback_magic);
+            /* MTR snmp_res_unlock(MT_SESSION); */
+	}	
     }
     /* call USM to free any securityStateRef supplied with the message */
     if (pdu->securityStateRef && pdu->command == SNMP_MSG_TRAP2) {
@@ -3336,7 +3395,7 @@ _sess_read(void *sessp,
 int
 snmp_sess_read(void *sessp,
 	       fd_set *fdset)
-{
+    {
     struct session_list *psl;
     struct snmp_session *pss;
     int rc;
@@ -3492,10 +3551,11 @@ void
 snmp_timeout (void)
 {
     struct session_list *slp;
-
+    snmp_res_lock(MT_SESSION);
     for(slp = Sessions; slp; slp = slp->next){
 	snmp_sess_timeout((void *)slp);
     }
+    snmp_res_unlock(MT_SESSION);
 }
 
 static int
@@ -3990,11 +4050,14 @@ snmp_sess_pointer(struct snmp_session *session)
 {
     struct session_list *slp;
 
+    snmp_res_lock(MT_SESSION);
     for(slp = Sessions; slp; slp = slp->next){
 	if (slp->session == session){
 	    break;
 	}
     }
+    snmp_res_unlock(MT_SESSION);
+
     if (slp == NULL){
 	snmp_errno = SNMPERR_BAD_SESSION; /*MTCRITICAL_RESOURCE*/
 	return(NULL);
