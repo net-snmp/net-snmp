@@ -92,7 +92,6 @@ PERFORMANCE OF THIS SOFTWARE.
 #define  MIN(a,b)                     (((a) < (b)) ? (a) : (b)) 
 #endif
 
-static int compare_tree (oid *, int, oid *, int);
 extern struct subtree subtrees_old[];
 
 static u_char *search_subtree_vars (struct subtree *, oid *, int *, u_char *, int *, u_short *, int, WriteMethod **write_method, struct packet_info *, int *);
@@ -777,7 +776,7 @@ getStatPtr(oid *name,
 }
 */
 
-static int
+int
 compare_tree(oid *name1,
 	     int len1, 
 	     oid *name2, 
