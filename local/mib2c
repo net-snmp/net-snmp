@@ -123,6 +123,19 @@ for($varlen = 0; $varlen <= $#varLengths; $varlen++) {
 }
 $varlen = $varLengths[$varlen];
 
+#============================================
+#
+#	Table-handling routines.
+#
+#============================================
+foreach $vtable (@table_list) {
+    foreach $ptable (@processtable) {
+	$variableTypes{$ptable}{'processed'} = 
+	    (eval "\"$variableTypes{$ptable}{'code'}\"") . "\n\n";
+    }
+    $var_routines .= 
+	(eval "\"$variableTypes{'code-var_table'}{'code'}\"") . "\n\n";
+}
 
 #============================================
 #
@@ -130,10 +143,8 @@ $varlen = $varLengths[$varlen];
 #
 #============================================
 open(DOTH,">$outputName.h");
-print DOTH (eval "\"$variableTypes{'code-dot-h'}{'code'}\"") . "\n";;
+print DOTH (eval "\"$variableTypes{'code-dot-h'}{'code'}\"") . "\n";
 close(DOTH);
-
-
 
 #============================================
 #
@@ -144,33 +155,17 @@ close(DOTH);
 
 open(DOTC,">$outputName.c");
 print DOTC (eval "\"$variableTypes{'code-main-part'}{'code'}\"") . "\n\n";;
-
-#============================================
-#
-#	Table-handling routines.
-#
-#============================================
-foreach $vtable (@table_list) {
-    print DOTC (eval "\"$variableTypes{'code-var_table'}{'code'}\"") . "\n\n";;
-}
-
-#============================================
-#
-#	Writing routines.
-#	   (and reporting on the results)
-#
-#============================================
-print DOTC "$writeFuncs";
 close(DOTC);
 
-
-
-
+#============================================
+#
+# Everyone loves statistics.
+#
+#============================================
 print "  depth: $depth\n";
 print "  Number of Lines Created:\n";
 system("wc -l $outputName.c $outputName.h");
 print "Done.\n";
-
 
 #============================================
 #
@@ -188,42 +183,26 @@ sub loadMib {
     print "doing $mib->{label} : $mib->{objectID}\n" if $debug;
     if (defined($mib->{'access'}) && 
 	$mib->{'access'} =~ /ReadOnly|ReadWrite|WriteOnly|Create/) {
-	$caseStatement = "    case $cname:\n";
 	$count = $count + 1;
 	$subid = $mib->{'objectID'};
+	$type = $mib->{'type'};
 	$subid =~ s/$fulloid\.//;
 	$subid =~ s/\./,/g;
-	$structinfo .= sprintf("#define   %-20s  $count\n", $cname);
 	if (!defined($variableTypes{$mib->{'type'}})) {
-	    $caseStatement .= "/* unknown type: $mib->{type}.  mib2c can not set up a default value for this mib value */\n";
-	    # $defineStatements .= "/* unknown type: $mib->{type}.  mib2c can not handle this mib value: */\n";
 	    $count = $count + 1;
 	    print STDERR "unknown type:  $mib->{type} for $mib->{label}\n";
-	    $structinfo .= 
-		sprintf("/* unknown type: $mib->{type}.  mib2c can not handle this mib value: */\n{ %-20s, %-14s, %-6.6s, %s, %d, { %s } },\n",
-			$cname, "UNKNOWN_TYPE_$mib->{type}",
-			$accessToUCD{$mib->{'access'}},
-			"var_$vroutine",
-			$depth-1, $subid);
+	    print STDERR "unknown type:  no information generated for $mib->{label}\n";
 	} else {
-	    if ($mib->{'access'} =~ /ReadWrite|WriteOnly|Create/) {
-		createWriteFunction($mib->{'label'}, $mib->{'type'});
-		$caseStatement .= "      *write_method = write_$mib->{label};\n";
+	    foreach $i (@process) {
+		next if (defined($variableTypes{$i}{'skipif'}) &&
+			 eval $variableTypes{$i}{'skipif'});
+		my $str = "\"$variableTypes{$i}{'code'}\"";
+		print $str,"\n" if ($debug);
+		my $result = eval ($str);
+		$variableTypes{$i}{'processed'} .= "$result\n";
+		$variableTypes{$vroutine}{$i}{'processed'} .= "$result\n";
 	    }
-	    $x = $variableTypes{$mib->{'type'}}{'defaultInit'};
-	    $x =~ s/\n/\n        /g;
-	    $x = "        " . $x;
-	    $caseStatement .= $x . "\n";
-	    $structinfo .= 
-		sprintf("  { %-20s, %-14s, %-6.6s, %s, %d, { %s } },\n",
-			$cname, $variableTypes{$mib->{'type'}}{'asnType'},
-			$accessToUCD{$mib->{'access'}},
-			"var_$vroutine",
-			$depth-1, $subid);
 	}
-	$caseStatement .= "\n";
-	$caseStatements{$vroutine} .= $caseStatement;
-	# $defineStatements .= sprintf("#define   %-20s  $count\n", $cname);
     }
     my $children = $$mib{'children'}; 
     my $i;
@@ -231,7 +210,6 @@ sub loadMib {
     foreach $i (@{$children}) {
 	if ( $name =~ /Table$/ ) {
 	    $vroutine="$name";
-    	    $functionInfo .= "unsigned char *var_$name(struct variable *, oid *, int *, int, int *, WriteMethod **write_method);\n";
 	    push @table_list, $name;
 	    $newdepth = max(loadMib($i, $depth), $newdepth);
 	    $vroutine="$outputName";
@@ -250,22 +228,6 @@ sub max {
 }
 
 
-#============================================
-#
-#  createWriteFunction:
-#	Construct a write function for the current variable,
-#	including a declaration for the header file.
-#
-#============================================
-sub createWriteFunction {
-    my $name = shift;
-    my $type = shift;
-
-    $writeFuncs .= eval("\"$variableTypes{'code-write-func'}{'code'}\"") . 
-	"\n\n";
-    $functionInfo .= "int write_$name(int, u_char *,u_char, int, u_char *,oid*, int);\n";
-}
-
 sub read_config() {
     my $configfile = shift;
     my ($type, $lasttoken);
@@ -273,7 +235,7 @@ sub read_config() {
     if ( $fh->open("<$configfile") ) {
 	while(<$fh>) {
 	    next if (/^\s*\#/ || /^\s*$/);
-	    if (/type:\s*(.*)/) {
+	    if (/^\s*type:\s*(.*)/) {
 		if (defined($type) && defined($lasttoken) && 
 		    defined ($variableTypes{$type}{$lasttoken})) {
 		    chomp($variableTypes{$type}{$lasttoken});
@@ -282,6 +244,12 @@ sub read_config() {
 		chomp($type);
 	    } elsif (/include:\s*(.*)/) {
 		read_config($1);
+	    } elsif (/process:\s*(.*)/) {
+		push (@process, $1);
+	    } elsif (/processtable:\s*(.*)/) {
+		push (@processtable, $1);
+	    } elsif (/delete:\s*(.*)/) {
+		delete($variableTypes{$type}{$1});
 	    } elsif (/copy:\s*(.*)/) {
 		my $item;
 		chomp($1);
