@@ -112,6 +112,17 @@ _ifTable_initialize_interface(ifTable_registration_ptr reg_ptr,
     DEBUGMSGTL(("internal:_ifTable_initialize_interface", "called\n"));
 
 
+    /*
+     * set up the container. This is outside the rewrite ifdef, because
+     * the container is used by the ifXTable too..
+     */
+    _ifTable_container_init(&ifTable_if_ctx);
+    if (NULL == ifTable_if_ctx.container) {
+        snmp_log(LOG_ERR, "could not initialize container for ifTable\n");
+        return;
+    }
+
+#ifdef NETSNMP_ENABLE_MFD_REWRITES
     /*************************************************
      *
      * save interface context for ifTable
@@ -139,15 +150,6 @@ _ifTable_initialize_interface(ifTable_registration_ptr reg_ptr,
      * call data access initialization code
      */
     ifTable_init_data(reg_ptr);
-
-    /*
-     * set up the container
-     */
-    _ifTable_container_init(&ifTable_if_ctx);
-    if (NULL == ifTable_if_ctx.container) {
-        snmp_log(LOG_ERR, "could not initialize container for ifTable\n");
-        return;
-    }
 
     /*
      * access_multiplexer: REQUIRED wrapper for get request handling
@@ -269,6 +271,7 @@ _ifTable_initialize_interface(ifTable_registration_ptr reg_ptr,
      * register table
      */
     netsnmp_register_table(reginfo, tbl_info);
+#endif /* NETSNMP_ENABLE_MFD_REWRITES */
 }
 
 void
