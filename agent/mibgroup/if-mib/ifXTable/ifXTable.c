@@ -17,6 +17,8 @@
 #include <net-snmp/net-snmp-includes.h>
 #include <net-snmp/agent/net-snmp-agent-includes.h>
 
+#include <ctype.h>
+
 /*
  * include our parent header 
  */
@@ -26,11 +28,28 @@
 
 #include "ifXTable_interface.h"
 
+#define LINE_TERM_CHAR '$'
+
+/*
+ * not sure if we want to support set for promiscuous mode, because
+ * 1) careful thought should go into any settable object that performs
+ *    an action that requires root access
+ * 2) i don't want to write the code right now
+ * 
+ */
+#undef NETSNMP_ENABLE_PROMISCUOUSMODE_SET
+
 oid             ifXTable_oid[] = { IFXTABLE_OID };
 int             ifXTable_oid_size = OID_LENGTH(ifXTable_oid);
+const char     *row_token = "ifXTable";
 
 void            initialize_table_ifXTable(void);
 
+static void     _ifXTable_restore(const char *token, char *buf);
+static int      _ifXTable_save(int majorID, int minorID, void *serverarg,
+                               void *clientarg);
+
+extern netsnmp_container * _ifXTable_container_get(void);
 
 /**
  * Initializes the ifXTable module
@@ -57,6 +76,7 @@ initialize_table_ifXTable(void)
 {
     ifXTable_registration_ptr user_context;
     u_long          flags;
+    int             rc;
 
     DEBUGMSGTL(("verbose:ifXTable:initialize_table_ifXTable", "called\n"));
 
@@ -76,6 +96,15 @@ initialize_table_ifXTable(void)
      * call interface initialization code
      */
     _ifXTable_initialize_interface(user_context, flags);
+    netsnmp_assert(NULL!=_ifXTable_container_get());
+    register_config_handler(NULL, "ifXTable", _ifXTable_restore, NULL, NULL);
+    rc = snmp_register_callback(SNMP_CALLBACK_LIBRARY,
+                                SNMP_CALLBACK_STORE_DATA,
+                                _ifXTable_save, _ifXTable_container_get());
+    if (rc != SNMP_ERR_NOERROR)
+        snmp_log(LOG_ERR, "error registering for STORE_DATA callback "
+                 "in initialize_table_ifXTable\n");
+
 }
 
 /**
@@ -1651,25 +1680,28 @@ ifXTable_commit(ifXTable_rowreq_ctx * rowreq_ctx)
     rowreq_ctx->set_flags = 0;
 
     /*
-     * TODO:
      * commit data
+     *
+     * this is where one would usually commit data. In this case,
+     * ifLinkUpDownTrapEnable and ifAlias are purely internal, so
+     * nothing needs to be done. That leaves ifPromiscuosMode,
+     * which I'm leery about implementing. Thus, at this point,
+     * there is nothing to do except twiddle flag bits.
+     *
+     * in keeping with the net-snmp persistence policy, changes are kept
+     * in memory, and saved to disk when the agent shuts down.
      */
-#if 1
-#warning ifXtable commit
-#else
     if (save_flags & FLAG_IFLINKUPDOWNTRAPENABLE) {
         save_flags &= ~FLAG_IFLINKUPDOWNTRAPENABLE;     /* clear */
-        rc = TODO_commit_colum(...);
-        if (rc == TODO_success_code) {
-            /*
-             * set flag, in case we need to undo
-             */
-            rowreq_ctx->set_flags |= FLAG_IFLINKUPDOWNTRAPENABLE;
-        }
+        /*
+         * set flag, in case we need to undo
+         */
+        rowreq_ctx->set_flags |= FLAG_IFLINKUPDOWNTRAPENABLE;
     }
 
     if (save_flags & FLAG_IFPROMISCUOUSMODE) {
         save_flags &= ~FLAG_IFPROMISCUOUSMODE;  /* clear */
+#ifdef NETSNMP_ENABLE_PROMISCUOUSMODE_SET
         rc = TODO_commit_colum(...);
         if (rc == TODO_success_code) {
             /*
@@ -1677,19 +1709,16 @@ ifXTable_commit(ifXTable_rowreq_ctx * rowreq_ctx)
              */
             rowreq_ctx->set_flags |= FLAG_IFPROMISCUOUSMODE;
         }
+#endif
     }
 
     if (save_flags & FLAG_IFALIAS) {
         save_flags &= ~FLAG_IFALIAS;    /* clear */
-        rc = TODO_commit_colum(...);
-        if (rc == TODO_success_code) {
-            /*
-             * set flag, in case we need to undo
-             */
-            rowreq_ctx->set_flags |= FLAG_IFALIAS;
-        }
+        /*
+         * set flag, in case we need to undo
+         */
+        rowreq_ctx->set_flags |= FLAG_IFALIAS;
     }
-#endif
     if (save_flags) {
         snmp_log(LOG_ERR, "unhandled columns (0x%x) in commit\n",
                  save_flags);
@@ -2044,7 +2073,11 @@ ifPromiscuousMode_check_value(ifXTable_rowreq_ctx * rowreq_ctx,
     /*
      * if everything looks ok, return 0 
      */
+#ifdef NETSNMP_ENABLE_PROMISCUOUSMODE_SET
     return MFD_SUCCESS;
+#else
+    return MFD_NOT_VALID_EVER;
+#endif
 }
 
 /**
@@ -2389,7 +2422,7 @@ ifAlias_undo(ifXTable_rowreq_ctx * rowreq_ctx)
     memcpy(rowreq_ctx->data.ifAlias, rowreq_ctx->undo->ifAlias,
            (rowreq_ctx->data.ifAlias_len *
             sizeof(rowreq_ctx->data.ifAlias[0])));
-    rowreq_ctx->undo->ifAlias_len = rowreq_ctx->data.ifAlias_len;
+    rowreq_ctx->data.ifAlias_len = rowreq_ctx->undo->ifAlias_len;
 
 
     return MFD_SUCCESS;
@@ -2430,3 +2463,195 @@ ifXTable_check_dependencies(ifXTable_rowreq_ctx * rowreq_ctx)
 
 /** @} */
 /** @{ */
+
+int
+_ifXTable_row_save(ifXTable_rowreq_ctx * rowreq_ctx, void *type)
+{
+    char           *buf, *line;
+    int             size;
+
+    netsnmp_assert(NULL != rowreq_ctx);
+
+    /*
+     * allocate space for data. Remeber, data will be stored in
+     * ASCII form, so you need to allow for that. Here are some
+     * general guidelines:
+     *
+     * Object ID :  12 * len (ASCII len of max int + 1 for .)
+     * Octet String: (2 * len) + 2 (2 ASCII chars per byte + "0x")
+     * Integers :  12 (ASCII len for smallest negative number)
+     */
+    size = sizeof(row_token) + 1 + /* 'ifXTable ' */
+        13 +                       /* ifIndex value + ' ' */
+        13 +                       /* col #, + ':' */
+        rowreq_ctx->data.ifAlias_len +
+        2 +                        /* [0|1] + ' ' */
+        4;                         /* '\n\0' & possible quoting */
+
+    /*
+     * allocate memory for the line
+     */
+    line = buf = calloc(1, size);
+    if (NULL == buf) {
+        snmp_log(LOG_ERR, "error allocating memory while saving row\n");
+        return SNMP_ERR_GENERR;
+    }
+
+    /*
+     * build the line
+     */
+    buf += sprintf(buf, "%s ", row_token);
+    buf = read_config_save_objid(buf, rowreq_ctx->oid_idx.oids,
+                                 rowreq_ctx->oid_idx.len);
+    if (NULL == buf) {
+        snmp_log(LOG_ERR, "error saving row to persistent file\n");
+        free(line);
+        return SNMP_ERR_GENERR;
+    }
+    *buf++ = ' ';
+
+    /*
+     * prefix with column number, so we don't ever depend on
+     * order saved.
+     */
+    buf += sprintf(buf, "%u:", COLUMN_IFALIAS);
+    buf = read_config_save_octet_string(buf, rowreq_ctx->data.ifAlias,
+                                        rowreq_ctx->data.ifAlias_len);
+    *buf++ = ' ';
+
+    /*
+     * prefix with column number, so we don't ever depend on
+     * order saved.
+     */
+    buf += sprintf(buf, "%u:%1lu ", COLUMN_IFLINKUPDOWNTRAPENABLE,
+                   rowreq_ctx->data.ifLinkUpDownTrapEnable);
+
+    /*
+     * terminate and store the line
+     */
+    sprintf(buf, "%c\n", LINE_TERM_CHAR);
+    read_config_store((char *) type, line);
+
+    /*
+     * free memory
+     */
+    free(line);
+
+    return SNMP_ERR_NOERROR;
+
+}
+
+static int
+_ifXTable_save(int majorID, int minorID, void *serverarg, void *clientarg)
+{
+    char           *appname = netsnmp_ds_get_string(NETSNMP_DS_LIBRARY_ID,
+                                                    NETSNMP_DS_LIB_APPTYPE);
+
+    /*
+     * save all rows
+     */
+    CONTAINER_FOR_EACH((netsnmp_container *) clientarg,
+                       (netsnmp_container_obj_func *)
+                       _ifXTable_row_save, appname);
+
+    /*
+     * never fails 
+     */
+    return SNMPERR_SUCCESS;
+}
+
+
+static void     _ifXTable_restore(const char *token, char *buf)
+{
+    ifXTable_rowreq_ctx *context;
+    netsnmp_container *container;
+    netsnmp_index   index;
+    u_int           col, len;
+
+    if (strncmp(token, row_token, sizeof(row_token)) != 0) {
+        snmp_log(LOG_ERR,
+                 "unknown token in _ifXTable_restore\n");
+        return;
+    }
+
+    container = _ifXTable_container_get();
+    if (NULL == container) {
+        snmp_log(LOG_ERR, "null container in _ifXTable_restore\n");
+        return;
+    }
+
+    DEBUGMSGTL(("ifXTable:restore", "parsing line '%s'\n", buf));
+
+    /*
+     * pull out index and find row
+     */
+    index.oids = NULL;
+    buf = read_config_read_objid(buf, &index.oids, &index.len);
+    if (NULL == buf) {
+        snmp_log(LOG_ERR, "error reading row index in _ifXTable_restore\n");
+        return;
+    }
+    context = CONTAINER_FIND(container, &index);
+    if (NULL == context) {
+        snmp_log(LOG_ERR, "error finding row index in _ifXTable_restore\n");
+        return;
+    }
+
+    /*
+     * get each column
+     */
+    buf = skip_white(buf);
+    if ((NULL == buf) || !isdigit(*buf)) {
+        snmp_log(LOG_ERR, "unexpected format1 in _ifXTable_restore\n");
+        return;
+    }
+
+    /*
+     * extract column, skip ':'
+     */
+    col = (u_int) strtol(buf, &buf, 10);
+    if ((NULL == buf) || (*buf != ':') || (COLUMN_IFALIAS != col)) {
+        snmp_log(LOG_ERR, "unexpected format2 in _ifXTable_restore\n");
+        return;
+    }
+    ++buf;                  /* skip : */
+
+    /*
+     * parse value
+     */
+    DEBUGMSGTL(("ifXTable:restore", "parsing column %d\n", col));
+    context->data.ifAlias_len = sizeof(context->data.ifAlias);
+    buf = read_config_read_memory(ASN_OCTET_STR, buf,
+                                  (char *) &context->data.ifAlias,
+                                  (size_t *) & context->data.ifAlias_len);
+
+    /*
+     * extract column, skip ':'
+     */
+    col = (u_int) strtol(buf, &buf, 10);
+    if ((NULL == buf) || (*buf != ':') ||
+        (COLUMN_IFLINKUPDOWNTRAPENABLE != col)) {
+        snmp_log(LOG_ERR, "unexpected format3 in _ifXTable_restore\n");
+        return;
+    }
+    ++buf;                  /* skip : */
+
+    /*
+     * parse value
+     */
+    DEBUGMSGTL(("ifXTable:restore", "parsing column %d\n", col));
+    len = sizeof(context->data.ifLinkUpDownTrapEnable);
+    buf = read_config_read_memory(ASN_INTEGER, buf,
+                                  (char *) &context->data.ifLinkUpDownTrapEnable,
+                                  &len);
+
+    /*
+     * if the pointer is NULL and we didn't reach the
+     * end of the line, something went wrong. Log message,
+     * delete the row and bail.
+     */
+    if ((buf == NULL) || (*buf != LINE_TERM_CHAR)) {
+        snmp_log(LOG_ERR, "unexpected format4 in _ifXTable_restore\n");
+        return;
+    }
+}
