@@ -108,7 +108,7 @@ extern "C" {
        /*
         * release memory used by a container.
         *
-        * Note: if your data structures contained allcoated
+        * Note: if your data structures contained allocated
         * memory, you are responsible for releasing that
         * memory before calling this function!
         */
@@ -137,15 +137,14 @@ extern "C" {
        netsnmp_container_rtn   *find;
 
        /*
-        * find the first entry in the container with a key greater than
-        * the specified key.
+        * find the entry in the container with the next highest key
         *
         * If the key is NULL, return the first item in the container.
         */
        netsnmp_container_rtn   *find_next;
 
        /*
-        * find all entries iin the container which match the partial key
+        * find all entries in the container which match the partial key
         */
        netsnmp_container_set            *get_subset;
 
@@ -183,15 +182,11 @@ extern "C" {
     } netsnmp_container;
 
     /*
-     * initialize a container of container factories. used by
+     * initialize/free a container of container factories. used by
      * netsnmp_container_find* functions.
      */
     void netsnmp_container_init_list(void);
-
-    /*
-     * frees the containers 
-     */
-    void netsnmp_clear_container(void);
+    void netsnmp_container_free_lists(void);
 
     /*
      * register a new container factory
@@ -204,14 +199,6 @@ extern "C" {
      */
     netsnmp_container * netsnmp_container_find(const char *type_list);
     netsnmp_container * netsnmp_container_get(const char *type);
-
-    /*
-     * search for and create a container from a list of types or a
-     * specific type, using the provided container structure
-     */
-    int netsnmp_container_find_noalloc(const char *type_list,
-                                       netsnmp_container* c);
-    int netsnmp_container_get_noalloc(const char *type, netsnmp_container* c);
 
     /*
      * utility routines
@@ -303,9 +290,6 @@ extern "C" {
         return x->remove(x,k);
     }
     
-    /* clears the top level node if this container is it */
-    void netsnmp_release_if_top(netsnmp_container *cont);
-
     /*------------------------------------------------------------------
      * These functions should EXACTLY match the function version in
      * container.c. If you change one, change them both.
@@ -327,10 +311,6 @@ extern "C" {
             }
         }
 	rc = x->cfree(x);
-	if (rc != 0) {
-            netsnmp_release_if_top(x);
-	    SNMP_FREE(x);
-        }
 
 	return rc;
     }
