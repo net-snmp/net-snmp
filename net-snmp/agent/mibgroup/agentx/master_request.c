@@ -115,6 +115,7 @@ handle_agentx_response( int operation,
     struct ax_variable_list *ax_vlist = (struct ax_variable_list *)magic;
     struct variable_list *vbp, *next;
     struct agent_snmp_session *asp  =  ax_vlist->asp;
+    struct request_list *req;
     int i, type, index;
     struct ax_variable_list *retry_vlist;
     struct variable_list    *vb_retry, *vbp2;
@@ -215,9 +216,16 @@ handle_agentx_response( int operation,
 
     if ( asp->outstanding_requests ) {
 		/*
-		 * XXX - Need to send out any newly delegated requests
+		 * Send out any newly delegated requests
 		 * 	See 'handle_one_var' above
 		 */
+	for ( req=asp->outstanding_requests ; req ; req=req->next_request ) {
+	    if ( req->pdu ) {
+		snmp_async_send(req->session, req->pdu,
+				req->callback, req->cb_data);
+		req->pdu = NULL;
+	    }
+	}
     }
 
 finish:
@@ -395,7 +403,7 @@ agentx_add_request( struct agent_snmp_session *asp,
 	sub = find_subtree_previous( vbp->name, vbp->name_length, NULL );
         snmp_pdu_add_variable( request->pdu,
 			   vbp->name, vbp->name_length, ASN_PRIV_EXCL_RANGE,
-			   (u_char*)sub->end, sub->end_len);
+			   (u_char*)sub->end, sub->end_len*sizeof(oid));
     }
 
     return AGENTX_ERR_NOERROR;
