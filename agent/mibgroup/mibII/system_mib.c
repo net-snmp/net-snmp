@@ -90,7 +90,9 @@ void system_parse_config_sysloc(const char *token,
 {
   char tmpbuf[1024];
   
-  if (strlen(cptr) < sizeof(sysLocation)) {
+  if (strcmp(cptr,"\"\"") == 0) {
+      sysContact[0] = '\0';
+  } else if (strlen(cptr) < sizeof(sysLocation)) {
     strcpy(sysLocation,cptr);
   } else {
     sprintf(tmpbuf, "syslocation token too long (must be < %d):\n\t%s",
@@ -110,7 +112,9 @@ void system_parse_config_syscon(const char *token,
 {
   char tmpbuf[1024];
 
-  if (strlen(cptr) < sizeof(sysContact)) {
+  if (strcmp(cptr,"\"\"") == 0) {
+      sysContact[0] = '\0';
+  } else if (strlen(cptr) < sizeof(sysContact)) {
     strcpy(sysContact,cptr);
   } else {
     sprintf(tmpbuf, "syscontact token too long (must be < %d):\n\t%s",
