@@ -111,9 +111,14 @@ typedef struct ${context}_rowreq_ctx_s {
 @    end@
     ${context}_data            $mfd_tmp data;
 @   if $m2c_table_settable@
+@      if $m2c_undo_embed == 1@
+@         eval $mfd_tmp = " "@
+@      else@
+@         eval $mfd_tmp = "*"@
+@      end@ # embed
     ${context}_undo_data       $mfd_tmp undo;
     unsigned int                set_flags;
-@   end@
+@   end@ # settable
 
     /** implementor's context pointer provided during registration */
     ${context}_registration_ptr ${context}_reg;
@@ -145,13 +150,14 @@ typedef struct ${context}_ref_rowreq_ctx_s {
 @   if $m2c_data_init == 1@
     int ${context}_init_rowreq_ctx(${context}_rowreq_ctx *rowreq_ctx);
     void ${context}_cleanup_rowreq_ctx(${context}_rowreq_ctx *rowreq_ctx);
+
 @   end@
 @    if "$m2c_data_context" ne "generated"@
-@        if $m2c_data_allocate == 1@
+@        if ($m2c_data_allocate == 1) || ($m2c_undo_embed == 1)@
     ${context}_data * ${context}_allocate_data(void);
     void ${context}_release_data(${context}_data *data);
-@        end@
 
+@        end@
 @   end@
 @   if $m2c_table_settable@
 @      if $m2c_table_dependencies == 1@
