@@ -172,16 +172,17 @@ usm_parse_oid(oid *oidIndex, size_t oidLen,
     return 1;
   }
 
-  *engineID = (unsigned char *) malloc(engineIDL*sizeof(unsigned char));
+  *engineID = (unsigned char *) malloc(engineIDL);
   if (*engineID == NULL) {
     DEBUGMSGTL(("usmUser","parse_oid: malloc of the engineID failed\n"));
     return 1;
   }
   *engineIDLen = engineIDL;
 
-  *name = (unsigned char *) malloc((nameL+1)*sizeof(unsigned char));
+  *name = (unsigned char *) malloc(nameL+1);
   if (*name == NULL) {
     DEBUGMSGTL(("usmUser","parse_oid: malloc of the name failed\n"));
+    free(*engineID);
     return 1;
   }
   *nameLen = nameL;
@@ -196,8 +197,8 @@ usm_parse_oid(oid *oidIndex, size_t oidLen,
   for(i = 0; i < nameL; i++) {
     if (oidIndex[i+2+engineIDL] > 255) {
       UPO_parse_error:
-      free(engineID);
-      free(name);
+      free(*engineID);
+      free(*name);
       return 1;
     }
     name[0][i] = (unsigned char) oidIndex[i+2+engineIDL];
@@ -903,7 +904,7 @@ write_usmUserPublic(
     }
     if (uptr->userPublicString)
       free(uptr->userPublicString);
-    uptr->userPublicString = (u_char *) malloc(sizeof(char)*var_val_len+1);
+    uptr->userPublicString = (u_char *) malloc(var_val_len+1);
     if (uptr->userPublicString == NULL) {
       return SNMP_ERR_GENERR;
     }
@@ -1052,15 +1053,15 @@ write_usmUserStatus(
 
       /* copy in the engineID */
       uptr->engineID =
-        (unsigned char *) malloc(sizeof(unsigned char)*engineIDLen);
+        (unsigned char *) malloc(engineIDLen);
       if (uptr->engineID == NULL) {
         free(engineID);
         free(newName);
-        free(uptr);
+        usm_free_user(uptr);
         return SNMP_ERR_GENERR;
       }
       uptr->engineIDLen = engineIDLen;
-      memcpy(uptr->engineID, engineID, engineIDLen*sizeof(unsigned char));
+      memcpy(uptr->engineID, engineID, engineIDLen);
       free(engineID);
 
       /* copy in the name and secname */

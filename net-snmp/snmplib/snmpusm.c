@@ -2313,7 +2313,7 @@ usm_cloneFrom_user(struct usmUser *from, struct usmUser *to)
   SNMP_FREE(to->authKey);
 
   if (from->authKeyLen > 0 &&
-      (to->authKey = (u_char *) malloc(sizeof(char) * from->authKeyLen))
+      (to->authKey = (u_char *) malloc(from->authKeyLen))
       != NULL) {
     to->authKeyLen = from->authKeyLen;
     memcpy(to->authKey, from->authKey, to->authKeyLen);
@@ -2336,7 +2336,7 @@ usm_cloneFrom_user(struct usmUser *from, struct usmUser *to)
   SNMP_FREE(to->privKey);
 
   if (from->privKeyLen > 0 &&
-      (to->privKey = (u_char *) malloc(sizeof(char) * from->privKeyLen))
+      (to->privKey = (u_char *) malloc(from->privKeyLen))
       != NULL) {
     to->privKeyLen = from->privKeyLen;
     memcpy(to->privKey, from->privKey, to->privKeyLen);

@@ -274,7 +274,7 @@ agentx_register_index( struct snmp_session *ss,
     if ( varbind2 == NULL )
 	return NULL;
     if ( snmp_clone_var( varbind, varbind2 )) {
-	free( varbind2 );
+	snmp_free_varbind( varbind2 );
 	return NULL;
     }
     if ( varbind2->val.string == NULL )
@@ -282,7 +282,7 @@ agentx_register_index( struct snmp_session *ss,
 
     pdu = snmp_pdu_create(AGENTX_MSG_INDEX_ALLOCATE);
     if ( pdu == NULL ) {
-	free( varbind2 );
+	snmp_free_varbind( varbind2 );
 	return NULL;
     }
     pdu->time = 0;
@@ -349,13 +349,13 @@ agentx_unregister_index( struct snmp_session *ss,
     if ( varbind2 == NULL )
 	return -1;
     if ( snmp_clone_var( varbind, varbind2 )) {
-	free( varbind2 );
+	snmp_free_varbind( varbind2 );
 	return -1;
     }
 
     pdu = snmp_pdu_create(AGENTX_MSG_INDEX_DEALLOCATE);
     if ( pdu == NULL ) {
-	free( varbind2 );
+	snmp_free_varbind( varbind2 );
 	return -1;
     }
     pdu->time = 0;

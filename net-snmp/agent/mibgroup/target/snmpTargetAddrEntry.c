@@ -271,7 +271,7 @@ int snmpTargetAddr_addName(
       DEBUGMSGTL(("snmpTargetAddrEntry","ERROR snmpTargetAddrEntry: name out of range in config string\n"));
       return(0);
     }
-    entry->name = (char *)malloc(sizeof(char) * (len + 1));
+    entry->name = (char *)malloc(len + 1);
     strncpy(entry->name, cptr, len);
     entry->name[len] = '\0';
   }
@@ -323,7 +323,7 @@ int snmpTargetAddr_addTAddress(
 	  return(0);
       } */
     free(entry->tAddress);
-    entry->tAddress = (char *)malloc(sizeof(char) * (len + 1));
+    entry->tAddress = (char *)malloc(len + 1);
     strncpy(entry->tAddress, cptr, len);
     entry->tAddress[len] = '\0';
   }
@@ -394,7 +394,7 @@ int snmpTargetAddr_addTagList(
       return(0);
     } 
     free(entry->tagList);
-    entry->tagList = (char *)malloc(sizeof(char) * (len + 1));
+    entry->tagList = (char *)malloc(len + 1);
     strncpy(entry->tagList, cptr, len);
     entry->tagList[len] = '\0';
   }
@@ -418,7 +418,7 @@ int snmpTargetAddr_addParams(
       DEBUGMSGTL(("snmpTargetAddrEntry","ERROR snmpTargetAddrEntry: params out of range in config string\n"));
       return(0);
     } 
-    entry->params = (char *)malloc(sizeof(char) * (len + 1));
+    entry->params = (char *)malloc(len + 1);
     strncpy(entry->params, cptr, len);
     entry->params[len] = '\0';
   }
@@ -799,8 +799,8 @@ write_snmpTargetAddrTAddress(
   /* Finally, we're golden, check if we should save value */
   if (action == COMMIT)  {    
     free(temp_struct->tAddress);
-    temp_struct->tAddress = (char *)malloc( (size*sizeof(char))+1 );
-    memcpy(temp_struct->tAddress, string, size*sizeof(char));
+    temp_struct->tAddress = (char *)malloc(size + 1);
+    memcpy(temp_struct->tAddress, string, size);
     temp_struct->tAddress[size] = '\0';
     
     /* If row is new, check if its status can be updated */
@@ -959,8 +959,8 @@ write_snmpTargetAddrTagList(
   /* Finally, we're golden, check if we should save value */
   if (action == COMMIT)  {    
     free(temp_struct->tagList);
-    temp_struct->tagList = (char *)malloc( (size*sizeof(char))+1 );
-    memcpy(temp_struct->tagList, string, size*sizeof(char));
+    temp_struct->tagList = (char *)malloc(size + 1);
+    memcpy(temp_struct->tagList, string, size);
     temp_struct->tagList[size] = '\0';
   }
 
@@ -1010,8 +1010,8 @@ write_snmpTargetAddrParams(
   /* Finally, we're golden, check if we should save value */
   if (action == COMMIT)  {    
     free(temp_struct->params);
-    temp_struct->params = (char *)malloc( (size*sizeof(char))+1 );
-    memcpy(temp_struct->params, string, size*sizeof(char));
+    temp_struct->params = (char *)malloc(size + 1);
+    memcpy(temp_struct->params, string, size);
     temp_struct->params[size] = '\0';
     
     /* If row is new, check if its status can be updated */
@@ -1100,7 +1100,7 @@ int snmpTargetAddr_createNewRow(
   newNameLen = name_len - snmpTargetAddrOIDLen;
   if (newNameLen > 0) {
     temp_struct       = snmpTargetAddrTable_create();
-    temp_struct->name = (char *)malloc(sizeof(char)*(newNameLen + 1));
+    temp_struct->name = (char *)malloc(newNameLen + 1);
 
     for (i = 0; i < (int)newNameLen; i++) {
       temp_struct->name[i] = (char)name[i+snmpTargetAddrOIDLen];
