@@ -261,10 +261,10 @@ sub process {
 	    skippart();
 	} elsif (/\@\s*foreach\s+\$([^\@]+)\s+tables*\s*\@/) {
 	    my $var = $1;
-	    my $startpos = tell(C);
+	    my $startpos = $fh->tell();
 	    my $table;
 	    foreach $table (keys %tables) {
-		seek(C, $startpos, 0); # go to top of section.
+		$fh->seek($startpos, 0); # go to top of section.
 		my $oldvar = $vars{$var};
 		$vars{$var} = $table;
 		my $oldtable = $currenttable;
