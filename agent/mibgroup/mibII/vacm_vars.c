@@ -298,6 +298,10 @@ void vacm_parse_group (const char *token,
 	return;
     }
     gp = vacm_createGroupEntry(imodel, security);
+    if (!gp) {
+	config_perror("failed to create group entry");
+	return;
+    }
     strcpy (gp->groupName, group);
     gp->storageType = SNMP_STORAGE_PERMANENT;
     gp->status = SNMP_ROW_ACTIVE;
@@ -398,6 +402,10 @@ void vacm_parse_access (const char *token, char *param)
 	return;
     }
     ap = vacm_createAccessEntry (name, context, imodel, ilevel);
+    if (!ap) {
+	config_perror("failed to create access entry");
+	return;
+    }
     strcpy(ap->readView, readView);
     strcpy(ap->writeView, writeView);
     strcpy(ap->notifyView, notify);
@@ -474,6 +482,10 @@ void vacm_parse_view (const char *token,
 	    viewMask[i] = 0xff;
     }
     vp = vacm_createViewEntry(name, suboid, suboid_len);
+    if (!vp) {
+	config_perror("failed to create view entry");
+	return;
+    }
     memcpy(vp->viewMask, viewMask, sizeof(viewMask));
     vp->viewType = inclexcl;
     vp->viewStorageType = SNMP_STORAGE_PERMANENT;

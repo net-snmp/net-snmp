@@ -62,10 +62,11 @@ vacm_getViewEntry(const char *viewName,
 		  size_t viewSubtreeLen)
 {
     struct vacm_viewEntry *vp, *vpret = NULL;
-    char view[32];
+    char view[34];
     int found;
 
     view[0] = strlen(viewName);
+    if (view[0] >= VACM_MAX_STRING) return NULL;
     strcpy(view+1, viewName);
     for(vp = viewList; vp; vp = vp->next){
         if (!strcmp(view, vp->viewName)
@@ -128,6 +129,7 @@ vacm_createViewEntry(const char *viewName,
         return NULL;
 
     vp->viewName[0] = strlen(viewName);
+    if (vp->viewName[0] >= VACM_MAX_STRING) return NULL;
     strcpy(vp->viewName+1, viewName);
     memcpy(vp->viewSubtree, viewSubtree, viewSubtreeLen * sizeof(oid));
     vp->viewSubtreeLen = viewSubtreeLen;
@@ -200,9 +202,10 @@ vacm_getGroupEntry(int securityModel,
 		   const char *securityName)
 {
     struct vacm_groupEntry *vp;
-    char secname[32];
+    char secname[34];
 
     secname[0] = strlen(securityName);
+    if (secname[0] >= VACM_MAX_STRING) return NULL;
     strcpy(secname+1, securityName);
 
     for (vp = groupList; vp; vp = vp->next) {
@@ -240,6 +243,7 @@ vacm_createGroupEntry(int securityModel,
 
     gp->securityModel = securityModel;
     gp->securityName[0] = strlen(securityName);
+    if (gp->securityName[0] >= VACM_MAX_STRING) return NULL;
     strcpy(gp->securityName+1, securityName);
     gp->reserved = (struct vacm_groupEntry *)calloc(1, sizeof(struct vacm_groupEntry));
     if (gp->reserved == NULL) {
@@ -306,12 +310,14 @@ vacm_getAccessEntry(const char *groupName,
 		    int securityLevel)
 {
     struct vacm_accessEntry *vp;
-    char group[32];
-    char context[32];
+    char group[34];
+    char context[34];
 
     group[0] = strlen(groupName);
+    if (group[0] >= VACM_MAX_STRING) return NULL;
     strcpy(group+1, groupName);
     context[0] = strlen(contextPrefix);
+    if (context[0] >= VACM_MAX_STRING) return NULL;
     strcpy(context+1, contextPrefix);
     for(vp = accessList; vp; vp = vp->next){
         if ((securityModel == vp->securityModel || vp->securityModel == SNMP_SEC_MODEL_ANY)
@@ -353,8 +359,10 @@ vacm_createAccessEntry(const char *groupName,
     vp->securityModel = securityModel;
     vp->securityLevel = securityLevel;
     vp->groupName[0] = strlen(groupName);
+    if (vp->groupName[0] >= VACM_MAX_STRING) return NULL;
     strcpy(vp->groupName+1, groupName);
     vp->contextPrefix[0] = strlen(contextPrefix);
+    if (vp->contextPrefix[0] >= VACM_MAX_STRING) return NULL;
     strcpy(vp->contextPrefix+1, contextPrefix);
     vp->reserved = (struct vacm_accessEntry *)calloc(1, sizeof(struct vacm_accessEntry));
     if (vp->reserved == NULL) {
