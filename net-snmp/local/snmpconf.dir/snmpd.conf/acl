@@ -28,3 +28,9 @@ info	a SNMPv1/SNMPv2c read-write access community name
 info	arguments:  community [default|hostname|network/bits] [oid]
 steal rocommunity
 question 1 Enter the community name to add read-write access for
+
+group access_control
+multiple rwuser Do you want to allow SNMPv3 read-write user based access
+multiple rouser Do you want to allow SNMPv3 read-only user based access
+multiple rwcommunity Do you want to allow SNMPv1/v2c read-write community access
+multiple rocommunity Do you want to allow SNMPv1/v2c read-only community access
