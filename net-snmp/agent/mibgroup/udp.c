@@ -482,7 +482,10 @@ struct inpcb *RetInPcb;
 #ifdef netbsd1
 	next = udp_inpcb.inp_queue.cqe_next;
 #else
+#ifdef freebsd2
 	next = udp_inpcb.inp_list.le_next;
+#endif
+        next = udp_inpcb.inp_next;
 #endif
 
 	klookup((unsigned long)next, (char *)&udp_inpcb, sizeof (udp_inpcb));
