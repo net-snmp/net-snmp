@@ -14,6 +14,7 @@
 #include "mibincl.h"
 #include "hpux.h"
 
+#ifdef RESERVED_FOR_FUTURE_USE
 int writeHP(action, var_val, var_val_type, var_val_len, statP, name, name_len)
    int      action;
    u_char   *var_val;
@@ -26,6 +27,7 @@ int writeHP(action, var_val, var_val_type, var_val_len, statP, name, name_len)
   printf("Gotto:  writeHP\n");
   return SNMP_ERR_NOERROR;
 }
+#endif
 
 unsigned char *var_hp(vp, name, length, exact, var_len, write_method)
     register struct variable *vp;
@@ -56,7 +58,6 @@ unsigned char *var_hp(vp, name, length, exact, var_len, write_method)
     return NULL;
   bcopy((char *)newname, (char *)name, ((int)vp->namelen + 1) * sizeof(oid));
   *length = *length+1; 
-  *write_method = writeHP;
   *var_len = sizeof(long);	/* default length */
   switch (vp->magic){
     case HPFLAG:
