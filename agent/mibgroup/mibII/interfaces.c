@@ -760,37 +760,39 @@ var_ifEntry(struct variable *vp,
 	    *var_len = strlen(cp);
 	    return (u_char *)cp;
 	case IFTYPE:
-#if STRUCT_IFNET_HAS_IF_TYPE
-	    long_return = ifnet.if_type;
-#else
 	    if (if_ptr) long_return = if_ptr->type;
-	    else long_return = 1;	/* OTHER */
+            else {
+#if STRUCT_IFNET_HAS_IF_TYPE
+                long_return = ifnet.if_type;
+#else
+                long_return = 1;	/* OTHER */
 #endif
+            }
 	    return (u_char *) &long_return;
 	case IFMTU: {
 	    long_return = (long) ifnet.if_mtu;
 	    return (u_char *) &long_return;
 	}
 	case IFSPEED:
-#if STRUCT_IFNET_HAS_IF_BAUDRATE
-	    long_return = ifnet.if_baudrate;
-#elif STRUCT_IFNET_HAS_IF_SPEED
-	    long_return = ifnet.if_speed;
-#elif STRUCT_IFNET_HAS_IF_TYPE && defined(IFT_ETHER)
 	    if (if_ptr) long_return = if_ptr->speed;
 	    else {
+#if STRUCT_IFNET_HAS_IF_BAUDRATE
+                long_return = ifnet.if_baudrate;
+#elif STRUCT_IFNET_HAS_IF_SPEED
+                long_return = ifnet.if_speed;
+#elif STRUCT_IFNET_HAS_IF_TYPE && defined(IFT_ETHER)
 		if(ifnet.if_type == IFT_ETHER) long_return=10000000;
 		if(ifnet.if_type == IFT_P10) long_return=10000000;
 		if(ifnet.if_type == IFT_P80) long_return=80000000;
 		if(ifnet.if_type == IFT_ISDNBASIC) long_return=64000; /* EDSS1 only */
 		if(ifnet.if_type == IFT_ISDNPRIMARY) long_return=64000*30;
-	    }
 #else
 #if NO_DUMMY_VALUES
-	    return NULL;
+                return NULL;
 #endif
-	    long_return = (u_long) 10000000;
+                long_return = (u_long) 10000000;
 #endif
+	    }
 	    return (u_char *) &long_return;
 	case IFPHYSADDRESS:
 	    Interface_Get_Ether_By_Index(interface, return_buf);
