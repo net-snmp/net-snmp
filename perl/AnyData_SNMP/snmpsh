@@ -105,6 +105,9 @@ sub doit {
 #	print "$stmt\n";
 	($name, $args) = ($stmt =~ /^(\w+)\s*(.*)$/);
     }
+
+    # we have an SQL statement.  process it.
+    $stmt =~ s/;*$//; # get rid of trailing semicolons
     $sth = $dbh->prepare($stmt);
     $sth->execute();
     if ($stmt =~ /^select/) {
