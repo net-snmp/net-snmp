@@ -57,6 +57,9 @@
 # include <unistd.h>
 #endif /* HAVE_UNISTD_H */
 
+#ifdef HAVE_SYS_SELECT_H
+# include <sys/select.h>
+#endif /* HAVE_SYS_SELECT_H */
 #include <stdio.h>
 #include <sys/types.h>
 #include <netinet/in.h>
@@ -123,7 +126,7 @@ int peak;
   gettimeofday(tv, (struct timezone *)0);
 
   /* Create a tm struct from it */
-  memcpy(&tm, localtime(&tv->tv_sec), sizeof(tm));
+  memcpy(&tm, localtime((time_t *)&tv->tv_sec), sizeof(tm));
 
   /* Calculate the next hour */
   tm.tm_sec = 0;
@@ -226,7 +229,7 @@ int period;
   if (target){
     target += period;
   } else {
-    memcpy(&tm, localtime(&tv->tv_sec), sizeof(tm));
+    memcpy(&tm, localtime((time_t *)&tv->tv_sec), sizeof(tm));
     tm.tm_sec = 0;
     tm.tm_min = 0;
     tm.tm_hour++;
@@ -433,7 +436,7 @@ char **argv;
       if (response->errstat == SNMP_ERR_NOERROR){
 	if (timestamp){
 	  gettimeofday(&tv, (struct timezone *)0);
-	  memcpy(&tm, localtime(&tv.tv_sec), sizeof(tm));
+	  memcpy(&tm, localtime((time_t *) &tv.tv_sec), sizeof(tm));
 	  if (((period % 60)
 	       && (!peaks || ((period * peaks) % 60)))
 	      || keepSeconds)
