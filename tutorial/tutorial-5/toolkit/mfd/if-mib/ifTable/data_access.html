@@ -8,7 +8,18 @@
     <h1>MFD : ifTable data access</h1>
     <p>
       Now that we have the basic code generated, the next step is to
-      implement the data access functions. In the Linux 2.4 kernel, interface
+      implement the data access functions. The data access code is
+      responsible for reading the available data and determining the valid
+      indexes. For each data item, or row, a new <i>row request</i>
+      structure is created. The <i>mib context</i>, contained in the
+      <i>row request</i>, is initialized with the appropriate index
+      data for the row, and then the row is inserted into the table
+      container. The module can also initialize the <i>data context</i> at
+      this time, or delay that processing for later. (see
+      <a href="../../faq.html#init_data_context">When should I initialize
+        the data context?</a>)
+    </p><p>
+      In the Linux kernel, interface
       statistics are available by reading the file /proc/net/dev. The format
       looks like this:
     </p>
@@ -61,8 +72,11 @@ Inter-|   Receive                                                |  Transmit
       example, we are going to set up a <var>netsnmp_column_info</var>
       structure to let the agent know which columns we will be
       implementing. This will allow the agent to skip these columns.
-      We are also going to call a routine that will take a peek at
-      the data file, to try and determine the format of the file.
+    </p><p>
+      The format of the data file we are using changed between the
+      2.2 and 2.4 versions of the kernel. We need to know which format
+      the current system is using, so we call a routine that will take a peek
+      at the data file to determine the format of the file.
     </p>
     <table><tr>
           <td width=20></td>
@@ -112,7 +126,10 @@ ifTable_init_data(ifTable_registration_ptr ifTable_reg)
       be increased, depending on your tolerance for stale data.
       Set it to -1 if you want to rebuild the cache for every
       request.) We are going to to set one extra flag, to have
-      the cache pre-load right away.
+      the cache pre-load right away. This will allow the agent to
+      discover all the index values at startup, which is necessar
+      because other parts of the agent need to know what ifIndex
+      values are valid.
     </p>
     <table><tr>
           <td width=20></td>
@@ -709,7 +726,7 @@ ifTable_row_prep(ifTable_rowreq_ctx * rowreq_ctx)
 Version $Revision$
 <!-- Created: Fri Oct 24 10:41:49 EDT 2003 -->
 <!-- hhmts start -->
-Last modified: Sun Aug 29 00:10:56 EDT 2004
+Last modified: Tue Aug 31 13:03:17 EDT 2004
 <!-- hhmts end -->
 <!--#include virtual="/sfbutton.html" -->
   </body>
