@@ -121,6 +121,7 @@ AC_MSG_CHECKING(for and configuring mib modules to use)
 
 mibdir="agent/mibgroup"
 module_list=""
+module_list_code=""
 new_module_list="at interfaces snmp_mib tcp icmp ip system udp proc versioninfo pass disk loadave extensible acl_vars party_vars view_vars context_vars alarm event errormib $with_mib_modules"
 trap_list_o=""
 
@@ -149,12 +150,12 @@ while test "x$new_module_list" != "x"; do
     if echo " $with_out_mib_modules " | grep " $i " > /dev/null; then
       :
     else
-      if test -f $srcdir/$mibdir/$i.h -a -f $srcdir/$mibdir/$i.c; then
+      if test -f $srcdir/$mibdir/$i.h; then
 	new_list=`grep config_require $srcdir/$mibdir/$i.h | sed 's/.*config_require(\(.*\)).*/\1/'`
 	if test "x$new_list" != "x"; then
 	  for j in $new_list
 	    do
-	    if test ! -f $srcdir/$mibdir/$j.h -o ! -f $srcdir/$mibdir/$j.c; then
+	    if test ! -f $srcdir/$mibdir/$j.h; then
 	      AC_MSG_ERROR(mib module "$i" requires module "$j" but $j.h or $j.c could not be found in $srcdir/$mibdir)
 	    fi
 	    if echo " $with_out_mib_modules " | grep " $j " > /dev/null; then
@@ -172,8 +173,11 @@ while test "x$new_module_list" != "x"; do
       fi
       module_list="$module_list $i"
       echo '#include "'"mibgroup/$i.h"'"' >> $mibdir/mib_module_includes.h
-      if grep init_$i $srcdir/$mibdir/$i.c > /dev/null; then
-	echo "  init_$i();" >> $mibdir/mib_module_inits.h
+      if test -f $srcdir/$mibdir/$i.c; then
+        module_list_code="$module_list_code $i"
+	if grep init_$i $srcdir/$mibdir/$i.c > /dev/null; then
+	    echo "  init_$i();" >> $mibdir/mib_module_inits.h
+	fi
       fi
       grep config_load_mib $srcdir/$mibdir/$i.h | sed 's@.*config_load_mib(\([^)]*\), *\([^),]*\), *\([^),]*\)).*@{{\1}, \2, (struct variable *) \3, sizeof(\3)/sizeof(*\3),sizeof(*\3)},@;s/\.\([0-9]*\)/,\1/g' >> $mibdir/mib_module_loads.h
       grep config_parse_dot_conf $srcdir/$mibdir/$i.h | sed 's@.*config_parse_dot_conf(\([^)]*\), *\([^),]*\), *\([^),]*\)).*@{\1, \2, \3},@' >> $mibdir/mib_module_dot_conf.h
@@ -188,8 +192,8 @@ while test "x$new_module_list" != "x"; do
   new_list_two=""
 done
 
-module_list_o=`echo "$module_list " | sed 's/\([^ ]\) /\1.o /g'`
-module_list_c=`echo "$module_list " | sed 's/\([^ ]\) /\1.c /g'`
+module_list_o=`echo "$module_list_code " | sed 's/\([^ ]\) /\1.o /g'`
+module_list_c=`echo "$module_list_code " | sed 's/\([^ ]\) /\1.c /g'`
 mibgroup_list_o=`echo " $module_list_o " | sed 's@ \([^ ]*\)\.o@ mibgroup/\1.o @g'`
 changequote([, ])
 AC_SUBST(module_list_c)
