@@ -366,6 +366,10 @@ proxy_got_response(int operation, netsnmp_session * sess, int reqid,
         for (var = vars, request = requests;
              request && var;
              request = request->next, var = var->next_variable) {
+            /*
+             * XXX - should this be done here?
+             *       Or wait until we know it's OK?
+             */
             snmp_set_var_typed_value(request->requestvb, var->type,
                                      var->val.string, var->val_len);
 
@@ -375,29 +379,39 @@ proxy_got_response(int operation, netsnmp_session * sess, int reqid,
             request->delegated = 0;
 
             /*
-             * copy the oid it belongs to 
+             * Check the response oid is legitimate,
+             *   and discard the value if not.
+             *
+             * XXX - what's the difference between these cases?
              */
             if (sp->base_len &&
                 (var->name_length < sp->base_len ||
                  snmp_oid_compare(var->name, sp->base_len, sp->base,
                                   sp->base_len) != 0)) {
-                DEBUGMSGTL(("proxy", "out of registered range... "));
+                DEBUGMSGTL(( "proxy", "out of registered range... "));
                 DEBUGMSGOID(("proxy", var->name, sp->base_len));
-                DEBUGMSG(("proxy", " (%d) != ", sp->base_len));
+                DEBUGMSG((   "proxy", " (%d) != ", sp->base_len));
                 DEBUGMSGOID(("proxy", sp->base, sp->base_len));
-                DEBUGMSG(("proxy", "\n"));
+                DEBUGMSG((   "proxy", "\n"));
+                snmp_set_var_typed_value(request->requestvb, ASN_NULL, NULL, 0);
 
                 continue;
             } else if (!sp->base_len &&
                        (var->name_length < sp->name_len ||
                         snmp_oid_compare(var->name, sp->name_len, sp->name,
                                          sp->name_len) != 0)) {
-                DEBUGMSGTL(("proxy", "out of registered base range...\n"));
-                /*
-                 * or not if its out of our search range 
-                 */
+                DEBUGMSGTL(( "proxy", "out of registered base range... "));
+                DEBUGMSGOID(("proxy", var->name, sp->name_len));
+                DEBUGMSG((   "proxy", " (%d) != ", sp->name_len));
+                DEBUGMSGOID(("proxy", sp->name, sp->name_len));
+                DEBUGMSG((   "proxy", "\n"));
+                snmp_set_var_typed_value(request->requestvb, ASN_NULL, NULL, 0);
                 continue;
             } else {
+                /*
+                 * If the returned OID is legitimate, then update
+                 *   the original request varbind accordingly.
+                 */
                 if (sp->base_len) {
                     /*
                      * XXX: oid size maxed? 
