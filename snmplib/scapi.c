@@ -332,8 +332,8 @@ sc_hash(const oid * hashtype, size_t hashtypelen, u_char * buf,
 {
 #ifdef USE_OPENSSL
     int             rval = SNMPERR_SUCCESS;
-    EVP_MD         *hash(void);
-    HMAC_CTX       *c = NULL;
+    const EVP_MD         *hashfn;
+    EVP_MD_CTX     ctx;
 #endif
 
     DEBUGTRACE;
@@ -347,22 +347,31 @@ sc_hash(const oid * hashtype, size_t hashtypelen, u_char * buf,
     /*
      * Determine transform type.
      */
-    c = malloc(sizeof(HMAC_CTX));
-    if (c == NULL)
-        return (SNMPERR_GENERR);
-
     if (ISTRANSFORM(hashtype, HMACMD5Auth)) {
-        EVP_DigestInit(&c->md_ctx, (const EVP_MD *) EVP_md5());
+        hashfn = (const EVP_MD *) EVP_md5();
     } else if (ISTRANSFORM(hashtype, HMACSHA1Auth)) {
-        EVP_DigestInit(&c->md_ctx, (const EVP_MD *) EVP_sha1());
+        hashfn = (const EVP_MD *) EVP_sha1();
     } else {
         return (SNMPERR_GENERR);
     }
-    EVP_DigestUpdate(&c->md_ctx, buf, buf_len);
-    EVP_DigestFinal(&(c->md_ctx), MAC, MAC_len);
+
+/** initialize the pointer */
 #ifdef OLD_DES
-    /* openssl 0.9.7 now frees memory in EVP_DigestFinal */
-    free(c);
+    EVP_MD_CTX_init(&ctx);
+    EVP_DigestInit_ex(&ctx, hashfn);
+#else /* !OLD_DES */
+    EVP_DigestInit(&ctx, hashfn);
+#endif
+
+/** pass the data */
+    EVP_DigestUpdate(&ctx, buf, buf_len);
+
+/** do the final pass */
+#ifdef OLD_DES
+    EVP_DigestFinal(&ctx, MAC, MAC_len);
+#else /* !OLD_DES */
+    EVP_DigestFinal_ex(&ctx, MAC, MAC_len);
+    EVP_MD_CTX_cleanup(&ctx);
 #endif
     return (rval);
 #else                           /* USE_INTERNAL_MD5 */
