@@ -23,6 +23,7 @@ extern          "C" {
      * and SET related modes instead.
      */
 
+#include <net-snmp/library/container.h>
 #include <net-snmp/agent/table.h>
 
 #define TABLE_ARRAY_NAME "table_array"
@@ -99,7 +100,7 @@ extern          "C" {
         Netsnmp_User_Group_Method *set_undo;
 
        /** not callbacks, but this is a useful place for them... */
-       void ** tree;
+       netsnmp_container* idx2;
        char can_set;
 
     } netsnmp_table_array_callbacks;
