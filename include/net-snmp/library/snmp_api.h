@@ -339,9 +339,17 @@ typedef struct request_list {
 #define SNMP_DEFAULT_VERSION	    -1
 #define SNMP_DEFAULT_SECMODEL	    -1
 #define SNMP_DEFAULT_CONTEXT        ""
+#ifndef DISABLE_MD5
 #define SNMP_DEFAULT_AUTH_PROTO     usmHMACMD5AuthProtocol
+#else
+#define SNMP_DEFAULT_AUTH_PROTO     usmHMACSHA1AuthProtocol
+#endif
 #define SNMP_DEFAULT_AUTH_PROTOLEN  USM_LENGTH_OID_TRANSFORM
+#ifndef DISABLE_DES
 #define SNMP_DEFAULT_PRIV_PROTO     usmDESPrivProtocol
+#else
+#define SNMP_DEFAULT_PRIV_PROTO     usmAESPrivProtocol
+#endif
 #define SNMP_DEFAULT_PRIV_PROTOLEN  USM_LENGTH_OID_TRANSFORM
 
     extern const char *snmp_api_errstring(int);

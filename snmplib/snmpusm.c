@@ -76,12 +76,16 @@
 #include <net-snmp/library/snmpusm.h>
 
 oid             usmNoAuthProtocol[10] = { 1, 3, 6, 1, 6, 3, 10, 1, 1, 1 };
+#ifndef DISABLE_MD5
 oid             usmHMACMD5AuthProtocol[10] =
     { 1, 3, 6, 1, 6, 3, 10, 1, 1, 2 };
+#endif
 oid             usmHMACSHA1AuthProtocol[10] =
     { 1, 3, 6, 1, 6, 3, 10, 1, 1, 3 };
 oid             usmNoPrivProtocol[10] = { 1, 3, 6, 1, 6, 3, 10, 1, 2, 1 };
+#ifndef DISABLE_DES
 oid             usmDESPrivProtocol[10] = { 1, 3, 6, 1, 6, 3, 10, 1, 2, 2 };
+#endif
 oid             usmAESPrivProtocol[10] = { 1, 3, 6, 1, 4, 1, 8072, 876,876,128 };
 /* backwards compat */
 oid             *usmAES128PrivProtocol = usmAESPrivProtocol;
@@ -570,6 +574,7 @@ usm_calc_offsets(size_t globalDataLen,  /* SNMPv3Message + HeaderData */
 
 
 
+#ifndef DISABLE_DES
 /*******************************************************************-o-******
  * usm_set_salt
  *
@@ -641,6 +646,7 @@ usm_set_salt(u_char * iv,
     return 0;
 
 }                               /* end usm_set_salt() */
+#endif
 
 #ifdef HAVE_AES
 /*******************************************************************-o-******
@@ -1018,18 +1024,19 @@ usm_generate_out_msg(int msgProcModel,  /* (UNUSED) */
                 usm_free_usmStateReference(secStateRef);
                 return SNMPERR_USM_GENERICERROR;
             }
-        } else if (ISTRANSFORM(thePrivProtocol, DESPriv)) {
+        } 
 #endif
-        if (!thePrivKey ||
-            (usm_set_salt(salt, &salt_length,
-                          thePrivKey + 8, thePrivKeyLength - 8,
-                          &ptr[privParamsOffset])
-             == -1)) {
-            DEBUGMSGTL(("usm", "Can't set DES-CBC salt.\n"));
-            usm_free_usmStateReference(secStateRef);
-            return SNMPERR_USM_GENERICERROR;
-        }
-#ifdef HAVE_AES
+#ifndef DISABLE_DES
+        if (ISTRANSFORM(thePrivProtocol, DESPriv)) {
+            if (!thePrivKey ||
+                (usm_set_salt(salt, &salt_length,
+                              thePrivKey + 8, thePrivKeyLength - 8,
+                              &ptr[privParamsOffset])
+                 == -1)) {
+                DEBUGMSGTL(("usm", "Can't set DES-CBC salt.\n"));
+                usm_free_usmStateReference(secStateRef);
+                return SNMPERR_USM_GENERICERROR;
+            }
         }
 #endif
 
@@ -1039,7 +1046,7 @@ usm_generate_out_msg(int msgProcModel,  /* (UNUSED) */
                        scopedPdu, scopedPduLen,
                        &ptr[dataOffset], &encrypted_length)
             != SNMP_ERR_NOERROR) {
-            DEBUGMSGTL(("usm", "DES-CBC error.\n"));
+            DEBUGMSGTL(("usm", "encryption error.\n"));
             usm_free_usmStateReference(secStateRef);
             return SNMPERR_USM_ENCRYPTIONERROR;
         }
@@ -1067,7 +1074,7 @@ usm_generate_out_msg(int msgProcModel,  /* (UNUSED) */
          */
         if ((encrypted_length != (theTotalLength - dataOffset))
             || (salt_length != msgPrivParmLen)) {
-            DEBUGMSGTL(("usm", "DES-CBC length error.\n"));
+            DEBUGMSGTL(("usm", "encryption length error.\n"));
             usm_free_usmStateReference(secStateRef);
             return SNMPERR_USM_ENCRYPTIONERROR;
         }
@@ -1501,8 +1508,10 @@ usm_rgenerate_out_msg(int msgProcModel, /* (UNUSED) */
                 SNMP_FREE(ciphertext);
                 return SNMPERR_USM_GENERICERROR;
             }
-        } else if (ISTRANSFORM(thePrivProtocol, DESPriv)) {
+        } 
 #endif
+#ifndef DISABLE_DES
+        if (ISTRANSFORM(thePrivProtocol, DESPriv)) {
             salt_length = BYTESIZE(USM_DES_SALT_LENGTH);
             save_salt_length = BYTESIZE(USM_DES_SALT_LENGTH);
             save_salt_offset = 0;
@@ -1515,7 +1524,6 @@ usm_rgenerate_out_msg(int msgProcModel, /* (UNUSED) */
                 SNMP_FREE(ciphertext);
                 return SNMPERR_USM_GENERICERROR;
             }
-#ifdef HAVE_AES
         }
 #endif
 #ifdef SNMP_TESTING_CODE
@@ -1530,7 +1538,7 @@ usm_rgenerate_out_msg(int msgProcModel, /* (UNUSED) */
                        salt, salt_length,
                        scopedPdu, scopedPduLen,
                        ciphertext, &ciphertextlen) != SNMP_ERR_NOERROR) {
-            DEBUGMSGTL(("usm", "DES-CBC error.\n"));
+            DEBUGMSGTL(("usm", "encryption error.\n"));
             usm_free_usmStateReference(secStateRef);
             SNMP_FREE(ciphertext);
             return SNMPERR_USM_ENCRYPTIONERROR;
@@ -2553,6 +2561,7 @@ usm_process_in_msg(int msgProcModel,    /* (UNUSED) */
             return SNMPERR_USM_PARSEERROR;
         }
 
+#ifndef DISABLE_DES
         if (ISTRANSFORM(user->privProtocol, DESPriv)) {
             /*
              * From RFC2574:
@@ -2586,8 +2595,9 @@ usm_process_in_msg(int msgProcModel,    /* (UNUSED) */
             for (i = 0; i < (int) iv_length; i++)
                 iv[i] = salt[i] ^ user->privKey[iv_length + i];
         }
+#endif
 #ifdef HAVE_AES
-        else if (ISTRANSFORM(user->privProtocol, AESPriv)) {
+        if (ISTRANSFORM(user->privProtocol, AESPriv)) {
             iv_length = BYTESIZE(USM_AES_SALT_LENGTH);
             net_boots = ntohl(boots_uint);
             net_time = ntohl(time_uint);
@@ -2717,10 +2727,25 @@ init_usm_post_config(int majorid, int minorid, void *serverarg,
     }
 #endif
     
+#ifndef DISABLE_MD5
     noNameUser = usm_create_initial_user("", usmHMACMD5AuthProtocol,
                                          USM_LENGTH_OID_TRANSFORM,
+#ifndef DISABLE_DES
                                          usmDESPrivProtocol,
+#else
+                                         usmAESPrivProtocol,
+#endif
                                          USM_LENGTH_OID_TRANSFORM);
+#else
+    noNameUser = usm_create_initial_user("", usmHMACSHA1AuthProtocol,
+                                         USM_LENGTH_OID_TRANSFORM,
+#ifndef DISABLE_DES
+                                         usmDESPrivProtocol,
+#else
+                                         usmAESPrivProtocol,
+#endif
+                                         USM_LENGTH_OID_TRANSFORM);
+#endif
 
     SNMP_FREE(noNameUser->engineID);
     noNameUser->engineIDLen = 0;

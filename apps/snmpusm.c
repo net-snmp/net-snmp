@@ -318,11 +318,20 @@ main(int argc, char *argv[])
             /*
              * assume MD5 
              */
+#ifndef DISABLE_MD5
             session.securityAuthProtoLen =
                 sizeof(usmHMACMD5AuthProtocol) / sizeof(oid);
             session.securityAuthProto =
                 snmp_duplicate_objid(usmHMACMD5AuthProtocol,
                                      session.securityAuthProtoLen);
+#else
+            session.securityAuthProtoLen =
+                sizeof(usmHMACSHA1AuthProtocol) / sizeof(oid);
+            session.securityAuthProto =
+                snmp_duplicate_objid(usmHMACSHA1AuthProtocol,
+                                     session.securityAuthProtoLen);
+#endif
+
         }
         rval = generate_Ku(session.securityAuthProto,
                            session.securityAuthProtoLen,
