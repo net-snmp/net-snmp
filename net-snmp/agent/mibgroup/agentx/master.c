@@ -166,6 +166,7 @@ agentx_got_response( int operation,
                               SNMP_ERR_GENERR);
             ax_session = (struct snmp_session *) cache->localinfo;
             free_agent_snmp_session_by_session(ax_session, NULL);
+            free_delegated_cache(cache);
             return 0;
         }
 
@@ -182,6 +183,7 @@ agentx_got_response( int operation,
             handler_mark_requests_as_delegated(requests, REQUEST_IS_NOT_DELEGATED);
             set_request_error(cache->reqinfo, requests, /* XXXWWW: should be index=0 */
                               SNMP_ERR_GENERR);
+            free_delegated_cache(cache);
             return 0;
 
         case SNMP_CALLBACK_OP_RECEIVED_MESSAGE:
@@ -189,6 +191,7 @@ agentx_got_response( int operation,
             CLEAR_SNMP_STRIKE_FLAGS( session->flags );
             break;
         default:
+            free_delegated_cache(cache);
             return 0;
     }
 
@@ -212,6 +215,7 @@ agentx_got_response( int operation,
             /* ack, unknown, mark the first one */
             set_request_error(cache->reqinfo, request,
                               SNMP_ERR_GENERR);
+        free_delegated_cache(cache);
         return 1;
     } else if (cache->reqinfo->mode == MODE_GET
                || cache->reqinfo->mode == MODE_GETNEXT
@@ -254,6 +258,7 @@ agentx_got_response( int operation,
         }
     }
     DEBUGMSGTL(("agentx/master","handle_agentx_response() finishing...\n"));
+    free_delegated_cache(cache);
     return 1;
 }
 
