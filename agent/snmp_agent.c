@@ -431,8 +431,7 @@ ERROR("read-only? (ignoring)");
 	}
 	if (pi->pdutype == SET_REQ_MSG && pi->version == SNMP_VERSION_2
 	    && !snmp_access(acl, pi->community_id, rw)){
-printf("%X %d %d\n", acl, pi->community_id, rw);
-ERROR("");
+ERROR("Not Writable");
 	    return SNMP_ERR_NOTWRITABLE;
 	}
 	/* Its bogus to check here on getnexts - the whole packet shouldn't
