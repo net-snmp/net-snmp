@@ -1,19 +1,11 @@
 
-SHELL = /bin/sh
-srcdir = @srcdir@
-VPATH = @srcdir@
-@SET_MAKE@
-
-CFLAGS=@CFLAGS@
 CPPFLAGS=@CPPFLAGS@ -I../.. -I$(srcdir)/../.. -I$(srcdir)/../../snmplib \
 	-I$(srcdir)/.. -I..
-LDFLAGS=@LDFLAGS@
-
 CC = @CC@ $(CPPFLAGS)
 
 OBJS = @module_list_o@
 SRCS = @module_list_c@
- 
+
 all: $(OBJS)
 
 TAGS: $(SRCS)

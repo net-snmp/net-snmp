@@ -16,32 +16,15 @@
 #
 #	@(#)Makefile	5.10 (Berkeley) 9/20/88
 #
-SHELL = /bin/sh
-srcdir = @srcdir@
-VPATH = @srcdir@
-@SET_MAKE@
-
-prefix = @prefix@
-exec_prefix = @exec_prefix@
-bindir = @bindir@
-libdir = @libdir@
-datadir = @datadir@
-snmplibdir = $(datadir)/snmp
-
-CFLAGS=@CFLAGS@
-CPPFLAGS=@CPPFLAGS@ -I../.. -I$(srcdir)/../.. -I$(srcdir)/../../snmplib
-LDFLAGS=@LDFLAGS@
-
-INSTALL = @INSTALL@
-
-CC = @CC@ $(CPPFLAGS)
-
-USELIBS=../../snmplib/libsnmp.a
-LIBS=	$(USELIBS) @LIBS@
-LDFLAGS=@LDFLAGS@
 SRCS=	inet.c if.c main.c route.c 
 OBJS=	inet.o if.o main.o route.o
 TARG= snmpnetstat
+
+CPPFLAGS=@CPPFLAGS@ -I../.. -I$(srcdir)/../.. -I$(srcdir)/../../snmplib
+CC = @CC@ $(CPPFLAGS)
+
+USELIBS=../../snmplib/libsnmp.$(LIB_EXTENSION)
+LIBS=	 -L../../snmplib $(LD_RUNTIME_ARG) -lsnmp @LIBS@
 
 all: $(TARG)
 

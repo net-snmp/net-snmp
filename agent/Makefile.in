@@ -1,27 +1,11 @@
 #
 # Makefile for snmpd
 #
-SHELL = /bin/sh
-srcdir = @srcdir@
-VPATH = @srcdir@
-@SET_MAKE@
-
-prefix = @prefix@
-exec_prefix = @exec_prefix@
-libdir = @libdir@
-sbindir = @sbindir@
-datadir = @datadir@
-snmplibdir = $(datadir)/snmp
-
-INSTALL = @INSTALL@
 
 TARG=	 snmpd
-USELIBS= ../snmplib/libsnmp.a
-LIBS=	 $(USELIBS) @LIBS@
-LDFLAGS= @LDFLAGS@ 
-OSFLAGS=
+USELIBS= ../snmplib/libsnmp.$(LIB_EXTENSION)
+LIBS=	 -L../snmplib $(LD_RUNTIME_ARG) -lsnmp @LIBS@
 
-CFLAGS=@CFLAGS@
 CPPFLAGS=@CPPFLAGS@ -I.. -I$(srcdir)/.. -I$(srcdir)/../snmplib \
 	-I$(srcdir) -I. -I$(srcdir)/mibgroup -Imibgroup
 
@@ -48,7 +32,7 @@ getmibstat.o: mibgroup/kernel_sunos5.c
 
 AGENTOBJS=snmpd.o kernel.o snmp_agent.o snmp_vars.o view_parse.o read_config.o
 
-snmpd:	${MIBOBJS} ${AGENTOBJS} ../snmplib/libsnmp.a
+snmpd:	${MIBOBJS} ${AGENTOBJS} ../snmplib/libsnmp.$(LIB_EXTENSION)
 	${CC} -o $@ ${AGENTOBJS} ${MIBOBJS} ${LDFLAGS} ${LIBS}  
 
 clean:

@@ -383,10 +383,6 @@
   
 #include <mib_module_config.h>
 
-#ifndef DONT_INC_STRUCTS
-#include "agent/mibgroup/struct.h"
-#endif
-
 #ifndef linux
 #ifndef solaris2
 #define bsdlike

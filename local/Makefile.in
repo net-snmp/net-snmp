@@ -1,18 +1,3 @@
-SHELL = /bin/sh
-srcdir = @srcdir@
-VPATH = @srcdir@
-@SET_MAKE@
-
-prefix = @prefix@
-exec_prefix = @exec_prefix@
-bindir = @bindir@
-libdir = @libdir@
-snmplibdir = $(datadir)/snmp
-
-SED = @SED@
-
-INSTALL = @INSTALL@
-
 snmpcheck: snmpcheck.def ../sedscript
 	$(SED) -f ../sedscript $(srcdir)/snmpcheck.def > snmpcheck
 	chmod a+x snmpcheck
