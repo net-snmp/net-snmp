@@ -79,6 +79,7 @@ SOFTWARE.
 #include "read_config.h"
 #include "snmp_debug.h"
 #include "default_store.h"
+#include "snmp_logging.h"
 
 static struct tree * _sprint_objid(char *buf, oid *objid, size_t objidlen);
 static char *uptimeString (u_long, char *);
@@ -2279,6 +2280,7 @@ _add_strings_to_oid(struct tree *tp, char *cp,
     char *fcp, *ecp, *cp2 = NULL;
     char doingquote;
     int len = -1, pos = -1;
+    int check = !ds_get_boolean(DS_LIBRARY_ID, DS_LIB_DONT_CHECK_RANGE);
 
     while (cp && tp && tp->child_list) {
 	fcp = cp;
@@ -2328,6 +2330,7 @@ _add_strings_to_oid(struct tree *tp, char *cp,
 	case TYPE_INTEGER32:
 	case TYPE_UINTEGER:
 	case TYPE_UNSIGNED32:
+	case TYPE_TIMETICKS:
 	    /* Isolate the next entry */
 	    cp2 = strchr( cp, '.' );
 	    if (cp2) *cp2++ = '\0';
@@ -2344,7 +2347,7 @@ _add_strings_to_oid(struct tree *tp, char *cp,
 		}
 		else goto bad_id;
 	    }
-	    if (tp->ranges) {
+	    if (check && tp->ranges) {
 		struct range_list *rp = tp->ranges;
 		int ok = 0;
 		while (!ok && rp)
@@ -2362,6 +2365,7 @@ _add_strings_to_oid(struct tree *tp, char *cp,
 		fcp = cp; cp2 = strchr(cp, '.'); if (cp2) *cp2++ = 0;
 		objid[*objidlen] = strtoul(cp, &ecp, 0);
 		if (*ecp) goto bad_id;
+		if (check && objid[*objidlen] > 255) goto bad_id;
 		(*objidlen)++;
 		cp = cp2;
 	    }
@@ -2426,7 +2430,7 @@ _add_strings_to_oid(struct tree *tp, char *cp,
 		    fcp = cp; cp2 = strchr(cp, '.'); if (cp2) *cp2++ = 0;
 		    objid[*objidlen] = strtoul(cp, &ecp, 0);
 		    if (*ecp) goto bad_id;
-		    if (objid[*objidlen] < 0 || objid[*objidlen] > 255)
+		    if (check && objid[*objidlen] > 255)
 		        goto bad_id;
 		    (*objidlen)++;
 		    len--;
@@ -2435,10 +2439,16 @@ _add_strings_to_oid(struct tree *tp, char *cp,
 	    }
 	    break;
 	case TYPE_OBJID:
+	    in_dices = NULL;
+	    break;
+	default:
+	    snmp_log(LOG_ERR, "Unexpected index type: %d %s %s\n",
+	    	     tp->type, in_dices->ilabel, cp);
+	    in_dices = NULL;
 	    break;
 	}
 	cp = cp2;
-	in_dices = in_dices->next;
+	if (in_dices) in_dices = in_dices->next;
     }
 
     while (cp) {
