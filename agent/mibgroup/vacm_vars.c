@@ -52,7 +52,7 @@
 void
 init_vacm_vars __P((void)) {
 #ifdef USING_SYSORTABLE_MODULE
-  oid reg[] = {1,3,6,1,6,3,13};
+  static oid reg[] = {1,3,6,1,6,3,13};
   register_sysORTable(reg,7,"View-based Access Control Model for SNMP.");
 #endif
 }
