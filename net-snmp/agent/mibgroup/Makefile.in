@@ -660,10 +660,9 @@ host/hr_system.o: host/hr_system.h host/hr_utils.h ./../auto_nlist.h
 host/hr_system.o: ../../snmplib/system.h 
 host/hr_storage.o: ../../config.h ../../mib_module_config.h ../../s/linux.h
 host/hr_storage.o: ../../s/sysv.h ../../s/generic.h ../../m/generic.h
-host/hr_storage.o:  host_res.h 
-host/hr_storage.o:  ./../../snmplib/asn1.h
-host/hr_storage.o: ./../../snmplib/snmp.h ./../../snmplib/snmp_api.h
-host/hr_storage.o: ./../../snmplib/snmp_impl.h 
+host/hr_storage.o: host_res.h  
+host/hr_storage.o: ./../../snmplib/asn1.h ./../../snmplib/snmp.h
+host/hr_storage.o: ./../../snmplib/snmp_api.h ./../../snmplib/snmp_impl.h
 host/hr_storage.o:  ./../../snmplib/mib.h
 host/hr_storage.o: ./../snmp_vars.h ./../var_struct.h ../../snmplib/system.h
 host/hr_storage.o:  ./../../snmplib/snmp_debug.h
@@ -837,12 +836,12 @@ util_funcs.o: ucd-snmp/errormib.h mibdefs.h ./../../snmplib/read_config.h
 mibII/var_route.o: ../../config.h ../../mib_module_config.h ../../s/linux.h
 mibII/var_route.o: ../../s/sysv.h ../../s/generic.h ../../m/generic.h
 mibII/var_route.o: ./../auto_nlist.h ./../../snmplib/asn1.h
-mibII/var_route.o: ./../../snmplib/snmp_debug.h ./../../snmplib/snmp_api.h
+mibII/var_route.o: ./../../snmplib/snmp_debug.h
+mibII/var_route.o: ./../../snmplib/snmp_logging.h ./../../snmplib/snmp_api.h
 mibII/var_route.o: ./../../snmplib/snmp_impl.h ./../../snmplib/mib.h
 mibII/var_route.o: ./../../snmplib/snmp.h ../snmp_vars.h mibII/ip.h
 mibII/var_route.o: mibII/var_route.h mibII/route_write.h mibII/at.h
 mibII/var_route.o: ../kernel.h mibII/interfaces.h struct.h util_funcs.h
-mibII/var_route.o: ./../../snmplib/snmp_logging.h 
 mibII/route_write.o: ../../config.h ../../mib_module_config.h ../../s/linux.h
 mibII/route_write.o: ../../s/sysv.h ../../s/generic.h ../../m/generic.h
 mibII/route_write.o:  ./../../snmplib/asn1.h

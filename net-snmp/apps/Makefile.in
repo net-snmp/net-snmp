@@ -128,6 +128,7 @@ snmp_parse_args.o: ./../snmplib/scapi.h ./../snmplib/keytools.h
 snmp_parse_args.o: snmp_parse_args.h ./../snmplib/snmp_logging.h
 snmp_parse_args.o: ../version.h ./../snmplib/system.h ./../snmplib/parse.h
 snmp_parse_args.o: ./../snmplib/read_config.h ./../snmplib/snmp_debug.h
+snmp_parse_args.o: ./../snmplib/snmpv3.h
 snmpbulkwalk.o: ../config.h ../mib_module_config.h ../s/linux.h ../s/sysv.h
 snmpbulkwalk.o: ../s/generic.h ../m/generic.h 
 snmpbulkwalk.o:  ./../snmplib/asn1.h
