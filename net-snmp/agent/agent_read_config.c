@@ -1,3 +1,7 @@
+/*
+ * agent_read_config.c
+ */
+
 #include <config.h>
 
 #include <sys/types.h>
@@ -38,6 +42,7 @@
 
 #include "m2m.h"
 #include "mibincl.h"
+#include "snmpusm.h"
 
 #include "mibgroup/struct.h"
 #include "read_config.h"
@@ -59,6 +64,7 @@ void init_agent_read_config (void)
   register_config_handler("snmpd","authtrapenable",
                           snmpd_parse_config_authtrap, NULL,
                           "1 | 2\t\t(1 = enable, 2 = disable)");
+
   register_config_handler("snmpd","trapsink",
                           snmpd_parse_config_trapsink, snmpd_free_trapsinks,
                           "host");
@@ -257,16 +263,5 @@ snmpd_unregister_config_handler(char *token)
 void
 snmpd_store_config(char *line)
 {
-#ifdef PERSISTENTFILE
-  FILE *OUT;
-  if ((OUT = fopen(PERSISTENTFILE, "a")) != NULL) {
-    fprintf(OUT,line);
-    if (line[strlen(line)] != '\n')
-      fprintf(OUT,"\n");
-    DEBUGMSGTL(("agent_read_config", "storing: %s\n",line));
-  } else {
-    snmp_perror("snmpd");
-  }
-  fclose(OUT);
-#endif
+  read_config_store("snmpd",line);
 }

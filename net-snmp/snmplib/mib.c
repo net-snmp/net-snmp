@@ -9,13 +9,13 @@
 
                       All Rights Reserved
 
-Permission to use, copy, modify, and distribute this software and its 
-documentation for any purpose and without fee is hereby granted, 
+Permission to use, copy, modify, and distribute this software and its
+documentation for any purpose and without fee is hereby granted,
 provided that the above copyright notice appear in all copies and that
-both that copyright notice and this permission notice appear in 
+both that copyright notice and this permission notice appear in
 supporting documentation, and that the name of CMU not be
 used in advertising or publicity pertaining to distribution of the
-software without specific, written prior permission.  
+software without specific, written prior permission.
 
 CMU DISCLAIMS ALL WARRANTIES WITH REGARD TO THIS SOFTWARE, INCLUDING
 ALL IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS, IN NO EVENT SHALL
@@ -204,9 +204,11 @@ uptimeString(u_long timeticks,
     return buf;
 }
 
-static void sprint_hexstring(char *buf,
-			     u_char  *cp,
-			     int	    len)
+
+
+void sprint_hexstring(char *buf,
+                      u_char *cp,
+                      int len)
 {
 
     for(; len >= 16; len -= 16){
@@ -451,7 +453,7 @@ sprint_opaque(char *buf,
       case ASN_OPAQUE_I64:
         sprint_counter64(buf, var, enums, hint, units);
         break;
-        
+
       case ASN_OPAQUE_FLOAT:
         sprint_float(buf, var, enums, hint, units);
         break;
@@ -679,7 +681,7 @@ sprint_networkaddress(char *buf,
 	sprintf(buf, "Network Address: ");
 	buf += strlen(buf);
     }
-    cp = var->val.string;    
+    cp = var->val.string;
     len = var->val_len;
     for(x = 0; x < len; x++){
 	sprintf(buf, "%02X", *cp++);
@@ -777,7 +779,7 @@ sprint_bitstring(char *buf,
 		}
 	    }
 	}
-	cp ++;	    
+	cp ++;
     }
 }
 
@@ -822,7 +824,6 @@ sprint_counter64(char *buf,
 	sprint_by_type(buf, var, NULL, NULL, NULL);
 	return;
     }
-/* XXX */
     if (!quick_print){
 #ifdef OPAQUE_SPECIAL_TYPES
       if (var->type != ASN_COUNTER64) {
@@ -1083,7 +1084,7 @@ init_mib (void)
     } else {
 	env_var = strdup(env_var);
     }
-    
+
     if ( env_var != 0 ) {
 	entry = strtok( env_var, ENV_SEPARATOR );
 	while ( entry ) {
@@ -1510,7 +1511,7 @@ found:
 	*buf = '\0';
 	return_tree = get_symbol(objid + 1, objidlen - 1, subtree->child_list,
 				 buf);
-    } 
+    }
     if (return_tree != NULL)
 	return return_tree;
     else
@@ -1667,7 +1668,7 @@ get_module_node(char *name,
 	    }
 
 					/* Is it numeric ? */
-	    if ( isdigit( *cp ) ) 
+	    if ( isdigit( *cp ) )
 		subid=(atoi(cp));
 	    else
 		subid = -1;
@@ -1695,7 +1696,7 @@ get_module_node(char *name,
 	    }
 	    cp = cp2;
 	}
-		
+
 	return 1;
     } else {
 	return 0;

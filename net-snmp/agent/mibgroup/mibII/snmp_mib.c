@@ -12,7 +12,6 @@
 #include "../mibincl.h"
 #include "../../../snmplib/system.h"
 
-/* #include "../common_header.h" */
 #include "snmp_mib.h"
 
 
@@ -22,35 +21,6 @@
 	 *   and internal forward declarations
 	 *
 	 *********************/
-
-
-int snmp_inpkts = 0;
-int snmp_outpkts = 0;
-int snmp_inbadversions = 0;
-int snmp_inbadcommunitynames = 0;
-int snmp_inbadcommunityuses = 0;
-int snmp_inasnparseerrors = 0;
-int snmp_intoobigs = 0;
-int snmp_innosuchnames = 0;
-int snmp_inbadvalues = 0;
-int snmp_inreadonlys = 0;
-int snmp_ingenerrs = 0;
-int snmp_intotalreqvars = 0;
-int snmp_intotalsetvars = 0;
-int snmp_ingetrequests = 0;
-int snmp_ingetnexts = 0;
-int snmp_insetrequests = 0;
-int snmp_ingetresponses = 0;
-int snmp_intraps = 0;
-int snmp_outtoobigs = 0;
-int snmp_outnosuchnames = 0;
-int snmp_outbadvalues = 0;
-int snmp_outgenerrs = 0;
-int snmp_outgetrequests = 0;
-int snmp_outgetnexts = 0;
-int snmp_outsetrequests = 0;
-int snmp_outgetresponses = 0;
-int snmp_outtraps = 0;
 
 extern int snmp_enableauthentraps;
 
@@ -163,106 +133,27 @@ var_snmp(struct variable *vp,
 	 int *var_len,
 	 WriteMethod **write_method)
 {
-    if (header_snmp(vp, name, length, exact, var_len, write_method) == MATCH_FAILED )
-	return NULL;
+  static long long_ret;
 
-    /* default value: */
-    long_return = 0;
+  *write_method = 0;         /* assume it isnt writable for the time being */
+  *var_len = sizeof(long_ret); /* assume an integer and change later if not */
 
-    switch (vp->magic){
-	case SNMPINPKTS:
-	    long_return = snmp_inpkts;
-      	    break;
-	case SNMPOUTPKTS:
-	    long_return = snmp_outpkts;
-      	    break;
-	case SNMPINBADVERSIONS:
-	    long_return = snmp_inbadversions;
-      	    break;
-	case SNMPINBADCOMMUNITYNAMES:
-	    long_return = snmp_inbadcommunitynames;
-      	    break;
-	case SNMPINBADCOMMUNITYUSES:
-      	    break;
-	case SNMPINASNPARSEERRORS:
-	    long_return = snmp_inasnparseerrors;
-      	    break;
-	case SNMPINTOOBIGS:
-	    long_return = snmp_intoobigs;
-      	    break;
-	case SNMPINNOSUCHNAMES:
-      	    break;
-	case SNMPINBADVALUES:
-	    long_return = snmp_inbadvalues;
-      	    break;
-	case SNMPINREADONLYS:
-	    long_return = snmp_inreadonlys;
-      	    break;
-	case SNMPINGENERRS:
-	    long_return = snmp_ingenerrs;
-      	    break;
-	case SNMPINTOTALREQVARS:
-	    long_return = snmp_intotalreqvars;
-      	    break;
-	case SNMPINTOTALSETVARS:
-	    long_return = snmp_intotalsetvars;
-      	    break;
-	case SNMPINGETREQUESTS:
-	    long_return = snmp_ingetrequests;
-      	    break;
-	case SNMPINGETNEXTS:
-	    long_return = snmp_ingetnexts;
-      	    break;
-	case SNMPINSETREQUESTS:
-	    long_return = snmp_insetrequests;
-      	    break;
-	case SNMPINGETRESPONSES:
-	    long_return = snmp_ingetresponses;
-      	    break;
-	case SNMPINTRAPS:
-	    long_return = snmp_intraps;
-      	    break;
-	case SNMPOUTTOOBIGS:
-	    long_return = snmp_outtoobigs;
-      	    break;
-	case SNMPOUTNOSUCHNAMES:
-	    long_return = snmp_outnosuchnames;
-      	    break;
-	case SNMPOUTBADVALUES:
-	    long_return = snmp_outbadvalues;
-      	    break;
-	case SNMPOUTGENERRS:
-	    long_return = snmp_outgenerrs;
-      	    break;
-	case SNMPOUTGETREQUESTS:
-	    long_return = snmp_outgetrequests;
-      	    break;
-	case SNMPOUTGETNEXTS:
-	    long_return = snmp_outgetnexts;
-      	    break;
-	case SNMPOUTSETREQUESTS:
-	    long_return = snmp_outsetrequests;
-      	    break;
-	case SNMPOUTGETRESPONSES:
-	    long_return = snmp_outgetresponses;
-      	    break;
-	case SNMPOUTTRAPS:
-	    long_return = snmp_outtraps;
-      	    break;
-	case SNMPENABLEAUTHENTRAPS:
-	    *write_method = write_snmp;
-	    long_return = snmp_enableauthentraps;
-      	    break;
-	default:
-	    ERROR_MSG("unknown snmp var");
-	    return NULL;
-    }
+  if (header_generic(vp, name, length, exact, var_len, write_method)
+      == MATCH_FAILED)
+    return NULL;
 
+    /* this is where we do the value assignments for the mib results. */
+  if ( (vp->magic >= 1)
+       && (vp->magic <= (STAT_SNMP_STATS_END - STAT_SNMP_STATS_START + 1)) ) {
+    long_ret = snmp_get_statistic(vp->magic + STAT_SNMP_STATS_START);
+    return (unsigned char *) &long_ret;
+  } else if (vp->magic == SNMPENABLEAUTHENTRAPS) {
+    *write_method = write_snmp;
+    long_return = snmp_enableauthentraps;
     return (u_char *) &long_return;
+  }
+  return NULL;
 }
-
-
-
 
 /*
  * only for snmpEnableAuthenTraps:
@@ -277,7 +168,6 @@ write_snmp (int action,
 	    oid *name,
 	    int name_len)
 {
-    int bigsize = 4;
     long intval;
 
     if (var_val_type != ASN_INTEGER){
@@ -285,7 +175,8 @@ write_snmp (int action,
 	return SNMP_ERR_WRONGTYPE;
     }
 
-    asn_parse_int(var_val, &bigsize, &var_val_type, &intval, sizeof (intval));
+    intval = *((long *) var_val);
+
     if (intval != 1 && intval != 2) {
         DEBUGMSGTL(("mibII/snmp_mib", "not valid %x\n", intval));
 	return SNMP_ERR_WRONGVALUE;

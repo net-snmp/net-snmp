@@ -3075,8 +3075,8 @@ print_parent_label(FILE *f,
 
 void
 print_subtree_oid_report(FILE *f,
-			 struct tree *tree,
-			 int count)
+                         struct tree *tree,
+                         int count)
 {
     struct tree *tp;
 

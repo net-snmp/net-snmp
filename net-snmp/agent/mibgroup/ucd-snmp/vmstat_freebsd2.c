@@ -1,3 +1,7 @@
+/*
+ * vmstat_freebsd2.c
+ */
+
 #include <config.h>
 
 /* Ripped from /usr/scr/usr.bin/vmstat/vmstat.c (covering all bases) */
@@ -34,6 +38,8 @@
 #include "util_funcs.h"
 
 #include "vmstat.h"
+#include "auto_nlist.h"
+
 
 /* nlist symbols */
 #define CPTIME_SYMBOL   "cp_time"

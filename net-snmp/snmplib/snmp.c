@@ -93,7 +93,7 @@ xdump(u_char *cp,
 	count += col;
     }
 
-}
+}  /* end xdump() */
 
 /* 
    u_char * snmp_parse_var_op(

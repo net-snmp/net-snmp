@@ -351,7 +351,23 @@ void vacm_free_view (void)
     vacm_destroyAllViewEntries();
 }
 
-int vacm_in_view (struct packet_info *pi,
+
+/*******************************************************************-o-******
+ * vacm_in_view
+ *
+ * Parameters:
+ *	*pdu
+ *	*name
+ *	 namelen
+ *      
+ * Returns:
+ *	1	On success.
+ *	0	Otherwise.
+ *
+ * Debug output listed as follows:
+ *	<securityName> <groupName> <viewName> <viewType>
+ */
+int vacm_in_view (struct snmp_pdu *pdu,
 		  oid *name,
 		  int namelen)
 {
@@ -362,13 +378,13 @@ int vacm_in_view (struct packet_info *pi,
     char *vn;
     char *sn;
 
-    if (pi->sec_model == SNMP_SEC_MODEL_SNMPv1 || pi->sec_model == SNMP_SEC_MODEL_SNMPv2c) {
-	DEBUGMSGTL(("mibII/vacm_vars", "vacm_in_view: ver=%d, source=%.8x, community=%s\n", pi->version, pi->source.sin_addr.s_addr, pi->community));
+    if (pdu->version == SNMP_VERSION_1 || pdu->version == SNMP_VERSION_2c) {
+	DEBUGMSGTL(("mibII/vacm_vars", "vacm_in_view: ver=%d, source=%.8x, community=%s\n", pdu->version, pdu->address.sin_addr.s_addr, pdu->community));
 
 	/* allow running without snmpd.conf */
 	if (sp == NULL) {
 	    DEBUGMSGTL(("mibII/vacm_vars", "vacm_in_view: accepted with no com2sec entries\n"));
-	    switch (pi->pdutype) {
+	    switch (pdu->command) {
 	    case SNMP_MSG_GET:
 	    case SNMP_MSG_GETNEXT:
 	    case SNMP_MSG_GETBULK:
@@ -378,51 +394,64 @@ int vacm_in_view (struct packet_info *pi,
 	    }
 	}
 	while (sp) {
-	    if ((pi->source.sin_addr.s_addr & sp->sourceMask.sin_addr.s_addr)
+	    if ((pdu->address.sin_addr.s_addr & sp->sourceMask.sin_addr.s_addr)
 		    == sp->sourceIp.sin_addr.s_addr
-		&& strcmp(sp->community, pi->community) == 0)
+                && strlen(sp->community) == pdu->community_len
+		&& !strncmp(sp->community, pdu->community, pdu->community_len))
 		break;
 	    sp = sp->next;
 	}
 	if (sp == NULL) return 0;
 	sn = sp->securityName;
-    }
-    else {
+    } else if (pdu->securityModel == SNMP_SEC_MODEL_USM) {
+      DEBUGP ("vacm_in_view: ver=%d, model=%d, secName=%s\n",
+              pdu->version, pdu->securityModel, pdu->securityName);
+      sn = pdu->securityName;
+    } else {
 	sn = NULL;
     }
 
     if (sn == NULL) return 0;
-    DEBUGMSGTL(("mibII/vacm_vars", "vacm_in_view: securityName == %s\n", sn));
-    gp = vacm_getGroupEntry(pi->sec_model, sn);
-    if (gp == NULL) return 0;
-    DEBUGMSGTL(("mibII/vacm_vars", "vacm_in_view: groupName == %s\n", gp->groupName));
-    ap = vacm_getAccessEntry(gp->groupName, "", pi->sec_model, pi->sec_level);
-    if (ap == NULL) return 0;
-    switch (pi->pdutype) {
-    case SNMP_MSG_GET:
-    case SNMP_MSG_GETNEXT:
-    case SNMP_MSG_GETBULK:
+    DEBUGMSGTL(("mibII/vacm_vars", "vacm_in_view: sn=%s", sn));
+
+    gp = vacm_getGroupEntry(pdu->securityModel, sn);
+    if (gp == NULL) { DEBUGMSG(("mibII/vacm_vars", "\n")); return 0; }
+    DEBUGMSG (("mibII/vacm_vars", ", gn=%s", gp->groupName));
+
+    ap = vacm_getAccessEntry(gp->groupName, "", pdu->securityModel,
+                             pdu->securityLevel);
+    if (ap == NULL) { DEBUGMSG(("mibII/vacm_vars", "\n")); return 0; }
+
+    switch (pdu->command) {
+      case SNMP_MSG_GET:
+      case SNMP_MSG_GETNEXT:
+      case SNMP_MSG_GETBULK:
 	vn = ap->readView;
 	break;
-    case SNMP_MSG_SET:
+      case SNMP_MSG_SET:
 	vn = ap->writeView;
 	break;
-    case SNMP_MSG_TRAP:
-    case SNMP_MSG_TRAP2:
-    case SNMP_MSG_INFORM:
+      case SNMP_MSG_TRAP:
+      case SNMP_MSG_TRAP2:
+      case SNMP_MSG_INFORM:
 	vn = ap->notifyView;
 	break;
-    default:
-	fprintf(stderr,"bad msg type in vacm_in_view: %d\n", pi->pdutype);
+      default:
+	fprintf(stderr,"bad msg type in vacm_in_view: %d\n", pdu->command);
 	vn = ap->readView;
     }
-    DEBUGMSGTL(("mibII/vacm_vars", "vacm_in_view: viewName == %s\n", vn));
+    DEBUGMSG (("mibII/vacm_vars", ", vn=%s", vn));
+
     vp = vacm_getViewEntry (vn, name, namelen);
-    if (vp == NULL) return 0;
-    DEBUGMSGTL(("mibII/vacm_vars", "vacm_in_view: viewType == %d\n", vp->viewType));
+    if (vp == NULL) { DEBUGMSG(("mibII/vacm_vars", "\n")); return 0; }
+    DEBUGMSG(("mibII/vacm_vars", ", vt=%d\n", vp->viewType));
+
     if (vp->viewType == SNMP_VIEW_EXCLUDED) return 0;
+
     return 1;
-}
+
+}  /* end vacm_in_view() */
+
 
 u_char *var_vacm_sec2group(struct variable *vp,
 			   oid *name,

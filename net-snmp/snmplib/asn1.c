@@ -330,13 +330,18 @@ asn_build_unsigned_int(u_char *data,
  *  Returns a pointer to the first byte past the end
  *   of this object (i.e. the start of the next object).
  *  Returns NULL on any error.
-
-  u_char * asn_parse_string(
-      u_char     *data         IN - pointer to start of object
-      int        *datalength   IN/OUT - number of valid bytes left in buffer
-      u_char     *type         OUT - asn type of object
-      u_char     *string       IN/OUT - pointer to start of output buffer
-      int        *strlength    IN/OUT - size of output buffer
+ *
+ * u_char * asn_parse_string(
+ *     u_char     *data         IN - pointer to start of object
+ *     int        *datalength   IN/OUT - number of valid bytes left in buffer
+ *     u_char     *type         OUT - asn type of object
+ *     u_char     *string       IN/OUT - pointer to start of output buffer
+ *     int        *strlength    IN/OUT - size of output buffer
+ *
+ *
+ * ASN.1 octet string	::=      primstring | cmpdstring
+ * primstring		::= 0x04 asnlength byte {byte}*
+ * cmpdstring		::= 0x24 asnlength string {string}*
  */
 u_char *
 asn_parse_string(u_char *data,
@@ -345,11 +350,6 @@ asn_parse_string(u_char *data,
 		 u_char *string,
 		 int    *strlength)
 {
-/*
- * ASN.1 octet string ::= primstring | cmpdstring
- * primstring ::= 0x04 asnlength byte {byte}*
- * cmpdstring ::= 0x24 asnlength string {string}*
- */
     register u_char *bufp = data;
     u_long	    asn_length;
 
@@ -407,10 +407,17 @@ asn_build_string(u_char *data,
 	return NULL;
     if (*datalength < strlength)
 	return NULL;
-    memmove(data, string, strlength);
+    if (strlength) {
+      if (string == NULL) {
+	memset(data, 0, strlength);
+      } else {
+	memmove(data, string, strlength);
+      }
+    }
     *datalength -= strlength;
     return data + strlength;
 }
+
 
 
 /*
@@ -481,8 +488,13 @@ asn_parse_header(u_char	*data,
     }
 #endif /* OPAQUE_SPECIAL_TYPES */
     *datalength = (int)asn_length;
+
+
     return bufp;
-}
+
+}  /* end asn_parse_header() */
+
+
 
 /*
  * asn_build_header - builds an ASN header for an object with the ID and
