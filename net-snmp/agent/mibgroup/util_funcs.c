@@ -217,7 +217,7 @@ get_exec_output(struct extensible *ex)
 #endif
 
 #ifdef EXCACHETIME
-    sprintf(cachefile, "%s/%s", PERSISTENT_DIRECTORY, CACHEFILE);
+    sprintf(cachefile, "%s/%s", get_persistent_directory(), CACHEFILE);
     curtime = time(NULL);
     if (curtime > (cachetime + EXCACHETIME) ||
         strcmp(ex->command, lastcmd) != 0) {

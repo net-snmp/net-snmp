@@ -278,7 +278,7 @@ updateLogmatch(int iindex)
      * ------------------------------------ 
      */
 
-    sprintf(perfilename, "%s/snmpd_logmatch_%s.pos", PERSISTENT_DIRECTORY,
+    sprintf(perfilename, "%s/snmpd_logmatch_%s.pos", get_persistent_directory(),
             logmatchTable[iindex].name);
 
 

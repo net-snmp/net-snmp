@@ -684,6 +684,8 @@ register_default_handlers(void)
                       NETSNMP_DS_LIBRARY_ID, NETSNMP_DS_LIB_NO_TOKEN_WARNINGS);
     netsnmp_ds_register_config(ASN_BOOLEAN, "snmp", "noRangeCheck",
 		      NETSNMP_DS_LIBRARY_ID, NETSNMP_DS_LIB_DONT_CHECK_RANGE);
+    netsnmp_ds_register_config(ASN_OCTET_STR, "snmp", "persistentDir",
+	              NETSNMP_DS_LIBRARY_ID, NETSNMP_DS_LIB_PERSISTENT_DIR);
 }
 
 void
