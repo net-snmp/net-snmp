@@ -3474,13 +3474,11 @@ snmp_pdu_parse(struct snmp_pdu *pdu, u_char  *data, size_t *length)
   u_char  type;
   u_char  msg_type;
   u_char  *var_val;
-  int      badtype;
+  int      badtype = 0;
   size_t   len;
   size_t   four;
   struct variable_list *vp = NULL;
   oid objid[MAX_OID_LEN];
-
-  badtype = 0;
 
   /* Get the PDU type */
   data = asn_parse_header(data, length, &msg_type);
@@ -3697,7 +3695,7 @@ snmp_pdu_parse(struct snmp_pdu *pdu, u_char  *data, size_t *length)
         break;
       default:
         snmp_log(LOG_ERR,"bad type returned (%x)\n", vp->type);
-        badtype = 1;
+        badtype = -1;
         break;
     }
     DEBUGINDENTADD(-4); 
