@@ -854,6 +854,19 @@ mkdirhier(const char *pathname, mode_t mode, int skiplast)
     entry = strtok(ourcopy, "/");
 
     buf[0] = '\0';
+
+#ifdef WIN32
+    /*
+     * Check if first entry contains a drive-letter
+     *   e.g  "c:\path"
+     */
+    if ((entry) && (':' == entry[1]) &&
+        (('\0' == entry[2]) || ('/' == entry[2]) || ('\\' == entry[1]))) {
+        strcat(buf, entry);
+        entry = strtok(NULL, "/");
+    }
+#endif
+
     /*
      * check to see if filename is a directory 
      */
@@ -869,13 +882,14 @@ mkdirhier(const char *pathname, mode_t mode, int skiplast)
              */
             snmp_log(LOG_INFO, "Creating directory: %s\n", buf);
 #ifdef WIN32
-            CreateDirectory(buf, NULL);
+            if (CreateDirectory(buf, NULL) == 0)
 #else
-            if (mkdir(buf, mode) == -1) {
+            if (mkdir(buf, mode) == -1)
+#endif
+            {
                 free(ourcopy);
                 return SNMPERR_GENERR;
             }
-#endif
         } else {
             /*
              * exists, is it a file? 
