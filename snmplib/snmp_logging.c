@@ -198,6 +198,15 @@ int
 snmp_log_options(char *optarg, int argc, char *const *argv)
 {
     char           *cp = optarg;
+        /*
+	 * Hmmm... this doesn't seem to work.
+	 * The main agent 'getopt' handling assumes
+	 *   that the -L option takes an argument,
+	 *   and objects if this is missing.
+	 * Trying to differentiate between
+	 *   new-style "-Lx", and old-style "-L xx"
+	 *   is likely to be a major headache.
+	 */
     char            missing_opt = 'e';	/* old -L is new -Le */
     int             priority = LOG_DEBUG;
     int             pri_max  = LOG_EMERG;
@@ -247,8 +256,10 @@ snmp_log_options(char *optarg, int argc, char *const *argv)
         /* Fallthrough */
     case 'e':
         logh = netsnmp_register_loghandler(NETSNMP_LOGHANDLER_STDERR, priority);
-        if (logh)
+        if (logh) {
             logh->pri_max = pri_max;
+            logh->token   = "stderr";
+	}
         break;
 
     /*
@@ -263,6 +274,7 @@ snmp_log_options(char *optarg, int argc, char *const *argv)
         logh = netsnmp_register_loghandler(NETSNMP_LOGHANDLER_STDERR, priority);
         if (logh) {
             logh->pri_max = pri_max;
+            logh->token   = "stdout";
             logh->imagic  = 1;	    /* stdout, not stderr */
 	}
         break;
