@@ -258,7 +258,7 @@ var_udp(struct variable *vp,
 #if defined(linux)
 	    long_return = udpstat.UdpInDatagrams;
 #else
-#ifdef NO_DUMMY_VALUES
+#if NO_DUMMY_VALUES
 	    return NULL;
 #endif
 	    long_return = 0;
@@ -272,7 +272,7 @@ var_udp(struct variable *vp,
 #if defined(linux)
 	    long_return = udpstat.UdpNoPorts;
 #else
-#ifdef NO_DUMMY_VALUES
+#if NO_DUMMY_VALUES
 	    return NULL;
 #endif
 	    long_return = 0;
@@ -286,7 +286,7 @@ var_udp(struct variable *vp,
 #if defined(linux)
 	    long_return = udpstat.UdpOutDatagrams;
 #else
-#ifdef NO_DUMMY_VALUES
+#if NO_DUMMY_VALUES
 	    return NULL;
 #endif
 	    long_return = 0;

@@ -344,7 +344,7 @@ var_hrswrun(struct variable *vp,
 
     switch (vp->magic){
 	case HRSWRUN_OSINDEX:
-#ifdef NO_DUMMY_VALUES
+#if NO_DUMMY_VALUES
 		return NULL;
 #else
 	    long_return = 1;		/* Probably! */
@@ -381,7 +381,7 @@ var_hrswrun(struct variable *vp,
 	    strcpy( string, cp );
             fclose(fp);
 #else
-#ifdef NO_DUMMY_VALUES
+#if NO_DUMMY_VALUES
 	    return NULL;
 #endif
 	    sprintf(string, "process name");
@@ -418,7 +418,7 @@ var_hrswrun(struct variable *vp,
 	    strcpy( string, buf );
             fclose(fp);
 #else
-#ifdef NO_DUMMY_VALUES
+#if NO_DUMMY_VALUES
 	    return NULL;
 #endif
 	    sprintf(string, "/bin/wombat");
@@ -481,7 +481,7 @@ var_hrswrun(struct variable *vp,
 	    strcpy( string, cp );
             fclose(fp);
 #else
-#ifdef NO_DUMMY_VALUES
+#if NO_DUMMY_VALUES
 	    return NULL;
 #endif
 	    sprintf(string, "-h -q -v");
@@ -651,7 +651,7 @@ var_hrswrun(struct variable *vp,
 	    long_return = atoi( cp );		/* rss */
             fclose(fp);
 #else
-#ifdef NO_DUMMY_VALUES
+#if NO_DUMMY_VALUES
 	    return NULL;
 #endif
 	    long_return = 16*1024;	/* XXX - 16M! */

@@ -234,7 +234,7 @@ var_hrdevice(struct variable *vp,
 	    if ( device_descr[ type ] != NULL )
         	strcpy(string, ((*device_descr[type])(dev_idx)) );
 	    else
-#ifdef NO_DUMMY_VALUES
+#if NO_DUMMY_VALUES
 		return NULL;
 #else
 	        sprintf(string, "a black box of some sort");
@@ -253,7 +253,7 @@ var_hrdevice(struct variable *vp,
 	    if ( device_status[ type ] != NULL )
         	long_return = ((*device_status[type])(dev_idx));
 	    else
-#ifdef NO_DUMMY_VALUES
+#if NO_DUMMY_VALUES
 		return NULL;
 #else
 	        long_return = 2;	/* Assume running */
@@ -263,7 +263,7 @@ var_hrdevice(struct variable *vp,
 	    if ( device_errors[ type ] != NULL )
         	long_return = (*device_errors[type])(dev_idx);
 	    else
-#ifdef NO_DUMMY_VALUES
+#if NO_DUMMY_VALUES
 		return NULL;
 #else
 	        long_return = 0;	/* Assume OK */
