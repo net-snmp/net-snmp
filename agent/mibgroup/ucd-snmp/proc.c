@@ -515,8 +515,7 @@ getstruct(off_t loc,
 #include <fcntl.h>
 #include <dirent.h>
 
-#define _STRUCTURED_PROC 1
-#include <sys/procfs.h>
+#include <procfs.h>
 
 /*
  * Gets process information from /proc/.../psinfo
