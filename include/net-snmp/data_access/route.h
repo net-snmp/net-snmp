@@ -38,6 +38,11 @@ typedef struct netsnmp_route_s {
    u_char    rt_nexthop[NETSNMP_ACCESS_ROUTE_ADDR_BUF_SIZE];
 
 #ifdef USING_IP_FORWARD_MIB_INETCIDRROUTETABLE_INETCIDRROUTETABLE_MODULE
+   /*
+    * define the maximum oid length for a policy, for use by the
+    * inetCidrRouteTable.
+    */
+#define NETSNMP_POLICY_OID_MAX_LEN  1
    oid      *rt_policy;      /* NULL should be interpreted as { 0, 0 } */
    u_char    rt_policy_len;  /* 0-128 oids */
 #endif
