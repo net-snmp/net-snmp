@@ -136,7 +136,11 @@ int get_exec_output(ex)
 #endif
 
 #ifdef CACHETIME
+#ifdef hpux
   curtime = time();
+#else
+  curtime = time(NULL);
+#endif
   if (curtime > (cachetime + CACHETIME) ||
       strcmp(ex->command, lastcmd) != 0) {
     strcpy(lastcmd,ex->command);
