@@ -23,9 +23,9 @@ $example_start
      $m2c_node_lh = 0;
 @    foreach $e $v enum@
 @        include m2c_setup_enum.m2i@
-#define IS_SET_$m2c_ename(${node}_ctx_ptr) \
-        (${node}_ctx_ptr != NULL)
-    if (IS_SET_$m2c_ename(ctx)) {
+#define IS_SET_${node}_$m2c_ename(${context}_ctx)        \
+    (${context}_ctx != NULL)
+    if (IS_SET_${node}_$m2c_ename(ctx)) {
         $m2c_node_lh |= $m2c_ename;
     }
 @    end@ # for each
