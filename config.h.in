@@ -332,6 +332,9 @@
 /* Define if you have the strtol function.  */
 #undef HAVE_STRTOL
 
+/* Define if you have the strtoul function.  */
+#undef HAVE_STRTOUL
+
 /* Define if you have the system function.  */
 #undef HAVE_SYSTEM
 
@@ -1046,6 +1049,11 @@
 #endif
 #endif
 #endif
+
+/* fake strtoul if we didn't find it. */
+#ifndef HAVE_STRTOUL
+#define strtoul(x,y,z) atoi(x)
+#endif /* HAVE_STRTOUL */
 
 /* define signal if DNE */
 
