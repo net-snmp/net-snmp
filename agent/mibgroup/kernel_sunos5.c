@@ -125,7 +125,7 @@ mibmap          Mibmap[MIBCACHE_SIZE] = {
     {0},
 };
 
-static int      sd = -2;        /* /dev/ip stream descriptor. */
+static int      sd = -2;        /* /dev/arp stream descriptor. */
 
 /*-
  * Static function prototypes (use void as argument type if there are none)
@@ -150,7 +150,7 @@ Name_cmp(void *, void *);
 static void
 init_mibcache_element(mibcache * cp);
 
-#define	STREAM_DEV	"/dev/ip"
+#define	STREAM_DEV	"/dev/arp"
 #define	BUFSIZE		40960   /* Buffer for  messages (should be modulo(pagesize) */
 
 /*-
@@ -810,11 +810,6 @@ getmib(int groupname, int subgroupname, void *statbuf, size_t size,
     if (sd == -2) {         /* First time */
 	if ((sd = open(STREAM_DEV, O_RDWR)) == -1) {
 	    snmp_log_perror(STREAM_DEV);
-	    ret = -1;
-	    goto Return;
-	}
-	if (ioctl(sd, I_PUSH, "arp") == -1) {
-	    snmp_log_perror("I_PUSH arp");
 	    ret = -1;
 	    goto Return;
 	}
