@@ -10,5 +10,5 @@ WriteMakefile(
 	'Format.pm' => '$(INST_LIBDIR)/Format/SNMP.pm',
 	'Storage.pm' => '$(INST_LIBDIR)/Storage/SNMP.pm',
     },
-    'EXE_FILES'         => [qw(snmpsh)]
+    'EXE_FILES'         => [qw(netsh)]
 );

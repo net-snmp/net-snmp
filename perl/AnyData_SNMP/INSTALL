@@ -28,7 +28,7 @@ Install steps:
 
 To use it:
   SQL like Shell script:
-    snmpsh [snmpcmd arguments] HOST [SQL COMMAND]
+    netsh [snmpcmd arguments] HOST [SQL COMMAND]
 
   Example commands to type at the prompt:
     select * from ifTable
