@@ -5,7 +5,7 @@
 #ifndef _MIBGROUP_REGISTRY_H
 #define _MIBGROUP_REGISTRY_H
 
-extern u_char	*var_registry (struct variable *, oid *, int *, int, int *, int (**write) (int, u_char *, u_char, int, u_char *, oid *, int));
+extern FindVarMethod var_registry;
 
 #define	REGISTRYINDEX		1
 #define	REGISTRYNAME		2

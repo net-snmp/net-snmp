@@ -204,7 +204,7 @@ header_tcp(struct variable *vp,
 	   int *length,
 	   int exact,
 	   int *var_len,
-	   int (**write_method) (int, u_char *,u_char, int, u_char *,oid*, int))
+	   WriteMethod **write_method)
 {
 #define TCP_NAME_LENGTH	8
     oid newname[MAX_NAME_LEN];
@@ -245,7 +245,7 @@ var_tcp(struct variable *vp,
 	int *length,
 	int exact,
 	int *var_len,
-	int (**write_method) (int, u_char *,u_char, int, u_char *,oid*, int))
+	WriteMethod **write_method)
 {
     static struct kna tcpipstats;
 
@@ -369,8 +369,8 @@ var_tcp(struct variable *vp,
 	oid *name,
 	int *length,
 	int exact,
-		int *var_len,
-	int (**write_method) (int, u_char *,u_char, int, u_char *,oid*, int))
+	int *var_len,
+	WriteMethod **write_method)
 {
     static struct tcpstat tcpstat;
 #ifdef hpux
@@ -520,7 +520,7 @@ var_tcpEntry(struct variable *vp,
 	     int *length,
 	     int exact,
 	     int *var_len,
-	     int (**write_method) (int, u_char *,u_char, int, u_char *,oid*, int))
+	     WriteMethod **write_method)
 {
     int i;
     oid newname[MAX_NAME_LEN], lowest[MAX_NAME_LEN], *op;
@@ -630,7 +630,7 @@ var_tcp(struct variable *vp,
 	int *length,
 	int exact,
 	int *var_len,
-	int (**write_method) (int, u_char *,u_char, int, u_char *,oid*, int))
+	WriteMethod **write_method)
 {
   mib2_tcp_t tcpstat;
   mib2_ip_t ipstat;
@@ -699,7 +699,7 @@ var_tcpEntry(struct variable *vp,
 	     int *length,
 	     int exact,
 	     int *var_len,
-	     int (**write_method) (int, u_char *,u_char, int, u_char *,oid*, int))
+	     WriteMethod **write_method)
 {
   oid newname[MAX_NAME_LEN], lowest[MAX_NAME_LEN], *op;
   u_char *cp;

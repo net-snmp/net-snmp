@@ -20,9 +20,9 @@ void vacm_parse_view (char *, char *);
 
 int vacm_in_view (struct packet_info *, oid *, int);
 
-extern u_char *var_vacm_sec2group (struct variable *, oid *, int *, int, int *, int (**write) (int, u_char *, u_char, int, u_char *, oid *, int) );
-extern u_char *var_vacm_access (struct variable *, oid *, int *, int, int *, int (**write) (int, u_char *, u_char, int, u_char *, oid *, int) );
-extern u_char *var_vacm_view (struct variable *, oid *, int *, int, int *, int (**write) (int, u_char *, u_char, int, u_char *, oid *, int) );
+extern FindVarMethod var_vacm_sec2group;
+extern FindVarMethod var_vacm_access;
+extern FindVarMethod var_vacm_view;
 
 #define OID_SNMPVACMMIB		SNMP_OID_SNMPMODULES, 13
 #define OID_VACMMIBOBJECTS	OID_SNMPVACMMIB, 1

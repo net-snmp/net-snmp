@@ -92,7 +92,7 @@ rmonGetValue(oid *srcParty,
     u_char type;
     int len;
     u_short acl;
-    int (*writeFunc) (int, u_char *, u_char, int, u_char *, oid *, int);
+    WriteMethod *write_method;
     u_char *var;
     struct packet_info pinfo, *pi = &pinfo;
     int noSuchObject;
@@ -183,7 +183,7 @@ rmonGetValue(oid *srcParty,
     memcpy(bigVar, variable, variableLen * sizeof(oid));
     bigVarLen = variableLen;
     
-    var = getStatPtr(bigVar, &bigVarLen, &type, &len, &acl, 1, &writeFunc, pi,
+    var = getStatPtr(bigVar, &bigVarLen, &type, &len, &acl, 1, &write_method, pi,
 		     &noSuchObject);
     if (var == NULL) {
 	return 6;
@@ -323,12 +323,12 @@ alarmShadowRow(struct alarmEntry *alarm)
 static struct alarmEntry *
 alarmGetRow(oid *context,
 	    int contextLen,
-	    int index)
+	    int iindex)
 {
 	struct alarmEntry *alarm;
 
 	for (alarm = alarmTab; alarm; alarm = alarm->next) {
-		if (alarm->index == index
+		if (alarm->index == iindex
 		    && alarm->contextLength == contextLen
 		    && !memcmp(alarm->contextID, context,
 			     contextLen * sizeof(oid))) {
@@ -341,12 +341,12 @@ alarmGetRow(oid *context,
 
 /* return a pointer to the given row in the alarmTab */
 static struct alarmEntry *
-alarmGetRowByIndex(int index)
+alarmGetRowByIndex(int iindex)
 {
     struct alarmEntry *alarm;
 
     for (alarm = alarmTab; alarm; alarm = alarm->next) {
-	if (alarm->index == index) {
+	if (alarm->index == iindex) {
 	    return alarm;
 	}
     }
@@ -364,12 +364,12 @@ alarmGetRowByIndex(int index)
 static struct alarmEntry *
 alarmNewRow(oid *context,
 	    int contextLen,
-	    int index)
+	    int iindex)
 {
     struct alarmEntry *alarm;
     int i = 0;
     
-    if ((index < 1) || (index > 65535)) {
+    if ((iindex < 1) || (iindex > 65535)) {
 	return NULL;
     }
     
@@ -385,7 +385,7 @@ alarmNewRow(oid *context,
     
     memset((char *)alarm, 0, sizeof(struct alarmEntry));
     
-    alarm->index = index;
+    alarm->index = iindex;
     memcpy(alarm->contextID, context, contextLen * sizeof(oid));
     alarm->contextLength = contextLen;
     alarm->status = ENTRY_DESTROY;
@@ -723,7 +723,7 @@ write_alarmtab(int action,
 	       oid *name,
 	       int name_len)
 {
-    register int index;
+    register int iindex;
     register int variable;
     register struct alarmEntry *alarm;
     int size;
@@ -739,13 +739,13 @@ write_alarmtab(int action,
     if (name_len < (13 + contextlen))
 	return SNMP_ERR_NOCREATION;
     context = name + 13;
-    index = name[13 + contextlen];
-    alarm = alarmGetRow(context, contextlen, index);
+    iindex = name[13 + contextlen];
+    alarm = alarmGetRow(context, contextlen, iindex);
     
     switch (action) {
       case RESERVE1:
 	if (alarm == NULL) {
-	    alarm = alarmNewRow(context, contextlen, index);
+	    alarm = alarmNewRow(context, contextlen, iindex);
 	    if (alarm == NULL) {
 		/* no memory for row */
 		return SNMP_ERR_RESOURCEUNAVAILABLE;
@@ -1065,7 +1065,7 @@ var_alarmnextindex(struct variable *vp,
 		   int *length,
 		   int exact,
 		   int *var_len,
-		   int (**write_method) (int, u_char *,u_char, int, u_char *,oid*, int))
+		   WriteMethod **write_method)
 {
     int result;
 
@@ -1095,7 +1095,7 @@ var_alarmtab(struct variable *vp,
 	     int *length,
 	     int exact,
 	     int *var_len,
-	     int (**write_method) (int, u_char *,u_char, int, u_char *,oid*, int))
+	     WriteMethod **write_method)
 {
     oid newname[MAX_NAME_LEN];
     int result;

@@ -82,6 +82,8 @@
 #include "kernel.h"
 #endif
 #include "../../../snmplib/system.h"
+#include "asn1.h"
+#include "snmp_debug.h"
 
 #include "mibincl.h"
 #include "auto_nlist.h"
@@ -171,7 +173,7 @@ header_udp(struct variable *vp,
 	   int *length,
 	   int exact,
 	   int *var_len,
-	   int (**write_method) (int, u_char *,u_char, int, u_char *,oid*, int))
+	   WriteMethod **write_method)
 {
 #define UDP_NAME_LENGTH	8
     oid newname[MAX_NAME_LEN];
@@ -213,7 +215,7 @@ var_udp(struct variable *vp,
 	int *length,
 	int exact,
 	int *var_len,
-	int (**write_method) (int, u_char *,u_char, int, u_char *,oid*, int))
+	WriteMethod **write_method)
 {
 #ifdef linux
     static struct udp_mib udpstat;
@@ -307,7 +309,7 @@ var_udp(struct variable *vp,
 	int *length,
 	int exact,
 	int *var_len,
-	int (**write_method) (int, u_char *,u_char, int, u_char *,oid*, int))
+	WriteMethod **write_method)
 {
     static struct kna tcpipstats;
 
@@ -349,7 +351,7 @@ var_udp(struct variable *vp,
 	int *length,
 	int exact,
 	int *var_len,
-	int (**write_method) (int, u_char *,u_char, int, u_char *,oid*, int))
+	WriteMethod **write_method)
 {
     static struct udpstat udpstat;
     static	counter MIB_udpcounter[MIB_udpMAXCTR+1];
@@ -399,7 +401,7 @@ var_udpEntry(struct variable *vp,
 	     int *length,
 	     int exact,
 	     int *var_len,
-	     int (**write_method) (int, u_char *,u_char, int, u_char *,oid*, int))
+	     WriteMethod **write_method)
 {
     int i;
     oid newname[MAX_NAME_LEN], lowest[MAX_NAME_LEN], *op;
@@ -469,7 +471,7 @@ var_udp(struct variable *vp,
 	int *length,
 	int exact,
 	int *var_len,
-	int (**write_method) (int, u_char *,u_char, int, u_char *,oid*, int))
+	WriteMethod **write_method)
 {
     mib2_udp_t udpstat;
     mib2_ip_t ipstat;
@@ -513,7 +515,7 @@ var_udpEntry(struct variable *vp,
 	     int *length,
 	     int exact,
 	     int *var_len,
-	     int (**write_method) (int, u_char *,u_char, int, u_char *,oid*, int))
+	     WriteMethod **write_method)
 {
     return NULL;
 }

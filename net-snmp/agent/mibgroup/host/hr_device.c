@@ -36,7 +36,8 @@ PFI device_errors[ HRDEV_TYPE_MAX ];
 int current_type;
 
 void Init_Device (void);
-int header_hrdevice (struct variable *,oid *, int *, int, int *, int (**write) (int, u_char *, u_char, int, u_char *,oid *,int));
+int header_hrdevice (struct variable *,oid *, int *, int, int *, WriteMethod **);
+
 
 	/*********************
 	 *
@@ -91,7 +92,7 @@ header_hrdevice(struct variable *vp,
 		int *length,
 		int exact,
 		int *var_len,
-		int (**write_method) (int, u_char *,u_char, int, u_char *,oid*, int))
+		WriteMethod **write_method)
 {
 #define HRDEV_ENTRY_NAME_LENGTH	11
     oid newname[MAX_NAME_LEN];
@@ -194,7 +195,7 @@ var_hrdevice(struct variable *vp,
 	     int *length,
 	     int exact,
 	     int *var_len,
-	     int (**write_method) (int, u_char *,u_char, int, u_char *,oid*, int))
+	     WriteMethod **write_method)
 {
     int dev_idx, type;
     oid *oid_p;

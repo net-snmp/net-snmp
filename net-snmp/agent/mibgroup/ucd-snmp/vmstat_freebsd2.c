@@ -101,7 +101,7 @@ unsigned char *var_extensible_vmstat(struct variable *vp,
 				     int *length,
 				     int exact,
 				     int *var_len,
-				     int (**write_method) (int, u_char *,u_char, int, u_char *,oid*, int))
+				     WriteMethod **write_method)
 {
 
     int loop;

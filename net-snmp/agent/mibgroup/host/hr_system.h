@@ -8,9 +8,7 @@
 config_require(host/hr_utils )
 
 extern void	init_hr_system (void);
-extern u_char	*var_hrsys (struct variable *, oid *, int *, int, int *, int
-			    (**write) (int, u_char *, u_char, int, u_char *,
-				       oid *, int));
+extern FindVarMethod var_hrsys;
 
 
 #define	HRSYS_UPTIME		1

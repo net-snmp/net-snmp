@@ -54,8 +54,8 @@ extern  int TCP_Scan_Next (int *, struct inpcb *);
 #endif
 
 extern void	init_tcp (void);
-extern u_char	*var_tcp (struct variable *, oid *, int *, int, int *, int (**write) (int, u_char *, u_char, int, u_char *, oid *, int) );
-extern u_char	*var_tcpEntry (struct variable *, oid *, int *, int, int *, int (**write) (int, u_char *, u_char, int, u_char *, oid *, int) );
+extern FindVarMethod var_tcp;
+extern FindVarMethod var_tcpEntry;
 
 
 #define TCPRTOALGORITHM      1

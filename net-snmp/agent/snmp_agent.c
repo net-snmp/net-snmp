@@ -510,7 +510,7 @@ parse_var_op_list(u_char *data,
     int	    statLen;
     u_short acl;
     int	    rw, exact, err;
-    int	    (*write_method) (int, u_char *, u_char, int, u_char *, oid *, int);
+    WriteMethod *write_method;
     u_char  *headerP, *var_list_start;
     int	    dummyLen;
     int	    noSuchObject;
@@ -700,7 +700,7 @@ bulk_var_op_list(u_char *data,
     register u_char *statP;
     int	    statLen;
     u_short acl;
-    int	    (*write_method) (int, u_char *, u_char, int, u_char *, oid *, int);
+    WriteMethod *write_method;
     u_char  *headerP, *var_list_start;
     int	    dummyLen;
     u_char  *repeaterStart, *out_data_save;

@@ -7,7 +7,7 @@
 
 config_require(util_funcs)
 
-unsigned char *var_extensible_disk (struct variable *, oid *, int *, int, int *, int (**write) (int, u_char *, u_char, int, u_char *, oid *, int) );
+extern FindVarMethod var_extensible_disk;
 
 /* config file parsing routines */
 void disk_free_config (void);

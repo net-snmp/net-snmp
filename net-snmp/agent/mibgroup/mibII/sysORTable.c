@@ -72,7 +72,7 @@ var_sysORTable(struct variable *vp,
 		int *length,
 		int exact,
 		int *var_len,
-		int (**write_method) (int, u_char *,u_char, int, u_char *,oid*, int))
+		WriteMethod **write_method)
 {
   struct timeval diff;
   int i;

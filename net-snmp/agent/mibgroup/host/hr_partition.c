@@ -51,7 +51,7 @@ void  Save_HR_Partition (int, int);
 
 void  Init_HR_Partition (void);
 int   Get_Next_HR_Partition (void);
-int header_hrpartition (struct variable *,oid *, int *, int, int *, int (**write) (int, u_char *, u_char, int, u_char *,oid *,int) );
+int header_hrpartition (struct variable *,oid *, int *, int, int *, WriteMethod **);
 
 #define MATCH_FAILED	-1
 #define MATCH_SUCCEEDED	0
@@ -74,7 +74,7 @@ header_hrpartition(struct variable *vp,
 		   int *length,
 		   int exact,
 		   int *var_len,
-		   int (**write_method) (int, u_char *, u_char, int, u_char *, oid *, int))
+		   WriteMethod **write_method)
 {
 #define HRPART_DISK_NAME_LENGTH		11
 #define HRPART_ENTRY_NAME_LENGTH	12
@@ -183,7 +183,7 @@ var_hrpartition(struct variable *vp,
 		int *length,
 		int exact,
 		int *var_len,
-		int (**write_method) (int, unsigned char *, unsigned char, int, unsigned char *, oid *, int))
+		WriteMethod **write_method)
 {
     int  part_idx;
     static char string[100];

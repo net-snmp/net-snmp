@@ -109,6 +109,7 @@
 #include "util_funcs.h"
 #include "memory.h"
 #include "auto_nlist.h"
+#include "agent_read_config.h"
 
 int minimumswap;
 #ifndef linux
@@ -247,20 +248,20 @@ unsigned** meminfo(void)
     return row;					/* NULL return ==> error */
 }
 
-unsigned memory(int index)
+unsigned memory(int iindex)
 {
 	unsigned **mem = meminfo();
         if (mem != NULL)
-          return mem[meminfo_main][index] / 1024;
+          return mem[meminfo_main][iindex] / 1024;
         else
           return -1;
 }
 
-unsigned memswap(int index)
+unsigned memswap(int iindex)
 {
 	unsigned **mem = meminfo();
         if (mem != NULL)
-          return mem[meminfo_swap][index] / 1024;
+          return mem[meminfo_swap][iindex] / 1024;
         else
           return -1;
 }
@@ -374,7 +375,7 @@ unsigned char *var_extensible_mem(struct variable *vp,
 				  int *length,
 				  int exact,
 				  int *var_len,
-				  int (**write_method) (int, u_char *,u_char, int, u_char *,oid*, int))
+				  WriteMethod **write_method)
 {
 
 #ifndef linux

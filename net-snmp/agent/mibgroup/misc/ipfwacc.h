@@ -46,10 +46,7 @@ config_add_mib(IPFWACC-MIB)
 
   /* extern void	init_ipfwacc void;*/
 
-    extern unsigned char	*var_ipfwacc (struct variable *, oid *, int *,
-					      int, int *, int (**write) (int,
-
-									 unsigned char *, unsigned char, int, unsigned char *, oid *, int));
+extern FindVarMethod var_ipfwacc;
 
 
 /* Only load this structure when this .h file is called in the snmp_vars.c 

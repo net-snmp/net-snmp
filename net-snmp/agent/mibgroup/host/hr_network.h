@@ -6,10 +6,7 @@
 #define _MIBGROUP_HRNET_H
 
 extern void	init_hr_network (void);
-extern u_char	*var_hrnet  (struct variable *, oid *, int *, int, int *, int
-			     (**write) (int, u_char *, u_char, int, u_char *,
-					oid *, int));
-
+extern FindVarMethod var_hrnet;
 
 config_require(mibII/interfaces);
 

@@ -64,7 +64,7 @@ var_ospf(struct variable *vp,
 	 int *length,
 	 int exact,
 	 int *var_len,
-	 int (**write_method) (int, u_char *,u_char, int, u_char *,oid*, int))
+	 WriteMethod **write_method)
 {
 	u_char *var;
 	int result;

@@ -38,7 +38,7 @@ struct utmp *getutent (void);
 static int get_load_dev (void);
 static int count_users (void);
 extern int count_processes (void);
-extern int header_hrsys (struct variable *,oid *, int *, int, int *, int (**write) (int, u_char *, u_char, int, u_char *,oid *,int) );
+extern int header_hrsys (struct variable *,oid *, int *, int, int *, WriteMethod **);
 
 
 	/*********************
@@ -76,7 +76,7 @@ header_hrsys(struct variable *vp,
 	     int *length,
 	     int exact,
 	     int *var_len,
-	     int (**write_method) (int, u_char *, u_char, int, u_char *, oid *, int))
+	     WriteMethod **write_method)
 {
 #define HRSYS_NAME_LENGTH	9
     oid newname[MAX_NAME_LEN];
@@ -114,7 +114,7 @@ var_hrsys(struct variable *vp,
 	  int *length,
 	  int exact,
 	  int *var_len,
-	  int (**write_method) (int, u_char *, u_char, int, u_char *, oid *, int))
+	  WriteMethod **write_method)
 {
     static char string[100];
     time_t	now;

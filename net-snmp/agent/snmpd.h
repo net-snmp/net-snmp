@@ -12,7 +12,7 @@ extern void open_ports_snmp2p (void);
 extern char *reverse_bytes (char *, int);
 extern void send_trap_pdu (struct snmp_pdu *);
 extern void send_easy_trap (int, int);
-extern u_char *getStatPtr (oid *, int *, u_char *, int *, u_short *, int, int (**write) (int, u_char *, u_char, int, u_char *, oid *, int), struct packet_info *, int * );
+extern u_char *getStatPtr (oid *, int *, u_char *, int *, u_short *, int, WriteMethod **write_method, struct packet_info *, int * );
 
 /* config file parsing routines */
 void snmpd_parse_config_authtrap (char *, char *);

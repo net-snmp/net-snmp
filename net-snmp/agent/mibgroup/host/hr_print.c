@@ -22,7 +22,7 @@ void  Init_HR_Print (void);
 int Get_Next_HR_Print (void);
 /* void  Save_HR_Print (void); */
 /* char*  describe_printer (void); */
-int header_hrprint (struct variable *,oid *, int *, int, int *, int (**write) (int, u_char *, u_char, int, u_char *,oid *,int) );
+int header_hrprint (struct variable *,oid *, int *, int, int *, WriteMethod **);
 
 
 	/*********************
@@ -64,7 +64,7 @@ header_hrprint(struct variable *vp,
 	       int *length,
 	       int exact,
 	       int *var_len,
-	       int (**write_method) (int, u_char *, u_char, int, u_char *, oid *, int))
+	       WriteMethod **write_method)
 {
 #define HRPRINT_ENTRY_NAME_LENGTH	11
     oid newname[MAX_NAME_LEN];
@@ -133,7 +133,7 @@ var_hrprint(struct variable *vp,
 	    int *length,
 	    int exact,
 	    int *var_len,
-	    int (**write_method) (int, unsigned char *, unsigned char, int, unsigned char *, oid *, int))
+	 WriteMethod **write_method)
 {
     int  print_idx;
 

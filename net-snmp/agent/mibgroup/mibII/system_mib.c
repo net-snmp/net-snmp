@@ -29,6 +29,7 @@
 #include "../struct.h"
 #include "../util_funcs.h"
 #include "read_config.h"
+#include "agent_read_config.h"
 #include "../../../snmplib/system.h"
 
 
@@ -49,10 +50,9 @@ extern int version_id_len;
 
 extern struct timeval starttime;
 
-int writeVersion (int, u_char *,u_char, int, u_char *,oid*, int);
-int writeSystem (int, u_char *,u_char, int, u_char *,oid*, int);
-int header_system (struct variable *,oid *, int *, int, int *, int (**write) (int, u_char *, u_char, int, u_char *,oid *,int) );
-
+WriteMethod writeVersion;
+WriteMethod writeSystem;
+int header_system(struct variable *,oid *, int *, int, int *, WriteMethod **);
 
 /* snmpd.conf config parsing */
 
@@ -176,7 +176,7 @@ header_system(struct variable *vp,
 	      int *length,
 	      int exact,
 	      int *var_len,
-	      int (**write_method) (int, u_char *,u_char, int, u_char *,oid*, int))
+	      WriteMethod **write_method)
 {
 #define SYSTEM_NAME_LENGTH	8
     oid newname[MAX_NAME_LEN];
@@ -219,7 +219,7 @@ var_system(struct variable *vp,
 	   int *length,
 	   int exact,
 	   int *var_len,
-	   int (**write_method) (int, u_char *,u_char, int, u_char *,oid*, int))
+	   WriteMethod **write_method)
 {
 
   struct timeval now, diff;

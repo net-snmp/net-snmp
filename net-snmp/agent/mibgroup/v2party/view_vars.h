@@ -5,8 +5,8 @@
 #ifndef _MIBGROUP_VIEW_VARS_H
 #define _MIBGROUP_VIEW_VARS_H
 
-extern u_char *var_view (struct variable *, oid *, int *, int, int *, int (**write) (int, u_char *, u_char, int, u_char *, oid *, int));
-extern int write_view (int, u_char *, u_char, int, u_char *, oid *, int);
+extern FindVarMethod var_view;
+extern WriteMethod write_view;
 
 #include "view.h"
 

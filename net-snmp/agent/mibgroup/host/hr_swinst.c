@@ -59,8 +59,8 @@
 	 *
 	 *********************/
 
-int header_hrswinst (struct variable *,oid *, int *, int, int *, int (**write) (int, u_char *, u_char, int, u_char *,oid *,int) );
-int header_hrswInstEntry (struct variable *,oid *, int *, int, int *, int (**write) (int, u_char *, u_char, int, u_char *,oid *,int) );
+int header_hrswinst (struct variable *,oid *, int *, int, int *, WriteMethod **);
+int header_hrswInstEntry (struct variable *,oid *, int *, int, int *, WriteMethod **);
 
        char *HRSW_directory = NULL;
 
@@ -135,7 +135,7 @@ header_hrswinst(struct variable *vp,
 		int *length,
 		int exact,
 		int *var_len,
-		int (**write_method) (int, u_char *, u_char, int, u_char *, oid *, int))
+		WriteMethod **write_method)
 {
 #define HRSWINST_NAME_LENGTH	9
     oid newname[MAX_NAME_LEN];
@@ -166,7 +166,7 @@ header_hrswInstEntry(struct variable *vp,
 		     int *length,
 		     int exact,
 		     int *var_len,
-		     int (**write_method) (int, u_char *, u_char, int, u_char *, oid *, int))
+		 WriteMethod **write_method)
 {
 #define HRSWINST_ENTRY_NAME_LENGTH	11
     oid newname[MAX_NAME_LEN];
@@ -240,7 +240,7 @@ var_hrswinst(struct variable *vp,
 	     int *length,
 	     int exact,
 	     int *var_len,
-	     int (**write_method) (int, u_char *, u_char, int, u_char *, oid *, int))
+	     WriteMethod **write_method)
 {
     int sw_idx=0;
     static char string[256];

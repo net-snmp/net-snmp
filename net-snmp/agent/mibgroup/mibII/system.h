@@ -10,7 +10,7 @@ config_require(util_funcs)
 extern char version_descr[];
 
 void init_system (void);
-u_char	*var_system (struct variable *, oid *, int *, int, int *, int (**write) (int, u_char *, u_char, int, u_char *, oid *, int) );
+extern FindVarMethod var_system;
 
 /* config file parsing routines */
 void system_parse_config_sysloc (char *, char *);

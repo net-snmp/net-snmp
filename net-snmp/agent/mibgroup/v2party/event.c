@@ -296,12 +296,12 @@ eventNotifyShadowRow(struct eventNotifyEntry *event)
 
 /* return a pointer to the given row in eventTab */
 static struct eventEntry *
-eventGetRow(int index)
+eventGetRow(int iindex)
 {
     struct eventEntry *event;
     
     for (event = eventTab; event; event = event->next) {
-	if (event->index == index) {
+	if (event->index == iindex) {
 	    return event;
 	}
     }
@@ -317,12 +317,12 @@ eventGetRow(int index)
  ** It makes sure the index is in the valid range.
  */
 static struct eventEntry *
-eventNewRow(int index)
+eventNewRow(int iindex)
 {
     struct eventEntry *event;
     int i = 0;
     
-    if ((index < 1) || (index > 65535)) {
+    if ((iindex < 1) || (iindex > 65535)) {
 	return NULL;
     }
     
@@ -338,7 +338,7 @@ eventNewRow(int index)
     
     memset((char *)event, 0, sizeof(struct eventEntry));
     
-    event->index = index;
+    event->index = iindex;
     event->status = ENTRY_DESTROY;
     
     event->bitmask = EVENTTABINDEXMASK;
@@ -379,14 +379,14 @@ eventNewRow(int index)
  ** It makes sure the index is in the valid range.
  */
 static struct eventNotifyEntry *
-eventNotifyNewRow(int index,
+eventNotifyNewRow(int iindex,
 		  oid *context,
 		  int contextLen)
 {
     struct eventNotifyEntry *event;
     int i = 0;
     
-    if ((index < 1) || (index > 65535)) {
+    if ((iindex < 1) || (iindex > 65535)) {
 	return NULL;
     }
     
@@ -402,7 +402,7 @@ eventNotifyNewRow(int index,
     
     memset((char *)event, 0, sizeof(struct eventNotifyEntry));
     
-    event->index = index;
+    event->index = iindex;
     event->contextLen = contextLen;
     memcpy(event->context, context, contextLen * sizeof(oid));
     event->status = ENTRY_DESTROY;
@@ -438,14 +438,14 @@ eventNotifyNewRow(int index,
 
 /* return a pointer to the given row in eventTab */
 static struct eventNotifyEntry *
-eventNotifyGetRow(int index,
+eventNotifyGetRow(int iindex,
 		  oid *context,
 		  int contextLen)
 {
     struct eventNotifyEntry *event;
     
     for (event = eventNotifyTab; event; event = event->next) {
-	if (event->index == index && event->contextLen == contextLen
+	if (event->index == iindex && event->contextLen == contextLen
 	    && !memcmp(event->context, context,
 		     contextLen * sizeof(oid))) {
 	    return event;
@@ -760,13 +760,13 @@ eventSendTrap(struct eventEntry *event,
  ** in the event table
  */
 Export void
-eventGenerate(int index,
+eventGenerate(int iindex,
 	      int eventType,
 	      void *generic)		/* info needed for traps */
 {
     struct eventEntry *event;
     
-    event = eventGetRow(index);
+    event = eventGetRow(iindex);
     if (event == NULL) {
 	/* event doesn't exist */
 	return;
@@ -838,7 +838,7 @@ write_eventtab(int action,
 	       oid *name,
 	       int name_len)
 {
-    register int index;
+    register int iindex;
     register int variable;
     register struct eventEntry *event;
     int size;
@@ -851,13 +851,13 @@ write_eventtab(int action,
 
     if (name_len != 13)
 	return SNMP_ERR_NOCREATION;
-    index = name[name_len - 1];
-    event = eventGetRow(index);
+    iindex = name[name_len - 1];
+    event = eventGetRow(iindex);
     
     switch (action) {
       case RESERVE1:
 	if (event == NULL) {
-	    event = eventNewRow(index);
+	    event = eventNewRow(iindex);
 	    if (event == NULL) {
 		/* no memory for row */
 		return SNMP_ERR_RESOURCEUNAVAILABLE;
@@ -1048,7 +1048,7 @@ write_eventnotifytab( int action,
 		      oid *name,
 		      int name_len)
 {
-    register int index;
+    register int iindex;
     register int variable;
     register struct eventNotifyEntry *event;
     long int_value;
@@ -1060,15 +1060,15 @@ write_eventnotifytab( int action,
 
     if (name_len < 15)
 	return SNMP_ERR_NOCREATION;
-    index = name[12];
+    iindex = name[12];
     contextLen = name[13];
     context = name + 14;
-    event = eventNotifyGetRow(index, context, contextLen);
+    event = eventNotifyGetRow(iindex, context, contextLen);
     
     switch (action) {
       case RESERVE1:
 	if (event == NULL) {
-	    event = eventNotifyNewRow(index, context, contextLen);
+	    event = eventNotifyNewRow(iindex, context, contextLen);
 	    if (event == NULL) {
 		/* no memory for row */
 		return SNMP_ERR_RESOURCEUNAVAILABLE;
@@ -1217,7 +1217,7 @@ var_eventnextindex(struct variable *vp,
 		   int *length,
 		   int exact,
 		   int *var_len,
-		   int (**write_method) (int, u_char *,u_char, int, u_char *,oid*, int))
+		   WriteMethod **write_method)
 {
     int result;
 
@@ -1247,7 +1247,7 @@ var_eventtab(struct variable *vp,
 	     int *length,
 	     int exact,
 	     int *var_len,
-	     int (**write_method) (int, u_char *,u_char, int, u_char *,oid*, int))
+	     WriteMethod **write_method)
 {
     oid newname[MAX_NAME_LEN];
     int result;
@@ -1314,7 +1314,7 @@ var_eventnotifyvars(struct variable *vp,
 		    int *length,
 		    int exact,
 		    int *var_len,
-		    int (**write_method) (int, u_char *,u_char, int, u_char *,oid*, int))
+		    WriteMethod **write_method)
 {
     int result;
 
@@ -1348,7 +1348,7 @@ var_eventnotifytab(struct variable *vp,
 		   int *length,
 		   int exact,
 		   int *var_len,
-		   int (**write_method) (int, u_char *,u_char, int, u_char *,oid*, int))
+		   WriteMethod **write_method)
 {
     oid newname[MAX_NAME_LEN];
     int result;

@@ -5,9 +5,9 @@
 #ifndef _MIBGROUP_VERSIONINFO_H
 #define _MIBGROUP_VERSIONINFO_H
 
-unsigned char *var_extensible_version (struct variable *, oid *, int *, int, int *, int (**write) (int, u_char *, u_char, int, u_char *, oid *, int) );
-int update_hook (int, u_char *, u_char, int, u_char *, oid *,int);
-int debugging_hook (int, u_char *, u_char, int, u_char *, oid *,int);
+extern FindVarMethod var_extensible_version;
+extern WriteMethod update_hook;
+extern WriteMethod debugging_hook;
 
 #include "mibdefs.h"
 

@@ -99,6 +99,7 @@
 #include "extensible.h"
 #include "util_funcs.h"
 #include "read_config.h"
+#include "agent_read_config.h"
 #include "auto_nlist.h"
 
 extern struct myproc *procwatch;         /* moved to proc.c */
@@ -261,7 +262,7 @@ unsigned char *var_extensible_shell(struct variable *vp,
 				    int *length,
 				    int exact,
 				    int *var_len,
-				    int (**write_method) (int, u_char *,u_char, int, u_char *,oid*, int))
+				    WriteMethod **write_method)
 {
 
   static struct extensible *exten = 0;
@@ -359,7 +360,7 @@ unsigned char *var_extensible_relocatable(struct variable *vp,
 					  int *length,
 					  int exact,
 					  int *var_len,
-					  int (**write_method) (int, u_char *,u_char, int, u_char *,oid*, int))
+					  WriteMethod **write_method)
 {
 
   int i, fd;

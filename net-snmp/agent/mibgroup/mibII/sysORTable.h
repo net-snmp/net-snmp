@@ -16,8 +16,8 @@ struct sysORTable {
 };
 
 extern void     init_sysORTable (void);
-extern u_char	*var_sysORTable (struct variable *, oid *, int *, int, int *, int (**write) (int, u_char *, u_char, int, u_char *, oid *, int) );
-extern u_char	*var_sysORLastChange (struct variable *, oid *, int *, int, int *, int (**write) (int, u_char *, u_char, int, u_char *, oid *, int) );
+extern FindVarMethod var_sysORTable;
+extern FindVarMethod var_sysORLastChange;
 extern void     register_sysORTable (oid *, int, char *);
 
 #define	SYSORTABLEINDEX		        1
