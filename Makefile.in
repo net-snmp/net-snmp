@@ -232,7 +232,7 @@ config.status: configure
 # Emacs TAGS file
 #
 TAGS:
-	find $(srcdir) -name '*.[ch]' -print | etags -
+	find $(srcdir) -path $(srcdir)/dist/rpm -prune -o -name '*.[ch]' -print | etags -
 
 #
 # Internal distribution packaging, etc.
