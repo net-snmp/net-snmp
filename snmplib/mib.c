@@ -1774,7 +1774,7 @@ _get_symbol(oid *objid,
 	case TYPE_OCTETSTR:
 	    if (extended_index && tp->hint) {
 	    	struct variable_list var;
-		char buffer[1024];
+		u_char buffer[1024];
 		int i;
 		memset(&var, 0, sizeof var);
 		if (in_dices->isimplied) {
