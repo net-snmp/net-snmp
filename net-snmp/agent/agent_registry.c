@@ -338,7 +338,7 @@ register_mib_context(const char *moduleName,
   memset(subtree, 0, sizeof(struct subtree));
 
   DEBUGMSGTL(("register_mib", "registering \"%s\" at ", moduleName));
-  DEBUGMSGOID(("register_mib", mibloc, mibloclen));
+  DEBUGMSGOIDRANGE(("register_mib", mibloc, mibloclen, range_subid, range_ubound));
   DEBUGMSG(("register_mib","\n"));
     
 	/*
@@ -542,24 +542,6 @@ register_mib(const char *moduleName,
 				mibloc, mibloclen, DEFAULT_MIB_PRIORITY );
 }
 
-
-int 
-unregister_mib_table_row(oid *mibloc, size_t mibloclen,
-			 int priority, int var_subid, oid range_ubound,
-			 const char *context)
-{
-  oid range_lbound = mibloc[var_subid - 1];
-
-  while (mibloc[var_subid - 1] <= range_ubound) {
-    unregister_mib_context(mibloc, mibloclen, priority,
-			   var_subid, range_ubound, context);
-    mibloc[var_subid - 1]++;
-  }
-  mibloc[var_subid - 1] = range_lbound;
-
-  return 0;
-}
-
 int 
 register_mib_table_row(const char *moduleName,
                        struct variable *var,
@@ -718,7 +700,7 @@ unregister_mib_context( oid *name, size_t len, int priority,
   struct register_parameters reg_parms;
 
   DEBUGMSGTL(("register_mib", "unregistering "));
-  DEBUGMSGOID(("register_mib", name, len));
+  DEBUGMSGOIDRANGE(("register_mib", name, len, range_subid, range_ubound));
   DEBUGMSG(("register_mib","\n"));
 
   list = find_subtree( name, len, subtrees );
@@ -774,6 +756,73 @@ unregister_mib_context( oid *name, size_t len, int priority,
                       &reg_parms);
 
   return MIB_UNREGISTERED_OK;
+}
+
+int 
+unregister_mib_table_row(oid *name, size_t len, int priority,
+			 int var_subid, oid range_ubound, const char *context)
+{
+  struct subtree *list, *myptr;
+  struct subtree *prev, *child;             /* loop through children */
+  struct register_parameters reg_parms;
+  oid range_lbound = name[var_subid - 1];
+
+  DEBUGMSGTL(("register_mib", "unregistering "));
+  DEBUGMSGOIDRANGE(("register_mib", name, len, var_subid, range_ubound));
+  DEBUGMSG(("register_mib","\n"));
+
+  for (; name[var_subid - 1] <= range_ubound; name[var_subid - 1]++) {
+    list = find_subtree(name, len, subtrees);
+
+    if (list == NULL) {
+      continue;
+    }
+
+    for (child=list, prev=NULL; child != NULL;
+	 prev=child, child=child->children) {
+
+      if ((snmp_oid_compare(child->name, child->namelen, name, len) == 0) &&
+	  (child->priority == priority)) {
+	break;	/* found it */
+      }
+    }
+
+    if (child == NULL) {
+      continue;
+    }
+
+    unload_subtree(child, prev);
+    myptr = child;	/* remember this for later */
+
+    for (list = myptr->next; list != NULL; list=list->next) {
+      for (child=list, prev=NULL; child != NULL;
+	   prev=child, child=child->children) {
+
+	if ((snmp_oid_compare(child->name, child->namelen, name, len) == 0) &&
+	    (child->priority == priority)) {
+	  unload_subtree(child, prev);
+	  free_subtree(child);
+	  break;
+	}
+      }
+      if (child == NULL) {	/* Didn't find the given name */
+	break;
+      }
+    }
+    free_subtree(myptr);
+  }
+
+  name[var_subid - 1] = range_lbound;
+  reg_parms.name = name;
+  reg_parms.namelen = len;
+  reg_parms.priority = priority;
+  reg_parms.range_subid  = var_subid;
+  reg_parms.range_ubound = range_ubound;
+  reg_parms.flags = 0x00;  /*  this is okay I think  */
+  snmp_call_callbacks(SNMP_CALLBACK_APPLICATION, SNMPD_CALLBACK_UNREGISTER_OID,
+                      &reg_parms);
+  
+  return 0;
 }
 
 int
