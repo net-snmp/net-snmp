@@ -323,7 +323,7 @@ var_smux_write(int action,
     u_char          buf[SMUXMAXPKTSIZE], *ptr, sout[3], type;
     int             reterr;
     size_t          var_len, datalen, name_length, packet_len;
-    int             len;
+    size_t	     len;
     long            reqid, errsts, erridx;
     u_char          var_type, *dataptr;
 
@@ -533,7 +533,8 @@ smux_accept(int sd)
     struct sockaddr_in in_socket;
     struct timeval  tv;
     int             fail, fd, alen;
-    int             length, len;
+    int             length;
+    size_t 	     len;
 
     alen = sizeof(struct sockaddr_in);
     /*
@@ -1707,7 +1708,7 @@ smux_trap_process(u_char * rsp, size_t * len)
 {
     oid             sa_enterpriseoid[MAX_OID_LEN], var_name[MAX_OID_LEN];
     size_t          datalen, var_name_len, var_val_len, maxlen;
-    int             sa_enterpriseoid_len;
+    size_t	     sa_enterpriseoid_len;
     u_char          vartype, *ptr, *var_val;
 
     long            trap, specific;
