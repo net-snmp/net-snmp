@@ -129,6 +129,9 @@
 #include "kernel_sunos5.h"
 #endif
 
+#include "agent_read_config.h"
+#include "read_config.h"
+
 #define HRSTORE_MONOTONICALLY_INCREASING
 
 	/*********************
@@ -173,6 +176,8 @@ static long physmem;
 static int physmem;
 #endif
 static int pagesize;
+
+static void parse_storage_config(const char *, char *);
 
 	/*********************
 	 *
@@ -279,6 +284,30 @@ void init_hr_storage (void)
 #endif
 
     REGISTER_MIB("host/hr_storage", hrstore_variables, variable4, hrstore_variables_oid);
+
+    snmpd_register_config_handler("storageUseNFS", parse_storage_config, NULL,
+	"1 | 2\t\t(1 = enable, 2 = disable)");
+}
+
+static int storageUseNFS = 0;	/* initially disabled */
+
+static void
+parse_storage_config(const char *token, char *cptr)
+{
+    char *val;
+    int ival;
+
+    val = strtok(cptr, " \t");
+    if (!val) {
+	config_perror("Missing FLAG parameter in storageUseNFS");
+	return;
+    }
+    ival = atoi(val);
+    if (ival < 1 || ival > 2) {
+	config_perror("storageUseNFS must be 1 or 2");
+	return;
+    }
+    storageUseNFS = (ival == 1) ? 1 : 0;
 }
 
 /*
@@ -489,8 +518,12 @@ var_hrstore(struct variable *vp,
 	    long_return = store_idx;
 	    return (u_char *)&long_return;
 	case HRSTORE_TYPE:
-	    if ( store_idx < HRS_TYPE_FS_MAX )
-		storage_type_id[storage_type_len-1] = 4;	/* Assume fixed */
+	    if ( store_idx < HRS_TYPE_FS_MAX ) {
+		if (storageUseNFS && Check_HR_FileSys_NFS())
+		    storage_type_id[storage_type_len-1] = 10;	/* Network Disk */
+		else
+		    storage_type_id[storage_type_len-1] = 4;	/* Fixed Disk */
+	    }
 	    else switch ( store_idx ) {
 		case HRS_TYPE_MEM:
 			storage_type_id[storage_type_len-1] = 2;	/* RAM */
