@@ -95,6 +95,10 @@
 
 #define PSCMD "/bin/ps"
 
+/* This ID is returned after the AGENTID above.  IE, the resulting
+   value returned by a query to sysObjectID is
+   EXTENSIBLEMIB.AGENTID.???, where ??? is defined below by OSTYPE */
+
 /* Define if you have the gethostname function.  */
 #undef HAVE_GETHOSTNAME
 
@@ -253,6 +257,37 @@ sure to end it in -1.*/
 
 #define AGENTID 250  /* The sub id of EXENSIBLEMIB returned to queries of
                         .iso.org.dod.internet.mgmt.mib-2.system.sysObjectID.0 */
+
+/* This ID is returned after the AGENTID above.  IE, the resulting
+   value returned by a query to sysObjectID is
+   EXTENSIBLEMIB.AGENTID.???, where ??? is defined below by OSTYPE */
+
+#define HPUXID    1
+#define SUNOS4ID  2 
+#define SOLARISID 3
+#define OSF3ID    4
+#define ULTRIXID  5
+#define UNKNOWNID 255
+
+#ifdef hpux9
+#define OSTYPE HPUXID
+#endif
+#ifdef sunos4
+#define OSTYPE SUNOS4ID
+#endif
+#ifdef solaris2
+#define OSTYPE SOLARISID
+#endif
+#ifdef osf3
+#define OSTYPE OSF3ID
+#endif
+#ifdef ultrix4
+#define OSTYPE ULTRIXID
+#endif
+/* unknown */
+#ifndef OSTYPE
+#define OSTYPE UNKNOWNID
+#endif
 
 /* how long to wait (seconds) for error querys before reseting the error trap.*/
 #define ERRORTIMELENGTH 600 

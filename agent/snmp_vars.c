@@ -1047,7 +1047,7 @@ char sysContact[128] = SYS_CONTACT;
 char sysName[128] = SYS_NAME;
 char sysLocation[128] = SYS_LOC;
 
-oid version_id[] = {EXTENSIBLEMIB,AGENTID};
+oid version_id[] = {EXTENSIBLEMIB,AGENTID,OSTYPE};
 
 u_long
 sysUpTime(){
