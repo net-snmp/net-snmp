@@ -184,7 +184,7 @@ agent_check_and_process(int block) {
 		for Index Allocation use initially. */
 struct snmp_session *main_session;
 
-void
+int
 init_master_agent(int dest_port, 
                   int (*pre_parse) (struct snmp_session *, snmp_ipaddr),
                   int (*post_parse) (struct snmp_session *, struct snmp_pdu *,int))
@@ -192,7 +192,7 @@ init_master_agent(int dest_port,
     struct snmp_session sess, *session;
 
     if ( ds_get_boolean(DS_APPLICATION_ID, DS_AGENT_ROLE) != MASTER_AGENT )
-	return;
+	return 0; /* no error if ! MASTER_AGENT */
 
     DEBUGMSGTL(("snmpd","installing master agent on port %d", dest_port));
 
@@ -211,9 +211,10 @@ init_master_agent(int dest_port,
     if ( session == NULL ) {
       /* diagnose snmp_open errors with the input struct snmp_session pointer */
 	snmp_sess_perror("init_master_agent", &sess);
-	exit(1);
+		return 1;
     }
     main_session = session;
+	return 0;
 }
 
 struct agent_snmp_session  *
