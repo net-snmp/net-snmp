@@ -609,7 +609,7 @@ sc_encrypt_quit:
 	memset(my_iv, 0, sizeof(my_iv));
 	memset(pad_block, 0, sizeof(pad_block));
 	memset(key_struct, 0, sizeof(key_struct));
-	memset(key_sch, 0, sizeof(key_sch));
+	memset(&key_sch, 0, sizeof(key_sch));
 	return rval;
 
 }  /* end sc_encrypt() */
@@ -722,7 +722,7 @@ sc_decrypt(	oid    *privtype,	size_t privtypelen,
 
 /* exit cond */
 sc_decrypt_quit:
-	memset(key_sch, 0, sizeof(key_sch));
+	memset(&key_sch, 0, sizeof(key_sch));
 	memset(key_struct, 0, sizeof(key_struct));
 	memset(my_iv, 0, sizeof(my_iv));
 	return rval;
