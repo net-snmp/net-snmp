@@ -40,7 +40,7 @@ SOFTWARE.
 #define PARSE_ERROR	-1
 #define BUILD_ERROR	-2
 
-#define COMMUNITY_MAX_LEN	64
+#define COMMUNITY_MAX_LEN	256
 #define MAX_NAME_LEN		128  /* number of subid's in a objid */
 
 #ifndef NULL
@@ -63,7 +63,7 @@ struct packet_info {
     int		sec_level;
 
     /* community based authentication */
-    u_char	community[COMMUNITY_MAX_LEN + 1];
+    u_char	community[COMMUNITY_MAX_LEN];
     int		community_len;
 
     /* snmp security based authentication */
