@@ -37,7 +37,7 @@
 #if HAVE_WINSOCK_H
 #include <winsock.h>
 #endif
-
+#include "snmp-tc.h"
 #include "mibincl.h"
 #include "read_config.h"
 #include "agent_read_config.h"
@@ -47,6 +47,7 @@
 #include "agent_registry.h"
 #include "agent_callbacks.h"
 #include "vacm_vars.h"
+#include "util_funcs.h"
 #ifdef USING_MIBII_SYSORTABLE_MODULE
 #if TIME_WITH_SYS_TIME
 # ifdef WIN32
@@ -64,6 +65,7 @@
 #endif
 #include "sysORTable.h"
 #endif
+static unsigned int vacmViewSpinLock=0;
 
 void
 init_vacm_vars (void) 
@@ -76,38 +78,43 @@ init_vacm_vars (void)
 #define PRIVRW	(SNMPV2ANY | 0x5000)
 
   struct variable2 vacm_sec2group[] = {
-    {SECURITYGROUP, ASN_OCTET_STR, PRIVRW, var_vacm_sec2group, 1, {3}},
-    {SECURITYSTORAGE, ASN_INTEGER, PRIVRW, var_vacm_sec2group, 1, {4}},
-    {SECURITYSTATUS, ASN_INTEGER, PRIVRW, var_vacm_sec2group, 1, {5}},
+    {SECURITYGROUP, ASN_OCTET_STR, RWRITE, var_vacm_sec2group, 1, {3}},
+    {SECURITYSTORAGE, ASN_INTEGER, RWRITE, var_vacm_sec2group, 1, {4}},
+    {SECURITYSTATUS, ASN_INTEGER, RWRITE, var_vacm_sec2group, 1, {5}},
   };
 
   struct variable2 vacm_access[] = {
-    {ACCESSMATCH, ASN_INTEGER, PRIVRW, var_vacm_access, 1, {4}},
-    {ACCESSREAD, ASN_OCTET_STR, PRIVRW, var_vacm_access, 1, {5}},
-    {ACCESSWRITE, ASN_OCTET_STR, PRIVRW, var_vacm_access, 1, {6}},
-    {ACCESSNOTIFY, ASN_OCTET_STR, PRIVRW, var_vacm_access, 1, {7}},
-    {ACCESSSTORAGE, ASN_INTEGER, PRIVRW, var_vacm_access, 1, {8}},
-    {ACCESSSTATUS, ASN_INTEGER, PRIVRW, var_vacm_access, 1, {9}},
+    {ACCESSMATCH, ASN_INTEGER, RWRITE, var_vacm_access, 1, {4}},
+    {ACCESSREAD, ASN_OCTET_STR, RWRITE, var_vacm_access, 1, {5}},
+    {ACCESSWRITE, ASN_OCTET_STR, RWRITE, var_vacm_access, 1, {6}},
+    {ACCESSNOTIFY, ASN_OCTET_STR, RWRITE, var_vacm_access, 1, {7}},
+    {ACCESSSTORAGE, ASN_INTEGER, RWRITE, var_vacm_access, 1, {8}},
+    {ACCESSSTATUS, ASN_INTEGER, RWRITE, var_vacm_access, 1, {9}},
   };
 
-  struct variable2 vacm_view[] = {
-    {VIEWMASK, ASN_OCTET_STR, PRIVRW, var_vacm_view, 1, {3}},
-    {VIEWTYPE, ASN_INTEGER, PRIVRW, var_vacm_view, 1, {4}},
-    {VIEWSTORAGE, ASN_INTEGER, PRIVRW, var_vacm_view, 1, {5}},
-    {VIEWSTATUS, ASN_INTEGER, PRIVRW, var_vacm_view, 1, {6}},
+  struct variable4 vacm_view[] = {
+	{VACMVIEWSPINLOCK, ASN_INTEGER, RWRITE, var_vacm_view, 1, {1}},
+    {VIEWMASK, ASN_OCTET_STR, RWRITE, var_vacm_view, 3, {2,1,3}},
+    {VIEWTYPE, ASN_INTEGER, RWRITE, var_vacm_view, 3, {2,1,4}},
+    {VIEWSTORAGE, ASN_INTEGER, RWRITE, var_vacm_view, 3, {2,1,5}},
+    {VIEWSTATUS, ASN_INTEGER, RWRITE, var_vacm_view, 3, {2,1,6}},
   };
 
 /* Define the OID pointer to the top of the mib tree that we're
    registering underneath */
   oid vacm_sec2group_oid[] = { OID_VACMGROUPENTRY };
   oid vacm_access_oid[] = { OID_VACMACCESSENTRY};
-  oid vacm_view_oid[] = { OID_VACMVIEWENTRY };
+  oid vacm_view_oid[] = { OID_VACMMIBVIEWS };
+
+  /* we need to be called back later */
+  snmp_register_callback(SNMP_CALLBACK_LIBRARY, SNMP_CALLBACK_STORE_DATA,
+                         store_vacm, NULL);
 
   /* register ourselves with the agent to handle our mib tree */
   REGISTER_MIB("mibII/vacm:sec2group", vacm_sec2group, variable2, \
                vacm_sec2group_oid);
   REGISTER_MIB("mibII/vacm:access", vacm_access, variable2, vacm_access_oid);
-  REGISTER_MIB("mibII/vacm:view", vacm_view, variable2, vacm_view_oid);
+  REGISTER_MIB("mibII/vacm:view", vacm_view, variable4, vacm_view_oid);
 
   snmpd_register_config_handler("com2sec", vacm_parse_security,
                                 vacm_free_security,"name source community");
@@ -125,6 +132,13 @@ init_vacm_vars (void)
                                 NULL,"user [noauth|auth|priv] [oid]");
   snmpd_register_config_handler("rouser", vacm_parse_simple,
                                 NULL,"user [noauth|auth|priv] [oid]");
+  snmpd_register_config_handler("vacmView", vacm_parse_config_view, NULL,
+                                "internal use only");
+  snmpd_register_config_handler("vacmGroup", vacm_parse_config_group, NULL,
+                                "internal use only");
+  snmpd_register_config_handler("vacmAccess", vacm_parse_config_access, NULL,
+                                "internal use only");                                
+					  
 
 #ifdef USING_MIBII_SYSORTABLE_MODULE
   register_sysORTable(reg,10,"View-based Access Control Model for SNMP.");
@@ -651,7 +665,7 @@ int vacm_in_view (struct snmp_pdu *pdu,
 	}
 
 	/* allow running without snmpd.conf */
-	if (sp == NULL && !vacm_is_configured()) {
+	if (sp == NULL) {
 	    DEBUGMSGTL(("mibII/vacm_vars", "vacm_in_view: accepted with no com2sec entries\n"));
 	    switch (pdu->command) {
 	    case SNMP_MSG_GET:
@@ -743,7 +757,7 @@ u_char *var_vacm_sec2group(struct variable *vp,
     int secmodel;
     char secname[32], *cp;
 
-    write_method = NULL;
+    *write_method = NULL;
     if (memcmp(name, vp->name, sizeof(oid)*vp->namelen) != 0) {
 	memcpy(name, vp->name, sizeof(oid)*vp->namelen);
 	*length = vp->namelen;
@@ -791,25 +805,48 @@ u_char *var_vacm_sec2group(struct variable *vp,
 	}
     }
 
-    if (!gp) return NULL;
+    if (!gp && !exact) return NULL;
 
     *var_len =sizeof(long_return);
     switch (vp->magic) {
     case SECURITYMODEL:
+	  if(gp)
+	  {
 	long_return = gp->securityModel;
 	return (u_char *)&long_return;
+	  }
+	  return NULL;
     case SECURITYNAME:
+	  if(gp)
+	  {
 	*var_len = gp->securityName[0];
 	return (u_char *)&gp->securityName[1];
+	  }
+	  return NULL;
     case SECURITYGROUP:
+	  *write_method = write_vacmGroupName;
+	  if(gp)
+	  {
 	*var_len = strlen(gp->groupName);
 	return (u_char *)gp->groupName;
+	  }
+	  return NULL;
     case SECURITYSTORAGE:
+	  *write_method = write_vacmSecurityToGroupStorageType;
+	  if(gp)
+	  {
 	long_return = gp->storageType;
 	return (u_char *)&long_return;
+	  }
+	  return NULL;
     case SECURITYSTATUS:
+	  *write_method = write_vacmSecurityToGroupStatus;
+	  if(gp)
+	  {
 	long_return = gp->status;
 	return (u_char *)&long_return;
+    }
+    return NULL;
     }
     return NULL;
 }
@@ -831,12 +868,14 @@ u_char *var_vacm_access(struct variable *vp,
     char *cp;
     int cmp;
 
-    write_method = NULL;
+    *write_method = NULL;
+    
     if (memcmp(name, vp->name, sizeof(oid)*vp->namelen) != 0) {
 	memcpy(name, vp->name, sizeof(oid)*vp->namelen);
 	*length = vp->namelen;
     }
-    if (exact) {
+	if (exact) 
+	{
 	if (*length < 15) return NULL;
 
 	op = name+11;
@@ -930,37 +969,81 @@ u_char *var_vacm_access(struct variable *vp,
 	}
     }
 
-    if (!gp) return NULL;
+    if (!gp  && !exact) return NULL;
+	
+	
 
     *var_len =sizeof(long_return);
     switch (vp->magic) {
     case ACCESSMATCH:
+	  *write_method = write_vacmAccessContextMatch;
+	  if(gp)
+	  {
 	long_return = gp->contextMatch;
 	return (u_char *)&long_return;
+	  }
+	  return NULL;
     case ACCESSLEVEL:
+	  if(gp)
+	  {
 	long_return = gp->securityLevel;
 	return (u_char *)&long_return;
+	  }
+	  return NULL;
     case ACCESSMODEL:
+	  if(gp)
+	  {
 	long_return = gp->securityModel;
 	return (u_char *)&long_return;
+	  }
+	  return NULL;
     case ACCESSPREFIX:
+	  if(gp)
+	  {
 	*var_len = *gp->contextPrefix;
 	return (u_char *)&gp->contextPrefix[1];
+	  }
+	  return NULL;
     case ACCESSREAD:
+	  *write_method = write_vacmAccessReadViewName;
+	  if(gp)
+	  {
 	*var_len = strlen(gp->readView);
 	return (u_char *)gp->readView;
+	  }
+	  return NULL;
     case ACCESSWRITE:
+	  *write_method = write_vacmAccessWriteViewName;
+	  if(gp)
+	  {
 	*var_len = strlen(gp->writeView);
 	return (u_char *)gp->writeView;
+	  }
+	  return NULL;
     case ACCESSNOTIFY:
+	  *write_method = write_vacmAccessNotifyViewName;
+	  if(gp)
+	  {
 	*var_len = strlen(gp->notifyView);
 	return (u_char *)gp->notifyView;
+	  }
+	  return NULL;
     case ACCESSSTORAGE:
+	  *write_method = write_vacmAccessStorageType;
+	  if(gp)
+	  {
 	long_return = gp->storageType;
 	return (u_char *)&long_return;
+	  }
+	  return NULL;
     case ACCESSSTATUS:
+	  *write_method = write_vacmAccessStatus;
+	  if(gp)
+	  {
 	long_return = gp->status;
 	return (u_char *)&long_return;
+    }
+    return NULL;
     }
     return NULL;
 }
@@ -972,16 +1055,20 @@ u_char *var_vacm_view(struct variable *vp,
 		      size_t *var_len,
 		      WriteMethod **write_method)
 {
-    struct vacm_viewEntry *gp;
+    struct vacm_viewEntry *gp=NULL;
     char viewName[32];
     oid subtree[MAX_OID_LEN];
     size_t subtreeLen = 0;
     oid *op, *op1;
     int len;
     char *cp;
-    int cmp;
+    int cmp,cmp2,t;
 
-    write_method = NULL;
+    *write_method = NULL;
+    *var_len =sizeof(long_return);
+    if(vp->magic != VACMVIEWSPINLOCK)
+    {
+
     if (memcmp(name, vp->name, sizeof(oid)*vp->namelen) != 0) {
 	memcpy(name, vp->name, sizeof(oid)*vp->namelen);
 	*length = vp->namelen;
@@ -994,7 +1081,7 @@ u_char *var_vacm_view(struct variable *vp,
 	cp = viewName;
 	while (len-- > 0) {
             if (*op > 255)
-              return 0; /* illegal value */
+              return 0; 
 	    *cp++ = (char) *op++;
 	}
 	*cp = 0;
@@ -1009,6 +1096,9 @@ u_char *var_vacm_view(struct variable *vp,
 	}
 
 	gp = vacm_getViewEntry(viewName, subtree, subtreeLen);
+	if(gp)
+	  if(gp->viewSubtreeLen!=subtreeLen)
+		  gp=NULL;
     }
     else {
 	viewName[0] = 0;
@@ -1020,7 +1110,7 @@ u_char *var_vacm_view(struct variable *vp,
 	    cp = viewName;
 	    while (len-- >= 0) {
                 if (*op > 255)
-                  return 0; /* illegal value */
+                  return 0; 
 		*cp++ = (char) *op++;
 	    }
 	    *cp = 0;
@@ -1034,10 +1124,13 @@ u_char *var_vacm_view(struct variable *vp,
 		*op1++ = *op++;
 		subtreeLen++;
 	    }
+	    subtreeLen--;
 	}
 	vacm_scanViewInit();
 	while ((gp = vacm_scanViewNext()) != NULL) {
 	    cmp = strcmp(gp->viewName, viewName);
+	    cmp2= memcmp(gp->viewSubtree,subtree,sizeof(oid)*subtreeLen);
+		if (cmp==0 && cmp2>0) break;
 	    if (cmp > 0) break;
 	    if (cmp < 0) continue;
 	}
@@ -1049,34 +1142,1055 @@ u_char *var_vacm_view(struct variable *vp,
 	    } while (*cp);
 	    op1 = gp->viewSubtree;
 	    len = gp->viewSubtreeLen;
-	    do {
+	    while (len-- > 0){
 		name[(*length)++] = *op1++;
-	    } while (len-- > 0);
+	    } 
 	}
     }
 
-    if (!gp) return NULL;
+    if (!gp && !exact) return NULL;
+	
+	} else {
+	  if(header_generic(vp,name,length,exact,var_len,write_method))
+		return NULL;
+	} /*endif -- vp->magic != VACMVIEWSPINLOCK */
 
-    *var_len =sizeof(long_return);
     switch (vp->magic) {
+    case VACMVIEWSPINLOCK:
+      *write_method = write_vacmViewSpinLock;
+      long_return = vacmViewSpinLock;
+      return (unsigned char *) &long_return;
     case VIEWNAME:
+	  if(gp)
+	  {
 	*var_len = gp->viewName[0];
 	return (u_char *)&gp->viewName[1];
+	  }
+	  return NULL;
     case VIEWSUBTREE:
+	  if(gp)
+	  {
 	*var_len = gp->viewSubtreeLen*sizeof(oid);
 	return (u_char *)gp->viewSubtree;
+	  }
+	  return NULL;
     case VIEWMASK:
+	  *write_method=write_vacmViewMask;
+	  if(gp)
+	  {
 	*var_len = (gp->viewSubtreeLen + 7) / 8;
 	return (u_char *)gp->viewMask;
+	  }
+	  return NULL;
     case VIEWTYPE:
+	  *write_method=write_vacmViewType;
+	  if(gp)
+	  {
 	long_return = gp->viewType;
 	return (u_char *)&long_return;
+	  }
+	  return NULL;
     case VIEWSTORAGE:
+	  *write_method=write_vacmViewStorageType; 
+	  if(gp)
+	  {
 	long_return = gp->viewStorageType;
 	return (u_char *)&long_return;
+	  }
+	  return NULL;
     case VIEWSTATUS:
+	  *write_method=write_vacmViewStatus;
+	  if(gp)
+	  {
 	long_return = gp->viewStatus;
 	return (u_char *)&long_return;
     }
     return NULL;
+    }
+    return NULL;
 }
+
+oid *
+sec2group_generate_OID(oid *prefix, size_t prefixLen, struct vacm_groupEntry *geptr,
+                       size_t *length)
+{
+  oid *indexOid;
+  int i,securityNameLen;
+
+  securityNameLen=strlen(geptr->securityName);
+  
+  *length = 2 + securityNameLen + prefixLen;
+  indexOid = (oid *) malloc(*length * sizeof(oid));
+  if (indexOid) {
+    memmove(indexOid, prefix, prefixLen * sizeof (oid));
+    
+    indexOid[prefixLen] = geptr->securityModel;
+
+    indexOid[prefixLen+1]= securityNameLen;
+    for(i = 0; i < securityNameLen; i++)
+      indexOid[prefixLen+2+i] = (oid) geptr->securityName[i];
+
+  }
+  return indexOid;
+
+}
+
+int 
+sec2group_parse_oid(oid *oidIndex, size_t oidLen,
+              int *model, unsigned char **name, size_t *nameLen)
+{
+  int nameL;
+  int i;
+
+  /* first check the validity of the oid */
+  if ((oidLen <= 0) || (!oidIndex)) {
+    return 1;
+  }
+  nameL = oidIndex[1];	/* the initial name length */
+  if ((int)oidLen != nameL + 2) {
+    return 1;
+  }
+
+  /* its valid, malloc the space and store the results */
+  if (name == NULL) {
+    return 1;
+  }
+
+  *name = (unsigned char *) malloc(nameL+1);
+  if (*name == NULL) {
+    return 1;
+  }
+  
+  *model = oidIndex[0];
+  *nameLen = nameL;
+  
+
+  for(i = 0; i < nameL; i++) {
+    if (oidIndex[i+2] > 255) {
+      free(*name);
+      return 1;
+    }
+    name[0][i] = (unsigned char) oidIndex[i+2];
+  }
+  name[0][nameL] = 0;
+  
+  return 0;
+
+} 
+
+struct vacm_groupEntry *
+sec2group_parse_groupEntry(oid *name, size_t name_len)
+{
+  struct vacm_groupEntry *geptr;
+
+  char *newName;
+  int model;
+  size_t nameLen;
+  
+  /* get the name and engineID out of the incoming oid */
+  if (sec2group_parse_oid(&name[SEC2GROUP_MIB_LENGTH], name_len-SEC2GROUP_MIB_LENGTH,
+                     &model, (u_char **)&newName, &nameLen))
+    return NULL;
+
+  /* Now see if a user exists with these index values */
+  geptr = vacm_getGroupEntry(model, newName);
+  free(newName);
+
+  return geptr;
+
+}  /* end vacm_parse_groupEntry() */
+
+int
+write_vacmGroupName(int      action,
+            u_char   *var_val,
+            u_char   var_val_type,
+            size_t   var_val_len,
+            u_char   *statP,
+            oid      *name,
+            size_t   name_len)
+{
+    /* variables we may use later */
+  static unsigned char string[SNMP_MAXBUF];
+
+  struct vacm_groupEntry *geptr;
+
+  if (var_val_type != ASN_OCTET_STR){
+      DEBUGMSGTL(("mibII/vacm_vars","write to vacmGroupName not ASN_OCTET_STR\n"));
+      return SNMP_ERR_WRONGTYPE;
+  }
+  if (var_val_len > sizeof(string)){
+      DEBUGMSGTL(("mibII/vacm_vars","write to vacmGroupName: bad length\n"));
+      return SNMP_ERR_WRONGLENGTH;
+  }
+  if (action == COMMIT) {
+    /* don't allow creations here */
+    if ((geptr = sec2group_parse_groupEntry(name, name_len)) == NULL) {
+      return SNMP_ERR_NOSUCHNAME;
+    }
+    memcpy(geptr->groupName, var_val, var_val_len);
+    geptr->groupName[var_val_len] = 0;
+  }
+  
+  return SNMP_ERR_NOERROR;
+}
+
+int
+write_vacmSecurityToGroupStorageType(int      action,
+            u_char   *var_val,
+            u_char   var_val_type,
+            size_t   var_val_len,
+            u_char   *statP,
+            oid      *name,
+            size_t   name_len)
+{
+  /* variables we may use later */
+  static long long_ret;
+  struct vacm_groupEntry *geptr;
+  
+  if (var_val_type != ASN_INTEGER){
+      DEBUGMSGTL(("mibII/vacm_vars","write to vacmSecurityToGroupStorageType not ASN_INTEGER\n"));
+      return SNMP_ERR_WRONGTYPE;
+  }
+  if (var_val_len > sizeof(long_ret)){
+      DEBUGMSGTL(("mibII/vacm_vars","write to vacmSecurityToGroupStorageType: bad length\n"));
+      return SNMP_ERR_WRONGLENGTH;
+  }
+  if (action == COMMIT){
+      /* don't allow creations here */
+      if ((geptr = sec2group_parse_groupEntry(name, name_len)) == NULL) {
+        return SNMP_ERR_NOSUCHNAME;
+      }
+      long_ret = *((long *) var_val);
+      if ((long_ret == ST_VOLATILE || long_ret == ST_NONVOLATILE) &&
+          (geptr->storageType == ST_VOLATILE ||
+           geptr->storageType == ST_NONVOLATILE))
+        geptr->storageType = long_ret;
+      else
+        return SNMP_ERR_INCONSISTENTVALUE;
+  }
+  return SNMP_ERR_NOERROR;
+}
+
+
+int
+write_vacmSecurityToGroupStatus(int      action,
+            u_char   *var_val,
+            u_char   var_val_type,
+            size_t   var_val_len,
+            u_char   *statP,
+            oid      *name,
+            size_t   name_len)
+{
+
+  /* variables we may use later */
+  static long long_ret;
+  int model;
+  char *newName;
+  size_t nameLen;
+  struct vacm_groupEntry *geptr;
+
+  if (var_val_type != ASN_INTEGER){
+      DEBUGMSGTL(("mibII/vacm_vars","write to vacmSecurityToGroupStatus not ASN_INTEGER\n"));
+      return SNMP_ERR_WRONGTYPE;
+  }
+  if (var_val_len > sizeof(long_ret)){
+      DEBUGMSGTL(("mibII/vacm_vars","write to vacmSecurityToGroupStatus: bad length\n"));
+      return SNMP_ERR_WRONGLENGTH;
+  }
+  if (action == COMMIT){
+    long_ret = *((long *) var_val);
+
+    /* ditch illegal values now */
+    /* notReady can not be used, but the return error code is not mentioned */
+    if (long_ret == RS_NOTREADY || long_ret < 1 || long_ret > 6)
+      return SNMP_ERR_INCONSISTENTVALUE;
+    
+    /* see if we can parse the oid for model/name first */
+    if (sec2group_parse_oid(&name[SEC2GROUP_MIB_LENGTH], name_len-SEC2GROUP_MIB_LENGTH,
+                      &model, (u_char **)&newName, &nameLen))
+      return SNMP_ERR_INCONSISTENTNAME;
+
+    /* Now see if a group already exists with these index values */
+    geptr = vacm_getGroupEntry(model, newName);
+
+
+    if (geptr) {			/* If so, we set the appropriate value... */
+      if (long_ret == RS_CREATEANDGO || long_ret == RS_CREATEANDWAIT) {
+        return SNMP_ERR_INCONSISTENTVALUE;
+      }
+      if (long_ret == RS_DESTROY) {
+        vacm_destroyGroupEntry(model,newName);        
+      } else {
+        geptr->status = long_ret;
+      }
+      free(newName);
+    } else {			/* ...else we create a new group entry */
+      /* check for a valid status column set */
+      if (long_ret == RS_ACTIVE || long_ret == RS_NOTINSERVICE) {
+        free(newName);
+        return SNMP_ERR_INCONSISTENTVALUE;
+      }
+      if (long_ret == RS_DESTROY) {
+        /* destroying a non-existent row is actually legal */
+        free(newName);
+        return SNMP_ERR_NOERROR;
+      }
+
+      /* generate a new group entry */
+      if ((geptr = vacm_createGroupEntry(model,newName)) == NULL) {
+        free(newName);
+        return SNMP_ERR_GENERR;
+      }
+
+	  /*set default storage type*/
+	  geptr->storageType = ST_NONVOLATILE;
+
+      /* set the status of the row based on the request */
+      if (long_ret == RS_CREATEANDGO)
+        geptr->status = RS_ACTIVE;
+      else if (long_ret == RS_CREATEANDWAIT)
+        geptr->status = RS_NOTINSERVICE;
+
+    }  /* endif -- uptr */
+  }  /* endif -- action==COMMIT */
+
+  return SNMP_ERR_NOERROR;
+}
+
+oid *
+access_generate_OID(oid *prefix, size_t prefixLen, struct vacm_accessEntry *aptr,
+                       size_t *length)
+{
+  oid *indexOid;
+  int i,groupNameLen,contextPrefixLen;
+
+  groupNameLen=strlen(aptr->groupName);
+  contextPrefixLen=strlen(aptr->contextPrefix);
+
+  *length = 4 + groupNameLen + contextPrefixLen + prefixLen;
+  indexOid = (oid *) malloc(*length * sizeof(oid));
+  if (indexOid) {
+    memmove(indexOid, prefix, prefixLen * sizeof (oid));
+  
+  indexOid[prefixLen]=groupNameLen;    
+  for(i = 0; i < groupNameLen; i++)
+      indexOid[groupNameLen+1+i] = (oid) aptr->groupName[i];
+      
+  indexOid[prefixLen+groupNameLen+1]=contextPrefixLen;    
+  for(i = 0; i < contextPrefixLen; i++)
+      indexOid[prefixLen+groupNameLen+2+i] = (oid) aptr->contextPrefix[i];
+
+  indexOid[prefixLen+groupNameLen+contextPrefixLen+3] = aptr->securityModel;
+  indexOid[prefixLen+groupNameLen+contextPrefixLen+4] = aptr->securityLevel;
+
+  }
+  return indexOid;
+
+}
+
+int 
+access_parse_oid(oid *oidIndex, size_t oidLen,
+			  unsigned char **groupName, size_t *groupNameLen,
+              unsigned char **contextPrefix, size_t *contextPrefixLen,
+              int *model, int *level)
+{
+  int groupNameL,contextPrefixL;
+  int i;
+
+  /* first check the validity of the oid */
+  if ((oidLen <= 0) || (!oidIndex)) {
+    return 1;
+  }
+  groupNameL=oidIndex[0];
+  contextPrefixL = oidIndex[groupNameL+1];	/* the initial name length */
+  if ((int)oidLen != groupNameL+contextPrefixL + 4) {
+    return 1;
+  }
+
+  /* its valid, malloc the space and store the results */
+  if (contextPrefix == NULL || groupName == NULL) {
+    return 1;
+  }
+
+  *groupName = (unsigned char *) malloc(groupNameL+1);
+  if (*groupName == NULL) {
+    return 1;
+  }
+  
+  *contextPrefix = (unsigned char *) malloc(contextPrefixL+1);
+  if (*contextPrefix == NULL) {
+	  free(*groupName);
+    return 1;
+  }
+    
+  *contextPrefixLen = contextPrefixL;
+  *groupNameLen = groupNameL;
+
+  for(i = 0; i < groupNameL; i++) {
+    if (oidIndex[i+1] > 255) {
+      free(*groupName);
+      free(*contextPrefix);
+      return 1;
+    }
+    groupName[0][i] = (unsigned char) oidIndex[i+1];
+  }
+  groupName[0][groupNameL] = 0;
+  
+
+  for(i = 0; i < contextPrefixL; i++) {
+    if (oidIndex[i+groupNameL+2] > 255) {
+	  free(*groupName);
+      free(*contextPrefix);
+      return 1;
+    }
+    contextPrefix[0][i] = (unsigned char) oidIndex[i+groupNameL+2];
+  }
+  contextPrefix[0][contextPrefixL] = 0;
+  
+  *model = oidIndex[groupNameL+contextPrefixL+2];
+  *level = oidIndex[groupNameL+contextPrefixL+3];
+ 
+  return 0;
+
+} 
+
+struct vacm_accessEntry *
+access_parse_accessEntry(oid *name, size_t name_len)
+{
+  struct vacm_accessEntry *aptr;
+
+  char *newGroupName;
+  char *newContextPrefix;
+  int model,level;
+  size_t groupNameLen,contextPrefixLen;
+  
+  /* get the name and engineID out of the incoming oid */
+  if (access_parse_oid(&name[ACCESS_MIB_LENGTH], name_len-ACCESS_MIB_LENGTH,
+					  (u_char **)&newGroupName, &groupNameLen,
+					  (u_char **)&newContextPrefix, &contextPrefixLen,
+					  &model, &level))
+    return NULL;
+
+  /* Now see if a user exists with these index values */
+  aptr = vacm_getAccessEntry(newGroupName, newContextPrefix, model, level);
+  free(newContextPrefix);
+  free(newGroupName);
+  
+  return aptr;
+
+}  /* end vacm_parse_accessEntry() */
+
+int
+write_vacmAccessStatus(int      action,
+            u_char   *var_val,
+            u_char   var_val_type,
+            size_t   var_val_len,
+            u_char   *statP,
+            oid      *name,
+            size_t   name_len)
+{
+
+  /* variables we may use later */
+  static long long_ret;
+  int model,level;
+  char *newGroupName,*newContextPrefix;
+  size_t groupNameLen,contextPrefixLen;
+  struct vacm_accessEntry *aptr;
+
+  if (var_val_type != ASN_INTEGER){
+      DEBUGMSGTL(("mibII/vacm_vars","write to vacmSecurityToGroupStatus not ASN_INTEGER\n"));
+      return SNMP_ERR_WRONGTYPE;
+  }
+  if (var_val_len > sizeof(long_ret)){
+      DEBUGMSGTL(("mibII/vacm_vars","write to vacmSecurityToGroupStatus: bad length\n"));
+      return SNMP_ERR_WRONGLENGTH;
+  }
+  if (action == COMMIT){
+    long_ret = *((long *) var_val);
+
+    /* ditch illegal values now */
+    /* notReady can not be used, but the return error code is not mentioned */
+    if (long_ret == RS_NOTREADY || long_ret < 1 || long_ret > 6)
+      return SNMP_ERR_INCONSISTENTVALUE;
+    
+    /* see if we can parse the oid for model/name first */
+    if (access_parse_oid(&name[ACCESS_MIB_LENGTH], name_len-ACCESS_MIB_LENGTH,
+                      (u_char **)&newGroupName, &groupNameLen,
+                      (u_char **)&newContextPrefix, &contextPrefixLen,
+                      &model,&level))
+      return SNMP_ERR_INCONSISTENTNAME;
+
+    /* Now see if a group already exists with these index values */
+    aptr = vacm_getAccessEntry(newGroupName,newContextPrefix,model,level);
+
+
+    if (aptr) {			/* If so, we set the appropriate value... */
+      if (long_ret == RS_CREATEANDGO || long_ret == RS_CREATEANDWAIT) {
+        return SNMP_ERR_INCONSISTENTVALUE;
+      }
+      if (long_ret == RS_DESTROY) {
+        vacm_destroyAccessEntry(newGroupName,newContextPrefix,model,level);
+      } else {
+        aptr->status = long_ret;
+      }
+      free(newGroupName);
+      free(newContextPrefix);
+    } else {			/* ...else we create a new group entry */
+      /* check for a valid status column set */
+      if (long_ret == RS_ACTIVE || long_ret == RS_NOTINSERVICE) {
+        free(newGroupName);
+        free(newContextPrefix);
+        return SNMP_ERR_INCONSISTENTVALUE;
+      }
+      if (long_ret == RS_DESTROY) {
+        /* destroying a non-existent row is actually legal */
+        free(newGroupName);
+        free(newContextPrefix);
+        return SNMP_ERR_NOERROR;
+      }
+
+      /* generate a new group entry */
+      if ((aptr = vacm_createAccessEntry(newGroupName,newContextPrefix,model,level)) == NULL) {
+        free(newGroupName);
+        free(newContextPrefix);
+        return SNMP_ERR_GENERR;
+      }
+
+	  /*set default storage type*/
+	  /*This version only supports volatile storage*/
+	  aptr->storageType = ST_NONVOLATILE;
+
+      /* set the status of the row based on the request */
+      if (long_ret == RS_CREATEANDGO)
+        aptr->status = RS_ACTIVE;
+      else if (long_ret == RS_CREATEANDWAIT)
+        aptr->status = RS_NOTINSERVICE;
+
+    }  /* endif -- uptr */
+  }  /* endif -- action==COMMIT */
+
+  return SNMP_ERR_NOERROR;
+}
+
+int
+write_vacmAccessStorageType(int      action,
+            u_char   *var_val,
+            u_char   var_val_type,
+            size_t   var_val_len,
+            u_char   *statP,
+            oid      *name,
+            size_t   name_len)
+{
+  /* variables we may use later */
+  static long long_ret;
+  struct vacm_accessEntry *aptr;
+  
+  if (var_val_type != ASN_INTEGER){
+      DEBUGMSGTL(("mibII/vacm_vars","write to vacmSecurityToGroupStorageType not ASN_INTEGER\n"));
+      return SNMP_ERR_WRONGTYPE;
+  }
+  if (var_val_len > sizeof(long_ret)){
+      DEBUGMSGTL(("mibII/vacm_vars","write to vacmSecurityToGroupStorageType: bad length\n"));
+      return SNMP_ERR_WRONGLENGTH;
+  }
+  if (action == COMMIT){
+      /* don't allow creations here */
+      if ((aptr = access_parse_accessEntry(name, name_len)) == NULL) {
+        return SNMP_ERR_NOSUCHNAME;
+      }
+      long_ret = *((long *) var_val);
+/*      if ((long_ret == ST_VOLATILE || long_ret == ST_NONVOLATILE) &&
+          (aptr->storageType == ST_VOLATILE ||
+           aptr->storageType == ST_NONVOLATILE)) */
+	  /*This version only supports volatile storage*/ 
+	  if (long_ret == ST_VOLATILE &&
+          aptr->storageType == ST_VOLATILE)           
+        aptr->storageType = long_ret;
+      else
+        return SNMP_ERR_INCONSISTENTVALUE;
+  }
+  return SNMP_ERR_NOERROR;
+}
+
+int
+write_vacmAccessContextMatch(int      action,
+            u_char   *var_val,
+            u_char   var_val_type,
+            size_t   var_val_len,
+            u_char   *statP,
+            oid      *name,
+            size_t   name_len)
+{
+  /* variables we may use later */
+  static long long_ret;
+  struct vacm_accessEntry *aptr;
+  
+  if (var_val_type != ASN_INTEGER){
+      DEBUGMSGTL(("mibII/vacm_vars","write to vacmAccessContextMatch not ASN_INTEGER\n"));
+      return SNMP_ERR_WRONGTYPE;
+  }
+  if (var_val_len > sizeof(long_ret)){
+      DEBUGMSGTL(("mibII/vacm_vars","write to vacmAccessContextMatch: bad length\n"));
+      return SNMP_ERR_WRONGLENGTH;
+  }
+  if (action == COMMIT){
+      /* don't allow creations here */
+      if ((aptr = access_parse_accessEntry(name, name_len)) == NULL) {
+        return SNMP_ERR_NOSUCHNAME;
+      }
+      long_ret = *((long *) var_val);
+      if (long_ret == CM_EXACT || long_ret == CM_PREFIX)
+        aptr->contextMatch = long_ret;
+      else
+        return SNMP_ERR_INCONSISTENTVALUE;
+  }
+  return SNMP_ERR_NOERROR;
+}
+
+int
+write_vacmAccessReadViewName(int      action,
+            u_char   *var_val,
+            u_char   var_val_type,
+            size_t   var_val_len,
+            u_char   *statP,
+            oid      *name,
+            size_t   name_len)
+{
+  /* variables we may use later */
+  static unsigned char string[VACMSTRINGLEN];
+  struct vacm_accessEntry *aptr;
+  
+  if (var_val_type != ASN_OCTET_STR){
+      DEBUGMSGTL(("mibII/vacm_vars","write to vacmAccessReadViewName not ASN_OCTET_STR\n"));
+      return SNMP_ERR_WRONGTYPE;
+  }
+  if (var_val_len > sizeof(string)){
+      DEBUGMSGTL(("mibII/vacm_vars","write to vacmAccessReadViewName: bad length\n"));
+      return SNMP_ERR_WRONGLENGTH;
+  }
+  if (action == COMMIT){
+      /* don't allow creations here */
+      if ((aptr = access_parse_accessEntry(name, name_len)) == NULL) {
+        return SNMP_ERR_NOSUCHNAME;
+      }
+      
+      memcpy(aptr->readView, var_val, var_val_len);
+	  aptr->readView[var_val_len] = 0;
+           
+  }
+  return SNMP_ERR_NOERROR;
+}
+
+int
+write_vacmAccessWriteViewName(int      action,
+            u_char   *var_val,
+            u_char   var_val_type,
+            size_t   var_val_len,
+            u_char   *statP,
+            oid      *name,
+            size_t   name_len)
+{
+  /* variables we may use later */
+  static unsigned char string[VACMSTRINGLEN];
+  struct vacm_accessEntry *aptr;
+  
+  if (var_val_type != ASN_OCTET_STR){
+      DEBUGMSGTL(("mibII/vacm_vars","write to vacmAccessWriteViewName not ASN_OCTET_STR\n"));
+      return SNMP_ERR_WRONGTYPE;
+  }
+  if (var_val_len > sizeof(string)){
+      DEBUGMSGTL(("mibII/vacm_vars","write to vacmAccessWriteViewName: bad length\n"));
+      return SNMP_ERR_WRONGLENGTH;
+  }
+  if (action == COMMIT){
+      /* don't allow creations here */
+      if ((aptr = access_parse_accessEntry(name, name_len)) == NULL) {
+        return SNMP_ERR_NOSUCHNAME;
+      }
+      
+      memcpy(aptr->writeView, var_val, var_val_len);
+	  aptr->writeView[var_val_len] = 0;
+   
+  }
+  return SNMP_ERR_NOERROR;
+}
+
+int
+write_vacmAccessNotifyViewName(int      action,
+            u_char   *var_val,
+            u_char   var_val_type,
+            size_t   var_val_len,
+            u_char   *statP,
+            oid      *name,
+            size_t   name_len)
+{
+  /* variables we may use later */
+  static unsigned char string[VACMSTRINGLEN];
+  struct vacm_accessEntry *aptr;
+  
+  if (var_val_type != ASN_OCTET_STR){
+      DEBUGMSGTL(("mibII/vacm_vars","write to vacmAccessNotifyViewName not ASN_OCTET_STR\n"));
+      return SNMP_ERR_WRONGTYPE;
+  }
+  if (var_val_len > sizeof(string)){
+      DEBUGMSGTL(("mibII/vacm_vars","write to vacmAccessNotifyViewName: bad length\n"));
+      return SNMP_ERR_WRONGLENGTH;
+  }
+  if (action == COMMIT){
+      /* don't allow creations here */
+      if ((aptr = access_parse_accessEntry(name, name_len)) == NULL) {
+        return SNMP_ERR_NOSUCHNAME;
+      }
+      
+      memcpy(aptr->notifyView, var_val, var_val_len);
+	  aptr->notifyView[var_val_len] = 0;
+      
+  }
+  return SNMP_ERR_NOERROR;
+}
+
+int 
+view_parse_oid(oid *oidIndex, size_t oidLen,
+			  unsigned char **viewName, size_t *viewNameLen,
+              oid **subtree, size_t *subtreeLen)
+{
+  int viewNameL,subtreeL;
+  int i;
+
+  /* first check the validity of the oid */
+  if ((oidLen <= 0) || (!oidIndex)) {
+    return 1;
+  }
+  viewNameL=oidIndex[0];
+  subtreeL = oidLen-viewNameL-1;	/* the initial name length */
+ 
+  /* its valid, malloc the space and store the results */
+  if (viewName == NULL || subtree == NULL) {
+    return 1;
+  }
+
+  
+  *viewName = (unsigned char *) malloc(viewNameL+1);
+
+  if (*viewName == NULL) {
+    return 1;
+  }
+  
+  *subtree = (oid *) malloc(sizeof(oid)*subtreeL);        
+  if (*subtree == NULL) {
+	  free(*viewName);
+    return 1;
+  }
+    
+  *subtreeLen = subtreeL;
+  *viewNameLen = viewNameL;
+
+  for(i = 0; i < viewNameL; i++) {
+    if (oidIndex[i+1] > 255) {
+      free(*viewName);
+      free(*subtree);
+      return 1;
+    }
+    viewName[0][i] = (unsigned char) oidIndex[i+1];
+  }
+  viewName[0][viewNameL] = 0;
+  
+  
+  for(i = 0; i < subtreeL; i++) {  
+    if (oidIndex[i+viewNameL+1] > 255) {
+	  free(*viewName);
+      free(*subtree);
+      return 1;
+    }
+    subtree[0][i] = (oid) oidIndex[i+viewNameL+1];
+  }
+
+  return 0;
+
+} 
+
+oid *
+view_generate_OID(oid *prefix, size_t prefixLen, struct vacm_viewEntry *vptr,
+                       size_t *length)
+{
+  oid *indexOid;
+  int i,viewNameLen,viewSubtreeLen;
+
+  viewNameLen=strlen(vptr->viewName);
+  viewSubtreeLen=vptr->viewSubtreeLen;
+
+  *length = 2 + viewNameLen + viewSubtreeLen + prefixLen;
+  indexOid = (oid *) malloc(*length * sizeof(oid));
+  if (indexOid) {
+    memmove(indexOid, prefix, prefixLen * sizeof (oid));
+  
+  indexOid[prefixLen]=viewNameLen;    
+  for(i = 0; i < viewNameLen; i++)
+      indexOid[viewNameLen+1+i] = (oid) vptr->viewName[i];
+      
+  indexOid[prefixLen+viewNameLen+1]=viewSubtreeLen;    
+  for(i = 0; i < viewSubtreeLen; i++)
+      indexOid[prefixLen+viewNameLen+2+i] = (oid) vptr->viewSubtree[i];
+
+  }
+  return indexOid;
+
+}
+
+struct vacm_viewEntry *
+view_parse_viewEntry(oid *name, size_t name_len)
+{
+  struct vacm_viewEntry *vptr;
+
+  char *newViewName;
+  oid *newViewSubtree;
+  size_t viewNameLen,viewSubtreeLen;
+  
+  if (view_parse_oid(&name[VIEW_MIB_LENGTH], name_len-VIEW_MIB_LENGTH,
+					  (u_char **)&newViewName, &viewNameLen,
+					  (oid **)&newViewSubtree, &viewSubtreeLen))
+    return NULL;
+
+  vptr = vacm_getViewEntry(newViewName, newViewSubtree, viewSubtreeLen);
+  free(newViewName);
+  free(newViewSubtree);
+  
+  return vptr;
+
+}  /* end vacm_parse_viewEntry() */
+
+int
+write_vacmViewStatus(int      action,
+            u_char   *var_val,
+            u_char   var_val_type,
+            size_t   var_val_len,
+            u_char   *statP,
+            oid      *name,
+            size_t   name_len)
+{
+
+  /* variables we may use later */
+  static long long_ret;
+  int model,level;
+  char *newViewName;
+  oid *newViewSubtree;
+  size_t viewNameLen,viewSubtreeLen;
+  struct vacm_viewEntry *vptr;
+
+  if (var_val_type != ASN_INTEGER){
+      DEBUGMSGTL(("mibII/vacm_vars","write to vacmViewStatus not ASN_INTEGER\n"));
+      return SNMP_ERR_WRONGTYPE;
+  }
+  if (var_val_len > sizeof(long_ret)){
+      DEBUGMSGTL(("mibII/vacm_vars","write to vacmViewStatus: bad length\n"));
+      return SNMP_ERR_WRONGLENGTH;
+  }
+  if (action == COMMIT){
+    long_ret = *((long *) var_val);
+
+    /* ditch illegal values now */
+    /* notReady can not be used, but the return error code is not mentioned */
+    if (long_ret == RS_NOTREADY || long_ret < 1 || long_ret > 6)
+      return SNMP_ERR_INCONSISTENTVALUE;
+    
+    /* see if we can parse the oid for model/name first */
+    if (view_parse_oid(&name[VIEW_MIB_LENGTH], name_len-VIEW_MIB_LENGTH,
+                      (u_char **)&newViewName, &viewNameLen,
+                      (oid **)&newViewSubtree, &viewSubtreeLen))      
+      return SNMP_ERR_INCONSISTENTNAME;		
+	
+	
+    /* Now see if a group already exists with these index values */
+    vptr = vacm_getViewEntry(newViewName, newViewSubtree, viewSubtreeLen);
+    
+    if (vptr)
+	  {			/* If so, we set the appropriate value... */
+		if (long_ret == RS_CREATEANDGO || long_ret == RS_CREATEANDWAIT) 
+		{
+		  return SNMP_ERR_INCONSISTENTVALUE;
+		}
+		if (long_ret == RS_DESTROY) 
+		{
+		  vacm_destroyViewEntry(newViewName, newViewSubtree, viewSubtreeLen);        
+		} 
+		else 
+		{
+		  vptr->viewStatus = long_ret;
+		}
+	  } 
+	  else 
+	  {			/* ...else we create a new group entry */
+		/* check for a valid status column set */
+		if (long_ret == RS_ACTIVE || long_ret == RS_NOTINSERVICE) {
+          free(newViewName);
+          free(newViewSubtree);
+          return SNMP_ERR_INCONSISTENTVALUE;
+		}
+		
+		if (long_ret == RS_DESTROY) {
+		  /* destroying a non-existent row is actually legal */
+		  free(newViewName);
+          free(newViewSubtree);        
+          return SNMP_ERR_NOERROR;
+        }
+
+	    /* generate a new group entry */
+        if ((vptr = vacm_createViewEntry(newViewName,newViewSubtree,viewSubtreeLen)) == NULL) {
+		  free(newViewName);
+          free(newViewSubtree);
+		  return SNMP_ERR_GENERR;
+		}
+		
+		/*set default storage type*/
+		vptr->viewStorageType = ST_NONVOLATILE;
+		
+		/* set the status of the row based on the request */
+		if (long_ret == RS_CREATEANDGO)
+		  vptr->viewStatus = RS_ACTIVE;
+		else if (long_ret == RS_CREATEANDWAIT)
+		  vptr->viewStatus = RS_NOTINSERVICE;
+
+	  }  /* endif -- uptr */
+	free(newViewName);
+	free(newViewSubtree);
+    }  /* endif -- action==COMMIT */
+
+  return SNMP_ERR_NOERROR;
+}
+
+int
+write_vacmViewStorageType(int      action,
+            u_char   *var_val,
+            u_char   var_val_type,
+            size_t   var_val_len,
+            u_char   *statP,
+            oid      *name,
+            size_t   name_len)
+{
+  /* variables we may use later */
+  static long long_ret;
+  struct vacm_viewEntry *vptr;
+  
+  if (var_val_type != ASN_INTEGER){
+      DEBUGMSGTL(("mibII/vacm_vars","write to vacmSecurityToGroupStorageType not ASN_INTEGER\n"));
+      return SNMP_ERR_WRONGTYPE;
+  }
+  if (var_val_len > sizeof(long_ret)){
+      DEBUGMSGTL(("mibII/vacm_vars","write to vacmSecurityToGroupStorageType: bad length\n"));
+      return SNMP_ERR_WRONGLENGTH;
+  }
+  if (action == COMMIT){
+      /* don't allow creations here */
+      if ((vptr = view_parse_viewEntry(name, name_len)) == NULL) {
+        return SNMP_ERR_NOSUCHNAME;
+      }
+      long_ret = *((long *) var_val);
+      
+      if ((long_ret == ST_VOLATILE || long_ret == ST_NONVOLATILE) &&
+          (vptr->viewStorageType == ST_VOLATILE ||
+           vptr->viewStorageType == ST_NONVOLATILE))
+		vptr->viewStorageType = long_ret;
+      else
+        return SNMP_ERR_INCONSISTENTVALUE;
+  }
+  return SNMP_ERR_NOERROR;
+}
+
+int
+write_vacmViewMask(int      action,
+            u_char   *var_val,
+            u_char   var_val_type,
+            size_t   var_val_len,
+            u_char   *statP,
+            oid      *name,
+            size_t   name_len)
+{
+  /* variables we may use later */
+  static unsigned char string[VACMSTRINGLEN];
+  struct vacm_viewEntry *vptr;
+  
+  if (var_val_type != ASN_OCTET_STR){
+      DEBUGMSGTL(("mibII/vacm_vars","write to vacmViewTreeFamilyMask not ASN_OCTET_STR\n"));
+      return SNMP_ERR_WRONGTYPE;
+  }
+  if (var_val_len > sizeof(string)){
+      DEBUGMSGTL(("mibII/vacm_vars","write to vacmViewTreeFamilyMask: bad length\n"));
+      return SNMP_ERR_WRONGLENGTH;
+  }
+  if (action == COMMIT){
+      /* don't allow creations here */
+      if ((vptr = view_parse_viewEntry(name, name_len)) == NULL) {
+        return SNMP_ERR_NOSUCHNAME;
+      }
+      
+      memcpy(vptr->viewMask, var_val, var_val_len);
+      vptr->viewMaskLen = var_val_len;   
+  }
+  return SNMP_ERR_NOERROR;
+}
+
+int
+write_vacmViewType(int      action,
+            u_char   *var_val,
+            u_char   var_val_type,
+            size_t   var_val_len,
+            u_char   *statP,
+            oid      *name,
+            size_t   name_len)
+{
+  /* variables we may use later */
+  static long long_ret;
+  struct vacm_viewEntry *vptr;
+  
+  if (var_val_type != ASN_INTEGER){
+      DEBUGMSGTL(("mibII/vacm_vars","write to vacmViewTreeFamilyType not ASN_INTEGER\n"));
+      return SNMP_ERR_WRONGTYPE;
+  }
+  if (var_val_len > sizeof(long_ret)){
+      DEBUGMSGTL(("mibII/vacm_vars","write to vacmViewTreeFamilyType: bad length\n"));
+      return SNMP_ERR_WRONGLENGTH;
+  }
+  if (action == COMMIT){
+      /* don't allow creations here */
+      if ((vptr = view_parse_viewEntry(name, name_len)) == NULL) {
+        return SNMP_ERR_NOSUCHNAME;
+      }
+      
+      long_ret=*((long *) var_val);
+	  vptr->viewType=long_ret;
+  }
+  return SNMP_ERR_NOERROR;
+}
+
+int
+write_vacmViewSpinLock(
+   int      action,
+   u_char   *var_val,
+   u_char   var_val_type,
+   size_t   var_val_len,
+   u_char   *statP,
+   oid      *name,
+   size_t   name_len)
+{
+  /* variables we may use later */
+  static long long_ret;
+
+  if (var_val_type != ASN_INTEGER){
+      DEBUGMSGTL(("mibII/vacm_vars","write to vacmViewSpinLock not ASN_INTEGER\n"));
+      return SNMP_ERR_WRONGTYPE;
+  }
+  if (var_val_len > sizeof(long_ret)){
+      DEBUGMSGTL(("mibII/vacm_vars","write to vacmViewSpinLock: bad length\n"));
+      return SNMP_ERR_WRONGLENGTH;
+  }
+  long_ret = *((long *) var_val);
+  if (long_ret != (long)vacmViewSpinLock)
+    return SNMP_ERR_INCONSISTENTVALUE;
+  if (action == COMMIT) {
+    if (vacmViewSpinLock == 2147483647)
+      vacmViewSpinLock = 0;
+    else
+      vacmViewSpinLock++;
+  }
+  return SNMP_ERR_NOERROR;
+}  /* end write_vacmViewSpinLock() */
