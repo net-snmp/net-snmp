@@ -31,7 +31,8 @@ $MenuFrame = $top->Frame(-relief => "raised",-borderwidth => 2);
 $MenuFrame->pack(-fill => "x",-expand => 1);
 $FileMenuBut = $MenuFrame->Menubutton(-text => "File",
 				      -menuitems =>
-      [[Button => "Save Output", -command => [\&saveOutput]],
+      [
+#       [Button => "Save Output", -command => [\&saveOutput]],
        [Button => "Quit",        -command => [\&exit]]
        ])->pack(-side => 'left');
 
@@ -403,9 +404,11 @@ sub toggleWidgetShown {
 sub loadNewMibFile {
     my $sel = $top->FileSelect();
     my $file = $sel->Show();
-    SNMP::addMibFiles($file);
-    showChildren("1.3.6.1");
-    showChildren("1.3.6.1");
+    if (defined($file)) {
+      SNMP::addMibFiles($file);
+	showChildren("1.3.6.1");
+	showChildren("1.3.6.1");
+    }
 }
 
 sub loadNewMibModule {
@@ -431,7 +434,13 @@ sub loadIt {
     my $var = shift;
     my $wid = shift;
     $wid->destroy();
-    SNMP::loadModules($$var);
-    showChildren("1.3.6.1");
-    showChildren("1.3.6.1");
+    if ($$var ne "") {
+        my $ret = SNMP::loadModules($$var);
+	if ($ret) {
+	    showChildren("1.3.6.1");
+	    showChildren("1.3.6.1");
+	} else {
+	    $status->configure(-text => "Failed reading module $$var");
+	}
+    }
 }
