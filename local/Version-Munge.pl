@@ -56,6 +56,12 @@ my @exprs = (
 	       repl => 'VERSION = \'$VERSION\'',
 	       files => [qw(dist/Makefile)]},
 
+	     # Doxygen config
+	     { type => 'doxygen',
+	       expr => 'PROJECT_NUMBER(\s+)=(\s+)\'(.*)\'',
+	       repl => 'PROJECT_NUMBER$1=$2\'$VERSION\'',
+	       files => [qw(doxygen.conf)]},
+
 	     # perl files
 	     { type => 'perl',
 	       expr => 'VERSION = \'(.*)\'',
@@ -68,6 +74,7 @@ my @exprs = (
 			    perl/ASN/ASN.pm
 			    perl/AnyData_SNMP/Storage.pm
 			    perl/AnyData_SNMP/Format.pm
+			    perl/TrapReceiver/TrapReceiver.pm
 			   )]}
 	    );
 
