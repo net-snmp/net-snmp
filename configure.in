@@ -2082,6 +2082,8 @@ AC_CHECK_FUNCS(getpwnam getgrnam setgid setuid setgroups)
 AC_CHECK_FUNCS(setitimer)
 # functions to support the clock.
 AC_CHECK_FUNCS(mktime stime times sysconf)
+# missing from hp-ux
+AC_CHECK_FUNCS(if_nametoindex)
 
 AC_MSG_CHECKING([[for SIOCGIFADDR in sys/ioctl.h]])
 AC_CACHE_VAL(cv_sys_ioctl_h_has_SIOCGIFADDR,
