@@ -105,6 +105,14 @@ close_agentx_session(struct snmp_session *session, int sessid)
 {
     struct snmp_session *sp, *prev = NULL;
     
+    if ( sessid == -1 ) {
+	unregister_mibs_by_session( session );
+	unregister_index_by_session( session );
+	unregister_sysORTable_by_session( session );
+
+	return AGENTX_ERR_NOERROR;
+    }
+    else
     for ( sp = session->subsession ; sp != NULL ; prev = sp, sp = sp->next ) {
         if ( sp->sessid == sessid ) {
 
