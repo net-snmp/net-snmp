@@ -105,7 +105,7 @@ void memory_free_config (void)
   minimumswap = DEFAULTMINIMUMSWAP;
 }
 
-#ifndef freebsd3
+#ifndef freebsd4
 /* Executes swapinfo and parses last line */
 /* This is just way too ugly ;) */
 
