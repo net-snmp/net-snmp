@@ -82,8 +82,9 @@ agentx_synch_input(int op,
     struct synch_state *state = (struct synch_state *)magic;
     struct timeval now, diff;
 
-    if ( reqid != state->reqid )
-	return 0;
+    if (reqid != state->reqid) {
+	return handle_agentx_packet(op, session, reqid, pdu, magic);
+    }
 
     DEBUGMSGTL(("agentx/subagent", "synching input, op 0x%02x\n", op));
     state->waiting = 0;
