@@ -59,6 +59,36 @@ get_list_data(data_list *head, const char *name)
   return NULL;
 }
 
+inline void *
+get_list_node(data_list *head, const char *name)
+{
+  for(; head; head = head->next)
+    if (head->name && strcmp(head->name, name) == 0)
+      break;
+  if (head)
+    return head;
+  return NULL;
+}
+
+int
+remove_list_node(data_list **realhead, const char *name)
+{
+    data_list *head, *prev;
+    for(head = *realhead, prev = NULL; head; prev = head, head = head->next) {
+        if (head->name && strcmp(head->name, name) == 0) {
+            if (prev)
+                prev->next = head->next;
+            else
+                *realhead = head->next;
+            free_list_data(head);
+            free(head);
+            return 0;
+        }
+    }
+    return 1;
+}
+
+
 inline void
 free_list_data(data_list *node)
 {
