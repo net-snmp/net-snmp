@@ -2217,11 +2217,12 @@ mte_get_response(struct mteTriggerTable_data *item, struct snmp_pdu *pdu) {
         /* XXX */
     }
     if (response->variables)
-        sprint_variable(buf, response->variables->name,
+        snprint_variable(buf, sizeof(buf), response->variables->name,
                         response->variables->name_length,
                         response->variables);
     else
-        strcpy(buf,"empty");
+        strncpy(buf,sizeof(buf),"empty");
+    buf[sizeof(buf)-1] = '\0';
     DEBUGMSGTL(("mteTriggerTable","got a variables: %s\n", buf));
     return response;
 }
@@ -2438,7 +2439,9 @@ mte_run_trigger(unsigned int clientreg, void *clientarg) {
         else
             value = NULL;
 
-        sprint_variable(buf, next_oid , next_oid_len, response->variables);
+        snprint_variable(buf, sizeof(buf),
+                         next_oid , next_oid_len, response->variables);
+        buf[sizeof(buf)-1] = '\0';
         DEBUGMSGTL(("mteTriggerTable","received %s (type %d)\n", buf,
 		    response->variables->type));
 
