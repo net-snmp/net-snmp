@@ -1,0 +1,22 @@
+#!/bin/sh
+
+. ../eval_tools.sh
+
+HEADER SNMPv3 get using initial of system.sysUpTime.0
+
+#
+# Begin test
+#
+
+# standard V3 configuration for initial user
+. ./Sv3config
+
+STARTAGENT
+
+CAPTURE "snmpget $SNMP_SNMPD_PORT -v 3 -l nanp -u initial -n xxx localhost system.sysUpTime.0"
+
+STOPAGENT
+
+CHECK "system.sysUpTime.0 = Timeticks:"
+
+FINISHED
