@@ -312,13 +312,33 @@ Requirements
  -Windows
  -Nullsoft Scriptable Install System 2.0 - http://nsis.sourceforge.net/home/
 
-1.  Complete the three sections above:  'Compiling binaries' and 'Compiling 
-    HTMLHelp file' and 'Combining the binaries, HTMLHelp and README files'
+1.  Complete the three sections above:  'Compiling binaries', 'Compiling 
+    HTMLHelp file' and 'Combining the binaries and HTMLHelp files'.  Net-SNMP
+    should be located in c:\usr.
 
-2.  Wave a magic wand
+2.  Copy the following files to c:\usr:
 
-3.  You should now have a c:\temp\Net-SNMP-x.x.x-1.exe binary installer 
+    cd (source dir)
+    copy win32\dist\installer\SetEnVar.nsi c:\usr\
+    copy win32\dist\installer\net-snmp.nsi c:\usr\
+    copy win32\dist\installer\Add2Path.nsi c:\usr\
+    copy win32\dist\installer\unregisterservice.bat c:\usr\
+    copy win32\dist\installer\registerservice.bat c:\usr\
+
+3.  Create an empty snmp.conf file in:
+
+    notepad c:\usr\etc\snmp\snmp.conf
+
+4.  Launch the 'Nullsoft Install System (NSIS 2.0)'
+
+5.  Select 'MakeNSISW (compiler interface)'
+
+6.  Click File - Load Script
+
+7.  Select c:\usr\net-snmp.nsi
+
+8.  You should now have a c:\usr\Net-SNMP-x.x.x-1.exe binary installer 
     package
 
-
+9.  Test the package
 
