@@ -835,7 +835,6 @@ netsnmp_agent_check_packet(netsnmp_session * session,
     if (addr_string != NULL) {
         netsnmp_addrcache_add(addr_string);
         SNMP_FREE(addr_string);
-        addr_string = NULL;
     }
     return 1;
 }
