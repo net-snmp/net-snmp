@@ -278,8 +278,8 @@ snmp_parse_args(argc, argv, session)
     }
   }
 
-  /* read in MIB database */
-  init_mib();
+  /* read in MIB database and initialize the snmp library*/
+  init_snmp();
 
   /* get the hostname */
   if (arg == argc) {
