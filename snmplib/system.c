@@ -188,7 +188,7 @@ opendir(const char *filename)
      * the filenames that we find.
      */
     idx = strlen(FindData.cFileName)+1;
-    p->start = (char*)malloc(idx * sizeof(char));
+    p->start = (char*)malloc(idx);
     /* New(1304, p->start, idx, char);*/
     if(p->start == NULL) {
 		free(p);
@@ -210,8 +210,7 @@ opendir(const char *filename)
 	/* bump the string table size by enough for the
 	 * new name and it's null terminator
 	 */
-	p->start = (char*)realloc((void*)p->start,
-			idx+len+1 * sizeof(char));
+	p->start = (char*)realloc((void*)p->start, idx+len+1);
 	/* Renew(p->start, idx+len+1, char);*/
 	if(p->start == NULL) {
 		free(p);

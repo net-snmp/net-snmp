@@ -262,7 +262,7 @@ int snmpTargetParams_addParamName(
       DEBUGMSGTL(("snmpTargetParamsEntry","ERROR snmpTargetParamsEntry: param name out of range in config string\n"));
       return(0);
     }
-    entry->paramName = (char *)malloc(sizeof(char) * (len + 1));
+    entry->paramName = (char *)malloc(len + 1);
     strncpy(entry->paramName, cptr, len);
     entry->paramName[len] = '\0';
   }
@@ -323,7 +323,7 @@ int snmpTargetParams_addSecName(
   }
   else {
     len = strlen(cptr);
-    entry->secName = (char *)malloc(sizeof(char)*(len+1));
+    entry->secName = (char *)malloc(len + 1);
     strncpy(entry->secName, cptr, len);
     entry->secName[len] = '\0';
   }
@@ -553,7 +553,7 @@ var_snmpTargetParamsEntry(
       if (temp_struct->secName == 0)  return(0);
       /* including null character. */
       memcpy(string, temp_struct->secName, 
-	     strlen(temp_struct->secName)*sizeof(char));
+	     strlen(temp_struct->secName));
       string[strlen(temp_struct->secName)] = '\0';
       *var_len = strlen(temp_struct->secName);
       return (unsigned char *) string;
@@ -763,8 +763,8 @@ write_snmpTargetParamsSecurityName(
   /* Finally, we're golden, check if we should save value */
   if (action == COMMIT)  {    
     free(temp_struct->secName);
-    temp_struct->secName = (char *)malloc( (size*sizeof(char))+1 );
-    memcpy(temp_struct->secName, string, size*sizeof(char));
+    temp_struct->secName = (char *)malloc(size + 1);
+    memcpy(temp_struct->secName, string, size);
     temp_struct->secName[size] = '\0';
     
     /* If row is new, check if its status can be updated */
@@ -913,7 +913,7 @@ int snmpTargetParams_createNewRow(
   pNameLen = name_len - snmpTargetParamsOIDLen;
   if (pNameLen > 0) {
     temp_struct            = snmpTargetParamTable_create();
-    temp_struct->paramName = (char *)malloc(sizeof(char)*(pNameLen + 1));
+    temp_struct->paramName = (char *)malloc(pNameLen + 1);
 
     for (i = 0; i < pNameLen; i++) {
       temp_struct->paramName[i] = (char)name[i+snmpTargetParamsOIDLen];
