@@ -165,6 +165,8 @@ netsnmp_table_data_remove_row(netsnmp_table_data *table,
 
     if (row->next)
         row->next->prev = row->prev;
+    else
+        table->last_row = row->prev;
 
     return row;
 }
