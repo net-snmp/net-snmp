@@ -72,6 +72,7 @@ int subtree_old_size (void);
 void sort_tree (void);
 struct subtree *find_subtree (oid *, size_t, struct subtree *);
 struct subtree *find_subtree_next (oid *, size_t, struct subtree *);
+struct subtree *find_subtree_previous (oid *, size_t, struct subtree *);
 void register_mib (const char *, struct variable *, size_t , size_t , oid *, size_t);
 void unregister_mib (oid *, size_t);
 struct subtree *unregister_mib_tree (oid *, size_t, struct subtree *);

@@ -16,6 +16,9 @@ struct subtree {
     int			variables_len;	/* number of entries in above array */
     int			variables_width; /* sizeof each variable entry */
     char                label[256];     /* calling module's label */
+    int			session;			/* or struct snmp_session* */
+    u_char		flags;
+    u_char		priority;
     struct subtree      *next;		/* List of 'sibling' subtrees */
     struct subtree      *children;	/* List of 'child' subtrees */
 };
