@@ -22,73 +22,8 @@ REQUIREMENTS
 
 SETTING UP THE MYSQL DATABASES
   Use mysql itself to set up the mysql database resquired:
-  
-    create database snmp;
-    use snmp;
-    create table hosts (id integer auto_increment primary key, 
-                        name varchar(16), 
-                        community varchar(32));
-    create table hosttables (id integer auto_increment primary key, 
-                       host varchar(16), tablename varchar(64),
-		       groupname varchar(32),
-                       keephistory integer(2));
-    create table usergroups (id integer auto_increment primary key, 
-                       user varchar(16),
-                       groupname varchar(32),
-		       isadmin enum('N','Y') default 'N');
-    create table userprefs (id integer auto_increment primary key, 
-                            user varchar(16),
-                            groupname varchar(32),
-                            tablename varchar(64),
-                            columnname varchar(64),
-                            displayit enum('N','Y') default 'Y');
-    create table hostgroups (id integer auto_increment primary key, 
-                             host varchar(16), 
-                             groupname varchar(32));
 
-    create table errorexpressions (id integer auto_increment primary key, 
-                                   tablename varchar(64), 
-                                   expression varchar(255),
-                                   returnfield(64));
-    insert into errorexpressions(tablename, expression, returnfield)
-                values('prEntry', 'prErrorFlag > 0', 'prErrMessage');
-    insert into errorexpressions(tablename, expression, returnfield)
-                values('extEntry', 'extResult > 0', 'extOutput');
-    insert into errorexpressions(tablename, expression, returnfield)
-                values('dskEntry', 'dskErrorFlag > 0', 'dskErrMessage');
-    insert into errorexpressions(tablename, expression, returnfield)
-                values('laEntry', 'laErrorFlag > 0', 'laErrMessage');
-    insert into errorexpressions(tablename, expression, returnfield)
-                values('fileEntry', 'fileErrorFlag > 0', 'fileErrMessage');
-    insert into errorexpressions(tablename, expression, returnfield)
-                values('snmperrs', 'snmperrErrorFlag > 0', 'snmperrErrMessage');
-    insert into errorexpressions(tablename, expression, returnfield)
-                values('memory', 'memSwapError > 0', 'memSwapErrMessage');
-		       
-    
-  Which should produce the tables you need:
-  
-    mysql> show columns from hosts;
-    +-----------+-------------+------+-----+---------+----------------+
-    | Field     | Type        | Null | Key | Default | Extra          |
-    +-----------+-------------+------+-----+---------+----------------+
-    | id        | int(11)     |      | PRI | 0       | auto_increment |
-    | name      | varchar(16) | YES  |     | NULL    |                |
-    | community | varchar(32) | YES  |     | NULL    |                |
-    +-----------+-------------+------+-----+---------+----------------+
-    3 rows in set (0.03 sec)
-    
-    mysql> show columns from hosttables;
-    +-------------+-------------+------+-----+---------+----------------+
-    | Field       | Type        | Null | Key | Default | Extra          |
-    +-------------+-------------+------+-----+---------+----------------+
-    | id          | int(11)     |      | PRI | 0       | auto_increment |
-    | host        | varchar(16) | YES  |     | NULL    |                |
-    | tablename   | varchar(32) | YES  |     | NULL    |                |
-    | keephistory | int(2)      | YES  |     | NULL    |                |
-    +-------------+-------------+------+-----+---------+----------------+
-    4 rows in set (0.00 sec)
-
+    ./setupdb -u root -p PASS -h SQLHOST
 
   For each host you want to monitor, put an entry in the hosts table
   using:
@@ -97,11 +32,11 @@ SETTING UP THE MYSQL DATABASES
   
   Then, for each thing you want to monitor on a given host:
   
-    insert into hosttables(host, tablename) values(HOSTNAME, TABLENAME)
+    insert into hosttables(host, groupname, tablename) values(HOSTNAME, GROUPNAME, TABLENAME)
 
   This can be automatted using the setupnewhost command, like:
 
-    setupnewhost -u root -p password host1 host2 ...
+    setupnewhost -u root -p password GROUP host1 host2 ...
 
   which will put the standard list of ucd-snmp specific mib tables in
   the table for you.
