@@ -5,7 +5,6 @@
 #ifndef _MIBGROUP_SNMP_H
 #define _MIBGROUP_SNMP_H
 
-extern void	init_snmpgroup();
 extern u_char	*var_snmp();
 extern int	write_snmp();
 
@@ -104,10 +103,7 @@ struct variable2 snmp_variables[] = {
     {SNMPOUTTRAPS, COUNTER, RONLY, var_snmp, 1, {29}},
     {SNMPENABLEAUTHENTRAPS, INTEGER, RWRITE, var_snmp, 1, {30}}
 };
-#define  SNMP_SUBTREE { \
-    {MIB, 11}, 7, (struct variable *)snmp_variables, \
-	 sizeof(snmp_variables)/sizeof(*snmp_variables), \
-	 sizeof(*snmp_variables) }
+config_load_mib({MIB.11}, 7, snmp_variables)
 #endif
 
 #endif /* _MIBGROUP_SNMP_H */

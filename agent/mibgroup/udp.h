@@ -28,10 +28,8 @@ struct variable8 udp_variables[] = {
     {UDPLOCALADDRESS, IPADDRESS, RONLY, var_udpEntry, 3, {5, 1, 1}},
     {UDPLOCALPORT, INTEGER, RONLY, var_udpEntry, 3, {5, 1, 2}}
 };
-#define  UDP_SUBTREE  { \
-    {MIB, 7}, 7, (struct variable *)udp_variables, \
-	 sizeof(udp_variables)/sizeof(*udp_variables), \
-	 sizeof(*udp_variables) }
+
+config_load_mib({MIB.7}, 7,udp_variables)
 #endif
 
 #endif /* _MIBGROUP_UDP_H */
