@@ -206,7 +206,7 @@ nsExtendOutput1Entry     OBJECT-TYPE
     STATUS      current
     DESCRIPTION
       "A conceptual row within the extension table."
-    AUGMENTS    { nsExtendConfigTable }
+    AUGMENTS    { nsExtendConfigEntry }
     ::= { nsExtendOutput1Table 1 }
 
 NsExtendOutput1Entry ::= SEQUENCE {
