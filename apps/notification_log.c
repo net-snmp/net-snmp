@@ -19,11 +19,40 @@
 extern u_long num_received;
 u_long num_deleted = 0;
 
-u_long max_logged = 0;
+u_long max_logged = 10;
 u_long max_age = 1440;
 
 netsnmp_table_data_set *nlmLogTable;
 netsnmp_table_data_set *nlmLogVarTable;
+
+void
+check_log_size(void) 
+{
+    netsnmp_table_row *row, *deleterow, *tmprow;
+    u_long count = 0;
+
+    for(row = nlmLogTable->table->first_row; row; row = row->next) {
+        count++;
+        if (max_logged && count == max_logged)
+            break;
+    }
+
+    if (!row)
+        return;
+
+    /* we've reached the limit, so keep looping but start deleting
+       from the beginning */
+    for(deleterow = nlmLogTable->table->first_row, row = row->next; row;
+        row = row->next) {
+        DEBUGMSGTL(("notification_log", "deleting a log entry\n"));
+        tmprow = deleterow->next;
+        netsnmp_table_dataset_delete_row(nlmLogTable, deleterow);
+        deleterow = tmprow;
+        num_deleted++;
+        /* XXX: delete vars from it's table */
+    }
+}
+
 
 /** Initialize the nlmLogVariableTable table by defining it's contents and how it's structured */
 void
@@ -281,6 +310,22 @@ initialize_table_nlmLogTable(void)
                              HANDLER_CAN_RWRITE), nlmLogTable, NULL);
 }
 
+int
+notification_log_config_handler(
+    netsnmp_mib_handler               *handler,
+    netsnmp_handler_registration      *reginfo,
+    netsnmp_agent_request_info        *reqinfo,
+    netsnmp_request_info              *requests) {
+    /*
+     *this handler exists only to act as a trigger when the
+     * configuration variables get set to a value and thus
+     * notifications must be possibly deleted from our archives.
+     */
+    if (reqinfo->mode == MODE_SET_COMMIT)
+        check_log_size();
+    return SNMP_ERR_NOERROR;
+}
+
 void
 init_notification_log(void) 
 {
@@ -303,12 +348,12 @@ init_notification_log(void)
     netsnmp_register_ulong_instance("nlmConfigGlobalEntryLimit",
                             my_nlmConfigGlobalEntryLimit_oid,
                             OID_LENGTH(my_nlmConfigGlobalEntryLimit_oid),
-                            &max_logged, NULL);
+                            &max_logged, notification_log_config_handler);
 
     netsnmp_register_ulong_instance("nlmConfigGlobalAgeOut",
                             my_nlmConfigGlobalAgeOut_oid,
                             OID_LENGTH(my_nlmConfigGlobalAgeOut_oid),
-                            &max_age, NULL);
+                            &max_age, notification_log_config_handler);
 
     /* tables */
     initialize_table_nlmLogTable();
@@ -456,6 +501,8 @@ log_notification(struct hostent *host, netsnmp_pdu *pdu,
 
     /* store the row */
     netsnmp_table_dataset_add_row(nlmLogTable, row);
+
+    check_log_size();
     DEBUGMSGTL(("log_notification","done logging something\n"));
 }
 
