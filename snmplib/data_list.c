@@ -19,7 +19,7 @@
  * Note that this doesn't free the node itself.
  * @param node the node for which the data should be freed
  */
-inline void
+NETSNMP_INLINE void
 netsnmp_free_list_data(netsnmp_data_list *node)
 {
     Netsnmp_Free_List_Data *beer;
@@ -35,7 +35,7 @@ netsnmp_free_list_data(netsnmp_data_list *node)
 /** frees all data and nodes in a list.
  * @param head the top node of the list to be freed.
  */
-inline void
+NETSNMP_INLINE void
 netsnmp_free_all_list_data(netsnmp_data_list *head)
 {
     netsnmp_data_list *tmpptr;
@@ -53,7 +53,7 @@ netsnmp_free_all_list_data(netsnmp_data_list *head)
  * @param beer A function that can free the data pointer (in the future)
  * @return a newly created data_list node which can be given to the netsnmp_add_list_data function.
  */
-inline netsnmp_data_list *
+NETSNMP_INLINE netsnmp_data_list *
 netsnmp_create_data_list(const char *name, void *data,
                          Netsnmp_Free_List_Data * beer)
 {
@@ -70,9 +70,9 @@ netsnmp_create_data_list(const char *name, void *data,
 /** adds data to a datalist
  * @param head a pointer to the head node of a data_list
  * @param node a node to stash in the data_list
- * @return a pointer to the data cached at that node
  */
-inline void
+/** depreciated: use netsnmp_data_list_add_node instead */
+NETSNMP_INLINE void
 netsnmp_add_list_data(netsnmp_data_list **head, netsnmp_data_list *node)
 {
     netsnmp_data_list *ptr;
@@ -94,12 +94,64 @@ netsnmp_add_list_data(netsnmp_data_list **head, netsnmp_data_list *node)
         ptr->next = node;
 }
 
+/** adds data to a datalist
+ * @param head a pointer to the head node of a data_list
+ * @param node a node to stash in the data_list
+ */
+NETSNMP_INLINE void
+netsnmp_data_list_add_node(netsnmp_data_list **head, netsnmp_data_list *node)
+{
+    /*
+     * don't duplicate code. call depreciated function until it is
+     * removed (hah!). it's inline, so there should be no speed hit.
+     */
+    netsnmp_add_list_data(head, node);
+}
+
+/** adds data to a datalist
+ * @param head a pointer to the head node of a data_list
+ * @param name the name of the node to cache the data.
+ * @param data the data to be stored under that name
+ * @param beer A function that can free the data pointer (in the future)
+ * @return a newly created data_list node which was inserted in the list
+ */
+NETSNMP_INLINE netsnmp_data_list *
+netsnmp_data_list_add_data(netsnmp_data_list **head, const char *name,
+                           void *data, Netsnmp_Free_List_Data * beer)
+{
+    netsnmp_data_list *ptr;
+    netsnmp_data_list *node = netsnmp_create_data_list(name, data, beer);
+    if(NULL == node) {
+        snmp_log(LOG_ERR,"could not allocte memory for node.");
+        return NULL;
+    }
+    
+    if (!*head) {
+        *head = node;
+        return node;
+    }
+
+    /*
+     * xxx-rks: check for duplicate names? 
+     */
+    for (ptr = *head; ptr->next != NULL; ptr = ptr->next) {
+        /*
+         * noop 
+         */
+    }
+
+    if (ptr)                    /* should always be true */
+        ptr->next = node;
+
+    return node;
+}
+
 /** returns a data_list node's data for a given name within a data_list
  * @param head the head node of a data_list
  * @param name the name to find
  * @return a pointer to the data cached at that node
  */
-inline void    *
+NETSNMP_INLINE void    *
 netsnmp_get_list_data(netsnmp_data_list *head, const char *name)
 {
     for (; head; head = head->next)
@@ -115,7 +167,7 @@ netsnmp_get_list_data(netsnmp_data_list *head, const char *name)
  * @param name the name to find
  * @return a pointer to the data_list node
  */
-inline netsnmp_data_list    *
+NETSNMP_INLINE netsnmp_data_list    *
 netsnmp_get_list_node(netsnmp_data_list *head, const char *name)
 {
     for (; head; head = head->next)
