@@ -24,7 +24,7 @@
   if (should_init("snmpNotifyTable")) init_snmpNotifyTable();
   if (should_init("snmpNotifyFilterTable")) init_snmpNotifyFilterTable();
   if (should_init("snmpNotifyFilterProfileTable")) init_snmpNotifyFilterProfileTable();
-  if (should_init("master")) init_master();
+//  if (should_init("master")) init_master();
   if (should_init("smux")) init_smux();
   if (should_init("snmpTargetAddrEntry")) init_snmpTargetAddrEntry();
   if (should_init("snmpTargetParamsEntry")) init_snmpTargetParamsEntry();

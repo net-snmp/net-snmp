@@ -673,6 +673,33 @@ extern "C" {
 #define OSTYPE UNKNOWNID
 #endif
 
+/* The enterprise number has been assigned by the IANA group.   */
+/* Optionally, this may point to the location in the tree your  */
+/* company/organization has been allocated.                     */
+/* The assigned enterprise number for the NET_SNMP MIB modules. */
+#define ENTERPRISE_OID			8072
+#define ENTERPRISE_MIB			1,3,6,1,4,1,8072
+#define ENTERPRISE_DOT_MIB		1.3.6.1.4.1.8072
+#define ENTERPRISE_DOT_MIB_LENGTH	7
+
+/* The assigned enterprise number for sysObjectID. */
+#define SYSTEM_MIB		1,3,6,1,4,1,2021,AGENTID,OSTYPE
+#define SYSTEM_DOT_MIB		1.3.6.1.4.1.2021.AGENTID.OSTYPE
+#define SYSTEM_DOT_MIB_LENGTH	9
+
+/* The assigned enterprise number for notifications. */
+#define NOTIFICATION_MIB		1,3,6,1,4,1,2021,251
+#define NOTIFICATION_DOT_MIB		1.3.6.1.4.1.2021.251
+#define NOTIFICATION_DOT_MIB_LENGTH	8
+
+/* this is the location of the ucdavis mib tree.  It shouldn't be
+   changed, as the places it is used are expected to be constant
+   values or are directly tied to the UCD-SNMP-MIB. */
+#define UCDAVIS_OID		2021
+#define UCDAVIS_MIB		1,3,6,1,4,1,2021
+#define UCDAVIS_DOT_MIB		1.3.6.1.4.1.2021
+#define UCDAVIS_DOT_MIB_LENGTH	7
+
 /* how long to wait (seconds) for error querys before reseting the error trap.*/
 #define ERRORTIMELENGTH 600
 
@@ -843,3 +870,4 @@ typedef unsigned short mode_t;
 }
 #endif
 
+#define inline

@@ -9,7 +9,7 @@
 #define USING_NOTIFICATION_MODULE 1
  
 /* Define if compiling with the agentx module files.  */
-#define USING_AGENTX_MODULE 1
+//#define USING_AGENTX_MODULE 1
  
 /* Define if compiling with the smux module files.  */
 #define USING_SMUX_MODULE 1
@@ -93,10 +93,10 @@
 #define USING_NOTIFICATION_SNMPNOTIFYFILTERPROFILETABLE_MODULE 1
  
 /* Define if compiling with the agentx/master module files.  */
-#define USING_AGENTX_MASTER_MODULE 1
+//#define USING_AGENTX_MASTER_MODULE 1
  
 /* Define if compiling with the agentx/subagent module files.  */
-#define USING_AGENTX_SUBAGENT_MODULE 1
+//#define USING_AGENTX_SUBAGENT_MODULE 1
  
 /* Define if compiling with the smux/smux module files.  */
 #define USING_SMUX_SMUX_MODULE 1
@@ -117,16 +117,16 @@
 #define USING_HEADER_COMPLEX_MODULE 1
  
 /* Define if compiling with the agentx/protocol module files.  */
-#define USING_AGENTX_PROTOCOL_MODULE 1
+//#define USING_AGENTX_PROTOCOL_MODULE 1
  
 /* Define if compiling with the agentx/client module files.  */
-#define USING_AGENTX_CLIENT_MODULE 1
+//#define USING_AGENTX_CLIENT_MODULE 1
  
 /* Define if compiling with the agentx/master_admin module files.  */
-#define USING_AGENTX_MASTER_ADMIN_MODULE 1
+//#define USING_AGENTX_MASTER_ADMIN_MODULE 1
  
 /* Define if compiling with the agentx/master_request module files.  */
-#define USING_AGENTX_MASTER_REQUEST_MODULE 1
+//#define USING_AGENTX_MASTER_REQUEST_MODULE 1
  
 /* Define if compiling with the mibII/udp module files.  */
 #define USING_MIBII_UDP_MODULE 1
