@@ -20,7 +20,6 @@
 #include <stdlib.h>
 #endif
 
-#include "host_res.h"
 #if TIME_WITH_SYS_TIME
 # include <sys/time.h>
 # include <time.h>
@@ -32,6 +31,7 @@
 # endif
 #endif
 
+#include "snmp-tc.h"
 
 u_char *
 date_n_time ( time_t *when, size_t  *length)
@@ -105,7 +105,7 @@ date_n_time ( time_t *when, size_t  *length)
 }
 
 
-time_t ctime_to_timet( char *string )
+time_t ctime_to_timet( char* string )
 {
     struct tm tm;
 

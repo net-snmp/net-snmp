@@ -7,6 +7,9 @@ extern "C" {
 /* snmp-tc.h: Provide some standard #defines for Textual Convention
    related value information */
 
+u_char * date_n_time (time_t * , size_t * );
+time_t ctime_to_timet (char* );
+
 /* TrueValue */
 #define TV_TRUE 1
 #define TV_FALSE 2
