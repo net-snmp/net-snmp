@@ -52,7 +52,7 @@ netsnmp_table_data_add_row(netsnmp_table_data *table,
                            netsnmp_table_row *row)
 {
     int rc, dup = 0;
-    netsnmp_table_row *nextrow, *prevrow;
+    netsnmp_table_row *nextrow = NULL, *prevrow;
 
     if (!row || !table)
         return SNMPERR_GENERR;
