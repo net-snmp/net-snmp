@@ -72,7 +72,7 @@ dlmodIndex OBJECT-TYPE
     MAX-ACCESS	not-accessible
     STATUS	current
     DESCRIPTION
-	"An index that uniqely indentifies an entry in the dlmodTable."
+	"An index that uniqely identifies an entry in the dlmodTable."
     ::= { dlmodEntry 1 }
 
 dlmodName OBJECT-TYPE
