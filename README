@@ -123,6 +123,19 @@ HELPING OUT
   which can be obtained from CVS using the information found at
   http://www.net-snmp.org/cvs/.
 
+  Contributions to the Net-SNMP source code in any form are greatly
+  appreciated.  We expect the parties providing such contributions to
+  have the right to contribute them to the Net-SNMP project or that
+  the parties that do have the right have directed the person
+  submitting the contribution to do so.  In addition, all contributors
+  need to be aware that if the contribution is accepted and
+  incorporated into the Net-SNMP project, it will be redistributed
+  under the terms of the license agreement used for the entire body of
+  work that comprises the Net-SNMP project (see the COPYING file for
+  details).  If this license agreement ever changes the contribution
+  will continue to be released under any new licenses as well.  Thank
+  you, in advance, for your gracious contributions.
+
 CODE UPDATE ANNOUNCEMENTS
 
   See the NEWS file and the ChangeLog file for details on what has
