@@ -4,7 +4,9 @@
  */
 
 #include <config.h>
+#ifdef HAVE_NLIST_H
 #include <nlist.h>
+#endif
 
 #include "host_res.h"
 #include "hr_proc.h"

@@ -136,7 +136,9 @@
 #if HAVE_NETINET_ICMP_VAR_H
 #include <netinet/icmp_var.h>
 #endif
+#ifdef HAVE_NLIST_H
 #include <nlist.h>
+#endif
 #if HAVE_SYS_PROTOSW_H
 #include <sys/protosw.h>
 #endif
