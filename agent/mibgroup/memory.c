@@ -9,6 +9,7 @@
 #if HAVE_FCNTL_H
 #include <fcntl.h>
 #endif
+#include <ctype.h>
 #include <signal.h>
 #include <nlist.h>
 #if HAVE_MACHINE_PARAM_H
@@ -90,11 +91,13 @@
 
 #include "mibincl.h"
 #include "mibdefs.h"
-
+#include "util_funcs.h"
 #include "memory.h"
 
 int minimumswap;
+#ifndef linux
 static int pageshift;           /* log base 2 of the pagesize */
+#endif
 
 #ifdef linux
 enum meminfo_row { meminfo_main = 0,
@@ -198,8 +201,8 @@ static struct nlist memory_nl[] = {
 
 void init_memory()
 {
-  int pagesize;
 #ifndef linux
+  int pagesize;
   init_nlist( memory_nl );
 
 #ifndef bsdi2
@@ -229,7 +232,7 @@ int nswapfs=10;            /* taken from <machine/space.h> */
 int getswap(rettype)
   int rettype;
 {
-  int spaceleft=0, spacetotal=0, i, fd;
+  int spaceleft=0, spacetotal=0;
 
 #ifdef linux
 	spaceleft = memswap(meminfo_free);
@@ -247,6 +250,7 @@ int getswap(rettype)
   struct fswdevt fswdevt[100];
   FILE *file;
   struct extensible ex;
+  int i, fd;
   
   if (KNLookup(NL_SWDEVT,(int *) swdevt, sizeof(struct swdevt)*nswapdev)
       == NULL)
@@ -285,7 +289,7 @@ int getswap(rettype)
     fclose(file);
     close(fd);
   } else {
-    return(NULL);
+    return(0);
   }
 #endif
 #endif
@@ -296,6 +300,7 @@ int getswap(rettype)
     case SWAPGETTOTAL:
       return(spacetotal);
   }
+  return 0;
 }
 
 unsigned char *var_extensible_mem(vp, name, length, exact, var_len, write_method)
@@ -314,9 +319,7 @@ unsigned char *var_extensible_mem(vp, name, length, exact, var_len, write_method
 {
 
   oid newname[30];
-  int count, result,i, rtest=0;
-  register int interface;
-  struct myproc *proc;
+  int result;
   static long long_ret;
   static char errmsg[300];
 #ifndef linux

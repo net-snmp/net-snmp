@@ -24,7 +24,16 @@ SOFTWARE.
 
 #include <config.h>
 
+#if HAVE_STRING_H
+#include <string.h>
+#else
+#include <strings.h>
+#endif
+
 #include <stdio.h>
+#if HAVE_STDLIB_H
+#include <stdlib.h>
+#endif
 #include <sys/types.h>
 #if TIME_WITH_SYS_TIME
 # include <sys/time.h>
@@ -55,12 +64,26 @@ SOFTWARE.
 #include "snmp_vars_m2m.h"
 #include "event.h"
 #include "alarm.h"
-#include "system.h"
+#include "../../snmplib/system.h"
 #include "snmpd.h"
 
 static struct alarmEntry *alarmTab = NULL;
 static long alarmNextIndex = 1;
 static int write_alarmtab __P((int, u_char *, u_char, int, u_char *, oid *, int));
+static int rmonGetValue __P((oid *, int, oid *, int, oid *, int, oid *, int,
+	long *, struct alarmEntry *));
+static void cmutimeradd __P((struct timeval *, struct timeval *, struct timeval *));
+static void alarmInsertRow __P((struct alarmEntry *));
+static void alarmFreeShadow __P((struct alarmEntry *));
+static void alarmDeleteRow __P((struct alarmEntry *));
+static int alarmShadowRow __P((struct alarmEntry *));
+static struct alarmEntry *alarmGetRow __P((oid *, int, int));
+static struct alarmEntry *alarmGetRowByIndex __P((int));
+static struct alarmEntry *alarmNewRow __P((oid *, int, int));
+static void alarmCommitRow __P((struct alarmEntry *));
+static void alarmProcessValue __P((struct alarmEntry *, long, long));
+static void alarmUpdateDelta __P((struct alarmEntry *, long));
+static void alarmUpdateAbs __P((struct alarmEntry *, long));
 
 /* retrieve the given variable from the MIB.  Returns 0 on success,
 ** 1 if the request was asynchronously transmitted to another host,
@@ -92,7 +115,7 @@ rmonGetValue(srcParty, srcPartyLen, dstParty, dstPartyLen,
     struct variable_list *varList;
     u_long addr;
     struct get_req_state *state;
-    extern int snmp_input();
+    extern int snmp_input __P((int, struct snmp_session *, int, struct snmp_pdu *, void *));
     
     /* whether it's local or non-local, I have to know about the
        parties and context */
@@ -102,14 +125,14 @@ rmonGetValue(srcParty, srcPartyLen, dstParty, dstPartyLen,
 	return 2;
     
     addr = get_myaddr();
-    if (bcmp(dstp->partyTAddress, &addr, 4)) {
+    if (memcmp(dstp->partyTAddress, &addr, 4)) {
 	/* this is a different IP address, so it must be non-local */
 	if (alarm->ss == NULL) {
 	    state = (struct get_req_state *)malloc(sizeof(struct get_req_state));
 	    state->type = ALARM_GET_REQ;
 	    state->info = (void *)alarm;
 	    alarm->magic = state;
-	    bzero((char *)&session, sizeof(struct snmp_session));
+	    memset((char *)&session, 0, sizeof(struct snmp_session));
 	    session.peername = SNMP_DEFAULT_PEERNAME;
 	    session.version = SNMP_VERSION_2_HISTORIC;
 	    session.srcParty = srcParty;
@@ -130,13 +153,13 @@ rmonGetValue(srcParty, srcPartyLen, dstParty, dstPartyLen,
 	}
 	
 	pdu = snmp_pdu_create(GET_REQ_MSG);
-	bcopy(dstp->partyTAddress, (char *)&pdu->address.sin_addr.s_addr, 4);
-	bcopy(dstp->partyTAddress + 4, &pdu->address.sin_port, 2);
+	memcpy(&pdu->address.sin_addr.s_addr, dstp->partyTAddress, 4);
+	memcpy(&pdu->address.sin_port, dstp->partyTAddress + 4, 2);
 	pdu->address.sin_family = AF_INET;
 	varList = (struct variable_list *)malloc(sizeof(struct variable_list));
 	
 	varList->name = (oid *)malloc(variableLen * sizeof(oid));
-	bcopy(variable, varList->name, variableLen * sizeof(oid));
+	memcpy(varList->name, variable, variableLen * sizeof(oid));
 	varList->name_length = variableLen;
 	varList->type = ASN_NULL;
 	varList->val_len = 0;
@@ -155,11 +178,11 @@ rmonGetValue(srcParty, srcPartyLen, dstParty, dstPartyLen,
 		    cxp->contextIndex))
 	return 4;
     
-    bcopy(srcParty, pi->srcParty, srcPartyLen * sizeof(oid));
+    memcpy(pi->srcParty, srcParty, srcPartyLen * sizeof(oid));
     pi->srcPartyLength = srcPartyLen;
-    bcopy(dstParty, pi->dstParty, dstPartyLen * sizeof(oid));
+    memcpy(pi->dstParty, dstParty, dstPartyLen * sizeof(oid));
     pi->dstPartyLength = dstPartyLen;
-    bcopy(context, pi->context, contextLen * sizeof(oid));
+    memcpy(pi->context, context, contextLen * sizeof(oid));
     pi->contextLength = contextLen;
     pi->srcp = srcp;
     pi->dstp = dstp;
@@ -169,7 +192,7 @@ rmonGetValue(srcParty, srcPartyLen, dstParty, dstPartyLen,
     pi->pdutype = GET_REQ_MSG;
     /* rest of pi is not needed */
     
-    bcopy((char *)variable, (char *)bigVar, variableLen * sizeof(oid));
+    memcpy(bigVar, variable, variableLen * sizeof(oid));
     bigVarLen = variableLen;
     
     var = getStatPtr(bigVar, &bigVarLen, &type, &len, &acl, 1, &writeFunc, pi,
@@ -306,7 +329,7 @@ struct alarmEntry *alarm;
 	return 0;
     }
     
-    bcopy((char *)alarm, (char *)alarm->shadow, sizeof(struct alarmEntry));
+    memcpy(alarm->shadow, alarm, sizeof(struct alarmEntry));
     
     return 1;
 }
@@ -323,7 +346,7 @@ alarmGetRow(context, contextLen, index)
 	for (alarm = alarmTab; alarm; alarm = alarm->next) {
 		if (alarm->index == index
 		    && alarm->contextLength == contextLen
-		    && !bcmp(alarm->contextID, context,
+		    && !memcmp(alarm->contextID, context,
 			     contextLen * sizeof(oid))) {
 			return alarm;
 		}
@@ -378,10 +401,10 @@ alarmNewRow(context, contextLen, index)
 	return NULL;
     }
     
-    bzero((char *)alarm, sizeof(struct alarmEntry));
+    memset((char *)alarm, 0, sizeof(struct alarmEntry));
     
     alarm->index = index;
-    bcopy(context, alarm->contextID, contextLen * sizeof(oid));
+    memcpy(alarm->contextID, context, contextLen * sizeof(oid));
     alarm->contextLength = contextLen;
     alarm->status = ENTRY_DESTROY;
     
@@ -459,7 +482,7 @@ alarmCommitRow(alarm)
     }
     
     nextPtr = alarm->next;
-    bcopy((char *)alarm->shadow, (char *)alarm, sizeof(struct alarmEntry));
+    memcpy(alarm, alarm->shadow, sizeof(struct alarmEntry));
     
     if (alarm->next != nextPtr) {
 	/* KLF debugging */
@@ -479,10 +502,10 @@ alarmCommitRow(alarm)
 		  alarm->dstPartyID, &(alarm->dstPartyLength),
                     alarm->contextID, &(alarm->contextLength));
 #if 0
-    bcopy((char *)alarm->contextID, (char *)alarm->srcPartyID,
-	  alarm->contextLength * sizeof(oid));
-    bcopy((char *)alarm->contextID, (char *)alarm->dstPartyID,
-	  alarm->contextLength * sizeof(oid));
+    memcpy(alarm->srcPartyID,
+	  alarm->contextID, alarm->contextLength * sizeof(oid));
+    memcpy(alarm->dstPartyID,
+	  alarm->contextID, alarm->contextLength * sizeof(oid));
     alarm->srcPartyLength = alarm->contextLength;
     alarm->dstPartyLength = alarm->contextLength;
     alarm->srcPartyID[8] = 3;
@@ -722,7 +745,6 @@ write_alarmtab(action, var_val, var_val_type, var_val_len, statP,
     int size;
     long int_value;
     oid oid_value[MAX_OID_LEN];
-    u_char string_value[MAX_OWNER_STR_LEN];
     int buffersize = 1000;
     int contextlen;
     oid *context;
@@ -817,8 +839,7 @@ write_alarmtab(action, var_val, var_val_type, var_val_len, statP,
 	     ** communities have read access to all variables,
 	     ** this test is punted.
 	     */
-	    bcopy((char *)oid_value, (char *)alarm->shadow->variable,
-		  size * sizeof(oid));
+	    memcpy(alarm->shadow->variable, oid_value, size * sizeof(oid));
 	    alarm->shadow->variableLen = size;
 	    alarm->shadow->bitmask |= ALARMTABVARIABLEMASK;
 	}
@@ -1074,8 +1095,7 @@ var_alarmnextindex(vp, name, length, exact, var_len, write_method)
     if ((exact && (result != 0)) || (!exact && (result >= 0)))
 	return NULL;
 
-    bcopy((char *)vp->name, (char *)name,
-	  (int)vp->namelen * sizeof(oid));
+    memcpy(name, vp->name, (int)vp->namelen * sizeof(oid));
     *length = vp->namelen;
     *var_len = sizeof(long);
     
@@ -1109,8 +1129,7 @@ var_alarmtab(vp, name, length, exact, var_len, write_method)
     struct alarmEntry *alarm;
 
     mask = 1 << (vp->magic - 1);
-    bcopy((char *)vp->name, (char *)newname,
-	  (int)vp->namelen * sizeof(oid));
+    memcpy(newname, vp->name, (int)vp->namelen * sizeof(oid));
     *write_method = write_alarmtab;
     
     /* .1.3.6.1.6.3.2.1.1.2.1.X.cxlen.context.index */
@@ -1122,8 +1141,8 @@ var_alarmtab(vp, name, length, exact, var_len, write_method)
 	    continue;
 	}
 	newname[12] = (oid)alarm->contextLength;
-	bcopy(alarm->contextID, newname + 13,
-	      alarm->contextLength * sizeof(oid));
+	memcpy(newname + 13,
+	      alarm->contextID, alarm->contextLength * sizeof(oid));
 	newname[13 + alarm->contextLength] = (oid)alarm->index;
 	result = compare(name, *length,
 			 newname, 14 + alarm->contextLength);
@@ -1135,8 +1154,7 @@ var_alarmtab(vp, name, length, exact, var_len, write_method)
     }
     
     
-    bcopy((char *)newname, (char *)name,
-	  (int)(14 + alarm->contextLength) * sizeof(oid));
+    memcpy(name, newname, (int)(14 + alarm->contextLength) * sizeof(oid));
     *length = 14 + alarm->contextLength;
     *var_len = sizeof(long);
     
