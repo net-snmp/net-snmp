@@ -114,6 +114,7 @@ snmp_alarm_unregister_all(void)
     sa_tmp = sa_ptr->next;
     free(sa_ptr);
   }
+  DEBUGMSGTL(("snmp_alarm", "ALL alarms unregistered\n"));
   thealarms = NULL;
 }  
 
