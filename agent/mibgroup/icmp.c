@@ -31,6 +31,14 @@
 #include <netinet/icmp_var.h>
 #endif
 
+#if HAVE_INET_MIB2_H
+#include <inet/mib2.h>
+#endif
+#ifdef solaris2
+#include "kernel_sunos5.h"
+#endif
+#include "../../snmplib/system.h"
+
 #include "mibincl.h"
 #include <nlist.h>
 
@@ -235,7 +243,7 @@ var_icmp(vp, name, length, exact, var_len, write_method)
     int     *length;
     int     exact;
     int     *var_len;
-    int     (**write_method)();
+    int     (**write_method) __P((int, u_char *, u_char, int, u_char *, oid *, int));
 {
     register int i;
     static struct icmpstat icmpstat;

@@ -1,6 +1,3 @@
-#if OSTYPE == SOLARISID
-#define _KMEMUSER
-#endif
 #include <config.h>
 
 #if HAVE_STDLIB_H
@@ -463,7 +460,7 @@ sh_count_procs(procname)
                 }
 		u = kvm_getu(kd, p);
                 /* Skip this entry if u or u->u_comm is a NULL pointer */
-                if( !u || !u->u_comm ) {
+                if( !u ) {
                         continue;
                 }
 		if (strcmp(procname, u->u_comm) == 0)

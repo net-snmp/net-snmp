@@ -41,10 +41,10 @@
 #include <fcntl.h>
 #endif
 
-#if HAVE_STRING_H
-#include <string.h>
-#else
+#if HAVE_STRINGS_H
 #include <strings.h>
+#else
+#include <string.h>
 #endif
 
 #define HRSWINST_MONOTONICALLY_INCREASING
