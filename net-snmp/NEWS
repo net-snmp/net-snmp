@@ -17,6 +17,10 @@ the ChangeLog file for a more detailed listing of changes/bug fixes.
       - Embedded perl support for trap handlers (much faster).
         (configure --with-embedded-perl and run 'perldoc NetSNMP::TrapReceiver')
 
+    agent:
+      - community strings can be mapped to individual SNMPv3 contexts
+        (see the snmpd.conf manual on "com2sec").
+
 *5.1*
  New:
 
