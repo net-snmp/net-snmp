@@ -617,6 +617,8 @@ init_mib()
 	Mib = read_mib("mib.txt");
     if (!Mib)
 	Mib = read_mib("/usr/local/lib/mib.txt");
+    if (!Mib)
+	Mib = read_mib("/etc/mib.txt");
     if (!Mib){
 	fprintf(stderr, "Couldn't find mib file\n");
 	exit(2);
