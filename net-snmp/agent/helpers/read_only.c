@@ -31,7 +31,14 @@
 netsnmp_mib_handler *
 netsnmp_get_read_only_handler(void)
 {
-    return netsnmp_create_handler("read_only", netsnmp_read_only_helper);
+    netsnmp_mib_handler *ret = NULL;
+    
+    ret = netsnmp_create_handler("read_only",
+                                 netsnmp_read_only_helper);
+    if (ret) {
+        ret->flags |= MIB_HANDLER_AUTO_NEXT;
+    }
+    return ret;
 }
 
 /** @internal Implements the read_only handler */
@@ -54,12 +61,20 @@ netsnmp_read_only_helper(netsnmp_mib_handler *handler,
     case MODE_SET_UNDO:
         netsnmp_set_all_requests_error(reqinfo, requests,
                                        SNMP_ERR_NOTWRITABLE);
+        return SNMP_ERR_NOTWRITABLE;
+
+    case MODE_GET:
+    case MODE_GETNEXT:
+    case MODE_GETBULK:
+        /* next handler called automatically - 'AUTO_NEXT' */
         return SNMP_ERR_NOERROR;
 
     default:
-        return netsnmp_call_next_handler(handler, reginfo, reqinfo,
-                                         requests);
+        netsnmp_set_all_requests_error(reqinfo, requests,
+                                       SNMP_ERR_GENERR);
+        return SNMP_ERR_GENERR;
     }
+    netsnmp_set_all_requests_error(reqinfo, requests, SNMP_ERR_GENERR);
     return SNMP_ERR_GENERR;     /* should never get here */
 }
 

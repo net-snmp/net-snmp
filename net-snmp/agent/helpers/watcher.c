@@ -27,8 +27,14 @@
 netsnmp_mib_handler *
 netsnmp_get_watcher_handler(void)
 {
-    return netsnmp_create_handler("watcher",
-                                  netsnmp_watcher_helper_handler);
+    netsnmp_mib_handler *ret = NULL;
+    
+    ret = netsnmp_create_handler("watcher",
+                                 netsnmp_watcher_helper_handler);
+    if (ret) {
+        ret->flags |= MIB_HANDLER_AUTO_NEXT;
+    }
+    return ret;
 }
 
 netsnmp_watcher_info *
@@ -165,9 +171,8 @@ netsnmp_watcher_helper_handler(netsnmp_mib_handler *handler,
         break;
 
     }
-    if (handler->next && handler->next->access_method)
-        return netsnmp_call_next_handler(handler, reginfo, reqinfo,
-                                         requests);
+
+    /* next handler called automatically - 'AUTO_NEXT' */
     return SNMP_ERR_NOERROR;
 }
 
@@ -182,8 +187,14 @@ netsnmp_watcher_helper_handler(netsnmp_mib_handler *handler,
 netsnmp_mib_handler *
 netsnmp_get_watched_timestamp_handler(void)
 {
-    return netsnmp_create_handler("watcher",
-                                  netsnmp_watched_timestamp_handler);
+    netsnmp_mib_handler *ret = NULL;
+    
+    ret = netsnmp_create_handler("watcher",
+                                 netsnmp_watched_timestamp_handler);
+    if (ret) {
+        ret->flags |= MIB_HANDLER_AUTO_NEXT;
+    }
+    return ret;
 }
 
 int
@@ -238,10 +249,13 @@ netsnmp_watched_timestamp_handler(netsnmp_mib_handler *handler,
          * Timestamps are inherently Read-Only,
          *  so don't need to support SET requests.
          */
+    case MODE_SET_RESERVE1:
+        netsnmp_set_request_error(reqinfo, requests,
+                                  SNMP_ERR_NOTWRITABLE);
+        return SNMP_ERR_NOTWRITABLE;
     }
-    if (handler->next && handler->next->access_method)
-        return netsnmp_call_next_handler(handler, reginfo, reqinfo,
-                                         requests);
+
+    /* next handler called automatically - 'AUTO_NEXT' */
     return SNMP_ERR_NOERROR;
 }
 
@@ -255,8 +269,14 @@ netsnmp_watched_timestamp_handler(netsnmp_mib_handler *handler,
 netsnmp_mib_handler *
 netsnmp_get_watched_spinlock_handler(void)
 {
-    return netsnmp_create_handler("watcher",
-                                  netsnmp_watched_spinlock_handler);
+    netsnmp_mib_handler *ret = NULL;
+    
+    ret = netsnmp_create_handler("watcher",
+                                 netsnmp_watched_spinlock_handler);
+    if (ret) {
+        ret->flags |= MIB_HANDLER_AUTO_NEXT;
+    }
+    return ret;
 }
 
 int
@@ -319,8 +339,7 @@ netsnmp_watched_spinlock_handler(netsnmp_mib_handler *handler,
 	(*spinlock)++;
 	break;
     }
-    if (handler->next && handler->next->access_method)
-        return netsnmp_call_next_handler(handler, reginfo, reqinfo,
-                                         requests);
+
+    /* next handler called automatically - 'AUTO_NEXT' */
     return SNMP_ERR_NOERROR;
 }
