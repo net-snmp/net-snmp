@@ -31,6 +31,7 @@ TABLE OF CONTENTS
    What traps are sent by the agent?
    When I run the agent it runs and then quits without staying around. Why?
    How can I stop other people getting at my agent?
+   I don't understand the new access control stuff - what does it mean?
  TECHNICAL
    How do I write C code to integrate with the agent?
    What ASN.1 parser is used?
@@ -481,6 +482,118 @@ How can I stop other people getting at my agent?
 		This uses the TCP 'libwrap' library (available separately)
 		to allow/deny access via /etc/hosts.{allow,deny}
 	- Use SNMPv3 view-access-control
+
+
+
+I don't understand the new access control stuff - what does it mean?
+-------------------------------------------------------------------
+
+  The idea behind the new access control model is to give a more flexible
+  way of specifying who can see and do what within the MIB tree.
+  It's more complicated to understand than the old community style, but
+  that's because it can do a whole lot more.
+
+    There are four configuration keywords in the new scheme:
+	'com2sec', 'group', 'view', and 'access'
+
+  We'll consider these one at a time, starting with 'access'.
+  (Because I feel like starting with the last one, that's why - OK?)
+
+
+  The "access" keyword has the job of specifying who has access to
+  which bits of the MIB tree.  This has eight parameters, so can look
+  rather offputting. Most of these can be safely left with default values
+  in most cases (so don't you worry your pretty little head about them).
+  The syntax is
+
+	access {group} "" any noauth 0 {read-tree} {write-tree} {notify-tree}
+
+  where the entries in braces need to be defined elsewhere (I'm coming
+  to that - be patient!), and the rest can be left as shown here.
+
+	[ If you really want to know, the 'sec.model' field can be used
+	  to have an access line that's only relevant to particular
+	  versions of SNMP (such v1 or v2c) rather than "any" version,
+	  and the 'sec.level' field can be used to ensure that the
+	  request is authenticated or encrypted.
+	    You'll have to ask Niels about the other two!]
+
+
+  The "view" keyword is used to define particular bits of the MIB tree,
+  for use in the last three field of the access entry.
+  This has the syntax
+
+	view  {name}  included/excluded  {subtree}   {mask}
+
+  where {name} is the identifier to be used for this view (i.e. what should
+  appear in the access entry), and {subtree} is the portion of the MIB tree
+  that this name refers to (in either numeric or named form).
+    Note that the name of the view does not have to have anything to do
+  with the MIB sub-identifier names - it's purely an identifying tag for
+  use within the config file (though choosing a meaningful name is, as
+  always, a very good idea).
+  
+    The {mask} field is used to control which elements of the OID subtree
+  should be regarded as relevent when determining which view an OID is in.
+  Normally, the whole of the OID should be included, so you'll need a mask
+  with as many bits set as there are OID elements.
+    Thus, in the example config file,  ".1" (i.e. the whole dod tree) has
+  one element, so the mask has one bit set (counting from the most
+  significant) - i.e. '80' (in hex).
+  ".iso.org.dod.internet.mgmt.mib-2" has six elements, so six bits set ('fc').
+  "system" is short for ".iso.org.dod.internet.mgmt.mib-2.system", which
+  has seven elements, and so seven bits in its mask (hence 'fe')
+    If there are more than eight elements, you specify the longer masks
+  as single octet values, separated by dots (e.g. 'ff.c0' for 10 bits)
+  The third field can be used to include or exclude particular portions
+  of the MIB from the view, and different lines can use the same view name
+  to build up a more complicated view, if that's what's needed.
+
+    The three view fields in the access line are used to control which
+  portions of the MIB tree a particular {group} can see (GET et al),
+  alter (SET), or request NOTIFYs on.
+
+
+
+    That's dealt with the "what" - now for the "who".
+  This is the role of the "group" and "com2sec" entries.
+
+  The "group" keyword gives general control, by mapping between a
+  "security name" (and possibly a particular protocol version), and the
+  internal name used in the access line.  This will really only come into
+  play once the full features of SNMP v3 are available.
+
+    At the moment, it's just an intermediate step between the "access" line
+  and the "com2sec" line, which is the last bit of the jigsaw.
+  The "com2sec" entry is used to determine a "security name" from the
+  traditional community string, taking into account where the request has
+  come from.  Thus the same community string can give access to  different
+  portions of the tree, depending on where the request is sent from.
+
+     For example, in the example config file, there are two com2sec lines
+  with the community string "public" - one is valid from anywhere (with
+  the security name "public") and one is only valid from the local network
+  (using the security name "mynet").
+     The group lines convert these security names into the groups "public"
+  and "mygroup" respectively, and the access lines give these two groups
+  the ability to GET values in the 'system' sub-tree (from anywhere) or
+  the 'mib-2' sub-tree (from the local network).  Neither of these can
+  SET any values though, (since the write-tree is "none" in both cases).
+    Someone on the local machine, using the community string "private",
+  has the security name "local" and the group name "local", and hence has
+  full access (both GET and SET, as well as NOTIFY) to the whole of the
+  MIB tree (or at least everything under .1, which covers most things!)
+
+     Note that the three occurances of "public", as community string,
+  security name and group name, are three totally separate things.
+  You can't use a community string in a security name field, or either
+  of these as a group name (or vice versa), unless you set up suitable
+  entries to map one name onto the other.
+
+
+  And here concludes our tour of the view-based access control mechanism.
+  Phew!
+
 
 
 
