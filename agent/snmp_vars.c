@@ -115,6 +115,9 @@ PERFORMANCE OF THIS SOFTWARE.
 #include "snmp_vars.h"
 #include "default_store.h"
 #include "ds_agent.h"
+#ifdef SNMP_TRANSPORT_UDP_DOMAIN
+#include "snmpUDPDomain.h"
+#endif
 
 #include "mibgroup/struct.h"
 #include "read_config.h"

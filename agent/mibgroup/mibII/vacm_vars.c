@@ -554,7 +554,7 @@ int vacm_in_view (struct snmp_pdu *pdu,
 	if (snmp_get_do_debugging()) {
             char *buf;
             if (pdu->community) {
-                buf = malloc(1+ pdu->community_len);
+                buf = (char *)malloc(1+ pdu->community_len);
                 memcpy(buf, pdu->community, pdu->community_len);
                 buf[pdu->community_len] = '\0';
             } else {
@@ -573,7 +573,7 @@ int vacm_in_view (struct snmp_pdu *pdu,
 	if (pdu->tDomain == snmpUDPDomain || pdu->tDomain == snmpTCPDomain) {
 	  if (!snmp_udp_getSecName(pdu->transport_data,
 				   pdu->transport_data_length,
-				   pdu->community, pdu->community_len, &sn) &&
+				   (char *)pdu->community, pdu->community_len, &sn) &&
               !vacm_is_configured()) {
 	    /*  There are no com2sec entries.  */
 	    DEBUGMSGTL(("mibII/vacm_vars",

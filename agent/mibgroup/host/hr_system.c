@@ -4,6 +4,11 @@
  */
 
 #include <config.h>
+#if HAVE_STRING_H
+#include <string.h>
+#else
+#include <strings.h>
+#endif
 
 #include "mibincl.h"
 #include "host.h"
