@@ -128,7 +128,7 @@ do_cp()
     if [ "$PWD" != "$start/$src" ]; then
         die "cd $src did not work ($PWD != $start/$src)"
     fi
-    files=`ls *$UPDATE_OID* 2>/dev/null| egrep "(file|m2d|txt|\.c|\.h)$"`
+    files=`ls *$UPDATE_OID* 2>/dev/null| egrep "(file|onf|m2d|txt|\.c|\.h)$"`
     if [ -z "$files" ]; then
        echo "   no files to copy from $src"
     else
