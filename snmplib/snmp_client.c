@@ -215,8 +215,10 @@ snmp_fix_pdu(pdu, command)
     newpdu->errstat = SNMP_DEFAULT_ERRSTAT;
     newpdu->errindex = SNMP_DEFAULT_ERRINDEX;
     if (pdu->enterprise){
-	newpdu->enterprise = (oid *)malloc(pdu->enterprise_length);
-	memmove(newpdu->enterprise, pdu->enterprise, pdu->enterprise_length);
+	newpdu->enterprise =
+          (oid *)malloc(pdu->enterprise_length * sizeof(oid));
+	memmove(newpdu->enterprise, pdu->enterprise,
+                pdu->enterprise_length * sizeof(oid));
     }
     if (pdu->community){
 	newpdu->community = (u_char *)malloc(pdu->community_len);
