@@ -143,6 +143,9 @@
 /* Define if you have the getloadavg function.  */
 #undef HAVE_GETLOADAVG
 
+/* Define if you have the setenv function.  */
+#undef HAVE_SETENV
+
 /* Define if you have the index function.  */
 #undef HAVE_INDEX
 
