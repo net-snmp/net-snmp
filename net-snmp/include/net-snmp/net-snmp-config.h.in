@@ -616,9 +616,6 @@
 /* Define if you have the <sys/diskio.h> header file.  */
 #undef HAVE_SYS_DISKIO_H
 
-/* Define if you have the <sys/disklabel.h> header file.  */
-#undef HAVE_SYS_DISKLABEL_H
-
 /* Define if you have the <sys/dkio.h> header file.  */
 #undef HAVE_SYS_DKIO_H
 
@@ -828,6 +825,9 @@
 
 /* define if you have <netinet/in_pcb.h> */
 #undef HAVE_NETINET_IN_PCB_H
+
+/* define if you have <sys/disklabel.h> */
+#undef HAVE_SYS_DISKLABEL_H
 
 /* define if you are using linux and /proc/net/dev has the compressed
    field, which exists in linux kernels 2.2 and greater. */
