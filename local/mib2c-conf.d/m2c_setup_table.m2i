@@ -37,7 +37,12 @@
 ##
 ##   allow for user override, or save defaults
 ##
-@    ifconf default-table-${context}.m2d@
+@    ifconf ${m2c_defaults_dir}table-${context}.m2d@
+@       print Warning: using defaults in current directory. Consider moving@
+@       print them to $m2c_defaults_dir.@
+@       eval $m2c_defaults_dir = "default-"@
+@    end@
+@    ifconf ${m2c_defaults_dir}table-${context}.m2d@
 @      if $mfd_interactive_setup == 1@
 @        print There are existing defaults for $context.@
 @        prompt $ans o)verwrite or u)se existing [default=u] : @
@@ -46,12 +51,13 @@
 @        end@ 
 @      end@
 @    else@ # no existing defaults
+@      perleval mkdir(defaults,0775); return 0; @
 @      run mfd-interactive-setup.m2c@
 @    end@ # no conf file
 @    if $m2c_gen_table_defaults == 1@
 @       exit@
 @    end@
-@    include default-table-${context}.m2d@
+@    include ${m2c_defaults_dir}table-${context}.m2d@
 ##
 @    eval $m2c_data_item_base = "${m2c_context_item}data"@
 @    if $m2c_data_allocate == 1@
