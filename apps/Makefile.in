@@ -85,7 +85,7 @@ snmpdf:    snmpdf.$(OSUFFIX) $(PARSEOBJS) $(USELIBS)
 
 
 clean:
-	rm -f *.o *.lo $(TARG) $(SBINTARG)
+	rm -f *.o *.lo $(TARG) $(SBINTARG) core
 	rm -rf .libs
 	for i in $(SUBDIRS) ; do \
 	( cd $$i ; $(MAKE) clean ) ; \
