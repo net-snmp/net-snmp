@@ -177,21 +177,6 @@ u_char	*asn_build_double (u_char *, size_t *, u_char, double *,
                                size_t);
 u_char	*asn_parse_double (u_char *, size_t *, u_char *, double *, size_t);
 
-u_char	*asn_dparse_int (u_char *, size_t *, u_char *, long *, size_t, int);
-u_char	*asn_dparse_unsigned_int (u_char *, size_t *, u_char *, u_long *, size_t, int);
-u_char	*asn_dparse_string (u_char *, size_t *, u_char *, u_char *, size_t *, int);
-u_char	*asn_dparse_header (u_char *, size_t *, u_char *, int);
-u_char	*asn_dparse_length (u_char *, u_long *, int);
-u_char	*asn_dparse_objid (u_char *, size_t *, u_char *, oid *, size_t *, int);
-u_char	*asn_dparse_null (u_char *, size_t *, u_char *, int);
-u_char	*asn_dparse_bitstring (u_char *, size_t *, u_char *, u_char *, size_t *, int);
-u_char	*asn_dparse_unsigned_int64 (u_char *, size_t *, u_char *,
-                                       struct counter64 *, size_t, int);
-u_char	*asn_dparse_signed_int64 (u_char *, size_t *, u_char *,
-                                       struct counter64 *, size_t, int);
-u_char	*asn_dparse_float (u_char *, size_t *, u_char *, float *, size_t, int);
-u_char	*asn_dparse_double (u_char *, size_t *, u_char *, double *, size_t, int);
-
 #ifdef __cplusplus
 }
 #endif

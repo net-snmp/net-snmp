@@ -2,11 +2,6 @@
  * snmp_auth.c
  *
  * Community name parse/build routines.
- * v2p parse/build routines with authentication and verification checks.
- *
- *
- * NOTE: All code bounded by USE_V2PARTY_PROTOCOL as been collected
- *	 at the end of the file.
  */
 /**********************************************************************
     Copyright 1988, 1989, 1991, 1992 by Carnegie Mellon University
@@ -109,18 +104,11 @@ SOFTWARE.
  * in SNMPv1 and SNMPv2c.
  */
 u_char *
-snmp_comstr_parse(u_char *data, size_t *length,
-		  u_char *psid, size_t *slen, int *version)
-{
-    return(snmp_comstr_dparse(data, length, psid, slen, version, PARSE_PACKET));
-}
-u_char *
-snmp_comstr_dparse(u_char *data,
+snmp_comstr_parse(u_char *data,
 		  size_t *length,
 		  u_char *psid,
 		  size_t *slen,
-		  int *version,
-		  int  action)
+		  int *version)
 {
     u_char   	type;
     long	ver;
@@ -128,7 +116,7 @@ snmp_comstr_dparse(u_char *data,
 
     /* Message is an ASN.1 SEQUENCE.
      */
-    data = asn_dparse_header(data, length, &type, action);
+    data = asn_parse_header(data, length, &type);
     if (data == NULL){
         ERROR_MSG("bad header");
         return NULL;
@@ -142,7 +130,7 @@ snmp_comstr_dparse(u_char *data,
     /* First field is the version.
      */
     DEBUGDUMPHEADER("dump_recv", "Parsing SNMP version\n");
-    data = asn_dparse_int(data, length, &type, &ver, sizeof(ver), action);
+    data = asn_parse_int(data, length, &type, &ver, sizeof(ver));
     DEBUGINDENTLESS();
     *version = ver;
     if (data == NULL){
@@ -152,7 +140,7 @@ snmp_comstr_dparse(u_char *data,
 
     /* second field is the community string for SNMPv1 & SNMPv2c */
     DEBUGDUMPHEADER("dump_recv", "Parsing community string\n");
-    data = asn_dparse_string(data, length, &type, psid, slen, action);
+    data = asn_parse_string(data, length, &type, psid, slen);
     DEBUGINDENTLESS();
     if (data == NULL){
         ERROR_MSG("bad parse of community");
