@@ -119,6 +119,8 @@ typedef int (Netsnmp_Node_Handler) (netsnmp_mib_handler *handler,
     void            netsnmp_init_handler_conf(void);
     int             netsnmp_register_handler(netsnmp_handler_registration
                                              *reginfo);
+    int             netsnmp_unregister_handler(netsnmp_handler_registration
+                                               *reginfo);
     int            
         netsnmp_register_handler_nocallback(netsnmp_handler_registration
                                             *reginfo);
