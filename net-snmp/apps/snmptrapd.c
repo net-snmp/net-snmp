@@ -90,33 +90,9 @@ SOFTWARE.
 #include <signal.h>
 #include <errno.h>
 
-#include <net-snmp/getopt.h>
-
-#include <net-snmp/asn1.h>
-#include <net-snmp/snmp_api.h>
-#include <net-snmp/snmp_impl.h>
-#include <net-snmp/snmp_client.h>
-#include <net-snmp/mib.h>
-#include <net-snmp/snmp.h>
-#include <net-snmp/system.h>
-#include <net-snmp/version.h>
+#include <net-snmp/net-snmp-includes.h>
 #include "snmptrapd_handlers.h"
 #include "snmptrapd_log.h"
-#include <net-snmp/read_config.h>
-#include <net-snmp/snmp_debug.h>
-#include <net-snmp/snmp_logging.h>
-#include <net-snmp/callback.h>
-#include <net-snmp/snmp_secmod.h>
-#include <net-snmp/snmpusm.h>
-#include <net-snmp/tools.h>
-#include <net-snmp/lcd_time.h>
-#include <net-snmp/transform_oids.h>
-#include <net-snmp/snmpv3.h>
-#include <net-snmp/default_store.h>
-#include <net-snmp/snmp_transport.h>
-#ifdef SNMP_TRANSPORT_TCP_DOMAIN
-#include <net-snmp/snmpTCPDomain.h>
-#endif
 #include <net-snmp/agent/ds_agent.h>
 #include <net-snmp/agent/snmp_vars.h>
 #include "notification_log.h"

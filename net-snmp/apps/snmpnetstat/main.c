@@ -94,17 +94,7 @@ char copyright[] =
 #include <arpa/inet.h>
 #endif
 
-#include <net-snmp/asn1.h>
-#include <net-snmp/mib.h>
-#include <net-snmp/snmp.h>
-#include <net-snmp/snmp_api.h>
-#include <net-snmp/snmp_impl.h>
-#include <net-snmp/snmp_client.h>
-#include <net-snmp/version.h>
-#include <net-snmp/snmp_debug.h>
-#include <net-snmp/system.h>
-#include <net-snmp/default_store.h>
-
+#include <net-snmp/net-snmp-includes.h>
 #include "netstat.h"
 
 #define NULLPROTOX	((struct protox *) 0)

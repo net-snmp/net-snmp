@@ -57,18 +57,9 @@ SOFTWARE.
 #include <winsock.h>
 #endif
 
-#include <net-snmp/asn1.h>
-#include <net-snmp/snmp_api.h>
-#include <net-snmp/snmp_impl.h>
-#include <net-snmp/snmp_client.h>
-#include <net-snmp/parse.h>
-#include <net-snmp/mib.h>
-#include <net-snmp/snmp.h>
-#include <net-snmp/snmp_debug.h>
-#include <net-snmp/default_store.h>
-#include <net-snmp/system.h>
-
-#include <net-snmp/version.h>
+#include <net-snmp/config_api.h>
+#include <net-snmp/logging_api.h>
+#include <net-snmp/mib_api.h>
 
 int show_all_matched_objects (FILE *, const char *, oid *, size_t *, int, int);
 
