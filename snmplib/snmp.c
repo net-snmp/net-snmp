@@ -186,6 +186,10 @@ snmp_build_var_op(data, var_name, var_name_len, var_val_type, var_val_len,
 	    data = asn_build_unsigned_int(data, listlength, var_val_type,
 					  (u_long *)var_val, var_val_len);
 	    break;
+#ifdef OPAQUE_SPECIAL_TYPES
+	case ASN_OPAQUE_COUNTER64:
+	case ASN_OPAQUE_U64:
+#endif
 	case ASN_COUNTER64:
 	    data = asn_build_unsigned_int64(data, listlength, var_val_type,
 					   (struct counter64 *)var_val,
@@ -214,6 +218,21 @@ snmp_build_var_op(data, var_name, var_name_len, var_val_type, var_val_len,
 	case SNMP_ENDOFMIBVIEW:
 	    data = asn_build_null(data, listlength, var_val_type);
 	    break;
+#ifdef OPAQUE_SPECIAL_TYPES
+      case ASN_OPAQUE_FLOAT:
+        data = asn_build_float(data, listlength, var_val_type,
+                               (float *) var_val, var_val_len);
+        break;
+      case ASN_OPAQUE_DOUBLE:
+        data = asn_build_double(data, listlength, var_val_type,
+                               (double *) var_val, var_val_len);
+        break;
+      case ASN_OPAQUE_I64:
+        data = asn_build_signed_int64(data, listlength, var_val_type,
+                                      (struct counter64 *) var_val,
+                                      var_val_len);
+        break;
+#endif /* OPAQUE_SPECIAL_TYPES */
 	default:
 	    ERROR_MSG("wrong type");
 	    return NULL;

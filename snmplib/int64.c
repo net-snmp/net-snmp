@@ -189,7 +189,6 @@ zeroU64(pu64)
 
     pu64->low = 0;
     pu64->high = 0;
-
 } /* zeroU64 */
 
 
@@ -218,14 +217,13 @@ printU64(pu64)
   U64 u64a;
   U64 u64b;
 
-#define I64CHARSZ 20
-  static char aRes[I64CHARSZ+1];
+#define I64CHARSZ 21
+  static char aRes[I64CHARSZ+1], *cp;
   unsigned int u;
   int j;
 
   u64a.high = pu64->high;
   u64a.low = pu64->low;
-  
   aRes[I64CHARSZ] = 0;
   for (j = 0; j < I64CHARSZ; j++) {
     divBy10(u64a, &u64b, &u);
@@ -237,6 +235,76 @@ printU64(pu64)
   }
   return &aRes[(I64CHARSZ-1)-j];
 }
+
+char *
+printI64(pu64)
+  U64 *pu64;
+{
+  U64 u64a;
+  U64 u64b;
+
+#define I64CHARSZ 21
+  static char aRes[I64CHARSZ+1], *cp;
+  unsigned int u;
+  int j, sign=0;
+
+  if (pu64->high & 0x80000000) {
+    u64a.high = ~pu64->high;
+    u64a.low = ~pu64->low;
+    sign = 1;
+    incrByU32(&u64a, 1);  /* bit invert and incr by 1 to print 2s complement */
+  } else {
+    u64a.high = pu64->high;
+    u64a.low = pu64->low;
+  }
+  
+  aRes[I64CHARSZ] = 0;
+  for (j = 0; j < I64CHARSZ; j++) {
+    divBy10(u64a, &u64b, &u);
+    aRes[(I64CHARSZ-1)-j] = (char)('0' + u);
+    u64a.high = u64b.high;
+    u64a.low = u64b.low;
+    if (isZeroU64(&u64a))
+      break;
+  }
+  if (sign == 1) {
+    aRes[(I64CHARSZ-1)-j-1] = '-';
+    return &aRes[(I64CHARSZ-1)-j-1];
+  }
+  return &aRes[(I64CHARSZ-1)-j];
+}
+
+void
+read64(i64, string)
+  U64 *i64;
+  char *string;
+{
+  U64 i64p;
+  unsigned int u;
+  int sign = 0;
+  
+  zeroU64(i64);
+  if (*string == '-') {
+    sign = 1;
+    string++;
+  }
+  
+  while (*string && isdigit(*string)) {
+    u = *string - '0';
+    multBy10(*i64, &i64p);
+    memcpy(i64, &i64p, sizeof(i64p));
+    incrByU16(i64, u);
+    string++;
+  }
+  if (sign) {
+    i64->high = ~i64->high;
+    i64->low = ~i64->low;
+    incrByU16(i64,1);
+  }
+}
+
+
+  
 
 #ifdef TESTING
 void

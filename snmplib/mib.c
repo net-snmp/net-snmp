@@ -330,6 +330,56 @@ sprint_octet_string(buf, var, enums, hint, units)
     if (units) sprintf (buf, " %s", units);
 }
 
+#ifdef OPAQUE_SPECIAL_TYPES
+
+static void
+sprint_float(buf, var, enums, hint, units)
+    char *buf;
+    struct variable_list *var;
+    struct enum_list	    *enums;
+    char *hint;
+    char *units;
+{
+  if (var->type != ASN_OPAQUE_FLOAT) {
+	sprintf(buf, "Wrong Type (should be Float): ");
+	buf += strlen(buf);
+	sprint_by_type(buf, var, NULL, NULL, NULL);
+	return;
+    }
+    if (!quick_print){
+	sprintf(buf, "Opaque: Float:");
+	buf += strlen(buf);
+    }
+    sprintf(buf, " %f", *var->val.floatVal);
+    buf += strlen (buf);
+    if (units) sprintf (buf, " %s", units);
+}
+
+static void
+sprint_double(buf, var, enums, hint, units)
+    char *buf;
+    struct variable_list *var;
+    struct enum_list	    *enums;
+    char *hint;
+    char *units;
+{
+  if (var->type != ASN_OPAQUE_DOUBLE) {
+	sprintf(buf, "Wrong Type (should be Double): ");
+	buf += strlen(buf);
+	sprint_by_type(buf, var, NULL, NULL, NULL);
+	return;
+    }
+    if (!quick_print){
+	sprintf(buf, "Opaque: Double:");
+	buf += strlen(buf);
+    }
+    sprintf(buf, " %f", *var->val.doubleVal);
+    buf += strlen (buf);
+    if (units) sprintf (buf, " %s", units);
+}
+
+#endif /* OPAQUE_SPECIAL_TYPES */
+
 static void
 sprint_opaque(buf, var, enums, hint, units)
     char *buf;
@@ -339,18 +389,47 @@ sprint_opaque(buf, var, enums, hint, units)
     char *units;
 {
 
-    if (var->type != ASN_OPAQUE){
+    if (var->type != ASN_OPAQUE
+#ifdef OPAQUE_SPECIAL_TYPES
+        && var->type != ASN_OPAQUE_COUNTER64
+        && var->type != ASN_OPAQUE_U64
+        && var->type != ASN_OPAQUE_I64
+        && var->type != ASN_OPAQUE_FLOAT
+        && var->type != ASN_OPAQUE_DOUBLE
+#endif /* OPAQUE_SPECIAL_TYPES */
+      ){
 	sprintf(buf, "Wrong Type (should be Opaque): ");
 	buf += strlen(buf);
 	sprint_by_type(buf, var, NULL, NULL, NULL);
 	return;
     }
+#ifdef OPAQUE_SPECIAL_TYPES
+    switch(var->type) {
+      case ASN_OPAQUE_COUNTER64:
+      case ASN_OPAQUE_U64:
+      case ASN_OPAQUE_I64:
+        sprint_counter64(buf, var, enums, hint, units);
+        break;
+        
+      case ASN_OPAQUE_FLOAT:
+        sprint_float(buf, var, enums, hint, units);
+        break;
+
+      case ASN_OPAQUE_DOUBLE:
+        sprint_double(buf, var, enums, hint, units);
+        break;
+
+      case ASN_OPAQUE:
+#endif
     if (!quick_print){
 	sprintf(buf, "OPAQUE: ");
 	buf += strlen(buf);
     }
     sprint_hexstring(buf, var->val.string, var->val_len);
     buf += strlen (buf);
+#ifdef OPAQUE_SPECIAL_TYPES
+    }
+#endif
     if (units) sprintf (buf, " %s", units);
 }
 
@@ -701,7 +780,13 @@ sprint_counter64(buf, var, enums, hint, units)
     char *hint;
     char *units;
 {
-    if (var->type != ASN_COUNTER64){
+  if (var->type != ASN_COUNTER64
+#ifdef OPAQUE_SPECIAL_TYPES
+      && var->type != ASN_OPAQUE_COUNTER64
+      && var->type != ASN_OPAQUE_I64
+      && var->type != ASN_OPAQUE_U64
+#endif
+    ){
 	sprintf(buf, "Wrong Type (should be Counter64): ");
 	buf += strlen(buf);
 	sprint_by_type(buf, var, NULL, NULL, NULL);
@@ -709,14 +794,36 @@ sprint_counter64(buf, var, enums, hint, units)
     }
 /* XXX */
     if (!quick_print){
-	sprintf(buf, "Counter64: ");
+#ifdef OPAQUE_SPECIAL_TYPES
+      if (var->type != ASN_COUNTER64) {
+	sprintf(buf, "Opaque: ");
+	buf += strlen(buf);
+      }
+#endif
+#ifdef OPAQUE_SPECIAL_TYPES
+        switch(var->type) {
+          case ASN_OPAQUE_U64:
+            sprintf(buf, "UInt64: ");
+            break;
+          case ASN_OPAQUE_I64:
+            sprintf(buf, "Int64: ");
+            break;
+          case ASN_COUNTER64:
+          case ASN_OPAQUE_COUNTER64:
+#endif
+            sprintf(buf, "Counter64: ");
+#ifdef OPAQUE_SPECIAL_TYPES
+        }
+#endif
 	buf += strlen(buf);
     }
-    sprintf(buf, printU64(var->val.counter64));
+    if (var->type == ASN_OPAQUE_I64)
+      sprintf(buf, printI64(var->val.counter64));
+    else
+      sprintf(buf, printU64(var->val.counter64));
     buf += strlen (buf);
     if (units) sprintf (buf, " %s", units);
 }
-
 
 static void
 sprint_unknowntype(buf, var, enums, hint, units)
@@ -781,9 +888,23 @@ sprint_by_type(buf, var, enums, hint, units)
 	    sprint_uinteger(buf, var, enums, hint, units);
 	    break;
 	case ASN_COUNTER64:
+#ifdef OPAQUE_SPECIAL_TYPES
+	case ASN_OPAQUE_U64:
+	case ASN_OPAQUE_I64:
+	case ASN_OPAQUE_COUNTER64:
+#endif /* OPAQUE_SPECIAL_TYPES */
 	    sprint_counter64(buf, var, enums, hint, units);
 	    break;
+#ifdef OPAQUE_SPECIAL_TYPES
+	case ASN_OPAQUE_FLOAT:
+	    sprint_float(buf, var, enums, hint, units);
+	    break;
+	case ASN_OPAQUE_DOUBLE:
+	    sprint_double(buf, var, enums, hint, units);
+	    break;
+#endif /* OPAQUE_SPECIAL_TYPES */
 	default:
+            DEBUGP("bad type: %d\n", var->type);
 	    sprint_badtype(buf, var, enums, hint, units);
 	    break;
     }

@@ -409,6 +409,36 @@ asn_parse_header(data, datalength, type)
 	ERROR_MSG("asn length too long");
 	return NULL;
     }
+#ifdef OPAQUE_SPECIAL_TYPES
+
+    if ((*type == ASN_OPAQUE) &&
+        (*bufp == ASN_OPAQUE_TAG1)) {
+      /* check if 64-but counter */
+      switch(*(bufp+1)) {
+        case ASN_OPAQUE_COUNTER64:
+        case ASN_OPAQUE_U64:
+        case ASN_OPAQUE_FLOAT:
+        case ASN_OPAQUE_DOUBLE:
+        case ASN_OPAQUE_I64:
+          *type = *(bufp+1);
+          break;
+        
+        default:
+          /* just an Opaque */
+          *datalength = (int)asn_length;
+          return bufp;
+      }
+      /* value is encoded as special format */
+      bufp = asn_parse_length(bufp + 2, &asn_length);
+      if (bufp == NULL)
+        return NULL;
+      header_len = bufp - data;
+      if (header_len + asn_length > *datalength){
+        ERROR_MSG("asn length too long");
+        return NULL;
+      }
+    }
+#endif /* OPAQUE_SPECIAL_TYPES */
     *datalength = (int)asn_length;
     return bufp;
 }
@@ -939,6 +969,25 @@ asn_parse_unsigned_int64(data, datalength, type, cp, countersize)
 	ERROR_MSG("overflow of message");
 	return NULL;
     }
+#ifdef OPAQUE_SPECIAL_TYPES
+/* 64 bit counters as opaque */
+    if ((*type == ASN_OPAQUE) &&
+            (asn_length <= ASN_OPAQUE_COUNTER64_MX_BER_LEN) &&
+	    (*bufp == ASN_OPAQUE_TAG1) &&
+	    ((*(bufp+1) == ASN_OPAQUE_COUNTER64) ||
+             (*(bufp+1) == ASN_OPAQUE_U64))) {
+	/* change type to Counter64 or U64 */
+        *type = *(bufp+1);
+        /* value is encoded as special format */
+	bufp = asn_parse_length(bufp + 2, &asn_length);
+        if (bufp == NULL)
+            return NULL;
+        if (asn_length + (bufp - data) > *datalength){
+            ERROR_MSG("overflow of message");
+            return NULL;
+        }
+    }
+#endif /* OPAQUE_SPECIAL_TYPES */
     if (((int)asn_length > (intsize * 2 + 1)) ||
 	(((int)asn_length == (intsize * 2 + 1)) && *bufp != 0x00)){
 	ERROR_MSG("I don't support such large integers");
@@ -1013,11 +1062,49 @@ asn_build_unsigned_int64(data, datalength, type, cp, countersize)
 	    low <<= 8;
 	}
     }
+#ifdef OPAQUE_SPECIAL_TYPES
+/* encode a Counter64 as an opaque (it also works in SNMPv1) */
+    /* turn into Opaque holding special tagged value */
+    if (type == ASN_OPAQUE_COUNTER64) {
+        /* put the tag and length for the Opaque wrapper */
+        data = asn_build_header(data, datalength, ASN_OPAQUE, intsize+3);
+        if (data == NULL)
+            return NULL;
+        if (*datalength < (intsize+3))
+            return NULL;
+	/* put the special tag and length */
+	*data++ = ASN_OPAQUE_TAG1;
+	*data++ = ASN_OPAQUE_COUNTER64;
+	*data++ = (u_char)intsize;
+	*datalength = *datalength - 3;
+    }
+    else
+/* Encode the Unsigned int64 in an opaque */
+    /* turn into Opaque holding special tagged value */
+    if (type == ASN_OPAQUE_U64) {
+        /* put the tag and length for the Opaque wrapper */
+        data = asn_build_header(data, datalength, ASN_OPAQUE, intsize+3);
+        if (data == NULL)
+            return NULL;
+        if (*datalength < (intsize+3))
+            return NULL;
+	/* put the special tag and length */
+	*data++ = ASN_OPAQUE_TAG1;
+	*data++ = ASN_OPAQUE_U64;
+	*data++ = (u_char)intsize;
+	*datalength = *datalength - 3;
+    }
+    else
+    {
+#endif /* OPAQUE_SPECIAL_TYPES */
     data = asn_build_header(data, datalength, type, intsize);
     if (data == NULL)
 	return NULL;
     if (*datalength < intsize)
 	return NULL;
+#ifdef OPAQUE_SPECIAL_TYPES
+    }
+#endif /* OPAQUE_SPECIAL_TYPES */
     *datalength -= intsize;
     if (add_null_byte == 1){
 	*data++ = '\0';
@@ -1032,3 +1119,375 @@ asn_build_unsigned_int64(data, datalength, type, cp, countersize)
     }
     return data;
 }
+
+#ifdef OPAQUE_SPECIAL_TYPES
+
+u_char *
+asn_parse_signed_int64(data, datalength, type, cp, countersize)
+    register u_char	    *data;	/* IN - pointer to start of object */
+    register int	    *datalength;/* IN/OUT - number of valid bytes left in buffer */
+    u_char		    *type;	/* OUT - asn type of object */
+    struct counter64	    *cp;	/* IN/OUT -pointer to counter struct */
+    int			    countersize;/* IN - size of output buffer */
+{
+  register u_char *bufp = data;
+  u_long	    asn_length;
+  register u_int low = 0, high = 0;
+  int intsize = 4;
+    
+  if (countersize != sizeof(struct counter64)){
+    ERROR_MSG("not right size");
+    return NULL;
+  }
+  *type = *bufp++;
+  bufp = asn_parse_length(bufp, &asn_length);
+  if (bufp == NULL){
+    ERROR_MSG("bad length");
+    return NULL;
+  }
+  if ((asn_length + (bufp - data)) > (u_int)(*datalength)){
+    ERROR_MSG("overflow of message");
+    return NULL;
+  }
+  if ((*type == ASN_OPAQUE) &&
+      (asn_length <= ASN_OPAQUE_COUNTER64_MX_BER_LEN) &&
+      (*bufp == ASN_OPAQUE_TAG1) &&
+       (*(bufp+1) == ASN_OPAQUE_I64)) {
+    /* change type to Int64 */
+    *type = *(bufp+1);
+    /* value is encoded as special format */
+    bufp = asn_parse_length(bufp + 2, &asn_length);
+    if (bufp == NULL)
+      return NULL;
+    if (asn_length + (bufp - data) > *datalength){
+      ERROR_MSG("overflow of message");
+      return NULL;
+    }
+  }
+  /* this should always have been true until snmp gets int64 PDU types */
+  else {
+    ERROR_MSG("wrong type");
+    return NULL;
+  }
+  if (((int)asn_length > (intsize * 2 + 1)) ||
+      (((int)asn_length == (intsize * 2 + 1)) && *bufp != 0x00)){
+    ERROR_MSG("I don't support such large integers");
+    return NULL;
+  }
+  *datalength -= (int)asn_length + (bufp - data);
+  if (*bufp & 0x80){
+    low = ~low; /* integer is negative */
+    high = ~high;
+  }
+  while(asn_length--){
+    high = (high << 8) | ((low & 0xFF000000) >> 24);
+    low = (low << 8) | *bufp++;
+  }
+  cp->low = low;
+  cp->high = high;
+  return bufp;
+}
+
+u_char *
+asn_build_signed_int64(data, datalength, type, cp, countersize)
+    register u_char *data;	/* IN - pointer to start of output buffer */
+    register int    *datalength;/* IN/OUT - number of valid bytes left in buffer */
+    u_char	    type;	/* IN - asn type of object */
+    struct counter64 *cp;	/* IN - pointer to counter struct */
+    register int    countersize; /* IN - size of *intp */
+{
+/*
+ * ASN.1 integer ::= 0x02 asnlength byte {byte}*
+ */
+
+    struct counter64 c64;
+    register u_int mask, mask2;
+    u_long low, high;
+    int intsize;
+
+    if (countersize != sizeof (struct counter64))
+	return NULL;
+    intsize = 8;
+    memcpy(&c64, cp, sizeof(struct counter64));  /* we're may modify it */
+    low = c64.low;
+    high = c64.high;
+    
+    /*
+     * Truncate "unnecessary" bytes off of the most significant end of this
+     * 2's complement integer.  There should be no sequence of 9
+     * consecutive 1's or 0's at the most significant end of the
+     * integer.
+     */
+    mask = ((u_int) 0xFF) << (8 * (sizeof(u_int) - 1));
+    mask2 = ((u_int) 0x1FF) << ((8 * (sizeof(u_int) - 1)) - 1);
+    /* mask is 0xFF800000 on a big-endian machine */
+    while((((high & mask2) == 0) || ((high & mask2) == mask2)) && intsize > 1){
+      intsize--;
+      high = (high << 8)
+        | ((low & mask) >> (8 * (sizeof(u_int) - 1)));
+      low <<= 8;
+    }
+    /* until a real int64 gets incorperated into SNMP, we are going to
+       encode it as an opaque instead.  First, we build the opaque
+       header and then the int64 tag type we use to mark it as an
+       int64 in the opaque string. */
+    data = asn_build_header(data, datalength, ASN_OPAQUE, intsize+3);
+    if (data == NULL)
+	return NULL;
+    if (*datalength < (intsize+3))
+	return NULL;
+    *data++ = ASN_OPAQUE_TAG1;
+    *data++ = ASN_OPAQUE_I64;
+    *data++ = (u_char)intsize;
+    *datalength -= (3 + intsize);
+    
+    while(intsize--){
+	*data++ = (u_char)((high & mask) >> (8 * (sizeof(u_int) - 1)));
+	high = (high << 8)
+	    | ((low & mask) >> (8 * (sizeof(u_int) - 1)));
+	low <<= 8;
+    }
+    return data;
+}
+
+/*
+ * asn_parse_float - pulls a single precision floating-point out of an opaque type.
+ *
+ *  On entry, datalength is input as the number of valid bytes following
+ *   "data".  On exit, it is returned as the number of valid bytes
+ *   following the end of this object.
+ *
+ *  Returns a pointer to the first byte past the end
+ *   of this object (i.e. the start of the next object).
+ *  Returns NULL on any error.
+ */
+u_char *
+asn_parse_float(data, datalength, type, floatp, floatsize)
+    register u_char	    *data;	/* IN - pointer to start of object */
+    register int	    *datalength;/* IN/OUT - number of valid bytes left in buffer */
+    u_char		    *type;	/* OUT - asn type of object */
+    float	            *floatp;	/* IN/OUT - pointer to float */
+    int			    floatsize;  /* IN - size of output buffer */
+{
+    register u_char *bufp = data;
+    u_long	    asn_length;
+    union {
+        float  floatVal;
+	long   longVal;
+	u_char c[sizeof(float)];
+    } fu;
+
+    if (floatsize != sizeof(float)){
+	ERROR_MSG("not right size");
+	return NULL;
+    }
+    *type = *bufp++;
+    bufp = asn_parse_length(bufp, &asn_length);
+    if (bufp == NULL){
+	ERROR_MSG("bad length");
+	return NULL;
+    }
+    if (asn_length + (bufp - data) > *datalength){
+	ERROR_MSG("overflow of message");
+	return NULL;
+    }
+/* the float is encoded as an opaque */
+    if ((*type == ASN_OPAQUE) &&
+            (asn_length == ASN_OPAQUE_FLOAT_BER_LEN) &&
+	    (*bufp == ASN_OPAQUE_TAG1) &&
+	    (*(bufp+1) == ASN_OPAQUE_FLOAT)) {
+        /* value is encoded as special format */
+	bufp = asn_parse_length(bufp + 2, &asn_length);
+        if (bufp == NULL)
+            return NULL;
+        if (asn_length + (bufp - data) > *datalength){
+            ERROR_MSG("overflow of message");
+            return NULL;
+        }
+	/* change type to Float */
+	*type = ASN_OPAQUE_FLOAT;
+    }
+
+    if (asn_length != sizeof(float)) {
+	ERROR_MSG("Size of float incorrect");
+	return NULL;
+    }
+    *datalength -= (int)asn_length + (bufp - data);
+    bcopy((char *)bufp, (char *)(&(fu.c[0])), (int)asn_length);
+
+   /* correct for endian differences */
+    fu.longVal = ntohl(fu.longVal);	
+
+    *floatp =  fu.floatVal;
+
+    return bufp;
+}
+
+/*
+ * asn_build_float - builds an ASN object containing a single precision floating-point
+ *                    number in an Opaque value.
+ *
+ *  On entry, datalength is input as the number of valid bytes following
+ *   "data".  On exit, it is returned as the number of valid bytes
+ *   following the end of this object.
+ *
+ *  Returns a pointer to the first byte past the end
+ *   of this object (i.e. the start of the next object).
+ *  Returns NULL on any error.
+ */
+u_char *
+asn_build_float(data, datalength, type, floatp, floatsize)
+    register u_char *data;	/* IN - pointer to start of output buffer */
+    register int    *datalength;/* IN/OUT - number of valid bytes left in buffer */
+    u_char	    type;	/* IN - asn type of object */
+    float           *floatp;	/* IN - pointer to float value */
+    register int    floatsize;	/* IN - size of *floatp */
+{
+    union {
+        float  floatVal;
+        int    intVal;
+	u_char c[sizeof(float)];
+    } fu;
+
+    if (floatsize != sizeof (float))
+	return NULL;
+
+/* encode the float as an opaque */
+    /* turn into Opaque holding special tagged value */
+
+    /* put the tag and length for the Opaque wrapper */
+    data = asn_build_header(data, datalength, ASN_OPAQUE, floatsize+3);
+    if (data == NULL)
+        return NULL;
+    if (*datalength < (floatsize+3))
+        return NULL;
+    /* put the special tag and length */
+    *data++ = ASN_OPAQUE_TAG1;
+    *data++ = ASN_OPAQUE_FLOAT;
+    *data++ = (u_char)floatsize;
+    *datalength = *datalength - 3;
+
+    fu.floatVal = *floatp;
+    /* correct for endian differences */
+    fu.intVal = htonl(fu.intVal);	
+
+    *datalength -= floatsize;
+    bcopy((char *)(&(fu.c[0])), (char *)data, (int)floatsize);
+
+    data += floatsize;
+    return data;
+}
+
+u_char *
+asn_parse_double(data, datalength, type, doublep, doublesize)
+    register u_char	    *data;	/* IN - pointer to start of object */
+    register int	    *datalength;/* IN/OUT - number of valid bytes left in buffer */
+    u_char		    *type;	/* OUT - asn type of object */
+    double	            *doublep;	/* IN/OUT - pointer to double */
+    int			    doublesize; /* IN - size of output buffer */
+{
+    register u_char *bufp = data;
+    u_long	    asn_length;
+    long            tmp;
+    union {
+        double doubleVal;
+        int    intVal[2];
+	u_char c[sizeof(double)];
+    } fu;
+    
+
+    if (doublesize != sizeof(double)){
+	ERROR_MSG("not right size");
+	return NULL;
+    }
+    *type = *bufp++;
+    bufp = asn_parse_length(bufp, &asn_length);
+    if (bufp == NULL){
+	ERROR_MSG("bad length");
+	return NULL;
+    }
+    if (asn_length + (bufp - data) > *datalength){
+	ERROR_MSG("overflow of message");
+	return NULL;
+    }
+/* the double is encoded as an opaque */
+    if ((*type == ASN_OPAQUE) &&
+            (asn_length == ASN_OPAQUE_DOUBLE_BER_LEN) &&
+	    (*bufp == ASN_OPAQUE_TAG1) &&
+	    (*(bufp+1) == ASN_OPAQUE_DOUBLE)) {
+        /* value is encoded as special format */
+	bufp = asn_parse_length(bufp + 2, &asn_length);
+        if (bufp == NULL)
+            return NULL;
+        if (asn_length + (bufp - data) > *datalength){
+            ERROR_MSG("overflow of message");
+            return NULL;
+        }
+	/* change type to Double */
+	*type = ASN_OPAQUE_DOUBLE;
+    }
+
+    if (asn_length != sizeof(double)) {
+	ERROR_MSG("Size of double incorrect");
+	return NULL;
+    }
+    *datalength -= (int)asn_length + (bufp - data);
+    bcopy((char *)bufp, (char *)(&(fu.c[0])), (int)asn_length);
+
+   /* correct for endian differences */
+
+    tmp = ntohl(fu.intVal[0]);
+    fu.intVal[0] = ntohl(fu.intVal[1]);
+    fu.intVal[1] = tmp;
+    	
+    *doublep =  fu.doubleVal;
+
+    return bufp;
+}
+
+u_char *
+asn_build_double(data, datalength, type, doublep, doublesize)
+    register u_char *data;	/* IN - pointer to start of output buffer */
+    register int    *datalength;/* IN/OUT - number of valid bytes left in buffer */
+    u_char	    type;	/* IN - asn type of object */
+    double          *doublep;	/* IN - pointer to float value */
+    register int    doublesize;	/* IN - size of *floatp */
+{
+    long  tmp;
+    union {
+        double doubleVal;
+	int    intVal[2];
+	u_char c[sizeof(double)];
+    } fu;
+
+    if (doublesize != sizeof (double))
+	return NULL;
+
+/* encode the double as an opaque */
+    /* turn into Opaque holding special tagged value */
+
+    /* put the tag and length for the Opaque wrapper */
+    data = asn_build_header(data, datalength, ASN_OPAQUE, doublesize+3);
+    if (data == NULL)
+        return NULL;
+    if (*datalength < (doublesize+3))
+        return NULL;
+    /* put the special tag and length */
+    *data++ = ASN_OPAQUE_TAG1;
+    *data++ = ASN_OPAQUE_DOUBLE;
+    *data++ = (u_char)doublesize;
+    *datalength = *datalength - 3;
+
+    fu.doubleVal = *doublep;
+    /* correct for endian differences */
+    tmp = htonl(fu.intVal[0]);
+    fu.intVal[0] = htonl(fu.intVal[1]);	
+    fu.intVal[1] = tmp;
+    *datalength -= doublesize;
+    bcopy((char *)(&(fu.c[0])), (char *)data, (int)doublesize);
+
+    data += doublesize;
+    return data;
+}
+
+#endif /* OPAQUE_SPECIAL_TYPES */

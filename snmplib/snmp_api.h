@@ -145,6 +145,11 @@ struct variable_list {
 	oid	*objid;
 	u_char  *bitstring;
 	struct counter64 *counter64;
+#ifdef OPAQUE_SPECIAL_TYPES
+	float   *floatVal;
+	double	*doubleVal;
+/*	t_union *unionVal; */
+#endif /* OPAQUE_SPECIAL_TYPES */
     } val;
     int	    val_len;
 };
