@@ -178,6 +178,7 @@ tcpTable_handler(netsnmp_mib_handler          *handler,
 {
     netsnmp_request_info  *request;
     netsnmp_variable_list *requestvb;
+    netsnmp_table_request_info *table_info;
     TCPTABLE_ENTRY_TYPE	  *entry;
     oid      subid;
     long     port;
@@ -197,7 +198,8 @@ tcpTable_handler(netsnmp_mib_handler          *handler,
             entry = (TCPTABLE_ENTRY_TYPE *)netsnmp_extract_iterator_context(request);
             if (!entry)
                 continue;
-            subid = requestvb->name[OID_LENGTH(tcpTable_oid)+1];
+            table_info = netsnmp_extract_table_info(request);
+            subid      = table_info->colnum;
 
             switch (subid) {
             case TCPCONNSTATE:
