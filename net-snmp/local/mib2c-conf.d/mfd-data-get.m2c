@@ -32,7 +32,7 @@
 @        if $node.noaccess == 1@
 @            break@ # skip to next column
 @        end@
-@        print Processing       nonindex $node@
+@        print | |   +-> Processing nonindex $node@
 @        include node-get.m2i@
 @    end@ # foreach column
 @end@ # foreach table
