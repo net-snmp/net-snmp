@@ -134,7 +134,8 @@ snmp_parse_args_descriptions(FILE *outf)
 int
 snmp_parse_args(int argc, 
 		char *const *argv, 
-		struct snmp_session *session, const char *localOpts, void(* proc)(int))
+		struct snmp_session *session, const char *localOpts,
+		void(* proc)(int, char *const *, int))
 {
   int arg;
   char *cp;
@@ -386,7 +387,7 @@ snmp_parse_args(int argc,
         break;
 
       default:
-	proc(arg);
+	proc(argc, argv, arg);
 	break;
     }
   }
