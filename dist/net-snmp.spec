@@ -58,8 +58,9 @@ rm -rf $RPM_BUILD_ROOT
 /usr/lib/*.so*
 
 %files devel
-%dir /usr/include
+/usr/include
 /usr/lib/*.a
+/usr/lib/*.la
 
 %changelog
 * Wed Oct 09 2002 Wes Hardaker <hardaker@users.sourceforge.net>
