@@ -1,0 +1,22 @@
+#!/bin/sh
+
+. ../eval_tools.sh
+
+HEADER for failure of SNMPv3 get using unknown user.
+
+#
+# Begin test
+#
+
+# standard V3 configuration for initial user
+. ./Sv3config
+
+STARTAGENT
+
+CAPTURE "snmpget $SNMP_FLAGS -v 3 -l nanp -u unknownuser -n xxx localhost system.sysUpTime.0"
+
+STOPAGENT
+
+CHECK "Unknown user name"
+
+FINISHED
