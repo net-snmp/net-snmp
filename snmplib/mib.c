@@ -940,6 +940,47 @@ struct tree *get_tree_head __P((void))
    return(tree_head);
 }
 
+static char *confmibdir=NULL;
+static char *confmibs=NULL;
+
+void
+handle_mibdirs_conf(word, line)
+  char *word;
+  char *line;
+{
+  if (confmibdir)
+    free(confmibdir);
+  confmibdir=strdup(line);
+  DEBUGP("using mibdir path: %s\n",line);
+}
+
+void
+handle_mibs_conf(word, line)
+  char *word;
+  char *line;
+{
+  if (confmibs)
+    free(confmibs);
+  confmibs=strdup(line);
+  DEBUGP("using mibs: %s\n",line);
+}
+
+void
+handle_mibfile_conf(word, line)
+  char *word;
+  char *line;
+{
+  DEBUGP("reading mibfile: %s\n",line);
+  read_mib(line);
+}
+
+void
+register_mib_handlers __P((void)) {
+  register_premib_handler("snmp","mibdirs",handle_mibdirs_conf,NULL);
+  register_premib_handler("snmp","mibs",handle_mibs_conf,NULL);
+  register_config_handler("snmp","mibfile",handle_mibfile_conf,NULL);
+}
+
 void
 init_mib __P((void))
 {
@@ -955,12 +996,21 @@ init_mib __P((void))
 
     env_var = getenv("MIBDIRS");
     if ( env_var == NULL ) {
+      if (confmibdir != NULL) {
+        if (*confmibdir == '+')
+          sprintf(path, "%s%c%s", DEFAULT_MIBDIRS, ENV_SEPARATOR_CHAR,
+                  confmibdir+1);
+        else
+          strcpy(path, confmibdir);
+      } else
         strcpy(path, DEFAULT_MIBDIRS);
     } else if ( *env_var == '+' ) {
       sprintf(path, "%s%c%s", DEFAULT_MIBDIRS, ENV_SEPARATOR_CHAR, env_var+1);
     } else {
       strcpy(path, env_var);
     }
+
+    DEBUGP("Looking in %s for mibs...\n",path);
 
     entry = strtok( path, ENV_SEPARATOR );
     while ( entry ) {
@@ -974,6 +1024,13 @@ init_mib __P((void))
 
     env_var = getenv("MIBS");
     if ( env_var == NULL ) {
+      if (confmibs != NULL) {
+        if (*confmibs == '+')
+          sprintf(path, "%s%c%s", DEFAULT_MIBS, ENV_SEPARATOR_CHAR,
+                  confmibs+1);
+        else
+          strcpy(path, confmibs);
+      } else
         strcpy(path, DEFAULT_MIBS);
     } else {
       if ( *env_var == '+' ) {
@@ -982,6 +1039,7 @@ init_mib __P((void))
         strcpy(path, env_var);
       }
     }
+    DEBUGP("Looking for mibs... %s\n",path);
     if (strcmp (path, "ALL") == 0) {
 	read_all_mibs();
     } else {

@@ -43,7 +43,20 @@ int config_errors;
 
 struct config_files *config_files = NULL;
 
-void
+struct config_line *
+register_premib_handler(type, token, parser, releaser)
+  char *type;
+  char *token;
+  void (*parser) __P((char *, char *));
+  void (*releaser) __P((void));
+{
+  struct config_line *ltmp;
+  ltmp = register_config_handler(type, token, parser, releaser);
+  if (ltmp != NULL)
+    ltmp->config_time = PREMIB_CONFIG;
+}
+
+struct config_line *
 register_config_handler(type, token, parser, releaser)
   char *type;
   char *token;
@@ -76,6 +89,7 @@ register_config_handler(type, token, parser, releaser)
     /* Not found, create a new one. */
     *ltmp = (struct config_line *) malloc(sizeof(struct config_line));
     (*ltmp)->next = NULL;
+    (*ltmp)->config_time = NORMAL_CONFIG;
     (*ltmp)->parse_line = 0;
     (*ltmp)->free_func = 0;
     (*ltmp)->config_token = strdup(token);
@@ -86,6 +100,7 @@ register_config_handler(type, token, parser, releaser)
 
   (*ltmp)->parse_line = parser;
   (*ltmp)->free_func = releaser;
+  return (*ltmp);
 }
 
 void
@@ -151,16 +166,17 @@ void read_config_with_type(filename, type)
   char *type;
 {
   struct config_files *ctmp = config_files;
-  for(;ctmp != NULL && strcmp(ctmp->fileHeader,"snmpd"); ctmp = ctmp->next);
+  for(;ctmp != NULL && strcmp(ctmp->fileHeader,type); ctmp = ctmp->next);
   if (ctmp)
-    read_config(filename, ctmp->start);
+    read_config(filename, ctmp->start, EITHER_CONFIG);
   else
-    fprintf(stderr, "snmpd: %s: %s\n", filename, strerror(errno));
+    fprintf(stderr, "%s: %s: %s\n", type, filename, strerror(errno));
 }
 
-void read_config(filename, line_handler)
+void read_config(filename, line_handler, when)
   char *filename;
   struct config_line *line_handler;
+  int when;
 {
 
   FILE *ifile;
@@ -173,10 +189,10 @@ void read_config(filename, line_handler)
   curfilename = filename;
   
   if ((ifile = fopen(filename, "r")) == NULL) {
-    fprintf(stderr, "snmpd: %s: %s\n", filename, strerror(errno));
+    fprintf(stderr, "ucd-snmp: %s: %s\n", filename, strerror(errno));
     return;
   } else {
-    DEBUGP("snmpd: Reading configuration %s\n", filename);
+    DEBUGP("ucd-snmp: Reading configuration %s\n", filename);
   }
 
   while (fgets(line, STRINGMAX, ifile) != NULL) 
@@ -201,7 +217,8 @@ void read_config(filename, line_handler)
                 lptr != NULL && !done;
                 lptr = lptr->next) {
               if (!strcasecmp(word,lptr->config_token)) {
-                (*(lptr->parse_line))(word,cptr);
+                if (when == EITHER_CONFIG || lptr->config_time == when)
+                  (*(lptr->parse_line))(word,cptr);
                 done = 1;
               }
             }
@@ -231,16 +248,30 @@ free_config __P((void))
 void
 read_configs __P((void))
 {
+  read_config_files(NORMAL_CONFIG);
+}
+
+void
+read_premib_configs __P((void))
+{
+  read_config_files(PREMIB_CONFIG);
+}
+
+void
+read_config_files(when)
+  int when;
+{
   int i;
   char configfile[300];
-  char *envconfpath;
+  char *envconfpath, *homepath;
   char *cptr1, *cptr2;
   char defaultPath[1024];
 
   struct config_files *ctmp = config_files;
   struct config_line *ltmp;
   
-  free_config();
+  if (when == PREMIB_CONFIG)
+    free_config();
 
   /* read all config file types */
   for(;ctmp != NULL; ctmp = ctmp->next) {
@@ -249,7 +280,11 @@ read_configs __P((void))
 
     /* read the config files */
     if ((envconfpath = getenv("SNMPCONFPATH")) == NULL) {
-      sprintf(defaultPath,"%s:%s",SNMPSHAREPATH,SNMPLIBPATH);
+      homepath=getenv("HOME");
+      sprintf(defaultPath,"%s:%s%s%s%s",SNMPSHAREPATH,SNMPLIBPATH,
+              ((homepath == NULL) ? "" : ":"),
+              ((homepath == NULL) ? "" : homepath),
+              ((homepath == NULL) ? "" : "/.snmp"));
       envconfpath = defaultPath;
     }
     envconfpath = strdup(envconfpath);  /* prevent actually writing in env */
@@ -263,9 +298,9 @@ read_configs __P((void))
       else
         *cptr1 = 0;
       sprintf(configfile,"%s/%s.conf",cptr2, ctmp->fileHeader);
-      read_config (configfile, ltmp);
+      read_config (configfile, ltmp, when);
       sprintf(configfile,"%s/%s.local.conf",cptr2, ctmp->fileHeader);
-      read_config (configfile, ltmp);
+      read_config (configfile, ltmp, when);
       cptr2 = ++cptr1;
     }
     free(envconfpath);
