@@ -92,6 +92,7 @@ SOFTWARE.
 #include "int64.h"
 #include "read_config.h"
 #include "snmp_debug.h"
+#include "snmp_client.h"
 
 static void init_snmp_session (void);
 

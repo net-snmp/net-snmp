@@ -3249,7 +3249,6 @@ static void print_mib_leaves(FILE *f, struct tree *tp)
 
   { int i, count = 0;
     u_long previous = 0;
-    struct tree *lp;
 
     for (ntp = tp->child_list; ntp; ntp = ntp->next_peer) count++;
 
