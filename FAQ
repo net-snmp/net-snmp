@@ -91,7 +91,7 @@ TABLE OF CONTENTS
    How can I combine two copies of the 'mib2' tree from separate subagents?
    What traps are sent by the agent?
    How can I send a particular trap to selected destinations?
-   Why does calling 'snmp_v2trap' generate an SNMPv1 trap (or vice versa)?
+   Why does calling 'send_v2trap' generate an SNMPv1 trap (or vice versa)?
    When I run the agent it runs and then quits without staying around. Why?
    After a while the agent stops responding, and starts eating CPU time.  Why?
    How can I stop other people getting at my agent?
@@ -1974,7 +1974,7 @@ How can I send a particular trap to selected destinations?
 
     With the 4.2.x agent, this isn't possible (or at least not
   easily).  When you request the agent to generate a trap (using
-  either 'snmp_v2trap' or 'snmp_easy_trap'), this will be send
+  either 'send_v2trap' or 'send_easy_trap'), this will be send
   to all the known destinations.
 
     The 5.0 agent introduces preliminary support for the
@@ -1986,7 +1986,7 @@ How can I send a particular trap to selected destinations?
 
 
 
-Why does calling 'snmp_v2trap' generate an SNMPv1 trap (or vice versa)?
+Why does calling 'send_v2trap' generate an SNMPv1 trap (or vice versa)?
 ----------------------------------------------------------------------
 
     The two versions of the trap API calls are concerned with how
