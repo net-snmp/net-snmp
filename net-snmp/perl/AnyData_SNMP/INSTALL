@@ -18,6 +18,8 @@ is a good source for documentation about the AnyData modules.
   
 
 Install steps:
+  0) INSTALL the DBI perl module (run: perl -MCPAN -e "install DBI")
+
   1) download, and install the modified AnyData perl modules from:
      http://www.net-snmp.org/AnyData-wes/AnyData-0.05.tar.gz
      http://www.net-snmp.org/AnyData-wes/DBD-AnyData-0.05.wes.tar.gz
