@@ -99,8 +99,6 @@ typedef struct netsnmp_interface_entry_s {
      */
     char   *if_name;
     char   *if_descr;
-    char   *if_alias;
-    char   *if_old_alias;
     int     if_type;
     unsigned int     if_speed;
     unsigned int     if_speed_high;
@@ -111,12 +109,10 @@ typedef struct netsnmp_interface_entry_s {
     u_long  if_lastchange;
     time_t  if_discontinuity;
 
-   char  if_admin_status;
    char  if_oper_status;
 
    /** booleans (not TruthValues!) */
    char  if_promiscuous;
-   char  if_link_updown_trap;
    char  if_connector_present;
 
    /*
@@ -191,6 +187,12 @@ netsnmp_access_interface_entry_get_by_index(netsnmp_container *container,
  * find ifIndex for given interface. 0 == not found.
  */
 oid netsnmp_access_interface_index_find(const char *name);
+
+/*
+ * copy interface entry data
+ */
+int netsnmp_access_interface_entry_copy(netsnmp_interface_entry * lhs,
+                                        netsnmp_interface_entry * rhs);
 
 /**---------------------------------------------------------------------*/
 
