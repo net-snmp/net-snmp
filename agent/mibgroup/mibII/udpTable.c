@@ -214,6 +214,15 @@ LowState = -1;		/* UDP doesn't have 'State', but it's a useful flag */
 
 #else /* solaris2 - udp */
 
+static int
+UDP_Cmp(void *addr, void *ep)
+{
+    if (memcmp((mib2_udpEntry_t *)ep, (mib2_udpEntry_t *)addr,
+	    sizeof(mib2_udpEntry_t)) == 0)
+	return (0);
+    else
+	return (1);
+}
 
 u_char *
 var_udpEntry(struct variable *vp,
@@ -223,6 +232,71 @@ var_udpEntry(struct variable *vp,
 	     size_t *var_len,
 	     WriteMethod **write_method)
 {
+    oid newname[MAX_OID_LEN], lowest[MAX_OID_LEN], *op;
+    u_char *cp;
+
+#define UDP_LISTEN_LENGTH 15
+#define UDP_LOCADDR_OFF   10
+#define UDP_LOCPORT_OFF   14
+    mib2_udpEntry_t Lowentry, Nextentry, entry;
+    req_e           req_type;
+    int             Found = 0;
+
+    memset (&Lowentry, 0, sizeof (Lowentry));
+    memcpy( (char *)newname,(char *)vp->name, vp->namelen * sizeof(oid));
+    if (*length == UDP_LISTEN_LENGTH) /* Assume that the input name is the lowest */
+	memcpy( (char *)lowest,(char *)name, UDP_LISTEN_LENGTH * sizeof(oid));
+    for (Nextentry.udpLocalAddress = (u_long)-1, req_type = GET_FIRST;
+	    ;
+	    req_type = GET_NEXT) {
+	if (getMibstat(MIB_UDP_LISTEN, &entry, sizeof(mib2_udpEntry_t),
+		req_type, &UDP_Cmp, &entry) != 0)
+	    break;
+	if (entry.udpEntryInfo.ue_state != MIB2_UDP_idle)
+	    continue; /* we only want to get listen ports */
+	COPY_IPADDR(cp, (u_char *)&entry.udpLocalAddress, op, newname + UDP_LOCADDR_OFF);
+	newname[UDP_LOCPORT_OFF] = entry.udpLocalPort;
+
+	if (exact) {
+	    if (snmp_oid_compare(newname, UDP_LISTEN_LENGTH, name, *length) == 0){
+		memcpy( (char *)lowest,(char *)newname, UDP_LISTEN_LENGTH * sizeof(oid));
+		Lowentry = entry;
+		Found++;
+		break;  /* no need to search further */
+	    }
+	} else {
+	    if ((snmp_oid_compare(newname, UDP_LISTEN_LENGTH, name, *length) > 0) &&
+		((Nextentry.udpLocalAddress == (u_long)-1) ||
+		(snmp_oid_compare(newname, UDP_LISTEN_LENGTH, lowest, UDP_LISTEN_LENGTH) < 0) ||
+		(snmp_oid_compare(name, *length, lowest, UDP_LISTEN_LENGTH) == 0))){
+		/* if new one is greater than input and closer to input than
+		 * previous lowest, and is not equal to it, save this one as
+		 * the "next" one.
+		 */
+		memcpy( (char *)lowest,(char *)newname, UDP_LISTEN_LENGTH * sizeof(oid));
+		Lowentry = entry;
+		Found++;
+	    }
+	}
+	Nextentry = entry;
+    }
+    if (Found == 0)
+	return(NULL);
+    memcpy((char *)name, (char *)lowest,
+	(vp->namelen + UDP_LISTEN_LENGTH - UDP_LOCADDR_OFF) * sizeof(oid));
+    *length = vp->namelen + UDP_LISTEN_LENGTH - UDP_LOCADDR_OFF;
+    *write_method = 0;
+    *var_len = sizeof(long);
+    switch (vp->magic) {
+	case UDPLOCALADDRESS:
+	    long_return = Lowentry.udpLocalAddress;
+	    return (u_char *) &long_return;
+	case UDPLOCALPORT:
+	    long_return = Lowentry.udpLocalPort;
+	    return (u_char *) &long_return;
+	default:
+	    DEBUGMSGTL(("snmpd", "unknown sub-id %d in var_udpEntry\n", vp->magic));
+    }
     return NULL;
 }
 #endif /* solaris2 - udp */
