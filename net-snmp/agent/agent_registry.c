@@ -646,7 +646,7 @@ netsnmp_register_mib(const char *moduleName,
             sub2->name_a[range_subid - 1]  = i;
             sub2->start_a[range_subid - 1] = i;
             sub2->end_a[range_subid - 1]   = i;     /* XXX - ???? */
-            if (range_subid == mibloclen)
+            if (range_subid == (int)mibloclen)
                 ++sub2->end_a[range_subid - 1];
             res = netsnmp_subtree_load(sub2, context);
             sub2->flags |= SUBTREE_ATTACHED;
