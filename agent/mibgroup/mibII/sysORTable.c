@@ -122,7 +122,8 @@ var_sysORTable(struct variable *vp,
                size_t * length,
                int exact, size_t * var_len, WriteMethod ** write_method)
 {
-    unsigned long   i = 0, ret;
+    unsigned long   i = 0;
+    static unsigned long ret;
     struct sysORTable *ptr = table;
 
     if (header_simple_table
