@@ -22,9 +22,10 @@ NAME = net-snmp
 VERSION = 5.0.6
 RELEASE = 1
 
+VERSION_TAG=`echo Ext-$(VERSION) | sed 's/\./-/g;'`
 
 VER=$(VERSION)
-REL=($RELEASE)
+REL=$(RELEASE)
 
 # Define the RPM architecture, i.e., 'noarch', 'i386', 'i686', etc.
 ARCH = i386
@@ -64,7 +65,7 @@ $(GZIP_TAR):	$(RPM_BASE)/SOURCES
 	@echo "Creating a compressed archive of the package's source files..."
 	(cd $(RPM_BASE)/SOURCES; \
 	cvs -d$(CVSROOT) login; \
-	cvs -z3 -d$(CVSROOT) export -r$(VERSION) $(NAME); \
+	cvs -z3 -d$(CVSROOT) export -r$(VERSION_TAG) $(NAME); \
 	mv $(NAME) $(PKG_VER); \
 	tar cf $(PKG_VER).tar $(PKG_VER); \
 	gzip $(PKG_VER).tar)
@@ -96,7 +97,7 @@ RPM_SPEC   := $(RPM_BASE)/SPECS/$(SPEC_FILE)
 BINARY_RPM := $(RPM_BASE)/RPMS/$(ARCH)/$(PKG_VER)-$(REL).$(ARCH).rpm
 SOURCE_RPM := $(RPM_BASE)/SRPMS/$(PKG_VER)-$(REL).src.rpm
 
-rpm_files:	binary_rpm source_rpm
+rpm_files:	$(GZIP_TAR) binary_rpm source_rpm
 binary_rpm:	$(BINARY_RPM)
 source_rpm:	$(SOURCE_RPM)
 
