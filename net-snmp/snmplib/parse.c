@@ -71,6 +71,7 @@ struct tc {	/* textual conventions */
 
 
 int Line = 1;
+char File[300];
 int save_mib_descriptions = 0;
 
 #define SYNTAX_MASK	0x80
@@ -181,6 +182,7 @@ struct tok tokens[] = {
 	{ "TimeTicks", sizeof ("TimeTicks")-1, TIMETICKS },
 	{ "NOTIFICATION-TYPE", sizeof ("NOTIFICATION-TYPE")-1, NOTIFTYPE },
 	{ "OBJECT-GROUP", sizeof ("OBJECT-GROUP")-1, OBJGROUP },
+	{ "OBJECT-IDENTITY", sizeof ("OBJECT-IDENTITY")-1, OBJGROUP },
 	{ "OBJECTIDENTIFIER", sizeof ("OBJECTIDENTIFIER")-1, OBJID },
 	/*
 	 * This CONTINUE appends the next word onto OBJECT,
@@ -310,11 +312,13 @@ print_error(string, token, type)
     int type;
 {
     if (type == ENDOFFILE)
-	fprintf(stderr, "%s(EOF): On or around line %d\n", string, Line);
+	fprintf(stderr, "%s(EOF): On or around line %d in %s\n", string, Line,
+                File);
     else if (token)
-	fprintf(stderr, "%s(%s): On or around line %d\n", string, token, Line);
+	fprintf(stderr, "%s(%s): On or around line %d in %s\n", string, token,
+                Line, File);
     else
-	fprintf(stderr, "%s: On or around line %d\n", string, Line);
+	fprintf(stderr, "%s: On or around line %d in \n", string, Line, File);
 }
 
 #ifdef TEST
@@ -1279,6 +1283,9 @@ printf("Description== \"%.50s\"\n", quoted_string_buffer);
 /*
  * Parses an OBJECT GROUP macro.
  * Returns 0 on error.
+ *
+ * Also parses object-identy, since they are similar (ignore STATUS).
+ *   - WJH 10/96
  */
 static struct node *
 parse_objectgroup(fp, name)
@@ -1738,7 +1745,7 @@ skipget:
 		print_error("Bad parse of module header", (char *)NULL, type);
 		return NULL;
 	    }
-       } else if (type == OBJTYPE){
+        } else if (type == OBJTYPE){
 	    if (root == NULL){
 		/* first link in chain */
 		np = root = parse_objecttype(fp, name);
@@ -1887,10 +1894,12 @@ skipget:
 	} else if (type == ENDOFFILE){
 	    break;
  	} else if (lasttype == LABEL) {
- 	    while (type != RIGHTBRACKET)
- 	    {
- 		type = get_token(fp, token, MAXTOKEN);
- 	    }
+ 	    while (type != RIGHTBRACKET && type != ENDOFFILE)
+              type = get_token(fp, token, MAXTOKEN);
+            if (type == ENDOFFILE) {
+              print_error("Expected \"}\"", token, type);
+              return NULL;
+            }
  	    type = lasttype;
 	    
  	    goto skipget;
@@ -2024,12 +2033,15 @@ read_mib(filename)
     fp = fopen(filename, "r");
     if (fp == NULL)
 	return NULL;
+    DEBUGP1("Parsing mib file:  %s... ",filename);
+    strcpy(File,filename);
     nodes = parse(fp, nodes);
     if (!nodes){
 	fprintf(stderr, "Mib table is bad.  Exiting\n");
 	exit(1);
     }
     fclose(fp);
+    DEBUGP("Done\n");
 
     sprintf(tmpstr,"%s/mibs",SNMPLIBPATH);
     if (nodes != NULL && (dir = opendir(tmpstr))) {
@@ -2047,6 +2059,8 @@ read_mib(filename)
               perror("fopen");
               exit(1);
             }
+            Line = 1;
+            strcpy(File,tmpstr);
             nodes = parse(fp, nodes);
             if (nodes == NULL) {
               fprintf(stderr, "Mib table is bad.  Exiting\n");
