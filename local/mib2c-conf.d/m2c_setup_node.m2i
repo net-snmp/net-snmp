@@ -198,10 +198,6 @@
 @   eval $m2c_node_summary="$m2c_node_summary/H"@
 @end@
 ########################################################################
-@if "$m2c_data_context" eq "generated"@
-@   eval $m2c_nvv_sizeof = "$m2c_data_item$node"@
-@end@
-########################################################################
 @  ifconf ${m2c_defaults_dir}node-${node}.m2d@
 @  else@
 @    push@
