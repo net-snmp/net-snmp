@@ -36,7 +36,6 @@ PERFORMANCE OF THIS SOFTWARE.
 
 #include <config.h>
 #include "common_header.h"
-#include "extensible/extproto.h"
 #include "mibgroup/mib_module_includes.h"
 
 #include "party.h"
