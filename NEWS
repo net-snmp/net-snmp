@@ -1,6 +1,29 @@
 This file contains major changes in released revisions.  Please read
 the ChangeLog file for a more detailed listing of changes/bug fixes.
 
+*5.0.2*
+
+ New:
+    - mib2c support for the old-4.X style api and for scalars.
+    - many improvements to the netsh shell environment.
+
+ Fixes:
+    - tcpwrappers support should work significantly better.
+    - NFS file systems are better supported in the hrStorageTable
+    - the memory reporting no longer accidentally reports -1 integers
+    - a few memory leaks fixed in the table_iterator API
+    - fixes for Sun's "make"
+    - ds_ prefix name-space protection (-> netsnmp_ds_)
+      (run configure with --enable-ucd-compatibility for old API)
+    - v1/v2c access control fixes for ipv6 addresses
+    - many many misc fixes
+
+ Perl:
+    - The perl modules have a number of fixes, and the build process
+      was fixed (again).
+    - all make test suites should pass for people now.
+      (there are still some known minor limitations, but we removed the tests)
+
 *5.0.1*
 
  New:
@@ -94,7 +117,7 @@ the ChangeLog file for a more detailed listing of changes/bug fixes.
       - NetSNMP::agent which allows perl scripts to become net-snmp
         master or subagents
       - AnyData::SNMP is available that implements a perl DBI
-        interface to map SQL commands to SNMP.  Included is a "snmpsh"
+        interface to map SQL commands to SNMP.  Included is a "netsh"
         shell where SQL commands can be typed, aliases created, etc.
         See the perl/AnyData_SNMP/INSTALL file for details.
     - Beginning (alpha level quality) support for embedding perl
