@@ -325,10 +325,10 @@ char* typestr;
 {
 	if (typestr == NULL || *typestr == '\0') return TYPE_UNKNOWN;
 
+	if (!strncasecmp(typestr,"INTEGER32",8))
+            return(TYPE_INTEGER32);
 	if (!strncasecmp(typestr,"INTEGER",3))
             return(TYPE_INTEGER);
-	if (!strncasecmp(typestr,"INTEGER32",3))
-            return(TYPE_INTEGER32);
 	if (!strncasecmp(typestr,"UNSIGNED32",3))
             return(TYPE_UNSIGNED32);
 	if (!strcasecmp(typestr,"COUNTER")) /* check all in case counter64 */
@@ -362,6 +362,8 @@ char* typestr;
                                    /* but it does?                  */
 	if (!strncasecmp(typestr, "NOTIF", 3))
 		return(TYPE_NOTIFTYPE);
+	if (!strncasecmp(typestr, "TRAP", 4))
+		return(TYPE_TRAPTYPE);
         return(TYPE_UNKNOWN);
 }
 
@@ -623,6 +625,9 @@ char * str;
                 break;
 	case TYPE_NOTIFTYPE:
 		strcpy(str, "NOTIF");
+		break;
+	case TYPE_TRAPTYPE:
+		strcpy(str, "TRAP");
 		break;
 	case TYPE_OTHER: /* not sure if this is a valid leaf type?? */
 	case TYPE_BITSTRING:
