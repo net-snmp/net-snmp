@@ -162,6 +162,9 @@
 /* define if SIOCGIFADDR exists in sys/ioctl.h */
 #undef SYS_IOCTL_H_HAS_SIOCGIFADDR
 
+/* define if your compiler (processor) defines __FUNCTION__ for you */
+#undef HAVE_CPP_UNDERBAR_FUNCTION_DEFINED
+
 /* mib pointer to the top of the extensible tree.  This has been
  assigned to UCDavis by the iana group.  Optionally, point this to the
  location in the tree your company/organization has been allocated. */
