@@ -35,8 +35,8 @@ ultrix            OBJECT IDENTIFIER ::= { ucdSnmpAgent ULTRIXID }
 unknown           OBJECT IDENTIFIER ::= { ucdSnmpAgent UNKNOWNID }
 
 
-Processes OBJECT-TYPE
-	SYNTAX processes
+processes OBJECT-TYPE
+	SYNTAX Processes
 	ACCESS not-accessible
 	STATUS mandatory
 	DESCRIPTION
@@ -45,7 +45,7 @@ Processes OBJECT-TYPE
 	::= { local PROCMIBNUM }
 
 
-processes ::= SEQUENCE {
+Processes ::= SEQUENCE {
    processIndex  INTEGER,
    processNames  DisplayString,
    processMin    INTEGER,
@@ -126,8 +126,8 @@ processErrFix OBJECT-TYPE
 		"Setting this to one will try to fix the problem if possible."
 	::= { Processes ERRORFIX }
 
-Extensible OBJECT-TYPE
-	SYNTAX extensible
+extensible OBJECT-TYPE
+	SYNTAX Extensible
 	ACCESS not-accessible
 	STATUS mandatory
 	DESCRIPTION
@@ -135,7 +135,7 @@ Extensible OBJECT-TYPE
 	INDEX { extensibleIndex }
 	::= { local SHELLMIBNUM }
 
-extensible ::= SEQUENCE {
+Extensible ::= SEQUENCE {
    extensibleIndex   INTEGER,
    extensibleNames   DisplayString,
    extensibleCommand DisplayString,
@@ -192,15 +192,15 @@ extensibleErrFix OBJECT-TYPE
 		"Set to 1 to fix the problem, if possible."
 	::= { Extensible ERRORFIX }
 	
-Memory OBJECT-TYPE
-	SYNTAX extensible
+memory OBJECT-TYPE
+	SYNTAX Memory
 	ACCESS not-accessible
 	STATUS mandatory
 	DESCRIPTION
 		"Miscellanous stuff -- memory related."
 	::= { local MEMMIBNUM }
 
-memory ::= SEQUENCE {
+Memory ::= SEQUENCE {
    memIndex        INTEGER,
    memErrorName    DisplayString,
    memTotalSwap     INTEGER,
@@ -328,8 +328,8 @@ memSwapErrorMsg OBJECT-TYPE
           "Error message describing the errorflag condition"
      ::= { Memory ERRORMSG } 
 
-Lockd OBJECT-TYPE
-	SYNTAX lockd
+lockd OBJECT-TYPE
+	SYNTAX Lockd
 	ACCESS not-accessible
 	STATUS mandatory
 	DESCRIPTION
@@ -337,7 +337,7 @@ Lockd OBJECT-TYPE
 	INDEX { lockdIndex }
 	::= { local LOCKDMIBNUM }
 
-lockd ::= SEQUENCE {
+Lockd ::= SEQUENCE {
    lockdIndex   INTEGER,
    lockdError  INTEGER,
    lockdErrorMsg  DisplayString
@@ -367,8 +367,8 @@ lockdErrorMsg OBJECT-TYPE
 		"Error message if something is wrong"
 	::= { Lockd ERRORMSG }
 
-Disk 	OBJECT-TYPE
-	SYNTAX disk
+disk 	OBJECT-TYPE
+	SYNTAX Disk
 	ACCESS not-accessible
 	STATUS mandatory
 	DESCRIPTION
@@ -376,7 +376,7 @@ Disk 	OBJECT-TYPE
 	INDEX { diskIndex }
 	::= { local DISKMIBNUM }
 
-disk ::= SEQUENCE {
+Disk ::= SEQUENCE {
    diskIndex   INTEGER,
    diskPath  DisplayString,
    diskDevice  DisplayString,
@@ -469,8 +469,8 @@ diskErrorMsg OBJECT-TYPE
           "A text description of what caused the error flag to be set."
      ::= { Disk ERRORMSG } 
      
-Loadaves OBJECT-TYPE
-	SYNTAX loadaves
+loadaves OBJECT-TYPE
+	SYNTAX Loadaves
 	ACCESS not-accessible
 	STATUS mandatory
 	DESCRIPTION
@@ -479,7 +479,7 @@ Loadaves OBJECT-TYPE
 	::= { local LOADAVEMIBNUM }
 
 
-loadaves ::= SEQUENCE {
+Loadaves ::= SEQUENCE {
    loadaveIndex  INTEGER,
    loadaveNames  DisplayString,
    loadaveLoad   DisplayString,
@@ -537,8 +537,8 @@ loadaveErrMessage OBJECT-TYPE
 		"An error message describing the problem (if one exists)."
 	::= { Loadaves ERRORMSG }
 
-Version	OBJECT-TYPE
-	SYNTAX version
+version	OBJECT-TYPE
+	SYNTAX Version
 	ACCESS not-accessible
 	STATUS mandatory
 	DESCRIPTION
@@ -546,7 +546,7 @@ Version	OBJECT-TYPE
 	INDEX { versionIndex }
 	::= { local VERSIONMIBNUM }
 
-version ::= SEQUENCE {
+Version ::= SEQUENCE {
    versionIndex   INTEGER,
    versionTag  DisplayString,
    versionDate  DisplayString,
@@ -620,8 +620,8 @@ versionRestartAgent OBJECT-TYPE
           "Set to 1 to restart the agent."
      ::= { Version VERRESTARTAGENT } 
 
-Snmperrs OBJECT-TYPE
-	SYNTAX snmperrs
+snmperrs OBJECT-TYPE
+	SYNTAX Snmperrs
 	ACCESS not-accessible
 	STATUS mandatory
 	DESCRIPTION
@@ -630,7 +630,7 @@ Snmperrs OBJECT-TYPE
 	::= { local ERRORMIBNUM }
 
 
-snmperrs ::= SEQUENCE {
+Snmperrs ::= SEQUENCE {
    snmperrIndex  INTEGER,
    snmperrNames  DisplayString,
    snmperrError  INTEGER,
