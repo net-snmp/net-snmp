@@ -233,7 +233,7 @@ int main(int argc, char *argv[])
 
 	      case 'v':
 		if (argv[arg][2] != 0) argp = argv[arg]+2;
-		else if (arg == argc) {
+		else if (++arg == argc) {
 		    usage();
 		    exit(1);
 		}
