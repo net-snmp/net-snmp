@@ -94,16 +94,16 @@ fi
 if [ -z "$BUILDD" ]; then
    BUILDD=$HOME/build
 fi
-if [ -z "$INSTALLD" ]; then
-   INSTALLD=$HOME/build/`nsb-sysname`/usr/local
-fi
-
-
-########################################################################
-########################################################################
 if [ $SRCD != $BUILDD ];then
     BUILDD=$BUILDD/$VERSION-`nsb-sysname`
 fi
+if [ -z "$INSTALLD" ]; then
+   INSTALLD=$BUILDD/usr/local
+fi
+
+
+########################################################################
+########################################################################
 nsb-prompt "press enter to build $SRCD in $BUILDD, and install in $INSTALLD"
 nsb-build $VERSION $SRCD $BUILDD $INSTALLD $NSB_CONFIG_ALL
 rc=$?
