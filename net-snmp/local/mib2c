@@ -176,7 +176,7 @@ sub process_vars {
     $it =~ s/\$(\w+)\.(perltype)/$SNMP::MIB{$vars{$1}}{type}/g;
     $it =~ s/\$(\w+)\.(type)/$perltoctypes{$SNMP::MIB{$vars{$1}}{$2}}/g;
     $it =~ s/\$(\w+)\.(subid)/$SNMP::MIB{$vars{$1}}{subID}/g;
-    $it =~ s/\$(\w+)\.(settable)/(($SNMP::MIB{$vars{$1}}{access} =~ \/(ReadWrite|Create|Writeonly)\/)?1:0)/eg;
+    $it =~ s/\$(\w+)\.(settable)/(($SNMP::MIB{$vars{$1}}{access} =~ \/(ReadWrite|Create|WriteOnly)\/)?1:0)/eg;
     $it =~ s/\$(\w+)\.(noaccess)/(($SNMP::MIB{$vars{$1}}{access} =~ \/(NoAccess)\/)?1:0)/eg;
     $it =~ s/\$(\w+)\.(objectID|label|subID|access|status|syntax)/$SNMP::MIB{$vars{$1}}{$2}/g;
     $it =~ s/\$(\w+)\.(decl)/$perltodecl{$SNMP::MIB{$vars{$1}}{type}}/g;
