@@ -96,7 +96,7 @@ void  Init_HR_Store __P((void));
 
 int linux_mem __P((int, int));
 
-void	init_hrstore( )
+void	init_hr_storeage( )
 {
 #ifndef linux
     init_nlist( hrstore_nl );

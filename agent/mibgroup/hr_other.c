@@ -21,7 +21,7 @@ void  Init_HR_CoProc();
 int   Get_Next_HR_CoProc();
 char *describe_coproc();
 
-void	init_hrother( )
+void	init_hr_other( )
 {
     init_device[ HRDEV_PROC ] = &Init_HR_CPU;	
     next_device[ HRDEV_PROC ] = &Get_Next_HR_CPU;

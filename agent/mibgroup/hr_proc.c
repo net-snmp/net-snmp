@@ -41,7 +41,7 @@ static struct nlist hrproc_nl[] = {
 	 *********************/
 
 
-void	init_hrproc( )
+void	init_hr_proc( )
 {
     init_device[ HRDEV_PROC ] = &Init_HR_Proc;	
     next_device[ HRDEV_PROC ] = &Get_Next_HR_Proc;

@@ -55,7 +55,7 @@ extern int count_processes();
 	 *********************/
 
 
-void	init_hrsys( )
+void	init_hr_system( )
 {
 #ifndef linux
     init_nlist( hrsys_nl );

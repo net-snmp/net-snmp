@@ -35,7 +35,7 @@ int   network_errors();
 	 *********************/
 
 
-void	init_hrnet( )
+void	init_hr_network( )
 {
     init_device[ HRDEV_NETWORK ] = &Init_HR_Network;	
     next_device[ HRDEV_NETWORK ] = &Get_Next_HR_Network;

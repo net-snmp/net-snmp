@@ -67,7 +67,7 @@ static long HRD_savedCapacity;
 	 *********************/
 
 
-void	init_hrdisk( )
+void	init_hr_disk( )
 {
     init_device[ HRDEV_DISK ] = &Init_HR_Disk;	
     next_device[ HRDEV_DISK ] = &Get_Next_HR_Disk;

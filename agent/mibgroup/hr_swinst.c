@@ -79,7 +79,7 @@ extern int   Get_Next_HR_SWInst();
 extern void  End_HR_SWInst();
 
 
-void	init_hrswinst( )
+void	init_hr_swinst( )
 {
 #ifdef HAVE_LIBRPM
     rpmReadConfigFiles( NULL, NULL, NULL, 0);

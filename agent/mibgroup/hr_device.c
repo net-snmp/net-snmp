@@ -43,7 +43,7 @@ void Init_Device();
 	 *
 	 *********************/
 
-void	init_hrdevice( )
+void	init_hr_device( )
 {
     int i;
 
