@@ -7,6 +7,7 @@ u_char *var_extensible_lockd_test();
 u_char *var_extensible_loadave();
 u_char *var_extensible_proc();
 u_char *var_extensible_mem();
+u_char *var_extensible_errors();
 
 #ifdef PROCMIBNUM
 /* the variable that stores the process watching mib info */
@@ -99,6 +100,15 @@ struct variable2 extensible_loadave_variables[] = {
   {LOADMAXVAL, STRING, RONLY, var_extensible_loadave, 1, {LOADMAXVAL}},
     {ERRORFLAG, INTEGER, RONLY, var_extensible_loadave, 1, {ERRORFLAG}},
     {ERRORMSG, STRING, RONLY, var_extensible_loadave, 1, {ERRORMSG}}
+};
+#endif
+
+#ifdef ERRORMIBNUM
+struct variable2 extensible_error_variables[] = {
+  {MIBINDEX, INTEGER, RONLY, var_extensible_errors, 1, {MIBINDEX}},
+  {ERRORNAME, STRING, RONLY, var_extensible_errors, 1, {ERRORNAME}},
+    {ERRORFLAG, INTEGER, RONLY, var_extensible_errors, 1, {ERRORFLAG}},
+    {ERRORMSG, STRING, RONLY, var_extensible_errors, 1, {ERRORMSG}}
 };
 #endif
 
