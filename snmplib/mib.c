@@ -101,6 +101,7 @@ static void sprint_nsapaddress (char *, struct variable_list *, struct enum_list
 static void sprint_counter64 (char *, struct variable_list *, struct enum_list *, const char *, const char *);
 static void sprint_unknowntype (char *, struct variable_list *, struct enum_list *, const char *, const char *);
 static void sprint_badtype (char *, struct variable_list *, struct enum_list *, const char *, const char *);
+struct tree *_get_symbol(oid *objid, size_t objidlen, struct tree *subtree, char *buf, struct index_list *in_dices, char **end_of_known);
   
 #ifdef OPAQUE_SPECIAL_TYPES
 static void sprint_float (char *, struct variable_list *, struct enum_list *, const char *, const char *);
@@ -1488,19 +1489,24 @@ _sprint_objid(char *buf,
 {
     char    tempbuf[SPRINT_MAX_LEN], *cp;
     struct tree    *subtree = tree_head;
+    char *midpoint = 0;
 
     *tempbuf = '.';	/* this is a fully qualified name */
-    subtree = get_symbol(objid, objidlen, subtree, tempbuf + 1);
+    subtree = _get_symbol(objid, objidlen, subtree, tempbuf + 1, 0, &midpoint);
     if (ds_get_boolean(DS_LIBRARY_ID,DS_LIB_PRINT_NUMERIC_OIDS)) {
         cp = tempbuf;
     } else if (ds_get_int(DS_LIBRARY_ID, DS_LIB_PRINT_SUFFIX_ONLY)){
 	for(cp = tempbuf; *cp; cp++)
 	    ;
-	while(cp >= tempbuf){
-	    if (isalpha(*cp))
-		break;
-	    cp--;
-	}
+        if (midpoint)
+            cp = midpoint-2; /* beyond the '.' */
+        else {
+            while(cp >= tempbuf){
+                if (isalpha(*cp))
+                    break;
+                cp--;
+            }
+        }
 	while(cp >= tempbuf){
 	    if (*cp == '.')
 		break;
@@ -1702,7 +1708,8 @@ _get_symbol(oid *objid,
 	   size_t objidlen,
 	   struct tree *subtree,
 	   char *buf,
-	   struct index_list *in_dices)
+	   struct index_list *in_dices,
+           char **end_of_known)
 {
     struct tree    *return_tree = NULL;
 
@@ -1718,6 +1725,9 @@ _get_symbol(oid *objid,
 	    goto found;
 	}
     }
+
+    if (end_of_known)
+        *end_of_known = buf;
 
     /* subtree not found */
 
@@ -1753,7 +1763,7 @@ _get_symbol(oid *objid,
 	    numids = (size_t)*objid;
 	    if ( (1+numids) > objidlen)
 		goto finish_it;
-	    _get_symbol(objid + 1, numids, NULL, buf, NULL);
+	    _get_symbol(objid + 1, numids, NULL, buf, NULL, NULL);
 	    objid += (1+numids);
 	    objidlen -= (1+numids);
 	    break;
@@ -1782,7 +1792,7 @@ found:
 	*buf = '\0';
 
 	return_tree = _get_symbol(objid + 1, objidlen - 1, subtree->child_list,
-				 buf, in_dices);
+				 buf, in_dices, end_of_known);
     }
     if (return_tree != NULL)
 	return return_tree;
@@ -1796,7 +1806,7 @@ get_symbol(oid *objid,
 	   struct tree *subtree,
 	   char *buf)
 {
-   return _get_symbol(objid,objidlen,subtree,buf,0);
+   return _get_symbol(objid,objidlen,subtree,buf,0,0);
 }
 
 /*
