@@ -34,14 +34,14 @@ init_snmp_enum(void)
         return SE_NOMEM;
     current_maj_num = SE_MAX_IDS;
 
-    for (i = 0; i < SE_MAX_SUBIDS; i++) {
+    for (i = 0; i < SE_MAX_IDS; i++) {
         if (!snmp_enum_lists[i])
             snmp_enum_lists[i] = (struct snmp_enum_list **)
                 malloc(sizeof(struct snmp_enum_list *) * SE_MAX_SUBIDS);
         if (!snmp_enum_lists[i])
             return SE_NOMEM;
     }
-    current_min_num = SE_MAX_IDS;
+    current_min_num = SE_MAX_SUBIDS;
 
     if (!sliststorage)
         sliststorage = NULL;
