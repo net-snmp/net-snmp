@@ -418,8 +418,8 @@ header_ifEntry(struct variable *vp,
 {
 #define IFENTRY_NAME_LENGTH	10
     oid             newname[MAX_OID_LEN];
-    short           interface;
-    int             result, found = 0;
+    register int    interface;
+    int             result, count;
 
     DEBUGMSGTL(("mibII/interfaces", "var_ifEntry: "));
     DEBUGMSGOID(("mibII/interfaces", name, *length));
@@ -430,18 +430,16 @@ header_ifEntry(struct variable *vp,
     /*
      * find "next" interface 
      */
-    Interface_Scan_Init();
-    while (Interface_Scan_Next(&interface, NULL, NULL, NULL)) {
+    count = Interface_Scan_Get_Count();
+    for (interface = 1; interface <= count; interface++) {
         newname[IFENTRY_NAME_LENGTH] = (oid) interface;
         result =
             snmp_oid_compare(name, *length, newname,
                              (int) vp->namelen + 1);
-        if ((exact && (result == 0)) || (!exact && (result < 0))) {
-            found = 1;
+        if ((exact && (result == 0)) || (!exact && (result < 0)))
             break;
-        }
     }
-    if (0 == found) {
+    if (interface > count) {
         DEBUGMSGTL(("mibII/interfaces", "... index out of range\n"));
         return MATCH_FAILED;
     }
@@ -1693,17 +1691,6 @@ Interface_Scan_Init(void)
         /*
          * set name and interface# : 
          */
-        strncpy(ifrq.ifr_name, ifname, sizeof(ifrq.ifr_name));
-        ifrq.ifr_name[ sizeof(ifrq.ifr_name)-1 ] = 0;
-        if(ioctl(fd, SIOCGIFINDEX, &ifrq) < 0) {
-            snmp_log(LOG_ERR,"cannot find ifIndex for '%s', skipping\n",
-                     ifname);
-            free(nnew);
-            continue;
-        }
-        else
-            nnew->if_index = ifrq.ifr_ifindex;
-
         nnew->if_name = (char *) strdup(ifname);
         for (ptr = nnew->if_name; *ptr && (*ptr < '0' || *ptr > '9');
              ptr++);
@@ -1901,7 +1888,7 @@ Interface_Scan_Next(short *Index,
         if (1 || strcmp(saveName, "lo0") != 0) {        /* XXX */
 
             if (Index)
-                *Index = ifnet.if_index;
+                *Index = ++saveIndex;
             if (Retifnet)
                 *Retifnet = ifnet;
             if (Name)
