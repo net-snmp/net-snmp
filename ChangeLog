@@ -1,5 +1,11 @@
 -------------------------------------------------------------------------------
 
+20020-05-12 17:30  driehuis
+
+   * configure.in:
+
+   detect -ldevstat when needed; fix -lkvm detection
+
 Changes: V5.0 -> V5.0.1
 
 2002-05-10 17:09  hardaker
