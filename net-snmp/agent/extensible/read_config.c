@@ -178,7 +178,6 @@ int read_config(filename, procp, numps, pprelocs, numrelocs, pppassthrus,
               while (mntent = getmntent (mntfp))
 		if (strcmp (disk[*numdisks].path, mntent->mnt_dir) == 0) {
                   copy_word (mntent->mnt_fsname, disk[*numdisks].device);
-                  *numdisks += 1;
                   DEBUGP1("Disk:  %s\n",mntent->mnt_fsname);
 		  break;
                 }
@@ -191,6 +190,7 @@ int read_config(filename, procp, numps, pprelocs, numrelocs, pppassthrus,
               endmntent(mntfp);
               if (disk[*numdisks].device[0] != NULL) {
                 /* dummy clause for else below */
+                *numdisks += 1;  /* but inc numdisks here after test */
               }
 #else /* getmentent but not setmntent */
 	      mntfp = fopen (ETC_MNTTAB, "r");
