@@ -18,7 +18,6 @@
 #include <dmalloc.h>
 #endif
 
-
 /** @defgroup watcher watcher: watch a specified variable and process
  *   it as an instance or scalar object
  *  @ingroup leaf
@@ -198,15 +197,24 @@ netsnmp_get_watched_timestamp_handler(void)
 }
 
 int
+netsnmp_watched_timestamp_register(netsnmp_mib_handler *whandler,
+                                   netsnmp_handler_registration *reginfo,
+                                   marker_t timestamp)
+{
+    whandler->myvoid = (void *)timestamp;
+    netsnmp_inject_handler(reginfo, whandler);
+    return netsnmp_register_scalar(reginfo);   /* XXX - or instance? */
+}
+
+int
 netsnmp_register_watched_timestamp(netsnmp_handler_registration *reginfo,
                                    marker_t timestamp)
 {
     netsnmp_mib_handler *whandler;
 
     whandler         = netsnmp_get_watched_timestamp_handler();
-    whandler->myvoid = (void *)timestamp;
-    netsnmp_inject_handler(reginfo, whandler);
-    return netsnmp_register_scalar(reginfo);   /* XXX - or instance? */
+
+    return netsnmp_watched_timestamp_register(whandler, reginfo, timestamp);
 }
 
 
@@ -238,7 +246,10 @@ netsnmp_watched_timestamp_handler(netsnmp_mib_handler *handler,
          * data requests 
          */
     case MODE_GET:
-        uptime = netsnmp_marker_uptime( timestamp );
+        if (handler->flags & NETSNMP_WATCHER_DIRECT)
+            uptime = * (long*)timestamp;
+        else
+            uptime = netsnmp_marker_uptime( timestamp );
         snmp_set_var_typed_value(requests->requestvb,
                                  ASN_TIMETICKS,
                                  (u_char *) &uptime,
