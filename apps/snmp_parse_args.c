@@ -311,7 +311,7 @@ snmp_parse_args(int argc,
           usage();
           exit(1);
         }
-        if ((++optind<argc) && isdigit(argv[optind][0]))
+        if ((optind<argc) && isdigit(argv[optind][0]))
           session->engineTime = strtoul(argv[optind], NULL, 10);
         else {
           fprintf(stderr,"Need engine time value after -Z flag.\n");

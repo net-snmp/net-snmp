@@ -633,11 +633,13 @@ int main(int argc, char *argv[])
 	}
 
         /* retry if the errored variable was successfully removed */
-        pdu = snmp_fix_pdu(response, SNMP_MSG_GET);
-        snmp_free_pdu(response);
-	response = NULL;
-        if (pdu != NULL)
-	  goto retry;
+        if (ds_get_boolean(DS_LIBRARY_ID, DS_LIB_FIX_PDUS)) {
+            pdu = snmp_fix_pdu(response, SNMP_MSG_GET);
+            snmp_free_pdu(response);
+            response = NULL;
+            if (pdu != NULL)
+                goto retry;
+        }
       }
 	    
     } else if (status == STAT_TIMEOUT){

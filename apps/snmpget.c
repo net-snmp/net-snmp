@@ -77,6 +77,7 @@ SOFTWARE.
 #include "snmp.h"
 #include "system.h"
 #include "snmp_parse_args.h"
+#include "default_store.h"
 
 int failures=0;
 
@@ -178,12 +179,13 @@ retry:
         }
 
         /* retry if the errored variable was successfully removed */
-        pdu = snmp_fix_pdu(response, SNMP_MSG_GET);
-        snmp_free_pdu(response);
-	response = NULL;
-        if (pdu != NULL)
-          goto retry;
-
+        if (ds_get_boolean(DS_LIBRARY_ID, DS_LIB_FIX_PDUS)) {
+            pdu = snmp_fix_pdu(response, SNMP_MSG_GET);
+            snmp_free_pdu(response);
+            response = NULL;
+            if (pdu != NULL)
+                goto retry;
+        }
       }  /* endif -- SNMP_ERR_NOERROR */
 
     } else if (status == STAT_TIMEOUT){
