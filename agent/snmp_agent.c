@@ -477,10 +477,6 @@ ERROR("Not Writable");
 				     var_name_len);
 		if (err != SNMP_ERR_NOERROR){
                   return err;
-		    if (pi->version != SNMP_VERSION_2)
-			return SNMP_ERR_BADVALUE;
-		    else
-			return err;
 		}
 	    }
 	} else {
