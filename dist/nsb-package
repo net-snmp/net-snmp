@@ -21,19 +21,28 @@ usage()
    echo " -d : dirty build (don't make distclean)"
    echo " -m : skip 'make all'"
    echo " -p : don't pause at prompts in between stages"
+   echo " -r : remove bulid dir (rm -fR) before build"
    echo " -t : skip 'make test'"
    exit 1
 }
 
+#trap exit SIGINT
+
 #set -x
 
-
-if [ -f nsb-functions ];then
-   source nsb-functions
+#
+# find nsb-platform based on te path to this script
+#
+EXE_PATH=${0%nsb-package}
+EXE_PATH=${EXE_PATH%/}
+if [ -f $EXE_PATH/nsb-functions ];then
+   source $EXE_PATH/nsb-functions
 elif [ -f $HOME/bin/nsb-functions ]; then
    source $HOME/bin/nsb-functions
+elif [ -f nsb-functions ];then
+   source nsb-functions
 else
-   echo "Cannot find nsb-functions"
+   echo "Cannot find nsb-functions in $EXE_PATH, $HOME/bin or $PWD"
    exit 1
 fi
 
@@ -42,7 +51,7 @@ fi
 ########################################################################
 
 #      x)  x=$OPTARG ;;
-while getopts b:cdi:mps:tx opt
+while getopts b:cdi:mprs:tx opt
 do
     case "$opt" in
       b)  BUILDD=$OPTARG ;;
@@ -51,6 +60,7 @@ do
       i)  INSTALLD=$OPTARG ;;
       m)  NSB_SKIP_BUILD=1 ;;
       p)  NSB_PROMPT=0 ;;
+      r)  NSB_CLEAN=2 ;;
       s)  SRCD=$OPTARG ;;
       t)  NSB_SKIP_TEST=1 ;;
       x)  NSB_CONFIG_ALL=1;;
@@ -88,7 +98,8 @@ fi
 ########################################################################
 ########################################################################
 if [ $SRCD != $BUILDD ];then
-    BUILDD=$BUILDD/`nsb-sysname`
+    BUILDD=$BUILDD/$VERSION-`nsb-sysname`
 fi
 nsb-prompt "press enter to build $SRCD in $BUILDD, and install in $INSTALLD"
 nsb-build $VERSION $SRCD $BUILDD $INSTALLD $NSB_CONFIG_ALL
+exit $?
