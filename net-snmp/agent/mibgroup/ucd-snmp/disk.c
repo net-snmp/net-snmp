@@ -128,7 +128,7 @@
 #if USING_UCD_SNMP_ERRORMIB_MODULE
 #include "errormib.h"
 #else
-#define setPerrorstatus(x) log_perror(x)
+#define setPerrorstatus(x) snmp_log_perror(x)
 #endif
 #include "../../../snmplib/system.h"
 
