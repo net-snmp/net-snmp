@@ -690,7 +690,7 @@ realloc_handle_trap_fmt(u_char **buf, size_t *buf_len, size_t *out_len,
   u_char 	         *temp_buf = NULL;
   size_t		 tbuf_len = 64, tout_len = 0;
 
-  if ((temp_buf = (u_char *)malloc(tbuf_len)) == NULL) {
+  if ((temp_buf = (u_char *)calloc(tbuf_len, 1)) == NULL) {
     return 0;
   }
 
