@@ -640,15 +640,38 @@ snmp_open(struct snmp_session *session)
     slp = (struct session_list *)snmp_sess_open(session);
     if (!slp) return NULL;
 
-    { /*MTCRITICAL_RESOURCE*/
-	snmp_res_lock(MT_LIBRARY_ID, MT_LIB_SESSION);
-	slp->next = Sessions;
-	Sessions = slp;
-	snmp_res_unlock(MT_LIBRARY_ID, MT_LIB_SESSION);
-    }
+    snmp_res_lock(MT_LIBRARY_ID, MT_LIB_SESSION);
+    slp->next = Sessions;
+    Sessions = slp;
+    snmp_res_unlock(MT_LIBRARY_ID, MT_LIB_SESSION);
+
     return (slp->session);
 }
 
+/* extended open */
+struct snmp_session *snmp_open_ex (
+  struct snmp_session *session,
+  int (*fpre_parse) (struct snmp_session *, snmp_ipaddr),
+  int (*fparse) (struct snmp_session *, struct snmp_pdu *, u_char *, size_t),
+  int (*fpost_parse) (struct snmp_session *, struct snmp_pdu *, int),
+  int (*fbuild) (struct snmp_session *, struct snmp_pdu *, u_char *, size_t *)
+)
+{
+    struct session_list *slp;
+    slp = (struct session_list *)snmp_sess_open(session);
+    if (!slp) return NULL;
+    slp->internal->hook_pre = fpre_parse;
+    slp->internal->hook_parse = fparse;
+    slp->internal->hook_post = fpost_parse;
+    slp->internal->hook_build = fbuild;
+
+    snmp_res_lock(MT_LIBRARY_ID, MT_LIB_SESSION);
+    slp->next = Sessions;
+    Sessions = slp;
+    snmp_res_unlock(MT_LIBRARY_ID, MT_LIB_SESSION);
+
+    return (slp->session);
+}
 
 static struct session_list *
 _sess_copy( struct snmp_session *in_session)
@@ -1758,62 +1781,6 @@ snmpv3_packet_build(struct snmp_pdu *pdu, u_char *packet, size_t *out_length,
     return result;
 
 }  /* end snmpv3_packet_build() */
-
-
-void
-set_pre_parse( struct snmp_session *sp, int (*hook) (struct snmp_session *, snmp_ipaddr) ) {
-    struct session_list *slp;
-    snmp_res_lock(MT_LIBRARY_ID, MT_LIB_SESSION);
-    for(slp = Sessions; slp; slp = slp->next){
-	if  (slp->session == sp ) {
-	    slp->internal->hook_pre = hook;
-	    break;
-	}
-    }
-    snmp_res_unlock(MT_LIBRARY_ID, MT_LIB_SESSION);
-}
-
-void
-set_parse( struct snmp_session *sp,
-		int (*hook) (struct snmp_session *, struct snmp_pdu *, u_char *, size_t)) {
-    struct session_list *slp;
-    snmp_res_lock(MT_LIBRARY_ID, MT_LIB_SESSION);
-    for(slp = Sessions; slp; slp = slp->next){
-	if  (slp->session == sp ) {
-	    slp->internal->hook_parse = hook;
-	    break;
-	}
-    }
-    snmp_res_unlock(MT_LIBRARY_ID, MT_LIB_SESSION);
-}
-
-void
-set_post_parse( struct snmp_session *sp,
-                int (*hook) ( struct snmp_session*, struct snmp_pdu *, int) ) {
-    struct session_list *slp;
-    snmp_res_lock(MT_LIBRARY_ID, MT_LIB_SESSION);
-    for(slp = Sessions; slp; slp = slp->next){
-	if  (slp->session == sp ) {
-	    slp->internal->hook_post = hook;
-	    break;
-	}
-    }
-    snmp_res_unlock(MT_LIBRARY_ID, MT_LIB_SESSION);
-}
-
-void
-set_build( struct snmp_session *sp,
-		int (*hook) (struct snmp_session *, struct snmp_pdu *, u_char *, size_t *)) {
-    struct session_list *slp;
-    snmp_res_lock(MT_LIBRARY_ID, MT_LIB_SESSION);
-    for(slp = Sessions; slp; slp = slp->next){
-	if  (slp->session == sp ) {
-	    slp->internal->hook_build = hook;
-	    break;
-	}
-    }
-    snmp_res_unlock(MT_LIBRARY_ID, MT_LIB_SESSION);
-}
 
 
 /*

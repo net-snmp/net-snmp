@@ -1900,6 +1900,7 @@ get_node(const char *name,
 	 oid *objid,
 	 size_t *objidlen)
 {
+    char *cp;
     int res;
 
     if (( cp=strchr(name, ':')) == NULL )

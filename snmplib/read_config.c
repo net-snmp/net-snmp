@@ -631,7 +631,7 @@ snmp_save_persistent(const char *type)
 void
 snmp_clean_persistent(const char *type)
 {
-  char file[512], fileold[512];
+  char file[512];
   struct stat statbuf;
   int j;
 
