@@ -277,19 +277,22 @@ netsnmp_table_data_set_clone_row(netsnmp_table_row *row)
     data = (netsnmp_table_data_set_storage *) row->data;
     
     if (data) {
-        for(newrowdata = (netsnmp_table_data_set_storage **) &newrow->data;
+        for(newrowdata = (netsnmp_table_data_set_storage **) &(newrow->data);
             data;
             newrowdata = &((*newrowdata)->next), data = data->next) {
             
-            memdup((u_char **) newrowdata, (u_char *) row->data,
+            memdup((u_char **) newrowdata, (u_char *) data,
                    sizeof(netsnmp_table_data_set_storage));
             if (!*newrowdata)
                 return NULL;
-            memdup((u_char **) (*newrowdata)->data.voidp,
-                   (u_char *) data->data.voidp,
-                   data->data_len);
-            if (!(*newrowdata)->data.voidp)
-                return NULL;
+
+            if (data->data.voidp) {
+                memdup((u_char **) &((*newrowdata)->data.voidp),
+                       (u_char *) data->data.voidp,
+                       data->data_len);
+                if (!(*newrowdata)->data.voidp)
+                    return NULL;
+            }
         }
     }
     return newrow;
@@ -359,6 +362,11 @@ netsnmp_table_data_set_helper_handler(
 
             if (!newrowstash) {
                 if (!row) {
+                    if (!datatable->allow_creation) {
+                        netsnmp_set_request_error(reqinfo, request,
+                                                  SNMP_ERR_NOSUCHNAME);
+                        continue;
+                    }
                     /* entirely new row.  Create the row from the template */
                     newrowstash = SNMP_MALLOC_TYPEDEF(newrow_stash);
                     newrowstash->created = 1;
@@ -589,6 +597,7 @@ netsnmp_config_parse_table_set(const char *token, char *line)
 
         switch (tp->access) {
             case MIB_ACCESS_CREATE:
+                table_set->allow_creation = 1;
             case MIB_ACCESS_READWRITE:
             case MIB_ACCESS_WRITEONLY:
                 canwrite = 1;
