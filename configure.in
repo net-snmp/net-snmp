@@ -309,14 +309,17 @@ if test "x$developer" = "xyes"; then
   AC_DISABLE_SHARED
 fi
 
+AC_PROG_CC
+AC_PROG_CPP
+AC_AIX
+AC_EXEEXT
+
 dnl libtool stuff for shared/static libraries.
 AC_LIBTOOL_DLOPEN
 AC_LIBTOOL_WIN32_DLL
 AC_PROG_LIBTOOL
 
 dnl Checks for programs.
-AC_PROG_CC
-AC_PROG_CPP
 AC_PROG_INSTALL
 AC_PROG_LN_S
 AC_PROG_MAKE_SET
@@ -338,8 +341,6 @@ fi
 AC_PATH_PROG(UNAMEPROG,uname)
 AC_DEFINE_UNQUOTED(UNAMEPROG,"$UNAMEPROG")
 
-AC_AIX
-
 AC_C_CONST
 
 dnl get version number.
@@ -351,7 +352,7 @@ AC_MSG_RESULT($VERSION)
 dnl super type checking
 AC_MSG_CHECKING(for developer gcc flags)
 if test "x$developer" = "xyes" -a "x$ac_cv_prog_gcc" = "xyes"; then
-  devflags="-Wall -Wstrict-prototypes -Wwrite-strings -Wcast-qual -Wno-unused -Wno-char-subscripts"
+  devflags="-Wall -Wstrict-prototypes -Wwrite-strings -Wcast-qual -Wno-char-subscripts"
   CFLAGS="$CFLAGS $devflags"
 else
   devflags="none"
