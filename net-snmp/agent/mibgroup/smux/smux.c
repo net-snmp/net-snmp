@@ -339,10 +339,10 @@ smux_accept(int sd)
 	u_char data[SMUXMAXPKTSIZE], *ptr, type;
 	struct sockaddr_in in_socket;
 	struct timeval tv;
-	int fail, fd;
+	int fail, fd, alen;
 	size_t len;
 
-	len = sizeof(struct sockaddr_in);
+	alen = sizeof(struct sockaddr_in);
 	/* this may be too high */
 	tv.tv_sec = 5;
 	tv.tv_usec = 0;
@@ -350,7 +350,7 @@ smux_accept(int sd)
 	/* connection request */
 	DEBUGMSGTL (("smux","[smux_accept] Calling accept()\n"));
 	errno = 0;
-	if((fd = accept(sd, (struct sockaddr *)&in_socket, &len)) < 0) {
+	if((fd = accept(sd, (struct sockaddr *)&in_socket, &alen)) < 0) {
 		perror("[smux_accept] accept failed\n");
 		return SMUXNOTOK;
 	} else {

@@ -109,9 +109,9 @@ void dummy_free_config (void) {
 int
 header_dummy(struct variable *vp,
 	     oid *name,
-	     int *length,
+	     size_t *length,
 	     int exact,
-	     int *var_len,
+	     size_t *var_len,
 	     WriteMethod **write_method) 
 {
 #define DUMMY_NAME_LENGTH	8
@@ -146,9 +146,9 @@ header_dummy(struct variable *vp,
 u_char	*
 var_dummy(struct variable *vp,
 	  oid *name,
-	  int *length,
+	  size_t *length,
 	  int exact,
-	  int *var_len,
+	  size_t *var_len,
 	  WriteMethod **write_method) 
 {
 
