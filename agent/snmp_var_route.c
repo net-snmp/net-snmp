@@ -64,6 +64,9 @@ PERFORMANCE OF THIS SOFTWARE.
 #include <sys/mbuf.h>
 #endif
 #include <net/if.h>
+#if HAVE_SYS_HASHING_H
+#include <sys/hashing.h>
+#endif
 #if HAVE_NETINET_IN_VAR_H
 #include <netinet/in_var.h>
 #endif
@@ -72,7 +75,7 @@ PERFORMANCE OF THIS SOFTWARE.
 #undef	KERNEL
 #ifdef RTENTRY_4_4
 #define rt_unit rt_refcnt	       /* Reuse this field for device # */
-#if defined(osf3) || defined(netbsd1) || defined(freebsd2) || defined(bsdi2)
+#if defined(irix6) || defined(osf3) || defined(netbsd1) || defined(freebsd2) || defined(bsdi2)
 #define rt_dst rt_nodes->rn_key
 #endif
 #else

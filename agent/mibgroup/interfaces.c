@@ -85,7 +85,7 @@ header_interfaces(vp, name, length, exact, var_len, write_method)
     *write_method = 0;
     *var_len = sizeof(long);	/* default to 'long' results */
     return MATCH_SUCCEEDED;
-};
+}
 
 
 
@@ -137,7 +137,7 @@ header_ifEntry(vp, name, length, exact, var_len, write_method)
 #endif
 
     return interface;
-};
+}
 
 
 
@@ -187,7 +187,7 @@ var_ifEntry(vp, name, length, exact, var_len, write_method)
     register int interface;
 #ifndef sunV3
     static struct in_ifaddr in_ifaddr;
-#endif sunV3
+#endif /* sunV3 */
     static char Name[16];
     register char *cp;
 #if STRUCT_IFNET_HAS_IF_LASTCHANGE_TV_SEC
@@ -213,7 +213,7 @@ var_ifEntry(vp, name, length, exact, var_len, write_method)
 #define USE_NAME_AS_DESCRIPTION
 #ifdef USE_NAME_AS_DESCRIPTION
 	    cp = Name;
-#else  USE_NAME_AS_DESCRIPTION
+#else  /* USE_NAME_AS_DESCRIPTION */
 	    cp = Lookup_Device_Annotation(Name, "snmp-descr");
 	    if (!cp)
 		cp = Lookup_Device_Annotation(Name, 0);
@@ -426,7 +426,7 @@ var_ifEntry(vp, name, length, exact, var_len, write_method)
           close(hp_fd);
           hp_fd = -1;         /* failed */
       }
-    };
+    }
 #undef		OBJID
 #define		OBJID		ASN_OBJECT_ID
 
@@ -777,7 +777,7 @@ struct in_ifaddr *Retin_ifaddr;
 		    ia = in_ifaddr.ia_next;
 		}
 
-#if !defined(netbsd1) && !defined(freebsd2)
+#if !defined(netbsd1) && !defined(freebsd2) && !defined(STRUCT_IFNET_HAS_IF_ADDRLIST)
 		ifnet.if_addrlist = (struct ifaddr *)ia;     /* WRONG DATA TYPE; ONLY A FLAG */
 #endif
 /*		ifnet.if_addrlist = (struct ifaddr *)&ia->ia_ifa;   */  /* WRONG DATA TYPE; ONLY A FLAG */

@@ -14,7 +14,10 @@ extern u_char	*var_atEntry __P((struct variable *, oid *, int *, int, int *, int
 #define ATPHYSADDRESS	1
 #define ATNETADDRESS	2
 
-#include "ip.h"		/* for ipNetToMedia table */
+#define IPMEDIAIFINDEX          0
+#define IPMEDIAPHYSADDRESS      1
+#define IPMEDIANETADDRESS       2
+#define IPMEDIATYPE             3
 
 #ifdef IN_SNMP_VARS_C
 
