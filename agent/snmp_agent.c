@@ -172,6 +172,11 @@ agent_check_and_process(int block) {
  *   This then processes the incoming packet, calling the pre_parse, parse,
  * post_parse and callback routines in turn.
  */
+
+	/* Global access to the primary session structure for this agent.
+		for Index Allocation use initially. */
+struct snmp_session *main_session;
+
 void
 init_master_agent(int dest_port, 
                   int (*pre_parse) (struct snmp_session *, snmp_ipaddr),
@@ -201,6 +206,7 @@ init_master_agent(int dest_port,
 	snmp_sess_perror("init_master_agent", &sess);
 	exit(1);
     }
+    main_session = session;
 }
 
 struct agent_snmp_session  *
