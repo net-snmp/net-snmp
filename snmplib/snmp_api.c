@@ -2408,7 +2408,7 @@ snmpv3_scopedPDU_header_build(netsnmp_pdu *pdu,
 
 
 #ifdef USE_REVERSE_ASNENCODING
-static int
+int
 snmpv3_scopedPDU_header_realloc_rbuild(u_char ** pkt, size_t * pkt_len,
                                        size_t * offset, netsnmp_pdu *pdu,
                                        size_t body_len)
@@ -4104,48 +4104,14 @@ _snmp_parse(void *sessp,
             if (!sessp) {
                 session->s_snmp_errno = result;
             } else {
-
                 /*
-                 * handle reportable errors 
+                 * Call the security model to special handle any errors
                  */
-                switch (result) {
-                case SNMPERR_USM_AUTHENTICATIONFAILURE:
-		  {
-                    int res = session->s_snmp_errno;
-                    session->s_snmp_errno = result;
-                    if (session->callback) {
-                       session->callback(NETSNMP_CALLBACK_OP_RECEIVED_MESSAGE,
-                            session, pdu->reqid, pdu, session->callback_magic);
-                    }
-                    session->s_snmp_errno = res;
-                  }  
-                case SNMPERR_USM_UNKNOWNENGINEID:
-                case SNMPERR_USM_UNKNOWNSECURITYNAME:
-                case SNMPERR_USM_UNSUPPORTEDSECURITYLEVEL:
-                case SNMPERR_USM_NOTINTIMEWINDOW:
-                case SNMPERR_USM_DECRYPTIONERROR:
+                struct snmp_secmod_def *secmod =
+                    find_sec_mod(session->securityModel);
 
-                    if (SNMP_CMD_CONFIRMED(pdu->command) ||
-                        (pdu->command == 0
-                         && (pdu->flags & SNMP_MSG_FLAG_RPRT_BIT))) {
-                        netsnmp_pdu    *pdu2;
-                        int             flags = pdu->flags;
-
-                        pdu->flags |= UCD_MSG_FLAG_FORCE_PDU_COPY;
-                        pdu2 = snmp_clone_pdu(pdu);
-                        pdu->flags = pdu2->flags = flags;
-                        snmpv3_make_report(pdu2, result);
-                        if (0 == snmp_sess_send(sessp, pdu2)) {
-                            snmp_free_pdu(pdu2);
-                            /*
-                             * TODO: indicate error 
-                             */
-                        }
-                    }
-                    break;
-                default:
-                    session->s_snmp_errno = result;
-                    break;
+                if (secmod && secmod->handle_report) {
+                    (secmod->handle_report)(sessp, session, result, pdu);
                 }
             }
         }
@@ -5070,7 +5036,7 @@ _sess_process_packet(void *sessp, netsnmp_session * sp,
 
   if (ret != SNMP_ERR_NOERROR) {
     /*
-     * Call USM to free any securityStateRef supplied with the message.  
+     * Call the security model to free any securityStateRef supplied w/ msg.  
      */
     if (pdu->securityStateRef != NULL) {
       sptr = find_sec_mod(pdu->securityModel);
