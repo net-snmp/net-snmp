@@ -11,9 +11,10 @@ init_mib;
 $hostname = 'localhost';          # Host that serves the mSQL Database
 $dbname = 'snmp';                 # mySQL Database name
 $doit = 1;
+$somehosts = 0;
 
 sub usage {
-    print "$0 [-H host] [-u user] [-p password] [-v] [-h] [-n] [-d] <-m mibnode>\n";
+    print "$0 [-H host] [-u user] [-p password] [-l hostlist,...] [-v] [-h] [-n] [-d] <-m mibnode>\n";
     exit 0;
 }
 
@@ -21,6 +22,15 @@ while ($#ARGV > -1) {
     $_ = shift @ARGV;
     usage if (/-h/);
     $hostname = shift if (/-H/);
+    if (/-l/) {
+	my $arg = shift;
+	my @a = split(/,/,$arg);
+	my $i;
+	$somehosts = 1;
+	foreach $i (@a) {
+	    $dohost{$i} = 1;
+	}
+    }
     $user = shift if (/-u/);
     $pass = shift if (/-p/);
     $verbose = 1 if (/-v/);
@@ -40,8 +50,11 @@ while ($#ARGV > -1) {
 $cursor = getcursor("SELECT distinct host FROM hosttables");
 while (  $hostrow = $cursor->fetchrow_hashref ) {
 
-    #set up the session
     my $host = $hostrow->{'host'};
+
+    next if ($somehosts && !defined($dohost{$host}));
+
+    #set up the session
     print " starting $host\n" if ($verbose);
     my $x = $dbh->prepare("select community from hosts where name = '$host'");
     my $y = $x->execute();
@@ -84,7 +97,7 @@ while (  $hostrow = $cursor->fetchrow_hashref ) {
 	my %tbl_ids;
 	while (1) {
 	    my $varlabel = $var->[$SNMP::Varbind::tag_f];
-	    print "last $host $varlabel: $void\n" if (SNMP::translateObj($varlabel) !~ /^$void/);
+	    print "last $host " . SNMP::translateObj($varlabel) . ": $void\n" if ($verbose && SNMP::translateObj($varlabel) !~ /^$void/);
 	    last if (SNMP::translateObj($varlabel) !~ /^$void/);
 	    $varlabel = SNMP::translateObj($var->[$SNMP::Varbind::tag_f]) if ($varlabel =~ /^[\.0-9]+$/);
 	    $initlabel = $varlabel if ($initlabel eq "");
