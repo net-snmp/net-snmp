@@ -103,7 +103,7 @@ int main(int argc, char  *argv[])
     int  count;
     int  running;
     int  status;
-    int  reps = 1000;
+    int  reps = 100;
     int  exitval = 0;
 
     /* get the common command line arguments */
