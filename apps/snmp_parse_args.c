@@ -67,6 +67,7 @@
 #include "parse.h"
 #include "read_config.h"
 #include "snmp_debug.h"
+#include "snmpv3.h"
 
 int random_access = 0;
 
@@ -478,6 +479,10 @@ snmp_parse_args(int argc,
 
   /* read in MIB database and initialize the snmp library*/
   init_snmp("snmpapp");
+
+  /* make our engineID something other than what the localhost might
+   * be using, otherwise the automatic v3 time-synchronization won't work */
+  setup_engineID(NULL, "a bogus text string");
 
   /* make master key from pass phrases */
   if (Apsz) {
