@@ -7,6 +7,7 @@
 
 config_require(util_funcs)
 config_require(if-mib/data_access/interface_common)
+config_arch_require(linux, if-mib/data_access/interface)
 config_arch_require(solaris2, kernel_sunos5)
 /*
  * need get_address in var_route for some platforms (USE_SYSCTL_IFLIST).
