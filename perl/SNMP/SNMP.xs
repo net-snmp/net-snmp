@@ -1285,6 +1285,7 @@ snmp_set_do_debugging(0); /* overrides lib dflt - silence init_mib_internals */
 snmp_set_quick_print(1);
 init_snmpv3("snmpapp");
 snmp_call_callbacks(0,0,NULL);
+ds_set_boolean(DS_LIBRARY_ID, DS_LIB_DONT_BREAKDOWN_OIDS, 1);
 #init_mib_internals();
 
 double
