@@ -341,6 +341,9 @@
 /* Define if you have the <ndir.h> header file.  */
 #undef HAVE_NDIR_H
 
+/* Define if you have the <net/if.h> header file.  */
+#undef HAVE_NET_IF_H
+
 /* Define if you have the <net/if_dl.h> header file.  */
 #undef HAVE_NET_IF_DL_H
 
@@ -352,6 +355,9 @@
 
 /* Define if you have the <net/if_var.h> header file.  */
 #undef HAVE_NET_IF_VAR_H
+
+/* Define if you have the <netdb.h> header file.  */
+#undef HAVE_NETDB_H
 
 /* Define if you have the <net/route.h> header file.  */
 #undef HAVE_NET_ROUTE_H
@@ -487,6 +493,9 @@
 
 /* Define if you have the <sys/select.h> header file.  */
 #undef HAVE_SYS_SELECT_H
+
+/* Define if you have the <sys/socket.h> header file.  */
+#undef HAVE_SYS_SOCKET_H
 
 /* Define if you have the <sys/sockio.h> header file.  */
 #undef HAVE_SYS_SOCKIO_H
