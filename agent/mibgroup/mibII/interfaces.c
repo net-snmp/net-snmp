@@ -1245,15 +1245,18 @@ Interface_Scan_Init (void)
 
     i = 0;
 
-    /* read the first line (a header) and determine the fields we
+    /* read the second line (a header) and determine the fields we
        should read from.  This should be done in a better way by
        actually looking for the field names we want.  But thats too
        much work for today.  -- Wes */
     fgets(line, 256, devin);
+    fgets(line, 256, devin);
     if (strstr(line, "compressed")) {
       scan_line_to_use = scan_line_2_2;
+      DEBUGMSGTL(("mibII/interfaces", "using linux 2.2 kernel /proc/net/dev\n"));
     } else {
       scan_line_to_use = scan_line_2_0;
+      DEBUGMSGTL(("mibII/interfaces", "using linux 2.0 kernel /proc/net/dev\n"));
     }
     
       
