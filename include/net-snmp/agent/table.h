@@ -119,8 +119,6 @@ extern          "C" {
                                            *reginfo,
                                            netsnmp_table_registration_info
                                            *tabreq);
-    int   netsnmp_register_sparse_table(netsnmp_handler_registration    *reginfo,
-                                        netsnmp_table_registration_info *tabreq);
     int             netsnmp_table_build_oid(netsnmp_handler_registration
                                             *reginfo,
                                             netsnmp_request_info *reqinfo,
@@ -152,12 +150,12 @@ extern          "C" {
     netsnmp_index * netsnmp_table_index_find_next_row(netsnmp_container *c,
                                                       netsnmp_table_request_info *tblreq);
 
+    unsigned int    netsnmp_table_next_column(netsnmp_table_request_info *table_info);
     unsigned int    netsnmp_closest_column(unsigned int current,
                                            netsnmp_column_info
                                            *valid_columns);
 
     Netsnmp_Node_Handler table_helper_handler;
-    Netsnmp_Node_Handler sparse_table_helper_handler;
 
 #define netsnmp_table_helper_add_index(tinfo, type) snmp_varlist_add_variable(&tinfo->indexes, NULL, 0, (u_char)type, NULL, 0);
 
@@ -184,6 +182,11 @@ extern          "C" {
 	unsigned int
 		netsnmp_table_next_column(netsnmp_table_request_info *table_info);
 
+
+    int   netsnmp_sparse_table_register(netsnmp_handler_registration    *reginfo,
+                                        netsnmp_table_registration_info *tabreq);
+
+    netsnmp_mib_handler *netsnmp_sparse_table_handler_get(void);
 
 #ifdef __cplusplus
 };
