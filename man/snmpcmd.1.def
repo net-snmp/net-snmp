@@ -259,12 +259,12 @@ on
 .I hostname
 (which will be looked up as an AAAA record).
 .TP 24
-.IR "UDP6:fe80::2d0:b7ff:fe21:c6c0"
+.IR "UDP6:[fe80::2d0:b7ff:fe21:c6c0]"
 perform the query using UDP/IPv6 datagrams to port 161 at address
 .IR fe80::2d0:b7ff:fe21:c6c0 .
 .TP 24
-.IR "tcpipv6:::1"
-connect to port 161 on the local host
+.IR "tcpipv6:[::1]:1611"
+connect to port 1611 on the local host
 .IR "" ( ::1 
 in IPv6 parlance) using TCP/IPv6 and perform query over that connection.
 .PP
