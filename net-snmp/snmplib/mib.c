@@ -153,7 +153,7 @@ uptimeString(u_long timeticks, char *buf)
 {
     int             centisecs, seconds, minutes, hours, days;
 
-    if (ds_get_boolean(DS_LIBRARY_ID, DS_LIB_NUMERIC_TIMETICKS)) {
+    if (netsnmp_ds_get_boolean(NETSNMP_DS_LIBRARY_ID, NETSNMP_DS_LIB_NUMERIC_TIMETICKS)) {
         sprintf(buf, "%lu", timeticks);
         return buf;
     }
@@ -170,7 +170,7 @@ uptimeString(u_long timeticks, char *buf)
     minutes = timeticks / 60;
     seconds = timeticks % 60;
 
-    if (ds_get_boolean(DS_LIBRARY_ID, DS_LIB_QUICK_PRINT))
+    if (netsnmp_ds_get_boolean(NETSNMP_DS_LIBRARY_ID, NETSNMP_DS_LIB_QUICK_PRINT))
         sprintf(buf, "%d:%d:%02d:%02d.%02d",
                 days, hours, minutes, seconds, centisecs);
     else {
@@ -254,7 +254,7 @@ sprint_realloc_hexstring(u_char ** buf, size_t * buf_len, size_t * out_len,
         *out_len += strlen((char *) (*buf + *out_len));
         cp += 8;
 
-        if (ds_get_boolean(DS_LIBRARY_ID, DS_LIB_PRINT_HEX_TEXT)) {
+        if (netsnmp_ds_get_boolean(NETSNMP_DS_LIBRARY_ID, NETSNMP_DS_LIB_PRINT_HEX_TEXT)) {
             while ((*out_len + 21) >= *buf_len) {
                 if (!(allow_realloc && snmp_realloc(buf, buf_len))) {
                     return 0;
@@ -292,7 +292,7 @@ sprint_realloc_hexstring(u_char ** buf, size_t * buf_len, size_t * out_len,
     }
 
     if ((lenleft > 0)
-        && ds_get_boolean(DS_LIBRARY_ID, DS_LIB_PRINT_HEX_TEXT)) {
+        && netsnmp_ds_get_boolean(NETSNMP_DS_LIBRARY_ID, NETSNMP_DS_LIB_PRINT_HEX_TEXT)) {
         while ((*out_len + 5 + lenleft) >= *buf_len) {
             if (!(allow_realloc && snmp_realloc(buf, buf_len))) {
                 return 0;
@@ -422,7 +422,7 @@ sprint_realloc_octet_string(u_char ** buf, size_t * buf_len,
         char            code = 'd', separ = 0, term = 0, ch, intbuf[16];
         u_char         *ecp;
 
-        if (!ds_get_boolean(DS_LIBRARY_ID, DS_LIB_QUICK_PRINT)) {
+        if (!netsnmp_ds_get_boolean(NETSNMP_DS_LIBRARY_ID, NETSNMP_DS_LIB_QUICK_PRINT)) {
             if (!snmp_strcat(buf, buf_len, out_len, allow_realloc,
                              (const u_char *) "STRING: ")) {
                 return 0;
@@ -570,7 +570,7 @@ sprint_realloc_octet_string(u_char ** buf, size_t * buf_len,
     }
 
     if (hex) {
-        if (ds_get_boolean(DS_LIBRARY_ID, DS_LIB_QUICK_PRINT)) {
+        if (netsnmp_ds_get_boolean(NETSNMP_DS_LIBRARY_ID, NETSNMP_DS_LIB_QUICK_PRINT)) {
             if (!snmp_strcat
                 (buf, buf_len, out_len, allow_realloc,
                  (const u_char *) "\"")) {
@@ -589,7 +589,7 @@ sprint_realloc_octet_string(u_char ** buf, size_t * buf_len,
             return 0;
         }
 
-        if (ds_get_boolean(DS_LIBRARY_ID, DS_LIB_QUICK_PRINT)) {
+        if (netsnmp_ds_get_boolean(NETSNMP_DS_LIBRARY_ID, NETSNMP_DS_LIB_QUICK_PRINT)) {
             if (!snmp_strcat
                 (buf, buf_len, out_len, allow_realloc,
                  (const u_char *) "\"")) {
@@ -597,7 +597,7 @@ sprint_realloc_octet_string(u_char ** buf, size_t * buf_len,
             }
         }
     } else {
-        if (!ds_get_boolean(DS_LIBRARY_ID, DS_LIB_QUICK_PRINT)) {
+        if (!netsnmp_ds_get_boolean(NETSNMP_DS_LIBRARY_ID, NETSNMP_DS_LIB_QUICK_PRINT)) {
             if (!snmp_strcat(buf, buf_len, out_len, allow_realloc,
                              (const u_char *) "STRING: ")) {
                 return 0;
@@ -672,7 +672,7 @@ sprint_realloc_float(u_char ** buf, size_t * buf_len,
         }
     }
 
-    if (!ds_get_boolean(DS_LIBRARY_ID, DS_LIB_QUICK_PRINT)) {
+    if (!netsnmp_ds_get_boolean(NETSNMP_DS_LIBRARY_ID, NETSNMP_DS_LIB_QUICK_PRINT)) {
         if (!snmp_strcat
             (buf, buf_len, out_len, allow_realloc,
              (const u_char *) "Opaque: Float: ")) {
@@ -746,7 +746,7 @@ sprint_realloc_double(u_char ** buf, size_t * buf_len,
         }
     }
 
-    if (!ds_get_boolean(DS_LIBRARY_ID, DS_LIB_QUICK_PRINT)) {
+    if (!netsnmp_ds_get_boolean(NETSNMP_DS_LIBRARY_ID, NETSNMP_DS_LIB_QUICK_PRINT)) {
         if (!snmp_strcat
             (buf, buf_len, out_len, allow_realloc,
              (const u_char *) "Opaque: Float: ")) {
@@ -827,7 +827,7 @@ sprint_realloc_counter64(u_char ** buf, size_t * buf_len, size_t * out_len,
         }
     }
 
-    if (!ds_get_boolean(DS_LIBRARY_ID, DS_LIB_QUICK_PRINT)) {
+    if (!netsnmp_ds_get_boolean(NETSNMP_DS_LIBRARY_ID, NETSNMP_DS_LIB_QUICK_PRINT)) {
 #ifdef OPAQUE_SPECIAL_TYPES
         if (var->type != ASN_COUNTER64) {
             if (!snmp_strcat
@@ -962,7 +962,7 @@ sprint_realloc_opaque(u_char ** buf, size_t * buf_len,
 
     case ASN_OPAQUE:
 #endif
-        if (!ds_get_boolean(DS_LIBRARY_ID, DS_LIB_QUICK_PRINT)) {
+        if (!netsnmp_ds_get_boolean(NETSNMP_DS_LIBRARY_ID, NETSNMP_DS_LIB_QUICK_PRINT)) {
             u_char          str[] = "OPAQUE: ";
             if (!snmp_strcat(buf, buf_len, out_len, allow_realloc, str)) {
                 return 0;
@@ -1027,7 +1027,7 @@ sprint_realloc_object_identifier(u_char ** buf, size_t * buf_len,
         }
     }
 
-    if (!ds_get_boolean(DS_LIBRARY_ID, DS_LIB_QUICK_PRINT)) {
+    if (!netsnmp_ds_get_boolean(NETSNMP_DS_LIBRARY_ID, NETSNMP_DS_LIB_QUICK_PRINT)) {
         u_char          str[] = "OID: ";
         if (!snmp_strcat(buf, buf_len, out_len, allow_realloc, str)) {
             return 0;
@@ -1095,7 +1095,7 @@ sprint_realloc_timeticks(u_char ** buf, size_t * buf_len, size_t * out_len,
         }
     }
 
-    if (ds_get_boolean(DS_LIBRARY_ID, DS_LIB_NUMERIC_TIMETICKS)) {
+    if (netsnmp_ds_get_boolean(NETSNMP_DS_LIBRARY_ID, NETSNMP_DS_LIB_NUMERIC_TIMETICKS)) {
         char            str[16];
         sprintf(str, "%lu", *(u_long *) var->val.integer);
         if (!snmp_strcat
@@ -1104,7 +1104,7 @@ sprint_realloc_timeticks(u_char ** buf, size_t * buf_len, size_t * out_len,
         }
         return 1;
     }
-    if (!ds_get_boolean(DS_LIBRARY_ID, DS_LIB_QUICK_PRINT)) {
+    if (!netsnmp_ds_get_boolean(NETSNMP_DS_LIBRARY_ID, NETSNMP_DS_LIB_QUICK_PRINT)) {
         char            str[32];
         sprintf(str, "Timeticks: (%lu) ", *(u_long *) var->val.integer);
         if (!snmp_strcat
@@ -1248,7 +1248,7 @@ sprint_realloc_integer(u_char ** buf, size_t * buf_len, size_t * out_len,
         }
     }
 
-    if (!ds_get_boolean(DS_LIBRARY_ID, DS_LIB_QUICK_PRINT)) {
+    if (!netsnmp_ds_get_boolean(NETSNMP_DS_LIBRARY_ID, NETSNMP_DS_LIB_QUICK_PRINT)) {
         if (!snmp_strcat(buf, buf_len, out_len, allow_realloc,
                          (const u_char *) "INTEGER: ")) {
             return 0;
@@ -1256,7 +1256,7 @@ sprint_realloc_integer(u_char ** buf, size_t * buf_len, size_t * out_len,
     }
 
     if (enum_string == NULL ||
-        ds_get_boolean(DS_LIBRARY_ID, DS_LIB_PRINT_NUMERIC_ENUM)) {
+        netsnmp_ds_get_boolean(NETSNMP_DS_LIBRARY_ID, NETSNMP_DS_LIB_PRINT_NUMERIC_ENUM)) {
         if (hint) {
             if (!(sprint_realloc_hinted_integer(buf, buf_len, out_len,
                                                 allow_realloc,
@@ -1273,7 +1273,7 @@ sprint_realloc_integer(u_char ** buf, size_t * buf_len, size_t * out_len,
                 return 0;
             }
         }
-    } else if (ds_get_boolean(DS_LIBRARY_ID, DS_LIB_QUICK_PRINT)) {
+    } else if (netsnmp_ds_get_boolean(NETSNMP_DS_LIBRARY_ID, NETSNMP_DS_LIB_QUICK_PRINT)) {
         if (!snmp_strcat
             (buf, buf_len, out_len, allow_realloc,
              (const u_char *) enum_string)) {
@@ -1352,7 +1352,7 @@ sprint_realloc_uinteger(u_char ** buf, size_t * buf_len, size_t * out_len,
     }
 
     if (enum_string == NULL ||
-        ds_get_boolean(DS_LIBRARY_ID, DS_LIB_PRINT_NUMERIC_ENUM)) {
+        netsnmp_ds_get_boolean(NETSNMP_DS_LIBRARY_ID, NETSNMP_DS_LIB_PRINT_NUMERIC_ENUM)) {
         if (hint) {
             if (!(sprint_realloc_hinted_integer(buf, buf_len, out_len,
                                                 allow_realloc,
@@ -1369,7 +1369,7 @@ sprint_realloc_uinteger(u_char ** buf, size_t * buf_len, size_t * out_len,
                 return 0;
             }
         }
-    } else if (ds_get_boolean(DS_LIBRARY_ID, DS_LIB_QUICK_PRINT)) {
+    } else if (netsnmp_ds_get_boolean(NETSNMP_DS_LIBRARY_ID, NETSNMP_DS_LIB_QUICK_PRINT)) {
         if (!snmp_strcat
             (buf, buf_len, out_len, allow_realloc,
              (const u_char *) enum_string)) {
@@ -1441,7 +1441,7 @@ sprint_realloc_gauge(u_char ** buf, size_t * buf_len, size_t * out_len,
         }
     }
 
-    if (!ds_get_boolean(DS_LIBRARY_ID, DS_LIB_QUICK_PRINT)) {
+    if (!netsnmp_ds_get_boolean(NETSNMP_DS_LIBRARY_ID, NETSNMP_DS_LIB_QUICK_PRINT)) {
         u_char          str[] = "Gauge32: ";
         if (!snmp_strcat(buf, buf_len, out_len, allow_realloc, str)) {
             return 0;
@@ -1512,7 +1512,7 @@ sprint_realloc_counter(u_char ** buf, size_t * buf_len, size_t * out_len,
         }
     }
 
-    if (!ds_get_boolean(DS_LIBRARY_ID, DS_LIB_QUICK_PRINT)) {
+    if (!netsnmp_ds_get_boolean(NETSNMP_DS_LIBRARY_ID, NETSNMP_DS_LIB_QUICK_PRINT)) {
         u_char          str[] = "Counter32: ";
         if (!snmp_strcat(buf, buf_len, out_len, allow_realloc, str)) {
             return 0;
@@ -1574,7 +1574,7 @@ sprint_realloc_networkaddress(u_char ** buf, size_t * buf_len,
         }
     }
 
-    if (!ds_get_boolean(DS_LIBRARY_ID, DS_LIB_QUICK_PRINT)) {
+    if (!netsnmp_ds_get_boolean(NETSNMP_DS_LIBRARY_ID, NETSNMP_DS_LIB_QUICK_PRINT)) {
         u_char          str[] = "Network Address: ";
         if (!snmp_strcat(buf, buf_len, out_len, allow_realloc, str)) {
             return 0;
@@ -1639,7 +1639,7 @@ sprint_realloc_ipaddress(u_char ** buf, size_t * buf_len, size_t * out_len,
         }
     }
 
-    if (!ds_get_boolean(DS_LIBRARY_ID, DS_LIB_QUICK_PRINT)) {
+    if (!netsnmp_ds_get_boolean(NETSNMP_DS_LIBRARY_ID, NETSNMP_DS_LIB_QUICK_PRINT)) {
         u_char          str[] = "IpAddress: ";
         if (!snmp_strcat(buf, buf_len, out_len, allow_realloc, str)) {
             return 0;
@@ -1742,7 +1742,7 @@ sprint_realloc_bitstring(u_char ** buf, size_t * buf_len, size_t * out_len,
         }
     }
 
-    if (ds_get_boolean(DS_LIBRARY_ID, DS_LIB_QUICK_PRINT)) {
+    if (netsnmp_ds_get_boolean(NETSNMP_DS_LIBRARY_ID, NETSNMP_DS_LIB_QUICK_PRINT)) {
         u_char          str[] = "\"";
         if (!snmp_strcat(buf, buf_len, out_len, allow_realloc, str)) {
             return 0;
@@ -1758,7 +1758,7 @@ sprint_realloc_bitstring(u_char ** buf, size_t * buf_len, size_t * out_len,
         return 0;
     }
 
-    if (ds_get_boolean(DS_LIBRARY_ID, DS_LIB_QUICK_PRINT)) {
+    if (netsnmp_ds_get_boolean(NETSNMP_DS_LIBRARY_ID, NETSNMP_DS_LIB_QUICK_PRINT)) {
         u_char          str[] = "\"";
         if (!snmp_strcat(buf, buf_len, out_len, allow_realloc, str)) {
             return 0;
@@ -1776,8 +1776,8 @@ sprint_realloc_bitstring(u_char ** buf, size_t * buf_len, size_t * out_len,
                         }
                     }
                     if (enum_string == NULL ||
-                        ds_get_boolean(DS_LIBRARY_ID,
-                                       DS_LIB_PRINT_NUMERIC_ENUM)) {
+                        netsnmp_ds_get_boolean(NETSNMP_DS_LIBRARY_ID,
+                                       NETSNMP_DS_LIB_PRINT_NUMERIC_ENUM)) {
                         char            str[16];
                         sprintf(str, "%d ", (len * 8) + bit);
                         if (!snmp_strcat
@@ -1825,7 +1825,7 @@ sprint_realloc_nsapaddress(u_char ** buf, size_t * buf_len,
         }
     }
 
-    if (!ds_get_boolean(DS_LIBRARY_ID, DS_LIB_QUICK_PRINT)) {
+    if (!netsnmp_ds_get_boolean(NETSNMP_DS_LIBRARY_ID, NETSNMP_DS_LIB_QUICK_PRINT)) {
         u_char          str[] = "NsapAddress: ";
         if (!snmp_strcat(buf, buf_len, out_len, allow_realloc, str)) {
             return 0;
@@ -2030,53 +2030,53 @@ snmp_out_toggle_options(char *options)
     while (*options) {
         switch (*options++) {
         case 'n':
-            ds_toggle_boolean(DS_LIBRARY_ID, DS_LIB_PRINT_NUMERIC_OIDS);
+            netsnmp_ds_toggle_boolean(NETSNMP_DS_LIBRARY_ID, NETSNMP_DS_LIB_PRINT_NUMERIC_OIDS);
             break;
         case 'e':
-            ds_toggle_boolean(DS_LIBRARY_ID, DS_LIB_PRINT_NUMERIC_ENUM);
+            netsnmp_ds_toggle_boolean(NETSNMP_DS_LIBRARY_ID, NETSNMP_DS_LIB_PRINT_NUMERIC_ENUM);
             break;
         case 'b':
-            ds_toggle_boolean(DS_LIBRARY_ID, DS_LIB_DONT_BREAKDOWN_OIDS);
+            netsnmp_ds_toggle_boolean(NETSNMP_DS_LIBRARY_ID, NETSNMP_DS_LIB_DONT_BREAKDOWN_OIDS);
             break;
         case 'E':
-            ds_toggle_boolean(DS_LIBRARY_ID, DS_LIB_ESCAPE_QUOTES);
+            netsnmp_ds_toggle_boolean(NETSNMP_DS_LIBRARY_ID, NETSNMP_DS_LIB_ESCAPE_QUOTES);
             break;
         case 'X':
-            ds_toggle_boolean(DS_LIBRARY_ID, DS_LIB_EXTENDED_INDEX);
+            netsnmp_ds_toggle_boolean(NETSNMP_DS_LIBRARY_ID, NETSNMP_DS_LIB_EXTENDED_INDEX);
             break;
         case 'q':
-            ds_toggle_boolean(DS_LIBRARY_ID, DS_LIB_QUICK_PRINT);
+            netsnmp_ds_toggle_boolean(NETSNMP_DS_LIBRARY_ID, NETSNMP_DS_LIB_QUICK_PRINT);
             break;
         case 'Q':
-            ds_set_boolean(DS_LIBRARY_ID, DS_LIB_QUICKE_PRINT, 1);
-            ds_toggle_boolean(DS_LIBRARY_ID, DS_LIB_QUICK_PRINT);
+            netsnmp_ds_set_boolean(NETSNMP_DS_LIBRARY_ID, NETSNMP_DS_LIB_QUICKE_PRINT, 1);
+            netsnmp_ds_toggle_boolean(NETSNMP_DS_LIBRARY_ID, NETSNMP_DS_LIB_QUICK_PRINT);
             break;
         case 'f':
-            ds_set_int(DS_LIBRARY_ID, DS_LIB_PRINT_SUFFIX_ONLY, 0);
-            ds_set_boolean(DS_LIBRARY_ID, DS_LIB_PRINT_NUMERIC_OIDS, 0);
-            ds_toggle_boolean(DS_LIBRARY_ID, DS_LIB_PRINT_FULL_OID);
+            netsnmp_ds_set_int(NETSNMP_DS_LIBRARY_ID, NETSNMP_DS_LIB_PRINT_SUFFIX_ONLY, 0);
+            netsnmp_ds_set_boolean(NETSNMP_DS_LIBRARY_ID, NETSNMP_DS_LIB_PRINT_NUMERIC_OIDS, 0);
+            netsnmp_ds_toggle_boolean(NETSNMP_DS_LIBRARY_ID, NETSNMP_DS_LIB_PRINT_FULL_OID);
             break;
         case 't':
-            ds_toggle_boolean(DS_LIBRARY_ID, DS_LIB_NUMERIC_TIMETICKS);
+            netsnmp_ds_toggle_boolean(NETSNMP_DS_LIBRARY_ID, NETSNMP_DS_LIB_NUMERIC_TIMETICKS);
             break;
         case 'u':
-            ds_set_int(DS_LIBRARY_ID, DS_LIB_PRINT_SUFFIX_ONLY, 0);
-            ds_set_boolean(DS_LIBRARY_ID, DS_LIB_PRINT_NUMERIC_OIDS, 0);
-            ds_toggle_boolean(DS_LIBRARY_ID, DS_LIB_PRINT_UCD_STYLE_OID);
+            netsnmp_ds_set_int(NETSNMP_DS_LIBRARY_ID, NETSNMP_DS_LIB_PRINT_SUFFIX_ONLY, 0);
+            netsnmp_ds_set_boolean(NETSNMP_DS_LIBRARY_ID, NETSNMP_DS_LIB_PRINT_NUMERIC_OIDS, 0);
+            netsnmp_ds_toggle_boolean(NETSNMP_DS_LIBRARY_ID, NETSNMP_DS_LIB_PRINT_UCD_STYLE_OID);
             break;
         case 'v':
-            ds_toggle_boolean(DS_LIBRARY_ID, DS_LIB_PRINT_BARE_VALUE);
+            netsnmp_ds_toggle_boolean(NETSNMP_DS_LIBRARY_ID, NETSNMP_DS_LIB_PRINT_BARE_VALUE);
             break;
         case 's':
-            ds_set_int(DS_LIBRARY_ID, DS_LIB_PRINT_SUFFIX_ONLY, 1);
-            ds_set_boolean(DS_LIBRARY_ID, DS_LIB_PRINT_NUMERIC_OIDS, 0);
+            netsnmp_ds_set_int(NETSNMP_DS_LIBRARY_ID, NETSNMP_DS_LIB_PRINT_SUFFIX_ONLY, 1);
+            netsnmp_ds_set_boolean(NETSNMP_DS_LIBRARY_ID, NETSNMP_DS_LIB_PRINT_NUMERIC_OIDS, 0);
             break;
         case 'S':
-            ds_set_int(DS_LIBRARY_ID, DS_LIB_PRINT_SUFFIX_ONLY, 2);
-            ds_set_boolean(DS_LIBRARY_ID, DS_LIB_PRINT_NUMERIC_OIDS, 0);
+            netsnmp_ds_set_int(NETSNMP_DS_LIBRARY_ID, NETSNMP_DS_LIB_PRINT_SUFFIX_ONLY, 2);
+            netsnmp_ds_set_boolean(NETSNMP_DS_LIBRARY_ID, NETSNMP_DS_LIB_PRINT_NUMERIC_OIDS, 0);
             break;
         case 'T':
-            ds_toggle_boolean(DS_LIBRARY_ID, DS_LIB_PRINT_HEX_TEXT);
+            netsnmp_ds_toggle_boolean(NETSNMP_DS_LIBRARY_ID, NETSNMP_DS_LIB_PRINT_HEX_TEXT);
             break;
         default:
             return options - 1;
@@ -2114,16 +2114,16 @@ snmp_in_toggle_options(char *options)
     while (*options) {
         switch (*options++) {
         case 'R':
-            ds_toggle_boolean(DS_LIBRARY_ID, DS_LIB_RANDOM_ACCESS);
+            netsnmp_ds_toggle_boolean(NETSNMP_DS_LIBRARY_ID, NETSNMP_DS_LIB_RANDOM_ACCESS);
             break;
         case 'b':
-            ds_toggle_boolean(DS_LIBRARY_ID, DS_LIB_REGEX_ACCESS);
+            netsnmp_ds_toggle_boolean(NETSNMP_DS_LIBRARY_ID, NETSNMP_DS_LIB_REGEX_ACCESS);
             break;
         case 'r':
-            ds_toggle_boolean(DS_LIBRARY_ID, DS_LIB_DONT_CHECK_RANGE);
+            netsnmp_ds_toggle_boolean(NETSNMP_DS_LIBRARY_ID, NETSNMP_DS_LIB_DONT_CHECK_RANGE);
             break;
         case 'u':
-            ds_toggle_boolean(DS_LIBRARY_ID, DS_LIB_READ_UCD_STYLE_OID);
+            netsnmp_ds_toggle_boolean(NETSNMP_DS_LIBRARY_ID, NETSNMP_DS_LIB_READ_UCD_STYLE_OID);
             break;
         default:
             return options - 1;
@@ -2173,37 +2173,37 @@ register_mib_handlers(void)
      * parsing behaviour 
      */
 
-    ds_register_premib(ASN_BOOLEAN, "snmp", "showMibErrors",
-                       DS_LIBRARY_ID, DS_LIB_MIB_ERRORS);
-    ds_register_premib(ASN_BOOLEAN, "snmp", "strictCommentTerm",
-                       DS_LIBRARY_ID, DS_LIB_MIB_COMMENT_TERM);
-    ds_register_premib(ASN_BOOLEAN, "snmp", "mibAllowUnderline",
-                       DS_LIBRARY_ID, DS_LIB_MIB_PARSE_LABEL);
-    ds_register_premib(ASN_INTEGER, "snmp", "mibWarningLevel",
-                       DS_LIBRARY_ID, DS_LIB_MIB_WARNINGS);
-    ds_register_premib(ASN_BOOLEAN, "snmp", "mibReplaceWithLatest",
-                       DS_LIBRARY_ID, DS_LIB_MIB_REPLACE);
+    netsnmp_ds_register_premib(ASN_BOOLEAN, "snmp", "showMibErrors",
+                       NETSNMP_DS_LIBRARY_ID, NETSNMP_DS_LIB_MIB_ERRORS);
+    netsnmp_ds_register_premib(ASN_BOOLEAN, "snmp", "strictCommentTerm",
+                       NETSNMP_DS_LIBRARY_ID, NETSNMP_DS_LIB_MIB_COMMENT_TERM);
+    netsnmp_ds_register_premib(ASN_BOOLEAN, "snmp", "mibAllowUnderline",
+                       NETSNMP_DS_LIBRARY_ID, NETSNMP_DS_LIB_MIB_PARSE_LABEL);
+    netsnmp_ds_register_premib(ASN_INTEGER, "snmp", "mibWarningLevel",
+                       NETSNMP_DS_LIBRARY_ID, NETSNMP_DS_LIB_MIB_WARNINGS);
+    netsnmp_ds_register_premib(ASN_BOOLEAN, "snmp", "mibReplaceWithLatest",
+                       NETSNMP_DS_LIBRARY_ID, NETSNMP_DS_LIB_MIB_REPLACE);
 
-    ds_register_premib(ASN_BOOLEAN, "snmp", "printNumericEnums",
-                       DS_LIBRARY_ID, DS_LIB_PRINT_NUMERIC_ENUM);
-    ds_register_premib(ASN_BOOLEAN, "snmp", "printNumericOids",
-                       DS_LIBRARY_ID, DS_LIB_PRINT_NUMERIC_OIDS);
-    ds_register_premib(ASN_BOOLEAN, "snmp", "escapeQuotes",
-                       DS_LIBRARY_ID, DS_LIB_ESCAPE_QUOTES);
-    ds_register_premib(ASN_BOOLEAN, "snmp", "dontBreakdownOids",
-                       DS_LIBRARY_ID, DS_LIB_DONT_BREAKDOWN_OIDS);
-    ds_register_premib(ASN_BOOLEAN, "snmp", "quickPrinting",
-                       DS_LIBRARY_ID, DS_LIB_QUICK_PRINT);
-    ds_register_premib(ASN_BOOLEAN, "snmp", "numericTimeticks",
-                       DS_LIBRARY_ID, DS_LIB_NUMERIC_TIMETICKS);
-    ds_register_premib(ASN_INTEGER, "snmp", "suffixPrinting",
-                       DS_LIBRARY_ID, DS_LIB_PRINT_SUFFIX_ONLY);
-    ds_register_premib(ASN_BOOLEAN, "snmp", "extendedIndex",
-                       DS_LIBRARY_ID, DS_LIB_EXTENDED_INDEX);
-    ds_register_premib(ASN_BOOLEAN, "snmp", "printHexText",
-                       DS_LIBRARY_ID, DS_LIB_PRINT_HEX_TEXT);
-    ds_register_premib(ASN_BOOLEAN, "snmp", "printValueOnly",
-                       DS_LIBRARY_ID, DS_LIB_PRINT_BARE_VALUE);
+    netsnmp_ds_register_premib(ASN_BOOLEAN, "snmp", "printNumericEnums",
+                       NETSNMP_DS_LIBRARY_ID, NETSNMP_DS_LIB_PRINT_NUMERIC_ENUM);
+    netsnmp_ds_register_premib(ASN_BOOLEAN, "snmp", "printNumericOids",
+                       NETSNMP_DS_LIBRARY_ID, NETSNMP_DS_LIB_PRINT_NUMERIC_OIDS);
+    netsnmp_ds_register_premib(ASN_BOOLEAN, "snmp", "escapeQuotes",
+                       NETSNMP_DS_LIBRARY_ID, NETSNMP_DS_LIB_ESCAPE_QUOTES);
+    netsnmp_ds_register_premib(ASN_BOOLEAN, "snmp", "dontBreakdownOids",
+                       NETSNMP_DS_LIBRARY_ID, NETSNMP_DS_LIB_DONT_BREAKDOWN_OIDS);
+    netsnmp_ds_register_premib(ASN_BOOLEAN, "snmp", "quickPrinting",
+                       NETSNMP_DS_LIBRARY_ID, NETSNMP_DS_LIB_QUICK_PRINT);
+    netsnmp_ds_register_premib(ASN_BOOLEAN, "snmp", "numericTimeticks",
+                       NETSNMP_DS_LIBRARY_ID, NETSNMP_DS_LIB_NUMERIC_TIMETICKS);
+    netsnmp_ds_register_premib(ASN_INTEGER, "snmp", "suffixPrinting",
+                       NETSNMP_DS_LIBRARY_ID, NETSNMP_DS_LIB_PRINT_SUFFIX_ONLY);
+    netsnmp_ds_register_premib(ASN_BOOLEAN, "snmp", "extendedIndex",
+                       NETSNMP_DS_LIBRARY_ID, NETSNMP_DS_LIB_EXTENDED_INDEX);
+    netsnmp_ds_register_premib(ASN_BOOLEAN, "snmp", "printHexText",
+                       NETSNMP_DS_LIBRARY_ID, NETSNMP_DS_LIB_PRINT_HEX_TEXT);
+    netsnmp_ds_register_premib(ASN_BOOLEAN, "snmp", "printValueOnly",
+                       NETSNMP_DS_LIBRARY_ID, NETSNMP_DS_LIB_PRINT_BARE_VALUE);
 
 }
 
@@ -2542,7 +2542,7 @@ read_objid(const char *input, oid * output, size_t * out_len)
 
     if (*input == '.')
         input++;
-    else if (ds_get_boolean(DS_LIBRARY_ID, DS_LIB_READ_UCD_STYLE_OID)) {
+    else if (netsnmp_ds_get_boolean(NETSNMP_DS_LIBRARY_ID, NETSNMP_DS_LIB_READ_UCD_STYLE_OID)) {
         /*
          * get past leading '.', append '.' to Prefix. 
          */
@@ -2613,9 +2613,9 @@ netsnmp_sprint_realloc_objid_tree(u_char ** buf, size_t * buf_len,
         return subtree;
     }
 
-    if (ds_get_boolean(DS_LIBRARY_ID, DS_LIB_PRINT_NUMERIC_OIDS)) {
+    if (netsnmp_ds_get_boolean(NETSNMP_DS_LIBRARY_ID, NETSNMP_DS_LIB_PRINT_NUMERIC_OIDS)) {
         cp = tbuf;
-    } else if (ds_get_int(DS_LIBRARY_ID, DS_LIB_PRINT_SUFFIX_ONLY)) {
+    } else if (netsnmp_ds_get_int(NETSNMP_DS_LIBRARY_ID, NETSNMP_DS_LIB_PRINT_SUFFIX_ONLY)) {
         for (cp = tbuf; *cp; cp++);
 
         if (midpoint_offset != 0) {
@@ -2638,7 +2638,7 @@ netsnmp_sprint_realloc_objid_tree(u_char ** buf, size_t * buf_len,
 
         cp++;
 
-        if (ds_get_int(DS_LIBRARY_ID, DS_LIB_PRINT_SUFFIX_ONLY) == 2
+        if (netsnmp_ds_get_int(NETSNMP_DS_LIBRARY_ID, NETSNMP_DS_LIB_PRINT_SUFFIX_ONLY) == 2
             && cp > tbuf) {
             char            modbuf[256] = { 0 }, *mod =
                 module_name(subtree->modid, modbuf);
@@ -2658,7 +2658,7 @@ netsnmp_sprint_realloc_objid_tree(u_char ** buf, size_t * buf_len,
                 }
             }
         }
-    } else if (ds_get_boolean(DS_LIBRARY_ID, DS_LIB_PRINT_UCD_STYLE_OID)) {
+    } else if (netsnmp_ds_get_boolean(NETSNMP_DS_LIBRARY_ID, NETSNMP_DS_LIB_PRINT_UCD_STYLE_OID)) {
         PrefixListPtr   pp = &mib_prefixes[0];
         size_t          ilen, tlen;
         const char     *testcp;
@@ -2774,15 +2774,15 @@ sprint_realloc_variable(u_char ** buf, size_t * buf_len,
     if (buf_overflow) {
         return 0;
     }
-    if (!ds_get_boolean(DS_LIBRARY_ID, DS_LIB_PRINT_BARE_VALUE)) {
-        if (ds_get_boolean(DS_LIBRARY_ID, DS_LIB_QUICKE_PRINT)) {
+    if (!netsnmp_ds_get_boolean(NETSNMP_DS_LIBRARY_ID, NETSNMP_DS_LIB_PRINT_BARE_VALUE)) {
+        if (netsnmp_ds_get_boolean(NETSNMP_DS_LIBRARY_ID, NETSNMP_DS_LIB_QUICKE_PRINT)) {
             if (!snmp_strcat
                 (buf, buf_len, out_len, allow_realloc,
                  (const u_char *) " = ")) {
                 return 0;
             }
         } else {
-            if (ds_get_boolean(DS_LIBRARY_ID, DS_LIB_QUICK_PRINT)) {
+            if (netsnmp_ds_get_boolean(NETSNMP_DS_LIBRARY_ID, NETSNMP_DS_LIB_QUICK_PRINT)) {
                 if (!snmp_strcat
                     (buf, buf_len, out_len, allow_realloc,
                      (const u_char *) " ")) {
@@ -2794,8 +2794,8 @@ sprint_realloc_variable(u_char ** buf, size_t * buf_len,
                      (const u_char *) " = ")) {
                     return 0;
                 }
-            }                   /* end if-else DS_LIB_QUICK_PRINT */
-        }                       /* end if-else DS_LIB_QUICKE_PRINT */
+            }                   /* end if-else NETSNMP_DS_LIB_QUICK_PRINT */
+        }                       /* end if-else NETSNMP_DS_LIB_QUICKE_PRINT */
     } else {
         *out_len = 0;
     }
@@ -3301,7 +3301,7 @@ dump_realloc_oid_to_string(const oid * objid, size_t objidlen,
             }
 
             if (alen == 0) {
-                if (ds_get_boolean(DS_LIBRARY_ID, DS_LIB_ESCAPE_QUOTES)) {
+                if (netsnmp_ds_get_boolean(NETSNMP_DS_LIBRARY_ID, NETSNMP_DS_LIB_ESCAPE_QUOTES)) {
                     while ((*out_len + 2) >= *buf_len) {
                         if (!(allow_realloc && snmp_realloc(buf, buf_len))) {
                             return 0;
@@ -3330,7 +3330,7 @@ dump_realloc_oid_to_string(const oid * objid, size_t objidlen,
         }
 
         if (alen) {
-            if (ds_get_boolean(DS_LIBRARY_ID, DS_LIB_ESCAPE_QUOTES)) {
+            if (netsnmp_ds_get_boolean(NETSNMP_DS_LIBRARY_ID, NETSNMP_DS_LIB_ESCAPE_QUOTES)) {
                 while ((*out_len + 2) >= *buf_len) {
                     if (!(allow_realloc && snmp_realloc(buf, buf_len))) {
                         return 0;
@@ -3363,7 +3363,7 @@ _get_realloc_symbol(const oid * objid, size_t objidlen,
 {
     struct tree    *return_tree = NULL;
     int             extended_index =
-        ds_get_boolean(DS_LIBRARY_ID, DS_LIB_EXTENDED_INDEX);
+        netsnmp_ds_get_boolean(NETSNMP_DS_LIBRARY_ID, NETSNMP_DS_LIB_EXTENDED_INDEX);
     char            intbuf[64];
 
     if (!objid || !buf) {
@@ -3383,7 +3383,7 @@ _get_realloc_symbol(const oid * objid, size_t objidlen,
             }
 
             if (!strncmp(subtree->label, ANON, ANON_LEN) ||
-                ds_get_boolean(DS_LIBRARY_ID, DS_LIB_PRINT_NUMERIC_OIDS)) {
+                netsnmp_ds_get_boolean(NETSNMP_DS_LIBRARY_ID, NETSNMP_DS_LIB_PRINT_NUMERIC_OIDS)) {
                 sprintf(intbuf, "%lu", subtree->subid);
                 if (!*buf_overflow && !snmp_strcat(buf, buf_len, out_len,
                                                    allow_realloc,
@@ -3433,8 +3433,8 @@ _get_realloc_symbol(const oid * objid, size_t objidlen,
      */
 
     while (in_dices && (objidlen > 0) &&
-           !ds_get_boolean(DS_LIBRARY_ID, DS_LIB_PRINT_NUMERIC_OIDS) &&
-           !ds_get_boolean(DS_LIBRARY_ID, DS_LIB_DONT_BREAKDOWN_OIDS)) {
+           !netsnmp_ds_get_boolean(NETSNMP_DS_LIBRARY_ID, NETSNMP_DS_LIB_PRINT_NUMERIC_OIDS) &&
+           !netsnmp_ds_get_boolean(NETSNMP_DS_LIBRARY_ID, NETSNMP_DS_LIB_DONT_BREAKDOWN_OIDS)) {
         size_t          numids;
         struct tree    *tp;
 
@@ -3530,8 +3530,8 @@ _get_realloc_symbol(const oid * objid, size_t objidlen,
                 if (numids > objidlen)
                     goto finish_it;
                 if (numids == 1) {
-                    if (ds_get_boolean
-                        (DS_LIBRARY_ID, DS_LIB_ESCAPE_QUOTES)) {
+                    if (netsnmp_ds_get_boolean
+                        (NETSNMP_DS_LIBRARY_ID, NETSNMP_DS_LIB_ESCAPE_QUOTES)) {
                         if (!*buf_overflow
                             && !snmp_strcat(buf, buf_len, out_len,
                                             allow_realloc,
@@ -3545,8 +3545,8 @@ _get_realloc_symbol(const oid * objid, size_t objidlen,
                                         (const u_char *) "\"")) {
                         *buf_overflow = 1;
                     }
-                    if (ds_get_boolean
-                        (DS_LIBRARY_ID, DS_LIB_ESCAPE_QUOTES)) {
+                    if (netsnmp_ds_get_boolean
+                        (NETSNMP_DS_LIBRARY_ID, NETSNMP_DS_LIB_ESCAPE_QUOTES)) {
                         if (!*buf_overflow
                             && !snmp_strcat(buf, buf_len, out_len,
                                             allow_realloc,
@@ -4218,7 +4218,7 @@ _add_strings_to_oid(struct tree *tp, char *cp,
     char            doingquote;
     int             len = -1, pos = -1;
     int             check =
-        !ds_get_boolean(DS_LIBRARY_ID, DS_LIB_DONT_CHECK_RANGE);
+        !netsnmp_ds_get_boolean(NETSNMP_DS_LIBRARY_ID, NETSNMP_DS_LIB_DONT_CHECK_RANGE);
 
     while (cp && tp && tp->child_list) {
         fcp = cp;
@@ -4821,12 +4821,12 @@ oid            *
 snmp_parse_oid(const char *argv, oid * root, size_t * rootlen)
 {
     size_t          savlen = *rootlen;
-    if (ds_get_boolean(DS_LIBRARY_ID, DS_LIB_RANDOM_ACCESS)
+    if (netsnmp_ds_get_boolean(NETSNMP_DS_LIBRARY_ID, NETSNMP_DS_LIB_RANDOM_ACCESS)
         || strchr(argv, ':')) {
         if (get_node(argv, root, rootlen)) {
             return root;
         }
-    } else if (ds_get_boolean(DS_LIBRARY_ID, DS_LIB_REGEX_ACCESS)) {
+    } else if (netsnmp_ds_get_boolean(NETSNMP_DS_LIBRARY_ID, NETSNMP_DS_LIB_REGEX_ACCESS)) {
         if (get_wild_node(argv, root, rootlen)) {
             return root;
         }

@@ -327,9 +327,10 @@ netsnmp_sockaddr_in(struct sockaddr_in *addr,
     addr->sin_family = AF_INET;
     if (remote_port > 0) {
         addr->sin_port = htons(remote_port);
-    } else if (ds_get_int(DS_LIBRARY_ID, DS_LIB_DEFAULT_PORT) > 0) {
-        addr->sin_port =
-            htons(ds_get_int(DS_LIBRARY_ID, DS_LIB_DEFAULT_PORT));
+    } else if (netsnmp_ds_get_int(NETSNMP_DS_LIBRARY_ID, 
+				  NETSNMP_DS_LIB_DEFAULT_PORT) > 0) {
+        addr->sin_port = htons(netsnmp_ds_get_int(NETSNMP_DS_LIBRARY_ID, 
+						 NETSNMP_DS_LIB_DEFAULT_PORT));
     } else {
         addr->sin_port = htons(SNMP_PORT);
     }
