@@ -2222,14 +2222,29 @@ parse_objecttype(FILE *fp,
                 return NULL;
             }   
             
-            type = get_token(fp,quoted_string_buffer,MAXTOKEN);         
-            np->defaultValue = strdup (quoted_string_buffer);
-           
-            type = get_token(fp,quoted_string_buffer,MAXTOKEN);
-            if (type != RIGHTBRACKET) {
-                print_error("Bad DEFAULTVALUE",quoted_string_buffer,type);
-                free_node(np);
-                return NULL;
+	    {   int level = 1;
+	     	char defbuf [512];
+
+		defbuf[0] = 0;
+		while (1) {
+		    type = get_token(fp, quoted_string_buffer, MAXTOKEN);         
+		    if ((type == RIGHTBRACKET && --level == 0) || type == ENDOFFILE)
+		        break;
+		    else if (type == LEFTBRACKET) level++;
+		    if (type == QUOTESTRING) strcat(defbuf, "\"");
+		    strcat(defbuf, quoted_string_buffer);
+		    if (type == QUOTESTRING) strcat(defbuf, "\"");
+		    strcat(defbuf, " ");
+		}
+
+		if (type != RIGHTBRACKET) {
+		    print_error("Bad DEFAULTVALUE",quoted_string_buffer,type);
+		    free_node(np);
+		    return NULL;
+		}
+
+		defbuf[strlen(defbuf)-1] = 0;
+		np->defaultValue = strdup (defbuf);
             }
             
             break;  
@@ -2839,6 +2854,7 @@ parse_capabilities(FILE *fp,
 		type = get_token(fp, token, MAXTOKEN);
 	    }
 	    if (type == DEFVAL) {
+	        int level = 1;
 		type = get_token(fp, token, MAXTOKEN);
 		if (type != LEFTBRACKET) {
 		    print_error("Expected \"{\" after DEFVAL", token, type);
@@ -2846,7 +2862,9 @@ parse_capabilities(FILE *fp,
 		}
 		do {
 		    type = get_token(fp, token, MAXTOKEN);
-		} while (type != RIGHTBRACKET && type != ENDOFFILE);
+		    if (type == LEFTBRACKET) level++;
+		    else if (type == RIGHTBRACKET) level--;
+		} while (type != RIGHTBRACKET && type != ENDOFFILE && level != 0);
 		if (type != RIGHTBRACKET) {
 		    print_error("Missing \"}\" after DEFVAL", token, type);
 		    goto skip;
