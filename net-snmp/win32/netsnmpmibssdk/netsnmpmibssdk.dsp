@@ -49,7 +49,7 @@ BSC32=bscmake.exe
 # ADD BSC32 /nologo
 LIB32=link.exe -lib
 # ADD BASE LIB32 /nologo
-# ADD LIB32 /nologo /out:"../lib/release/netsnmpmibs.lib"
+# ADD LIB32 iphlpapi.lib /nologo /out:"../lib/release/netsnmpmibs.lib"
 
 !ELSEIF  "$(CFG)" == "netsnmpmibssdk - Win32 Debug"
 
@@ -72,7 +72,7 @@ BSC32=bscmake.exe
 # ADD BSC32 /nologo
 LIB32=link.exe -lib
 # ADD BASE LIB32 /nologo
-# ADD LIB32 /nologo /out:"../lib/debug/netsnmpmibs.lib"
+# ADD LIB32 iphlpapi.lib /nologo /out:"../lib/debug/netsnmpmibs.lib"
 
 !ENDIF 
 
