@@ -363,7 +363,7 @@ register_mib_context(const char *moduleName,
 	if ( res != MIB_REGISTERED_OK ) {
 	    unregister_mib_context( mibloc, mibloclen, priority,
 				  range_subid, range_ubound, context);
-	    return MIB_REGISTRATION_FAILED;
+	    return res;
 	}
     }
   } else if (res == MIB_DUPLICATE_REGISTRATION ||
