@@ -747,9 +747,13 @@ parse_asntype(fp, name, ntype, ntoken)
 	return 0;
     } else {
 	if (!strcmp(token, "TEXTUAL-CONVENTION")){
-	    while (type != SYNTAX)
-		type = get_token(fp, token);
-	    type = get_token(fp, token);
+          while (type != SYNTAX) {
+              if (type == DESCRIPTION)
+		type = get_token(fp, quoted_string_buffer);
+              else
+                type = get_token(fp, token);
+          }
+          type = get_token(fp, token);
 	}
 	/* textual convention */
 	for(i = 0; i < MAXTC; i++){
@@ -1318,7 +1322,10 @@ parse_compliance(fp, name)
     np->description = NULL;        /* default to an empty description */
     type = get_token(fp, token);
     while (type != EQUALS) {
-	type = get_token(fp, token);
+      if (type == DESCRIPTION)
+        type = get_token(fp, quoted_string_buffer);
+      else
+        type = get_token(fp, token);
     }
     length = getoid(fp, oid, 32);
     if (length > 1 && length <= 32){
@@ -1638,7 +1645,7 @@ get_token(fp, token)
     register char *cp = token;
     register int hash = 0;
     register struct tok *tp;
-
+    
     *cp = 0;
     ch = last;
     /* skip all white space */
@@ -1761,18 +1768,22 @@ parseQuoteString(fp, token)
     register char *token;
 {
     register int ch;
-    int eat_space = 0;
+    int eat_space = 0, count = 0;
 
     ch = getc(fp);
     while(ch != -1) {
-	if (ch == '\n')
-	    Line++;
-	else if (ch == '"') {
-	    *token = '\0';
-	    return QUOTESTRING;
-	}
+      if (ch == '\n') {
+        Line++;
+      }
+      else if (ch == '"') {
+        *token = '\0';
+        return QUOTESTRING;
+      }
+      /* maximum description length check.  If greater, keep parsing
+         but truncate the string */
+      if (count++ < MAXQUOTESTR)
 	*token++ = ch;
-	ch = getc(fp);
+      ch = getc(fp);
     }
 
     return NULL;
