@@ -9,6 +9,7 @@
 
 #include <net-snmp/agent/net-snmp-agent-includes.h>
 #include <net-snmp/data_access/ipaddress.h>
+#include <net-snmp/data_access/interface.h>
 
 #include <errno.h>
 #include <sys/ioctl.h>
@@ -19,8 +20,8 @@ static void _print_flags(short flags);
 /**
  */
 int
-netsnmp_access_ipaddress_container_ioctl_load_v4(netsnmp_container *container,
-                                                 int idx_offset)
+_netsnmp_access_ipaddress_container_ioctl_load_v4(netsnmp_container *container,
+                                                  int idx_offset)
 {
     int             i, sd, rc = 0, interfaces = 0;
     struct ifconf   ifc;
@@ -53,9 +54,14 @@ netsnmp_access_ipaddress_container_ioctl_load_v4(netsnmp_container *container,
             rc = -3;
             break;
         }
-        entry->ns_ia_index = i + idx_offset;
+        entry->ns_ia_index = ++idx_offset;
 
-        // xxx-rks: linux/if.h vs. net/if.h
+        /*
+         * each time we make an ioctl, we need to specify the address, but
+         * it will be overwritten in the call. so we save address here.
+         */
+        save_addr = ifrp->ifr_addr;
+
         /*
          * set indexes
          */
@@ -86,11 +92,21 @@ netsnmp_access_ipaddress_container_ioctl_load_v4(netsnmp_container *container,
                 continue;
         }
 
-        save_addr = ifrp->ifr_addr;
-
         /*
-         * get if_index // xxx-rks: any relation to ifIndex??
-         * // test if it changes with ifup/down, has holes, etc
+         * get ifindex
+         */
+#ifndef NETSNMP_USE_IOCTL_IFINDEX
+        /*
+         * there is an iotcl to get an ifindex, but I'm not sure that
+         * it has the correct characteristics required to be the actual
+         * ifIndex for the mib, so we'll use the netsnmp interface method
+         * (which is based on the interface name).
+         */
+        entry->if_index = netsnmp_access_interface_index_find(ifrp->ifr_name);
+#else
+        /*
+         * get ifindex. not sure how if it is appropriate for use as
+         * the mib index.
          */
         if (ioctl(sd, SIOCGIFINDEX, ifrp) < 0) {
             snmp_log(LOG_ERR,
@@ -99,6 +115,7 @@ netsnmp_access_ipaddress_container_ioctl_load_v4(netsnmp_container *container,
             continue;
         }
         entry->if_index = ifrp->ifr_ifindex;
+#endif
 
         /*
          * get flags
@@ -118,7 +135,7 @@ netsnmp_access_ipaddress_container_ioctl_load_v4(netsnmp_container *container,
         /*
          * per the MIB:
          *   In the absence of other information, an IPv4 address is
-         *   always preferred(1)."
+         *   always preferred(1).
          */
         entry->ia_status = 1;
 
@@ -153,10 +170,10 @@ netsnmp_access_ipaddress_container_ioctl_load_v4(netsnmp_container *container,
     /*
      * return number of interfaces seen
      */
-    if(0 == rc)
-        rc = i;
+    if(rc < 0)
+        return rc;
 
-    return rc;
+    return idx_offset;
 }
 
 /**

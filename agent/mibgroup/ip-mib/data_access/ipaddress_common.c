@@ -52,6 +52,7 @@ netsnmp_access_ipaddress_container_init(u_int flags)
     if (NULL == container1)
         return NULL;
 
+#ifdef xxx-rks
     if (flags & NETSNMP_ACCESS_IPADDRESS_INIT_ADDL_IDX_BY_NAME) {
         netsnmp_container *container2 =
             netsnmp_container_find("access_ipaddress:table_container");
@@ -62,6 +63,7 @@ netsnmp_access_ipaddress_container_init(u_int flags)
         
         netsnmp_container_add_index(container1, container2);
     }
+#endif
 
     return container1;
 }
