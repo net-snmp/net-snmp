@@ -83,12 +83,35 @@ export SNMP_PERSISTENT_FILE
 if [ "x$SNMP_FLAGS" = "x" ]; then
     SNMP_FLAGS="-d"
 fi
+
+BASE_PORT=8765
+MAX_RETRIES=3
+if [ -x /bin/netstat ]; then
+    while :
+    do
+        IN_USE=`/bin/netstat -l --protocol=inet --extend --program 2>/dev/null | grep ":$BASE_PORT"`
+        if [ $? -eq 0 ]; then
+            #echo "Port $BASE_PORT in use:"
+            #echo "->$IN_USE"
+            (( BASE_PORT = $BASE_PORT + ($RANDOM % 100) ))
+        else
+            #echo "Using port $BASE_PORT"
+            break
+        fi
+        (( MAX_RETRIES = $MAX_RETRIES - 1 ))
+        if [ $MAX_RETRIES -eq 0 ]; then
+            echo "ERROR: Could not find available port."
+            exit 255
+        fi
+    done
+fi
+
 if [ "x$SNMP_SNMPD_PORT" = "x" ]; then
-    SNMP_SNMPD_PORT="8765"
+    SNMP_SNMPD_PORT=$BASE_PORT
 fi
 
 if [ "x$SNMP_SNMPTRAPD_PORT" = "x" ]; then
-    SNMP_SNMPTRAPD_PORT="8764"
+    (( SNMP_SNMPTRAPD_PORT = $BASE_PORT - 1 ))
 fi
 export SNMP_FLAGS SNMP_SNMPD_PORT SNMP_SNMPTRAPD_PORT
 
