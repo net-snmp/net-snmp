@@ -18,9 +18,12 @@
 #define SHELLRESULT 4
 #define SHELLOUTPUT 5
 
+#define MEMTOTALSWAP 1
+#define MEMUSEDSWAP 2
 
 unsigned char *var_wes_proc();
+unsigned char *var_wes_mem();
 
-#define DEFPROCFILE "/etc/snmpProcWatch.conf"
+#define DEFPROCFILE "/etc/snmp-ece.conf"
 
 #include "struct.h"

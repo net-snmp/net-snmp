@@ -4,3 +4,6 @@ OBJS = misc.o read_config.o wes.o
 SRCS:=$(subst .o,.c,$(OBJS))
 
 all: $(OBJS)
+
+wes.o: wes.h wes.c struct.h
+readconfig.o: readconfig.c struct.h

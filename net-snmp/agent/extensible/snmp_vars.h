@@ -20,3 +20,8 @@ struct variable2 wes_extensible_variables[] = {
     {SHELLOUTPUT, STRING, RONLY, var_wes_shell, 1, {5 }}
 };
 
+struct variable2 wes_mem_variables[] = {
+  {MEMTOTALSWAP, INTEGER, RONLY, var_wes_mem, 1, {1 }},
+  {MEMUSEDSWAP, INTEGER, RONLY, var_wes_mem, 1, {2 }}
+};
+
