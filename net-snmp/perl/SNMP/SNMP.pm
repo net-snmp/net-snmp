@@ -229,7 +229,8 @@ sub mapEnum {
 		   Version => 1,
 		   Timeout => 1,
 		   Retries => 1,
-		   RemotePort => 1);
+		   RemotePort => 1,
+                   LocalPort => 1);
 
 sub strip_session_params {
     my @params;
@@ -375,6 +376,9 @@ sub new {
    # allow override of remote SNMP port
    $this->{RemotePort} ||= 161;
 
+   # allow override of local SNMP port
+   $this->{LocalPort} ||= 0;
+
    # destination host defaults to localhost
    $this->{DestHost} ||= 'localhost';
 
@@ -409,6 +413,7 @@ sub new {
 					     $this->{Community},
 					     $this->{DestAddr},
 					     $this->{RemotePort},
+					     $this->{LocalPort},
 					     $this->{Retries},
 					     $this->{Timeout},
 					     );
@@ -463,7 +468,7 @@ sub new {
 
 sub update {
 # *Not Implemented*
-# designed to update the fields of session to allow retargettinf to different
+# designed to update the fields of session to allow retargetting to different
 # host, community name change, timeout, retry changes etc. Unfortunately not
 # working yet because some updates (the address in particular) need to be
 # done on the internal session pointer which cannot be fetched w/o touching
@@ -501,6 +506,7 @@ sub update {
 		 $this->{Community},
 		 $this->{DestAddr},
 		 $this->{RemotePort},
+		 $this->{LocalPort},
 		 $this->{Retries},
 		 $this->{Timeout},
 		);
