@@ -222,7 +222,7 @@ snmp_parse_args(int argc,
       case 'I':
         cp = snmp_in_toggle_options(optarg);
         if (cp != NULL) {
-          fprintf(stderr,"Unknown output option passed to -I: %c.\n", *cp);
+          fprintf(stderr,"Unknown input option passed to -I: %c.\n", *cp);
           usage();
           exit(1);
         }
