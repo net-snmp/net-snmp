@@ -133,11 +133,11 @@ init_vacm_vars (void)
   snmpd_register_config_handler("rouser", vacm_parse_simple,
                                 NULL,"user [noauth|auth|priv] [oid]");
   snmpd_register_config_handler("vacmView", vacm_parse_config_view, NULL,
-                                "internal use only");
+                                NULL);
   snmpd_register_config_handler("vacmGroup", vacm_parse_config_group, NULL,
-                                "internal use only");
+                                NULL);
   snmpd_register_config_handler("vacmAccess", vacm_parse_config_access, NULL,
-                                "internal use only");                                
+                                NULL);                                
 					  
 
 #ifdef USING_MIBII_SYSORTABLE_MODULE

@@ -751,17 +751,17 @@ init_snmpv3(const char *type) {
   register_config_handler("snmp","defSecurityLevel", snmpv3_secLevel_conf,
                           NULL, "noAuthNoPriv|authNoPriv|authPriv");
   register_config_handler(type,"userSetAuthPass", usm_set_password, NULL,
-                          "secname engineIDLen engineID pass");
+                          NULL);
   register_config_handler(type,"userSetPrivPass", usm_set_password, NULL,
-                          "secname engineIDLen engineID pass");
+                          NULL);
   register_config_handler(type,"userSetAuthKey", usm_set_password, NULL,
-                          "secname engineIDLen engineID KuLen Ku");
+                          NULL);
   register_config_handler(type,"userSetPrivKey", usm_set_password, NULL,
-                          "secname engineIDLen engineID KuLen Ku");
+                          NULL);
   register_config_handler(type,"userSetAuthLocalKey", usm_set_password, NULL,
-                          "secname engineIDLen engineID KulLen Kul");
+                          NULL);
   register_config_handler(type,"userSetPrivLocalKey", usm_set_password, NULL,
-                          "secname engineIDLen engineID KulLen Kul");
+                          NULL);
 }
 
 /*
