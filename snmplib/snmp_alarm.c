@@ -117,8 +117,6 @@ sa_update_entry(struct snmp_alarm *a)
     }
 }
 
-
-
 void
 snmp_alarm_unregister(unsigned int clientreg)
 {
@@ -132,19 +130,29 @@ snmp_alarm_unregister(unsigned int clientreg)
 
     if (sa_ptr != NULL) {
         *prevNext = sa_ptr->next;
-        DEBUGMSGTL(("snmp_alarm", "unregistered alarm %d\n",
-                    sa_ptr->clientreg));
+        DEBUGMSGTL(("snmp_alarm", "unregistered alarm %d\n", 
+		    sa_ptr->clientreg));
         /*
          * Note:  do not free the clientarg, its the clients responsibility 
          */
         free(sa_ptr);
     } else {
-        DEBUGMSGTL(("snmp_alarm", "no alarm %d to unregister\n",
-                    clientreg));
+        DEBUGMSGTL(("snmp_alarm", "no alarm %d to unregister\n", clientreg));
     }
 }
 
+void
+snmp_alarm_unregister_all(void)
+{
+  struct snmp_alarm *sa_ptr, *sa_tmp;
 
+  for (sa_ptr = thealarms; sa_ptr != NULL; sa_ptr = sa_tmp) {
+    sa_tmp = sa_ptr->next;
+    free(sa_ptr);
+  }
+  DEBUGMSGTL(("snmp_alarm", "ALL alarms unregistered\n"));
+  thealarms = NULL;
+}  
 
 struct snmp_alarm *
 sa_find_next(void)
@@ -165,8 +173,6 @@ sa_find_next(void)
     return lowest;
 }
 
-
-
 struct snmp_alarm *
 sa_find_specific(unsigned int clientreg)
 {
@@ -178,8 +184,6 @@ sa_find_specific(unsigned int clientreg)
     }
     return NULL;
 }
-
-
 
 void
 run_alarms(void)
@@ -294,11 +298,10 @@ set_an_alarm(void)
      * run_alarms().  
      */
 
-    if (nextalarm &&
-	!netsnmp_ds_get_boolean(NETSNMP_DS_LIBRARY_ID,
-				NETSNMP_DS_LIB_ALARM_DONT_USE_SIG)) {
+    if (nextalarm && !netsnmp_ds_get_boolean(NETSNMP_DS_LIBRARY_ID,
+					NETSNMP_DS_LIB_ALARM_DONT_USE_SIG)) {
 #ifndef WIN32
-# ifdef   HAVE_SETITIMER
+# ifdef HAVE_SETITIMER
         struct itimerval it;
 
         it.it_value.tv_sec = delta.tv_sec;
@@ -310,16 +313,16 @@ set_an_alarm(void)
         setitimer(ITIMER_REAL, &it, NULL);
         DEBUGMSGTL(("snmp_alarm", "schedule alarm %d in %d.%03d seconds\n",
                     nextalarm, delta.tv_sec, (delta.tv_usec / 1000)));
-# else                          /* HAVE_SETITIMER */
-#  ifdef    SIGALRM
+# else  /* HAVE_SETITIMER */
+#  ifdef SIGALRM
         signal(SIGALRM, alarm_handler);
         alarm(delta.tv_sec);
         DEBUGMSGTL(("snmp_alarm",
                     "schedule alarm %d in roughly %d seconds\n", nextalarm,
                     delta.tv_sec));
-#  endif                        /* SIGALRM */
-# endif                         /* HAVE_SETITIMER */
-#endif                          /* WIN32 */
+#  endif  /* SIGALRM */
+# endif  /* HAVE_SETITIMER */
+#endif  /* WIN32 */
 
     } else {
         DEBUGMSGTL(("snmp_alarm", "no alarms found to schedule\n"));
@@ -354,7 +357,7 @@ snmp_alarm_register(unsigned int when, unsigned int flags,
     sa_update_entry(*sa_pptr);
 
     DEBUGMSGTL(("snmp_alarm",
-                "registered alarm %d, t = %d.%03d, flags=0x%02x\n",
+		"registered alarm %d, t = %d.%03d, flags=0x%02x\n",
                 (*sa_pptr)->clientreg, (*sa_pptr)->t.tv_sec,
                 ((*sa_pptr)->t.tv_usec / 1000), (*sa_pptr)->flags));
 
