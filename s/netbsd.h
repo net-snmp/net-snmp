@@ -1,6 +1,6 @@
 #include "bsd.h"
 
-#define PCB_TABLE
+#define PCB_TABLE 1
 #undef TCP_SYMBOL
 #define TCP_SYMBOL "tcbtable"
 #undef TCP_TTL_SYMBOL

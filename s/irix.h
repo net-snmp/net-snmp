@@ -15,7 +15,7 @@
 #undef TCPSTAT_SYMBOL
 #undef UDPSTAT_SYMBOL
 
-#define _KMEMUSER
+#define _KMEMUSER 1
 
 /* don't define _KERNEL before including sys/unistd.h */
-#define IFNET_NEEDS_KERNEL_LATE 
+#define IFNET_NEEDS_KERNEL_LATE  1
