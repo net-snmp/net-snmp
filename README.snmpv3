@@ -5,6 +5,14 @@ doesn't ;-) --Wes:
 Note: SHA authentication and DES encryption support is only available
 if you have OpenSSL installed.
 
+Note: encryption support isn't enabled in the binary releases downloadable
+from the net-snmp web site.
+
+Note: this description assumes you're using the software compiled from
+source, and so installed using the default prefix location (/usr/local).
+If you're working with a vendor-provided system, or have configured
+things with a different prefix, you'll need to adjust locations accordingly.
+
 CREATING THE FIRST USER:
 
   First off, you need to add snmpd.conf VACM entries to allow you to
