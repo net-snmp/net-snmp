@@ -41,6 +41,10 @@ check_log_size(unsigned int clientreg, void *clientarg)
     gettimeofday(&now, NULL);
     tmpl = netsnmp_timeval_uptime(&now);
 
+    if (!nlmLogTable || !nlmLogTable->table )  {
+        DEBUGMSGTL(("notification_log", "missing log table\n"));
+        return;
+    }
     for (row = nlmLogTable->table->first_row; row; row = row->next) {
         /*
          * check max allowed count 
@@ -99,13 +103,13 @@ check_log_size(unsigned int clientreg, void *clientarg)
         deleterow = tmprow;
         num_deleted++;
         /*
-         * XXX: delete vars from it's table 
+         * XXX: delete vars from its table 
          */
     }
 }
 
 
-/** Initialize the nlmLogVariableTable table by defining it's contents and how it's structured */
+/** Initialize the nlmLogVariableTable table by defining its contents and how it's structured */
 void
 initialize_table_nlmLogVariableTable(void)
 {
@@ -270,7 +274,7 @@ initialize_table_nlmLogVariableTable(void)
     netsnmp_register_table_data_set(reginfo, table_set, NULL);
 }
 
-/** Initialize the nlmLogTable table by defining it's contents and how it's structured */
+/** Initialize the nlmLogTable table by defining its contents and how it's structured */
 void
 initialize_table_nlmLogTable(void)
 {
