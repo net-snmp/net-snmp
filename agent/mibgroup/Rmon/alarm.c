@@ -139,7 +139,7 @@
     register u_char *access;
 
 
-    tree_ptr = find_subtree(name, namelen, NULL);
+    tree_ptr = find_subtree(name, namelen, NULL, "");
     if (!tree_ptr) {
         return SNMP_ERR_NOSUCHNAME;
     }
