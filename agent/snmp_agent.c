@@ -789,6 +789,10 @@ handle_snmp_packet(int operation, struct snmp_session *session, int reqid,
     int status, allDone, i;
     struct variable_list *var_ptr, *var_ptr2;
 
+    if (operation != SNMP_CALLBACK_OP_RECEIVED_MESSAGE) {
+      return 1;
+    }
+
     if ( magic == NULL ) {
 	asp = init_agent_snmp_session( session, pdu );
 	status = SNMP_ERR_NOERROR;
