@@ -556,11 +556,6 @@ int snmp_pdu_parse(struct snmp_pdu *pdu, u_char *data, size_t *length);
 int snmp_pdu_dparse(struct snmp_pdu *pdu, u_char *data, size_t *length, int);
 u_char* snmpv3_scopedPDU_parse(struct snmp_pdu *pdu, u_char *cp, size_t *length);
 u_char* snmpv3_scopedPDU_dparse(struct snmp_pdu *pdu, u_char *cp, size_t *length, int);
-void set_pre_parse( struct snmp_session *sp, int (*hook) (struct snmp_session *, snmp_ipaddr) );
-/*void set_pre_parse(struct snmp_session *, int* (struct snmp_session *, snmp_ipaddr);*/
-void set_parse(struct snmp_session *, int (*hook) (struct snmp_session *, struct snmp_pdu *, u_char *, size_t));
-void set_post_parse (struct snmp_session *, int (*hook) (struct snmp_session *, struct snmp_pdu *,int));
-void set_build(struct snmp_session *, int (*hook) (struct snmp_session *, struct snmp_pdu *, u_char *, size_t *));
 void snmp_shutdown(const char *type);
 struct variable_list *snmp_pdu_add_variable (struct snmp_pdu *, oid *, size_t, u_char, u_char *, size_t);
 struct variable_list *snmp_varlist_add_variable(struct variable_list **varlist,
@@ -574,6 +569,14 @@ u_int snmp_increment_statistic_by(int which, int count);
 u_int snmp_get_statistic(int which);
 void  snmp_init_statistics(void);
 int create_user_from_session(struct snmp_session *session);
+
+/* extended open */
+struct snmp_session *snmp_open_ex (struct snmp_session *,
+  int (*fpre_parse) (struct snmp_session *, snmp_ipaddr),
+  int (*fparse) (struct snmp_session *, struct snmp_pdu *, u_char *, size_t),
+  int (*fpost_parse) (struct snmp_session *, struct snmp_pdu *, int),
+  int (*fbuild) (struct snmp_session *, struct snmp_pdu *, u_char *, size_t *)
+);
 
 /* provided for backwards compatability.  Don't use these functions.
    See snmp_debug.h and snmp_debug.c instead.
