@@ -633,9 +633,7 @@ dnl Maybe add library extensions for thread mutex locking.
 dnl
 
 if test "x$with_res_locks" = "xyes"; then
-
-    cat >> confdefs.h <<\EOF
-#define _REENTRANT 1
+  AC_DEFINE(NS_REENTRANT)
 EOF
 
     case $target_os in

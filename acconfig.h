@@ -480,6 +480,9 @@
 #undef LPSTAT_PATH
 #undef HAVE_PRINTCAP
 
+/* define if you want to build with reentrant/threaded code */
+#undef NS_REENTRANT
+
 /* Not-to-be-compiled macros for use by configure only */
 #define config_require(x)
 #define config_arch_require(x,y)
