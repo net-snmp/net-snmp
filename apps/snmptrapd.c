@@ -784,3 +784,11 @@ init_syslog __P((void))
     openlog("snmptrapd", LOG_CONS|LOG_PID, Facility);
     syslog(LOG_INFO, "Starting snmptrapd");
 }
+
+#ifdef hpux9
+int
+getdtablesize()
+{
+        return(sysconf(_SC_OPEN_MAX));
+}
+#endif
