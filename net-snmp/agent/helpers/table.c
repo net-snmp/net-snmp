@@ -9,7 +9,17 @@
 #else
 #include <strings.h>
 #endif
+
+
+#if ! defined(NDEBUG) && ! defined(NETSNMP_USE_ASSERT)
+# define NETSNMP_TMP_NDEBUG
+# define NDEBUG
+#endif
 #include <assert.h>
+#if defined(NETSNMP_TMP_NDEBUG)
+# undef NDEBUG
+# undef NETSNMP_TMP_NDEBUG
+#endif
 
 #include <net-snmp/net-snmp-includes.h>
 #include <net-snmp/agent/net-snmp-agent-includes.h>
