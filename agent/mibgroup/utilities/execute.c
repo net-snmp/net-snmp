@@ -187,6 +187,8 @@ int
 run_exec_command( char *command, char *input,
                   char *output,  int  *out_len)	/* Or realloc style ? */
 {
+#if HAVE_EXECV
+
     int ipipe[2];
     int opipe[2];
     int i, len;
@@ -195,7 +197,6 @@ run_exec_command( char *command, char *input,
     char **argv;
     int argc;
 
-#if HAVE_EXECV
     pipe(ipipe);
     pipe(opipe);
     if ((pid = fork()) == 0) {
