@@ -159,7 +159,15 @@ SOURCE=..\..\snmplib\snmp_client.c
 # End Source File
 # Begin Source File
 
+SOURCE=..\..\snmplib\snmp_debug.c
+# End Source File
+# Begin Source File
+
 SOURCE=..\..\snmplib\system.c
+# End Source File
+# Begin Source File
+
+SOURCE=..\..\snmplib\vacm.c
 # End Source File
 # Begin Source File
 
