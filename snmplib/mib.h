@@ -292,6 +292,7 @@ struct tree *get_tree (oid *, size_t, struct tree *);
 struct tree *get_tree_head (void);
 void  set_function (struct tree *);
 void sprint_hexstring (char *, const u_char *, size_t);
+void sprint_asciistring(char *buf, u_char *cp, size_t len);
 
 void print_oid_report (FILE *);
 void print_oid_report_enable_labeledoid (void);
@@ -299,7 +300,7 @@ void print_oid_report_enable_oid (void);
 void print_oid_report_enable_suffix (void);
 void print_oid_report_enable_symbolic (void);
 
-void sprint_asciistring(char *buf, u_char *cp, size_t len);
+void clear_tree_flags(register struct tree *tp);
 
 char *snmp_oid_toggle_options(char *);
 void snmp_oid_toggle_options_usage(const char *, FILE *);
