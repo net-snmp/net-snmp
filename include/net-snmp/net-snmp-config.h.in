@@ -1,4 +1,15 @@
 /* include/net-snmp/net-snmp-config.h.in.  Generated from configure.in by autoheader.  */
+/* Portions of this file are subject to the following copyright(s).  See
+ * the Net-SNMP's COPYING file for more details and other copyrights
+ * that may apply:
+ */
+/*
+ * Portions of this file are copyrighted by:
+ * Copyright © 2003 Sun Microsystems, Inc. All rights reserved.
+ * Use is subject to license terms specified in the COPYING file
+ * distributed with the Net-SNMP package.
+ */
+
 #ifndef NET_SNMP_CONFIG_H
 #define NET_SNMP_CONFIG_H
 
@@ -319,6 +330,9 @@
 /* Define to 1 if you have the <libperfstat.h> header file. */
 #undef HAVE_LIBPERFSTAT_H
 
+/* Define to 1 if you have the `pkcs11' library (-lpkcs11). */
+#undef HAVE_LIBPKCS11
+
 /* Define to 1 if you have the `RSAglue' library (-lRSAglue). */
 #undef HAVE_LIBRSAGLUE
 
@@ -534,6 +548,9 @@
 
 /* Define to 1 if you have the <search.h> header file. */
 #undef HAVE_SEARCH_H
+
+/* Define to 1 if you have the <security/cryptoki.h> header file. */
+#undef HAVE_SECURITY_CRYPTOKI_H
 
 /* Define to 1 if you have the `select' function. */
 #undef HAVE_SELECT
@@ -1359,11 +1376,12 @@
 
 /* Not-to-be-compiled macros for use by configure only */
 #define config_require(x)
+#define config_exclude(x)
 #define config_arch_require(x,y)
 #define config_parse_dot_conf(w,x,y,z)
 #define config_add_mib(x)
   
-#if defined (WIN32) || defined (mingw32) || defined (cygwin)
+#ifdef WIN32
 #define ENV_SEPARATOR ";"
 #define ENV_SEPARATOR_CHAR ';'
 #else
@@ -1431,5 +1449,17 @@
 
 #undef INET6
 #undef LOCAL_SMUX
+
+/* define if agentx transport is to use domain sockets only */
+#undef AGENTX_DOM_SOCK_ONLY
+
+#ifdef __cplusplus
+#define NETSNMP_CPP_WRAP_START extern          "C" {
+#define NETSNMP_CPP_WRAP_END                   };
+#else
+#define NETSNMP_CPP_WRAP_START
+#define NETSNMP_CPP_WRAP_END
+#endif
+
 
 #endif /* NET_SNMP_CONFIG_H */
