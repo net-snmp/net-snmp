@@ -82,9 +82,9 @@ SOFTWARE.
 oid objid_mib[] = {1, 3, 6, 1, 2, 1};
 int max_repetitions = 100;
 int non_repeaters = 0;
-struct {
+struct nameStruct {
   oid name[MAX_OID_LEN];
-  int name_len;
+  u_long name_len;
 } *name, *namep;
 int names;
 
@@ -128,7 +128,7 @@ int main(int argc, char  *argv[])
       exit(1);
     }
 
-    namep = name = calloc(names, sizeof(*name));
+    namep = name = (struct nameStruct *)calloc(names, sizeof(*name));
     while (arg < argc) {
       namep->name_len = MAX_OID_LEN;
       if (snmp_parse_oid(argv[arg], namep->name, &namep->name_len) == NULL) {

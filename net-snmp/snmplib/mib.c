@@ -934,7 +934,7 @@ handle_mibdirs_conf(const char *token,
     char *ctmp;
 
     if (confmibdir) {
-        ctmp = malloc(strlen(confmibdir) + strlen(line) + 1);
+        ctmp = (char *)malloc(strlen(confmibdir) + strlen(line) + 1);
         if (*line == '+')
             line++;
         sprintf(ctmp,"%s:%s",confmibdir,line);
@@ -953,7 +953,7 @@ handle_mibs_conf(const char *token,
     char *ctmp;
 
     if (confmibs) {
-        ctmp = malloc(strlen(confmibs) + strlen(line) + 1);
+        ctmp = (char *)malloc(strlen(confmibs) + strlen(line) + 1);
         if (*line == '+')
             line++;
         sprintf(ctmp,"%s:%s",confmibs,line);
