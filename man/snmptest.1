@@ -27,8 +27,6 @@ snmptest - communicates with a network entity using SNMP Requests
 snmptest -v 1 hostname community
 .PP
 snmptest [-v 2] hostname noAuth
-.PP
-snmptest [-v 2] hostname srcParty dstParty
 .SH DESCRIPTION
 Snmptest is a flexible SNMP application that can monitor and manage
 information on a network entity.
@@ -38,18 +36,9 @@ The
 specification may be either a host name or an internet address
 specified in "dot notation".
 .PP
-The version 1
+The version 1 and version 2c
 .I community
 specifies the community name for the transaction with the remote system.
-.PP
-The version 2
-.I srcParty
-and
-.I dstParty
-specify the party names for the transaction with the remote system, as
-they are defined in /etc/party.conf.  To forgo authentication, use the
-.B noAuth
-keyword instead of specifying party names.
 .PP
 After invoking the program, a command line
 interpreter proceeds to accept commands.  It will prompt with:

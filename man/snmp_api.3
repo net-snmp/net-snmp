@@ -19,212 +19,95 @@
 .\" ARISING OUT OF OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS
 .\" SOFTWARE.
 .\" ******************************************************************/
-.TH SNMP_API 3 "1 June, 1992"
+.TH SNMP_API 3 "21 October, 1999"
 .UC 5
 .SH NAME
-snmp_open, snmp_close, snmp_send, snmp_read, snmp_free_pdu, snmp_select_info, snmp_timeout \- send and receive SNMP messages
+snmp_sess_init, snmp_open, snmp_send, snmp_free_pdu, snmp_select_info, snmp_read, snmp_timeout, snmp_close, snmp_perror, snmp_sess_perror, snmp_error, snmp_api_errstring \- send and receive SNMP messages
 .SH SYNOPSIS
-.B "#include <sys/types>
+#include <sys/types>
 .br
-.B "#include <netinet/in.h>
+#include <netinet/in.h>
 .br
-.B "#include <sys/time.h>
+#include <sys/time.h>
 .br
-.B "#include <netdb.h>
+#include <netdb.h>
 .br
-.B #include <ucd-snmp/asn1.h>
+#include <ucd-snmp/asn1.h>
 .br
-.B #include <ucd-snmp/snmp.h>
+#include <ucd-snmp/snmp.h>
 .br
-.B #include <ucd-snmp/snmp_api.h>
+#include <ucd-snmp/snmp_api.h>
 .PP
-.B "struct snmp_session *snmp_open(session)
-.br
-.B "struct snmp_session *session;
+void snmp_sess_init ( struct snmp_session * );
 .PP
-.B "int snmp_close(session)
-.br
-.B "struct snmp_session *session;
+struct snmp_session * snmp_open ( struct snmp_session *);
+.RS
+.B /* Input parameter not used in active sessions */
+.RE
 .PP
-.B "int snmp_send(session, pdu)
-.br
-.B "struct snmp_session *session;
-.br
-.B "struct snmp_pdu *pdu;
+int snmp_send ( struct snmp_session *session,
+.RS
+struct snmp_pdu *pdu );
+.RE
 .PP
-.B "void snmp_read(fdset)
-.br
-.B "fd_set *fdset;
+int snmp_select_info ( int *numfds, fd_set *fdset,
+.RS
+struct timeval *timeout, int *block );
+.RE
 .PP
-.B "int snmp_select_info(numfds, fdset, timeout, block)
-.br
-.B "int *numfds;
-.br
-.B "fd_set *fdset;
-.br
-.B "struct timeval *timeout;
-.br
-.B "int *block;
+void snmp_read ( fd_set *fdset );
 .PP
-.B "void snmp_timeout()
+void snmp_timeout ( void );
 .PP
-.B "void snmp_free_pdu(pdu)
-.br
-.B "struct snmp_pdu *pdu;
+int snmp_close ( struct snmp_session *session );
 .PP
-.B "void snmp_error(psess, pcliberr, psnmperr, pperrstring)
-.br
-.B "struct snmp_session *psess;
-.br
-.B "int *pcliberr;
-.br
-.B "int *psnmperr;
-.br
-.B "char **pperrstring;
+void snmp_free_pdu (
+struct snmp_pdu *pdu );
 .PP
-.B "char *snmp_api_errstring(snmperr)
-.br
-.B "int snmperr;
+void snmp_error (
+struct snmp_session *session,
+.RS
+int *pcliberr,
+int *psnmperr,
+char **pperrstring );
+.RE
 .PP
-.B "void snmp_perror(msg)
-.br
-.B "char *msg;
+char *snmp_api_errstring ( int snmperr );
+.PP
+void snmp_perror ( char * msg );
+.RS
+.B /* for parsing errors only */
+.RE
+.PP
+void snmp_sess_perror (char * msg, struct snmp_session *);
+.RS
+.B /* all other SNMP library errors */
+.RE
 .PP
 .SH DESCRIPTION
-.I Snmp_open, snmp_close,
-and
-.I snmp_send
-each take as input a pointer to an object with the
-following structure.  In addition,
+.I Snmp_sess_init
+prepares a struct snmp_session that sources transport characteristics
+and common information that will be used for a set of SNMP transactions.
+After this structure is passed to
 .I snmp_open
-also returns a pointer to an object with this structure.
-This structure contains information for a set of transactions that
-will share similar transport characteristics.
-.RS
+to create an SNMP session, the structure is not used.
 .PP
-.nf
-typedef struct sockaddr_in  ipaddr;
-
-struct snmp_session {
-    u_char  *community;	/* community for outgoing requests. */
-    int	    community_len;  /* Length of community name. */
-    int	    retries;	/* Number of retries before timeout. */
-    long    timeout;    /* Number of uS until first timeout, then exponential backoff */
-    char    *peername;	/* Domain name or dotted IP address of default peer */
-    u_short remote_port;/* UDP port number of peer. */
-    u_short local_port; /* My UDP port number, 0 for default, picked randomly */
-
-    /* Authentication function or NULL if null authentication is used */
-    u_char  *(*authenticator)();
-
-    int	    (*callback)();  /* Function to interpret incoming data */
-
-    /* Pointer to data that the callback function may consider important */
-    void    *callback_magic;
-    int     version;	/* 0 for SNMP, 1 for secure SNMP */
-    oid     *srcParty;	/* partyID of source party */
-    int     srcPartyLen; /* length in subIDs of srcParty */
-    oid     *dstParty;	/* partyID of destination party */
-    int     dstPartyLen; /* length in subIDs of dstParty */
-};
-
-/*
- * Set fields in session and pdu to the following to get a default or unconfigured value.
- */
-#define SNMP_DEFAULT_COMMUNITY_LEN  0/* for default community name */
-#define SNMP_DEFAULT_RETRIES	    -1
-#define SNMP_DEFAULT_TIMEOUT	    -1
-#define SNMP_DEFAULT_REMPORT	    0
-#define SNMP_DEFAULT_REQID	    0
-#define SNMP_DEFAULT_ERRSTAT	    -1
-#define SNMP_DEFAULT_ERRINDEX	    -1
-#define SNMP_DEFAULT_ADDRESS	    0
-#define SNMP_DEFAULT_PEERNAME	    NULL
-#define SNMP_DEFAULT_ENTERPRISE_LENGTH	0
-#define SNMP_DEFAULT_TIME	    0
-
-/*
- * This routine must be supplied by the application:
- *
- * u_char *authenticator(pdu, length, community, community_len)
- * u_char *pdu;		The rest of the PDU to be authenticated
- * int *length;		The length of the PDU (updated by the authenticator)
- * u_char *community;	The community name to authenticate under.
- * int	community_len	The length of the community name.
- *
- * Returns the authenticated pdu, or NULL if authentication failed.
- * If null authentication is used, the authenticator in snmp_session can be
- * set to NULL(0).
- */
-
-/*
- * This routine must be supplied by the application:
- *
- * int callback(operation, session, reqid, pdu, magic)
- * int operation;
- * struct snmp_session *session;    The session authenticated under.
- * int reqid;			    The request id of this pdu (0 for TRAP)
- * struct snmp_pdu *pdu;	    The pdu information.
- * void *magic			    A link to the data for this routine.
- *
- * Returns 1 if request was successful, 0 if it should be kept pending.
- * Any data in the pdu must be copied because it will be freed elsewhere.
- * Operations are defined below:
- */
-#define RECEIVED_MESSAGE   1
-#define TIMED_OUT	   2
-.ft R
-.ad
-.fi
-.RE
+.I Snmp_open
+returns a pointer to a newly-formed
+.I struct snmp_session
+object, which the application must use to reference the
+active SNMP session.
 .PP
 .I Snmp_send
 and
 .I snmp_free_pdu
-each take as input a pointer to an object with the
-following structure.
+each take as input a pointer to a
+.I struct snmp_pdu
+object.
 This structure contains information that describes a transaction
 that will be performed over an open session.
-.RS
 .PP
-.nf
-struct snmp_pdu {
-    ipaddr  address;	/* Address of peer */
-
-    int	    command;	/* Type of this PDU */
-
-    u_long  reqid;	/* Request id */
-    u_long  errstat;	/* Error status */
-    u_long  errindex;	/* Error index */
-
-    /* Trap information */
-    oid	    *enterprise;/* System OID */
-    int	    enterprise_length;
-    ipaddr  agent_addr;	/* address of object generating trap */
-    int	    trap_type;	/* trap type */
-    int	    specific_type;  /* specific type */
-    u_long  time;	/* Uptime */
-
-    struct variable_list *variables;
-};
-
-
-struct variable_list {
-    struct variable_list *next_variable;    /* NULL for last variable */
-    oid	    *name;  /* Object identifier of variable */
-    int	    name_length;    /* number of subid's in name */
-    u_char  type;   /* ASN type of variable */
-    union { /* value of variable */
-	long	*integer;
-	u_char	*string;
-	oid	*objid;
-    } val;
-    int	    val_len;
-};
-.ft R
-.ad
-.fi
-.RE
+Consult snmp_api.h for the definitions of these structures.
 .PP
 .I Snmp_read, snmp_select_info,
 and
@@ -265,11 +148,11 @@ After calling
 .I snmp_select_info, select
 is called with the returned data.  When select returns,
 .I snmp_read
-is called with the
+should be called with the
 .I fd_set
 returned from
-.I select.
-This will read all SNMP sockets with input.
+.I select
+to read each SNMP socket that has input.
 If
 .I select
 times out,
@@ -277,14 +160,21 @@ times out,
 should be called to see if the timeout was intended for SNMP.
 .SH DIAGNOSTICS
 .PP
-Previous versions of the library relied on reading the value
-of a global variable
-.I snmp_errno
-and a method
+Previous versions of the library used
 .IR snmp_get_errno
-that retrieved it
-to determine if an error had occurred within the SNMP library.
-This has been replaced with a new method
+to read the global variable
+.I snmp_errno
+which may have held the error status within the SNMP library.
+The existing method
+.I snmp_perror
+should be used to log ASN.1 coding errors only.
+.PP
+The new method
+.I snmp_sess_perror
+is provided to capture errors that occur during the processing
+of a particular SNMP session.
+.I Snmp_sess_perror
+calls
 .IR snmp_error
 function to obtain the "C" library error
 .I errno
@@ -294,7 +184,7 @@ function to obtain the "C" library error
 that is associated with an error that occurred during a given session.
 .PP
 Note that in all cases except one,
-.IR snmp_error
+.IR snmp_sess_perror
 should be handed the
 .I struct snmp_session *
 pointer returned from
@@ -318,9 +208,11 @@ Upon successful return from
 .I snmp_send
 the pdu will be freed by the library.
 .PP
+Consult snmp_api.h for the complete set of SNMP library
+error values.
 The SNMP library error value
 .IR snmperr
-can have the following values:
+can be one of the following values:
 .RS 2n
 .IP SNMPERR_GENERR \w'SNMPERR_BAD_REPETITIONS'u+2n
 A generic error occurred.
@@ -341,13 +233,7 @@ The specified session was not open.
 .IP SNMPERR_BAD_SENDTO \w'SNMPERR_BAD_REPETITIONS'u+2n
 .IP SNMPERR_BAD_PARSE \w'SNMPERR_BAD_REPETITIONS'u+2n
 .IP SNMPERR_BAD_VERSION \w'SNMPERR_BAD_REPETITIONS'u+2n
-.IP SNMPERR_BAD_SRC_PARTY \w'SNMPERR_BAD_REPETITIONS'u+2n
-.IP SNMPERR_BAD_DST_PARTY \w'SNMPERR_BAD_REPETITIONS'u+2n
-.IP SNMPERR_BAD_CONTEXT \w'SNMPERR_BAD_REPETITIONS'u+2n
-.IP SNMPERR_BAD_COMMUNITY \w'SNMPERR_BAD_REPETITIONS'u+2n
 .IP SNMPERR_NOAUTH_DESPRIV \w'SNMPERR_BAD_REPETITIONS'u+2n
-.IP SNMPERR_BAD_ACL \w'SNMPERR_BAD_REPETITIONS'u+2n
-.IP SNMPERR_BAD_PARTY \w'SNMPERR_BAD_REPETITIONS'u+2n
 .IP SNMPERR_ABORT \w'SNMPERR_BAD_REPETITIONS'u+2n
 .IP SNMPERR_UNKNOWN_PDU \w'SNMPERR_BAD_REPETITIONS'u+2n
 .IP SNMPERR_TIMEOUT \w'SNMPERR_BAD_REPETITIONS'u+2n
