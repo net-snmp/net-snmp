@@ -764,8 +764,6 @@ smux_auth_peer(oid *name, size_t namelen, char *passwd, int fd)
 				Auths[i]->sa_active_fd = fd;
 				return 1;
 			}
-			else
-				return 0;
 		}
 	}
 	/* did not match oid and passwd */
