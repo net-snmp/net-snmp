@@ -285,12 +285,16 @@ information is reported by the 'system' table in the mibII tree.
 .IP "authtrapenable NUMBER"
 Setting authtrapenable to 1 enables generation of authentication failure
 traps. The default value is 2 (disable).
-.IP "trapsink HOST"
 .IP "trapcommunity STRING"
-This sets the host to receive traps. The daemon sends a Cold Start
+.IP "trapsink HOST [COMMUNITY]"
+.IP "trap2sink HOST [COMMUNITY]"
+This defines the host to receive traps. The daemon sends a Cold Start
 trap when it starts up. If enabled, it also sends traps on
-authentication failures.  Multiple "trapsink" lines may be specified
+authentication failures.  Multiple \fItrapsink\fR lines may be specified
 to specify multiple destinations.
+Use \fItrap2sink\fR to send SNMPv2 traps.
+If COMMUNITY is not specified, the string from a preceeding \fItrapcommunity\fR
+directive will be used.
 .SH "PASS-THROUGH CONTROL"
 .IP "pass MIBOID EXEC"
 Passes entire control of MIBOID to the EXEC program.  The EXEC program

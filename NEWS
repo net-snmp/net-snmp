@@ -10,6 +10,12 @@ the ChangeLog file for a more detailed listing of changes/bug fixes.
  API Change:
     - A small change to the write functions in mib modules.
 
+*3.6.2*
+ Fixes:
+    - An important multi-session bug fix, especially needed for the
+      SNMP perl module.
+    - Many minor bug fixes.
+
 *3.6.1*
  Fixes:
     - Minor last second fixes mostly.

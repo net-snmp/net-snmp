@@ -104,6 +104,7 @@ SOFTWARE.
 #include "keytools.h"
 #include "lcd_time.h"
 #include "callback.h"
+#include "snmp_alarm.h"
 
 static void init_snmp_session (void);
 #include "transform_oids.h"
@@ -3076,13 +3077,13 @@ snmp_sess_read(void *sessp,
     snmp_ipaddr        from;
     struct sockaddr_in *fromIp = (struct sockaddr_in *)&from;
     size_t length;
-    int  fromlength;
     struct snmp_pdu *pdu;
     struct request_list *rp, *orp = NULL;
     snmp_callback callback;
     void *magic;
     int ret;
-    int new_sd, addrlen;
+    int new_sd;
+    size_t addrlen, fromlength;
 
     if (!(FD_ISSET(slp->internal->sd, fdset)))
         return;

@@ -54,6 +54,9 @@
 #endif
 #include <netinet/in_systm.h>
 #include <netinet/ip.h>
+#if HAVE_SYS_QUEUE_H
+#include <sys/queue.h>
+#endif
 #if HAVE_NETINET_IP_VAR_H
 #include <netinet/ip_var.h>
 #endif
@@ -536,7 +539,9 @@ var_tcpEntry(struct variable *vp,
 #endif
 #endif
     
-	memcpy( (char *)newname,(char *)vp->name, vp->namelen * sizeof(oid));
+	memcpy( (char *)newname,(char *)vp->name, (int)vp->namelen * sizeof(oid));
+	lowest[0] = 9999;
+
 	/* find "next" connection */
 Again:
 LowState = -1;	    /* Don't have one yet */
@@ -570,8 +575,8 @@ LowState = -1;	    /* Don't have one yet */
 		    break;  /* no need to search further */
 		}
 	    } else {
-		if ((snmp_oid_compare(newname, 20, name, *length) > 0) &&
-		     ((LowState < 0) || (snmp_oid_compare(newname, 20, lowest, 20) < 0))){
+		if (snmp_oid_compare(newname, 20, name, *length) > 0 &&
+		     snmp_oid_compare(newname, 20, lowest, 20) < 0){
 		    /*
 		     * if new one is greater than input and closer to input than
 		     * previous lowest, save this one as the "next" one.
@@ -889,6 +894,9 @@ Again:	/*
 #endif
 
 static struct inpcb tcp_inpcb, *tcp_prev;
+#ifdef PCB_TABLE
+static struct inpcb *tcp_next, *tcp_head;
+#endif
 #ifdef linux
 static struct inpcb *inpcb_list;
 #endif
@@ -901,12 +909,21 @@ static struct xinpgen *xig = NULL;
 void TCP_Scan_Init (void)
 {
 #if !defined(CAN_USE_SYSCTL) || !defined(TCPCTL_PCBLIST)
+#ifdef PCB_TABLE
+    struct inpcbtable table;
+#endif
 #ifndef linux
+#ifdef PCB_TABLE
+    auto_nlist(TCP_SYMBOL, (char *)&table, sizeof(table));
+    tcp_head = tcp_prev = (struct inpcb *)&((struct inpcbtable *)auto_nlist_value(TCP_SYMBOL))->inpt_queue.cqh_first;
+    tcp_next = table.inpt_queue.cqh_first;
+#else	/* PCB_TABLE */
     auto_nlist(TCP_SYMBOL, (char *)&tcp_inpcb, sizeof(tcp_inpcb));
 #if !(defined(freebsd2) || defined(netbsd1) || defined(openbsd2))
     tcp_prev = (struct inpcb *) auto_nlist_value(TCP_SYMBOL);
 #endif
-#else
+#endif	/* PCB_TABLE */
+#else	/* linux */
     FILE *in;
     char line [256];
     struct inpcb **pp;
@@ -1016,22 +1033,28 @@ int TCP_Scan_Next(int *State,
 #ifndef linux
 	struct tcpcb tcpcb;
 
-#if defined(freebsd2) || defined(netbsd1) || defined(openbsd2)
-	if ((tcp_inpcb.INP_NEXT_SYMBOL == NULL) ||
-	    (tcp_inpcb.INP_NEXT_SYMBOL == (struct inpcb *) auto_nlist_value(TCP_SYMBOL))) {
+#ifdef PCB_TABLE
+	if (tcp_next == tcp_head) {
+#elif defined(freebsd2) || defined(netbsd1) || defined(openbsd2)
+	if (tcp_inpcb.INP_NEXT_SYMBOL == NULL ||
+	    tcp_inpcb.INP_NEXT_SYMBOL == (struct inpcb *) auto_nlist_value(TCP_SYMBOL)) {
 #else
 	if (tcp_inpcb.INP_NEXT_SYMBOL == (struct inpcb *) auto_nlist_value(TCP_SYMBOL)) {
 #endif
 	    return(0);	    /* "EOF" */
 	}
 
+#ifdef PCB_TABLE
+	klookup((unsigned long)tcp_next, (char *)&tcp_inpcb, sizeof(tcp_inpcb));
+	tcp_next = tcp_inpcb.inp_queue.cqe_next;
+#else
 	next = tcp_inpcb.INP_NEXT_SYMBOL;
-
 	klookup((unsigned long)next, (char *)&tcp_inpcb, sizeof (tcp_inpcb));
 #if !(defined(netbsd1) || defined(freebsd2)) || defined(openbsd2)
 	if (tcp_inpcb.INP_PREV_SYMBOL != tcp_prev)	   /* ??? */
           return(-1); /* "FAILURE" */
 #endif /*  !(defined(netbsd1) || defined(freebsd2) || defined(openbsd2)) */
+#endif	/* PCB_TABLE */
 	klookup ( (int)tcp_inpcb.inp_ppcb, (char *)&tcpcb, sizeof (tcpcb));
 	*State = tcpcb.t_state;
 #else /* linux */

@@ -109,7 +109,7 @@ struct tc {     /* textual conventions */
 } tclist[MAXTC];
 
 int Line = 1;
-const char *File;
+char *File = (char *)"(none)";
 static int save_mib_descriptions = 0;
 static int mib_warnings = 0;
 static int mib_errors = 1;
@@ -284,11 +284,11 @@ struct module_compatability *module_map_head;
 struct module_compatability module_map[] = {
 	{ "RFC1065-SMI",	"RFC1155-SMI",	NULL,	0},
 	{ "RFC1066-MIB",	"RFC1156-MIB",	NULL,	0},
-				/* 'mib' -> 'mib-2' */
+	         	/* 'mib' -> 'mib-2' */
 	{ "RFC1156-MIB",	"RFC1158-MIB",	NULL,	0},
-				/* 'snmpEnableAuthTraps' -> 'snmpEnableAuthenTraps' */
-	{ "RFC1158-MIB",	"RFC1213-MIB",	NULL,	0},
-				/* 'nullOID' -> 'zeroDotZero' */
+	         	/* 'snmpEnableAuthTraps' -> 'snmpEnableAuthenTraps' */
+	{ "RFC1158-MIB",       "RFC1213-MIB",	NULL,	0},
+	         	/* 'nullOID' -> 'zeroDotZero' */
 	{ "RFC1155-SMI",	"SNMPv2-SMI",	NULL,	0},
 	{ "RFC1213-MIB",	"SNMPv2-SMI",	"mib-2", 0},
 	{ "RFC1213-MIB",	"SNMPv2-MIB",	"sys",	3},
@@ -477,9 +477,11 @@ name_hash(const char* name)
     int hash = 0;
     const char *cp;
 
-    if (name)
-      for(cp = name; *cp; cp++)
+    if (name) {
+      for(cp = name; *cp; cp++) {
         hash += tolower(*cp);
+      }
+    }
     return(hash);
 }
 

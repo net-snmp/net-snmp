@@ -383,11 +383,11 @@ snmp_party_parse(u_char *data,
 		 int pass)
 {
     oid *srcParty       =   pdu->srcParty;
-    int *srcPartyLength = &(pdu->srcPartyLen);
+    size_t *srcPartyLength = &(pdu->srcPartyLen);
     oid *dstParty       =   pdu->dstParty;
-    int *dstPartyLength = &(pdu->dstPartyLen);
+    size_t *dstPartyLength = &(pdu->dstPartyLen);
     oid *context        =   pdu->context;
-    int *contextLength  = &(pdu->contextLen);
+    size_t *contextLength  = &(pdu->contextLen);
 
     size_t		 dstParty2Length = MAX_OID_LEN,
    			 authMsgLen,

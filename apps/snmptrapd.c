@@ -764,18 +764,18 @@ int main(int argc, char *argv[])
     }
 
     if (Syslog) {
-      /* open syslog */
-      init_syslog();
+	/* open syslog */
+	init_syslog();
     }
     if (Print) {
-      struct tm *tm;
-      time_t timer;
-      time (&timer);
-      tm = localtime (&timer);
-      printf("%.4d-%.2d-%.2d %.2d:%.2d:%.2d UCD-snmp version %s Started.\n",
-             tm->tm_year+1900, tm->tm_mon+1, tm->tm_mday,
-             tm->tm_hour, tm->tm_min, tm->tm_sec,
-             VersionInfo);
+	struct tm *tm;
+	time_t timer;
+	time (&timer);
+	tm = localtime (&timer);
+	printf("%.4d-%.2d-%.2d %.2d:%.2d:%.2d UCD-snmp version %s Started.\n",
+	       tm->tm_year+1900, tm->tm_mon+1, tm->tm_mday,
+	       tm->tm_hour, tm->tm_min, tm->tm_sec,
+	       VersionInfo);
     }
 
 

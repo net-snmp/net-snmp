@@ -82,7 +82,7 @@ vacm_getViewEntry(const char *viewName,
 	    }
             if (found) {
               /* match successful, keep this node if its longer than
-                 the previous or (equal and legigraphically greater
+                 the previous or (equal and lexicographically greater
                  than the previous). */
               if (vpret == NULL || vp->viewSubtreeLen > vpret->viewSubtreeLen ||
                   (vp->viewSubtreeLen == vpret->viewSubtreeLen &&

@@ -147,6 +147,7 @@ struct timeval	starttime;
 int 		log_addresses	 = 0;
 int 		verbose		 = 0;
 int 		snmp_dump_packet;
+int             running          = 1;
 
 oid version_id[]	 = { EXTENSIBLEMIB, AGENTID, OSTYPE };
 int version_id_len	 = sizeof(version_id)/sizeof(version_id[0]);
@@ -219,7 +220,7 @@ static void send_v1_trap (struct snmp_session *, int, int);
 static void send_v2_trap (struct snmp_session *, int, int, int);
 static void usage (char *);
 int main (int, char **);
-static RETSIGTYPE SnmpTrapNodeDown (int);
+static void SnmpTrapNodeDown (void);
 static int receive(void);
 int snmp_check_packet(struct snmp_session*, snmp_ipaddr);
 int snmp_check_parse(struct snmp_session*, struct snmp_pdu*, int);
@@ -249,7 +250,6 @@ static int create_v1_trap_session (const char *sink,
     struct trap_sink *new_sink =
       (struct trap_sink *) malloc (sizeof (*new_sink));
 
-    if (!snmp_trapcommunity) snmp_trapcommunity = strdup("public");
     memset (&new_sink->ses, 0, sizeof (struct snmp_session));
     new_sink->ses.peername = strdup(sink);
     new_sink->ses.version = SNMP_VERSION_1;
@@ -282,7 +282,6 @@ static int create_v2_trap_session (const char *sink,
     struct trap_sink *new_sink =
       (struct trap_sink *) malloc (sizeof (*new_sink));
 
-    if (!snmp_trapcommunity) snmp_trapcommunity = strdup("public");
     memset (&new_sink->ses, 0, sizeof (struct snmp_session));
     new_sink->ses.peername = strdup(sink);
     new_sink->ses.version = SNMP_VERSION_2c;
@@ -543,13 +542,13 @@ SnmpdShutDown(int a)
 #include "mib_module_shutdown.h"
 
   DEBUGMSGTL(("snmpd", "sending shutdown trap\n"));
-  SnmpTrapNodeDown(a);
+  SnmpTrapNodeDown();
   DEBUGMSGTL(("snmpd", "Bye...\n"));
-  exit(1);
+  running = 0;
 }
 
-static RETSIGTYPE
-SnmpTrapNodeDown(int a)
+static void
+SnmpTrapNodeDown(void)
 {
     send_easy_trap (SNMP_TRAP_ENTERPRISESPECIFIC, 2);
     /* XXX  2 - Node Down #define it as NODE_DOWN_TRAP */
@@ -833,6 +832,10 @@ main(int argc, char *argv[])
      * Forever monitor the dest_port for incoming PDUs.
      */
     receive();
+#include "mib_module_shutdown.h"
+    DEBUGMSGTL(("snmpd", "sending shutdown trap\n"));
+    SnmpTrapNodeDown();
+    DEBUGMSGTL(("snmpd", "Bye...\n"));
     return 0;
 
 }  /* End main() -- snmpd */
@@ -874,13 +877,11 @@ receive(void)
 	svp->tv_sec++;
     }
 
-
-
     /*
      * Loop-forever: execute message handlers for sockets with data,
      * reset the 'sched'uler.
      */
-    while(1){
+    while (running) {
 	tvp =  &timeout;
 	tvp->tv_sec = 0;
 	tvp->tv_usec = TIMETICK;
@@ -1115,8 +1116,12 @@ void snmpd_parse_config_trapsink(char *token,
 				 char *cptr)
 {
     char tmpbuf[1024];
+    char *sp, *cp;
   
-    if (create_v1_trap_session(cptr, snmp_trapcommunity) == 0) {
+    if (!snmp_trapcommunity) snmp_trapcommunity = strdup("public");
+    sp = strtok(cptr, " \t\n");
+    cp = strtok(NULL, " \t\n");
+    if (create_v1_trap_session(sp, cp ? cp : snmp_trapcommunity) == 0) {
 	sprintf(tmpbuf,"cannot create trapsink: %s", cptr);
 	config_perror(tmpbuf);
     }
@@ -1127,8 +1132,12 @@ void
 snmpd_parse_config_trap2sink(char *word, char *cptr)
 {
     char tmpbuf[1024];
+    char *sp, *cp;
   
-    if (create_v2_trap_session(cptr, snmp_trapcommunity) == 0) {
+    if (!snmp_trapcommunity) snmp_trapcommunity = strdup("public");
+    sp = strtok(cptr, " \t\n");
+    cp = strtok(NULL, " \t\n");
+    if (create_v2_trap_session(sp, cp ? cp : snmp_trapcommunity) == 0) {
 	sprintf(tmpbuf,"cannot create trap2sink: %s", cptr);
 	config_perror(tmpbuf);
     }

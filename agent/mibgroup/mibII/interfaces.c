@@ -70,6 +70,9 @@
 #include <netinet/in_var.h>
 #endif
 #include <netinet/ip.h>
+#if HAVE_SYS_QUEUE_H
+#include <sys/queue.h>
+#endif
 #if HAVE_NETINET_IN_PCB_H
 #include <netinet/in_pcb.h>
 #endif
@@ -134,9 +137,6 @@
 
 #ifdef HAVE_OSRELDATE_H
 #include <osreldate.h>
-#endif
-#ifdef HAVE_SYS_QUEUE_H
-#include <sys/queue.h>
 #endif
 #ifdef CAN_USE_SYSCTL
 #include <sys/sysctl.h>

@@ -314,11 +314,11 @@ setPass(int action,
   int i, j, rtest, last;
   struct extensible *passthru;
 
-  char buf[BUFMAX], buf2[BUFMAX];
-  long tmp;
-  unsigned long utmp;
-  size_t itmp;
-  oid objid[MAX_OID_LEN];
+  static char buf[BUFMAX], buf2[BUFMAX];
+  static long tmp;
+  static unsigned long utmp;
+  static size_t itmp;
+  static oid objid[MAX_OID_LEN];
   
   for(i=1; i<= numpassthrus; i++) {
     passthru = get_exten_instance(passthrus,i);
