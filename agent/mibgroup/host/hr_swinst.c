@@ -4,9 +4,6 @@
  */
 
 #include <config.h>
-#include "host_res.h"
-#include "hr_swinst.h"
-#include "hr_utils.h"
 
 #include <sys/stat.h>
 #if TIME_WITH_SYS_TIME
@@ -53,6 +50,11 @@
 #include <strings.h>
 #endif
 
+#include "host_res.h"
+#include "hr_swinst.h"
+#include "hr_utils.h"
+#include "tools.h"
+
 #define HRSWINST_MONOTONICALLY_INCREASING
 
 	/*********************
@@ -68,7 +70,7 @@
  *	Old			New
  *======================================================
  *	HRSW_directory		swi->swi_directory
- *	HRSW_name[100]		swi->swi_name[PATH_MAX]
+ *	HRSW_name[100]		swi->swi_name[SNMP_MAXPATH]
  *	HRSW_index		swi->swi_index
  *
  *				swi->swi_dbpath		(RPM only)
@@ -84,7 +86,7 @@
  */
 typedef struct {
     const char *swi_directory;
-    char	swi_name[PATH_MAX];	/* XXX longest file name */
+    char	swi_name[SNMP_MAXPATH];	/* XXX longest file name */
     int		swi_index;
 
 #ifdef	HAVE_LIBRPM
@@ -172,7 +174,7 @@ void init_hr_swinst(void)
 
 #ifdef HAVE_LIBRPM
     if (swi->swi_directory == NULL) {
-	char path[PATH_MAX];
+	char path[SNMP_MAXPATH];
 
     /* XXX distinguish between rpm-2.5.x and rpm-2.9x */
 #ifdef HAVE_RPMGETPATH
@@ -316,7 +318,7 @@ var_hrswinst(struct variable *vp,
 {
     SWI_t *swi = &_myswi;	/* XXX static for now */
     int sw_idx=0;
-    static char string[PATH_MAX];
+    static char string[SNMP_MAXPATH];
     u_char *ret = NULL;
     struct stat stat_buf;
 
@@ -535,7 +537,7 @@ Save_HR_SW_info (int ix)
 	sprintf(swi->swi_name, "%s-%s-%s", n, v, r);
     }
 #else
-    sprintf(sw->swi_name, swi->swi_dep->d_name);
+    sprintf(swi->swi_name, swi->swi_dep->d_name);
 #endif
 }
 
