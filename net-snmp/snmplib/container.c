@@ -2,6 +2,8 @@
 #include <net-snmp/net-snmp-includes.h>
 #include <net-snmp/library/container.h>
 #include <net-snmp/library/container_binary_array.h>
+#include <net-snmp/library/container_list_ssll.h>
+#include <net-snmp/library/container_null.h>
 
 /*------------------------------------------------------------------
  */
@@ -45,20 +47,31 @@ netsnmp_container_init_list(void)
     if (NULL != containers)
         return;
 
+    /*
+     * create a binary arry container to hold container
+     * factories
+     */
     containers = netsnmp_container_get_binary_array();
     containers->compare = netsnmp_compare_cstring;
     containers->cfree = _ba_release_with_free;
     containers->remove = _ba_remove_with_free;
-    /*
-     */
-    ct = SNMP_MALLOC_TYPEDEF(container_type);
-    if (NULL == ct)
-        return;
-    ct->name = strdup("binary_array");
-    ct->factory = netsnmp_container_get_binary_array_factory();
-    CONTAINER_INSERT(containers, ct);
 
-    netsnmp_container_register("table_container", ct->factory);
+    /*
+     * register containers
+     */
+    netsnmp_container_binary_array_init();
+    netsnmp_container_ssll_init();
+    netsnmp_container_null_init();
+
+    /*
+     * default aliases for some containers
+     */
+    netsnmp_container_register("table_container",
+                               netsnmp_container_get_factory("binary_array"));
+    netsnmp_container_register("linked_list",
+                               netsnmp_container_get_factory("sorted_singly_linked_list"));
+    netsnmp_container_register("ssll_container",
+                               netsnmp_container_get_factory("sorted_singly_linked_list"));
 }
 
 void
@@ -247,11 +260,10 @@ int CONTAINER_FREE(netsnmp_container *x)
         while(tmp->next)
             tmp = tmp->next;
         while(tmp) {
-            rc = tmp->cfree(tmp);
+            tmp = tmp->prev;
+            rc = tmp->next->cfree(tmp->next);
             if (rc)
                 snmp_log(LOG_ERR,"error on subcontainer free (%d)\n", rc);
-            tmp = tmp->prev;
- 	    SNMP_FREE(tmp->next);
         }
     }
     rc = x->cfree(x);
@@ -259,7 +271,6 @@ int CONTAINER_FREE(netsnmp_container *x)
 	if (containers == x) {
 	    containers = NULL;
 	}
-	SNMP_FREE(x);
     }
 
     return rc;
