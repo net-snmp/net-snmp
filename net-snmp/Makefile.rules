@@ -44,6 +44,15 @@ installheaders:
 	                echo "installing $$i in $(includedir)/$(INCLUDESUBDIR)" ; \
 	        done \
 	fi
+	@if test "$(INCLUDESUBDIRHEADERS2)" != "" ; then \
+		echo creating directory $(includedir)/$(INCLUDESUBDIR2) ; \
+		it="$(INCLUDESUBDIRHEADERS2)" ; \
+		$(SHELL) $(top_srcdir)/mkinstalldirs $(includedir)/$(INCLUDESUBDIR2) ; \
+	        for i in $$it ; do \
+			$(INSTALL) $(top_srcdir)/include/net-snmp/$(INCLUDESUBDIR2)/$$i $(includedir)/$(INCLUDESUBDIR2) ; \
+	                echo "installing $$i in $(includedir)/$(INCLUDESUBDIR2)" ; \
+	        done \
+	fi
 	@if test "$(SUBDIRS)" != ""; then \
 		it="$(SUBDIRS)" ; \
 		for i in $$it ; do       \
