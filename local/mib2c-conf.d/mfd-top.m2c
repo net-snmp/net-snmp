@@ -73,9 +73,9 @@ void init_$name(void);
      * TODO:101:o: |-> Review $context registration context.
      */
 @    if "x$m2c_context_reg" eq "x"@
-@        eval $m2c_context_reg = "void *"@
+@        eval $m2c_context_reg = "netsnmp_data_list"@
 @    end@
-typedef $m2c_context_reg ${context}_registration_ptr;
+typedef $m2c_context_reg ${context}_registration;
 
 @    include generic-data-context.m2i@
 
@@ -129,11 +129,6 @@ typedef struct ${context}_rowreq_ctx_s {
     u_int                       rowreq_flags;
 
     /*
-     * implementor's context pointer (provided during registration)
-     */
-    ${context}_registration_ptr ${context}_reg;
-
-    /*
      * TODO:131:o: |   |-> Add useful data to $context rowreq context.
      */
     
@@ -152,8 +147,8 @@ typedef struct ${context}_ref_rowreq_ctx_s {
  * function prototypes
  */
 ## {
-    int ${context}_pre_request(${context}_registration_ptr user_context);
-    int ${context}_post_request(${context}_registration_ptr user_context);
+    int ${context}_pre_request(${context}_registration * user_context);
+    int ${context}_post_request(${context}_registration * user_context);
 
 @   if $m2c_data_init == 1@
     int ${context}_rowreq_ctx_init(${context}_rowreq_ctx *rowreq_ctx);
@@ -273,7 +268,7 @@ init_$name(void)
 void
 initialize_table_$context(void)
 {
-    ${context}_registration_ptr user_context;
+    ${context}_registration * user_context;
     u_long flags;
 
     DEBUGMSGTL(("verbose:$context:initialize_table_$context","called\n"));
@@ -287,7 +282,7 @@ initialize_table_$context(void)
      * if you'd like to pass in a pointer to some data for this
      * table, allocate or set it up here.
      */
-@    if "$m2c_context_reg" eq "netsnmp_data_list *"@
+@    if "$m2c_context_reg" eq "netsnmp_data_list"@
     /*
      * a netsnmp_data_list is a simple way to store void pointers. A simple
      * string token is used to add, find or remove pointers.
@@ -360,7 +355,7 @@ void ${context}_rowreq_ctx_cleanup(${context}_rowreq_ctx *rowreq_ctx)
  * @retval MFD_ERROR                : other error
  */
 int
-${context}_pre_request(${context}_registration_ptr user_context)
+${context}_pre_request(${context}_registration * user_context)
 {
     DEBUGMSGTL(("verbose:${context}:${context}_pre_request","called\n"));
 
@@ -379,7 +374,7 @@ ${context}_pre_request(${context}_registration_ptr user_context)
  * @retval MFD_ERROR   : other error (ignored)
  */
 int
-${context}_post_request(${context}_registration_ptr user_context)
+${context}_post_request(${context}_registration * user_context)
 {
     DEBUGMSGTL(("verbose:${context}:${context}_post_request","called\n"));
 
