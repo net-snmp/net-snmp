@@ -265,7 +265,7 @@ unsigned char *var_extensible_pass_persist(struct variable *vp,
         } else if (!strncasecmp(buf,"ipaddress",9)) {
           newlen = parse_miboid(buf2,objid);
           if (newlen != 4) {
-            fprintf(stderr,"invalid ipaddress returned:  %s\n",buf2);
+            snmp_log(LOG_ERR,"invalid ipaddress returned:  %s\n",buf2);
             *var_len = 0;
             return(NULL);
           }

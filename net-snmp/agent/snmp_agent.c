@@ -65,6 +65,7 @@ SOFTWARE.
 #include "mibgroup/util_funcs.h"
 #include "var_struct.h"
 #include "read_config.h"
+#include "snmp_logging.h"
 #include "mib_module_config.h"
 #if USING_MIBII_VACM_VARS_MODULE
 #include "mibgroup/mibII/vacm_vars.h"
@@ -95,7 +96,7 @@ static void dump_var (
     temp_var.val.string = (u_char *)statP;
     temp_var.val_len = statLen;
     sprint_variable (buf, var_name, var_name_len, &temp_var);
-    fprintf (stdout, "    >> %s\n", buf);
+    snmp_log(LOG_DEBUG, "    >> %s\n", buf);
 }
 
 
@@ -453,12 +454,13 @@ statp_loop:
 	      || !in_a_view(varbind_ptr->name, &varbind_ptr->name_length,
                             asp->pdu, varbind_ptr->type)) {
 	    if (asp->pdu->version == SNMP_VERSION_1 || asp->rw != WRITE) {
-		if (verbose) fprintf (stdout, "    >> noSuchName (read-only)\n");
+		if (verbose)
+                  snmp_log(LOG_DEBUG, "    >> noSuchName (read-only)\n");
 		ERROR_MSG("read-only");
 		statType = SNMP_ERR_NOSUCHNAME;
 	    }
 	    else {
-		if (verbose) fprintf (stdout, "    >> notWritable\n");
+		if (verbose) snmp_log(LOG_DEBUG, "    >> notWritable\n");
 		ERROR_MSG("Not Writable");
 		statType = SNMP_ERR_NOTWRITABLE;
 	    }

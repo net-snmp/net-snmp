@@ -65,6 +65,7 @@ SOFTWARE.
 #include "event.h"
 #include "alarm.h"
 #include "../../../snmplib/system.h"
+#include "snmp_logging.h"
 #include "snmpd.h"
 
 static struct alarmEntry *alarmTab = NULL;
@@ -279,7 +280,7 @@ alarmDeleteRow(struct alarmEntry *alarm)
     
     /* KLF debugging */
     if (temp == NULL) {
-	printf("alarmDeleteRow: didn't find row (%d) in alarmTab\n",
+ snmp_log(LOG_DEBUG, "alarmDeleteRow: didn't find row (%d) in alarmTab\n",
 	       alarm->index);
     }
     
@@ -468,7 +469,7 @@ alarmCommitRow(struct alarmEntry *alarm)
     
     if (alarm->next != nextPtr) {
 	/* KLF debugging */
-	printf("alarmCommitRow(%d): next pointer was different\n",
+ snmp_log(LOG_DEBUG, "alarmCommitRow(%d): next pointer was different\n",
 	       alarm->index);
 	alarm->next = nextPtr;
     }

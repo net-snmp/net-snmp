@@ -124,6 +124,7 @@ typedef long    fd_mask;
 
 #include "snmp_agent.h"
 #include "agent_read_config.h"
+#include "../snmplib/snmp_logging.h"
 
 #include "version.h"
 
@@ -133,7 +134,6 @@ typedef long    fd_mask;
  * Globals.
  */
 #ifdef USE_LIBWRAP
-#include <syslog.h>
 #include <tcpd.h>
 
 int allow_severity	 = LOG_INFO;
@@ -406,6 +406,7 @@ static void send_v2_trap (struct snmp_session *ss,
     var->val_len	 = sizeof(long);
 
 
+
     /*
      * Allocate space for another var-bind to contain the trap data.
      */
@@ -521,20 +522,21 @@ static void usage(char *prog)
   printf("-p NUM\t\tRun on port NUM instead of the default:  161\n");
   printf("-c CONFFILE\tRead CONFFILE as a configuration file.\n");
   printf("-C\t\tDon't read the default configuration files.\n");
-  printf("-L\t\tPrint warnings/messages to stdout/err rather than a logfile\n");
+  printf("-L\t\tPrint warnings/messages to stdout/err\n");
+  printf("-s\t\tLog warnings/messages to syslog\n");
   printf("-A\t\tAppend to the logfile rather than truncating it.\n");
   printf("-l LOGFILE\tPrint warnings/messages to LOGFILE\n");
-#if HAVE_UNISTD_H
-  printf("-g \t\tChange to this gid after opening port\n");
-  printf("-u \t\tChange to this uid after opening port\n");
-#endif
   printf("\t\t(By default LOGFILE=%s)\n",
 #ifdef LOGFILE
          LOGFILE
 #else
-    "stdout/err"
+    "none"
 #endif
     );
+#if HAVE_UNISTD_H
+  printf("-g \t\tChange to this gid after opening port\n");
+  printf("-u \t\tChange to this uid after opening port\n");
+#endif
   printf("\n");
   exit(1);
 }
@@ -544,9 +546,7 @@ SnmpdShutDown(int a)
 {
   /* We've received a sigTERM.  Shutdown by calling mib-module
      functions and sending out a shutdown trap. */
-  fprintf(stderr, "%s Received TERM or STOP signal...  shutting down...\n",
-          sprintf_stamp(NULL));
-
+  snmp_log(LOG_INFO, "Received TERM or STOP signal...  shutting down...\n");
   snmp_shutdown("snmpd");
 
 #include "mib_module_shutdown.h"
@@ -591,7 +591,6 @@ init_master_agent(int dest_port)
     set_post_parse( session, snmp_check_parse );
 }
 
-
 /*******************************************************************-o-******
  * main
  *
@@ -620,6 +619,7 @@ main(int argc, char *argv[])
         char           *pid_file = NULL;
         FILE           *PID;
         int             dont_zero_log = 0;
+        int             stderr_log=0, syslog_log=0;
         int             uid=0, gid=0;
 
 	logfile[0]		= 0;
@@ -695,8 +695,11 @@ main(int argc, char *argv[])
                   break;
 
                 case 'L':
-                    logfile[0] = 0;
+		    stderr_log=1;
                     break;
+		case 's':
+		    syslog_log=1;
+		    break;
                 case 'A':
                     dont_zero_log = 1;
                     break;
@@ -774,19 +777,17 @@ main(int argc, char *argv[])
 	/* 
 	 * Open the logfile if necessary.
 	 */
-	if (logfile[0]) {
-		close(1);
-		open(logfile, O_WRONLY | O_CREAT |
-                     ((dont_zero_log) ? O_APPEND : O_TRUNC), 0644);
-		close(2);
-		dup(1);
-		close(0);
-	}
-#ifdef USE_LIBWRAP
-    openlog("snmpd", LOG_CONS, LOG_AUTH|LOG_INFO);
-#endif
+
+    /* Should open logfile and/or syslog based on arguments */
+    if (logfile[0])
+      enable_filelog(logfile, dont_zero_log);
+    if (stderr_log)
+      enable_stderrlog();
+    if (syslog_log)
+      enable_syslog(); 
+
     setvbuf(stdout, NULL, _IOLBF, BUFSIZ);
-    printf("%s UCD-SNMP version %s\n", sprintf_stamp(NULL), VersionInfo);
+    snmp_log(LOG_INFO, "UCD-SNMP version %s\n", VersionInfo);
     /* 
      * Initialize the world.  Detach from the shell.
      * Create initial user.
@@ -797,7 +798,7 @@ main(int argc, char *argv[])
 
     if (pid_file != NULL) {
       if ((PID = fopen(pid_file, "w")) == NULL) {
-        perror("fopen");
+        log_perror("fopen");
         exit(1);
       }
       fprintf(PID, "%d\n", (int)getpid());
@@ -949,11 +950,11 @@ receive(void)
 		if (errno == EINTR){
 		    continue;
 		} else {
-		    perror("select");
+		    log_perror("select");
 		}
 		return -1;
 	    default:
-		printf("select returned %d\n", count);
+		snmp_log(LOG_ERR, "select returned %d\n", count);
 		return -1;
 	}  /* endif -- count>0 */
 
@@ -1036,9 +1037,9 @@ snmp_check_packet(struct snmp_session *session,
       addr_string = STRING_UNKNOWN;
     }
     if(hosts_ctl("snmpd", addr_string, addr_string, STRING_UNKNOWN)) {
-      syslog(allow_severity, "Connection from %s", addr_string);
+      snmp_log(allow_severity, "Connection from %s", addr_string);
     } else {
-      syslog(deny_severity, "Connection from %s refused", addr_string);
+      snmp_log(deny_severity, "Connection from %s refused", addr_string);
       return(0);
     }
 #endif	/* USE_LIBWRAP */
@@ -1055,8 +1056,8 @@ snmp_check_packet(struct snmp_session *session,
 	}
 
 	if (count >= ADDRCACHE || verbose){
-	    printf("%s Received SNMP packet(s) from %s\n",
-		   sprintf_stamp(NULL), inet_ntoa(fromIp->sin_addr));
+	    snmp_log(LOG_DEBUG, "Received SNMP packet(s) from %s\n",
+                     inet_ntoa(fromIp->sin_addr));
 	    for(count = 0; count < ADDRCACHE; count++){
 		if (addrCache[count].status == UNUSED){
 		    addrCache[count].addr = fromIp->sin_addr.s_addr;
@@ -1067,7 +1068,7 @@ snmp_check_packet(struct snmp_session *session,
 	} else {
 	    addrCache[count].status = USED;
 	}
-    }  /* endif -- snmp_dump_packet */
+    }
 
     return ( 1 );
 }

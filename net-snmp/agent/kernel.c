@@ -26,6 +26,7 @@
 #include "asn1.h"
 #include "snmp_api.h"
 #include "snmp_impl.h"
+#include "snmp_logging.h"
 
 #include "kernel.h"
 
@@ -44,10 +45,12 @@ init_kmem(const char *file)
     char err[4096];
     kd = kvm_openfiles(NULL, NULL, NULL, O_RDONLY, err);
     if (kd == NULL) {
-	fprintf(stderr, "init_kmem: kvm_openfiles failed: %s\n", err);
+ snmp_log(LOG_NOTICE, "init_kmem: kvm_openfiles failed: %s\n", err);
     }
 #else
-    kd = kvm_open(NULL, NULL, NULL, O_RDONLY, "kvm_open");
+    kd = kvm_open(NULL, NULL, NULL, O_RDONLY, NULL);
+    if (!kd)
+      snmp_log(LOG_NOTICE, "init_kmem: kvm_open failed with errno %d\n", errno);
 #endif
 }
 
@@ -73,10 +76,10 @@ klookup(unsigned long off,
     result = kvm_read(kd, off, target, siz);
     if (result != siz) {
 #if HAVE_KVM_OPENFILES
-	fprintf(stderr,"kvm_read(*, %lx, %p, %d) = %d: %s\n", off, target, siz,
+ snmp_log(LOG_ERR,"kvm_read(*, %lx, %p, %d) = %d: %s\n", off, target, siz,
 		result, kvm_geterr(kd));
 #else
-	fprintf(stderr,"kvm_read(*, %lx, %p, %d) = %d: ", off, target, siz,
+ snmp_log(LOG_ERR,"kvm_read(*, %lx, %p, %d) = %d: ", off, target, siz,
 		result);
 	perror(NULL);
 #endif
@@ -96,7 +99,7 @@ init_kmem(const char *file)
 {
   kmem = open(file, O_RDONLY);
   if (kmem < 0){
-    fprintf(stderr, "cannot open %s: ",file);
+    snmp_log(LOG_NOTICE, "cannot open %s: ",file);
     perror(NULL);
 #ifndef NO_ROOT_ACCESS
     exit(1);
@@ -105,7 +108,7 @@ init_kmem(const char *file)
   fcntl(kmem,F_SETFD,1);
   mem = open("/dev/mem",O_RDONLY);    
   if (mem < 0){
-    fprintf(stderr, "cannot open /dev/mem: ");
+    snmp_log(LOG_NOTICE, "cannot open /dev/mem: ");
     perror(NULL);
 #ifndef NO_ROOT_ACCESS
     exit(1);
@@ -115,7 +118,7 @@ init_kmem(const char *file)
 #ifdef DMEM_LOC
   swap = open(DMEM_LOC,O_RDONLY);
   if (swap < 0){
-    fprintf(stderr, "cannot open %s: ",DMEM_LOC);
+    snmp_log(LOG_NOTICE, "cannot open %s: ",DMEM_LOC);
     perror(NULL);
 #ifndef NO_ROOT_ACCESS
     exit(1);
@@ -168,7 +171,7 @@ klookup(unsigned long off,
   if (kmem < 0) return 0;
 
   if ((retsiz = klseek((off_t) off)) != off) {
-    fprintf (stderr, "klookup(%lx, %p, %d): ", off, target, siz);
+    snmp_log(LOG_ERR, "klookup(%lx, %p, %d): ", off, target, siz);
     perror("klseek");
 #ifdef EXIT_ON_BAD_KLREAD
     exit(1);
@@ -179,7 +182,7 @@ klookup(unsigned long off,
     if (snmp_get_do_debugging()) {
     /* these happen too often on too many architectures to print them
        unless we're in debugging mode. People get very full log files. */
-      fprintf (stderr, "klookup(%lx, %p, %d): ", off, target, siz);
+      snmp_log(LOG_ERR, "klookup(%lx, %p, %d): ", off, target, siz);
       perror("klread");
       ERROR_MSG("klread");
     }

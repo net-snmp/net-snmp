@@ -277,13 +277,13 @@ var_ipRouteEntry(struct variable *vp,
 	break;
       if (rtp->rtm_version != RTM_VERSION)
 	{
-	  fprintf (stderr, "routing socket message version mismatch (%d instead of %d)\n",
+	  snmp_log(LOG_ERR, "routing socket message version mismatch (%d instead of %d)\n",
 		   rtp->rtm_version, RTM_VERSION);
 	  break;
 	}
       if (rtp->rtm_type != RTM_GET)
 	{
-	  fprintf (stderr, "routing socket returned message other than GET (%d)\n",
+	  snmp_log(LOG_ERR, "routing socket returned message other than GET (%d)\n",
 		   rtp->rtm_type);
 	  continue;
 	}
@@ -414,7 +414,7 @@ static void Route_Scan_Reload (void)
   if (sysctl (name, sizeof (name) / sizeof (int),
 	      0, &size, 0, 0) == -1)
     {
-      fprintf (stderr, "sysctl(CTL_NET,PF_ROUTE,0,0,NET_RT_DUMP,0)\n");
+      snmp_log(LOG_ERR, "sysctl(CTL_NET,PF_ROUTE,0,0,NET_RT_DUMP,0)\n");
     }
   else
     {
@@ -427,7 +427,7 @@ static void Route_Scan_Reload (void)
 	    }
 	  if ((all_routes = malloc (size)) == 0)
 	    {
-	      fprintf (stderr, "out of memory allocating route table\n");
+	      snmp_log(LOG_ERR, "out of memory allocating route table\n");
 	    }
 	  all_routes_size = size;
 	}
@@ -438,7 +438,7 @@ static void Route_Scan_Reload (void)
       if (sysctl (name, sizeof (name) / sizeof (int),
 		  all_routes, &size, 0, 0) == -1)
 	{
-	  fprintf (stderr, "sysctl(CTL_NET,PF_ROUTE,0,0,NET_RT_DUMP,0)\n");
+	  snmp_log(LOG_ERR, "sysctl(CTL_NET,PF_ROUTE,0,0,NET_RT_DUMP,0)\n");
 	}
       all_routes_end = all_routes + size;
     }
@@ -1156,7 +1156,7 @@ static void Route_Scan_Reload (void)
 
 	if (! (in = fopen ("/proc/net/route", "r")))
 	  {
-	    fprintf (stderr, "cannot open /proc/net/route - burps\n");
+	    snmp_log(LOG_ERR, "cannot open /proc/net/route - burps\n");
 	    return;
 	  }
 
@@ -1368,7 +1368,7 @@ rtmsg(struct rt_msghdr *rtm)
 	}
 	if (!gotdest) {
 		/* XXX can't happen if code above is correct */
-		fprintf(stderr, "route no dest?\n");
+	 snmp_log(LOG_ERR, "route no dest?\n");
 		free(rt);
 	} else {
 		/* If no mask provided, it was a host route. */

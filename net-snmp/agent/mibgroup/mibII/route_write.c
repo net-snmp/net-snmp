@@ -47,6 +47,7 @@
 #include "snmp_vars.h"
 #include "ip.h"
 #include "route_write.h"
+#include "snmp_logging.h"
 
 #ifndef STRUCT_RTENTRY_HAS_RT_DST
 #define rt_dst rt_nodes->rn_key
@@ -255,7 +256,7 @@ write_rte(
      */
 
     if (length != 14) {
-	printf("length error\n");
+ snmp_log(LOG_ERR, "length error\n");
 	return SNMP_ERR_NOCREATION;
     }
 
@@ -274,7 +275,7 @@ write_rte(
 
 	rp = newCacheRTE();
 	if (!rp) {
-	    printf("newCacheRTE");
+	    snmp_log(LOG_ERR, "newCacheRTE");
 	    return SNMP_ERR_RESOURCEUNAVAILABLE;
 	}
 	rp->rt_type = rp->xx_type = 2;
@@ -298,14 +299,14 @@ write_rte(
             if (action == RESERVE1){
 
 		if (var_val_type != ASN_OCTET_STR) {
-		    printf("not octet");
+		    snmp_log(LOG_ERR, "not octet");
 		    return SNMP_ERR_WRONGTYPE;
 		}
 
                 memcpy(buf, var_val, (var_val_len > 8) ? 8 : var_val_len);
 
 		if (var_val_type != ASN_OCTET_STR) {
-		    printf("not octet2");
+		    snmp_log(LOG_ERR, "not octet2");
 		    return SNMP_ERR_WRONGTYPE;
 		}
 		
@@ -321,14 +322,14 @@ write_rte(
 
 	    if (action == RESERVE1) {
 		if (var_val_type != ASN_INTEGER) {
-		    printf("not int1");
+		    snmp_log(LOG_ERR, "not int1");
 		    return SNMP_ERR_WRONGTYPE;
 		}
 		
                 val = *((long *) var_val);
 
 		if (val < -1) {
-		    printf("not right1");
+		    snmp_log(LOG_ERR, "not right1");
 		    return SNMP_ERR_WRONGVALUE;
 		}
 
@@ -337,7 +338,7 @@ write_rte(
 	    } else if (action == RESERVE2) {
 
 		if ((rp->xx_metric1 == 1) && (rp->xx_type != 4)) {
-		    printf("reserve2 failed\n");
+		    snmp_log(LOG_ERR, "reserve2 failed\n");
 		    return SNMP_ERR_WRONGVALUE;
 		}
 
@@ -350,14 +351,14 @@ write_rte(
 
 	    if (action == RESERVE1) {
 		if (var_val_type != ASN_INTEGER) {
-		    printf("not right2");
+                  snmp_log(LOG_ERR, "not right2");
 		  return SNMP_ERR_WRONGTYPE;
 		}
 		
                 val = *((long *) var_val);
 
 		if (val <= 0) {
-		    printf("not right3");
+		    snmp_log(LOG_ERR, "not right3");
 		    return SNMP_ERR_WRONGVALUE;
 		}
 
@@ -373,14 +374,14 @@ write_rte(
             if (action == RESERVE1){
 
 		if (var_val_type != ASN_OCTET_STR) {
-		    printf("not right4");
+		    snmp_log(LOG_ERR, "not right4");
 		  return SNMP_ERR_WRONGTYPE;
 		}
 
                 memcpy(buf, var_val, (var_val_len > 8) ? 8 : var_val_len);
 
 		if (var_val_type != ASN_OCTET_STR) {
-		    printf("not right5");
+		    snmp_log(LOG_ERR, "not right5");
 		    return SNMP_ERR_WRONGTYPE;
 		}
 		
@@ -410,7 +411,7 @@ write_rte(
                 val = *((long *) var_val);
 
 		if ((val < 2) || (val > 4)) { /* only accept invalid, direct, indirect */
-		    printf("not right6");
+		    snmp_log(LOG_ERR, "not right6");
 		    return SNMP_ERR_WRONGVALUE;
 		}
 
@@ -454,7 +455,7 @@ write_rte(
 	case IPROUTEPROTO:
 
 	default:
-                printf("err default\n");
+                snmp_log(LOG_ERR, "err default\n");
         	return SNMP_ERR_NOCREATION;
 
 

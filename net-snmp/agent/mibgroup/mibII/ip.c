@@ -448,7 +448,7 @@ var_ip(struct variable *vp,
 			&result, &result_size,
 			0, 0) == -1)
 	      {
-		fprintf (stderr, "sysctl(CTL_NET,PF_NET,IPPROTO_IP,IPCTL_FORWARDING)\n");
+	 snmp_log(LOG_ERR, "sysctl(CTL_NET,PF_NET,IPPROTO_IP,IPCTL_FORWARDING)\n");
 	      }
 	    else
 	      {

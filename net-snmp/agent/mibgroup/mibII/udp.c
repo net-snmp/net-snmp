@@ -583,7 +583,7 @@ static void UDP_Scan_Init(void)
 
     if (! (in = fopen ("/proc/net/udp", "r")))
       {
-	fprintf (stderr, "snmpd: cannot open /proc/net/udp ...\n");
+ snmp_log(LOG_ERR, "snmpd: cannot open /proc/net/udp ...\n");
 	udp_prev = 0;
 	return;
       }

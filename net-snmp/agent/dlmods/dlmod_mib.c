@@ -37,8 +37,7 @@ init_dlmod_mib (void) {
 		     sizeof(dlmod_variables) / sizeof(*dlmod_variables),
 		     dlmod_name, dlmod_name_len);
 #if 1
-	fprintf(stderr, "register mib\n");
-	fflush(stderr);
+ snmp_log(LOG_DEBUG, "register mib\n");
 #endif
 }
 
@@ -51,8 +50,7 @@ int
 dynamic_init_dlmod_mib (void) {
 	init_dlmod_mib();
 #if 1
-	fprintf(stderr, "dynamic_init_dlmod_mib\n");
-	fflush(stderr);
+ snmp_log(LOG_DEBUG, "dynamic_init_dlmod_mib\n");
 #endif
 	return 0;
 }
@@ -92,17 +90,17 @@ header_dlmod(struct variable *vp,
 	newname[DLMOD_NAME_LENGTH] = 0;
 #if 1
 
-	fprintf(stderr, "dlmod exact: %d\n", exact);
+ snmp_log(LOG_DEBUG, "dlmod exact: %d\n", exact);
 	sprint_mib_oid(buf, name, *length);
-	fprintf(stderr, "dlmod name: %s length %d\n", buf, *length);
+ snmp_log(LOG_DEBUG, "dlmod name: %s length %d\n", buf, *length);
 	sprint_mib_oid(buf, newname, vp->namelen+1);
-	fprintf(stderr, "dlmod newname: %s length %d\n", buf, vp->namelen+1);
+ snmp_log(LOG_DEBUG, "dlmod newname: %s length %d\n", buf, vp->namelen+1);
 #endif
 
 	result = snmp_oid_compare(name, *length, newname, (int) vp->namelen + 1);
 	if ((exact && (result != 0)) || (!exact && (result >= 0)))  {
 #if 1
-		fprintf(stderr, "dlmod: FAILED\n");
+	 snmp_log(LOG_DEBUG, "dlmod: FAILED\n");
 #endif
 		return MATCH_FAILED;
 	}
@@ -113,7 +111,7 @@ header_dlmod(struct variable *vp,
 	*write_method = 0;
 	*var_len = sizeof(long);/* default to 'long' results */
 #if 1
-	fprintf(stderr, "dlmod: SUCCEEDED\n");
+ snmp_log(LOG_DEBUG, "dlmod: SUCCEEDED\n");
 #endif
 	return MATCH_SUCCEEDED;
 }
@@ -185,19 +183,19 @@ header_dlmodEntry(struct variable *vp,
 	for (dlmod_index = 1; dlmod_index < dlmod_next_index; dlmod_index++)  {
 		dlm = dlmod_get_by_index(dlmod_index);
 #if 1
-		fprintf(stderr, "dlmodEntry dlm: %x dlmod_index: %d\n",
+	 snmp_log(LOG_DEBUG, "dlmodEntry dlm: %x dlmod_index: %d\n",
                         (int) dlm, dlmod_index);
 #endif
 		if (dlm) {
 			newname[11] = dlmod_index;
 			result = snmp_oid_compare(name, *length, newname, (int) vp->namelen + 1);
 #if 1
-			fprintf(stderr, "dlmodEntry exact: %d\n", exact);
+		 snmp_log(LOG_DEBUG, "dlmodEntry exact: %d\n", exact);
 			sprint_mib_oid(buf, name, *length);
-			fprintf(stderr, "dlmodEntry name: %s length %d\n", buf, *length);
+		 snmp_log(LOG_DEBUG, "dlmodEntry name: %s length %d\n", buf, *length);
 			sprint_mib_oid(buf, newname, vp->namelen+1);
-			fprintf(stderr, "dlmodEntry newname: %s length %d\n", buf, vp->namelen+1);
-			fprintf(stderr, "dlmodEntry result: %d\n", result);
+		 snmp_log(LOG_DEBUG, "dlmodEntry newname: %s length %d\n", buf, vp->namelen+1);
+		 snmp_log(LOG_DEBUG, "dlmodEntry result: %d\n", result);
 #endif
 
 			if ((exact && (result == 0)) || (!exact && (result < 0))) 
@@ -205,12 +203,12 @@ header_dlmodEntry(struct variable *vp,
 		}
 	}
 #if 1
-	fprintf(stderr, "dlmod_index: %d dlmod_next_index %d\n",
+ snmp_log(LOG_DEBUG, "dlmod_index: %d dlmod_next_index %d\n",
 		dlmod_index, dlmod_next_index);
 #endif
 	if (dlmod_index >= dlmod_next_index) {
 #if 1
-		fprintf(stderr, "vp->magic :%d\n", vp->magic);
+	 snmp_log(LOG_DEBUG, "vp->magic :%d\n", vp->magic);
 #endif
 		if (dlmod_index == dlmod_next_index && 
 			exact && vp->magic == DLMODSTATUS)  
@@ -224,7 +222,7 @@ header_dlmodEntry(struct variable *vp,
 
 	*var_len = sizeof(long);/* default to 'long' results */
 #if 1
-    fprintf(stderr, "dlmodEntry return dlm: %x\n", (int) dlm);
+    snmp_log(LOG_DEBUG, "dlmodEntry return dlm: %x\n", (int) dlm);
 #endif
 	return dlm;
 }
@@ -294,16 +292,16 @@ write_dlmodName(int action,
 	char buf[1024];
 
 #if 1
-	fprintf(stderr, "write_dlmodName type: %d action %d\n",
+ snmp_log(LOG_DEBUG, "write_dlmodName type: %d action %d\n",
 		var_val_type, action);
 #endif
 
 	if (var_val_type != ASN_OCTET_STR) {
-		fprintf(stderr, "write to dlmodName not ASN_OCTET_STR\n");
+	 snmp_log(LOG_DEBUG, "write to dlmodName not ASN_OCTET_STR\n");
 		return SNMP_ERR_WRONGTYPE;
 	}
 	if (var_val_len > sizeof(string)) {
-		fprintf(stderr, "write to dlmodName: bad length\n");
+	 snmp_log(LOG_DEBUG, "write to dlmodName: bad length\n");
 		return SNMP_ERR_WRONGLENGTH;
 	}
 	if (action == COMMIT) {
@@ -312,7 +310,7 @@ write_dlmodName(int action,
 		
 #if 1
 		sprint_mib_oid(buf, name, name_len);
-		fprintf(stderr, "write_dlmodName strings: %s size: %d big_size: %d name: %s name_len %d\n",
+	 snmp_log(LOG_DEBUG, "write_dlmodName strings: %s size: %d big_size: %d name: %s name_len %d\n",
 			string, size, bigsize, buf, name_len);
 #endif
 		string[size] = '\0';
@@ -344,11 +342,11 @@ write_dlmodPath(int action,
 	struct dlmod *dlm;
 
 	if (var_val_type != ASN_OCTET_STR) {
-		fprintf(stderr, "write to dlmodPath not ASN_OCTET_STR\n");
+	 snmp_log(LOG_ERR, "write to dlmodPath not ASN_OCTET_STR\n");
 		return SNMP_ERR_WRONGTYPE;
 	}
 	if (var_val_len > sizeof(string)) {
-		fprintf(stderr, "write to dlmodPath: bad length\n");
+	 snmp_log(LOG_ERR, "write to dlmodPath: bad length\n");
 		return SNMP_ERR_WRONGLENGTH;
 	}
 	if (action == COMMIT) {
@@ -383,11 +381,11 @@ write_dlmodStatus(int action,
 	int bigsize = 1000, size;
 
 	if (var_val_type != ASN_INTEGER) {
-		fprintf(stderr, "write to dlmodStatus not ASN_INTEGER\n");
+	 snmp_log(LOG_ERR, "write to dlmodStatus not ASN_INTEGER\n");
 		return SNMP_ERR_WRONGTYPE;
 	}
 	if (var_val_len > sizeof(dlm_status)) {
-		fprintf(stderr, "write to dlmodStatus: bad length\n");
+	 snmp_log(LOG_ERR, "write to dlmodStatus: bad length\n");
 		return SNMP_ERR_WRONGLENGTH;
 	}
 	if (action == COMMIT) {
