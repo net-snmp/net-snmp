@@ -268,7 +268,10 @@ tuning the snmp.conf file.  See the snmp.conf(5) manual page for
 details.
 .SH "INPUT OPTIONS"
 The -I flag specifies various options that control how your input to
-the program is parsed.
+the program is parsed.  By default, all input parsing methods are
+used: First the oid is parsed regularily, then -IR is used, then -Ib
+is used, unless one of the following flags is specified which will
+force it to only use one method.
 .IP -IR
 The -IR flag specifies random access lookup, so that if the entire OID 
 path is not specified, it will search for a node in the mib tree with
