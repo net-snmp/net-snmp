@@ -53,6 +53,9 @@
 #if HAVE_NET_IF_DL_H
 #include <net/if_dl.h>
 #endif
+#if HAVE_SYS_STREAM_H
+#include <sys/stream.h>
+#endif
 #if HAVE_NET_ROUTE_H
 #include <net/route.h>
 #endif

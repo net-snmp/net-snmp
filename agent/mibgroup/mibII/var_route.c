@@ -82,6 +82,9 @@ PERFORMANCE OF THIS SOFTWARE.
 #include <netinet/in_var.h>
 #endif
 #define KERNEL		/* to get routehash and RTHASHSIZ */
+#if HAVE_SYS_STREAM_H
+#include <sys/stream.h>
+#endif
 #include <net/route.h>
 #undef	KERNEL
 #ifdef RTENTRY_4_4
@@ -285,6 +288,9 @@ var_ipRouteEntry(struct variable *vp,
 	continue;
       cp = (u_char *) get_in_address ((struct sockaddr *) (rtp + 1),
 				      rtp->rtm_addrs, RTA_DST);
+      if (cp == NULL)
+        return NULL;
+      
       op = Current + 10;
       *op++ = *cp++;
       *op++ = *cp++;
@@ -1271,6 +1277,9 @@ static int qsort_compare(RTENTRY **r1,
 #endif
 
 #include <net/if_dl.h>
+#if HAVE_SYS_STREAM_H
+#include <sys/stream.h>
+#endif
 #include <net/route.h>
 #include <netinet/in.h>
 
@@ -1655,6 +1664,9 @@ get_in_address (const void * ap, int addresses, int wanted)
   struct sockaddr_in * a;
 
   a = (struct sockaddr_in *) get_address (ap, addresses, wanted);
+  if (a == NULL)
+    return NULL;
+
   if (a->sin_family != AF_INET)
     {
       ERROR_MSG("AF_INET sockaddr expected");

@@ -43,6 +43,9 @@
 #ifdef _I_DEFINED_KERNEL
 #undef _KERNEL
 #endif
+#if HAVE_SYS_STREAM_H
+#include <sys/stream.h>
+#endif
 #ifdef HAVE_NET_ROUTE_H
 #include <net/route.h>
 #endif
