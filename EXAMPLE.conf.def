@@ -103,7 +103,11 @@ exec echotest /bin/echo hello world
 # echo hi there
 # exit 35
 #
-exec shelltest /bin/sh /tmp/shtest
+# Note:  this has been specifically commented out to prevent
+# accidental security holes due to someone else on your system writing
+# a /tmp/shtest before you do.  Uncomment to use it.
+#
+#exec shelltest /bin/sh /tmp/shtest
 
 # Then, 
 # % snmpwalk -v 1 localhost public .EXTENSIBLEDOTMIB.SHELLMIBNUM
@@ -253,7 +257,11 @@ load 12 14 14
 # echo hi there
 # exit 35
 #
-exec .EXTENSIBLEDOTMIB.50 shelltest /bin/sh /tmp/shtest
+# Note:  this has been specifically commented out to prevent
+# accidental security holes due to someone else on your system writing
+# a /tmp/shtest before you do.  Uncomment to use it.
+#
+# exec .EXTENSIBLEDOTMIB.50 shelltest /bin/sh /tmp/shtest
 
 # % snmpwalk localhost public .EXTENSIBLEDOTMIB.50
 # local.50.1.1 = 1
