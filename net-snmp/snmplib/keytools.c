@@ -130,11 +130,11 @@ generate_Ku(	oid	*hashtype,	u_int  hashtype_len,
         MDbegin(&MD);
 #endif /* USE_OPENSSL */
 
-        for(i = 0; i < USM_LENGTH_KU_HASHBLOCK / pplen + 1; i++)
-            memcpy((char *)buf + (int)(pplen * i), (char *)P,
-                   (int)pplen < USM_LENGTH_KU_HASHBLOCK ? 
-                   (int)pplen : USM_LENGTH_KU_HASHBLOCK);
         while (nbytes > 0) {
+                bufp = buf;
+                for (i = 0; i < USM_LENGTH_KU_HASHBLOCK; i++) {
+                        *bufp++ = P[pindex++ % pplen];
+                }
 #ifdef USE_OPENSSL
 		EVP_DigestUpdate(ctx, buf, USM_LENGTH_KU_HASHBLOCK);
 #else
@@ -166,7 +166,7 @@ md5_fin:
         DEBUGMSGTL(("generate_Ku", "generating Ku (from %s): ", P));
         for(i=0; i < *kulen; i++)
           DEBUGMSG(("generate_Ku", "%02x",Ku[i]));
-        DEBUGMSG(("keytools","\n"));
+        DEBUGMSG(("generate_Ku","\n"));
 #endif /* SNMP_TESTING_CODE */
 
 
