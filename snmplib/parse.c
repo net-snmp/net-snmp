@@ -3751,10 +3751,7 @@ read_module_internal(const char *name)
             return MODULE_LOADED_OK;
         }
 
-    if (netsnmp_ds_get_int(NETSNMP_DS_LIBRARY_ID,
-				NETSNMP_DS_LIB_MIB_WARNINGS)) {
-	snmp_log(LOG_WARNING, "Module %s not found\n", name);
-    }
+    snmp_log(LOG_WARNING, "%s: Module not found\n", name);
     return MODULE_NOT_FOUND;
 }
 
