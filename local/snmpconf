@@ -1,0 +1,310 @@
+#!/usr/bin/perl -w
+
+#
+# A simple configuration file builder based on questions listed in
+# it's own configuration file.  It would certainly be easy to use this
+# for other programs as well.
+#
+
+use Getopt::Std;
+use Term::ReadLine;
+use IO::Dir;
+use IO::File;
+use Data::Dumper;
+
+# globals
+%tokenitems=qw(line 1 info 1 comment 1);
+%arrayitems=qw(question 1 validanswer 1);
+
+$opts{'c'} = "/usr/local/share/snmp/snmpconf";
+getopts("dhfc:", \%opts);
+
+# display help
+if ($opts{'h'}) {
+    print "$0 [-h] [-d] [-f] [-c config_directory] [FILETOCREATE]\n";
+    exit;
+}
+
+# setup terminal interface.
+$term = new Term::ReadLine 'snmpconf';
+
+# read in configuration file set
+read_config_files($opts{'c'}, \%filetypes);
+debug(Dumper(\%filetypes));
+
+if ($#ARGV >= 0) {
+    #
+    # loop through requested files.
+    #
+    foreach my $i (@ARGV) {
+	if (!defined($filetypes{$i})) {
+	    warn "invalid file: $i\n";
+	} else {
+	    build_file($term, $i, $filetypes{$i});
+	}
+    }
+} else {
+    #
+    # select file type to operate on.
+    #
+    while(1) {
+	print "\nSelect file to create:\n";
+	print "  ",join("\n  ",keys(%filetypes)), "\n";
+	print "  [or 'quit']\n";
+	my $line = get_answer($term, "Select file>",
+			      valid_answers(keys(%filetypes),"quit","q"));
+	last if ($line eq "quit" || $line eq "q");
+	debug("file selected: $line\n");
+	build_file($term, $line, $filetypes{$line});
+    }
+}
+
+output_files(\%filetypes, $term);
+print "The following files were created:\n";
+
+foreach my $i (keys(%didfile)) {
+    if ($i ne "1") {
+	print "  $didfile{$i} ",
+	($i ne $didfile{$i})?"[ from $i specifications]":" ","\n";
+	if ($opts{'d'}) {
+	    open(I,$didfile{$i});
+	    debug("    " . join("    ",<I>) . "\n");
+	    close(I);
+	}
+    }
+}
+
+sub build_file {
+    my ($term, $filename, $fileconf) = @_;
+    $didfile{$filename} = 1;
+    my (@lines);
+    while(1) {
+	print "\nSelect configuration section for $filename to operate on:\n";
+	for(my $i = 0; $i <= $#{$fileconf}; $i++) {
+	    printf "  %2d:  $fileconf->[$i]{title}[0]\n", $i+1;
+	}
+	print "  [or 'finished']\n";
+	my $line = $term->readline("Select section>");
+
+	return @lines if ($line eq "finished" || $line eq "f");
+	if ($line <= 0 || $line > $#{$fileconf}+1) {
+	    warn "invalid selection: $line [must be 1-".($#{$fileconf}+1)."]\n";
+	} else {
+	    do_section($fileconf->[$line-1]);
+	}
+    }
+}
+
+sub do_section {
+    my $confsect = shift;
+    my @lines;
+    while(1) {
+	print "\nSelect from:\n";
+	my $count=1;
+	foreach my $i (keys(%{$confsect->{'thetokens'}})) {
+	    printf "  %2d:  Add $confsect->{$i}{info}[0]\n", $count++;
+	}
+	print "  [or 'finished']\n";
+	my $line = $term->readline("Select section>");
+	return @lines if ($line eq "finished" || $line eq "f");
+
+	if ($line <= 0 || $line > $count) {
+	    warn "invalid selection: $line [must be 1-".($count-1)."]\n";
+	} else {
+	    foreach my $i (keys(%{$confsect->{'thetokens'}})) {
+		if (--$line == 0) {
+		    do_line($i, $confsect->{$i});
+		    last;
+		}
+	    }
+	}
+    }
+    print "operating on $confsect\n";
+    return;
+}
+
+sub do_line {
+    my $token = shift;
+    my $confline = shift;
+    my (@answers, $counter, $i);
+#    debug(Dumper($confline));
+    for($i=0; $i <= $#{$confline->{'question'}}; $i++) {
+	if (defined($confline->{'question'}[$i]) &&
+	    $confline->{'question'}[$i] ne "") {
+	    $answers[$i] = get_answer($term,$confline->{'question'}[$i] . ": ",
+				      $confline->{'validanswer'}[$i]);
+	}
+    }
+    if ($#{$confline->{'line'}} == -1) {
+	my ($i,$line);
+	for($i=0; $i <= $#{$confline->{'question'}}; $i++) {
+	    next if (!defined($confline->{'question'}[$i]) ||
+		     $confline->{'question'}[$i] eq "");
+	    $line .= " \$" . $i;
+	}
+	push @{$confline->{'line'}}, $line;
+    }
+
+    foreach my $line (@{$confline->{'line'}}) {
+	my $finished = $line;
+	debug("preline: $finished\n");
+	debug("answers: ",Dumper(\@answers));
+	$finished =~ s/\$(\d+)/$answers[$1]/g;
+	if ($line =~ s/^eval\s+//) {
+	    debug("eval: $finished\n");
+	    $finished = eval $finished;
+	    debug("eval results: $finished\n");
+	}
+	$finished = $token . " " . $finished;
+	debug("line: $finished\n");
+	push @{$confline->{'results'}},$finished;
+    }
+}
+
+#
+# read all sets of config files in the various subdirectories.
+sub read_config_files {
+    my $readdir = shift;
+    my $filetypes = shift;
+    my $dh = new IO::Dir($readdir);
+    die "no such directory $readdir, did you run make install?\n" if (!defined($dh));
+    my $dir;
+    while(defined($dir = $dh->read)) {
+	next if ($dir =~ /^\./);
+	debug("dir entry: $dir\n");
+	if (-d "$readdir/$dir") {
+	    $filetypes->{$dir} = read_config_items("$readdir/$dir");
+	}
+    }
+}
+
+#
+# read each configuration file in a directory
+#
+sub read_config_items {
+    my $itemdir = shift;
+    my $dh = new IO::Dir($itemdir);
+    return if (!defined($dh));
+    my $file;
+    my @results;
+    while(defined($file = $dh->read)) {
+	next if ($file =~ /~$/);
+	if (-f "$itemdir/$file") {
+	    push @results, read_config_item("$itemdir/$file");
+	}
+    }
+    return \@results;
+}
+
+#
+# Parse one file
+#
+sub read_config_item {
+    my $itemfile = shift;
+    my $fh = new IO::File($itemfile);
+    return if (!defined($fh));
+    my (%results, $curtoken);
+    debug("tokenitems:  ", Dumper(\%tokenitems));
+    while($line = <$fh>) {
+	next if ($line =~ /^\s*\#/);
+	my ($token, $rest) = ($line =~ /^(\w+)\s+(.*)/);
+	next if (!defined($token) || !defined($rest));
+	debug("token: $token => $rest\n");
+	if ($token eq 'steal') {
+	    foreach my $stealfrom (keys(%{$results{$rest}})) {
+		if (!defined($results{$curtoken}{$stealfrom})) {
+		    @{$results{$curtoken}{$stealfrom}} = 
+			@{$results{$rest}{$stealfrom}};
+		}
+	    }
+	} elsif (defined($tokenitems{$token})) {
+	    if (!defined($curtoken)) {
+		die "error in configuration file $itemfile, no token set\n";
+	    }
+	    push @{$results{$curtoken}{$token}},$rest;
+	} elsif (defined($arrayitems{$token})) {
+	    if (!defined($curtoken)) {
+		die "error in configuration file $itemfile, no token set\n";
+	    }
+	    my ($num, $newrest) = ($rest =~ /^(\d+)\s+(.*)/);
+	    if (!defined($num) || !defined($newrest)) {
+		warn "invalid config line: $line\n";
+	    } else {
+		$results{$curtoken}{$token}[$num] = $newrest;
+	    }
+	} elsif ($token =~ /^token\s*$/) {
+	    $curtoken = $rest;
+	    $results{'thetokens'}{$curtoken} = 1;
+	    debug("current token set to $token\n");
+	} else {
+	    push @{$results{$token}},$rest;
+	}
+    }
+    return \%results;
+}
+
+sub debug {
+    print @_ if ($opts{'d'});
+}
+
+sub output_files {
+    my $filetypes = shift;
+    my $term = shift;
+    foreach my $ft (keys(%$filetypes)) {
+	next if (!$didfile{$ft});
+	my $outputf = $ft;
+	if (-f $outputf && !$opts{'f'}) {
+	    my $ans = get_answer($term,"$outputf already exists.  Should we 'overwrite', 'skip', 'rename' or 'append'? ",valid_answers(qw(o overwrite r rename s skip a append)));
+	    next if ($ans =~ /^(s|skip)$/i);
+	    if ($ans =~ /^(a|append)/) {
+		$outputf = ">$outputf";
+	    } elsif ($ans =~ /^(r|rename)$/i) {
+		# default to rename for error conditions
+		$outputf = $term->readline("Save to what file name then (or 'skip')? ");
+	    }
+	}
+	$didfile{$ft} = $outputf;
+	open(O,">$outputf") || warn "couldn't write to $outputf\n";
+	foreach my $sect (@{$filetypes->{$ft}}) {
+	    my $secthelp = 0;
+	    foreach my $token (keys(%{$sect->{'thetokens'}})) {
+		if ($#{$sect->{$token}{'results'}} >= 0) {
+		    if ($secthelp++ == 0) {
+			print O "#\n# SECTION: ",
+			join("\n#          ", @{$sect->{title}}), "\n#\n";
+			print O "#   ", join("\n#   ",@{$sect->{description}}),
+			"\n";
+		    }
+		    print O "\n# $token: ",join("\n#   ",@{$sect->{$token}{info}}),
+		    "\n";
+		    foreach my $result (@{$sect->{$token}{'results'}}) {
+			print O "$result\n";
+		    }
+		}
+	    }
+	    print O "\n\n\n";
+	}
+	close(O);
+    }
+}
+
+sub get_answer {
+    my ($term, $question, $regexp, $defaultval) = @_;
+    $question .= "(default = $defaultval): " if (defined($defaultval) && $defaultval ne "");
+    my $ans = $term->readline($question);
+    return $defaultval if ($ans eq "" && defined($defaultval) && 
+			   $defaultval ne "");
+    while (!(!defined($regexp) ||
+	     $regexp eq "" ||
+	     $ans =~ /$regexp/)) {
+	print "invalid answer!  It must match this regular expression: $regexp\n";
+	$ans = $term->readline($question);
+    }
+    return $defaultval if ($ans eq "" && defined($defaultval) && 
+			   $defaultval ne "");
+    return $ans;
+}
+    
+sub valid_answers {
+    return "^(" . join("|",@_) . ")\$";
+}
