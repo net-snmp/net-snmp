@@ -282,7 +282,8 @@ int main(int argc, char *argv[])
     }
     
     init_snmp("snmpapp");
-    if (print == 1) print_mib_tree (stdout, get_tree_head());
+    if (print == 1 && current_name == NULL)
+        print_mib_tree (stdout, get_tree_head());
     if (print == 2) print_ascii_dump (stdout);
     if (print == 3) print_oid_report (stdout);
     if (!current_name) exit (0);
@@ -298,6 +299,13 @@ int main(int argc, char *argv[])
 	    fprintf(stderr, "Invalid object identifier: %s\n", current_name);
 	    exit(2);
 	}
+    }
+
+    if (print == 1) {
+        struct tree *tp;
+        tp = get_tree(name, name_length, get_tree_head());
+        print_mib_tree (stdout, tp);
+        exit(0);
     }
 
     if (tosymbolic){
