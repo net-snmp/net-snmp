@@ -1,6 +1,28 @@
 This file contains major changes in released revisions.  Please read
 the ChangeLog file for a more detailed listing of changes/bug fixes.
 
+*3.1*
+
+  Features:
+    - Pass thru extensibility added!
+    - snmpnetstat greatly improved (Niels Baggesen <recnba@mediator.uni-c.dk>)
+    - improved solaris info caching (Dan A. Dickey" <ddickey@transition.com>)
+
+  Bug fixes:
+    - many fixes for solaris (Niels Baggesen <recnba@mediator.uni-c.dk>
+      and "Dan A. Dickey" <ddickey@transition.com>)
+    - greatly reduced memory usage by mib parser (Niels Baggesen)
+    - disk checks fixed for solaris and osf.
+    - improved Mib parsing from Mike Perik <mikep@crt.com>
+      - TRAP-TYPE/NOTIFICATION-TYPE now handled.
+      - IMPORTS definition no longer required.
+      - SIZE syntax fixed.
+    - sedscript compiles correctly with Solaris's spro compiler.
+    - many more small ones.
+
+  Misc:
+    - Upgraded to autoconf-2.10
+
 *3.0.7.2*
 
   Major solaris patches from Niels Baggesen <recnba@mediator.uni-c.dk>. Thanks!
