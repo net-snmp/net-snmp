@@ -980,7 +980,7 @@ handle_mibfile_conf(const char *token,
 }
 
 char *
-snmp_oid_toggle_options(char *options)
+snmp_out_toggle_options(char *options)
 {
     while(*options) {
         switch(*options++) {
@@ -1005,8 +1005,35 @@ snmp_oid_toggle_options(char *options)
         case 'S':
 	    snmp_set_suffix_only(2);
 	    break;
+        default:
+	    return options-1;
+	}
+    }
+    return NULL;
+}
+
+void snmp_out_toggle_options_usage(const char *lead, FILE *outf)
+{
+  fprintf(outf, "%sOUTOPTS values:\n", lead);
+  fprintf(outf, "%s    n: Print oids numerically.\n", lead);
+  fprintf(outf, "%s    e: Print enums numerically.\n", lead);
+  fprintf(outf, "%s    b: Dont break oid indexes down.\n", lead);
+  fprintf(outf, "%s    q: Quick print for easier parsing.\n", lead);
+  fprintf(outf, "%s    f: Print full oids on output.\n", lead);
+  fprintf(outf, "%s    s: Print only last symbolic element of oid.\n", lead);
+  fprintf(outf, "%s    S: Print MIB module-id plus last element.\n", lead);
+}
+
+char *
+snmp_in_toggle_options(char *options)
+{
+    while(*options) {
+        switch(*options++) {
 	case 'R':
 	    ds_toggle_boolean(DS_LIBRARY_ID, DS_LIB_RANDOM_ACCESS);
+	    break;
+	case 'b':
+	    ds_toggle_boolean(DS_LIBRARY_ID, DS_LIB_REGEX_ACCESS);
 	    break;
         default:
 	    return options-1;
@@ -1015,17 +1042,11 @@ snmp_oid_toggle_options(char *options)
     return NULL;
 }
 
-void snmp_oid_toggle_options_usage(const char *lead, FILE *outf)
+void snmp_in_toggle_options_usage(const char *lead, FILE *outf)
 {
-  fprintf(outf, "%sOIDOPTS values:\n", lead);
-  fprintf(outf, "%s    n: Print oids numerically.\n", lead);
-  fprintf(outf, "%s    e: Print enums numerically.\n", lead);
-  fprintf(outf, "%s    b: Dont break oid indexes down.\n", lead);
-  fprintf(outf, "%s    q: Quick print for easier parsing.\n", lead);
-  fprintf(outf, "%s    f: Print full oids on output.\n", lead);
-  fprintf(outf, "%s    s: Print only last symbolic element of oid.\n", lead);
-  fprintf(outf, "%s    S: Print MIB module-id plus last element.\n", lead);
+  fprintf(outf, "%sINOPTS values:\n", lead);
   fprintf(outf, "%s    R: Do random access to oid labels.\n", lead);
+  fprintf(outf, "%s    b: Do best/regex matching to find a MIB node.\n", lead);
 }
 
 void

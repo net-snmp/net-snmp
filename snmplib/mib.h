@@ -302,8 +302,10 @@ void print_oid_report_enable_symbolic (void);
 
 void clear_tree_flags(register struct tree *tp);
 
-char *snmp_oid_toggle_options(char *);
-void snmp_oid_toggle_options_usage(const char *, FILE *);
+char *snmp_out_toggle_options(char *);
+void snmp_out_toggle_options_usage(const char *, FILE *);
+char *snmp_in_toggle_options(char *);
+void snmp_in_toggle_options_usage(const char *, FILE *);
 
 #ifdef __cplusplus
 }
