@@ -1,6 +1,14 @@
 /* ucdDemoPublic.c */
 
 #include <net-snmp/net-snmp-config.h>
+#if HAVE_STDLIB_H
+#include <stdlib.h>
+#endif
+#if HAVE_STRING_H
+#include <string.h>
+#else
+#include <strings.h>
+#endif
 
 #if TIME_WITH_SYS_TIME
 # ifdef WIN32
@@ -142,7 +150,7 @@ write_ucdDemoResetKeys(
   /* variables we may use later */
   static long long_ret;
   unsigned char *engineID;
-  int engineIDLen;
+  size_t engineIDLen;
   int i;
   struct usmUser *user;
 
