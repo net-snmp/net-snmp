@@ -12,6 +12,7 @@ struct extensible
 {
    char name[STRMAX];
    char command[STRMAX];
+   char fixcmd[STRMAX];
    int type;
    int result;
    char output[STRMAX];
@@ -24,6 +25,7 @@ struct extensible
 struct myproc
 {
   char name[STRMAX];
+  char fixcmd[STRMAX];
   int min;
   int max;
   struct myproc *next;

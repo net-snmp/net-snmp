@@ -50,6 +50,12 @@ If MAX and MIN are not specified, MAX is assumed to be
 and MIN is assumed to be 1.
 .IP
 If MAX is specified but MIN is not specified, MIN is assumed to be 0.
+.IP "procfix NAME PROG ARGS"
+This registers a command that knows how to fix errors with the given
+process NAME.  When EXTENSIBLEDOTMIB.PROCMIBNUM.ERRORFIX for a given
+NAMEd program is set to the integer value of 1, this command will be
+called.  It defaults to a compiled value set using the PROCFIXCMD
+definition in the config.h file.
 .IP "exec NAME PROG ARGS"
 .IP "exec MIBNUM NAME PROG ARGS"
 .IP
@@ -78,6 +84,12 @@ maintain consistency of information for consecutive table queries.
 The cache can be flushed by a snmp-set request of integer(1) to
 EXTENSIBLEDOTMIB.VERSIONMIBNUM.VERCLEARCACHE.
 .RE
+.IP "execfix NAME PROG ARGS"
+This registers a command that knows how to fix errors with the given
+exec or sh NAME.  When EXTENSIBLEDOTMIB.SHELLMIBNUM.ERRORFIX for a
+given NAMEd entry is set to the integer value of 1, this command will
+be called.  It defaults to a compiled value set using the EXECFIXCMD
+definition in the config.h file.
 .IP "disk PATH"
 .IP "disk PATH [ MINSPACE | MINPERCENT% ]"
 .IP
