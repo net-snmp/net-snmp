@@ -87,6 +87,8 @@ fi
 
 ########################################################################
 ########################################################################
-BUILDD=$BUILDD/`nsb-sysname`
+if [ $SRCD != $BUILDD ];then
+    BUILDD=$BUILDD/`nsb-sysname`
+fi
 nsb-prompt "press enter to build $SRCD in $BUILDD, and install in $INSTALLD"
 nsb-build $VERSION $SRCD $BUILDD $INSTALLD $NSB_CONFIG_ALL
