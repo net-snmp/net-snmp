@@ -130,7 +130,6 @@ setup_oid(oid *it, int *len, u_char *id, int idlen, u_char *user)
     it[i] = user[i-14-idlen];
   *len = 14+idlen+strlen(user);
   sprint_objid(buf, it, *len);
-  DEBUGP("buf: %s\n", buf);
 }
 
 int
