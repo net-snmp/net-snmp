@@ -245,12 +245,15 @@ static void
 _add_new_interface(netsnmp_interface_entry *ifentry,
                    netsnmp_container * container)
 {
+    ifTable_rowreq_ctx *rowreq_ctx;
+
     DEBUGMSGTL(("ifTable:access","creating new entry\n"));
+
     /*
      * allocate an row context and set the index(es), then add it to
      * the container
      */
-    ifTable_rowreq_ctx *rowreq_ctx = ifTable_allocate_rowreq_ctx(ifentry);
+    rowreq_ctx = ifTable_allocate_rowreq_ctx(ifentry);
     if( (NULL != rowreq_ctx) &&
         ( MFD_SUCCESS == ifTable_indexes_set(rowreq_ctx, ifentry->index))) {
         CONTAINER_INSERT(container, rowreq_ctx);
