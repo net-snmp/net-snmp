@@ -111,8 +111,8 @@ not installed by default, but can be downloaded from
 as follows:
 
     -  Using Internet Explorer (Netscape won't work), go to the above URL
-    -  From the menu at the left, select "Downloads by Topic";
-            From the main window, select "Platform SDK".
+    -  From the menu at the left, Click "Downloads by Topic";
+            From the main window, Click "Platform SDK".
     -  From the new window that appears, select "Core SDK".
     -  The full Core SDK is ~240Mb (expanding to ~560Mb on installation).
        In fact, the only portion that's required is the basic "Build
@@ -288,11 +288,12 @@ not be possible.  For example, the conf module tests will fail.
     Copy win32\net-snmp\net-snmp-config.h to 
     win32\net-snmp\static-config.h.
 
-3.  Open net-snmp/net-snmp-config.h using a text editor.
+3.  Open win32\net-snmp\net-snmp-config.h using a text editor.
 
-4.  *Remove* the following line which is located near the bottom of the file:
-
-    #define NETSNMP_NO_DLL 1
+4.  *Change* the following line which is located near the top of the file:
+        #undef NETSNMP_USE_DLL
+    *To*
+        #define NETSNMP_USE_DLL 1
 
 5.  Make a backup of the new net-snmp-config.h which contains settings
     for a DLL build of Net-SNMP:
@@ -450,21 +451,21 @@ Building from source:
  3. Once the OpenSSL libraries are built, you must copy them to the the MSVC 
     directory:
 
-    a.  Copy the inc32\openssl folder to the include folder of MSVC++
+    a.  Copy folder inc32\openssl to the include folder of MSVC++
 
         Example: "C:\Program Files\Microsoft Visual Studio .NET 2003\
                   Vc7\include\openssl\*.h"
         Example: "C:\Program Files\Microsoft Visual Studio\
                   VC98\include\openssl\*.h"
 
-    b.  Copy out32dll\libeay32.lib to the lib folder of MSVC++
+    b.  Copy file out32dll\libeay32.lib to the lib folder of MSVC++
 
         Example: "C:\Program Files\Microsoft Visual Studio .NET 2003\
                   Vc7\lib\libeay32.lib"
         Example: "C:\Program Files\Microsoft Visual Studio\
                   VC98\lib\libeay32.lib"
 
-    c.  Copy out32dll\libeay32.dll to your %windir%\system32 folder
+    c.  Copy file out32dll\libeay32.dll to your %windir%\system32 folder
 
         Example: "C:\winnt\system32\libeay32.dll"
 
@@ -703,7 +704,7 @@ builds under MinGW with MSyS is available at:
 
 4.  Configure net-snmp using the configure flags as shown:
 
-	export BASEDIR=c:/progra~1/Net-SNMP
+	BASEDIR=c:/progra~1/Net-SNMP
 
 	./configure --prefix="$BASEDIR" \
 		--with-mibdirs="$BASEDIR/share/snmp/mibs" \
