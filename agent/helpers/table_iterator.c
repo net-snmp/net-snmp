@@ -289,12 +289,6 @@ netsnmp_table_iterator_helper_handler(netsnmp_mib_handler *handler,
                                                     iinfo);
                         callback_data_context = NULL;
                     }
-
-                    if (callback_data_context && iinfo->free_data_context) {
-                        (iinfo->free_data_context) (callback_data_keep,
-                                                    iinfo);
-                        callback_data_keep = NULL;
-                    }
                     
                     index_search =
                         (iinfo->
