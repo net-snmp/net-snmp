@@ -95,6 +95,7 @@ typedef long    fd_mask;
 #include "mib.h"
 #include "snmp_groupvars.h"
 #include "extensible/extproto.h"
+#include "snmp_client.h"
 
 extern int  errno;
 int snmp_dump_packet = 0;
@@ -121,6 +122,24 @@ extern void init_snmp();
 
 int receive();
 int snmp_read_packet();
+
+char *sprintf_stamp (now)
+    time_t *now;
+{
+    time_t Now;
+    struct tm *tm;
+    static char sbuf [20];
+
+    if (now == NULL) {
+	now = &Now;
+	time (now);
+    }
+    tm = localtime (now);
+    sprintf(sbuf, "%.4d-%.2d-%.2d %.2d:%.2d:%.2d",
+	    tm->tm_year+1900, tm->tm_mon+1, tm->tm_mday,
+	    tm->tm_hour, tm->tm_min, tm->tm_sec);
+    return sbuf;
+}
 
 /*
  * In: My ip address, View subtree
@@ -384,57 +403,64 @@ agent_party_init(myaddr, dest_port, view)
     return 0; /* SUCCESS */
 }
 
-/*
- * send a trap via snmptrap(1). ignore silently, if not avail.
- */
-static void
-send_trap (host, comm, dev, trap)
-char *host, *comm, *dev;
-int trap;
-{
-    char trapt [20];
-    int pid;
-    char *cmd;
-    char *argv[] = {cmd, "-v", "1", host, comm, dev, "", trapt, "0", "", NULL};
-#ifdef SNMPPATH
-    cmd = (char *) malloc(strlen(SNMPPATH) + strlen("snmptrap") + 2);
-    sprintf(cmd,"%s/%s",SNMPPATH,"snmptrap");
-#else
-    cmd = strdup("/home/local/sbin/snmptrap");
-#endif
-    argv[0] = cmd;
-    
-    sprintf (trapt, "%d", trap);
-#if 0
-    { int i;
-    for (i = 0; i < sizeof(argv)/sizeof(argv[0])-1; i++) {
-	fprintf (stderr, "'%s' ", argv[i]);
-    }
-    fprintf (stderr, "\n");
-    }
-#endif
-    snmp_outtraps++;
+static struct snmp_session trap_session, *trap_sesp = NULL;
 
-    if (! (pid = fork ())) {
-	execv (cmd, argv);
-	perror (cmd);
-	_exit (0);
+struct snmp_session *create_trap_session (ses, sink, com)
+    struct snmp_session *ses;
+    char *sink, *com;
+{
+    struct snmp_session *sesp;
+    memset (ses, 0, sizeof (struct snmp_session));
+    ses->peername = sink;
+    ses->version = SNMP_VERSION_1;
+    ses->community = strdup (com);
+    ses->community_len = strlen (com);
+    ses->retries = SNMP_DEFAULT_RETRIES;
+    ses->timeout = SNMP_DEFAULT_TIMEOUT;
+    ses->callback = NULL;
+    ses->remote_port = SNMP_TRAP_PORT;
+    sesp = snmp_open (ses);
+    if (sesp == NULL) {
+	fprintf (stderr, "snmpd: cannot open SNMP session to %s\n", sink);
     }
-    else if (pid > 0)
-	waitpid (pid, (int *) 0, 0);		/* simple wait should work */
+    return sesp;
+}
+
+void
+send_trap (ss, trap)
+    struct snmp_session *ss;
+    int trap;
+{   struct snmp_pdu *pdu;
+
+    pdu = snmp_pdu_create (TRP_REQ_MSG);
+    pdu->enterprise = version_id;
+    pdu->enterprise_length = version_id_len;
+    pdu->agent_addr.sin_addr.s_addr = get_myaddr();
+    pdu->trap_type = trap;
+    pdu->specific_type = 0;
+    pdu->time = get_uptime();
+    if (snmp_send (ss, pdu) == 0) {
+        fprintf (stderr, "snmpd: send_trap: %d\n", snmp_errno);
+    }
 }
 
 void
 send_easy_trap (trap)
-int trap;
-{   char agent_oid[32];
-
-    sprint_mib_oid (agent_oid, version_id, version_id_len);
-    if (snmp_enableauthentraps != 2 && snmp_trapsink != NULL)
-	send_trap (snmp_trapsink, snmp_trapcommunity, agent_oid, trap);
+      int trap;
+{
+    if (snmp_enableauthentraps == 1 && snmp_trapsink != NULL) {
+        if (trap_sesp == NULL) {
+	    trap_sesp = create_trap_session (&trap_session, snmp_trapsink,
+	                                     snmp_trapcommunity);
+	    if (trap_sesp == NULL) {
+		snmp_enableauthentraps = 2;
+		return;
+	    }
+	}
+	send_trap (trap_sesp, trap);
+    }
 }
-
-
+  
 char *reverse_bytes(buf,num)
   char *buf;
   int num;
@@ -595,6 +621,7 @@ main(argc, argv)
       close(0);
     }
     setvbuf (stdout, NULL, _IOLBF, BUFSIZ);
+    printf ("%s UCD-SNMP version %s\n", sprintf_stamp (NULL), VersionInfo);
     if (!dont_fork && fork() != 0)   /* detach from shell */
       exit(0);
     init_snmp();
@@ -673,7 +700,7 @@ main(argc, argv)
 	/* already in network byte order (I think) */
 	me.sin_port = htons(dest_port);
 	if (bind(sd, (struct sockaddr *)&me, sizeof(me)) != 0){
-	    fprintf(stderr,"bind/%d: ",me.sin_port);
+	    fprintf(stderr,"bind/%d: ", ntohs(me.sin_port));
 	    perror(NULL);
 	    return 2;
 	}
@@ -813,14 +840,8 @@ snmp_read_packet(sd)
 		break;
 	}
 	if (count >= ADDRCACHE){
-	    time_t now;
-	    struct tm *tm;
-	    time (&now);
-	    tm = localtime (&now);
-	    printf("%.4d-%.2d-%.2d %.2d:%.2d:%.2d Recieved SNMP packet(s) from %s\n",
-		   tm->tm_year+1900, tm->tm_mon+1, tm->tm_mday,
-		   tm->tm_hour, tm->tm_min, tm->tm_sec,
-		   inet_ntoa(from.sin_addr));
+	    printf("%s Recieved SNMP packet(s) from %s\n",
+		   sprintf_stamp(NULL), inet_ntoa(from.sin_addr));
 	    for(count = 0; count < ADDRCACHE; count++){
 		if (addrCache[count].status == UNUSED){
 		    addrCache[count].addr = from.sin_addr.s_addr;
