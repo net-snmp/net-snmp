@@ -40,7 +40,8 @@ TABLE OF CONTENTS
    Why do I sometimes get "End of MIB" when walking a tree, and sometimes not?
    I cannot set any variables in the MIB.
    Variables seem to disappear when I try to set them.  Why?
-   I still can't change sysLocation, though the access settings allow it.  Why not?
+   I still can't change sysLocation, though the access settings allow
+       it.  Why not?
    I get an error when trying to set a negative value - why?
    I get an error when trying to get a string-indexed table value - why?
    How do I send traps and notifications?
@@ -70,7 +71,7 @@ TABLE OF CONTENTS
    What does "Cannot find module (XXX-MIB)" mean?
    What about "unlinked OID"?
    The parser doesn't handle comments properly. Why not?
-   How do I replace MIB values with new ones ?
+   How do I replace MIB values with new ones?
    How can I get more information about these MIB file problems?
    What's this about "too many imported symbols"?
  AGENT
@@ -125,7 +126,7 @@ TABLE OF CONTENTS
    I'm getting an error "autoheader: not found" - what's wrong?
    What about a failed dependency on 'libcrypto'?  Where can I get that?
    Why is the project workspace empty under Visual C++?
-   Why are packets requesting the same information larger with UC-Davis SNMP ?
+   Why are packets requesting the same information larger with UC-Davis SNMP?
    What ASN.1 parser is used?
    What is the Official Slogan of the ucd-snmp-coders list?
 
@@ -647,12 +648,12 @@ Why can't I see values in the <INSERT ENTERPRISE HERE> tree?
   To walk a specific enterprise subtree, specify the root of this as
   the starting point - e.g:
 
-	snmpwalk localhost public ucdavis
+	snmpwalk -v1 -c public localhost ucdavis
  
   Or, of course, you can walk a selected portion of an enterprise subtree
   by specifying the appropriate starting point - e.g:
 
-	snmpwalk localhost public ucdavis.version
+	snmpwalk -v1 -c public localhost ucdavis.version
   
   If you still can't see any information, keep reading.  The next few
   questions will probably help you.
@@ -700,9 +701,9 @@ I can see the system group, but nothing else.  Why?
     The easiest way to test this is to try a GETNEXT request, that ought
   to return the entry of interest.
   e.g.
-	snmpgetnext localhost public ucdavis.version.versionTag
+	snmpgetnext -v1 -c public localhost ucdavis.version.versionTag
   instead of
-	snmpget     localhost public ucdavis.version.versionTag.0
+	snmpget     -v1 -c public localhost ucdavis.version.versionTag.0
 
   If the agent responds with "end of MIB" or a different object, then
   either the agent doesn't implement that particular object at all, or
@@ -750,7 +751,7 @@ Requesting an object fails with "Unknown Object Identifier"  Why?
     Secondly, the object may be defined in a MIB that hasn't been loaded.
   Try loading in all the MIB files:
 
-	snmpget -m ALL localhost public sysUpTime.0
+	snmpget -m ALL -v1 -c public localhost sysUpTime.0
 
   (though if snmpwalk translates it OK, that's less likely to be the cause).
 
@@ -759,7 +760,7 @@ Requesting an object fails with "Unknown Object Identifier"  Why?
   (".iso.org.dod.internet.mgmt.mib-2.system.sysUpTime") or the 'mib-2'
   subtree ("system.sysUpTime").  Try:
   
-	snmpget myhost public system.sysUpTime.0
+	snmpget -v1 -c public myhost system.sysUpTime.0
 
   These earlier versions of the tools may take a command-line option '-R'
   or '-IR' (depending on vintage) to invoke this "random-access" mode.
@@ -768,7 +769,7 @@ Requesting an object fails with "Unknown Object Identifier"  Why?
 
   All versions of the UCD tools accept the syntax
 
-	snmpget myhost public RFC1213-MIB:sysUpTime.0
+	snmpget -v1 -c public myhost RFC1213-MIB:sysUpTime.0
 
   to denote a particular object in a specific MIB module.  Note that this
   uses the name of the *module*, not the name of the file.  See the second
@@ -788,16 +789,16 @@ Why do I get "noSuchName" when asking for "sysUpTime" (or similar)?
   a GET request.
      Compare the following:
 
-	$ snmpget localhost public sysUpTime
+	$ snmpget -v1 -c public localhost sysUpTime
 	Error in packet
 	Reason: (noSuchName) There is no such variable name in this MIB.
 	This name doesn't exist: system.sysUpTime
-	$ snmpget localhost public sysUpTime.0
+	$ snmpget -v1 -c public localhost sysUpTime.0
 	system.sysUpTime.0 = Timeticks: (69189271) 8 days, 0:11:32.71
 
   This is a little less obscure when using SNMPv2c or v3 requests:
 
-	$ snmpget -v 2c localhost public sysUpTime
+	$ snmpget -v 2c -c public localhost sysUpTime
 	system.sysUpTime = No Such Instance currently exists
 
 
@@ -810,8 +811,8 @@ Why do I sometimes get "End of MIB" when walking a tree, and sometimes not?
 
   Recall that a tree is walked by repeatedly asking for "the next entry" until
   all the values under that tree have been retrieved.  However, the agent has
-  no idea that this is what's happening - all it sees is a request for "the next
-  entry after X".
+  no idea that this is what's happening - all it sees is a request for "the
+  next entry after X".
 
   If the object X happens to be the last entry in a sub-tree, the agent will
   provide the next object supported (as requested) even though this will be
@@ -819,8 +820,8 @@ Why do I sometimes get "End of MIB" when walking a tree, and sometimes not?
   this last result lies outside the area of interest, and simply discard it.
 
   If the object X happens to be the last entry supported by the agent, it
-  doesn't have another object to provide, so returns an "end of MIB" indication.
-  The UCD tools report this with the message above.
+  doesn't have another object to provide, so returns an "end of MIB"
+  indication.  The UCD tools report this with the message above.
 
   But in either case, the actual information provided will be the same.
 
@@ -862,17 +863,17 @@ Variables seem to disappear when I try to set them.  Why?
   particularly obvious, particularly when using SNMPv1.  A typical
   example of this effect would be
 
-	$ snmpget localhost public system.sysLocation.0
+	$ snmpget -v1 -c public localhost system.sysLocation.0
 	system.sysLocation.0 = somewhere nearby
 
-	$ snmpset localhost public system.sysLocation.0 s "right here"
+	$ snmpset -v1 -c public localhost system.sysLocation.0 s "right here"
 	Error in packet.
 	Reason: (noSuchName) There is no such variable name in this MIB.
 	This name doesn't exist: system.sysLocation.0
 
   Trying the same request using SNMPv2 or above is somewhat more informative:
 
-	$ snmpset -v 2c localhost public system.sysLocation.0 s "right here"
+	$ snmpset -v 2c -c public localhost system.sysLocation.0 s "right here"
         Error in packet.
         Reason: notWritable
 
@@ -883,10 +884,10 @@ Variables seem to disappear when I try to set them.  Why?
   This might be because the variable doesn't exist, it does exist but
   you don't have access to it (but someone else may do), or it exists
   but you can't perform that particular operation (i.e. changing it).
-    Similarly, the SNMPv2 error 'notWritable' means "not writeable in
-  this particular case" rather than "not writeable under any circumstances".
+    Similarly, the SNMPv2 error 'notWritable' means "not writable in
+  this particular case" rather than "not writable under any circumstances".
 
-  If you are sure that the object is writeable (and has been implemented
+  If you are sure that the object is writable (and has been implemented
   as such), then you probably need to look at the agent access control.
   See the AGENT section for more details.
 
@@ -921,7 +922,7 @@ I get an error when trying to set a negative value - why?
   indicator '--' in the command line, somewhere before the new value
   (but after all of the options, obviously).  For example:
 
-	snmpset -v 2c localhost public -- versionRestartAgent.0 i -1
+	snmpset -v 2c -c public localhost -- versionRestartAgent.0 i -1
 
   (This will also fail, since -1 isn't an acceptable value for this
   object, but it will be rejected by the agent, rather than confusing
@@ -1485,8 +1486,15 @@ How do I replace MIB values with new ones?
 
     4. The MIBFILES environment can specify the path of the new MIB file.
 
-  Within a program, the call
-	ds_set_boolean(DS_LIBRARY_ID, DS_LIB_MIB_REPLACE, 1 | 0)
+  Within a program, the call:
+	 /*  4.2.x  */
+	 ds_set_boolean(DS_LIBRARY_ID, DS_LIB_MIB_REPLACE, 1 | 0);
+
+  or, if using the 5.0.x series code:
+	/*  5.0.x  */
+	netsnmp_ds_set_boolean(NETSNMP_DS_LIBRARY_ID,
+			       NETSNMP_DS_LIB_MIB_REPLACE, 1 | 0);
+
   will enable or disable the Replace MIB feature respectively.
   If you're having problems loading a particular MIB file, this
   call can be used to disable this feature, before using read_mib() to
@@ -1954,8 +1962,9 @@ How can I listen on just one particular interface?
 			snmpd 127.0.0.1:6161
 			snmpd 127.0.0.1:161 127.0.0.1:6161
 
-  The AgentX port option ('-x') works in much the same way, using the "host:port"
-  syntax (in both 4.2 and 5.0 lines - and yes, this *is* an inconsistency in 4.2!)
+  The AgentX port option ('-x') works in much the same way, using the
+  "host:port" syntax (in both 4.2 and 5.0 lines - and yes, this *is* an
+  inconsistency in 4.2!)
 
 
 
@@ -2130,10 +2139,10 @@ What's the difference between /var/ucd-snmp and /usr/local/share/snmp?
 ---------------------------------------------------------------------
 
     Most "static" agent configuration should go in the traditional location
-  (typically /usr/local/share/snmp/snmpd.conf or /etc/snmp).   The /var/ucd-snmp
-  (or /var/net-snmp) location is used for information set during the running
-  of the agent, which needs to be persistent between one run of the agent
-  and the next.
+  (typically /usr/local/share/snmp/snmpd.conf or /etc/snmp).   The
+  /var/ucd-snmp (or /var/net-snmp) location is used for information set during
+  the running of the agent, which needs to be persistent between one run of
+  the agent and the next.
 
     Putting the 'createUser' line in this persistent file is an exception,
   for security reasons (see above).  In general you shouldn't need to put
@@ -2686,7 +2695,7 @@ Why is the project workspace empty under Visual C++?
 
 
 
-Why are packets requesting the same information larger with UC-Davis SNMP ?
+Why are packets requesting the same information larger with UC-Davis SNMP?
 -------------------------------------------------------------------------
 
     This shouldn't happen with version 4.2 or later, but for older
