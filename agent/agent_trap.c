@@ -70,6 +70,9 @@ oid  egp_xxx_oid[] =		{ SNMPV2_TRAPS_PREFIX, 99 };	/* ??? */
 oid  snmptrap_oid[] 	      =	{ SNMPV2_TRAP_OBJS_PREFIX, 1 };
 oid  snmptrapenterprise_oid[] =	{ SNMPV2_TRAP_OBJS_PREFIX, 3 };
 oid  sysuptime_oid[] 	      =	{ 1,3,6,1,2,1,1,3,0 };
+int  snmptrap_oid_len 	      =	OID_LENGTH(snmptrap_oid);
+int  snmptrapenterprise_oid_len = OID_LENGTH(snmptrapenterprise_oid);
+int  sysuptime_oid_len 	      =	OID_LENGTH(sysuptime_oid);
 
 
 #define SNMP_AUTHENTICATED_TRAPS_ENABLED	1
@@ -95,7 +98,7 @@ static void send_v2_trap (struct snmp_session *, int, int, int);
 	 *
 	 *******************/
 
-static int create_trap_session (char *sink, 
+int create_trap_session (char *sink, 
 				char *com,
 				int version, int pdutype)
 {

@@ -14,4 +14,6 @@ void snmpd_free_trapsinks (void);
 void snmpd_parse_config_trapcommunity (char *, char *);
 void snmpd_free_trapcommunity (void);
 
+int create_trap_session (char *, char *, int, int);
+
 #endif /* AGENT_TRAP_H */
