@@ -4130,7 +4130,7 @@ int main() {
 
   struct rtentry rt; 
   rt.rt_nodes[0].rn_b = 1;
-  rt.rt_dst.sa_len;
+  rt.rt_dst;
   
 ; return 0; }
 EOF

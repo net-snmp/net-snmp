@@ -490,7 +490,7 @@ AC_TRY_COMPILE([
 
   struct rtentry rt; 
   rt.rt_nodes[0].rn_b = 1;
-  rt.rt_dst.sa_len;
+  rt.rt_dst;
   ], ac_cv_RTENTRY_TYPE="BSD-4.4")
 
 dnl 4.3 compat
