@@ -16,6 +16,8 @@
 #endif
 
 netsnmp_cache       *cache_head = NULL;
+long                 caching_enabled       = 1;
+long                 cache_default_timeout = 5;		/* in seconds */
 
 /** @defgroup cache_handler cache_handler: Maintains a cache of data for use by lower level handlers.
  *  @ingroup handler
@@ -44,6 +46,7 @@ netsnmp_get_cache_handler(int timeout, NetsnmpCacheLoad *load_hook,
             cache->timeout     = timeout;
             cache->load_cache  = load_hook;
             cache->free_cache  = free_hook;
+            cache->enabled     = 1;
 
             /*
 	     * Add the registered OID information, and tack
@@ -88,8 +91,9 @@ netsnmp_cache_helper_handler(netsnmp_mib_handler *handler,
                                  netsnmp_request_info *requests)
 {
     netsnmp_cache       *cache = NULL;
+    long cache_timeout;
 
-    DEBUGMSGTL(("helper:cache_handler", "Got request\n"));
+    DEBUGMSGTL(("helper:cache_handler", "Got request: "));
     DEBUGMSGOID(("helper:cache_handler", reginfo->rootoid, reginfo->rootoid_len));
 
     cache = (netsnmp_cache *)handler->myvoid;
@@ -97,15 +101,23 @@ netsnmp_cache_helper_handler(netsnmp_mib_handler *handler,
      * If the cache is out-of-date (or invalid),
      * call the load hook, and update the cache timestamp
      */
-    if (!atime_ready(cache->timestamp, 1000*cache->timeout)) {
-        cache->load_cache(cache);	/* XXX - what if this fails? */
-        if (cache->timestamp)
-       	    atime_setMarker(cache->timestamp);
-	else
-            cache->timestamp = atime_newMarker();
-        DEBUGMSG(("helper:cache_handler", "loaded\n"));
+    if (caching_enabled && cache && cache->enabled) {
+        cache_timeout = cache->timeout;
+        if (cache_timeout == 0)
+            cache_timeout = cache_default_timeout;
+        if (!cache->timestamp ||
+             atime_ready(cache->timestamp, 1000*cache_timeout)) {
+            cache->load_cache(cache);	/* XXX - what if this fails? */
+            if (cache->timestamp)
+       	        atime_setMarker(cache->timestamp);
+	    else
+                cache->timestamp = atime_newMarker();
+            DEBUGMSG(("helper:cache_handler", " loaded (%d)\n", cache_timeout));
+        } else {
+            DEBUGMSG(("helper:cache_handler", " cached (%d)\n", cache_timeout));
+        }
     } else {
-        DEBUGMSG(("helper:cache_handler", "cached\n"));
+        DEBUGMSG(("helper:cache_handler", " skipped\n"));
     }
 
     return netsnmp_call_next_handler(handler, reginfo, reqinfo,

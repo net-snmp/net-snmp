@@ -23,7 +23,7 @@ extern          "C" {
         /*
 	 * For operation of the data caches
 	 */
-        int      status;	/* RowStatus-style status */
+        int      enabled;
         int      timeout;	/* Length of time the cache is valid (in s) */
         marker_t timestamp;	/* When the cache was last loaded */
 
