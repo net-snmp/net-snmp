@@ -79,6 +79,7 @@ struct vacm_viewEntry {
 };
 
 void vacm_destroyViewEntry __P((char *, oid *, int));
+void vacm_destroyAllViewEntries __P((void));
 
 struct vacm_viewEntry *
 vacm_getViewEntry __P((char *, oid*, int));
@@ -117,19 +118,22 @@ vacm_createViewEntry __P((char *, oid *, int));
  */
 
 void vacm_destroyGroupEntry __P((int, char *));
+void vacm_destroyAllGroupEntries __P((void));
 struct vacm_groupEntry * vacm_createGroupEntry __P((int, char *));
 struct vacm_groupEntry *vacm_getGroupEntry __P((int, char *));
 void vacm_scanGroupInit __P((void));
 struct vacm_groupEntry *vacm_scanGroupNext __P((void));
 
 void vacm_destroyAccessEntry __P((char *, char *, int, int));
+void vacm_destroyAllAccessEntries __P((void));
 struct vacm_accessEntry * vacm_createAccessEntry __P((char *, char *, int, int));
 struct vacm_accessEntry *vacm_getAccessEntry __P((char *, char *, int, int));
 void vacm_scanAccessInit __P((void));
 struct vacm_accessEntry *vacm_scanAccessNext __P((void));
 
 void vacm_destroySecurityEntry __P((char *));
+void vacm_destroyAllSecurityEntries __P((void));
 struct vacm_securityEntry * vacm_createSecurityEntry __P((char *));
 struct vacm_securityEntry *vacm_getSecurityEntry __P((char *));
 void vacm_scanSecurityInit __P((void));
-struct vacm_accessEntry *vacm_scanSecurityEntry __P((void));
+struct vacm_securityEntry *vacm_scanSecurityEntry __P((void));
