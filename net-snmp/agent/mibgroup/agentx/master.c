@@ -162,16 +162,16 @@ real_init_master(void)
             /*
              * diagnose snmp_open errors with the input netsnmp_session pointer 
              */
+            char buf[1024];
             if (!netsnmp_ds_get_boolean(NETSNMP_DS_APPLICATION_ID, NETSNMP_DS_AGENT_NO_ROOT_ACCESS)) {
-                char buf[1024];
                 snprintf(buf, sizeof(buf),
                     "Error: Couldn't open a master agentx socket to listen on (%s)", sess.peername);
                 snmp_sess_perror(buf, &sess);
                 exit(1);
             } else {
-                netsnmp_sess_log_error(LOG_WARNING,
-                                       "Warning: Couldn't open a agentx master socket to listen on",
-                                       &sess);
+                snprintf(buf, sizeof(buf),
+                    "Warning: Couldn't open a master agentx socket to listen on (%s)", sess.peername);
+                netsnmp_sess_log_error(LOG_WARNING, buf, &sess);
             }
         }
 
