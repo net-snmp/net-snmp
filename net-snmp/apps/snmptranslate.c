@@ -118,7 +118,6 @@ int main(int argc, char *argv[])
     size_t name_length;
     int description = 0;
     int print = 0;
-    int find_best = 0;
     int find_all = 0;
     char n_opt[] = "n";
     
@@ -126,14 +125,13 @@ int main(int argc, char *argv[])
      * usage: snmptranslate name
      */
     snmp_out_toggle_options(n_opt);
-    while ((arg = getopt(argc, argv, "VhndRrwWbBpafsSm:M:D:P:tT:O:I:")) != EOF){
+    while ((arg = getopt(argc, argv, "VhndrRwWptafsSm:M:D:P:T:O:I:")) != EOF){
 	switch(arg) {
 	case 'h':
 	    usage();
             exit(1);
-	case 'b':
-            find_best = 1;
-            break;
+
+#ifndef DEPRECATED_CLI_OPTIONS
 	case 'n':
 	    fprintf(stderr, "Warning: -n option is deprecated - use -On\n");
 	    snmp_out_toggle_options(n_opt);
@@ -160,6 +158,11 @@ int main(int argc, char *argv[])
 	    fprintf(stderr, "Warning: -p option is deprecated - use -Tp\n");
             print = 1;
             break;
+	case 't':
+	    fprintf(stderr, "Warning: this option is deprecated - use -Tt\n");
+            print = 3;
+            print_oid_report_enable_suffix();
+            break;
         case 'a':
 	    fprintf(stderr, "Warning: -a option is deprecated - use -Ta\n");
             print = 2;
@@ -176,6 +179,8 @@ int main(int argc, char *argv[])
 	    fprintf(stderr, "Warning: -S option is deprecated - use -OS\n");
 	    snmp_set_suffix_only(2);
 	    break;
+#endif /* DEPRECATED_CLI_OPTIONS */
+
         case 'm':
             setenv("MIBS", optarg, 1);
             break;
@@ -214,11 +219,6 @@ int main(int argc, char *argv[])
 		exit(1);
 	    }
 	    break;
-	case 't':
-	    fprintf(stderr, "Warning: this option is deprecated - use -Tt\n");
-            print = 3;
-            print_oid_report_enable_suffix();
-            break;
         case 'T':
             for(cp = optarg; *cp; cp++)
             {

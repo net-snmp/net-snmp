@@ -151,7 +151,7 @@ snmp_parse_args(int argc,
 
   /* initialize session to default values */
   snmp_sess_init( session );
-  strcpy(Opts, "VhHm:M:fsSqO:I:P:D:dRv:p:r:t:c:Z:e:E:n:u:l:x:X:a:A:T:");
+  strcpy(Opts, "VhHm:M:fsSqRO:I:P:D:dv:p:r:t:c:Z:e:E:n:u:l:x:X:a:A:T:");
   if (localOpts) strcat(Opts, localOpts);
 
   /* get the options */
@@ -180,6 +180,7 @@ snmp_parse_args(int argc,
         setenv("MIBDIRS", optarg, 1);
         break;
 
+#ifndef DEPRECATED_CLI_OPTIONS
       case 'f':
 	fprintf(stderr, "Warning: -f option is deprecated - use -Of\n");
 	snmp_set_full_objid(1);
@@ -199,6 +200,12 @@ snmp_parse_args(int argc,
 	fprintf(stderr, "Warning: -q option is deprecated - use -Oq\n");
 	snmp_set_quick_print(1);
 	break;
+
+      case 'R':
+	fprintf(stderr, "Warning: -R option is deprecated - use -IR\n");
+        snmp_set_random_access(1);
+        break;
+#endif /* DEPRECATED_CLI_OPTIONS */
 
       case 'O':
         cp = snmp_out_toggle_options(optarg);
@@ -235,12 +242,6 @@ snmp_parse_args(int argc,
       case 'd':
         snmp_set_dump_packet(1);
         break;
-
-      case 'R':
-	fprintf(stderr, "Warning: -R option is deprecated - use -IR\n");
-        snmp_set_random_access(1);
-        break;
-
 
       case 'v':
         if (!strcmp(optarg,"1")) {
