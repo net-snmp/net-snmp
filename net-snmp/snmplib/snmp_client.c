@@ -484,25 +484,25 @@ snmp_synch_setup(struct snmp_session *session)
 }
 
 char	*error_string[19] = {
-    "(noError) No Error",
-    "(tooBig) Response message would have been too large.",
-    "(noSuchName) There is no such variable name in this MIB.",
-    "(badValue) The value given has the wrong type or length.",
-    "(readOnly) The two parties used do not have access to use the specified SNMP PDU.",
-    "(genError) A general failure occured",
-    "noAccess",
-    "wrongType",
-    "wrongLength",
-    "wrongEncoding",
-    "wrongValue",
-    "noCreation",
-    "inconsistentValue",
-    "resourceUnavailable",
-    "commitFailed",
-    "undoFailed",
-    "authorizationError",
-    "notWritable",
-    "inconsistentName"
+    (char*)"(noError) No Error",
+    (char*)"(tooBig) Response message would have been too large.",
+    (char*)"(noSuchName) There is no such variable name in this MIB.",
+    (char*)"(badValue) The value given has the wrong type or length.",
+    (char*)"(readOnly) The two parties used do not have access to use the specified SNMP PDU.",
+    (char*)"(genError) A general failure occured",
+    (char*)"noAccess",
+    (char*)"wrongType",
+    (char*)"wrongLength",
+    (char*)"wrongEncoding",
+    (char*)"wrongValue",
+    (char*)"noCreation",
+    (char*)"inconsistentValue",
+    (char*)"resourceUnavailable",
+    (char*)"commitFailed",
+    (char*)"undoFailed",
+    (char*)"authorizationError",
+    (char*)"notWritable",
+    (char*)"inconsistentName"
 };
 
 char *
@@ -666,4 +666,3 @@ ms_party_init(in_addr_t destaddr,
 }
 
 #endif /* USE_V2PARTY_PROTOCOL */
-

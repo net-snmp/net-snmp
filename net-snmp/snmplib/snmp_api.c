@@ -1075,7 +1075,7 @@ snmp_parse(struct snmp_session *session,
             return -1;
 
 	/* maybe get the community string. */
-	_snmp_free(pdu->community);
+	_snmp_free((char*)pdu->community);
 	pdu->community_len = 0;
 	pdu->community = (u_char *)0;
 	if (community_length) {
@@ -1539,14 +1539,14 @@ snmp_sess_async_send(void *sessp,
 #else /* !NO_ZEROLENGTH_COMMUNITY */
 	/* copy session community exactly to pdu community */
 	    if (0 == session->community_len) {
-		_snmp_free(pdu->community); pdu->community = 0;
+		_snmp_free((char*)pdu->community); pdu->community = 0;
 	    }
 	    else if (pdu->community_len == session->community_len) {
 		memmove(pdu->community, session->community,
 			    session->community_len);
 	    }
 	    else {
-	    _snmp_free(pdu->community);
+	    _snmp_free((char*)pdu->community);
 	    pdu->community = (u_char *)malloc(session->community_len);
 	    memmove(pdu->community, session->community,
                         session->community_len);
@@ -2189,7 +2189,7 @@ ascii_to_binary(u_char *cp,
         fprintf(stderr, "Input error\n");
         return -1;
       }
-      subidentifier = atoi(cp);
+      subidentifier = atoi((char*)cp);
       if (subidentifier > 255){
         fprintf(stderr, "subidentifier %d is too large ( > 255)\n",
                 subidentifier);
@@ -2242,7 +2242,7 @@ snmp_add_var(struct snmp_pdu *pdu,
 	     char type,
 	     char *value)
 {
-    char buf[2048];
+    u_char buf[2048];
     int tint;
     long ltmp;
 #ifdef OPAQUE_SPECIAL_TYPES
@@ -2288,14 +2288,14 @@ snmp_add_var(struct snmp_pdu *pdu,
         if (type == 'd'){
           tint = ascii_to_binary((u_char *)value, buf);
         } else if (type == 's'){
-          strcpy(buf, value);
-          tint = strlen(buf);
+          strcpy((char*)buf, value);
+          tint = strlen((char*)buf);
         } else if (type == 'x'){
           tint = hex_to_binary((u_char *)value, buf);
         }
         if (tint < 0) {
-          sprintf(buf, "Bad value: %s\n", value);
-          snmp_set_detail(buf);
+          sprintf((char*)buf, "Bad value: %s\n", value);
+          snmp_set_detail((char*)buf);
           return 1;
         }
         snmp_pdu_add_variable(pdu, name, name_length, ASN_OCTET_STR, buf, tint);
