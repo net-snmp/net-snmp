@@ -529,25 +529,39 @@ void atime_setMarker(marker_t pm)
   gettimeofday((struct timeval *)pm, 0);
 }
 
+
 /*
- * Test: Has (marked time plus delta) exceeded current time ?
+ * Returns the difference (in msec) between the two markers
+ */
+long atime_diff( marker_t first, marker_t second )
+{
+    struct timeval *tv1, *tv2, diff;
+
+    tv1 = (struct timeval *)first;
+    tv2 = (struct timeval *)second;
+
+    diff.tv_sec  = tv2->tv_sec  - tv1->tv_sec  - 1;
+    diff.tv_usec = tv2->tv_usec - tv1->tv_usec + 1000000;
+
+    return ( diff.tv_sec * 1000 + diff.tv_usec/1000 );
+}
+
+/*
+ * Test: Has (marked time plus delta) exceeded current time (in msec) ?
  * Returns 0 if test fails or cannot be tested (no marker).
  */
 int atime_ready( marker_t pm, int deltaT)
 {
-  struct timeval txdelta, txnow;
+  marker_t now;
+  long diff;
   if (! pm) return 0;
 
-  memcpy((void *)&txdelta, pm, sizeof(txdelta));
-  while (deltaT > 1000) {
-     txdelta.tv_sec ++;
-     deltaT -= 1000;
-  }
-  txdelta.tv_usec = (deltaT * 1000) + txdelta.tv_usec;
+  now = atime_newMarker();
 
-  gettimeofday(&txnow, 0);
-  if (timercmp(&txnow, &txdelta, <))
-        return 0;
+  diff = atime_diff( pm, now );
+  free( now );
+  if ( diff < deltaT )
+	return 0;
 
   return 1;
 }
