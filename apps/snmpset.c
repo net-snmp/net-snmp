@@ -57,12 +57,12 @@ SOFTWARE.
 #include <arpa/inet.h>
 #endif
 
-#include "snmp.h"
-#include "mib.h"
 #include "asn1.h"
 #include "snmp_impl.h"
 #include "snmp_api.h"
 #include "snmp_client.h"
+#include "mib.h"
+#include "snmp.h"
 #include "party.h"
 #include "context.h"
 #include "view.h"
@@ -70,12 +70,14 @@ SOFTWARE.
 
 extern int  errno;
 
-void snmp_add_var();
-int ascii_to_binary();
-int hex_to_binary();
+int main __P((int, char **));
+void snmp_add_var __P((struct snmp_pdu *, oid*, int, char, char *));
+int ascii_to_binary __P((u_char *, u_char *));
+int hex_to_binary __P((u_char *, u_char *));
 
 void
-usage(){
+usage __P((void))
+{
     fprintf(stderr, "Usage: snmpset -v 1 [-q] hostname community [objectID type value]+    or:\n");
     fprintf(stderr, "Usage: snmpset [-v 2] [-q] hostname noAuth [objectID type value]+     or:\n");
     fprintf(stderr, "Usage: snmpset [-v 2] [-q] hostname srcParty dstParty context [oID type val]+\n");
@@ -95,7 +97,7 @@ main(argc, argv)
     int	arg;
     char *hostname = NULL;
     char *community = NULL;
-    int timeout_flag = 0, timeout, retransmission_flag = 0, retransmission;
+    int timeout = SNMP_DEFAULT_TIMEOUT, retransmission = SNMP_DEFAULT_RETRIES;
     int	count, current_name = 0, current_type = 0, current_value = 0;
     char *names[128], types[128], *values[128];
     oid name[MAX_NAME_LEN];
@@ -104,7 +106,7 @@ main(argc, argv)
     int version = 2;
     int port_flag = 0;
     int dest_port = 0;
-    u_long      srcclock, dstclock;
+    u_long      srcclock = 0, dstclock = 0;
     int clock_flag = 0;
     oid src[MAX_NAME_LEN], dst[MAX_NAME_LEN], context[MAX_NAME_LEN];
     int srclen = 0, dstlen = 0, contextlen = 0;
@@ -132,11 +134,9 @@ main(argc, argv)
                     dest_port = atoi(argv[++arg]);
                     break;
                 case 't':
-                    timeout_flag++;
                     timeout = atoi(argv[++arg]) * 1000000L;
                     break;
                 case 'r':
-                    retransmission_flag++;
                     retransmission = atoi(argv[++arg]);
                     break;
                 case 'c':
@@ -320,14 +320,8 @@ main(argc, argv)
         session.context = context;
         session.contextLen = contextlen;
     }
-    if (retransmission_flag)
-        session.retries = retransmission;
-    else
-        session.retries = SNMP_DEFAULT_RETRIES;
-    if (timeout_flag)
-        session.timeout = timeout;
-    else
-        session.timeout = SNMP_DEFAULT_TIMEOUT;
+    session.retries = retransmission;
+    session.timeout = timeout;
 
     session.authenticator = NULL;
     snmp_synch_setup(&session);

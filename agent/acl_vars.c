@@ -17,6 +17,8 @@
 #include "snmp_impl.h"
 #include "snmp_vars.h"
 
+#include "mibgroup/snmpv2_vars.h"
+
 #include "acl.h"
 
 #define OIDCMP(l1, l2, o1, o2) (((l1) == (l2)) \
@@ -32,6 +34,8 @@
 
 #define ACLCOMPLETE_MASK	0x3F /* all columns */
 
+struct aclEntry *acl_rowCreate __P((int, int, int));
+void acl_rowDelete __P((int, int, int));
 
 struct aclEntry *
 acl_rowCreate(target, subject, resources)
@@ -52,6 +56,7 @@ acl_rowCreate(target, subject, resources)
     return ap;
 }
 
+void
 acl_rowDelete(target, subject, resources)
     int target, subject, resources;
 {
@@ -191,7 +196,7 @@ var_acl(vp, name, length, exact, var_len, write_method)
     register int *length;    /* IN/OUT - length of input and output oid's */
     int          exact;      /* IN - TRUE if an exact match was requested. */
     int          *var_len;   /* OUT - length of variable or 0 if function returned. */
-    int          (**write_method)(); /* OUT - pointer to function to set variable, otherwise 0 */
+    int          (**write_method) __P((int, u_char *, u_char, int, u_char *, oid *, int));
 {
     oid newname[MAX_NAME_LEN], lowname[MAX_NAME_LEN], *np;
     int newnamelen, lownamelen;

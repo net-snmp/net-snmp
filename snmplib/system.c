@@ -70,7 +70,8 @@ SOFTWARE.
 #define IFF_LOOPBACK 0
 #endif
 #define LOOPBACK    0x7f000001
-u_long get_myaddr(){
+u_long get_myaddr __P((void))
+{
     int sd;
     struct ifconf ifc;
     struct ifreq conf[NUM_NETWORKS], *ifrp, ifreq;
@@ -114,7 +115,8 @@ u_long get_myaddr(){
 /*
  * Returns uptime in centiseconds(!).
  */
-long get_uptime(){
+long get_uptime __P((void))
+{
 #ifdef bsdlike
     struct timeval boottime, now, diff;
 #ifndef CAN_USE_SYSCTL

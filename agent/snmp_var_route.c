@@ -108,10 +108,12 @@ PERFORMANCE OF THIS SOFTWARE.
 #define CACHE_TIME (120)	    /* Seconds */
 
 #include "asn1.h"
-#include "snmp.h"
 #include "snmp_impl.h"
+#include "snmp_api.h"
 #include "mib.h"
+#include "snmp.h"
 #include "snmp_vars.h"
+#include "mibgroup/ip.h"
 
 #ifndef  MIN
 #define  MIN(a,b)                     (((a) < (b)) ? (a) : (b))
@@ -122,11 +124,16 @@ extern int compare(oid *name1, int len1, oid *name2, int len2);
 extern int klookup(unsigned long off, char *target, int siz);
 
 void Interface_Scan_Init(void);
+#if defined(sunV3) || defined(linux)
+int Interface_Scan_Next(short *Index, char *Name, struct ifnet *Retifnet);
+#else
 int Interface_Scan_Next(short *Index, char *Name, struct ifnet *Retifnet,
 			struct in_ifaddr *Retin_ifaddr);
 #endif
+#endif
 
-static void Route_Scan_Reload();
+static void Route_Scan_Reload __P((void));
+void string_append_int __P((char *, int));
 
 static RTENTRY **rthead=0;
 static int rtsize=0, rtallocate=0;
@@ -155,7 +162,7 @@ static struct nlist nl[] = {
 	{ 0 },
 };
 
-extern write_rte();
+extern int write_rte __P((int, u_char *, u_char, int, u_char *, oid *, int));
 
 void
 string_append_int (s, val)
@@ -197,11 +204,9 @@ var_ipRouteEntry(vp, name, length, exact, var_len, write_method)
     register struct variable *vp;   /* IN - pointer to variable entry that points here */
     register oid	*name;	    /* IN/OUT - input name requested, output name found */
     register int	*length;    /* IN/OUT - length of input and output strings */
-#ifndef linux
     int			exact;	    /* IN - TRUE if an exact match was requested. */
     int			*var_len;   /* OUT - length of variable or 0 if function returned. */
-#endif /* linux */
-    int			(**write_method)(); /* OUT - pointer to function to set variable, otherwise 0 */
+    int			(**write_method) __P((int, u_char *, u_char, int, u_char *, oid *, int));
 {
     /*
      * object identifier is of form:
@@ -216,8 +221,10 @@ var_ipRouteEntry(vp, name, length, exact, var_len, write_method)
 #if defined(freebsd2) || defined(netbsd1) || defined(bsdi2)
     struct sockaddr_in *sa;
 #endif
+#ifndef linux
     struct ifnet     rt_ifnet;
     struct in_ifaddr rt_ifnetaddr;
+#endif
 #ifdef linux
     /** 
      ** this optimisation fails, if there is only a single route avail.
@@ -357,14 +364,14 @@ var_ipRouteEntry(vp, name, length, exact, var_len, write_method)
 
 		long_return = rt_ifnetaddr.ia_subnetmask;
 #else /* linux */
-                long_return =  (u_char *) rthead[RtIndex]->rt_genmask.sa_data;
+                long_return =  (long)rthead[RtIndex]->rt_genmask.sa_data;
 #endif /* linux */
 	    }
 #endif /* defined(freebsd2) || defined(netbsd1) || defined(bsdi2) */
 	    return (u_char *)&long_return;
 	case IPROUTEINFO:
 	    *var_len = nullOidLen;
-	    return (u_char *)&nullOid;
+	    return (u_char *)nullOid;
 	default:
 	    ERROR("");
    }
@@ -405,7 +412,7 @@ register oid	*name;	    /* IN/OUT - input name requested, output name found */
 register int	*length;    /* IN/OUT - length of input and output strings */
 int		exact;	    /* IN - TRUE if an exact match was requested. */
 int		*var_len;   /* OUT - length of variable or 0 if function returned. */
-int		(**write_method)(); /* OUT - pointer to function to set variable, otherwise 0 */
+int		(**write_method) __P((int, u_char *, u_char, int, u_char *, oid *, int));
 {
   /*
    * object identifier is of form:
@@ -505,7 +512,8 @@ int		(**write_method)(); /* OUT - pointer to function to set variable, otherwise
 #endif /* solaris2 - var_IProute */
 
 void
-init_routes(){
+init_routes __P((void))
+{
   int ret;
 #if HAVE_KVM_OPENFILES
   kvm_t *kernel;
@@ -534,7 +542,7 @@ init_routes(){
   }
 }
 
-static int qsort_compare();
+static int qsort_compare __P((RTENTRY **, RTENTRY **));
 
 #if defined(RTENTRY_4_4) || defined(RTENTRY_RT_NEXT)
 
@@ -729,7 +737,7 @@ static void Route_Scan_Reload()
 #else
 
 #if HAVE_SYS_MBUF_H
-static Route_Scan_Reload()
+static void Route_Scan_Reload()
 {
 	struct mbuf **routehash, mb;
 	register struct mbuf *m;
@@ -825,7 +833,7 @@ static Route_Scan_Reload()
 	qsort((char *)rthead,rtsize,sizeof(rthead[0]),qsort_compare);
 }
 #else
-static void Route_Scan_Reload()
+static void Route_Scan_Reload __P((void))
 {
 }
 #endif

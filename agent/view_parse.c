@@ -1,5 +1,11 @@
 #include <config.h>
 
+#if STDC_HEADERS
+#include <stdlib.h>
+#include <unistd.h>
+#include <string.h>
+#endif
+
 #include <stdio.h>
 #include <ctype.h>
 #include <sys/types.h>
@@ -20,12 +26,15 @@
 #include <unistd.h>
 #endif
 #include "asn1.h"
+#include "mib.h"
 #include "view.h"
 
 #define TRUE 1
 #define FALSE 0
 
-static error_exit(str, linenumber, filename)
+static void error_exit __P((char *, int, char *));
+
+static void error_exit(str, linenumber, filename)
     char *str;
     int linenumber;
     char *filename;

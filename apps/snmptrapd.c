@@ -69,7 +69,6 @@ SOFTWARE.
 #include <arpa/inet.h>
 #endif
 
-#include "snmp.h"
 #include "asn1.h"
 #include "snmp_impl.h"
 #include "snmp_api.h"
@@ -79,6 +78,7 @@ SOFTWARE.
 #include "acl.h"
 #include "context.h"
 #include "mib.h"
+#include "snmp.h"
 #include "system.h"
 
 #ifndef BSD4_3
@@ -96,13 +96,20 @@ typedef long	fd_mask;
 #define FD_ZERO(p)      memset((p), 0, sizeof(*(p)))
 #endif
 
+int main __P((int, char **));
 extern int  errno;
 int Print = 0;
 int Event = 0;
 int Syslog = 0;
 struct timeval Now;
 
-void init_syslog();
+void init_syslog __P((void));
+char *trap_description __P((int));
+char *uptime_string __P((u_long, char *));
+struct snmp_pdu *snmp_clone_pdu2 __P((struct snmp_pdu *, int));
+void event_input __P((struct variable_list *));
+int snmp_input __P((int, struct snmp_session *, int, struct snmp_pdu *, void *));
+void usage __P((void));
 
 char *
 trap_description(trap)
@@ -331,7 +338,7 @@ int snmp_input(op, session, reqid, pdu, magic)
 }
 
 
-void usage ()
+void usage __P((void))
 {
     fprintf(stderr,"Usage: snmptrapd [-v 1] [-q] [-P #] [-p] [-s] [-e] [-d]\n");
     exit (1);
@@ -354,8 +361,6 @@ main(argc, argv)
     int srclen, dstlen, contextlen;
     int local_port = SNMP_TRAP_PORT;
     char *config_file = NULL;
-    struct config_module *dp;
-    struct sockaddr_in me;
     char ctmp[300];
 
     setvbuf (stdout, NULL, _IOLBF, BUFSIZ);
@@ -490,7 +495,8 @@ main(argc, argv)
 }
 
 void
-init_syslog(){
+init_syslog __P((void))
+{
 /*
  * These definitions handle 4.2 systems without additional syslog facilities.
  */

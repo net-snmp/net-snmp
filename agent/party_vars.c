@@ -22,6 +22,12 @@
 #include "acl.h"
 #include "view.h"
 
+int write_party __P((int, u_char *, u_char, int, u_char *, oid *, int));
+u_char *var_party __P((struct variable *, oid *, int *, int, int *, int (**write) __P((int, u_char *, u_char, int, u_char *, oid *, int)) ));
+
+struct partyEntry *party_rowCreate __P((oid *, int));
+void party_rowDelete __P((oid *, int));
+
 oid snmpUdpDomain[] = {1, 3, 6, 1, 6, 1, 1};
 /* no others defined yet */
 
@@ -76,6 +82,7 @@ party_rowCreate(partyID, partyIDLen)
     return pp;
 }
 
+void
 party_rowDelete(partyID, partyIDLen)
     oid *partyID;
     int partyIDLen;
@@ -108,7 +115,7 @@ write_party(action, var_val, var_val_type, var_val_len, statP, name, length)
     int bigsize = 1000, size;
     struct aclEntry *ap;
     struct viewEntry *vp;
-    u_long get_myaddr(), myaddr;
+    u_long myaddr;
     
     if (length < 13)  /* maybe this should be 15 to guarantee oidlength >= 2 */
 	return SNMP_ERR_NOCREATION;  
@@ -530,7 +537,7 @@ var_party(vp, name, length, exact, var_len, write_method)
     register int *length;    /* IN/OUT - length of input and output oid's */
     int          exact;      /* IN - TRUE if an exact match was requested. */
     int          *var_len;   /* OUT - length of variable or 0 if function returned. */
-    int          (**write_method)(); /* OUT - pointer to function to set variable, otherwise 0 */
+    int          (**write_method) __P((int, u_char *, u_char, int, u_char *, oid *, int));
 {
     oid newname[MAX_NAME_LEN], lowname[MAX_NAME_LEN];
     int newnamelen, lownamelen;

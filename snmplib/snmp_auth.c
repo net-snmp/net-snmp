@@ -34,6 +34,7 @@ SOFTWARE.
 #include "fp4/cmdmacro.h"
 #endif
 
+#include <stdio.h>
 #if HAVE_STRINGS_H
 #include <strings.h>
 #else
@@ -61,8 +62,9 @@ SOFTWARE.
 #include <in.h>
 #endif
 
-#include "mib.h"
 #include "asn1.h"
+#include "snmp_api.h"
+#include "mib.h"
 #include "snmp.h"
 #include "snmp_impl.h"
 #include "party.h"
@@ -75,7 +77,7 @@ SOFTWARE.
 */
 #define LOWBYTEFIRST FALSE
 
-static void md5Digest();
+static void md5Digest __P((u_char *, int, u_char *));
 
 u_char *
 snmp_auth_parse(data, length, sid, slen, version)
@@ -126,7 +128,7 @@ int		    	pass;
     u_long authSrcTimeStamp, authDstTimeStamp;
     u_char authDigest[16], digest[16];
     int authDigestLen;
-    u_char *authMsg, *digestStart, *digestEnd;
+    u_char *authMsg, *digestStart = NULL, *digestEnd = NULL;
     struct partyEntry *srcp, *dstp;
     struct contextEntry *cxp;
     int biglen, ismd5 = 0;
@@ -394,11 +396,11 @@ snmp_secauth_build(data, length, pi, messagelen, srcParty, srcPartyLen,
     struct timeval now;
     u_char *endOfPacket;
     int dummyLength;
-    u_char *digestStart = NULL, *digestEnd, *authMsgStart;
+    u_char *digestStart = NULL, *digestEnd = NULL, *authMsgStart;
     u_char authDigest[16];
-    u_char *h1, *h2, *h3, *h5;
+    u_char *h1, *h2, *h3 = NULL, *h5;
     int pad;
-    int authInfoSize;
+    int authInfoSize = 0;
 
     
     srcp = pi->srcp;

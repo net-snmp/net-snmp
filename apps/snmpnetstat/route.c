@@ -35,6 +35,8 @@ SOFTWARE.
 
 #if STDC_HEADERS
 #include <string.h>
+#include <stdlib.h>
+#include <unistd.h>
 #endif
 
 #include <stdio.h>
@@ -45,6 +47,9 @@ SOFTWARE.
 
 #if HAVE_NETINET_IN_H
 #include <netinet/in.h>
+#endif
+#if HAVE_ARPA_INET_H
+#include <arpa/inet.h>
 #endif
 #define	LOOPBACKNET 127
 
@@ -58,14 +63,15 @@ SOFTWARE.
 #include "mib.h"
 
 extern	int nflag;
-extern	char *routename(), *netname(), *plural();
-extern	char *malloc();
+char *routename __P((struct in_addr));
+char *netname __P((struct in_addr, u_long));
+char *plural __P((int));
 extern	struct snmp_session *Session;
-extern	struct variable_list *getvarbyname();
+extern	struct variable_list *getvarbyname __P((struct snmp_session *, oid *, int));
 extern	int print_errors;
 
-void get_ifname();
-void routepr();
+void get_ifname __P((char *, int));
+void routepr __P((void));
 
 struct route_entry {
     oid	    instance[4];
@@ -306,9 +312,9 @@ routename(in)
 	if (cp)
 		strncpy(line, cp, sizeof(line) - 1);
 	else {
-#define C(x)	((x) & 0xff)
+#define C(x)	(unsigned)((x) & 0xff)
 		in.s_addr = ntohl(in.s_addr);
-		sprintf(line, "%lu.%lu.%lu.%lu", C(in.s_addr >> 24),
+		sprintf(line, "%u.%u.%u.%u", C(in.s_addr >> 24),
 			C(in.s_addr >> 16), C(in.s_addr >> 8), C(in.s_addr));
 	}
 	return (line);
@@ -377,7 +383,7 @@ netname(in, mask)
  * Print routing statistics
  */
 void
-rt_stats()
+rt_stats __P((void))
 {
 	struct variable_list *var;
 

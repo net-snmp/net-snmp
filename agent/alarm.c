@@ -53,11 +53,11 @@ SOFTWARE.
 #include "event.h"
 #include "alarm.h"
 #include "system.h"
-
-u_char	*getStatPtr();
+#include "snmpd.h"
 
 static struct alarmEntry *alarmTab = NULL;
 static long alarmNextIndex = 1;
+static int write_alarmtab __P((int, u_char *, u_char, int, u_char *, oid *, int));
 
 /* retrieve the given variable from the MIB.  Returns 0 on success,
 ** 1 if the request was asynchronously transmitted to another host,
@@ -717,7 +717,7 @@ write_alarmtab(action, var_val, var_val_type, var_val_len, statP,
     register int variable;
     register struct alarmEntry *alarm;
     int size;
-    int int_value;
+    long int_value;
     oid oid_value[MAX_OID_LEN];
     u_char string_value[MAX_OWNER_STR_LEN];
     int buffersize = 1000;
@@ -1062,9 +1062,7 @@ var_alarmnextindex(vp, name, length, exact, var_len, write_method)
     register int *length;	/* IN/OUT - length of input and output oid's */
     int exact;		/* IN - TRUE if an exact match was requested. */
     int *var_len;   /* OUT - length of variable or 0 if function returned. */
-    int			(**write_method)(); /* OUT - pointer to function to set
-					     ** variable, otherwise 0
-					     */
+    int	(**write_method) __P((int, u_char *, u_char, int, u_char *, oid *, int));
 {
     int result;
 
@@ -1100,9 +1098,7 @@ var_alarmtab(vp, name, length, exact, var_len, write_method)
     register int *length;	/* IN/OUT - length of input and output oid's */
     int exact;		/* IN - TRUE if an exact match was requested. */
     int *var_len;   /* OUT - length of variable or 0 if function returned. */
-    int			(**write_method)(); /* OUT - pointer to function to set
-					     ** variable, otherwise 0
-					     */
+    int	(**write_method) __P((int, u_char *, u_char, int, u_char *,oid *, int));
 {
     oid newname[MAX_NAME_LEN];
     int result;

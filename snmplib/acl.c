@@ -1,5 +1,10 @@
 #include <config.h>
 
+#if STDC_HEADERS
+#include <stdlib.h>
+#include <unistd.h>
+#include <string.h>
+#endif
 #include <sys/types.h>
 #include <stdio.h>
 #if TIME_WITH_SYS_TIME
@@ -19,7 +24,6 @@
 
 static struct aclEntry *List = NULL, *ScanPtr = NULL;
 
-
 struct aclEntry *
 acl_getEntry(target, subject, resources)
     int target, subject, resources;
@@ -36,13 +40,13 @@ acl_getEntry(target, subject, resources)
 }
 
 void
-acl_scanInit()
+acl_scanInit __P((void))
 {
   ScanPtr = List;
 }
 
 struct aclEntry *
-acl_scanNext()
+acl_scanNext __P((void))
 {
     struct aclEntry *returnval;
 
@@ -59,21 +63,13 @@ acl_createEntry(target, subject, resources)
     struct aclEntry *ap;
 
     ap = (struct aclEntry *)malloc(sizeof(struct aclEntry));
-#ifdef SVR4
-    memset((char *)ap, NULL, sizeof(struct aclEntry));
-#else
-    bzero((char *)ap, sizeof(struct aclEntry));
-#endif
+    memset(ap, 0, sizeof(struct aclEntry));
 
     ap->aclTarget = target;
     ap->aclSubject = subject;
     ap->aclResources = resources;
     ap->reserved = (struct aclEntry *)malloc(sizeof(struct aclEntry));
-#ifdef SVR4
-    memset((char *)ap->reserved, NULL, sizeof(struct aclEntry));
-#else
-    bzero((char *)ap->reserved, sizeof(struct aclEntry));
-#endif
+    memset(ap->reserved, 0, sizeof(struct aclEntry));
 
     ap->next = List;
     List = ap;
@@ -84,7 +80,7 @@ void
 acl_destroyEntry(target, subject, resources)
     int target, subject, resources;
 {
-    struct aclEntry *ap, *lastap;
+    struct aclEntry *ap, *lastap = NULL;
 
     if (List->aclTarget == target && List->aclSubject == subject
 	&& List->aclResources == resources){

@@ -41,31 +41,27 @@ SOFTWARE.
 #include <netinet/in.h>
 #endif
 
-#include "snmp.h"
 #include "asn1.h"
 #include "snmp_impl.h"
+#include "snmp.h"
 #include "acl.h"
 #include "party.h"
 #include "context.h"
 #include "mib.h"
 #include "mibgroup/snmp.h"
 #include "extensible/extproto.h"
+#include "snmpd.h"
 
-extern int snmp_dump_packet;
-void	send_trap();
-void	send_easy_trap();
-int	create_identical();
-int	parse_var_op_list();
-int	snmp_access();
+int	create_identical __P((u_char *, u_char *, int, long, long, struct packet_info *));
+int	parse_var_op_list __P((u_char *, int, u_char *, int, long *, struct packet_info *, int));
+int	snmp_access __P((u_short, int, int));
 static int snmp_vars_inc;
-static int get_community();
-static int bulk_var_op_list();
-static int create_toobig();
-static int goodValue();
-static void setVariable();
+static int get_community __P((u_char *, int));
+static int bulk_var_op_list __P((u_char *, int, u_char *, int, int, int, long *, struct packet_info *));
+static int create_toobig __P((u_char *, int, long, struct packet_info *));
+static int goodValue __P((u_char, int, u_char, int));
+static void setVariable __P((u_char *, u_char, int, u_char *, int));
 
-
-struct pbuf *definitelyGetBuf();
 
 char	communities[NUM_COMMUNITIES][COMMUNITY_MAX_LEN] = {
     "public", 
@@ -454,10 +450,9 @@ parse_var_op_list(data, length, out_data, out_length, index, pi, action)
     int	    statLen;
     u_short acl;
     int	    rw, exact, err;
-    int	    (*write_method)();
+    int	    (*write_method) __P((int, u_char *, u_char, int, u_char *, oid *, int));
     u_char  *headerP, *var_list_start;
     int	    dummyLen;
-    u_char  *getStatPtr();
     int	    noSuchObject;
 
     if (pi->pdutype == SET_REQ_MSG)
@@ -620,7 +615,7 @@ struct repeater {
  * should be FREE'd.
  * If any error occurs, an error code is returned.
  */
-int
+static int
 bulk_var_op_list(data, length, out_data, out_length, non_repeaters,
 		 max_repetitions, index, pi)
     register u_char	*data;
@@ -639,10 +634,9 @@ bulk_var_op_list(data, length, out_data, out_length, non_repeaters,
     register u_char *statP;
     int	    statLen;
     u_short acl;
-    int	    (*write_method)();
+    int	    (*write_method) __P((int, u_char *, u_char, int, u_char *, oid *, int));
     u_char  *headerP, *var_list_start;
     int	    dummyLen;
-    u_char  *getStatPtr();
     u_char  *repeaterStart, *out_data_save;
     int	    repeatCount, repeaterLength, indexStart, out_length_save;
     int	    full = FALSE;
@@ -868,7 +862,7 @@ create_identical(snmp_in, snmp_out, snmp_length, errstat, errindex, pi)
 				       pi->context, &pi->contextLength, 0);
     } else {
         ERROR("unknown auth header type");
-        return NULL;
+        return 0;
     }
     if (pi->version == SNMP_VERSION_2){
         /*
@@ -959,7 +953,7 @@ create_identical(snmp_in, snmp_out, snmp_length, errstat, errindex, pi)
     return 1;
 }
 
-int
+static int
 create_toobig(snmp_out, snmp_length, reqid, pi)
     u_char	    	*snmp_out;
     int		    	snmp_length;
@@ -968,7 +962,8 @@ create_toobig(snmp_out, snmp_length, reqid, pi)
 {
     register u_char *data;
     u_char	    type;
-    int		    errstat = SNMP_ERR_TOOBIG, errindex = 0;
+    long	    errstat = SNMP_ERR_TOOBIG;
+    long	    errindex = 0;
     int		    length;
     register u_char *headerPtr, *reqidPtr;
     int		    packet_len;
@@ -1041,7 +1036,7 @@ snmp_access(acl, community, rw)
     }
 }
 
-int
+static int
 get_community(community, community_len)
     u_char	*community;
     int		community_len;
@@ -1058,7 +1053,7 @@ get_community(community, community_len)
     return count + 1;
 }
 
-int
+static int
 goodValue(inType, inLen, actualType, actualLen)
     u_char	inType, actualType;
     int		inLen, actualLen;
@@ -1068,7 +1063,7 @@ goodValue(inType, inLen, actualType, actualLen)
     return (inType == actualType);
 }
 
-void
+static void
 setVariable(var_val, var_val_type, var_val_len, statP, statLen)
     u_char  *var_val;
     u_char  var_val_type;

@@ -56,6 +56,10 @@
 static long cachetime;
 #endif
 
+void Exit __P((int));
+struct myproc *get_proc_instance __P((struct myproc*, int));
+RETSIGTYPE restart_doit __P((int));
+
 extern int numprocs, numextens;
 
 void
@@ -360,7 +364,8 @@ clear_cache(action, var_val, var_val_type, var_val_len, statP, name, name_len)
    int      name_len;
 {
   
-  int tmp=0, tmplen=1000;
+  long tmp=0;
+  int tmplen=1000;
 
   if (var_val_type != INTEGER) {
     printf("Wrong type != int\n");
@@ -385,7 +390,8 @@ update_hook(action, var_val, var_val_type, var_val_len, statP, name, name_len)
    oid      *name;
    int      name_len;
 {
-  int tmp=0, tmplen=1000;
+  long tmp=0;
+  int tmplen=1000;
 
   if (var_val_type != INTEGER) {
     printf("Wrong type != int\n");
@@ -393,7 +399,7 @@ update_hook(action, var_val, var_val_type, var_val_len, statP, name, name_len)
   }
   asn_parse_int(var_val,&tmplen,&var_val_type,&tmp,sizeof(int));
   if (tmp == 1 && action == COMMIT) {
-    update_config();
+    update_config(0);
   } 
   return SNMP_ERR_NOERROR;
 }
@@ -425,7 +431,8 @@ restart_hook(action, var_val, var_val_type, var_val_len, statP, name, name_len)
    int      name_len;
 {
   
-  int tmp=0, tmplen=1000;
+  long tmp=0;
+  int tmplen=1000;
 
   if (var_val_type != INTEGER) {
     printf("Wrong type != int\n");

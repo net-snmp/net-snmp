@@ -66,7 +66,8 @@ struct subid {
 #define MAXTC   256
 struct tc {     /* textual conventions */
     int type;
-    char descriptor[MAXTOKEN];
+    char *descriptor;
+    char *hint;
     struct enum_list *enums;
 } tclist[MAXTC];
 
@@ -153,6 +154,7 @@ int mib_warnings = 0;
 #define BAR         68
 #define RANGE       69
 #define CONVENTION  70
+#define DISPLAYHINT 71
 
 struct tok {
     char *name;                 /* token name */
@@ -238,6 +240,7 @@ struct tok tokens[] = {
     { "..", sizeof ("..")-1, RANGE },
     { "TEXTUAL-CONVENTION", sizeof ("TEXTUAL-CONVENTION")-1, CONVENTION },
     { "NOTIFICATION-GROUP", sizeof ("NOTIFICATION-GROUP")-1, NOTIFTYPE },
+    { "DISPLAY-HINT", sizeof ("DISPLAY-HINT")-1, DISPLAYHINT },
     { NULL }
 };
 
@@ -246,14 +249,40 @@ struct tok tokens[] = {
 
 struct tok      *buckets[HASHSIZE];
 
-static void do_subtree();
-static int get_token();
-static void unget_token();
-static int parseQuoteString();
-static int tossObjectIdentifier();
+static void do_subtree __P((struct tree *, struct node **));
+static int get_token __P((FILE *, char *,int));
+static void unget_token __P((int));
+static int parseQuoteString __P((FILE *, char *, int));
+static int tossObjectIdentifier __P((FILE *));
+static void hash_init __P((void));
+static void init_node_hash __P((struct node *));
+static void print_error __P((char *, char *, int));
+static void *Malloc __P((unsigned));
+static char *Strdup __P((char *));
+static void Malloc_stats __P((FILE *));
+static void free_tree __P((struct tree *));
+static void free_node __P((struct node *));
+#ifdef TEST
+static void print_nodes __P((FILE *, struct node *));
+#endif
+static void build_translation_table __P((void));
+static struct tree *build_tree __P((struct node *));
+static int getoid __P((FILE *, struct subid *, int));
+static struct node *parse_objectid __P((FILE *, char *));
+static int get_tc __P((char *, struct enum_list **, char **));
+static int get_tc_index __P((char *));
+static struct enum_list *parse_enumlist __P((FILE *));
+static struct node *parse_asntype __P((FILE *, char *, int *, char *));
+static struct node *parse_objecttype __P((FILE *, char *));
+static struct node *parse_objectgroup __P((FILE *, char *));
+static struct node *parse_notificationDefinition __P((FILE *, char *));
+static struct node *parse_trapDefinition __P((FILE *, char *));
+static struct node *parse_compliance __P((FILE *, char *));
+static struct node *parse_moduleIdentity __P((FILE *, char *));
+static struct node *parse __P((FILE *, struct node *));
 
 static void
-hash_init()
+hash_init __P((void))
 {
     register struct tok *tp;
     register char       *cp;
@@ -410,6 +439,7 @@ free_node(np)
     free(np);
 }
 
+#ifdef TEST
 static void
 print_nodes(fp, root)
     FILE *fp;
@@ -431,6 +461,7 @@ print_nodes(fp, root)
         }
     }
 }
+#endif
 
 void
 print_subtree(f, tree, count)
@@ -532,6 +563,7 @@ build_tree(nodes)
     tp->next_peer = NULL;
     tp->child_list = NULL;
     tp->enums = NULL;
+    tp->hint = NULL;
     tp->label = Strdup("joint-iso-ccitt");
     tp->subid = 2;
     tp->tc_index = -1;
@@ -547,6 +579,7 @@ build_tree(nodes)
     tp->next_peer = lasttp;
     tp->child_list = NULL;
     tp->enums = NULL;
+    tp->hint = NULL;
     tp->label = Strdup("ccitt");
     tp->subid = 0;
     tp->tc_index = -1;
@@ -562,6 +595,7 @@ build_tree(nodes)
     tp->next_peer = lasttp;
     tp->child_list = NULL;
     tp->enums = NULL;
+    tp->hint = NULL;
     tp->label = Strdup("iso");
     tp->subid = 1;
     tp->tc_index = -1;
@@ -668,6 +702,10 @@ do_subtree(root, nodes)
         tp->type = translation_table[np->type];
         tp->enums = np->enums;
         np->enums = NULL;       /* so we don't free them later */
+        tp->hint = np->hint;
+	np->hint = NULL;
+	tp->units = np->units;
+	np->units = NULL;
         tp->description = np->description; /* steals memory from np */
         np->description = NULL; /* so we don't free it later */
         tp->next_peer = root->child_list;
@@ -695,9 +733,9 @@ do_subtree(root, nodes)
  * Returns NULL on error.
  */
 static int
-getoid(fp, oid,  length)
+getoid(fp, id,  length)
     register FILE *fp;
-    register struct subid *oid; /* an array of subids */
+    register struct subid *id; /* an array of subids */
     int length;     /* the length of the array */
 {
     register int count;
@@ -709,9 +747,9 @@ getoid(fp, oid,  length)
         return 0;
     }
     type = get_token(fp, token,MAXTOKEN);
-    for(count = 0; count < length; count++, oid++){
-        oid->label = NULL;
-        oid->subid = -1;
+    for(count = 0; count < length; count++, id++){
+        id->label = NULL;
+        id->subid = -1;
         if (type == RIGHTBRACKET){
             return count;
         } else if (type != LABEL && type != NUMBER){
@@ -720,12 +758,12 @@ getoid(fp, oid,  length)
         }
         if (type == LABEL){
             /* this entry has a label */
-            oid->label = Strdup(token);
+            id->label = Strdup(token);
             type = get_token(fp, token,MAXTOKEN);
             if (type == LEFTPAREN){
                 type = get_token(fp, token,MAXTOKEN);
                 if (type == NUMBER){
-                    oid->subid = atoi(token);
+                    id->subid = atoi(token);
                     if ((type = get_token(fp, token,MAXTOKEN)) != RIGHTPAREN){
                         print_error("Expected a closing bracket", token, type);
                         return 0;
@@ -739,7 +777,7 @@ getoid(fp, oid,  length)
             }
         } else {
             /* this entry  has just an integer sub-identifier */
-            oid->subid = atoi(token);
+            id->subid = atoi(token);
         }
         type = get_token(fp, token,MAXTOKEN);
     }
@@ -836,18 +874,21 @@ parse_objectid(fp, name)
 }
 
 static int
-get_tc(descriptor, ep)
+get_tc(descriptor, ep, hint)
     char *descriptor;
     struct enum_list **ep;
+    char **hint;
 {
     int i;
+    struct tc *tcp;
 
-    for(i = 0; i < MAXTC; i++){
-        if (tclist[i].type == 0)
+    for(i = 0, tcp = tclist; i < MAXTC; i++, tcp++){
+        if (tcp->type == 0)
             break;
-        if (!strcmp(descriptor, tclist[i].descriptor)){
-            *ep = tclist[i].enums;
-            return tclist[i].type;
+        if (!strcmp(descriptor, tcp->descriptor)){
+            *ep = tcp->enums;
+	    *hint = tcp->hint;
+            return tcp->type;
         }
     }
     return LABEL;
@@ -936,6 +977,8 @@ parse_asntype(fp, name, ntype, ntoken)
 {
     int type, i;
     char token[MAXTOKEN];
+    char *hint = NULL;
+    char *tmp_hint;
     struct enum_list *ep;
     struct tc *tcp;
     int level;
@@ -961,14 +1004,21 @@ parse_asntype(fp, name, ntype, ntoken)
         return NULL;
     } else {
         if (type == CONVENTION) {
-            while (type != SYNTAX && type != ENDOFFILE)
-                type = get_token(fp, token, MAXTOKEN);
+            while (type != SYNTAX && type != ENDOFFILE) {
+                if (type == DISPLAYHINT) {
+                    type = get_token(fp, token, MAXTOKEN);
+                    if (type != QUOTESTRING) print_error("DISPLAY-HINT must be string", token, type);
+                    else hint = Strdup (token);
+                }
+                else
+		    type = get_token(fp, token, MAXTOKEN);
+            }
             type = get_token(fp, token, MAXTOKEN);
         }
 
         if (type == LABEL)
         {
-            type = get_tc(token, &ep);
+            type = get_tc(token, &ep, &tmp_hint);
         }
         
         
@@ -983,19 +1033,20 @@ parse_asntype(fp, name, ntype, ntoken)
             return NULL;
         }
         tcp = &tclist[i];
-        strncpy(tcp->descriptor, name, MAXTOKEN);
+        tcp->descriptor = Strdup(name);
+        tcp->hint = hint;
         if (!(type & SYNTAX_MASK)){
             print_error("Textual convention doesn't map to real type", token,
                         type);
             return NULL;
         }
         tcp->type = type;
-        *ntype = get_token(fp, ntoken,MAXTOKEN);
+        *ntype = get_token(fp, ntoken, MAXTOKEN);
         if (*ntype == LEFTPAREN){
             level = 1;
             /* don't record any constraints for now */
             while(level > 0){
-                *ntype = get_token(fp, ntoken,MAXTOKEN);
+                *ntype = get_token(fp, ntoken, MAXTOKEN);
                 if (*ntype == LEFTPAREN)
                     level++;
                 else if (*ntype == RIGHTPAREN)
@@ -1003,11 +1054,11 @@ parse_asntype(fp, name, ntype, ntoken)
                 else if (*ntype == ENDOFFILE)
                     break;
             }
-            *ntype = get_token(fp, ntoken,MAXTOKEN);
+            *ntype = get_token(fp, ntoken, MAXTOKEN);
         } else if (*ntype == LEFTBRACKET) {
             /* if there is an enumeration list, parse it */
             tcp->enums = parse_enumlist(fp);
-            *ntype = get_token(fp, ntoken,MAXTOKEN);
+            *ntype = get_token(fp, ntoken, MAXTOKEN);
         }
         return NULL;
     }
@@ -1038,10 +1089,11 @@ parse_objecttype(fp, name)
     np->next = NULL;
     np->tc_index = -1;
     np->enums = NULL;
+    np->units = NULL;
     np->description = NULL;        /* default to an empty description */
     type = get_token(fp, token, MAXTOKEN);
     if (type == LABEL){
-        tctype = get_tc(token, &(np->enums));
+        tctype = get_tc(token, &np->enums, &np->hint);
         if (tctype == LABEL && mib_warnings > 1){
             print_error("Warning: No known translation for type", token, type);
         }
@@ -1143,12 +1195,13 @@ parse_objecttype(fp, name)
             return NULL;
     }
     if (nexttype == UNITS){
-        type = get_token(fp, quoted_string_buffer,MAXQUOTESTR);
+        type = get_token(fp, quoted_string_buffer, MAXQUOTESTR);
         if (type != QUOTESTRING) {
             print_error("Bad UNITS", quoted_string_buffer, type);
             free_node(np);
             return NULL;
         }
+	np->units = Strdup (quoted_string_buffer);
         nexttype = get_token(fp, nexttoken,MAXTOKEN);
     }
     if (nexttype != ACCESS){

@@ -58,24 +58,29 @@ SOFTWARE.
 #endif
 #include <errno.h>
 
-#include "snmp.h"
-#include "mib.h"
 #include "asn1.h"
 #include "snmp_impl.h"
 #include "snmp_api.h"
+#include "mib.h"
+#include "snmp.h"
 #include "snmp_client.h"
 #include "party.h"
 #include "context.h"
 #include "view.h"
 #include "acl.h"
 
+int main __P((int, char **));
+int ascii_to_binary __P((u_char *, u_char *));
+int hex_to_binary __P((u_char *, u_char *));
+
 extern int  errno;
 int command = GET_REQ_MSG;
 
-int input_variable();
+int input_variable __P((struct variable_list *));
 
 void
-usage(){
+usage __P((void))
+{
     fprintf(stderr, "Usage: snmptest -v 1 [-q] hostname community      or:\n");
     fprintf(stderr, "Usage: snmptest [-v 2] [-q] hostname noAuth       or:\n");
     fprintf(stderr, "Usage: snmptest [-v 2] [-q] hostname srcParty dstParty context\n");
@@ -96,14 +101,14 @@ main(argc, argv)
     int dest_port = 0;
     oid src[MAX_NAME_LEN], dst[MAX_NAME_LEN], context[MAX_NAME_LEN];
     int srclen = 0, dstlen = 0, contextlen = 0;
-    u_long      srcclock, dstclock;
+    u_long      srcclock = 0, dstclock = 0;
     int clock_flag = 0;
     struct partyEntry *pp;
     struct contextEntry *cxp;
     int	    status, count;
     char	input[128];
     int varcount, nonRepeaters = -1, maxRepetitions;
-    int timeout_flag = 0, timeout, retransmission_flag = 0, retransmission;
+    int timeout = SNMP_DEFAULT_TIMEOUT, retransmission = SNMP_DEFAULT_RETRIES;
     int trivialSNMPv2 = FALSE;
     struct hostent *hp;
     u_long destAddr;
@@ -128,11 +133,9 @@ main(argc, argv)
                     dest_port = atoi(argv[++arg]);
                     break;
                 case 't':
-                    timeout_flag++;
                     timeout = atoi(argv[++arg]) * 1000000L;
                     break;
                 case 'r':
-                    retransmission_flag++;
                     retransmission = atoi(argv[++arg]);
                     break;
                 case 'c':
@@ -298,14 +301,8 @@ main(argc, argv)
         session.context = context;
         session.contextLen = contextlen;
     }
-    if (retransmission_flag)
-	session.retries = retransmission;
-    else
-	session.retries = SNMP_DEFAULT_RETRIES;
-    if (timeout_flag)
-	session.timeout = timeout;
-    else
-	session.timeout = SNMP_DEFAULT_TIMEOUT;
+    session.retries = retransmission;
+    session.timeout = timeout;
     session.authenticator = NULL;
     snmp_synch_setup(&session);
     ss = snmp_open(&session);

@@ -22,6 +22,11 @@ WHETHER IN AN ACTION OF CONTRACT, NEGLIGENCE OR OTHER TORTIOUS ACTION,
 ARISING OUT OF OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS
 SOFTWARE.
 ******************************************************************/
+
+struct snmp_pdu;
+struct snmp_session;
+struct variable_list;
+
 struct synch_state {
     int	waiting;
     int status;
@@ -35,13 +40,11 @@ struct synch_state {
 
 extern struct synch_state snmp_synch_state;
 
-/* Modif PVA GTmH 21/05/96 return pointer to added variable */
-struct variable_list* snmp_add_null_var();
-/* End Modif PVA GTmH 21/05/96 return pointer to added variable */
-struct snmp_pdu	*snmp_pdu_create();
-struct snmp_pdu *snmp_fix_pdu();
-struct snmp_pdu *snmp_clone_pdu();
-char *snmp_errstring();
-void snmp_synch_setup();
-int snmp_synch_response();
-int ms_party_init();
+struct variable_list* snmp_add_null_var __P((struct snmp_pdu *, oid *, int));
+struct snmp_pdu	*snmp_pdu_create __P((int));
+struct snmp_pdu *snmp_fix_pdu __P((struct snmp_pdu *, int));
+struct snmp_pdu *snmp_clone_pdu __P((struct snmp_pdu *));
+char *snmp_errstring __P((int));
+void snmp_synch_setup __P((struct snmp_session *));
+int snmp_synch_response __P((struct snmp_session *, struct snmp_pdu *, struct snmp_pdu **));
+int ms_party_init __P((u_long, oid *, int *, oid *, int *, oid *, int *));

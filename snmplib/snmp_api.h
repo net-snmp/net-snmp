@@ -26,6 +26,40 @@ SOFTWARE.
 
 typedef struct sockaddr_in  ipaddr;
 
+struct variable_list;
+struct timeval;
+
+struct snmp_pdu {
+    int	    version;
+
+    ipaddr  address;	/* Address of peer */
+    oid	    *srcParty;
+    int	    srcPartyLen;
+    oid	    *dstParty;
+    int	    dstPartyLen;
+    oid	    *context;
+    int     contextLen;
+
+    u_char  *community;	/* community for outgoing requests. */
+    int	    community_len;  /* Length of community name. */
+
+    int	    command;	/* Type of this PDU */
+
+    long  reqid;	/* Request id */
+    long  errstat;	/* Error status (non_repeaters in GetBulk) */
+    long  errindex;	/* Error index (max_repetitions in GetBulk) */
+
+    /* Trap information */
+    oid	    *enterprise;/* System OID */
+    int	    enterprise_length;
+    ipaddr  agent_addr;	/* address of object generating trap */
+    int	    trap_type;	/* trap type */
+    int	    specific_type;  /* specific type */
+    u_long  time;	/* Uptime */
+
+    struct variable_list *variables;
+};
+
 struct snmp_session {
     u_char  *community;	/* community for outgoing requests. */
     int	    community_len;  /* Length of community name. */
@@ -35,8 +69,9 @@ struct snmp_session {
     u_short remote_port;/* UDP port number of peer. */
     u_short local_port; /* My UDP port number, 0 for default, picked randomly */
     /* Authentication function or NULL if null authentication is used */
-    u_char    *(*authenticator)();
-    int	    (*callback)();  /* Function to interpret incoming data */
+    u_char    *(*authenticator) __P((u_char *, int *, char *, int));
+    int	    (*callback) __P((int, struct snmp_session *, int, struct snmp_pdu *, void *));
+   	/* Function to interpret incoming data */
     /* Pointer to data that the callback function may consider important */
     void    *callback_magic;
     int	    version;
@@ -75,37 +110,6 @@ extern int snmp_errno;
 #define non_repeaters	errstat
 #define max_repetitions errindex
 
-struct snmp_pdu {
-    int	    version;
-
-    ipaddr  address;	/* Address of peer */
-    oid	    *srcParty;
-    int	    srcPartyLen;
-    oid	    *dstParty;
-    int	    dstPartyLen;
-    oid	    *context;
-    int     contextLen;
-
-    u_char  *community;	/* community for outgoing requests. */
-    int	    community_len;  /* Length of community name. */
-
-    int	    command;	/* Type of this PDU */
-
-    long  reqid;	/* Request id */
-    long  errstat;	/* Error status (non_repeaters in GetBulk) */
-    long  errindex;	/* Error index (max_repetitions in GetBulk) */
-
-    /* Trap information */
-    oid	    *enterprise;/* System OID */
-    int	    enterprise_length;
-    ipaddr  agent_addr;	/* address of object generating trap */
-    int	    trap_type;	/* trap type */
-    int	    specific_type;  /* specific type */
-    u_long  time;	/* Uptime */
-
-    struct variable_list *variables;
-};
-
 
 struct variable_list {
     struct variable_list *next_variable;    /* NULL for last variable */
@@ -132,7 +136,7 @@ struct variable_list {
  * the pointer passed to snmp_open()).  On any error, NULL is returned
  * and snmp_errno is set to the appropriate error code.
  */
-struct snmp_session *snmp_open();
+struct snmp_session *snmp_open __P((struct snmp_session *));
 
 /*
  * int snmp_close(session)
@@ -142,7 +146,7 @@ struct snmp_session *snmp_open();
  * dequeues any pending requests, and closes any sockets allocated for
  * the session.  Returns 0 on error, 1 otherwise.
  */
-int snmp_close();
+int snmp_close __P((struct snmp_session *));
 
 
 /*
@@ -158,7 +162,7 @@ int snmp_close();
  * On any error, 0 is returned.
  * The pdu is freed by snmp_send() unless a failure occured.
  */
-int snmp_send();
+int snmp_send __P((struct snmp_session *, struct snmp_pdu *));
 
 
 /*
@@ -171,7 +175,7 @@ int snmp_send();
  * is passed to the callback routine for that session.  If the callback
  * routine returns successfully, the pdu and it's request are deleted.
  */
-void snmp_read();
+void snmp_read __P((fd_set *));
 
 
 /*
@@ -181,7 +185,7 @@ void snmp_read();
  * 
  * Frees the pdu and any malloc'd data associated with it.
  */
-void snmp_free_pdu();
+void snmp_free_pdu __P((struct snmp_pdu *));
 
 /*
  * int snmp_select_info(numfds, fdset, timeout, block)
@@ -209,7 +213,7 @@ void snmp_free_pdu();
  *
  * snmp_select_info returns the number of open sockets.  (i.e. The number of sessions open)
  */
-int snmp_select_info();
+int snmp_select_info __P((int *, fd_set *, struct timeval *, int *));
 
 /*
  * void snmp_timeout();
@@ -222,7 +226,7 @@ int snmp_select_info();
  * resent.  If there are no more retries available, the callback for the session
  * is used to alert the user of the timeout.
  */
-void snmp_timeout();
+void snmp_timeout __P((void));
 
 
 /*
@@ -261,7 +265,7 @@ void snmp_timeout();
 extern int snmp_dump_packet;
 extern int quick_print;
 */
-void snmp_set_dump_packet();
-int snmp_get_dump_packet();
-void snmp_set_quick_print();
-int snmp_get_quick_print();
+void snmp_set_dump_packet __P((int));
+int snmp_get_dump_packet __P((void));
+void snmp_set_quick_print __P((int));
+int snmp_get_quick_print __P((void));
