@@ -1,5 +1,278 @@
 -------------------------------------------------------------------------------
 
+Changes: V3.1.2.1 -> V3.1.3
+
+whardake 10 Jan 97 08:43:42
+    - (COPYING):  Update for 97.
+
+whardake 10 Jan 97 08:46:00
+    - (config*): Check for /dev/ksyms for solaris kernel.
+
+whardake 10 Jan 97 08:46:36
+    - (snmptrapd.c): Remove broken FD_SET code.
+
+whardake 14 Jan 97 16:45:33
+    - (PORTING, README, TODO):  Added ucd-snmp-coders as default mail address.
+
+whardake 17 Jan 97 09:28:56
+    patch niels.0
+
+whardake 17 Jan 97 11:51:40
+    - (snmpd.c, extensible.c):
+      - New arg -c FILE:  	   Read FILE as a configuration file as well.
+      - New arg -C:       	   Don't read default configuration files.
+      - New env SNMPCONFPATH:  Read snmpd{,.local}.conf files in : seperated path.
+
+whardake 17 Jan 97 11:58:46
+    - (snmpd.c):
+      - Usage() update and version printout update.
+
+whardake 17 Jan 97 14:55:28
+    Dave Shield patches
+
+whardake 20 Jan 97 11:17:53
+    Niel's patches integrated
+
+whardake 20 Jan 97 15:09:25
+    - Patches from Dave Shield <D.T.Shield@csc.liv.ac.uk>:
+     - implemented: interfaces.ifTable.ifEntry.ifSpecific,
+          ip.ipRoutingDiscards,
+          ip.ipAddrTable.ipAddrEntry.ipAdEntReasmMaxSize,
+          ip.ipRouteTable.ipRouteEntry.ipRouteMask ,
+          ip.ipRouteTable.ipRouteEntry.ipRouteMetric5,
+          ip.ipRouteTable.ipRouteEntry.ipRouteInfo, ip.ipNetToMediaTable,
+          udp.udpTable.
+     - udp connection table.
+     - ipNetToMedia.
+    
+    - Patches from Niels Baggesen <Niels.Baggesen@uni-c.dk>:
+     - udpNoPort, tcpInErrs fixes for Solaris.
+     - linux application support.
+     - snmp variable group.
+     - simple cold start traps via exec('snmptrap').
+     - MIB parser fixes.
+     - Memory/free allocation fixes.
+
+whardake 20 Jan 97 15:22:53
+    - Patches from Niels Baggesen <Niels.Baggesen@uni-c.dk>:
+     - (snmp_client.c): Wait 120 seconds before returning.
+
+whardake 20 Jan 97 15:37:08
+    - (config*): Autoheader is dumb:  Put macro defines belowe @BOTTOM@ symbol.
+
+whardake 20 Jan 97 15:38:59
+    - (snmp_vars.c, extensible.c, read_config.c): Remove ANSI cpp #elif's.
+
+whardake 20 Jan 97 15:50:37
+    - (snmp_vars.c): bsdi #ifdef fixes.
+
+whardake 20 Jan 97 15:55:45
+    - (snmp_vars.c): Patch from Martin Jacobsson <martin@exmandato.se>:
+      - add bsdi to some #ifdefs.
+
+whardake 20 Jan 97 15:58:51
+    - (extensible.c): Patch from Martin Jacobsson <martin@exmandato.se>:
+      - watch out for string lengths on version desc and sysname.
+
+whardake 20 Jan 97 16:38:20
+    patrice.1 patch
+
+whardake 20 Jan 97 16:43:25
+    - (snmp_api.c, snmp_client.[ch]):
+      - Patch from Patrice VANACKER <vanacker@worldnet.fr>:
+        - fix request deletions in snmp_read().
+        - added return argument to snmp_add_null_var().
+
+whardake 20 Jan 97 16:59:02
+    - (extensible.c): Patch from sxjzhang@sss.ssi1.com:
+        - fix disk reporting on sunos 4.1.3 with ODS 1.0.
+
+whardake 20 Jan 97 16:59:56
+    version tag ( 3.1.3.pre1 )
+
+whardake 21 Jan 97 08:33:04
+    - (read_config.c): Patch from Karl Lehenbauer <karl@hammer1.ops.NeoSoft.com>:
+      - #if DODEBUG -> #ifdef DODEBUG.
+
+whardake 21 Jan 97 08:33:52
+    - (snmpd.c): remove second char definition.
+
+whardake 21 Jan 97 08:34:32
+    - (snmp_client.h): remove second (wrong) function prototype.
+
+whardake 21 Jan 97 09:17:42
+    - (snmp_var_route.c, snmp_vars.c):
+      - Patch from Karl Lehenbauer <karl@hammer1.ops.NeoSoft.com>
+        - handle multiple interface names > 10 properly.
+
+whardake 29 Jan 97 10:47:40
+    bug reporting script add
+
+whardake 29 Jan 97 12:07:00
+    - (bug-report):
+     - Always use multipart: version info and config.cache are one.
+     - re-arranged a bit.
+     - Added introduction.
+     - Guess at domain name if possible.
+
+whardake 29 Jan 97 12:07:59
+    - (acconfig.h):
+     - SNMPBLOCK = !SNMPBLOCK
+
+whardake 29 Jan 97 12:09:05
+    - (aclocal.m4): Fix check_struct_for to define things correctly.
+
+whardake 29 Jan 97 12:10:28
+    - (configure.in): New ps options to check for.
+
+whardake 29 Jan 97 12:11:04
+    - (FAQ): revision one!
+
+whardake 29 Jan 97 12:11:29
+    - (config.h.in, configure): update
+
+whardake 29 Jan 97 12:58:46
+    - (kernel.c, snmp_agent.c, snmpd.c): Patch from Niels Baggesen:
+      - Fix various warnings/errors.
+      - Implement real traps.
+
+whardake 29 Jan 97 13:03:15
+    - (versiontag): Modify ../../bug-report as well.
+
+whardake 29 Jan 97 13:08:11
+    - (bug-report):
+      - change to address (back) to ucd-snmp-coders.
+      - Add a trap on signals to remove tmp files.
+
+whardake 31 Jan 97 09:58:10
+    - (config*): Check for kstat.h and if sysctl can read the boottime.
+
+whardake 31 Jan 97 10:01:59
+    - (snmp_var_route.c, snmp_vars.c): Patch from Martin Jacobsson:
+      - Change some system specific ifdefs to CAN_USE_SYSCTL.
+      - Fix compliation errors on bsdi2.
+      - Fix routing tables for similar.
+
+whardake 31 Jan 97 10:49:07
+    - (versiontag): uh, commit it again.
+
+whardake 31 Jan 97 10:50:04
+    - (configure.in, configure): fire off ksh if hpux && sh.
+
+whardake 31 Jan 97 10:59:43
+    - (configure.in, configure): changed arch to hppa and make sure /bin/ksh exists.
+
+whardake 31 Jan 97 11:03:11
+    version tag update
+
+whardake  3 Feb 97 10:02:12
+    - (bug-report): Patch from Dave Shield:
+      - domain name fix and editor bomb out.
+
+whardake  3 Feb 97 10:03:10
+    - (EXAMPLE.conf.def): comment out possible security problem lines.
+
+whardake  3 Feb 97 10:46:02
+    - (configure.in):
+      - Check for whoami, logname.
+      - Don't pass null args to ksh.
+
+whardake  3 Feb 97 10:47:04
+    - (snmp_vars.c): Patch from Dave Shield
+      - Mark stuff for later changes.
+
+whardake  3 Feb 97 10:48:06
+    - (snmplib/system.c):  Use CAN_USE_SYSCTL instead of bsdlike.
+
+whardake  3 Feb 97 11:50:23
+    - (config*):
+      - Check for irix 6.2 headers.
+      - Check if _KERNEL needs to be defined for irix and ifnet usage.
+      - Use the found UNAME program instead of assuming we have it.
+
+whardake  3 Feb 97 12:44:51
+    - (snmplib/system.c): typo:  needs a space between 'static' and 'struct'.
+
+whardake  3 Feb 97 12:47:58
+    - (snmp_vars.c): add some irix appropriate includes.
+
+whardake  3 Feb 97 12:51:04
+    - (README): remove project history.
+
+whardake  3 Feb 97 13:15:11
+    - (README):
+      - added FAQ pointer.
+      - Dave's English pointers (ie, he proofed it and I, uh, don't...).
+      - switch ftp mirror.
+      - bug-report script mentioned.
+      - I -> We, me -> us...
+
+whardake  3 Feb 97 13:33:11
+    - (README, NEWS, TODO): Update for 3.1.3.
+
+whardake  3 Feb 97 13:53:04
+    - (bug-report): move config.cache to end of message.
+
+whardake  3 Feb 97 13:55:05
+    version tag ( 3.1.3.pre3 )
+
+whardake  4 Feb 97 09:35:02
+    - (FAQ): Dave's latest revision.
+
+whardake  4 Feb 97 09:35:37
+    - (TODO): Added suggestions from ucd-snmp-coders.
+
+whardake  4 Feb 97 09:36:43
+    - (configure, configure.in): Fix hpux problems, *again*.
+
+whardake  4 Feb 97 09:37:26
+    - (mib.c): Patch from Simon: comment #ifdef endings for ANSI compliers.
+
+whardake  4 Feb 97 09:41:39
+    - (FAQ): Added TOC and autor notes ;-).
+
+whardake  5 Feb 97 16:33:01
+    - (FAQ): Dave updated architecture lists.
+
+whardake  5 Feb 97 16:33:32
+    - (TODO): misc requested additions.
+
+whardake  5 Feb 97 17:07:25
+    - (configure, configure.in): Put /dev/ksyms ahead of /kernel/unix.
+
+whardake  5 Feb 97 17:11:15
+    - (many): Patch from Niels Baggesen:
+      - snmp mib group cleanups.
+      - trap generation cleanups.
+      - added man entries for trap generation.
+      - improved agent debugging output with agent's -d flag.
+
+whardake  5 Feb 97 17:13:09
+    - (system.c): Patch from Dave Shield to fix nlist problems.
+
+whardake  5 Feb 97 17:20:10
+    - (bug-report): Change subject line to shorten and force better description.
+
+whardake  5 Feb 97 17:23:41
+    - (tcl, tk, snmptcl): Nuked.
+
+whardake  5 Feb 97 17:25:03
+    - (NEWS): removed tcl stuff.
+
+whardake  5 Feb 97 17:29:54
+    - (Makefile.in, configure.in): removed tcl stuff.
+
+whardake  5 Feb 97 17:41:50
+    version tag ( 3.1.3.pre4 )
+
+whardake 10 Feb 97 09:22:03
+    - (FAQ): Dave Shields' additions:  finding more info.
+
+whardake 10 Feb 97 09:22:53
+    - (snmpnetstat/main.c): Remove malloc prototype, now in stdlib.h.
+
+-------------------------------------------------------------------------------
+
 Changes: V3.1.2 -> V3.1.2.1
 
 whardake  5 Dec 96 09:13:56
