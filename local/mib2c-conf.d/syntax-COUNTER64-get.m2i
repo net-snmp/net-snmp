@@ -12,7 +12,7 @@
 @include generic-get-decl.m2i@
 /*
  * TODO:231:o: |-> copy $node data.
- * get ${m2c_node_lh}.low and ${m2c_node_lh}.high from $m2c_data_item
+ * get ${m2c_node_lh}.low and ${m2c_node_lh}.high from $m2c_data_item_base
  */
 @if ("$m2c_data_context" eq "generated")@
     ${m2c_node_lh}.high = ${m2c_data_item}${node}.high;
