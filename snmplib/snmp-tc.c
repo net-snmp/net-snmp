@@ -79,7 +79,7 @@ date_n_time(time_t * when, size_t * length)
     /*
      * Timezone offset
      */
-#if !defined(SYSV) && !defined(aix) && !defined(WIN32)
+#if !defined(SYSV) && !defined(aix4) && !defined(WIN32)
 #define timezone tm_p->tm_gmtoff
 #endif
     if (timezone > 0)
