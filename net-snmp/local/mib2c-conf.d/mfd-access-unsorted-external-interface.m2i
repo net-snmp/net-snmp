@@ -11,7 +11,7 @@
 /*
  *
  */
-int
+static int
 ${table}_index2oid(netsnmp_mfd_registration *reg,
                    ${table}_ref_loop *loop_ref,
                    ${table}_ref_ctx *ctx_ref)
@@ -40,6 +40,50 @@ ${table}_index2oid(netsnmp_mfd_registration *reg,
     return SNMPERR_SUCCESS;
 }
 
+/*
+ *
+ */
+static int
+${table}_get_first_wrapper(netsnmp_mfd_registration * reg,
+                           ${table}_ref_loop * loop_ref,
+                           ${table}_ref_ctx * ctx_ref)
+{
+    int rc;
+    DEBUGMSGT(("${name}:trace", ">%s\n", __FUNCTION__));
+
+    rc = ${table}_get_first(reg, loop_ref, ctx_ref);
+
+    /*
+     * convert index to OID
+     */
+    if(SNMPERR_SUCCESS == rc )
+        rc = ${table}_index2oid(reg, loop_ref, ctx_ref);
+
+    return rc;
+}
+
+/*
+ *
+ */
+static int
+${table}_get_next_wrapper(netsnmp_mfd_registration * reg,
+                          ${table}_ref_loop * loop_ref,
+                          ${table}_ref_ctx * ctx_ref)
+{
+    int rc;
+    DEBUGMSGT(("${name}:trace", ">%s\n", __FUNCTION__));
+
+    rc = ${table}_get_next(reg, loop_ref, ctx_ref);
+
+    /*
+     * convert index to OID
+     */
+    if(SNMPERR_SUCCESS == rc )
+        rc = ${table}_index2oid(reg, loop_ref, ctx_ref);
+
+    return rc;
+}
+
 netsnmp_container *
 ${table}_container_init(netsnmp_mfd_registration *reg)
 {
@@ -52,9 +96,9 @@ ${table}_container_init(netsnmp_mfd_registration *reg)
         /** compare */
         NULL,
         /** get_first */
-        (Netsnmp_Iterator_Loop_Key*)${table}_get_first,
+        (Netsnmp_Iterator_Loop_Key*)${table}_get_first_wrapper,
         /** get_next */
-        (Netsnmp_Iterator_Loop_Key*)${table}_get_next,
+        (Netsnmp_Iterator_Loop_Key*)${table}_get_next_wrapper,
         /** get_data */
         (Netsnmp_Iterator_Loop_Data*)${table}_get_data,
         /** save_pos */
