@@ -7,9 +7,9 @@
 #endif
 
 #include "mibincl.h"
-#include "table.h"
-#include "table_data.h"
-#include "read_only.h"
+#include <net-snmp/agent/table.h>
+#include <net-snmp/agent/table_data.h>
+#include <net-snmp/agent/read_only.h>
 
 #if HAVE_DMALLOC_H
 #include <dmalloc.h>

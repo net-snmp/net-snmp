@@ -13,9 +13,9 @@
 #include "snmp_alarm.h"
 
 #include "snmp_api.h"
-#include "helpers/table.h"
-#include "helpers/instance.h"
-#include "helpers/serialize.h"
+#include <net-snmp/agent/table.h>
+#include <net-snmp/agent/instance.h>
+#include <net-snmp/agent/serialize.h>
 
 static oid my_delayed_oid[5] = {1,2,3,99,1};
 

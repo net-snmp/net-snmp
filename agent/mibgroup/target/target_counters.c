@@ -12,7 +12,7 @@
 
 #include "snmp_api.h"
 #include "snmp_client.h"
-#include "helpers/instance.h"
+#include <net-snmp/agent/instance.h>
 
 static oid unavailable_context_oid[] = {1,3,6,1,6,3,12,1,4,0};
 static oid unknown_context_oid[]     = {1,3,6,1,6,3,12,1,5,0};

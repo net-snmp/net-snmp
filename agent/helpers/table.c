@@ -14,7 +14,7 @@
 #include "mibincl.h"
 #include "tools.h"
 #include "snmp_agent.h"
-#include "table.h"
+#include <net-snmp/agent/table.h>
 
 #if HAVE_DMALLOC_H
 #include <dmalloc.h>

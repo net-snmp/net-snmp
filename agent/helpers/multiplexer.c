@@ -6,7 +6,7 @@
 #include "tools.h"
 #include "snmp_agent.h"
 #include "agent_registry.h"
-#include "multiplexer.h"
+#include <net-snmp/agent/multiplexer.h>
 
 #if HAVE_DMALLOC_H
 #include <dmalloc.h>

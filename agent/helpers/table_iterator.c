@@ -21,9 +21,9 @@
 #include "mibincl.h"
 #include "tools.h"
 #include "snmp_agent.h"
-#include "table.h"
-#include "serialize.h"
-#include "table_iterator.h"
+#include <net-snmp/agent/table.h>
+#include <net-snmp/agent/serialize.h>
+#include <net-snmp/agent/table_iterator.h>
 
 #if HAVE_DMALLOC_H
 #include <dmalloc.h>

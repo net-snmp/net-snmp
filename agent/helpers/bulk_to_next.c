@@ -9,7 +9,7 @@
 #include "mibincl.h"
 #include "tools.h"
 #include "snmp_agent.h"
-#include "bulk_to_next.h"
+#include <net-snmp/agent/bulk_to_next.h>
 
 #if HAVE_DMALLOC_H
 #include <dmalloc.h>
