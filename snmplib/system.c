@@ -412,14 +412,19 @@ in_addr_t get_myaddr (void)
 }
 
 
+#if !defined(solaris2) && !defined(linux)
 /*
- * Returns uptime in centiseconds(!).
+ * Returns boottime in centiseconds(!).
+ *	Caches this for future use.
  */
-long get_uptime (void)
+long get_boottime (void)
 {
-#if defined(bsdlike) && !defined(solaris2) && !defined(linux)
-    struct timeval boottime, now, diff;
-#ifndef	CAN_USE_SYSCTL
+    static long boottime_csecs = 0;
+    struct timeval boottime;
+#ifdef	CAN_USE_SYSCTL
+    int	    mib[2];
+    size_t  len;
+#else
     int kmem;
     static struct nlist nl[] = {
 #if !defined(hpux)
@@ -429,7 +434,21 @@ long get_uptime (void)
 #endif
 	    { (char*)"" }
 	};
+#endif
 
+
+    if ( boottime_csecs != 0 )
+	return( boottime_csecs );
+
+#ifdef CAN_USE_SYSCTL
+    mib[0] = CTL_KERN;
+    mib[1] = KERN_BOOTTIME;
+
+    len = sizeof(boottime);
+
+    sysctl(mib, 2, &boottime, &len, NULL, NULL);
+    boottime_csecs = (boottime.tv_sec * 100) + (boottime.tv_usec / 10000);
+#else						/* CAN_USE_SYSCTL */
     if ((kmem = open("/dev/kmem", 0)) < 0)
 	return 0;
     nlist(KERNEL_LOC, nl);
@@ -441,30 +460,30 @@ long get_uptime (void)
     lseek(kmem, (long)nl[0].n_value, L_SET);
     read(kmem, &boottime, sizeof(boottime));
     close(kmem);
-#else						/* CAN_USE_SYSCTL */
-    int	    mib[2];
-    size_t  len;
-
-    mib[0] = CTL_KERN;
-    mib[1] = KERN_BOOTTIME;
-
-    len = sizeof(boottime);
-
-    sysctl(mib, 2, &boottime, &len, NULL, NULL);
+    boottime_csecs = (boottime.tv_sec * 100) + (boottime.tv_usec / 10000);
 #endif						/* CAN_USE_SYSCTL */
 
-    gettimeofday(&now,(struct timezone *)0);
+    return( boottime_csecs );
+}
+#endif
 
-    now.tv_sec--;
-    now.tv_usec += 1000000L;
-    diff.tv_sec = now.tv_sec - boottime.tv_sec;
-    diff.tv_usec = now.tv_usec - boottime.tv_usec;
-    if (diff.tv_usec > 1000000L){
-	diff.tv_usec -= 1000000L;
-	diff.tv_sec++;
-    }
-    return ((diff.tv_sec * 100) + (diff.tv_usec / 10000));
-#endif /* bsdlike */
+/*
+ * Returns uptime in centiseconds(!).
+ */
+long get_uptime (void)
+{
+#if !defined(solaris2) && !defined(linux)
+    struct timeval now;
+    long boottime_csecs, nowtime_csecs;
+
+    boottime_csecs = get_boottime();
+    if (boottime_csecs == 0)
+	return 0;
+    gettimeofday(&now,(struct timezone *)0);
+    nowtime_csecs = (now.tv_sec * 100) + (now.tv_usec / 10000);
+
+    return (nowtime_csecs - boottime_csecs);
+#endif
 
 #ifdef solaris2
     kstat_ctl_t *ksc = kstat_open();
