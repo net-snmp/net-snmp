@@ -101,6 +101,7 @@ void set_configuration_directory(const char *dir);
 const char *get_configuration_directory(void);
 void set_persistent_directory(const char *dir);
 const char *get_persistent_directory(void);
+void handle_long_opt(const char *myoptarg);
 
 #ifdef __cplusplus
 }

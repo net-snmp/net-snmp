@@ -389,7 +389,16 @@ snmp_config_when(char *line, int when) {
 
 int
 snmp_config(char *line) {
-    return snmp_config_when(line, EITHER_CONFIG);
+    int ret = SNMP_ERR_NOERROR;
+    DEBUGMSGTL(("snmp_config", "remembering line \"%s\"\n", line));
+    snmp_config_remember(line); /* always remember it so it's read
+                                   processed after a free_config()
+                                   call */
+    if (ds_get_boolean(DS_LIBRARY_ID, DS_LIB_HAVE_READ_CONFIG)) {
+        DEBUGMSGTL(("snmp_config", "  ... processing it now\n"));
+        ret = snmp_config_when(line, NORMAL_CONFIG);
+    }
+    return ret;
 }
 
 void
@@ -590,6 +599,7 @@ read_configs (void)
 
   snmp_config_process_memories_when(NORMAL_CONFIG);
 
+  ds_set_boolean(DS_LIBRARY_ID, DS_LIB_HAVE_READ_CONFIG, 1);
   snmp_call_callbacks(SNMP_CALLBACK_LIBRARY, SNMP_CALLBACK_POST_READ_CONFIG,
                       NULL);
 }
@@ -604,6 +614,7 @@ read_premib_configs (void)
 
   snmp_config_process_memories_when(PREMIB_CONFIG);
 
+  ds_set_boolean(DS_LIBRARY_ID, DS_LIB_HAVE_READ_PREMIB_CONFIG, 1);
   snmp_call_callbacks(SNMP_CALLBACK_LIBRARY,
                       SNMP_CALLBACK_POST_PREMIB_READ_CONFIG,
                       NULL);
