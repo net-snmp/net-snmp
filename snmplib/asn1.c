@@ -2219,6 +2219,7 @@ asn_rbuild_length (u_char *data,
 {
     static const char *errpre = "build length";
     char ebuf[128];
+    int tmp_int;
     
     u_char    *start_data = data;
 
@@ -2245,7 +2246,8 @@ asn_rbuild_length (u_char *data,
             return NULL;
         }
         *data-- = length & 0xff;
-        *data-- = (start_data - data) | 0x80;
+        tmp_int = (start_data - data);
+        *data-- = tmp_int | 0x80;
         *datalength -= 2;
     }
     return data;
