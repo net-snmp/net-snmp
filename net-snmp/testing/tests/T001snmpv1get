@@ -13,7 +13,7 @@ HEADER SNMPv1 get of system.sysUpTime.0
 
 STARTAGENT
 
-CAPTURE "snmpget -On $SNMP_FLAGS -v 1 udp:localhost:$SNMP_SNMPD_PORT testcommunity .1.3.6.1.2.1.1.3.0"
+CAPTURE "snmpget -On $SNMP_FLAGS -c testcommunity -v 1 udp:localhost:$SNMP_SNMPD_PORT .1.3.6.1.2.1.1.3.0"
 
 STOPAGENT
 
