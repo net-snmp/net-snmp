@@ -264,13 +264,21 @@ void print_config_handlers (void)
 int linecount;
 const char *curfilename;
 
+struct config_line *
+read_config_get_handlers(const char *type) {
+    struct config_files *ctmp = config_files;
+    for(;ctmp != NULL && strcmp(ctmp->fileHeader,type); ctmp = ctmp->next);
+    if (ctmp)
+        return ctmp->start;
+    return NULL;
+}
+
 void read_config_with_type(const char *filename, 
 			   const char *type)
 {
-  struct config_files *ctmp = config_files;
-  for(;ctmp != NULL && strcmp(ctmp->fileHeader,type); ctmp = ctmp->next);
+  struct config_line *ctmp = read_config_get_handlers(type);
   if (ctmp)
-    read_config(filename, ctmp->start, EITHER_CONFIG);
+    read_config(filename, ctmp, EITHER_CONFIG);
   else
     DEBUGMSGTL(("read_config", "read_config: I have no registrations for type:%s,file:%s\n",
            type, filename));
@@ -344,12 +352,34 @@ void read_config(const char *filename,
       if ((cptr = skip_white(cptr)))
 	{
           cptr = copy_word(cptr,token);
+          if (token[0] == '[') {
+              token[strlen(token)-1] = '\0';
+              lptr = read_config_get_handlers(&token[1]);
+              if (lptr == NULL) {
+                  sprintf(tmpbuf,"No handlers regestered for type %s.",
+                          &token[1]);
+                  config_perror(tmpbuf);
+                  continue;
+              }
+              DEBUGMSGTL(("read_config","Switching to new context: %s%s\n",
+                          ((cptr)?"(this line only) ":""),&token[1]));
+              if (cptr == NULL) {
+                  /* change context permanently */
+                  line_handler = lptr;
+                  continue;
+              } else {
+                  /* the rest of this line only applies. */
+                  cptr = copy_word(cptr,token);
+              }
+          } else {
+              lptr = line_handler;
+          }
           if (cptr == NULL) {
             sprintf(tmpbuf,"Blank line following %s token.", token);
             config_perror(tmpbuf);
           } else {
-            for(lptr = line_handler, done=0;
-                lptr != NULL && !done;
+              
+            for(done=0; lptr != NULL && !done;
                 lptr = lptr->next) {
               if (!strcasecmp(token,lptr->config_token)) {
                 if (when == EITHER_CONFIG || lptr->config_time == when) {

@@ -41,11 +41,52 @@ The snmp.conf configuration file is intended to be a application suite
 wide configuration file that supports directives that are useful for
 controlling the fundamental nature of all of the snmp applications,
 such as how they all manipulate and parse the textual SNMP mib files.
+.SH "SWITCHING CONFIGURATION TYPES IN MID-FILE"
+It's possible to switch in mid-file the configuration type that the
+parser is supposed to be reading.  Since that sentence doesn't make
+much sense, lets give you an example: say that you wanted to turn on
+packet dumping output for the agent by default, but you didn't want to
+do that for the rest of the applications (ie, snmpget, snmpwalk,
+...).  Normally to enable packet dumping in the configuration file
+you'd need to put a line like:
+.PP
+.RS
+dumpPacket true
+.RE
+.PP
+into the snmp.conf file.  But, this would turn it on for all of the
+applications.  So, instead, you can put the same line in the
+snmpd.conf file so that it only applies to the snmpd demon.  However,
+you need to tell the parser to expect this line.  You do this by
+putting a special type specification token inside a [] set.  In other
+words, inside your snmpd.conf file you could put the above snmp.conf
+directive by adding a line like so:
+.PP
+.RS
+[snmp] dumpPacket true
+.RE
+.PP
+This tells the parser to parse the above line as if it were inside a
+snmp.conf file instead of an snmpd.conf file.  If you want to parse a
+bunch of lines rather than just one then you can make the context
+switch apply to the remainder of the file or until the next context
+switch directive by putting the special token on a line by itself:
+.PP
+.RS
+.nf
+# make this file handle snmp.conf tokens:
+[snmp]
+dumpPacket true
+logTimestamp true
+# return to our original snmpd.conf tokens:
+[snmpd]
+rocommunity mypublic
+.RE
 .SH COMMENTS
 .PP
 Any lines beginning with the character '#' in the configuration files
 are treated as a comment and are not parsed.
-.SH "API Interface"
+.SH "API INTERFACE"
 .PP
 Information about writing C code that makes use of this system in
 either the agent's mib modules or in applications can be found in the
