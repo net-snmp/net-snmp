@@ -141,13 +141,14 @@ Where can I get it?
 
 WWW:
   Download:
-    - http://download.sourceforge.net/net-snmp/
+    - http://www.net-snmp.org/download
   Web page:
-    - http://www.netsnmp.org/
-  Project page:
-    - http://sourceforge.net/projects/net-snmp/
+    - http://www.net-snmp.org/
+  Sourceforge Project page:
+    - http://www.net-snmp.org/project
 
 FTP:
+  - ftp://download.sourceforge.net/pub/sourceforge/net-snmp/ucd-snmp.tar.gz
   - ftp://ucd-snmp.ucdavis.edu/ucd-snmp.tar.gz
   - ftp://sunsite.cnlab-switch.ch:/mirror/ucd-snmp/ucd-snmp.tar.gz
   - ftp://ftp.win.ne.jp/pub/network/snmp/ucd-snmp/ucd-snmp.tar.gz
@@ -166,12 +167,12 @@ What documentation is available?
 	EXAMPLE.conf
 	man pages for the individual tools, files and the API
 	A guide for extending the agent
-	A Tutorial at http://www.netsnmp.org/tutorial/
+	A Tutorial at http://www.net-snmp.org/tutorial/
 
       Most of this documentation (plus archives of the mailing lists)
 	 is also available on our web page:
 
-        	http://www.netsnmp.org/
+        	http://www.net-snmp.org/
 
 
 
@@ -284,8 +285,8 @@ How do I find out about new releases?
   	net-snmp-announce@lists.sourceforge.net
 
   To be added to (or removed from) this list, visit
-  http://lists.sourceforge.net/mailman/listinfo/net-snmp-announce.  Or
-  you can send a message to the address
+  http://www.net-snmp.org/lists/net-snmp-announce/.  Or you can send a
+  message to the address
   'net-snmp-announce-request@lists.sourceforge.net' with a subject
   line of 'subscribe' (or 'unsubscribe' as appropriate).
 
@@ -295,7 +296,7 @@ How do I find out about new releases?
 
   Patches to fix known problems are also made available via the web site:
 
-        http://sourceforge.net/patch/?group_id=12694
+        http://www.net-snmp.org/patches/
 
 
 
@@ -307,10 +308,9 @@ How can I find out what other people are doing?
   	net-snmp-users@lists.sourceforge.net
 
   To be added to (or removed from) this list, visit
-  http://lists.sourceforge.net/mailman/listinfo/net-snmp-users.  Or
-  you can send a message to the address
-  'net-snmp-users-request@lists.sourceforge.net' with a subject line
-  of 'subscribe' (or 'unsubscribe' as appropriate).
+  http://www.net-snmp.org/lists/net-snmp-users.  Or you can send a
+  message to the address 'net-snmp-users-request@lists.sourceforge.net'
+  with a subject line of 'subscribe' (or 'unsubscribe' as appropriate).
 
   To find out what the developers are doing, and to help them out, please
   read the PORTING file enclosed with the package.
@@ -321,22 +321,22 @@ How do I submit a patch or bug report?
 -------------------------------------
 
   All bug reports should be submitted to the bug database through the
-  interface found at http://sourceforge.net/bugs/?group_id=12694.  Be
+  interface found at http://www.net-snmp.org/bugs/.  Be
   sure to include the version of the package that you've been working
   with, the output of the command 'uname -a', the precise command that
   triggers the problem and a copy of the output it produces.
 
     All patches should be submitted to the patch manager at
-  http://sourceforge.net/patch/?group_id=12694.  If possible, submit a
+  http://www.net-snmp.org/patches/.  If possible, submit a
   bug report describing the patch as well (referencing it by its patch
   number) since patch manager doesn't contain a decent description
   field.
 
     There is also a support database at
-  http://sourceforge.net/patch/?group_id=12694 where "I need help
-  with" questions can be submitted.  Be advised that the people
-  answering these kinds of questions are doing so out of the goodness
-  of their hearts, as this is an otherwise unsupported package.
+  http://www.net-snmp.org/support/ where "I need help with" questions
+  can be submitted.  Be advised that the people answering these kinds
+  of questions are doing so out of the goodness of their hearts, as
+  this is an otherwise unsupported package.
 
     You can also mail the net-snmp-users@lists.sourceforge.net list
   with your questions and see if anyone there can help you.
@@ -840,7 +840,7 @@ How do I send traps and notifications?
   CODING sections.
 
   You should also read the snmptrap tutorial at
-	http://www.netsnmp.org/tutorial/commands/snmptrap.html
+	http://www.net-snmp.org/tutorial/commands/snmptrap.html
   which will help you understand everything you need to know about traps.
 
 
@@ -875,7 +875,7 @@ How do I handle traps and notifications?
   of mapping SNMPv1 traps to SNMPv2 OIDs.
 
   There's a tutorial with more details on the web site at
-	http://www.netsnmp.org/tutorial/commands/snmptrap.html
+	http://www.net-snmp.org/tutorial/commands/snmptrap.html
   
 
 
@@ -1293,7 +1293,7 @@ How can I get more information about these MIB file problems?
   There are other '-P' options to control various aspects of MIB parsing.
   See the 'snmptranslate(1)' and 'snmpcmd(1)' man pages for more details,
   or the tutorial at
-	http://www.netsnmp.org/tutorial/commands/snmptranslate.html
+	http://www.net-snmp.org/tutorial/commands/snmptranslate.html
 
 
 

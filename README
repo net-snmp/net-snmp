@@ -75,13 +75,14 @@ AVAILABILITY
 
   WWW:
     Download:
-      - http://download.sourceforge.net/net-snmp/
+      - http://www.net-snmp.org/download/
     Web page:
-      - http://www.netsnmp.org/
+      - http://www.net-snmp.org/
     Project page:
-      - http://sourceforge.net/projects/net-snmp/
+      - http://www.net-snmp.org/project/
 
   FTP:
+    - ftp://download.sourceforge.net/pub/sourceforge/net-snmp/ucd-snmp.tar.gz
     - ftp://ucd-snmp.ucdavis.edu/ucd-snmp.tar.gz
     - ftp://sunsite.cnlab-switch.ch:/mirror/ucd-snmp/ucd-snmp.tar.gz
     - ftp://ftp.win.ne.jp/pub/network/snmp/ucd-snmp/ucd-snmp.tar.gz
@@ -91,8 +92,8 @@ AVAILABILITY
 
 WEB PAGES
 
-  http://www.netsnmp.org/
-  http://sourceforge.net/projects/net-snmp/
+  http://www.net-snmp.org/
+  http://www.net-snmp.org/project/
 
   Make sure you check out the logo there, which is created using
   postcards submitted from various locations that make use of the
@@ -150,7 +151,7 @@ MAILING LISTS
 
     To subscribe to these lists, please see:
   
-      http://sourceforge.net/mail/?group_id=12694
+      http://www.net-snmp.org/lists/
 
     The lists you definitely want to subscribe to is the
     net-snmp-announce@lists.sourceforge.net list and the
@@ -163,7 +164,7 @@ MAILING LISTS
   Archives:
     The archives for these mailing lists can be found by following links at
 
-      http://sourceforge.net/mail/?group_id=12694
+      http://www.net-snmp.org/lists/
 
 AGENT EXTENSIBILITY
 
@@ -176,7 +177,7 @@ AGENT EXTENSIBILITY
   re-run configure and re-compile (or link against its libraries).  No
   modification of the distributed source files are necessary.  See the
   following files for details on how to go about this:
-  http://www.netsnmp.org/tutorial/toolkit/, AGENT.txt,
+  http://www.net-snmp.org/tutorial/toolkit/, AGENT.txt,
   agent/mibgroup/examples/example.c, and agent/mibgroup/examples/example.h.
 
   Also, see the local/mib2c program and its README file for help in
@@ -207,14 +208,14 @@ SUBMITTING BUG REPORTS
   as detailed information about exactly what is wrong.
 
   To submit a bug report, please use the web interface at
-  http://sourceforge.net/bugs/?group_id=12694.  It is a full-fledged
+  http://www.net-snmp.org/bugs/.  It is a full-fledged
   bug-tracking system that will allow you to search for already
   existing bug reports as well as track the status of your report as
   it is processed by the core developers.
 
   If you intend to submit a patch as well, please read the PORTING
   file before you do so and then submit it to
-  http://sourceforge.net/patch/?group_id=12694.
+  http://www.net-snmp.org/patches/.
 
 CLOSING
 
