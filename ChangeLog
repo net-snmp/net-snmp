@@ -1,5 +1,453 @@
 -------------------------------------------------------------------------------
 
+Changes: V4.2.5 -> V4.2.6pre1
+
+2002-08-24 18:25  driehuis
+
+   * agent/mibgroup/ucd-snmp/diskio.c, configure.in:
+
+   Merge from HEAD: detect the requirement for linking with -ldevstat.
+   Ugly hack to make sure diskio device names include the device number.
+   
+2002-08-23 16:46  dts12
+
+   * snmplib/Makefile.in:
+
+   make depend
+   
+2002-08-22 12:06  jbpn
+
+   * agent/snmpd.c:
+
+     - stop and restart logging when HUPped.  This allows logfiles to be
+       rotated and so forth.
+   
+2002-08-19 15:46  jbpn
+
+   * FAQ:
+
+     - don't use positional community parameter in examples
+     - break a couple of over-long lines
+     - mention netsnmp_ variant of ds_set_ function
+   
+2002-08-19 10:44  dts12
+
+   * FAQ:
+
+   Add an entry about the snmptrapd/AgentX warning message.
+   
+2002-08-06 08:17  jbpn
+
+   * snmplib/snmp_alarm.c:
+
+     - add debugging output when all alarms unregistered
+   
+2002-08-06 08:10  jbpn
+
+   * agent/mibgroup/agentx/subagent.c:
+
+     - set main_session to NULL in subagent_shutdown().  This (along with the
+       deregistration of all alarms) allows AgentX functionality to be
+       stopped and restarted in subagents.
+     - Thanks to Vishal Verma for this patch (#558517)
+   
+2002-08-06 08:08  jbpn
+
+   * snmplib/: snmp_alarm.c, snmp_alarm.h,
+   snmp_api.c:
+
+     - add snmp_alarm_unregister_all() function
+     - call it from snmp_shutdown()
+     - thanks to Vishal Verma for providing this patch
+   
+2002-08-01 09:12  dts12
+
+   * README.win32:
+
+   Fuller instructions for downloading the Microsoft Platform SDK.
+   
+2002-07-30 16:10  dts12
+
+   * local/snmpconf.dir/snmp.conf/output:
+
+   Recognise '0' as a valid setting for suffixPrinting.  See Bug #567451
+   
+2002-07-30 09:39  dts12
+
+   * FAQ:
+
+   Mention the need to escape quotes when querying string-indexed tables.
+   
+2002-07-29 10:59  jbpn
+
+   * agent/mibgroup/kernel_sunos5.c:
+
+     - detect `dmfe' ethernet cards as found on Netra X1 machines.
+       Thanks to John Olson for verifying this fix.
+   
+2002-07-26 16:38  dts12
+
+   * man/: snmpd.1.def, snmpd.conf.5.def:
+
+   Use a different syntax for alternative values to keep DocBook happy - see Bug #585654
+   
+2002-07-26 15:24  dts12
+
+   * FAQ:
+
+   A bit more detail on mib2c, plus the non-writeability of sys{Location,Contact}
+   
+2002-07-26 13:25  dts12
+
+   * FAQ:
+
+   Another entry about invalid use of mib2c.
+   
+2002-07-23 15:45  dts12
+
+   * man/mib_api.3:
+
+   Fix the descriptions of the 'sprint_realloc' calls, to include the 'allow_realloc' parameter.
+   
+2002-07-18 17:12  dts12
+
+   * man/snmptrapd.8:
+
+   Fix markup problem on snmptrapd man page (Bug #583329)
+   
+2002-07-18 17:06  dts12
+
+   * apps/encode_keychange.c:
+
+   Fix off-by-one buffer overflow (patch #577261)
+   
+2002-07-04 14:00  dts12
+
+   * agent/mibgroup/host/hr_storage.c,
+   man/snmpd.conf.5.def:
+
+   Apply Johannes Schmidt-Fischer's NetworkDisk patch #554554
+   
+2002-07-04 13:58  dts12
+
+   * agent/mibgroup/host/: hr_filesys.c, hr_filesys.h
+:
+
+   Apply Johannes Schmidt-Fischer's NFS filesystem patch #554553
+   (simplified to avoid the re-indentation - which makes it easier to see
+    what's changed.  The whole HostRes group needs cleaning up anyway!)
+   
+2002-07-03 23:03  dts12
+
+   * agent/snmp_agent.c:
+
+   Oops - missing a brace.   Sorry!
+   
+2002-07-03 11:42  dts12
+
+   * agent/mibgroup/util_funcs.c:
+
+   Shut the agent down cleanly before restarting.
+   This closes any SNMP/AgentX ports as well.
+   
+2002-07-03 11:28  dts12
+
+   * agent/mibgroup/util_funcs.c:
+
+   OID sub-identifiers are unsigned, so treating them as signed can
+   give the wrong results with large values.
+   Also reject '0' as a valid index value (see the definition of a "simple table")
+   
+2002-07-03 11:20  dts12
+
+   * snmplib/system.h:
+
+   Ensure in_addr_t is defined.
+   
+2002-07-03 11:10  dts12
+
+   * agent/snmp_agent.c:
+
+   Check for insufficient variables to fulfil a GetBulk "non-repeater" count.
+   Problem spotted and analysed by Shantha Kumara.
+   
+2002-07-03 10:52  dts12
+
+   * acconfig.h, configure, configure.in
+, config.h.in:
+
+   Testing for <sys/disklabel.h> requires <machine/types.h> on NetBSD 1.5.
+   Reported by Felicia Neff.
+   
+2002-07-01 15:53  dts12
+
+   * snmplib/asn1.c:
+
+   Encode/Decode OIDs of the form 2.X (X > 40) correctly.
+   
+2002-06-27 11:09  dts12
+
+   * agent/mibgroup/mibII/snmp_mib.c:
+
+   Validate new snmpEnableAuthenTraps value before trying to use it.
+   Spotted & fixed by Shantha Kumara
+   
+2002-06-25 10:55  jbpn
+
+   * EXAMPLE.conf.def:
+
+     - mention that setting sysLocation et al. in snmpd.conf makes them
+       read-only
+   
+     - also change syntax of all example command line tools to use newer
+       -c COMMUNITY syntax not positional parameter
+   
+2002-06-24 22:29  nba
+
+   * snmplib/parse.c:
+
+   Yuck. Why isn't C like python
+   
+2002-06-23 22:53  hardaker
+
+   * perl/SNMP/SNMP.xs:
+
+   fix reported by Willem Dekker for Windows.  Bug #543194 fixed.
+   
+2002-06-20 06:08  hardaker
+
+   * snmplib/mib.c:
+
+   fix sprint_value to call appropriate sub-function.
+     (reported as a bug to the perl SNMP module by Al Sorrell)
+   
+2002-06-15 22:54  nba
+
+   * mibs/: IANA-ADDRESS-FAMILY-NUMBERS-MIB.txt, INET-ADDRESS-MIB.txt,
+   Makefile.mib, ianalist, rfclist:
+
+   Update to current MIB texts, and reorganized IANA ftp site
+   
+2002-06-15 22:53  nba
+
+   * configure.in:
+
+   A configure.in that matches configure
+   
+2002-06-11 14:23  nba
+
+   * snmplib/mib.c:
+
+   Reinstate patches for several mibs defining different names for identical
+   oids.
+   This was apparently lost by the realloc patches.
+   
+2002-06-11 12:01  nba
+
+   * snmplib/snmp_client.c:
+
+   Someone did something really bad without testing it
+   
+2002-06-11 12:00  nba
+
+   * snmplib/system.h:
+
+   typedef needs semicolon
+   
+2002-06-10 12:05  dts12
+
+   * snmplib/snmpv3.c:
+
+   Handle errors in decoding engineIDs (rather than assigning -1 to
+   an unsigned variable).  Spotted by Alex Ruzin.
+   
+2002-06-10 11:27  jbpn
+
+   * agent/mibgroup/ucd-snmp/vmstat_solaris2.c:
+
+     - add \n to a few log messages
+   
+2002-06-10 11:10  jbpn
+
+   * agent/mibgroup/mibII/interfaces.c:
+
+     - return appropriate ifType for ATM interfaces
+   
+2002-06-10 10:47  rstory
+
+   * agent/mibgroup/util_funcs.c, agent/mibgroup/util_funcs.h,
+   snmplib/tools.c, snmplib/tools.h:
+
+   change marker/atime functions to use u_long instead of int, to (hopefully)
+   fix uptime problems reported in bugs 418335,487791.
+   
+2002-06-10 10:07  dts12
+
+   * FAQ:
+
+   Mention the other perl modules, introduced with v5 (particularly 'default_store')
+   
+2002-06-10 09:28  dts12
+
+   * FAQ:
+
+   New entry describing possible problems with trap handlers.
+   
+2002-06-07 23:23  rstory
+
+   * snmplib/system.h, acconfig.h, configure
+, configure.in, config.h.in:
+
+   typedefs for in_addr_t and socklen_t if not defined for a system
+   
+2002-06-07 16:17  dts12
+
+   * agent/mibgroup/mibII/interfaces.c:
+
+   Only null-terminate the interface name while it's actually being copied.
+   Restore the data line afterwards, so the debugging output is meaningful.
+   
+2002-06-06 09:12  dts12
+
+   * aclocal.m4, configure:
+
+   Don't differenciate between elf- and a.out-based NetBSD systems.
+   (Problem highlighted by Felicia Neff)
+   
+2002-06-05 12:43  dts12
+
+   * man/snmpcmd.1:
+
+   Brief mention of the need to quote OIDs containing string indexes,
+   to protect the double quotes from the shell.
+   
+2002-06-05 07:55  nba
+
+   * apps/snmptable.c:
+
+   Add a missing & operator - segfaults when using getbulk
+   
+2002-05-30 03:57  hardaker
+
+   * snmplib/snmp_alarm.c:
+
+   set the storage pointer to NULL, as pointed out by Mark Hoy.
+   
+2002-05-29 15:45  dts12
+
+   * snmplib/snmp_api.c:
+
+   Set REUSEADDR so that specifying the same port twice doesn't kill the agent.
+   (Suggested by Robert Hastings)
+   
+2002-05-29 15:44  dts12
+
+   * FAQ:
+
+   Expand on when OpenSSL is necessary, and how to compile using it.
+   
+2002-05-29 10:42  dts12
+
+   * FAQ:
+
+   Reference both versions of the tutorial (since this document is used
+   for building the on-line version of the FAQ)
+   
+2002-05-29 10:17  dts12
+
+   * FAQ:
+
+   Clarify that trap filtering is not yet operational.
+   
+2002-05-29 00:56  hardaker
+
+   * snmplib/snmp_client.c:
+
+   don't copy NULL variables.
+   
+2002-05-29 00:53  hardaker
+
+   * snmplib/: snmp.c, asn1.c, snmp_api.c
+:
+
+   set oid length to zero when you can't parse it.
+   
+2002-05-27 09:32  dts12
+
+   * agent/mibgroup/snmpv3/usmUser.c,
+   apps/snmptrapd.c:
+
+   Tweak 'usmUser' help string to accurately reflect which bits are optional.
+   Reported by Ali Chanaui.
+   
+2002-05-27 09:22  dts12
+
+   * man/snmpd.conf.5.def:
+
+   Document the limit on the number of "file" directives.
+   
+2002-05-21 13:20  dts12
+
+   * agent/mibgroup/ucd-snmp/memory.c:
+
+   Latch memory reporting at 2^31-1, rather than 2^32-1 since these
+   objects are defined as (signed) Integer32.
+   Only latch if the value is *greater* than this threshold, not less!
+   
+2002-05-15 10:02  jbpn
+
+   * agent/mibgroup/smux/smux.c:
+
+     - initialise smux_listen_sd to avoid problems noted in bug #545448
+       (a bit unreasonable in my view but it can't do any harm).
+   
+2002-05-13 09:29  dts12
+
+   * agent/snmp_agent.c:
+
+   Act on a non-standard port parameter, passed to init_master_agent()
+   Reported by Juergen Froese
+   
+2002-05-10 23:13  hardaker
+
+   * agent/snmp_agent.c:
+
+   Apply patch from Robert Hastings to do proper stream flag removal
+   
+2002-05-10 22:04  hardaker
+
+   * agent/mibgroup/mibII/vacm_vars.c:
+
+   fix vacm problem on sets with OIDs containing large numbers as noted
+   by Vinay Gaonkar on the -coders mailing list.
+   
+2002-05-09 17:12  hardaker
+
+   * agent/mibgroup/ucd-snmp/memory_solaris2.c:
+
+   patch from Takumi Kadode to fix memory usage on solaris
+   
+2002-05-08 17:58  hardaker
+
+   * agent/snmp_vars.c:
+
+   fix bug mentioned in -users list where agentx_add_request isn't available.
+   
+2002-05-08 11:35  dts12
+
+   * agent/snmp_agent.c:
+
+   Fix negative values for non-repeaters and max-repetitions.
+   (Reported by Srini Kode)
+   
+2002-05-07 04:58  rstory
+
+   * mibs/Makefile.mib:
+
+   fix missing $ noted by John Mills on the coders list
+
+-------------------------------------------------------------------------------
+
 Changes: V4.2.4 -> V4.2.5
 
 2002-05-06 16:13  hardaker
