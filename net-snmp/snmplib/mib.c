@@ -5610,6 +5610,7 @@ snmp_parse_oid(const char *argv, oid * root, size_t * rootlen)
             return root;
         }
     } else if (netsnmp_ds_get_boolean(NETSNMP_DS_LIBRARY_ID, NETSNMP_DS_LIB_REGEX_ACCESS)) {
+	clear_tree_flags(tree_head);
         if (get_wild_node(argv, root, rootlen)) {
             return root;
         }
@@ -5625,6 +5626,7 @@ snmp_parse_oid(const char *argv, oid * root, size_t * rootlen)
         }
         *rootlen = savlen;
         DEBUGMSGTL(("parse_oid", "wildly parsing\n"));
+	clear_tree_flags(tree_head);
         if (get_wild_node(argv, root, rootlen)) {
             return root;
         }
