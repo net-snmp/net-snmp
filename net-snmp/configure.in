@@ -1469,6 +1469,11 @@ fi
 if test "x$PARTIALTARGETOS" = "xmingw32"; then
   # migw32 uses ';' as the environment variable seperator char
   DEFAULT_MIBS=`echo "$DEFAULT_MIBS" | sed 's/:/;/g'`
+  default_mibs=`echo "$default_mibs" | sed 's/:/;/g'`
+elif test "x$PARTIALTARGETOS" = "xcygwin"; then
+  # cygwin uses ';' as the environment variable seperator char
+  DEFAULT_MIBS=`echo "$DEFAULT_MIBS" | sed 's/:/;/g'`
+  default_mibs=`echo "$default_mibs" | sed 's/:/;/g'`
 fi
 AC_DEFINE_UNQUOTED(DEFAULT_MIBS,"$DEFAULT_MIBS")
 AC_MSG_RESULT($DEFAULT_MIBS)
