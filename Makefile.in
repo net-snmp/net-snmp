@@ -24,7 +24,7 @@ INCLUDESUBDIR2=machine
 INCLUDESUBDIRHEADERS2=generic.h
 INSTALLBUILTHEADERS=include/net-snmp/net-snmp-config.h
 INSTALLBINSCRIPTS=net-snmp-config
-INSTALLUCDHEADERS=ucd-snmp-config.h version.h mib_module_config.h
+INSTALLUCDHEADERS=ucd-snmp-config.h version.h mib_module_config.h agent_module_config.h
 
 #
 # other install rules.
@@ -184,8 +184,13 @@ configclean: makefileclean
 		net-snmp-config net-snmp-config-x configure-summary
 	rm -f mibs/.index
 	rm -f include/net-snmp/agent/mib_module_config.h		\
+		include/net-snmp/agent/agent_module_config.h		\
 		include/net-snmp/library/snmpv3-security-includes.h \
 		snmplib/snmpsm_init.h                   \
+		agent/mibgroup/agent_module_includes.h 	\
+		agent/mibgroup/agent_module_inits.h 	\
+		agent/mibgroup/agent_module_shutdown.h 	\
+		agent/mibgroup/agent_module_dot_conf.h  \
 		agent/mibgroup/mib_module_includes.h 	\
 		agent/mibgroup/mib_module_inits.h 	\
 		agent/mibgroup/mib_module_shutdown.h 	\
