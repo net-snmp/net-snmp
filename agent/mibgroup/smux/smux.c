@@ -210,7 +210,7 @@ init_smux(void)
 
 	fprintf(stderr, "sdlen in smux_init: %d\n", sdlen);
 	fprintf(stderr, "[smux_init] done; smux_sd is %d, smux_port is %d\n", smux_sd,
-		 lo_socket.sin_port);
+		 ntohs(lo_socket.sin_port));
 
 	return SMUXOK;
 }
