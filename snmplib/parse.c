@@ -347,7 +347,7 @@ static int  name_hash (char *);
 static void init_node_hash (struct node *);
 static void print_error (char *, char *, int);
 #ifndef xmalloc
-static void *xmalloc (unsigned);
+static void *xmalloc (size_t);
 #endif
 static void xmalloc_stats (FILE *);
 #ifndef xstrdup
@@ -548,7 +548,7 @@ static long xmalloc_errors = 0;
 
 #ifndef xmalloc
 static void *
-xmalloc(unsigned num)
+xmalloc(size_t num)
 {
     void *p;
     /* this is to fix (what seems to be) a problem with the IBM RT C
@@ -584,15 +584,15 @@ static char *xstrdup (char *s)
 #endif
 
 /* like calloc, but uses our very own memory allocator. */
-static char *xcalloc (size_t cnt,
+static void *xcalloc (size_t cnt,
 		      size_t siz)
 {
     size_t sizeit = cnt * siz;
-    char *ss = (char *) xmalloc (sizeit);
+    void *ss = (char *) xmalloc (sizeit);
     if (ss == NULL)
       return (NULL);
 
-    memset((void*)ss, 0, sizeit);
+    memset(ss, 0, sizeit);
     return ss;
 }
 
