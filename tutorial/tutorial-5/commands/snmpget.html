@@ -23,10 +23,13 @@ system.sysUpTime.0 = Timeticks: (586731977) 67 days, 21:48:39.77
       <i>system.sysUpTime.0</i>.
 
     <p>
-      All of the net-snmp utilities use SNMPv1 by default and expects
-      the community name to follow the host name.  SNMPv2c, which is
-      similar in nature to SNMPv1 with small modifications, still used 
-      clear-text community names as "passwords" to authenticate the
+      Earlier versions of the ucd-snmp utilities used SNMPv1 by default
+      and expected the community name to follow the host name. The net-snmp
+      versions of these tools now typically use SNMPv3 by default, and require
+      both the version <B>and</B> the community string to be given as
+      command line options (as illustrated in these examples). SNMPv2c,
+      which is similar in nature to SNMPv1 with small modifications, still
+      used clear-text community names as "passwords" to authenticate the
       issuer of the command.  The result from a command using the
       SNMPv2c version would have been the same:
 <pre>
