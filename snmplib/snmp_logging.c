@@ -169,9 +169,9 @@ decode_facility( char *optarg )
     case 'd':
     case 'D':
         return LOG_DAEMON;
-    case 'i':
-    case 'I':
-        return LOG_INFO;
+    case 'u':
+    case 'U':
+        return LOG_USER;
     case '0':
         return LOG_LOCAL0;
     case '1':
