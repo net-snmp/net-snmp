@@ -1,6 +1,0 @@
-#!/bin/sh
-
-. ../eval_tools.sh
-../rfc1213/run 3
-real_return_value=$?
-
