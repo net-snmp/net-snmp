@@ -172,6 +172,7 @@ register_config_handler(const char *type_param,
     (*ltmp)->config_token	 = strdup(token);
     if (help != NULL)
       (*ltmp)->help = strdup(help);
+    else (*ltmp)->help = NULL;
 
   }
 
