@@ -111,7 +111,7 @@ static int
 _${table}_loop_cleanup_context( $mfd_aue_wrap_param_decl,
                             ${context}_ref_loop_ctx *ref)
 {
-   DEBUGTRACE;
+   DEBUGMSGTL(("internal:${context}:_${table}_loop_cleanup_context","called\n"));
 
    return ${table}_loop_cleanup_context($mfd_aue_wrap_param->user_ctx, ref);
 }
@@ -124,7 +124,7 @@ static int
 _${table}_loop_save_position( $mfd_aue_wrap_param_decl, ${context}_ref_loop_ctx *ref,
                          ${context}_ref_loop_ctx *ref_copy, int reuse)
 {
-   DEBUGTRACE;
+   DEBUGMSGTL(("internal:${context}:_${table}_loop_save_position","called\n"));
 
    return ${table}_loop_save_position($mfd_aue_wrap_param->user_ctx, ref,
                                  ref_copy, reuse);
@@ -140,7 +140,7 @@ _${table}_loop_get_first_wrapper($mfd_aue_wrap_param_decl,
                            ${context}_ref_rowreq_ctx * rowreq_ctx_ref)
 {
     int rc;
-    DEBUGTRACE;
+    DEBUGMSGTL(("internal:${context}:_${table}_loop_get_first_wrapper","called\n"));
 
     rc = ${table}_loop_get_first($mfd_aue_wrap_param->user_ctx, loop_ctx_ref,
                                  rowreq_ctx_ref);
@@ -170,7 +170,7 @@ _${table}_loop_get_next_wrapper($mfd_aue_wrap_param_decl,
                           ${context}_ref_rowreq_ctx * rowreq_ctx_ref)
 {
     int rc;
-    DEBUGTRACE;
+    DEBUGMSGTL(("internal:${context}:_${table}_loop_get_next_wrapper","called\n"));
 
     rc = ${table}_loop_get_next($mfd_aue_wrap_param->user_ctx, loop_ctx_ref,
                                 rowreq_ctx_ref);
@@ -202,7 +202,7 @@ _${table}_loop_get_data_wrapper($mfd_aue_wrap_param_decl,
 {
 //    ${context}_rowreq_ctx *orig_ctx = rowreq_ctx_ref->rowreq_ctx;
 
-    DEBUGTRACE;
+    DEBUGMSGTL(("internal:${context}:_${table}_loop_get_data_wrapper","called\n"));
 
     return ${table}_loop_get_data($mfd_aue_wrap_param->user_ctx, loop_ctx_ref, rowreq_ctx_ref);
 }
@@ -215,7 +215,7 @@ _${table}_loop_get_data_wrapper($mfd_aue_wrap_param_decl,
 void
 _${table}_container_init(${context}_interface_ctx *if_ctx)
 {
-    DEBUGTRACE;
+    DEBUGMSGTL(("internal:${context}:_${table}_container_init","called\n"));
     
     if_ctx->container = netsnmp_container_iterator_get(/** registration */
         if_ctx,
@@ -329,7 +329,7 @@ int
 ${table}_loop_get_first( $mfd_aue_param_decl, ${context}_ref_loop_ctx *loop_ctx_ref,
                     ${context}_ref_rowreq_ctx *rowreq_ctx_ref)
 {
-    DEBUGTRACE;
+    DEBUGMSGTL(("verbose:${table}_loop_get_first","called\n"));
 
     netsnmp_assert(rowreq_ctx_ref);
     netsnmp_assert(loop_ctx_ref);
@@ -468,7 +468,7 @@ int
 ${table}_loop_get_next( $mfd_aue_param_decl, ${context}_ref_loop_ctx *loop_ctx_ref,
                         ${context}_ref_rowreq_ctx *rowreq_ctx_ref)
 {
-    DEBUGTRACE;
+    DEBUGMSGTL(("verbose:${table}_loop_get_next","called\n"));
 
     netsnmp_assert(loop_ctx_ref && loop_ctx_ref->loop_ctx);
     netsnmp_assert(rowreq_ctx_ref);
@@ -597,7 +597,7 @@ ${table}_loop_save_position($mfd_aue_param_decl,
                        ${context}_ref_loop_ctx *save_loop_ctx_ref,
                        int reuse)
 {
-    DEBUGTRACE;
+    DEBUGMSGTL(("verbose:${table}_loop_save_position","called\n"));
 
     netsnmp_assert(loop_ctx_ref && save_loop_ctx_ref);
 
@@ -697,7 +697,7 @@ int
 ${table}_loop_get_data( $mfd_aue_param_decl, ${context}_ref_loop_ctx *loop_ctx_ref,
                            ${context}_ref_rowreq_ctx *rowreq_ctx_ref)
 {
-    DEBUGTRACE;
+    DEBUGMSGTL(("verbose:${table}_loop_get_data","called\n"));
 
     netsnmp_assert((NULL != loop_ctx_ref) && (NULL != loop_ctx_ref->loop_ctx));
     netsnmp_assert(NULL != rowreq_ctx_ref);
@@ -752,7 +752,7 @@ ${table}_loop_get_data( $mfd_aue_param_decl, ${context}_ref_loop_ctx *loop_ctx_r
 int
 ${table}_loop_cleanup_context( $mfd_aue_param_decl, ${context}_ref_loop_ctx *loop_ctx_ref)
 {
-    DEBUGTRACE;
+    DEBUGMSGTL(("verbose:${table}_loop_cleanup_context","called\n"));
     
     netsnmp_assert(loop_ctx_ref);
     

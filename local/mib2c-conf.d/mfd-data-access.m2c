@@ -89,7 +89,7 @@
 int
 ${table}_init_data(${context}_registration_ptr ${context}_reg)
 {
-    DEBUGTRACE;
+    DEBUGMSGTL(("verbose:${table}_init_data","called\n"));
 
 @ifconf ${table}_init_data.m2i@
 @   include ${table}_init_data.m2i@
@@ -127,7 +127,7 @@ $example_end
 int
 ${table}_row_prep( ${context}_rowreq_ctx *rowreq_ctx)
 {
-    DEBUGTRACE;
+    DEBUGMSGTL(("verbose:${table}_row_prep","called\n"));
 
     netsnmp_assert(NULL != rowreq_ctx);
 

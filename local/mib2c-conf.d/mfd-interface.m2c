@@ -146,7 +146,7 @@ _${table}_initialize_interface(${context}_registration_ptr reg_ptr,  u_long flag
     netsnmp_mib_handler *handler;
     int    mfd_modes;
 
-    DEBUGTRACE;
+    DEBUGMSGTL(("internal:_${table}_initialize_interface","called\n"));
 
 
     /*************************************************
@@ -331,7 +331,7 @@ ${table}_allocate_rowreq_ctx(void)
 {
     ${context}_rowreq_ctx *rowreq_ctx = SNMP_MALLOC_TYPEDEF(${context}_rowreq_ctx);
 
-    DEBUGTRACE;
+    DEBUGMSGTL(("internal:${table}_allocate_rowreq_ctx","called\n"));
 
     if(NULL == rowreq_ctx) {
         snmp_log(LOG_ERR,"Couldn't allocate memory for a "
@@ -374,7 +374,7 @@ ${table}_allocate_rowreq_ctx(void)
 void
 ${table}_release_rowreq_ctx(${context}_rowreq_ctx *rowreq_ctx)
 {
-    DEBUGTRACE;
+    DEBUGMSGTL(("internal:${table}_release_rowreq_ctx","called\n"));
 
     netsnmp_assert(NULL != rowreq_ctx);
     
@@ -444,7 +444,7 @@ _mfd_${context}_object_lookup(netsnmp_mib_handler *handler,
     ${context}_rowreq_ctx *rowreq_ctx =
                   netsnmp_container_table_extract_context(requests);
     
-    DEBUGTRACE;
+    DEBUGMSGTL(("internal:_mfd_${context}_object_lookup","called\n"));
 
     /*
      * get our context from mfd
@@ -530,7 +530,7 @@ _${context}_get_column( ${context}_rowreq_ctx *rowreq_ctx,
 {
     int rc = SNMPERR_SUCCESS;
     
-    DEBUGTRACE;
+    DEBUGMSGTL(("internal:_${context}_get_column","called\n"));
 
 
     netsnmp_assert(NULL != rowreq_ctx);
@@ -596,7 +596,7 @@ _mfd_${table}_get_values(netsnmp_mib_handler *handler,
     void                      (*dataFreeHook)(void *);
     int                        rc;
 
-    DEBUGTRACE;
+    DEBUGMSGTL(("internal:_mfd_${table}_get_values","called\n"));
 
     netsnmp_assert(NULL != rowreq_ctx);
     
@@ -681,7 +681,7 @@ _${context}_check_column( ${context}_rowreq_ctx *rowreq_ctx,
 {
     int rc = SNMPERR_SUCCESS;
     
-    DEBUGTRACE;
+    DEBUGMSGTL(("internal:_${context}_check_column","called\n"));
 
     netsnmp_assert(NULL != rowreq_ctx);
 
@@ -733,7 +733,7 @@ _mfd_${context}_check_objects(netsnmp_mib_handler *handler,
     netsnmp_table_request_info * tri;
     int                          rc;
 
-    DEBUGTRACE;
+    DEBUGMSGTL(("internal:_mfd_${context}_check_objects","called\n"));
 
     netsnmp_assert(NULL != rowreq_ctx);
     
@@ -764,7 +764,7 @@ _${context}_check_indexes(${context}_rowreq_ctx * rowreq_ctx)
 {
     int                          rc;
 
-    DEBUGTRACE;
+    DEBUGMSGTL(("internal:_${context}_check_indexes","called\n"));
 
     netsnmp_assert(NULL != rowreq_ctx);
 
@@ -823,7 +823,7 @@ _mfd_${context}_check_dependencies(netsnmp_mib_handler *handler,
 {
     ${context}_rowreq_ctx *rowreq_ctx =
                   netsnmp_container_table_extract_context(requests);
-    DEBUGTRACE;
+    DEBUGMSGTL(("internal:_mfd_${context}_check_dependencies","called\n"));
 
     netsnmp_assert(NULL != rowreq_ctx);
 
@@ -846,7 +846,7 @@ ${context}_undo_setup( ${context}_rowreq_ctx *rowreq_ctx )
 {
     int rc = SNMP_ERR_NOERROR;
 
-    DEBUGTRACE;
+    DEBUGMSGTL(("internal:${context}_undo_setup","called\n"));
 
     /** we should have a non-NULL pointer */
     netsnmp_assert( NULL != rowreq_ctx );
@@ -914,7 +914,7 @@ _${context}_set_column( ${context}_rowreq_ctx *rowreq_ctx,
 {
     int rc = SNMPERR_SUCCESS;
     
-    DEBUGTRACE;
+    DEBUGMSGTL(("internal:_${context}_set_column","called\n"));
 
     netsnmp_assert(NULL != rowreq_ctx);
 
@@ -957,7 +957,7 @@ _mfd_${table}_set_values(netsnmp_mib_handler *handler,
     netsnmp_table_request_info * tri;
     int                          rc = SNMP_ERR_NOERROR;
 
-    DEBUGTRACE;
+    DEBUGMSGTL(("internal:_mfd_${table}_set_values","called\n"));
 
     netsnmp_assert(NULL != rowreq_ctx);
     
@@ -1012,7 +1012,7 @@ _${context}_undo_column( ${context}_rowreq_ctx *rowreq_ctx,
 {
     int rc = SNMPERR_SUCCESS;
     
-    DEBUGTRACE;
+    DEBUGMSGTL(("internal:_${context}_undo_column","called\n"));
 
     netsnmp_assert(NULL != rowreq_ctx);
 
@@ -1046,7 +1046,7 @@ _mfd_${context}_undo_values(netsnmp_mib_handler *handler,
     netsnmp_table_request_info * tri;
     int                          rc = SNMP_ERR_NOERROR;
 
-    DEBUGTRACE;
+    DEBUGMSGTL(("internal:_mfd_${context}_undo_values","called\n"));
 
     netsnmp_assert(NULL != rowreq_ctx);
     
