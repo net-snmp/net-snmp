@@ -65,6 +65,7 @@ extern	struct variable_list *getvarbyname();
 
 
 char	*inetname();
+void	inetprint();
 
 struct stat_table {
     int	    entry;  /* entry number in table */
@@ -186,6 +187,7 @@ char *tcpstates[] = {
  * Print a summary of connections related to an Internet
  * protocol (currently only TCP).  For TCP, also give state of connection.
  */
+void
 protopr(){
     struct tcpconn_entry *tcpconn = NULL, *tp, *newp;
     struct snmp_pdu *request, *response;
@@ -298,6 +300,7 @@ protopr(){
 /*
  * Dump UDP statistics structure.
  */
+void
 udp_stats()
 {
     oid varname[MAX_NAME_LEN], *udpentry;
@@ -327,6 +330,7 @@ udp_stats()
 /*
  * Dump TCP statistics structure.
  */
+void
 tcp_stats()
 {
     oid varname[MAX_NAME_LEN], *tcpentry;
@@ -356,6 +360,7 @@ tcp_stats()
 /*
  * Dump IP statistics structure.
  */
+void
 ip_stats()
 {
     oid varname[MAX_NAME_LEN], *ipentry;
@@ -385,6 +390,7 @@ ip_stats()
 /*
  * Dump ICMP statistics.
  */
+void
 icmp_stats()
 {
     oid varname[MAX_NAME_LEN], *icmpentry;
@@ -451,6 +457,7 @@ icmp_stats()
  * Pretty print an Internet address (net address + port).
  * If the nflag was specified, use numbers instead of names.
  */
+void
 inetprint(in, port, proto)
 	register struct in_addr *in;
 	u_short port; 
@@ -523,7 +530,7 @@ inetname(in)
 	else {
 		in.s_addr = ntohl(in.s_addr);
 #define C(x)	((x) & 0xff)
-		sprintf(line, "%u.%u.%u.%u", C(in.s_addr >> 24),
+		sprintf(line, "%lu.%lu.%lu.%lu", C(in.s_addr >> 24),
 			C(in.s_addr >> 16), C(in.s_addr >> 8), C(in.s_addr));
 	}
 	return (line);

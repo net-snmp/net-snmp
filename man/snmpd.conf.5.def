@@ -131,6 +131,13 @@ source file.
 .IP
 Sets the system location and the system contact for the agent.  This
 information is reported by the 'system' table in the mibII tree.
+.IP "authtrapsenable NUMBER"
+Setting authtrapsenable to 1 enables generation of authentification failure
+traps. The default value is 2 (disable).
+.IP "trapsink HOST"
+.IP "trapcommunity STRING"
+This sets the host to receive traps. The daemon sends a Cold Start trap when
+it starts up. If enabled, it also sends traps on authentification failures.
 .SH "PASS-THROUGH CONTROL"
 .IP "pass MIBOID EXEC"
 Passes entire control of MIBOID to the EXEC program.  The EXEC program

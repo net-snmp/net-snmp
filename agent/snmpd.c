@@ -442,13 +442,14 @@ send_trap (ss, trap)
     if (snmp_send (ss, pdu) == 0) {
         fprintf (stderr, "snmpd: send_trap: %d\n", snmp_errno);
     }
+    snmp_outtraps++;
 }
 
 void
 send_easy_trap (trap)
       int trap;
 {
-    if (snmp_enableauthentraps == 1 && snmp_trapsink != NULL) {
+    if ((snmp_enableauthentraps == 1 || trap != 4) && snmp_trapsink != NULL) {
         if (trap_sesp == NULL) {
 	    trap_sesp = create_trap_session (&trap_session, snmp_trapsink,
 	                                     snmp_trapcommunity);
@@ -863,12 +864,12 @@ snmp_read_packet(sd)
 	    printf("\n\n");
             fflush(stdout);
 	}
+	snmp_outpkts++;
 	if (sendto(sd, (char *)outpacket, out_length, 0,
 		   (struct sockaddr *)&from, sizeof(from)) < 0){
 	    perror("sendto");
 	    return 0;
 	}
-	else snmp_outpkts++;
 
     }
     return 1;

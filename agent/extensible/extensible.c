@@ -130,13 +130,13 @@ int checkmib(vp,name,length,exact,var_len,write_method,newname,max)
 /*  printf("%d/ck:  vp=%d  ln=%d lst=%d\n",exact,
          vp->namelen,*length,name[*length-1]); */
   if (((int) *length) <= (int) vp->namelen || rtest == -1) {
-    bcopy((char *) vp->name, (char *)newname, (int)vp->namelen * sizeof (oid));
+    memmove(newname, vp->name, (int)vp->namelen * sizeof (oid));
     newname[vp->namelen] = 1;
     *length = vp->namelen+1;
   }
   else {
     *length = vp->namelen+1;
-    bcopy((char *)name, (char *)newname, (*length) * sizeof(oid));
+    memmove(newname, name, (*length) * sizeof(oid));
     if (!exact)
       newname[*length-1] = name[*length-1] + 1;
     else
@@ -147,7 +147,7 @@ int checkmib(vp,name,length,exact,var_len,write_method,newname,max)
       *var_len = NULL;
     return NULL;
   }
-  bcopy((char *)newname, (char *)name, (*length) * sizeof(oid)); 
+  memmove(name, newname, (*length) * sizeof(oid)); 
   if (write_method)
     *write_method = 0;
   if (var_len)
@@ -840,7 +840,7 @@ void setup_tree()
 
   subtrees = (struct subtree *) malloc ((numrelocs + old_treesz + numpassthrus)
                                         *sizeof(struct subtree));
-  bcopy(subtrees_old,subtrees,old_treesz *sizeof(struct subtree));
+  memmove(subtrees, subtrees_old, old_treesz *sizeof(struct subtree));
   sb = subtrees;
   sb += old_treesz;
 
@@ -915,7 +915,7 @@ int a;
     sprintf(configfile,"%s/snmpd.local.conf",SNMPLIBPATH);
     read_config (configfile,&procwatch,&numprocs,&relocs,&numrelocs,&passthrus,&numpassthrus,&extens,&numextens,&minimumswap,disks,&numdisks,maxload);
 
-    if (envconfpath = getenv("SNMPCONFPATH")) {
+    if ((envconfpath = getenv("SNMPCONFPATH"))) {
       envconfpath = strdup(envconfpath);  /* prevent actually writting in env */
       cptr1 = cptr2 = envconfpath;
       i = 1;

@@ -39,6 +39,16 @@ char copyright[] =
  All rights reserved.\n";
 #endif not lint
 
+#ifdef HAVE_STDLIB_H
+#include <stdlib.h>
+#endif
+#ifdef HAVE_UNISTD_H
+#include <unistd.h>
+#endif
+#ifdef HAVE_STRING_H
+#include <string.h>
+#endif
+
 #include <sys/types.h>
 #include <sys/param.h>
 
@@ -52,10 +62,13 @@ char copyright[] =
 #if HAVE_NETINET_IN_H
 #include <netinet/in.h>
 #endif
+
 #include "asn1.h"
+#include "mib.h"
 #include "snmp.h"
 #include "snmp_api.h"
 #include "snmp_impl.h"
+#include "snmp_client.h"
 #include "party.h"
 #include "context.h"
 #include "view.h"
@@ -64,6 +77,9 @@ char copyright[] =
 /* internet protocols */
 extern	int protopr();
 extern	int tcp_stats(), udp_stats(), ip_stats(), icmp_stats();
+extern	void routepr();
+extern	void rt_stats();
+extern	void intpr();
 
 #define NULLPROTOX	((struct protox *) 0)
 struct protox {
@@ -96,12 +112,15 @@ extern	char *malloc();
 struct snmp_session *Session;
 int snmp_dump_packet = 0;
 int print_errors = 0;
+
+void
 usage(){
     fprintf(stderr, "Usage: snmpnetstat -v 1 [-q] hostname community [-ainrs] [-p proto] [-I interface] [interval]      or:\n");
     fprintf(stderr, "Usage: snmpnetstat [-v 2] [-q] hostname noAuth [-ainrs] [-p proto] [-I interface] [interval]       or:\n");
     fprintf(stderr, "Usage: snmpnetstat [-v 2] [-q] hostname srcParty dstParty context [-ainrs] [-p proto] [-I interface] [interval]\n");
 }
 
+int
 main(argc, argv)
 	int argc;
 	char *argv[];
@@ -393,7 +412,7 @@ main(argc, argv)
     
     setprotoent(1);
     setservent(1);
-    while (p = getprotoent()) {
+    while ((p = getprotoent())) {
 	
 	for (tp = protox; tp->pr_name; tp++)
 	    if (strcmp(tp->pr_name, p->p_name) == 0)
@@ -449,11 +468,11 @@ name2protox(name)
 	 * Try to find the name in the list of "well-known" names. If that
 	 * fails, check if name is an alias for an Internet protocol.
 	 */
-	if (tp = knownname(name))
+	if ((tp = knownname(name)))
 		return(tp);
 		
 	setprotoent(1);			/* make protocol lookup cheaper */
-	while (p = getprotoent()) {
+	while ((p = getprotoent())) {
 		/* assert: name not same as p->name */
 		for (alias = p->p_aliases; *alias; alias++)
 			if (strcmp(name, *alias) == 0) {
