@@ -519,9 +519,6 @@ find_device(char *path)
     copy_word(statf.f_mntfromname, device);
     DEBUGMSGTL(("ucd-snmp/disk", "Disk:  %s\n",
 		statf.f_mntfromname));
-  } else {
-    DEBUGMSGT(("ucd-snmp/disk", "  %s != %s\n",
-	       path, statf.f_mntfromname));
   }
 #endif /* HAVE_STATFS */
 #endif /* HAVE_FSTAB_H */
