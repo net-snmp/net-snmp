@@ -15,13 +15,13 @@ BEGIN {
     require DBI;
     require CGI;
 
-    use PNGgraph();
-    use PNGgraph::lines();
-    use PNGgraph::bars();
-    use PNGgraph::points();
-    use PNGgraph::linespoints();
-    use PNGgraph::area();
-    use PNGgraph::pie();
+    use GD::Graph();
+    use GD::Graph::lines();
+    use GD::Graph::bars();
+    use GD::Graph::points();
+    use GD::Graph::linespoints();
+    use GD::Graph::area();
+    use GD::Graph::pie();
 };
 
 $tableparms="border=1 bgcolor=\"#c0c0e0\"";
@@ -134,7 +134,7 @@ sub displaygraph {
 
     if ($#pngdata > 0) {
     # create the graph itself
-	my $graph = new PNGgraph::lines($x, $y);
+	my $graph = new GD::Graph::lines($x, $y);
 	$graph->set('bgclr' => $bgcolor);
 #	print STDERR "columns: ", join(",",@{$config{'-columns'}}), "\n";
  	if (defined($config{'-legend'})) {
