@@ -1364,6 +1364,21 @@ main(int argc, char *argv[])
                      tm->tm_hour, tm->tm_min, tm->tm_sec,
                      netsnmp_get_version());
             }
+
+            /*
+             * If we are logging to a file, receipt of SIGHUP also
+             * indicates the the log file should be closed and re-opened.
+             * This is useful for users that want to rotate logs in a more
+             * predictable manner.
+             */
+            if (logfile) {
+                snmp_enable_filelog(logfile, 1);
+            }
+            snmp_log(LOG_INFO,"%.4d-%.2d-%.2d %.2d:%.2d:%.2d "
+                     "NET-SNMP version %s Reconfigured.\n",
+                     tm->tm_year + 1900, tm->tm_mon + 1, tm->tm_mday,
+                     tm->tm_hour, tm->tm_min, tm->tm_sec,
+                     VersionInfo);
             if (Syslog)
                 snmp_log(LOG_INFO, "Snmptrapd reconfiguring");
             trapd_update_config();
