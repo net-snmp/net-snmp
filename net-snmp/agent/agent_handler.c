@@ -1022,6 +1022,34 @@ netsnmp_init_handler_conf(void)
     se_add_pair_to_slist("agent_mode", strdup("SET_FREE"), MODE_SET_FREE);
     se_add_pair_to_slist("agent_mode", strdup("SET_UNDO"), MODE_SET_UNDO);
 
+    se_add_pair_to_slist("babystep_mode", strdup("pre-request"),
+                         MODE_BSTEP_PRE_REQUEST);
+    se_add_pair_to_slist("babystep_mode", strdup("object_lookup"),
+                         MODE_BSTEP_OBJECT_LOOKUP);
+    se_add_pair_to_slist("babystep_mode", strdup("check_value"),
+                         MODE_BSTEP_CHECK_VALUE);
+    se_add_pair_to_slist("babystep_mode", strdup("row_create"),
+                         MODE_BSTEP_ROW_CREATE);
+    se_add_pair_to_slist("babystep_mode", strdup("undo_setup"),
+                         MODE_BSTEP_UNDO_SETUP);
+    se_add_pair_to_slist("babystep_mode", strdup("set_value"),
+                         MODE_BSTEP_SET_VALUE);
+    se_add_pair_to_slist("babystep_mode", strdup("check_consistency"),
+                         MODE_BSTEP_CHECK_CONSISTENCY);
+    se_add_pair_to_slist("babystep_mode", strdup("undo_set"),
+                         MODE_BSTEP_UNDO_SET);
+    se_add_pair_to_slist("babystep_mode", strdup("commit"),
+                         MODE_BSTEP_COMMIT);
+    se_add_pair_to_slist("babystep_mode", strdup("undo_commit"),
+                         MODE_BSTEP_UNDO_COMMIT);
+    se_add_pair_to_slist("babystep_mode", strdup("irreversible_commit"),
+                         MODE_BSTEP_IRREVERSIBLE_COMMIT);
+    se_add_pair_to_slist("babystep_mode", strdup("undo_cleanup"),
+                         MODE_BSTEP_UNDO_CLEANUP);
+    se_add_pair_to_slist("babystep_mode", strdup("post_request"),
+                         MODE_BSTEP_POST_REQUEST);
+    se_add_pair_to_slist("babystep_mode", strdup("original"), 0xffff);
+
     /*
      * xxx-rks: hmmm.. will this work for modes which are or'd together?
      *          I'm betting not...
