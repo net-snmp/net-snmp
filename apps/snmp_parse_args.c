@@ -63,6 +63,7 @@
 #include "snmp_parse_args.h"
 #include "version.h"
 #include "system.h"
+#include "parse.h"
 
 int random_access = 0;
 
@@ -99,6 +100,8 @@ snmp_parse_args_descriptions(outf)
   fprintf(outf, "  -r <R>\tset the number of retries to R.\n");
   fprintf(outf,
           "  -c <S> <D>\tset the source/destination clocks for v2p requests.\n");
+  fprintf(outf, "  -P <MIBOPTS>\tToggle various defaults controlling mib parsing:\n");
+  snmp_mib_toggle_options_usage("\t\t  ", outf);
   fprintf(outf, "  -w\t\tEnable warnings of MIB symbol conflicts.\n");
   fprintf(outf, "  -W\t\tEnable detailed warnings of MIB symbol conflicts.\n");
 }
@@ -110,7 +113,7 @@ snmp_parse_args(argc, argv, session)
   struct snmp_session *session;
 {
   int arg;
-  char *psz;
+  char *psz, *cp;
 #ifdef USE_V2PARTY_PROTOCOL
   static oid src[MAX_NAME_LEN];
   static oid dst[MAX_NAME_LEN];
@@ -138,26 +141,6 @@ snmp_parse_args(argc, argv, session)
     switch(argv[arg][1]){
       case 'd':
         snmp_set_dump_packet(1);
-        break;
-
-      case 'C':
-        snmp_set_mib_comment_term(1); /* 0=strict, 1=EOL terminated */
-        break;
-
-      case 'w':
-        snmp_set_mib_warnings(1);  /* enable warning messages */
-        break;
-
-      case 'W':
-        snmp_set_mib_warnings(2);  /* more warning messages */
-        break;
-
-      case 'z':
-        snmp_set_mib_parse_label(1); /* 0=strict, 1=underscore OK in label */
-        break;
-
-      case 'Z':
-        snmp_set_save_descriptions(1);
         break;
 
       case 'R':
@@ -303,6 +286,24 @@ snmp_parse_args(argc, argv, session)
         fprintf(stderr, "Configuration directives understood:\n");
         read_config_print_usage("  ");
         exit(0);
+
+      case 'P':
+        if (argv[arg][2] != 0)
+          cp = &argv[arg][2];
+        else if (++arg<argc)
+          cp = &argv[arg][2];
+        else {
+          fprintf(stderr,"Need option arguments after -P flag.\n");
+          usage();
+          exit(1);
+        }
+        cp = snmp_mib_toggle_options(cp);
+        if (cp != NULL) {
+          fprintf(stderr,"Unknown parsing option passed to -P: %c.\n", *cp);
+          usage();
+          exit(1);
+        }
+        break;
 
       default:
         /* This should be removed to support options in clients that
