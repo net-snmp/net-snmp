@@ -543,7 +543,7 @@ snmp_set_var_objid (struct variable_list *vp,
 {
     size_t len = sizeof(oid) * name_length;
 
-    if (!vp || !vp->name)
+    if (!vp)
         return 1;
     
     /* use built-in storage for smaller values */
