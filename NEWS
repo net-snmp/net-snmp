@@ -9,6 +9,12 @@ the ChangeLog file for a more detailed listing of changes/bug fixes.
 
  Fixes:
     - Perl build environment should better under Windows
+    - Misc kerberos support fixes.
+    - Improvements on various manual pages.
+    - A annoying bug with SETs being passed to pass scripts was fixed.
+    - The often talked about VACM optimization improvement was fixed again.
+    - mib2c handles augmentation tables better now.
+    - Various 64 bit issues have been addressed.
 
 *5.0.8*
  New:

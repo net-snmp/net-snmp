@@ -1,5 +1,574 @@
 -------------------------------------------------------------------------------
 
+Changes: V5.0.8 -> V5.0.9
+
+2003-09-05 23:42  hardaker
+
+   * agent/Makefile.depend, agent/helpers/Makefile.depend
+, agent/mibgroup/Makefile.depend,
+   apps/Makefile.depend, apps/snmpnetstat/Makefile.depend
+, snmplib/Makefile.depend:
+
+   make depend
+   
+2003-09-05 23:41  hardaker
+
+   * configure, configure.in:
+
+   forgot a test after the if
+   
+2003-09-05 23:37  hardaker
+
+   * README:
+
+   added Bob Rowlands
+   
+2003-09-05 23:30  hardaker
+
+   * man/: netsnmp_agent.3, netsnmp_bulk_to_next.3
+, netsnmp_debug.3, netsnmp_handler.3,
+   netsnmp_instance.3, netsnmp_library.3,
+   netsnmp_mib_utilities.3, netsnmp_mode_end_call.3
+, netsnmp_multiplexer.3, netsnmp_old_api.3
+, netsnmp_read_only.3, netsnmp_scalar.3
+, netsnmp_serialize.3, netsnmp_table.3
+, netsnmp_table_array.3, netsnmp_table_data.3
+, netsnmp_table_dataset.3,
+   netsnmp_table_iterator.3, netsnmp_todo.3,
+   netsnmp_watcher.3:
+
+   doxygen update
+   
+2003-09-05 23:25  hardaker
+
+   * Makefile.top:
+
+   update for 5.0.9
+   
+2003-09-05 22:36  hardaker
+
+   * agent/helpers/: table.c, table_iterator.c:
+
+   Patch #800561 from Bob Rowlands to fix 64bit problems (-> size_t)
+   
+2003-09-05 22:30  hardaker
+
+   * agent/mibgroup/agentx/protocol.c:
+
+   Patch #800485 from Bob Rowlands for 64 bit agentx problems
+   
+2003-09-05 22:16  hardaker
+
+   * snmplib/snmpusm.c:
+
+   Patch #792008 from Thomas? to allow usmUser tokens to override previous entries
+   
+2003-09-05 22:04  hardaker
+
+   * man/: mib2c.1.def, snmpcmd.1.def,
+   snmpdelta.1, snmpdf.1, snmpnetstat.1,
+   snmpstatus.1.def, snmptable.1.def,
+   snmptest.1.def, snmptranslate.1.def:
+
+   Patch #789485 from Bob Rowlands for a long needed overhaul of the manual pages.
+   
+2003-09-05 22:00  hardaker
+
+   * Makefile.in, snmplib/Makefile.in:
+
+   one run-away patch
+   
+2003-09-05 21:58  hardaker
+
+   * Makefile.in, configure.in, agent/snmpd.c
+, agent/mibgroup/ucd-snmp/file.c,
+   agent/mibgroup/ucd-snmp/logmatch.c,
+   include/net-snmp/library/system.h, snmplib/mib.c
+, snmplib/parse.c:
+
+   high level comments about contained copyrights moved from the main branch
+   
+2003-09-05 21:54  hardaker
+
+   * NEWS:
+
+   minor updates
+   
+2003-09-05 21:21  hardaker
+
+   * Makefile.in, configure, configure.in
+:
+
+   Add optional arguments to the --with-perl-modules flag for passing down
+   
+2003-09-05 16:57  hardaker
+
+   * agent/snmp_agent.c,
+   include/net-snmp/agent/snmp_agent.h:
+
+   - fix a getbulk bug pointed out by Jurij Smakov.
+   
+2003-07-27 16:54  rstory
+
+   * local/mib2c:
+
+   fix filename in error msg, as noted in coders
+   
+2003-07-24 18:14  rstory
+
+   * perl/SNMP/SNMP.xs:
+
+   add access to augments tag (fix bug 740082: mib2c handles AUGMENTing tables
+   incorrectly)
+   
+2003-07-24 18:13  rstory
+
+   * local/mib2c:
+
+   add indexes from augmented table for tables using augments (fix
+   bug 740082: mib2c handles AUGMENTing tables incorrectly)
+   
+2003-07-24 05:27  rstory
+
+   * acconfig.h:
+
+   define NETSNMP_INLINE as empty if not defined
+   
+2003-07-10 09:32  rstory
+
+   * dist/nsb-functions:
+
+   fix typo; use which to find scp; add extra config to other config
+   
+2003-07-09 20:56  rstory
+
+   * dist/nsb-functions:
+
+   add host/path upload; try to extract more info from make log on error
+   
+2003-07-09 20:54  rstory
+
+   * dist/: nsb-package, nsb-nightly:
+
+   add host/path upload params; use new nsb-default-paths
+   
+2003-07-03 20:52  rstory
+
+   * snmplib/: container_list_ssll.c, container_null.c
+:
+
+   oops - no new features for 5.0.8
+   
+2003-07-03 20:26  rstory
+
+   * snmplib/container_list_ssll.c:
+
+   file container_list_ssll.c was initially added on branch V5-0-patches.
+   
+2003-07-03 20:26  rstory
+
+   * snmplib/container_null.c:
+
+   file container_null.c was initially added on branch V5-0-patches.
+   
+2003-07-03 20:26  rstory
+
+   * snmplib/: container_list_ssll.c, container_null.c
+:
+
+   new containers
+   
+2003-07-02 13:02  hardaker
+
+   * agent/agent_registry.c:
+
+   Patch #724925 from Peter Warasin to fix netsnmp_subtree_unload() to update the root pointer
+   
+2003-07-02 12:47  hardaker
+
+   * agent/mibgroup/ucd-snmp/file.c,
+   agent/mibgroup/ucd-snmp/logmatch.c, snmplib/parse.c
+:
+
+   Patch #760448 from Bob Rowlands/Sun to fix bug #751913 to protect a few minor security violations
+   
+2003-07-02 10:44  hardaker
+
+   * snmplib/strlcpy.c:
+
+   file strlcpy.c was initially added on branch V5-0-patches.
+   
+2003-07-02 10:44  hardaker
+
+   * COPYING, configure, configure.in,
+   agent/snmpd.c, include/net-snmp/net-snmp-config.h.in
+, include/net-snmp/library/system.h,
+   snmplib/Makefile.in, snmplib/mib.c,
+   snmplib/strlcpy.c:
+
+   Patch #760417 from Bob Rowlands/Sun for fixing Bug #751920 for minor security problems (PID file unliked first, and use strlcpy instead of strcpy.  A new strlcpy file was defined if not defined for a system.
+   
+2003-07-02 10:37  hardaker
+
+   * snmplib/mib.c:
+
+   don't use isspace and isprint simultaniously
+   
+2003-07-02 10:36  hardaker
+
+   * local/mib2c.iterate.conf:
+
+   comment change for clarification
+   
+2003-07-02 10:26  hardaker
+
+   * include/net-snmp/library/snmp_debug.h:
+
+   Patch #764047 from Stephen J. Friedl: Remove redundant declaration from snmp_debug.h and fix a few comments
+   
+2003-07-02 10:21  hardaker
+
+   * configure, configure.in:
+
+   Patch #759309 from Stephen Friedl to add prompt over-ride flag descriptions to prompt output
+   
+2003-07-02 10:19  hardaker
+
+   * configure, configure.in:
+
+   patch #759298: fix spelling error
+   
+2003-06-25 14:29  hardaker
+
+   * agent/mibgroup/ucd-snmp/proxy.c:
+
+   fix proxying for getbulk
+   
+2003-06-22 07:23  hardaker
+
+   * apps/snmpvacm.c:
+
+   fix usage for flag ordering
+   
+2003-06-16 14:59  hardaker
+
+   * testing/RUNTESTS:
+
+   remove no longer needed comment about it being broken, as pointed out
+   by Bruce.
+   
+2003-06-16 14:58  hardaker
+
+   * testing/RUNTESTS:
+
+   support , separated arguments to -T like -h says it will.
+   
+2003-06-16 14:57  hardaker
+
+   * testing/RUNTESTS:
+
+   Bruce Shaw's patch 755553 to fix RUNTESTS test number reporting when
+   testing subsets are used.
+   
+2003-06-16 14:44  hardaker
+
+   * agent/mibgroup/kernel_sunos5.c:
+
+   Patch #755540 from Bruce Shaw and IRC:SebNob to fix bug #701439 for 64 bit solaris systems and 64 bit integers returned by getKstat
+   
+2003-06-16 14:43  hardaker
+
+   * testing/tests/: T055agentv1mintrap, T056agentv2cmintrap
+:
+
+   Patch #754105 from Bruce Shaw to fix some spelling errors
+   
+2003-06-10 15:48  nba
+
+   * snmplib/snmp_api.c:
+
+   Beware of dereferencing a NULL pointer
+   
+2003-06-10 10:45  hardaker
+
+   * snmplib/snmp_api.c:
+
+   remove the unused function as pointed out by Bob Rowlands
+   
+2003-06-09 16:11  hardaker
+
+   * agent/mibgroup/mibII/vacm_vars.c, agent/snmp_agent.c
+, include/net-snmp/library/vacm.h,
+   snmplib/vacm.c:
+
+   Long overdue patch #695192 from Ron Tabor to fix the VACM spinning problem that I didn't quite fix before
+   
+2003-06-09 16:01  hardaker
+
+   * configure.in, testing/tests/T023snmpv3getMD5DES
+, testing/tests/T025snmpv3getSHADES:
+
+   fix bug #706710 to show when privacy has been disabled
+   
+2003-06-09 15:33  hardaker
+
+   * snmplib/snmp_api.c:
+
+   bug #748431 from John Shiver: fix thread-safe problems with snmp_get_fd_for_session (which was missing in the 5.x line anyway)
+   
+2003-06-09 14:49  hardaker
+
+   * README.Matsushita.txt, README.Matsushita.txt:
+
+   Patch #748305 from srinivasa rao gurusu describing how to build net-snmp on Matsushita embedded systems
+   
+2003-06-09 14:44  hardaker
+
+   * agent/mibgroup/mibII/ipAddr.c:
+
+   Patch 746339: Otto Solares fixes a file descriptor leak on linux
+   
+2003-06-09 14:38  hardaker
+
+   * agent/mibgroup/ucd-snmp/pass.c:
+
+   patch #740918 from Eric E. Bowles: fix pass through invocation for SETs
+   
+2003-06-09 14:31  hardaker
+
+   * agent/mibgroup/kernel_sunos5.c:
+
+   Patch #749062 to fix caching crashing and clashing under Solaris
+   
+2003-06-09 14:28  hardaker
+
+   * agent/mibgroup/ucd-snmp/proxy.c:
+
+   patch #749103 from Garry C Marshall to fix the proxy when a timeout occurs from the target
+   
+2003-06-06 23:17  nba
+
+   * snmplib/mib.c:
+
+   Fix missing length byte when setting index with checks disabled
+   
+2003-05-28 17:25  hardaker
+
+   * agent/helpers/old_api.c:
+
+   remove unused code as pointed out by Peter Warasin
+   
+2003-05-28 14:29  hardaker
+
+   * AGENT.txt:
+
+   added V4/V5 note from main branch to patches
+   
+2003-05-23 11:25  rstory
+
+   * snmplib/container_binary_array.c:
+
+   free container after freeing contents
+   
+2003-05-23 11:24  rstory
+
+   * include/net-snmp/library/container.h,
+   snmplib/container.c:
+
+   update container free macro/code to deal w/pointer being deleted
+   
+2003-05-23 11:22  rstory
+
+   * agent/mibgroup/ucd-snmp/logmatch.c:
+
+   EXTENSIBLEMIB -> UCDAVIS_MIB
+   
+2003-05-14 10:30  rstory
+
+   * configure:
+
+   configure to match config.in
+   
+2003-05-14 10:28  rstory
+
+   * configure.in:
+
+   fix net-snmp-config chmod to work from configure and config.status
+   
+2003-05-12 22:58  hardaker
+
+   * apps/snmptrapd.c:
+
+   Patch #735511 from Alex Burger: fix snmptrapd to ensure there are the correct number of varbinds
+   
+2003-05-12 22:55  hardaker
+
+   * agent/mibgroup/ucd-snmp/proxy.c:
+
+   Patch #736784 from Ron Tabor: fix proxies for restarted NSMPv3 sub-agents
+   
+2003-05-08 16:16  hardaker
+
+   * README:
+
+   mention Andrew Findlay
+   
+2003-05-08 16:15  hardaker
+
+   * perl/agent/agent.xs:
+
+   (excellent) patch #705566 from Andrew Findlay on perl agent support:
+   
+   1) Agent cannot return MAC addresses containing zero octet.
+   
+   2) Agent coredumps when trying to return IP addresses
+   if these are supplied as dotted-quad or as a hostname
+   that fails to resolve.
+   
+   3) Agent corrupts OID values.
+   
+   4) Agent truncates any OCTET_STRING or BIT_STRING that
+   contains a zero octet (this is the root cause of (1) above)
+   
+   API changes introduced:
+   
+   a) IP addresses now passed as binary strings (4 octets
+   for IPv4) rather than dotted-quad or name. This
+   sidesteps the IPv4/IPv6 problem and leaves the calling
+   script to deal with name->address resolution and
+   associated error handling.
+   
+2003-05-08 09:42  hardaker
+
+   * README:
+
+   mention Alex Burger, who submitted the perl win32 patches
+   
+2003-05-08 09:32  hardaker
+
+   * README:
+
+   mention Stephen
+   
+2003-05-08 09:32  hardaker
+
+   * include/net-snmp/library/mib.h,
+   include/net-snmp/library/parse.h,
+   include/net-snmp/library/snmp_api.h,
+   include/net-snmp/library/snmp_client.h, snmplib/mib.c
+, snmplib/snmp_api.c, snmplib/snmp_client.c
+:
+
+   patch #710275 from Stephen J. Friedl: const fixes for APIs that don't modify their arguments
+   
+2003-05-08 09:28  hardaker
+
+   * include/net-snmp/library/system.h:
+
+   missed a commit for a perl patch
+   
+2003-05-08 09:22  hardaker
+
+   * agent/mibgroup/mibII/ipAddr.c:
+
+   Applied patch #712101: minor irix fix
+   
+2003-05-08 09:21  hardaker
+
+   * NEWS:
+
+   Mention patch #715603
+   
+2003-05-08 09:18  hardaker
+
+   * perl/: Makefile.PL, Makefile.subs.pl,
+   ASN/Makefile.PL, OID/Makefile.PL,
+   SNMP/Makefile.PL, SNMP/README, SNMP/SNMP.xs
+, agent/Makefile.PL,
+   agent/default_store/Makefile.PL,
+   default_store/Makefile.PL:
+
+   patch #715603: fix perl module builds under windows
+   
+2003-05-08 07:10  rstory
+
+   * agent/helpers/table_array.c:
+
+   try to use default container if none specified; non-existent row status not
+   legal for a new row; sanity check asserts; remove unused cooperative
+   notification code; check for null table container
+   
+2003-05-08 07:06  rstory
+
+   * agent/Makefile.in:
+
+   remove object_monitor as it doesn't do anything and would be a new feature if
+   it did
+   
+2003-05-08 07:05  rstory
+
+   * dist/nsb-functions:
+
+   fix sysname translation for /; allow extra config to be specified in
+   environment var
+   
+2003-05-08 07:02  rstory
+
+   * include/net-snmp/library/snmp_assert.h:
+
+   chg NET_SNMP_USE_ASSERT define to NETSNMP_USE_ASSERT to be consistent
+   
+2003-05-08 06:58  rstory
+
+   * include/net-snmp/library/container.h,
+   snmplib/container.c:
+
+   apply patch [ 724927 ] to fix log msg; add \n to log msgs
+   
+2003-05-05 15:35  hardaker
+
+   * man/snmpd.conf.5.def:
+
+   document agentxPingInterval
+   
+2003-05-05 10:35  rstory
+
+   * configure:
+
+   configure to match configure.in
+   
+2003-05-05 10:29  rstory
+
+   * Makefile.in, configure.in:
+
+   chmod net-snmp-config after configure, instead in make
+   
+2003-04-03 15:12  rstory
+
+   * include/net-snmp/library/tools.h:
+
+   wrap SNMP_FREE macro w/do while, so it won't affect if/then flow
+   
+2003-03-28 06:48  hardaker
+
+   * README.krb5:
+
+   Ken Hornstein noted that the rwuser -s flag was missing it's argument
+   
+2003-03-28 06:47  hardaker
+
+   * snmplib/snmpksm.c:
+
+   Patch from Ken for misc krb5 fixes (encryption types, New crypto support,...
+   
+2003-03-19 11:46  rstory
+
+   * Makefile.in:
+
+   remove trailing \ from perl rules
+   
+-------------------------------------------------------------------------------
+
 Changes: V5.0.7 -> V5.0.8
 
 2003-03-17 17:33  rstory
