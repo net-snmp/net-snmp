@@ -23,6 +23,7 @@ extern          "C" {
      * other required module components 
      */
     /* *INDENT-OFF*  */
+config_require(if-mib/data_access/interface);
 config_require(ip-mib/data_access/ipaddress);
 config_require(ip-mib/ipAddressTable/ipAddressTable_interface);
 config_require(ip-mib/ipAddressTable/ipAddressTable_data_access);
@@ -126,8 +127,14 @@ config_require(ip-mib/ipAddressTable/ipAddressTable_data_access);
          * add any other useful data
          *       (e.g. flags for when a column has been set)
          */
-       u_int32_t created;    /* sysUpTime */
-       u_int32_t changed;    /* sysUpTime */
+       
+       /*
+        * not available from net-snmp ipaddress data_access
+        */
+       u_int32_t ipAddressCreated;      /* sysUpTime */
+       u_int32_t ipAddressLastChanged;  /* sysUpTime */
+       int       ipAddressRowStatus;
+       int       ipAddressStorageType;
 
         /*
          * storage for future expansion
@@ -408,18 +415,6 @@ config_require(ip-mib/ipAddressTable/ipAddressTable_data_access);
         ipAddressTable_check_dependencies(ipAddressTable_rowreq_ctx * ctx);
 
 
-
-#ifndef MFD_SUCCESS
-#define MFD_SUCCESS              SNMP_ERR_NOERROR
-#define MFD_SKIP                 SNMP_NOSUCHINSTANCE
-#define MFD_ERROR                SNMP_ERR_GENERR
-#define MFD_RESOURCE_UNAVAILABLE SNMP_ERR_RESOURCEUNAVAILABLE
-#define MFD_NOT_VALID_NOW        SNMP_ERR_INCONSISTENTVALUE
-#define MFD_NOT_VALID_EVER       SNMP_ERR_WRONGVALUE
-#define MFD_CANNOT_CREATE_NOW    SNMP_ERR_INCONSISTENTNAME
-#define MFD_CANNOT_CREATE_EVER   SNMP_ERR_NOCREATION
-#define MFD_END_OF_DATA          SNMP_ENDOFMIBVIEW
-#endif
 
 #ifdef __cplusplus
 };
