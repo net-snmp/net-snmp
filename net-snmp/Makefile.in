@@ -18,7 +18,7 @@ CFLAGS = @CFLAGS@
 TARG = bin/snmpget bin/snmpgetnext bin/snmpset bin/snmptranslate bin/snmpwalk bin/snmpbulkwalk bin/snmptest bin/snmptrapd bin/snmpnetstat bin/snmpd
 
 SUBDIRS = snmplib agent apps local
-INSTALLDIRS = $(SUBDIRS) man local
+INSTALLDIRS = $(SUBDIRS) man
 
 all:	mib.txt sedscript EXAMPLE.conf subdirs
 
@@ -50,18 +50,16 @@ depend:
 	cd agent; make depend
 
 clean:
-	cd snmplib; make clean
-	cd apps; make clean
-	cd apps/snmpnetstat; make clean
-	cd agent; make clean
-	cd snmptcl; make clean
-	rm -f mib.txt
+	for i in $(SUBDIRS) ; do \
+        ( cd $$i ; $(MAKE) clean ) \
+	done
+	rm -f mib.txt EXAMPLE.conf sedscript
 
 distclean: clean configclean
 
 configclean:
-	rm -f config.cache config.status
-	rm -f snmplib/Makefile Makefile snmptcl/Makefile agent/Makefile apps/Makefile apps/snmpnetstat/Makefile agent/extensible/Makefile
+	rm -f config.cache config.status config.log
+	rm -f snmplib/Makefile Makefile snmptcl/Makefile agent/Makefile apps/Makefile apps/snmpnetstat/Makefile agent/extensible/Makefile local/Makefile
 
 ${srcdir}/configure: configure.in aclocal.m4
 	cd ${srcdir} && autoconf
