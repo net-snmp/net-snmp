@@ -39,7 +39,7 @@
 #include <net-snmp/library/snmpUDPIPv6Domain.h>
 #include <net-snmp/library/snmpTCPIPv6Domain.h>
 
-oid             netsnmp_TCPIPv6Domain[9] = { ENTERPRISE_MIB, 3, 3, 5 };
+oid             netsnmp_TCPIPv6Domain[] = { ENTERPRISE_MIB, 3, 3, 5 };
 static netsnmp_tdomain tcp6Domain;
 
 /*
