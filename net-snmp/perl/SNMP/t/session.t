@@ -7,7 +7,7 @@ BEGIN {
     }
 }
 use Test;
-BEGIN { plan tests => 5 }
+BEGIN { plan tests => 4}
 use SNMP;
 use vars qw($agent_port $comm $agent_host);
 require "t/startagent.pl";
@@ -26,10 +26,6 @@ my $name = "gmarzot\@nortelnetworks.com";
 my $version = 7;
 
 $SNMP::debugging = 0;
-$n = 14;  # Number of tests to run
-
-#print "1..$n\n";
-if ($n == 0) { exit 0; }
 
 # create list of varbinds for GETS, val field can be null or omitted
 my $vars = new SNMP::VarList (
@@ -45,8 +41,9 @@ my $vars = new SNMP::VarList (
 
 #########################== 1 ===#########################################
 # Create a bogus session, undef means the host can't be found.
-my $s1 = new SNMP::Session (DestHost => $junk_host );
-ok(!defined($s1));
+# removed! this test can hang for a long time if DNS is not functioning
+# my $s1 = new SNMP::Session (DestHost => $junk_host );
+# ok(!defined($s1));
 #print("\n");
 #####################== 2 ====############################################
 # Fire up a session.
@@ -83,4 +80,4 @@ ok(!defined($s6));
 #print("\n");
 #####################  7  ############################################
 
-    snmptest_cleanup();
+snmptest_cleanup();
