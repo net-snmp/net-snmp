@@ -35,7 +35,7 @@ void _${table}_initialize_interface(${context}_registration_ptr user_ctx,
 
 ${table}_ctx * ${table}_allocate_ctx(void);
 void ${table}_release_ctx(${table}_ctx *ctx);
-@    if ($m2c_data_context eq "generated") && ($m2c_data_allocate == 1)@
+@    if ("$m2c_data_context" eq "generated") && ($m2c_data_allocate == 1)@
 static ${context}_data *${context}_allocate_data(void);
 
 @   end@
@@ -102,7 +102,9 @@ NETSNMP_STATIC_INLINE int _mfd_${context}_check_dependencies($mfd_base_params, $
 
 NETSNMP_STATIC_INLINE int _${context}_undo_column( ${context}_ctx *ctx,
                                                    netsnmp_variable_list *var, int column );
+@if $m2c_table_row_creation == 1@
 NETSNMP_STATIC_INLINE int _${context}_check_indexes(${table}_ctx * ctx);
+@end@
 
 @   end@ # writable
 
@@ -234,6 +236,9 @@ _${table}_initialize_interface(${context}_registration_ptr reg_ptr,  u_long flag
         );
 }
 
+@include generic-table-indexes-to-oid.m2i@
+@include generic-table-indexes-from-oid.m2i@
+
 ########################################################################
 ##
 @    if $m2c_data_allocate == 1 && $m2c_data_context eq "generated"@
@@ -359,7 +364,7 @@ _mfd_${context}_object_lookup( $mfd_base_params, ${table}_ctx * ctx)
                   (${context}_interface_ctx *)pdu_ctx->mfd_user_ctx;
 
     if(NULL == ctx) {
-@   if $m2c_table_settable@
+@   if $m2c_table_row_creation == 1@
         /*
          * xxx-rks:
          *   check indexes vs check syntax?
@@ -377,7 +382,7 @@ _mfd_${context}_object_lookup( $mfd_base_params, ${table}_ctx * ctx)
     }
     else {
         netsnmp_table_request_info * tri;
-        
+
         /*
          * set indexes
          */
@@ -389,6 +394,10 @@ _mfd_${context}_object_lookup( $mfd_base_params, ${table}_ctx * ctx)
              * xxx-rks: this is silly. we set the vb in index2oid to set oid,
              * to set the vb here, which is used to set the vb oid. sheesh.
              */
+            if(ctx->oid_idx.len > (sizeof(tri->index_oid) / sizeof(oid))) {
+                snmp_log(LOG_ERR,"truncated oid length\n");
+                ctx->oid_idx.len = sizeof(tri->index_oid) / sizeof(oid);
+            }
             memcpy(tri->index_oid, ctx->oid_idx.oids,
                    ctx->oid_idx.len * sizeof(oid));
             tri->index_oid_len = ctx->oid_idx.len;
@@ -508,7 +517,13 @@ _mfd_${table}_get_values($mfd_base_params, ${table}_ctx * ctx)
             continue;
         
         rc = _${table}_get_column(ctx, requests->requestvb, tri->colnum);
-        if(!rc && (NULL == requests->requestvb->val.string)) {
+        if(rc) {
+            if(MFD_SKIP == rc) {
+                requests->requestvb->type = ASN_PRIV_RETRY;
+                rc = SNMP_ERR_NOERROR;
+            }
+        }
+        else if (NULL == requests->requestvb->val.string) {
             snmp_log(LOG_ERR,"NULL varbind data pointer!\n");
             rc = SNMP_ERR_GENERR;
         }
@@ -631,6 +646,7 @@ _mfd_${context}_check_objects($mfd_base_params, ${table}_ctx * ctx)
 }
 
 ##----------------------------------------------------------------------
+@if $m2c_table_row_creation == 1@
 NETSNMP_STATIC_INLINE int
 _${context}_check_indexes(${table}_ctx * ctx)
 {
@@ -678,6 +694,8 @@ _${context}_check_indexes(${table}_ctx * ctx)
     
     return rc;
 }
+@end@ # $m2c_table_row_creation
+
 
 @      if $m2c_table_dependencies == 1@
 /*----------------------------------------------------------------------
@@ -704,7 +722,7 @@ _mfd_${context}_check_dependencies($mfd_base_params, ${table}_ctx * ctx)
  * SET: Undo setup
  *
  *---------------------------------------------------------------------*/
-@if $m2c_data_context eq "generated"@
+@if "$m2c_data_context" eq "generated"@
 /**
  * @internal
  * Setup up context with information needed to undo a set request.
@@ -722,7 +740,7 @@ ${context}_undo_setup( ${context}_ctx *ctx )
     /*
      * copy data to undo
      */
-@if $m2c_data_context ne "generated"@
+@if "$m2c_data_context" ne "generated"@
 $example_start
 @end@
 @    foreach $node nonindex@
@@ -731,7 +749,7 @@ $example_start
 @        eval $m2c_ctx_rh = "$m2c_data_item"@
 @        include generic-ctx-copy.m2i@
 @    end@ # foreach nonindex
-@if $m2c_data_context ne "generated"@
+@if "$m2c_data_context" ne "generated"@
 $example_end
 @end@
 
