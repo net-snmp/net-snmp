@@ -214,18 +214,25 @@ protopr (name)
     oid *instance;
     int first, status;
 
+
+    response = NULL;
+    if (strcmp(name, "tcp") == 0)
+    {
     request = snmp_pdu_create(SNMP_MSG_GETNEXT);
     snmp_add_null_var(request, oid_tcpconntable, sizeof(oid_tcpconntable)/sizeof(oid));
-
-    if (strcmp(name, "tcp") == 0) status = STAT_SUCCESS;
+	status = STAT_SUCCESS;
+	}
     else status = STAT_TIMEOUT;
     while (status == STAT_SUCCESS) {
+    if (response) snmp_free_pdu(response);
+    response = NULL;
 	status = snmp_synch_response(Session, request, &response);
 	if (status != STAT_SUCCESS || response->errstat != SNMP_ERR_NOERROR){
 	    snmp_perror("SNMP request failed");
 	    break;
 	}
 	vp = response->variables;
+	if (!vp) break;
 	if (vp->name_length != 20 ||
             memcmp(vp->name, oid_tcpconntable, sizeof(oid_tcpconntable))){
 		break;
@@ -272,8 +279,6 @@ protopr (name)
 	    tp->remotePort = *vp->val.integer;
 	    tp->remPortSet = 1;
 	}
-	snmp_free_pdu(response);
-	response = NULL;
     }
     if (response) snmp_free_pdu(response);
     response = NULL;
@@ -308,18 +313,25 @@ protopr (name)
     }
     if(newtp) free(newtp);
 
+
+    response = NULL;
+    if (strcmp (name, "udp") == 0)
+	{
     request = snmp_pdu_create(SNMP_MSG_GETNEXT);
     snmp_add_null_var(request, oid_udptable, sizeof(oid_udptable)/sizeof(oid));
-
-    if (strcmp (name, "udp") == 0) status = STAT_SUCCESS;
+	status = STAT_SUCCESS;
+	}
     else status = STAT_TIMEOUT;
     while (status == STAT_SUCCESS) {
+    if (response) snmp_free_pdu(response);
+	response = NULL;
 	status = snmp_synch_response(Session, request, &response);
 	if (status != STAT_SUCCESS || response->errstat != SNMP_ERR_NOERROR){
 	    fprintf(stderr, "SNMP request failed\n");
 	    break;
 	}
 	vp = response->variables;
+	if (!vp) break;
 	if (vp->name_length != 15 ||
             memcmp(vp->name, oid_udptable, sizeof(oid_udptable))){
 		break;
@@ -352,10 +364,9 @@ protopr (name)
 	    up->localPort = *vp->val.integer;
 	    up->locPortSet = 1;
 	}
-	snmp_free_pdu(response);
-	response = NULL;
     }
     if (response) snmp_free_pdu(response);
+    response = NULL;
 
     for(first = 1, up = udpconn, newup = NULL; up != NULL; up = up->next){
 	if (newup) free(newup);
