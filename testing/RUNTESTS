@@ -267,7 +267,6 @@ if [ "x$do_tests" = "x" ]; then
 		if echo " $inp " | grep " $a " > /dev/null; then
 		    do_tests="$do_tests $1"
 		    if [ "x$test_nums" = "x" ] ; then
-			# actually broken.  sets only the first num correctly.
 			test_nums=$a
 		    fi
 		fi
