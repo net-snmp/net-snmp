@@ -6,6 +6,7 @@
 #include <net-snmp/net-snmp-config.h>
 #include "host_res.h"
 #include "hr_filesys.h"
+#include "hr_storage.h"
 #include <net-snmp/utilities.h>
 
 #if HAVE_MNTENT_H
@@ -440,7 +441,7 @@ var_hrfilesys(struct variable *vp,
             long_return = 2;    /* others probably aren't */
         return (u_char *) & long_return;
     case HRFSYS_STOREIDX:
-        long_return = fsys_idx; /* Use the same indices */
+        long_return = fsys_idx + HRS_TYPE_FIXED_MAX;
         return (u_char *) & long_return;
     case HRFSYS_FULLDUMP:
         return when_dumped(HRFS_entry->HRFS_name, FULL_DUMP, var_len);
