@@ -6,12 +6,6 @@ DESCRIPTION     'UCD SNMP Library'
 ;CODE            SHARED READ EXECUTE
 ;DATA            SHARED READ WRITE
 EXPORTS
-	acl_destroyEntry
-	acl_getEntry
-	acl_scanInit
-	acl_scanNext
-	acl_createEntry
-	read_acl_database
 	asn_parse_int
 	asn_build_int
 	asn_parse_unsigned_int
@@ -31,12 +25,6 @@ EXPORTS
 	asn_build_bitstring
 	asn_parse_unsigned_int64
 	asn_build_unsigned_int64
-	context_destroyEntry
-	context_getEntry
-	context_scanInit
-	context_scanNext
-	context_createEntry
-	read_context_database
 	MDbegin
 	MDupdate
 	MDprint
@@ -71,15 +59,12 @@ EXPORTS
 	add_module_replacement
 	print_subtree
 	print_ascii_dump_tree
-	party_getEntry
-	party_scanInit
-	party_scanNext
-	party_createEntry
-	party_destroyEntry
-	read_party_database
 	xdump
 	snmp_parse_var_op
 	snmp_build_var_op
+	printU64
+	u64Subtract
+	zeroU64
 	opendir
 	readdir
 	closedir
@@ -125,16 +110,6 @@ EXPORTS
 	print_oid_report_enable_labeledoid
 	ascii_to_binary
 	hex_to_binary
-	ms_party_init
-	snmp_comstr_parse
-	snmp_party_parse
-	snmp_party_build
-	has_access
-	view_destroyEntry
-	view_getEntry
-	view_scanInit
-	view_scanNext
-	view_createEntry
 	get_tc_descriptor
 	setenv
 	find_module

@@ -61,6 +61,7 @@ SOFTWARE.
 #include "parse.h"
 #include "mib.h"
 #include "snmp.h"
+#include "snmp_debug.h"
 #include "../snmplib/system.h"
 
 #include "version.h"
@@ -313,7 +314,7 @@ int main(int argc, char *argv[])
     if (tosymbolic){
 	print_objid(name, name_length);
     } else {
-	for(count = 0; count < name_length; count++)
+	for(count = 0; count < (int)name_length; count++)
 	    printf(".%ld", name[count]);
 	printf("\n");
     }

@@ -55,6 +55,9 @@ struct direct *readdir (DIR *dirp);
 int closedir (DIR *dirp);
 
 int gettimeofday (struct timeval *, struct timezone *tz);
+#ifndef HAVE_STRNCASECMP
+int strncasecmp(const char *s1, const char *s2, size_t n);
+#endif
 
 char * winsock_startup (void);
 void winsock_cleanup (void);

@@ -919,7 +919,6 @@ snmp_sess_open(struct snmp_session *in_session)
         meIp = (struct sockaddr_in*)&(isp->me);
         meIp->sin_addr.s_addr = INADDR_ANY;
         meIp->sin_port = htons(session->local_port);
-        addr_size = sizeof( struct sockaddr_in );
     }
     else if ( isp->me.sa_family == AF_UNIX ) {
         if ( session->local_port != 0 ) {	/* 'local' implies server */
@@ -938,11 +937,9 @@ snmp_sess_open(struct snmp_session *in_session)
 #endif
 
         }
-        addr_size = sizeof( struct sockaddr_un );
     }
-    else {
-        addr_size = sizeof( struct sockaddr );
-    }
+
+    addr_size = snmp_socket_length(isp->me.sa_family);
 
     /* Set up connections */
     if ( session->flags & SNMP_FLAGS_STREAM_SOCKET ) {
@@ -2953,12 +2950,8 @@ snmp_sess_async_send(void *sessp,
 	}
 	memmove(&pdu->address, &(isp->addr), sizeof(isp->addr));
     }
-    if (pdu->address.sa_family == AF_INET)
-	addr_size = sizeof( struct sockaddr_in );
-    else if (pdu->address.sa_family == AF_UNIX)
-	addr_size = sizeof( struct sockaddr_un );
-    else
-	addr_size = sizeof( struct sockaddr );
+
+    addr_size = snmp_socket_length(pdu->address.sa_family);
 
     /* build the message to send */
     if (isp->hook_build)
@@ -3486,12 +3479,7 @@ snmp_resend_request(struct session_list *slp, struct request_list *rp,
     printf("\n");
   }
 
-  if (rp->pdu->address.sa_family == AF_INET)
-	addr_size = sizeof( struct sockaddr_in );
-  else if (rp->pdu->address.sa_family == AF_UNIX)
-	addr_size = sizeof( struct sockaddr_un );
-  else
-	addr_size = sizeof( struct sockaddr );
+    addr_size = snmp_socket_length(rp->pdu->address.sa_family);
 
   if ( sp->flags & SNMP_FLAGS_STREAM_SOCKET )
     result = send(isp->sd, (char *)packet, length, 0);
@@ -4122,3 +4110,41 @@ snmp_init_statistics(void)
   memset(statistics, 0, sizeof(statistics));
 }
 
+/* returns the length of a socket structure */
+
+size_t snmp_socket_length( int family)
+{
+  size_t length;
+  switch (family)
+    {
+#ifndef cygwin
+#ifndef WIN32
+#ifdef AF_UNIX
+    case AF_UNIX:
+      length = sizeof (struct sockaddr_un);
+      break;
+#endif /* AF_UNIX */
+#endif
+#endif
+
+#ifdef AF_LINK
+    case AF_LINK:
+#ifdef _MAX_SA_LEN
+      length = _MAX_SA_LEN;
+#else
+      length = sizeof (struct sockaddr_dl);
+#endif
+      break;
+#endif /* AF_LINK */
+
+    case AF_INET:
+      length = sizeof (struct sockaddr_in);
+      break;
+    default:
+/* XXX: next was not in agent/mibgroup/mibII/var_route.c!! */
+      length = sizeof (struct sockaddr);
+      break;
+    }
+
+    return length;
+}

@@ -604,6 +604,7 @@ extern int snmp_dump_packet;
 extern int quick_print;
 #endif
 
+size_t snmp_socket_length   (int family);
 
 /*
  * snmp_error - return error data
