@@ -62,6 +62,8 @@ SOFTWARE.
 
 #include "system.h"
 #include "parse.h"
+#include "asn1.h"
+#include "mib.h"
 
 /* A quoted string value-- too long for a general "token" */
 char quoted_string_buffer[MAXQUOTESTR];
@@ -308,7 +310,6 @@ static char last = ' ';
 static void unget_token __P((int));
 static int parseQuoteString __P((FILE *, char *, int));
 static int tossObjectIdentifier __P((FILE *));
-       void init_mib_internals __P((void));	/* called from 'mib.c' */
 static int  name_hash __P((char *));
 static void init_node_hash __P((struct node *));
 static void print_error __P((char *, char *, int));
@@ -342,13 +343,9 @@ static int read_module_internal __P((char *));
 static void read_module_replacements __P((char *));
 static void read_import_replacements __P((char *, char *));
 
-       int  which_module __P((char *));		/* used by 'mib.c' */
-struct tree *find_tree_node __P((char *, int));	/* used by mib.c */
 static char *module_name __P((int));
 static void  new_module  __P((char *, char *));
 
-extern void  set_function __P((struct tree *));	/* from 'mib.c' */
-extern void init_mib __P((void));	/* from mib.c */
 
 void snmp_set_mib_warnings(warn)
     int warn;
@@ -782,7 +779,7 @@ find_tree_node( name, modid )
 
     headtp = tbuckets[NBUCKET(name_hash(name))];
     for ( tp = headtp ; tp ; tp=tp->next ) {
-        if ( !strcmp(tp->label, name) ) {
+        if ( !strcasecmp(tp->label, name) ) {
 
             if ( modid == -1 )	/* Any module */
                 return(tp);
@@ -1111,11 +1108,11 @@ parse_objectid(fp, name)
     register int count;
     register struct subid *op, *nop;
     int length;
-    struct subid oid[32];
+    struct subid loid[32];
     struct node *np, *root, *oldnp = NULL;
     struct tree *tp;
 
-    if ((length = getoid(fp, oid, 32)) != 0){
+    if ((length = getoid(fp, loid, 32)) != 0){
         np = root = (struct node *) Malloc(sizeof(struct node));
         memset(np, 0, sizeof(struct node));
 
@@ -1123,10 +1120,10 @@ parse_objectid(fp, name)
 	 * Handle numeric-only object identifiers,
 	 *  by labelling the first sub-identifier
 	 */
-        if ( !oid->label )
+        if ( !loid->label )
            for ( tp = tree_head ; tp ; tp=tp->next_peer )
-               if ( (int)tp->subid == oid->subid ) {
-                   oid->label = Strdup(tp->label);
+               if ( (int)tp->subid == loid->subid ) {
+                   loid->label = Strdup(tp->label);
                    break;
                }
 
@@ -1134,7 +1131,7 @@ parse_objectid(fp, name)
          * For each parent-child subid pair in the subid array,
          * create a node and link it into the node list.
          */
-        for(count = 0, op = oid, nop=oid+1; count < (length - 2); count++,
+        for(count = 0, op = loid, nop=loid+1; count < (length - 2); count++,
             op++, nop++){
             /* every node must have parent's name and child's name or number */
             if (op->label && (nop->label || (nop->subid != -1))){
@@ -1189,8 +1186,8 @@ parse_objectid(fp, name)
                 oldnp->next = NULL;
             return NULL;
         }
-        /* free the oid array */
-        for(count = 0, op = oid; count < length; count++, op++){
+        /* free the loid array */
+        for(count = 0, op = loid; count < length; count++, op++){
             if (op->label)
                 free(op->label);
         }
@@ -2234,8 +2231,8 @@ read_module_internal (name )
 			onp = orphan_nodes = nbuckets[i];
 		    nbuckets[i] = NULL;
 		    while (onp) {
-		        fprintf (stderr, "Unlinked OID in %s: { %s %s(%ld) }\n",
-				name, onp->parent, onp->label, onp->subid);
+		        fprintf (stderr, "Unlinked OID in %s: %s ::= { %s %ld }\n",
+				name, onp->label, onp->parent, onp->subid);
 			np = onp;
 			onp = onp->next;
 		    }

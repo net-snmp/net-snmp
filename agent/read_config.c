@@ -39,6 +39,7 @@
 #include "mib_module_config.h"
 #include "../snmp_agent.h"
 #include "../snmpd.h"
+#include "../../snmplib/system.h"
 
 extern int subtree_size;  /* in read_config.c */
 extern int subtree_malloc_size;  /* in read_config.c */

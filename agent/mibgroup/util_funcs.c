@@ -57,6 +57,7 @@
 #include "mibincl.h"
 #include "struct.h"
 #include "util_funcs.h"
+#include "../../snmplib/system.h"
 #ifdef USING_ERRORMIB_MODULE
 #include "errormib.h"
 #else

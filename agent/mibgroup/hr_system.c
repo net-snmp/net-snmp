@@ -13,13 +13,19 @@
 #include "../../snmplib/system.h"
 
 #ifdef HAVE_SYS_PROC_H
+#include <sys/param.h>
 #include "sys/proc.h"
 #endif
-#include "utmp.h"
+#include <utmp.h>
 #ifdef linux
 #include "linux/tasks.h"
 #endif
 
+#ifdef UTMP_FILE
+void setutent __P((void));
+void endutent __P((void));
+struct utmp *getutent __P((void));
+#endif /* UTMP_FILE */
 
 
 	/*********************
@@ -135,7 +141,11 @@ var_hrsys(vp, name, length, exact, var_len, write_method)
 	    long_return = count_users();
 	    return (u_char *)&long_return;
 	case HRSYS_PROCS:
+#if USING_HR_SWRUN_MODULE
 	    long_return = count_processes();
+#else
+	    long_return = 0;
+#endif
 	    return (u_char *)&long_return;
 	case HRSYS_MAXPROCS:
 #ifndef linux
@@ -178,9 +188,39 @@ static int count_users()
 
      setutent();
      while ( (utmp_p = getutent()) != NULL ) {
+#ifndef UTMP_HAS_NO_TYPE
 	if ( utmp_p->ut_type == USER_PROCESS )
+#endif
 	    ++total;
      }
      endutent();
      return total;
 }
+
+#ifdef UTMP_FILE
+
+static FILE *utmp_file;
+static struct utmp utmp_rec;
+
+void setutent __P((void))
+{
+	if (utmp_file) fclose(utmp_file);
+	utmp_file = fopen(UTMP_FILE, "r");
+}
+
+void endutent __P((void))
+{
+	if (utmp_file) {
+		fclose(utmp_file);
+		utmp_file = NULL;
+	}
+}
+
+struct utmp *getutent __P((void))
+{
+	if (fread(&utmp_rec, sizeof(utmp_rec), 1, utmp_file) == 1)
+		return &utmp_rec;
+	return NULL;
+}
+
+#endif /* UTMP_FILE */
