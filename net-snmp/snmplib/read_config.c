@@ -1563,6 +1563,7 @@ read_config_read_octet_string(char *readfrom, u_char ** str, size_t * len)
             ilen = strlen(readfrom);
 
         if (ilen % 2) {
+            snmp_log(LOG_WARNING,"invalid hex string: wrong length\n");
             DEBUGMSGTL(("read_config_read_octet_string",
                         "invalid hex string: wrong length"));
             return NULL;

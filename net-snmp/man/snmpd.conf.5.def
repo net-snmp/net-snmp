@@ -1,7 +1,7 @@
 .TH SNMPD.CONF 5 "08 Feb 2002" VVERSIONINFO "Net-SNMP"
 .UC 4
 .SH NAME
-SYSCONFDIR/snmp/snmpd.conf - configuration file for the Net-SNMP SNMP agent.
+snmpd.conf - configuration file for the Net-SNMP SNMP agent
 .SH DESCRIPTION
 .B snmpd.conf
 is the configuration file which defines how the Net-SNMP SNMP agent
