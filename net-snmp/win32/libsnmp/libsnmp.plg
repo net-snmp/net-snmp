@@ -1,0 +1,35 @@
+--------------------Configuration: libsnmp - Win32 Debug--------------------
+Begining build with project "H:\Archive\ucd-snmp-3.3pre3-new\win32\libsnmp\libsnmp.dsp", at root.
+Active configuration is Win32 (x86) Static Library (based on Win32 (x86) Static Library)
+
+Project's tools are:
+			"32-bit C/C++ Compiler for 80x86" with flags "/nologo /MLd /W3 /GX /Z7 /Od /I "." /I ".." /I "..\..\snmplib" /I "..\.." /D "WIN32" /D "_DEBUG" /D "_WINDOWS" /Fp"Debug/libsnmp.pch" /YX /Fo"Debug/" /Fd"Debug/" /FD /c "
+			"Browser Database Maker" with flags "/nologo /o"Debug/libsnmp.bsc" "
+			"Library Manager" with flags "/nologo /out:"..\lib\snmp.lib" "
+			"Custom Build" with flags ""
+			"<Component 0xa>" with flags ""
+
+Creating temp file "D:\TEMP\RSP4E.tmp" with contents </nologo /out:"..\lib\snmp.lib" 
+".\Debug\acl.obj"
+".\Debug\acl_parse.obj"
+".\Debug\asn1.obj"
+".\Debug\context.obj"
+".\Debug\context_parse.obj"
+".\Debug\hpux.obj"
+".\Debug\md5.obj"
+".\Debug\mib.obj"
+".\Debug\parse.obj"
+".\Debug\party.obj"
+".\Debug\party_parse.obj"
+".\Debug\snmp.obj"
+".\Debug\snmp_api.obj"
+".\Debug\snmp_auth.obj"
+".\Debug\snmp_client.obj"
+".\Debug\system.obj"
+".\Debug\view.obj">
+Creating command line "link.exe -lib @D:\TEMP\RSP4E.tmp" 
+Creating library...
+
+
+
+snmp.lib - 0 error(s), 0 warning(s)
