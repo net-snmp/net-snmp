@@ -75,8 +75,10 @@ else
       Xalgorithm="DES"
       token=rwuser
       shift
-      arg=$1
-      shift
+      if test "x$1" != "x" ; then
+          arg=$1
+          shift
+      fi
       while test "x$done" = "x" -a "x$arg" != "x" ; do
 	case $arg in
 	    -A)
