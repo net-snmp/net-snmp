@@ -271,6 +271,13 @@ on
 .IR "udp6:fe80::2d0:b7ff:fe21:c6c0"
 perform the query using UDP/IPv6 datagrams to port 161 at address
 .IR fe80::2d0:b7ff:fe21:c6c0 .
+.PP
+Note that not all the transport domains listed above will always be
+available; for instance, hosts with no IPv6 support will not be able
+to use udp6 transport addresses, and attempts to do so will result in
+the error "Unknown host".  Likewise, since AAL5 PVC support is only
+currently available on Linux, it will fail with the same error on
+other platforms.
 .SH "MIB PARSING OPTIONS"
 The UCD MIB parser mostly adheres to
 the Structure of Management Information (SMI).
