@@ -842,6 +842,29 @@ netsnmp_check_for_delegated(netsnmp_agent_session *asp) {
     return 0;
 }
 
+int
+netsnmp_check_delegated_chain_for(netsnmp_agent_session *asp) {
+    netsnmp_agent_session *asptmp;
+    for(asptmp = agent_delegated_list; asptmp; asptmp = asptmp->next) {
+        if (asptmp == asp)
+            return 1;
+    }
+    return 0;
+}
+
+int
+netsnmp_check_for_delegated_and_add(netsnmp_agent_session *asp) {
+    if (netsnmp_check_for_delegated(asp)) {
+        if (!netsnmp_check_delegated_chain_for(asp)) {
+            /* add to delegated request chain */
+            asp->next = agent_delegated_list;
+            agent_delegated_list = asp;
+        }
+        return 1;
+    }
+    return 0;
+}
+
 
 int
 netsnmp_wrap_up_request(netsnmp_agent_session *asp, int status)
@@ -1154,11 +1177,9 @@ handle_snmp_packet(int op, netsnmp_session *session, int reqid,
     }
 
     /* check for uncompleted requests */
-    if (netsnmp_check_for_delegated(asp)) {
+    if (netsnmp_check_for_delegated_and_add(asp)) {
         /* add to delegated request chain */
 	asp->status = status;
-	asp->next = agent_delegated_list;
-	agent_delegated_list = asp;
     } else {
         /* if we don't have anything outstanding (delegated), wrap up */
         return netsnmp_wrap_up_request(asp, status);
@@ -1691,8 +1712,10 @@ check_delayed_request(netsnmp_agent_session  *asp) {
             if (netsnmp_check_for_delegated(asp) &&
                 netsnmp_check_transaction_id(asp->pdu->transid) != SNMPERR_SUCCESS) {
                 /* add to delegated request chain */
-                asp->next = agent_delegated_list;
-                agent_delegated_list = asp;
+                if (!netsnmp_check_delegated_chain_for(asp)) {
+                    asp->next = agent_delegated_list;
+                    agent_delegated_list = asp;
+                }
             }
             break;
 
@@ -1716,12 +1739,10 @@ check_delayed_request(netsnmp_agent_session  *asp) {
             if (asp->mode != FINISHED_SUCCESS &&
                 asp->mode != FINISHED_FAILURE) {
 
-                if (netsnmp_check_for_delegated(asp)) {
+                if (netsnmp_check_for_delegated_and_add(asp)) {
                     /* add to delegated request chain */
                     if (!asp->status)
                         asp->status = status;
-                    asp->next = agent_delegated_list;
-                    agent_delegated_list = asp;
                 }
 
                 return SNMP_ERR_NOERROR;
