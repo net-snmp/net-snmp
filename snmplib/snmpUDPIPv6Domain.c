@@ -32,6 +32,7 @@ typedef unsigned char uint8_t;
 
 extern int         inet_pton(int, const char*, void*);
 extern const char *inet_ntop(int, const void*, char*, size_t);
+const struct in6_addr in6addr_any = IN6ADDR_ANY_INIT;
 #endif
 
 #if HAVE_NETINET_IN_H
