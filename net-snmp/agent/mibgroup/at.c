@@ -189,7 +189,7 @@ var_atEntry(vp, name, length, exact, var_len, write_method)
 	    long_return = lowIfType;
 	    return (u_char *)&long_return;
 	default:
-	    ERROR("");
+	    ERROR_MSG("");
    }
    return NULL;
 }
@@ -317,7 +317,7 @@ var_atEntry(struct variable *vp, oid *name, int *length, int exact,
 	    long_return = Lowentry.ipNetToMediaNetAddress;
 	    return (u_char *)&long_return;
 	default:
-	    ERROR("");
+	    ERROR_MSG("");
    }
    return NULL;
 }

@@ -364,7 +364,7 @@ main(argc, argv)
         session.community = (u_char *)community;
         session.community_len = strlen((char *)community);
     } else if (version == 2){
-        session.version = SNMP_VERSION_2_HISTORIC;
+        session.version = SNMP_VERSION_2p;
         session.srcParty = src;
         session.srcPartyLen = srclen;
         session.dstParty = dst;

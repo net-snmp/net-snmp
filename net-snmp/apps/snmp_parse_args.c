@@ -13,13 +13,19 @@
 #endif
 #include <sys/types.h>
 #include <stdio.h>
+#if HAVE_UNISTD_H
 #include <unistd.h>
+#endif
 #include <ctype.h>
 #if HAVE_NETINET_IN_H
 #include <netinet/in.h>
 #endif
 #if TIME_WITH_SYS_TIME
-# include <sys/time.h>
+# ifdef WIN32
+#  include <sys/timeb.h>
+# else
+#  include <sys/time.h>
+# endif
 # include <time.h>
 #else
 # if HAVE_SYS_TIME_H
@@ -28,7 +34,11 @@
 #  include <time.h>
 # endif
 #endif
+#if HAVE_WINSOCK_H
+#include <winsock.h>
+#else
 #include <netdb.h>
+#endif
 #if HAVE_ARPA_INET_H
 #include <arpa/inet.h>
 #endif
@@ -45,27 +55,33 @@
 #include "acl.h"
 #include "snmp_parse_args.h"
 #include "version.h"
+#include "system.h"
+
+void usage __P((void));
 
 void
 snmp_parse_args_usage(outf)
   FILE *outf;
 {
-  fprintf(outf, "[-v 1|2|2h] [-V] [-h] [-d] [-q] [-p P] [-t T] [-r R] [-c S D] hostname <community|srcParty dstParty context>");
+  fprintf(outf,
+        "[-v 1|2c|2p] [-h] [-d] [-q] [-p <P>] [-t <T>] [-r <R>] [-c <S> <D>] <hostname> <community>|{<srcParty> <dstParty> <context>}");
 }
 
 void
 snmp_parse_args_descriptions(outf)
   FILE *outf;
 {
-  fprintf(outf, "  -v 1|2|2h\tspecifies snmp version to transmit.\n");
+  fprintf(outf, "  -v 1|2c|2p\tspecifies snmp version to use.\n");
+  fprintf(outf, "            \twhere 1 is SNMPv1, 2c is SNMPv2c, and 2p is SNMPv2-party\n");
   fprintf(outf, "  -h\t\tthis help message.\n");
   fprintf(outf, "  -V\t\tdisplay version number.\n");
   fprintf(outf, "  -d\t\tdump input/output packets.\n");
   fprintf(outf, "  -q\t\tquick print output for easier parsing ability.\n");
-  fprintf(outf, "  -p P\t\tuse port P instead of the default port.\n");
-  fprintf(outf, "  -t T\t\tset the request timeout to T.\n");
-  fprintf(outf, "  -r R\t\tset the number of retries to R.\n");
-  fprintf(outf, "  -c S D\tset the source/destination clocks for v2h requests.\n");
+  fprintf(outf, "  -p <P>\tuse port P instead of the default port.\n");
+  fprintf(outf, "  -t <T>\tset the request timeout to T.\n");
+  fprintf(outf, "  -r <R>\tset the number of retries to R.\n");
+  fprintf(outf,
+          "  -c <S> <D>\tset the source/destination clocks for v2p requests.\n");
 }
 
 
@@ -76,16 +92,20 @@ snmp_parse_args(argc, argv, session)
   struct snmp_session *session;
 {
   int arg;
-  static oid src[MAX_NAME_LEN], dst[MAX_NAME_LEN], context[MAX_NAME_LEN];
+  static oid src[MAX_NAME_LEN];
+  static oid dst[MAX_NAME_LEN];
+  static oid context[MAX_NAME_LEN];
   int clock_flag = 0;
-  u_long      srcclock = 0, dstclock = 0;
+  u_long srcclock = 0;
+  u_long dstclock = 0;
   struct partyEntry *pp;
   struct contextEntry *cxp;
   char ctmp[300];
-  in_addr_t destAddr;
+  char *psz;
   struct hostent *hp;
+  in_addr_t destAddr;
 
-  /* defaults */
+  /* initialize session to default values */
   memset(session, 0, sizeof(struct snmp_session));
   session->remote_port = SNMP_PORT;
   session->timeout = SNMP_DEFAULT_TIMEOUT;
@@ -93,69 +113,135 @@ snmp_parse_args(argc, argv, session)
   session->authenticator = NULL;
   session->peername = NULL;
 
-  for(arg = 1; arg < argc && argv[arg][0] == '-'; arg++){
+  /* get the options */
+  for(arg = 1; (arg < argc) && (argv[arg][0] == '-'); arg++){
     switch(argv[arg][1]){
       case 'd':
         snmp_set_dump_packet(1);
         break;
+
       case 'q':
         snmp_set_quick_print(1);
         break;
+
       case 'p':
-        session->remote_port = atoi(argv[++arg]);
-        break;
-      case 't':
-        session->timeout = atoi(argv[++arg]) * 1000000L;
-        break;
-      case 'r':
-        session->retries = atoi(argv[++arg]);
-        break;
-      case 'c':
-        clock_flag++;
-        srcclock = atoi(argv[++arg]);
-        dstclock = atoi(argv[++arg]);
-        break;
-      case 'V':
-        fprintf(stderr,"UCD-snmp version: %s\n", VersionInfo);
-        exit(0);
-        break;
-      case 'v':
-        if (!strcmp(argv[++arg],"1")) {
-          session->version = SNMP_VERSION_1;
-        } else if (!(strcasecmp(argv[arg],"2p") && strcasecmp(argv[arg],"2h"))) {
-          session->version = SNMP_VERSION_2_HISTORIC;
-        } else if (!strcmp(argv[arg],"2")) {
-          session->version = SNMP_VERSION_2;
-        } else {
-          fprintf(stderr,"Invalid version specified:  %s\n", argv[arg]);
+        if (isdigit(argv[arg][2]))
+          session->remote_port = atoi(&(argv[arg][2]));
+        else if ((++arg<argc) && isdigit(argv[arg][0]))
+          session->remote_port = atoi(argv[arg]);
+        else {
+          fprintf(stderr,"Need port number after -p flag.\n");
           usage();
           exit(1);
         }
         break;
+
+      case 't':
+        if (isdigit(argv[arg][2]))
+          session->timeout = atoi(&(argv[arg][2])) * 1000000L;
+        else if ((++arg<argc) && isdigit(argv[arg][0]))
+          session->timeout = atoi(argv[arg]) * 1000000L;
+        else {
+          fprintf(stderr,"Need time in seconds after -t flag.\n");
+          usage();
+          exit(1);
+        }
+        break;
+
+      case 'r':
+        if (isdigit(argv[arg][2]))
+          session->retries = atoi(&(argv[arg][2]));
+        else if ((++arg<argc) && isdigit(argv[arg][0]))
+          session->retries = atoi(argv[arg]);
+        else {
+          fprintf(stderr,"Need number of retries after -r flag.\n");
+          usage();
+          exit(1);
+        }
+        break;
+
+      case 'c':
+        clock_flag++;
+        srcclock = atoi(argv[++arg]);
+        if (isdigit(argv[arg][2]))
+          srcclock = (u_long)(atol(&(argv[arg][2])));
+        else if ((++arg<argc) && isdigit(argv[arg][0]))
+          srcclock = (u_long)(atol(argv[arg]));
+        else {
+          fprintf(stderr,"Need source clock value after -c flag.\n");
+          usage();
+          exit(1);
+        }
+        if ((++arg<argc) && isdigit(argv[arg][0]))
+          dstclock = (u_long)(atol(argv[arg]));
+        else {
+          fprintf(stderr,"Need destination clock value after -c flag.\n");
+          usage();
+          exit(1);
+        }
+        break;
+
+      case 'V':
+        fprintf(stderr,"UCD-snmp version: %s\n", VersionInfo);
+        exit(0);
+        break;
+
+      case 'v':
+        if (argv[arg][2] != 0)
+          psz = &(argv[arg][2]);
+        else
+          psz = argv[++arg];
+        if (!strcmp(psz,"1")) {
+          session->version = SNMP_VERSION_1;
+        } else if (!strcasecmp(psz,"2c")) {
+          session->version = SNMP_VERSION_2c;
+        } else if (!strcasecmp(psz,"2p")) {
+          session->version = SNMP_VERSION_2p;
+          fprintf(stderr,"Invalid version specified after -v flag: %s\n", psz);
+          usage();
+          exit(1);
+        }
+        break;
+
       case 'h':
         usage();
         exit(1);
         break;
           
       default:
-        /* printf("invalid option: -%c\n", argv[arg][1]); */
+        /* This should be removed to support options in clients that
+           have more parameters than the defaults above! */
+        /*
+        fprintf(stderr, "invalid option: -%c\n", argv[arg][1]);
+        usage();
+        exit(1);
+        */
         break;
     }
   }
+
+  /* get the hostname */
   if (arg == argc) {
     fprintf(stderr,"No hostname specified.\n");
     usage();
     exit(1);
   }
   session->peername = argv[arg++];     /* hostname */
-  if (session->version == SNMP_VERSION_1 ||
-      session->version == SNMP_VERSION_2) {
-    /* v1 and v2 communities */
-    session->community = (unsigned char *) argv[arg];
+
+  /* get community or party */
+  if ((session->version == SNMP_VERSION_1) ||
+      (session->version == SNMP_VERSION_2c)) {
+    /* v1 and v2c - so get community string */
+    if (arg == argc) {
+      fprintf(stderr,"No community name specified.\n");
+      usage();
+      exit(1);
+    }
+    session->community = (unsigned char *)argv[arg];
     session->community_len = strlen((char *)argv[arg]);
     arg++;
   } else {
-    /* v2 historic party configuration */
+    /* v2p - so get party info */
     if (arg == argc) {
       fprintf(stderr,"Neither a source party nor noAuth was specified.\n");
       usage();
@@ -177,7 +263,7 @@ snmp_parse_args(argc, argv, session)
         }
       }
       session->srcPartyLen = session->dstPartyLen =
-        session->contextLen = MAX_NAME_LEN;
+                    session->contextLen = MAX_NAME_LEN;
       ms_party_init(destAddr, session->srcParty, &(session->srcPartyLen),
                     session->dstParty, &(session->dstPartyLen),
                     session->context, &(session->contextLen));
@@ -214,7 +300,7 @@ snmp_parse_args(argc, argv, session)
       if (!pp){
         session->srcPartyLen = MAX_NAME_LEN;
         if (!read_objid(argv[arg], session->srcParty, &(session->srcPartyLen))){
-          fprintf(stderr,"Invalid source party: %s\n", argv[arg]);
+          fprintf(stderr,"Invalid source party: %s.\n", argv[arg]);
           session->srcPartyLen = 0;
           usage();
           exit(1);
@@ -242,7 +328,7 @@ snmp_parse_args(argc, argv, session)
       }
       if (!pp){
         if (!read_objid(argv[arg], session->dstParty, &(session->dstPartyLen))){
-          fprintf(stderr,"Invalid destination party: %s\n", argv[arg]);
+          fprintf(stderr,"Invalid destination party: %s.\n", argv[arg]);
           session->dstPartyLen = 0;
           usage();
           exit(1);
@@ -270,7 +356,7 @@ snmp_parse_args(argc, argv, session)
       }
       if (!cxp){
         if (!read_objid(argv[arg], session->context, &(session->contextLen))){
-          fprintf(stderr,"Invalid context: %s\n", argv[arg]);
+          fprintf(stderr,"Invalid context: %s.\n", argv[arg]);
           session->contextLen = 0;
           usage();
           exit(1);

@@ -182,7 +182,7 @@ var_udp(vp, name, length, exact, var_len, write_method)
 #endif /* linux */
 
 	default:
-	    ERROR("");
+	    ERROR_MSG("");
     }
     return NULL;
 }
@@ -231,7 +231,7 @@ var_udp(vp, name, length, exact, var_len, write_method)
 	    return (u_char *) &long_return;
 
 	default:
-	    ERROR("");
+	    ERROR_MSG("");
     }
     return NULL;
 }
@@ -304,7 +304,7 @@ LowState = -1;		/* UDP doesn't have 'State', but it's a useful flag */
 		long_return = ntohs(Lowinpcb.inp_lport);
 		return (u_char *) &long_return;
 	    default:
-		ERROR("");
+		ERROR_MSG("");
 	}
     return  NULL;
 }
@@ -351,7 +351,7 @@ var_udp(vp, name, length, exact, var_len, write_method)
       		break;
 	default:
 		ret = NULL;
-		ERROR("");
+		ERROR_MSG("");
     }
     return (ret);
 }

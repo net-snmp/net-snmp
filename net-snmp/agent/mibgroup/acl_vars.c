@@ -274,7 +274,7 @@ var_acl(vp, name, length, exact, var_len, write_method)
       case ACLSTATUS:
 	return (u_char *)&ap->aclStatus;
       default:
-            ERROR("");
+            ERROR_MSG("");
     }
     return NULL;
 }
