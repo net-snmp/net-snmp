@@ -61,6 +61,9 @@ SOFTWARE.
 #if HAVE_ARPA_INET_H
 #include <arpa/inet.h>
 #endif
+#if HAVE_GETOPT_H
+#include <getopt.h>
+#endif
 
 #include "asn1.h"
 #include "snmp_api.h"
@@ -120,6 +123,8 @@ main(argc, argv)
   char  *argv[];
 {
   int   arg, argt;
+  extern int optind;
+  extern char *optarg;
 #ifdef _DEBUG_MALLOC_INC
   unsigned long histid1, histid2, orig_size, current_size;
 #endif
@@ -162,7 +167,7 @@ main(argc, argv)
     /* specified on the command line */
     rootlen = MAX_NAME_LEN;
     if (!read_objid(argv[optind], root, &rootlen)){
-      fprintf(stderr, "Invalid object identifier: %s\n", argv[arg]);
+      fprintf(stderr, "Invalid object identifier: %s\n", argv[optind]);
       exit(1);
     }
     debug = snmp_get_dump_packet();

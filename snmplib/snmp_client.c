@@ -178,6 +178,7 @@ snmp_synch_input(op, session, reqid, pdu, magic)
     } else if (op == TIMED_OUT){
 	state->pdu = NULL;
 	state->status = STAT_TIMEOUT;
+        snmp_errno = SNMPERR_TIMEOUT;
     }
     return 1;
 }
@@ -402,13 +403,13 @@ snmp_synch_setup(session)
     session->callback_magic = (void *)&snmp_synch_state;
 }
 
-char	*error_string[18] = {
-    "No Error",
-    "Response message would have been too large.",
-    "There is no such variable name in this MIB.",
-    "The value given has the wrong type or length.",
-    "The two parties used do not have access to use the specified SNMP PDU.",
-    "A general failure occured",
+char	*error_string[19] = {
+    "(noError) No Error",
+    "(tooBig) Response message would have been too large.",
+    "(noSuchName) There is no such variable name in this MIB.",
+    "(badValue) The value given has the wrong type or length.",
+    "(readOnly) The two parties used do not have access to use the specified SNMP PDU.",
+    "(genError) A general failure occured",
     "noAccess",
     "wrongType",
     "wrongLength",
@@ -420,14 +421,15 @@ char	*error_string[18] = {
     "commitFailed",
     "undoFailed",
     "authorizationError",
-    "notWritable"
+    "notWritable",
+    "inconsistentName"
 };
 
 char *
 snmp_errstring(errstat)
     int	errstat;
 {
-    if (errstat <= SNMP_ERR_NOTWRITABLE && errstat >= SNMP_ERR_NOERROR){
+    if (errstat <= MAX_SNMP_ERR && errstat >= SNMP_ERR_NOERROR){
 	return error_string[errstat];
     } else {
 	return "Unknown Error";
