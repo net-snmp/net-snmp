@@ -106,6 +106,12 @@ int main(int argc, char *argv[])
     /* get the common command line arguments */
     arg = snmp_parse_args(argc, argv, &session);
 
+    if (arg >= argc) {
+      fprintf(stderr, "Missing object name\n");
+      usage();
+      exit(1);
+    }
+
     /* get the object names */
     for(; arg < argc; arg++)
       names[current_name++] = argv[arg];
