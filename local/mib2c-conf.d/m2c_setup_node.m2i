@@ -101,6 +101,7 @@
 @  if $m2c_node_needlength == 1@
 @    eval $m2c_node_param_val_name = "${m2c_node_param_val_name}_ptr"@
 @    eval $m2c_node_param_val_lname = "${m2c_node_param_val_name}_len"@
+@    eval $m2c_node_param_val_call = "${m2c_node_param_val_name}, ${m2c_node_param_val_lname}"@
 @    eval $m2c_node_param_ref_name = "${m2c_node_param_ref_name}_ptr"@
 @    eval $m2c_node_param_ref_lname = "${m2c_node_param_val_lname}_ptr"@
 @    eval $m2c_XX = "$m2c_decl **$m2c_node_param_ref_name,"@
@@ -110,6 +111,7 @@
 @  else@
 @    eval $m2c_node_param_ref = "$m2c_decl * $m2c_node_param_ref_name"@
 @    eval $m2c_node_param_val = "$m2c_decl $m2c_node_param_val_name"@
+@    eval $m2c_node_param_val_call = "$m2c_node_param_val_name"@
 ##
 @  end@
 ##
