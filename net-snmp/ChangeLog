@@ -1,3 +1,35 @@
+Changes since V3.0.4
+
+hardaker 19 Jan 96 17:31:16
+    - (configure*)
+      - updated to autoconf v2.7
+      - Hopefully now using correct 'make' definitions
+
+hardaker 19 Jan 96 17:32:57
+    - (agent/extensible/*.c)
+      - Declaired more static variables (long_ret) to fix sun4s exit codes (again).
+
+hardaker 22 Jan 96 16:27:30
+    - (acconfig.h, agent/snmp_vars.c, agent/extensible/*.c)
+      - Added new defines to turn on/off sections of the extensible mib.
+      - This also fixes the mib.txt file definitions if something is turned off.
+    - (Makefile.in) removed ${srcdir} from the front of stamp-h.in
+
+hardaker 22 Jan 96 17:18:58
+    - (local/Makefile.in) Added a chmod to make the snmpcheck script executable
+
+hardaker 22 Jan 96 17:23:17
+    - (local/snmpcheck)
+      - added agent controls:  restart, updateconfig, clearcache.
+      - removed an old debugging printf.
+      - ctrl-f => fixall.
+      - Added keyboard accelerators to the associated menu items.
+      - Made highlightThickness a global parameter via $window->option('add').
+      - Added a entry box to the executable commands with the command to run.
+
+
+-------------------------------------------------------------------------------
+
 Changes since V3.0.3
 
 hardaker 23 Oct 95 16:37:43
