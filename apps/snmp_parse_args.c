@@ -185,17 +185,17 @@ snmp_parse_args(argc, argv, session)
     } else {
       sprintf(ctmp,"%s/party.conf",SNMPLIBPATH);
       if (read_party_database(ctmp) != 0){
-	fprintf (stderr, "%s\n", snmp_api_errstring(snmp_errno));
+	snmp_perror(argv[0]);
         exit(1);
       }
       sprintf(ctmp,"%s/context.conf",SNMPLIBPATH);
       if (read_context_database(ctmp) != 0){
-	fprintf (stderr, "%s\n", snmp_api_errstring(snmp_errno));
+	snmp_perror(argv[0]);
         exit(1);
       }
       sprintf(ctmp,"%s/acl.conf",SNMPLIBPATH);
       if (read_acl_database(ctmp) != 0){
-	fprintf (stderr, "%s\n", snmp_api_errstring(snmp_errno));
+	snmp_perror(argv[0]);
         exit(1);
       }
 

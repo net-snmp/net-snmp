@@ -136,7 +136,7 @@ main(argc, argv)
     snmp_synch_setup(&session);
     ss = snmp_open(&session);
     if (ss == NULL){
-	fprintf(stderr, "Couldn't open snmp: %s\n", snmp_api_errstring(snmp_errno));
+        snmp_perror("snmpwalk: Couldn't open snmp");
 	exit(1);
     }
 
@@ -190,8 +190,7 @@ main(argc, argv)
 	} else if (status == STAT_TIMEOUT){
 	    fprintf(stderr, "No Response from %s\n", session.peername);
 	} else {    /* status == STAT_ERROR */
-	    fprintf(stderr, "An error occurred: %s\nQuitting\n",
-		    snmp_api_errstring(snmp_errno));
+            snmp_perror("snmpwalk: An error occurred");
 	}
 
 	if (response)

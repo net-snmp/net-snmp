@@ -101,6 +101,9 @@ struct snmp_session {
 
 extern int snmp_errno;
 extern char *snmp_api_errstring __P((int));
+extern void snmp_perror __P((char *));
+#define SNMP_DETAIL_SIZE        512
+
 /* Error return values */
 #define SNMPERR_GENERR		(-1)
 #define SNMPERR_BAD_LOCPORT	(-2)
