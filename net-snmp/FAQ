@@ -338,8 +338,8 @@ What are all these different SNMPv2's anyway?
 			the proponents of usec and v2star.
 
   The formal successor to the SNMP-NG work has been termed SNMPv3.
-  This has now been effectively finalised, and been put forward for
-  approval as Proposed Standards.  This is described in RFCs 2271-2275.
+  This has now been effectively finalised, and as been published as
+  Proposed Standards.  This is described in RFCs 2571-2575.
 
 
 
@@ -736,10 +736,12 @@ How do I use SNMPv3?
 
     As far as the applications are concerned, this is simply a matter of using
   the "-v 3" option, and providing suitable values for the various SNMPv3
-  parameters.
+  parameters.  These are described in the snmpcmd(1) manual page.
     Configuring the UCD agent is less straightforward.  There is an initial
   description of how to do this in the file 'README.snmpv3', but this is more
   complex than we would like, and will hopefully be revised in the future.
+    Also see the snmpusm(1) manual page, as it describes some basic
+  information about how SNMPv3's user based security module works.
     Watch this space....
  
 
