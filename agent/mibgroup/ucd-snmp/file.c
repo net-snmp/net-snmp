@@ -10,10 +10,32 @@
 
 #define MAXFILE   20
 
-
 struct filestat fileTable[MAXFILE];
 int fileCount;
 	
+void init_file(void) {
+
+  struct variable2 file_table[] = {
+    {FILE_INDEX,  ASN_INTEGER,   RONLY, var_file_table, 1, {1}},
+    {FILE_NAME,   ASN_OCTET_STR, RONLY, var_file_table, 1, {2}},
+    {FILE_SIZE,   ASN_INTEGER,   RONLY, var_file_table, 1, {3}},
+    {FILE_MAX,    ASN_INTEGER,   RONLY, var_file_table, 1, {4}},
+    {FILE_ERROR,  ASN_INTEGER,   RONLY, var_file_table, 1, {100}},
+    {FILE_MSG,    ASN_OCTET_STR, RONLY, var_file_table, 1, {101}}
+  };
+
+/* Define the OID pointer to the top of the mib tree that we're
+   registering underneath */
+  oid file_variables_oid[] = { EXTENSIBLEMIB,15,1 };
+
+  /* register ourselves with the agent to handle our mib tree */
+  REGISTER_MIB("mibII/file", file_table, variable2, file_variables_oid);
+
+  snmpd_register_config_handler("file", file_parse_config, file_free_config,
+                                "file [maxsize]");
+
+}
+
 void file_free_config(void) 
 {
     fileCount = 0;

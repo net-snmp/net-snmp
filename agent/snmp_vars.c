@@ -277,10 +277,9 @@ register_mib(moduleName, var, varsize, numvars, mibloc, mibloclen)
   subtree = (struct subtree *) malloc(sizeof(struct subtree));
   memset(subtree, 0, sizeof(struct subtree));
 
-  if (snmp_get_do_debugging()) {
-    sprint_objid(c_oid, mibloc, mibloclen);
-    DEBUGMSGTL(("snmp_vars", "registering \"%s\" at %s\n", moduleName, c_oid));
-  }
+  sprint_objid(c_oid, mibloc, mibloclen);
+  DEBUGMSGTL(("register_mib", "registering \"%s\" at %s\n",
+              moduleName, c_oid));
     
   memcpy(subtree->name, mibloc, mibloclen*sizeof(oid));
   memcpy(subtree->label, moduleName, strlen(moduleName)+1);

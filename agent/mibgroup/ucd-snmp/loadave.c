@@ -111,6 +111,28 @@ double maxload[3];
 
 void	init_loadave( )
 {
+
+/* define the structure we're going to ask the agent to register our
+   information at */
+  struct variable2 extensible_loadave_variables[] = {
+    {MIBINDEX, ASN_INTEGER, RONLY, var_extensible_loadave, 1, {MIBINDEX}},
+    {ERRORNAME, ASN_OCTET_STR, RONLY, var_extensible_loadave, 1, {ERRORNAME}},
+    {LOADAVE, ASN_OCTET_STR, RONLY, var_extensible_loadave, 1, {LOADAVE}},
+    {LOADMAXVAL, ASN_OCTET_STR, RONLY, var_extensible_loadave, 1, {LOADMAXVAL}},
+    {ERRORFLAG, ASN_INTEGER, RONLY, var_extensible_loadave, 1, {ERRORFLAG}},
+    {ERRORMSG, ASN_OCTET_STR, RONLY, var_extensible_loadave, 1, {ERRORMSG}}
+  };
+
+/* Define the OID pointer to the top of the mib tree that we're
+   registering underneath */
+  oid loadave_variables_oid[] = { EXTENSIBLEMIB,LOADAVEMIBNUM,1 };
+
+  /* register ourselves with the agent to handle our mib tree */
+  REGISTER_MIB("ucd_snmp/loadave", extensible_loadave_variables, variable2, \
+               loadave_variables_oid);
+
+  snmpd_register_config_handler("load", loadave_parse_config,
+                                loadave_free_config, "max1 [max5] [max15]");
 }
 
 void loadave_parse_config(word,cptr)

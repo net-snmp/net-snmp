@@ -17,22 +17,4 @@ unsigned char *var_hp __P((struct variable *, oid *, int *, int, int *, int (**w
 #define HPSTATUS 6
 #define HPTRAP 101
 
-#ifdef IN_SNMP_VARS_C
-
-struct variable2 hp_variables[] = {
-  {HPCONF, ASN_INTEGER, RWRITE, var_hp, 1, {HPCONF}},
-  {HPRECONFIG, ASN_INTEGER, RWRITE, var_hp, 1, {HPRECONFIG}},
-  {HPFLAG, ASN_INTEGER, RWRITE, var_hp, 1, {HPFLAG}},
-  {HPLOGMASK, ASN_INTEGER, RWRITE, var_hp, 1, {ERRORFLAG}},
-  {HPSTATUS, ASN_INTEGER, RWRITE, var_hp, 1, {ERRORMSG}}
-};
-
-struct variable2 hptrap_variables[] = {
-  {HPTRAP, ASN_IPADDRESS, RWRITE, var_hp, 1, {HPTRAP }},
-};
-
-config_load_mib(1.3.6.1.4.1.11.2.13.1.2.1, 12, hptrap_variables)
-config_load_mib(1.3.6.1.4.1.11.2.13.2, 10, hp_variables)
-
-#endif
 #endif /* _MIBGROUP_HPUX_H */

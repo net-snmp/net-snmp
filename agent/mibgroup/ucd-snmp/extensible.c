@@ -111,6 +111,33 @@ extern struct subtree *subtrees,subtrees_old[];
 extern struct variable2 extensible_relocatable_variables[];
 extern struct variable2 extensible_passthru_variables[];
 
+void init_extensible(void) {
+
+  struct variable2 extensible_extensible_variables[] = {
+    {MIBINDEX, ASN_INTEGER, RONLY, var_extensible_shell, 1, {MIBINDEX}},
+    {ERRORNAME, ASN_OCTET_STR, RONLY, var_extensible_shell, 1, {ERRORNAME}}, 
+    {SHELLCOMMAND, ASN_OCTET_STR, RONLY, var_extensible_shell, 1, {SHELLCOMMAND}}, 
+    {ERRORFLAG, ASN_INTEGER, RONLY, var_extensible_shell, 1, {ERRORFLAG}},
+    {ERRORMSG, ASN_OCTET_STR, RONLY, var_extensible_shell, 1, {ERRORMSG}},
+    {ERRORFIX, ASN_INTEGER, RWRITE, var_extensible_shell, 1, {ERRORFIX }}
+  };
+
+/* Define the OID pointer to the top of the mib tree that we're
+   registering underneath */
+  oid extensible_variables_oid[] = { EXTENSIBLEMIB,SHELLMIBNUM,1 };
+
+  /* register ourselves with the agent to handle our mib tree */
+  REGISTER_MIB("mibII/extensible", extensible_extensible_variables, variable2, \
+               extensible_variables_oid);
+
+  snmpd_register_config_handler("exec", extensible_parse_config,
+                                extensible_free_config,
+                                "[miboid] name program arguments");
+  snmpd_register_config_handler("sh", extensible_parse_config,
+                                extensible_free_config,
+                                "[miboid] name program-or-script arguments");
+}
+
 void extensible_parse_config(word,cptr)
   char *word;
   char *cptr;

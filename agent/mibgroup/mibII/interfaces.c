@@ -143,16 +143,54 @@ static int Interface_Scan_Get_Count __P((void));
 static int header_interfaces __P((struct variable *, oid *, int *, int, int *, int (**write) __P((int, u_char *, u_char,int, u_char *, oid *, int)) ));
 static int header_ifEntry __P((struct variable *, oid *, int *, int, int *, int (**write) __P((int, u_char *, u_char,int, u_char *, oid *, int)) ));
 
+struct variable4 interfaces_variables[] = {
+    {IFNUMBER, ASN_INTEGER, RONLY, var_interfaces, 1, {1}},
+    {IFINDEX, ASN_INTEGER, RONLY, var_ifEntry, 3, {2, 1, 1}},
+    {IFDESCR, ASN_OCTET_STR, RONLY, var_ifEntry, 3, {2, 1, 2}},
+    {IFTYPE, ASN_INTEGER, RONLY, var_ifEntry, 3, {2, 1, 3}},
+    {IFMTU, ASN_INTEGER, RONLY, var_ifEntry, 3, {2, 1, 4}},
+    {IFSPEED, ASN_GAUGE, RONLY, var_ifEntry, 3, {2, 1, 5}},
+    {IFPHYSADDRESS, ASN_OCTET_STR, RONLY, var_ifEntry, 3, {2, 1, 6}},
+    {IFADMINSTATUS, ASN_INTEGER, RWRITE, var_ifEntry, 3, {2, 1, 7}},
+    {IFOPERSTATUS, ASN_INTEGER, RONLY, var_ifEntry, 3, {2, 1, 8}},
+    {IFLASTCHANGE, ASN_TIMETICKS, RONLY, var_ifEntry, 3, {2, 1, 9}},
+    {IFINOCTETS, ASN_COUNTER, RONLY, var_ifEntry, 3, {2, 1, 10}},
+    {IFINUCASTPKTS, ASN_COUNTER, RONLY, var_ifEntry, 3, {2, 1, 11}},
+    {IFINNUCASTPKTS, ASN_COUNTER, RONLY, var_ifEntry, 3, {2, 1, 12}},
+    {IFINDISCARDS, ASN_COUNTER, RONLY, var_ifEntry, 3, {2, 1, 13}},
+    {IFINERRORS, ASN_COUNTER, RONLY, var_ifEntry, 3, {2, 1, 14}},
+    {IFINUNKNOWNPROTOS, ASN_COUNTER, RONLY, var_ifEntry, 3, {2, 1, 15}},
+    {IFOUTOCTETS, ASN_COUNTER, RONLY, var_ifEntry, 3, {2, 1, 16}},
+    {IFOUTUCASTPKTS, ASN_COUNTER, RONLY, var_ifEntry, 3, {2, 1, 17}},
+    {IFOUTNUCASTPKTS, ASN_COUNTER, RONLY, var_ifEntry, 3, {2, 1, 18}},
+    {IFOUTDISCARDS, ASN_COUNTER, RONLY, var_ifEntry, 3, {2, 1, 19}},
+    {IFOUTERRORS, ASN_COUNTER, RONLY, var_ifEntry, 3, {2, 1, 20}},
+    {IFOUTQLEN, ASN_GAUGE, RONLY, var_ifEntry, 3, {2, 1, 21}},
+    {IFSPECIFIC, ASN_OBJECT_ID, RONLY, var_ifEntry, 3, {2, 1, 22}}
+};
+
+/* Define the OID pointer to the top of the mib tree that we're
+   registering underneath */
+oid interfaces_variables_oid[] = { 1,3,6,1,2,1,2 };
+
+void init_interfaces(void)
+{
+  /* register ourselves with the agent to handle our mib tree */
+  REGISTER_MIB("mibII/interfaces", interfaces_variables, variable4, \
+               interfaces_variables_oid);
+  
+#ifndef USE_SYSCTL_IFLIST
+#ifdef HAVE_NET_IF_MIB_H
+  init_interfaces_setup();
+#endif
+#endif
+}
+
 #ifdef USE_SYSCTL_IFLIST
 
 static u_char * if_list = 0;
 static const u_char * if_list_end;
 static size_t if_list_size = 0;
-
-void
-init_interfaces __P((void))
-{
-}
 
 #define MATCH_FAILED	-1
 #define MATCH_SUCCEEDED	0
@@ -540,10 +578,6 @@ static int Interface_Get_Ether_By_Index __P((int, u_char *));
 	 *
 	 *********************/
 
-
-void	init_interfaces( )
-{
-}
 
 #define MATCH_FAILED	-1
 #define MATCH_SUCCEEDED	0
@@ -1644,7 +1678,7 @@ static	char *physaddrbuf;
 static	int nphysaddrs;
 struct	sockaddr_dl **physaddrs;
 
-void	init_interfaces()
+void	init_interfaces_setup()
 {
 	int naddrs, ilen, bit;
 	static int mib[6] 
@@ -1744,7 +1778,7 @@ get_phys_address(int index, char **ap, int *len)
 		}
 		if (i < nphysaddrs)
 			break;
-		init_interfaces();
+		init_interfaces_setup();
 	} while (once--);
 
 	if (i < nphysaddrs) {

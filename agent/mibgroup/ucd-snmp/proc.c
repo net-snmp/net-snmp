@@ -49,6 +49,34 @@ struct myproc *procwatch = NULL;
 static struct extensible fixproc;
 int numprocs=0;
 
+void init_proc(void) {
+
+/* define the structure we're going to ask the agent to register our
+   information at */
+  struct variable2 extensible_proc_variables[] = {
+    {MIBINDEX, ASN_INTEGER, RONLY, var_extensible_proc, 1, {MIBINDEX}},
+    {ERRORNAME, ASN_OCTET_STR, RONLY, var_extensible_proc, 1, {ERRORNAME}}, 
+    {PROCMIN, ASN_INTEGER, RONLY, var_extensible_proc, 1, {PROCMIN}}, 
+    {PROCMAX, ASN_INTEGER, RONLY, var_extensible_proc, 1, {PROCMAX}},
+    {PROCCOUNT, ASN_INTEGER, RONLY, var_extensible_proc, 1, {PROCCOUNT}},
+    {ERRORFLAG, ASN_INTEGER, RONLY, var_extensible_proc, 1, {ERRORFLAG}},
+    {ERRORMSG, ASN_OCTET_STR, RONLY, var_extensible_proc, 1, {ERRORMSG}},
+    {ERRORFIX, ASN_INTEGER, RWRITE, var_extensible_proc, 1, {ERRORFIX }}
+  };
+
+/* Define the OID pointer to the top of the mib tree that we're
+   registering underneath */
+  oid proc_variables_oid[] = { EXTENSIBLEMIB,PROCMIBNUM,1 };
+
+  /* register ourselves with the agent to handle our mib tree */
+  REGISTER_MIB("ucd-snmp/proc", extensible_proc_variables, variable2, \
+               proc_variables_oid);
+
+  snmpd_register_config_handler("proc", proc_parse_config, proc_free_config,
+                                "process-name [max-num] [min-num]");
+}
+
+
 /* Define snmpd.conf reading routines first.  They get called
    automatically by the invocation of a macro in the proc.h file. */
 

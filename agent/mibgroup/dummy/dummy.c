@@ -63,6 +63,25 @@ void calculate_dummy();
 
 void	init_dummy( )
 {
+
+/* define the structure we're going to ask the agent to register our
+   information at */
+  struct variable2 dummy_variables[] = {
+    { DUMMYIFINFO,  ASN_OCTET_STR, RONLY, var_dummy, 1, {DUMMYIFINFO}},
+    { DUMMYIFID,   ASN_INTEGER, RONLY, var_dummy, 1, {DUMMYIFID}},
+    { DUMMYNOOFINTERFACES, ASN_COUNTER, RONLY, var_dummy, 1, {DUMMYNOOFINTERFACES}},
+    { DUMMYCAPACITY, ASN_COUNTER, RONLY, var_dummy, 1, {DUMMYCAPACITY}},
+    { DUMMYSLOTMGTSCHEME, ASN_INTEGER, RONLY, var_dummy, 1, {DUMMYSLOTMGTSCHEME}}
+  };
+
+/* Define the OID pointer to the top of the mib tree that we're
+   registering underneath */
+  oid dummy_variables_oid[] = { 1,3,6,1,4,1,3209 };
+
+  /* register ourselves with the agent to handle our mib tree */
+  REGISTER_MIB("dummy", dummy_variables, variable2, dummy_variables_oid);
+
+#endif
 }
 
 /* function which scans a given snmpd.conf line for information */

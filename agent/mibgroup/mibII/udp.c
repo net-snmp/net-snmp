@@ -121,9 +121,25 @@ static void linux_read_udp_stat __P((struct udp_mib *));
 	 *
 	 *********************/
 
+struct variable8 udp_variables[] = {
+    {UDPINDATAGRAMS, ASN_COUNTER, RONLY, var_udp, 1, {1}},
+    {UDPNOPORTS, ASN_COUNTER, RONLY, var_udp, 1, {2}},
+    {UDPINERRORS, ASN_COUNTER, RONLY, var_udp, 1, {3}},
+    {UDPOUTDATAGRAMS, ASN_COUNTER, RONLY, var_udp, 1, {4}},
+    {UDPLOCALADDRESS, ASN_IPADDRESS, RONLY, var_udpEntry, 3, {5, 1, 1}},
+    {UDPLOCALPORT, ASN_INTEGER, RONLY, var_udpEntry, 3, {5, 1, 2}}
+};
+
+/* Define the OID pointer to the top of the mib tree that we're
+   registering underneath */
+oid udp_variables_oid[] = { 1,3,6,1,2,1,7 };
 
 void	init_udp( )
 {
+
+  /* register ourselves with the agent to handle our mib tree */
+  REGISTER_MIB("mibII/udp", udp_variables, variable8, udp_variables_oid);
+
 #ifdef UDPSTAT_SYMBOL
   auto_nlist( UDPSTAT_SYMBOL,0,0 );
 #endif

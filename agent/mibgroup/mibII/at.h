@@ -20,19 +20,6 @@ extern u_char	*var_atEntry __P((struct variable *, oid *, int *, int, int *, int
 #define IPMEDIANETADDRESS       2
 #define IPMEDIATYPE             3
 
-#ifdef IN_SNMP_VARS_C
-
-  /* variable4 because var_atEntry is also used by ipNetToMediaTable */
-struct variable4 at_variables[] = {
-    {ATIFINDEX, ASN_INTEGER, RONLY, var_atEntry, 1, {1}},
-    {ATPHYSADDRESS, ASN_OCTET_STR, RONLY, var_atEntry, 1, {2}},
-    {ATNETADDRESS, ASN_IPADDRESS, RONLY, var_atEntry, 1, {3}}
-};
-
-    config_load_mib(MIB.3.1.1, 9, at_variables)
-
-#endif
-
 /* in case its missing: */
 #ifndef ATF_PERM
 # define ATF_PERM	0x04
