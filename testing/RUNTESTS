@@ -67,6 +67,7 @@ SNMP_UPDIR=..		## building from the source tree
 interactive=no
 SNMP_VERBOSE=0
 SNMP_SLEEP=1		## default seconds to sleep
+SH_DEBUG=0
 
 while [ -n "$1" ]; do
     case "$1" in
@@ -108,6 +109,10 @@ while [ -n "$1" ]; do
 	-S)
 	    shift
 	    SNMP_SLEEP="$1"
+	    ;;
+
+	-x)
+	    SH_DEBUG=1
 	    ;;
 
     esac
@@ -261,6 +266,10 @@ if [ "x$do_tests" = "x" ]; then
 	    while [ $a -le $num ]; do
 		if echo " $inp " | grep " $a " > /dev/null; then
 		    do_tests="$do_tests $1"
+		    if [ "x$test_nums" = "x" ] ; then
+			# actually broken.  sets only the first num correctly.
+			test_nums=$a
+		    fi
 		fi
 		shift
 		a=`expr $a + 1`
@@ -274,7 +283,7 @@ fi
 #
 # Run the tests
 #
-if [ "x$test_nums" = "xall" ]; then
+if [ "x$test_nums" = "xall" -o "x$test_nums" = "x" ] ; then
     num=1
 else
     num="$test_nums"
@@ -283,7 +292,11 @@ for testfile in $do_tests; do
     dothisone="yes";
     if [ "x$interactive" = "xyes" ]; then
 
-	eval_onescript.sh $testfile $num "yes"
+        if [ $SH_DEBUG = 1 ] ; then
+	    sh -x eval_onescript.sh $testfile $num "yes"
+	else
+	    eval_onescript.sh $testfile $num "yes"
+	fi
 
 	ECHO "  Run test #$num (y/n) [y]? "
 	read inp
@@ -293,7 +306,11 @@ for testfile in $do_tests; do
     fi
   
     if [ "x$dothisone" = "xyes" ]; then
-	eval_onescript.sh $testfile $num "no"
+        if [ $SH_DEBUG = 1 ] ; then
+	    sh -x eval_onescript.sh $testfile $num "no"
+	else
+	    eval_onescript.sh $testfile $num "no"
+	fi
 	if [ $? = 0 ]; then
 	    success_count=`expr $success_count + 1`
 	else
