@@ -31,7 +31,8 @@ CREATING THE FIRST USER:
     snmpget -v 3 -u myuser -l authNoPriv -a MD5 -A my_password localhost sysUpTime.0
        [ this should return information about how long your agent has been up]
   
-    snmpget -v 3 -u myuser -l authPriv -a MD5 -A my_password localhost sysUpTime.0
+    snmpget -v 3 -u myuser -l authPriv   -a MD5 -A my_password
+                                         -x DES -X my_password localhost sysUpTime.0
        [ this should return similar information, but encrypts the transmission ]
 
 CREATING A SECOND USER:
