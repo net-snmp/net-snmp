@@ -27,7 +27,7 @@
 #else
 #include <utmp.h>
 #endif
-#include <sys/signal.h>
+#include <signal.h>
 #include <errno.h>
 
 #ifdef linux
