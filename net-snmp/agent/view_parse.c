@@ -49,7 +49,7 @@ read_view_database(char *filename)
     int blank, nonhex;
     int linenumber = 0;
     int viewIndex;
-    oid viewSubtree[64];
+    oid viewSubtree[MAX_OID_LEN];
     int viewSubtreeLen;
     int status = 0;
     u_long byte;
@@ -60,7 +60,7 @@ read_view_database(char *filename)
     fp = fopen(filename, "r");
     if (fp == NULL)
 	return -1;
-    while (fgets(buf, 256, fp)){
+    while (fgets(buf, sizeof(buf), fp)){
 	linenumber++;
 	if (strlen(buf) > 250)
 	    error_exit("Line longer than 250 bytes", linenumber, filename);
@@ -84,7 +84,7 @@ read_view_database(char *filename)
                            linenumber, filename);
 	viewIndex = atoi(buf1);
 
-	viewSubtreeLen = 64;
+	viewSubtreeLen = MAX_OID_LEN;
 	if (!read_objid(buf2, viewSubtree, &viewSubtreeLen))
 	    error_exit("Bad object identifier", linenumber, filename);
 

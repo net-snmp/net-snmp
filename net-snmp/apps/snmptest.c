@@ -154,7 +154,7 @@ int main(int argc, char *argv[])
 		    } else {
 			printf("What repeat count? ");
 			fflush(stdout);
-			fgets(input, sizeof input, stdin);
+			fgets(input, sizeof(input), stdin);
 			maxRepetitions = atoi(input);
 			pdu->non_repeaters = nonRepeaters;
 			pdu->max_repetitions = maxRepetitions;
@@ -260,7 +260,7 @@ input_variable(struct variable_list *vp)
 
     printf("Variable: ");
     fflush(stdout);
-    fgets(buf, sizeof buf, stdin);
+    fgets(buf, sizeof(buf), stdin);
 
     if (*buf == '\n'){
 	vp->name_length = 0;
@@ -339,7 +339,7 @@ input_variable(struct variable_list *vp)
 	|| command == SNMP_MSG_TRAP2){
 	printf("Type [i|s|x|d|n|o|t|a]: ");
 	fflush(stdout);
-	fgets(buf, sizeof buf, stdin);
+	fgets(buf, sizeof(buf), stdin);
 	ch = *buf;
 	switch(ch){
 	    case 'i':
@@ -371,7 +371,7 @@ input_variable(struct variable_list *vp)
 		return -1;
 	}
 	printf("Value: "); fflush(stdout);
-	fgets(buf, sizeof buf, stdin);
+	fgets(buf, sizeof(buf), stdin);
 	switch(vp->type){
 	    case ASN_INTEGER:
 		vp->val.integer = (long *)malloc(sizeof(long));

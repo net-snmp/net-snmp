@@ -1156,7 +1156,7 @@ static void Route_Scan_Reload (void)
 	    return;
 	  }
 
-	while (fgets (line, sizeof line, in))
+	while (fgets (line, sizeof(line), in))
 	  {
 	    struct rtentry rtent;
 	    char rtent_name [32];

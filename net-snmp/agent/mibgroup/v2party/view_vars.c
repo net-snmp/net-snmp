@@ -44,7 +44,7 @@ view_rowCreate(int viewIndex,
 {
     struct viewEntry *vp;
 
-    if (viewSubtreeLen > 32)
+    if (viewSubtreeLen > MAX_OID_LEN)
 	return NULL;
     vp = view_createEntry(viewIndex, viewSubtree, viewSubtreeLen);
     vp->viewBitMask = 0;

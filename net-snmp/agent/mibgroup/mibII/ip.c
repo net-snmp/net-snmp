@@ -1013,7 +1013,7 @@ linux_read_ip_stat (struct ip_mib *ipstat)
   if (! in)
     return;
 
-  while (line == fgets (line, 1024, in))
+  while (line == fgets (line, sizeof(line), in))
     {
       if (19 == sscanf (line,   
 "Ip: %lu %lu %lu %lu %lu %lu %lu %lu %lu %lu %lu %lu %lu %lu %lu %lu %lu %lu %lu",

@@ -448,7 +448,7 @@ static void ARP_Scan_Init (void)
 		arptab_current = 0;
 		return;
 	}
-	for (n = -1; fgets (line, sizeof line, in); n++)
+	for (n = -1; fgets (line, sizeof(line), in); n++)
 		;
 	fclose (in);
 	in = fopen ("/proc/net/arp", "r");
@@ -461,7 +461,7 @@ static void ARP_Scan_Init (void)
 	else
 		at = NULL;
 	for (i = 0; i < arptab_size; i++) {
-		while (line == fgets (line, sizeof line, in) &&
+		while (line == fgets (line, sizeof(line), in) &&
 			11 != sscanf (line, "%d.%d.%d.%d 0x%*x 0x%x %x:%x:%x:%x:%x:%x",
 			&za, &zb, &zc, &zd, &at[i].at_flags,
 			&ze, &zf, &zg, &zh, &zi, &zj))
