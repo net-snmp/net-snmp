@@ -10,3 +10,4 @@ snmptrap
 snmptrapd
 snmpwalk
 snmpdelta
+snmptable
