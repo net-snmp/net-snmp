@@ -13,7 +13,7 @@ BEGIN {
 $SNMP::save_descriptions = 1;
 
 use Test;
-BEGIN {plan tests => 28}
+BEGIN {plan tests => 30}
 use SNMP;
 
 $SNMP::verbose = 0;
@@ -49,8 +49,7 @@ ok($res eq 'OCTETSTR');
 #############################  6  ####################################
 $res =  $SNMP::MIB{sysLocation}{status};
 #print STDERR ("status is: $res\n");
-#XXX: test fails due SMIv1 codes being returned intstead of SMIv2...
-#ok($res eq 'Current');
+ok($res eq 'Current');
 #print STDERR ("\n");
 #############################  7  #################################
 $res =  $SNMP::MIB{sysORTable}{access};
@@ -73,9 +72,8 @@ ok($res eq 'IPADDR');
 #print("\n");
 ##########################  11  ##########################
 $res = $SNMP::MIB{atNetAddress}{syntax};
-#print("syntax is: $res\n");
-#XXX: test fails due SMIv1 codes being returned intstead of SMIv2...
-#ok($res eq 'IPADDR');
+#print ("syntax is: $res\n");
+ok($res eq 'NETADDR');
 #print("\n");
 ########################   12  ###############################
 $res = $SNMP::MIB{ipReasmOKs}{syntax};
