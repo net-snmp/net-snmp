@@ -445,6 +445,7 @@ int create_v1_trap_session (sink, com)
 	sinks = new_sink;
 	return 1;
     }
+    fprintf (stderr, "%s\n", snmp_api_errstring (snmp_errno));
     free(new_sink);
     return 0;
 }
@@ -475,7 +476,7 @@ send_v1_trap (ss, trap, specific)
     pdu->specific_type = specific;
     pdu->time = diff.tv_sec * 100 + diff.tv_usec / 10000;
     if (snmp_send (ss, pdu) == 0) {
-        fprintf (stderr, "snmpd: send_trap: %d\n", snmp_errno);
+        fprintf (stderr, "snmpd: send_trap: %s\n", snmp_api_errstring(snmp_errno));
     }
 #ifdef USING_SNMP_MIB_MODULE       
     snmp_outtraps++;

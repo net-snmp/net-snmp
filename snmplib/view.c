@@ -35,7 +35,7 @@ view_getEntry(viewIndex, viewSubtree, viewSubtreeLen)
     for(vp = List; vp; vp = vp->next){
         if (viewIndex == vp->viewIndex
 	    && viewSubtreeLen == vp->viewSubtreeLen
-	    && !bcmp((char *)vp->viewSubtree, (char *)viewSubtree,
+	    && !memcmp((char *)vp->viewSubtree, (char *)viewSubtree,
 		     viewSubtreeLen * sizeof(oid)))
 	  return vp;
     }
@@ -67,14 +67,13 @@ view_createEntry(viewIndex, viewSubtree, viewSubtreeLen)
     struct viewEntry *vp;
 
     vp = (struct viewEntry *)malloc(sizeof(struct viewEntry));
-    bzero((char *)vp, sizeof(struct viewEntry));
+    memset(vp, 0, sizeof(struct viewEntry));
 
     vp->viewIndex = viewIndex;
-    bcopy((char *)viewSubtree, (char *)vp->viewSubtree,
-	   viewSubtreeLen * sizeof(oid));
+    memcpy(vp->viewSubtree, viewSubtree, viewSubtreeLen * sizeof(oid));
     vp->viewSubtreeLen = viewSubtreeLen;
     vp->reserved = (struct viewEntry *)malloc(sizeof(struct viewEntry));
-    bzero((char *)vp->reserved, sizeof(struct viewEntry));
+    memset(vp->reserved, 0, sizeof(struct viewEntry));
 
     vp->next = List;
     List = vp;
@@ -90,7 +89,7 @@ view_destroyEntry(viewIndex, viewSubtree, viewSubtreeLen)
 
     if (List->viewIndex == viewIndex
 	&& List->viewSubtreeLen == viewSubtreeLen
-	&& !bcmp((char *)List->viewSubtree, (char *)viewSubtree,
+	&& !memcmp((char *)List->viewSubtree, (char *)viewSubtree,
 		 viewSubtreeLen * sizeof(oid))){
 	vp = List;
 	List = List->next;
@@ -98,7 +97,7 @@ view_destroyEntry(viewIndex, viewSubtree, viewSubtreeLen)
 	for(vp = List; vp; vp = vp->next){
 	    if (vp->viewIndex == viewIndex
 		&& vp->viewSubtreeLen  == viewSubtreeLen 
-		&& !bcmp((char *)vp->viewSubtree, (char *)viewSubtree,
+		&& !memcmp((char *)vp->viewSubtree, (char *)viewSubtree,
 			 viewSubtreeLen * sizeof(oid)))
 		break;
 	    lastvp = vp;

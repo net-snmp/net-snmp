@@ -118,11 +118,12 @@ struct trapVar {
 #ifdef DODEBUG
 #define ERROR(string)	printf("%s(%d): %s\n",__FILE__, __LINE__, string);fflush(stdout);
 #else
-#define ERROR(string)
+#define ERROR(string)	snmp_detail = string
 #endif
 
 /* from snmp.c*/
 extern u_char	sid[];	/* size SID_MAX_LEN */
+extern char *snmp_detail;
 
 
 /*

@@ -80,6 +80,7 @@ typedef long	fd_mask;
 #define FD_ZERO(p)	memset((p), 0, sizeof(*(p)))
 #endif
 
+#define PARTY_MIB_BASE	".1.3.6.1.6.3.3.1.3.127.0.0.1.1"
 
 extern int errno;
 struct synch_state snmp_synch_state;
@@ -305,6 +306,18 @@ snmp_clone_pdu(pdu)
 	newpdu->community = (u_char *)malloc(pdu->community_len);
 	memmove(newpdu->community, pdu->community, pdu->community_len);
     }
+    if (pdu->srcParty){
+	newpdu->srcParty = (oid *)malloc(pdu->srcPartyLen);
+	memmove(newpdu->srcParty, pdu->srcParty, pdu->srcPartyLen);
+    }
+    if (pdu->dstParty){
+	newpdu->dstParty = (oid *)malloc(pdu->dstPartyLen);
+	memmove(newpdu->dstParty, pdu->dstParty, pdu->dstPartyLen);
+    }
+    if (pdu->context){
+	newpdu->context = (oid *)malloc(pdu->contextLen);
+	memmove(newpdu->context, pdu->context, pdu->contextLen);
+    }
     return newpdu;
 }
 
@@ -350,7 +363,8 @@ snmp_synch_response(ss, pdu, response)
 		if (errno == EINTR){
 		    continue;
 		} else {
-		    perror("select");
+		    snmp_detail = strerror(errno);
+		    snmp_errno = SNMPERR_GENERR;
 		}
 	    /* FALLTHRU */
 	    default:
@@ -423,9 +437,9 @@ ms_party_init(destaddr, src, srclen, dst, dstlen, context, contextlen)
     int oneIndex, twoIndex, cxindex;
 
     
-    if (!read_objid(".1.3.6.1.6.3.3.1.3.128.2.35.55.1",
-		    dst, dstlen)){
-	fprintf(stderr, "Bad object identifier: %s\n", ".1.3.6.1.6.3.3.1.3.128.2.35.55.1");
+    if (!read_objid(PARTY_MIB_BASE, dst, dstlen)){
+	snmp_errno = SNMPERR_GENERR;
+	snmp_detail = PARTY_MIB_BASE;
 	return -1;
     }
     adp = (unsigned char *)&destaddr;
@@ -467,8 +481,9 @@ ms_party_init(destaddr, src, srclen, dst, dstlen, context, contextlen)
     }
     oneIndex = pp1->partyIndex;
 
-    if (!read_objid(".1.3.6.1.6.3.3.1.3.128.2.35.55.1", src, srclen)){
-	fprintf(stderr, "Bad object identifier: %s\n", ".1.3.6.1.6.3.3.1.3.128.2.35.55.1");
+    if (!read_objid(PARTY_MIB_BASE, src, srclen)){
+	snmp_errno = SNMPERR_GENERR;
+	snmp_detail = PARTY_MIB_BASE;
 	return -1;
     }
     src[9] =  adp[0];
@@ -505,9 +520,9 @@ ms_party_init(destaddr, src, srclen, dst, dstlen, context, contextlen)
     }
     twoIndex = pp2->partyIndex;
 
-    if (!read_objid(".1.3.6.1.6.3.3.1.4.128.2.35.55.1",
-		    context, contextlen)){
-	fprintf(stderr, "Bad object identifier: %s\n", ".1.3.6.1.6.3.3.1.4.128.2.35.55.1");
+    if (!read_objid(PARTY_MIB_BASE, context, contextlen)){
+	snmp_errno = SNMPERR_GENERR;
+	snmp_detail = PARTY_MIB_BASE;
 	return -1;
     }
     context[9] =  adp[0];

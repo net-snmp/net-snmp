@@ -99,24 +99,10 @@ main(argc, argv)
     struct snmp_session session, *ss;
     struct snmp_pdu *pdu = NULL, *response, *copy = NULL;
     struct variable_list *vars, *vp;
-    int	arg, ret, version = 2;
-    char *hostname = NULL;
-    char *community = NULL;
-    int dest_port = SNMP_PORT;
-    oid src[MAX_NAME_LEN], dst[MAX_NAME_LEN], context[MAX_NAME_LEN];
-    int srclen = 0, dstlen = 0, contextlen = 0;
-    u_long      srcclock = 0, dstclock = 0;
-    int clock_flag = 0;
-    struct partyEntry *pp;
-    struct contextEntry *cxp;
+    int	ret;
     int	    status, count;
     char	input[128];
     int varcount, nonRepeaters = -1, maxRepetitions;
-    int timeout = SNMP_DEFAULT_TIMEOUT, retransmission = SNMP_DEFAULT_RETRIES;
-    int trivialSNMPv2 = FALSE;
-    struct hostent *hp;
-    in_addr_t destAddr;
-    char ctmp[300];
 
     init_mib();
     /* Usage: snmptest -v 1 [-q] hostname community [objectID]      or:
@@ -129,7 +115,7 @@ main(argc, argv)
     snmp_synch_setup(&session);
     ss = snmp_open(&session);
     if (ss == NULL){
-	fprintf(stderr, "Couldn't open snmp\n");
+	fprintf(stderr, "Couldn't open snmp: %s\n", snmp_api_errstring(snmp_errno));
 	exit(1);
     }
 
@@ -192,7 +178,7 @@ main(argc, argv)
 	if (command == TRP2_REQ_MSG){
 	    /* No response needed */
 	    if (!snmp_send(ss, pdu)){
-		printf("Couldn't send SNMPv2 trap.\n");
+		fprintf(stderr, "%s\n", snmp_api_errstring(snmp_errno));
 	    }
 	} else {
 	    status = snmp_synch_response(ss, pdu, &response);
@@ -253,9 +239,10 @@ main(argc, argv)
 		    }
 		}
 	    } else if (status == STAT_TIMEOUT){
-		fprintf(stderr, "No Response from %s\n", hostname);
+		fprintf(stderr, "No Response from %s\n", session.peername);
 	    } else {    /* status == STAT_ERROR */
-		fprintf(stderr, "An error occurred, Quitting\n");
+		fprintf(stderr, "An error occurred: %s\n",
+                        snmp_api_errstring(snmp_errno));
 	    }
 	    
 	    if (response)

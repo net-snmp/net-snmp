@@ -24,12 +24,17 @@
 #if HAVE_UNISTD_H
 #include <unistd.h>
 #endif
+#ifdef HAVE_NETINET_IN_H
+#include <netinet/in.h>
+#endif
 
 #include "asn1.h"
 #include "mib.h"
 #include "acl.h"
 #include "party.h"
 #include "context.h"
+#include "snmp_impl.h"
+#include "snmp_api.h"
 
 #define TRUE 1
 #define FALSE 0
@@ -41,8 +46,9 @@ static void error_exit(str, linenumber, filename)
     int linenumber;
     char *filename;
 {
-    fprintf(stderr, "%s on line %d of %s\n", str, linenumber, filename);
-    exit(1);
+    snmp_errno = SNMPERR_BAD_ACL;
+    snmp_detail = malloc(128);
+    sprintf(snmp_detail, "%s on line %d of %s", str, linenumber, filename);
 }
 
 int
@@ -67,8 +73,11 @@ read_acl_database(filename)
 	return -1;
     while (fgets(buf, 256, fp)){
 	linenumber++;
-	if (strlen(buf) > 250)
+	if (strlen(buf) > 250) {
 	    error_exit("Line longer than 250 bytes", linenumber, filename);
+	    fclose(fp);
+	    return -1;
+	}
 	if (buf[0] == '#')
 	    continue;
 	blank = TRUE;
@@ -80,8 +89,11 @@ read_acl_database(filename)
 	if (blank)
 	    continue;
 
-	if (sscanf(buf, "%s %s %s %s", buf1, buf2, buf3, buf4) != 4)
+	if (sscanf(buf, "%s %s %s %s", buf1, buf2, buf3, buf4) != 4) {
 	    error_exit("Bad parse", linenumber, filename);
+	    fclose(fp);
+	    return -1;
+	}
 	party_scanInit();
 	for(pp = party_scanNext(); pp; pp = party_scanNext()){
 	    if (!strcasecmp(pp->partyName, buf1)){
@@ -90,13 +102,19 @@ read_acl_database(filename)
 	}
 	if (!pp){
 	    targetPartyLen = 64;
-	    if (!read_objid(buf1, targetParty, &targetPartyLen))
+	    if (!read_objid(buf1, targetParty, &targetPartyLen)) {
 		error_exit("Bad target object identifier", linenumber, filename);
+		fclose(fp);
+		return -1;
+	    }
 	    
 	    pp = party_getEntry(targetParty, targetPartyLen);
-	    if (!pp)
+	    if (!pp) {
 		error_exit("Unknown target party identifier",
 			   linenumber, filename);
+		fclose(fp);
+		return -1;
+	    }
 	    /* why do I have subject and target mixed up here? */
 	}
 	subject = pp->partyIndex;
@@ -109,14 +127,20 @@ read_acl_database(filename)
 	}
 	if (!pp){
 	    subjectPartyLen = 64;
-	    if (!read_objid(buf2, subjectParty, &subjectPartyLen))
+	    if (!read_objid(buf2, subjectParty, &subjectPartyLen)) {
 		error_exit("Bad subject object identifier", linenumber, filename);
+		fclose(fp);
+		return -1;
+	    }
 	    
 	    
 	    pp = party_getEntry(subjectParty, subjectPartyLen);
-	    if (!pp)
+	    if (!pp) {
 		error_exit("Unknown subject party identifier",
 			   linenumber, filename);
+		fclose(fp);
+		return -1;
+	    }
 	}
 	target = pp->partyIndex;
 	
@@ -128,12 +152,18 @@ read_acl_database(filename)
 	}
 	if (!cxp){
 	    resourcesLen = 64;
-	    if (!read_objid(buf3, resources, &resourcesLen))
+	    if (!read_objid(buf3, resources, &resourcesLen)) {
 		error_exit("Bad context object identifier", linenumber, filename);
+		fclose(fp);
+		return -1;
+	    }
 	    
 	    cxp = context_getEntry(resources, resourcesLen);
-	    if (!cxp)
+	    if (!cxp) {
 		error_exit("Unknown context identifier", linenumber, filename);
+		fclose(fp);
+		return -1;
+	    }
 	}
 	res = cxp->contextIndex;
 
@@ -176,6 +206,8 @@ read_acl_database(filename)
 		break;
 	      default:
 		error_exit("Bad priveleges code", linenumber, filename);
+		fclose(fp);
+		return -1;
 		break;
 	    }
 	}

@@ -36,6 +36,8 @@
 #include "mib.h"
 #include "party.h"
 #include "system.h"
+#include "snmp_impl.h"
+#include "snmp_api.h"
 
 #define TRUE 1
 #define FALSE 0
@@ -60,8 +62,9 @@ static void error_exit(str, linenumber, filename)
     int linenumber;
     char *filename;
 {
-    fprintf(stderr, "%s on line %d of %s\n", str, linenumber, filename);
-    exit(1);
+    snmp_errno = SNMPERR_BAD_PARTY;
+    snmp_detail = malloc(128);
+    sprintf(snmp_detail, "%s on line %d of %s", str, linenumber, filename);
 }
 
 int
@@ -78,28 +81,31 @@ read_party_database(filename)
     u_short port;
     oid partyid[64];
     int partyidlen;
-    int priv, auth;
+    int priv = 0, auth = 0;
 #if 0
     int proxy;
 #endif
-    int lifetime, maxmessagesize;
+    int lifetime = 0, maxmessagesize = 0;
     u_long clock;
     u_char privPrivate[32], authPrivate[32], privPublic[64], authPublic[64];
     u_char *ucp;
     u_long byte;
-    int privPublicLength, authPublicLength;
+    int privPublicLength, authPublicLength = 0;
     char name[64];	/* friendly name */
     struct partyEntry *pp, *rp;
     u_int myaddr;
-    int domain;
+    int domain = 0;
 
     fp = fopen(filename, "r");
     if (fp == NULL)
 	return -1;
     while (fgets(buf, 256, fp)){
 	linenumber++;
-	if (strlen(buf) > 250)
+	if (strlen(buf) > 250) {
 	    error_exit("Line longer than 250 bytes", linenumber, filename);
+	    fclose(fp);
+	    return -1;
+	}
 	chars += strlen(buf);
 	if (buf[0] == '#')
 	    continue;
@@ -113,116 +119,185 @@ read_party_database(filename)
 	    continue;
 	switch(state){
 	  case IDENTITY_STATE:
-	    if (sscanf(buf, "%s %s", name, buf1) != 2)
+	    if (sscanf(buf, "%s %s", name, buf1) != 2) {
 		error_exit("Bad parse", linenumber, filename);
+		fclose(fp);
+		return -1;
+	    }
 	    partyidlen = 64;
-	    if (!read_objid(buf1, partyid, &partyidlen))
+	    if (!read_objid(buf1, partyid, &partyidlen)) {
 		error_exit("Bad object identifier", linenumber, filename);
+		fclose(fp);
+		return -1;
+	    }
 	    state = TRANSPORT_STATE;
 	    break;
 	  case TRANSPORT_STATE:
-	    if (sscanf(buf, "%s %s %s", buf1, buf2, buf3) != 3)
+	    if (sscanf(buf, "%s %s %s", buf1, buf2, buf3) != 3) {
 		error_exit("Bad parse", linenumber, filename);
+		fclose(fp);
+		return -1;
+	    }
 	    if (!strcasecmp(buf1, "snmpUdpDomain"))
 		domain = DOMAINSNMPUDP;
-	    else
+	    else {
 		error_exit("Bad protocol type", linenumber, filename);
-	    if ((addr = inet_addr(buf2)) == -1)
+		fclose(fp);
+		return -1;
+	    }
+	    if ((addr = inet_addr(buf2)) == -1) {
 		error_exit("Bad IP address", linenumber, filename);
+		fclose(fp);
+		return -1;
+	    }
 	    for(cp = buf3; *cp; cp++)
-		if (!isdigit(*cp))
+		if (!isdigit(*cp)) {
 		    error_exit("Not a port number", linenumber, filename);
+		    fclose(fp);
+		    return -1;
+		}
 	    port = atoi(buf3);
 	    state = PROTOCOL_STATE;
 	    break;
 	  case PROTOCOL_STATE:
-	    if (sscanf(buf, "%s %s", buf1, buf2) != 2)
+	    if (sscanf(buf, "%s %s", buf1, buf2) != 2) {
 		error_exit("Bad parse", linenumber, filename);
+		fclose(fp);
+		return -1;
+	    }
 	    /* maybe these should be oids */
 
 	    if (!strcasecmp(buf1, "noAuth"))
 		auth = NOAUTH;
 	    else if (!strcasecmp(buf1, "snmpv2MD5Auth"))
 		auth = SNMPV2MD5AUTHPROT;
-	    else
+	    else {
 		error_exit("Bad authentication protocol type", linenumber,
 			   filename);
+		fclose(fp);
+		return -1;
+	    }
 
 	    if (!strcasecmp(buf2, "noPriv"))
 		priv = NOPRIV;
 	    else if (!strcasecmp(buf2, "desPriv"))
 		priv = DESPRIVPROT;
-	    else
+	    else {
 		error_exit("Bad privacy protocol type", linenumber, filename);
+		fclose(fp);
+		return -1;
+	    }
 	    state = LIFETIME_STATE;
 	    break;
 	  case LIFETIME_STATE:
-	    if (sscanf(buf, "%s %s", buf1, buf2) != 2)
+	    if (sscanf(buf, "%s %s", buf1, buf2) != 2) {
 		error_exit("Bad parse", linenumber, filename);
+		fclose(fp);
+		return -1;
+	    }
 	    for(cp = buf1; *cp; cp++)
-		if (!isdigit(*cp))
+		if (!isdigit(*cp)) {
 		    error_exit("Bad lifetime value (should be decimal integer)",
 			       linenumber, filename);
+		    fclose(fp);
+		    return -1;
+		}
 	    lifetime = atoi(buf1);
 	    for(cp = buf2; *cp; cp++)
-		if (!isdigit(*cp))
+		if (!isdigit(*cp)) {
 		error_exit("Bad Max Message Size value (should be decimal integer)", linenumber, filename);
+		fclose(fp);
+		return -1;
+	    }
 	    maxmessagesize = atoi(buf2);
 	    state = CLOCK_STATE;
 	    break;	    
 	  case CLOCK_STATE:
-	    if (sscanf(buf, "%s", buf1) != 1)
+	    if (sscanf(buf, "%s", buf1) != 1) {
 		error_exit("Bad parse", linenumber, filename);
-	    if (strlen(buf1) != 8)
+		fclose(fp);
+		return -1;
+	    }
+	    if (strlen(buf1) != 8) {
 		error_exit("Bad clock value (should be 8 hex digits)",
 			   linenumber, filename);
+		fclose(fp);
+		return -1;
+	    }
 	    for(cp = buf1; *cp; cp++){
-		if (!isxdigit(*cp))
+		if (!isxdigit(*cp)) {
 		    error_exit("Bad clock value (should be 8 hex digits)",
 			       linenumber, filename);
+		    fclose(fp);
+		    return -1;
+		}
 	    }
-	    if (sscanf(buf1, "%lx", &clock) != 1)
+	    if (sscanf(buf1, "%lx", &clock) != 1) {
 		error_exit("Bad clock value", linenumber, filename);
+		fclose(fp);
+		return -1;
+	    }
 	    clock_pos = chars - strlen(buf);
 	    for(cp = buf; *cp && !isxdigit(*cp); cp++)
 		clock_pos++;
 	    state = AUTH_STATE;
 	    break;
 	  case AUTH_STATE:
-	    if (sscanf(buf, "%s %s", buf1, buf2) != 2)
+	    if (sscanf(buf, "%s %s", buf1, buf2) != 2) {
 		error_exit("Bad parse", linenumber, filename);
-	    if (strlen(buf1) != 32)
+		fclose(fp);
+		return -1;
+	    }
+	    if (strlen(buf1) != 32) {
 		error_exit("Bad private key (should be 32 hex digits)",
 			   linenumber, filename);
+		fclose(fp);
+		return -1;
+	    }
 	    for(cp = buf1; *cp; cp++){
-		if (!isxdigit(*cp))
+		if (!isxdigit(*cp)) {
 		    error_exit("Bad private key value (should be 32 hex digits)",
 			       linenumber, filename);
+		    fclose(fp);
+		    return -1;
+		}
 	    }
 	    ucp = authPrivate;
 	    for(cp = buf1; *cp; cp += 2, ucp++){
-		if (sscanf(cp, "%2lx", &byte) != 1)
+		if (sscanf(cp, "%2lx", &byte) != 1) {
 		    error_exit("Bad parse", linenumber, filename);
+		    fclose(fp);
+		    return -1;
+		}
 		*ucp = byte;
 	    }
 
-	    if (strlen(buf2) % 2)
+	    if (strlen(buf2) % 2) {
 		error_exit("Bad private key value (should be an even number of hex digits)", linenumber, filename);
+		fclose(fp);
+		return -1;
+	    }
 	    nonhex = 0;
 	    for(cp = buf2; *cp; cp++){
 		if (!isxdigit(*cp))
 		    nonhex = 1;
 	    }
 	    if (nonhex){
-		if (strcasecmp(buf2, "Null"))
+		if (strcasecmp(buf2, "Null")) {
 		    error_exit("Bad private key value (should be hex digits or null)",
 			       linenumber, filename);
+		    fclose(fp);
+		    return -1;
+		}
 		authPublicLength = 0;
 	    } else {
 		ucp = authPublic;
 		for(cp = buf2; *cp; cp += 2, ucp++){
-		    if (sscanf(cp, "%2lx", &byte) != 1)
+		    if (sscanf(cp, "%2lx", &byte) != 1) {
 			error_exit("Bad parse", linenumber, filename);
+			fclose(fp);
+			return -1;
+		    }
 		    *ucp = byte;
 		}
 		authPublicLength = ucp - authPublic;
@@ -230,40 +305,61 @@ read_party_database(filename)
 	    state = PRIV_STATE;
 	    break;
 	  case PRIV_STATE:
-	    if (sscanf(buf, "%s %s", buf1, buf2) != 2)
+	    if (sscanf(buf, "%s %s", buf1, buf2) != 2) {
 		error_exit("Bad parse", linenumber, filename);
-	    if (strlen(buf1) != 32)
+		fclose(fp);
+		return -1;
+	    }
+	    if (strlen(buf1) != 32) {
 		error_exit("Bad private key (should be 32 hex digits)",
 			   linenumber, filename);
+		fclose(fp);
+		return -1;
+	    }
 	    for(cp = buf1; *cp; cp++){
-		if (!isxdigit(*cp))
+		if (!isxdigit(*cp)) {
 		    error_exit("Bad private key value (should be 32 hex digits)",
 			       linenumber, filename);
+		    fclose(fp);
+		    return -1;
+		}
 	    }
 	    ucp = privPrivate;
 	    for(cp = buf1; *cp; cp += 2, ucp++){
-		if (sscanf(cp, "%2lx", &byte) != 1)
+		if (sscanf(cp, "%2lx", &byte) != 1) {
 		    error_exit("Bad parse", linenumber, filename);
+		    fclose(fp);
+		    return -1;
+		}
 		*ucp = byte;
 	    }
 
-	    if (strlen(buf2) % 2)
+	    if (strlen(buf2) % 2) {
 		error_exit("Bad private key value (should be an even number of hex digits)", linenumber, filename);
+		fclose(fp);
+		return -1;
+	    }
 	    nonhex = 0;	
 	    for(cp = buf2; *cp; cp++){
 		if (!isxdigit(*cp))
 		    nonhex = 1;
 	    }
 	    if (nonhex){
-		if (strcasecmp(buf2, "Null"))
+		if (strcasecmp(buf2, "Null")) {
 		    error_exit("Bad private key value (should be hex digits or null)",
 			       linenumber, filename);
+		    fclose(fp);
+		    return -1;
+		}
 		privPublicLength = 0;
 	    } else {
 		ucp = privPublic;
 		for(cp = buf2; *cp; cp += 2, ucp++){
-		    if (sscanf(cp, "%2lx", &byte) != 1)
+		    if (sscanf(cp, "%2lx", &byte) != 1) {
 			error_exit("Bad parse", linenumber, filename);
+			fclose(fp);
+			return -1;
+		    }
 		    *ucp = byte;
 		}
 		privPublicLength = ucp - privPublic;
@@ -341,10 +437,15 @@ read_party_database(filename)
 	    break;
 	  default:
 	    error_exit("unknown state", linenumber, filename);
+	    fclose(fp);
+	    return -1;
 	}
     }
-    if (state != IDENTITY_STATE)
+    if (state != IDENTITY_STATE) {
 	error_exit("Unfinished entry at EOF", linenumber, filename);
+	fclose(fp);
+	return -1;
+    }
     fclose(fp);
     return 0;
 }

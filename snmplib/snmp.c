@@ -66,18 +66,18 @@ xdump(cp, length, prefix)
     count = 0;
     while(count < length){
 	printf("%s", prefix);
-	for(col = 0;count + col < length && col < 16; col++){
-	    if (col != 0 && (col % 4) == 0)
-		printf(" ");
+	for(col = 0; count + col < length && col < 16; col++){
+	    if (col == 0) printf ("%.4d: ", count);
+	    else if (col % 4 == 0) printf(" ");
 	    printf("%02X ", cp[count + col]);
 	}
 	while(col++ < 16){	/* pad end of buffer with zeros */
-	    if ((col % 4) == 0)
+	    if (col % 4 == 0)
 		printf(" ");
 	    printf("   ");
 	}
 	printf("  ");
-	for(col = 0;count + col < length && col < 16; col++){
+	for(col = 0; count + col < length && col < 16; col++){
 	    if (isprint(cp[count + col]))
 		printf("%c", cp[count + col]);
 	    else
@@ -88,7 +88,6 @@ xdump(cp, length, prefix)
     }
 
 }
-
 
 
 u_char *
