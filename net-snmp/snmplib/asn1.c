@@ -167,7 +167,7 @@ asn_dparse_int(u_char *data,
 	value = (value << 8) | *bufp++;
 
     if ( action == DUMP_PACKET )
-	printf("\t = %d\n", value);
+	printf("\t = %ld\n", value);
 
     *intp = value;
     return bufp;
@@ -242,7 +242,7 @@ asn_dparse_unsigned_int(u_char *data,
 	value = (value << 8) | *bufp++;
 
     if ( action == DUMP_PACKET )
-	printf("\t = %d\n", value);
+	printf("\t = %ld\n", value);
 
     *intp = value;
     return bufp;
@@ -701,7 +701,7 @@ asn_dparse_length(u_char  *data,
 	*length >>= (8 * ((sizeof(u_long)) - lengthbyte));
 
         if ( action == DUMP_PACKET )
-	    printf("\t = Length %d\n", *length);
+	    printf("\t = Length %ld\n", *length);
 
 	return data + lengthbyte + 1;
     } else { /* short asnlength */
@@ -1265,7 +1265,7 @@ asn_dparse_unsigned_int64(u_char *data,
     }
 
     if ( action == DUMP_PACKET ) {
-	printf("\t = %d %d\n", high, low );
+	printf("\t = %ld %ld\n", high, low );
     }
 
     cp->low = low;
