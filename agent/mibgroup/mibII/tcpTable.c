@@ -342,7 +342,7 @@ tcpTable_next_entry( void **loop_context,
 void
 tcpTable_free(netsnmp_cache *cache, void *magic)
 {
-#if WIN32
+#ifdef WIN32
     if (tcp_head) {
 		/* the allocated structure is a count followed by table entries */
 		free((char *)(tcp_head) - sizeof(DWORD));
