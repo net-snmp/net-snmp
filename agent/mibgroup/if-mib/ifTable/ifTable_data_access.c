@@ -134,7 +134,7 @@ ifTable_container_init(netsnmp_container ** container_ptr_ptr,
     cache->flags |=
         (NETSNMP_CACHE_DONT_AUTO_RELEASE | NETSNMP_CACHE_DONT_FREE_EXPIRED |
          NETSNMP_CACHE_DONT_FREE_BEFORE_LOAD |NETSNMP_CACHE_PRELOAD |
-         NETSNMP_CACHE_AUTO_RELOAD);
+         NETSNMP_CACHE_AUTO_RELOAD | NETSNMP_CACHE_DONT_INVALIDATE_ON_SET);
 }
 
 /**
@@ -194,7 +194,7 @@ ifTable_cache_load(netsnmp_container * container)
      * so the dal function doesn't need to clear the container.
        */
     netsnmp_access_interface_container_free(ifcontainer,
-                                               NETSNMP_ACCESS_INTERFACE_FREE_DONT_CLEAR );
+                                            NETSNMP_ACCESS_INTERFACE_FREE_DONT_CLEAR );
   
       return MFD_SUCCESS;
   }
@@ -246,15 +246,15 @@ _add_new_interface(netsnmp_interface_entry *ifentry,
                    netsnmp_container * container)
 {
     DEBUGMSGTL(("ifTable:access","creating new entry\n"));
-      /*
+    /*
      * allocate an row context and set the index(es), then add it to
      * the container
      */
     ifTable_rowreq_ctx *rowreq_ctx = ifTable_allocate_rowreq_ctx(ifentry);
     if( (NULL != rowreq_ctx) &&
         ( MFD_SUCCESS == ifTable_indexes_set(rowreq_ctx, ifentry->index))) {
-          CONTAINER_INSERT(container, rowreq_ctx);
-      }
+        CONTAINER_INSERT(container, rowreq_ctx);
+    }
     else {
         if(rowreq_ctx) {
               snmp_log(LOG_ERR, "error setting index while loading "
