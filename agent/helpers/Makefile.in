@@ -5,8 +5,8 @@ top_builddir=../..
 #
 
 INSTALLLIBS=libnetsnmphelpers.$(LIB_EXTENSION)$(LIB_VERSION)
-INSTALLSUBDIR=agent
-INSTALLSUBDIRHEADERS=all_helpers.h \
+INCLUDESUBDIR=agent
+INCLUDESUBDIRHEADERS=all_helpers.h \
 	instance.h \
         multiplexer.h \
 	bulk_to_next.h \
