@@ -21,7 +21,7 @@ USELIBS=  ../snmplib/libsnmp.a
 LIBS=	  $(USELIBS) @LIBS@
 
 CFLAGS=@CFLAGS@
-CPPFLAGS=@CPPFLAGS@ -I.. -I../snmplib
+CPPFLAGS=@CPPFLAGS@ -I.. -I$(srcdir)/.. -I$(srcdir)/../snmplib
 LDFLAGS=@LDFLAGS@
 
 CC = @CC@ $(CPPFLAGS)
