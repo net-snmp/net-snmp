@@ -46,7 +46,6 @@ $configfile="mib2c.conf";
 $debug=0;
 $quiet=0;
 $strict_unk_token = 0;
-$nostats = 0;
 $noindent = 0;
 $currentline = 0;
 $currentlevel = -1;
@@ -67,7 +66,6 @@ sub usage {
     print "  -I PATH\tSpecifies a path to look for configuration files in\n\n";
     print "  -f prefix\tSpecifies the output prefix to use.  All code\n\t\twill be put into prefix.c and prefix.h\n\n";
     print "  -d\t\tdebugging output (dont do it.  trust me.)\n\n";
-    print "  -s\t\tDon't display statistics at the end\n\n";
     print "  -S VAR=VAL\tSet $VAR variable to $VAL\n\n";
     print "  -i Don't run indent on the resulting code\n";
     print "  mibNode\tThe name of the top level mib node you want to\n\t\tgenerate code for.  By default, the code will be stored in\n\t\tmibNode.c and mibNode.h (use the -f flag to change this)\n\n";
@@ -85,7 +83,6 @@ while($#ARGV >= 0) {
         $assignments{$var} = $val;
     }
     $quiet = 1 if (/^-q/);
-    $nostats = 1 if (/^-s/);
     $noindent = 1 if (/^-i/);
     usage && exit(1) if (/^-h/);
     $outputName = shift if (/^-f/);
