@@ -1011,10 +1011,6 @@ init_snmpv3(const char *type)
                            init_snmpv3_post_config, NULL);
 
     snmp_register_callback(SNMP_CALLBACK_LIBRARY,
-                           SNMP_CALLBACK_POST_READ_CONFIG,
-                           free_enginetime_on_shutdown, NULL);
-
-    snmp_register_callback(SNMP_CALLBACK_LIBRARY,
                            SNMP_CALLBACK_POST_PREMIB_READ_CONFIG,
                            init_snmpv3_post_premib_config, NULL);
     /*
@@ -1022,6 +1018,13 @@ init_snmpv3(const char *type)
      */
     snmp_register_callback(SNMP_CALLBACK_LIBRARY, SNMP_CALLBACK_STORE_DATA,
                            snmpv3_store, (void *) strdup(type));
+
+    /*
+     * Free stuff at shutdown time
+     */
+    snmp_register_callback(SNMP_CALLBACK_LIBRARY,
+                           SNMP_CALLBACK_SHUTDOWN,
+                           free_enginetime_on_shutdown, NULL);
 
     /*
      * initialize submodules 
