@@ -1,10 +1,11 @@
 #
 # Set your net-snmp base source directory here
 #
-NETSNMP_SRC_DIR=~/snmp/main
+NETSNMP_SRC_DIR=~/snmp/clean/5.2.x
 
 if ! test -d $NETSNMP_SRC_DIR/agent/mibgroup ; then
 	echo "could not find the 'agent/mibgroup' directory in '$NETSNMP_SRC_DIR'."
+	echo "update module-templates/base-dir to point to your source directory"
 	exit 1
 fi
 
