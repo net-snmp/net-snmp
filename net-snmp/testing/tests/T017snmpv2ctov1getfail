@@ -21,6 +21,6 @@ CAPTURE "snmpget $SNMP_FLAGS -v 2c localhost notavalidcommunity system.sysUpTime
 
 STOPAGENT
 
-CHECK "authorizationError"
+CHECK "Timeout"
 
 FINISHED
