@@ -32,10 +32,8 @@ PERFORMANCE OF THIS SOFTWARE.
  * Ported to UCD by Jennifer Bray of Origin (jbray@origin-at.co.uk) 1997
  */
 
-#include <time.h>
-#ifndef linux
-# include <sys/proc.h>
-#else /* linux */
+#ifdef /* linux */
+# include <time.h>
 # include <linux/tasks.h>
 # include <utmp.h>
 # include <dirent.h>
@@ -43,50 +41,11 @@ PERFORMANCE OF THIS SOFTWARE.
 # include <sys/vfs.h>
 # include <unistd.h>
 # include <ctype.h>
-#endif /* linux */
+# define sunV3
+# include <stdlib.h>
+# include <pwd.h>
+# include <sys/time.h>
 
-#ifndef linux
-#include <net/route.h>
-#include <netinet/in_pcb.h>
-#include <netinet/if_ether.h>
-#include <netinet/in_systm.h>
-#else /* linux */
-#define sunV3
-#include <stdlib.h>
-#endif /* linux */
-
-#ifndef sunV3
-# ifndef linux
-#  include <netinet/in_var.h>
-# endif /* linux */
-#endif /* sunV3 */
-
-#ifndef linux
-# include <netinet/ip_var.h>
-#endif /* linux */
-
-#ifndef linux
-# include <netinet/tcp_timer.h>
-# include <netinet/tcp_var.h>
-# include <netinet/tcp_fsm.h>
-#endif /* linux */
-
-#ifndef linux
-#include <netinet/udp.h>
-#include <netinet/udp_var.h>
-#include <netinet/ip_icmp.h>
-#include <netinet/icmp_var.h>
-#endif /* linux */
-
-#ifndef linux
-#include <sys/protosw.h>
-#endif /* linux */
-
-#ifdef linux
-
-#include <pwd.h>
-
-#include <sys/time.h>
 /*
  * this struct ifnet is cloned from the generic type and somewhat modified.
  * it will not work for other un*x'es...
