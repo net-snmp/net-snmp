@@ -1,4 +1,4 @@
-#include <config.h>             /* local SNMP configuration details */
+#include <net-snmp/net-snmp-config.h>
 
 #ifdef dynix
 #  ifdef HAVE_SYS_SWAP_H
@@ -72,7 +72,7 @@ init_memory_dynix(void)
      * Define the OID pointer to the top of the mib tree that we're
      * registering underneath 
      */
-    oid             mem_variables_oid[] = { EXTENSIBLEMIB, MEMMIBNUM };
+    oid             mem_variables_oid[] = { UCDAVIS_MIB, MEMMIBNUM };
 
     /*
      * register ourselves with the agent to handle our mib tree 

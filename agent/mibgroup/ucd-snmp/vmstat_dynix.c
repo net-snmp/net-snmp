@@ -19,6 +19,7 @@
 /*
  * Includes start here 
  */
+#include <net-snmp/net-snmp-config.h>
 
 /*
  * Standard includes 
@@ -210,7 +211,7 @@ init_vmstat_dynix(void)
     /*
      * registering underneath 
      */
-    oid             vmstat_variables_oid[] = { EXTENSIBLEMIB, 11 };
+    oid             vmstat_variables_oid[] = { UCDAVIS_MIB, 11 };
 
     /*
      * register ourselves with the agent to handle our mib tree 
