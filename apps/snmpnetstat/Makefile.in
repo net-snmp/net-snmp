@@ -71,7 +71,8 @@ depend:
 	makedepend $(CPPFLAGS) $(srcdir)/*.c
 
 nosysdepend: depend
-	perl -n -i.bak -e ' if (/^# DO NOT DELETE THIS LINE/) {$$doit=1;} if ($$doit == 1) {s#/usr/include/[^\s]+##g ; s#$(srcdir)/##g; print if (! /^[\w]+\.o:\s*$$/);} else {print;}' Makefile
+	makedepend $(CPPFLAGS) *.c
+	perl -n -i.bak -e ' if (/^# DO NOT DELETE THIS LINE/) {$$doit=1;} if ($$doit == 1) {s#/usr/include/[^\s]+##g ; print if (! /^[\w]+\.o:\s*$$/);} else {print;}' Makefile
 
 # DO NOT DELETE THIS LINE -- make depend depends on it.
 

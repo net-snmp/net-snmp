@@ -40,8 +40,9 @@ clean:
 depend: 
 	makedepend $(CPPFLAGS) $(srcdir)/*.c
 
-nosysdepend: depend
-	perl -n -i.bak -e ' if (/^# DO NOT DELETE THIS LINE/) {$$doit=1;} if ($$doit == 1) {s#/usr/include/[^\s]+##g ; s#$(srcdir)/##g; print if (! /^[\w]+\.o:\s*$$/);} else {print;}' Makefile
+nosysdepend:
+	makedepend $(CPPFLAGS) *.c
+	perl -n -i.bak -e ' if (/^# DO NOT DELETE THIS LINE/) {$$doit=1;} if ($$doit == 1) {s#/usr/include/[^\s]+##g ; print if (! /^[\w]+\.o:\s*$$/);} else {print;}' Makefile
 
 # DO NOT DELETE THIS LINE -- make depend depends on it.
 
@@ -52,34 +53,35 @@ acl_parse.o:  asn1.h mib.h acl.h party.h context.h
 asn1.o: ../config.h ../mib_module_config.h ../agent/mibgroup/struct.h
 asn1.o:  asn1.h
 context.o: ../config.h ../mib_module_config.h ../agent/mibgroup/struct.h
-context.o:  asn1.h context.h
+context.o:   asn1.h
+context.o: context.h
 context_parse.o: ../config.h ../mib_module_config.h
 context_parse.o: ../agent/mibgroup/struct.h 
-context_parse.o:  asn1.h mib.h context.h system.h
+context_parse.o:  asn1.h mib.h context.h
+context_parse.o: system.h
 md5.o: ../config.h ../mib_module_config.h ../agent/mibgroup/struct.h
-md5.o:  md5.h
+md5.o:   md5.h
 mib.o: ../config.h ../mib_module_config.h ../agent/mibgroup/struct.h
-mib.o:  asn1.h snmp_api.h mib.h snmp.h snmp_impl.h parse.h
+mib.o: asn1.h snmp_api.h mib.h snmp.h snmp_impl.h parse.h
 parse.o: ../config.h ../mib_module_config.h ../agent/mibgroup/struct.h
-parse.o:  parse.h
+parse.o:   parse.h
 party.o: ../config.h ../mib_module_config.h ../agent/mibgroup/struct.h
 party.o:   asn1.h party.h
 party_parse.o: ../config.h ../mib_module_config.h ../agent/mibgroup/struct.h
 party_parse.o:  asn1.h mib.h party.h system.h
 snmp.o: ../config.h ../mib_module_config.h ../agent/mibgroup/struct.h
-snmp.o:   asn1.h
-snmp.o: snmp.h snmp_impl.h mib.h
+snmp.o:   asn1.h snmp.h
+snmp.o: snmp_impl.h mib.h
 snmp_api.o: ../config.h ../mib_module_config.h ../agent/mibgroup/struct.h
-snmp_api.o:   asn1.h snmp.h
-snmp_api.o: snmp_impl.h snmp_api.h party.h context.h
+snmp_api.o:  asn1.h snmp.h snmp_impl.h snmp_api.h
+snmp_api.o: party.h context.h
 snmp_auth.o: ../config.h ../mib_module_config.h ../agent/mibgroup/struct.h
-snmp_auth.o:  asn1.h snmp_api.h mib.h snmp.h snmp_impl.h
-snmp_auth.o: party.h context.h md5.h acl.h
+snmp_auth.o:  asn1.h snmp_api.h mib.h snmp.h
+snmp_auth.o: snmp_impl.h party.h context.h md5.h acl.h
 snmp_client.o: ../config.h ../mib_module_config.h ../agent/mibgroup/struct.h
-snmp_client.o:   asn1.h
-snmp_client.o: snmp_api.h snmp_client.h mib.h snmp.h snmp_impl.h party.h
-snmp_client.o: context.h view.h acl.h
+snmp_client.o:  asn1.h snmp_api.h snmp_client.h mib.h
+snmp_client.o: snmp.h snmp_impl.h party.h context.h view.h acl.h
 system.o: ../config.h ../mib_module_config.h ../agent/mibgroup/struct.h
-system.o:   system.h
+system.o:  system.h
 view.o: ../config.h ../mib_module_config.h ../agent/mibgroup/struct.h
 view.o:   asn1.h view.h

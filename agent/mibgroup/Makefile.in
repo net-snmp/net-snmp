@@ -25,34 +25,62 @@ clean:
 depend: 
 	makedepend $(CPPFLAGS) $(srcdir)/*.c
 
-nosysdepend: depend
-	perl -n -i.bak -e ' if (/^# DO NOT DELETE THIS LINE/) {$$doit=1;} if ($$doit == 1) {s#/usr/include/[^\s]+##g ; s#$(srcdir)/##g; print if (! /^[\w]+\.o:\s*$$/);} else {print;}' Makefile
+nosysdepend:
+	makedepend $(CPPFLAGS) *.c
+	perl -n -i.bak -e ' if (/^# DO NOT DELETE THIS LINE/) {$$doit=1;} if ($$doit == 1) {s#/usr/include/[^\s]+##g ; print if (! /^[\w]+\.o:\s*$$/);} else {print;}' Makefile
 
 # DO NOT DELETE THIS LINE -- make depend depends on it.
 
+acl_vars.o: ../../config.h ../../mib_module_config.h
+acl_vars.o: ../../agent/mibgroup/struct.h 
+acl_vars.o: ./../../snmplib/asn1.h ./../../snmplib/snmp.h
+acl_vars.o: ./../../snmplib/snmp_impl.h 
+acl_vars.o:  ./../snmp_vars.h ./../../snmplib/party.h
+acl_vars.o: acl_vars.h ./../../snmplib/acl.h
+alarm.o: ../../config.h ../../mib_module_config.h
+alarm.o: ../../agent/mibgroup/struct.h 
+alarm.o: ./../../snmplib/asn1.h ./../../snmplib/snmp_impl.h
+alarm.o: ./../../snmplib/snmp_api.h ./../../snmplib/snmp_client.h
+alarm.o: ./../../snmplib/party.h ./../../snmplib/context.h ./../snmp_vars.h
+alarm.o: ./../../snmplib/snmp.h ./../m2m.h ./../snmp_vars_m2m.h event.h
+alarm.o: alarm.h system.h ../var_struct.h ./../snmpd.h
 at.o: ../common_header.h ../../config.h ../../mib_module_config.h
 at.o: ../../agent/mibgroup/struct.h 
-at.o:  ../../../cmusnmp/agent/../snmplib/asn1.h
-at.o: ../../../cmusnmp/agent/../snmplib/snmp.h
-at.o: ../../../cmusnmp/agent/../snmplib/snmp_impl.h 
-at.o: ../../../cmusnmp/agent/../snmplib/mib.h ../var_struct.h ../snmp_vars.h
-at.o: ../m2m.h ../snmp_vars_m2m.h ../snmp_vars.linux.h ../alarm.h ../event.h
+at.o:   ./../../snmplib/asn1.h
+at.o: ./../../snmplib/snmp.h ./../../snmplib/snmp_impl.h 
+at.o:  ./../../snmplib/mib.h ../var_struct.h
+at.o: ./../snmp_vars.h ./../m2m.h ./../snmp_vars_m2m.h ../snmp_vars.linux.h
 at.o: ../kernel.h at.h interfaces.h
+context_vars.o: ../../config.h ../../mib_module_config.h
+context_vars.o: ../../agent/mibgroup/struct.h 
+context_vars.o:  ./../../snmplib/asn1.h
+context_vars.o: ./../../snmplib/snmp.h ./../../snmplib/snmp_impl.h
+context_vars.o:   ./../snmp_vars.h
+context_vars.o: system.h ../var_struct.h ./../../snmplib/acl.h
+context_vars.o: ./../../snmplib/view.h context_vars.h
+context_vars.o: ./../../snmplib/context.h
 disk.o: ../../config.h ../../mib_module_config.h
 disk.o: ../../agent/mibgroup/struct.h 
-disk.o:  mibincl.h 
-disk.o: ../../snmplib/asn1.h ../../snmplib/snmp_impl.h ../snmp_vars.h
-disk.o: ../var_struct.h ../../snmplib/snmp.h disk.h mibdefs.h util_funcs.h
-disk.o: errormib.h
+disk.o:   mibincl.h
+disk.o:   ../../snmplib/asn1.h
+disk.o: ../../snmplib/snmp_impl.h ../snmp_vars.h ../var_struct.h
+disk.o: ../../snmplib/snmp.h disk.h mibdefs.h util_funcs.h errormib.h
 errormib.o: ../../config.h ../../mib_module_config.h
 errormib.o: ../../agent/mibgroup/struct.h 
 errormib.o:   mibincl.h
-errormib.o:  ../../snmplib/asn1.h
+errormib.o:   ../../snmplib/asn1.h
 errormib.o: ../../snmplib/snmp_impl.h ../snmp_vars.h ../var_struct.h
 errormib.o: ../../snmplib/snmp.h errormib.h mibdefs.h util_funcs.h
+event.o: ../../config.h ../../mib_module_config.h
+event.o: ../../agent/mibgroup/struct.h 
+event.o:   ./../../snmplib/asn1.h
+event.o: ./../../snmplib/snmp_impl.h ./../../snmplib/snmp.h ./../snmp_vars.h
+event.o: ./../m2m.h ./../snmp_vars_m2m.h alarm.h event.h
+event.o: ./../../snmplib/snmp_api.h ./../../snmplib/party.h
+event.o: ./../../snmplib/snmp_client.h
 extensible.o: ../../config.h ../../mib_module_config.h
 extensible.o: ../../agent/mibgroup/struct.h 
-extensible.o:   mibincl.h
+extensible.o:  mibincl.h 
 extensible.o:  ../../snmplib/asn1.h
 extensible.o: ../../snmplib/snmp_impl.h ../snmp_vars.h ../var_struct.h
 extensible.o: ../../snmplib/snmp.h extensible.h mibdefs.h util_funcs.h
@@ -60,108 +88,101 @@ hpux.o: ../../config.h ../../mib_module_config.h
 hpux.o: ../../agent/mibgroup/struct.h 
 hpux.o:   mibincl.h
 hpux.o: ../../snmplib/asn1.h ../../snmplib/snmp_impl.h ../snmp_vars.h
-hpux.o: ../var_struct.h ../../snmplib/snmp.h
+hpux.o: ../var_struct.h ../../snmplib/snmp.h hpux.h
 icmp.o: ../common_header.h ../../config.h ../../mib_module_config.h
 icmp.o: ../../agent/mibgroup/struct.h 
-icmp.o:  ../../../cmusnmp/agent/../snmplib/asn1.h
-icmp.o: ../../../cmusnmp/agent/../snmplib/snmp.h
-icmp.o: ../../../cmusnmp/agent/../snmplib/snmp_impl.h 
-icmp.o: ../../../cmusnmp/agent/../snmplib/mib.h ../var_struct.h
-icmp.o: ../snmp_vars.h ../m2m.h ../snmp_vars_m2m.h ../snmp_vars.linux.h
-icmp.o: ../alarm.h ../event.h ../kernel.h icmp.h
+icmp.o:  ./../../snmplib/asn1.h
+icmp.o: ./../../snmplib/snmp.h ./../../snmplib/snmp_impl.h
+icmp.o:   ./../../snmplib/mib.h
+icmp.o: ../var_struct.h ./../snmp_vars.h ./../m2m.h ./../snmp_vars_m2m.h
+icmp.o: ../snmp_vars.linux.h ../kernel.h icmp.h
 interfaces.o: ../common_header.h ../../config.h ../../mib_module_config.h
 interfaces.o: ../../agent/mibgroup/struct.h 
-interfaces.o:  ../../../cmusnmp/agent/../snmplib/asn1.h
-interfaces.o: ../../../cmusnmp/agent/../snmplib/snmp.h
-interfaces.o: ../../../cmusnmp/agent/../snmplib/snmp_impl.h
-interfaces.o:  ../../../cmusnmp/agent/../snmplib/mib.h
-interfaces.o: ../var_struct.h ../snmp_vars.h ../m2m.h ../snmp_vars_m2m.h
-interfaces.o: ../snmp_vars.linux.h ../alarm.h ../event.h ../kernel.h
-interfaces.o: interfaces.h
+interfaces.o:  ./../../snmplib/asn1.h
+interfaces.o: ./../../snmplib/snmp.h ./../../snmplib/snmp_impl.h
+interfaces.o: ./../../snmplib/mib.h ../var_struct.h ./../snmp_vars.h
+interfaces.o: ./../m2m.h ./../snmp_vars_m2m.h ../snmp_vars.linux.h
+interfaces.o: ../kernel.h interfaces.h
 ip.o: ../common_header.h ../../config.h ../../mib_module_config.h
 ip.o: ../../agent/mibgroup/struct.h 
-ip.o:  ../../../cmusnmp/agent/../snmplib/asn1.h
-ip.o: ../../../cmusnmp/agent/../snmplib/snmp.h
-ip.o: ../../../cmusnmp/agent/../snmplib/snmp_impl.h 
-ip.o: ../../../cmusnmp/agent/../snmplib/mib.h ../var_struct.h ../snmp_vars.h
-ip.o: ../m2m.h ../snmp_vars_m2m.h ../snmp_vars.linux.h ../alarm.h ../event.h
+ip.o:   ./../../snmplib/asn1.h
+ip.o: ./../../snmplib/snmp.h ./../../snmplib/snmp_impl.h 
+ip.o:  ./../../snmplib/mib.h ../var_struct.h
+ip.o: ./../snmp_vars.h ./../m2m.h ./../snmp_vars_m2m.h ../snmp_vars.linux.h
 ip.o: ../kernel.h ip.h var_route.h route_write.h at.h interfaces.h
+kernel_sunos5.o: ../../config.h ../../mib_module_config.h
+kernel_sunos5.o: ../../agent/mibgroup/struct.h
 loadave.o: ../../config.h ../../mib_module_config.h
 loadave.o: ../../agent/mibgroup/struct.h 
 loadave.o:   mibincl.h
-loadave.o:  ../../snmplib/asn1.h
+loadave.o:   ../../snmplib/asn1.h
 loadave.o: ../../snmplib/snmp_impl.h ../snmp_vars.h ../var_struct.h
 loadave.o: ../../snmplib/snmp.h loadave.h mibdefs.h util_funcs.h ../kernel.h
 memory.o: ../../config.h ../../mib_module_config.h
 memory.o: ../../agent/mibgroup/struct.h 
 memory.o:   mibincl.h
-memory.o:  ../../snmplib/asn1.h ../../snmplib/snmp_impl.h
-memory.o: ../snmp_vars.h ../var_struct.h ../../snmplib/snmp.h mibdefs.h
+memory.o:   ../../snmplib/asn1.h
+memory.o: ../../snmplib/snmp_impl.h ../snmp_vars.h ../var_struct.h
+memory.o: ../../snmplib/snmp.h mibdefs.h memory.h
+party_vars.o: ../../config.h ../../mib_module_config.h
+party_vars.o: ../../agent/mibgroup/struct.h 
+party_vars.o:  ./../../snmplib/asn1.h
+party_vars.o: ./../../snmplib/snmp.h ./../../snmplib/snmp_impl.h
+party_vars.o:   ./../snmp_vars.h
+party_vars.o: system.h ../var_struct.h ./../../snmplib/acl.h
+party_vars.o: ./../../snmplib/view.h party_vars.h ./../../snmplib/party.h
 pass.o: ../../config.h ../../mib_module_config.h
 pass.o: ../../agent/mibgroup/struct.h 
-pass.o:  mibincl.h 
-pass.o: ../../snmplib/asn1.h ../../snmplib/snmp_impl.h ../snmp_vars.h
-pass.o: ../var_struct.h ../../snmplib/snmp.h pass.h mibdefs.h extensible.h
-pass.o: util_funcs.h
+pass.o: mibincl.h ../../snmplib/asn1.h ../../snmplib/snmp_impl.h
+pass.o: ../snmp_vars.h ../var_struct.h ../../snmplib/snmp.h pass.h mibdefs.h
+pass.o: extensible.h util_funcs.h
 proc.o: ../../config.h ../../mib_module_config.h
-proc.o: ../../agent/mibgroup/struct.h mibincl.h 
+proc.o: ../../agent/mibgroup/struct.h 
+proc.o:  mibincl.h 
 proc.o: ../../snmplib/asn1.h ../../snmplib/snmp_impl.h ../snmp_vars.h
 proc.o: ../var_struct.h ../../snmplib/snmp.h proc.h mibdefs.h util_funcs.h
 proc.o: errormib.h
 read_config.o: ../../config.h ../../mib_module_config.h
 read_config.o: ../../agent/mibgroup/struct.h 
-read_config.o:  mibincl.h ../../snmplib/asn1.h
-read_config.o: ../../snmplib/snmp_impl.h ../snmp_vars.h ../var_struct.h
-read_config.o: ../../snmplib/snmp.h read_config.h util_funcs.h extensible.h
-read_config.o: mibdefs.h
+read_config.o:   mibincl.h
+read_config.o: ../../snmplib/asn1.h ../../snmplib/snmp_impl.h ../snmp_vars.h
+read_config.o: ../var_struct.h ../../snmplib/snmp.h read_config.h
+read_config.o: util_funcs.h extensible.h mibdefs.h
 route_write.o: ../../config.h ../../mib_module_config.h
 route_write.o: ../../agent/mibgroup/struct.h 
-route_write.o: ../../../cmusnmp/agent/../snmplib/asn1.h
-route_write.o: ../../../cmusnmp/agent/../snmplib/snmp.h
-route_write.o: ../../../cmusnmp/agent/../snmplib/snmp_impl.h ../snmp_vars.h
-route_write.o: ip.h var_route.h route_write.h at.h
+route_write.o:  ./../../snmplib/asn1.h
+route_write.o: ./../../snmplib/snmp.h ./../../snmplib/snmp_impl.h
+route_write.o: ./../snmp_vars.h ip.h var_route.h route_write.h at.h
 snmp_mib.o: ../common_header.h ../../config.h ../../mib_module_config.h
 snmp_mib.o: ../../agent/mibgroup/struct.h 
-snmp_mib.o:  ../../../cmusnmp/agent/../snmplib/asn1.h
-snmp_mib.o: ../../../cmusnmp/agent/../snmplib/snmp.h
-snmp_mib.o: ../../../cmusnmp/agent/../snmplib/snmp_impl.h
-snmp_mib.o:  ../../../cmusnmp/agent/../snmplib/mib.h
-snmp_mib.o: ../var_struct.h ../snmp_vars.h ../m2m.h ../snmp_vars_m2m.h
-snmp_mib.o: ../snmp_vars.linux.h ../alarm.h ../event.h ../kernel.h snmp_mib.h
+snmp_mib.o:  ./../../snmplib/asn1.h
+snmp_mib.o: ./../../snmplib/snmp.h ./../../snmplib/snmp_impl.h
+snmp_mib.o:   ./../../snmplib/mib.h
+snmp_mib.o: ../var_struct.h ./../snmp_vars.h ./../m2m.h ./../snmp_vars_m2m.h
+snmp_mib.o: ../snmp_vars.linux.h ../kernel.h snmp_mib.h
 system.o: ../common_header.h ../../config.h ../../mib_module_config.h
 system.o: ../../agent/mibgroup/struct.h 
-system.o:  ../../../cmusnmp/agent/../snmplib/asn1.h
-system.o: ../../../cmusnmp/agent/../snmplib/snmp.h
-system.o: ../../../cmusnmp/agent/../snmplib/snmp_impl.h 
-system.o: ../../../cmusnmp/agent/../snmplib/mib.h ../var_struct.h
-system.o: ../snmp_vars.h ../m2m.h ../snmp_vars_m2m.h ../snmp_vars.linux.h
-system.o: ../alarm.h ../event.h ../kernel.h  system.h
+system.o: ./../../snmplib/asn1.h ./../../snmplib/snmp.h
+system.o: ./../../snmplib/snmp_impl.h 
+system.o:  ./../../snmplib/mib.h ../var_struct.h
+system.o: ./../snmp_vars.h ./../m2m.h ./../snmp_vars_m2m.h
+system.o: ../snmp_vars.linux.h ../kernel.h 
+system.o:   system.h
 system.o: ../var_struct.h util_funcs.h ../../snmplib/system.h
 tcp.o: ../common_header.h ../../config.h ../../mib_module_config.h
 tcp.o: ../../agent/mibgroup/struct.h 
-tcp.o:  ../../../cmusnmp/agent/../snmplib/asn1.h
-tcp.o: ../../../cmusnmp/agent/../snmplib/snmp.h
-tcp.o: ../../../cmusnmp/agent/../snmplib/snmp_impl.h 
-tcp.o: ../../../cmusnmp/agent/../snmplib/mib.h ../var_struct.h ../snmp_vars.h
-tcp.o: ../m2m.h ../snmp_vars_m2m.h ../snmp_vars.linux.h ../alarm.h ../event.h
-tcp.o: ../kernel.h tcp.h
-testconfig.o: ../common_header.h ../../config.h ../../mib_module_config.h
-testconfig.o: ../../agent/mibgroup/struct.h 
-testconfig.o:  ../../../cmusnmp/agent/../snmplib/asn1.h
-testconfig.o: ../../../cmusnmp/agent/../snmplib/snmp.h
-testconfig.o: ../../../cmusnmp/agent/../snmplib/snmp_impl.h
-testconfig.o:  ../../../cmusnmp/agent/../snmplib/mib.h
-testconfig.o: ../var_struct.h ../snmp_vars.h ../m2m.h ../snmp_vars_m2m.h
-testconfig.o: ../snmp_vars.linux.h ../alarm.h ../event.h ../kernel.h
-testconfig.o: testconfig.h
+tcp.o:   ./../../snmplib/asn1.h
+tcp.o: ./../../snmplib/snmp.h ./../../snmplib/snmp_impl.h
+tcp.o:   ./../../snmplib/mib.h
+tcp.o: ../var_struct.h ./../snmp_vars.h ./../m2m.h ./../snmp_vars_m2m.h
+tcp.o: ../snmp_vars.linux.h ../kernel.h tcp.h
 udp.o: ../common_header.h ../../config.h ../../mib_module_config.h
 udp.o: ../../agent/mibgroup/struct.h 
-udp.o:  ../../../cmusnmp/agent/../snmplib/asn1.h
-udp.o: ../../../cmusnmp/agent/../snmplib/snmp.h
-udp.o: ../../../cmusnmp/agent/../snmplib/snmp_impl.h 
-udp.o: ../../../cmusnmp/agent/../snmplib/mib.h ../var_struct.h ../snmp_vars.h
-udp.o: ../m2m.h ../snmp_vars_m2m.h ../snmp_vars.linux.h ../alarm.h ../event.h
-udp.o: ../kernel.h udp.h
+udp.o:   ./../../snmplib/asn1.h
+udp.o: ./../../snmplib/snmp.h ./../../snmplib/snmp_impl.h
+udp.o:   ./../../snmplib/mib.h
+udp.o: ../var_struct.h ./../snmp_vars.h ./../m2m.h ./../snmp_vars_m2m.h
+udp.o: ../snmp_vars.linux.h ../kernel.h udp.h
 util_funcs.o: ../../config.h ../../mib_module_config.h
 util_funcs.o: ../../agent/mibgroup/struct.h 
 util_funcs.o:  mibincl.h ../../snmplib/asn1.h
@@ -170,23 +191,26 @@ util_funcs.o: ../../snmplib/snmp.h util_funcs.h errormib.h mibdefs.h
 util_funcs.o: read_config.h
 var_route.o: ../../config.h ../../mib_module_config.h
 var_route.o: ../../agent/mibgroup/struct.h 
-var_route.o: ../../../cmusnmp/agent/../snmplib/asn1.h
-var_route.o: ../../../cmusnmp/agent/../snmplib/snmp_impl.h
-var_route.o: ../../../cmusnmp/agent/../snmplib/snmp_api.h
-var_route.o: ../../../cmusnmp/agent/../snmplib/mib.h
-var_route.o: ../../../cmusnmp/agent/../snmplib/snmp.h ../snmp_vars.h ip.h
-var_route.o: var_route.h route_write.h at.h ../kernel.h
+var_route.o: ./../../snmplib/asn1.h ./../../snmplib/snmp_impl.h
+var_route.o: ./../../snmplib/snmp_api.h ./../../snmplib/mib.h
+var_route.o: ./../../snmplib/snmp.h ../snmp_vars.h ip.h var_route.h
+var_route.o: route_write.h at.h ../kernel.h
 versioninfo.o: ../../config.h ../../mib_module_config.h
 versioninfo.o: ../../agent/mibgroup/struct.h 
-versioninfo.o:  mibincl.h
-versioninfo.o: ../../snmplib/asn1.h ../../snmplib/snmp_impl.h ../snmp_vars.h
-versioninfo.o: ../var_struct.h ../../snmplib/snmp.h versioninfo.h mibdefs.h
-versioninfo.o: util_funcs.h
+versioninfo.o:  mibincl.h 
+versioninfo.o:  ../../snmplib/asn1.h
+versioninfo.o: ../../snmplib/snmp_impl.h ../snmp_vars.h ../var_struct.h
+versioninfo.o: ../../snmplib/snmp.h versioninfo.h mibdefs.h util_funcs.h
+view_vars.o: ../../config.h ../../mib_module_config.h
+view_vars.o: ../../agent/mibgroup/struct.h 
+view_vars.o: ./../../snmplib/asn1.h ./../../snmplib/snmp.h
+view_vars.o: ./../../snmplib/snmp_impl.h 
+view_vars.o:  ./../snmp_vars.h view_vars.h
+view_vars.o: ./../../snmplib/view.h
 wombat.o: ../common_header.h ../../config.h ../../mib_module_config.h
 wombat.o: ../../agent/mibgroup/struct.h 
-wombat.o:  ../../../cmusnmp/agent/../snmplib/asn1.h
-wombat.o: ../../../cmusnmp/agent/../snmplib/snmp.h
-wombat.o: ../../../cmusnmp/agent/../snmplib/snmp_impl.h 
-wombat.o: ../../../cmusnmp/agent/../snmplib/mib.h ../var_struct.h
-wombat.o: ../snmp_vars.h ../m2m.h ../snmp_vars_m2m.h ../snmp_vars.linux.h
-wombat.o: ../alarm.h ../event.h ../kernel.h wombat.h
+wombat.o: ./../../snmplib/asn1.h ./../../snmplib/snmp.h
+wombat.o: ./../../snmplib/snmp_impl.h 
+wombat.o:  ./../../snmplib/mib.h ../var_struct.h
+wombat.o: ./../snmp_vars.h ./../m2m.h ./../snmp_vars_m2m.h
+wombat.o: ../snmp_vars.linux.h ../kernel.h wombat.h
