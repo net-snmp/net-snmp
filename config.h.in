@@ -740,6 +740,9 @@
 /* Define if you have the nsl library (-lnsl).  */
 #undef HAVE_LIBNSL
 
+/* Define if you have the popt library (-lpopt).  */
+#undef HAVE_LIBPOPT
+
 /* Define if you have the z library (-lz).  */
 #undef HAVE_LIBZ
 

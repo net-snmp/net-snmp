@@ -905,6 +905,9 @@ if test "x$use_wrap" = "xtrue"; then
 	CPPFLAGS=${_cppflags} LDFLAGS=${_ldflags})
 fi
 
+dnl ARG.  RPM is a real pain.
+AC_CHECK_LIB(popt, poptParseArgvString)
+
 dnl zlib is required for newer versions of rpm
 _cppflags="${CPPFLAGS}"
 _ldflags="${LDFLAGS}"
