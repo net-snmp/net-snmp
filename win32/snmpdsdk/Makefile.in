@@ -289,14 +289,14 @@ SOURCE=..\..\snmplib\winservice.rc
 
 
 "$(INTDIR)\winservice.res" : $(SOURCE) "$(INTDIR)"
-	$(RSC) /l 0x409 /fo"$(INTDIR)\winservice.res" /i "\Prog\net-snmp-5.1.1.pre2\snmplib" /d "NDEBUG" $(SOURCE)
+	$(RSC) /l 0x409 /fo"$(INTDIR)\winservice.res" /i "..\..\snmplib" /d "NDEBUG" $(SOURCE)
 
 
 !ELSEIF  "$(CFG)" == "debug"
 
 
 "$(INTDIR)\winservice.res" : $(SOURCE) "$(INTDIR)"
-	$(RSC) /l 0x409 /fo"$(INTDIR)\winservice.res" /i "\Prog\net-snmp-5.1.1.pre2\snmplib" /d "_DEBUG" $(SOURCE)
+	$(RSC) /l 0x409 /fo"$(INTDIR)\winservice.res" /i "..\..\snmplib" /d "_DEBUG" $(SOURCE)
 
 
 !ENDIF 
