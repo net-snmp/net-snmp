@@ -96,6 +96,9 @@
 #  include <time.h>
 # endif
 #endif
+#ifdef HAVE_SYS_PARAM_H
+#include <sys/param.h>
+#endif
 
 #include "mibincl.h"
 #include "mibdefs.h"
