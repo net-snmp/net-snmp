@@ -1132,7 +1132,7 @@ _sess_open(struct snmp_session *in_session)
         if ( session->local_port == 0 ) {	/* Client session */
 
             if ( connect( sd, (struct sockaddr *)&(isp->addr),
-                               sizeof(isp->addr)) != 0 ) {
+                               snmp_socket_length(isp->addr.sa_family)) != 0 ) {
 	        in_session->s_snmp_errno = SNMPERR_BAD_LOCPORT;
 	        in_session->s_errno = errno;
 	        snmp_set_detail(strerror(errno));
