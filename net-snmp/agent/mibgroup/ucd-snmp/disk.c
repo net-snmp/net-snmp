@@ -318,7 +318,17 @@ disk_parse_config_all(const char *token, char *cptr)
 static void
 add_device(char *path, char *device, int minspace, int minpercent, int override) 
 {
-  int index = disk_exists(path);
+  int index;
+  if (numdisks == MAXDISKS) {
+    char tmpbuf[1024];
+    config_perror("Too many disks specified.");
+    snprintf(tmpbuf, sizeof(tmpbuf), "\tignoring:  %s", device);
+    tmpbuf[ sizeof(tmpbuf)-1 ] = 0;
+    config_perror(tmpbuf);
+    return;
+  }
+
+  index = disk_exists(path);
   if((index != -1) && (index < MAXDISKS) && (override==1)) {
     modify_disk_parameters(index, minspace, minpercent);
   }
@@ -437,6 +447,9 @@ find_and_add_allDisks(int minpercent)
   }
 #endif
   else {
+    if (numdisks == MAXDISKS) {
+      return;
+    }
     snprintf(tmpbuf, sizeof(tmpbuf),
              "Couldn't find device for disk %s",
              disks[numdisks].path);
