@@ -167,7 +167,7 @@ agent_registry.o: mibgroup/mibII/var_route.h mibgroup/mibII/route_write.h
 agent_registry.o: mibgroup/agentx/protocol.h mibgroup/agentx/client.h
 agent_registry.o: mibgroup/agentx/master_admin.h
 agent_registry.o: mibgroup/agentx/master_request.h
-agent_registry.o: ./mibgroup/agentx/subagent.h mibgroup/mib_module_loads.h
+agent_registry.o: ./mibgroup/agentx/subagent.h
 auto_nlist.o: ../config.h ../mib_module_config.h ../s/linux.h ../s/sysv.h
 auto_nlist.o: ../s/generic.h ../m/generic.h
 history.o: ../config.h ../mib_module_config.h ../s/linux.h ../s/sysv.h
