@@ -1381,10 +1381,11 @@ Interface_Scan_Init (void)
     struct ifreq ifrq;
     struct ifnet **ifnetaddr_ptr;
     FILE *devin;
-    unsigned long long rec_pkt, rec_oct, rec_err, snd_pkt, snd_oct, snd_err, coll;
+    unsigned long long rec_pkt, rec_oct, rec_err, rec_drop;
+    unsigned long long snd_pkt, snd_oct, snd_err, snd_drop, coll;
     int i, fd;
     conf_if_list *if_ptr;
-    const char *scan_line_2_2="%llu %llu %llu %*llu %*llu %*llu %*llu %*llu %llu %llu %llu %*llu %*llu %llu";
+    const char *scan_line_2_2="%llu %llu %llu %llu %*llu %*llu %*llu %*llu %llu %llu %llu %llu %*llu %llu";
     const char *scan_line_2_0="%llu %llu %*llu %*llu %*llu %llu %llu %*llu %*llu %llu";
     const char *scan_line_to_use;
     
@@ -1471,7 +1472,7 @@ Interface_Scan_Init (void)
 
         if ((scan_line_to_use == scan_line_2_2 &&
             sscanf (stats, scan_line_to_use, &rec_oct, &rec_pkt, &rec_err,
-&snd_oct, &snd_pkt, &snd_err, &coll) != 7) ||
+&rec_drop, &snd_oct, &snd_pkt, &snd_err, &snd_drop, &coll) != 9) ||
             (scan_line_to_use == scan_line_2_0 &&
             sscanf (stats, scan_line_to_use, &rec_pkt, &rec_err, &snd_pkt,
 &snd_err, &coll) != 5)) {
@@ -1500,6 +1501,8 @@ Interface_Scan_Init (void)
 	nnew->if_collisions = coll;
 	if (scan_line_to_use == scan_line_2_2) {
 	  nnew->if_ibytes = rec_oct; nnew->if_obytes = snd_oct;
+	  nnew->if_iqdrops = rec_drop;
+	  nnew->if_snd.ifq_drops = snd_drop;
 	}
 	else {
 	  nnew->if_ibytes = rec_pkt*308; nnew->if_obytes = snd_pkt*308;

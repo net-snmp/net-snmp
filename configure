@@ -13074,6 +13074,7 @@ struct ifnet {
 		int	ifq_drops;
 	} if_snd;			/* output queue */
 	int	if_ibytes;		/* octets received on interface */
+	int	if_iqdrops;		/* input queue overruns */
 	int	if_ipackets;		/* packets received on interface */
 	int	if_ierrors;		/* input errors on interface */
 	int	if_obytes;		/* octets sent on interface */
@@ -13181,6 +13182,7 @@ struct ifnet {
 		int	ifq_drops;
 	} if_snd;			/* output queue */
 	int	if_ibytes;		/* octets received on interface */
+	int	if_iqdrops;		/* input queue overruns */
 	int	if_ipackets;		/* packets received on interface */
 	int	if_ierrors;		/* input errors on interface */
 	int	if_obytes;		/* octets sent on interface */
@@ -13288,6 +13290,7 @@ struct ifnet {
 		int	ifq_drops;
 	} if_snd;			/* output queue */
 	int	if_ibytes;		/* octets received on interface */
+	int	if_iqdrops;		/* input queue overruns */
 	int	if_ipackets;		/* packets received on interface */
 	int	if_ierrors;		/* input errors on interface */
 	int	if_obytes;		/* octets sent on interface */
@@ -13395,6 +13398,7 @@ struct ifnet {
 		int	ifq_drops;
 	} if_snd;			/* output queue */
 	int	if_ibytes;		/* octets received on interface */
+	int	if_iqdrops;		/* input queue overruns */
 	int	if_ipackets;		/* packets received on interface */
 	int	if_ierrors;		/* input errors on interface */
 	int	if_obytes;		/* octets sent on interface */
@@ -13502,6 +13506,7 @@ struct ifnet {
 		int	ifq_drops;
 	} if_snd;			/* output queue */
 	int	if_ibytes;		/* octets received on interface */
+	int	if_iqdrops;		/* input queue overruns */
 	int	if_ipackets;		/* packets received on interface */
 	int	if_ierrors;		/* input errors on interface */
 	int	if_obytes;		/* octets sent on interface */
@@ -13609,6 +13614,7 @@ struct ifnet {
 		int	ifq_drops;
 	} if_snd;			/* output queue */
 	int	if_ibytes;		/* octets received on interface */
+	int	if_iqdrops;		/* input queue overruns */
 	int	if_ipackets;		/* packets received on interface */
 	int	if_ierrors;		/* input errors on interface */
 	int	if_obytes;		/* octets sent on interface */
@@ -13716,6 +13722,7 @@ struct ifnet {
 		int	ifq_drops;
 	} if_snd;			/* output queue */
 	int	if_ibytes;		/* octets received on interface */
+	int	if_iqdrops;		/* input queue overruns */
 	int	if_ipackets;		/* packets received on interface */
 	int	if_ierrors;		/* input errors on interface */
 	int	if_obytes;		/* octets sent on interface */
@@ -13823,6 +13830,7 @@ struct ifnet {
 		int	ifq_drops;
 	} if_snd;			/* output queue */
 	int	if_ibytes;		/* octets received on interface */
+	int	if_iqdrops;		/* input queue overruns */
 	int	if_ipackets;		/* packets received on interface */
 	int	if_ierrors;		/* input errors on interface */
 	int	if_obytes;		/* octets sent on interface */
@@ -13930,6 +13938,7 @@ struct ifnet {
 		int	ifq_drops;
 	} if_snd;			/* output queue */
 	int	if_ibytes;		/* octets received on interface */
+	int	if_iqdrops;		/* input queue overruns */
 	int	if_ipackets;		/* packets received on interface */
 	int	if_ierrors;		/* input errors on interface */
 	int	if_obytes;		/* octets sent on interface */
@@ -14037,6 +14046,7 @@ struct ifnet {
 		int	ifq_drops;
 	} if_snd;			/* output queue */
 	int	if_ibytes;		/* octets received on interface */
+	int	if_iqdrops;		/* input queue overruns */
 	int	if_ipackets;		/* packets received on interface */
 	int	if_ierrors;		/* input errors on interface */
 	int	if_obytes;		/* octets sent on interface */
@@ -14144,6 +14154,7 @@ struct ifnet {
 		int	ifq_drops;
 	} if_snd;			/* output queue */
 	int	if_ibytes;		/* octets received on interface */
+	int	if_iqdrops;		/* input queue overruns */
 	int	if_ipackets;		/* packets received on interface */
 	int	if_ierrors;		/* input errors on interface */
 	int	if_obytes;		/* octets sent on interface */
@@ -14251,6 +14262,7 @@ struct ifnet {
 		int	ifq_drops;
 	} if_snd;			/* output queue */
 	int	if_ibytes;		/* octets received on interface */
+	int	if_iqdrops;		/* input queue overruns */
 	int	if_ipackets;		/* packets received on interface */
 	int	if_ierrors;		/* input errors on interface */
 	int	if_obytes;		/* octets sent on interface */
@@ -14358,6 +14370,7 @@ struct ifnet {
 		int	ifq_drops;
 	} if_snd;			/* output queue */
 	int	if_ibytes;		/* octets received on interface */
+	int	if_iqdrops;		/* input queue overruns */
 	int	if_ipackets;		/* packets received on interface */
 	int	if_ierrors;		/* input errors on interface */
 	int	if_obytes;		/* octets sent on interface */
@@ -14465,6 +14478,7 @@ struct ifnet {
 		int	ifq_drops;
 	} if_snd;			/* output queue */
 	int	if_ibytes;		/* octets received on interface */
+	int	if_iqdrops;		/* input queue overruns */
 	int	if_ipackets;		/* packets received on interface */
 	int	if_ierrors;		/* input errors on interface */
 	int	if_obytes;		/* octets sent on interface */

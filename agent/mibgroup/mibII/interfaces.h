@@ -80,6 +80,7 @@ struct ifnet {
 		int	ifq_drops;
 	} if_snd;			/* output queue */
 	u_long	if_ibytes;		/* octets received on interface */
+	u_long	if_iqdrops;		/* input queue overruns */
 	u_long	if_ipackets;		/* packets received on interface */
 	u_long	if_ierrors;		/* input errors on interface */
 	u_long	if_obytes;		/* octets sent on interface */
