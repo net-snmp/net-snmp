@@ -612,7 +612,8 @@ var_ipAddrEntry(struct variable * vp,
     oid             current[IP_ADDRNAME_LENGTH], *op;
     u_char         *cp;
     IpAddress       NextAddr;
-    mib2_ipAddrEntry_t entry, Lowentry;
+    mib2_ipAddrEntry_t entry;
+    static mib2_ipAddrEntry_t Lowentry;
     int             Found = 0;
     req_e           req_type;
 
@@ -679,19 +680,19 @@ var_ipAddrEntry(struct variable * vp,
     *var_len = sizeof(long_return);
     switch (vp->magic) {
     case IPADADDR:
-        long_return = Lowentry.ipAdEntAddr;
-        return (u_char *) & long_return;
+	*var_len = sizeof(Lowentry.ipAdEntAddr);
+        return (u_char *)&Lowentry.ipAdEntAddr;
     case IPADIFINDEX:
         long_return =
             Interface_Index_By_Name(Lowentry.ipAdEntIfIndex.o_bytes,
                                     Lowentry.ipAdEntIfIndex.o_length);
         return (u_char *) & long_return;
     case IPADNETMASK:
-        long_return = Lowentry.ipAdEntNetMask;
-        return (u_char *) & long_return;
+	*var_len = sizeof(Lowentry.ipAdEntNetMask);
+        return (u_char *)&Lowentry.ipAdEntNetMask;
     case IPADBCASTADDR:
-        long_return = Lowentry.ipAdEntBcastAddr;
-        return (u_char *) & long_return;
+	*var_len = sizeof(Lowentry.ipAdEntBcastAddr);
+        return (u_char *)&Lowentry.ipAdEntBcastAddr;
     default:
         DEBUGMSGTL(("snmpd", "unknown sub-id %d in var_ipAddrEntry\n",
                     vp->magic));
