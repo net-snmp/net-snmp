@@ -6,9 +6,8 @@
 
 
 
-int
-netsnmp_check_vb_type_and_size(netsnmp_variable_list *var,
-                               int type, size_t size)
+NETSNMP_INLINE int
+netsnmp_check_vb_type(netsnmp_variable_list *var, int type )
 {
     register int rc = SNMP_ERR_NOERROR;
 
@@ -17,14 +16,30 @@ netsnmp_check_vb_type_and_size(netsnmp_variable_list *var,
     
     if (var->type != type) {
         rc = SNMP_ERR_WRONGTYPE;
-    } else if (var->val_len != size) {
+    }
+
+    return rc;
+}
+
+NETSNMP_INLINE int
+netsnmp_check_vb_type_and_size(netsnmp_variable_list *var,
+                               int type, size_t size)
+{
+    register int rc = SNMP_ERR_NOERROR;
+
+    if (NULL == var)
+        return SNMP_ERR_GENERR;
+    
+    if ((rc = netsnmp_check_vb_type(var,type)))
+        ;
+    else if (var->val_len != size) {
         rc = SNMP_ERR_WRONGLENGTH;
     }
 
     return rc;
 }
 
-int
+NETSNMP_INLINE int
 netsnmp_check_vb_int_range(netsnmp_variable_list *var, int low, int high)
 {
     register int rc = SNMP_ERR_NOERROR;
