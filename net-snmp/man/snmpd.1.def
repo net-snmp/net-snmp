@@ -5,7 +5,7 @@
 .SH NAME
 snmpd - daemon to respond to SNMP request packets.
 .SH SYNOPSIS
-.B "snmpd [-a] [-V] [-d] [-q] [-p port] [-f] [-l logfile] [-L]"
+.B "snmpd [-a] [-V] [-d] [-q] [-p port] [-f] [-l logfile] [-L] [-c file] [-C]"
 .SH DESCRIPTION
 .B snmpd
 is a SNMP agent which binds to a port and awaits requests from
@@ -42,6 +42,16 @@ Defaults to a compiled option.
 .TP
 .B -L
 Don't open a log file; use stdout/err instead.
+.TP
+.B -c file
+Read 
+.I file
+as a configuration file.
+.TP
+.B -C
+Don't read any configuration files execpt the one optionally specified by the 
+.B -c 
+option.
 .RE
 .SH CONFIGURATION FILES
 .PP
@@ -52,12 +62,18 @@ checks for the existance of and parses the following files:
 .B PREFIX/lib/snmp/snmpd.conf
 .TP
 .B PREFIX/lib/snmp/snmpd.local.conf
-Configures the agent.  See snmpd.conf(5) for details.  These files
-are optional and are only used to configure the extensible portions of
-the agent and the values of the community strings.  By default, the
-first community string ("public" by default) is allowed read-only access and the
-second ("private" by default) is allowed write access as well.  The
-3-5th community strings are read-only as well.
+Configures the agent.  See snmpd.conf(5) for details.  These files are
+optional and are only used to configure the extensible portions of the
+agent, the values of the community strings, and the optional trap
+destinations.  By default, the first community string ("public" by
+default) is allowed read-only access and the second ("private" by
+default) is allowed write access as well.  The 3-5th community strings
+are read-only as well.
+.IP
+In addition to these two configuration files in PREFIX/lib/snmp, the
+agent will read any files with the names snmpd.conf and
+snmpd.local.conf in a colon sepereated path specified in the
+SNMPCONFPATH environmental variable.
 .TP
 .B PREFIX/lib/snmp/mib.txt
 Defines the mib it should use.
