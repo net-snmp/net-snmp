@@ -183,12 +183,13 @@ RELEASING:
           [if you did this before above, do it again if you made any
            changes to the CVS tree since creating the last revision]
 
-          $ cvs2cl -r -b -f ChangeLog.add --no-wrap -S
+          $ cvs2cl -r -b -f ChangeLog.add -F trunk --no-wrap -S
 
           Note that if you're on a branch, add the -F option to cvs2cl
           like:
 
-          $ cvs2cl -r -f ChangeLog.add -F V4-2-patches --no-wrap -S
+          $ cvs2cl -r -f ChangeLog.add -F V4-2-patches --no-ancestors \
+             --no-wrap -S
 
        b) Fixup the changelog
 
