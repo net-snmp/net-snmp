@@ -2776,8 +2776,9 @@ var_ifEntry(struct variable * vp,
 {
     int             ifIndex;
     static MIB_IFROW ifRow;
-    conf_if_list   *if_ptr = conf_list;;
-
+    conf_if_list   *if_ptr = conf_list;
+    static char     Name[16];
+    
     ifIndex =
         header_ifEntry(vp, name, length, exact, var_len, write_method);
     if (ifIndex == MATCH_FAILED)
