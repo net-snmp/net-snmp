@@ -57,8 +57,7 @@ void
 init_usmUser(void)
 {
   snmpd_register_config_handler("usmUser",
-                                usm_parse_config_usmUser, NULL,
-                                "internal use only");
+                                usm_parse_config_usmUser, NULL, NULL);
   snmpd_register_config_handler("createUser",
                                 usm_parse_create_usmUser, NULL,
                                 "username (MD5|SHA) passphrase [DES] [passphrase]");
