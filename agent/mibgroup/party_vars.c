@@ -5,10 +5,10 @@
 #include <stddef.h>
 #endif
 
-#if HAVE_STRING_H
-#include <string.h>
-#else
+#if HAVE_STRINGS_H
 #include <strings.h>
+#else
+#include <string.h>
 #endif
 
 #include <sys/types.h>
