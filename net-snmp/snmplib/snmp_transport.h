@@ -58,6 +58,10 @@ typedef struct _snmp_transport {
   void	       	*data;
   int		 data_length;
 
+  /*  Maximum size of PDU that can be sent/received by this transport.  */
+
+  size_t	 msgMaxSize;
+
   /*  Callbacks.  */
 
   /*               this pointer, fd, buf, size, *opaque, *opaque_length  */

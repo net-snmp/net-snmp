@@ -249,11 +249,14 @@ snmp_transport		*snmp_udp_transport	(struct sockaddr_in *addr,
     t->data_length = sizeof(struct sockaddr_in);
   }
 
-  t->f_recv    = snmp_udp_recv;
-  t->f_send    = snmp_udp_send;
-  t->f_close   = snmp_udp_close;
-  t->f_accept  = NULL;
-  t->f_fmtaddr = snmp_udp_fmtaddr;
+  /*  16-bit length field, 8 byte UDP header, 20 byte IPv4 header  */
+
+  t->msgMaxSize  = 0xffff - 8 - 20;
+  t->f_recv      = snmp_udp_recv;
+  t->f_send      = snmp_udp_send;
+  t->f_close     = snmp_udp_close;
+  t->f_accept    = NULL;
+  t->f_fmtaddr   = snmp_udp_fmtaddr;
 
   return t;
 }
