@@ -308,6 +308,7 @@ getKstat(const char *statname, const char *varname, void *value)
     int             ret;
     u_longlong_t    val;    /* The largest value */
     void           *v;
+    static char    buf[128];
 
     if (value == NULL) {      /* Pretty useless but ... */
 	v = (void *) &val;
@@ -394,8 +395,10 @@ getKstat(const char *statname, const char *varname, void *value)
 	if (strcmp(d->name, varname) == 0) {
 	    switch (d->data_type) {
 	    case KSTAT_DATA_CHAR:
-		*(char *)v = (int)d->value.c;
-		DEBUGMSGTL(("kernel_sunos5", "value: %d\n", (int)d->value.c));
+		DEBUGMSGTL(("kernel_sunos5", "value: %s\n", d->value.c));
+		*(char **)v = buf;
+		buf[sizeof(buf)-1] = 0;
+		strncpy(buf, d->value.c, sizeof(buf)-1);
 		break;
 #ifdef KSTAT_DATA_INT32         /* Solaris 2.6 and up */
 	    case KSTAT_DATA_INT32:

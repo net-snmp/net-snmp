@@ -63,7 +63,7 @@ char            sysContact[SYS_STRING_LEN] = SYS_CONTACT;
 char            sysName[SYS_STRING_LEN] = SYS_NAME;
 char            sysLocation[SYS_STRING_LEN] = SYS_LOC;
 oid             sysObjectID[MAX_OID_LEN];
-int             sysObjectIDLength;
+size_t          sysObjectIDLength;
 oid             version_sysoid[] = { SYSTEM_MIB };
 
 char            oldversion_descr[SYS_STRING_LEN];
@@ -97,8 +97,8 @@ system_parse_config_sysdescr(const char *token, char *cptr)
     if (strlen(cptr) >= sizeof(version_descr)) {
         snprintf(tmpbuf,
                  sizeof(tmpbuf),
-                 "sysdescr token too long (must be < %d):\n\t%s",
-                 sizeof(version_descr),
+                 "sysdescr token too long (must be < %lu):\n\t%s",
+                 (unsigned long)sizeof(version_descr),
                  cptr);
         config_perror(tmpbuf);
     } else if (strcmp(cptr, "\"\"") == 0) {
@@ -115,8 +115,8 @@ system_parse_config_sysloc(const char *token, char *cptr)
 
     if (strlen(cptr) >= sizeof(sysLocation)) {
         snprintf(tmpbuf, 1024,
-                 "syslocation token too long (must be < %d):\n\t%s",
-                 sizeof(sysLocation), cptr);
+                 "syslocation token too long (must be < %lu):\n\t%s",
+                 (unsigned long)sizeof(sysLocation), cptr);
         config_perror(tmpbuf);
     }
 
@@ -162,8 +162,8 @@ system_parse_config_syscon(const char *token, char *cptr)
 
     if (strlen(cptr) >= sizeof(sysContact)) {
         snprintf(tmpbuf, 1024,
-                 "syscontact token too long (must be < %d):\n\t%s",
-                 sizeof(sysContact), cptr);
+                 "syscontact token too long (must be < %lu):\n\t%s",
+                 (unsigned long)sizeof(sysContact), cptr);
         config_perror(tmpbuf);
     }
 
@@ -209,8 +209,8 @@ system_parse_config_sysname(const char *token, char *cptr)
 
     if (strlen(cptr) >= sizeof(sysName)) {
         snprintf(tmpbuf, 1024,
-                 "sysname token too long (must be < %d):\n\t%s",
-                 sizeof(sysName), cptr);
+                 "sysname token too long (must be < %lu):\n\t%s",
+                 (unsigned long)sizeof(sysName), cptr);
         config_perror(tmpbuf);
     }
 

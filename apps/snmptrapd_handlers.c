@@ -74,7 +74,7 @@ snmptrapd_parse_traphandle(const char *token, char *line)
 {
     char            buf[STRINGMAX];
     oid             obuf[MAX_OID_LEN];
-    int             olen = MAX_OID_LEN;
+    size_t          olen = MAX_OID_LEN;
     char           *cptr;
     netsnmp_trapd_handler *traph;
 
@@ -110,7 +110,7 @@ parse_forward(const char *token, char *line)
 {
     char            buf[STRINGMAX];
     oid             obuf[MAX_OID_LEN];
-    int             olen = MAX_OID_LEN;
+    size_t          olen = MAX_OID_LEN;
     char           *cptr;
     netsnmp_trapd_handler *traph;
 
