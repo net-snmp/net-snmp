@@ -556,6 +556,7 @@ oid
       return root;
     }
   }
+  snmp_errno = SNMPERR_UNKNOWN_OBJID;
   return NULL;
 }
 
