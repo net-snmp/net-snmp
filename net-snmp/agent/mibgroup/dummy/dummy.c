@@ -49,6 +49,7 @@
 	 *********************/
 
 
+/* this shouldn't be done this way anymore.  Use auto_nlist() instead. */
 static struct nlist dummy_nl[] = {
 #define N_DUMMYSTAT    0
 #define N_MIN_DUMMY    1
@@ -76,6 +77,7 @@ void calculate_dummy();
 
 void	init_dummy( )
 {
+/* this shouldn't be done this way anymore.  Use auto_nlist() instead. */
     init_nlist( dummy_nl );
 }
 
