@@ -142,7 +142,7 @@ extern          "C" {
     /*
      * release memory used by a table.
      *
-     * Note: if your data structure contained allcoated
+     * Note: if your data structures contained allocated
      * memory, you are responsible for releasing that
      * memory before calling this function!
      */
