@@ -92,6 +92,7 @@ struct packet_info {
 #define COMMIT      2
 #define ACTION	    3
 #define FREE        4
+#define UNDO        5
 
 /* Access control statements for the agent */
 #define RONLY	0x1	/* read access only */
