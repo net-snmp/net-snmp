@@ -5,8 +5,6 @@
 
 #include <net-snmp/net-snmp-config.h>
 
-#ifdef HAVE_SEARCH_H
-
 #if HAVE_STRING_H
 #include <string.h>
 #else
@@ -769,16 +767,20 @@ process_set_group(netsnmp_oid_array_header *o, void *c)
             if (!ag->new_row) {
                 /** remove deleted row */
                 netsnmp_remove_oid_data(ag->table, ag->old_row, NULL);
+#ifdef HAVE_SEARCH_H
                 if (context->tad->cb->tree)
                     tdelete(ag->old_row,context->tad->cb->tree,
                             context->tad->cb->row_compare);
+#endif /* HAVE_SEARCH_H */
             }
         } else {
             /** insert new row */
             netsnmp_add_oid_data(ag->table, ag->new_row);
+#ifdef HAVE_SEARCH_H
             if (context->tad->cb->tree)
                 tsearch(ag->new_row,context->tad->cb->tree,
                         context->tad->cb->row_compare);
+#endif /* HAVE_SEARCH_H */
         }
 
         netsnmp_add_oid_data(context->tad->changing, ag->new_row);
@@ -838,9 +840,11 @@ process_set_group(netsnmp_oid_array_header *o, void *c)
                  * insert old_row
                  */
                 netsnmp_add_oid_data(ag->table, ag->old_row);
+#ifdef HAVE_SEARCH_H
                 if (context->tad->cb->tree)
                     tsearch(ag->old_row,context->tad->cb->tree,
                             context->tad->cb->row_compare);
+#endif /* HAVE_SEARCH_H */
             }
         } else {
             /*
@@ -848,9 +852,11 @@ process_set_group(netsnmp_oid_array_header *o, void *c)
              */
             assert(ag->new_row != NULL);
             netsnmp_remove_oid_data(ag->table, ag->new_row, NULL);
+#ifdef HAVE_SEARCH_H
             if (context->tad->cb->tree)
                 tdelete(ag->new_row,context->tad->cb->tree,
                         context->tad->cb->row_compare);
+#endif /* HAVE_SEARCH_H */
         }
         netsnmp_remove_oid_data(context->tad->changing, ag->new_row, NULL);
 
@@ -990,4 +996,3 @@ netsnmp_table_array_helper_handler(netsnmp_mib_handler *handler,
     return rc;
 }
 #endif /** DOXYGEN_SHOULD_SKIP_THIS */
-#endif /* HAVE_SEARCH_H */
