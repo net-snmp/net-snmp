@@ -20,7 +20,7 @@ EXTRACPPFLAGS = @EXTRACPPFLAGS@
 TARG = bin/snmpget bin/snmpgetnext bin/snmpset bin/snmptranslate bin/snmpwalk bin/snmpbulkwalk bin/snmptest bin/snmptrapd bin/snmpnetstat bin/snmpd
 
 SUBDIRS = snmplib agent apps local ov man
-INSTALLDIRS = $(SUBDIRS)
+INSTALLDIRS = snmplib agent apps local man mibs
 
 all:	sedscript EXAMPLE.conf subdirs
 
@@ -39,7 +39,6 @@ install:    subdirs installdirs
         ( cd $$i ; $(MAKE) install ) \
 	done
 	@$(INSTALL) mib.txt $(snmplibdir) ; echo "install:  installed mib.txt in $(snmplibdir)"
-	@$(INSTALL) ucd-snmp.txt $(mibdir) ; echo "install:  installed ucd-snmp.txt in $(mibdir)"
 
 installdirs:
 	@$(SHELL) $(srcdir)/mkinstalldirs $(snmplibdir) $(mibdir)
