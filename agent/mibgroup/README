@@ -6,6 +6,9 @@ Additionally, you may wish to check out the 'mib2c' perl script in the
 SRCDIR/local directory that can convert a written mib into C template
 files for use with this package as mib modules.
 
+Furthermore, you may wish to see the example documentation in
+dummy/AddModuleForDummies.txt.
+
 Each group consists of two files:
 
   examples/wombat.h:	interface information
