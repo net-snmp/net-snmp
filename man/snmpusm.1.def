@@ -26,7 +26,8 @@ OLD-PASSPHRASE NEW-PASSPHRASE
 .SH DESCRIPTION
 .B snmpusm
 is an SNMP application that can be used to do simple maintenance on a
-SNMP agent's User-based Security Module (USM) table.  You can create,
+SNMP agent's User-based Security Module (USM) table.  The user needs
+write access to the usmUserTable MIB table.  You can create,
 delete, clone, and change the passphrase of users configured on a
 running SNMP agent.
 .PP
