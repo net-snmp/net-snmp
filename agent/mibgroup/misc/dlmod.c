@@ -30,7 +30,7 @@
 #endif
 
 #ifndef _DLMOD_PATH
-#define _DLMOD_PATH "/usr/local/lib/snmp/dlmod"
+#define _DLMOD_PATH "snmp/dlmod"
 #endif
 
 struct dlmod {
@@ -78,11 +78,12 @@ void dlmod_parse_config(word,cptr)
   dl_path = strtok(NULL, "\t ");
   if (dl_path == NULL) 
 	snprintf(ptmp->path, sizeof(ptmp->path), 
-		"%s/%s.so", _DLMOD_PATH, ptmp->name);
+		"%s/%s/%s.so", SNMPLIBPATH, _DLMOD_PATH, ptmp->name);
   else if (dl_path[0] == '/') 
 	strncpy(ptmp->path, dl_path, sizeof(ptmp->path));
   else
-	snprintf(ptmp->path, sizeof(ptmp->path), "%s/%s", _DLMOD_PATH, dl_path);
+	snprintf(ptmp->path, sizeof(ptmp->path), "%s/%s/%s", SNMPLIBPATH,
+                 _DLMOD_PATH, dl_path);
 
   ptmp->handle = dlopen(ptmp->path, RTLD_NOW);
   if (ptmp->handle == NULL) {
@@ -90,7 +91,7 @@ void dlmod_parse_config(word,cptr)
 	free(ptmp);
 	return;
   }
-  snprintf(sym_init, sizeof(sym_init), "_%s_init", ptmp->name);
+  snprintf(sym_init, sizeof(sym_init), "_dynamic_init_%s", ptmp->name);
   dl_init = dlsym(ptmp->handle, sym_init);
   if (dl_init == NULL) {
 	config_perror(dlerror());
@@ -120,7 +121,8 @@ void dlmod_free_config __P((void)) {
   for (dtmp = dlmods; dtmp != NULL;) {
     dtmp2 = dtmp;
     dtmp = dtmp->next;
-	snprintf(sym_deinit, sizeof(sym_deinit), "_%s_deinit", dtmp2->name);
+	snprintf(sym_deinit, sizeof(sym_deinit), "_dynamic_deinit_%s",
+                 dtmp2->name);
 	dl_deinit = dlsym(dtmp2->handle, sym_deinit);
 	if (dl_deinit) 
 		dl_deinit();
