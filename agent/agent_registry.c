@@ -797,14 +797,18 @@ void dump_registry( void )
 int external_readfd[NUM_EXTERNAL_FDS], external_readfdlen = 0;
 int external_writefd[NUM_EXTERNAL_FDS], external_writefdlen = 0;
 int external_exceptfd[NUM_EXTERNAL_FDS], external_exceptfdlen = 0;
-void (* external_readfdfunc[NUM_EXTERNAL_FDS])(int);
-void (* external_writefdfunc[NUM_EXTERNAL_FDS])(int);
-void (* external_exceptfdfunc[NUM_EXTERNAL_FDS])(int);
+void (* external_readfdfunc[NUM_EXTERNAL_FDS])(int, void *);
+void (* external_writefdfunc[NUM_EXTERNAL_FDS])(int, void *);
+void (* external_exceptfdfunc[NUM_EXTERNAL_FDS])(int, void *);
+void *external_readfd_data[NUM_EXTERNAL_FDS];
+void *external_writefd_data[NUM_EXTERNAL_FDS];
+void *external_exceptfd_data[NUM_EXTERNAL_FDS];
 
-int register_readfd(int fd, void (*func)(int)) {
+int register_readfd(int fd, void (*func)(int, void *), void *data) {
     if (external_readfdlen < NUM_EXTERNAL_FDS) {
 	external_readfd[external_readfdlen] = fd;
 	external_readfdfunc[external_readfdlen] = func;
+	external_readfd_data[external_readfdlen] = data;
 	external_readfdlen++;
 	DEBUGMSGTL(("register_readfd", "registered fd %d\n", fd));
 	return FD_REGISTERED_OK;
@@ -814,10 +818,11 @@ int register_readfd(int fd, void (*func)(int)) {
     }
 }
 
-int register_writefd(int fd, void (*func)(int)) {
+int register_writefd(int fd, void (*func)(int, void *), void *data) {
     if (external_writefdlen < NUM_EXTERNAL_FDS) {
 	external_writefd[external_writefdlen] = fd;
 	external_writefdfunc[external_writefdlen] = func;
+	external_writefd_data[external_writefdlen] = data;
 	external_writefdlen++;
 	DEBUGMSGTL(("register_writefd", "registered fd %d\n", fd));
 	return FD_REGISTERED_OK;
@@ -827,10 +832,11 @@ int register_writefd(int fd, void (*func)(int)) {
     }
 }
 
-int register_exceptfd(int fd, void (*func)(int)) {
+int register_exceptfd(int fd, void (*func)(int, void *), void *data) {
     if (external_exceptfdlen < NUM_EXTERNAL_FDS) {
 	external_exceptfd[external_exceptfdlen] = fd;
 	external_exceptfdfunc[external_exceptfdlen] = func;
+	external_exceptfd_data[external_exceptfdlen] = data;
 	external_exceptfdlen++;
 	DEBUGMSGTL(("register_exceptfd", "registered fd %d\n", fd));
 	return FD_REGISTERED_OK;
@@ -848,6 +854,7 @@ int unregister_readfd(int fd) {
 	    external_readfdlen--;
 	    for (j = i; j < external_readfdlen; j++) {
 		external_readfd[j] = external_readfd[j+1];
+		external_readfd_data[j] = external_readfd_data[j+1];
 	    }
 	    DEBUGMSGTL(("unregister_readfd", "unregistered fd %d\n", fd));
 	    return FD_UNREGISTERED_OK;
@@ -864,6 +871,7 @@ int unregister_writefd(int fd) {
 	    external_writefdlen--;
 	    for (j = i; j < external_writefdlen; j++) {
 		external_writefd[j] = external_writefd[j+1];
+		external_writefd_data[j] = external_writefd_data[j+1];
 	    }
 	    DEBUGMSGTL(("unregister_writefd", "unregistered fd %d\n", fd));
 	    return FD_UNREGISTERED_OK;
@@ -880,6 +888,7 @@ int unregister_exceptfd(int fd) {
 	    external_exceptfdlen--;
 	    for (j = i; j < external_exceptfdlen; j++) {
 		external_exceptfd[j] = external_exceptfd[j+1];
+		external_exceptfd_data[j] = external_exceptfd_data[j+1];
 	    }
 	    DEBUGMSGTL(("unregister_exceptfd", "unregistered fd %d\n", fd));
 	    return FD_UNREGISTERED_OK;

@@ -730,21 +730,24 @@ receive(void)
 
 	    for (i = 0; count && (i < external_readfdlen); i++) {
 		if (FD_ISSET(external_readfd[i], &readfds)) {
-		    external_readfdfunc[i](external_readfd[i]);
+		    external_readfdfunc[i](external_readfd[i],
+					   external_readfd_data[i]);
 		    FD_CLR(external_readfd[i], &readfds);
 		    count--;
 		}
 	    }
 	    for (i = 0; count && (i < external_writefdlen); i++) {
 		if (FD_ISSET(external_writefd[i], &writefds)) {
-		    external_writefdfunc[i](external_writefd[i]);
+		    external_writefdfunc[i](external_writefd[i],
+					    external_writefd_data[i]);
 		    FD_CLR(external_writefd[i], &writefds);
 		    count--;
 		}
 	    }
 	    for (i = 0; count && (i < external_exceptfdlen); i++) {
 		if (FD_ISSET(external_exceptfd[i], &exceptfds)) {
-		    external_exceptfdfunc[i](external_exceptfd[i]);
+		    external_exceptfdfunc[i](external_exceptfd[i],
+					     external_exceptfd_data[i]);
 		    FD_CLR(external_exceptfd[i], &exceptfds);
 		    count--;
 		}
