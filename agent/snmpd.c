@@ -797,7 +797,6 @@ main(int argc, char *argv[])
       enable_syslog(); 
 
     setvbuf(stdout, NULL, _IOLBF, BUFSIZ);
-    snmp_log(LOG_INFO, "UCD-SNMP version %s\n", VersionInfo);
     /* 
      * Initialize the world.  Detach from the shell.
      * Create initial user.
@@ -805,6 +804,8 @@ main(int argc, char *argv[])
     if (!dont_fork && fork() != 0) {
       exit(0);
     }
+
+    snmp_log(LOG_INFO, "UCD-SNMP version %s\n", VersionInfo);
 
     if (pid_file != NULL) {
       if ((PID = fopen(pid_file, "w")) == NULL) {
