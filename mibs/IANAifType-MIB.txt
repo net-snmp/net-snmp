@@ -5,7 +5,7 @@
        TEXTUAL-CONVENTION          FROM SNMPv2-TC;
 
    ianaifType MODULE-IDENTITY
-       LAST-UPDATED "200101120000Z"  -- Jan 12, 2001
+       LAST-UPDATED "200105110000Z"  -- May 11, 2001
        ORGANIZATION "IANA"
        CONTACT-INFO "        Internet Assigned Numbers Authority
 
@@ -18,6 +18,10 @@
        DESCRIPTION  "This MIB module defines the IANAifType Textual
                      Convention, and thus the enumerated values of
                      the ifType object defined in MIB-II's ifTable."
+
+       REVISION     "200105110000Z"  -- May 11, 2001
+       DESCRIPTION  "Registration of new IANAifType
+                    197."
 
        REVISION     "200101120000Z"  -- Jan 12, 2001
        DESCRIPTION  "Registration of new IANAifTypes
@@ -279,7 +283,7 @@
                    shdsl (169), -- Multirate HDSL2
                    ds1FDL (170), -- Facility Data Link 4Kbps on a DS1
                    pos (171), -- Packet over SONET/SDH Interface
-                   dvbAsiln (172), -- DVB-ASI Input
+                   dvbAsiIn (172), -- DVB-ASI Input
                    dvbAsiOut (173), -- DVB-ASI Output 
                    plc (174), -- Power Line Communtications
                    nfas (175), -- Non Facility Associated Signaling
@@ -299,11 +303,12 @@
                    atmRadio (189), -- ATM over radio links   
                    imt (190), -- Inter Machine Trunks
                    mvl (191), -- Multiple Virtual Lines DSL
-                   reachDSL (192), -- Long Rach DSL
+                   reachDSL (192), -- Long Reach DSL
                    frDlciEndPt (193), -- Frame Relay DLCI End Point
                    atmVciEndPt (194), -- ATM VCI End Point
                    opticalChannel (195), -- Optical Channel
-                   opticalTransport (196) -- Optical Transport
+                   opticalTransport (196), -- Optical Transport
+                   propAtm (197) -- Proprietary ATM
 }
 
    END
