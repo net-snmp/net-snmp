@@ -396,7 +396,7 @@ netsnmp_table_data_set_helper_handler(netsnmp_mib_handler *handler,
                 if (!row) {
                     if (!datatable->allow_creation) {
                         netsnmp_set_request_error(reqinfo, request,
-                                                  SNMP_ERR_NOSUCHNAME);
+                                                  SNMP_ERR_NOCREATION);
                         continue;
                     }
                     /*
@@ -438,7 +438,7 @@ netsnmp_table_data_set_helper_handler(netsnmp_mib_handler *handler,
         if (!row || !table_info || !data) {
             if (!MODE_IS_SET(reqinfo->mode)) {
                 netsnmp_set_request_error(reqinfo, request,
-                                          SNMP_ERR_NOSUCHNAME);
+                                          SNMP_NOSUCHINSTANCE);
                 continue;
             }
         }
