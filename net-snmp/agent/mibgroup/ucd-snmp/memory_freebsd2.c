@@ -10,6 +10,9 @@
 #include <sys/time.h>
 #include <sys/proc.h>
 #include <sys/dkstat.h>
+#ifdef freebsd5
+#include <sys/bio.h>
+#endif
 #include <sys/buf.h>
 #include <sys/uio.h>
 #include <sys/namei.h>
@@ -301,8 +304,12 @@ unsigned char *var_extensible_mem(struct variable *vp,
 	long_ret = bufspace >> 10;
 	return((u_char *) (&long_ret));
     case MEMCACHED:
+#ifdef openbsd2
+	return NULL;
+#else
 	long_ret = ptok(mem.v_cache_count);
 	return((u_char *) (&long_ret));
+#endif
     case ERRORFLAG:
 	long_ret = (swapFree > minimumswap)?0:1;
 	return((u_char *) (&long_ret));

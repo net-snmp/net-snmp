@@ -62,6 +62,11 @@ void init_vmstat_netbsd1(void)
     {CPUUSER, ASN_INTEGER, RONLY, var_extensible_vmstat, 1, {CPUUSER}},
     {CPUSYSTEM, ASN_INTEGER, RONLY, var_extensible_vmstat, 1, {CPUSYSTEM}},
     {CPUIDLE, ASN_INTEGER, RONLY, var_extensible_vmstat, 1, {CPUIDLE}},
+    {CPURAWUSER, ASN_COUNTER, RONLY, var_extensible_vmstat, 1, {CPURAWUSER}},
+    {CPURAWNICE, ASN_COUNTER, RONLY, var_extensible_vmstat, 1, {CPURAWNICE}},
+    {CPURAWSYSTEM, ASN_COUNTER, RONLY, var_extensible_vmstat, 1, {CPURAWSYSTEM}},
+    {CPURAWIDLE, ASN_COUNTER, RONLY, var_extensible_vmstat, 1, {CPURAWIDLE}},
+
 /* Future use: */
 /*
   {ERRORFLAG, ASN_INTEGER, RONLY, var_extensible_vmstat, 1, {ERRORFLAG }},
@@ -207,6 +212,18 @@ unsigned char *var_extensible_vmstat(struct variable *vp,
 	cpu_sum = cpu_diff[CP_IDLE];
 	cpu_prc = (float)cpu_sum / (float)cpu_total;
 	long_ret = cpu_prc * CPU_PRC;
+	return((u_char *) (&long_ret));
+    case CPURAWUSER:
+	long_ret = cpu_new[CP_USER];
+	return((u_char *) (&long_ret));
+    case CPURAWNICE:
+	long_ret = cpu_new[CP_NICE];
+	return((u_char *) (&long_ret));
+    case CPURAWSYSTEM:
+	long_ret = cpu_new[CP_SYS] + cpu_new[CP_INTR];
+	return((u_char *) (&long_ret));
+    case CPURAWIDLE:
+	long_ret = cpu_new[CP_IDLE];
 	return((u_char *) (&long_ret));
 /* reserved for future use */
 /*
