@@ -1131,7 +1131,7 @@ var_system(vp, name, length, exact, var_len, write_method)
 	    *var_len = strlen(version_descr);
 	    *write_method = writeVersion;
 	    return (u_char *)version_descr;
-	case VERSION_ID:
+	case VERSIONID:
 	    *var_len = sizeof(version_id);
 	    return (u_char *)version_id;
 	case UPTIME:
