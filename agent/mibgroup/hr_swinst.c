@@ -303,8 +303,12 @@ var_hrswinst(vp, name, length, exact, var_len, write_method)
 	case HRSWINST_DATE:
 #ifdef HAVE_LIBRPM
 	    headerGetEntry(rpm_head, RPMTAG_INSTALLTIME, NULL,(void **) &rpm_data, NULL );
-	    installTime = *rpm_data;
-	    return ( date_n_time(&installTime, var_len));
+            if (rpm_data != NULL) {
+              installTime = *rpm_data;
+              return ( date_n_time(&installTime, var_len));
+            } else {
+              return ( date_n_time(0,var_len));
+            }
 #else
 	    if ( HRSW_directory ) {
 		sprintf(string, "%s/%s", HRSW_directory, HRSW_name);
