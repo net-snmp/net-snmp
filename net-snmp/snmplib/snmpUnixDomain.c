@@ -43,7 +43,7 @@
                       + strlen ((ptr)->sun_path))
 #endif
 
-oid             netsnmp_ucdSnmpUnixDomain[9] = { UCDAVIS_MIB, 251, 2 };
+oid             netsnmp_UnixDomain[10] = { ENTERPRISE_MIB, 3, 3, 2 };
 static netsnmp_tdomain unixDomain;
 
 
@@ -254,10 +254,10 @@ netsnmp_unix_transport(struct sockaddr_un *addr, int local)
 
     memset(t, 0, sizeof(netsnmp_transport));
 
-    t->domain = netsnmp_ucdSnmpUnixDomain;
+    t->domain = netsnmp_UnixDomain;
     t->domain_length =
-        sizeof(netsnmp_ucdSnmpUnixDomain) /
-        sizeof(netsnmp_ucdSnmpUnixDomain[0]);
+        sizeof(netsnmp_UnixDomain) /
+        sizeof(netsnmp_UnixDomain[0]);
 
     t->data = malloc(sizeof(sockaddr_un_pair));
     if (t->data == NULL) {
@@ -413,9 +413,9 @@ snmp_unix_create_ostring(const u_char * o, size_t o_len, int local)
 void
 netsnmp_unix_ctor(void)
 {
-    unixDomain.name = netsnmp_ucdSnmpUnixDomain;
+    unixDomain.name = netsnmp_UnixDomain;
     unixDomain.name_length =
-        sizeof(netsnmp_ucdSnmpUnixDomain) / sizeof(oid);
+        sizeof(netsnmp_UnixDomain) / sizeof(oid);
     unixDomain.prefix = calloc(2, sizeof(char *));
     unixDomain.prefix[0] = "unix";
 

@@ -29,7 +29,7 @@
 #include <net-snmp/library/snmpAAL5PVCDomain.h>
 
 
-oid             ucdSnmpAAL5PVCDomain[9] = { UCDAVIS_MIB, 251, 3 };
+oid             netsnmp_AAL5PVCDomain[10] = { ENTERPRISE_MIB, 3, 3, 3 };
 static netsnmp_tdomain aal5pvcDomain;
 
 
@@ -177,9 +177,9 @@ netsnmp_aal5pvc_transport(struct sockaddr_atmpvc *addr, int local)
 
     memset(t, 0, sizeof(netsnmp_transport));
 
-    t->domain = ucdSnmpAAL5PVCDomain;
+    t->domain = netsnmp_AAL5PVCDomain;
     t->domain_length =
-        sizeof(ucdSnmpAAL5PVCDomain) / sizeof(ucdSnmpAAL5PVCDomain[0]);
+        sizeof(netsnmp_AAL5PVCDomain) / sizeof(netsnmp_AAL5PVCDomain[0]);
 
     t->sock = socket(PF_ATMPVC, SOCK_DGRAM, 0);
     if (t->sock < 0) {
@@ -334,8 +334,8 @@ snmp_aal5pvc_create_ostring(const u_char * o, size_t o_len, int local)
 void
 netsnmp_aal5pvc_ctor(void)
 {
-    aal5pvcDomain.name = ucdSnmpAAL5PVCDomain;
-    aal5pvcDomain.name_length = sizeof(ucdSnmpAAL5PVCDomain) / sizeof(oid);
+    aal5pvcDomain.name = netsnmp_AAL5PVCDomain;
+    aal5pvcDomain.name_length = sizeof(netsnmp_AAL5PVCDomain) / sizeof(oid);
     aal5pvcDomain.prefix = calloc(3, sizeof(char *));
     aal5pvcDomain.prefix[0] = "aal5pvc";
     aal5pvcDomain.prefix[1] = "pvc";
