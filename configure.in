@@ -1263,76 +1263,86 @@ AC_ARG_WITH(libwrap,
   fi
 ])
 
-dnl ARG.  RPM is a real pain.
-AC_CHECK_LIB(popt, poptParseArgvString)
-
-dnl zlib is required for newer versions of rpm
-_cppflags="${CPPFLAGS}"
-_ldflags="${LDFLAGS}"
-
-AC_ARG_WITH(zlib,
-[  --with-zlib[=DIR]        use libz in DIR],[
-  if test -d "$withval"; then
-    CPPFLAGS="${CPPFLAGS} -I$withval/include"
-    LDFLAGS="${LDFLAGS} -L$withval/lib"
-  fi
-])
-
-AC_CHECK_HEADER(zlib.h,
-    AC_CHECK_LIB(z, gzread, , CPPFLAGS=${_cppflags} LDFLAGS=${_ldflags}),
-    CPPFLAGS=${_cppflags} LDFLAGS=${_ldflags})
-
 dnl
-dnl with rpm3 or higher, we need db1 to exist
+dnl rpm libraries only needed for the host resources mib software
+dnl installed tables (on linux in particular)
 dnl
+if echo " $module_list " | grep " host/hr_swinst " > /dev/null; then
+  dnl ARG.  RPM is a real pain.
+  AC_CHECK_LIB(popt, poptParseArgvString)
 
-AC_CHECK_LIB(db1, dbopen,[
-  AC_DEFINE(HAVE_LIBDB)
-  LIBS="-ldb1 $LIBS"
-],,-lz)
+  dnl zlib is required for newer versions of rpm
+  _cppflags="${CPPFLAGS}"
+  _ldflags="${LDFLAGS}"
 
-dnl Ok, -ldb1 may not exist, try -ldb
-_cppflags="${CPPFLAGS}"
-_ldflags="${LDFLAGS}"
+  AC_ARG_WITH(zlib,
+  [  --with-zlib[=DIR]        use libz in DIR],[
+    if test -d "$withval"; then
+      CPPFLAGS="${CPPFLAGS} -I$withval/include"
+      LDFLAGS="${LDFLAGS} -L$withval/lib"
+    fi
+  ])
 
-AC_ARG_WITH(db,
-[  --with-db[=DIR]          use db in DIR],[
-  if test -d "$withval"; then
-    CPPFLAGS="${CPPFLAGS} -I$withval/include"
-    LDFLAGS="${LDFLAGS} -L$withval/lib"
-  fi
-])
+  AC_CHECK_HEADER(zlib.h,
+      AC_CHECK_LIB(z, gzread, , CPPFLAGS=${_cppflags} LDFLAGS=${_ldflags}),
+      CPPFLAGS=${_cppflags} LDFLAGS=${_ldflags})
 
-if test "x$ac_cv_lib_db1_dbopen" = "xno"; then
-  AC_CHECK_HEADER(db.h,
-    AC_CHECK_LIB(db, dbopen,[
+  dnl
+  dnl with rpm3 or higher, we need db1 to exist
+  dnl
+
+  AC_CHECK_LIB(db1, dbopen,[
     AC_DEFINE(HAVE_LIBDB)
-    LIBS="-ldb $LIBS"
-  ], CPPFLAGS=${_cppflags} LDFLAGS=${_ldflags}),
-  CPPFLAGS=${_cppflags} LDFLAGS=${_ldflags})
-fi
+    LIBS="-ldb1 $LIBS"
+  ],,-lz)
 
-dnl
-dnl now check for rpm using the appropriate db library
-dnl
-AC_CHECK_LIB(rpm, rpmdbOpen,[
-  AC_DEFINE(HAVE_LIBRPM)
-  LIBS="-lrpm $LIBS"
-  CFLAGS="$CFLAGS -I/usr/include/rpm"
-],,-lz)
+  dnl Ok, -ldb1 may not exist, try -ldb
+  _cppflags="${CPPFLAGS}"
+  _ldflags="${LDFLAGS}"
 
-dnl
-dnl now check for rpm using the appropriate db library
-dnl
-if test x$ac_cv_lib_rpm_rpmdbOpen = xno; then
-  unset ac_cv_lib_rpm_rpmdbOpen
+  AC_ARG_WITH(db,
+  [  --with-db[=DIR]          use db in DIR],[
+    if test -d "$withval"; then
+      CPPFLAGS="${CPPFLAGS} -I$withval/include"
+      LDFLAGS="${LDFLAGS} -L$withval/lib"
+    fi
+  ])
+
+  if test "x$ac_cv_lib_db1_dbopen" = "xno"; then
+    AC_CHECK_HEADER(db.h,
+      AC_CHECK_LIB(db, dbopen,[
+      AC_DEFINE(HAVE_LIBDB)
+      LIBS="-ldb $LIBS"
+    ], CPPFLAGS=${_cppflags} LDFLAGS=${_ldflags}),
+    CPPFLAGS=${_cppflags} LDFLAGS=${_ldflags})
+  fi
+
+  dnl
+  dnl rpm4 or higher needs rpmio
+  dnl
+  AC_CHECK_LIB(rpmio, Fopen)
+
+  dnl
+  dnl now check for rpm using the appropriate db library
+  dnl
   AC_CHECK_LIB(rpm, rpmdbOpen,[
     AC_DEFINE(HAVE_LIBRPM)
-    LIBS="-lrpm -lpopt $LIBS"
+    LIBS="-lrpm $LIBS"
     CFLAGS="$CFLAGS -I/usr/include/rpm"
-  ],,-lpopt -lz)
-fi
+  ],,-lz)
 
+  dnl
+  dnl now check for rpm using the appropriate db library
+  dnl
+  if test x$ac_cv_lib_rpm_rpmdbOpen = xno; then
+    unset ac_cv_lib_rpm_rpmdbOpen
+    AC_CHECK_LIB(rpm, rpmdbOpen,[
+      AC_DEFINE(HAVE_LIBRPM)
+      LIBS="-lrpm -lpopt $LIBS"
+      CFLAGS="$CFLAGS -I/usr/include/rpm"
+    ],,-lpopt -lz)
+  fi
+fi
 
 dnl Replace `main' with a function in -lkvm:
 AC_CHECK_LIB(kvm, kvm_read)
@@ -1383,10 +1393,11 @@ dnl DYNAMIC MODULE SUPPORT
 AC_CHECK_HEADERS(dlfcn.h)
 
 dnl RPM subdirectory path (sigh)
-AC_CHECK_HEADERS(rpmio.h,, [
-   AC_CHECK_HEADERS(rpm/rpmio.h, CFLAGS="-I/usr/include/rpm $CFLAGS")
-])
-
+if echo " $module_list " | grep " host/hr_swinst " > /dev/null; then
+  AC_CHECK_HEADERS(rpmio.h,, [
+     AC_CHECK_HEADERS(rpm/rpmio.h, CFLAGS="-I/usr/include/rpm $CFLAGS")
+  ])
+fi
 
 dnl OpenBSD 2.6 needs netinet/in.h before netinet/in_pcb.h
 AC_MSG_CHECKING([for netinet/in_pcb.h])
@@ -1506,7 +1517,12 @@ AC_CHECK_FUNCS(sigaction)
 AC_CHECK_FUNCS(snprintf strtoul)
 AC_CHECK_FUNCS(random lrand48 rand)
 AC_CHECK_FUNCS(execv system fork getpid strncasecmp sigalrm)
-AC_CHECK_FUNCS(rpmGetPath)
+if echo " $module_list " | grep " host/hr_swinst " > /dev/null; then
+  OLDLIBS=$LIBS
+  LIBS=$AGENTLIBS
+  AC_CHECK_FUNCS(rpmGetPath)
+  LIBS=$OLDLIBS
+fi
 
 AC_CHECK_FUNCS(getloadavg)
 AC_CHECK_FUNCS(kvm_openfiles nlist knlist)
