@@ -117,6 +117,7 @@ main(argc, argv)
       exit(1);
     }
     
+    init_mib();
     if (print == 1) print_mib (stdout);
     if (print == 2) print_ascii_dump (stdout);
     if (!current_name) exit (0);
