@@ -58,7 +58,9 @@ SOFTWARE.
 #include <sys/ioctl.h>
 #endif
 #ifndef WIN32
+#ifdef HAVE_NLIST_H
 #include <nlist.h>
+#endif
 #endif
 #if HAVE_SYS_FILE_H
 #include <sys/file.h>
