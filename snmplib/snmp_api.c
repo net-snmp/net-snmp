@@ -4003,7 +4003,7 @@ _sess_read(void *sessp,
     size_t length = 0;
     struct snmp_pdu *pdu;
     struct request_list *rp, *orp = NULL;
-    int ret;
+    int ret = 0, handled = 0;
     socklen_t addrlen;
     socklen_t fromlength;
     
@@ -4249,6 +4249,7 @@ _sess_read(void *sessp,
           callback = sp->callback;
           magic = sp->callback_magic;
         }
+        handled = 1;
 
         /* MTR snmp_res_lock(MT_LIBRARY_ID, MT_LIB_SESSION);  ?* XX lock should be per session ! */
         if (callback == NULL || 
@@ -4311,6 +4312,7 @@ _sess_read(void *sessp,
       if (sp->callback)
         {
           /* MTR snmp_res_lock(MT_LIBRARY_ID, MT_LIB_SESSION); */
+          handled = 1;
           sp->callback(RECEIVED_MESSAGE, sp, pdu->reqid, pdu,
                        sp->callback_magic);
           /* MTR snmp_res_unlock(MT_LIBRARY_ID, MT_LIB_SESSION); */
@@ -4320,6 +4322,10 @@ _sess_read(void *sessp,
     if (pdu->securityStateRef && pdu->command == SNMP_MSG_TRAP2) {
       usm_free_usmStateReference(pdu->securityStateRef);
       pdu->securityStateRef = NULL;
+    }
+    if (!handled) {
+      snmp_increment_statistics(STAT_SNMPUNKNOWNPDUHANDLERS);
+      DEBUGMSGTL(("sess_process_packet", "unhandled PDU\n"));
     }
     snmp_free_pdu(pdu);
     return 0;
