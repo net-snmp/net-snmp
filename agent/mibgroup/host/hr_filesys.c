@@ -274,7 +274,7 @@ var_hrfilesys(struct variable *vp,
 	    *var_len = strlen(string);
 	    return (u_char *) string;
 	case HRFSYS_RMOUNT:
-	    if (Check_HR_FileSys_NFS()) O
+	    if (Check_HR_FileSys_NFS()) {
 	        snprintf(string, sizeof(string), HRFS_entry->HRFS_name);
 	        string[ sizeof(string)-1 ] = 0;
 	    } else
