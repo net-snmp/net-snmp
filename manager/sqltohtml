@@ -232,7 +232,7 @@ sub checkhost {
     my ($tblh);
 
     # get a list of tables we want to display
-    $cmd = "SELECT * FROM hosttables where (host = '$host' and groupname = '$group')";
+    my $cmd = "SELECT * FROM hosttables where (host = '$host' and groupname = '$group')";
     print " $cmd\n" if ($verbose);
     ( $tblh = $dbh->prepare( $cmd ) )
 	or die "\nnot ok: $DBI::errstr\n";
@@ -250,7 +250,7 @@ sub checkhost {
 	    or print( "\tnot ok: $DBI::errstr\n" );
 
 	while($expr = $exprs->fetchrow_hashref) {
-	    if ($dbh->do("select * from $tablelist->{tablename} where $expr->{expression}") ne "0E0") {
+	    if ($dbh->do("select * from $tablelist->{tablename} where $expr->{expression} and host = '$host'") ne "0E0") {
 		return 1;
 	    }
 	}
@@ -313,7 +313,7 @@ sub printredgreen {
 
     $img = $greenimage;
     while($expr = $exprs->fetchrow_hashref) {
-	if ($dbh->do("select oidindex from $tablename where oidindex = '$data->{oidindex}' and $expr->{expression}") ne "0E0") {
+	if ($dbh->do("select oidindex from $tablename where host = '$data->{host}' and oidindex = '$data->{oidindex}' and $expr->{expression}") ne "0E0") {
 	    $img = $redimage;
 	}
     }
