@@ -9,9 +9,62 @@
 ########################################################################
 ## {
     /*
-     * check for valid RowStatus transition (old, new)
+     * check RowStatus dependencies
      */
-    rc = check_rowstatus_transition( ${m2c_undo_item}$node, ${m2c_data_item}$node );
+    if (rowreq_ctx->column_set_flags & FLAG_$node.uc) {
+        /*
+         * check for valid RowStatus transition (old, new)
+         * (Note: move transition check to $node_check_value
+         *  to catch errors earlier)
+         */
+        rc = check_rowstatus_transition( ${m2c_undo_item}$node,
+                                         ${m2c_data_item}$node );
+        if (MFD_SUCCESS != rc)
+            return rc;
+        
+        /*
+         * row creation requirements
+         */
+        if (rowreq_ctx->rowreq_flags & MFD_ROW_CREATED) {
+            if (ROWSTATUS_CREATEANDGO ==  ${m2c_data_item}$node) {
+                if (rowreq_ctx->column_set_flags != $context.uc_REQUIRED_ROWS) {
+                    DEBUGMSGTL(("${context}",
+                                "required columns missing\n"));
+                    return MFD_CANNOT_CREATE_NOW;
+                }
+            }
+        } /* row creation */
+        else {
+            /*
+             * row change requirements
+             */
+            /*
+             * don't allow a destroy if any other value was changed, since
+             * that might call data access routines with bad info.
+             *
+             * you may or may not require the row be notInService before it
+             * can be destroyed.
+             */
+            if (ROWSTATUS_DESTROY == ${m2c_data_item}$node) {
+                if (rowreq_ctx->column_set_flags & ~FLAG_$node.uc) {
+                    DEBUGMSGTL(("$context",
+                                "destroy must be only varbind for row\n"));
+                    return MFD_NOT_VALID_NOW;
+                }
+            } /* row destroy */
+        } /* row change */
+    }
+    else {
+        /*
+         * must have row status to create a row
+         */
+        if (rowreq_ctx->rowreq_flags & MFD_ROW_CREATED) {
+            DEBUGMSGTL(("$context",
+                        "must use RowStatus to create rows\n"));
+            return MFD_CANNOT_CREATE_NOW;
+        }
+    } /* row status not set */
+
 ## }
 ########################################################################
 @if $m2c_mark_boundary == 1@
