@@ -30,6 +30,7 @@
 
 extern void     Init_HR_Proc(void);
 extern int      Get_Next_HR_Proc(void);
+const char     *describe_proc(int);
 int             header_hrproc(struct variable *, oid *, size_t *, int,
                               size_t *, WriteMethod **);
 
@@ -55,6 +56,7 @@ init_hr_proc(void)
 {
     init_device[HRDEV_PROC] = Init_HR_Proc;
     next_device[HRDEV_PROC] = Get_Next_HR_Proc;
+    device_descr[HRDEV_PROC] = describe_proc;
 #ifdef HRPROC_MONOTONICALLY_INCREASING
     dev_idx_inc[HRDEV_PROC] = 1;
 #endif
@@ -210,4 +212,35 @@ Get_Next_HR_Proc(void)
         return (HRDEV_PROC << HRDEV_TYPE_SHIFT) + HRP_index++;
     else
         return -1;
+}
+
+const char     *
+describe_proc(int idx)
+{
+#ifdef _SC_CPU_VERSION
+    int             result;
+
+    result = sysconf(_SC_CPU_VERSION);
+    switch (result) {
+    case CPU_HP_MC68020:
+        return (" Motorola MC68020 ");
+    case CPU_HP_MC68030:
+        return (" Motorola MC68030 ");
+    case CPU_HP_MC68040:
+        return (" Motorola MC68040 ");
+    case CPU_PA_RISC1_0:
+        return (" HP PA-RISC 1.0 ");
+    case CPU_PA_RISC1_1:
+        return (" HP PA-RISC 1.1 ");
+    case CPU_PA_RISC1_2:
+        return (" HP PA-RISC 1.2 ");
+    case CPU_PA_RISC2_0:
+        return (" HP PA-RISC 2.0 ");
+    default:
+        return ("An electronic chip with an HP label");
+
+    }
+#else
+    return ("An electronic chip that makes the computer work.");
+#endif
 }
