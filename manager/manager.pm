@@ -205,7 +205,7 @@ if ((param('displaygraph') || param('dograph')) && param('table')) {
 $r->content_type("text/html");
 $r->send_http_header();
 print "<body bgcolor=\"#ffffff\">\n";
-print "<h1>UCD-SNMP Host Management</h1>\n";
+print "<h1>UCD-SNMP Management Console</h1>\n";
 print "<hr>\n";
 
 #===========================================================================
