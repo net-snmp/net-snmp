@@ -54,6 +54,7 @@
 #include "snmp.h"
 #include "snmp_debug.h"
 #include "snmp_vars.h"
+#include "var_struct.h"
 #include "agent_registry.h"
 #include "agent_index.h"
 #include "ds_agent.h"
@@ -83,7 +84,7 @@ agentx_synch_input(int op,
     if ( reqid != state->reqid )
 	return 0;
 
-    DEBUGMSGTL(("agentx/subagent","synching input\n"));
+    DEBUGMSGTL(("agentx/subagent", "synching input, op 0x%02x\n", op));
     state->waiting = 0;
     if (op == SNMP_CALLBACK_OP_RECEIVED_MESSAGE) {
 	if (pdu->command == AGENTX_MSG_RESPONSE) {
@@ -119,7 +120,8 @@ agentx_synch_input(int op,
 
 
 int
-agentx_synch_response( struct snmp_session *ss, struct snmp_pdu *pdu, struct snmp_pdu **response )
+agentx_synch_response(struct snmp_session *ss, struct snmp_pdu *pdu,
+		      struct snmp_pdu **response)
 {
     return snmp_synch_response_cb(ss, pdu, response, agentx_synch_input);
 }
@@ -185,38 +187,47 @@ agentx_close_session( struct snmp_session *ss, int why )
 }
 
 int
-agentx_register( struct snmp_session *ss, oid start[], size_t startlen,
-		 int priority, int range_subid, oid range_ubound, int timeout)
+agentx_register(struct snmp_session *ss, oid start[], size_t startlen,
+		int priority, int range_subid, oid range_ubound, int timeout, 
+		u_char flags)
 {
     struct snmp_pdu *pdu, *response;
 
     DEBUGMSGTL(("agentx/subagent","registering: "));
     DEBUGMSGOID(("agentx/subagent", start, startlen));
     DEBUGMSG(("agentx/subagent","\n"));
-    if (! IS_AGENTX_VERSION( ss->version ))
-	return 0;
+
+    if (!IS_AGENTX_VERSION(ss->version)) {
+      return 0;
+    }
 
     pdu = snmp_pdu_create(AGENTX_MSG_REGISTER);
-    if ( pdu == NULL )
+    if (pdu == NULL) {
 	return 0;
+    }
     pdu->time = timeout;
     pdu->priority = priority;
     pdu->sessid = ss->sessid;
     pdu->range_subid = range_subid;
-    if ( range_subid ) {
-	snmp_pdu_add_variable( pdu, start, startlen,
-				ASN_OBJECT_ID, (u_char *)start, startlen*sizeof(oid));
-	pdu->variables->val.objid[ range_subid-1 ] = range_ubound;
-    }
-    else
-	snmp_add_null_var( pdu, start, startlen);
 
-    if ( agentx_synch_response(ss, pdu, &response) != STAT_SUCCESS ) {
+    if (flags & FULLY_QUALIFIED_INSTANCE) {
+      pdu->flags |= AGENTX_MSG_FLAG_INSTANCE_REGISTER;
+    }
+
+    if (range_subid) {
+	snmp_pdu_add_variable(pdu, start, startlen, ASN_OBJECT_ID,
+			      (u_char *)start, startlen * sizeof(oid));
+	pdu->variables->val.objid[range_subid - 1] = range_ubound;
+    } else {
+	snmp_add_null_var(pdu, start, startlen);
+    }
+
+    if (agentx_synch_response(ss, pdu, &response) != STAT_SUCCESS) {
         DEBUGMSGTL(("agentx/subagent","registering failed!\n"));
         return 0;
     }
 
-    if ( response->errstat != SNMP_ERR_NOERROR ) {
+    if (response->errstat != SNMP_ERR_NOERROR) {
         DEBUGMSGTL(("agentx/subagent","registering pdu failed: %d!\n",
                     response->errstat));
 	snmp_free_pdu(response);
