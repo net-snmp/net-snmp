@@ -963,6 +963,8 @@ find_best_tree_node(const char *name, struct tree *tree_top, u_int *match)
             best_so_far = tp;
             old_match = new_match;
         }
+        if (new_match == 0)
+            break;  /* this is the best result we can get */
         if (tp->child_list) {
             retptr = find_best_tree_node(name, tp->child_list, &new_match);
             if (new_match < old_match) {

@@ -2086,6 +2086,17 @@ get_module_node(const char *fname,
 
 
 int
+get_wild_node(const char *name,
+              oid *objid,
+              size_t *objidlen)
+{
+    struct tree *tp = find_best_tree_node(name, 0, NULL);
+    if (!tp)
+        return 0;
+    return get_node(tp->label, objid, objidlen);
+}
+
+int
 get_node(const char *name,
 	 oid *objid,
 	 size_t *objidlen)

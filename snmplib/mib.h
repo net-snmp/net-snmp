@@ -285,6 +285,7 @@ char *sprint_objid (char *, oid *, size_t);
 void print_description (oid *, size_t);
 void fprint_description (FILE *, oid *, size_t);
 int get_module_node (const char *, const char *, oid *, size_t *);
+int get_wild_node(const char *, oid *, size_t *);
 int get_node (const char *, oid *, size_t *);
 struct tree *get_symbol (oid *, size_t, struct tree *, char *);
 struct tree *get_tree (oid *, size_t, struct tree *);

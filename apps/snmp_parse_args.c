@@ -478,6 +478,11 @@ oid
     if (get_node(argv,root,rootlen)) {
       return root;
     }
+    *rootlen = savlen;
+    DEBUGMSGTL(("parse_oid","wildly parsing\n"));
+    if (get_wild_node(argv,root,rootlen)) {
+      return root;
+    }
   }
   return NULL;
 }
