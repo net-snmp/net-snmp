@@ -110,7 +110,7 @@ ${node}_check_value( ${context}_ctx *ctx, $m2c_node_param_val)
 int
 ${node}_undo_setup( ${context}_ctx *ctx )
 {
-    DEBUGMSGT(("${name}:trace",">%s\n",__FUNCTION__));
+    DEBUGTRACE;
 
 @ifconf syntax-$node.syntax-undo-setup.m2i@
 @    include syntax-$node.syntax-undo-setup.m2i@

@@ -18,7 +18,7 @@ ${context}_index_to_oid(netsnmp_index *oid_idx,
 {
 @include generic-table-indexes-varbind-setup.m2i@
 
-    DEBUGMSGT(("mfd:table:trace:${name}",">%s\n",__FUNCTION__));
+    DEBUGTRACE;
 
 @    foreach $node index@
 @        include m2c_setup_node.m2i@
