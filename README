@@ -1,11 +1,36 @@
 		      ucd-snmp Version: 4.2.1.pre2
+
+                      ****************************
+                      ***       IMPORTANT      ***
+                      ****************************
+
+  The ucd-snmp project has now moved from UCDavis, and is now based
+  at SourceForge (www.sourceforge.net), under the new name 'net-snmp'.
+  This is the LAST release that will bear the 'ucd-snmp' name, and all
+  future releases will be distributed as 'net-snmp'.
+
+  The 4.2.1 release is intended as a 'bug-fix' update to the earlier 4.2
+  code, and there are no significant changes to the APIs in this release.
+
+  It is very likely that there will be changes made to the APIs at some
+  point in the near future.   While every effort will be made to ensure
+  that net-snmp remains backwardly compatible with existing ucd-snmp based
+  code as much as possible, this cannot be guaranteed 100% completely.
+
+
 DISCLAIMER
 
-  The Authors, the University of California, and the University of
-  California at Davis assume no responsibility for damage or loss of
-  system performance as a direct or indirect result of the use of this
+  The Authors assume no responsibility for damage or loss of system
+  performance as a direct or indirect result of the use of this
   software.  This software is provided "as is" without express or
   implied warranty.
+
+  Despite the name, this software package has no connection with the
+  University of California, or the University of California at Davis.
+  These bodies also assume no responsibility for damage or loss of
+  system performance as a direct or indirect result of the use of this
+  software.
+
 
 TABLE OF CONTENTS
 
@@ -130,6 +155,10 @@ MAILING LISTS
     The lists you definitely want to subscribe to is the
     net-snmp-announce@lists.sourceforge.net list and the
     net-snmp-users@lists.sourceforge.net list.
+
+    Please do *NOT* send messages to both -users and -coders lists.
+    This is completely unnecessary, and simply serves to further
+    overload (and annoy) the core development team.  Thank you.
 
   Archives:
     The archives for these mailing lists can be found by following links at
