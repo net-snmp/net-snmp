@@ -820,6 +820,7 @@ main(int argc, char *argv[])
 
     usm_set_reportErrorOnUnknownID(1);
     init_agent();		/* register our .conf handlers */
+    init_snmp_alarm();
     init_snmpv3("snmpd");	/* register the v3 handlers */
     register_mib_handlers();	/* snmplib .conf handlers */
     read_premib_configs();	/* read pre-mib-reading .conf handlers */
