@@ -604,6 +604,10 @@ Is Net-SNMP thread safe?
   a threaded application as long as *all* SNMP-related activity (including
   generating traps, and parsing MIBs) is handled within a single thread.
 
+  Unfortunately, the SNMPv3 support was added about the same time as
+  the thread support and since they occurred in parallel the SNMPv3
+  support was never checked for multi-threading correctness.  It is
+  most likely that it is not thread-safe at this time.
 
 
 APPLICATIONS
