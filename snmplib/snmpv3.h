@@ -11,10 +11,11 @@ extern "C" {
 
 #define MAX_ENGINEID_LENGTH 128
 
-#define ENGINEID_TYPE_IPV4 1
-#define ENGINEID_TYPE_IPV6 2
+#define ENGINEID_TYPE_IPV4    1
+#define ENGINEID_TYPE_IPV6    2
 #define ENGINEID_TYPE_MACADDR 3
-#define ENGINEID_TYPE_TEXT 4
+#define ENGINEID_TYPE_TEXT    4
+#define ENGINEID_TYPE_UCD_RND 128
 
 #define	DEFAULT_NIC "eth0"
 
@@ -29,6 +30,8 @@ void	usm_parse_create_usmUser(const char *token, char *line);
 void    init_snmpv3(const char *);
 int	init_snmpv3_post_config(int majorid, int minorid, void *serverarg,
                                 void *clientarg);
+int	init_snmpv3_post_premib_config(int majorid, int minorid,
+                                       void *serverarg, void *clientarg);
 void    shutdown_snmpv3(const char *type);
 int     snmpv3_store(int majorID, int minorID, void *serverarg,
                      void *clientarg);
