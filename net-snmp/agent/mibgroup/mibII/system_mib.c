@@ -56,6 +56,9 @@ char oldsysContact[    SYS_STRING_LEN ];
 char oldsysName[       SYS_STRING_LEN ];
 char oldsysLocation[   SYS_STRING_LEN ];
 
+int sysServices=72;
+int sysServicesConfiged=0;
+
 extern oid version_id[];
 extern int version_id_len;
 
@@ -78,6 +81,12 @@ void system_parse_config_sysloc(char *token,
 		 sizeof(sysLocation), cptr);
     config_perror(tmpbuf);
   }
+}
+
+void system_parse_config_sysServices(char *token, char *cptr)
+{
+  sysServices = atoi(cptr);
+  sysServicesConfiged = 1;
 }
 
 void system_parse_config_syscon(char *token, 
@@ -164,6 +173,8 @@ void init_system_mib(void)
                                 NULL, "location");
   snmpd_register_config_handler("syscontact", system_parse_config_syscon,
                                 NULL,"contact-name");
+  snmpd_register_config_handler("sysservices", system_parse_config_sysServices,
+                                NULL,"NUMBER");
 
 }
 
@@ -270,9 +281,10 @@ var_system(struct variable *vp,
             return (u_char *)sysLocation;
         case SYSSERVICES:
 #if NO_DUMMY_VALUES
-	    return NULL;
+            if (!sysServicesConfiged)
+                return NULL;
 #endif
-            long_return = 72;
+            long_return = sysServices;
             return (u_char *)&long_return;
 
 #ifdef USING_MIBII_SYSORTABLE_MODULE
