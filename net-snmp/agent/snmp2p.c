@@ -396,25 +396,15 @@ open_ports_snmp2p __P((void))
     int ret;
     
     party_scanInit();
-    myaddr = get_myaddr();
+    myaddr = htonl(get_myaddr());
     for(pp = party_scanNext(); pp; pp = party_scanNext()){
-#if WORDS_BIGENDIAN
         if ((pp->partyTDomain != DOMAINSNMPUDP)
 	    || memcmp(&myaddr, pp->partyTAddress, 4))
           continue;	/* don't listen for non-local parties */
-#else
-	if ((pp->partyTDomain != DOMAINSNMPUDP)
-	    || memcmp(reverse_bytes((char *) &myaddr,sizeof(myaddr)),
-                    pp->partyTAddress, 4))
-          continue;	/* don't listen for non-local parties */
-#endif
-	
-	dest_port = 0;
-#if WORDS_BIGENDIAN
-	memcpy(&dest_port, pp->partyTAddress + 4, 2);
-#else
-	memcpy(&dest_port, reverse_bytes(pp->partyTAddress + 4,2), 2);
-#endif
+
+        memcpy(&dest_port, pp->partyTAddress + 4, 2);
+        dest_port = ntohs(dest_port);
+
         if (( ret = open_port( dest_port )) > 0 )
             sd_handlers[ret-1] = snmp_read_packet;
         else if ( ret < 0 )
