@@ -17,7 +17,8 @@ then
 else
     case "$1" in
     Ext*) ;;
-    *) exit 0 ;;
+    *)  echo "VERSION must begin with Ext"
+        exit 0 ;;
     esac
 
     VERSION="$1"
@@ -40,6 +41,10 @@ if [ $2 = "tar" ]; then
     $DOIT cvs -d $CVSUSER@cvs.net-snmp.sourceforge.net:/cvsroot/net-snmp export -d net-snmp-$VERSION -r $VERSIONTAG net-snmp
     $DOIT net-snmp-$VERSION/remove-files net-snmp-$VERSION
     $DOIT tar czf net-snmp-$VERSION.tar.gz net-snmp-$VERSION
+fi
+
+if [ $2 = "clean" ]; then
+    $DOIT rm -fR net-snmp-[0-9]*
 fi
 
 exit 0
