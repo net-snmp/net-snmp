@@ -31,7 +31,7 @@ extern          "C" {
 #define BABY_STEP_ALL                   (0xffffffff)
 
 
-#define BABY_STEP_CHECK_VALUES          BABY_STEP_CHECK_VALUE
+#define BABY_STEP_CHECK_OBJECT          BABY_STEP_CHECK_VALUE
 #define BABY_STEP_SET_VALUES            BABY_STEP_SET_VALUE
 #define BABY_STEP_UNDO_SETS             BABY_STEP_UNDO_SET
 
