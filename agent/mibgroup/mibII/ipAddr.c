@@ -199,7 +199,9 @@ var_ipAddrEntry(struct variable *vp,
     static struct in_ifaddr in_ifaddr, lowin_ifaddr;
 #else
     static struct ifnet lowin_ifnet;
-#endif
+#if defined(linux)
+    static struct in_ifaddr in_ifaddr;
+#endif#endif
     static struct ifnet ifnet;
 #endif                          /* hpux11 */
 
@@ -210,7 +212,7 @@ var_ipAddrEntry(struct variable *vp,
     memcpy((char *) current, (char *) vp->name,
            (int) vp->namelen * sizeof(oid));
 
-#if !defined(freebsd2) && !defined(hpux11) && !defined(linux)
+#if !defined(freebsd2) && !defined(hpux11)
     Interface_Scan_Init();
 #else
     Address_Scan_Init();
@@ -226,7 +228,7 @@ var_ipAddrEntry(struct variable *vp,
 #endif
 #else                           /* !freebsd2 && !hpux11 */
 #if defined(linux)
-        if (Address_Scan_Next(&interface, &ifnet) == 0)
+        if (Interface_Scan_Next(&interface, NULL, &ifnet, &in_ifaddr) == 0)
             break;
 #else
         if (Address_Scan_Next(&interface, &in_ifaddr) == 0)
@@ -239,6 +241,9 @@ var_ipAddrEntry(struct variable *vp,
 #elif defined(linux) || defined(sunV3)
         cp = (u_char *) & (((struct sockaddr_in *) &(ifnet.if_addr))->
                            sin_addr.s_addr);
+
+        if (*cp == 0)		/* first octet is zero? 0.x.x.x is not a */
+            continue;		/* legal address for an interface */
 #else
         cp = (u_char *) & (((struct sockaddr_in *) &(in_ifaddr.ia_addr))->
                            sin_addr.s_addr);
