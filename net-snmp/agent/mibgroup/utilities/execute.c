@@ -241,7 +241,7 @@ run_exec_command( char *command, char *input,
     } else if (pid > 0) {
         char            cache[MAXCACHESIZE];
         char           *cache_ptr;
-        ssize_t         count, cache_size, offset = 0;;
+        ssize_t         count, cache_size, offset = 0;
         int             waited = 0, numfds;
         fd_set          readfds;
         struct timeval  timeout;
