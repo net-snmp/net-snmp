@@ -273,6 +273,7 @@ main(int argc, char *argv[])
     }
 
     init_snmp("snmpapp");
+    snmp_enable_stderrlog();
     if (version == SNMP_DEFAULT_VERSION) {
         version = netsnmp_ds_get_int(NETSNMP_DS_LIBRARY_ID,
 		                     NETSNMP_DS_LIB_SNMPVERSION);
