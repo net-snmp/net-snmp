@@ -123,7 +123,7 @@
 ########################################################################
 ## include user overrides
 ########################################################################
-@  include -ifexists default-node-${node}.m2d@
+@  include -ifexists ${m2c_defaults_dir}node-${node}.m2d@
 ########################################################################
 ##
 ########################################################################
@@ -202,10 +202,10 @@
 @   eval $m2c_nvv_sizeof = "$m2c_data_item$node"@
 @end@
 ########################################################################
-@  ifconf default-node-${node}.m2d@
+@  ifconf ${m2c_defaults_dir}node-${node}.m2d@
 @  else@
 @    push@
-@    open default-node-${node}.m2d@
+@    open ${m2c_defaults_dir}node-${node}.m2d@
 @    eval $m2c_conf_comment = "##"@
 @    eval $m2c_conf_comment_divider = "########################################################################"@
 $m2c_conf_comment_divider
@@ -253,6 +253,6 @@ $m2c_conf_comment using a fixed size buffer, this value should be 0.
 $m2c_conf_comment
 $m2c_conf_comment @eval $@m2c_node_realloc = $m2c_node_realloc@
 @      end@
-@    close default-node-${node}.m2d@
+@    close ${m2c_defaults_dir}node-${node}.m2d@
 @    pop@
 @  end@
