@@ -7,6 +7,15 @@
 #undef HAVE_SOCKET
 #undef HAVE_SIGNAL
 
+/* Define if you have the gethostbyname function.  */
+#define HAVE_GETHOSTBYNAME 1
+
+/* Define if you have the gethostname function.  */
+#define HAVE_GETHOSTNAME 1
+
+/* Define if you have the getservbyname function.  */
+#define HAVE_GETSERVBYNAME 1
+
 /* Define if you have raise() instead of alarm() */
 #define HAVE_RAISE 1
 
@@ -46,3 +55,4 @@ struct timezone {
 	int tz_minuteswest;
 	int tz_dsttime;
 };
+
