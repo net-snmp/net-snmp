@@ -134,8 +134,6 @@ static void md5Digest (u_char *, int, u_char *);
  *
  * Parse the header of a community string-based message such as that found
  * in SNMPv1 and SNMPv2c.
- *
- *		FIX -- Status of this note?
  */
 u_char *
 snmp_comstr_parse(u_char *data,
