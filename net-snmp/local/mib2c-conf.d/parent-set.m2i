@@ -78,7 +78,7 @@ $example_start
          * (even though it could be created under other circumstances),
          * SNMP_ERR_INCONSISTENTNAME.
          */
-        if(1) {
+        if(0) {
             return SNMP_ERR_NOCREATION;
         }
         else {
