@@ -180,23 +180,38 @@ agentx_got_response(int operation,
          *    original index of the variable resonsible
          */
 	DEBUGMSGTL(("agentx/master","agentx_got_response() error branch\n"));
-        ret = 0;
-        for(request = requests, i = 1; request; request = request->next, i++) {
-            if (request->index == pdu->errindex) {
-                /* mark this one as the one generating the error */
-                netsnmp_set_request_error(cache->reqinfo, request,
-                                  pdu->errstat);
-                ret = 1;
+        if (cache->reqinfo->mode == MODE_GETNEXT) {
+            /* grr...  got back an actual error for a getnext.
+               Replace error with NULL and change the rest to retry */
+            for(request = requests, i = 1; request; request = request->next, i++) {
+                if (request->index != pdu->errindex &&
+                    request->requestvb->type == ASN_NULL) {
+                    request->requestvb->type = ASN_PRIV_RETRY;
+                }
+                request->delegated = REQUEST_IS_NOT_DELEGATED;
             }
-            request->delegated = REQUEST_IS_NOT_DELEGATED;
+            netsnmp_free_delegated_cache(cache);
+            DEBUGMSGTL(("agentx/master","end error branch\n"));
+            return 1;
+        } else {
+            ret = 0;
+            for(request = requests, i = 1; request; request = request->next, i++) {
+                if (request->index == pdu->errindex) {
+                    /* mark this one as the one generating the error */
+                    netsnmp_set_request_error(cache->reqinfo, request,
+                                              pdu->errstat);
+                    ret = 1;
+                }
+                request->delegated = REQUEST_IS_NOT_DELEGATED;
+            }
+            if (!ret) {
+                /* ack, unknown, mark the first one */
+                netsnmp_set_request_error(cache->reqinfo, request, SNMP_ERR_GENERR);
+            }
+            netsnmp_free_delegated_cache(cache);
+            DEBUGMSGTL(("agentx/master","end error branch\n"));
+            return 1;
         }
-        if (!ret) {
-            /* ack, unknown, mark the first one */
-            netsnmp_set_request_error(cache->reqinfo, request, SNMP_ERR_GENERR);
-	}
-        netsnmp_free_delegated_cache(cache);
-	DEBUGMSGTL(("agentx/master","end error branch\n"));
-        return 1;
     } else if (cache->reqinfo->mode == MODE_GET     ||
                cache->reqinfo->mode == MODE_GETNEXT ||
                cache->reqinfo->mode == MODE_GETBULK) {
