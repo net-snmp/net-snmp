@@ -55,6 +55,9 @@ void init_agent_read_config __P((void))
   register_config_handler("snmpd","trapsink",
                           snmpd_parse_config_trapsink, snmpd_free_trapsinks,
                           "host");
+  register_config_handler("snmpd","trap2sink",
+                          snmpd_parse_config_trap2sink, NULL,
+                          "host");
   register_config_handler("snmpd","trapcommunity",
                           snmpd_parse_config_trapcommunity,
                           snmpd_free_trapcommunity,
