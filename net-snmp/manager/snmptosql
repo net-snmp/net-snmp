@@ -5,7 +5,6 @@ use getValues;
 use SNMP;
 use DBI;
 use Net::SMTP;
-init_mib;
 
 #===========================================================================
 #  Global defines
@@ -43,13 +42,17 @@ while ($#ARGV > -1) {
     $doit = 0 if (/-n/);
     if (/-m/) {
 	# load some mibs
-      SNMP::loadModules(shift);
+	# SNMP::loadModules(shift);
+	$ENV{'MIBS'} = shift;
     }
     if (/-M/) {
 	# add a mib directory to look in
-      SNMP::addMibDirs(shift);
+	$ENV{'MIBDIRS'} = shift;
+	# SNMP::addMibDirs(shift);
     }
 }
+
+init_mib;
 
 #===========================================================================
 # Connect to the mSQL database with the appropriate driver
