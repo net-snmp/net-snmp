@@ -570,7 +570,7 @@ int snmp_input(int op,
 
 void usage(void)
 {
-    fprintf(stderr,"Usage: snmptrapd [-h|-H|-V] [-q] [-D] [-p #] [-P] [-s] [-f] [-l [d0-7]] [-e] [-d] [-S] [-a] [-m <MIBS>] [-M <MIBDIRS]\n");
+    fprintf(stderr,"Usage: snmptrapd [-h|-H|-V] [-D] [-p #] [-P] [-s] [-f] [-l [d0-7]] [-e] [-d] [-a] [-m <MIBS>] [-M <MIBDIRS]\n");
     fprintf(stderr, "\
   -h        Print this help message and exit\n\
   -H        Read what can show up in config file\n\
@@ -581,15 +581,14 @@ void usage(void)
   -P        Print to standard output\n\
   -e        Print Event # (rising/falling alarm], etc.\n\
   -s        Log syslog\n\
-  -S        Print module id plus last element of object identifiers.\n\
-\n\
   -f        Stay in foreground (don't fork)\n\
   -l [d0-7 ]  Set syslog Facility to log daemon[d], log local 0(default) [1-7]\n\
   -d        Dump input/output packets\n\
   -a        Ignore Authentication Failture traps.\n\
   -m <MIBS>     Use MIBS list instead of the default mib list.\n\
   -M <MIBDIRS>  Use MIBDIRS as the location to look for mibs.\n\
-");
+  -O <OIDOPTS>  Toggle various options controlling OID printing\n");
+  snmp_oid_toggle_options_usage("\t\t  ", stderr);
 }
 
 RETSIGTYPE term_handler(int sig)
@@ -608,6 +607,7 @@ int main(int argc, char *argv[])
     struct timeval timeout, *tvp;
     int local_port = SNMP_TRAP_PORT;
     int dofork=1;
+    char *cp;
 
 #ifdef notused
     in_addr_t myaddr;
@@ -625,9 +625,9 @@ int main(int argc, char *argv[])
     setvbuf (stdout, NULL, _IOLBF, BUFSIZ);
 #endif
     /*
-     * usage: snmptrapd [-q] [-D] [-p #] [-P] [-s] [-f] [-l [d0-7]] [-d] [-e] [-S] [-a]
+     * usage: snmptrapd [-D] [-p #] [-P] [-s] [-l [d0-7]] [-d] [-e] [-a]
      */
-    while ((arg = getopt(argc, argv, "VdqRD:p:m:M:PesSafl:H")) != EOF){
+    while ((arg = getopt(argc, argv, "VdqRD:p:m:M:PO:esSafl:H")) != EOF){
 	switch(arg) {
 	case 'V':
             fprintf(stderr,"UCD-snmp version: %s\n", VersionInfo);
@@ -651,6 +651,14 @@ int main(int argc, char *argv[])
 	    break;
 	case 'M':
 	    setenv("MIBDIRS", optarg, 1);
+	    break;
+	case 'O':
+	    cp = snmp_oid_toggle_options(optarg);
+	    if (cp != NULL) {
+		fprintf(stderr, "Unknow output option passed to -O: %c\n", *cp);
+		usage();
+		exit(1);
+	    }
 	    break;
 	case 'P':
 	    Print++;
