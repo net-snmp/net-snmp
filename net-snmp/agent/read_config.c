@@ -1,14 +1,7 @@
 #include <config.h>
 
-#if HAVE_FSTAB_H
-#include <fstab.h>
-#endif
-#if HAVE_MNTENT_H
-#include <mntent.h>
-#endif
-#if HAVE_SYS_MNTTAB_H
-#include <sys/mnttab.h>
-#endif
+#include <signal.h>
+#include <ctype.h>
 
 #include "common_header.h"
 #include "read_config.h"
@@ -16,17 +9,8 @@
 #include "../snmp_agent.h"
 #include "../snmpd.h"
 
-extern struct myproc *procwatch;         /* moved to proc.c */
-extern int numprocs;                     /* ditto */
-extern struct extensible *extens;       /* In exec.c */
-extern struct extensible *relocs;       /* In exec.c */
-extern int numextens;                    /* ditto */
-extern int numrelocs;                    /* ditto */
 extern struct extensible *passthrus;    /* In pass.c */
 extern int numpassthrus;                 /* ditto */
-extern double maxload[3];
-extern int numdisks;
-extern struct diskpart disks[MAXDISKS];
 
 int minimumswap;
 char dontReadConfigFiles;
@@ -195,7 +179,9 @@ int pass_compare(a, b)
   return compare((*ap)->miboid,(*ap)->miblen,(*bp)->miboid,(*bp)->miblen);
 }
 
-void config_perror(char *string) {
+void config_perror(string)
+  char *string;
+{
   fprintf(stderr, "snmpd: %s: line %d: %s\n", curfilename, linecount, string);
 }
 
@@ -242,15 +228,16 @@ int tree_compare(a, b)
 void setup_tree __P((void))
 {
   extern struct subtree *subtrees,subtrees_old[];
-  extern struct variable2 extensible_relocatable_variables[];
-  extern struct variable2 extensible_passthru_variables[];
   struct subtree *sb;
-  int i, old_treesz;
+  int old_treesz;
+#if USING_EXTENSIBLE_MIB_MODULE
+  int i;
   static struct subtree mysubtree[1];
   struct extensible *exten;
-#if USING_EXTENSIBLE_MIB_MODULE
   extern int numrelocs, numpassthrus;
   extern struct extensible relocs, passthrus;
+  extern struct variable2 extensible_relocatable_variables[];
+  extern struct variable2 extensible_passthru_variables[];
 #endif
     
   /* Malloc new space at the end of the mib tree for the new
