@@ -379,6 +379,7 @@ ksm_rgenerate_out_msg(struct snmp_secmod_outgoing_params *parms)
     struct ksm_secStateRef *ksm_state = (struct ksm_secStateRef *)
         parms->secStateRef;
     int rc;
+    char *colon = NULL;
 
     DEBUGMSGTL(("ksm", "Starting KSM processing\n"));
 
@@ -389,6 +390,16 @@ ksm_rgenerate_out_msg(struct snmp_secmod_outgoing_params *parms)
     pdu_checksum.contents = NULL;
 
     if (!ksm_state) {
+        /*
+         * If we've got a port number as part of the "peername", then
+         * suppress this (temporarily) while we build the credential info.
+         *   XXX - what about "udp:host" style addresses?
+         */
+        colon = strrchr(params->session->peername, ':');
+        if (colon != NULL) {
+            *colon='\0';
+        }
+
         /*
          * If we don't have a ksm_state, then we're a request.  Get a
          * credential cache and build a ap_req.
@@ -419,6 +430,9 @@ ksm_rgenerate_out_msg(struct snmp_secmod_outgoing_params *parms)
                         AP_OPTS_MUTUAL_REQUIRED | AP_OPTS_USE_SUBKEY,
                         (char *) "host", parms->session->peername, NULL,
                         cc, &outdata);
+
+        if (colon != NULL)
+            *colon=':';
 
         if (retcode) {
             DEBUGMSGTL(("ksm", "KSM: krb5_mk_req failed: %s\n",
