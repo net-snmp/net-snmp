@@ -335,8 +335,9 @@ UPDATING WEB PAGE DOCUMENTS
      properly on the web server so that files created become
      group-writable!!!
 
-  1) NEWS at the top of the webpage is auto-extracted from the NEWS
-     submissions on SF.  Don't worry about it.
+  1) NEWS at the top of the www.net-snmp.org webpage is auto-extracted
+     (hourly) from the NEWS submissions on SF.  Don't worry about
+     updating it.
 
   2) TBD
 
