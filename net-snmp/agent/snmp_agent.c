@@ -785,6 +785,9 @@ netsnmp_agent_check_packet(netsnmp_session * session,
                            void *transport_data, int transport_data_length)
 {
     char           *addr_string = NULL;
+#ifdef  USE_LIBWRAP
+    char *tcpudpaddr;
+#endif
 
     /*
      * Log the message and/or dump the message.
@@ -803,7 +806,7 @@ netsnmp_agent_check_packet(netsnmp_session * session,
     }
 #ifdef  USE_LIBWRAP
     /* Catch udp,udp6,tcp,tcp6 transports using "[" */
-    char *tcpudpaddr = strstr(addr_string, "[");
+    tcpudpaddr = strstr(addr_string, "[");
     if ( tcpudpaddr != 0 ) {
         char sbuf[64];
         char *xp;
@@ -821,7 +824,6 @@ netsnmp_agent_check_packet(netsnmp_session * session,
             SNMP_FREE(addr_string);
             return 0;
         }
-      }
     } else {
         if (hosts_ctl("snmpd", STRING_UNKNOWN, STRING_UNKNOWN, STRING_UNKNOWN)){
             snmp_log(allow_severity, "Connection from <UNKNOWN>\n");
