@@ -345,11 +345,12 @@ register_subtree(stp)
   return subtree_size;
 }
 
-/* register_mib(struct variable *, int varsize, int numvars, oid mibloc,
-                int mibloclen)
+/* register_mib(char *moduleName, struct variable *, int varsize,
+                int numvars, oid mibloc, int mibloclen)
  */
 int
-register_mib(var, varsize, numvars, mibloc, mibloclen)
+register_mib(moduleName, var, varsize, numvars, mibloc, mibloclen)
+  char *moduleName;
   struct variable *var;
   int varsize;
   int numvars;
@@ -358,6 +359,7 @@ register_mib(var, varsize, numvars, mibloc, mibloclen)
 {
   struct subtree subtree;
   memcpy(subtree.name, mibloc, mibloclen*sizeof(oid));
+  memcpy(subtree.label, moduleName, strlen(moduleName)+1);
   subtree.namelen = (u_char) mibloclen;
   subtree.variables = (struct variable *) malloc(varsize*numvars);
   memcpy(subtree.variables, var, numvars*varsize);

@@ -13,6 +13,7 @@ struct subtree {
     struct variable	*variables;   /* pointer to variables array */
     int			variables_len;	/* number of entries in above array */
     int			variables_width; /* sizeof each variable entry */
+    char                label[256];     /* calling module's label */
 };
 
 /*
