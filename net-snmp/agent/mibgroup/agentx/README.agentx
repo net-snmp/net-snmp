@@ -1,76 +1,78 @@
-This sub-group of the UCD agent is an *ALPHA* implementation
+This sub-group of the UCD agent is a beta implementation
 of the AgentX agent extensibility protocol, as described in
 RFC2257, and extended in a current internet draft
 	<draft-ietf-agentx-rfc-update-00.txt>	(June 1999)
 
+  This is a reasonably full implementation, in as much as it 
+supports all the protocol operations described in this document.
+However, it has not really been extensively tested - either 
+across the full range of architectures of the main agent, or 
+in terms of interoperability with other AgentX implementations.
 
-  This is not a full implementation, and is not guaranteed to
-precisely follow the detail of the AgentX specifications.  In fact,
-it is currently guaranteed to NOT follow these specs in certain areas.
-This is, of course, a temporary situation - the intention is to fill
-in these "gaps" as quickly as possible.
-  The basic operation of MIB registration, and GET/GETNEXT retrieval
-does appear to work reasonably successfully.
+  Testing has basically concentrated on ensuring correct operation
+between the UCD master and subagent code on the core development
+system (a Linux box, running RedHat 5.2 with kernel 2.0.36).
+It is quite likely that running this on other architectures,
+or against other AgentX implementations, will reveal outstanding
+problems, and it would be premature to rely on this release for a
+production system.  Hopefully, experience gained with this code
+should result in a production-capable status fairly quickly.
 
-  All of the development has taken place on a Linux system
-(RedHat 5.2, kernel 2.0.36), and nothing has yet been tested on
-any other architecture.
+  Although the basic operations are all supported, there are a number
+of areas that are known to be incomplete or missing.  These include:
 
-  Known areas which still need work include (but are not limited to):
+	- Contexts
+		The UCD agent does not currently handle
+		non-default contexts at all.  The AgentX
+		elements simply ignore the context field.
 
-	-  Index Allocation	(not supported)
+	- Repeated sub-agent failures
+		If a GetNext request to a subagent fails to
+		return an acceptable response, the request
+		will then be passed on to the next MIB module.
+		  If this also fails to respond successfully,
+		then the agent may not keep trying correctly.
 
-	-  Ping & Notify	(not supported)
+	- Timeouts
+		The master agent does not currently handle
+		tardy responses from a subagent.
+		  The register of MIB regions does not record
+		the associated timeouts.
 
-	-  SysUpTime
-		not included in responses (contravenes spec)
-		no synchronisation between master & subagent
+	- GETNEXT ranges
+		The end range of an AgentX GetNext request is
+		not set correctly by the master agent, or
+		interpreted by the subagent.
 
-	-  sub-agent error handling in master
-		(Most noticeable when 'snmpwalk'ing off the end of
-		 a sub-agent's supported tree, which has a tendency
-		 to enter an infinite loop)
+	- AgentX GETBULK
+		The master agent will handle an SNMP GetBulk
+		request using a sequence of AgentX GetNext calls.
+		The subagent GetBulk handling _should_ work
+		correctly, but this has not been tested.
 
-	-  priorities of registration	(currently ignored)
-
-	-  contexts			(currently ignored)
-
-	-  Session ObjID/Description	(currently ignored)
-
-	-  Unregistration and session closure
-		This "ought" to work, but hasn't been tested,
-		so I'd be rather surprised if it did!
+	- AgentX MIB
+		This has not yet been implemented.
 
 	-  Multiple sessions on a single connection
+		This should work, but has not been tested.
 
 
-If, despite this catalogue of gloom and despondancy, anyone wishes
-to try out this implementation, the procedure is as follows:
+  While these areas will need to be fixed before this implementation
+can be regarded as "finished", it was not felt worth delaying the
+release of the latest version until they could be handled correctly.
+  The state of the AgentX implementation should be sufficiently useable
+for it to be worth releasing to a wider audience, in order to gather
+feedback and useability reports.
 
-	- Run configure with the flag --with-mib-module="agentx"
-
-	- Edit the file 'agent/mibgroup/mib_module_inits' and
-		move the calls 'init_master()' and 'init_slave()'
-		to the top of the file
-
-	- compile the library and agent
-
-	- rename a copy of the agent 'snmpd' as 'agentxd'
-		(or create a symbolic link by this name)
-
-	- create the directory '/var/agentx'
-
-  Running the agent as 'agentxd' will invoke a subagent, which will try
-and connect to a master agent via the socket /var/agentx/master
-  Running the agent via any other name will invoke it as a master agent,
-which will server the compiled in modules "native", as well as listening
-for AgentX subagents on the same socket.
-  In order to make sensible use of the UCD-based agent as both master and
-subagent, it will be necessary to re-configure (and re-compile) the suite
-using different sets of supported modules (as otherwise, the master versions
-will simply mask the subagent, which will never be called).
+  To configure AgentX support into the UCD agent, run configure with
+the flag --with-mib-module="agentx", and compile the library and agent.
+Copy (or link) the 'snmpd' binary (the main master agent) to 'agentxd',
+which will run as a subagent.
+  Note that the subagent will read the config file 'agentxd.conf' rather
+than the usual 'snmpd.conf', though the syntax and contents of this file
+work in precisely the same way.
 
 
-Comments, corrections, critiques, cash - all will be very welcome.
+  Please report any problems experienced to the ucd-snmp-coders list.
 
 Dave
