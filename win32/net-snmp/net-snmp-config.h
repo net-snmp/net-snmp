@@ -644,7 +644,7 @@ extern "C" {
 #ifdef solaris2
 #define OSTYPE SOLARISID
 #endif
-#if defined(osf3) || defined(osf4)
+#if defined(osf3) || defined(osf4) || defined (osf5)
 #define OSTYPE OSFID
 #endif
 #ifdef ultrix4
