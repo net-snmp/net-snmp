@@ -42,6 +42,7 @@ SOFTWARE.
 extern int  errno;
 int	snmp_dump_packet = 0;
 extern int save_mib_descriptions;
+extern int mib_warnings;
 
 main(argc, argv)
     int	    argc;
@@ -55,6 +56,7 @@ main(argc, argv)
     int tosymbolic = 0;
     int description = 0;
     int random_access = 0;
+    int print = 0;
     
     /*
      * usage: snmptranslate name
@@ -72,8 +74,17 @@ main(argc, argv)
 	      case 'r':
 		random_access = 1;
 		break;
+              case 'w':
+                mib_warnings = 1;
+                break;
+              case 'W':
+                mib_warnings = 2;
+                break;
+              case 'p':
+                print = 1;
+                break;
 	      default:
-		printf("invalid option: -%c\n", argv[arg][1]);
+		fprintf(stderr,"invalid option: -%c\n", argv[arg][1]);
 		break;
 	    }
 	    continue;
@@ -81,11 +92,16 @@ main(argc, argv)
 	current_name = argv[arg];
     }
     
-    if (current_name == NULL){
-	printf("usage: snmptranslate [-n] [-d] [-r] objectID\n");
-	exit(1);
+    if (current_name == NULL && !print){
+      fprintf(stderr,
+              "usage: snmptranslate [-n] [-d] [-r] [-w|-W] [-p] objectID\n");
+      exit(1);
     }
+    
     init_mib();
+    if (print) print_mib (stdout);
+    if (!current_name) exit (0);
+
     name_length = MAX_NAME_LEN;
     if (random_access){
 	if (!get_node(current_name, name, &name_length)){
@@ -108,5 +124,5 @@ main(argc, argv)
 	printf("\n");
 	print_description(name, name_length);
     }
+    exit (0);
 }
-

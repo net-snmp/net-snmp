@@ -168,11 +168,7 @@ main(argc, argv)
 		for(pp = party_scanNext(); pp; pp = party_scanNext()){
 		    if (!strcasecmp(pp->partyName, argv[arg])){
 			srclen = pp->partyIdentityLen;
-#ifdef SVR4
 			memmove(src, pp->partyIdentity, srclen * sizeof(oid));
-#else
-			bcopy(pp->partyIdentity, src, srclen * sizeof(oid));
-#endif
 			break;
 		    }
 		}
@@ -192,11 +188,7 @@ main(argc, argv)
 	    for(pp = party_scanNext(); pp; pp = party_scanNext()){
 		if (!strcasecmp(pp->partyName, argv[arg])){
 		    dstlen = pp->partyIdentityLen;
-#ifdef SVR4
 		    memmove(dst, pp->partyIdentity, dstlen * sizeof(oid));
-#else
-		    bcopy(pp->partyIdentity, dst, dstlen * sizeof(oid));
-#endif
 		    break;
 		}
 	    }
@@ -214,13 +206,8 @@ main(argc, argv)
             for(cxp = context_scanNext(); cxp; cxp = context_scanNext()){
                 if (!strcasecmp(cxp->contextName, argv[arg])){
                     contextlen = cxp->contextIdentityLen;
-#ifdef SVR4
                     memmove(context, cxp->contextIdentity,
                           contextlen * sizeof(oid));
-#else
-                    bcopy(cxp->contextIdentity, context,
-                          contextlen * sizeof(oid));
-#endif
                     break;
                 }
             }
@@ -272,13 +259,7 @@ main(argc, argv)
 		fprintf(stderr, "unknown host: %s\n", hostname);
 		exit(1);
 	    } else {
-#ifdef SVR4
-		memmove((char *)&destAddr, (char *)hp->h_addr,
-		      hp->h_length);
-#else
-		bcopy((char *)hp->h_addr, (char *)&destAddr,
-		      hp->h_length);
-#endif
+              memmove(&destAddr, hp->h_addr, hp->h_length);
 	    }
 	}
 	srclen = dstlen = contextlen = MAX_NAME_LEN;
@@ -301,11 +282,7 @@ main(argc, argv)
         }
     }
 
-#ifdef SVR4
-    memset((char *)&session, NULL, sizeof(struct snmp_session));
-#else
-    bzero((char *)&session, sizeof(struct snmp_session));
-#endif
+    memset(&session, 0, sizeof(struct snmp_session));
     session.peername = hostname;
     if (port_flag)
         session.remote_port = dest_port;
@@ -412,11 +389,7 @@ snmp_add_var(pdu, name, name_length, type, value)
 
     vars->next_variable = NULL;
     vars->name = (oid *)malloc(name_length * sizeof(oid));
-#ifdef SVR4
-    memmove((char *)vars->name, (char *)name, name_length * sizeof(oid));
-#else
-    bcopy((char *)name, (char *)vars->name, name_length * sizeof(oid));
-#endif
+    memmove(vars->name, name, name_length * sizeof(oid));
     vars->name_length = name_length;
 
     switch(type){
@@ -439,11 +412,7 @@ snmp_add_var(pdu, name, name_length, type, value)
 		vars->val_len = hex_to_binary((u_char *)value, buf);
 	    }
 	    vars->val.string = (u_char *)malloc(vars->val_len);
-#ifdef SVR4
-	    memmove((char *)vars->val.string, (char *)buf, vars->val_len);
-#else
-	    bcopy((char *)buf, (char *)vars->val.string, vars->val_len);
-#endif
+          memmove(vars->val.string, buf, vars->val_len);
 	    break;
 	case 'n':
 	    vars->type = NULLOBJ;
@@ -456,11 +425,7 @@ snmp_add_var(pdu, name, name_length, type, value)
 	    read_objid(value, (oid *)buf, &vars->val_len);
 	    vars->val_len *= sizeof(oid);
 	    vars->val.objid = (oid *)malloc(vars->val_len);
-#ifdef SVR4
-	    memmove((char *)vars->val.objid, (char *)buf, vars->val_len);
-#else
-	    bcopy((char *)buf, (char *)vars->val.objid, vars->val_len);
-#endif
+          memmove(vars->val.objid, buf, vars->val_len);
 	    break;
 	case 't':
 	    vars->type = TIMETICKS;
