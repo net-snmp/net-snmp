@@ -239,7 +239,6 @@ nsb-make()
 
 nsb-build()
 {
-   nsb-flow build
    if [ $# -lt 5 ]; then
       nsb-abort "usage: $0 release src_dir build_directory dest_dir config_all_flag"
    fi
@@ -251,6 +250,9 @@ nsb-build()
    dest_dir=$4
    nsb_config_all=$5
    shift 5
+
+   nsb-flow build in $build_dir
+
 
    if [ ! -d $src_dir ]; then
       nsb-abort "$src_dir does not exist!"
