@@ -89,6 +89,10 @@ proxy_parse_config(const char *token, char *line)
 
     DEBUGMSGTL(("proxy_config", "parsing args: %d\n", argn));
     arg = snmp_parse_args(argn, argv, &session, "C:", proxyOptProc);
+    if (arg < 0) {
+        config_perror("failed to parse proxy args");
+        return;
+    }
     DEBUGMSGTL(("proxy_config", "done parsing args\n"));
 
     if (arg >= argn) {
