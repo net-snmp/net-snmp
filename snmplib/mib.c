@@ -818,6 +818,11 @@ init_mib __P((void))
     if ( env_var == NULL ) {
         strcpy(path, DEFAULT_MIBDIRS);
 	env_var = path;
+    } else if ( *env_var == '+' ) {
+      strcpy(path, DEFAULT_MIBDIRS);
+      *env_var = ':';
+      strcat(path, env_var);
+      env_var = path ;
     }
     entry = strtok( env_var, ":" );
     while ( entry ) {
@@ -861,6 +866,15 @@ init_mib __P((void))
       }
 #endif
     }
+#ifdef DEFAULT_MIBFILES
+    else if ( *env_var == '+') {
+      strcpy(path, DEFAULT_MIBFILES);
+      *env_var = ':';
+      strcat(path, env_var);
+      env_var = path ;
+    }
+#endif
+    
     if ( env_var != NULL ) {
       entry = strtok( env_var, ":" );
       while ( entry ) {
