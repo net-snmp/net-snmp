@@ -77,5 +77,7 @@ extern char *snmp_trapcommunity;
 #define SNMPOUTGETRESPONSES	28
 #define SNMPOUTTRAPS		29
 #define SNMPENABLEAUTHENTRAPS	30
+#define SNMPSILENTDROPS		31
+#define SNMPPROXYDROPS		32
 
 #endif /* _MIBGROUP_SNMP_H */
