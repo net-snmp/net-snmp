@@ -1016,7 +1016,7 @@ unregister_mibs_by_session(netsnmp_session * ss)
     subtree_context_cache *contextptr;
 
     DEBUGMSGTL(("register_mib", "unregister_mibs_by_session(%p) ctxt \"%s\"\n",
-		ss, ss->contextName ? ss->contextName : "[NIL]"));
+		ss, (ss && ss->contextName) ? ss->contextName : "[NIL]"));
 
     for (contextptr = get_top_context_cache(); contextptr != NULL;
          contextptr = contextptr->next) {
@@ -1026,9 +1026,9 @@ unregister_mibs_by_session(netsnmp_session * ss)
             for (child = list, prev = NULL; child != NULL; child = next_child){
                 next_child = child->children;
 
-                if (((ss->flags & SNMP_FLAGS_SUBSESSION) &&
+                if (((!ss || ss->flags & SNMP_FLAGS_SUBSESSION) &&
 		     child->session == ss) ||
-                    (!(ss->flags & SNMP_FLAGS_SUBSESSION) && child->session &&
+                    (!(!ss || ss->flags & SNMP_FLAGS_SUBSESSION) && child->session &&
                      child->session->subsession == ss)) {
 
                     rp.name = child->name_a;
