@@ -62,7 +62,7 @@ fixproc.made: $(srcdir)/fixproc
 
 rsnmp.made: $(srcdir)/rsnmp
 	if test "x$(PERLPROG)" != "x"; then \
-	  $(PERLPROG) -p -e 's@^#!.*/perl.*@#!$(PERLPROG)@' ${srcdir}/rsnmp > rsnmp.made; \
+	  $(PERLPROG) -p -e 's@^#!.*/perl.*@#!$(PERLPROG)@; s@/usr/local/share@$(datadir)@g;' ${srcdir}/rsnmp > rsnmp.made; \
 	else \
 	  touch rsnmp.made; \
         fi
