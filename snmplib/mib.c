@@ -1855,6 +1855,8 @@ register_mib_handlers (void)
 		       DS_LIBRARY_ID, DS_LIB_EXTENDED_INDEX);
     ds_register_premib(ASN_BOOLEAN, "snmp","printHexText",
 		       DS_LIBRARY_ID, DS_LIB_PRINT_HEX_TEXT);
+    ds_register_premib(ASN_BOOLEAN, "snmp","printValueOnly",
+		       DS_LIBRARY_ID, DS_LIB_PRINT_BARE_VALUE);
 }
 
 void
