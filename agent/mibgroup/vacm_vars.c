@@ -10,10 +10,10 @@
 #if HAVE_UNISTD_H
 #include <unistd.h>
 #endif
-#if HAVE_STRINGS_H
-#include <strings.h>
-#else
+#if HAVE_STRING_H
 #include <string.h>
+#else
+#include <strings.h>
 #endif
 #if HAVE_MALLOC_H
 #include <malloc.h>
@@ -302,7 +302,14 @@ int vacm_in_view (pi, name, namelen)
 	/* allow running without snmpd.conf */
 	if (sp == NULL) {
 	    DEBUGP("vacm_in_view: accepted with no com2sec entries\n");
-	    return 1;
+	    switch (pi->pdutype) {
+	    case SNMP_MSG_GET:
+	    case SNMP_MSG_GETNEXT:
+	    case SNMP_MSG_GETBULK:
+		return 1;
+	    default:
+		return 0;
+	    }
 	}
 	while (sp) {
 	    if ((pi->source.sin_addr.s_addr & sp->sourceMask.sin_addr.s_addr)

@@ -15,6 +15,7 @@
 #endif
 #endif
 #include <sys/types.h>
+#include <sys/param.h>
 #include <sys/socket.h>
 
 #if TIME_WITH_SYS_TIME
@@ -74,6 +75,8 @@
 #endif
 #ifdef solaris2
 #include "kernel_sunos5.h"
+#else
+#include "kernel.h"
 #endif
 #include "../../snmplib/system.h"
 

@@ -23,6 +23,7 @@
 #endif
 
 #include <sys/types.h>
+#include <sys/param.h>
 #include <sys/socket.h>
 #if HAVE_SYS_PROTOSW_H
 #include <sys/protosw.h>
@@ -69,9 +70,17 @@
 #endif
 #ifdef solaris2
 #include "kernel_sunos5.h"
+#else
+#include "kernel.h"
 #endif
 #include "mibincl.h"
 #include "../../snmplib/system.h"
+#if HAVE_SYS_SYSCTL_H
+#include <sys/sysctl.h>
+#endif
+#if HAVE_ARPA_INET_H
+#include <arpa/inet.h>
+#endif
 
 #if defined(osf4) || defined(aix4) || defined(hpux10)
 /* these are undefed to remove a stupid warning on osf compilers
@@ -765,7 +774,10 @@ int TCP_Count_Connections __P((void))
 {
 	int Established;
 	struct inpcb cb;
-	register struct inpcb *prev, *next;
+	register struct inpcb *next;
+#if !(defined(freebsd2) || defined(netbsd2) || defined(openbsd2))
+	register struct inpcb *prev;
+#endif
 	struct inpcb inpcb;
 	struct tcpcb tcpcb;
 

@@ -8,6 +8,7 @@
 #include <config.h>
 #if STDC_HEADERS
 #include <stdlib.h>
+#include <string.h>
 #endif
 #if defined(IFNET_NEEDS_KERNEL) && !defined(_KERNEL)
 #define _KERNEL 1
@@ -89,8 +90,6 @@ static int ARP_Scan_Next __P((u_long *, char *, u_long *));
 
 void	init_at( )
 {
-  auto_nlist( ARPTAB_SYMBOL,0,0 );
-  auto_nlist( ARPTAB_SIZE_SYMBOL,0,0 );
 }
 
 
@@ -362,11 +361,11 @@ var_atEntry(struct variable *vp, oid *name, int *length, int exact,
 
 #ifndef solaris2
 
-static int arptab_size, arptab_current;
 #if CAN_USE_SYSCTL
 static char *lim, *rtnext;
 static char *at = 0;
 #else
+static int arptab_size, arptab_current;
 #ifdef STRUCT_ARPHD_HAS_AT_NEXT
 static struct arphd *at=0;
 static struct arptab *at_ptr, at_entry;
@@ -508,7 +507,6 @@ u_long *ifType;
 	struct rt_msghdr *rtm;
 	struct sockaddr_inarp *sin;
 	struct sockaddr_dl *sdl;
-	extern int h_errno;
 
 	while (rtnext < lim) {
 		rtm = (struct rt_msghdr *)rtnext;

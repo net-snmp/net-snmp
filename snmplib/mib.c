@@ -41,13 +41,13 @@ SOFTWARE.
 #  include <time.h>
 # endif
 #endif
-#if STDC_HEADERS
+#if HAVE_STRING_H
 #include <string.h>
-#include <stdlib.h>
 #else
+#include <strings.h>
+#endif
 #if HAVE_STDLIB_H
 #include <stdlib.h>
-#endif
 #endif
 #if HAVE_SYS_SELECT_H
 #include <sys/select.h>

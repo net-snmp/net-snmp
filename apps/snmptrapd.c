@@ -31,10 +31,10 @@ SOFTWARE.
 #if HAVE_UNISTD_H
 #include <unistd.h>
 #endif
-#if HAVE_STRINGS_H
-#include <strings.h>
-#else
+#if HAVE_STRING_H
 #include <string.h>
+#else
+#include <strings.h>
 #endif
 #include <sys/types.h>
 #include <sys/socket.h>
@@ -105,6 +105,7 @@ typedef long	fd_mask;
 int main __P((int, char **));
 int Print = 0;
 int Event = 0;
+char *Command = NULL;
 
 int Syslog = 0;
 /*
@@ -327,7 +328,10 @@ int snmp_input(op, session, reqid, pdu, magic)
     struct tm *tm;
     time_t timer;
     struct hostent *host;
-
+    int fd[2];
+    int pid, result;
+    FILE *file;
+    
     if (op == RECEIVED_MESSAGE){
 	if (pdu->command == SNMP_MSG_TRAP){
 	    if (Print){
@@ -405,6 +409,44 @@ int snmp_input(op, session, reqid, pdu, magic)
 		       uptime_string(pdu->time, buf),varbuf);
 		}
 	    }
+            if (Command) {
+              if (pipe(fd)) {
+                perror("pipe");
+                return 1;
+              }
+              if ((pid = fork()) == 0) {
+                /* child */
+                close(0);
+                if (dup(fd[0]) != 0) {
+                  perror("dup");
+                  return 1;
+                }
+                close(fd[1]);
+                close(fd[0]);
+                system(Command);
+                exit(0);
+              } else if (pid > 0) {
+                file = fdopen(fd[1],"w");
+                fprintf(file,"%.4d-%.2d-%.2d %.2d:%.2d:%.2d %s [%s] %s:\n",
+                        tm->tm_year+1900, tm->tm_mon+1, tm->tm_mday,
+                        tm->tm_hour, tm->tm_min, tm->tm_sec,
+                        host ? host->h_name :
+                          inet_ntoa(pdu->agent_addr.sin_addr),
+                        inet_ntoa(pdu->agent_addr.sin_addr),
+                        sprint_objid (oid_buf, pdu->enterprise,
+                                      pdu->enterprise_length));
+                fclose(file);
+                close(fd[0]);
+                close(fd[1]);
+                if (waitpid(pid, &result,0) < 0) {
+                  perror("waitpid");
+                  return 1;
+                }
+              } else {
+                perror("fork");
+                return 1;
+              }
+            }
 	} else if (pdu->command == SNMP_MSG_TRAP2
 		   || pdu->command == SNMP_MSG_INFORM){
 	    if (Print){
@@ -495,6 +537,13 @@ main(argc, argv)
 		    }
                     local_port = atoi(argv[arg]);
                     break;
+		case 'C':
+		    if (++arg == argc) {
+			usage();
+			exit(2);
+		    }
+		    Command = argv[arg];
+		    break;
 		case 'P':
 		    Print++;
 		    break;

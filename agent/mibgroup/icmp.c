@@ -11,6 +11,7 @@
 #define _I_DEFINED_KERNEL
 #endif
 #include <sys/types.h>
+#include <sys/param.h>
 #include <sys/socket.h>
 
 #if STDC_HEADERS
@@ -45,6 +46,9 @@
 #include <netinet/icmp_var.h>
 #endif
 
+#if HAVE_SYS_SYSCTL_H
+#include <sys/sysctl.h>
+#endif
 #if HAVE_INET_MIB2_H
 #include <inet/mib2.h>
 #endif

@@ -160,9 +160,7 @@ var_hrnet(vp, name, length, exact, var_len, write_method)
 static short		HRN_index;
 static char		HRN_name[16];
 static struct ifnet	HRN_ifnet;
-#if !(defined(linux) || defined(sunV3))
 static struct in_ifaddr	HRN_ifaddr;	/* Not used */
-#endif
 
 static char		HRN_savedName[16];
 static u_short		HRN_savedFlags;;
@@ -181,11 +179,7 @@ int
 Get_Next_HR_Network __P((void))
 {
 #ifndef solaris2
-#if defined(linux) || defined(sunV3)
-    if (Interface_Scan_Next( &HRN_index, HRN_name, &HRN_ifnet))
-#else
     if (Interface_Scan_Next( &HRN_index, HRN_name, &HRN_ifnet, &HRN_ifaddr))
-#endif
         return ( HRDEV_NETWORK << HRDEV_TYPE_SHIFT ) + HRN_index;
     else
 #endif

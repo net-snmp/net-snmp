@@ -261,10 +261,8 @@ static int getstruct __P((off_t, char *, off_t, int));
 
 extern int kmem, mem, swap;
 
-/* #include <sys/param.h> */
 #include <sys/user.h>
 #include <sys/proc.h>
-/* #include <sys/tty.h> */
 #include <sys/file.h>
 #include <sys/vm.h>
 #include <machine/pte.h>

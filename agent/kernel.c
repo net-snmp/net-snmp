@@ -19,6 +19,9 @@
 #if HAVE_NETINET_IN_H
 #include <netinet/in.h>
 #endif
+#if HAVE_KVM_H
+#include <kvm.h>
+#endif
 
 #include "asn1.h"
 #include "snmp_api.h"
@@ -30,9 +33,63 @@
 #define NULL 0
 #endif
 
-off_t klseek __P((off_t));
-int klread __P((char *, int));
 
+#if HAVE_KVM_H
+kvm_t *kd;
+
+void
+init_kmem(file)
+    char *file;
+{
+#if HAVE_KVM_OPENFILES
+    char err[4096];
+    kd = kvm_openfiles(NULL, NULL, NULL, O_RDONLY, err);
+    if (kd == NULL) {
+	fprintf(stderr, "init_kmem: kvm_openfiles failed: %s\n", err);
+    }
+#else
+    kd = kvm_open(NULL, NULL, NULL, O_RDONLY, "kvm_open");
+#endif
+}
+
+
+/*
+ *  klookup:
+ *
+ *  It seeks to the location  off  in kmem
+ *  It does a read into  target  of  siz  bytes.
+ *
+ *  Return NULL on failure and 1 on sucess.
+ *
+ */
+
+
+int
+klookup(off, target, siz) 
+     unsigned long off;
+     char   *target;
+     int     siz;
+{
+    int result;
+    result = kvm_read(kd, off, target, siz);
+    if (result != siz) {
+#if HAVE_KVM_OPENFILES
+	fprintf(stderr,"kvm_read(*, %lx, %p, %d) = %d: %s\n", off, target, siz,
+		result, kvm_geterr(kd));
+#else
+	fprintf(stderr,"kvm_read(*, %lx, %p, %d) = %d: ", off, target, siz,
+		result);
+	perror(NULL);
+#endif
+	return 0;
+    }
+    return 1;
+}
+
+#else /* HAVE_KVM_H */
+
+static off_t klseek __P((off_t));
+static int klread __P((char *, int));
 int swap, mem, kmem;
 
 void
@@ -74,7 +131,7 @@ init_kmem(file)
 /*
  *  Seek into the kernel for a value.
  */
-off_t
+static off_t
 klseek(base)
      off_t base;
 {
@@ -85,14 +142,13 @@ klseek(base)
 /*
  *  Read from the kernel 
  */
-int
+static int
 klread(buf, buflen)
     char *buf;
     int buflen;
 {
   return (read(kmem, buf, buflen));
 }
-
 
 
 /*
@@ -112,7 +168,6 @@ klookup(off, target, siz)
      char   *target;
      int     siz;
 {
-
   long retsiz;
 
   if ((retsiz = klseek((off_t) off)) != off) {
@@ -134,5 +189,7 @@ klookup(off, target, siz)
   }
   return (1);
 }
+
+#endif /* HAVE_KVM_H */
 
 #endif /* CAN_USE_NLIST */
