@@ -607,7 +607,7 @@ netsnmp_table_data_set_helper_handler(netsnmp_mib_handler *handler,
             }
             if (!data ) {
                 netsnmp_set_request_error(reqinfo, request,
-                                          SNMP_ERR_NOTWRITABLE);
+                                          SNMP_ERR_NOCREATION);
                 continue;
             }
 
