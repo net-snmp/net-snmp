@@ -1589,11 +1589,7 @@ smux_trap_process(u_char *rsp, size_t *len)
 	send_enterprise_trap_vars(trap, specific, (oid *)&sa_enterpriseoid, sa_enterpriseoid_len, snmptrap_head);
 
 	/* free trap variables */
-	while (snmptrap_head) {
-		snmptrap_tmp = snmptrap_head->next_variable;
-		free(snmptrap_head);
-		snmptrap_head = snmptrap_tmp;
-	}
+	snmp_free_varbind(snmptrap_head);
 
 	return ptr;
 
