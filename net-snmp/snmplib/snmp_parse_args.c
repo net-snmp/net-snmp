@@ -190,27 +190,27 @@ snmp_parse_args(int argc,
 #ifndef DEPRECATED_CLI_OPTIONS
       case 'f':
 	fprintf(stderr, "Warning: -f option is deprecated - use -Of\n");
-	snmp_set_full_objid(1);
+	ds_set_boolean(DS_LIBRARY_ID, DS_LIB_PRINT_FULL_OID, 1);
 	break;
 
       case 's':
 	fprintf(stderr, "Warning: -s option is deprecated - use -Os\n");
-	snmp_set_suffix_only(1);
+	ds_set_int(DS_LIBRARY_ID, DS_LIB_PRINT_SUFFIX_ONLY, 1);
 	break;
 
       case 'S':
 	fprintf(stderr, "Warning: -S option is deprecated - use -OS\n");
-	snmp_set_suffix_only(2);
+	ds_set_int(DS_LIBRARY_ID, DS_LIB_PRINT_SUFFIX_ONLY, 2);
 	break;
 
       case 'q':
 	fprintf(stderr, "Warning: -q option is deprecated - use -Oq\n");
-	snmp_set_quick_print(1);
+	ds_set_boolean(DS_LIBRARY_ID, DS_LIB_QUICK_PRINT, 1);
 	break;
 
       case 'R':
 	fprintf(stderr, "Warning: -R option is deprecated - use -IR\n");
-        snmp_set_random_access(1);
+        ds_set_boolean(DS_LIBRARY_ID, DS_LIB_RANDOM_ACCESS, 1);
         break;
 #endif /* DEPRECATED_CLI_OPTIONS */
 
@@ -244,7 +244,7 @@ snmp_parse_args(int argc,
         break;
 
       case 'd':
-        snmp_set_dump_packet(1);
+        ds_set_boolean(DS_LIBRARY_ID, DS_LIB_DUMP_PACKET, 1);
         break;
 
       case 'v':
