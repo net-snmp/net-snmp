@@ -120,6 +120,10 @@ monitors the size without reporting errors about it.
 Any errors in obtaining the above information are reported via the
 EXTENSIBLEDOTMIB.ERRORMIBNUM.ERRORFLAG flag and the
 EXTENSIBLEDOTMIB.ERRORMIBNUM.ERRORMSG text-string description.
+.SH AGENTX SUB-AGENTS
+To enable AgentX support in the snmp master agent, put the following
+line in your snmpd.conf file:
+.IP "master agentx"
 .SH SMUX SUB-AGENTS
 To enable and SMUX based sub-agent, such as
 .IR gated ,
@@ -434,7 +438,7 @@ examples.
 The ucd-snmp agent can be forced to re-read its configuration files.
 It can be told to do so by one of two ways:
 .IP 1.
-An snmpset of integer(1) to EXTENSIBLEDOTMIB.VERSIONMIBNUM.VERUPDATECONFIG.
+An snmpset of integer(1) to UCD-SNMP-MIB::versionUpdateConfig.0
 .IP 2.
 A "kill -HUP" signal sent to the snmpd agent process.
 .SH "FILES"
