@@ -19,7 +19,7 @@ IMPORTS
 
 
 ipFwAccTable OBJECT-TYPE
-	SYNTAX IpFwAccEntry
+	SYNTAX SEQUENCE OF IpFwAccEntry
 	ACCESS not-accessible
 	STATUS mandatory
 	DESCRIPTION
