@@ -292,7 +292,7 @@ $dbh->disconnect();
 # setup a table in the database based on a MIB table.
 sub setuptable {
 
-    my %conversions = qw(INTEGER integer OCTETSTR varchar(254) COUNTER integer UINTEGER integer IPADDR varchar(254) OBJECTID varchar(254) GAGUE integer OPAQUE varchar(254) TICKS integer GAUGE integer);
+    my %conversions = qw(INTEGER integer INTEGER32 integer OCTETSTR varchar(254) COUNTER integer UINTEGER integer IPADDR varchar(254) OBJECTID varchar(254) GAGUE integer OPAQUE varchar(254) TICKS integer GAUGE integer);
 
     # set up mib info
     my ($dbh, $mibnode, $delete, $suffix) = @_;
