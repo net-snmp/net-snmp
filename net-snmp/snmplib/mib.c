@@ -137,6 +137,17 @@ PrefixList      mib_prefixes[] = {
     {NULL, 0}                   /* end of list */
 };
 
+
+/**
+ * @internal
+ * Converts timeticks to hours, minutes, seconds string.
+ *
+ * @param timeticks    The timeticks to convert.
+ * @param buf          Buffer to write to, has to be at 
+ *                     least 64 Bytes large.
+ *       
+ * @return The buffer.
+ */
 static char    *
 uptimeString(u_long timeticks, char *buf)
 {
@@ -179,9 +190,13 @@ uptimeString(u_long timeticks, char *buf)
 
 
 
-/*
- * prints character pointed to if in human-readable ASCII range,
- * otherwise prints a blank space 
+/**
+ * @internal
+ * Prints the character pointed to if in human-readable ASCII range,
+ * otherwise prints a dot.
+ *
+ * @param buf buffer to print the character to
+ * @param ch  character to print
  */
 static void
 sprint_char(char *buf, const u_char ch)
@@ -194,6 +209,25 @@ sprint_char(char *buf, const u_char ch)
 }
 
 
+
+/**
+ * Prints a hexadecimal string into a buffer.
+ *
+ * The characters pointed by *cp are encoded as hexadecimal string.
+ * If allow_realloc is true the buffer will be (re)allocated to fit in the 
+ * needed size. (Note: *buf may change due to this.)
+ * 
+ * @param buf      address of the buffer to print to.
+ * @param buf_len  address to an integer containing the size of buf.
+ * @param out_len  incremented by the number of characters printed.
+ * @param allow_realloc if not zero reallocate the buffer to fit the 
+ *                      needed size.
+ * @param cp       the array of characters to encode.
+ * @param len      the array length of cp.
+ * 
+ * @return 1 on success, or 0 on failure (out of memory, or buffer to
+ *         small when not allowed to realloc.)
+ */
 int
 sprint_realloc_hexstring(u_char ** buf, size_t * buf_len, size_t * out_len,
                          int allow_realloc, const u_char * cp, size_t len)
@@ -275,6 +309,26 @@ sprint_realloc_hexstring(u_char ** buf, size_t * buf_len, size_t * out_len,
     return 1;
 }
 
+
+
+/**
+ * Prints an ascii string into a buffer.
+ *
+ * The characters pointed by *cp are encoded as an ascii string.
+ * If allow_realloc is true the buffer will be (re)allocated to fit in the 
+ * needed size. (Note: *buf may change due to this.)
+ * 
+ * @param buf      address of the buffer to print to.
+ * @param buf_len  address to an integer containing the size of buf.
+ * @param out_len  incremented by the number of characters printed.
+ * @param allow_realloc if not zero reallocate the buffer to fit the 
+ *                      needed size.
+ * @param cp       the array of characters to encode.
+ * @param len      the array length of cp.
+ * 
+ * @return 1 on success, or 0 on failure (out of memory, or buffer to
+ *         small when not allowed to realloc.)
+ */
 int
 sprint_realloc_asciistring(u_char ** buf, size_t * buf_len,
                            size_t * out_len, int allow_realloc,
@@ -313,7 +367,26 @@ sprint_realloc_asciistring(u_char ** buf, size_t * buf_len,
     return 1;
 }
 
-
+/**
+ * Prints an octet string into a buffer.
+ *
+ * The variable var is encoded as octet string.
+ * If allow_realloc is true the buffer will be (re)allocated to fit in the 
+ * needed size. (Note: *buf may change due to this.)
+ * 
+ * @param buf      address of the buffer to print to.
+ * @param buf_len  address to an integer containing the size of buf.
+ * @param out_len  incremented by the number of characters printed.
+ * @param allow_realloc if not zero reallocate the buffer to fit the 
+ *                      needed size.
+ * @param var      the variable to encode.
+ * @param enums    ???
+ * @param hint     ??? 
+ * @param units    ??? 
+ * 
+ * @return 1 on success, or 0 on failure (out of memory, or buffer to
+ *         small when not allowed to realloc.)
+ */
 int
 sprint_realloc_octet_string(u_char ** buf, size_t * buf_len,
                             size_t * out_len, int allow_realloc,
@@ -1674,6 +1747,14 @@ snmp_in_toggle_options(char *options)
     return NULL;
 }
 
+
+/**
+ * Prints out a help usage for the in toggle options.
+ *
+ * @param lead      The lead to print for every line.
+ * @param outf      The file descriptor to write to.
+ * 
+ */
 void
 snmp_in_toggle_options_usage(const char *lead, FILE * outf)
 {
@@ -1736,6 +1817,10 @@ register_mib_handlers(void)
 
 }
 
+/**
+ * Initialises the mib reader.
+ * Reads in all mibs. 
+ */
 void
 init_mib(void)
 {
@@ -1921,6 +2006,9 @@ init_mib(void)
     }
 }
 
+/**
+ * Unloads all mibs.
+ */
 void
 shutdown_mib(void)
 {
@@ -1939,6 +2027,11 @@ shutdown_mib(void)
         Prefix = NULL;
 }
 
+/**
+ * Prints the MIBs to the file fp.
+ *
+ * @param fp   The file descriptor to print to.
+ */
 void
 print_mib(FILE * fp)
 {
@@ -1953,6 +2046,13 @@ print_ascii_dump(FILE * fp)
     fprintf(fp, "END\n");
 }
 
+
+/**
+ * Set's the printing function printomat in a subtree according
+ * it's type
+ *
+ * @param subtree the subtree to set.
+ */
 void
 set_function(struct tree *subtree)
 {
@@ -2013,10 +2113,17 @@ set_function(struct tree *subtree)
     }
 }
 
-/*
- * Read an object identifier from input string into internal OID form.
+/**
+ * Reads an object identifier from an input string into internal OID form.
+ * 
  * When called, out_len must hold the maximum length of the output array.
- * Returns 1 if successful.
+ *
+ * @param input     the input string.
+ * @param output    the oid wirte.
+ * @param out_len   number of subid's in output.
+ * 
+ * @return 1 if successful.
+ * 
  * If an error occurs, this function returns 0 and MAY set snmp_errno.
  * snmp_errno is NOT set if SET_SNMP_ERROR evaluates to nothing.
  * This can make multi-threaded use a tiny bit more robust.
@@ -2079,6 +2186,9 @@ read_objid(const char *input, oid * output, size_t * out_len)
     return 1;
 }
 
+/**
+ * 
+ */
 struct tree    *
 netsnmp_sprint_realloc_objid_tree(u_char ** buf, size_t * buf_len,
                                   size_t * out_len, int allow_realloc,
@@ -2213,12 +2323,26 @@ snprint_objid(char *buf, size_t buf_len,
     }
 }
 
+/**
+ * Prints an oid to stdout.
+ *
+ * @param objid      The oid to print
+ * @param objidlen   The length of oidid.
+ */
 void
 print_objid(const oid * objid, size_t objidlen)
 {                               /* number of subidentifiers */
     fprint_objid(stdout, objid, objidlen);
 }
 
+
+/**
+ * Prints an oid to a file descriptor.
+ *
+ * @param f          The file descriptor to print to.
+ * @param objid      The oid to print
+ * @param objidlen   The length of oidid.
+ */
 void
 fprint_objid(FILE * f, const oid * objid, size_t objidlen)
 {                               /* number of subidentifiers */
@@ -2326,7 +2450,13 @@ snprint_variable(char *buf, size_t buf_len,
     }
 }
 
-
+/**
+ * Prints a variable to stdout.
+ *
+ * @param objid     The object id.
+ * @param objidlen  The length of teh object id.
+ * @param variable  The variable to print.
+ */
 void
 print_variable(const oid * objid,
                size_t objidlen, netsnmp_variable_list * variable)
@@ -2334,6 +2464,15 @@ print_variable(const oid * objid,
     fprint_variable(stdout, objid, objidlen, variable);
 }
 
+
+/**
+ * Prints a variable to a file descriptor.
+ *
+ * @param f         The file descriptor to print to.
+ * @param objid     The object id.
+ * @param objidlen  The length of teh object id.
+ * @param variable  The variable to print.
+ */
 void
 fprint_variable(FILE * f,
                 const oid * objid,
@@ -2439,11 +2578,12 @@ fprint_value(FILE * f,
 }
 
 
-/*
- * takes the value in VAR and turns it into an OID segment in VAR->NAME 
- */
-/*
- * returns SNMPERR_SUCCESS or SNMPERR_GENERR 
+/**
+ * Takes the value in VAR and turns it into an OID segment in var->name.
+ *  
+ * @param var    The variable.
+ *
+ * @return SNMPERR_SUCCESS or SNMPERR_GENERR 
  */
 int
 build_oid_segment(netsnmp_variable_list * var)
@@ -3604,15 +3744,16 @@ get_module_node(const char *fname,
 }
 
 
-/*
- * Populate object identifier from a node in the MIB hierarchy.
- * Build up the object ID, working backwards,
+/**
+ * Populates the object identifier from a node in the MIB hierarchy.
+ * Builds up the object ID, working backwards,
  * starting from the end of the objid buffer.
- * When the top of the MIB tree is reached, adjust the buffer.
+ * When the top of the MIB tree is reached, the buffer is adjusted.
  *
  * The buffer length is set to the number of subidentifiers
  * for the object identifier associated with the MIB node.
- * Returns the number of subidentifiers copied.
+ * 
+ * @return the number of subidentifiers copied.
  *
  * If 0 is returned, the objid buffer is too small,
  * and the buffer contents are indeterminate.
@@ -4155,12 +4296,15 @@ print_parent_label(FILE * f, struct tree *tp)
     }
 }
 
-/*
- * print_subtree_oid_report():
- *
+/**
+ * @internal
  * This methods generates variations on the original print_subtree() report.
  * Traverse the tree depth first, from least to greatest sub-identifier.
  * Warning: this methods recurses and calls methods that recurse.
+ *
+ * @param f       File descriptor to print to.
+ * @param tree    ???
+ * @param count   ???
  */
 
 static void
@@ -4230,9 +4374,16 @@ print_subtree_oid_report(FILE * f, struct tree *tree, int count)
 }
 
 
-/*
- * Convert timeticks to hours, minutes, seconds string.
+/**
+ * Converts timeticks to hours, minutes, seconds string.
  * CMU compatible does not show centiseconds.
+ *
+ * @param timeticks    The timeticks to convert.
+ * @param buf          Buffer to write to, has to be at 
+ *                     least 64 Bytes large.
+ *       
+ * @return The buffer
+ * @see uptimeString
  */
 char           *
 uptime_string(u_long timeticks, char *buf)
@@ -4329,9 +4480,15 @@ mib_to_asn_type(int mib_type)
     return -1;
 }
 
-/*
- * convert a string to its OID form.
- *   "hello" = 5 . 'h' . 'e' . 'l' . 'l' . 'o'
+/**
+ * Converts a string to its OID form.
+ * in example  "hello" = 5 . 'h' . 'e' . 'l' . 'l' . 'o'
+ *
+ * @param S   The string.
+ * @param O   The oid.
+ * @param L   The length of the oid.
+ *
+ * @return 0 on Sucess, 1 on failure.
  */
 int
 netsnmp_str2oid(const char *S, oid * O, int L)
