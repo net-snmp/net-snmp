@@ -43,6 +43,7 @@ TABLE OF CONTENTS
    How do I handle traps and notifications?
    How do I use SNMPv3?
    Applications complain about entries in your example 'snmp.conf' file.  Why?
+   What is the story about snmp.conf?
  AGENT
    What MIBs are supported?
    How do I add a MIB to the agent?
@@ -789,6 +790,23 @@ Applications complain about entries in your example 'snmp.conf' file.  Why?
   applicable to all applications (via the SNMP library).
     Rename (or merge) the 'snmp.conf' file to 'snmpd.conf', and this should
   fix the problem.
+
+
+
+What is the story about snmp.conf?
+---------------------------------
+
+    Snmp.conf is sensed by the read_config portion of the library
+  to help set common configuration for most of the applications,
+  except for snmpd (uses snmpd.conf) and snmptrapd (uses snmptrapd.conf).
+
+    Snmp.conf is an optional component, and is not installed.
+
+    Invoke "snmpget -H" to obtain a list of the configurable values
+  that one can save in snmp.conf.
+
+  Refer to the manual page for snmp.conf for more details.
+
 
 
 
