@@ -2370,6 +2370,7 @@ register_mib_handlers (void)
 		       DS_LIBRARY_ID, DS_LIB_EXTENDED_INDEX);
     ds_register_premib(ASN_BOOLEAN, "snmp","printHexText",
 		       DS_LIBRARY_ID, DS_LIB_PRINT_HEX_TEXT);
+
 }
 
 void
@@ -2517,9 +2518,6 @@ init_mib (void)
 	pp->len = strlen(pp->str);
 	pp++;
     }
-
-    /* Default to MIB::node style output */
-    ds_set_int(DS_LIBRARY_ID, DS_LIB_PRINT_SUFFIX_ONLY, 2);
 
     Mib = tree_head;          /* Backwards compatibility */
     tree_top = (struct tree *)calloc(1,sizeof(struct tree));
