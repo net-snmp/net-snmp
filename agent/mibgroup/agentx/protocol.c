@@ -50,6 +50,7 @@
 #include "snmp_client.h"
 #include "snmp_debug.h"
 #include "mib.h"
+#include "tools.h"
 
 #include "agentx/protocol.h"
 
@@ -79,6 +80,43 @@ agentx_cmd( u_char code )
    }
 }
 
+int
+agentx_realloc_build_int(u_char **buf, size_t *buf_len, size_t *out_len,
+			 int allow_realloc,
+			 unsigned int value, int network_order)
+{
+  unsigned int ivalue = value, i = 0;
+  size_t ilen = *out_len;
+
+  while ((*out_len + 4) >= *buf_len) {
+    if (!(allow_realloc && snmp_realloc(buf, buf_len))) {
+      return 0;
+    }
+  }
+
+  if (network_order) {
+#ifndef WORDS_BIGENDIAN
+    value = ntohl(value);
+#endif
+    memmove((*buf + *out_len), &value, 4);
+    *out_len += 4;
+  } else {
+#ifndef WORDS_BIGENDIAN
+    memmove((*buf + *out_len), &value, 4);
+    *out_len += 4;
+#else
+    for (i = 0; i < 4; i++) {
+      *(*buf + *out_len) = (u_char)value & 0xff;
+      (*out_len)++;
+      value >>= 8;
+    }
+#endif
+  }
+  DEBUGDUMPSETUP("send", (*buf + ilen), 4);
+  DEBUGMSG(("dumpv_send", "  Integer:\t%lu (0x%.2lX)\n", ivalue, ivalue));
+  return 1;
+}
+
 void
 agentx_build_int(u_char *bufp, u_int value, int network_byte_order)
 {
@@ -105,6 +143,43 @@ agentx_build_int(u_char *bufp, u_int value, int network_byte_order)
     DEBUGMSG(("dumpv_send", "  Integer:\t%ld (0x%.2X)\n", orig_val, orig_val));
 }
 
+int
+agentx_realloc_build_short(u_char **buf, size_t *buf_len, size_t *out_len,
+			   int allow_realloc,
+			   unsigned short value, int network_order)
+{
+  unsigned short ivalue = value, i = 0;
+  size_t ilen = *out_len;
+
+  while ((*out_len + 2) >= *buf_len) {
+    if (!(allow_realloc && snmp_realloc(buf, buf_len))) {
+      return 0;
+    }
+  }
+
+  if (network_order) {
+#ifndef WORDS_BIGENDIAN
+    value = ntohs(value);
+#endif
+    memmove((*buf + *out_len), &value, 2);
+    *out_len += 2;
+  } else {
+#ifndef WORDS_BIGENDIAN
+    memmove((*buf + *out_len), &value, 2);
+    *out_len += 2;
+#else
+    for (i = 0; i < 2; i++) {
+      *(*buf + *out_len) = (u_char)value & 0xff;
+      (*out_len)++;
+      value >>= 8;
+    }
+#endif
+  }
+  DEBUGDUMPSETUP("send", (*buf + ilen), 2);
+  DEBUGMSG(("dumpv_send", "  Short:\t%hu (0x%.2hX)\n", ivalue, ivalue));
+  return 1;
+}
+
 void
 agentx_build_short(u_char *bufp, int in_value, int network_byte_order)
 {
@@ -128,6 +203,69 @@ agentx_build_short(u_char *bufp, int in_value, int network_byte_order)
     DEBUGMSG(("dumpv_send", "  Short:\t%ld (0x%.2X)\n", in_value, in_value));
 }
 
+
+int
+agentx_realloc_build_oid(u_char **buf, size_t *buf_len, size_t *out_len,
+			 int allow_realloc,
+			 int inclusive, oid *name, size_t name_len,
+			 int network_order)
+{
+  size_t ilen = *out_len, i = 0;
+  int prefix = 0;
+
+  DEBUGPRINTINDENT("dumpv_send");
+  DEBUGMSG(("dumpv_send", "OID: "));
+  DEBUGMSGOID(("dumpv_send", name, name_len));
+  DEBUGMSG(("dumpv_send", "\n"));
+
+  if (name_len == 2 && (name[0] == 0 && name[1] == 0)) {
+    name_len = 0;	/* Null OID */
+  }
+    
+  /* 'Compact' internet OIDs */
+  if (name_len >= 5 && (name[0] == 1 && name[1] == 3 &&
+			name[2] == 6 && name[3] == 1)) {
+    prefix = name[4];
+    name += 5;
+    name_len -= 5;
+  }
+    
+  while ((*out_len + 4 + (4 * name_len)) >= *buf_len) {
+    if (!(allow_realloc && snmp_realloc(buf, buf_len))) {
+      return 0;
+    }
+  }
+
+  *(*buf + *out_len) = (u_char)name_len;
+  (*out_len)++;
+  *(*buf + *out_len) = (u_char)prefix;
+  (*out_len)++;
+  *(*buf + *out_len) = (u_char)inclusive;
+  (*out_len)++;
+  *(*buf + *out_len) = (u_char)0x00;
+  (*out_len)++;
+    
+  DEBUGDUMPHEADER("send", "OID Header");
+  DEBUGDUMPSETUP("send", (*buf + ilen), 4);
+  DEBUGMSG(("dumpv_send", "  # subids:\t%d (0x%.2X)\n", name_len, name_len));
+  DEBUGPRINTINDENT("dumpv_send");
+  DEBUGMSG(("dumpv_send", "  prefix:\t%d (0x%.2X)\n", prefix, prefix));
+  DEBUGPRINTINDENT("dumpv_send");
+  DEBUGMSG(("dumpv_send", "  inclusive:\t%d (0x%.2X)\n", inclusive,inclusive));
+  DEBUGINDENTLESS();
+  DEBUGDUMPHEADER("send", "OID Segments");
+
+  for (i = 0; i < name_len; i++ ) {
+    if (!agentx_realloc_build_int(buf, buf_len, out_len, allow_realloc,
+				  name[i], network_order)) {
+      DEBUGINDENTLESS();
+      return 0;
+    }
+  }
+  DEBUGINDENTLESS();
+
+  return 1;
+}
 
 u_char*
 agentx_build_oid(u_char *bufp, size_t *out_length, int inc,
@@ -191,6 +329,55 @@ agentx_build_oid(u_char *bufp, size_t *out_length, int inc,
     return bufp;
 }
 
+int
+agentx_realloc_build_string(u_char **buf, size_t *buf_len, size_t *out_len,
+			    int allow_realloc,
+			    u_char *string, size_t string_len,
+			    int network_order)
+{
+  size_t ilen = *out_len, i = 0;
+  
+  while ((*out_len + 4 + (4 * ((string_len + 3) / 4))) >= *buf_len) {
+    if (!(allow_realloc && snmp_realloc(buf, buf_len))) {
+      return 0;
+    }
+  }
+
+  DEBUGDUMPHEADER("send", "Build String");
+  DEBUGDUMPHEADER("send", "length");
+  if (!agentx_realloc_build_int(buf, buf_len, out_len, allow_realloc,
+				string_len, network_order)) {
+    DEBUGINDENTLESS();
+    DEBUGINDENTLESS();
+    return 0;
+  }
+
+  if (string_len == 0) {
+    DEBUGMSG(("dumpv_send", "  String: <empty>\n"));
+    DEBUGINDENTLESS();
+    DEBUGINDENTLESS();
+    return 1;
+  }
+    
+  memmove((*buf + *out_len), string, string_len);
+  *out_len += string_len;
+    
+  /*  Pad to a multiple of 4 bytes if necessary (per RFC 2741).  */
+
+  if (string_len % 4 != 0) {
+    for (i = 0; i < 4 - (string_len % 4); i++) {
+      *(*buf + *out_len) = 0;
+      (*out_len)++;
+    }
+  }
+
+  DEBUGDUMPSETUP("send", (*buf + ilen + 4), ((string_len + 3) / 4) * 4);
+  DEBUGMSG(("dumpv_send", "  String:\t%s\n", string));
+  DEBUGINDENTLESS();
+  DEBUGINDENTLESS();
+  return 1;
+}
+
 u_char*
 agentx_build_string(u_char *bufp, size_t *out_length,
 	u_char *name, size_t name_len, int network_byte_order)
@@ -198,6 +385,7 @@ agentx_build_string(u_char *bufp, size_t *out_length,
     u_char *orig_bufp = bufp;
 
     if ( *out_length < 4 + name_len ) {
+        DEBUGMSGTL(("agentx_build_string", "%d < 4 + %d, fail\n", *out_length, name_len));
         return NULL;
     }
     DEBUGDUMPHEADER("send", "Build String");
@@ -234,6 +422,33 @@ agentx_build_string(u_char *bufp, size_t *out_length,
 }
 
 #ifdef OPAQUE_SPECIAL_TYPES
+int
+agentx_realloc_build_double(u_char **buf, size_t *buf_len, size_t *out_len,
+			    int allow_realloc,
+			    double double_val, int network_order)
+{
+  union {
+    double	doubleVal;
+    int		intVal[2];
+    char	c[sizeof(double)];
+  } du;
+  int tmp;
+  u_char opaque_buffer[3 + sizeof(double)];
+
+  opaque_buffer[0] = ASN_OPAQUE_TAG1;
+  opaque_buffer[1] = ASN_OPAQUE_DOUBLE;
+  opaque_buffer[2] = sizeof(double);
+
+  du.doubleVal = double_val;
+  tmp          = htonl(du.intVal[0]);
+  du.intVal[0] = htonl(du.intVal[1]);
+  du.intVal[1] = tmp;
+  memcpy(&opaque_buffer[3], &du.c[0], sizeof(double));
+
+  return agentx_realloc_build_string(buf, buf_len, out_len, allow_realloc,
+			    opaque_buffer, 3 + sizeof(double), network_order);
+}
+
 u_char*
 agentx_build_double(u_char *bufp, size_t *out_length,
 	double double_val, int network_byte_order)
@@ -262,6 +477,30 @@ agentx_build_double(u_char *bufp, size_t *out_length,
 
     return agentx_build_string( bufp, out_length,
 	    		buf, 3 + sizeof(double), network_byte_order);
+}
+
+int
+agentx_realloc_build_float(u_char **buf, size_t *buf_len, size_t *out_len,
+			   int allow_realloc,
+			   float float_val, int network_order)
+{
+  union {
+    float	floatVal;
+    int		intVal;
+    char	c[sizeof(float)];
+  } fu;
+  u_char opaque_buffer[3 + sizeof(float)];
+
+  opaque_buffer[0] = ASN_OPAQUE_TAG1;
+  opaque_buffer[1] = ASN_OPAQUE_FLOAT;
+  opaque_buffer[2] = sizeof(float);
+
+  fu.floatVal = float_val;
+  fu.intVal   = htonl(fu.intVal);
+  memcpy(&opaque_buffer[3], &fu.c[0], sizeof(float));
+
+  return agentx_realloc_build_string(buf, buf_len, out_len, allow_realloc,
+			      opaque_buffer, 3 + sizeof(float), network_order);
 }
 
 u_char*
@@ -425,6 +664,181 @@ agentx_build_varbind(u_char *bufp, size_t *out_length,
     return bufp;
 }
 
+int
+agentx_realloc_build_varbind(u_char **buf, size_t *buf_len, size_t *out_len,
+			     int allow_realloc,
+			     struct variable_list *vp, int network_order)
+{
+  DEBUGDUMPHEADER("send", "VarBind");
+  DEBUGDUMPHEADER("send", "type");
+#ifdef OPAQUE_SPECIAL_TYPES
+  if ((vp->type == ASN_OPAQUE_FLOAT) || (vp->type == ASN_OPAQUE_DOUBLE) ||
+      (vp->type == ASN_OPAQUE_I64)   || (vp->type == ASN_OPAQUE_U64)    ||
+      (vp->type == ASN_OPAQUE_COUNTER64)) {
+    if (!agentx_realloc_build_short(buf, buf_len, out_len, allow_realloc,
+				 (unsigned short)ASN_OPAQUE, network_order)) {
+      DEBUGINDENTLESS();
+      DEBUGINDENTLESS();
+      return 0;
+    }
+  } else
+#endif
+  if (vp->type == ASN_PRIV_INCL_RANGE || vp->type == ASN_PRIV_EXCL_RANGE) {
+    if (!agentx_realloc_build_short(buf, buf_len, out_len, allow_realloc,
+			      (unsigned short)ASN_OBJECT_ID, network_order)) {
+      DEBUGINDENTLESS();
+      DEBUGINDENTLESS();
+      return 0;
+    }
+  } else {
+    if (!agentx_realloc_build_short(buf, buf_len, out_len, allow_realloc,
+				   (unsigned short)vp->type, network_order)) {
+      DEBUGINDENTLESS();
+      DEBUGINDENTLESS();
+      return 0;
+    }
+  }
+  
+  while ((*out_len + 2) >= *buf_len) {
+    if (!(allow_realloc && snmp_realloc(buf, buf_len))) {
+      DEBUGINDENTLESS();
+      DEBUGINDENTLESS();
+      return 0;
+    }
+  }
+  
+  *(*buf + *out_len) = 0;
+  (*out_len)++;
+  *(*buf + *out_len) = 0;
+  (*out_len)++;
+  DEBUGINDENTLESS();
+
+  DEBUGDUMPHEADER("send", "name");
+  if (!agentx_realloc_build_oid(buf, buf_len, out_len, allow_realloc, 0,
+				vp->name, vp->name_length, network_order)) {
+    DEBUGINDENTLESS();
+    return 0;
+  }
+  DEBUGINDENTLESS();
+
+  DEBUGDUMPHEADER("send", "value");
+  switch (vp->type) {
+
+  case ASN_INTEGER:
+  case ASN_COUNTER:
+  case ASN_GAUGE:
+  case ASN_TIMETICKS:
+    if (!agentx_realloc_build_int(buf, buf_len, out_len, allow_realloc,
+				  *(vp->val.integer), network_order)) {
+      DEBUGINDENTLESS();
+      DEBUGINDENTLESS();
+      return 0;
+    }
+    break;
+
+#ifdef OPAQUE_SPECIAL_TYPES
+  case ASN_OPAQUE_FLOAT:
+    DEBUGDUMPHEADER("send", "Build Opaque Float");
+    DEBUGPRINTINDENT("dumpv_send");
+    DEBUGMSG(("dumpv_send", "  Float:\t%f\n", *(vp->val.floatVal)));
+    if (!agentx_realloc_build_float(buf, buf_len, out_len, allow_realloc,
+				    *(vp->val.floatVal), network_order)) {
+      DEBUGINDENTLESS();
+      DEBUGINDENTLESS();
+      DEBUGINDENTLESS();
+      return 0;
+    }	
+    DEBUGINDENTLESS();
+    break;
+
+  case ASN_OPAQUE_DOUBLE:
+    DEBUGDUMPHEADER("send", "Build Opaque Double");
+    DEBUGPRINTINDENT("dumpv_send");
+    DEBUGMSG(("dumpv_send",  "  Double:\t%lf\n", *(vp->val.doubleVal)));
+    if (!agentx_realloc_build_double(buf, buf_len, out_len, allow_realloc,
+				     *(vp->val.doubleVal), network_order)) {
+      DEBUGINDENTLESS();
+      DEBUGINDENTLESS();
+      DEBUGINDENTLESS();
+      return 0;
+    }	
+    DEBUGINDENTLESS();
+    break;
+
+  case ASN_OPAQUE_I64:
+  case ASN_OPAQUE_U64:
+  case ASN_OPAQUE_COUNTER64:
+	/*  XXX - TODO - encode as raw OPAQUE for now (so fall through
+	    here).  */
+#endif
+
+  case ASN_OCTET_STR:
+  case ASN_IPADDRESS:
+  case ASN_OPAQUE:
+    if (!agentx_realloc_build_string(buf, buf_len, out_len, allow_realloc,
+				vp->val.string, vp->val_len, network_order)) {
+      DEBUGINDENTLESS();
+      DEBUGINDENTLESS();
+      return 0;
+    }
+    break;
+
+  case ASN_OBJECT_ID:
+  case ASN_PRIV_EXCL_RANGE:
+  case ASN_PRIV_INCL_RANGE:
+    if (!agentx_realloc_build_oid(buf, buf_len, out_len, allow_realloc, 1,
+				  vp->val.objid, vp->val_len/sizeof(oid),
+				  network_order)) {
+      DEBUGINDENTLESS();
+      DEBUGINDENTLESS();
+      return 0;
+    }
+    break;
+
+  case ASN_COUNTER64:
+    if (network_order) {
+      DEBUGDUMPHEADER("send", "Build Counter64 (high, low)");
+      if (!agentx_realloc_build_int(buf, buf_len, out_len, allow_realloc,
+				    vp->val.counter64->high, network_order) ||
+	  !agentx_realloc_build_int(buf, buf_len, out_len, allow_realloc,
+				    vp->val.counter64->low, network_order)) {
+	DEBUGINDENTLESS();
+	DEBUGINDENTLESS();
+	DEBUGINDENTLESS();
+	return 0;
+      }
+    } else {
+      DEBUGDUMPHEADER("send", "Build Counter64 (low, high)");
+      if (!agentx_realloc_build_int(buf, buf_len, out_len, allow_realloc,
+				    vp->val.counter64->low, network_order) ||
+	  !agentx_realloc_build_int(buf, buf_len, out_len, allow_realloc,
+				    vp->val.counter64->high, network_order)) {
+	DEBUGINDENTLESS();
+	DEBUGINDENTLESS();
+	DEBUGINDENTLESS();
+	return 0;
+      }
+    }
+    break;
+
+  case ASN_NULL:
+  case SNMP_NOSUCHOBJECT:
+  case SNMP_NOSUCHINSTANCE:
+  case SNMP_ENDOFMIBVIEW:
+    break;
+
+  default:
+    DEBUGMSGTL(("agentx_build_varbind", "unknown type %d (0x%02x)\n",
+		vp->type, vp->type));
+    DEBUGINDENTLESS();
+    DEBUGINDENTLESS();
+    return 0;
+  }
+  DEBUGINDENTLESS();
+  DEBUGINDENTLESS();
+  return 1;
+}
+
 u_char*
 agentx_build_header(struct snmp_pdu *pdu, u_char *bufp, size_t *out_length)
 {
@@ -485,6 +899,400 @@ agentx_build_header(struct snmp_pdu *pdu, u_char *bufp, size_t *out_length)
 }
 
 
+int
+agentx_realloc_build_header(u_char **buf, size_t *buf_len, size_t *out_len,
+			    int allow_realloc,
+			    struct snmp_pdu *pdu)
+{
+  size_t ilen = *out_len;
+  const int network_order = pdu->flags & AGENTX_FLAGS_NETWORK_BYTE_ORDER;
+
+  while ((*out_len + 4) >= *buf_len) {
+    if (!(allow_realloc && snmp_realloc(buf, buf_len))) {
+      return 0;
+    }
+  }
+
+  /*  First 4 bytes are version, pdu type, flags, and a 0 reserved byte.  */
+
+  *(*buf + *out_len) = 1;
+  (*out_len)++;
+  *(*buf + *out_len) = pdu->command;
+  (*out_len)++;
+  *(*buf + *out_len) = (u_char)(pdu->flags & AGENTX_MSG_FLAGS_MASK);
+  (*out_len)++;
+  *(*buf + *out_len) = 0;
+  (*out_len)++;
+
+  DEBUGDUMPHEADER("send", "AgentX Header");
+  DEBUGDUMPSETUP("send", (*buf + ilen), 4);
+  DEBUGMSG(("dumpv_send", "  Version:\t%d\n", (int)*(*buf + ilen)));
+  DEBUGPRINTINDENT("dumpv_send");
+  DEBUGMSG(("dumpv_send", "  Command:\t%d (%s)\n", pdu->command,
+	    agentx_cmd(pdu->command)));
+  DEBUGPRINTINDENT("dumpv_send");
+  DEBUGMSG(("dumpv_send", "  Flags:\t%02x\n", (int)*(*buf + ilen + 2)));
+    
+  DEBUGDUMPHEADER("send", "Session ID");
+  if (!agentx_realloc_build_int(buf, buf_len, out_len, allow_realloc,
+				pdu->sessid, network_order)) {
+    DEBUGINDENTLESS();
+    DEBUGINDENTLESS();
+    return 0;
+  }
+  DEBUGINDENTLESS();
+
+  DEBUGDUMPHEADER("send", "Transaction ID");
+  if (!agentx_realloc_build_int(buf, buf_len, out_len, allow_realloc,
+				pdu->transid, network_order)) {
+    DEBUGINDENTLESS();
+    DEBUGINDENTLESS();
+    return 0;
+  }
+  DEBUGINDENTLESS();
+
+  DEBUGDUMPHEADER("send", "Request ID");
+  if (!agentx_realloc_build_int(buf, buf_len, out_len, allow_realloc,
+				pdu->reqid, network_order)) {
+    DEBUGINDENTLESS();
+    DEBUGINDENTLESS();
+    return 0;
+  }
+  DEBUGINDENTLESS();
+
+  DEBUGDUMPHEADER("send", "Dummy Length :-(");
+  if (!agentx_realloc_build_int(buf, buf_len, out_len, allow_realloc,
+				0, network_order)) {
+    DEBUGINDENTLESS();
+    DEBUGINDENTLESS();
+    return 0;
+  }
+  DEBUGINDENTLESS();
+
+  if (pdu->flags & AGENTX_MSG_FLAG_NON_DEFAULT_CONTEXT) {
+    DEBUGDUMPHEADER("send", "Community");
+    if (!agentx_realloc_build_string(buf, buf_len, out_len, allow_realloc,
+				     pdu->community, pdu->community_len,
+				     network_order)) {
+      DEBUGINDENTLESS();
+      DEBUGINDENTLESS();
+      return 0;
+    }
+    DEBUGINDENTLESS();
+  }
+
+  DEBUGINDENTLESS();
+  return 1;
+}
+
+static int
+_agentx_realloc_build(u_char **buf, size_t *buf_len, size_t *out_len,
+		      int allow_realloc,
+		      struct snmp_session *session,
+		      struct snmp_pdu *pdu)
+{
+  size_t ilen = *out_len, range_offset = 0, prefix_offset = 0;
+  struct variable_list *vp;
+  int inc, i = 0;
+  const int network_order = pdu->flags & AGENTX_FLAGS_NETWORK_BYTE_ORDER;
+  
+  session->s_snmp_errno = 0;
+  session->s_errno = 0;
+     
+  /*  Various PDU types don't include context information (RFC 2741, p. 20). */
+  switch (pdu->command) {
+  case AGENTX_MSG_OPEN:
+  case AGENTX_MSG_CLOSE:
+  case AGENTX_MSG_RESPONSE:
+  case AGENTX_MSG_COMMITSET:
+  case AGENTX_MSG_UNDOSET:
+  case AGENTX_MSG_CLEANUPSET:
+    pdu->flags &= ~(AGENTX_MSG_FLAG_NON_DEFAULT_CONTEXT);
+  }
+
+  /*  Build the header (and context if appropriate).  */
+  if (!agentx_realloc_build_header(buf, buf_len, out_len, allow_realloc, pdu)){
+    return 0;
+  }
+     
+  /*  Everything causes a response, except for agentx-Response-PDU and
+      agentx-CleanupSet-PDU.  */
+     
+  pdu->flags |= UCD_MSG_FLAG_EXPECT_RESPONSE;
+     
+  DEBUGDUMPHEADER("send", "AgentX Payload");
+  switch (pdu->command) {
+
+  case AGENTX_MSG_OPEN:
+    /*  Timeout  */
+    while ((*out_len + 4) >= *buf_len) {
+      if (!(allow_realloc && snmp_realloc(buf, buf_len))) {
+	DEBUGINDENTLESS();
+	return 0;
+      }
+    }
+    *(*buf + *out_len) = (u_char)pdu->time;
+    (*out_len)++;
+    for (i = 0; i < 3; i++) {
+      *(*buf + *out_len) = 0;
+      (*out_len)++;
+    }
+    DEBUGDUMPHEADER("send", "Open Timeout");
+    DEBUGDUMPSETUP("send", (*buf + *out_len - 4), 4);
+    DEBUGMSG(("dumpv_send", "  Timeout:\t%d\n", (int)*(*buf + *out_len - 4)));
+    DEBUGINDENTLESS();
+
+    DEBUGDUMPHEADER("send", "Open ID");
+    if (!agentx_realloc_build_oid(buf, buf_len, out_len, allow_realloc, 0,
+				  pdu->variables->name,
+				  pdu->variables->name_length, network_order)){
+      DEBUGINDENTLESS();
+      DEBUGINDENTLESS();
+      return 0;
+    }
+    DEBUGINDENTLESS();
+    DEBUGDUMPHEADER("send", "Open Description");
+    if (!agentx_realloc_build_string(buf, buf_len, out_len, allow_realloc,
+				     pdu->variables->val.string,
+				     pdu->variables->val_len, network_order)) {
+      DEBUGINDENTLESS();
+      DEBUGINDENTLESS();
+      return 0;
+    }
+    DEBUGINDENTLESS();
+    break;
+
+  case AGENTX_MSG_CLOSE:
+    /*  Reason  */
+    while ((*out_len + 4) >= *buf_len) {
+      if (!(allow_realloc && snmp_realloc(buf, buf_len))) {
+	DEBUGINDENTLESS();
+	return 0;
+      }
+    }
+    *(*buf + *out_len) = (u_char)pdu->errstat;
+    (*out_len)++;
+    for (i = 0; i < 3; i++) {
+      *(*buf + *out_len) = 0;
+      (*out_len)++;
+    }
+    DEBUGDUMPHEADER("send", "Close Reason");
+    DEBUGDUMPSETUP("send", (*buf + *out_len - 4), 4);
+    DEBUGMSG(("dumpv_send", "  Reason:\t%d\n", (int)*(*buf + *out_len - 4)));
+    DEBUGINDENTLESS();
+    break;
+	    
+  case AGENTX_MSG_REGISTER:
+  case AGENTX_MSG_UNREGISTER:
+    while ((*out_len + 4) >= *buf_len) {
+      if (!(allow_realloc && snmp_realloc(buf, buf_len))) {
+	DEBUGINDENTLESS();
+	return 0;
+      }
+    }
+    if (pdu->command == AGENTX_MSG_REGISTER) {
+      *(*buf + *out_len) = (u_char)pdu->time;
+    } else {
+      *(*buf + *out_len) = 0;
+    }
+    (*out_len)++;
+    *(*buf + *out_len) = (u_char)pdu->priority;
+    (*out_len)++;
+    *(*buf + *out_len) = (u_char)pdu->range_subid;
+    range_offset = *out_len;
+    (*out_len)++;
+    *(*buf + *out_len) = (u_char)0;
+    (*out_len)++;
+
+    DEBUGDUMPHEADER("send", "(Un)Register Header");
+    DEBUGDUMPSETUP("send", (*buf + *out_len - 4), 4);
+    if (pdu->command == AGENTX_MSG_REGISTER) {
+      DEBUGMSG(("dumpv_send", "  Timeout:\t%d\n", (int)*(*buf+*out_len-4)));
+      DEBUGPRINTINDENT("dumpv_send");
+    }
+    DEBUGMSG(("dumpv_send", "  Priority:\t%d\n", (int)*(*buf+*out_len-3)));
+    DEBUGPRINTINDENT("dumpv_send");
+    DEBUGMSG(("dumpv_send", "  Range SubID:\t%d\n", (int)*(*buf+*out_len-2)));
+    DEBUGINDENTLESS();
+
+    vp = pdu->variables;
+    prefix_offset = *out_len + 1;
+    DEBUGDUMPHEADER("send", "(Un)Register Prefix");
+    if (!agentx_realloc_build_oid(buf, buf_len, out_len, allow_realloc, 0,
+				  vp->name, vp->name_length, network_order)) {
+      
+      DEBUGINDENTLESS();
+      DEBUGINDENTLESS();
+      return 0;
+    }
+    DEBUGINDENTLESS();
+
+    if (pdu->range_subid) {
+      DEBUGDUMPHEADER("send", "(Un)Register Range");
+      if (!agentx_realloc_build_int(buf, buf_len, out_len, allow_realloc,
+			  vp->val.objid[pdu->range_subid-1], network_order)) {
+	DEBUGINDENTLESS();
+	DEBUGINDENTLESS();
+	return 0;
+      }
+      DEBUGINDENTLESS();
+
+      /*  If the OID has been 'compacted', then tweak the packet's
+	  'range_subid' to reflect this.  */
+      if (*(*buf + prefix_offset) != 0) {
+	*(*buf + prefix_offset) -= 5;
+	DEBUGPRINTINDENT("dumpv_send");
+	DEBUGMSG(("dumpv_send", "  Range SubID tweaked:\t%d\n",
+		  *(*buf + prefix_offset)));
+      }
+    }
+    break;
+	    
+  case AGENTX_MSG_GETBULK:
+    DEBUGDUMPHEADER("send", "GetBulk Non-Repeaters");
+    if (!agentx_realloc_build_short(buf, buf_len, out_len, allow_realloc,
+				    pdu->non_repeaters, network_order)) {
+      DEBUGINDENTLESS();
+      DEBUGINDENTLESS();
+      return 0;
+    }
+    DEBUGINDENTLESS();
+
+    DEBUGDUMPHEADER("send", "GetBulk Max-Repetitions");
+    if (!agentx_realloc_build_short(buf, buf_len, out_len, allow_realloc,
+				    pdu->max_repetitions, network_order)) {
+      DEBUGINDENTLESS();
+      DEBUGINDENTLESS();
+      return 0;
+    }
+    DEBUGINDENTLESS();
+
+    /*  Fallthrough  */
+
+  case AGENTX_MSG_GET:
+  case AGENTX_MSG_GETNEXT:
+    DEBUGDUMPHEADER("send", "Get* Variable List");
+    for (vp = pdu->variables; vp != NULL ; vp=vp->next_variable) {
+      inc = (vp->type == ASN_PRIV_INCL_RANGE);
+      if (!agentx_realloc_build_oid(buf, buf_len, out_len, allow_realloc, inc,
+				   vp->name, vp->name_length, network_order)) {
+	DEBUGINDENTLESS();
+	DEBUGINDENTLESS();
+	return 0;
+      }
+      if (!agentx_realloc_build_oid(buf, buf_len, out_len, allow_realloc, 0,
+				    vp->val.objid, vp->val_len/sizeof(oid),
+				    network_order)) {
+	DEBUGINDENTLESS();
+	DEBUGINDENTLESS();
+	return 0;
+      }
+    }
+    DEBUGINDENTLESS();
+    break;
+    
+  case AGENTX_MSG_RESPONSE:
+    pdu->flags &= ~(UCD_MSG_FLAG_EXPECT_RESPONSE);
+    if (!agentx_realloc_build_int(buf, buf_len, out_len, allow_realloc,
+				  pdu->time, network_order)) {
+      DEBUGINDENTLESS();
+      return 0;
+    }
+    DEBUGDUMPHEADER("send", "Response");
+    DEBUGDUMPSETUP("send", (*buf + *out_len - 4), 4);
+    DEBUGMSG(("dumpv_send", "  sysUpTime:\t%d\n", pdu->time));
+    DEBUGINDENTLESS();
+
+    if (!agentx_realloc_build_short(buf, buf_len, out_len, allow_realloc,
+				    pdu->errstat, network_order) ||
+	!agentx_realloc_build_short(buf, buf_len, out_len, allow_realloc,
+				    pdu->errindex, network_order)) {
+      DEBUGINDENTLESS();
+      return 0;
+    }
+    DEBUGDUMPHEADER("send", "Response errors");
+    DEBUGDUMPSETUP("send", (*buf + *out_len - 4), 4);
+    DEBUGMSG(("dumpv_send", "  errstat:\t%d\n",  pdu->errstat));
+    DEBUGPRINTINDENT("dumpv_send");
+    DEBUGMSG(("dumpv_send", "  errindex:\t%d\n", pdu->errindex));
+    DEBUGINDENTLESS();
+
+    /*  Fallthrough  */
+
+  case AGENTX_MSG_INDEX_ALLOCATE:
+  case AGENTX_MSG_INDEX_DEALLOCATE:
+  case AGENTX_MSG_NOTIFY:
+  case AGENTX_MSG_TESTSET:
+    DEBUGDUMPHEADER("send", "Get* Variable List");
+    for (vp = pdu->variables; vp != NULL; vp=vp->next_variable) {
+      if (!agentx_realloc_build_varbind(buf, buf_len, out_len, allow_realloc,
+					vp, network_order)) {
+	DEBUGINDENTLESS();
+	DEBUGINDENTLESS();
+	return 0;
+      }
+    }
+    DEBUGINDENTLESS();
+    break;
+	    
+  case AGENTX_MSG_COMMITSET:
+  case AGENTX_MSG_UNDOSET:
+  case AGENTX_MSG_PING:
+    /*  "Empty" packet.  */
+    break;
+
+  case AGENTX_MSG_CLEANUPSET:
+    pdu->flags &= ~(UCD_MSG_FLAG_EXPECT_RESPONSE);
+    break;
+	    
+  case AGENTX_MSG_ADD_AGENT_CAPS:
+    DEBUGDUMPHEADER("send", "AgentCaps OID");
+    if (!agentx_realloc_build_oid(buf, buf_len, out_len, allow_realloc, 0,
+			        pdu->variables->name,
+				pdu->variables->name_length, network_order)) {
+      DEBUGINDENTLESS();
+      DEBUGINDENTLESS();
+      return 0;
+    }
+    DEBUGINDENTLESS();
+
+    DEBUGDUMPHEADER("send", "AgentCaps Description");
+    if (!agentx_realloc_build_string(buf, buf_len, out_len, allow_realloc,
+				     pdu->variables->val.string,
+				     pdu->variables->val_len, network_order)) {
+      DEBUGINDENTLESS();
+      DEBUGINDENTLESS();
+      return 0;
+    }
+    DEBUGINDENTLESS();
+    break;
+
+  case AGENTX_MSG_REMOVE_AGENT_CAPS:
+    DEBUGDUMPHEADER("send", "AgentCaps OID");
+    if (!agentx_realloc_build_oid(buf, buf_len, out_len, allow_realloc, 0,
+			        pdu->variables->name,
+				pdu->variables->name_length, network_order)) {
+      DEBUGINDENTLESS();
+      DEBUGINDENTLESS();
+      return 0;
+    }
+    DEBUGINDENTLESS();
+    break;
+
+  default:
+    session->s_snmp_errno = SNMPERR_UNKNOWN_PDU;
+    return 0;
+  }
+  DEBUGINDENTLESS();
+
+  /*  Fix the payload length (ignoring the 20-byte header).  */
+
+  agentx_build_int((*buf + 16), (*out_len - ilen) - 20, network_order);
+
+  DEBUGMSGTL(("agentx_build", "packet built okay\n"));
+  return 1;
+}
+
 static int
 _agentx_build(struct snmp_session        *session,
              struct snmp_pdu            *pdu,
@@ -494,7 +1302,7 @@ _agentx_build(struct snmp_session        *session,
      u_char *bufp = packet;
      u_char *prefix_ptr, *range_ptr;
      struct variable_list *vp;
-     int inc;
+     int inc, vbc = 0;
      
     session->s_snmp_errno = 0;
     session->s_errno = 0;
@@ -693,10 +1501,18 @@ _agentx_build(struct snmp_session        *session,
 	case AGENTX_MSG_TESTSET:
 	    DEBUGDUMPHEADER("send", "Get* Variable List");
 	    for (vp = pdu->variables; vp ; vp=vp->next_variable ) {
+	        vbc++;
 		bufp = agentx_build_varbind( bufp, out_length, vp,
 				pdu->flags &  AGENTX_FLAGS_NETWORK_BYTE_ORDER);
 	    	if (bufp == NULL) {
-		  DEBUGMSGTL(("agentx_build", "error building varbind\n"));
+		  u_char *buf = NULL;
+		  size_t bl = 0, ol = 0;
+		  sprint_realloc_variable(&buf, &bl, &ol, 1,
+					  vp->name, vp->name_length, vp);
+		  DEBUGMSGTL(("agentx_build",
+			   "error building varbind #%d: %s [msgType 0x%02x]\n",
+			      vbc, buf, pdu->command));
+		  free(buf);
 		  return -1;
 		}
 	    }
@@ -763,12 +1579,35 @@ agentx_build(struct snmp_session        *session,
              size_t                        *out_length)
 {
     int rc;
+    DEBUGMSGTL(("agentx_build", "(%08p, %08p, %08p, %08p(->%d))\n",
+		session, pdu, packet, out_length, *out_length));
     rc = _agentx_build(session,pdu,packet,out_length);
     if (rc) {
         if (0 == session->s_snmp_errno)
             session->s_snmp_errno = SNMPERR_BAD_ASN1_BUILD;
     }
     return (rc);
+}
+
+int
+agentx_realloc_build(struct snmp_session *session, struct snmp_pdu *pdu,
+		     u_char **buf, size_t *buf_len, size_t *out_len)
+		     
+{
+  DEBUGMSGTL(("agentx_realloc_build", "blah\n"));
+
+  if (session == NULL || buf_len == NULL ||
+      out_len == NULL || pdu     == NULL || buf == NULL) {
+    return -1;
+  }
+  if (!_agentx_realloc_build(buf, buf_len, out_len, 1, session, pdu)) {
+    if (session->s_snmp_errno == 0) {
+      session->s_snmp_errno = SNMPERR_BAD_ASN1_BUILD;
+    }
+    return -1;
+  }
+
+  return 0;
 }
 
 	/***********************
@@ -1041,7 +1880,7 @@ agentx_parse_varbind( u_char *data, size_t *length, int *type,
     struct counter64 *c64 = (struct counter64 *)data_buf;
      
     DEBUGDUMPHEADER("recv", "VarBind:");
-    DEBUGDUMPHEADER("recv", "Byte Order");
+    DEBUGDUMPHEADER("recv", "Type");
     *type = agentx_parse_short(bufp, network_byte_order);
     DEBUGINDENTLESS();
     bufp    += 4;

@@ -79,6 +79,8 @@ extern "C" {
 
 
 int agentx_build(struct snmp_session *, struct snmp_pdu *, u_char *, size_t *);
+int agentx_realloc_build(struct snmp_session *session, struct snmp_pdu *pdu,
+			 u_char **buf, size_t *buf_len, size_t *out_len);
 int agentx_parse(struct snmp_session *, struct snmp_pdu *, u_char *, size_t);
 int agentx_check_packet(u_char *, size_t);
 
