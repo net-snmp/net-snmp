@@ -1548,10 +1548,10 @@ get_tc(const char *descriptor,
     struct tc *tcp;
 
     i = get_tc_index(descriptor, modid);
+    if (tc_index) *tc_index = i;
     if (i != -1)
       {
  	tcp = &tclist[i];
-	if (tc_index) *tc_index = i;
 	if (ep) {
 	    free_enums(ep);
 	    *ep = copy_enums(tcp->enums);
@@ -1566,7 +1566,6 @@ get_tc(const char *descriptor,
 	}
 	return tcp->type;
       }
-    else *tc_index = -1;
     return LABEL;
 }
 
