@@ -42,7 +42,8 @@ processes ::= SEQUENCE {
    processMax    INTEGER,
    processCount  INTEGER,
    processError  INTEGER,
-   processErrMessage  DisplayString
+   processErrMessage  DisplayString,
+   processErrorFix  INTEGER
 }
 
 processIndex OBJECT-TYPE
@@ -107,6 +108,14 @@ processErrMessage OBJECT-TYPE
 		"An error message describing the problem (if one exists)."
 	::= { Processes 101 }
 
+processErrFix OBJECT-TYPE
+	SYNTAX INTEGER
+	ACCESS read-write
+	STATUS mandatory
+	DESCRIPTION
+		"An error message describing the problem (if one exists)."
+	::= { Processes 102 }
+
 Extensible OBJECT-TYPE
 	SYNTAX extensible
 	ACCESS not-accessible
@@ -121,7 +130,8 @@ extensible ::= SEQUENCE {
    extensibleNames   DisplayString,
    extensibleCommand DisplayString,
    extensibleResult  INTEGER,
-   extensibleOutput  DisplayString
+   extensibleOutput  DisplayString,
+   extensibleErrFix  INTEGER
 }
 
 extensibleIndex OBJECT-TYPE
@@ -164,6 +174,14 @@ extensibleOutput OBJECT-TYPE
 		"The output of the extensible command (top line only)."
 	::= { Extensible 101 }
 
+extensibleErrFix OBJECT-TYPE
+	SYNTAX INTEGER
+	ACCESS read-write
+	STATUS mandatory
+	DESCRIPTION
+		"Set to 1 to fix the problem."
+	::= { Extensible 102 }
+	
 Memory OBJECT-TYPE
 	SYNTAX extensible
 	ACCESS not-accessible
