@@ -479,7 +479,7 @@ setup_engineID(u_char ** eidp, const char *text)
      */
 #ifdef HAVE_GETHOSTNAME
     u_char          buf[SNMP_MAXBUF_SMALL];
-    struct hostent *hent;
+    struct hostent *hent = NULL;
 #endif
     u_char         *bufp = NULL;
     size_t          len;
