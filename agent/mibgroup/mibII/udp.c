@@ -66,6 +66,9 @@
 #if HAVE_SYS_QUEUE_H
 #include <sys/queue.h>
 #endif
+#ifdef freebsd3
+#include <sys/socketvar.h>
+#endif
 #if HAVE_NETINET_IN_PCB_H
 #include <netinet/in_pcb.h>
 #endif
@@ -536,9 +539,15 @@ static struct inpcb udp_inpcb, *udp_prev;
 #ifdef PCB_TABLE
 static struct inpcb *udp_head, *udp_next;
 #endif
+#if defined(CAN_USE_SYSCTL) && defined(UDPCTL_PCBLIST)
+static char *udpcb_buf = NULL;
+static struct xinpgen *xig = NULL;
+#endif /* !defined(CAN_USE_SYSCTL) || !define(UDPCTL_PCBLIST) */
+
 
 static void UDP_Scan_Init(void)
 {
+#if !defined(CAN_USE_SYSCTL) || !defined(UDPCTL_PCBLIST)
 #ifdef PCB_TABLE
     struct inpcbtable table;
 #endif
@@ -619,10 +628,41 @@ static void UDP_Scan_Init(void)
     /* first entry to go: */
     udp_prev = udp_inpcb_list;
 #endif /*linux */
+#else /*  !defined(CAN_USE_SYSCTL) || !defined(UDPCTL_PCBLIST) */
+    {
+	size_t len;
+	int cc;
+	int sname[] = { CTL_NET, PF_INET, IPPROTO_UDP, UDPCTL_PCBLIST };
+
+	if (udpcb_buf) {
+	    free(udpcb_buf);
+	    udpcb_buf = NULL;
+	}
+	xig = NULL;
+
+	len = 0;
+	if (sysctl(sname, 4, 0, &len, 0, 0) < 0) {
+	    return;
+	}
+	if ((udpcb_buf = malloc(len)) == NULL) {
+	    return;
+	}
+	if (sysctl(sname, 4, udpcb_buf, &len, 0, 0) < 0) {
+	    free(udpcb_buf);
+	    udpcb_buf = NULL;
+	    return;
+	}
+
+	xig = (struct xinpgen *)udpcb_buf;
+	xig = (struct xinpgen *)((char *)xig + xig->xig_len);
+	return;
+    }
+#endif /*  !defined(CAN_USE_SYSCTL) || !defined(UDPCTL_PCBLIST) */
 }
 
 static int UDP_Scan_Next(struct inpcb *RetInPcb)
 {
+#if !defined(CAN_USE_SYSCTL) || !defined(UDPCTL_PCBLIST)
 	register struct inpcb *next;
 
 #ifndef linux
@@ -659,6 +699,17 @@ static int UDP_Scan_Next(struct inpcb *RetInPcb)
 	*RetInPcb = udp_inpcb;
 	udp_prev = next;
 #endif linux
+#else /*  !defined(CAN_USE_SYSCTL) || !defined(UDPCTL_PCBLIST) */
+	/* Are we done? */
+	if ((xig == NULL) ||
+	    (xig->xig_len <= sizeof(struct xinpgen)))
+	    return(0);  
+	    
+	*RetInPcb = ((struct xinpcb *)xig)->xi_inp;
+	
+	/* Prepare for Next read */
+	xig = (struct xinpgen *)((char *)xig + xig->xig_len);
+#endif /*  !defined(CAN_USE_SYSCTL) || !defined(UDPCTL_PCBLIST) */
 	return(1);	/* "OK" */
 }
 #endif /* solaris2 */

@@ -4,7 +4,6 @@
  *
  */
 
-
 #include <config.h>
 #include <unistd.h>
 #include "mib_module_config.h"
@@ -60,6 +59,9 @@
 #endif
 #if HAVE_NETINET_IP_VAR_H
 #include <netinet/ip_var.h>
+#endif
+#ifdef freebsd3
+#include <sys/socketvar.h>
 #endif
 #if HAVE_NETINET_IN_PCB_H
 #include <netinet/in_pcb.h>
@@ -355,7 +357,7 @@ var_tcp(struct variable *vp,
 	    case TCPOUTRSTS:
 		long_return = tcpstat.tcps_sndctrl - tcpstat.tcps_closed;
 		return (u_char *) &long_return;
-#endif linux
+#endif /* linux */
 	    default:
 		ERROR_MSG("");
 	}
@@ -899,8 +901,14 @@ static struct inpcb *tcp_next, *tcp_head;
 static struct inpcb *inpcb_list;
 #endif
 
+#if defined(CAN_USE_SYSCTL) && defined(TCPCTL_PCBLIST)
+static char *tcpcb_buf = NULL;
+static struct xinpgen *xig = NULL;
+#endif /* !defined(CAN_USE_SYSCTL) || !define(TCPCTL_PCBLIST) */
+
 void TCP_Scan_Init (void)
 {
+#if  !defined(CAN_USE_SYSCTL) || !defined(TCPCTL_PCBLIST)
 #ifdef PCB_TABLE
     struct inpcbtable table;
 #endif
@@ -988,11 +996,41 @@ void TCP_Scan_Init (void)
     tcp_prev = inpcb_list;
 
 #endif /* linux */
+#else /*  !defined(CAN_USE_SYSCTL) || !defined(TCPCTL_PCBLIST) */
+    {
+	size_t len;
+	int sname[] = { CTL_NET, PF_INET, IPPROTO_TCP, TCPCTL_PCBLIST };
+
+	if (tcpcb_buf) {
+	    free(tcpcb_buf);
+	    tcpcb_buf = NULL;
+	}
+	xig = NULL;
+
+	len = 0;
+	if (sysctl(sname, 4, 0, &len, 0, 0) < 0) {
+	    return;
+	}
+	if ((tcpcb_buf = malloc(len)) == NULL) {
+	    return;
+	}
+	if (sysctl(sname, 4, tcpcb_buf, &len, 0, 0) < 0) {
+	    free(tcpcb_buf);
+	    tcpcb_buf = NULL;
+	    return;
+	}
+
+	xig = (struct xinpgen *)tcpcb_buf;
+	xig = (struct xinpgen *)((char *)xig + xig->xig_len);
+	return;
+    }
+#endif /*  !defined(CAN_USE_SYSCTL) || !defined(TCPCTL_PCBLIST) */
 }
 
 int TCP_Scan_Next(int *State,
 		  struct inpcb *RetInPcb)
 {
+#if !defined(CAN_USE_SYSCTL) || !defined(TCPCTL_PCBLIST)
 	register struct inpcb *next;
 #ifndef linux
 	struct tcpcb tcpcb;
@@ -1034,6 +1072,18 @@ int TCP_Scan_Next(int *State,
 #if !(defined(netbsd1) || defined(freebsd2) || defined(openbsd2))
 	tcp_prev = next;
 #endif
+#else /*  !defined(CAN_USE_SYSCTL) || !defined(TCPCTL_PCBLIST) */
+	/* Are we done? */
+	if ((xig == NULL) ||
+	    (xig->xig_len <= sizeof(struct xinpgen)))
+	    return(0);  
+	
+	*State = ((struct xtcpcb *)xig)->xt_tp.t_state;
+	*RetInPcb = ((struct xtcpcb *)xig)->xt_inp;
+	
+	/* Prepare for Next read */
+	xig = (struct xinpgen *)((char *)xig + xig->xig_len);
+#endif /*  !defined(CAN_USE_SYSCTL) || !defined(TCPCTL_PCBLIST) */
 	return(1);	/* "OK" */
 }
 #endif /* solaris2 */
