@@ -5,6 +5,11 @@
 #if HAVE_NETINET_IN_H
 #include <netinet/in.h>
 #endif
+#if HAVE_STRING_H
+#include <string.h>
+#else
+#include <strings.h>
+#endif
 
 #include "tools.h"
 #include "callback.h"
@@ -70,6 +75,9 @@ snmp_call_callbacks(int major, int minor, void *caller_arg) {
 
   /* for each registered callback of type major and minor */
   for(scp = thecallbacks[major][minor]; scp != NULL; scp = scp->next) {
+
+    DEBUGMSGTL(("callback","calling a callback for maj=%d min=%d\n",
+                major, minor));
 
     /* call them */
     (*(scp->sc_callback))(major, minor, caller_arg, scp->sc_client_arg);

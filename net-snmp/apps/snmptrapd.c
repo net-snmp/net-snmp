@@ -890,7 +890,8 @@ void update_config(a)
     read_config_with_type (optconfigfile, "snmptrapd");
   } 
 #endif
-  snmp_call_callbacks(SNMP_CALLBACK_LIBRARY, SNMP_CALLBACK_POST_READ_CONFIG);
+  snmp_call_callbacks(SNMP_CALLBACK_LIBRARY, SNMP_CALLBACK_POST_READ_CONFIG,
+                      NULL);
 
   signal(SIGHUP, update_config);
 }

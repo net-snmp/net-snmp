@@ -43,8 +43,9 @@ struct targetParamTable_struct {
 
 /* function definitions */
 
-extern void          init_snmpTargetParamsEntry(void);
-extern void          shutdown_snmpTargetParamsEntry(void);
+void          init_snmpTargetParamsEntry(void);
+int           store_snmpTargetParamsEntry(int majorID, int minorID,
+                                          void *serverarg, void *clientarg);
 extern FindVarMethod var_snmpTargetParamsEntry;
 
 void snmpd_parse_config_targetParams(   char *, char *);

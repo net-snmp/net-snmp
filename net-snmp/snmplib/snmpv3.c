@@ -423,6 +423,9 @@ init_snmpv3(const char *type) {
   /* we need to be called back later */
   snmp_register_callback(SNMP_CALLBACK_LIBRARY, SNMP_CALLBACK_POST_READ_CONFIG,
                          init_snmpv3_post_config, NULL);
+  /* we need to be called back later */
+  snmp_register_callback(SNMP_CALLBACK_LIBRARY, SNMP_CALLBACK_STORE_DATA,
+                         snmpv3_store, (void *) type);
 
 
 #if		!defined(USE_INTERNAL_MD5)
@@ -495,20 +498,24 @@ init_snmpv3_post_config(int majorid, int minorid, void *serverarg,
                  TRUE);
 
   free(c_engineID);
+  return SNMPERR_SUCCESS;
 }
 
 /*******************************************************************-o-******
- * shutdown_snmpv3
+ * store_snmpv3
  *
  * Parameters:
  *	*type
  */
-void
-shutdown_snmpv3(const char *type)
-{
+int
+snmpv3_store(int majorID, int minorID, void *serverarg, void *clientarg) {
   char line[SNMP_MAXBUF_SMALL];
   char c_engineID[SNMP_MAXBUF_SMALL];
   int  engineIDLen;
+  const char *type = (const char *) clientarg;
+
+  if (type == NULL)  /* should never happen, since the arg is ours */
+    type = "unknown";
 
   sprintf(line, "engineBoots %d", engineBoots);
   read_config_store(type, line);
@@ -522,12 +529,8 @@ shutdown_snmpv3(const char *type)
                                   engineIDLen);
     read_config_store(type, line);
   }
-        
-#if		!defined(USE_INTERNAL_MD5) 
-  sc_shutdown();
-#endif		/* !USE_INTERNAL_MD5 */
-
-}  /* shutdown_snmpv3() */
+  return SNMPERR_SUCCESS;
+}  /* snmpv3_store() */
 
 int
 snmpv3_local_snmpEngineBoots(void)

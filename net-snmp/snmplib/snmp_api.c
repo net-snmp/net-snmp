@@ -461,6 +461,8 @@ init_snmp(const char *type)
 {
   static int	done_init = 0;	/* To prevent double init's. */
 
+  init_callbacks();
+
   if (done_init) {
     return;
   }
@@ -479,11 +481,19 @@ init_snmp(const char *type)
   init_mib();
 
   read_configs();
-  snmp_call_callbacks(SNMP_CALLBACK_LIBRARY, SNMP_CALLBACK_POST_READ_CONFIG);
+  snmp_call_callbacks(SNMP_CALLBACK_LIBRARY, SNMP_CALLBACK_POST_READ_CONFIG,
+                      NULL);
 
   init_snmp_session();
 
 }  /* end init_snmp() */
+
+void
+snmp_store(const char *type) {
+  snmp_clean_persistent(type);
+  snmp_call_callbacks(SNMP_CALLBACK_LIBRARY, SNMP_CALLBACK_STORE_DATA, NULL);
+}
+
 
 /* snmp_shutdown(const char *type):
 
@@ -495,8 +505,8 @@ init_snmp(const char *type)
 */
 void
 snmp_shutdown(const char *type) {
-  snmp_clean_persistent(type);
-  shutdown_snmpv3(type);
+  snmp_store(type);
+  snmp_call_callbacks(SNMP_CALLBACK_LIBRARY, SNMP_CALLBACK_SHUTDOWN, NULL);
 }
 
 
