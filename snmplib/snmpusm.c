@@ -2250,7 +2250,8 @@ usm_process_in_msg (
 	 * If the user/engine ID is unknown, report this as an error.
 	 */
 	if ((user = usm_get_user_from_list(secEngineID, *secEngineIDLen,
-					   secName, userList, 0)) == NULL) {
+					   secName, userList,
+                                           (sess->isAuthoritative == SNMP_SESS_AUTHORITATIVE) ? 0 : 1)) == NULL) {
 	  DEBUGMSGTL(("usm","Unknown User(%s)\n",secName));		
 	  if (snmp_increment_statistic (STAT_USMSTATSUNKNOWNUSERNAMES)==0) {
 	      DEBUGMSGTL(("usm","%s\n", "Failed to increment statistic."));
@@ -2638,7 +2639,7 @@ usm_get_user_from_list(u_char *engineID, size_t engineIDLen,
   }
 
   /* return "" user used to facilitate engineID discovery */
-  if (use_default && !strcmp(name, "")) return noNameUser;
+  if (use_default && !strcmp(name, "")) return noNameUser; 
   return NULL;
 }
 
