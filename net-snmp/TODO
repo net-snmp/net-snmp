@@ -17,6 +17,7 @@ TODO list for the ucd-snmp-coders:
   snmpset should check against MIB size if possible?
   Remove unsuppored mib nodes from output instead of returning '0's.
   Support for Counter64 in snmpdelta
+  API for traps that subagents can use. Needs pass_persist and/or passthrough.
 
 ===================
 
