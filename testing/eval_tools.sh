@@ -176,7 +176,7 @@ DELAY() {
 #   Sets return_value to 0 or 1.
 #
 EXPECTRESULT() {
-    if [ $snmp_last_test_result = $1 ]; then
+    if [ "$snmp_last_test_result" = "$1" ]; then
 	return_value=0
     else
 	return_value=1
