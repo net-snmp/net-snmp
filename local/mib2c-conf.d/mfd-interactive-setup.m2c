@@ -283,6 +283,12 @@ $m2c_conf_comment
 $m2c_conf_comment
 $m2c_conf_maybe_comment @eval $@m2c_include_examples = $m2c_temp_include_examples@
 $m2c_conf_comment
+$m2c_conf_comment_divider
+$m2c_conf_comment
+$m2c_conf_comment
+$m2c_conf_comment
+$m2c_conf_maybe_comment @eval $@m2c_irreversible_commit = $m2c_irreversible_commit@
+$m2c_conf_comment
 ##
 ########################################################################
 @if $m2c_mark_boundary == 1@
