@@ -206,7 +206,7 @@ nexthost: while (  $hostrow = $cursor->fetchrow_hashref ) {
 		    or warn "\nnot ok: $cmd -> $DBI::errstr\n" if ($doit);
 		
 		# delete the data beyond the number of days requested.
-		$dbh->do("delete from $tablelist->{'tablename'}hist where (unix_timestamp()-unix_timestamp(updated)) > $tablelist->{'keephistory'}*24*60*60") or warn "\nnot ok: $DBI::errstr\n" if ($doit);
+		$dbh->do("delete from $tablelist->{'tablename'}hist where (unix_timestamp()-unix_timestamp(updated)) > $tablelist->{'keephistory'}*24*60*60 and host = $host") or warn "\nnot ok: $DBI::errstr\n" if ($doit);
 	    }
 
 	    my $newerr = 
@@ -275,7 +275,7 @@ sub setuptable {
     print STDERR "show tables like $mib->{label}$suffix: $ret\n" if($verbose);
     print STDERR " creating table for $mibnode ($mib->{label}$suffix)\n" if ($verbose);
     
-    $cmd = "create table $mib->{label}$suffix (id integer auto_increment primary key, host varchar(16), oidindex varchar(254)";
+    $cmd = "create table $mib->{label}$suffix (id integer auto_increment primary key, host varchar(64), oidindex varchar(254)";
     foreach $j (@$children) {
 	if (!defined($conversions{$j->{type}})) {
 	    print STDERR "no conversion for ". $j->{type} . "!\n";
