@@ -69,7 +69,7 @@ snmp_parse_args_usage(outf)
   FILE *outf;
 {
   fprintf(outf,
-        "[-v 1|2c|2p] [-h] [-d] [-q] [-R] [-D] [-p <P>] [-t <T>] [-r <R>] [-c <S> <D>] <hostname> <community>|{<srcParty> <dstParty> <context>}");
+        "[-v 1|2c|2p] [-h] [-d] [-q] [-R] [-D] [-m <MIBS>] [-M <MIDDIRS>] [-p <P>] [-t <T>] [-r <R>] [-c <S> <D>] <hostname> <community>|{<srcParty> <dstParty> <context>}");
 }
 
 void
@@ -84,6 +84,8 @@ snmp_parse_args_descriptions(outf)
   fprintf(outf, "  -q\t\tquick print output for easier parsing ability.\n");
   fprintf(outf, "  -R\t\tuse \"random access\" to the mib tree.\n");
   fprintf(outf, "  -D\t\tturn on debugging output.\n");
+  fprintf(outf, "  -m <MIBS>\tuse MIBS list instead of the default mib list.\n");
+  fprintf(outf, "  -M <MIBDIRS>\tuse MIBDIRS as the location to look for mibs.\n");
   fprintf(outf, "  -p <P>\tuse port P instead of the default port.\n");
   fprintf(outf, "  -t <T>\tset the request timeout to T.\n");
   fprintf(outf, "  -r <R>\tset the number of retries to R.\n");
@@ -136,6 +138,30 @@ snmp_parse_args(argc, argv, session)
 
       case 'D':
         snmp_set_do_debugging(1);
+        break;
+        
+      case 'm':
+        if (argv[arg][2] != 0)
+          setenv("MIBS",&argv[arg][2], 1);
+        else if (++arg < argc)
+          setenv("MIBS",argv[arg], 1);
+        else {
+          fprintf(stderr,"Need MIBS after -m flag.\n");
+          usage();
+          exit(1);
+        }
+        break;
+
+      case 'M':
+        if (argv[arg][2] != 0)
+          setenv("MIBDIRS",&argv[arg][2], 1);
+        else if (++arg < argc)
+          setenv("MIBDIRS",argv[arg], 1);
+        else {
+          fprintf(stderr,"Need MIBS after -m flag.\n");
+          usage();
+          exit(1);
+        }
         break;
         
       case 'p':
