@@ -256,6 +256,7 @@ struct	mib_egpNeighEntry {
 struct variable_list;
 
 void print_mib __P((FILE *));
+void print_ascii_dump __P((FILE *));
 int read_objid __P((char *, oid *, int *));
 void init_mib __P((void));
 void print_variable __P((oid *, int, struct variable_list *));
