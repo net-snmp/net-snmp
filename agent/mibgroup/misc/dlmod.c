@@ -83,8 +83,7 @@ dlmod_parse_config(char *token,
 	return;
     }
     /* remove comments */
-    *(cptr + strcspn(cptr, "
-#;\r\n")) = '\0';
+    *(cptr + strcspn(cptr, "#;\r\n")) = '\0';
 
     dlm = dlmod_create_module();
     if (!dlm)
