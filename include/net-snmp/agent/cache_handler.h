@@ -73,6 +73,7 @@ extern          "C" {
 #define NETSNMP_CACHE_DONT_INVALIDATE_ON_SET                0x0001
 #define NETSNMP_CACHE_DONT_FREE_EXPIRED                     0x0002
 #define NETSNMP_CACHE_DONT_AUTO_RELEASE                     0x0004
+#define NETSNMP_CACHE_PRELOAD                               0x0008
 
 #ifdef __cplusplus
 };
