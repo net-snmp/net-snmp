@@ -419,7 +419,7 @@ open_sendmailst(BOOL config)
     if (sendmailst_fh == -1) {
         print_error(LOG_ERR, config, TRUE,
                     "mibII/mta_sendmail.c:open_sendmailst",
-                    "could not open file \"%s\"\n", sendmailst_fn);
+                    "could not open file \"%s\"", sendmailst_fn);
         return;
     }
 
@@ -478,7 +478,7 @@ open_sendmailst(BOOL config)
         } else {
             print_error(LOG_WARNING, config, FALSE,
                         "mibII/mta_sendmail.c:open_sendmailst",
-                        "could not guess version of statistics file \"%s\"\n",
+                        "could not guess version of statistics file \"%s\"",
                         sendmailst_fn);
             while (close(sendmailst_fh) == -1 && errno == EINTR) {
                 /*
@@ -504,7 +504,7 @@ open_sendmailst(BOOL config)
         } else {
             print_error(LOG_WARNING, config, FALSE,
                         "mibII/mta_sendmail.c:open_sendmailst",
-                        "could not guess version of statistics file \"%s\"\n",
+                        "could not guess version of statistics file \"%s\"",
                         sendmailst_fn);
             while (close(sendmailst_fh) == -1 && errno == EINTR) {
                 /*
@@ -733,7 +733,7 @@ read_sendmailcf(BOOL config)
     if (sendmailcf_fp == NULL) {
         print_error(LOG_ERR, config, TRUE,
                     "mibII/mta_sendmail.c:read_sendmailcf",
-                    "could not open file \"%s\"\n", sendmailcf_fn);
+                    "could not open file \"%s\"", sendmailcf_fn);
         return FALSE;
     }
 
@@ -756,7 +756,7 @@ read_sendmailcf(BOOL config)
         if (line[linelen - 1] != '\n') {
             print_error(LOG_WARNING, config, FALSE,
                         "mibII/mta_sendmail.c:read_sendmailcf",
-                        "line %d in config file \"%s\" is too long\n",
+                        "line %d in config file \"%s is too long\n",
                         linenr, sendmailcf_fn);
             while (fgets(line, sizeof line, sendmailcf_fp) != NULL && line[strlen(line) - 1] != '\n') { /* skip rest of the line */
                 /*
@@ -811,7 +811,7 @@ read_sendmailcf(BOOL config)
             } else {
                 print_error(LOG_WARNING, config, FALSE,
                             "mibII/mta_sendmail.c:read_sendmailcf",
-                            "found too many mailers in config file \"%s\"\n",
+                            "found too many mailers in config file \"%s\"",
                             sendmailcf_fn);
             }
 
@@ -854,7 +854,7 @@ read_sendmailcf(BOOL config)
                 if (*filename++ != '=') {
                     print_error(LOG_WARNING, config, FALSE,
                                 "mibII/mta_sendmail.c:read_sendmailcf",
-                                "line %d in config file \"%s\" ist missing an '='\n",
+                                "line %d in config file \"%s\" ist missing an '='",
                                 linenr, sendmailcf_fn);
                     break;
                 }
@@ -868,7 +868,7 @@ read_sendmailcf(BOOL config)
                 if (strlen(filename) > FILENAMELEN) {
                     print_error(LOG_WARNING, config, FALSE,
                                 "mibII/mta_sendmail.c:read_sendmailcf",
-                                "line %d config file \"%s\" contains a filename that's too long\n",
+                                "line %d config file \"%s\" contains a filename that's too long",
                                 linenr, sendmailcf_fn);
                     break;
                 }
@@ -886,7 +886,7 @@ read_sendmailcf(BOOL config)
                 } else {
                     print_error(LOG_CRIT, config, FALSE,
                                 "mibII/mta_sendmail.c:read_sendmailcf",
-                                "This shouldn't happen.\n");
+                                "This shouldn't happen.");
                     abort();
                 }
                 break;
@@ -895,7 +895,7 @@ read_sendmailcf(BOOL config)
                 if (strlen(line + 2) > FILENAMELEN) {
                     print_error(LOG_WARNING, config, FALSE,
                                 "mibII/mta_sendmail.c:read_sendmailcf",
-                                "line %d config file \"%s\" contains a filename that's too long\n",
+                                "line %d config file \"%s\" contains a filename that's too long",
                                 linenr, sendmailcf_fn);
                     break;
                 }
@@ -910,7 +910,7 @@ read_sendmailcf(BOOL config)
                 if (strlen(line + 2) > FILENAMELEN) {
                     print_error(LOG_WARNING, config, FALSE,
                                 "mibII/mta_sendmail.c:read_sendmailcf",
-                                "line %d config file \"%s\" contains a filename that's too long\n",
+                                "line %d config file \"%s\" contains a filename that's too long",
                                 linenr, sendmailcf_fn);
                     break;
                 }
@@ -931,7 +931,7 @@ read_sendmailcf(BOOL config)
             if (*p == '\0') {
                 print_error(LOG_WARNING, config, FALSE,
                             "mibII/mta_sendmail.c:read_sendmailcf",
-                            "line %d config file \"%s\" contains a weird queuegroup\n",
+                            "line %d config file \"%s\" contains a weird queuegroup",
                             linenr, sendmailcf_fn);
                 break;
             }
@@ -954,7 +954,7 @@ read_sendmailcf(BOOL config)
                     if (*p++ != '=') {
                         print_error(LOG_WARNING, config, FALSE,
                                     "mibII/mta_sendmail.c:read_sendmailcf",
-                                    "line %d config file \"%s\" contains a weird queuegroup\n",
+                                    "line %d config file \"%s\" contains a weird queuegroup",
                                     linenr, sendmailcf_fn);
                         break;
                     }
@@ -984,7 +984,7 @@ read_sendmailcf(BOOL config)
             } else {
                 print_error(LOG_WARNING, config, FALSE,
                             "mibII/mta_sendmail.c:read_sendmailcf",
-                            "line %d config file \"%s\" contains a weird queuegroup: no directory\n",
+                            "line %d config file \"%s\" contains a weird queuegroup: no directory",
                             linenr, sendmailcf_fn);
             }
 
