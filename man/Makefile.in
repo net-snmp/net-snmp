@@ -184,6 +184,8 @@ html: $(MANALL)
 	   if test `wc -l $$i | awk '{print $$1}'` != 1 ; then \
 		   base=`echo $$i | sed 's/.[0-9]$$//;'` ; \
 		   echo "<HTML><BODY bgcolor=\"#ffffff\" background=\"../ucd-snmp-bg3.gif\"><PRE>" > $$base.html; \
-		   man2html -r ./$$i | perl -p -e 's/HREF=\"..\/man.\//HREF=\"/g;s/\.[1-9]\.html/.html/g;' >> $$base.html; \
-	   fi \
-	done
+		   man2html -r ./$$i | perl -p -e 's/HREF=\"..\/man.\//HREF=\"/g;s/\.[1-9]\.html/.html/g;' | grep -v 'Content-type:' >> $$base.html; \
+		   a="$$a $$i"; \
+	   fi ; \
+	done ;\
+	perl make_index.pl man_sections.txt $$a > index.html
