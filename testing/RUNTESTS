@@ -103,8 +103,9 @@ while [ -n "$1" ]; do
 done
 
 
-PATH=`pwd`:${SNMP_UPDIR}/apps:${SNMP_UPDIR}/agent:$PATH
+PATH=.:..:${SNMP_UPDIR}/apps:${SNMP_UPDIR}/agent:$PATH
 export PATH
+#echo $PATH
 SNMP_PATH=yes
 
 #
