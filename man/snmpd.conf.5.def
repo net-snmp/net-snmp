@@ -132,8 +132,8 @@ source file.
 .IP
 Sets the system location and the system contact for the agent.  This
 information is reported by the 'system' table in the mibII tree.
-.IP "authtrapsenable NUMBER"
-Setting authtrapsenable to 1 enables generation of authentification failure
+.IP "authtrapenable NUMBER"
+Setting authtrapenable to 1 enables generation of authentification failure
 traps. The default value is 2 (disable).
 .IP "trapsink HOST"
 .IP "trapcommunity STRING"
