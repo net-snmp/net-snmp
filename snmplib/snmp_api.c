@@ -3083,11 +3083,8 @@ _sess_async_send(void *sessp,
 	tv.tv_usec %= 1000000L;
 	rp->expire = tv;
     }
-#if COMMENT
-XXX enable next two lines when problems with make test are resolved.
     else
         snmp_free_pdu(pdu);  /* free v1 or v2 TRAP PDU */
-#endif
 
     return reqid;
 }
