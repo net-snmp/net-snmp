@@ -33,6 +33,9 @@
 /* Define to `long' if <sys/types.h> doesn't define.  */
 #undef off_t
 
+/* Define to `int' if <sys/types.h> doesn't define.  */
+#undef pid_t
+
 /* Define as the return type of signal handlers (int or void).  */
 #undef RETSIGTYPE
 
