@@ -253,7 +253,8 @@ Init_Device __P((void))
 		 *  Find the first non-NULL initialisation function
 		 *    and call it
 		 */
-    while ( init_device[ current_type ] == NULL )
+    while ( current_type < HRDEV_TYPE_MAX &&
+            init_device[ current_type ] == NULL )
 	if ( ++current_type >= HRDEV_TYPE_MAX)
 	    return;
     (*init_device[current_type]) ();
@@ -270,7 +271,7 @@ Get_Next_Device __P((void))
 		 *
 		 *  TODO:  save the necessary information about that device
 		 */
-    if ( next_device[ current_type ] != NULL )
+    if ( current_type < HRDEV_TYPE_MAX && next_device[ current_type ] != NULL )
         result = (*next_device[current_type]) ();
 
 		/*
@@ -287,5 +288,3 @@ Get_Next_Device __P((void))
     }
         return result;
 }
-
-
