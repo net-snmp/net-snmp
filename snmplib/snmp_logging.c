@@ -3,6 +3,9 @@
 
 #include "config.h"
 #include <stdio.h>
+#ifdef HAVE_MALLOC_H
+#include <malloc.h>
+#endif
 #ifdef HAVE_STRING_H
 #include <string.h>
 #else
@@ -93,11 +96,11 @@ enable_stderrlog(void) {
 
 
 void
-log_syslog (int priority, const char *format)
+log_syslog (int priority, const char *string)
 {
 #if HAVE_SYSLOG_H
   if (do_syslogging) {
-    syslog(priority, format);
+    syslog(priority, string);
   }
 #endif
 }
@@ -122,19 +125,61 @@ log_stderrlog (int priority, const char *string)
   }
 }
 
-void
-vlog (int priority, const char *format, va_list ap)
+void 
+log_string (int priority, const char *string)
 {
-  char string[LOGLENGTH];
-
-  vsprintf(string, format, ap);
   log_syslog(priority, string);
   log_filelog(priority, string);
   log_stderrlog(priority, string);
 }
 
 
-void
+int
+vlog (int priority, const char *format, va_list ap)
+{
+  char buffer[LOGLENGTH];
+  int length; 
+#if HAVE_VSNPRINTF
+  char *dynamic;
+
+  length=vsnprintf(buffer, LOGLENGTH, format, ap);
+#else
+
+  length=vsprintf(buffer, format, ap);
+#endif
+
+  if (length < 0 ) {
+    log_string(LOG_ERR, "Could not format log-string\n");
+    return(-1);
+  }
+
+  if (length < LOGLENGTH) {
+    log_string(priority, buffer);
+    return(0);
+  } 
+
+#if HAVE_VSNPRINTF
+  dynamic=malloc(length+1);
+  if (dynamic==NULL) {
+    log_string(LOG_ERR, "Could not allocate memory for log-message\n");
+    log_string(priority, buffer);
+    return(-2);
+  }
+
+  vsnprintf(dynamic, length+1, format, ap);
+  log_string(priority, dynamic);
+  free(dynamic);
+  return(0);
+
+#else
+  log_string(priority, buffer);
+  log_string(LOG_ERR, "Log-message too long!\n");
+  return(-3);
+#endif
+}
+
+
+int
 #ifdef STDC_HEADERS
 snmp_log (int priority, const char *format, ...)
 #else
@@ -143,6 +188,7 @@ snmp_log (int priority, va_alist)
 #endif
 {
   va_list ap;
+  int ret;
 #ifdef STDC_HEADERS
   va_start(ap, format);
 #else
@@ -150,27 +196,28 @@ snmp_log (int priority, va_alist)
   va_start(ap);
   format = va_arg(ap, const char *);
 #endif
-  vlog(priority, format, ap);
+  ret=vlog(priority, format, ap);
   va_end(ap);
+  return(ret);
 }
 
 /*
  * log a critical error.
- * Use small messages, please !
  */
 void
 log_perror(const char *s)
 {
-  char sbuf[LOGLENGTH];
-  char *serr = strerror(errno);
-
-  if (s && *s)
-    sprintf(sbuf, "%s: %s\n", s, serr);
-  else
-    sprintf(sbuf, "%s\n", serr);
-
-  log_syslog(LOG_ERR, sbuf);
-  log_filelog(LOG_ERR, sbuf);
-  log_stderrlog(LOG_ERR, sbuf);
+  char *error  = strerror(errno);
+  if (s) {
+    if (error)
+      snmp_log(LOG_ERR, "%s: %s\n", s, error);
+    else 
+      snmp_log(LOG_ERR, "%s: Error %d out-of-range\n", s, errno);
+  } else {
+    if (error)
+      snmp_log(LOG_ERR, "%s\n", error);
+    else
+      snmp_log(LOG_ERR, "Error %d out-of-range\n", errno);
+  }
 }
 

@@ -36,8 +36,14 @@ void enable_stderrlog(void);
 void log_syslog(int priority, const char *string);
 void log_filelog(int priority, const char *string);
 void log_stderrlog(int priority, const char *string);
-void snmp_log(int priority, const char *format, ...);
-void vlog(int priority, const char *format, va_list ap);
+
+int snmp_log(int priority, const char *format, ...);
+int vlog(int priority, const char *format, va_list ap);
+   /*  0 - successful message formatting */
+   /* -1 - Could not format log-string */
+   /* -2 - Could not allocate memory for log-message */
+   /* -3 - Log-message too long! */
+
 void log_perror(const char *s);
 
 #ifdef __cplusplus
