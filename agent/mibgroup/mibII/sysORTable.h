@@ -19,7 +19,7 @@ struct sysORTable {
 struct register_sysOR_parameters {
    oid  *name;
    int   namelen;
-   char *descr;
+   const char *descr;
 };
 
 extern void     init_sysORTable (void);
@@ -29,7 +29,7 @@ extern int      register_sysORTable (oid *, size_t, const char *);
 extern int    unregister_sysORTable (oid *, size_t);
 extern int      register_sysORTable_sess (oid *, size_t, const char *, struct snmp_session *);
 extern int    unregister_sysORTable_sess (oid *, size_t, struct snmp_session *);
-extern int    unregister_sysORTable_by_session (struct snmp_session *);
+extern void   unregister_sysORTable_by_session (struct snmp_session *);
 
 #define	SYSORTABLEINDEX		        1
 #define	SYSORTABLEID		        2
