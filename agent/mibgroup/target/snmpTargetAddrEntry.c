@@ -557,14 +557,13 @@ shutdown_snmpTargetAddrEntry(void)
 
 
 unsigned char *
-var_snmpTargetAddrEntry(vp, name, length, exact, var_len, write_method)
-    struct variable *vp;
-    oid     *name;
-    int     *length;
-    int     exact;
-    int     *var_len;
-    int     (**write_method) (int, unsigned char *,unsigned 
-			      char, int, unsigned char *,oid*, int);
+var_snmpTargetAddrEntry(
+    struct variable *vp,
+    oid     *name,
+    int     *length,
+    int     exact,
+    int     *var_len,
+    WriteMethod **write_method)
 {
 
   /* variables we may use later */
@@ -652,15 +651,14 @@ var_snmpTargetAddrEntry(vp, name, length, exact, var_len, write_method)
 
 
 int
-write_snmpTargetAddrTDomain(action, var_val, var_val_type, 
-			    var_val_len, statP, name, name_len)
-   int      action;
-   u_char   *var_val;
-   u_char   var_val_type;
-   int      var_val_len;
-   u_char   *statP;
-   oid      *name;
-   int      name_len;
+write_snmpTargetAddrTDomain(
+   int      action,
+   u_char   *var_val,
+   u_char   var_val_type,
+   int      var_val_len,
+   u_char   *statP,
+   oid      *name,
+   int      name_len)
 {
   int                            objSize=128, bigsize=1000, i;
   struct targetAddrTable_struct *temp_struct;
@@ -713,15 +711,14 @@ write_snmpTargetAddrTDomain(action, var_val, var_val_type,
 
 
 int
-write_snmpTargetAddrTAddress(action, var_val, var_val_type, var_val_len, 
-			     statP, name, name_len)
-   int      action;
-   u_char   *var_val;
-   u_char   var_val_type;
-   int      var_val_len;
-   u_char   *statP;
-   oid      *name;
-   int      name_len;
+write_snmpTargetAddrTAddress(
+   int action,
+   u_char   *var_val,
+   u_char   var_val_type,
+   int      var_val_len,
+   u_char   *statP,
+   oid      *name,
+   int      name_len)
 {
   static unsigned char           string[1500];
   int                            size=1500, bigsize=1000;
@@ -774,15 +771,14 @@ write_snmpTargetAddrTAddress(action, var_val, var_val_type, var_val_len,
 
 
 int
-write_snmpTargetAddrTimeout(action, var_val, var_val_type, var_val_len, 
-			    statP, name, name_len)
-   int      action;
-   u_char   *var_val;
-   u_char   var_val_type;
-   int      var_val_len;
-   u_char   *statP;
-   oid      *name;
-   int      name_len;
+write_snmpTargetAddrTimeout(
+   int      action,
+   u_char   *var_val,
+   u_char   var_val_type,
+   int      var_val_len,
+   u_char   *statP,
+   oid      *name,
+   int      name_len)
 {
   /* variables we may use later */
   static long                    long_ret;
@@ -826,15 +822,14 @@ write_snmpTargetAddrTimeout(action, var_val, var_val_type, var_val_len,
 
 
 int
-write_snmpTargetAddrRetryCount(action, var_val, var_val_type, var_val_len, 
-			       statP, name, name_len)
-   int      action;
-   u_char   *var_val;
-   u_char   var_val_type;
-   int      var_val_len;
-   u_char   *statP;
-   oid      *name;
-   int      name_len;
+write_snmpTargetAddrRetryCount(
+   int      action,
+   u_char   *var_val,
+   u_char   var_val_type,
+   int      var_val_len,
+   u_char   *statP,
+   oid      *name,
+   int      name_len)
 {
   /* variables we may use later */
   static long                    long_ret;
@@ -878,15 +873,14 @@ write_snmpTargetAddrRetryCount(action, var_val, var_val_type, var_val_len,
 
 
 int
-write_snmpTargetAddrTagList(action, var_val, var_val_type, var_val_len, 
-			    statP, name, name_len)
-   int      action;
-   u_char   *var_val;
-   u_char   var_val_type;
-   int      var_val_len;
-   u_char   *statP;
-   oid      *name;
-   int      name_len;
+write_snmpTargetAddrTagList(
+   int      action,
+   u_char   *var_val,
+   u_char   var_val_type,
+   int      var_val_len,
+   u_char   *statP,
+   oid      *name,
+   int      name_len)
 {
   /* variables we may use later */
   static unsigned char           string[1500];
@@ -931,15 +925,14 @@ write_snmpTargetAddrTagList(action, var_val, var_val_type, var_val_len,
 
 
 int
-write_snmpTargetAddrParams(action, var_val, var_val_type, var_val_len, 
-			   statP, name, name_len)
-   int      action;
-   u_char   *var_val;
-   u_char   var_val_type;
-   int      var_val_len;
-   u_char   *statP;
-   oid      *name;
-   int      name_len;
+write_snmpTargetAddrParams(
+   int      action,
+   u_char   *var_val,
+   u_char   var_val_type,
+   int      var_val_len,
+   u_char   *statP,
+   oid      *name,
+   int      name_len)
 {
   static unsigned char           string[1500];
   int                            size=1500, bigsize=1000;
@@ -988,15 +981,14 @@ write_snmpTargetAddrParams(action, var_val, var_val_type, var_val_len,
 
 
 int
-write_snmpTargetAddrStorageType(action, var_val, var_val_type, var_val_len, 
-				statP, name, name_len)
-   int      action;
-   u_char   *var_val;
-   u_char   var_val_type;
-   int      var_val_len;
-   u_char   *statP;
-   oid      *name;
-   int      name_len;
+write_snmpTargetAddrStorageType(
+   int      action,
+   u_char   *var_val,
+   u_char   var_val_type,
+   int      var_val_len,
+   u_char   *statP,
+   oid      *name,
+   int      name_len)
 {
   static long                    long_ret;
   int                            size, bigsize=1000;
@@ -1082,15 +1074,14 @@ int snmpTargetAddr_createNewRow(
 
 /* Assign a value to the Row Status variable */
 int
-write_snmpTargetAddrRowStatus(action, var_val, var_val_type, var_val_len, 
-			      statP, name, name_len)
-   int      action;
-   u_char   *var_val;
-   u_char   var_val_type;
-   int      var_val_len;
-   u_char   *statP;
-   oid      *name;
-   int      name_len;
+write_snmpTargetAddrRowStatus(
+   int      action,
+   u_char   *var_val,
+   u_char   var_val_type,
+   int      var_val_len,
+   u_char   *statP,
+   oid      *name,
+   int      name_len)
 {
   enum commit_action_enum        {NOTHING, DESTROY, CREATE, CHANGE};
   enum commit_action_enum        onCommitDo = NOTHING; 
