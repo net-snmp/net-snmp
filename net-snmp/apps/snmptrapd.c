@@ -101,12 +101,12 @@ SOFTWARE.
 #include "read_config.h"
 #include "snmp_debug.h"
 #include "snmp_logging.h"
+#include "callback.h"
 #include "snmpusm.h"
 #include "tools.h"
 #include "lcd_time.h"
 #include "transform_oids.h"
 #include "snmpv3.h"
-#include "callback.h"
 #include "snmp_alarm.h"
 #include "default_store.h"
 
@@ -652,7 +652,6 @@ RETSIGTYPE hup_handler(int sig)
 }
 #endif
 
-
 int main(int argc, char *argv[])
 {
     struct snmp_session sess, *session = &sess, *ss;
@@ -682,6 +681,13 @@ int main(int argc, char *argv[])
     register_config_handler("snmptrapd", "createUser",
 			    usm_parse_create_usmUser, NULL,
 			    "username (MD5|SHA) passphrase [DES passphrase]");
+    register_config_handler("snmptrapd", "usmUser",
+                            usm_parse_config_usmUser, NULL,
+                            "internal use only");
+
+  /* we need to be called back later */
+  snmp_register_callback(SNMP_CALLBACK_LIBRARY, SNMP_CALLBACK_STORE_DATA,
+                         usm_store_users, NULL);
 
 #ifdef WIN32
     setvbuf (stdout, NULL, _IONBF, BUFSIZ);
@@ -963,6 +969,7 @@ int main(int argc, char *argv[])
 	syslog(LOG_INFO, "Stopping snmptrapd");
 
     snmp_close(ss);
+    snmp_shutdown("snmptrapd");
     SOCK_CLEANUP;
     return 0;
 }
