@@ -1,4 +1,4 @@
-.TH "A generic callback mechanism" 3 "2 Sep 2004" "net-snmp" \" -*- nroff -*-
+.TH "A generic callback mechanism" 3 "15 Oct 2004" "net-snmp" \" -*- nroff -*-
 .ad l
 .nh
 .SH NAME
@@ -149,8 +149,6 @@ Returns the number of callbacks that were unregistered.
 \fBsnmp_call_callbacks\fP 
 .RE
 .PP
-netsnmp_assert(1==_lock); * xxx-rks: this gets hit at shutdown.
-.PP
-set cleanup flag? Definition at line 288 of file callback.c.
+set cleanup flag? Definition at line 295 of file callback.c.
 .PP
 References SNMP_FREE, and snmp_log().

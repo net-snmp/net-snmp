@@ -1,4 +1,4 @@
-.TH "various PDU processing routines" 3 "2 Sep 2004" "net-snmp" \" -*- nroff -*-
+.TH "various PDU processing routines" 3 "15 Oct 2004" "net-snmp" \" -*- nroff -*-
 .ad l
 .nh
 .SH NAME
@@ -138,7 +138,7 @@ returns 0 on success and 1 on a malloc error
 .in +1c
 \fBdelayed_instance.c\fP.
 .PP
-Definition at line 670 of file snmp_client.c.
+Definition at line 671 of file snmp_client.c.
 .PP
 References variable_list::type.
 .PP
@@ -160,15 +160,15 @@ Referenced by check_getnext_results(), handle_pdu(), netsnmp_check_getnext_reply
     'wrongLength (The set value has an illegal length from what the agent expects)',
     'wrongEncoding',
     'wrongValue (The set value is illegal or unsupported in some way)',
-    'noCreation (that table does not support row creation)',
+    'noCreation (That table does not support row creation or that object can not ever be created)',
     'inconsistentValue (The set value is illegal or unsupported in some way)',
     'resourceUnavailable (This is likely a out-of-memory failure within the agent)',
     'commitFailed',
     'undoFailed',
     'authorizationError (access denied to that object)',
-    'notWritable (that object does not support modification)',
-    'inconsistentName'
+    'notWritable (That object does not support modification)',
+    'inconsistentName (That object can not currently be created)'
 }
 .fi
 .PP
-Definition at line 926 of file snmp_client.c.
+Definition at line 927 of file snmp_client.c.
