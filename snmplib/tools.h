@@ -29,6 +29,7 @@
 #define SNMP_FREE(s)		if (s) { free((void *)s); s=NULL; }
 #define SNMP_MALLOC(s)		malloc_zero(s)
 					/* XXX Not optimal everywhere. */
+#define SNMP_MALLOC_STRUCT(s)   (struct s *) malloc_zero(sizeof(struct s))
 #define SNMP_ZERO(s,l)		if (s) memset(s, 0, l);
 
 
