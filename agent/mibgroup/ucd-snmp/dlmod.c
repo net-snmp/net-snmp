@@ -100,7 +100,7 @@ dlmod_create_module (void)
     struct dlmod **pdlmod, *dlm;
 
     DEBUGMSGTL(("dlmod", "dlmod_create_module\n"));
-    dlm = calloc(1, sizeof(struct dlmod));
+    dlm = (struct dlmod *)calloc(1, sizeof(struct dlmod));
     if (dlm == NULL) 
 	return NULL;
 

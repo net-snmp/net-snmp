@@ -163,7 +163,7 @@ notifyTable_register_notifications(int major, int minor,
     if (hp != NULL){
         /* XXX: fix for other domain types */
         ptr->tAddressLen = hp->h_length + 2;
-        ptr->tAddress = malloc(ptr->tAddressLen);
+        ptr->tAddress = (unsigned char *)malloc(ptr->tAddressLen);
         memmove(ptr->tAddress, hp->h_addr, hp->h_length);
         ptr->tAddress[hp->h_length] = (ss->remote_port & 0xff00) >> 8;
         ptr->tAddress[hp->h_length+1] = (ss->remote_port & 0xff);
