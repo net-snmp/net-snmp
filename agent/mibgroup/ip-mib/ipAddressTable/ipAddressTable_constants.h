@@ -42,6 +42,11 @@ extern          "C" {
 
 #define FLAG_MAX_IPADDRESSTABLE 5
 
+    /*
+     * required rows on creation
+     */
+#define IPADDRESS_REQUIRED_COLS (FLAG_IPADDRESSIFINDEX | \
+                                 FLAG_IPADDRESSROWSTATUS)
 
     /*
      * NOTES on enums

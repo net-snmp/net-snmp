@@ -107,7 +107,13 @@ extern          "C" {
 
         ipAddressTable_data *data;
         ipAddressTable_undo_data *undo;
-        unsigned int    set_flags;
+        unsigned int    column_set_flags;
+
+       /*
+        * flags per row. Currently, the first 8 bits are reserverd
+        * for the user. See mfd.h for other flags.
+        */
+       u_int                       rowreq_flags;
 
     /** implementor's context pointer provided during registration */
         ipAddressTable_registration_ptr ipAddressTable_reg;
@@ -122,9 +128,8 @@ extern          "C" {
         * not available from net-snmp ipaddress data_access
         */
        uint32_t  ipAddressCreated;      /* sysUpTime */
-       uint32_t  ipAddressLastChanged;  /* sysUpTime */
+       uint32_t  ipAddressLastChanged, ipAddressLastChanged_undo;  /* sysUpTime */
        int       ipAddressRowStatus, ipAddressRowStatus_undo;
-       int       ipAddressStorageType, ipAddressStorageType_undo;
 
         /*
          * storage for future expansion

@@ -531,6 +531,7 @@ _mfd_ipAddressTable_post_request(netsnmp_mib_handler *handler,
                                  netsnmp_agent_request_info *agtreq_info,
                                  netsnmp_request_info *requests)
 {
+    ipAddressTable_rowreq_ctx *rowreq_ctx;
     int             rc =
         ipAddressTable_post_request(ipAddressTable_if_ctx.user_ctx);
     if (MFD_SUCCESS != rc) {
@@ -540,6 +541,13 @@ _mfd_ipAddressTable_post_request(netsnmp_mib_handler *handler,
         DEBUGMSGTL(("verbose:ipAddressTable:mfd", "error %d from "
                     "ipAddressTable_undo_cleanup\n", rc));
     }
+
+    /*
+     * if it was set, clear row created flag.
+     */
+    rowreq_ctx = netsnmp_container_table_extract_context(requests);
+    if ((NULL != rowreq_ctx) && (rowreq_ctx->rowreq_flags & MFD_ROW_CREATED))
+        rowreq_ctx->rowreq_flags &= ~MFD_ROW_CREATED;
 
     return SNMP_ERR_NOERROR;
 }
@@ -587,7 +595,10 @@ _mfd_ipAddressTable_object_lookup(netsnmp_mib_handler *handler,
         oid_idx.oids = tblreq_info->index_oid;
         oid_idx.len = tblreq_info->index_oid_len;
         rc = ipAddressTable_index_from_oid(&oid_idx, &mib_idx);
-        if (MFD_SUCCESS == rc) {
+        if(MFD_SUCCESS != rc) {
+            netsnmp_request_set_error_all(requests, SNMP_VALIDATE_ERR(rc));
+        }
+        else {
             /*
              * allocate new context
              */
@@ -607,11 +618,13 @@ _mfd_ipAddressTable_object_lookup(netsnmp_mib_handler *handler,
                 netsnmp_request_set_error_all(requests, rc);
                 ipAddressTable_release_rowreq_ctx(rowreq_ctx);
             } else {
+                rowreq_ctx->rowreq_flags |= MFD_ROW_CREATED;
                 netsnmp_request_add_list_data(requests, netsnmp_create_data_list(TABLE_CONTAINER_NAME, rowreq_ctx, NULL));      /* xxx-rks: free routine? */
             }
         }
 #endif
     } else {
+        netsnmp_assert(! (rowreq_ctx->rowreq_flags & MFD_ROW_CREATED));
         ipAddressTable_row_prep(rowreq_ctx);
     }
 
@@ -1167,14 +1180,15 @@ _mfd_ipAddressTable_undo_cleanup(netsnmp_mib_handler *handler,
     /*
      * release undo context, if needed
      */
-    if (rowreq_ctx->undo)
+    if (rowreq_ctx->undo) {
         ipAddressTable_release_data(rowreq_ctx->undo);
-
+        rowreq_ctx->undo = NULL;
+    }
 
     /*
      * clear set flags
      */
-    rowreq_ctx->set_flags = 0;
+    rowreq_ctx->column_set_flags = 0;
 
     return SNMP_ERR_NOERROR;
 }
@@ -1211,7 +1225,7 @@ _ipAddressTable_set_column(ipAddressTable_rowreq_ctx * rowreq_ctx,
                      var->val_len, sizeof(long));
             break;
         }
-        rowreq_ctx->set_flags |= FLAG_IPADDRESSIFINDEX;
+        rowreq_ctx->column_set_flags |= FLAG_IPADDRESSIFINDEX;
         rc = ipAddressIfIndex_set(rowreq_ctx, *((long *) var->val.string));
         break;
 
@@ -1226,7 +1240,7 @@ _ipAddressTable_set_column(ipAddressTable_rowreq_ctx * rowreq_ctx,
                      var->val_len, sizeof(u_long));
             break;
         }
-        rowreq_ctx->set_flags |= FLAG_IPADDRESSTYPE;
+        rowreq_ctx->column_set_flags |= FLAG_IPADDRESSTYPE;
         rc = ipAddressType_set(rowreq_ctx, *((u_long *) var->val.string));
         break;
 
@@ -1241,7 +1255,7 @@ _ipAddressTable_set_column(ipAddressTable_rowreq_ctx * rowreq_ctx,
                      var->val_len, sizeof(u_long));
             break;
         }
-        rowreq_ctx->set_flags |= FLAG_IPADDRESSSTATUS;
+        rowreq_ctx->column_set_flags |= FLAG_IPADDRESSSTATUS;
         rc = ipAddressStatus_set(rowreq_ctx,
                                  *((u_long *) var->val.string));
         break;
@@ -1257,7 +1271,7 @@ _ipAddressTable_set_column(ipAddressTable_rowreq_ctx * rowreq_ctx,
                      var->val_len, sizeof(u_long));
             break;
         }
-        rowreq_ctx->set_flags |= FLAG_IPADDRESSROWSTATUS;
+        rowreq_ctx->column_set_flags |= FLAG_IPADDRESSROWSTATUS;
         rc = ipAddressRowStatus_set(rowreq_ctx,
                                     *((u_long *) var->val.string));
         break;
@@ -1273,7 +1287,7 @@ _ipAddressTable_set_column(ipAddressTable_rowreq_ctx * rowreq_ctx,
                      var->val_len, sizeof(u_long));
             break;
         }
-        rowreq_ctx->set_flags |= FLAG_IPADDRESSSTORAGETYPE;
+        rowreq_ctx->column_set_flags |= FLAG_IPADDRESSSTORAGETYPE;
         rc = ipAddressStorageType_set(rowreq_ctx,
                                       *((u_long *) var->val.string));
         break;
@@ -1299,7 +1313,7 @@ _mfd_ipAddressTable_set_values(netsnmp_mib_handler *handler,
 
     netsnmp_assert(NULL != rowreq_ctx);
 
-    rowreq_ctx->set_flags = 0;
+    rowreq_ctx->column_set_flags = 0;
     for (; requests; requests = requests->next) {
         /*
          * set column data
