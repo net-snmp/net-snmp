@@ -250,6 +250,28 @@ if test "x$tryopenssl" = "xdefaultyes"; then
       tryopenssl=yes
 fi
 
+trykrb5=defaultyes
+askedkrb5=no
+AC_ARG_WITH(krb5,
+[  --with-krb5=PATH             Look for krb5 in PATH/lib.],
+    if test "x$withval" = "xyes"; then
+      trykrb5=yes
+      askedkrb5=yes
+      krb5path=undef
+    elif test "x$withval" = "xno"; then
+      trykrb5=no
+      krb5path=undef
+    elif test -d "$withval"; then
+      trykrb5=yes
+      askedkrb5=yes
+      krb5path=$withval
+    fi,
+)
+if test "x$trykrb5" = "xdefaultyes"; then
+      trykrb5=yes
+      krb5path=/usr/kerberos
+fi
+
 AC_ARG_WITH(rpm,
 [  --without-rpm                  Don't include support for the RPM package
                                  management system when building the host MIB
@@ -1337,17 +1359,93 @@ AC_MSG_CACHE_ADD(SNMPv3 Security Modules:   $new_with_security)
 # Handle the special case of KSM to see which crypto API we support
 #
 
+ac_cv_MIT_NEW_CRYPTO=no
+rebuilt_with_security=
+already_checked_krb5=no
+
 for sec in $new_with_security
 do
-  if test x$sec = xksm; then
-    AC_MSG_CHECKING([to see which crypto API we need to use])
+  if test "x$sec" = "xksm" -a "xyes" = "x$already_checked_krb5"; then
+    continue
+  fi
+  already_checked_krb5=yes
 
+  if test x$sec != xksm; then
+    rebuilt_new_with_security="$rebuilt_new_with_security $sec"
+  else
+    if test no = $trykrb5; then
+      AC_MSG_NOTICE([configured not to use krb5. disabling ksm])
+      continue
+    fi
+
+    AC_PATH_PROG([krb5_config],krb5-config,[no],$krb5path/bin:$PATH)
+
+    if test no != $krb5_config; then
+      CPPFLAGS="$CPPFLAGS `$krb5_config --cflags`"
+      LIBS="$LIBS `$krb5_config --libs`"
+    elif test $krb5path != no; then
+      AC_ADD_SEARCH_PATH($krb5path)
+    else
+      AC_ADD_SEARCH_PATH(/usr/kerberos)
+    fi
+
+    AC_MSG_CHECKING([for krb5])
+    AC_CACHE_VAL(ac_cv_have_krb5,
+      AC_CHECK_LIB(krb5, krb5_init_context,
+	ac_cv_have_krb5=yes, ac_cv_have_krb5=no
+      )
+    )
+
+    if test $ac_cv_have_krb5 = no; then
+      if test "x$askedkrb5" = "xyes"; then
+	AC_MSG_ERROR(Asked to use krb5 but I couldn't find it.)
+      fi
+      AC_MSG_RESULT(no. disabling ksm)
+      continue
+    fi
+      
+    AC_MSG_RESULT(yes)
+    rebuilt_new_with_security="$rebuilt_new_with_security ksm"
+
+    AC_MSG_CHECKING([[for heimdal]])
+    AC_CACHE_VAL(ac_cv_heimdal,
+    [AC_TRY_COMPILE(
+      [#include <krb5.h>],
+      [const char *v = heimdal_version;],
+      ac_cv_heimdal=yes,
+      ac_cv_heimdal=no
+    )])
+    AC_MSG_RESULT($ac_cv_heimdal)
+    if test $ac_cv_heimdal = yes; then
+      AC_DEFINE(HEIMDAL)
+      if test no = $krb5_config; then
+	LIBS="$LIBS -lkrb5 -lasn1 -lcom_err -lroken"
+      fi
+    elif test no = $krb5_config; then
+	LIBS="$LIBS -lkrb5 -lcom_err"
+    fi
+
+    AC_MSG_CHECKING([to see which crypto API we need to use])
     AC_CHECK_FUNC(krb5_c_encrypt,[
+    AC_CACHE_VAL(ac_cv_MIT_NEW_CRYPTO,
+      AC_CHECK_LIB(k5crypto, krb5_init_context,
+	ac_cv_MIT_NEW_CRYPTO=yes, ac_cv_MIT_NEW_CRYPTo=no
+      )
+    )
+
+    if test yes = $ac_cv_MIT_NEW_CRYPTO; then
       AC_MSG_RESULT(new MIT crypto API)
-      AC_DEFINE(MIT_NEW_CRYPTO)],[
+      AC_DEFINE(MIT_NEW_CRYPTO)
+      if test no = $krb5_config; then
+	LIBS="$LIBS -lk5crypto"
+      fi
+    else
       AC_MSG_RESULT(old MIT crypto API)])
+    fi
   fi
 done
+
+new_with_security=$rebuilt_new_with_security
 
 #
 # Do hairy agent module processing.
