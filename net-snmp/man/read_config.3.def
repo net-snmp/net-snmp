@@ -154,6 +154,7 @@ line in the
 configuration file(s) matches "genericToken" (see 
 .B read_configs() 
 below).
+.TP
 .B register_premib_handler()
 The 
 .B register_premib_handler()
