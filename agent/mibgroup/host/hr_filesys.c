@@ -431,6 +431,7 @@ End_HR_FileSys __P((void))
 #else
     if ( fp != NULL )
 	fclose(fp);
+    fp = NULL;
 #endif
 }
 
