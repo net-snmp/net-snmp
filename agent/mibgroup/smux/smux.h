@@ -60,11 +60,9 @@ typedef struct _smux_reg {
 	struct _smux_reg *sr_next;      /* next one                     */
 } smux_reg;
 
-extern int init_smux __P((void));
-extern int smux_accept __P((int));
-extern u_char *smux_snmp_process __P((int, oid *, int *, int *, u_char *, int));
-extern int smux_process __P((int));
-extern void smux_parse_peer_auth __P((char *, char *));
-extern void smux_free_peer_auth __P((void));
-
-config_parse_dot_conf("smuxpeer", smux_parse_peer_auth, smux_free_peer_auth);
+extern int init_smux (void);
+extern int smux_accept (int);
+extern u_char *smux_snmp_process (int, oid *, int *, int *, u_char *, int);
+extern int smux_process (int);
+extern void smux_parse_peer_auth (char *, char *);
+extern void smux_free_peer_auth (void);
