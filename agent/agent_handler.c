@@ -548,7 +548,7 @@ free_request_data_sets(request_info *request)
 
 /** Returns a handler from a chain based on the name */
 mib_handler *
-find_handler_by_name(handler_registration *reginfo, char *name) 
+find_handler_by_name(handler_registration *reginfo, const char *name) 
 {
     mib_handler *it;
     for(it = reginfo->handler; it; it = it->next) {
@@ -565,7 +565,7 @@ find_handler_by_name(handler_registration *reginfo, char *name)
  advertise some function for you to use instead. */
 void *
 find_handler_data_by_name(handler_registration *reginfo,
-                          char *name) 
+                          const char *name) 
 {
     mib_handler *it = find_handler_by_name(reginfo, name);
     if (it)
