@@ -2664,6 +2664,11 @@ usm_handle_report(void *sessp,
     /*
      * handle reportable errors 
      */
+
+    /* this will get in our way */
+    usm_free_usmStateReference(pdu->securityStateRef);
+    pdu->securityStateRef = NULL;
+
     switch (result) {
     case SNMPERR_USM_AUTHENTICATIONFAILURE:
     {
