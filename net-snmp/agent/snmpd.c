@@ -445,7 +445,7 @@ int create_v1_trap_session (sink, com)
 	sinks = new_sink;
 	return 1;
     }
-    fprintf (stderr, "%s\n", snmp_api_errstring (snmp_errno));
+    snmp_perror("snmpd");
     free(new_sink);
     return 0;
 }

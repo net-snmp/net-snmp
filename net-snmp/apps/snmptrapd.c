@@ -345,8 +345,7 @@ int snmp_input(op, session, reqid, pdu, magic)
 		reply->errindex = 0;
 		reply->address = pdu->address;
 		if (!snmp_send(session, reply)){
-		    fprintf(stderr, "Couldn't respond to inform pdu: %s\n",
-			    snmp_api_errstring(snmp_errno));
+                    snmp_perror("snmptrapd: Couldn't respond to inform pdu");
 		}
 	    }
 	}
@@ -484,7 +483,7 @@ main(argc, argv)
     session.local_port = local_port;
     ss = snmp_open(&session);
     if (ss == NULL){
-	fprintf(stderr,"Couldn't open snmp: %s\n", snmp_api_errstring(snmp_errno));
+        snmp_perror("snmptrapd: Couldn't open snmp");
 	exit(1);
     }
 

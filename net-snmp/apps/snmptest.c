@@ -115,7 +115,7 @@ main(argc, argv)
     snmp_synch_setup(&session);
     ss = snmp_open(&session);
     if (ss == NULL){
-	fprintf(stderr, "Couldn't open snmp: %s\n", snmp_api_errstring(snmp_errno));
+        snmp_perror("snmptest: Couldn't open snmp");
 	exit(1);
     }
 
@@ -178,7 +178,7 @@ main(argc, argv)
 	if (command == TRP2_REQ_MSG){
 	    /* No response needed */
 	    if (!snmp_send(ss, pdu)){
-		fprintf(stderr, "%s\n", snmp_api_errstring(snmp_errno));
+                snmp_perror("snmptest");
 	    }
 	} else {
 	    status = snmp_synch_response(ss, pdu, &response);
@@ -241,8 +241,7 @@ main(argc, argv)
 	    } else if (status == STAT_TIMEOUT){
 		fprintf(stderr, "No Response from %s\n", session.peername);
 	    } else {    /* status == STAT_ERROR */
-		fprintf(stderr, "An error occurred: %s\n",
-                        snmp_api_errstring(snmp_errno));
+              snmp_perror("snmptest: An error occurred");
 	    }
 	    
 	    if (response)

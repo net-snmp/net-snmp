@@ -122,8 +122,8 @@ main(argc, argv)
     snmp_synch_setup(&session);
     ss = snmp_open(&session);
     if (ss == NULL){
-	fprintf(stderr, "Couldn't open snmp: %s\n", snmp_api_errstring(snmp_errno));
-	exit(1);
+      snmp_perror("snmpbulkwalk: Couldn't open snmp");
+      exit(1);
     }
 
     memmove(name, root, rootlen * sizeof(oid));
@@ -184,9 +184,8 @@ main(argc, argv)
 	    fprintf(stderr,"No Response from %s\n",session.peername);
 	    running = 0;
 	} else {    /* status == STAT_ERROR */
-	    fprintf(stderr, "An error occurred: %s\nQuitting\n",
-		    snmp_api_errstring(snmp_errno));
-	    running = 0;
+          snmp_perror("snmpbulkwalk: An error occurred: ");
+          running = 0;
 	}
 
 	if (response)

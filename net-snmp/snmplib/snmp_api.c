@@ -186,7 +186,7 @@ struct session_list *Sessions = NULL;
 
 long Reqid = 0;
 int snmp_errno = 0;
-char *snmp_detail;
+char *snmp_detail = NULL;
 
 static char *api_errors[-SNMPERR_MAX+1] = {
     "No error",
@@ -249,6 +249,13 @@ int snmp_get_dump_packet __P((void))
     return snmp_dump_packet;
 }
 
+void
+snmp_perror(prog_string)
+  char *prog_string;
+{
+  fprintf(stderr,"%s: %s\n",prog_string, snmp_api_errstring(snmp_errno));
+}
+
 char *
 snmp_api_errstring(snmp_errnumber)
     int	snmp_errnumber;
@@ -262,6 +269,8 @@ snmp_api_errstring(snmp_errnumber)
     }
     if (snmp_detail) {
 	sprintf (msg_buf, "%s (%s)", msg, snmp_detail);
+        free(snmp_detail);
+        snmp_detail = NULL;  /* only return the detail once */
 	return msg_buf;
     }
     else return msg;
