@@ -68,10 +68,11 @@ netsnmp_create_data_list(const char *name, void *data,
 
 
 /** adds data to a datalist
+ * \deprecated use netsnmp_data_list_add_node instead
  * @param head a pointer to the head node of a data_list
  * @param node a node to stash in the data_list
  */
-/** depreciated: use netsnmp_data_list_add_node instead */
+/**  */
 NETSNMP_INLINE void
 netsnmp_add_list_data(netsnmp_data_list **head, netsnmp_data_list *node)
 {
