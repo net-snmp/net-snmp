@@ -65,7 +65,7 @@ print_description, fprint_description - mib_api functions
 .br
 .B "int snprint_value( char *buf, size_t buflen, oid *objid, size_t objidlen, struct variable_list *variable)
 .br
-.B "void sprint_realloc_value( u_char **buf, size_t *buf_len, size_t *out_len, oid *objid, size_t objidlen, struct variable_list *variable)
+.B "void sprint_realloc_value( u_char **buf, size_t *buf_len, size_t *out_len, int allow_realloc, oid *objid, size_t objidlen, struct variable_list *variable)
 .PP
 .B "void print_objid( oid *objid, size_t objidlen);
 .br
@@ -75,7 +75,7 @@ print_description, fprint_description - mib_api functions
 .br
 .B "int snprint_objid( char *buf, size_t buflen, oid *objid, size_t objidlen);
 .br
-.B "void sprint_realloc_objid( u_char **buf, size_t *buf_len, size_t *out_len, oid *objid, size_t objidlen);
+.B "void sprint_realloc_objid( u_char **buf, size_t *buf_len, size_t *out_len, int allow_realloc, oid *objid, size_t objidlen);
 .PP
 .B "void print_description( oid *objid, size_t objidlen);
 .br
