@@ -48,6 +48,16 @@ parameters are documented in the manual pages for each application.
 
 .SH OPTIONS
 .TP
+.BI "-3[MmKk]  0xHEXKEY"
+Sets the keys to be used for SNMPv3 transactions.  These options allow
+you to set the master authentication and encryption keys (-3m and -3M
+respectively) or set the localized authentication and encryption keys
+(-3k and -3K respectively).  SNMPv3 keys can be either passed in by
+hand using these flags, or by the use of keys generated from passwords
+using the -A and -X flags discussed below.  For further details on
+SNMPv3 and it's usage of keying information, see the Net-SNMP tutorial
+web site ( http://www.Net-SNMP.org/tutorial-5/commands/ ).
+.TP
 .BI -a " authProtocol"
 Set the authentication protocol (MD5|SHA) used for authenticated SNMPv3
 messages. Overrides the defAuthType token in the
