@@ -70,7 +70,8 @@ kernel.o: ../s/linux.h ../s/generic.h ../m/i686.h ../m/i586.h ../m/i386.h
 read_config.o: ../config.h ../mib_module_config.h 
 read_config.o: ../s/linux.h ../s/generic.h ../m/i686.h ../m/i586.h
 read_config.o: ../m/i386.h 
-read_config.o:  m2m.h ./mibgroup/mibincl.h
+read_config.o:   m2m.h
+read_config.o: ./mibgroup/mibincl.h  
 read_config.o:  ./../snmplib/asn1.h
 read_config.o: ./../snmplib/snmp_api.h ./../snmplib/snmp_impl.h ./snmp_vars.h
 read_config.o: ./var_struct.h ./../snmplib/snmp.h ./../snmplib/mib.h
@@ -109,7 +110,7 @@ snmp_vars.o: ../s/linux.h ../s/generic.h ../m/i686.h ../m/i586.h ../m/i386.h
 snmp_vars.o:  ./mibgroup/mibincl.h ./../snmplib/asn1.h
 snmp_vars.o: ./../snmplib/snmp_api.h ./../snmplib/snmp_impl.h ./snmp_vars.h
 snmp_vars.o: ./var_struct.h ./../snmplib/snmp.h ./../snmplib/mib.h m2m.h
-snmp_vars.o: snmp_vars_m2m.h ../snmplib/system.h mibgroup/struct.h
+snmp_vars.o: snmp_vars_m2m.h ../snmplib/system.h kernel.h mibgroup/struct.h
 snmp_vars.o: mibgroup/mib_module_includes.h mibgroup/mibII.h
 snmp_vars.o: mibgroup/ucd_snmp.h mibgroup/v2party.h mibgroup/host.h
 snmp_vars.o: mibgroup/system.h mibgroup/sysORTable.h mibgroup/at.h
