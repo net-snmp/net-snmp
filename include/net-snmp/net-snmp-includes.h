@@ -13,6 +13,9 @@
      */
 #include <stdio.h>
 #include <sys/types.h>
+#ifdef HAVE_STDINT_H
+#include <stdint.h>
+#endif
 
 #ifndef NET_SNMP_CONFIG_H
 #error "Please include <net-snmp/net-snmp-config.h> before this file"
