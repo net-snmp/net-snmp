@@ -16,7 +16,7 @@
 @include generic-source-includes.m2i@
 
 @foreach $table table@
-@    include generic-table.m2d@
+@    include m2c_setup_table.m2i@
 @    include details-table.m2i@
 @    foreach $node nonindex@
 @        print Processing       nonindex $node@

@@ -14,12 +14,12 @@
  * return 0 if the incoming value is legal, an SNMP error code otherwise.
  */
 int
-${node}_check_value( ${context}_reg *reg, ${context}_ctx *ctx,
-                     ${context}_ctx *undo_ctx, $m2c_node_set_parms)
+${node}_check_value( ${context}_ctx *ctx, $m2c_node_set_parms)
 {
-    netsnmp_assert(NULL != reg);
     netsnmp_assert(NULL != ctx);
-    netsnmp_assert(NULL != undo_ctx);
+    netsnmp_assert(NULL != ctx->reg);
+    netsnmp_assert(NULL != ctx->data);
+    netsnmp_assert(NULL != ctx->undo);
 @if $m2c_node_needlength == 1@
     netsnmp_assert(NULL != ${node}_ptr);
 @end@
@@ -75,15 +75,15 @@ $m2c_node_set_comments
 @end@
  */
 int
-${node}_set( ${context}_reg *reg, ${context}_ctx *ctx,
-             ${context}_ctx *undo_ctx, $m2c_node_set_parms )
+${node}_set( ${context}_ctx *ctx, $m2c_node_set_parms )
 {
 @ifconf syntax-$node.syntax-set.m2i@
 @    include syntax-$node.syntax-set.m2i@
 @else@
-    netsnmp_assert(NULL != reg);
     netsnmp_assert(NULL != ctx);
-    netsnmp_assert(NULL != undo_ctx);
+    netsnmp_assert(NULL != ctx->reg);
+    netsnmp_assert(NULL != ctx->data);
+    netsnmp_assert(NULL != ctx->undo);
 @if $m2c_node_needlength == 1@
     netsnmp_assert(NULL != ${node}_ptr);
 @end@
@@ -123,16 +123,16 @@ $m2c_node_undo_comments
 @end@
  */
 int
-${node}_undo( ${context}_reg *reg, ${context}_ctx *ctx,
-              ${context}_ctx *undo_ctx, $m2c_node_set_parms )
+${node}_undo( ${context}_ctx *ctx, $m2c_node_set_parms )
 {
 @ifconf syntax-$node.syntax-undo.m2i@
 @    include syntax-$node.syntax-undo.m2i@
 @else@
     /** syntax-$node.syntax-undo.m2i not found */
-    netsnmp_assert(NULL != reg);
     netsnmp_assert(NULL != ctx);
-    netsnmp_assert(NULL != undo_ctx);
+    netsnmp_assert(NULL != ctx->reg);
+    netsnmp_assert(NULL != ctx->data);
+    netsnmp_assert(NULL != ctx->undo);
 @if $m2c_node_needlength == 1@
     netsnmp_assert(NULL != ${node}_ptr);
 @end@

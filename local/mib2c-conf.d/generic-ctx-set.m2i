@@ -11,10 +11,10 @@
 $example_start
     /** TODO: update/replace $node set code? */
 @if $m2c_node_needlength == 0@
-    ctx->$node = $m2c_node_srh;
+    ctx->data->$node = $m2c_node_srh;
 @else@
-    memcpy( ctx->$node, $m2c_node_srh, $m2c_node_srhs);
-    ctx->${node}_len = $m2c_node_srhs;
+    memcpy( ctx->data->$node, $m2c_node_srh, $m2c_node_srhs);
+    ctx->data->${node}_len = $m2c_node_srhs;
 @end@ # need length
 $example_end
 

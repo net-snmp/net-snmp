@@ -14,11 +14,8 @@
  *
  * Extract the current value of the $node data.
  *
- * Param: ${context}_reg
- *        Pointer supplied by user during registration.
  * Param: ${context}_ctx
- *        Pointer to the users context. You should know how to
- *        extract the value from this object.
+ *        Pointer to the context.
 @if $m2c_node_get_comments ne ""@
 $m2c_node_get_comments
 @else@
@@ -37,13 +34,16 @@ $m2c_node_get_comments
 @end@
  */
 int
-${node}_get( ${context}_reg *reg, ${context}_ctx *ctx, $m2c_node_get_parms )
+${node}_get( ${context}_ctx *ctx, $m2c_node_get_parms )
 {
 @ifconf syntax-$node.syntax-get.m2i@
 @    include syntax-$node.syntax-get.m2i@
 @else@
     /** syntax-$node.syntax-get.m2i not found */
 @    include generic-get-decl.m2i@
+    netsnmp_assert(NULL != ctx);
+    netsnmp_assert(NULL != ctx->reg);
+    netsnmp_assert(NULL != ctx->data);
 @    if $m2c_node_skip_get != 1@
 @        include generic-ctx-get.m2i@
 @    end@
