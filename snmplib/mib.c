@@ -260,84 +260,74 @@ sprint_char(char *buf, const u_char ch)
  *         small when not allowed to realloc.)
  */
 int
-sprint_realloc_hexstring(u_char ** buf, size_t * buf_len, size_t * out_len,
-                         int allow_realloc, const u_char * cp, size_t len)
+_sprint_hexstring_line(u_char ** buf, size_t * buf_len, size_t * out_len,
+                       int allow_realloc, const u_char * cp, size_t line_len)
 {
     const u_char   *tp;
-    size_t          lenleft;
+    u_char         *cp2 = cp;
+    size_t          lenleft = line_len;
 
-    for (; len >= 16; len -= 16) {
-        while ((*out_len + 50) >= *buf_len) {
-            if (!(allow_realloc && snmp_realloc(buf, buf_len))) {
-                return 0;
-            }
+    /*
+     * Make sure there's enough room for the hex output....
+     */
+    while ((*out_len + line_len*3+1) >= *buf_len) {
+        if (!(allow_realloc && snmp_realloc(buf, buf_len))) {
+            return 0;
         }
+    }
 
+    /*
+     * .... and display the hex values themselves....
+     */
+    for (; lenleft >= 8; lenleft-=8) {
         sprintf((char *) (*buf + *out_len),
                 "%02X %02X %02X %02X %02X %02X %02X %02X ", cp[0], cp[1],
                 cp[2], cp[3], cp[4], cp[5], cp[6], cp[7]);
         *out_len += strlen((char *) (*buf + *out_len));
-        cp += 8;
-        sprintf((char *) (*buf + *out_len),
-                "%02X %02X %02X %02X %02X %02X %02X %02X", cp[0], cp[1],
-                cp[2], cp[3], cp[4], cp[5], cp[6], cp[7]);
-        *out_len += strlen((char *) (*buf + *out_len));
-        cp += 8;
-
-        if (netsnmp_ds_get_boolean(NETSNMP_DS_LIBRARY_ID, NETSNMP_DS_LIB_PRINT_HEX_TEXT)) {
-            while ((*out_len + 21) >= *buf_len) {
-                if (!(allow_realloc && snmp_realloc(buf, buf_len))) {
-                    return 0;
-                }
-            }
-            sprintf((char *) (*buf + *out_len), "  [");
-            *out_len += strlen((char *) (*buf + *out_len));
-            for (tp = cp - 16; tp < cp; tp++) {
-                sprint_char((char *) (*buf + *out_len), *tp);
-                (*out_len)++;
-            }
-            sprintf((char *) (*buf + *out_len), "]");
-            *out_len += strlen((char *) (*buf + *out_len));
-        }
-        if (len > 16) {
-            while ((*out_len + 2) >= *buf_len) {
-                if (!(allow_realloc && snmp_realloc(buf, buf_len))) {
-                    return 0;
-                }
-            }
-            *(*buf + (*out_len)++) = '\n';
-            *(*buf + *out_len) = 0;
-        }
+        cp       += 8;
     }
-
-    lenleft = len;
-    for (; len > 0; len--) {
-        while ((*out_len + 4) >= *buf_len) {
-            if (!(allow_realloc && snmp_realloc(buf, buf_len))) {
-                return 0;
-            }
-        }
+    for (; lenleft > 0; lenleft--) {
         sprintf((char *) (*buf + *out_len), "%02X ", *cp++);
         *out_len += strlen((char *) (*buf + *out_len));
     }
 
-    if ((lenleft > 0)
-        && netsnmp_ds_get_boolean(NETSNMP_DS_LIBRARY_ID, NETSNMP_DS_LIB_PRINT_HEX_TEXT)) {
-        while ((*out_len + 5 + lenleft) >= *buf_len) {
+    /*
+     * .... plus (optionally) do the same for the ASCII equivalent.
+     */
+    if (netsnmp_ds_get_boolean(NETSNMP_DS_LIBRARY_ID, NETSNMP_DS_LIB_PRINT_HEX_TEXT)) {
+        while ((*out_len + line_len+5) >= *buf_len) {
             if (!(allow_realloc && snmp_realloc(buf, buf_len))) {
                 return 0;
             }
         }
         sprintf((char *) (*buf + *out_len), "  [");
         *out_len += strlen((char *) (*buf + *out_len));
-        for (tp = cp - lenleft; tp < cp; tp++) {
+        for (tp = cp2; tp < cp; tp++) {
             sprint_char((char *) (*buf + *out_len), *tp);
             (*out_len)++;
         }
         sprintf((char *) (*buf + *out_len), "]");
         *out_len += strlen((char *) (*buf + *out_len));
     }
+    *(*buf + (*out_len)++) = '\n';
+    *(*buf + *out_len) = 0;
     return 1;
+}
+
+int
+sprint_realloc_hexstring(u_char ** buf, size_t * buf_len, size_t * out_len,
+                         int allow_realloc, const u_char * cp, size_t len)
+{
+    int line_len = netsnmp_ds_get_int(NETSNMP_DS_LIBRARY_ID,
+                                      NETSNMP_DS_LIB_HEX_OUTPUT_LENGTH);
+    if (!line_len)
+        line_len=len;
+
+    for (; len > line_len; len -= line_len) {
+        _sprint_hexstring_line(buf, buf_len, out_len, allow_realloc, cp, line_len);
+        cp += line_len;
+    }
+    return _sprint_hexstring_line(buf, buf_len, out_len, allow_realloc, cp, len);
 }
 
 
@@ -2364,6 +2354,8 @@ register_mib_handlers(void)
                        NETSNMP_DS_LIBRARY_ID, NETSNMP_DS_LIB_PRINT_BARE_VALUE);
     netsnmp_ds_register_premib(ASN_BOOLEAN, "snmp", "dontPrintUnits",
                        NETSNMP_DS_LIBRARY_ID, NETSNMP_DS_LIB_DONT_PRINT_UNITS);
+    netsnmp_ds_register_premib(ASN_INTEGER, "snmp", "hexOutputLength",
+                       NETSNMP_DS_LIBRARY_ID, NETSNMP_DS_LIB_HEX_OUTPUT_LENGTH);
 }
 
 #ifndef DISABLE_MIB_LOADING
