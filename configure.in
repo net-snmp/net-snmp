@@ -1156,10 +1156,11 @@ fi
 # ultrix
 AC_MSG_CHECKING([for two-argument statfs with struct fs_data (Ultrix)])
 AC_CACHE_VAL(fu_cv_sys_stat_fs_data,
-[AC_TRY_RUN([#include <sys/types.h>
+[AC_TRY_RUN([
 #ifdef HAVE_SYS_PARAM_H
 #include <sys/param.h>
 #endif
+#include <sys/types.h>
 #ifdef HAVE_SYS_MOUNT_H
 #include <sys/mount.h>
 #endif
@@ -1193,11 +1194,17 @@ if test "x$ac_cv_HAVE_CPP_UNDERBAR_FUNCTION_DEFINED" = "xyes"; then
 fi
 
 AC_CHECK_STRUCT_FOR([
+#ifdef HAVE_SYS_PARAM_H
+#include <sys/param.h>
+#endif
 #include <sys/types.h>
 #include <sys/signal.h>
 ], sigaction, sa_sigaction, no)
 
 AC_CHECK_STRUCT_FOR([
+#ifdef HAVE_SYS_PARAM_H
+#include <sys/param.h>
+#endif
 #include <sys/types.h>
 #define KERNEL
 #define _KERNEL
@@ -1207,6 +1214,9 @@ AC_CHECK_STRUCT_FOR([
 ], sockaddr, sa_len, no)
 
 AC_CHECK_STRUCT_FOR([
+#ifdef HAVE_SYS_PARAM_H
+#include <sys/param.h>
+#endif
 #include <sys/types.h>
 #define KERNEL
 #define _KERNEL
@@ -1216,6 +1226,9 @@ AC_CHECK_STRUCT_FOR([
 ], sockaddr, sa_union.sa_generic.sa_family2, no)
 
 AC_CHECK_STRUCT_FOR([
+#ifdef HAVE_SYS_PARAM_H
+#include <sys/param.h>
+#endif
 #include <sys/types.h>
 #define KERNEL
 #define _KERNEL
@@ -1231,6 +1244,9 @@ AC_CACHE_CHECK(type of rtentry structure,ac_cv_RTENTRY_TYPE,
 
 dnl 4.4 compat
 AC_TRY_COMPILE([
+#ifdef HAVE_SYS_PARAM_H
+#include <sys/param.h>
+#endif
 #include <sys/types.h>
 #define KERNEL
 #define _KERNEL
@@ -1252,6 +1268,9 @@ AC_TRY_COMPILE([
 dnl 4.3 compat
 if test "x$ac_cv_RTENTRY_TYPE" = "x"; then
 AC_TRY_COMPILE([
+#ifdef HAVE_SYS_PARAM_H
+#include <sys/param.h>
+#endif
 #include <sys/types.h>
 #define KERNEL
 #define _KERNEL
@@ -1281,7 +1300,7 @@ dnl checking for alpha's ortentry vs rtentry
 if test "x$ac_cv_RTENTRY_TYPE" = "xunknown"; then
 AC_CACHE_CHECK(for struct rtentry, ac_cv_struct_rtentry,
 [AC_EGREP_CPP(ortentry, [#define KERNEL
-#include<net/route.h>
+#include <net/route.h>
 ],  ac_cv_struct_rtentry=ortentry,  ac_cv_struct_rtentry=rtentry )
 if test "x$ac_cv_struct_rtentry" = "xrtentry" ; then
   ac_cv_struct_rtentry="rtentry"
@@ -1306,6 +1325,9 @@ AC_CACHE_CHECK(for struct rtentry has a rt_next node,
 	ac_cv_struct_rtentry_rt_next,
 [
 AC_TRY_COMPILE([
+#ifdef HAVE_SYS_PARAM_H
+#include <sys/param.h>
+#endif
 #include <sys/types.h>
 #define KERNEL
 #define _KERNEL
@@ -1327,6 +1349,9 @@ fi
 
 dnl Check struct rtentry for various things.
 AC_CHECK_STRUCT_FOR([
+#ifdef HAVE_SYS_PARAM_H
+#include <sys/param.h>
+#endif
 #include <sys/types.h>
 #define KERNEL
 #define _KERNEL
@@ -1337,6 +1362,9 @@ AC_CHECK_STRUCT_FOR([
 ], rtentry, rt_unit)
 
 AC_CHECK_STRUCT_FOR([
+#ifdef HAVE_SYS_PARAM_H
+#include <sys/param.h>
+#endif
 #include <sys/types.h>
 #define KERNEL
 #define _KERNEL
@@ -1347,6 +1375,9 @@ AC_CHECK_STRUCT_FOR([
 ], rtentry, rt_refcnt)
 
 AC_CHECK_STRUCT_FOR([
+#ifdef HAVE_SYS_PARAM_H
+#include <sys/param.h>
+#endif
 #include <sys/types.h>
 #define KERNEL
 #define _KERNEL
@@ -1357,6 +1388,9 @@ AC_CHECK_STRUCT_FOR([
 ], rtentry, rt_hash)
 
 AC_CHECK_STRUCT_FOR([
+#ifdef HAVE_SYS_PARAM_H
+#include <sys/param.h>
+#endif
 #include <sys/types.h>
 #define KERNEL
 #define _KERNEL
@@ -1368,6 +1402,9 @@ AC_CHECK_STRUCT_FOR([
 
 dnl Check tcpstat for tcpstat.tcp_rcvmemdrop
 AC_CHECK_STRUCT_FOR([
+#ifdef HAVE_SYS_PARAM_H
+#include <sys/param.h>
+#endif
 #include <sys/types.h>
 #include <netinet/tcp.h>
 #ifdef HAVE_NETINET_TCP_TIMER_H
@@ -1375,13 +1412,16 @@ AC_CHECK_STRUCT_FOR([
 #endif
 
 #ifdef HAVE_NETINET_TCP_VAR_H
-#include<netinet/tcp_var.h>
+#include <netinet/tcp_var.h>
 #endif
 ], tcpstat, tcp_rcvmemdrop)
 
 dnl irix checks
 
 AC_CHECK_STRUCT_FOR([
+#ifdef HAVE_SYS_PARAM_H
+#include <sys/param.h>
+#endif
 #include <sys/types.h>
 #include <sys/socket.h>
 #include <net/if.h>
@@ -1398,6 +1438,9 @@ if test "x$ac_cv_struct_ifnet_has_if_mtu" = "xyes"; then
 else
 AC_TRY_COMPILE([
 #define _KERNEL 1
+#ifdef HAVE_SYS_PARAM_H
+#include <sys/param.h>
+#endif
 #include <sys/types.h>
 #include <sys/socket.h>
 #ifdef HAVE_SYS_TIME_H
@@ -1422,6 +1465,9 @@ fi
 AC_CHECK_STRUCT_FOR([
 #ifdef IFNET_NEEDS_KERNEL
 #define _KERNEL 1
+#endif
+#ifdef HAVE_SYS_PARAM_H
+#include <sys/param.h>
 #endif
 #include <sys/types.h>
 #include <sys/socket.h>
@@ -1460,17 +1506,20 @@ AC_CHECK_STRUCT_FOR([
 ],udpstat,udps_discard)
 
 AC_CHECK_STRUCT_FOR([
-#include<sys/types.h>
-#include<sys/socket.h>
+#ifdef HAVE_SYS_PARAM_H
+#include <sys/param.h>
+#endif
+#include <sys/types.h>
+#include <sys/socket.h>
 #ifdef HAVE_SYS_TIME_H
 #include <sys/time.h>
 #endif
-#include<net/if.h>
+#include <net/if.h>
 #if HAVE_NETINET_IN_H
-#include<netinet/in.h>
+#include <netinet/in.h>
 #endif
 #if HAVE_NETINET_IF_ETHER_H
-#include<netinet/if_ether.h>
+#include <netinet/if_ether.h>
 #endif
 ],arphd,at_next)
 
@@ -1524,10 +1573,10 @@ AC_CACHE_CHECK(if sysctl can read kernel information,ac_cv_CAN_USE_SYSCTL,
 #  include <time.h>
 # endif
 #endif
-#include <sys/types.h>
 #if HAVE_SYS_PARAM_H
 # include <sys/param.h>
 #endif
+#include <sys/types.h>
 #if HAVE_SYS_SYSCTL_H
 # include <sys/sysctl.h>
 #endif
