@@ -42,6 +42,11 @@
 # endif
 #endif
 
+/* Must be right after system headers, but before library code for best usage */
+#ifdef HAVE_DMALLOC_H
+#include <dmalloc.h>
+#endif
+
   /* The check for missing 'in_addr_t' is handled
      within the main net-snmp-config.h file */
 
@@ -49,10 +54,10 @@
     /*
      *  The full Net-SNMP API
      */
-#include <net-snmp/utilities.h>
 #include <net-snmp/definitions.h>
 #include <net-snmp/types.h>
 
+#include <net-snmp/utilities.h>
 #include <net-snmp/session_api.h>
 #include <net-snmp/pdu_api.h>
 #include <net-snmp/mib_api.h>
