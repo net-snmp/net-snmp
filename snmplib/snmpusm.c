@@ -82,9 +82,9 @@ oid             usmHMACSHA1AuthProtocol[10] =
     { 1, 3, 6, 1, 6, 3, 10, 1, 1, 3 };
 oid             usmNoPrivProtocol[10] = { 1, 3, 6, 1, 6, 3, 10, 1, 2, 1 };
 oid             usmDESPrivProtocol[10] = { 1, 3, 6, 1, 6, 3, 10, 1, 2, 2 };
-oid             usmAES128PrivProtocol[10] = { 1, 3, 6, 1, 4, 1, 8072, 876,876,128 };
-oid             usmAES192PrivProtocol[10] = { 1, 3, 6, 1, 4, 1, 8072, 876,876,192 };
-oid             usmAES256PrivProtocol[10] = { 1, 3, 6, 1, 4, 1, 8072, 876,876,256 };
+oid             usmAESPrivProtocol[10] = { 1, 3, 6, 1, 4, 1, 8072, 876,876,128 };
+/* backwards compat */
+oid             *usmAES128PrivProtocol = usmAESPrivProtocol;
 
 static u_int    dummy_etime, dummy_eboot;       /* For ISENGINEKNOWN(). */
 
@@ -1009,9 +1009,7 @@ usm_generate_out_msg(int msgProcModel,  /* (UNUSED) */
          * XXX  Hardwired to seek into a 1DES private key!
          */
 #ifdef HAVE_AES
-        if (ISTRANSFORM(thePrivProtocol, AES128Priv) &&
-            ISTRANSFORM(thePrivProtocol, AES192Priv) &&
-            ISTRANSFORM(thePrivProtocol, AES256Priv)) {
+        if (ISTRANSFORM(thePrivProtocol, AESPriv)) {
             if (!thePrivKey ||
                 usm_set_aes_iv(salt, &salt_length,
                                htonl(boots_uint), htonl(time_uint),
@@ -1490,9 +1488,7 @@ usm_rgenerate_out_msg(int msgProcModel, /* (UNUSED) */
          * XXX Hardwired to seek into a 1DES private key!  
          */
 #ifdef HAVE_AES
-        if (ISTRANSFORM(thePrivProtocol, AES128Priv) ||
-            ISTRANSFORM(thePrivProtocol, AES192Priv) ||
-            ISTRANSFORM(thePrivProtocol, AES256Priv)) {
+        if (ISTRANSFORM(thePrivProtocol, AESPriv)) {
             salt_length = BYTESIZE(USM_AES_SALT_LENGTH);
             save_salt_length = BYTESIZE(USM_AES_SALT_LENGTH)/2;
             save_salt_offset = 0;
@@ -2589,9 +2585,7 @@ usm_process_in_msg(int msgProcModel,    /* (UNUSED) */
                 iv[i] = salt[i] ^ user->privKey[iv_length + i];
         }
 #ifdef HAVE_AES
-        else if (ISTRANSFORM(user->privProtocol, AES128Priv) ||
-                 ISTRANSFORM(user->privProtocol, AES192Priv) ||
-                 ISTRANSFORM(user->privProtocol, AES256Priv)) {
+        else if (ISTRANSFORM(user->privProtocol, AESPriv)) {
             iv_length = BYTESIZE(USM_AES_SALT_LENGTH);
             net_boots = ntohl(boots_uint);
             net_time = ntohl(time_uint);
