@@ -75,11 +75,6 @@ static u_int salt_integer;
 	/* 1/2 of seed for the salt.   Cf. RFC2274, Sect 8.1.1.1.
 	 */
 
-int reportErrorOnUnknownID = 0;
-	/* Should be determined based on msg type.
-	 */
-
-static struct usmUser *initialUser = NULL;
 static struct usmUser *noNameUser = NULL;
 
 /*
@@ -119,13 +114,6 @@ usm_check_secLevel_vs_protocols(int level,
 	ref->field_len = len;						\
 									\
 	return 0;							\
-}
-
-
-void
-usm_set_reportErrorOnUnknownID (int value)
-{
-	reportErrorOnUnknownID = value;
 }
 
 
@@ -1613,7 +1601,8 @@ usm_process_in_msg (
 	size_t  *scopedPduLen,	   /* IN/OUT - Len available, len returned.   */
 
 	size_t  *maxSizeResponse,  /* OUT    - Max size of Response PDU.      */
-	void   **secStateRf)	   /* OUT    - Ref to security state.         */
+	void   **secStateRf,
+        u_char msg_flags)	   /* IN     - v3 Message flags.              */
 {
 	size_t   remaining = wholeMsgLen
 				- (u_int)
@@ -1713,7 +1702,7 @@ usm_process_in_msg (
 	 * Locate the engine ID record.
 	 * If it is unknown, then either create one or note this as an error.
 	 */
-	if (reportErrorOnUnknownID)
+	if (msg_flags & SNMP_MSG_FLAG_RPRT_BIT)
 	{
 		if (ISENGINEKNOWN(secEngineID, *secEngineIDLen)==FALSE)
 		{
@@ -1956,14 +1945,15 @@ usm_process_in_msg (
 
 void
 init_usm(void) {
-  snmp_register_callback(SNMP_CALLBACK_LIBRARY, SNMP_CALLBACK_POST_READ_CONFIG,
+  snmp_register_callback(SNMP_CALLBACK_LIBRARY,
+                         SNMP_CALLBACK_POST_PREMIB_READ_CONFIG,
                          init_usm_post_config, NULL);
 }
 
 /* 
  * initializations for the USM.
  *
- * Should be called after the configuration files have been read.
+ * Should be called after the (engineid) configuration files have been read.
  *
  * Set "arbitrary" portion of salt to a random number.
  */
@@ -1971,13 +1961,6 @@ int
 init_usm_post_config(int majorid, int minorid, void *serverarg,
                      void *clientarg) {
   size_t	salt_integer_len = sizeof(salt_integer);
-
-  initialUser = usm_create_initial_user("initial", usmHMACMD5AuthProtocol,
-                                        USM_LENGTH_OID_TRANSFORM,
-                                        usmDESPrivProtocol,
-                                        USM_LENGTH_OID_TRANSFORM);
-  SNMP_FREE(initialUser->engineID);
-  initialUser->engineIDLen = 0;
 
   if ( sc_random((u_char *) &salt_integer, &salt_integer_len) != SNMPERR_SUCCESS )
   {
@@ -2118,10 +2101,6 @@ usm_get_user_from_list(u_char *engineID, size_t engineIDLen,
   }
   /* return "" user used to facilitate engineID discovery */
   if (use_default && !strcmp(name, "")) return noNameUser;
-  /* this next line may be vestigial from when the draft used 'initial'
-     to discover engineID, also did not remove creation if 'inital' user
-     -gsm 2/6/99 */
-  if (use_default && !strcmp(name, "initial")) return initialUser;
   return NULL;
 }
 
