@@ -156,7 +156,14 @@ snmp_parse_args(int argc,
   if (localOpts) strcat(Opts, localOpts);
 
   /* get the options */
+  DEBUGMSGTL(("snmp_parse_args","starting: %d/%d\n", optind, argc));
+  for(arg=0; arg < argc; arg++) {
+      DEBUGMSGTL(("snmp_parse_args"," arg %d = %s\n", arg, argv[arg]));
+  }
+      
+  optind = 0;
   while ((arg = getopt(argc, argv, Opts)) != EOF) {
+    DEBUGMSGTL(("snmp_parse_args","handling (#%d): %c\n", optind, arg));
     switch(arg){
       case 'V':
         fprintf(stderr,"UCD-snmp version: %s\n", VersionInfo);
@@ -398,6 +405,7 @@ snmp_parse_args(int argc,
 	break;
     }
   }
+  DEBUGMSGTL(("snmp_parse_args","finished: %d/%d\n", optind, argc));
 
   /* read in MIB database and initialize the snmp library*/
   init_snmp("snmpapp");
