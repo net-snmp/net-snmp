@@ -13,6 +13,7 @@
 #include <net-snmp/agent/agent_read_config.h>
 #include <net-snmp/agent/agent_trap.h>
 #include <net-snmp/agent/agent_handler.h>
+#include <net-snmp/agent/all_helpers.h>
 
 #include <net-snmp/agent/mib_module_config.h>
 
