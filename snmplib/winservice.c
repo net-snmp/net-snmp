@@ -297,7 +297,6 @@ RegisterService (LPCTSTR lpszServiceName, LPCTSTR lpszServiceDisplayName,
      * Log message to eventlog 
      */
     WriteToEventLog (EVENTLOG_INFORMATION_TYPE, MsgErrorString);
-    MessageBox (NULL, MsgErrorString, g_szAppName, MB_ICONINFORMATION);
   }
 
   FINALLY
@@ -372,7 +371,6 @@ UnregisterService (LPCSTR lpszServiceName)
       {
 	_stprintf (MsgErrorString, "%s %s", _T ("Can't delete service"),
 		   lpszServiceName);
-	MessageBox (NULL, MsgErrorString, g_szAppName, MB_ICONHAND);
 
 	/*
 	 * Log message to eventlog 
@@ -393,7 +391,6 @@ UnregisterService (LPCSTR lpszServiceName)
     _tcscpy (szRegKey, szRegAppLogKey);
     _tcscat (szRegKey, lpszServiceName);
     RegDeleteKey (HKEY_LOCAL_MACHINE, szRegKey);
-    MessageBox (NULL, MsgErrorString, g_szAppName, MB_ICONINFORMATION);
   }
 
   /*
