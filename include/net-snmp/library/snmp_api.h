@@ -258,6 +258,7 @@ struct snmp_session {
     char           *securityName;
     /** Length of securityName. */
     size_t          securityNameLen;
+
     /** auth protocol oid */
     oid            *securityAuthProto;
     /** Length of auth protocol oid */
@@ -266,6 +267,11 @@ struct snmp_session {
     u_char          securityAuthKey[USM_AUTH_KU_LEN];       
     /** Length of Ku for auth protocol */
     size_t          securityAuthKeyLen;
+    /** Kul for auth protocol */
+    u_char          *securityAuthLocalKey;       
+    /** Length of Kul for auth protocol XXX */
+    size_t          securityAuthLocalKeyLen;       
+
     /** priv protocol oid */
     oid            *securityPrivProto;
     /** Length of priv protocol oid */
@@ -274,6 +280,11 @@ struct snmp_session {
     u_char          securityPrivKey[USM_PRIV_KU_LEN];       
     /** Length of Ku for priv protocol */
     size_t          securityPrivKeyLen;
+    /** Kul for priv protocol */
+    u_char          *securityPrivLocalKey;       
+    /** Length of Kul for priv protocol XXX */
+    size_t          securityPrivLocalKeyLen;       
+
     /** snmp security model, v1, v2c, usm */
     int             securityModel;
     /** noAuthNoPriv, authNoPriv, authPriv */
