@@ -104,7 +104,13 @@ initialize_table_ifXTable(void)
      * set any flags here.
      */
     flags = 0;
+
+    /*
+     * call interface initialization code
+     */
+    _ifXTable_initialize_interface(user_context, flags);
     netsnmp_assert(NULL!=_ifXTable_container_get());
+
     register_config_handler(NULL, "ifXTable", _ifXTable_restore, NULL, NULL);
     rc = snmp_register_callback(SNMP_CALLBACK_LIBRARY,
                                 SNMP_CALLBACK_STORE_DATA,
@@ -113,11 +119,6 @@ initialize_table_ifXTable(void)
         snmp_log(LOG_ERR, "error registering for STORE_DATA callback "
                  "in initialize_table_ifXTable\n");
 
-
-    /*
-     * call interface initialization code
-     */
-    _ifXTable_initialize_interface(user_context, flags);
 }                               /* initialize_table_ifXTable */
 
 /**
