@@ -36,7 +36,10 @@
 
 static int      h_stay_open, s_stay_open, p_stay_open, n_stay_open;
 static FILE    *h_fp, *s_fp, *p_fp, *n_fp;
-static char    *h_fn, *s_fn, *p_fn, *n_fn;
+static char    *p_fn;
+#ifdef notused
+static char    *h_fn, *s_fn, *n_fn;
+#endif
 
 #ifdef aix4
 #define ROOT_BASE "/etc/"
