@@ -7,6 +7,9 @@
 #if STDC_HEADERS
 #include <stdlib.h>
 #endif
+#if HAVE_NETINET_IN_H
+#include <netinet/in.h>
+#endif
 
 #include "mibincl.h"
 #include "snmp_api.h"

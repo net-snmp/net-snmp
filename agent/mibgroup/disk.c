@@ -100,6 +100,9 @@
 #if HAVE_SYS_MNTTAB_H
 #include <sys/mnttab.h>
 #endif
+#if HAVE_NETINET_IN_H
+#include <netinet/in.h>
+#endif
 
 #include "mibincl.h"
 #include "struct.h"
