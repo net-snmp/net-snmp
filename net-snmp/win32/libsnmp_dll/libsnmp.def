@@ -155,6 +155,7 @@ EXPORTS
 	snmp_mib_toggle_options
 	snmp_mib_toggle_options_usage
 	read_config_print_usage
+	debug_register_tokens
 	Mib			DATA
 	tree_head		DATA
 	snmp_errno		DATA

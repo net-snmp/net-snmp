@@ -96,7 +96,7 @@ static void md5Digest (u_char *, int, u_char *) ;
 *        since the version field must first be examined to see
 *        if the message contains a community string.
 
-    u_char * nmp_comstr_parse(
+    u_char * snmp_comstr_parse(
     u_char *data        IN - message
     int *length         IN/OUT - bytes left in message
     u_char *sid         OUT - community string
