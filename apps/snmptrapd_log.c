@@ -1096,7 +1096,7 @@ realloc_format_plain_trap (u_char **buf, size_t *buf_len, size_t *out_len,
     if (!snmp_strcat(buf, buf_len, out_len, allow_realloc, inet_ntoa(pdu_ip->sin_addr))) {
       return 0;
     }
-    if (!snmp_strcat(buf, buf_len, out_len, allow_realloc, "])")) {
+    if (!snmp_strcat(buf, buf_len, out_len, allow_realloc, "]) ")) {
       return 0;
     }
   }
