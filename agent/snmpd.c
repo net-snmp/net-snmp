@@ -791,7 +791,7 @@ main(int argc, char *argv[])
     /* Should open logfile and/or syslog based on arguments */
     if (logfile[0])
       enable_filelog(logfile, dont_zero_log);
-    if (stderr_log)
+    /* decide to not log stderr after init succeeds */
       enable_stderrlog();
     if (syslog_log)
       enable_syslog(); 
@@ -880,6 +880,9 @@ main(int argc, char *argv[])
     }
 #endif
 
+    /* honor selection of standard error output */
+    if (!stderr_log)
+      disable_stderrlog();
 
     memset(addrCache, 0, sizeof(addrCache));
     /* 
