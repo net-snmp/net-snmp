@@ -44,11 +44,17 @@
 void _${context}_initialize_interface(${context}_registration_ptr user_ctx,
                                     u_long flags);
 
-@if $m2c_data_allocate == 1@
-    ${context}_rowreq_ctx * ${context}_allocate_rowreq_ctx(${context}_data *);
-@else@
-    ${context}_rowreq_ctx * ${context}_allocate_rowreq_ctx(void);
-@end@
+@   if $m2c_data_allocate == 1@
+@      eval $m2c_tmp = "${context}_data *"@
+@      if $m2c_data_init == 1@
+@         eval $m2c_tmp = "$m2c_tmp, void *"@
+@      @end@
+@   elsif $m2c_data_init == 1@
+@      eval $m2c_tmp = "void *"@
+@   else@
+@      eval $m2c_tmp = "void"@
+@   end@
+    ${context}_rowreq_ctx * ${context}_allocate_rowreq_ctx($m2c_tmp);
 void ${context}_release_rowreq_ctx(${context}_rowreq_ctx *rowreq_ctx);
 @    if ("$m2c_data_context" eq "generated") && ($m2c_data_allocate == 1)@
 static ${context}_data *${context}_allocate_data(void);
@@ -332,12 +338,19 @@ _${context}_initialize_interface(${context}_registration_ptr reg_ptr,  u_long fl
  */
 ${context}_rowreq_ctx *
 @if $m2c_data_allocate == 1@
-${context}_allocate_rowreq_ctx(${context}_data *data)
+@   eval $m2c_tmp = "${context}_data *data"@
+@   if $m2c_data_init == 1@
+@     eval $m2c_tmp = "$m2c_tmp, void *user_init_ctx"@
+@   end@
+@elsif $m2c_data_init == 1@
+@   eval $m2c_tmp = "void *user_init_ctx"@
 @else@
-${context}_allocate_rowreq_ctx(void)
+@   eval $m2c_tmp = "void"@
 @end@
+${context}_allocate_rowreq_ctx($m2c_tmp)
 {
-    ${context}_rowreq_ctx *rowreq_ctx = SNMP_MALLOC_TYPEDEF(${context}_rowreq_ctx);
+    ${context}_rowreq_ctx *rowreq_ctx =
+                  SNMP_MALLOC_TYPEDEF(${context}_rowreq_ctx);
 
     DEBUGMSGTL(("internal:${context}_allocate_rowreq_ctx","called\n"));
 
@@ -366,8 +379,9 @@ ${context}_allocate_rowreq_ctx(void)
     rowreq_ctx->${context}_reg = ${context}_if_ctx.user_ctx;
 
 @if $m2c_data_init == 1@
-    if(SNMPERR_SUCCESS != ${context}_rowreq_ctx_init(rowreq_ctx)) {
-       ${context}_release_rowreq_ctx(if_ctx, rowreq_ctx);
+    if(SNMPERR_SUCCESS !=
+        ${context}_rowreq_ctx_init(rowreq_ctx, user_init_ctx)) {
+       ${context}_release_rowreq_ctx(rowreq_ctx);
        rowreq_ctx = NULL;
     }
 @end@
@@ -387,12 +401,15 @@ ${context}_release_rowreq_ctx(${context}_rowreq_ctx *rowreq_ctx)
     netsnmp_assert(NULL != rowreq_ctx);
     
 @if $m2c_data_init == 1@
-    ${context}_rowreq_ctx_cleanupx(rowreq_ctx);
+    ${context}_rowreq_ctx_cleanup(rowreq_ctx);
 @end@
 
 @if $m2c_data_allocate == 1@
     if(rowreq_ctx->data)
         ${context}_release_data(rowreq_ctx->data);
+ 
+    if(rowreq_ctx->undo)
+        ${context}_release_data(rowreq_ctx->undo);
  
 @end@ 
     /*
@@ -480,11 +497,14 @@ _mfd_${context}_object_lookup(netsnmp_mib_handler *handler,
             /*
              * allocate new context
              */
-@if $m2c_data_allocate == 1@
-            rowreq_ctx = ${context}_allocate_rowreq_ctx(NULL);
-@else@
-            rowreq_ctx = ${context}_allocate_rowreq_ctx();
-@end@
+@   eval $m2c_tmp = ""@
+@   if ($m2c_data_allocate == 1) || ($m2c_data_init == 1)@
+@      eval $m2c_tmp = "NULL"@
+@      if ($m2c_data_allocate == 1) && ($m2c_data_init == 1)@
+@         eval $m2c_tmp = "$m2c_tmp, NULL"@
+@      @end@
+@   end@
+            rowreq_ctx = ${context}_allocate_rowreq_ctx($m2c_tmp);
             if (NULL == rowreq_ctx)
                 return MFD_ERROR; /* msg already logged */
 
@@ -860,6 +880,9 @@ ${context}_undo_setup( ${context}_rowreq_ctx *rowreq_ctx )
      */
 @    foreach $node nonindex@
 @        include m2c_setup_node.m2i@
+@        if $node.settable == 0@
+@           next@
+@        end@
 @        eval $m2c_ctx_lh = "${m2c_undo_item}${node}"@
 @        eval $m2c_ctx_lhs = "${m2c_undo_item}${node}_len"@
 @        include generic-ctx-copy.m2i@
