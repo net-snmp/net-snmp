@@ -368,6 +368,9 @@
 #ifdef openbsd2
 #define OSTYPE OPENBSDID
 #endif
+#ifdef WIN32
+#define OSTYPE WIN32ID
+#endif
 /* unknown */
 #ifndef OSTYPE
 #define OSTYPE UNKNOWNID
