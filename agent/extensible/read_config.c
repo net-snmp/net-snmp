@@ -52,7 +52,11 @@ int read_config(filename, procp, numps, pprelocs, numrelocs, pppassthrus,
   int linecount=0,i;
   struct stat stat1, stat2;
 #if HAVE_GETMNTENT
+#if HAVE_SYS_MNTTAB_H
   struct mnttab mnttab;
+#else
+  struct mntent *mntent;
+#endif
   FILE *mntfp;
 #elif HAVE_FSTAB_H
   struct fstab *fstab;
@@ -164,8 +168,28 @@ int read_config(filename, procp, numps, pprelocs, numrelocs, pppassthrus,
               }
               /* find the device associated with the directory */
 #if HAVE_GETMNTENT
+#if HAVE_SETMNTENT
+              mntfp = setmntent(ETC_MNTTAB, "r");
+	      disk[*numdisks].device[0] = NULL;
+              while (mntent = getmntent (mntfp))
+		if (strcmp (disk[*numdisks].path, mntent->mnt_dir) == 0) {
+                  copy_word (mntent->mnt_fsname, disk[*numdisks].device);
+                  *numdisks += 1;
+                  DEBUGP1("Disk:  %s\n",mntent->mnt_fsname);
+		  break;
+                }
+#ifdef DODEBUG
+		else {
+                  printf ("%s != %s\n", disk[*numdisks].path,
+                          mntent->mnt_dir);
+                }
+#endif
+              endmntent(mntfp);
+              if (disk[*numdisks].device[0] != NULL) {
+                /* dummy clause for else below */
+              }
+#else /* getmentent but not setmntent */
 	      mntfp = fopen (ETC_MNTTAB, "r");
-
 	      while ((i = getmntent (mntfp, &mnttab)) == 0)
 		if (strcmp (disk[*numdisks].path, mnttab.mnt_mountp) == 0)
 		  break;
@@ -174,10 +198,12 @@ int read_config(filename, procp, numps, pprelocs, numrelocs, pppassthrus,
                   printf ("%s != %s\n", disk[*numdisks].path, mnttab.mnt_mountp);
 #endif
                 }
+	      fclose (mntfp);
 	      if (i == 0) {
 		copy_word (mnttab.mnt_special, disk[*numdisks].device);
 		*numdisks += 1;
 	      }
+#endif /* HAVE_SETMNTENT */
 #elif HAVE_FSTAB_H
               stat(disk[*numdisks].path,&stat1);
               setfsent();
@@ -192,9 +218,7 @@ int read_config(filename, procp, numps, pprelocs, numrelocs, pppassthrus,
                 disk[*numdisks].minimumspace = -1;
                 disk[*numdisks].path[0] = 0;
               }
-#if HAVE_GETMNTENT
-	      fclose (mntfp);
-#elif HAVE_FSTAB_H
+#if HAVE_FSTAB_H
               endfsent();
 #endif
             }
