@@ -11,9 +11,11 @@ INSTALLHEADERS=\
 	callback.h \
 	default_store.h \
 	int64.h \
+	keytools.h \
 	mib.h \
 	parse.h \
 	read_config.h \
+	scapi.h \
 	snmp.h \
 	snmp_alarm.h \
 	snmp_api.h \
@@ -21,8 +23,10 @@ INSTALLHEADERS=\
 	snmp_debug.h \
 	snmp_impl.h \
 	snmp_logging.h \
+	snmpv3.h \
 	system.h \
 	tools.h \
+	transform_oids.h \
 	ucd-snmp-includes.h
 
 CSRCS=	snmp_client.c mib.c parse.c snmp_api.c snmp.c 		\
