@@ -80,6 +80,7 @@ extern "C" {
 
 int agentx_build(struct snmp_session *, struct snmp_pdu *, u_char *, size_t *);
 int agentx_parse(struct snmp_session *, struct snmp_pdu *, u_char *, size_t);
+int agentx_check_packet(u_char *, size_t);
 
 #ifdef __cplusplus
 }

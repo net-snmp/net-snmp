@@ -577,7 +577,8 @@ struct snmp_session *snmp_open_ex (struct snmp_session *,
   int (*fpre_parse) (struct snmp_session *, snmp_ipaddr),
   int (*fparse) (struct snmp_session *, struct snmp_pdu *, u_char *, size_t),
   int (*fpost_parse) (struct snmp_session *, struct snmp_pdu *, int),
-  int (*fbuild) (struct snmp_session *, struct snmp_pdu *, u_char *, size_t *)
+  int (*fbuild) (struct snmp_session *, struct snmp_pdu *, u_char *, size_t *),
+  int (*fcheck) (u_char *, size_t)
 );
 
 /* provided for backwards compatability.  Don't use these functions.

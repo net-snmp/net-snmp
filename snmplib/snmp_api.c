@@ -174,6 +174,7 @@ struct snmp_internal_session {
     int (*hook_parse)( struct snmp_session *, struct snmp_pdu *, u_char *, size_t);
     int (*hook_post) ( struct snmp_session*, struct snmp_pdu*, int );
     int (*hook_build)( struct snmp_session *, struct snmp_pdu *, u_char *, size_t *);
+    int (*check_packet) ( u_char *, size_t );
     u_char *packet;
     long packet_len, proper_len;
     size_t packet_size;
@@ -650,7 +651,8 @@ struct snmp_session *snmp_open_ex (
   int (*fpre_parse) (struct snmp_session *, snmp_ipaddr),
   int (*fparse) (struct snmp_session *, struct snmp_pdu *, u_char *, size_t),
   int (*fpost_parse) (struct snmp_session *, struct snmp_pdu *, int),
-  int (*fbuild) (struct snmp_session *, struct snmp_pdu *, u_char *, size_t *)
+  int (*fbuild) (struct snmp_session *, struct snmp_pdu *, u_char *, size_t *),
+  int (*fcheck) (u_char *, size_t )
 )
 {
     struct session_list *slp;
@@ -660,6 +662,7 @@ struct snmp_session *snmp_open_ex (
     slp->internal->hook_parse = fparse;
     slp->internal->hook_post = fpost_parse;
     slp->internal->hook_build = fbuild;
+    slp->internal->check_packet = fcheck;
 
     snmp_res_lock(MT_LIBRARY_ID, MT_LIB_SESSION);
     slp->next = Sessions;
@@ -3228,8 +3231,7 @@ _sess_read(void *sessp,
     int addrlen;
     int fromlength;
 
-    if (slp->internal->sd == -1 ||
-        (!slp->internal->newpkt && !(FD_ISSET(slp->internal->sd, fdset)))) {
+    if ((!slp->internal->newpkt && !(FD_ISSET(slp->internal->sd, fdset)))) {
       DEBUGMSGTL(("sess_read","not reading...\n"));
       return 0;
     }
@@ -3313,7 +3315,7 @@ _sess_read(void *sessp,
     if (sp->flags & SNMP_FLAGS_STREAM_SOCKET ) {
 
       if (isp->newpkt == 1) {
-        /* move the old memory down */
+        /* move the old memory down, if we have saved data */
         memmove(isp->packet, isp->packet+isp->proper_len, isp->proper_len);
         isp->newpkt = 0;
         isp->packet_len -= isp->proper_len;
@@ -3332,7 +3334,8 @@ _sess_read(void *sessp,
           /* maximum length exceeded, drop connection */
           snmp_log(LOG_ERR,"Maximum saved packet size exceeded.\n");
           isp->sd = -1;
-		/* Don't unlink the server listening socket prematurely */
+          /* Don't unlink the server listening socket prematurely */
+          /* XXX: do this?? */
 #ifdef AF_UNIX
         if (( isp->me.sa_family == AF_UNIX ) &&
            !( sp->flags & SNMP_FLAGS_LISTENING ))
@@ -3345,18 +3348,25 @@ _sess_read(void *sessp,
           isp->packet_size = (isp->packet_len + length); /* shouldn't happen */
         isp->packet = (u_char *) realloc(isp->packet, isp->packet_size);
       }
+
+      /* add the new data to the end of our buffer */
       memcpy(isp->packet+isp->packet_len, packet, length);
       isp->packet_len += length;
       
       /* check for agentx length parser */
       if (isp->proper_len == 0) {
-        /* XXX: use a isp->check_packet() function if it exists.  The below will only work for SNMP, not agentx... */
-        isp->proper_len = asn_check_packet(isp->packet, isp->packet_len);
+        /* get the total data length we're expecting (and need to wait for) */
+        if (isp->check_packet)
+          isp->proper_len = isp->check_packet(isp->packet, isp->packet_len);
+        else
+          isp->proper_len = asn_check_packet(isp->packet, isp->packet_len);
+
         if (isp->proper_len > MAX_PACKET_LENGTH) {
           /* illegal length, drop the connection */
           snmp_log(LOG_ERR,"Maximum packet size exceeded in a request.\n");
           isp->sd = -1;
-		/* Don't unlink the server listening socket prematurely */
+          /* Don't unlink the server listening socket prematurely */
+          /* XXX: do this?? */
 #ifdef AF_UNIX
         if (( isp->me.sa_family == AF_UNIX ) &&
            !( sp->flags & SNMP_FLAGS_LISTENING ))
@@ -3389,123 +3399,123 @@ _sess_read(void *sessp,
       }
     }
 
-        if (ds_get_boolean(DS_LIBRARY_ID, DS_LIB_DUMP_PACKET)){
-          snmp_log(LOG_DEBUG, "\nReceived %d bytes from %s:%hu\n", length,
-                   inet_ntoa(fromIp->sin_addr), ntohs(fromIp->sin_port));
-          xdump(packetptr, length, "");
-        }
-        if ( isp->hook_pre ) {
-          if ( isp->hook_pre( sp, from ) == 0 )
-            return -1;
-        }
+    if (ds_get_boolean(DS_LIBRARY_ID, DS_LIB_DUMP_PACKET)){
+      snmp_log(LOG_DEBUG, "\nReceived %d bytes from %s:%hu\n", length,
+               inet_ntoa(fromIp->sin_addr), ntohs(fromIp->sin_port));
+      xdump(packetptr, length, "");
+    }
+    if ( isp->hook_pre ) {
+      if ( isp->hook_pre( sp, from ) == 0 )
+        return -1;
+    }
 
-        pdu = (struct snmp_pdu *)malloc(sizeof(struct snmp_pdu));
-        memset (pdu, 0, sizeof(*pdu));
-        pdu->address = from;
+    pdu = (struct snmp_pdu *)malloc(sizeof(struct snmp_pdu));
+    memset (pdu, 0, sizeof(*pdu));
+    pdu->address = from;
 
-        if ( isp->hook_parse )
-          ret = isp->hook_parse(sp, pdu, packetptr, length);
-        else
-          ret = snmp_parse(sp, pdu, packetptr, length);
-        if ( isp->hook_post ) {
-          if ( isp->hook_post( sp, pdu, ret ) == 0 ) {
-            snmp_free_pdu(pdu);
-            return -1;
-          }
-        }
-        if (ret != SNMP_ERR_NOERROR) {
-          snmp_free_pdu(pdu);
-          return -1;
-        }
-
-        if (pdu->flags & UCD_MSG_FLAG_RESPONSE_PDU) {
-          /* call USM to free any securityStateRef supplied with the message */
-          if (pdu->securityStateRef) {
-            usm_free_usmStateReference(pdu->securityStateRef);
-            pdu->securityStateRef = NULL;
-          }
-          for(rp = isp->requests; rp; orp = rp, rp = rp->next_request) {
-            if (pdu->version == SNMP_VERSION_3) {
-              /* msgId must match for V3 messages */
-              if (rp->message_id != pdu->msgid) continue;
-              /* check that message fields match original,
-               * if not, no further processing */
-              if (!snmpv3_verify_msg(rp,pdu)) break;
-            } else {
-              if (rp->request_id != pdu->reqid) continue;
-            }
-            callback = sp->callback;
-            magic = sp->callback_magic;
-            if (rp->callback) {
-	      callback = rp->callback;
-	      magic = rp->cb_data;
-            }
-
-            /* MTR snmp_res_lock(MT_LIBRARY_ID, MT_LIB_SESSION);  ?* XX lock should be per session ! */
-            if (callback == NULL || 
-                callback(RECEIVED_MESSAGE,sp,pdu->reqid,pdu,magic) == 1){
-              if (pdu->command == SNMP_MSG_REPORT) {
-                if (sp->s_snmp_errno == SNMPERR_NOT_IN_TIME_WINDOW) {
-                  /* trigger immediate retry on recoverable Reports 
-                   * (notInTimeWindow), incr_retries == TRUE to prevent
-                   * inifinite resend 		       */
-                  if (rp->retries <= sp->retries) {
-                    snmp_resend_request(slp, rp, TRUE);
-                    break;
-                  }
-                } else {
-                  if (SNMPV3_IGNORE_UNAUTH_REPORTS) break;
-                }
-                /* handle engineID discovery - */
-                if (!sp->securityEngineIDLen && pdu->securityEngineIDLen) {
-                  sp->securityEngineID = (u_char *)malloc(pdu->securityEngineIDLen);
-                  memcpy(sp->securityEngineID, pdu->securityEngineID,
-                         pdu->securityEngineIDLen);
-                  sp->securityEngineIDLen = pdu->securityEngineIDLen;
-                  if (!sp->contextEngineIDLen) {
-                    sp->contextEngineID = (u_char *)malloc(pdu->securityEngineIDLen);
-                    memcpy(sp->contextEngineID, pdu->securityEngineID,
-                           pdu->securityEngineIDLen);
-                    sp->contextEngineIDLen = pdu->securityEngineIDLen;
-                  }
-                }
-              }
-              /* successful, so delete request */
-              if (isp->requests == rp){
-                /* first in list */
-                isp->requests = rp->next_request;
-                if (isp->requestsEnd == rp)
-                  isp->requestsEnd = NULL;
-              } else {
-                orp->next_request = rp->next_request;
-                if (isp->requestsEnd == rp)
-                  isp->requestsEnd = orp;
-              }
-              snmp_free_pdu(rp->pdu);
-              free((char *)rp);
-              /* there shouldn't be any more requests with the
-                 same reqid */
-              break;
-            }
-            /* MTR snmp_res_unlock(MT_LIBRARY_ID, MT_LIB_SESSION);  ?* XX lock should be per session ! */
-          }
-        } else {
-          if (sp->callback)
-            {
-              /* MTR snmp_res_lock(MT_LIBRARY_ID, MT_LIB_SESSION); */
-              sp->callback(RECEIVED_MESSAGE, sp, pdu->reqid, pdu,
-                           sp->callback_magic);
-              /* MTR snmp_res_unlock(MT_LIBRARY_ID, MT_LIB_SESSION); */
-            }	
-        }
-        /* call USM to free any securityStateRef supplied with the message */
-        if (pdu->securityStateRef && pdu->command == SNMP_MSG_TRAP2) {
-          usm_free_usmStateReference(pdu->securityStateRef);
-          pdu->securityStateRef = NULL;
-        }
+    if ( isp->hook_parse )
+      ret = isp->hook_parse(sp, pdu, packetptr, length);
+    else
+      ret = snmp_parse(sp, pdu, packetptr, length);
+    if ( isp->hook_post ) {
+      if ( isp->hook_post( sp, pdu, ret ) == 0 ) {
         snmp_free_pdu(pdu);
-        return 0;
+        return -1;
       }
+    }
+    if (ret != SNMP_ERR_NOERROR) {
+      snmp_free_pdu(pdu);
+      return -1;
+    }
+
+    if (pdu->flags & UCD_MSG_FLAG_RESPONSE_PDU) {
+      /* call USM to free any securityStateRef supplied with the message */
+      if (pdu->securityStateRef) {
+        usm_free_usmStateReference(pdu->securityStateRef);
+        pdu->securityStateRef = NULL;
+      }
+      for(rp = isp->requests; rp; orp = rp, rp = rp->next_request) {
+        if (pdu->version == SNMP_VERSION_3) {
+          /* msgId must match for V3 messages */
+          if (rp->message_id != pdu->msgid) continue;
+          /* check that message fields match original,
+           * if not, no further processing */
+          if (!snmpv3_verify_msg(rp,pdu)) break;
+        } else {
+          if (rp->request_id != pdu->reqid) continue;
+        }
+        callback = sp->callback;
+        magic = sp->callback_magic;
+        if (rp->callback) {
+          callback = rp->callback;
+          magic = rp->cb_data;
+        }
+
+        /* MTR snmp_res_lock(MT_LIBRARY_ID, MT_LIB_SESSION);  ?* XX lock should be per session ! */
+        if (callback == NULL || 
+            callback(RECEIVED_MESSAGE,sp,pdu->reqid,pdu,magic) == 1){
+          if (pdu->command == SNMP_MSG_REPORT) {
+            if (sp->s_snmp_errno == SNMPERR_NOT_IN_TIME_WINDOW) {
+              /* trigger immediate retry on recoverable Reports 
+               * (notInTimeWindow), incr_retries == TRUE to prevent
+               * inifinite resend 		       */
+              if (rp->retries <= sp->retries) {
+                snmp_resend_request(slp, rp, TRUE);
+                break;
+              }
+            } else {
+              if (SNMPV3_IGNORE_UNAUTH_REPORTS) break;
+            }
+            /* handle engineID discovery - */
+            if (!sp->securityEngineIDLen && pdu->securityEngineIDLen) {
+              sp->securityEngineID = (u_char *)malloc(pdu->securityEngineIDLen);
+              memcpy(sp->securityEngineID, pdu->securityEngineID,
+                     pdu->securityEngineIDLen);
+              sp->securityEngineIDLen = pdu->securityEngineIDLen;
+              if (!sp->contextEngineIDLen) {
+                sp->contextEngineID = (u_char *)malloc(pdu->securityEngineIDLen);
+                memcpy(sp->contextEngineID, pdu->securityEngineID,
+                       pdu->securityEngineIDLen);
+                sp->contextEngineIDLen = pdu->securityEngineIDLen;
+              }
+            }
+          }
+          /* successful, so delete request */
+          if (isp->requests == rp){
+            /* first in list */
+            isp->requests = rp->next_request;
+            if (isp->requestsEnd == rp)
+              isp->requestsEnd = NULL;
+          } else {
+            orp->next_request = rp->next_request;
+            if (isp->requestsEnd == rp)
+              isp->requestsEnd = orp;
+          }
+          snmp_free_pdu(rp->pdu);
+          free((char *)rp);
+          /* there shouldn't be any more requests with the
+             same reqid */
+          break;
+        }
+        /* MTR snmp_res_unlock(MT_LIBRARY_ID, MT_LIB_SESSION);  ?* XX lock should be per session ! */
+      }
+    } else {
+      if (sp->callback)
+        {
+          /* MTR snmp_res_lock(MT_LIBRARY_ID, MT_LIB_SESSION); */
+          sp->callback(RECEIVED_MESSAGE, sp, pdu->reqid, pdu,
+                       sp->callback_magic);
+          /* MTR snmp_res_unlock(MT_LIBRARY_ID, MT_LIB_SESSION); */
+        }	
+    }
+    /* call USM to free any securityStateRef supplied with the message */
+    if (pdu->securityStateRef && pdu->command == SNMP_MSG_TRAP2) {
+      usm_free_usmStateReference(pdu->securityStateRef);
+      pdu->securityStateRef = NULL;
+    }
+    snmp_free_pdu(pdu);
+    return 0;
+}
 
 /* returns 0 if success, -1 if fail */
 int
