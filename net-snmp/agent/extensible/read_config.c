@@ -33,6 +33,10 @@ int read_config(filename, procp, numps, ppexten, numexs,minimumswap,disk,numdisk
     return(1);
   }
 
+  /* skip past set procp/ppexten */
+  while (*ppexten != NULL) ppexten = &((*ppexten)->next);
+  while (*procp != NULL) procp = &((*procp)->next);
+
   while (fgets(line,STRMAX,ifile) != NULL) 
     {
       linecount++;
@@ -53,7 +57,7 @@ int read_config(filename, procp, numps, ppexten, numexs,minimumswap,disk,numdisk
             (*ppexten)->next = NULL;
             (*numexs)++;
             /* determine type */
-            if (!strncmp(word,"sh",2))
+            if (!strncasecmp(word,"sh",2))
               (*ppexten)->type = SHPROC;
             else
               (*ppexten)->type = EXECPROC;
