@@ -204,7 +204,7 @@ Note:  A temporary location of /tmp/net-snmp is used.
 
     mandir2html
     readme2html
-    readme2html
+    poddir2html
 
     Note:  mandir2html will process ALL man pages in c:\temp\net-snmp while
            readme2html and poddir2html will only process files listed in the
@@ -224,12 +224,6 @@ Note:  A temporary location of /tmp/net-snmp is used.
     are located in /tmp/net-snmp/html by default.  In some instances, URLs may be 
     split across two lines such as the Variables link at the bottom of 
     man8-snmptrapd.8.html.
-
-    You may have to bold the commands listed in the SYNOPSIS section for:
-
-    snmpnetstat
-    snmpdelta
-    snmpdf
 
 11. If new man pages are added or removed, the Table of Contents (Net-SNMP.hhc) and
     project file (Net-SNMP.hhp) need to be updated by hand.
