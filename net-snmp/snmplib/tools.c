@@ -906,3 +906,133 @@ timeval_tticks(struct timeval *tv)
 {
     return marker_tticks((marker_t) tv);
 }
+
+/**
+ * Non Windows:  Returns a pointer to the desired environment variable  
+ *               or NULL if the environment variable does not exist.  
+ *               
+ * Windows:      Returns a pointer to the desired environment variable  
+ *               if it exists.  If it does not, the variable is looked up
+ *               in the registry in HKCU\Net-SNMP or HKLM\Net-SNMP
+ *               (whichever it finds first) and stores the result in the 
+ *               environment variable.  It then returns a pointer to 
+ *               environment variable.
+ */
+
+char *netsnmp_getenv(const char *name)
+{
+  char *temp = NULL;  
+#ifndef WIN32
+  return (getenv(name));
+#else
+  HKEY hKey;
+  unsigned char * key_value = NULL;
+  DWORD key_value_size = 0;
+  DWORD key_value_type = 0;
+
+  DEBUGMSGTL(("read_config", "netsnmp_getenv called with name: %s\n",name));
+
+  if (!(name))
+    return NULL;
+  
+  /* Try environment variable first */ 
+  temp = getenv(name);
+  if (temp)
+    DEBUGMSGTL(("read_config", "netsnmp_getenv will return from ENV: %s\n",temp));
+  
+  /* Next try HKCU */
+  if (temp == NULL)
+  {
+    if (RegOpenKeyExA(
+          HKEY_CURRENT_USER, 
+          "SOFTWARE\\Net-SNMP", 
+          0, 
+          KEY_QUERY_VALUE, 
+          &hKey) == ERROR_SUCCESS) {   
+      
+      if (RegQueryValueExA(
+            hKey, 
+            name, 
+            NULL, 
+            &key_value_type, 
+            NULL,               /* Just get the size */
+            &key_value_size) == ERROR_SUCCESS) {
+
+        if (key_value)
+          SNMP_FREE(key_value);
+
+        /* Allocate memory needed +1 to allow RegQueryValueExA to NULL terminate the
+         * string data in registry is missing one (which is unlikely).
+         */
+        key_value = (char *) malloc((sizeof(char) * key_value_size)+sizeof(char));
+        
+        if (RegQueryValueExA(
+              hKey, 
+              name, 
+              NULL, 
+              &key_value_type, 
+              key_value, 
+              &key_value_size) == ERROR_SUCCESS) {
+        }
+        temp = key_value;
+      }
+      RegCloseKey(hKey);
+      if (temp)
+        DEBUGMSGTL(("read_config", "netsnmp_getenv will return from HKCU: %s\n",temp));
+    }
+  }
+
+  /* Next try HKLM */
+  if (temp == NULL)
+  {
+    if (RegOpenKeyExA(
+          HKEY_LOCAL_MACHINE, 
+          "SOFTWARE\\Net-SNMP", 
+          0, 
+          KEY_QUERY_VALUE, 
+          &hKey) == ERROR_SUCCESS) {   
+      
+      if (RegQueryValueExA(
+            hKey, 
+            name, 
+            NULL, 
+            &key_value_type, 
+            NULL,               /* Just get the size */
+            &key_value_size) == ERROR_SUCCESS) {
+
+        if (key_value)
+          SNMP_FREE(key_value);
+
+        /* Allocate memory needed +1 to allow RegQueryValueExA to NULL terminate the
+         * string data in registry is missing one (which is unlikely).
+         */
+        key_value = (char *) malloc((sizeof(char) * key_value_size)+sizeof(char));
+        
+        if (RegQueryValueExA(
+              hKey, 
+              name, 
+              NULL, 
+              &key_value_type, 
+              key_value, 
+              &key_value_size) == ERROR_SUCCESS) {
+        }
+        temp = key_value;
+
+      }
+      RegCloseKey(hKey);
+      if (temp)
+        DEBUGMSGTL(("read_config", "netsnmp_getenv will return from HKLM: %s\n",temp));
+    }
+  }
+  
+  if (temp) {
+    setenv(name, temp, 1);
+    SNMP_FREE(temp);
+  }
+
+  DEBUGMSGTL(("read_config", "netsnmp_getenv returning: %s\n",getenv(name)));
+
+  return(getenv(name));
+#endif
+}
+

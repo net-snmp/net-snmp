@@ -41,9 +41,9 @@ INSTALLATION
   - Installs the Net-SNMP binaries, MIB files and ActiveState 5.8.x Perl PPM 
     package into the installation folder (defaults to c:\usr). 
   - Adds (install folder)\bin to the system PATH. 
-  - Adds the following system environment variables: 
-    - SNMPCONFPATH=(install folder)/etc/snmp
-    - SNMPSHAREPATH=(install folder)/share/snmp
+  - Adds the following registry keys:
+    - HKEY_LOCAL_MACHINE\Software\Net-SNMP\SNMPCONFPATH=(install folder)/etc/snmp
+    - HKEY_LOCAL_MACHINE\Software\Net-SNMP\SNMPSHAREPATH=(install folder)/share/snmp
   - Creates an snmp.conf file in SNMPCONFPATH which defines: 
     - mibdirs (install folder)/share/snmp/mibs 
     - persistentDir (install folder)/snmp/persist 
