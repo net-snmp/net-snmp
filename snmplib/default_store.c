@@ -2,6 +2,9 @@
 
 #include <config.h>
 #include <sys/types.h>
+#if HAVE_STDLIB_H
+#include <stdlib.h>
+#endif
 #if HAVE_NETINET_IN_H
 #include <netinet/in.h>
 #endif
@@ -15,6 +18,7 @@
 #include "snmp_api.h"
 #include "snmp_debug.h"
 #include "tools.h"
+#include "read_config.h"
 #include "default_store.h"
 
 struct ds_read_config *ds_configs = NULL;
@@ -55,6 +59,8 @@ ds_set_int(int storeid, int which, int value) {
   if (storeid > DS_MAX_IDS || which > DS_MAX_SUBIDS ||
       storeid < 0 || which < 0)
     return SNMPERR_GENERR;
+
+  DEBUGMSGTL(("ds_set_int","Setting %d:%d = %d\n", storeid, which, value));
 
   ds_integers[storeid][which] = value;
   return SNMPERR_SUCCESS;
@@ -104,12 +110,13 @@ ds_handle_config(char *token, char *line) {
   struct ds_read_config *drsp;
   int itmp;
 
-  DEBUGMSGTL(("ds_handle_config", "handling %s", token));
-  for(drsp = ds_configs; drsp != NULL && !strcmp(token, drsp->token);
+  DEBUGMSGTL(("ds_handle_config", "handling %s\n", token));
+  for(drsp = ds_configs; drsp != NULL && strcmp(token, drsp->token) != 0;
       drsp = drsp->next);
   if (drsp != NULL) {
-    DEBUGMSGTL(("ds_handle_config", "setting %d: %d/%d", drsp->type,
-                drsp->storeid, drsp->which));
+    DEBUGMSGTL(("ds_handle_config",
+                "setting: token=%s, type=%d, id=%d, which=%d\n",
+                drsp->token, drsp->type, drsp->storeid, drsp->which));
     switch (drsp->type) {
       case ASN_BOOLEAN:
         if (strncasecmp(line,"yes",3) == 0 || strncasecmp(line,"true",4) == 0) {
@@ -123,28 +130,31 @@ ds_handle_config(char *token, char *line) {
           itmp = 0;
         }
         ds_set_boolean(drsp->storeid, drsp->which, itmp);
+        DEBUGMSGTL(("ds_handle_config", "bool: %d\n", itmp));
         break;
 
       case ASN_INTEGER:
-        ds_set_boolean(drsp->storeid, drsp->which, atoi(line));
+        ds_set_int(drsp->storeid, drsp->which, atoi(line));
+        DEBUGMSGTL(("ds_handle_config", "int: %d\n", atoi(line)));
         break;
 
       case ASN_OCTET_STR:
         ds_set_string(drsp->storeid, drsp->which, line);
+        DEBUGMSGTL(("ds_handle_config", "string: %s\n", line));
         break;
 
       default:
-        DEBUGMSGTL(("ds_handle_config", "*** unknown type %d", drsp->type));
+        DEBUGMSGTL(("ds_handle_config", "*** unknown type %d\n", drsp->type));
         break;
     }
   } else {
-    DEBUGMSGTL(("ds_handle_config", "*** no registration for %s", token));
+    DEBUGMSGTL(("ds_handle_config", "*** no registration for %s\n", token));
   }
 }
 
 
 int
-ds_register_config(u_char type, char *ftype, char *token,
+ds_register_config(u_char type, const char *ftype, const char *token,
                    int storeid, int which) {
   struct ds_read_config *drsp;
 
@@ -166,7 +176,60 @@ ds_register_config(u_char type, char *ftype, char *token,
   drsp->storeid = storeid;
   drsp->which = which;
 
-  register_config_handler(ftype, token, ds_handle_config, NULL, "generic");
+  switch (type) {
+    case ASN_BOOLEAN:
+      register_config_handler(ftype, token, ds_handle_config, NULL,"(1|yes|true|0|no|false)");
+      break;
+
+    case ASN_INTEGER:
+      register_config_handler(ftype, token, ds_handle_config, NULL,"integerValue");
+      break;
+
+    case ASN_OCTET_STR:
+      register_config_handler(ftype, token, ds_handle_config, NULL,"string");
+      break;
+    
+  }
+  return SNMPERR_SUCCESS;
+}
+
+int
+ds_register_premib(u_char type, const char *ftype, const char *token,
+                   int storeid, int which) {
+  struct ds_read_config *drsp;
+
+  if (storeid > DS_MAX_IDS || which > DS_MAX_SUBIDS ||
+      storeid < 0 || which < 0 || token == NULL)
+    return SNMPERR_GENERR;
+
+  if (ds_configs == NULL) {
+    ds_configs = SNMP_MALLOC_STRUCT(ds_read_config);
+    drsp = ds_configs;
+  } else {
+    for(drsp = ds_configs; drsp->next != NULL; drsp = drsp->next);
+    drsp->next = SNMP_MALLOC_STRUCT(ds_read_config);
+    drsp = drsp->next;
+  }
+
+  drsp->type = type;
+  drsp->token = strdup(token);
+  drsp->storeid = storeid;
+  drsp->which = which;
+
+  switch (type) {
+    case ASN_BOOLEAN:
+      register_premib_handler(ftype, token, ds_handle_config, NULL,"(1|yes|true|0|no|false)");
+      break;
+
+    case ASN_INTEGER:
+      register_premib_handler(ftype, token, ds_handle_config, NULL,"integerValue");
+      break;
+
+    case ASN_OCTET_STR:
+      register_premib_handler(ftype, token, ds_handle_config, NULL,"string");
+      break;
+    
+  }
   return SNMPERR_SUCCESS;
 }
 

@@ -9,6 +9,15 @@
 #define DS_APPLICATION_ID 1
 #define DS_TOKEN_ID       2
 
+/* library booleans */
+#define DS_LIB_MIB_ERRORS       0
+#define DS_LIB_SAVE_MIB_DESCRS  1
+#define DS_LIB_MIB_COMMENT_TERM 2
+#define DS_LIB_MIB_PARSE_LABEL  3
+
+/* library integers */
+#define DS_LIB_MIB_WARNINGS  0
+
 struct ds_read_config {
    u_char type;
    char  *token;
@@ -23,5 +32,9 @@ int ds_set_int(int storeid, int which, int value);
 int ds_get_int(int storeid, int which);
 int ds_set_string(int storeid, int which, char *value);
 char *ds_get_string(int storeid, int which);
+int ds_register_config(u_char type, const char *ftype, const char *token,
+                       int storeid, int which);
+int ds_register_premib(u_char type, const char *ftype, const char *token,
+                       int storeid, int which);
 
 #endif /* DEFAULT_STORE_H */
