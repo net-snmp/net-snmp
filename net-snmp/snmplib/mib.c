@@ -2085,12 +2085,15 @@ get_module_node(const char *fname,
 }
 
 
+/*
+ * see comments on find_best_tree_node for usage after first time.
+ */
 int
 get_wild_node(const char *name,
               oid *objid,
               size_t *objidlen)
 {
-    struct tree *tp = find_best_tree_node(name, 0, NULL);
+    struct tree *tp = find_best_tree_node(name, tree_head, NULL);
     if (!tp)
         return 0;
     return get_node(tp->label, objid, objidlen);
@@ -2156,6 +2159,16 @@ main(int argc, char* argv[])
 
 #endif /* testing */
 
+/* initialize: no peers included in the report. */
+void clear_tree_flags(register struct tree *tp)
+{
+    for (; tp; tp = tp->next_peer)
+    {
+        tp->reported = 0;
+        clear_tree_flags(tp->child_list); /*RECURSE*/
+    }
+}
+
 /*
  * Update: 1998-07-17 <jhy@gsu.edu>
  * Added print_oid_report* functions.
@@ -2176,6 +2189,7 @@ void
 print_oid_report (FILE *fp)
 {
     struct tree *tp;
+    clear_tree_flags(tree_head);
     for (tp = tree_head ; tp ; tp=tp->next_peer)
         print_subtree_oid_report (fp, tp, 0);
 }
@@ -2276,12 +2290,6 @@ print_subtree_oid_report(FILE *f,
     if(!tree)
     {
         return;
-    }
-
-    /* initialize: no peers included in the report. */
-    for(tp = tree->child_list; tp; tp = tp->next_peer)
-    {
-        tp->reported = 0;
     }
 
     /*
