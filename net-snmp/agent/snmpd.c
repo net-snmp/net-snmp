@@ -214,7 +214,6 @@ int		(*sd_handlers[NUM_SOCKETS]) (int);
  */
 int snmp_read_packet (int);
 int snmp_input (int, struct snmp_session *, int, struct snmp_pdu *, void *);
-static char *sprintf_stamp (time_t *);
 static int create_v1_trap_session (const char *, const char *);
 static int create_v2_trap_session (const char *, const char *);
 static void free_v1_trap_session (struct trap_sink *sp);
@@ -227,24 +226,6 @@ static void SnmpTrapNodeDown (void);
 static int receive(void);
 int snmp_check_packet(struct snmp_session*, snmp_ipaddr);
 int snmp_check_parse(struct snmp_session*, struct snmp_pdu*, int);
-
-static char *
-sprintf_stamp (time_t *now)
-{
-    time_t Now;
-    struct tm *tm;
-    static char sbuf [32];
-
-    if (now == NULL) {
-	now = &Now;
-	time (now);
-    }
-    tm = localtime (now);
-    sprintf(sbuf, "%.4d-%.2d-%.2d %.2d:%.2d:%.2d",
-	    tm->tm_year+1900, tm->tm_mon+1, tm->tm_mday,
-	    tm->tm_hour, tm->tm_min, tm->tm_sec);
-    return sbuf;
-}
 
 
 static int create_v1_trap_session (const char *sink, 
@@ -1073,7 +1054,7 @@ snmp_check_packet(struct snmp_session *session,
 
     snmp_increment_statistic(STAT_SNMPINPKTS);
 
-    if (log_addresses){
+    if (log_addresses || verbose){
 	int count;
 	
 	for(count = 0; count < ADDRCACHE; count++){
@@ -1083,8 +1064,8 @@ snmp_check_packet(struct snmp_session *session,
 	}
 
 	if (count >= ADDRCACHE || verbose){
-	    DEBUGMSGTL(("snmpd", "Received SNMP packet(s) from %s\n",
-                        inet_ntoa(fromIp->sin_addr)));
+	    snmp_log(LOG_INFO, "Received SNMP packet(s) from %s\n",
+                        inet_ntoa(fromIp->sin_addr));
 	    for(count = 0; count < ADDRCACHE; count++){
 		if (addrCache[count].status == UNUSED){
 		    addrCache[count].addr = fromIp->sin_addr.s_addr;

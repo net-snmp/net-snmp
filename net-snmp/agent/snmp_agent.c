@@ -97,7 +97,7 @@ static void dump_var (
     temp_var.val.string = (u_char *)statP;
     temp_var.val_len = statLen;
     sprint_variable (buf, var_name, var_name_len, &temp_var);
-    DEBUGMSGTL(("snmp_agent", "    >> %s\n", buf));
+    snmp_log(LOG_INFO, "    >> %s\n", buf);
 }
 
 
@@ -158,6 +158,7 @@ handle_snmp_packet(int operation, struct snmp_session *session, int reqid,
 	if ( asp->mode != RESERVE1 )
 	    break;			/* Single pass */
         snmp_increment_statistic(STAT_SNMPINGETREQUESTS);
+	if (verbose) snmp_log(LOG_INFO, "    GET request\n");
 	status = handle_next_pass( asp );
 	asp->mode = RESERVE2;
 	break;
@@ -166,6 +167,7 @@ handle_snmp_packet(int operation, struct snmp_session *session, int reqid,
 	if ( asp->mode != RESERVE1 )
 	    break;			/* Single pass */
         snmp_increment_statistic(STAT_SNMPINGETNEXTS);
+	if (verbose) snmp_log(LOG_INFO, "    GETNEXT request\n");
 	asp->exact   = FALSE;
 	status = handle_next_pass( asp );
 	asp->mode = RESERVE2;
@@ -183,6 +185,7 @@ handle_snmp_packet(int operation, struct snmp_session *session, int reqid,
 	     */
 	if ( asp->mode == RESERVE1 ) {
             snmp_increment_statistic(STAT_SNMPINGETREQUESTS);
+	    if (verbose) snmp_log(LOG_INFO, "    GETBULK request\n");
 	    asp->exact   = FALSE;
 		    /*
 		     * Limit max repetitions to something reasonable
@@ -254,6 +257,7 @@ handle_snmp_packet(int operation, struct snmp_session *session, int reqid,
 	     */
 	if ( asp->mode == RESERVE1 ) {
             snmp_increment_statistic(STAT_SNMPINSETREQUESTS);
+	    if (verbose) snmp_log(LOG_INFO, "    SET request\n");
 	    asp->rw      = WRITE;
 
 	    status = handle_next_pass( asp );
@@ -319,11 +323,13 @@ handle_snmp_packet(int operation, struct snmp_session *session, int reqid,
 
     case SNMP_MSG_RESPONSE:
         snmp_increment_statistic(STAT_SNMPINGETRESPONSES);
+	if (verbose) snmp_log(LOG_INFO, "    RESPONSE request\n");
 	free( asp );
 	return 0;
     case SNMP_MSG_TRAP:
     case SNMP_MSG_TRAP2:
         snmp_increment_statistic(STAT_SNMPINTRAPS);
+	if (verbose) snmp_log(LOG_INFO, "    TRAP request\n");
 	free( asp );
 	return 0;
     default:
@@ -456,12 +462,12 @@ statp_loop:
                             asp->pdu, varbind_ptr->type)) {
 	    if (asp->pdu->version == SNMP_VERSION_1 || asp->rw != WRITE) {
 		if (verbose)
-                  DEBUGMSGTL(("snmp_agent", "    >> noSuchName (read-only)\n"));
+                  snmp_log(LOG_INFO, "    >> noSuchName (read-only)\n");
 		ERROR_MSG("read-only");
 		statType = SNMP_ERR_NOSUCHNAME;
 	    }
 	    else {
-		if (verbose) DEBUGMSGTL(("snmp_agent", "    >> notWritable\n"));
+		if (verbose) snmp_log(LOG_INFO, "    >> notWritable\n");
 		ERROR_MSG("Not Writable");
 		statType = SNMP_ERR_NOTWRITABLE;
 	    }
