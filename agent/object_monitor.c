@@ -28,7 +28,7 @@
 #include <net-snmp/net-snmp-config.h>
 #include <net-snmp/net-snmp-includes.h>
 #include <net-snmp/agent/net-snmp-agent-includes.h>
-#include <net-snmp/library/oid_array.h>
+#include <net-snmp/library/container.h>
 
 #include "net-snmp/agent/object_monitor.h"
 
@@ -71,8 +71,8 @@ error "TRUE != 1"
  */
 typedef struct watcher_list_s {
 
-   /** netsnmp_oid_array_header must be first! */
-    netsnmp_oid_array_header monitored_object;
+   /** netsnmp_index must be first! */
+    netsnmp_index  monitored_object;
 
     monitor_info   *head;
 
@@ -101,7 +101,7 @@ typedef struct callback_placeholder_s {
  * local statics
  */
 static char     need_init = 1;
-static oid_array monitored_objects;
+static netsnmp_container *monitored_objects = NULL;
 static netsnmp_monitor_callback_header *callback_pending_list;
 static callback_placeholder *callback_ready_list;
 
@@ -133,10 +133,12 @@ netsnmp_monitor_init(void)
     callback_pending_list = NULL;
     callback_ready_list = NULL;
 
-    monitored_objects = netsnmp_initialize_oid_array(sizeof(void*));
+    monitored_objects = netsnmp_container_get("object_monitor:binary_array");
     if (NULL != monitored_objects)
         need_init = 0;
-
+    monitored_objects->compare = netsnmp_compare_netsnmp_index;
+    monitored_objects->ncompare = netsnmp_ncompare_netsnmp_index;
+    
     return;
 }
 
@@ -237,8 +239,8 @@ netsnmp_monitor_unregister(oid * object, size_t oid_len, int priority,
         last->next = mi->next;
 
     if (NULL == wl->head) {
-        netsnmp_remove_oid_data(monitored_objects, wl, NULL);
-        free(wl->monitored_object.idx);
+        CONTAINER_REMOVE(monitored_objects, wl);
+        free(wl->monitored_object.oids);
         free(wl);
     }
 
@@ -348,7 +350,7 @@ netsnmp_monitor_process_callbacks(void)
          * release memory (don't free current_cbr->mi)
          */
         if (--(current_cbr->cbh->refs) == 0) {
-            free(current_cbr->cbh->monitored_object.idx);
+            free(current_cbr->cbh->monitored_object.oids);
             free(current_cbr->cbh);
         }
         free(current_cbr);
@@ -407,12 +409,12 @@ netsnmp_notify_cooperative(int event, oid * o, size_t o_len, char o_steal,
 
     cbh->hdr.event = event;
     cbh->hdr.object_info = object_info;
-    cbh->hdr.monitored_object.idx_len = o_len;
+    cbh->hdr.monitored_object.len = o_len;
 
     if (o_steal) {
-        cbh->hdr.monitored_object.idx = o;
+        cbh->hdr.monitored_object.oids = o;
     } else {
-        cbh->hdr.monitored_object.idx = snmp_duplicate_objid(o, o_len);
+        cbh->hdr.monitored_object.oids = snmp_duplicate_objid(o, o_len);
     }
 
     netsnmp_notify_monitor((netsnmp_monitor_callback_header *) cbh);
@@ -437,13 +439,12 @@ netsnmp_notify_cooperative(int event, oid * o, size_t o_len, char o_steal,
 static watcher_list *
 find_watchers(oid * object, size_t oid_len)
 {
-    netsnmp_oid_array_header oah;
+    netsnmp_index oah;
 
-    oah.idx = object;
-    oah.idx_len = oid_len;
+    oah.oids = object;
+    oah.len = oid_len;
 
-    return (watcher_list *)
-        netsnmp_get_oid_data(monitored_objects, &oah, TRUE);
+    return (watcher_list *)CONTAINER_FIND(monitored_objects, &oah);
 }
 
 static int
@@ -492,22 +493,22 @@ insert_watcher(oid * object, size_t oid_len, monitor_info * mi)
         /*
          * copy index oid
          */
-        wl->monitored_object.idx_len = oid_len;
-        wl->monitored_object.idx = malloc(sizeof(oid) * oid_len);
-        if (NULL == wl->monitored_object.idx) {
+        wl->monitored_object.len = oid_len;
+        wl->monitored_object.oids = malloc(sizeof(oid) * oid_len);
+        if (NULL == wl->monitored_object.oids) {
             free(wl);
             return SNMPERR_MALLOC;
         }
-        memcpy(wl->monitored_object.idx, object, sizeof(oid) * oid_len);
+        memcpy(wl->monitored_object.oids, object, sizeof(oid) * oid_len);
 
         /*
          * add watcher, and insert into array
          */
         wl->head = mi;
         mi->next = NULL;
-        rc = netsnmp_add_oid_data(monitored_objects, wl);
+        rc = CONTAINER_INSERT(monitored_objects, wl);
         if (rc) {
-            free(wl->monitored_object.idx);
+            free(wl->monitored_object.oids);
             free(wl);
             return rc;
         }
@@ -622,8 +623,8 @@ move_pending_to_ready(void)
         cbp = callback_pending_list;
         callback_pending_list = cbp->private; /** next */
 
-        if (0 == check_registered(cbp->event, cbp->monitored_object.idx,
-                                  cbp->monitored_object.idx_len, &wl,
+        if (0 == check_registered(cbp->event, cbp->monitored_object.oids,
+                                  cbp->monitored_object.len, &wl,
                                   &mi)) {
 
             /*
@@ -689,13 +690,13 @@ dummy_callback(netsnmp_monitor_callback_header * cbh)
 }
 
 void
-dump_watchers(netsnmp_oid_array_header *oah, void *)
+dump_watchers(netsnmp_index *oah, void *)
 {
     watcher_list   *wl = (watcher_list *) oah;
     netsnmp_monitor_callback_header *cbh = wl->head;
 
     printf("Watcher List for OID ");
-    print_objid(wl->hdr->idx, wl->hdr->idx_len);
+    print_objid(wl->hdr->oids, wl->hdr->len);
     printf("\n");
 
     while (cbh) {
@@ -756,7 +757,7 @@ main(int argc, char **argv)
     /*
      * dump table
      */
-    netsnmp_for_each_oid_data(monitored_objects, dump_watchers, NULL, 1);
+    CONTAINER_FOR_EACH(monitored_objects, dump_watchers, NULL);
 }
 #endif /** defined TESTING_OBJECT_MONITOR */
 
