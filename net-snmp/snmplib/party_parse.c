@@ -90,7 +90,7 @@ read_party_database(filename)
     int privPublicLength, authPublicLength;
     char name[64];	/* friendly name */
     struct partyEntry *pp, *rp;
-    u_long myaddr;
+    u_int myaddr;
     int domain;
 
     fp = fopen(filename, "r");
