@@ -152,19 +152,18 @@ unsigned char *var_extensible_errors(vp, name, length, exact, var_len, write_met
 /* OUT - pointer to function to set variable, otherwise 0 */
 {
 
-  oid newname[30];
   static long long_ret;
   static char errmsg[300];
 
 
-  if (!checkmib(vp,name,length,exact,var_len,write_method,newname,1))
+  if (header_generic(vp,name,length,exact,var_len,write_method))
     return(NULL);
 
   errmsg[0] = 0;
   
   switch (vp->magic) {
     case MIBINDEX:
-      long_ret = newname[*length - 1];
+      long_ret = name[*length - 1];
       return((u_char *) (&long_ret));
     case ERRORNAME:
       strcpy(errmsg,"snmp");

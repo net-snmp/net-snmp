@@ -358,17 +358,17 @@ sprint_mib_oid(buf,name,len)
   }
 }
 
-int checkmib(vp,name,length,exact,var_len,write_method,newname,max)
+int checkmib(vp,name,length,exact,var_len,write_method,max)
     register struct variable *vp;
     register oid	*name;
     register int	*length;
     int			exact;
     int			*var_len;
     int			(**write_method)__P((int, u_char *, u_char, int, u_char *, oid *, int));
-    oid                 *newname;
     int                 max;
 {
   int i, rtest;
+  int newname[100];
 
   for(i=0,rtest=0; i < (int) vp->namelen && i < (int)(*length) && !rtest; i++) {
     if (name[i] != vp->name[i]) {
@@ -410,6 +410,41 @@ int checkmib(vp,name,length,exact,var_len,write_method,newname,max)
   if (var_len)
     *var_len = sizeof(long);   /* default */
   return(1);
+}
+
+#define MATCH_FAILED	1
+#define MATCH_SUCCEEDED	0
+
+int
+header_generic(vp, name, length, exact, var_len, write_method)
+    register struct variable *vp;    /* IN - pointer to variable entry that points here */
+    oid     *name;	    /* IN/OUT - input name requested, output name found */
+    int     *length;	    /* IN/OUT - length of input and output oid's */
+    int     exact;	    /* IN - TRUE if an exact match was requested. */
+    int     *var_len;	    /* OUT - length of variable or 0 if function returned. */
+    int     (**write_method) __P((int, u_char *,u_char, int, u_char *,oid*, int));
+{
+    oid newname[MAX_NAME_LEN];
+    int result;
+    char c_oid[MAX_NAME_LEN];
+
+    if (snmp_get_do_debugging()) {
+      sprint_objid (c_oid, name, *length);
+      DEBUGP ("header_generic: %s exact=%d\n", c_oid, exact);
+    }
+
+    memcpy((char *)newname, (char *)vp->name, (int)vp->namelen * sizeof(oid));
+    newname[vp->namelen] = 0;
+    result = compare(name, *length, newname, (int)vp->namelen + 1);
+    DEBUGP("  result: %d\n", result);
+    if ((exact && (result != 0)) || (!exact && (result >= 0)))
+        return(MATCH_FAILED);
+    memcpy( (char *)name,(char *)newname, ((int)vp->namelen + 1) * sizeof(oid));
+    *length = vp->namelen + 1;
+
+    *write_method = 0;
+    *var_len = sizeof(long);	/* default to 'long' results */
+    return(MATCH_SUCCEEDED);
 }
 
 char *find_field(ptr,field)

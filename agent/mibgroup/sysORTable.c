@@ -63,15 +63,13 @@ var_sysORTable(vp, name, length, exact, var_len, write_method)
   int i;
   struct sysORTable *ptr;
   static u_long long_return;
-  oid newname[30];
 
-  if (!checkmib(vp, name, length, exact, var_len, write_method,
-                        newname, numEntries))
+  if (!checkmib(vp, name, length, exact, var_len, write_method, numEntries))
     return NULL;
 
-  for(i = 1, ptr=table; ptr != NULL && i < newname[*length-1];
+  for(i = 1, ptr=table; ptr != NULL && i < name[*length-1];
       ptr = ptr->next, i++) {
-    DEBUGP("sysORTable -- %d != %d\n",i,newname[*length-1]);
+    DEBUGP("sysORTable -- %d != %d\n",i,name[*length-1]);
   }
   if (ptr == NULL) {
     DEBUGP("sysORTable -- no match: %d\n",i);

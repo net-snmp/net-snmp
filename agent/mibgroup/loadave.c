@@ -142,7 +142,6 @@ unsigned char *var_extensible_loadave(vp, name, length, exact, var_len, write_me
 /* OUT - pointer to function to set variable, otherwise 0 */
 {
 
-  oid newname[30];
   static long long_ret;
   static char errmsg[300];
 #ifdef HAVE_SYS_FIXPOINT_H
@@ -157,16 +156,16 @@ unsigned char *var_extensible_loadave(vp, name, length, exact, var_len, write_me
 #endif
   double avenrun[3];
   
-  if (!checkmib(vp,name,length,exact,var_len,write_method,newname,3))
+  if (!checkmib(vp,name,length,exact,var_len,write_method,3))
     return(NULL);
 
   switch (vp->magic) {
     case MIBINDEX:
-      long_ret = newname[*length-1];
+      long_ret = name[*length-1];
       return((u_char *) (&long_ret));
     case ERRORNAME:
-      sprintf(errmsg,"Load-%d",((newname[*length-1] == 1) ? 1 :
-                                ((newname[*length-1] == 2) ? 5 : 15)));
+      sprintf(errmsg,"Load-%d",((name[*length-1] == 1) ? 1 :
+                                ((name[*length-1] == 2) ? 5 : 15)));
       *var_len = strlen(errmsg);
       return((u_char *) (errmsg));
   }
@@ -197,23 +196,23 @@ unsigned char *var_extensible_loadave(vp, name, length, exact, var_len, write_me
 #endif /* HAVE_GETLOADAVG */
   switch (vp->magic) {
     case LOADAVE:
-      sprintf(errmsg,"%.2f",avenrun[newname[*length-1]-1]);
+      sprintf(errmsg,"%.2f",avenrun[name[*length-1]-1]);
       *var_len = strlen(errmsg);
       return((u_char *) (errmsg));
     case LOADMAXVAL:
-      sprintf(errmsg,"%.2f",maxload[newname[*length-1]-1]);
+      sprintf(errmsg,"%.2f",maxload[name[*length-1]-1]);
       *var_len = strlen(errmsg);
       return((u_char *) (errmsg));
     case ERRORFLAG:
-      long_ret = (maxload[newname[*length-1]-1] != 0 &&
-                  avenrun[newname[*length-1]-1] >= maxload[newname[*length-1]-1]) ? 1 : 0;
+      long_ret = (maxload[name[*length-1]-1] != 0 &&
+                  avenrun[name[*length-1]-1] >= maxload[name[*length-1]-1]) ? 1 : 0;
       return((u_char *) (&long_ret));
     case ERRORMSG:
-      if (maxload[newname[*length-1]-1] != 0 &&
-          avenrun[newname[*length-1]-1] >= maxload[newname[*length-1]-1]) {
+      if (maxload[name[*length-1]-1] != 0 &&
+          avenrun[name[*length-1]-1] >= maxload[name[*length-1]-1]) {
         sprintf(errmsg,"%d min Load Average too high (= %.2f)",
-                (newname[*length-1] == 1)?1:((newname[*length-1] == 2)?5:15),
-                avenrun[newname[*length-1]-1]);
+                (name[*length-1] == 1)?1:((name[*length-1] == 2)?5:15),
+                avenrun[name[*length-1]-1]);
       } else {
         errmsg[0] = 0;
       }
