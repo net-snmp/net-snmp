@@ -158,6 +158,9 @@
 /* define if you have <netinet/in_pcb.h> */
 #undef HAVE_NETINET_IN_PCB_H
 
+/* define if you have <sys/disklabel.h> */
+#undef HAVE_SYS_DISKLABEL_H
+
 /* define if you are using linux and /proc/net/dev has the compressed
    field, which exists in linux kernels 2.2 and greater. */
 #undef PROC_NET_DEV_HAS_COMPRESSED
