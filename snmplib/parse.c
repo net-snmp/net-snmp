@@ -1578,7 +1578,7 @@ getoid(FILE *fp,
             if (type == LEFTPAREN){
                 type = get_token(fp, token, MAXTOKEN);
                 if (type == NUMBER){
-                    id->subid = atoi(token);
+                    id->subid = strtoul(token, NULL, 10);
                     if ((type = get_token(fp, token, MAXTOKEN)) != RIGHTPAREN){
                         print_error("Expected a closing parenthesis",
                                     token, type);
@@ -1594,7 +1594,7 @@ getoid(FILE *fp,
         }
 	else if (type == NUMBER) {
             /* this entry  has just an integer sub-identifier */
-            id->subid = atoi(token);
+            id->subid = strtoul(token, NULL, 10);
         }
 	else {
 	    print_error("Expected label or number", token, type);
@@ -1842,7 +1842,7 @@ parse_enumlist(FILE *fp, struct enum_list **retp)
                 print_error("Expected integer", token, type);
                 return NULL;
             }
-            (*epp)->value = atoi(token);
+            (*epp)->value = strtol(token, NULL, 10);
             type = get_token(fp, token, MAXTOKEN);
             if (type != RIGHTPAREN) {
                 print_error("Expected \")\"", token, type);
@@ -1880,11 +1880,11 @@ static struct range_list *parse_ranges(FILE *fp, struct range_list **retp)
     do {
 	if (!taken) nexttype = get_token(fp, nexttoken, MAXTOKEN);
 	else taken = 0;
-	high = low = atol(nexttoken);
+	high = low = strtol(nexttoken, NULL, 10);
 	nexttype = get_token(fp, nexttoken, MAXTOKEN);
 	if (nexttype == RANGE) {
 	    nexttype = get_token(fp, nexttoken, MAXTOKEN);
-	    high = atol(nexttoken);
+	    high = strtol(nexttoken, NULL, 10);
 	    nexttype = get_token(fp, nexttoken, MAXTOKEN);
 	}
 	*rpp = (struct range_list *)calloc (1, sizeof(struct range_list));
@@ -2535,7 +2535,7 @@ parse_trapDefinition(FILE *fp,
         free_node(np);
         return NULL;
     }
-    np->subid = atoi(token);
+    np->subid = strtoul(token, NULL, 10);
     np->next = alloc_node(current_module);
     if (np->next == NULL)  {
         free_node(np);

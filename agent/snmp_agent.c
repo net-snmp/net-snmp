@@ -103,6 +103,10 @@ SOFTWARE.
 #include "agentx/protocol.h"
 #endif
 
+#ifdef USING_AGENTX_MASTER_MODULE
+#include "agentx/master.h"
+#endif
+
 #define SNMP_ADDRCACHE_SIZE 10
 
 struct addrCache {
@@ -559,6 +563,11 @@ init_master_agent(void)
     return 0; /*  No error if ! MASTER_AGENT  */
   }
 
+#ifdef USING_AGENTX_MASTER_MODULE
+    if ( ds_get_boolean(DS_APPLICATION_ID, DS_AGENT_AGENTX_MASTER) == 1 )
+        real_init_master();
+#endif
+
   /*  Have specific agent ports been specified?  */
   cptr = ds_get_string(DS_APPLICATION_ID, DS_AGENT_PORTS);
 
@@ -710,7 +719,8 @@ init_agent_snmp_session( struct snmp_session *session, struct snmp_pdu *pdu )
 {
     struct agent_snmp_session  *asp;
 
-    asp = (struct agent_snmp_session *)malloc( sizeof( struct agent_snmp_session ));
+    asp = (struct agent_snmp_session *) malloc( sizeof( struct agent_snmp_session ));
+
     if ( asp == NULL )
 	return NULL;
     asp->session = session;

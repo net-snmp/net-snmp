@@ -471,7 +471,7 @@ print_mib_oid(oid name[],
 	      size_t len)
 {
   char *buffer;
-  buffer=(char *)malloc(11*len); /* maximum digit lengths for int32 + a '.' */
+  buffer=(char*)malloc(11*len); /* maximum digit lengths for int32 + a '.' */
   if (!buffer) {
     snmp_log(LOG_ERR, "Malloc failed - out of memory?");
     return;
@@ -541,7 +541,6 @@ int header_simple_table(struct variable *vp, oid *name, size_t *length,
     }
   }
   if (rtest > 0 ||
-      (rtest == 0 && !exact && (int)(vp->namelen+1) < (int) *length) ||
     (exact == 1 && (rtest || (int)*length != (int)(vp->namelen+1)))) {
     if (var_len)
 	*var_len = 0;
@@ -554,6 +553,10 @@ int header_simple_table(struct variable *vp, oid *name, size_t *length,
     memmove(newname, vp->name, (int)vp->namelen * sizeof (oid));
     newname[vp->namelen] = 1;
     *length = vp->namelen+1;
+  } else if (((int)*length) > (int)vp->namelen+1) {  /* exact case checked earlier */
+    *length = vp->namelen+1;
+    memmove(newname, name, (*length) * sizeof(oid));
+    newname[*length-1] = name[*length-1] + 1;
   }
   else {
     *length = vp->namelen+1;

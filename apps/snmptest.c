@@ -133,9 +133,7 @@ int main(int argc, char *argv[])
 	vars = NULL;
 	for(ret = 1; ret != 0;){
 	    vp = (struct variable_list *)malloc(sizeof(struct variable_list));
-	    vp->next_variable = NULL;
-	    vp->name = NULL;
-	    vp->val.string = NULL;
+	    memset(vp, 0, sizeof(struct variable_list));
 
 	    while((ret = input_variable(vp)) == -1)
 		;

@@ -287,7 +287,7 @@ STARTTRAPD() {
 #    master agent and sub agent.
 STOPPROG() {
     if [ -f $1 ]; then
-	COMMAND="kill -SIGTERM `cat $1`"
+	COMMAND="kill -TERM `cat $1`"
 	echo $COMMAND >> $SNMP_TMPDIR/invoked
 
 	DELAY

@@ -234,7 +234,7 @@ struct snmpNotifyFilterTable_data *StorageTmp = NULL;
    * this assumes you have registered all your data properly
    */
   if ((StorageTmp = (struct snmpNotifyFilterTable_data *)
-       header_complex(snmpNotifyFilterTableStorage, vp,name,length,exact,
+       header_complex((struct header_complex_index *)snmpNotifyFilterTableStorage, vp,name,length,exact,
                       var_len,write_method)) == NULL) {
       if (vp->magic == SNMPNOTIFYFILTERROWSTATUS)
           *write_method = write_snmpNotifyFilterRowStatus;
@@ -294,7 +294,7 @@ write_snmpNotifyFilterMask(int      action,
 
   DEBUGMSGTL(("snmpNotifyFilterTable", "write_snmpNotifyFilterMask entering action=%d...  \n", action));
   if ((StorageTmp = (struct snmpNotifyFilterTable_data *)
-       header_complex(snmpNotifyFilterTableStorage, NULL,
+       header_complex((struct header_complex_index *)snmpNotifyFilterTableStorage, NULL,
                       &name[sizeof(snmpNotifyFilterTable_variables_oid)/sizeof(oid) + 3 - 1], 
                       &newlen, 1, NULL, NULL)) == NULL)
       return SNMP_ERR_NOSUCHNAME; /* remove if you support creation here */
@@ -365,7 +365,7 @@ write_snmpNotifyFilterType(int      action,
 
   DEBUGMSGTL(("snmpNotifyFilterTable", "write_snmpNotifyFilterType entering action=%d...  \n", action));
   if ((StorageTmp = (struct snmpNotifyFilterTable_data *)
-       header_complex(snmpNotifyFilterTableStorage, NULL,
+       header_complex((struct header_complex_index *)snmpNotifyFilterTableStorage, NULL,
                       &name[sizeof(snmpNotifyFilterTable_variables_oid)/sizeof(oid) + 3 - 1], 
                       &newlen, 1, NULL, NULL)) == NULL)
       return SNMP_ERR_NOSUCHNAME; /* remove if you support creation here */
@@ -432,7 +432,7 @@ write_snmpNotifyFilterStorageType(int      action,
 
   DEBUGMSGTL(("snmpNotifyFilterTable", "write_snmpNotifyFilterStorageType entering action=%d...  \n", action));
   if ((StorageTmp = (struct snmpNotifyFilterTable_data *)
-       header_complex(snmpNotifyFilterTableStorage, NULL,
+       header_complex((struct header_complex_index *)snmpNotifyFilterTableStorage, NULL,
                       &name[sizeof(snmpNotifyFilterTable_variables_oid)/sizeof(oid) + 3 - 1], 
                       &newlen, 1, NULL, NULL)) == NULL)
       return SNMP_ERR_NOSUCHNAME; /* remove if you support creation here */
@@ -505,7 +505,7 @@ write_snmpNotifyFilterRowStatus(int      action,
 
 
   StorageTmp = (struct snmpNotifyFilterTable_data *)
-    header_complex(snmpNotifyFilterTableStorage, NULL,
+    header_complex((struct header_complex_index *)snmpNotifyFilterTableStorage, NULL,
                    &name[sizeof(snmpNotifyFilterTable_variables_oid)/sizeof(oid) + 3 - 1], 
                    &newlen, 1, NULL, NULL);
   
@@ -627,7 +627,7 @@ write_snmpNotifyFilterRowStatus(int      action,
                  header_complex_find_entry(snmpNotifyFilterTableStorage,
                                            StorageTmp);
                StorageDel = (struct snmpNotifyFilterTable_data *)
-                 header_complex_extract_entry(&snmpNotifyFilterTableStorage,
+                 header_complex_extract_entry((struct header_complex_index **)&snmpNotifyFilterTableStorage,
                                               hciptr);
              }
           break;
@@ -643,7 +643,7 @@ write_snmpNotifyFilterRowStatus(int      action,
                  header_complex_find_entry(snmpNotifyFilterTableStorage,
                                            StorageTmp);
                StorageDel = (struct snmpNotifyFilterTable_data *)
-                 header_complex_extract_entry(&snmpNotifyFilterTableStorage,
+                 header_complex_extract_entry((struct header_complex_index **)&snmpNotifyFilterTableStorage,
                                               hciptr);
                /* XXX: free it */
              } else if (StorageDel != NULL) {

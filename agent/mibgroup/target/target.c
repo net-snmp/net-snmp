@@ -140,7 +140,8 @@ get_target_sessions(char *taglist, TargetFilterFunction *filterfunct,
                                     strlen(thissess.securityName);
                                 thissess.securityLevel = param->secLevel;
                             } else {
-                                thissess.community = (u_char*) param->secName;
+                                thissess.community =
+                                    (u_char *)strdup(param->secName);
                                 thissess.community_len =
                                     strlen((char *)thissess.community);
                             }

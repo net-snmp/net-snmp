@@ -189,9 +189,9 @@ int try_getloadavg(double *r_ave, size_t s_ave)
 #ifdef HAVE_SYS_FIXPOINT_H
   fix favenrun[3];
 #endif
-#if (defined(ultrix) || defined(sun) || defined(__alpha)) && !defined(solaris2)
+#if (defined(ultrix) || defined(sun) || defined(__alpha))
   int i;
-#if (defined(sun) || defined(__alpha)) && !defined(solaris2)
+#if (defined(sun) || defined(__alpha))
   long favenrun[3];
   if (s_ave > 3) /* bounds check */
     return (-1); 
