@@ -193,7 +193,7 @@ extern "C" {
      * netsnmp_container_find* functions.
      */
     void netsnmp_container_init_list(void);
-    void netsnmp_container_free_lists(void);
+    void netsnmp_container_free_list(void);
 
     /*
      * register a new container factory
