@@ -4,6 +4,10 @@
 /** @defgroup agent The Net-SNMP agent
  * The snmp agent responds to SNMP queries from management stations
  */
+/* Portions of this file are subject to the following copyrights.  See
+ * the Net-SNMP's COPYING file for more details and other copyrights
+ * that may apply:
+ */
 /*
  * Copyright 1988, 1989 by Carnegie Mellon University
  * 
