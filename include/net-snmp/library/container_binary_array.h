@@ -15,18 +15,23 @@ extern          "C" {
 #include <net-snmp/library/factory.h>
 
     /*
-     * get an container which uses an binary_array for storage
+     * initialize binary array container. call at startup.
      */
     void netsnmp_container_binary_array_init(void);
+
+    /*
+     * get an container which uses an binary_array for storage
+     */
     netsnmp_container *   netsnmp_container_get_binary_array(void);
-    int netsnmp_container_get_binary_array_noalloc(netsnmp_container *c);
 
     /*
      * get a factory for producing binary_array objects
      */
     netsnmp_factory *     netsnmp_container_get_binary_array_factory(void);
 
-    int netsnmp_binary_array_remove(netsnmp_container *c, const void *key, void **save);
+
+    int netsnmp_binary_array_remove(netsnmp_container *c, const void *key,
+                                    void **save);
 
     void netsnmp_binary_array_release(netsnmp_container *c);
 
