@@ -51,6 +51,7 @@ int
 netsnmp_table_data_add_row(netsnmp_table_data *table,
                            netsnmp_table_row *row)
 {
+    int rc, dup = 0;
     netsnmp_table_row *nextrow, *prevrow;
 
     if (!row || !table)
@@ -76,26 +77,48 @@ netsnmp_table_data_add_row(netsnmp_table_data *table,
     }
 
     /*
+     * check for simple append
+     */
+    if ((prevrow = table->last_row) != NULL) {
+        rc = snmp_oid_compare(prevrow->index_oid, prevrow->index_oid_len,
+                              row->index_oid, row->index_oid_len);
+        if (0 == rc)
+            dup = 1;
+    }
+    else
+        rc = 1;
+    
+    /*
+     * if no last row, or newrow < last row, search the table and
      * insert it into the table in the proper oid-lexographical order 
      */
-    for (nextrow = table->first_row, prevrow = NULL;
-         nextrow != NULL; prevrow = nextrow, nextrow = nextrow->next) {
-        if (nextrow->index_oid &&
-            snmp_oid_compare(nextrow->index_oid, nextrow->index_oid_len,
-                             row->index_oid, row->index_oid_len) > 0)
-            break;
-        if (nextrow->index_oid &&
-            snmp_oid_compare(nextrow->index_oid, nextrow->index_oid_len,
-                             row->index_oid, row->index_oid_len) == 0) {
-            /*
-             * exact match.  Duplicate entries illegal 
-             */
-            snmp_log(LOG_WARNING,
-                     "duplicate table data attempted to be entered\n");
-            return SNMPERR_GENERR;
+    if (rc > 0) {
+        for (nextrow = table->first_row, prevrow = NULL;
+             nextrow != NULL; prevrow = nextrow, nextrow = nextrow->next) {
+            if (NULL == nextrow->index_oid) {
+                DEBUGMSGT(("table_data_add_data", "row doesn't have index!\n"));
+                /** xxx-rks: remove invalid row? */
+                continue;
+            }
+            rc = snmp_oid_compare(nextrow->index_oid, nextrow->index_oid_len,
+                                  row->index_oid, row->index_oid_len);
+            if(rc > 0)
+                break;
+            if (0 == rc) {
+                dup = 1;
+                break;
+            }
         }
     }
 
+    if (dup) {
+        /*
+         * exact match.  Duplicate entries illegal 
+         */
+        snmp_log(LOG_WARNING,
+                 "duplicate table data attempted to be entered\n");
+        return SNMPERR_GENERR;
+    }
 
     /*
      * ok, we have the location of where it should go 
@@ -114,6 +137,8 @@ netsnmp_table_data_add_row(netsnmp_table_data *table,
 
     if (NULL == row->prev)      /* it's the (new) first row */
         table->first_row = row;
+    if (NULL == row->next)      /* it's the last row */
+        table->last_row = row;
 
     DEBUGMSGTL(("table_data_add_data", "added something...\n"));
 
