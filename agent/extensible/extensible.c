@@ -74,7 +74,7 @@ int checkmib(vp,name,length,exact,var_len,write_method,newname,max)
 {
   int i, rtest;
 
-  for(i=0,rtest=0; i < vp->namelen && i < *length && !rtest; i++) {
+  for(i=0,rtest=0; i < (int) vp->namelen && i < (int)(*length) && !rtest; i++) {
     if (name[i] != vp->name[i]) {
       if (name[i] < vp->name[i]) 
         rtest = -1;
@@ -82,7 +82,7 @@ int checkmib(vp,name,length,exact,var_len,write_method,newname,max)
         rtest = 1;
     }
   }
-  if (rtest > 0 || (rtest == 0 && vp->namelen+1 < *length) ||
+  if (rtest > 0 || (rtest == 0 && (int) vp->namelen+1 < (int) *length) ||
     (exact == -1 && rtest)) {
     if (var_len)
 	*var_len = NULL;
@@ -90,7 +90,7 @@ int checkmib(vp,name,length,exact,var_len,write_method,newname,max)
   }
 /*  printf("%d/ck:  vp=%d  ln=%d lst=%d\n",exact,
          vp->namelen,*length,name[*length-1]); */
-  if (*length <= vp->namelen || rtest == -1) {
+  if (((int) *length) <= (int) vp->namelen || rtest == -1) {
     bcopy((char *) vp->name, (char *)newname, (int)vp->namelen * sizeof (oid));
     newname[vp->namelen] = 1;
     *length = vp->namelen+1;
@@ -114,12 +114,12 @@ int checkmib(vp,name,length,exact,var_len,write_method,newname,max)
   if (var_len)
     *var_len = sizeof(long);   /* default */
 #ifdef GLOBALSECURITY
-  vp->acl = ((((vp->acl & 0x5555) >> 1) & GLOBALSECURITY) << 1) /* ick */
+  vp->acl = ((((int)(vp->acl & 0x5555) >> 1) & GLOBALSECURITY) << 1) /* ick */
     | GLOBALSECURITY;      /* RO/RW + SECURITY */
 #ifdef SECURITYEXCEPTIONS
   for(i=0; exceptions[i] != -1; i += 2)
     if (vp->magic == exceptions[i])
-      vp->acl = ((((vp->acl & 0x5555) >> 1) & exceptions[i+1]) << 1) |
+      vp->acl = ((((int)(vp->acl & 0x5555) >> 1) & exceptions[i+1]) << 1) |
         exceptions[i+1];   /* RO/RW + SECURITY */
 #endif
 #endif
