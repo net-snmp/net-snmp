@@ -12,7 +12,10 @@
  Functionally, this release contains all the items listed in the NEWS
  file but many aren't documented (or are poorly documented).  It is
  not intended to be a "pretty" release.  But we'd love feedback about
- the new functionality found within.
+ the new functionality found within.  To contact the developers about
+ this prerelease, please either use the bug database
+ (http://www.net-snmp.org/bugs/) or email the
+ net-snmp-coders@lists.sourceforge.net mailing list.
 
 DISCLAIMER
 
