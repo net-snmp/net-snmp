@@ -1297,8 +1297,6 @@ ipAddressTable_undo_commit(ipAddressTable_rowreq_ctx * rowreq_ctx)
         rc = MFD_ERROR;
     }
 
-#warning "test ipAddressTable undo commit"
-
     return rc;
 }                               /* ipAddressTable_undo_commit */
 
