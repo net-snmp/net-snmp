@@ -1067,34 +1067,37 @@ add_varbind_to_cache(struct agent_snmp_session  *asp, int vbcount,
         }
     } else {
         /* for non-SET modes, set the type to NULL */
-      DEBUGMSGTL(("snmp_agent", "tp->start "));
-      DEBUGMSGOID(("snmp_agent", tp->start, tp->start_len));
-      DEBUGMSG(("snmp_agent", ", tp->end "));
-      DEBUGMSGOID(("snmp_agent", tp->end, tp->end_len));
-      DEBUGMSG(("snmp_agent", ", \n"));
+	DEBUGMSGTL(("snmp_agent", "tp->start "));
+	DEBUGMSGOID(("snmp_agent", tp->start, tp->start_len));
+	DEBUGMSG(("snmp_agent", ", tp->end "));
+	DEBUGMSGOID(("snmp_agent", tp->end, tp->end_len));
+	DEBUGMSG(("snmp_agent", ", \n"));
 
-
-        if (!MODE_IS_SET(asp->pdu->command))
-            varbind_ptr->type = ASN_NULL;
-
-        /* malloc the request structure */
         request = &(asp->requests[vbcount-1]);
         request->index = vbcount;
         request->delegated = 0;
         request->processed = 0;
-	//	request->inclusive = 0;
         request->status = 0;
         request->subtree = tp;
-        if (request->parent_data)
+        if (request->parent_data) {
             free_request_data_sets(request);
+	}
+
+	if (!MODE_IS_SET(asp->pdu->command)) {
+	    if (varbind_ptr->type == ASN_PRIV_INCL_RANGE) {
+		DEBUGMSGTL(("snmp_agent", "varbind %d is inclusive\n",
+			    request->index));
+		request->inclusive = 1;
+	    }
+            varbind_ptr->type = ASN_NULL;
+	}
 
         /* place them in a cache */
         if (tp->cacheid > -1 && tp->cacheid <= asp->treecache_num &&
             asp->treecache[tp->cacheid].subtree == tp) {
             /* we have already added a request to this tree
                pointer before */
-					cacheid = tp->cacheid;
-
+	    cacheid = tp->cacheid;
         } else {
             cacheid = ++(asp->treecache_num);
             /* new slot needed */
@@ -1473,12 +1476,33 @@ check_getnext_results(struct agent_snmp_session  *asp) {
     tree_cache *old_treecache = asp->treecache;
     int old_treecache_num = asp->treecache_num;
     int count = 0;
-    int i;
+    int i, special = 0;
     request_info *request;
+
+    if (asp->mode == SNMP_MSG_GET) {
+	/*  Special case for doing INCLUSIVE getNext operations in
+	    AgentX subagents.  */
+	DEBUGMSGTL(("snmp_agent","asp->mode == SNMP_MSG_GET in ch_getnext\n"));
+	asp->mode = SNMP_MSG_GETNEXT;
+	special = 1;
+    }
     
     for(i = 0; i <= old_treecache_num; i++) {
         for(request = old_treecache[i].requests_begin; request;
             request = request->next) {
+
+	    /*  If we have just done the special case AgentX GET, then any
+		requests which were not INCLUSIVE will now have a wrong
+		response, so junk them and retry from the same place (except
+		that this time the handler will be called in "inexact"
+		mode).  */
+
+	    if (special && !request->inclusive) {
+		DEBUGMSGTL(("snmp_agent", "request %d wasn't inclusive\n",
+			    request->index));
+                snmp_set_var_typed_value(request->requestvb, ASN_PRIV_RETRY,
+                                        NULL, 0);
+	    }
 
             /* out of range? */
             if (snmp_oid_compare(request->requestvb->name,
@@ -1495,7 +1519,7 @@ check_getnext_results(struct agent_snmp_session  *asp) {
                 snmp_set_var_typed_value(request->requestvb, ASN_NULL,
                                          NULL, 0);
             }
-
+	    
             /* mark any existent requests with illegal results as NULL */
             if (request->requestvb->type == SNMP_ENDOFMIBVIEW) {
                 /* illegal response from a subagent.  Change it back to NULL */
@@ -1656,8 +1680,10 @@ handle_set_loop(struct agent_snmp_session  *asp) {
 }
 
 int
-handle_pdu(struct agent_snmp_session  *asp) {
-    int status;
+handle_pdu(struct agent_snmp_session  *asp)
+{
+    int status, inclusives = 0;
+    struct variable_list *v = NULL;
 
     /* for illegal requests, mark all nodes as ASN_NULL */
     switch(asp->pdu->command) {
@@ -1673,7 +1699,17 @@ handle_pdu(struct agent_snmp_session  *asp) {
         case SNMP_MSG_GET:
         case SNMP_MSG_GETNEXT:
         case SNMP_MSG_GETBULK:
-            snmp_reset_var_types(asp->pdu->variables, ASN_NULL);
+	    for (v = asp->pdu->variables; v != NULL; v = v->next_variable) {
+		if (v->type == ASN_PRIV_INCL_RANGE) {
+		    /*  Leave the type for now (it gets set to ASN_NULL in
+			add_varbind_to_cache, called by create_subtree_cache
+			below).  If we set it to ASN_NULL now, we wouldn't
+			be able to distinguish INCLUSIVE search ranges.  */
+		    inclusives++;
+		} else {
+		    snmp_set_var_typed_value(v, ASN_NULL, NULL, 0);
+		}
+	    }
             /* fall through */
 
         case SNMP_MSG_INTERNAL_SET_BEGIN:
@@ -1707,14 +1743,28 @@ handle_pdu(struct agent_snmp_session  *asp) {
             /* increment the message type counter */
             snmp_increment_statistic(STAT_SNMPINGETNEXTS);
 
-            /* loop through our mib tree till we find an
-               appropriate response to return to the caller. */
-
+	    if (inclusives) {
+		/*  This is a special case for AgentX INCLUSIVE getNext
+		    requests where a result lexi-equal to the request is okay
+		    but if such a result does not exist, we still want the
+		    lexi-next one.  So basically we do a GET first, and if any
+		    of the INCLUSIVE requests are satisfied, we use that
+		    value.  Then, unsatisfied INCLUSIVE requests, and
+		    non-INCLUSIVE requests get done as normal.  */
+		
+		DEBUGMSGTL(("snmp_agent", "inclusive range(s) in getNext\n"));
+		asp->mode = SNMP_MSG_GET;
+	    }
+	    
             /* first pass */
+
             status = handle_var_requests(asp);
             if (status != SNMP_ERR_NOERROR) {
                 return status; /* should never really happen */
             }
+
+            /* loop through our mib tree till we find an
+               appropriate response to return to the caller. */
 
             handle_getnext_loop(asp);
             break;
@@ -1742,6 +1792,10 @@ handle_pdu(struct agent_snmp_session  *asp) {
             break;
 
         case SNMP_MSG_GETBULK:
+	    /*  Same handling is needed as for SNMP_MSG_GETNEXT for INCLUSIVE
+		search ranges, i.e. do a asp->mode = SNMP_MSG_GET first, and
+		then re-do requests that either failed, or weren't inclusive
+		search ranges in the first place.  */
             break;
             /* WWW */
 
