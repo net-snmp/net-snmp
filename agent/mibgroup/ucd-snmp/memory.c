@@ -324,12 +324,9 @@ int getswap(int rettype)
   for (i=0; i < nswapdev; i++) {
 #ifdef hpux11
     DEBUGMSGTL(("ucd-snmp/memory", "swdevt[%d]: %d\n",i, swdevt[i].sw_flags & SW_ENABLE));
-#else
-    DEBUGMSGTL(("ucd-snmp/memory", "swdevt[%d]: %d\n",i, swdevt[i].sw_enable));
-#endif
-#ifdef hpux11
     if (swdevt[i].sw_flags & SW_ENABLE)
 #else
+    DEBUGMSGTL(("ucd-snmp/memory", "swdevt[%d]: %d\n",i, swdevt[i].sw_enable));
     if (swdevt[i].sw_enable)
 #endif
     {
