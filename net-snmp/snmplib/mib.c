@@ -2392,26 +2392,38 @@ netsnmp_fixup_mib_directory()
 {
     char *homepath = getenv("HOME");
     char *mibpath = netsnmp_get_mib_directory();
+    char *oldmibpath = NULL;
     char *ptr_home;
     char *new_mibpath;
 
     DEBUGTRACE;
     if (homepath && mibpath) {
         DEBUGMSGTL(("fixup_mib_directory", "mib directories '%s'\n", mibpath));
-        while((ptr_home = strstr(mibpath, "$HOME"))) {
-            new_mibpath = (char *) malloc(strlen(mibpath) - strlen("$HOME") +
-                                      strlen(homepath)+1);
+        while ((ptr_home = strstr(mibpath, "$HOME"))) {
+            new_mibpath = (char *)malloc(strlen(mibpath) - strlen("$HOME") +
+					 strlen(homepath)+1);
             if (new_mibpath) {
                 *ptr_home = 0; /* null out the spot where we stop copying */
                 sprintf(new_mibpath, "%s%s%s", mibpath, homepath,
-                      ptr_home + strlen("$HOME"));
+			ptr_home + strlen("$HOME"));
                 /** swap in the new value and repeat */
                 mibpath = new_mibpath;
+		if (oldmibpath != NULL) {
+		    free(oldmibpath);
+		}
+		oldmibpath = new_mibpath;
             } else {
                 break;
             }
         }
+
         netsnmp_set_mib_directory(mibpath);
+	
+	/*  The above copies the mibpath for us, so...  */
+
+	if (oldmibpath != NULL) {
+	    free(oldmibpath);
+	}
     }
 
 }
