@@ -40,6 +40,11 @@
 
 #undef LOGFILE
 
+/* PERSISTENTFILE: If defined, the agent is capabile of saving
+   persisant information to this file in the form of configuration
+   lines */
+#define PERSISTENTFILE "/var/snmp/snmpd.persistant.conf"
+
 /* configuration files.  I rdist the first one and leave machine
    specific stuff in the second one */
 

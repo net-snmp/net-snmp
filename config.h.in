@@ -101,6 +101,11 @@
 
 #undef LOGFILE
 
+/* PERSISTENTFILE: If defined, the agent is capabile of saving
+   persisant information to this file in the form of configuration
+   lines */
+#define PERSISTENTFILE "/var/snmp/snmpd.persistant.conf"
+
 /* default system contact */
 #undef SYS_CONTACT
 
