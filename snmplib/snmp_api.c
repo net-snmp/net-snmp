@@ -2000,7 +2000,7 @@ snmpv3_packet_rbuild(struct snmp_pdu *pdu, u_char *packet, size_t *out_length,
                         pdu->securityEngineID,	pdu->securityEngineIDLen,
                         pdu->securityName,	pdu->securityNameLen,
                         pdu->securityLevel,	
-			cp, packet-cp,
+			cp+1, packet-cp,
 			pdu->securityStateRef,
                         packet, out_length);
     DEBUGINDENTLESS();
