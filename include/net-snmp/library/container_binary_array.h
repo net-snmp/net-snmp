@@ -29,6 +29,7 @@ extern          "C" {
 
     void netsnmp_binary_array_release(netsnmp_container *c);
 
+    void netsnmp_container_binary_array_init(void):
 
 #ifdef __cplusplus
 }
