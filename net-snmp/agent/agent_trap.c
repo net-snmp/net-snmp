@@ -202,7 +202,8 @@ int add_trap_session( struct snmp_session *ss, int pdutype, int confirm, int ver
                    ss->securityNameLen+1);
 	    pptr->secName[ss->securityNameLen] = 0;
         } else {
-            pptr->secModel = ss->version;
+            pptr->secModel = ss->version == SNMP_VERSION_1 ?
+	      			SNMP_SEC_MODEL_SNMPv1 : SNMP_SEC_MODEL_SNMPv2c;
             pptr->secLevel = SNMP_SEC_LEVEL_NOAUTH;
             pptr->secName = NULL;
             if (ss->community && (ss->community_len > 0)) {
