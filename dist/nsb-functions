@@ -214,7 +214,7 @@ nsb-make()
          > nsb-make-$target-errs.$DATE
    nsb_make_rc=$?
    if [ $nsb_make_rc -eq 0 ]; then
-      nsb-prompt -f "press enter to view errors"
+      nsb-prompt "press enter to view errors"
       $NSB_VIEW nsb-make-$target-errs.$DATE
    fi
 
