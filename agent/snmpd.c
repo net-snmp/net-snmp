@@ -449,8 +449,18 @@ main(argc, argv)
                     printf("\nUcd-snmp version:  %s\n",VersionInfo);
                     printf("Author:            hardaker@ece.ucdavis.edu\n\n");
                     exit (0);
+                case '-':
+                  switch(argv[arg][2]){
+                    case 'v': 
+                      printf("\nUcd-snmp version:  %s\n",VersionInfo);
+                      printf("Author:            hardaker@ece.ucdavis.edu\n\n");
+                      exit (0);
+                    case 'h':
+                      usage(argv[0]);
+                      exit(0);
+                  }
 		default:
-		    printf("invalid option: -%c\n", argv[arg][1]);
+		    printf("invalid option: %s\n", argv[arg]);
                     usage(argv[0]);
 		    break;
 	    }
