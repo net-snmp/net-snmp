@@ -61,6 +61,7 @@
 #include "keytools.h"
 
 #include "snmp_parse_args.h"
+#include "snmp_logging.h"
 #include "version.h"
 #include "system.h"
 #include "parse.h"
@@ -133,6 +134,7 @@ snmp_parse_args(int argc,
 
   /* initialize session to default values */
   snmp_sess_init( session );
+  enable_stderrlog();
 
   /* get the options */
   for(arg = 1; (arg < argc) && (argv[arg][0] == '-'); arg++){
