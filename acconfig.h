@@ -5,6 +5,10 @@
 #define SNMPV2ANY   0xA000       /* V2 Any type (includes NoAuth) */
 #define SNMPV2AUTH  0x8000       /* V2 Authenticated requests only */
 
+/* default list of mibs to load */
+
+#undef DEFAULT_MIBS
+
 @TOP@
 
 /* SNMPLIBDIR contains important files */
