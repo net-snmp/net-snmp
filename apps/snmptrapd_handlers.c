@@ -50,6 +50,7 @@ struct traphandle {
 };
 
 struct traphandle *traphandlers=0;
+struct traphandle *defaulthandler=0;
 
 /* handles parsing .conf lines of: */
 /*   traphandle OID EXEC           */
@@ -65,7 +66,11 @@ snmptrapd_get_traphandler(oid *name, size_t namelen)
       *ttmp != NULL && snmp_oid_compare((*ttmp)->trap, (*ttmp)->traplen, name, namelen);
       ttmp = &((*ttmp)->next));
   if (*ttmp == NULL) {
-    DEBUGMSGTL(("snmptrapd:traphandler", "  Didn't find it.\n"));
+    if (defaulthandler) {
+      DEBUGMSGTL(("snmptrapd:traphandler", "  None found, Using the default handler.\n"));
+      return defaulthandler->exec;
+    }
+    DEBUGMSGTL(("snmptrapd:traphandler", "  Didn't find one.\n"));
     return NULL;
   }
   DEBUGMSGTL(("snmptrapd:traphandler", "  Found it!\n"));
@@ -78,30 +83,41 @@ snmptrapd_traphandle(char *token, char *line)
   struct traphandle **ttmp;
   char buf[STRINGMAX];
   char *cptr;
+  int doingdefault=0;
 
   /* find the current one, if it exists */
-  for(ttmp = &traphandlers; *ttmp != NULL; ttmp = &((*ttmp)->next));
+  if (strncmp(line,"default",7) == 0) {
+    ttmp = &defaulthandler;
+    doingdefault = 1;
+  } else {
+    for(ttmp = &traphandlers; *ttmp != NULL; ttmp = &((*ttmp)->next));
+  }
 
   if (*ttmp == NULL) {
     /* it doesn't, so allocate a new one. */
     *ttmp = (struct traphandle *) malloc(sizeof(struct traphandle));
-    (*ttmp)->next = NULL;
-    (*ttmp)->exec = NULL;
+    memset(*ttmp, 0, sizeof(struct traphandle));
   } else {
     if ((*ttmp)->exec)
       free((*ttmp)->exec);
   }
-  copy_word(line, buf);
-  (*ttmp)->traplen = MAX_OID_LEN;
-  if (!read_objid(buf,(*ttmp)->trap, &((*ttmp)->traplen))) {
-    snmp_perror(buf);
-    config_perror(buf);
-    return;
+  cptr = copy_word(line, buf);
+  if (!doingdefault) {
+    (*ttmp)->traplen = MAX_OID_LEN;
+    if (!read_objid(buf,(*ttmp)->trap, &((*ttmp)->traplen))) {
+      snmp_perror(buf);
+      config_perror(buf);
+      return;
+    }
   }
-  cptr = skip_not_white(line);
+
   (*ttmp)->exec = strdup(cptr);
   DEBUGMSGTL(("read_config:traphandler", "registered handler for: "));
-  DEBUGMSGOID(("read_config:traphandler", (*ttmp)->trap, (*ttmp)->traplen));
+  if (doingdefault) {
+    DEBUGMSG(("read_config:traphandler", "default"));
+  } else {
+    DEBUGMSGOID(("read_config:traphandler", (*ttmp)->trap, (*ttmp)->traplen));
+  }
   DEBUGMSG(("read_config:traphandler", "\n"));
 }
 
