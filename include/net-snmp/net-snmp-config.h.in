@@ -843,6 +843,7 @@
 /* Define to 1 if you have the <xti.h> header file. */
 #undef HAVE_XTI_H
 
+#ifndef PACKAGE_NAME
 /* Define to the address where bug reports for this package should be sent. */
 #undef PACKAGE_BUGREPORT
 
@@ -857,6 +858,7 @@
 
 /* Define to the version of this package. */
 #undef PACKAGE_VERSION
+#endif
 
 /* Define as the return type of signal handlers (`int' or `void'). */
 #undef RETSIGTYPE
