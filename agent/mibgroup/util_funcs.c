@@ -199,8 +199,17 @@ int get_exec_output(struct extensible *ex)
             setPerrorstatus("dup");
             return 0;
           }
-        close(fd[1]);
-        close(fd[0]);
+
+        /* write standard output and standard error to pipe. */
+        /* close all other file descriptors. */
+        for (cnt=getdtablesize()-1; cnt>=2; --cnt)
+                (void) close(cnt);
+        (void) dup(1);                 /* stderr */
+
+        /* set standard input to /dev/null */
+        close(0);
+        (void) open("/dev/null", O_RDWR);
+
         for(cnt=1,cptr1 = ex->command, cptr2 = argvs; *cptr1 != 0;
             cptr2++, cptr1++) {
           *cptr2 = *cptr1;
@@ -227,7 +236,7 @@ int get_exec_output(struct extensible *ex)
         *(aptr++) = NULL;
         copy_word(ex->command,ctmp);
         execv(ctmp,argv);
-        snmp_log_perror(ctmp);
+        perror(ctmp);
         exit(1);
       }
     else
@@ -333,10 +342,13 @@ int get_exec_pipes(char *cmd,
           setPerrorstatus("dup");
           return 0;
         }
-      close(fd[0][0]);
-      close(fd[0][1]);
-      close(fd[1][0]);
-      close(fd[1][1]);
+
+        /* write standard output and standard error to pipe. */
+        /* close all non-standard open file descriptors */
+        for (cnt=getdtablesize()-1; cnt>=2; --cnt)
+                (void) close(cnt);
+        (void) dup(1);                 /* stderr */
+
       for(cnt=1,cptr1 = cmd, cptr2 = argvs; *cptr1 != 0;
           cptr2++, cptr1++) {
         *cptr2 = *cptr1;
@@ -363,7 +375,7 @@ int get_exec_pipes(char *cmd,
       *(aptr++) = NULL;
       copy_word(cmd,ctmp);
       execv(ctmp,argv);
-      snmp_log_perror("execv");
+      perror("execv");
       exit(1);
     }
   else
