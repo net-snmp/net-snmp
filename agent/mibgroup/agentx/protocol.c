@@ -73,8 +73,9 @@ agentx_build_int(u_char *bufp, u_int value, int network_byte_order)
 }
 
 void
-agentx_build_short(u_char *bufp, int value, int network_byte_order)
+agentx_build_short(u_char *bufp, int in_value, int network_byte_order)
 {
+    u_short value = (u_short)in_value;
     if ( network_byte_order ) {
 #if BYTE_ORDER == LITTLE_ENDIAN
 	value = ntohs( value );
@@ -521,7 +522,7 @@ agentx_parse_int(u_char *data, u_int network_byte_order)
 int
 agentx_parse_short(u_char *data, u_int network_byte_order)
 {
-    u_int    value = 0;
+    u_short    value = 0;
 
     if ( network_byte_order ) {
 	memmove( &value, data, 2);
