@@ -35,7 +35,7 @@
 #include <stdlib.h>
 #endif
 
-#if defined(freebsd3) || defined(freebsd4)
+#ifdef freebsd3
 #if HAVE_GETFSSTAT
 #if defined(MFSNAMELEN)
 #define MOUNT_NFS "nfs"
