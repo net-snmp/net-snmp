@@ -51,10 +51,10 @@ auto_nlist_value(string)
       init_nlist(it->nl);
     }
     if (it->nl[0].n_type == 0) {
-      DEBUGP("nlist err:  neither %s nor _%s found.\n",string,string);
+      DEBUGP("nlist err:  neither %s nor _%s found.\n", string, string);
       return( -1 );
     } else {
-      DEBUGP("nlist:  found symbol %s.\n",it->symbol);
+      DEBUGP("nlist:  found symbol %s at %x.\n", it->symbol, it->nl[0].n_value);
       return( it->nl[0].n_value );
     }
   }
@@ -69,12 +69,17 @@ auto_nlist(string, var, size)
   int size;
 {
   int result;
+  int ret;
 
   result = auto_nlist_value(string);
   if (result!= -1) {
-    if (var != 0)
-      return klookup(result, var, size);
-    else
+    if (var != 0) {
+      ret =  klookup(result, var, size);
+      if (!ret)
+        DEBUGP("auto_nlist failed on %s at location %x\n",
+               string, result);
+      return ret;
+    } else
       return 1;
   }
   return 0;
