@@ -17,6 +17,14 @@
  *
  * $$hack:$
  */
+/** @defgroup interface: Routines to interface to Net-SNMP
+ *
+ * \warning This code should not be modified, called directly,
+ *          or used to interpret functionality. It is subject to
+ *          change at any time.
+ * 
+ * @{
+ */
 @include m2c-internal-warning.m2i@
 ##
 @eval $m2c_save = "$name"@
@@ -94,6 +102,8 @@ static void _${table}_container_init(
     ${context}_interface_ctx *if_ctx);
 
 
+static Netsnmp_Node_Handler _mfd_${context}_pre_request;
+static Netsnmp_Node_Handler _mfd_${context}_post_request;
 static Netsnmp_Node_Handler _mfd_${context}_object_lookup;
 static Netsnmp_Node_Handler _mfd_${context}_get_values;
 @   if $m2c_table_settable@
@@ -187,8 +197,8 @@ _${table}_initialize_interface(${context}_registration_ptr reg_ptr,  u_long flag
     /*
      * no wrappers yet
      */
-    access_multiplexer->pre_request = ${table}_pre_request;
-    access_multiplexer->post_request = ${table}_post_request;
+    access_multiplexer->pre_request = _mfd_${table}_pre_request;
+    access_multiplexer->post_request = _mfd_${table}_post_request;
     access_multiplexer->commit = _mfd_${table}_commit;
 @   if $m2c_irreversible_commit == 1@
     access_multiplexer->irreversible_commit = _mfd_${table}_irreversible_commit;
@@ -383,6 +393,34 @@ ${table}_release_rowreq_ctx(${context}_rowreq_ctx *rowreq_ctx)
  * wrapper
  */
 static int
+_mfd_${context}_pre_request(netsnmp_mib_handler *handler,
+                            netsnmp_handler_registration *reginfo,
+                            netsnmp_agent_request_info *agtreq_info,
+                            netsnmp_request_info *requests)
+{
+    return ${context}_pre_request(${context}_if_ctx.user_ctx);
+}
+
+/**
+ * @internal
+ * wrapper
+ */
+static int
+_mfd_${context}_post_request(netsnmp_mib_handler *handler,
+                             netsnmp_handler_registration *reginfo,
+                             netsnmp_agent_request_info *agtreq_info,
+                             netsnmp_request_info *requests)
+{
+    return ${context}_post_request(${context}_if_ctx.user_ctx);
+}
+
+########################################################################
+##
+/**
+ * @internal
+ * wrapper
+ */
+static int
 _mfd_${context}_object_lookup(netsnmp_mib_handler *handler,
                          netsnmp_handler_registration *reginfo,
                          netsnmp_agent_request_info *agtreq_info,
@@ -446,19 +484,11 @@ _mfd_${context}_object_lookup(netsnmp_mib_handler *handler,
         }
 @   end@ // row creation
     }
+@   if $m2c_data_transient != 0@ #
     else {
-        /*
-         * set up registration pointer for user
-         */
-        rowreq_ctx->${context}_reg = if_ctx->user_ctx;
-
-        /*
-         * set up data list for user
-         */
-        /*rowreq_ctx->${context}_data_list = pdu_ctx->mfd_data_list;*/
-
+        ${context}_row_prep(rowreq_ctx);
     }
-
+@   end@
     return MFD_SUCCESS;
 }
 
