@@ -9,7 +9,9 @@ require Exporter;
 require DynaLoader;
 use AutoLoader;
 
-our @ISA = qw(Exporter DynaLoader);
+use vars qw(@ISA %EXPORT_TAGS @EXPORT_OK @EXPORT $VERSION);
+
+@ISA = qw(Exporter DynaLoader);
 
 # Items to export into callers namespace by default. Note: do not export
 # names by default without a very good reason. Use EXPORT_OK instead.
@@ -18,7 +20,7 @@ our @ISA = qw(Exporter DynaLoader);
 # This allows declaration	use NetSNMP::ASN ':all';
 # If you do not need this, moving things directly into @EXPORT or @EXPORT_OK
 # will save memory.
-our %EXPORT_TAGS = ( 'all' => [ qw(
+%EXPORT_TAGS = ( 'all' => [ qw(
 	ASN_APPLICATION
 	ASN_BIT_STR
 	ASN_BOOLEAN
@@ -41,9 +43,9 @@ our %EXPORT_TAGS = ( 'all' => [ qw(
 	ASN_UNSIGNED64
 ) ] );
 
-our @EXPORT_OK = ( @{ $EXPORT_TAGS{'all'} } );
+@EXPORT_OK = ( @{ $EXPORT_TAGS{'all'} } );
 
-our @EXPORT = qw(
+@EXPORT = qw(
 	ASN_APPLICATION
 	ASN_BIT_STR
 	ASN_BOOLEAN
@@ -65,7 +67,7 @@ our @EXPORT = qw(
 	ASN_UNSIGNED
 	ASN_UNSIGNED64
 );
-our $VERSION = '0.01';
+$VERSION = '0.01';
 
 sub AUTOLOAD {
     # This AUTOLOAD is used to 'autoload' constants from the constant()

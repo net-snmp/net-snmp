@@ -14,7 +14,9 @@ use NetSNMP::agent::default_store (':all');
 use NetSNMP::OID (':all');
 use NetSNMP::agent::netsnmp_request_info;
 
-our @ISA = qw(Exporter AutoLoader DynaLoader);
+use vars qw(@ISA %EXPORT_TAGS @EXPORT_OK @EXPORT $VERSION);
+
+@ISA = qw(Exporter AutoLoader DynaLoader);
 
 # Items to export into callers namespace by default. Note: do not export
 # names by default without a very good reason. Use EXPORT_OK instead.
@@ -23,7 +25,7 @@ our @ISA = qw(Exporter AutoLoader DynaLoader);
 # This allows declaration	use NetSNMP::agent ':all';
 # If you do not need this, moving things directly into @EXPORT or @EXPORT_OK
 # will save memory.
-our %EXPORT_TAGS = ( 'all' => [ qw(
+%EXPORT_TAGS = ( 'all' => [ qw(
 	MODE_GET
 	MODE_GETBULK
 	MODE_GETNEXT
@@ -36,9 +38,9 @@ our %EXPORT_TAGS = ( 'all' => [ qw(
 	MODE_SET_UNDO
 ) ] );
 
-our @EXPORT_OK = ( @{ $EXPORT_TAGS{'all'} } );
+@EXPORT_OK = ( @{ $EXPORT_TAGS{'all'} } );
 
-our @EXPORT = qw(
+@EXPORT = qw(
 	MODE_GET
 	MODE_GETBULK
 	MODE_GETNEXT
@@ -50,7 +52,7 @@ our @EXPORT = qw(
 	MODE_SET_RESERVE2
 	MODE_SET_UNDO
 );
-our $VERSION = '0.01';
+$VERSION = '0.01';
 
 sub AUTOLOAD {
     # This AUTOLOAD is used to 'autoload' constants from the constant()
