@@ -186,7 +186,7 @@ snmpstatus.o:  ./../snmplib/getopt.h
 snmpstatus.o: ./../snmplib/asn1.h ./../snmplib/snmp_api.h
 snmpstatus.o: ./../snmplib/snmp_impl.h ./../snmplib/snmp_client.h
 snmpstatus.o: ./../snmplib/mib.h ./../snmplib/snmp.h ./../snmplib/system.h
-snmpstatus.o: snmp_parse_args.h
+snmpstatus.o: ./../snmplib/tools.h snmp_parse_args.h
 snmptable.o: ../config.h ../mib_module_config.h ../s/linux.h ../s/sysv.h
 snmptable.o: ../s/generic.h ../m/generic.h 
 snmptable.o:  ./../snmplib/getopt.h
