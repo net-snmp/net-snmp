@@ -1332,8 +1332,6 @@ snmp_new_session(version, community, peer, port, retries, timeout)
            session.timeout = timeout; /* 1000000L */
            session.authenticator = NULL;
 
-           snmp_synch_setup(&session);
-
            ss = snmp_open(&session);
 
            if (ss == NULL) {
@@ -1442,7 +1440,6 @@ snmp_new_v3_session(version, peer, port, retries, timeout, sec_name, sec_level, 
                  goto end;
                }
             }
-           snmp_synch_setup(&session);
 
            ss = snmp_open(&session);
 
