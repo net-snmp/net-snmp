@@ -314,15 +314,18 @@ agentx_add_request( struct agent_snmp_session *asp,
     struct request_list *request;
     struct ax_variable_list *ax_vlist;
     struct subtree      *sub;
+    int			 sessid;
 
     if (asp->pdu->command == SNMP_MSG_SET && asp->mode == RESERVE1 )
 	return AGENTX_ERR_NOERROR;
 
-				/* Or msgid ? */
     ax_session = get_session_for_oid( vbp->name, vbp->name_length );
+    sessid = ax_session->sessid;
     if ( ax_session->flags & SNMP_FLAGS_SUBSESSION )
 	ax_session = ax_session->subsession;
     request    = get_agentx_request( asp, ax_session, pdu->transid );
+    request->pdu->sessid = sessid;	/* Use the registered (sub)session's ID,
+					   not the main listening session ID */
     ax_vlist   = (struct ax_variable_list *)request->cb_data;
 
     ax_vlist->variables[ ax_vlist->num_vars ] = vbp;
