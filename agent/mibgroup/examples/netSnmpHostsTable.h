@@ -6,8 +6,8 @@
 #define NETSNMPHOSTSTABLE_H
 
 /** other required module components */
-config_require(netSnmpHostsTable_access)
-    config_require(netSnmpHostsTable_checkfns)
+config_require(examples/netSnmpHostsTable_access)
+    config_require(examples/netSnmpHostsTable_checkfns)
 
     /*
      * function declarations 
