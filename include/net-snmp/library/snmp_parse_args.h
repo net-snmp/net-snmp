@@ -1,3 +1,5 @@
+#ifndef SNMP_PARSE_ARGS_H
+#define SNMP_PARSE_ARGS_H
 #ifdef __cplusplus
 extern          "C" {
 #endif
@@ -11,4 +13,5 @@ extern          "C" {
 
 #ifdef __cplusplus
 }
+#endif
 #endif

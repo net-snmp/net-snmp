@@ -1,6 +1,10 @@
 #ifndef AGENT_TRAP_H
 #define AGENT_TRAP_H
 
+#ifdef __cplusplus
+extern          "C" {
+#endif
+
 struct agent_add_trap_args {
     netsnmp_session *ss;
     int             confirm;
@@ -30,4 +34,7 @@ int             create_trap_session(char *, u_short, char *, int, int);
 int             add_trap_session(netsnmp_session *, int, int, int);
 int             remove_trap_session(netsnmp_session *);
 
+#ifdef __cplusplus
+}
+#endif
 #endif                          /* AGENT_TRAP_H */

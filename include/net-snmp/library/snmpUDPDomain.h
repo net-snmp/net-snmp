@@ -1,6 +1,10 @@
 #ifndef _SNMPUDPDOMAIN_H
 #define _SNMPUDPDOMAIN_H
 
+#ifdef __cplusplus
+extern          "C" {
+#endif
+
 #include <net-snmp/library/snmp_transport.h>
 #include <net-snmp/library/asn1.h>
 
@@ -44,4 +48,7 @@ int             netsnmp_udp_getSecName(void *opaque, int olength,
 
 void            netsnmp_udp_ctor(void);
 
+#ifdef __cplusplus
+}
+#endif
 #endif/*_SNMPUDPDOMAIN_H*/

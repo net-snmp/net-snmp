@@ -1,3 +1,6 @@
+#ifndef SERIALIZE_H
+#define SERIALIZE_H
+
 /*
  * The serialized helper merely calls its clients multiple times for a
  * * given request set, so they don't have to loop through the requests
@@ -17,4 +20,5 @@ extern          "C" {
 
 #ifdef __cplusplus
 };
+#endif
 #endif

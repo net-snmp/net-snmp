@@ -3,6 +3,10 @@
 
 #ifdef SNMP_TRANSPORT_AAL5PVC_DOMAIN
 
+#ifdef __cplusplus
+extern          "C" {
+#endif
+
 #if HAVE_SYS_SOCKET_H
 #include <sys/socket.h>
 #endif
@@ -23,6 +27,9 @@ netsnmp_transport *netsnmp_aal5pvc_transport(struct sockaddr_atmpvc *addr,
 
 void            netsnmp_aal5pvc_ctor(void);
 
+#ifdef __cplusplus
+}
+#endif
 #endif                          /*SNMP_TRANSPORT_AAL5PVC_DOMAIN */
 
 #endif/*_SNMPAAL5PVCDOMAIN_H*/
