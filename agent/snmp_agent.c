@@ -407,13 +407,17 @@ handle_snmp_packet(int operation, struct snmp_session *session, int reqid,
 	        break;
     
 	    while ( asp->pdu->errstat-- > 0 )	/* Skip non-repeaters */
+	    {
+	        if ( NULL != asp->start )	/* if there are variables ... */
 	        asp->start = asp->start->next_variable;
+	    }
 	    asp->pdu->errindex--;           /* Handled first repetition */
 
 	    if ( asp->outstanding_requests != NULL )
 		return 1;
 	}
 
+	if ( NULL != asp->start )	/* if there are variables ... */
 	while ( asp->pdu->errindex-- > 0 ) {	/* Process repeaters */
 		/*
 		 * Add new variable structures for the
@@ -630,7 +634,6 @@ handle_snmp_packet(int operation, struct snmp_session *session, int reqid,
 
     return 1;
 }
-
 
 int
 handle_next_pass(struct agent_snmp_session  *asp)
@@ -909,6 +912,3 @@ statp_loop:
 	return SNMP_ERR_NOERROR;
 	
 }
-
-
-
