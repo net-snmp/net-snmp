@@ -47,6 +47,9 @@ Defaults to a compiled option.
 .B -L
 Don't open a log file; use stdout/err instead.
 .TP
+.B -A
+Append to the log file rather than truncating it.
+.TP
 .B -c file
 Read 
 .I file
