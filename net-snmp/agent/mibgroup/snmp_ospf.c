@@ -4,21 +4,45 @@
  * Smux module authored by Rohit Dube.
  */
 
+#include <config.h>
+
 #include <stdio.h>
+#if HAVE_STDLIB_H
 #include <stdlib.h>
+#endif
+#if HAVE_STRINGS_H
+#include <strings.h>
+#else
 #include <string.h>
+#endif
+#if HAVE_UNISTD_H
 #include <unistd.h>
+#endif
+#if HAVE_ERR_H
 #include <err.h>
-#include <time.h>
+#endif
+#if TIME_WITH_SYS_TIME
+# include <sys/time.h>
+# include <time.h>
+#else
+# if HAVE_SYS_TIME_H
+#  include <sys/time.h>
+# else
+#  include <time.h>
+# endif
+#endif
 #include <errno.h>
 #include <netdb.h>
 
 #include <sys/stat.h>
 #include <sys/socket.h>
-#include <sys/filio.h> 
+#if HAVE_SYS_FILIO_H
+#include <sys/filio.h>
+#endif
 
+#if HAVE_NETINET_IN_H
 #include <netinet/in.h>
-
+#endif
 
 #include "asn1.h"
 #include "snmp.h"
@@ -43,7 +67,7 @@ var_ospf(vp, name, length, exact, var_len, write_method)
 	u_char *var;
 	int result;
 
-#ifdef SMUXDEBUG
+#ifdef DODEBUG
 	printf("[var_ospf] var len %d, oid requested Len %d-",*var_len, *length);
 	print_oid(name, *length);
 	printf("\n");
@@ -74,7 +98,7 @@ var_ospf(vp, name, length, exact, var_len, write_method)
 		         sizeof(max_ospf_mib)/sizeof(u_int));
 
 	if (result >= 0) {
-#ifdef SMUXDEBUG
+#ifdef DODEBUG
 		printf("Over shot\n");
 #endif
 		return NULL;
@@ -84,7 +108,7 @@ var_ospf(vp, name, length, exact, var_len, write_method)
 	result = compare(name, *length, min_ospf_mib, 
 			 sizeof(min_ospf_mib)/sizeof(u_int));
 	if (exact && (result < 0)) {
-#ifdef SMUXDEBUG
+#ifdef DODEBUG
 		printf("Exact but doesn't match length %d, size %d\n",
 			*length, sizeof(min_ospf_mib));
 #endif
@@ -99,7 +123,7 @@ var_ospf(vp, name, length, exact, var_len, write_method)
 	 */
 	var = smux_snmp_process(exact, name, length, var_len);
 
-#ifdef SMUXDEBUG
+#ifdef DODEBUG
 	printf("[var_ospf] var len %d, oid obtained Len %d-",*var_len, *length);
 	print_oid(name, *length);
 	printf("\n");
