@@ -30,11 +30,11 @@ extern "C" {
  * group_item is to allow us to keep a list of requests without
  * disrupting the actual netsnmp_request_info list.
  */
-typedef struct netsnmp_netsnmp_array_group_item_s {
+typedef struct netsnmp_array_group_item_s {
     netsnmp_request_info              *ri;
     netsnmp_table_request_info        *tri;
-    struct netsnmp_netsnmp_array_group_item_s *next;
-} netsnmp_netsnmp_array_group_item;
+    struct netsnmp_array_group_item_s *next;
+} netsnmp_array_group_item;
 
 /*
  * structure to keep a list of requests for each unique index
@@ -47,7 +47,7 @@ typedef struct netsnmp_array_group_s {
     netsnmp_oid_array_header   *old_row;
     netsnmp_oid_array_header   *new_row;
 
-    netsnmp_netsnmp_array_group_item   *list;
+    netsnmp_array_group_item   *list;
 
     int                status;
 
@@ -88,7 +88,7 @@ typedef struct netsnmp_table_array_callbacks_s {
 } netsnmp_table_array_callbacks;
 
 
-int netsnmp_netsnmp_register_table_array(netsnmp_handler_registration *reginfo,
+int netsnmp_register_table_array(netsnmp_handler_registration *reginfo,
                          netsnmp_table_registration_info *tabreq,
                          netsnmp_table_array_callbacks   *cb,
                          int                     group_rows);

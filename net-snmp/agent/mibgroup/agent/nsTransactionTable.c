@@ -46,7 +46,7 @@ initialize_table_nsTransactionTable(void)
     /***************************************************
      * Setting up the table's definition
      */
-    netsnmp_netsnmp_table_helper_add_index(table_info, ASN_INTEGER);    /* index:
+    netsnmp_table_helper_add_index(table_info, ASN_INTEGER);    /* index:
                                                          * nsTransactionID 
                                                          */
 
@@ -63,7 +63,7 @@ initialize_table_nsTransactionTable(void)
      */
     DEBUGMSGTL(("initialize_table_nsTransactionTable",
                 "Registering table nsTransactionTable as a table iterator\n"));
-    netsnmp_netsnmp_register_table_iterator(my_handler, iinfo);
+    netsnmp_register_table_iterator(my_handler, iinfo);
 }
 
 /** Initialzies the nsTransactionTable module */

@@ -510,7 +510,7 @@ netsnmp_table_build_oid(netsnmp_handler_registration * reginfo,
 /** Builds an oid from index information.
  */
 int
-netsnmp_netsnmp_table_build_oid_from_index(netsnmp_handler_registration * reginfo,
+netsnmp_table_build_oid_from_index(netsnmp_handler_registration * reginfo,
                            netsnmp_request_info * reqinfo,
                            netsnmp_table_request_info * table_info)
 {
@@ -682,9 +682,9 @@ netsnmp_closest_column(unsigned int current, netsnmp_column_info * valid_columns
 
 void
 #if HAVE_STDARG_H
-netsnmp_netsnmp_netsnmp_netsnmp_table_helper_add_indexes(netsnmp_table_registration_info *tinfo, ...)
+netsnmp_table_helper_add_indexes(netsnmp_table_registration_info *tinfo, ...)
 #else
-netsnmp_netsnmp_netsnmp_netsnmp_table_helper_add_indexes(va_alist)
+netsnmp_table_helper_add_indexes(va_alist)
   va_dcl
 #endif
 {
@@ -701,7 +701,7 @@ netsnmp_netsnmp_netsnmp_netsnmp_table_helper_add_indexes(va_alist)
 #endif
 
   while((type = va_arg(debugargs, int)) != 0) {
-      netsnmp_netsnmp_table_helper_add_index(tinfo, type);
+      netsnmp_table_helper_add_index(tinfo, type);
   }
 
   va_end(debugargs);

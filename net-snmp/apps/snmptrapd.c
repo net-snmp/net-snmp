@@ -541,7 +541,7 @@ int snmp_input(int op,
 	      don't want to try to be too clever here).  */
 #ifdef SNMP_TRANSPORT_TCP_DOMAIN
 	  if (transport != NULL && (transport->domain == netsnmpUDPDomain ||
-				    transport->domain == snmpTCPDomain)) {
+				    transport->domain == netsnmp_snmpTCPDomain)) {
 #else
 	  if (transport != NULL && transport->domain == netsnmpUDPDomain) {
 #endif
@@ -594,7 +594,7 @@ int snmp_input(int op,
 		don't want to try to be too clever here).  */
 #ifdef SNMP_TRANSPORT_TCP_DOMAIN
 	    if (transport != NULL && (transport->domain == netsnmpUDPDomain ||
-				      transport->domain == snmpTCPDomain)) {
+				      transport->domain == netsnmp_snmpTCPDomain)) {
 #else
 	    if (transport != NULL && transport->domain == netsnmpUDPDomain) {
 #endif	

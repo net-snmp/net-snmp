@@ -13,14 +13,14 @@
 #include <netinet/in.h>
 #endif
 
-extern const oid snmpTCPDomain[8];  /*  = { 1, 3, 6, 1, 3, 91, 1, 1 };  */
+extern const oid netsnmp_snmpTCPDomain[8];  /*  = { 1, 3, 6, 1, 3, 91, 1, 1 };  */
 
-netsnmp_transport  *snmp_tcp_transport	(struct sockaddr_in *addr,
+netsnmp_transport  *netsnmp_tcp_transport	(struct sockaddr_in *addr,
 						 int local);
 
 /*  "Constructor" for transport domain object.  */
 
-void		snmp_tcp_ctor		(void);
+void		netsnmp_tcp_ctor		(void);
 
 #endif/*SNMP_TRANSPORT_TCP_DOMAIN*/
 

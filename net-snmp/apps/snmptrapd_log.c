@@ -629,7 +629,7 @@ realloc_handle_ip_fmt(u_char **buf, size_t *buf_len, size_t *out_len,
 	too clever here).  */
 #ifdef SNMP_TRANSPORT_TCP_DOMAIN
     if (transport != NULL && (transport->domain == netsnmpUDPDomain ||
-			      transport->domain == snmpTCPDomain)) {
+			      transport->domain == netsnmp_snmpTCPDomain)) {
 #else
     if (transport != NULL && transport->domain == netsnmpUDPDomain) {
 #endif

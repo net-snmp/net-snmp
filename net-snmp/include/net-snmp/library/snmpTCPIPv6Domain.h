@@ -4,13 +4,13 @@
 #include <net-snmp/library/snmp_transport.h>
 #include <net-snmp/library/asn1.h>
 
-const oid ucdSnmpTCPIPv6Domain[9];  /* = { UCDAVIS_MIB, 251, 5 }; */
+const oid netsnmp_ucdSnmpTCPIPv6Domain[9];  /* = { UCDAVIS_MIB, 251, 5 }; */
 
-netsnmp_transport	*snmp_tcp6_transport	(struct sockaddr_in6 *addr,
+netsnmp_transport	*netsnmp_tcp6_transport	(struct sockaddr_in6 *addr,
 					 int local);
 
 /*  "Constructor" for transport domain object.  */
 
-void		 snmp_tcp6_ctor		(void);
+void		 netsnmp_tcp6_ctor		(void);
 
 #endif/*_SNMPTCPIPV6DOMAIN_H*/

@@ -458,7 +458,7 @@ void vacm_parse_simple(const char *token, char *confline) {
     sprintf(secname, "anonymousSecName%03d", num);
     sprintf(line,"%s %s %s", secname, addressname, community);
     DEBUGMSGTL((token,"passing: %s %s\n", "com2sec", line));
-    snmp_udp_parse_security("com2sec",line);
+    netsnmp_udp_parse_security("com2sec",line);
 
     /* sec->group mapping */
     /* group   anonymousGroupNameNUM  any      anonymousSecNameNUM */
@@ -564,8 +564,8 @@ int vacm_in_view (struct snmp_pdu *pdu,
 	    ask the transport abstraction layer to map its source address and
 	    community string to a security name for us.  */
 	
-	if (pdu->tDomain == netsnmpUDPDomain || pdu->tDomain == snmpTCPDomain) {
-	  if (!snmp_udp_getSecName(pdu->transport_data,
+	if (pdu->tDomain == netsnmpUDPDomain || pdu->tDomain == netsnmp_snmpTCPDomain) {
+	  if (!netsnmp_udp_getSecName(pdu->transport_data,
 				   pdu->transport_data_length,
 				   (char *)pdu->community, pdu->community_len, &sn) &&
               !vacm_is_configured()) {

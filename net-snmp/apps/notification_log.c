@@ -337,14 +337,14 @@ log_notification(struct hostent *host, struct snmp_pdu *pdu,
     int col;
     
     DEBUGMSGTL(("log_notification","logging something\n"));
-    row = netsnmp_netsnmp_create_table_data_row();
+    row = netsnmp_create_table_data_row();
 
     default_num++;
 
     /* indexes to the table */
-    netsnmp_netsnmp_table_row_add_index(row, ASN_OCTET_STR, "default",
+    netsnmp_table_row_add_index(row, ASN_OCTET_STR, "default",
                         strlen("default"));
-    netsnmp_netsnmp_table_row_add_index(row, ASN_UNSIGNED, &default_num,
+    netsnmp_table_row_add_index(row, ASN_UNSIGNED, &default_num,
                         sizeof(default_num));
 
     /* add the data */
@@ -390,15 +390,15 @@ log_notification(struct hostent *host, struct snmp_pdu *pdu,
 
         } else {
             netsnmp_table_row *myrow;
-            myrow = netsnmp_netsnmp_create_table_data_row();
+            myrow = netsnmp_create_table_data_row();
 
             /* indexes to the table */
-            netsnmp_netsnmp_table_row_add_index(myrow, ASN_OCTET_STR, "default",
+            netsnmp_table_row_add_index(myrow, ASN_OCTET_STR, "default",
                                 strlen("default"));
-            netsnmp_netsnmp_table_row_add_index(myrow, ASN_UNSIGNED, &default_num,
+            netsnmp_table_row_add_index(myrow, ASN_UNSIGNED, &default_num,
                                 sizeof(default_num));
             vbcount++;
-            netsnmp_netsnmp_table_row_add_index(myrow, ASN_UNSIGNED, &vbcount,
+            netsnmp_table_row_add_index(myrow, ASN_UNSIGNED, &vbcount,
                                 sizeof(vbcount));
 
             /* OID */
