@@ -87,12 +87,18 @@
        - #define NETSNMP_DS_LIB_DONT_PRINT_UNITS    29 don't print UNITS suffix
        - #define NETSNMP_DS_LIB_NO_DISPLAY_HINT     30 don't apply DISPLAY-HINTs
        - #define NETSNMP_DS_LIB_16BIT_IDS           31 restrict requestIDs, etc to 16-bit values
+       - #define NETSNMP_DS_LIB_DONT_PERSIST_STATE  32 don't save/load any persistant state
+       - #define NETSNMP_DS_LIB_2DIGIT_HEX_OUTPUT   33 print a leading 0 on hex values <= 'f'
 
 
        library integers
 
        - #define NETSNMP_DS_LIB_MIB_WARNINGS  0
        - #define NETSNMP_DS_LIB_SECLEVEL      1
+       - #define NETSNMP_DS_LIB_SNMPVERSION   2
+       - #define NETSNMP_DS_LIB_DEFAULT_PORT  3
+       - #define NETSNMP_DS_LIB_OID_OUTPUT_FORMAT  4
+       - #define NETSNMP_DS_LIB_STRING_OUTPUT_FORMAT 5
 
        library strings
 
@@ -108,6 +114,14 @@
        - #define NETSNMP_DS_LIB_CONFIGURATION_DIR 9
        - #define NETSNMP_DS_LIB_SECMODEL          10
        - #define NETSNMP_DS_LIB_MIBDIRS           11
+       - #define NETSNMP_DS_LIB_OIDSUFFIX         12
+       - #define NETSNMP_DS_LIB_OIDPREFIX         13
+       - #define NETSNMP_DS_LIB_CLIENT_ADDR       14
+       - #define NETSNMP_DS_LIB_TEMP_FILE_PATTERN 15
+       - #define NETSNMP_DS_LIB_AUTHMASTERKEY     16
+       - #define NETSNMP_DS_LIB_PRIVMASTERKEY     17
+       - #define NETSNMP_DS_LIB_AUTHLOCALIZEDKEY  18
+       - #define NETSNMP_DS_LIB_PRIVLOCALIZEDKEY  19
 
  *  @{
  */

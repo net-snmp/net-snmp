@@ -1133,6 +1133,19 @@ _sess_copy(netsnmp_session * in_session)
 
     if ((in_session->securityAuthKeyLen <= 0) &&
         ((cp = netsnmp_ds_get_string(NETSNMP_DS_LIBRARY_ID, 
+				     NETSNMP_DS_LIB_AUTHMASTERKEY)))) {
+        size_t buflen = sizeof(session->securityAuthKey);
+        u_char *tmpp = session->securityAuthKey;
+        session->securityAuthKeyLen = 0;
+        /* it will be a hex string */
+        if (!snmp_hex_to_binary(&tmpp, &buflen,
+                                &session->securityAuthKeyLen, 0, cp)) {
+            snmp_set_detail("error parsing authentication master key");
+            snmp_sess_close(slp);
+            return NULL;
+        }
+    } else if ((in_session->securityAuthKeyLen <= 0) &&
+        ((cp = netsnmp_ds_get_string(NETSNMP_DS_LIBRARY_ID, 
 				     NETSNMP_DS_LIB_AUTHPASSPHRASE)) ||
          (cp = netsnmp_ds_get_string(NETSNMP_DS_LIBRARY_ID, 
 				     NETSNMP_DS_LIB_PASSPHRASE)))) {
@@ -1149,7 +1162,21 @@ _sess_copy(netsnmp_session * in_session)
         }
     }
 
+    
     if ((in_session->securityPrivKeyLen <= 0) &&
+        ((cp = netsnmp_ds_get_string(NETSNMP_DS_LIBRARY_ID, 
+				     NETSNMP_DS_LIB_PRIVMASTERKEY)))) {
+        size_t buflen = sizeof(session->securityPrivKey);
+        u_char *tmpp = session->securityPrivKey;
+        session->securityPrivKeyLen = 0;
+        /* it will be a hex string */
+        if (!snmp_hex_to_binary(&tmpp, &buflen,
+                                &session->securityPrivKeyLen, 0, cp)) {
+            snmp_set_detail("error parsing encryption master key");
+            snmp_sess_close(slp);
+            return NULL;
+        }
+    } else if ((in_session->securityPrivKeyLen <= 0) &&
         ((cp = netsnmp_ds_get_string(NETSNMP_DS_LIBRARY_ID, 
 				     NETSNMP_DS_LIB_PRIVPASSPHRASE)) ||
          (cp = netsnmp_ds_get_string(NETSNMP_DS_LIBRARY_ID, 
@@ -1537,6 +1564,7 @@ create_user_from_session(netsnmp_session * session)
 {
     struct usmUser *user;
     int             user_just_created = 0;
+    u_char *cp;
 
     /*
      * now that we have the engineID, create an entry in the USM list
@@ -1640,6 +1668,17 @@ create_user_from_session(netsnmp_session * session)
             usm_free_user(user);
             return SNMPERR_GENERR;
         }
+    } else if ((cp = netsnmp_ds_get_string(NETSNMP_DS_LIBRARY_ID, 
+                                           NETSNMP_DS_LIB_AUTHLOCALIZEDKEY))) {
+        size_t buflen = USM_AUTH_KU_LEN;
+        user->authKey = malloc(buflen); /* max length needed */
+        user->authKeyLen = 0;
+        /* it will be a hex string */
+        if (!snmp_hex_to_binary(&user->authKey, &buflen, &user->authKeyLen,
+                                0, cp)) {
+            usm_free_user(user);
+            return SNMPERR_GENERR;
+        }
     }
 
     /*
@@ -1669,6 +1708,17 @@ create_user_from_session(netsnmp_session * session)
                          session->securityPrivKey,
                          session->securityPrivKeyLen, user->privKey,
                          &user->privKeyLen) != SNMPERR_SUCCESS) {
+            usm_free_user(user);
+            return SNMPERR_GENERR;
+        }
+    } else if ((cp = netsnmp_ds_get_string(NETSNMP_DS_LIBRARY_ID, 
+                                           NETSNMP_DS_LIB_PRIVLOCALIZEDKEY))) {
+        size_t buflen = USM_PRIV_KU_LEN;
+        user->privKey = malloc(buflen); /* max length needed */
+        user->privKeyLen = 0;
+        /* it will be a hex string */
+        if (!snmp_hex_to_binary(&user->privKey, &buflen, &user->privKeyLen,
+                                0, cp)) {
             usm_free_user(user);
             return SNMPERR_GENERR;
         }
