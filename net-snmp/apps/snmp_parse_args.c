@@ -370,7 +370,7 @@ snmp_parse_args(int argc,
       default:
         /* This should be removed to support options in clients that
            have more parameters than the defaults above! */
-        fprintf(stderr, "invalid option: -%c\n", argv[arg][1]);
+        fprintf(stderr, "invalid option: -%c\n", arg);
         usage();
         exit(1);
         break;
@@ -426,8 +426,8 @@ snmp_parse_args(int argc,
       usage();
       exit(1);
     }
-    session->community = (unsigned char *)argv[arg];
-    session->community_len = strlen((char *)argv[arg]);
+    session->community = (unsigned char *)argv[optind];
+    session->community_len = strlen((char *)argv[optind]);
     optind++;
   }
   return optind;
