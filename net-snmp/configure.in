@@ -121,7 +121,7 @@ AC_MSG_CHECKING(for and configuring mib modules to use)
 
 mibdir="agent/mibgroup"
 module_list=""
-new_module_list="at interfaces snmp_mib tcp icmp ip system udp proc versioninfo pass disk loadave extensible acl_vars party_vars view_vars context_vars alarm event $with_mib_modules"
+new_module_list="at interfaces snmp_mib tcp icmp ip system udp proc versioninfo pass disk loadave extensible acl_vars party_vars view_vars context_vars alarm event errormib $with_mib_modules"
 trap_list_o=""
 
 case $target_os in
@@ -190,7 +190,7 @@ done
 
 module_list_o=`echo "$module_list " | sed 's/\([^ ]\) /\1.o /g'`
 module_list_c=`echo "$module_list " | sed 's/\([^ ]\) /\1.c /g'`
-mibgroup_list_o=`echo " $module_list_o " | sed 's@ \([^ ]*\).o@ mibgroup/\1.o @g'`
+mibgroup_list_o=`echo " $module_list_o " | sed 's@ \([^ ]*\)\.o@ mibgroup/\1.o @g'`
 changequote([, ])
 AC_SUBST(module_list_c)
 AC_SUBST(module_list_o)
@@ -317,7 +317,9 @@ AC_TYPE_PID_T
 AC_HEADER_TIME
 
 dnl AIX keeps in_addr_t in /usr/include/netinet/in.h
-AC_EGREP_CPP(dnl
+AC_MSG_CHECKING(for in_addr_t)
+AC_CACHE_VAL(ac_cv_type_$1,
+[AC_EGREP_CPP(dnl
 changequote(<<,>>)dnl
 <<in_addr_t[^a-zA-Z_0-9]>>dnl
 changequote([,]), [#include <sys/types.h>
@@ -328,11 +330,11 @@ changequote([,]), [#include <sys/types.h>
 #ifdef HAVE_NETINET_IN_H
 #include <netinet/in.h>
 #endif], ac_cv_type_in_addr_t=yes, ac_cv_type_in_addr_t=no)])dnl
+
 AC_MSG_RESULT($ac_cv_type_in_addr_t)
 if test $ac_cv_type_in_addr_t = no; then
   AC_DEFINE(in_addr_t, u_int)
 fi
-])
 
 dnl Check ps args
 AC_CACHE_CHECK(for correct flags to ps, ac_cv_ps_flags,
