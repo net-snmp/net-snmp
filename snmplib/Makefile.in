@@ -2,7 +2,7 @@
 # Makefile for snmplib
 #
 
-TARG=	libsnmp.$(SHLIB_EXTENSION)
+TARG=	libsnmp.$(SHLIB_EXTENSION)$(SHLIB_VERSION)
 CSRCS=	snmp_client.c mib.c parse.c snmp_api.c snmp.c \
 	snmp_auth.c asn1.c md5.c \
 	party.c context.c acl.c view.c \
@@ -22,9 +22,9 @@ CC = @CC@ $(CPPFLAGS)
 
 all: $(TARG)
 
-libsnmp.$(SHLIB_EXTENSION):    ${OBJS}
-	$(SHLIB_LD_CMD) libsnmp.$(SHLIB_EXTENSION) ${OBJS}
-	$(RANLIB) libsnmp.$(SHLIB_EXTENSION)
+libsnmp.$(SHLIB_EXTENSION)$(SHLIB_VERSION):    ${OBJS}
+	$(SHLIB_LD_CMD) libsnmp.$(SHLIB_EXTENSION)$(SHLIB_VERSION) ${OBJS}
+	$(RANLIB) libsnmp.$(SHLIB_EXTENSION)$(SHLIB_VERSION)
 
 installdirs:
 	@$(SHELL) $(srcdir)/../mkinstalldirs $(libdir) $(includedir)
@@ -34,9 +34,9 @@ install:	$(TARG) installdirs
 	@for i in $(INSTALLHEADERS) ; do $(INSTALL) $(srcdir)/$$i $(includedir) ; echo "install:  installed $$i in $(includedir)" ; done
 	$(SHLIB_LDCONFIG_CMD)
 
-../lib/libsnmp.$(SHLIB_EXTENSION):	libsnmp.$(SHLIB_EXTENSION)
-	cp libsnmp.$(SHLIB_EXTENSION) ../lib
-	@RANLIB@ ../lib/libsnmp.$(SHLIB_EXTENSION)
+../lib/libsnmp.$(SHLIB_EXTENSION)$(SHLIB_VERSION):	libsnmp.$(SHLIB_EXTENSION)$(SHLIB_VERSION)
+	cp libsnmp.$(SHLIB_EXTENSION)$(SHLIB_VERSION) ../lib
+	@RANLIB@ ../lib/libsnmp.$(SHLIB_EXTENSION)$(SHLIB_VERSION)
 
 parse:  mib.o parse.c
 	$(CC) $(CFLAGS) -DTEST parse.c mib.o -o parse

@@ -1,0 +1,51 @@
+#
+# Makefile for snmpd
+#
+DLMODDIR=	/usr/local/lib/snmp/dlmod
+TARG=	 dlmod_mib.so example.so
+USELIBS= $(top_srcdir)/snmplib/libsnmp.$(SHLIB_EXTENSION)$(SHLIB_VERSION)
+LIBS=	 -L$(top_srcdir)/snmplib $(CC_RUNTIME_ARG) -lsnmp @LIBS@
+
+CPPFLAGS=@CPPFLAGS@ -I$(top_srcdir) -I$(top_srcdir)/snmplib \
+	-I..  -I. -I../mibgroup  -I../mibgroup/misc
+
+CC = @CC@ $(CPPFLAGS)
+
+
+all: $(TARG)
+
+DLMOD_MIB_OBJS= dlmod_mib.o
+EXAMPLE_OBJS= example.o
+
+.c.o:
+	$(CC) $(CFLAGS) $(SHLIB_CFLAGS) -o $@ -c $<
+
+dlmod_mib.so: $(DLMOD_MIB_OBJS)
+	$(SHLIB_LD_CMD) $@ $(DLMOD_MIB_OBJS) $(LIBS)
+
+example.so: $(EXAMPLE_OBJS)
+	$(SHLIB_LD_CMD) $@ $(EXAMPLE_OBJS) $(LIBS)
+
+clean:
+	rm -f *.o ${TARG}
+
+install:  installdirs
+	@$(INSTALL) $(TARG) $(DLMODDIR) ; echo "install:  installed $(TARG) in $(sbindir) "
+
+installdirs:
+	@$(SHELL) $(top_srcdir)/mkinstalldirs $(DLMODDIR)
+
+dependlocal: 
+	makedepend $(CPPFLAGS) $(srcdir)/*.c
+
+depend: dependlocal
+
+nosysdepend:
+	makedepend $(CPPFLAGS) *.c
+	perl -n -i.bak -e ' if (/^# DO NOT DELETE THIS LINE/) {$$doit=1;} if ($$doit == 1) {s#/usr/(include|lib)/[^\s]+##g ; print if (! /^\w+\.o:\s*$$/);} else {print;}' Makefile
+
+makefileindepend: nosysdepend
+	perl -e ' rename("Makefile.in","Makefile.in.bak"); open(F,"Makefile.in.bak"); open(G,"Makefile"); open(O,">Makefile.in"); $$_ = <F>; while(!/^# DO NOT DELETE THIS LINE/) { print O $$_; $$_ = <F>; } print O $$_; $$_ = <G>; while(!/^# DO NOT DELETE THIS LINE/) { $$_ = <G>; } while (<G>) {print O $$_;} '
+
+
+# DO NOT DELETE THIS LINE -- make depend depends on it.
