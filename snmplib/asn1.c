@@ -162,7 +162,7 @@ asn_check_packet (u_char *pkt, size_t len)
 }
 
 static
-int _asn_bitstring_check(const char * str, u_long asn_length, u_char datum)
+int _asn_bitstring_check(const char * str, size_t asn_length, u_char datum)
 {
     char ebuf[128];
 
