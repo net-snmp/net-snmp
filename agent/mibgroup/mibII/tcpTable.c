@@ -4,6 +4,17 @@
  *
  */
 
+/* Portions of this file are subject to the following copyright(s).  See
+ * the Net-SNMP's COPYING file for more details and other copyrights
+ * that may apply:
+ */
+/*
+ * Portions of this file are copyrighted by:
+ * Copyright © 2003 Sun Microsystems, Inc. All rights reserved.
+ * Use is subject to license terms specified in the COPYING file
+ * distributed with the Net-SNMP package.
+ */
+
 #include <net-snmp/net-snmp-config.h>
 
 #if HAVE_UNISTD_H
@@ -366,6 +377,8 @@ var_tcpEntry(struct variable * vp,
     if (*length == TCP_CONN_LENGTH)     /* Assume that the input name is the lowest */
         memcpy((char *) lowest, (char *) name,
                TCP_CONN_LENGTH * sizeof(oid));
+    else 
+	lowest[0] = 0xff;
     for (Nextentry.tcpConnLocalAddress = (u_long) - 1, req_type =
          GET_FIRST;; Nextentry = entry, req_type = GET_NEXT) {
         if (getMibstat
@@ -424,14 +437,16 @@ var_tcpEntry(struct variable * vp,
         long_return = Lowentry.tcpConnState;
         return (u_char *) & long_return;
     case TCPCONNLOCALADDRESS:
-        long_return = Lowentry.tcpConnLocalAddress;
-        return (u_char *) & long_return;
+	*var_len = sizeof(uint32_t);
+        ipaddr_return = Lowentry.tcpConnLocalAddress;
+        return (u_char *) & ipaddr_return; 
     case TCPCONNLOCALPORT:
         long_return = Lowentry.tcpConnLocalPort;
         return (u_char *) & long_return;
     case TCPCONNREMADDRESS:
-        long_return = Lowentry.tcpConnRemAddress;
-        return (u_char *) & long_return;
+	*var_len = sizeof(uint32_t);
+        ipaddr_return = Lowentry.tcpConnRemAddress; 
+        return (u_char *) & ipaddr_return; 
     case TCPCONNREMPORT:
         long_return = Lowentry.tcpConnRemPort;
         return (u_char *) & long_return;
