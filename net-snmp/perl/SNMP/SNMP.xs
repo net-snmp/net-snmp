@@ -2825,14 +2825,9 @@ void
 snmp_init_mib_internals()
 	CODE:
         {
-	/*XYX REMOVE? snmp_init_mib_internals does nothing and is not called. */
-        int verbose = SvIV(perl_get_sv("SNMP::verbose", 0x01 | 0x04));
-
-        /* should test better to see if it has been done already */
-	if (get_tree_head() == NULL) {
-           if (verbose) warn("initializing MIB internals (empty)\n");
-           /* init_mib_internals(); */
-        }
+	int notused = 1;
+	/* this function does nothing */
+	/* it is kept only for backwards compatibility */
         }
 
 
@@ -2844,12 +2839,9 @@ snmp_read_mib(mib_file, force=0)
         {
         int verbose = SvIV(perl_get_sv("SNMP::verbose", 0x01 | 0x04));
 
-        /*XYX if (get_tree_head() && force) __free_tree(get_tree_head()); needs more work to cleanup */
-
         if ((mib_file == NULL) || (*mib_file == '\0')) {
            if (get_tree_head() == NULL) {
               if (verbose) warn("initializing MIB\n");
-              /* init_mib_internals(); */
               init_mib();
               if (get_tree_head()) {
                  if (verbose) warn("done\n");
@@ -2859,7 +2851,6 @@ snmp_read_mib(mib_file, force=0)
 	   }
         } else {
            if (verbose) warn("reading MIB: %s [%s:%s]\n", mib_file, DEFAULT_MIBDIRS, DEFAULT_MIBS);
-           /*XYX if (get_tree_head() == NULL) init_mib_internals();*/
            if (strcmp("ALL",mib_file))
               read_mib(mib_file);
            else
