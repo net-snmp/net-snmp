@@ -811,3 +811,40 @@ char *read_config_read_data(int type, char *readfrom, void *dataptr, int *len) {
   }
   return NULL;
 }
+
+/* read_config_read_data():
+   reads data of a given type from a token(s) on a configuration line.
+
+   Returns: character pointer to the next token in the configuration line.
+            NULL if none left.
+            NULL if an unknown type.
+*/
+char *read_config_store_data(int type, char *storeto, void *dataptr, int *len) {
+
+  int *intp;
+  char **charpp;
+  oid  **oidpp;
+
+  if (dataptr == NULL || storeto == NULL)
+    return NULL;
+  
+  switch(type) {
+    case ASN_INTEGER:
+      intp = (int *) dataptr;
+      sprintf(storeto," %d", *intp);
+      return (storeto + strlen(storeto));
+      
+    case ASN_OCTET_STR:
+      charpp = (char **) dataptr;
+      return read_config_save_octet_string(storeto, *charpp, *len);
+
+    case ASN_OBJECT_ID:
+      oidpp = (oid **) dataptr;
+      return read_config_save_objid(storeto, *oidpp, *len);
+
+    default:
+      DEBUGMSGTL(("read_config_store_data","Fail: Unknown type: %d", type));
+      return NULL;
+  }
+  return NULL;
+}
