@@ -192,7 +192,7 @@ main(int argc, char **argv)
 		engineid_len = hex_to_binary2(	engineid+2,
 						strlen(engineid)-2,
 						(char **) &engineid);
-                DEBUGP("engineIDLen: %d\n", engineid_len);
+                DEBUGMSGTL(("encode_keychange","engineIDLen: %d\n", engineid_len));
 	} else {
 		engineid_len = setup_engineID(&engineid, engineid);
 
@@ -253,15 +253,15 @@ main(int argc, char **argv)
 	QUITFUN(rval, main_quit);
 
 
-        DEBUGP("EID (%d): ", engineid_len);
+        DEBUGMSGTL(("encode_keychange", "EID (%d): ", engineid_len));
         for(i=0; i < engineid_len; i++)
-          DEBUGP("%02x",(int) (engineid[i]));
-        DEBUGP("\n");
+          DEBUGMSGTL(("encode_keychange", "%02x",(int) (engineid[i])));
+        DEBUGMSGTL(("encode_keychange","\n"));
 
-        DEBUGP("old Ku (%d) (from %s): ", oldKu_len, oldpass);
+        DEBUGMSGTL(("encode_keychange", "old Ku (%d) (from %s): ", oldKu_len, oldpass));
         for(i=0; i < oldKu_len; i++)
-          DEBUGP("%02x",(int) (oldKu[i]));
-        DEBUGP("\n");
+          DEBUGMSGTL(("encode_keychange", "%02x",(int) (oldKu[i])));
+        DEBUGMSGTL(("encode_keychange","\n"));
 
 	rval = generate_kul(	transform_type, USM_LENGTH_OID_TRANSFORM,
 				engineid, engineid_len,
@@ -270,10 +270,10 @@ main(int argc, char **argv)
 	QUITFUN(rval, main_quit);
 
 
-        DEBUGP("generating old Kul (%d) (from Ku): ", oldkul_len);
+        DEBUGMSGTL(("encode_keychange", "generating old Kul (%d) (from Ku): ", oldkul_len));
         for(i=0; i < oldkul_len; i++)
-          DEBUGP("%02x",(int) (oldkul[i]));
-        DEBUGP("\n");
+          DEBUGMSGTL(("encode_keychange", "%02x",(int) (oldkul[i])));
+        DEBUGMSGTL(("encode_keychange","\n"));
 
 	rval = generate_kul(	transform_type, USM_LENGTH_OID_TRANSFORM,
 				engineid, engineid_len,
@@ -281,10 +281,10 @@ main(int argc, char **argv)
 				newkul, &newkul_len);
 	QUITFUN(rval, main_quit);
         
-        DEBUGP("generating new Kul (%d) (from Ku): ", oldkul_len);
+        DEBUGMSGTL(("encode_keychange", "generating new Kul (%d) (from Ku): ", oldkul_len));
         for(i=0; i < newkul_len; i++)
-          DEBUGP("%02x",newkul[i]);
-        DEBUGP("\n");
+          DEBUGMSGTL(("encode_keychange", "%02x",newkul[i]));
+        DEBUGMSGTL(("encode_keychange","\n"));
 
 	rval = encode_keychange(transform_type, USM_LENGTH_OID_TRANSFORM,
 				oldkul, oldkul_len,
