@@ -26,18 +26,18 @@ ac_help="$ac_help
 ac_help="$ac_help
   --with-logfile=\"location\"       Default log file location."
 ac_help="$ac_help
-  --with-security=\"TYPE\"          Default security type to enforce
+  --with-security=\"TYPE\"          Default security type to enforce.
                                     (Default: SNMPV1)."
+ac_help="$ac_help
+  --with-mibdirs=\"dir1:dir2:\"     Default directories to look for mibs.
+                                    (Default: PREFIX/lib/snmp/mibs)"
 ac_help="$ac_help
   --with-mibs=\"item1:item2:\"      Default mib IDs to load.
                                     (Default: SNMPv2-SMI:SNMPv2-TC:SNMPv2-MIB:
                                               SNMPv2-CONF:UCD-SNMP-MIB)"
 ac_help="$ac_help
-  --with-mibdirs=\"dir1:dir2:\"     Default directories for mibs.
-                                    (Default: PREFIX/lib/snmp/mibs)"
-ac_help="$ac_help
   --with-mibfiles=\"file1:file2\"   Default mib files to load.
-                                    (Default:  none.  uses ID's above instead.)"
+                                    (Default:  none.  uses IDs above instead.)"
 ac_help="$ac_help
   --with-mib-modules=\"list\"       Compile with additional mib modules."
 ac_help="$ac_help
@@ -598,15 +598,6 @@ if test "${with_security+set}" = set; then
   ac_cv_user_prompt_GLOBALSECURITY="$with_security"
 fi
 
-# Check whether --with-mibs or --without-mibs was given.
-if test "${with_mibs+set}" = set; then
-  withval="$with_mibs"
-  cat >> confdefs.h <<EOF
-#define DEFAULT_MIBS "$with_mibs"
-EOF
-
-fi
-
 # Check whether --with-mibdirs or --without-mibdirs was given.
 if test "${with_mibdirs+set}" = set; then
   withval="$with_mibdirs"
@@ -615,6 +606,15 @@ if test "${with_mibdirs+set}" = set; then
 #define DEFAULT_MIBDIRS "$with_mibdirs"
 EOF
 
+
+fi
+
+# Check whether --with-mibs or --without-mibs was given.
+if test "${with_mibs+set}" = set; then
+  withval="$with_mibs"
+  cat >> confdefs.h <<EOF
+#define DEFAULT_MIBS "$with_mibs"
+EOF
 
 fi
 

@@ -10,17 +10,17 @@ AC_ARG_WITH(sys_contact,[  --with-sys-contact=\"who@where\"  Default system cont
 AC_ARG_WITH(sys_location,[  --with-sys-location=\"location\"  Default system location.
                                     (Default: Unknown)],ac_cv_user_prompt_SYS_LOC="$with_sys_location")
 AC_ARG_WITH(logfile,[  --with-logfile=\"location\"       Default log file location.],ac_cv_user_prompt_LOGFILE="$with_logfile")
-AC_ARG_WITH(security,[  --with-security=\"TYPE\"          Default security type to enforce
+AC_ARG_WITH(security,[  --with-security=\"TYPE\"          Default security type to enforce.
                                     (Default: SNMPV1).],ac_cv_user_prompt_GLOBALSECURITY="$with_security")
-AC_ARG_WITH(mibs,[  --with-mibs=\"item1:item2:\"      Default mib IDs to load.
-                                    (Default: SNMPv2-SMI:SNMPv2-TC:SNMPv2-MIB:
-                                              SNMPv2-CONF:UCD-SNMP-MIB)], AC_DEFINE_UNQUOTED(DEFAULT_MIBS,"$with_mibs"))
-AC_ARG_WITH(mibdirs,[  --with-mibdirs=\"dir1:dir2:\"     Default directories for mibs.
+AC_ARG_WITH(mibdirs,[  --with-mibdirs=\"dir1:dir2:\"     Default directories to look for mibs.
                                     (Default: PREFIX/lib/snmp/mibs)],[DEFAULT_MIBDIRS="$with_mibdirs"
   AC_DEFINE_UNQUOTED(DEFAULT_MIBDIRS,"$with_mibdirs")
 ])
+AC_ARG_WITH(mibs,[  --with-mibs=\"item1:item2:\"      Default mib IDs to load.
+                                    (Default: SNMPv2-SMI:SNMPv2-TC:SNMPv2-MIB:
+                                              SNMPv2-CONF:UCD-SNMP-MIB)], AC_DEFINE_UNQUOTED(DEFAULT_MIBS,"$with_mibs"))
 AC_ARG_WITH(mibfiles,[  --with-mibfiles=\"file1:file2\"   Default mib files to load.
-                                    (Default:  none.  uses ID's above instead.)],AC_DEFINE_UNQUOTED(DEFAULT_MIBFILES,"$with_mibfiles"))
+                                    (Default:  none.  uses IDs above instead.)],AC_DEFINE_UNQUOTED(DEFAULT_MIBFILES,"$with_mibfiles"))
 AC_ARG_WITH(mib_modules,[  --with-mib-modules=\"list\"       Compile with additional mib modules.])
 AC_ARG_WITH(out_mib_modules,[  --with-out-mib-modules=\"list\"   Compile without these mib modules.])
 

@@ -53,15 +53,15 @@ Optional features to pass to configure for ucd-snmp:
   --with-sys-location="location"  Default system location.
                                     (Default: Unknown)
   --with-logfile="location"       Default log file location.
-  --with-security="TYPE"          Default security type to enforce
+  --with-security="TYPE"          Default security type to enforce.
                                     (Default: SNMPV1).
+  --with-mibdirs="dir1:dir2:"     Default directories to look for mibs.
+                                    (Default: PREFIX/lib/snmp/mibs)
   --with-mibs="item1:item2:"      Default mib IDs to load.
                                     (Default: SNMPv2-SMI:SNMPv2-TC:SNMPv2-MIB:
                                               SNMPv2-CONF:UCD-SNMP-MIB)
-  --with-mibdirs="dir1:dir2:"     Default directories for mibs.
-                                    (Default: PREFIX/lib/snmp/mibs)
   --with-mibfiles="file1:file2"   Default mib files to load.
-                                    (Default:  none.  uses ID's above instead.)
+                                    (Default:  none.  uses IDs above instead.)
   --with-mib-modules="list"       Compile with additional mib modules.
   --with-out-mib-modules="list"   Compile without these mib modules.
 
