@@ -51,7 +51,7 @@ snmpVacmMIB       MODULE-IDENTITY
     DESCRIPTION  "The management information definitions for the
                   View-based Access Control Model for SNMP.
                  "
-    ::= { snmpModules 13 }
+    ::= { snmpModules 16 }
 
 -- Administrative assignments ****************************************
 
