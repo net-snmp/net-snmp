@@ -117,7 +117,7 @@ static int Interface_Scan_Get_Count();
 static int Interface_Scan_By_Index();
 static int Interface_Get_Ether_By_Index();
 
-#define  KNLookup(nl_which, buf, s)   (klookup((int) nl[nl_which].n_value, buf, s))
+#define  KNLookup(nl_which, buf, s)   (klookup(nl[nl_which].n_value, buf, s))
 
 
 #define N_IPSTAT	0
@@ -262,12 +262,12 @@ init_snmp()
   int ret;
 #ifdef hpux
   if ((ret = nlist("/hp-ux",nl)) == -1) {
+#else
+  if ((ret = nlist("/vmunix",nl)) == -1) {
+#endif
     ERROR("nlist");
     exit(1);
   }
-#else
-  nlist("/vmunix",nl);
-#endif
   for(ret = 0; nl[ret].n_name != NULL; ret++) {
     if (nl[ret].n_type == 0) {
       fprintf(stderr, "nlist err:  %s not found\n",nl[ret].n_name);
@@ -1026,6 +1026,7 @@ sysUpTime(){
     if (KNLookup(N_BOOTTIME, (char *)&boottime, sizeof(boottime)) == NULL) {
 	return(0);
     }
+
     gettimeofday(&now, (struct timezone *)0);
     return (u_long) ((now.tv_sec - boottime.tv_sec) * 100
 			    + (now.tv_usec - boottime.tv_usec) / 10000);
@@ -1473,7 +1474,6 @@ var_atEntry(vp, name, length, exact, var_len, write_method)
     u_long		    Addr, LowAddr;
 
     /* fill in object part of name for current (less sizeof instance part) */
-
     bcopy((char *)vp->name, (char *)current, (int)vp->namelen * sizeof(oid));
 
     LowAddr = -1;      /* Don't have one yet */
@@ -2085,7 +2085,7 @@ Again:	/*
 	while (inpcb.inp_next != (struct inpcb *) nl[N_TCB].n_value) {
 		next = inpcb.inp_next;
 
-		klookup( (int)next, (char *)&inpcb, sizeof (inpcb));
+		klookup(next, (char *)&inpcb, sizeof (inpcb));
 		if (inpcb.inp_prev != prev) {	    /* ??? */
 			sleep(1);
 			goto Again;
@@ -2094,7 +2094,7 @@ Again:	/*
 			prev = next;
 			continue;
 		}
-		klookup( (int)inpcb.inp_ppcb, (char *)&tcpcb, sizeof (tcpcb));
+		klookup(inpcb.inp_ppcb, (char *)&tcpcb, sizeof (tcpcb));
 
 		if ((tcpcb.t_state == TCPS_ESTABLISHED) ||
 		    (tcpcb.t_state == TCPS_CLOSE_WAIT))
@@ -2126,7 +2126,7 @@ struct inpcb *RetInPcb;
 
 	next = inpcb.inp_next;
 
-	klookup( (int)next, (char *)&inpcb, sizeof (inpcb));
+	klookup(next, (char *)&inpcb, sizeof (inpcb));
 	if (inpcb.inp_prev != prev)	   /* ??? */
 		return(-1); /* "FAILURE" */
 
@@ -2207,8 +2207,8 @@ struct ifnet *Retifnet;
 	    /*
 	     *	    Get the "ifnet" structure and extract the device name
 	     */
-	    klookup((int)ifnetaddr, (char *)&ifnet, sizeof ifnet);
-	    klookup((int)ifnet.if_name, (char *)saveName, 16);
+	    klookup(ifnetaddr, (char *)&ifnet, sizeof ifnet);
+	    klookup(ifnet.if_name, (char *)saveName, 16);
 	    if (strcmp(saveName, "ip") == 0) {
 		ifnetaddr = ifnet.if_next;
 		continue;
@@ -2257,8 +2257,8 @@ struct in_ifaddr *Retin_ifaddr;
 	    /*
 	     *	    Get the "ifnet" structure and extract the device name
 	     */
-	    klookup((int)ifnetaddr, (char *)&ifnet, sizeof ifnet);
-	    klookup((int)ifnet.if_name, (char *)saveName, 16);
+	    klookup(ifnetaddr, (char *)&ifnet, sizeof ifnet);
+	    klookup(ifnet.if_name, (char *)saveName, 16);
 
 	    saveName[15] = '\0';
 	    cp = index(saveName, '\0');
@@ -2271,7 +2271,7 @@ struct in_ifaddr *Retin_ifaddr;
 
 		KNLookup(N_IN_IFADDR, (char *)&ia, sizeof(ia));
 		while (ia) {
-		    klookup((int)ia ,  (char *)&in_ifaddr, sizeof(in_ifaddr));
+		    klookup(ia ,  (char *)&in_ifaddr, sizeof(in_ifaddr));
 		    if (in_ifaddr.ia_ifp == ifnetaddr) break;
 		    ia = in_ifaddr.ia_next;
 		}
@@ -2403,7 +2403,7 @@ u_char *EtherAddr;
 	 *  the arpcom structure is an extended ifnet structure which
 	 *  contains the ethernet address.
 	 */
-	klookup((int)saveifnetaddr, (char *)&arpcom, sizeof (struct arpcom));
+	klookup(saveifnetaddr, (char *)&arpcom, sizeof (struct arpcom));
 	if (strncmp("lo", saveName, 2) == 0) {
 	    /*
 	     *  Loopback doesn't have a HW addr, so return 00:00:00:00:00:00
@@ -2472,7 +2472,7 @@ u_char *var_process(vp, name, length, exact, var_len, write_method)
     while ((!proc) && (slotindex < count)) {
       
         numread = MIN(count - slotindex, PROCBLOC);
-        if (klookup((int)procp, (char *)procbuf,
+        if (klookup(procp, (char *)procbuf,
 		    numread * sizeof(struct proc)) == NULL) {
 	    return(NULL);
 	}
