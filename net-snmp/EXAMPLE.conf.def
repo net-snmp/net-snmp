@@ -61,8 +61,10 @@ com2sec mynetwork NETWORK/24      COMMUNITY
 # Second, map the security names into group names:
 
 #             	sec.model  sec.name
-group MyRWGroup	any        local
-group MyROGroup any        mynetwork
+group MyRWGroup	v1         local
+group MyROGroup v1         mynetwork
+group MyRWGroup	v2c        local
+group MyROGroup v2c        mynetwork
 
 ####
 # Third, create a view for us to let the groups have rights to:
@@ -74,9 +76,9 @@ view all    included  .1                               80
 # Finally, grant the 2 groups access to the 1 view with different
 # write permissions:
 
-#                context sec.model sec.level prefix read   write  notif
-access MyROGroup ""      any       noauth    0      all    none   none
-access MyRWGroup ""      any       noauth    0      all    all    none
+#                context sec.model sec.level match  read   write  notif
+access MyROGroup ""      any       noauth    exact  all    none   none
+access MyRWGroup ""      any       noauth    exact  all    all    none
 
 # -----------------------------------------------------------------------------
 
