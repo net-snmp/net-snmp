@@ -1367,15 +1367,15 @@ while test "x$new_module_list" != "x"; do
         #
 	new_list_excl="`$MODULECPP $srcdir/$mibdir/$i.h | grep config_exclude | sed 's/.*config_exclude(\(.*\)).*/\1/'`"
 	if test "x$new_list_excl" != "x"; then
+          if test $module_debug -eq 1; then
+             echo "$i excludes $new_list_excl"
+          fi
 	  for j in $new_list_excl
 	    do
-	    if echo " $new_mib_module_list " | grep " $j " > /dev/null; then
+	    if echo " $module_list $new_mib_module_list $new_list_two " | grep " $j " > /dev/null; then
 	      changequote([, ])
-	      AC_MSG_ERROR([mib module "$i" excludes module "$j" but you told me to compile with it])
-              changequote(, )
-	    elif echo " $new_list_two " | grep " $j " > /dev/null; then
-	      changequote([, ])
-	      AC_MSG_ERROR([mib module "$i" excludes module "$j" but another module requires it])
+	      AC_MSG_WARN([mib module "$i" excludes module "$j" but another module requires it])
+              AC_MSG_CACHE_ADD([*** MIB Module warning *** mib module "$i" excludes module "$j" but another module requires it])
               changequote(, )
 	    else
 	      new_with_out_mib_modules="$j $new_with_out_mib_modules"
@@ -1420,7 +1420,8 @@ while test "x$new_module_list" != "x"; do
               changequote(, )
 	    elif echo " $new_with_out_mib_modules " | grep " $j " > /dev/null; then
               changequote([, ])
-	      AC_MSG_ERROR([mib module "$i" requires module "$j" but someone told me to compile without it])
+	      AC_MSG_WARN([mib module "$i" requires module "$j" but someone told me to compile without it])
+              AC_MSG_CACHE_ADD([*** MIB Module warning *** mib module "$i" requires module "$j" but someone told me to compile without it])
               changequote(, )
 	    elif echo " $module_list $new_list_two $new_module_list " | grep " $j " > /dev/null; then
               if test $module_debug -eq 1; then
