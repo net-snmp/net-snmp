@@ -22,6 +22,12 @@
 #if HAVE_SYS_UN_H
 #include <sys/un.h>
 #endif
+#if HAVE_IO_H
+#include <io.h>
+#endif
+#if HAVE_FCNTL_H
+#include <fcntl.h>
+#endif
 
 #include <net-snmp/types.h>	
 #include <net-snmp/output_api.h>
@@ -164,7 +170,6 @@ int		snmp_callback_recv	(snmp_transport *t, void *buf, int size,
 int		snmp_callback_send	(snmp_transport *t, void *buf, int size,
                                          void **opaque, int *olength)
 {
-    int rc;
     int from;
     callback_info *mystuff = (callback_info *) t->data;
     callback_pass *cp;
@@ -224,7 +229,7 @@ int		snmp_callback_send	(snmp_transport *t, void *buf, int size,
     }
 
     DEBUGMSGTL(("transport_callback","hook_send exit\n"));
-    return rc;
+    return 0;
 }
 
 
@@ -280,7 +285,11 @@ snmp_transport		*snmp_callback_transport   (int to)
     mydata->data = NULL;
     t->data = mydata;
 
+#ifdef WIN32
+    rc = _pipe(mydata->pipefds, 1024, O_BINARY);
+#else
     rc = pipe(mydata->pipefds);
+#endif
     t->sock = mydata->pipefds[0];
     
     if (rc) {
