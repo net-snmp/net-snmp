@@ -681,6 +681,11 @@ static void handle_trap_fmt (char * bfr,
 
   /* output with correct justification, leading zeroes, etc. */
   output_temp_bfr (bfr, tail, len, out_ptr, options);
+  if (*tail < len) {
+      bfr[*tail] = '\0';
+  } else {
+      bfr[len-1] = '\0';
+  }
 
   return;
 #undef LCL_SAFE_LEN
