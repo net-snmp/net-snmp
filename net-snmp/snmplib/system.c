@@ -458,6 +458,8 @@ long get_uptime (void)
    }
    return uptim;
 #endif /* linux */
+
+   return (0); /* not implemented */
 }
 #endif
 
