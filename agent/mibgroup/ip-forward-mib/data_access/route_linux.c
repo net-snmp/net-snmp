@@ -71,12 +71,11 @@ _load_ipv4(netsnmp_container* container, u_long *index )
         name[ sizeof(name)-1 ] = 0;
         /*
          * linux says ``lo'', but the interface is stored as ``lo0'': 
-         * xxx-rks: sez who? stored where? not on 2.4.20...
+         * rks: sez who? stored where? not on 2.4.20...
+         * if (!strcmp(name, "lo"))
+         *   strcat(name, "0");
          */
-        //if (!strcmp(name, "lo"))
-        //   strcat(name, "0");
 
-        // xxx-rks: how to make sure interfaces has been loaded?
         entry->if_index = se_find_value_in_slist("interfaces", name);
         if(SE_DNE == entry->if_index) {
             snmp_log(LOG_ERR,"unknown interface '%s' in /proc/net/route\n",
@@ -84,7 +83,7 @@ _load_ipv4(netsnmp_container* container, u_long *index )
             netsnmp_access_route_entry_free(entry);
             continue;
         }
-         /*
+        /*
          * arbitrary index
          */
         entry->ns_rt_index = ++(*index);
