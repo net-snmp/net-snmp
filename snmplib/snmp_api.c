@@ -750,7 +750,7 @@ init_snmp(const char *type)
     setlocale(LC_CTYPE, "");
 #endif
 
-    snmp_debug_init();          /* should be done first, to turn on debugging ASAP */
+    snmp_debug_init();    /* should be done first, to turn on debugging ASAP */
     netsnmp_container_init_list();
     init_callbacks();
     init_snmp_logging();
@@ -773,8 +773,7 @@ snmp_store(const char *type)
 {
     DEBUGMSGTL(("snmp_store", "storing stuff...\n"));
     snmp_save_persistent(type);
-    snmp_call_callbacks(SNMP_CALLBACK_LIBRARY, SNMP_CALLBACK_STORE_DATA,
-                        NULL);
+    snmp_call_callbacks(SNMP_CALLBACK_LIBRARY, SNMP_CALLBACK_STORE_DATA, NULL);
     snmp_clean_persistent(type);
 }
 
@@ -793,6 +792,7 @@ snmp_shutdown(const char *type)
 {
     snmp_store(type);
     snmp_call_callbacks(SNMP_CALLBACK_LIBRARY, SNMP_CALLBACK_SHUTDOWN, NULL);
+    snmp_alarm_unregister_all();
     snmp_close_sessions();
     shutdown_mib();
     unregister_all_config_handlers();
@@ -886,10 +886,8 @@ _sess_copy(netsnmp_session * in_session)
 
     slp->transport = NULL;
 
-    isp =
-        (struct snmp_internal_session *) calloc(1,
-                                                sizeof(struct
-                                                       snmp_internal_session));
+    isp = (struct snmp_internal_session *)calloc(1, sizeof(struct snmp_internal_session));
+
     if (isp == NULL) {
         snmp_sess_close(slp);
         in_session->s_snmp_errno = SNMPERR_MALLOC;
@@ -897,7 +895,7 @@ _sess_copy(netsnmp_session * in_session)
     }
 
     slp->internal = isp;
-    slp->session = (netsnmp_session *) malloc(sizeof(netsnmp_session));
+    slp->session = (netsnmp_session *)malloc(sizeof(netsnmp_session));
     if (slp->session == NULL) {
         snmp_sess_close(slp);
         in_session->s_snmp_errno = SNMPERR_MALLOC;
@@ -925,8 +923,7 @@ _sess_copy(netsnmp_session * in_session)
      */
 
     if (in_session->peername != NULL) {
-        session->peername =
-            (char *) malloc(strlen(in_session->peername) + 1);
+        session->peername = (char *)malloc(strlen(in_session->peername) + 1);
         if (session->peername == NULL) {
             snmp_sess_close(slp);
             in_session->s_snmp_errno = SNMPERR_MALLOC;
