@@ -69,7 +69,7 @@ my %syntax_list = ("ds" => "DisplayString",
 		   "ia" => "IPADDR");
 
 #############################  1  ######################################
-#check if 
+#check if
 my $res = $SNMP::MIB{sysDescr}{label};
 #print("Label is:$res\n");
 ok("sysDescr" eq $res);
@@ -147,16 +147,16 @@ ok(defined($des));
 ######################  15   #########################
 $res = $SNMP::MIB{atNetAddress}{nextNode};
 #print("res is --> $res\n");
-ok($res =~ /^HASH/);
+ok(ref($res) eq "HASH");
 #print("\n");
 
 ########################  16   #########################
 $res = $SNMP::MIB{sysDescr}{children};
 #print("res is --> $res\n");
-ok($res =~ /^ARRAY/);
+ok(ref($res) eq "ARRAY");
 #print("\n");
 ####################  17   #########################
- 
+
 ### ***************  SEE ***************
 
 #$res = $SNMP::MIB{sysDes}{lalalala};
