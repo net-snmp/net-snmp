@@ -38,6 +38,8 @@ install:    subdirs installdirs
 	for i in $(INSTALLDIRS) ; do \
         ( cd $$i ; $(MAKE) install ) \
 	done
+	@if test -f $(snmplibdir)/mib.txt; then echo "*** warning: $(snmplibdir)/mib.txt exists, but is no longer needed.  You might wish to remove it as we will still try to read it even though its not necessary."; fi
+
 
 installdirs:
 	@$(SHELL) $(srcdir)/mkinstalldirs $(snmplibdir) $(mibdir)
