@@ -1813,6 +1813,9 @@ var_ifEntry(vp, name, length, exact, var_len, write_method)
 	    return (u_char *) &long_return;
 	case IFINUCASTPKTS:
 	    long_return = (u_long)  ifnet.if_ipackets;
+#if STRUCT_IFNET_HAS_IF_IMCASTS
+	    long_return -= (u_long) ifnet.if_imcasts;
+#endif
 	    return (u_char *) &long_return;
 	case IFINNUCASTPKTS:
 #if STRUCT_IFNET_HAS_IF_IMCASTS
@@ -1846,6 +1849,9 @@ var_ifEntry(vp, name, length, exact, var_len, write_method)
 	    return (u_char *) &long_return;
 	case IFOUTUCASTPKTS:
 	    long_return = (u_long)  ifnet.if_opackets;
+#if STRUCT_IFNET_HAS_IF_OMCASTS
+	    long_return -= (u_long) ifnet.if_omcasts;
+#endif
 	    return (u_char *) &long_return;
 	case IFOUTNUCASTPKTS:
 #if STRUCT_IFNET_HAS_IF_OMCASTS
@@ -2384,7 +2390,12 @@ var_ip(vp, name, length, exact, var_len, write_method)
 	    return (u_char *) &ipstat.ips_fragments;
 
 	case IPREASMOKS:
-	    return (u_char *) &ipstat.ips_fragments;
+	    long_return = ipstat.ips_fragments;		/* XXX */
+		/*
+		 * NB: This is the count of fragments received, rather than
+		 *	"the number of IP datagrams successfully reassembled"
+		 */
+	    return (u_char *) &long_return;
 
 	case IPREASMFAILS:
 	    long_return = ipstat.ips_fragdropped + ipstat.ips_fragtimeout;
@@ -3014,13 +3025,17 @@ var_udp(vp, name, length, exact, var_len, write_method)
 	case UDPINDATAGRAMS:
 #if defined(freebsd2) || defined(netbsd1)
 	    long_return = udpstat.udps_ipackets;
-	    return (u_char *) &long_return;
+#else
+	    long_return = 0;
 #endif
+	    return (u_char *) &long_return;
 	case UDPNOPORTS:
 #if defined(freebsd2) || defined(netbsd1)
 	    long_return = udpstat.udps_noport;
-	    return (u_char *) &long_return;
+#else
+	    long_return = 0;
 #endif
+	    return (u_char *) &long_return;
 	case UDPOUTDATAGRAMS:
 #if defined(freebsd2) || defined(netbsd1)
 	    long_return = udpstat.udps_opackets;
@@ -3222,16 +3237,28 @@ var_tcp(vp, name, length, exact, var_len, write_method)
 	    case TCPPASSIVEOPENS:
 		return (u_char *) &tcpstat.tcps_accepts;
 	    case TCPATTEMPTFAILS:
-		return (u_char *) &tcpstat.tcps_conndrops;
+		long_return = tcpstat.tcps_conndrops;	/* XXX */
+		return (u_char *) &long_return;
 	    case TCPESTABRESETS:
-		return (u_char *) &tcpstat.tcps_drops;
+		long_return = tcpstat.tcps_drops;	/* XXX */
+		return (u_char *) &long_return;
+		/*
+		 * NB:  tcps_drops is actually the sum of the two MIB
+		 *	counters tcpAttemptFails and tcpEstabResets.
+		 */
 	    case TCPCURRESTAB:
 		long_return = TCP_Count_Connections();
 		return (u_char *) &long_return;
 	    case TCPINSEGS:
 		return (u_char *) &tcpstat.tcps_rcvtotal;
 	    case TCPOUTSEGS:
-		return (u_char *) &tcpstat.tcps_sndtotal;
+		long_return = tcpstat.tcps_sndtotal
+			    - tcpstat.tcps_sndrexmitpack;
+		/*
+		 * RFC 1213 defines this as the number of segments sent
+		 * "excluding those containing only retransmitted octets"
+		 */
+		return (u_char *) &long_return;
 	    case TCPRETRANSSEGS:
 		return (u_char *) &tcpstat.tcps_sndrexmitpack;
 	    case TCPINERRS:
