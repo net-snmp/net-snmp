@@ -310,7 +310,8 @@ handle_agentx_packet(int operation, netsnmp_session * session, int reqid,
     case AGENTX_MSG_CLEANUPSET:
         DEBUGMSGTL(("agentx/subagent", "  -> cleanupset\n"));
         asi = restore_set_vars(session, pdu);
-        if (asi->mode == AGENTX_MSG_TESTSET) {
+        if (asi->mode == SNMP_MSG_INTERNAL_SET_RESERVE1 ||
+            asi->mode == SNMP_MSG_INTERNAL_SET_RESERVE2) {
             asi->mode = pdu->command = SNMP_MSG_INTERNAL_SET_FREE;
         } else {
             asi->mode = pdu->command = SNMP_MSG_INTERNAL_SET_COMMIT;
