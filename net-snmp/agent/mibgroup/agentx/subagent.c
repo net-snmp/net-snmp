@@ -343,7 +343,7 @@ handle_agentx_packet(int operation, struct snmp_session *session, int reqid,
 }
 
 
-struct snmp_session *agentx_session;
+extern struct snmp_session *main_session;	/* from snmp_agent.c */
 
 int
 agentx_registration_callback(int majorID, int minorID, void *serverarg,
@@ -434,37 +434,37 @@ subagent_pre_init( void )
     sess.local_port = 0;	/* client */
     sess.callback = handle_agentx_packet;
     sess.authenticator = NULL;
-    agentx_session = snmp_open_ex( &sess, 0, agentx_parse, 0, agentx_build,
+    main_session = snmp_open_ex( &sess, 0, agentx_parse, 0, agentx_build,
                                    agentx_check_packet );
 
-    if ( agentx_session == NULL ) {
+    if ( main_session == NULL ) {
       /* diagnose snmp_open errors with the input struct snmp_session pointer */
 	snmp_sess_perror("subagent_pre_init", &sess);
 	exit(1);
     }
 
-    if ( agentx_open_session( agentx_session ) < 0 ) {
-	snmp_close( agentx_session );
+    if ( agentx_open_session( main_session ) < 0 ) {
+	snmp_close( main_session );
 	exit(1);
     }
 
 
     snmp_register_callback(SNMP_CALLBACK_LIBRARY, SNMP_CALLBACK_POST_PREMIB_READ_CONFIG,
-                           subagent_register_for_traps, agentx_session);
+                           subagent_register_for_traps, main_session);
     snmp_register_callback(SNMP_CALLBACK_LIBRARY, SNMP_CALLBACK_SHUTDOWN,
-                           subagent_shutdown, agentx_session);
+                           subagent_shutdown, main_session);
     snmp_register_callback(SNMP_CALLBACK_APPLICATION,
                            SNMPD_CALLBACK_REGISTER_OID,
-                           agentx_registration_callback, agentx_session);
+                           agentx_registration_callback, main_session);
     snmp_register_callback(SNMP_CALLBACK_APPLICATION,
                            SNMPD_CALLBACK_UNREGISTER_OID,
-                           agentx_registration_callback, agentx_session);
+                           agentx_registration_callback, main_session);
     snmp_register_callback(SNMP_CALLBACK_APPLICATION,
                            SNMPD_CALLBACK_REG_SYSOR,
-                           agentx_sysOR_callback, agentx_session);
+                           agentx_sysOR_callback, main_session);
     snmp_register_callback(SNMP_CALLBACK_APPLICATION,
                            SNMPD_CALLBACK_UNREG_SYSOR,
-                           agentx_sysOR_callback, agentx_session);
+                           agentx_sysOR_callback, main_session);
     DEBUGMSGTL(("agentx/subagent","initializing....  DONE\n"));
 }
 
