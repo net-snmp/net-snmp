@@ -98,6 +98,7 @@ EXPORTS
 	snmp_pdu_create
 	snmp_fix_pdu
 	snmp_clone_pdu
+	snmp_clone_mem
 	snmp_set_var_value
 	snmp_set_var_objid
 	snmp_api_errstring
@@ -182,8 +183,12 @@ EXPORTS
 	snmp_res_lock
 	snmp_res_unlock
 	snmp_res_destroy_mutex
-	snmp_oid_toggle_options
-	snmp_oid_toggle_options_usage
+	snmp_mib_toggle_options
+	snmp_mib_toggle_options_usage
+	snmp_in_toggle_options
+	snmp_in_toggle_options_usage
+	snmp_out_toggle_options
+	snmp_out_toggle_options_usage
 	snmp_oid_compare
 	usm_free_user
 	usm_add_user
