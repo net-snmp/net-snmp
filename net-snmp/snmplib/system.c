@@ -887,6 +887,7 @@ setenv(const char *name, const char *value, int overwrite)
 }
 #endif                          /* HAVE_SETENV */
 
+/* returns centiseconds */
 int
 calculate_time_diff(struct timeval *now, struct timeval *then)
 {
@@ -901,6 +902,25 @@ calculate_time_diff(struct timeval *now, struct timeval *then)
         diff.tv_sec++;
     }
     return ((diff.tv_sec * 100) + (diff.tv_usec / 10000));
+}
+
+/* returns diff in rounded seconds */
+u_int
+calculate_sectime_diff(struct timeval *now, struct timeval *then)
+{
+    struct timeval  tmp, diff;
+    memcpy(&tmp, now, sizeof(struct timeval));
+    tmp.tv_sec--;
+    tmp.tv_usec += 1000000L;
+    diff.tv_sec = tmp.tv_sec - then->tv_sec;
+    diff.tv_usec = tmp.tv_usec - then->tv_usec;
+    if (diff.tv_usec > 1000000L) {
+        diff.tv_usec -= 1000000L;
+        diff.tv_sec++;
+    }
+    if (diff.tv_usec >= 500000L)
+        return diff.tv_sec + 1;
+    return  diff.tv_sec;
 }
 
 #ifndef HAVE_STRCASESTR
