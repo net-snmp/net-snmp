@@ -472,9 +472,10 @@ main(argc, argv)
     fflush(stdout);
     party_scanInit();
     for(pp = party_scanNext(); pp; pp = party_scanNext()){
-#ifdef ultrix                            /* little endian systems */
+#if defined(ultrix) || defined(__alpha)         /* little endian systems */
 	if ((pp->partyTDomain != DOMAINSNMPUDP)
-	    || bcmp(reverse_bytes((char *)&myaddr,4), pp->partyTAddress, 4))
+	    || bcmp(reverse_bytes((char *)&myaddr,sizeof(long)),
+                    pp->partyTAddress, 4))
           continue;	/* don't listen for non-local parties */
 #else
         if ((pp->partyTDomain != DOMAINSNMPUDP)
@@ -483,7 +484,7 @@ main(argc, argv)
 #endif
 	
 	dest_port = 0;
-#ifdef ultrix                            /* little endian systems */
+#if defined(ultrix) || defined(__alpha)        /* little endian systems */
 	bcopy(reverse_bytes(pp->partyTAddress + 4,2), &dest_port, 2);
 #else
 	bcopy(pp->partyTAddress + 4, &dest_port, 2);
@@ -506,6 +507,7 @@ main(argc, argv)
 	/* already in network byte order (I think) */
 	me.sin_port = htons(dest_port);
 	if (bind(sd, (struct sockaddr *)&me, sizeof(me)) != 0){
+          fprintf(stderr,"bind/%d",me.sin_port);
 	    perror("bind");
 	    return 2;
 	}

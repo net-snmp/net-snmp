@@ -1,5 +1,17 @@
 #include <stdio.h>
+#ifdef __alpha
+#ifndef _BSD
+#define _BSD
+#define _myBSD
+#endif
+#endif
 #include <sys/wait.h>
+#ifdef __alpha
+#ifdef _myBSD
+#undef _BSD
+#undef _myBSD
+#endif
+#endif
 #include <sys/time.h>
 #include <unistd.h>
 #include <fcntl.h>
