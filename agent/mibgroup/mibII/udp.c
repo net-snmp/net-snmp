@@ -4,84 +4,13 @@
  */
 
 #include <net-snmp/net-snmp-config.h>
+#include "mibII_common.h"
 
-#if HAVE_STRING_H
-#include <string.h>
-#else
-#include <strings.h>
-#endif
-#include <sys/types.h>
-#if HAVE_WINSOCK_H
-#include <winsock.h>
-#endif
-
-#if HAVE_SYS_PARAM_H
-#include <sys/param.h>
-#endif
-
-#if HAVE_NETINET_IN_H
-#include <netinet/in.h>
-#endif
-#if HAVE_SYS_SYSMP_H
-#include <sys/sysmp.h>
-#endif
-#if HAVE_SYS_TCPIPSTATS_H
-#include <sys/tcpipstats.h>
-#endif
-#if defined(IFNET_NEEDS_KERNEL) && !defined(_KERNEL)
-#define _KERNEL 1
-#define _I_DEFINED_KERNEL
-#endif
-#if HAVE_SYS_SOCKET_H
-#include <sys/socket.h>
-#endif
-#if HAVE_NET_IF_H
-#include <net/if.h>
-#endif
-#if HAVE_NET_IF_VAR_H
-#include <net/if_var.h>
-#endif
-#ifdef _I_DEFINED_KERNEL
-#undef _KERNEL
-#endif
-
-#if HAVE_SYS_STREAM_H
-#include <sys/stream.h>
-#endif
-#if HAVE_NET_ROUTE_H
-#include <net/route.h>
-#endif
-#if HAVE_NETINET_IN_SYSTM_H
-#include <netinet/in_systm.h>
-#endif
-#if HAVE_NETINET_IP_H
-#include <netinet/ip.h>
-#endif
-#if HAVE_SYS_QUEUE_H
-#include <sys/queue.h>
-#endif
-#if HAVE_SYS_SOCKETVAR_H
-#include <sys/socketvar.h>
-#endif
-#if HAVE_NETINET_IP_VAR_H
-#include <netinet/ip_var.h>
-#endif
-#ifdef INET6
-#if HAVE_NETINET6_IP6_VAR_H
-#include <netinet6/ip6_var.h>
-#endif
-#endif
-#if HAVE_NETINET_IN_PCB_H
-#include <netinet/in_pcb.h>
-#endif
 #ifdef HAVE_NETINET_UDP_H
 #include <netinet/udp.h>
 #endif
 #if HAVE_NETINET_UDP_VAR_H
 #include <netinet/udp_var.h>
-#endif
-#if HAVE_INET_MIB2_H
-#include <inet/mib2.h>
 #endif
 
 #include <net-snmp/net-snmp-includes.h>
@@ -131,7 +60,6 @@
 #ifndef UDP_STATS_CACHE_TIMEOUT
 #define UDP_STATS_CACHE_TIMEOUT	MIB_STATS_CACHE_TIMEOUT
 #endif
-marker_t        udp_stats_cache_marker = NULL;
 
         /*********************
 	 *
@@ -147,30 +75,46 @@ marker_t        udp_stats_cache_marker = NULL;
 	 *
 	 *********************/
 
-struct variable3 udp_variables[] = {
-    {UDPINDATAGRAMS, ASN_COUNTER, RONLY, var_udp, 1, {1}},
-    {UDPNOPORTS, ASN_COUNTER, RONLY, var_udp, 1, {2}},
-    {UDPINERRORS, ASN_COUNTER, RONLY, var_udp, 1, {3}},
-    {UDPOUTDATAGRAMS, ASN_COUNTER, RONLY, var_udp, 1, {4}},
-    {UDPLOCALADDRESS, ASN_IPADDRESS, RONLY, var_udpEntry, 3, {5, 1, 1}},
-    {UDPLOCALPORT, ASN_INTEGER, RONLY, var_udpEntry, 3, {5, 1, 2}}
+struct variable1 udpconn_variables[] = {
+    {UDPLOCALADDRESS, ASN_IPADDRESS, RONLY, var_udpEntry, 1, {1}},
+    {UDPLOCALPORT,    ASN_INTEGER,   RONLY, var_udpEntry, 1, {2}}
 };
 
 /*
  * Define the OID pointer to the top of the mib tree that we're
  * registering underneath, and the OID for the MIB module 
  */
-oid             udp_variables_oid[] = { SNMP_OID_MIB2, 7 };
-oid             udp_module_oid[] = { SNMP_OID_MIB2, 50 };
+oid             udp_oid[]               = { SNMP_OID_MIB2, 7 };
+oid             udpconn_variables_oid[] = { SNMP_OID_MIB2, 7, 5, 1 };
+oid             udp_module_oid[]        = { SNMP_OID_MIB2, 50 };
 
 void
 init_udp(void)
 {
+    netsnmp_handler_registration *reginfo;
 
     /*
-     * register ourselves with the agent to handle our mib tree 
+     * register ourselves with the agent as a group of scalars...
      */
-    REGISTER_MIB("mibII/udp", udp_variables, variable3, udp_variables_oid);
+    reginfo = netsnmp_create_handler_registration("udp", udp_handler,
+		    udp_oid, OID_LENGTH(udp_oid), HANDLER_CAN_RONLY);
+    netsnmp_register_scalar_group(reginfo, UDPINDATAGRAMS, UDPOUTDATAGRAMS);
+
+    /*
+     * .... with a local cache
+     *    (except for HP-UX 11, which extracts objects individually)
+     */
+#ifndef hpux11
+    netsnmp_inject_handler( reginfo,
+		    netsnmp_get_cache_handler(UDP_STATS_CACHE_TIMEOUT,
+			   		udp_load, udp_free,
+					udp_oid, OID_LENGTH(udp_oid)));
+#endif
+
+    /*
+     * register (using the old-style API) to handle the UDP connection table
+     */
+    REGISTER_MIB("mibII/udpconn",  udpconn_variables, variable1, udpconn_variables_oid);
     REGISTER_SYSOR_ENTRY(udp_module_oid,
                          "The MIB module for managing UDP implementations");
 
@@ -192,6 +136,10 @@ init_udp(void)
 	 *
 	 *********************/
 
+#ifdef hpux11
+#define UDP_STAT_STRUCTURE	int
+#endif
+
 #ifdef linux
 #define UDP_STAT_STRUCTURE	struct udp_mib
 #define USES_SNMP_DESIGNED_UDPSTAT
@@ -201,10 +149,6 @@ init_udp(void)
 #ifdef solaris2
 #define UDP_STAT_STRUCTURE	mib2_udp_t
 #define USES_SNMP_DESIGNED_UDPSTAT
-#endif
-
-#ifdef hpux11
-#define UDP_STAT_STRUCTURE	int
 #endif
 
 #ifdef WIN32
@@ -223,25 +167,77 @@ init_udp(void)
 #define USES_TRADITIONAL_UDPSTAT
 #endif
 
-long            read_udp_stat(UDP_STAT_STRUCTURE *, int);
+UDP_STAT_STRUCTURE udpstat;
+int udp_valid = 0;
 
-u_char         *
-var_udp(struct variable *vp,
-        oid * name,
-        size_t * length,
-        int exact, size_t * var_len, WriteMethod ** write_method)
+
+
+        /*********************
+	 *
+	 *  System independent handler (mostly)
+	 *
+	 *********************/
+
+
+
+int
+udp_handler(netsnmp_mib_handler          *handler,
+            netsnmp_handler_registration *reginfo,
+            netsnmp_agent_request_info   *reqinfo,
+            netsnmp_request_info         *requests)
 {
-    static UDP_STAT_STRUCTURE udpstat;
-    static long     ret_value;
+    netsnmp_request_info *request;
+    long     ret_value = -1;
+    oid      subid;
+    int      type = ASN_COUNTER;
 
-    if (header_generic(vp, name, length, exact, var_len, write_method) ==
-        MATCH_FAILED)
-        return NULL;
+    /*
+     * The cached data should already have been loaded by the
+     *    cache handler, higher up the handler chain.
+     * But just to be safe, check this and load it manually if necessary
+     */
+#ifndef hpux11
+    if (!udp_valid) {
+        udp_load( NULL, NULL );	/* XXX - check for failure */
+    }
+#endif
 
-    ret_value = read_udp_stat(&udpstat, vp->magic);
-    if (ret_value < 0)
-        return NULL;
 
+    /*
+     * 
+     *
+     */
+    switch (reqinfo->mode) {
+    case MODE_GET:
+        for (request=requests; request; request=request->next) {
+            subid = request->requestvb->name[OID_LENGTH(udp_oid)];  /* XXX */
+            switch (subid) {
+
+#ifdef USES_SNMP_DESIGNED_UDPSTAT
+    case UDPINDATAGRAMS:
+        ret_value = udpstat.udpInDatagrams;
+        break;
+    case UDPNOPORTS:
+#ifdef solaris2
+        ret_value = udp_load(NULL, (void *)UDPNOPORTS);
+	if (ret_value == -1) {
+            netsnmp_set_request_error(reqinfo, request, SNMP_NOSUCHOBJECT);
+            continue;
+	}
+        break;
+#else
+        ret_value = udpstat.udpNoPorts;
+        break;
+#endif
+    case UDPOUTDATAGRAMS:
+        ret_value = udpstat.udpOutDatagrams;
+        break;
+    case UDPINERRORS:
+        ret_value = udpstat.udpInErrors;
+        break;
+#else			/* USES_SNMP_DESIGNED_UDPSTAT */
+
+#ifdef USES_TRADITIONAL_UDPSTAT
 #ifdef HAVE_SYS_TCPIPSTATS_H
     /*
      * This actually reads statistics for *all* the groups together,
@@ -249,55 +245,35 @@ var_udp(struct variable *vp,
      */
 #define udpstat          udpstat.udpstat
 #endif
-
-    /*
-     *        Get the UDP statistics from the kernel...
-     */
-
-
-    switch (vp->magic) {
-#ifdef USES_SNMP_DESIGNED_UDPSTAT
-    case UDPINDATAGRAMS:
-        return (u_char *) & udpstat.udpInDatagrams;
-    case UDPNOPORTS:
-#ifdef solaris2
-        /*
-         * Solaris keeps the count of UDP No Port errors in
-         * the IP Mib structure, so this value is returned
-         * via the return value of the read_udp_stats routine 
-         */
-        return (u_char *) & ret_value;
-#else
-        return (u_char *) & udpstat.udpNoPorts;
-#endif
-    case UDPOUTDATAGRAMS:
-        return (u_char *) & udpstat.udpOutDatagrams;
-    case UDPINERRORS:
-        return (u_char *) & udpstat.udpInErrors;
-#endif                          /* SNMP_DESIGNED_UDPSTAT */
-
-
-#ifdef USES_TRADITIONAL_UDPSTAT
     case UDPINDATAGRAMS:
 #if STRUCT_UDPSTAT_HAS_UDPS_IPACKETS
-        return (u_char *) & udpstat.udps_ipackets;
+        ret_value = udpstat.udps_ipackets;
+        break;
 #else
-        return NULL;
+        netsnmp_set_request_error(reqinfo, request, SNMP_NOSUCHOBJECT);
+        continue;
 #endif
+
     case UDPNOPORTS:
 #if STRUCT_UDPSTAT_HAS_UDPS_NOPORT
-        return (u_char *) & udpstat.udps_noport;
+        ret_value = udpstat.udps_noport;
+        break;
 #else
-        return NULL;
+        netsnmp_set_request_error(reqinfo, request, SNMP_NOSUCHOBJECT);
+        continue;
 #endif
+
     case UDPOUTDATAGRAMS:
 #if STRUCT_UDPSTAT_HAS_UDPS_OPACKETS
-        return (u_char *) & udpstat.udps_opackets;
+        ret_value = udpstat.udps_opackets;
+        break;
 #else
-        return NULL;
+        netsnmp_set_request_error(reqinfo, request, SNMP_NOSUCHOBJECT);
+        continue;
 #endif
+
     case UDPINERRORS:
-        long_return = udpstat.udps_hdrops + udpstat.udps_badsum +
+        ret_value = udpstat.udps_hdrops + udpstat.udps_badsum +
 #ifdef STRUCT_UDPSTAT_HAS_UDPS_DISCARD
             udpstat.udps_discard +
 #endif
@@ -305,29 +281,67 @@ var_udp(struct variable *vp,
             udpstat.udps_fullsock +
 #endif
             udpstat.udps_badlen;
-        return (u_char *) & long_return;
-
-#endif                          /* USES_TRADITIONAL_UDPSTAT */
-#ifdef WIN32
-    case UDPINDATAGRAMS:
-        return (u_char *) & udpstat.dwInDatagrams;
-    case UDPNOPORTS:
-        return (u_char *) & udpstat.dwNoPorts;
-    case UDPOUTDATAGRAMS:
-        return (u_char *) & udpstat.dwOutDatagrams;
-    case UDPINERRORS:
-        return (u_char *) & udpstat.dwInErrors;
-#endif                          /* WIN32 */
-
-    default:
-        DEBUGMSGTL(("snmpd", "unknown sub-id %d in var_udp\n", vp->magic));
-    }
-    return NULL;
-
+        break;
 #ifdef HAVE_SYS_TCPIPSTATS_H
 #undef udpstat
 #endif
+#else			/* USES_TRADITIONAL_UDPSTAT */
+
+#ifdef hpux11
+    case UDPINDATAGRAMS:
+    case UDPNOPORTS:
+    case UDPOUTDATAGRAMS:
+    case UDPINERRORS:
+	/*
+	 * This is a bit of a hack, to shoehorn the HP-UX 11
+	 * single-object retrieval approach into the caching
+	 * architecture.
+	 */
+	if (udp_load(NULL, (void*)subid) == -1 ) {
+            netsnmp_set_request_error(reqinfo, request, SNMP_NOSUCHOBJECT);
+            continue;
+	}
+        ret_value = udpstat;
+        break;
+#else			/* hpux11 */
+#ifdef WIN32
+    case UDPINDATAGRAMS:
+        ret_value = udpstat.dwInDatagrams;
+        break;
+    case UDPNOPORTS:
+        ret_value = udpstat.dwNoPorts;
+        break;
+    case UDPOUTDATAGRAMS:
+        ret_value = udpstat.dwOutDatagrams;
+        break;
+    case UDPINERRORS:
+        ret_value = udpstat.dwInErrors;
+        break;
+#endif			/* WIN32 */
+#endif			/* hpux11 */
+#endif			/* USES_TRADITIONAL_UDPSTAT */
+#endif			/* USES_SNMP_DESIGNED_UDPSTAT */
+
+	    }
+	    snmp_set_var_typed_value(request->requestvb, type,
+			             (u_char *)&ret_value, sizeof(ret_value));
+	}
+        break;
+
+    case MODE_GETNEXT:
+    case MODE_SET_RESERVE1:
+    case MODE_SET_RESERVE2:
+    case MODE_SET_ACTION:
+    case MODE_SET_COMMIT:
+    case MODE_SET_FREE:
+    case MODE_SET_UNDO:
+    default:
+        break;
+    }
+
+    return SNMP_ERR_NOERROR;
 }
+
 
         /*********************
 	 *
@@ -335,24 +349,16 @@ var_udp(struct variable *vp,
 	 *
 	 *********************/
 
-long
-read_udp_stat(UDP_STAT_STRUCTURE * udpstat, int magic)
-{
-    long            ret_value = -1;
-#if (defined(CAN_USE_SYSCTL) && defined(UDPCTL_STATS))
-    static int      sname[4] =
-        { CTL_NET, PF_INET, IPPROTO_UDP, UDPCTL_STATS };
-    size_t          len = sizeof(*udpstat);
-#endif
-#ifdef solaris2
-    static mib2_ip_t ipstat;
-#endif
-
 #ifdef hpux11
+int
+udp_load(netsnmp_cache *cache, void *vmagic)
+{
     int             fd;
     struct nmparms  p;
     unsigned int    ulen;
-
+    int             ret;
+    int             magic = (int) vmagic;
+    
     if ((fd = open_mib("/dev/ip", O_RDONLY, 0, NM_ASYNC_OFF)) < 0)
         return (-1);            /* error */
 
@@ -370,72 +376,134 @@ read_udp_stat(UDP_STAT_STRUCTURE * udpstat, int magic)
         p.objid = ID_udpInErrors;
         break;
     default:
-        *udpstat = 0;
+        udpstat = 0;
         close_mib(fd);
-        return (0);
+        return -1;
     }
 
-    p.buffer = (void *) udpstat;
+    p.buffer = (void *)&udpstat;
     ulen = sizeof(UDP_STAT_STRUCTURE);
     p.len = &ulen;
     ret_value = get_mib_info(fd, &p);
     close_mib(fd);
 
     return (ret_value);         /* 0: ok, < 0: error */
+}
 #else                           /* hpux11 */
-
-    if (udp_stats_cache_marker &&
-        (!atime_ready
-         (udp_stats_cache_marker, UDP_STATS_CACHE_TIMEOUT * 1000)))
-#ifdef solaris2
-        return (magic == UDPNOPORTS ? ipstat.udpNoPorts : 0);
-#else
-        return 0;
-#endif
-
-    if (udp_stats_cache_marker)
-        atime_setMarker(udp_stats_cache_marker);
-    else
-        udp_stats_cache_marker = atime_newMarker();
-
 #ifdef linux
-    ret_value = linux_read_udp_stat(udpstat);
-#endif
+int
+udp_load(netsnmp_cache *cache, void *vmagic)
+{
+    long ret_value = -1;
 
-#ifdef WIN32
-    ret_value = GetUdpStatistics(udpstat);
-#endif
+    ret_value = linux_read_udp_stat(&udpstat);
 
+    udp_valid = (ret_value == 0);
+    return ret_value;
+}
+#else                           /* linux */
 #ifdef solaris2
+int
+udp_load(netsnmp_cache *cache, void *vmagic)
+{
+    long ret_value = -1;
+    int  magic = (int)vmagic;
+    mib2_ip_t ipstat;
+
+    /*
+     * udpNoPorts is actually implemented as part of the MIB_IP group
+     * so we need to retrieve this independently
+     */
     if (magic == UDPNOPORTS) {
         if (getMibstat
             (MIB_IP, &ipstat, sizeof(mib2_ip_t), GET_FIRST,
              &Get_everything, NULL) < 0)
-            ret_value = -1;
+            return -1;
         else
-            ret_value = ipstat.udpNoPorts;
-    } else
-        ret_value = getMibstat(MIB_UDP, udpstat, sizeof(mib2_udp_t),
-                               GET_FIRST, &Get_everything, NULL);
-#endif
-
-#ifdef HAVE_SYS_TCPIPSTATS_H
-    ret_value = sysmp(MP_SAGET, MPSA_TCPIPSTATS, udpstat, sizeof *udpstat);
-#endif
-
-#if defined(CAN_USE_SYSCTL) && defined(UDPCTL_STATS)
-    ret_value = sysctl(sname, 4, udpstat, &len, 0, 0);
-#endif
-
-#ifdef UDPSTAT_SYMBOL
-    if (auto_nlist(UDPSTAT_SYMBOL, (char *) udpstat, sizeof(*udpstat)))
-        ret_value = 0;
-#endif
-
-    if (ret_value == -1) {
-        free(udp_stats_cache_marker);
-        udp_stats_cache_marker = NULL;
+            return ipstat.udpNoPorts;
     }
+
+    /*
+     * Otherwise, retrieve the whole of the MIB_UDP group (and cache it)
+     */
+    ret_value = getMibstat(MIB_UDP, &udpstat, sizeof(mib2_udp_t),
+                           GET_FIRST, &Get_everything, NULL);
+
+    udp_valid = (ret_value == 0);
     return ret_value;
+}
+#else                           /* solaris2 */
+#ifdef WIN32
+int
+udp_load(netsnmp_cache *cache, void *vmagic)
+{
+    long ret_value = -1;
+
+    ret_value = GetUdpStatistics(&udpstat);
+
+    udp_valid = (ret_value == 0);
+    return ret_value;
+}
+#else                           /* WIN32 */
+#if (defined(CAN_USE_SYSCTL) && defined(UDPCTL_STATS))
+int
+udp_load(netsnmp_cache *cache, void *vmagic)
+{
+    int     sname[4]  = { CTL_NET, PF_INET, IPPROTO_UDP, UDPCTL_STATS };
+    size_t  len       = sizeof(udpstat);
+    long    ret_value = -1;
+
+    ret_value = sysctl(sname, 4, &udpstat, &len, 0, 0);
+
+    udp_valid = (ret_value == 0);
+    return ret_value;
+}
+#else		/* (defined(CAN_USE_SYSCTL) && defined(UDPCTL_STATS)) */
+#ifdef HAVE_SYS_TCPIPSTATS_H
+int
+udp_load(netsnmp_cache *cache, void *vmagic)
+{
+    long ret_value = -1;
+
+    ret_value = sysmp(MP_SAGET, MPSA_TCPIPSTATS, &udpstat, sizeof(udpstat));
+
+    udp_valid = (ret_value == 0);
+    return ret_value;
+}
+#else				/* HAVE_SYS_TCPIPSTATS_H */
+#ifdef UDPSTAT_SYMBOL
+int
+udp_load(netsnmp_cache *cache, void *vmagic)
+{
+    long ret_value = -1;
+
+    if (auto_nlist(UDPSTAT_SYMBOL, (char *)&udpstat, sizeof(udpstat)))
+        ret_value = 0;
+
+    udp_valid = (ret_value == 0);
+    return ret_value;
+}
+#else				/* UDPSTAT_SYMBOL */
+int
+udp_load(netsnmp_cache *cache, void *vmagic)
+{
+    long ret_value = -1;
+
+    udp_valid = (ret_value == 0);
+    return ret_value;
+}
+#endif				/* UDPSTAT_SYMBOL */
+#endif				/* HAVE_SYS_TCPIPSTATS_H */
+#endif		/* (defined(CAN_USE_SYSCTL) && defined(UDPCTL_STATS)) */
 #endif                          /* hpux11 */
+#endif                          /* linux */
+#endif                          /* solaris2 */
+#endif                          /* WIN32 */
+
+
+void
+udp_free(void)
+{
+    memset(&udpstat, 0, sizeof(udpstat));
+    udp_valid = 0;
 }

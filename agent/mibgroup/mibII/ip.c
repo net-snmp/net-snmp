@@ -4,76 +4,13 @@
  */
 
 #include <net-snmp/net-snmp-config.h>
+#include "mibII_common.h"
 
-#if defined(IFNET_NEEDS_KERNEL) && !defined(_KERNEL)
-#define _KERNEL 1
-#define _I_DEFINED_KERNEL
-#endif
-#if HAVE_SYS_PARAM_H
-#include <sys/param.h>
-#endif
-#if HAVE_SYS_SOCKET_H
-#include <sys/socket.h>
-#endif
-
-#if HAVE_STRING_H
-#include <string.h>
-#else
-#include <strings.h>
-#endif
-#if HAVE_WINSOCK_H
-#include <winsock.h>
-#endif
-#if HAVE_SYS_SYSCTL_H
-#ifdef _I_DEFINED_KERNEL
-#undef _KERNEL
-#endif
-#include <sys/sysctl.h>
-#ifdef _I_DEFINED_KERNEL
-#define _KERNEL 1
-#endif
-#endif
-#if HAVE_SYS_SYSMP_H
-#include <sys/sysmp.h>
-#endif
-#if HAVE_SYS_TCPIPSTATS_H
-#include <sys/tcpipstats.h>
-#endif
-#if HAVE_NET_IF_H
-#include <net/if.h>
-#endif
-#if HAVE_NET_IF_VAR_H
-#include <net/if_var.h>
-#endif
-#ifdef _I_DEFINED_KERNEL
-#undef _KERNEL
-#endif
-#if HAVE_NETINET_IN_H
-#include <netinet/in.h>
-#endif
-#if HAVE_NETINET_IN_SYSTM_H
-#include <netinet/in_systm.h>
-#endif
 #if HAVE_SYS_HASHING_H
 #include <sys/hashing.h>
 #endif
 #if HAVE_NETINET_IN_VAR_H
 #include <netinet/in_var.h>
-#endif
-#if HAVE_NETINET_IP_H
-#include <netinet/ip.h>
-#endif
-#if HAVE_NETINET_IP_VAR_H
-#include <netinet/ip_var.h>
-#endif
-#if HAVE_INET_MIB2_H
-#include <inet/mib2.h>
-#endif
-#if HAVE_SYS_STREAM_H
-#include <sys/stream.h>
-#endif
-#if HAVE_NET_ROUTE_H
-#include <net/route.h>
 #endif
 #if HAVE_SYSLOG_H
 #include <syslog.h>
@@ -83,30 +20,11 @@
 #include <net-snmp/agent/net-snmp-agent-includes.h>
 #include <net-snmp/agent/auto_nlist.h>
 
-#ifdef solaris2
-#include "kernel_sunos5.h"
-#else
-#include "kernel.h"
-#endif
-#ifdef linux
-#include "kernel_linux.h"
-#endif
-
-#if defined(MIB_IPCOUNTER_SYMBOL) || defined(hpux11)
-#include <sys/mib.h>
-#include <netinet/mib_kern.h>
-#endif                          /* MIB_IPCOUNTER_SYMBOL || hpux11 */
-
 #include "util_funcs.h"
 #include "ip.h"
 #include "ipAddr.h"
 #include "interfaces.h"
 #include "sysORTable.h"
-
-#ifdef cygwin
-#define WIN32
-#include <windows.h>
-#endif
 
 #ifndef MIB_STATS_CACHE_TIMEOUT
 #define MIB_STATS_CACHE_TIMEOUT	5
@@ -114,7 +32,6 @@
 #ifndef IP_STATS_CACHE_TIMEOUT
 #define IP_STATS_CACHE_TIMEOUT	MIB_STATS_CACHE_TIMEOUT
 #endif
-marker_t        ip_stats_cache_marker = NULL;
 
         /*********************
 	 *
@@ -137,83 +54,57 @@ extern void     init_routes(void);
  * define the structure we're going to ask the agent to register our
  * information at 
  */
-struct variable3 ip_variables[] = {
-#ifdef WIN32
-    {IPFORWARDING, ASN_INTEGER, RWRITE, var_ip, 1, {1}},
-    {IPDEFAULTTTL, ASN_INTEGER, RWRITE, var_ip, 1, {2}},
-#else
-    {IPFORWARDING, ASN_INTEGER, RONLY, var_ip, 1, {1}},
-    {IPDEFAULTTTL, ASN_INTEGER, RONLY, var_ip, 1, {2}},
-#endif
+struct variable1 ipaddr_variables[] = {
+    {IPADADDR,      ASN_IPADDRESS, RONLY, var_ipAddrEntry, 1, {1}},
+    {IPADIFINDEX,   ASN_INTEGER,   RONLY, var_ipAddrEntry, 1, {2}},
 #ifndef sunV3
-    {IPINRECEIVES, ASN_COUNTER, RONLY, var_ip, 1, {3}},
+    {IPADNETMASK,   ASN_IPADDRESS, RONLY, var_ipAddrEntry, 1, {3}},
 #endif
-    {IPINHDRERRORS, ASN_COUNTER, RONLY, var_ip, 1, {4}},
-#ifndef sunV3
-    {IPINADDRERRORS, ASN_COUNTER, RONLY, var_ip, 1, {5}},
-    {IPFORWDATAGRAMS, ASN_COUNTER, RONLY, var_ip, 1, {6}},
-#endif
-    {IPINUNKNOWNPROTOS, ASN_COUNTER, RONLY, var_ip, 1, {7}},
-#ifndef sunV3
-    {IPINDISCARDS, ASN_COUNTER, RONLY, var_ip, 1, {8}},
-    {IPINDELIVERS, ASN_COUNTER, RONLY, var_ip, 1, {9}},
-#endif
-    {IPOUTREQUESTS, ASN_COUNTER, RONLY, var_ip, 1, {10}},
-    {IPOUTDISCARDS, ASN_COUNTER, RONLY, var_ip, 1, {11}},
-    {IPOUTNOROUTES, ASN_COUNTER, RONLY, var_ip, 1, {12}},
-    {IPREASMTIMEOUT, ASN_INTEGER, RONLY, var_ip, 1, {13}},
-#ifndef sunV3
-    {IPREASMREQDS, ASN_COUNTER, RONLY, var_ip, 1, {14}},
-    {IPREASMOKS, ASN_COUNTER, RONLY, var_ip, 1, {15}},
-    {IPREASMFAILS, ASN_COUNTER, RONLY, var_ip, 1, {16}},
-#endif
-    {IPFRAGOKS, ASN_COUNTER, RONLY, var_ip, 1, {17}},
-    {IPFRAGFAILS, ASN_COUNTER, RONLY, var_ip, 1, {18}},
-    {IPFRAGCREATES, ASN_COUNTER, RONLY, var_ip, 1, {19}},
-    {IPADADDR, ASN_IPADDRESS, RONLY, var_ipAddrEntry, 3, {20, 1, 1}},
-    {IPADIFINDEX, ASN_INTEGER, RONLY, var_ipAddrEntry, 3, {20, 1, 2}},
-#ifndef sunV3
-    {IPADNETMASK, ASN_IPADDRESS, RONLY, var_ipAddrEntry, 3, {20, 1, 3}},
-#endif
-    {IPADBCASTADDR, ASN_INTEGER, RONLY, var_ipAddrEntry, 3, {20, 1, 4}},
-    {IPADREASMMAX, ASN_INTEGER, RONLY, var_ipAddrEntry, 3, {20, 1, 5}},
-    {IPROUTEDEST, ASN_IPADDRESS, RWRITE, var_ipRouteEntry, 3, {21, 1, 1}},
-    {IPROUTEIFINDEX, ASN_INTEGER, RWRITE, var_ipRouteEntry, 3, {21, 1, 2}},
-    {IPROUTEMETRIC1, ASN_INTEGER, RWRITE, var_ipRouteEntry, 3, {21, 1, 3}},
-    {IPROUTEMETRIC2, ASN_INTEGER, RWRITE, var_ipRouteEntry, 3, {21, 1, 4}},
-    {IPROUTEMETRIC3, ASN_INTEGER, RWRITE, var_ipRouteEntry, 3, {21, 1, 5}},
-    {IPROUTEMETRIC4, ASN_INTEGER, RWRITE, var_ipRouteEntry, 3, {21, 1, 6}},
-    {IPROUTENEXTHOP, ASN_IPADDRESS, RWRITE, var_ipRouteEntry, 3,
-     {21, 1, 7}},
-    {IPROUTETYPE, ASN_INTEGER, RWRITE, var_ipRouteEntry, 3, {21, 1, 8}},
-    {IPROUTEPROTO, ASN_INTEGER, RONLY, var_ipRouteEntry, 3, {21, 1, 9}},
-    {IPROUTEAGE, ASN_INTEGER, RWRITE, var_ipRouteEntry, 3, {21, 1, 10}},
-    {IPROUTEMASK, ASN_IPADDRESS, RWRITE, var_ipRouteEntry, 3, {21, 1, 11}},
-    {IPROUTEMETRIC5, ASN_INTEGER, RWRITE, var_ipRouteEntry, 3,
-     {21, 1, 12}},
-    {IPROUTEINFO, ASN_OBJECT_ID, RONLY, var_ipRouteEntry, 3, {21, 1, 13}},
+    {IPADBCASTADDR, ASN_INTEGER,   RONLY, var_ipAddrEntry, 1, {4}},
+    {IPADREASMMAX,  ASN_INTEGER,   RONLY, var_ipAddrEntry, 1, {5}}
+};
+
+struct variable1 iproute_variables[] = {
+    {IPROUTEDEST,    ASN_IPADDRESS, RWRITE, var_ipRouteEntry, 1, {1}},
+    {IPROUTEIFINDEX, ASN_INTEGER,   RWRITE, var_ipRouteEntry, 1, {2}},
+    {IPROUTEMETRIC1, ASN_INTEGER,   RWRITE, var_ipRouteEntry, 1, {3}},
+    {IPROUTEMETRIC2, ASN_INTEGER,   RWRITE, var_ipRouteEntry, 1, {4}},
+    {IPROUTEMETRIC3, ASN_INTEGER,   RWRITE, var_ipRouteEntry, 1, {5}},
+    {IPROUTEMETRIC4, ASN_INTEGER,   RWRITE, var_ipRouteEntry, 1, {6}},
+    {IPROUTENEXTHOP, ASN_IPADDRESS, RWRITE, var_ipRouteEntry, 1, {7}},
+    {IPROUTETYPE,    ASN_INTEGER,   RWRITE, var_ipRouteEntry, 1, {8}},
+    {IPROUTEPROTO,   ASN_INTEGER,   RONLY,  var_ipRouteEntry, 1, {9}},
+    {IPROUTEAGE,     ASN_INTEGER,   RWRITE, var_ipRouteEntry, 1, {10}},
+    {IPROUTEMASK,    ASN_IPADDRESS, RWRITE, var_ipRouteEntry, 1, {11}},
+    {IPROUTEMETRIC5, ASN_INTEGER,   RWRITE, var_ipRouteEntry, 1, {12}},
+    {IPROUTEINFO,    ASN_OBJECT_ID, RONLY,  var_ipRouteEntry, 1, {13}}
+};
+
+struct variable1 ipmedia_variables[] = {
 #ifdef USING_MIBII_AT_MODULE
 #ifdef WIN32
-    {IPMEDIAIFINDEX, ASN_INTEGER, RWRITE, var_atEntry, 3, {22, 1, 1}},
-    {IPMEDIAPHYSADDRESS, ASN_OCTET_STR, RWRITE, var_atEntry, 3,
-     {22, 1, 2}},
-    {IPMEDIANETADDRESS, ASN_IPADDRESS, RWRITE, var_atEntry, 3, {22, 1, 3}},
-    {IPMEDIATYPE, ASN_INTEGER, RWRITE, var_atEntry, 3, {22, 1, 4}},
+    {IPMEDIAIFINDEX,     ASN_INTEGER,   RWRITE, var_atEntry, 1, {1}},
+    {IPMEDIAPHYSADDRESS, ASN_OCTET_STR, RWRITE, var_atEntry, 1, {2}},
+    {IPMEDIANETADDRESS,  ASN_IPADDRESS, RWRITE, var_atEntry, 1, {3}},
+    {IPMEDIATYPE,        ASN_INTEGER,   RWRITE, var_atEntry, 1, {4}}
 #else
-    {IPMEDIAIFINDEX, ASN_INTEGER, RONLY, var_atEntry, 3, {22, 1, 1}},
-    {IPMEDIAPHYSADDRESS, ASN_OCTET_STR, RONLY, var_atEntry, 3, {22, 1, 2}},
-    {IPMEDIANETADDRESS, ASN_IPADDRESS, RONLY, var_atEntry, 3, {22, 1, 3}},
-    {IPMEDIATYPE, ASN_INTEGER, RONLY, var_atEntry, 3, {22, 1, 4}},
+    {IPMEDIAIFINDEX,     ASN_INTEGER,   RONLY, var_atEntry, 1, {1}},
+    {IPMEDIAPHYSADDRESS, ASN_OCTET_STR, RONLY, var_atEntry, 1, {2}},
+    {IPMEDIANETADDRESS,  ASN_IPADDRESS, RONLY, var_atEntry, 1, {3}},
+    {IPMEDIATYPE,        ASN_INTEGER,   RONLY, var_atEntry, 1, {4}}
 #endif
 #endif
-    {IPROUTEDISCARDS, ASN_COUNTER, RONLY, var_ip, 1, {23}}
 };
 
 /*
  * Define the OID pointer to the top of the mib tree that we're
  * registering underneath, and the OID of the MIB module 
  */
-oid             ip_variables_oid[] = { SNMP_OID_MIB2, 4 };
+oid             ip_oid[]                = { SNMP_OID_MIB2, 4 };
+
+oid             ipaddr_variables_oid[]  = { SNMP_OID_MIB2, 4, 20, 1 };
+oid             iproute_variables_oid[] = { SNMP_OID_MIB2, 4, 21, 1 };
+oid             ipmedia_variables_oid[] = { SNMP_OID_MIB2, 4, 22, 1 };
 oid             ip_module_oid[] = { SNMP_OID_MIB2, 4 };
 oid             ip_module_oid_len = sizeof(ip_module_oid) / sizeof(oid);
 int             ip_module_count = 0;    /* Need to liaise with icmp.c */
@@ -221,10 +112,35 @@ int             ip_module_count = 0;    /* Need to liaise with icmp.c */
 void
 init_ip(void)
 {
+    netsnmp_handler_registration *reginfo;
+
     /*
-     * register ourselves with the agent to handle our mib tree 
+     * register ourselves with the agent as a group of scalars...
      */
-    REGISTER_MIB("mibII/ip", ip_variables, variable3, ip_variables_oid);
+    reginfo = netsnmp_create_handler_registration("ip", ip_handler,
+                            ip_oid, OID_LENGTH(ip_oid), HANDLER_CAN_RONLY);
+    netsnmp_register_scalar_group(reginfo, IPFORWARDING, IPROUTEDISCARDS);
+
+    /*
+     * .... with a local cache
+     *    (except for HP-UX 11, which extracts objects individually)
+     */
+#ifndef hpux11
+    netsnmp_inject_handler( reginfo,
+		    netsnmp_get_cache_handler(IP_STATS_CACHE_TIMEOUT,
+			   		ip_load, ip_free,
+					ip_oid, OID_LENGTH(ip_oid)));
+#endif
+
+    /*
+     * register (using the old-style API) to handle the IP tables
+     */
+    REGISTER_MIB("mibII/ipaddr",  ipaddr_variables,
+                       variable1, ipaddr_variables_oid);
+    REGISTER_MIB("mibII/iproute", iproute_variables,
+                       variable1, iproute_variables_oid);
+    REGISTER_MIB("mibII/ipmedia", ipmedia_variables,
+                       variable1, ipmedia_variables_oid);
     if (++ip_module_count == 2)
         REGISTER_SYSOR_ENTRY(ip_module_oid,
                              "The MIB module for managing IP and ICMP implementations");
@@ -253,9 +169,13 @@ init_ip(void)
 
         /*********************
 	 *
-	 *  System specific implementation functions
+	 *  System specific data formats
 	 *
 	 *********************/
+
+#ifdef hpux11
+#define IP_STAT_STRUCTURE	int
+#endif
 
 #ifdef linux
 #define IP_STAT_STRUCTURE	struct ip_mib
@@ -267,48 +187,137 @@ init_ip(void)
 #define	USES_SNMP_DESIGNED_IPSTAT
 #endif
 
-#ifdef hpux11
-#define IP_STAT_STRUCTURE	int
-#endif
+#ifdef WIN32
+#include <iphlpapi.h>
+#define IP_STAT_STRUCTURE MIB_IPSTATS
+long            ipForwarding;
+long            oldipForwarding;
+long            ipTTL, oldipTTL;
+#endif                          /* WIN32 */
 
 #ifdef HAVE_SYS_TCPIPSTATS_H
 #define IP_STAT_STRUCTURE	struct kna
 #define	USES_TRADITIONAL_IPSTAT
 #endif
 
-#ifdef WIN32
-#include <iphlpapi.h>
-#define IP_STAT_STRUCTURE MIB_IPSTATS
-WriteMethod     writeIpStats;
-long            ipForwarding;
-long            oldipForwarding;
-long            ipTTL, oldipTTL;
-#endif                          /* WIN32 */
-
 #if !defined(IP_STAT_STRUCTURE)
 #define IP_STAT_STRUCTURE	struct ipstat
 #define	USES_TRADITIONAL_IPSTAT
 #endif
 
-long            read_ip_stat(IP_STAT_STRUCTURE *, int);
+IP_STAT_STRUCTURE ipstat;
+int ip_valid = 0;
 
-u_char         *
-var_ip(struct variable *vp,
-       oid * name,
-       size_t * length,
-       int exact, size_t * var_len, WriteMethod ** write_method)
+
+
+        /*********************
+	 *
+	 *  System independent handler
+	 *      (mostly)
+	 *
+	 *********************/
+
+
+int
+ip_handler(netsnmp_mib_handler          *handler,
+           netsnmp_handler_registration *reginfo,
+           netsnmp_agent_request_info   *reqinfo,
+           netsnmp_request_info         *requests)
 {
-    static IP_STAT_STRUCTURE ipstat;
-    static long     ret_value;
+    netsnmp_request_info *request;
+    long     ret_value;
+    oid      subid;
+    int      type = ASN_COUNTER;
 
-    if (header_generic(vp, name, length, exact, var_len, write_method) ==
-        MATCH_FAILED)
-        return NULL;
+    /*
+     * The cached data should already have been loaded by the
+     *    cache handler, higher up the handler chain.
+     * But just to be safe, check this and load it manually if necessary
+     */
+#ifndef hpux11
+    if (!ip_valid) {
+        ip_load( NULL, NULL );	/* XXX - check for failure */
+    }
+#endif
 
-    ret_value = read_ip_stat(&ipstat, vp->magic);
-    if (ret_value < 0)
-        return NULL;
 
+    /*
+     * 
+     *
+     */
+    switch (reqinfo->mode) {
+    case MODE_GET:
+        for (request=requests; request; request=request->next) {
+            subid = request->requestvb->name[OID_LENGTH(ip_oid)];  /* XXX */
+            switch (subid) {
+
+#ifdef USES_SNMP_DESIGNED_IPSTAT
+    case IPFORWARDING:
+        ret_value = ipstat.ipForwarding;
+        type = ASN_INTEGER;
+        break;
+    case IPDEFAULTTTL:
+        ret_value = ipstat.ipDefaultTTL;
+        type = ASN_INTEGER;
+        break;
+    case IPINRECEIVES:
+        ret_value = ipstat.ipInReceives;
+        break;
+    case IPINHDRERRORS:
+        ret_value = ipstat.ipInHdrErrors;
+        break;
+    case IPINADDRERRORS:
+        ret_value = ipstat.ipInAddrErrors;
+        break;
+    case IPFORWDATAGRAMS:
+        ret_value = ipstat.ipForwDatagrams;
+        break;
+    case IPINUNKNOWNPROTOS:
+        ret_value = ipstat.ipInUnknownProtos;
+        break;
+    case IPINDISCARDS:
+        ret_value = ipstat.ipInDiscards;
+        break;
+    case IPINDELIVERS:
+        ret_value = ipstat.ipInDelivers;
+        break;
+    case IPOUTREQUESTS:
+        ret_value = ipstat.ipOutRequests;
+        break;
+    case IPOUTDISCARDS:
+        ret_value = ipstat.ipOutDiscards;
+        break;
+    case IPOUTNOROUTES:
+        ret_value = ipstat.ipOutNoRoutes;
+        break;
+    case IPREASMTIMEOUT:
+        ret_value = ipstat.ipReasmTimeout;
+        type = ASN_INTEGER;
+        break;
+    case IPREASMREQDS:
+        ret_value = ipstat.ipReasmReqds;
+        break;
+    case IPREASMOKS:
+        ret_value = ipstat.ipReasmOKs;
+        break;
+    case IPREASMFAILS:
+        ret_value = ipstat.ipReasmFails;
+        break;
+    case IPFRAGOKS:
+        ret_value = ipstat.ipFragOKs;
+        break;
+    case IPFRAGFAILS:
+        ret_value = ipstat.ipFragFails;
+        break;
+    case IPFRAGCREATES:
+        ret_value = ipstat.ipFragCreates;
+        break;
+    case IPROUTEDISCARDS:
+        ret_value = ipstat.ipRoutingDiscards;
+        break;
+#else		/* USES_SNMP_DESIGNED_IPSTAT */
+
+#ifdef USES_TRADITIONAL_IPSTAT
 #ifdef HAVE_SYS_TCPIPSTATS_H
     /*
      * This actually reads statistics for *all* the groups together,
@@ -316,106 +325,71 @@ var_ip(struct variable *vp,
      */
 #define	ipstat		ipstat.ipstat
 #endif
-
-    switch (vp->magic) {
-#ifdef USES_SNMP_DESIGNED_IPSTAT
     case IPFORWARDING:
-        return (u_char *) & ipstat.ipForwarding;
     case IPDEFAULTTTL:
-        return (u_char *) & ipstat.ipDefaultTTL;
+        /* 
+         * Query these two individually
+         */
+        ret_value = ip_load(NULL, (void *)subid);
+        if (ret_value == -1 ) {
+            netsnmp_set_request_error(reqinfo, request, SNMP_NOSUCHOBJECT);
+            continue;
+	}
+        type = ASN_INTEGER;
+        break;
     case IPINRECEIVES:
-        return (u_char *) & ipstat.ipInReceives;
+        ret_value = ipstat.ips_total;
+        break;
     case IPINHDRERRORS:
-        return (u_char *) & ipstat.ipInHdrErrors;
-    case IPINADDRERRORS:
-        return (u_char *) & ipstat.ipInAddrErrors;
-    case IPFORWDATAGRAMS:
-        return (u_char *) & ipstat.ipForwDatagrams;
-    case IPINUNKNOWNPROTOS:
-        return (u_char *) & ipstat.ipInUnknownProtos;
-    case IPINDISCARDS:
-        return (u_char *) & ipstat.ipInDiscards;
-    case IPINDELIVERS:
-        return (u_char *) & ipstat.ipInDelivers;
-    case IPOUTREQUESTS:
-        return (u_char *) & ipstat.ipOutRequests;
-    case IPOUTDISCARDS:
-        return (u_char *) & ipstat.ipOutDiscards;
-    case IPOUTNOROUTES:
-        return (u_char *) & ipstat.ipOutNoRoutes;
-    case IPREASMTIMEOUT:
-        return (u_char *) & ipstat.ipReasmTimeout;
-    case IPREASMREQDS:
-        return (u_char *) & ipstat.ipReasmReqds;
-    case IPREASMOKS:
-        return (u_char *) & ipstat.ipReasmOKs;
-    case IPREASMFAILS:
-        return (u_char *) & ipstat.ipReasmFails;
-    case IPFRAGOKS:
-        return (u_char *) & ipstat.ipFragOKs;
-    case IPFRAGFAILS:
-        return (u_char *) & ipstat.ipFragFails;
-    case IPFRAGCREATES:
-        return (u_char *) & ipstat.ipFragCreates;
-    case IPROUTEDISCARDS:
-        return (u_char *) & ipstat.ipRoutingDiscards;
-#endif
-
-
-
-#ifdef USES_TRADITIONAL_IPSTAT
-    case IPFORWARDING:
-        return (u_char *) & ret_value;
-    case IPDEFAULTTTL:
-        return (u_char *) & ret_value;
-    case IPINRECEIVES:
-        long_return = ipstat.ips_total;
-        return (u_char *) & long_return;
-    case IPINHDRERRORS:
-        long_return = ipstat.ips_badsum
+        ret_value = ipstat.ips_badsum
             + ipstat.ips_tooshort
             + ipstat.ips_toosmall + ipstat.ips_badhlen + ipstat.ips_badlen;
-        return (u_char *) & long_return;
+        break;
     case IPINADDRERRORS:
-        long_return = ipstat.ips_cantforward;
-        return (u_char *) & long_return;
+        ret_value = ipstat.ips_cantforward;
+        break;
     case IPFORWDATAGRAMS:
-        long_return = ipstat.ips_forward;
-        return (u_char *) & long_return;
+        ret_value = ipstat.ips_forward;
+        break;
     case IPINUNKNOWNPROTOS:
 #if STRUCT_IPSTAT_HAS_IPS_NOPROTO
-        long_return = ipstat.ips_noproto;
-        return (u_char *) & long_return;
+        ret_value = ipstat.ips_noproto;
+        break;
 #else
-        return NULL;
+        netsnmp_set_request_error(reqinfo, request, SNMP_NOSUCHOBJECT);
+        continue;
 #endif
     case IPINDISCARDS:
 #if STRUCT_IPSTAT_HAS_IPS_FRAGDROPPED
-        long_return = ipstat.ips_fragdropped;   /* ?? */
-        return (u_char *) & long_return;
+        ret_value = ipstat.ips_fragdropped;   /* ?? */
+        break;
 #else
-        return NULL;
+        netsnmp_set_request_error(reqinfo, request, SNMP_NOSUCHOBJECT);
+        continue;
 #endif
     case IPINDELIVERS:
 #if STRUCT_IPSTAT_HAS_IPS_DELIVERED
-        long_return = ipstat.ips_delivered;
-        return (u_char *) & long_return;
+        ret_value = ipstat.ips_delivered;
+        break;
 #else
-        return NULL;
+        netsnmp_set_request_error(reqinfo, request, SNMP_NOSUCHOBJECT);
+        continue;
 #endif
     case IPOUTREQUESTS:
 #if STRUCT_IPSTAT_HAS_IPS_LOCALOUT
-        long_return = ipstat.ips_localout;
-        return (u_char *) & long_return;
+        ret_value = ipstat.ips_localout;
+        break;
 #else
-        return NULL;
+        netsnmp_set_request_error(reqinfo, request, SNMP_NOSUCHOBJECT);
+        continue;
 #endif
     case IPOUTDISCARDS:
 #if STRUCT_IPSTAT_HAS_IPS_ODROPPED
-        long_return = ipstat.ips_odropped;
-        return (u_char *) & long_return;
+        ret_value = ipstat.ips_odropped;
+        break;
 #else
-        return NULL;
+        netsnmp_set_request_error(reqinfo, request, SNMP_NOSUCHOBJECT);
+        continue;
 #endif
     case IPOUTNOROUTES:
         /*
@@ -423,105 +397,195 @@ var_ip(struct variable *vp,
          * ipstat.ips_cantforward isn't right, as it counts packets.
          * ipstat.ips_noroute is also incorrect.
          */
+        netsnmp_set_request_error(reqinfo, request, SNMP_NOSUCHOBJECT);
         return NULL;
     case IPREASMTIMEOUT:
-        long_return = IPFRAGTTL;
-        return (u_char *) & long_return;
+        ret_value = IPFRAGTTL;
+        type = ASN_INTEGER;
+        break;
     case IPREASMREQDS:
-        long_return = ipstat.ips_fragments;
-        return (u_char *) & long_return;
+        ret_value = ipstat.ips_fragments;
+        break;
     case IPREASMOKS:
 #if STRUCT_IPSTAT_HAS_IPS_REASSEMBLED
-        long_return = ipstat.ips_reassembled;
-        return (u_char *) & long_return;
+        ret_value = ipstat.ips_reassembled;
+        break;
 #else
-        return NULL;
+        netsnmp_set_request_error(reqinfo, request, SNMP_NOSUCHOBJECT);
+        continue;
 #endif
     case IPREASMFAILS:
-        long_return = ipstat.ips_fragdropped + ipstat.ips_fragtimeout;
-        return (u_char *) & long_return;
+        ret_value = ipstat.ips_fragdropped + ipstat.ips_fragtimeout;
+        break;
     case IPFRAGOKS:            /* XXX */
-        long_return = ipstat.ips_fragments
+        ret_value = ipstat.ips_fragments
             - (ipstat.ips_fragdropped + ipstat.ips_fragtimeout);
-        return (u_char *) & long_return;
+        break;
     case IPFRAGFAILS:
 #if STRUCT_IPSTAT_HAS_IPS_CANTFRAG
-        long_return = ipstat.ips_cantfrag;
-        return (u_char *) & long_return;
+        ret_value = ipstat.ips_cantfrag;
+        break;
 #else
-        return NULL;
+        netsnmp_set_request_error(reqinfo, request, SNMP_NOSUCHOBJECT);
+        continue;
 #endif
     case IPFRAGCREATES:
 #if STRUCT_IPSTAT_HAS_IPS_OFRAGMENTS
-        long_return = ipstat.ips_ofragments;
-        return (u_char *) & long_return;
+        ret_value = ipstat.ips_ofragments;
+        break;
 #else
-        return NULL;
+        netsnmp_set_request_error(reqinfo, request, SNMP_NOSUCHOBJECT);
+        continue;
 #endif
     case IPROUTEDISCARDS:
 #if STRUCT_IPSTAT_HAS_IPS_NOROUTE
-        long_return = ipstat.ips_noroute;
-        return (u_char *) & long_return;
+        ret_value = ipstat.ips_noroute;
+        break;
 #else
-        return NULL;
+        netsnmp_set_request_error(reqinfo, request, SNMP_NOSUCHOBJECT);
+        continue;
 #endif
+#ifdef HAVE_SYS_TCPIPSTATS_H
+#undef ipstat
+#endif
+#else                          /* USE_TRADITIONAL_IPSTAT */
 
-#endif                          /* USE_TRADITIONAL_IPSTAT */
+#ifdef hpux11
+    case IPFORWARDING:
+    case IPDEFAULTTTL:
+    case IPREASMTIMEOUT:
+        type = ASN_INTEGER;
+    case IPINRECEIVES:
+    case IPINHDRERRORS:
+    case IPINADDRERRORS:
+    case IPFORWDATAGRAMS:
+    case IPINUNKNOWNPROTOS:
+    case IPINDISCARDS:
+    case IPINDELIVERS:
+    case IPOUTREQUESTS:
+    case IPOUTDISCARDS:
+    case IPOUTNOROUTES:
+    case IPREASMREQDS:
+    case IPREASMOKS:
+    case IPREASMFAILS:
+    case IPFRAGOKS:
+    case IPFRAGFAILS:
+    case IPFRAGCREATES:
+    case IPROUTEDISCARDS:
+	/*
+	 * This is a bit of a hack, to shoehorn the HP-UX 11
+	 * single-object retrieval approach into the caching
+	 * architecture.
+	 */
+	if (ip_load(NULL, (void*)subid) == -1 ) {
+            netsnmp_set_request_error(reqinfo, request, SNMP_NOSUCHOBJECT);
+            continue;
+	}
+        ret_value = ipstat;
+        break;
+#else                  /* hpux11 */
+
 #ifdef WIN32
     case IPFORWARDING:
-        *write_method = writeIpStats;
         ipForwarding = ipstat.dwForwarding;
-        return (u_char *) & ipstat.dwForwarding;
+        ret_value    = ipstat.dwForwarding;
+        type = ASN_INTEGER;
+        break;
     case IPDEFAULTTTL:
-        *write_method = writeIpStats;
-        ipTTL = ipstat.dwDefaultTTL;
-        return (u_char *) & ipstat.dwDefaultTTL;
+        ipTTL     = ipstat.dwDefaultTTL;
+        ret_value = ipstat.dwDefaultTTL;
+        type = ASN_INTEGER;
+        break;
     case IPINRECEIVES:
-        return (u_char *) & ipstat.dwInReceives;
+        ret_value = ipstat.dwInReceives;
+        break;
     case IPINHDRERRORS:
-        return (u_char *) & ipstat.dwInHdrErrors;
+        ret_value = ipstat.dwInHdrErrors;
+        break;
     case IPINADDRERRORS:
-        return (u_char *) & ipstat.dwInAddrErrors;
+        ret_value = ipstat.dwInAddrErrors;
+        break;
     case IPFORWDATAGRAMS:
-        return (u_char *) & ipstat.dwForwDatagrams;
+        ret_value = ipstat.dwForwDatagrams;
+        break;
     case IPINUNKNOWNPROTOS:
-        return (u_char *) & ipstat.dwInUnknownProtos;
+        ret_value = ipstat.dwInUnknownProtos;
+        break;
     case IPINDISCARDS:
-        return (u_char *) & ipstat.dwInDiscards;
+        ret_value = ipstat.dwInDiscards;
+        break;
     case IPINDELIVERS:
-        return (u_char *) & ipstat.dwInDelivers;
+        ret_value = ipstat.dwInDelivers;
+        break;
     case IPOUTREQUESTS:
-        return (u_char *) & ipstat.dwOutRequests;
+        ret_value = ipstat.dwOutRequests;
+        break;
     case IPOUTDISCARDS:
-        return (u_char *) & ipstat.dwOutDiscards;
+        ret_value = ipstat.dwOutDiscards;
+        break;
     case IPOUTNOROUTES:
-        return (u_char *) & ipstat.dwOutNoRoutes;
+        ret_value = ipstat.dwOutNoRoutes;
+        break;
     case IPREASMTIMEOUT:
-        return (u_char *) & ipstat.dwReasmTimeout;
+        ret_value = ipstat.dwReasmTimeout;
+        type = ASN_INTEGER;
+        break;
     case IPREASMREQDS:
-        return (u_char *) & ipstat.dwReasmReqds;
+        ret_value = ipstat.dwReasmReqds;
+        break;
     case IPREASMOKS:
-        return (u_char *) & ipstat.dwReasmOks;
+        ret_value = ipstat.dwReasmOks;
+        break;
     case IPREASMFAILS:
-        return (u_char *) & ipstat.dwReasmFails;
+        ret_value = ipstat.dwReasmFails;
+        break;
     case IPFRAGOKS:
-        return (u_char *) & ipstat.dwFragOks;
+        ret_value = ipstat.dwFragOks;
+        break;
     case IPFRAGFAILS:
-        return (u_char *) & ipstat.dwFragFails;
+        ret_value = ipstat.dwFragFails;
+        break;
     case IPFRAGCREATES:
-        return (u_char *) & ipstat.dwFragCreates;
+        ret_value = ipstat.dwFragCreates;
+        break;
     case IPROUTEDISCARDS:
-        return (u_char *) & ipstat.dwRoutingDiscards;
-#endif                          /* WIN32 */
+        ret_value = ipstat.dwRoutingDiscards;
+        break;
+#endif                  /* WIN32 */
+#endif                  /* hpux11 */
+#endif                  /* USE_TRADITIONAL_IPSTAT */
+#endif			/* USES_SNMP_DESIGNED_IPSTAT */
 
+    case IPADDRTABLE:
+    case IPROUTETABLE:
+    case IPMEDIATABLE:
+        /*
+	 * These are not actually valid scalar objects.
+	 * The relevant table registrations should take precedence,
+	 *   so skip these three subtrees, regardless of architecture.
+	 */
+        netsnmp_set_request_error(reqinfo, request, SNMP_NOSUCHOBJECT);
+        continue;
+
+	    }
+	    snmp_set_var_typed_value(request->requestvb, type,
+			             (u_char *)&ret_value, sizeof(ret_value));
+	}
+        break;
+
+    case MODE_GETNEXT:
+    case MODE_SET_RESERVE1:
+		/* XXX - Windows currently supports setting this */
+    case MODE_SET_RESERVE2:
+    case MODE_SET_ACTION:
+    case MODE_SET_COMMIT:
+    case MODE_SET_FREE:
+    case MODE_SET_UNDO:
     default:
-        DEBUGMSGTL(("snmpd", "unknown sub-id %d in var_ip\n", vp->magic));
+        break;
     }
-    return NULL;
 
-#ifdef HAVE_SYS_TCPIPSTATS_H
-#undef	ipstat
-#endif
+    return SNMP_ERR_NOERROR;
 }
 
 
@@ -532,28 +596,17 @@ var_ip(struct variable *vp,
 	 *
 	 *********************/
 
-long
-read_ip_stat(IP_STAT_STRUCTURE * ipstat, int magic)
-{
-    long            ret_value = 0;
-#if (defined(CAN_USE_SYSCTL) && defined(IPCTL_STATS))
-    int             i;
-#endif
-#if !(defined (linux) || defined(solaris2))
-    static int      ttl, forward;
-#endif
+
 #ifdef hpux11
+int
+ip_load(netsnmp_cache *cache, void *vmagic)
+{
     int             fd;
     struct nmparms  p;
     unsigned int    ulen;
-#endif
-
-#if (defined(CAN_USE_SYSCTL) && defined(IPCTL_STATS))
-    static int      sname[4] = { CTL_NET, PF_INET, IPPROTO_IP, 0 };
-    size_t          len;
-#endif
-
-#ifdef hpux11
+    int             ret;
+    int             magic = (int) vmagic;
+    
     if ((fd = open_mib("/dev/ip", O_RDONLY, 0, NM_ASYNC_OFF)) < 0)
         return (-1);            /* error */
 
@@ -624,217 +677,174 @@ read_ip_stat(IP_STAT_STRUCTURE * ipstat, int magic)
         return (0);
     }
 
-    p.buffer = (void *) ipstat;
+    p.buffer = (void *)&ipstat;
     ulen = sizeof(IP_STAT_STRUCTURE);
     p.len = &ulen;
     ret_value = get_mib_info(fd, &p);
     close_mib(fd);
 
     return (ret_value);         /* 0: ok, < 0: error */
+}
 #else                           /* hpux11 */
-
-
-    if (ip_stats_cache_marker &&
-        (!atime_ready
-         (ip_stats_cache_marker, IP_STATS_CACHE_TIMEOUT * 1000)))
-#if !(defined(linux) || defined(solaris2))
-        return ((magic == IPFORWARDING ? forward :
-                 (magic == IPDEFAULTTTL ? ttl : 0)));
-#else
-        return 0;
-#endif
-
-    if (ip_stats_cache_marker)
-        atime_setMarker(ip_stats_cache_marker);
-    else
-        ip_stats_cache_marker = atime_newMarker();
-
-
 #ifdef linux
-    ret_value = linux_read_ip_stat(ipstat);
-#endif
+int
+ip_load(netsnmp_cache *cache, void *vmagic)
+{
+    long ret_value = -1;
 
+    ret_value = linux_read_ip_stat(&ipstat);
+
+    ip_valid = (ret_value == 0);
+    return ret_value;
+}
+#else                           /* linux */
 #ifdef solaris2
+int
+ip_load(netsnmp_cache *cache, void *vmagic)
+{
+    long ret_value = -1;
+
     ret_value =
-        getMibstat(MIB_IP, ipstat, sizeof(mib2_ip_t), GET_FIRST,
+        getMibstat(MIB_IP, &ipstat, sizeof(mib2_ip_t), GET_FIRST,
                    &Get_everything, NULL);
-#endif
 
+    ip_valid = (ret_value == 0);
+    return ret_value;
+}
+#else                           /* solaris2 */
 #ifdef WIN32
-    ret_value = GetIpStatistics(ipstat);
-#endif
+int
+ip_load(netsnmp_cache *cache, void *vmagic)
+{
+    long ret_value = -1;
 
-#if !(defined(linux) || defined(solaris2) || defined(WIN32))
-    if (magic == IPFORWARDING) {
+    ret_value = GetIpStatistics(&ipstat);
 
-#if defined(CAN_USE_SYSCTL) && defined(IPCTL_STATS)
+    ip_valid = (ret_value == 0);
+    return ret_value;
+}
+#else                           /* WIN32 */
+#if (defined(CAN_USE_SYSCTL) && defined(IPCTL_STATS))
+int
+ip_load(netsnmp_cache *cache, void *vmagic)
+{
+    long            ret_value = 0;
+    int             i;
+    static int      sname[4] = { CTL_NET, PF_INET, IPPROTO_IP, 0 };
+    size_t          len;
+    int             magic = (int) vmagic;
+
+    switch (magic) {
+    case IPFORWARDING:
         len = sizeof i;
         sname[3] = IPCTL_FORWARDING;
         if (sysctl(sname, 4, &i, &len, 0, 0) < 0)
-            forward = -1;
+            return -1;
         else
-            forward = (i ? 1    /* GATEWAY */
-                       : 2 /* HOST    */ );
-#else
-        if (!auto_nlist
-            (IP_FORWARDING_SYMBOL, (char *) &ret_value, sizeof(ret_value)))
-            forward = -1;
-        else
-            forward = (ret_value ? 1    /* GATEWAY */
-                       : 2 /* HOST    */ );
-#endif
-        if (forward == -1) {
-            free(ip_stats_cache_marker);
-            ip_stats_cache_marker = NULL;
-        }
-        return forward;
-    }
+            return (i ? 1 /* GATEWAY */
+                      : 2 /* HOST    */ );
 
-    if (magic == IPDEFAULTTTL) {
-
-#if (defined(CAN_USE_SYSCTL) && defined(IPCTL_STATS))
+    case IPDEFAULTTTL:
         len = sizeof i;
         sname[3] = IPCTL_DEFTTL;
         if (sysctl(sname, 4, &i, &len, 0, 0) < 0)
-            ttl = -1;
+            return -1;
         else
-            ttl = i;
-#else
+            return i;
+
+    default:
+        len = sizeof(ipstat);
+        sname[3] = IPCTL_STATS;
+        ret_value = sysctl(sname, 4, &ipstat, &len, 0, 0);
+
+        ip_valid = (ret_value == 0);
+        return ret_value;
+    }
+}
+#else		/* (defined(CAN_USE_SYSCTL) && defined(IPCTL_STATS)) */
+#ifdef HAVE_SYS_TCPIPSTATS_H
+int
+ip_load(netsnmp_cache *cache, void *vmagic)
+{
+    long ret_value = -1;
+    int  magic     = (int) vmagic;
+
+    switch (magic) {
+    case IPFORWARDING:
+        if (!auto_nlist
+            (IP_FORWARDING_SYMBOL, (char *) &ret_value, sizeof(ret_value)))
+            return -1;
+        else
+            return (ret_value ? 1 /* GATEWAY */
+                              : 2 /* HOST    */ );
+
+    case IPDEFAULTTTL:
         if (!auto_nlist
             (TCP_TTL_SYMBOL, (char *) &ret_value, sizeof(ret_value)))
-            ttl = -1;
+            return -1;
         else
-            ttl = ret_value;
-#endif
-        if (ttl == -1) {
-            free(ip_stats_cache_marker);
-            ip_stats_cache_marker = NULL;
-        }
-        return ttl;
+            return ret_value;
+
+    default:
+        ret_value = sysmp(MP_SAGET, MPSA_TCPIPSTATS, &ipstat, sizeof ipstat);
+
+        ip_valid = (ret_value == 0);
+        return ret_value;
     }
-
-#ifdef HAVE_SYS_TCPIPSTATS_H
-    ret_value = sysmp(MP_SAGET, MPSA_TCPIPSTATS, ipstat, sizeof *ipstat);
-#endif
-
-#if (defined(CAN_USE_SYSCTL) && defined(IPCTL_STATS))
-    len = sizeof *ipstat;
-    sname[3] = IPCTL_STATS;
-    ret_value = sysctl(sname, 4, ipstat, &len, 0, 0);
-#endif
+}
+#else				/* HAVE_SYS_TCPIPSTATS_H */
 #ifdef IPSTAT_SYMBOL
-    if (auto_nlist(IPSTAT_SYMBOL, (char *) ipstat, sizeof(*ipstat)))
-        ret_value = 0;
-#endif
-#endif                          /* !(defined(linux) || defined(solaris2)) */
+int
+ip_load(netsnmp_cache *cache, void *vmagic)
+{
+    long ret_value = -1;
+    int  magic     = (int) vmagic;
 
-    if (ret_value == -1) {
-        free(ip_stats_cache_marker);
-        ip_stats_cache_marker = NULL;
+    switch (magic) {
+    case IPFORWARDING:
+        if (!auto_nlist
+            (IP_FORWARDING_SYMBOL, (char *) &ret_value, sizeof(ret_value)))
+            return -1;
+        else
+            return (ret_value ? 1 /* GATEWAY */
+                              : 2 /* HOST    */ );
+
+    case IPDEFAULTTTL:
+        if (!auto_nlist
+            (TCP_TTL_SYMBOL, (char *) &ret_value, sizeof(ret_value)))
+            return -1;
+        else
+            return ret_value;
+
+    default:
+        if (auto_nlist(IPSTAT_SYMBOL, (char *)&ipstat, sizeof(ipstat)))
+            ret_value = 0;
+
+        ip_valid = (ret_value == 0);
+        return ret_value;
     }
+}
+#else				/* IPSTAT_SYMBOL */
+int
+ip_load(netsnmp_cache *cache, void *vmagic)
+{
+    long ret_value = -1;
+
+    ip_valid = (ret_value == 0);
     return ret_value;
+}
+#endif				/* IPSTAT_SYMBOL */
+#endif				/* HAVE_SYS_TCPIPSTATS_H */
+#endif		/* (defined(CAN_USE_SYSCTL) && defined(IPCTL_STATS)) */
 #endif                          /* hpux11 */
+#endif                          /* linux */
+#endif                          /* solaris2 */
+#endif                          /* WIN32 */
+
+void
+ip_free(void)
+{
+    memset(&ipstat, 0, sizeof(ipstat));
+    ip_valid = 0;
 }
 
-#ifdef WIN32
-int
-writeIpStats(int action,
-             u_char * var_val,
-             u_char var_val_type,
-             size_t var_val_len,
-             u_char * statP, oid * name, size_t name_len)
-{
-    long           *buf, *oldbuf;
-    MIB_IPSTATS     ipStats;
-    int             var;
-    int             retval = SNMP_ERR_NOERROR;
-    /*
-     * #define for ip scalar objects are 1 less than corresponding sub-id in MIB
-     * * i.e. IPFORWARDING defined as 0, but ipForwarding registered as 1
-     */
-    var = name[7] - 1;
-    switch (var) {
-    case IPFORWARDING:
-        buf = &ipForwarding;
-        oldbuf = &oldipForwarding;
-        break;
-    case IPDEFAULTTTL:
-        buf = &ipTTL;
-        oldbuf = &oldipTTL;
-        break;
-    default:
-        return SNMP_ERR_NOTWRITABLE;
-    }
-
-    switch (action) {
-    case RESERVE1:             /* Check values for acceptability */
-        if (var_val_type != ASN_INTEGER) {
-            snmp_log(LOG_ERR, "not integer\n");
-            return SNMP_ERR_WRONGTYPE;
-        }
-        if (var_val_len > sizeof(int)) {
-            snmp_log(LOG_ERR, "bad length\n");
-            return SNMP_ERR_WRONGLENGTH;
-        }
-        switch (var) {
-        case IPFORWARDING:
-            if (((int) *var_val < 1) || ((int) *var_val > 2)) {
-                snmp_log(LOG_ERR, "not supported ip forwarding : %d\n",
-                         *var_val);
-                return SNMP_ERR_WRONGVALUE;
-            }
-            break;
-        case IPDEFAULTTTL:
-            if ((int) *var_val < 0) {
-                snmp_log(LOG_ERR, "not supported ip Default : %d\n",
-                         (int) *var_val);
-                return SNMP_ERR_WRONGVALUE;
-            }
-        }
-        break;
-
-    case RESERVE2:             /* Allocate memory and similar resources */
-        break;
-
-    case ACTION:
-        /*
-         * Save the old value, in case of UNDO 
-         */
-
-        *oldbuf = *buf;
-        *buf = (int) *var_val;
-        break;
-
-    case UNDO:                 /* Reverse the SET action and free resources */
-        *buf = *oldbuf;
-        break;
-
-    case COMMIT:               /* Confirm the SET, performing any irreversible actions,
-                                 * and free resources */
-        switch (var) {
-        case IPFORWARDING:
-            /*
-             * Currently windows supports only ON->OFF 
-             */
-            ipStats.dwForwarding = *buf;
-            ipStats.dwDefaultTTL = MIB_USE_CURRENT_TTL;
-            if (SetIpStatistics(&ipStats) != NO_ERROR) {
-                retval = SNMP_ERR_COMMITFAILED;
-                snmp_log(LOG_ERR,
-                         "Can't set ipForwarding, supports only enable->disable \n");
-            }
-            break;
-        case IPDEFAULTTTL:
-            if (SetIpTTL((UINT) * buf) != NO_ERROR) {
-                retval = SNMP_ERR_COMMITFAILED;
-                snmp_log(LOG_ERR, "Can't set ipDefaultTTL\n");
-            }
-            break;
-        }
-
-    case FREE:                 /* Free any resources allocated */
-        break;
-    }
-    return retval;
-}                               /* end of writeIpStats */
-#endif                          /* WIN32 */
