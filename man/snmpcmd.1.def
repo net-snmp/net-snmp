@@ -27,7 +27,7 @@
 .\" Use is subject to license terms specified in the COPYING file
 .\" distributed with the Net-SNMP package.
 .\" ******************************************************************/
-.TH SNMPCMD 1 "25 Jul 2003" VVERSIONINFO "Net-SNMP"
+.TH SNMPCMD 1 "09 Jan 2004" VVERSIONINFO "Net-SNMP"
 .UC 4
 .SH NAME
 snmpcmd - commands to communicate with a network entity using SNMP Requests.
@@ -570,10 +570,10 @@ There are also "upper case" versions of each of these options, which
 allow the corresponding logging mechanism to be restricted to certain
 priorities of message.  Using standard error logging as an example:
 .TP
-.B -Le pri
+.B -LE pri
 will log messages of priority 'pri' and above to standard error.
 .TP
-.B -Le p1-p2
+.B -LE p1-p2
 will log messages with priority between 'p1' and 'p2' (inclusive) to
 standard error.
 .PP
