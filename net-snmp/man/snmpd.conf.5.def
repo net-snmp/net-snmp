@@ -1,4 +1,4 @@
-.TH SNMPD.CONF 5 "27 Jan 2000"
+.TH SNMPD.CONF 5 "31 Oct 2000"
 .ds )H U.C. Davis, ECE Dept.
 .ds ]W VVERSIONINFO
 .UC 4
@@ -297,7 +297,7 @@ above example, the default transport mapping is
 .IP "interface NAME TYPE SPEED"
 For interfaces where the agent fails to guess correctly on the type and
 speed, this directive can supply additional information.
-TYPE is a type value as given in the IANAidType-MIB.
+TYPE is a type value as given in the IANAifType-MIB.
 .IP "authtrapenable NUMBER"
 Setting authtrapenable to 1 enables generation of authentication failure
 traps. The default value is 2 (disable).
