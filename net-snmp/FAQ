@@ -1274,7 +1274,8 @@ But compiling this fails! Why?
   *not* those used for compiling the Net-SNMP (or UCD) library.
   If these are different (e.g. 'gcc' used for one and 'cc' for the other)
   then this may well cause problems.  It's much safer to use a consistent
-  environment for both.
+  environment for both.  This issue is discussed in greater detail in
+  the README.solaris file.
 
     Also note that the v5 Net-SNMP suite *must* be configured to provide
   shared libraries in order for the perl modules to work correctly.  This
