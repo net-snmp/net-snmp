@@ -2110,7 +2110,7 @@ if test $cv_have_sys_disklabel_h = yes; then
 fi
 
 # OpenSSL
-AC_CHECK_HEADERS(openssl/hmac.h openssl/evp.h openssl/aes.h openssl/des.h)
+AC_CHECK_HEADERS(openssl/hmac.h openssl/evp.h openssl/aes.h openssl/des.h openssl/dh.h)
 AC_CHECK_HEADERS(security/cryptoki.h)
 
 # Printing

@@ -17671,7 +17671,8 @@ fi
 
 
 
-for ac_header in openssl/hmac.h openssl/evp.h openssl/aes.h openssl/des.h
+
+for ac_header in openssl/hmac.h openssl/evp.h openssl/aes.h openssl/des.h openssl/dh.h
 do
 as_ac_Header=`echo "ac_cv_header_$ac_header" | $as_tr_sh`
 if eval "test \"\${$as_ac_Header+set}\" = set"; then
