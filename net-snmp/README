@@ -46,13 +46,13 @@ SUPPORTED ARCHITECTURES
 
 AVAILABILITY
 
-  ftp.ece.ucdavis.edu:/pub/snmp/ucd-snmp.README
-  ftp.ece.ucdavis.edu:/pub/snmp/ucd-snmp.tar.gz
+  ftp://ftp.ece.ucdavis.edu:/pub/snmp/ucd-snmp.README
+  ftp://ftp.ece.ucdavis.edu:/pub/snmp/ucd-snmp.tar.gz
 
-  or [mirror in Switzerland]:
+  or [mirrors in Switzerland and Japan]:
 
-  sunsite.cnlab-switch.ch:/mirror/ucd-snmp/ucd-snmp.README
-  sunsite.cnlab-switch.ch:/mirror/ucd-snmp/ucd-snmp.tar.gz
+  ftp://sunsite.cnlab-switch.ch:/mirror/ucd-snmp/ucd-snmp.tar.gz
+  ftp://ftp.win.or.jp/pub/network/snmp/ucd-snmp/ucd-snmp.tar.gz
 
 INSTALLATION
 
@@ -169,6 +169,7 @@ THANKS
     Simon Burge <simonb@telstra.com.au>
     David Paul Zimmerman <dpz@apple.com>
     Alan Batie <batie@aahz.jf.intel.com>
+    Michael Douglass <mikedoug@texas.net>
 
   We've probably forgotten people on this list.  Let us know if you've
   contributed code and we've left you out.

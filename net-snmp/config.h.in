@@ -10,11 +10,12 @@
 
 #define DEFAULT_MIBS "IP-MIB:IF-MIB:TCP-MIB:UDP-MIB:SNMPv2-MIB:RFC1213-MIB:UCD-SNMP-MIB"
 
-/* default location to look for mibs to load */
+/* default location to look for mibs to load using the above tokens
+   and/or those in the MIBS envrionment variable*/
 
 #undef DEFAULT_MIBDIRS
 
-/* default location to look for mibs to load */
+/* default mib files to load, specified by path. */
 
 #undef DEFAULT_MIBFILES
 
@@ -218,6 +219,9 @@
 /* Define if you have the <fstab.h> header file.  */
 #undef HAVE_FSTAB_H
 
+/* Define if you have the <getopt.h> header file.  */
+#undef HAVE_GETOPT_H
+
 /* Define if you have the <inet/mib2.h> header file.  */
 #undef HAVE_INET_MIB2_H
 
@@ -346,6 +350,9 @@
 
 /* Define if you have the <sys/mbuf.h> header file.  */
 #undef HAVE_SYS_MBUF_H
+
+/* Define if you have the <sys/mntent.h> header file.  */
+#undef HAVE_SYS_MNTENT_H
 
 /* Define if you have the <sys/mnttab.h> header file.  */
 #undef HAVE_SYS_MNTTAB_H

@@ -679,7 +679,7 @@ smux_parse_var(varbind, varbindlength, objid, oidlen, varlength)
 		*varlength = str_len;
 		return smux_str;
 		break;
-	    case OPAQUE:
+	    case ASNT_OPAQUE:
 	    case NSAP:
 	    case ASN_OBJECT_ID:
 		objid_len = MAX_OID_LEN;

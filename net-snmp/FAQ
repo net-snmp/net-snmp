@@ -52,6 +52,7 @@ TABLE OF CONTENTS
    I can't load any of the mib files, and they seem to be missing
        the first two characters of the filename.  What's happening?
    How do I compile with 'gcc' instead of 'cc'?
+   But gcc doesn't compile it successfully on my new Solaris system. Why not?
    I cannot set any variables in the MIB.
    Sometimes I seem to get the wrong answers.  Why?
 
@@ -80,6 +81,7 @@ Where can I get it?
 
   - ftp://ftp.ece.ucdavis.edu/pub/snmp/ucd-snmp.tar.gz
   - ftp://sunsite.cnlab-switch.ch/mirror/ucd-snmp/ucd-snmp.tar.gz
+  - ftp://ftp.win.or.jp/pub/network/snmp/ucd-snmp/ucd-snmp.tar.gz
 
 
 What documentation is available?
@@ -549,6 +551,12 @@ What's this about a "party database", when I try to send a query?
 
 Why can't I see values in the UCDavis 'extensible' tree?
 -------------------------------------------------------
+
+  The extensible tree is designed to report things you ask it to report
+  on.  If you don't declare anything in the snmpd.conf file for it to
+  monitor, it will not report anything.  See the snmpd.conf manual page
+  and the EXAMPLE.conf file for details no configuring the agent.
+
 Why can't I see values in the <INSERT ENTERPRISE HERE> tree?
 -----------------------------------------------------------
 
@@ -716,6 +724,24 @@ How do I compile with 'gcc' instead of 'cc'?
 
   Set the environmental variable 'CC' to have the value 'gcc' before
   running the configure script.
+
+
+But gcc doesn't compile it successfully on my new Solaris system. Why not?
+-------------------------------------------------------------------------
+
+  Whenever you upgrade the operating system under Solaris, you need to
+  reinstall gcc, and run the 'fixincludes' script.  (This is probably
+  a sensible step to take when you upgrade any operating system).
+    Under Solaris 2.6, there is also a bug in the gcc 'fixinc.sv4' script.
+  This needs an additional line as follows:
+
+*** fixinc.svr4.cln     Thu Jun 15 22:03:29 1995
+--- fixinc.svr4 Tue Nov 25 09:47:57 1997
+***************
+*** 191,191 ****
+--- 191,192 ----
+          s/__STDC__ - 0 == 0/!defined (__STRICT_ANSI__)/g
++         s/__STDC__ - 0 == 1/defined (__STRICT_ANSI__)/g
 
 
 I cannot set any variables in the MIB.
