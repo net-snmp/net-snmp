@@ -101,6 +101,7 @@ snmp_parse_args_descriptions(FILE *outf)
   fprintf(outf, "  \t\t    noFlags:\told style quick printing\n");
   fprintf(outf, "  \t\t    o:\t\tprint oids numerically\n");
   fprintf(outf, "  \t\t    e:\t\tprint enums numerically\n");
+  fprintf(outf, "  \t\t    b:\t\tdont break oid indexes down\n");
   fprintf(outf, "  -f\t\tprint full object identifiers on output.\n");
   fprintf(outf, "  -s\t\tprint only last element of object identifiers.\n");
   fprintf(outf, "  -S\t\tmodule id plus last element of object identifiers.\n");
@@ -168,6 +169,10 @@ snmp_parse_args(int argc,
                       case 'e':
                           ds_set_boolean(DS_LIBRARY_ID,
                                          DS_LIB_PRINT_NUMERIC_ENUM, 1);
+                          break;
+                      case 'b':
+                          ds_set_boolean(DS_LIBRARY_ID,
+                                         DS_LIB_DONT_BREAKDOWN_OIDS, 1);
                           break;
                       default:
                           fprintf(stderr,"unknown option after -q flag\n");

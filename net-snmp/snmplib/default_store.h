@@ -7,7 +7,7 @@ extern "C" {
 #endif
 
 #define DS_MAX_IDS 3
-#define DS_MAX_SUBIDS 10
+#define DS_MAX_SUBIDS 20
 
 /* begin storage definitions */
 /* These definitions correspond with the "storid" argument to the API */
@@ -28,6 +28,8 @@ extern "C" {
 #define DS_LIB_MIB_REPLACE         7  /* replace objects from latest module */
 #define DS_LIB_PRINT_NUMERIC_ENUM  8  /* print only numeric enum values */
 #define DS_LIB_PRINT_NUMERIC_OIDS  9  /* print only numeric enum values */
+#define DS_LIB_DONT_BREAKDOWN_OIDS 10 /* dont print oid indexes specially */
+#define DS_LIB_ALARM_DONT_USE_SIG  11 /* don't use the alarm() signal */
 
 /* library integers */
 #define DS_LIB_MIB_WARNINGS  0

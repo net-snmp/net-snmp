@@ -156,19 +156,29 @@ alarm_handler(int a) {
   set_an_alarm();
 }
 
-void
-set_an_alarm(void) {
+int
+get_next_alarm_delay_time(void) {
   struct snmp_alarm *sa_ptr;
-  int nexttime;
-  
+  int nexttime = 0;
+
   sa_ptr = sa_find_next();
   if (sa_ptr) {
     nexttime = sa_ptr->nextcall - time(NULL);
+    if (nexttime <= 0)
+      nexttime = 1; /* occurred already, return 1 second */
+  }
+  return nexttime;
+}
 
-    if (nexttime <= 0) /* just in case some really should be run now
-                          by freak timing accident. */
-      nexttime = 1;
 
+void
+set_an_alarm(void) {
+  int nexttime = get_next_alarm_delay_time();
+  
+  /* we don't use signals if they asked us nicely not to.  It's
+     expected they'll check the next alarm time and do their own
+     calling of run_alarms(). */
+  if (ds_get_boolean(DS_LIBRARY_ID, DS_LIB_ALARM_DONT_USE_SIG) && nexttime) {
 #ifndef WIN32
 #ifdef SIGALRM
     alarm(nexttime);
