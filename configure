@@ -5201,12 +5201,12 @@ fi
 
 
 ac_safe_struct=`echo "ifnet" | sed 'y%./+-%__p_%'`
-ac_safe_member=`echo "if_type" | sed 'y%./+-%__p_%'`
+ac_safe_member=`echo "if_speed" | sed 'y%./+-%__p_%'`
 ac_safe_all="ac_cv_struct_${ac_safe_struct}_has_${ac_safe_member}"
   ac_uc_define=STRUCT_`echo "${ac_safe_struct}_HAS_${ac_safe_member}" | sed 'y%abcdefghijklmnopqrstuvwxyz./-%ABCDEFGHIJKLMNOPQRSTUVWXYZ___%'`
 
-echo $ac_n "checking for ifnet.if_type""... $ac_c" 1>&6
-echo "configure:5210: checking for ifnet.if_type" >&5
+echo $ac_n "checking for ifnet.if_speed""... $ac_c" 1>&6
+echo "configure:5210: checking for ifnet.if_speed" >&5
 if eval "test \"`echo '$''{'$ac_safe_all'+set}'`\" = set"; then
   echo $ac_n "(cached) $ac_c" 1>&6
 else
@@ -5263,7 +5263,7 @@ struct ifnet {
 int main() {
 
 struct ifnet testit; 
-testit.if_type $defineit;
+testit.if_speed $defineit;
 
 ; return 0; }
 EOF
@@ -5297,12 +5297,12 @@ fi
 
 
 ac_safe_struct=`echo "ifnet" | sed 'y%./+-%__p_%'`
-ac_safe_member=`echo "if_imcasts" | sed 'y%./+-%__p_%'`
+ac_safe_member=`echo "if_type" | sed 'y%./+-%__p_%'`
 ac_safe_all="ac_cv_struct_${ac_safe_struct}_has_${ac_safe_member}"
   ac_uc_define=STRUCT_`echo "${ac_safe_struct}_HAS_${ac_safe_member}" | sed 'y%abcdefghijklmnopqrstuvwxyz./-%ABCDEFGHIJKLMNOPQRSTUVWXYZ___%'`
 
-echo $ac_n "checking for ifnet.if_imcasts""... $ac_c" 1>&6
-echo "configure:5306: checking for ifnet.if_imcasts" >&5
+echo $ac_n "checking for ifnet.if_type""... $ac_c" 1>&6
+echo "configure:5306: checking for ifnet.if_type" >&5
 if eval "test \"`echo '$''{'$ac_safe_all'+set}'`\" = set"; then
   echo $ac_n "(cached) $ac_c" 1>&6
 else
@@ -5359,7 +5359,7 @@ struct ifnet {
 int main() {
 
 struct ifnet testit; 
-testit.if_imcasts $defineit;
+testit.if_type $defineit;
 
 ; return 0; }
 EOF
@@ -5393,12 +5393,12 @@ fi
 
 
 ac_safe_struct=`echo "ifnet" | sed 'y%./+-%__p_%'`
-ac_safe_member=`echo "if_iqdrops" | sed 'y%./+-%__p_%'`
+ac_safe_member=`echo "if_imcasts" | sed 'y%./+-%__p_%'`
 ac_safe_all="ac_cv_struct_${ac_safe_struct}_has_${ac_safe_member}"
   ac_uc_define=STRUCT_`echo "${ac_safe_struct}_HAS_${ac_safe_member}" | sed 'y%abcdefghijklmnopqrstuvwxyz./-%ABCDEFGHIJKLMNOPQRSTUVWXYZ___%'`
 
-echo $ac_n "checking for ifnet.if_iqdrops""... $ac_c" 1>&6
-echo "configure:5402: checking for ifnet.if_iqdrops" >&5
+echo $ac_n "checking for ifnet.if_imcasts""... $ac_c" 1>&6
+echo "configure:5402: checking for ifnet.if_imcasts" >&5
 if eval "test \"`echo '$''{'$ac_safe_all'+set}'`\" = set"; then
   echo $ac_n "(cached) $ac_c" 1>&6
 else
@@ -5455,7 +5455,7 @@ struct ifnet {
 int main() {
 
 struct ifnet testit; 
-testit.if_iqdrops $defineit;
+testit.if_imcasts $defineit;
 
 ; return 0; }
 EOF
@@ -5489,12 +5489,12 @@ fi
 
 
 ac_safe_struct=`echo "ifnet" | sed 'y%./+-%__p_%'`
-ac_safe_member=`echo "if_noproto" | sed 'y%./+-%__p_%'`
+ac_safe_member=`echo "if_iqdrops" | sed 'y%./+-%__p_%'`
 ac_safe_all="ac_cv_struct_${ac_safe_struct}_has_${ac_safe_member}"
   ac_uc_define=STRUCT_`echo "${ac_safe_struct}_HAS_${ac_safe_member}" | sed 'y%abcdefghijklmnopqrstuvwxyz./-%ABCDEFGHIJKLMNOPQRSTUVWXYZ___%'`
 
-echo $ac_n "checking for ifnet.if_noproto""... $ac_c" 1>&6
-echo "configure:5498: checking for ifnet.if_noproto" >&5
+echo $ac_n "checking for ifnet.if_iqdrops""... $ac_c" 1>&6
+echo "configure:5498: checking for ifnet.if_iqdrops" >&5
 if eval "test \"`echo '$''{'$ac_safe_all'+set}'`\" = set"; then
   echo $ac_n "(cached) $ac_c" 1>&6
 else
@@ -5551,7 +5551,7 @@ struct ifnet {
 int main() {
 
 struct ifnet testit; 
-testit.if_noproto $defineit;
+testit.if_iqdrops $defineit;
 
 ; return 0; }
 EOF
@@ -5585,12 +5585,12 @@ fi
 
 
 ac_safe_struct=`echo "ifnet" | sed 'y%./+-%__p_%'`
-ac_safe_member=`echo "if_omcasts" | sed 'y%./+-%__p_%'`
+ac_safe_member=`echo "if_noproto" | sed 'y%./+-%__p_%'`
 ac_safe_all="ac_cv_struct_${ac_safe_struct}_has_${ac_safe_member}"
   ac_uc_define=STRUCT_`echo "${ac_safe_struct}_HAS_${ac_safe_member}" | sed 'y%abcdefghijklmnopqrstuvwxyz./-%ABCDEFGHIJKLMNOPQRSTUVWXYZ___%'`
 
-echo $ac_n "checking for ifnet.if_omcasts""... $ac_c" 1>&6
-echo "configure:5594: checking for ifnet.if_omcasts" >&5
+echo $ac_n "checking for ifnet.if_noproto""... $ac_c" 1>&6
+echo "configure:5594: checking for ifnet.if_noproto" >&5
 if eval "test \"`echo '$''{'$ac_safe_all'+set}'`\" = set"; then
   echo $ac_n "(cached) $ac_c" 1>&6
 else
@@ -5647,11 +5647,107 @@ struct ifnet {
 int main() {
 
 struct ifnet testit; 
-testit.if_omcasts $defineit;
+testit.if_noproto $defineit;
 
 ; return 0; }
 EOF
 if { (eval echo configure:5655: \"$ac_compile\") 1>&5; (eval $ac_compile) 2>&5; }; then
+  rm -rf conftest*
+  eval "${ac_safe_all}=yes"
+else
+  echo "configure: failed program was:" >&5
+  cat conftest.$ac_ext >&5
+  rm -rf conftest*
+  eval "${ac_safe_all}=no" 
+fi
+rm -f conftest*
+
+fi
+
+
+if eval "test \"x$`echo ${ac_safe_all}`\" = \"xyes\""; then
+  echo "$ac_t""yes" 1>&6
+  cat >> confdefs.h <<EOF
+#define $ac_uc_define 1
+EOF
+
+else
+  echo "$ac_t""no" 1>&6
+fi
+
+
+
+
+
+
+ac_safe_struct=`echo "ifnet" | sed 'y%./+-%__p_%'`
+ac_safe_member=`echo "if_omcasts" | sed 'y%./+-%__p_%'`
+ac_safe_all="ac_cv_struct_${ac_safe_struct}_has_${ac_safe_member}"
+  ac_uc_define=STRUCT_`echo "${ac_safe_struct}_HAS_${ac_safe_member}" | sed 'y%abcdefghijklmnopqrstuvwxyz./-%ABCDEFGHIJKLMNOPQRSTUVWXYZ___%'`
+
+echo $ac_n "checking for ifnet.if_omcasts""... $ac_c" 1>&6
+echo "configure:5690: checking for ifnet.if_omcasts" >&5
+if eval "test \"`echo '$''{'$ac_safe_all'+set}'`\" = set"; then
+  echo $ac_n "(cached) $ac_c" 1>&6
+else
+  
+if test "x" = "x"; then
+  defineit="= 0"
+elif test "x" = "xno"; then
+  defineit=""
+else
+  defineit=""
+fi
+cat > conftest.$ac_ext <<EOF
+#line 5703 "configure"
+#include "confdefs.h"
+
+
+#ifdef IFNET_NEEDS_KERNEL
+#define _KERNEL 1
+#endif
+#include <sys/types.h>
+#include <sys/socket.h>
+#include <net/if.h>
+#ifdef linux
+struct ifnet {
+	char	*if_name;		/* name, e.g. ``en'' or ``lo'' */
+	short	if_unit;		/* sub-unit for lower level driver */
+	short	if_mtu;			/* maximum transmission unit */
+	short	if_flags;		/* up/down, broadcast, etc. */
+	int	if_metric;		/* routing metric (external only) */
+	char    if_hwaddr [6];		/* ethernet address */
+	int	if_type;		/* interface type: 1=generic,
+					   28=slip, ether=6, loopback=24 */
+	int	if_speed;		/* interface speed: in bits/sec */
+
+	struct sockaddr if_addr;	/* interface's address */
+	struct sockaddr ifu_broadaddr;	/* broadcast address */
+	struct sockaddr ia_subnetmask; 	/* interface's mask */
+
+	struct	ifqueue {
+		int	ifq_len;
+		int	ifq_drops;
+	} if_snd;			/* output queue */
+	int	if_ipackets;		/* packets received on interface */
+	int	if_ierrors;		/* input errors on interface */
+	int	if_opackets;		/* packets sent on interface */
+	int	if_oerrors;		/* output errors on interface */
+	int	if_collisions;		/* collisions on csma interfaces */
+/* end statistics */
+	struct	ifnet *if_next;
+};
+#endif
+
+
+int main() {
+
+struct ifnet testit; 
+testit.if_omcasts $defineit;
+
+; return 0; }
+EOF
+if { (eval echo configure:5751: \"$ac_compile\") 1>&5; (eval $ac_compile) 2>&5; }; then
   rm -rf conftest*
   eval "${ac_safe_all}=yes"
 else
@@ -5686,7 +5782,7 @@ ac_safe_all="ac_cv_struct_${ac_safe_struct}_has_${ac_safe_member}"
   ac_uc_define=STRUCT_`echo "${ac_safe_struct}_HAS_${ac_safe_member}" | sed 'y%abcdefghijklmnopqrstuvwxyz./-%ABCDEFGHIJKLMNOPQRSTUVWXYZ___%'`
 
 echo $ac_n "checking for ifnet.if_xname""... $ac_c" 1>&6
-echo "configure:5690: checking for ifnet.if_xname" >&5
+echo "configure:5786: checking for ifnet.if_xname" >&5
 if eval "test \"`echo '$''{'$ac_safe_all'+set}'`\" = set"; then
   echo $ac_n "(cached) $ac_c" 1>&6
 else
@@ -5699,7 +5795,7 @@ else
   defineit="no"
 fi
 cat > conftest.$ac_ext <<EOF
-#line 5703 "configure"
+#line 5799 "configure"
 #include "confdefs.h"
 
 
@@ -5747,7 +5843,7 @@ testit.if_xname $defineit;
 
 ; return 0; }
 EOF
-if { (eval echo configure:5751: \"$ac_compile\") 1>&5; (eval $ac_compile) 2>&5; }; then
+if { (eval echo configure:5847: \"$ac_compile\") 1>&5; (eval $ac_compile) 2>&5; }; then
   rm -rf conftest*
   eval "${ac_safe_all}=yes"
 else
@@ -5782,103 +5878,7 @@ ac_safe_all="ac_cv_struct_${ac_safe_struct}_has_${ac_safe_member}"
   ac_uc_define=STRUCT_`echo "${ac_safe_struct}_HAS_${ac_safe_member}" | sed 'y%abcdefghijklmnopqrstuvwxyz./-%ABCDEFGHIJKLMNOPQRSTUVWXYZ___%'`
 
 echo $ac_n "checking for ifnet.if_lastchange.tv_sec""... $ac_c" 1>&6
-echo "configure:5786: checking for ifnet.if_lastchange.tv_sec" >&5
-if eval "test \"`echo '$''{'$ac_safe_all'+set}'`\" = set"; then
-  echo $ac_n "(cached) $ac_c" 1>&6
-else
-  
-if test "x" = "x"; then
-  defineit="= 0"
-elif test "x" = "xno"; then
-  defineit=""
-else
-  defineit=""
-fi
-cat > conftest.$ac_ext <<EOF
-#line 5799 "configure"
-#include "confdefs.h"
-
-
-#ifdef IFNET_NEEDS_KERNEL
-#define _KERNEL 1
-#endif
-#include <sys/types.h>
-#include <sys/socket.h>
-#include <net/if.h>
-#ifdef linux
-struct ifnet {
-	char	*if_name;		/* name, e.g. ``en'' or ``lo'' */
-	short	if_unit;		/* sub-unit for lower level driver */
-	short	if_mtu;			/* maximum transmission unit */
-	short	if_flags;		/* up/down, broadcast, etc. */
-	int	if_metric;		/* routing metric (external only) */
-	char    if_hwaddr [6];		/* ethernet address */
-	int	if_type;		/* interface type: 1=generic,
-					   28=slip, ether=6, loopback=24 */
-	int	if_speed;		/* interface speed: in bits/sec */
-
-	struct sockaddr if_addr;	/* interface's address */
-	struct sockaddr ifu_broadaddr;	/* broadcast address */
-	struct sockaddr ia_subnetmask; 	/* interface's mask */
-
-	struct	ifqueue {
-		int	ifq_len;
-		int	ifq_drops;
-	} if_snd;			/* output queue */
-	int	if_ipackets;		/* packets received on interface */
-	int	if_ierrors;		/* input errors on interface */
-	int	if_opackets;		/* packets sent on interface */
-	int	if_oerrors;		/* output errors on interface */
-	int	if_collisions;		/* collisions on csma interfaces */
-/* end statistics */
-	struct	ifnet *if_next;
-};
-#endif
-
-
-int main() {
-
-struct ifnet testit; 
-testit.if_lastchange.tv_sec $defineit;
-
-; return 0; }
-EOF
-if { (eval echo configure:5847: \"$ac_compile\") 1>&5; (eval $ac_compile) 2>&5; }; then
-  rm -rf conftest*
-  eval "${ac_safe_all}=yes"
-else
-  echo "configure: failed program was:" >&5
-  cat conftest.$ac_ext >&5
-  rm -rf conftest*
-  eval "${ac_safe_all}=no" 
-fi
-rm -f conftest*
-
-fi
-
-
-if eval "test \"x$`echo ${ac_safe_all}`\" = \"xyes\""; then
-  echo "$ac_t""yes" 1>&6
-  cat >> confdefs.h <<EOF
-#define $ac_uc_define 1
-EOF
-
-else
-  echo "$ac_t""no" 1>&6
-fi
-
-
-
-
-
-
-ac_safe_struct=`echo "ifnet" | sed 'y%./+-%__p_%'`
-ac_safe_member=`echo "if_obytes" | sed 'y%./+-%__p_%'`
-ac_safe_all="ac_cv_struct_${ac_safe_struct}_has_${ac_safe_member}"
-  ac_uc_define=STRUCT_`echo "${ac_safe_struct}_HAS_${ac_safe_member}" | sed 'y%abcdefghijklmnopqrstuvwxyz./-%ABCDEFGHIJKLMNOPQRSTUVWXYZ___%'`
-
-echo $ac_n "checking for ifnet.if_obytes""... $ac_c" 1>&6
-echo "configure:5882: checking for ifnet.if_obytes" >&5
+echo "configure:5882: checking for ifnet.if_lastchange.tv_sec" >&5
 if eval "test \"`echo '$''{'$ac_safe_all'+set}'`\" = set"; then
   echo $ac_n "(cached) $ac_c" 1>&6
 else
@@ -5935,7 +5935,7 @@ struct ifnet {
 int main() {
 
 struct ifnet testit; 
-testit.if_obytes $defineit;
+testit.if_lastchange.tv_sec $defineit;
 
 ; return 0; }
 EOF
@@ -5969,12 +5969,12 @@ fi
 
 
 ac_safe_struct=`echo "ifnet" | sed 'y%./+-%__p_%'`
-ac_safe_member=`echo "if_ibytes" | sed 'y%./+-%__p_%'`
+ac_safe_member=`echo "if_obytes" | sed 'y%./+-%__p_%'`
 ac_safe_all="ac_cv_struct_${ac_safe_struct}_has_${ac_safe_member}"
   ac_uc_define=STRUCT_`echo "${ac_safe_struct}_HAS_${ac_safe_member}" | sed 'y%abcdefghijklmnopqrstuvwxyz./-%ABCDEFGHIJKLMNOPQRSTUVWXYZ___%'`
 
-echo $ac_n "checking for ifnet.if_ibytes""... $ac_c" 1>&6
-echo "configure:5978: checking for ifnet.if_ibytes" >&5
+echo $ac_n "checking for ifnet.if_obytes""... $ac_c" 1>&6
+echo "configure:5978: checking for ifnet.if_obytes" >&5
 if eval "test \"`echo '$''{'$ac_safe_all'+set}'`\" = set"; then
   echo $ac_n "(cached) $ac_c" 1>&6
 else
@@ -6031,7 +6031,7 @@ struct ifnet {
 int main() {
 
 struct ifnet testit; 
-testit.if_ibytes $defineit;
+testit.if_obytes $defineit;
 
 ; return 0; }
 EOF
@@ -6065,12 +6065,12 @@ fi
 
 
 ac_safe_struct=`echo "ifnet" | sed 'y%./+-%__p_%'`
-ac_safe_member=`echo "if_addrlist" | sed 'y%./+-%__p_%'`
+ac_safe_member=`echo "if_ibytes" | sed 'y%./+-%__p_%'`
 ac_safe_all="ac_cv_struct_${ac_safe_struct}_has_${ac_safe_member}"
   ac_uc_define=STRUCT_`echo "${ac_safe_struct}_HAS_${ac_safe_member}" | sed 'y%abcdefghijklmnopqrstuvwxyz./-%ABCDEFGHIJKLMNOPQRSTUVWXYZ___%'`
 
-echo $ac_n "checking for ifnet.if_addrlist""... $ac_c" 1>&6
-echo "configure:6074: checking for ifnet.if_addrlist" >&5
+echo $ac_n "checking for ifnet.if_ibytes""... $ac_c" 1>&6
+echo "configure:6074: checking for ifnet.if_ibytes" >&5
 if eval "test \"`echo '$''{'$ac_safe_all'+set}'`\" = set"; then
   echo $ac_n "(cached) $ac_c" 1>&6
 else
@@ -6127,11 +6127,107 @@ struct ifnet {
 int main() {
 
 struct ifnet testit; 
-testit.if_addrlist $defineit;
+testit.if_ibytes $defineit;
 
 ; return 0; }
 EOF
 if { (eval echo configure:6135: \"$ac_compile\") 1>&5; (eval $ac_compile) 2>&5; }; then
+  rm -rf conftest*
+  eval "${ac_safe_all}=yes"
+else
+  echo "configure: failed program was:" >&5
+  cat conftest.$ac_ext >&5
+  rm -rf conftest*
+  eval "${ac_safe_all}=no" 
+fi
+rm -f conftest*
+
+fi
+
+
+if eval "test \"x$`echo ${ac_safe_all}`\" = \"xyes\""; then
+  echo "$ac_t""yes" 1>&6
+  cat >> confdefs.h <<EOF
+#define $ac_uc_define 1
+EOF
+
+else
+  echo "$ac_t""no" 1>&6
+fi
+
+
+
+
+
+
+ac_safe_struct=`echo "ifnet" | sed 'y%./+-%__p_%'`
+ac_safe_member=`echo "if_addrlist" | sed 'y%./+-%__p_%'`
+ac_safe_all="ac_cv_struct_${ac_safe_struct}_has_${ac_safe_member}"
+  ac_uc_define=STRUCT_`echo "${ac_safe_struct}_HAS_${ac_safe_member}" | sed 'y%abcdefghijklmnopqrstuvwxyz./-%ABCDEFGHIJKLMNOPQRSTUVWXYZ___%'`
+
+echo $ac_n "checking for ifnet.if_addrlist""... $ac_c" 1>&6
+echo "configure:6170: checking for ifnet.if_addrlist" >&5
+if eval "test \"`echo '$''{'$ac_safe_all'+set}'`\" = set"; then
+  echo $ac_n "(cached) $ac_c" 1>&6
+else
+  
+if test "x" = "x"; then
+  defineit="= 0"
+elif test "x" = "xno"; then
+  defineit=""
+else
+  defineit=""
+fi
+cat > conftest.$ac_ext <<EOF
+#line 6183 "configure"
+#include "confdefs.h"
+
+
+#ifdef IFNET_NEEDS_KERNEL
+#define _KERNEL 1
+#endif
+#include <sys/types.h>
+#include <sys/socket.h>
+#include <net/if.h>
+#ifdef linux
+struct ifnet {
+	char	*if_name;		/* name, e.g. ``en'' or ``lo'' */
+	short	if_unit;		/* sub-unit for lower level driver */
+	short	if_mtu;			/* maximum transmission unit */
+	short	if_flags;		/* up/down, broadcast, etc. */
+	int	if_metric;		/* routing metric (external only) */
+	char    if_hwaddr [6];		/* ethernet address */
+	int	if_type;		/* interface type: 1=generic,
+					   28=slip, ether=6, loopback=24 */
+	int	if_speed;		/* interface speed: in bits/sec */
+
+	struct sockaddr if_addr;	/* interface's address */
+	struct sockaddr ifu_broadaddr;	/* broadcast address */
+	struct sockaddr ia_subnetmask; 	/* interface's mask */
+
+	struct	ifqueue {
+		int	ifq_len;
+		int	ifq_drops;
+	} if_snd;			/* output queue */
+	int	if_ipackets;		/* packets received on interface */
+	int	if_ierrors;		/* input errors on interface */
+	int	if_opackets;		/* packets sent on interface */
+	int	if_oerrors;		/* output errors on interface */
+	int	if_collisions;		/* collisions on csma interfaces */
+/* end statistics */
+	struct	ifnet *if_next;
+};
+#endif
+
+
+int main() {
+
+struct ifnet testit; 
+testit.if_addrlist $defineit;
+
+; return 0; }
+EOF
+if { (eval echo configure:6231: \"$ac_compile\") 1>&5; (eval $ac_compile) 2>&5; }; then
   rm -rf conftest*
   eval "${ac_safe_all}=yes"
 else
@@ -6166,7 +6262,7 @@ ac_safe_all="ac_cv_struct_${ac_safe_struct}_has_${ac_safe_member}"
   ac_uc_define=STRUCT_`echo "${ac_safe_struct}_HAS_${ac_safe_member}" | sed 'y%abcdefghijklmnopqrstuvwxyz./-%ABCDEFGHIJKLMNOPQRSTUVWXYZ___%'`
 
 echo $ac_n "checking for udpstat.udps_discard""... $ac_c" 1>&6
-echo "configure:6170: checking for udpstat.udps_discard" >&5
+echo "configure:6266: checking for udpstat.udps_discard" >&5
 if eval "test \"`echo '$''{'$ac_safe_all'+set}'`\" = set"; then
   echo $ac_n "(cached) $ac_c" 1>&6
 else
@@ -6179,7 +6275,7 @@ else
   defineit=""
 fi
 cat > conftest.$ac_ext <<EOF
-#line 6183 "configure"
+#line 6279 "configure"
 #include "confdefs.h"
 
 
@@ -6195,7 +6291,7 @@ testit.udps_discard $defineit;
 
 ; return 0; }
 EOF
-if { (eval echo configure:6199: \"$ac_compile\") 1>&5; (eval $ac_compile) 2>&5; }; then
+if { (eval echo configure:6295: \"$ac_compile\") 1>&5; (eval $ac_compile) 2>&5; }; then
   rm -rf conftest*
   eval "${ac_safe_all}=yes"
 else
@@ -6229,7 +6325,7 @@ ac_safe_all="ac_cv_struct_${ac_safe_struct}_has_${ac_safe_member}"
   ac_uc_define=STRUCT_`echo "${ac_safe_struct}_HAS_${ac_safe_member}" | sed 'y%abcdefghijklmnopqrstuvwxyz./-%ABCDEFGHIJKLMNOPQRSTUVWXYZ___%'`
 
 echo $ac_n "checking for arphd.at_next""... $ac_c" 1>&6
-echo "configure:6233: checking for arphd.at_next" >&5
+echo "configure:6329: checking for arphd.at_next" >&5
 if eval "test \"`echo '$''{'$ac_safe_all'+set}'`\" = set"; then
   echo $ac_n "(cached) $ac_c" 1>&6
 else
@@ -6242,7 +6338,7 @@ else
   defineit=""
 fi
 cat > conftest.$ac_ext <<EOF
-#line 6246 "configure"
+#line 6342 "configure"
 #include "confdefs.h"
 
 
@@ -6264,7 +6360,7 @@ testit.at_next $defineit;
 
 ; return 0; }
 EOF
-if { (eval echo configure:6268: \"$ac_compile\") 1>&5; (eval $ac_compile) 2>&5; }; then
+if { (eval echo configure:6364: \"$ac_compile\") 1>&5; (eval $ac_compile) 2>&5; }; then
   rm -rf conftest*
   eval "${ac_safe_all}=yes"
 else
@@ -6298,7 +6394,7 @@ ac_safe_all="ac_cv_struct_${ac_safe_struct}_has_${ac_safe_member}"
   ac_uc_define=STRUCT_`echo "${ac_safe_struct}_HAS_${ac_safe_member}" | sed 'y%abcdefghijklmnopqrstuvwxyz./-%ABCDEFGHIJKLMNOPQRSTUVWXYZ___%'`
 
 echo $ac_n "checking for swdevt.sw_nblksenabled""... $ac_c" 1>&6
-echo "configure:6302: checking for swdevt.sw_nblksenabled" >&5
+echo "configure:6398: checking for swdevt.sw_nblksenabled" >&5
 if eval "test \"`echo '$''{'$ac_safe_all'+set}'`\" = set"; then
   echo $ac_n "(cached) $ac_c" 1>&6
 else
@@ -6311,7 +6407,7 @@ else
   defineit=""
 fi
 cat > conftest.$ac_ext <<EOF
-#line 6315 "configure"
+#line 6411 "configure"
 #include "confdefs.h"
 
 
@@ -6327,7 +6423,7 @@ testit.sw_nblksenabled $defineit;
 
 ; return 0; }
 EOF
-if { (eval echo configure:6331: \"$ac_compile\") 1>&5; (eval $ac_compile) 2>&5; }; then
+if { (eval echo configure:6427: \"$ac_compile\") 1>&5; (eval $ac_compile) 2>&5; }; then
   rm -rf conftest*
   eval "${ac_safe_all}=yes"
 else
@@ -6355,7 +6451,7 @@ fi
 
 
 echo $ac_n "checking if sysctl can read kernel information""... $ac_c" 1>&6
-echo "configure:6359: checking if sysctl can read kernel information" >&5
+echo "configure:6455: checking if sysctl can read kernel information" >&5
 if eval "test \"`echo '$''{'ac_cv_CAN_USE_SYSCTL'+set}'`\" = set"; then
   echo $ac_n "(cached) $ac_c" 1>&6
 else
@@ -6363,7 +6459,7 @@ else
     { echo "configure: error: can not run test program while cross compiling" 1>&2; exit 1; }
 else
   cat > conftest.$ac_ext <<EOF
-#line 6367 "configure"
+#line 6463 "configure"
 #include "confdefs.h"
 
 #if TIME_WITH_SYS_TIME
@@ -6401,7 +6497,7 @@ main() {
 }
 
 EOF
-if { (eval echo configure:6405: \"$ac_link\") 1>&5; (eval $ac_link) 2>&5; } && test -s conftest && (./conftest; exit) 2>/dev/null
+if { (eval echo configure:6501: \"$ac_link\") 1>&5; (eval $ac_link) 2>&5; } && test -s conftest && (./conftest; exit) 2>/dev/null
 then
   ac_cv_CAN_USE_SYSCTL=yes
 else
@@ -6426,7 +6522,7 @@ fi
 
 if test "x$ac_cv_user_prompt_GLOBALSECURITY" = "x" -o "x$ac_cv_user_prompt_LOGFILE" = "x" -o "x$ac_cv_user_prompt_SYS_LOC" = "x" -o "x$ac_cv_user_prompt_SYS_CONTACT" = "x"; then
 echo $ac_n "checking if you have run configure before""... $ac_c" 1>&6
-echo "configure:6430: checking if you have run configure before" >&5
+echo "configure:6526: checking if you have run configure before" >&5
 if eval "test \"`echo '$''{'ac_cv_have_warned'+set}'`\" = set"; then
   echo $ac_n "(cached) $ac_c" 1>&6
 else
@@ -6481,7 +6577,7 @@ Configuration Files.
 
 System Contact Information" | tail -1`
 echo $ac_n "checking $MSG_CHECK""... $ac_c" 1>&6
-echo "configure:6485: checking $MSG_CHECK" >&5
+echo "configure:6581: checking $MSG_CHECK" >&5
 if eval "test \"`echo '$''{'ac_cv_user_prompt_SYS_CONTACT'+set}'`\" = set"; then
   echo $ac_n "(cached) $ac_c" 1>&6
 else
@@ -6541,7 +6637,7 @@ available in the MIB-II tree.  This Can Also Be Over-Ridden Using The
 
 System Location" | tail -1`
 echo $ac_n "checking $MSG_CHECK""... $ac_c" 1>&6
-echo "configure:6545: checking $MSG_CHECK" >&5
+echo "configure:6641: checking $MSG_CHECK" >&5
 if eval "test \"`echo '$''{'ac_cv_user_prompt_SYS_LOC'+set}'`\" = set"; then
   echo $ac_n "(cached) $ac_c" 1>&6
 else
@@ -6607,7 +6703,7 @@ at the prompt below) the agent will use stdout and stderr instead.
 
 Location to write logfile" | tail -1`
 echo $ac_n "checking $MSG_CHECK""... $ac_c" 1>&6
-echo "configure:6611: checking $MSG_CHECK" >&5
+echo "configure:6707: checking $MSG_CHECK" >&5
 if eval "test \"`echo '$''{'ac_cv_user_prompt_LOGFILE'+set}'`\" = set"; then
   echo $ac_n "(cached) $ac_c" 1>&6
 else
@@ -6677,7 +6773,7 @@ SNMPV2AUTH   Only authenticated V2 transmissions can access the extensible tree.
 
 What type of security to use" | tail -1`
 echo $ac_n "checking $MSG_CHECK""... $ac_c" 1>&6
-echo "configure:6681: checking $MSG_CHECK" >&5
+echo "configure:6777: checking $MSG_CHECK" >&5
 if eval "test \"`echo '$''{'ac_cv_user_prompt_GLOBALSECURITY'+set}'`\" = set"; then
   echo $ac_n "(cached) $ac_c" 1>&6
 else

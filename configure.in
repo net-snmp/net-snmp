@@ -850,6 +850,7 @@ AC_CHECK_STRUCT_FOR([
 
 dnl Check ifnet entries using macro defined in aclocal.m4.
 AC_CHECK_IFNET_FOR(if_baudrate)
+AC_CHECK_IFNET_FOR(if_speed)
 AC_CHECK_IFNET_FOR(if_type)
 AC_CHECK_IFNET_FOR(if_imcasts)
 AC_CHECK_IFNET_FOR(if_iqdrops)
