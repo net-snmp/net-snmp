@@ -48,6 +48,8 @@ the ChangeLog file for a more detailed listing of changes/bug fixes.
       files are now in the include subdirectory.  You can now point to
       the includes easily without having to run "make install" first.
     - the agent now requires a configuration file to access any information.
+    - The entire code base has had indent run on it to effect a
+      consistent coding style.  See the CodingStyle file for details.
 
  Perl:
     
