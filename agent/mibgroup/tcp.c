@@ -89,7 +89,9 @@
 
 
 #include "mibincl.h"
+#ifdef HAVE_NLIST_H
 #include <nlist.h>
+#endif
 
 #ifdef hpux
 #undef OBJID
