@@ -12,6 +12,7 @@ the ChangeLog file for a more detailed listing of changes/bug fixes.
  Fixes:
     - Solaris core dumps.
     - Fixes for NetBSD 1.3.
+    - The apps work again on 64bit machines.
 
  Ports:
     - host resources module should work on more platforms: NetBSD,
