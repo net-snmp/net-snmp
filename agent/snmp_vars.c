@@ -406,6 +406,7 @@ search_subtree_vars(struct subtree *tp,
 	    if (access != NULL || (exact && *write_method != NULL)) {
 	        *type = cvp->type;
 		*acl = cvp->acl;
+		*noSuchObject = FALSE;
 		return access;
 	    }
 	    return NULL;
