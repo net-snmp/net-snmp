@@ -1,12 +1,16 @@
-V3.2
+TODO list for the ucd-snmp-coders:
+
   snmpv2c support.
   split agent/snmp_vars.c in to manageable pieces.
   merge similar apps/* code into one file linked by all apps.
   continue to add and improve manual pages/documentation.
   more snmpset'able variables.
   should be able to set the fix script line in the .conf files per type.
+  complete linux port.
+  create prototypes for functions.
+  run-time configurable access restrictions for mib tree sections.
 
-Ideas:
+Other Ideas:
   Make the mib parser figure out which of the above files it needs to
     load rather than loading them all -- Tom Georges & Joe Marzot
     (tom.georges@antec.com & gmarzot@BayNetworks.com)
