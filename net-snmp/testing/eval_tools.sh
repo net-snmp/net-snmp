@@ -350,7 +350,9 @@ STARTPROG() {
     fi
     echo $COMMAND >> $SNMP_TMPDIR/invoked
     if [ "x$OSTYPE" = "xmsys" ]; then
-      $COMMAND > $LOG_FILE.stdout 2>&1 &
+      ## $COMMAND > $LOG_FILE.stdout 2>&1 &
+      COMMAND="cmd.exe //c start //min $COMMAND"
+      start $COMMAND > $LOG_FILE.stdout 2>&1
     else
       $COMMAND > $LOG_FILE.stdout 2>&1
     fi
