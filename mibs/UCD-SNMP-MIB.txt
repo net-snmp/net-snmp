@@ -514,6 +514,7 @@ DskEntry ::= SEQUENCE {
    dskAvail  INTEGER,
    dskUsed  INTEGER,
    dskPercent  INTEGER,
+   dskPercentNode  INTEGER,
    dskErrorFlag  INTEGER,
    dskErrorMsg  DisplayString
 }
@@ -593,6 +594,14 @@ dskPercent OBJECT-TYPE
      DESCRIPTION  
           "Percentage of space used on disk"
      ::= { dskEntry 9 } 
+
+dskPercentNode OBJECT-TYPE
+     SYNTAX  INTEGER
+     ACCESS  read-only
+     STATUS  mandatory
+     DESCRIPTION  
+          "Percentage of inodes used on disk"
+     ::= { dskEntry 10 } 
 
 dskErrorFlag OBJECT-TYPE
      SYNTAX  INTEGER
