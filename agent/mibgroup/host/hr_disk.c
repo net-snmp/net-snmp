@@ -399,7 +399,13 @@ Get_Next_HR_Disk (void)
 	    DEBUGMSGTL(("host/hr_disk", "Get_Next_HR_Disk: %s (%d/%d)\n",
                         string, HRD_type_index, HRD_index ));
 	
-	    fd = open( string, O_RDONLY  );
+	    /* use O_NDELAY to avoid CDROM spin-up and media detection
+	     * (too slow) --okir */
+#ifdef O_NDELAY /* I'm sure everything has it, but just in case...  --Wes */
+	    fd = open( string, O_RDONLY | O_NDELAY );
+#else
+	    fd = open( string, O_RDONLY );
+#endif
 	    if (fd != -1 ) {
 		result = Query_Disk( fd );
 		close(fd);
