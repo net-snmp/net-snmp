@@ -66,28 +66,18 @@ SOFTWARE.
 #include <dmalloc.h>
 #endif
 
-#include "asn1.h"
 #define SNMP_NEED_REQUEST_LIST
-#include "snmp_api.h"
-#include "snmp_impl.h"
-#include "snmp.h"
-#include "mib.h"
+#include "mibincl.h"
 #include "snmp_client.h"
 
-#include "snmp_vars.h"
 #include "snmpd.h"
 #include "mibgroup/struct.h"
 #include "mibgroup/util_funcs.h"
-#include "var_struct.h"
-#include "read_config.h"
-#include "snmp_logging.h"
-#include "snmp_debug.h"
 #include "mib_module_config.h"
 
 #include "default_store.h"
 #include "ds_agent.h"
 #include "snmp_agent.h"
-#include "agent_trap.h"
 
 #ifdef USING_AGENTX_PROTOCOL_MODULE
 #include "agentx/protocol.h"
