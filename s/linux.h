@@ -1,5 +1,7 @@
 #include "generic.h"
 
+#define DONT_USE_NLIST
+
 #undef bsdlike
 
 /* red hat >= 5.0 doesn't have this */
