@@ -267,7 +267,7 @@ SOFTWARE.
      * 
      * rc  = asn_realloc_rbuild_int(&buf, &buf_len, &offset, allow_realloc,
      * type, &data1, sizeof(long));
-     * ptr = buf[buf_len - offset];   // points at encoding of data1
+     * ptr = buf[buf_len - offset];   / * points at encoding of data1 * /
      * if (rc == 0) {
      * error;
      * }
@@ -276,8 +276,8 @@ SOFTWARE.
      * make use of ptr here;
      * 
      * 
-     * ptr is **INVALID** at this point.  In general, you should store the offset 
-     * value and compute pointers when you need them:
+     * ptr is **INVALID** at this point.  In general, you should store the
+     * offset value and compute pointers when you need them:
      * 
      * 
      * 

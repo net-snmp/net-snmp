@@ -1883,9 +1883,9 @@ Interface_Scan_Next(short *Index,
 #endif
             /*
              * ifnet.if_addrlist = (struct ifaddr *)&ia->ia_ifa;   
- *//*
- * WRONG DATA TYPE; ONLY A FLAG 
- */
+             *
+             * WRONG DATA TYPE; ONLY A FLAG 
+             */
 
             if (Index)
                 *Index = ++saveIndex;
