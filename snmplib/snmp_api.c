@@ -3108,7 +3108,7 @@ snmpv3_parse(
 
   if (ret_val != SNMPERR_SUCCESS) {
     DEBUGDUMPSECTION("recv", "ScopedPDU");
-    /* parse as much as possible */
+    /*  Parse as much as possible -- though I don't see the point? [jbpn].  */
     if (cp) {
         cp = snmpv3_scopedPDU_parse(pdu, cp, &pdu_buf_len);
     }
@@ -3123,6 +3123,12 @@ snmpv3_parse(
     if (mallocbuf) {
         free(mallocbuf);
     }
+    if (pdu->securityStateRef != NULL) {
+	if (sptr && sptr->pdu_free_state_ref) {
+	    sptr->pdu_free_state_ref(pdu->securityStateRef);
+	    pdu->securityStateRef = NULL;
+	}
+    }
     return ret_val;
   }
   
@@ -3131,11 +3137,18 @@ snmpv3_parse(
   DEBUGDUMPSECTION("recv", "ScopedPDU");
   data = snmpv3_scopedPDU_parse(pdu, cp, length);
   if (data == NULL) {
-    snmp_increment_statistic(STAT_SNMPINASNPARSEERRS);
-    DEBUGINDENTADD(-4);
-    if (mallocbuf)
-        free(mallocbuf);
-    return SNMPERR_ASN_PARSE_ERR;
+      snmp_increment_statistic(STAT_SNMPINASNPARSEERRS);
+      DEBUGINDENTADD(-4);
+      if (mallocbuf) {
+	  free(mallocbuf);
+      }
+      if (pdu->securityStateRef != NULL) {
+	  if (sptr && sptr->pdu_free_state_ref) {
+	      sptr->pdu_free_state_ref(pdu->securityStateRef);
+	      pdu->securityStateRef = NULL;
+	  }
+      }
+      return SNMPERR_ASN_PARSE_ERR;
   }
 
   /*  parse the PDU.  */
@@ -3153,15 +3166,23 @@ snmpv3_parse(
   }
 
   if (ret != SNMPERR_SUCCESS) {
-    ERROR_MSG("error parsing PDU");
-    snmp_increment_statistic(STAT_SNMPINASNPARSEERRS);
-    if (mallocbuf)
-        free(mallocbuf);
-    return SNMPERR_ASN_PARSE_ERR;
+      ERROR_MSG("error parsing PDU");
+      snmp_increment_statistic(STAT_SNMPINASNPARSEERRS);
+      if (mallocbuf) {
+	  free(mallocbuf);
+      }
+      if (pdu->securityStateRef != NULL) {
+	  if (sptr && sptr->pdu_free_state_ref) {
+	      sptr->pdu_free_state_ref(pdu->securityStateRef);
+	      pdu->securityStateRef = NULL;
+	  }
+      }
+      return SNMPERR_ASN_PARSE_ERR;
   }
 
-  if (mallocbuf)
+  if (mallocbuf) {
       free(mallocbuf);
+  }
   return SNMPERR_SUCCESS;
 }  /* end snmpv3_parse() */
 
