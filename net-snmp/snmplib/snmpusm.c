@@ -100,9 +100,8 @@ usm_check_secLevel_vs_protocols(int level,
 		SNMP_ZERO(ref->field, ref->field_len);			\
 		SNMP_FREE(ref->field);					\
 	}								\
+	ref->field_len = 0;						\
         if (len == 0 || item == NULL) {					\
-		ref->field = NULL;					\
-		ref->field_len = 0;					\
 		return 0;						\
 	}					 			\
 	if ((ref->field = (type*) malloc (len * sizeof(type))) == NULL)	\
