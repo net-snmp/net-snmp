@@ -165,7 +165,7 @@ int main(int argc, char *argv[])
     /* open an SNMP session */
     ss = snmp_open(&session);
     if (ss == NULL){
-      snmp_sess_perror("snmpset", ss);
+      snmp_sess_perror("snmpset", &session);
       exit(1);
     }
 
@@ -174,11 +174,11 @@ int main(int argc, char *argv[])
     for(count = 0; count < current_name; count++){
       name_length = MAX_OID_LEN;
       if (snmp_parse_oid(names[count], name, &name_length) == NULL) {
-        snmp_sess_perror(names[count], ss);
+        snmp_perror(names[count]);
         failures++;
       } else
         if (snmp_add_var(pdu, name, name_length, types[count], values[count])) {
-          snmp_sess_perror(names[count], ss);
+          snmp_perror(names[count]);
           failures++;
         }
     }

@@ -322,7 +322,7 @@ void get_table_entries(void)
   /* open an SNMP session */
   ss = snmp_open(&session);
   if (ss == NULL){
-    snmp_sess_perror("snmptable", ss);
+    snmp_sess_perror("snmptable", &session);
     SOCK_CLEANUP;
     exit(1);
   }

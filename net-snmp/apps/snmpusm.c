@@ -188,7 +188,7 @@ main(int argc, char *argv[])
     /*   Note:  this wil obtain the engineID needed below */
     ss = snmp_open(&session);
     if (ss == NULL){
-      snmp_sess_perror("snmpusm", ss);
+      snmp_sess_perror("snmpusm", &session);
       exit(1);
     }
 

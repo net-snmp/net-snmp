@@ -269,7 +269,7 @@ static int create_v1_trap_session (const char *sink,
 	sinks = new_sink;
 	return 1;
     }
-    snmp_perror("snmpd");
+    snmp_sess_perror("snmpd: create_v1_trap", &new_sink->ses);
     free(new_sink);
     return 0;
 }
@@ -301,7 +301,7 @@ static int create_v2_trap_session (const char *sink,
 	sinks = new_sink;
 	return 1;
     }
-    snmp_perror("snmpd");
+    snmp_sess_perror("snmpd: create_v2_trap", &new_sink->ses);
     free(new_sink);
     return 0;
 }
@@ -357,7 +357,7 @@ static void send_v1_trap (struct snmp_session *ss,
     pdu->time		 	 = calculate_time_diff(&now, &starttime);
 
     if (snmp_send (ss, pdu) == 0) {
-        snmp_perror ("snmpd: send_v1_trap");
+        snmp_sess_perror ("snmpd: send_v1_trap", ss);
     }
 
     snmp_increment_statistic(STAT_SNMPOUTTRAPS);
@@ -444,7 +444,7 @@ static void send_v2_trap (struct snmp_session *ss,
     }
 
     if (snmp_send (ss, pdu) == 0) {
-        snmp_perror ("snmpd: send_v2_trap");
+        snmp_sess_perror ("snmpd: send_v2_trap", ss);
     }
 
     snmp_increment_statistic(STAT_SNMPOUTTRAPS);
@@ -465,7 +465,7 @@ send_trap_pdu(struct snmp_pdu *pdu)
         DEBUGMSGTL(("snmpd", " found v2 session...\n"));
         mypdu = snmp_clone_pdu(pdu);
         if (snmp_send(sink->sesp, mypdu) == 0) {
-          snmp_perror ("snmpd: send_trap_pdu");
+          snmp_sess_perror ("snmpd: send_trap_pdu", sink->sesp);
         }
         snmp_increment_statistic(STAT_SNMPOUTTRAPS);
       }
@@ -590,6 +590,13 @@ init_master_agent(int dest_port)
     session->callback = handle_snmp_packet;
     session->authenticator = NULL;
     session = snmp_open( session );
+
+    if ( session == NULL ) {
+	snmp_sess_perror("init_master_agent", &sess);
+	/*return;*/
+	exit(1);
+    }
+
     set_pre_parse( session, snmp_check_packet );
     set_post_parse( session, snmp_check_parse );
 }
@@ -859,14 +866,14 @@ main(int argc, char *argv[])
     if (gid) {
       DEBUGMSGTL(("snmpd", "Changing gid to %d.\n", gid));
       if (setgid(gid)==-1) {
-          snmp_perror("setgid failed: ");
+          log_perror("setgid failed: ");
           exit(1);
       }
     }
     if (uid) {
       DEBUGMSGTL(("snmpd", "Changing uid to %d.\n", uid));
       if(setuid(uid)==-1) {
-          snmp_perror("setuid failed: ");
+          log_perror("setuid failed: ");
           exit(1);
       }
     }
