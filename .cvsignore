@@ -24,3 +24,4 @@ sedscript
 targets
 ucd-snmp-config.h
 ucd-snmp.txt
+autom4te.cache
