@@ -333,6 +333,7 @@ netsnmp_old_api_helper(netsnmp_mib_handler *handler,
                                                  SNMP_ERR_RESOURCEUNAVAILABLE);
             cacheptr->data = access;
             cacheptr->write_method = write_method;
+            write_method = NULL;
             netsnmp_request_add_list_data(requests,
                                           netsnmp_create_data_list
                                           (OLD_API_NAME, cacheptr, free));
