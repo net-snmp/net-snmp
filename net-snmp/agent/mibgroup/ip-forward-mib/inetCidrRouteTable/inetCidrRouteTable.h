@@ -101,7 +101,7 @@ extern          "C" {
          * inetCidrRouteDest(2)/InetAddress/ASN_OCTET_STR/char(char)//L/a/w/e/R/d/h
          */
         /** 128 - 5(other indexes) - oid length(11) = 112 */
-        char            inetCidrRouteDest[112];
+        char            inetCidrRouteDest[NETSNMP_ACCESS_ROUTE_ADDR_BUF_SIZE];
         size_t          inetCidrRouteDest_len;
 
         /*
@@ -113,7 +113,7 @@ extern          "C" {
          * inetCidrRoutePolicy(4)/OBJECTID/ASN_OBJECT_ID/oid(oid)//L/a/w/e/r/d/h
          */
         /** 128 - 5(other indexes) - oid length(11) = 112 */
-        oid             inetCidrRoutePolicy[112];
+        oid             inetCidrRoutePolicy[NETSNMP_POLICY_OID_MAX_LEN];
         size_t          inetCidrRoutePolicy_len;
 
         /*
@@ -125,7 +125,7 @@ extern          "C" {
          * inetCidrRouteNextHop(6)/InetAddress/ASN_OCTET_STR/char(char)//L/a/w/e/R/d/h
          */
         /** 128 - 5(other indexes) - oid length(11) = 112 */
-        char            inetCidrRouteNextHop[112];
+        char            inetCidrRouteNextHop[NETSNMP_ACCESS_ROUTE_ADDR_BUF_SIZE];
         size_t          inetCidrRouteNextHop_len;
 
 
@@ -138,9 +138,8 @@ extern          "C" {
      *
      * BE VERY CAREFUL TO TAKE INTO ACCOUNT THE MAXIMUM
      * POSSIBLE LENGHT FOR EVERY VARIABLE LENGTH INDEX!
-     * Guessing 128 - col/entry(2)  - oid len(9)
      */
-#define MAX_inetCidrRouteTable_IDX_LEN     117
+#define MAX_inetCidrRouteTable_IDX_LEN (((NETSNMP_ACCESS_ROUTE_ADDR_BUF_SIZE+1)*2)+ 3 + (NETSNMP_POLICY_OID_MAX_LEN + 1))
 
 
     /*
