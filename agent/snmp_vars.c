@@ -87,6 +87,7 @@ PERFORMANCE OF THIS SOFTWARE.
 #endif
 
 int compare_tree __P((oid *, int, oid *, int));
+struct subtree *find_subtree __P((oid *, int, struct subtree *));
 extern struct subtree subtrees_old[];
 
 int subtree_size;
@@ -185,7 +186,6 @@ init_nlist(nl)
 #endif
 }
 
-struct subtree *subtrees;
 
 void
 init_snmp __P((void))
@@ -772,7 +772,11 @@ compare_tree(name1, len1, name2, len2)
     return 0;
 }
 
-struct subtree *find_subtree_next(name, len, subtree) {
+struct subtree *find_subtree_next(name, len, subtree)
+  oid *name;
+  int len;
+  struct subtree *subtree;
+{
   struct subtree *myptr;
   myptr = find_subtree(name,len,subtree);
   if (myptr == NULL)
