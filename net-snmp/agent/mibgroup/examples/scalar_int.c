@@ -1,5 +1,5 @@
-/** @defgroup example_scalar_int example_scalar_int: instantiates a few example scalars.
- *  This example merely creates some scalar registrations that allows
+/**  @example scalar_int.c
+ *  This example creates some scalar registrations that allows
  *  some simple variables to be accessed via SNMP.  In a more
  *  realistic example, it is likely that these variables would also be
  *  manipulated in other ways outside of SNMP gets/sets.
@@ -8,17 +8,15 @@
  *  issue snmp commands that look something like (authentication
  *  information not shown in these commands):
  *
- *  snmpget localhost netSnmpExampleInteger.0
- *  netSnmpExampleScalars = 42
+ *  - snmpget localhost netSnmpExampleInteger.0
+ *  - netSnmpExampleScalars = 42
  *
- *  snmpset localhost netSnmpExampleInteger.0 = 1234
- *  netSnmpExampleScalars = 1234
+ *  - snmpset localhost netSnmpExampleInteger.0 = 1234
+ *  - netSnmpExampleScalars = 1234
  *  
- *  snmpget localhost netSnmpExampleInteger.0
- *  netSnmpExampleScalars = 1234
+ *  - snmpget localhost netSnmpExampleInteger.0
+ *  - netSnmpExampleScalars = 1234
  *
- *  @ingroup instance
- *  @{
  */
 
 /* start be including the appropriate header files */
