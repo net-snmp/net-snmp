@@ -2147,6 +2147,7 @@ write_vacmViewStatus(int      action,
 	      /*  Set defaults.  */
 	      vptr->viewStorageType = ST_NONVOLATILE;
 	      vptr->viewStatus = RS_NOTREADY;
+	      vptr->viewType = SNMP_VIEW_INCLUDED;
 	  }
       }	
       free(newViewName);
