@@ -66,7 +66,7 @@ struct netsnmp_udpEntry_s {
 #define INP_NEXT_SYMBOL		inp_next
 #endif
 
-#ifdef freebsd4
+#if defined(freebsd4) || defined(darwin)
 typedef struct netsnmp_inpcb_s netsnmp_inpcb;
 struct netsnmp_inpcb_s {
     struct inpcb    pcb;
@@ -623,7 +623,7 @@ udpTable_load(netsnmp_cache *cache, void *vmagic)
         nnew = SNMP_MALLOC_TYPEDEF(UDPTABLE_ENTRY_TYPE);
         if (!nnew)
             break;
-#ifdef freebsd4
+#if defined(freebsd4) || defined(darwin)
         memcpy(nnew, &((struct xinpcb *) xig)->xi_inp, sizeof(struct inpcb));
 	nnew->inp_next = udp_head;
 #else
