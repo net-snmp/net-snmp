@@ -110,12 +110,12 @@ extern          "C" {
         /*
          * ifInOctets(10)/COUNTER/ASN_COUNTER/u_long(u_long)//l/A/w/e/r/d/h
          */
-#define ifInOctets ifentry->if_ibytes.low
+#define ifInOctets ifentry->stats.ibytes.low
 
         /*
          * ifInUcastPkts(11)/COUNTER/ASN_COUNTER/u_long(u_long)//l/A/w/e/r/d/h
          */
-#define ifInUcastPkts ifentry->if_iucast.low
+#define ifInUcastPkts ifentry->stats.iucast.low
 
         /*
          * ifInNUcastPkts(12)/COUNTER/ASN_COUNTER/u_long(u_long)//l/A/w/e/r/d/h
@@ -125,27 +125,27 @@ extern          "C" {
         /*
          * ifInDiscards(13)/COUNTER/ASN_COUNTER/u_long(u_long)//l/A/w/e/r/d/h
          */
-#define ifInDiscards ifentry->if_idiscards
+#define ifInDiscards ifentry->stats.idiscards
 
         /*
          * ifInErrors(14)/COUNTER/ASN_COUNTER/u_long(u_long)//l/A/w/e/r/d/h
          */
-#define ifInErrors ifentry->if_ierrors
+#define ifInErrors ifentry->stats.ierrors
 
         /*
          * ifInUnknownProtos(15)/COUNTER/ASN_COUNTER/u_long(u_long)//l/A/w/e/r/d/h
          */
-#define ifInUnknownProtos ifentry->if_iunknown_protos
+#define ifInUnknownProtos ifentry->stats.iunknown_protos
 
         /*
          * ifOutOctets(16)/COUNTER/ASN_COUNTER/u_long(u_long)//l/A/w/e/r/d/h
          */
-#define ifOutOctets ifentry->if_obytes.low
+#define ifOutOctets ifentry->stats.obytes.low
 
         /*
          * ifOutUcastPkts(17)/COUNTER/ASN_COUNTER/u_long(u_long)//l/A/w/e/r/d/h
          */
-#define ifOutUcastPkts ifentry->if_oucast.low
+#define ifOutUcastPkts ifentry->stats.oucast.low
 
         /*
          * ifOutNUcastPkts(18)/COUNTER/ASN_COUNTER/u_long(u_long)//l/A/w/e/r/d/h
@@ -155,17 +155,17 @@ extern          "C" {
         /*
          * ifOutDiscards(19)/COUNTER/ASN_COUNTER/u_long(u_long)//l/A/w/e/r/d/h
          */
-#define ifOutDiscards ifentry->if_odiscards
+#define ifOutDiscards ifentry->stats.odiscards
 
         /*
          * ifOutErrors(20)/COUNTER/ASN_COUNTER/u_long(u_long)//l/A/w/e/r/d/h
          */
-#define ifOutErrors ifentry->if_oerrors
+#define ifOutErrors ifentry->stats.oerrors
 
         /*
          * ifOutQLen(21)/GAUGE/ASN_GAUGE/u_long(u_long)//l/A/w/e/r/d/h
          */
-#define ifOutQLen ifentry->if_oqlen
+#define ifOutQLen ifentry->stats.oqlen
 
         /*
          * ifSpecific(22)/OBJECTID/ASN_OBJECT_ID/oid(oid)//L/A/w/e/r/d/h
@@ -208,42 +208,42 @@ extern          "C" {
         /*
          * ifHCInOctets(6)/COUNTER64/ASN_COUNTER64/U64(U64)//l/A/w/e/r/d/h
          */
-#define ifHCInOctets ifentry->if_ibytes
+#define ifHCInOctets ifentry->stats.ibytes
 
         /*
          * ifHCInUcastPkts(7)/COUNTER64/ASN_COUNTER64/U64(U64)//l/A/w/e/r/d/h
          */
-#define ifHCInUcastPkts ifentry->if_iucast
+#define ifHCInUcastPkts ifentry->stats.iucast
 
         /*
          * ifHCInMulticastPkts(8)/COUNTER64/ASN_COUNTER64/U64(U64)//l/A/w/e/r/d/h
          */
-#define ifHCInMulticastPkts ifentry->if_imcast
+#define ifHCInMulticastPkts ifentry->stats.imcast
 
         /*
          * ifHCInBroadcastPkts(9)/COUNTER64/ASN_COUNTER64/U64(U64)//l/A/w/e/r/d/h
          */
-#define ifHCInBroadcastPkts ifentry->if_ibcast
+#define ifHCInBroadcastPkts ifentry->stats.ibcast
 
         /*
          * ifHCOutOctets(10)/COUNTER64/ASN_COUNTER64/U64(U64)//l/A/w/e/r/d/h
          */
-#define ifHCOutOctets ifentry->if_obytes
+#define ifHCOutOctets ifentry->stats.obytes
 
         /*
          * ifHCOutUcastPkts(11)/COUNTER64/ASN_COUNTER64/U64(U64)//l/A/w/e/r/d/h
          */
-#define ifHCOutUcastPkts ifentry->if_oucast
+#define ifHCOutUcastPkts ifentry->stats.oucast
 
         /*
          * ifHCOutMulticastPkts(12)/COUNTER64/ASN_COUNTER64/U64(U64)//l/A/w/e/r/d/h
          */
-#define ifHCOutMulticastPkts ifentry->if_omcast
+#define ifHCOutMulticastPkts ifentry->stats.omcast
 
         /*
          * ifHCOutBroadcastPkts(13)/COUNTER64/ASN_COUNTER64/U64(U64)//l/A/w/e/r/d/h
          */
-#define ifHCOutBroadcastPkts ifentry->if_obcast
+#define ifHCOutBroadcastPkts ifentry->stats.obcast
 
         /*
          * ifLinkUpDownTrapEnable(14)/INTEGER/ASN_INTEGER/long(u_long)//l/A/W/E/r/d/h

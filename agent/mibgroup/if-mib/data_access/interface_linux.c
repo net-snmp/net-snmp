@@ -211,19 +211,19 @@ netsnmp_access_interface_container_arch_load(netsnmp_container* container,
          */
 
 
-        entry->if_ibytes.low = rec_oct & 0xffffffff;
-        entry->if_ibytes.high = rec_oct >> 32;
-        entry->if_iucast.low = rec_pkt & 0xffffffff;
-        entry->if_iucast.high = rec_pkt >> 32;
-        entry->if_ierrors = rec_err;
-        entry->if_idiscards = rec_drop;
-        entry->if_obytes.low = snd_oct & 0xffffffff;
-        entry->if_obytes.high = snd_oct >> 32;
-        entry->if_oucast.low = snd_pkt & 0xffffffff;
-        entry->if_oucast.high = snd_pkt >> 32;
-        entry->if_oerrors = snd_err;
-        entry->if_odiscards = snd_drop;
-        entry->if_collisions = coll;
+        entry->stats.ibytes.low = rec_oct & 0xffffffff;
+        entry->stats.ibytes.high = rec_oct >> 32;
+        entry->stats.iucast.low = rec_pkt & 0xffffffff;
+        entry->stats.iucast.high = rec_pkt >> 32;
+        entry->stats.ierrors = rec_err;
+        entry->stats.idiscards = rec_drop;
+        entry->stats.obytes.low = snd_oct & 0xffffffff;
+        entry->stats.obytes.high = snd_oct >> 32;
+        entry->stats.oucast.low = snd_pkt & 0xffffffff;
+        entry->stats.oucast.high = snd_pkt >> 32;
+        entry->stats.oerrors = snd_err;
+        entry->stats.odiscards = snd_drop;
+        entry->stats.collisions = coll;
 
         /*
          * use ioctls for some stuff
