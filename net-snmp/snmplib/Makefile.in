@@ -176,7 +176,8 @@ snmp_debug.o:  asn1.h mib.h snmp_api.h
 snmp_debug.o: read_config.h snmp_debug.h snmp_impl.h snmp_logging.h
 snmp_logging.o: ../config.h ../mib_module_config.h ../s/linux.h ../s/sysv.h
 snmp_logging.o: ../s/generic.h ../m/generic.h 
-snmp_logging.o: snmp_logging.h
+snmp_logging.o:   asn1.h
+snmp_logging.o: default_store.h snmp_logging.h
 snmpusm.o: ../config.h ../mib_module_config.h ../s/linux.h ../s/sysv.h
 snmpusm.o: ../s/generic.h ../m/generic.h 
 snmpusm.o:   asn1.h
