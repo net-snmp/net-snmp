@@ -88,7 +88,7 @@ What is it?
 	* tools to request or set information from SNMP agents
 	* tools to generate and handle SNMP traps
 	* a version of the unix 'netstat' command using SNMP
-        * a graphical Perl/Tk/SNMP based mib browser
+	* a graphical Perl/Tk/SNMP based mib browser
 
     This package is originally based on the Carnegie Mellon University
     SNMP implementation (version 2.1.2.1), but has developed significantly
@@ -141,6 +141,9 @@ Where can I get the perl SNMP package?
 
   Consult the README file in the SNMP perl module distribution to find 
   out what version of the ucd-snmp library it needs to be linked against.
+
+  Tk.pm is a Perl package that needs to be installed before tkmib will run.
+  It's available on Perl CPAN.  Suggest using version after "Tk800.011".
 
 What operating systems does it run on?
 -------------------------------------
