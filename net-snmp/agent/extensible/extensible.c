@@ -599,7 +599,9 @@ setPerrorstatus(to)
   char *to;
 {
   char buf[STRMAX];
+#ifndef netbsd1
   extern char *sys_errlist[];
+#endif
   extern int errno;
   
   sprintf(buf,"%s:  %s",to,sys_errlist[errno]);
