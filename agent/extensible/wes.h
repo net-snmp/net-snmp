@@ -8,6 +8,8 @@
    ERRORMSG:  A text message describing what caused the above condition,
               Also used as the single line return message from programs */
 
+#define MIBINDEX 1
+#define ERRORNAME 2
 #define ERRORFLAG 100
 #define ERRORMSG 101
 
@@ -33,17 +35,20 @@
 #define LOCKDNFSFILE "/.nfslockdtest/nfs/subdir/test"
 #define LOCKDREALFILE "/.nfslockdtest/real/subdir/test"
 
-#define MEMTOTALSWAP 1
-#define MEMUSEDSWAP 2
-#define MEMTOTALREAL 3
-#define MEMUSEDREAL 4
-#define MEMTOTALSWAPTXT 5
-#define MEMUSEDSWAPTXT 6
-#define MEMTOTALREALTXT 7
-#define MEMUSEDREALTXT 8
-#define MEMTOTALFREE 9
-#define MEMSWAPMINIMUM 10
-#define MEMSWAPERROR 11
+#define MEMSWAPINDEX 1
+#define MEMERRNAME 2 /* always returns "swap", for other mib
+                        compatibility purposes */
+#define MEMTOTALSWAP 3
+#define MEMUSEDSWAP 4
+#define MEMTOTALREAL 5
+#define MEMUSEDREAL 6
+#define MEMTOTALSWAPTXT 7
+#define MEMUSEDSWAPTXT 8
+#define MEMTOTALREALTXT 9
+#define MEMUSEDREALTXT 10
+#define MEMTOTALFREE 11
+#define MEMSWAPMINIMUM 12
+#define MEMSWAPERROR 13
 #define DEFAULTMINIMUMSWAP 16000  /* kilobytes */
 
 /* disk watching mib.  Returns are in kbytes */

@@ -104,10 +104,10 @@ unsigned char *var_wes_proc(vp, name, length, exact, var_len, write_method)
   
   if (proc = get_proc_instance(procwatch,newname[8])) {
     switch (vp->magic) {
-      case PROCINDEX:
+      case MIBINDEX:
         long_ret = newname[8];
         return((u_char *) (&long_ret));
-      case PROCNAMES:
+      case ERRORNAME:   /* process name to check for */
         *var_len = strlen(proc->name);
         return((u_char *) (proc->name));
       case PROCMIN:
@@ -181,10 +181,10 @@ unsigned char *var_wes_shell(vp, name, length, exact, var_len, write_method)
 
   if (exten = get_exten_instance(extens,newname[8])) {
     switch (vp->magic) {
-      case SHELLINDEX:
+      case MIBINDEX:
         long_ret = newname[8];
         return((u_char *) (&long_ret));
-      case SHELLNAMES:
+      case ERRORNAME: /* name defined in config file */
         *var_len = strlen(exten->name);
         return((u_char *) (exten->name));
       case SHELLCOMMAND:
@@ -289,12 +289,10 @@ int getswap(rettype)
   while(wait3(&ex.result,0,0) > 0);
   switch
     (rettype) {
-    case
-      SWAPGETLEFT:
-    return(spaceleft);
-    case
-      SWAPGETTOTAL:
-    return(spacetotal);
+    case SWAPGETLEFT:
+      return(spaceleft);
+    case SWAPGETTOTAL:
+      return(spacetotal);
   }
 }
 
@@ -328,9 +326,20 @@ unsigned char *var_wes_mem(vp, name, length, exact, var_len, write_method)
     return(0);
   }
   switch (vp->magic) {
+    case MIBINBEX:
+      long_ret = 1;
+      return((u_char *) (&long_ret));
+    case ERRORNAME:    /* dummy name */
+      sprintf(errmsg,"swap");
+      *var_len = strlen(errmsg);
+      return((u_char *) (errmsg));
     case MEMTOTALSWAP:
       long_ret = getswap(SWAPGETTOTAL);
       return((u_char *) (&long_ret));
+    case MEMERRNAME:
+      sprintf(errmsg,"swap");
+      *var_len = strlen(errmsg);
+      return((u_char *) (errmsg));
     case MEMUSEDSWAP:
       long_ret = getswap(SWAPGETLEFT);
       return((u_char *) (&long_ret));
@@ -409,10 +418,10 @@ unsigned char *var_wes_disk(vp, name, length, exact, var_len, write_method)
     return(NULL);
   disknum = newname[*length - 1] - 1;
   switch (vp->magic) {
-    case DISKINDEX:
+    case MIBINDEX:
       long_ret = disknum;
       return((u_char *) (&long_ret));
-    case DISKPATH:
+    case ERRORNAME:       /* DISKPATH */
       *var_len = strlen(disks[disknum].path);
       return((u_char *) disks[disknum].path);
     case DISKDEVICE:
@@ -550,7 +559,7 @@ unsigned char *var_wes_lockd_test(vp, name, length, exact, var_len, write_method
   errmsg[0] = NULL;
   
   switch (vp->magic) {
-    case LOCKDINDEX:
+    case MIBINDEX:
       long_ret = newname[*length - 1];
       return((u_char *) (&long_ret));
     case ERRORFLAG:
