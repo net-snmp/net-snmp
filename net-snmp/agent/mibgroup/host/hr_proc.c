@@ -34,6 +34,12 @@ extern int      Get_Next_HR_Proc(void);
 const char     *describe_proc(int);
 int             header_hrproc(struct variable *, oid *, size_t *, int,
                               size_t *, WriteMethod **);
+#ifdef linux
+void detect_hrproc(void);
+#endif
+
+#define MAX_NUM_HRPROC  10
+char proc_descriptions[MAX_NUM_HRPROC][BUFSIZ];
 
         /*********************
 	 *
@@ -60,6 +66,10 @@ init_hr_proc(void)
     device_descr[HRDEV_PROC] = describe_proc;
 #ifdef HRPROC_MONOTONICALLY_INCREASING
     dev_idx_inc[HRDEV_PROC] = 1;
+#endif
+
+#ifdef linux
+    detect_hrproc();
 #endif
 
     REGISTER_MIB("host/hr_proc", hrproc_variables, variable4,
@@ -193,11 +203,12 @@ var_hrproc(struct variable * vp,
 	 *********************/
 
 static int      HRP_index;
+static int      HRP_max_index = 1;
 
 void
 Init_HR_Proc(void)
 {
-    HRP_index = 1;
+    HRP_index = 0;
 }
 
 int
@@ -209,7 +220,7 @@ Get_Next_HR_Proc(void)
      *   Assume we've just got one.
      */
 
-    if (HRP_index < 2)
+    if (HRP_index < HRP_max_index)
         return (HRDEV_PROC << HRDEV_TYPE_SHIFT) + HRP_index++;
     else
         return -1;
@@ -242,16 +253,38 @@ describe_proc(int idx)
 
     }
 #elif linux
-    char tmpbuf[BUFSIZ];
-    static char descr_buf[BUFSIZ];
-    char *cp;
+    return (proc_descriptions[idx & HRDEV_TYPE_MASK]);
+
+#else
+    return ("An electronic chip that makes the computer work.");
+#endif
+}
+
+#ifdef linux
+void detect_hrproc(void)
+{
+    int i;
+    char tmpbuf[BUFSIZ], *cp;
     FILE *fp;
 
+    /*
+     * Clear the buffers...
+     */
+    for ( i=0 ; i<MAX_NUM_HRPROC; i++ ) {
+        memset( proc_descriptions[i], '\0', BUFSIZ);
+    }
+
+    /*
+     * ... and try to interpret the CPU information
+     */
     fp = fopen("/proc/cpuinfo", "r");
-    if (!fp)
-        return ("An electronic chip that makes the computer work.");
+    if (!fp) {
+        sprintf( proc_descriptions[0],
+                 "An electronic chip that makes the computer work.");
+        return;
+    }
 
-
+    i = 0;
     while (fgets(tmpbuf, BUFSIZ, fp)) {
         if ( !strncmp( tmpbuf, "vendor_id", 9)) {
 	    /* Stomp on trailing newline... */
@@ -262,7 +295,7 @@ describe_proc(int idx)
 	    cp++;
 	    while ( cp && isspace(*cp))
 	        cp++;
-	    snprintf( descr_buf, BUFSIZ, "%s: ", cp);
+            snprintf( proc_descriptions[i], BUFSIZ, "%s", cp);
         }
         if ( !strncmp( tmpbuf, "model name", 10)) {
 	    /* Stomp on trailing newline... */
@@ -273,17 +306,15 @@ describe_proc(int idx)
 	    cp++;
 	    while ( cp && isspace(*cp))
 	        cp++;
-	    strncat( descr_buf, cp, BUFSIZ-strlen(descr_buf));
-	    /*
-	     * Hardwired assumption of just one processor
-	     */
-	    fclose(fp);
-	    break;
+            strncat( proc_descriptions[i], ": ",
+                     BUFSIZ-strlen(proc_descriptions[i]));
+            strncat( proc_descriptions[i], cp,
+                     BUFSIZ-strlen(proc_descriptions[i]));
+            i++;
         }
     }
-    return (descr_buf);
-
-#else
-    return ("An electronic chip that makes the computer work.");
-#endif
+    HRP_max_index = i;
+    fclose(fp);
+    return;
 }
+#endif
