@@ -53,8 +53,7 @@ BSC32=bscmake.exe
 # ADD BSC32 /nologo
 LINK32=link.exe
 # ADD BASE LINK32 kernel32.lib user32.lib gdi32.lib winspool.lib comdlg32.lib advapi32.lib shell32.lib ole32.lib oleaut32.lib uuid.lib odbc32.lib odbccp32.lib /nologo /subsystem:windows /dll /machine:I386
-# ADD LINK32 wsock32.lib msvcrt.lib kernel32.lib user32.lib oldnames.lib advapi32.lib /nologo /subsystem:windows /dll /machine:I386 /nodefaultlib /def:".\libsnmp.def" /out:"../bin/libsnmp.dll"
-# SUBTRACT LINK32 /pdb:none
+# ADD LINK32 wsock32.lib msvcrt.lib kernel32.lib user32.lib oldnames.lib advapi32.lib /nologo /subsystem:windows /dll /pdb:none /machine:I386 /nodefaultlib /def:".\libsnmp.def" /out:"../bin/libsnmp.dll"
 
 !ELSEIF  "$(CFG)" == "libsnmp_dll - Win32 Debug"
 
@@ -98,6 +97,14 @@ SOURCE=..\..\snmplib\callback.c
 # End Source File
 # Begin Source File
 
+SOURCE=..\..\snmplib\cmu_compat.c
+# End Source File
+# Begin Source File
+
+SOURCE=..\..\snmplib\data_list.c
+# End Source File
+# Begin Source File
+
 SOURCE=..\..\snmplib\default_store.c
 # End Source File
 # Begin Source File
@@ -130,6 +137,14 @@ SOURCE=..\..\snmplib\mt_support.c
 # End Source File
 # Begin Source File
 
+SOURCE=..\..\snmplib\oid_array.c
+# End Source File
+# Begin Source File
+
+SOURCE=..\..\snmplib\oid_stash.c
+# End Source File
+# Begin Source File
+
 SOURCE=..\..\snmplib\parse.c
 # End Source File
 # Begin Source File
@@ -139,6 +154,10 @@ SOURCE=..\..\snmplib\read_config.c
 # Begin Source File
 
 SOURCE=..\..\snmplib\scapi.c
+# End Source File
+# Begin Source File
+
+SOURCE="..\..\snmplib\snmp-tc.c"
 # End Source File
 # Begin Source File
 
@@ -174,11 +193,23 @@ SOURCE=..\..\snmplib\snmp_logging.c
 # End Source File
 # Begin Source File
 
+SOURCE=..\..\snmplib\snmp_parse_args.c
+# End Source File
+# Begin Source File
+
 SOURCE=..\..\snmplib\snmp_secmod.c
 # End Source File
 # Begin Source File
 
 SOURCE=..\..\snmplib\snmp_transport.c
+# End Source File
+# Begin Source File
+
+SOURCE=..\..\snmplib\snmp_version.c
+# End Source File
+# Begin Source File
+
+SOURCE=..\..\snmplib\snmpCallbackDomain.c
 # End Source File
 # Begin Source File
 

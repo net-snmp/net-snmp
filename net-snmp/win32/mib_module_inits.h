@@ -33,7 +33,7 @@
   if (should_init("target_counters")) init_target_counters();
   if (should_init("nsTransactionTable")) init_nsTransactionTable();
   if (should_init("nsModuleTable")) init_nsModuleTable();
-  if (should_init("subagent")) init_subagent();
+  /* if (should_init("subagent")) init_subagent(); */
   if (should_init("override")) init_override();
   if (should_init("var_route")) init_var_route();
   if (should_init("vacm_context")) init_vacm_context();
