@@ -291,45 +291,50 @@ int main(int argc, char *argv[])
         exit (0);
     }
 
-    name_length = MAX_OID_LEN;
-    if (snmp_get_random_access()){
-	if (!get_node(current_name, name, &name_length)){
-	    fprintf(stderr, "Unknown object identifier: %s\n", current_name);
-	    exit(2);
-	}
-    } else if (find_all) {
-        if (0 == show_all_matched_objects(stdout, current_name,
-                                name, &name_length, description)) {
-            fprintf(stderr, "Unable to find a matching object identifier for \"%s\"\n",
-                   current_name);
-            exit(1);
-        }
+    do {
+        name_length = MAX_OID_LEN;
+        if (snmp_get_random_access()){
+            if (!get_node(current_name, name, &name_length)){
+                fprintf(stderr, "Unknown object identifier: %s\n", current_name);
+                exit(2);
+            }
+        } else if (find_all) {
+            if (0 == show_all_matched_objects(stdout, current_name,
+                                              name, &name_length, description)) {
+                fprintf(stderr, "Unable to find a matching object identifier for \"%s\"\n",
+                        current_name);
+                exit(1);
+            }
 	    exit(0);
-    } else if (ds_get_boolean(DS_LIBRARY_ID, DS_LIB_REGEX_ACCESS)) {
-        if (0 == get_wild_node(current_name, name, &name_length)) {
-            fprintf(stderr, "Unable to find a matching object identifier for \"%s\"\n",
-                   current_name);
-            exit(1);
+        } else if (ds_get_boolean(DS_LIBRARY_ID, DS_LIB_REGEX_ACCESS)) {
+            if (0 == get_wild_node(current_name, name, &name_length)) {
+                fprintf(stderr, "Unable to find a matching object identifier for \"%s\"\n",
+                        current_name);
+                exit(1);
+            }
+        } else {
+            if (!read_objid(current_name, name, &name_length)){
+                fprintf(stderr, "Invalid object identifier: %s\n", current_name);
+                exit(2);
+            }
         }
-    } else {
-	if (!read_objid(current_name, name, &name_length)){
-	    fprintf(stderr, "Invalid object identifier: %s\n", current_name);
-	    exit(2);
-	}
-    }
     
 
-    if (print == 1) {
-        struct tree *tp;
-        tp = get_tree(name, name_length, get_tree_head());
-        print_mib_tree (stdout, tp);
-        exit(0);
-    }
+        if (print == 1) {
+            struct tree *tp;
+            tp = get_tree(name, name_length, get_tree_head());
+            print_mib_tree (stdout, tp);
+        } else {
+            print_objid(name, name_length);
+            if (description){
+                print_description(name, name_length);
+            }
+        }
+	current_name = argv[++optind];
+        if( current_name != NULL )
+            printf("\n");
+    } while( optind < argc );
 
-    print_objid(name, name_length);
-    if (description){
-	print_description(name, name_length);
-    }
     return (0);
 }
 
