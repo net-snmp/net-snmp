@@ -201,7 +201,7 @@ struct tok tokens[] = {
     { "NUM-ENTRIES", sizeof("NUM-ENTRIES")-1, NUM_ENTRIES},
     { "BITSTRING", sizeof("BITSTRING")-1, BITSTRING},
     { "BIT", sizeof("BIT")-1, CONTINUE},
-    { "BITS", sizeof("BITS")-1, CONTINUE},
+    { "BITS", sizeof("BITS")-1, BITSTRING},
     { "Counter64", sizeof("Counter64")-1, COUNTER64},
     { "TimeTicks", sizeof ("TimeTicks")-1, TIMETICKS },
     { "NOTIFICATION-TYPE", sizeof ("NOTIFICATION-TYPE")-1, NOTIFTYPE },
@@ -1370,8 +1370,12 @@ parse_asntype(fp, name, ntype, ntoken)
 
     type = get_token(fp, token,MAXTOKEN);
     if (type == SEQUENCE){
+      int level = 0;
         while((type = get_token(fp, token, MAXTOKEN)) != ENDOFFILE){
-            if (type == RIGHTBRACKET){
+            if (type == LEFTBRACKET){
+              level++;
+          }
+          else if (type == RIGHTBRACKET && --level == 0){
                 *ntype = get_token(fp, ntoken,MAXTOKEN);
                 return NULL;
             }
