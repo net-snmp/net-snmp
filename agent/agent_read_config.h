@@ -5,9 +5,8 @@
 #ifndef _AGENT_READ_CONFIG_H
 #define _AGENT_READ_CONFIG_H
 
-void init_agent_read_config (void);
+void init_agent_read_config (const char *);
 void update_config (void);
-struct subtree;
 void snmpd_register_config_handler (const char *,
                                     void (*parser)(const char *, char *),
                                     void (*releaser) (void),

@@ -73,7 +73,7 @@ struct variable {
     oid		    name[MAX_OID_LEN];	    /* object identifier of variable */
 };
 
-void init_agent(void);
+void init_agent(const char *);
 int subtree_old_size (void);
 void sort_tree (void);
 

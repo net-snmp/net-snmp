@@ -85,24 +85,27 @@
 char dontReadConfigFiles;
 char *optconfigfile;
 
-void init_agent_read_config (void)
+void init_agent_read_config (const char *app)
 {
-  register_config_handler("snmpd","authtrapenable",
+  if ( app != NULL )
+      ds_set_string(DS_LIBRARY_ID, DS_LIB_APPTYPE, app);
+
+  register_app_config_handler("authtrapenable",
                           snmpd_parse_config_authtrap, NULL,
                           "1 | 2\t\t(1 = enable, 2 = disable)");
 
   if ( ds_get_boolean(DS_APPLICATION_ID, DS_AGENT_ROLE) == MASTER_AGENT ) {
-      register_config_handler("snmpd","trapsink",
+      register_app_config_handler("trapsink",
                           snmpd_parse_config_trapsink, snmpd_free_trapsinks,
                           "host [community]");
-      register_config_handler("snmpd","trap2sink",
+      register_app_config_handler("trap2sink",
                           snmpd_parse_config_trap2sink, NULL,
                           "host [community]");
-      register_config_handler("snmpd","informsink",
+      register_app_config_handler("informsink",
                           snmpd_parse_config_informsink, NULL,
                           "host [community]");
   }
-  register_config_handler("snmpd","trapcommunity",
+  register_app_config_handler("trapcommunity",
                           snmpd_parse_config_trapcommunity,
                           snmpd_free_trapcommunity,
                           "community-string");
@@ -121,7 +124,7 @@ void update_config(void)
   /* last is -c from command line */
   /* always read this one even if -C is present (ie both -c and -C) */
   if (optconfigfile != NULL) {
-    read_config_with_type (optconfigfile, "snmpd");
+    read_config_with_type (optconfigfile, ds_get_string(DS_LIBRARY_ID, DS_LIB_APPTYPE));
   }
   snmp_call_callbacks(SNMP_CALLBACK_LIBRARY, SNMP_CALLBACK_POST_READ_CONFIG,
                       NULL);
@@ -134,15 +137,15 @@ snmpd_register_config_handler(const char *token,
 			      void (*releaser) (void),
 			      const char *help)
 {
-  DEBUGMSGTL(("snmpd_register_config_handler",
+  DEBUGMSGTL(("snmpd_register_app_config_handler",
               "registering .conf token for \"%s\"\n", token));
-  register_config_handler("snmpd", token, parser, releaser, help);
+  register_app_config_handler(token, parser, releaser, help);
 }
 
 void
 snmpd_unregister_config_handler(const char *token)
 {
-  unregister_config_handler("snmpd", token);
+  unregister_app_config_handler(token);
 }
 
 /* this function is intended for use by mib-modules to store permenant
@@ -150,5 +153,5 @@ snmpd_unregister_config_handler(const char *token)
 void
 snmpd_store_config(const char *line)
 {
-  read_config_store("snmpd",line);
+  read_app_config_store(line);
 }
