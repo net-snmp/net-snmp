@@ -1492,6 +1492,13 @@ void (* external_signal_handler[NUM_EXTERNAL_SIGS])(int);
 void agent_SIGCHLD_handler(void)
 {
   external_signal_scheduled[SIGCHLD]++;
+#ifndef HAVE_SIGACTION
+  /* signal() sucks. It *might* have SysV semantics, which means that
+   * a signal handler is reset once it gets called. Ensure that it
+   * remains active.
+   */
+  signal(SIGCHLD, (void *)agent_SIGCHLD_handler);
+#endif
 }
 
 int register_signal(int sig, void (*func)(int))
@@ -1500,9 +1507,7 @@ int register_signal(int sig, void (*func)(int))
     switch (sig) {
 #if defined(SIGCHLD)
     case SIGCHLD:
-  #if HAVE_SIGNAL
-	signal(SIGCHLD, (void *)agent_SIGCHLD_handler);
-  #else
+#ifdef HAVE_SIGACTION
 	{
 		static struct sigaction act;
 		act.sa_handler = agent_SIGCHLD_handler;
@@ -1510,7 +1515,9 @@ int register_signal(int sig, void (*func)(int))
 		act.sa_flags = 0;
 		sigaction(SIGCHLD, &act, NULL);
 	}
-  #endif
+#else
+	signal(SIGCHLD, (void *)agent_SIGCHLD_handler);
+#endif
 	break;
 #endif
     default:

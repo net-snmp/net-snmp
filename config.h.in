@@ -284,6 +284,9 @@
 /* Define if you have the setmntent function.  */
 #undef HAVE_SETMNTENT
 
+/* Define if you have the sigaction function.  */
+#undef HAVE_SIGACTION
+
 /* Define if you have the sigalrm function.  */
 #undef HAVE_SIGALRM
 
