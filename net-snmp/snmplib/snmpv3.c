@@ -371,7 +371,7 @@ usm_parse_create_usmUser(const char *token, char *line) {
   struct usmUser *newuser;
   u_char	  userKey[SNMP_MAXBUF_SMALL];
   size_t	  userKeyLen = SNMP_MAXBUF_SMALL;
-  u_long ret;
+  size_t ret;
 
   newuser = usm_create_user();
 
@@ -674,7 +674,7 @@ init_snmpv3(const char *type) {
                          init_snmpv3_post_config, NULL);
   /* we need to be called back later */
   snmp_register_callback(SNMP_CALLBACK_LIBRARY, SNMP_CALLBACK_STORE_DATA,
-                         snmpv3_store, (void *) type);
+                         snmpv3_store, (void *) strdup(type));
 
 
 #if		!defined(USE_INTERNAL_MD5)
@@ -733,7 +733,7 @@ int
 init_snmpv3_post_config(int majorid, int minorid, void *serverarg,
                         void *clientarg) {
 
-  u_long engineIDLen;
+  size_t engineIDLen;
   u_char *c_engineID;
 
   c_engineID = snmpv3_generate_engineID(&engineIDLen);
