@@ -118,7 +118,7 @@ struct subid_s {
     char *label;
 };
 
-#define MAXTC   1024
+#define MAXTC   4096
 struct tc {     /* textual conventions */
     int type;
     int modid;
