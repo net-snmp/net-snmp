@@ -49,12 +49,16 @@ int unregister_mib_priority (oid *, size_t, int);
 int unregister_mib_range (oid *, size_t, int, int, oid);
 int unregister_mib_context (oid *, size_t, int, int, oid, const char*);
 void unregister_mibs_by_session (struct snmp_session *);
+int  unregister_mib_table_row	(oid *mibloc, size_t mibloclen, int priority,
+				 int var_subid, oid range_ubound,
+				 const char *context);
 
 struct subtree *free_subtree (struct subtree *);
 int compare_tree (const oid *, size_t, const oid *, size_t);
 int in_a_view(oid *, size_t *, struct snmp_pdu *, int);
 int check_access(struct snmp_pdu *pdu);
 void register_mib_reattach(void);
+void register_mib_detach(void);
 
 /* REGISTER_MIB(): This macro simply loads register_mib with less pain:
 
