@@ -153,10 +153,12 @@ register_agentx_list(struct snmp_session *session, struct snmp_pdu *pdu)
 		*/ 
     if ( pdu->range_subid )
 	ubound = pdu->variables->val.objid[ pdu->range_subid-1 ];
-    switch (register_mib_range(buf, (struct variable *)agentx_varlist,
+    switch (register_mib_context(buf, (struct variable *)agentx_varlist,
 			 sizeof(agentx_varlist[0]), 1,
 			 pdu->variables->name, pdu->variables->name_length,
-			 pdu->priority, pdu->range_subid, ubound, sp)) {
+			 pdu->priority, pdu->range_subid, ubound, sp,
+			 pdu->community, pdu->time,
+			 pdu->flags&AGENTX_MSG_FLAG_INSTANCE_REGISTER)) {
 
 	case MIB_REGISTERED_OK:
 				DEBUGMSGTL(("agentx:register",
@@ -184,9 +186,10 @@ unregister_agentx_list(struct snmp_session *session, struct snmp_pdu *pdu)
     if ( sp == NULL )
         return AGENTX_ERR_NOT_OPEN;
 
-    switch (unregister_mib_range(pdu->variables->name,
+    switch (unregister_mib_context(pdu->variables->name,
     		       pdu->variables->name_length,
-		       pdu->priority, pdu->range_subid, ubound)) {
+		       pdu->priority, pdu->range_subid, ubound,
+		       pdu->community, -1, pdu->flags)) {
 	case MIB_UNREGISTERED_OK:
 				return AGENTX_ERR_NOERROR;
 	case MIB_NO_SUCH_REGISTRATION:

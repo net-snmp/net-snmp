@@ -39,6 +39,7 @@ struct snmp_session *get_session_for_oid( oid *, size_t);
 int register_mib(const char *, struct variable *, size_t, size_t, oid *, size_t);
 int register_mib_priority(const char *, struct variable *, size_t, size_t, oid *, size_t, int);
 int register_mib_range(const char *, struct variable *, size_t , size_t , oid *, size_t, int, int, oid, struct snmp_session *);
+int register_mib_context(const char *, struct variable *, size_t , size_t , oid *, size_t, int, int, oid, struct snmp_session *, char*, int, int);
 
 int unregister_mib (oid *, size_t);
 int unregister_mib_priority (oid *, size_t, int);
