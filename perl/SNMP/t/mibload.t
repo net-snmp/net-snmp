@@ -10,7 +10,7 @@ BEGIN {
 }
 
 use Test;
-BEGIN {plan tests => 5}
+BEGIN {plan tests => 7}
 use SNMP;
 
 $SNMP::verbose = 0;
@@ -19,18 +19,27 @@ $SNMP::verbose = 0;
 #print "1..$n\n";
 #if ($n == 0) { exit 0; } else { $n = 1; }
 
+my @mibdir;
+my @mibfile;
+my $mibfile1;
 my $junk_oid = ".1.3.6.1.2.1.1.1.1.1.1";
 my $oid = '.1.3.6.1.2.1.1.1';
 my $name = 'sysDescr';
 my $junk_name = 'fooDescr';
 my $mib_file = 't/mib.txt';
 my $junk_mib_file = 'mib.txt';
-my @mibdir = ('/usr/local/share/snmp/mibs/');
-my @mibfile = ('/usr/local/share/snmp/mibs/IPV6-TCP-MIB.txt');
-
+if ($^O =~ /win32/i) {
+    $mibfile1 = "/usr/mibs/TCP-MIB.txt";
+    @mibdir = ("/usr/mibs");
+    @mibfile = ("/usr/mibs/IPV6-TCP-MIB.txt", "/usr/mibs/snmp-proxy-mib.txt");
+} else {
+    $mibfile1 = "/usr/local/share/snmp/mibs/TCP-MIB.txt";
+    @mibdir = ('/usr/local/share/snmp/mibs/');
+    @mibfile = ('/usr/local/share/snmp/mibs/IPV6-TCP-MIB.txt');
+}
 ######################################################################
 # See if we can find a mib to use, return of 0 means the file wasn't
-# found or isn't readable. 
+# found or isn't readable.
 
 $res = SNMP::setMib($junk_mib_file,1);
 #printf "%s %d\n", (!$res) ? "ok" :"not ok", $n++;
@@ -66,11 +75,14 @@ ok(!defined($res));
 ########################  5  ############################
 # add mib file
 
-$res = SNMP::addMibFiles($mibfile[0]);
-#print("the file is: $mibfile[0]\n");
+$res1 = SNMP::addMibFiles($mibfile1);
+ok(defined($res1));
+$res2 = SNMP::addMibFiles($mibfile[0]);
+ok(defined($res2));
+#print("res is; $res1, $res2\n");
 $res = $SNMP::MIB{ipv6TcpConnState}{moduleID};
 #print("Module ID is: $res\n");
 ok($res =~ /^IPV6-TCP-MIB/);
-########################  6  ##########################
+#################################################
 
 
