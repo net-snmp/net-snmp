@@ -31,8 +31,6 @@ agentx_parse_master(const char *token, char *cptr)
         !strcmp(cptr, "yes") || !strcmp(cptr, "on")) {
         i = 1;
         snmp_log(LOG_INFO, "Turning on AgentX master support.\n");
-        snmp_log(LOG_INFO,
-                 "Note this is still experimental and shouldn't be used on critical systems.\n");
     } else if (!strcmp(cptr, "no") || !strcmp(cptr, "off"))
         i = 0;
     else
