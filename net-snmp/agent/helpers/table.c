@@ -528,6 +528,8 @@ table_helper_handler(netsnmp_mib_handler *handler,
         if ((reqinfo->mode != MODE_GETNEXT) &&
             ((tbl_req_info->number_indexes != tbl_info->number_indexes) ||
              (tmp_len != -1))) {
+            DEBUGMSGTL(("helper:table",
+                        "invalid index(es) for table - skipping\n"));
             table_helper_cleanup(reqinfo, request, SNMP_NOSUCHINSTANCE);
             continue;
         }
