@@ -1210,7 +1210,10 @@ snmpv3_clone_engineID(u_char ** dest, size_t * destlen, u_char * src,
     if (!dest || !destlen)
         return 0;
 
-    *dest = NULL;
+    if (*dest) {
+        SNMP_FREE(*dest);
+        *dest = NULL;
+    }
     *destlen = 0;
 
     if (srclen && src) {
