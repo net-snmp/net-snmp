@@ -1312,6 +1312,7 @@ if test "x$tryopenssl" != "xno"; then
     fi
 
     AC_CHECK_LIB(crypto, EVP_md5)
+    AC_CHECK_FUNCS(AES_cfb128_encrypt)
 fi
 
 dnl Check for libraries that the agent needs
@@ -1565,7 +1566,7 @@ if test $cv_have_sys_disklabel_h = yes; then
 fi
 
 dnl OpenSSL
-AC_CHECK_HEADERS(openssl/hmac.h openssl/evp.h)
+AC_CHECK_HEADERS(openssl/hmac.h openssl/evp.h openssl/aes.h openssl/des.h)
 
 dnl Printing
 AC_PATH_PROG(LPSTAT_PATH,lpstat)
@@ -2310,6 +2311,14 @@ AC_CHECK_STRUCT_FOR([
 #include <netinet/ip_var.h>
 #endif
 ], ipstat, ips_reassembled)
+
+dnl check for the des_ks_struct.weak_key attribute, which indicates the 
+dnl older opensll version is being used.
+if test "x$ac_cv_header_openssl_des_h" = "xyes" ; then
+AC_CHECK_STRUCT_FOR([
+#include <openssl/des.h>
+], des_ks_struct, weak_key)
+fi
 
 dnl attempt to figure out if sysctl is usable
 
