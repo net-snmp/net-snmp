@@ -241,6 +241,9 @@ intpr(interval)
 		snmp_free_pdu (response);
 
 		cur_if->name[6] = '\0';
+                cp = (char *) strchr(cur_if->name, ' ');
+                if ( cp != NULL )
+                  *cp = '\0';
 		if (interface != NULL && strcmp(cur_if->name, interface) != 0) {
 			cur_if->name [0] = 0;
 			continue;
@@ -316,6 +319,9 @@ sidewaysintpr(interval)
 		if (var){
 		    memmove(ip->ift_name + 1, var->val.string, var->val_len);
 		}
+                cp = (char *) strchr(ip->ift_name, ' ');
+                if ( cp != NULL )
+                  *cp = '\0';
 		if (interface && strcmp(ip->ift_name + 1, interface) == 0)
 			interesting = ip;
 		ip->ift_name[15] = '\0';
@@ -432,6 +438,7 @@ loop:
 		sigpause(0);
 	}
 	sigsetmask(oldmask);
+        (void)signal(SIGALRM, catchalarm);
 #endif
 	signalled = NO;
 	(void)alarm(interval);
