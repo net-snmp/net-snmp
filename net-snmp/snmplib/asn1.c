@@ -718,13 +718,12 @@ asn_build_sequence(u_char *data,
     static const char *errpre = "build seq";
     char ebuf[128];
     
-    *datalength -= 4;
-    if (*datalength < 0){
-	*datalength += 4;	/* fix up before punting */
+    if (*datalength < 4){
 	sprintf(ebuf, "%s: length %d < 4: PUNT", errpre, (int)*datalength);
 	ERROR_MSG(ebuf);
 	return NULL;
     }
+    *datalength -= 4;
     *data++ = type;
     *data++ = (u_char)(0x02 | ASN_LONG_LEN);
     *data++ = (u_char)((length >> 8) & 0xFF);

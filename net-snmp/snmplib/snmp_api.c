@@ -4219,14 +4219,14 @@ snmp_add_var(struct snmp_pdu *pdu,
       case 'x':
       case 'd':
         if (type == 'd'){
-          tint = ascii_to_binary(value, buf);
+          ltmp = ascii_to_binary(value, buf);
         } else if (type == 's'){
           strcpy((char*)buf, value);
-          tint = strlen((char*)buf);
+          ltmp = strlen((char*)buf);
         } else if (type == 'x'){
-          tint = hex_to_binary(value, buf);
+          ltmp = hex_to_binary(value, buf);
         }
-        if (tint < 0) {
+        if (ltmp < 0) {
           result = SNMPERR_VALUE;
           snmp_set_detail(value);
           break;
@@ -4235,7 +4235,7 @@ snmp_add_var(struct snmp_pdu *pdu,
 	if (tp && tp->ranges) {
 	    rp = tp->ranges;
 	    while (rp) {
-		if (rp->low <= (int)tint && (int)tint <= rp->high) break;
+		if (rp->low <= ltmp && ltmp <= rp->high) break;
 		rp = rp->next;
 	    }
 	    if (!rp) {
@@ -4244,7 +4244,7 @@ snmp_add_var(struct snmp_pdu *pdu,
 		break;
 	    }
 	}
-        snmp_pdu_add_variable(pdu, name, name_length, ASN_OCTET_STR, buf, tint);
+        snmp_pdu_add_variable(pdu, name, name_length, ASN_OCTET_STR, buf, ltmp);
         break;
 
       case 'n':

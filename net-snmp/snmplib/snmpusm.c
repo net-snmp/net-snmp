@@ -1406,7 +1406,7 @@ usm_check_and_update_timeliness(
 	int    *error)
 {
 	u_char	myID[USM_MAX_ID_LENGTH];
-	size_t	myIDLength = snmpv3_get_engineID(myID, USM_MAX_ID_LENGTH);
+	int	myIDLength = snmpv3_get_engineID(myID, USM_MAX_ID_LENGTH);
 	u_int	myBoots;
 	u_int	myTime;
 
