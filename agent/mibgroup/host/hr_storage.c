@@ -606,6 +606,8 @@ try_next:
             case HRS_TYPE_MBUF:
 #ifdef MSIZE
                 long_return = MSIZE;
+#elif defined(linux)
+                long_return = 1024;
 #else
                 long_return = 256;
 #endif
@@ -624,6 +626,7 @@ try_next:
         else
             switch (store_idx) {
 #if defined(linux)
+            case HRS_TYPE_MBUF:
             case HRS_TYPE_MEM:
             case HRS_TYPE_SWAP:
                 long_return = linux_mem(store_idx, HRSTORE_SIZE);
@@ -691,6 +694,7 @@ try_next:
         else
             switch (store_idx) {
 #if defined(linux)
+            case HRS_TYPE_MBUF:
             case HRS_TYPE_MEM:
             case HRS_TYPE_SWAP:
                 long_return = linux_mem(store_idx, HRSTORE_USED);
@@ -792,7 +796,7 @@ static int      HRS_index;
 void
 Init_HR_Store(void)
 {
-#if !defined(solaris2) && !defined(hpux10) && !defined(hpux11) && !defined(linux)
+#if !defined(solaris2) && !defined(hpux10) && !defined(hpux11)
     HRS_index = 0;
 #else
     HRS_index = HRS_TYPE_MBUF;
@@ -836,23 +840,32 @@ linux_mem(int mem_type, int size_or_used)
 {
     FILE           *fp;
     char            buf[1024];
-    int             size = -1, free = -1;
+    int             size = -1, free = -1, buffers = -1;
 
     if ((fp = fopen("/proc/meminfo", "r")) == NULL)
         return -1;
 
     while (fgets(buf, sizeof(buf), fp) != NULL) {
-       if ((!strncmp(buf, "MemTotal:", 9) && mem_type == HRS_TYPE_MEM) ||
+       if ((!strncmp(buf, "MemTotal:", 9) && (mem_type == HRS_TYPE_MEM || mem_type == HRS_TYPE_MBUF)) ||
             (!strncmp(buf, "SwapTotal:", 10) && mem_type == HRS_TYPE_SWAP))
             sscanf(buf, "%*s %d", &size);
 
        if ((!strncmp(buf, "MemFree:", 8) && mem_type == HRS_TYPE_MEM) ||
             (!strncmp(buf, "SwapFree:", 9) && mem_type == HRS_TYPE_SWAP))
             sscanf(buf, "%*s %d", &free);
+
+       if ((!strncmp(buf, "Buffers:", 8) && mem_type == HRS_TYPE_MBUF))
+		sscanf(buf, "%*s %d", &buffers);
     }
 
     fclose(fp);
-    return (size_or_used == HRSTORE_SIZE ? size : (size - free));
+
+    switch (mem_type) {
+        case HRS_TYPE_MBUF:
+            return (size_or_used == HRSTORE_SIZE ? size : buffers);
+        default:
+            return (size_or_used == HRSTORE_SIZE ? size : (size - free));
+    } /* switch */
 
 }
 #endif
