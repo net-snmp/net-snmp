@@ -104,9 +104,9 @@ getuptime(void )
 
 unsigned char *var_extensible_vmstat(struct variable *vp,
 				     oid *name,
-				     int *length,
+				     size_t *length,
 				     int exact,
-				     int *var_len,
+				     size_t *var_len,
 				     WriteMethod **write_method)
 {
 
