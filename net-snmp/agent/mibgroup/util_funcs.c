@@ -107,7 +107,7 @@ Exit(int var)
     exit(var);
 }
 
-static const char *
+const char *
 make_tempfile(void)
 {
     static char     name[32];
