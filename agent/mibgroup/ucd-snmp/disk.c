@@ -203,14 +203,18 @@ void disk_parse_config(const char *token, char *cptr)
 #if HAVE_FSTAB_H
   struct fstab *fstab;
   struct stat stat1;
-#endif
-#endif
+#else
+#if HAVE_STATFS
+  struct statfs statf;
+#endif /* HAVE_STATFS */
+#endif /* HAVE_FSTAB_H */
+#endif /* HAVE_GETMNTENT */
   char tmpbuf[1024];
 #if defined(HAVE_GETMNTENT) && !defined(HAVE_SETMNTENT)
   int i;
 #endif
 
-#if HAVE_FSTAB_H || HAVE_GETMNTENT
+#if HAVE_FSTAB_H || HAVE_GETMNTENT || HAVE_STATFS
   if (numdisks == MAXDISKS) {
     config_perror("Too many disks specified.");
     sprintf(tmpbuf,"\tignoring:  %s",cptr);
@@ -280,8 +284,21 @@ void disk_parse_config(const char *token, char *cptr)
       copy_word(fstab->fs_spec,disks[numdisks].device);
       numdisks += 1;
     }
-#endif
-#endif
+#else
+#if HAVE_STATFS
+    if (statfs( disks[numdisks].path, &statf) == 0) {
+      copy_word(statf.f_mntfromname,disks[numdisks].device);
+      DEBUGMSGTL(("ucd-snmp/disk", "Disk:  %s\n",statf.f_mntfromname));
+    } else {
+      DEBUGMSGT(("ucd-snmp/disk","  %s != %s\n", disks[numdisks].path, statf.f_mntfromname));
+    }
+    if (disks[numdisks].device[0] != 0) {
+      /* dummy clause for else below */
+      numdisks += 1;  /* but inc numdisks here after test */
+    }
+#endif HAVE_STATFS
+#endif /* HAVE_FSTAB_H */
+#endif /* HAVE_GETMNTENT */
     else {
       sprintf(tmpbuf, "Couldn't find device for disk %s",
               disks[numdisks].path);
@@ -296,7 +313,7 @@ void disk_parse_config(const char *token, char *cptr)
   }
 #else
   config_perror("'disk' checks not supported on this architecture.");
-#endif
+#endif /* HAVE_FSTAB_H || HAVE_GETMNTENT || HAVE_STATFS */
 }
 /*
   var_extensible_disk(...
