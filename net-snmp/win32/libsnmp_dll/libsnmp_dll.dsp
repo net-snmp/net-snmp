@@ -163,3 +163,8 @@ SOURCE=..\..\snmplib\view.c
 # End Source File
 # End Target
 # End Project
+
+SOURCE=..\..\snmplib\read_config.c
+# End Source File
+# Begin Source File
+

@@ -112,6 +112,19 @@ EXPORTS
 	snmp_errstring
 	snmp_synch_setup
 	snmp_synch_response
+	init_snmp
+	snmp_add_var
+	print_oid_report
+	print_oid_report_disable_suffix
+	print_oid_report_enable_suffix
+	print_oid_report_disable_symbolic
+	print_oid_report_enable_symbolic
+	print_oid_report_disable_oid
+	print_oid_report_enable_oid
+	print_oid_report_disable_labeledoid
+	print_oid_report_enable_labeledoid
+	ascii_to_binary
+	hex_to_binary
 	ms_party_init
 	snmp_comstr_parse
 	snmp_party_parse
