@@ -55,8 +55,6 @@ I forget the appropriate RFC number.
 The demon blocks on the executing traphandle commands.  (This should
 be fixed in the future with an appropriate signal catch and wait()
 combination).
-.IP o
-There is no "default" traphandler, as there should be.
 .SH "SEE ALSO"
 snmp_config(5), snmptrapd(8), syslog(8), variables(5), read_config(3).
 
