@@ -78,6 +78,9 @@ dnl AC_CHECK_IFNET_FOR(SUBSTRUCT,[no])
 AC_DEFUN(AC_CHECK_IFNET_FOR,[
 dnl check for $1 in struct ifnet
 AC_CHECK_STRUCT_FOR([
+#ifdef IFNET_NEEDS_KERNEL
+#define _KERNEL 1
+#endif
 #include <sys/types.h>
 #include <sys/socket.h>
 #include <net/if.h>

@@ -13,7 +13,9 @@ fi
 
 dnl overflow problems with hpux's sh
 
-if test "`arch`" = "hppa" -a -x /bin/ksh; then
+AC_PATH_PROG(UNAMEPROG,uname)
+
+if test "`$ac_cv_path_UNAMEPROG -s`" = "HP_UX" -a -x /bin/ksh; then
   (typeset) >/dev/null 2>&1
   if test $? != 0; then
     echo feeding configure to /bin/ksh to avoid hpux /bin/sh problems
@@ -36,8 +38,8 @@ AC_PROG_MAKE_SET
 AC_PROG_RANLIB
 AC_PATH_PROG(PSPROG,ps)
 AC_CHECK_PROGS(WHOAMI, whoami logname, whoami)
-AC_DEFINE_UNQUOTED(UNAMEPROG,"$UNAMEPROG")
 AC_CHECK_PROGS(SED,sed gsed)
+AC_DEFINE_UNQUOTED(UNAMEPROG,"$UNAMEPROG")
 
 AC_AIX
 
@@ -171,6 +173,9 @@ dnl NetBSD required headers
 AC_CHECK_HEADERS(arpa/inet.h kvm.h)
 dnl BSDi2 headers
 AC_CHECK_HEADERS(sys/mount.h vm/swap_pager.h)
+dnl irix headers
+AC_CHECK_HEADERS(sys/hashing.h sys/tcpipstats.h)
+
 
 dnl Checks for typedefs, structures, and compiler characteristics.
 AC_TYPE_OFF_T
@@ -323,6 +328,39 @@ AC_CHECK_STRUCT_FOR([
 #include<netinet/tcp_var.h>
 #endif
 ], tcpstat, tcp_rcvmemdrop)
+
+dnl irix checks
+
+AC_CHECK_STRUCT_FOR([
+#include<net/if.h>
+], ifnet, if_mtu)
+
+if test "x$ac_cv_struct_ifnet_has_if_mtu" = "xno"; then
+AC_CACHE_CHECK(if _KERNEL needs to be defined for if_mtu, ac_cv_IFNET_NEEDS_KERNEL,
+[
+AC_TRY_COMPILE([
+#define _KERNEL 1
+#include <sys/types.h>
+#include <sys/socket.h>
+#include <net/if.h>
+],[
+struct ifnet testit;
+testit.if_mtu = 0;
+], ac_cv_IFNET_NEEDS_KERNEL=yes, ac_cv_IFNET_NEEDS_KERNEL=no)])
+
+if test "x$ac_cv_IFNET_NEEDS_KERNEL" = "xyes"; then
+  AC_DEFINE(IFNET_NEEDS_KERNEL)
+fi
+fi
+
+AC_CHECK_STRUCT_FOR([
+#ifdef IFNET_NEEDS_KERNEL
+#define _KERNEL 1
+#endif
+#include <sys/types.h>
+#include <sys/socket.h>
+#include <net/if.h>
+], ifaddr, ifa_next)
 
 dnl Check ifnet entries using macro defined in aclocal.m4.
 AC_CHECK_IFNET_FOR(if_baudrate)
