@@ -100,7 +100,11 @@ What operating systems does it run on?
 	* FreeBSD 2.x on all? systems
 	* BSDi 2.1 on all? systems
 
-  It is believed to also run on Linux and Irix systems
+  The applications (though not necessarily the agent) run on the
+  following systems:
+
+        * Linux - all? versions?
+        * Irix 6.2
 
 
 What happens if mine isn't listed?
