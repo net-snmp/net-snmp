@@ -147,6 +147,7 @@ int dropauth = 0;
 int running = 1;
 int reconfig = 0;
 u_long num_received = 0;
+static const char *default_port = "udp:162";
 
 const char *trap1_std_str = "%.4y-%.2m-%.2l %.2h:%.2j:%.2k %B [%b] (via %A [%a]): %N\n\t%W Trap (%q) Uptime: %#T\n%v\n",
 	   *trap2_std_str = "%.4y-%.2m-%.2l %.2h:%.2j:%.2k %B [%b]:\n%v\n";
@@ -685,10 +686,9 @@ void usage(void)
   -V        Print version and exit\n\
   -q        Quick print mib display\n\
   -D[TOKEN,...] turn on debugging output, optionally by the list of TOKENs.\n\
-  -p <port> Local port to listen from\n\
+  -p <addr> Local address to listen from\n\
   -P        Print to standard error\n\
   -F \"...\" Use custom format for logging to standard error\n\
-  -T TCP|UDP Listen to traffic on the TCP or UDP transport.\n\
   -o file   Print to the specified file\n\
   -u PIDFILE create PIDFILE with process id\n\
   -e        Print Event # (rising/falling alarm], etc.\n\
@@ -723,14 +723,12 @@ int main(int argc, char *argv[])
 {
     struct snmp_session sess, *session = &sess, *ss;
     snmp_transport *transport = NULL;
-    struct sockaddr_in addr;
     int	arg;
     int count, numfds, block;
     fd_set fdset;
     struct timeval timeout, *tvp;
-    int local_port = SNMP_TRAP_PORT;
     int dofork=1;
-    char *cp;
+    char *cp, *listen_ports = default_port;
     int tcp=0;
     char *trap1_fmt_str_remember = NULL;
     int agentx_subagent = 1;
@@ -774,7 +772,7 @@ int main(int argc, char *argv[])
     /*
      * usage: snmptrapd [-D] [-u PIDFILE] [-p #] [-P] [-s] [-l [d0-7]] [-d] [-e] [-a]
      */
-    while ((arg = getopt(argc, argv, "VdnqD:p:m:M:Po:O:esSafl:Hu:c:CF:T:")) != EOF){
+    while ((arg = getopt(argc, argv, "VdnqD:p:m:M:Po:O:esSafl:Hu:c:CF:")) != EOF){
 	switch(arg) {
 	case 'V':
             fprintf(stderr,"UCD-snmp version: %s\n", VersionInfo);
@@ -792,7 +790,7 @@ int main(int argc, char *argv[])
             snmp_set_do_debugging(1);
 	    break;
         case 'p':
-            local_port = atoi(optarg);
+            listen_ports = optarg;
             break;
 	case 'm':
 	    setenv("MIBS", optarg, 1);
@@ -800,16 +798,6 @@ int main(int argc, char *argv[])
 	case 'M':
 	    setenv("MIBDIRS", optarg, 1);
 	    break;
-        case 'T':
-            if (strcasecmp(optarg,"TCP") == 0) {
-                tcp = 1;
-            } else if (strcasecmp(optarg,"UDP") == 0) {
-                tcp = 0;
-            } else {
-                fprintf(stderr,"Unknown transport \"%s\" after -T flag.\n", optarg);
-                exit(1);
-            }
-            break;
 	case 'O':
 	    cp = snmp_out_toggle_options(optarg);
 	    if (cp != NULL) {
@@ -997,18 +985,11 @@ int main(int argc, char *argv[])
 
     SOCK_STARTUP;
 
-    addr.sin_family      = AF_INET;
-    addr.sin_port        = htons(local_port);
-    addr.sin_addr.s_addr = INADDR_ANY;
-    if (tcp) {
-      transport = snmp_tcp_transport(&addr, 1);
-    } else {
-      transport = snmp_udp_transport(&addr, 1);
-    }
+    transport = snmp_tdomain_transport(listen_ports, 1, "udp");
 
     if (transport == NULL) {
-      snmp_log(LOG_ERR, "couldn't open %s port %d -- errno %d (\"%s\")\n",
-	       tcp?"TCP":"UDP", local_port, errno, strerror(errno));
+      snmp_log(LOG_ERR, "couldn't open %s -- errno %d (\"%s\")\n",
+	       listen_ports, errno, strerror(errno));
       SOCK_CLEANUP;
       exit(1);
     }
