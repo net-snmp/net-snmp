@@ -27,6 +27,8 @@ VERSION_TAG=`echo Ext-$(VERSION) | sed 's/\./-/g;'`
 VER=$(VERSION)
 REL=$(RELEASE)
 
+WITH_PERL=1
+
 # Define the RPM architecture, i.e., 'noarch', 'i386', 'i686', etc.
 ARCH = i386
 
@@ -40,9 +42,9 @@ RPM_TREE := \
     $(RPM_BASE)/SPECS \
     $(RPM_BASE)/SRPMS
 
-.PHONY:	all clean rpm_files binary_rpm source_rpm
+.PHONY:	all clean rpm_files binary_rpm source_rpm all_rpm
 
-all:	rpm_files
+all:	all_rpm_files
 
 # Delete all generated files.
 clean:
@@ -84,12 +86,14 @@ $(GZIP_TAR):
 # stripping of binaries, but still retain the compression of
 # manual pages.
 #
+PERLOPTS=--define='with_perl $(WITH_PERL)'
+
 RPM_OPTS := \
     --define='_topdir $(PWD)/rpm' \
     --define='_includedir /usr/include/net-snmp' \
     --define='version $(VER)' \
     --define='release $(REL)' \
-    --target $(ARCH)
+    --target $(ARCH) $(PERLOPTS)
 
 SPEC_FILE  := $(NAME).spec
 RPM_SPEC   := $(RPM_BASE)/SPECS/$(SPEC_FILE)
@@ -97,9 +101,13 @@ RPM_SPEC   := $(RPM_BASE)/SPECS/$(SPEC_FILE)
 BINARY_RPM := $(RPM_BASE)/RPMS/$(ARCH)/$(PKG_VER)-$(REL).$(ARCH).rpm
 SOURCE_RPM := $(RPM_BASE)/SRPMS/$(PKG_VER)-$(REL).src.rpm
 
-rpm_files:	$(GZIP_TAR) binary_rpm source_rpm
+rpm_files:	$(GZIP_TAR) all_rpm_files
 binary_rpm:	$(BINARY_RPM)
 source_rpm:	$(SOURCE_RPM)
+
+all_rpm_files:	$(RPM_TREE) $(RPM_SPEC)
+	(cd $(RPM_BASE)/SPECS; \
+	rpmbuild -ba $(RPM_OPTS) $(SPEC_FILE))
 
 $(BINARY_RPM):	$(RPM_TREE) $(RPM_SPEC)
 	(cd $(RPM_BASE)/SPECS; \
