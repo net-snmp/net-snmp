@@ -966,7 +966,7 @@ mkdirhier(const char *pathname, mode_t mode, int skiplast)
     char           *entry;
     char            buf[SNMP_MAXPATH];
 
-#ifdef WIN32
+#if defined (WIN32) || defined (cygwin)
     /* convert backslash to forward slash */
     for (entry = ourcopy; *entry; entry++)
         if (*entry == '\\')
@@ -977,7 +977,7 @@ mkdirhier(const char *pathname, mode_t mode, int skiplast)
 
     buf[0] = '\0';
 
-#ifdef WIN32
+#if defined (WIN32) || defined (cygwin)
     /*
      * Check if first entry contains a drive-letter
      *   e.g  "c:/path"
