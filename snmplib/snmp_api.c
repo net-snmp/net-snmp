@@ -966,11 +966,11 @@ _sess_open(struct snmp_session *in_session)
     isp     = slp->internal;
     session = slp->session;
 
-    if ( isp->addr.sa__family == AF_UNSPEC ) {
+    if ( isp->addr.sa_family == AF_UNSPEC ) {
         if ( session->peername && session->peername[0] == '/' ) {
 #ifdef AF_UNIX
-            isp->addr.sa__family = AF_UNIX;
-            strcpy( isp->addr.sa__data, session->peername);
+            isp->addr.sa_family = AF_UNIX;
+            strcpy( isp->addr.sa_data, session->peername);
 #else /* AF_UNIX */
             snmp_log(LOG_ERR,"%s:%d: _sess_open invalid session name %s- unix sockets not supported  \n",
                     __FILE__,__LINE__,
@@ -979,7 +979,7 @@ _sess_open(struct snmp_session *in_session)
 #endif /* AF_UNIX */
             
         } else {
-            isp->addr.sa__family = AF_INET;
+            isp->addr.sa_family = AF_INET;
             isp_addr = (struct sockaddr_in *)&(isp->addr);
             if (session->peername != SNMP_DEFAULT_PEERNAME){
                 if ((int)(addr = inet_addr(session->peername)) != -1){
@@ -1031,7 +1031,7 @@ _sess_open(struct snmp_session *in_session)
 	 */
 	memcpy( &isp->me, &isp->addr, sizeof(isp->me));
 
-	if ( isp->addr.sa__family == AF_INET ) {
+	if ( isp->addr.sa_family == AF_INET ) {
 			/*
 			 * Remember to use the specified local port,
 			 *   rather than the (default?) remote one.
@@ -1048,37 +1048,37 @@ _sess_open(struct snmp_session *in_session)
     }
     else {
         memset(&isp->me, '\0', sizeof(isp->me));
-        isp->me.sa__family = isp->addr.sa__family;
-        if ( isp->me.sa__family == AF_INET ) {
+        isp->me.sa_family = isp->addr.sa_family;
+        if ( isp->me.sa_family == AF_INET ) {
 	    meIp = (struct sockaddr_in*)&(isp->me);
             meIp->sin_addr.s_addr = INADDR_ANY;
             meIp->sin_port = htons(session->local_port);
         }
 #ifdef AF_UNIX
-        else if ( isp->me.sa__family == AF_UNIX ) {
+        else if ( isp->me.sa_family == AF_UNIX ) {
     		/* Need a unique socket name */
 #ifndef UNIX_SOCKET_BASE_NAME
 #define UNIX_SOCKET_BASE_NAME  "/tmp/s."
 #endif
     
 #ifndef WIN32
-                strcpy( isp->me.sa__data, UNIX_SOCKET_BASE_NAME );
-                strcat( isp->me.sa__data, "XXXXXX" );
-                mktemp( isp->me.sa__data );
+                strcpy( isp->me.sa_data, UNIX_SOCKET_BASE_NAME );
+                strcat( isp->me.sa_data, "XXXXXX" );
+                mktemp( isp->me.sa_data );
 #endif
         }
 #endif /* AF_UNIX */
     }
-    addr_size = snmp_socket_length(isp->me.sa__family);
+    addr_size = snmp_socket_length(isp->me.sa_family);
 
     /* Set up connections */
     if ( session->flags & SNMP_FLAGS_STREAM_SOCKET ) {
         if ( session->local_port != 0 )
             session->flags |= SNMP_FLAGS_LISTENING;
-        sd = socket(isp->me.sa__family, SOCK_STREAM, 0);
+        sd = socket(isp->me.sa_family, SOCK_STREAM, 0);
     }
     else
-        sd = socket(isp->me.sa__family, SOCK_DGRAM, 0);
+        sd = socket(isp->me.sa_family, SOCK_DGRAM, 0);
     if (sd < 0){
 	in_session->s_snmp_errno = SNMPERR_NO_SOCKET;
 	in_session->s_errno = errno;
@@ -1102,7 +1102,7 @@ _sess_open(struct snmp_session *in_session)
 #ifndef SERVER_REQUIRES_CLIENT_SOCKET
     if (!(( session->flags & SNMP_FLAGS_STREAM_SOCKET ) &&
 #ifdef AF_UNIX
-        ( isp->me.sa__family == AF_UNIX ) &&
+        ( isp->me.sa_family == AF_UNIX ) &&
 #endif /* AF_UNIX */
         ( session->local_port == 0 ))) {
 
@@ -1353,8 +1353,8 @@ snmp_sess_close(void *sessp)
 	    closesocket(isp->sd);
 #endif
 #ifdef AF_UNIX
-            if ( isp->me.sa__family == AF_UNIX )
-                unlink( isp->me.sa__data );
+            if ( isp->me.sa_family == AF_UNIX )
+                unlink( isp->me.sa_data );
 #endif /* AF_UNIX */
 	}
 
@@ -3097,10 +3097,10 @@ _sess_async_send(void *sessp,
         return 0;
     }
 
-    if (pdu->address.sa__family == AF_UNSPEC){
+    if (pdu->address.sa_family == AF_UNSPEC){
 	isp_addr = (struct sockaddr_in *)&(isp->addr);
-	if (isp->addr.sa__family == AF_UNSPEC ||
-	   (isp->addr.sa__family == AF_INET &&
+	if (isp->addr.sa_family == AF_UNSPEC ||
+	   (isp->addr.sa_family == AF_INET &&
 	    isp_addr->sin_addr.s_addr == SNMP_DEFAULT_ADDRESS)){
 	        session->s_snmp_errno = SNMPERR_BAD_ADDRESS;
 	        return 0;
@@ -3108,7 +3108,7 @@ _sess_async_send(void *sessp,
 	memmove(&pdu->address, &(isp->addr), sizeof(isp->addr));
     }
 
-    addr_size = snmp_socket_length(pdu->address.sa__family);
+    addr_size = snmp_socket_length(pdu->address.sa_family);
 
     /* build the message to send */
     if (isp->hook_build)
@@ -3339,7 +3339,7 @@ _sess_read(void *sessp,
                    (u_char *)slp->internal,
                    sizeof(*slp->internal));
             isp->sd = new_sd;
-            isp->addr.sa__family = isp->me.sa__family;
+            isp->addr.sa_family = isp->me.sa_family;
             sp->flags &= (~SNMP_FLAGS_LISTENING);
             /* MTR snmp_res_unlock(MT_LIBRARY_ID, MT_LIB_SESSION); */
     } /*END MTCRITICAL_RESOURCE*/
@@ -3355,8 +3355,8 @@ _sess_read(void *sessp,
     } else {
         length = recvfrom(isp->sd, (char *)packet, PACKET_LENGTH, 0,
 		      (struct sockaddr *)&from, &fromlength);
-        if (from.sa__family == AF_UNSPEC)
-            from.sa__family = AF_INET; /* bad bad bad OS, no bone! */
+        if (from.sa_family == AF_UNSPEC)
+            from.sa_family = AF_INET; /* bad bad bad OS, no bone! */
     }
 
     if (length == -1) {
@@ -3373,9 +3373,9 @@ _sess_read(void *sessp,
         /* XXX: its not properly closing... */
 		/* Don't unlink the server listening socket prematurely */
 #ifdef AF_UNIX
-        if (( isp->me.sa__family == AF_UNIX ) &&
+        if (( isp->me.sa_family == AF_UNIX ) &&
            !( sp->flags & SNMP_FLAGS_LISTENING ))
-                  isp->me.sa__family = AF_UNSPEC;
+                  isp->me.sa_family = AF_UNSPEC;
 #endif /*AF_UNIX */
         return -1;
     }
@@ -3405,9 +3405,9 @@ _sess_read(void *sessp,
           /* Don't unlink the server listening socket prematurely */
           /* XXX: do this?? */
 #ifdef AF_UNIX
-        if (( isp->me.sa__family == AF_UNIX ) &&
+        if (( isp->me.sa_family == AF_UNIX ) &&
            !( sp->flags & SNMP_FLAGS_LISTENING ))
-                  isp->me.sa__family = AF_UNSPEC;
+                  isp->me.sa_family = AF_UNSPEC;
 #endif /*AF_UNIX */
           return -1;
         }
@@ -3436,9 +3436,9 @@ _sess_read(void *sessp,
           /* Don't unlink the server listening socket prematurely */
           /* XXX: do this?? */
 #ifdef AF_UNIX
-        if (( isp->me.sa__family == AF_UNIX ) &&
+        if (( isp->me.sa_family == AF_UNIX ) &&
            !( sp->flags & SNMP_FLAGS_LISTENING ))
-                  isp->me.sa__family = AF_UNSPEC;
+                  isp->me.sa_family = AF_UNSPEC;
 #endif /*AF_UNIX */
           return -1;
         }
@@ -3813,7 +3813,7 @@ snmp_resend_request(struct session_list *slp, struct request_list *rp,
     xdump(packet, length, "");
   }
 
-    addr_size = snmp_socket_length(rp->pdu->address.sa__family);
+    addr_size = snmp_socket_length(rp->pdu->address.sa_family);
 
   if ( sp->flags & SNMP_FLAGS_STREAM_SOCKET )
     result = send(isp->sd, (char *)packet, length, 0);
