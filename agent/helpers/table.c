@@ -154,9 +154,7 @@ table_helper_handler(netsnmp_mib_handler *handler,
             return netsnmp_call_next_handler(handler, reginfo, reqinfo,
                                              requests);
         } else {
-#ifndef WIN32
-#pragma warning "XXX-rks: memory leak. add cleanup handler?"
-#endif
+/** XXX-rks: memory leak. add cleanup handler? */
             netsnmp_free_agent_data_sets(reqinfo);
         }
     }
