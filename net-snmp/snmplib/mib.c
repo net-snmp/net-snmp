@@ -2725,11 +2725,14 @@ read_objid(const char *input, oid * output, size_t * out_len)
          * get past leading '.', append '.' to Prefix. 
          */
         if (*Prefix == '.')
-            strcpy(buf, Prefix + 1);
+            strncpy(buf, Prefix + 1, sizeof(buf)-1);
         else
-            strcpy(buf, Prefix);
+            strncpy(buf, Prefix, sizeof(buf)-1);
+        buf[ sizeof(buf)-1 ] = 0;
         strcat(buf, ".");
-        strcat(buf, input);
+        buf[ sizeof(buf)-1 ] = 0;
+        strncat(buf, input, sizeof(buf)-strlen(buf));
+        buf[ sizeof(buf)-1 ] = 0;
         input = buf;
     }
 
@@ -4086,9 +4089,10 @@ fprint_description(FILE * f, oid * objid, size_t objidlen,
             if (*objid == subtree->subid) {
                 while (subtree->next_peer && subtree->next_peer->subid == *objid)
                     subtree = subtree->next_peer;
-                if (strncmp(subtree->label, ANON, ANON_LEN))
-                    sprintf(buf, " %s(%lu)", subtree->label, subtree->subid);
-                else
+                if (strncmp(subtree->label, ANON, ANON_LEN)) {
+                    snprintf(buf, sizeof(buf), " %s(%lu)", subtree->label, subtree->subid);
+                    buf[ sizeof(buf)-1 ] = 0;
+                } else
                     sprintf(buf, " %lu", subtree->subid);
                 len = strlen(buf);
                 if (pos + len + 2 > width) {
@@ -4250,7 +4254,8 @@ print_tree_node(FILE * f, struct tree *tp, int width)
                     first = 0;
                 else
                     fprintf(f, ", ");
-                sprintf(str, "%s(%d)", ep->label, ep->value);
+                snprintf(str, sizeof(str), "%s(%d)", ep->label, ep->value);
+                str[ sizeof(str)-1 ] = 0;
                 len = strlen(str);
                 if (pos + len + 2 > width) {
                     fprintf(f, "\n\t\t  ");
@@ -4340,8 +4345,10 @@ print_tree_node(FILE * f, struct tree *tp, int width)
                     first = 0;
                 else
                     fprintf(f, ", ");
-                sprintf(str, "%s%s", ip->isimplied ? "IMPLIED " : "",
+                snprintf(str, sizeof(str), "%s%s",
+                        ip->isimplied ? "IMPLIED " : "",
                         ip->ilabel);
+                str[ sizeof(str)-1 ] = 0;
                 len = strlen(str);
                 if (pos + len + 2 > width) {
                     fprintf(f, "\n\t\t  ");
@@ -4365,7 +4372,8 @@ print_tree_node(FILE * f, struct tree *tp, int width)
                     first = 0;
                 else
                     fprintf(f, ", ");
-                sprintf(str, "%s", vp->vblabel);
+                snprintf(str, sizeof(str), "%s", vp->vblabel);
+                str[ sizeof(str)-1 ] = 0;
                 len = strlen(str);
                 if (pos + len + 2 > width) {
                     fprintf(f, "\n\t\t  ");
@@ -4880,12 +4888,13 @@ _add_strings_to_oid(struct tree *tp, char *cp,
     {
         char            buf[256];
         if (in_dices)
-            sprintf(buf, "Index out of range: %s (%s)",
+            snprintf(buf, sizeof(buf), "Index out of range: %s (%s)",
                     fcp, in_dices->ilabel);
         else if (tp)
-            sprintf(buf, "Sub-id not found: %s -> %s", tp->label, fcp);
+            snprintf(buf, sizeof(buf), "Sub-id not found: %s -> %s", tp->label, fcp);
         else
-            sprintf(buf, "%s", fcp);
+            snprintf(buf, sizeof(buf), "%s", fcp);
+        buf[ sizeof(buf)-1 ] = 0;
 
         snmp_set_detail(buf);
     }

@@ -541,11 +541,12 @@ snmpd_parse_config_targetParams(const char *token, char *char_ptr)
         snmpTargetParamTable_dispose(newEntry);
         return;
     }
-    sprintf(buff,
+    snprintf(buff, sizeof(buff),
             "snmp_parse_config_targetParams, read: %s %d %d %s %d %d %d\n",
             newEntry->paramName, newEntry->mpModel, newEntry->secModel,
             newEntry->secName, newEntry->secLevel, newEntry->storageType,
             newEntry->rowStatus);
+    buff[ sizeof(buff)-1 ] = 0;
     DEBUGMSGTL(("snmpTargetParamsEntry", buff));
 
     update_timestamp(newEntry);
@@ -578,12 +579,13 @@ store_snmpTargetParamsEntry(int majorID, int minorID, void *serverarg,
                 &&
                 (curr_struct->rowStatus == SNMP_ROW_ACTIVE ||
                  curr_struct->rowStatus == SNMP_ROW_NOTINSERVICE)) {
-                sprintf(&line[strlen(line)],
+                snprintf(&line[strlen(line)], sizeof(line)-strlen(line)-1,
                         "targetParams %s %i %i %s %i %i %i\n",
                         curr_struct->paramName, curr_struct->mpModel,
                         curr_struct->secModel, curr_struct->secName,
                         curr_struct->secLevel, curr_struct->storageType,
                         curr_struct->rowStatus);
+                line[ sizeof(line)-1 ] = 0;
 
                 /*
                  * store to file 

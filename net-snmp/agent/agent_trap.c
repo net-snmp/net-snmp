@@ -681,7 +681,8 @@ snmpd_parse_config_trapsink(const char *token, char *cptr)
     }
     if (create_v1_trap_session(sp, sinkport,
                                cp ? cp : snmp_trapcommunity) == 0) {
-        sprintf(tmpbuf, "cannot create trapsink: %s", cptr);
+        snprintf(tmpbuf, sizeof(tmpbuf), "cannot create trapsink: %s", cptr);
+        tmpbuf[sizeof(tmpbuf)-1] = '\0';
         config_perror(tmpbuf);
     }
 }
@@ -711,7 +712,8 @@ snmpd_parse_config_trap2sink(const char *word, char *cptr)
     }
     if (create_v2_trap_session(sp, sinkport,
                                cp ? cp : snmp_trapcommunity) == 0) {
-        sprintf(tmpbuf, "cannot create trap2sink: %s", cptr);
+        snprintf(tmpbuf, sizeof(tmpbuf), "cannot create trap2sink: %s", cptr);
+        tmpbuf[sizeof(tmpbuf)-1] = '\0';
         config_perror(tmpbuf);
     }
 }
@@ -740,7 +742,8 @@ snmpd_parse_config_informsink(const char *word, char *cptr)
     }
     if (create_v2_inform_session(sp, sinkport,
                                  cp ? cp : snmp_trapcommunity) == 0) {
-        sprintf(tmpbuf, "cannot create informsink: %s", cptr);
+        snprintf(tmpbuf, sizeof(tmpbuf), "cannot create informsink: %s", cptr);
+        tmpbuf[sizeof(tmpbuf)-1] = '\0';
         config_perror(tmpbuf);
     }
 }

@@ -182,7 +182,8 @@ snmpv3_secLevel_conf(const char *word, char *cptr)
         netsnmp_ds_set_int(NETSNMP_DS_LIBRARY_ID, 
 			   NETSNMP_DS_LIB_SECLEVEL, SNMP_SEC_LEVEL_AUTHPRIV);
     } else {
-        sprintf(buf, "Unknown security level: %s", cptr);
+        snprintf(buf, sizeof(buf), "Unknown security level: %s", cptr);
+        buf[ sizeof(buf)-1 ] = 0;
         config_perror(buf);
     }
     DEBUGMSGTL(("snmpv3", "default secLevel set to: %s = %d\n", cptr,
