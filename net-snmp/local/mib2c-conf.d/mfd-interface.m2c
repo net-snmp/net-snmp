@@ -34,6 +34,7 @@
 
 #include "${name}.h"
 
+
 /* ********************************************************************
  * Table declarations
  */
@@ -43,6 +44,12 @@
 /* PUBLIC interface initialization routine */
 void _${context}_initialize_interface(${context}_registration * user_ctx,
                                     u_long flags);
+
+${context}_registration *
+${context}_registration_get( void );
+
+${context}_registration *
+${context}_registration_set( ${context}_registration * new );
 
 @   if $m2c_data_allocate == 1@
 @      eval $m2c_tmp = "${context}_data *"@
@@ -114,6 +121,21 @@ static ${context}_interface_ctx ${context}_if_ctx;
 
 static void _${context}_container_init(
     ${context}_interface_ctx *if_ctx);
+
+
+${context}_registration *
+${context}_registration_get( void )
+{
+    return ${context}_if_ctx.user_ctx;
+}
+
+${context}_registration *
+${context}_registration_set( ${context}_registration * new )
+{
+    ${context}_registration * old = ${context}_if_ctx.user_ctx;
+    ${context}_if_ctx.user_ctx = new;
+    return old;
+}
 
 /*
  * persistence
@@ -497,7 +519,18 @@ _mfd_${context}_pre_request(netsnmp_mib_handler *handler,
                             netsnmp_agent_request_info *agtreq_info,
                             netsnmp_request_info *requests)
 {
-    int rc = ${context}_pre_request(${context}_if_ctx.user_ctx);
+    int rc;
+
+    DEBUGMSGTL(("internal:${context}:_mfd_${context}_pre_request",
+                "called\n"));
+    
+    if (1 != netsnmp_row_merge_status_first(reginfo, agtreq_info)) {
+        DEBUGMSGTL(("internal:${context}",
+                    "skipping additional pre_request\n"));
+        return SNMP_ERR_NOERROR;
+    }
+        
+    rc = ${context}_pre_request(${context}_if_ctx.user_ctx);
     if (MFD_SUCCESS != rc) {
         /*
          * nothing we can do about it but log it
@@ -521,7 +554,19 @@ _mfd_${context}_post_request(netsnmp_mib_handler *handler,
                              netsnmp_request_info *requests)
 {
     ${context}_rowreq_ctx *rowreq_ctx;
-    int rc = ${context}_post_request(${context}_if_ctx.user_ctx);
+    int rc;
+
+    DEBUGMSGTL(("internal:${context}:_mfd_${context}_post_request",
+                "called\n"));
+
+    if (1 != netsnmp_row_merge_status_last(reginfo, agtreq_info)) {
+        DEBUGMSGTL(("internal:${context}",
+                    "waiting for last post_request\n"));
+        return SNMP_ERR_NOERROR;
+    }
+    
+    rc = ${context}_post_request(${context}_if_ctx.user_ctx,
+                                     agtreq_info->asp->status);
     if (MFD_SUCCESS != rc) {
         /*
          * nothing we can do about it but log it
@@ -532,18 +577,33 @@ _mfd_${context}_post_request(netsnmp_mib_handler *handler,
     
     /*
      * if there are no errors, check for and handle row creation/deletion
+     * and update column exist flags...
      */
-    rc = netsnmp_check_requests_error(requests);
-    if ((SNMP_ERR_NOERROR == rc) &&
+    if ((SNMP_ERR_NOERROR == agtreq_info->asp->status) &&
         (NULL !=
          (rowreq_ctx = netsnmp_container_table_row_extract(requests)))) {
-        if (rowreq_ctx->rowreq_flags & MFD_ROW_CREATED) {
-            rowreq_ctx->rowreq_flags &= ~MFD_ROW_CREATED;
-            CONTAINER_INSERT(${context}_if_ctx.container, rowreq_ctx);
-        }
-        else if (rowreq_ctx->rowreq_flags & MFD_ROW_DELETED) {
+        if (rowreq_ctx->rowreq_flags & MFD_ROW_DELETED) {
             CONTAINER_REMOVE(${context}_if_ctx.container, rowreq_ctx);
             ${context}_release_rowreq_ctx(rowreq_ctx);
+        }
+        else {
+            if (rowreq_ctx->column_set_flags) {
+                DEBUGMSGTL(("internal:${context}:_mfd_post_request",
+                            "updating exists (%p) w/set (%p) = %p\n",
+                            rowreq_ctx->column_exists_flags,
+                            rowreq_ctx->column_set_flags,
+                            (rowreq_ctx->column_exists_flags |
+                             rowreq_ctx->column_set_flags)));
+                rowreq_ctx->column_exists_flags |=
+                    rowreq_ctx->column_set_flags;
+
+                rowreq_ctx->column_set_flags = 0;
+
+            }
+            if (rowreq_ctx->rowreq_flags & MFD_ROW_CREATED) {
+                rowreq_ctx->rowreq_flags &= ~MFD_ROW_CREATED;
+                CONTAINER_INSERT(${context}_if_ctx.container, rowreq_ctx);
+            }
         }
     }
 
@@ -663,7 +723,7 @@ _mfd_${context}_object_lookup(netsnmp_mib_handler *handler,
             /*
              * add rowreq_ctx to request data lists
              */
-            netsnmp_container_table_row_insert(requests, rowreq_ctx);
+            netsnmp_container_table_row_insert(requests, (void*)rowreq_ctx);
         }
 @   end@ // row creation
     }
@@ -691,7 +751,8 @@ _${context}_get_column( ${context}_rowreq_ctx *rowreq_ctx,
 {
     int rc = SNMPERR_SUCCESS;
     
-    DEBUGMSGTL(("internal:${context}:_mfd_${context}_get_column","called\n"));
+    DEBUGMSGTL(("internal:${context}:_mfd_${context}_get_column",
+                "called for %d\n", column));
 
 
     netsnmp_assert(NULL != rowreq_ctx);
@@ -728,6 +789,14 @@ _${context}_get_column( ${context}_rowreq_ctx *rowreq_ctx,
 
     /* $m2c_node_summary */
     case COLUMN_$node.uc:
+@   if $m2c_table_sparse == 1@
+        if (! (COLUMN_$node.uc_FLAG & rowreq_ctx->column_exists_flags)) {
+            DEBUGMSGTL(("internal:${context}:_mfd_${context}_get_column",
+                        "column %d ($node) doesn't exist\n", column));
+            return MFD_SKIP;
+        }
+
+@   end@
 ##         use sizeof except for BITS
 @         if $m2c_node_needlength == 0@
 @            if "$node.perltype" eq "BITS"@
@@ -782,6 +851,9 @@ _mfd_${context}_get_values(netsnmp_mib_handler *handler,
 
     netsnmp_assert(NULL != rowreq_ctx);
     
+    DEBUGMSGTL(("9:${context}:_mfd_${context}_get_values",
+                "exists %p\n", (void*)rowreq_ctx->column_exists_flags));
+
     for(;requests; requests = requests->next) {
         /*
          * save old pointer, so we can free it if replaced
@@ -807,7 +879,7 @@ _mfd_${context}_get_values(netsnmp_mib_handler *handler,
         rc = _${context}_get_column(rowreq_ctx, requests->requestvb, tri->colnum);
         if(rc) {
             if(MFD_SKIP == rc) {
-                requests->requestvb->type = ASN_PRIV_RETRY;
+                requests->requestvb->type = SNMP_NOSUCHINSTANCE;
                 rc = SNMP_ERR_NOERROR;
             }
         }
@@ -863,7 +935,8 @@ _${context}_check_column( ${context}_rowreq_ctx *rowreq_ctx,
 {
     int rc = SNMPERR_SUCCESS;
     
-    DEBUGMSGTL(("internal:${context}:_${context}_check_column","called\n"));
+    DEBUGMSGTL(("internal:${context}:_${context}_check_column",
+                "called for %d\n", column));
 
     netsnmp_assert(NULL != rowreq_ctx);
 
@@ -887,7 +960,11 @@ _${context}_check_column( ${context}_rowreq_ctx *rowreq_ctx,
     /* $m2c_node_summary */
     case COLUMN_$node.uc:
 @      include node-varbind-validate.m2i@
-    if(SNMPERR_SUCCESS == rc) {
+    if(SNMPERR_SUCCESS != rc) {
+        DEBUGMSGTL(("${context}:_${context}_check_column:$node",
+                    "varbind validation failed (eg bad type or size)\n"));
+    }
+    else {
         rc = ${node}_check_value( rowreq_ctx, $m2c_node_var_val );
         if((MFD_SUCCESS != rc) && (MFD_NOT_VALID_EVER != rc) &&
            (MFD_NOT_VALID_NOW != rc)) {
@@ -1033,7 +1110,8 @@ _${context}_undo_setup_column( ${context}_rowreq_ctx *rowreq_ctx, int column )
 {
     int rc = SNMPERR_SUCCESS;
     
-    DEBUGMSGTL(("internal:${context}:_${context}_undo_setup_column","called\n"));
+    DEBUGMSGTL(("internal:${context}:_${context}_undo_setup_column",
+                "called for %d\n", column));
 
     netsnmp_assert(NULL != rowreq_ctx);
 
@@ -1044,7 +1122,7 @@ _${context}_undo_setup_column( ${context}_rowreq_ctx *rowreq_ctx, int column )
 
     /* $m2c_node_summary */
     case COLUMN_$node.uc:
-        rowreq_ctx->column_set_flags |= FLAG_$node.uc;
+        rowreq_ctx->column_set_flags |= COLUMN_$node.uc_FLAG;
         rc = ${node}_undo_setup(rowreq_ctx );
         break;
  @      end@ # settable
@@ -1169,10 +1247,6 @@ _mfd_${context}_undo_cleanup(netsnmp_mib_handler *handler,
     }
 
 @end@
-    /*
-     * clear set flags
-     */
-    rowreq_ctx->column_set_flags = 0;
 
     return SNMP_ERR_NOERROR;
 } /* _mfd_${context}_undo_cleanup */
@@ -1192,7 +1266,8 @@ _${context}_set_column( ${context}_rowreq_ctx *rowreq_ctx,
 {
     int rc = SNMPERR_SUCCESS;
     
-    DEBUGMSGTL(("internal:${context}:_${context}_set_column","called\n"));
+    DEBUGMSGTL(("internal:${context}:_${context}_set_column",
+                "called for %d\n", column));
 
     netsnmp_assert(NULL != rowreq_ctx);
 
@@ -1203,16 +1278,7 @@ _${context}_set_column( ${context}_rowreq_ctx *rowreq_ctx,
 
     /* $m2c_node_summary */
     case COLUMN_$node.uc:
-@         if $m2c_node_needlength == 0@
-        if(var->val_len != sizeof($m2c_decl)) {
-            rc = SNMP_ERR_WRONGLENGTH;
-            snmp_log(LOG_ERR,
-                     "varbind size of %d does not match expected size %d\n",
-                     var->val_len, sizeof($m2c_decl));
-            break;
-        }
-@         end@
-        rowreq_ctx->column_set_flags |= FLAG_$node.uc;
+        rowreq_ctx->column_set_flags |= COLUMN_$node.uc_FLAG;
         rc = ${node}_set(rowreq_ctx, $m2c_node_var_val );
         break;
  @      end@ # settable
@@ -1220,6 +1286,7 @@ _${context}_set_column( ${context}_rowreq_ctx *rowreq_ctx,
 
      default:
          snmp_log(LOG_ERR,"unknown column %d in _${context}_set_column\n", column);
+         rc = SNMP_ERR_GENERR;
          break;
     }
     
@@ -1338,7 +1405,8 @@ _${context}_undo_column( ${context}_rowreq_ctx *rowreq_ctx,
 {
     int rc = SNMPERR_SUCCESS;
     
-    DEBUGMSGTL(("internal:${context}:_${context}_undo_column","called\n"));
+    DEBUGMSGTL(("internal:${context}:_${context}_undo_column",
+                "called for %d\n", column));
 
     netsnmp_assert(NULL != rowreq_ctx);
 
@@ -1813,6 +1881,10 @@ _${context}_container_col_restore(
                                           (char*)&${m2c_ctx_rh},
                                           &len);
 @      end@
+@      if $m2c_table_sparse == 1@
+            if (NULL != buf)
+                rowreq_ctx->column_exists_flags |= COLUMN_$node.uc_FLAG;
+@      end@ # table sparse
         break;
     
 @   end@ # foreach col
