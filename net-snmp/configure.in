@@ -11,6 +11,17 @@ if test "x$with_root_access" = "xno"; then
   AC_DEFINE(NO_ROOT_ACCESS)
 fi
 
+dnl overflow problems with hpux's sh
+
+if test `arch` = "hpux"; then
+  (typeset) >/dev/null 2>&1
+  if test $? != 0; then
+    echo feeding configure to /bin/ksh to avoid hpux /bin/sh problems
+    /bin/ksh $0 "$@"
+  fi
+fi
+
+
 dnl Checks for programs.
 AC_CHECK_PROGS(CC,cc gcc c89 shlicc2,cc)
 AC_PROG_CC
