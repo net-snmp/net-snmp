@@ -3,34 +3,76 @@
 
 require 5;
 
+use SNMP;
+use Tk;
 require Tk::Table;
 require Tk::HList;
 require Tk::FileSelect;
 require Tk::Dialog;
+use Getopt::Std;
+use Data::Dumper;
 
 $host = 'localhost';
 $OID = '.1.3.6.1';
+$opts{'C'}=$ENV{'HOME'} . "/.snmp/tkmibrc";
 
 # default session options
-%session_opts = (Community    => "public",
-		 RemotePort   => 161,
-		 Timeout      => 5000000,
-		 Retries      => 5,
-		 Version      => 1,
-		 AuthProto    => 'MD5',
-		 PrivProto    => 'DES',
-		 AuthPass     => '',
-		 PrivPass     => '',
-		 Context      => 'default',
-		 SecName      => 'initial',
-		 SecLevel     => 'authNoPriv',
-		 UseLongNames => 1);
-
-while($#ARGV > -1 && $ARGV[0] =~ /^-/) {
-    $_ = shift;
-    $session_opts{'RemotePort'} = shift if (/-p/);
-    $findoid = shift if (/-o/);
+if (test_version(0,4,2,1)) {
+    print "setting opts\n";
+    %opts = (
+	     'c'          => "public",
+	     'p'   => 161,
+	     't'      => 5000000,
+	     'r'      => 5,
+	     'v'      => 1,
+	     'a'    => 'MD5',
+	     'x'    => 'DES',
+	     'A'     => '',
+	     'X'     => '',
+	     'n'      => '',
+	     'u'      => 'initial',
+	     'l'     => 'authNoPriv',
+	     );
 }
+
+getopts("hp:v:a:A:x:X:n:u:l:r:t:o:c:C", \%opts);
+
+sub usage {
+    print "
+tkmib [-C] [-o OID] [SNMPCMD arguments] [host]
+  -C CONFIG_FILE  load CONFIG_FILE after starting up. (default: ~/.snmp/tkmibrc)
+                  (use -C /dev/null to not read one).
+
+  See the snmpcmd manual page for related SNMPCMD arguments.  (Not all
+  options are currently supported.)
+";
+    exit();
+}
+
+usage() if ($opts{'h'});
+
+@displayInfo=qw(type access status units hint moduleID enums indexes);
+foreach my $i (@displayInfo) {
+    $displayInfoStates{$i} = 1;
+}
+
+# source config file
+do $opts{'C'} if ($opts{'C'} && -f $opts{'C'});
+
+$session_opts{'UseLongNames'} => 1;
+$session_opts{'RemotePort'} = $opts{'p'} if ($opts{'p'});
+$session_opts{'Community'} = $opts{'c'} if ($opts{'c'});
+$session_opts{'Version'} = $opts{'v'} if ($opts{'v'});
+$session_opts{'AuthProto'} = $opts{'a'} if ($opts{'a'});
+$session_opts{'AuthPass'} = $opts{'A'} if ($opts{'A'});
+$session_opts{'PrivProto'} = $opts{'x'} if ($opts{'x'});
+$session_opts{'PrivPass'} = $opts{'X'} if ($opts{'X'});
+$session_opts{'Context'} = $opts{'n'} if ($opts{'n'});
+$session_opts{'SecName'} = $opts{'u'} if ($opts{'u'});
+$session_opts{'SecLevel'} = $opts{'l'} if ($opts{'l'});
+$session_opts{'Retries'} = $opts{'r'} if ($opts{'r'});
+$session_opts{'Timeout'} = $opts{'t'} if ($opts{'t'});
+
 $host = shift if ($#ARGV > -1);
 $session_opts{'Community'} = shift if ($#ARGV > -1);
 
@@ -38,17 +80,16 @@ $graphtime=5;
 $graphdelta=1;
 @graphcolors=qw(blue red green yellow purple);
 
-@displayInfo=qw(type access status units hint moduleID enums indexes);
-
-use Tk;
-require Tk::HList;
-use SNMP;
+# initialize SNMP module
 $SNMP::save_descriptions=1;
 $SNMP::use_long_names=1;
 $SNMP::use_enums=1;
+if (test_version(1,4,2,1)) {
+#  print "reading\n";
+  SNMP::read_configs();
+}
 SNMP::initMib();
 $SNMP::verbose = 1;
-
 my $tmpbd = 3;
 
 $top = MainWindow->new();
@@ -150,6 +191,8 @@ $OptMenuBut = $MenuFrame->Menubutton(-text => "Options",
 	-command => sub { entryBox("Retries", 
 				   "Number of Times to Retransmit Requests:", 
 				    \$session_opts{'Retries'});}],
+       [Button => "Save Options",
+	-command => \&save_options]
        ])->pack(-side => 'left');
         
 $tmp = $OptMenuBut->cget(-menu);
@@ -176,7 +219,7 @@ $dispFrame=$top->Frame(-relief => 'raised', -borderwidth => $tmpbd);
 $dispFrame->pack(-side => 'top', -fill =>'x');
 for($i=0;$i<= $#displayInfo;$i++) {
     createRow($i);
-    optionalWidget($i,$OptMenuWidgets);
+    optionalWidget($i,$OptMenuWidgets, \$displayInfoStates{$i});
 }
     
 $descrFrame=$top->Frame(-relief => 'raised', -borderwidth => $tmpbd);
@@ -191,10 +234,12 @@ $bFrame->pack(-side => 'top', -fill => 'x');
 $hostEntry = $bFrame->Entry(-textvariable => \$host, -width => 12);
 $hostEntry->pack(-side => 'left');
 $bFrame->Button(-text => 'graph', -command => \&snmpgraph)->pack(-side => 'right');
-$bFrame->Button(-text => 'table', -command => \&snmptable)->pack(-side => 'right');
+$tablebutton = $bFrame->Button(-text => 'table', -command => \&snmptable);
+$tablebutton->pack(-side => 'right');
 $bFrame->Button(-text => 'walk', -command => \&snmpwalk)->pack(-side => 'right');
 $bFrame->Button(-text => 'getnext', -command => \&snmpgetnext)->pack(-side => 'right');
 $bFrame->Button(-text => 'get', -command => \&snmpget)->pack(-side => 'right');
+$bFrame->Button(-text => 'set', -command => [\&snmpsetbegin, 'OID'])->pack(-side => 'right');
 $stopBut = $bFrame->Button(-text => 'stop', -command => sub { stop(1) },
 			   -state => 'disabled');
 $stopBut->pack(-side => 'right');
@@ -216,8 +261,8 @@ foreach $i (qw(.1 .1.3 .1.3.6 .1.3.6.1)) {
     addMibOID($i);
 }
 showChildren("$OID");
-if (defined($findoid)) {
-    findANode($findoid);
+if (defined($opts{'o'})) {
+    findANode($opts{'o'});
 }
 
 MainLoop();
@@ -238,7 +283,18 @@ sub insertresult {
 					     my $tag = SNMP::translateObj($oid);
 					     showInfo($tag);},$oid]);
     $output->insert('end', " = ");
-    $output->insert('end', $val, "value:$val");
+    my $mib = $SNMP::MIB{"$oid"};
+    $output->insert('end', $val, "value:$oid");
+    if ($mib->{'access'} =~ /(Write|Create)/) {
+	$output->tagConfigure("value:$oid", -foreground => 'blue');
+	$output->tagBind("value:$oid", '<1>', [sub{shift; 
+						   my $oid = shift;
+						   my $value = shift;
+						   snmpsetmaybebegin($oid, $value);
+						   findANode($oid);
+						   my $tag = SNMP::translateObj($oid);
+						   showInfo($tag);},$oid, $val]);
+    }
     $output->insert('end', "\n");
 }
 
@@ -269,6 +325,7 @@ sub snmpsetup {
     }
     stop(0);
     initText();
+    $oid = "." . $oid if ($oid !~ /^\./);
     print "oid: $oid\n";
     return ($oid, $sess, $var);
 }
@@ -312,6 +369,98 @@ sub snmpget {
     }
 }
 
+sub snmpsetbegin {
+    my $startoid = shift;
+    my $startval = shift;
+    my $setwin = MainWindow->new();
+    $setwin->title("SNMP set");
+    my $varswin = $setwin->Frame(-relief => "raised",-borderwidth => $tmpbd);
+    my $vars = new SNMP::VarList;
+    $varswin->pack(-side => 'top');
+    my $buttons = $setwin->Frame(-relief => "raised")->pack(-side => 'top', -fill => "x",-expand => 1);
+    $buttons->Button(-text => 'Add a varbind', -command => [\&snmpsetbegin_addvar, $vars, $varswin, 'OID'])->pack(-side => 'left', -fill => "x",-expand => 1);
+    $buttons->Button(-text => 'perform set', -command => [\&snmpsetbegin_ok, $vars, $setwin, $varswin])->pack(-side => 'left');
+    $buttons->Button(-text => 'Cancel', -command => [sub { my $widget = shift; $varswin = shift; if ($setmain == $varswin) { $setmain = undef; } $widget->destroy();}, $setwin, $varswin])->pack(-side => 'right');
+    if ($startoid ne "") {
+	snmpsetbegin_addvar($vars, $varswin, $startoid, $startval);
+    }
+    if (!$setmain) {
+	$setmain = $varswin;
+	$setvars = $vars;
+    }
+}
+
+sub make_enum_button {
+    my $win = shift;
+    my $var = shift;
+    my @objs;
+    foreach my $i (@_) {
+	push @objs,[Radiobutton => $i, -variable => $var];
+    }
+    return $win->Menubutton(-textvariable => $var,
+			    -relief => raised,
+			    -menuitems => \@objs);
+}
+
+sub snmpsetmaybebegin {
+    my ($oid, $val) = @_;
+    if ($setmain) {
+	snmpsetbegin_addvar($setvars, $setmain, $oid, $val);
+    } else {
+	snmpsetbegin($oid, $val);
+    }
+}
+
+
+sub snmpsetbegin_addvar {
+    my ($vars, $place, $oid, $val) = @_;
+    print "oid: $oid\n";
+    $oid = $OID if ($oid eq "OID");
+#    $oid =~ s/^\.//;
+    print "ref win: " . ref($place) . "\n";
+    print "ref vars: " . ref($vars) . "\n";
+    print "oid: $oid\n";
+    my $mib = $SNMP::MIB{"$oid"};
+    my $var = new SNMP::Varbind([$oid, '', $val, $mib->{'type'} || 'INTEGER']);
+    push @$vars,$var;
+    my $frame = $place->Frame();
+    $frame->Entry(-textvariable => \$var->[0], -width => 20)->pack(-side => 'left');
+    make_enum_button($frame, \$var->[3], qw(OBJECTID OCTETSTR INTEGER NETADDR IPADDR COUNTER COUNTER64 GAUGE UINTEGER TICKS OPAQUE NULL))->pack(-side => 'left');
+    print "enums: " . ref($mib->{'enums'}) . "\n";
+    if (ref($mib->{'enums'}) eq HASH && scalar(keys(%{$mib->{'enums'}})) > 0) {
+	make_enum_button($frame, \$var->[2], keys(%{$mib->{'enums'}}))->pack(-side => 'left');
+    } else {
+	$frame->Entry(-textvariable => \$var->[2])->pack(-side => 'left');
+    }
+    $frame->pack(-expand => 1, -fill => 'x');
+}
+
+sub snmpsetbegin_ok {
+    my ($vars, $win, $frame) = @_;
+    snmpset($vars);
+    $setmain = undef if ($setmain == $frame);
+    $win->destroy();
+}
+
+sub snmpset {
+    my $vars = shift;
+    (my $oid, my $sess, my $var) = snmpsetup();
+    print "setting:  $host " . Dumper($vars) . "\n";
+    $status->configure(-text => "setting:  $host -> " . Dumper($vars) . "\n");
+    $top->update();
+    my $val = $sess->set($vars);
+    print "$sess->{ErrorStr}\n";
+    if ($sess->{ErrorStr}) {
+	$output->insert('end', "Set failed.\nReason:  $sess->{ErrorStr}");
+	$status->configure(-text => $sess->{ErrorStr});
+    } else {
+	foreach my $i (@$vars) {
+	    insertvar($i);
+	}
+	$status->configure(-text => "");
+    }
+}
+
 sub snmpgetnext {
     (my $oid, my $sess, my $var) = snmpsetup();
     print "getnexting:  $host $community $oid\n";
@@ -351,7 +500,7 @@ sub snmptable {
     (my $oid, my $sess, my $var) = snmpsetup();
     $status->configure(-text => "collecting data:  $host $community $oid");
     $top->update();
-    my (@tb, @tags, @index);
+    my (%tb, @tags, @index, %tboids);
     while (!$sess->{ErrorStr} && !$stopit) {
 	my $val = $sess->getnext($var);
 	last if (!defined($var->tag) ||
@@ -368,6 +517,8 @@ sub snmptable {
 	    push @index,$2;
 	}
 	$tb{$2}{$1} = $var->val;
+#	$tboids{$2}{$1} = $var->tag;
+	$tboids{$2}{$1} = $newoid;
     }
     initTable($#tags+1);
     for(my $k=0;$k <= $#tags;$k++) {
@@ -379,7 +530,12 @@ sub snmptable {
     }
     for(my $i=0;$i <= $#index; $i++) {
 	for(my $k=0;$k <= $#tags;$k++) {
-	    $output->put($i+2,$k+2,$tb{$index[$i]}{$tags[$k]});
+	    my $mib = $SNMP::MIB{"$tboids{$index[$i]}{$tags[$k]}"};
+	    if ($mib->{'access'} =~ /(Write|Create)/) {
+		$output->put($i+2,$k+2,$output->Button(-text => $tb{$index[$i]}{$tags[$k]}, -command => [\&snmpsetmaybebegin, $tboids{$index[$i]}{$tags[$k]}, $tb{$index[$i]}{$tags[$k]}], -padx => 0, -pady => 0));
+	    } else {
+		$output->put($i+2,$k+2,$tb{$index[$i]}{$tags[$k]});
+	    }
 	}
     }
     $status->configure(-text => "");
@@ -559,6 +715,11 @@ sub updateInfo {
 	$mib = $SNMP::MIB{"$oid"};
     }
     if (defined($mib)) {
+	if ($mib->{'label'} =~ /Table$/) {
+	    $tablebutton->configure(-state => 'normal');
+	} else {
+	    $tablebutton->configure(-state => 'disabled');
+	}
 	$mibOID->configure(-text => $mib->{'objectID'});
 	$mibTextOID->configure(-text => 
 			     SNMP::translateObj($mib->{'objectID'},1));
@@ -588,9 +749,9 @@ sub updateInfo {
 sub optionalWidget {
     my $num = shift;
     my $menu = shift;
-    my $state = 1;
+    my $var = shift;
     $menu->checkbutton(-label => $displayInfo[$num], 
-		       -variable => \$state,
+		       -variable => $var,
 		       -command => [\&toggleWidgetShown, $num]);
 }
 
@@ -718,4 +879,38 @@ sub findANode {
 	$top->Dialog(-text => "$val not found")->Show();
 	return 0;
     }
+}
+
+sub test_version {
+    my ($gt, $major, $minor, $sub) = @_;
+    $SNMP::VERSION =~ /(\d)\.(\d).(\d)/;
+    if ($gt) {
+	if ($1 > $major || ($1 == $major && $2 > $minor) || ($1 == $major && $2 == $minor && $3 >= $sub)) {
+	    return 1;
+	}
+    } else {
+	if ($1 < $major || ($1 == $major && $2 < $minor) || ($1 == $major && $2 == $minor && $3 < $sub)) {
+	    return 1;
+	}
+    }
+    return 0;
+}
+
+sub save_options {
+    if (!open(O,">$opts{C}")) {
+	warn "can't save to $opts{C}\n";
+	return;
+    }
+    print "saving to $opts{C}\n";
+    foreach $i (keys(%session_opts)) {
+	print O '$session_opts{\'' . $i . '\'} = "' . $session_opts{$i} . "\";\n";
+    }
+    foreach my $i (@displayInfo) {
+	print O '$displayInfoStates{' . $i . '} = ' . "\"$displayInfoStates{$i}\"\n;";
+    }
+    foreach $i (keys(%session_opts)) {
+	print O '$session_opts{\'' . $i . '\'} = "' . $session_opts{$i} . "\";\n";
+    }
+    print O '$graphtime = ' . $graphtime . ";\n";
+    close(O);
 }
