@@ -6,6 +6,7 @@
 #define _MIBGROUP_VACM_H
 
 config_require(util_funcs)
+config_add_mib(SNMP-VIEW-BASED-ACM-MIB) 
 
 void vacm_free_security __P((void));
 void vacm_free_group __P((void));
