@@ -278,7 +278,7 @@ usmDHUserKeyTable_commit(usmDHUserKeyTable_rowreq_ctx * rowreq_ctx)
      */
     if (save_flags & FLAG_USMDHUSERAUTHKEYCHANGE) {
         save_flags &= ~FLAG_USMDHUSERAUTHKEYCHANGE;     /* clear */
-//        rc = TODO_commit_colum(...);
+/*         rc = TODO_commit_colum(...); */
         if (rc == MFD_SUCCESS) {
             /*
              * set flag, in case we need to undo
@@ -289,7 +289,7 @@ usmDHUserKeyTable_commit(usmDHUserKeyTable_rowreq_ctx * rowreq_ctx)
 
     if (save_flags & FLAG_USMDHUSEROWNAUTHKEYCHANGE) {
         save_flags &= ~FLAG_USMDHUSEROWNAUTHKEYCHANGE;  /* clear */
-//        rc = TODO_commit_colum(...);
+/*         rc = TODO_commit_colum(...); */
         if (rc == MFD_SUCCESS) {
             /*
              * set flag, in case we need to undo
@@ -300,7 +300,7 @@ usmDHUserKeyTable_commit(usmDHUserKeyTable_rowreq_ctx * rowreq_ctx)
 
     if (save_flags & FLAG_USMDHUSERPRIVKEYCHANGE) {
         save_flags &= ~FLAG_USMDHUSERPRIVKEYCHANGE;     /* clear */
-//        rc = TODO_commit_colum(...);
+/*         rc = TODO_commit_colum(...); */
         if (rc == MFD_SUCCESS) {
             /*
              * set flag, in case we need to undo
@@ -311,7 +311,7 @@ usmDHUserKeyTable_commit(usmDHUserKeyTable_rowreq_ctx * rowreq_ctx)
 
     if (save_flags & FLAG_USMDHUSEROWNPRIVKEYCHANGE) {
         save_flags &= ~FLAG_USMDHUSEROWNPRIVKEYCHANGE;  /* clear */
-//        rc = TODO_commit_colum(...);
+/*         rc = TODO_commit_colum(...); */
         if (rc == MFD_SUCCESS) {
             /*
              * set flag, in case we need to undo
@@ -638,7 +638,7 @@ usmDHUserAuthKeyChange_check_value(usmDHUserKeyTable_rowreq_ctx *
 
     /** should never get a NULL pointer */
     netsnmp_assert(NULL != rowreq_ctx);
-    netsnmp_assert(NULL != usmDHUserAuthKeyChange_val_ptr);  /* XXXWWW: added _val */
+    netsnmp_assert(NULL != usmDHUserAuthKeyChange_val_ptr);
 
     return usmDHUserCheckValue(rowreq_ctx->data, 1,
                                usmDHUserAuthKeyChange_val_ptr,
@@ -705,7 +705,7 @@ usmDHUserAuthKeyChange_set(usmDHUserKeyTable_rowreq_ctx * rowreq_ctx,
 
     /** should never get a NULL pointer */
     netsnmp_assert(NULL != rowreq_ctx);
-    netsnmp_assert(NULL != usmDHUserAuthKeyChange_val_ptr); /* XXXWWW: add _val */
+    netsnmp_assert(NULL != usmDHUserAuthKeyChange_val_ptr);
 
     /*
      * TODO:
@@ -1268,7 +1268,7 @@ int
 usmDHUserKeyTable_check_dependencies(usmDHUserKeyTable_rowreq_ctx *
                                      rowreq_ctx)
 {
-    int             rc = SNMP_ERR_NOERROR;  /* XXXWWW: use MFD code? */
+    int             rc = SNMP_ERR_NOERROR;
     int flags;
     
     netsnmp_assert(NULL != rowreq_ctx);
