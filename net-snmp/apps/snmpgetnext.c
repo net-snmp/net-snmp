@@ -106,7 +106,7 @@ main (argc, argv)
     int   failures = 0;
 
     /* get the common command line arguments */
-    arg = snmp_parse_args(argc, argv, &session);
+    arg = snmp_parse_args(argc, argv, &session, "snmpgetnext");
 
     /* get the object names */
     for(; arg < argc; arg++)

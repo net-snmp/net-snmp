@@ -32,6 +32,7 @@
 
 #include "m2m.h"
 #include "mibincl.h"
+#include "snmpusm.h"
 
 #include "mibgroup/struct.h"
 #include "read_config.h"
@@ -51,7 +52,6 @@ void init_agent_read_config __P((void))
 {
   register_config_handler("snmpd","authtrapenable",
                           snmpd_parse_config_authtrap, NULL);
-  register_config_handler("snmpd","agentBoots", agentBoots_conf, NULL);
   register_config_handler("snmpd","trapsink",
                           snmpd_parse_config_trapsink, snmpd_free_trapsinks);
   register_config_handler("snmpd","trapcommunity",
@@ -255,16 +255,5 @@ void
 snmpd_store_config(line)
   char *line;
 {
-#ifdef PERSISTENTFILE
-  FILE *OUT;
-  if ((OUT = fopen(PERSISTENTFILE, "a")) != NULL) {
-    fprintf(OUT,line);
-    if (line[strlen(line)] != '\n')
-      fprintf(OUT,"\n");
-    DEBUGP("storing: %s\n",line);
-  } else {
-    snmp_perror("snmpd");
-  }
-  close(OUT);
-#endif
+  read_config_store("snmpd",line);
 }

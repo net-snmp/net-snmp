@@ -328,8 +328,11 @@ int vacm_in_view (pi, name, namelen)
 	}
 	if (sp == NULL) return 0;
 	sn = sp->securityName;
-    }
-    else {
+    } else if (pi->sec_model == SNMP_SEC_MODEL_USM) {
+      DEBUGP ("vacm_in_view: ver=%d, model=%d, secName=%s\n",
+              pi->version, pi->sec_model, pi->securityName);
+      sn = pi->securityName;
+    } else {
 	sn = NULL;
     }
 

@@ -5,7 +5,6 @@ extern int (*sd_handlers[])__P((int));
 
 extern int snmp_agent_parse __P((u_char *, int, u_char *, int *, u_long));
 extern int snmp_read_packet __P((int));
-extern void init_snmp __P((void));
 extern void init_snmp2p __P((u_short));
 extern int open_port __P((u_short));
 extern void open_ports_snmp2p __P((void));

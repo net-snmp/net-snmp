@@ -73,15 +73,14 @@ snmp_parse_args_usage(outf)
   FILE *outf;
 {
   fprintf(outf,
-        "[-v 1|2c|2p] [-h] [-d] [-q] [-R] [-D] [-m <MIBS>] [-M <MIDDIRS>] [-p <P>] [-t <T>] [-r <R>] [-c <S> <D>] <hostname> <community>|{<srcParty> <dstParty> <context>}");
+        "[-v 1|2c|2p|3] [-h] [-d] [-q] [-R] [-D] [-m <MIBS>] [-M <MIDDIRS>] [-p <P>] [-t <T>] [-r <R>] [-c <S> <D>] [-e <E>] [-n <N>] [-u <U>] [-l <L>] [-k|-K <K>] hostname> <community>|{<srcParty> <dstParty> <context>}");
 }
 
 void
 snmp_parse_args_descriptions(outf)
   FILE *outf;
 {
-  fprintf(outf, "  -v 1|2c|2p\tspecifies snmp version to use.\n");
-  fprintf(outf, "            \twhere 1 is SNMPv1, 2c is SNMPv2c, and 2p is SNMPv2-party\n");
+  fprintf(outf, "  -v 1|2c|2p|3\tspecifies snmp version to use.\n");
   fprintf(outf, "  -h\t\tthis help message.\n");
   fprintf(outf, "  -V\t\tdisplay version number.\n");
   fprintf(outf, "  -d\t\tdump input/output packets.\n");
@@ -98,16 +97,25 @@ snmp_parse_args_descriptions(outf)
   fprintf(outf, "  -r <R>\tset the number of retries to R.\n");
   fprintf(outf,
           "  -c <S> <D>\tset the source/destination clocks for v2p requests.\n");
+  fprintf(outf, "  -e <E>\tengine ID (e.g., 800000020109840301).\n");
+  fprintf(outf, "  -n <N>\tcontext name (e.g., bridge1).\n");
+  fprintf(outf, "  -u <U>\tsecurity name (e.g., bert).\n");
+  fprintf(outf, "  -l <L>\tsecurity level (noAuthNoPriv|authNoPriv|authPriv).\n");
+  fprintf(outf, "  -k <K>\tpass phrase.\n");
+  fprintf(outf, "  -K <K>\tpass key\n");
 }
-
+#define BUF_SIZE 512
 int
-snmp_parse_args(argc, argv, session)
+snmp_parse_args(argc, argv, session, type)
   int argc;
-  char *argv[];
+  char **argv;
   struct snmp_session *session;
+  char *type;
 {
   int arg;
   char *psz;
+  u_char buf[BUF_SIZE];
+  int bsize;
 #ifdef USE_V2PARTY_PROTOCOL
   static oid src[MAX_NAME_LEN];
   static oid dst[MAX_NAME_LEN];
@@ -263,11 +271,93 @@ snmp_parse_args(argc, argv, session)
           session->version = SNMP_VERSION_2c;
         } else if (!strcasecmp(psz,"2p")) {
           session->version = SNMP_VERSION_2p;
+        } else if (!strcasecmp(psz,"3")) {
+          session->version = SNMP_VERSION_3;
         } else {
           fprintf(stderr,"Invalid version specified after -v flag: %s\n", psz);
           usage();
           exit(1);
         }
+        break;
+
+      case 'e':
+        if (argv[arg][2] != 0)
+          psz = &(argv[arg][2]);
+        else
+          psz = argv[++arg];
+        if( psz == NULL) {
+          fprintf(stderr,"Need engine ID value after -e flag. \n");
+          usage();
+          exit(1);
+        }
+	if ((bsize = hex_to_binary(psz,buf)) <= 0) {
+          fprintf(stderr,"Need engine ID value after -e flag. \n");
+          usage();
+          exit(1);
+	}
+	session->contextEngineID = malloc(bsize);
+	memcpy(session->contextEngineID, buf, bsize);
+	session->contextEngineIDLen = bsize;
+        break;
+
+      case 'n':
+        if (argv[arg][2] != 0)
+          psz = &(argv[arg][2]);
+        else
+          psz = argv[++arg];
+        if( psz == NULL) {
+          fprintf(stderr,"Need context name value after -n flag. \n");
+          usage();
+          exit(1);
+        }
+	session->contextName = strdup(psz);
+	session->contextNameLen = strlen(psz);
+        break;
+
+      case 'u':
+        if (argv[arg][2] != 0)
+          psz = &(argv[arg][2]);
+        else
+          psz = argv[++arg];
+        if( psz == NULL) {
+          fprintf(stderr,"Need security user name value after -u flag. \n");
+          usage();
+          exit(1);
+        }
+	session->securityName = strdup(psz);
+	session->securityNameLen = strlen(psz);
+        break;
+
+      case 'l':
+        if (argv[arg][2] != 0)
+          psz = &(argv[arg][2]);
+        else
+          psz = argv[++arg];
+        if( psz == NULL) {
+          fprintf(stderr,"Need security level value after -l flag. \n");
+          usage();
+          exit(1);
+        }
+        if (!strcmp(psz,"noAuthNoPriv") || !strcmp(psz,"1")) {
+          session->securityLevel = SNMP_SEC_LEVEL_NOAUTH;
+        } else if (!strcmp(psz,"authNoPriv") || !strcmp(psz,"2")) {
+          session->securityLevel = SNMP_SEC_LEVEL_AUTHNOPRIV;
+        } else if (!strcmp(psz,"authPriv") || !strcmp(psz,"3")) {
+          session->securityLevel = SNMP_SEC_LEVEL_AUTHPRIV;
+        } else {
+          fprintf(stderr,"Invalid security level specified after -l flag: %s\n", psz);
+          usage();
+          exit(1);
+        }
+	
+        break;
+
+      case 'k':
+	/* handle user password for v3 auth/priv */
+        break;
+
+      case 'K':
+	/* handle user key v3 auth/priv */
         break;
 
       case 'h':
@@ -286,7 +376,7 @@ snmp_parse_args(argc, argv, session)
   }
 
   /* read in MIB database and initialize the snmp library*/
-  init_snmp();
+  init_snmp(type);
 
   /* get the hostname */
   if (arg == argc) {
@@ -309,7 +399,7 @@ snmp_parse_args(argc, argv, session)
     session->community_len = strlen((char *)argv[arg]);
     arg++;
 #ifdef USE_V2PARTY_PROTOCOL
-  } else {
+  } else if (session->version == SNMP_VERSION_2p) {
     /* v2p - so get party info */
     if (arg == argc) {
       fprintf(stderr,"Neither a source party nor noAuth was specified.\n");

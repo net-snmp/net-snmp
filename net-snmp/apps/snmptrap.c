@@ -146,7 +146,7 @@ main(argc, argv)
     /*
      * usage: snmptrap gateway-name srcParty dstParty trap-type specific-type device-description [ -a agent-addr ]
      */
-    arg = snmp_parse_args(argc, argv, &session);
+    arg = snmp_parse_args(argc, argv, &session, "snmptrap");
  
     session.callback = snmp_input;
     session.callback_magic = NULL;

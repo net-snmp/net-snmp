@@ -1,3 +1,6 @@
+/*
+ * system.c
+ */
 /***********************************************************
         Copyright 1992 by Carnegie Mellon University
 
@@ -488,3 +491,19 @@ int setenv(name, value, overwrite)
     return ret;
 }
 #endif /* HAVE_SETENV */
+
+int
+calculate_time_diff(struct timeval *t1, struct timeval *t2)
+{
+  struct timeval tmp, diff;
+  memcpy(&tmp, t1, sizeof(struct timeval));
+  tmp.tv_sec--;
+  tmp.tv_usec += 1000000L;
+  diff.tv_sec = tmp.tv_sec - t2->tv_sec;
+  diff.tv_usec = tmp.tv_usec - t2->tv_usec;
+  if (diff.tv_usec > 1000000L){
+    diff.tv_usec -= 1000000L;
+    diff.tv_sec++;
+  }
+  return ((diff.tv_sec * 100) + (diff.tv_usec / 10000));
+}

@@ -587,20 +587,3 @@ int val;
     strcpy(s, textVal);
     return;
 }
-
-int
-calculate_time_diff(t1, t2)
-  struct timeval t1, t2;
-{
-  struct timeval tmp, diff;
-  memcpy(&tmp, &t1, sizeof(struct timeval));
-  tmp.tv_sec--;
-  tmp.tv_usec += 1000000L;
-  diff.tv_sec = tmp.tv_sec - t2.tv_sec;
-  diff.tv_usec = tmp.tv_usec - t2.tv_usec;
-  if (diff.tv_usec > 1000000L){
-    diff.tv_usec -= 1000000L;
-    diff.tv_sec++;
-  }
-  return ((diff.tv_sec * 100) + (diff.tv_usec / 10000));
-}

@@ -318,7 +318,7 @@ char **argv;
   int varbindsPerPacket = 60;
   int print = 1;
     
-  arg = snmp_parse_args(argc, argv, &session);
+  arg = snmp_parse_args(argc, argv, &session,"snmpdelta");
   gateway = session.peername;
 
   /*

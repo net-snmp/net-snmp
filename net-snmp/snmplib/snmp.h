@@ -191,6 +191,10 @@ SOFTWARE.
 #define SNMP_SEC_LEVEL_AUTHNOPRIV	2
 #define SNMP_SEC_LEVEL_AUTHPRIV		3
 
+#define SNMP_MSG_FLAG_AUTH_BIT          0x01
+#define SNMP_MSG_FLAG_PRIV_BIT          0x02
+#define SNMP_MSG_FLAG_RPRT_BIT          0x04
+
 /* view status */
 #define SNMP_VIEW_INCLUDED		1
 #define SNMP_VIEW_EXCLUDED		2
