@@ -2410,8 +2410,8 @@ The system uptime (sysUpTime) returned is wrong!
 How can I reduce the memory footprint?
 --------------------------------------
 
-  In order to reduce the memory footprint for instance to
-  embed the snmpd into a device the following configure options
+  In order to reduce the memory footprint (for instance, to
+  embed the snmpd into a device), the following configure options
   could be used.
 
   '--disable-debugging'
@@ -2436,9 +2436,13 @@ How can I reduce the memory footprint?
      These options specify not loading the MIB modules for the
      agent. It reduces the memory footprint only during
      runtime.
-     On top of this one could even attempt to exclude the complete
-     MIB loading functionality, but there is currently no
-     configure option for this.
+
+  On top of this one could even attempt to exclude the complete
+  MIB loading functionality, but there is currently no
+  configure option for this.
+
+  Once the agent (snmpd) has been linked, you might also try running
+  'strip snmpd' to remove un-necessary debug/symbol information.
 
 
 
