@@ -42,6 +42,6 @@
 #include <net-snmp/library/snmp_impl.h>
 #include <net-snmp/library/snmp-tc.h>
 
-#include <net-snmp/library/version.h>
+#include <net-snmp/version.h>
 
 #endif /* NET_SNMP_UTILITIES_H */
