@@ -24,6 +24,7 @@ NSB_DIST_MODULES="host disman/event-mib smux"
 NSB_EXTRA_MODULES="examples examples/example testhandler smux Rmon disman/event-mib"
 NSB_EXTRA_CONFIG=${NSB_EXTRA_CONFIG:=""}
 NSB_VIEW=cat
+NSB_SCP=`which scp`
 NSB_PERL=
 #NSB_PERL=--enable-embedded-perl
 NSB_FLOW=
@@ -168,12 +169,12 @@ nsb-config-all()
    # inside of single quotes, so use double quotes
    #
    echo $ngc_src/configure  --with-defaults \
-      --disable-developer \
+      --disable-developer $NSB_EXTRA_CONFIG \
       "--with-mib-modules=$NSB_FINAL_MODULES" \
       "--with-transports=$NSB_DIST_TRANSPORTS $NSB_EXTRA_TRANSPORTS" \
        $NSB_PERL --enable-shared --with-libwrap
    $ngc_src/configure  --with-defaults \
-      --disable-developer \
+      --disable-developer $NSB_EXTRA_CONFIG \
       "--with-mib-modules=$NSB_FINAL_MODULES" \
       "--with-transports=$NSB_DIST_TRANSPORTS $NSB_EXTRA_TRANSPORTS" \
       $NSB_PERL --enable-shared --with-libwrap
@@ -227,12 +228,12 @@ nsb-zip()
 
 nsb-upload()
 {
-   nsb-flow upload 
+   nsb-flow upload
    build_dir=$1
    target=$2
    dir=$PWD
    cd $build_dir
-   /usr/bin/scp config.log configure-summary nsb-make-all.* \
+   $NSB_SCP config.log configure-summary nsb-make-all.* \
                  $target
    cd $dir
 }
@@ -346,7 +347,7 @@ nsb-build()
       nsb-info "Cleaning up..."
       if [ $NSB_CLEAN -eq 2 ];then
         if [ "x$PWD" = "/" ]; then
-           nsb-abort "Not runninf rm -fR from /"
+           nsb-abort "Not running rm -fR from /"
         fi
         nsb-info "rm -fR * .[a-zA-Z]* 2>&1 > /dev/null"
         rm -fR * .[a-zA-Z]* 2>&1 > /dev/null
