@@ -1,5 +1,9 @@
 #include "sysv.h"
 
+#ifdef hpux11
+#define DONT_USE_NLIST 1
+#endif
+
 #undef TCP_TTL_SYMBOL
 #ifndef hpux11
 #define TCP_TTL_SYMBOL "ipDefaultTTL"
@@ -21,6 +25,18 @@
 #undef ARPTAB_SIZE_SYMBOL
 #ifndef hpux11
 #define ARPTAB_SIZE_SYMBOL "arptab_nb"
+#endif
+
+#if defined(hpux10) || defined(hpux11)
+#undef SWDEVT_SYMBOL
+#undef FSWDEVT_SYMBOL
+#undef NSWAPFS_SYMBOL
+#undef NSWAPDEV_SYMBOL
+#undef LOADAVE_SYMBOL
+#undef PROC_SYMBOL
+#undef NPROC_SYMBOL
+#undef TOTAL_MEMORY_SYMBOL
+#undef MBSTAT_SYMBOL
 #endif
 
 #ifdef hpux11

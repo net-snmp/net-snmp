@@ -102,7 +102,7 @@
 #  include <time.h>
 # endif
 #endif
-#ifdef hpux11
+#if defined(hpux10) || defined(hpux11)
 #include <sys/pstat.h>
 #endif
 
@@ -119,6 +119,15 @@ int             minimumswap;
 #ifndef linux
 static int      pageshift;      /* log base 2 of the pagesize */
 #endif
+
+#ifndef bsdi2
+#ifdef NSWAPDEV_SYMBOL
+int nswapdev=10;            /* taken from <machine/space.h> */
+#endif
+#ifdef NSWAPFS_SYMBOL
+int nswapfs=10;            /* taken from <machine/space.h> */
+#endif
+#endif      /* !bsdi2 */
 
 #define DEFAULTMINIMUMSWAP 16000        /* kilobytes */
 
@@ -152,12 +161,16 @@ init_memory(void)
 #endif
 
 #ifndef bsdi2
+#ifdef NSWAPDEV_SYMBOL
     if (auto_nlist(NSWAPDEV_SYMBOL, (char *) &nswapdev, sizeof(nswapdev))
         == 0)
         return;
+#endif
+#ifdef NSWAPFS_SYMBOL
     if (auto_nlist(NSWAPFS_SYMBOL, (char *) &nswapfs, sizeof(nswapfs)) ==
         0)
         return;
+#endif
 #endif
     pagesize = 1 << PGSHIFT;
     pageshift = 0;
@@ -326,13 +339,10 @@ memswap(int iindex)
 #define SWAPGETLEFT 0
 #define SWAPGETTOTAL 1
 
-int             nswapdev = 10;  /* taken from <machine/space.h> */
-int             nswapfs = 10;   /* taken from <machine/space.h> */
-
-int
+static long
 getswap(int rettype)
 {
-    int             spaceleft = 0, spacetotal = 0;
+    long            spaceleft = 0, spacetotal = 0;
 
 #if defined(linux)
     spaceleft = memswap(meminfo_free);
@@ -345,7 +355,39 @@ getswap(int rettype)
         return (0);
     spaceleft = swapst.swap_free / 2;
     spacetotal = swapst.swap_total / 2;
-#else                           /* !linux && !bsdi2 */
+#elif defined (hpux10) || defined(hpux11)
+    struct pst_swapinfo pst_buf;
+    int ndx = 0;
+    long pgs, pgs_free;
+  
+    while (pstat_getswap(&pst_buf, sizeof(struct pst_swapinfo), 1, ndx) > 0) {
+        if (pst_buf.pss_flags & SW_BLOCK) {
+            pgs = pst_buf.pss_nblksenabled;
+            pgs_free = pst_buf.pss_nblksavail;
+        }
+        else if (pst_buf.pss_flags & SW_FS) {
+            pgs = pst_buf.pss_limit;
+            pgs_free = pgs - pst_buf.pss_allocated - pst_buf.pss_reserve;
+            /*
+             * the following calculation is done this way to avoid integer overflow!
+             * pss_swapchunk is either 512 or a multiple of 1024!
+             */
+            if (pst_buf.pss_swapchunk == 512) {
+                pgs_free /= 2;
+                pgs /= 2;
+            } else {
+                pgs_free *= (pst_buf.pss_swapchunk / 1024);
+                pgs *= (pst_buf.pss_swapchunk / 1024);
+            }
+        }
+        else {
+            pgs = pgs_free = 0;
+        }
+        spaceleft += pgs_free;
+        spacetotal += pgs;
+        ndx = pst_buf.pss_idx + 1;
+    }
+#else /* !linux && !bsdi2 && !hpux10 && !hpux11 */
     struct swdevt   swdevt[100];
     struct fswdevt  fswdevt[100];
     FILE           *file;
@@ -359,18 +401,9 @@ getswap(int rettype)
         return (0);
     DEBUGMSGTL(("ucd-snmp/memory", "%d block swap devices: \n", nswapdev));
     for (i = 0; i < nswapdev; i++) {
-#ifdef hpux11
-        DEBUGMSGTL(("ucd-snmp/memory", "swdevt[%d]: %d\n", i,
-                    swdevt[i].sw_flags & SW_ENABLE));
-#else
         DEBUGMSGTL(("ucd-snmp/memory", "swdevt[%d]: %d\n", i,
                     swdevt[i].sw_enable));
-#endif
-#ifdef hpux11
-        if (swdevt[i].sw_flags & SW_ENABLE)
-#else
         if (swdevt[i].sw_enable)
-#endif
         {
 #ifdef STRUCT_SWDEVT_HAS_SW_NBLKSENABLED
             DEBUGMSGTL(("ucd-snmp/memory",
@@ -394,18 +427,9 @@ getswap(int rettype)
         return (0);
     DEBUGMSGTL(("ucd-snmp/memory", "%d fs swap devices: \n", nswapfs));
     for (i = 0; i < nswapfs; i++) {
-#ifdef hpux11
-        DEBUGMSGTL(("ucd-snmp/memory", "fswdevt[%d]: %d\n", i,
-                    fswdevt[i].fsw_flags & FSW_ENABLE));
-#else
         DEBUGMSGTL(("ucd-snmp/memory", "fswdevt[%d]: %d\n", i,
                     fswdevt[i].fsw_enable));
-#endif
-#ifdef hpux11
-        if (fswdevt[i].fsw_flags & FSW_ENABLE)
-#else
         if (fswdevt[i].fsw_enable)
-#endif
         {
             spacetotal += (fswdevt[i].fsw_limit * 2048);        /* 2048=bytes per page? */
             spaceleft += (fswdevt[i].fsw_limit * 2048 -
@@ -433,11 +457,7 @@ getswap(int rettype)
      * I can't figure out how to read it out of the kernel directly
      * -- Wes 
      */
-#if !defined(hpux10) && !defined(hpux11)
     strcpy(ex.command, "/etc/swapinfo -h");
-#else
-    strcpy(ex.command, "/usr/sbin/swapinfo -r");
-#endif
     if ((fd = get_exec_output(&ex))) {
         file = fdopen(fd, "r");
         for (i = 1;
@@ -456,7 +476,7 @@ getswap(int rettype)
     } else {
         return (0);
     }
-#endif                          /* !linux && !bsdi2 */
+#endif                          /* !linux && !bsdi2 && !hpux10 && !hpux11 */
 
     switch (rettype) {
     case SWAPGETLEFT:
@@ -478,8 +498,12 @@ var_extensible_mem(struct variable *vp,
 
     static long     long_ret;
     static char     errmsg[300];
-#if !defined(linux) && (defined(TOTAL_MEMORY_SYMBOL) || defined(USE_SYSCTL_VM))
-    struct vmtotal  total;
+#if !defined(linux)
+#if defined(hpux10) || defined(hpux11)
+    struct pst_dynamic pst_buf;
+#elif defined(TOTAL_MEMORY_SYMBOL) || defined(USE_SYSCTL_VM)
+    struct vmtotal total;
+#endif
 #endif
 
     long_ret = 0;               /* set to 0 as default */
@@ -487,8 +511,11 @@ var_extensible_mem(struct variable *vp,
     if (header_generic(vp, name, length, exact, var_len, write_method))
         return (NULL);
 
-#ifndef linux
-#if defined(USE_SYSCTL_VM)
+#if !defined(linux)
+#if defined(hpux10) || defined(hpux11)
+    if (pstat_getdynamic(&pst_buf, sizeof(struct pst_dynamic), 1, 0) < 0)
+        return NULL;
+#elif defined(USE_SYSCTL_VM)
     /*
      * sum memory statistics 
      */
@@ -531,7 +558,7 @@ var_extensible_mem(struct variable *vp,
                 return NULL;
             long_ret = long_ret / 1024;
         }
-#elif defined(hpux11)
+#elif defined(hpux10) || defined(hpux11)
         {
             struct pst_static pst_buf;
             if (pstat_getstatic(&pst_buf, sizeof(struct pst_static), 1, 0)
@@ -560,6 +587,8 @@ var_extensible_mem(struct variable *vp,
     case MEMAVAILREAL:
 #ifdef linux
         long_ret = memory(meminfo_free);
+#elif defined(hpux10) || defined(hpux11)
+        long_ret = pagetok((int) pst_buf.psd_arm);
 #elif defined(TOTAL_MEMORY_SYMBOL) || defined(USE_SYSCTL_VM)
         long_ret = pagetok((int) total.t_arm);
 #else
@@ -568,28 +597,36 @@ var_extensible_mem(struct variable *vp,
         return ((u_char *) (&long_ret));
 #ifndef linux
     case MEMTOTALSWAPTXT:
-#ifndef bsdi2
+#if defined(hpux10) || defined(hpux11)
+        long_ret = pagetok((int) pst_buf.psd_vmtxt);
+#elif !defined(bsdi2)
         long_ret = pagetok(total.t_vmtxt);
 #else
         return NULL;            /* no dummy values */
 #endif
         return ((u_char *) (&long_ret));
     case MEMUSEDSWAPTXT:
-#ifndef bsdi2
+#if defined(hpux10) || defined(hpux11)
+        long_ret = pagetok((int) pst_buf.psd_avmtxt);
+#elif !defined(bsdi2)
         long_ret = pagetok(total.t_avmtxt);
 #else
         return NULL;            /* no dummy values */
 #endif
         return ((u_char *) (&long_ret));
     case MEMTOTALREALTXT:
-#ifndef bsdi2
+#if defined(hpux10) || defined(hpux11)
+        long_ret = pagetok((int) pst_buf.psd_rmtxt);
+#elif !defined(bsdi2)
         long_ret = pagetok(total.t_rmtxt);
 #else
         return NULL;            /* no dummy values */
 #endif
         return ((u_char *) (&long_ret));
     case MEMUSEDREALTXT:
-#ifndef bsdi2
+#if defined(hpux10) || defined(hpux11)
+        long_ret = pagetok((int) pst_buf.psd_armtxt);
+#elif !defined(bsdi2)
         long_ret = pagetok(total.t_armtxt);
 #else
         return NULL;            /* no dummy values */
@@ -599,6 +636,8 @@ var_extensible_mem(struct variable *vp,
     case MEMTOTALFREE:
 #ifdef linux
         long_ret = memory(meminfo_free) + memswap(meminfo_free);
+#elif defined(hpux10) || defined(hpux11)
+        long_ret = pagetok((int) pst_buf.psd_free);
 #else
         long_ret = pagetok(total.t_free);
 #endif
