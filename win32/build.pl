@@ -1,7 +1,13 @@
 #!/usr/bin/perl
+# 
+# Build script for Net-SNMP and MSVC
+# Written by Alex Burger - alex_b@users.sourceforge.net
+# March 12th, 2004
+#
 my $openssl = "disabled";
 my $sdk = "disabled";
-my $install_base = "c:/usr";
+my $default_install_base = "c:/usr";
+my $install_base = $default_install_base;
 my $install = "enabled";
 my $perl = "disabled";
 my $perl_install = "disabled";
@@ -54,19 +60,10 @@ while (1) {
   print "8. Debug mode:           " . $debug . "\n";
   print "\nF. Finished - start build\n";
   print "Q. Quit - abort build\n\n";
-  print "Select option to set/toggle: ";
+  print "Select option to set / toggle: ";
 
   chomp ($option = <>);
   if ($option eq "1") {
-    my $default_install_base = "c:/usr";
-    print "Please enter the new install path [$default_install_base]: ";
-    chomp ($install_base = <>);
-    if ($install_base eq "") {
-      $install_base = $default_install_base;
-    }
-    $install_base =~ s/\\/\//g;
-  }
-  elsif ($option eq "2") {
     if ($openssl eq "enabled") {
       $openssl = "disabled";
     }
@@ -83,7 +80,6 @@ while (1) {
     }
   }
   elsif ($option eq "3") {
-    my $default_install_base = "c:/Program Files/Net-SNMP";
     print "Please enter the new install path [$default_install_base]: ";
     chomp ($install_base = <>);
     if ($install_base eq "") {
@@ -201,7 +197,7 @@ if ($logging eq "enabled") {
     print "Type nmake install to install the package to $install_base\n";
   }
   
-  if ($perl_install eq "disabled") {
+  if ($perl_install eq "disabled" && $perl eq "enabled") {
     print "Type nmake perl_install to install the Perl modules\n";
   }
 }
@@ -228,19 +224,19 @@ else {
       print "Installing Perl modules...\n";
       system("nmake /nologo perl_install") == 0 || die "Build error (see above)";
     }
+  }
 
-    print "\n";
-    if ($install eq "enabled") {
-      print "Installing main package...\n";
-      system("nmake /nologo install") == 0 || die "Build error (see above)";
-    }
-    else {
-      print "Type nmake install to install the package to $install_base\n";
-    }
-    
-    if ($perl_install eq "disabled") {
-      print "Type nmake perl_install to install the Perl modules\n";
-    }
+  print "\n";
+  if ($install eq "enabled") {
+    print "Installing main package...\n";
+    system("nmake /nologo install") == 0 || die "Build error (see above)";
+  }
+  else {
+    print "Type nmake install to install the package to $install_base\n";
+  }
+  
+  if ($perl_install eq "disabled" && $perl eq "enabled") {
+    print "Type nmake perl_install to install the Perl modules\n";
   }
 }
 
