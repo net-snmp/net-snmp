@@ -484,8 +484,9 @@ struct inpcb *RetInPcb;
 #else
 #ifdef freebsd2
 	next = udp_inpcb.inp_list.le_next;
-#endif
+#else
         next = udp_inpcb.inp_next;
+#endif
 #endif
 
 	klookup((unsigned long)next, (char *)&udp_inpcb, sizeof (udp_inpcb));
