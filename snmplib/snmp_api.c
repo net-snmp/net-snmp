@@ -1195,6 +1195,16 @@ _sess_open(struct snmp_session *in_session)
 	setsockopt(sd, SOL_SOCKET, SO_BSDCOMPAT, &one, sizeof(one));
     }
 #endif /* SO_BSDCOMPAT */
+#ifdef SO_REUSEADDR
+    /*
+     * Allow a port to be specified multiple times without failing.
+     *   (useful for a listener)
+     */
+    {
+	int one=1;
+	setsockopt(sd, SOL_SOCKET, SO_REUSEADDR, &one, sizeof(one));
+    }
+#endif /* SO_REUSEADDR */
 
 #ifndef SERVER_REQUIRES_CLIENT_SOCKET
     if (!(( session->flags & SNMP_FLAGS_STREAM_SOCKET ) &&
