@@ -54,6 +54,7 @@ LIB_LD_CMD      = $(LIBTOOL) --mode=link $(CC) -rpath $(libdir) -release 0.$(VER
 LIB_EXTENSION   = la
 LIB_VERSION     =
 LIB_LDCONFIG_CMD = $(LIBTOOL) --mode=finish $(libdir)
+LINK		= $(LIBTOOL) --mode=link $(CC)
 # RANLIB 	= @RANLIB@
 RANLIB		= :
 

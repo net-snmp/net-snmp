@@ -56,7 +56,7 @@ getmibstat.o: mibgroup/kernel_sunos5.c
 	$(CC) $(CFLAGS) -o $@ -D_GETMIBSTAT_TEST -DDODEBUG -c $? 
 
 snmpd:	${LAGENTOBJS} $(USELIBS) $(LIBTARG)
-	$(LIBTOOL) ${CC} $(CFLAGS) -o $@ ${LAGENTOBJS} $(LOCAL_LIBS) ${LDFLAGS} ${AGENT_LIBS}  
+	$(LINK) $(CFLAGS) -o $@ ${LAGENTOBJS} $(LOCAL_LIBS) ${LDFLAGS} ${AGENT_LIBS}  
 
 
 libucdagent.$(LIB_EXTENSION)$(LIB_VERSION):    ${LLIBAGENTOBJS} libucdmibs.$(LIB_EXTENSION)$(LIB_VERSION)
