@@ -4,7 +4,7 @@
 !define PRODUCT_NAME "Net-SNMP"
 !define PRODUCT_MAJ_VERSION "5"
 !define PRODUCT_MIN_VERSION "1"
-!define PRODUCT_REVISION "1"
+!define PRODUCT_REVISION "2"
 !define PRODUCT_EXE_VERSION "rc1"
 !define PRODUCT_WEB_SITE "http://www.net-snmp.com"
 !define PRODUCT_DIR_REGKEY "Software\Microsoft\Windows\CurrentVersion\App Paths\encode_keychange.exe"
@@ -275,7 +275,7 @@ SectionEnd
                from other SNMP agents."
   !insertmacro MUI_DESCRIPTION_TEXT ${SEC04} \
                "The Perl SNMP Modules can be used if this computer will be used to \
-               run or develop Perl-based SNMP programs (e.g. 'mib2c' or 'snmpconf')
+               run or develop Perl-based SNMP programs (e.g. 'mib2c' or 'snmpconf')"
 !insertmacro MUI_FUNCTION_DESCRIPTION_END
 
 Function CreateSnmpConf
@@ -317,11 +317,34 @@ Function CreateAgentBats
   FileOpen $0 "registeragent.bat" "w"
   IfErrors cleanup
   FileWrite $0 "$\"$INSTDIR\bin\snmpd.exe$\" -register$\r$\n"
-
+  FileWrite $0 "pause"
+  
   ClearErrors
   FileOpen $1 "unregisteragent.bat" "w"
   IfErrors cleanup
   FileWrite $1 "$\"$INSTDIR\bin\snmpd.exe$\" -unregister$\r$\n"
+  FileWrite $1 "pause"
+
+  cleanup:
+  FileClose $0
+  FileClose $1
+FunctionEnd
+
+; The trap receiver has not been tested
+; completely as a Windows service.
+Function CreateTrapdBats
+  SetOutPath "$INSTDIR\"
+  ClearErrors
+  FileOpen $0 "registertrapd.bat" "w"
+  IfErrors cleanup
+  FileWrite $0 "$\"$INSTDIR\bin\snmptrapd.exe$\" -register$\r$\n"
+  FileWrite $0 "pause"
+
+  ClearErrors
+  FileOpen $1 "unregistertrapd.bat" "w"
+  IfErrors cleanup
+  FileWrite $1 "$\"$INSTDIR\bin\snmptrapd.exe$\" -unregister$\r$\n"
+  FileWrite $1 "pause"
 
   cleanup:
   FileClose $0
