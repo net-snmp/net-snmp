@@ -20,6 +20,7 @@ How To build the Perl SNMP modules using MSVC
 Extending the Agent with MS VC++
 How to Register Net-SNMP Agent as a Windows service
 Building with Cygwin
+Building with MinGW
 Notes on SET support for WIN32 ports
 Acknowledgements
 
@@ -502,6 +503,27 @@ but this regular expression support has since been incorporated
 into the main Cygwin package, and it is no longer necessary to
 include it separately.
 
+***************************************************************************
+*
+* Building with MinGW
+*
+***************************************************************************
+
+Currently the tools and agent will compile on win32 platforms using the
+MinGW tools with the MSyS environment. MinGW, MSyS and the associated
+documentation can be downloaded from: http://www.mingw.org.
+
+Compiling net-snmp with MinGW requires GNU regex. A GNU regex package that
+builds under MinGW with MSyS is available at: 
+	http://www.boedog.com/net-snmp/gnu_regex/regex-0-12-mingw-r2.tar.gz
+
+Build and install GNU regex following the instructions in the README.
+Configure net-snmp using the configure flag
+	--with-libs="-lregex "
+Run make to compile the package. 
+
+The agent will not currently run as a service on Windows system that support
+services when built with MinGW. 
 
 ***************************************************************************
 *
