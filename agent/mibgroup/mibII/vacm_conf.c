@@ -675,6 +675,8 @@ vacm_in_view(netsnmp_pdu *pdu, oid * name, size_t namelen,
     struct vacm_accessEntry *ap;
     struct vacm_groupEntry *gp;
     struct vacm_viewEntry *vp;
+    char            vacm_default_context[1] = "";
+    char           *contextName = vacm_default_context;
     char           *vn;
     char           *sn = NULL;
     /*
@@ -716,12 +718,17 @@ vacm_in_view(netsnmp_pdu *pdu, oid * name, size_t namelen,
             if (!netsnmp_udp_getSecName(pdu->transport_data,
                                         pdu->transport_data_length,
                                         (char *) pdu->community,
-                                        pdu->community_len, &sn)) {
+                                        pdu->community_len, &sn,
+                                        &contextName)) {
                 /*
                  * There are no com2sec entries.  
                  */
                 sn = NULL;
             }
+            /* force the community -> context name mapping here */
+            SNMP_FREE(pdu->contextName);
+            pdu->contextName = strdup(contextName);
+            pdu->contextNameLen = strlen(contextName);
 #ifdef SNMP_TRANSPORT_UDPIPV6_DOMAIN
         } else if (pdu->tDomain == netsnmp_UDPIPv6Domain
 #ifdef SNMP_TRANSPORT_TCPIPV6_DOMAIN
@@ -731,31 +738,31 @@ vacm_in_view(netsnmp_pdu *pdu, oid * name, size_t namelen,
             if (!netsnmp_udp6_getSecName(pdu->transport_data,
                                          pdu->transport_data_length,
                                          (char *) pdu->community,
-                                         pdu->community_len, &sn)
-                && !vacm_is_configured()) {
+                                         pdu->community_len, &sn,
+                                         &contextName)) {
                 /*
                  * There are no com2sec entries.  
                  */
-                DEBUGMSGTL(("mibII/vacm_vars",
-                            "vacm_in_view: accepted with no com2sec entries\n"));
-                switch (pdu->command) {
-                case SNMP_MSG_GET:
-                case SNMP_MSG_GETNEXT:
-                case SNMP_MSG_GETBULK:
-                    return 0;
-                default:
-                    return 1;
-                }
+                sn = NULL;
             }
+            /* force the community -> context name mapping here */
+            SNMP_FREE(pdu->contextName);
+            pdu->contextName = strdup(contextName);
+            pdu->contextNameLen = strlen(contextName);
 #endif
 #ifdef SNMP_TRANSPORT_UNIX_DOMAIN
         } else if (pdu->tDomain == netsnmp_UnixDomain){
             if (!netsnmp_unix_getSecName(pdu->transport_data,
-                                        pdu->transport_data_length,
-                                        (char *) pdu->community,
-                                        pdu->community_len, &sn)) {
+                                         pdu->transport_data_length,
+                                         (char *) pdu->community,
+                                         pdu->community_len, &sn,
+                                         &contextName)) {
 					sn = NULL;
-				  }
+            }
+            /* force the community -> context name mapping here */
+            SNMP_FREE(pdu->contextName);
+            pdu->contextName = strdup(contextName);
+            pdu->contextNameLen = strlen(contextName);
 #endif	
         } else {
             /*
@@ -781,6 +788,7 @@ vacm_in_view(netsnmp_pdu *pdu, oid * name, size_t namelen,
                   "vacm_in_view: ver=%d, model=%d, secName=%s\n",
                   pdu->version, pdu->securityModel, pdu->securityName));
         sn = pdu->securityName;
+        contextName = pdu->contextName;
     } else {
         sn = NULL;
     }

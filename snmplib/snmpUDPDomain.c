@@ -486,6 +486,7 @@ typedef struct _com2SecEntry {
     unsigned long   network;
     unsigned long   mask;
     char            secName[VACMSTRINGLEN];
+    char            contextName[VACMSTRINGLEN];
     struct _com2SecEntry *next;
 } com2SecEntry;
 
@@ -495,6 +496,7 @@ void
 netsnmp_udp_parse_security(const char *token, char *param)
 {
     char            secName[VACMSTRINGLEN];
+    char            contextName[VACMSTRINGLEN];
     char            community[VACMSTRINGLEN];
     char            source[VACMSTRINGLEN];
     char           *cp = NULL;
@@ -507,6 +509,14 @@ netsnmp_udp_parse_security(const char *token, char *param)
      */
 
     cp = copy_nword( param, secName, sizeof(secName));
+    if (strcmp(secName, "-Cn") == 0) {
+        if (!cp) {
+            config_perror("missing CONTEXT_NAME parameter");
+            return;
+        }
+        cp = copy_nword( cp, contextName, sizeof(contextName));
+        cp = copy_nword( cp, secName, sizeof(secName));
+    }
     if (secName[0] == '\0') {
         config_perror("missing NAME parameter");
         return;
@@ -652,6 +662,7 @@ netsnmp_udp_parse_security(const char *token, char *param)
                 "<\"%s\", 0x%08x/0x%08x> => \"%s\"\n", community, network,
                 mask, secName));
 
+    strcpy(e->contextName, contextName);
     strcpy(e->secName, secName);
     strcpy(e->community, community);
     e->network = network;
@@ -686,7 +697,7 @@ netsnmp_udp_agent_config_tokens_register(void)
 #if !defined(DISABLE_SNMPV1) || !defined(DISABLE_SNMPV2C)
     register_app_config_handler("com2sec", netsnmp_udp_parse_security,
                                 netsnmp_udp_com2SecList_free,
-                                "name IPv4-network-address[/netmask] community");
+                                "[-Cn CONTEXT] secName IPv4-network-address[/netmask] community");
 #endif /* support for community based SNMP */
 }
 
@@ -703,7 +714,8 @@ netsnmp_udp_agent_config_tokens_register(void)
 int
 netsnmp_udp_getSecName(void *opaque, int olength,
                        const char *community,
-                       size_t community_len, char **secName)
+                       size_t community_len, char **secName,
+                       char **contextName)
 {
     com2SecEntry   *c;
     struct sockaddr_in *from = (struct sockaddr_in *) opaque;
@@ -758,6 +770,7 @@ netsnmp_udp_getSecName(void *opaque, int olength,
             DEBUGMSG(("netsnmp_udp_getSecName", "... SUCCESS\n"));
             if (secName != NULL) {
                 *secName = c->secName;
+                *contextName = c->contextName;
             }
             break;
         }
