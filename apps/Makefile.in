@@ -8,7 +8,7 @@ SBINTARG= snmptrapd
 SUBDIRS=  snmpnetstat
 TRAPSPECIAL=@trap_list_o@
 
-USELIBS= ../snmplib/libsnmp.$(SHLIB_EXTENSION)
+USELIBS= ../snmplib/libsnmp.$(SHLIB_EXTENSION)$(SHLIB_VERSION)
 LIBS=	 -L../snmplib $(CC_RUNTIME_ARG) -lsnmp @LIBS@
 
 PARSEOBJS=snmp_parse_args.o
