@@ -509,7 +509,7 @@ AC_CHECK_HEADERS(sys/mount.h vm/swap_pager.h ufs/ufs/dinode.h)
 dnl BSDi3 headers
 AC_CHECK_HEADERS(sys/stat.h sys/vnode.h ufs/ufs/quota.h ufs/ufs/inode.h)
 dnl irix headers
-AC_CHECK_HEADERS(sys/hashing.h sys/tcpipstats.h)
+AC_CHECK_HEADERS(sys/hashing.h sys/tcpipstats.h sys/sysmp.h)
 dnl from smux stuff
 AC_CHECK_HEADERS(err.h sys/filio.h sgtty.h)
 dnl AIX needs this for statfs func
