@@ -1,7 +1,8 @@
 
-#ifdef WIN32
 #ifndef _WINSTUB_H_
 #define _WINSTUB_H_
+
+#if (defined(WIN32) || defined(cygwin32))
 
 /* database access functions for host, services, protocols, networks */
 
@@ -22,7 +23,7 @@ struct servent *getservent (void);
 struct protoent *getprotoent (void);
 struct netent *getnetent (void);
 
-struct netent * getnetbyaddr (unsigned long net, int type);
+struct netent * getnetbyaddr (long net, int type);
 
 /* Return the network number from an internet address */
 u_long inet_netof(struct in_addr in);
@@ -30,6 +31,7 @@ u_long inet_netof(struct in_addr in);
 /* Return the host number from an internet address */
 u_long inet_lnaof(struct in_addr in);
 
+#endif /* WIN32 or cygwin32 */
+
 #endif /*_WINSTUB_H_ */
-#endif /* WIN32 */
 

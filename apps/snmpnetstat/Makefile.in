@@ -16,8 +16,8 @@
 #
 #	@(#)Makefile	5.10 (Berkeley) 9/20/88
 #
-SRCS=	inet.c if.c main.c route.c 
-OBJS=	inet.o if.o main.o route.o
+SRCS=	inet.c if.c main.c route.c winstub.c
+OBJS=	inet.o if.o main.o route.o winstub.o
 TARG= snmpnetstat
 
 CPPFLAGS=@CPPFLAGS@ -I../.. -I$(srcdir)/../.. -I$(srcdir)/../../snmplib

@@ -470,7 +470,7 @@ u_char	signalled;			/* set if alarm goes off "early" */
  * timing precision is not considered important.
  */
 
-#ifdef WIN32
+#if (defined(WIN32) || defined(cygwin32))
 static int sav_int;
 static time_t timezup;
 static void
@@ -485,7 +485,16 @@ timerPause(void)
 {
 	time_t now;
 	while (time(&now) < timezup)
+#ifdef WIN32
 		Sleep(400);
+#else
+	{
+		struct timeval tx;
+		tx.tv_sec = 0;
+		tx.tv_usec = 400 * 1000; /* 400 milliseconds */
+		select( 0,0,0,0,&tx);
+	}
+#endif
 }
 
 #else
@@ -530,7 +539,7 @@ timerPause(void)
 #endif
 }
 
-#endif /* !WIN32 */
+#endif /* !WIN32 && !cygwin32 */
 
 /*
  * Print a running summary of interface statistics.
