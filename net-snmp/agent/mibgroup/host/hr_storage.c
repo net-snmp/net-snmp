@@ -106,6 +106,11 @@
 #ifdef hpux11
 #include <sys/pstat.h>
 #endif
+#if defined(solaris2)
+#if HAVE_SYS_SWAP_H
+#include <sys/swap.h>
+#endif
+#endif
 
 #if HAVE_STRING_H
 #include <string.h>
@@ -115,6 +120,10 @@
 
 #include <net-snmp/system.h>
 #include <net-snmp/snmp_logging.h>
+
+#if solaris2
+#include "kernel_sunos5.h"
+#endif
 
 #define HRSTORE_MONOTONICALLY_INCREASING
 
@@ -166,7 +175,13 @@ void  Init_HR_Store (void);
 int header_hrstore (struct variable *,oid *, size_t *, int, size_t *, WriteMethod **);
 int header_hrstoreEntry (struct variable *,oid *, size_t *, int, size_t *, WriteMethod **);
 
+#ifdef linux
 int linux_mem (int, int);
+#endif
+
+#ifdef solaris2
+void sol_get_swapinfo (int *, int *);
+#endif
 
 #define	HRSTORE_MEMSIZE		1
 #define	HRSTORE_INDEX		2
@@ -245,7 +260,7 @@ void init_hr_storage (void)
     auto_nlist(PHYSMEM_SYMBOL, (char *)&physmem, sizeof (physmem));
 #endif
 #endif
-#endif	/* USE_SYSCTL */
+#endif	/* !USE_SYSCTL && !hpux11 */
 #ifdef TOTAL_MEMORY_SYMBOL
     auto_nlist(TOTAL_MEMORY_SYMBOL,0,0);
 #endif
@@ -385,8 +400,10 @@ var_hrstore(struct variable *vp,
 	    WriteMethod **write_method)
 {
     int store_idx=0;
-#ifndef linux
-#ifndef solaris2
+#if defined(solaris2)
+    int freemem;
+    int swap_total, swap_used;
+#elif !defined(linux)
 #if defined(TOTAL_MEMORY_SYMBOL) || defined(USE_SYSCTL_VM)
     struct vmtotal memory_totals;
 #endif
@@ -397,8 +414,7 @@ var_hrstore(struct variable *vp,
 #ifdef MBSTAT_SYMBOL
     struct mbstat  mbstat;
 #endif
-#endif	/* solaris2 */
-#endif	/* linux */
+#endif	/* !linux */
     static char string[100];
     struct HRFS_statfs stat_buf;
 
@@ -443,7 +459,7 @@ var_hrstore(struct variable *vp,
 		default:
 			break;
 	}
-#endif
+#endif	/* !linux && !solaris2 */
     }
         
 
@@ -496,7 +512,7 @@ var_hrstore(struct variable *vp,
 	    else switch ( store_idx ) {
 		case HRS_TYPE_MEM:
 		case HRS_TYPE_SWAP:
-#ifdef USE_SYSCTL
+#if defined(USE_SYSCTL) || defined(solaris2)
 			long_return = pagesize;
 #elif defined(NBPG)
 			long_return = NBPG;
@@ -523,7 +539,20 @@ var_hrstore(struct variable *vp,
 	    if ( store_idx < HRS_TYPE_FS_MAX )
 		long_return = stat_buf.f_blocks;
 	    else switch ( store_idx ) {
-#if !defined(linux) && !defined(solaris2)
+#if defined(linux)
+		case HRS_TYPE_MEM:
+		case HRS_TYPE_SWAP:
+			long_return = linux_mem( store_idx, HRSTORE_SIZE);
+			break;
+#elif defined(solaris2)
+		case HRS_TYPE_MEM:
+			long_return = physmem;
+			break;
+		case HRS_TYPE_SWAP:
+			sol_get_swapinfo(&swap_total, &swap_used);
+			long_return = swap_total;
+			break;
+#else	/* !linux && !solaris2 */
 #if defined(TOTAL_MEMORY_SYMBOL) || defined(USE_SYSCTL_VM)
 		case HRS_TYPE_MEM:
 			long_return = memory_totals.t_rm;
@@ -531,7 +560,7 @@ var_hrstore(struct variable *vp,
 		case HRS_TYPE_SWAP:
 			long_return = memory_totals.t_vm;
 			break;
-#else
+#else	/* TOTAL_MEMORY_SYMBOL || USE_SYSCTL_VM */
 		case HRS_TYPE_MEM:
 			long_return = physmem;
 			break;
@@ -539,8 +568,9 @@ var_hrstore(struct variable *vp,
 #if NO_DUMMY_VALUES
 			return NULL;
 #endif
+			long_return = 0;
 			break;
-#endif
+#endif	/* TOTAL_MEMORY_SYMBOL || USE_SYSCTL_VM */
 		case HRS_TYPE_MBUF:
 #if HAVE_SYS_POOL_H
 			long_return = 0;
@@ -554,14 +584,7 @@ var_hrstore(struct variable *vp,
 			long_return = 0;
 #endif
 			break;
-#else	/* linux */
-#ifdef linux
-		case HRS_TYPE_MEM:
-		case HRS_TYPE_SWAP:
-			long_return = linux_mem( store_idx, HRSTORE_SIZE);
-			break;
-#endif
-#endif
+#endif	/* !linux && !solaris2 */
 		default:
 #if NO_DUMMY_VALUES
 			return NULL;
@@ -574,7 +597,22 @@ var_hrstore(struct variable *vp,
 	    if ( store_idx < HRS_TYPE_FS_MAX )
 		long_return = (stat_buf.f_blocks - stat_buf.f_bfree);
 	    else switch ( store_idx ) {
-#if !defined(linux) && !defined(solaris2)
+#if defined(linux)
+		case HRS_TYPE_MEM:
+		case HRS_TYPE_SWAP:
+			long_return = linux_mem( store_idx, HRSTORE_USED);
+			break;
+#elif defined(solaris2)
+		case HRS_TYPE_MEM:
+			getKstatInt("unix", "system_pages", "freemem",
+			    &freemem);
+			long_return = physmem - freemem;
+			break;
+		case HRS_TYPE_SWAP:
+			sol_get_swapinfo(&swap_total, &swap_used);
+			long_return = swap_used;
+			break;
+#else	/* !linux && !solaris2 */
 #if defined(TOTAL_MEMORY_SYMBOL) || defined(USE_SYSCTL_VM)
 		case HRS_TYPE_MEM:
 			long_return = memory_totals.t_arm;
@@ -582,11 +620,13 @@ var_hrstore(struct variable *vp,
 		case HRS_TYPE_SWAP:
 			long_return = memory_totals.t_avm;
 			break;
-#endif
+#endif	/* TOTAL_MEMORY_SYMBOL || USE_SYSCTL_VM */
 		case HRS_TYPE_MBUF:
 #if HAVE_SYS_POOL_H
-			long_return = (mbpool.pr_nget - mbpool.pr_nput)*mbpool.pr_size
-				+ (mclpool.pr_nget - mclpool.pr_nput)*mclpool.pr_size;
+			long_return = (mbpool.pr_nget - mbpool.pr_nput)
+				    * mbpool.pr_size
+				+ (mclpool.pr_nget - mclpool.pr_nput)
+				    * mclpool.pr_size;
 #elif defined(MBSTAT_SYMBOL)
 			long_return = mbstat.m_clusters - mbstat.m_clfree;	/* unlikely, but... */
 #elif defined(NO_DUMMY_VALUES)
@@ -595,14 +635,7 @@ var_hrstore(struct variable *vp,
 			long_return = 0;
 #endif
 			break;
-#else	/* linux */
-#ifdef linux
-		case HRS_TYPE_MEM:
-		case HRS_TYPE_SWAP:
-			long_return = linux_mem( store_idx, HRSTORE_USED);
-			break;
-#endif
-#endif
+#endif	/* !linux && !solaris2 */
 		default:
 #if NO_DUMMY_VALUES
 			return NULL;
@@ -626,7 +659,7 @@ var_hrstore(struct variable *vp,
 		case HRS_TYPE_MBUF:
 			long_return = mbstat.m_drops;
 			break;
-#endif
+#endif	/* !linux && !solaris2 && MBSTAT_SYMBOL */
 		default:
 #if NO_DUMMY_VALUES
 			return NULL;
@@ -679,6 +712,10 @@ Get_Next_HR_Store(void)
     if ( HRS_index < HRS_TYPE_MAX )
 	return HRS_index;
     else
+#else
+    if ( HRS_index < HRS_TYPE_MBUF )
+	return HRS_index;
+    else
 #endif
 	return -1;
 }
@@ -708,3 +745,19 @@ linux_mem(int mem_type,
 
 }
 #endif
+
+#ifdef solaris2
+void
+sol_get_swapinfo(int *totalP, int *usedP)
+{
+    struct anoninfo ainfo;
+
+    if (swapctl(SC_AINFO, &ainfo) < 0) {
+	*totalP = *usedP = 0;
+	return;
+    }
+
+    *totalP = ainfo.ani_max;
+    *usedP = ainfo.ani_resv;
+}
+#endif	/* solaris2 */
