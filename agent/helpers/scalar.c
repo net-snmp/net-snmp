@@ -94,7 +94,7 @@ netsnmp_scalar_helper_handler(netsnmp_mib_handler *handler,
                                       SNMP_NOSUCHOBJECT);
             return SNMP_ERR_NOERROR;
         } else {
-            reginfo->rootoid_len++;
+            reginfo->rootoid[reginfo->rootoid_len++] = 0;
             ret = netsnmp_call_next_handler(handler, reginfo, reqinfo,
                                              requests);
             reginfo->rootoid_len--;
@@ -113,7 +113,7 @@ netsnmp_scalar_helper_handler(netsnmp_mib_handler *handler,
                                       SNMP_ERR_NOCREATION);
             return SNMP_ERR_NOERROR;
         } else {
-            reginfo->rootoid_len++;
+            reginfo->rootoid[reginfo->rootoid_len++] = 0;
             ret = netsnmp_call_next_handler(handler, reginfo, reqinfo,
                                              requests);
             reginfo->rootoid_len--;
@@ -122,7 +122,7 @@ netsnmp_scalar_helper_handler(netsnmp_mib_handler *handler,
         break;
 
     case MODE_GETNEXT:
-        reginfo->rootoid_len++;
+        reginfo->rootoid[reginfo->rootoid_len++] = 0;
         ret = netsnmp_call_next_handler(handler, reginfo, reqinfo, requests);
         reginfo->rootoid_len--;
         return ret;
