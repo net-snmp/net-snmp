@@ -45,12 +45,12 @@ AUTOHEADER	= autoheader
 CFLAGS		= @CFLAGS@
 EXTRACPPFLAGS	= @EXTRACPPFLAGS@
 LDFLAGS		= @LDFLAGS@ 
-LIBTOOL		= @LIBTOOL@
+LIBTOOL		= @LIBTOOL@ --quiet
 
 # Misc Compiling Stuff
-CC	        = @CC@ $(CPPFLAGS) $(CFLAGS)
+CC	        = @CC@
 # version number is prefixed by a 0 for a better shared library version number
-LIB_LD_CMD      = $(LIBTOOL) --mode=link $(CC) -rpath $(libdir) -release 0.$(VERSION) -o
+LIB_LD_CMD      = $(LIBTOOL) --mode=link $(CC) $(CFLAGS) -rpath $(libdir) -release 0.$(VERSION) -o
 LIB_EXTENSION   = la
 LIB_VERSION     =
 LIB_LDCONFIG_CMD = $(LIBTOOL) --mode=finish $(libdir)
@@ -61,4 +61,4 @@ RANLIB		= :
 # libtool definitions
 .SUFFIXES: .c .o .lo
 .c.lo:
-	$(LIBTOOL) --mode=compile $(CC) -c -o $@ $<
+	$(LIBTOOL) --mode=compile $(CC) $(CFLAGS) $(CPPFLAGS) -c -o $@ $<
