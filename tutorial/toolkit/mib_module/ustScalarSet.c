@@ -17,6 +17,9 @@
 #else /* !IN_UCD_SNMP_SOURCE */
 
 #include <ucd-snmp/ucd-snmp-config.h>
+#ifdef HAVE_NETINET_IN_H
+#include <netinet/in.h>
+#endif
 #include <ucd-snmp/ucd-snmp-includes.h>
 #include <ucd-snmp/ucd-snmp-agent-includes.h>
 
