@@ -337,7 +337,7 @@ static void send_v1_trap (struct snmp_session *ss,
     gettimeofday(&now, NULL);
 
     pdu = snmp_pdu_create (SNMP_MSG_TRAP);
-    pduIp = (struct sockaddr_in *)&(pdu->agent_addr);
+    pduIp = (struct sockaddr_in *)&(pdu->address);
 
     if (trap == SNMP_TRAP_ENTERPRISESPECIFIC) {
 	pdu->enterprise		 = objid_enterprisetrap;
