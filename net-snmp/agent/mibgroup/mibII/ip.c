@@ -176,7 +176,6 @@ struct variable4 ip_variables[] = {
 #endif
     {IPADBCASTADDR, ASN_INTEGER, RONLY, var_ipAddrEntry, 3, {20, 1, 4}},
     {IPADREASMMAX, ASN_INTEGER, RONLY, var_ipAddrEntry, 3, {20, 1, 5}},
-#ifdef WIN32
     {IPROUTEDEST, ASN_IPADDRESS, RWRITE, var_ipRouteEntry, 3, {21, 1, 1}},
     {IPROUTEIFINDEX, ASN_INTEGER, RWRITE, var_ipRouteEntry, 3, {21, 1, 2}},
     {IPROUTEMETRIC1, ASN_INTEGER, RWRITE, var_ipRouteEntry, 3, {21, 1, 3}},
@@ -185,26 +184,10 @@ struct variable4 ip_variables[] = {
     {IPROUTEMETRIC4, ASN_INTEGER, RWRITE, var_ipRouteEntry, 3, {21, 1, 6}},
     {IPROUTENEXTHOP, ASN_IPADDRESS, RWRITE, var_ipRouteEntry, 3, {21, 1, 7}},
     {IPROUTETYPE, ASN_INTEGER, RWRITE, var_ipRouteEntry, 3, {21, 1, 8}},
-#else
-    {IPROUTEDEST, ASN_IPADDRESS, RWRITE, var_ipRouteEntry, 3, {21, 1, 1}},
-    {IPROUTEIFINDEX, ASN_INTEGER, RWRITE, var_ipRouteEntry, 3, {21, 1, 2}},
-    {IPROUTEMETRIC1, ASN_INTEGER, RWRITE, var_ipRouteEntry, 3, {21, 1, 3}},
-    {IPROUTEMETRIC2, ASN_INTEGER, RWRITE, var_ipRouteEntry, 3, {21, 1, 4}},
-    {IPROUTEMETRIC3, ASN_INTEGER, RWRITE, var_ipRouteEntry, 3, {21, 1, 5}},
-    {IPROUTEMETRIC4, ASN_INTEGER, RWRITE, var_ipRouteEntry, 3, {21, 1, 6}},
-    {IPROUTENEXTHOP, ASN_IPADDRESS, RWRITE, var_ipRouteEntry, 3, {21, 1, 7}},
-    {IPROUTETYPE, ASN_INTEGER, RWRITE, var_ipRouteEntry, 3, {21, 1, 8}},
-#endif
     {IPROUTEPROTO, ASN_INTEGER, RONLY, var_ipRouteEntry, 3, {21, 1, 9}},
-#ifdef WIN32
     {IPROUTEAGE, ASN_INTEGER, RWRITE, var_ipRouteEntry, 3, {21, 1, 10}},
     {IPROUTEMASK, ASN_IPADDRESS, RWRITE, var_ipRouteEntry, 3, {21, 1, 11}},
     {IPROUTEMETRIC5, ASN_INTEGER, RWRITE, var_ipRouteEntry, 3, {21, 1, 12}},
-#else
-    {IPROUTEAGE, ASN_INTEGER, RWRITE, var_ipRouteEntry, 3, {21, 1, 10}},
-    {IPROUTEMASK, ASN_IPADDRESS, RWRITE, var_ipRouteEntry, 3, {21, 1, 11}},
-    {IPROUTEMETRIC5, ASN_INTEGER, RWRITE, var_ipRouteEntry, 3, {21, 1, 12}},
-#endif
     {IPROUTEINFO, ASN_OBJECT_ID, RONLY, var_ipRouteEntry, 3, {21, 1, 13}},
 #ifdef USING_MIBII_AT_MODULE
 #ifdef WIN32
