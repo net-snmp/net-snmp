@@ -55,8 +55,8 @@ netsnmp_access_interface_container_arch_load(netsnmp_container* container,
     static const char     *scan_line_to_use = NULL;
     static char     scan_expected;
     int             scan_count, fd;
-    unsigned long long rec_pkt, rec_oct, rec_err, rec_drop, rec_mcast;
-    unsigned long long snd_pkt, snd_oct, snd_err, snd_drop, coll;
+    uintmax_t       rec_pkt, rec_oct, rec_err, rec_drop, rec_mcast;
+    uintmax_t       snd_pkt, snd_oct, snd_err, snd_drop, coll;
     netsnmp_interface_entry *entry = NULL;
 
     DEBUGMSGTL(("access:interface:container:arch", "load (flags %p)\n",
