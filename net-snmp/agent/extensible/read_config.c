@@ -200,7 +200,7 @@ int read_config(filename, procp, numps, pprelocs, numrelocs, pppassthrus,
             }
 #else
             fprintf(stderr,
-                    "'disk' checks not supported for this arcitecture.\n");
+                    "'disk' checks not supported for this architecture.\n");
 #endif
           }
           else if (!strncmp(word,"proc",4)) {
