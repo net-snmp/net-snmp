@@ -54,6 +54,7 @@
 #include "tools.h"
 #include "lcd_time.h"
 #include "snmp_debug.h"
+#include "callback.h"
 
 #include "transform_oids.h"
 
@@ -415,6 +416,22 @@ void
 init_snmpv3(const char *type) {
   gettimeofday(&snmpv3starttime, NULL);
   setup_engineID(NULL, NULL);
+
+  /* initialize submodules */
+  init_usm();
+
+  /* we need to be called back later */
+  snmp_register_callback(SNMP_CALLBACK_LIBRARY, SNMP_CALLBACK_POST_READ_CONFIG,
+                         init_snmpv3_post_config, NULL);
+
+
+#if		!defined(USE_INTERNAL_MD5)
+  /* doesn't belong here at all */
+  sc_init();
+#endif		/* !USE_INTERNAL_MD5 */
+
+  /* register all our configuration handlers (ack, there's a lot) */
+
   /* handle engineID setup before everything else which may depend on it */
   register_premib_handler(type,"engineID", engineID_conf, NULL, "string");
   register_premib_handler(type,"oldEngineID", oldengineID_conf, NULL,
@@ -448,9 +465,6 @@ init_snmpv3(const char *type) {
                           "secname engineIDLen engineID KulLen Kul");
   register_config_handler(type,"userSetPrivLocalKey", usm_set_password, NULL,
                           "secname engineIDLen engineID KulLen Kul");
-#if		!defined(USE_INTERNAL_MD5)
-	sc_init();
-#endif		/* !USE_INTERNAL_MD5 */
 }
 
 /*
@@ -458,8 +472,9 @@ init_snmpv3(const char *type) {
  * have been read.
  */
 
-void
-init_snmpv3_post_config(void) {
+int
+init_snmpv3_post_config(int majorid, int minorid, void *serverarg,
+                        void *clientarg) {
 
   int engineIDLen;
   u_char *c_engineID;
