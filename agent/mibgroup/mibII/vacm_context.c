@@ -116,7 +116,7 @@ vacm_context_handler(netsnmp_mib_handler *handler,
 {
     subtree_context_cache *context_ptr;
 
-    while (requests) {
+    for(; requests; requests = requests->next) {
         netsnmp_variable_list *var = requests->requestvb;
 
         if (requests->processed != 0)
@@ -129,7 +129,6 @@ vacm_context_handler(netsnmp_mib_handler *handler,
         if (context_ptr == NULL) {
             snmp_log(LOG_ERR,
                      "vacm_context_handler called without data\n");
-            requests = requests->next;
             continue;
         }
 
@@ -159,8 +158,6 @@ vacm_context_handler(netsnmp_mib_handler *handler,
 
 
         }
-
-        requests = requests->next;
     }
 
     return SNMP_ERR_NOERROR;
