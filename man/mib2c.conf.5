@@ -27,6 +27,11 @@ Anything with an @ sign at the front and back of the line is generally
 supposed to be a mib2c specific command.  These are detailed here:
 .IP "@open FILE@"
 writes generated output to FILE
+note that for file specifications, opening '-' will print to stdout.
+.IP "@append FILE@"
+appends the given FILE
+.IP "@close FILE@"
+closes the given FILE
 .IP "@push@"
 save the current outputs, then clear outputs. Use with @open@
 and @pop@ to write to a new file without interfering with current
@@ -70,7 +75,10 @@ to the label and values from the enum list.
 repeat iterate over code until @end@ setting $RANGE_START and $RANGE_END
 to the legal accepted range set for a given mib NODE.
 .IP "@eval $VAR = expression@"
-evaluates expression and assigns the results to $VAR
+evaluates expression and assigns the results to $VAR.  This is
+not a full perl eval, but sort of a "psuedo" eval useful for
+simple expressions while keeping the same variable name space.
+See below for a full-blown export to perl.
 .IP "@perleval STUFF@"
 evaluates STUFF directly in perl.  Note that all mib2c variables
 interpereted within .conf files are in $vars{NAME}.
@@ -83,13 +91,30 @@ skips out of current conditional, then continues to skip to
 end for the current foreach clause.
 .IP "@if expression@"
 evaluates expression, and if expression is true processes
-contained part until appropriate @end@ is reached.
+contained part until appropriate @end@ is reached.  If an @else@
+clause is found, it will be evaluated instead if expression
+isn't true.
 .IP "@define NAME@"
 .IP "@enddefine@"
 Memorizes "stuff" between the define and enddefine tags for
 later calling as NAME by @calldefine NAME@.
 .IP "@calldefine NAME@"
 Executes stuff previously memorized as NAME.
+.IP "@printf "expression" stuff1, stuff2, ...@"
+Like all the other printf's you know and love.
+.IP "@run FILE@"
+Sources the contents of FILE as a mib2c file,
+but does not affect current files opened.
+.IP "@include FILE@"
+Sources the contents of FILE as a mib2c file and appends its
+output to the current output.
+.IP "@prompt $var QUESTION@"
+Presents the user with QUESTION, expects a response and puts it in $var
+.IP "@print STUFF@"
+Prints stuff directly to the users screen (ie, not to where
+normal mib2c output goes)
+.IP "@exit@"
+Bail out!
 .SH VARIABLES
 .PP
 Variables in the mib2c language look very similar to perl variables,
@@ -114,17 +139,31 @@ will produce "ifTypetext" instead.
 .IP "$var.uc"
 all upper case version of $var
 .IP "$var.objectID"
-dotted full OID
+dotted, fully-qualified, and numeric OID
 .IP "$var.commaoid"
-comma separated OID for array init
-.IP "$var.subid"
-last number component of oid
+comma separated numeric OID for array initialization
 .IP "$var.oidlength"
 length of the oid
+.IP "$var.subid"
+last number component of oid
+.IP "$var.module"
+MIB name that the object comes from
+.IP "$var.parent"
+contains the label of the parent node of $var.
+.IP "$var.isscalar"
+returns 1 if var contains the name of a scalar
+.IP "$var.iscolumn"
+returns 1 if var contains the name of a column
+.IP "$var.children"
+returns 1 if var has children
 .IP "$var.perltype"
-node's perl SYNTAX
+node's perl SYNTAX ($SNMP::MIB{node}{'syntax'})
 .IP "$var.type"
-node's ASN_XXX type
+node's ASN_XXX type (Net-SNMP specific #define)
+.IP "$var.decl"
+C data type (char, u_long, ...)
+.IP "$var.readable"
+1 if it's readable, 0 if not
 .IP "$var.settable"
 1 if it's writable, 0 if not
 .IP "$var.noaccess"
@@ -133,22 +172,24 @@ node's ASN_XXX type
 1 if accessible, 0 if not
 .IP "$var.hasdefval"
 1 if a DEFVAL was defined, 0 if not
+.IP "$var.hasdefval"
+returns 1 if var has a DEFVAL clause
 .IP "$var.defval"
-node's defval
+node's DEFVAL
+.IP "$var.hashint"
+returns 1 if var has a HINT clause
+.IP "$var.hint"
+node's HINT
+.IP "$var.ranges"
+returns 1 if var has a value range defined
+.IP "$var.enums"
+returns 1 if var has enums defined for it.
 .IP "$var.access"
 node's access type
 .IP "$var.status"
 node's status
 .IP "$var.syntax"
 node's syntax
-.IP "$var.decl"
-C data type
-.IP "$var.isscalar"
-returns 1 if var contains the name of a scalar
-.IP "$var.iscolumn"
-returns 1 if var contains the name of a column
-.IP "$var.parent"
-contains the label of the parent node of $var.
 .SH SEE ALSO
 .PP
 mib2c(1)
