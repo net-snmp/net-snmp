@@ -594,6 +594,7 @@ get_table_entries(netsnmp_session * ss)
                                 switch (netsnmp_ds_get_int(NETSNMP_DS_LIBRARY_ID,
                                                           NETSNMP_DS_LIB_OID_OUTPUT_FORMAT)) {
                                 case NETSNMP_OID_OUTPUT_MODULE:
+				case 0:
                                     name_p = strrchr(buf, ':');
                                     break;
                                 case NETSNMP_OID_OUTPUT_SUFFIX:
@@ -605,6 +606,11 @@ get_table_entries(netsnmp_session * ss)
                                     name_p = buf + strlen(table_name)+1;
                                     name_p = strchr(name_p, '.')+1;
                                     break;
+				default:
+				    fprintf(stderr, "Unrecognized -O option: %d\n",
+					    netsnmp_ds_get_int(NETSNMP_DS_LIBRARY_ID,
+							      NETSNMP_DS_LIB_OID_OUTPUT_FORMAT));
+				    exit(1);
                                 }
                                 name_p = strchr(name_p, '.') + 1;
                             }
@@ -754,6 +760,7 @@ getbulk_table_entries(netsnmp_session * ss)
                         switch (netsnmp_ds_get_int(NETSNMP_DS_LIBRARY_ID,
                                                   NETSNMP_DS_LIB_OID_OUTPUT_FORMAT)) {
                         case NETSNMP_OID_OUTPUT_MODULE:
+			case 0:
                             name_p = strrchr(buf, ':');
                             break;
                         case NETSNMP_OID_OUTPUT_SUFFIX:
@@ -765,6 +772,11 @@ getbulk_table_entries(netsnmp_session * ss)
                             name_p = buf + strlen(table_name)+1;
                             name_p = strchr(name_p, '.')+1;
                             break;
+			default:
+			    fprintf(stderr, "Unrecognized -O option: %d\n",
+				    netsnmp_ds_get_int(NETSNMP_DS_LIBRARY_ID,
+					              NETSNMP_DS_LIB_OID_OUTPUT_FORMAT));
+			    exit(1);
                         }
                         name_p = strchr(name_p, '.') + 1;
                     }
