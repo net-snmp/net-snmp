@@ -344,7 +344,7 @@ Gives you the complete OID:
  .iso.org.dod.internet.mgmt.mib-2.system.sysUpTime.0 = Timeticks: (14096763) 1 day, 15:09:27.63
 .TP
 .B -Os
-Deletes all by the last symbolic part of the OID:
+Deletes all but the last symbolic part of the OID:
 .br
 sysUpTime.0 = Timeticks: (14096763) 1 day, 15:09:27.63
 .TP
@@ -354,6 +354,14 @@ A variation on
 that adds the name of the MIB that defined the object:
 .br
 SNMPv2-MIB::sysUpTime.0 = Timeticks: (14096763) 1 day, 15:09:27.63
+.br
+(from release 5.0, this is now the default output format)
+.TP
+.B -Ou
+Prints the OID in the UCD-style (inherited from the original CMU code)
+removing a series of "standard" prefixes (if relevant).
+.br
+system.sysUpTime.0 = Timeticks: (14096763) 1 day, 15:09:27.63
 .TP
 .B -On
 Prints the OID numerically:
@@ -463,6 +471,15 @@ current side effect of this option is that you can't specify indexes or
 multiple nodes, since the '.' is treated as part of the regular
 expression.
 .TP
+.B -Iu
+Use the traditional UCD-style input approach of assuming that OIDs
+are rooted at the 'mib-2' point in the tree (unless they start with
+an explicit '.')   If random access lookup is in effect (which is
+the default for most commands), then this will only affect OIDs
+specified with a leading numberic subidentifier (and no initial '.')
+Thus an input of "snmpcmd ... 1" would refer to 'iso' (from v5.0
+onwards) while "snmpcmd -Iu ... 1" would refer to 'system'.
+.TP
 .B -Ir
 By default, indices into tables and values to be assigned to objects
 are checked against range and type specified in the MIB.  The
@@ -472,11 +489,14 @@ testing an agent.  For normal operation it is useful to get your
 requests checked before they are sent to the remote agent (the
 diagnostic that the library can provide is also much more precise).
 .SH "RANDOM ACCESS MIBS"
-Normally, an object identifier such as system.sysDescr.0 will be
+In previous releases of the UCD-SNMP package (and if using the
+.B -Iu
+option), an object identifier such as system.sysDescr.0 will be
 lookup in a single "well known" place, built into the SNMP library (or
 specified by the PREFIX environment variable).  The standard place
 is: .iso.org.dod.internet.mgmt.mib-2.  The identifier may alternatively be
-a complete object identifier, this is designated by a leading "dot".
+a complete object identifier, this is designated by a leading "dot"
+if using UCD-input style, and is the first thing tried otherwise.
 To simplify the specification of object identifiers the library
 supports random access to the identifiers in the MIBs. This is
 requested by the
@@ -488,13 +508,14 @@ also be entered as sysDescr.0.  To search only a single MIB for the
 identifier (if it appears in more than one), specify it as
 SNMPv2-MIB::sysDescr.0. (use
 .B -OS
-to print output OIDs in this manner). This notation will also ensure
+to print output OIDs in this manner, though this is the default as
+from v5.0). This notation will also ensure
 that the specified MIB is loaded, i.e. it need not be mentioned in the
 .B -m
 option (or MIBS environment variable).
 .SH "ENVIRONMENT VARIABLES"
 .IP PREFIX
-The standard prefix for object identifiers.
+The standard prefix for object identifiers (if using UCD-style output).
 Defaults to .iso.org.dod.internet.mgmt.mib-2
 .IP MIBS
 The list of MIBs to load. Defaults to
@@ -507,10 +528,6 @@ The list of directories to search for MIBs. Defaults to PREFIX/share/snmp/mibs.
 Overridden by the
 .B -M
 option.
-.IP SUFFIX
-If this variable is set, the applications acts as if the
-.B -s
-option is specified.
 .SH FILES
 .IP PREFIX/share/snmp/snmpd.conf
 Agent configuration file. See
