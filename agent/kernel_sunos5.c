@@ -585,13 +585,19 @@ getif(mib2_ifEntry_t *ifbuf, size_t size, req_e req_type,
 	ifp->ifMtu = ifrp->ifr_metric;
 	ifp->ifSpeed = 10000000; 	/* Best guess */
 	if (getKstat(ifrp->ifr_name, "ipackets", &ifp->ifInUcastPkts) < 0) {
-	    ret = -1;
-	    goto Return;
+          /* Virtual interfaces (dev:X) don't have individual statistics, */
+          /* at least on Solaris 2.5 as of 5/1/96.  -ddickey */
+          if (!strchr(ifrp->ifr_name, ':')) {
+            ret = -1;
+            goto Return;
+          }
 	}
 	ifp->ifInOctets = ifp->ifInUcastPkts * 308;	/* XXX */
 	if (getKstat(ifrp->ifr_name, "opackets", &ifp->ifOutUcastPkts) < 0) {
+          if (!strchr(ifrp->ifr_name, ':')) {
 	    ret = -1;
 	    goto Return;
+          }
 	}
 	ifp->ifOutOctets = ifp->ifOutUcastPkts * 308;	/* XXX */
 	if (strcmp(ifrp->ifr_name, "lo0") == 0) { /* No other stat for lo0 */
@@ -600,12 +606,16 @@ getif(mib2_ifEntry_t *ifbuf, size_t size, req_e req_type,
 	}
 	ifp->ifType = (ifp->ifMtu == 1500)? 6 : 1; /* Best guess */
 	if (getKstat(ifrp->ifr_name, "ierrors", &ifp->ifInErrors) < 0) {
+          if (!strchr(ifrp->ifr_name, ':')) {
 	    ret = -1;
 	    goto Return;
+          }
 	}
 	if (getKstat(ifrp->ifr_name, "oerrors", &ifp->ifOutErrors) < 0) {
+          if (!strchr(ifrp->ifr_name, ':')) {
 	    ret = -1;
 	    goto Return;
+          }
 	}
 	/*
 	 * An attempt to determine the physical address of the interface.
