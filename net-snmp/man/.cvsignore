@@ -1,5 +1,8 @@
 *.html
 Makefile
 read_config.3
+snmp.conf.5
+snmp_config.5
 snmpd.1
 snmpd.conf.5
+snmptrapd.conf.5
