@@ -335,6 +335,15 @@ init_agent(const char *app)
     init_perl();
 #endif
 
+#ifdef USING_AGENTX_SUBAGENT_MODULE
+    /*
+     * don't init agent modules for a sub-agent
+     */
+    if (netsnmp_ds_get_boolean(NETSNMP_DS_APPLICATION_ID, 
+			       NETSNMP_DS_AGENT_ROLE) == SUB_AGENT)
+        return r;
+#endif
+
 #  include "agent_module_inits.h"
 
     return r;
