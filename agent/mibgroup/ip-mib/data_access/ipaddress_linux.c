@@ -9,6 +9,7 @@
 
 #include <net-snmp/agent/net-snmp-agent-includes.h>
 #include <net-snmp/data_access/ipaddress.h>
+#include <net-snmp/data_access/interface.h>
 
 #include "ip-mib/ipAddressTable/ipAddressTable_constants.h"
 
@@ -25,17 +26,115 @@
 
 int _load_v6(netsnmp_container *container, int idx_offset);
 
+/*
+ * initialize arch specific storage
+ *
+ * @retval  0: success
+ * @retval <0: error
+ */
+int
+netsnmp_arch_ipaddress_entry_init(netsnmp_ipaddress_entry *entry)
+{
+    /*
+     * init ipv4 stuff
+     */
+    if (NULL == netsnmp_ioctl_ipaddress_entry_init(entry))
+        return -1;
+
+    /*
+     * init ipv6 stuff
+     *   so far, we can just share the ipv4 stuff, so nothing to do
+     */
+    
+    return 0;
+}
+
+/*
+ * cleanup arch specific storage
+ */
+void
+netsnmp_arch_ipaddress_entry_cleanup(netsnmp_ipaddress_entry *entry)
+{
+    /*
+     * cleanup ipv4 stuff
+     */
+    netsnmp_ioctl_ipaddress_entry_cleanup(entry);
+
+    /*
+     * cleanup ipv6 stuff
+     *   so far, we can just share the ipv4 stuff, so nothing to do
+     */
+}
+
+/*
+ * copy arch specific storage
+ */
+int
+netsnmp_arch_ipaddress_entry_copy(netsnmp_ipaddress_entry *lhs,
+                                  netsnmp_ipaddress_entry *rhs)
+{
+    int rc;
+
+    /*
+     * copy ipv4 stuff
+     */
+    rc = netsnmp_ioctl_ipaddress_entry_copy(lhs, rhs);
+    if (rc)
+        return rc;
+
+    /*
+     * copy ipv6 stuff
+     *   so far, we can just share the ipv4 stuff, so nothing to do
+     */
+
+    return rc;
+}
+
+/*
+ * create a new entry
+ */
+int
+netsnmp_arch_ipaddress_create(netsnmp_ipaddress_entry *entry)
+{
+    if (NULL == entry)
+        return -1;
+
+    if (4 != entry->ia_address_len) {
+        DEBUGMSGT(("access:ipaddress:create", "on ipv4 supported\n"));
+        return -2;
+    }
+
+    return _netsnmp_ioctl_ipaddress_set_v4(entry);
+}
+
+/*
+ * create a new entry
+ */
+int
+netsnmp_arch_ipaddress_delete(netsnmp_ipaddress_entry *entry)
+{
+    if (NULL == entry)
+        return -1;
+
+    if (4 != entry->ia_address_len) {
+        DEBUGMSGT(("access:ipaddress:create", "only ipv4 supported\n"));
+        return -2;
+    }
+
+    return _netsnmp_ioctl_ipaddress_delete_v4(entry);
+}
+
 /**
  *
  * @retval  0 no errors
  * @retval !0 errors
  */
 int
-netsnmp_access_ipaddress_container_arch_load(netsnmp_container *container)
+netsnmp_arch_ipaddress_container_load(netsnmp_container *container)
 {
     int rc = 0, idx_offset = 0;
 
-    rc = _netsnmp_access_ipaddress_container_ioctl_load_v4(container, idx_offset);
+    rc = _netsnmp_ioctl_ipaddress_container_load_v4(container, idx_offset);
     if(rc < 0) {
         u_int flags = NETSNMP_ACCESS_IPADDRESS_FREE_KEEP_CONTAINER;
         netsnmp_access_ipaddress_container_free(container, flags);
@@ -73,10 +172,11 @@ int
 _load_v6(netsnmp_container *container, int idx_offset)
 {
     FILE           *in;
-    char            line[80], addr[33], if_name[9];
+    char            line[80], addr[33], if_name[IFNAMSIZ];
     u_char          *buf;
     int             if_index, pfx_len, scope, flags, rc = 0, in_len, out_len;
     netsnmp_ipaddress_entry *entry;
+    _ioctl_extras           *extras;
     static int      log_open_err = 1;
     
     netsnmp_assert(NULL != container);
@@ -144,9 +244,13 @@ _load_v6(netsnmp_container *container, int idx_offset)
 
         entry->ns_ia_index = ++idx_offset;
 
-        entry->ia_flags = flags;
+        /*
+         * save if name
+         */
+        extras = netsnmp_ioctl_ipaddress_extras_get(entry);
+        memcpy(extras->name, if_name, sizeof(extras->name));
+        extras->flags = flags;
 
-#ifndef NETSNMP_USE_IOCTL_IFINDEX
         /*
          * there is an iotcl to get an ifindex, but I'm not sure that
          * it has the correct characteristics required to be the actual
@@ -154,9 +258,6 @@ _load_v6(netsnmp_container *container, int idx_offset)
          * (which is based on the interface name).
          */
         entry->if_index = netsnmp_access_interface_index_find(if_name);
-#else
-        entry->if_index = if_index;
-#endif
 
         /*
           #define IPADDRESSSTATUSTC_PREFERRED  1
