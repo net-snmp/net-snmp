@@ -379,7 +379,7 @@ snmp_comstr_build(data, length, sid, slen, version, messagelen)
     int         *length;
     u_char      *sid;
     int         *slen;
-    int         *version;
+    long        *version;
     int         messagelen;
 {
   /* version is an 'int' (CMU had it as a long, but was passing in a *int.

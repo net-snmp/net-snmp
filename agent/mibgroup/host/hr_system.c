@@ -50,7 +50,9 @@ extern int header_hrsys __P((struct variable *,oid *, int *, int, int *, int (**
 
 void	init_hr_system( )
 {
+#ifdef NPROC_SYMBOL
   auto_nlist(NPROC_SYMBOL,0,0);
+#endif
 }
 
 
@@ -110,7 +112,7 @@ var_hrsys(vp, name, length, exact, var_len, write_method)
 #ifdef linux
     FILE       *fp;
 #endif
-#ifndef linux
+#ifdef NPROC_SYMBOL
     int		nproc;
 #endif
 
@@ -148,12 +150,12 @@ var_hrsys(vp, name, length, exact, var_len, write_method)
 #endif
 	    return (u_char *)&long_return;
 	case HRSYS_MAXPROCS:
-#ifndef linux
-	    auto_nlist(NPROC_SYMBOL, (char *)&nproc, sizeof (int));
-	    long_return = nproc;
-#else
 #ifdef NR_TASKS
 	    long_return = NR_TASKS;	/* <linux/tasks.h> */
+#else
+#ifdef NPROC_SYMBOL
+	    auto_nlist(NPROC_SYMBOL, (char *)&nproc, sizeof (int));
+	    long_return = nproc;
 #else
 	    long_return = 0;
 #endif
@@ -218,7 +220,8 @@ void endutent __P((void))
 
 struct utmp *getutent __P((void))
 {
-	if (fread(&utmp_rec, sizeof(utmp_rec), 1, utmp_file) == 1)
+	while (fread(&utmp_rec, sizeof(utmp_rec), 1, utmp_file) == 1)
+	    if (*utmp_rec.ut_name && *utmp_rec.ut_line)
 		return &utmp_rec;
 	return NULL;
 }

@@ -20,11 +20,20 @@
 #if HAVE_SYS_PSTAT_H
 #include <sys/pstat.h>
 #endif
+#if HAVE_SYS_USER_H
+#ifdef solaris2
+#define _KMEMUSER
+#endif
+#include <sys/user.h>
+#endif
 #if HAVE_SYS_PROC_H
 #include <sys/proc.h>
 #endif
 #if HAVE_KVM_H
 #include <kvm.h>
+#endif
+#if HAVE_SYS_SYSCTL_H
+#include <sys/sysctl.h>
 #endif
 #if HAVE_DIRENT_H
 #include <dirent.h>
@@ -63,15 +72,19 @@
 #ifndef linux
 static int LowProcIndex;
 #endif
-
-#ifndef linux
-#ifndef hpux10
-extern struct proc *proc_table;
+#ifdef hpux10
+struct pst_status *proc_table;
+struct pst_dynamic pst_dyn;
+#elif HAVE_KVM_GETPROCS
+struct kinfo_proc *proc_table;
+static kvm_t *kd;
+#elif defined(solaris2)
+int *proc_table;
+static kvm_t *kd;
 #else
-extern struct pst_status *proc_table;
+struct proc *proc_table;
 #endif
-static int current_proc_entry;
-#endif
+int current_proc_entry;
 
 void	init_hr_swrun( )
 {
@@ -160,7 +173,7 @@ header_hrswrunEntry(vp, name, length, exact, var_len, write_method)
         if (exact && (result == 0)) {
 	    LowPid = pid;
 #ifndef linux
-	    LowProcIndex = current_proc_entry;
+	    LowProcIndex = current_proc_entry-1;
 #endif
 DEBUGP (" saved\n");
 	    /* Save process status information */
@@ -170,7 +183,7 @@ DEBUGP (" saved\n");
 		( LowPid == -1 || pid < LowPid )) {
 	    LowPid = pid;
 #ifndef linux
-	    LowProcIndex = current_proc_entry;
+	    LowProcIndex = current_proc_entry-1;
 #endif
 	    /* Save process status information */
 DEBUGP (" saved");
@@ -214,13 +227,21 @@ var_hrswrun(vp, name, length, exact, var_len, write_method)
     static char string[100];
 #ifdef HAVE_SYS_PSTAT_H
     struct pst_status proc_buf;
+#elif defined(solaris2)
+    static struct proc *proc_buf;
+#endif
+#if HAVE_KVM_GETPROCS
+    char **argv;
 #endif
 #ifdef linux
     FILE *fp;
     char buf[256];
     int i;
 #endif
-    char *cp;
+    char *cp, *cp1;
+    static time_t when = 0;
+    time_t now;
+    static int oldpid = -1;
 
     if ( vp->magic == HRSWRUN_OSINDEX ) {
         if (header_hrswrun(vp, name, length, exact, var_len, write_method) == MATCH_FAILED )
@@ -235,9 +256,18 @@ var_hrswrun(vp, name, length, exact, var_len, write_method)
 
 #ifdef HAVE_SYS_PSTAT_H
     if (pstat_getproc( &proc_buf, sizeof(struct pst_status), 0, pid ) == -1)
-	    return NULL;
+	return NULL;
+#elif defined(solaris2)
+    time(&now);
+    if (pid == oldpid) {
+	if (now != when) oldpid = -1;
+    }
+    if (oldpid != pid) {
+	if ((proc_buf = kvm_getproc(kd, pid)) == NULL) return NULL;
+	oldpid = pid;
+	when = now;
+    }
 #endif
-        
 
     switch (vp->magic){
 	case HRSWRUN_OSINDEX:
@@ -253,10 +283,13 @@ var_hrswrun(vp, name, length, exact, var_len, write_method)
 	    cp = strchr( string, ' ');
 	    if ( cp != NULL )
 		*cp = '\0';
-#else
-#ifdef linux
+#elif defined(solaris2)
+	    strcpy(string, proc_buf->p_user.u_comm);
+#elif HAVE_KVM_GETPROCS
+            strcpy(string, proc_table[LowProcIndex].kp_proc.p_comm);
+#elif defined(linux)
 	    sprintf( string, "/proc/%d/status", pid );
-	    fp = fopen( string, "r");
+	    if ((fp = fopen( string, "r")) == NULL) return NULL;
 	    fgets( buf, 100, fp );	/* Name: process name */
 	    cp = buf;
 	    while ( *cp != ':' )
@@ -268,7 +301,6 @@ var_hrswrun(vp, name, length, exact, var_len, write_method)
             fclose(fp);
 #else
 	    sprintf(string, "process name");
-#endif
 #endif
 	    *var_len = strlen(string);
 	    return (u_char *) string;
@@ -282,16 +314,21 @@ var_hrswrun(vp, name, length, exact, var_len, write_method)
 	    cp = strchr( string, ' ');
 	    if ( cp != NULL )
 		*cp = '\0';
-#else
-#ifdef linux
+#elif defined(solaris2)
+	    cp = proc_buf->p_user.u_psargs;
+	    cp1 = string;
+	    while (*cp && *cp != ' ') *cp1++ = *cp++;
+	    *cp1 = 0;
+#elif HAVE_KVM_GETPROCS
+            strcpy(string, proc_table[LowProcIndex].kp_proc.p_comm);
+#elif defined(linux)
 	    sprintf( string, "/proc/%d/cmdline", pid );
-	    fp = fopen( string, "r");
+	    if ((fp = fopen( string, "r")) == NULL) return NULL;
 	    fgets( buf, 100, fp );	/* argv[0] '\0' argv[1] '\0' .... */
 	    strcpy( string, buf );
             fclose(fp);
 #else
 	    sprintf(string, "/bin/wombat");
-#endif
 #endif
 	    *var_len = strlen(string);
 	    return (u_char *) string;
@@ -304,11 +341,22 @@ var_hrswrun(vp, name, length, exact, var_len, write_method)
 	    }
 	    else
 		string[0] = '\0';
-#else
-#ifdef linux
+#elif defined(solaris2)
+	    cp = proc_buf->p_user.u_psargs;
+	    while (*cp && *cp != ' ') cp++;
+	    if (*cp == ' ') cp++;
+	    strcpy (string, cp);
+#elif HAVE_KVM_GETPROCS
+	    string[0] = 0;
+	    argv = kvm_getargv(kd, proc_table+LowProcIndex, sizeof(string));
+	    while (argv && *argv) {
+		strcat(string, *argv);
+		argv++;
+	    }
+#elif defined(linux)
 	    sprintf( string, "/proc/%d/cmdline", pid );
-	    fp = fopen( string, "r");
-	    memset( buf,(0), 100 );
+	    if ((fp = fopen( string, "r")) == NULL) return NULL;
+	    memset( buf, 0, 100 );
 	    fgets( buf, 100, fp );   /* argv[0] '\0' argv[1] '\0' .... */
 
 		/* Skip over argv[0] */
@@ -333,7 +381,6 @@ var_hrswrun(vp, name, length, exact, var_len, write_method)
             fclose(fp);
 #else
 	    sprintf(string, "-h -q -v");
-#endif
 #endif
 	    *var_len = strlen(string);
 	    return (u_char *) string;
@@ -366,7 +413,13 @@ var_hrswrun(vp, name, length, exact, var_len, write_method)
 			break;
 	    }
 #else
+#if HAVE_KVM_GETPROCS
+	    switch ( proc_table[LowProcIndex].kp_proc.p_stat ) {
+#elif defined(solaris2)
+	    switch ( proc_buf->p_stat ) {
+#else
 	    switch ( proc_table[LowProcIndex].p_stat ) {
+#endif
 		case SSTOP:
 	    		long_return = 3;	/* notRunnable */
 			break;
@@ -392,7 +445,7 @@ var_hrswrun(vp, name, length, exact, var_len, write_method)
 #endif
 #else
 	    sprintf( string, "/proc/%d/stat", pid );
-	    fp = fopen( string, "r");
+	    if ((fp = fopen( string, "r")) == NULL) return NULL;
 	    fgets( buf, 250, fp );
 	    cp = buf;
 	    for ( i = 0 ; i < 2 ; ++i ) {	/* skip two fields */
@@ -424,23 +477,19 @@ var_hrswrun(vp, name, length, exact, var_len, write_method)
 	case HRSWRUNPERF_CPU:
 #ifdef HAVE_SYS_PSTAT_H
 	    long_return = proc_buf.pst_cptickstotal;
-#else
-#ifndef linux
 				/*
 				 * Not convinced this is right, but....
 				 */
-#ifdef solaris2
-	    long_return = proc_table[LowProcIndex].p_utime*100 +
-	    		  proc_table[LowProcIndex].p_stime*100;
-#else
-	    long_return = proc_table[LowProcIndex].p_utime.tv_sec*100 +
-			  proc_table[LowProcIndex].p_utime.tv_usec/10000 +
-	    		  proc_table[LowProcIndex].p_stime.tv_sec*100 +
-			  proc_table[LowProcIndex].p_stime.tv_usec/10000;
-#endif
-#else
+#elif defined(solaris2)
+	    long_return = proc_buf->p_utime*100 +
+	    		  proc_buf->p_stime*100;
+#elif HAVE_KVM_GETPROCS
+	    long_return = proc_table[LowProcIndex].kp_proc.p_uticks +
+	    		  proc_table[LowProcIndex].kp_proc.p_sticks +
+	    		  proc_table[LowProcIndex].kp_proc.p_iticks;
+#elif defined(linux)
 	    sprintf( string, "/proc/%d/stat", pid );
-	    fp = fopen( string, "r");
+	    if ((fp = fopen( string, "r")) == NULL) return NULL;
 	    fgets( buf, 250, fp );
 	    cp = buf;
 	    for ( i = 0 ; i < 13 ; ++i ) {	/* skip 13 fields */
@@ -456,16 +505,23 @@ var_hrswrun(vp, name, length, exact, var_len, write_method)
 	    ++cp;
 	    long_return += atoi( cp );		/* + stime */
             fclose(fp);
-#endif
+#else
+	    long_return = proc_table[LowProcIndex].p_utime.tv_sec*100 +
+			  proc_table[LowProcIndex].p_utime.tv_usec/10000 +
+	    		  proc_table[LowProcIndex].p_stime.tv_sec*100 +
+			  proc_table[LowProcIndex].p_stime.tv_usec/10000;
 #endif
 	    return (u_char *)&long_return;
 	case HRSWRUNPERF_MEM:
 #ifdef HAVE_SYS_PSTAT_H
 	    long_return = (proc_buf.pst_rssize << PGSHIFT)/1024;
-#else
-#ifdef linux
+#elif defined(solaris2)
+	    long_return = proc_buf->p_swrss;
+#elif HAVE_KVM_GETPROCS
+	    long_return = proc_table[LowProcIndex].kp_eproc.e_xrssize;
+#elif defined(linux)
 	    sprintf( string, "/proc/%d/stat", pid );
-	    fp = fopen( string, "r");
+	    if ((fp = fopen( string, "r")) == NULL) return NULL;
 	    fgets( buf, 250, fp );
 	    cp = buf;
 	    for ( i = 0 ; i < 23 ; ++i ) {	/* skip 23 fields */
@@ -477,7 +533,6 @@ var_hrswrun(vp, name, length, exact, var_len, write_method)
             fclose(fp);
 #else
 	    long_return = 16*1024;	/* XXX - 16M! */
-#endif
 #endif
 	    return (u_char *)&long_return;
 	default:
@@ -495,52 +550,73 @@ var_hrswrun(vp, name, length, exact, var_len, write_method)
 
 #ifndef linux
 static int nproc;
-#ifndef hpux10
-struct proc *proc_table;
-#else
-struct pst_status *proc_table;
-struct pst_dynamic pst_dyn;
-#endif
 
 void
 Init_HR_SWRun __P((void))
 {
-    int proc_table_base;
     int bytes;
+    static time_t iwhen = 0;
+    time_t now;
+
+    time(&now);
+    if (now == iwhen) {
+	current_proc_entry = 0;
+	return;
+    }
+    iwhen = now;
 
 #if defined(hpux10)
     pstat_getdynamic( &pst_dyn, sizeof( struct pst_dynamic ),
 			1, 0 );
     nproc = pst_dyn.psd_activeprocs ;
     bytes = nproc*sizeof(struct pst_status);
-#elif defined(solaris2)
-    auto_nlist(NPROC_SYMBOL, (char *)&nproc, sizeof(int));
-    bytes = nproc*sizeof(struct proc);
-#else
-    auto_nlist(NPROC_SYMBOL, (char *)&nproc, sizeof(int));
-    bytes = nproc*sizeof(struct proc);
-#endif
-    if ((proc_table=(struct pst_status *) malloc(bytes)) == NULL ) {
+    if ((proc_table=(struct pst_status *) realloc(proc_table, bytes)) == NULL ) {
 	current_proc_entry = nproc+1;
 	return;
     }
+#elif defined(solaris2)
+    auto_nlist(NPROC_SYMBOL, (char *)&nproc, sizeof(int));
+    bytes = nproc*sizeof(int);
+    if ((proc_table=(int *) realloc(proc_table, bytes)) == NULL ) {
+	current_proc_entry = nproc+1;
+	return;
+    }
+#elif HAVE_KVM_GETPROCS
+#else
+    auto_nlist(NPROC_SYMBOL, (char *)&nproc, sizeof(int));
+    bytes = nproc*sizeof(struct proc);
+    if ((proc_table=(struct proc *) realloc(proc_table, bytes)) == NULL ) {
+	current_proc_entry = nproc+1;
+	return;
+    }
+#endif
 
 #if defined(hpux10)
     pstat_getproc( proc_table, sizeof( struct pst_status ),
 			nproc, 0 );
 #elif defined(solaris2)
-    {   struct proc *pp;
-	kvm_t *kd;
-	kd = kvm_open(NULL, NULL, NULL, O_RDONLY, "oops");
+    {
+	DIR *f;
+	struct dirent *dp;
+	if (kd == NULL)
+	    kd = kvm_open(NULL, NULL, NULL, O_RDONLY, "hr_swrun");
+	f = opendir("/proc");
 	current_proc_entry = 0;
-	kvm_setproc(kd);
-	while ((pp = kvm_nextproc(kd)) != NULL && current_proc_entry < nproc)
-	    proc_table[current_proc_entry++] = *pp;
-	kvm_close(kd);
+	while ((dp = readdir(f)) != NULL && current_proc_entry < nproc)
+	    if (dp->d_name[0] != '.')
+		proc_table[current_proc_entry++] = atoi(dp->d_name);
+	closedir(f);
+    }
+#elif HAVE_KVM_GETPROCS
+    {
+	kd = kvm_open(NULL, NULL, NULL, O_RDONLY, "kvm_getprocs");
+	proc_table = kvm_getprocs(kd, KERN_PROC_ALL, 0, &nproc);
     }
 #else
-    auto_nlist(PROC_SYMBOL, (char *)&proc_table_base, sizeof(proc_table_base));
-    klookup( proc_table_base, (char *)proc_table, bytes);
+    {   int proc_table_base;
+        auto_nlist(PROC_SYMBOL, (char *)&proc_table_base, sizeof(proc_table_base));
+        klookup( proc_table_base, (char *)proc_table, bytes);
+    }
 #endif
     current_proc_entry = 0;
 }
@@ -549,24 +625,28 @@ int
 Get_Next_HR_SWRun __P((void))
 {
     while ( current_proc_entry < nproc ) {
-#ifndef hpux10
+#ifdef hpux10
+	return proc_table[current_proc_entry++].pst_pid;
+#elif defined(solaris2)
+	return proc_table[current_proc_entry++];
+#elif HAVE_KVM_GETPROCS
+	if ( proc_table[current_proc_entry].kp_proc.p_stat != 0 )
+	    return proc_table[current_proc_entry++].kp_proc.p_pid;
+#else
 	if ( proc_table[current_proc_entry].p_stat != 0 )
 	    return proc_table[current_proc_entry++].p_pid;
 	else
 	    ++current_proc_entry;
-#else
-	    return proc_table[current_proc_entry++].pst_pid;
 #endif
 
     }
     End_HR_SWRun();
     return -1;
 }
-	
+
 void
 End_HR_SWRun __P((void))
 {
-    free(proc_table);
     current_proc_entry = nproc+1;
 }
 
@@ -595,13 +675,13 @@ Get_Next_HR_SWRun __P((void))
    pid = atoi(procentry_p->d_name);
    if ( pid == 0 )
 	return( Get_Next_HR_SWRun());
-   return -1;
+   return pid;
 }
 
 void
 End_HR_SWRun __P((void))
 {
-   closedir( procdir );
+   if (procdir) closedir( procdir );
    procdir = NULL;
 }
 
@@ -615,7 +695,7 @@ int count_processes  __P((void))
     int total=0;
 
     Init_HR_SWRun();
-#ifdef hpux10
+#if defined(hpux10) || HAVE_KVM_GETPROCS || defined(solaris2)
     total = nproc;
 #else
 #ifndef linux

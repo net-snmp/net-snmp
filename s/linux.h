@@ -1,4 +1,4 @@
-#include "generic.h"
+#include "sysv.h"
 
 #define DONT_USE_NLIST
 

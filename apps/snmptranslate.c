@@ -108,6 +108,11 @@ main(argc, argv)
 		break;
 	      case 's':
 		snmp_set_suffix_only(1);
+		tosymbolic = 1;
+		break;
+	      case 'S':
+		snmp_set_suffix_only(2);
+		tosymbolic = 1;
 		break;
 	      default:
 		fprintf(stderr,"invalid option: -%c\n", argv[arg][1]);
@@ -120,7 +125,7 @@ main(argc, argv)
     
     if (current_name == NULL && !print){
       fprintf(stderr,
-              "usage: snmptranslate [-n] [-d] [-R] [-w|-W] [-f|-s] [-p] objectID\n");
+              "usage: snmptranslate [-n] [-d] [-R] [-w|-W] [-f|-s|-S] [-p] objectID\n");
       exit(1);
     }
     
@@ -132,12 +137,13 @@ main(argc, argv)
     name_length = MAX_NAME_LEN;
     if (random_access){
 	if (!get_node(current_name, name, &name_length)){
-	    fprintf(stderr, "Unknown object descriptor %s\n", current_name);
+	    fprintf(stderr, "Unknown object identifier: %s\n", current_name);
 	    exit(2);
 	}
     } else {
 	if (!read_objid(current_name, name, &name_length)){
 	    fprintf(stderr, "Invalid object identifier: %s\n", current_name);
+	    exit(2);
 	}
     }
     if (tosymbolic){

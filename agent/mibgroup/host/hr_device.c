@@ -204,7 +204,7 @@ var_hrdevice(vp, name, length, exact, var_len, write_method)
 	case HRDEV_TYPE:
 	    device_type_id[device_type_len-1] = type;
             *var_len = sizeof(device_type_id);
-	    return (u_char *)&device_type_id;
+	    return (u_char *)device_type_id;
 	case HRDEV_DESCR:
 	    if ( device_descr[ type ] != NULL )
         	strcpy(string, ((*device_descr[type])(dev_idx)) );

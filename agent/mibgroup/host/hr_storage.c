@@ -82,6 +82,13 @@ extern struct mnttab *HRFS_entry;
 #define HRFS_mount	mnt_mountp
 #define HRFS_statfs	statvfs
 
+#elif defined(HAVE_GETFSSTAT)
+
+extern struct statfs *HRFS_entry;
+extern int fscount;
+#define HRFS_statfs	statfs
+#define HRFS_mount	f_mntonname
+
 #else
 
 extern struct mntent *HRFS_entry;
@@ -104,9 +111,11 @@ int linux_mem __P((int, int));
 
 void	init_hr_storeage __P((void))
 {
-  auto_nlist(PHYSMEM_SYMBOL,0,0);
-  auto_nlist(TOTAL_MEMORY_SYMBOL,0,0);
-  auto_nlist(MBSTAT_SYMBOL,0,0);
+    auto_nlist(PHYSMEM_SYMBOL,0,0);
+#ifdef TOTAL_MEMORY_SYMBOL
+    auto_nlist(TOTAL_MEMORY_SYMBOL,0,0);
+#endif
+    auto_nlist(MBSTAT_SYMBOL,0,0);
 }
 
 #define MATCH_FAILED	-1
@@ -242,7 +251,9 @@ var_hrstore(vp, name, length, exact, var_len, write_method)
 #ifndef linux
     int physmem;
 #ifndef solaris2
+#ifdef TOTAL_MEMORY_SYMBOL
     struct vmtotal memory_totals;
+#endif
     struct mbstat  mbstat;
 #endif
 #else
@@ -272,7 +283,9 @@ var_hrstore(vp, name, length, exact, var_len, write_method)
 	else switch ( store_idx ) {
 		case HRS_TYPE_MEM:
 		case HRS_TYPE_SWAP:
+#ifdef TOTAL_MEMORY_SYMBOL
 			auto_nlist(TOTAL_MEMORY_SYMBOL, (char *)&memory_totals, sizeof (struct vmtotal));
+#endif
 			break;
 		case HRS_TYPE_MBUF:
 			auto_nlist(MBSTAT_SYMBOL, (char *)&mbstat, sizeof (struct mbstat));
@@ -290,6 +303,10 @@ var_hrstore(vp, name, length, exact, var_len, write_method)
 #ifndef linux
 #ifdef PGSHIFT
 	    long_return = physmem << PGSHIFT;
+#elif defined(PAGE_SHIFT)
+	    long_return = physmem << PAGE_SHIFT;
+#elif defined(PAGE_SIZE)
+	    long_return = physmem * PAGE_SIZE;
 #else
 	    long_return = physmem * PAGESIZE;
 #endif
@@ -361,12 +378,20 @@ var_hrstore(vp, name, length, exact, var_len, write_method)
 		long_return = stat_buf.f_blocks;
 	    else switch ( store_idx ) {
 #if !defined(linux) && !defined(solaris2)
+#ifdef TOTAL_MEMORY_SYMBOL
 		case HRS_TYPE_MEM:
 			long_return = memory_totals.t_rm;
 			break;
 		case HRS_TYPE_SWAP:
 			long_return = memory_totals.t_vm;
 			break;
+#else
+		case HRS_TYPE_MEM:
+			long_return = physmem * PAGE_SIZE / 1024;
+			break;
+		case HRS_TYPE_SWAP:
+			break;
+#endif
 		case HRS_TYPE_MBUF:
 			long_return = mbstat.m_mbufs;
 			break;
@@ -388,12 +413,14 @@ var_hrstore(vp, name, length, exact, var_len, write_method)
 		long_return = (stat_buf.f_blocks - stat_buf.f_bfree);
 	    else switch ( store_idx ) {
 #if !defined(linux) && !defined(solaris2)
+#ifdef TOTAL_MEMORY_SYMBOL
 		case HRS_TYPE_MEM:
 			long_return = memory_totals.t_arm;
 			break;
 		case HRS_TYPE_SWAP:
 			long_return = memory_totals.t_avm;
 			break;
+#endif
 		case HRS_TYPE_MBUF:
 			long_return = mbstat.m_clusters - mbstat.m_clfree;	/* unlikely, but... */
 			break;
@@ -456,6 +483,7 @@ int
 Get_Next_HR_Store()
 {
 		/* File-based storage */
+    long_return = -1;
     if ( FS_storage == 1 ) {
 	HRS_index = Get_Next_HR_FileSys();
 

@@ -1260,6 +1260,9 @@ RTENTRY **r1, **r2;
 #include <sys/queue.h>
 #include <sys/socket.h>
 #include <sys/sysctl.h>
+#if HAVE_SYS_TIME_H
+#include <sys/time.h>
+#endif
 
 #include <net/if_dl.h>
 #include <net/route.h>
@@ -1436,6 +1439,7 @@ var_ipRouteEntry(vp, name, length, exact, var_len, write_method)
 	static int saveNameLen, saveExact;
 	static oid saveName[14], Current[14];
 
+#if 0
 	/*
 	 *	OPTIMIZATION:
 	 *
@@ -1452,9 +1456,12 @@ var_ipRouteEntry(vp, name, length, exact, var_len, write_method)
 	} else {
 		Save_Valid = 0;
 	}
+#else
+	Save_Valid = 0;
+#endif
 
 	if (Save_Valid) {
-		register int temp = name[9]; /* Fix up 'lowest' found entry */
+		int temp = name[9];
 		memcpy(name, Current, 14 * sizeof(oid));
 		name[9] = temp;
 		*length = 14;
@@ -1467,17 +1474,20 @@ var_ipRouteEntry(vp, name, length, exact, var_len, write_method)
 
 		suck_krt(0);
 
-		op = Current + 10;
 		for (rt = rthead.tqh_first; rt; rt = rt->link.tqe_next) {
-			memcpy(op, &rt->dest, 4);
-
+			op = Current + 10;
+			cp = (u_char *)&rt->dest;
+			*op++ = *cp++;
+			*op++ = *cp++;
+			*op++ = *cp++;
+			*op++ = *cp++;
 			result = compare(name, *length, Current, 14);
 			if ((exact && (result == 0))
 			    || (!exact && (result < 0)))
 				break;
 		}
-		if (rt == 0)
-			return 0;
+		if (rt == NULL)
+			return NULL;
 
 		/*
 		 *  Save in the 'cache'

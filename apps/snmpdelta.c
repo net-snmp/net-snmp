@@ -286,6 +286,7 @@ char **argv;
   int period = 1;
   int deltat = 0, timestamp = 0, fileout = 0, dosum = 0, printmax = 0;
   int keepSeconds = 0, peaks = 0;
+  int tableForm = 0;
   time_t last_time = 0;
   time_t this_time;
   time_t delta_time;
@@ -349,6 +350,9 @@ char **argv;
       case 'k':
 	keepSeconds = 1;
 	break;
+      case 'T':
+	tableForm = 1;
+	break;
       default:
 	fprintf(stderr, "Invalid option: -%c\n", argv[arg][1]);
 	usage();
@@ -381,6 +385,9 @@ char **argv;
     exit(1);
   }
     
+  if (tableForm && timestamp) {
+    printf("%s", gateway);
+  }
   for(count = 0; count < current_name; count++){
     vip = varinfo + count;
     if (vip->name){
@@ -392,6 +399,7 @@ char **argv;
 	exit(1);
       }
       sprint_descriptor(vip->descriptor, vip);
+      if (tableForm) printf("\t%s", vip->descriptor);
     } else {
       vip->oidlen = 0;
       strcpy(vip->descriptor, SumFile);
@@ -461,7 +469,7 @@ char **argv;
 	  this_time = 1;
 	}
 
-	for(count = begin; count < end; count++){
+	for(count = begin; count < end; count++) {
 	  vip = varinfo + count;
 
 	  if (vip->oidlen){
@@ -487,11 +495,17 @@ char **argv;
 	  if (vip->oidlen)
 	    sum += value;
 
-	  sprintf(outstr, "%s %s", timestring, vip->descriptor);
+	  if (tableForm) {
+	    if (count == begin) sprintf(outstr, "%s", timestring+1);
+	    else outstr[0] = 0;
+	  }
+	  else
+	    sprintf(outstr, "%s %s", timestring, vip->descriptor);
 
-	  if (deltat){
+	  if (deltat || tableForm){
 	    printvalue = ((float)value * 100) / delta_time;
-	    sprintf(valueStr, " /sec: %.2f", printvalue);
+	    if (tableForm) sprintf(valueStr, "\t%.2f", printvalue);
+	    else sprintf(valueStr, " /sec: %.2f", printvalue);
 	  } else {
 	    printvalue = value;
 	    sprintf(valueStr, " /%d sec: %.0f",
@@ -546,11 +560,13 @@ char **argv;
 	      sprintf(filename, "%s-%s", gateway, vip->descriptor);
 	      log(filename, outstr + 1);
 	    } else {
-	      fprintf(stderr, "%s\n", outstr + 1);
+	      if (tableForm) printf("%s", outstr);
+	      else printf("%s\n", outstr + 1);
 	      fflush(stdout);
 	    }
 	  }
 	}
+	if (end == last_end && tableForm) printf("\n");
       } else {
 	if (response->errstat == SNMP_ERR_TOOBIG){
 	  if (response->errindex <= varbindsPerPacket

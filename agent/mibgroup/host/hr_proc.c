@@ -5,6 +5,10 @@
 
 #include <config.h>
 
+#if HAVE_STDLIB_H
+#include <stdlib.h>
+#endif
+
 #include "host_res.h"
 #include "hr_proc.h"
 #include "auto_nlist.h"
@@ -31,13 +35,11 @@ int header_hrproc __P((struct variable *,oid *, int *, int, int *, int (**write)
 
 void	init_hr_proc( )
 {
-    init_device[ HRDEV_PROC ] = &Init_HR_Proc;	
-    next_device[ HRDEV_PROC ] = &Get_Next_HR_Proc;
+    init_device[ HRDEV_PROC ] = Init_HR_Proc;	
+    next_device[ HRDEV_PROC ] = Get_Next_HR_Proc;
 #ifdef HRPROC_MONOTONICALLY_INCREASING
     dev_idx_inc[ HRDEV_PROC ] = 1;
 #endif
-
-    auto_nlist( LOADAVE_SYMBOL,0,0 );
 }
 
 #define MATCH_FAILED	-1
@@ -126,9 +128,7 @@ var_hrproc(vp, name, length, exact, var_len, write_method)
 #if defined(sun) || defined(__alpha)
   long   avenrun[3];
 #else
-#ifndef linux
   double avenrun[3];
-#endif
 #endif
  
 
@@ -136,9 +136,22 @@ var_hrproc(vp, name, length, exact, var_len, write_method)
     if ( proc_idx == MATCH_FAILED )
 	return NULL;
 
-#ifndef linux
+#ifdef linux
+  { FILE *in = fopen("/proc/loadavg", "r");
+    if (!in) {
+      fprintf (stderr, "snmpd: cannot open /proc/loadavg\n");
+      return NULL;
+    }
+    fscanf(in, "%lf %lf %lf", &avenrun[0], &avenrun[1], &avenrun[2]);
+    fclose(in);
+  }
+#elif HAVE_GETLOADAVG
+    getloadavg(avenrun, sizeof(avenrun)/sizeof(avenrun[0]));
+#elif defined(LOADAVE_SYMBOL)
     if (auto_nlist(LOADAVE_SYMBOL, (char*) avenrun, sizeof(avenrun)) == 0 )
 	return NULL;
+#else
+    return NULL;
 #endif
 
     switch (vp->magic){
@@ -164,13 +177,9 @@ var_hrproc(vp, name, length, exact, var_len, write_method)
 			 *
 			 * I'm also assuming a single processor
 			 */
-#ifndef linux
 	    long_return = avenrun[0] * 100;	/* 1 minute average */
 	    if ( long_return > 100 )
 		long_return=100;
-#else
-	    long_return=42;
-#endif
 	    return (u_char *)&long_return;
 	default:
 	    ERROR_MSG("");

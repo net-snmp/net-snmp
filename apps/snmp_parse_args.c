@@ -82,6 +82,9 @@ snmp_parse_args_descriptions(outf)
   fprintf(outf, "  -V\t\tdisplay version number.\n");
   fprintf(outf, "  -d\t\tdump input/output packets.\n");
   fprintf(outf, "  -q\t\tquick print output for easier parsing ability.\n");
+  fprintf(outf, "  -f\t\tprint full object identifiers on output.\n");
+  fprintf(outf, "  -s\t\tprint only last element of object identifiers.\n");
+  fprintf(outf, "  -S\t\tmodule id plus last element of object identifiers.\n");
   fprintf(outf, "  -R\t\tuse \"random access\" to the mib tree.\n");
   fprintf(outf, "  -D\t\tturn on debugging output.\n");
   fprintf(outf, "  -m <MIBS>\tuse MIBS list instead of the default mib list.\n");
@@ -164,6 +167,18 @@ snmp_parse_args(argc, argv, session)
         }
         break;
         
+      case 'f':
+	snmp_set_full_objid(1);
+	break;
+
+      case 's':
+	snmp_set_suffix_only(1);
+	break;
+
+      case 'S':
+	snmp_set_suffix_only(2);
+	break;
+
       case 'p':
         if (isdigit(argv[arg][2]))
           session->remote_port = atoi(&(argv[arg][2]));
@@ -256,11 +271,9 @@ snmp_parse_args(argc, argv, session)
       default:
         /* This should be removed to support options in clients that
            have more parameters than the defaults above! */
-        /*
         fprintf(stderr, "invalid option: -%c\n", argv[arg][1]);
         usage();
         exit(1);
-        */
         break;
     }
   }
