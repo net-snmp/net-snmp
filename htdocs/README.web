@@ -40,7 +40,7 @@ Updating Documentation / FAQ
 
  -cd (source dir)
  -make FAQ.html
- -local/add-header-footer.pl --section=documentation FAQ.html
+ -local/html-add-header-footer.pl --section=documentation FAQ.html
  -copy FAQ.html to \docs\
 
 
@@ -57,7 +57,7 @@ Updating Documentation / Man pages
  -make sedscript
  -cd (source dir)/man
  -make html
- -find . -name '*.html' | ../local/add-header-footer.pl --section=documentation --body --tidy
+ -find . -name '*.html' | ../local/html-add-header-footer.pl --section=documentation --body --tidy
  -cp *.html to web site /docs/man
 
 
@@ -66,7 +66,7 @@ Updating Documentation / MIBS
 
  -cd (source dir)/mibs
  -make htmldir
- -find html/. -name '*.html' | ../local/add-header-footer.pl --section=documentation --body
+ -find html/. -name '*.html' | ../local/html-add-header-footer.pl --section=documentation --body
  -cp html/*.html to web site /docs/mibs
  -cp *.txt to web site /docs/mibs
  -cp *.inc to web site /docs/mibs
@@ -77,7 +77,7 @@ Updating Development / API
 
  -cd (source dir)
  -make docs
- -find docs/html/. -name '*.html' | local/add-header-footer.pl --section=development --body --tidy
+ -find docs/html/. -name '*.html' | local/html-add-header-footer.pl --section=development --body --tidy
  -cp docs/html/*.html to web site /dev/agent
 
 
