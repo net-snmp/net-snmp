@@ -6488,7 +6488,7 @@ esac
 
 echo $ac_n "checking for net-snmp version number""... $ac_c" 1>&6
 echo "configure:6491: checking for net-snmp version number" >&5
-VERSION=`grep NetSnmpVersionInfo= $srcdir/snmplib/snmp_version.c | sed 's/";.*//;s/.*"//;s/pre/0./;'`
+VERSION=`grep NetSnmpVersionInfo.*= $srcdir/snmplib/snmp_version.c | sed 's/";.*//;s/.*"//;s/pre/0./;'`
 
 RELEASEVERSION=`echo $VERSION | sed 's/^\([0-9]\)\.\([0-9]\)/\1:\2:0/'`
 
