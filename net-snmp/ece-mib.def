@@ -1,8 +1,7 @@
-SNMP-WTEST DEFINITIONS ::= BEGIN
+SNMP-EXTENSIBLE DEFINITIONS ::= BEGIN
 
 --
---  Hewlett-Packard definitons for unix agents 
---  @(#) hp-unix $Date$ $Revision$
+--  Change as necessary
 --
 
 IMPORTS
@@ -15,16 +14,16 @@ IMPORTS
 	    FROM RFC1213-MIB;
 
 private	       OBJECT IDENTIFIER ::= { internet 4 }
-wesTests       OBJECT IDENTIFIER ::= { private 10 }
--- processes      OBJECT IDENTIFIER ::= { wesTests 1 }
--- pstat_-T       OBJECT IDENTIFIER ::= { wesTests 2 }
--- extensible     OBJECT IDENTIFIER ::= { wesTests 3 }
--- memory         OBJECT IDENTIFIER ::= { wesTests 4 }
--- lockd          OBJECT IDENTIFIER ::= { wesTests 5 }
--- disk           OBJECT IDENTIFIER ::= { wesTests 6 }
--- disk           OBJECT IDENTIFIER ::= { wesTests 7 }
--- version        OBJECT IDENTIFIER ::= { wesTests 100 }
-miscTests      OBJECT IDENTIFIER ::= { wesTests 9 }
+local          OBJECT IDENTIFIER ::= { private 10 }
+-- processes      OBJECT IDENTIFIER ::= { local 1 }
+-- pstat_-T       OBJECT IDENTIFIER ::= { local 2 }
+-- exec           OBJECT IDENTIFIER ::= { local 3 }
+-- memory         OBJECT IDENTIFIER ::= { local 4 }
+-- lockd          OBJECT IDENTIFIER ::= { local 5 }
+-- disk           OBJECT IDENTIFIER ::= { local 6 }
+-- load           OBJECT IDENTIFIER ::= { local 7 }
+-- version        OBJECT IDENTIFIER ::= { local 100 }
+-- miscTests      OBJECT IDENTIFIER ::= { local 9 }
 
 Processes OBJECT-TYPE
 	SYNTAX processes
@@ -33,7 +32,7 @@ Processes OBJECT-TYPE
 	DESCRIPTION
 		"A set of information on running DEC daemons."
 	INDEX { processIndex }
-	::= { wesTests 1 }
+	::= { local 1 }
 
 
 processes ::= SEQUENCE {
@@ -48,7 +47,7 @@ processes ::= SEQUENCE {
 }
 
 processIndex OBJECT-TYPE
-	SYNTAX INTEGER (SIZE (0..4294967295))
+	SYNTAX INTEGER
 	ACCESS read-only
 	STATUS mandatory
 	DESCRIPTION
@@ -124,7 +123,7 @@ Extensible OBJECT-TYPE
 	DESCRIPTION
 		"Extensible commands returning output and result codes."
 	INDEX { extensibleIndex }
-	::= { wesTests 3 }
+	::= { local 3 }
 
 extensible ::= SEQUENCE {
    extensibleIndex   INTEGER,
@@ -136,7 +135,7 @@ extensible ::= SEQUENCE {
 }
 
 extensibleIndex OBJECT-TYPE
-	SYNTAX INTEGER (SIZE (0..4294967295))
+	SYNTAX INTEGER
 	ACCESS read-only
 	STATUS mandatory
 	DESCRIPTION
@@ -189,7 +188,7 @@ Memory OBJECT-TYPE
 	STATUS mandatory
 	DESCRIPTION
 		"Miscellanous stuff -- memory."
-	::= { wesTests 4 }
+	::= { local 4 }
 
 memory ::= SEQUENCE {
    memIndex        INTEGER,
@@ -223,7 +222,7 @@ memErrorName OBJECT-TYPE
      ::= { Memory 2 } 
 
 memTotalSwap OBJECT-TYPE
-	SYNTAX INTEGER (SIZE (0..4294967295))
+	SYNTAX INTEGER
 	ACCESS read-only
 	STATUS mandatory
 	DESCRIPTION
@@ -231,7 +230,7 @@ memTotalSwap OBJECT-TYPE
 	::= { Memory 3 }
 
 memAvailSwap OBJECT-TYPE
-	SYNTAX INTEGER (SIZE (0..4294967295))
+	SYNTAX INTEGER
 	ACCESS read-only
 	STATUS mandatory
 	DESCRIPTION
@@ -239,7 +238,7 @@ memAvailSwap OBJECT-TYPE
 	::= { Memory 4 }
 
 memTotalReal OBJECT-TYPE
-	SYNTAX INTEGER (SIZE (0..4294967295))
+	SYNTAX INTEGER
 	ACCESS read-only
 	STATUS mandatory
 	DESCRIPTION
@@ -247,7 +246,7 @@ memTotalReal OBJECT-TYPE
 	::= { Memory 5 }
 
 memAvailReal OBJECT-TYPE
-	SYNTAX INTEGER (SIZE (0..4294967295))
+	SYNTAX INTEGER
 	ACCESS read-only
 	STATUS mandatory
 	DESCRIPTION
@@ -255,7 +254,7 @@ memAvailReal OBJECT-TYPE
 	::= { Memory 6 }
 
 memTotalSwapTXT OBJECT-TYPE
-	SYNTAX INTEGER (SIZE (0..4294967295))
+	SYNTAX INTEGER
 	ACCESS read-only
 	STATUS mandatory
 	DESCRIPTION
@@ -263,7 +262,7 @@ memTotalSwapTXT OBJECT-TYPE
 	::= { Memory 7 }
 
 memAvailSwapTXT OBJECT-TYPE
-	SYNTAX INTEGER (SIZE (0..4294967295))
+	SYNTAX INTEGER
 	ACCESS read-only
 	STATUS mandatory
 	DESCRIPTION
@@ -271,7 +270,7 @@ memAvailSwapTXT OBJECT-TYPE
 	::= { Memory 8 }
 
 memTotalRealTXT OBJECT-TYPE
-	SYNTAX INTEGER (SIZE (0..4294967295))
+	SYNTAX INTEGER
 	ACCESS read-only
 	STATUS mandatory
 	DESCRIPTION
@@ -279,7 +278,7 @@ memTotalRealTXT OBJECT-TYPE
 	::= { Memory 9 }
 
 memAvailRealTXT OBJECT-TYPE
-	SYNTAX INTEGER (SIZE (0..4294967295))
+	SYNTAX INTEGER
 	ACCESS read-only
 	STATUS mandatory
 	DESCRIPTION
@@ -287,7 +286,7 @@ memAvailRealTXT OBJECT-TYPE
 	::= { Memory 10 }
 
 memTotalFree OBJECT-TYPE
-	SYNTAX INTEGER (SIZE (0..4294967295))
+	SYNTAX INTEGER
 	ACCESS read-only
 	STATUS mandatory
 	DESCRIPTION
@@ -295,7 +294,7 @@ memTotalFree OBJECT-TYPE
 	::= { Memory 11 }
 
 memMinimumSwap OBJECT-TYPE
-	SYNTAX INTEGER (SIZE (0..4294967295))
+	SYNTAX INTEGER
 	ACCESS read-only
 	STATUS mandatory
 	DESCRIPTION
@@ -304,7 +303,7 @@ memMinimumSwap OBJECT-TYPE
 	::= { Memory 12 }
 
 memSwapError OBJECT-TYPE
-	SYNTAX INTEGER (SIZE (0..4294967295))
+	SYNTAX INTEGER
 	ACCESS read-only
 	STATUS mandatory
 	DESCRIPTION
@@ -326,7 +325,7 @@ Lockd OBJECT-TYPE
 	DESCRIPTION
 		"Tests the functionality of the rpc.lockd/rpc.statd pair."
 	INDEX { lockdIndex }
-	::= { wesTests 5 }
+	::= { local 5 }
 
 lockd ::= SEQUENCE {
    lockdIndex   INTEGER,
@@ -335,7 +334,7 @@ lockd ::= SEQUENCE {
 }
 
 lockdIndex OBJECT-TYPE
-	SYNTAX INTEGER (SIZE (0..4294967295))
+	SYNTAX INTEGER
 	ACCESS read-only
 	STATUS mandatory
 	DESCRIPTION
@@ -365,7 +364,7 @@ Disk 	OBJECT-TYPE
 	DESCRIPTION
 		"Disk watching information."
 	INDEX { diskIndex }
-	::= { wesTests 6 }
+	::= { local 6 }
 
 disk ::= SEQUENCE {
    diskIndex   INTEGER,
@@ -381,7 +380,7 @@ disk ::= SEQUENCE {
 }
 
 diskIndex OBJECT-TYPE
-	SYNTAX INTEGER (SIZE (0..4294967295))
+	SYNTAX INTEGER
 	ACCESS read-only
 	STATUS mandatory
 	DESCRIPTION
@@ -467,7 +466,7 @@ Loadaves OBJECT-TYPE
 	DESCRIPTION
 		"Load average information."
 	INDEX { loadaveIndex }
-	::= { wesTests 7 }
+	::= { local 7 }
 
 
 loadaves ::= SEQUENCE {
@@ -480,7 +479,7 @@ loadaves ::= SEQUENCE {
 }
 
 loadaveIndex OBJECT-TYPE
-	SYNTAX INTEGER (SIZE (0..4294967295))
+	SYNTAX INTEGER
 	ACCESS read-only
 	STATUS mandatory
 	DESCRIPTION
@@ -535,7 +534,7 @@ Version	OBJECT-TYPE
 	DESCRIPTION
 		"ece-snmpd version info."
 	INDEX { versionIndex }
-	::= { wesTests 100 }
+	::= { local 100 }
 
 version ::= SEQUENCE {
    versionIndex   INTEGER,
