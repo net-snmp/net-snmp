@@ -31,6 +31,23 @@
 <pre>
 #include &lt;ucd-snmp/ucd-snmp-config.h&gt;
 #include &lt;ucd-snmp/ucd-snmp-includes.h&gt;
+#include <string.h>
+</pre>
+    <p>
+      Next, we'll set up some local definitions that you can toggle if
+      you want to use SNMPv3 or SNMPv1.  By default, we're setting up
+      for SNMPv3 here (which is more complex, so make sure you've read
+      about the <a href="../../commands/snmpv3.html"> SNMPv3 Options
+      </a> first.  If you don't want to deal with SNMPv3 for now,
+      turn the #define statement below to #undef.
+<pre>
+/* change the word "undef" to "define" to try the (insecure) SNMPv1 version */
+#define DEMO_USE_SNMP_VERSION_3
+
+#ifdef DEMO_USE_SNMP_VERSION_3
+#include "ucd-snmp/transform_oids.h"
+const char *our_v3_passphrase = "The UCD Demo Password";
+#endif
 </pre>
     <p>
       Next, we declare our main() routine and the variables we need:
@@ -81,28 +98,87 @@ main() {
       Next, we'll inialize a session that describes who we want to
       talk to, what version of SNMP we want to use, how to
       authenticate to it, etc.  A full definition of this session
-      can be found in the ucd-snmp/snmp_api.h header file.  We'll talk 
-      about using a SNMPv3 session later....
+      can be found in the ucd-snmp/snmp_api.h header file.
+    <p>
+      We've picked SNMPv3 by default above, which is a bit more complex to
+      understand so make sure you've read 
     </p>
     <pre>
-    /*
+     /*
      * Initialize a "session" that defines who we're going to talk to
      */
     snmp_sess_init( &session );                   /* set up defaults */
-    session.version = SNMP_VERSION_1;
     session.peername = "ucd-snmp.ucdavis.edu";
+
+    /* set up the authentication parameters for talking to the server */
+
+#ifdef DEMO_USE_SNMP_VERSION_3
+
+    /* Use SNMPv3 to talk to the experimental server */
+
+    /* set the SNMP version number */
+    session.version=SNMP_VERSION_3;
+        
+    /* set the SNMPv3 user name */
+    session.securityName = strdup("MD5User");
+    session.securityNameLen = strlen(session.securityName);
+
+    /* set the security level to authenticated, but not encrypted */
+    session.securityLevel = SNMP_SEC_LEVEL_AUTHNOPRIV;
+
+    /* set the authentication method to MD5 */
+    session.securityAuthProto = usmHMACMD5AuthProtocol;
+    session.securityAuthProtoLen = sizeof(usmHMACMD5AuthProtocol)/sizeof(oid);
+    session.securityAuthKeyLen = USM_AUTH_KU_LEN;
+
+    /* set the authentication key to a MD5 hashed version of our
+       passphrase "The UCD Demo Password" (which must be at least 8
+       characters long) */
+    if (generate_Ku(session.securityAuthProto,
+                    session.securityAuthProtoLen,
+                    (u_char *) our_v3_passphrase, strlen(our_v3_passphrase),
+                    session.securityAuthKey,
+                    &session.securityAuthKeyLen) != SNMPERR_SUCCESS) {
+        snmp_perror(argv[0]);
+        snmp_log(LOG_ERR,
+                 "Error generating Ku from authentication pass phrase. \n");
+        exit(1);
+    }
+    
+#else /* we'll use the insecure (but simplier) SNMPv1 */
+
+    /* set the SNMP version number */
+    session.version = SNMP_VERSION_1;
+
+    /* set the SNMPv1 community name used for authentication */
     session.community = "demopublic";
     session.community_len = strlen(session.community);
-    </pre>
+
+#endif /* SNMPv1 */
+   </pre>
     <p>
       After we have established the session, we then need to open it.
       Opening it returns a pointer to another session that we should
       use for all our future calls:
 <pre>
+    /* windows32 specific initialization (is a noop on unix) */
+    SOCK_STARTUP;
+
     /*
      * Open the session
      */
     ss = snmp_open(&session);                     /* establish the session */
+</pre>
+
+    <p>
+      If the session failed to open properly, print an error message
+      and exit:
+<pre>
+    if (!ss) {
+        snmp_perror("ack");
+        snmp_log(LOG_ERR, "something horrible happened!!!\n");
+        exit(2);
+    }
 </pre>
     <p>
       Next we create the PDU the we are going to send to the remote
@@ -129,9 +205,12 @@ main() {
       more types of OIDs.
 
     <pre>
+    read_objid(".1.3.6.1.2.1.1.1.0", anOID, &anOID_len);
+
+#if OTHER_METHODS
     get_node("sysDescr.0", anOID, &anOID_len);
-    /* Or: read_objid(".1.3.6.1.2.1.1.1.0", anOID, &anOID_len); */
-    /* Or: read_objid("system.sysDescr.0", anOID, &anOID_len); */
+    read_objid("system.sysDescr.0", anOID, &anOID_len);
+#endif
     </pre>
 
     <p>
@@ -182,8 +261,13 @@ main() {
       /* manipuate the information ourselves */
       for(vars = response->variables; vars; vars = vars->next_variable) {
         int count=1;
-        if (vars->type == ASN_OCTET_STR)
-          printf("value #%d is a string: %s\n", count++, vars->val.string);
+        if (vars->type == ASN_OCTET_STR) {
+	  char *sp = (char *)malloc(1 + vars->val_len);
+	  memcpy(sp, vars->val.string, vars->val_len);
+	  sp[vars->val_len] = '\0';
+          printf("value #%d is a string: %s\n", count++, sp);
+	  free(sp);
+	}
         else
           printf("value #%d is NOT a string! Ack!\n", count++);
       }
@@ -218,6 +302,10 @@ main() {
     if (response)
       snmp_free_pdu(response);
     snmp_close(ss);
+
+    /* windows32 specific cleanup (is a noop on unix) */
+    SOCK_CLEANUP;
+
 } /* main() */
     </pre>
     <p>
@@ -248,7 +336,7 @@ value #1 is a string: HP-UX ucd-snmp B.10.20 A 9000/715
     <address><a href="mailto:Wes Hardaker <wjhardaker@ucdavis.edu>"></a></address>
 <!-- Created: Fri Nov  5 12:09:03 PST 1999 -->
 <!-- hhmts start -->
-Last modified: Fri Aug 11 08:53:39 PDT 2000
+Last modified: Fri Jul 20 14:55:22 PDT 2001
 <!-- hhmts end -->
   </body>
 </html>

@@ -1,6 +1,15 @@
 #include <ucd-snmp/ucd-snmp-config.h>
 #include <ucd-snmp/ucd-snmp-includes.h>
 #include <ucd-snmp/system.h>   /* remove if included by previous header file */
+#include <string.h>
+
+/* change the word "undef" to "define" to try the (insecure) SNMPv1 version */
+#define DEMO_USE_SNMP_VERSION_3
+
+#ifdef DEMO_USE_SNMP_VERSION_3
+#include "ucd-snmp/transform_oids.h"
+const char *our_v3_passphrase = "The UCD Demo Password";
+#endif
 
 int main(int argc, char ** argv)
 {
@@ -23,10 +32,53 @@ int main(int argc, char ** argv)
      * Initialize a "session" that defines who we're going to talk to
      */
     snmp_sess_init( &session );                   /* set up defaults */
-    session.version = SNMP_VERSION_1;
     session.peername = "ucd-snmp.ucdavis.edu";
+
+    /* set up the authentication parameters for talking to the server */
+
+#ifdef DEMO_USE_SNMP_VERSION_3
+
+    /* Use SNMPv3 to talk to the experimental server */
+
+    /* set the SNMP version number */
+    session.version=SNMP_VERSION_3;
+        
+    /* set the SNMPv3 user name */
+    session.securityName = strdup("MD5User");
+    session.securityNameLen = strlen(session.securityName);
+
+    /* set the security level to authenticated, but not encrypted */
+    session.securityLevel = SNMP_SEC_LEVEL_AUTHNOPRIV;
+
+    /* set the authentication method to MD5 */
+    session.securityAuthProto = usmHMACMD5AuthProtocol;
+    session.securityAuthProtoLen = sizeof(usmHMACMD5AuthProtocol)/sizeof(oid);
+    session.securityAuthKeyLen = USM_AUTH_KU_LEN;
+
+    /* set the authentication key to a MD5 hashed version of our
+       passphrase "The UCD Demo Password" (which must be at least 8
+       characters long) */
+    if (generate_Ku(session.securityAuthProto,
+                    session.securityAuthProtoLen,
+                    (u_char *) our_v3_passphrase, strlen(our_v3_passphrase),
+                    session.securityAuthKey,
+                    &session.securityAuthKeyLen) != SNMPERR_SUCCESS) {
+        snmp_perror(argv[0]);
+        snmp_log(LOG_ERR,
+                 "Error generating Ku from authentication pass phrase. \n");
+        exit(1);
+    }
+    
+#else /* we'll use the insecure (but simplier) SNMPv1 */
+
+    /* set the SNMP version number */
+    session.version = SNMP_VERSION_1;
+
+    /* set the SNMPv1 community name used for authentication */
     session.community = "demopublic";
     session.community_len = strlen(session.community);
+
+#endif /* SNMPv1 */
 
     /*
      * Open the session
@@ -34,6 +86,12 @@ int main(int argc, char ** argv)
     SOCK_STARTUP;
     ss = snmp_open(&session);                     /* establish the session */
 
+    if (!ss) {
+        snmp_perror("ack");
+        snmp_log(LOG_ERR, "something horrible happened!!!\n");
+        exit(2);
+    }
+    
     /*
      * Create the PDU for the data for our request.
      *   1) We're going to GET the system.sysDescr.0 node.
@@ -43,7 +101,6 @@ int main(int argc, char ** argv)
 
 #if OTHER_METHODS
     get_node("sysDescr.0", anOID, &anOID_len);
-    read_objid(".1.3.6.1.2.1.1.1.0", anOID, &anOID_len);
     read_objid("system.sysDescr.0", anOID, &anOID_len);
 #endif
 
