@@ -25,7 +25,13 @@ After that, modify the configure.in and acconfig.h files as needed
 instead of modifying the config.h or configure files directly.  The
 Makefile will re-produce these files from the first two.
 
-Some examples:
+Worst case: Don't put in #ifdef architecture style statements.
+Rather, create a new define in the s/ and m/ system specific header
+files and use those defines to test against in the C code.  This
+should only be done for things that can't be checked using configure
+though.
+
+Some autoconf examples:
 
 --- HEADER FILES
 

@@ -1,6 +1,37 @@
 This file contains major changes in released revisions.  Please read
 the ChangeLog file for a more detailed listing of changes/bug fixes.
 
+*3.4*
+
+ Important:
+    - the UCD-SNMP specific mib structure changed.
+      - many of the table oids have changed location and have been renamed.
+    - the SNMPv3 access control module was implemented in the agent.
+      Therefore, the "community" snmpd.conf parameter no longer
+      exists.  See the snmpd.conf file for how to control access via
+      community names now.
+    - The header file #defines have changed.  You may have to compile
+      third party applications with -DCMU_COMPATIBLE (like perl-SNMP <= V1.7).
+
+ New:
+    - dynamic library support:  configure with --enable-shared.
+    - the beginnings of of Perl/Tk/SNMP mib browser (see local/tkmib).
+    - all applications support -R for random oid-name lookups.
+    - default mib list changes when you add or remove agent mib-groups.
+    - debugging in the agent can be turned on and off using snmpsets.
+    - a new mib module displays a list of all loaded mib modules.
+    - the internal structure of the agent's mib modules is now hierarchical.
+    - the agent looks for .conf files in both the lib/ and share/ directories.
+
+ Fixes:
+    - The code was run through purify for memory leaks and a few were found.
+    - snmptrap sends to the correct default port of 162 again.
+
+ Ports:
+    - irix 6.2 support improved.
+    - openbsd.
+    - the host resources mib compiles on Solaris.
+
 *3.3.1*
 
  New:
