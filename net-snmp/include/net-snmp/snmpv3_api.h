@@ -29,7 +29,9 @@
 #include <net-snmp/keytools.h>
 #include <net-snmp/scapi.h>
 #include <net-snmp/lcd_time.h>
+#ifdef USE_INTERNAL_MD5
 #include <net-snmp/md5.h>
+#endif
 
 #include <net-snmp/snmp_secmod.h>
 #include <net-snmp/snmpksm.h>

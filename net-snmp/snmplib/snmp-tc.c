@@ -31,9 +31,8 @@
 # endif
 #endif
 
-#include <net-snmp/snmp-tc.h>
-#include <net-snmp/asn1.h>
-#include <net-snmp/snmp.h>
+#include <net-snmp/types.h>	
+#include <net-snmp/snmp-tc.h>	/* for "internal" definitions */
 #include <net-snmp/snmp_api.h>
 
 u_char *

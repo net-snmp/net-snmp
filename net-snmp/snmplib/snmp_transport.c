@@ -12,6 +12,9 @@
 #include <stdlib.h>
 #endif
 
+#include <net-snmp/output_api.h>
+#include <net-snmp/utilities.h>
+
 #include <net-snmp/snmp_transport.h>
 #include <net-snmp/snmpUDPDomain.h>
 #ifdef SNMP_TRANSPORT_TCP_DOMAIN
@@ -33,9 +36,6 @@
 #include <net-snmp/snmpTCPIPv6Domain.h>
 #endif
 #include <net-snmp/snmp_api.h>
-#include <net-snmp/snmp_debug.h>
-#include <net-snmp/snmp_logging.h>
-#include <net-snmp/tools.h>
 
 
 /*  Our list of supported transport domains.  */

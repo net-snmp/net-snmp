@@ -48,20 +48,18 @@
 #include <krb5.h>
 #include <com_err.h>
   
+#include <net-snmp/output_api.h>
+#include <net-snmp/config_api.h>
+#include <net-snmp/utilities.h>
+
 #include <net-snmp/asn1.h>
 #include <net-snmp/snmp_api.h>
-#include <net-snmp/snmp_debug.h>
 #include <net-snmp/callback.h>
-#include <net-snmp/tools.h>
 #include <net-snmp/keytools.h>
-#include <net-snmp/snmp.h>
-#include <net-snmp/read_config.h>
 #include <net-snmp/snmpv3.h>
-#include <net-snmp/snmp-tc.h>
 #include <net-snmp/lcd_time.h>
 #include <net-snmp/scapi.h>
 #include <net-snmp/callback.h>
-#include <net-snmp/default_store.h>
 #include <net-snmp/snmp_secmod.h>
 #include <net-snmp/snmpksm.h>
 

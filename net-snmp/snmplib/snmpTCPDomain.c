@@ -28,8 +28,9 @@
 #include <fcntl.h>
 #endif
 
-#include <net-snmp/asn1.h>
-#include <net-snmp/snmp_debug.h>
+#include <net-snmp/types.h>	
+#include <net-snmp/output_api.h>
+
 #include <net-snmp/snmp_transport.h>
 #include <net-snmp/snmpUDPDomain.h>
 #include <net-snmp/snmpTCPDomain.h>
