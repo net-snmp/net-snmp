@@ -81,6 +81,10 @@ sub date_format {
     return $ret;
 }
 
+
+#
+# Graphing of historical data
+#
 if ((param('displaygraph') || param('dograph')) && param('table')) {
     my $host = param('host');
     my $group = param('group');
@@ -97,25 +101,33 @@ if ((param('displaygraph') || param('dograph')) && param('table')) {
 	$r->content_type("text/html");
 	$r->send_http_header();
 	print "<body bgcolor=\"#ffffff\">\n";
-	print "<h1>Select indexes to graph</h1>\n";
 	print "<form>\n";
-	print "<table>\n";
+	print "<table border=1><tr><td>\n";
 
-	my $handle = getcursor($dbh, "SELECT distinct(oidindex) FROM $table where host = '$host' order by oidindex");
+	print "<table>\n";
+	print "<tr align=top><th></th><th>Select indexes<br>to graph</th></tr>\n";
+
+	my $handle = getcursor($dbh, "SELECT distinct(oidindex) FROM $table where host = '$host'");
 	my @cols;
 	while (  $row = $handle->fetchrow_hashref ) {
 	    print "<tr><td>$row->{oidindex}</td><td><input type=checkbox value=1 name=graph_" . displaytable::to_unique_key($row->{'oidindex'}) . "></td></tr>\n";
 	}
 	print "</table>\n";
 
-	print "<h1>Select Columns to graph</h1>\n";
+	print "</td><td>\n";
+
 	print "<table>\n";
+	print "<tr align=top><th></th><th>Select Columns<br>to graph</th></tr>\n";
 	my $handle = getcursor($dbh, "SELECT * FROM $table limit 1");
 	my $row = $handle->fetchrow_hashref;
 	map { print "<tr><td>$_</td><td><input type=checkbox value=1 name=column_" . displaytable::to_unique_key($_) . "></td></tr>\n"; } keys(%$row);
 	print "</table>\n";
 
+	print "</td></tr></table>\n";
+
 	print "<br>Graph as a Rate: <input type=checkbox value=1 name=graph_as_rate><br>\n";
+	print "<br>Maximum Y Value: <input type=text value=inf name=max_y><br>\n";
+	print "<br>Minimum Y Value: <input type=text value=-inf name=min_y><br>\n";
 
 	print "<input type=hidden name=table value=\"$table\">\n";
 	print "<input type=hidden name=host value=\"$host\">\n";
@@ -166,38 +178,38 @@ if ((param('displaygraph') || param('dograph')) && param('table')) {
 #    print STDERR "graphing clause: $clause, columns: ", join(", ",@columns), "\n";
     my @args;
     push (@args, '-rate', '60') if (param('graph_as_rate'));
+    push (@args, '-max', param('max_y')) if (param('max_y') && param('max_y') =~ /^[-.\d]+$/);
+    push (@args, '-min', param('min_y')) if (param('min_y') && param('min_y') =~ /^[-.\d]+$/);
 
     displaygraph($dbh, $table,
 #		 '-xcol', "date_format(updated,'%m-%d-%y %h:%i')",
 		 '-xcol', "unix_timestamp(updated)",
 		 '-pngparms', [
 		     'x_labels_vertical', '1',
-		     'x_label_skip', 50,
-		     'title', $table,
+		     'x_tick_number', 6,
+		     'x_number_format', \&date_format,
 		     'y_label', 'Count/Min',
+		     'title', $table,
 #		     'y_min_value', 0,
-#		     'x_number_format', \&date_format,
-#		     'x_tick_number', 'auto',
 		 ],
 		 '-clauses', "$clause order by updated",
 		 @args,
-		 '-positive_only', 1,
-#		 '-clauses', 'where oidindex = 2 order by updated',
 		 '-columns', \@columns,
 		 '-indexes', ['oidindex']);
     return OK();
 }
 
-$r->content_type("text/html");
-$r->send_http_header();
-
 #===========================================================================
 # Start HTML.
 #===========================================================================
+$r->content_type("text/html");
+$r->send_http_header();
 print "<body bgcolor=\"#ffffff\">\n";
+print "<h1>UCD-SNMP Host Management</h1>\n";
+print "<hr>\n";
 
 #===========================================================================
-# Display mib related information
+# Display mib related data information
 #===========================================================================
 if (param('displayinfo')) {
     makemibtable(param('displayinfo'));
@@ -205,18 +217,18 @@ if (param('displayinfo')) {
 }
 
 #===========================================================================
-# Display a generic sql table of any kind.
+# Display a generic sql table of any kind (debugging).
 #===========================================================================
-if (my $disptable = param('displaytable')) {
-    if (param('editable') == 1) {
-	print "<form submit=dont>\n";
-	displaytable($disptable, -editable, 1);
-	print "</form>\n";
-    } else {
-	displaytable($disptable);
-    }
-    return Exit($dbh,  "");
-}
+# if (my $disptable = param('displaytable')) {
+#     if (param('editable') == 1) {
+# 	print "<form submit=dont>\n";
+# 	displaytable($disptable, -editable, 1);
+# 	print "</form>\n";
+#     } else {
+# 	displaytable($disptable);
+#     }
+#     return Exit($dbh,  "");
+# }
 
 #===========================================================================
 # Get host and group from CGI query.
@@ -230,10 +242,20 @@ my $group = param('group');
 #===========================================================================
 if (!defined($group)) {
     my @groups = getgroupsforuser($dbh, $remuser);
+    print "<title>ucd-snmp Group List</title>\n";
+    print "<h2>Host groupings you may access:</h2>\n";
+    if (!isexpert($user)) {
+	print "<ul>\n";
+	print "<li>Click on a group to operate or view the hosts in that group.\n";
+	print "<li>Click on a red status light below to list the problems found.\n";
+	print "</ul>\n";
+    }
+	
     if ($#groups > 0) {
 	displaytable($dbh, 'usergroups', 
 		     '-clauses', "where (user = '$remuser')",
 		     '-select', 'distinct groupname',
+		     '-notitle', 1,
 		     '-printonly', ['groupname'],
 		     '-datalink', sub { my $q = self_url();
 					my $key = shift;
@@ -246,7 +268,7 @@ if (!defined($group)) {
 			 my $q = self_url();
 			 my($dbh, $junk, $data) = @_;
 			 if (!defined($data)) {
-			     print "<td></td>";
+			     print "<th>Status</th>";
 			     return;
 			 }
 			 my ($cur, $row);
@@ -339,7 +361,8 @@ if (defined(param('setupuserprefssubmit')) &&
 # summarize problems in a group
 #===========================================================================
 if (defined(param('summarizegroup'))) {
-    print "<title>group summary: $group</title>\n";
+    print "<title>group problem summary: $group</title>\n";
+    print "<h2>The following is a list of problems in the group \"$group\":</h2>\n";
     summarizeerrors($dbh, "where groupname = '$group'");
     return Exit($dbh, $group);
 }
@@ -349,6 +372,7 @@ if (defined(param('summarizegroup'))) {
 #===========================================================================
 if (defined($host) && defined(param('summarizehost'))) {
     print "<title>host summary: $host</title>\n";
+    print "<h2>The following is a list of problems for the host \"$host\":</h2>\n";
     summarizeerrors($dbh, "where groupname = '$group' and host = '$host'");
     return Exit($dbh, $group);
 }
@@ -357,6 +381,14 @@ if (defined($host) && defined(param('summarizehost'))) {
 # display a list of hosts in a group
 #===========================================================================
 if (!defined($host)) {
+    print "<title>ucd-snmp Host $host</title>\n";
+    print "<h2>Hosts in the group \"$group\":</h2>\n";
+    if (!isexpert($user)) {
+	print "<ul>\n";
+	print "<li>Click on a hostname to operate on or view the information tables associated with that group.\n";
+	print "<li>Click on a red status light below to list the problems found in with a particular host.\n";
+	print "</ul>\n";
+    }
     displaytable($dbh, 'hostgroups', 
 		 '-notitle',0,
 		 '-clauses', "where (groupname = '$group')",
@@ -372,7 +404,7 @@ if (!defined($host)) {
 		     my $q = self_url();
 		     my($dbh, $junk, $data) = @_;
 		     if (!defined($data)) {
-			 print "<td></td>";
+			 print "<th>Status</th>";
 			 return;
 		     }
 		     if (checkhost($dbh, $group, $data->{'host'})) {
@@ -392,11 +424,20 @@ if (!defined($host)) {
 }
 
 if (param('setuphost')) {
+    print "<title>ucd-snmp history setup for host: $host</title>\n";
+    print "<h2>ucd-snmp history setup for the host: \"$host\"</h2>\n";
+    print "<p>Enter the number of days to keep the data for a given table for the host \"$host\":\n";
+    if (!isexpert($user)) {
+	print "<ul>\n";
+        print "<li>Numbers must be greater than or equal to 1 to enable history logging.\n";
+	print "</ul>\n";
+    }
     print "<form method=post><input type=hidden name=setuphost value=1><input type=hidden name=host value=\"$host\"><input type=hidden name=group value=\"$group\">\n";
     displaytable($dbh, 'hosttables',
     '-clauses',"where host = '$host' and groupname = '$group'",
     '-select','groupname, host, tablename, keephistory',
     '-selectorder', 1,
+    '-notitle', 1,
     '-editable', ['groupname','host','tablename'],
     '-CGI', $CGI::Q
     );
@@ -440,7 +481,7 @@ if (isadmin($dbh, $remuser, $group)) {
     	    print "<br>adding: ",join(", ",@x),"<br>\n";
     	}
     } else {
-        print "<br>Add new Tables to collect for this host: <form><input type=hidden name=host value=\"$host\"><input type=hidden name=group value=\"$group\"><input name=\"newtables\" type=text><input type=submit value=\"add tables\"></form>\n";
+        print "<br>Add new MIB Tables or Groups that you want to collect for this host: <form><input type=hidden name=host value=\"$host\"><input type=hidden name=group value=\"$group\"><input name=\"newtables\" type=text><br><input type=submit value=\"add tables\"></form>\n";
     }
     my $q = self_url();
     $q =~ s/\?.*//;
@@ -557,9 +598,18 @@ sub showhost {
     my $host = shift;
     my $group = shift;
     my $remuser = shift;
+    my $q = self_url();
+    $q =~ s/\?.*//;
     # host header
     print "<title>ucd-snmp manager report for host: $host</title>\n";
-    print "<h3>host: $host</h3>\n";
+    print "<h2>Monitored information for the host $host</h2>\n";
+    if (!isexpert($user)) {
+	print "<ul>\n";
+	print "<li>Click on a column name for information about the data in that column.\n";
+	print "<li>Click on a column name or table name for information about the data in the table.\n";
+	print "<li>If you are <a href=\"" . addtoken($q, "setuphost=1&host=$host&group=$group") . "\">collecting past history</a> for a data set, links will appear below the table that allow you to view and/or graph the historic data.\n";
+	print "</ul>\n";
+    }
 
     # does the host have a serious error?
 
@@ -708,9 +758,15 @@ sub gethostsforgroup {
 sub addhostentryform {
     my $group = shift;
     print "<form method=\"get\" action=\"" . self_url() . "\">\n";
-    print "Add new host to group: <input type=\"text\" name=\"newhost\">";
+    print "Add a new host to the group \"$group\": <input type=\"text\" name=\"newhost\"><br>";
     print "<input type=\"hidden\" name=\"group\" value=\"$group\">";
+    print "<input type=submit value=\"Add Hosts\">\n";
     print "</form>";
+}
+
+#is an expert user?
+sub isexpert {
+    return 0;
 }
 
 #is remuser a admin?
@@ -871,7 +927,7 @@ sub Exit {
     $tq =~ s/\?.*//;
     print "<hr>\n";
     print "<a href=\"$tq\">[TOP]</a>\n";
-    print "<a href=\"$tq?userprefs=1\">[options]</a>\n";
+    print "<a href=\"$tq?userprefs=1?group=$group\">[options]</a>\n";
     if (defined($group)) {
 	print "<a href=\"$tq?group=$group\">[group: $group]</a>\n";
 	print "<a href=\"$tq?group=$group&summarizegroup=1\">[summarize $group]</a>\n";
