@@ -187,7 +187,7 @@ _ipCidrRouteTable_initialize_interface(ipCidrRouteTable_registration_ptr
                                             ipCidrRouteTable_oid,
                                             ipCidrRouteTable_oid_size,
                                             HANDLER_CAN_BABY_STEP |
-                                            HANDLER_CAN_RWRITE);
+                                            HANDLER_CAN_RONLY);
     if (NULL == reginfo) {
         snmp_log(LOG_ERR, "error registering tabel ipCidrRouteTable\n");
         return;
