@@ -372,8 +372,7 @@ Function CreateAgentBats
   IfErrors cleanup
   FileWrite $0 "@echo off $\r$\n \
 		set cmdline=$\"$INSTDIR\bin\snmpd.exe$\" -register $\r$\n\
-		set additionaloptions= -C -c $\"$R0/etc/snmp/snmpd.conf$\" \
-		-Lf $\"$R0/log/snmpd.log$\"$\r$\n"
+		set additionaloptions= -Lf $\"$R0/log/snmpd.log$\"$\r$\n"
 
   FileWrite $0 "echo Registering snmpd as a service using the following additional options: $\r$\n \
 		echo . $\r$\n \
@@ -383,6 +382,10 @@ Function CreateAgentBats
   FileWrite $0 "echo . $\r$\n \
 		%cmdline% %additionaloptions% $\r$\n \
 		echo . $\r$\n \
+                echo A reboot may be required after registering as a service to allow the $\r$\n \
+                echo Service Control Manager to read the system environment variables for $\r$\n \
+                echo SNMPCONFPATH.  $\r$\n \
+                echo .  $\r$\n \
 		echo For information on running snmpd.exe and snmptrapd.exe as a Windows $\r$\n \
 		echo service, see 'How to Register the Net-SNMP Agent and Trap Daemon as $\r$\n \
 		echo Windows services' in README.win32. $\r$\n \
@@ -418,8 +421,7 @@ Function CreateTrapdBats
   IfErrors cleanup
   FileWrite $0 "@echo off $\r$\n \
 		set cmdline=$\"$INSTDIR\bin\snmptrapd.exe$\" -register $\r$\n\
-		set additionaloptions= -C -c $\"$R0/etc/snmp/snmptrapd.conf$\" \
-		-Lf $\"$R0/log/snmptrapd.log$\"$\r$\n"
+		set additionaloptions= -Lf $\"$R0/log/snmptrapd.log$\"$\r$\n"
 
   FileWrite $0 "echo Registering snmptrapd as a service using the following additional options: $\r$\n \
 		echo . $\r$\n \
@@ -429,6 +431,10 @@ Function CreateTrapdBats
   FileWrite $0 "echo . $\r$\n \
 		%cmdline% %additionaloptions% $\r$\n \
 		echo . $\r$\n \
+                echo A reboot may be required after registering as a service to allow the $\r$\n \
+                echo Service Control Manager to read the system environment variables for $\r$\n \
+                echo SNMPCONFPATH.  $\r$\n \
+                echo .  $\r$\n \
 		echo For information on running snmpd.exe and snmptrapd.exe as a Windows $\r$\n \
 		echo service, see 'How to Register the Net-SNMP Agent and Trap Daemon as $\r$\n \
 		echo Windows services' in README.win32. $\r$\n \
