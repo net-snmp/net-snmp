@@ -11,7 +11,7 @@ TABLE OF CONTENTS
 
   Disclaimer
   Table Of Contents
-  Intro
+  Introduction
 * Supported Architectures
   Availability
 * Installation
@@ -28,7 +28,7 @@ TABLE OF CONTENTS
 
   * = Required Reading.
 
-INTRO
+INTRODUCTION
 
   This package contains a port and modified code of the CMU 2.1.2.1
   snmp agent.  It has been modified to allow extensibility quickly
@@ -91,7 +91,7 @@ CODE UPDATE ANNOUNCEMENTS / MAILING LIST(S)
 
   We hate broadcasting announce messages to other mailing lists and
   newsgroups, so there is a mailing list set up to handle release
-  announcements.  Anytime we put new software out for ftp, we'll mail
+  announcements.  Any time we put new software out for ftp, we'll mail
   this fact to ucd-snmp-announce@ece.ucdavis.edu.  To
   subscribe/unsubscribe yourself to/from this list, mail a note to
   ucd-snmp-announce-request@ece.ucdavis.edu with a subject line of
@@ -121,7 +121,7 @@ EXTENSIBILITY
 
   Note:  This agent uses its own API for extensibility.  The IETF's
   agentx working group is working on developing a common API for
-  subagent extensibility.  When they have finished the developement of
+  subagent extensibility.  When they have finished the development of
   their specifications, we will begin working on implementing them.
 
 EXAMPLE USAGE 
@@ -142,9 +142,9 @@ SNMPv1 vs. SNMPv2
   security type.  I define mine to SNMPV2AUTH, for authenticated
   requests only.  I then define the SECURITYEXCEPTIONS to allow .100
   requests, since HP Openview can only use SNMPv1 protocols.  The CMU
-  code does not support enscryption due to export regulation in the
+  code does not support encryption due to export regulation in the
   United States, so it is not possible to restrict access to encrypted
-  transmittions.
+  transmissions.
 
   If you don't understand anything we have said here, select the
   default security model of SNMPV1 when prompted by the configure
