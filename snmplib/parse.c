@@ -367,7 +367,7 @@ name_hash( name )
     char *cp;
 
     for(cp = name; *cp; cp++)
-        hash += *cp;
+        hash += tolower(*cp);
     return(hash);
 }
 
@@ -2042,7 +2042,7 @@ which_module(name)
     struct module *mp;
 
     for ( mp=module_head ; mp ; mp=mp->next )
-	if ( !strcmp(mp->name, name))
+	if ( !strcasecmp(mp->name, name))
 	    return(mp->modid);
 
     DEBUGP("Module %s not found\n", name);
@@ -2167,7 +2167,7 @@ read_module_internal (name )
 	init_mib();
 
     for ( mp=module_head ; mp ; mp=mp->next )
-	if ( !strcmp(mp->name, name)) {
+	if ( !strcasecmp(mp->name, name)) {
 	    if ( mp->no_imports != -1 ) {
 		DEBUGP("Module %s already loaded\n", name);
 		return MODULE_ALREADY_LOADED;
@@ -2588,10 +2588,10 @@ get_token(fp, token, maxtlen)
 	 * type.  Else it is a label.
 	 */
 	if (!(isalnum(ch) || ch == '-')) return LABEL;
-	hash += ch;
+	hash += tolower(ch);
   more:
 	while (isalnum((ch_next = getc(fp))) || ch_next == '-') {
-	    hash += ch_next;
+	    hash += tolower(ch_next);
 	    if (cp - token < maxtlen - 1) *cp++ = ch_next;
 	    else too_long = 1;
 	}
@@ -2611,7 +2611,7 @@ get_token(fp, token, maxtlen)
 	    if (ch_next == EOF) return ENDOFFILE;
 	    if (isalnum(ch_next)) {
 		*cp++ = ch_next;
-		hash += ch_next;
+		hash += tolower(ch_next);
 		goto more;
 	    }
 	}

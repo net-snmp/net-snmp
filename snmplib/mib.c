@@ -1436,8 +1436,11 @@ get_module_node(name, module, objid, objidlen)
 
     if ( !strcmp(module, "ANY") )
         modid = -1;
-    else
+    else {
+	read_module(module);
         modid = which_module( module );
+	if (modid == -1) return 0;
+    }
 
 		/* Isolate the first component of the name ... */
     cp = strchr( name, '.' );
@@ -1505,8 +1508,6 @@ get_module_node(name, module, objid, objidlen)
     } else {
 	return 0;
     }
-
-    
 }
 
 
@@ -1521,15 +1522,21 @@ get_node(name, objid, objidlen)
     if (( cp=strchr(name, ':')) == NULL )
 	return( get_module_node( name, "ANY", objid, objidlen ));
     else {
+	char *module;
+	int res;
 		/*
 		 *  requested name is of the form
 		 *	"module:subidentifier"
 		 */
-	*cp = '\0';	/* isolate the module name */
+	module = malloc(cp-name+1);
+	memcpy(module,name,cp-name);
+	module[cp-name] = 0;
 	cp++;		/* cp now point to the subidentifier */
 
 			/* 'cp' and 'name' *do* go that way round! */
-	return( get_module_node( cp, name, objid, objidlen ));
+	res = get_module_node( cp, module, objid, objidlen );
+	free(module);
+	return res;
     }
 }
 
