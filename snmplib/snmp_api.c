@@ -4075,10 +4075,13 @@ snmp_varlist_add_variable(struct variable_list **varlist,
 #ifdef OPAQUE_SPECIAL_TYPES
       case ASN_OPAQUE_U64:
       case ASN_OPAQUE_I64:
+#endif /* OPAQUE_SPECIAL_TYPES */
+      case ASN_COUNTER64:
         vars->val_len = sizeof(struct counter64);
         memmove(vars->val.counter64, value, vars->val_len);
         break;
 
+#ifdef OPAQUE_SPECIAL_TYPES
       case ASN_OPAQUE_FLOAT:
         vars->val_len = sizeof(float);
         memmove(vars->val.floatVal, value, vars->val_len);
