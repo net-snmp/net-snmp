@@ -1,5 +1,136 @@
 -------------------------------------------------------------------------------
 
+Changes: V4.1 -> V4.1.1
+
+marz  5 Feb 100 06:56:43
+    fix version  number
+
+hardaker  5 Feb 100 08:37:27
+    - (snmptrapd.c): fix wrapped line continuation in usage message.
+
+hardaker  5 Feb 100 17:39:54
+    - (snmpv3.c): correct some awful text -> engineID creation mistakes.
+
+nba  6 Feb 100 06:11:59
+    - read_config.c: Fix one final ':' to ENV_SEPARATOR_CHAR
+
+hardaker  7 Feb 100 07:20:24
+    - (PORTING): Michael likes diff -u.
+
+mslifcak  7 Feb 100 10:43:29
+    Keep customer's nodename out of the published 'uname' information.
+
+mslifcak  7 Feb 100 11:18:26
+    Undo last change; on Sun, additional platform info was not obtained;
+    the proper solution would be to remove the second token (hostname).
+
+marz  7 Feb 100 11:49:01
+    oops missing important fix for win32 build - fd_set must be same size as in winsock
+
+hardaker  9 Feb 100 08:41:11
+    - (vmstat_solaris2.c, vmstat_solaris2.h): Update from Jochen Kmietsch
+
+hardaker  9 Feb 100 10:37:00
+    - (Makefile.in):
+      - fix rsnmp.made.
+      - use $(MAKE).
+
+hardaker  9 Feb 100 10:41:14
+    - (hr_filesys.c, hr_storage.c): Patch from Andy HOOD:
+      - Solaris patches.
+
+hardaker  9 Feb 100 10:41:44
+    - (Makefile.in): fix rsnmp build.  Really.  I mean it.
+
+hardaker  9 Feb 100 10:43:05
+    - (configure.in): change mode to autoconf.
+
+hardaker  9 Feb 100 11:38:42
+    - (hr_swinst.c): patch from redhat for better RPM support.
+
+hardaker  9 Feb 100 13:16:17
+    - (agent_callbacks.h, agent_registry.c, agent_registry.h,
+      snmp_agent.c, vacm_vars.c):
+      - fix posible acm DoS problems by checking access tables early on.
+
+hardaker  9 Feb 100 13:16:58
+    - (UCD-SNMP-MIB.txt): mention a new ucdExperimental registration (wavlan).
+
+mslifcak  9 Feb 100 13:31:01
+    Define SNMP_MAXPATH, and use it.
+
+hardaker  9 Feb 100 13:31:24
+    - (T003snmpv1getfail, T016snmpv2cgetfail, T017snmpv2ctov1getfail,
+      T018snmpv1tov2cgetfail): fix for proper ACM error outputs.
+
+mslifcak  9 Feb 100 13:51:12
+    include sys/param.h to get PATH_MAX on FreeBSD.
+
+hardaker  9 Feb 100 13:53:37
+    - (eval_tools.sh, T023snmpv3getMD5DES, T024snmpv3getSHA1, T025snmpv3getSHADES):
+      - skip ssl tests we can't perform.
+
+daves 10 Feb 100 04:41:10
+    - (snmplib/{snmp_api,snmp_client}.c apps/snmpnetstat/inet6.c):
+      -  Comment unused code more informatively as to why it is omitted.
+
+daves 10 Feb 100 07:14:51
+    - (FAQ): Explicit examples of sending traps by hand
+
+hardaker 10 Feb 100 07:54:46
+    - (FAQ): mention the tutorial.
+
+mslifcak 10 Feb 100 08:00:26
+    typedef int ssize_t (one line added) for build on SunOS 4.
+
+mslifcak 10 Feb 100 08:13:14
+    fix varargs decl/defn of snmp_log
+
+nba 10 Feb 100 08:40:04
+    - man/*: set the dates on the pages to reflect the revision date
+
+hardaker 10 Feb 100 10:28:21
+    - (snmpv3.c): fix setup engineID buffer overflow found by Mike Baer.
+
+hardaker 10 Feb 100 10:32:08
+    - (hr_swinst.c): minor fixes pointed out by Michael.
+
+mslifcak 10 Feb 100 10:33:47
+    *** empty log message ***
+
+mslifcak 10 Feb 100 11:14:58
+    fix for older platforms to use pass_persist; not included by default.
+
+hardaker 11 Feb 100 06:58:03
+    - (acconfig.h, config.h.in): Dont define PROCFIXCMD and EXECFIXCMD by default.
+
+hardaker 11 Feb 100 12:22:10
+    - (acconfig.h, config.h.in): change perl path to /usr/bin.
+
+hardaker 11 Feb 100 12:29:37
+    - (snmp_agent.c): patch from Niels:
+      - don't send autherror responses for v2c.
+      - send authFailure trap.
+
+hardaker 11 Feb 100 12:30:02
+    - (sysORTable.h): Patch from Niels Baggesen:
+      - compiler warning fix.
+
+hardaker 11 Feb 100 12:44:23
+    - (local/Makefile.in): fix for seperate build path
+
+hardaker 11 Feb 100 12:49:03
+    - (local/Makefile.in): don't cp for snmpcheck
+
+hardaker 11 Feb 100 12:53:15
+    - (T016snmpv2cgetfail, T017snmpv2ctov1getfail): update for Timeout for v2c.
+
+hardaker 11 Feb 100 13:29:29
+    - (version.h bug-report sedscript.in): version tag ( 4.1.1 )
+
+	
+-------------------------------------------------------------------------------
+
 Changes: V4.0.1 -> V4.1
 
 mslifcak 24 Aug 99 04:44:47
