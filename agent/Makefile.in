@@ -22,15 +22,15 @@ LMIBOBJS		= @mibgroup_list_lo@ mib_modules.lo
 MIBOBJS		= @mibgroup_list_o@ mib_modules.o
 
 # normal objects
-AGENTOBJS=snmpd.o auto_nlist.o
+AGENTOBJS=snmpd.o
 LIBAGENTOBJS=snmp_agent.o snmp_vars.o agent_read_config.o agent_registry.o \
-	agent_index.o agent_trap.o kernel.o
+	agent_index.o agent_trap.o kernel.o auto_nlist.o
 
 
 # libtool objects
-LAGENTOBJS=snmpd.lo auto_nlist.lo
+LAGENTOBJS=snmpd.lo
 LLIBAGENTOBJS=snmp_agent.lo snmp_vars.lo agent_read_config.lo agent_registry.lo\
-	agent_index.lo agent_trap.lo kernel.lo
+	agent_index.lo agent_trap.lo kernel.lo auto_nlist.lo
 
 INSTALLHEADERS=agent_read_config.h agent_registry.h agent_index.h agent_trap.h \
 	auto_nlist.h ds_agent.h snmp_agent.h snmp_vars.h var_struct.h \
