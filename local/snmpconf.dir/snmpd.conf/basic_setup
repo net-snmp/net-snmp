@@ -1,9 +1,17 @@
 group basic_setup
-filetype snmpd.conf 1
+message ************************************************
+message *** Beginning basic system information setup ***
+message ************************************************
+subgroup system_setup Do you want to configure the information returned in the system MIB group (contact info, etc)?
 message **************************************
 message *** BEGINNING ACCESS CONTROL SETUP ***
 message **************************************
-multiple rwuser Do you want to allow SNMPv3 read-write user based access
-multiple rouser Do you want to allow SNMPv3 read-only user based access
-multiple rwcommunity Do you want to allow SNMPv1/v2c read-write community access
-multiple rocommunity Do you want to allow SNMPv1/v2c read-only community access
+subgroup access_control Do you want to configure the agent's access control?
+message ****************************************
+message *** Beginning trap destination setup ***
+message ****************************************
+subgroup trapsinks Do you want to configure where and if the agent will send traps?
+message ****************************************
+message *** Beginning monitoring setup ***
+message ****************************************
+subgroup monitoring_services Do you want to configure the agent's ability to monitor various aspects of your system?

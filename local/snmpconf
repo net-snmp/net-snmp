@@ -19,17 +19,15 @@ use Data::Dumper;
 $opts{'c'} = "/usr/local/share/snmp/snmpconf";
 
 # read the argument string
-getopts("adhfc:pir:R:g:G", \%opts);
+getopts("qadhfc:piI:r:R:g:G", \%opts);
 
 # display help
 if ($opts{'h'}) {
     print "$0 [-h] [-d] [-f] [-c config_directory] [FILETOCREATE...]\n";
-    print "  -c conf_dir  use alternate configuration directory.\n";
     print "  -f           overwrite existing files without prompting\n";
-    print "  -d           turn on debugging output\n";
-    print "  -D           turn on debugging dumper output\n";
     print "  -i           install created files into /usr/local/share/snmp.\n";
     print "  -p           install created files into $ENV{HOME}/.snmp.\n";
+    print "  -I DIR       install created files into DIR.\n";
     print "  -a           Don't ask any questions, just read in current\n";
     print "                   current .conf files and comment them\n";
     print "  -f           Overwrite existing files without asking.\n";
@@ -37,6 +35,10 @@ if ($opts{'h'}) {
     print "  -R file,...  Read in a particular list of .conf files.\n";
     print "  -g GROUP     Ask a series of GROUPed questions.\n";
     print "  -G           List known GROUPs.\n";
+    print "  -c conf_dir  use alternate configuration directory.\n";
+    print "  -q           run more quietly with less advice.\n";
+    print "  -d           turn on debugging output.\n";
+    print "  -D           turn on debugging dumper output.\n";
     exit;
 }
 
@@ -48,17 +50,20 @@ read_config_files($opts{'c'}, \%filetypes);
 debug(my_Dumper(\%filetypes));
 
 if ($opts{'G'}) {
-    print "Known GROUPs of tokens:\n\n";
+    Print("\nKnown GROUPs of tokens:\n\n");
     foreach my $group (keys(%groups)) {
 	print "  $group\n";
     }
+    Print("\n");
     exit;
 }
 
 #
 # Find existing files to possibly read in.
 #
-foreach my $i (qw(/usr/local/share/snmp /usr/local/etc/snmp .), "$ENV{HOME}/.snmp") {
+my @searchpath = (qw(/usr/local/share/snmp /usr/local/etc/snmp .), "$ENV{HOME}/.snmp");
+push @searchpath, $opts{I} if ($opts{I});
+foreach my $i (@searchpath) {
     debug("searching $i\n");
     foreach my $ft (keys(%filetypes)) {
 	debug("searching for $i/$ft\n");
@@ -88,7 +93,7 @@ if (keys(%knownfiles)) {
 	    $x =~ s/.*\/([^\/]+)$/$1/;
 	    $knownfiles{$i} = $x;
 	}
-	print "reading: ", join(",",@files),"\n";
+	Print("reading: ", join(",",@files),"\n");
     } else {
 	my @files = display_menu(-head => "The following configuration files were found:\n",
 				 -tail => "Would you like me to read them in?  Their content will be merged with the\noutput files created by this session.\nValid answer examples: \"all\", \"none\",\"1,2,5\"\n",
@@ -106,30 +111,7 @@ if (keys(%knownfiles)) {
 if ($opts{'g'}) {
     my @groups = split(/,:\s/,$opts{'g'});
     foreach my $group (@groups) {
-	die "no such group: $group\n" if (!defined($groups{$group}));
-	foreach my $token (@{$groups{$group}}) {
-	    if ($token->[0] eq "message") {
-		print "$token->[1] $token->[2]\n";
-	    } elsif (defined($tokenmap{$token->[1]})) {
-		my $ans = "y";
-		if ($token->[2] ne "") {
-		    $ans = get_answer($term, $token->[2],
-				      valid_answers(qw(yes y no n)), 'y');
-		}
-		if ($ans =~ /^y/) {
-		    do {
-			do_line($token->[1], $tokenmap{$token->[1]});
-		    } until ($token->[0] ne "multiple" ||
-			     get_answer($term, "Do another $token->[1] line?",
-					valid_answers(qw(yes y no n)), 'y')
-			     =~ /n/);
-		}
-	    } elsif (defined($filetypes{$token->[1]})) {
-		$didfile{$token->[1]} = 1;
-	    } else {
-		die "invalid member $token->[1] of group $group\n";
-	    }
-	}
+	do_group($group);
     }
 } elsif ($#ARGV >= 0) {
     #
@@ -170,21 +152,22 @@ output_files(\%filetypes, $term);
 #
 # Display the files that have been created for the user.
 #
-print "\nThe following files were created:\n\n";
+Print("\nThe following files were created:\n\n");
 @didfiles = keys(%didfile);
 foreach my $i (@didfiles) {
     if ($didfile{$i} ne "1") {
-	if ($opts{'i'}) {
-	    system("mv /usr/local/share/snmp/$i /usr/local/share/snmp/$i.bak");
-	    system("mv $didfile{$i} /usr/local/share/snmp");
-	    print "  $didfile{$i} installed in /usr/local/share/snmp\n";
+	if ($opts{'i'} || $opts{'I'}) {
+	    $opts{'I'} = "/usr/local/share/snmp" if (!$opts{'I'});
+	    system("mv $opts{'I'}/$i $opts{'I'}/$i.bak") if (-f "$opts{'I'}/$i");
+	    system("mv $didfile{$i} $opts{'I'}");
+	    Print("  $didfile{$i} installed in $opts{'I'}\n");
 	} elsif ($opts{'p'}) {
 	    system("mv $ENV{HOME}/.snmp/$i $ENV{HOME}/.snmp/$i.bak");
 	    system("mv $i $ENV{HOME}/.snmp");
-	    print "  $didfile{$i} installed in $ENV{HOME}/.snmp\n";
+	    Print("  $didfile{$i} installed in $ENV{HOME}/.snmp\n");
 	} else {
-	    print "  $didfile{$i} ",
-	    ($i ne $didfile{$i})?"[ from $i specifications]":" ","\n";
+	    Print("  $didfile{$i} ",
+	    ($i ne $didfile{$i})?"[ from $i specifications]":" ","\n");
 	    if ($opts{'d'}) {
 		open(I,$didfile{$i});
 		debug("    " . join("    ",<I>) . "\n");
@@ -196,29 +179,72 @@ foreach my $i (@didfiles) {
 
 $didfilesc = join(",",@didfiles);
 $didfiless = join(" ",@didfiles);
-if (!$opts{'p'} && !$opts{'i'}) {
-    print "\nThese files should be moved to /usr/local/share/snmp/ if you
+if (!$opts{'p'} && !$opts{'i'} && !$opts{'I'}) {
+    Print("\nThese files should be moved to /usr/local/share/snmp/ if you
 want them used by everyone on the system.  To do this automatically
-right now, you can run the following command:
+right now, you can run one of the following commands:
 
+   mv $didfiless /usr/local/share/snmp/
    $0 -R $didfilesc -f -i -a $didfiless
 
 Or, if you want them for your personal use, copy them to
 $ENV{HOME}/.snmp  To do this automatically
 right now, you can run the following command:
 
+   mv $didfiless $ENV{HOME}/.snmp/
    $0 -R $didfilesc -f -p -a $didfiless
 
 FYI, if you specify -i or -p on the command line for future runs of
 $0, this will be done immediately after snmpconf finishes creating the
 files for you.
 
-";
+");
 }
 
 ###########################################################################
 # Functions
 ###########################################################################
+
+sub Print {
+    print @_ if (!$opts{'q'});
+}
+#
+# handle a group of questions
+#
+sub get_yn_maybe {
+    my $question = shift;
+    my $ans = "y";
+    if ($question ne "") {
+	$ans = get_answer($term, $question,
+			  valid_answers(qw(yes y no n)), 'y');
+    }
+    return ($ans =~ /^y/)?1:0;
+}
+
+sub do_group {
+    my $group = shift;
+    die "no such group $group\n" if (!$groups{$group});
+    foreach my $token (@{$groups{$group}}) {
+	if ($token->[0] eq "message") {
+	    Print ("$token->[1] $token->[2]\n");
+	} elsif ($token->[0] eq "subgroup") {
+	    do_group($token->[1]) if (get_yn_maybe($token->[2]));
+	} elsif (defined($tokenmap{$token->[1]})) {
+	    if (get_yn_maybe($token->[2])) {
+		do {
+		    do_line($token->[1], $tokenmap{$token->[1]});
+		} until ($token->[0] ne "multiple" ||
+			 get_answer($term, "Do another $token->[1] line?",
+				    valid_answers(qw(yes y no n)), 'y')
+			 =~ /n/);
+	    }
+	} elsif (defined($filetypes{$token->[1]})) {
+	    $didfile{$token->[1]} = 1;
+	} else {
+	    die "invalid member $token->[1] of group $group\n";
+	}
+    }
+}
 
 #
 # build a particular type of file by operating on sections
@@ -246,9 +272,9 @@ sub do_section {
     my $confsect = shift;
     my @lines;
     while(1) {
-	print "\nSection: $confsect->{'title'}[0]\n";
-	print "Description:\n";
-	print "  ", join("\n  ",@{$confsect->{'description'}}),"\n";
+	Print ("\nSection: $confsect->{'title'}[0]\n");
+	Print ("Description:\n");
+	Print ("  ", join("\n  ",@{$confsect->{'description'}}),"\n");
 	my $line =
 	    display_menu(-head => "Select from:\n",
 			 -otheranswers => ['finished','f','list','l'],
@@ -277,8 +303,8 @@ sub do_line {
     my $confline = shift;
     my (@answers, $counter, $i);
 #    debug(my_Dumper($confline));
-    print "\nConfiguring: $token\n";
-    print "Description:\n  ",join("\n    ",@{$confline->{'info'}}),"\n\n";
+    Print ("\nConfiguring: $token\n");
+    Print ("Description:\n  ",join("\n    ",@{$confline->{'info'}}),"\n\n");
     for($i=0; $i <= $#{$confline->{'question'}}; $i++) {
 	if (defined($confline->{'question'}[$i]) &&
 	    $confline->{'question'}[$i] ne "") {
@@ -310,7 +336,7 @@ sub do_line {
 	    debug("eval results: $finished\n");
 	}
 	$finished = $token . " " . $finished;
-	print "\nFinished Output: $finished\n";
+	Print ("\nFinished Output: $finished\n");
 	push @{$confline->{'results'}},$finished;
     }
 }
@@ -328,7 +354,7 @@ sub read_config_files {
 	next if ($dir =~ /CVS/);
 	debug("dir entry: $dir\n");
 	if (-d "$readdir/$dir") {
-	    $filetypes->{$dir} = read_config_items("$readdir/$dir");
+	    $filetypes->{$dir} = read_config_items("$readdir/$dir", $dir);
 	}
     }
     closedir DH;
@@ -339,13 +365,14 @@ sub read_config_files {
 #
 sub read_config_items {
     my $itemdir = shift;
+    my $type = shift;
     opendir(ITEMS, $itemdir);
     my $file;
     my @results;
     while(defined($file = readdir(ITEMS))) {
 	next if ($file =~ /~$/);
 	if (-f "$itemdir/$file") {
-	    push @results, read_config_item("$itemdir/$file");
+	    push @results, read_config_item("$itemdir/$file", $type);
 	}
     }
     closedir(ITEMS);
@@ -356,13 +383,15 @@ sub read_config_items {
 # mark a list of tokens as a special "group"
 #
 sub read_config_group {
-    my ($fh, $group) = @_;
+    my ($fh, $group, $type) = @_;
     my $line;
     debug("handling group $group\n");
+    push (@{$groups{$group}},['filetype', $type]);
     while($line = <$fh>) {
 	chomp($line);
 	next if ($line =~ /^\s*$/);
-	return $line if ($line !~ /^(single|multiple|message|filetype)/);
+	next if ($line =~ /^\#/);
+	return $line if ($line !~ /^(single|multiple|message|filetype|subgroup)/);
 	my ($type, $token, $rest) = ($line =~ /^(\w+)\s+([^\s]+)\s*(.*)/);
 	debug ("reading group $group : $type -> $token -> $rest\n");
 	push (@{$groups{$group}}, [$type, $token, $rest]);
@@ -376,21 +405,23 @@ sub read_config_group {
 #
 sub read_config_item {
     my $itemfile = shift;
+    my $type = shift;
     my $fh = new IO::File($itemfile);
     return if (!defined($fh));
     my (%results, $curtoken);
     debug("tokenitems:  ", my_Dumper(\%tokenitems));
+  topwhile:
     while($line = <$fh>) {
 	next if ($line =~ /^\s*\#/);
 	my ($token, $rest) = ($line =~ /^(\w+)\s+(.*)/);
 	next if (!defined($token) || !defined($rest));
-	if ($token eq 'group') {
+	while ($token eq 'group') {
 	    # handle special group list
-	    my $next = read_config_group($fh, $rest);
+	    my $next = read_config_group($fh, $rest,$type);
 	    if ($next) {
-		my ($token, $rest) = ($line =~ /^(\w+)\s+(.*)/);
+		($token, $rest) = ($next =~ /^(\w+)\s+(.*)/);
 	    } else {
-		next;
+		next topwhile;
 	    }
 	}
 	debug("token: $token => $rest\n");
@@ -505,7 +536,11 @@ sub get_answer {
 }
     
 sub valid_answers {
-    return "^(" . join("|",@_) . ")\$";
+    my @list;
+    foreach $i (@_) {
+	push @list, $i if ($i);
+    }
+    return "^(" . join("|",@list) . ")\$";
 }
 
 sub read_config {
@@ -556,7 +591,7 @@ sub display_menu {
 	@list = @_;
     }
     foreach my $i (@list) {
-	printf "  %2d:  $i\n", $count++;
+	printf "  %2d:  $i\n", $count++ if ($i);
     }
     print "\n" if (!defined($config{'-dense'}));
     if (defined($config{'-otheranswers'})) {
@@ -636,3 +671,4 @@ sub my_Dumper {
 	return "\n";
     }
 }
+
