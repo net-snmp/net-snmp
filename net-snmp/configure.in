@@ -1345,6 +1345,10 @@ dnl Dynix
 AC_CHECK_HEADERS(net/route.h)
 dnl for HostRes (HP-UX at least)
 AC_CHECK_HEADERS(sys/dkio.h sys/diskio.h sys/pstat.h linux/hdreg.h pkglocs.h)
+dnl for HostRes (Solaris 2.x at least)
+AC_CHECK_HEADERS(pkginfo.h,
+    AC_CHECK_LIB(adm, pkginfo, AC_DEFINE(HAVE_PKGINFO)
+    LIBS="${LIBS} -ladm"))
 dnl WIN32
 AC_CHECK_HEADERS(winsock.h io.h)
 dnl SCO
