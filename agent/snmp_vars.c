@@ -136,8 +136,8 @@ static struct nlist nl[] = {
 	{ "_ifnet" },
 	{ "_tcpstat" },
 	{ "_tcb" },
-	{ "_arptab_size" }, 
-	{ "_arptab" },      
+	{ "arptab_size" }, 
+	{ "arptab" },      
 	{ "_in_ifaddr" },
 	{ "_boottime" },
 	{ "_proc" },
@@ -150,15 +150,15 @@ static struct nlist nl[] = {
 #else
 	{ "ipstat"},  
 	{ "ipforwarding" },
-	{ "tcp_ttl"},
+	{ "tcpDefaultTTL"},
 	{ "udpstat" },
 	{ "in_interfaces" },
 	{ "icmpstat" },
 	{ "ifnet" },
 	{ "tcpstat" },
 	{ "tcb" },
-	{ "arptab_size" }, 
-	{ "arptab" },      
+	{ "arptab_nb" }, 
+	{ "arphd" },      
 	{ "in_ifaddr" },
 	{ "boottime" },
 	{ "proc" },
@@ -251,6 +251,7 @@ init_snmp()
 #endif
   init_kmem("/dev/kmem"); 
   init_routes();
+  init_wes();
 }
 
 #define CMUMIB 1, 3, 6, 1, 4, 1, 3
@@ -327,63 +328,7 @@ Export oid trapObjUnavailAlarmOid[] = {SNMPV2ALARMEVENTS, 3};
 Export int trapObjUnavailAlarmOidLen = sizeof(trapObjUnavailAlarmOidLen)/sizeof(oid);
 
 
-/*
- * The subtree structure contains a subtree prefix which applies to
- * all variables in the associated variable list.
- * No subtree may be a subtree of another subtree in this list.  i.e.:
- * 1.2
- * 1.2.0
- */
-struct subtree {
-    oid			name[16];	/* objid prefix of subtree */
-    u_char 		namelen;	/* number of subid's in name above */
-    struct variable	*variables;   /* pointer to variables array */
-    int			variables_len;	/* number of entries in above array */
-    int			variables_width; /* sizeof each variable entry */
-};
-
-/*
- * This is a new variable structure that doesn't have as much memory
- * tied up in the object identifier.  It's elements have also been re-arranged
- * so that the name field can be variable length.  Any number of these
- * structures can be created with lengths tailor made to a particular
- * application.  The first 5 elements of the structure must remain constant.
- */
-struct variable2 {
-    u_char          magic;          /* passed to function as a hint */
-    char            type;           /* type of variable */
-    u_short         acl;            /* access control list for variable */
-    u_char          *(*findVar)();  /* function that finds variable */
-    u_char          namelen;        /* length of name below */
-    oid             name[2];       /* object identifier of variable */
-};
-
-struct variable4 {
-    u_char          magic;          /* passed to function as a hint */
-    char            type;           /* type of variable */
-    u_short         acl;            /* access control list for variable */
-    u_char          *(*findVar)();  /* function that finds variable */
-    u_char          namelen;        /* length of name below */
-    oid             name[4];       /* object identifier of variable */
-};
-
-struct variable7 {
-    u_char          magic;          /* passed to function as a hint */
-    char            type;           /* type of variable */
-    u_short         acl;            /* access control list for variable */
-    u_char          *(*findVar)();  /* function that finds variable */
-    u_char          namelen;        /* length of name below */
-    oid             name[7];       /* object identifier of variable */
-};
-
-struct variable13 {
-    u_char          magic;          /* passed to function as a hint */
-    char            type;           /* type of variable */
-    u_short         acl;            /* access control list for variable */
-    u_char          *(*findVar)();  /* function that finds variable */
-    u_char          namelen;        /* length of name below */
-    oid             name[13];       /* object identifier of variable */
-};
+#include "var_struct.h"
 
 /*
  * ##############################################################
@@ -697,12 +642,12 @@ struct variable2 eventnotifytab_variables[] = {
         {EVENTNOTIFYTABSTATUS, INTEGER, RWRITE, var_eventnotifytab, 1, {4 }},
 };
 
-#include "wes/wes.c"
-
+#include "wes/wes.h"
+#include "wes/wes_vars.h"
 struct subtree subtrees[] = {
-  {{WESMIB,1}, 8, (struct variable *)wes_proc_variables,
+  {{WESMIB, 1}, 7, (struct variable *)wes_proc_variables,
    sizeof(wes_proc_variables)/sizeof(*wes_proc_variables),
-   sizeof(wes_proc_variables)},
+   sizeof(*wes_proc_variables)},
     {{MIB, 1}, 7, (struct variable *)system_variables,
 	 sizeof(system_variables)/sizeof(*system_variables),
 	 sizeof(*system_variables)},
@@ -977,10 +922,10 @@ compare_tree(name1, len1, name2, len2)
 
 
 
-char version_descr[128] = "Unix 4.3BSD";
-char sysContact[128] = "Unknown";
+char version_descr[128] = "HP-UX A.09.05";
+char sysContact[128] = "support@ece.ucdavis.edu";
 char sysName[128] = "Unknown";
-char sysLocation[128] = "Unknown";
+char sysLocation[128] = "UCDavis Electrical Engineering Department";
 
 
 oid version_id[] = {1, 3, 6, 1, 4, 1, 3, 1, 1};
