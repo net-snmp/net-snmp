@@ -1,3 +1,4 @@
+
  
 #ifndef SNMP_API_H
 #define SNMP_API_H
@@ -412,7 +413,7 @@ int    snmp_sess_async_send __P((void *, struct snmp_pdu *,
                                          snmp_callback, void *));
 int    snmp_sess_select_info __P((void *, int *, fd_set *,
                                          struct timeval *, int *));
-void   snmp_sess_read       __P((void *));
+void   snmp_sess_read       __P((void *, fd_set *));
 void   snmp_sess_timeout    __P((void *));
 int    snmp_sess_close      __P((void *));
 
