@@ -960,10 +960,13 @@ snmp_sess_open(struct snmp_session *in_session)
     }
 #endif /* SO_BSDCOMPAT */
 
+#ifndef SERVER_REQUIRES_CLIENT_SOCKET
     if (!(( session->flags & SNMP_FLAGS_STREAM_SOCKET ) &&
         ( isp->me.sa_family == AF_UNIX ) &&
         ( session->local_port == 0 ))) {
+
 		/* Client Unix-domain stream sockets don't need to 'bind' */
+#endif
     if (bind(sd, (struct sockaddr *)&isp->me, sizeof(isp->me)) != 0){
 	snmp_errno = SNMPERR_BAD_LOCPORT;
 	in_session->s_snmp_errno = SNMPERR_BAD_LOCPORT;
@@ -972,7 +975,9 @@ snmp_sess_open(struct snmp_session *in_session)
 	snmp_sess_close(slp);
 	return 0;
         }
+#ifndef SERVER_REQUIRES_CLIENT_SOCKET
     }
+#endif
 
     if ( session->flags & SNMP_FLAGS_STREAM_SOCKET ) {
         if ( session->local_port == 0 ) {	/* Client session */
