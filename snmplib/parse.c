@@ -42,7 +42,7 @@ struct subid {
     char *label;
 };
 
-#define MAXTC	128
+#define MAXTC	256
 struct tc {	/* textual conventions */
     int type;
     char descriptor[MAXTOKEN];
@@ -64,6 +64,7 @@ int Line = 1;
 #define OBJID	    (4 | SYNTAX_MASK)
 #define OCTETSTR    (5 | SYNTAX_MASK)
 #define INTEGER	    (6 | SYNTAX_MASK)
+#define INTEGER32   (INTEGER | SYNTAX_MASK)
 #define NETADDR	    (7 | SYNTAX_MASK)
 #define	IPADDR	    (8 | SYNTAX_MASK)
 #define COUNTER	    (9 | SYNTAX_MASK)
@@ -118,6 +119,12 @@ int Line = 1;
 #define DEFINITIONS 58
 #define END         59
 #define SEMI        60
+#define TRAPTYPE    61
+#define ENTERPRISE  62
+/* #define DISPLAYSTR (63 | SYNTAX_MASK) */
+#define BEGIN       64
+#define IMPORTS     65
+#define EXPORTS     66
 
 struct tok {
 	char *name;			/* token name */
@@ -192,6 +199,13 @@ struct tok tokens[] = {
 	{ "(", sizeof ("(")-1, LEFTPAREN },
 	{ ")", sizeof (")")-1, RIGHTPAREN },
 	{ ",", sizeof (",")-1, COMMA },
+	{ "TRAP-TYPE", sizeof ("TRAP-TYPE")-1, TRAPTYPE },
+	{ "ENTERPRISE", sizeof ("ENTERPRISE")-1, ENTERPRISE },
+	/*	{ "DisplayString", sizeof ("DisplayString")-1, DISPLAYSTR },
+	{ "Integer32", sizeof ("Integer32")-1, INTEGER32 }, */
+	{ "BEGIN", sizeof ("BEGIN")-1, BEGIN },
+	{ "IMPORTS", sizeof ("IMPORTS")-1, IMPORTS },
+	{ "EXPORTS", sizeof ("EXPORTS")-1, IMPORTS },
 	{ NULL }
 };
 
@@ -199,6 +213,14 @@ struct tok tokens[] = {
 #define	BUCKET(x)	(x & 0x01F)
 
 struct tok	*buckets[HASHSIZE];
+
+static void do_subtree(struct tree *root, struct node **nodes);
+static int get_token(register FILE *fp, register char *token, int maxtlen);
+static int parseQuoteString(register FILE *fp, register char *token, int maxtlen);
+static int tossObjectIdentifier(register FILE *fp);
+
+
+
 
 static
 hash_init()
@@ -587,6 +609,39 @@ getoid(fp, oid,  length)
 
 }
 
+static 
+free_tree(Tree)
+    struct tree *Tree;
+{
+    if (Tree == NULL)
+    {
+	return NULL;
+    }
+
+    if (Tree->enums)
+    {
+	struct enum_list *ep, *tep;
+
+	ep = Tree->enums;
+	while(ep)
+	{
+	    tep = ep;
+	    ep = ep->next;
+	    if (tep->label)
+		free(tep->label);
+	
+	    free((char *)tep);
+	}
+    }
+
+    if (Tree->description)
+    {
+	free(Tree->description);
+    }
+
+    free_tree(Tree->child_list);
+}
+
 static
 free_node(np)
     struct node *np;
@@ -597,8 +652,14 @@ free_node(np)
     while(ep){
 	tep = ep;
 	ep = ep->next;
+	if (tep->label)
+	    free(tep->label);
+	
 	free((char *)tep);
     }
+    if (np->description)
+	free(np->description);
+    
     free((char *)np);
 }
 
@@ -753,11 +814,19 @@ parse_asntype(fp, name, ntype, ntoken)
             type = get_token(fp, token,MAXTOKEN);
           type = get_token(fp, token,MAXTOKEN);
 	}
+
+	if (type == LABEL)
+	{
+	    type = get_tc(token, &ep);
+	}
+	
+	
 	/* textual convention */
 	for(i = 0; i < MAXTC; i++){
 	    if (tclist[i].type == 0)
 		break;
 	}
+
 	if (i == MAXTC){
 	    print_error("No more textual conventions possible.", token, type);
 	    return 0;
@@ -769,7 +838,7 @@ parse_asntype(fp, name, ntype, ntoken)
 			type);
 	    return 0;
 	}
-	tcp->type = type;
+	tcp->type = type; 
 	*ntype = get_token(fp, ntoken,MAXTOKEN);
 	if (*ntype == LEFTPAREN){
 	    level = 1;
@@ -941,6 +1010,16 @@ parse_objecttype(fp, name)
 	    } else if (nexttype == LEFTPAREN){
 		/* ignore the "constrained integer" for now */
 		nexttype = get_token(fp, nexttoken,MAXTOKEN);
+		if (nexttype == SIZE)
+		{
+		    /* LEFTPAREN */
+		    nexttype = get_token(fp, nexttoken,MAXTOKEN);
+		    /* Range */
+		    nexttype = get_token(fp, nexttoken,MAXTOKEN);
+		    /* RIGHTPAREN */
+		    nexttype = get_token(fp, nexttoken,MAXTOKEN);
+		}
+		/* RIGHTPAREN */
 		nexttype = get_token(fp, nexttoken,MAXTOKEN);
 		nexttype = get_token(fp, nexttoken,MAXTOKEN);
 	    }
@@ -1301,6 +1380,97 @@ printf("Description== \"%.50s\"\n", quoted_string_buffer);
 }
 
 /*
+ * Parses a TRAP-TYPE macro.
+ * Returns 0 on error.
+ */
+static struct node *
+parse_trapDefinition(fp, name)
+    register FILE *fp;
+    char *name;
+{
+    register int type;
+    char token[MAXTOKEN];
+    int count, length;
+    struct subid oid[32];
+    char syntax[MAXTOKEN];
+    int nexttype, tctype;
+    char nexttoken[MAXTOKEN];
+    register struct node *np;
+    register struct enum_list *ep;
+
+    np = (struct node *)Malloc(sizeof(struct node));
+    np->type = 0;
+    np->next = 0;
+    np->enums = 0;
+    np->description = NULL;        /* default to an empty description */
+    type = get_token(fp, token, MAXTOKEN);
+    while (type != EQUALS) {
+	switch (type) {
+	    case DESCRIPTION:
+		type = get_token(fp, quoted_string_buffer, MAXQUOTESTR);
+		if (type != QUOTESTRING) {
+		    print_error("Bad DESCRIPTION", quoted_string_buffer, type);
+		    free_node(np);
+		    return 0;
+		}
+
+#ifdef TEST
+                printf("Description== \"%.50s\"\n", quoted_string_buffer);
+#endif
+#ifdef USE_DESCRIPTION
+		np->description = quoted_string_buffer;
+		quoted_string_buffer = (char *)malloc(MAXQUOTESTR);
+#endif
+		break;
+	    case ENTERPRISE:
+		type = get_token(fp, quoted_string_buffer, MAXQUOTESTR);
+		if (type == LEFTBRACKET)
+		{
+		    type = get_token(fp, quoted_string_buffer, MAXQUOTESTR);
+		    if (type != LABEL)
+		    {
+			print_error("Bad Trap Format", 
+				    quoted_string_buffer, type);
+			free_node(np);
+			return 0;
+		    }
+		    strcpy(np->parent, quoted_string_buffer);
+		    /* Get right bracket */
+		    type = get_token(fp, quoted_string_buffer, MAXQUOTESTR);
+		}
+		else if (type == LABEL)
+		{
+		    strcpy(np->parent, quoted_string_buffer);
+		}
+		
+		break;
+	    default:
+		/* NOTHING */
+		break;
+	}
+	type = get_token(fp, token, MAXTOKEN);
+    }
+    type = get_token(fp, token, MAXTOKEN);
+
+    strcpy(np->label, name);
+    
+    if (type != NUMBER)
+    {
+	print_error("Expected a Number", token, type);
+	free_node(np);
+	np = 0;
+	
+    }
+    else
+    {
+	np->subid = atoi(token);
+    }
+
+    return np;
+}
+
+
+/*
  * Parses a compliance macro
  * Returns 0 on error.
  */
@@ -1410,7 +1580,7 @@ int parse_mib_header(fp, name)
     char *name;
 {
     int type = DEFINITIONS;
-    char token[MAXTOKEN];
+    char token[MAXQUOTESTR];
     
     /* This probably isn't good enough.  If there is no
        imports clause we can't go around waiting (forever) for a semicolon.
@@ -1419,8 +1589,27 @@ int parse_mib_header(fp, name)
        that I needed to hack to get to parse because they didn't have
        an IMPORTS or and EXPORTS clause.
        */
-    while(type != SEMI){
-	type = get_token(fp, token,MAXTOKEN);
+    while(type != BEGIN) {
+      type = get_token(fp, token, MAXQUOTESTR);
+    }
+
+    if (type == IMPORTS) {
+      while(1) {
+        type = get_token(fp, token, MAXQUOTESTR);
+        if (type == SEMI)
+          break;
+      }
+      type = get_token(fp, token, MAXQUOTESTR);
+    }
+
+
+    if (type == EXPORTS) {
+      while(1) {
+        type = get_token(fp, token, MAXQUOTESTR);
+        if (type == SEMI)
+          break;
+      }
+      type = get_token(fp, token, MAXQUOTESTR);
     }
     return 1;
 }
@@ -1438,6 +1627,8 @@ parse(fp)
     char token[MAXTOKEN];
     char name[MAXTOKEN];
     int	type = 1;
+    int lasttype;
+    
 #define BETWEEN_MIBS  	      1
 #define IN_MIB                2
     int state = BETWEEN_MIBS;
@@ -1452,7 +1643,7 @@ parse(fp)
 #endif
 
     while(type != ENDOFFILE){
-	type = get_token(fp, token,MAXTOKEN);
+	type = lasttype = get_token(fp, token,MAXTOKEN);
 skipget:
 	if (type == END){
 	    if (state != IN_MIB){
@@ -1461,7 +1652,22 @@ skipget:
 	    }
 	    state = BETWEEN_MIBS;
 	    continue;
-	} else if (type != LABEL){
+	}
+	else if (type == IMPORTS)
+	{
+	    while (type != SEMI)
+		type = get_token(fp, token, MAXTOKEN);
+
+	    type = get_token(fp, token, MAXTOKEN);
+	} 
+	else if (type == EXPORTS)
+	{
+	    while (type != SEMI)
+		type = get_token(fp, token, MAXTOKEN);
+
+	    type = get_token(fp, token, MAXTOKEN);
+	} 
+	else if (type != LABEL){
 	    if (type == ENDOFFILE){
 		return root;
 	    }
@@ -1514,6 +1720,26 @@ skipget:
 		if (np->next == NULL){
 		    print_error("Bad parse of objectgroup", (char *)NULL,
 				type);
+		    return NULL;
+		}
+	    }
+	    /* now find end of chain */
+	    while(np->next)
+		np = np->next;
+	} else if (type == TRAPTYPE){
+	    if (root == NULL){
+		/* first link in chain */
+		np = root = parse_trapDefinition(fp, name);
+		if (np == NULL){
+		    print_error("Bad parse of trap definition",
+				(char *)NULL, type);
+		    return NULL;
+		}
+	    } else {
+		np->next = parse_trapDefinition(fp, name);
+		if (np->next == NULL){
+		    print_error("Bad parse of trap definition",
+				(char *)NULL, type);
 		    return NULL;
 		}
 	    }
@@ -1593,6 +1819,7 @@ skipget:
 		if (np->next == NULL){
 		    print_error("Bad parse of object type", (char *)NULL,
 				type);
+		
 		    return NULL;
 		}
 	    }
@@ -1607,6 +1834,14 @@ skipget:
 	    goto skipget;
 	} else if (type == ENDOFFILE){
 	    break;
+ 	} else if (lasttype == LABEL) {
+ 	    while (type != RIGHTBRACKET)
+ 	    {
+ 		type = get_token(fp, token, MAXTOKEN);
+ 	    }
+ 	    type = lasttype;
+	    
+ 	    goto skipget;
 	} else {
 	    print_error("Bad operator", (char *)NULL, type);
 	    return NULL;
@@ -1750,7 +1985,8 @@ main(argc, argv)
 {
     FILE *fp;
     struct node *nodes;
-    struct tree *tp;
+    struct tree *tp = NULL;
+    
 
     fp = fopen("mib.txt", "r");
     if (fp == NULL){
@@ -1758,8 +1994,14 @@ main(argc, argv)
 	return 1;
     }
     nodes = parse(fp);
-    tp = build_tree(nodes);
-    print_subtree(tp, 0);
+    if (nodes != NULL)
+    {
+	tp = build_tree(nodes);
+	print_subtree(tp, 0);
+    }
+
+    free_tree(tp);
+    
     fclose(fp);
 }
 
@@ -1769,10 +2011,11 @@ static int
 parseQuoteString(fp, token,maxtlen)
     register FILE *fp;
     register char *token;
+    int maxtlen;
 {
     register int ch;
     int eat_space = 0, count = 0;
-
+    
     ch = getc(fp);
     while(ch != -1) {
       if (ch == '\n') {
@@ -1800,28 +2043,20 @@ static int
 tossObjectIdentifier(fp)
     register FILE *fp;
 {
-    register int ch;
-
-        ch = getc(fp);
-/*    ch = last; = ' '? */
-    /* skip all white space */
-    while(isspace(ch) && ch != -1){
-        ch = getc(fp);
-        if (ch == '\n')
-            Line++;
+    int type;
+    char token[MAXTOKEN];
+    
+    type = get_token(fp, token, MAXTOKEN);
+    
+    if (type != LEFTBRACKET)
+	return NULL;
+    while (type != RIGHTBRACKET && type != ENDOFFILE)
+    {
+	type = get_token(fp, token, MAXTOKEN);
     }
-    if (ch != '{')
-        return NULL;
-
-    while(ch != -1) {
-        ch = getc(fp);
-
-        if (ch == '\n')
-            Line++;
-        else if (ch == '}')
-            return OBJID;
-    }
-
-/*    last = ch;*/
-    return NULL;
+    
+    if (type == RIGHTBRACKET)
+	return OBJID;
+    else
+	return NULL;
 }
