@@ -49,7 +49,7 @@ ${table}_loop_init_data($mfd_aue_param_decl)
 @ifconf ${table}_init_data.m2i@
 @   include ${table}_init_data.m2i@
 @else@
-@if $m2c_include_examples == 1@
+@   if $m2c_include_examples == 1@
 $example_start
     /*
      * if you are the sole writer for the file, you could
@@ -59,9 +59,10 @@ $example_start
      * we start up. So we can't do anything here.
      */
 $example_end
-@end@
+@   end@
 
     return MFD_SUCCESS;
+@end@ #ifconf
 }
 
 /***********************************************************************
@@ -198,11 +199,11 @@ ${table}_loop_get_first( $mfd_aue_param_decl, ${context}_ref_loop_ctx *loop_ctx_
      */
     rowreq_ctx_ref->rowreq_ctx = loop_ctx_ref->loop_ctx->rowreq_ctx;
 
-@if $m2c_include_examples == 1@
-$example_start
 @ifconf ${table}_update_idx.m2i@
 @   include ${table}_update_idx.m2i@
 @else@
+@   if $m2c_include_examples == 1@
+$example_start
     /*
      * get a line (skip blank lines)
      */
@@ -220,19 +221,49 @@ $example_start
      */
     if(NULL == loop_ctx_ref->loop_ctx->filep)
         return MFD_END_OF_DATA;
-    
-@foreach $node index@
-@    include m2c_setup_node.m2i@
+$example_end
+@    end@ # example
+
     /*
      * TODO:
-     * parse loop_ctx_ref->line to set rowreq_ctx_ref->tbl_idx->$node
+     * set local vars for index from loop_ctx_ref->loop_ctx
+     *  this can be done in one of two ways:
      */
-@end@
-@end@
-$example_end
-@else@
+    
+    /*
+     * 1) individually
+     */
+@   foreach $node index@
+@      include m2c_setup_node.m2i@
+        /*
+         * TODO:
+         * set rowreq_ctx_ref->rowreq_ctx->tbl_idx->$node
+@      if $m2c_node_needlength == 1@
+         *     and rowreq_ctx_ref->tbl_idx->${node}_len
+@      end@
+         */
+@   end@ #foreach
+
+    /*
+     * OR
+     */
+
+        /*
+         * 2) by calling ${context}_indexes_set()
+         * ${context}_indexes_set(rowreq_ctx_ref->tbl_idx,
+@   foreach $node index@
+@      include m2c_setup_node.m2i@
+@        if $m2c_node_needlength == 1@
+    *       ${node}_ptr, ${node}_len
+@        else@
+    *       $node
+@        end@
+@   end@ # foreach index
+    *      );
+    */
+@end@ #ifconf
+
     return MFD_SUCCESS;
-@end@ # example
 }
 
 /**
@@ -309,9 +340,9 @@ $example_end
  *  the iterator moves on to the next row.
 @end@
  *
+@if $m2c_data_transient != 0@ # persistent
  * More Details
  * ------------
-@if $m2c_data_transient != 0@ # persistent
 @   if $m2c_data_transient == 1@ # short term
  *  Since your data is semi-TRANSIENT data, you could just keep a pointer
  *  to the data in the loop reference. The data should then be copied in
@@ -322,6 +353,7 @@ $example_end
  *  reference structure, and allocate memory here.
  *
 @   end@
+@end@
  * @param $mfd_aue_param_cmt
  * @param loop_ctx_ref  Reference to current loop context.
  * @param save_loop_ctx_ref Reference to a loop context for saving the current
@@ -450,26 +482,29 @@ ${table}_loop_get_data( $mfd_aue_param_decl, ${context}_ref_loop_ctx *loop_ctx_r
     loop_ctx_ref->loop_ctx->rowreq_ctx = NULL;
     
     /*
-     * TODO:
      * copy data to the data context (rowreq_ctx_ref->${m2c_data_item})
      */
-@if $m2c_include_examples == 1@
-$example_start
+##@if $m2c_include_examples == 1@
+##$example_start
 @   foreach $node nonindex@
 @      include m2c_setup_node.m2i@
     /*
-     * TODO:
-     * set rowreq_ctx_ref->${m2c_data_item}$node
-     *     from your loop context.
+     * $m2c_node_summary
      */
+@   eval $m2c_ctx_lh = "rowreq_ctx_ref->$m2c_ctx_rh"@
+@   eval $m2c_ctx_lhs = "rowreq_ctx_ref->$m2c_ctx_rhs"@
+@   eval $m2c_ctx_rh = "loop_ctx_ref->loop_ctx->TODO_FIND_$node"@
+@   eval $m2c_ctx_rhs = "loop_ctx_ref->loop_ctx->TODO_FIND_${node}_len@"@
+@   include generic-value-map.m2i@
+    
 @   end@
-$example_end
-@end@
+##$example_end
+##@end@
 
    return MFD_SUCCESS;
 }
 
-@end@
+@end@ # if $m2c_data_transient != 0
 
 /**
  * clean up a loop reference
