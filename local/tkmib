@@ -6,7 +6,7 @@ require Tk::HList;
 $host = 'localhost';
 $community = 'public';
 
-@displayInfo=qw(type access units hint enums moduleID);
+@displayInfo=qw(type access status units hint enums moduleID);
 
 use Tk;
 require Tk::HList;
@@ -25,6 +25,8 @@ $hlist=$top->Scrolled(qw(HList -itemtype imagetext -browsecmd main::showInfo
 $hlist->pack(-side => 'top', -expand => 1, -fill => 'both');
 my $sFrame = $top->Frame(-relief => 'raised', -borderwidth => $tmpbd);
 $sFrame->pack(-side => 'top', -fill => 'x');
+$sFrame->Label(-text => 'OID: ', -relief => 'raised', -borderwidth => $tmpbd)
+    ->pack(-side => 'left');
 $mibOID = $sFrame->Label(-text => '');
 $mibOID->pack(-side => 'left');
 $mibTextOID = $sFrame->Label(-text => '');
@@ -32,35 +34,49 @@ $mibTextOID->pack(-side => 'right');
 
 my $tmpFrame=$top->Frame(-relief => 'raised', -borderwidth => $tmpbd);
 $tmpFrame->pack(-side => 'top', -fill =>'x');
+my $f1 = $tmpFrame->Frame(-relief => 'raised', -borderwidth => $tmpbd);
+$f1->pack(-side => 'left', -fill => 'y');
+my $f2 = $tmpFrame->Frame();
+$f2->pack(-side => 'left', -fill => 'both');
+for($i=0;$i<= $#displayInfo;$i++) {
+    $f1->Label(-text => $displayInfo[$i], 
+	       -anchor => 'w', -borderwidth => $tmpbd)
+	->pack(-fill => 'x', -side => 'top');
+    $dpyInfo[$i] = "";
+    $f2->Entry(-textvariable => \$dpyInfo[$i], -width => 80, 
+	       -relief => 'flat', -borderwidth => $tmpbd)
+	->pack(-fill => 'x', -side => 'top');
+}
+    
+$tmpFrame=$top->Frame(-relief => 'raised', -borderwidth => $tmpbd);
+$tmpFrame->pack(-side => 'top', -fill =>'x');
 $tmpFrame->Label(-text => 'Description:', -anchor => 'w')->pack(-side => 'top',
 								-fill => 'x');
 $descr = $tmpFrame->Scrolled(qw(Text -width 80 -height 4));
 $descr->pack(-side => 'top', -fill => 'x');
-$tmpFrame=$top->Frame(-relief => 'raised', -borderwidth => $tmpbd);
-$tmpFrame->pack(-side => 'top', -fill =>'x');
-$labelTable = $tmpFrame->Table(-columns => 2, #-font => $textfont, 
-			  -fg => 'black', -scrollbars => 'se');
-$labelTable->pack(-side => 'top', -fill => 'x', -expand => 'yes');
-for($i=0;$i<= $#displayInfo;$i++) {
-    $labelTable->put($i,0,$labelTable->Label(-text => $displayInfo[$i], 
-					     -anchor => 'w'));
-    $dpyInfo[$i] = "";
-    $labelTable->put($i,1,$labelTable->Entry(-textvariable => \$dpyInfo[$i],
-					     -width => 80, -relief => 'flat'));
-}
-    
-$bFrame = $top->Frame();
+
+$bFrame = $top->Frame(-relief => 'raised', -borderwidth => $tmpbd);
 $bFrame->pack(-side => 'top', -fill => 'x');
 $hostEntry = $bFrame->Entry(-textvariable => \$host, -width => 12);
 $hostEntry->pack(-side => 'left');
 $commEntry = $bFrame->Entry(-textvariable => \$community, -width => 12);
 $commEntry->pack(-side => 'left');
+$bFrame->Button(-text => 'table', -command => \&snmptable)->pack(-side => 'right');
 $bFrame->Button(-text => 'walk', -command => \&snmpwalk)->pack(-side => 'right');
-$output = $top->Scrolled(qw(Text -width 80 -height 14));
+$bFrame->Button(-text => 'getnext', -command => \&snmpgetnext)->pack(-side => 'right');
+$bFrame->Button(-text => 'get', -command => \&snmpget)->pack(-side => 'right');
+$oFrame = $top->Frame(-borderwidth => $tmpbd, -relief => 'raised');
+$oFrame->pack(-side => 'top', -fill => 'both');
+$output = $oFrame->Scrolled(qw(Text -width 80 -height 14));
 $output->pack(-side => 'top', -fill => 'both', -expand => 1);
 
-$status = $top->Label(-anchor => 'w');
-$status->pack(-side => 'top', -fill => 'x');
+$tmpFrame = $top->Frame(-relief => 'raised', -borderwidth => $tmpbd);
+$tmpFrame->pack(-side => 'top', -fill => 'x');
+$tmpFrame->Label(-text => "Status:  ", -anchor => 'w')
+#		 -relief => 'raised', -borderwidth => $tmpbd)
+    ->pack(-side => 'left');
+$status = $tmpFrame->Label(-anchor => 'w');
+$status->pack(-side => 'left', -fill => 'x');
 
 # initialize the browser
 foreach $i (qw(.1 .1.3 .1.3.6 .1.3.6.1)) {
@@ -70,19 +86,66 @@ showChildren("1.3.6.1");
 
 MainLoop();
 
-sub snmpwalk {
+sub snmpsetup {
     my $oid = $hlist->selectionGet();
     my $tag = SNMP::translateObj($oid,0);
-    $status->configure(-text => "walking:  $host $community $oid");
-    $top->update();
     my $sess = new SNMP::Session(DestHost => $host, Community => $community,
 				 UseLongNames => 1);
-    $output->delete('0.0','end');
     my $var = new SNMP::Varbind([$tag]);
+    initText();
+    return ($oid, $sess, $var);
+}
+
+sub initText {
+    if (ref($output) eq "Tk::Frame") {
+	$output->delete('0.0','end');
+    } else {
+	$output->destroy();
+	$output = $oFrame->Scrolled(qw(Text -width 80 -height 14));
+	$output->pack(-side => 'top', -fill => 'both', -expand => 1);
+    }
+}
+
+sub initTable {
+    $output->destroy();
+    $oFrame->packPropagate(0);
+    $output = $oFrame->Table(-columns => shift, -width => 80, -height => 14,
+			     -fixedrows => 2, -fixedcolumns => 2);
+    $output->pack(-side => 'top', -fill => 'both', -expand => 1);
+}
+
+sub snmpget {
+    (my $oid, my $sess, my $var) = snmpsetup();
+    $status->configure(-text => "getting:  $host $community $oid");
+    $top->update();
+    my $val = $sess->get($var);
+    if ($sess->{ErrorStr}) {
+	$status->configure(-text => $sess->{ErrorStr});
+    } else {
+	$output->insert('end',"$var->[$SNMP::Varbind::tag_f].$var->[$SNMP::Varbind::iid_f] = $var->[$SNMP::Varbind::val_f]\n");
+	$status->configure(-text => "");
+    }
+}
+
+sub snmpgetnext {
+    (my $oid, my $sess, my $var) = snmpsetup();
+    $status->configure(-text => "get next:  $host $community $oid");
+    $top->update();
+    my $val = $sess->getnext($var);
+    if ($sess->{ErrorStr}) {
+	$status->configure(-text => $sess->{ErrorStr});
+    } else {
+	$output->insert('end',"$var->[$SNMP::Varbind::tag_f].$var->[$SNMP::Varbind::iid_f] = $var->[$SNMP::Varbind::val_f]\n");
+	$status->configure(-text => "");
+    }
+}
+
+sub snmpwalk {
+    (my $oid, my $sess, my $var) = snmpsetup();
+    $status->configure(-text => "walking:  $host $community $oid");
+    $top->update();
     while (!$sess->{ErrorStr}) {
 	my $val = $sess->getnext($var);
-	print $var->tag . " .. " . SNMP::translateObj($var->tag). " (oid=$oid)\n";
-	print join(",",@{$var}),"\n";
 	last if (!defined($var->tag) ||
 		 $sess->{ErrorStr} ||
 	         SNMP::translateObj($var->tag) !~ /^\.$oid/);
@@ -90,9 +153,51 @@ sub snmpwalk {
 	$top->update();
     }
     if ($sess->{ErrorStr}) {
+	$status->configure(-text => $sess->{ErrorStr});
 	$output->insert('end',"$sess->{ErrorStr} ($sess->{ErrorNum})\n");
+    } else {
+	$status->configure(-text => "");
     }
-    $status->configure(-text => "");
+}
+
+sub snmptable {
+    (my $oid, my $sess, my $var) = snmpsetup();
+    $status->configure(-text => "collecting data:  $host $community $oid");
+    $top->update();
+    my (@tb, @tags, @index);
+    while (!$sess->{ErrorStr}) {
+	my $val = $sess->getnext($var);
+	last if (!defined($var->tag) ||
+		 $sess->{ErrorStr} ||
+	         SNMP::translateObj($var->tag) !~ /^\.$oid/);
+	$newoid = "$var->[$SNMP::Varbind::tag_f].$var->[$SNMP::Varbind::iid_f]";
+	$output->insert('end',"$var->[$SNMP::Varbind::tag_f].$var->[$SNMP::Varbind::iid_f] = $var->[$SNMP::Varbind::val_f]\n");
+	$top->update();
+	$newoid =~ /([^\.]+)\.([0-9\.]+)$/;
+	if (!grep(/$1/,@tags)) {
+	    push @tags,$1;
+	}
+	if (!grep(/$2/,@index)) {
+	    push @index,$2;
+	    print "index:  $var->[$SNMP::Varbind::iid_f]\n";
+	}
+	$tb{$2}{$1} = $var->val;
+    }
+    $oFrame->Scrolled(qw(Text -width 80 -height 14));
+    $output->pack(-side => 'top', -fill => 'both', -expand => 1);
+    initTable($#tags+1);
+    for(my $k=0;$k <= $#tags;$k++) {
+	$output->put(1,$k+2,$tags[$k]);
+    }
+    $output->put(1,1,"Index");
+    for(my $i=0;$i <= $#index;$i++) {
+	$output->put($i+2,1,$index[$i]);
+    }
+    for(my $i=0;$i <= $#index; $i++) {
+	for(my $k=0;$k <= $#tags;$k++) {
+	    $output->put($i+2,$k+2,$tb{$index[$i]}{$tags[$k]});
+	}
+    }
 }
 
 sub addMibOID {
@@ -110,14 +215,15 @@ sub addMibOID {
 
 sub showInfo {
     my $oid = shift;
-    if ($last ne $oid) {
+    if (!defined($last) || "$last" ne $oid) {
 	my $mib = $SNMP::MIB{".$oid"};
 	if (defined($mib)) {
 	    $mibOID->configure(-text => $mib->{'objectID'});
 	    $mibTextOID->configure(-text => 
 				 SNMP::translateObj($mib->{'objectID'},1));
 	    $descr->delete('0.0','end');
-	    if (exists($mib->{'description'}) && $mib->{'description'} ne "") {
+	    if (defined($mib->{'description'}) && 
+		$mib->{'description'} ne "") {
 		my $desc = $mib->{'description'};
 		$desc =~ s/\n[ \t]+/\n/g;
 		$descr->insert('end',$desc);
