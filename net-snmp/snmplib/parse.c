@@ -3056,10 +3056,6 @@ parse_compliance(FILE * fp, char *name)
                 print_error("Bad DESCRIPTION", token, type);
                 goto skip;
             }
-            if (netsnmp_ds_get_boolean(NETSNMP_DS_LIBRARY_ID, 
-				       NETSNMP_DS_LIB_SAVE_MIB_DESCRS)) {
-                np->description = strdup(token);
-            }
             type = get_token(fp, token, MAXTOKEN);
         }
     }
