@@ -2514,9 +2514,9 @@ usm_read_user(char *line)
   line = skip_token(line);
   line = read_config_read_octet_string(line, &user->engineID,
                                        &user->engineIDLen);
-  line = read_config_read_octet_string(line, (u_char *)&user->name,
+  line = read_config_read_octet_string(line, (u_char **)&user->name,
                                        &len);
-  line = read_config_read_octet_string(line, (u_char *)&user->secName,
+  line = read_config_read_octet_string(line, (u_char **)&user->secName,
                                        &len);
   if (user->cloneFrom) {
     free(user->cloneFrom);
