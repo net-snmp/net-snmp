@@ -546,7 +546,7 @@ snmp_sess_open(struct snmp_session *in_session)
 	session->peername = (char *)cp;
     }
 
-#ifdef NO_NULL_COMMUNITY
+#ifdef NO_ZEROLENGTH_COMMUNITY
     /* Fill in defaults if necessary */
     if (session->community_len != SNMP_DEFAULT_COMMUNITY_LEN){
 	cp = (u_char *)malloc((unsigned)session->community_len);
@@ -567,7 +567,7 @@ snmp_sess_open(struct snmp_session *in_session)
     }
 
     session->community = cp;	/* replace pointer with pointer to new data */
-#endif /* NO_NULL_COMMUNITY */
+#endif /* NO_ZEROLENGTH_COMMUNITY */
 
     if (session->srcPartyLen > 0){
 	op = (oid *)malloc((unsigned)session->srcPartyLen * sizeof(oid));
@@ -1523,7 +1523,7 @@ snmp_sess_async_send(void *sessp,
     switch (pdu->version) {
     case SNMP_VERSION_1:
     case SNMP_VERSION_2c:
-#ifdef NO_NULL_COMMUNITY
+#ifdef NO_ZEROLENGTH_COMMUNITY
 	if (pdu->community_len == 0){
 	    if (session->community_len == 0){
 		snmp_errno = SNMPERR_BAD_ADDRESS;
@@ -1535,7 +1535,7 @@ snmp_sess_async_send(void *sessp,
                         session->community_len);
 	    pdu->community_len = session->community_len;
 	}
-#else /* !NO_NULL_COMMUNITY */
+#else /* !NO_ZEROLENGTH_COMMUNITY */
 	/* copy session community exactly to pdu community */
 	    if (0 == session->community_len) {
 		_snmp_free(pdu->community); pdu->community = 0;
@@ -1551,7 +1551,7 @@ snmp_sess_async_send(void *sessp,
                         session->community_len);
 	    }
 	    pdu->community_len = session->community_len;
-#endif /* !NO_NULL_COMMUNITY */
+#endif /* !NO_ZEROLENGTH_COMMUNITY */
 
         break;
 
