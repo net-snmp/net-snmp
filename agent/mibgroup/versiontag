@@ -32,7 +32,7 @@ if [ $2 = "tag" ]; then
 fi
 
 if [ $2 = "tar" ]; then
-    $DOIT cvs -d :gserver:hardaker@dcas08.ucdavis.edu:/opt/ucd-snmp export -d ucd-snmp-$VERSION -r $VERSIONTAG ucd-snmp
+    $DOIT cvs -d :gserver:hardaker@ucd-snmp.ucdavis.edu:/opt/ucd-snmp export -d ucd-snmp-$VERSION -r $VERSIONTAG ucd-snmp
     $DOIT ucd-snmp-$VERSION/remove-files ucd-snmp-$VERSION
     $DOIT tar czf ucd-snmp-$VERSION.tar.gz ucd-snmp-$VERSION
 fi
