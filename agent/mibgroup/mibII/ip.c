@@ -688,7 +688,7 @@ ip_load(netsnmp_cache *cache, void *vmagic)
         p.objid = ID_ipRoutingDiscards;
         break;
     default:
-        *ipstat = 0;
+        ipstat = 0;
         close_mib(fd);
         return (0);
     }

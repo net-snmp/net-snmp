@@ -609,7 +609,7 @@ icmp_load(netsnmp_cache *cache, void *vmagic)
         p.objid = ID_icmpOutAddrMaskReps;
         break;
     default:
-        *icmpstat = 0;
+        icmpstat = 0;
         close_mib(fd);
         return (0);
     }
