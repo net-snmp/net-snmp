@@ -1,7 +1,320 @@
 -------------------------------------------------------------------------------
 
+Changes: V5.0.4.pre2 -> V5.0.4
+
+2002-09-18 00:59  rstory
+
+   * Makefile.in:
+
+   add $(srcdir) to a few dependencies to try and reduce the # of times that
+   config.status is run when building outside the src dir
+   
+2002-09-18 00:54  rstory
+
+   * README.win32:
+
+   visually provocative section headers; add recent status (all bad news);
+   not to use new win32sdk.dsw to get additonal functionality with platform sdk;
+   remove info on removing agentx, as it's been around now for a while; add
+   section on what files to edit to add mib2c generated code to agent; remove
+   reference to specific release number in example
+   
+2002-09-18 00:25  rstory
+
+   * win32/snmpdsdk/snmpd.dsp:
+
+   take 'sdk' out of exe name
+   
+2002-09-18 00:25  rstory
+
+   * win32/win32sdk.dsw:
+
+   swap snmpdsdk for snmpd
+   
+2002-09-18 00:14  rstory
+
+   * win32/: encode_keychange/encode_keychange.dsp,
+   libsnmp/libsnmp.dsp, libsnmp_dll/libsnmp_dll.dsp,
+   snmpbulkget/snmpbulkget.dsp, snmpbulkwalk/snmpbulkwalk.dsp
+, snmpd/snmpd.dsp, snmpdelta/snmpdelta.dsp,
+   snmpdf/snmpdf.dsp, snmpget/snmpget.dsp,
+   snmpgetnext/snmpgetnext.dsp, snmpnetstat/snmpnetstat.dsp
+, snmpset/snmpset.dsp, snmpstatus/snmpstatus.dsp,
+   snmptable/snmptable.dsp, snmptest/snmptest.dsp,
+   snmptranslate/snmptranslate.dsp, snmptrap/snmptrap.dsp,
+   snmptrapd/snmptrapd.dsp, snmpusm/snmpusm.dsp,
+   snmpvacm/snmpvacm.dsp, snmpwalk/snmpwalk.dsp:
+
+   get all our ducks in a row: add advapi32.lib to link lines, make sure all
+   Release and Debug libs/apps are compile with same C++ settings
+   
+2002-09-18 00:12  rstory
+
+   * win32/netsnmpmibs/netsnmpmibs.dsp:
+
+   remove sdk dependent modules
+   
+2002-09-18 00:10  rstory
+
+   * win32/mib_module_inits.h:
+
+   group modules that depend on win32 sdk together, with ifdef
+   
+2002-09-18 00:08  rstory
+
+   * agent/snmp_vars.c:
+
+   no callback for win32 until pipe fd problem is fixed
+   
+2002-09-18 00:07  rstory
+
+   * win32/: netsnmpmibssdk/netsnmpmibssdk.dsp,
+   snmpdsdk/snmpd.dsp:
+
+   new versions for sdk users
+   
+2002-09-18 00:05  rstory
+
+   * win32/win32sdk.dsw:
+
+   new workspace for sdk users
+   
+2002-09-16 16:27  hardaker
+
+   * perl/SNMP/SNMP.pm:
+
+   mib module loading fixes by calling init_snmp first
+   
+2002-09-13 15:05  rstory
+
+   * dist/RELEASE-INSTRUCTIONS:
+
+   tweak example nsb-config command; add -b back to cvs2cl, otherwise you
+   get changelog msgs from other branches and have to weed them out
+   
+2002-09-13 12:33  hardaker
+
+   * perl/OID/: OID.pm, OID.xs, test.pl:
+
+   fix illegal oids to not return a pointer.
+   
+2002-09-13 10:40  jbpn
+
+   * snmplib/snmpUDPDomain.c:
+
+     - minor optimisation; we don't need a zero-terminated community
+       string except for debugging output.
+   
+2002-09-13 10:35  hardaker
+
+   * local/mib2c:
+
+   added -i option to request indent not be run
+   
+2002-09-13 10:06  jbpn
+
+   * COPYING:
+
+     - add missing verb in introduction
+   
+2002-09-12 15:58  hardaker
+
+   * perl/SNMP/SNMP.xs:
+
+   protect calling some SvIV dereference functions if it's not an IV.
+     - eliminates the remaining perl warnings.
+   
+2002-09-12 14:45  hardaker
+
+   * net-snmp-config.in:
+
+   include ldflags where appropriate (--libs, --agent-libs, ...)
+   
+2002-09-12 01:48  rstory
+
+   * dist/: nsb-nightly, nsb-package:
+
+   add/use new option to remove build dir after successful build
+   
+2002-09-12 01:47  rstory
+
+   * dist/nsb-functions:
+
+   print build dir
+   
+2002-09-12 01:19  hardaker
+
+   * testing/tests/: Sv3config, T030snmpv3usercreation:
+
+   much more complex tests of USM user creation/modification.
+   
+2002-09-12 01:07  hardaker
+
+   * testing/: eval_tools.sh, tests/T001snmpv1get,
+   tests/T002snmpv1getnext, tests/T003snmpv1getfail,
+   tests/T004snmpv1nosuch:
+
+   - support for multiple tests at once.
+   - merge v1 tests into a single (faster) test.
+   
+2002-09-12 00:34  rstory
+
+   * dist/nsb-functions:
+
+   don't monkey around with returning error codes, just exit; more regexp tweaks
+   
+2002-09-11 19:36  hardaker
+
+   * testing/eval_tools.sh:
+
+   - use sub-second sleeps if available
+   - sleep 1 (sub-)second at a time when waiting for particular tests
+     rather than the full SNMP_SLEEP duration.
+   
+2002-09-11 19:24  hardaker
+
+   * apps/snmptrapd.c:
+
+   use snmp_log instead of printf for shutdown message.
+   
+2002-09-11 18:42  hardaker
+
+   * local/mib2c.iterate.conf:
+
+   missing variable decl pointed out by irc:df
+   
+2002-09-10 16:16  rstory
+
+   * dist/nsb-functions:
+
+   tweak error regexps & error messages
+   
+2002-09-10 15:28  rstory
+
+   * local/mib2c.array-user.conf:
+
+   compiler warnings are your friend!; fix embeded comments; fix non-void
+   functions w/no rtn values; code reorg to fix emacs indent complaints
+   
+2002-09-10 15:26  rstory
+
+   * Makefile.in:
+
+   new start-flag end-flag targets to help nightly build script determine
+   if a make completed successfully
+   
+2002-09-10 15:12  rstory
+
+   * dist/nsb-functions:
+
+   tweaks for new script for automated nightly builds; ad nsb-abort, nsb-flow;
+   direct some messages to stderr; use new start-flag end-flag make targets;
+   update error grep to include '***'; check for new value to rm -fR build dir
+   
+2002-09-10 15:08  rstory
+
+   * dist/nsb-nightly:
+
+   new script for automated nightly builds
+   
+2002-09-10 15:08  rstory
+
+   * dist/nsb-package:
+
+   add option to rm -fR build dir at start; check scrip path for nsb-functions;
+   prefix default build dir w/version; exit w/rc from nsb-build
+   
+2002-09-10 15:05  rstory
+
+   * dist/: nsb-config, nsb-platform:
+
+   add current path to script to nsb-function search path
+   
+2002-09-09 09:28  jbpn
+
+   * snmplib/snmp_api.c:
+
+     - fix bug pointed out by Jared Smith-Mickelson (bug #605147)
+       whereby passing an unknown type character to snmp_add_var would
+       cause a segfault.
+   
+2002-09-09 09:09  hardaker
+
+   * apps/snmptranslate.c:
+
+   double check a pointer value before using it.
+   
+2002-09-09 09:09  hardaker
+
+   * configure, configure.in,
+   agent/mibgroup/ucd-snmp/memory_netbsd1.c,
+   agent/mibgroup/ucd-snmp/vmstat_netbsd1.c,
+   include/net-snmp/net-snmp-config.h.in:
+
+   Current header update patch for netbsd from Patrick Welche.
+   
+2002-09-06 18:30  driehuis
+
+   * mibs/UCD-SNMP-MIB.txt:
+
+   Mark the non-raw variants of objects that are accessable as raw counters
+   as deprecated, to (hopefully!) cut down on the number of users that get
+   bitten by it..
+   
+2002-09-04 14:36  hardaker
+
+   * README.solaris:
+
+   added Bruce's email address
+   
+2002-09-04 14:27  hardaker
+
+   * Makefile.in, Makefile.rules:
+
+   fix perlclean
+   
+2002-09-04 14:10  hardaker
+
+   * agent/snmpd.c:
+
+   Fix process grouping by calling setsid() (reported by irc:TrogL)
+   
+2002-09-04 14:09  hardaker
+
+   * configure, configure.in,
+   include/net-snmp/net-snmp-config.h.in:
+
+   check for setsid().
+   
+2002-09-03 13:51  hardaker
+
+   * local/mib2c:
+
+   fix cases where there either are no tables or no scalars.
+   
+2002-09-03 13:23  hardaker
+
+   * perl/SNMP/SNMP.xs:
+
+   don't use NULL variables.
+   
+-------------------------------------------------------------------------------
+
 Changes: V5.0.4.pre1 -> V5.0.4.pre2
 
+2002-09-02 22:33  rstory
+
+   * FAQ, README, sedscript.in, perl/SNMP/SNMP.pm
+, snmplib/snmp_version.c:
+
+   - (snmplib/snmp_version.c sedscript.in): version tag ( 5.0.4.pre2 )
+   
+2002-09-02 22:33  rstory
+
+   * ChangeLog:
+
+   update for release 5.0.4.pre2
+   
 2002-09-02 22:22  rstory
 
    * man/netsnmp_handler.3:
