@@ -956,7 +956,7 @@ snmpd_parse_config_trapsink(const char *token, char *cptr)
 {
     char            tmpbuf[1024];
     char           *sp, *cp, *pp = NULL;
-    u_short         sinkport;
+    int             sinkport;
 
     if (!snmp_trapcommunity)
         snmp_trapcommunity = strdup("public");
@@ -987,7 +987,7 @@ snmpd_parse_config_trap2sink(const char *word, char *cptr)
 {
     char            tmpbuf[1024];
     char           *sp, *cp, *pp = NULL;
-    u_short         sinkport;
+    int             sinkport;
 
     if (!snmp_trapcommunity)
         snmp_trapcommunity = strdup("public");
@@ -1017,7 +1017,7 @@ snmpd_parse_config_informsink(const char *word, char *cptr)
 {
     char            tmpbuf[1024];
     char           *sp, *cp, *pp = NULL;
-    u_short         sinkport;
+    int             sinkport;
 
     if (!snmp_trapcommunity)
         snmp_trapcommunity = strdup("public");
