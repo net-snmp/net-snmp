@@ -25,6 +25,17 @@ SOFTWARE.
 ******************************************************************/
 #include <config.h>
 
+#if HAVE_STDLIB_H
+#include <stdlib.h>
+#endif
+#if HAVE_UNISTD_H
+#include <unistd.h>
+#endif
+#if HAVE_STRINGS_H
+#include <strings.h>
+#else
+#include <string.h>
+#endif
 #include <sys/types.h>
 #if HAVE_NETINET_IN_H
 #include <netinet/in.h>
@@ -42,8 +53,12 @@ SOFTWARE.
 # endif
 #endif
 #include <netdb.h>
+#if HAVE_ARPA_INET_H
+#include <arpa/inet.h>
+#endif
 
 #include "snmp.h"
+#include "mib.h"
 #include "asn1.h"
 #include "snmp_impl.h"
 #include "snmp_api.h"
@@ -56,12 +71,14 @@ SOFTWARE.
 extern int  errno;
 int	snmp_dump_packet = 0;
 
+void
 usage(){
     fprintf(stderr, "Usage: snmpget -v 1 [-q] hostname community [objectID]+               or:\n");
     fprintf(stderr, "Usage: snmpget [-v 2] [-q] hostname noAuth [objectID]+                or:\n");
     fprintf(stderr, "Usage: snmpget [-v 2] [-q] hostname srcParty dstParty context [objectID]+\n");
 }
 
+int
 main(argc, argv)
     int	    argc;
     char    *argv[];
@@ -141,19 +158,19 @@ main(argc, argv)
             community = argv[arg];
 	} else if (version == 2 && srclen == 0 && !trivialSNMPv2){
             sprintf(ctmp,"%s/party.conf",SNMPLIBPATH);
-	    if (read_party_database(ctmp) > 0){
+	    if (read_party_database(ctmp) != 0){
 		fprintf(stderr,
 			"Couldn't read party database from %s\n",ctmp);
 		exit(0);
 	    }
             sprintf(ctmp,"%s/context.conf",SNMPLIBPATH);
-	    if (read_context_database(ctmp) > 0){
+	    if (read_context_database(ctmp) != 0){
 		fprintf(stderr,
 			"Couldn't read context database from %s\n",ctmp);
 		exit(0);
 	    }
             sprintf(ctmp,"%s/acl.conf",SNMPLIBPATH);
-	    if (read_acl_database(ctmp) > 0){
+	    if (read_acl_database(ctmp) != 0){
 		fprintf(stderr,
 			"Couldn't read access control database from %s\n",ctmp);
 		exit(0);

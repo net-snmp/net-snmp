@@ -25,11 +25,26 @@ SOFTWARE.
 ******************************************************************/
 #include <config.h>
 
+#include <stdio.h>
+#include <errno.h>
+#if HAVE_STRINGS_H
+#include <strings.h>
+#else
+#include <string.h>
+#endif
+#if HAVE_STDLIB_H
+#include <stdlib.h>
+#endif
+#if HAVE_UNISTD_H
+#include <unistd.h>
+#endif
 #include <sys/types.h>
 #if HAVE_NETINET_IN_H
 #include <netinet/in.h>
 #endif
-#include <stdio.h>
+#if HAVE_ARPA_INET_H
+#include <arpa/inet.h>
+#endif
 #if TIME_WITH_SYS_TIME
 # include <sys/time.h>
 # include <time.h>
@@ -41,7 +56,6 @@ SOFTWARE.
 # endif
 #endif
 #include <sys/socket.h>
-#include <errno.h>
 #include <net/if.h>
 #if HAVE_SYS_IOCTL_H
 #include <sys/ioctl.h>
@@ -52,8 +66,18 @@ SOFTWARE.
 #ifdef HAVE_FCNTL_H
 #include <fcntl.h>
 #endif
-#if STDC_HEADERS
-#include <string.h>
+#include <sys/wait.h>
+
+#ifndef FD_SET
+#ifdef HAVE_SYS_PARAM_H
+#include <sys/param.h>
+#endif
+typedef long    fd_mask;
+#define NFDBITS (sizeof(fd_mask) * NBBY)        /* bits per mask */
+#define FD_SET(n, p)    ((p)->fds_bits[(n)/NFDBITS] |= (1 << ((n) % NFDBITS)))
+#define FD_CLR(n, p)    ((p)->fds_bits[(n)/NFDBITS] &= ~(1 << ((n) % NFDBITS)))
+#define FD_ISSET(n, p)  ((p)->fds_bits[(n)/NFDBITS] & (1 << ((n) % NFDBITS)))
+#define FD_ZERO(p)      memset((p), 0, sizeof(*(p)))
 #endif
 
 #include "snmp.h"
@@ -64,12 +88,19 @@ SOFTWARE.
 #include "m2m.h"
 #include "party.h"
 #include "alarm.h"
+#include "event.h"
 #include "view.h"
 #include "context.h"
 #include "acl.h"
+#include "mib.h"
+#include "snmp_groupvars.h"
+#include "extensible/extproto.h"
 
 extern int  errno;
-int	snmp_dump_packet = 0;
+int snmp_dump_packet = 0;
+extern char *version_descr;
+extern oid version_id[];
+extern int version_id_len;
 int log_addresses = 0;
 
 struct addrCache {
@@ -85,18 +116,11 @@ struct addrCache {
 static struct addrCache addrCache[ADDRCACHE];
 static int lastAddrAge = 0;
 
+extern int snmp_agent_parse();
+extern void init_snmp();
 
-#ifndef FD_SET
-#include <sys/param.h>
-typedef long    fd_mask;
-#define NFDBITS (sizeof(fd_mask) * NBBY)        /* bits per mask */
-
-#define FD_SET(n, p)    ((p)->fds_bits[(n)/NFDBITS] |= (1 << ((n) % NFDBITS)))
-#define FD_CLR(n, p)    ((p)->fds_bits[(n)/NFDBITS] &= ~(1 << ((n) % NFDBITS)))
-#define FD_ISSET(n, p)  ((p)->fds_bits[(n)/NFDBITS] & (1 << ((n) % NFDBITS)))
-#define FD_ZERO(p)      bzero((char *)(p), sizeof(*(p)))
-
-#endif
+int receive();
+int snmp_read_packet();
 
 /*
  * In: My ip address, View subtree
@@ -106,6 +130,7 @@ typedef long    fd_mask;
  * Out: returns 0 if OK, 1 if conflict with a pre-installed
  * party/context/acl/view, -1 if an error occurred.
  */
+int
 agent_party_init(myaddr, dest_port, view)
     u_long myaddr;
     u_short dest_port;
@@ -257,9 +282,9 @@ agent_party_init(myaddr, dest_port, view)
     pp1->partyTDomain = rp->partyTDomain = DOMAINSNMPUDP;
     addr = htonl(myaddr);
     port = htons(dest_port);
-    bcopy((char *)&addr, pp1->partyTAddress, sizeof(addr));
-    bcopy((char *)&port, pp1->partyTAddress + 4, sizeof(port));
-    bcopy(pp1->partyTAddress, rp->partyTAddress, 6);
+    memcpy(pp1->partyTAddress, &addr, sizeof(addr));
+    memcpy(pp1->partyTAddress + 4, &port, sizeof(port));
+    memcpy(rp->partyTAddress, pp1->partyTAddress, 6);
     pp1->partyTAddressLen = rp->partyTAddressLen = 6;
     pp1->partyAuthProtocol = rp->partyAuthProtocol = NOAUTH;
     pp1->partyAuthClock = rp->partyAuthClock = 0;
@@ -281,8 +306,8 @@ agent_party_init(myaddr, dest_port, view)
     rp = pp2->reserved;
     strcpy(pp2->partyName, "noAuthMS");
     pp2->partyTDomain = rp->partyTDomain = DOMAINSNMPUDP;
-    bzero(pp2->partyTAddress, 6);
-    bcopy(pp2->partyTAddress, rp->partyTAddress, 6);
+    memset(pp2->partyTAddress, 0, 6);
+    memcpy(rp->partyTAddress, pp2->partyTAddress, 6);
     pp2->partyTAddressLen = rp->partyTAddressLen = 6;
     pp2->partyAuthProtocol = rp->partyAuthProtocol = NOAUTH;
     pp2->partyAuthClock = rp->partyAuthClock = 0;
@@ -359,6 +384,57 @@ agent_party_init(myaddr, dest_port, view)
     return 0; /* SUCCESS */
 }
 
+/*
+ * send a trap via snmptrap(1). ignore silently, if not avail.
+ */
+static void
+send_trap (host, comm, dev, trap)
+char *host, *comm, *dev;
+int trap;
+{
+    char trapt [20];
+    int pid;
+    char *cmd;
+    char *argv[] = {cmd, "-v", "1", host, comm, dev, "", trapt, "0", "", NULL};
+#ifdef SNMPPATH
+    char *cmd = (char *) malloc(strlen(SNMPPATH) + strlen("snmptrap") + 2);
+    sprintf(cmd,"%s/%s",SNMPPATH,"snmptrap");
+#else
+    cmd = strdup("/home/local/sbin/snmptrap");
+#endif
+    argv[0] = cmd;
+    
+    sprintf (trapt, "%d", trap);
+#if 0
+    { int i;
+    for (i = 0; i < sizeof(argv)/sizeof(argv[0])-1; i++) {
+	fprintf (stderr, "'%s' ", argv[i]);
+    }
+    fprintf (stderr, "\n");
+    }
+#endif
+    snmp_outtraps++;
+
+    if (! (pid = fork ())) {
+	execv (cmd, argv);
+	perror (cmd);
+	_exit (0);
+    }
+    else if (pid > 0)
+	waitpid (pid, (int *) 0, 0);		/* simple wait should work */
+}
+
+void
+send_easy_trap (trap)
+int trap;
+{   char agent_oid[32];
+
+    sprint_mib_oid (agent_oid, version_id, version_id_len);
+    if (snmp_enableauthentraps != 2 && snmp_trapsink != NULL)
+	send_trap (snmp_trapsink, snmp_trapcommunity, agent_oid, trap);
+}
+
+
 char *reverse_bytes(buf,num)
   char *buf;
   int num;
@@ -408,6 +484,7 @@ char *prog;
   exit(1);
 }
 
+int
 main(argc, argv)
     int	    argc;
     char    *argv[];
@@ -419,7 +496,6 @@ main(argc, argv)
     u_short dest_port = 161;
     struct partyEntry *pp;
     u_long myaddr;
-    int on=1;
     int dont_fork=0;
     char logfile[300], miscfile[300];
     char *cptr, **argvptr;
@@ -507,7 +583,7 @@ main(argc, argv)
       *(argvptr++) = cptr;
       cptr += strlen(argv[i]) + 1;
     }
-    *cptr = NULL;
+    *cptr = 0;
     *argvptr = NULL;
 
     /* open the logfile if necessary */
@@ -546,7 +622,7 @@ main(argc, argv)
     
     myaddr = get_myaddr();
     /* XXX mib-2 subtree only??? */
-    if (ret = agent_party_init(myaddr, dest_port, ".iso.org.dod.internet")){
+    if ((ret = agent_party_init(myaddr, dest_port, ".iso.org.dod.internet"))){
 	if (ret == 1){
 	    fprintf(stderr, "Conflict found with initial noAuth/noPriv parties... continuing\n");
 	} else if (ret == -1){
@@ -564,20 +640,20 @@ main(argc, argv)
     for(pp = party_scanNext(); pp; pp = party_scanNext()){
 #if WORDS_BIGENDIAN
         if ((pp->partyTDomain != DOMAINSNMPUDP)
-	    || bcmp((char *)&myaddr, pp->partyTAddress, 4))
+	    || memcmp(&myaddr, pp->partyTAddress, 4))
           continue;	/* don't listen for non-local parties */
 #else
 	if ((pp->partyTDomain != DOMAINSNMPUDP)
-	    || bcmp(reverse_bytes((char *)&myaddr,sizeof(long)),
+	    || memcmp(reverse_bytes(&myaddr,sizeof(long)),
                     pp->partyTAddress, 4))
           continue;	/* don't listen for non-local parties */
 #endif
 	
 	dest_port = 0;
 #if WORDS_BIGENDIAN
-	bcopy(pp->partyTAddress + 4, &dest_port, 2);
+	memcpy(&dest_port, pp->partyTAddress + 4, 2);
 #else
-	bcopy(reverse_bytes(pp->partyTAddress + 4,2), &dest_port, 2);
+	memcpy(&dest_port, reverse_bytes(pp->partyTAddress + 4,2), 2);
 #endif
 	for(index = 0; index < sdlen; index++)
 	    if (dest_port == portlist[index])
@@ -597,8 +673,8 @@ main(argc, argv)
 	/* already in network byte order (I think) */
 	me.sin_port = htons(dest_port);
 	if (bind(sd, (struct sockaddr *)&me, sizeof(me)) != 0){
-          fprintf(stderr,"bind/%d: ",me.sin_port);
-          perror(NULL);
+	    fprintf(stderr,"bind/%d: ",me.sin_port);
+	    perror(NULL);
 	    return 2;
 	}
 	sdlist[sdlen] = sd;
@@ -611,11 +687,16 @@ main(argc, argv)
     }
     printf("\n");
     fflush(stdout);
-    bzero((char *)addrCache, sizeof(addrCache));
+
+    /* send coldstart trap via snmptrap(1) if possible */
+    send_easy_trap (0);
+
+    memset(addrCache, 0, sizeof(addrCache));
     receive(sdlist, sdlen);
     return 0;
 }
 
+int
 receive(sdlist, sdlen)
     int sdlist[];
     int sdlen;
@@ -625,7 +706,6 @@ receive(sdlist, sdlen)
     struct timeval  timeout, *tvp = &timeout;
     struct timeval  sched, *svp = &sched, now, *nvp = &now;
     int count, block;
-int counter = 0;
 
 
     gettimeofday(nvp, (struct timezone *) NULL);
@@ -637,10 +717,6 @@ int counter = 0;
 	svp->tv_sec = nvp->tv_sec + 1;
     }
     while(1){
-#if 0
-	if (counter++ == 8000)
-	    exit(0);
-#endif
 	tvp =  &timeout;
 	tvp->tv_sec = 0;
 	tvp->tv_usec = 500000L;
@@ -705,8 +781,10 @@ int counter = 0;
 	    }
 	}
     }
+    return 0;
 }
 
+int
 snmp_read_packet(sd)
     int sd;
 {
@@ -719,6 +797,7 @@ snmp_read_packet(sd)
 		      &fromlength);
     if (length == -1)
 	perror("recvfrom");
+    snmp_inpkts++;
     if (snmp_dump_packet){
 	printf("recieved %d bytes from %s:\n", length,
 	       inet_ntoa(from.sin_addr));
@@ -728,21 +807,21 @@ snmp_read_packet(sd)
     } else if (log_addresses){
 	int count;
 	
-      for(count = 0; count < ADDRCACHE; count++){
-          if (addrCache[count].status > UNUSED /* used or old */
+	for(count = 0; count < ADDRCACHE; count++){
+	    if (addrCache[count].status > UNUSED /* used or old */
 		&& from.sin_addr.s_addr == addrCache[count].addr)
 		break;
 	}
-      if (count >= ADDRCACHE){
-          time_t now;
-          struct tm *tm;
-          time (&now);
-          tm = localtime (&now);
-          printf("%.4d-%.2d-%.2d %.2d:%.2d:%.2d Recieved SNMP packet(s) from %s\n",
-                 tm->tm_year+1900, tm->tm_mon+1, tm->tm_mday,
-                 tm->tm_hour, tm->tm_min, tm->tm_sec,
+	if (count >= ADDRCACHE){
+	    time_t now;
+	    struct tm *tm;
+	    time (&now);
+	    tm = localtime (&now);
+	    printf("%.4d-%.2d-%.2d %.2d:%.2d:%.2d Recieved SNMP packet(s) from %s\n",
+		   tm->tm_year+1900, tm->tm_mon+1, tm->tm_mday,
+		   tm->tm_hour, tm->tm_min, tm->tm_sec,
 		   inet_ntoa(from.sin_addr));
-          for(count = 0; count < ADDRCACHE; count++){
+	    for(count = 0; count < ADDRCACHE; count++){
 		if (addrCache[count].status == UNUSED){
 		    addrCache[count].addr = from.sin_addr.s_addr;
 		    addrCache[count].status = USED;
@@ -764,11 +843,11 @@ snmp_read_packet(sd)
             fflush(stdout);
 	}
 	if (sendto(sd, (char *)outpacket, out_length, 0,
-		   (struct sockaddr *)&from,
-	    sizeof(from)) < 0){
-		perror("sendto");
-		return 0;
+		   (struct sockaddr *)&from, sizeof(from)) < 0){
+	    perror("sendto");
+	    return 0;
 	}
+	else snmp_outpkts++;
 
     }
     return 1;

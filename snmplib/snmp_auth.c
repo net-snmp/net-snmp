@@ -34,6 +34,11 @@ SOFTWARE.
 #include "fp4/cmdmacro.h"
 #endif
 
+#if HAVE_STRINGS_H
+#include <strings.h>
+#else
+#include <string.h>
+#endif
 #include <sys/types.h>
 #if TIME_WITH_SYS_TIME
 # include <sys/time.h>
@@ -56,6 +61,7 @@ SOFTWARE.
 #include <in.h>
 #endif
 
+#include "mib.h"
 #include "asn1.h"
 #include "snmp.h"
 #include "snmp_impl.h"
@@ -69,6 +75,8 @@ SOFTWARE.
 ** and FALSE for machines that byte swap.
 */
 #define LOWBYTEFIRST FALSE
+
+static void md5Digest();
 
 u_char *
 snmp_auth_parse(data, length, sid, slen, version)
@@ -219,35 +227,33 @@ int		    	pass;
     data = asn_parse_objid(data, length, &type, srcParty, srcPartyLength);
     if (data == NULL){
 	ERROR("bad parse of srcParty");
-	printf("Source party: ");
-	print_objid(srcParty, *srcPartyLength);
 	return NULL;
     }
     data = asn_parse_objid(data, length, &type, context, contextLength);
     if (data == NULL){
 	ERROR("bad parse of context");
-	printf("Context: ");
-	print_objid(context, *contextLength);
 	return NULL;
     }
     if (*dstPartyLength != dstParty2Length
-#ifdef SVR4
-	|| memcmp((char *)dstParty, (char *)dstParty2, dstParty2Length)){
-#else
-	|| bcmp((char *)dstParty, (char *)dstParty2, dstParty2Length)){
-#endif
+	|| memcmp(dstParty, dstParty2, dstParty2Length)){
 	ERROR("Mismatch of destination parties\n");
 	return NULL;
     }
     
     srcp = party_getEntry(srcParty, *srcPartyLength);
-    if (!srcp)
+    if (!srcp) {
+	printf("Unknown source party: ");
+	print_objid(srcParty, *srcPartyLength);
 	return NULL;
+    }
     pi->srcp = srcp;
 
     cxp = context_getEntry(context, *contextLength);
-    if (!cxp)
+    if (!cxp) {
+	printf("Unknown context: ");
+	print_objid(context, *contextLength);
 	return NULL;
+    }
     pi->cxp = cxp;
 
     /* Only perform the following authentication checks if this is the
@@ -287,11 +293,7 @@ int		    	pass;
 	md5Digest(authMsg, authMsgLen, digest);
 	
 	/* RFC1446, Pg 19, 3.2.6 */
-#ifdef SVR4
 	if (authDigestLen != 16 || memcmp(authDigest, digest, 16)){
-#else
-	if (authDigestLen != 16 || bcmp(authDigest, digest, 16)){
-#endif
 	    ERROR("unauthentic");
 	    /* snmpStatsWrongDigestValues++ */
 	    return NULL;
@@ -587,6 +589,7 @@ snmp_secauth_build(data, length, pi, messagelen, srcParty, srcPartyLen,
     return (u_char *)endOfPacket;
 }
 
+static void
 md5Digest(start, length, digest)
     u_char *start;
     int length;
@@ -614,11 +617,7 @@ md5Digest(start, length, digest)
 #else
     /* do the computation in a static array */
     cp = buf = buffer;
-#ifdef SVR4
-    memmove(buf, (char *)start, length);
-#else
-    bcopy((char *)start, buf, length);
-#endif
+    memmove(buf, start, length);
 #endif    
     
     MDbegin(&MD);

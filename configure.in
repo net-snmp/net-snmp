@@ -50,11 +50,13 @@ fi
 AC_SUBST(EXTRACPPFLAGS,$EXTRACPPFLAGS)
 AC_MSG_RESULT($EXTRACPPFLAGS)
 
-dnl Set SNMPLIBPATH
+dnl Set SNMPLIBPATH and SNMPPATH
 if test "x$prefix" = "xNONE"; then
 AC_DEFINE_UNQUOTED(SNMPLIBPATH,"$ac_default_prefix/lib/snmp")
+AC_DEFINE_UNQUOTED(SNMPPATH,"$ac_default_prefix")
 else
 AC_DEFINE_UNQUOTED(SNMPLIBPATH,"$prefix/lib/snmp")
+AC_DEFINE_UNQUOTED(SNMPPATH,"$prefix")
 fi
 
 dnl

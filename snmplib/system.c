@@ -23,6 +23,7 @@ SOFTWARE.
  * System dependent routines go here
  */
 #include <config.h>
+#include <stdio.h>
 #if HAVE_UNISTD_H
 #include <unistd.h>
 #endif
@@ -51,6 +52,9 @@ SOFTWARE.
 #include <nlist.h>
 #if HAVE_SYS_FILE_H
 #include <sys/file.h>
+#endif
+#ifdef solaris2
+#include <kstat.h>
 #endif
 #include "system.h"
 
@@ -84,40 +88,58 @@ u_long get_myaddr(){
             continue;
         in_addr = (struct sockaddr_in *)&ifrp->ifr_addr;
         if ((ifreq.ifr_flags & IFF_UP)
-            && (ifreq.ifr_flags & IFF_RUNNING)
-            && !(ifreq.ifr_flags & IFF_LOOPBACK)
-            && in_addr->sin_addr.s_addr != LOOPBACK){
-                close(sd);
-                return in_addr->sin_addr.s_addr;
-            }
+          && (ifreq.ifr_flags & IFF_RUNNING)
+          && !(ifreq.ifr_flags & IFF_LOOPBACK)
+          && in_addr->sin_addr.s_addr != LOOPBACK){
+#ifdef freebsd2
+	    if (ioctl(sd, SIOCGIFADDR, (char *)&ifreq) < 0)
+		continue;
+	    in_addr = (struct sockaddr_in *)&(ifreq.ifr_addr);
+#endif
+	    close(sd);
+	    return in_addr->sin_addr.s_addr;
+	}
     }
     close(sd);
     return 0;
 }
 
-struct nlist nl[] = {
-    { "_boottime" },
-    { "" }
-};
 
 /*
  * Returns uptime in centiseconds(!).
  */
 long get_uptime(){
+#if bsdlike
     struct timeval boottime, now, diff;
+#ifndef freebsd2
     int kmem;
+    staticstruct nlist nl[] = {
+	    { "_boottime" },
+	    { "" }
+	};
 
     if ((kmem = open("/dev/kmem", 0)) < 0)
-        return 0;
-    nlist(KERNEL_LOC, nl);
+	return 0;
+    nlist("/vmunix", nl);
     if (nl[0].n_type == 0){
-        close(kmem);
-        return 0;
+	close(kmem);
+	return 0;
     }
 
     lseek(kmem, (long)nl[0].n_value, L_SET);
     read(kmem, &boottime, sizeof(boottime));
     close(kmem);
+#else /* freebsd2 */
+    int                 mib[2];
+    size_t              len;
+
+    mib[0] = CTL_KERN;
+    mib[1] = KERN_BOOTTIME;
+
+    len = sizeof(boottime);
+
+    sysctl(mib, 2, &boottime, &len, NULL, NULL);
+#endif /* freebsd2 */
 
     gettimeofday(&now, 0);
     now.tv_sec--;
@@ -125,9 +147,39 @@ long get_uptime(){
     diff.tv_sec = now.tv_sec - boottime.tv_sec;
     diff.tv_usec = now.tv_usec - boottime.tv_usec;
     if (diff.tv_usec > 1000000L){
-        diff.tv_usec -= 1000000L;
-        diff.tv_sec++;
+	diff.tv_usec -= 1000000L;
+	diff.tv_sec++;
     }
     return ((diff.tv_sec * 100) + (diff.tv_usec / 10000));
-}
+#endif /* bsdlike */
 
+#ifdef solaris2
+    kstat_ctl_t *ksc = kstat_open();
+    kstat_t *ks;
+    kid_t kid;
+    kstat_named_t *named;
+    u_long lbolt;
+
+    if (ksc == NULL) return 0;
+    ks = kstat_lookup (ksc, "unix", -1, "system_misc");
+    if (ks == NULL) return 0;
+    kid = kstat_read (ksc, ks, NULL);
+    if (kid == -1) return 0;
+    named = kstat_data_lookup(ks, "lbolt");
+    if (named == NULL) return 0;
+    lbolt = named->value.ul;
+    kstat_close(ksc);
+    return lbolt;
+#endif /* solaris2 */
+
+#ifdef linux
+   FILE *in = fopen ("/proc/uptime", "r");
+   long uptim = 0, a, b;
+   if (in) {
+       if (2 == fscanf (in, "%ld.%ld", &a, &b))
+	   uptim = a * 100 + b;
+       fclose (in);
+   }
+   return uptim;
+#endif /* linux */
+}

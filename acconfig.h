@@ -11,6 +11,10 @@
 
 #undef SNMPLIBPATH
 
+/* SNMPPATH contains (more) important files */
+
+#undef SNMPPATH
+
 /* LOGFILE:  If defined it closes stdout/err/in and opens this in out/err's
    place.  (stdin is closed so that sh scripts won't wait for it) */
 
@@ -99,12 +103,6 @@
 #define EXTENSIBLEDOTMIB 1.3.6.1.4.1.2021
 /* count the above numbers */
 #define EXTENSIBLENUM 7
-
-/* If defined, the snmplib library will store contents of the
-   DESCRIPTION field in the mib.txt file.  Since none of the
-   distributed applications use this information, it is turned off by
-   default.  Uncomment to turn storage back on. */
-/* #define USE_DESCRIPTION */
 
 /* the ErrorFlag is V1 accessable because HP Openview does not support
    V2.  You can make this list of pairs as long as you want, just make
@@ -333,3 +331,8 @@
 #include "agent/extensible/struct.h"
 #endif
 
+#ifndef linux
+#ifndef solaris2
+#define bsdlike
+#endif
+#endif

@@ -25,6 +25,17 @@ SOFTWARE.
 
 #include <config.h>
 
+#if HAVE_STDLIB_H
+#include <stdlib.h>
+#endif
+#if HAVE_UNISTD_H
+#include <unistd.h>
+#endif
+#if HAVE_STRINGS_H
+#include <strings.h>
+#else
+#include <string.h>
+#endif
 #include <sys/types.h>
 
 #if HAVE_NETINET_IN_H
@@ -34,6 +45,7 @@ SOFTWARE.
 #include <ctype.h>
 
 #include "snmp.h"
+#include "mib.h"
 #include "asn1.h"
 #include "snmp_impl.h"
 #include "snmp_api.h"
@@ -44,13 +56,13 @@ int	snmp_dump_packet = 0;
 extern int save_mib_descriptions;
 extern int mib_warnings;
 
+int
 main(argc, argv)
     int	    argc;
     char    *argv[];
 {
     int	arg, count;
     char *current_name = NULL;
-    char *cp, buf[256];
     oid name[MAX_NAME_LEN];
     int name_length;
     int tosymbolic = 0;
@@ -117,7 +129,7 @@ main(argc, argv)
 	print_objid(name, name_length);
     } else {
 	for(count = 0; count < name_length; count++)
-	    printf(".%d", name[count]);
+	    printf(".%ld", name[count]);
 	printf("\n");
     }
     if (description){

@@ -182,8 +182,9 @@ struct tok tokens[] = {
     { "UNITS", sizeof("Units")-1, UNITS},
     { "REFERENCE", sizeof("REFERENCE")-1, REFERENCE},
     { "NUM-ENTRIES", sizeof("NUM-ENTRIES")-1, NUM_ENTRIES},
-    { "BITSTRING", sizeof("BitString")-1, BITSTRING},
+    { "BITSTRING", sizeof("BITSTRING")-1, BITSTRING},
     { "BIT", sizeof("BIT")-1, CONTINUE},
+    { "BITS", sizeof("BITS")-1, CONTINUE},
     { "Counter64", sizeof("Counter64")-1, COUNTER64},
     { "TimeTicks", sizeof ("TimeTicks")-1, TIMETICKS },
     { "NOTIFICATION-TYPE", sizeof ("NOTIFICATION-TYPE")-1, NOTIFTYPE },
@@ -236,6 +237,7 @@ struct tok tokens[] = {
     { "|", sizeof ("|")-1, BAR },
     { "..", sizeof ("..")-1, RANGE },
     { "TEXTUAL-CONVENTION", sizeof ("TEXTUAL-CONVENTION")-1, CONVENTION },
+    { "NOTIFICATION-GROUP", sizeof ("NOTIFICATION-GROUP")-1, NOTIFTYPE },
     { NULL }
 };
 
@@ -389,7 +391,8 @@ free_node(np)
 {
     struct enum_list *ep, *tep;
 
-    ep = np->enums;
+    if (np->tc_index == -1) ep = np->enums;
+    else ep = NULL;
     while (ep) {
         tep = ep;
         ep = ep->next;
@@ -428,6 +431,7 @@ print_nodes(fp, root)
         }
     }
 }
+
 void
 print_subtree(f, tree, count)
     FILE *f;
@@ -528,7 +532,7 @@ build_tree(nodes)
     tp->next_peer = NULL;
     tp->child_list = NULL;
     tp->enums = NULL;
-    tp->label = "joint-iso-ccitt";
+    tp->label = Strdup("joint-iso-ccitt");
     tp->subid = 2;
     tp->tc_index = -1;
     tp->type = 0;
@@ -543,7 +547,7 @@ build_tree(nodes)
     tp->next_peer = lasttp;
     tp->child_list = NULL;
     tp->enums = NULL;
-    tp->label = "ccitt";
+    tp->label = Strdup("ccitt");
     tp->subid = 0;
     tp->tc_index = -1;
     tp->type = 0;
@@ -558,7 +562,7 @@ build_tree(nodes)
     tp->next_peer = lasttp;
     tp->child_list = NULL;
     tp->enums = NULL;
-    tp->label = "iso";
+    tp->label = Strdup("iso");
     tp->subid = 1;
     tp->tc_index = -1;
     tp->type = 0;
@@ -1062,41 +1066,37 @@ parse_objecttype(fp, name)
                 np->enums = parse_enumlist(fp);
                 nexttype = get_token(fp, nexttoken,MAXTOKEN);
             } else if (nexttype == LEFTPAREN){
-                /* ignore the "constrained integer" for now */
-                nexttype = get_token(fp, nexttoken,MAXTOKEN);
-                if (nexttype == SIZE)
-                {
-                    /* LEFTPAREN */
-                    nexttype = get_token(fp, nexttoken, MAXTOKEN);
-                    /* Range */
-                    nexttype = get_token(fp, nexttoken, MAXTOKEN);
-                    nexttype = get_token(fp, nexttoken, MAXTOKEN);
-                    if (nexttype == RANGE) {
-                        nexttype = get_token(fp, nexttoken, MAXTOKEN);
-                        nexttype = get_token(fp, nexttoken, MAXTOKEN);
-                    }
-                    nexttype = get_token(fp, nexttoken,MAXTOKEN);
-                }
-                else {
-                    nexttype = get_token(fp, nexttoken,MAXTOKEN);
-                    while (nexttype == BAR) {
-                        nexttype = get_token(fp, nexttoken,MAXTOKEN);
-                        nexttype = get_token(fp, nexttoken,MAXTOKEN);
-                    }
-                }
-                nexttype = get_token(fp, nexttoken,MAXTOKEN);
+		do {
+		    nexttype = get_token(fp, nexttoken, MAXTOKEN);
+		    nexttype = get_token(fp, nexttoken, MAXTOKEN);
+		    if (nexttype == RANGE) {
+			nexttype = get_token(fp, nexttoken, MAXTOKEN);
+			nexttype = get_token(fp, nexttoken, MAXTOKEN);
+		    }
+		} while (nexttype == BAR);
+		if (nexttype != RIGHTPAREN)
+		    print_error ("Expected \")\"", nexttoken, nexttype);
+                nexttype = get_token(fp, nexttoken, MAXTOKEN);
             }
             break;
         case BITSTRING:
             if (nexttype == LEFTBRACKET) {
                 /* if there is an enumeration list, parse it */
                 np->enums = parse_enumlist(fp);
-                nexttype = get_token(fp, nexttoken,MAXTOKEN);
+                nexttype = get_token(fp, nexttoken, MAXTOKEN);
             } else if (nexttype == LEFTPAREN){
                 /* ignore the "constrained integer" for now */
-                nexttype = get_token(fp, nexttoken,MAXTOKEN);
-                nexttype = get_token(fp, nexttoken,MAXTOKEN);
-                nexttype = get_token(fp, nexttoken,MAXTOKEN);
+		do {
+		    nexttype = get_token(fp, nexttoken, MAXTOKEN);
+		    nexttype = get_token(fp, nexttoken, MAXTOKEN);
+		    if (nexttype == RANGE) {
+			nexttype = get_token(fp, nexttoken, MAXTOKEN);
+			nexttype = get_token(fp, nexttoken, MAXTOKEN);
+		    }
+		} while (nexttype == BAR);
+		if (nexttype != RIGHTPAREN)
+		    print_error ("Expected \")\"", nexttoken, nexttype);
+		nexttype = get_token (fp, nexttoken, MAXTOKEN);
             }
             break;
         case OCTETSTR:
@@ -1553,6 +1553,19 @@ parse(fp, root)
         strcpy(name, token);
         type = get_token(fp, token, MAXTOKEN);
         nnp = NULL;
+
+	/* Handle obsolete method to assign an object identifier to a 
+	   module*/
+	if (lasttype == LABEL && type == LEFTBRACKET) {
+	    while (type != RIGHTBRACKET && type != ENDOFFILE)
+		type = get_token(fp, token, MAXTOKEN);
+	    if (type == ENDOFFILE){
+		print_error("Expected \"}\"", token, type);
+		return NULL;
+	    }
+	    type = get_token(fp, token, MAXTOKEN);
+	}
+
         switch (type) {
         case DEFINITIONS:
             if (state != BETWEEN_MIBS){
@@ -1609,7 +1622,7 @@ parse(fp, root)
         case OBJID:
             type = get_token(fp, token, MAXTOKEN);
             if (type != EQUALS){
-                print_error("Bad format", token, type);
+                print_error("Expected \"::=\"", token, type);
                 return NULL;
             }
             nnp = parse_objectid(fp, name);
@@ -1625,8 +1638,8 @@ parse(fp, root)
         case ENDOFFILE:
             break;
         default:
-            print_error("Bad operator", token, type);
-            return NULL;
+	    print_error("Bad operator", token, type);
+	    return NULL;
         }
         if (nnp) {
             if (np) np->next = nnp;
@@ -1662,7 +1675,7 @@ get_token(fp, token,maxtlen)
     int maxtlen;
 {
     static char last = ' ';
-    register int ch;
+    register int ch, ch_next;
     register char *cp = token;
     register int hash = 0;
     register struct tok *tp;
@@ -1691,20 +1704,33 @@ get_token(fp, token,maxtlen)
     /*
      * Accumulate characters until end of token is found.  Then attempt to
      * match this token as a reserved word.  If a match is found, return the
-     * type.  Else it is a label.
+     * type.  Else it is a label. Handle the RANGE token correctly.
      */
     do {
         if (ch == '\n')
             Line++;
+	ch_next = getc(fp);
         if (isspace(ch) || ch == '(' || ch == ')' || ch == '{' || ch == '}' ||
-            ch == ',' || ch == ';' || ch == '|' || ch == '.' && *token == 0){
-            if (!isspace(ch) && *token == 0){
+            ch == ',' || ch == ';' || ch == '|' || (ch == '.' && ch_next == '.')){
+	    if (ch == '.' && ch_next == '.' && *token == 0) {
+                hash += ch + ch_next;
+                if (cp-token < maxtlen-1)
+                    *cp++ = ch;
+                else too_long = 1;
+                if (cp-token < maxtlen-1)
+                    *cp++ = ch_next;
+                else too_long = 1;
+                last = ' ';
+            }
+	    else if (!isspace(ch) && *token == 0){
+	        ungetc (ch_next, fp);
                 hash += ch;
                 if (cp-token < maxtlen-1)
                     *cp++ = ch;
                 else too_long = 1;
                 last = ' ';
             } else {
+		ungetc (ch_next, fp);
                 last = ch;
             }
             *cp = '\0';
@@ -1739,7 +1765,9 @@ get_token(fp, token,maxtlen)
                 if (!isdigit(*cp))
                     return LABEL;
             return NUMBER;
-        } else {
+        }
+	else {
+	    ungetc (ch_next, fp);
             hash += ch;
             if (cp-token < maxtlen-1)
                 *cp++ = ch;
@@ -1781,19 +1809,19 @@ read_mib(filename)
     libpath = getenv("SNMPLIBPATH");
     if (!libpath) libpath = SNMPLIBPATH;
     sprintf(tmpstr,"%s/mibs", libpath);
-    if (nodes != NULL && (dir = opendir(tmpstr))) {
-        while (nodes != NULL && (file = readdir(dir))) {
+    if ((dir = opendir(tmpstr))) {
+        while ((file = readdir(dir))) {
             /* Only parse file names not beginning with a '.' */
             if (file->d_name != NULL && file->d_name[0] != '.') {
                 sprintf(tmpstr, "%s/mibs/%s", libpath, file->d_name);
-                if (dir2 = opendir(tmpstr)) {
+                if ((dir2 = opendir(tmpstr))) {
                     /* file is a directory, don't read it */
                     closedir(dir2);
                 } else {
                     /* parse it */
                     if ((fp = fopen(tmpstr, "r")) == NULL) {
                         perror(tmpstr);
-                        exit(1);
+			continue;
                     }
                     DEBUGP1("Parsing %s...",tmpstr);
                     Line = 1;
