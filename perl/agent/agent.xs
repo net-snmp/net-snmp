@@ -221,7 +221,7 @@ handler_wrapper(netsnmp_mib_handler          *handler,
         sv_setiv(arg, (int) reqinfo);
         XPUSHs(rarg);
         rarg = newSViv(0);
-        arg = newSVrv(rarg, "NetSNMP::agent::netsnmp_request_info");
+        arg = newSVrv(rarg, "NetSNMP::agent::netsnmp_request_infoPtr");
         sv_setiv(arg, (int) requests);
         XPUSHs(rarg);
         PUTBACK;
@@ -338,7 +338,7 @@ nsahr_register(me)
     OUTPUT:
 	RETVAL
 
-MODULE = NetSNMP::agent  PACKAGE = NetSNMP::agent::netsnmp_request_info PREFIX = nari_
+MODULE = NetSNMP::agent  PACKAGE = netsnmp_request_infoPtr PREFIX = nari_
 
 netsnmp_oid *
 nari_getOIDptr(me)

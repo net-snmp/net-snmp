@@ -15,8 +15,8 @@ sub InitMakeParams {
 		  'XSPROTOARG'          => '-prototypes',
 		  'PM'                => { 
 		      'agent.pm' => '$(INST_LIBDIR)/agent.pm',
-		      'netsnmp_request_info.pm' =>
-			  '$(INST_LIBDIR)/agent/netsnmp_request_info.pm'
+		      'netsnmp_request_infoPtr.pm' =>
+			  '$(INST_LIBDIR)/agent/netsnmp_request_infoPtr.pm'
 		  },
 		  'PREREQ_PM'           => {},
 		  );
