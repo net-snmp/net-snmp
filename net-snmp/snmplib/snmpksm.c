@@ -66,6 +66,8 @@
 #include "snmpksm.h"
 
 static krb5_context kcontext = NULL;
+static krb5_rcache rcache = NULL;
+
 static int ksm_session_init(struct snmp_session *);
 static void ksm_free_state_ref(void *);
 static int ksm_free_pdu(struct snmp_pdu *);
@@ -649,8 +651,8 @@ ksm_rgenerate_out_msg (struct snmp_secmod_outgoing_params *parms)
 
     wholeMsg = asn_rbuild_string(wholeMsg, parms->wholeMsgLen,
 				  (u_char) (ASN_UNIVERSAL | ASN_PRIMITIVE |
-					    ASN_OCTET_STR), outdata.data,
-				  outdata.length);
+					    ASN_OCTET_STR),
+				  (u_char *) outdata.data, outdata.length);
 
     if (!wholeMsg) {
 	DEBUGMSGTL(("ksm", "Building ksm AP_REQ failed.\n"));
@@ -865,8 +867,8 @@ ksm_rgenerate_out_msg (struct snmp_secmod_outgoing_params *parms)
 
     if (!ksm_state) {
 	if ((retval = ksm_insert_cache(parms->pdu->msgid, auth_context,
-				       parms->secName, parms->secNameLen)) !=
-							SNMPERR_SUCCESS)
+				       (u_char *) parms->secName,
+				       parms->secNameLen)) != SNMPERR_SUCCESS)
 	    goto error;
 	auth_context = NULL;
     }
@@ -1098,11 +1100,56 @@ ksm_process_in_msg(struct snmp_secmod_incoming_params *parms)
      */
 
     if (ap_req.length && (ap_req.data[0] == 0x6e || ap_req.data[0] == 0x4e)) {
+
+	/*
+	 * We need to initalize the authorization context, and set the
+	 * replay cache in it (and initialize the replay cache if we
+	 * haven't already
+	 */
+	
+	retcode = krb5_auth_con_init(kcontext, &auth_context);
+
+	if (retcode) {
+	    DEBUGMSGTL(("ksm", "krb5_auth_con_init failed: %s\n",
+			error_message(retcode)));
+	    retval = SNMPERR_KRB5;
+	    snmp_set_detail(error_message(retcode));
+	    goto error;
+	}
+
+	if (! rcache) {
+	    krb5_data server;
+	    server.data = "host";
+	    server.length = strlen(server.data);
+
+	    retcode = krb5_get_server_rcache(kcontext, &server, &rcache);
+
+	    if (retcode) {
+		DEBUGMSGTL(("ksm", "krb5_get_server_rcache failed: %s\n",
+			    error_message(retcode)));
+		retval = SNMPERR_KRB5;
+		snmp_set_detail(error_message(retcode));
+		goto error;
+	    }
+	}
+
+	retcode = krb5_auth_con_setrcache(kcontext, auth_context, rcache);
+
+	if (retcode) {
+	    DEBUGMSGTL(("ksm", "krb5_auth_con_setrcache failed: %s\n",
+			error_message(retcode)));
+	    retval = SNMPERR_KRB5;
+	    snmp_set_detail(error_message(retcode));
+	    goto error;
+	}
+
 	retcode = krb5_rd_req(kcontext, &auth_context, &ap_req, NULL,
 			      NULL, &flags, &ticket);
 
+	krb5_auth_con_setrcache(kcontext, auth_context, NULL);
+
 	if (retcode) {
-	    DEBUGMSGTL(("ksm", "KSM krb5_rd_req() failed: %s\n",
+	    DEBUGMSGTL(("ksm", "krb5_rd_req() failed: %s\n",
 			error_message(retcode)));
 	    retval = SNMPERR_KRB5;
 	    snmp_set_detail(error_message(retcode));
@@ -1197,7 +1244,7 @@ ksm_process_in_msg(struct snmp_secmod_incoming_params *parms)
     }
 
 #ifdef MIT_NEW_CRYPTO
-    input.data = parms->wholeMsg;
+    input.data = (char *) parms->wholeMsg;
     input.length = parms->wholeMsgLen;
 
     retcode = krb5_c_verify_checksum(kcontext, subkey, KSM_KEY_USAGE_CHECKSUM,
@@ -1321,10 +1368,10 @@ ksm_process_in_msg(struct snmp_secmod_incoming_params *parms)
 	}
 
 #ifdef MIT_NEW_CRYPTO
-	in_crypt.ciphertext.data = current;
+	in_crypt.ciphertext.data = (char *) current;
 	in_crypt.ciphertext.length = length;
 	in_crypt.enctype = subkey->enctype;
-	output.data = *parms->scopedPdu;
+	output.data = (char *) *parms->scopedPdu;
 	output.length = *parms->scopedPduLen;
 
 	retcode = krb5_c_decrypt(kcontext, subkey, KSM_KEY_USAGE_ENCRYPTION,
