@@ -738,8 +738,8 @@ sprint_bitstring(char *buf,
 	*buf++ = '"';
 	*buf = '\0';
     } else {
-	cp = var->val.bitstring + 1;
-	for(len = 0; len < (int)var->val_len - 1; len++){
+	cp = var->val.bitstring;
+	for(len = 0; len < (int)var->val_len; len++){
 	    for(bit = 0; bit < 8; bit++){
 		if (*cp & (0x80 >> bit)){
 		    enum_string = NULL;
@@ -756,8 +756,8 @@ sprint_bitstring(char *buf,
 		    buf += strlen(buf);
 		}
 	    }
+	    cp ++;
 	}
-	cp ++;
     }
 }
 
