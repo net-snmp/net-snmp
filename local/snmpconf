@@ -8,7 +8,6 @@
 
 use Getopt::Std;
 use Term::ReadLine;
-use IO::Dir;
 use IO::File;
 use Data::Dumper;
 
@@ -20,7 +19,7 @@ use Data::Dumper;
 $opts{'c'} = "/usr/local/share/snmp/snmpconf";
 
 # read the argument string
-getopts("adhfc:pir:R:", \%opts);
+getopts("adhfc:pir:R:g:G", \%opts);
 
 # display help
 if ($opts{'h'}) {
@@ -28,6 +27,7 @@ if ($opts{'h'}) {
     print "  -c conf_dir  use alternate configuration directory.\n";
     print "  -f           overwrite existing files without prompting\n";
     print "  -d           turn on debugging output\n";
+    print "  -D           turn on debugging dumper output\n";
     print "  -i           install created files into /usr/local/share/snmp.\n";
     print "  -p           install created files into $ENV{HOME}/.snmp.\n";
     print "  -a           Don't ask any questions, just read in current\n";
@@ -35,6 +35,8 @@ if ($opts{'h'}) {
     print "  -f           Overwrite existing files without asking.\n";
     print "  -r all|none  Read in all or none of the .conf files found.\n";
     print "  -R file,...  Read in a particular list of .conf files.\n";
+    print "  -g GROUP     Ask a series of GROUPed questions.\n";
+    print "  -G           List known GROUPs.\n";
     exit;
 }
 
@@ -43,7 +45,15 @@ $term = new Term::ReadLine 'snmpconf';
 
 # read in configuration file set
 read_config_files($opts{'c'}, \%filetypes);
-debug(Dumper(\%filetypes));
+debug(my_Dumper(\%filetypes));
+
+if ($opts{'G'}) {
+    print "Known GROUPs of tokens:\n\n";
+    foreach my $group (keys(%groups)) {
+	print "  $group\n";
+    }
+    exit;
+}
 
 #
 # Find existing files to possibly read in.
@@ -81,7 +91,7 @@ if (keys(%knownfiles)) {
 	print "reading: ", join(",",@files),"\n";
     } else {
 	my @files = display_menu(-head => "The following configuration files were found:\n",
-				 -tail => "Would you like me to read them in?  Their content will be added to the\noutput files created by this session.\nValid answer examples: \"all\", \"none\",\"1,2,5\"\n",
+				 -tail => "Would you like me to read them in?  Their content will be merged with the\noutput files created by this session.\nValid answer examples: \"all\", \"none\",\"1,2,5\"\n",
 				 -multiple => 1,
 				 -question => 'Read in which',
 				 -defaultvalue => 'all',
@@ -93,7 +103,35 @@ if (keys(%knownfiles)) {
     }
 }
 
-if ($#ARGV >= 0) {
+if ($opts{'g'}) {
+    my @groups = split(/,:\s/,$opts{'g'});
+    foreach my $group (@groups) {
+	die "no such group: $group\n" if (!defined($groups{$group}));
+	foreach my $token (@{$groups{$group}}) {
+	    if ($token->[0] eq "message") {
+		print "$token->[1] $token->[2]\n";
+	    } elsif (defined($tokenmap{$token->[1]})) {
+		my $ans = "y";
+		if ($token->[2] ne "") {
+		    $ans = get_answer($term, $token->[2],
+				      valid_answers(qw(yes y no n)), 'y');
+		}
+		if ($ans =~ /^y/) {
+		    do {
+			do_line($token->[1], $tokenmap{$token->[1]});
+		    } until ($token->[0] ne "multiple" ||
+			     get_answer($term, "Do another $token->[1] line?",
+					valid_answers(qw(yes y no n)), 'y')
+			     =~ /n/);
+		}
+	    } elsif (defined($filetypes{$token->[1]})) {
+		$didfile{$token->[1]} = 1;
+	    } else {
+		die "invalid member $token->[1] of group $group\n";
+	    }
+	}
+    }
+} elsif ($#ARGV >= 0) {
     #
     # loop through requested files.
     #
@@ -132,8 +170,9 @@ output_files(\%filetypes, $term);
 #
 # Display the files that have been created for the user.
 #
-print "The following files were created:\n";
-foreach my $i (keys(%didfile)) {
+print "\nThe following files were created:\n\n";
+@didfiles = keys(%didfile);
+foreach my $i (@didfiles) {
     if ($didfile{$i} ne "1") {
 	if ($opts{'i'}) {
 	    system("mv /usr/local/share/snmp/$i /usr/local/share/snmp/$i.bak");
@@ -154,6 +193,32 @@ foreach my $i (keys(%didfile)) {
 	}
     }
 }
+
+$didfilesc = join(",",@didfiles);
+$didfiless = join(" ",@didfiles);
+if (!$opts{'p'} && !$opts{'i'}) {
+    print "\nThese files should be moved to /usr/local/share/snmp/ if you
+want them used by everyone on the system.  To do this automatically
+right now, you can run the following command:
+
+   $0 -R $didfilesc -f -i -a $didfiless
+
+Or, if you want them for your personal use, copy them to
+$ENV{HOME}/.snmp  To do this automatically
+right now, you can run the following command:
+
+   $0 -R $didfilesc -f -p -a $didfiless
+
+FYI, if you specify -i or -p on the command line for future runs of
+$0, this will be done immediately after snmpconf finishes creating the
+files for you.
+
+";
+}
+
+###########################################################################
+# Functions
+###########################################################################
 
 #
 # build a particular type of file by operating on sections
@@ -211,7 +276,7 @@ sub do_line {
     my $token = shift;
     my $confline = shift;
     my (@answers, $counter, $i);
-#    debug(Dumper($confline));
+#    debug(my_Dumper($confline));
     print "\nConfiguring: $token\n";
     print "Description:\n  ",join("\n    ",@{$confline->{'info'}}),"\n\n";
     for($i=0; $i <= $#{$confline->{'question'}}; $i++) {
@@ -237,7 +302,7 @@ sub do_line {
     foreach my $line (@{$confline->{'line'}}) {
 	my $finished = $line;
 	debug("preline: $finished\n");
-	debug("answers: ",Dumper(\@answers));
+	debug("answers: ",my_Dumper(\@answers));
 	$finished =~ s/\$(\d+)/$answers[$1]/g;
 	if ($line =~ s/^eval\s+//) {
 	    debug("eval: $finished\n");
@@ -256,10 +321,9 @@ sub do_line {
 sub read_config_files {
     my $readdir = shift;
     my $filetypes = shift;
-    my $dh = new IO::Dir($readdir);
-    die "no such directory $readdir, did you run make install?\n" if (!defined($dh));
+    opendir(DH, $readdir) || die "no such directory $readdir, did you run make install?\n";
     my $dir;
-    while(defined($dir = $dh->read)) {
+    while(defined($dir = readdir(DH))) {
 	next if ($dir =~ /^\./);
 	next if ($dir =~ /CVS/);
 	debug("dir entry: $dir\n");
@@ -267,6 +331,7 @@ sub read_config_files {
 	    $filetypes->{$dir} = read_config_items("$readdir/$dir");
 	}
     }
+    closedir DH;
 }
 
 #
@@ -274,18 +339,37 @@ sub read_config_files {
 #
 sub read_config_items {
     my $itemdir = shift;
-    my $dh = new IO::Dir($itemdir);
-    return if (!defined($dh));
+    opendir(ITEMS, $itemdir);
     my $file;
     my @results;
-    while(defined($file = $dh->read)) {
+    while(defined($file = readdir(ITEMS))) {
 	next if ($file =~ /~$/);
 	if (-f "$itemdir/$file") {
 	    push @results, read_config_item("$itemdir/$file");
 	}
     }
+    closedir(ITEMS);
     return \@results;
 }
+
+#
+# mark a list of tokens as a special "group"
+#
+sub read_config_group {
+    my ($fh, $group) = @_;
+    my $line;
+    debug("handling group $group\n");
+    while($line = <$fh>) {
+	chomp($line);
+	next if ($line =~ /^\s*$/);
+	return $line if ($line !~ /^(single|multiple|message|filetype)/);
+	my ($type, $token, $rest) = ($line =~ /^(\w+)\s+([^\s]+)\s*(.*)/);
+	debug ("reading group $group : $type -> $token -> $rest\n");
+	push (@{$groups{$group}}, [$type, $token, $rest]);
+    }
+    return;
+}
+	
 
 #
 # Parse one file
@@ -295,11 +379,20 @@ sub read_config_item {
     my $fh = new IO::File($itemfile);
     return if (!defined($fh));
     my (%results, $curtoken);
-    debug("tokenitems:  ", Dumper(\%tokenitems));
+    debug("tokenitems:  ", my_Dumper(\%tokenitems));
     while($line = <$fh>) {
 	next if ($line =~ /^\s*\#/);
 	my ($token, $rest) = ($line =~ /^(\w+)\s+(.*)/);
 	next if (!defined($token) || !defined($rest));
+	if ($token eq 'group') {
+	    # handle special group list
+	    my $next = read_config_group($fh, $rest);
+	    if ($next) {
+		my ($token, $rest) = ($line =~ /^(\w+)\s+(.*)/);
+	    } else {
+		next;
+	    }
+	}
 	debug("token: $token => $rest\n");
 	if ($token eq 'steal') {
 	    foreach my $stealfrom (keys(%{$results{$rest}})) {
@@ -419,6 +512,10 @@ sub read_config {
     my $file = shift;
     my $filetype = shift;
     return if (!defined($filetypes{$filetype}));
+    if (! -f $file) {
+	warn "$file does not exist\n";
+	return;
+    }
     open(I,$file);
     while(<I>) {
 	next if (/^\s*\#/);
@@ -529,5 +626,13 @@ sub display_menu {
 		return $ans;
 	    }
 	}
+    }
+}
+
+sub my_Dumper {
+    if ($opts{'D'}) {
+	return Dumper(@_);
+    } else {
+	return "\n";
     }
 }
