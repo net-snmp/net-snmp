@@ -1203,6 +1203,10 @@ Interface_Scan_Init (void)
     int a, b, c, d, e, i, fd;
     extern conf_if_list *if_list;
     conf_if_list *if_ptr;
+    char *scan_line_2_2="%[^:]: %*d %d %d %*d %*d %*d %*d %*d %*d %d %d %*d %*d %d";
+    char *scan_line_2_0="%[^:]: %d %d %*d %*d %*d %d %d %*d %*d %d";
+    char *scan_line_to_use;
+    
 #endif  
 
     auto_nlist(IFNET_SYMBOL, (char *)&ifnetaddr, sizeof(ifnetaddr));
@@ -1240,11 +1244,24 @@ Interface_Scan_Init (void)
       }
 
     i = 0;
+
+    /* read the first line (a header) and determine the fields we
+       should read from.  This should be done in a better way by
+       actually looking for the field names we want.  But thats too
+       much work for today.  -- Wes */
+    fgets(line, 256, devin);
+    if (strstr(line, "compressed")) {
+      scan_line_to_use = scan_line_2_2;
+    } else {
+      scan_line_to_use = scan_line_2_0;
+    }
+    
+      
     while (fgets (line, 256, devin))
       {
 	struct ifnet *nnew;
 
-	if (6 != sscanf (line, LINUX_INTERFACE_SCAN_LINE,
+	if (6 != sscanf (line, scan_line_to_use,
 			 ifname_buf, &a, &b, &c, &d, &e))
 	  continue;
 	
