@@ -190,6 +190,8 @@ int             Facility = LOG_DAEMON;
 #define AGENT_STOPPED 0
 int             agent_status = AGENT_STOPPED;
 LPTSTR          g_szAppName = _T("Net-SNMP Agent");     /* Application Name */
+#else
+char           *g_szAppName = "snmpd";
 #endif
 
 extern char   **argvrestartp;
@@ -422,7 +424,7 @@ setup_log(int restart, int dont_zero, int stderr_log, int syslog_log,
     }
 
     if (syslog_log_s) {
-	snmp_enable_syslog_ident("snmpd", Facility);
+	snmp_enable_syslog_ident(g_szAppName, Facility);
     }
 }
 
@@ -507,6 +509,8 @@ main(int argc, char *argv[])
         if (!strcmp(argv[i], "-L"))
             argv[i] = option_compatability;            
     }
+
+    snmp_log_syslogname(g_szAppName);
 
     /*
      * Now process options normally.  

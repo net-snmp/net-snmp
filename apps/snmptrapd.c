@@ -200,6 +200,8 @@ int Facility = LOG_DAEMON;
 #define SNMPTRAPD_STOPPED 0
 int             trapd_status = SNMPTRAPD_STOPPED;
 LPTSTR          g_szAppName = _T("Net-SNMP Trap Handler");     /* Application Name */
+#else
+char           *g_szAppName = "snmptrapd";
 #endif
 
 struct timeval  Now;
@@ -544,6 +546,8 @@ main(int argc, char *argv[])
 #if HAVE_GETPID
     strcat(options, "p:u:");
 #endif
+
+    snmp_log_syslogname(g_szAppName);
 
     /*
      * Now process options normally.  
@@ -929,7 +933,7 @@ main(int argc, char *argv[])
 #endif
 
     if (Syslog) {
-        snmp_enable_syslog_ident("snmptrapd", Facility);
+        snmp_enable_syslog_ident(g_szAppName, Facility);
         snmp_log(LOG_INFO, "Starting snmptrapd %s\n", netsnmp_get_version());
 	if (depmsg) {
 	    snmp_log(LOG_WARNING, "-s and -S options are deprecated; use -Ls <facility> instead\n");
