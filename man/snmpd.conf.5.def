@@ -130,7 +130,7 @@ configuration entry
 For 
 .I gated
 a sensible entry might be
-.IP .1.3.6.1.4.1.4.1.3 secret
+.I smuxpeer .1.3.6.1.4.1.4.1.3 secret
 .SH DYNAMICALLY LOADABLE MODULES
 If the agent is built with support for the UCD-DLMOD-MIB it is capable
 of loading agent MIB modules dynamically at startup through
