@@ -55,7 +55,11 @@ PERFORMANCE OF THIS SOFTWARE.
 #define KERNEL		/* to get routehash and RTHASHSIZ */
 #include <net/route.h>
 #undef	KERNEL
+#ifdef RTENTRY_4_4
+#define rt_unit rt_upd		       /* Reuse this field for device # */
+#else
 #define rt_unit rt_hash		       /* Reuse this field for device # */
+#endif
 #include <nlist.h>
 #ifndef NULL
 #define NULL 0
@@ -92,14 +96,17 @@ static struct nlist nl[] = {
 #define N_RTHOST       0
 #define N_RTNET        1
 #define N_RTHASHSIZE	2
+#define N_RTTABLES 3
 #if defined(hpux) || defined(solaris2)
 	{ "rthost" },
 	{ "rtnet" },
 	{ "rthashsize" },
+	{ "rt_table" },
 #else 
 	{ "_rthost" },
 	{ "_rtnet" },
 	{ "_rthashsize" },
+	{ "_rt_table" },
 #endif
 	0,
 };
@@ -374,105 +381,181 @@ init_routes(){
   }
   for(ret = 0; nl[ret].n_name != NULL; ret++) {
     if (nl[ret].n_type == 0) {
-/*      fprintf(stderr, "nlist err:  %s not found\n",nl[ret].n_name); */
+      DEBUGP1("nlist err:  %s not found\n",nl[ret].n_name)
     }
   }
 }
 
 static int qsort_compare();
-#if defined(mips) || defined(hpux)
+
+#ifdef RTENTRY
+
+#ifdef RTENTRY_4_4
+load_rtentries(pt)
+struct radix_node *pt;
+{
+  struct radix_node node;
+  RTENTRY rt;
+  struct ifnet ifnet;
+  char name[16], temp[16];
+  register char *cp;
+  
+  if (!klookup(pt , (char *) &node , sizeof (struct radix_node))) {
+    DEBUGP("Fail\n");
+    return;
+  }
+  if (node.rn_b >= 0) {
+      load_rtentries(node.rn_r);
+      load_rtentries(node.rn_l);
+  } else {
+    if (node.rn_flags & RNF_ROOT) {
+      /* root node */
+      if (node.rn_dupedkey)
+        load_rtentries(node.rn_dupedkey);
+      return;
+    }
+    /* get the route */
+    klookup(pt, (char *) &rt, sizeof (RTENTRY));
+
+    if (rt.rt_ifp != 0) {
+      klookup( rt.rt_ifp, (char *)&ifnet, sizeof (ifnet));
+      klookup( ifnet.if_name, name, 16);
+      name[15] = '\0';
+      cp = (char *) index(name, '\0');
+      *cp++ = ifnet.if_unit + '0';
+      *cp = '\0';
+      Interface_Scan_Init();
+      rt.rt_unit = 0;
+      while (Interface_Scan_Next((int *)&rt.rt_unit, temp, 0, 0) != 0) {
+        if (strcmp(name, temp) == 0) break;
+      }
+    }
+    /* check for space and malloc */
+    if (rtsize >= rtalloc) {
+      rthead = (RTENTRY **) realloc((char *)rthead, 2 * rtalloc * sizeof(RTENTRY *));
+      bzero((char *) &rthead[rtalloc], rtalloc * sizeof(RTENTRY *));
+
+      rtalloc *= 2;
+    }
+    if (!rthead[rtsize])
+      rthead[rtsize] = (RTENTRY *) malloc(sizeof(RTENTRY));
+    /*
+     *	Add this to the database
+     */
+    bcopy((char *) &rt, (char *)rthead[rtsize], sizeof(RTENTRY));
+    rtsize++;
+    if (node.rn_dupedkey)
+      load_rtentries(node.rn_dupedkey);
+  }
+}
+#endif
 
 static Route_Scan_Reload()
 {
   RTENTRY **routehash, mb;
   register RTENTRY *m;
   RTENTRY *rt;
-	struct ifnet ifnet;
-	int i, table, qsort_compare();
-	register char *cp;
-	char name[16], temp[16];
-	static int Time_Of_Last_Reload=0;
-	struct timeval now;
-	int hashsize;
-	extern char *index(), *malloc();
+#if defined(RTENTRY_4_4)
+  struct radix_node_head head, *rt_table[AF_MAX+1];
+#endif
+  struct ifnet ifnet;
+  int i, table, qsort_compare();
+  register char *cp;
+  char name[16], temp[16];
+  static int Time_Of_Last_Reload=0;
+  struct timeval now;
+  int hashsize;
 
-	gettimeofday(&now, (struct timezone *)0);
-	if (Time_Of_Last_Reload+CACHE_TIME > now.tv_sec)
-	    return;
-	Time_Of_Last_Reload =  now.tv_sec;
+  gettimeofday(&now, (struct timezone *)0);
+  if (Time_Of_Last_Reload+CACHE_TIME > now.tv_sec)
+    return;
+  Time_Of_Last_Reload =  now.tv_sec;
 
-	/*
+  /*
 	 *  Makes sure we have SOME space allocated for new routing entries
 	 */
-	if (!rthead) {
-          rthead = (RTENTRY **) malloc(100 * sizeof(RTENTRY *));
-	    if (!rthead) {
-		ERROR("malloc");
-		return;
-	    }
-	    bzero((char *)rthead, 100 * sizeof(RTENTRY *));
-	    rtalloc = 100;
-	}
+  if (!rthead) {
+    rthead = (RTENTRY **) malloc(100 * sizeof(RTENTRY *));
+    if (!rthead) {
+      ERROR("malloc");
+      return;
+    }
+    bzero((char *)rthead, 100 * sizeof(RTENTRY *));
+    rtalloc = 100;
+  }
 
-        /* reset the routing table size to zero -- was a CMU memory leak */
-        rtsize = 0;
+  /* reset the routing table size to zero -- was a CMU memory leak */
+  rtsize = 0;
 
-	for (table=N_RTHOST; table<=N_RTNET; table++) {
+#ifdef RTENTRY_4_4 
+/* rtentry is a BSD 4.4 compat */
 
-	    KNLookup(N_RTHASHSIZE, (char *)&hashsize, sizeof(hashsize));
-	    routehash = (RTENTRY **)malloc(hashsize * sizeof(struct mbuf *));
-	    KNLookup( table, (char *)routehash, hashsize * sizeof(struct mbuf *));
-	    for (i = 0; i < hashsize; i++) {
-		if (routehash[i] == 0)
-			continue;
-		m = routehash[i];
-		while (m) {
-		    /*
-		     *	Dig the route out of the kernel...
-		     */
-		    klookup(m , (char *)&mb, sizeof (mb));
-		    m = mb.rt_next;
+  KNLookup(N_RTTABLES, (char *) &rt_table, sizeof(rt_table));
+  if (rt_table[AF_UNSPEC]) {
+    if (klookup(rt_table[AF_UNSPEC], (char *) &head, sizeof(head))) {
+      load_rtentries(head.rnh_treetop);
+    }
+    else {
+      fprintf(stderr,"couldn't load routing tables from kernel\n");
+    }
+  }
+        
+#else /* rtentry is a BSD 4.3 compat */
+  for (table=N_RTHOST; table<=N_RTNET; table++) {
 
-		    rt = &mb;
-		    if (rt->rt_ifp != 0) {
-			klookup( rt->rt_ifp, (char *)&ifnet, sizeof (ifnet));
-			klookup( ifnet.if_name, name, 16);
-			name[15] = '\0';
-			cp = (char *) index(name, '\0');
-			*cp++ = ifnet.if_unit + '0';
-			*cp = '\0';
-/*			if (strcmp(name,"lo0") == 0) continue; */
+    KNLookup(N_RTHASHSIZE, (char *)&hashsize, sizeof(hashsize));
+    routehash = (RTENTRY **)malloc(hashsize * sizeof(struct mbuf *));
+    KNLookup( table, (char *)routehash, hashsize * sizeof(struct mbuf *));
+    for (i = 0; i < hashsize; i++) {
+      if (routehash[i] == 0)
+        continue;
+      m = routehash[i];
+      while (m) {
+        /*
+         *	Dig the route out of the kernel...
+         */
+        klookup(m , (char *)&mb, sizeof (mb));
+        m = mb.rt_next;
 
+        rt = &mb;
+        if (rt->rt_ifp != 0) {
+          klookup( rt->rt_ifp, (char *)&ifnet, sizeof (ifnet));
+          klookup( ifnet.if_name, name, 16);
+          name[15] = '\0';
+          cp = (char *) index(name, '\0');
+          *cp++ = ifnet.if_unit + '0';
+          *cp = '\0';
 
-			Interface_Scan_Init();
-			while (Interface_Scan_Next((int *)&rt->rt_unit, temp, 0, 0) != 0) {
-			    if (strcmp(name, temp) == 0) break;
-			}
-		    }
-		    /*
-		     *	Allocate a block to hold it and add it to the database
-		     */
-		    if (rtsize >= rtalloc) {
-                      rthead = (RTENTRY **) realloc((char *)rthead, 2 * rtalloc * sizeof(RTENTRY *));
-                      bzero((char *) &rthead[rtalloc], rtalloc * sizeof(RTENTRY *));
+          Interface_Scan_Init();
+          while (Interface_Scan_Next((int *)&rt->rt_unit, temp, 0, 0) != 0) {
+            if (strcmp(name, temp) == 0) break;
+          }
+        }
+        /*
+         *	Allocate a block to hold it and add it to the database
+         */
+        if (rtsize >= rtalloc) {
+          rthead = (RTENTRY **) realloc((char *)rthead, 2 * rtalloc * sizeof(RTENTRY *));
+          bzero((char *) &rthead[rtalloc], rtalloc * sizeof(RTENTRY *));
 
-			rtalloc *= 2;
-		    }
-		    if (!rthead[rtsize])
-                    rthead[rtsize] = (RTENTRY *) malloc(sizeof(RTENTRY));
-                      /*
-		     *	Add this to the database
-		     */
-		    bcopy((char *)rt, (char *)rthead[rtsize], sizeof(RTENTRY));
-		    rtsize++;
-		}
-	    }
-            free(routehash);
-	}
-	/*
-	 *  Sort it!
-	 */
-	qsort((char *)rthead,rtsize,sizeof(rthead[0]),qsort_compare);
+          rtalloc *= 2;
+        }
+        if (!rthead[rtsize])
+          rthead[rtsize] = (RTENTRY *) malloc(sizeof(RTENTRY));
+        /*
+         *	Add this to the database
+         */
+        bcopy((char *)rt, (char *)rthead[rtsize], sizeof(RTENTRY));
+        rtsize++;
+      }
+    }
+    free(routehash);
+  }
+#endif
+  /*
+   *  Sort it!
+   */
+  qsort((char *)rthead,rtsize,sizeof(rthead[0]),qsort_compare);
 }
 
 #else

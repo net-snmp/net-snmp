@@ -3,7 +3,8 @@ Field "SNMPAgent" {
 	Flags	capability, general, locate;
 	Enumeration 
 		"Unset",
-		"UCD HP-UX",
+		"UCD HP-UX 9",
+		"UCD HP-UX 10",
 		"UCD SunOS4",
 		"UCD Solaris",
 		"UCD OSF/3",
