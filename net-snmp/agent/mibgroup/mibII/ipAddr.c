@@ -232,7 +232,7 @@ var_ipAddrEntry(struct variable *vp,
 #ifdef linux
             return (u_char *)&((struct sockaddr_in *)&lowin_ifnet.ia_subnetmask)->sin_addr.s_addr;
 #else
-	    long_return = ntohl(lowin_ifaddr.ia_subnetmask);
+	    long_return = lowin_ifaddr.ia_subnetmask;
 	    return(u_char *) &long_return;
 #endif
 #endif
