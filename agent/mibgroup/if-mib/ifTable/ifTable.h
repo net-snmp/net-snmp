@@ -25,6 +25,7 @@ extern          "C" {
     config_require(if-mib/data_access/interface);
     config_require(if-mib/ifTable/ifTable_interface);
     config_require(if-mib/ifTable/ifTable_data_access);
+    config_exclude(mibII/interfaces);
 
     /*
      * OID, column number and enum definions for  
@@ -142,7 +143,7 @@ extern          "C" {
                                                rowreq_ctx);
     int             ifTable_commit(ifTable_rowreq_ctx * rowreq_ctx);
 
-    extern oid      ifTable_oid[];
+    extern oid     *ifTable_oid;
     extern int      ifTable_oid_size;
 
 
