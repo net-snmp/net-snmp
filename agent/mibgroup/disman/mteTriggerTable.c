@@ -3204,7 +3204,7 @@ mte_run_trigger(unsigned int clientreg, void *clientarg)
     size_t          next_oid_len;
     long           *value, *old_value, x;
     struct last_state *laststate;
-    char            lastbool = 0, boolresult = 0, lastthresh = 0;
+    char            lastbool = 0, boolresult = 0, lastthresh = 0, senttrap = 0;
 
     if (!item) {
         /*
@@ -3329,6 +3329,7 @@ mte_run_trigger(unsigned int clientreg, void *clientarg)
                               value, item->mteTriggerExistenceObjectsOwner,
                               item->mteTriggerExistenceObjects,
                               "existence: present");
+                senttrap = 1;
             }
 
             if ((item->mteTriggerExistenceTest[0] &
@@ -3346,6 +3347,7 @@ mte_run_trigger(unsigned int clientreg, void *clientarg)
                               value, item->mteTriggerExistenceObjectsOwner,
                               item->mteTriggerExistenceObjects,
                               "existence: changed");
+                senttrap = 1;
             }
         }
 
@@ -3428,6 +3430,7 @@ mte_run_trigger(unsigned int clientreg, void *clientarg)
                               &x, item->mteTriggerBooleanObjectsOwner,
                               item->mteTriggerBooleanObjects,
                               "boolean: true");
+                senttrap = 1;
             }
 
             DEBUGMSGTL(("mteTriggerTable",
@@ -3477,6 +3480,7 @@ mte_run_trigger(unsigned int clientreg, void *clientarg)
                               item->mteTriggerThresholdObjectsOwner,
                               item->mteTriggerThresholdObjects,
                               "threshold: rising");
+                senttrap = 1;
             }
             if (((item->started == MTE_STARTED && laststate &&
                   lastthresh == MTE_THRESHOLD_HIGH) ||
@@ -3492,6 +3496,7 @@ mte_run_trigger(unsigned int clientreg, void *clientarg)
                               item->mteTriggerThresholdObjectsOwner,
                               item->mteTriggerThresholdObjects,
                               "threshold: falling");
+                senttrap = 1;
             }
 
         }
@@ -3543,7 +3548,10 @@ mte_run_trigger(unsigned int clientreg, void *clientarg)
         /*
          * We are now done with the response PDU.  
          */
-        snmp_free_pdu(response);
+        if (senttrap) 
+            senttrap = 0;
+        else
+            snmp_free_pdu(response);
     } while (item->mteTriggerValueIDWildcard == TV_TRUE);
 
     /*
