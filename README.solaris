@@ -57,6 +57,7 @@ to be 64 when compiling libnetsnmp. According to what I see in Solaris's
 /usr/include/sys/feature_tests.h, you can select a 64-bit off_t at 
 compile time with this setting, which should make readdir()'s off_t 
 compatible with SFIO's ftell(), fseek().
+ [[ We have received reports that this approach does not in fact work ]]
 
 Finally, thanks to Phong Vo and AT&T Labs for a fast, robust and
 portable package that solves this headache very neatly.
