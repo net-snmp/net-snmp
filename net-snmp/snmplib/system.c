@@ -131,11 +131,6 @@ opendir(char *filename)
  *	downcase = TRUE;
  *  }
  */
-    /* Get us a DIR structure */
-    p = (DIR*)malloc(sizeof(DIR));
-    /* Newz(1303, p, 1, DIR); */
-    if(p == NULL)
-	return NULL;
 
     /* Create the search pattern */
     strcpy(scanname, filename);
@@ -151,6 +146,12 @@ opendir(char *filename)
 	return NULL;
     }
 
+    /* Get us a DIR structure */
+    p = (DIR*)malloc(sizeof(DIR));
+    /* Newz(1303, p, 1, DIR); */
+    if(p == NULL)
+	return NULL;
+
     /* now allocate the first part of the string table for
      * the filenames that we find.
      */
@@ -158,7 +159,8 @@ opendir(char *filename)
     p->start = (char*)malloc(idx * sizeof(char));
     /* New(1304, p->start, idx, char);*/
     if(p->start == NULL) {
-	return NULL;
+		free(p);
+		return NULL;
     }
     strcpy(p->start, FindData.cFileName);
 /*  if(downcase)
@@ -180,6 +182,7 @@ opendir(char *filename)
 			idx+len+1 * sizeof(char));
 	/* Renew(p->start, idx+len+1, char);*/
 	if(p->start == NULL) {
+		free(p);
 	    return NULL;
 	}
 	strcpy(&p->start[idx], FindData.cFileName);
