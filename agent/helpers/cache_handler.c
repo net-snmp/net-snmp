@@ -31,6 +31,10 @@ void            release_cached_resources(unsigned int regNo,
  *  registered "load_cache" routine if necessary.
  *  The lower handlers can then work with this local cached data.
  *
+ *  A timeout value of -1 will cause netsnmp_cache_check_expired() to
+ *  always return true, and thus the cache will be reloaded for every
+ *  request.
+ *
  *  To minimze resource use by the agent, a periodic callback checks for
  *  expired caches, and will call the free_cache function for any expired
  *  cache.
@@ -45,6 +49,11 @@ void            release_cached_resources(unsigned int regNo,
  *  will not be called after a set request has processed. It is assumed that
  *  the lower mib handler using the cache has maintained cache consistency.
  *
+ *  If NETSNMP_CACHE_DONT_FREE_BEFORE_LOAD is set, the free_cache method
+ *  will not be called before the load_cache method is called. It is assumed
+ *  that the load_cache routine will properly deal with being called with a
+ *  valid cache.
+ *
  *  If NETSNMP_CACHE_DONT_FREE_EXPIRED is set, the free_cache method will
  *  not be called with the cache expires. The expired flag will be set, but
  *  the valid flag will not be cleared. It is assumed that the load_cache
@@ -58,6 +67,41 @@ void            release_cached_resources(unsigned int regNo,
  *  checked for expiration when a request triggers the cache handler. This
  *  is useful if the cache has it's own periodic callback to keep the cache
  *  fresh.
+ *
+ *  If NETSNMP_CACHE_AUTO_RELOAD is set, a timer will be set up to reload
+ *  the cache when it expires. This is useful for keeping the cache fresh,
+ *  even in the absence of incoming snmp requests.
+ *
+ *
+ *  Here are some suggestions for some common situations.
+ *
+ *  Cached File:
+ *      If your table is based on a file that may periodically change,
+ *      you can test the modification date to see if the file has
+ *      changed since the last cache load. To get the cache helper to call
+ *      the load function for every request, set the timeout to -1, which
+ *      will cause the cache to always report that it is expired. This means
+ *      that you will want to prevent the agent from flushing the cache when
+ *      it has expired, and you will have to flush it manually if you
+ *      detect that the file has changed. To accomplish this, set the
+ *      following flags:
+ *
+ *          NETSNMP_CACHE_DONT_FREE_EXPIRED
+ *          NETSNMP_CACHE_DONT_AUTO_RELEASE
+ *
+ *
+ *  Constant (periodic) reload:
+ *      If you want the cache kept up to date regularly, even if no requests
+ *      for the table are received, you can have your cache load routine
+ *      called periodically. This is very useful if you need to monitor the
+ *      data for changes (eg a <i>LastChanged</i> object). You will need to
+ *      prevent the agent from flushing the cache when it expires. Set the
+ *      cache timeout to the frequency, in seconds, that you wish to
+ *      reload your cache, and set the following flags:
+ *
+ *          NETSNMP_CACHE_DONT_FREE_EXPIRED
+ *          NETSNMP_CACHE_DONT_AUTO_RELEASE
+ *          NETSNMP_CACHE_AUTO_RELOAD
  *
  *  @{
  */
@@ -132,25 +176,92 @@ netsnmp_cache_create(int timeout, NetsnmpCacheLoad * load_hook,
     return cache;
 }
 
+/** callback function to call cache load function */
+static void
+_timer_reload(unsigned int regNo, void *clientargs)
+{
+    netsnmp_cache *cache = (netsnmp_cache *)clientargs;
+
+    DEBUGMSGT(("cache_timer:start", "loading cache %p\n", cache));
+
+    cache->expired = 1;
+
+    _cache_load(cache);
+}
+
+/** starts the recurring cache_load callback */
+unsigned int
+netsnmp_cache_timer_start(netsnmp_cache *cache)
+{
+    if(NULL == cache)
+        return 0;
+
+    if(0 != cache->timer_id) {
+        snmp_log(LOG_WARNING, "cache has existing timer id.\n");
+        return cache->timer_id;
+    }
+    
+    if(! (cache->flags & NETSNMP_CACHE_AUTO_RELOAD)) {
+        snmp_log(LOG_ERR,
+                 "cache_timer_start called but auto_reload not set.\n");
+        return 0;
+    }
+
+    cache->timer_id = snmp_alarm_register(cache->timeout, SA_REPEAT,
+                                          _timer_reload, cache);
+    if(0 == cache->timer_id) {
+        snmp_log(LOG_ERR,"could not register alarm\n");
+        return 0;
+    }
+
+    DEBUGMSGT(("cache_timer:start",
+               "starting timer %d for cache %p\n", cache->timer_id, cache));
+    return cache->timer_id;
+}
+
+/** stops the recurring cache_load callback */
+void
+netsnmp_cache_timer_stop(netsnmp_cache *cache)
+{
+    if(NULL == cache)
+        return;
+
+    if(0 == cache->timer_id) {
+        snmp_log(LOG_WARNING, "cache has no timer id.\n");
+        return;
+    }
+
+    DEBUGMSGT(("cache_timer:stop",
+               "stopping timer %d for cache %p\n", cache->timer_id, cache));
+
+    snmp_alarm_unregister(cache->timer_id);
+}
+
+
 /** returns a cache handler that can be injected into a given handler chain.  
  */
 netsnmp_mib_handler *
 netsnmp_cache_handler_get(netsnmp_cache* cache)
 {
     netsnmp_mib_handler *ret = NULL;
-
+    
     ret = netsnmp_create_handler("cache_handler",
                                  netsnmp_cache_helper_handler);
     if (ret) {
         ret->flags |= MIB_HANDLER_AUTO_NEXT;
         ret->myvoid = (void *) cache;
-
-        if((NULL != cache) &&
-           (cache->flags & NETSNMP_CACHE_PRELOAD) && ! cache->valid) {
-            /*
-             * load cache, ignore rc (failed load doesn't affect registration)
-             */
-            (void)_cache_load(cache);
+        
+        if(NULL != cache) {
+            if ((cache->flags & NETSNMP_CACHE_PRELOAD) && ! cache->valid) {
+                /*
+                 * load cache, ignore rc
+                 * (failed load doesn't affect registration)
+                 */
+                (void)_cache_load(cache);
+            }
+            if (cache->flags & NETSNMP_CACHE_AUTO_RELOAD)
+                netsnmp_cache_timer_start(cache);
+            
         }
     }
     return ret;
@@ -219,7 +330,7 @@ netsnmp_cache_check_expired(netsnmp_cache *cache)
     if(NULL == cache)
         return 0;
     
-    if(!cache->valid || (NULL == cache->timestamp))
+    if(!cache->valid || (NULL == cache->timestamp) || (-1 == cache->timeout))
         cache->expired = 1;
     else
         cache->expired = atime_ready(cache->timestamp, 1000 * cache->timeout);
@@ -269,7 +380,6 @@ netsnmp_cache_helper_handler(netsnmp_mib_handler * handler,
                              netsnmp_request_info * requests)
 {
     netsnmp_cache  *cache = NULL;
-    int             ret;
 
     DEBUGMSGTL(("helper:cache_handler", "Got request (%d): ",
                 reqinfo->mode));
@@ -294,7 +404,12 @@ netsnmp_cache_helper_handler(netsnmp_mib_handler * handler,
     case MODE_GETBULK:
     case MODE_SET_RESERVE1:
         /*
-         * only touch cache once per pdu request
+         * only touch cache once per pdu request, to prevent a cache
+         * reload while a module is using cached data.
+         *
+         * XXX: this won't catch a request reloading the cache while
+         * a previous (delegated) request is still using the cache.
+         * maybe use a reference counter?
          */
         if(netsnmp_cache_is_valid(reqinfo))
             return SNMP_ERR_NOERROR;
@@ -339,8 +454,7 @@ netsnmp_cache_helper_handler(netsnmp_mib_handler * handler,
 static void
 _cache_free( netsnmp_cache *cache )
 {
-    if ((NULL != cache->free_cache) && 
-        ! (cache->flags & NETSNMP_CACHE_DONT_FREE_EXPIRED)) {
+    if (NULL != cache->free_cache) {
         cache->free_cache(cache, cache->magic);
         cache->valid = 0;
     }
@@ -354,7 +468,8 @@ _cache_load( netsnmp_cache *cache )
     /*
      * If we've got a valid cache, then release it before reloading
      */
-    if (cache->valid )
+    if (cache->valid &&
+        (! (cache->flags & NETSNMP_CACHE_DONT_FREE_BEFORE_LOAD)))
         _cache_free(cache);
 
     if ( cache->load_cache)
@@ -366,12 +481,14 @@ _cache_load( netsnmp_cache *cache )
         return ret;
     }
     cache->valid = 1;
-    
+    cache->expired = 0;
+
     /*
      * If we didn't previously have any valid caches outstanding,
      *   then schedule a pass of the auto-release routine.
      */
-    if (!cache_outstanding_valid) {
+    if ((!cache_outstanding_valid) &&
+        (! (cache->flags & NETSNMP_CACHE_DONT_FREE_EXPIRED))) {
         snmp_alarm_register(CACHE_RELEASE_FREQUENCY,
                             0, release_cached_resources, NULL);
         cache_outstanding_valid = 1;
@@ -415,7 +532,8 @@ release_cached_resources(unsigned int regNo, void *clientargs)
              *   least one active cache.
              */
             if (netsnmp_cache_check_expired(cache)) {
-                _cache_free(cache);
+                if(! (cache->flags & NETSNMP_CACHE_DONT_FREE_EXPIRED))
+                    _cache_free(cache);
             } else {
                 cache_outstanding_valid = 1;
             }

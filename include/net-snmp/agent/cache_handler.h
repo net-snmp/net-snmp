@@ -31,6 +31,7 @@ extern          "C" {
         char     expired;
         int      timeout;	/* Length of time the cache is valid (in s) */
         marker_t timestamp;	/* When the cache was last loaded */
+        u_long   timer_id;      /* periodic timer id */
 
         NetsnmpCacheLoad *load_cache;
         NetsnmpCacheFree *free_cache;
@@ -71,10 +72,18 @@ extern          "C" {
     netsnmp_cache * netsnmp_cache_find_by_oid(oid * rootoid,
                                               int rootoid_len);
 
+    unsigned int netsnmp_cache_timer_start(netsnmp_cache *cache);
+    void netsnmp_cache_timer_stop(netsnmp_cache *cache);
+
+/*
+ * Flags affecting cache operation
+ */
 #define NETSNMP_CACHE_DONT_INVALIDATE_ON_SET                0x0001
-#define NETSNMP_CACHE_DONT_FREE_EXPIRED                     0x0002
-#define NETSNMP_CACHE_DONT_AUTO_RELEASE                     0x0004
-#define NETSNMP_CACHE_PRELOAD                               0x0008
+#define NETSNMP_CACHE_DONT_FREE_BEFORE_LOAD                 0x0002
+#define NETSNMP_CACHE_DONT_FREE_EXPIRED                     0x0004
+#define NETSNMP_CACHE_DONT_AUTO_RELEASE                     0x0008
+#define NETSNMP_CACHE_PRELOAD                               0x0010
+#define NETSNMP_CACHE_AUTO_RELOAD                           0x0020
 
 #ifdef __cplusplus
 };
