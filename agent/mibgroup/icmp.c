@@ -336,10 +336,10 @@ var_icmp(vp, name, length, exact, var_len, write_method)
       		long_return = icmpstat.icmpOutAddrMaskReps;
       		break;
 	default:
-		ret = NULL;
 		ERROR("");
+                return(NULL);
     }
-    return (ret);
+    return ((u_char *) &long_return);
 }
 #endif /* solaris2 */
 
