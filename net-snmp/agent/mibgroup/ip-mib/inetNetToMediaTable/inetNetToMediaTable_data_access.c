@@ -198,7 +198,6 @@ _snarf_arp_entry(netsnmp_arp_entry * arp_entry,
 int
 inetNetToMediaTable_cache_load(netsnmp_container * container)
 {
-    inetNetToMediaTable_rowreq_ctx *rowreq_ctx;
     netsnmp_container *arp_container;
 
     DEBUGMSGTL(("verbose:inetNetToMediaTable:inetNetToMediaTable_cache_load", "called\n"));

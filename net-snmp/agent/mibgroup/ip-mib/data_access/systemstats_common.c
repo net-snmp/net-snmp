@@ -32,6 +32,8 @@ static void _entry_release(netsnmp_systemstats_entry * entry, void *unused);
 extern int
 netsnmp_access_systemstats_container_arch_load(netsnmp_container* container,
                                              u_int load_flags);
+extern void
+netsnmp_access_systemstats_arch_init(void);
 
 /**---------------------------------------------------------------------*/
 /*
@@ -246,7 +248,7 @@ netsnmp_access_systemstats_entry_update_stats(netsnmp_systemstats_entry * prev_v
         /*
          * if we don't have old stats, they can't have wrapped, so just copy
          */
-        prev_vals->old_stats = SNMP_MALLOC_TYPEDEF(netsnmp_systemstats_entry);
+        prev_vals->old_stats = SNMP_MALLOC_TYPEDEF(netsnmp_ipstats);
         if (NULL == prev_vals->old_stats) {
             return -2;
         }
