@@ -16,11 +16,12 @@ OTHERUNINSTALL=localuninstall
 #
 SNMPCONFPATH=@SNMPCONFPATH@
 PERLSCRIPTS=snmpcheck tkmib mib2c fixproc ipf-mod.pl snmpconf traptoemail
+SHELLSCRIPTS=mib2c-update
 SCRIPTSMADEFORPERL=snmpcheck.made tkmib.made mib2c.made fixproc.made \
 	ipf-mod.pl.made snmpconf.made traptoemail.made
 PERLPROG=@PERLPROG@
 DATASRCS=mib2c.conf mib2c.iterate.conf mib2c.iterate_access.conf \
-	mib2c.create-dataset.conf \
+	mib2c.create-dataset.conf mib2c.mfd.conf \
 	mib2c.array-user.conf mib2c.column_enums.conf \
 	mib2c.column_defines.conf mib2c.old-api.conf mib2c.scalar.conf \
 	mib2c.check_values.conf mib2c.check_values_local.conf \
@@ -127,9 +128,10 @@ traptoemail.made: $(srcdir)/traptoemail
 	  touch traptoemail.made; \
         fi
 
-localinstall:
+localinstall: $(SCRIPTSMADEFORPERL)
 	@if test "x$(PERLPROG)" != "x" ; then \
 	  for i in $(PERLSCRIPTS) ; do $(INSTALL) $$i.made $(INSTALL_PREFIX)$(bindir)/$$i ; echo "install:  installed $$i in $(INSTALL_PREFIX)$(bindir)" ; done ; \
+	  for i in $(SHELLSCRIPTS) ; do $(INSTALL) $$i $(INSTALL_PREFIX)$(bindir)/$$i ; echo "install:  installed $$i in $(INSTALL_PREFIX)$(bindir)" ; done ; \
 	  $(SHELL) $(srcdir)/../mkinstalldirs $(INSTALL_PREFIX)$(snmplibdir) ; \
 	  for i in $(DATASRCS) ; do $(INSTALL_DATA) $(srcdir)/$$i $(INSTALL_PREFIX)$(snmplibdir)/$$i ; echo "install:  installed $$i in $(INSTALL_PREFIX)$(snmplibdir)" ; done ; \
 	  for i in $(CONFDIRS); do $(SHELL) $(srcdir)/../mkinstalldirs $(INSTALL_PREFIX)$(CONFINSTALLDIR)/$$i ; done ; \
@@ -141,6 +143,7 @@ localinstall:
 localuninstall:
 	@if test "x$(PERLPROG)" != "x" ; then \
 	  for i in $(PERLSCRIPTS) ; do rm -f $(INSTALL_PREFIX)$(bindir)/$$i ; echo "removed $$i from $(INSTALL_PREFIX)$(bindir)" ; done ; \
+	  for i in $(SHELLSCRIPTS) ; do rm -f $(INSTALL_PREFIX)$(bindir)/$$i ; echo "removed $$i from $(INSTALL_PREFIX)$(bindir)" ; done ; \
 	  for i in $(DATASRCS) ; do rm -f $(INSTALL_PREFIX)$(snmplibdir)/$$i ; echo "removed $$i from $(INSTALL_PREFIX)$(snmplibdir)" ; done ; \
 	  for i in $(CONFFILES); do rm -f $(INSTALL_PREFIX)$(CONFINSTALLDIR)/$$i; echo "removed $$i from $(INSTALL_PREFIX)$(CONFINSTALLDIR)"; done ; \
 	  for i in $(MIB2CFILES); do rm -f $(INSTALL_PREFIX)$(MIB2CINSTALLDIR)/$$i; echo "removed $$i from $(INSTALL_PREFIX)$(MIB2CINSTALLDIR)"; done \
