@@ -69,16 +69,16 @@ SOFTWARE.
 #include <dmalloc.h>
 #endif
 
+#define SNMP_NEED_REQUEST_LIST
+#include <net-snmp/net-snmp-includes.h>
+#include <net-snmp/agent/net-snmp-agent-includes.h>
+#include <net-snmp/library/snmp_assert.h>
+
 #ifdef USE_LIBWRAP
 #include <tcpd.h>
 int             allow_severity = LOG_INFO;
 int             deny_severity = LOG_WARNING;
 #endif
-
-#define SNMP_NEED_REQUEST_LIST
-#include <net-snmp/net-snmp-includes.h>
-#include <net-snmp/agent/net-snmp-agent-includes.h>
-#include <net-snmp/library/snmp_assert.h>
 
 #include "snmpd.h"
 #include "mibgroup/struct.h"
