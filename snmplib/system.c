@@ -287,13 +287,6 @@ int gettimeofday(struct timeval *tv,
 }
 #endif	/* !HAVE_GETTIMEOFDAY */
 
-#ifndef HAVE_STRNCASECMP
-int strncasecmp(const char *s1, const char *s2, size_t n)
-{
-  return _strnicmp(s1, s2, n);
-}
-#endif /* HAVE_STRNCASECMP */
-
 in_addr_t get_myaddr(void)
 {
   char local_host[130];
@@ -368,7 +361,8 @@ void winsock_cleanup (void)
    WSACleanup();
 }
 
-#else							/* WIN32 */
+#else							/* ! WIN32 */
+/*******************************************************************/
 
 /*
  * XXX	What if we have multiple addresses?
@@ -507,7 +501,52 @@ long get_uptime (void)
 #endif /* linux */
    return (0); /* not implemented */
 }
-#endif
+
+#endif							/* ! WIN32 */
+/*******************************************************************/
+
+#ifndef HAVE_STRNCASECMP
+
+/* test for NULL pointers before and NULL characters after
+ * comparing possibly non-NULL strings.
+ * WARNING: This function does NOT check for array overflow.
+ */
+int strncasecmp(const char *s1, const char *s2, size_t nch)
+{
+    size_t ii;
+    int res = -1;
+
+    if (!s1) {
+        if (!s2)  return 0;
+        return (-1);
+    }
+    if (!s2)
+        return (1);
+
+    for (ii=0; (ii < nch) && (*s1 != '\0')
+         && (*s2 != '\0'); ii++, *s1++, *s2++)
+    {
+        res = (int) (tolower(*s1) - tolower(*s2));
+        if (res != 0) break;
+    }
+
+    if (! *s1) {
+        if (! *s2)  return 0;
+        return (-1);
+    }
+    if (! *s2)
+        return (1);
+
+    return (res);
+}
+
+int strcasecmp(const char *s1, const char *s2)
+{
+    return strncasecmp(s1, s2, 1000000);
+}
+
+#endif /* HAVE_STRNCASECMP */
+
 
 #ifndef HAVE_STRDUP
 char *

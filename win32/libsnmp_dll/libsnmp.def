@@ -161,6 +161,7 @@ EXPORTS
 	snmp_register_callback
 	snmp_call_callbacks
 	strncasecmp
+	strcasecmp
 	init_snmp_alarm
 	ds_register_premib
 	ds_register_config
