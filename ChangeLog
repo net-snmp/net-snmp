@@ -1,5 +1,43 @@
 -------------------------------------------------------------------------------
-	
+
+Changes: V3.5.2 -> V3.5.3
+
+hardaker 12 Sep 98 09:02:37
+    - (snmp_api.c): Patch from Michael Slifcak:
+      - bug fix to check for NULL session pointer before using it.
+
+hardaker 20 Sep 98 11:47:17
+    - (snmp_agent.c): if a mib module returns an error > SNMP_GEN_ERR,
+      translate the error to SNMP_GEN_ERR for v1 requests.
+
+hardaker 21 Sep 98 11:13:19
+    - (snmp_vars.c): finally fixed the write_method's for creation problem.
+
+hardaker 25 Sep 98 16:53:31
+    - (EXAMPLE.conf.def): update.
+
+hardaker 25 Sep 98 17:02:39
+    - (configure, configure.in): perl eq -> test = (opps).
+
+hardaker 25 Sep 98 17:08:25
+    - (parse.c): Patch from Michael Slifcak:
+      - check for a null name.
+
+hardaker 25 Sep 98 17:42:10
+    - (parse.c): Patch from Joe Marzot:
+      - use a memset to zero out new pointers instead of doing it by hand.
+
+hardaker 28 Sep 98 13:09:06
+    - (interfaces.c): don't use a & on osf3 for arpcom.ac_enaddr.
+
+hardaker 28 Sep 98 13:09:45
+    - (snmp_api.c): typecast the default community string to (u_char *).
+
+hardaker 28 Sep 98 15:42:21
+    - (memory.c): /etc/swapinfo -> /usr/sbin/swapinfo for hpux10.
+
+-------------------------------------------------------------------------------
+
 Changes: V3.5.1 -> V3.5.2
 
 hardaker  8 Sep 98 09:26:13
@@ -26,6 +64,9 @@ hardaker  9 Sep 98 09:50:22
 hardaker  9 Sep 98 11:00:44
     - (NEWS): update for 3.5.2.
 
+marz  9 Sep 98  18:31:00
+    - (snmptrap.c, snmptest.c): add SOCK_ macros for win32 support
+	
 -------------------------------------------------------------------------------
 	
 Changes: V3.5 -> V3.5.1

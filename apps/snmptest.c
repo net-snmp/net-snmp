@@ -7,13 +7,13 @@
 
                       All Rights Reserved
 
-Permission to use, copy, modify, and distribute this software and its 
-documentation for any purpose and without fee is hereby granted, 
+Permission to use, copy, modify, and distribute this software and its
+documentation for any purpose and without fee is hereby granted,
 provided that the above copyright notice appear in all copies and that
-both that copyright notice and this permission notice appear in 
+both that copyright notice and this permission notice appear in
 supporting documentation, and that the name of CMU not be
 used in advertising or publicity pertaining to distribution of the
-software without specific, written prior permission.  
+software without specific, written prior permission.
 
 CMU DISCLAIMS ALL WARRANTIES WITH REGARD TO THIS SOFTWARE, INCLUDING
 ALL IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS, IN NO EVENT SHALL
@@ -112,10 +112,13 @@ main(argc, argv)
 
     snmp_parse_args(argc, argv, &session);
 
+    SOCK_STARTUP;
+
     snmp_synch_setup(&session);
     ss = snmp_open(&session);
     if (ss == NULL){
         snmp_perror("snmptest");
+        SOCK_CLEANUP;
 	exit(1);
     }
 
@@ -243,13 +246,14 @@ main(argc, argv)
 	    } else {    /* status == STAT_ERROR */
               snmp_perror("snmptest");
 	    }
-	    
+
 	    if (response)
 		snmp_free_pdu(response);
 	}
 	varcount = 0;
 	nonRepeaters = -1;
     }
+    SOCK_CLEANUP;
     return 0;
 }
 
@@ -313,6 +317,7 @@ input_variable(vp)
                     case '\n':
 		    case 0:
 		        printf("Quitting,  Goodbye\n");
+                        SOCK_CLEANUP;
 			exit(0);
 			break;
 		    case 'P':
