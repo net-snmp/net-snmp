@@ -1,18 +1,6 @@
 package NetSNMP::agent::netsnmp_request_infoPtr;
 
-use strict;
-use Carp;
-
-require Exporter;
-require DynaLoader;
-use AutoLoader;
-
-use NetSNMP::OID (':all');
-
-sub getOID {
-  return NetSNMP::OID::newwithptr("NetSNMP::OID", getOIDptr($_[0]));
-}
-
+# bogus file
 
 1;
 __END__
@@ -22,9 +10,7 @@ NetSNMP::agent::netsnmp_request_infoPtr - Perl extension for request information
 
 =head1 SYNOPSIS
 
-  use NetSNMP::agent;
-  my $agent = new NetSNMP::agent('Name' -> 'my_agent_name');
-  ... TBD ...
+  see NetSNMP::agent documentation
 
 =head1 AUTHOR
 
