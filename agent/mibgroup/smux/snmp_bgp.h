@@ -5,7 +5,7 @@
 #ifndef _MIBGROUP_SNMP_BGP_H
 #define _MIBGROUP_SNMP_BGP_H
 
-config_require(smux)
+config_require(smux/smux)
 
 extern u_char	*var_bgp();
 
