@@ -420,6 +420,7 @@ getValue:
 		    if (!snmp_decimal_to_binary(&(vp->val.string), &buf_len,
 						&val_len, 1, buf)) {
 			printf("Bad value or no sub-identifier > 255\n");
+			free(vp->val.string);
 			goto getValue;
 		    }
 		    vp->val_len = val_len;
@@ -442,6 +443,7 @@ getValue:
 		    if (!snmp_hex_to_binary(&(vp->val.string), &buf_len,
 					    &val_len, 1, buf)) {
 			printf("Bad value (need pairs of hex digits)\n");
+			free(vp->val.string);
 			goto getValue;
 		    }
 		    vp->val_len = val_len;
