@@ -24,7 +24,7 @@ INSTALLDIRS = $(SUBDIRS)
 all:	mib.txt sedscript EXAMPLE.conf subdirs
 
 sedscript: sedscript.in config.h agent/extensible/mibdefs.h
-	$(CPP) -DPREFIX=$(prefix) sedscript.in | sed 's/REMOVEME//g' > sedscript
+	$(CPP) -DPREFIX=$(prefix) sedscript.in | sed 's/REMOVEME//g;s# /#/#g;s/ #/#/g;' > sedscript
 
 subdirs:
 	for i in $(SUBDIRS) ; do \
