@@ -421,6 +421,9 @@ int type;
 	case ASN_UINTEGER:
             return(TYPE_UINTEGER);
 	    break;
+	case ASN_COUNTER64:
+            return(TYPE_COUNTER64);
+	    break;
 	default:
             warn("translate_asn_type: unhandled asn type (%d)\n",type);
             return(TYPE_OTHER);
