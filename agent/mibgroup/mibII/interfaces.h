@@ -16,6 +16,8 @@ config_require(util_funcs)
 
      int             Interface_Scan_Get_Count(void);
      int             Interface_Index_By_Name(char *, int);
+int      Interface_Scan_By_Index(int, char *, struct ifnet *,
+                                        struct in_ifaddr *);
      void            Interface_Scan_Init(void);
 #if defined(linux) || defined(sunV3)
      struct in_ifaddr {

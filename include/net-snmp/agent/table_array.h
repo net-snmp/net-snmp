@@ -26,7 +26,11 @@ extern          "C" {
 #include <net-snmp/library/container.h>
 #include <net-snmp/agent/table.h>
 
-#define TABLE_ARRAY_NAME "table_array"
+    /*
+     * forward declares
+     */
+    struct netsnmp_container;
+    struct netsnmp_index;
 
     /*
      * group_item is to allow us to keep a list of requests without
@@ -77,6 +81,10 @@ extern          "C" {
         void                        *rg_void;
 
     } netsnmp_request_group;
+
+
+#define TABLE_ARRAY_NAME "table_array"
+
 
     typedef int     (Netsnmp_User_Row_Operation_c) (const void *lhs,
                                                     const void *rhs);
