@@ -1,0 +1,238 @@
+IPFILTER DEFINITIONS ::= BEGIN
+
+-- This module defines MIB components for reading information from the
+-- IP Filter. This would let you only read its rules and counters.
+-- IP Filter by Darren Reed <darrenr@pobox.com>
+-- IP Filter web page URL http://coombs.anu.edu.au/~avalon/
+-- ipf-mod.pl module by Yaroslav Terletsky <ts@polynet.lviv.ua>
+-- IP Filter UCD-SNMP module URL
+--	ftp://ftp.polynet.lviv.ua/pub/UNIX/security/ipf/ucd-snmp-ipf-mod.tgz
+-- Yaroslav Terletsky <ts@polynet.lviv.ua>
+
+IMPORTS
+	OBJECT-TYPE
+	    FROM RFC-1212
+	enterprises, Counter
+	    FROM RFC1155-SMI
+	ucdExperimental
+	    FROM UCD-SNMP-MIB;
+
+-- numerical definition
+ipFilter	OBJECT IDENTIFIER ::= { ucdExperimental 2 }
+
+ipfInTable OBJECT-TYPE
+	SYNTAX SEQUENCE OF IpfInEntry
+	ACCESS not-accessible
+	STATUS mandatory
+	DESCRIPTION
+		"A table with IP Filter incoming rules and statistic"
+	::= { ipFilter 1 }
+
+ipfInEntry OBJECT-TYPE
+	SYNTAX IpfInTableEntry
+	ACCESS not-accessible
+	STATUS mandatory
+	DESCRIPTION
+		"IP Filter incoming rules table entry"
+	INDEX { ipfInIndex }
+	::= { ipfInTable 1 }
+
+IpfInTableEntry ::= SEQUENCE {
+	ipfInIndex	INTEGER,
+	ipfInRule	OCTET STRING,
+	ipfInHits	Counter
+	}
+
+ipfInIndex OBJECT-TYPE
+	SYNTAX INTEGER
+	ACCESS read-only
+	STATUS mandatory
+	DESCRIPTION
+		"Reference index for each incoming IP Filter rule"
+	::= { ipfInEntry 1 }
+
+ipfInRule OBJECT-TYPE
+	SYNTAX OCTET STRING
+	ACCESS read-only
+	STATUS mandatory
+	DESCRIPTION
+		"Textual representation of the incoming IP Filter rule"
+	::= { ipfInEntry 2 }
+
+ipfInHits OBJECT-TYPE
+	SYNTAX Counter
+	ACCESS read-only
+	STATUS mandatory
+	DESCRIPTION
+		"Hits of the incoming IP Filter rule"
+	::= { ipfInEntry 3 }
+
+ipfOutTable OBJECT-TYPE
+	SYNTAX SEQUENCE OF IpfOutEntry
+	ACCESS not-accessible
+	STATUS mandatory
+	DESCRIPTION
+		"A table with IP Filter outgoing rules and statistic"
+	::= { ipFilter 2 }
+
+ipfOutEntry OBJECT-TYPE  
+	SYNTAX IpfOutTableEntry
+	ACCESS not-accessible 
+	STATUS mandatory
+	DESCRIPTION
+		"IP Filter outgoing rules table entry"
+	INDEX { ipfOutIndex }
+	::= { ipfOutTable 1 }
+
+IpfOutTableEntry ::= SEQUENCE {
+	ipfOutIndex	INTEGER,
+	ipfOutRule	OCTET STRING,
+	ipfOutHits	Counter
+	}
+
+ipfOutIndex OBJECT-TYPE
+	SYNTAX INTEGER
+	ACCESS read-only
+	STATUS mandatory
+	DESCRIPTION
+		"Reference index for each outgoing IP Filter rule"
+	::= { ipfOutEntry 1 }
+
+ipfOutRule OBJECT-TYPE
+	SYNTAX OCTET STRING
+	ACCESS read-only
+	STATUS mandatory
+	DESCRIPTION
+		"Textual representation of the outgoing IP Filter rule"
+	::= { ipfOutEntry 2 }
+
+ipfOutHits OBJECT-TYPE
+	SYNTAX Counter
+	ACCESS read-only
+	STATUS mandatory
+	DESCRIPTION
+		"Hits of the outgoing IP Filter rule"
+	::= { ipfOutEntry 3 }
+
+ipfAccInTable OBJECT-TYPE
+	SYNTAX SEQUENCE OF IpfAccInEntry
+	ACCESS not-accessible
+	STATUS mandatory
+	DESCRIPTION
+		"A table with IP Filter incoming accounting rules
+		and statistic"
+	::= { ipFilter 3 }
+
+ipfAccInEntry OBJECT-TYPE
+	SYNTAX IpfAccInTableEntry
+	ACCESS not-accessible
+	STATUS mandatory
+	DESCRIPTION
+		"IP FIlter incoming accounting rules table entry"
+	INDEX { ipfAccInIndex }
+	::= { ipfAccInTable 1 }
+
+IpfAccInTableEntry ::= SEQUENCE {
+	ipfAccInIndex	INTEGER,
+	ipfAccInRule	OCTET STRING,
+	ipfAccInHits	Counter
+	ipfAccInBytes	Counter
+	}
+
+ipfAccInIndex OBJECT-TYPE
+	SYNTAX INTEGER
+	ACCESS read-only
+	STATUS mandatory
+	DESCRIPTION
+		"Reference index for each incoming accounting
+		IP Filter rule"
+	::= { ipfAccInEntry 1 }
+
+ipfAccInRule OBJECT-TYPE
+	SYNTAX OCTET STRING
+	ACCESS read-only
+	STATUS mandatory
+	DESCRIPTION
+		"Textual representation of the incoming accounting
+		IP Filter rule"
+	::= { ipfAccInEntry 2 }
+
+ipfAccInHits OBJECT-TYPE
+	SYNTAX Counter
+	ACCESS read-only
+	STATUS mandatory
+	DESCRIPTION
+		"Hits of the incoming accounting IP Filter rule"
+	::= { ipfAccInEntry 3 }
+
+ipfAccInBytes OBJECT-TYPE
+	SYNTAX Counter
+	ACCESS read-only
+	STATUS mandatory
+	DESCRIPTION
+		"Bytes passed thru the incoming accounting
+		IP Filter rule"
+	::= { ipfAccInEntry 4 }
+
+ipfAccOutTable OBJECT-TYPE
+	SYNTAX SEQUENCE OF IpfAccOutEntry
+	ACCESS not-accessible
+	STATUS mandatory
+	DESCRIPTION
+		"A table with IP Filter outgoing accounting rules
+		and statistic"
+	::= { ipFilter 4 }
+
+ipfAccOutEntry OBJECT-TYPE
+	SYNTAX IpfAccOutTableEntry
+	ACCESS not-accessible
+	STATUS mandatory
+	DESCRIPTION
+		"IP Filter outgoing accounting rules table entry"
+	INDEX { ipfAccOutIndex }
+	::= { ipfAccOutTable 1 }
+
+IpfAccOutTableEntry ::= SEQUENCE {
+	ipfAccOutIndex	INTEGER,
+	ipfAccOutRule	OCTET STRING,
+	ipfAccOutHits	Counter
+	ipfAccOutBytes	Counter
+	}
+
+ipfAccOutIndex OBJECT-TYPE
+	SYNTAX INTEGER
+	ACCESS read-only
+	STATUS mandatory
+	DESCRIPTION
+		"Reference index for each outgoing accounting
+		IP Filter rule"
+	::= { ipfAccOutEntry 1 }
+
+ipfAccOutRule OBJECT-TYPE
+	SYNTAX OCTET STRING
+	ACCESS read-only
+	STATUS mandatory
+	DESCRIPTION
+		"Textual representation of the outgoing accounting
+		IP Filter rule"
+	::= { ipfAccOutEntry 2 }
+
+ipfAccOutHits OBJECT-TYPE
+	SYNTAX Counter
+	ACCESS read-only
+	STATUS mandatory
+	DESCRIPTION
+		"Hits of the outgoing accounting IP Filter rule"
+	::= { ipfAccOutEntry 3 }
+
+ipfAccOutBytes OBJECT-TYPE
+	SYNTAX Counter
+	ACCESS read-only
+	STATUS mandatory
+	DESCRIPTION
+		"Bytes passed thru the outgoing accounting
+		IP Filter rule"
+	::= { ipfAccOutEntry 4 }
+
+END
+
