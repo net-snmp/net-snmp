@@ -4,7 +4,7 @@
 config_require(agentx/protocol)
 config_require(agentx/client)
 
-void init_subagent(void);
+void pre_init_subagent(void);
 int handle_agentx_packet(int, struct snmp_session *, int, struct snmp_pdu *, void *);
 SNMPCallback agentx_register_callback;
 SNMPCallback agentx_unregister_callback;
