@@ -362,10 +362,10 @@ var_ipAddrEntry(vp, name, length, exact, var_len, write_method)
 
 #endif
 
-#ifndef linux
+#if !defined(linux) && !defined(freebsd2)
       if ( ifnet.if_addrlist == 0 )
           continue;                   /* No address found for interface */
-#endif /* linux */
+#endif /* linux/freebsd2 */
 
 	op = current + 10;
 	*op++ = *cp++;
