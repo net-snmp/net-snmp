@@ -1238,7 +1238,7 @@ get_symbol(objid, objidlen, subtree, buf)
 
     for(; subtree; subtree = subtree->next_peer){
 	if (*objid == subtree->subid){
-	    if (!strncmp( subtree->label, "anonymous#", 10))
+	    if (!strncmp( subtree->label, ANON, ANON_LEN))
                 sprintf(buf, "%lu", subtree->subid);
 	    else
                 strcpy(buf, subtree->label);
