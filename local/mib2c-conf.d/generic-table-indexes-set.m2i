@@ -66,8 +66,6 @@ ${context}_indexes_set_tbl_idx(${context}_mib_index *tbl_idx$gtis_tmp)
     
 @end@ // for each column
 
-    /** xxx-rks: call validation routines? assume caller knows what they
-     * are doing? */
     return MFD_SUCCESS;
 }
 
