@@ -1451,6 +1451,29 @@ create_user_from_session(struct snmp_session *session)
 }  /* end create_user_from_session() */
 
 /*
+ *  Do a "deep free()" of a struct snmp_session.
+ *
+ *  CAUTION:  SHOULD ONLY BE USED FROM snmp_sess_close() OR SIMILAR.
+ *                                                      (hence it is static)
+ */
+
+static void
+snmp_free_session(struct snmp_session *s)
+{
+  if (s) {
+    SNMP_FREE(s->peername);
+    SNMP_FREE(s->community);
+    SNMP_FREE(s->contextEngineID);
+    SNMP_FREE(s->contextName);
+    SNMP_FREE(s->securityEngineID);
+    SNMP_FREE(s->securityName);
+    SNMP_FREE(s->securityAuthProto);
+    SNMP_FREE(s->securityPrivProto);
+    free((char *)s);
+  }
+}
+
+/*
  * Close the input session.  Frees all data allocated for the session,
  * dequeues any pending requests, and closes any sockets allocated for
  * the session.  Returns 0 on error, 1 otherwise.
@@ -1500,23 +1523,25 @@ snmp_sess_close(void *sessp)
     }
 
     sesp = slp->session; slp->session = 0;
+
+    /*  The following is necessary to avoid memory leakage when closing AgentX 
+	sessions that may have multiple subsessions.  These hang off the main
+	session at ->subsession, and chain through ->next.  */
+
     if (sesp != NULL  && sesp->subsession != NULL) {
-      DEBUGMSGTL(("snmp_sess_close", "closing an AgentX session?\n"));
-    }
-    if (sesp) {
-        SNMP_FREE(sesp->peername);
-        SNMP_FREE(sesp->community);
-        SNMP_FREE(sesp->contextEngineID);
-        SNMP_FREE(sesp->contextName);
-        SNMP_FREE(sesp->securityEngineID);
-        SNMP_FREE(sesp->securityName);
-        SNMP_FREE(sesp->securityAuthProto);
-        SNMP_FREE(sesp->securityPrivProto);
-        free((char *)sesp);
-    }
+      struct snmp_session *subsession = sesp->subsession, *tmpsub;
 
+      while (subsession != NULL) {
+	DEBUGMSGTL(("snmp_sess_close", "closing session %p, subsession %p\n",
+		    sesp, subsession));
+	tmpsub = subsession->next;
+	snmp_free_session(subsession);
+	subsession = tmpsub;
+      }
+    }
+    
+    snmp_free_session(sesp);
     free((char *)slp);
-
     return 1;
 }
 
@@ -4025,6 +4050,221 @@ snmp_free_pdu(struct snmp_pdu *pdu)
     free((char *)pdu);
 }
 
+/*  This function processes a complete (according to asn_check_packet or the
+    AgentX equivalent) packet, parsing it into a PDU and calling the relevant
+    callbacks.  On entry, packetptr points at the packet in the session's
+    buffer and length is the length of the packet.  */
+
+static int
+_sess_process_packet(void *sessp, struct snmp_session *sp,
+		     struct snmp_internal_session *isp,
+		     snmp_transport *transport,
+		     void *opaque, int olength,
+		     char *packetptr, int length)
+		     
+{
+  struct session_list *slp = (struct session_list *)sessp;
+  struct snmp_pdu *pdu;
+  struct request_list *rp, *orp = NULL;
+  struct snmp_secmod_def *sptr;
+  int ret = 0;
+  
+  DEBUGMSGTL(("sess_process_packet", "session %p, pkt %p length %d\n",
+	      sessp, packetptr, length));
+
+  if (ds_get_boolean(DS_LIBRARY_ID, DS_LIB_DUMP_PACKET)) {
+    if (transport->f_fmtaddr != NULL) {
+      char *addrtxt = transport->f_fmtaddr(transport, opaque, olength);
+      if (addrtxt != NULL) {
+	snmp_log(LOG_DEBUG, "\nReceived %d bytes from %s\n", length, addrtxt);
+	free(addrtxt);
+      } else {
+	snmp_log(LOG_DEBUG, "\nReceived %d bytes from <UNKNOWN>\n", length);
+      }
+    }
+    xdump(packetptr, length, "");
+  }
+
+  /*  Do transport-level filtering (e.g. IP-address based allow/deny).  */
+
+  if (isp->hook_pre) {
+    if (isp->hook_pre(sp, transport, opaque, olength) == 0) {
+      return -1;
+    }
+  }
+
+  pdu = (struct snmp_pdu *)calloc(1,sizeof(struct snmp_pdu));
+  if (pdu == NULL) {
+    return -1;
+  }
+
+  /*  Save the transport-level data specific to this reception (e.g. UDP
+      source address).  */
+
+  pdu->transport_data        = opaque;
+  pdu->transport_data_length = olength;
+  pdu->tDomain		     = transport->domain;
+  pdu->tDomainLen	     = transport->domain_length;
+
+  if (isp->hook_parse) {
+    ret = isp->hook_parse(sp, pdu, packetptr, length);
+  } else {
+    ret = snmp_parse(sessp, sp, pdu, packetptr, length);
+  }
+
+  if (isp->hook_post) {
+    if (isp->hook_post(sp, pdu, ret) == 0) {
+      snmp_free_pdu(pdu);
+      return -1;
+    }
+  }
+
+  if (ret != SNMP_ERR_NOERROR) {
+    snmp_free_pdu(pdu);
+    return -1;
+  }
+
+  if (pdu->flags & UCD_MSG_FLAG_RESPONSE_PDU) {
+    /*  Call USM to free any securityStateRef supplied with the message.  */
+    if (pdu->securityStateRef) {
+      sptr = find_sec_mod(pdu->securityModel);
+      if (sptr) {
+	if (sptr->pdu_free_state_ref) {
+	  (*sptr->pdu_free_state_ref)(pdu->securityStateRef);
+	} else {
+	  snmp_log(LOG_ERR, "Security Model %d can't free state references\n",
+		   pdu->securityModel);
+	}
+      } else {
+	snmp_log(LOG_ERR, "Can't find security model to free ptr: %d\n",
+		 pdu->securityModel);
+      }
+      pdu->securityStateRef = NULL;
+    }
+
+    for (rp = isp->requests; rp; orp = rp, rp = rp->next_request) {
+      snmp_callback callback;
+      void *magic;
+
+      if (pdu->version == SNMP_VERSION_3) {
+	/*  msgId must match for v3 messages.  */
+	if (rp->message_id != pdu->msgid) {
+	  continue;
+	}
+
+	/*  Check that message fields match original, if not, no further
+	    processing.  */ 
+	if (!snmpv3_verify_msg(rp,pdu)) {
+	  break;
+	}
+      } else {
+	if (rp->request_id != pdu->reqid) {
+	  continue;
+	}
+      }
+
+      if (rp->callback) {
+	callback = rp->callback;
+	magic    = rp->cb_data;
+      } else {
+	callback = sp->callback;
+	magic    = sp->callback_magic;
+      }
+
+      /* MTR snmp_res_lock(MT_LIBRARY_ID, MT_LIB_SESSION);  ?* XX lock
+	 should be per session ! */
+
+      if (callback == NULL || callback(SNMP_CALLBACK_OP_RECEIVED_MESSAGE,
+				       sp, pdu->reqid, pdu, magic) == 1) {
+	if (pdu->command == SNMP_MSG_REPORT) {
+	  if (sp->s_snmp_errno == SNMPERR_NOT_IN_TIME_WINDOW) {
+	    /* trigger immediate retry on recoverable Reports 
+	     * (notInTimeWindow), incr_retries == TRUE to prevent
+	     * inifinite resend 		       */
+	    if (rp->retries <= sp->retries) {
+	      snmp_resend_request(slp, rp, TRUE);
+	      break;
+	    }
+	  } else {
+	    if (SNMPV3_IGNORE_UNAUTH_REPORTS) {
+	      break;
+	    }
+	  }
+
+	  /*  Handle engineID discovery.  */
+	  if (!sp->securityEngineIDLen && pdu->securityEngineIDLen) {
+	    sp->securityEngineID = (u_char *)malloc(pdu->securityEngineIDLen);
+	    if (sp->securityEngineID == NULL) {
+	      /* TODO FIX: recover after message callback *?
+		 return -1;
+	      */
+	    }
+	    memcpy(sp->securityEngineID, pdu->securityEngineID,
+		   pdu->securityEngineIDLen);
+	    sp->securityEngineIDLen = pdu->securityEngineIDLen;
+	    if (!sp->contextEngineIDLen) {
+	      sp->contextEngineID = (u_char *)malloc(pdu->securityEngineIDLen);
+	      if (sp->contextEngineID == NULL) {
+		/* TODO FIX: recover after message callback *?
+		   return -1;
+		*/
+	      }
+	      memcpy(sp->contextEngineID, pdu->securityEngineID,
+		     pdu->securityEngineIDLen);
+	      sp->contextEngineIDLen = pdu->securityEngineIDLen;
+	    }
+	  }
+	}
+
+	/*  Successful, so delete request.  */
+	if (isp->requests == rp) {
+	  isp->requests = rp->next_request;
+	  if (isp->requestsEnd == rp) {
+	    isp->requestsEnd = NULL;
+	  }
+	} else {
+	  orp->next_request = rp->next_request;
+	  if (isp->requestsEnd == rp) {
+	    isp->requestsEnd = orp;
+	  }
+	}
+	snmp_free_pdu(rp->pdu);
+	free((char *)rp);
+	/*  There shouldn't be any more requests with the same reqid.  */
+	break;
+      }
+      /* MTR snmp_res_unlock(MT_LIBRARY_ID, MT_LIB_SESSION);  ?* XX lock should be per session ! */
+    }
+  } else {
+    if (sp->callback) {
+      /* MTR snmp_res_lock(MT_LIBRARY_ID, MT_LIB_SESSION); */
+      sp->callback(SNMP_CALLBACK_OP_RECEIVED_MESSAGE,
+		   sp, pdu->reqid, pdu,sp->callback_magic);
+      /* MTR snmp_res_unlock(MT_LIBRARY_ID, MT_LIB_SESSION); */
+    }	
+  }
+
+  /*  Call USM to free any securityStateRef supplied with the message.  */
+  if (pdu != NULL && pdu->securityStateRef && pdu->command == SNMP_MSG_TRAP2) {
+    sptr = find_sec_mod(pdu->securityModel);
+    if (sptr) {
+      if (sptr->pdu_free_state_ref) {
+	(*sptr->pdu_free_state_ref)(pdu->securityStateRef);
+      } else {
+	snmp_log(LOG_ERR, "Security Model %d can't free state references\n",
+		 pdu->securityModel);
+      }
+    } else {
+      snmp_log(LOG_ERR, "Can't find security model to free ptr: %d\n",
+	       pdu->securityModel);
+    }
+    pdu->securityStateRef = NULL;
+  }
+
+  snmp_free_pdu(pdu);
+  return 0;
+}
+
 /*
  * Checks to see if any of the fd's set in the fdset belong to
  * snmp.  Each socket with it's fd set has a packet read from it
@@ -4048,31 +4288,26 @@ snmp_read(fd_set *fdset)
 /* MTR: can't lock here and at snmp_read */
 /* Beware recursive send maybe inside snmp_read callback function. */
 int
-_sess_read(void *sessp,
-	       fd_set *fdset)
+_sess_read(void *sessp, fd_set *fdset)
 {
   struct session_list *slp = (struct session_list *)sessp;
-  struct snmp_session *sp;
-  struct snmp_internal_session *isp;
-  snmp_transport *transport;
+  struct snmp_session *sp = slp->session;
+  struct snmp_internal_session *isp = slp->internal;
+  snmp_transport *transport = slp->transport;
   u_char packet[PACKET_LENGTH], *packetptr = packet;
-  size_t length = 0;
-  struct snmp_pdu *pdu;
-  struct request_list *rp, *orp = NULL;
-  int ret, olength = 0;
+  size_t length = 0, packetlen = 0;
+  int olength = 0, rc = 0;
   void *opaque = NULL;
-  struct snmp_secmod_def *sptr;
   
-  sp = slp->session; isp = slp->internal;
-  transport = slp->transport;
-
   if (!sp || !isp || !transport) {
     DEBUGMSGTL(("sess_read", "read fail: closing...\n"));
     return 0;
   }
 
   if (!isp->newpkt && (!fdset || !(FD_ISSET(transport->sock, fdset)))) {
-    DEBUGMSGTL(("sess_read", "not reading...\n"));
+    DEBUGMSGTL(("sess_read", "not reading %d (newpkt %d fdset %p set %d)\n",
+		transport->sock, isp->newpkt, fdset,
+		fdset?FD_ISSET(transport->sock, fdset):-9));
     return 0;
   }
     
@@ -4152,15 +4387,28 @@ _sess_read(void *sessp,
 
   if ((length == 0 && !isp->newpkt) &&
       (transport->flags & SNMP_TRANSPORT_FLAG_STREAM)) {
+    /*  Alert the application if possible.  */
+    if (sp->callback != NULL) {
+      DEBUGMSGTL(("sess_read", "perform callback with op=DISCONNECT\n"));
+      (void)sp->callback(SNMP_CALLBACK_OP_DISCONNECT,
+			 sp, 0, NULL, sp->callback_magic);
+    }
     /*  Close socket and mark session for deletion.  */
-    DEBUGMSGTL(("sess_read", "fd %d closed\n", transport->sock));
+    DEBUGMSGTL(("sess_read", "fd %d closed\n", transport->sock));    
     transport->f_close(transport);
     return -1;
   }
 
   if (transport->flags & SNMP_TRANSPORT_FLAG_STREAM) {
     if (isp->newpkt == 1) {
-      /*  Move the old memory down, if we have saved data.  */
+      /*  We have saved a *partial* packet from last time.  isp->packet_len
+	  tells you the total length of the buffer, which contains previously
+	  processed packets as well as our partial packet.  isp->proper_len is 
+	  the number of bytes of that buffer that we have processed already,
+	  so we move the data from past that point to the start of the buffer
+	  and update isp->packet_len and isp->proper_len.  */ 
+      DEBUGMSGTL(("sess_read","isp->newpkt set, packet_len %d proper_len %d\n",
+		  isp->packet_len, isp->proper_len));
       isp->packet_len -= isp->proper_len;
       memmove(isp->packet, isp->packet+isp->proper_len, isp->packet_len);
       isp->newpkt = 0;
@@ -4197,223 +4445,62 @@ _sess_read(void *sessp,
     /*  Add the new data to the end of our buffer.  */
     memcpy(isp->packet+isp->packet_len, packet, length);
     isp->packet_len += length;
-      
-    /*  Check for agentx length parser.  */
-    if (isp->proper_len == 0) {
-      /*  Get the total data length we're expecting (and need to wait for) */
-      if (isp->check_packet) {
-	isp->proper_len = isp->check_packet(isp->packet, isp->packet_len);
-      } else {
-	isp->proper_len = asn_check_packet(isp->packet, isp->packet_len);
-      }
+    isp->newpkt = 1;
 
-      if (isp->proper_len > MAX_PACKET_LENGTH) {
+    while (isp->packet_len > 0) {
+      /*  Get the total data length we're expecting (and need to wait for).  */
+      if (isp->check_packet) {
+	packetlen = isp->check_packet(packetptr, isp->packet_len);
+      } else {
+	packetlen = asn_check_packet(packetptr, isp->packet_len);
+      }
+      
+      DEBUGMSGTL(("sess_read","loop packet_len %d, proper_len %d, pktlen %d\n",
+		  isp->packet_len, isp->proper_len, packetlen));
+
+      if (packetlen > MAX_PACKET_LENGTH) {
 	/*  Illegal length, drop the connection.  */
 	snmp_log(LOG_ERR, "Maximum packet size exceeded in a request.\n");
 	transport->f_close(transport);
 	return -1;
       }
-    }
-      
-    /*  If its not long enough now, give up and contiune waiting.  */
-    if (isp->proper_len == 0 || isp->packet_len < isp->proper_len) {
-      DEBUGMSGTL(("sess_read", "short packet! (%d/%d)\n",
-		  isp->packet_len, isp->proper_len));
-      return 0;
-    }
 
-    /*  Else we need to continue, and process the saved data.
-	Careful though, we may have more than is needed!  Save it!  */
-    packetptr = isp->packet;
-    length = isp->proper_len;
-    if (isp->packet_len - isp->proper_len == 0) {
-      isp->packet_len -= isp->proper_len;
-      isp->proper_len = 0;
-    } else if (isp->packet_len - isp->proper_len < 0) {
-      snmp_log(LOG_ERR,"something seriously wrong, packet size calculations are negative.\n");
-      isp->packet_len = 0;
-      isp->proper_len = 0;
-    } else if (isp->packet_len - isp->proper_len > 0) {
-      isp->newpkt = 1;
-    }
-  }
-
-  if (ds_get_boolean(DS_LIBRARY_ID, DS_LIB_DUMP_PACKET)) {
-    if (transport->f_fmtaddr != NULL) {
-      char *addrtxt = transport->f_fmtaddr(transport, opaque, olength);
-      if (addrtxt != NULL) {
-	snmp_log(LOG_DEBUG, "\nReceived %d bytes from %s\n", length, addrtxt);
-	free(addrtxt);
-      } else {
-	snmp_log(LOG_DEBUG, "\nReceived %d bytes from <UNKNOWN>\n", length);
-      }
-    }
-    xdump(packetptr, length, "");
-  }
-
-  /*  Do transport-level filtering (e.g. IP-address based allow/deny).  */
-
-  if (isp->hook_pre) {
-    if (isp->hook_pre(sp, transport, opaque, olength) == 0) {
-      return -1;
-    }
-  }
-
-  pdu = (struct snmp_pdu *)calloc(1,sizeof(struct snmp_pdu));
-  if (pdu == NULL) {
-    return -1;
-  }
-
-  /*  Save the transport-level data specific to this reception (e.g. UDP
-      source address).  */
-
-  pdu->transport_data        = opaque;
-  pdu->transport_data_length = olength;
-  pdu->tDomain		     = transport->domain;
-  pdu->tDomainLen	     = transport->domain_length;
-
-  if (isp->hook_parse) {
-    ret = isp->hook_parse(sp, pdu, packetptr, length);
-  } else {
-    ret = snmp_parse(sessp, sp, pdu, packetptr, length);
-  }
-  if (isp->hook_post) {
-    if (isp->hook_post(sp, pdu, ret) == 0) {
-      snmp_free_pdu(pdu);
-      return -1;
-    }
-  }
-  if (ret != SNMP_ERR_NOERROR) {
-    snmp_free_pdu(pdu);
-    return -1;
-  }
-
-  if (pdu->flags & UCD_MSG_FLAG_RESPONSE_PDU) {
-    /* call USM to free any securityStateRef supplied with the message */
-    if (pdu->securityStateRef) {
-        sptr = find_sec_mod(pdu->securityModel);
-        if (sptr) {
-            if (sptr->pdu_free_state_ref) {
-                (*sptr->pdu_free_state_ref)(pdu->securityStateRef);
-            } else {
-                snmp_log(LOG_ERR,
-                         "Security Model %d can't free state references\n",
-                         pdu->securityModel);
-            }
-        } else {
-            snmp_log(LOG_ERR, "Can't find security model to free ptr: %d\n",
-                     pdu->securityModel);
-        }
-        pdu->securityStateRef = NULL;
-    }
-    for(rp = isp->requests; rp; orp = rp, rp = rp->next_request) {
-      snmp_callback callback;
-      void *magic;
-      if (pdu->version == SNMP_VERSION_3) {
-	/* msgId must match for V3 messages */
-	if (rp->message_id != pdu->msgid) continue;
-	/* check that message fields match original,
-	 * if not, no further processing */
-	if (!snmpv3_verify_msg(rp,pdu)) break;
-      } else {
-	if (rp->request_id != pdu->reqid) continue;
-      }
-      if (rp->callback) {
-	callback = rp->callback;
-	magic = rp->cb_data;
-      } else {
-	callback = sp->callback;
-	magic = sp->callback_magic;
+      if (packetlen == 0 || packetlen > isp->packet_len) {
+	/*  We don't have a complete packet yet.  Return, and wait for more
+	    data to arrive.  */
+	DEBUGMSGTL(("sess_read", "short packet (needed %d got %d)\n",
+		    packetlen, isp->packet_len));
+	return 0;
       }
 
-      /* MTR snmp_res_lock(MT_LIBRARY_ID, MT_LIB_SESSION);  ?* XX lock
-	 should be per session ! */
+      /*  We have *at least* one complete packet in the buffer now.  */
 
-      if (callback == NULL || 
-	  callback(SNMP_CALLBACK_OP_RECEIVED_MESSAGE,
-		   sp, pdu->reqid, pdu, magic) == 1) {
-	if (pdu->command == SNMP_MSG_REPORT) {
-	  if (sp->s_snmp_errno == SNMPERR_NOT_IN_TIME_WINDOW) {
-	    /* trigger immediate retry on recoverable Reports 
-	     * (notInTimeWindow), incr_retries == TRUE to prevent
-	     * inifinite resend 		       */
-	    if (rp->retries <= sp->retries) {
-	      snmp_resend_request(slp, rp, TRUE);
-	      break;
-	    }
-	  } else {
-	    if (SNMPV3_IGNORE_UNAUTH_REPORTS) break;
-	  }
-	  /* handle engineID discovery - */
-	  if (!sp->securityEngineIDLen && pdu->securityEngineIDLen) {
-	    sp->securityEngineID = (u_char *)malloc(pdu->securityEngineIDLen);
-	    if (sp->securityEngineID == NULL) {
-	      /* TODO FIX: recover after message callback *?
-		 return -1;
-	      */
-	    }
-	    memcpy(sp->securityEngineID, pdu->securityEngineID,
-		   pdu->securityEngineIDLen);
-	    sp->securityEngineIDLen = pdu->securityEngineIDLen;
-	    if (!sp->contextEngineIDLen) {
-	      sp->contextEngineID = (u_char *)malloc(pdu->securityEngineIDLen);
-	      if (sp->contextEngineID == NULL) {
-		/* TODO FIX: recover after message callback *?
-		   return -1;
-		*/
-	      }
-	      memcpy(sp->contextEngineID, pdu->securityEngineID,
-		     pdu->securityEngineIDLen);
-	      sp->contextEngineIDLen = pdu->securityEngineIDLen;
-	    }
-	  }
+      if ((rc = _sess_process_packet(sessp, sp,  isp, transport,
+				     opaque, olength, packetptr, packetlen))) {
+	/*  Something went wrong while processing this packet -- set the
+	    errno.  */
+	if (sp->s_snmp_errno != 0) {
+	  SET_SNMP_ERROR(sp->s_snmp_errno);
 	}
-	/*  Successful, so delete request.  */
-	if (isp->requests == rp) {
-	  isp->requests = rp->next_request;
-	  if (isp->requestsEnd == rp) {
-	    isp->requestsEnd = NULL;
-	  }
-	} else {
-	  orp->next_request = rp->next_request;
-	  if (isp->requestsEnd == rp) {
-	    isp->requestsEnd = orp;
-	  }
-	}
-	snmp_free_pdu(rp->pdu);
-	free((char *)rp);
-	/*  There shouldn't be any more requests with the same reqid.  */
-	break;
       }
-      /* MTR snmp_res_unlock(MT_LIBRARY_ID, MT_LIB_SESSION);  ?* XX lock should be per session ! */
+
+      packetptr += packetlen;
+      isp->proper_len += packetlen;
+      isp->packet_len -= packetlen;
     }
+
+    /*  If we get here, then there is no partial packet left at the end of the 
+	buffer, so isp->newpkt = 0 and isp->proper_len = 0.  */
+
+    DEBUGMSGTL(("sess_read","end packet_len %d, proper_len %d, pktlen %d\n",
+		isp->packet_len, isp->proper_len, packetlen));
+    isp->newpkt = 0;
+    isp->proper_len = 0;
+    return rc;
   } else {
-    if (sp->callback) {
-      /* MTR snmp_res_lock(MT_LIBRARY_ID, MT_LIB_SESSION); */
-      sp->callback(SNMP_CALLBACK_OP_RECEIVED_MESSAGE,
-		   sp, pdu->reqid, pdu,sp->callback_magic);
-      /* MTR snmp_res_unlock(MT_LIBRARY_ID, MT_LIB_SESSION); */
-    }	
+    return _sess_process_packet(sessp, sp, isp, transport, opaque, olength,
+				packet, length);
   }
-  /* call USM to free any securityStateRef supplied with the message */
-  if (pdu != NULL && pdu->securityStateRef && pdu->command == SNMP_MSG_TRAP2) {
-      sptr = find_sec_mod(pdu->securityModel);
-      if (sptr) {
-          if (sptr->pdu_free_state_ref) {
-              (*sptr->pdu_free_state_ref)(pdu->securityStateRef);
-          } else {
-              snmp_log(LOG_ERR,
-                       "Security Model %d can't free state references\n",
-                       pdu->securityModel);
-          }
-      } else {
-          snmp_log(LOG_ERR, "Can't find security model to free ptr: %d\n",
-                   pdu->securityModel);
-      }
-      pdu->securityStateRef = NULL;
-  }
-  snmp_free_pdu(pdu);
-  return 0;
 }
 
 
@@ -4544,13 +4631,6 @@ snmp_sess_select_info(void *sessp,
       }
     }
 
-    if (slp->internal != NULL && slp->internal->newpkt) {
-      /*  Don't block at all, more data waiting to be processed.  */
-      DEBUGMSGTL(("sess_select","more data in buffer, not blocking\n"));
-      requests++;
-      timer_set = 1;
-      *block = 0;
-    }
     active++;
     if (sessp) {
       /*  Single session processing.  */
@@ -4593,7 +4673,7 @@ snmp_sess_select_info(void *sessp,
 
   if (timer_set || earliest.tv_sec < now.tv_sec) {
     earliest.tv_sec  = 0;
-    earliest.tv_usec = 100;
+    earliest.tv_usec = 0;
   }
   else if (earliest.tv_sec == now.tv_sec) {
     earliest.tv_sec  = 0;
