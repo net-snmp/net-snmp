@@ -756,6 +756,7 @@ if test "x$mini_agent" = "xyes"; then
 new_with_out_mib_modules="mibII $new_without_mib_modules"
 new_module_list="snmpv3mibs mibII/snmp_mib mibII/system_mib mibII/sysORTable examples/ucdDemoPublic mibII/vacm_vars $new_with_mib_modules"
 default_mibs=SNMPv2-MIB:RFC1213-MIB
+default_mibs_install=" "
 fi
 
 
@@ -831,6 +832,15 @@ while test "x$new_module_list" != "x"; do
 		if test "x`echo :$default_mibs: | grep :$j:`" = "x"; then
 		    default_mibs="$default_mibs:$j"
 		fi
+		if test -f $srcdir/mibs/$j.txt; then
+		    if echo $default_mibs_install | grep " $j " > /dev/null; then
+			    echo "************** not adding $j ($default_mibs_install)"
+			    :
+		    else
+			    echo "-------------- adding $j"
+			    default_mibs_install="$default_mibs_install $j.txt"
+		    fi
+		fi
 	    done
 	fi
       else
@@ -877,6 +887,7 @@ AC_SUBST(module_list_c)
 AC_SUBST(module_list_h)
 AC_SUBST(module_list_o)
 AC_SUBST(mibgroup_list_o)
+AC_SUBST(default_mibs_install)
 
 AC_MSG_RESULT(.)
 

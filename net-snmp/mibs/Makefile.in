@@ -20,7 +20,8 @@ RFCMIBS	= IANAifType-MIB.txt IF-MIB.txt IP-MIB.txt TCP-MIB.txt UDP-MIB.txt \
 	IPV6-UDP-MIB.txt
 
 MIBS	= $(V1MIBS) $(V2MIBS) $(V2PMIBS) $(V3MIBS) $(RFCMIBS) \
-	UCD-SNMP-MIB.txt UCD-DEMO-MIB.txt UCD-IPFWACC-MIB.txt UCD-DLMOD-MIB.txt
+	UCD-SNMP-MIB.txt UCD-DEMO-MIB.txt UCD-IPFWACC-MIB.txt \
+	UCD-DLMOD-MIB.txt @default_mibs_install@
 
 all:
 
