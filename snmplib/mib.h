@@ -277,9 +277,7 @@ void init_mib (void);
 void shutdown_mib (void);
 void print_variable (oid *, size_t, struct variable_list *);
 void fprint_variable (FILE *, oid *, size_t, struct variable_list *);
-#ifdef UNSAFE_FUNCTIONS
 void sprint_variable (char *, oid *, size_t, struct variable_list *);
-#endif	/* UNSAFE_FUNCTIONS */
 int snprint_variable		(char *buf, size_t buf_len,
 				 const oid *objid, size_t objidlen,
 				 struct variable_list *variable);
@@ -295,9 +293,7 @@ int sprint_realloc_objid   (u_char **buf, size_t *buf_len,
 
 void print_value (oid *, size_t, struct variable_list *);
 void fprint_value (FILE *, oid *, size_t, struct variable_list *);
-#ifdef UNSAFE_FUNCTIONS
 void sprint_value (char *, oid *, size_t, struct variable_list *);
-#endif	/* UNSAFE_FUNCTIONS */
 int snprint_value		(char *buf, size_t buf_len,
 				 const oid *objid, size_t objidlen,
 				 struct variable_list *variable);
@@ -308,9 +304,7 @@ sprint_realloc_value(u_char **buf, size_t *buf_len,
 		     struct variable_list *variable);
 void print_objid (oid *, size_t);
 void fprint_objid (FILE *, oid *, size_t);
-#ifdef UNSAFE_FUNCTIONS
 char *sprint_objid (char *, oid *, size_t);
-#endif	/* UNSAFE_FUNCTIONS */
 int snprint_objid		(char *buf, size_t buf_len,
 				 const oid *objid, size_t objidlen);
 void print_description (oid *, size_t, int);
@@ -324,7 +318,6 @@ struct tree *get_tree (const oid *, size_t, struct tree *);
 struct tree *get_tree_head (void);
 void  set_function (struct tree *);
 
-#ifdef UNSAFE_FUNCTIONS
 void sprint_hexstring (char *, const u_char *, size_t);
 void sprint_asciistring(char *buf, const u_char *cp, size_t len);
 
@@ -369,7 +362,6 @@ void sprint_float (char *, struct variable_list *, struct enum_list *,
 void sprint_double (char *, struct variable_list *, struct enum_list *,
                     const char *, const char *);
 #endif	/* OPAQUE_SPECIAL_TYPES */
-#endif	/* UNSAFE_FUNCTIONS */
 
 int snprint_hexstring (char *, size_t, const u_char *, size_t);
 int snprint_asciistring(char *, size_t, const u_char *, size_t);
