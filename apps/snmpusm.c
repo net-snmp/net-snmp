@@ -62,6 +62,10 @@
 #include <arpa/inet.h>
 #endif
 
+#ifdef HAVE_OPENSSL_DH_H
+#include <openssl/dh.h>
+#endif
+
 #include <net-snmp/net-snmp-includes.h>
 
 int             main(int, char **);
@@ -78,8 +82,10 @@ int             main(int, char **);
 #define CMD_ACTIVATE       5
 #define CMD_DEACTIVATE_NAME "deactivate"
 #define CMD_DEACTIVATE     6
+#define CMD_CHANGEKEY_NAME  "changekey"
+#define CMD_CHANGEKEY      7
 
-#define CMD_NUM    6
+#define CMD_NUM    7
 
 static const char *successNotes[CMD_NUM] = {
     "SNMPv3 Key(s) successfully changed.",
@@ -87,24 +93,33 @@ static const char *successNotes[CMD_NUM] = {
     "User successfully deleted.",
     "User successfully cloned.",
     "User successfully activated.",
-    "User successfully deactivated."
+    "User successfully deactivated.",
+    "SNMPv3 Key(s) successfully changed."
 };
 
 #define                   USM_OID_LEN    12
+#define                DH_USM_OID_LEN    11
 
-static oid      authKeyOid[MAX_OID_LEN] =
-    { 1, 3, 6, 1, 6, 3, 15, 1, 2, 2, 1, 6 }, ownAuthKeyOid[MAX_OID_LEN] = {
-1, 3, 6, 1, 6, 3, 15, 1, 2, 2, 1, 7}, privKeyOid[MAX_OID_LEN] = {
-1, 3, 6, 1, 6, 3, 15, 1, 2, 2, 1, 9}, ownPrivKeyOid[MAX_OID_LEN] = {
-1, 3, 6, 1, 6, 3, 15, 1, 2, 2, 1, 10}, usmUserCloneFrom[MAX_OID_LEN] = {
-1, 3, 6, 1, 6, 3, 15, 1, 2, 2, 1, 4}, usmUserSecurityName[MAX_OID_LEN] = {
-1, 3, 6, 1, 6, 3, 15, 1, 2, 2, 1, 3}, usmUserStatus[MAX_OID_LEN] = {
-1, 3, 6, 1, 6, 3, 15, 1, 2, 2, 1, 13}
+static oid
 
+authKeyOid[MAX_OID_LEN] = { 1, 3, 6, 1, 6, 3, 15, 1, 2, 2, 1, 6 },
+ownAuthKeyOid[MAX_OID_LEN] = {1, 3, 6, 1, 6, 3, 15, 1, 2, 2, 1, 7},
+privKeyOid[MAX_OID_LEN] = {1, 3, 6, 1, 6, 3, 15, 1, 2, 2, 1, 9},
+ownPrivKeyOid[MAX_OID_LEN] = {1, 3, 6, 1, 6, 3, 15, 1, 2, 2, 1, 10},
+usmUserCloneFrom[MAX_OID_LEN] = {1, 3, 6, 1, 6, 3, 15, 1, 2, 2, 1, 4},
+usmUserSecurityName[MAX_OID_LEN] = {1, 3, 6, 1, 6, 3, 15, 1, 2, 2, 1, 3},
+usmUserStatus[MAX_OID_LEN] = {1, 3, 6, 1, 6, 3, 15, 1, 2, 2, 1, 13},
+/* diffie helman change key objects */
+usmDHUserAuthKeyChange[MAX_OID_LEN] = {1, 3, 6, 1, 3, 101, 1, 1, 2, 1, 1 },
+usmDHUserOwnAuthKeyChange[MAX_OID_LEN] = {1, 3, 6, 1, 3, 101, 1, 1, 2, 1, 2 },
+usmDHUserPrivKeyChange[MAX_OID_LEN] = {1, 3, 6, 1, 3, 101, 1, 1, 2, 1, 3 },
+usmDHUserOwnPrivKeyChange[MAX_OID_LEN] = {1, 3, 6, 1, 3, 101, 1, 1, 2, 1, 4 }
 ;
 
 static
 oid            *authKeyChange = authKeyOid, *privKeyChange = privKeyOid;
+oid            *dhauthKeyChange = usmDHUserAuthKeyChange,
+               *dhprivKeyChange = usmDHUserPrivKeyChange;
 int             doauthkey = 0, doprivkey = 0;
 
 void
@@ -133,7 +148,7 @@ void
 setup_oid(oid * it, size_t * len, u_char * id, size_t idlen,
           const char *user)
 {
-    int             i, itIndex = 12;
+    int             i, itIndex = *len;
 
     *len = itIndex + 1 + idlen + 1 + strlen(user);
 
@@ -156,6 +171,67 @@ setup_oid(oid * it, size_t * len, u_char * id, size_t idlen,
     /*
      * fprintf(stdout, "\n");  
      */
+}
+
+int
+get_USM_DH_key(netsnmp_variable_list *vars, size_t outkey_len,
+               netsnmp_pdu *pdu, const char *keyname,
+               oid *keyoid, size_t keyoid_len) {
+    char *dhkeychange;
+    DH *dh;
+    BIGNUM *other_pub;
+    u_char *key;
+    size_t key_len;
+            
+    dhkeychange = malloc(2 * vars->val_len);
+    memcpy(dhkeychange, vars->val.string, vars->val_len);
+
+    /* XXX: currently hard coded oakley group 2 */
+    dh = DH_new();
+    if (!dh)
+        return SNMPERR_GENERR;
+    
+    BN_hex2bn(&dh->g, "02");
+    BN_hex2bn(&dh->p, "ffffffffffffffffc90fdaa22168c234c4c6628b80dc1cd129024e088a67cc74020bbea63b139b22514a08798e3404ddef9519b3cd3a431b302b0a6df25f14374fe1356d6d51c245e485b576625e7ec6f44c42e9a637ed6b0bff5cb6f406b7edee386bfb5a899fa5ae9f24117c4b1fe649286651ece65381ffffffffffffffff");
+    if (!dh->g || !dh->p)
+        return SNMPERR_GENERR;
+    DH_generate_key(dh);
+    if (!dh->pub_key)
+        return SNMPERR_GENERR;
+            
+    if (vars->val_len != BN_num_bytes(dh->pub_key)) {
+        fprintf(stderr,"incorrect diffie-helman lengths (%d != %d)\n",
+                vars->val_len, BN_num_bytes(dh->pub_key));
+        return SNMPERR_GENERR;
+    }
+
+    BN_bn2bin(dh->pub_key, vars->val.string + vars->val_len);
+
+    key_len = DH_size(dh);
+    if (!key_len)
+        return SNMPERR_GENERR;
+    key = malloc(key_len);
+
+    other_pub = BN_bin2bn(vars->val.string, vars->val_len, NULL);
+    if (!other_pub)
+        return SNMPERR_GENERR;
+
+    if (DH_compute_key(key, other_pub, dh)) {
+        u_char *kp;
+
+        printf("new %s key: 0x", keyname);
+        for(kp = key + key_len - outkey_len;
+            kp - key < key_len;  kp++) {
+            printf("%02x", (unsigned char) *kp);
+        }
+        printf("\n");
+    }
+
+    snmp_pdu_add_variable(pdu, keyoid, keyoid_len,
+                          ASN_OCTET_STR, vars->val.string,
+                          2 * vars->val_len);
+
+    return SNMPERR_SUCCESS;
 }
 
 static void
@@ -214,13 +290,20 @@ main(int argc, char *argv[])
     size_t          oldKu_len = SNMP_MAXBUF_SMALL,
         newKu_len = SNMP_MAXBUF_SMALL,
         oldkul_len = SNMP_MAXBUF_SMALL,
-        newkul_len = SNMP_MAXBUF_SMALL, keychange_len = SNMP_MAXBUF_SMALL;
+        oldkulpriv_len = SNMP_MAXBUF_SMALL,
+        newkulpriv_len = SNMP_MAXBUF_SMALL,
+        newkul_len = SNMP_MAXBUF_SMALL,
+        keychange_len = SNMP_MAXBUF_SMALL,
+        keychangepriv_len = SNMP_MAXBUF_SMALL;
 
     char           *newpass = NULL, *oldpass = NULL;
     u_char          oldKu[SNMP_MAXBUF_SMALL],
         newKu[SNMP_MAXBUF_SMALL],
         oldkul[SNMP_MAXBUF_SMALL],
-        newkul[SNMP_MAXBUF_SMALL], keychange[SNMP_MAXBUF_SMALL];
+        oldkulpriv[SNMP_MAXBUF_SMALL],
+        newkulpriv[SNMP_MAXBUF_SMALL],
+        newkul[SNMP_MAXBUF_SMALL], keychange[SNMP_MAXBUF_SMALL],
+        keychangepriv[SNMP_MAXBUF_SMALL];
 
     authKeyChange = authKeyOid;
     privKeyChange = privKeyOid;
@@ -402,6 +485,33 @@ main(int argc, char *argv[])
         }
 
         /*
+         * for encryption, we may need to truncate the key to the proper length
+         * so we need two copies.  For simplicity, we always just copy even if
+         * they're the same lengths.
+         */
+        if (doprivkey) {
+            if (!session.securityPrivProto) {
+                snmp_log(LOG_ERR, "no encryption type specified, which I need in order to know to change the key\n");
+                exit(1);
+            }
+                
+#ifndef DISABLE_DES
+            if (ISTRANSFORM(session.securityPrivProto, DESPriv)) {
+                /* DES uses a 128 bit key, 64 bits of which is a salt */
+                oldkulpriv_len = newkulpriv_len = 16;
+            }
+#endif
+#ifdef HAVE_AES
+            if (ISTRANSFORM(session.securityPrivProto, AESPriv)) {
+                oldkulpriv_len = newkulpriv_len = 16;
+            }
+#endif
+            memcpy(oldkulpriv, oldkul, oldkulpriv_len);
+            memcpy(newkulpriv, newkul, newkulpriv_len);
+        }
+            
+
+        /*
          * create the keychange string 
          */
         rval = encode_keychange(session.securityAuthProto,
@@ -409,6 +519,21 @@ main(int argc, char *argv[])
                                 oldkul, oldkul_len,
                                 newkul, newkul_len,
                                 keychange, &keychange_len);
+
+        if (rval != SNMPERR_SUCCESS) {
+            snmp_perror(argv[0]);
+            fprintf(stderr, "encoding the keychange failed\n");
+            usage();
+            exit(1);
+        }
+
+        /* which is slightly different for encryption if lengths are
+           different */
+        rval = encode_keychange(session.securityAuthProto,
+                                session.securityAuthProtoLen,
+                                oldkulpriv, oldkulpriv_len,
+                                newkulpriv, newkulpriv_len,
+                                keychangepriv, &keychangepriv_len);
 
         if (rval != SNMPERR_SUCCESS) {
             snmp_perror(argv[0]);
@@ -428,11 +553,16 @@ main(int argc, char *argv[])
                                   ASN_OCTET_STR, keychange, keychange_len);
         }
         if (doprivkey) {
-            setup_oid(privKeyChange, &name_length,
+            printf("priv lengths: %d %d %d\n",
+                   oldkulpriv_len,
+                   newkulpriv_len,
+                   keychangepriv_len);
+            setup_oid(privKeyChange, &name_length2,
                       ss->contextEngineID, ss->contextEngineIDLen,
                       session.securityName);
             snmp_pdu_add_variable(pdu, privKeyChange, name_length,
-                                  ASN_OCTET_STR, keychange, keychange_len);
+                                  ASN_OCTET_STR,
+                                  keychangepriv, keychangepriv_len);
         }
 
     } else if (strcmp(argv[arg], CMD_CREATE_NAME) == 0) {
@@ -461,6 +591,7 @@ main(int argc, char *argv[])
                                   ASN_INTEGER, (u_char *) & longvar,
                                   sizeof(longvar));
 
+            name_length = USM_OID_LEN;
             setup_oid(usmUserCloneFrom, &name_length,
                       ss->contextEngineID, ss->contextEngineIDLen,
                       argv[arg - 1]);
@@ -504,6 +635,7 @@ main(int argc, char *argv[])
         snmp_pdu_add_variable(pdu, usmUserStatus, name_length,
                               ASN_INTEGER, (u_char *) & longvar,
                               sizeof(longvar));
+        name_length = USM_OID_LEN;
         setup_oid(usmUserCloneFrom, &name_length,
                   ss->contextEngineID, ss->contextEngineIDLen, argv[arg]);
 
@@ -575,6 +707,105 @@ main(int argc, char *argv[])
         snmp_pdu_add_variable(pdu, usmUserStatus, name_length,
                               ASN_INTEGER, (u_char *) & longvar,
                               sizeof(longvar));
+#ifdef HAVE_OPENSSL_DH_H
+    } else if (strcmp(argv[arg], CMD_CHANGEKEY_NAME) == 0) {
+        /*
+         * change the key of a user if DH is available
+         */
+
+        char *passwd_user;
+        netsnmp_pdu *dhpdu, *dhresponse = NULL;
+        netsnmp_variable_list *vars;
+        
+        command = CMD_CHANGEKEY;
+        name_length = DH_USM_OID_LEN;
+        name_length2 = DH_USM_OID_LEN;
+
+        passwd_user = argv[++arg];
+
+        if (doprivkey == 0 && doauthkey == 0)
+            doprivkey = doauthkey = 1;
+
+        /* 
+         * Change the user supplied on command line.
+         */
+        if ((passwd_user != NULL) && (strlen(passwd_user) > 0)) {
+            session.securityName = passwd_user;
+        } else {
+            /*
+             * Use own key object if no user was supplied.
+             */
+            dhauthKeyChange = usmDHUserOwnAuthKeyChange;
+            dhprivKeyChange = usmDHUserOwnPrivKeyChange;
+        }
+
+        /*
+         * do we have a securityName?  If not, copy the default 
+         */
+        if (session.securityName == NULL) {
+            session.securityName = 
+	      strdup(netsnmp_ds_get_string(NETSNMP_DS_LIBRARY_ID, 
+					   NETSNMP_DS_LIB_SECNAME));
+        }
+
+        /* fetch the needed diffie helman parameters */
+        dhpdu = snmp_pdu_create(SNMP_MSG_GET);
+        if (doauthkey) {
+            setup_oid(dhauthKeyChange, &name_length,
+                      ss->contextEngineID, ss->contextEngineIDLen,
+                      session.securityName);
+            snmp_add_null_var(dhpdu, dhauthKeyChange, name_length);
+        }
+            
+        if (doprivkey) {
+            setup_oid(dhprivKeyChange, &name_length2,
+                      ss->contextEngineID, ss->contextEngineIDLen,
+                      session.securityName);
+            snmp_add_null_var(dhpdu, dhprivKeyChange, name_length2);
+        }
+
+        /* fetch the values */
+        status = snmp_synch_response(ss, dhpdu, &dhresponse);
+
+        if (status != SNMPERR_SUCCESS || dhresponse == NULL ||
+            dhresponse->errstat != SNMP_ERR_NOERROR ||
+            dhresponse->variables->type != ASN_OCTET_STR) {
+            snmp_sess_perror("snmpusm", ss);
+            if (dhresponse && dhresponse->variables &&
+                dhresponse->variables->type != ASN_OCTET_STR) {
+                fprintf(stderr,
+                        "Can't get diffie-helman exchange from the agent\n");
+                fprintf(stderr,
+                        "  (maybe it doesn't support the SNMP-USM-DH-OBJECTS-MIB MIB)\n");
+            }
+            exitval = 1;
+            goto begone;
+        }
+        
+        vars = dhresponse->variables;
+
+        /* complete the DH equation & print resulting keys */
+        if (doauthkey) {
+            if (get_USM_DH_key(vars,
+                               sc_get_properlength(ss->securityAuthProto,
+                                                   ss->securityAuthProtoLen),
+                               pdu, "auth",
+                               dhauthKeyChange, name_length) != SNMPERR_SUCCESS)
+                goto begone;
+            vars = vars->next_variable;
+        }
+        if (doprivkey) {
+            if (get_USM_DH_key(vars,
+                               sc_get_properlength(ss->securityAuthProto,
+                                                   ss->securityAuthProtoLen),
+                               pdu, "priv",
+                               dhprivKeyChange, name_length2)
+                != SNMPERR_SUCCESS)
+                goto begone;
+            vars = vars->next_variable;
+        }
+        /* snmp_free_pdu(dhresponse); */ /* parts still in use somewhere */
+#endif /* HAVE_OPENSSL_DH_H */
     } else {
         fprintf(stderr, "Unknown command\n");
         usage();
@@ -618,6 +849,7 @@ main(int argc, char *argv[])
         exitval = 1;
     }
 
+  begone:
     if (response)
         snmp_free_pdu(response);
     snmp_close(ss);
