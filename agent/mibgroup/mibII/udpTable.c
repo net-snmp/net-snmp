@@ -271,8 +271,15 @@ udpTable_next_entry( void **loop_context,
 void
 udpTable_free(netsnmp_cache *cache, void *magic)
 {
+#ifdef WIN32
+    if (udp_head) {
+		/* the allocated structure is a count followed by table entries */
+		free((char *)(udp_head) - sizeof(DWORD));
+	}
+#else
     if (udp_head)
         free(udp_head);
+#endif
     udp_head = NULL;
     udp_size = 0;
 }
@@ -540,11 +547,13 @@ udpTable_load(netsnmp_cache *cache, void *vmagic)
     }
     if (status == NO_ERROR) {
         DEBUGMSGTL(("mibII/udpTable", "Loaded UDP Table\n"));
-        udp_size = pUdpTable->dwNumEntries;
+        udp_size = pUdpTable->dwNumEntries -1;  /* entries are counted starting with 0 */
         udp_head = pUdpTable->table;
         return 0;
     }
     DEBUGMSGTL(("mibII/udpTable", "Failed to load UDP Table (win32)\n"));
+    if (pUdpTable)
+	free(pUdpTable);
     return -1;
 }
 #else                           /* WIN32 */
