@@ -394,10 +394,6 @@ Function CreateAgentBats
 
   FileWrite $0 "echo . $\r$\n \
 		%cmdline% %additionaloptions% $\r$\n \
-		echo . $\r$\n \
-                echo A reboot may be required after registering as a service to allow the $\r$\n \
-                echo Service Control Manager to read the system environment variables for $\r$\n \
-                echo SNMPCONFPATH.  $\r$\n \
                 echo .  $\r$\n \
 		echo For information on running snmpd.exe and snmptrapd.exe as a Windows $\r$\n \
 		echo service, see 'How to Register the Net-SNMP Agent and Trap Daemon as $\r$\n \
@@ -443,10 +439,6 @@ Function CreateTrapdBats
 
   FileWrite $0 "echo . $\r$\n \
 		%cmdline% %additionaloptions% $\r$\n \
-		echo . $\r$\n \
-                echo A reboot may be required after registering as a service to allow the $\r$\n \
-                echo Service Control Manager to read the system environment variables for $\r$\n \
-                echo SNMPCONFPATH.  $\r$\n \
                 echo .  $\r$\n \
 		echo For information on running snmpd.exe and snmptrapd.exe as a Windows $\r$\n \
 		echo service, see 'How to Register the Net-SNMP Agent and Trap Daemon as $\r$\n \
