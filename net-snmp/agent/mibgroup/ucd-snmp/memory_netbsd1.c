@@ -164,7 +164,7 @@ var_extensible_mem(struct variable *vp,
                    size_t * var_len, WriteMethod ** write_method)
 {
     static long     long_ret;
-    static char     errmsg[300];
+    static char     errmsg[1024];
 
     static struct uvmexp uvmexp;
     int             uvmexp_size = sizeof(uvmexp);

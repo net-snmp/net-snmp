@@ -80,13 +80,14 @@ get_first_logging_entry(void **loop_context, void **data_context,
                       netsnmp_variable_list *index,
                       netsnmp_iterator_info *data)
 {
-    extern netsnmp_log_handler  *logh_head;
-
+    long temp;
+    netsnmp_log_handler  *logh_head = get_logh_head();
     if ( !logh_head )
         return NULL;
 
-    snmp_set_var_value(index, (u_char*)&logh_head->priority,
-		                 sizeof(logh_head->priority));
+    temp = logh_head->priority;
+    snmp_set_var_value(index, (u_char*)&temp,
+		                 sizeof(temp));
     if ( logh_head->token )
         snmp_set_var_value(index->next_variable, (const u_char*)logh_head->token,
 		                                   strlen(logh_head->token));
@@ -102,14 +103,16 @@ get_next_logging_entry(void **loop_context, void **data_context,
                       netsnmp_variable_list *index,
                       netsnmp_iterator_info *data)
 {
+    long temp;
     netsnmp_log_handler *logh = (netsnmp_log_handler *)*loop_context;
     logh = logh->next;
 
     if ( !logh )
         return NULL;
 
-    snmp_set_var_value(index, (u_char*)&logh->priority,
-		                 sizeof(logh->priority));
+    temp = logh->priority;
+    snmp_set_var_value(index, (u_char*)&temp,
+		                 sizeof(temp));
     if ( logh->token )
         snmp_set_var_value(index->next_variable, (const u_char*)logh->token,
 		                                   strlen(logh->token));
@@ -127,7 +130,7 @@ handle_nsLoggingTable(netsnmp_mib_handler *handler,
                 netsnmp_agent_request_info *reqinfo,
                 netsnmp_request_info *requests)
 {
-    long status;
+    long temp;
     netsnmp_request_info       *request     = NULL;
     netsnmp_table_request_info *table_info  = NULL;
     netsnmp_log_handler        *logh        = NULL;
@@ -148,9 +151,10 @@ handle_nsLoggingTable(netsnmp_mib_handler *handler,
                     netsnmp_set_request_error(reqinfo, request, SNMP_NOSUCHINSTANCE);
                     continue;
 		}
+		temp = logh->type;
 	        snmp_set_var_typed_value(request->requestvb, ASN_INTEGER,
-                                         (u_char*)&logh->type,
-                                            sizeof(logh->type));
+                                         (u_char*)&temp,
+                                            sizeof(temp));
 	        break;
 
             case NSLOGGING_MAXLEVEL:
@@ -158,9 +162,10 @@ handle_nsLoggingTable(netsnmp_mib_handler *handler,
                     netsnmp_set_request_error(reqinfo, request, SNMP_NOSUCHINSTANCE);
                     continue;
 		}
+		temp = logh->pri_max;
 	        snmp_set_var_typed_value(request->requestvb, ASN_INTEGER,
-                                         (u_char*)&logh->pri_max,
-                                            sizeof(logh->pri_max));
+                                         (u_char*)&temp,
+                                            sizeof(temp));
 	        break;
 
             case NSLOGGING_STATUS:
@@ -168,13 +173,13 @@ handle_nsLoggingTable(netsnmp_mib_handler *handler,
                     netsnmp_set_request_error(reqinfo, request, SNMP_NOSUCHINSTANCE);
                     continue;
 		}
-		status = (logh->type ?
+		temp = (logh->type ?
 	                   (logh->enabled ?
 	                      RS_ACTIVE:
 	                      RS_NOTINSERVICE) :
 	                    RS_NOTREADY);
 	        snmp_set_var_typed_value(request->requestvb, ASN_INTEGER,
-                                         (u_char*)&status, sizeof(status));
+                                         (u_char*)&temp, sizeof(temp));
 	        break;
 
             default:
@@ -232,8 +237,7 @@ handle_nsLoggingTable(netsnmp_mib_handler *handler,
                     netsnmp_set_request_error(reqinfo, request, SNMP_ERR_WRONGTYPE);
                     return SNMP_ERR_WRONGTYPE;
                 }
-                status = *request->requestvb->val.integer;
-		switch ( status ) {
+		switch ( *request->requestvb->val.integer ) {
                 case RS_ACTIVE:
                 case RS_NOTINSERVICE:
                     /*
@@ -354,8 +358,7 @@ handle_nsLoggingTable(netsnmp_mib_handler *handler,
 		 * of the request.  Basically, for a row to be marked
 		 * 'active', then there needs to be a valid type value.
 		 */
-                status = *request->requestvb->val.integer;
-		switch ( status ) {
+		switch ( *request->requestvb->val.integer ) {
                 case RS_ACTIVE:
                 case RS_CREATEANDGO:
                     if ( !logh->type ) {
@@ -409,9 +412,9 @@ handle_nsLoggingTable(netsnmp_mib_handler *handler,
 	        break;
 
             case NSLOGGING_STATUS:
-                status = *request->requestvb->val.integer;
-                if ( logh && ( status == RS_CREATEANDGO ||
-                               status == RS_CREATEANDWAIT)) {
+                temp = *request->requestvb->val.integer;
+                if ( logh && ( temp == RS_CREATEANDGO ||
+                               temp == RS_CREATEANDWAIT)) {
 		    netsnmp_remove_loghandler( logh );
 		}
 	        break;

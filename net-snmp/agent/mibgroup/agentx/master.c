@@ -1,8 +1,22 @@
 /*
  *  AgentX master agent
  */
+/* Portions of this file are subject to the following copyright(s).  See
+ * the Net-SNMP's COPYING file for more details and other copyrights
+ * that may apply:
+ */
+/*
+ * Portions of this file are copyrighted by:
+ * Copyright © 2003 Sun Microsystems, Inc. All rights reserved.
+ * Use is subject to license terms specified in the COPYING file
+ * distributed with the Net-SNMP package.
+ */
+
 
 #include <net-snmp/net-snmp-config.h>
+#if HAVE_IO_H
+#include <io.h>
+#endif
 
 #include <stdio.h>
 #include <sys/types.h>
@@ -49,13 +63,36 @@ real_init_master(void)
     netsnmp_session sess, *session;
     char *agentx_sockets;
     char *cp1, *cp2;
+
+#ifdef SNMP_TRANSPORT_UNIX_DOMAIN
     int agentx_dir_perm;
     int agentx_sock_perm;
     int agentx_sock_user;
     int agentx_sock_group;
+#endif
 
     if (netsnmp_ds_get_boolean(NETSNMP_DS_APPLICATION_ID, NETSNMP_DS_AGENT_ROLE) != MASTER_AGENT)
         return;
+
+    if (netsnmp_ds_get_string(NETSNMP_DS_APPLICATION_ID,
+                              NETSNMP_DS_AGENT_X_SOCKET)) {
+       agentx_sockets = netsnmp_ds_get_string(NETSNMP_DS_APPLICATION_ID,
+                                              NETSNMP_DS_AGENT_X_SOCKET);
+#ifdef AGENTX_DOM_SOCK_ONLY
+       if (agentx_sockets[0] != '/') {
+           /* unix:/path */
+           if (agentx_sockets[5] != '/') {
+               snmp_log(LOG_ERR,
+                    "Error: %s transport is not supported, disabling agentx/master.\n", agentx_sockets);
+               SNMP_FREE(agentx_sockets);
+               return;
+           }
+       }
+#endif
+    } else {
+        agentx_sockets = strdup(AGENTX_SOCKET);
+    }
+
 
     DEBUGMSGTL(("agentx/master", "initializing...\n"));
     snmp_sess_init(&sess);
@@ -65,15 +102,6 @@ real_init_master(void)
                                       NETSNMP_DS_AGENT_AGENTX_TIMEOUT);
     sess.retries = netsnmp_ds_get_int(NETSNMP_DS_APPLICATION_ID,
                                       NETSNMP_DS_AGENT_AGENTX_RETRIES);
-
-    if (netsnmp_ds_get_string(NETSNMP_DS_APPLICATION_ID, 
-			      NETSNMP_DS_AGENT_X_SOCKET)) {
-	agentx_sockets = netsnmp_ds_get_string(NETSNMP_DS_APPLICATION_ID, 
-					       NETSNMP_DS_AGENT_X_SOCKET);
-    } else {
-        agentx_sockets = strdup(AGENTX_SOCKET);
-    }
-
     cp1 = agentx_sockets;
     while (1) {
         /*
@@ -91,6 +119,7 @@ real_init_master(void)
 	}
     
         if (sess.peername[0] == '/') {
+#ifdef SNMP_TRANSPORT_UNIX_DOMAIN
             /*
              *  If this is a Unix pathname,
              *  try and create the directory first.
@@ -99,11 +128,16 @@ real_init_master(void)
                                                  NETSNMP_DS_AGENT_X_DIR_PERM);
             if (agentx_dir_perm == 0)
                 agentx_dir_perm = AGENT_DIRECTORY_MODE;
-            if (mkdirhier(sess.peername, agentx_dir_perm, 1)) {
+            if (mkdirhier(sess.peername, (mode_t)agentx_dir_perm, 1)) {
                 snmp_log(LOG_ERR,
                          "Failed to create the directory for the agentX socket: %s\n",
                          sess.peername);
             }
+#else
+            netsnmp_sess_log_error(LOG_WARNING,
+                                   "unix domain support not available\n",
+                                   &sess);
+#endif
         }
     
         /*
@@ -140,7 +174,7 @@ real_init_master(void)
             }
         }
 
-
+#ifdef SNMP_TRANSPORT_UNIX_DOMAIN
     /*
      * Apply any settings to the ownership/permissions of the AgentX socket
      */
@@ -164,7 +198,7 @@ real_init_master(void)
             agentx_sock_group = -1;
         chown(sess.peername, agentx_sock_user, agentx_sock_group);
     }
-
+#endif
         /*
          * If we've processed the last (or only) socket, then we're done.
          */
@@ -472,7 +506,7 @@ agentx_master_handler(netsnmp_mib_handler *handler,
         oid   *nptr = request->requestvb->name;
         
         DEBUGMSGTL(("agentx/master","request for variable ("));
-        DEBUGMSGOID(("agent/master", nptr, nlen));
+        DEBUGMSGOID(("agentx/master", nptr, nlen));
         DEBUGMSG(("agentx/master", ")\n"));
         
         /*
@@ -484,7 +518,7 @@ agentx_master_handler(netsnmp_mib_handler *handler,
             if (snmp_oid_compare(nptr, nlen, request->subtree->start_a,
                                  request->subtree->start_len) < 0) {
                 DEBUGMSGTL(("agentx/master","inexact request preceeding region ("));
-                DEBUGMSGOID(("agent/master", request->subtree->start_a,
+                DEBUGMSGOID(("agentx/master", request->subtree->start_a,
                              request->subtree->start_len));
                 DEBUGMSG(("agentx/master", ")\n"));
                 nptr = request->subtree->start_a;

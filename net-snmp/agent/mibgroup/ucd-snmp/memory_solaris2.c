@@ -28,7 +28,7 @@
 #define MAXSTRSIZE	80
 
 int             minimumswap;
-static char     errmsg[300];
+static char     errmsg[1024];
 /****************************
  * Kstat specific variables *
  ****************************/
@@ -98,7 +98,7 @@ init_memory_solaris2(void)
     if (kstat_fd == 0) {
         kstat_fd = kstat_open();
         if (kstat_fd == 0) {
-            snmp_log(LOG_ERR, "kstat_open(): failed\n");
+            snmp_log_perror("kstat_open");
         }
     }
 }
@@ -270,7 +270,8 @@ getTotalFree(void)
     struct anoninfo ai;
 
     if (-1 == swapctl(SC_AINFO, &ai)) {
-        snmp_log(LOG_ERR, "error swapctl\n");
+        snmp_log_perror("swapctl(SC_AINFO)");
+	return 0;
     }
     allocated = ai.ani_max - ai.ani_free;
     reserved = (ai.ani_resv - allocated);

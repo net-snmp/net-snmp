@@ -37,8 +37,10 @@ if [ "x$SNMP_VERBOSE" = "x" ]; then
 fi
 
 if [ "x$MIBDIRS" = "x" ]; then
+  if [ "x$SNMP_PREFER_NEAR_MIBS" = "x1" ]; then
     MIBDIRS=${SNMP_BASEDIR}/../mibs
     export MIBDIRS
+  fi
 fi
 
 # Set up the path to the programs we want to use.
@@ -86,9 +88,14 @@ fi
 if [ "x$SNMP_SNMPD_PORT" = "x" ]; then
     SNMP_SNMPD_PORT="8765"
 fi
-
 if [ "x$SNMP_SNMPTRAPD_PORT" = "x" ]; then
     SNMP_SNMPTRAPD_PORT="8764"
+fi
+if [ "x$SNMP_TRANSPORT_SPEC" = "x" ];then
+	SNMP_TRANSPORT_SPEC="udp"
+fi
+if [ "x$SNMP_TEST_DEST" = "x" -a $SNMP_TRANSPORT_SPEC != "unix" ];then
+	SNMP_TEST_DEST="localhost:"
 fi
 export SNMP_FLAGS SNMP_SNMPD_PORT SNMP_SNMPTRAPD_PORT
 
