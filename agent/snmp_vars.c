@@ -32,7 +32,6 @@ PERFORMANCE OF THIS SOFTWARE.
  * (jbray@origin-at.co.uk) 1997
  */
 
-#define IN_SNMP_VARS_C
 
 #include <config.h>
 #if STDC_HEADERS
@@ -99,8 +98,6 @@ PERFORMANCE OF THIS SOFTWARE.
 #define  MIN(a,b)                     (((a) < (b)) ? (a) : (b)) 
 #endif
 
-extern struct subtree subtrees_old[];
-
 static u_char *search_subtree_vars (struct subtree *, oid *, size_t *,
 	u_char *, size_t *, u_short *, int, WriteMethod **write_method,
 	struct snmp_pdu *, int *);
@@ -108,6 +105,7 @@ static u_char *search_subtree (struct subtree *, oid *, size_t *,
 	u_char *, size_t *, u_short *, int, WriteMethod **write_method,
 	struct snmp_pdu *, int *);
 
+extern struct subtree *subtrees;
 int subtree_size;
 int subtree_malloc_size;
 
@@ -225,7 +223,6 @@ init_agent (void)
 #define EVENTTAB                EVENT, 1, 1                 /* eventEntry */
 #endif
 
-#define PARTYMIB 	SNMPV2, 3, 3
 
 /* various OIDs that are needed throughout the agent */
 #ifdef USING_V2PARTY_ALARM_MODULE
@@ -255,156 +252,6 @@ Export int trapFallingAlarmOidLen = sizeof(trapFallingAlarmOid)/sizeof(oid);
 Export oid trapObjUnavailAlarmOid[] = {SNMPV2ALARMEVENTS, 3};
 Export int trapObjUnavailAlarmOidLen = sizeof(trapObjUnavailAlarmOid)/sizeof(oid);
 #endif
-
-struct subtree *subtrees;   /* this is now set up in
-                                      read_config.c */
-
-struct subtree subtrees_old[] = {
-#include "mibgroup/mib_module_loads.h"
-};
-
-#ifdef USING_V2PARTY_VIEW_VARS_MODULE
-extern int in_view (oid *, int, int);
-#endif
-
-int subtree_old_size (void) {
-  return (sizeof(subtrees_old)/ sizeof(struct subtree));
-}
-
-/* register_mib(const char *moduleName, struct variable *, int varsize,
-                int numvars, oid mibloc, int mibloclen)
- */
-void
-register_mib(const char *moduleName,
-	     struct variable *var,
-	     size_t varsize,
-	     size_t numvars,
-	     oid *mibloc,
-	     size_t mibloclen)
-{
-  struct subtree *subtree;
-  char c_oid[SPRINT_MAX_LEN];
-
-  subtree = (struct subtree *) malloc(sizeof(struct subtree));
-  memset(subtree, 0, sizeof(struct subtree));
-
-  sprint_objid(c_oid, mibloc, mibloclen);
-  DEBUGMSGTL(("register_mib", "registering \"%s\" at %s\n",
-              moduleName, c_oid));
-    
-  memcpy(subtree->name, mibloc, mibloclen*sizeof(oid));
-  memcpy(subtree->label, moduleName, strlen(moduleName)+1);
-  subtree->namelen = (u_char) mibloclen;
-  subtree->variables = (struct variable *) malloc(varsize*numvars);
-  memcpy(subtree->variables, var, numvars*varsize);
-  subtree->variables_len = numvars;
-  subtree->variables_width = varsize;
-  load_subtree(subtree);
-
-  if ( agent_role == SUB_AGENT )
-    agentx_register( agentx_session, mibloc, mibloclen );
-}
-
-/* unregister_mib(oid mibloc, int mibloclen)
- */
-void
-unregister_mib(oid *name,
-	       size_t len)
-{
-  unregister_mib_tree(name, len, subtrees);
-  if ( agent_role == SUB_AGENT )
-    agentx_unregister( agentx_session, name, len );
-}
-
-struct subtree *
-unregister_mib_tree(oid *name,
-		    size_t len,
-		    struct subtree *subtree)
-{
-  struct subtree *myptr = NULL;
-  int ret;
-
-  if ((ret = snmp_oid_compare(name, len, subtree->name, subtree->namelen)) == 0) {
-    /* found it */
-    return subtree;
-  }
-
-  if (ret > 0) {
-    if (is_parent(subtree->name, subtree->namelen, name) &&
-        subtree->children != NULL) {
-      myptr = unregister_mib_tree(name, len, subtree->children);
-      if (myptr != NULL) {
-        /* found it, remove it as our child possibly adding the next child */
-        myptr = free_subtree(myptr);
-        subtree->children = myptr;
-        return NULL;
-      }
-    }
-    if (subtree->next != NULL) {
-      myptr = unregister_mib_tree(name, len, subtree->next);
-      if (myptr != NULL) {
-        /* found it next, remove it as next and take the one after that. */
-        myptr = free_subtree(myptr);
-        subtree->next = myptr;
-        return NULL;
-      }
-    }
-  }
-  return NULL;
-}
-
-struct subtree *
-free_subtree(struct subtree *st)
-{
-  struct subtree *ret = NULL;
-  if (st->variables != NULL)
-    free(st->variables);
-  if (st->children != NULL)
-    free_subtree(st->children);
-  if (st->next != NULL)
-    ret = st->next;
-  free(st);
-  return ret;
-}
-
-/* in_a_view: determines if a given snmp_pdu is allowed to see a
-   given name/namelen OID pointer
-   name         IN - name of var, OUT - name matched
-   nameLen      IN -number of sub-ids in name, OUT - subid-is in matched name
-   pi           IN - relevant auth info re PDU 
-   cvp          IN - relevant auth info re mib module
-*/
-
-int
-in_a_view(oid		  *name,      /* IN - name of var, OUT - name matched */
-          size_t	  *namelen,   /* IN -number of sub-ids in name*/
-          struct snmp_pdu *pdu,       /* IN - relevant auth info re PDU */
-          int	           type)      /* IN - variable type being checked */
-{
-  if (pdu->flags & UCD_MSG_FLAG_ALWAYS_IN_VIEW)
-    return 1;		/* Enable bypassing of view-based access control */
-
-  /* check for v1 and counter64s, since snmpv1 doesn't support it */
-  if (pdu->version == SNMP_VERSION_1 && type == ASN_COUNTER64)
-    return 0;
-  switch (pdu->version) {
-  case SNMP_VERSION_1:
-  case SNMP_VERSION_2c:
-  case SNMP_VERSION_3:
-#ifdef USING_MIBII_VACM_VARS_MODULE
-    return vacm_in_view(pdu, name, *namelen);
-#else
-    return 1;
-#endif
-  case SNMP_VERSION_2p:
-#ifdef USING_V2PARTY_VIEW_VARS_MODULE
-    return in_view(name, *namelen, 0 /* XXX: pi->cxp->contextViewIndex */);
-#else
-    return 1;
-#endif
-  }
-  return 0;
-}
 
 
 /*
@@ -783,72 +630,3 @@ getStatPtr(
 }
 */
 
-int
-compare_tree(oid *name1,
-	     size_t len1, 
-	     oid *name2, 
-	     size_t len2)
-{
-    register int    len;
-
-    /* len = minimum of len1 and len2 */
-    if (len1 < len2)
-	len = len1;
-    else
-	len = len2;
-    /* find first non-matching byte */
-    while(len-- > 0){
-	if (*name1 < *name2)
-	    return -1;
-	if (*name2++ < *name1++)
-	    return 1;
-    }
-    /* bytes match up to length of shorter string */
-    if (len1 < len2)
-	return -1;  /* name1 shorter, so it is "less" */
-    /* name1 matches name2 for length of name2, or they are equal */
-    return 0;
-}
-
-struct subtree *find_subtree_next(oid *name, 
-				  size_t len,
-				  struct subtree *subtree)
-{
-  struct subtree *myptr = NULL;
-  int ret;
-
-  if ((ret = snmp_oid_compare(name, len, subtree->name, subtree->namelen)) == 0) {
-    if (subtree->children != NULL)
-      return subtree->children;
-    if (subtree->next != NULL)
-      return subtree->next;
-    return NULL;
-  }
-
-  if (ret > 0) {
-    if (is_parent(subtree->name, subtree->namelen, name) &&
-        subtree->children != NULL) {
-      myptr = find_subtree_next(name, len, subtree->children);
-      if (myptr != NULL)
-        return myptr;
-      return subtree->next;
-    }
-    if (subtree->next != NULL)
-      return find_subtree_next(name, len, subtree->next);
-  }
-
-  return NULL;
-}
-
-struct subtree *find_subtree(oid *name,
-			     size_t len,
-			     struct subtree *subtree)
-{
-  struct subtree *myptr;
-
-  for(myptr = subtree; myptr != NULL; myptr = myptr->next) {
-    if (snmp_oid_compare(name, len, myptr->name, myptr->namelen) == 0)
-      return myptr;
-  }
-  return NULL;
-}
