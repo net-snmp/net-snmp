@@ -95,6 +95,9 @@ CODE UPDATE ANNOUNCEMENTS / MAILING LIST(S)
   work on the code and submit patches frequently.  To join it, mail a
   "subscribe" request to ucd-snmp-coders-request@ece.ucdavis.edu.
 
+  The archives for these mailing lists can be found at
+  http://www.ece.ucdavis.edu/ucd-snmp.
+
 EXTENSIBILITY
 
   The agent that comes with this package is extensible through use of

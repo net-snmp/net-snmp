@@ -11,7 +11,7 @@ the ChangeLog file for a more detailed listing of changes/bug fixes.
 
   New:
     - basic SNMPV2c support.  
-      - Not fully tested (feedback please!)
+      - Not fully tested (feedback please!), and not RFC compliant.
       - all apps require '-v 2c' for v2c and '-v 2p' for the older party code.
     - basic host-resources mib support for linux, and hpux.
     - All environment variables can be set with a preceding '+' for
@@ -26,9 +26,9 @@ the ChangeLog file for a more detailed listing of changes/bug fixes.
 
   Ported:
     - irix should be more complete.
-    - aix 4.1.5 (almost).
+    - aix 4.1.5.
     - fixes for hpux 10.20.
-    - linux 2.1.x support
+    - linux 2.1.x support.
     - library and apps supported under 32bit windows systems.
 
   Fixes:
