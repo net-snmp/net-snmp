@@ -184,7 +184,7 @@ write_snmp(int action,
            u_char var_val_type,
            size_t var_val_len, u_char * statP, oid * name, size_t name_len)
 {
-    long            intval = *((long *) var_val);
+    long            intval = 0;
 
     switch (action) {
     case RESERVE1:             /* Check values for acceptability */
@@ -194,6 +194,7 @@ write_snmp(int action,
             return SNMP_ERR_WRONGTYPE;
         }
 
+        intval = *((long *) var_val);
         if (intval != 1 && intval != 2) {
             DEBUGMSGTL(("mibII/snmp_mib", "not valid %x\n", intval));
             return SNMP_ERR_WRONGVALUE;
@@ -218,6 +219,7 @@ write_snmp(int action,
         /*
          * Save the old value, in case of UNDO 
          */
+        intval = *((long *) var_val);
         old_snmp_enableauthentraps = snmp_enableauthentraps;
         snmp_enableauthentraps = intval;
         break;
