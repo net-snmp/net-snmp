@@ -478,6 +478,7 @@ main(int argc, char *argv[])
                   usage(argv[0]);
                   break;
                 case 'H':
+                  ds_set_boolean(DS_APPLICATION_ID, DS_AGENT_NO_ROOT_ACCESS, 1);
                   init_agent("snmpd");   /* register our .conf handlers */
                   init_mib_modules();
                   init_snmp("snmpd");
