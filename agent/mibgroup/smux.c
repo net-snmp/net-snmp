@@ -48,6 +48,10 @@
 #include <sys/ioctl.h>
 #endif
 
+#ifndef FD_COPY
+#define FD_COPY(f, t)   bcopy(f, t, sizeof(*(f)))
+#endif
+
 #include "snmp.h"
 #include "asn1.h"
 #include "snmp_impl.h"
