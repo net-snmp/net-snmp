@@ -202,9 +202,6 @@ main(int argc, char *argv[])
     int                   rval;
     int                   command         = 0;
     long                  longvar;
-                         
-    oid                  *authKeyChange   = authKeyOid,
-                         *privKeyChange   = privKeyOid;
 
     size_t                oldKu_len       = SNMP_MAXBUF_SMALL,
                           newKu_len       = SNMP_MAXBUF_SMALL,
@@ -219,6 +216,9 @@ main(int argc, char *argv[])
                           oldkul[SNMP_MAXBUF_SMALL],
                           newkul[SNMP_MAXBUF_SMALL],
                           keychange[SNMP_MAXBUF_SMALL];
+
+    *authKeyChange   = authKeyOid;
+    *privKeyChange   = privKeyOid;
                          
     /* get the common command line arguments */
     arg = snmp_parse_args(argc, argv, &session, "C:", optProc);
