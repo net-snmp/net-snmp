@@ -568,7 +568,7 @@ write_exampletrap(int	action,
 			 */
             DEBUGMSGTL(("example","write_exampletrap sending the trap\n",
                         action));
-	    send_easy_trap( SNMP_TRAP_ENTERPRISESPECIFIC, 3 );
+	    send_easy_trap( SNMP_TRAP_ENTERPRISESPECIFIC, 99 );
             DEBUGMSGTL(("example","write_exampletrap trap sent\n",action));
 	    break;
 

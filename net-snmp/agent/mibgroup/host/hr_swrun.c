@@ -33,7 +33,7 @@
 #if HAVE_SYS_SYSCTL_H
 #include <sys/sysctl.h>
 #endif
-#if HAVE_DIRENT_H
+#if HAVE_DIRENT_H && !defined(cygwin)
 #include <dirent.h>
 #else
 # define dirent direct
@@ -46,6 +46,10 @@
 # if HAVE_NDIR_H
 #  include <ndir.h>
 # endif
+#endif
+#ifdef cygwin
+#include <windows.h>
+#include <sys/cygwin.h>
 #endif
 
 #if _SLASH_PROC_METHOD_
@@ -79,7 +83,10 @@ void  End_HR_SWRun (void);
 int header_hrswrun (struct variable *,oid *, size_t *, int, size_t *, WriteMethod **);
 int header_hrswrunEntry (struct variable *,oid *, size_t *, int, size_t *, WriteMethod **);
 
-#ifndef linux
+#ifdef cygwin
+static struct external_pinfo *curproc;
+static struct external_pinfo lowproc;
+#elif !defined(linux)
 static int LowProcIndex;
 #endif
 #ifdef hpux10
@@ -216,28 +223,32 @@ header_hrswrunEntry(struct variable *vp,
         if ( pid == -1 )
 	    break;
 	newname[HRSWRUN_ENTRY_NAME_LENGTH] = pid;
-    DEBUGMSGOID(("host/hr_swrun", newname, *length));
-    DEBUGMSG(("host/hr_swrun","\n"));
+	DEBUGMSGOID(("host/hr_swrun", newname, *length));
+	DEBUGMSG(("host/hr_swrun","\n"));
         result = snmp_oid_compare(name, *length, newname, vp->namelen + 1);
         if (exact && (result == 0)) {
 	    LowPid = pid;
-#ifndef linux
+#ifdef cygwin
+	    lowproc = *curproc;
+#elif !defined(linux)
 	    LowProcIndex = current_proc_entry-1;
 #endif
-DEBUGMSGTL(("host/hr_swrun", " saved\n"));
+	    DEBUGMSGTL(("host/hr_swrun", " saved\n"));
 	    /* Save process status information */
             break;
 	}
 	if ((!exact && (result < 0)) &&
 		( LowPid == -1 || pid < LowPid )) {
 	    LowPid = pid;
-#ifndef linux
+#ifdef cygwin
+	    lowproc = *curproc;
+#elif !defined(linux)
 	    LowProcIndex = current_proc_entry-1;
 #endif
 	    /* Save process status information */
-DEBUGMSG(("host/hr_swrun", " saved"));
+	    DEBUGMSG(("host/hr_swrun", " saved"));
 	}
-DEBUGMSG(("host/hr_swrun", "\n"));
+	DEBUGMSG(("host/hr_swrun", "\n"));
     }
 
     if ( LowPid == -1 ) {
@@ -279,16 +290,16 @@ var_hrswrun(struct variable *vp,
 #elif defined(solaris2)
 #if _SLASH_PROC_METHOD_
     static psinfo_t psinfo;
-    static psinfo_t *proc_buf = &psinfo;
+    static psinfo_t *proc_buf;
     int procfd;
     char procfn[sizeof "/proc/00000/psinfo"];
 #else
     static struct proc *proc_buf;
+    char *cp1;
 #endif	/* _SLASH_PROC_METHOD_ */
     static time_t when = 0;
     time_t now;
     static int oldpid = -1;
-    char *cp1;
 #endif
 #if HAVE_KVM_GETPROCS
     char **argv;
@@ -321,10 +332,13 @@ var_hrswrun(struct variable *vp,
     }
     if (oldpid != pid || proc_buf == NULL) {
 #if _SLASH_PROC_METHOD_
+	proc_buf = &psinfo;
 	sprintf(procfn, "/proc/%.5d/psinfo", pid);
-	if ((procfd = open(procfn, O_RDONLY)) == -1) return NULL;
-	if (read(procfd, proc_buf, sizeof(*proc_buf)) != sizeof(*proc_buf)) abort();
-	close(procfd);
+	if ((procfd = open(procfn, O_RDONLY)) != -1) {
+		if (read(procfd, proc_buf, sizeof(*proc_buf)) != sizeof(*proc_buf)) abort();
+		close(procfd);
+	} else
+		proc_buf = NULL;
 #else
 	if (kd == NULL) return NULL;
 	if ((proc_buf = kvm_getproc(kd, pid)) == NULL) return NULL;
@@ -340,8 +354,8 @@ var_hrswrun(struct variable *vp,
 		return NULL;
 #else
 	    long_return = 1;		/* Probably! */
-#endif
 	    return (u_char *)&long_return;
+#endif
 
 	case HRSWRUN_INDEX:
 	    long_return = pid;
@@ -354,7 +368,10 @@ var_hrswrun(struct variable *vp,
 		*cp = '\0';
 #elif defined(solaris2)
 #if _SLASH_PROC_METHOD_
-	    strcpy(string, proc_buf->pr_fname);
+	    if (proc_buf)
+		    strcpy(string, proc_buf->pr_fname);
+	    else
+		    strcpy(string, "<exited>");
 #else
 	    strcpy(string, proc_buf->p_user.u_comm);
 #endif
@@ -372,6 +389,21 @@ var_hrswrun(struct variable *vp,
 		++cp;
 	    strcpy( string, cp );
             fclose(fp);
+#elif defined(cygwin)
+	    if (lowproc.process_state & (PID_ZOMBIE | PID_EXITED))
+		strcpy(string, "<defunct>");
+	    else if (lowproc.ppid) {
+		cygwin_conv_to_posix_path(lowproc.progname, string);
+		cp = strrchr(string, '/');
+		if (cp) strcpy(string, cp+1);
+	    }
+	    else {
+		/* get code from ps to get windows process path */
+		string[0] = 0;
+	    }
+	    cp = strchr(string, '\0') - 4;
+	    if (cp > string && strcasecmp(cp, ".exe") == 0)
+		*cp = '\0';
 #else
 #if NO_DUMMY_VALUES
 	    return NULL;
@@ -398,7 +430,10 @@ var_hrswrun(struct variable *vp,
 		*cp = '\0';
 #elif defined(solaris2)
 #ifdef _SLASH_PROC_METHOD_
-	    strcpy(string, proc_buf->pr_psargs);
+	    if (proc_buf)
+	        strcpy(string, proc_buf->pr_psargs);
+	    else
+		sprintf(string, "<exited>");
 	    cp = strchr(string, ' ');
 	    if (cp) *cp = 0;
 #else
@@ -429,6 +464,15 @@ var_hrswrun(struct variable *vp,
 		if (cp) *cp = 0;
 	    }
             fclose(fp);
+#elif defined(cygwin)
+	    if (lowproc.process_state & (PID_ZOMBIE | PID_EXITED))
+		strcpy(string, "<defunct>");
+	    else if (lowproc.ppid)
+		cygwin_conv_to_posix_path(lowproc.progname, string);
+	    else {
+		/* get code from ps to get windows process path! */
+	    	string[0] = 0;
+	    }
 #else
 #if NO_DUMMY_VALUES
 	    return NULL;
@@ -448,9 +492,12 @@ var_hrswrun(struct variable *vp,
 		string[0] = '\0';
 #elif defined(solaris2)
 #ifdef _SLASH_PROC_METHOD_
-	    cp = strchr(proc_buf->pr_psargs, ' ');
-	    if (cp) strcpy(string, cp+1);
-	    else string[0] = 0;
+	    if (proc_buf) {
+	        cp = strchr(proc_buf->pr_psargs, ' ');
+	        if (cp) strcpy(string, cp+1);
+	        else string[0] = 0;
+	    } else
+		string[0] = 0;
 #else
 	    cp = proc_buf->p_user.u_psargs;
 	    while (*cp && *cp != ' ') cp++;
@@ -470,9 +517,16 @@ var_hrswrun(struct variable *vp,
 	    sprintf( string, "/proc/%d/cmdline", pid );
 	    if ((fp = fopen( string, "r")) == NULL) return NULL;
 	    memset( buf, 0, sizeof(buf) );
-	    if(!fgets( buf, sizeof(buf)-2, fp ))
-		return NULL;   /* argv[0] '\0' argv[1] '\0' .... */
 
+                /* argv[0] '\0' argv[1] '\0' .... */
+	    if(!fgets( buf, sizeof(buf)-2, fp )) {
+                /* maybe be empty (even argv[0] is missing) */
+                string[0] = '\0';
+                *var_len = 0;
+                fclose(fp);
+                return string;
+            }
+            
 		/* Skip over argv[0] */
 	    cp = buf;
 	    while ( *cp )
@@ -493,6 +547,8 @@ var_hrswrun(struct variable *vp,
 	    ++cp;
 	    strcpy( string, cp );
             fclose(fp);
+#elif defined(cygwin)
+	    string[0] = 0;
 #else
 #if NO_DUMMY_VALUES
 	    return NULL;
@@ -510,7 +566,14 @@ var_hrswrun(struct variable *vp,
 		long_return = 4;	/* application */
 	    return (u_char *)&long_return;
 	case HRSWRUN_STATUS:
-#ifndef linux
+#if defined(cygwin)
+	    if (lowproc.process_state & PID_STOPPED)
+		long_return = 3; /* notRunnable */
+	    else if (lowproc.process_state & PID_ZOMBIE)
+		long_return = 4; /* invalid */
+	    else
+		long_return = 1; /* running */
+#elif !defined(linux)
 #ifdef hpux10
 	    switch ( proc_table[LowProcIndex].pst_stat ) {
 		case PS_STOP:
@@ -534,7 +597,7 @@ var_hrswrun(struct variable *vp,
 	    switch ( proc_table[LowProcIndex].kp_proc.p_stat ) {
 #elif defined(solaris2)
 #if _SLASH_PROC_METHOD_
-	    switch (proc_buf->pr_lwp.pr_state) {
+	    switch (proc_buf ? proc_buf->pr_lwp.pr_state : SIDL) {
 #else
 	    switch ( proc_buf->p_stat ) {
 #endif
@@ -566,32 +629,34 @@ var_hrswrun(struct variable *vp,
 #endif
 #else
 	    sprintf( string, "/proc/%d/stat", pid );
-	    if ((fp = fopen( string, "r")) == NULL) return NULL;
-	    fgets( buf, sizeof(buf), fp );
-	    cp = buf;
-	    for ( i = 0 ; i < 2 ; ++i ) {	/* skip two fields */
-		while ( *cp != ' ')
+	    if ((fp = fopen( string, "r")) != NULL) {
+		fgets( buf, sizeof(buf), fp );
+		cp = buf;
+		for ( i = 0 ; i < 2 ; ++i ) {	/* skip two fields */
+		    while ( *cp != ' ')
+			++cp;
 		    ++cp;
-		++cp;
-	    }
+		}
 
-	    switch ( *cp ) {
-		case 'R':
+		switch ( *cp ) {
+		    case 'R':
 	    		long_return = 1;	/* running */
 			break;
-		case 'S':
+		    case 'S':
 	    		long_return = 2;	/* runnable */
 			break;
-		case 'D':
-		case 'T':
+		    case 'D':
+		    case 'T':
 	    		long_return = 3;	/* notRunnable */
 			break;
-		case 'Z':
-		default:
+		    case 'Z':
+		    default:
 	    		long_return = 4;	/* invalid */
 			break;
-	    }
-            fclose(fp);
+		}
+                fclose(fp);
+	    } else
+		long_return = 4;		/* invalid */
 #endif
 	    return (u_char *)&long_return;
 
@@ -603,8 +668,8 @@ var_hrswrun(struct variable *vp,
 				 */
 #elif defined(solaris2)
 #if _SLASH_PROC_METHOD_
-	    long_return = proc_buf->pr_time.tv_sec * 100 +
-			  proc_buf->pr_time.tv_nsec/10000000;
+	    long_return = proc_buf ? proc_buf->pr_time.tv_sec * 100 +
+			  proc_buf->pr_time.tv_nsec/10000000 : 0;
 #else
 	    long_return = proc_buf->p_utime*100 +
 	    		  proc_buf->p_stime*100;
@@ -633,6 +698,11 @@ var_hrswrun(struct variable *vp,
             fclose(fp);
 #elif defined(sunos4)
 	    long_return = proc_table[LowProcIndex].p_time;
+#elif defined(cygwin)
+	    long_return = lowproc.rusage_self.ru_utime.tv_sec*100 +
+			  lowproc.rusage_self.ru_utime.tv_usec/10000 +
+	    		  lowproc.rusage_self.ru_stime.tv_sec*100 +
+			  lowproc.rusage_self.ru_stime.tv_usec/10000;
 #else
 	    long_return = proc_table[LowProcIndex].p_utime.tv_sec*100 +
 			  proc_table[LowProcIndex].p_utime.tv_usec/10000 +
@@ -645,7 +715,7 @@ var_hrswrun(struct variable *vp,
 	    long_return = (proc_buf.pst_rssize << PGSHIFT)/1024;
 #elif defined(solaris2)
 #if _SLASH_PROC_METHOD_
-	    long_return = proc_buf->pr_rssize;
+	    long_return = proc_buf ? proc_buf->pr_rssize : 0;
 #else
 	    long_return = proc_buf->p_swrss;
 #endif
@@ -670,6 +740,14 @@ var_hrswrun(struct variable *vp,
 	    }
 	    long_return = atoi( cp ) * (getpagesize()/1024);		/* rss */
             fclose(fp);
+#elif defined(cygwin)
+printf("%d: %d %d %d %d %d\n", lowproc.pid,
+lowproc.rusage_self.ru_maxrss,
+lowproc.rusage_self.ru_ixrss,
+lowproc.rusage_self.ru_idrss,
+lowproc.rusage_self.ru_isrss,
+lowproc.rusage_self.ru_nswap);
+	    long_return = lowproc.rusage_self.ru_idrss; /* ??? */
 #else
 #if NO_DUMMY_VALUES
 	    return NULL;
@@ -690,7 +768,68 @@ var_hrswrun(struct variable *vp,
 	 *
 	 *********************/
 
-#ifndef linux
+#if defined(linux)
+
+DIR *procdir = NULL;
+struct dirent *procentry_p;
+
+void
+Init_HR_SWRun (void)
+{
+    if ( procdir != NULL )
+        closedir( procdir );
+    procdir = opendir("/proc");
+}
+
+int
+Get_Next_HR_SWRun (void)
+{
+    int pid;
+    procentry_p = readdir( procdir );
+
+    if ( procentry_p == NULL )
+	return -1;
+
+    pid = atoi(procentry_p->d_name);
+    if ( pid == 0 )
+	return( Get_Next_HR_SWRun());
+    return pid;
+}
+
+void
+End_HR_SWRun (void)
+{
+    if (procdir) closedir( procdir );
+    procdir = NULL;
+}
+
+#elif defined(cygwin)
+
+static int curpid;
+
+void
+Init_HR_SWRun(void)
+{
+    cygwin_internal(CW_LOCK_PINFO, 1000);
+    curpid = 0;
+}
+
+int
+Get_Next_HR_SWRun(void)
+{
+    curproc = (struct external_pinfo *) cygwin_internal(CW_GETPINFO_FULL, curpid|CW_NEXTPID);
+    curpid = curproc ? curproc->pid : -1;
+    return curpid;
+}
+
+void
+End_HR_SWRun(void)
+{
+    cygwin_internal(CW_UNLOCK_PINFO);
+}
+
+#else /* linux */
+
 static int nproc;
 
 void
@@ -747,6 +886,10 @@ Init_HR_SWRun (void)
     }
 #elif HAVE_KVM_GETPROCS
     {
+	if (kd == NULL) {
+	    nproc = 0;
+	    return;
+	}
 	proc_table = kvm_getprocs(kd, KERN_PROC_ALL, 0, &nproc);
     }
 #else
@@ -813,47 +956,11 @@ End_HR_SWRun (void)
 {
     current_proc_entry = nproc+1;
 }
-
-#else /* linux */
-
-DIR *procdir = NULL;
-struct dirent *procentry_p;
-
-void
-Init_HR_SWRun (void)
-{
-    if ( procdir != NULL )
-        closedir( procdir );
-    procdir = opendir("/proc");
-}
-
-int
-Get_Next_HR_SWRun (void)
-{
-   int pid;
-   procentry_p = readdir( procdir );
-
-   if ( procentry_p == NULL )
-	return -1;
-
-   pid = atoi(procentry_p->d_name);
-   if ( pid == 0 )
-	return( Get_Next_HR_SWRun());
-   return pid;
-}
-
-void
-End_HR_SWRun (void)
-{
-   if (procdir) closedir( procdir );
-   procdir = NULL;
-}
-
 #endif
 
 int count_processes (void)
 {
-#ifndef linux
+#if !(defined(linux) || defined(hpux10) || defined(solaris2) || HAVE_KVM_GETPROCS)
     int i;
 #endif
     int total=0;
@@ -862,7 +969,7 @@ int count_processes (void)
 #if defined(hpux10) || HAVE_KVM_GETPROCS || defined(solaris2)
     total = nproc;
 #else
-#ifndef linux
+#if !defined(linux) && !defined(cygwin)
     for ( i = 0 ; i<nproc ; ++i ) {
 	if ( proc_table[i].p_stat != 0 )
 #else

@@ -170,11 +170,13 @@ int _asn_bitstring_check(const char * str, u_long asn_length, u_char datum)
 	ERROR_MSG(ebuf);
 	return 1;
     }
+/*
     if (datum > 7){
 	sprintf(ebuf,"%s: datum %d >7: too large", str, (int)(datum));
 	ERROR_MSG(ebuf);
 	return 1;
     }
+*/
     return 0;
 }
 
@@ -2084,11 +2086,11 @@ asn_rbuild_int (u_char *data,
     integer = *intp;
 
     if (((*datalength)--) < 1) return NULL;
-    *data-- = integer & 0xff;
+    *data-- = (u_char)integer;
     integer >>= 8;
     while (integer != testvalue) {
         if (((*datalength)--) < 1) return NULL;
-        *data-- = integer & 0xff;
+        *data-- = (u_char)integer;
         integer >>= 8;
     }
     if ((*(data+1) & 0x80) != (testvalue & 0x80)) {
@@ -2160,11 +2162,11 @@ asn_rbuild_unsigned_int (u_char *data,
     integer = *intp;
 
     if (((*datalength)--) < 1) return NULL;
-    *data-- = integer & 0xff;
+    *data-- = (u_char)integer;
     integer >>= 8;
     while (integer != 0) {
         if (((*datalength)--) < 1) return NULL;
-        *data-- = integer & 0xff;
+        *data-- = (u_char)integer;
         integer >>= 8;
     }
     if ((*(data+1) & 0x80) != (0 & 0x80)) {
@@ -2219,6 +2221,7 @@ asn_rbuild_length (u_char *data,
 {
     static const char *errpre = "build length";
     char ebuf[128];
+    int tmp_int;
     
     u_char    *start_data = data;
 
@@ -2245,7 +2248,8 @@ asn_rbuild_length (u_char *data,
             return NULL;
         }
         *data-- = length & 0xff;
-        *data-- = (start_data - data) | 0x80;
+        tmp_int = (start_data - data);
+        *data-- = tmp_int | 0x80;
         *datalength -= 2;
     }
     return data;
@@ -2265,7 +2269,8 @@ asn_rbuild_objid (u_char *data,
  * lastbyte ::= 0 7bitvalue
  */
     register oid *op = objid;
-    register int i, tmpint;
+    register int i;
+    register unsigned int tmpint;
     u_char *initdatap = data;
     const char *errpre = "build objid";
 
@@ -2281,7 +2286,7 @@ asn_rbuild_objid (u_char *data,
     } else if (objidlength == 1) {
         /* encode the first value */
         if ((*datalength)-- < 1) return NULL;
-        *data-- = objid[0];
+        *data-- = (u_char)objid[0];
     } else {
         for(i = objidlength; i > 2; i--) {
             tmpint = objid[i-1];
@@ -2302,7 +2307,7 @@ asn_rbuild_objid (u_char *data,
 	    return NULL;
 	}
         if ((*datalength)-- < 1) return NULL;
-	*data-- = (op[0] * 40) + op[1];
+	*data-- = (u_char)((op[0] * 40) + op[1]);
     }
     
     tmpint = initdatap-data;
@@ -2359,13 +2364,13 @@ u_char	*asn_rbuild_unsigned_int64 (u_char *data,
   
   /* encode the low 4 bytes first */
   if (((*datalength)--) < 1) return NULL;
-  *data-- = low & 0xff;
+  *data-- = (u_char)low;
   low >>= 8;
   count = 1;
   while (low != 0) {
       count++;
       if (((*datalength)--) < 1) return NULL;
-      *data-- = low & 0xff;
+      *data-- = (u_char)low;
       low >>= 8;
   }
 
@@ -2379,11 +2384,11 @@ u_char	*asn_rbuild_unsigned_int64 (u_char *data,
 
       /* do high byte */
       if (((*datalength)--) < 1) return NULL;
-      *data-- = high & 0xff;
+      *data-- = (u_char)high;
       high >>= 8;
       while (high != 0) {
           if (((*datalength)--) < 1) return NULL;
-          *data-- = high & 0xff;
+          *data-- = (u_char)high;
           high >>= 8;
       }
   }
@@ -2398,13 +2403,13 @@ u_char	*asn_rbuild_unsigned_int64 (u_char *data,
   intsize = initdatap-data;
 
 #ifdef OPAQUE_SPECIAL_TYPES
-  if (*datalength < 5) return NULL;
-  *datalength -= 3;
-  *data-- = (u_char)intsize;
-
   /* encode a Counter64 as an opaque (it also works in SNMPv1) */
   /* turn into Opaque holding special tagged value */
   if (type == ASN_OPAQUE_COUNTER64) {
+      if (*datalength < 5) return NULL;
+      *datalength -= 3;
+      *data-- = (u_char)intsize;
+
       *data-- = ASN_OPAQUE_COUNTER64;
       *data-- = ASN_OPAQUE_TAG1;
       
@@ -2417,6 +2422,10 @@ u_char	*asn_rbuild_unsigned_int64 (u_char *data,
       /* Encode the Unsigned int64 in an opaque */
       /* turn into Opaque holding special tagged value */
 
+      if (*datalength < 5) return NULL;
+      *datalength -= 3;
+      *data-- = (u_char)intsize;
+
       *data-- = ASN_OPAQUE_U64;
       *data-- = ASN_OPAQUE_TAG1;
       
@@ -2426,6 +2435,7 @@ u_char	*asn_rbuild_unsigned_int64 (u_char *data,
           return NULL;
     } else {
 #endif /* OPAQUE_SPECIAL_TYPES */
+
     data = asn_rbuild_header(data, datalength, type, intsize);
     if (_asn_build_header_check("build uint64", data+1, *datalength, intsize))
 	return NULL;
@@ -2467,13 +2477,13 @@ u_char	*asn_rbuild_signed_int64 (u_char *data,
   
   /* encode the low 4 bytes first */
   if (((*datalength)--) < 1) return NULL;
-  *data-- = low & 0xff;
+  *data-- = (u_char)low;
   low >>= 8;
   count = 1;
-  while (low != testvalue) {
+  while ((int)low != testvalue) {
       count++;
       if (((*datalength)--) < 1) return NULL;
-      *data-- = low & 0xff;
+      *data-- = (u_char)low;
       low >>= 8;
   }
 
@@ -2487,11 +2497,11 @@ u_char	*asn_rbuild_signed_int64 (u_char *data,
 
       /* do high byte */
       if (((*datalength)--) < 1) return NULL;
-      *data-- = high & 0xff;
+      *data-- = (u_char)high;
       high >>= 8;
-      while (high != testvalue) {
+      while ((int)high != testvalue) {
           if (((*datalength)--) < 1) return NULL;
-          *data-- = high & 0xff;
+          *data-- = (u_char)high;
           high >>= 8;
       }
   }

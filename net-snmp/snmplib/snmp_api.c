@@ -64,6 +64,9 @@ SOFTWARE.
 #if HAVE_SYS_SELECT_H
 #include <sys/select.h>
 #endif
+#if HAVE_IO_H
+#include <io.h>
+#endif
 #if HAVE_WINSOCK_H
 #include <winsock.h>
 #endif
@@ -112,6 +115,7 @@ SOFTWARE.
 #include "default_store.h"
 #include "mt_support.h"
 #include "snmp-tc.h"
+#include "snmp_parse_args.h"
 
 static void _init_snmp (void);
 
@@ -629,7 +633,6 @@ init_snmp(const char *type)
 #endif
 
   snmp_debug_init(); /* should be done first, to turn on debugging ASAP */
-  if ( type != NULL )
   init_callbacks();
   init_snmp_logging();
   snmp_init_statistics();
@@ -1131,18 +1134,17 @@ _sess_open(struct snmp_session *in_session)
 #ifdef AF_UNIX
         else if ( isp->me.sa_family == AF_UNIX ) {
     		/* Need a unique socket name */
+			/* to avoid unlinking the server's socket */
+			/* when this client closes. */
 #ifndef UNIX_SOCKET_BASE_NAME
 #define UNIX_SOCKET_BASE_NAME  "/tmp/s."
 #endif
-    
-#ifndef WIN32
                 strcpy( isp->me.sa_data, UNIX_SOCKET_BASE_NAME );
                 strcat( isp->me.sa_data, "XXXXXX" );
 #ifdef HAVE_MKSTEMP
-                mkstemp( isp->me.sa_data );
+                close(mkstemp( isp->me.sa_data ));
 #else
                 mktemp( isp->me.sa_data );
-#endif
 #endif
         }
 #endif /* AF_UNIX */
@@ -2743,7 +2745,7 @@ snmp_pdu_rbuild (struct snmp_pdu *pdu, u_char *cp, size_t *out_length)
 
   /* build the PDU sequence */
   cp = asn_rbuild_sequence(cp, out_length,
-                           pdu->command,
+                           (u_char)pdu->command,
                            startcp - cp);
 
   return cp;
@@ -3940,8 +3942,8 @@ _sess_read(void *sessp,
     struct snmp_pdu *pdu;
     struct request_list *rp, *orp = NULL;
     int ret;
-    int addrlen;
-    int fromlength;
+    size_t addrlen;
+    size_t fromlength;
 
     sp = slp->session; isp = slp->internal;
     if (!sp || !isp) {
@@ -4604,7 +4606,7 @@ snmp_oid_compare(const oid *in_name1,
 		 const oid *in_name2, 
 		 size_t len2)
 {
-    register int len, res;
+    register int len;
     register const oid * name1 = in_name1;
     register const oid * name2 = in_name2;
 
@@ -4614,11 +4616,13 @@ snmp_oid_compare(const oid *in_name1,
     else
 	len = len2;
     /* find first non-matching OID */
-    while(len-- > 0){
-	res = *(name1++) - *(name2++);
-	if (res < 0)
+    while(len-- > 0) {
+        /* these must be done in seperate comparisons, since
+           subtracting them and using that result has problems with
+           subids > 2^31. */
+	if (*(name1) < *(name2))
 	    return -1;
-	if (res > 0)
+	if (*(name1++) > *(name2++))
 	    return 1;
     }
     /* both OIDs equal up to length of shorter OID */
@@ -4703,6 +4707,7 @@ snmp_varlist_add_variable(struct variable_list **varlist,
 
       case ASN_PRIV_IMPLIED_OCTET_STR:
       case ASN_OCTET_STR:
+      case ASN_BIT_STR:
       case ASN_OPAQUE:
       case ASN_NSAP:
         if (largeval) {
@@ -4839,6 +4844,7 @@ snmp_add_var(struct snmp_pdu *pdu,
 	     const char *value)
 {
     int result = 0;
+    char *ecp;
     int check = !ds_get_boolean(DS_LIBRARY_ID, DS_LIB_DONT_CHECK_RANGE);
     u_char buf[SPRINT_MAX_LEN];
     size_t tint;
@@ -4862,7 +4868,9 @@ snmp_add_var(struct snmp_pdu *pdu,
 	    result = SNMPERR_VALUE;
 	    goto type_error;
 	}
-        if (sscanf(value, "%ld", &ltmp) != 1) {
+	if (!*value) goto fail;
+        ltmp = strtol(value, &ecp, 10);
+	if (*ecp) {
 	    ep = tp ? tp->enums : NULL;
 	    while (ep) {
 		if (strcmp(value, ep->label) == 0) {
@@ -4900,7 +4908,8 @@ snmp_add_var(struct snmp_pdu *pdu,
 	    result = SNMPERR_VALUE;
 	    goto type_error;
 	}
-        if (sscanf(value, "%lu", &ltmp) == 1)
+        ltmp = strtoul(value, &ecp, 10);
+	if (*value && !*ecp)
 	    snmp_pdu_add_variable(pdu, name, name_length, ASN_UNSIGNED,
 				  (u_char *) &ltmp, sizeof(ltmp));
 	else goto fail;
@@ -4912,7 +4921,8 @@ snmp_add_var(struct snmp_pdu *pdu,
 	    result = SNMPERR_VALUE;
 	    goto type_error;
 	}
-        if (sscanf(value, "%lu", &ltmp) == 1)
+        ltmp = strtoul(value, &ecp, 10);
+	if (*value && !*ecp)
 	    snmp_pdu_add_variable(pdu, name, name_length, ASN_UINTEGER,
 				  (u_char *) &ltmp, sizeof(ltmp));
 	else goto fail;
@@ -4924,7 +4934,8 @@ snmp_add_var(struct snmp_pdu *pdu,
 	    result = SNMPERR_VALUE;
 	    goto type_error;
 	}
-        if (sscanf(value, "%lu", &ltmp) == 1)
+        ltmp = strtoul(value, &ecp, 10);
+	if (*value && !*ecp)
 	    snmp_pdu_add_variable(pdu, name, name_length, ASN_COUNTER,
 				  (u_char *) &ltmp, sizeof(ltmp));
 	else goto fail;
@@ -4936,7 +4947,8 @@ snmp_add_var(struct snmp_pdu *pdu,
 	    result = SNMPERR_VALUE;
 	    goto type_error;
 	}
-        if (sscanf(value, "%lu", &ltmp) == 1)
+        ltmp = strtoul(value, &ecp, 10);
+	if (*value && !*ecp)
 	    snmp_pdu_add_variable(pdu, name, name_length, ASN_TIMETICKS,
 				  (u_char *) &ltmp, sizeof(long));
 	else goto fail;
@@ -4962,7 +4974,7 @@ snmp_add_var(struct snmp_pdu *pdu,
 	    goto type_error;
 	}
         tint = sizeof(buf) / sizeof(oid);
-        if (read_objid(value, (oid *)buf, &tint))
+        if (snmp_parse_oid(value, (oid *)buf, &tint))
             snmp_pdu_add_variable(pdu, name, name_length, ASN_OBJECT_ID, buf,
                               sizeof(oid)*tint);
 	else result = snmp_errno;
@@ -5009,7 +5021,7 @@ snmp_add_var(struct snmp_pdu *pdu,
         break;
 
       case 'b':
-        if (check && (tp->type != TYPE_OCTETSTR || !tp->enums)) {
+        if (check && (tp->type != TYPE_BITSTRING || !tp->enums)) {
 	    value = "BITS";
 	    result = SNMPERR_VALUE;
 	    goto type_error;
@@ -5017,12 +5029,13 @@ snmp_add_var(struct snmp_pdu *pdu,
 	tint = 0;
 	memset(buf, 0, sizeof buf);
 	{ char *lvalue = strdup(value), *cp;
+          for (ep = tp ? tp->enums : NULL; ep; ep = ep->next)
+            if (ep->value / 8 >= (int)tint) tint = ep->value / 8 + 1;
 	  for (cp = strtok(lvalue, " \t,"); cp; cp = strtok(NULL, " \t,")) {
-	    char *ecp;
 	    int ix, bit;
 	    ltmp = strtoul(cp, &ecp, 0);
 	    if (*ecp != 0) {
-	      struct enum_list *ep = tp ? tp->enums : NULL;
+	      ep = tp ? tp->enums : NULL;
 	      while (ep)
 		if (strcmp(ep->label, cp)) ep = ep->next;
 		else break;

@@ -568,7 +568,8 @@ handle_snmp_packet(int operation, struct snmp_session *session, int reqid,
 		 * May need to "dumb down" a SET error status for a
 		 *  v1 query.  See RFC2576 - section 4.3
 		 */
-	if (( asp->pdu->command == SNMP_MSG_SET ) &&
+	if (( asp->pdu                          ) &&
+	    ( asp->pdu->command == SNMP_MSG_SET ) &&
 	    ( asp->pdu->version == SNMP_VERSION_1 )) {
 	    switch ( status ) {
 		case SNMP_ERR_WRONGVALUE:
@@ -597,7 +598,8 @@ handle_snmp_packet(int operation, struct snmp_session *session, int reqid,
 		 *  types to throw an error for a v1 query.
 		 *  See RFC2576 - section 4.1.2.3
 		 */
-	if (( asp->pdu->command != SNMP_MSG_SET ) &&
+	if (( asp->pdu                          ) &&
+	    ( asp->pdu->command != SNMP_MSG_SET ) &&
 	    ( asp->pdu->version == SNMP_VERSION_1 )) {
 		for ( var_ptr = asp->pdu->variables, i=1 ;
 			var_ptr != NULL ;
@@ -613,7 +615,7 @@ handle_snmp_packet(int operation, struct snmp_session *session, int reqid,
 		    }
 	    }
 	}
-	if ( status == SNMP_ERR_NOERROR ) {
+	if (( status == SNMP_ERR_NOERROR ) && ( asp->pdu )) {
 	    snmp_increment_statistic_by(
 		(asp->pdu->command == SNMP_MSG_SET ?
 			STAT_SNMPINTOTALSETVARS : STAT_SNMPINTOTALREQVARS ),
@@ -628,15 +630,17 @@ handle_snmp_packet(int operation, struct snmp_session *session, int reqid,
 	    asp->pdu = asp->orig_pdu;
 	    asp->orig_pdu = NULL;
 	}
-	asp->pdu->command  = SNMP_MSG_RESPONSE;
-	asp->pdu->errstat  = status;
-	asp->pdu->errindex = asp->index;
-	if (! snmp_send( asp->session, asp->pdu ))
-	    snmp_free_pdu(asp->pdu);
-	snmp_increment_statistic(STAT_SNMPOUTPKTS);
-	snmp_increment_statistic(STAT_SNMPOUTGETRESPONSES);
-	asp->pdu = NULL;
-	free_agent_snmp_session( asp );
+	if ( asp->pdu ) {
+	    asp->pdu->command  = SNMP_MSG_RESPONSE;
+	    asp->pdu->errstat  = status;
+	    asp->pdu->errindex = asp->index;
+	    if (! snmp_send( asp->session, asp->pdu ))
+	        snmp_free_pdu(asp->pdu);
+	    snmp_increment_statistic(STAT_SNMPOUTPKTS);
+	    snmp_increment_statistic(STAT_SNMPOUTGETRESPONSES);
+	    asp->pdu = NULL;
+	    free_agent_snmp_session( asp );
+	}
     }
 
     return 1;
@@ -669,6 +673,7 @@ handle_next_pass(struct agent_snmp_session  *asp)
 					 req_p->pdu->reqid,
 					 req_p->pdu,
 					 req_p->cb_data );
+			return SNMP_ERR_GENERR;
 		    }
 		}
 	    }

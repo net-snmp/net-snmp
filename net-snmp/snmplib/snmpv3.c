@@ -94,7 +94,9 @@ static size_t	 defaultAuthTypeLen	= 0;
 static oid	*defaultPrivType	= NULL;
 static size_t	 defaultPrivTypeLen	= 0;
 
+#if defined(IFHWADDRLEN) && defined(SIOCGIFHWADDR)
 static int getHwAddress(const char * networkDevice, char * addressOut);
+#endif
 
 void
 snmpv3_authtype_conf(const char *word, char *cptr)
@@ -703,6 +705,9 @@ init_snmpv3(const char *type) {
 
   gettimeofday(&snmpv3starttime, NULL);
 
+  if (!type)
+      type = ds_get_string(DS_LIBRARY_ID, DS_LIB_APPTYPE);
+
   /* we need to be called back later */
   snmp_register_callback(SNMP_CALLBACK_LIBRARY, SNMP_CALLBACK_POST_READ_CONFIG,
                          init_snmpv3_post_config, NULL);
@@ -710,8 +715,9 @@ init_snmpv3(const char *type) {
                          SNMP_CALLBACK_POST_PREMIB_READ_CONFIG,
                          init_snmpv3_post_premib_config, NULL);
   /* we need to be called back later */
-  snmp_register_callback(SNMP_CALLBACK_LIBRARY, SNMP_CALLBACK_STORE_DATA,
-                         snmpv3_store, (void *) strdup(type));
+  if (type)
+      snmp_register_callback(SNMP_CALLBACK_LIBRARY, SNMP_CALLBACK_STORE_DATA,
+                             snmpv3_store, (void *) strdup(type));
 
   /* initialize submodules */
   /*   NOTE: this must be after the callbacks are registered above,
@@ -726,12 +732,16 @@ init_snmpv3(const char *type) {
   /* register all our configuration handlers (ack, there's a lot) */
 
   /* handle engineID setup before everything else which may depend on it */
-  register_premib_handler(type,"engineID", engineID_conf, NULL, "string");
-  register_premib_handler(type,"oldEngineID", oldengineID_conf, NULL, NULL);
-  register_premib_handler(type,"engineIDType", engineIDType_conf, NULL,"num");
-  register_premib_handler(type,"engineIDNic", engineIDNic_conf, NULL,"string");
-  register_config_handler(type,"engineBoots", engineBoots_conf, NULL, NULL);
-
+  if (type) {
+      register_premib_handler(type,"engineID", engineID_conf, NULL, "string");
+      register_premib_handler(type,"oldEngineID", oldengineID_conf, NULL, NULL);
+      register_premib_handler(type,"engineIDType", engineIDType_conf, NULL,
+                              "num");
+      register_premib_handler(type,"engineIDNic", engineIDNic_conf, NULL,
+                              "string");
+      register_config_handler(type,"engineBoots", engineBoots_conf, NULL, NULL);
+  }
+  
   /* default store config entries */
   ds_register_config(ASN_OCTET_STR, "snmp", "defSecurityName", DS_LIBRARY_ID,
                      DS_LIB_SECNAME);
@@ -751,18 +761,21 @@ init_snmpv3(const char *type) {
                           "DES (currently the only possible value)");
   register_config_handler("snmp","defSecurityLevel", snmpv3_secLevel_conf,
                           NULL, "noAuthNoPriv|authNoPriv|authPriv");
-  register_config_handler(type,"userSetAuthPass", usm_set_password, NULL,
-                          NULL);
-  register_config_handler(type,"userSetPrivPass", usm_set_password, NULL,
-                          NULL);
-  register_config_handler(type,"userSetAuthKey", usm_set_password, NULL,
-                          NULL);
-  register_config_handler(type,"userSetPrivKey", usm_set_password, NULL,
-                          NULL);
-  register_config_handler(type,"userSetAuthLocalKey", usm_set_password, NULL,
-                          NULL);
-  register_config_handler(type,"userSetPrivLocalKey", usm_set_password, NULL,
-                          NULL);
+
+  if (type) {
+      register_config_handler(type,"userSetAuthPass", usm_set_password, NULL,
+                              NULL);
+      register_config_handler(type,"userSetPrivPass", usm_set_password, NULL,
+                              NULL);
+      register_config_handler(type,"userSetAuthKey", usm_set_password, NULL,
+                              NULL);
+      register_config_handler(type,"userSetPrivKey", usm_set_password, NULL,
+                              NULL);
+      register_config_handler(type,"userSetAuthLocalKey", usm_set_password,
+                              NULL, NULL);
+      register_config_handler(type,"userSetPrivLocalKey", usm_set_password,
+                              NULL, NULL);
+  }
 }
 
 /*

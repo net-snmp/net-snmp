@@ -89,6 +89,9 @@ SOFTWARE.
 #ifdef HAVE_SYS_PARAM_H
 #include <sys/param.h>
 #endif
+#if HAVE_PROCESS_H  /* Win32-getpid */
+#include <process.h>
+#endif
 
 #ifndef FD_SET
 typedef long    fd_mask;
@@ -130,8 +133,6 @@ typedef long    fd_mask;
 #include "tools.h"
 #include "lcd_time.h"
 #include "mibgroup/util_funcs.h"
-
-#include "transform_oids.h"
 
 #include "snmp_agent.h"
 #include "agent_trap.h"
@@ -357,7 +358,7 @@ main(int argc, char *argv[])
                     if (argv[arg][2] != '\0') 
                         cptr = &argv[arg][2];
                     else if (++arg>argc) {
-                        fprintf(stderr,"Need UDP or TCP after -T flag.\n");
+                        fprintf(stderr,"%s: Need UDP or TCP after -T flag.\n", argv[0]);
                         usage(argv[0]);
                         exit(1);
                     } else {
@@ -371,8 +372,8 @@ main(int argc, char *argv[])
                         /* default, do nothing */
                     } else {
                         fprintf(stderr,
-                                "Unknown transport \"%s\" after -T flag.\n",
-                                cptr);
+                                "%s: Unknown transport \"%s\" after -T flag.\n",
+                                argv[0], cptr);
                         usage(argv[0]);
                         exit(1);
                     }
@@ -398,7 +399,7 @@ main(int argc, char *argv[])
                       strcpy(buf,argv[arg]);
 
                   DEBUGMSGTL(("snmpd_ports","port spec: %s\n", buf));
-                  ds_set_string(DS_APPLICATION_ID, DS_AGENT_PORTS, strdup(buf));
+                  ds_set_string(DS_APPLICATION_ID, DS_AGENT_PORTS, buf);
                   break;
 
 #if defined(USING_AGENTX_SUBAGENT_MODULE) || defined(USING_AGENTX_MASTER_MODULE)
@@ -413,7 +414,7 @@ main(int argc, char *argv[])
 #if defined(USING_AGENTX_SUBAGENT_MODULE)
                   agent_mode = SUB_AGENT;
 #else
-                  fprintf(stderr,"Illegal argument -X: AgentX support not compiled in.\n");
+                  fprintf(stderr,"%s: Illegal argument -X: AgentX support not compiled in.\n", argv[0]);
                   usage(argv[0]);
                   exit(1);
 #endif
@@ -430,7 +431,7 @@ main(int argc, char *argv[])
                   pid_file = argv[arg];
 
                 case 'a':
-                      log_addresses++;
+		  log_addresses++;
                   break;
 
                 case 'V':
@@ -503,12 +504,16 @@ main(int argc, char *argv[])
                   }
 
                 default:
-                  printf("invalid option: %s\n", argv[arg]);
+                  fprintf(stderr, "%s: Invalid option: %s\n", argv[0], argv[arg]);
                   usage(argv[0]);
                   break;
               }
               continue;
             }
+	    else {
+	      fprintf(stderr, "%s: Bad argument: %s\n", argv[0], argv[arg]);
+	      exit(1);
+	    }
 	}  /* end-for */
 
 	/* 
@@ -729,6 +734,13 @@ receive(void)
 	}
 #endif	/* USING_SMUX_MODULE */
 
+	for (i = 0; i < NUM_EXTERNAL_SIGS; i++) {
+	    if (external_signal_scheduled[i]) {
+		external_signal_scheduled[i]--;
+		external_signal_handler[i](i);
+	    }
+	}
+
 	for (i = 0; i < external_readfdlen; i++) {
 	    FD_SET(external_readfd[i], &readfds);
 	    if (external_readfd[i] >= numfds)
@@ -743,13 +755,6 @@ receive(void)
 	    FD_SET(external_exceptfd[i], &exceptfds);
 	    if (external_exceptfd[i] >= numfds)
 		numfds = external_exceptfd[i] + 1;
-	}
-
-	for (i = 0; i < NUM_EXTERNAL_SIGS; i++) {
-	    if (external_signal_scheduled[i]) {
-		external_signal_scheduled[i]--;
-		external_signal_handler[i](i);
-	    }
 	}
 	
 	count = select(numfds, &readfds, &writefds, &exceptfds, tvp);

@@ -2,7 +2,7 @@
 
 . ../eval_tools.sh
 
-HEADER snmpv1 traps are sent by snmpd API
+HEADER snmpv1 traps are sent by snmpd without notifcation mib support
 
 SKIPIFNOT USING_EXAMPLES_EXAMPLE_MODULE
 
@@ -17,7 +17,8 @@ CONFIGAGENT trapsink localhost public $REAL_TRAPD_PORT
 
 STARTTRAPD
 
-AGENT_FLAGS="$AGENT_FLAGS -Dexample,header_generic,add_trap"
+# initialize only the example mib, and not the notification mib stuff
+AGENT_FLAGS="$AGENT_FLAGS -Dexample,header_generic,add_trap,mib_init,callback -I example,usmUser,vacm_vars"
 STARTAGENT
 
 CAPTURE "snmpset $SNMP_FLAGS -v 3 -a MD5 -A initial_test_pass_auth -l anp -u initial -n xxx localhost ucdavis.254.7.0 i 1"

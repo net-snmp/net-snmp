@@ -81,10 +81,10 @@ clean:
 
 
 install:  installdirs
-	@$(INSTALL) $(TARG) $(sbindir) ; echo "install:  installed $(TARG) in $(sbindir) "
 	@for i in $(INSTALLHEADERS) ; do $(INSTALL) $(srcdir)/$$i $(includedir) ; echo "install:  installed $$i in $(includedir)" ; done
 	@for i in $(LIBTARG) ; do $(INSTALL) $$i $(libdir) ; $(RANLIB) $(libdir)/$$i ; echo "install:  installed $$i in $(libdir)" ; done
 	$(LIB_LDCONFIG_CMD)
+	@$(INSTALL) $(TARG) $(sbindir) ; echo "install:  installed $(TARG) in $(sbindir) "
 
 installdirs:
 	@$(SHELL) $(srcdir)/../mkinstalldirs $(sbindir) $(snmplibdir) $(includedir) $(libdir)
