@@ -487,6 +487,34 @@ handle_snmp_packet(int operation, struct snmp_session *session, int reqid,
 			STAT_SNMPINTOTALSETVARS : STAT_SNMPINTOTALREQVARS ),
 	    	count_varbinds( asp->pdu ));
 	}
+		/*
+		 * May need to "dumb down" a SET error status for a
+		 *  v1 query.  See RFC2576 - section 4.3
+		 */
+	if (( asp->pdu->command == SNMP_MSG_SET ) &&
+	    ( asp->pdu->version == SNMP_VERSION_1 )) {
+	    switch ( status ) {
+		case SNMP_ERR_WRONGVALUE:
+		case SNMP_ERR_WRONGENCODING:
+		case SNMP_ERR_WRONGTYPE:
+		case SNMP_ERR_WRONGLENGTH:
+		case SNMP_ERR_INCONSISTENTVALUE:
+			status = SNMP_ERR_BADVALUE;
+			break;
+		case SNMP_ERR_NOACCESS:
+		case SNMP_ERR_NOTWRITABLE:
+		case SNMP_ERR_NOCREATION:
+		case SNMP_ERR_INCONSISTENTNAME:
+		case SNMP_ERR_AUTHORIZATIONERROR:
+			status = SNMP_ERR_NOSUCHNAME;
+			break;
+		case SNMP_ERR_RESOURCEUNAVAILABLE:
+		case SNMP_ERR_COMMITFAILED:
+		case SNMP_ERR_UNDOFAILED:
+			status = SNMP_ERR_GENERR;
+			break;
+	    }
+	}
 	asp->pdu->command = SNMP_MSG_RESPONSE;
 	asp->pdu->errstat = status;
 	snmp_send( asp->session, asp->pdu );
