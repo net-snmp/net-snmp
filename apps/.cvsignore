@@ -1,12 +1,16 @@
+*.lo
 .gdb.auto.init
 .gdbinit
+.libs
 Makefile
 encode_keychange
 snmpbulkget
 snmpbulkwalk
 snmpdelta
+snmpdf
 snmpget
 snmpgetnext
+snmpinform
 snmppass
 snmpset
 snmpstatus
@@ -16,7 +20,5 @@ snmptranslate
 snmptrap
 snmptrapd
 snmpusm
+snmpvacm
 snmpwalk
-snmpinform
-*.lo
-.libs
