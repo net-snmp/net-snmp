@@ -266,9 +266,9 @@ static const char * usmSecLevelName[] =
  */
 /*MTCRITICAL_RESOURCE*/
 /* use token in comments to individually protect these resources */
-struct session_list	*Sessions	 = NULL; /* MT_SESSION */
-static long		 Reqid		 = 0;    /* MT_REQUESTID */
-static long		 Msgid		 = 0;    /* MT_MESSAGEID */
+struct session_list	*Sessions	 = NULL; /* MT_LIB_SESSION */
+static long		 Reqid		 = 0;    /* MT_LIB_REQUESTID */
+static long		 Msgid		 = 0;    /* MT_LIB_MESSAGEID */
 int              snmp_errno  = 0;
 /*END MTCRITICAL_RESOURCE*/
 
@@ -314,11 +314,11 @@ long
 snmp_get_next_reqid (void)
 { 
     long retVal;
-    snmp_res_lock(MT_REQUESTID);
+    snmp_res_lock(MT_LIBRARY_ID, MT_LIB_REQUESTID);
     retVal = 1 + Reqid; /*MTCRITICAL_RESOURCE*/
     if (!retVal) retVal = 2;
     Reqid = retVal;
-    snmp_res_unlock(MT_REQUESTID);
+    snmp_res_unlock(MT_LIBRARY_ID, MT_LIB_REQUESTID);
     return retVal;
 }
 
@@ -326,11 +326,11 @@ long
 snmp_get_next_msgid (void)
 {
     long retVal;
-    snmp_res_lock(MT_MESSAGEID);
+    snmp_res_lock(MT_LIBRARY_ID, MT_LIB_MESSAGEID);
     retVal = 1 + Msgid; /*MTCRITICAL_RESOURCE*/
     if (!retVal) retVal = 2;
     Msgid = retVal;
-    snmp_res_unlock(MT_MESSAGEID);
+    snmp_res_unlock(MT_LIBRARY_ID, MT_LIB_MESSAGEID);
     return retVal;
 }
 
@@ -610,10 +610,10 @@ snmp_open(struct snmp_session *session)
     if (!slp) return NULL;
 
     { /*MTCRITICAL_RESOURCE*/
-	snmp_res_lock(MT_SESSION);
+	snmp_res_lock(MT_LIBRARY_ID, MT_LIB_SESSION);
 	slp->next = Sessions;
 	Sessions = slp;
-	snmp_res_unlock(MT_SESSION);
+	snmp_res_unlock(MT_LIBRARY_ID, MT_LIB_SESSION);
     }
     return (slp->session);
 }
@@ -1285,7 +1285,7 @@ snmp_close(struct snmp_session *session)
     struct session_list *slp = NULL, *oslp = NULL;
 
     { /*MTCRITICAL_RESOURCE*/
-	snmp_res_lock(MT_SESSION);
+	snmp_res_lock(MT_LIBRARY_ID, MT_LIB_SESSION);
     if (Sessions->session == session){	/* If first entry */
 	slp = Sessions;
 	Sessions = slp->next;
@@ -1299,7 +1299,7 @@ snmp_close(struct snmp_session *session)
 	    oslp = slp;
 	}
     }
-	snmp_res_unlock(MT_SESSION);
+	snmp_res_unlock(MT_LIBRARY_ID, MT_LIB_SESSION);
     } /*END MTCRITICAL_RESOURCE*/
     if (slp == NULL){
 	return 0;
@@ -1734,56 +1734,56 @@ snmpv3_packet_build(struct snmp_pdu *pdu, u_char *packet, size_t *out_length,
 void
 set_pre_parse( struct snmp_session *sp, int (*hook) (struct snmp_session *, snmp_ipaddr) ) {
     struct session_list *slp;
-    snmp_res_lock(MT_SESSION);
+    snmp_res_lock(MT_LIBRARY_ID, MT_LIB_SESSION);
     for(slp = Sessions; slp; slp = slp->next){
 	if  (slp->session == sp ) {
 	    slp->internal->hook_pre = hook;
 	    break;
 	}
     }
-    snmp_res_unlock(MT_SESSION);
+    snmp_res_unlock(MT_LIBRARY_ID, MT_LIB_SESSION);
 }
 
 void
 set_parse( struct snmp_session *sp,
 		int (*hook) (struct snmp_session *, struct snmp_pdu *, u_char *, size_t)) {
     struct session_list *slp;
-    snmp_res_lock(MT_SESSION);
+    snmp_res_lock(MT_LIBRARY_ID, MT_LIB_SESSION);
     for(slp = Sessions; slp; slp = slp->next){
 	if  (slp->session == sp ) {
 	    slp->internal->hook_parse = hook;
 	    break;
 	}
     }
-    snmp_res_unlock(MT_SESSION);
+    snmp_res_unlock(MT_LIBRARY_ID, MT_LIB_SESSION);
 }
 
 void
 set_post_parse( struct snmp_session *sp,
                 int (*hook) ( struct snmp_session*, struct snmp_pdu *, int) ) {
     struct session_list *slp;
-    snmp_res_lock(MT_SESSION);
+    snmp_res_lock(MT_LIBRARY_ID, MT_LIB_SESSION);
     for(slp = Sessions; slp; slp = slp->next){
 	if  (slp->session == sp ) {
 	    slp->internal->hook_post = hook;
 	    break;
 	}
     }
-    snmp_res_unlock(MT_SESSION);
+    snmp_res_unlock(MT_LIBRARY_ID, MT_LIB_SESSION);
 }
 
 void
 set_build( struct snmp_session *sp,
 		int (*hook) (struct snmp_session *, struct snmp_pdu *, u_char *, size_t *)) {
     struct session_list *slp;
-    snmp_res_lock(MT_SESSION);
+    snmp_res_lock(MT_LIBRARY_ID, MT_LIB_SESSION);
     for(slp = Sessions; slp; slp = slp->next){
 	if  (slp->session == sp ) {
 	    slp->internal->hook_build = hook;
 	    break;
 	}
     }
-    snmp_res_unlock(MT_SESSION);
+    snmp_res_unlock(MT_LIBRARY_ID, MT_LIB_SESSION);
 }
 
 
@@ -3060,7 +3060,7 @@ _sess_async_send(void *sessp,
 	}
 	memset(rp, 0, sizeof(struct request_list));
 	/* XX isp needs lock iff multiple threads can handle this session */
-	snmp_res_lock(MT_SESSION);  /* XX lock should be per session ! */
+	snmp_res_lock(MT_LIBRARY_ID, MT_LIB_SESSION);  /* XX lock should be per session ! */
 	if (isp->requestsEnd){
 	    rp->next_request = isp->requestsEnd->next_request;
 	    isp->requestsEnd->next_request = rp;
@@ -3070,7 +3070,7 @@ _sess_async_send(void *sessp,
 	    isp->requests = rp;
 	    isp->requestsEnd = rp;
 	}
-	snmp_res_unlock(MT_SESSION); /* XX lock should be per session ! */
+	snmp_res_unlock(MT_LIBRARY_ID, MT_LIB_SESSION); /* XX lock should be per session ! */
 	rp->pdu = pdu;
 	rp->request_id = pdu->reqid;
 	rp->message_id = pdu->msgid;
@@ -3169,11 +3169,11 @@ void
 snmp_read(fd_set *fdset)
 {
     struct session_list *slp;
-    snmp_res_lock(MT_SESSION);
+    snmp_res_lock(MT_LIBRARY_ID, MT_LIB_SESSION);
     for(slp = Sessions; slp; slp = slp->next){
         snmp_sess_read((void *)slp, fdset);
     }
-    snmp_res_unlock(MT_SESSION);
+    snmp_res_unlock(MT_LIBRARY_ID, MT_LIB_SESSION);
 }
 
 /* Same as snmp_read, but works just one session. */
@@ -3231,7 +3231,7 @@ _sess_read(void *sessp,
                 return -1;
     { /*MTCRITICAL_RESOURCE*/
 	/* indirectly accesses the Sessions list */
-            /* MTR snmp_res_lock(MT_SESSION); */
+            /* MTR snmp_res_lock(MT_LIBRARY_ID, MT_LIB_SESSION); */
             new_slp->next = slp->next;
             slp->next     = new_slp;
 
@@ -3243,7 +3243,7 @@ _sess_read(void *sessp,
             isp->sd = new_sd;
             isp->addr.sa_family = isp->me.sa_family;
             sp->flags &= (~SNMP_FLAGS_LISTENING);
-            /* MTR snmp_res_unlock(MT_SESSION); */
+            /* MTR snmp_res_unlock(MT_LIBRARY_ID, MT_LIB_SESSION); */
     } /*END MTCRITICAL_RESOURCE*/
         }
         memcpy((u_char *)&from, (u_char *)&(isp->addr), sizeof( isp->addr ));
@@ -3328,7 +3328,7 @@ _sess_read(void *sessp,
 	      magic = rp->cb_data;
 	  }
 
-	  /* MTR snmp_res_lock(MT_SESSION);  ?* XX lock should be per session ! */
+	  /* MTR snmp_res_lock(MT_LIBRARY_ID, MT_LIB_SESSION);  ?* XX lock should be per session ! */
 	  if (callback == NULL || 
 	      callback(RECEIVED_MESSAGE,sp,pdu->reqid,pdu,magic) == 1){
 	    if (pdu->command == SNMP_MSG_REPORT) {
@@ -3374,15 +3374,15 @@ _sess_read(void *sessp,
 	       same reqid */
 	    break;
 	  }
-	  /* MTR snmp_res_unlock(MT_SESSION);  ?* XX lock should be per session ! */
+	  /* MTR snmp_res_unlock(MT_LIBRARY_ID, MT_LIB_SESSION);  ?* XX lock should be per session ! */
 	}
     } else {
 	if (sp->callback)
 	{
-            /* MTR snmp_res_lock(MT_SESSION); */
+            /* MTR snmp_res_lock(MT_LIBRARY_ID, MT_LIB_SESSION); */
 	    sp->callback(RECEIVED_MESSAGE, sp, pdu->reqid, pdu,
 		     sp->callback_magic);
-            /* MTR snmp_res_unlock(MT_SESSION); */
+            /* MTR snmp_res_unlock(MT_LIBRARY_ID, MT_LIB_SESSION); */
 	}	
     }
     /* call USM to free any securityStateRef supplied with the message */
@@ -3554,11 +3554,11 @@ void
 snmp_timeout (void)
 {
     struct session_list *slp;
-    snmp_res_lock(MT_SESSION);
+    snmp_res_lock(MT_LIBRARY_ID, MT_LIB_SESSION);
     for(slp = Sessions; slp; slp = slp->next){
 	snmp_sess_timeout((void *)slp);
     }
-    snmp_res_unlock(MT_SESSION);
+    snmp_res_unlock(MT_LIBRARY_ID, MT_LIB_SESSION);
 }
 
 static int
@@ -4053,13 +4053,13 @@ snmp_sess_pointer(struct snmp_session *session)
 {
     struct session_list *slp;
 
-    snmp_res_lock(MT_SESSION);
+    snmp_res_lock(MT_LIBRARY_ID, MT_LIB_SESSION);
     for(slp = Sessions; slp; slp = slp->next){
 	if (slp->session == session){
 	    break;
 	}
     }
-    snmp_res_unlock(MT_SESSION);
+    snmp_res_unlock(MT_LIBRARY_ID, MT_LIB_SESSION);
 
     if (slp == NULL){
 	snmp_errno = SNMPERR_BAD_SESSION; /*MTCRITICAL_RESOURCE*/
