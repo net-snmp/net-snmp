@@ -175,7 +175,7 @@ merge_trees( struct subtree *existing, struct subtree *new_tree )
 }
 
 
-void
+int
 load_subtree (struct subtree *new_subtree)
 {
     struct subtree *next_tree = subtrees;
@@ -187,7 +187,7 @@ load_subtree (struct subtree *new_subtree)
 	if ((snmp_oid_compare(new_subtree->name, new_subtree->namelen, 
 			      previous->name, previous->namelen) == 0)
 	    && (strlen(previous->label) > 0 ))
-			return;		/* Duplicate registration */
+			return -2;		/* Duplicate registration */
 	next_tree = previous->next;
     }
     else
@@ -219,9 +219,10 @@ load_subtree (struct subtree *new_subtree)
 	    subtrees = new_subtree;
 	new_subtree->next = next_tree;
     }
+    return 0;
 }
 
-void
+int
 register_mib(const char *moduleName,
 	     struct variable *var,
 	     size_t varsize,
@@ -231,8 +232,11 @@ register_mib(const char *moduleName,
 {
   struct subtree *subtree;
   char c_oid[SPRINT_MAX_LEN];
+  int res;
 
   subtree = (struct subtree *) malloc(sizeof(struct subtree));
+  if ( subtree == NULL )
+    return -1;
   memset(subtree, 0, sizeof(struct subtree));
 
   sprint_objid(c_oid, mibloc, mibloclen);
@@ -246,14 +250,16 @@ register_mib(const char *moduleName,
   memcpy(subtree->variables, var, numvars*varsize);
   subtree->variables_len = numvars;
   subtree->variables_width = varsize;
-  load_subtree(subtree);
+  res = load_subtree(subtree);
 
   if ( agent_role == SUB_AGENT )
     agentx_register( agentx_session, mibloc, mibloclen );
+
+  return res;
 }
 
 
-void
+int
 unload_subtree( oid *name, size_t len, struct subtree *previous)
 {
   struct subtree *list, *list_prev = NULL;      /* loop through children */
@@ -264,7 +270,7 @@ unload_subtree( oid *name, size_t len, struct subtree *previous)
   list = previous->next;
 
   if ( snmp_oid_compare( list->name, list->namelen, name, len) != 0 )
-        return;
+        return -1;
   strcpy( label, list->label );         /* or save registration ID */
  
   while (1) {
@@ -300,21 +306,25 @@ unload_subtree( oid *name, size_t len, struct subtree *previous)
     list = free_subtree( list );        /* returns list->next */
     previous = previous->next;
   }
+  return 0;
 }
 
-void
+int
 unregister_mib(oid *name,
 	       size_t len)
 {
   struct subtree *my_ptr;
+  int res;
 
   my_ptr = find_subtree( name, len, subtrees );
   if ( my_ptr == NULL )
-     return;
+     return -1;
 
-  unload_subtree(name, len, subtrees);
+  res = unload_subtree(name, len, subtrees);
   if ( agent_role == SUB_AGENT )
     agentx_unregister( agentx_session, name, len );
+
+  return res;
 }
 
 
