@@ -142,6 +142,7 @@ int main(int argc, char *argv[])
       names[current_name++] = argv[arg++];
       if (arg < argc) {
         switch(*argv[arg]){
+	case '=':
         case 'i':
         case 'u':
         case 't':

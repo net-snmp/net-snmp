@@ -4877,6 +4877,32 @@ snmp_add_var(struct snmp_pdu *pdu,
     tp = get_tree(name, name_length, get_tree_head());
     if (!tp || !tp->type || tp->type > TYPE_SIMPLE_LAST) check = 0;
 
+    if (tp && type == '=') {
+	/* generic assignment - let the tree node decide value format */
+        switch (tp->type) {
+	case TYPE_INTEGER:
+	case TYPE_INTEGER32:
+	    type = 'i'; break;
+	case TYPE_GAUGE:
+	case TYPE_UNSIGNED32:
+	    type = 'u'; break;
+	case TYPE_UINTEGER:
+	    type = '3'; break;
+	case TYPE_COUNTER:
+	    type = 'c'; break;
+	case TYPE_TIMETICKS:
+	    type = 't'; break;
+	case TYPE_OCTETSTR:
+	    type = 's'; break;
+	case TYPE_BITSTRING:
+	    type = 'b'; break;
+	case TYPE_IPADDR:
+	    type = 'a'; break;
+	case TYPE_OBJID:
+	    type = 'o'; break;
+	}
+    }
+
     switch(type){
       case 'i':
         if (check && tp->type != TYPE_INTEGER && tp->type != TYPE_INTEGER32) {
