@@ -80,7 +80,11 @@ SOFTWARE.
 #include <netdb.h>
 #endif
 #if HAVE_NET_IF_DL_H
+#ifndef dynix
 #include <net/if_dl.h>
+#else
+#include <sys/net/if_dl.h>
+#endif
 #endif
 #include <errno.h>
 

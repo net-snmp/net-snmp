@@ -98,6 +98,14 @@ struct statfs *HRFS_entry;
 #define HRFS_mount	f_mntonname
 #define HRFS_name	f_mntfromname
 
+#elif defined(dynix)
+
+struct mntent *HRFS_entry;
+#define	HRFS_name	mnt_fsname
+#define	HRFS_mount	mnt_dir
+#define	HRFS_type	mnt_type
+#define	HRFS_statfs	statvfs
+
 #else
 
 struct mntent *HRFS_entry;
