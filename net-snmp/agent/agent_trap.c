@@ -71,12 +71,13 @@ int             enterprisetrap_len;
 int             trap_version_id_len;
 
 #define SNMPV2_TRAPS_PREFIX	SNMP_OID_SNMPMODULES,1,1,5
+oid             trap_prefix[]    = { SNMPV2_TRAPS_PREFIX };
 oid             cold_start_oid[] = { SNMPV2_TRAPS_PREFIX, 1 };  /* SNMPv2-MIB */
 oid             warm_start_oid[] = { SNMPV2_TRAPS_PREFIX, 2 };  /* SNMPv2-MIB */
-oid             link_down_oid[] = { SNMPV2_TRAPS_PREFIX, 3 };   /* IF-MIB */
-oid             link_up_oid[] = { SNMPV2_TRAPS_PREFIX, 4 };     /* IF-MIB */
-oid             auth_fail_oid[] = { SNMPV2_TRAPS_PREFIX, 5 };   /* SNMPv2-MIB */
-oid             egp_xxx_oid[] = { SNMPV2_TRAPS_PREFIX, 99 };    /* ??? */
+oid             link_down_oid[]  = { SNMPV2_TRAPS_PREFIX, 3 };  /* IF-MIB */
+oid             link_up_oid[]    = { SNMPV2_TRAPS_PREFIX, 4 };  /* IF-MIB */
+oid             auth_fail_oid[]  = { SNMPV2_TRAPS_PREFIX, 5 };  /* SNMPv2-MIB */
+oid             egp_xxx_oid[]    = { SNMPV2_TRAPS_PREFIX, 99 }; /* ??? */
 
 #define SNMPV2_TRAP_OBJS_PREFIX	SNMP_OID_SNMPMODULES,1,1,4
 oid             snmptrap_oid[] = { SNMPV2_TRAP_OBJS_PREFIX, 1, 0 };
@@ -282,132 +283,422 @@ snmpd_free_trapsinks(void)
 	 *
 	 *******************/
 
-void
-convert_v2_to_v1(netsnmp_variable_list * vars, netsnmp_pdu *template_pdu)
+
+netsnmp_variable_list*
+find_varbind_in_list( netsnmp_variable_list *vblist,
+                      oid *name, size_t len)
 {
-    netsnmp_variable_list *v, *trap_v = NULL, *ent_v = NULL;
-    oid             trap_prefix[] = { SNMPV2_TRAPS_PREFIX };
-    int             len;
+    netsnmp_variable_list *v;
 
-    for (v = vars; v; v = v->next_variable) {
-        if (netsnmp_oid_equals(v->name, v->name_length,
-                             snmptrap_oid, OID_LENGTH(snmptrap_oid)) == 0)
-            trap_v = v;
-        if (netsnmp_oid_equals(v->name, v->name_length,
-                             snmptrapenterprise_oid,
-                             OID_LENGTH(snmptrapenterprise_oid)) == 0)
-            ent_v = v;
-    }
+    for (v=vblist; v; v=v->next_variable)
+        if (!snmp_oid_compare(v->name, v->name_length,
+                              name,    len))
+            return v;
 
-    if (!trap_v)
-        return;                 /* Can't find v2 snmpTrapOID varbind */
-
-    /*
-     * Is this a 'standard' trap?
-     *  Or at least, does it have the correct prefix?
-     */
-    if (netsnmp_oid_equals(trap_v->val.objid, OID_LENGTH(trap_prefix),
-                         trap_prefix, OID_LENGTH(trap_prefix)) == 0) {
-        template_pdu->trap_type =
-            trap_v->val.objid[OID_LENGTH(trap_prefix)] - 1;
-        template_pdu->specific_type = 0;
-    } else {
-        len = trap_v->val_len / sizeof(oid);
-        template_pdu->trap_type = 6;    /* enterprise specific */
-        template_pdu->specific_type = trap_v->val.objid[len - 1];
-    }
-
-    /*
-     *  TODO:
-     *    Extract the appropriate enterprise value from 'ent_v'
-     *    Remove uptime/trapOID varbinds from 'vars' list
-     */
-
+    return NULL;
 }
 
-netsnmp_variable_list *
-convert_v1_to_v2(netsnmp_pdu *pdu)
+netsnmp_pdu*
+convert_v2pdu_to_v1( netsnmp_pdu* template_v2pdu )
 {
-    netsnmp_variable_list
-        *uptime_var     = SNMP_MALLOC_TYPEDEF(netsnmp_variable_list);
-    netsnmp_variable_list
-        *snmptrap_var   = SNMP_MALLOC_TYPEDEF(netsnmp_variable_list);
-    netsnmp_variable_list
-        *agentaddr_var  = SNMP_MALLOC_TYPEDEF(netsnmp_variable_list);
-    netsnmp_variable_list
-        *community_var  = SNMP_MALLOC_TYPEDEF(netsnmp_variable_list);
-    netsnmp_variable_list
-        *enterprise_var = SNMP_MALLOC_TYPEDEF(netsnmp_variable_list);
-    netsnmp_variable_list *v2_vars, *vptr;
-    oid enttrapoid[MAX_OID_LEN];
-    int enttrap_len;
+    netsnmp_pdu           *template_v1pdu;
+    netsnmp_variable_list *first_vb, *vblist;
+    netsnmp_variable_list *var;
+    size_t                 len;
 
-    if (!pdu)
+    /*
+     * Make a copy of the v2 Trap PDU
+     *   before starting to convert this
+     *   into a v1 Trap PDU.
+     */
+    template_v1pdu = snmp_clone_pdu( template_v2pdu);
+    if (!template_v1pdu) {
+        snmp_log(LOG_WARNING,
+                 "send_trap: failed to copy v1 template PDU\n");
         return NULL;
-
-    v2_vars = snmp_clone_varbind( pdu->variables );
+    }
+    template_v1pdu->command = SNMP_MSG_TRAP;
+    first_vb = template_v1pdu->variables;
+    vblist   = template_v1pdu->variables;
 
     /*
-     * Variables to be added to the beginning of the list
+     * The first varbind should be the system uptime.
      */
-    snmp_set_var_objid( uptime_var, sysuptime_oid, sysuptime_oid_len );
-    snmp_set_var_typed_value( uptime_var, ASN_TIMETICKS,
-                              (char*)&pdu->time, sizeof(pdu->time));
-
-    snmp_set_var_objid( snmptrap_var, snmptrap_oid, snmptrap_oid_len );
-    if (pdu->trap_type == SNMP_TRAP_ENTERPRISESPECIFIC) {
-        enttrap_len = pdu->enterprise_length;
-        memcpy(enttrapoid, pdu->enterprise, enttrap_len * sizeof(oid));
-	if (enttrapoid[enttrap_len - 1] != 0)
-	    enttrapoid[enttrap_len++] = 0;
-	enttrapoid[enttrap_len++] = pdu->specific_type;
-        snmp_set_var_typed_value( snmptrap_var, ASN_OBJECT_ID,
-                                  (char*)enttrapoid, enttrap_len * sizeof(oid));
-    } else {
-        snmp_set_var_typed_value( snmptrap_var, ASN_OBJECT_ID,
-                                  (char*)cold_start_oid,
-                                  sizeof(cold_start_oid));
-	snmptrap_var->name[9] = pdu->trap_type+1;
+    if (!vblist ||
+        snmp_oid_compare(vblist->name,  vblist->name_length,
+                         sysuptime_oid, sysuptime_oid_len)) {
+        snmp_log(LOG_WARNING,
+                 "send_trap: no v2 sysUptime varbind to set from\n");
+        snmp_free_pdu(template_v1pdu);
+        return NULL;
+    }
+    template_v1pdu->time = *vblist->val.integer;
+    vblist = vblist->next_variable;
+            
+    /*
+     * The second varbind should be the snmpTrapOID.
+     */
+    if (!vblist ||
+        snmp_oid_compare(vblist->name, vblist->name_length,
+                         snmptrap_oid, snmptrap_oid_len)) {
+        snmp_log(LOG_WARNING,
+                 "send_trap: no v2 trapOID varbind to set from\n");
+        snmp_free_pdu(template_v1pdu);
+        return NULL;
     }
 
     /*
-     * Variables to be added to the end of the list
+     * Set the generic & specific trap types,
+     *    and the enterprise field from the v2 varbind list.
+     * If there's an agentIPAddress varbind, set the agent_addr too
      */
-    snmp_set_var_objid( agentaddr_var, agentaddr_oid,
-                                       agentaddr_oid_len );
-    snmp_set_var_typed_value( agentaddr_var, ASN_IPADDRESS,
-                              (char*)pdu->agent_addr, 4);
+    if (!snmp_oid_compare(vblist->val.objid, OID_LENGTH(trap_prefix),
+                          trap_prefix,       OID_LENGTH(trap_prefix))) {
+        /*
+         * For 'standard' traps, extract the generic trap type
+         *   from the snmpTrapOID value, and take the enterprise
+         *   value from the 'snmpEnterprise' varbind.
+         */
+        template_v1pdu->trap_type =
+            vblist->val.objid[OID_LENGTH(trap_prefix)] - 1;
+        template_v1pdu->specific_type = 0;
 
-    snmp_set_var_objid( community_var, community_oid,
-                                       community_oid_len );
-    snmp_set_var_typed_value( community_var, ASN_OCTET_STR,
-                              pdu->community, pdu->community_len);
-
-    snmp_set_var_objid( enterprise_var, snmptrapenterprise_oid,
-                                        snmptrapenterprise_oid_len );
-    snmp_set_var_typed_value( enterprise_var, ASN_OBJECT_ID,
-                              (char*)pdu->enterprise,
-                              pdu->enterprise_length * sizeof(oid) );
+        var = find_varbind_in_list( vblist,
+                             snmptrapenterprise_oid,
+                             snmptrapenterprise_oid_len);
+        if (var) {
+            memdup((u_char**)&template_v1pdu->enterprise,
+                   (const u_char*)var->val.objid, var->val_len);
+            template_v1pdu->enterprise_length = var->val_len/sizeof(oid);
+        } else {
+            template_v1pdu->enterprise        = NULL;
+            template_v1pdu->enterprise_length = 0;		/* XXX ??? */
+        }
+    } else {
+        /*
+         * For enterprise-specific traps, split the snmpTrapOID value
+         *   into enterprise and specific trap
+         */
+        len = vblist->val_len / sizeof(oid);
+        template_v1pdu->trap_type     = SNMP_TRAP_ENTERPRISESPECIFIC;
+        template_v1pdu->specific_type = vblist->val.objid[len - 1];
+        len--;
+        if (vblist->val.objid[len-1] == 0)
+            len--;
+        memcpy(template_v1pdu->enterprise,
+               vblist->val.objid, len*sizeof(oid));
+        template_v1pdu->enterprise_length = len;
+    }
+    var = find_varbind_in_list( vblist, agentaddr_oid,
+                                        agentaddr_oid_len);
+    if (var) {
+        memcpy(template_v1pdu->agent_addr,
+               var->val.string, 4);
+    }
 
     /*
-     * Link everything together and return this list
+     * The remainder of the v2 varbind list is kept
+     * as the v2 varbind list.  Update the PDU and
+     * free the two redundant varbinds.
      */
-    uptime_var->next_variable   = snmptrap_var;
-    snmptrap_var->next_variable = v2_vars;
-    if (v2_vars) {
-        for (vptr = v2_vars; vptr->next_variable == NULL;
-                             vptr = vptr->next_variable )
-            ;
-    } else {
-        vptr = snmptrap_var;
-    }
-    /* XXX - only if not already present */
-    vptr->next_variable = agentaddr_var;
-    agentaddr_var->next_variable = community_var;
-    community_var->next_variable = enterprise_var;
-
-    return uptime_var;
+    template_v1pdu->variables = vblist->next_variable;
+    vblist->next_variable = NULL;
+    snmp_free_varbind( first_vb );
+            
+    return template_v1pdu;
 }
+
+netsnmp_pdu*
+convert_v1pdu_to_v2( netsnmp_pdu* template_v1pdu )
+{
+    netsnmp_pdu           *template_v2pdu;
+    netsnmp_variable_list *first_vb;
+    netsnmp_variable_list *var;
+    oid                    enterprise[MAX_OID_LEN];
+    size_t                 enterprise_len;
+
+    /*
+     * Make a copy of the v1 Trap PDU
+     *   before starting to convert this
+     *   into a v2 Trap PDU.
+     */
+    template_v2pdu = snmp_clone_pdu( template_v1pdu);
+    if (!template_v2pdu) {
+        snmp_log(LOG_WARNING,
+                 "send_trap: failed to copy v2 template PDU\n");
+        return NULL;
+    }
+    template_v2pdu->command = SNMP_MSG_TRAP2;
+    first_vb = template_v2pdu->variables;
+
+    /*
+     * Insert an snmpTrapOID varbind before the original v1 varbind list
+     *   either using one of the standard defined trap OIDs,
+     *   or constructing this from the PDU enterprise & specific trap fields
+     */
+    if (template_v1pdu->trap_type == SNMP_TRAP_ENTERPRISESPECIFIC) {
+        memcpy(enterprise, template_v1pdu->enterprise,
+                           template_v1pdu->enterprise_length*sizeof(oid));
+        enterprise_len               = template_v1pdu->enterprise_length;
+        enterprise[enterprise_len++] = 0;
+        enterprise[enterprise_len++] = template_v1pdu->specific_type;
+    } else {
+        memcpy(enterprise, cold_start_oid, sizeof(cold_start_oid));
+	enterprise[9]  = template_v1pdu->trap_type+1;
+        enterprise_len = sizeof(cold_start_oid)/sizeof(oid);
+    }
+
+    var = NULL;
+    if (!snmp_varlist_add_variable( &var,
+             snmptrap_oid, snmptrap_oid_len,
+             ASN_OBJECT_ID,
+             (u_char*)enterprise, enterprise_len*sizeof(oid))) {
+        snmp_log(LOG_WARNING,
+                 "send_trap: failed to insert copied snmpTrapOID varbind\n");
+        snmp_free_pdu(template_v2pdu);
+        return NULL;
+    }
+    var->next_variable        = template_v2pdu->variables;
+    template_v2pdu->variables = var;
+
+    /*
+     * Insert a sysUptime varbind at the head of the v2 varbind list
+     */
+    var = NULL;
+    if (!snmp_varlist_add_variable( &var,
+             sysuptime_oid, sysuptime_oid_len,
+             ASN_TIMETICKS,
+             (u_char*)&(template_v1pdu->time), 
+             sizeof(template_v1pdu->time))) {
+        snmp_log(LOG_WARNING,
+                 "send_trap: failed to insert copied sysUptime varbind\n");
+        snmp_free_pdu(template_v2pdu);
+        return NULL;
+    }
+    var->next_variable        = template_v2pdu->variables;
+    template_v2pdu->variables = var;
+
+    /*
+     * Append the other three conversion varbinds,
+     *  (snmpTrapAgentAddr, snmpTrapCommunity & snmpTrapEnterprise)
+     *  if they're not already present.
+     *  But don't bomb out completely if there are problems.
+     */
+    var = find_varbind_in_list( template_v2pdu->variables,
+                                agentaddr_oid, agentaddr_oid_len);
+    if (!var && template_v1pdu->agent_addr[0]
+             && template_v1pdu->agent_addr[1]
+             && template_v1pdu->agent_addr[2]
+             && template_v1pdu->agent_addr[3]) {
+        if (!snmp_varlist_add_variable( &(template_v2pdu->variables),
+                 agentaddr_oid, agentaddr_oid_len,
+                 ASN_IPADDRESS,
+                 (u_char*)&(template_v1pdu->agent_addr), 
+                 sizeof(template_v1pdu->agent_addr)))
+            snmp_log(LOG_WARNING,
+                 "send_trap: failed to append snmpTrapAddr varbind\n");
+    }
+    var = find_varbind_in_list( template_v2pdu->variables,
+                                community_oid, community_oid_len);
+    if (!var && template_v1pdu->community) {
+        if (!snmp_varlist_add_variable( &(template_v2pdu->variables),
+                 community_oid, community_oid_len,
+                 ASN_OCTET_STR,
+                 template_v1pdu->community, 
+                 strlen(template_v1pdu->community)))
+            snmp_log(LOG_WARNING,
+                 "send_trap: failed to append snmpTrapCommunity varbind\n");
+    }
+    var = find_varbind_in_list( template_v2pdu->variables,
+                                snmptrapenterprise_oid,
+                                snmptrapenterprise_oid_len);
+    if (!var && 
+        template_v1pdu->trap_type != SNMP_TRAP_ENTERPRISESPECIFIC) {
+        if (!snmp_varlist_add_variable( &(template_v2pdu->variables),
+                 snmptrapenterprise_oid, snmptrapenterprise_oid_len,
+                 ASN_OBJECT_ID,
+                 (u_char*)template_v1pdu->enterprise, 
+                 template_v1pdu->enterprise_length*sizeof(oid)))
+            snmp_log(LOG_WARNING,
+                 "send_trap: failed to append snmpEnterprise varbind\n");
+    }
+    return template_v2pdu;
+}
+
+int
+netsnmp_send_traps(int trap, int specific,
+                          oid * enterprise, int enterprise_length,
+                          netsnmp_variable_list * vars,
+                          /* These next two are currently unused */
+                          char * context, int flags)
+{
+    netsnmp_pdu           *template_v1pdu;
+    netsnmp_pdu           *template_v2pdu;
+    netsnmp_variable_list *vblist = NULL;
+    netsnmp_variable_list *trap_vb;
+    netsnmp_variable_list *var;
+    u_long                 uptime;
+    struct trap_sink *sink;
+
+    DEBUGMSGTL(( "trap", "send_trap %d %d ", trap, specific));
+    DEBUGMSGOID(("trap", enterprise, enterprise_length));
+    DEBUGMSGTL(( "trap", "\n"));
+
+    if (vars) {
+        vblist = snmp_clone_varbind( vars );
+        if (!vblist) {
+            snmp_log(LOG_WARNING,
+                     "send_trap: failed to clone varbind list\n");
+            return -1;
+        }
+    }
+
+    if ( trap == -1 ) {
+        /*
+         * Construct the SNMPv2-style notification PDU
+         */
+        if (!vblist) {
+            snmp_log(LOG_WARNING,
+                     "send_trap: called with NULL v2 information\n");
+            return -1;
+        }
+        template_v2pdu = snmp_pdu_create(SNMP_MSG_TRAP2);
+        if (!template_v2pdu) {
+            snmp_log(LOG_WARNING,
+                     "send_trap: failed to construct v2 template PDU\n");
+            return -1;
+        }
+
+        /*
+         * Check the varbind list we've been given.
+         * If it starts with a 'sysUptime.0' varbind, then use that.
+         * Otherwise, prepend a suitable 'sysUptime.0' varbind.
+         */
+        if (!snmp_oid_compare( vblist->name,    vblist->name_length,
+                               sysuptime_oid, sysuptime_oid_len )) {
+            template_v2pdu->variables = vblist;
+            trap_vb  = vblist->next_variable;
+        } else {
+            uptime   = netsnmp_get_agent_uptime();
+            var = NULL;
+            snmp_varlist_add_variable( &var,
+                           sysuptime_oid, sysuptime_oid_len,
+                           ASN_TIMETICKS, (u_char*)&uptime, sizeof(uptime));
+            if (!var) {
+                snmp_log(LOG_WARNING,
+                     "send_trap: failed to insert sysUptime varbind\n");
+                snmp_free_pdu(template_v2pdu);
+                return -1;
+            }
+            template_v2pdu->variables = var;
+            var->next_variable        = vblist;
+            trap_vb  = vblist;
+        }
+
+        /*
+         * 'trap_vb' should point to the snmpTrapOID.0 varbind,
+         *   identifying the requested trap.  If not then bomb out.
+         * If it's a 'standard' trap, then we need to append an
+         *   snmpEnterprise varbind (if there isn't already one).
+         */
+        if (!trap_vb ||
+            snmp_oid_compare(trap_vb->name, trap_vb->name_length,
+                             snmptrap_oid,  snmptrap_oid_len)) {
+            snmp_log(LOG_WARNING,
+                     "send_trap: no v2 trapOID varbind provided\n");
+            snmp_free_pdu(template_v2pdu);
+            return -1;
+        }
+        if (!snmp_oid_compare(vblist->val.objid, OID_LENGTH(trap_prefix),
+                              trap_prefix,       OID_LENGTH(trap_prefix))) {
+            var = find_varbind_in_list( template_v2pdu->variables,
+                                        snmptrapenterprise_oid,
+                                        snmptrapenterprise_oid_len);
+            if (!var &&
+                !snmp_varlist_add_variable( &(template_v2pdu->variables),
+                     snmptrapenterprise_oid, snmptrapenterprise_oid_len,
+                     ASN_OBJECT_ID,
+                     (char*)enterprise, enterprise_length*sizeof(oid))) {
+                snmp_log(LOG_WARNING,
+                     "send_trap: failed to add snmpEnterprise to v2 trap\n");
+                snmp_free_pdu(template_v2pdu);
+                return -1;
+            }
+        }
+            
+
+        /*
+         * If everything's OK, convert the v2 template into an SNMPv1 trap PDU.
+         */
+        template_v1pdu = convert_v2pdu_to_v1( template_v2pdu );
+        if (!template_v1pdu) {
+            snmp_log(LOG_WARNING,
+                     "send_trap: failed to convert v2->v1 template PDU\n");
+            snmp_free_pdu(template_v2pdu);
+            return -1;
+        }
+
+    } else {
+        /*
+         * Construct the SNMPv1 trap PDU....
+         */
+        template_v1pdu = snmp_pdu_create(SNMP_MSG_TRAP);
+        if (!template_v1pdu) {
+            snmp_log(LOG_WARNING,
+                     "send_trap: failed to construct v1 template PDU\n");
+            return -1;
+        }
+        template_v1pdu->trap_type     = trap;
+        template_v1pdu->specific_type = specific;
+        template_v1pdu->time          = netsnmp_get_agent_uptime();
+
+        if (snmp_clone_mem((void **) &template_v1pdu->enterprise,
+                       enterprise, enterprise_length * sizeof(oid))) {
+            snmp_log(LOG_WARNING,
+                     "send_trap: failed to set v1 enterprise OID\n");
+            snmp_free_pdu(template_v1pdu);
+            return -1;
+        }
+        template_v1pdu->enterprise_length = enterprise_length;
+
+        template_v1pdu->flags    |= UCD_MSG_FLAG_FORCE_PDU_COPY;
+        template_v1pdu->variables = vblist;
+
+        /*
+         * ... and convert it into an SNMPv2-style notification PDU.
+         */
+
+        template_v2pdu = convert_v1pdu_to_v2( template_v1pdu );
+        if (!template_v2pdu) {
+            snmp_log(LOG_WARNING,
+                     "send_trap: failed to convert v1->v2 template PDU\n");
+            snmp_free_pdu(template_v1pdu);
+            return -1;
+        }
+    }
+
+
+    /*
+     *  Now loop through the list of trap sinks
+     *   and call the trap callback routines,
+     *   providing an appropriately formatted PDU in each case
+     */
+    for (sink = sinks; sink; sink = sink->next) {
+        if (sink->version == SNMP_VERSION_1) {
+            send_trap_to_sess(sink->sesp, template_v1pdu);
+        } else {
+            send_trap_to_sess(sink->sesp, template_v2pdu);
+        }
+    }
+    snmp_call_callbacks(SNMP_CALLBACK_APPLICATION,
+                        SNMPD_CALLBACK_SEND_TRAP1, template_v1pdu);
+    snmp_call_callbacks(SNMP_CALLBACK_APPLICATION,
+                        SNMPD_CALLBACK_SEND_TRAP2, template_v2pdu);
+    snmp_free_pdu(template_v1pdu);
+    snmp_free_pdu(template_v2pdu);
+    return 0;
+}
+
 
 void
 send_enterprise_trap_vars(int trap,
@@ -415,222 +706,10 @@ send_enterprise_trap_vars(int trap,
                           oid * enterprise, int enterprise_length,
                           netsnmp_variable_list * vars)
 {
-    netsnmp_variable_list uptime_var, snmptrap_var, enterprise_var;
-    netsnmp_variable_list *v2_vars, *last_var = NULL;
-    netsnmp_pdu    *template_pdu;
-    u_long          uptime;
-    in_addr_t      *pdu_in_addr_t;
-    struct trap_sink *sink;
-    oid             temp_oid[MAX_OID_LEN];
-
-    /*
-     * Initialise SNMPv2 required variables
-     */
-    uptime = netsnmp_get_agent_uptime();
-    memset(&uptime_var, 0, sizeof(netsnmp_variable_list));
-    snmp_set_var_objid(&uptime_var, sysuptime_oid,
-                       OID_LENGTH(sysuptime_oid));
-    snmp_set_var_value(&uptime_var, (u_char *) & uptime, sizeof(uptime));
-    uptime_var.type = ASN_TIMETICKS;
-    uptime_var.next_variable = &snmptrap_var;
-
-    memset(&snmptrap_var, 0, sizeof(netsnmp_variable_list));
-    snmp_set_var_objid(&snmptrap_var, snmptrap_oid,
-                       OID_LENGTH(snmptrap_oid));
-    /*
-     * value set later .... 
-     */
-    snmptrap_var.type = ASN_OBJECT_ID;
-    if (vars)
-        snmptrap_var.next_variable = vars;
-    else
-        snmptrap_var.next_variable = &enterprise_var;
-
-    /*
-     * find end of provided varbind list,
-     * ready to append the enterprise info if necessary 
-     */
-    last_var = vars;
-    while (last_var && last_var->next_variable)
-        last_var = last_var->next_variable;
-
-    memset(&enterprise_var, 0, sizeof(netsnmp_variable_list));
-    snmp_set_var_objid(&enterprise_var,
-                       snmptrapenterprise_oid,
-                       OID_LENGTH(snmptrapenterprise_oid));
-    snmp_set_var_value(&enterprise_var, (u_char *) enterprise,
-                       enterprise_length * sizeof(oid));
-    enterprise_var.type = ASN_OBJECT_ID;
-    enterprise_var.next_variable = NULL;
-
-    v2_vars = &uptime_var;
-
-    /*
-     *  Create a template PDU, ready for sending
-     */
-    template_pdu = snmp_pdu_create(SNMP_MSG_TRAP);
-    if (template_pdu == NULL) {
-        /*
-         * Free memory if value stored dynamically 
-         */
-        snmp_set_var_value(&enterprise_var, NULL, 0);
-        return;
-    }
-    template_pdu->trap_type = trap;
-    template_pdu->specific_type = specific;
-    if (snmp_clone_mem((void **) &template_pdu->enterprise,
-                       enterprise, enterprise_length * sizeof(oid))) {
-        snmp_free_pdu(template_pdu);
-        snmp_set_var_value(&enterprise_var, NULL, 0);
-        return;
-    }
-    template_pdu->enterprise_length = enterprise_length;
-    template_pdu->flags |= UCD_MSG_FLAG_FORCE_PDU_COPY;
-
-    pdu_in_addr_t = (in_addr_t *) template_pdu->agent_addr;
-    *pdu_in_addr_t = get_myaddr();
-    template_pdu->time = uptime;
-
-    /*
-     *  Now use the parameters to determine
-     *    which v2 variables are needed,
-     *    and what values they should take.
-     */
-    switch (trap) {
-    case -1:                   /*
-                                 *      SNMPv2 only
-                                 *  Check to see whether the variables provided
-                                 *    are sufficient for SNMPv2 notifications
-                                 */
-        if (vars && netsnmp_oid_equals(vars->name, vars->name_length,
-                                     sysuptime_oid,
-                                     OID_LENGTH(sysuptime_oid)) == 0)
-            v2_vars = vars;
-        else if (vars && netsnmp_oid_equals(vars->name, vars->name_length,
-                                          snmptrap_oid,
-                                          OID_LENGTH(snmptrap_oid)) == 0)
-            uptime_var.next_variable = vars;
-        else {
-            /*
-             * Hmmm... we don't seem to have a value - oops! 
-             */
-            snmptrap_var.next_variable = vars;
-        }
-        last_var = NULL;        /* Don't need enterprise info */
-        convert_v2_to_v1(vars, template_pdu);
-        break;
-
-        /*
-         * "Standard" SNMPv1 traps 
-         */
-
-    case SNMP_TRAP_COLDSTART:
-        snmp_set_var_value(&snmptrap_var,
-                           (u_char *) cold_start_oid,
-                           sizeof(cold_start_oid));
-        break;
-    case SNMP_TRAP_WARMSTART:
-        snmp_set_var_value(&snmptrap_var,
-                           (u_char *) warm_start_oid,
-                           sizeof(warm_start_oid));
-        break;
-    case SNMP_TRAP_LINKDOWN:
-        snmp_set_var_value(&snmptrap_var,
-                           (u_char *) link_down_oid,
-                           sizeof(link_down_oid));
-        break;
-    case SNMP_TRAP_LINKUP:
-        snmp_set_var_value(&snmptrap_var,
-                           (u_char *) link_up_oid, sizeof(link_up_oid));
-        break;
-    case SNMP_TRAP_AUTHFAIL:
-        if (snmp_enableauthentraps == SNMP_AUTHENTICATED_TRAPS_DISABLED) {
-            snmp_free_pdu(template_pdu);
-            snmp_set_var_value(&enterprise_var, NULL, 0);
-            return;
-        }
-        snmp_set_var_value(&snmptrap_var,
-                           (u_char *) auth_fail_oid,
-                           sizeof(auth_fail_oid));
-        break;
-    case SNMP_TRAP_EGPNEIGHBORLOSS:
-        snmp_set_var_value(&snmptrap_var,
-                           (u_char *) egp_xxx_oid, sizeof(egp_xxx_oid));
-        break;
-
-    case SNMP_TRAP_ENTERPRISESPECIFIC:
-        memcpy(temp_oid,
-               (char *) enterprise, (enterprise_length) * sizeof(oid));
-        temp_oid[enterprise_length] = 0;
-        temp_oid[enterprise_length + 1] = specific;
-        snmp_set_var_value(&snmptrap_var,
-                           (u_char *) temp_oid,
-                           (enterprise_length + 2) * sizeof(oid));
-        snmptrap_var.next_variable = vars;
-        last_var = NULL;        /* Don't need version info */
-        break;
-    }
-
-
-    /*
-     *  Now loop through the list of trap sinks,
-     *   sending an appropriately formatted PDU to each
-     */
-    for (sink = sinks; sink; sink = sink->next) {
-        if (sink->version == SNMP_VERSION_1 && trap == -1)
-            continue;           /* Skip v1 sinks for v2 only traps */
-        template_pdu->command = sink->pdutype;
-
-        if (sink->version != SNMP_VERSION_1) {
-            template_pdu->variables = v2_vars;
-            if (last_var)
-                last_var->next_variable = &enterprise_var;
-        } else
-            template_pdu->variables = vars;
-
-        send_trap_to_sess(sink->sesp, template_pdu);
-
-        if (sink->version != SNMP_VERSION_1 && last_var)
-            last_var->next_variable = NULL;
-    }
-
-    /*
-     * send stuff to registered callbacks 
-     */
-    /*
-     * v2 traps/informs 
-     */
-    template_pdu->variables = v2_vars;
-    if (last_var)
-        last_var->next_variable = &enterprise_var;
-
-    snmp_call_callbacks(SNMP_CALLBACK_APPLICATION,
-                        SNMPD_CALLBACK_SEND_TRAP2, template_pdu);
-
-    if (last_var)
-        last_var->next_variable = NULL;
-
-    /*
-     * v1 traps 
-     */
-    template_pdu->command = SNMP_MSG_TRAP;
-    template_pdu->variables = vars;
-
-    snmp_call_callbacks(SNMP_CALLBACK_APPLICATION,
-                        SNMPD_CALLBACK_SEND_TRAP1, template_pdu);
-
-    /*
-     * Free memory if values stored dynamically 
-     */
-    snmp_set_var_value(&enterprise_var, NULL, 0);
-    snmp_set_var_value(&snmptrap_var, NULL, 0);
-    /*
-     * Ensure we don't free anything we shouldn't 
-     */
-    if (last_var)
-        last_var->next_variable = NULL;
-    template_pdu->variables = NULL;
-    snmp_free_pdu(template_pdu);
+    netsnmp_send_traps(trap, specific,
+                       enterprise, enterprise_length,
+                       vars, NULL, 0);
+    return;
 }
 
 /*
