@@ -24,17 +24,17 @@
    counter64, i64, ui64, union? */
 #define OPAQUE_SPECIAL_TYPES 1
 
-/* comment the next line if you are compiling with libsnmp.h 
+/* comment the next line if you are compiling with libsnmp.h
    and are not using the UC-Davis SNMP library. */
 #define UCD_SNMP_LIBRARY 1
 
 /* define if you want to compile support for both authentication and
    privacy support. */
-#define SCAPI_AUTHPRIV 1 
- 
+#define SCAPI_AUTHPRIV 1
+
 /* define if you are using the internal MD5 code */
-#define USE_INTERNAL_MD5 1 
- 
+#define USE_INTERNAL_MD5 1
+
 /* add in recent CMU library extensions (not complete) */
 #define CMU_COMPATIBLE 1
 
@@ -155,7 +155,7 @@
 #define UNAMEPROG "/bin/uname"
 
 /* testing code sections. */
-/* #undef SNMP_TESTING_CODE */ 
+/* #undef SNMP_TESTING_CODE */
 
 /* If you don't have root access don't exit upon kmem errors */
 #undef NO_ROOT_ACCESS
@@ -526,10 +526,10 @@
 
 /* type check for in_addr_t */
 #define in_addr_t u_long
- 
+
 /* define if your compiler (processor) defines __FUNCTION__ for you */
 #undef HAVE_CPP_UNDERBAR_FUNCTION_DEFINED
- 
+
 /* mib pointer to the top of the extensible tree.  This has been
  assigned to UCDavis by the iana group.  Optionally, point this to the
  location in the tree your company/organization has been allocated. */
@@ -585,12 +585,12 @@
 
 /* which version are you using? This mibloc will tell you */
 #define VERSIONMIBNUM 100
-#define USEVERSIONMIB    
+#define USEVERSIONMIB
 
 /* Reports errors the agent runs into */
 /* (typically its "can't fork, no mem" problems) */
 #define ERRORMIBNUM 101
-#define USEERRORMIB    
+#define USEERRORMIB
 
 /* The sub id of EXENSIBLEMIB returned to queries of
    .iso.org.dod.internet.mgmt.mib-2.system.sysObjectID.0 */
@@ -601,7 +601,7 @@
    EXTENSIBLEMIB.AGENTID.???, where ??? is defined below by OSTYPE */
 
 #define HPUX9ID 1
-#define SUNOS4ID 2 
+#define SUNOS4ID 2
 #define SOLARISID 3
 #define OSFID 4
 #define ULTRIXID 5
@@ -656,7 +656,7 @@
 #endif
 
 /* how long to wait (seconds) for error querys before reseting the error trap.*/
-#define ERRORTIMELENGTH 600 
+#define ERRORTIMELENGTH 600
 
 /* Exec command to fix PROC problems */
 /* %s will be replaced by the process name in error */
@@ -808,6 +808,6 @@ int strcasecmp(const char *s1, const char *s2);
 
 #endif
 
-typedef int mode_t;
+typedef unsigned short mode_t;
 
 #define AGENT_DIRECTORY_MODE 0700
