@@ -897,7 +897,7 @@ get_configuration_directory()
 
     if (NULL == netsnmp_ds_get_string(NETSNMP_DS_LIBRARY_ID, 
 				      NETSNMP_DS_LIB_CONFIGURATION_DIR)) {
-        homepath = getenv("HOME");
+        homepath = netsnmp_getenv("HOME");
         snprintf(defaultPath, sizeof(defaultPath), "%s%c%s%c%s%s%s%s",
                 SNMPCONFPATH, ENV_SEPARATOR_CHAR,
                 SNMPSHAREPATH, ENV_SEPARATOR_CHAR, SNMPLIBPATH,
@@ -1054,7 +1054,7 @@ read_config_files(int when)
         /*
          * read the config files 
          */
-        if ((envconfpath = getenv("SNMPCONFPATH")) == NULL) {
+        if ((envconfpath = netsnmp_getenv("SNMPCONFPATH")) == NULL) {
             snprintf(defaultPath, sizeof(defaultPath), "%s%s%s",
                     ((confpath == NULL) ? "" : confpath),
                     ((perspath == NULL) ? "" : ENV_SEPARATOR),
@@ -1082,7 +1082,7 @@ read_config_files(int when)
              * then we read all the configuration files we can, starting with
              * the oldest first.
              */
-	    persfile = getenv("SNMP_PERSISTENT_FILE");
+	    persfile = netsnmp_getenv("SNMP_PERSISTENT_FILE");
             if (strncmp(cptr2, perspath, strlen(perspath)) == 0 ||
                 (persfile != NULL &&
                  strncmp(cptr2, persfile, strlen(persfile)) == 0)) {
@@ -1195,7 +1195,7 @@ read_config_store(const char *type, const char *line)
      * 1. ENV variable SNMP_PERSISTENT_FILE
      * 2. configured <PERSISTENT_DIRECTORY>/<type>.conf
      */
-    if ((filep = getenv("SNMP_PERSISTENT_FILE")) == NULL) {
+    if ((filep = netsnmp_getenv("SNMP_PERSISTENT_FILE")) == NULL) {
         snprintf(file, sizeof(file),
                  "%s/%s.conf", get_persistent_directory(), type);
         file[ sizeof(file)-1 ] = 0;

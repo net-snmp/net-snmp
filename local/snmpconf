@@ -11,25 +11,69 @@ use Term::ReadLine;
 use IO::File;
 use Data::Dumper;
 use File::Copy;
+if ($^O eq 'MSWin32') {
+  eval 'require Win32::Registry;';
+  if ($@) {
+    print "\nWarning: Perl module Win32::Registry is not installed.  This module is\n";
+    print "         required to read the SNMPSHAREPATH and SNMPCONFPATH values from \n";
+    print "         the registry.  To use snmpconf without the module you need to\n";
+    print "         define SNMPSHAREPATH and SNMPCONFPATH as environment variables\n";
+    print "         or use the -c and -I command line options.\n";
+  }
+}
 
 # globals
 %tokenitems=qw(line 1 info 1 comment 1);
 %arrayitems=qw(question 1 validanswer 1);
 
-# default folder for snmpconf-data
-if (defined($ENV{SNMPSHAREPATH})) {
-  $opts{'c'} = "$ENV{SNMPSHAREPATH}/snmpconf-data";
+if ($^O ne 'MSWin32') {
+  # default folder for snmpconf-data
+  if (defined($ENV{SNMPSHAREPATH})) {
+    $opts{'c'} = "$ENV{SNMPSHAREPATH}/snmpconf-data";
+  }
+  else {
+    $opts{'c'} = "/usr/local/share/snmp/snmpconf-data";
+  }
+  
+  # default config file path
+  if (defined($ENV{SNMPCONFPATH})) {
+    $confpath = "$ENV{SNMPCONFPATH}";
+  }
+  else {
+    $confpath = "/usr/local/share/snmp";
+  }
 }
-else {
-  $opts{'c'} = "/usr/local/share/snmp/snmpconf-data";
-}
+else
+{
+  my $temp;
 
-# default config file path
-if (defined($ENV{SNMPCONFPATH})) {
-  $confpath = "$ENV{SNMPCONFPATH}";
-}
-else {
-  $confpath = "/usr/local/share/snmp";
+  # default folder for snmpconf-data
+  $temp = &win32_reg_read("SOFTWARE\\Net-SNMP","SNMPSHAREPATH");
+  if ($temp ne "") {
+    $opts{'c'} = "$temp/snmpconf-data";
+  }
+  else {
+    if (defined($ENV{SNMPSHAREPATH})) {
+      $opts{'c'} = "$ENV{SNMPSHAREPATH}/snmpconf-data";
+    }
+    else {
+      $opts{'c'} = "/usr/local/share/snmp/snmpconf-data";
+    }
+  }
+
+  # default config file path
+  $temp = &win32_reg_read("SOFTWARE\\Net-SNMP","SNMPCONFPATH");
+  if ($temp ne "") {
+    $confpath = "$temp";
+  }
+  else {    
+    if (defined($ENV{SNMPCONFPATH})) {
+      $confpath = "$ENV{SNMPCONFPATH}";
+    }
+    else {
+      $confpath = "/usr/local/share/snmp";
+    }
+  }
 }
 
 # home environment variable
@@ -749,3 +793,42 @@ sub my_Dumper {
     }
 }
 
+# Usage:   &win32_reg_read("key", "value")
+# Example: &win32_reg_read("SOFTWARE\\Net-SNMP","SNMPSHAREPATH");
+# Returns: Value if found in HKCU or HCLM.  Otherwise an empty string.
+sub win32_reg_read {
+  my $sub_key = shift;
+  my $value = shift;
+
+  require Win32::Registry;
+   
+  my ($hkey, %key_values, $temp, $no_warn);
+ 
+  # Try HKCU first
+  $no_warn = $HKEY_CURRENT_USER;
+  if ($HKEY_CURRENT_USER->Open($sub_key, $hkey))
+  {
+    $hkey->GetValues(\%key_values);   
+    foreach $temp (sort keys %key_values) {
+      if ($temp eq $value) {
+        return $key_values{$temp}[2];
+      }
+    }
+    $hkey->Close(); 
+  }
+
+  # Try HKLM second
+  $no_warn = $HKEY_LOCAL_MACHINE;
+  if ($HKEY_LOCAL_MACHINE->Open($sub_key, $hkey))
+  {
+    $hkey->GetValues(\%key_values);
+    foreach $temp (sort keys %key_values) {
+      if ($temp eq $value) {
+        return $key_values{$temp}[2];
+      }
+    }
+    $hkey->Close(); 
+  }
+  return "";
+}
+ 

@@ -359,13 +359,15 @@ Function CreateSnmpConf
   ;!define ALL_USERS
   
   ; Set the conf path
-  Push "SNMPCONFPATH"
-  Push "$R0/etc/snmp"
-  Call WriteEnvStr
+  ;Push "SNMPCONFPATH"
+  ;Push "$R0/etc/snmp"
+  ;Call WriteEnvStr
+  WriteRegStr HKLM "${PRODUCT_DIR_REGKEY}" "SNMPCONFPATH" "$R0/etc/snmp"
   
-  Push "SNMPSHAREPATH"
-  Push "$R0/share/snmp"
-  Call WriteEnvStr
+  ;Push "SNMPSHAREPATH"
+  ;Push "$R0/share/snmp"
+  ;Call WriteEnvStr
+  WriteRegStr HKLM "${PRODUCT_DIR_REGKEY}" "SNMPSHAREPATH" "$R0/share/snmp"
 FunctionEnd
 
 Function CreateAgentBats
@@ -784,11 +786,11 @@ Section Uninstall
   RMDir "$INSTDIR\include"
   RMDir "$INSTDIR"
   ; Delete the environment variables
-  Push "SNMPCONFPATH"
-  Call un.DeleteEnvStr
+  ;Push "SNMPCONFPATH"
+  ;Call un.DeleteEnvStr
   
-  Push "SNMPSHAREPATH"
-  Call un.DeleteEnvStr
+  ;Push "SNMPSHAREPATH"
+  ;Call un.DeleteEnvStr
 
   Push "$INSTDIR\bin"
   Call un.RemoveFromPath
