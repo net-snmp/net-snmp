@@ -50,6 +50,7 @@
 
 #include "agentx/protocol.h"
 #include "agentx/client.h"
+#include "agentx/subagent.h"
 
 extern struct timeval starttime;
 

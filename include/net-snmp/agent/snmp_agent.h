@@ -187,6 +187,7 @@ extern          "C" {
                                                *, void *, int);
     int             netsnmp_agent_check_parse(netsnmp_session *,
                                               netsnmp_pdu *, int);
+    int             netsnmp_allocate_globalcacheid(void);
 
     /*
      * Register and de-register agent NSAPs.  

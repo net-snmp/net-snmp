@@ -49,6 +49,7 @@
 
 #include <net-snmp/net-snmp-includes.h>
 #include <net-snmp/agent/agent_trap.h>
+#include <net-snmp/agent/snmp_agent.h>
 #include <net-snmp/agent/agent_callbacks.h>
 
 #include <net-snmp/agent/mib_module_config.h>

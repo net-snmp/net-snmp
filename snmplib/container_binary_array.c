@@ -97,11 +97,11 @@ static int
 binary_search(const void *val, netsnmp_container *c, int exact)
 {
     binary_array_table *t = (binary_array_table*)c->private;
-    int             len = t->count;
-    int             half;
-    int             middle;
-    int             result = 0;
-    int             first = 0;
+    size_t             len = t->count;
+    size_t             half;
+    size_t             middle;
+    size_t             result = 0;
+    size_t             first = 0;
 
     if (!len)
         return -1;
@@ -287,7 +287,7 @@ netsnmp_binary_array_for_each(netsnmp_container *c,
                               void *context, int sort)
 {
     binary_array_table *t = (binary_array_table*)c->private;
-    int             i;
+    size_t             i;
 
     if (sort && t->dirty)
         Sort_Array(c);
@@ -352,11 +352,11 @@ static int
 binary_search_for_start(netsnmp_index *val, netsnmp_container *c)
 {
     binary_array_table *t = (binary_array_table*)c->private;
-    int             len = t->count;
-    int             half;
-    int             middle;
-    int             result = 0;
-    int             first = 0;
+    size_t             len = t->count;
+    size_t             half;
+    size_t             middle;
+    size_t             result = 0;
+    size_t             first = 0;
 
     if (!len)
         return -1;
@@ -388,7 +388,8 @@ netsnmp_binary_array_get_subset(netsnmp_container *c, void *key, int *len)
 {
     binary_array_table *t = (binary_array_table*)c->private;
     void          **subset;
-    int             start, end, i;
+    int             start, end;
+    size_t          i;
 
     /*
      * if there is no data, return NULL;
