@@ -372,7 +372,8 @@ name_hash( name )
     int hash = 0;
     char *cp;
 
-    for(cp = name; *cp; cp++)
+    if (name)
+      for(cp = name; *cp; cp++)
         hash += tolower(*cp);
     return(hash);
 }
