@@ -36,7 +36,7 @@ name is given in the format specified in
 .PP
 For example:
 .PP
-snmpget zeus public system.sysDescr.0
+snmpget -c public zeus system.sysDescr.0
 .PP
 will retrieve the variable system.sysDescr.0:
 .PP
@@ -64,13 +64,13 @@ example (note that system.sysUpTime is an incomplete OID as it needs
 the .0 index appended to it):
 .PP
 .nf
-snmpget -v1 -Cf localhost public system.sysUpTime system.sysContact.0
+snmpget -v1 -Cf -c public localhost system.sysUpTime system.sysContact.0
 .BR
 Error in packet
 Reason: (noSuchName) There is no such variable name in this MIB.
 This name doesn't exist: system.sysUpTime
 
-snmpget -v1 localhost public system.sysUpTime system.sysContact.0
+snmpget -v1 -c public localhost system.sysUpTime system.sysContact.0
 Error in packet
 Reason: (noSuchName) There is no such variable name in this MIB.
 This name doesn't exist: system.sysUpTime
