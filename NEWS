@@ -8,26 +8,77 @@ the ChangeLog file for a more detailed listing of changes/bug fixes.
     - configure & make supports a --with-install-prefix option
     - linkUp and linkDown notifications can be enabled
       (see the linkUpDownNotifications snmpd.conf token documentation)
-    - notifications (traps) can be generated for disman events.
+    - notifications (traps) can be generated for disman/monitor events.
       (see the snmpd.conf documentation on "monitor" and "notificatonEvent")
     - new configure options to disable building of the agent, apps, ...
       ./configure --help for a list of package sections that can be excluded.
     - new configure option to remove specific code pieces (mib reading, ...)
       ./configure --help for a list of code areas that can be excluded.
-    - new snmpd.conf tokens:  includeAllDisks
+    - snmptrapd now supports forwarding of notifications.
+      (see the snmptrapd.conf manual for details)
     - snmptrapd's new -t switch can be used to disable syslog.
       (useful for a no-output snmptrapd with only traphandle support)
     - snmptable sports 3 new options: fixed width, max-repeaters, left-justify.
       (see snmptable -h for details)
+    - new snmpd.conf tokens:  includeAllDisks
     - the UCD-DISKIO-MIB will now work on linux.
     - com2sec mappings for SNMP over unix sockets.
+    - mib2c walks you through instructions to help you generate code
+      "just for you".  Including some new forms of output code, like
+      notification code generation.  Run mib2c NODE for details.
+    - some speed improvements have been made that should increase the
+      speed of the agent's processing time.
+    - for mib code using the table iterator, an auto-caching mechanism
+      which can greatly speed up access at the cost of caching.
+    - snmpwalk supports a new -Ct option for timing how long a walk takes.
+    - more documentation, especially for APIs
 
  Fixes:
     - More patches to properly demonize snmpd (close std*, double fork, ...).
+    - Version numbers of all packages/perl-modules/etc are better synchronized.
 
  Ports:
     - diskio MIB support for Darwin.
     - ifSpeed under Linux should now be correct for most network cards.
+
+*5.0.9*
+
+ SECURITY:
+    - An existing user/community could get access to data in MIB
+      objects that were explicitly excluded from their view.
+
+ Fixes:
+    - Perl build environment should better under Windows
+    - Misc kerberos support fixes.
+    - Improvements on various manual pages.
+    - A annoying bug with SETs being passed to pass scripts was fixed.
+    - The often talked about VACM optimization improvement was fixed again.
+    - mib2c handles augmentation tables better now.
+    - Various 64 bit issues have been addressed.
+
+*5.0.8*
+ New:
+    - No new features will be added to the 5.0.x line.
+
+ Ports:
+    - Update libtool to version 1.4.3, for the benefit of Darwin
+    - diskio support for Darwin
+    - Updates for OpenBSD 3. 
+    - Updates to solaris README
+
+ Fixes:
+    - find libwrap w/nsl on RedHat
+    - fix for openssl 0.9.7
+    - Fix some AgentX memory leaks
+    - use macro for inline function prototypes
+    - Attempt to find unused port before running tests
+    - Use SNMP_SLEEP environment variable when running tests
+    - calculate a proper ifSpeed under linux when possible
+    - better daemonization of snmpd
+    - close and reopen snmptrapd log files on HUP
+    - support for 16 bit reuqest ids
+    - Recognize new 't' code in display hints
+    - misc other fixes
 
 *5.0.7*
  New:
