@@ -101,7 +101,7 @@ HCNUM-TC.txt:	$(MIBDEPS)
 	./mibfetch $(RFCHOST) $(RFCDIR) 2856
 
 INET-ADDRESS-MIB.txt:	$(MIBDEPS)
-	./mibfetch $(RFCHOST) $(RFCDIR) 3291
+	./mibfetch $(RFCHOST) $(RFCDIR) 4001
 
 EtherLike-MIB.txt:	$(MIBDEPS)
 	./mibfetch $(RFCHOST) $(RFCDIR) 3635
