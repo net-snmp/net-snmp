@@ -79,6 +79,7 @@ TABLE OF CONTENTS
    What's this about "too many imported symbols"?
    How do I compile with 'gcc' instead of 'cc'?
    But gcc doesn't compile it successfully on my new Solaris system. Why not?
+   Why are packets requesting the same information larger with UC-Davis SNMP ?
 
 
 GENERAL
@@ -1534,3 +1535,30 @@ But gcc doesn't compile it successfully on my new Solaris system. Why not?
 --- 191,192 ----
           s/__STDC__ - 0 == 0/!defined (__STRICT_ANSI__)/g
 +         s/__STDC__ - 0 == 1/defined (__STRICT_ANSI__)/g
+
+
+Why are packets requesting the same information larger with UC-Davis SNMP ?
+-------------------------------------------------------------------------
+
+Some users note that UCD-SNMP applications always generate larger PDUs
+than other SNMP packages, even if the information requested is the same.
+Further, there are some agents that refuse PDUs from UCD-SNMP applications
+but accept PDUs from other applications.
+
+UCD-SNMP is based on the CMU code from a long time ago which encoded things
+using the long form of length encoding.  Some agents use the short form
+of length encoding only, and do not understand the long form.
+
+If you think that this is a problem, you can add this line to snmp_api.c :
+
+  #define USE_ASN_SHORT_LEN 1
+
+and re-compile.  This will build an alternate PDU assembly method which
+will attempt to use the short form length encoding when possible.
+Caution:  Using the alternate method imposes a performance penalty,
+as the packet contents are first assembled using long form,
+then memory is shuffled to generate smaller length encodings.
+
+Note that at this time no short form length encoding is possible
+for SNMPv3 PDUs.
+
