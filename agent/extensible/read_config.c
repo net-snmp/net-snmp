@@ -152,7 +152,7 @@ int read_config(filename, procp, numps, pprelocs, numrelocs, pppassthrus,
               strcpy((*pptmp)->name, (*pptmp)->command);
             }
           }
-          else if (!strncmp(word,"disk",4)) {
+          else if (!strncasecmp(word,"disk",4)) {
 #if HAVE_FSTAB_H || HAVE_GETMNTENT
             if (*numdisks == MAXDISKS) {
               fprintf(stderr,"Too many disks specified in %s\n",filename);
@@ -231,7 +231,7 @@ int read_config(filename, procp, numps, pprelocs, numrelocs, pppassthrus,
                     "'disk' checks not supported for this architecture.\n");
 #endif
           }
-          else if (!strncmp(word,"proc",4)) {
+          else if (!strncasecmp(word,"proc",4)) {
             (*procp) = (struct myproc *) malloc(sizeof(struct myproc));
             (*procp)->next = NULL;
             (*numps)++;
@@ -258,10 +258,10 @@ int read_config(filename, procp, numps, pprelocs, numrelocs, pppassthrus,
 #endif
             procp = &((*procp)->next);
           }
-          else if (!strncmp(word,"swap",4)) {
+          else if (!strncasecmp(word,"swap",4)) {
             *minimumswap = atoi(cptr);
           }
-          else if (!strncmp(word,"load",4)) {
+          else if (!strncasecmp(word,"load",4)) {
             for(i=0;i<=2;i++) {
               if (cptr != NULL)
                 *maxload++ = atof(cptr);
@@ -271,7 +271,7 @@ int read_config(filename, procp, numps, pprelocs, numrelocs, pppassthrus,
               cptr = skip_white(cptr);
             }
           }
-          else if (!strncmp(word,"community",9)) {
+          else if (!strncasecmp(word,"community",9)) {
             i = atoi(cptr);
             if (i > 0 && i <= NUM_COMMUNITIES) {
               cptr = skip_not_white(cptr);
@@ -292,7 +292,7 @@ int read_config(filename, procp, numps, pprelocs, numrelocs, pppassthrus,
           } else if (!strncasecmp(word,"syscon",6)) {
             if (strlen(cptr) < 128) {
               strcpy(sysContact,cptr);
-              sysContact[strlen(sysContact)-1] = NULL;  /* chomp new line */
+              sysContact[strlen(sysContact)-1] = 0;  /* chomp new line */
             } else
               fprintf(stderr,
                       "syscontact token too long (must be < 128):\n\t%s\n",
@@ -300,7 +300,7 @@ int read_config(filename, procp, numps, pprelocs, numrelocs, pppassthrus,
           } else if (!strncasecmp(word,"sysloc",6)) {
             if (strlen(cptr) < 128) {
               strcpy(sysLocation,cptr);
-              sysLocation[strlen(sysLocation)-1] = NULL; /* chomp new line */
+              sysLocation[strlen(sysLocation)-1] = 0; /* chomp new line */
             } else
               fprintf(stderr,
                       "syslocation token too long (must be < 128):\n\t%s\n",
