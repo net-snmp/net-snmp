@@ -11,9 +11,9 @@
 extern "C" {
 #endif
 
-#include <net-snmp/snmp_impl.h>
-#include <net-snmp/tools.h>
-#include <net-snmp/data_list.h>
+#include <net-snmp/library/snmp_impl.h>
+#include <net-snmp/library/tools.h>
+#include <net-snmp/library/data_list.h>
 
 #define SNMP_MAX_PDU_SIZE 64000 /* local constraint on PDU size sent by agent
                                   (see also SNMP_MAX_MSG_SIZE in snmp_api.h) */

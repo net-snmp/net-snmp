@@ -1,8 +1,8 @@
 #ifndef _SNMPUDPDOMAIN_H
 #define _SNMPUDPDOMAIN_H
 
-#include "snmp_transport.h"
-#include "asn1.h"
+#include <net-snmp/library/snmp_transport.h>
+#include <net-snmp/library/asn1.h>
 
 #if HAVE_SYS_SOCKET_H
 #include <sys/socket.h>

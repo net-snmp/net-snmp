@@ -1,7 +1,7 @@
 #ifndef _SNMPCALLBACKDOMAIN_H
 #define _SNMPCALLBACKDOMAIN_H
 
-#include "snmp_transport.h"
+#include <net-snmp/library/snmp_transport.h>
 
 typedef struct callback_pass_s {
    int return_transport_num;

@@ -39,7 +39,7 @@
 #if HAVE_NETINET_IN_H
 #include <netinet/in.h>
 #endif
-#include <net-snmp/getopt.h>
+#include <net-snmp/utilities.h>
 
 #if HAVE_DMALLOC_H
 #include <dmalloc.h>

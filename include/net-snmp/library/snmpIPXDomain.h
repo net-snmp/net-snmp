@@ -1,8 +1,8 @@
 #ifndef _SNMPIPXDOMAIN_H
 #define _SNMPIPXDOMAIN_H
 
-#include "snmp_transport.h"
-#include "asn1.h"
+#include <net-snmp/library/snmp_transport.h>
+#include <net-snmp/library/asn1.h>
 #if HAVE_NETIPX_IPX_H
 #include <netipx/ipx.h>
 #endif

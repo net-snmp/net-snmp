@@ -54,7 +54,7 @@
 #include <net-snmp/types.h>	
 #include <net-snmp/output_api.h>
 #include <net-snmp/config_api.h>
-#include <net-snmp/snmp_parse_args.h>	/* for "internal" definitions */
+#include <net-snmp/library/snmp_parse_args.h>	/* for "internal" definitions */
 #include <net-snmp/utilities.h>
 
 #include <net-snmp/library/snmp_api.h>

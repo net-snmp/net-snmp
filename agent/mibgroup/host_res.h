@@ -11,17 +11,11 @@
 #include <netinet/in.h>
 #endif
 
-#include <net-snmp/asn1.h>
-#include <net-snmp/snmp.h>
-#include <net-snmp/snmp_api.h>
-#include <net-snmp/snmp_impl.h>
+#include <net-snmp/net-snmp-includes.h>
 #include <net-snmp/agent/snmp_agent.h>
 #include <net-snmp/agent/agent_handler.h>
-#include <net-snmp/mib.h>
 #include <net-snmp/agent/snmp_vars.h>
 #include <net-snmp/agent/var_struct.h>
-#include <net-snmp/system.h>
-#include <net-snmp/snmp_debug.h>
 
 #if defined(IFNET_NEEDS_KERNEL) && !defined(_KERNEL)
 #define _KERNEL 1

@@ -22,7 +22,7 @@ extern "C" {
    and SET related modes instead.
  */
 
-#include "table.h"
+#include <net-snmp/agent/table.h>
 
 #define TABLE_ARRAY_NAME "table_array"
 
