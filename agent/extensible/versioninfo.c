@@ -39,7 +39,7 @@ unsigned char *var_extensible_version(vp, name, length, exact, var_len, write_me
   int count, result,i, rtest=0;
   register int interface;
   struct myproc *proc;
-  long long_ret;
+  static long long_ret;
   static char errmsg[300];
   char *cptr;
   time_t curtime;

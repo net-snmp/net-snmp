@@ -237,7 +237,7 @@ unsigned char *var_extensible_mem(vp, name, length, exact, var_len, write_method
   int count, result,i, rtest=0;
   register int interface;
   struct myproc *proc;
-  long long_ret;
+  static long long_ret;
   static char errmsg[300];
 
   struct vmtotal total;
@@ -330,7 +330,7 @@ unsigned char *var_extensible_disk(vp, name, length, exact, var_len, write_metho
   int totalblks, free, used, avail, availblks;
   register int interface;
   struct myproc *proc;
-  long long_ret;
+  static long long_ret;
   static char errmsg[300];
 
   int file;
@@ -480,7 +480,7 @@ unsigned char *var_extensible_lockd_test(vp, name, length, exact, var_len, write
   int count, result,i, rtest=0;
   register int interface;
   struct myproc *proc;
-  long long_ret;
+  static long long_ret;
   static char errmsg[300];
 
 
@@ -526,7 +526,7 @@ unsigned char *var_extensible_loadave(vp, name, length, exact, var_len, write_me
   int count, result,i, rtest=0;
   register int interface;
   struct extensible *exten;
-  long long_ret;
+  static long long_ret;
   static char errmsg[300];
 #ifdef HAVE_SYS_FIXPOINT_H
   fix favenrun[3];
@@ -635,7 +635,7 @@ unsigned char *var_extensible_errors(vp, name, length, exact, var_len, write_met
 {
 
   oid newname[30];
-  long long_ret;
+  static long long_ret;
   static char errmsg[300];
 
 
