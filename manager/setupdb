@@ -77,6 +77,10 @@ DO("CREATE TABLE hostgroups (
   id int(11) DEFAULT '0' NOT NULL auto_increment,
   host varchar(64),
   groupname varchar(32),
+  sysObjectId varchar(255),
+  sysDescr varchar(255),
+  versionTag varchar(32),
+  sysUpTime varchar(64),
   PRIMARY KEY (id)
 )");
 
