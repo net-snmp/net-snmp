@@ -166,9 +166,10 @@ _check_interface_entry_for_updates(ifTable_rowreq_ctx * rowreq_ctx,
     } else {
         DEBUGMSGTL(("ifTable:access", "updating existing entry\n"));
 
+#ifdef USING_IF_MIB_IFXTABLE_IFXTABLE_MODULE
         netsnmp_assert(strcmp(rowreq_ctx->data.ifName,
                               ifentry->name) == 0);
-
+#endif
         /*
          * if the interface was missing, but came back, clear the
          * missing flag and set the discontinuity time. (if an os keeps
@@ -177,8 +178,10 @@ _check_interface_entry_for_updates(ifTable_rowreq_ctx * rowreq_ctx,
          */
         if (rowreq_ctx->known_missing) {
             rowreq_ctx->known_missing = 0;
+#ifdef USING_IF_MIB_IFXTABLE_IFXTABLE_MODULE
             rowreq_ctx->data.ifCounterDiscontinuityTime =
                 netsnmp_get_agent_uptime();
+#endif
         }
 
         /*
@@ -270,7 +273,6 @@ _add_new_interface(netsnmp_interface_entry * ifentry,
 int
 ifTable_cache_load(netsnmp_container * container)
 {
-    ifTable_rowreq_ctx *rowreq_ctx;
     netsnmp_container *ifcontainer;
 
     DEBUGMSGTL(("verbose:ifTable:ifTable_cache_load", "called\n"));
