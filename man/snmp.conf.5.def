@@ -43,6 +43,12 @@ list read from the mibs token.  Note that the value
 specified here can be overridden by the
 .B MIBFILES
 environment variable.
+.IP "defaultPort port"
+The default port number that all snmp applications and demons should use.
+.IP "defVersion (v1|v2c|v3)"
+The default snmp version to use.
+.IP "defCommunity string"
+The default snmpv1 and snmpv2c community string to use.
 .IP "defSecurityName string"
 The default snmpv3 USM security name you want to use for snmpv3 requests.
 .IP "defContext      string"
@@ -63,12 +69,6 @@ possible value, and isn't supported out of the box due to U.S. export
 restrictions.
 .IP "defSecurityLevel noAuthNoPriv|authNoPriv|authPriv"
 The snmpv3 default security level to use.
-.IP "doDebugging (1|0)"
-Turns on debugging for all aplications run if set to 1.
-.IP "debugTokens token[,token...]"
-The debugging tokens that should be printed.  See the
-.I snmpcmd(1)
-manual page for debugging usage details.
 .IP "showMibErrors   (1|yes|true|0|no|false)"
 Weather or not to display textual mib parsing errors when commands are
 run.
@@ -80,14 +80,31 @@ distributed mibs have broken comments in them, hence this option.
 Allow underline characters in mibs (illegal).
 .IP "mibWarningLevel integerValue"
 The minimum warning level of the warnings printed by the mib parser.
-.IP "dumpPacket      (1|yes|true|0|no|false)"
-Weather the commands should dump packets by default.
 .IP "logTimestamp      (1|yes|true|0|no|false)"
 Weather the commands should log timestamps with their error/message
 logging or not.  Note that output will not look as pretty with
 timestamps if the source code that is doing the logging does
 incremental logging of messages that are not line buffered before
 being passed to the logging routines.
+.IP "printNumericEnums (1|yes|true|0|no|false)"
+Equivelent to -Oe
+.IP "printNumericOids (1|yes|true|0|no|false)"
+Equivelent to -On
+.IP "dontBreakdownOids (1|yes|true|0|no|false)"
+Equivelent to -Ob
+.IP "quickPrinting (1|yes|true|0|no|false)"
+Equivelent to -Oq
+.IP "suffixPrinting (0|1|2)"
+If the value is 1, its equivelent to -Os and if the value is 2 it's
+equivelent to -OS.
+.IP "dumpPacket      (1|yes|true|0|no|false)"
+Weather the commands should dump packets by default.
+.IP "doDebugging (1|0)"
+Turns on debugging for all aplications run if set to 1.
+.IP "debugTokens token[,token...]"
+The debugging tokens that should be printed.  See the
+.I snmpcmd(1)
+manual page for debugging usage details.
 .SH "SEE ALSO"
 snmp_config(5), read_config(3), snmpcmd(1).
 .\" Local Variables:
