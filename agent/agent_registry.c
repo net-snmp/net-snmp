@@ -489,6 +489,7 @@ netsnmp_subtree_load(netsnmp_subtree *new_sub, const char *context_name)
 	
 	    if (next && (next->namelen  == new_sub->namelen) &&
 		(next->priority == new_sub->priority)) {
+                netsnmp_assert("registration" != "duplicate");
 		return MIB_DUPLICATE_REGISTRATION;
 	    }
 
