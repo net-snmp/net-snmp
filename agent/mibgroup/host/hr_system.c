@@ -40,6 +40,10 @@
 #endif
 #endif
 
+#if defined(hpux10) || defined(hpux11)
+#include <sys/pstat.h>
+#endif
+
 #ifdef HAVE_SYS_SYSCTL_H
 #include <sys/sysctl.h>
 #endif
@@ -168,6 +172,9 @@ var_hrsys(struct variable * vp,
     static int      maxproc_mib[] = { CTL_KERN, KERN_MAXPROC };
     int             buf_size;
 #endif
+#if defined(hpux10) || defined(hpux11)
+    struct pst_static pst_buf;
+#endif
 
     if (header_hrsys(vp, name, length, exact, var_len, write_method) ==
         MATCH_FAILED)
@@ -217,6 +224,9 @@ var_hrsys(struct variable * vp,
         if (sysctl(maxproc_mib, 2, &nproc, &buf_size, NULL, 0) < 0)
             return NULL;
         long_return = nproc;
+#elif defined(hpux10) || defined(hpux11)
+        pstat_getstatic(&pst_buf, sizeof(struct pst_static), 1, 0);
+        long_return = pst_buf.max_proc;
 #elif defined(NPROC_SYMBOL)
         auto_nlist(NPROC_SYMBOL, (char *) &nproc, sizeof(int));
         long_return = nproc;

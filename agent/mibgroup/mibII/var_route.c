@@ -1472,16 +1472,16 @@ Route_Scan_Reload(void)
  */
 #ifdef hpux11
 static int
-qsort_compare(void *v1, void *v2)
+qsort_compare(const void *v1, const void *v2)
 {
     mib_ipRouteEnt **r1 = (mib_ipRouteEnt **) v1;
     mib_ipRouteEnt **r2 = (mib_ipRouteEnt **) v2;
     /*
      *      Do the comparison
      */
-    if (r1->Dest == r2->Dest)
+    if ((*r1)->Dest == (*r2)->Dest)
         return (0);
-    if (r1->Dest > r2->Dest)
+    if ((*r1)->Dest  > (*r2)->Dest)
         return (1);
     return (-1);
 }
