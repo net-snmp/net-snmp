@@ -137,6 +137,10 @@ SOURCE=..\..\agent\mibgroup\mibII\udpTable.c
 # End Source File
 # Begin Source File
 
+SOURCE=..\..\agent\mibgroup\mibII\vacm_context.c
+# End Source File
+# Begin Source File
+
 SOURCE=..\..\agent\mibgroup\mibII\vacm_vars.c
 # End Source File
 # Begin Source File
@@ -259,10 +263,18 @@ SOURCE=..\..\agent\mibgroup\target\snmpTargetParamsEntry.c
 
 SOURCE=..\..\agent\mibgroup\target\target.c
 # End Source File
+# Begin Source File
+
+SOURCE=..\..\agent\mibgroup\target\target_counters.c
+# End Source File
 # End Group
 # Begin Group "agentx"
 
 # PROP Default_Filter ""
+# Begin Source File
+
+SOURCE=..\..\agent\mibgroup\agentx\agentx_config.c
+# End Source File
 # Begin Source File
 
 SOURCE=..\..\agent\mibgroup\agentx\client.c
@@ -304,19 +316,6 @@ SOURCE=..\..\agent\mibgroup\agentx\master_admin.c
 # End Source File
 # Begin Source File
 
-SOURCE=..\..\agent\mibgroup\agentx\master_request.c
-
-!IF  "$(CFG)" == "netsnmpmibs - Win32 Release"
-
-!ELSEIF  "$(CFG)" == "netsnmpmibs - Win32 Debug"
-
-# PROP Exclude_From_Build 1
-
-!ENDIF 
-
-# End Source File
-# Begin Source File
-
 SOURCE=..\..\agent\mibgroup\agentx\protocol.c
 
 !IF  "$(CFG)" == "netsnmpmibs - Win32 Release"
@@ -340,6 +339,26 @@ SOURCE=..\..\agent\mibgroup\agentx\subagent.c
 
 !ENDIF 
 
+# End Source File
+# End Group
+# Begin Group "agent"
+
+# PROP Default_Filter ""
+# Begin Source File
+
+SOURCE=..\..\agent\mibgroup\agent\nsModuleTable.c
+# End Source File
+# Begin Source File
+
+SOURCE=..\..\agent\mibgroup\agent\nsTransactionTable.c
+# End Source File
+# End Group
+# Begin Group "utilities"
+
+# PROP Default_Filter ""
+# Begin Source File
+
+SOURCE=..\..\agent\mibgroup\utilities\override.c
 # End Source File
 # End Group
 # Begin Source File
