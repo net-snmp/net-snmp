@@ -839,23 +839,47 @@ extern "C" {
 
 /*  Pluggable transports.  */
 
+/*  This is defined if support for the UDP/IP transport domain is
+    available.   */
+#define SNMP_TRANSPORT_UDP_DOMAIN 1
+
+/*  This is defined if support for the "callback" transport domain is
+    available.   */
     /*
      * the pipe call creates fds that select chokes on, so
      * disable callbacks on WIN32 until a fix can be found
      */
-#define SNMP_TRANSPORT_CALLBACK_DOMAIN 0
+#undef SNMP_TRANSPORT_CALLBACK_DOMAIN
 
-#define SNMP_TRANSPORT_UDP_DOMAIN 1
+/*  This is defined if support for the TCP/IP transport domain is
+    available.  */
 #define SNMP_TRANSPORT_TCP_DOMAIN 1
+
+/*  This is defined if support for the Unix transport domain
+    (a.k.a. "local IPC") is available.  */
 #undef SNMP_TRANSPORT_UNIX_DOMAIN
+
+/*  This is defined if support for the AAL5 PVC transport domain is
+    available.  */
 #undef SNMP_TRANSPORT_AAL5PVC_DOMAIN
+
+/*  This is defined if support for the IPX transport domain is
+    available.  */
 #undef SNMP_TRANSPORT_IPX_DOMAIN
+
+/*  This is defined if support for the UDP/IPv6 transport domain is
+    available.  */
 #undef SNMP_TRANSPORT_UDPIPV6_DOMAIN
+
+/*  This is defined if support for the TCP/IPv6 transport domain is
+    available.  */
 #undef SNMP_TRANSPORT_TCPIPV6_DOMAIN
 
-/* Security Models */
+/* define this if the USM security module is available */
 #define SNMP_SECMOD_USM 1
-#undef  SNMP_SECMOD_KSM
+
+/* define this if the KSM (kerberos based snmp) security module is available */
+#undef SNMP_SECMOD_KSM
 
 #ifdef WIN32
 
@@ -923,7 +947,9 @@ typedef unsigned short mode_t;
 #if NETSNMP_ENABLE_INLINE && !defined(NETSNMP_NO_INLINE)
 #   define NETSNMP_USE_INLINE
 #else
+#   undef  NETSNMP_INLINE
 #   define NETSNMP_INLINE 
+#   undef  NETSNMP_STATIC_INLINE
 #   define NETSNMP_STATIC_INLINE static
 #endif
 
