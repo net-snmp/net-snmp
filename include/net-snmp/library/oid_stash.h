@@ -3,7 +3,7 @@
 
 /*
  * designed to store/retrieve information associated with a given oid.
- * * Storage is done in an efficient manner for fast lookups.
+ * Storage is done in an efficient tree manner for fast lookups.
  */
 
 #define OID_STASH_CHILDREN_SIZE 31
@@ -19,6 +19,8 @@ extern          "C" {
                                         void *,
                                         struct netsnmp_oid_stash_node_s *);
 
+    typedef void    (NetSNMPStashFreeNode) (void *);
+    
     typedef struct netsnmp_oid_stash_node_s {
         oid             value;
         struct netsnmp_oid_stash_node_s **children;     /* array of children */
@@ -59,8 +61,14 @@ extern          "C" {
     netsnmp_oid_stash_node *netsnmp_oid_stash_create_node(void);        /* returns a malloced node */
 
     void netsnmp_oid_stash_store(netsnmp_oid_stash_node *root,
-                                 const char *tokenname, NetSNMPStashDump *dumpfn,
+                                 const char *tokenname,
+                                 NetSNMPStashDump *dumpfn,
                                  oid *curoid, size_t curoid_len);
+
+    /* frees all data in the stash and cleans it out.  Sets root = NULL */
+    void netsnmp_oid_stash_free(netsnmp_oid_stash_node **root,
+                                NetSNMPStashFreeNode *freefn);
+                                
 
 #ifdef __cplusplus
 }
