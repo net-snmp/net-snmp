@@ -1,8 +1,8 @@
 /*
  *  vmstat_solaris2.c
- *  UCD SNMP module for sysStatus section of UCD-SNMP-MIB for SunOS/Solaris
+ *  UCD SNMP module for systemStats section of UCD-SNMP-MIB for SunOS/Solaris
  *  Jochen Kmietsch <kmietsch@jochen.de>
- *  with fixes from the UCD-SNMP community
+ *  with fixes and additions from the UCD-SNMP community
  *  Uses some ideas from xosview and top
  *  Some comments paraphrased from the SUN man pages 
  *  Version 0.1 initial release (Dec 1999)
@@ -11,6 +11,7 @@
  *  Version 0.4 portability issue and raw cpu value support (Jun 2000)
  *  Version 0.5 64-bit Solaris support and new data gathering routine (Aug 2000)
  *  Version 0.6 Memory savings, overroll precautions and lint checks (Aug 2000)
+ *  Version 0.7 More raw counters and some cosmetic changes (Jan 2001)
  *
  */
 
@@ -142,6 +143,8 @@ void init_vmstat_solaris2(void)
     {CPURAWIDLE, ASN_COUNTER, RONLY, var_extensible_vmstat, 1, {CPURAWIDLE}},
     {CPURAWWAIT, ASN_COUNTER, RONLY, var_extensible_vmstat, 1, {CPURAWWAIT}},
     {CPURAWKERNEL, ASN_COUNTER, RONLY, var_extensible_vmstat, 1, {CPURAWKERNEL}},
+    {IORAWSENT, ASN_COUNTER, RONLY, var_extensible_vmstat, 1, {IORAWSENT}},
+    {IORAWRECEIVE, ASN_COUNTER, RONLY, var_extensible_vmstat, 1, {IORAWRECEIVE}},
     /* Future use: */
     /*
       {ERRORFLAG, ASN_INTEGER, RONLY, var_extensible_vmstat, 1, {ERRORFLAG }},
@@ -377,9 +380,11 @@ static void update_stats(unsigned int registrationNumber, void *clientarg)
       /* decided to use sysconf(_SC_PAGESIZE) instead to get around an #ifndef (I don't like those) */
       /* that was needed b/c some old Solaris versions don't have getpagesize() */
       /* LINTED cast needed, really */
-      swapin       = (uint_t)((css_new->css_swapin - css_old->css_swapin) * (hrtime_t) 1000 * sysconf(_SC_PAGESIZE) / 1024 / time_diff ); 
+      swapin       = (uint_t)((css_new->css_swapin - css_old->css_swapin) * (hrtime_t) 1000
+			* sysconf(_SC_PAGESIZE) / 1024 / time_diff ); 
       /* LINTED cast needed, really */
-      swapout      = (uint_t)((css_new->css_swapout - css_old->css_swapout) * (hrtime_t) 1000 * sysconf(_SC_PAGESIZE) / 1024 / time_diff); 
+      swapout      = (uint_t)((css_new->css_swapout - css_old->css_swapout) * (hrtime_t) 1000
+			* sysconf(_SC_PAGESIZE) / 1024 / time_diff); 
       /* LINTED cast needed, really */
       blocks_read  = (uint_t)((css_new->css_blocks_read - css_old->css_blocks_read) * (hrtime_t) 1000 / time_diff); 
       /* LINTED cast needed, really */
@@ -483,6 +488,7 @@ static unsigned char *var_extensible_vmstat(struct variable *vp,
   /* We are missing CPURAWNICE, Solaris does not account for this in the kernel so this OID can not */
   /* be returned.  Also, these values will roll over sooner or later and then return inaccurate data */
   /* but the MIB wants Integer32 so we cannot put a counter here */
+  /* (Has been changed to Counter32 in the latest MIB version!) */
   case CPURAWSYSTEM:
     take_snapshot(&raw_values);
     /* LINTED has to be 'long' */
@@ -503,6 +509,13 @@ static unsigned char *var_extensible_vmstat(struct variable *vp,
     /* LINTED has to be 'long' */
     long_ret = (long)(raw_values.css_cpu[CPU_KERNEL] / raw_values.css_cpus);
     return((u_char *) (&long_ret));    
+  case IORAWSENT:
+    long_ret = (long)(raw_values.css_blocks_write);
+    return((u_char *) (&long_ret));
+  case IORAWRECEIVE:
+    long_ret = (long)(raw_values.css_blocks_read);
+    return((u_char *) (&long_ret));
+
     /* reserved for future use */
     /*
       case ERRORFLAG:
