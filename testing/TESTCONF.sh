@@ -14,6 +14,21 @@ if [ "x$TESTCONF_SH_EVALED" != "xyes" ]; then
     TESTCONF_SH_EVALED=yes
 
 #
+# Set up an NL suppressing echo command
+#
+case "`echo 'x\c'`" in
+  'x\c')
+    ECHO() { echo -n $*; }
+    ;;
+  x)
+    ECHO() { echo $*\\c; }
+    ;;
+  *)
+    echo "I don't understand your echo command ..."
+    exit 1
+    ;;
+esac
+#
 # how verbose should we be (0 or 1)
 #
 if [ "x$SNMP_VERBOSE" = "x" ]; then

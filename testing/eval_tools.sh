@@ -39,7 +39,7 @@ HEADER() {
         echo test $*
 	exit 0;
     else
-	echo -n "testing $*...  "
+	ECHO "testing $*...  "
     fi
 }
 
