@@ -13,6 +13,12 @@ Each group consists of two files:
 	- declaration of the function(s) for setting variable
 		information (if appropriate)
 
+	- declaration of the function(s) for parsing the snmpd.conf file
+		(optional)
+        - a call to config_parse_dot_conf() to explain to the .conf
+		parser which tokens we want to parse.
+		(optional)
+
 	- definitions of the MIB group 'magic numbers'
 		declarations of the 'public' functions
 
@@ -34,10 +40,14 @@ Each group consists of two files:
 
 
   wombat.c:	implementation code
+		(can be non-existant if only the .h file is needed)
 
 	- a list of kernel information needed to report
 		on this group
 	- an initialisation function (optional)
+        - a routine to parse an snmpd.conf line.
+        - a routine to free resources from above and return to 
+                default settings.
 	- 'header' function(s) to map the OID requested
 		to the next appropriate OID
 		(and similar system-independent setup)
@@ -64,6 +74,8 @@ and edit them as follows:
 		    returned OID (omitting the group prefix).
 		    For non-table values, this will probably be one
 		    greater than the length of the sub-identifier.
+                update or remove the 'config_parse_dot_conf' call if
+                    you need to handle lines in the snmpd.conf files.
 		update the 'config_load_mib' call with the appropriate
 		    location within the global MIB structure, and
 		    its length (note that 'MIB' has length 6)
