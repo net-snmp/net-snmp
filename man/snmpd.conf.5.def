@@ -895,12 +895,32 @@ referenced by "modulename".  The types of handlers available for
 insertion are:
 .RS
 .nf
-debug        - Prints out lots of debugging information when -Dhelper:debug
-               is passed to the snmpd application.
+stash_cache  - Caches information returned from the lower level.  This
+               greatly help the performance of the agent, at the cost
+               of caching the data such that its no longer "live" for
+               30 seconds (in this future, this will be configurable).
+               Note that this means snmpd will use more memory as well
+               while the information is cached.  Currently this only
+               works for handlers registered using the table_iterator
+               support, which is only a few mib tables.  To use it,
+               you need to make sure to install it before the
+               table_iterator point in the chain, so to do this:
+
+                  injectHandler stash_cache NAME table_iterator
+
+               If you want a table to play with, try walking the
+               nsModuleTable with and without this injected.
+
+debug        - Prints out lots of debugging information when
+               the -Dhelper:debug flag is passed to the snmpd
+               application.
+
 read_only    - Forces turning off write support for the given module.
+
 serialize    - If a module is failing to handle multiple requests
                properly (using the new 5.0 module API), this will force
                the module to only receive one request at a time.
+
 bulk_to_next - If a module registers to handle getbulk support, but
                for some reason is failing to implement it properly,
                this module will convert all getbulk requests to
