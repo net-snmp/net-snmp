@@ -558,7 +558,8 @@ snmp_sess_open(struct snmp_session *in_session)
     oid *op;
     int sd;
     in_addr_t addr;
-    struct sockaddr_in	me, *isp_addr;
+    snmp_ipaddr me;
+    struct sockaddr_in *isp_addr, *meIp = (struct sockaddr_in *)&me;
     struct hostent *hp;
     struct snmp_pdu *pdu, *response;
     int status;
@@ -845,8 +846,45 @@ snmp_sess_open(struct snmp_session *in_session)
     if (session->timeout == SNMP_DEFAULT_TIMEOUT)
 	session->timeout = DEFAULT_TIMEOUT;
 
+
+    if ( isp->addr.sa_family == AF_UNSPEC ) {
+        isp->addr.sa_family = AF_INET;
+        isp_addr = (struct sockaddr_in *)&(isp->addr);
+        if (session->peername != SNMP_DEFAULT_PEERNAME){
+            if ((int)(addr = inet_addr(session->peername)) != -1){
+                memmove(&isp_addr->sin_addr, &addr, sizeof(isp_addr->sin_addr));
+            } else {
+                hp = gethostbyname(session->peername);
+                if (hp == NULL){
+                    snmp_errno = SNMPERR_BAD_ADDRESS;
+                    in_session->s_snmp_errno = SNMPERR_BAD_ADDRESS;
+                    in_session->s_errno = errno;
+                    snmp_set_detail(session->peername);
+                    snmp_sess_close(slp);
+                    return 0;
+                } else {
+                    memmove(&isp_addr->sin_addr, hp->h_addr, hp->h_length);
+                }
+            }
+            if (session->remote_port == SNMP_DEFAULT_REMPORT){
+                isp_addr->sin_port = default_s_port;
+            } else {
+                isp_addr->sin_port = htons(session->remote_port);
+            }
+        } else {
+            isp_addr->sin_addr.s_addr = SNMP_DEFAULT_ADDRESS;
+        }
+    }
+
+    memset(&me, '\0', sizeof(me));
+    me.sa_family = isp->addr.sa_family;
+    if ( me.sa_family == AF_INET ) {
+        meIp->sin_addr.s_addr = INADDR_ANY;
+        meIp->sin_port = htons(session->local_port);
+    }
+
     /* Set up connections */
-    sd = socket(AF_INET, SOCK_DGRAM, 0);
+    sd = socket(me.sa_family, SOCK_DGRAM, 0);
     if (sd < 0){
 	snmp_errno = SNMPERR_NO_SOCKET;
 	in_session->s_snmp_errno = SNMPERR_NO_SOCKET;
@@ -855,6 +893,7 @@ snmp_sess_open(struct snmp_session *in_session)
 	snmp_sess_close(slp);
 	return 0;
     }
+    isp->sd = sd;
 
 #ifdef SO_BSDCOMPAT
     /* Patch for Linux.  Without this, UDP packets that fail get an ICMP
@@ -866,39 +905,6 @@ snmp_sess_open(struct snmp_session *in_session)
 	setsockopt(sd, SOL_SOCKET, SO_BSDCOMPAT, &one, sizeof(one));
     }
 #endif /* SO_BSDCOMPAT */
-
-    isp->sd = sd;
-    isp_addr = (struct sockaddr_in *)&(isp->addr);
-    if (session->peername != SNMP_DEFAULT_PEERNAME){
-	if ((int)(addr = inet_addr(session->peername)) != -1){
-	    memmove(&isp_addr->sin_addr, &addr, sizeof(isp_addr->sin_addr));
-	} else {
-	    hp = gethostbyname(session->peername);
-	    if (hp == NULL){
-		snmp_errno = SNMPERR_BAD_ADDRESS;
-		in_session->s_snmp_errno = SNMPERR_BAD_ADDRESS;
-		in_session->s_errno = errno;
-		snmp_set_detail(session->peername);
-		snmp_sess_close(slp);
-		return 0;
-	    } else {
-		memmove(&isp_addr->sin_addr, hp->h_addr, hp->h_length);
-	    }
-	}
-	isp_addr->sin_family = AF_INET;
-	if (session->remote_port == SNMP_DEFAULT_REMPORT){
-	    isp_addr->sin_port = default_s_port;
-	} else {
-	    isp_addr->sin_port = htons(session->remote_port);
-	}
-    } else {
-	isp_addr->sin_addr.s_addr = SNMP_DEFAULT_ADDRESS;
-    }
-
-    memset(&me, '\0', sizeof(me));
-    me.sin_family = AF_INET;
-    me.sin_addr.s_addr = INADDR_ANY;
-    me.sin_port = htons(session->local_port);
     if (bind(sd, (struct sockaddr *)&me, sizeof(me)) != 0){
 	snmp_errno = SNMPERR_BAD_LOCPORT;
 	in_session->s_snmp_errno = SNMPERR_BAD_LOCPORT;
@@ -2686,15 +2692,16 @@ snmp_sess_async_send(void *sessp,
         return 0;
     }
 
-    if (pduIp->sin_addr.s_addr == SNMP_DEFAULT_ADDRESS){
+    if (pdu->address.sa_family == AF_UNSPEC){
 	isp_addr = (struct sockaddr_in *)&(isp->addr);
-	if (isp_addr->sin_addr.s_addr != SNMP_DEFAULT_ADDRESS){
-	    memmove(&pdu->address, isp_addr, sizeof(*pduIp));
-	} else {
-	    snmp_errno = SNMPERR_BAD_ADDRESS;
-	    session->s_snmp_errno = SNMPERR_BAD_ADDRESS;
-	    return 0;
+	if (isp->addr.sa_family == AF_UNSPEC ||
+	   (isp->addr.sa_family == AF_INET &&
+	    isp_addr->sin_addr.s_addr == SNMP_DEFAULT_ADDRESS)){
+	        snmp_errno = SNMPERR_BAD_ADDRESS;
+	        session->s_snmp_errno = SNMPERR_BAD_ADDRESS;
+	        return 0;
 	}
+	memmove(&pdu->address, &(isp->addr), sizeof(isp->addr));
     }
 
     /* setup administrative fields based on version */
