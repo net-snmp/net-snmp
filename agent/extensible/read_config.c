@@ -96,6 +96,29 @@ int read_config(filename, procp, numps, ppexten, numexs)
   close(ifile);
 }
 
+free_config(procp,ppexten)
+     struct myproc **procp;
+     struct extensible **ppexten;
+{
+  struct myproc *ptmp, *ptmp2;
+  struct extensible *etmp, *etmp2;
+
+  for (ptmp = *procp; ptmp != NULL;) {
+    ptmp2 = ptmp;
+    ptmp = ptmp->next;
+    free(ptmp2);
+  }
+
+  for (etmp = *ppexten; etmp != NULL;) {
+    etmp2 = etmp;
+    etmp = etmp->next;
+    free(etmp2);
+  }
+
+  *procp = NULL;
+  *ppexten = NULL;
+
+}
 /* skip all white spaces and return 1 if found something either end of
    line or a comment character */
 
