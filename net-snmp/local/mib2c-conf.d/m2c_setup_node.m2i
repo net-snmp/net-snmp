@@ -5,7 +5,7 @@
 @if "$m2c_node_name" ne "$node"@
 ## if $node.accessible != 1, might be inaccessible index node
 @  eval $m2c_node_name = $node@
-@  eval $m2c_node_skip_mapping = 0@
+@  eval $m2c_node_skip_mapping = 1@
 @  eval $m2c_node_needlength = $node.needlength@
 @  eval $m2c_node_get_comments = ""@
 @  eval $m2c_node_set_comments = ""@
@@ -16,6 +16,8 @@
 ## fix some declarations
 ########################################################################
 @  if $node.enums == 1@
+##
+@    eval $m2c_node_skip_mapping = 0@
 ##
 ## validate some assumptions
 ##
@@ -124,15 +126,11 @@
 @    eval $m2c_node_lh = "temp_$node"@
 @    eval $m2c_node_lhs = "temp_${node}_len"@
 @  else@
-@    if $m2c_node_needlength == 1@
-@      eval $m2c_node_lh = "(* ${node}_ptr_ptr)"@
-@    else@
-@      eval $m2c_node_lh = "(* ${node}_ptr)"@
-@    end@
-@    eval $m2c_node_lhs = "(* ${node}_len_ptr)"@
+@    eval $m2c_node_lh = "(* $m2c_node_param_ref_name )"@
+@    eval $m2c_node_lhs = "(* $m2c_node_param_ref_lname )"@
 @  end@
 @  eval $m2c_ctx_lh="$m2c_node_lh"@
-@  eval $m2c_ctx_lhs="${m2c_node_lh}_len"@
+@  eval $m2c_ctx_lhs="$m2c_node_lhs"@
 @  eval $m2c_ctx_rh="${m2c_data_item}${node}"@
 @  eval $m2c_ctx_rhs="${m2c_data_item}${node}_len"@
 ########################################################################
@@ -153,12 +151,8 @@
 ########################################################################
 ##
 ########################################################################
-@  if $m2c_node_needlength == 1@
-@    eval $m2c_node_srh = "${node}_ptr"@
-@  else@
-@    eval $m2c_node_srh = "${node}"@
-@  end@
-@  eval $m2c_node_srhs = "${node}_len"@
+@  eval $m2c_node_srh = "$m2c_node_param_val_name"@
+@  eval $m2c_node_srhs = "$m2c_node_param_val_lname"@
 @end@
 ########################################################################
 ##
