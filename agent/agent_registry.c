@@ -244,7 +244,7 @@ split_subtree(struct subtree *current, oid name[], int name_len)
           ptr->prev = new_sub;
 
     /* retain original APIv2 registration information */
-    new_sub->reginfo = current->reginfo;
+    new_sub->reginfo = netsnmp_handler_registration_dup(current->reginfo);
 
     return new_sub;
 }
