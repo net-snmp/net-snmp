@@ -534,7 +534,6 @@ netsnmp_table_iterator_helper_handler(netsnmp_mib_handler *handler,
 
                     case MODE_GETNEXT:
                         /* looking for "next" matches */
-                        coloid[reginfo->rootoid_len + 1] = table_info->colnum;
                         if (netsnmp_check_getnext_reply
                             (request, coloid, coloid_len, index_search,
                              &ti_info->results)) {
