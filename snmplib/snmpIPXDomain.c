@@ -233,6 +233,7 @@ int			snmp_sockaddr_ipx	(struct sockaddr_ipx *addr,
   if (addr == NULL) {
     return 0;
   }
+  memset(addr, 0, sizeof(struct sockaddr_ipx));
 
   DEBUGMSGTL(("snmp_sockaddr_ipx", "addr %p, peername \"%s\"\n",
 	      addr, peername?peername:"[NIL]"));
