@@ -627,18 +627,18 @@ int Route_Scan_Reload( mib_table_t t )
 		    continue;
 		switch ( bit ) {
 		    case RTA_DST:
-				entry.rt_dst = satosin(sa)->sin_addr;
+				entry.rt_dst = satosin(*sa)->sin_addr;
 				break;
 		    case RTA_GATEWAY:
 				if ( sa->sa_family == AF_INET )
-				    entry.rt_gateway = satosin(sa)->sin_addr;
+				    entry.rt_gateway = satosin(*sa)->sin_addr;
 				break;
 		    case RTA_NETMASK:
-				entry.rt_genmask = satosin(sa)->sin_addr;
+				entry.rt_genmask = satosin(*sa)->sin_addr;
 				break;
 		    case RTA_IFA:
 				if ( sa->sa_family == AF_INET )
-				    entry.ifa = satosin(sa)->sin_addr;
+				    entry.ifa = satosin(*sa)->sin_addr;
 				break;
 		}
 /* from 'rtsock.c' */

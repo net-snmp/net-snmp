@@ -14,6 +14,7 @@
 #define _I_DEFINED_KERNEL
 #endif
 #include <sys/types.h>
+#include <sys/socket.h>
 
 #include <net/if.h>
 #if HAVE_NET_IF_VAR_H
@@ -113,7 +114,7 @@ struct dummy_arptab {
     int			at_flags;
 };
 #define MEDIA_TYPE	struct dummy_arptab
-#define AT_INDEX_FIELD		at_index
+#define AT_INDEX_FIELD		index
 #define AT_PHYSADDR_FIELD	at_enaddr
 #define AT_ADDRESS_FIELD	at_iaddr
 #define AT_FLAGS_FIELD		at_flags
@@ -464,12 +465,15 @@ int Arp_Scan_Reload( mib_table_t t )
 	snmp_log(LOG_ERR,"sysctl size fail\n");
 	return -1;
     }
+    if (size == 0)
+	return -1;
     if ((arpbuf = malloc (size)) == NULL) {
 	snmp_log(LOG_ERR,"out of memory allocating arp table\n");
 	return -1;
     }
     if (sysctl (name, sizeof (name) / sizeof (int), arpbuf, &size, 0, 0) == -1) {
 	snmp_log(LOG_ERR,"sysctl get fail\n");
+	free(arpbuf);
 	return -1;
     }
 

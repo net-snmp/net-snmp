@@ -6,7 +6,9 @@
 #ifndef _MIBGROUP_IF_FIELDS_H
 #define _MIBGROUP_IF_FIELDS_H
 
-
+#ifdef freebsd4		/* XXX Use the same ifdefs as in interfaces.c */
+#define USE_SYSCTL_IFLIST	1
+#endif
 
 	/*
 	 * Definitions for 'USE_SYSCTL_IFLIST'
@@ -32,15 +34,15 @@ struct small_ifaddr
 #define IFENTRY_FIELD_INOCTETS	ifm_data.ifi_ibytes
 #define IFENTRY_FIELD_INPKTS	ifm_data.ifi_ipackets
 #define IFENTRY_FIELD_INMCASTS	ifm_data.ifi_imcasts
-#ifndef freebsd4
 #define IFENTRY_FIELD_INDISCARDS ifm_data.ifi_iqdrops
-#endif
 #define IFENTRY_FIELD_INERRORS	ifm_data.ifi_ierrors
 #define IFENTRY_FIELD_UNKNOWN	ifm_data.ifi_noproto
 #define IFENTRY_FIELD_OUTOCTETS	ifm_data.ifi_obytes
 #define IFENTRY_FIELD_OUTPKTS	ifm_data.ifi_opackets
 #define IFENTRY_FIELD_OUTMCASTS	ifm_data.ifi_omcasts
+#ifndef freebsd4
 #define IFENTRY_FIELD_OUTDISCARDS ifm_data.ifi_oqdrops
+#endif
 #define IFENTRY_FIELD_OUTERRORS	ifm_data.ifi_oerrors
 #undef  IFENTRY_FIELD_QLEN
 #undef  IFENTRY_FIELD_OID
@@ -62,7 +64,7 @@ struct small_ifaddr
 	 * Definitions for 'HAVE_NET_IF_MIB_H'
 	 */
 
-#ifdef 						HAVE_NET_IF_MIB_H
+#if !defined(USE_SYSCTL_IFLIST) && defined(HAVE_NET_IF_MIB_H)
 #define IFENTRY_TYPE	struct if_mibdata
 #define IFADDR_TYPE	struct in_ifaddr
 

@@ -700,11 +700,16 @@ Interface_Scan_Next(short *Index,
 
 #ifdef  USE_SYSCTL_IFLIST
 #define LOAD_INTERFACE_LIST
+#define ROUNDUP(a) \
+        ((a) > 0 ? (1 + (((a) - 1) | (sizeof(long) - 1))) : sizeof(long))
+#define ADVANCE(x, n) (x += ROUNDUP((n)->sa_len))
+
 int Load_Interface_List( mib_table_t t )
 {
     int name[] = {CTL_NET,PF_ROUTE,0,0,NET_RT_IFLIST,0};
     u_char *if_list, *if_list_end, *cp;
     struct if_msghdr *ifm;
+    struct ifa_msghdr *ifam;
     size_t size;
     struct if_entry entry;
     struct sockaddr_dl *sdl;
@@ -726,6 +731,7 @@ int Load_Interface_List( mib_table_t t )
     }
     if (sysctl (name, sizeof(name)/sizeof(int), if_list, &size, 0, 0) == -1) {
 	snmp_log(LOG_ERR,"sysctl get fail\n");
+	free(if_list);
 	return -1;
     }
     if_list_end = if_list + size;
@@ -735,14 +741,13 @@ int Load_Interface_List( mib_table_t t )
 		 * Step through this buffer,
 		 *  adding entries to the table
 		 */
-    for (cp = if_list; cp < if_list_end; cp += ifp->ifm_msglen) {
+    for (cp = if_list; cp < if_list_end; cp += ifm->ifm_msglen) {
 	ifm = (struct if_msghdr *)cp;
 
-	if (ifp->ifm_type == RTM_IFINFO) {
+	if (ifm->ifm_type == RTM_IFINFO) {
 	    entry.ifstat = malloc(sizeof(*ifm));
 	    if ( entry.ifstat == NULL )
 		break;
-	    entry.ifaddr = NULL;	/* XXX - need to add address info */
 
 	    sdl = (struct sockaddr_dl *)&ifm[1];
 	    entry.index  = ifm->ifm_index;
@@ -750,12 +755,40 @@ int Load_Interface_List( mib_table_t t )
 	    entry.name[sdl->sdl_nlen] = 0;
 	    memcpy(entry.ifstat, ifm, sizeof(*ifm));
 
+	    entry.ifaddr = malloc(sizeof(*entry.ifaddr));
+	    entry.ifaddr->sifa_addr.s_addr = 0;		/* XXX */
+	    entry.ifaddr->sifa_netmask.s_addr = 0;	/* XXX */
+	    entry.ifaddr->sifa_broadcast.s_addr = 0;	/* XXX */
+
+	    ifm = (struct if_msghdr *)(cp + ifm->ifm_msglen);
+	    if (ifm->ifm_type == RTM_NEWADDR) {
+		char *cp2, *cp2lim;
+		int i;
+		struct sockaddr_in *sin;
+
+		cp = (char *)ifm;
+		ifam = (struct ifa_msghdr *) ifm;
+		cp2 = (char *)(ifam + 1);
+		cp2lim =  ifam->ifam_msglen + (char *)ifam;
+		for (i = 0; (i < RTAX_MAX) && (cp2 < cp2lim); i++) {
+		    if ((ifam->ifam_addrs & (1 << i)) == 0)
+			continue;
+		    sin = (struct sockaddr_in *)cp2;
+		    if (i == RTAX_IFA)
+			entry.ifaddr->sifa_addr = sin->sin_addr;
+		    if (i == RTAX_BRD)
+			entry.ifaddr->sifa_netmask = sin->sin_addr;
+		    if (i == RTAX_NETMASK)
+			entry.ifaddr->sifa_broadcast = sin->sin_addr;
+		    ADVANCE(cp2, (struct sockaddr *)sin);
+		}
+	    }
 
 		/*
 		 * Add this to the table
 		 */
-	    if ( Add_IF_Entry( t, &entry ) < 0 )
-		break;
+	        if ( Add_IF_Entry( t, &entry ) < 0 )
+		    break;
 	}
 
     }
@@ -790,6 +823,7 @@ int Load_Interface_List( mib_table_t t )
     }
     if (sysctl (name, sizeof(name)/sizeof(int), if_list, &size, 0, 0) == -1) {
 	snmp_log(LOG_ERR,"sysctl get fail\n");
+	free(if_list);
 	return -1;
     }
     if_list_end = if_list + size;
