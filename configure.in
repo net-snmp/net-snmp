@@ -226,37 +226,37 @@ AC_ARG_WITH(out_mib_modules,
 
   Default mib modules compiled into the agent (which can be removed):
   
-    mibII:                 support for the mib-II tree.
-    snmpv3:                support for the snmpv3 mib modules.
-    ucd_snmp:              ucd-snmp specific extensions.
-    agentx:                (see below)
-    notification:          mibs supporting specification of trap destinations.
+    mibII                  support for the mib-II tree.
+    snmpv3                 support for the snmpv3 mib modules.
+    ucd_snmp               ucd-snmp specific extensions.
+    agentx                 (see below)
+    notification           mibs supporting specification of trap destinations.
 
   Optional mib modules that can be built into the agent include:
-    host:                  host resources mib support.
+    host                   host resources mib support.
                              (beta level code for linux, hpux, solaris, bsdi)
-    smux:                  smux support to allow subagents to attach to snmpd.
-    misc/ipfwacc:          accounting rules IP firewall information (linux).
-    ipfwchains/ipfwchains: firewall chains under ipfw for linux.
+    smux                   smux support to allow subagents to attach to snmpd.
+    misc/ipfwacc           accounting rules IP firewall information (linux).
+    ipfwchains/ipfwchains  firewall chains under ipfw for linux.
                            (Download separately from the ucd-snmp ftp site.)
-    ucd-snmp/diskio:       Table of io-devices and how much data they have
+    ucd-snmp/diskio        Table of io-devices and how much data they have
                            read/written.  (only tested on Solaris)
-    target:                Support for the SNMP WGs TARGET-MIB.
+    target                 Support for the SNMP WGs TARGET-MIB.
                            (note: this is required for the notification mib 
 			   above, and hence is usually included).
-    tunnel:                Linux TUNNEL-MIB support (ifTable extension)
+    tunnel                 Linux TUNNEL-MIB support (ifTable extension)
 
   AgentX support:  (warning: beta code)
-    agentx/subagent:       allows the agent to run as either a snmp agent
+    agentx/subagent        allows the agent to run as either a snmp agent
                            or as an agentX sub-agent.
-    agentx/master:         makes the agent run as an agentX master agent
+    agentx/master          makes the agent run as an agentX master agent
                            as well as a normal snmp agent.
-    agentx:                includes both agentx/master and agentx/client.
+    agentx                 includes both agentx/master and agentx/client.
 
   Optional modules for C coders to look at and/or include as extension examples:
   
-    examples/ucdDemoPublic: SNMPv3 interoperability testing mib.
-    examples/example:       example C code extension.])
+    examples/ucdDemoPublic  SNMPv3 interoperability testing mib.
+    examples/example        example C code extension.])
 
 dnl
 dnl Catch common mistakes in configure options
