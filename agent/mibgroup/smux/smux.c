@@ -247,6 +247,9 @@ var_smux(struct variable *vp,
 	valptr = smux_snmp_process(exact, name, length,
 	    var_len, &val_type, rptr->sr_fd);
 
+	if (valptr == NULL)
+		return NULL;
+
 	if ((compare_tree(name, *length, rptr->sr_name,
 	    rptr->sr_name_len)) != 0) {
 		/* the peer has returned a value outside
@@ -944,7 +947,7 @@ smux_snmp_process(int exact,
 
 	/* Interpret reply */
 	if ((ptr = smux_parse(result, objid, len, return_len, return_type)) == NULL) {
-		smux_send_close(sd, SMUXC_PACKETFORMAT);
+		/* either error or parse failed, just return NULL */
 		return NULL;
 	}
 
