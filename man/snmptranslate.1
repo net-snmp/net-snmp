@@ -19,25 +19,20 @@
 .\" ARISING OUT OF OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS
 .\" SOFTWARE.
 .\" ******************************************************************/
-.TH SNMPTRANSLATE 1 "30 May 2000"
+.TH SNMPTRANSLATE 1 "21 Jun 2001"
 .UC 4
 .SH NAME
 snmptranslate - translate SNMP objects into more useful information
 .SH SYNOPSIS
 snmptranslate [-h] 
-.br
 [-V] 
-.br
 [-D <TOKEN[,TOKEN,...]>]
-.br
 [-I <INOPTS>] 
-.br
 [-O <OUTOPTS>] 
-.br
 [-P <MIBOPTS>] 
-.br
 [-T <TRANSOPTS>] 
-.br
+[-m <mibs>]
+[-M <mibdirs>]
 objectID
 .SH DESCRIPTION
 Snmptranslate is an application that translates an SNMP object (SMI value or
@@ -249,4 +244,4 @@ will produce the following dump
               sysUpTime(3) type=8
 .fi
 .SH "SEE ALSO"
-variables(5), RFC 1155, RFC 1156, RFC 1157, SNMP Security Internet Drafts
+snmpcmd(1), variables(5), RFC 2578-2580.
