@@ -166,7 +166,7 @@ netsnmp_arch_interface_container_load(netsnmp_container* container,
         if ((scan_line_to_use == scan_line_2_2) && ((stats - line) < 6)) {
             snmp_log(LOG_ERR,
                      "interface data format error 2 (%d < 6), line ==|%s|\n",
-                     line, stats - line);
+                     stats - line, line);
         }
 
         DEBUGMSGTL(("9:access:ifcontainer", "processing '%s'\n", ifstart));

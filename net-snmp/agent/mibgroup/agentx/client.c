@@ -227,7 +227,7 @@ agentx_register(netsnmp_session * ss, oid start[], size_t startlen,
     }
 
     if (response->errstat != SNMP_ERR_NOERROR) {
-        snmp_log(LOG_ERR,"registering pdu failed: %d!\n", response->errstat);
+        snmp_log(LOG_ERR,"registering pdu failed: %ld!\n", response->errstat);
         snmp_free_pdu(response);
         return 0;
     }
