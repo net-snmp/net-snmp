@@ -11,7 +11,7 @@ the ChangeLog file for a more detailed listing of changes/bug fixes.
 
   New:
     - basic SNMPV2c support.  
-      - Not fully complete in all apps.  Not fully tested (feedback please!)
+      - Not fully tested (feedback please!)
       - all apps require '-v 2c' for v2c and '-v 2p' for the older party code.
     - basic host-resources mib support for linux, and hpux.
     - All environment variables can be set with a preceding '+' for
@@ -20,13 +20,19 @@ the ChangeLog file for a more detailed listing of changes/bug fixes.
     - mib modules have a new macro for callbacks when reading a .conf file.
     - apps command line interfaces have merged together for standardization.
     - the libsnmp library no longer forces printing of errors.
+    - 2 new applications: snmpdelta and snmptable.
+    - the mib parser caches mib directory scans for speed improvements.
+    - snmptrapd is snmp-version multi-lingual.
 
   Ported:
     - irix should be more complete.
-    - aix 4.1.5.
+    - aix 4.1.5 (almost).
     - fixes for hpux 10.20.
     - linux 2.1.x support
     - library and apps supported under 32bit windows systems.
+
+  Fixes:
+    - too numerous to mention.
 
 *3.2*
 
