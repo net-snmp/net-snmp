@@ -1877,7 +1877,8 @@ AC_ARG_WITH(libwrap,
 
     LIBS="$LIBS -lwrap"
 	AC_MSG_CHECKING([for TCP wrappers library -lwrap])
-	AC_TRY_LINK([#include <tcpd.h>
+	AC_TRY_LINK([#include <sys/types.h>
+		     #include <tcpd.h>
 		     int allow_severity = 0;
 		     int deny_severity  = 0;
 		    ],[hosts_access((void *)0)],[
@@ -1892,7 +1893,8 @@ AC_ARG_WITH(libwrap,
 	    AC_CHECK_FUNC(yp_get_default_domain, ,
 		AC_CHECK_LIB(nsl, yp_get_default_domain))
 	    AC_MSG_CHECKING([for TCP wrappers library -lwrap linked with -lnsl])
-	    AC_TRY_LINK([#include <tcpd.h>
+	    AC_TRY_LINK([#include <sys/types.h>
+		         #include <tcpd.h>
 		         int allow_severity = 0;
 	                 int deny_severity  = 0;
 	 		],[hosts_access((void *)0)],
