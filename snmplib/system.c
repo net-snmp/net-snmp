@@ -275,7 +275,7 @@ opendir(const char *filename)
     /*
      * check to see if filename is a directory 
      */
-    if (stat(filename, &sbuf) < 0 || sbuf.st_mode & S_IFDIR == 0) {
+    if ((stat(filename, &sbuf) < 0) || ((sbuf.st_mode & S_IFDIR) == 0)) {
         return NULL;
     }
 
