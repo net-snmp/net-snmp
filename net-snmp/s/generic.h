@@ -46,3 +46,7 @@
 #define RTHASHSIZE_SYMBOL "rthashsize"
 #define RTHOST_SYMBOL "rthost"
 #define RTNET_SYMBOL "rtnet"
+
+/* udp_inpcb list symbol */
+#define INP_NEXT_SYMBOL inp_next
+#define INP_PREV_SYMBOL inp_prev

@@ -515,7 +515,7 @@ void	init_var_route( )
 
 #ifndef solaris2
 
-#if defined(freebsd2) || defined(netbsd1) || defined(bsdi2)
+#if NEED_KLGETSA
 static union {
     struct  sockaddr_in sin;
     u_short data[128];
@@ -550,7 +550,7 @@ var_ipRouteEntry(vp, name, length, exact, var_len, write_method)
     static oid saveName[14], Current[14];
     u_char *cp;
     oid *op;
-#if defined(freebsd2) || defined(netbsd1) || defined(bsdi2)
+#if NEED_KLGETSA
     struct sockaddr_in *sa;
 #endif
 #ifndef linux
@@ -604,7 +604,7 @@ var_ipRouteEntry(vp, name, length, exact, var_len, write_method)
         Route_Scan_Reload();
 #endif
 	for(RtIndex=0; RtIndex < rtsize; RtIndex++) {
-#if defined(freebsd2) || defined(netbsd1) || defined(bsdi2)
+#if NEED_KLGETSA
 	    sa = klgetsa((struct sockaddr_in *) rthead[RtIndex]->rt_dst);
 	    cp = (u_char *) &(sa->sin_addr.s_addr);
 #else
@@ -646,7 +646,7 @@ var_ipRouteEntry(vp, name, length, exact, var_len, write_method)
 
     switch(vp->magic){
 	case IPROUTEDEST:
-#if defined(freebsd2) || defined(netbsd1) || defined(bsdi2)
+#if NEED_KLGETSA
 	    sa = klgetsa((struct sockaddr_in *) rthead[RtIndex]->rt_dst);
 	    return(u_char *) &(sa->sin_addr.s_addr);
 #else
@@ -675,7 +675,7 @@ var_ipRouteEntry(vp, name, length, exact, var_len, write_method)
 	    long_return = -1;
 	    return (u_char *)&long_return;
 	case IPROUTENEXTHOP:
-#if defined(freebsd2) || defined(netbsd1) || defined(bsdi2)
+#if NEED_KLGETSA
 	    sa = klgetsa((struct sockaddr_in *) rthead[RtIndex]->rt_gateway);
 	    return(u_char *) &(sa->sin_addr.s_addr);
 #else
@@ -695,11 +695,11 @@ var_ipRouteEntry(vp, name, length, exact, var_len, write_method)
 	    long_return = 0;
 	    return (u_char *)&long_return;
 	case IPROUTEMASK:
-#if defined(freebsd2) || defined(netbsd1) || defined(bsdi2)
+#if NEED_KLGETSA
 		/* XXX - Almost certainly not right
 		    but I don't have a suitable system to test this on */
 	    long_return = 0;
-#else /*  defined(freebsd2) || defined(netbsd1) || defined(bsdi2) */
+#else /*  NEED_KLGETSA */
 	    if ( ((struct sockaddr_in *) &rthead[RtIndex]->rt_dst)->sin_addr.s_addr == 0 )
 		long_return = 0;	/* Default route */
 	    else {
@@ -714,7 +714,7 @@ var_ipRouteEntry(vp, name, length, exact, var_len, write_method)
                 return (u_char *) rthead[RtIndex]->rt_genmask.sa_data;
 #endif /* linux */
 	    }
-#endif /* defined(freebsd2) || defined(netbsd1) || defined(bsdi2) */
+#endif /* NEED_KLGETSA */
 	    return (u_char *)&long_return;
 	case IPROUTEINFO:
 	    *var_len = nullOidLen;
@@ -919,7 +919,7 @@ struct radix_node *pt;
       }
     }
       
-#if defined(freebsd2) || defined(bsdi2)
+#if CHECK_RT_FLAGS
     if (((rt.rt_flags & RTF_CLONING) != RTF_CLONING)
         && ((rt.rt_flags & RTF_LLINFO) != RTF_LLINFO))
       {
@@ -938,7 +938,7 @@ struct radix_node *pt;
          */
         memcpy( (char *)rthead[rtsize],(char *) &rt, sizeof(RTENTRY));
         rtsize++;
-#if defined(freebsd2) || defined(bsdi2)
+#if CHECK_RT_FLAGS
       }
 #endif
 
@@ -1295,7 +1295,7 @@ static void Route_Scan_Reload __P((void))
 static int qsort_compare(r1,r2)
 RTENTRY **r1, **r2;
 {
-#if defined(freebsd2) || defined(bsdi2) || defined(netbsd1)
+#if NEED_KLGETSA
 	register u_long dst1 = ntohl(klgetsa((struct sockaddr_in *)(*r1)->rt_dst)->sin_addr.s_addr);
 	register u_long dst2 = ntohl(klgetsa((struct sockaddr_in *)(*r2)->rt_dst)->sin_addr.s_addr);
 #else

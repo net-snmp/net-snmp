@@ -491,14 +491,12 @@ int sh_count_procs(procname)
         copy_word(cptr,line);
         if (!strcmp(line,procname)) ret++;
       }
-#ifdef USEERRORMIB
     if (ftell(file) < 2) {
 #ifdef USING_ERRORMIB_MODULE
       seterrorstatus("process list unreasonable short (mem?)",2);
 #endif
       ret = -1;
     }
-#endif
     fclose(file);
     close(fd);
 #ifndef EXCACHETIME
