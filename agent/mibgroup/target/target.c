@@ -87,6 +87,7 @@ get_target_sessions(char *taglist, TargetFilterFunction *filterfunct,
                         }
 
                         if (targaddrs->storageType != ST_PERMANENT &&
+                            param->updateTime &&
                             param->updateTime >=
                             targaddrs->sessionCreationTime) {
                             /* parameters have changed, nuke the old session */
