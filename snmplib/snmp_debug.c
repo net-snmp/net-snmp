@@ -181,6 +181,32 @@ debugmsg_oid(const char *token, const oid *theoid, size_t len)
 }
 
 void
+debugmsg_var(const char *token, struct variable_list *var)
+{
+  u_char *buf = NULL;
+  size_t buf_len = 0, out_len = 0;
+
+  if (var == NULL || token == NULL) {
+    return;
+  }
+
+  if (sprint_realloc_variable(&buf, &buf_len, &out_len, 1, 
+			      var->name, var->name_length, var)) {
+    if (buf != NULL) {
+      debugmsg(token, "%s", buf);
+    }
+  } else {
+    if (buf != NULL) {	
+      debugmsg(token, "%s [TRUNCATED]", buf);
+    }
+  }
+
+  if (buf != NULL) {
+    free(buf);
+  }
+}
+
+void
 debugmsg_oidrange(const char *token, const oid *theoid, size_t len,
 		  size_t var_subid, oid range_ubound)
 {
