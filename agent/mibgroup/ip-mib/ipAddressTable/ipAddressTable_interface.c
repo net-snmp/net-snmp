@@ -980,7 +980,7 @@ _ipAddressTable_check_column(ipAddressTable_rowreq_ctx * rowreq_ctx,
                  "unknown column in _ipAddressTable_check_column\n");
     }
 
-    return SNMP_ERR_NOERROR;
+    return rc;
 }
 
 int
@@ -1281,7 +1281,7 @@ _ipAddressTable_set_column(ipAddressTable_rowreq_ctx * rowreq_ctx,
     }
 
 
-    return SNMP_ERR_NOERROR;
+    return rc;
 }
 
 int
