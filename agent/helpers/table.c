@@ -178,10 +178,14 @@ table_helper_handler(netsnmp_mib_handler *handler,
         return SNMP_ERR_GENERR;
     }
 
-    DEBUGMSGTL(("helper:table", "Got request for handler %s: base oid:",
-                handler->handler_name));
-    DEBUGMSGOID(("helper:table", reginfo->rootoid, reginfo->rootoid_len));
-    DEBUGMSG(("helper:table", "\n"));
+    DEBUGIF("helper:table:req") {
+        DEBUGMSGTL(("helper:table:req",
+                    "Got request for handler %s: base oid:",
+                    handler->handler_name));
+        DEBUGMSGOID(("helper:table:req", reginfo->rootoid,
+                     reginfo->rootoid_len));
+        DEBUGMSG(("helper:table:req", "\n"));
+    }
     
     /*
      * if the agent request info has a state reference, then this is a 
@@ -232,7 +236,7 @@ table_helper_handler(netsnmp_mib_handler *handler,
         DEBUGMSG(("verbose:table", "\n"));
 
         if (request->processed) {
-            DEBUGMSG(("helper:table", "already processed\n"));
+            DEBUGMSG(("verbose:table", "already processed\n"));
             continue;
         }
         netsnmp_assert(request->status == SNMP_ERR_NOERROR);
@@ -252,23 +256,23 @@ table_helper_handler(netsnmp_mib_handler *handler,
         }
 
         if (reqinfo->mode == MODE_SET_RESERVE1) {
-            DEBUGIF("helper:table") {
+            DEBUGIF("helper:table:set") {
                 u_char         *buf = NULL;
                 size_t          buf_len = 0, out_len = 0;
-                DEBUGMSGTL(("helper:table", " SET_REQUEST for OID: "));
-                DEBUGMSGOID(("helper:table", var->name, var->name_length));
+                DEBUGMSGTL(("helper:table:set", " SET_REQUEST for OID: "));
+                DEBUGMSGOID(("helper:table:set", var->name, var->name_length));
                 out_len = 0;
                 if (sprint_realloc_by_type(&buf, &buf_len, &out_len, 1,
                                            var, 0, 0, 0)) {
-                    DEBUGMSG(("helper:table"," type=%d(%02x), value=%s\n",
+                    DEBUGMSG(("helper:table:set"," type=%d(%02x), value=%s\n",
                               var->type, var->type, buf));
                 } else {
                     if (buf != NULL) {
-                        DEBUGMSG(("helper:table",
+                        DEBUGMSG(("helper:table:set",
                                   " type=%d(%02x), value=%s [TRUNCATED]\n",
                                   var->type, var->type, buf));
                     } else {
-                        DEBUGMSG(("helper:table",
+                        DEBUGMSG(("helper:table:set",
                                   " type=%d(%02x), value=[NIL] [TRUNCATED]\n",
                                   var->type, var->type));
                     }
@@ -369,11 +373,12 @@ table_helper_handler(netsnmp_mib_handler *handler,
             /*
              * oid is long enough to contain COLUMN info
              */
-            DEBUGMSGTL(("helper:table", "  have at least a column (%d)\n",
-                           var->name[oid_column_pos]));
+            DEBUGMSGTL(("helper:table:col", "  have at least a column (%d)\n",
+                        var->name[oid_column_pos]));
             if (var->name[oid_column_pos] < tbl_info->min_column) {
-                DEBUGMSGTL(("helper:table", "    but it's less than min (%d)\n",
-                               tbl_info->min_column));
+                DEBUGMSGTL(("helper:table:col",
+                            "    but it's less than min (%d)\n",
+                            tbl_info->min_column));
                 if (reqinfo->mode == MODE_GETNEXT) {
                     /*
                      * fix column, truncate useless column info 
@@ -413,7 +418,7 @@ table_helper_handler(netsnmp_mib_handler *handler,
                 tbl_req_info->colnum =
                     netsnmp_closest_column(var->name[oid_column_pos],
                                            tbl_info->valid_columns);
-                DEBUGMSGTL(("helper:table", "    closest column is %d\n",
+                DEBUGMSGTL(("helper:table:col", "    closest column is %d\n",
                             tbl_req_info->colnum));
                 /*
                  * xxx-rks: document why the continue...
@@ -421,7 +426,7 @@ table_helper_handler(netsnmp_mib_handler *handler,
                 if (tbl_req_info->colnum == 0)
                     continue;
                 if (tbl_req_info->colnum != var->name[oid_column_pos]) {
-                    DEBUGMSGTL(("helper:table",
+                    DEBUGMSGTL(("helper:table:col",
                                 "    which doesn't match req %d - truncating index info\n",
                                    var->name[oid_column_pos]));
                     /*
@@ -537,15 +542,16 @@ table_helper_handler(netsnmp_mib_handler *handler,
                 }
             }
         }                       /** for loop */
-        DEBUGMSGTL(("helper:table", "  found %d indexes\n",
-                    tbl_req_info->number_indexes));
 
-        DEBUGIF("helper:table") {
+        DEBUGIF("helper:table:results") {
+            DEBUGMSGTL(("helper:table:results", "  found %d indexes\n",
+                        tbl_req_info->number_indexes));
             if (!cleaned_up) {
                 unsigned int    count;
                 u_char         *buf = NULL;
                 size_t          buf_len = 0, out_len = 0;
-                DEBUGMSGTL(("helper:table", "  column: %d, indexes: %d",
+                DEBUGMSGTL(("helper:table:results",
+                            "  column: %d, indexes: %d",
                             tbl_req_info->colnum,
                             tbl_req_info->number_indexes));
                 for (vb = tbl_req_info->indexes, count = 0;
@@ -554,16 +560,16 @@ table_helper_handler(netsnmp_mib_handler *handler,
                     out_len = 0;
                     if (sprint_realloc_by_type(&buf, &buf_len, &out_len, 1,
                                                vb, 0, 0, 0)) {
-                        DEBUGMSG(("helper:table",
+                        DEBUGMSG(("helper:table:results",
                                   "   index: type=%d(%02x), value=%s",
                                   vb->type, vb->type, buf));
                     } else {
                         if (buf != NULL) {
-                            DEBUGMSG(("helper:table",
+                            DEBUGMSG(("helper:table:results",
                                       "   index: type=%d(%02x), value=%s [TRUNCATED]",
                                       vb->type, vb->type, buf));
                         } else {
-                            DEBUGMSG(("helper:table",
+                            DEBUGMSG(("helper:table:results",
                                       "   index: type=%d(%02x), value=[NIL] [TRUNCATED]",
                                       vb->type, vb->type));
                         }
@@ -572,7 +578,7 @@ table_helper_handler(netsnmp_mib_handler *handler,
                 if (buf != NULL) {
                     free(buf);
                 }
-                DEBUGMSG(("helper:table", "\n"));
+                DEBUGMSG(("helper:table:results", "\n"));
             }
         }
 
@@ -670,6 +676,7 @@ sparse_table_helper_handler(netsnmp_mib_handler *handler,
                  * get next skipped this value for this column, we
                  * need to keep searching forward 
                  */
+                DEBUGMSGT(("sparse", "retry for NOSUCHINSTANCE\n"));
                 request->requestvb->type = ASN_PRIV_RETRY;
             }
             if (request->requestvb->type == SNMP_NOSUCHOBJECT ||
@@ -678,6 +685,7 @@ sparse_table_helper_handler(netsnmp_mib_handler *handler,
                  * get next has completely finished with this column,
                  * so we need to try with the next column (if any)
                  */
+                DEBUGMSGT(("sparse", "retry for NOSUCHOBJECT\n"));
                 table_info = netsnmp_extract_table_info(request);
                 table_info->colnum = netsnmp_table_next_column(table_info);
                 if (0 != table_info->colnum) {
