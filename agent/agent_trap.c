@@ -189,19 +189,26 @@ int create_trap_session (char *sink, u_short sinkport,
 				int version, int pdutype)
 {
     struct snmp_session	 session, *sesp;
+    char *peername = NULL;
+    
+    if ((peername = malloc(strlen(sink) + 4 + 32)) == NULL) {
+      return 0;
+    } else {
+      snprintf(peername, strlen(sink) + 4 + 32, "udp:%s:%hu", sink, sinkport);
+    }
 
-    memset (&session, 0, sizeof (struct snmp_session));
-    session.peername = sink;
+    memset(&session, 0, sizeof (struct snmp_session));
+    session.peername = peername;
     session.version = version;
     if (com) {
         session.community = (u_char *)com;
         session.community_len = strlen (com);
     }
-    session.remote_port = sinkport;
-    sesp = snmp_open (&session);
+    sesp = snmp_open(&session);
+    free(peername);
 
     if (sesp) {
-	return( add_trap_session( sesp, pdutype, (pdutype==SNMP_MSG_INFORM), version ));
+	return add_trap_session(sesp, pdutype, (pdutype==SNMP_MSG_INFORM), version);
     }
 
     /* diagnose snmp_open errors with the input struct snmp_session pointer */
