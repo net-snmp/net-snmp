@@ -275,11 +275,9 @@ event_input(struct variable_list *vp)
     
 }
 
-void do_external(char *cmd,
-		 struct hostent *host,
-		 struct snmp_pdu *pdu)
+void send_handler_data(FILE *file, struct hostent *host, 
+		       struct snmp_pdu *pdu)
 {
-#ifndef WIN32
   struct variable_list tmpvar, *vars;
   struct sockaddr_in *pduIp = (struct sockaddr_in *)&(pdu->address);
   static oid trapoids[] = {1,3,6,1,6,3,1,1,5,0};
@@ -290,16 +288,76 @@ void do_external(char *cmd,
   static oid snmptrapcom[] = {1,3,6,1,6,3,18,1,4,0};
   oid enttrapoid[MAX_OID_LEN];
   int enttraplen = pdu->enterprise_length;
-  int fd[2];
-  int pid, result;
+  char varbuf[2048];
+
+  fprintf(file,"%s\n%s\n",
+      host ? host->h_name : inet_ntoa(pduIp->sin_addr),
+      inet_ntoa(pduIp->sin_addr));
+  if (pdu->command == SNMP_MSG_TRAP){
+  /* convert a v1 trap to a v2 variable binding list:
+      The uptime and trapOID go first in the list. */
+      tmpvar.val.integer = (long *) &pdu->time;
+      tmpvar.val_len = sizeof(pdu->time);
+      tmpvar.type = ASN_TIMETICKS;
+      sprint_variable(varbuf, snmpsysuptime, sizeof(snmpsysuptime)/sizeof(snmpsysuptime[0]), &tmpvar);
+      fprintf(file,"%s\n",varbuf);
+      tmpvar.type = ASN_OBJECT_ID;
+      if (pdu->trap_type == SNMP_TRAP_ENTERPRISESPECIFIC) {
+	  memcpy(enttrapoid, pdu->enterprise, sizeof(oid)*enttraplen);
+	  if (enttrapoid[enttraplen-1] != 0) enttrapoid[enttraplen++] = 0;
+	  enttrapoid[enttraplen++] = pdu->specific_type;
+	  tmpvar.val.objid = enttrapoid;
+	  tmpvar.val_len = enttraplen*sizeof(oid);
+      }
+      else {
+	  trapoids[9] = pdu->trap_type+1;
+	  tmpvar.val.objid = trapoids;
+	  tmpvar.val_len = 10*sizeof(oid);
+      }
+      sprint_variable(varbuf, snmptrapoid, sizeof(snmptrapoid)/sizeof(snmptrapoid[0]), &tmpvar);
+      fprintf(file,"%s\n",varbuf);
+  }
+  /* do the variables in the pdu */
+  for(vars = pdu->variables; vars; vars = vars->next_variable) {
+      sprint_variable(varbuf, vars->name, vars->name_length, vars);
+      fprintf(file,"%s\n",varbuf);
+  }
+  if (pdu->command == SNMP_MSG_TRAP){
+  /* convert a v1 trap to a v2 variable binding list:
+      The enterprise goes last. */
+      tmpvar.val.string = (u_char *)&((struct sockaddr_in*)&pdu->agent_addr)->sin_addr.s_addr;
+      tmpvar.val_len = 4;
+      tmpvar.type = ASN_IPADDRESS;
+      sprint_variable(varbuf, snmptrapaddr, sizeof(snmptrapaddr)/sizeof(snmptrapaddr[0]), &tmpvar);
+      fprintf(file,"%s\n",varbuf);
+      tmpvar.val.string = pdu->community;
+      tmpvar.val_len = pdu->community_len;
+      tmpvar.type = ASN_OCTET_STR;
+      sprint_variable(varbuf, snmptrapcom, sizeof(snmptrapcom)/sizeof(snmptrapcom[0]), &tmpvar);
+      fprintf(file,"%s\n",varbuf);
+      tmpvar.val.objid = pdu->enterprise;
+      tmpvar.val_len = pdu->enterprise_length*sizeof(oid);
+      tmpvar.type = ASN_OBJECT_ID;
+      sprint_variable(varbuf, snmptrapent, sizeof(snmptrapent)/sizeof(snmptrapent[0]), &tmpvar);
+      fprintf(file,"%s\n",varbuf);
+  }
+}
+
+void do_external(char *cmd,
+		 struct hostent *host,
+		 struct snmp_pdu *pdu)
+{
   FILE *file;
-  char varbuf[SPRINT_MAX_LEN];
-  int oldquick;
+  int oldquick, result;
   
   DEBUGMSGTL(("snmptrapd", "Running: %s\n", cmd));
   oldquick = snmp_get_quick_print();
   snmp_set_quick_print(1);
   if (cmd) {
+#ifndef WIN32
+    int fd[2];
+    int pid;
+
     if (pipe(fd)) {
       snmp_log_perror("pipe");
     }
@@ -315,57 +373,7 @@ void do_external(char *cmd,
       exit(0);
     } else if (pid > 0) {
       file = fdopen(fd[1],"w");
-      fprintf(file,"%s\n%s\n",
-              host ? host->h_name : inet_ntoa(pduIp->sin_addr),
-              inet_ntoa(pduIp->sin_addr));
-      if (pdu->command == SNMP_MSG_TRAP){
-        /* convert a v1 trap to a v2 variable binding list:
-           The uptime and trapOID go first in the list. */
-        tmpvar.val.integer = (long *) &pdu->time;
-        tmpvar.val_len = sizeof(pdu->time);
-        tmpvar.type = ASN_TIMETICKS;
-        sprint_variable(varbuf, snmpsysuptime, sizeof(snmpsysuptime)/sizeof(snmpsysuptime[0]), &tmpvar);
-        fprintf(file,"%s\n",varbuf);
-        tmpvar.type = ASN_OBJECT_ID;
-	if (pdu->trap_type == SNMP_TRAP_ENTERPRISESPECIFIC) {
-	  memcpy(enttrapoid, pdu->enterprise, sizeof(oid)*enttraplen);
-	  if (enttrapoid[enttraplen-1] != 0) enttrapoid[enttraplen++] = 0;
-	  enttrapoid[enttraplen++] = pdu->specific_type;
-	  tmpvar.val.objid = enttrapoid;
-	  tmpvar.val_len = enttraplen*sizeof(oid);
-	}
-	else {
-	  trapoids[9] = pdu->trap_type+1;
-	  tmpvar.val.objid = trapoids;
-	  tmpvar.val_len = 10*sizeof(oid);
-	}
-        sprint_variable(varbuf, snmptrapoid, sizeof(snmptrapoid)/sizeof(snmptrapoid[0]), &tmpvar);
-        fprintf(file,"%s\n",varbuf);
-      }
-      /* do the variables in the pdu */
-      for(vars = pdu->variables; vars; vars = vars->next_variable) {
-        sprint_variable(varbuf, vars->name, vars->name_length, vars);
-        fprintf(file,"%s\n",varbuf);
-      }
-      if (pdu->command == SNMP_MSG_TRAP){
-        /* convert a v1 trap to a v2 variable binding list:
-           The enterprise goes last. */
-        tmpvar.val.string = (u_char *)&((struct sockaddr_in*)&pdu->agent_addr)->sin_addr.s_addr;
-        tmpvar.val_len = 4;
-	tmpvar.type = ASN_IPADDRESS;
-        sprint_variable(varbuf, snmptrapaddr, sizeof(snmptrapaddr)/sizeof(snmptrapaddr[0]), &tmpvar);
-        fprintf(file,"%s\n",varbuf);
-        tmpvar.val.string = pdu->community;
-        tmpvar.val_len = pdu->community_len;
-	tmpvar.type = ASN_OCTET_STR;
-        sprint_variable(varbuf, snmptrapcom, sizeof(snmptrapcom)/sizeof(snmptrapcom[0]), &tmpvar);
-        fprintf(file,"%s\n",varbuf);
-        tmpvar.val.objid = pdu->enterprise;
-        tmpvar.val_len = pdu->enterprise_length*sizeof(oid);
-	tmpvar.type = ASN_OBJECT_ID;
-        sprint_variable(varbuf, snmptrapent, sizeof(snmptrapent)/sizeof(snmptrapent[0]), &tmpvar);
-        fprintf(file,"%s\n",varbuf);
-      }
+      send_handler_data(file, host, pdu);
       fclose(file);
       close(fd[0]);
       close(fd[1]);
@@ -375,9 +383,29 @@ void do_external(char *cmd,
     } else {
       snmp_log_perror("fork");
     }
+#else
+    char command_buf[128];
+    char file_buf[L_tmpnam];
+
+    tmpnam(file_buf);
+    file = fopen(file_buf, "w");
+    if (!file) {
+	fprintf(stderr, "fopen: %s: %s\n", file_buf, strerror(errno));
+    }
+    else {
+        send_handler_data(file, host, pdu);
+        fclose(file);
+	sprintf(command_buf, "%s < %s", cmd, file_buf);
+        result = system(command_buf);
+	if (result == -1)
+	    fprintf(stderr, "system: %s: %s\n", command_buf, strerror(errno));
+	else if (result)
+	    fprintf(stderr, "system: %s: %d\n", command_buf, result);
+        remove(file_buf);
+    }
+#endif	/* WIN32 */
   }
   snmp_set_quick_print(oldquick);
-#endif	/* WIN32 */
 }
 
 int snmp_input(int op,
