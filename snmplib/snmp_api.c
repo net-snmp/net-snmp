@@ -2787,6 +2787,7 @@ snmpv3_parse(
   u_char	 tmp_buf[SNMP_MAX_MSG_SIZE];
   size_t	 tmp_buf_len;
   u_char	 pdu_buf[SNMP_MAX_MSG_SIZE];
+  u_char         *mallocbuf = NULL;
   size_t	 pdu_buf_len = SNMP_MAX_MSG_SIZE;
   u_char	*sec_params;
   u_char	*msg_data;
@@ -2927,8 +2928,15 @@ snmpv3_parse(
   {
       return SNMPERR_MALLOC;
   }
-  memset(pdu_buf, 0, pdu_buf_len);
-  cp = pdu_buf;
+  if (pdu_buf_len < msg_len && pdu->securityLevel == SNMP_SEC_LEVEL_AUTHPRIV) {
+      /* space needed is larger than we have in the default buffer */
+      mallocbuf = (u_char *) calloc(1, msg_len);
+      pdu_buf_len = msg_len;
+      cp = mallocbuf;
+  } else {
+      memset(pdu_buf, 0, pdu_buf_len);
+      cp = pdu_buf;
+  }
 
   DEBUGDUMPSECTION("recv", "USM msgSecurityParameters");
   ret_val = usm_process_in_msg(SNMP_VERSION_3, msg_max_size,
@@ -2952,6 +2960,8 @@ snmpv3_parse(
         DEBUGINDENTADD(-8);
     } else
         DEBUGINDENTADD(-4);
+    if (mallocbuf)
+        free(mallocbuf);
     return ret_val;
   }
   
@@ -2962,6 +2972,8 @@ snmpv3_parse(
   if (data == NULL) {
     snmp_increment_statistic(STAT_SNMPINASNPARSEERRS);
     DEBUGINDENTADD(-4);
+    if (mallocbuf)
+        free(mallocbuf);
     return SNMPERR_ASN_PARSE_ERR;
   }
 
@@ -2982,9 +2994,13 @@ snmpv3_parse(
   if (ret != SNMPERR_SUCCESS) {
     ERROR_MSG("error parsing PDU");
     snmp_increment_statistic(STAT_SNMPINASNPARSEERRS);
+    if (mallocbuf)
+        free(mallocbuf);
     return SNMPERR_ASN_PARSE_ERR;
   }
 
+  if (mallocbuf)
+      free(mallocbuf);
   return SNMPERR_SUCCESS;
 }  /* end snmpv3_parse() */
 
