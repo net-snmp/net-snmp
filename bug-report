@@ -42,13 +42,9 @@ echo ""
 #
 #   Ask for subject and 'From:' field
 #
-subject="UCD-SNMP version $VersionInfo bug report"
-echo $n "Subject [$subject]: $c"
+echo $n "Subject [none]: $c"
 read answer
-if [ "$answer" != "" ]
-then
-    subject=$answer
-fi
+subject="$VersionInfo: $answer"
 
 # attempt to figure out domain name.
 domain=`grep "^domain" /etc/resolv.conf | awk '{print $2}'`;
