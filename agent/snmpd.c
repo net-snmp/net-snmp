@@ -906,7 +906,7 @@ snmp_read_packet(sd)
     snmp_inpkts++;
 #endif
     if (snmp_dump_packet){
-	printf("\nrecieved %d bytes from %s:\n", length,
+	printf("\nreceived %d bytes from %s:\n", length,
 	       inet_ntoa(from.sin_addr));
 	xdump(packet, length, "");
 	printf("\n");
@@ -920,7 +920,7 @@ snmp_read_packet(sd)
 		break;
 	}
 	if (count >= ADDRCACHE){
-	    printf("%s Recieved SNMP packet(s) from %s\n",
+	    printf("%s Received SNMP packet(s) from %s\n",
 		   sprintf_stamp(NULL), inet_ntoa(from.sin_addr));
 	    for(count = 0; count < ADDRCACHE; count++){
 		if (addrCache[count].status == UNUSED){
