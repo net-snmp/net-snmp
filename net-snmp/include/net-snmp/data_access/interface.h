@@ -70,22 +70,22 @@ typedef struct netsnmp_interface_stats_s {
      *
      */
    /** input */
-    struct counter64 if_ibytes;
-    struct counter64 if_iucast;
-    struct counter64 if_imcast;
-    struct counter64 if_ibcast;
-    unsigned int     if_ierrors;
-    unsigned int     if_idiscards;
-    unsigned int     if_iunknown_protos;
+    struct counter64 ibytes;
+    struct counter64 iucast;
+    struct counter64 imcast;
+    struct counter64 ibcast;
+    unsigned int     ierrors;
+    unsigned int     idiscards;
+    unsigned int     iunknown_protos;
    /** output */
-    struct counter64 if_obytes;
-    struct counter64 if_oucast;
-    struct counter64 if_omcast;
-    struct counter64 if_obcast;
-    unsigned int     if_oerrors;
-    unsigned int     if_odiscards;
-    unsigned int     if_oqlen;
-    unsigned int     if_collisions;
+    struct counter64 obytes;
+    struct counter64 oucast;
+    struct counter64 omcast;
+    struct counter64 obcast;
+    unsigned int     oerrors;
+    unsigned int     odiscards;
+    unsigned int     oqlen;
+    unsigned int     collisions;
 } netsnmp_interface_stats;
 
 typedef struct netsnmp_interface_entry_s {
@@ -126,25 +126,53 @@ typedef struct netsnmp_interface_entry_s {
     * statistics
     */
    netsnmp_interface_stats stats;
+   netsnmp_interface_stats *old_stats;
 
 } netsnmp_interface_entry;
 
 /** I learned this nasty trick in kernel header files */
-#define if_ibytes stats.if_ibytes
-#define if_iucast stats.if_iucast
-#define if_imcast stats.if_imcast
-#define if_ibcast stats.if_ibcast
-#define if_ierrors stats.if_ierrors
-#define if_idiscards stats.if_idiscards
-#define if_iunknown_protos stats.if_iunknown_protos
-#define if_obytes stats.if_obytes
-#define if_oucast stats.if_oucast
-#define if_omcast stats.if_omcast
-#define if_obcast stats.if_obcast
-#define if_oerrors stats.if_oerrors
-#define if_odiscards stats.if_odiscards
-#define if_oqlen stats.if_oqlen
-#define if_collisions stats.if_collisions
+#define if_ibytes stats.ibytes
+#define if_iucast stats.iucast
+#define if_imcast stats.imcast
+#define if_ibcast stats.ibcast
+#define if_ierrors stats.ierrors
+#define if_idiscards stats.idiscards
+#define if_iunknown_protos stats.iunknown_protos
+#define if_obytes stats.obytes
+#define if_oucast stats.oucast
+#define if_omcast stats.omcast
+#define if_obcast stats.obcast
+#define if_oerrors stats.oerrors
+#define if_odiscards stats.odiscards
+#define if_oqlen stats.oqlen
+#define if_collisions stats.collisions
+
+#define old_ibytes old_stats->ibytes
+#define old_iucast old_stats->iucast
+#define old_imcast old_stats->imcast
+#define old_ibcast old_stats->ibcast
+#define old_ierrors old_stats->ierrors
+#define old_idiscards old_stats->idiscards
+#define old_iunknown_protos old_stats->iunknown_protos
+#define old_obytes old_stats->obytes
+#define old_oucast old_stats->oucast
+#define old_omcast old_stats->omcast
+#define old_obcast old_stats->obcast
+#define old_oerrors old_stats->oerrors
+#define old_odiscards old_stats->odiscards
+#define old_oqlen old_stats->oqlen
+#define old_collisions old_stats->collisions
+
+/*
+ * conf file overrides
+ */
+typedef struct _conf_if_list {
+    char           *name;
+    int             type;
+    u_long          speed;
+    struct _conf_if_list *next;
+} netsnmp_conf_if_list;
+
 
 /**---------------------------------------------------------------------*/
 /*
@@ -203,6 +231,10 @@ int netsnmp_access_interface_entry_copy(netsnmp_interface_entry * lhs,
 
 void netsnmp_access_interface_entry_guess_speed(netsnmp_interface_entry *);
 void netsnmp_access_interface_entry_overrides(netsnmp_interface_entry *);
+
+
+netsnmp_conf_if_list *
+netsnmp_access_interface_entry_overrides_get(const char * name);
 
 /**---------------------------------------------------------------------*/
 
