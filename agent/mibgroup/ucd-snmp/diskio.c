@@ -69,11 +69,16 @@ static int ps_numdisks;			/* number of disks in system, may change while running
 #endif                          /* bsdi */
 
 #if defined (freebsd4) || defined(freebsd5)
+#include <sys/param.h>
+#if __FreeBSD_version >= 500101
+#include <sys/resource.h>       /* for CPUSTATES in devstat.h */
+#else
 #include <sys/dkstat.h>
+#endif
 #include <devstat.h>
 #endif                          /* freebsd */
 
-#if HAVE_DEVSTAT_GETDEVS
+#if defined(freebsd5) && __FreeBSD_version >= 500107
   #define GETDEVS(x) devstat_getdevs(NULL, (x))
 #else
   #define GETDEVS(x) getdevs((x))
@@ -470,28 +475,28 @@ var_diskio(struct variable * vp,
         *var_len = strlen(stat->dinfo->devices[indx].device_name);
         return (u_char *) stat->dinfo->devices[indx].device_name;
     case DISKIO_NREAD:
-#if defined(freebsd5)
+#if defined(freebsd5) && __FreeBSD_version >= 500107
         long_ret = (signed long) stat->dinfo->devices[indx].bytes[DEVSTAT_READ];
 #else
         long_ret = (signed long) stat->dinfo->devices[indx].bytes_read;
 #endif
         return (u_char *) & long_ret;
     case DISKIO_NWRITTEN:
-#if defined(freebsd5)
+#if defined(freebsd5) && __FreeBSD_version >= 500107
         long_ret = (signed long) stat->dinfo->devices[indx].bytes[DEVSTAT_WRITE];
 #else
         long_ret = (signed long) stat->dinfo->devices[indx].bytes_written;
 #endif
         return (u_char *) & long_ret;
     case DISKIO_READS:
-#if defined(freebsd5)
+#if defined(freebsd5) && __FreeBSD_version >= 500107
         long_ret = (signed long) stat->dinfo->devices[indx].operations[DEVSTAT_READ];
 #else
         long_ret = (signed long) stat->dinfo->devices[indx].num_reads;
 #endif
         return (u_char *) & long_ret;
     case DISKIO_WRITES:
-#if defined(freebsd5)
+#if defined(freebsd5) && __FreeBSD_version >= 500107
         long_ret = (signed long) stat->dinfo->devices[indx].operations[DEVSTAT_WRITE];
 #else
         long_ret = (signed long) stat->dinfo->devices[indx].num_writes;
