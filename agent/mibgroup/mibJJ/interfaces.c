@@ -1059,6 +1059,8 @@ int Load_Interface_List( mib_table_t t )
 	strcpy (ifrq.ifr_name, ifname);
 	if (ioctl(fd, SIOCGIFHWADDR, &ifrq) == 0) {
 	  memcpy (nnew->if_hwaddr, ifrq.ifr_hwaddr.sa_data, 6);
+
+#ifdef ARPHRD_LOOPBACK
 	  switch (ifrq.ifr_hwaddr.sa_family) {
 	  case ARPHRD_TUNNEL:
 	  case ARPHRD_TUNNEL6:
@@ -1076,6 +1078,7 @@ int Load_Interface_List( mib_table_t t )
 	      nnew->if_type = 24; break; /* softwareLoopback */
           /* XXX: more if_arp.h:ARPHDR_xxx to IANAifType mappings... */
 	  }
+#endif
 	}
 	    
 	strcpy (ifrq.ifr_name, ifname);
