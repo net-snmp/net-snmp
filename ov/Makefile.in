@@ -1,15 +1,3 @@
-SHELL = /bin/sh
-srcdir = @srcdir@
-VPATH = @srcdir@
-@SET_MAKE@
-
-libdir = @libdir@
-snmplibdir = $(datadir)/snmp
-
-SED = @SED@
-
-INSTALL = @INSTALL@
-
 TARG = oid_to_type oid_to_sym
 
 all: $(TARG)
