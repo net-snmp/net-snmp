@@ -4736,13 +4736,16 @@ snmp_varlist_add_variable(struct variable_list **varlist,
       case ASN_TIMETICKS:
       case ASN_IPADDRESS:
       case ASN_COUNTER:
-        if (vars->val_len == sizeof(int)) {
-            val_int = (int*) value;
-            *(vars->val.integer) = (long) *val_int;
-        } else {
-            val_long = (long*) value;
-            *(vars->val.integer) = (long) *val_long;
+        if (value) {
+            if (vars->val_len == sizeof(int)) {
+                val_int = (int*) value;
+                *(vars->val.integer) = (long) *val_int;
+            } else {
+                val_long = (long*) value;
+                *(vars->val.integer) = (long) *val_long;
+            }
         }
+        vars->val_len = sizeof(long);
         break;
 
       case ASN_OBJECT_ID:
