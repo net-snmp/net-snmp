@@ -183,18 +183,21 @@ netsnmp_row_merge_helper_handler(netsnmp_mib_handler *handler,
      * Count the requests, and set up an array to keep
      *  track of the original order.
      */
-    for (count = 0, request = requests; request; request = request->next) 
+    for (count = 0, request = requests; request; request = request->next) {
+        DEBUGIF("helper:row_merge") {
+            DEBUGMSGTL(("helper:row_merge", "  got varbind: "));
+            DEBUGMSGOID(("helper:row_merge", request->requestvb->name,
+                         request->requestvb->name_length));
+            DEBUGMSG(("helper:row_merge", "\n"));
+        }
         count++;
+    }
 
     /*
      * Optimization: skip all this if there is just one request
      */
     if(count == 1) {
         rm_status->count = count;
-        DEBUGMSGTL(("helper:row_merge", "  one varbind: "));
-        DEBUGMSGOID(("helper:row_merge", requests->requestvb->name,
-                     requests->requestvb->name_length));
-        DEBUGMSG(("helper:row_merge", "\n"));
         return netsnmp_call_next_handler(handler, reginfo, reqinfo, requests);
     }
 
@@ -208,15 +211,23 @@ netsnmp_row_merge_helper_handler(netsnmp_mib_handler *handler,
      * if the count changed, re-do everything
      */
     if ((0 != rm_status->count) && (rm_status->count != count)) {
-        netsnmp_assert((NULL != rm_status->saved_requests) &&
-                       (NULL != rm_status->saved_status));
+        /*
+         * ok, i know next/bulk can cause this condition. Probably
+         * GET, too. need to rething this mode counting. maybe
+         * add the mode to the rm_status structure? xxx-rks
+         */
+        if ((reqinfo->mode != MODE_GETNEXT) &&
+            (reqinfo->mode != MODE_GETBULK)) {
+            netsnmp_assert((NULL != rm_status->saved_requests) &&
+                           (NULL != rm_status->saved_status));
+        }
         DEBUGMSGTL(("helper:row_merge", "count changed! do over...\n"));
         /*
          * if it got bigger, we need to reallocate memory
          */
         if (count > rm_status->count) {
-            free(rm_status->saved_requests);
-            free(rm_status->saved_status);
+            SNMP_FREE(rm_status->saved_requests);
+            SNMP_FREE(rm_status->saved_status);
         }
         rm_status->count = 0;
         rm_status->rows = 0;
