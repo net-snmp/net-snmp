@@ -707,6 +707,178 @@ string_append_int (char *s,
     return;
 }
 
+struct internal_mib_table {
+    int		max_size;		/* Size of the current data table */
+    int		next_index;		/* Index of the next free entry */
+    int		current_index;		/* Index of the 'current' entry */
+    int		cache_timeout;
+    marker_t	cache_marker;
+    RELOAD*	reload;			/* Routine to read in the data */
+    COMPARE*	compare;		/* Routine to compare two entries */
+    int		data_size;		/* Size of an individual entry */
+    void*	data;			/* The table itself */
+};
+
+mib_table_t
+Initialise_Table( int size, int timeout, RELOAD* reload, COMPARE* compare)
+{
+    struct internal_mib_table *t;
+
+    t = (struct internal_mib_table*)malloc(sizeof(struct internal_mib_table));
+    if ( t == NULL )
+	return NULL;
+
+    t->max_size		= 0;
+    t->next_index	= 1;	/* Don't use index 0 */
+    t->current_index	= 1;
+    t->cache_timeout	= timeout;
+    t->cache_marker	= NULL;
+    t->reload		= reload;
+    t->compare		= compare;
+    t->data_size	= size;
+    t->data		= NULL;
+ 
+    return (mib_table_t) t ;
+}
+
+#define TABLE_ADD( x, y )	((void*)((char*)(x) + y))
+#define TABLE_INDEX(t, i)	(TABLE_ADD(t->data, i * t->data_size))
+#define TABLE_START(t)		(TABLE_INDEX(t, 1))
+#define TABLE_NEXT(t)		(TABLE_INDEX(t, t->next_index))
+#define TABLE_CURRENT(t)	(TABLE_INDEX(t, t->current_index))
+
+int check_and_reload_table( struct internal_mib_table *table )
+{
+		/*
+		 * If the saved data is fairly recent,
+		 *    we don't need to reload it
+		 */
+    if ( table->cache_marker &&
+	 !(atime_ready( table->cache_marker, table->cache_timeout*1000)))
+		return 1;
+
+
+		/*
+		 * Call the routine provided to read in the data
+		 *
+		 * N.B:  Update the cache marker *before* calling
+		 *   this routine, to avoid problems with recursion
+		 */
+	if ( !table->cache_marker )
+	    table->cache_marker = atime_newMarker();
+	else
+	    atime_setMarker( table->cache_marker );
+
+	table->next_index = 1;
+	if ( table->reload( (mib_table_t)table ) < 0 ) {
+	    free( table->cache_marker );
+	    table->cache_marker = NULL;
+	    return 0;
+	}
+	table->current_index = 1;
+	if ( table->compare != NULL )		/* Sort the table */
+	    qsort( TABLE_START(table), table->next_index,
+		   table->data_size, table->compare );
+	return 1;
+}
+
+int
+Search_Table( mib_table_t t, void* entry, int exact)
+{
+    struct internal_mib_table *table = (struct internal_mib_table *)t;
+    void *entry2;
+    int   res;
+
+    if (!check_and_reload_table( table ))
+	return -1;
+
+    if ( table->compare == NULL ) {
+		/* XXX - not sure this is right ? */
+	memcpy(entry, table->data, table->data_size);
+	return 0;
+    }
+
+    if ( table->next_index == table->current_index )
+	table->current_index = 1;
+
+    entry2 = TABLE_CURRENT(table);
+    res = table->compare( entry, entry2 );
+    if (( res < 0 ) && (table->current_index != 1)) {
+	table->current_index = 1;
+	entry2 = TABLE_CURRENT(table);
+	res = table->compare( entry, entry2 );
+    }
+
+    while ( res > 0 ) {
+	table->current_index++;
+	if ( table->next_index == table->current_index )
+	    return -1;
+	entry2 = TABLE_CURRENT(table);
+	res = table->compare( entry, entry2 );
+    }
+
+    if ( exact && res != 0 )
+	return -1;
+
+    if ( !exact && res == 0 ) {
+	table->current_index++;
+	if ( table->next_index == table->current_index )
+	    return -1;
+	entry2 = TABLE_CURRENT(table);
+    }
+    memcpy(entry, entry2, table->data_size);
+    return 0;
+}
+
+int   Add_Entry( mib_table_t t, void* entry)
+{
+    struct internal_mib_table *table = (struct internal_mib_table *)t;
+    int   new_max;
+    void *new_data;	/* Used for
+			 *	a) extending the data table
+			 *	b) the next entry to use
+			 */
+
+    if ( table->max_size <= table->next_index ) {
+		/*
+		 * Table is full, so extend it to double the size
+		 */
+	new_max = 2*table->max_size;
+	if ( new_max == 0 )
+	    new_max = 10;	/* Start with 10 entries */
+
+	new_data = (void*)malloc( new_max * table->data_size );
+	if ( new_data == NULL )
+	    return -1;
+
+	if ( table->data ) {
+	    memcpy(new_data, table->data, table->max_size * table->data_size);
+	    free( table->data );
+	}
+	table->data = new_data;
+	table->max_size = new_max;
+    }
+
+	/*
+	 * Insert the new entry into the data array
+	 */
+    new_data = TABLE_NEXT(table);
+    memcpy( new_data, entry, table->data_size );
+    table->next_index++;
+    return 0;
+}
+
+void *Retrieve_Table_Data( mib_table_t t, int* max_idx)
+{
+    struct internal_mib_table *table = (struct internal_mib_table *)t;
+    void *entry2;
+    int   res;
+
+    if (!check_and_reload_table( table ))
+	return NULL;
+    *max_idx = table->next_index-1;
+    return table->data;
+}
 
 	/*
 	 * Time-related utility functions
@@ -730,7 +902,7 @@ int
 marker_tticks( marker_t pm )
 {
     int res;
-    marker_t now = atime_newMarker;
+    marker_t now = atime_newMarker();
 
     res = atime_diff( pm, now );
     free( now );
