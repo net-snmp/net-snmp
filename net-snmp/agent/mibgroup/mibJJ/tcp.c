@@ -86,7 +86,7 @@
 #include "kernel_hpux.h"
 #endif
 
-#include "system.h"
+#include <net-snmp/system.h>
 #if HAVE_SYS_SYSCTL_H
 #include <sys/sysctl.h>
 #endif
@@ -123,7 +123,7 @@
 #endif
 
 #include <net-snmp/agent/auto_nlist.h>
-#include "tools.h"
+#include <net-snmp/tools.h>
 
 
 #include "tcp.h"

@@ -5,7 +5,7 @@
 #ifndef _MIBGROUP_VACM_H
 #define _MIBGROUP_VACM_H
 
-#include "vacm.h"
+#include <net-snmp/vacm.h>
 
 config_require(util_funcs)
 config_require(mibII/vacm_context)

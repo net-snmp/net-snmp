@@ -12,30 +12,30 @@
 #include <stdlib.h>
 #endif
 
-#include "snmp_transport.h"
-#include "snmpUDPDomain.h"
+#include <net-snmp/snmp_transport.h>
+#include <net-snmp/snmpUDPDomain.h>
 #ifdef SNMP_TRANSPORT_TCP_DOMAIN
-#include "snmpTCPDomain.h"
+#include <net-snmp/snmpTCPDomain.h>
 #endif
 #ifdef SNMP_TRANSPORT_IPX_DOMAIN
-#include "snmpIPXDomain.h"
+#include <net-snmp/snmpIPXDomain.h>
 #endif
 #ifdef SNMP_TRANSPORT_UNIX_DOMAIN
-#include "snmpUnixDomain.h"
+#include <net-snmp/snmpUnixDomain.h>
 #endif
 #ifdef SNMP_TRANSPORT_AAL5PVC_DOMAIN
-#include "snmpAAL5PVCDomain.h"
+#include <net-snmp/snmpAAL5PVCDomain.h>
 #endif
 #ifdef SNMP_TRANSPORT_UDPIPV6_DOMAIN
-#include "snmpUDPIPv6Domain.h"
+#include <net-snmp/snmpUDPIPv6Domain.h>
 #endif
 #ifdef SNMP_TRANSPORT_TCPIPV6_DOMAIN
-#include "snmpTCPIPv6Domain.h"
+#include <net-snmp/snmpTCPIPv6Domain.h>
 #endif
-#include "snmp_api.h"
-#include "snmp_debug.h"
-#include "snmp_logging.h"
-#include "tools.h"
+#include <net-snmp/snmp_api.h>
+#include <net-snmp/snmp_debug.h>
+#include <net-snmp/snmp_logging.h>
+#include <net-snmp/tools.h>
 
 
 /*  Our list of supported transport domains.  */

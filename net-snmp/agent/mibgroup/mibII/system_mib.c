@@ -45,11 +45,11 @@
 #include "util_funcs.h"
 #include "system_mib.h"
 #include "struct.h"
-#include "read_config.h"
+#include <net-snmp/read_config.h>
 #include <net-snmp/agent/agent_read_config.h>
-#include "system.h"
+#include <net-snmp/system.h>
 #include "sysORTable.h"
-#include "default_store.h"
+#include <net-snmp/default_store.h>
 
 
 	/*********************

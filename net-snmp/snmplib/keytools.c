@@ -25,23 +25,23 @@
 #include <dmalloc.h>
 #endif
 
-#include "asn1.h"
-#include "snmp_api.h"
+#include <net-snmp/asn1.h>
+#include <net-snmp/snmp_api.h>
 #ifdef USE_OPENSSL
 #	include <openssl/hmac.h>
 #else 
 #ifdef USE_INTERNAL_MD5
-#include "md5.h"
+#include <net-snmp/md5.h>
 #endif
 #endif
 
-#include "scapi.h"
-#include "keytools.h"
-#include "tools.h"
-#include "snmp_debug.h"
-#include "snmp_logging.h"
+#include <net-snmp/scapi.h>
+#include <net-snmp/keytools.h>
+#include <net-snmp/tools.h>
+#include <net-snmp/snmp_debug.h>
+#include <net-snmp/snmp_logging.h>
 
-#include "transform_oids.h"
+#include <net-snmp/transform_oids.h>
 
 /*******************************************************************-o-******
  * generate_Ku

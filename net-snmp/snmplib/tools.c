@@ -46,14 +46,14 @@
 #include <dmalloc.h>
 #endif
 
-#include "asn1.h" 
-#include "system.h"
-#include "snmp_api.h"
-#include "snmp_debug.h"
-#include "snmp_debug.h"
-#include "tools.h"
-#include "mib.h"
-#include "scapi.h" 
+#include <net-snmp/asn1.h> 
+#include <net-snmp/system.h>
+#include <net-snmp/snmp_api.h>
+#include <net-snmp/snmp_debug.h>
+#include <net-snmp/snmp_debug.h>
+#include <net-snmp/tools.h>
+#include <net-snmp/mib.h>
+#include <net-snmp/scapi.h> 
 
 
 /*  snmp_realloc:

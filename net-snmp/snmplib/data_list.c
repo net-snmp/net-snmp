@@ -11,7 +11,7 @@
 #include <string.h>
 #endif
 
-#include "data_list.h"
+#include <net-snmp/data_list.h>
 
 /***********************************************************************/
 /* New Handler based API */

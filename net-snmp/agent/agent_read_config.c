@@ -92,21 +92,21 @@
 #endif
 
 #include "mibincl.h"
-#include "snmp_secmod.h"
-#include "snmpusm.h"
+#include <net-snmp/snmp_secmod.h>
+#include <net-snmp/snmpusm.h>
 
 #include "mibgroup/struct.h"
-#include "read_config.h"
+#include <net-snmp/read_config.h>
 #include <net-snmp/agent/agent_read_config.h>
-#include "callback.h"
+#include <net-snmp/callback.h>
 #include <net-snmp/agent/snmp_agent.h>
 #include <net-snmp/agent/agent_trap.h>
 #include "snmpd.h"
-#include "system.h"
-#include "snmp_debug.h"
-#include "snmp_alarm.h"
+#include <net-snmp/system.h>
+#include <net-snmp/snmp_debug.h>
+#include <net-snmp/snmp_alarm.h>
 #include <net-snmp/agent/agent_callbacks.h>
-#include "default_store.h"
+#include <net-snmp/default_store.h>
 #include <net-snmp/agent/ds_agent.h>
 #include "net-snmp/agent/table.h"
 #include "net-snmp/agent/table_iterator.h"

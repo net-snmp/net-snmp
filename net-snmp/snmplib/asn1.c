@@ -60,18 +60,18 @@ SOFTWARE.
 #include <dmalloc.h>
 #endif
 
-#include "asn1.h"
-#include "int64.h"
-#include "snmp_debug.h"
-#include "mib.h"
-#include "tools.h"
+#include <net-snmp/asn1.h>
+#include <net-snmp/int64.h>
+#include <net-snmp/snmp_debug.h>
+#include <net-snmp/mib.h>
+#include <net-snmp/tools.h>
 
 #ifndef NULL
 #define NULL	0
 #endif
 
-#include "snmp_api.h"
-#include "snmp_impl.h" /* to define ERROR_MSG */
+#include <net-snmp/snmp_api.h>
+#include <net-snmp/snmp_impl.h> /* to define ERROR_MSG */
 
 static
 void _asn_size_err(const char *str, size_t wrongsize, size_t rightsize)

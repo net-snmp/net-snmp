@@ -36,13 +36,13 @@
 #include <dmalloc.h>
 #endif
 
-#include "asn1.h"
-#include "snmp_api.h"
-#include "snmp_debug.h"
-#include "tools.h"
-#include "default_store.h"
-#include "callback.h"
-#include "snmp_alarm.h"
+#include <net-snmp/asn1.h>
+#include <net-snmp/snmp_api.h>
+#include <net-snmp/snmp_debug.h>
+#include <net-snmp/tools.h>
+#include <net-snmp/default_store.h>
+#include <net-snmp/callback.h>
+#include <net-snmp/snmp_alarm.h>
 
 static struct snmp_alarm *thealarms;
 static int start_alarms = 0;

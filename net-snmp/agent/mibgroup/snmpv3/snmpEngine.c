@@ -7,9 +7,9 @@
 #endif
 
 #include "mibincl.h"
-#include "snmpv3.h"
+#include <net-snmp/snmpv3.h>
 #include "util_funcs.h"
-#include "lcd_time.h"
+#include <net-snmp/lcd_time.h>
 #include "../mibII/sysORTable.h"
 #include "snmpEngine.h"
 

@@ -75,13 +75,13 @@ SOFTWARE.
 #include <winsock.h>
 #endif
 
-#include "asn1.h"
-#include "snmp.h"
-#include "snmp_api.h"
-#include "snmp_impl.h"
-#include "snmp_client.h"
-#include "snmp_secmod.h"
-#include "mib.h"
+#include <net-snmp/asn1.h>
+#include <net-snmp/snmp.h>
+#include <net-snmp/snmp_api.h>
+#include <net-snmp/snmp_impl.h>
+#include <net-snmp/snmp_client.h>
+#include <net-snmp/snmp_secmod.h>
+#include <net-snmp/mib.h>
 
 
 #ifndef BSD4_3

@@ -19,7 +19,7 @@
 #include "header_complex.h"
 #include "mteTriggerDeltaTable.h"
 #include "mteTriggerTable.h"
-#include "snmp-tc.h"
+#include <net-snmp/snmp-tc.h>
 
 
 /* 

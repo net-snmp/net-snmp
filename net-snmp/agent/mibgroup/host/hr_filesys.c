@@ -6,7 +6,7 @@
 #include <net-snmp/net-snmp-config.h>
 #include "host_res.h"
 #include "hr_filesys.h"
-#include "snmp-tc.h"
+#include <net-snmp/snmp-tc.h>
 
 #if HAVE_MNTENT_H
 #include <mntent.h>

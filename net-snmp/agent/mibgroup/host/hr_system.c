@@ -15,7 +15,7 @@
 #include "host_res.h"
 #include "hr_system.h"
 #include <net-snmp/agent/auto_nlist.h>
-#include "../../../snmplib/system.h"
+#include <net-snmp/system.h>
 
 #ifdef HAVE_SYS_PROC_H
 #include <sys/param.h>

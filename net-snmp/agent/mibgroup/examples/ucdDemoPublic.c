@@ -22,10 +22,10 @@
 #endif
 
 #include "mibincl.h"
-#include "snmpv3.h"
-#include "snmp_secmod.h"
-#include "snmpusm.h"
-#include "snmpusm.h"
+#include <net-snmp/snmpv3.h>
+#include <net-snmp/snmp_secmod.h>
+#include <net-snmp/snmpusm.h>
+#include <net-snmp/snmpusm.h>
 #include <net-snmp/agent/agent_read_config.h>
 #include "util_funcs.h"
 #include "ucdDemoPublic.h"

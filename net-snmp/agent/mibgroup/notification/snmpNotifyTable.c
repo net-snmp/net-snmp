@@ -20,10 +20,10 @@
 
 /* minimal include directives */
 #include "mibincl.h"
-#include "snmp_transport.h"
+#include <net-snmp/snmp_transport.h>
 #include "header_complex.h"
 #include "snmpNotifyTable.h"
-#include "snmp-tc.h"
+#include <net-snmp/snmp-tc.h>
 #include "target/snmpTargetParamsEntry.h"
 #include "target/snmpTargetAddrEntry.h"
 #include "target/target.h"

@@ -42,16 +42,16 @@
 #include <winsock.h>
 #endif
 
-#include "asn1.h"
-#include "snmp_api.h"
-#include "tools.h"
-#include "scapi.h"
-#include "snmpv3.h"
-#include "keytools.h"
-#include "snmp_debug.h"
-#include "callback.h"
+#include <net-snmp/asn1.h>
+#include <net-snmp/snmp_api.h>
+#include <net-snmp/tools.h>
+#include <net-snmp/scapi.h>
+#include <net-snmp/snmpv3.h>
+#include <net-snmp/keytools.h>
+#include <net-snmp/snmp_debug.h>
+#include <net-snmp/callback.h>
 
-#include "../snmplib/transform_oids.h"
+#include <net-snmp/transform_oids.h>
 
 #include <stdlib.h>
 

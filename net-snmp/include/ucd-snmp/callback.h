@@ -1,6 +1,6 @@
 #ifdef UCD_COMPATIBLE
 
-#include <net-snmp/snmplib/callback.h>
+#include <net-snmp/callback.h>
 
 #else
 

@@ -136,7 +136,7 @@ if [ -f "$bf" ] ; then
    PATH=$SNMP_UPDIR/agent:$PATH
 fi
 
-bf=config.h
+bf=include/net-snmp/net-snmp-config.h
 if [ ! -s "$bf" ] ; then
    echo "No \"$bf\" in $SNMP_UPDIR . Some tests will be skipped"
 fi

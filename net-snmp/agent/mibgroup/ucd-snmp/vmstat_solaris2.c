@@ -42,7 +42,7 @@
 
 /* Utility functions for UCD-SNMP */
 #include "util_funcs.h"
-#include <snmp_alarm.h>
+#include <net-snmp/snmp_alarm.h>
 
 /* Header file for this module */
 #include "vmstat.h"

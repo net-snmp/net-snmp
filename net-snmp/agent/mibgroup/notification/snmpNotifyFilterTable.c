@@ -23,7 +23,7 @@
 #include "mibincl.h"
 #include "header_complex.h"
 #include "snmpNotifyFilterTable.h"
-#include "snmp-tc.h"
+#include <net-snmp/snmp-tc.h>
 
 
 /* 

@@ -14,7 +14,7 @@
 
 #include "mibincl.h"                  /* Standard set of SNMP includes*/
 #include "util_funcs.h"               /* utility function declarations*/
-#include "read_config.h"              /* if the module uses run-time*/
+#include <net-snmp/read_config.h>              /* if the module uses run-time*/
                                         /*      configuration controls*/
 #include <net-snmp/agent/auto_nlist.h>               /* if the module needs to read*/
                                        /*      kernel data structures*/

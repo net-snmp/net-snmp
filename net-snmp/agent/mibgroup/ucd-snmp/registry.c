@@ -20,7 +20,7 @@
 
 #include "mibincl.h"
 #include "registry.h"
-#include "system.h"
+#include <net-snmp/system.h>
 
 	/*********************
 	 *

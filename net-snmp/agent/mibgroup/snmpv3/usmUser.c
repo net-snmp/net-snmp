@@ -16,19 +16,19 @@
 #endif
 
 #include "mibincl.h"
-#include "snmp_secmod.h"
-#include "snmpusm.h"
-#include "snmpv3.h"
-#include "snmp-tc.h"
-#include "read_config.h"
+#include <net-snmp/snmp_secmod.h>
+#include <net-snmp/snmpusm.h>
+#include <net-snmp/snmpv3.h>
+#include <net-snmp/snmp-tc.h>
+#include <net-snmp/read_config.h>
 #include <net-snmp/agent/agent_read_config.h>
 #include "util_funcs.h"
-#include "keytools.h"
-#include "tools.h"
-#include "scapi.h"
+#include <net-snmp/keytools.h>
+#include <net-snmp/tools.h>
+#include <net-snmp/scapi.h>
 
 #include "usmUser.h"
-#include "transform_oids.h"
+#include <net-snmp/transform_oids.h>
 
 struct variable4 usmUser_variables[] = {
   { USMUSERSPINLOCK     , ASN_INTEGER   , RWRITE, var_usmUser, 1, { 1 } },

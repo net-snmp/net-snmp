@@ -38,8 +38,8 @@
 #include "pass_persist.h"
 #include "extensible.h"
 #include "util_funcs.h"
-#include "read_config.h"
-#include "system.h"
+#include <net-snmp/read_config.h>
+#include <net-snmp/system.h>
 
 struct extensible *persistpassthrus=NULL;
 int numpersistpassthrus=0;

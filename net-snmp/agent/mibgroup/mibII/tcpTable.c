@@ -85,7 +85,7 @@
 #include "kernel.h"
 #endif
 
-#include "system.h"
+#include <net-snmp/system.h>
 #if HAVE_SYS_SYSCTL_H
 #include <sys/sysctl.h>
 #endif

@@ -9,7 +9,7 @@
 #endif
 
 #include "mibincl.h"
-#include "snmp_transport.h"
+#include <net-snmp/snmp_transport.h>
 #include <net-snmp/agent/instance.h>
 #include <net-snmp/agent/table.h>
 #include <net-snmp/agent/table_data.h>

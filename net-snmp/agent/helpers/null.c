@@ -7,7 +7,7 @@
 #endif
 
 #include "mibincl.h"
-#include "tools.h"
+#include <net-snmp/tools.h>
 #include <net-snmp/agent/snmp_agent.h>
 
 #if HAVE_DMALLOC_H

@@ -109,11 +109,11 @@ SOFTWARE.
 #include <sys/stat.h>
 #endif
 
-#include "asn1.h"
-#include "snmp_api.h"
-#include "tools.h"
-#include "system.h"
-#include "snmp_logging.h"
+#include <net-snmp/asn1.h>
+#include <net-snmp/snmp_api.h>
+#include <net-snmp/tools.h>
+#include <net-snmp/system.h>
+#include <net-snmp/snmp_logging.h>
 
 #ifndef IFF_LOOPBACK
 #	define IFF_LOOPBACK 0

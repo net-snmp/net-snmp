@@ -52,8 +52,8 @@
  */
 
 #include "../../snmplib/system.h"
-#include "asn1.h"
-#include "snmp_debug.h"
+#include <net-snmp/asn1.h>
+#include <net-snmp/snmp_debug.h>
 #include "mibincl.h"
 
 #include "kernel_sunos5.h"

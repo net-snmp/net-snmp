@@ -22,12 +22,12 @@
 #include <netinet/in.h>
 #endif
 
-#include "asn1.h"
-#include "snmp.h"
-#include "snmp_debug.h"
-#include "default_store.h"
-#include "snmp_transport.h"
-#include "snmpIPXDomain.h"
+#include <net-snmp/asn1.h>
+#include <net-snmp/snmp.h>
+#include <net-snmp/snmp_debug.h>
+#include <net-snmp/default_store.h>
+#include <net-snmp/snmp_transport.h>
+#include <net-snmp/snmpIPXDomain.h>
 
 #define SNMP_IPX_DEFAULT_PORT	36879		/*  Specified in RFC 1420.  */
 static snmp_tdomain ipxDomain;

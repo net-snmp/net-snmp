@@ -24,15 +24,15 @@
 #include <dmalloc.h>
 #endif
 
-#include "asn1.h"
-#include "snmp_api.h"
-#include "snmp_debug.h"
-#include "snmp_logging.h"
-#include "tools.h"
-#include "read_config.h"
-#include "default_store.h"
-#include "read_config.h"
-#include "system.h"
+#include <net-snmp/asn1.h>
+#include <net-snmp/snmp_api.h>
+#include <net-snmp/snmp_debug.h>
+#include <net-snmp/snmp_logging.h>
+#include <net-snmp/tools.h>
+#include <net-snmp/read_config.h>
+#include <net-snmp/default_store.h>
+#include <net-snmp/read_config.h>
+#include <net-snmp/system.h>
 
 struct ds_read_config *ds_configs = NULL;
 

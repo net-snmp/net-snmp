@@ -20,11 +20,11 @@
 #include <netdb.h>
 #endif
 
-#include "asn1.h"
-#include "mib.h"
-#include "snmp_api.h"
-#include "read_config.h"
-#include "snmp_debug.h"
+#include <net-snmp/asn1.h>
+#include <net-snmp/mib.h>
+#include <net-snmp/snmp_api.h>
+#include <net-snmp/read_config.h>
+#include <net-snmp/snmp_debug.h>
 
 struct traphandle {
    char *exec;

@@ -19,12 +19,12 @@
 #endif
 
 #include "mibincl.h"
-#include "system.h"
+#include <net-snmp/system.h>
 #include "util_funcs.h"
 
 #include "snmp_mib.h"
 #include "sysORTable.h"
-#include "default_store.h"
+#include <net-snmp/default_store.h>
 
 
 	/*********************
