@@ -446,3 +446,19 @@ long get_uptime __P((void))
 #endif /* linux */
 }
 #endif
+
+#ifndef HAVE_STRDUP
+char *
+strdup(src)
+    char *src;
+{
+    int len;
+    char *dst;
+
+    len = strlen(src) + 1;
+    if ((dst = (char *)malloc(len)) == NULL)
+	return(NULL);
+    strcpy(dst, src);
+    return(dst);
+}
+#endif
