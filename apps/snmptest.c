@@ -272,12 +272,19 @@ input_variable(struct variable_list *vp)
 
     printf("Variable: ");
     fflush(stdout);
-    fgets(buf, sizeof(buf), stdin);
+    if (!fgets(buf, sizeof(buf), stdin)) {
+    	printf("Quitting,  Goobye\n");
+	SOCK_CLEANUP;
+	exit(0);
+    }
+    val_len = strlen(buf);
 
-    if (*buf == '\n'){
+    if (val_len == 0 || *buf == '\n'){
 	vp->name_length = 0;
 	return 0;
     }
+    if (buf[val_len-1] == '\n')
+    	buf[val_len-1] = 0;
     if (*buf == '$'){
 	switch(toupper(buf[1])){
 	    case 'G':
@@ -342,8 +349,10 @@ input_variable(struct variable_list *vp)
 	return -1;
     }
     vp->name_length = MAX_OID_LEN;
-    if (!snmp_parse_oid(buf, name, &vp->name_length))
+    if (!snmp_parse_oid(buf, name, &vp->name_length)) {
+    	snmp_perror(buf);
 	return -1;
+    }
     vp->name = (oid *)malloc(vp->name_length * sizeof(oid));
     memmove(vp->name, name, vp->name_length * sizeof(oid));
 
