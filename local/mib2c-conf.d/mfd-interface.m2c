@@ -460,27 +460,29 @@ _mfd_${context}_object_lookup(netsnmp_mib_handler *handler,
         rc = ${context}_index_from_oid(&oid_idx, &mib_idx);
         if(MFD_SUCCESS == rc) {
             /*
-             * xxx-rks:
-             *   auto check syntax?
-             */
-            rc = _${context}_check_indexes(rowreq_ctx);
-            if(MFD_BAD_VALUE == rc)
-                rc = SNMP_ERR_NOCREATION;
-        }
-        if (rc)
-            netsnmp_request_set_error_all(requests, rc);
-        else {
-            /*
              * allocate new context
              */
             rowreq_ctx = ${table}_allocate_rowreq_ctx();
             if (NULL == rowreq_ctx)
                 return MFD_ERROR; /* msg already logged */
+
             memcpy(&rowreq_ctx->tbl_idx, &mib_idx, sizeof(mib_idx));
-            netsnmp_request_add_list_data(requests, netsnmp_create_data_list
-                                          (TABLE_CONTAINER_NAME, rowreq_ctx,
-                                           NULL)); /* xxx-rks: free routine? */
-            
+
+            /*
+             * check indexes
+             */
+            rc = _${context}_check_indexes(rowreq_ctx);
+            if(MFD_SUCCESS != rc) {
+                netsnmp_assert((rc == SNMP_ERR_NOCREATION) ||
+                               (rc == SNMP_ERR_INCONSISTENTNAME));
+                netsnmp_request_set_error_all(requests, rc);
+                ${context}_release_rowreq_ctx(rowreq_ctx);
+            }
+            else {
+                netsnmp_request_add_list_data(requests, netsnmp_create_data_list
+                                              (TABLE_CONTAINER_NAME, rowreq_ctx,
+                                               NULL)); /* xxx-rks: free routine? */
+            }
         }
 @   end@ // row creation
     }
