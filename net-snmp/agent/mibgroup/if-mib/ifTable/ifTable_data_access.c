@@ -19,9 +19,13 @@
 
 #include "ifTable_data_access.h"
 
-static void _check_interface_entry_for_updates(netsnmp_interface_entry *ifentry,
-                                               netsnmp_container *container);
+static void
+_check_interface_entry_for_updates(ifTable_rowreq_ctx *rowreq_ctx,
+                                   netsnmp_container * ifcontainer);
 
+static void
+_add_new_interface(netsnmp_interface_entry *ifentry,
+                   netsnmp_container * container);
 
 /** @defgroup data_access data_access: Routines to access data
  *
@@ -127,7 +131,9 @@ ifTable_container_init(netsnmp_container ** container_ptr_ptr,
      * don't release resources
      */
     // is this right?
-    //cache->flags &= NETSNMP_CACHE_DONT_AUTO_RELEASE;
+    cache->flags |=
+        (NETSNMP_CACHE_DONT_AUTO_RELEASE | NETSNMP_CACHE_DONT_FREE_EXPIRED |
+            NETSNMP_CACHE_PRELOAD);
 }
 
 /**
@@ -171,11 +177,16 @@ ifTable_cache_load(netsnmp_container * container)
      * we just got a fresh copy of interface data. compare it to
      * what we've already got, and make any adjustements...
      */
-    CONTAINER_FOR_EACH(ifcontainer,
+    CONTAINER_FOR_EACH(container,
                        (netsnmp_container_obj_func*)_check_interface_entry_for_updates,
-                       container);
+                       ifcontainer);
 
-    // xxx-rks: deal with inactive entries before 5.2
+    /*
+     * now add any new interfaces
+     */
+    CONTAINER_FOR_EACH(ifcontainer,
+                       (netsnmp_container_obj_func*)_add_new_interface,
+                       container);
 
     /*
      * free the container. we've either claimed each ifentry, or released it,
@@ -192,40 +203,23 @@ ifTable_cache_load(netsnmp_container * container)
  *
  */
 static void
-_check_interface_entry_for_updates(netsnmp_interface_entry *ifentry,
-                           netsnmp_container * container)
+_check_interface_entry_for_updates(ifTable_rowreq_ctx *rowreq_ctx,
+                                   netsnmp_container * ifcontainer)
 {
     /*
      * check for matching entry. We can do this directly, since
      * both containers use the same index.
      */
-    ifTable_rowreq_ctx *rowreq_ctx = CONTAINER_FIND(container, ifentry);
-    if(NULL == rowreq_ctx) {
-        DEBUGMSGTL(("ifTable:access","creating new entry\n"));
-        /*
-         * allocate an row context and set the index(es), then add it to
-         * the container
-         */
-        rowreq_ctx = ifTable_allocate_rowreq_ctx(ifentry);
-        if( (NULL != rowreq_ctx) &&
-            ( MFD_SUCCESS == ifTable_indexes_set(rowreq_ctx, ifentry->index))) {
-            CONTAINER_INSERT(container, rowreq_ctx);
-            ifentry = NULL;
-        }
-        else {
-            if(rowreq_ctx) {
-                snmp_log(LOG_ERR, "error setting index while loading "
-                         "ifTable cache.\n");
-                ifTable_release_rowreq_ctx(rowreq_ctx);
-            }
-            else
-                netsnmp_access_interface_entry_free(ifentry);
-        }
+    netsnmp_interface_entry *ifentry = CONTAINER_FIND(ifcontainer, rowreq_ctx);
+    if(NULL == ifentry) {
+        rowreq_ctx->data->if_oper_status = IFOPERSTATUS_DOWN;
     }
     else {
         int updated = 0;
 
         DEBUGMSGTL(("ifTable:access","updating existing entry\n"));
+
+        rowreq_ctx->data->if_oper_status = IFOPERSTATUS_UP;
 
         /*
          * we already have an entry-> copy stats and check for updates.
@@ -243,13 +237,33 @@ _check_interface_entry_for_updates(netsnmp_interface_entry *ifentry,
          * xxx-rks: what should we check for changes?
          *
          */
-        if(strcmp(rowreq_ctx->data->if_descr, ifentry->if_descr)) {
-            ++updated;
-            SNMP_SWIPE_MEM(rowreq_ctx->data->if_descr, ifentry->if_descr);
+        if(NULL == ifentry->if_descr) {
+            if(NULL != rowreq_ctx->data->if_descr) {
+                ++updated;
+                SNMP_FREE(rowreq_ctx->data->if_descr);
+            }
         }
-        if(strcmp(rowreq_ctx->data->if_alias, ifentry->if_alias)) {
-            ++updated;
-            SNMP_SWIPE_MEM(rowreq_ctx->data->if_alias, ifentry->if_alias);
+        else {
+            if((NULL == rowreq_ctx->data->if_descr) ||
+               (strcmp(rowreq_ctx->data->if_descr, ifentry->if_descr))) {
+                ++updated;
+                SNMP_SWIPE_MEM(rowreq_ctx->data->if_descr, ifentry->if_descr);
+            }
+        }
+        // xxx-rks: if_alias is SNMP specific, it probably should be in
+        // the rowreq context instead of interface entry...
+        if(NULL == ifentry->if_alias) {
+            if(NULL != rowreq_ctx->data->if_alias) {
+                ++updated;
+                SNMP_FREE(rowreq_ctx->data->if_alias);
+            }
+        }
+        else {
+            if((NULL == rowreq_ctx->data->if_alias) ||
+               (strcmp(rowreq_ctx->data->if_alias, ifentry->if_alias))) {
+                ++updated;
+                SNMP_SWIPE_MEM(rowreq_ctx->data->if_alias, ifentry->if_alias);
+            }
         }
         if(rowreq_ctx->data->if_type != ifentry->if_type) {
             ++updated;
@@ -273,10 +287,41 @@ _check_interface_entry_for_updates(netsnmp_interface_entry *ifentry,
         if(updated) {
             rowreq_ctx->data->if_lastchange = netsnmp_get_agent_uptime();
         }
+
+        /*
+         * remove entry from ifcontainer
+         */
+        CONTAINER_REMOVE(ifcontainer,ifentry);
         netsnmp_access_interface_entry_free(ifentry);
     }
     
 } 
+
+static void
+_add_new_interface(netsnmp_interface_entry *ifentry,
+                   netsnmp_container * container)
+{
+    DEBUGMSGTL(("ifTable:access","creating new entry\n"));
+    /*
+     * allocate an row context and set the index(es), then add it to
+     * the container
+     */
+    ifTable_rowreq_ctx *rowreq_ctx = ifTable_allocate_rowreq_ctx(ifentry);
+    if( (NULL != rowreq_ctx) &&
+        ( MFD_SUCCESS == ifTable_indexes_set(rowreq_ctx, ifentry->index))) {
+        CONTAINER_INSERT(container, rowreq_ctx);
+    }
+    else {
+        if(rowreq_ctx) {
+            snmp_log(LOG_ERR, "error setting index while loading "
+                     "ifTable cache.\n");
+            ifTable_release_rowreq_ctx(rowreq_ctx);
+        }
+        else
+            netsnmp_access_interface_entry_free(ifentry);
+    }
+}
+
 
 /**
  * cache clean up
