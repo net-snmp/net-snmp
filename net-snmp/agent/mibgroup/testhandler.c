@@ -71,8 +71,7 @@ init_testhandler(void) {
 
     table_info = SNMP_MALLOC_TYPEDEF(table_registration_info);
 
-    table_helper_add_index(table_info, ASN_INTEGER);
-    table_helper_add_index(table_info, ASN_INTEGER);
+    table_helper_add_indexes(table_info, ASN_INTEGER, ASN_INTEGER, 0);
     table_info->min_column = 3;
     table_info->max_column = 3;
     register_table(my_test, table_info);
@@ -112,8 +111,7 @@ init_testhandler(void) {
        automatically parsed column and index information */
     table_info = SNMP_MALLOC_TYPEDEF(table_registration_info);
 
-    table_helper_add_index(table_info, ASN_INTEGER);
-    table_helper_add_index(table_info, ASN_OCTET_STR);
+    table_helper_add_indexes(table_info, ASN_INTEGER, ASN_OCTET_STR, 0);
     table_info->min_column = 3;
     table_info->max_column = 3;
 
@@ -139,8 +137,9 @@ init_testhandler(void) {
     
     /* set up what a row "should" look like */
     table_dataset_add_index(table_set, ASN_OCTET_STR);
-    table_set_add_default_row(table_set, 2, ASN_OCTET_STR, 1);
-    table_set_add_default_row(table_set, 3, ASN_OCTET_STR, 1);
+    table_set_multi_add_default_row(table_set,
+                                    2, ASN_OCTET_STR, 1,
+                                    3, ASN_OCTET_STR, 1);
 
     /* register the table */
     register_table_data_set(create_handler_registration("chairs",
