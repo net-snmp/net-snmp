@@ -125,7 +125,7 @@ extern          "C" {
          * add any other useful data
          *       (e.g. flags for when a column has been set)
          */
-       u_char     ipCidrRouteRowStatus;
+       u_char     ipCidrRouteStatus;
 
         /*
          * storage for future expansion
