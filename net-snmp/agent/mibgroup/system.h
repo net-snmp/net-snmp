@@ -23,6 +23,7 @@ config_parse_dot_conf("syscontact",system_parse_config_syscon, NULL);
 #define SYSTEMNAME		5
 #define SYSLOCATION		6
 #define SYSSERVICES		7
+#define SYSORLASTCHANGE		8
 
 
 #include "../var_struct.h"
@@ -37,7 +38,8 @@ struct variable2 system_variables[] = {
     {SYSCONTACT, ASN_OCTET_STR, RWRITE, var_system, 1, {4}},
     {SYSTEMNAME, ASN_OCTET_STR, RWRITE, var_system, 1, {5}},
     {SYSLOCATION, ASN_OCTET_STR, RWRITE, var_system, 1, {6}},
-    {SYSSERVICES, ASN_INTEGER, RONLY, var_system, 1, {7}}
+    {SYSSERVICES, ASN_INTEGER, RONLY, var_system, 1, {7}},
+    {SYSORLASTCHANGE, ASN_TIMETICKS, RONLY, var_system, 1, {8}}
 };
 
 config_load_mib(MIB.1, 7, system_variables)
