@@ -13,7 +13,7 @@
 #define NETSNMP_DS_AGENT_AGENTX_MASTER  3       /* 1 if AgentX desired */
 #define NETSNMP_DS_AGENT_QUIT_IMMEDIATELY 4     /* 1 to never start the agent */
 #define NETSNMP_DS_AGENT_DISABLE_PERL   5       /* 1 to never start the agent */
-
+#define NETSNMP_DS_AGENT_NO_CONNECTION_WARNINGS 6 /* 1 = !see !connect msgs */
 /*
  * strings 
  */
