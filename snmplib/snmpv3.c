@@ -51,6 +51,7 @@
 #include "system.h"
 #include "asn1.h"
 #include "snmpv3.h"
+#include "callback.h"
 #include "snmpusm.h"
 #include "snmp.h"
 #include "snmp_api.h"
@@ -63,7 +64,6 @@
 #include "lcd_time.h"
 #include "snmp_debug.h"
 #include "snmp_logging.h"
-#include "callback.h"
 #include "default_store.h"
 
 #include "transform_oids.h"
@@ -509,7 +509,7 @@ init_snmpv3(const char *type) {
                          init_snmpv3_post_config, NULL);
   /* we need to be called back later */
   snmp_register_callback(SNMP_CALLBACK_LIBRARY, SNMP_CALLBACK_STORE_DATA,
-                         snmpv3_store, (void *)type);
+                         snmpv3_store, (void *) type);
 
 
 #if		!defined(USE_INTERNAL_MD5)
