@@ -268,8 +268,8 @@ extern "C" {
             int                rc2;
             while(tmp) {
                 rc2 = tmp->insert(tmp,k);
-                if (rc)
-                    snmp_log(LOG_ERR,"error on subcontainer insert (%d)", rc2);
+                if (rc2)
+                    snmp_log(LOG_ERR,"error on subcontainer insert (%d)\n", rc2);
                 tmp = tmp->next;
             }
         }
@@ -291,7 +291,7 @@ extern "C" {
             while(tmp) {
                 rc = tmp->remove(tmp,k);
                 if (rc)
-                    snmp_log(LOG_ERR,"error on subcontainer remove (%d)", rc);
+                    snmp_log(LOG_ERR,"error on subcontainer remove (%d)\n", rc);
                 tmp = tmp->prev;
             }
         }
@@ -314,7 +314,7 @@ extern "C" {
             while(tmp) {
                 rc = tmp->cfree(tmp);
                 if (rc)
-                    snmp_log(LOG_ERR,"error on subcontainer cfree (%d)", rc);
+                    snmp_log(LOG_ERR,"error on subcontainer cfree (%d)\n", rc);
                 tmp = tmp->prev;
             }
         }
