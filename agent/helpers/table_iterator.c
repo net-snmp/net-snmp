@@ -605,6 +605,9 @@ netsnmp_table_iterator_helper_handler(netsnmp_mib_handler *handler,
                 for(request = requests ; request; request = request->next) {
                     if (request->processed)
                         continue;
+                    ti_info =
+                        netsnmp_request_get_list_data(request,
+                                                      TI_REQUEST_CACHE);
                     if (!ti_info->results) {
                         table_info = netsnmp_extract_table_info(request);
                         if (table_info->colnum == tbl_info->max_column) {
