@@ -1244,7 +1244,7 @@ _sess_open(struct snmp_session *in_session)
        handled correctly */
     if (session->version == SNMP_VERSION_3) {
       if (session->securityEngineIDLen == 0 &&
-          (session->securityEngineIDLen & SNMP_FLAGS_DONT_PROBE) !=
+          (session->flags & SNMP_FLAGS_DONT_PROBE) !=
           SNMP_FLAGS_DONT_PROBE) {
 	if (snmpv3_build_probe_pdu(&pdu) != 0) {
 	  DEBUGMSGTL(("snmp_api","unable to create probe PDU\n"));
