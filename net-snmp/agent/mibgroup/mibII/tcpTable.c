@@ -5,9 +5,13 @@
  */
 
 #include <config.h>
-#include "mibincl.h"
 
 #include <unistd.h>
+#if HAVE_STRING_H
+#include <string.h>
+#else
+#include <strings.h>
+#endif
 
 #if HAVE_SYS_PARAM_H
 #include <sys/param.h>
@@ -26,7 +30,15 @@
 #if HAVE_SYS_SOCKET_H
 #include <sys/socket.h>
 #endif
+#if HAVE_WINSOCK_H
+#include <winsock.h>
+#endif
+#if HAVE_NETINET_IN_H
+#include <netinet/in.h>
+#endif
+#if HAVE_NET_IF_H
 #include <net/if.h>
+#endif
 #if HAVE_NET_IF_VAR_H
 #include <net/if_var.h>
 #endif
@@ -42,7 +54,9 @@
 #if HAVE_NETINET_IN_SYSTM_H
 #include <netinet/in_systm.h>
 #endif
+#if HAVE_NETINET_IP_H
 #include <netinet/ip.h>
+#endif
 #if HAVE_SYS_QUEUE_H
 #include <sys/queue.h>
 #endif
@@ -62,9 +76,6 @@
 #endif
 #if HAVE_INET_MIB2_H
 #include <inet/mib2.h>
-#endif
-#if HAVE_STRING_H
-#include <string.h>
 #endif
 #ifdef solaris2
 #include "kernel_sunos5.h"
@@ -109,6 +120,7 @@
 #endif
 
 #include "auto_nlist.h"
+#include "mibincl.h"
 
 #ifdef hpux
 #include <sys/mib.h>
@@ -139,6 +151,7 @@
 	 *
 	 *********************/
 
+#ifndef WIN32
 #ifndef solaris2
 
 u_char *
@@ -614,3 +627,111 @@ int TCP_Scan_Next(int *State,
 	return(1);	/* "OK" */
 }
 #endif /* solaris2 */
+#else /* WIN32 */
+#include <iphlpapi.h>
+
+u_char *
+var_tcpEntry(struct variable *vp,
+	     oid *name,
+	     size_t *length,
+	     int exact,
+	     size_t *var_len,
+	     WriteMethod **write_method)
+{
+    oid newname[MAX_OID_LEN], lowest[MAX_OID_LEN], *op;
+    u_char *cp;
+    int LowState = -1;
+    static PMIB_TCPTABLE pTcpTable = NULL;
+    DWORD status = NO_ERROR;
+    DWORD dwActualSize = 0;
+    UINT i;
+    struct timeval now;
+    static long Time_Of_Last_Reload = 0;
+
+    memcpy( (char *)newname,(char *)vp->name, (int)vp->namelen * sizeof(oid));    
+
+    /*
+     * save some cpu-cycles, and reload after 5 secs...
+     */
+    gettimeofday (&now, (struct timezone *) 0);
+    if ((Time_Of_Last_Reload + 5 <= now.tv_sec) || (pTcpTable == NULL) )
+    {
+        if(pTcpTable != NULL)
+            free(pTcpTable);
+        Time_Of_Last_Reload = now.tv_sec;
+        /* query for buffer size needed */
+        status = GetTcpTable(pTcpTable, &dwActualSize, TRUE);
+        if (status == ERROR_INSUFFICIENT_BUFFER)
+        {
+            pTcpTable = (PMIB_TCPTABLE) malloc(dwActualSize);
+            if(pTcpTable != NULL){  
+                /* Get the sorted TCP table */
+                status = GetTcpTable(pTcpTable, &dwActualSize, TRUE);
+            }
+        }
+    }
+   
+    if(status == NO_ERROR)
+    {
+        for (i = 0; i < pTcpTable->dwNumEntries; ++i)
+        {
+	   
+            cp = (u_char *)&pTcpTable->table[i].dwLocalAddr;
+            op = newname + 10;
+            *op++ = *cp++;
+            *op++ = *cp++;
+            *op++ = *cp++;
+            *op++ = *cp++;
+    
+            newname[14] = ntohs((unsigned short)(0x0000FFFF & pTcpTable->table[i].dwLocalPort));
+
+            cp = (u_char *)&pTcpTable->table[i].dwRemoteAddr;
+            op = newname + 15;
+            *op++ = *cp++;
+            *op++ = *cp++;
+            *op++ = *cp++;
+            *op++ = *cp++;
+        
+            newname[19] = ntohs((unsigned short)(0x0000FFFF & pTcpTable->table[i].dwRemotePort));
+
+            if (exact){
+                if (snmp_oid_compare(newname, 20, name, *length) == 0){
+                    memcpy( (char *)lowest,(char *)newname, 20 * sizeof(oid));
+                    LowState = i;
+                    break;  /* no need to search further */
+                }
+            } else {
+                if (snmp_oid_compare(newname, 20, name, *length) > 0)
+                 {
+                    memcpy( (char *)lowest,(char *)newname, 20 * sizeof(oid));
+                    LowState = i;
+                    break; /* As the table is sorted, no need to search further */
+                }
+            }
+        }
+    }
+    if (LowState < 0) return(NULL);
+    memcpy( (char *)name,(char *)lowest, (vp->namelen + 10) * sizeof(oid));
+    *length = vp->namelen + 10;
+    *write_method = 0;
+    *var_len = sizeof(long);
+    switch (vp->magic) {
+        case TCPCONNSTATE:
+             return (u_char *) &pTcpTable->table[i].dwState;
+        case TCPCONNLOCALADDRESS:
+            return (u_char *) &pTcpTable->table[i].dwLocalAddr;
+        case TCPCONNLOCALPORT:
+            long_return = ntohs((unsigned short)(0x0000FFFF & pTcpTable->table[i].dwLocalPort));
+            return (u_char *) &long_return;
+        case TCPCONNREMADDRESS:
+            return (u_char *) &pTcpTable->table[i].dwRemoteAddr;
+        case TCPCONNREMPORT:
+            long_return = ntohs((unsigned short)(0x0000FFFF & pTcpTable->table[i].dwRemotePort));
+            return (u_char *) &long_return;
+        default:
+            DEBUGMSGTL(("snmpd", "unknown sub-id %d in var_tcpEntry\n", vp->magic));
+    }
+    return NULL;
+}
+
+#endif

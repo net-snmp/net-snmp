@@ -30,14 +30,14 @@ UCD-SNMP-MIB DEFINITIONS ::= BEGIN
 
 IMPORTS
     OBJECT-TYPE, NOTIFICATION-TYPE, MODULE-IDENTITY,
-    Integer32, Opaque, enterprises
+    Integer32, Opaque, enterprises, Counter32
         FROM SNMPv2-SMI
 
     TEXTUAL-CONVENTION, DisplayString, TruthValue
 	FROM SNMPv2-TC;
 
 ucdavis MODULE-IDENTITY
-    LAST-UPDATED "9912090000Z"
+    LAST-UPDATED "200101170000Z"
     ORGANIZATION "University of California, Davis"
     CONTACT-INFO    
 	 "The ucd-snmp-coders mailing list is the best place
@@ -53,6 +53,9 @@ ucdavis MODULE-IDENTITY
          email:     wjhardaker@ucdavis.edu"
     DESCRIPTION
 	"This file defines the private UCD SNMP MIB extensions."
+    REVISION	 "200101170000Z"
+    DESCRIPTION
+	"Added raw CPU and IO counters."
     REVISION	 "9912090000Z"
     DESCRIPTION
 	"SMIv2 version converted from older MIB definitions."
@@ -984,6 +987,9 @@ ssCpuIdle OBJECT-TYPE
 	"percentages of idle CPU time."
     ::= { systemStats 11 }
 
+-- The agent only implements those of the following counters that the
+-- kernel supports! Don't expect all to be present.
+
 ssCpuRawUser OBJECT-TYPE
     SYNTAX      Counter32
     MAX-ACCESS  read-only
@@ -1015,6 +1021,62 @@ ssCpuRawIdle OBJECT-TYPE
     DESCRIPTION
         "idle CPU time."
     ::= { systemStats 53 }
+
+ssCpuRawWait OBJECT-TYPE
+    SYNTAX      Counter32
+    MAX-ACCESS  read-only
+    STATUS      current
+    DESCRIPTION
+        "iowait CPU time. This is primarily a SysV thingie"
+    ::= { systemStats 54 }
+
+ssCpuRawKernel OBJECT-TYPE
+    SYNTAX      Counter32
+    MAX-ACCESS  read-only
+    STATUS      current
+    DESCRIPTION
+        "kernel CPU time."
+    ::= { systemStats 55 }
+
+ssCpuRawInterrupt OBJECT-TYPE
+    SYNTAX      Counter32
+    MAX-ACCESS  read-only
+    STATUS      current
+    DESCRIPTION
+        "interruptlevel CPU time. This is primarily a BSD thingie"
+    ::= { systemStats 56 }
+
+ssIORawSent OBJECT-TYPE
+    SYNTAX      Counter32
+    MAX-ACCESS  read-only
+    STATUS      current
+    DESCRIPTION
+        "Number of requests sent to a block device"
+    ::= { systemStats 57 }
+
+ssIORawReceived OBJECT-TYPE
+    SYNTAX      Counter32
+    MAX-ACCESS  read-only
+    STATUS      current
+    DESCRIPTION
+        "Number of interrupts processed"
+    ::= { systemStats 58 }
+
+ssRawInterrupts OBJECT-TYPE
+    SYNTAX      Counter32
+    MAX-ACCESS  read-only
+    STATUS      current
+    DESCRIPTION
+        "Number of requests received from a block device"
+    ::= { systemStats 59 }
+
+ssRawContexts OBJECT-TYPE
+    SYNTAX      Counter32
+    MAX-ACCESS  read-only
+    STATUS      current
+    DESCRIPTION
+        "Number of context switches"
+    ::= { systemStats 60 }
 
 -- possibly used in the future:
 --

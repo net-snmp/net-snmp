@@ -131,9 +131,7 @@ int main(int argc, char *argv[])
 	vars = NULL;
 	for(ret = 1; ret != 0;){
 	    vp = (struct variable_list *)malloc(sizeof(struct variable_list));
-	    vp->next_variable = NULL;
-	    vp->name = NULL;
-	    vp->val.string = NULL;
+	    memset(vp, 0, sizeof(struct variable_list));
 
 	    while((ret = input_variable(vp)) == -1)
 		;
@@ -428,6 +426,8 @@ getValue:
 		vp->val.string = NULL;
 		break;
 	    case ASN_OBJECT_ID:
+		if ('\n' == buf[strlen(buf)-1])
+		    buf[strlen(buf)-1] = '\0';
 		vp->val_len = MAX_OID_LEN;;
 		read_objid(buf, (oid *)value, &vp->val_len);
 		vp->val_len *= sizeof(oid);

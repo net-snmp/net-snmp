@@ -11,6 +11,7 @@
 #define TCP_TTL_SYMBOL "tcp_ttl"
 
 #undef IPSTAT_SYMBOL
+#define NO_DOUBLE_ICMPSTAT
 #undef ICMPSTAT_SYMBOL
 #undef TCPSTAT_SYMBOL
 #undef UDPSTAT_SYMBOL

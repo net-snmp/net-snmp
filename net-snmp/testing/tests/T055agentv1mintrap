@@ -1,0 +1,32 @@
+#!/bin/sh
+
+. ../eval_tools.sh
+
+HEADER snmpv1 traps are sent by snmpd without notifcation mib support
+
+SKIPIFNOT USING_EXAMPLES_EXAMPLE_MODULE
+
+#
+# Begin test
+#
+
+# standard V1 configuration: testcomunnity
+. ./Sv3config
+REAL_TRAPD_PORT=`echo $SNMP_SNMPTRAPD_PORT | awk '{print $2}'`
+CONFIGAGENT trapsink localhost public $REAL_TRAPD_PORT
+
+STARTTRAPD
+
+# initialize only the example mib, and not the notification mib stuff
+AGENT_FLAGS="$AGENT_FLAGS -Dexample,header_generic,add_trap,mib_init,callback -I example,usmUser,vacm_vars"
+STARTAGENT
+
+CAPTURE "snmpset $SNMP_FLAGS -v 3 -a MD5 -A initial_test_pass_auth -l anp -u initial -n xxx localhost ucdavis.254.7.0 i 1"
+
+STOPAGENT
+
+STOPTRAPD
+
+CHECKTRAPD "Enterprise Specific Trap (99)"
+
+FINISHED
