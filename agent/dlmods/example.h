@@ -18,11 +18,11 @@ config_require(util_funcs);
 /* Define all our functions using prototyping for ANSI compilers */
 /* These functions are then defined in the example.c file */
 
-void	init_example();
-void	deinit_example();
-int	dynamic_init_example();
-int	dynamic_deinit_example();
-u_char	*var_example (struct variable *, oid *, int *, int, int *, int (**write) (int, u_char *, u_char, int, u_char *, oid *, int));
+void	init_example(void);
+void	deinit_example(void);
+int	dynamic_init_example(void);
+int	dynamic_deinit_example(void);
+FindVarMethod var_example;
 
 /* Magic number definitions.  These numbers are the last oid index
    numbers to the table that you are going to define.  For example,

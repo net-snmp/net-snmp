@@ -84,7 +84,7 @@ header_dlmod(struct variable *vp,
 	     int *length,
 	     int exact,
 	     int *var_len,
-	     int (**write_method) (int, u_char *, u_char, int, u_char *, oid *, int))
+	     WriteMethod **write_method)
 {
 #define DLMOD_NAME_LENGTH	9	
 	oid             newname[MAX_NAME_LEN];
@@ -128,7 +128,7 @@ var_dlmod(struct variable *vp,
 	  int *length,
 	  int exact,
 	  int *var_len,
-	  int (**write_method) (int, unsigned char *, unsigned char, int, unsigned char *, oid *, int))
+	  WriteMethod **write_method)
 {
 
 	/* variables we may use later */
@@ -173,7 +173,7 @@ header_dlmodEntry(struct variable *vp,
 		  int *length,
 		  int exact,
 		  int *var_len,
-		  int (**write_method) (int, u_char *, u_char, int, u_char *, oid *, int))
+		  WriteMethod **write_method)
 {
 #define DLMODENTRY_NAME_LENGTH	11
 	oid	newname[MAX_NAME_LEN];
@@ -238,7 +238,7 @@ var_dlmodEntry(struct variable *vp,
 	       int *length,
 	       int exact,
 	       int *var_len,
-	       int (**write_method) (int, unsigned char *, unsigned char, int, unsigned char *, oid *, int))
+	       WriteMethod **write_method)
 {
 
 	/* variables we may use later */
