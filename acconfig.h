@@ -152,6 +152,9 @@
 
 @BOTTOM@
 
+/* define if you have getdevs() */
+#undef HAVE_GETDEVS
+
 /* define if you have <netinet/in_pcb.h> */
 #undef HAVE_NETINET_IN_PCB_H
 
