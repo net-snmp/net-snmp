@@ -81,8 +81,10 @@ netsnmp_create_handler(const char *name,
                        Netsnmp_Node_Handler * handler_access_method)
 {
     netsnmp_mib_handler *ret = SNMP_MALLOC_TYPEDEF(netsnmp_mib_handler);
-    ret->handler_name = strdup(name);
-    ret->access_method = handler_access_method;
+    if (ret) {
+        ret->handler_name = strdup(name);
+        ret->access_method = handler_access_method;
+    }
     return ret;
 }
 
@@ -125,6 +127,11 @@ int
 netsnmp_register_handler(netsnmp_handler_registration *reginfo)
 {
     netsnmp_mib_handler *handler;
+    if (reginfo == NULL) {
+        snmp_log(LOG_ERR, "netsnmp_register_handler() called illegally\n");
+        return SNMP_ERR_GENERR;
+    }
+
     DEBUGIF("handler::register") {
         DEBUGMSGTL(("handler::register", "Registering "));
         for (handler = reginfo->handler; handler; handler = handler->next) {
@@ -175,6 +182,10 @@ int
 netsnmp_register_handler_nocallback(netsnmp_handler_registration *reginfo)
 {
     netsnmp_mib_handler *handler;
+    if (reginfo == NULL) {
+        snmp_log(LOG_ERR, "netsnmp_register_handler_nocallback() called illegally\n");
+        return SNMP_ERR_GENERR;
+    }
     DEBUGIF("handler::register") {
         DEBUGMSGTL(("handler::register",
                     "Registering (with no callback) "));
@@ -221,6 +232,14 @@ int
 netsnmp_inject_handler(netsnmp_handler_registration *reginfo,
                        netsnmp_mib_handler *handler)
 {
+    if (handler == NULL || reginfo == NULL) {
+        snmp_log(LOG_ERR, "netsnmp_inject_handler() called illegally\n");
+        return SNMP_ERR_GENERR;
+    }
+    if (reginfo->handler == NULL) {
+        snmp_log(LOG_ERR, "no handler specified.");
+        return SNMP_ERR_GENERR;
+    }
     DEBUGMSGTL(("handler:inject", "injecting %s before %s\n",
                 handler->handler_name, reginfo->handler->handler_name));
     handler->next = reginfo->handler;
