@@ -57,6 +57,9 @@ extern          "C" {
         return netsnmp_request_get_list_data(request, TABLE_CONTAINER_NAME);
     }
 
+    void netsnmp_container_table_insert_row(netsnmp_request_info *request,
+                                            netsnmp_index *row);
+
     /** retrieve the container used by the table_container helper */
     netsnmp_container*
     netsnmp_container_table_extract(netsnmp_request_info *request);
