@@ -147,12 +147,6 @@ handle_snmp_packet(int operation, struct snmp_session *session, int reqid,
 	while ( asp->end->next_variable != NULL )
 	    asp->end = asp->end->next_variable;
 	
-    /* FIX -- surely this is undesired?
-     */
-    asp->next = agent_session_list;
-    agent_session_list = asp;
-    /* */
-
     handle_next_pass( asp );
     return 1;
 }
