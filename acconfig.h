@@ -197,6 +197,15 @@
 /* udpstat.udps_discard */
 #undef STRUCT_UDPSTAT_HAS_UDPS_DISCARD
 
+/* udpstat.udps_discard */
+#undef STRUCT_UDPSTAT_HAS_UDPS_NOPORT
+
+/* udpstat.udps_discard */
+#undef STRUCT_UDPSTAT_HAS_UDPS_NOPORTBCAST
+
+/* udpstat.udps_discard */
+#undef STRUCT_UDPSTAT_HAS_UDPS_FULLSOCK
+
 /* arphd.at_next */
 #undef STRUCT_ARPHD_HAS_AT_NEXT
 
