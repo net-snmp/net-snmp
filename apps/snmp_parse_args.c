@@ -224,7 +224,7 @@ snmp_parse_args(argc, argv, session)
 
       case 'h':
         usage();
-        exit(1);
+        exit(0);
         break;
           
       default:

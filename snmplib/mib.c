@@ -65,12 +65,8 @@ SOFTWARE.
 #include "parse.h"
 #include "int64.h"
 
-char *sprint_objid __P((char *, oid *, int));
-
 static void sprint_by_type __P((char *, struct variable_list *, struct enum_list *, char *, char *));
 static parse_subtree __P((struct tree *, char *, oid *, int *));
-       void set_function __P((struct tree *));		/* used by parse.c */
-static int lc_cmp __P((char *, char *));
 static char *uptimeString __P((u_long, char *));
 static void sprint_hexstring __P((char *, u_char *, int));
 static void sprint_asciistring __P((char *, u_char *, int));
@@ -806,9 +802,6 @@ struct tree *Mib;             /* Backwards compatibility */
 char Standard_Prefix[] = ".1.3.6.1.2.1.";
 char Prefix[128];
 
-extern void    init_mib_internals __P((void));	/* from parse.c */
-extern int     which_module __P((char *));	/* from parse.c */
-extern struct tree *find_tree_node __P((char *, int));	/* from parse.c */
 
 struct tree *get_tree_head __P((void))
 {
@@ -1057,7 +1050,7 @@ parse_subtree(subtree, input, output, out_len)
 	 * Find the name in the subtree;
 	 */
 	for (tp = subtree; tp; tp = tp->next_peer) {
-	    if (lc_cmp(tp->label, buf) == 0) {
+	    if (strcasecmp(tp->label, buf) == 0) {
 		subid = tp->subid;
 		goto found;
 	    }
@@ -1322,35 +1315,6 @@ found:
 	return subtree;
 }
 
-
-static int
-lc_cmp(s1, s2)
-    char *s1, *s2;
-{
-    char c1, c2;
-
-    while(*s1 && *s2){
-	if (isupper(*s1))
-	    c1 = tolower(*s1);
-	else
-	    c1 = *s1;
-	if (isupper(*s2))
-	    c2 = tolower(*s2);
-	else
-	    c2 = *s2;
-	if (c1 != c2)
-	    return ((c1 - c2) > 0 ? 1 : -1);
-	s1++;
-	s2++;
-    }
-
-    if (*s1)
-	return -1;
-    if (*s2)
-	return 1;
-    return 0;
-}
-
 /*
  * Clone of get_symbol that doesn't take a buffer argument
  */
@@ -1408,6 +1372,7 @@ fprint_description(f, objid, objidlen)
 {
     struct tree *tp = get_tree(objid, objidlen, tree_head);
     char *cp;
+    char str[32];
     if (tp) {
 	switch (tp->type) {
 	case TYPE_OBJID:	cp = "OBJECT IDENTIFIER"; break;
@@ -1424,7 +1389,8 @@ fprint_description(f, objid, objidlen)
 	case TYPE_BITSTRING:	cp = "BIT STRING"; break;
 	case TYPE_NSAPADDRESS:	cp = "NsapAddress"; break;
 	case TYPE_UINTEGER:	cp = "UInteger32"; break;
-	default:		cp = NULL;
+	case 0:			cp = NULL; break;
+	default:		sprintf(str,"type_%d", tp->type); cp = str;
 	}
 	if (cp) fprintf(f, "SYNTAX\t%s\n", cp);
 	if (tp->hint) fprintf(f, "DISPLAY-HINT\t\"%s\"\n", tp->hint);
@@ -1436,7 +1402,8 @@ fprint_description(f, objid, objidlen)
 	case ACCESS_NOACCESS:	cp = "not-accessible"; break;
 	case ACCESS_NOTIFY:	cp = "accessible-for-notify"; break;
 	case ACCESS_CREATE:	cp = "read-create"; break;
-	default:		cp = NULL;
+	case 0:			cp = NULL; break;
+	default:		sprintf(str,"access_%d", tp->access); cp = str;
 	}
 	if (cp) fprintf(f, "MAX-ACCESS\t%s\n", cp);
 	switch (tp->status) {
@@ -1445,7 +1412,8 @@ fprint_description(f, objid, objidlen)
 	case STATUS_OBSOLETE:	cp = "obsolete"; break;
 	case STATUS_DEPRECATED: cp = "deprecated"; break;
 	case STATUS_CURRENT:	cp = "current"; break;
-	default:		cp = NULL;
+	case 0:			cp = NULL; break;
+	default:		sprintf(str,"status_%d", tp->status); cp = str;
 	}
 	if (cp) fprintf(f, "STATUS\t%s\n", cp);
 	if (tp->description) fprintf(f, "DESCRIPTION\t\"%s\"\n", tp->description);

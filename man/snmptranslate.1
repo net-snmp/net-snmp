@@ -24,7 +24,7 @@
 .SH NAME
 snmptranslate - translate SNMP objects into more useful information
 .SH SYNOPSIS
-snmptranslate [-n] [-d] [-r] [-f|-s] [-w|-W] [-p] objectID
+snmptranslate [-n] [-d] [-R] [-f|-s] [-w|-W] [-p] objectID
 .SH DESCRIPTION
 Snmptranslate is an application that translates an SNMP object (SMI value or
 symbolic form) into another form of information.  With no other options, an
@@ -53,18 +53,18 @@ Print only the last symbolic part of the OID.
 .B \-d
 Print a description of the object.
 .TP
-.B \-r
+.B \-R
 Use "random access" to access the symbolic object wherever in the MIB tree it
 lives.
 .SH EXAMPLES
 .PP
-.I snmptranslate -n -r sysDescr
+.I snmptranslate -n -R sysDescr
 .PP
 will translate "sysDescr" to a more qualified form:
 .PP
 .I system.sysDescr
 .PP
-.I snmptranslate -n -f -d -r sysDescr
+.I snmptranslate -n -f -d -R sysDescr
 .PP
 will translate "sysDecr" to
 .PP

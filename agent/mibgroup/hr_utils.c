@@ -5,6 +5,7 @@
 
 
 #include <config.h>
+#include <sys/types.h>
 #if HAVE_NETINET_IN_H
 #include <netinet/in.h>
 #endif
@@ -44,7 +45,7 @@ date_n_time ( when, length )
     int  *length;
 {
     struct tm	*tm_p;
-    static char string[11];
+    static u_char string[11];
 
 		/*
 		 * Null time

@@ -83,7 +83,7 @@ struct column {
 
 static char **data = NULL;
 static char **indices = NULL;
-static index_width = 5;
+static int index_width = 5;
 static int fields;
 static int entries;
 static int allocated;

@@ -136,6 +136,9 @@ PERFORMANCE OF THIS SOFTWARE.
 #include <net/if_dl.h>
 #endif
 
+#if HAVE_NLIST_H
+#include <nlist.h>
+#endif
 #include "auto_nlist.h"
 #if solaris2
 #include "kernel_sunos5.h"

@@ -275,3 +275,5 @@ int get_node __P((char *, oid *, int *));
 struct tree *get_symbol __P((oid *, int, struct tree *, char *));
 struct tree *get_tree __P((oid *, int, struct tree *));
 struct tree *get_tree_head __P((void));
+void  set_function __P((struct tree *));
+void init_mib __P((void));

@@ -15,6 +15,7 @@
 #include "hr_swrun.h"
 #include "auto_nlist.h"
 
+#include <sys/param.h>
 #include <ctype.h>
 #if HAVE_SYS_PSTAT_H
 #include <sys/pstat.h>
@@ -74,8 +75,12 @@ static int current_proc_entry;
 
 void	init_hr_swrun( )
 {
+#ifdef PROC_SYMBOL
   auto_nlist( PROC_SYMBOL,0,0 );
+#endif
+#ifdef NPROC_SYMBOL
   auto_nlist( NPROC_SYMBOL,0,0 );
+#endif
 }
 
 #define MATCH_FAILED	-1
