@@ -75,9 +75,16 @@ handle_agentx_response( int operation,
 
     asp->outstanding_requests = NULL;
 
+    DEBUGMSGTL(("agentx/master","handle_agentx_response() beginning...\n"));
     for ( i = 0, vbp = pdu->variables ;
-		i < ax_vlist->num_vars ; i++, vbp = vbp->next_variable ) {
+          vbp && i < ax_vlist->num_vars ;
+          i++, vbp = vbp->next_variable ) {
 
+      if (vbp) {
+        DEBUGMSGTL(("agentx/master","  handle_agentx_response: processing: "));
+        DEBUGMSGOID(("agentx/master",vbp->name, vbp->name_length));
+        DEBUGMSG(("agentx/master","\n"));
+      }
 	if ( ds_get_boolean(DS_APPLICATION_ID, DS_AGENT_VERBOSE) ) {
 	    sprint_variable (buf, vbp->name, vbp->name_length, vbp);
 	    DEBUGMSGTL(("snmp_agent", "    >> %s\n", buf));
@@ -109,6 +116,7 @@ handle_agentx_response( int operation,
 					asp->pdu, (void*)asp);
     else
 #endif
+      DEBUGMSGTL(("agentx/master","handle_agentx_response() finishing...\n"));
 	return handle_snmp_packet(operation, session, reqid,
 					asp->pdu, (void*)asp);
 }
@@ -127,6 +135,8 @@ get_agentx_request(struct agent_snmp_session *asp,
     struct request_list     *req;
     struct snmp_pdu         *pdu;
     struct ax_variable_list *vlist;
+
+    DEBUGMSGTL(("agentx/master","processing request...\n"));
 
     for (req = asp->outstanding_requests ; req != NULL ; req = req->next_request ) {
 	if ( req->request_id == transID)		/* ??? */
@@ -158,13 +168,16 @@ get_agentx_request(struct agent_snmp_session *asp,
     pdu->sessid      = ax_session->sessid;
     switch (asp->pdu->command ) {
 	case SNMP_MSG_GET:
+                DEBUGMSGTL(("agentx/master","-> get\n"));
 		pdu->command = AGENTX_MSG_GET;
 		break;
 	case SNMP_MSG_GETNEXT:
 	case SNMP_MSG_GETBULK:
+                DEBUGMSGTL(("agentx/master","-> getnext/bulk\n"));
 		pdu->command = AGENTX_MSG_GETNEXT;
 		break;
 	case SNMP_MSG_SET:
+                DEBUGMSGTL(("agentx/master","-> set\n"));
 		switch ( asp->mode ) {
 				/*
 				 * This is a provisional mapping of
@@ -189,6 +202,7 @@ get_agentx_request(struct agent_snmp_session *asp,
 		}
 		break;
 	default:
+                DEBUGMSGTL(("agentx/master","-> unknown\n"));
 		free( req );
 		free( pdu );
 		free( vlist );
@@ -210,6 +224,7 @@ get_agentx_request(struct agent_snmp_session *asp,
     req->next_request         = asp->outstanding_requests;
     asp->outstanding_requests = req;
 
+    DEBUGMSGTL(("agentx/master","processing request...  DONE\n"));
     return req;
 }
 

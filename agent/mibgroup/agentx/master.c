@@ -25,6 +25,7 @@
 #include "agentx/protocol.h"
 #include "agentx/master_admin.h"
 #include "agentx/master_request.h"
+#include "snmp_debug.h"
 #include "default_store.h"
 #include "ds_agent.h"
 
@@ -47,6 +48,7 @@ void init_master(void)
     if ( ds_get_boolean(DS_APPLICATION_ID, DS_AGENT_ROLE) != MASTER_AGENT )
 	return;
 
+    DEBUGMSGTL(("agentx/master","initializing...\n"));
     snmp_sess_init( session );
     session->version  = AGENTX_VERSION_1;
     session->peername = strdup(AGENTX_SOCKET);
@@ -72,6 +74,7 @@ void init_master(void)
 
     set_parse( session, agentx_parse );
     set_build( session, agentx_build );
+    DEBUGMSGTL(("agentx/master","initializing...   DONE\n"));
 }
 
 u_char *
@@ -85,6 +88,9 @@ agentx_var(struct variable *vp,
     int result;
     AddVarMethod *add_method;
 
+    DEBUGMSGTL(("agentx/master","request to pass to client:  "));
+    DEBUGMSGOID(("agentx/master", name, *length));
+    DEBUGMSG(("agentx/master","\n"));
 	/*
 	 * If the requested OID precedes the area of responsibility
 	 * of this subagent (and hence it's presumable a non-exact match),
