@@ -357,7 +357,7 @@ read_tcp_stat( TCP_STAT_STRUCTURE *tcpstat, int magic )
    int i;
 #if (defined(CAN_USE_SYSCTL) && defined(TCPCTL_STATS))
    static int sname[4] = { CTL_NET, PF_INET, IPPROTO_TCP, TCPCTL_STATS };
-   size_t len = sizeof( *udpstat );
+   size_t len = sizeof( *tcpstat );
 #endif
 #ifdef solaris2
    mib2_ip_t ipstat;
