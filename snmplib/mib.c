@@ -2271,9 +2271,13 @@ _sprint_realloc_objid(u_char **buf, size_t *buf_len,
     cp++;
 
     if (ds_get_int(DS_LIBRARY_ID, DS_LIB_PRINT_SUFFIX_ONLY) == 2 && cp > tbuf){
-      char modbuf[256], *mod = module_name(subtree->modid, modbuf);
+      char modbuf[256] = {0}, *mod = module_name(subtree->modid, modbuf);
 
-      if (!*buf_overflow) {
+      /*
+       * Don't add the module ID if it's just numeric
+       * (i.e. we couldn't look it up properly)
+       */
+      if (!*buf_overflow && modbuf[0] != '#') {
 	if (!snmp_strcat(buf, buf_len, out_len, allow_realloc, (const u_char*)mod) ||
 	    !snmp_strcat(buf, buf_len, out_len, allow_realloc, (const u_char*)"::")) {
 	  *buf_overflow = 1;
