@@ -16,3 +16,8 @@
 #define NPROC_SYMBOL "nprocs"
 
 #undef TOTAL_MEMORY_SYMBOL
+
+#undef MBSTAT_SYMBOL
+
+#undef INP_NEXT_SYMBOL
+#define INP_NEXT_SYMBOL inp_next

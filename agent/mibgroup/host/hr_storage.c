@@ -4,6 +4,13 @@
  */
 
 #include <net-snmp/net-snmp-config.h>
+
+#if defined(freebsd5)
+/* undefine these in order to use getfsstat */
+#undef HAVE_STATVFS
+#undef STRUCT_STATVFS_HAS_F_FRSIZE
+#endif
+
 #include <sys/types.h>
 #include <sys/param.h>
 #if HAVE_UNISTD_H
