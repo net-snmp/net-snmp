@@ -40,6 +40,7 @@ extern          "C" {
     int             init_snmp_enum(const char *type);
     struct snmp_enum_list *se_find_list(unsigned int major,
                                         unsigned int minor);
+    struct snmp_enum_list *se_find_slist(const char *listname);
     int             se_store_in_list(struct snmp_enum_list *,
                                      unsigned int major, unsigned int minor);
     int             se_find_value(unsigned int major, unsigned int minor,
@@ -54,7 +55,8 @@ extern          "C" {
      * finds a list of enums in a list of enum structs associated by a name. 
      */
     /*
-     * not as fast as the above routines, since two lists must be traversed. 
+     * find a list, and then operate on that list
+     *   ( direct methods further below if you already have the list pointer)
      */
     char           *se_find_label_in_slist(const char *listname,
                                            int value);
