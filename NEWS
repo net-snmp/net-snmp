@@ -39,7 +39,7 @@ the ChangeLog file for a more detailed listing of changes/bug fixes.
     - The target mib has been implemented as an optional module.
     - More documentation has been written.
     - The recommended mib module API has changed slightly, but is
-      backwards compatible as well.  See the AGENT file for new
+      backwards compatible as well.  See the AGENT.txt file for new
       documentation on how to write mib modules for the agent.
     
   Fixes:
