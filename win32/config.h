@@ -158,7 +158,7 @@
 #undef HAVE_BCOPY
 
 /* Define if you have the gethostname function.  */
-#undef HAVE_GETHOSTNAME
+#define HAVE_GETHOSTNAME 1
 
 /* Define if you have the getloadavg function.  */
 #undef HAVE_GETLOADAVG
