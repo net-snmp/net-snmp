@@ -31,6 +31,7 @@ struct agent_snmp_session {
     int		exact;
     int		status;
     int		index;
+    int		inclusive;
     
     struct request_list *outstanding_requests;
     struct agent_snmp_session *next;
