@@ -356,6 +356,9 @@ main(argc, argv)
 		case 'd':
 		    snmp_dump_packet++;
 		    break;
+		case 'q':
+		    quick_print++;
+		    break;
                 case 'p':
                     port_flag++;
                     dest_port = atoi(argv[++arg]);
