@@ -53,8 +53,14 @@ SOFTWARE.
 #if HAVE_SYS_FILE_H
 #include <sys/file.h>
 #endif
-#ifdef solaris2
+#if HAVE_KSTAT_H
 #include <kstat.h>
+#endif
+#if HAVE_SYS_PARAM_H
+#include <sys/param.h>
+#endif
+#if HAVE_SYS_SYSCTL_H
+#include <sys/sysctl.h>
 #endif
 #include "system.h"
 
@@ -109,9 +115,9 @@ u_long get_myaddr(){
  * Returns uptime in centiseconds(!).
  */
 long get_uptime(){
-#if bsdlike
+#ifdef bsdlike
     struct timeval boottime, now, diff;
-#ifndef freebsd2
+#ifndef CAN_USE_SYSCTL
     int kmem;
     staticstruct nlist nl[] = {
 	    { "_boottime" },
@@ -129,7 +135,7 @@ long get_uptime(){
     lseek(kmem, (long)nl[0].n_value, L_SET);
     read(kmem, &boottime, sizeof(boottime));
     close(kmem);
-#else /* freebsd2 */
+#else /* CAN_USE_SYSCTL */
     int                 mib[2];
     size_t              len;
 
@@ -139,7 +145,7 @@ long get_uptime(){
     len = sizeof(boottime);
 
     sysctl(mib, 2, &boottime, &len, NULL, NULL);
-#endif /* freebsd2 */
+#endif /* CAN_USE_SYSCTL */
 
     gettimeofday(&now, 0);
     now.tv_sec--;
