@@ -344,6 +344,20 @@ proxy_got_response(int operation, netsnmp_session * sess, int reqid,
         return 0;
 
     case NETSNMP_CALLBACK_OP_RECEIVED_MESSAGE:
+        if (pdu->errstat != SNMP_ERR_NOERROR) {
+            /*
+             *  This is much too simplistic, but if we receive an error
+             *   from the proxy agent, we've got to do *something* with it.
+             *   We can hardly pretend it didn't happen and process the
+             *   (missing) varbinds regardless!
+             *
+             *  Note that the indentation of the 'else' block has not been
+             *   updated (since this is a temporary fix), so don't be misled.
+             */
+            DEBUGMSGTL(("proxy", "got error response (%d)\n", pdu->errstat));
+            netsnmp_set_request_error(cache->reqinfo, requests,
+                                      SNMP_ERR_GENERR);
+	} else {
         vars = pdu->variables;
 
         /*
@@ -427,6 +441,7 @@ proxy_got_response(int operation, netsnmp_session * sess, int reqid,
                      "response to proxy request illegal.  We're screwed.\n");
             netsnmp_set_request_error(cache->reqinfo, requests,
                                       SNMP_ERR_GENERR);
+        }
         }
 
         /* fix bulk_to_next operations */
