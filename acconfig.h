@@ -323,6 +323,9 @@
 
 #define LASTFIELD -1      /* internal define */
 
+/* configure options specified */
+#define CONFIGURE_OPTIONS ""
+
 /* debugging macros */
 
 #ifndef HAVE_STRCHR
