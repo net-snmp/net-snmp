@@ -84,6 +84,9 @@
 #if HAVE_NETINET_TCP_TIMER_H
 #include <netinet/tcp_timer.h>
 #endif
+#if HAVE_NETINET_TCPIP_H
+#include <netinet/tcpip.h>
+#endif
 #if HAVE_NETINET_TCP_VAR_H
 #include <netinet/tcp_var.h>
 #endif
