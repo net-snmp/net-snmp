@@ -424,6 +424,7 @@ snmp_parse_args(int argc,
                       (u_char *)Apsz, strlen(Apsz),
                       session->securityAuthKey,
                       &session->securityAuthKeyLen) != SNMPERR_SUCCESS) {
+          snmp_perror("snmpgetnext");
           fprintf(stderr,"Error generating Ku from authentication pass phrase. \n");
           usage();
           exit(1);
@@ -446,6 +447,7 @@ snmp_parse_args(int argc,
                       (u_char *)Xpsz, strlen(Xpsz),
                       session->securityPrivKey,
                       &session->securityPrivKeyLen) != SNMPERR_SUCCESS) {
+          snmp_perror("snmpgetnext");
           fprintf(stderr,"Error generating Ku from privacy pass phrase. \n");
           usage();
           exit(1);
