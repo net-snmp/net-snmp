@@ -805,7 +805,7 @@ asn_parse_length(u_char  *data,
 	}
 	if ((long) *length < 0) {
 	    snprintf(ebuf, sizeof(ebuf),
-	    	"%s: negative data length %ld\n", (long) *length);
+	    	"%s: negative data length %ld\n", errpre, (long) *length);
 	    ERROR_MSG(ebuf);
 	    return NULL;
 	}
