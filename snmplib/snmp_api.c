@@ -1,3 +1,4 @@
+#define USE_ASN_SHORT_LEN 1
 /******************************************************************
 	Copyright 1989, 1991, 1992 by Carnegie Mellon University
 
@@ -1788,6 +1789,37 @@ _snmp_build(struct snmp_session *session,
     switch (pdu->version) {
     case SNMP_VERSION_1:
     case SNMP_VERSION_2c:
+#ifdef NO_ZEROLENGTH_COMMUNITY
+	if (pdu->community_len == 0){
+	    if (session->community_len == 0){
+		session->s_snmp_errno = SNMPERR_BAD_ADDRESS;
+		return -1;
+	    }
+	    pdu->community = (u_char *)malloc(session->community_len);
+	    memmove(pdu->community, session->community,
+                        session->community_len);
+	    pdu->community_len = session->community_len;
+	}
+#else /* !NO_ZEROLENGTH_COMMUNITY */
+	if (! (pdu->community_len != 0 &&
+	       pdu->command == SNMP_MSG_RESPONSE )) {
+	/* copy session community exactly to pdu community */
+	    if (0 == session->community_len) {
+		SNMP_FREE(pdu->community); pdu->community = 0;
+	    }
+	    else if (pdu->community_len == session->community_len) {
+		memmove(pdu->community, session->community,
+			    session->community_len);
+	    }
+	    else {
+	    SNMP_FREE(pdu->community);
+	    pdu->community = (u_char *)malloc(session->community_len);
+	    memmove(pdu->community, session->community,
+                        session->community_len);
+	    }
+	    pdu->community_len = session->community_len;
+	}
+#endif /* !NO_ZEROLENGTH_COMMUNITY */
 
         /* store the version field */
         version = pdu->version;
