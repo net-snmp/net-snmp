@@ -1274,7 +1274,7 @@ find_best_tree_node(const char *pattrn, struct tree *tree_top,
         tree_top = get_tree_head();
 
     for (tp = tree_top; tp; tp = tp->next_peer) {
-        if (!tp->reported)
+        if (!tp->reported && tp->label)
             new_match = compute_match(tp->label, pattrn);
         tp->reported = 1;
 
