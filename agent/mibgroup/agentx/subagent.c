@@ -681,8 +681,8 @@ subagent_open_master_session(void)
     sess.timeout = SNMP_DEFAULT_TIMEOUT;
     sess.flags |= SNMP_FLAGS_STREAM_SOCKET;
     if (netsnmp_ds_get_string(NETSNMP_DS_APPLICATION_ID, NETSNMP_DS_AGENT_X_SOCKET)) {
-        sess.peername =
-            netsnmp_ds_get_string(NETSNMP_DS_APPLICATION_ID, NETSNMP_DS_AGENT_X_SOCKET);
+        sess.peername = strdup(
+            netsnmp_ds_get_string(NETSNMP_DS_APPLICATION_ID, NETSNMP_DS_AGENT_X_SOCKET));
     } else {
         sess.peername = strdup(AGENTX_SOCKET);
     }
