@@ -223,7 +223,6 @@ u_char *var_extensible_pass(struct variable *vp,
         if (fgets(buf,sizeof(buf),file) == NULL) {
           *var_len = 0;
           fclose(file);
-          close(fd);
           wait_on_exec(passthru);
           return(NULL);
         }
@@ -240,12 +239,10 @@ u_char *var_extensible_pass(struct variable *vp,
             || fgets(buf2,sizeof(buf2),file) == NULL) {
           *var_len = 0;
           fclose(file);
-          close(fd);
           wait_on_exec(passthru);
           return(NULL);
         }
         fclose(file);
-        close(fd);
         wait_on_exec(passthru);
         /* buf contains the return type, and buf2 contains the data */
         if (!strncasecmp(buf,"string",6)) {

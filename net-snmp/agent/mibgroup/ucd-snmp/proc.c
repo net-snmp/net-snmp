@@ -624,7 +624,8 @@ int sh_count_procs(char *procname)
   struct extensible ex;
   int slow = strstr (PSCMD, "ax") != NULL;
   
-  if ((fd = get_ps_output(&ex)) > 0) {
+  strcpy(ex.command,PSCMD);
+  if ((fd = get_exec_output(&ex)) > 0) {
     if ((file = fdopen(fd,"r")) == NULL) {
       setPerrorstatus("fdopen");
       close(fd);
@@ -660,9 +661,7 @@ int sh_count_procs(char *procname)
       ret = -1;
     }
     fclose(file);
-    close(fd);
     wait_on_exec(&ex);
-    ex.pid = 0;
   } else {
     ret = -1;
   }
@@ -670,12 +669,4 @@ int sh_count_procs(char *procname)
 }
 #endif
 
-int get_ps_output(struct extensible *ex)
-{
-  int fd;
-
-  strcpy(ex->command,PSCMD);
-  fd = get_exec_output(ex);
-  return(fd);
-} 
 
