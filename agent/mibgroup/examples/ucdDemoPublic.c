@@ -117,11 +117,11 @@ write_ucdDemoResetKeys(
   struct usmUser *user;
 
   if (var_val_type != ASN_INTEGER) {
-      DEBUGP("write to ucdDemoResetKeys not ASN_INTEGER\n");
+      DEBUGMSGTL(("ucdDemoPublic","write to ucdDemoResetKeys not ASN_INTEGER\n"));
       return SNMP_ERR_WRONGTYPE;
   }
   if (var_val_len > sizeof(long_ret)) {
-      DEBUGP("write to ucdDemoResetKeys: bad length\n");
+      DEBUGMSGTL(("ucdDemoPublic","write to ucdDemoResetKeys: bad length\n"));
       return SNMP_ERR_WRONGLENGTH;
   }
   if (action == COMMIT) {
@@ -159,11 +159,11 @@ write_ucdDemoPublicString(
   int size, bigsize=1000;
 
   if (var_val_type != ASN_OCTET_STR) {
-      DEBUGP("write to ucdDemoPublicString not ASN_OCTET_STR\n");
+      DEBUGMSGTL(("ucdDemoPublic","write to ucdDemoPublicString not ASN_OCTET_STR\n"));
       return SNMP_ERR_WRONGTYPE;
   }
   if (var_val_len > sizeof(string)) {
-      DEBUGP("write to ucdDemoPublicString: bad length\n");
+      DEBUGMSGTL(("ucdDemoPublic","write to ucdDemoPublicString: bad length\n"));
       return SNMP_ERR_WRONGLENGTH;
   }
   if (action == COMMIT) {
