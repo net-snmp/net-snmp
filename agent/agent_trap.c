@@ -325,8 +325,10 @@ void send_enterprise_trap_vars (int trap,
 				    sizeof(link_up_oid));
 		break;
 	case SNMP_TRAP_AUTHFAIL:
-		if (snmp_enableauthentraps == SNMP_AUTHENTICATED_TRAPS_DISABLED)
+		if (snmp_enableauthentraps == SNMP_AUTHENTICATED_TRAPS_DISABLED) {
+		    snmp_free_pdu(template_pdu);
 		    return;
+		}
 		snmp_set_var_value( &snmptrap_var,
 				    (u_char *)auth_fail_oid,
 				    sizeof(auth_fail_oid));
