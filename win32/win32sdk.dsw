@@ -362,9 +362,6 @@ Package=<5>
 
 Package=<3>
 {{{
-    Begin Project Dependency
-    Project_Dep_Name libsnmp
-    End Project Dependency
 }}}
 
 ###############################################################################
