@@ -28,7 +28,7 @@ libdir = $(exec_prefix)/lib
 snmplibdir = $(prefix)/lib/snmp
 
 CFLAGS=@CFLAGS@
-CPPFLAGS=@CPPFLAGS@ -I../.. -I../../snmplib
+CPPFLAGS=@CPPFLAGS@ -I../.. -I$(srcdir)/../.. -I$(srcdir)/../../snmplib
 LDFLAGS=@LDFLAGS@
 
 INSTALL = @INSTALL@

@@ -13,7 +13,7 @@ mibdir = $(snmplibdir)/mibs
 SED = @SED@
 
 INSTALL = @INSTALL@
-CPP = @CPP@ -I. -DDONT_INC_STRUCTS -DBINDIR=$(bindir) $(EXTRACPPFLAGS)
+CPP = @CPP@ -I. -I$(srcdir) -DDONT_INC_STRUCTS -DBINDIR=$(bindir) $(EXTRACPPFLAGS)
 CFLAGS = @CFLAGS@
 EXTRACPPFLAGS = @EXTRACPPFLAGS@
 
@@ -25,7 +25,7 @@ INSTALLDIRS = $(SUBDIRS)
 all:	mib.txt ucd-snmp.txt sedscript EXAMPLE.conf subdirs
 
 sedscript: sedscript.in config.h agent/extensible/mibdefs.h
-	$(CPP) -DPREFIX=$(prefix) sedscript.in | sed 's/REMOVEME//g;s# /#/#g;s/ #/#/g;' > sedscript
+	$(CPP) -DPREFIX=$(prefix) $(srcdir)/sedscript.in | sed 's/REMOVEME//g;s# /#/#g;s/ #/#/g;' > sedscript
 
 subdirs:
 	for i in $(SUBDIRS) ; do \
@@ -87,16 +87,16 @@ touchit:
 	touch Makefile
 
 Makefile: Makefile.in config.status
-	$(SHELL) ./config.status
+	./config.status
 
 config.status: configure
 	$(srcdir)/config.status --recheck
 
 mib.txt: mibII.txt
-	cat mibII.txt > mib.txt
+	cp $(srcdir)/mibII.txt mib.txt
 
 ucd-snmp.txt: ece-mib.def sedscript
-	cat ece-mib.def | $(SED) -f sedscript > ucd-snmp.txt
+	$(SED) -f sedscript $(srcdir)/ece-mib.def > ucd-snmp.txt
 
 EXAMPLE.conf: sedscript EXAMPLE.conf.def
-	$(SED) -f sedscript EXAMPLE.conf.def > EXAMPLE.conf
+	$(SED) -f sedscript $(srcdir)/EXAMPLE.conf.def > EXAMPLE.conf
