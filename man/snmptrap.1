@@ -24,9 +24,9 @@
 .SH NAME
 snmptrap, snmpinform - sends an SNMP trap to a manager
 .SH SYNOPSIS
-snmptrap -v 1 [common arguments] enterprise-oid agent generic-trap specific-trap uptime [objectID type value]...
+snmptrap -v 1 [-Ci] [common arguments] enterprise-oid agent generic-trap specific-trap uptime [objectID type value]...
 .PP
-snmptrap -v [2c|3] [common arguments] uptime trap-oid [objectID type value]...
+snmptrap -v [2c|3] [-Ci] [common arguments] uptime trap-oid [objectID type value]...
 .PP
 snmpinform -v [2c|3] [common arguments] uptime trap-oid [objectID type value]...
 .SH DESCRIPTION
@@ -38,10 +38,11 @@ identifier.  Each variable name is given in the format specified in
 .IR variables (5).
 .PP
 When invoked as
-.I snmpinform
-it sends an INFORM-PDU, expecting a response from the trap receiver,
-retransmitting if required.
-Otherwise it sends an TRAP-PDU or TRAP2-PDU.
+.I snmpinform,
+or when -Ci is added to the command line flags of snmptrap, it sends
+an INFORM-PDU, expecting a response from the trap receiver,
+retransmitting if required.  Otherwise it sends an TRAP-PDU or
+TRAP2-PDU.
 .PP
 If any of the required version 1 parameters, 
 .IR enterprise-oid ,
