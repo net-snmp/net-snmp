@@ -189,7 +189,7 @@ int             Facility = LOG_DAEMON;
 #define AGENT_RUNNING 1
 #define AGENT_STOPPED 0
 int             agent_status = AGENT_STOPPED;
-LPTSTR          g_szAppName = _T("Net-Snmp Agent");     /* Application Name */
+LPTSTR          g_szAppName = _T("Net-SNMP Agent");     /* Application Name */
 #endif
 
 extern char   **argvrestartp;
