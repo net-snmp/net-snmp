@@ -21,6 +21,7 @@ Microsoft Visual C++ - Installing
 Microsoft Visual C++ - Building with OpenSSL
 Microsoft Visual C++ - Building your own applications with snmplib
 Microsoft Visual C++ - Extending the Agent
+GCC on Windows
 Cygwin - Building
 MinGW - Building
 Configuring Net-SNMP
@@ -546,6 +547,40 @@ and 'snmpd' project. And things should work just fine.
 
 ***************************************************************************
 *
+* GCC on Windows
+*
+***************************************************************************
+
+There are two versions of GCC (the GNU Compiler Collection) in common use on
+Microsoft Windows operating systems. This section will attempt to point the 
+user to the information required to choose the one to best suit their needs.
+
+Cygwin
+
+The Cygwin compiler and toolkit provides a Unix style shell and environment
+for Windows based systems. The cygwin1.dll provides a POSIX emulation layer 
+that simplifies porting Unix / Linux applications to Windows. The Cygwin dlls
+are required if an application is to be distributed. The dependency on the 
+Cygwin dlls can be eliminated with the --mno-cygwin compiler flag, which uses
+MinGW to compile a native Windows binary, but the benefit of the POSIX emulation
+is lost. The Cygwin tool chain and documentation can be found at:
+
+http://sources.redhat.com/cygwin/
+
+
+MinGW
+
+The MinGW compiler is a Windows native version of gcc. The tool chain links 
+against existing Windows dlls found on most systems. Binaries compiled with MinGW
+do not require additional libraries to be distributed. The MSyS environment 
+provides a shell (Bash) and tools to emulate a Unix style build environment on 
+Windows. The MinGW and MSyS tools and documentation can be found at:
+
+http://www.mingw.org
+
+
+***************************************************************************
+*
 * Cygwin - Building
 *
 ***************************************************************************
@@ -600,9 +635,6 @@ Configure net-snmp using the configure flag
 Run make to compile the package. 
 
 Run make install to install the package.
-
-The agent will not currently run as a service on Windows system that support
-services when built with MinGW. 
 
 
 ***************************************************************************
