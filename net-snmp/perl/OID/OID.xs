@@ -47,7 +47,6 @@ netsnmp_oid *
 nso_newptr(initstring)
     char *initstring
     CODE:
-        init_snmp(NULL);
         RETVAL = SNMP_MALLOC_TYPEDEF(netsnmp_oid);
         RETVAL->name = RETVAL->namebuf;
         RETVAL->len = sizeof(RETVAL->namebuf)/sizeof(RETVAL->namebuf[0]);
