@@ -87,6 +87,7 @@ EXPORTS
 	snmp_timeout
 	snmp_set_do_debugging
 	snmp_get_do_debugging
+	snmp_get_do_logging
 	snmp_disable_stderrlog
 	snmp_enable_syslog
 	snmp_enable_filelog
