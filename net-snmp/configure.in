@@ -764,7 +764,7 @@ for i in $new_transport_list; do
     fi
     transport_src="snmp"$i"Domain.c"
     rel_transport_src="snmplib/"$transport_src
-    if test -f $rel_transport_src; then
+    if test -f "$srcdir/$rel_transport_src"; then
       transport_result_list="$transport_result_list $i"
       transport_src_list="$transport_src $transport_src_list"
       transport_def=`echo $i | sed 'y/abcdefghijklmnopqrstuvwxyz/ABCDEFGHIJKLMNOPQRSTUVWXYZ/'`
@@ -816,7 +816,7 @@ for i in $new_with_security; do
   hfile="snmp"$i".h"
 
   # make sure support exists for it
-  if test -f "snmplib/"$cfile -a -f "snmplib/"$hfile; then
+  if test -f $srcdir"/snmplib/"$cfile -a -f $srcdir"/snmplib/"$hfile; then
     :
   else
     echo
