@@ -668,13 +668,13 @@ main(int argc, char *argv[])
 int
 open_port (u_short dest_port)
 {
-    int sd, index;
+    int sd, lindex;
     struct sockaddr_in	me;
         
-        for(index = 0; index < sdlen; index++)
-	    if (dest_port == portlist[index])
+        for(lindex = 0; lindex < sdlen; lindex++)
+	    if (dest_port == portlist[lindex])
 		break;
-	if (index < sdlen)  /* found a hit before the end of the list */
+	if (lindex < sdlen)  /* found a hit before the end of the list */
 	    return 0;
 	printf("%u ", dest_port); 
 	fflush(stdout);
@@ -707,10 +707,10 @@ open_port (u_short dest_port)
 #define ONE_SEC         1000000L
 
 static int
-receive(int sdlist[], 
-	int sdlen)
+receive(int sdv[], 
+	int sdc)
 {
-    int numfds, iindex;
+    int numfds, ii;
     fd_set fdset;
     struct timeval  timeout, *tvp = &timeout;
     struct timeval  sched, *svp = &sched, now, *nvp = &now;
@@ -732,10 +732,10 @@ receive(int sdlist[],
 
 	numfds = 0;
 	FD_ZERO(&fdset);
-	for(iindex = 0; iindex < sdlen; iindex++){
-	    if (sdlist[iindex] + 1 > numfds)
-		numfds = sdlist[iindex] + 1;
-	    FD_SET(sdlist[iindex], &fdset);
+	for(ii = 0; ii < sdc; ii++){
+	    if (sdv[ii] + 1 > numfds)
+		numfds = sdv[ii] + 1;
+	    FD_SET(sdv[ii], &fdset);
 	}
         block = 0;
         snmp_select_info(&numfds, &fdset, tvp, &block);
@@ -743,10 +743,10 @@ receive(int sdlist[],
             tvp = NULL; /* block without timeout */
 	count = select(numfds, &fdset, 0, 0, tvp);
 	if (count > 0){
-	    for(iindex = 0; iindex < sdlen; iindex++){
-		if(FD_ISSET(sdlist[iindex], &fdset)){
-		    sd_handlers[iindex](sdlist[iindex]);
-		    FD_CLR(sdlist[iindex], &fdset);
+	    for(ii = 0; ii < sdc; ii++){
+		if(FD_ISSET(sdv[ii], &fdset)){
+		    sd_handlers[ii](sdv[ii]);
+		    FD_CLR(sdv[ii], &fdset);
 		}
 	    }
 	    snmp_read(&fdset);
