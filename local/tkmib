@@ -56,6 +56,8 @@ foreach my $i (@displayInfo) {
     $displayInfoStates{$i} = 1;
 }
 
+my @saveoptions = ('displayoidas', 'writecolor', 'graphtime', 'graphdelta');
+
 # source config file
 do $opts{'C'} if ($opts{'C'} && -f $opts{'C'});
 
@@ -76,6 +78,7 @@ $session_opts{'Timeout'} = $opts{'t'} if ($opts{'t'});
 $host = shift if ($#ARGV > -1);
 $session_opts{'Community'} = shift if ($#ARGV > -1);
 
+$displayoidas='full';
 $graphtime=5;
 $graphdelta=1;
 @graphcolors=qw(blue red green yellow purple);
@@ -125,7 +128,21 @@ $MibMenuBut->pack(-side => 'left');
 
 $OptMenuBut = $MenuFrame->Menubutton(-pady => $tmpbd, -padx => $tmpbd, -text => "Options",
 				     -menuitems =>
-      [[Cascade => "~Display"],
+      [[Cascade => "~Display", -menuitems =>
+	[
+	 [Cascade => "~OID Display", -menuitems =>
+	  [
+	   [Radiobutton => 'full', -variable => \$displayoidas],
+	   [Radiobutton => 'numeric', -variable => \$displayoidas],
+	   [Radiobutton => 'short', -variable => \$displayoidas],
+	   [Radiobutton => 'module', -variable => \$displayoidas]
+	   ]
+	  ],
+	 [Button => "Writable Color", 
+	  -command => [\&entryBox,"Writable Color",
+		       "Color for writable objects:",
+		       \$writecolor]]
+	 ]],
        [Cascade => "Use SNMP Version", -menuitems =>
 	[
 	 [Radiobutton => '1', -variable => \$session_opts{'Version'}],
@@ -301,12 +318,7 @@ sub insertresult {
 
 sub insertvar {
     my $var = shift;
-    my $name;
-    if ($var->tag !~ /[a-z]/) {
-	$name = SNMP::translateObj($var->tag);
-    } else {
-	$name = "$var->[$SNMP::Varbind::tag_f].$var->[$SNMP::Varbind::iid_f]";
-    }
+    my $name = get_oid($var);
 
     insertresult($name,"$var->[$SNMP::Varbind::val_f]");
 }
@@ -904,14 +916,15 @@ sub save_options {
     }
     umask $umask;
     $status->configure(-text => "saving options to $opts{C}");
-    foreach $i (keys(%session_opts)) {
-	print O '$session_opts{\'' . $i . '\'} = "' . $session_opts{$i} . "\";\n";
-    }
+    print O Data::Dumper->Dump([\%session_opts], [qw(*session_opts)]);
     foreach my $i (@displayInfo) {
-	print O '$displayInfoStates{' . $i . '} = ' . "\"$displayInfoStates{$i}\"\n;";
+	print O '$displayInfoStates{' . $i . '} = ' . "\"$displayInfoStates{$i}\";\n";
     }
-    print O '$graphtime = ' . $graphtime . ";\n";
+    foreach my $var (@saveoptions) {
+	print O Data::Dumper->Dump([$$var], [$var]);
+    }
     close(O);
+    $status->configure(-text => "saved options to $opts{C}");
 }
 
 # returns 1 if $oid2 is below $oid1 in the hierarchy
@@ -924,4 +937,37 @@ sub is_in_subtree {
     # has more on it or is exactly the same
     return 1 if ($oid2 =~ /^$oid1\./ || $oid2 =~ /^$oid1$/);
     return 0;
+}
+
+sub format_oid {
+    my ($oid, $type) = @_;
+    $type = $displayoidas if ($type eq "");
+
+    if ($type eq 'numeric') {
+	return SNMP::translateObj($oid) if ($oid !~ /^[\d\.]*$/);
+	return $oid;
+    } elsif ($type eq 'full') {
+	return SNMP::translateObj($oid, 1) if ($oid =~ /^[\d\.]*$/);
+	return SNMP::translateObj(SNMP::translateObj($oid), 1) if ($oid !~ /^\./);
+	return $oid;
+    } elsif ($type eq 'short' || $type eq 'module') {
+	$oid = SNMP::translateObj($oid) if ($oid =~ /^[\d\.]*$/);
+	$oid =~ s/.*\.([a-zA-Z]\w+)\.(.*)/$1.$2/;
+	if ($type eq 'module') {
+	    $oid = $SNMP::MIB{$oid}->{'moduleID'} . "::" . $oid;
+	}
+	return $oid;
+    } elsif ($type eq 'module') {
+	$oid = SNMP::translateObj($oid) if ($oid =~ /^[\d\.]*$/);
+	$oid =~ s/.*\.([a-zA-Z]\w+)\.(.*)/$1.$2/;
+	return $oid;
+    } else {
+	warn 'unknown oid translation type: $type';
+	return $oid;
+    }
+}
+
+sub get_oid {
+    my ($var, $type) = @_;
+    return format_oid($var->tag . "." . $var->iid, $type);
 }
