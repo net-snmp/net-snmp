@@ -441,11 +441,13 @@ snmp_api_errstring(int snmp_errnumber)
         msg = "Unknown Error";
     }
     if (snmp_detail_f) {
-        sprintf (msg_buf, "%s (%s)", msg, snmp_detail);
+        snprintf (msg_buf, 256, "%s (%s)", msg, snmp_detail);
         snmp_detail_f = 0;
     }
-    else
-        strcpy(msg_buf,msg);
+    else {
+        strncpy(msg_buf,msg,256);
+    }
+    msg_buf[255] = '\0';
 
     return (msg_buf);
 }
@@ -471,15 +473,18 @@ snmp_error(struct snmp_session *psess,
     strcpy(buf, "");
     snmp_errnumber = psess->s_snmp_errno;
     if (snmp_errnumber >= SNMPERR_MAX && snmp_errnumber <= SNMPERR_GENERR){
-	strcpy(buf, api_errors[-snmp_errnumber]);
+	strncpy(buf, api_errors[-snmp_errnumber], 256);
     } else {
 	if (snmp_errnumber)
-	sprintf(buf, "Unknown Error %d", snmp_errnumber);
+	snprintf(buf, 256, "Unknown Error %d", snmp_errnumber);
     }
+    buf[255] = '\0';
 
     /* append a useful system errno interpretation. */
     if (psess->s_errno)
-        sprintf (&buf[strlen(buf)], " (%s)", strerror(psess->s_errno));
+        snprintf (&buf[strlen(buf)], 256-strlen(buf),
+                 " (%s)", strerror(psess->s_errno));
+    buf[255] = '\0';
     *p_str = strdup(buf);
 }
 
@@ -5038,7 +5043,8 @@ snmp_add_var(struct snmp_pdu *pdu,
         if (type == 'd'){
           ltmp = ascii_to_binary(value, buf);
         } else if (type == 's'){
-          strcpy((char*)buf, value);
+          strncpy((char*)buf, value, sizeof(buf));
+          buf[sizeof(buf)-1] = '\0';
           ltmp = strlen((char*)buf);
         } else if (type == 'x'){
           ltmp = hex_to_binary(value, buf);
