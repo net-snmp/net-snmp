@@ -556,10 +556,15 @@ struct variable2 context_variables[] = {
     {CONTEXTSTATUS, INTEGER, RWRITE, var_context, 1, {11}}
 };
 
+
 /* No access for community SNMP, RW possible for Secure SNMP */
 #define PRIVRW   0x0003  
 /* No access for community SNMP, RO possible for Secure SNMP */
 #define PRIVRO   0x0002
+
+/* Decline NoAuth requests */
+#define PRIVAUTHRW 0x0005
+#define PRIVAUTHRO 0x0004
 
 struct variable2 acl_variables[] = {
     {ACLPRIVELEGES, INTEGER, PRIVRW, var_acl, 1, {4}},
@@ -847,7 +852,11 @@ getStatPtr(name, namelen, type, len, acl, exact, write_method, pi,
                         (((pi->version == SNMP_VERSION_2) &&
                          !in_view(name, *namelen, pi->cxp->contextViewIndex)) ||
                          ((pi->version == SNMP_VERSION_1) &&
-                          (cvp->acl == PRIVRW || cvp->acl == PRIVRO)))) {
+                          (cvp->acl >= PRIVRO)) ||
+                          (pi->version == SNMP_VERSION_2) &&
+                          (cvp->acl >= PRIVAUTHRO) &&
+                          (pi->srcp->partyAuthProtocol == NOAUTH ||
+                           pi->dstp->partyAuthProtocol == NOAUTH))) {
 			access = NULL;
 			*write_method = NULL;
 			/*
