@@ -156,23 +156,11 @@ register_index(struct variable_list *varbind, int flags, struct snmp_session *ss
     struct variable_list *rv = NULL;
     struct snmp_index *new_index, *idxptr, *idxptr2;
     struct snmp_index *prev_oid_ptr, *prev_idx_ptr;
-    size_t buf_len = 0, out_len = 0;
-    u_char *buf = NULL;
     int res, res2, i;
 
-    if (sprint_realloc_variable(&buf, &buf_len, &out_len, 1,
-				varbind->name, varbind->name_length,
-				varbind)) {
-      DEBUGMSGTL(("register_index", "%s for session %08p\n", buf, ss));
-    } else {
-      DEBUGMSGTL(("register_index", "%s [TRUNCATED] for session %08p\n",
-		  buf, ss));
-    }
-    if (buf != NULL) {
-      free(buf);
-      buf = NULL;
-    }
-
+    DEBUGMSGTL(("register_index", "register "));
+    DEBUGMSGVAR(("register_index", varbind));
+    DEBUGMSG(("register_index", "for session %08p\n", ss));
 
 #if defined(USING_AGENTX_SUBAGENT_MODULE) && !defined(TESTING)
     if (ds_get_boolean(DS_APPLICATION_ID, DS_AGENT_ROLE) == SUB_AGENT )
