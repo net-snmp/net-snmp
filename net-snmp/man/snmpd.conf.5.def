@@ -111,6 +111,10 @@ EXTENSIBLEDOTMIB.LOADAVEMIBNUM.ERRORMSG (respectively) when the
 1-minute, 5-minute, or 15-minute averages exceed the associated
 maximum values.  If any of the MAX1, MAX5, or MAX15 values are
 unspecified, they default to a value of DEFMAXLOADAVE.
+.IP "file FILE [MAXSIZE]"
+Monitors file sizes and makes sure they don't grow beyond a certain
+size.  MAXSIZE defaults to infinite if not specified, and only
+monitors the size without reporting errors about it.
 .SS "Errors"
 .PP
 Any errors in obtaining the above information are reported via the
