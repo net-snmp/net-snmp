@@ -285,8 +285,12 @@ EXPORTS
 	atime_ready
 	fprint_variable
 	sprint_realloc_objid
-	snmp_strcat
 	sprint_realloc_variable
+	sprint_realloc_value
+	snprint_objid
+	snprint_variable
+	snprint_value
+	snmp_strcat
 	snmp_realloc
 	Mib                     DATA
 	tree_head               DATA
