@@ -226,7 +226,7 @@ snmp_transport		*snmp_udp6_transport	(struct sockaddr_in6 *addr,
 	IP address, which may include an interface address, or could be
 	INADDR_ANY, but certainly includes a port number.  */
     
-    rc = bind(t->sock, (struct sockaddr *)addr, sizeof(struct sockaddr));
+    rc = bind(t->sock, (struct sockaddr *)addr, sizeof(struct sockaddr_in6));
     if (rc != 0) {
       snmp_udp6_close(t);
       snmp_transport_free(t);
