@@ -1283,7 +1283,7 @@ AC_ARG_WITH(libwrap,
 		AC_MSG_RESULT(yes)
 		AC_DEFINE(USE_LIBWRAP)
 		test "$with_libwrap" != no -a "$with_libwrap" != yes && WRAPLIBS="-L$with_libwrap/lib"
-		WRAPLIBS="$WRAPLIBS -lwrap", AC_MSG_RESULT(no)),
+		WRAPLIBS="$WRAPLIBS -lwrap -lnsl", AC_MSG_RESULT(no)),
 	    CPPFLAGS=${_cppflags}),
 	CPPFLAGS=${_cppflags})
     LDFLAGS=${_ldflags}
