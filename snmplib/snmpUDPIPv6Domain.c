@@ -237,7 +237,7 @@ snmp_transport		*snmp_udp6_transport	(struct sockaddr_in6 *addr,
       snmp_udp6_close(t);
       snmp_transport_free(t);
     }
-    memcpy(t->local, addr.sin6_addr.s6_addr, 16);
+    memcpy(t->local, addr->sin6_addr.s6_addr, 16);
     t->local[16] = (addr->sin6_port & 0xff00) >> 8;
     t->local[17] = (addr->sin6_port & 0x00ff) >> 0;
     t->local_length = 18;
@@ -260,7 +260,7 @@ snmp_transport		*snmp_udp6_transport	(struct sockaddr_in6 *addr,
       snmp_transport_free(t);
       return NULL;
     }
-    memcpy(t->remote, addr.sin6_addr.s6_addr, 16);
+    memcpy(t->remote, addr->sin6_addr.s6_addr, 16);
     t->remote[16] = (addr->sin6_port & 0xff00) >> 8;
     t->remote[17] = (addr->sin6_port & 0x00ff) >> 0;
     t->remote_length = 18;
