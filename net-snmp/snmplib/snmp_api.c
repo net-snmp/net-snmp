@@ -320,12 +320,24 @@ snmp_api_errstring(snmp_errnumber)
     else return msg;
 }
 
+/*
+  init_snmp: call appropriately the functions to do config file
+  loading and mib module parsing in the correct order.
+*/
+
+void
+init_snmp __P((void)) {
+  register_mib_handlers();
+  read_premib_configs();
+  init_mib();
+  read_configs();
+}
 
 /*
  * Gets initial request ID for all transactions.
  */
 static void
-init_snmp __P((void))
+init_snmp_session __P((void))
 {
     struct timeval tv;
 
@@ -364,7 +376,7 @@ snmp_open(session)
 
 
     if (Reqid == 0)
-	init_snmp();
+	init_snmp_session();
 
     if (! servp)
       servp = getservbyname("snmp", "udp");
@@ -617,7 +629,7 @@ snmp_build(session, pdu, packet, out_length)
        upto the PDU sequence
        (note that actual length of message will be inserted later) */
     h0 = packet;
-    switch (session->version) {
+    switch (pdu->version) {
     case SNMP_VERSION_1:
     case SNMP_VERSION_2c:
         /* Save current location and build SEQUENCE tag and length
@@ -770,7 +782,7 @@ snmp_build(session, pdu, packet, out_length)
                        cp - h1e);
 
     /* insert the actual length of the message sequence */        
-    switch (session->version) {
+    switch (pdu->version) {
     case SNMP_VERSION_1:
     case SNMP_VERSION_2c:
         asn_build_sequence(packet, &length,
@@ -1116,7 +1128,7 @@ snmp_send(session, pdu)
     struct snmp_session *session;
     struct snmp_pdu	*pdu;
 {
-  return snmp_async_send(session, pdu, NULL, NULL);
+    return snmp_async_send(session, pdu, NULL, NULL);
 }
 
 /*
@@ -1191,8 +1203,8 @@ snmp_async_send(session, pdu, callback, cb_data)
         if (pdu->command == SNMP_MSG_RESPONSE)
             /* don't expect a response */
             expect_response = 0;
-    } else if ((pdu->command == SNMP_MSG_INFORM) ||
-               (pdu->command == SNMP_MSG_TRAP2)) {
+    } else if (pdu->command == SNMP_MSG_INFORM ||
+               pdu->command == SNMP_MSG_TRAP2) {
         /* not supported in SNMPv1 and SNMPsec */
 	if ((session->version == SNMP_VERSION_1) ||
                 (session->version == SNMP_VERSION_sec)) {
@@ -1207,7 +1219,6 @@ snmp_async_send(session, pdu, callback, cb_data)
 	if (pdu->errindex == SNMP_DEFAULT_ERRINDEX)
 	    pdu->errindex = 0;
         if (pdu->command == SNMP_MSG_TRAP2)
-            /* don't expect a response */
             expect_response = 0;
     } else if (pdu->command == SNMP_MSG_GETBULK) {
         /* not supported in SNMPv1 and SNMPsec */
@@ -1329,7 +1340,7 @@ snmp_async_send(session, pdu, callback, cb_data)
 	return 0;
     }
     if (snmp_dump_packet){
-	printf("\nsending %d bytes to %s:%hd:\n", length,
+	printf("\nsending %d bytes to %s:%hu:\n", length,
 	       inet_ntoa(pdu->address.sin_addr), ntohs(pdu->address.sin_port));
 	xdump(packet, length, "");
         printf("\n");
@@ -1476,7 +1487,7 @@ snmp_read(fdset)
 		continue;
 	    }
 	    if (snmp_dump_packet){
-		printf("\nreceived %d bytes from %s:%hd:\n", length,
+		printf("\nreceived %d bytes from %s:%hu:\n", length,
 		       inet_ntoa(from.sin_addr), ntohs(from.sin_port));
 		xdump(packet, length, "");
                 printf("\n");
@@ -1705,7 +1716,7 @@ snmp_timeout __P((void))
 			abort();
 		    }
 		    if (snmp_dump_packet){
-			printf("\nsending %d bytes to %s:%hd:\n", length,
+			printf("\nsending %d bytes to %s:%hu:\n", length,
 			       inet_ntoa(rp->pdu->address.sin_addr), ntohs(rp->pdu->address.sin_port));
 			xdump(packet, length, "");
 			printf("\n");
