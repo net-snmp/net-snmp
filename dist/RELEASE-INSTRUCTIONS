@@ -75,6 +75,13 @@ TESTING:
      about improper numbering before you make the release and not
      after you've uploaded the tar ball :-/
 
+  1b) Change the configure script version number.  This isn't
+      autochanged either.  The line to change looks like this:
+
+        AC_INIT([Net-SNMP], [5.1.2], [net-snmp-coders@lists.sourceforge.net])
+
+      And then run autoconf and autoheader, as well as a CVS commit.
+
   2) Log into as many machines types as you can and run "make test".
      You should get perfect results.  If you don't, try running just
      those tests again with a slower sleep time (use the -S flag to
