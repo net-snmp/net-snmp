@@ -12,14 +12,14 @@ struct header_complex_index {
 };
 
 void *header_complex(struct header_complex_index *datalist, struct variable *vp,
-                     oid *name, int *length, int exact, int *var_len,
+                     oid *name, size_t *length, int exact, size_t *var_len,
                      WriteMethod **write_method);
 
 int header_complex_generate_varoid(struct variable_list *var);
-int header_complex_parse_oid(oid *oidIndex, int oidLen,
-                             struct header_complex_index *data);
-void header_complex_generate_oid(oid *name, int *length, oid *prefix,
-                                 int prefix_len,
+int header_complex_parse_oid(oid *oidIndex, size_t oidLen,
+                             struct variable_list *data);
+void header_complex_generate_oid(oid *name, size_t *length, oid *prefix,
+                                 size_t prefix_len,
                                  struct header_complex_index *data);
 int header_complex_var_compare(struct variable_list *varl,
                                struct variable_list *varr);
