@@ -242,7 +242,7 @@ init_agent (const char *app)
 
 
 oid nullOid[] = {0,0};
-int nullOidLen = sizeof(nullOid)/sizeof(oid);
+int nullOidLen = sizeof(nullOid);
 
 /*
  * getStatPtr - return a pointer to the named variable, as well as it's
