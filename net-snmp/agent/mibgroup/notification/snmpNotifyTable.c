@@ -202,6 +202,33 @@ notifyTable_register_notifications(int major, int minor,
     return 0;
 }
 
+
+/* XXX: this really needs to be done for the target mib entries too.
+   But we can only trust that we've added stuff here and we don't want
+   to destroy other valid entries in the target tables, so...  Don't
+   do too many kill -HUPs to your agent as re reading the config file
+   will be a slow memory leak in the target mib. */
+int
+notifyTable_unregister_notifications(int major, int minor,
+                                     void *serverarg, void *clientarg)
+{
+    struct header_complex_index *hptr, *nhptr;
+    struct snmpNotifyTable_data *nptr;
+
+    for(hptr = snmpNotifyTableStorage; hptr; hptr = nhptr) {
+        nptr = (struct snmpNotifyTable_data *) hptr->data;
+        nhptr = hptr->next;
+        if (nptr->snmpNotifyStorageType == ST_READONLY) {
+            header_complex_extract_entry(&snmpNotifyTableStorage,
+                                                hptr);
+            SNMP_FREE(nptr->snmpNotifyName);
+            SNMP_FREE(nptr->snmpNotifyTag);
+            SNMP_FREE(nptr);
+        }
+    }
+    return(0);
+}
+
 /*
  * init_snmpNotifyTable():
  *   Initialization routine.  This is called when the agent starts up.
@@ -232,7 +259,11 @@ void init_snmpNotifyTable(void) {
   snmp_register_callback(SNMP_CALLBACK_APPLICATION,
                          SNMPD_CALLBACK_REGISTER_NOTIFICATIONS,
                          notifyTable_register_notifications, NULL);
-
+  snmp_register_callback(SNMP_CALLBACK_APPLICATION,
+                         SNMPD_CALLBACK_PRE_UPDATE_CONFIG,
+                         notifyTable_unregister_notifications,
+                         NULL);
+  
   /* place any other initialization junk you need here */
 
 

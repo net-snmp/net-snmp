@@ -427,6 +427,9 @@
 /* Define if you have the <linux/hdreg.h> header file.  */
 #undef HAVE_LINUX_HDREG_H
 
+/* Define if you have the <linux/tasks.h> header file.  */
+#undef HAVE_LINUX_TASKS_H
+
 /* Define if you have the <locale.h> header file.  */
 #undef HAVE_LOCALE_H
 
@@ -886,6 +889,19 @@
 /* nlist.n_value */
 #undef STRUCT_NLIST_HAS_N_VALUE
 
+/* ipstat structure tests */
+#undef STRUCT_IPSTAT_HAS_IPS_CANTFORWARD
+#undef STRUCT_IPSTAT_HAS_IPS_CANTFRAG
+#undef STRUCT_IPSTAT_HAS_IPS_DELIVERED
+#undef STRUCT_IPSTAT_HAS_IPS_FRAGDROPPED
+#undef STRUCT_IPSTAT_HAS_IPS_FRAGTIMEOUT
+#undef STRUCT_IPSTAT_HAS_IPS_LOCALOUT
+#undef STRUCT_IPSTAT_HAS_IPS_NOPROTO
+#undef STRUCT_IPSTAT_HAS_IPS_NOROUTE
+#undef STRUCT_IPSTAT_HAS_IPS_ODROPPED
+#undef STRUCT_IPSTAT_HAS_IPS_OFRAGMENTS
+#undef STRUCT_IPSTAT_HAS_IPS_REASSEMBLED
+
 /* vfsstat.f_frsize */
 #undef STRUCT_STATVFS_HAS_F_FRSIZE
 
@@ -1186,9 +1202,13 @@
     available.  */
 #undef SNMP_TRANSPORT_IPX_DOMAIN
 
-/*  This is defined if support for the UDPIPv6 transport domain is
+/*  This is defined if support for the UDP/IPv6 transport domain is
     available.  */
 #undef SNMP_TRANSPORT_UDPIPV6_DOMAIN
+
+/*  This is defined if support for the TCP/IPv6 transport domain is
+    available.  */
+#undef SNMP_TRANSPORT_TCPIPV6_DOMAIN
 
 /* define this if the USM security module is available */
 #undef SNMP_SECMOD_USM

@@ -332,7 +332,7 @@ u_char *var_extensible_disk(struct variable *vp,
 #ifdef STAT_STATFS_FS_DATA
   struct fs_data fsd;
   struct {
-    u_int f_blocks, f_bfree, f_bavail;
+    u_int f_blocks, f_bfree, f_bavail, f_bsize;
   } vfs;
 #else
   struct statvfs vfs;
@@ -382,6 +382,7 @@ u_char *var_extensible_disk(struct variable *vp,
   vfs.f_blocks = fsd.fd_btot;
   vfs.f_bfree  = fsd.fd_bfree;
   vfs.f_bavail = fsd.fd_bfreen;
+  vfs.f_bsize  = 1024;	/*  Ultrix f_bsize is a VM parameter apparently.  */
 #endif
 #if defined(HAVE_ODS)
   vfs.f_blocks = vfs.f_spare[0];
