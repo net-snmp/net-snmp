@@ -93,7 +93,6 @@ typedef struct agent_request_info_s {
 
 struct agent_snmp_session {
     int		mode;
-    struct variable_list *start, *end;
     struct snmp_session  *session;
     struct snmp_pdu      *pdu;
     struct snmp_pdu      *orig_pdu;
