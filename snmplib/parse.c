@@ -230,6 +230,8 @@ struct objgroup {
 #define OBJSYNTAX	(99 | SYNTAX_MASK)
 #define SIMPLESYNTAX	(100 | SYNTAX_MASK)
 #define OBJNAME		(101 | SYNTAX_MASK)
+#define NOTIFNAME	(102 | SYNTAX_MASK)
+#define VARIABLES	103
 /* Beware of reaching SYNTAX_MASK (0x80) */
 
 struct tok {
@@ -332,6 +334,8 @@ static struct tok tokens[] = {
     { "SimpleSyntax", sizeof("SimpleSyntax")-1, SIMPLESYNTAX },
     { "ApplicationSyntax", sizeof("ApplicationSyntax")-1, APPSYNTAX },
     { "ObjectName", sizeof("ObjectName")-1, OBJNAME },
+    { "NotificationName", sizeof("NotificationName")-1, NOTIFNAME },
+    { "VARIABLES", sizeof("VARIABLES")-1, VARIABLES },
     { NULL }
 };
 
@@ -434,12 +438,15 @@ static void  new_module  (const char *, const char *);
 
 static struct node *merge_parse_objectid (struct node *, FILE *, char *);
 static struct index_list *getIndexes(FILE *fp, struct index_list **);
+static struct varbind_list *getVarbinds(FILE *fp, struct varbind_list **);
 static void free_indexes(struct index_list **);
+static void free_varbinds(struct varbind_list **);
 static void free_ranges(struct range_list **);
 static void free_enums(struct enum_list **);
 static struct range_list * copy_ranges(struct range_list *);
 static struct enum_list  * copy_enums(struct enum_list *);
 static struct index_list * copy_indexes(struct index_list *);
+static struct varbind_list * copy_varbinds(struct varbind_list *);
 
 /* backwards compatibility wrappers */
 void snmp_set_mib_errors(int err)
@@ -683,11 +690,13 @@ free_partial_tree(struct tree *tp, int keep_label)
     free_enums(&tp->enums);
     free_ranges(&tp->ranges);
     free_indexes(&tp->indexes);
+    free_varbinds(&tp->varbinds);
     if (!keep_label)
 	SNMP_FREE(tp->label);
     SNMP_FREE(tp->hint);
     SNMP_FREE(tp->units);
     SNMP_FREE(tp->description);
+    SNMP_FREE(tp->augments);
 }
 
 /*
@@ -715,11 +724,13 @@ free_node(struct node *np)
     free_enums(&np->enums);
     free_ranges(&np->ranges);
     free_indexes(&np->indexes);
+    free_varbinds(&np->varbinds);
     if (np->label) free(np->label);
     if (np->hint) free(np->hint);
     if (np->units) free(np->units);
     if (np->description) free(np->description);
     if (np->parent) free(np->parent);
+    if (np->augments) free(np->augments);
     free((char*)np);
 }
 
@@ -732,6 +743,7 @@ extern void xmalloc_stats (FILE *);
     struct enum_list *ep;
     struct index_list *ip;
     struct range_list *rp;
+    struct varbind_list *vp;
     struct node *np;
 
     for(np = root; np; np = np->next){
@@ -755,6 +767,14 @@ extern void xmalloc_stats (FILE *);
             fprintf(fp, "  Indexes: \n");
             for(ip = np->indexes; ip; ip = ip->next){
                 fprintf(fp, "    %s\n", ip->ilabel);
+            }
+        }
+	if (np->augments)
+	    fprintf(fp, "  Augments: %s\n", np->augments);
+        if (np->varbinds){
+            fprintf(fp, "  Varbinds: \n");
+            for(vp = np->varbinds; vp; vp = vp->next){
+                fprintf(fp, "    %s\n", vp->vblabel);
             }
         }
         if (np->hint)
@@ -868,6 +888,24 @@ build_translation_table()
             case UINTEGER32:
                 translation_table[count] = TYPE_UINTEGER;
                 break;
+	    case TRAPTYPE:
+		translation_table[count] = TYPE_TRAPTYPE;
+		break;
+	    case NOTIFTYPE:
+		translation_table[count] = TYPE_NOTIFTYPE;
+		break;
+	    case OBJGROUP:
+		translation_table[count] = TYPE_OBJGROUP;
+		break;
+	    case MODULEIDENTITY:
+		translation_table[count] = TYPE_MODID;
+		break;
+	    case AGENTCAP:
+		translation_table[count] = TYPE_AGENTCAP;
+		break;
+	    case COMPLIANCE:
+		translation_table[count] = TYPE_MODCOMP;
+		break;
             default:
                 translation_table[count] = TYPE_OTHER;
                 break;
@@ -1306,6 +1344,8 @@ do_subtree(struct tree *root,
                 anon_tp->type = tp->type;
                 anon_tp->enums = tp->enums;
                 anon_tp->indexes = tp->indexes;
+                anon_tp->augments = tp->augments;
+                anon_tp->varbinds = tp->varbinds;
                 anon_tp->ranges = tp->ranges;
                 anon_tp->hint = tp->hint;
                 anon_tp->units = tp->units;
@@ -2120,16 +2160,34 @@ parse_objecttype(FILE *fp,
           }
           break;
         case INDEX:
+	  if (np->augments) {
+	      print_error("Cannot have both INDEX and AUGMENTS", token, type);
+	      free_node(np);
+	      return NULL;
+	  }
           np->indexes = getIndexes(fp, &np->indexes);
           if (np->indexes == NULL) {
-            print_error("Bad Index List",token,type);
+            print_error("Bad INDEX list", token, type);
             free_node(np);
             return NULL;
           }
           break;
-
-        case DEFVAL:
         case AUGMENTS:
+	  if (np->indexes) {
+	      print_error("Cannot have both INDEX and AUGMENTS", token, type);
+	      free_node(np);
+	      return NULL;
+	  }
+          np->indexes = getIndexes(fp, &np->indexes);
+          if (np->indexes == NULL) {
+            print_error("Bad AUGMENTS list", token, type);
+            free_node(np);
+            return NULL;
+          }
+	  np->augments = strdup(np->indexes->ilabel);
+	  free_indexes(&np->indexes);
+          break;
+        case DEFVAL:
         case NUM_ENTRIES:
           if (tossObjectIdentifier(fp) != OBJID) {
               print_error("Bad Object Identifier", token, type);
@@ -2258,7 +2316,7 @@ parse_notificationDefinition(FILE *fp,
     type = get_token(fp, token, MAXTOKEN);
     while (type != EQUALS && type != ENDOFFILE) {
       switch (type) {
-        case DESCRIPTION:
+      case DESCRIPTION:
           type = get_token(fp, quoted_string_buffer, MAXQUOTESTR);
           if (type != QUOTESTRING) {
               print_error("Bad DESCRIPTION", quoted_string_buffer, type);
@@ -2269,8 +2327,15 @@ parse_notificationDefinition(FILE *fp,
               np->description = strdup (quoted_string_buffer);
           }
           break;
-
-        default:
+      case OBJECTS:
+	  np->varbinds = getVarbinds(fp, &np->varbinds);
+	  if (!np->varbinds) {
+	      print_error("Bad OBJECTS list", token, type);
+	      free_node(np);
+	      return NULL;
+	  }
+	  break;
+      default:
           /* NOTHING */
           break;
       }
@@ -2324,6 +2389,14 @@ parse_trapDefinition(FILE *fp,
                 else if (type == LABEL)
                     np->parent = strdup(token);
                 break;
+	    case VARIABLES:
+		np->varbinds = getVarbinds(fp, &np->varbinds);
+		if (!np->varbinds) {
+		    print_error("Bad VARIABLES list", token, type);
+		    free_node(np);
+		    return NULL;
+		}
+		break;
             default:
                 /* NOTHING */
                 break;
@@ -3497,6 +3570,7 @@ parse(FILE *fp,
 	case APPSYNTAX:
 	case SIMPLESYNTAX:
 	case OBJNAME:
+	case NOTIFNAME:
 	case KW_OPAQUE:
 	case TIMETICKS:
             break;
@@ -3647,6 +3721,7 @@ parse(FILE *fp,
 	    return NULL;
         }
         if (nnp) {
+	    if (nnp->type == TYPE_OTHER) nnp->type = type;
             if (np) np->next = nnp;
             else np = root = nnp;
             while (np->next) np = np->next;
@@ -3846,7 +3921,7 @@ add_mibdir(const char *dirname)
     DIR *dir, *dir2;
     const char *oldFile = File;
     struct dirent *file;
-    char token[MAXTOKEN];
+    char token[MAXTOKEN], token2[MAXTOKEN];
     char tmpstr[300];
     int count = 0;
 #ifndef WIN32
@@ -3896,10 +3971,13 @@ add_mibdir(const char *dirname)
                     Line = 1;
                     File = tmpstr;
                     get_token( fp, token, MAXTOKEN);
-                    new_module(token, tmpstr);
-                    count++;
+		    /* simple test for this being a MIB */
+		    if (get_token(fp, token2, MAXTOKEN) == DEFINITIONS) {
+			new_module(token, tmpstr);
+			count++;
+			if (ip) fprintf(ip, "%s %s\n", token, file->d_name);
+		    }
                     fclose (fp);
-		    if (ip) fprintf(ip, "%s %s\n", token, file->d_name);
                 }
             }
         }
@@ -4059,34 +4137,82 @@ getIndexes(FILE *fp, struct index_list **retp) {
   return mylist;
 }
 
+static struct varbind_list *
+getVarbinds(FILE *fp, struct varbind_list **retp) {
+    int type;
+    char token[MAXTOKEN];
+
+    struct varbind_list *mylist = NULL;
+    struct varbind_list **mypp = &mylist;
+
+    free_varbinds(retp);
+
+    type = get_token(fp, token, MAXTOKEN);
+
+    if (type != LEFTBRACKET) {
+	return NULL;
+    }
+
+    type = get_token(fp, token, MAXTOKEN);
+    while (type != RIGHTBRACKET && type != ENDOFFILE) {
+	if ((type == LABEL) || (type & SYNTAX_MASK)) {
+	    *mypp = (struct varbind_list *) calloc(1, sizeof(struct varbind_list));
+	    if (*mypp) {
+		(*mypp)->vblabel = strdup(token);
+		mypp = &(*mypp)->next;
+	    }
+	}
+	type = get_token(fp, token, MAXTOKEN);
+    }
+
+    *retp = mylist;
+    return mylist;
+  }
+
 static void
 free_indexes(struct index_list **spp) {
   if (spp && *spp) {
-  struct index_list *pp, *npp;
+    struct index_list *pp, *npp;
 
-  pp = *spp; *spp = NULL;
+    pp = *spp; *spp = NULL;
 
-  while(pp) {
-    npp = pp->next;
-    if (pp->ilabel) free(pp->ilabel);
-    free(pp);
-    pp = npp;
+    while(pp) {
+      npp = pp->next;
+      if (pp->ilabel) free(pp->ilabel);
+      free(pp);
+      pp = npp;
+    }
   }
+}
+
+static void
+free_varbinds(struct varbind_list **spp) {
+  if (spp && *spp) {
+    struct varbind_list *pp, *npp;
+
+    pp = *spp; *spp = NULL;
+
+    while(pp) {
+      npp = pp->next;
+      if (pp->vblabel) free(pp->vblabel);
+      free(pp);
+      pp = npp;
+    }
   }
 }
 
 static void
 free_ranges(struct range_list **spp) {
   if (spp && *spp) {
-  struct range_list *pp, *npp;
+    struct range_list *pp, *npp;
 
-  pp = *spp; *spp = NULL;
+    pp = *spp; *spp = NULL;
 
-  while(pp) {
-    npp = pp->next;
-    free(pp);
-    pp = npp;
-  }
+    while(pp) {
+      npp = pp->next;
+      free(pp);
+      pp = npp;
+    }
   }
 }
 
@@ -4094,17 +4220,17 @@ static void
 free_enums(struct enum_list **spp)
 {
   if (spp && *spp) {
-  struct enum_list *pp, *npp;
+    struct enum_list *pp, *npp;
 
-  pp = *spp; *spp = NULL;
+    pp = *spp; *spp = NULL;
 
-  while(pp)
-  {
-    npp = pp->next;
-    if (pp->label) free(pp->label);
-    free(pp);
-    pp = npp;
-  }
+    while(pp)
+    {
+      npp = pp->next;
+      if (pp->label) free(pp->label);
+      free(pp);
+      pp = npp;
+    }
   }
 }
 
@@ -4149,6 +4275,22 @@ copy_indexes (struct index_list *sp)
     *spp = (struct index_list *) calloc(1, sizeof(struct index_list));
     if (!*spp) break;
     (*spp)->ilabel = strdup(sp->ilabel);
+    (*spp)->isimplied = sp->isimplied;
+    spp = &(*spp)->next;
+    sp = sp->next;
+  }
+  return (xp);
+}
+
+static struct varbind_list *
+copy_varbinds (struct varbind_list *sp)
+{
+  struct varbind_list *xp = NULL, **spp = &xp;
+
+  while (sp) {
+    *spp = (struct varbind_list *) calloc(1, sizeof(struct varbind_list));
+    if (!*spp) break;
+    (*spp)->vblabel = strdup(sp->vblabel);
     spp = &(*spp)->next;
     sp = sp->next;
   }
@@ -4216,7 +4358,7 @@ static void print_mib_leaves(FILE *f, struct tree *tp, int width)
   char last_ipch = *ip;
 
   *ip = '+';
-  if (tp->type == 0) {
+  if (tp->type == TYPE_OTHER || tp->type > TYPE_SIMPLE_LAST) {
     fprintf(f, "%s--%s(%ld)\n", leave_indent, tp->label, tp->subid);
     if (tp->indexes) {
       struct index_list *xp = tp->indexes;
@@ -4309,7 +4451,7 @@ static void print_mib_leaves(FILE *f, struct tree *tp, int width)
   }
   *ip = last_ipch;
   strcat(leave_indent, "  |");
-  leave_was_simple = tp->type != 0;
+  leave_was_simple = tp->type != TYPE_OTHER;
 
   { int i, j, count = 0;
     struct leave {
@@ -4413,6 +4555,8 @@ tree_from_node(struct tree *tp, struct node *np)
     tp->enums = np->enums;  np->enums = NULL;
     tp->ranges = np->ranges;  np->ranges = NULL;
     tp->indexes = np->indexes;  np->indexes = NULL;
+    tp->augments = np->augments;  np->augments = NULL;
+    tp->varbinds = np->varbinds;  np->varbinds = NULL;
     tp->hint = np->hint;  np->hint = NULL;
     tp->units = np->units;  np->units = NULL;
     tp->description = np->description;  np->description = NULL;
