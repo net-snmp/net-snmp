@@ -65,9 +65,6 @@ typedef struct table_array_data_s {
      * mutex_type                lock;
      */
 
-   /** container for new/changing rows */
-    oid_array       changing;
-
    /** do we want to group rows with the same index
     * together when calling callbacks? */
     int             group_rows;
@@ -184,7 +181,6 @@ netsnmp_register_table_array(netsnmp_handler_registration *reginfo,
     /*
      * netsnmp_mutex_init(&tad->lock); 
      */
-    tad->changing = netsnmp_initialize_oid_array(sizeof(void *));
     tad->cb = cb;
 
     reginfo->handler->myvoid = tad;
@@ -239,13 +235,7 @@ netsnmp_table_array_get_by_index(netsnmp_handler_registration *reginfo,
      * netsnmp_mutex_lock(&tad->lock);
      */
 
-    if (tad->changing && netsnmp_get_oid_data_count(tad->changing)) {
-        rtn = netsnmp_get_oid_data(tad->changing, hdr, 1);
-        if (!rtn)
-            rtn = netsnmp_get_oid_data(tad->array, hdr, 1);
-    } else {
-        rtn = netsnmp_get_oid_data(tad->array, hdr, 1);
-    }
+    rtn = netsnmp_get_oid_data(tad->array, hdr, 1);
 
     /*
      * netsnmp_mutex_unlock(&tad->lock);
@@ -280,13 +270,6 @@ netsnmp_table_array_get_subset(netsnmp_handler_registration *reginfo,
      * netsnmp_mutex_lock(&tad->lock);
      */
 
-    /*
-     * I really really don't want to merge two tables. so just freak
-     * out if this is called during a set. 
-     */
-    assert(!tad->changing
-           || netsnmp_get_oid_data_count(tad->changing) == 0);
-
     rtn =
         (const netsnmp_oid_array_header **)
         netsnmp_get_oid_data_subset(tad->array, hdr, len);
@@ -297,6 +280,38 @@ netsnmp_table_array_get_subset(netsnmp_handler_registration *reginfo,
 
     return rtn;
 }
+
+/** this function is called to remove a row from the table */
+netsnmp_oid_array_header *
+netsnmp_table_array_remove_row(netsnmp_handler_registration *reginfo,
+                               netsnmp_oid_array_header *hdr)
+{
+    table_array_data *tad;
+    netsnmp_mib_handler *mh;
+    netsnmp_oid_array_header *rtn;
+    
+    if (reginfo == NULL)
+        return NULL;
+
+    mh = netsnmp_find_table_array_handler(reginfo);
+    if (mh == NULL)
+        return NULL;
+
+    tad = (table_array_data *) mh->myvoid;
+    if (!tad->array)
+        return NULL;
+
+    /** netsnmp_mutex_lock(&tad->lock); */
+
+    netsnmp_remove_oid_data(tad, hdr, &rtn);
+    if (tad->cb->idx2)
+        tad->cb->idx2->remove_data(tad->cb->idx2,hdr);
+
+    /** netsnmp_mutex_unlock(&tad->lock); */
+
+    return rtn;
+}
+
 
 /** this function is called to validate RowStatus transitions. */
 int
@@ -777,7 +792,6 @@ process_set_group(netsnmp_oid_array_header *o, void *c)
                                                     ag->new_row);
         }
 
-        netsnmp_add_oid_data(context->tad->changing, ag->new_row);
         if (context->tad->cb->set_action)
             context->tad->cb->set_action(ag);
         break;
@@ -791,7 +805,6 @@ process_set_group(netsnmp_oid_array_header *o, void *c)
             context->tad->cb->delete_row(ag->old_row);
             ag->old_row = NULL;
         }
-        netsnmp_remove_oid_data(context->tad->changing, ag->new_row, NULL);
 
 
 #if 0
@@ -848,7 +861,6 @@ process_set_group(netsnmp_oid_array_header *o, void *c)
                 context->tad->cb->idx2->remove_data(context->tad->cb->idx2,
                                                     ag->new_row);
         }
-        netsnmp_remove_oid_data(context->tad->changing, ag->new_row, NULL);
 
         /** status already set - don't change it now */
         if (context->tad->cb->set_undo)

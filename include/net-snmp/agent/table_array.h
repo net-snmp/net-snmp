@@ -127,6 +127,9 @@ extern          "C" {
                                          *reginfo,
                                          netsnmp_oid_array_header *hdr,
                                          int *len);
+    netsnmp_oid_array_header *
+    netsnmp_table_array_remove_row(netsnmp_handler_registration *reginfo,
+                                   netsnmp_oid_array_header *hdr);
 
 
 #ifdef __cplusplus
