@@ -55,7 +55,7 @@ SUPPORTED ARCHITECTURES
        - known to work under 1.0, 1.2
      alpha-dec-osf3.2
      *-freebsd2.?
-     bsdi?
+     bsdi2.1 (use gcc)
 
   Please let us know if you compile it on other OS versions and it
   works for you so we can add them to the above list.
