@@ -219,13 +219,13 @@ ac_help="$ac_help
 
   --with-enterprise-sysoid           The base OID for the sysObjectID
                                      of the system group
-                                     (default .1.6.3.1.4.1.8072... = 
-                                      "enterprise.net-snmp...")"
+                                     (default .1.6.3.1.4.1.2021... = 
+                                      "enterprise.ucdavis...")"
 ac_help="$ac_help
 
   --with-enterprise-notification-oid The OID used for the root of
 				     enterprise specific notifications.
-                                     (default .1.6.3.1.4.1.8072 = "enterprise.net-snmp")"
+                                     (default .1.6.3.1.4.1.2021 = "enterprise.ucdavis")"
 ac_help="$ac_help
 "
 ac_help="$ac_help
@@ -1390,7 +1390,7 @@ EOF
 
 else
   
-  echo "$ac_t""using default "enterprise.net-snmp..."" 1>&6
+  echo "$ac_t""using default "enterprise.ucdavis..."" 1>&6
 
 fi
 
@@ -1418,7 +1418,7 @@ EOF
 
 else
   
-  echo "$ac_t""using default "enterprise.net-snmp"" 1>&6
+  echo "$ac_t""using default "enterprise.ucdavis"" 1>&6
 
 fi
 
