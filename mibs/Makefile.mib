@@ -151,7 +151,7 @@ ianamibs:	ianalist
 		do \
 		  if [ "$$file" != "#" ]; \
 		  then \
-		    ./mibfetch -d (ALLDIR) $(IANAHOST) $(IANADIR) $$file $$mibs; \
+		    ./mibfetch -d $(ALLDIR) $(IANAHOST) $(IANADIR) $$file $$mibs; \
 		  fi; \
 		done
 
