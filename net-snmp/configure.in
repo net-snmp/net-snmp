@@ -2,6 +2,7 @@ dnl Process this file with autoconf to produce a configure script.
 dnl
 AC_INIT(agent/mibgroup/ucd-snmp/extensible.c)
 AC_CONFIG_HEADER(include/net-snmp/net-snmp-config.h)
+AC_MSG_CACHE_INIT()
 
 dnl
 dnl save the configure arguments
@@ -450,6 +451,7 @@ dnl
 if test "x$ucd_compat" != "xno" ; then	
   installucdheaders=installucdheaders
   installucdlibs=installucdlibs
+  AC_MSG_CACHE_ADD(UCD-SNMP compatability:     enabled)
 fi
 AC_SUBST(installucdheaders)
 AC_SUBST(installucdlibs)
@@ -548,6 +550,7 @@ changequote([, ])
 AC_SUBST(VERSION)
 AC_SUBST(RELEASEVERSION)
 AC_MSG_RESULT($VERSION)
+AC_MSG_CACHE_ADD(Net-SNMP Version:           $VERSION)
 
 dnl super type checking
 AC_MSG_CHECKING(for developer gcc flags)
@@ -565,6 +568,7 @@ changequote(, )
 PARTIALTARGETOS=`echo $target_os | sed 's/[-._].*//'`
 CFLAGS="$CFLAGS -D$PARTIALTARGETOS"
 changequote([, ])
+AC_MSG_CACHE_ADD(Building for:               $PARTIALTARGETOS)
 
 dnl
 dnl check for special includes and pick one
@@ -936,6 +940,7 @@ for i in $transport_def_list; do
   AC_DEFINE_UNQUOTED($i)
 done
 AC_MSG_RESULT($transport_result_list.)
+AC_MSG_CACHE_ADD(Network transport support: $transport_result_list)
 
 dnl
 dnl Security modules to use
@@ -1012,6 +1017,7 @@ AC_SUBST(security_obj_list)
 AC_SUBST(security_lobj_list)
 AC_SUBST(security_hdr_list)
 AC_MSG_RESULT($new_with_security)
+AC_MSG_CACHE_ADD(SNMPv3 Security Modules:   $new_with_security)
 
 dnl
 dnl Handle the special case of KSM to see which crypto API we support
@@ -1081,6 +1087,9 @@ for i in $test_modules
 done
 
 AC_MSG_RESULT($new_module_list.)
+changequote([, ])
+AC_MSG_CACHE_ADD(Agent MIB code:            $new_module_list)
+changequote(, )
 
 AC_MSG_CHECKING(for and configuring mib modules pieces to use)
 while test "x$new_module_list" != "x"; do
@@ -1456,6 +1465,7 @@ if test "x$install_perl" = "xyes" -o "x$embed_perl" = "xyes"; then
     PERLINSTALLTARGS="perlinstall"
     AC_SUBST(PERLTARGS)
     AC_SUBST(PERLINSTALLTARGS)
+    AC_MSG_CACHE_ADD(SNMP Perl modules:          enabled)
 fi
 
 dnl
@@ -1486,6 +1496,7 @@ if test "x$embed_perl" = "xyes"; then
 
     EMBEDPERLINSTALL="embedperlinstall"
     AC_SUBST(EMBEDPERLINSTALL)
+    AC_MSG_CACHE_ADD(Embedded perl support:      enabled)
 fi
 
 dnl reset libs
@@ -1583,19 +1594,32 @@ AC_MSG_CHECKING(for authentication support)
 if test "x$ac_cv_lib_crypto_EVP_md5" != "xyes" -o "x$ac_cv_header_openssl_hmac_h" != "xyes" -o "x$ac_cv_header_openssl_hmac_h" != "xyes"; then
 dnl if OpenSSL is not found, default to using internal md5 support.
     AC_DEFINE(USE_INTERNAL_MD5)
+    authmodes="MD5"
+    encrmodes=""
     AC_MSG_RESULT(Internal MD5 Support)
     if test "x$askedopenssl" = "xyes"; then
 	AC_MSG_ERROR(Asked to use OpenSSL but I couldn't find it.)
     fi
 else
     if test "x$tryopenssl" = "xno"; then
+        authmodes="MD5"
+        encrmodes=""
 	AC_DEFINE(USE_INTERNAL_MD5)
 	AC_MSG_RESULT(Internal MD5 Support)
     else
+        authmodes="MD5 SHA1"
+	if test $ac_cv_header_openssl_aes_h = "yes" ; then
+	    encrmodes="DES AES128 AES192 AES256"
+	else
+	    encrmodes="DES"
+	fi
 	AC_DEFINE(USE_OPENSSL)
 	AC_MSG_RESULT(OpenSSL Support)
     fi
 fi
+
+AC_MSG_CACHE_ADD(Authentication support:     $authmodes)
+AC_MSG_CACHE_ADD(Encryption support:         $encrmodes)
 
 dnl Checks for typedefs, structures, and compiler characteristics.
 AC_TYPE_OFF_T
@@ -2608,6 +2632,8 @@ AC_OUTPUT([
  mibs/Makefile:Makefile.top:mibs/Makefile.in:Makefile.rules
  net-snmp-config:net-snmp-config.in
 ], echo timestamp > stamp-h)
+
+AC_MSG_CACHE_DISPLAY()
 
 dnl Local Variables:
 dnl mode: Autoconf
