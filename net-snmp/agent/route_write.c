@@ -44,9 +44,9 @@
 #include "snmp_impl.h"
 #include "snmp_vars.h"
 
-
-
-
+#ifdef osf3
+#define rt_dst rt_nodes->rn_key
+#endif
 
 int  addRoute(dstip, gwip, iff, flags)
 u_long  dstip;
@@ -134,6 +134,9 @@ u_short  flags;
 }
 
 
+#ifdef osf3
+#undef rt_dst
+#endif
 
 
 

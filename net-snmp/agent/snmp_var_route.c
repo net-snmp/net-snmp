@@ -56,7 +56,10 @@ PERFORMANCE OF THIS SOFTWARE.
 #include <net/route.h>
 #undef	KERNEL
 #ifdef RTENTRY_4_4
-#define rt_unit rt_upd		       /* Reuse this field for device # */
+#define rt_unit rt_refcnt	       /* Reuse this field for device # */
+#ifdef osf3
+#define rt_dst rt_nodes->rn_key
+#endif
 #else
 #define rt_unit rt_hash		       /* Reuse this field for device # */
 #endif
@@ -490,7 +493,7 @@ static Route_Scan_Reload()
 #ifdef RTENTRY_4_4 
 /* rtentry is a BSD 4.4 compat */
 
-  KNLookup(N_RTTABLES, (char *) &rt_table, sizeof(rt_table));
+  KNLookup(N_RTTABLES, (char *) rt_table, sizeof(rt_table));
   if (rt_table[AF_UNSPEC]) {
     if (klookup(rt_table[AF_UNSPEC], (char *) &head, sizeof(head))) {
       load_rtentries(head.rnh_treetop);
