@@ -6609,7 +6609,7 @@ snmp_add_var(netsnmp_pdu *pdu,
                                       ASN_OBJECT_ID, buf,
                                       sizeof(oid) * tint);
             } else {
-                result = snmp_errno;
+                result = snmp_errno;    /*MTCRITICAL_RESOURCE */
             }
         }
         break;
