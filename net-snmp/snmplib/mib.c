@@ -2245,24 +2245,28 @@ snmp_out_toggle_options(char *options)
 	    ds_toggle_boolean(DS_LIBRARY_ID, DS_LIB_QUICK_PRINT);
 	    break;
         case 'f':
-	    ds_set_int(DS_LIBRARY_ID, DS_LIB_PRINT_SUFFIX_ONLY, 0);
+	    ds_set_int(       DS_LIBRARY_ID, DS_LIB_PRINT_SUFFIX_ONLY,  0);
+            ds_set_boolean(   DS_LIBRARY_ID, DS_LIB_PRINT_NUMERIC_OIDS, 0);
             ds_toggle_boolean(DS_LIBRARY_ID, DS_LIB_PRINT_FULL_OID);
 	    break;
 	case 't':
 	    ds_toggle_boolean(DS_LIBRARY_ID, DS_LIB_NUMERIC_TIMETICKS);
 	    break;
 	case 'u':
-	    ds_set_int(DS_LIBRARY_ID, DS_LIB_PRINT_SUFFIX_ONLY, 0);
+	    ds_set_int(       DS_LIBRARY_ID, DS_LIB_PRINT_SUFFIX_ONLY,  0);
+            ds_set_boolean(   DS_LIBRARY_ID, DS_LIB_PRINT_NUMERIC_OIDS, 0);
 	    ds_toggle_boolean(DS_LIBRARY_ID, DS_LIB_PRINT_UCD_STYLE_OID);
 	    break;
 	case 'v':
 	    ds_toggle_boolean(DS_LIBRARY_ID, DS_LIB_PRINT_BARE_VALUE);
 	    break;
         case 's':
-	    ds_set_int(DS_LIBRARY_ID, DS_LIB_PRINT_SUFFIX_ONLY, 1);
+	    ds_set_int(    DS_LIBRARY_ID, DS_LIB_PRINT_SUFFIX_ONLY,  1);
+            ds_set_boolean(DS_LIBRARY_ID, DS_LIB_PRINT_NUMERIC_OIDS, 0);
 	    break;
         case 'S':
-	    ds_set_int(DS_LIBRARY_ID, DS_LIB_PRINT_SUFFIX_ONLY, 2);
+	    ds_set_int(    DS_LIBRARY_ID, DS_LIB_PRINT_SUFFIX_ONLY,  2);
+            ds_set_boolean(DS_LIBRARY_ID, DS_LIB_PRINT_NUMERIC_OIDS, 0);
 	    break;
 	case 'T':
 	     ds_toggle_boolean(DS_LIBRARY_ID, DS_LIB_PRINT_HEX_TEXT);
