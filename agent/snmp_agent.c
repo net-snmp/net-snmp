@@ -810,7 +810,7 @@ netsnmp_agent_check_packet(netsnmp_session * session,
     if ( tcpudpaddr != 0 ) {
         char sbuf[64];
         char *xp;
-        strncpy(sbuf, sizeof(sbuf), tcpudpaddr + 1);
+        strncpy(sbuf, tcpudpaddr + 1, sizeof(sbuf));
         sbuf[sizeof(sbuf)-1] = '\0';
         xp = strstr(sbuf, "]");
         if (xp)
