@@ -48,11 +48,19 @@ our $VERSION = '0.01';
 
 sub new {
     my $type = shift;
-    my $self = {};
     my $arg = shift;
     SNMP::init_snmp();
+    my $ptr = NetSNMP::OID::newptr($arg);
+    return newwithptr($type, $ptr);
+}
+
+sub newwithptr {
+    my $type = shift;
+    my $self = {};
+    my $ptr = shift;
+    SNMP::init_snmp();
+    $self->{'oidptr'} = $ptr;
     bless($self, $type);
-    $self->{'oidptr'} = NetSNMP::OID::newptr($arg);
     return $self;
 }
 
@@ -131,11 +139,12 @@ NetSNMP::OID - Perl extension for manipulating OIDs
 
 =head1 DESCRIPTION
 
-The NetSNMP::OID class is a simple wrapper around a C-based net-snmp
-oid.  The OID is internally stored as a C array of integers for speed
-purposes when doing comparisons, etc.  The standard logical expression
-operators (<, >, ==, ...) are overloaded such that lexographical
-comparisons may be done with them.
+The NetSNMP::OID module is a simple wrapper around a C-based net-snmp
+oid (which is an array of unsigned integers).  The OID is internally
+stored as a C array of integers for speed purposes when doing
+comparisons, etc.  The standard logical expression operators (<, >,
+==, ...) are overloaded such that lexographical comparisons may be
+done with them.
 
 =head2 EXPORT
 
