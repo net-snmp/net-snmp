@@ -8,6 +8,14 @@
 extern "C" {
 #endif
 
+/*
+ * if handler flag has this bit set, the timestamp will be
+ * treated as a pointer to the timestamp. If this bit is
+ * not set (the default), the timestamp is a struct timeval
+ * that must be compared to the agent starttime.
+ */
+#define NETSNMP_WATCHER_DIRECT MIB_HANDLER_CUSTOM1
+
 #define WATCHER_FIXED_SIZE    0x01
 #define WATCHER_MAX_SIZE      0x02
 
@@ -24,6 +32,9 @@ int netsnmp_register_watched_instance( netsnmp_handler_registration *reginfo,
 int netsnmp_register_watched_scalar(   netsnmp_handler_registration *reginfo,
                                        netsnmp_watcher_info         *winfo);
 int netsnmp_register_watched_timestamp(netsnmp_handler_registration *reginfo,
+                                       marker_t timestamp);
+int netsnmp_watched_timestamp_register(netsnmp_mib_handler *whandler,
+                                       netsnmp_handler_registration *reginfo,
                                        marker_t timestamp);
 int netsnmp_register_watched_spinlock(netsnmp_handler_registration *reginfo,
                                       int *spinlock);    
