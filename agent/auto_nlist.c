@@ -108,6 +108,7 @@ init_nlist(struct nlist nl[])
   char kvm_errbuf[4096];
 
   if((kernel = kvm_openfiles(KERNEL_LOC, NULL, NULL, O_RDONLY, kvm_errbuf)) == NULL) {
+      log_perror("kvm_openfiles");
       snmp_log(LOG_ERR, "kvm_openfiles: %s\n", kvm_errbuf);
       exit(1);
   }
