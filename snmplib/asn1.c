@@ -974,12 +974,21 @@ asn_build_objid(u_char *data,
     register int i;
 
     /* check if there are at least 2 sub-identifiers */
-    if (objidlength < 2){
+    if (objidlength == 0){
         /* there are not, so make OID have two with value of zero */
         objid_val = 0;
 	objidlength = 2;
+    } else if (objidlength == 1){
+        /* encode the first value */
+	objid_val = (op[0] * 40);
+	objidlength = 2;
+	op++;
     } else {
         /* combine the first two values */
+	if ( op[1] > 40 ) {
+	    ERROR_MSG("build objid: bad second subidentifier");
+	    return NULL;
+	}
 	objid_val = (op[0] * 40) + op[1];
 	op += 2;
     }
