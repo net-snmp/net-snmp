@@ -141,7 +141,7 @@ sure to end it in -1.*/
 #define PROCFIXCMD "/usr/local/bin/perl /local/scripts/fixproc %s"
 
 /* Exec command to fix EXEC problems */
-/* %s will be replaced by the process name in error */
+/* %s will be replaced by the exec/script name in error */
 
 #define EXECFIXCMD "/usr/local/bin/perl /local/scripts/fixproc %s"
 
@@ -176,6 +176,8 @@ sure to end it in -1.*/
                              before restarting the agent.  This is
                              necessary to finish the snmpset reply
                              before restarting. */
+
+#define NUM_COMMUNITIES	5  /* Number of community strings to store */
 
 /* #define EXIT_ON_BAD_KLREAD  */
 /* define to exit the agent on a bad kernel read */
