@@ -1,5 +1,6 @@
 /* wrapper to call all the mib module initialization functions */
 
+#include "mib_module_config.h"
 #include <config.h>
 #if HAVE_STRING_H
 #include <string.h>
