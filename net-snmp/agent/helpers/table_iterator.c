@@ -285,20 +285,24 @@ netsnmp_table_iterator_helper_handler(netsnmp_mib_handler *handler,
 
             /* find first data point */
             if (!index_search) {
-                /* XXXWWW: does only using the first have ramifications? */
-                table_info = netsnmp_extract_table_info(requests);
-                index_search = snmp_clone_varbind(table_info->indexes);
-                free_this_index_search = index_search;
+                if (free_this_index_search) {
+                    /* previously done */
+                    index_search = free_this_index_search;
+                } else {
+                    table_info = netsnmp_extract_table_info(requests);
+                    index_search = snmp_clone_varbind(table_info->indexes);
+                    free_this_index_search = index_search;
 
-                /* setup, malloc search data: */
-                if (!index_search) {
-                    /*
-                     * hmmm....  invalid table? 
-                     */
-                    snmp_log(LOG_WARNING,
-                             "invalid index list or failed malloc for table %s\n",
-                             reginfo->handlerName);
-                    return SNMP_ERR_NOERROR;
+                    /* setup, malloc search data: */
+                    if (!index_search) {
+                        /*
+                         * hmmm....  invalid table? 
+                         */
+                        snmp_log(LOG_WARNING,
+                                 "invalid index list or failed malloc for table %s\n",
+                                 reginfo->handlerName);
+                        return SNMP_ERR_NOERROR;
+                    }
                 }
             }
 
