@@ -246,20 +246,36 @@ handle_agentx_response( int operation,
 		}
 	    }
 
-	    if ( !asp->exact && (vbp->type == SNMP_ENDOFMIBVIEW ||
-			     in_a_view( vbp->name, &vbp->name_length,
-                                        asp->pdu,  vbp->type ))) {
+	    retry_sub = find_subtree(vbp->name, vbp->name_length, NULL);
+
+	    if (!(asp->exact) && (retry_sub != NULL) &&
+		(retry_sub->flags & FULLY_QUALIFIED_INSTANCE)  &&
+		(vbp->type == SNMP_NOSUCHINSTANCE)) {
+	      DEBUGMSGTL(("agentx/master",
+			  "noSuchInstance doing getNext on FQI\n"));
+
+	      /*  This is *almost* like the case below, but we have to handle
+		  it slightly differenly because of the way inexact queries
+		  get stepped over FQIs for us.  */
+	      
+	      asp->index = ax_vlist->variables[i]->index;
+	      asp->status = handle_one_var(asp, ax_vlist->variables[i]);
+	    } else if (!asp->exact && (vbp->type == SNMP_ENDOFMIBVIEW ||
+				       in_a_view(vbp->name, &vbp->name_length,
+						 asp->pdu, vbp->type))) {
 	        /*
 	         *   Retry unfulfilled requests
 	         */
-	        retry_sub = find_subtree_next( vbp->name, vbp->name_length, NULL );
-	        if ( retry_sub ) {
-		    (void)snmp_set_var_objid(ax_vlist->variables[i], retry_sub->name, retry_sub->namelen);
+	        retry_sub = find_subtree_next(vbp->name,vbp->name_length,NULL);
+
+	        if (retry_sub) {
+		    (void)snmp_set_var_objid(ax_vlist->variables[i], 
+					  retry_sub->name, retry_sub->namelen);
 		    asp->index = ax_vlist->variables[i]->index;
 		    asp->status = handle_one_var(asp, ax_vlist->variables[i]);
-	        }
-	        else
+	        } else {
 		    ax_vlist->variables[i]->type = SNMP_ENDOFMIBVIEW;
+		}
 	    }
 	    else {
 		next  = ax_vlist->variables[i]->next_variable;
