@@ -21,7 +21,7 @@ sub InitMakeParams {
 		  'PREREQ_PM'           => {},
 		  );
 
-    my $snmp_lib, $snmp_llib, $sep;
+    my ($snmp_lib, $snmp_llib, $sep);
     if ($Config{'osname'} eq 'MSWin32') {
 	$snmp_lib = 'libnetsnmp.lib';
 	$snmp_link_lib = 'libnetsnmp';

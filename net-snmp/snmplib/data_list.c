@@ -25,7 +25,7 @@
  */
 /***********************************************************************/
 
-inline void
+NETSNMP_INLINE void
 netsnmp_free_list_data(netsnmp_data_list *node)
 {
     Netsnmp_Free_List_Data *beer;
@@ -38,7 +38,7 @@ netsnmp_free_list_data(netsnmp_data_list *node)
     SNMP_FREE(node->name);
 }
 
-inline void
+NETSNMP_INLINE void
 netsnmp_free_all_list_data(netsnmp_data_list *head)
 {
     netsnmp_data_list *tmpptr;
@@ -50,7 +50,7 @@ netsnmp_free_all_list_data(netsnmp_data_list *head)
     }
 }
 
-inline netsnmp_data_list *
+NETSNMP_INLINE netsnmp_data_list *
 netsnmp_create_data_list(const char *name, void *data,
                          Netsnmp_Free_List_Data * beer)
 {
@@ -64,7 +64,7 @@ netsnmp_create_data_list(const char *name, void *data,
 }
 
 
-inline void
+NETSNMP_INLINE void
 netsnmp_add_list_data(netsnmp_data_list **head, netsnmp_data_list *node)
 {
     netsnmp_data_list *ptr;
@@ -86,7 +86,7 @@ netsnmp_add_list_data(netsnmp_data_list **head, netsnmp_data_list *node)
         ptr->next = node;
 }
 
-inline void    *
+NETSNMP_INLINE void    *
 netsnmp_get_list_data(netsnmp_data_list *head, const char *name)
 {
     for (; head; head = head->next)
@@ -97,7 +97,7 @@ netsnmp_get_list_data(netsnmp_data_list *head, const char *name)
     return NULL;
 }
 
-inline void    *
+NETSNMP_INLINE void    *
 netsnmp_get_list_node(netsnmp_data_list *head, const char *name)
 {
     for (; head; head = head->next)

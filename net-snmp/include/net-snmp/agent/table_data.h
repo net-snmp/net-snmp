@@ -79,7 +79,7 @@ extern          "C" {
     netsnmp_table_row *netsnmp_create_table_data_row(void);
     netsnmp_table_row *netsnmp_table_data_clone_row(netsnmp_table_row
                                                     *row);
-    inline void     netsnmp_table_data_replace_row(netsnmp_table_data
+    NETSNMP_INLINE void     netsnmp_table_data_replace_row(netsnmp_table_data
                                                    *table,
                                                    netsnmp_table_row
                                                    *origrow,

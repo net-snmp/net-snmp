@@ -30,7 +30,9 @@ if [ $2 = "add" -o $2 = "reverse" ]; then
   $DOIT perl -p -i.bak -e 's/Version: [\.0-9a-zA-Z]+/Version: '$VERSION'/;' $COLONFILES
   $DOIT perl -p -i.bak -e 's#^s/VERSIONINFO/.*#s/VERSIONINFO/'$VERSION'/g#;' $SEDFILES
   $DOIT perl -p -i.bak -e "s/VERSION = \'(.*)\'/VERSION = \'$VERSION\'/;" $PERLFILES
+ if [ "x$3" != "xnocvs" ]; then
   $DOIT cvs commit -m "- ($QUOTEFILES $SEDFILES): version tag ( $VERSION )" $QUOTEFILES $SEDFILES $COLONFILES $PERLFILES
+ fi
 fi
 
 if [ $2 = "tag" ]; then
@@ -41,6 +43,7 @@ if [ $2 = "tar" ]; then
     $DOIT cvs -d $CVSUSER@cvs.net-snmp.sourceforge.net:/cvsroot/net-snmp export -d net-snmp-$VERSION -r $VERSIONTAG net-snmp
     $DOIT net-snmp-$VERSION/remove-files net-snmp-$VERSION
     $DOIT tar czf net-snmp-$VERSION.tar.gz net-snmp-$VERSION
+    $DOIT md5sum net-snmp-$VERSION.tar.gz > net-snmp-$VERSION.tar.gz.md5
 fi
 
 if [ $2 = "clean" ]; then

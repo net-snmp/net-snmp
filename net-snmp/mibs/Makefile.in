@@ -36,7 +36,8 @@ RFCMIBS	= IF-MIB.txt IF-INVERTED-STACK-MIB.txt \
 	DISMAN-SCRIPT-MIB.txt DISMAN-SCHEDULE-MIB.txt \
 	NOTIFICATION-LOG-MIB.txt
 
-NETSNMPMIBS = NET-SNMP-MIB.txt NET-SNMP-AGENT-MIB.txt NET-SNMP-EXAMPLES-MIB.txt
+NETSNMPMIBS = NET-SNMP-TC.txt NET-SNMP-MIB.txt NET-SNMP-AGENT-MIB.txt \
+	NET-SNMP-EXAMPLES-MIB.txt
 
 UCDMIBS = UCD-SNMP-MIB.txt UCD-DEMO-MIB.txt UCD-IPFWACC-MIB.txt \
 	UCD-DLMOD-MIB.txt UCD-DISKIO-MIB.txt
@@ -51,7 +52,7 @@ all: standardall
 
 mibsinstall: installdirs
 	@for i in $(MIBS) ; do \
-		$(INSTALL) $(srcdir)/$$i $(mibdir) ; \
+		$(INSTALL_DATA) $(srcdir)/$$i $(mibdir) ; \
 		echo "install: installed $$i in $(mibdir)" ; \
 	done
 
