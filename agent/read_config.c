@@ -48,7 +48,6 @@ struct config_line config_handlers[] = {
 
 void init_read_config __P((void))
 {
-  
   update_config(0);
   signal(SIGHUP,update_config);
 }
@@ -57,7 +56,7 @@ int linecount;
 char *curfilename;
 
 int read_config(filename)
-     char *filename;
+  char *filename;
 {
 
   FILE *ifile;
@@ -68,14 +67,17 @@ int read_config(filename)
   linecount = 0;
   curfilename = filename;
   
-  if ((ifile = fopen(filename,"r")) == NULL) {
+  if ((ifile = fopen(filename, "r")) == NULL) {
     return(1);
   }
 
-  while (fgets(line,STRMAX,ifile) != NULL) 
+  while (fgets(line, STRMAX, ifile) != NULL) 
     {
       linecount++;
       cptr = line;
+      i = strlen(line)-1;
+      if (line[i] == '\n')
+        line[i] = 0;
       /* check blank line or # comment */
       if ((cptr = skip_white(cptr)))
 	{

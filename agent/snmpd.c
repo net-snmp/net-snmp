@@ -1005,7 +1005,6 @@ void snmpd_parse_config_trapsink(word,cptr)
 {
   char tmpbuf[1024];
   
-  cptr[strlen(cptr)-1] = 0;
   if (create_v1_trap_session(cptr, snmp_trapcommunity) == 0) {
     sprintf(tmpbuf,"cannot create trapsink: %s", cptr);
     config_perror(tmpbuf);
