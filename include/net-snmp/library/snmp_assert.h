@@ -13,6 +13,17 @@
  */
 
 /*
+ * define __STRING for systems (*cough* sun *cough*) that don't have it
+ */
+#ifndef __STRING
+#  ifdef __STDC__
+#    define __STRING(x) #x
+#  else
+#    define __STRING(x) "x"
+#  endif /* __STDC__ */
+#endif /* __STRING */
+
+/*
  * always use assert if requested
  */
 #ifdef NETSNMP_USE_ASSERT
