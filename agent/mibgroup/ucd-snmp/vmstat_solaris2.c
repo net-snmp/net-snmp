@@ -41,8 +41,7 @@
 /* to this structure.  This pointer must be used as the kc argument in */
 /* following function calls from libkstat */
 /* Pointer to structure to be opened with kstat_open in main procedure */
-/* We share this one with kernel_sunos5, where it's defined, and memory_solaris2
- */
+/* We share this one with kernel_sunos5, where it's defined, and memory_solaris2 */
 extern kstat_ctl_t *kstat_fd;
 kstat_ctl_t *kctl;
 
@@ -65,8 +64,7 @@ void init_vmstat_solaris2(void)
     {SWAPOUT, ASN_INTEGER, RONLY, var_extensible_vmstat, 1, {SWAPOUT}},
     {IOSENT, ASN_INTEGER, RONLY, var_extensible_vmstat, 1, {IOSENT}},
     {IORECEIVE, ASN_INTEGER, RONLY, var_extensible_vmstat, 1, {IORECEIVE}},
-    {SYSINTERRUPTS, ASN_INTEGER, RONLY, var_extensible_vmstat, 1, {SYSINTERRUPTS
-}},
+    {SYSINTERRUPTS, ASN_INTEGER, RONLY, var_extensible_vmstat, 1, {SYSINTERRUPTS}},
     {SYSCONTEXT, ASN_INTEGER, RONLY, var_extensible_vmstat, 1, {SYSCONTEXT}},
     {CPUUSER, ASN_INTEGER, RONLY, var_extensible_vmstat, 1, {CPUUSER}},
     {CPUSYSTEM, ASN_INTEGER, RONLY, var_extensible_vmstat, 1, {CPUSYSTEM}},
@@ -89,8 +87,7 @@ void init_vmstat_solaris2(void)
   /* Re-use kstat control from kernel_sunos5 */
   if ((kctl = kstat_fd) == NULL)
     {
-      snmp_log(LOG_ERR,"vmstat_solaris2 (init): Could not open kstat control.\n"
-);
+      snmp_log(LOG_ERR,"vmstat_solaris2 (init): Could not open kstat control.\n");
     }
 }
 /* init_vmstat_solaris2 ends here */
@@ -125,8 +122,7 @@ long getMisc(int what)
   /* Get time */
   time(&timestamp_new);
   
-  /* If we have just gotten the data, return the values from last run (skip if) 
-*/
+  /* If we have just gotten the data, return the values from last run (skip if) */
   /* This happens on a snmpwalk request.  No need to read the kstat again */
   /* if we just did it less than a second ago */
   /* +1 b/c we sleep(1) on the first run */
@@ -152,8 +148,7 @@ long getMisc(int what)
       /* Memory allocation is done automagically by the kstat library. */
       if (kstat_read(kctl, ksp, &cs) == -1)
 	{
-	  snmp_log(LOG_ERR, "vmstat_solaris2 (getMisc): failure to init cs structure.")
-;
+	  snmp_log(LOG_ERR, "vmstat_solaris2 (getMisc): failure to init cs structure.");
 	}
       
       /* Get kb/s swapped in */
@@ -177,18 +172,15 @@ long getMisc(int what)
       /* Update cs structure with new kstat values after we are awake again. */
       if (kstat_read(kctl, ksp, &cs) == -1)
 	{
-	  snmp_log(LOG_ERR, "vmstat_solaris2 (getMisc): failure to update cs structure.
-");
+	  snmp_log(LOG_ERR, "vmstat_solaris2 (getMisc): failure to update cs structure.");
 	  return(NULL);
 	}
       
       /* Get new samples after waiting for counters to increments */
       /* thru system activity. */
-      /* Get new number of pages swapped in, convert to kB and calculate differe
-nce */
+      /* Get new number of pages swapped in, convert to kB and calculate difference */
       swapin = ((cs.cpu_vminfo.pgswapin * getpagesize()) / 1024) - swapin ;
-      /* Get new number of pages swapped out, convert to kB and calculate differ
-ence */
+      /* Get new number of pages swapped out, convert to kB and calculate difference */
       swapout = ((cs.cpu_vminfo.pgswapin * getpagesize()) / 1024) - swapout ;
       /* Get new number of blocks written and calculate difference */
       blocks_write = cs.cpu_sysinfo.bwrite - blocks_write;
@@ -253,8 +245,7 @@ long getCPU(int state)
   /* Get time */
   time(&timestamp_new);
 
-  /* If we have just gotten the data, return the values from last run (skip if) 
-*/
+  /* If we have just gotten the data, return the values from last run (skip if) */
   /* This happens on a snmpwalk request.  No need to read the kstat again */
   /* if we just did it less than a second ago */
   /* +1 b/c we sleep(1) */
@@ -325,8 +316,7 @@ long getCPU(int state)
 
     } /* end if (timestamp_new > (timestamp_old_2 + 1)) */
   
-  /* Returns the requested percentage value, dropping fractions b/c casting to l
-ong */
+  /* Returns the requested percentage value, dropping fractions b/c casting to long */
   return((long) cpu_perc[state]);
   
 } /* end function getCPU */
@@ -348,11 +338,9 @@ unsigned char *var_extensible_vmstat(struct variable *vp,
 
   /* generic check whether the options passed make sense and whether the */
   /* right variable is requested */
-  if (header_generic(vp,name,length,exact,var_len, write_method) != MATCH_SUCCEE
-DED)
+  if (header_generic(vp,name,length,exact,var_len, write_method) != MATCH_SUCCEEDED)
     {
-      snmp_log(LOG_ERR,"vmstat_solaris2 (var_extensible_vmstat): Header check fa
-iled.\n");
+      snmp_log(LOG_ERR,"vmstat_solaris2 (var_extensible_vmstat): Header check failed.\n");
       return(NULL);
     }     
   
