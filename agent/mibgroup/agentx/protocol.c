@@ -725,6 +725,7 @@ agentx_parse_varbind( u_char *data, size_t *length, int *type,
 	case SNMP_NOSUCHINSTANCE:
 	case SNMP_ENDOFMIBVIEW:
 		/* No data associated with these types */
+		*data_len = 0;
 		break;
 	default:
                 DEBUGINDENTLESS();
