@@ -822,7 +822,7 @@ dnl
 dnl Add the default transports to the list
 dnl
 if test "x$PARTIALTARGETOS" = "xcygwin"; then
-  transport_default_list="UDP TCP"
+  transport_default_list="UDP TCP Callback"
 else
   transport_default_list="UDP TCP Unix Callback"
 fi
