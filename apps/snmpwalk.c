@@ -246,11 +246,11 @@ int main(int argc, char *argv[])
               /* not an exception value */
 	      if (check && snmp_oid_compare(name, name_length, vars->name,
 	      				    vars->name_length) >= 0) {
-		fprintf(stderr, "Error: OID not increasing: ");
-		fprint_objid(stderr, name, name_length);
-		fprintf(stderr, " >= ");
-		fprint_objid(stderr, vars->name, vars->name_length);
-		fprintf(stderr, "\n");
+		char name_buf[SPRINT_MAX_LEN], var_buf[SPRINT_MAX_LEN];
+		snprint_objid(name_buf, sizeof(name_buf), name, name_length);
+		snprint_objid(var_buf, sizeof(var_buf), vars->name, vars->name_length);
+		fprintf(stderr, "Error: OID not increasing: %s >= %s\n",
+			name_buf, var_buf);
 	        running = 0;
 		exitval = 1;
 	      }
@@ -277,7 +277,8 @@ int main(int argc, char *argv[])
                 /*EMPTY*/;
               if (vars)
                 fprint_objid(stderr, vars->name, vars->name_length);
-              fprintf(stderr, "\n");
+	      else
+		fprintf(stderr, "\n");
             }
 	    exitval = 2;
           }
