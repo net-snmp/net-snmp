@@ -32,13 +32,34 @@ header_complex_generate_varoid(struct variable_list *var) {
         var->name[0] = *(var->val.integer);
         break;
 
+      case ASN_PRIV_IMPLIED_OBJECT_ID:
+        var->name_length = var->val_len/sizeof(oid);
+        var->name = (oid *) malloc(sizeof(oid) * (var->name_length));
+        if (var->name == NULL)
+            return SNMPERR_GENERR;
+
+        for(i = 0; i < var->name_length; i++)
+          var->name[i] = var->val.objid[i];
+        break;
+
+      case ASN_OBJECT_ID:
+        var->name_length = var->val_len/sizeof(oid) + 1;
+        var->name = (oid *) malloc(sizeof(oid) * (var->name_length));
+        if (var->name == NULL)
+            return SNMPERR_GENERR;
+
+        var->name[0] = var->name_length-1;
+        for(i = 0; i < var->name_length-1; i++)
+          var->name[i+1] = var->val.objid[i];
+        break;
+        
       case ASN_PRIV_IMPLIED_OCTET_STR:
         var->name_length = var->val_len;
         var->name = (oid *) malloc(sizeof(oid) * (var->name_length));
         if (var->name == NULL)
             return SNMPERR_GENERR;
 
-        for(i = 0; i <= var->val_len; i++)
+        for(i = 0; i < var->val_len; i++)
           var->name[i] = (oid) var->val.string[i];
         break;
 
@@ -50,7 +71,7 @@ header_complex_generate_varoid(struct variable_list *var) {
             return SNMPERR_GENERR;
 
         var->name[0] = (oid) var->val_len;
-        for(i = 0; i <= var->val_len; i++)
+        for(i = 0; i < var->val_len; i++)
           var->name[i+1] = (oid) var->val.string[i];
         break;
       
@@ -97,6 +118,34 @@ int header_complex_parse_oid(oid *oidIndex, size_t oidLen,
         oidLen--;
         DEBUGMSGTL(("header_complex_parse_oid",
                     "Parsed int(%d): %d\n", var->type, *var->val.integer));
+        break;
+
+      case ASN_OBJECT_ID:
+      case ASN_PRIV_IMPLIED_OBJECT_ID:
+        if (var->type == ASN_PRIV_IMPLIED_OBJECT_ID) {
+            itmp = oidLen;
+        } else {
+            itmp = (long) *oidIndex++;
+            oidLen--;
+            if (itmp > oidLen)
+                return SNMPERR_GENERR;
+        }
+
+        if (itmp == 0)
+          break;        /* zero length strings shouldn't malloc */
+        
+        var->val_len = itmp*sizeof(oid);
+        var->val.objid = (oid *) calloc(1,var->val_len);
+        if (var->val.objid == NULL)
+            return SNMPERR_GENERR;
+
+        for(i = 0; i < itmp; i++)
+          var->val.objid[i] = (u_char) *oidIndex++;
+        oidLen -= itmp;
+
+        DEBUGMSGTL(("header_complex_parse_oid", "Parsed oid: "));
+        DEBUGMSGOID(("header_complex_parse_oid", var->val.objid, var->val_len/sizeof(oid)));
+        DEBUGMSG(("header_complex_parse_oid", "\n"));
         break;
 
       case ASN_OPAQUE:
@@ -171,6 +220,25 @@ header_complex_generate_oid(oid *name, /* out */
   DEBUGMSGTL(("header_complex_generate_oid", "generated: "));
   DEBUGMSGOID(("header_complex_generate_oid", name, *length));
   DEBUGMSG(("header_complex_generate_oid", "\n"));
+}
+
+/* finds the data in "datalist" stored at "index" */
+void *
+header_complex_get(struct header_complex_index *datalist,
+                    struct variable_list *index) {
+    oid searchfor[MAX_OID_LEN];
+    size_t searchfor_len;
+    struct header_complex_index *nptr;
+    
+    header_complex_generate_oid(searchfor,     /* out */
+                                &searchfor_len, /* out */
+                                NULL, 0, index);
+    for(nptr = datalist; nptr != NULL; nptr = nptr->next) {
+        if (snmp_oid_compare(searchfor, searchfor_len,
+                             nptr->name, nptr->namelen) == 0)
+            return nptr->data;
+    }
+    return NULL;
 }
 
 
