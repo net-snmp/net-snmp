@@ -240,9 +240,8 @@ closedir(DIR *dirp)
 
 #ifndef HAVE_GETTIMEOFDAY
 
-int gettimeofday(tv, tz)
-struct timeval *tv;
-struct timezone *tz;
+int gettimeofday(struct timeval *tv,
+		 struct timezone *tz)
 {
     struct _timeb timebuffer;
 
@@ -253,7 +252,7 @@ struct timezone *tz;
 }
 #endif
 
-in_addr_t get_myaddr()
+in_addr_t get_myaddr(void)
 {
   char local_host[130];
   int result;
@@ -294,13 +293,13 @@ in_addr_t get_myaddr()
   return((in_addr_t)in_addr.sin_addr.s_addr);
 }
 
-long get_uptime __P((void))
+long get_uptime (void)
 {
     return (0); /* not implemented */
 }
 
 char *
-winsock_startup __P((void))
+winsock_startup (void)
 {
  WORD VersionRequested;
  WSADATA stWSAData;
@@ -322,13 +321,13 @@ winsock_startup __P((void))
  return(NULL);
 }
 
-void winsock_cleanup __P((void))
+void winsock_cleanup (void)
 {
    WSACleanup();
 }
 
 #else
-in_addr_t get_myaddr __P((void))
+in_addr_t get_myaddr (void)
 {
     int sd;
     struct ifconf ifc;
@@ -373,7 +372,7 @@ in_addr_t get_myaddr __P((void))
 /*
  * Returns uptime in centiseconds(!).
  */
-long get_uptime __P((void))
+long get_uptime (void)
 {
 #if defined(bsdlike) && !defined(solaris2) && !defined(linux)
     struct timeval boottime, now, diff;
@@ -458,8 +457,7 @@ long get_uptime __P((void))
 
 #ifndef HAVE_STRDUP
 char *
-strdup(src)
-    char *src;
+strdup(char *src)
 {
     int len;
     char *dst;
@@ -473,10 +471,9 @@ strdup(src)
 #endif	/* HAVE_STRDUP */
 
 #ifndef HAVE_SETENV
-int setenv(name, value, overwrite)
-    char *name;
-    char *value;
-    int overwrite;
+int setenv(char *name,
+	   char *value,
+	   int overwrite)
 {
     char *cp;
     int ret;

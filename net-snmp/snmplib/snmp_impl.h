@@ -145,7 +145,7 @@ struct trapVar {
 };
 
 /* changed to ERROR_MSG to eliminate conflict with other includes */
-#define ERROR_MSG(string)	snmp_set_detail((string))
+#define ERROR_MSG(string)	snmp_set_detail(string)
 
 /* from snmp.c */
 extern u_char	sid[];	/* size SID_MAX_LEN */
@@ -163,13 +163,13 @@ extern int snmp_errno;
  */
 #define FIRST_PASS	1
 #define	LAST_PASS	2
-u_char	*snmp_comstr_parse __P((u_char *, int *, u_char *, int *, int *));
-u_char	*snmp_comstr_build __P((u_char *, int *, u_char *, int *, int *, int));
+u_char	*snmp_comstr_parse (u_char *, int *, u_char *, int *, int *);
+u_char	*snmp_comstr_build (u_char *, int *, u_char *, int *, int *, int);
 
-u_char	*snmp_party_parse __P((u_char *, int *, struct packet_info *,
-                                 oid *, int *, oid *, int *, oid *, int *, int));
-u_char	*snmp_party_build __P((u_char *, int *, struct packet_info *, int,
-                                 oid *, int, oid *, int, oid *, int, int *, int));
+u_char	*snmp_party_parse (u_char *, int *, struct packet_info *,
+                                 oid *, int *, oid *, int *, oid *, int *, int);
+u_char	*snmp_party_build (u_char *, int *, struct packet_info *, int,
+                                 oid *, int, oid *, int, oid *, int, int *, int);
 
-int has_access __P((u_char, int, int, int));
+int has_access (u_char, int, int, int);
 #endif /* SNMP_IMPL_H */

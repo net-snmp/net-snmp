@@ -55,6 +55,8 @@ SOFTWARE.
 #include <sys/types.h>
 #include <sys/stat.h>
 
+#include "system.h"
+
 /* Wow.  This is ugly.  -- Wes */
 #if HAVE_DIRENT_H
 # include <dirent.h>
@@ -206,99 +208,99 @@ struct tok {
 
 
 struct tok tokens[] = {
-    { "obsolete", sizeof ("obsolete")-1, OBSOLETE },
-    { "Opaque", sizeof ("Opaque")-1, KW_OPAQUE },
-    { "optional", sizeof ("optional")-1, KW_OPTIONAL },
-    { "LAST-UPDATED", sizeof ("LAST-UPDATED")-1, LASTUPDATED },
-    { "ORGANIZATION", sizeof ("ORGANIZATION")-1, ORGANIZATION },
-    { "CONTACT-INFO", sizeof ("CONTACT-INFO")-1, CONTACTINFO },
-    { "MODULE-IDENTITY", sizeof ("MODULE-IDENTITY")-1, MODULEIDENTITY },
-    { "MODULE-COMPLIANCE", sizeof ("MODULE-COMPLIANCE")-1, COMPLIANCE },
-    { "DEFINITIONS", sizeof("DEFINITIONS")-1, DEFINITIONS},
-    { "END", sizeof("END")-1, END},
-    { "AUGMENTS", sizeof ("AUGMENTS")-1, AUGMENTS },
-    { "not-accessible", sizeof ("not-accessible")-1, NOACCESS },
-    { "write-only", sizeof ("write-only")-1, WRITEONLY },
-    { "NsapAddress", sizeof("NsapAddress")-1, NSAPADDRESS},
-    { "UNITS", sizeof("Units")-1, UNITS},
-    { "REFERENCE", sizeof("REFERENCE")-1, REFERENCE},
-    { "NUM-ENTRIES", sizeof("NUM-ENTRIES")-1, NUM_ENTRIES},
-    { "BITSTRING", sizeof("BITSTRING")-1, BITSTRING},
-    { "BIT", sizeof("BIT")-1, CONTINUE},
-    { "BITS", sizeof("BITS")-1, BITSTRING},
-    { "Counter64", sizeof("Counter64")-1, COUNTER64},
-    { "TimeTicks", sizeof ("TimeTicks")-1, TIMETICKS },
-    { "NOTIFICATION-TYPE", sizeof ("NOTIFICATION-TYPE")-1, NOTIFTYPE },
-    { "OBJECT-GROUP", sizeof ("OBJECT-GROUP")-1, OBJGROUP },
-    { "OBJECT-IDENTITY", sizeof ("OBJECT-IDENTITY")-1, OBJGROUP },
-    { "OBJECTIDENTIFIER", sizeof ("OBJECTIDENTIFIER")-1, OBJID },
-    { "OBJECT", sizeof ("OBJECT")-1, CONTINUE },
-    { "NetworkAddress", sizeof ("NetworkAddress")-1, NETADDR },
-    { "Gauge", sizeof ("Gauge")-1, GAUGE },
-    { "Gauge32", sizeof ("Gauge32")-1, GAUGE },
-    { "Unsigned32", sizeof ("Unsigned32")-1, GAUGE },
-    { "read-write", sizeof ("read-write")-1, READWRITE },
-    { "read-create", sizeof ("read-create")-1, READCREATE },
-    { "OCTETSTRING", sizeof ("OCTETSTRING")-1, OCTETSTR },
-    { "OCTET", sizeof ("OCTET")-1, CONTINUE },
-    { "OF", sizeof ("OF")-1, OF },
-    { "SEQUENCE", sizeof ("SEQUENCE")-1, SEQUENCE },
-    { "NULL", sizeof ("NULL")-1, NUL },
-    { "IpAddress", sizeof ("IpAddress")-1, IPADDR },
-    { "UInteger32", sizeof ("UInteger32")-1, UINTEGER32 },
-    { "INTEGER", sizeof ("INTEGER")-1, INTEGER },
-    { "Integer32", sizeof ("Integer32")-1, INTEGER32 },
-    { "Counter", sizeof ("Counter")-1, COUNTER },
-    { "Counter32", sizeof ("Counter32")-1, COUNTER },
-    { "read-only", sizeof ("read-only")-1, READONLY },
-    { "DESCRIPTION", sizeof ("DESCRIPTION")-1, DESCRIPTION },
-    { "INDEX", sizeof ("INDEX")-1, INDEX },
-    { "DEFVAL", sizeof ("DEFVAL")-1, DEFVAL },
-    { "deprecated", sizeof ("deprecated")-1, DEPRECATED },
-    { "SIZE", sizeof ("SIZE")-1, SIZE },
-    { "MAX-ACCESS", sizeof ("MAX-ACCESS")-1, ACCESS },
-    { "ACCESS", sizeof ("ACCESS")-1, ACCESS },
-    { "mandatory", sizeof ("mandatory")-1, MANDATORY },
-    { "current", sizeof ("current")-1, CURRENT },
-    { "STATUS", sizeof ("STATUS")-1, STATUS },
-    { "SYNTAX", sizeof ("SYNTAX")-1, SYNTAX },
-    { "OBJECT-TYPE", sizeof ("OBJECT-TYPE")-1, OBJTYPE },
-    { "TRAP-TYPE", sizeof ("TRAP-TYPE")-1, TRAPTYPE },
-    { "ENTERPRISE", sizeof ("ENTERPRISE")-1, ENTERPRISE },
-    { "BEGIN", sizeof ("BEGIN")-1, BEGIN },
-    { "IMPORTS", sizeof ("IMPORTS")-1, IMPORTS },
-    { "EXPORTS", sizeof ("EXPORTS")-1, EXPORTS },
-    { "accessible-for-notify", sizeof ("accessible-for-notify")-1, ACCNOTIFY },
-    { "TEXTUAL-CONVENTION", sizeof ("TEXTUAL-CONVENTION")-1, CONVENTION },
-    { "NOTIFICATION-GROUP", sizeof ("NOTIFICATION-GROUP")-1, NOTIFTYPE },
-    { "DISPLAY-HINT", sizeof ("DISPLAY-HINT")-1, DISPLAYHINT },
-    { "FROM", sizeof ("FROM")-1, FROM },
+    { (char*)"obsolete", sizeof ("obsolete")-1, OBSOLETE },
+    { (char*)"Opaque", sizeof ("Opaque")-1, KW_OPAQUE },
+    { (char*)"optional", sizeof ("optional")-1, KW_OPTIONAL },
+    { (char*)"LAST-UPDATED", sizeof ("LAST-UPDATED")-1, LASTUPDATED },
+    { (char*)"ORGANIZATION", sizeof ("ORGANIZATION")-1, ORGANIZATION },
+    { (char*)"CONTACT-INFO", sizeof ("CONTACT-INFO")-1, CONTACTINFO },
+    { (char*)"MODULE-IDENTITY", sizeof ("MODULE-IDENTITY")-1, MODULEIDENTITY },
+    { (char*)"MODULE-COMPLIANCE", sizeof ("MODULE-COMPLIANCE")-1, COMPLIANCE },
+    { (char*)"DEFINITIONS", sizeof("DEFINITIONS")-1, DEFINITIONS},
+    { (char*)"END", sizeof("END")-1, END},
+    { (char*)"AUGMENTS", sizeof ("AUGMENTS")-1, AUGMENTS },
+    { (char*)"not-accessible", sizeof ("not-accessible")-1, NOACCESS },
+    { (char*)"write-only", sizeof ("write-only")-1, WRITEONLY },
+    { (char*)"NsapAddress", sizeof("NsapAddress")-1, NSAPADDRESS},
+    { (char*)"UNITS", sizeof("Units")-1, UNITS},
+    { (char*)"REFERENCE", sizeof("REFERENCE")-1, REFERENCE},
+    { (char*)"NUM-ENTRIES", sizeof("NUM-ENTRIES")-1, NUM_ENTRIES},
+    { (char*)"BITSTRING", sizeof("BITSTRING")-1, BITSTRING},
+    { (char*)"BIT", sizeof("BIT")-1, CONTINUE},
+    { (char*)"BITS", sizeof("BITS")-1, BITSTRING},
+    { (char*)"Counter64", sizeof("Counter64")-1, COUNTER64},
+    { (char*)"TimeTicks", sizeof ("TimeTicks")-1, TIMETICKS },
+    { (char*)"NOTIFICATION-TYPE", sizeof ("NOTIFICATION-TYPE")-1, NOTIFTYPE },
+    { (char*)"OBJECT-GROUP", sizeof ("OBJECT-GROUP")-1, OBJGROUP },
+    { (char*)"OBJECT-IDENTITY", sizeof ("OBJECT-IDENTITY")-1, OBJGROUP },
+    { (char*)"OBJECTIDENTIFIER", sizeof ("OBJECTIDENTIFIER")-1, OBJID },
+    { (char*)"OBJECT", sizeof ("OBJECT")-1, CONTINUE },
+    { (char*)"NetworkAddress", sizeof ("NetworkAddress")-1, NETADDR },
+    { (char*)"Gauge", sizeof ("Gauge")-1, GAUGE },
+    { (char*)"Gauge32", sizeof ("Gauge32")-1, GAUGE },
+    { (char*)"Unsigned32", sizeof ("Unsigned32")-1, GAUGE },
+    { (char*)"read-write", sizeof ("read-write")-1, READWRITE },
+    { (char*)"read-create", sizeof ("read-create")-1, READCREATE },
+    { (char*)"OCTETSTRING", sizeof ("OCTETSTRING")-1, OCTETSTR },
+    { (char*)"OCTET", sizeof ("OCTET")-1, CONTINUE },
+    { (char*)"OF", sizeof ("OF")-1, OF },
+    { (char*)"SEQUENCE", sizeof ("SEQUENCE")-1, SEQUENCE },
+    { (char*)"NULL", sizeof ("NULL")-1, NUL },
+    { (char*)"IpAddress", sizeof ("IpAddress")-1, IPADDR },
+    { (char*)"UInteger32", sizeof ("UInteger32")-1, UINTEGER32 },
+    { (char*)"INTEGER", sizeof ("INTEGER")-1, INTEGER },
+    { (char*)"Integer32", sizeof ("Integer32")-1, INTEGER32 },
+    { (char*)"Counter", sizeof ("Counter")-1, COUNTER },
+    { (char*)"Counter32", sizeof ("Counter32")-1, COUNTER },
+    { (char*)"read-only", sizeof ("read-only")-1, READONLY },
+    { (char*)"DESCRIPTION", sizeof ("DESCRIPTION")-1, DESCRIPTION },
+    { (char*)"INDEX", sizeof ("INDEX")-1, INDEX },
+    { (char*)"DEFVAL", sizeof ("DEFVAL")-1, DEFVAL },
+    { (char*)"deprecated", sizeof ("deprecated")-1, DEPRECATED },
+    { (char*)"SIZE", sizeof ("SIZE")-1, SIZE },
+    { (char*)"MAX-ACCESS", sizeof ("MAX-ACCESS")-1, ACCESS },
+    { (char*)"ACCESS", sizeof ("ACCESS")-1, ACCESS },
+    { (char*)"mandatory", sizeof ("mandatory")-1, MANDATORY },
+    { (char*)"current", sizeof ("current")-1, CURRENT },
+    { (char*)"STATUS", sizeof ("STATUS")-1, STATUS },
+    { (char*)"SYNTAX", sizeof ("SYNTAX")-1, SYNTAX },
+    { (char*)"OBJECT-TYPE", sizeof ("OBJECT-TYPE")-1, OBJTYPE },
+    { (char*)"TRAP-TYPE", sizeof ("TRAP-TYPE")-1, TRAPTYPE },
+    { (char*)"ENTERPRISE", sizeof ("ENTERPRISE")-1, ENTERPRISE },
+    { (char*)"BEGIN", sizeof ("BEGIN")-1, BEGIN },
+    { (char*)"IMPORTS", sizeof ("IMPORTS")-1, IMPORTS },
+    { (char*)"EXPORTS", sizeof ("EXPORTS")-1, EXPORTS },
+    { (char*)"accessible-for-notify", sizeof ("accessible-for-notify")-1, ACCNOTIFY },
+    { (char*)"TEXTUAL-CONVENTION", sizeof ("TEXTUAL-CONVENTION")-1, CONVENTION },
+    { (char*)"NOTIFICATION-GROUP", sizeof ("NOTIFICATION-GROUP")-1, NOTIFTYPE },
+    { (char*)"DISPLAY-HINT", sizeof ("DISPLAY-HINT")-1, DISPLAYHINT },
+    { (char*)"FROM", sizeof ("FROM")-1, FROM },
     { NULL }
 };
 
 struct module_compatability *module_map_head;
 struct module_compatability module_map[] = {
-	{"RFC1065-SMI",	"RFC1155-SMI",	NULL,	0},
-	{"RFC1066-MIB",	"RFC1156-MIB",	NULL,	0},
+	{ (char*)"RFC1065-SMI",	(char*)"RFC1155-SMI",	NULL,	0},
+	{ (char*)"RFC1066-MIB",	(char*)"RFC1156-MIB",	NULL,	0},
 				/* 'mib' -> 'mib-2' */
-	{"RFC1156-MIB",	"RFC1158-MIB",	NULL,	0},
+	{ (char*)"RFC1156-MIB",	(char*)"RFC1158-MIB",	NULL,	0},
 				/* 'snmpEnableAuthTraps' -> 'snmpEnableAuthenTraps' */
-	{"RFC1158-MIB",	"RFC1213-MIB",	NULL,	0},
+	{ (char*)"RFC1158-MIB",	(char*)"RFC1213-MIB",	NULL,	0},
 				/* 'nullOID' -> 'zeroDotZero' */
-	{"RFC1155-SMI",	"SNMPv2-SMI",	NULL,	0},
-	{"RFC1213-MIB",	"SNMPv2-SMI",	"mib-2", 0},
-	{"RFC1213-MIB",	"SNMPv2-MIB",	"sys",	3},
-	{"RFC1213-MIB",	"IF-MIB",	"if",	2},
-	{"RFC1213-MIB",	"IP-MIB",	"ip",	2},
-	{"RFC1213-MIB",	"IP-MIB",	"icmp",	4},
-	{"RFC1213-MIB",	"TCP-MIB",	"tcp",	3},
-	{"RFC1213-MIB",	"UDP-MIB",	"udp",	3},
-	{"RFC1213-MIB",	"SNMPv2-SMI",	"tranmission", 0},
-	{"RFC1213-MIB",	"SNMPv2-MIB",	"snmp",	4},
-	{"RFC1271-MIB",	"RMON-MIB",	NULL,	0},
-	{"RFC1286-MIB",	"SOURCE-ROUTING-MIB",	"dot1dSr", 7},
-	{"RFC1286-MIB",	"BRIDGE-MIB",	NULL,	0},
-	{"RFC1316-MIB",	"CHARACTER-MIB", NULL,	0},
+	{ (char*)"RFC1155-SMI",	(char*)"SNMPv2-SMI",	NULL,	0},
+	{ (char*)"RFC1213-MIB",	(char*)"SNMPv2-SMI",	(char*)"mib-2", 0},
+	{ (char*)"RFC1213-MIB",	(char*)"SNMPv2-MIB",	(char*)"sys",	3},
+	{ (char*)"RFC1213-MIB",	(char*)"IF-MIB",	(char*)"if",	2},
+	{ (char*)"RFC1213-MIB",	(char*)"IP-MIB",	(char*)"ip",	2},
+	{ (char*)"RFC1213-MIB",	(char*)"IP-MIB",	(char*)"icmp",	4},
+	{ (char*)"RFC1213-MIB",	(char*)"TCP-MIB",	(char*)"tcp",	3},
+	{ (char*)"RFC1213-MIB",	(char*)"UDP-MIB",	(char*)"udp",	3},
+	{ (char*)"RFC1213-MIB",	(char*)"SNMPv2-SMI",	(char*)"tranmission", 0},
+	{ (char*)"RFC1213-MIB",	(char*)"SNMPv2-MIB",	(char*)"snmp",	4},
+	{ (char*)"RFC1271-MIB",	(char*)"RMON-MIB",	NULL,	0},
+	{ (char*)"RFC1286-MIB",	(char*)"SOURCE-ROUTING-MIB",	(char*)"dot1dSr", 7},
+	{ (char*)"RFC1286-MIB",	(char*)"BRIDGE-MIB",	NULL,	0},
+	{ (char*)"RFC1316-MIB",	(char*)"CHARACTER-MIB", NULL,	0},
 };
 #define MODULE_NOT_FOUND	0
 #define MODULE_LOADED_OK	1
@@ -333,80 +335,76 @@ static print_subtree_oid_report_oid = 0;
 static print_subtree_oid_report_symbolic = 0;
 static print_subtree_oid_report_suffix = 0;
 
-static void do_subtree __P((struct tree *, struct node **));
-static void do_linkup __P((struct module *, struct node *));
-static void dump_module_list __P((void));
-static int get_token __P((FILE *, char *, int));
+static void do_subtree (struct tree *, struct node **);
+static void do_linkup (struct module *, struct node *);
+static void dump_module_list (void);
+static int get_token (FILE *, char *, int);
 static char last = ' ';
-static void unget_token __P((int));
-static int parseQuoteString __P((FILE *, char *, int));
-static int tossObjectIdentifier __P((FILE *));
-static int  name_hash __P((char *));
-static void init_node_hash __P((struct node *));
-static void print_error __P((char *, char *, int));
+static void unget_token (int);
+static int parseQuoteString (FILE *, char *, int);
+static int tossObjectIdentifier (FILE *);
+static int  name_hash (char *);
+static void init_node_hash (struct node *);
+static void print_error (char *, char *, int);
 #ifndef xmalloc
-static void *xmalloc __P((unsigned));
+static void *xmalloc (unsigned);
 #endif
-static void xmalloc_stats __P((FILE *));
+static void xmalloc_stats (FILE *);
 #ifndef xstrdup
-static char *xstrdup __P((char *));
+static char *xstrdup (char *);
 #endif
-static void free_tree __P((struct tree *));
-static void free_node __P((struct node *));
+static void free_tree (struct tree *);
+static void free_node (struct node *);
 #ifdef TEST
-static void print_nodes __P((FILE *, struct node *));
+static void print_nodes (FILE *, struct node *);
 #endif
-static void build_translation_table __P((void));
-char *module_name __P((int, char *));
-static void init_tree_roots __P((void));
-static void merge_anon_children __P((struct tree *, struct tree *));
-static int getoid __P((FILE *, struct subid *, int));
-static struct node *parse_objectid __P((FILE *, char *));
-static int get_tc __P((char *, int, struct enum_list **, char **));
-static int get_tc_index __P((char *, int));
-static struct enum_list *parse_enumlist __P((FILE *));
-static struct node *parse_asntype __P((FILE *, char *, int *, char *));
-static struct node *parse_objecttype __P((FILE *, char *));
-static struct node *parse_objectgroup __P((FILE *, char *));
-static struct node *parse_notificationDefinition __P((FILE *, char *));
-static struct node *parse_trapDefinition __P((FILE *, char *));
-static struct node *parse_compliance __P((FILE *, char *));
-static struct node *parse_moduleIdentity __P((FILE *, char *));
-static        void  parse_imports __P((FILE *));
-static struct node *parse __P((FILE *, struct node *));
+static void build_translation_table (void);
+char *module_name (int, char *);
+static void init_tree_roots (void);
+static void merge_anon_children (struct tree *, struct tree *);
+static int getoid (FILE *, struct subid *, int);
+static struct node *parse_objectid (FILE *, char *);
+static int get_tc (char *, int, struct enum_list **, char **);
+static int get_tc_index (char *, int);
+static struct enum_list *parse_enumlist (FILE *);
+static struct node *parse_asntype (FILE *, char *, int *, char *);
+static struct node *parse_objecttype (FILE *, char *);
+static struct node *parse_objectgroup (FILE *, char *);
+static struct node *parse_notificationDefinition (FILE *, char *);
+static struct node *parse_trapDefinition (FILE *, char *);
+static struct node *parse_compliance (FILE *, char *);
+static struct node *parse_moduleIdentity (FILE *, char *);
+static        void  parse_imports (FILE *);
+static struct node *parse (FILE *, struct node *);
 
-static int read_module_internal __P((char *));
-static void read_module_replacements __P((char *));
-static void read_import_replacements __P((char *, char *));
+static int read_module_internal (char *);
+static void read_module_replacements (char *);
+static void read_import_replacements (char *, char *);
 
-static void  new_module  __P((char *, char *));
+static void  new_module  (char *, char *);
 
-static struct tree *get_next_subid __P((u_long *, struct tree *tree));
-static void print_parent_labeledoid __P((FILE *, struct tree *));
-static void print_parent_oid __P((FILE *, struct tree *));
-static void print_parent_label __P((FILE *, struct tree *));
-static struct node *merge_parse_objectid __P((struct node *, FILE *, char *));
+static struct tree *get_next_subid (u_long *, struct tree *tree);
+static void print_parent_labeledoid (FILE *, struct tree *);
+static void print_parent_oid (FILE *, struct tree *);
+static void print_parent_label (FILE *, struct tree *);
+static struct node *merge_parse_objectid (struct node *, FILE *, char *);
 
-void snmp_set_mib_warnings(warn)
-    int warn;
+void snmp_set_mib_warnings(int warn)
 {
     mib_warnings = warn;
 }
 
-void snmp_set_save_descriptions(save)
-    int save;
+void snmp_set_save_descriptions(int save)
 {
     save_mib_descriptions = save;
 }
 
-void snmp_set_mib_comment_term(save)
-    int save;
+void snmp_set_mib_comment_term(int save)
 {
 	mib_comment_term = save; /* 0=strict, 1=EOL terminated */
 }
 
-void snmp_set_mib_parse_label(save)
-    int save;
+void snmp_set_mib_parse_label(int save)
 {
 	mib_parse_label = save; /* 0=strict, 1=underscore OK in label */
 }
@@ -460,8 +458,7 @@ char *snmp_mib_toggle_options(char *options) {
 }
 
 static int
-name_hash( name )
-    char *name;
+name_hash(char* name)
 {
     int hash = 0;
     char *cp;
@@ -473,7 +470,7 @@ name_hash( name )
 }
 
 void
-init_mib_internals __P((void))
+init_mib_internals (void)
 {
     register struct tok *tp;
     register int        b, i;
@@ -514,8 +511,7 @@ init_mib_internals __P((void))
 }
 
 static void
-init_node_hash(nodes)
-     struct node *nodes;
+init_node_hash(struct node *nodes)
 {
      register struct node *np, *nextp;
      register int hash;
@@ -531,10 +527,9 @@ init_node_hash(nodes)
 }
 
 static void
-print_error(string, token, type)
-    char *string;
-    char *token;
-    int type;
+print_error(char *string,
+	    char *token,
+	    int type)
 {
     DEBUGMSGTL(("parse-mibs", "\n"));
     if (type == ENDOFFILE)
@@ -553,8 +548,7 @@ static long xmalloc_errors = 0;
 
 #ifndef xmalloc
 static void *
-xmalloc(num)
-    unsigned num;
+xmalloc(unsigned num)
 {
     void *p;
     /* this is to fix (what seems to be) a problem with the IBM RT C
@@ -580,8 +574,7 @@ library malloc */
 #endif
 
 #ifndef xstrdup
-static char *xstrdup (s)
-    char *s;
+static char *xstrdup (char *s)
 {
     char *ss = (char *) xmalloc (strlen (s)+1);
     if (ss == NULL)
@@ -591,9 +584,8 @@ static char *xstrdup (s)
 #endif
 
 /* like calloc, but uses our very own memory allocator. */
-static char *xcalloc (cnt, siz)
-    size_t cnt;
-    size_t siz;
+static char *xcalloc (size_t cnt,
+		      size_t siz)
 {
     size_t sizeit = cnt * siz;
     char *ss = (char *) xmalloc (sizeit);
@@ -604,8 +596,7 @@ static char *xcalloc (cnt, siz)
     return ss;
 }
 
-static void xmalloc_stats(fp)
-    FILE *fp;
+static void xmalloc_stats(FILE *fp)
 {
 #ifndef xmalloc
     fprintf (fp, "xmalloc: %ld calls, %ld bytes, %ld errors\n", xmalloc_calls, xmalloc_bytes, xmalloc_errors);
@@ -613,8 +604,7 @@ static void xmalloc_stats(fp)
 }
 
 static struct node *
-alloc_node(modid)
-    int modid;
+alloc_node(int modid)
 {
     struct node *np;
     np = (struct node *) xcalloc(1, sizeof(struct node));
@@ -626,8 +616,7 @@ alloc_node(modid)
 }
 
 static void
-free_tree(Tree)
-    struct tree *Tree;
+free_tree(struct tree *Tree)
 {
     if (Tree == NULL)
     {
@@ -645,7 +634,7 @@ free_tree(Tree)
             ep = ep->next;
             if (tep->label)
                 free(tep->label);
-            free(tep);
+            free((char*)tep);
         }
     }
 
@@ -655,15 +644,14 @@ free_tree(Tree)
         free(Tree->label);
 
     if (Tree->number_modules > 1 )
-        free(Tree->module_list);
+        free((char*)Tree->module_list);
 
     /* free_tree(Tree->child_list); */
-    free (Tree);
+    free ((char*)Tree);
 }
 
 static void
-free_node(np)
-    struct node *np;
+free_node(struct node *np)
 {
     struct enum_list *ep, *tep;
 
@@ -674,7 +662,7 @@ free_node(np)
         ep = ep->next;
         if (tep->label)
             free(tep->label);
-        free(tep);
+        free((char*)tep);
     }
     if (np->description)
         free(np->description);
@@ -683,14 +671,13 @@ free_node(np)
     if (np->parent)
         free(np->parent);
 
-    free(np);
+    free((char*)np);
 }
 
 #ifdef TEST
 static void
-print_nodes(fp, root)
-    FILE *fp;
-    struct node *root;
+print_nodes(FILE *fp,
+	    struct node *root)
 {
     struct enum_list *ep;
     struct node *np;
@@ -715,10 +702,9 @@ print_nodes(fp, root)
 #endif
 
 void
-print_subtree(f, tree, count)
-    FILE *f;
-    struct tree *tree;
-    int count;
+print_subtree(FILE *f,
+	      struct tree *tree,
+	      int count)
 {
     struct tree *tp;
     int i;
@@ -751,10 +737,9 @@ print_subtree(f, tree, count)
 }
 
 void
-print_ascii_dump_tree(f, tree, count)
-    FILE *f;
-    struct tree *tree;
-    int count;
+print_ascii_dump_tree(FILE *f,
+		      struct tree *tree,
+		      int count)
 {
     struct tree *tp;
 
@@ -780,7 +765,8 @@ print_ascii_dump_tree(f, tree, count)
 static int translation_table[256];
 
 static void
-build_translation_table(){
+build_translation_table()
+{
     int count;
 
     for(count = 0; count < 256; count++){
@@ -909,9 +895,8 @@ init_tree_roots()
 
 
 struct tree *
-find_tree_node( name, modid )
-    char *name;
-    int   modid;
+find_tree_node(char *name,
+	       int modid)
 {
     struct tree *tp, *headtp;
     int count, *int_p;
@@ -935,8 +920,8 @@ find_tree_node( name, modid )
 }
 
 static void
-merge_anon_children( tp1, tp2 )
-    struct tree *tp1, *tp2;
+merge_anon_children(struct tree *tp1,
+		    struct tree *tp2)
 		/* NB: tp1 is the 'anonymous' node */
 {
     struct tree *child1, *child2, *previous;
@@ -1034,9 +1019,8 @@ merge_anon_children( tp1, tp2 )
  * tree and out of the nodes list.
  */
 static void
-do_subtree(root, nodes)
-    struct tree *root;
-    struct node **nodes;
+do_subtree(struct tree *root,
+	   struct node **nodes)
 {
     register struct tree *tp, *anon_tp=NULL;
     register struct node *np, **headp;
@@ -1084,7 +1068,7 @@ do_subtree(root, nodes)
                 memcpy(int_p, tp->module_list, tp->number_modules*sizeof(int));
                 int_p[tp->number_modules] = np->modid;
                 if (tp->number_modules > 1 )
-                   free(tp->module_list);
+                   free((char*)tp->module_list);
                 ++tp->number_modules;
                 tp->module_list = int_p;
 		    /* Handle children */
@@ -1182,9 +1166,8 @@ do_subtree(root, nodes)
         free_node(oldnp);
 }
 
-static void do_linkup(mp, np)
-    struct module *mp;
-    struct node *np;
+static void do_linkup(struct module *mp,
+		      struct node *np)
 {
     struct module_import *mip;
     struct node *onp;
@@ -1256,10 +1239,9 @@ static void do_linkup(mp, np)
  * Returns 0 on error.
  */
 static int
-getoid(fp, id,  length)
-    register FILE *fp;
-    register struct subid *id; /* an array of subids */
-    int length;     /* the length of the array */
+getoid(FILE *fp,
+       struct subid *id, /* an array of subids */
+       int length)  /* the length of the array */
 {
     register int count;
     int type;
@@ -1333,9 +1315,8 @@ getoid(fp, id,  length)
  * Returns NULL on error.  When this happens, memory may be leaked.
  */
 static struct node *
-parse_objectid(fp, name)
-    FILE *fp;
-    char *name;
+parse_objectid(FILE *fp,
+	       char *name)
 {
     register int count;
     register struct subid *op, *nop;
@@ -1422,11 +1403,10 @@ parse_objectid(fp, name)
 }
 
 static int
-get_tc(descriptor, modid, ep, hint)
-    char *descriptor;
-    int modid;
-    struct enum_list **ep;
-    char **hint;
+get_tc(char *descriptor,
+       int modid,
+       struct enum_list **ep,
+       char **hint)
 {
     int i;
     struct tc *tcp;
@@ -1446,9 +1426,8 @@ get_tc(descriptor, modid, ep, hint)
    return -1 if not found
  */
 static int
-get_tc_index(descriptor, modid)
-    char *descriptor;
-    int modid;
+get_tc_index(char *descriptor,
+	     int modid)
 {
     int i;
     struct tc *tcp;
@@ -1489,8 +1468,7 @@ get_tc_index(descriptor, modid)
  * Returns pointer to string in table (should not be modified) or NULL
  */
 char *
-get_tc_descriptor(tc_index)
-int tc_index;
+get_tc_descriptor(int tc_index)
 {
   if (tc_index < 0 || tc_index >= MAXTC) return NULL;
   return (tclist[tc_index].descriptor);
@@ -1505,8 +1483,7 @@ int tc_index;
  */
 
 static struct enum_list *
-parse_enumlist(fp)
-    register FILE *fp;
+parse_enumlist(FILE *fp)
 {
     register int type;
     char token [MAXTOKEN];
@@ -1553,11 +1530,10 @@ parse_enumlist(fp)
  * Returns NULL on error.
  */
 static struct node *
-parse_asntype(fp, name, ntype, ntoken)
-    FILE *fp;
-    char *name;
-    int *ntype;
-    char *ntoken;
+parse_asntype(FILE *fp,
+	      char *name,
+	      int *ntype,
+	      char *ntoken)
 {
     int type, i;
     char token[MAXTOKEN];
@@ -1659,9 +1635,8 @@ parse_asntype(fp, name, ntype, ntoken)
  * Returns 0 on error.
  */
 static struct node *
-parse_objecttype(fp, name)
-    register FILE *fp;
-    char *name;
+parse_objecttype(FILE *fp,
+		 char *name)
 {
     register int type;
     char token[MAXTOKEN];
@@ -1878,9 +1853,8 @@ parse_objecttype(fp, name)
  *   - WJH 10/96
  */
 static struct node *
-parse_objectgroup(fp, name)
-    register FILE *fp;
-    char *name;
+parse_objectgroup(FILE *fp,
+		  char *name)
 {
     register int type;
     char token[MAXTOKEN];
@@ -1927,9 +1901,8 @@ parse_objectgroup(fp, name)
  * Returns 0 on error.
  */
 static struct node *
-parse_notificationDefinition(fp, name)
-    register FILE *fp;
-    char *name;
+parse_notificationDefinition(FILE *fp,
+			     char *name)
 {
     register int type;
     char token[MAXTOKEN];
@@ -1967,9 +1940,8 @@ parse_notificationDefinition(fp, name)
  * Returns 0 on error.
  */
 static struct node *
-parse_trapDefinition(fp, name)
-    register FILE *fp;
-    char *name;
+parse_trapDefinition(FILE *fp,
+		     char *name)
 {
     register int type;
     char token[MAXTOKEN];
@@ -2047,9 +2019,8 @@ parse_trapDefinition(fp, name)
  * Returns 0 on error.
  */
 static struct node *
-parse_compliance(fp, name)
-    register FILE *fp;
-    char *name;
+parse_compliance(FILE *fp,
+		 char *name)
 {
     register int type;
     char token[MAXTOKEN];
@@ -2070,9 +2041,8 @@ parse_compliance(fp, name)
  * Returns 0 on error.
  */
 static struct node *
-parse_moduleIdentity(fp, name)
-    register FILE *fp;
-    char *name;
+parse_moduleIdentity(FILE *fp,
+		     char *name)
 {
     register int type;
     char token[MAXTOKEN];
@@ -2093,8 +2063,7 @@ parse_moduleIdentity(fp, name)
  *   loading any modules referenced
  */
 static void
-parse_imports(fp)
-    register FILE *fp;
+parse_imports(FILE *fp)
 {
     register int type;
     char token[MAXTOKEN];
@@ -2201,7 +2170,7 @@ parse_imports(fp)
  * MIB module handling routines
  */
 
-static void dump_module_list __P((void))
+static void dump_module_list (void)
 {
     struct module *mp = module_head;
 
@@ -2213,8 +2182,7 @@ static void dump_module_list __P((void))
 }
 
 int
-which_module(name)
-    char *name;
+which_module(char *name)
 {
     struct module *mp;
 
@@ -2230,9 +2198,8 @@ which_module(name)
  * module_name - copy module name to user buffer, return ptr to same.
  */
 char *
-module_name ( modid, cp )
-    int modid;
-    char *cp;
+module_name (int modid,
+	     char *cp)
 {
     struct module *mp;
 
@@ -2256,11 +2223,10 @@ module_name ( modid, cp )
  *	plus an interface to add new replacement requirements
  */
 void
-add_module_replacement( old_module, new_module, tag, len)
-    char *old_module;
-    char *new_module;
-    char *tag;
-    int len;
+add_module_replacement(char *old_module,
+		       char *new_module,
+		       char *tag,
+		       int len)
 {
     struct module_compatability *mcp;
 
@@ -2279,8 +2245,7 @@ add_module_replacement( old_module, new_module, tag, len)
 }
 
 static void
-read_module_replacements( name )
-    char *name;
+read_module_replacements(char *name)
 {
     struct module_compatability *mcp;
 
@@ -2294,9 +2259,8 @@ read_module_replacements( name )
 }
 
 static void
-read_import_replacements( module_name, node_identifier )
-    char *module_name;
-    char *node_identifier;
+read_import_replacements(char *module_name,
+			 char *node_identifier)
 {
     struct module_compatability *mcp;
 
@@ -2337,8 +2301,7 @@ read_import_replacements( module_name, node_identifier )
  *	(by analogy with 'read_mib')
  */
 static int
-read_module_internal (name )
-    char *name;
+read_module_internal (char *name)
 {
     struct module *mp;
     FILE *fp;
@@ -2373,7 +2336,7 @@ read_module_internal (name )
 }
 
 void
-adopt_orphans __P((void))
+adopt_orphans (void)
 {
     struct node *np, *onp;
     struct tree *tp;
@@ -2423,8 +2386,7 @@ adopt_orphans __P((void))
 }
 
 struct tree *
-read_module(name )
-    char *name;
+read_module(char *name)
 {
     if ( read_module_internal(name) == MODULE_NOT_FOUND )
 	read_module_replacements( name );
@@ -2433,12 +2395,11 @@ read_module(name )
 
 
 static void
-new_module (name , file)
-    char *name;
-    char *file;
+new_module (char *name,
+	    char *file)
 {
     struct module *mp;
-
+    
     for ( mp=module_head ; mp ; mp=mp->next )
 	if ( !label_compare(mp->name, name)) {
 	    DEBUGMSGTL(("parse-mibs", "Module %s already noted\n", name));
@@ -2477,9 +2438,8 @@ new_module (name , file)
  * Returns NULL on error.
  */
 static struct node *
-parse(fp, root)
-    FILE *fp;
-    struct node *root;
+parse(FILE *fp,
+      struct node *root)
 {
     char token[MAXTOKEN];
     char name[MAXTOKEN];
@@ -2651,8 +2611,7 @@ parse(fp, root)
 
 static int ungotten_token = CONTINUE;
 
-static void unget_token (token)
-  int token;
+static void unget_token (int token)
 {
     if (ungotten_token != CONTINUE) {
 #ifdef NO_EXCEPTION
@@ -2667,8 +2626,7 @@ static void unget_token (token)
 
 /* return zero if character is not a label character. */
 static int
-is_labelchar (ich)
-    int ich;
+is_labelchar (int ich)
 {
     if ((isalnum(ich)) || (ich == '-'))
 	    return 1;
@@ -2679,10 +2637,9 @@ is_labelchar (ich)
 }
 
 static int
-get_token(fp, token, maxtlen)
-    register FILE *fp;
-    register char *token;
-    int maxtlen;
+get_token(FILE *fp,
+	  char *token,
+	  int maxtlen)
 {
     register int ch, ch_next;
     register char *cp = token;
@@ -2842,8 +2799,7 @@ get_token(fp, token, maxtlen)
 }
 
 int
-add_mibdir( dirname )
-    char *dirname;
+add_mibdir(char *dirname)
 {
     FILE *fp, *ip;
     DIR *dir, *dir2;
@@ -2915,8 +2871,7 @@ add_mibdir( dirname )
  *   (for backwards compatability)
  */
 struct tree *
-read_mib(filename)
-    char *filename;
+read_mib(char *filename)
 {
     FILE *fp;
     char token[MAXTOKEN];
@@ -2953,9 +2908,7 @@ read_all_mibs()
 
 
 #ifdef TEST
-main(argc, argv)
-    int argc;
-    char *argv[];
+main(int argc, char *argv[])
 {
     int i;
     struct tree *tp;
@@ -2978,10 +2931,9 @@ main(argc, argv)
 #endif /* TEST */
 
 static int
-parseQuoteString(fp, token,maxtlen)
-    register FILE *fp;
-    register char *token;
-    int maxtlen;
+parseQuoteString(FILE *fp,
+		 char *token,
+		 int maxtlen)
 {
     register int ch;
     int count = 0;
@@ -3022,8 +2974,7 @@ parseQuoteString(fp, token,maxtlen)
  * it is well formed, and NULL if not.
  */
 static int
-tossObjectIdentifier(fp)
-    register FILE *fp;
+tossObjectIdentifier(FILE *fp)
 {
     int type;
     char token[MAXTOKEN];
@@ -3049,16 +3000,14 @@ tossObjectIdentifier(fp)
 }
 
 struct tree *
-find_node(name, subtree)
-  char *name;
-  struct tree *subtree;    /* Unused */
+find_node(char *name,
+	  struct tree *subtree)    /* Unused */
 {
   return( find_tree_node( name, -1 ));
 }
 
 struct module *
-find_module(mid)
-  int mid;
+find_module(int mid)
 {
   struct module *mp;
   
@@ -3099,10 +3048,8 @@ find_module(mid)
  */
 
 static struct tree *
-    get_next_subid(
-    u_long *current_subid,
-    struct tree *tree
-)
+get_next_subid(u_long *current_subid,
+	       struct tree *tree)
 {
     struct tree *tp;
     struct tree *ntp;
@@ -3134,9 +3081,8 @@ static struct tree *
 }
 
 static void
-print_parent_labeledoid(f, tp)
-    FILE *f;
-    struct tree *tp;
+print_parent_labeledoid(FILE *f,
+			struct tree *tp)
 {
     if(tp)
     {
@@ -3149,9 +3095,8 @@ print_parent_labeledoid(f, tp)
 }
 
 static void
-print_parent_oid(f, tp)
-    FILE *f;
-    struct tree *tp;
+print_parent_oid(FILE *f,
+		 struct tree *tp)
 {
     if(tp)
     {
@@ -3164,9 +3109,8 @@ print_parent_oid(f, tp)
 }
 
 static void
-print_parent_label(f, tp)
-FILE *f;
-struct tree *tp;
+print_parent_label(FILE *f,
+		   struct tree *tp)
 {
     if(tp)
     {
@@ -3187,10 +3131,9 @@ struct tree *tp;
  */
 
 void
-print_subtree_oid_report(f, tree, count)
-    FILE *f;
-    struct tree *tree;
-    int count;
+print_subtree_oid_report(FILE *f,
+			 struct tree *tree,
+			 int count)
 {
     struct tree *tp;
     int i;
@@ -3232,49 +3175,49 @@ print_subtree_oid_report(f, tree, count)
 }
 
 void
-print_subtree_oid_report_enable_labeledoid __P((void))
+print_subtree_oid_report_enable_labeledoid (void)
 {
     print_subtree_oid_report_labeledoid = 1;
 }
 
 void
-print_subtree_oid_report_enable_oid __P((void))
+print_subtree_oid_report_enable_oid (void)
 {
     print_subtree_oid_report_oid = 1;
 }
 
 void
-print_subtree_oid_report_enable_symbolic __P((void))
+print_subtree_oid_report_enable_symbolic (void)
 {
     print_subtree_oid_report_symbolic = 1;
 }
 
 void
-print_subtree_oid_report_enable_suffix __P((void))
+print_subtree_oid_report_enable_suffix (void)
 {
     print_subtree_oid_report_suffix = 1;
 }
 
 void
-print_subtree_oid_report_disable_labeledoid __P((void))
+print_subtree_oid_report_disable_labeledoid (void)
 {
     print_subtree_oid_report_labeledoid = 0;
 }
 
 void
-print_subtree_oid_report_disable_oid __P((void))
+print_subtree_oid_report_disable_oid (void)
 {
     print_subtree_oid_report_oid = 0;
 }
 
 void
-print_subtree_oid_report_disable_symbolic __P((void))
+print_subtree_oid_report_disable_symbolic (void)
 {
     print_subtree_oid_report_symbolic = 0;
 }
 
 void
-print_subtree_oid_report_disable_suffix __P((void))
+print_subtree_oid_report_disable_suffix (void)
 {
     print_subtree_oid_report_suffix = 0;
 }
@@ -3284,10 +3227,9 @@ print_subtree_oid_report_disable_suffix __P((void))
  * If there is a problem with the identifier, release the existing node.
  */
 static struct node *
-merge_parse_objectid(np, fp, name)
-    struct node *np;
-    FILE *fp;
-    char *name;
+merge_parse_objectid(struct node *np,
+		     FILE *fp,
+		     char *name)
 {
     struct node *nnp;
 

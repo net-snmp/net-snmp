@@ -87,7 +87,7 @@ SOFTWARE.
 #include "acl.h"
 #include "system.h"
 
-static void md5Digest __P((u_char *, int, u_char *));
+static void md5Digest (u_char *, int, u_char *) ;
 
 /** snmp_comstr_parse - parse the header of a community string-based message
 *                       such as that found in SNMPv1 and SNMPv2c.
@@ -95,14 +95,21 @@ static void md5Digest __P((u_char *, int, u_char *));
 *  NOTE: this function will need to be changed to support SNMPv2u and SNMPv3,
 *        since the version field must first be examined to see
 *        if the message contains a community string.
+
+    u_char * nmp_comstr_parse(
+    u_char *data        IN - message
+    int *length         IN/OUT - bytes left in message
+    u_char *sid         OUT - community string
+    int *slen           OUT - length of community string
+    int *version        OUT - message version
 */
+
 u_char *
-snmp_comstr_parse(data, length, sid, slen, version)
-u_char          *data;      /* IN - message */
-int             *length;    /* IN/OUT - bytes left in message */
-u_char          *sid;       /* OUT - community string */
-int             *slen;      /* OUT - length of community string */
-int             *version;   /* OUT - message version */
+snmp_comstr_parse(u_char *data,
+		  int *length,
+		  u_char *sid,
+		  int *slen,
+		  int *version)
 {
     u_char    type;
     long ver;
@@ -139,20 +146,31 @@ int             *version;   /* OUT - message version */
 #ifdef USE_V2PARTY_PROTOCOL
 /** snmp_party_parse - parse the header of a party-based message
 *                      such as that found in SNMPv2p
+
+    u_char * snmp_party_parse(
+    u_char          *data;       IN - message 
+    int		    *length;     IN/OUT - bytes left in message 
+    struct packet_info *pi;      OUT - packet info 
+    oid		    *srcParty;   OUT - source party 
+    oid             *dstParty;   OUT - dest party 
+    oid             *context;    OUT - context 
+    int		    *srcPartyLength;  OUT - length of source party 
+    int             *dstPartyLength;  OUT - length of dest party 
+    int             *contextLength;   OUT - length of context 
+    int		    pass;        IN - which pass     
 */
+
 u_char *
-snmp_party_parse(data, length,  pi, srcParty, srcPartyLength,
-                 dstParty, dstPartyLength, context, contextLength, pass)
-u_char          *data;      /* IN - message */
-int		*length;    /* IN/OUT - bytes left in message */
-struct packet_info *pi;     /* OUT - packet info */
-oid		*srcParty;  /* OUT - source party */
-oid             *dstParty;  /* OUT - dest party */
-oid             *context;   /* OUT - context */
-int		*srcPartyLength; /* OUT - length of source party */
-int             *dstPartyLength; /* OUT - length of dest party */
-int             *contextLength;  /* OUT - length of context */
-int		pass;       /* IN - which pass */
+snmp_party_parse(u_char *data,
+		 int *length,
+		 struct packet_info *pi,
+		 oid *srcParty,
+		 int *srcPartyLength,
+		 oid *dstParty,
+		 int *dstPartyLength,
+		 oid *context,		 
+		 int *contextLength,
+		 int pass)
 {
     u_char    type;
     oid	dstParty2[64];
@@ -378,13 +396,12 @@ int		pass;       /* IN - which pass */
 *        later, if not known.
 */
 u_char *
-snmp_comstr_build(data, length, sid, slen, version, messagelen)
-    u_char      *data;
-    int         *length;
-    u_char      *sid;
-    int         *slen;
-    int         *version;
-    int         messagelen;
+snmp_comstr_build(u_char *data,
+		  int *length,
+		  u_char *sid,
+		  int *slen,
+		  int *version,
+		  int messagelen)
 {
   /* version is an 'int' (CMU had it as a long, but was passing in a *int.
      Grrr.) assign version to verfix and pass in that to asn_build_int
@@ -437,21 +454,18 @@ snmp_comstr_build(data, length, sid, slen, version, messagelen)
 *                      message digest creation.
 */
 u_char *
-snmp_party_build(data, length, pi, messagelen, srcParty, srcPartyLen,
-		   dstParty, dstPartyLen, context, contextLen,
-		   packet_len, pass)
-    u_char	    *data;
-    int		    *length;
-    struct packet_info *pi;
-    int		    messagelen;
-    oid		    *srcParty;
-    int		    srcPartyLen;
-    oid		    *dstParty;
-    int		    dstPartyLen;
-    oid		    *context;
-    int             contextLen;
-    int		    *packet_len;    /* OUT - length of complete packet */
-    int		    pass;  /* FIRST_PASS, LAST_PASS, none, or both */
+snmp_party_build(u_char *data,
+		 int *length,
+		 struct packet_info *pi,
+		 int messagelen,
+		 oid *srcParty,
+		 int srcPartyLen,
+		 oid *dstParty,
+		 int dstPartyLen,
+		 oid *context,
+		 int contextLen,
+		 int *packet_len,    /* OUT - length of complete packet */
+		 int pass)  /* FIRST_PASS, LAST_PASS, none, or both */
 {
     struct partyEntry *srcp, *dstp;
     struct timeval now;
@@ -657,10 +671,9 @@ snmp_party_build(data, length, pi, messagelen, srcParty, srcPartyLen,
 #endif /* USE_V2PARTY_PROTOCOL */
 
 static void
-md5Digest(start, length, digest)
-    u_char *start;
-    int length;
-    u_char *digest;
+md5Digest(u_char *start,
+	  int length,
+	  u_char *digest)
 {
     u_char *cp;
     MDstruct MD;
@@ -703,9 +716,10 @@ md5Digest(start, length, digest)
 
 #ifdef USE_V2PARTY_PROTOCOL
 int
-has_access(msg_type, target, subject, resources)
-    u_char msg_type;
-    int target, subject, resources;
+has_access(u_char msg_type,
+	   int target, 
+	   int subject,
+	   int resources)
 {
     struct aclEntry *ap;
 

@@ -67,12 +67,11 @@ int config_errors;
 struct config_files *config_files = NULL;
 
 struct config_line *
-register_premib_handler(type, token, parser, releaser, help)
-  char *type;
-  char *token;
-  void (*parser) __P((char *, char *));
-  void (*releaser) __P((void));
-  char *help;
+register_premib_handler(char *type,
+			char *token,
+			void (*parser) (char *, char *),
+			void (*releaser) (void),
+			char *help)
 {
   struct config_line *ltmp;
   ltmp = register_config_handler(type, token, parser, releaser, help);
@@ -82,12 +81,11 @@ register_premib_handler(type, token, parser, releaser, help)
 }
 
 struct config_line *
-register_config_handler(type, token, parser, releaser, help)
-  char *type;
-  char *token;
-  void (*parser) __P((char *, char *));
-  void (*releaser) __P((void));
-  char *help;
+register_config_handler(char *type,
+			char *token,
+			void (*parser) (char *, char *),
+			void (*releaser) (void),
+			char *help)
 {
   struct config_files **ctmp = &config_files;
   struct config_line **ltmp;
@@ -134,9 +132,8 @@ register_config_handler(type, token, parser, releaser, help)
 }
 
 void
-unregister_config_handler(type, token)
-  char *type;
-  char *token;
+unregister_config_handler(char *type, 
+			  char *token)
 {
   struct config_files **ctmp = &config_files;
   struct config_line **ltmp, *ltmp2;
@@ -177,7 +174,7 @@ unregister_config_handler(type, token)
 }
 
 #ifdef TESTING
-void print_config_handlers __P((void))
+void print_config_handlers (void)
 {
   struct config_files *ctmp = config_files;
   struct config_line *ltmp;
@@ -193,9 +190,8 @@ void print_config_handlers __P((void))
 int linecount;
 char *curfilename;
 
-void read_config_with_type(filename, type)
-  char *filename;
-  char *type;
+void read_config_with_type(char *filename, 
+			   char *type)
 {
   struct config_files *ctmp = config_files;
   for(;ctmp != NULL && strcmp(ctmp->fileHeader,type); ctmp = ctmp->next);
@@ -206,10 +202,9 @@ void read_config_with_type(filename, type)
            type, filename));
 }
 
-void read_config(filename, line_handler, when)
-  char *filename;
-  struct config_line *line_handler;
-  int when;
+void read_config(char *filename,
+		 struct config_line *line_handler,
+		 int when)
 {
 
   FILE *ifile;
@@ -267,7 +262,7 @@ void read_config(filename, line_handler, when)
 }
 
 void
-free_config __P((void))
+free_config (void)
 {
   struct config_files *ctmp = config_files;
   struct config_line *ltmp;
@@ -279,20 +274,19 @@ free_config __P((void))
 }
 
 void
-read_configs __P((void))
+read_configs (void)
 {
   read_config_files(NORMAL_CONFIG);
 }
 
 void
-read_premib_configs __P((void))
+read_premib_configs (void)
 {
   read_config_files(PREMIB_CONFIG);
 }
 
 void
-read_config_files(when)
-  int when;
+read_config_files (int when)
 {
   int i;
   char configfile[300];
@@ -363,23 +357,20 @@ void read_config_print_usage(char *lead)
   }
 }
 
-void config_perror(string)
-  char *string;
+void config_perror(char *string)
 {
   config_pwarn(string);
   config_errors++;
 }
 
-void config_pwarn(string)
-  char *string;
+void config_pwarn(char *string)
 {
   fprintf(stderr, "snmpd: %s: line %d: %s\n", curfilename, linecount, string);
 }
 
 /* skip all white spaces and return 1 if found something either end of
    line or a comment character */
-char *skip_white(ptr)
-  char *ptr;
+char *skip_white(char *ptr)
 {
 
   if (ptr == NULL) return (NULL);
@@ -388,8 +379,7 @@ char *skip_white(ptr)
   return (ptr);
 }
 
-char *skip_not_white(ptr)
-  char *ptr;
+char *skip_not_white(char *ptr)
 {
   
   if (ptr == NULL) return (NULL);
@@ -406,8 +396,8 @@ char *skip_token(char *ptr)
   return (ptr);
 }
 
-char *copy_word(from, to)
-     char *from, *to;
+char *copy_word(char *from, char *to)
+     
 {
   while (*from != 0 && !isspace(*from)) *(to++) = *(from++);
   *to = 0;

@@ -23,6 +23,7 @@ WHETHER IN AN ACTION OF CONTRACT, NEGLIGENCE OR OTHER TORTIOUS ACTION,
 ARISING OUT OF OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS
 SOFTWARE.
 ******************************************************************/
+
 #include <config.h>
 
 #include <stdio.h>
@@ -104,11 +105,10 @@ typedef long	fd_mask;
 _CRTIMP extern int errno;
 
 int
-snmp_synch_input __P((int, struct snmp_session *, int, struct snmp_pdu *, void *));
+snmp_synch_input (int, struct snmp_session *, int, struct snmp_pdu *, void *);
 
 struct snmp_pdu *
-snmp_pdu_create(command)
-    int command;
+snmp_pdu_create(int command)
 {
     struct snmp_pdu *pdu;
 
@@ -132,10 +132,9 @@ snmp_pdu_create(command)
  * Add a null variable with the requested name to the end of the list of
  * variables for this pdu.
  */
-struct variable_list* snmp_add_null_var(pdu, name, name_length)
-    struct snmp_pdu *pdu;
-    oid *name;
-    int name_length;
+struct variable_list* snmp_add_null_var(struct snmp_pdu * pdu, 
+					oid *name, 
+					int name_length)
 {
     struct variable_list *vars;
 
@@ -159,12 +158,11 @@ struct variable_list* snmp_add_null_var(pdu, name, name_length)
 }
 
 int
-snmp_synch_input(op, session, reqid, pdu, magic)
-    int op;
-    struct snmp_session *session;
-    int reqid;
-    struct snmp_pdu *pdu;
-    void *magic;
+snmp_synch_input(int op,
+		 struct snmp_session *session,
+		 int reqid,
+		 struct snmp_pdu *pdu,
+		 void *magic)
 {
     struct synch_state *state = (struct synch_state *)magic;
 
@@ -199,9 +197,8 @@ snmp_synch_input(op, session, reqid, pdu, magic)
  * be returned.
  */
 struct snmp_pdu *
-snmp_fix_pdu(pdu, command)
-    struct snmp_pdu *pdu;
-    int command;
+snmp_fix_pdu(struct snmp_pdu *pdu,
+	     int command)
 {
     struct variable_list *var, *newvar;
     struct snmp_pdu *newpdu;
@@ -290,8 +287,7 @@ snmp_fix_pdu(pdu, command)
  * Creates (allocates and copies) a clone of the input PDU.
  */
 struct snmp_pdu *
-snmp_clone_pdu(pdu)
-    struct snmp_pdu *pdu;
+snmp_clone_pdu(struct snmp_pdu *pdu)
 {
     struct variable_list *var, *newvar, *oldvar;
     struct snmp_pdu *newpdu;
@@ -350,10 +346,9 @@ snmp_clone_pdu(pdu)
 
 
 int
-snmp_synch_response(ss, pdu, response)
-    struct snmp_session *ss;
-    struct snmp_pdu *pdu;
-    struct snmp_pdu **response;
+snmp_synch_response(struct snmp_session *ss,
+		    struct snmp_pdu *pdu,
+		    struct snmp_pdu **response)
 {
     struct synch_state *state = ss->snmp_synch_state;
     int numfds, count;
@@ -409,10 +404,9 @@ snmp_synch_response(ss, pdu, response)
 }
 
 int
-snmp_sess_synch_response(sessp, pdu, response)
-    void *sessp;
-    struct snmp_pdu *pdu;
-    struct snmp_pdu **response;
+snmp_sess_synch_response(void *sessp,
+			 struct snmp_pdu *pdu,
+			 struct snmp_pdu **response)
 {
     struct snmp_session *ss;
     struct synch_state *state;
@@ -471,17 +465,14 @@ snmp_sess_synch_response(sessp, pdu, response)
     return state->status;
 }
 
-void
-snmp_synch_reset(session)
-    struct snmp_session *session;
+void snmp_synch_reset(struct snmp_session *session)
 {
     if (session && session->snmp_synch_state)
-       free(session->snmp_synch_state);
+       free((char*)session->snmp_synch_state);
 }
 
 void
-snmp_synch_setup(session)
-    struct snmp_session *session;
+snmp_synch_setup(struct snmp_session *session)
 {
     struct synch_state *rp = (struct synch_state *)malloc(sizeof(struct synch_state));
     rp->waiting = 0;
@@ -515,8 +506,7 @@ char	*error_string[19] = {
 };
 
 char *
-snmp_errstring(errstat)
-    int	errstat;
+snmp_errstring(int errstat)
 {
     if (errstat <= MAX_SNMP_ERR && errstat >= SNMP_ERR_NOERROR){
 	return error_string[errstat];
@@ -534,10 +524,13 @@ snmp_errstring(errstat)
  * Out: returns 0 if OK, -1 if an error occurred.
  */
 int
-ms_party_init(destaddr, src, srclen, dst, dstlen, context, contextlen)
-    in_addr_t destaddr;
-    oid *src, *dst, *context;
-    int *srclen, *dstlen, *contextlen;
+ms_party_init(in_addr_t destaddr,
+	      oid *src, 
+	      int *srclen,
+	      oid *dst, 
+	      int *dstlen,
+	      oid *context,
+	      int *contextlen)
 {
     u_long addr;
     u_short port;

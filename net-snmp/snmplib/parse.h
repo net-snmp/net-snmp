@@ -82,8 +82,8 @@ struct tree {
     struct enum_list *enums;    /* (optional) list of enumerated integers */
     char *hint;
     char *units;
-    void (*printer) __P((char *, struct variable_list *, struct enum_list *,
-                         char *, char *));	/* Value printing function */
+    void (*printer) (char *, struct variable_list *, struct enum_list *,
+                         char *, char *);	/* Value printing function */
     char *description;          /* description (a quoted string) */
 };
 
@@ -161,35 +161,35 @@ struct module_compatability {
 #define	ANON	"anonymous#"
 #define	ANON_LEN  strlen(ANON)
 
-struct tree *read_module __P((char *));
-struct tree *read_mib __P((char *));
-struct tree *read_all_mibs __P((void));
-void init_mib_internals __P((void));
-int  add_mibdir __P((char *));
-void add_module_replacement __P(( char *, char *, char *, int));
-int  which_module __P((char *));
-char *module_name __P((int, char *));
-void print_subtree __P((FILE *, struct tree *, int));
-void print_ascii_dump_tree __P((FILE *, struct tree *, int));
-struct tree *find_tree_node __P((char *, int));
-char *get_tc_descriptor __P((int));
+struct tree *read_module (char *);
+struct tree *read_mib (char *);
+struct tree *read_all_mibs (void);
+void init_mib_internals (void);
+int  add_mibdir (char *);
+void add_module_replacement ( char *, char *, char *, int);
+int  which_module (char *);
+char *module_name (int, char *);
+void print_subtree (FILE *, struct tree *, int);
+void print_ascii_dump_tree (FILE *, struct tree *, int);
+struct tree *find_tree_node (char *, int);
+char *get_tc_descriptor (int);
  /* backwards compatability */
-struct tree *find_node __P((char *, struct tree*));
-struct module *find_module __P((int));
-void adopt_orphans __P((void));
-void snmp_set_mib_warnings __P((int));
-void snmp_set_save_descriptions __P((int));
-void snmp_set_mib_comment_term __P((int));
-void snmp_set_mib_parse_label __P((int));
+struct tree *find_node (char *, struct tree*);
+struct module *find_module (int);
+void adopt_orphans (void);
+void snmp_set_mib_warnings (int);
+void snmp_set_save_descriptions (int);
+void snmp_set_mib_comment_term (int);
+void snmp_set_mib_parse_label (int);
 char *snmp_mib_toggle_options(char *options);
 void snmp_mib_toggle_options_usage(char *lead, FILE *outf);
-void print_subtree_oid_report __P((FILE *, struct tree *, int));
-void print_subtree_oid_report_enable_labeledoid __P((void));
-void print_subtree_oid_report_enable_oid __P((void));
-void print_subtree_oid_report_enable_suffix __P((void));
-void print_subtree_oid_report_enable_symbolic __P((void));
-void print_subtree_oid_report_disable_labeledoid __P((void));
-void print_subtree_oid_report_disable_oid __P((void));
-void print_subtree_oid_report_disable_suffix __P((void));
-void print_subtree_oid_report_disable_symbolic __P((void));
+void print_subtree_oid_report (FILE *, struct tree *, int);
+void print_subtree_oid_report_enable_labeledoid (void);
+void print_subtree_oid_report_enable_oid (void);
+void print_subtree_oid_report_enable_suffix (void);
+void print_subtree_oid_report_enable_symbolic (void);
+void print_subtree_oid_report_disable_labeledoid (void);
+void print_subtree_oid_report_disable_oid (void);
+void print_subtree_oid_report_disable_suffix (void);
+void print_subtree_oid_report_disable_symbolic (void);
 #endif /* PARSE_H */
