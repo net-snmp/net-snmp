@@ -37,6 +37,7 @@ SOFTWARE.
 #include <strings.h>
 #endif
 #include <sys/types.h>
+#include <sys/wait.h>
 #include <sys/socket.h>
 #if HAVE_SYS_SOCKIO_H
 #include <sys/sockio.h>
@@ -342,12 +343,11 @@ int snmp_input(op, session, reqid, pdu, magic)
                   
     if (op == RECEIVED_MESSAGE){
 	if (pdu->command == SNMP_MSG_TRAP){
+	    host = gethostbyaddr ((char *)&pdu->agent_addr.sin_addr,
+				  sizeof (pdu->agent_addr.sin_addr), AF_INET);
 	    if (Print){
 		time (&timer);
 		tm = localtime (&timer);
-                host = gethostbyaddr ((char *)&pdu->agent_addr.sin_addr,
-                                      sizeof (pdu->agent_addr.sin_addr),
-                                      AF_INET);
                 printf("%.4d-%.2d-%.2d %.2d:%.2d:%.2d %s [%s] %s:\n",
 		       tm->tm_year+1900, tm->tm_mon+1, tm->tm_mday,
 		       tm->tm_hour, tm->tm_min, tm->tm_sec,
@@ -408,7 +408,7 @@ int snmp_input(op, session, reqid, pdu, magic)
 		       trap_description(pdu->trap_type),strrchr(oid_buf, '.')+1,
 		       uptime_string(pdu->time, buf),varbuf);
 		} else {
-		    syslog(LOG_WARNING, "%s: %s Trap (%d) Uptime: %s%s",
+		    syslog(LOG_WARNING, "%s: %s Trap (%ld) Uptime: %s%s",
 		       inet_ntoa(pdu->agent_addr.sin_addr),
 		       trap_description(pdu->trap_type), pdu->specific_type,
 		       uptime_string(pdu->time, buf),varbuf);
@@ -435,7 +435,7 @@ int snmp_input(op, session, reqid, pdu, magic)
                 fprintf(file,"%s\n%s\n",
                         host ? host->h_name : inet_ntoa(pdu->address.sin_addr),
                         inet_ntoa(pdu->address.sin_addr));
-                tmpvar.val.integer = &pdu->time;
+                tmpvar.val.integer = (long *) &pdu->time;
                 tmpvar.val_len = sizeof(pdu->time);
                 tmpvar.type = ASN_TIMETICKS;
                 sprint_variable(varbuf, snmpsysuptime, 8, &tmpvar);
@@ -468,13 +468,12 @@ int snmp_input(op, session, reqid, pdu, magic)
             }
 	} else if (pdu->command == SNMP_MSG_TRAP2
 		   || pdu->command == SNMP_MSG_INFORM){
+	    host = gethostbyaddr ((char *)&pdu->address.sin_addr,
+				  sizeof (pdu->address.sin_addr), AF_INET);
 	    if (Print){
 		printf("-------------------------------  Notification  -------------------------------\n");
 		time (&timer);
 		tm = localtime (&timer);
-                host = gethostbyaddr ((char *)&pdu->address.sin_addr,
-                                      sizeof (pdu->address.sin_addr),
-                                      AF_INET);
                 printf("%.4d-%.2d-%.2d %.2d:%.2d:%.2d %s [%s]:\n",
 		       tm->tm_year+1900, tm->tm_mon+1, tm->tm_mday,
 		       tm->tm_hour, tm->tm_min, tm->tm_sec,
