@@ -17,10 +17,11 @@ CONFIGAGENT trapsink localhost public $REAL_TRAPD_PORT
 
 STARTTRAPD
 
-AGENT_FLAGS="$AGENT_FLAGS -Dexample,header_generic"
+AGENT_FLAGS="$AGENT_FLAGS"
 STARTAGENT
 
-CAPTURE "snmpset $SNMP_FLAGS -v 3 -a MD5 -A initial_test_pass_auth -l anp -u initial -n xxx localhost ucdavis.254.8.0 i 1"
+sleep 1
+CAPTURE "snmpset -t 3 -r 0 $SNMP_FLAGS -v 3 -a MD5 -A initial_test_pass_auth -l anp -u initial -n xxx localhost ucdavis.254.8.0 i 1"
 
 STOPAGENT
 
