@@ -124,6 +124,10 @@ SOURCE=..\..\snmplib\party_parse.c
 # End Source File
 # Begin Source File
 
+SOURCE=..\..\snmplib\read_config.c
+# End Source File
+# Begin Source File
+
 SOURCE=..\..\snmplib\snmp.c
 # End Source File
 # Begin Source File
@@ -148,7 +152,3 @@ SOURCE=..\..\snmplib\view.c
 # End Source File
 # End Target
 # End Project
-SOURCE=..\..\snmplib\read_config.c
-# End Source File
-# Begin Source File
-
