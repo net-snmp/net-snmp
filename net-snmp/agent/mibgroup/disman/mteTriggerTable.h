@@ -113,7 +113,8 @@ struct mteTriggerTable_data {
    long         pdu_version;
    long         pdu_securityModel;
    long         pdu_securityLevel;
-   snmp_ipaddr  pdu_address;
+   void        *pdu_transport;
+   size_t       pdu_transportLen;
    u_char      *pdu_community;
    size_t       pdu_community_len;
    char        *pdu_contextName;
@@ -173,6 +174,8 @@ void   init_mteTriggerTable(void);
 FindVarMethod var_mteTriggerTable;
 void parse_mteTriggerTable(const char *, char *);
 SNMPCallback store_mteTriggerTable;
+struct snmp_pdu *mte_get_response(struct mteTriggerTable_data *,
+                                  struct snmp_pdu *);
 
 
 WriteMethod write_mteTriggerComment;
