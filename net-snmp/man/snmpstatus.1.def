@@ -1,3 +1,6 @@
+.\" Portions of this file are subject to the following copyright.  See
+.\" the Net-SNMP's COPYING file for more details and other copyrights
+.\" that may apply:
 .\" /***********************************************************
 .\" 	Copyright 1988, 1989 by Carnegie Mellon University
 .\" 
@@ -19,17 +22,32 @@
 .\" ARISING OUT OF OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS
 .\" SOFTWARE.
 .\" ******************************************************************/
-.TH SNMPSTATUS 1 "08 Feb 2002" VVERSIONINFO "Net-SNMP"
+.\" Portions of this file are copyrighted by:
+.\" Copyright Copyright 2003 Sun Microsystems, Inc. All rights reserved.
+.\" Use is subject to license terms specified in the COPYING file
+.\" distributed with the Net-SNMP package.
+.\" ******************************************************************/
+.TH SNMPSTATUS 1 "25 Jul 2003" VVERSIONINFO "Net-SNMP"
 .UC 4
 .SH NAME
 snmpstatus - Retrieves important information from a network entity.
 .SH SYNOPSIS
 .B snmpstatus
-[COMMON OPTIONS]
+[COMMON OPTIONS] [-Cf] AGENT
 .SH DESCRIPTION
 .B snmpstatus
 is an SNMP application that retrieves several important statistics
 from a network entity.
+.PP
+AGENT identifies a target SNMP agent, which is instrumented
+to monitor the given objects.  At its simplest, the AGENT
+specification will consist of a hostname or an IPv4 address.
+n this situation, the command will attempt communication with
+the agent, using UDP/IPv4 to port 161 of the given target host.
+.PP
+See the 
+.I snmpcmd(1)
+manual page for a full list of the possible formats for AGENT.
 .PP
 The information returned is:
 .IP
@@ -78,14 +96,18 @@ option is given, see below), but this variable will then be missing
 from the displayed data.
 .PP
 .SH OPTIONS
-.B snmpstatus
-takes the common options described in the
+.TP
+.B COMMON OPTIONS
+Please see
 .I snmpcmd(1)
-manual page and
-also the 
+for a list of possible values for COMMON OPTIONS
+as well as their descriptions.
+.TP
 .B -Cf
-option described in the 
-.I snmpget(1)
-manual page.
+By default, snmpstatus will try to fix errors returned
+by the agent and retry a request. In this situation,
+the command will display the data that it can. If the -Cf option
+is specified, then snmpstatus will not try to fix
+errors, and the error will cause the command to terminate.
 .SH "SEE ALSO"
 snmpcmd(1), snmpget(1)
