@@ -433,7 +433,6 @@
 /* Not-to-be-compiled macros for use by configure only */
 #define config_require(x)
 #define config_arch_require(x,y)
-#define config_load_mib(x,y,z)
 #define config_parse_dot_conf(w,x,y,z)
 #define config_add_mib(x)
   
