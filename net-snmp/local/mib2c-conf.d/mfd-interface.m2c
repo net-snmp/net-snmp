@@ -588,6 +588,7 @@ _mfd_${context}_post_request(netsnmp_mib_handler *handler,
         }
         else {
             if (rowreq_ctx->column_set_flags) {
+@if $m2c_table_sparse == 1@
                 DEBUGMSGTL(("internal:${context}:_mfd_post_request",
                             "updating exists (%p) w/set (%p) = %p\n",
                             rowreq_ctx->column_exists_flags,
@@ -596,7 +597,7 @@ _mfd_${context}_post_request(netsnmp_mib_handler *handler,
                              rowreq_ctx->column_set_flags)));
                 rowreq_ctx->column_exists_flags |=
                     rowreq_ctx->column_set_flags;
-
+@end@
                 rowreq_ctx->column_set_flags = 0;
 
             }
@@ -851,9 +852,11 @@ _mfd_${context}_get_values(netsnmp_mib_handler *handler,
 
     netsnmp_assert(NULL != rowreq_ctx);
     
+@if $m2c_table_sparse == 1@
     DEBUGMSGTL(("9:${context}:_mfd_${context}_get_values",
                 "exists %p\n", (void*)rowreq_ctx->column_exists_flags));
 
+@end@
     for(;requests; requests = requests->next) {
         /*
          * save old pointer, so we can free it if replaced
