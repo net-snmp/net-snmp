@@ -59,7 +59,6 @@
 #define DLL_IMPORT
 #endif
 
-extern int Suffix;
 DLL_IMPORT extern struct tree *Mib;
 #include <net-snmp/net-snmp-config.h>
 #include <net-snmp/net-snmp-includes.h>
@@ -818,7 +817,7 @@ int    best_guess;
 {
    struct tree *tp = NULL;
    struct tree *rtp = NULL;
-   extern struct tree *tree_head;
+   DLL_IMPORT extern struct tree *tree_head;
    oid newname[MAX_OID_LEN], *op;
    int newname_len = 0;
 
