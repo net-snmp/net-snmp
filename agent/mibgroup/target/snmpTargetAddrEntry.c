@@ -37,6 +37,16 @@ get_addrTable(void) {
     return aAddrTable;
 }
 
+struct targetAddrTable_struct *get_addrForName(char *name) {
+  struct targetAddrTable_struct *ptr;
+  for(ptr = aAddrTable; ptr != NULL; ptr = ptr->next) {
+      if (ptr->name && strcmp(ptr->name, name) == 0)
+          return ptr;
+  }
+  return NULL;
+}
+
+
 /* TargetAddrTable_create creates and returns a pointer
    to a targetAddrTable_struct with default values set */
 struct targetAddrTable_struct 
@@ -58,7 +68,6 @@ struct targetAddrTable_struct
 
   newEntry->tagList     = strdup("");
   newEntry->params      = 0;
-  newEntry->spinLock    = 0;
 
   newEntry->storageType = SNMP_STORAGE_NONVOLATILE;
   newEntry->rowStatus   = SNMP_ROW_NONEXISTENT;
@@ -80,7 +89,6 @@ void snmpTargetAddrTable_dispose(struct targetAddrTable_struct *reaped)
   
   SNMP_FREE(reaped);
 }  /* snmpTargetAddrTable_dispose  */
-
 
 /* snmpTargetAddrTable_addToList adds a targetAddrTable_struct 
    to a list passed in. The list is assumed to be in a sorted order,
@@ -138,6 +146,11 @@ void snmpTargetAddrTable_addToList(
   /* if we're here, no larger OID was ever found, insert on end of list */
   prev_struct->next = newEntry;
 }  /* snmpTargeAddrTable_addToList  */
+
+
+void snmpTargetAddrTable_add(struct targetAddrTable_struct *newEntry) {
+    snmpTargetAddrTable_addToList(newEntry, &aAddrTable);
+}
 
 
 /* snmpTargetAddrTable_remFromList removes a targetAddrTable_struct 
