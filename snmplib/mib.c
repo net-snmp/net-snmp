@@ -796,6 +796,7 @@ unsigned char PRIVATE_MIB_text[] = ".iso.org.dod.internet.private";
 unsigned char PARTY_MIB_text[] = ".iso.org.dod.internet.snmpParties";
 unsigned char SECRETS_MIB_text[] = ".iso.org.dod.internet.snmpSecrets";
 extern struct tree *tree_head;
+struct tree *Mib;             /* Backwards compatibility */
 
 char Standard_Prefix[] = ".1.3.6.1.2.1.";
 char Prefix[128];
@@ -863,6 +864,7 @@ init_mib __P((void))
     }
 
     prefix = getenv("PREFIX");
+
     if (!prefix)
         prefix = Standard_Prefix;
     if (prefix[strlen(prefix) - 1] != '.')
@@ -874,6 +876,8 @@ init_mib __P((void))
 	Suffix = TRUE;
     else
 	Suffix = FALSE;
+
+    Mib = tree_head;          /* Backwards compatibility */
 }
 
 void
