@@ -9,6 +9,7 @@
 config_require(mibII/ipCidrRouteTable_access)
 config_require(mibII/ipCidrRouteTable_checkfns)
 config_add_mib(IP-FORWARD-MIB)
+config_add_mib(IANA-RTPROTO-MIB)
 
 /*
  * function declarations 
