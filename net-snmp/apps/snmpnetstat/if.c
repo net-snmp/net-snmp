@@ -93,36 +93,44 @@ intpr(interval)
 	oid varname[MAX_NAME_LEN], *instance, *ifentry;
 	int varname_len;
 	int ifnum, cfg_nnets;
-        oid curifip [4];
+	oid curifip [4];
 	struct variable_list *var;
-        struct snmp_pdu *request, *response;
-        int status;
-	char name[128];
-        int ifindex;
-	int mtu;
-	int ipkts, ierrs, opkts, oerrs, operstatus, collisions, outqueue;
-        u_long netmask;
-        struct in_addr ifip, ifroute;
-        
+	struct snmp_pdu *request, *response;
+	int status;
+	int ifindex;
+	struct _if_info {
+	    char name[128];
+	    int mtu;
+	    int ipkts, ierrs, opkts, oerrs, operstatus, outqueue;
+	    u_long netmask;
+	    struct in_addr ifip, ifroute;
+	} *if_table, *cur_if;
+
 	if (interval) {
 		sidewaysintpr((unsigned)interval);
 		return;
 	}
-        printf("%-7.7s %-4.4s %-15.15s %-15.15s %8.8s %5.5s %8.8s %5.5s %5.5s",
-		"Name", "Mtu", "Network", "Address", "Ipkts", "Ierrs",
-		"Opkts", "Oerrs", "Queue");
-	putchar('\n');
 	var = getvarbyname(Session, oid_cfg_nnets, sizeof(oid_cfg_nnets) / sizeof(oid));
 	if (var)
 	    cfg_nnets = *var->val.integer;
-	else
+	else {
+	    fprintf (stderr, "No response when requesting number of interfaces.\n");
 	    return;
-	memset (curifip, 0, sizeof (curifip));
+	}
+#ifdef DODEBUG
+	printf ("cfg_nnets = %d\n", cfg_nnets);
+#endif
+	printf("%-7.7s %-4.4s %-15.15s %-15.15s %8.8s %5.5s %8.8s %5.5s %5.5s",
+		"Name", "Mtu", "Network", "Address", "Ipkts", "Ierrs",
+		"Opkts", "Oerrs", "Queue");
+	putchar('\n');
+
+	memset (&curifip, 0, sizeof (curifip));
+	if_table = calloc (cfg_nnets, sizeof (*if_table));
+	cur_if = if_table;
+
 	for (ifnum = 1; ifnum <= cfg_nnets; ifnum++) {
 		register char *cp;
-
-		*name = mtu = 0;
-		ipkts = ierrs = opkts = oerrs = operstatus = outqueue = 0;
 
 		request = snmp_pdu_create (GETNEXT_REQ_MSG);
 		memmove (varname, oid_ipadentaddr, sizeof (oid_ipadentaddr));
@@ -138,28 +146,39 @@ intpr(interval)
 
 		status = snmp_synch_response (Session, request, &response);
 		if (status != STAT_SUCCESS || response->errstat != SNMP_ERR_NOERROR) {
-		    fprintf (stderr, "SNMP request failed");
+		    fprintf (stderr, "SNMP request failed after %d out of %d interfaces\n", ifnum, cfg_nnets);
+		    cfg_nnets = ifnum;
 		    break;
 		}
 		for (var = response->variables; var; var = var->next_variable) {
+#ifdef DODEBUG
+		    print_variable (var->name, var->name_length, var);
+#endif
 		    switch (var->name [9]) {
 		    case IFINDEX:
-			ifindex = *var->val.integer; break;
+			ifindex = *var->val.integer;
+			cur_if = if_table + ifindex - 1;
+			break;
 		    case IPADDR:
 			memmove (curifip, var->name+10, sizeof (curifip));
-			memmove (&ifip, var->val.string, sizeof (u_long));
+			memmove (&cur_if->ifip, var->val.string, sizeof (u_long));
 			break;
 		    case IPNETMASK:
-			memmove (&netmask, var->val.string, sizeof (u_long));
+			memmove (&cur_if->netmask, var->val.string, sizeof (u_long));
 		    }
 		}
-		ifroute.s_addr = ifip.s_addr & netmask;
+		cur_if->ifroute.s_addr = cur_if->ifip.s_addr & cur_if->netmask;
+
+		snmp_free_pdu (request);
+		snmp_free_pdu (response);
+
 		memmove (varname, oid_ifname, sizeof(oid_ifname));
 		varname_len = sizeof(oid_ifname) / sizeof(oid);
 		ifentry = varname + 9;
 		instance = varname + 10;
 		request = snmp_pdu_create (GET_REQ_MSG);
-		*instance = ifindex;
+
+		*instance = ifnum;
 		*ifentry = IFNAME;
 		snmp_add_null_var (request, varname, varname_len);
 		*ifentry = IFMTU;
@@ -183,49 +202,65 @@ intpr(interval)
 
 		status = snmp_synch_response (Session, request, &response);
 		if (status != STAT_SUCCESS || response->errstat != SNMP_ERR_NOERROR) {
-		    fprintf (stderr, "SNMP request failed");
+		    fprintf (stderr, "SNMP request failed after %d out of %d interfaces\n", ifnum, cfg_nnets);
+		    cfg_nnets = ifnum;
 		    break;
 		}
-		request = NULL;
+		cur_if = if_table + ifnum - 1;
 		for (var = response->variables; var; var = var->next_variable) {
+#ifdef DODEBUG
+		    print_variable (var->name, var->name_length, var);
+#endif
 		    switch (var->name [9]) {
 		    case OUTQLEN:
-			outqueue = *var->val.integer; break;
+			cur_if->outqueue = *var->val.integer; break;
 		    case OUTERRORS:
-			oerrs = *var->val.integer; break;
+			cur_if->oerrs = *var->val.integer; break;
 		    case INERRORS:
-			ierrs = *var->val.integer; break;
+			cur_if->ierrs = *var->val.integer; break;
 		    case IFMTU:
-			mtu = *var->val.integer; break;
+			cur_if->mtu = *var->val.integer; break;
 		    case INUCASTPKTS:
-			ipkts += *var->val.integer; break;
+			cur_if->ipkts += *var->val.integer; break;
 		    case INNUCASTPKTS:
-			ipkts += *var->val.integer; break;
+			cur_if->ipkts += *var->val.integer; break;
 		    case OUTUCASTPKTS:
-			opkts += *var->val.integer; break;
+			cur_if->opkts += *var->val.integer; break;
 		    case OUTNUCASTPKTS:
-			opkts += *var->val.integer; break;
+			cur_if->opkts += *var->val.integer; break;
 		    case IFNAME:
-			memmove (name, var->val.string, var->val_len);
-			name [var->val_len] = 0;
+			memmove (cur_if->name, var->val.string, var->val_len);
+			cur_if->name [var->val_len] = 0;
 			break;
 		    case IFOPERSTATUS:
-			operstatus = *var->val.integer; break;
+			cur_if->operstatus = *var->val.integer; break;
 		    }
 		}
 
-		name[7] = '\0';
-		if (interface != NULL && strcmp(name, interface) != 0)
+		snmp_free_pdu (request);
+		snmp_free_pdu (response);
+
+		cur_if->name[6] = '\0';
+		if (interface != NULL && strcmp(cur_if->name, interface) != 0) {
+			cur_if->name [0] = 0;
 			continue;
-		cp = strchr(name, '\0');
-		if (operstatus != MIB_IFSTATUS_UP)
+		}
+		if (cur_if->operstatus != MIB_IFSTATUS_UP) {
+			cp = strchr(cur_if->name, '\0');
 			*cp++ = '*';
-		*cp = '\0';
-		printf("%-7.7s %-4d ", name, mtu);
-		printf("%-15.15s ", netname (ifroute, 0));
-		printf("%-15.15s ", routename (ifip));
+			*cp = '\0';
+		}
+	}
+
+	for (ifnum = 0, cur_if = if_table; ifnum < cfg_nnets; ifnum++, cur_if++) {
+		if (cur_if->name [0] == 0) continue;
+		printf("%-7.7s %4d ", cur_if->name, cur_if->mtu);
+		printf("%-15.15s ", cur_if->ifroute.s_addr ? netname (cur_if->ifroute, 0) : "none");
+		printf("%-15.15s ", cur_if->ifip.s_addr ? routename (cur_if->ifip) : "none");
 		printf("%8d %5d %8d %5d %5d",
-		    ipkts, ierrs, opkts, oerrs, outqueue);
+		    cur_if->ipkts, cur_if->ierrs,
+		    cur_if->opkts, cur_if->oerrs,
+		    cur_if->outqueue);
 		putchar('\n');
 	}
 }
@@ -292,7 +327,7 @@ sidewaysintpr(interval)
 	}
 	lastif = ip;
 
-#if SVR4
+#ifdef HAVE_SIGSET
 	(void)sigset(SIGALRM, catchalarm);
 #else
 	(void)signal(SIGALRM, catchalarm);
