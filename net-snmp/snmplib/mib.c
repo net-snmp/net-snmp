@@ -1062,6 +1062,8 @@ register_mib_handlers (void)
                        DS_LIBRARY_ID, DS_LIB_DONT_BREAKDOWN_OIDS);
     ds_register_premib(ASN_BOOLEAN, "snmp","quickPrinting",
                        DS_LIBRARY_ID, DS_LIB_QUICK_PRINT);
+    ds_register_premib(ASN_INTEGER, "snmp","suffixPrinting",
+                       DS_LIBRARY_ID, DS_LIB_PRINT_SUFFIX_ONLY);
     
     /* setup the default parser configurations, as specified by configure */
 #ifdef MIB_COMMENT_IS_EOL_TERMINATED
