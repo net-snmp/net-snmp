@@ -57,12 +57,14 @@ TABLE OF CONTENTS
    OK, what should I put in snmp.conf?
  PERL
    Where can I get the perl SNMP package?
-   How do I install the Perl SNMP module?
+   How do I install the Perl SNMP modules?
    But compiling this fails! Why?
    Compiling the perl module works OK, but 'make test' fails. Why?
+   The perl 'make test' fails on the OID tests. Is it safe to continue?
    I'm trying to use mib2c (or tkmib) and it can't locate SNMP.pm?
    I'm trying to use mib2c (or tkmib) and it can't load SNMP.so?
    I'm trying to use tkmib and it can't locate Tk.pm?
+   I've got a problem with the Net-SNMP module.  Can you help?
  MIBS
    Where can I find a MIB compiler?
    I can't load any of the mib files, and they seem to be missing
@@ -88,6 +90,7 @@ TABLE OF CONTENTS
    How can I send a particular trap to selected destinations?
    Why does calling 'snmp_v2trap' generate an SNMPv1 trap (or vice versa)?
    When I run the agent it runs and then quits without staying around. Why?
+   After a while the agent stops responding, and starts eating CPU time.  Why?
    How can I stop other people getting at my agent?
    How can I listen on just one particular interface?
    How do I configure access control?
@@ -1220,18 +1223,22 @@ Where can I get the perl SNMP package?
   (CPAN) site mirror in modules/by-module/SNMP.  To find the CPAN site
   nearest you, please see http://www.cpan.org/SITES.html.
 
+  With the v5 release of the Net-SNMP suite, this is now accompanied by
+  a number of perl modules grouped together under the NetSNMP namespace.
+
   Consult the README file in the SNMP perl module distribution to find 
   out what version of the ucd-snmp library it needs to be linked against.
 
 
 
-How do I install the Perl SNMP module?
--------------------------------------
+How do I install the Perl SNMP modules?
+--------------------------------------
 
   Assuming you have a reasonably new (and properly configured) perl system,
   this should be simply:
 
-        cd perl/SNMP
+        cd perl		(for 5.0.x)
+  or    cd perl/SNMP	(for 4.2.x)
 	perl Makefile.PL
 	    (press RETURN when prompted for host and community)
 	make
@@ -1280,6 +1287,34 @@ Compiling the perl module works OK, but 'make test' fails. Why?
 
 
 
+The perl 'make test' fails on the OID tests. Is it safe to continue?
+-------------------------------------------------------------------
+
+  No.  Almost certainly not.  If the "perl/OID" tests fail the first
+  four tests, and then crashes out complaining about a "netsnmp_oidPtr",
+  then this is a sign of a more fundamental problem.
+
+  The 4.2.x line perl support was a single module, so was independent
+  of the way that the C library was configured.  In contrast to this, 
+  the 5.0.x perl support consist of a number of inter-cooperating modules,
+  which rely on sharing a consistent C library environment.  In practise,
+  this means that the perl modules *MUST* be configured and compiled using
+  a shared version of the C library.   Unfortunately, the default for
+  most early versions of the Net-SNMP suite was to compile using static
+  libraries unless explicitly configured to use shared libraries.  The
+  default should be to use shared libraries from 5.0.7 onwards.
+
+  The error "oid1 is not of type netsnmp_oidPtr" is a fairly sure indication
+  that the C library was compiled statically.   You'll need to re-configure
+  the main Net-SNMP package using the "--enable-shared" configure flag.
+  Then re-install the C library before re-configuring and re-compiling
+  the perl module support.
+
+  Note that this problem does not arise when using the 4.2.x version
+  of perl support.
+
+
+
 I'm trying to use mib2c (or tkmib) and it can't locate SNMP.pm?
 ------------------------------------------------------------
 
@@ -1307,6 +1342,19 @@ I'm trying to use tkmib and it can't locate Tk.pm?
   "Tk800.011" or later.  It can be installed by issuing the command:
 
 		perl -MCPAN -e shell ; "install Tk"
+
+
+
+I've got a problem with the Net-SNMP module.  Can you help?
+----------------------------------------------------------
+
+  Sorry, despite the similar-sounding name, the Net-SNMP (or Net::SNMP)
+  module is nothing to do with this package, or the NetSNMP modules.
+  Net::SNMP is a "pure-perl" implementation of SNMP support, developed
+  by David Town.  The developers of the (C-based) Net-SNMP suite do
+  not have any significant experience in using this particular module,
+  and you'll probably be better off asking for help via CPAN or some
+  other perl-related forum.
 
 
 
@@ -1913,6 +1961,30 @@ When I run the agent it runs and then quits without staying around. Why?
   This agent crashes if there is a 'disk' configuration entry in the
   snmpd.conf file.  It is not currently known what causes this, as this
   setting works correctly if the agent is compiled from source.
+
+
+
+After a while the agent stops responding, and starts eating CPU time.  Why?
+--------------------------------------------------------------------------
+
+  This is most commonly seen when performing an "snmpwalk" on an agent
+  that's either using a default "vendor provided" configuration
+  (typically access to the 'system' group only), or which is trying
+  to restrict access for individual users or communities to a subset
+  of the whole OID tree.
+
+  The agent implementation of "GetNext" processing is relatively
+  inefficient when dealing with inaccessible objects, and it is quite
+  easy for the clients to time-out and retry a request, while the agent
+  is still trying to process the original.  If this happens continually
+  (as is typically the case with an snmpwalk), the agent can get swamped
+  by this backlog.
+
+  The 5.0.x line has now addressed this, starting with the 5.0.7 release.
+  The 4.2.x line still suffers from this problem, and it is unlikely that
+  this will be fixed.  (The 5.0.7 approach relies on some of the new
+  features in the 5.0.x line, and it has not proved possible to apply
+  this to the 4.2.x code base).
 
 
 
