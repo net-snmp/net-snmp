@@ -21,7 +21,4 @@ extern NetsnmpCacheFree udp_free;
 #define UDPINERRORS	    3
 #define UDPOUTDATAGRAMS     4
 
-#define UDPLOCALADDRESS     5
-#define UDPLOCALPORT	    6
-
 #endif                          /* _MIBGROUP_UDP_H */

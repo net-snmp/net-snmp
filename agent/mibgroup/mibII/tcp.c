@@ -82,25 +82,12 @@ int  hz = 1000;
 	 *
 	 *********************/
 
-struct variable1 tcpconn_variables[] = {
-#ifdef WIN32
-    {TCPCONNSTATE,        ASN_INTEGER,   RWRITE, var_tcpEntry, 1, {1}},
-#else
-    {TCPCONNSTATE,        ASN_INTEGER,   RONLY,  var_tcpEntry, 1, {1}},
-#endif
-    {TCPCONNLOCALADDRESS, ASN_IPADDRESS, RONLY,  var_tcpEntry, 1, {2}},
-    {TCPCONNLOCALPORT,    ASN_INTEGER,   RONLY,  var_tcpEntry, 1, {3}},
-    {TCPCONNREMADDRESS,   ASN_IPADDRESS, RONLY,  var_tcpEntry, 1, {4}},
-    {TCPCONNREMPORT,      ASN_INTEGER,   RONLY,  var_tcpEntry, 1, {5}},
-};
 
 /*
  * Define the OID pointer to the top of the mib tree that we're
  * registering underneath, and the OID for the MIB module 
  */
 oid             tcp_oid[]               = { SNMP_OID_MIB2, 6 };
-
-oid             tcpconn_variables_oid[] = { SNMP_OID_MIB2, 6, 13, 1 };
 oid             tcp_module_oid[]        = { SNMP_OID_MIB2, 49 };
 
 void
@@ -127,11 +114,6 @@ init_tcp(void)
 					tcp_oid, OID_LENGTH(tcp_oid)));
 #endif
 
-    /*
-     * register (using the old-style API) to handle the TCP connection table
-     */
-    REGISTER_MIB("mibII/tcpconn", tcpconn_variables,
-                       variable1, tcpconn_variables_oid);
     REGISTER_SYSOR_ENTRY(tcp_module_oid,
                          "The MIB module for managing TCP implementations");
 

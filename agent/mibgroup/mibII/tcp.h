@@ -32,10 +32,5 @@ extern NetsnmpCacheFree tcp_free;
 #define TCPINERRS           14
 #define TCPOUTRSTS          15
 
-#define TCPCONNSTATE	    21
-#define TCPCONNLOCALADDRESS 22
-#define TCPCONNLOCALPORT    23
-#define TCPCONNREMADDRESS   24
-#define TCPCONNREMPORT	    25
 
 #endif                          /* _MIBGROUP_TCP_H */
