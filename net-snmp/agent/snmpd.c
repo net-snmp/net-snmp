@@ -366,6 +366,33 @@ char **argvrestartp;
 char *argvrestart;
 char *argvrestartname;
 
+extern char *VersionInfo;
+
+void usage(prog)
+char *prog;
+{
+  printf("\nUsage:  %s [-h] [-v] [-f] [-a] [-d] [-q] [-L] [-l LOGFILE]\n",prog);
+  printf("\n\tVersion:  %s\n",VersionInfo);
+  printf("\tAuthor:   hardaker@ece.ucdavis.edu\n");
+  printf("\n-h\t\tThis usage message.\n");
+  printf("-v\t\tVersion information.\n");
+  printf("-f\t\tDon't fork from the shell.\n");
+  printf("-a\t\tLog addresses.\n");
+  printf("-d\t\tDump sent and received UDP SNMP packets\n");
+  printf("-q\t\tPrint information in a more parsable format (quick-print)\n");
+  printf("-L\t\tPrint warnings/messages to stdout/err rather than a logfile\n");
+  printf("-l LOGFILE\tPrint warnings/messages to LOGFILE\n");
+  printf("\t\t(By default LOGFILE=%s)\n",
+#ifdef LOGFILE
+         LOGFILE
+#else
+    "stdout/err"
+#endif
+    );
+  printf("\n");
+  exit(1);
+}
+
 main(argc, argv)
     int	    argc;
     char    *argv[];
@@ -415,8 +442,16 @@ main(argc, argv)
                 case 'L':
                     logfile[0] = NULL;
                     break;
+                case 'h':
+                    usage(argv[0]);
+                    break;
+                case 'v':
+                    printf("\nUcd-snmp version:  %s\n",VersionInfo);
+                    printf("Author:            hardaker@ece.ucdavis.edu\n\n");
+                    exit (0);
 		default:
 		    printf("invalid option: -%c\n", argv[arg][1]);
+                    usage(argv[0]);
 		    break;
 	    }
 	    continue;
