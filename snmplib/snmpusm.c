@@ -82,7 +82,7 @@ oid             usmHMACSHA1AuthProtocol[10] =
     { 1, 3, 6, 1, 6, 3, 10, 1, 1, 3 };
 oid             usmNoPrivProtocol[10] = { 1, 3, 6, 1, 6, 3, 10, 1, 2, 1 };
 oid             usmDESPrivProtocol[10] = { 1, 3, 6, 1, 6, 3, 10, 1, 2, 2 };
-oid             usmAES128PrivProtocol[10] = { 1, 3, 6, 1, 4, 1, 8072, 876,876,128 };
+oid             usmAES128PrivProtocol[10] = { 1, 3, 6, 1, 6, 3, 10, 1, 2, 4 };
 oid             usmAES192PrivProtocol[10] = { 1, 3, 6, 1, 4, 1, 8072, 876,876,192 };
 oid             usmAES256PrivProtocol[10] = { 1, 3, 6, 1, 4, 1, 8072, 876,876,256 };
 
