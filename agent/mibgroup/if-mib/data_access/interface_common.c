@@ -388,22 +388,22 @@ netsnmp_access_interface_entry_update_stats(netsnmp_interface_entry * prev_vals,
         }
     }
     else {
-        _update_32bit(&prev_vals->if_ibytes,
-                      &new_vals->if_ibytes, &prev_vals->old_ibytes);
-        _update_32bit(&prev_vals->if_iucast,
-                      &new_vals->if_iucast, &prev_vals->old_iucast);
-        _update_32bit(&prev_vals->if_imcast,
-                      &new_vals->if_imcast, &prev_vals->old_imcast);
-        _update_32bit(&prev_vals->if_ibcast,
-                      &new_vals->if_ibcast, &prev_vals->old_ibcast);
-        _update_32bit(&prev_vals->if_obytes,
-                      &new_vals->if_obytes, &prev_vals->old_obytes);
-        _update_32bit(&prev_vals->if_oucast,
-                      &new_vals->if_oucast, &prev_vals->old_oucast);
-        _update_32bit(&prev_vals->if_omcast,
-                      &new_vals->if_omcast, &prev_vals->old_omcast);
-        _update_32bit(&prev_vals->if_obcast,
-                      &new_vals->if_obcast, &prev_vals->old_obcast);
+        _update_32bit(&prev_vals->stats.ibytes,
+                      &new_vals->stats.ibytes, &prev_vals->old_stats->ibytes);
+        _update_32bit(&prev_vals->stats.iucast,
+                      &new_vals->stats.iucast, &prev_vals->old_stats->iucast);
+        _update_32bit(&prev_vals->stats.imcast,
+                      &new_vals->stats.imcast, &prev_vals->old_stats->imcast);
+        _update_32bit(&prev_vals->stats.ibcast,
+                      &new_vals->stats.ibcast, &prev_vals->old_stats->ibcast);
+        _update_32bit(&prev_vals->stats.obytes,
+                      &new_vals->stats.obytes, &prev_vals->old_stats->obytes);
+        _update_32bit(&prev_vals->stats.oucast,
+                      &new_vals->stats.oucast, &prev_vals->old_stats->oucast);
+        _update_32bit(&prev_vals->stats.omcast,
+                      &new_vals->stats.omcast, &prev_vals->old_stats->omcast);
+        _update_32bit(&prev_vals->stats.obcast,
+                      &new_vals->stats.obcast, &prev_vals->old_stats->obcast);
     }
     
     /*
