@@ -1,5 +1,5 @@
 
-#
+install:#
 # standard target definitions.  Set appropriate variables to make use of them.
 #
 # note: the strange use of the "it" variable is for shell parsing when
@@ -28,6 +28,9 @@ install: installlocalheaders @installucdheaders@ \
          installlocallibs    @installucdlibs@    \
          installlocalbin      installlocalsbin   \
          installsubdirs      $(OTHERINSTALL)
+
+uninstall: uninstalllibs uninstallbin uninstallsbin uninstallheaders \
+           uninstallsubdirs $(OTHERUNINSTALL)
 
 installprogs: installbin installsbin
 
@@ -89,18 +92,6 @@ installlocalheaders:
 	        done \
 	fi
 
-installsubdirheaders:
-	@if test "$(SUBDIRS)" != ""; then \
-		it="$(SUBDIRS)" ; \
-		for i in $$it ; do       \
-			echo "making installheaders in `pwd`/$$i"; \
-	                ( cd $$i ; $(MAKE) installheaders) ;   \
-                        if test $$? != 0 ; then \
-				exit 1 ; \
-			fi  \
-	        done \
-	fi
-
 installucdheaders:
 	@if test "$(INSTALLUCDHEADERS)" != "" ; then \
 		echo creating directory $(ucdincludedir) ; \
@@ -109,6 +100,43 @@ installucdheaders:
 	        for i in $$it ; do \
 			$(INSTALL_DATA) $(top_srcdir)/include/ucd-snmp/$$i $(ucdincludedir) ; \
 	                echo "installing $$i in $(ucdincludedir)" ; \
+	        done \
+	fi
+
+uninstallheaders:
+	@if test "$(INSTALLHEADERS)" != "" ; then \
+		it="$(INSTALLHEADERS)" ; \
+	        for i in $$it ; do \
+			rm -f $(includedir)/$$i ; \
+	                echo "removing $$i from $(includedir)" ; \
+	        done \
+	fi
+	@if test "$(INSTALLBUILTHEADERS)" != "" ; then \
+		it="$(INSTALLBUILTHEADERS)" ; \
+	        for i in $$it ; do \
+			rm -f $(includedir)/`basename $$i` ; \
+	                echo "removing $$i from $(includedir)" ; \
+	        done \
+	fi
+	@if test "$(INCLUDESUBDIRHEADERS)" != "" ; then \
+		it="$(INCLUDESUBDIRHEADERS)" ; \
+	        for i in $$it ; do \
+			rm -f $(includedir)/$(INCLUDESUBDIR)/$$i ; \
+	                echo "removing $$i from $(includedir)/$(INCLUDESUBDIR)" ; \
+	        done \
+	fi
+	@if test "$(INCLUDESUBDIRHEADERS2)" != "" ; then \
+		it="$(INCLUDESUBDIRHEADERS2)" ; \
+	        for i in $$it ; do \
+			rm -f $(includedir)/$(INCLUDESUBDIR2)/$$i ; \
+	                echo "removing $$i from $(includedir)/$(INCLUDESUBDIR2)" ; \
+	        done \
+	fi
+	@if test "$(INSTALLBUILTSUBDIRHEADERS)" != "" ; then \
+		it="$(INSTALLBUILTSUBDIRHEADERS)" ; \
+	        for i in $$it ; do \
+			rm -f $(includedir)/$(INSTALLBUILTSUBDIR)/`basename $$i` ; \
+	                echo "removing $$i from $(includedir)/$(INSTALLBUILTSUBDIR)" ; \
 	        done \
 	fi
 
@@ -155,6 +183,15 @@ installsubdirlibs:
 	        done \
 	fi
 
+uninstalllibs:
+	@if test "$(INSTALLLIBS)" != ""; then \
+		it="$(INSTALLLIBS)" ; \
+	        for i in $$it ; do   \
+		        $(UNINSTALL) $(libdir)/$$i ; \
+	                echo "removing $$i from $(libdir)"; \
+	        done \
+	fi
+
 #
 # normal bin binaries
 #
@@ -181,6 +218,15 @@ installsubdirbin:
                         if test $$? != 0 ; then \
 				exit 1 ; \
 			fi  \
+	        done \
+	fi
+
+uninstallbin:
+	@if test "$(INSTALLBINPROGS) $(INSTALLBINSCRIPTS)" != " "; then \
+		it="$(INSTALLBINPROGS) $(INSTALLBINSCRIPTS)" ; \
+	        for i in $$it ; do   \
+		        $(UNINSTALL) $(bindir)/$$i ; \
+	                echo "removing $$i from $(bindir)"; \
 	        done \
 	fi
 
@@ -213,6 +259,15 @@ installsubdirsbin:
 	        done \
 	fi
 
+uninstallsbin:
+	@if test "$(INSTALLSBINPROGS)" != ""; then \
+		it="$(INSTALLSBINPROGS)" ; \
+	        for i in $$it ; do   \
+		        $(UNINSTALL) $(sbindir)/$$i ; \
+	                echo "removing $$i from $(sbindir)"; \
+	        done \
+	fi
+
 #
 # general make install target for subdirs
 #
@@ -222,6 +277,18 @@ installsubdirs:
 		for i in $$it ; do       \
 			echo "making install in `pwd`/$$i"; \
 	                ( cd $$i ; $(MAKE) install) ;   \
+                        if test $$? != 0 ; then \
+				exit 1 ; \
+			fi  \
+	        done \
+	fi
+
+uninstallsubdirs:
+	@if test "$(SUBDIRS)" != ""; then \
+		it="$(SUBDIRS)" ; \
+		for i in $$it ; do       \
+			echo "making uninstall in `pwd`/$$i"; \
+	                ( cd $$i ; $(MAKE) uninstall) ;   \
                         if test $$? != 0 ; then \
 				exit 1 ; \
 			fi  \

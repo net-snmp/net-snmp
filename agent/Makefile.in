@@ -32,6 +32,7 @@ INSTALLBUILTSUBDIRHEADERS=../include/net-snmp/agent/mib_module_config.h \
 INSTALLBUILTSUBDIR=agent
 
 OTHERINSTALL=@EMBEDPERLINSTALL@
+OTHERUNINSTALL=@EMBEDPERLUNINSTALL@
 
 # XXX: need to install these  They're really UCD specific, however.
 BROKEINSTALL= \
@@ -129,7 +130,11 @@ libnetsnmpmibs.$(LIB_EXTENSION)$(LIB_VERSION):    ${LMIBOBJS}
 embedperlinstall:
 	  @$(SHELL) $(srcdir)/../mkinstalldirs $(snmplibdir)
 	  @$(INSTALL) $(srcdir)/snmp_perl.pl $(snmplibdir)/snmp_perl.pl
-	  @echo "install:  installed $$i in $(snmplibdir)"
+	  @echo "install:  installed snmp_perl.pl in $(snmplibdir)"
+
+embedperluninstall:
+	  @rm -f $(snmplibdir)/snmp_perl.pl
+	  @echo "removed snmp_perl.pl from $(snmplibdir)"
 
 snmp_vars.lo: @module_list_h@
 read_config.lo: @module_list_h@
