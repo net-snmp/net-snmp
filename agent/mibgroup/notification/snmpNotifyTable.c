@@ -480,8 +480,23 @@ struct snmpNotifyTable_data *StorageTmp = NULL;
   return NULL;
 }
 
+int
+snmpTagValid(const char *tag, const size_t tagLen)
+{
+    size_t i = 0;
 
+    static inline int is_delim(const char c) {
+	return (c == 0x020 || c == 0x09 || c == 0x0d || c == 0x0b);
+    }
 
+    for (i = 0; i < tagLen; i++) {
+	if (is_delim(tag[i])) {
+	    /*  Delimeters aren't allowed.  */
+	    return 0;
+	}
+    }
+    return 1;
+}
 
 int
 write_snmpNotifyTag(int      action,
@@ -492,7 +507,7 @@ write_snmpNotifyTag(int      action,
             oid      *name,
             size_t    name_len)
 {
-  static char * tmpvar;
+  static char *tmpvar;
   struct snmpNotifyTable_data *StorageTmp = NULL;
   static size_t tmplen;
   size_t newlen=name_len - (sizeof(snmpNotifyTable_variables_oid)/sizeof(oid) + 3 - 1);
@@ -502,55 +517,59 @@ write_snmpNotifyTag(int      action,
   if ((StorageTmp = (struct snmpNotifyTable_data *)
        header_complex((struct header_complex_index *)snmpNotifyTableStorage, NULL,
                       &name[sizeof(snmpNotifyTable_variables_oid)/sizeof(oid) + 3 - 1], 
-                      &newlen, 1, NULL, NULL)) == NULL)
+                      &newlen, 1, NULL, NULL)) == NULL) {
       return SNMP_ERR_NOSUCHNAME; /* remove if you support creation here */
-
-
-  switch ( action ) {
-        case RESERVE1:
-          if (var_val_type != ASN_OCTET_STR){
-              fprintf(stderr, "write to snmpNotifyTag not ASN_OCTET_STR\n");
-              return SNMP_ERR_WRONGTYPE;
-          }
-          break;
-
-
-        case RESERVE2:
-             /* memory reseveration, final preparation... */
-          break;
-
-
-        case FREE:
-             /* Release any resources that have been allocated */
-          break;
-
-
-        case ACTION:
-             /* The variable has been stored in string for
-             you to use, and you have just been asked to do something with
-             it.  Note that anything done here must be reversable in the UNDO case */
-             tmpvar = StorageTmp->snmpNotifyTag;
-             tmplen = StorageTmp->snmpNotifyTagLen;
-             memdup((u_char **) &StorageTmp->snmpNotifyTag, var_val, var_val_len);
-             StorageTmp->snmpNotifyTagLen = var_val_len;
-          break;
-
-
-        case UNDO:
-             /* Back out any changes made in the ACTION case */
-             SNMP_FREE(StorageTmp->snmpNotifyTag);
-             StorageTmp->snmpNotifyTag = tmpvar;
-             StorageTmp->snmpNotifyTagLen = tmplen;
-	     tmpvar = NULL;
-          break;
-
-
-        case COMMIT:
-             /* Things are working well, so it's now safe to make the change
-             permanently.  Make sure that anything done here can't fail! */
-	     SNMP_FREE(tmpvar);
-          break;
   }
+
+
+  switch (action) {
+  case RESERVE1:
+      if (var_val_type != ASN_OCTET_STR) {
+	  return SNMP_ERR_WRONGTYPE;
+      }
+      if (var_val_len < 0 || var_val_len > 255) {
+	  return SNMP_ERR_WRONGLENGTH;
+      }
+      if (!snmpTagValid(var_val, var_val_len)) {
+	  return SNMP_ERR_WRONGVALUE;
+      }
+      break;
+
+
+  case RESERVE2:
+      /* memory reseveration, final preparation... */
+      break;
+
+
+  case FREE:
+      /* Release any resources that have been allocated */
+      break;
+
+
+  case ACTION:
+      tmpvar = StorageTmp->snmpNotifyTag;
+      tmplen = StorageTmp->snmpNotifyTagLen;
+      memdup((u_char **) &StorageTmp->snmpNotifyTag, var_val, var_val_len);
+      StorageTmp->snmpNotifyTagLen = var_val_len;
+      break;
+
+
+  case UNDO:
+      /* Back out any changes made in the ACTION case */
+      SNMP_FREE(StorageTmp->snmpNotifyTag);
+      StorageTmp->snmpNotifyTag = tmpvar;
+      StorageTmp->snmpNotifyTagLen = tmplen;
+      tmpvar = NULL;
+      break;
+
+
+  case COMMIT:
+      /* Things are working well, so it's now safe to make the change
+	 permanently.  Make sure that anything done here can't fail! */
+      SNMP_FREE(tmpvar);
+      break;
+  }
+
   return SNMP_ERR_NOERROR;
 }
 
@@ -567,6 +586,7 @@ write_snmpNotifyType(int      action,
 {
   static int tmpvar;
   struct snmpNotifyTable_data *StorageTmp = NULL;
+  long value = *((long *)var_val);
   size_t newlen=name_len - (sizeof(snmpNotifyTable_variables_oid)/sizeof(oid) + 3 - 1);
 
 
@@ -574,50 +594,34 @@ write_snmpNotifyType(int      action,
   if ((StorageTmp = (struct snmpNotifyTable_data *)
        header_complex((struct header_complex_index *)snmpNotifyTableStorage, NULL,
                       &name[sizeof(snmpNotifyTable_variables_oid)/sizeof(oid) + 3 - 1], 
-                      &newlen, 1, NULL, NULL)) == NULL)
-      return SNMP_ERR_NOSUCHNAME; /* remove if you support creation here */
-
-
-  switch ( action ) {
-        case RESERVE1:
-          if (var_val_type != ASN_INTEGER){
-              fprintf(stderr, "write to snmpNotifyType not ASN_INTEGER\n");
-              return SNMP_ERR_WRONGTYPE;
-          }
-          break;
-
-
-        case RESERVE2:
-             /* memory reseveration, final preparation... */
-          break;
-
-
-        case FREE:
-             /* Release any resources that have been allocated */
-          break;
-
-
-        case ACTION:
-             /* The variable has been stored in long_ret for
-             you to use, and you have just been asked to do something with
-             it.  Note that anything done here must be reversable in the UNDO case */
-             tmpvar = StorageTmp->snmpNotifyType;
-             StorageTmp->snmpNotifyType = *((long *) var_val);
-          break;
-
-
-        case UNDO:
-             /* Back out any changes made in the ACTION case */
-             StorageTmp->snmpNotifyType = tmpvar;
-          break;
-
-
-        case COMMIT:
-             /* Things are working well, so it's now safe to make the change
-             permanently.  Make sure that anything done here can't fail! */
-
-          break;
+                      &newlen, 1, NULL, NULL)) == NULL) {
+      return SNMP_ERR_NOSUCHNAME;
   }
+
+  switch (action) {
+  case RESERVE1:
+      if (var_val_type != ASN_INTEGER){
+	  return SNMP_ERR_WRONGTYPE;
+      }
+      if (var_val_len != sizeof(long)) {
+	  return SNMP_ERR_WRONGLENGTH;
+      }
+      if (value < 1 || value > 2) {
+	  return SNMP_ERR_WRONGVALUE;
+      }
+      break;
+
+  case ACTION:
+      tmpvar = StorageTmp->snmpNotifyType;
+      StorageTmp->snmpNotifyType = value;
+      break;
+
+  case UNDO:
+      /* Back out any changes made in the ACTION case */
+      StorageTmp->snmpNotifyType = tmpvar;
+      break;
+  }
+
   return SNMP_ERR_NOERROR;
 }
 
@@ -633,6 +637,7 @@ write_snmpNotifyStorageType(int      action,
             size_t    name_len)
 {
   static int tmpvar;
+  long value = *((long *)var_val);
   struct snmpNotifyTable_data *StorageTmp = NULL;
   size_t newlen=name_len - (sizeof(snmpNotifyTable_variables_oid)/sizeof(oid) + 3 - 1);
 
@@ -641,49 +646,33 @@ write_snmpNotifyStorageType(int      action,
   if ((StorageTmp = (struct snmpNotifyTable_data *)
        header_complex((struct header_complex_index *)snmpNotifyTableStorage, NULL,
                       &name[sizeof(snmpNotifyTable_variables_oid)/sizeof(oid) + 3 - 1], 
-                      &newlen, 1, NULL, NULL)) == NULL)
-      return SNMP_ERR_NOSUCHNAME; /* remove if you support creation here */
+                      &newlen, 1, NULL, NULL)) == NULL) {
+      return SNMP_ERR_NOSUCHNAME;
+  }
 
 
-  switch ( action ) {
-        case RESERVE1:
-          if (var_val_type != ASN_INTEGER){
-              fprintf(stderr, "write to snmpNotifyStorageType not ASN_INTEGER\n");
-              return SNMP_ERR_WRONGTYPE;
-          }
-          break;
+  switch (action) {
+  case RESERVE1:
+      if (var_val_type != ASN_INTEGER) {
+	  return SNMP_ERR_WRONGTYPE;
+      }
+      if (var_val_len != sizeof(long)) {
+	  return SNMP_ERR_WRONGLENGTH;
+      }	
+      if (value != SNMP_STORAGE_OTHER && value != SNMP_STORAGE_VOLATILE &&
+	  value != SNMP_STORAGE_NONVOLATILE) {
+	  return SNMP_ERR_WRONGVALUE;
+      }
+      break;
 
+  case ACTION:
+      tmpvar = StorageTmp->snmpNotifyStorageType;
+      StorageTmp->snmpNotifyStorageType = value;
+      break;
 
-        case RESERVE2:
-             /* memory reseveration, final preparation... */
-          break;
-
-
-        case FREE:
-             /* Release any resources that have been allocated */
-          break;
-
-
-        case ACTION:
-             /* The variable has been stored in long_ret for
-             you to use, and you have just been asked to do something with
-             it.  Note that anything done here must be reversable in the UNDO case */
-             tmpvar = StorageTmp->snmpNotifyStorageType;
-             StorageTmp->snmpNotifyStorageType = *((long *) var_val);
-          break;
-
-
-        case UNDO:
-             /* Back out any changes made in the ACTION case */
-             StorageTmp->snmpNotifyStorageType = tmpvar;
-          break;
-
-
-        case COMMIT:
-             /* Things are working well, so it's now safe to make the change
-             permanently.  Make sure that anything done here can't fail! */
-
-          break;
+  case UNDO:
+      StorageTmp->snmpNotifyStorageType = tmpvar;
+      break;
   }
   return SNMP_ERR_NOERROR;
 }
@@ -706,7 +695,7 @@ write_snmpNotifyRowStatus(int      action,
   static struct snmpNotifyTable_data *StorageNew, *StorageDel;
   size_t newlen=name_len - (sizeof(snmpNotifyTable_variables_oid)/sizeof(oid) + 3 - 1);
   static int old_value;
-  int set_value;
+  int set_value = *((long *) var_val);
   static struct variable_list *vars, *vp;
   struct header_complex_index *hciptr;
 
@@ -717,167 +706,142 @@ write_snmpNotifyRowStatus(int      action,
                    &name[sizeof(snmpNotifyTable_variables_oid)/sizeof(oid) + 3 - 1], 
                    &newlen, 1, NULL, NULL);
   
-
-  
-
-  if (var_val_type != ASN_INTEGER || var_val == NULL){
-    fprintf(stderr, "write to snmpNotifyRowStatus not ASN_INTEGER\n");
-    return SNMP_ERR_WRONGTYPE;
-  }
-  set_value = *((long *) var_val);
-
-
-  /* check legal range, and notReady is reserved for us, not a user */
-  if (set_value < 1 || set_value > 6 || set_value == RS_NOTREADY)
-    return SNMP_ERR_INCONSISTENTVALUE;
-    
-
-  switch ( action ) {
-        case RESERVE1:
-  /* stage one: test validity */
-          if (StorageTmp == NULL) {
+  switch (action) {
+  case RESERVE1:
+      if (var_val_type != ASN_INTEGER || var_val == NULL) {
+	  return SNMP_ERR_WRONGTYPE;
+      }
+      if (var_val_len != sizeof(long)) {
+	  return SNMP_ERR_WRONGLENGTH;
+      }
+      if (set_value < 1 || set_value > 6 || set_value == RS_NOTREADY) {
+	  return SNMP_ERR_WRONGVALUE;
+      }
+      if (StorageTmp == NULL) {
             /* create the row now? */
-
-
             /* ditch illegal values now */
-            if (set_value == RS_ACTIVE || set_value == RS_NOTINSERVICE)
+	  if (set_value == RS_ACTIVE || set_value == RS_NOTINSERVICE) {
               return SNMP_ERR_INCONSISTENTVALUE;
-    
-          } else {
-            /* row exists.  Check for a valid state change */
-            if (set_value == RS_CREATEANDGO || set_value == RS_CREATEANDWAIT) {
+	  }
+      } else {
+	  /* row exists.  Check for a valid state change */
+	  if (set_value == RS_CREATEANDGO || set_value == RS_CREATEANDWAIT) {
               /* can't create a row that exists */
               return SNMP_ERR_INCONSISTENTVALUE;
-            }
+	  }
     /* XXX: interaction with row storage type needed */
-          }
-          break;
+      }
+      break;
 
+  case RESERVE2:
+      /* memory reseveration, final preparation... */
+      if (StorageTmp == NULL &&
+	  (set_value == RS_CREATEANDGO || set_value == RS_CREATEANDWAIT)) {
+	  /* creation */
+	  vars = NULL;
 
+	  snmp_varlist_add_variable(&vars, NULL, 0, ASN_PRIV_IMPLIED_OCTET_STR, NULL, 0); /* snmpNotifyName */
 
-
-        case RESERVE2:
-          /* memory reseveration, final preparation... */
-          if (StorageTmp == NULL &&
-              (set_value == RS_CREATEANDGO || set_value == RS_CREATEANDWAIT)) {
-            /* creation */
-            vars = NULL;
-
-            snmp_varlist_add_variable(&vars, NULL, 0, ASN_PRIV_IMPLIED_OCTET_STR, NULL, 0); /* snmpNotifyName */
-
-            if (header_complex_parse_oid(&(name[sizeof(snmpNotifyTable_variables_oid)/sizeof(oid)+2]), newlen,
-                                         vars) != SNMPERR_SUCCESS) {
+	  if (header_complex_parse_oid(&(name[sizeof(snmpNotifyTable_variables_oid)/sizeof(oid)+2]), newlen, vars) != SNMPERR_SUCCESS) {
               /* XXX: free, zero vars */
               snmp_free_var(vars);
               return SNMP_ERR_INCONSISTENTNAME;
-            }
-            vp = vars;
+	  }
+	  vp = vars;
 
 
-            StorageNew = SNMP_MALLOC_STRUCT(snmpNotifyTable_data);
-            memdup((u_char **) &(StorageNew->snmpNotifyName), 
-                   vp->val.string,
-                   vp->val_len);
-            StorageNew->snmpNotifyNameLen = vp->val_len;
-            vp = vp->next_variable;
+	  StorageNew = SNMP_MALLOC_STRUCT(snmpNotifyTable_data);
+	  if (StorageNew == NULL) {
+	      return SNMP_ERR_RESOURCEUNAVAILABLE;
+	  }
+	  memdup((u_char **) &(StorageNew->snmpNotifyName), 
+		 vp->val.string,
+		 vp->val_len);
+	  if (StorageNew->snmpNotifyName == NULL) {
+	      return SNMP_ERR_RESOURCEUNAVAILABLE;
+	  }
+	  StorageNew->snmpNotifyNameLen = vp->val_len;
+	  vp = vp->next_variable;
 
+	  /* default values */
+	  StorageNew->snmpNotifyStorageType = ST_NONVOLATILE;
+	  StorageNew->snmpNotifyType = SNMPNOTIFYTYPE_TRAP;
+	  StorageNew->snmpNotifyTagLen = 0;
+	  StorageNew->snmpNotifyTag = (char *)calloc(sizeof(char), 1);
+	  if (StorageNew->snmpNotifyTag == NULL) {
+	      return SNMP_ERR_RESOURCEUNAVAILABLE;
+	  }
 
-            /* default values */
-            StorageNew->snmpNotifyStorageType = ST_NONVOLATILE;
-            StorageNew->snmpNotifyType = SNMPNOTIFYTYPE_TRAP;
-            StorageNew->snmpNotifyTagLen = 0;
-            StorageNew->snmpNotifyTag = (char *)malloc(1); /* bogus pointer */
+	  StorageNew->snmpNotifyRowStatus = set_value;
+	  snmp_free_var(vars);
+      }
+      break;
 
-            StorageNew->snmpNotifyRowStatus = set_value;
-            snmp_free_var(vars);
-          }
-          
+  case FREE:
+      if (StorageNew != NULL) {
+	  SNMP_FREE(StorageNew->snmpNotifyTag);
+	  SNMP_FREE(StorageNew->snmpNotifyName);
+	  free(StorageNew);
+	  StorageNew = NULL;
+      }
+      break;
 
-          break;
+  case ACTION:
+      if (StorageTmp == NULL && (set_value == RS_CREATEANDGO ||
+				 set_value == RS_CREATEANDWAIT)) {
+	  /* row creation, so add it */
+	  if (StorageNew != NULL) {
+	      snmpNotifyTable_add(StorageNew);
+	  }
+      } else if (set_value != RS_DESTROY) {
+	  /* set the flag? */
+	  old_value = StorageTmp->snmpNotifyRowStatus;
+	  StorageTmp->snmpNotifyRowStatus = *((long *) var_val);
+      } else {
+	  /* destroy...  extract it for now */
+	  if (StorageTmp) {
+	      hciptr = header_complex_find_entry(snmpNotifyTableStorage,
+						 StorageTmp);
+	      StorageDel = (struct snmpNotifyTable_data *)
+                         header_complex_extract_entry((struct header_complex_index **)&snmpNotifyTableStorage, hciptr);
+	  }
+      }
+      break;
 
-
-
-
-        case FREE:
-          /* XXX: free, zero vars */
-          /* Release any resources that have been allocated */
-          break;
-
-
-
-
-        case ACTION:
-             /* The variable has been stored in set_value for you to
-             use, and you have just been asked to do something with
-             it.  Note that anything done here must be reversable in
-             the UNDO case */
-             
-
-             if (StorageTmp == NULL&&
-                 (set_value == RS_CREATEANDGO ||
-                  set_value == RS_CREATEANDWAIT)) {
-               /* row creation, so add it */
-               if (StorageNew != NULL)
-                 snmpNotifyTable_add(StorageNew);
-               /* XXX: ack, and if it is NULL? */
-             } else if (set_value != RS_DESTROY) {
-               /* set the flag? */
-               old_value = StorageTmp->snmpNotifyRowStatus;
-               StorageTmp->snmpNotifyRowStatus = *((long *) var_val);
-             } else {
-               /* destroy...  extract it for now */
-                 if (StorageTmp) {
-                     hciptr =
-                         header_complex_find_entry(snmpNotifyTableStorage,
-                                                   StorageTmp);
-                     StorageDel = (struct snmpNotifyTable_data *)
-                         header_complex_extract_entry((struct header_complex_index **)&snmpNotifyTableStorage,
-                                                      hciptr);
-                 }
-             }
-          break;
-
-
-
-
-        case UNDO:
-             /* Back out any changes made in the ACTION case */
-             if (StorageTmp == NULL &&
-                 (set_value == RS_CREATEANDGO ||
-                  set_value == RS_CREATEANDWAIT)) {
-               /* row creation, so remove it again */
-               hciptr =
-                 header_complex_find_entry(snmpNotifyTableStorage,
-                                           StorageNew);
-               StorageDel = (struct snmpNotifyTable_data *)
-                 header_complex_extract_entry((struct header_complex_index **)&snmpNotifyTableStorage,
-                                              hciptr);
+  case UNDO:
+      /* Back out any changes made in the ACTION case */
+      if (StorageTmp == NULL && (set_value == RS_CREATEANDGO ||
+				 set_value == RS_CREATEANDWAIT)) {
+	  /* row creation, so remove it again */
+	  hciptr =  header_complex_find_entry(snmpNotifyTableStorage,
+					      StorageNew);
+	  StorageDel = (struct snmpNotifyTable_data *)
+	      header_complex_extract_entry((struct header_complex_index **)&snmpNotifyTableStorage, hciptr);
                /* XXX: free it */
-             } else if (StorageDel != NULL) {
-               /* row deletion, so add it again */
-               snmpNotifyTable_add(StorageDel);
-             } else if (set_value != RS_DESTROY) {
-               StorageTmp->snmpNotifyRowStatus = old_value;
-             }
-          break;
+      } else if (StorageDel != NULL) {
+	  /* row deletion, so add it again */
+	  snmpNotifyTable_add(StorageDel);
+      } else if (set_value != RS_DESTROY) {
+	  StorageTmp->snmpNotifyRowStatus = old_value;
+      }
+      break;
 
-
-
-
-        case COMMIT:
-             /* Things are working well, so it's now safe to make the change
-             permanently.  Make sure that anything done here can't fail! */
-          if (StorageDel != NULL) {
-            StorageDel = NULL;
-            /* XXX: free it, its dead */
-          }
-          if (StorageTmp && StorageTmp->snmpNotifyRowStatus == RS_CREATEANDGO) {
-              StorageTmp->snmpNotifyRowStatus = RS_ACTIVE;
-          } else if (StorageTmp &&
-                     StorageTmp->snmpNotifyRowStatus == RS_CREATEANDWAIT) {
-              StorageTmp->snmpNotifyRowStatus = RS_NOTINSERVICE;
-          }
-          break;
+  case COMMIT:
+      if (StorageDel != NULL) {
+	  SNMP_FREE(StorageDel->snmpNotifyTag);
+	  SNMP_FREE(StorageDel->snmpNotifyName);
+	  free(StorageDel);
+	  StorageDel = NULL;
+      }
+      if (StorageTmp && StorageTmp->snmpNotifyRowStatus == RS_CREATEANDGO) {
+	  StorageTmp->snmpNotifyRowStatus = RS_ACTIVE;
+	  StorageNew = NULL;
+      } else if (StorageTmp &&
+		 StorageTmp->snmpNotifyRowStatus == RS_CREATEANDWAIT) {
+	  StorageTmp->snmpNotifyRowStatus = RS_NOTINSERVICE;
+	  StorageNew = NULL;
+      }
+      break;
   }
   return SNMP_ERR_NOERROR;
 }
