@@ -256,6 +256,9 @@
 /* Define if you have the <arpa/inet.h> header file.  */
 #undef HAVE_ARPA_INET_H
 
+/* Define if you have the <asm/page.h> header file.  */
+#undef HAVE_ASM_PAGE_H
+
 /* Define if you have the <dirent.h> header file.  */
 #undef HAVE_DIRENT_H
 
@@ -465,6 +468,9 @@
 
 /* Define if you have the <sys/statvfs.h> header file.  */
 #undef HAVE_SYS_STATVFS_H
+
+/* Define if you have the <sys/stream.h> header file.  */
+#undef HAVE_SYS_STREAM_H
 
 /* Define if you have the <sys/swap.h> header file.  */
 #undef HAVE_SYS_SWAP_H
@@ -792,8 +798,6 @@
 
 /* configure options specified */
 #define CONFIGURE_OPTIONS ""
-
-/* debugging macros */
 
 #ifndef HAVE_STRCHR
 #ifdef HAVE_INDEX
