@@ -415,7 +415,7 @@ snmp_open(session)
     comp = session->community;
     comlen = session->community_len;
     if (comlen == SNMP_DEFAULT_COMMUNITY_LEN) {
-	comp = DEFAULT_COMMUNITY;
+	comp = (u_char *) DEFAULT_COMMUNITY;
 	comlen = strlen(comp);
     }
     cp = (u_char *)malloc(comlen);
