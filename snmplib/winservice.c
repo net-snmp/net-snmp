@@ -14,6 +14,22 @@
 
 #include <net-snmp/library/winservice.h>
 
+#ifdef mingw32 /* MinGW doesn't fully support exception handling. */
+
+#define TRY if(1)
+#define LEAVE goto labelFIN
+#define FINALLY do { \
+labelFIN: \
+} while(0); if(1)
+
+#else
+
+#define TRY __try
+#define LEAVE __leave
+#define FINALLY __finally
+
+#endif /* mingw32 */
+
     /*
      * External global variables used here
      */
@@ -92,7 +108,7 @@ RegisterService (LPCTSTR lpszServiceName, LPCTSTR lpszServiceDisplayName,
   DWORD dwData;			/* Type of logging supported */
   DWORD i, j;			/* Loop variables */
   GetModuleFileName (NULL, szServicePath, MAX_PATH);
-  __try
+  TRY
   {
 
     /*
@@ -102,7 +118,7 @@ RegisterService (LPCTSTR lpszServiceName, LPCTSTR lpszServiceDisplayName,
     if (hSCManager == NULL)
       {
 	DisplayError (_T ("Can't open SCM"));
-	__leave;
+	LEAVE;
       }
 
     /*
@@ -126,7 +142,7 @@ RegisterService (LPCTSTR lpszServiceName, LPCTSTR lpszServiceDisplayName,
 	_stprintf (MsgErrorString, "%s %s",
 		   _T ("Can't Create Service"), lpszServiceDisplayName);
 	DisplayError (MsgErrorString);
-	__leave;
+	LEAVE;
       }
 
     /*
@@ -146,7 +162,7 @@ RegisterService (LPCTSTR lpszServiceName, LPCTSTR lpszServiceDisplayName,
 	_stprintf (MsgErrorString, "%s %s",
 		   _T ("Unable to create registry entires"), lpszServiceDisplayName);
 	DisplayError (MsgErrorString);
-	__leave;
+	LEAVE;
       }
 
     /*
@@ -190,7 +206,7 @@ RegisterService (LPCTSTR lpszServiceName, LPCTSTR lpszServiceDisplayName,
 		       _T ("Unable to create registry entires"),
 		       lpszServiceDisplayName);
 	    DisplayError (MsgErrorString);
-	    __leave;
+	    LEAVE;
 	  }
 
 	/*
@@ -207,7 +223,7 @@ RegisterService (LPCTSTR lpszServiceName, LPCTSTR lpszServiceDisplayName,
 			   _T ("Unable to create registry entires"),
 			   lpszServiceDisplayName);
 		DisplayError (MsgErrorString);
-		__leave;
+		LEAVE;
 	      };
 	  }
 
@@ -228,7 +244,7 @@ RegisterService (LPCTSTR lpszServiceName, LPCTSTR lpszServiceDisplayName,
 			   _T ("Unable to create registry entires"),
 			   lpszServiceDisplayName);
 		DisplayError (MsgErrorString);
-		__leave;
+		LEAVE;
 	      }
 
 	    /*
@@ -255,7 +271,7 @@ RegisterService (LPCTSTR lpszServiceName, LPCTSTR lpszServiceDisplayName,
 			       _T ("Unable to create registry entires"),
 			       lpszServiceDisplayName);
 		    DisplayError (MsgErrorString);
-		    __leave;
+		    LEAVE;
 		  };
 	      }
 	  }
@@ -283,7 +299,8 @@ RegisterService (LPCTSTR lpszServiceName, LPCTSTR lpszServiceDisplayName,
     WriteToEventLog (EVENTLOG_INFORMATION_TYPE, MsgErrorString);
     MessageBox (NULL, MsgErrorString, g_szAppName, MB_ICONINFORMATION);
   }
-  __finally
+
+  FINALLY
   {
     if (hSCManager)
       CloseServiceHandle (hSCManager);
@@ -311,7 +328,7 @@ UnregisterService (LPCSTR lpszServiceName)
     "SYSTEM\\CurrentControlSet\\Services\\EventLog\\Application\\";
   TCHAR szRegKey[512];
 /*  HKEY hKey = NULL;		?* Key to registry entry */
-  __try
+  TRY
   {
     /*
      * Open Service Control Manager 
@@ -320,7 +337,7 @@ UnregisterService (LPCSTR lpszServiceName)
     if (hSCManager == NULL)
       {
 	MessageBox (NULL, _T ("Can't open SCM"), g_szAppName, MB_ICONHAND);
-	__leave;
+	LEAVE;
       }
 
     /*
@@ -332,7 +349,7 @@ UnregisterService (LPCSTR lpszServiceName)
 	_stprintf (MsgErrorString, "%s %s", _T ("Can't open service"),
 		   lpszServiceName);
 	MessageBox (NULL, MsgErrorString, g_szAppName, MB_ICONHAND);
-	__leave;
+	LEAVE;
       }
 
     /*
@@ -361,7 +378,7 @@ UnregisterService (LPCSTR lpszServiceName)
 	 * Log message to eventlog 
 	 */
 	WriteToEventLog (EVENTLOG_INFORMATION_TYPE, MsgErrorString);
-	__leave;
+	LEAVE;
       }
 
     /*
@@ -382,7 +399,7 @@ UnregisterService (LPCSTR lpszServiceName)
   /*
    * Delete the handles 
    */
-  __finally
+  FINALLY
   {
     if (hService)
       CloseServiceHandle (hService);
@@ -662,13 +679,13 @@ ServiceMain (DWORD argc, LPTSTR argv[])
   /*
    * Spin of worker thread, which does majority of the work 
    */
-  __try
+  TRY
   {
     if (SetSimpleSecurityAttributes (&SecurityAttributes) == FALSE)
       {
 	WriteToEventLog (EVENTLOG_ERROR_TYPE,
 			 _T ("Couldn't init security attributes"));
-	__leave;
+	LEAVE;
       }
     hServiceThread =
       (void *) _beginthreadex (&SecurityAttributes, 0,
@@ -677,7 +694,7 @@ ServiceMain (DWORD argc, LPTSTR argv[])
     if (hServiceThread == NULL)
       {
 	WriteToEventLog (EVENTLOG_ERROR_TYPE, _T ("Couldn't start worker thread"));
-	__leave;
+	LEAVE;
       }
 
     /*
@@ -691,9 +708,8 @@ ServiceMain (DWORD argc, LPTSTR argv[])
      */
     WaitForSingleObject (hServiceThread, INFINITE);
   }
-  __finally
+  FINALLY
   {
-
     /*
      * Release resources 
      */
