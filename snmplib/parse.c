@@ -1037,7 +1037,7 @@ find_tree_node(const char *name,
 
     headtp = tbuckets[NBUCKET(name_hash(name))];
     for ( tp = headtp ; tp ; tp=tp->next ) {
-        if ( !label_compare(tp->label, name) ) {
+        if ( tp->label && !label_compare(tp->label, name) ) {
 
             if ( modid == -1 )	/* Any module */
                 return(tp);
@@ -1132,7 +1132,7 @@ find_best_tree_node(const char *pattrn, struct tree *tree_top, u_int *match)
         tree_top = get_tree_head();
 
     for ( tp = tree_top ; tp ; tp=tp->next_peer ) {
-        if (!tp->reported)
+        if (!tp->reported && tp->label)
             new_match = compute_match(tp->label, pattrn);
         tp->reported = 1;
 
@@ -3328,8 +3328,8 @@ add_module_replacement(const char *old_module,
 
     mcp->old_module = strdup( old_module );
     mcp->new_module = strdup( new_module_name );
-	if (tag)
-    mcp->tag	    = strdup( tag );
+    if (tag)
+        mcp->tag    = strdup( tag );
     mcp->tag_len = len;
 
     mcp->next    = module_map_head;
@@ -3613,7 +3613,8 @@ unload_all_mibs()
     for ( mcp=module_map_head ; mcp; mcp=module_map_head ) {
         if (mcp == module_map) break;
         module_map_head = mcp->next;
-        free ((char *)mcp->tag);
+        if (mcp->tag)
+            free ((char *)mcp->tag);
         free ((char *)mcp->old_module);
         free ((char *)mcp->new_module);
         free (mcp);
