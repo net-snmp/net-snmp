@@ -34,6 +34,15 @@
 
 #include <net-snmp/library/snmp_api.h>
 
+typedef struct netsnmp_ds_read_config_s {
+  u_char          type;
+  char           *token;
+  char           *ftype;
+  int             storeid;
+  int             which;
+  struct netsnmp_ds_read_config_s *next;
+} netsnmp_ds_read_config;
+
 static netsnmp_ds_read_config *netsnmp_ds_configs = NULL;
 
 static int   netsnmp_ds_integers[NETSNMP_DS_MAX_IDS][NETSNMP_DS_MAX_SUBIDS];
