@@ -52,7 +52,8 @@ echo Creating %INSTALL_BASE% sub-directories
 
 mkdir %INSTALL_BASE% > NUL:
 mkdir %INSTALL_BASE%\bin > NUL:
-mkdir %INSTALL_BASE%\conf > NUL:
+mkdir %INSTALL_BASE%\etc > NUL:
+mkdir %INSTALL_BASE%\etc\snmp > NUL:
 mkdir %INSTALL_BASE%\lib > NUL:
 mkdir %INSTALL_BASE%\temp > NUL:
 mkdir %INSTALL_BASE%\share > NUL:
