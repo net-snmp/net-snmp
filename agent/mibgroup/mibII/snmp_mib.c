@@ -11,6 +11,7 @@
 
 #include "../mibincl.h"
 #include "../../../snmplib/system.h"
+#include "util_funcs.h"
 
 #include "snmp_mib.h"
 
@@ -84,38 +85,6 @@ init_snmp_mib(void) {
   write_method
   
 */
-
-static int
-header_snmp(struct variable *vp,
-	    oid *name,
-	    int *length,
-	    int exact,
-	    int *var_len,
-	    WriteMethod **write_method)
-{
-#define SNMP_NAME_LENGTH	8
-    oid newname[MAX_OID_LEN];
-    int result;
-    char c_oid[SPRINT_MAX_LEN];
-
-    if (snmp_get_do_debugging()) {
-      sprint_objid (c_oid, name, *length);
-      DEBUGMSGTL(("mibII/snmp_mib", "var_snmp: %s %d\n", c_oid, exact));
-    }
-
-    memcpy( (char *)newname,(char *)vp->name, (int)vp->namelen * sizeof(oid));
-    newname[SNMP_NAME_LENGTH] = 0;
-    result = snmp_oid_compare(name, *length, newname, (int)vp->namelen + 1);
-    if ((exact && (result != 0)) || (!exact && (result >= 0)))
-        return(MATCH_FAILED);
-    memcpy( (char *)name,(char *)newname, ((int)vp->namelen + 1) * sizeof(oid));
-    *length = vp->namelen + 1;
-
-    *write_method = 0;
-    *var_len = sizeof(long);	/* default to 'long' results */
-    return(MATCH_SUCCEEDED);
-}
-
 
 	/*********************
 	 *
