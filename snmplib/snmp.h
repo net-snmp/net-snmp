@@ -30,9 +30,12 @@ SOFTWARE.
 
 #define SNMP_MAX_LEN	    1500
 
+/* SNMP version numbers */
 #define SNMP_VERSION_1	    0
-#define SNMP_SECURITY_1     1
-#define SNMP_VERSION_2	    2
+#define SNMP_VERSION_2	    1
+/* Outdated snmpv2 historic numbers, but never transmitted as is */
+#define SNMP_SECURITY_1     128
+#define SNMP_VERSION_2_HISTORIC	    129
 
 #define GET_REQ_MSG	    (ASN_CONTEXT | ASN_CONSTRUCTOR | 0x0)
 #define GETNEXT_REQ_MSG	    (ASN_CONTEXT | ASN_CONSTRUCTOR | 0x1)
@@ -54,6 +57,7 @@ SOFTWARE.
 #define SNMP_ERR_READONLY   (0x4)
 #define SNMP_ERR_GENERR	    (0x5)
 
+/* v2historic and v2c */
 #define SNMP_ERR_NOACCESS		(6)
 #define SNMP_ERR_WRONGTYPE		(7)
 #define SNMP_ERR_WRONGLENGTH		(8)
@@ -66,6 +70,9 @@ SOFTWARE.
 #define SNMP_ERR_UNDOFAILED		(15)
 #define SNMP_ERR_AUTHORIZATIONERROR	(16)
 #define SNMP_ERR_NOTWRITABLE		(17)
+
+/* v2c */
+#define SNMP_ERR_INCONSISTENTNAME	(18)
 
 #define SNMP_TRAP_COLDSTART		(0x0)
 #define SNMP_TRAP_WARMSTART		(0x1)

@@ -512,13 +512,14 @@ snmp_build(session, pdu, packet, out_length)
     struct  packet_info pkt, *pi = &pkt;
     int length, packet_length, header_length;
 
-    if (session->version == SNMP_VERSION_1){
+    if (session->version == SNMP_VERSION_1 ||
+        session->version == SNMP_VERSION_2){
         cp = snmp_auth_build(packet, out_length, pdu->community,
                          &pdu->community_len, &pdu->version,
                          0);
         if (cp == NULL)
             return -1;
-    } else if (session->version == SNMP_VERSION_2){
+    } else if (session->version == SNMP_VERSION_2_HISTORIC){
         pi->version = session->version;
         pi->srcp = NULL;
         pi->dstp = NULL;
@@ -535,7 +536,8 @@ snmp_build(session, pdu, packet, out_length)
     authEnd = cp;
 
     h1 = cp;
-    if (session->version == SNMP_VERSION_1)
+    if (session->version == SNMP_VERSION_1 ||
+        session->version == SNMP_VERSION_2)
 	cp = asn_build_header(cp, out_length, (u_char)pdu->command, 0);
     else
 	cp = asn_build_sequence(cp, out_length, (u_char)pdu->command, 0);
@@ -615,7 +617,8 @@ snmp_build(session, pdu, packet, out_length)
     asn_build_sequence(h2, &length,
 		       (u_char)(ASN_SEQUENCE | ASN_CONSTRUCTOR),
                           (cp - h2) - 4);
-    if (session->version == SNMP_VERSION_1){
+    if (session->version == SNMP_VERSION_1 ||
+        session->version == SNMP_VERSION_2){
 	if ((cp - h1e) < 0x80)
 	    header_length = 2;
 	else if ((cp - h1e) <= 0xFF)
@@ -629,11 +632,12 @@ snmp_build(session, pdu, packet, out_length)
 	asn_build_sequence(h1, &length, (u_char)pdu->command, (cp - h1) - 4);
     }
     
-    if (session->version == SNMP_VERSION_1){
+    if (session->version == SNMP_VERSION_1 ||
+        session->version == SNMP_VERSION_2){
         snmp_auth_build(packet, &length, pdu->community,
                          &pdu->community_len, &pdu->version,
                          cp - authEnd);
-    } else if (session->version == SNMP_VERSION_2){
+    } else if (session->version == SNMP_VERSION_2_HISTORIC){
         snmp_secauth_build(packet, &length, pi, cp - authEnd,
                              pdu->srcParty, pdu->srcPartyLen,
                              pdu->dstParty, pdu->dstPartyLen,
@@ -676,7 +680,8 @@ snmp_parse(session, pdu, data, length)
     (void)asn_parse_header(data, &len, &type);
 
     if (type == (ASN_SEQUENCE | ASN_CONSTRUCTOR)){
-	if (session->version != SNMP_VERSION_1)
+	if (session->version != SNMP_VERSION_1 &&
+            session->version != SNMP_VERSION_2)
 	    return -1;
 	/* authenticates message and returns length if valid */
 	data = snmp_auth_parse(data, &length, community, &community_length,
@@ -694,7 +699,7 @@ snmp_parse(session, pdu, data, length)
 	}
 
     } else if (type == (ASN_CONTEXT | ASN_CONSTRUCTOR | 1)){
-	if (session->version != SNMP_VERSION_2)
+	if (session->version != SNMP_VERSION_2_HISTORIC)
 	    return -1;
 	pdu->srcParty = pdu->srcPartyBuf;
 	pdu->dstParty = pdu->dstPartyBuf;
@@ -914,7 +919,7 @@ snmp_send(session, pdu)
 	if (pdu->errindex == SNMP_DEFAULT_ERRINDEX)
 	    pdu->errindex = 0;
     } else if (pdu->command == INFORM_REQ_MSG || pdu->command == TRP2_REQ_MSG){
-	if (session->version != SNMP_VERSION_2){
+	if (session->version != SNMP_VERSION_2_HISTORIC){
 	    fprintf(stderr, "Cant send SNMPv2 PDU's in SNMPv1 session.\n");
 	    snmp_errno = SNMPERR_GENERR;/* Fix this XXXXX */
 	    return 0;
@@ -935,7 +940,7 @@ snmp_send(session, pdu)
 	}
 	    
     } else {
-	if (session->version == SNMP_VERSION_2){
+	if (session->version == SNMP_VERSION_2_HISTORIC){
 	    fprintf(stderr, "Cant send old Trap PDU in SNMPv2 session.\n");
 	    snmp_errno = SNMPERR_GENERR;/* Fix this XXXXX */
 	    return 0;
@@ -981,7 +986,7 @@ snmp_send(session, pdu)
 	if (pdu->version == SNMP_DEFAULT_VERSION)
 	    pdu->version = session->version;
 
-    if (pdu->version == SNMP_VERSION_2){
+    if (pdu->version == SNMP_VERSION_2_HISTORIC){
 	if (pdu->srcPartyLen == 0){
 	    if (session->srcPartyLen == 0){
 		fprintf(stderr, "No source party specified\n");
@@ -1015,7 +1020,8 @@ snmp_send(session, pdu)
 		    session->contextLen * sizeof(oid));
 	    pdu->contextLen = session->contextLen;
 	}
-    } else if (pdu->version == SNMP_VERSION_1){
+    } else if (pdu->version == SNMP_VERSION_1 ||
+               pdu->version == SNMP_VERSION_2){
 	if (pdu->community_len == 0){
 	    if (session->community_len == 0){
 		fprintf(stderr, "No community name specified\n");

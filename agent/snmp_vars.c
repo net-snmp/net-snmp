@@ -334,12 +334,13 @@ getStatPtr(name, namelen, type, len, acl, exact, write_method, pi,
 		    if (write_method)
 			*acl = cvp->acl;
 		    if (access &&
-                        (((pi->version == SNMP_VERSION_2) &&
+                        (((pi->version == SNMP_VERSION_2_HISTORIC) &&
                          !in_view(name, *namelen, pi->cxp->contextViewIndex)) ||
-                         ((pi->version == SNMP_VERSION_1) &&
+                         ((pi->version == SNMP_VERSION_1 ||
+                           pi->version == SNMP_VERSION_2) &&
                           (((cvp->acl & 0xAFFC) == SNMPV2ANY) ||
                             (cvp->acl & 0xAFFC) == SNMPV2AUTH)) ||
-                          ((pi->version == SNMP_VERSION_2) &&
+                          ((pi->version == SNMP_VERSION_2_HISTORIC) &&
                           ((cvp->acl & 0xAFFC) == SNMPV2AUTH) &&
                           (pi->srcp->partyAuthProtocol == NOAUTH ||
                            pi->dstp->partyAuthProtocol == NOAUTH)))) {
