@@ -1733,6 +1733,7 @@ read_config_read_memory(int type, char *readfrom,
 {
     int            *intp;
     unsigned int   *uintp;
+    char            buf[SPRINT_MAX_LEN];
 
     if (!dataptr || !readfrom)
         return NULL;
@@ -1742,9 +1743,9 @@ read_config_read_memory(int type, char *readfrom,
         if (*len < sizeof(int))
             return NULL;
         intp = (int *) dataptr;
-        *intp = atoi(readfrom);
+        readfrom = copy_nword(readfrom, buf, sizeof(buf));
+        *intp = atoi(buf);
         *len = sizeof(int);
-        readfrom = skip_token(readfrom);
         return readfrom;
 
     case ASN_TIMETICKS:
@@ -1752,7 +1753,8 @@ read_config_read_memory(int type, char *readfrom,
         if (*len < sizeof(unsigned int))
             return NULL;
         uintp = (unsigned int *) dataptr;
-        *uintp = strtoul(readfrom, NULL, 0);
+        readfrom = copy_nword(readfrom, buf, sizeof(buf));
+        *uintp = strtoul(buf, NULL, 0);
         *len = sizeof(unsigned int);
         readfrom = skip_token(readfrom);
         return readfrom;
