@@ -70,10 +70,14 @@ TESTING:
        LIBAGE      = 0
      
      Functionally, it should match the release number
-     LIBCURRENT.LIBAGE.LIBREVISION.  Do this now, so that when you run
+     (LIBCURRENT+1).LIBAGE.LIBREVISION.  Do this now, so that when you run
      make in a second to test things you can spot libtool yelling
      about improper numbering before you make the release and not
      after you've uploaded the tar ball :-/
+
+     When you've done this, run 'make clean; ./config.status; cd
+     snmplib; make' a minimum to check the version number in
+     snmplib/.libs/ to see if it matches the release number.
 
   1b) Change the configure script version number.  This isn't
       autochanged either.  The line to change looks like this:
