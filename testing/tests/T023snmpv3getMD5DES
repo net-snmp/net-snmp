@@ -4,6 +4,8 @@
 
 HEADER SNMPv3 get using initial/MD5DES of system.sysUpTime.0
 
+SKIPIFNOT USE_OPENSSL
+
 #
 # Begin test
 #

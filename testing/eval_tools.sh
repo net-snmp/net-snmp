@@ -84,6 +84,16 @@ FAILED: $*
 GRONIK
 }
 
+#------------------------------------ -o-
+#
+SKIPIFNOT() {
+	grep "define $1" $SNMP_BASEDIR/../../config.h
+	if [ $? != 0 ]; then
+	    echo "SKIPPED"
+	    exit 0;
+	fi
+}
+	
 
 #------------------------------------ -o- 
 #
