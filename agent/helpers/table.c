@@ -101,7 +101,7 @@ netsnmp_register_table(netsnmp_handler_registration *reginfo,
  *  netsnmp_request_info information.  The resulting information includes the
  *  index values and the column number.
  */
-inline netsnmp_table_request_info *
+NETSNMP_INLINE netsnmp_table_request_info *
 netsnmp_extract_table_info(netsnmp_request_info *request)
 {
     return (netsnmp_table_request_info *)

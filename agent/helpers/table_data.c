@@ -190,7 +190,7 @@ netsnmp_table_data_remove_and_delete_row(netsnmp_table_data *table,
 }
 
 /** swaps out origrow with newrow.  This does *not* delete/free anything! */
-inline void
+NETSNMP_INLINE void
 netsnmp_table_data_replace_row(netsnmp_table_data *table,
                                netsnmp_table_row *origrow,
                                netsnmp_table_row *newrow)

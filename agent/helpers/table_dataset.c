@@ -182,7 +182,7 @@ netsnmp_extract_table_data_set_column(netsnmp_request_info *request,
 /**
  * extracts a netsnmp_table_data_set pointer from a given request
  */
-inline netsnmp_table_data_set *
+NETSNMP_INLINE netsnmp_table_data_set *
 netsnmp_extract_table_data_set(netsnmp_request_info *request)
 {
     return (netsnmp_table_data_set *)
@@ -920,7 +920,7 @@ netsnmp_config_parse_add_row(const char *token, char *line)
 }
 
 /** adds an index to the table.  Call this repeatly for each index. */
-inline void
+NETSNMP_INLINE void
 netsnmp_table_dataset_add_index(netsnmp_table_data_set *table, u_char type)
 {
     if (!table)
@@ -929,7 +929,7 @@ netsnmp_table_dataset_add_index(netsnmp_table_data_set *table, u_char type)
 }
 
 /** adds a new row to a dataset table */
-inline void
+NETSNMP_INLINE void
 netsnmp_table_dataset_add_row(netsnmp_table_data_set *table,
                               netsnmp_table_row *row)
 {
@@ -939,7 +939,7 @@ netsnmp_table_dataset_add_row(netsnmp_table_data_set *table,
 }
 
 /** adds a new row to a dataset table */
-inline void
+NETSNMP_INLINE void
 netsnmp_table_dataset_replace_row(netsnmp_table_data_set *table,
                                   netsnmp_table_row *origrow,
                                   netsnmp_table_row *newrow)
@@ -952,7 +952,7 @@ netsnmp_table_dataset_replace_row(netsnmp_table_data_set *table,
 /** deletes a single dataset table data.
  *  returns the (possibly still good) next pointer of the deleted data object.
  */
-inline netsnmp_table_data_set_storage *
+NETSNMP_INLINE netsnmp_table_data_set_storage *
 netsnmp_table_dataset_delete_data(netsnmp_table_data_set_storage *data)
 {
     netsnmp_table_data_set_storage *nextPtr = NULL;
@@ -965,7 +965,7 @@ netsnmp_table_dataset_delete_data(netsnmp_table_data_set_storage *data)
 }
 
 /** deletes all the data from this node and beyond in the linked list */
-inline void
+NETSNMP_INLINE void
 netsnmp_table_dataset_delete_all_data(netsnmp_table_data_set_storage *data)
 {
 
@@ -975,7 +975,7 @@ netsnmp_table_dataset_delete_all_data(netsnmp_table_data_set_storage *data)
 }
 
 /** deletes all the data from this node and beyond in the linked list */
-inline void
+NETSNMP_INLINE void
 netsnmp_table_dataset_delete_row(netsnmp_table_row *row)
 {
     netsnmp_table_data_set_storage *data;
@@ -988,7 +988,7 @@ netsnmp_table_dataset_delete_row(netsnmp_table_row *row)
 }
 
 /** removes a row from the table, but doesn't delete/free anything */
-inline void
+NETSNMP_INLINE void
 netsnmp_table_dataset_remove_row(netsnmp_table_data_set *table,
                                  netsnmp_table_row *row)
 {
@@ -999,7 +999,7 @@ netsnmp_table_dataset_remove_row(netsnmp_table_data_set *table,
 }
 
 /** removes a row from the table and then deletes it (and all it's data) */
-inline void
+NETSNMP_INLINE void
 netsnmp_table_dataset_remove_and_delete_row(netsnmp_table_data_set *table,
                                             netsnmp_table_row *row)
 {
