@@ -113,6 +113,11 @@ free_request_data_set(request_info *request);
 inline void
 free_request_data_sets(request_info *request);
 
+void		      snmp_handler_free		    (mib_handler *);
+mib_handler	     *snmp_handler_dup		    (mib_handler *);
+handler_registration *snmp_handler_registration_dup (handler_registration *);
+void		      snmp_handler_registration_free(handler_registration *);
+
 #define REQUEST_IS_DELEGATED     1
 #define REQUEST_IS_NOT_DELEGATED 0
 void handler_mark_requests_as_delegated(request_info *, int);
