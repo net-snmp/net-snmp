@@ -1184,6 +1184,22 @@ netsnmp_wrap_up_request(netsnmp_agent_session *asp, int status)
 
         /*
          * if this is a GETBULK response we need to rearrange the varbinds 
+         *
+         * Bulkcache holds the values for the *repeating* varbinds (only),
+         *   but ordered "by column" - i.e. the repetitions for each
+         *   repeating varbind follow on immediately from one another,
+         *   rather than being interleaved, as required by the protocol.
+         *
+         * So we need to rearrange the varbind list so it's ordered "by row".
+         *
+         * In the following code chunk:
+         *     n            = # non-repeating varbinds
+         *     r            = # repeating varbinds
+         *     asp->vbcount = # varbinds in the incoming PDU
+         *         (So asp->vbcount = n+r)
+         *
+         *     repeats = Desired # of repetitions (of 'r' varbinds)
+         *
          */
         if (asp->pdu->command == SNMP_MSG_GETBULK) {
             int             repeats = asp->pdu->errindex;
@@ -1198,12 +1214,26 @@ netsnmp_wrap_up_request(netsnmp_agent_session *asp, int status)
                 r = 0;
             }
             
+            /*
+             * For each of the original repeating varbinds (except the last),
+             *  go through the block of results for that varbind,
+             *  and link each instance to the corresponding instance
+             *  in the next block.
+             */
             for (i = 0; i < r - 1; i++) {
                 for (j = 0; j < repeats; j++) {
                     asp->bulkcache[i * repeats + j]->next_variable =
                         asp->bulkcache[(i + 1) * repeats + j];
                 }
             }
+            /*
+             * For the last of the original repeating varbinds,
+             *  go through that block of results, and link each
+             *  instance to the *next* instance in the *first* block.
+             *
+             * The very last instance of this block is left untouched
+             *  since it (correctly) points to the end of the list.
+             */
             if (r > 0) {
                 for (j = 0; j < repeats - 1; j++) {
                     asp->bulkcache[(r - 1) * repeats + j]->next_variable =
