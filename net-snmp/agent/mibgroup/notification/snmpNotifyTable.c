@@ -617,6 +617,11 @@ write_snmpNotifyTag(int action,
         /*
          * memory reseveration, final preparation... 
          */
+        tmpvar = StorageTmp->snmpNotifyTag;
+        tmplen = StorageTmp->snmpNotifyTagLen;
+        StorageTmp->snmpNotifyTag = calloc(1, var_val_len + 1);
+        if (NULL == StorageTmp->snmpNotifyTag)
+            return SNMP_ERR_RESOURCEUNAVAILABLE;
         break;
 
 
@@ -628,10 +633,7 @@ write_snmpNotifyTag(int action,
 
 
     case ACTION:
-        tmpvar = StorageTmp->snmpNotifyTag;
-        tmplen = StorageTmp->snmpNotifyTagLen;
-        memdup((u_char **) & StorageTmp->snmpNotifyTag, var_val,
-               var_val_len);
+        memcpy(StorageTmp->snmpNotifyTag, var_val, var_val_len);
         StorageTmp->snmpNotifyTagLen = var_val_len;
         break;
 
@@ -873,11 +875,11 @@ write_snmpNotifyRowStatus(int action,
             if (StorageNew == NULL) {
                 return SNMP_ERR_RESOURCEUNAVAILABLE;
             }
-            memdup((u_char **) & (StorageNew->snmpNotifyName),
-                   vp->val.string, vp->val_len);
+            StorageNew->snmpNotifyName = calloc( 1, vp->val_len + 1 );
             if (StorageNew->snmpNotifyName == NULL) {
                 return SNMP_ERR_RESOURCEUNAVAILABLE;
             }
+            memcpy(StorageNew->snmpNotifyName, vp->val.string, vp->val_len);
             StorageNew->snmpNotifyNameLen = vp->val_len;
             vp = vp->next_variable;
 
