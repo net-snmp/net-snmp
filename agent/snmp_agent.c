@@ -1204,6 +1204,8 @@ netsnmp_wrap_up_request(netsnmp_agent_session *asp, int status)
         if (asp->pdu->command == SNMP_MSG_GETBULK) {
             int             repeats = asp->pdu->errindex;
             int             j;
+            int             all_eoMib;
+            netsnmp_variable_list *prev = NULL;
             
             if (asp->pdu->errstat < asp->vbcount) {
                 n = asp->pdu->errstat;
@@ -1221,7 +1223,24 @@ netsnmp_wrap_up_request(netsnmp_agent_session *asp, int status)
              *  in the next block.
              */
             for (i = 0; i < r - 1; i++) {
+                prev = NULL;
                 for (j = 0; j < repeats; j++) {
+                    /*
+                     *  If we don't have a valid name for a given repetition
+                     *   (and probably for all the ones that follow as well),
+                     *   extend the previous result to indicate 'endOfMibView'
+                     */
+                    if (asp->bulkcache[i * repeats + j]->name_length == 0
+                        && prev) {
+                        snmp_set_var_objid(
+                            asp->bulkcache[i * repeats + j],
+                            prev->name, prev->name_length);
+                        snmp_set_var_typed_value(
+                            asp->bulkcache[i * repeats + j],
+                            SNMP_ENDOFMIBVIEW, NULL, 0);
+                    }
+                    prev = asp->bulkcache[i * repeats + j];
+
                     asp->bulkcache[i * repeats + j]->next_variable =
                         asp->bulkcache[(i + 1) * repeats + j];
                 }
@@ -1235,9 +1254,71 @@ netsnmp_wrap_up_request(netsnmp_agent_session *asp, int status)
              *  since it (correctly) points to the end of the list.
              */
             if (r > 0) {
+                prev = NULL;
                 for (j = 0; j < repeats - 1; j++) {
+                    /*
+                     *  Fill in missing names with 'endOfMibView' as above...
+                     */
+                    if (asp->bulkcache[(r - 1) * repeats + j]->name_length == 0
+                        && prev) {
+                        snmp_set_var_objid(
+                            asp->bulkcache[(r - 1) * repeats + j],
+                            prev->name, prev->name_length);
+                        snmp_set_var_typed_value(
+                            asp->bulkcache[(r - 1) * repeats + j],
+                            SNMP_ENDOFMIBVIEW, NULL, 0);
+                    }
+                    prev = asp->bulkcache[(r - 1) * repeats + j];
                     asp->bulkcache[(r - 1) * repeats + j]->next_variable =
                         asp->bulkcache[j + 1];
+                }
+                /*
+                 *  ... Not forgetting the very last entry
+                 */
+                if (asp->bulkcache[r * repeats - 1]->name_length == 0
+                    && prev) {
+                    snmp_set_var_objid(
+                        asp->bulkcache[r * repeats - 1],
+                        prev->name, prev->name_length);
+                    snmp_set_var_typed_value(
+                        asp->bulkcache[r * repeats - 1],
+                        SNMP_ENDOFMIBVIEW, NULL, 0);
+                }
+            }
+
+            /*
+             * If we've got a full row of endOfMibViews, then we
+             *  can truncate the result varbind list after that.
+             *
+             * Look for endOfMibView exception values in the list of
+             *  repetitions for the first varbind, and check the 
+             *  corresponding instances for the other varbinds
+             *  (following the next_variable links).
+             *
+             * If they're all endOfMibView too, then we can terminate
+             *  the linked list there, and free any redundant varbinds.
+             */
+            all_eoMib = 0;
+            for (i = 0; i < repeats; i++) {
+                if (asp->bulkcache[i]->type == SNMP_ENDOFMIBVIEW) {
+                    all_eoMib = 1;
+                    for (j = 1, prev=asp->bulkcache[i];
+                         j < r;
+                         j++, prev=prev->next_variable) {
+                        if (prev->type != SNMP_ENDOFMIBVIEW) {
+                            all_eoMib = 0;
+                            break;	/* Found a real value */
+                        }
+                    }
+                    if (all_eoMib) {
+                        /*
+                         * This is indeed a full endOfMibView row.
+                         * Terminate the list here & free the rest.
+                         */
+                        snmp_free_varbind( prev->next_variable );
+                        prev->next_variable = NULL;
+                        break;
+                    }
                 }
             }
         }
