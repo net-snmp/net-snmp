@@ -8,6 +8,12 @@
 #include "utilities/execute.h"
 #include "struct.h"
 
+#ifndef USING_UCD_SNMP_EXTENSIBLE_MODULE
+#include "util_funcs.h"
+#include "mibdefs.h"
+#define SHELLCOMMAND 3
+#endif
+
 oid  ns_extend_oid[]    = { 1, 3, 6, 1, 4, 1, 8072, 1, 3, 2 };
 oid  extend_count_oid[] = { 1, 3, 6, 1, 4, 1, 8072, 1, 3, 2, 1 };
 oid  extend_config_oid[] = { 1, 3, 6, 1, 4, 1, 8072, 1, 3, 2, 2 };
@@ -23,6 +29,33 @@ typedef struct extend_registration_block_s {
     struct extend_registration_block_s *next;
 } extend_registration_block;
 extend_registration_block *ereg_head = NULL;
+
+
+#ifndef USING_UCD_SNMP_EXTENSIBLE_MODULE
+typedef struct netsnmp_old_extend_s {
+    int idx;
+    netsnmp_extend *exec_entry;
+    netsnmp_extend *efix_entry;
+} netsnmp_old_extend;
+
+int             num_compatability_entries = 0;
+int             max_compatability_entries = 50;
+netsnmp_old_extend *compatability_entries;
+
+WriteMethod fixExec2Error;
+FindVarMethod var_extensible_old;
+oid  old_extensible_variables_oid[] = { UCDAVIS_MIB, SHELLMIBNUM, 1 };
+struct variable2 old_extensible_variables[] = {
+    {MIBINDEX,     ASN_INTEGER,   RONLY, var_extensible_old, 1, {MIBINDEX}},
+    {ERRORNAME,    ASN_OCTET_STR, RONLY, var_extensible_old, 1, {ERRORNAME}},
+    {SHELLCOMMAND, ASN_OCTET_STR, RONLY, var_extensible_old, 1, {SHELLCOMMAND}},
+    {ERRORFLAG,    ASN_INTEGER,   RONLY, var_extensible_old, 1, {ERRORFLAG}},
+    {ERRORMSG,     ASN_OCTET_STR, RONLY, var_extensible_old, 1, {ERRORMSG}},
+    {ERRORFIX,     ASN_INTEGER,  RWRITE, var_extensible_old, 1, {ERRORFIX}},
+    {ERRORFIXCMD,  ASN_OCTET_STR, RONLY, var_extensible_old, 1, {ERRORFIXCMD}}
+};
+#endif
+
 
         /*************************
          *
@@ -140,6 +173,16 @@ void init_extend( void )
     snmpd_register_config_handler("sh2",   extend_parse_config, NULL, NULL);
     snmpd_register_config_handler("execFix2", extend_parse_config, NULL, NULL);
     (void)_register_extend( ns_extend_oid, OID_LENGTH(ns_extend_oid));
+
+#ifndef USING_UCD_SNMP_EXTENSIBLE_MODULE
+    snmpd_register_config_handler("exec", extend_parse_config, NULL, NULL);
+    snmpd_register_config_handler("sh",   extend_parse_config, NULL, NULL);
+    snmpd_register_config_handler("execFix", extend_parse_config, NULL, NULL);
+    compatability_entries = calloc( max_compatability_entries,
+                                    sizeof(netsnmp_old_extend));
+    REGISTER_MIB("ucd-extensible", old_extensible_variables,
+                 variable2, old_extensible_variables_oid);
+#endif
 }
 
         /*************************
@@ -330,6 +373,7 @@ extend_parse_config(const char *token, char *cptr)
     size_t oid_len;
     extend_registration_block *eptr;
     int  flags;
+    int  i;
 
     cptr = copy_nword(cptr, exec_name,    sizeof(exec_name));
     if ( *exec_name == '.' ) {
@@ -343,9 +387,11 @@ extend_parse_config(const char *token, char *cptr)
     cptr = copy_nword(cptr, exec_command, sizeof(exec_command));
     /* XXX - check 'exec_command' exists & is executable */
     flags = (NS_EXTEND_FLAGS_ACTIVE | NS_EXTEND_FLAGS_CONFIG);
-    if (!strcmp( token, "sh2" ))
+    if (!strcmp( token, "sh"  ) ||
+        !strcmp( token, "sh2" ))
         flags |= NS_EXTEND_FLAGS_SHELL;
-    if (!strcmp( token, "execFix2" )) {
+    if (!strcmp( token, "execFix"  ) ||
+        !strcmp( token, "execFix2" )) {
         strcat( exec_name, "Fix" );
         flags |= NS_EXTEND_FLAGS_WRITEABLE;
         /* XXX - Check for shell... */
@@ -358,6 +404,32 @@ extend_parse_config(const char *token, char *cptr)
         if (cptr)
             extension->args = strdup( cptr );
     }
+
+#ifndef USING_UCD_SNMP_EXTENSIBLE_MODULE
+    /*
+     *  Compatability with the UCD extTable
+     */
+    if (!strcmp( token, "execFix"  )) {
+        for ( i=0; i < num_compatability_entries; i++ ) {
+            if (!strcmp( exec_name,
+                    compatability_entries[i].exec_entry->token))
+                break;
+        }
+        if ( i == num_compatability_entries )
+            config_perror("No matching exec entry" );
+        else
+            compatability_entries[ i ].efix_entry = extension;
+            
+    } else if (!strcmp( token, "sh"   ) ||
+               !strcmp( token, "exec" )) {
+        if ( num_compatability_entries == max_compatability_entries )
+            /* XXX - should really use dynamic allocation */
+            config_perror("No further UCD-compatible entries" );
+        else
+            compatability_entries[
+                num_compatability_entries++ ].exec_entry = extension;
+    }
+#endif
 }
 
         /*************************
@@ -1177,3 +1249,110 @@ handle_nsExtendOutput2Table(netsnmp_mib_handler          *handler,
     }
     return SNMP_ERR_NOERROR;
 }
+
+#ifndef USING_UCD_SNMP_EXTENSIBLE_MODULE
+        /*************************
+         *
+         *  Compatability with the UCD extTable
+         *
+         *************************/
+
+u_char *
+var_extensible_old(struct variable * vp,
+                     oid * name,
+                     size_t * length,
+                     int exact,
+                     size_t * var_len, WriteMethod ** write_method)
+{
+    netsnmp_old_extend *exten = NULL;
+    static long     long_ret;
+    int idx;
+
+    if (header_simple_table
+        (vp, name, length, exact, var_len, write_method, num_compatability_entries))
+        return (NULL);
+
+    idx = name[*length-1] -1;
+    exten = &compatability_entries[ idx ];
+    if (exten) {
+        switch (vp->magic) {
+        case MIBINDEX:
+            long_ret = name[*length - 1];
+            return ((u_char *) (&long_ret));
+        case ERRORNAME:        /* name defined in config file */
+            *var_len = strlen(exten->exec_entry->token);
+            return ((u_char *) (exten->exec_entry->token));
+        case SHELLCOMMAND:
+            *var_len = strlen(exten->exec_entry->command);
+            return ((u_char *) (exten->exec_entry->command));
+        case ERRORFLAG:        /* return code from the process */
+            netsnmp_cache_check_and_reload( exten->exec_entry->cache );
+            long_ret = exten->exec_entry->result;
+            return ((u_char *) (&long_ret));
+        case ERRORMSG:         /* first line of text returned from the process */
+            netsnmp_cache_check_and_reload( exten->exec_entry->cache );
+            if (exten->exec_entry->lines) {
+                *var_len = (exten->exec_entry->lines[1])-
+                           (exten->exec_entry->output) -1;
+            } else if (exten->exec_entry->output) {
+                *var_len = strlen(exten->exec_entry->output);
+            } else {
+                *var_len = 0;
+            }
+            return ((u_char *) (exten->exec_entry->output));
+        case ERRORFIX:
+            *write_method = fixExec2Error;
+            long_return = 0;
+            return ((u_char *) &long_return);
+
+        case ERRORFIXCMD:
+            if (exten->efix_entry) {
+                *var_len = strlen(exten->efix_entry->command);
+                return ((u_char *) exten->efix_entry->command);
+            } else {
+                *var_len = 0;
+                return ((u_char *) &long_return);  /* Just needs to be non-null! */
+            }
+        }
+        return NULL;
+    }
+    return NULL;
+}
+
+
+int
+fixExec2Error(int action,
+             u_char * var_val,
+             u_char var_val_type,
+             size_t var_val_len,
+             u_char * statP, oid * name, size_t name_len)
+{
+    netsnmp_old_extend *exten = NULL;
+    int idx;
+
+    idx = name[name_len-1] -1;
+    exten = &compatability_entries[ idx ];
+
+    switch (action) {
+    case MODE_SET_RESERVE1:
+        if (var_val_type != ASN_INTEGER) {
+            snmp_log(LOG_ERR, "Wrong type != int\n");
+            return SNMP_ERR_WRONGTYPE;
+        }
+        idx = *((long *) var_val);
+        if (idx != 1) {
+            snmp_log(LOG_ERR, "Wrong value != 1\n");
+            return SNMP_ERR_WRONGVALUE;
+        }
+        if (!exten || !exten->efix_entry) {
+            snmp_log(LOG_ERR, "No command to run\n");
+            return SNMP_ERR_GENERR;
+        }
+        return SNMP_ERR_NOERROR;
+
+    case MODE_SET_COMMIT:
+        netsnmp_cache_check_and_reload( exten->efix_entry->cache );
+    }
+    return SNMP_ERR_NOERROR;
+}
+#endif
