@@ -122,17 +122,7 @@ $vars{'oid'} = $oid;
 # loop through mib nodes, remembering stuff.
 setup_data($mibnode);
 
-# process .conf file
-$fh = new IO::File;
-if (-f "$configfile") {
-    $fh->open("$configfile");
-} elsif(-f "/usr/local/share/snmp/$configfile") {
-    $fh->open("/usr/local/share/snmp/$configfile");
-} else {
-    print STDERR "Can't find a configuration file called $configfile\n";
-    print STDERR "I looked in . and /usr/local/share/snmp\n";
-exit;
-}
+$fh = open_conf($configfile);
 process();
 $fh->close;
 
@@ -257,6 +247,19 @@ sub process {
 	    $out->open(">$spec") || die "failed to open $spec";
 	    print STDERR "writing to $spec\n" if (!$quiet);
 	    $written{$spec} = '1';
+	} elsif (/\@run (.*)\@/) {
+	    my $oldfh = $fh;
+	    my $oldout = $out;
+	    my %oldvars = %vars;
+	    # keep old copy of @vars and just build on it.
+	    $fh = open_conf($1);
+	    $out = undef;
+	    process();
+	    $fh->close();
+	    $fh = $oldfh;
+	    $out = $oldout;
+	    # don't keep values in replaced vars.  Revert to ours.
+	    %vars = %oldvars;
 	} elsif (/\@end\@/) {
 	    return;
 	} elsif (/\@if\s+([^@]*)\@/) {
@@ -417,4 +420,20 @@ sub min {
 sub max {
     return $_[0] if ($_[0] > $_[1]);
     return $_[1];
+}
+
+sub open_conf {
+    my $configfile = shift;
+# process .conf file
+    my $fh = new IO::File;
+    if (-f "$configfile") {
+	$fh->open("$configfile");
+    } elsif (-f "/usr/local/share/snmp/$configfile") {
+	$fh->open("/usr/local/share/snmp/$configfile");
+    } else {
+	print STDERR "Can't find a configuration file called $configfile\n";
+	print STDERR "I looked in . and /usr/local/share/snmp\n";
+	exit;
+    }
+    return $fh;
 }
