@@ -1,18 +1,12 @@
-#include <stdio.h>
-#include <sys/types.h>
 #include <signal.h>
 #include <nlist.h>
 #include <machine/param.h>
 #include <sys/vmmeter.h>
-#include "../../snmplib/asn1.h"
-#include "../../snmplib/snmp_impl.h"
-#include "../snmp_vars.h"
-#include "../var_struct.h"
-#define u_char unsigned char
-#define u_short unsigned short
 
 #define SNMP_ERR_NOERROR (0x0)
 
+#include "mibincl.h"
+#include "mibdefs.h"
 #include "wes.h"
 
 #define TRAPAGENT 128.120.57.92
