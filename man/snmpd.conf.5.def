@@ -27,7 +27,7 @@ to get you started.
 .SH EXTENSIBLE-MIB
 .PP
 The Net-SNMP SNMP agent reports much of its information through
-queries to the EXTENSIBLEDOTMIB section of the mib tree.  Every mib in
+queries to the EXTENSIBLEDOTMIB section of the MIB tree.  Every MIB in
 this section has the following table entries in it.
 .IP ".MIBINDEX -- index"
 This is the table's index numbers for each of the DIRECTIVES listed below.
@@ -52,7 +52,7 @@ be executed is configured in the config.h file at compile time.
 Checks to see if processes called NAME are running on the agent
 machine.  An error flag (1) and a description message are then passed
 to the EXTENSIBLEDOTMIB.PROCMIBNUM.1.ERRORFLAG and
-EXTENSIBLEDOTMIB.PROCMIBNUM.1.ERRORMSG mib columns (respectively) if
+EXTENSIBLEDOTMIB.PROCMIBNUM.1.ERRORMSG MIB columns (respectively) if
 the NAME'd program is not found in the process table as reported by
 PSCMD.
 .IP
@@ -79,8 +79,8 @@ STDOUT output beyond the first line is silently truncated.
 .IP
 If MIBNUM is specified, it acts as above but returns the exit status
 to MIBNUM.ERRORFLAG.0 and the entire STDOUT output to the table
-MIBNUM.ERRORMSG in a mib table.  In this case, the MIBNUM.ERRORMSG mib
-contains the entire STDOUT output, one mib table entry per line of
+MIBNUM.ERRORMSG in a MIB table.  In this case, the MIBNUM.ERRORMSG mib
+contains the entire STDOUT output, one MIB table entry per line of
 output (ie, the first line is output as MIBNUM.ERRORMSG.1, the second
 at MIBNUM.ERRORMSG.2, etc...).
 .RS
@@ -108,7 +108,7 @@ Checks the named disks mounted at PATH for available disk space.  If
 the disk space is less than MINSPACE (kB) if specified or less than
 MINPERCENT (%) if a % sign is specified, or DEFDISKMINIMUMSPACE (kB)
 if not specified, the associated entry in the
-EXTENSIBLEDOTMIB.DISKMIBNUM.1.ERRORFLAG mib table will be set to (1) and
+EXTENSIBLEDOTMIB.DISKMIBNUM.1.ERRORFLAG MIB table will be set to (1) and
 a descriptive error message will be returned to queries of
 EXTENSIBLEDOTMIB.DISKMIBNUM.1.ERRORMSG.
 .IP "load MAX1"
@@ -132,7 +132,7 @@ Any errors in obtaining the above information are reported via the
 EXTENSIBLEDOTMIB.ERRORMIBNUM.1.ERRORFLAG flag and the
 EXTENSIBLEDOTMIB.ERRORMIBNUM.1.ERRORMSG text-string description.
 .SH AGENTX SUB-AGENTS
-To enable AgentX support in the snmp master agent, put the following
+To enable AgentX support in the SNMP master agent, put the following
 line in your snmpd.conf file:
 .IP "master agentx"
 Note that this support is still experimental, and should not be used
@@ -287,7 +287,7 @@ described above.
 Warning: the minimum pass phrase length is 8 characters.
 .IP
 SNMPv3 users can be created at runtime using the
-.I snmpusm
+.I snmpusm(1)
 command.
 .IP
 .SH SETTING SYSTEM INFORMATION
@@ -421,7 +421,9 @@ proxied on to HOST instead.  Optionally, relocate the local OID tree
 to the new location at the REMOTEOID.  To authenticate to HOST you
 should use the appropriate set of
 .I "SNMPCMD ARGS."
-See the snmpcmd man page for details.
+See the
+.I snmpcmd(1)
+manual page for details.
 .IP
 Examples:
 .IP
@@ -440,7 +442,7 @@ These call lines match to SNMP get and getnext requests.  It is
 expected that the EXEC program will take the arguments passed to it
 and return the appropriate response through it's stdout.  
 .IP
-The first line of stdout should be the mib OID of the returning value.
+The first line of stdout should be the MIB OID of the returning value.
 The second line should be the TYPE of value returned, where TYPE is
 one of the text strings:
 .B string, integer, unsigned, objectid, timeticks, ipaddress, counter, 
@@ -463,8 +465,8 @@ return the following 3 lines:
 .IP
 To indicate that the script is unable to comply with the request due
 to an end-of-mib condition or an invalid request, simple exit and
-return no output to stdout at all.  A snmp error will be generated
-corresponding to the SNMP NO-SUCH-NAME response.
+return no output to stdout at all.  An SNMP error will be generated
+corresponding to the SNMP noSuchName response.
 .IP "EXEC -s MIBOID TYPE VALUE"
 .IP 
 For SNMP set requests, the above call method is used.  The TYPE passed
@@ -504,8 +506,8 @@ Upon initialization, EXEC is passed the string "PING\\n" in stdin,
 and it should respond by printing "PONG\\n" to stdout.
 .IP
 For get and getnext requests, EXEC program is passed two lines,
-the command (get or getnext) and the mib OID.  It should return
-three lines, the mib OID, the TYPE of value returned,
+the command (get or getnext) and the MIB OID.  It should return
+three lines, the MIB OID, the TYPE of value returned,
 the VALUE corresponding with the returned TYPE.
 .IP
 For example, if the value for .1.3.6.1.4.100 was requested, the following
@@ -550,7 +552,7 @@ A "kill -HUP" signal sent to the snmpd agent process.
 .SH "FILES"
 DATADIR/snmp/snmpd.conf
 .SH "SEE ALSO"
-snmpconf(1), snmp.conf(5), snmp_config(5), snmpd(1), EXAMPLE.conf, read_config(3).
+snmpconf(1), snmpusm(1), snmp.conf(5), snmp_config(5), snmpd(1), EXAMPLE.conf, read_config(3).
 .\" Local Variables:
 .\"  mode: nroff
 .\" End:

@@ -1,7 +1,7 @@
 .TH SNMPGET 1 "08 Feb 2002" VVERSIONINFO "Net-SNMP"
 .UC 4
 .SH NAME
-snmpconf - creates and modifies snmp configuration files
+snmpconf - creates and modifies SNMP configuration files
 .SH SYNOPSIS
 .B snmpconf
 [OPTIONS] [fileToCreate]
