@@ -2,7 +2,7 @@
  * keytools.c
  */
 
-#include <config.h>
+#include <net-snmp/net-snmp-config.h>
 
 #include <stdio.h>
 #include <sys/types.h>

@@ -1,7 +1,8 @@
 top_builddir=../..
 
-CPPFLAGS=-I. -I.. -I../.. -I$(srcdir) -I$(srcdir)/.. -I$(srcdir)/../mibgroup \
-	-I$(srcdir)/../.. -I$(srcdir)/../../snmplib @CPPFLAGS@ $(LIB_CFLAGS)
+CPPFLAGS=-I. -I ../../include -I.. -I../.. -I$(srcdir) -I$(srcdir)/..  \
+	-I$(srcdir)/../mibgroup -I$(srcdir)/../.. -I$(srcdir)/../../snmplib \
+	@CPPFLAGS@ $(LIB_CFLAGS)
 
 OBJS =  all_helpers.o \
 	multiplexer.o \

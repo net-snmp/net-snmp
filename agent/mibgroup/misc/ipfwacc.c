@@ -6,7 +6,7 @@
  * Author: Cristian.Estan@net.utcluj.ro                                     *
  ***************************************************************************/
 
-#include <config.h>
+#include <net-snmp/net-snmp-config.h>
 
 #if TIME_WITH_SYS_TIME
 # include <sys/time.h>

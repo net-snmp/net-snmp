@@ -25,7 +25,7 @@ ARISING OUT OF OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS
 SOFTWARE.
 ******************************************************************/
 
-#include <config.h>
+#include <net-snmp/net-snmp-config.h>
 
 #ifdef KINETICS
 #include "gw.h"

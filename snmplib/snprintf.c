@@ -51,7 +51,7 @@
  *
  **************************************************************/
 
-#include "config.h"
+#include <net-snmp/net-snmp-config.h>
 
 #if !defined(HAVE_SNPRINTF) || !defined(HAVE_VSNPRINTF)
 

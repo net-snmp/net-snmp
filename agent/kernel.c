@@ -3,7 +3,7 @@
  *  13 Jun 91  wsak (wk0x@andrew) added mips support
  */
 
-#include <config.h>
+#include <net-snmp/net-snmp-config.h>
 
 #ifdef CAN_USE_NLIST
 

@@ -6,7 +6,7 @@
    last changed 2/2/99.
 */
 
-#include <config.h>
+#include <net-snmp/net-snmp-config.h>
 #if HAVE_STRING_H
 #include <string.h>
 #else

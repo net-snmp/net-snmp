@@ -3,7 +3,7 @@
  *
  * $Id$
  */
-#include <config.h>
+#include <net-snmp/net-snmp-config.h>
 #include <sys/types.h>
 #include <stdlib.h>
 

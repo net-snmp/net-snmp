@@ -7,7 +7,7 @@
 
 #define IN_SNMP_VARS_C
 
-#include <config.h>
+#include <net-snmp/net-snmp-config.h>
 #include <signal.h>
 #if HAVE_STRING_H
 #include <string.h>

@@ -1,4 +1,4 @@
-#include <config.h>
+#include <net-snmp/net-snmp-config.h>
 
 /* needed by util_funcs.h */
 #if TIME_WITH_SYS_TIME

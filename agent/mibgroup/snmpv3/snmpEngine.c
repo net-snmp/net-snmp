@@ -1,6 +1,6 @@
 /* snmpEngine.c: implement's the SNMP-FRAMEWORK-MIB. */
 
-#include <config.h>
+#include <net-snmp/net-snmp-config.h>
 
 #if HAVE_WINSOCK_H
 #include <winsock.h>

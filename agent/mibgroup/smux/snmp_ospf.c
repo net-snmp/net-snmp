@@ -4,7 +4,7 @@
  * Smux module authored by Rohit Dube.
  */
 
-#include <config.h>
+#include <net-snmp/net-snmp-config.h>
 
 #include <stdio.h>
 #if HAVE_STDLIB_H

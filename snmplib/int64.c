@@ -5,7 +5,7 @@
 *
 */
 
-#include <config.h>
+#include <net-snmp/net-snmp-config.h>
 #include <sys/types.h>
 #include <stdio.h>
 #include <stdlib.h>

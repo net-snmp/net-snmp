@@ -20,7 +20,7 @@
  * FIX	This is slow...
  */
 
-#include <config.h>
+#include <net-snmp/net-snmp-config.h>
 
 #include <stdio.h>
 #include <ctype.h>

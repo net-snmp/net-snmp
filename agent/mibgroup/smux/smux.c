@@ -3,7 +3,7 @@
  * Rewritten by Nick Amato <naamato@merit.net>.
  */
 
-#include <config.h>
+#include <net-snmp/net-snmp-config.h>
 #include <sys/types.h>
 #include <ctype.h>
 

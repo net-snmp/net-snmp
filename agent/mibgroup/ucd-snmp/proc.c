@@ -1,4 +1,4 @@
-#include <config.h>
+#include <net-snmp/net-snmp-config.h>
 
 #ifdef solaris2
 #define _KMEMUSER	/* Needed by <sys/user.h> */

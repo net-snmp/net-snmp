@@ -2,7 +2,7 @@
  *  Dynamic Loadable Agent Modules MIB (UCD-DLMOD-MIB) - dlmod.c
  *
  */
-#include <config.h>
+#include <net-snmp/net-snmp-config.h>
 
 #if HAVE_STDLIB_H
 #include <stdlib.h>

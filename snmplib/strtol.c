@@ -31,7 +31,7 @@
  * SUCH DAMAGE.
  */
 
-#include "config.h"
+#include <net-snmp/net-snmp-config.h>
 
 #if defined(LIBC_SCCS) && !defined(lint)
 static char sccsid[] = "@(#)strtol.c    5.4 (Berkeley) 2/23/91";

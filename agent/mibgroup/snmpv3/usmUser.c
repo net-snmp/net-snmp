@@ -2,7 +2,7 @@
  * usmUser.c
  */
 
-#include <config.h>
+#include <net-snmp/net-snmp-config.h>
 #include <stdlib.h>
 
 #if HAVE_STRING_H

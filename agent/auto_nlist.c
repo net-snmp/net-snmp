@@ -1,4 +1,4 @@
-#include <config.h>
+#include <net-snmp/net-snmp-config.h>
 
 #ifdef CAN_USE_NLIST
 #if HAVE_STRING_H

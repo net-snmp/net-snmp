@@ -1,7 +1,7 @@
 /*
  *  AgentX Administrative request handling
  */
-#include "config.h"
+#include <net-snmp/net-snmp-config.h>
 
 #include <sys/types.h>
 #ifdef HAVE_STRING_H

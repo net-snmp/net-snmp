@@ -35,7 +35,7 @@ PERFORMANCE OF THIS SOFTWARE.
 /* XXXWWW merge todo: incl/excl range changes in differences between
    1.194 and 1.199 */
 
-#include <config.h>
+#include <net-snmp/net-snmp-config.h>
 #if HAVE_STRING_H
 #include <string.h>
 #endif

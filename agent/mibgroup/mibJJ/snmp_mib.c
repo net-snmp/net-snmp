@@ -3,7 +3,7 @@
  *
  */
 
-#include <config.h>
+#include <net-snmp/net-snmp-config.h>
 #include <sys/types.h>
 #if HAVE_STRING_H
 #include <string.h>
