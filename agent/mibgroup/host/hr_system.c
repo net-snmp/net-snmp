@@ -243,9 +243,12 @@ var_hrsys(struct variable * vp,
         return (u_char *) & long_return;
     case HRSYS_LOAD_PARAM:
 #ifdef linux
-        fp = fopen("/proc/cmdline", "r");
-        fgets(string, sizeof(string), fp);
-        fclose(fp);
+        if((fp = fopen("/proc/cmdline", "r")) != NULL) {
+            fgets(string, sizeof(string), fp);
+            fclose(fp);
+        } else {
+            return NULL;
+        }
 #elif defined(solaris2)
         *write_method=set_solaris_bootcommand_parameter;
         if ( get_solaris_eeprom_parameter("boot-command",bootparam) ) {
