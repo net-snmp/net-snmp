@@ -191,6 +191,23 @@ AC_CHECK_FUNCS(kvm_openfiles)
 dnl BSDi2 functions differ
 AC_CHECK_FUNCS(statvfs statfs)
 
+dnl check if compiler accepts void pointers
+AC_CACHE_CHECK(if $CC allows pointers to void,ac_cv_PTR_TO_VOID,
+[
+AC_TRY_COMPILE([
+void generic_function(a)
+  void *a;
+{
+}
+],[
+char *cp;
+generic_function((void *) cp);
+], ac_cv_PTR_TO_VOID=yes, ac_cv_PTR_TO_VOID=no)])
+
+if test "x$ac_cv_PTR_TO_VOID" = "xno"; then
+  AC_DEFINE(void,char)
+fi
+
 dnl checking for 4.3 vs 4.4 rtentry.
 AC_CACHE_CHECK(type of rtentry structure,ac_cv_RTENTRY_TYPE,
 [
