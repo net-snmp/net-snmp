@@ -1347,7 +1347,7 @@
 ./snmpnetstat/if.lo: ../include/net-snmp/system/sysv.h
 ./snmpnetstat/if.lo: ../include/net-snmp/system/generic.h
 ./snmpnetstat/if.lo: ../include/net-snmp/machine/generic.h
-./snmpnetstat/if.lo:  ./snmpnetstat/main.h
+./snmpnetstat/if.lo: ./snmpnetstat/main.h
 ./snmpnetstat/if.lo: ../include/net-snmp/net-snmp-includes.h
 ./snmpnetstat/if.lo: ../include/net-snmp/definitions.h
 ./snmpnetstat/if.lo: ../include/net-snmp/types.h
@@ -1419,7 +1419,7 @@
 ./snmpnetstat/inet.lo: ../include/net-snmp/system/sysv.h
 ./snmpnetstat/inet.lo: ../include/net-snmp/system/generic.h
 ./snmpnetstat/inet.lo: ../include/net-snmp/machine/generic.h
-./snmpnetstat/inet.lo:  ./snmpnetstat/main.h
+./snmpnetstat/inet.lo: ./snmpnetstat/main.h
 ./snmpnetstat/inet.lo: ../include/net-snmp/net-snmp-includes.h
 ./snmpnetstat/inet.lo: ../include/net-snmp/definitions.h
 ./snmpnetstat/inet.lo: ../include/net-snmp/types.h
@@ -1552,7 +1552,7 @@
 ./snmpnetstat/route.lo: ../include/net-snmp/system/sysv.h
 ./snmpnetstat/route.lo: ../include/net-snmp/system/generic.h
 ./snmpnetstat/route.lo: ../include/net-snmp/machine/generic.h
-./snmpnetstat/route.lo: ./snmpnetstat/main.h
+./snmpnetstat/route.lo:  ./snmpnetstat/main.h
 ./snmpnetstat/route.lo: ../include/net-snmp/net-snmp-includes.h
 ./snmpnetstat/route.lo: ../include/net-snmp/definitions.h
 ./snmpnetstat/route.lo: ../include/net-snmp/types.h

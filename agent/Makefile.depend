@@ -592,7 +592,8 @@
 ./agent_trap.lo: ../include/net-snmp/system/sysv.h
 ./agent_trap.lo: ../include/net-snmp/system/generic.h
 ./agent_trap.lo: ../include/net-snmp/machine/generic.h 
-./agent_trap.lo: ../include/net-snmp/utilities.h ../include/net-snmp/types.h
+./agent_trap.lo:  ../include/net-snmp/utilities.h
+./agent_trap.lo: ../include/net-snmp/types.h 
 ./agent_trap.lo: ../include/net-snmp/definitions.h
 ./agent_trap.lo: ../include/net-snmp/library/snmp_api.h
 ./agent_trap.lo: ../include/net-snmp/library/asn1.h

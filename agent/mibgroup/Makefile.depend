@@ -3648,7 +3648,7 @@
 ./host/hr_swinst.lo: ../../include/net-snmp/system/sysv.h
 ./host/hr_swinst.lo: ../../include/net-snmp/system/generic.h
 ./host/hr_swinst.lo: ../../include/net-snmp/machine/generic.h
-./host/hr_swinst.lo:  host_res.h
+./host/hr_swinst.lo: host_res.h 
 ./host/hr_swinst.lo: ../../include/net-snmp/net-snmp-includes.h
 ./host/hr_swinst.lo: ../../include/net-snmp/definitions.h
 ./host/hr_swinst.lo: ../../include/net-snmp/types.h
@@ -3898,7 +3898,7 @@
 ./mibII/at.lo: ../../include/net-snmp/library/snmp-tc.h
 ./mibII/at.lo: ../../include/net-snmp/utilities.h
 ./mibII/at.lo: ../../include/net-snmp/library/snmp_client.h
-./mibII/at.lo:  ../../include/net-snmp/library/system.h
+./mibII/at.lo: ../../include/net-snmp/library/system.h
 ./mibII/at.lo: ../../include/net-snmp/library/tools.h
 ./mibII/at.lo: ../../include/net-snmp/library/int64.h
 ./mibII/at.lo: ../../include/net-snmp/library/mt_support.h
@@ -4830,7 +4830,7 @@
 ./mibII/kernel_linux.lo: ../../include/net-snmp/agent/table_iterator.h
 ./mibII/kernel_linux.lo: ../../include/net-snmp/agent/mib_module_config.h
 ./mibII/kernel_linux.lo: util_funcs.h struct.h 
-./mibII/kernel_linux.lo: ./mibII/kernel_linux.h
+./mibII/kernel_linux.lo:  ./mibII/kernel_linux.h
 ./mibII/mta_sendmail.lo: ../../include/net-snmp/net-snmp-config.h
 ./mibII/mta_sendmail.lo: ../../include/net-snmp/system/linux.h
 ./mibII/mta_sendmail.lo: ../../include/net-snmp/system/sysv.h

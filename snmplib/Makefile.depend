@@ -1143,7 +1143,7 @@
 ./snmp_client.lo: ../include/net-snmp/system/sysv.h
 ./snmp_client.lo: ../include/net-snmp/system/generic.h
 ./snmp_client.lo: ../include/net-snmp/machine/generic.h 
-./snmp_client.lo: ../include/net-snmp/types.h
+./snmp_client.lo:  ../include/net-snmp/types.h
 ./snmp_client.lo: ../include/net-snmp/definitions.h
 ./snmp_client.lo: ../include/net-snmp/library/snmp_api.h
 ./snmp_client.lo: ../include/net-snmp/library/asn1.h
@@ -1629,8 +1629,7 @@
 ./snmpv3.lo: ../include/net-snmp/system/sysv.h
 ./snmpv3.lo: ../include/net-snmp/system/generic.h
 ./snmpv3.lo: ../include/net-snmp/machine/generic.h 
-./snmpv3.lo:  ../include/net-snmp/types.h
-./snmpv3.lo: ../include/net-snmp/definitions.h
+./snmpv3.lo: ../include/net-snmp/types.h ../include/net-snmp/definitions.h
 ./snmpv3.lo: ../include/net-snmp/library/snmp_api.h
 ./snmpv3.lo: ../include/net-snmp/library/asn1.h
 ./snmpv3.lo: ../include/net-snmp/library/snmp_impl.h
@@ -1697,8 +1696,7 @@
 ./system.lo: ../include/net-snmp/system/sysv.h
 ./system.lo: ../include/net-snmp/system/generic.h
 ./system.lo: ../include/net-snmp/machine/generic.h 
-./system.lo:  ../include/net-snmp/types.h
-./system.lo: ../include/net-snmp/definitions.h
+./system.lo: ../include/net-snmp/types.h ../include/net-snmp/definitions.h
 ./system.lo: ../include/net-snmp/library/snmp_api.h
 ./system.lo: ../include/net-snmp/library/asn1.h
 ./system.lo: ../include/net-snmp/library/snmp_impl.h
