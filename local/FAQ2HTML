@@ -45,6 +45,8 @@ while(<>) {
     if (defined($xlate{$y})) {
 	print O "<a name=\"$xlate{$y}\">\n";
     }
+    if ( /</ ) { $_ =~ s/</&lt;/g; }
+    if ( />/ ) { $_ =~ s/>/&gt;/g; }
     print O $_;
 }
 
