@@ -1243,9 +1243,30 @@ init_mib (void)
 	ds_set_boolean(DS_LIBRARY_ID, DS_LIB_PRINT_SUFFIX_ONLY, 1);
 
     Mib = tree_head;          /* Backwards compatibility */
-    tree_top = (struct tree *)malloc(sizeof(struct tree));
-    memset(tree_top, 0, sizeof(struct tree));
-    tree_top->child_list = tree_head;
+    tree_top = (struct tree *)calloc(1,sizeof(struct tree));
+    /* XX error check ? */
+    if (tree_top) {
+        struct tree* tp;
+        tree_top->child_list = tree_head;
+
+        /* link top level children (iso, ccitt, etc.)
+         * so that unlink_tree always works.
+         */
+        for ( tp=tree_head; tp; tp=tp->next_peer )
+            tp->parent = tree_top;
+    }
+}
+
+void
+shutdown_mib (void)
+{
+    unload_all_mibs();
+    free(tree_top); tree_top = NULL;
+    tree_head = NULL;
+    Mib = NULL;
+    free(Prefix); Prefix = NULL;
+    ds_shutdown();
+    unregister_all_config_handlers();
 }
 
 void

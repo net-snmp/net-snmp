@@ -91,6 +91,7 @@ SOFTWARE.
 #include "snmp_debug.h"
 #include "snmp_logging.h"
 #include "default_store.h"
+#include "read_config.h"
 #include "tools.h"
 
 /*
@@ -678,6 +679,8 @@ static void unlink_tree(struct tree *tp)
 	tp->label, tp->parent->label);
     else if (otp) otp->next_peer = ntp->next_peer;
     else tp->parent->child_list = tp->next_peer;
+
+    if (tree_head == tp) tree_head = tp->next_peer;
 }
 
 static void
@@ -3231,8 +3234,7 @@ read_module_internal (const char *name)
     FILE *fp;
     struct node *np;
 
-    if ( tree_head == NULL )
-	init_mib_internals(); /* was init_mib */
+    init_mib_internals();
 
     for ( mp=module_head ; mp ; mp=mp->next )
 	if ( !label_compare(mp->name, name)) {
@@ -3330,75 +3332,72 @@ read_module(const char *name)
 void
 unload_module_by_ID( int modID, struct tree *tree_top )
 {
-    struct tree *tp, *prev, *next;
+    struct tree *tp, *next;
     int i;
 
-    prev = NULL;
     for ( tp=tree_top ; tp ; tp=next ) {
-	next = tp->next_peer;
-		/*
-		 * This next section looks rather complex.
-		 * Essentially, this is equivalent to the code fragment:
-		 *  	if (tp->modID = modID)
-		 *	    tp->number_modules--;
-		 * but handles one tree node being part of several modules.
-		 */
-	for ( i=0 ; i<tp->number_modules ; i++ ) {
-	    if ( tp->module_list[i] == modID ) {
-		tp->number_modules--;
-		switch ( tp->number_modules ) {
+        /*
+         * Essentially, this is equivalent to the code fragment:
+         *      if (tp->modID == modID)
+         *        tp->number_modules--;
+         * but handles one tree node being part of several modules,
+         * and possible multiple copies of the same module ID.
+         */
+        int nmod = tp->number_modules;
+        if (nmod > 0) {  /* in some module */
+        /*
+         * Remove all copies of this module ID
+         */
+        int cnt = 0, * pi1, * pi2 = tp->module_list;
+        for ( i=0, pi1=pi2 ; i<nmod ; i++, pi2++ ) {
+            if (*pi2 == modID) continue;
+            cnt++; *pi1++ = *pi2;
+        }
+        if (nmod != cnt) { /* in this module */
+            /*if ( (nmod - cnt) > 1)
+            printf("Dup modid %d,  %d times, '%s'\n", tp->modid, (nmod-cnt), tp->label); fflush(stdout); ?* XXDEBUG */
+            tp->number_modules = cnt;
+            switch (cnt) {
+                case 0:
+                tp->module_list[0] = -1; /* Mark unused, and FALL THROUGH */
 
-		    case 0:	/* That was the only module */
-			tp->modid = -1;		/* Mark as unused */
-			break;
+                case 1:    /* save the remaining module */
+                if (&(tp->modid) != tp->module_list) {
+                    tp->modid = tp->module_list[0];
+                    free(tp->module_list);
+                    tp->module_list = &(tp->modid);
+                }
+                break;
 
-		    case 1:	/* We did have a list of two, but this is no
-				   longer needed.  Transfer the other entry
-				   ( i.e. module_list[1-i] - think about it! )
-				   to the 'single' slot tp->modid, and discard
-				   the list.
-				 */
-			tp->modid = tp->module_list[1-i];
-			free(tp->module_list);
-			tp->module_list = NULL;		/* let's be tidy */
-			break;
+                default:
+                break;
+            }
+        } /* if tree node is in this module */
+        } /* if tree node is in some module */
 
-		    default:	/* We still need the list, so shuffle down
-				   all following entries to close up the gap */
-			while ( i < tp->number_modules ) {
-			   tp->module_list[i] = tp->module_list[i+1];
-			   i++;
-			}
-			break;
-		}
-		break;	/* Don't need to look through the rest of the list */
-	    }
-	}
-
-		/*
-		 *  OK - that's dealt with *this* node.
-		 *	Now let's look at the children.
-		 *	(Isn't recursion wonderful!)
-		 */
-	if ( tp->child_list )
-	    unload_module_by_ID( modID, tp->child_list );
+        next = tp->next_peer;
 
 
-	if ( tp->number_modules == 0 ) {
-			/* This node isn't needed any more (except perhaps
-				for the sake of the children) */
- 	    if ( tp->child_list == NULL ) {
-		if ( prev )
-		    prev->next_peer = tp->next_peer;
-		else
-		    tp->parent->child_list = tp->next_peer;
-		free_tree( tp );
-	   }
-	   else
-		free_partial_tree( tp, TRUE );
-	}
-	else
-	    prev = tp;
+        /*
+         *  OK - that's dealt with *this* node.
+         *    Now let's look at the children.
+         *    (Isn't recursion wonderful!)
+         */
+    if ( tp->child_list )
+        unload_module_by_ID( modID, tp->child_list );
+
+
+    if ( tp->number_modules == 0 ) {
+        /* This node isn't needed any more (except perhaps
+            for the sake of the children) */
+        if ( tp->child_list == NULL ) {
+            unlink_tree( tp );
+            free_tree( tp );
+        }
+        else {
+            free_partial_tree( tp, TRUE );
+        }
+    }
     }
 }
 
@@ -3421,6 +3420,72 @@ unload_module(const char *name)
     unload_module_by_ID( modID, tree_head );
     mp->no_imports = -1;	/* mark as unloaded */
     return MODULE_LOADED_OK;	/* Well, you know what I mean! */
+}
+
+/*
+ * Clear module map, tree nodes, textual convention table.
+ */
+void
+unload_all_mibs()
+{
+    struct module *mp;
+    struct module_compatability *mcp;
+    struct tc *ptc;
+    int i;
+
+    for ( mcp=module_map_head ; mcp; mcp=module_map_head ) {
+        if (mcp == module_map) break;
+        module_map_head = mcp->next;
+        free ((char *)mcp->tag);
+        free ((char *)mcp->old_module);
+        free ((char *)mcp->new_module);
+        free (mcp);
+    }
+
+    for ( mp=module_head ; mp ; mp=module_head ) {
+        struct module_import *mi = mp->imports;
+        if (mi) {
+            for ( i=0; i<mp->no_imports; ++i ) {
+                SNMP_FREE((mi+i)->label);
+            }
+            mp->no_imports = 0;
+            if (mi == root_imports)
+                memset(mi, 0, sizeof(*mi));
+            else
+                free(mi);
+        }
+
+        unload_module_by_ID (mp->modid, tree_head);
+        module_head = mp->next;
+        free (mp->name);
+        free (mp->file);
+        free (mp);
+    }
+    unload_module_by_ID (-1, tree_head);
+    /* tree nodes are cleared */
+
+    for (i = 0, ptc= tclist; i < MAXTC; i++, ptc++) {
+        if (ptc->type == 0) continue;
+        free_enums( &ptc->enums );
+        free_ranges( &ptc->ranges );
+        free(ptc->descriptor);
+        free(ptc->hint);
+    }
+    memset(tclist, 0, MAXTC * sizeof(struct tc));
+
+    memset( buckets, 0, sizeof( buckets));
+    memset(nbuckets, 0, sizeof(nbuckets));
+    memset(tbuckets, 0, sizeof(tbuckets));
+
+    for (i =0; i < sizeof(root_imports)/sizeof(root_imports[0]); i++) {
+        SNMP_FREE(root_imports[i].label);
+    }
+
+    max_module = 0;
+    current_module = 0;
+    module_map_head = NULL;
+    SNMP_FREE(last_err_module);
+    free_config();
 }
 
 static void

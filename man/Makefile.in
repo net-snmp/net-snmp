@@ -13,6 +13,7 @@ MAN3 = snmp_agent_api.3 snmp_api.3 mib_api.3 snmp_sess_api.3 snmp_trap_api.3 \
 	init_mib.3 add_mibdir.3 init_mib_internals.3 snmp_set_mib_warnings.3 \
 	read_module.3 read_all_mibs.3 read_mib.3 read_module_node.3 read_objid.3 \
 	add_module_replacement.3 \
+	shutdown_mib.3 \
 	print_mib.3 print_variable.3 print_value.3 print_objid.3 print_description.3 \
 	snmp_set_save_descriptions.3 \
 	get_module_node.3 read_objid.3 add_module_replacement.3
