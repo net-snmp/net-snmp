@@ -94,6 +94,7 @@ sub GetTestInfo {
     my $sep = ($^O =~ /win32/i ? '\\' : '/');
     my $info_file = "t${sep}snmptest.cmd";
     my $snmpd_path1 = "${prefix}${sep}sbin";
+    my $mibdir = "${prefix}${sep}share${sep}snmp${sep}mibs";
     my $snmpd_path2 = "${sep}usr${sep}sbin";
     my $snmpd_path3 = "${sep}usr${sep}bin";
     open(H, ">$info_file") || die "Error: could not open file '$info_file'($!)";
@@ -118,22 +119,27 @@ WIN32
          print H "AGENT_PORT => $agent_port\n";
          $trap_port = prompt("Please enter the trap port number: ", 162);
          print H "TRAP_PORT => $trap_port\n";
+         $mibdir = prompt("Please enter the MIB directory: ", "/usr/mibs");
+         print H "MIBDIR => $mibdir\n";
     } else {
 # you are using UNIX
-# remember to add snmptrapd too
+    my $mibdir = find_files(["UCD-SNMP-MIB.txt"],[$mibdir]);
     my $snmpd = find_files(["snmpd"], [$snmpd_path1, $snmpd_path2]);
     my $snmptrapd = find_files(["snmptrapd"], [$snmpd_path1, $snmpd_path2]);
 
-    $snmpd = prompt("Unable to locate \"snmpd\". Please enter the path: ", $snmpd_path1)
-	unless $snmpd;
-    $snmptrapd = prompt("Unable to locate \"snmptrapd\". Please enter the path: ",$snmpd_path1)
-	unless $snmptrapd;
-
+    $mibdir ||= prompt("Unable to locate the MIBs, Please enter the path: ",
+		       $snmpd_path1);
+    $snmpd ||= prompt("Unable to locate \"snmpd\". Please enter the path: ",
+		      $snmpd_path1);
+    $snmptrapd ||=
+	prompt("Unable to locate \"snmptrapd\". Please enter the path: ",
+	       $snmpd_path1);
 
     $snmpd =~ s/($sep)?(snmpd)?$/${sep}snmpd/;
     $snmptrapd =~ s/($sep)?(snmptrapd)?$/${sep}snmptrapd/;
     print H "SNMPD => $snmpd\n";
     print H "SNMPTRAPD => $snmptrapd\n";
+    print H "MIBDIR => $mibdir\n";
 
     if (-e $snmpd and -r $snmpd) {
 	if (not -x $snmpd) {
