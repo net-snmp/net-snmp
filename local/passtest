@@ -2,7 +2,7 @@
 
 PATH=$path:/bin:/usr/bin:/usr/ucb
 
-PLACE=".1.3.6.1.4.11.12"
+PLACE=".1.3.6.1.4.1.2021.255"
 REQ="$2"
 
 if [ "$1" = "-s" ]; then
