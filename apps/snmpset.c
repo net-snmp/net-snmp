@@ -80,7 +80,7 @@ SOFTWARE.
 
 int failures = 0;
 
-void main __P((int, char **));
+int main __P((int, char **));
 
 void
 usage __P((void))
@@ -102,7 +102,7 @@ usage __P((void))
 
 }
 
-void
+int
 main(argc, argv)
     int   argc;
     char  *argv[];

@@ -77,7 +77,7 @@ SOFTWARE.
 #include "system.h"
 #include "apps/snmp_parse_args.h"
 
-void main __P((int, char **));
+int main __P((int, char **));
 struct column {
   int width;
   char *label;
@@ -124,7 +124,7 @@ void usage __P((void))
   exit(1);
 }
 
-void
+int
 main(argc, argv)
   int   argc;
   char  *argv[];
