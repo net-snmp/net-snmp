@@ -382,7 +382,7 @@ void
 snmp_set_detail(const char *detail_string)
 {
   if (detail_string != NULL) {
-    strncpy((char *)&snmp_detail, detail_string, sizeof(snmp_detail));
+    strncpy((char *)snmp_detail, detail_string, sizeof(snmp_detail));
     snmp_detail[sizeof(snmp_detail)-1] = '\0';
     snmp_detail_f = 1;
   }
