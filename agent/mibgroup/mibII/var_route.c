@@ -295,7 +295,7 @@ static void     Route_Scan_Reload(void);
 #ifdef hpux11
 static int      rtsize = 0;
 static mib_ipRouteEnt *rt = (mib_ipRouteEnt *) 0;
-#else                           /* hpux11 */
+#elif !defined(solaris)
 static RTENTRY **rthead = 0;
 static int      rtsize = 0, rtallocate = 0;
 
