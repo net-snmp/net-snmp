@@ -160,17 +160,17 @@ void disk_parse_config(word,cptr)
     /* read optional minimum disk usage spec */
     if (cptr != NULL) {
       if (strchr(cptr, '%') == NULL) {
-        disk[*numdisks].minimumspace = atoi(cptr);
-        disk[*numdisks].minpercent = -1;
+        disks[numdisks].minimumspace = atoi(cptr);
+        disks[numdisks].minpercent = -1;
       }
       else {
-        disk[*numdisks].minimumspace = -1;
-        disk[*numdisks].minpercent = atoi(cptr);
+        disks[numdisks].minimumspace = -1;
+        disks[numdisks].minpercent = atoi(cptr);
       }
     }
     else {
       disks[numdisks].minimumspace = DEFDISKMINIMUMSPACE;
-      disk[*numdisks].minpercent = -1;
+      disks[numdisks].minpercent = -1;
     }
     /* find the device associated with the directory */
 #if HAVE_GETMNTENT
