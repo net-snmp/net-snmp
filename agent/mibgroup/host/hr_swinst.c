@@ -50,6 +50,10 @@
 #include <rpm/rpmmacro.h>
 #endif
 
+#ifdef HAVE_RPM_RPMDB_H
+#include <rpm/rpmdb.h>
+#endif
+
 #if HAVE_STRING_H
 #include <string.h>
 #else
