@@ -1120,12 +1120,18 @@ AC_MSG_CHECKING([for platform-specific source])
 other_src_list=""
 other_objs_list=""
 other_lobjs_list=""
+other_agentobjs=""
+other_lagentobjs=""
+other_trapd_objects=""
 
 # Win32 service code
 if test "x$PARTIALTARGETOS" = "xmingw32" -o "x$PARTIALTARGETOS" = "xmingw32msvc" -o "x$PARTIALTARGETOS" = "xcygwin"; then
   other_src_list="$other_src_list winservice.c"
   other_objs_list="$other_objs_list winservice.o"
   other_lobjs_list="$other_lobjs_list winservice.lo"
+  other_agentobjs="../snmplib/winservicerc.o"
+  other_lagentobjs="../snmplib/winservicerc.lo"
+  other_trapd_objects="../snmplib/winservicerc.o" 
 fi
   
 # Win32 pipes
@@ -1138,8 +1144,12 @@ fi
 AC_SUBST(other_src_list)
 AC_SUBST(other_objs_list)
 AC_SUBST(other_lobjs_list)
+AC_SUBST(other_agentobjs)
+AC_SUBST(other_lagentobjs)
+AC_SUBST(other_trapd_objects)
 
 AC_MSG_RESULT([$other_src_list $other_objs_list $other_lobjs_list])
+AC_MSG_RESULT([$other_agentobjs $other_lagentobjs $other_trapd_objects])
   
 #
 # Do transport module processing.
