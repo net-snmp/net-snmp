@@ -13,15 +13,58 @@ sub compare($$);
 
 use overload
     '<=>' => \&compare,
-    '""' => \&quote_oid
+    '""' => \&quote_oid,
+    '+' => \&add
 ;
    
 
 use SNMP;
 
 sub quote_oid {
+    return $_[0]->{'oidptr'}->to_string();
+}
+
+sub length {
+    return $_[0]->{'oidptr'}->length();
+}
+
+sub append {
     my $this = shift;
-    return $this->{'oidptr'}->to_string();
+    my $str = shift;
+
+    if (ref($str) eq 'NetSNMP::OID') {
+	return $this->{'oidptr'}->append_oid($str->{'oidptr'});
+    }
+    $str = "." . $str if ($str =~ /^\d+/);
+    if ($str =~ /^[.\d]+/) {
+	# oid segment
+	return $this->{'oidptr'}->append($str);
+    }
+    if ($str =~ /^\"(.*)\"$/) {
+	# string index
+	my $newstr = "." . CORE::length($1);
+	map { $newstr .= ".$_" } unpack("c*",$1);
+	return $this->{'oidptr'}->append($newstr);
+    }
+    if ($str =~ /^\'(.*)\'$/) {
+	# string index, implied
+	my $newstr;
+	map { $newstr .= ".$_" } unpack("c*",$1);
+	return $this->{'oidptr'}->append($newstr);
+    }
+    # Just Parse it...
+    return $this->{'oidptr'}->append($str);
+}
+
+sub add {
+    my $this = shift;
+    my $str = shift;
+    my ($newoid, %newhash);
+    $newoid = \%newhash;
+    $newoid->{'oidptr'} = $this->{'oidptr'}->clone();
+    bless($newoid, ref($this));
+    $newoid->append($str);
+    return $newoid;
 }
 
 our @ISA = qw(Exporter DynaLoader);
