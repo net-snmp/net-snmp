@@ -793,6 +793,10 @@ static void handle_wrap_fmt(char *bfr, unsigned long *tail, unsigned long len,
       str_append(safe_bfr, &safe_tail, LCL_SAFE_LEN, sprint_bfr);
       break;
   }
+  if (safe_tail < LCL_SAFE_LEN)
+    safe_bfr[safe_tail] = '\0';
+  else 
+    safe_bfr[safe_tail - 1] = '\0';
   str_append (bfr, tail, len, safe_bfr);
 }
 
