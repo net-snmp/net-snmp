@@ -895,21 +895,21 @@ main (int argc, char **argv)
   while ((rc = getMibstat(MIB_INTERFACES, &ifstat, sizeof(mib2_ifEntry_t),
 			  req_type, &IF_cmp, &idx)) == 0) {
       idx = ifstat.ifIndex;
-      snmp_log(LOG_DEBUG, "Ifname = %s\n", ifstat.ifDescr.o_bytes);
+      DEBUGMSGTL(("kernel_sunos5", "Ifname = %s\n", ifstat.ifDescr.o_bytes));
       req_type = GET_NEXT;
   }
   rc = getMibstat(MIB_IP_ADDR, &ipbuf, sizeof(mib2_ipAddrEntry_t),
 		  req_type, ip20comp, argv[1]); 
 
   if (rc == 0)
-    snmp_log(LOG_DEBUG, "mtu = %ld\n", ipp->ipAdEntInfo.ae_mtu);
+    DEBUGMSGTL(("kernel_sunos5", "mtu = %ld\n", ipp->ipAdEntInfo.ae_mtu));
   else
-    snmp_log(LOG_DEBUG, "rc =%d\n", rc);
+    DEBUGMSGTL(("kernel_sunos5", "rc =%d\n", rc));
 
   while ((rc = getMibstat(MIB_IP_NET, &entry, sizeof(mib2_ipNetToMediaEntry_t),
 			  req_type, &ARP_Cmp_Addr, &LastAddr)) == 0) {
     LastAddr = ep->ipNetToMediaNetAddress;
-    snmp_log(LOG_DEBUG, "Ipaddr = %lX\n", (u_long)LastAddr);
+    DEBUGMSGTL(("kernel_sunos5", "Ipaddr = %lX\n", (u_long)LastAddr));
     req_type = GET_NEXT;
   }
   return 0;
