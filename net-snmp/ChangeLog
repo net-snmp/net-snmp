@@ -1,5 +1,191 @@
 -------------------------------------------------------------------------------
 
+Changes: V3.0.7.2 -> V3.1
+
+hardaker  3 May 96 14:34:03
+    - (acconfig.h, configure.in, snmplib/Makefile.in)
+      - Added a check for various random functions.
+      - Included another ifdef to ensure no #define loops occur with str/index fns.
+
+hardaker  3 May 96 14:35:27
+    - (agent/snmp_var_route.c,snmp_vars.c)
+      - Changed the interface counter to a short for all architectures (bus err)
+      - Undefed a function that is never used.
+
+hardaker  3 May 96 14:37:17
+    - (agent/snmp_vars.c) Solaris fix for interfaces.
+      - From Dan A. Dickey <ddickey@transition.com>
+
+hardaker  3 May 96 14:40:18
+    - (apps/snmptrap.c) Added #include<sys/sockio.h>
+
+hardaker  9 May 96 13:24:00
+    - (apps/snmpset.c) Added '.' as a delimiter for decimal encoded strings.
+
+hardaker  9 May 96 13:27:40
+    - (acconfig.h, configure.in, snmplib/Makefile.in)
+      - Added a check for various random functions.
+      - Included another ifdef to ensure no #define loops occur with str/index fns.
+
+hardaker  9 May 96 13:33:12
+    - (acconfig.h,agent/{Makefile,snmp_vars.c},agent/extensible/many):
+      - Added support for passthru mibs.  Total control is handed to exec's.
+
+hardaker  9 May 96 16:14:28
+    - (configure.in): Solaris specific cpp flags added for SUNspro's cpp.
+    - (agent/{snmp_vars,snmpd}.c,agent/extensible/{extensible,misc,pass}.c,
+       snmplib/{mib,snmp_client}.c):
+      - Cleaned up prototypes to match more carefully (with Solaris's spro cc).
+
+hardaker 10 May 96 10:27:14
+    - (kernel_sunos5.c): A patch to fix a virtual interface problem.
+      - patch supplied by "Dan A. Dickey" <ddickey@transition.com>
+
+hardaker 10 May 96 18:16:57
+    - (many): Mereged baggesen-3-0-7-2 branch into main trunk.
+
+hardaker 13 May 96 15:56:45
+    - (agent/extensible/misc.c): exec Names were getting included in the command.
+
+hardaker 13 May 96 15:57:43
+    - (agent/extensible/misc.c): close file descriptors before re-starting agent.
+
+hardaker 13 May 96 15:58:44
+    - (agent/snmp_agent.c, agent/snmp_vars.c, agent/extensible/extensible.c):
+      - Bug fix: GLOBALSECURITY bug:  save rightmost two bits in acl.
+
+hardaker 13 May 96 15:59:30
+    - (snmplib/snmp_impl.h): Change RWRITE to include Write for V2 bits.
+
+hardaker 15 May 96 08:59:51
+    - (agent/extensible/pass.c) Patch from Niels Baggesen <recnba@mediator.uni-c.dk>
+      - Implemented missing parts of interface address and network output (-i)
+
+hardaker 15 May 96 09:02:24
+    - (agent/kernel_sunos5.c) Patch from "Dan A. Dickey" <ddickey@transition.com>
+      - Better caching algorithm for improved speed.
+
+hardaker 15 May 96 09:05:49
+    - (*/.cvsignore) ignore file update.
+
+hardaker 15 May 96 09:06:49
+    - (Makefile.in,sedscript.in) Added PREFIX to the sedscript.
+
+hardaker 15 May 96 09:07:35
+    - (EXAMPLE.conf.def, man/snmpd.conf.5.def): documented pass thru mibs.
+
+hardaker 15 May 96 09:29:21
+    - (COPYING, README, TODO) Release docs updated.
+
+hardaker 15 May 96 09:50:15
+    - (agent/kernel_sunos5.c) patch mistake.
+
+hardaker 15 May 96 09:51:12
+    - (agent/extensible/read_config.c): ansi semantic fix for '<'.
+
+hardaker 15 May 96 09:51:37
+    version tag ( 3.1.A1 )
+
+hardaker 15 May 96 12:00:57
+    - (INSTALL) make install as root.
+
+hardaker 15 May 96 12:03:54
+    - (README) Added a note (pointer to docs) on the agent's extensiblity.
+
+hardaker 15 May 96 12:23:40
+    - (apps/snmpnetstat/if.c) removed & in front of array passed as arg.
+
+hardaker 15 May 96 12:35:16
+    - (sedscript.in) Fixed a horrible typo.  P -> PREFIX
+
+hardaker 22 May 96 08:50:28
+    - (man/Makefile.in) Updated the way sedscript is used.
+
+hardaker 22 May 96 08:51:01
+    - (config.guess, configure, install-sh, mkinstalldirs): Autoconf-2.10
+
+hardaker 22 May 96 12:50:24
+    - (agent/kernel_sunos5.c, snmp_vars.c,
+       agent/extensible/extensible.c,readconfig.c,snmp_vars.c):
+      - Patch from Niels Baggesen <recnba@mediator.uni-c.dk>:
+        - finally nailed that missing initialization that gave problems
+          with the AT subtree
+        - I also implemented the disk part of the extensibility in the
+          attached patch.
+
+hardaker 22 May 96 12:55:33
+    - (apps/snmpnetstat/if.c): Patch from Niels Baggesen <recnba@mediator.uni-c.dk>
+      - reworked the way snmpnetstat -i works.
+
+hardaker 23 May 96 14:43:49
+    - (acconfig.h, config.h.in): Don't define random if it already exists.
+
+hardaker 23 May 96 14:44:15
+    - (extensible.c):  Added a disk warning to stderr.
+
+hardaker 23 May 96 14:44:39
+    - (acl.c, party.c, view.c): removed NULL defines.
+
+hardaker 23 May 96 14:56:42
+    - (if.c): type casting bugs.
+
+hardaker 23 May 96 16:28:08
+    - (acl.c, party.c): include stdio.h
+
+hardaker 23 May 96 17:09:24
+    - (config*, extensible.c): fixed disk checks on Solaris and alpha's
+      - use statvfs over fstab if both present.
+
+hardaker 23 May 96 17:48:09
+    - (config*): check for getmntent.
+
+hardaker 24 May 96 12:23:52
+    - (snmplib/parse.c):  parsing fixes from Mike Perik <mikep@crt.com>
+
+hardaker 24 May 96 12:39:51
+    - (README): Added a thanks section.
+
+hardaker 24 May 96 13:08:28
+    - (EXAMPLE.conf.def): minor example file changes.
+
+hardaker 24 May 96 13:09:02
+    - (config*):  Check for sys/mnttab.h
+
+hardaker 24 May 96 13:09:52
+    - (read_config.c): ifdef cleanup
+
+hardaker 24 May 96 13:10:34
+    - (parse.c): declarations cleanup
+
+hardaker 24 May 96 13:13:21
+    - (snmpd.conf.5.def):  note on creating comments added.
+
+hardaker 24 May 96 13:38:46
+    - (read_config.c): #ifdef typo
+
+hardaker 24 May 96 13:54:25
+    - (acconfig.h, config.h.in):  define memmove if not defined and memcpy is.
+
+hardaker 24 May 96 13:55:14
+    - (if.c, route.c): cast returns from index to char *.
+
+hardaker 24 May 96 14:02:53
+    - (config*): check for memmove before you define it.
+
+hardaker 24 May 96 14:53:20
+    - (read_config.c): printf -> DODEBUG check
+
+hardaker 24 May 96 15:28:41
+    - (accconfig.h, config.h.in): #ifdef typos
+
+hardaker 24 May 96 15:29:13
+    - (snmp_vars.c): removed some ifdef requirements.
+
+hardaker 24 May 96 15:29:29
+    - (snmp_vars.h): reorganized
+
+-------------------------------------------------------------------------------
+
 Changes:  V3.0.7.1 -> V3.0.7.2
 
 Niels Baggesen <recnba@mediator.uni-c.dk> 1 May 96 12:37:35
