@@ -38,10 +38,6 @@ PERFORMANCE OF THIS SOFTWARE.
 #include "common_header.h"
 #include "mibgroup/mib_module_includes.h"
 
-#include "party.h"
-#include "context.h"
-#include "acl.h"
-#include "view.h"
 #include "snmpd.h"
 
 int compare_tree __P((oid *, int, oid *, int));
@@ -173,13 +169,6 @@ int KNLookup(nl, nl_which, buf, s)
 
 #define SNMPV2 			1, 3, 6, 1, 6
 #define SNMPV2M2M		SNMPV2, 3, 2
-#define SNMPV2ALARMNEXTINDEX	SNMPV2M2M, 1, 1, 1
-#define SNMPV2ALARMENTRY	SNMPV2M2M, 1, 1, 2, 1
-#define SNMPV2EVENTNEXTINDEX	SNMPV2M2M, 1, 2, 1
-#define SNMPV2EVENTENTRY	SNMPV2M2M, 1, 2, 2, 1
-#define SNMPV2EVENTNOTIFYMININT	SNMPV2M2M, 1, 2, 3
-#define SNMPV2EVENTNOTIFYMAXRET	SNMPV2M2M, 1, 2, 4
-#define SNMPV2EVENTNOTIFYENTRY	SNMPV2M2M, 1, 2, 5, 1
 
 #define SNMPV2ALARMEVENTS	SNMPV2M2M, 1, 1, 3
 
@@ -213,10 +202,6 @@ int KNLookup(nl, nl_which, buf, s)
 #endif
 
 #define PARTYMIB 	SNMPV2, 3, 3
-#define PARTYTABLE	PARTYMIB, 2, 1, 1, 1
-#define CONTEXTTABLE	PARTYMIB, 2, 2, 1, 1
-#define ACLTABLE	PARTYMIB, 2, 3, 1, 1
-#define VIEWTABLE	PARTYMIB, 2, 4, 1, 1
 
 /* various OIDs that are needed throughout the agent */
 Export oid alarmVariableOid[] = {SNMPV2ALARMENTRY, ALARMTABVARIABLE};
@@ -245,13 +230,11 @@ Export int trapObjUnavailAlarmOidLen = sizeof(trapObjUnavailAlarmOidLen)/sizeof(
 
 
 
-#include "mibgroup/snmpv2_vars.h"
 struct subtree *subtrees;   /* this is now malloced in
                                       mibgroup/extensible.c */
 
 struct subtree subtrees_old[] = {
 #include "mibgroup/mib_module_loads.h"
-#include "mibgroup/snmpv2_subtrees.h"
 };
 
 extern int in_view __P((oid *, int, int));

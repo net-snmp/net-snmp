@@ -18,9 +18,10 @@
 #include "snmp_vars.h"
 #include "system.h"
 
-#include "context.h"
 #include "acl.h"
 #include "view.h"
+
+#include "context_vars.h"
 
 #include "mibgroup/snmpv2_vars.h"
 

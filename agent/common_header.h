@@ -161,8 +161,10 @@
 /* jab2 debug */
 #include "snmp_vars.linux.h"
 /* jab2 debug */
-#include "alarm.h"
-#include "event.h"
+/*
+  #include "alarm.h"
+  #include "event.h"
+*/
 #if solaris2
 #include "kernel_sunos5.h"
 #endif
