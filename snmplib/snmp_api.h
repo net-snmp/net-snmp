@@ -353,6 +353,7 @@ void DEBUGP __P((va_alist));
 void debugmsg(va_alist);
 void debugmsgtoken(va_alist);
 #endif
+void debugmsg_oid(char *token, oid *theoid, int len);
 void DEBUGPOID __P((oid *, int));
 
 #define DEBUGMSG(x)    debugmsg x;
@@ -362,6 +363,9 @@ void DEBUGPOID __P((oid *, int));
 #define DEBUGMSGL(x)   DEBUGTRACE; debugmsg x;
 #define DEBUGMSGTL(x)  DEBUGTRACE; debugmsgtoken x; debugmsg x;
 #define DEBUGL(x)      DEBUGTRACE; debugmsg x;
+
+#define DEBUGMSGOID(x)    debugmsg_oid x;
+
 
 #ifdef CMU_COMPATIBLE
 extern int snmp_dump_packet;

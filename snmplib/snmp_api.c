@@ -2178,6 +2178,14 @@ debugmsg(va_alist)
 }
 
 void
+debugmsg_oid(char *token, oid *theoid, int len) {
+  char c_oid[MAX_NAME_LEN];
+  
+  sprint_objid(c_oid, theoid, len);
+  debugmsg(token, c_oid);
+}
+
+void
 #ifdef STDC_HEADERS
 debugmsgtoken(const char *token, const char *format, ...)
 #else
