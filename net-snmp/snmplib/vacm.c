@@ -1,4 +1,6 @@
 /*
+ * vacm.c
+ *
  * SNMPv3 View-based Access Control Model
  */
 
@@ -293,7 +295,7 @@ vacm_getAccessEntry(groupName, contextPrefix, securityModel, securityLevel)
     strcpy(context+1, contextPrefix);
     for(vp = accessList; vp; vp = vp->next){
         if ((securityModel == vp->securityModel || vp->securityModel == SNMP_SEC_MODEL_ANY)
-	    && securityLevel == vp->securityLevel
+	    && securityLevel >= vp->securityLevel
 	    && !strcmp(vp->groupName, group)
 	    && !strcmp(vp->contextPrefix, context))
 	  return vp;

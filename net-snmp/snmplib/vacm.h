@@ -1,8 +1,11 @@
-#ifndef VACM_H
-#define VACM_H
 /*
+ * vacm.h
+ *
  * SNMPv3 View-based Access Control Model
  */
+
+#ifndef VACM_H
+#define VACM_H
 
 #define SECURITYMODEL	1
 #define SECURITYNAME	2

@@ -1,3 +1,7 @@
+/*
+ * disk.c
+ */
+
 #include <config.h>
 
 #include <stdio.h>
@@ -153,7 +157,7 @@ void disk_parse_config(word,cptr)
 #else
 #if HAVE_FSTAB_H
   struct fstab *fstab;
-  struct stat stat1, stat2;
+  struct stat stat1;
 #endif
 #endif
   char tmpbuf[1024];

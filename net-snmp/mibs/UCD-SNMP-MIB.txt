@@ -73,6 +73,7 @@ ucdExperimental   OBJECT IDENTIFIER ::= { ucdavis 13 }
 -- Reserved
 --   ucdInternal      OBJECT IDENTIFIER ::= { ucdavis 12 }
 --   ucdExperimental  OBJECT IDENTIFIER ::= { ucdavis 13 }
+--   ucdDemoMIB       OBJECT IDENTIFIER ::= { ucdavis 14 }
 
 
 -- These are the returned values of the agent type.

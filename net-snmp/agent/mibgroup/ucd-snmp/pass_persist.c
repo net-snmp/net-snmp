@@ -501,7 +501,7 @@ static int open_persist_pipe(index, command)
   /* Send test packet always so we can self-catch */
   {
     char buf[STRMAX];
-    /* Should catch SIGPIPE around this call! */
+    /* Should catch SIGPIPE around this call! */	/* XXX */
     if( ! write_persist_pipe( index, "PING\n" ) ) {
       DEBUGP("open_persist_pipe: Error writing PING\n");
       close_persist_pipe(index);

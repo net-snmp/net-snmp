@@ -93,6 +93,9 @@ typedef long    fd_mask;
 #include "snmp.h"
 #include "mib.h"
 #include "m2m.h"
+#include "snmpv3.h"
+#include "snmp_vars.h"
+#include "mibgroup/snmpv3/usmUser.h"
 
 #ifdef USING_V2PARTY_ALARM_MODULE
 #include "mibgroup/v2party/alarm.h"
@@ -101,52 +104,104 @@ typedef long    fd_mask;
 #include "mibgroup/v2party/event.h"
 #endif
 
-#if USING_MIBII_SNMP_MIB_MODULE
-#include "mibgroup/mibII/snmp_mib.h"
-#endif
 #include "snmp_client.h"
 #include "snmpd.h"
 #include "var_struct.h"
 #include "mibgroup/struct.h"
 #include "mibgroup/util_funcs.h"
+#include "snmpusm.h"
+#include "tools.h"
+#include "lcd_time.h"
 
+#include "transform_oids.h"
+
+#include "agent_read_config.h"
+
+#include "version.h"
+
+
+
+/*
+ * Globals.
+ */
 #ifdef USE_LIBWRAP
 #include <syslog.h>
 #include <tcpd.h>
 
-int allow_severity = LOG_INFO;
-int deny_severity = LOG_WARNING;
-#endif
+int allow_severity	 = LOG_INFO;
+int deny_severity	 = LOG_WARNING;
+#endif  /* USE_LIBWRAP */
 
-struct timeval starttime;
-int log_addresses = 0;
-int verbose = 0;
-int snmp_dump_packet;
 
-oid version_id[] = {EXTENSIBLEMIB,AGENTID,OSTYPE};
-int version_id_len = sizeof(version_id)/sizeof(version_id[0]);
+#define TIMETICK         500000L
+#define ONE_SEC         1000000L
+
+struct timeval	starttime;
+int 		log_addresses	 = 0;
+int 		verbose		 = 0;
+int 		snmp_dump_packet;
+
+oid version_id[]	 = { EXTENSIBLEMIB, AGENTID, OSTYPE };
+int version_id_len	 = sizeof(version_id)/sizeof(version_id[0]);
+
+static oid objid_enterprisetrap[] = { EXTENSIBLEMIB, 251, 0, 0 };
+static int length_enterprisetrap  =
+	sizeof(objid_enterprisetrap)/sizeof(objid_enterprisetrap[0]);
+
 
 struct addrCache {
-    in_addr_t addr;
-    int status;
+    in_addr_t	addr;
+    int		status;
 #define UNUSED	0
 #define USED	1
 #define OLD	2
 };
 
-struct trap_sink {
-    struct snmp_session ses;
-    struct snmp_session *sesp;
-    struct trap_sink *next;
-};
-struct trap_sink *sinks = NULL;
-struct trap_sink *v2sinks = NULL;
-
 #define ADDRCACHE 10
 
-static struct addrCache addrCache[ADDRCACHE];
-static int lastAddrAge = 0;
+static struct addrCache	addrCache[ADDRCACHE];
+static int		lastAddrAge = 0;
 
+
+struct trap_sink {
+    struct snmp_session	 ses;
+    struct snmp_session	*sesp;
+    struct trap_sink	*next;
+};
+
+struct trap_sink *sinks	  = NULL;
+struct trap_sink *v2sinks = NULL;
+
+
+#define SNMP_AUTHENTICATED_TRAPS_ENABLED	1
+#define SNMP_AUTHENTICATED_TRAPS_DISABLED	2
+
+int	 snmp_enableauthentraps	= SNMP_AUTHENTICATED_TRAPS_DISABLED;
+char	*snmp_trapcommunity	= NULL;
+
+
+
+char **argvrestartp;
+char  *argvrestart;
+char  *argvrestartname;
+
+extern char *optconfigfile;
+extern char  dontReadConfigFiles;
+
+
+#define NUM_SOCKETS	32
+
+static int	  sdlist[NUM_SOCKETS],
+		  sdlen = 0;
+static int	  portlist[NUM_SOCKETS];
+int		(*sd_handlers[NUM_SOCKETS])__P((int));
+
+
+
+
+/*
+ * Prototypes.
+ */
 static int receive __P((int *, int));
 int snmp_read_packet __P((int));
 int snmp_input __P((int, struct snmp_session *, int, struct snmp_pdu *, void *));
@@ -161,12 +216,15 @@ static void usage __P((char *));
 int main __P((int, char **));
 static RETSIGTYPE SnmpTrapNodeDown __P((int));
 
-static char *sprintf_stamp (now)
+
+
+static char *
+sprintf_stamp (now)
     time_t *now;
 {
     time_t Now;
     struct tm *tm;
-    static char sbuf [20];
+    static char sbuf [32];
 
     if (now == NULL) {
 	now = &Now;
@@ -180,10 +238,8 @@ static char *sprintf_stamp (now)
 }
 
 
-int snmp_enableauthentraps = 2;		/* default: 2 == disabled */
-char *snmp_trapcommunity = NULL;
-
-static int create_v1_trap_session (sink, com)
+static int
+create_v1_trap_session (sink, com)
     char *sink, *com;
 {
     struct trap_sink *new_sink =
@@ -209,7 +265,8 @@ static int create_v1_trap_session (sink, com)
     return 0;
 }
 
-static void free_v1_trap_session (sp)
+static void
+free_v1_trap_session (sp)
     struct trap_sink *sp;
 {
     snmp_close(sp->sesp);
@@ -217,7 +274,8 @@ static void free_v1_trap_session (sp)
     free (sp);
 }
 
-static int create_v2_trap_session (sink, com)
+static int
+create_v2_trap_session (sink, com)
     char *sink, *com;
 {
     struct trap_sink *new_sink =
@@ -243,7 +301,8 @@ static int create_v2_trap_session (sink, com)
     return 0;
 }
 
-static void free_v2_trap_session (sp)
+static void
+free_v2_trap_session (sp)
     struct trap_sink *sp;
 {
     snmp_close(sp->sesp);
@@ -251,7 +310,8 @@ static void free_v2_trap_session (sp)
     free (sp);
 }
 
-void snmpd_free_trapsinks __P((void))
+void
+snmpd_free_trapsinks __P((void))
 {
     struct trap_sink *sp = sinks;
     while (sp) {
@@ -268,111 +328,129 @@ void snmpd_free_trapsinks __P((void))
     }
 }
 
-static oid objid_enterprisetrap[] = {EXTENSIBLEMIB,251,0,0};
-static int length_enterprisetrap = sizeof(objid_enterprisetrap)/sizeof(objid_enterprisetrap[0]);
-
-static void send_v1_trap (ss, trap, specific)
+static void
+send_v1_trap (ss, trap, specific)
     struct snmp_session *ss;
     int trap, specific;
 {
     struct snmp_pdu *pdu;
-    struct timeval now, diff;
+    struct timeval now;
 
     gettimeofday(&now, NULL);
-    now.tv_sec--;
-    now.tv_usec += 1000000L;
-    diff.tv_sec = now.tv_sec - starttime.tv_sec;
-    diff.tv_usec = now.tv_usec - starttime.tv_usec;
-    if (diff.tv_usec > 1000000L){
-	diff.tv_usec -= 1000000L;
-	diff.tv_sec++;
-    }
 
     pdu = snmp_pdu_create (SNMP_MSG_TRAP);
-    if (trap == 6) {
-	pdu->enterprise = objid_enterprisetrap;
-	pdu->enterprise_length = length_enterprisetrap-2;
+
+    if (trap == SNMP_TRAP_ENTERPRISESPECIFIC) {
+	pdu->enterprise		 = objid_enterprisetrap;
+	pdu->enterprise_length	 = length_enterprisetrap-2;
+
+    } else { 
+	pdu->enterprise		 = version_id;
+	pdu->enterprise_length	 = version_id_len;
     }
-    else { 
-	pdu->enterprise = version_id;
-	pdu->enterprise_length = version_id_len;
-    }
-    pdu->agent_addr.sin_addr.s_addr = get_myaddr();
-    pdu->trap_type = trap;
-    pdu->specific_type = specific;
-    pdu->time = diff.tv_sec * 100 + diff.tv_usec / 10000;
+    pdu->agent_addr.sin_addr.s_addr
+				 = get_myaddr();
+    pdu->trap_type		 = trap;
+    pdu->specific_type		 = specific;
+    pdu->time		 	 = calculate_time_diff(&now, &starttime);
+
     if (snmp_send (ss, pdu) == 0) {
         snmp_perror ("snmpd: send_v1_trap");
     }
-#ifdef USING_MIBII_SNMP_MIB_MODULE       
-    snmp_outtraps++;
-#endif
-}
 
-static void send_v2_trap (ss, trap, specific, type)
+    snmp_increment_statistic(STAT_SNMPOUTTRAPS);
+
+
+}  /* end send_v1_trap() */
+
+
+
+/*******************************************************************-o-******
+ * send_v2_trap
+ *
+ * Parameters:
+ *	*ss		Pointer to an open session.
+ *	 trap		Trap type.
+ *	 specific	Specific trap type (when trap is
+ *			  SNMP_TRAP_ENTERPRISESPECIFIC).
+ *	 type		PDU type.
+ */
+static void
+send_v2_trap (ss, trap, specific, type)
     struct snmp_session *ss;
     int trap, specific, type;
 {
     struct snmp_pdu *pdu;
     struct variable_list *var;
-    struct timeval now, diff;
+    struct timeval now;
     static oid objid_sysuptime[] = {1, 3, 6, 1, 2, 1, 1, 3, 0};
-    static oid objid_snmptrap[] = {1, 3, 6, 1, 6, 3, 1, 1, 4, 1, 0};
-    static oid objid_trapoid[] = {1, 3, 6, 1, 6, 3, 1, 1, 5, 1};
+    static oid objid_snmptrap[]  = {1, 3, 6, 1, 6, 3, 1, 1, 4, 1, 0};
+    static oid objid_trapoid[]   = {1, 3, 6, 1, 6, 3, 1, 1, 5, 1};
+
 
     gettimeofday(&now, NULL);
-    now.tv_sec--;
-    now.tv_usec += 1000000L;
-    diff.tv_sec = now.tv_sec - starttime.tv_sec;
-    diff.tv_usec = now.tv_usec - starttime.tv_usec;
-    if (diff.tv_usec > 1000000L){
-	diff.tv_usec -= 1000000L;
-	diff.tv_sec++;
-    }
 
     pdu = snmp_pdu_create (type);
 
-    pdu->variables = var = (struct variable_list *)malloc(sizeof(struct variable_list));
-    var->next_variable = NULL;
-    var->name = (oid *)malloc(sizeof(objid_sysuptime));
-    memcpy (var->name, objid_sysuptime, sizeof(objid_sysuptime));
-    var->name_length = sizeof(objid_sysuptime)/sizeof(objid_sysuptime[0]);
-    var->type = ASN_TIMETICKS;
-    var->val.integer = (long *)malloc(sizeof(long));
-    *var->val.integer = diff.tv_sec*100 + diff.tv_usec/10000;
-    var->val_len = sizeof(long);
 
-    var->next_variable = (struct variable_list *)malloc(sizeof(struct variable_list));
-    var = var->next_variable;
-    var->next_variable = NULL;
-    if (trap == 6) {
+    /*
+     * Create var-bind for sysUpTime.0
+     */
+    pdu->variables	 = var
+			 = (struct variable_list *)
+					malloc(sizeof(struct variable_list));
+    var->next_variable	 = NULL;
+
+    var->name		 = (oid *)malloc(sizeof(objid_sysuptime));
+    memcpy (var->name, objid_sysuptime, sizeof(objid_sysuptime));
+    var->name_length	 = sizeof(objid_sysuptime)/sizeof(objid_sysuptime[0]);
+
+    var->type		 = ASN_TIMETICKS;
+    var->val.integer	 = (long *)malloc(sizeof(long));
+    *var->val.integer	 = calculate_time_diff(&now, &starttime);
+    var->val_len	 = sizeof(long);
+
+
+    /*
+     * Allocate space for another var-bind to contain the trap data.
+     */
+    var->next_variable	 = (struct variable_list *)
+					malloc(sizeof(struct variable_list));
+    var		 	 = var->next_variable;
+    var->next_variable	 = NULL;
+
+
+    if (trap == SNMP_TRAP_ENTERPRISESPECIFIC) {
 	objid_enterprisetrap[length_enterprisetrap-1] = specific;
-	var->name = (oid *)malloc(sizeof(objid_snmptrap));
-	var->name_length = length_enterprisetrap;
+
+	var->name		 = (oid *)malloc(sizeof(objid_snmptrap));
+	var->name_length	 = length_enterprisetrap;
 	memcpy(var->name, objid_snmptrap, sizeof(objid_snmptrap));
-	var->type = ASN_OBJECT_ID;
-	var->val.objid = (oid *)malloc(sizeof(objid_enterprisetrap));
-	var->val_len = sizeof(objid_enterprisetrap);
-	memcpy(var->val.objid, objid_enterprisetrap, sizeof(objid_enterprisetrap));
-    }
-    else {
+	var->type		 = ASN_OBJECT_ID;
+	var->val.objid		 = (oid *)malloc(sizeof(objid_enterprisetrap));
+	var->val_len		 = sizeof(objid_enterprisetrap);
+	memcpy(var->val.objid,
+		objid_enterprisetrap, sizeof(objid_enterprisetrap));
+
+    } else {
 	objid_trapoid[9] = trap+1;
-	var->name = (oid *)malloc(sizeof(objid_snmptrap));
+
+	var->name	 = (oid *)malloc(sizeof(objid_snmptrap));
 	var->name_length = sizeof(objid_snmptrap)/sizeof(objid_snmptrap[0]);
 	memcpy(var->name, objid_snmptrap, sizeof(objid_snmptrap));
-	var->type = ASN_OBJECT_ID;
-	var->val.objid = (oid *)malloc(sizeof(objid_trapoid));
-	var->val_len = sizeof(objid_trapoid);
+	var->type	 = ASN_OBJECT_ID;
+	var->val.objid	 = (oid *)malloc(sizeof(objid_trapoid));
+	var->val_len	 = sizeof(objid_trapoid);
 	memcpy(var->val.objid, objid_trapoid, sizeof(objid_trapoid));
     }
 
     if (snmp_send (ss, pdu) == 0) {
         snmp_perror ("snmpd: send_v2_trap");
     }
-#ifdef USING_MIBII_SNMP_MIB_MODULE       
-    snmp_outtraps++;
-#endif
-}
+
+    snmp_increment_statistic(STAT_SNMPOUTTRAPS);
+
+}  /* end send_v2_trap() */
 
 void
 send_trap_pdu(pdu)
@@ -382,27 +460,34 @@ send_trap_pdu(pdu)
   
   struct trap_sink *sink = v2sinks;
 
-  if ((snmp_enableauthentraps == 1) && sink != NULL) {
+  if ( (snmp_enableauthentraps == SNMP_AUTHENTICATED_TRAPS_ENABLED)
+							&& (sink != NULL) )
+  {
     while (sink) {
       mypdu = snmp_clone_pdu(pdu);
       if (snmp_send(sink->sesp, mypdu) == 0) {
         snmp_perror ("snmpd: send_trap_pdu");
       }
-#ifdef USING_MIBII_SNMP_MIB_MODULE       
-      snmp_outtraps++;
-#endif
+      snmp_increment_statistic(STAT_SNMPOUTTRAPS);
       sink = sink->next;
     }
   }
-}
+}  /* end send_trap_pdu() */
 
-void send_easy_trap (trap, specific)
+/*
+ * FIX  Need case for v3? 
+ */
+void
+send_easy_trap (trap, specific)
     int trap;
     int specific;
 {
     struct trap_sink *sink = sinks;
 
-    if ((snmp_enableauthentraps == 1 || trap != 4) && sink != NULL) {
+    if ( ((snmp_enableauthentraps == SNMP_AUTHENTICATED_TRAPS_ENABLED)
+		|| (trap != SNMP_TRAP_AUTHFAIL))
+			&& (sink != NULL) )
+    {
 	while (sink) {
 	    switch (sink->ses.version) {
 	    case SNMP_VERSION_1:
@@ -418,30 +503,27 @@ void send_easy_trap (trap, specific)
 	    sink = sink->next;
 	}
     }
-}
-  
-char *reverse_bytes(buf,num)
+}  /* end send_easy_trap() */
+ 
+char *
+reverse_bytes(buf,num)
   char *buf;
   int num;
 {
   static char outbuf[100];
   int i;
+
+  if (num > 100)
+    return NULL;
   
   for(i=num-1;i>=0;i--)
     outbuf[i] = *buf++;
   return(outbuf);
-}
+}  /* end reverse_bytes() */
 
-char **argvrestartp;
-char *argvrestart;
-char *argvrestartname;
 
-#include "version.h"
-
-extern char *optconfigfile;
-extern char dontReadConfigFiles;
-
-static void usage(prog)
+static void
+usage(prog)
 char *prog;
 {
   printf("\nUsage:  %s [-h] [-v] [-f] [-a] [-d] [-q] [-D] [-p NUM] [-L] [-l LOGFILE]\n",prog);
@@ -471,204 +553,319 @@ char *prog;
   exit(1);
 }
 
-static int agentBoots=0;
-
-void
-agentBoots_conf(word, cptr)
-  char *word;
-  char *cptr;
-{
-  agentBoots = atoi(cptr)+1;
-  DEBUGP("agentBoots: %d\n",agentBoots);
-}
 
 RETSIGTYPE
 SnmpdShutDown(a)
   int a;
 {
-  char line[512];
-  /* We've received a sigTERM.  Shutdown by calling mib-module
-     functions and sending out a shutdown trap. */
-  fprintf(stderr, "Received TERM or STOP signal...  shutting down...\n");
+	/*
+	 * We've received a sigTERM.  Shutdown by calling mib-module
+	 * functions and sending out a shutdown trap.
+	 */
+	fprintf(stderr, "Received TERM or INT signal...  shutting down...\n");
+
+        snmp_shutdown("snmpd");
+
 #include "mib_module_shutdown.h"
-  sprintf(line, "agentBoots %d", agentBoots);
-  snmpd_store_config(line);
-  DEBUGP("sending shutdown trap\n");
-  SnmpTrapNodeDown(a);
-  DEBUGP("Bye...\n");
-  exit(1);
-}
+
+	DEBUGP("sending shutdown trap\n");
+	SnmpTrapNodeDown(a);
+
+
+	DEBUGP("Bye...\n");
+	exit(1);
+
+}  /* end SnmpdShutDown() */
+
 
 static RETSIGTYPE
 SnmpTrapNodeDown(a)
   int a;
 {
-    send_easy_trap (6, 2); /* 2 - Node Down #define it as NODE_DOWN_TRAP */
+    send_easy_trap (SNMP_TRAP_ENTERPRISESPECIFIC, 2);
+    /* XXX  2 - Node Down #define it as NODE_DOWN_TRAP */
 }
 
-#define NUM_SOCKETS     32
-static int sdlist[NUM_SOCKETS], sdlen = 0;
-static int portlist[NUM_SOCKETS];
-int (*sd_handlers[NUM_SOCKETS])__P((int));
 
+/*******************************************************************-o-******
+ * main
+ *
+ * Parameters:
+ *	 argc
+ *	*argv[]
+ *      
+ * Returns:
+ *	0	Always succeeds.  (?)
+ *
+ *
+ * Setup and start the agent daemon.
+ *
+ * Also successfully EXITs with zero for some options.
+ */
 int
 main(argc, argv)
     int	    argc;
     char    *argv[];
 {
-    int	arg,i;
-    int ret;
-    u_short dest_port = 161;
-    int dont_fork = 0;
-    char logfile[300];
-    char *cptr, **argvptr;
+	int             arg, i;
+	int             ret;
+	u_short         dest_port = SNMP_PORT;
+	int             dont_fork = 0;
+	char            logfile[SNMP_MAXBUF_SMALL],
+			file[SNMP_MAXBUF_SMALL];
+	char           *cptr, **argvptr;
+	u_char          *engineID;
+	int             engineIDLen;
+        struct usmUser *user, *userListPtr;
+        char           *pid_file = NULL;
+        FILE           *PID;
 
-    logfile[0] = 0;
-    optconfigfile = NULL;
-    dontReadConfigFiles = 0;
-    
+	logfile[0]		= 0;
+	optconfigfile		= NULL;
+	dontReadConfigFiles	= 0;
+
 #ifdef LOGFILE
-    strcpy(logfile,LOGFILE);
+	strcpy(logfile, LOGFILE);
 #endif
 
-    /*
-     * usage: snmpd
-     */
-    for(arg = 1; arg < argc; arg++){
-	if (argv[arg][0] == '-'){
-	    switch(argv[arg][1]){
+
+	/*
+	 * usage: snmpd
+	 */
+	for (arg = 1; arg < argc; arg++)
+          {
+            if (argv[arg][0] == '-') {
+              switch (argv[arg][1]) {
                 case 'c':
-		    if (++arg == argc) usage(argv[0]);
-                    optconfigfile = strdup(argv[arg]);
-                    break;
-                case 'C':
-                    dontReadConfigFiles = 1;
-                    break;
-		case 'd':
-		    snmp_dump_packet++;
-		    verbose = 1;
-		    break;
-		case 'q':
-		    snmp_set_quick_print(1);
-		    break;
-		case 'D':
-		    snmp_set_do_debugging(1);
-		    break;
-                case 'p':
-		    if (++arg == argc) usage(argv[0]);
-                    dest_port = atoi(argv[arg]);
-		    if (dest_port <= 0) usage(argv[0]);
-                    break;
-		case 'a':
-		    log_addresses++;
-		    break;
-		case 'V':
-		    verbose = 1;
-		    break;
-		case 'f':
-		    dont_fork = 1;
-		    break;
-                case 'l':
-		    if (++arg == argc) usage(argv[0]);
-                    strcpy(logfile,argv[arg]);
-                    break;
-                case 'L':
-                    logfile[0] = 0;
-                    break;
-                case 'h':
+                  if (++arg == argc)
                     usage(argv[0]);
-                    break;
+                  optconfigfile = strdup(argv[arg]);
+                  break;
+
+                case 'C':
+                  dontReadConfigFiles = 1;
+                  break;
+
+                case 'd':
+                  snmp_dump_packet++;
+                  verbose = 1;
+                  break;
+
+                case 'q':
+                  snmp_set_quick_print(1);
+                  break;
+
+                case 'D':
+                  snmp_set_do_debugging(!snmp_get_do_debugging());
+                  break;
+
+                case 'p':
+                  if (++arg == argc)
+                    usage(argv[0]);
+                  dest_port = atoi(argv[arg]);
+                  if (dest_port <= 0)
+                    usage(argv[0]);
+                  break;
+
+                case 'P':
+                  if (++arg == argc)
+                    usage(argv[0]);
+                  pid_file = argv[arg];
+
+                case 'a':
+                      log_addresses++;
+                  break;
+
+                case 'V':
+                  verbose = 1;
+                  break;
+
+                case 'f':
+                  dont_fork = 1;
+                  break;
+
+                case 'l':
+                  if (++arg == argc)
+                    usage(argv[0]);
+                  strcpy(logfile, argv[arg]);
+                  break;
+
+                case 'L':
+                  logfile[0] = 0;
+                  break;
+
+                case 'h':
+                  usage(argv[0]);
+                  break;
+
                 case 'v':
-                    printf("\nUCD-snmp version:  %s\n",VersionInfo);
-                    printf("Author:            Wes Hardaker\n");
-                    printf("Email:             ucd-snmp-coders@ece.ucdavis.edu\n\n");
-                    exit (0);
+                  printf(
+                    "\n"
+                    "UCD-snmp version:  %s\n"
+                    "Author:            Wes Hardaker\n"
+                    "Email:             ucd-snmp-coders@ece.ucdavis.edu\n\n",
+                    VersionInfo);
+                  exit(0);
+
                 case '-':
-                  switch(argv[arg][2]){
-                    case 'v': 
-                      printf("\nUCD-snmp version:  %s\n",VersionInfo);
-                      printf("Author:            Wes Hardaker\n");
-                      printf("Email:             ucd-snmp-coders@ece.ucdavis.edu\n\n");
-                      exit (0);
+                  switch (argv[arg][2]) {
+                    case 'v':
+                      printf(
+                        "\n"
+                        "UCD-snmp version:  %s\n"
+                        "Author:            Wes Hardaker\n"
+                        "Email:             ucd-snmp-coders@ece.ucdavis.edu\n\n",
+                        VersionInfo);
+                      exit(0);
                     case 'h':
                       usage(argv[0]);
                       exit(0);
                   }
-		default:
-		    printf("invalid option: %s\n", argv[arg]);
-                    usage(argv[0]);
-		    break;
-	    }
-	    continue;
+
+                default:
+                  printf("invalid option: %s\n", argv[arg]);
+                  usage(argv[0]);
+                  break;
+              }
+              continue;
+            }
+          }  /* end-for */
+
+
+	/* 
+	 * Initialize a argv set to the current for restarting the agent.
+	 */
+	argvrestartp = (char **) malloc((argc + 2) * sizeof(char *));
+	argvptr = argvrestartp;
+	for (i = 0, ret = 1; i < argc; i++) {
+		ret += strlen(argv[i]) + 1;
 	}
-    }
-    /* initialize a argv set to the current for restarting the agent */
-    argvrestartp = (char **) malloc((argc+2) * sizeof (char *));
-    argvptr = argvrestartp;
-    for(i=0, ret = 1; i < argc; i++) {
-      ret += strlen(argv[i])+1;
-    }
-    argvrestart = (char *) malloc((ret));
-    argvrestartname = (char *) malloc(strlen(argv[0])+1);
-    strcpy(argvrestartname,argv[0]);
-    for(cptr = argvrestart,i = 0; i < argc; i++) {
-      strcpy(cptr,argv[i]);
-      *(argvptr++) = cptr;
-      cptr += strlen(argv[i]) + 1;
-    }
-    *cptr = 0;
-    *argvptr = NULL;
+	argvrestart = (char *) malloc((ret));
+	argvrestartname = (char *) malloc(strlen(argv[0]) + 1);
+	strcpy(argvrestartname, argv[0]);
+	for (cptr = argvrestart, i = 0; i < argc; i++) {
+		strcpy(cptr, argv[i]);
+		*(argvptr++) = cptr;
+		cptr += strlen(argv[i]) + 1;
+	}
+	*cptr = 0;
+	*argvptr = NULL;
 
-    /* open the logfile if necessary */
-    if (logfile[0]) {
-      close(1);
-      open(logfile,O_WRONLY|O_CREAT|O_TRUNC,0644);
-      close(2);
-      dup(1);
-      close(0);
-    }
+
+	/* 
+	 * Open the logfile if necessary.
+	 */
+	if (logfile[0]) {
+		close(1);
+		open(logfile, O_WRONLY | O_CREAT | O_TRUNC, 0644);
+		close(2);
+		dup(1);
+		close(0);
+	}
 #ifdef USE_LIBWRAP
-    openlog("snmpd", LOG_CONS, LOG_AUTH|LOG_INFO);
+	openlog("snmpd", LOG_CONS, LOG_AUTH | LOG_INFO);
 #endif
-    setvbuf (stdout, NULL, _IOLBF, BUFSIZ);
-    printf ("%s UCD-SNMP version %s\n", sprintf_stamp (NULL), VersionInfo);
-    if (!dont_fork && fork() != 0)   /* detach from shell */
-      exit(0);
-    init_agent();            /* register our .conf handlers */
-    register_mib_handlers(); /* snmplib .conf handlers */
-    read_premib_configs();   /* read pre-mib-reading .conf handlers */
-    init_mib();              /* initialize the mib structures */
-    update_config(0);        /* read in config files and register HUP */
-#ifdef PERSISTENTFILE
-    /* read in the persistent information cache */
-    read_config_with_type(PERSISTENTFILE, "snmpd");
-    unlink(PERSISTENTFILE);  /* nuke it now that we've read it */
-#endif
-    init_snmp2p( dest_port );
-    
-    printf("Opening port(s): "); 
-    fflush(stdout);
-    if (( ret = open_port( dest_port )) > 0 )
-        sd_handlers[ret-1] = snmp_read_packet;   /* Save pointer to function */
-    open_ports_snmp2p( );
-    printf("\n");
-    fflush(stdout);
+	setvbuf(stdout, NULL, _IOLBF, BUFSIZ);
+	printf("%s UCD-SNMP version %s\n", sprintf_stamp(NULL), VersionInfo);
 
-    /* get current time (ie, the time the agent started) */
-    gettimeofday(&starttime, NULL);
-    starttime.tv_sec--;
-    starttime.tv_usec += 1000000L;
 
-    /* send coldstart trap via snmptrap(1) if possible */
-    send_easy_trap (0, 0);
-    signal(SIGTERM, SnmpdShutDown);
-    signal(SIGINT, SnmpdShutDown);
+	/* 
+	 * Initialize the world.  Detach from the shell.
+	 * Create initial user.
+	 */
+	if (!dont_fork && fork() != 0) {
+		exit(0);
+	}
 
-    memset(addrCache, 0, sizeof(addrCache));
-    receive(sdlist, sdlen);
-    return 0;
-}
+        if (pid_file != NULL) {
+          if ((PID = fopen(pid_file, "w")) == NULL) {
+            perror("fopen");
+            exit(1);
+          }
+          fprintf(PID, "%d\n", getpid());
+          fclose(PID);
+        }
 
+        usm_set_reportErrorOnUnknownID(1);
+	init_agent();		/* register our .conf handlers */
+	init_snmpv3("snmpd");	/* register the v3 handlers */
+	register_mib_handlers();/* snmplib .conf handlers */
+	read_premib_configs();	/* read pre-mib-reading .conf handlers */
+
+        /* create the initial and template users */
+        user = usm_create_initial_user("initial", usmHMACMD5AuthProtocol,
+                                       USM_LENGTH_OID_TRANSFORM,
+                                       usmDESPrivProtocol,
+                                       USM_LENGTH_OID_TRANSFORM);
+        userListPtr = usm_add_user(user);
+        user = usm_create_initial_user("templateMD5", usmHMACMD5AuthProtocol,
+                                       USM_LENGTH_OID_TRANSFORM,
+                                       usmDESPrivProtocol,
+                                       USM_LENGTH_OID_TRANSFORM);
+        userListPtr = usm_add_user(user);
+        user = usm_create_initial_user("templateSHA", usmHMACSHA1AuthProtocol,
+                                       USM_LENGTH_OID_TRANSFORM,
+                                       usmDESPrivProtocol,
+                                       USM_LENGTH_OID_TRANSFORM);
+        userListPtr = usm_add_user(user);
+        
+        if (userListPtr == NULL) /* user already existed */
+          usm_free_user(user);
+	init_mib();		/* initialize the mib structures */
+	update_config(0);	/* read in config files and register HUP */
+        init_usm_post_config();
+        init_snmpv3_post_config();
+
+	/* 
+	 * Open ports.
+	 * Set the time.
+	 * Tell the world we're up.
+	 * Set signal handlers.
+	 *
+	 * Forever monitor the dest_port for incoming PDUs.
+	 */
+	init_snmp2p(dest_port);
+	printf("Opening port(s): ");
+	fflush(stdout);
+	if ((ret = open_port(dest_port)) > 0) {
+		/* Save pointer to function.
+		 */
+		sd_handlers[ret - 1] = snmp_read_packet;	
+	}
+	open_ports_snmp2p();
+	printf("\n");
+	fflush(stdout);
+
+	gettimeofday(&starttime, NULL);
+	starttime.tv_sec--;
+	starttime.tv_usec += 1000000L;
+
+	send_easy_trap(SNMP_TRAP_COLDSTART, 0);
+	signal(SIGTERM, SnmpdShutDown);
+	signal(SIGINT, SnmpdShutDown);
+
+	memset(addrCache, 0, sizeof(addrCache));
+	receive(sdlist, sdlen);
+
+
+	return 0;
+
+}  /* end main() -- snmpd */
+
+
+/*******************************************************************-o-******
+ * open_port
+ *
+ * Parameters:
+ *	dest_port	Port number for destination to open.
+ *      
+ * Returns:
+ *	>0	On success: socket descriptor number.
+ *	 0	If the requested port is already open.
+ *	<0	Socket manipulation error.
+ *
+ * ASSUMEs dest_port is in host-byte order.
+ */
 int
 open_port ( dest_port )
      u_short dest_port;
@@ -691,7 +888,6 @@ open_port ( dest_port )
 	}
 	me.sin_family = AF_INET;
 	me.sin_addr.s_addr = INADDR_ANY;
-	/* already in network byte order (I think) */
 	me.sin_port = htons(dest_port);
 	if (bind(sd, (struct sockaddr *)&me, sizeof(me)) != 0){
 	    fprintf(stderr,"bind: udp/%d: ", ntohs(me.sin_port));
@@ -708,9 +904,25 @@ open_port ( dest_port )
         return sdlen;
 }
 
-#define TIMETICK         500000L
-#define ONE_SEC         1000000L
 
+
+
+
+/*******************************************************************-o-******
+ * receive
+ *
+ * Parameters:
+ *	sdlist[]
+ *	sdlen
+ *      
+ * Returns:
+ *	0	On success.
+ *	-1	System error.
+ *
+ * Infinite while-loop which monitors incoming messges for the agent.
+ * Invoke the established message handlers for incoming messages on a per
+ * port basis.  Handle timeouts.
+ */
 static int
 receive(sdlist, sdlen)
     int sdlist[];
@@ -718,11 +930,16 @@ receive(sdlist, sdlen)
 {
     int numfds, index;
     fd_set fdset;
-    struct timeval  timeout, *tvp = &timeout;
-    struct timeval  sched, *svp = &sched, now, *nvp = &now;
+    struct timeval	timeout, *tvp = &timeout;
+    struct timeval	sched,   *svp = &sched,
+			now,     *nvp = &now;
     int count, block;
 
 
+
+    /*
+     * Set the 'sched'uled timeout to the current time + one TIMETICK.
+     */
     gettimeofday(nvp, (struct timezone *) NULL);
     svp->tv_usec = nvp->tv_usec + TIMETICK;
     svp->tv_sec = nvp->tv_sec;
@@ -731,6 +948,13 @@ receive(sdlist, sdlen)
 	svp->tv_usec -= ONE_SEC;
 	svp->tv_sec++;
     }
+
+
+
+    /*
+     * Loop-forever: execute message handlers for sockets with data,
+     * reset the 'sched'uler.
+     */
     while(1){
 	tvp =  &timeout;
 	tvp->tv_sec = 0;
@@ -748,6 +972,7 @@ receive(sdlist, sdlen)
         if (block == 1)
             tvp = NULL; /* block without timeout */
 	count = select(numfds, &fdset, 0, 0, tvp);
+
 	if (count > 0){
 	    for(index = 0; index < sdlen; index++){
 		if(FD_ISSET(sdlist[index], &fdset)){
@@ -770,8 +995,19 @@ receive(sdlist, sdlen)
 	    default:
 		printf("select returned %d\n", count);
 		return -1;
-	}
+	}  /* endif -- count>0 */
+
+
+	/*
+	 * If the time 'now' is greater than the 'sched'uled time, then:
+	 *
+	 *	Check alarm and event timers if v2p is configured.
+	 *	Reset the 'sched'uled time to current time + one TIMETICK.
+	 *	Age the cache network addresses (from whom messges have
+	 *		been received).
+	 */
         gettimeofday(nvp, (struct timezone *) NULL);
+
 	if (nvp->tv_sec > svp->tv_sec
 	    || (nvp->tv_sec == svp->tv_sec && nvp->tv_usec > svp->tv_usec)){
 #ifdef USING_V2PARTY_ALARM_MODULE
@@ -798,50 +1034,82 @@ receive(sdlist, sdlen)
 			addrCache[count].status = OLD;
 		}
 	    }
-	}
-    }
-    return 0;
-}
+	}  /* endif -- now>sched */
+    }  /* endwhile */
 
+    return 0;
+
+}  /* end receive() */
+
+
+
+
+/*******************************************************************-o-******
+ * snmp_read_packet
+ *
+ * Parameters:
+ *	sd
+ *      
+ * Returns:
+ *	1	On success.
+ *	0	On error.
+ *
+ * Handler for all incoming messages (a.k.a. packets) for the agent.  Pass
+ * them on to snmp_agent_parse().  Write to the log file.
+ *
+ */
 int
 snmp_read_packet(sd)
     int sd;
 {
     struct sockaddr_in	from;
     int length, out_length, fromlength;
-    u_char  packet[1500], outpacket[1500];
+    u_char  packet[SNMP_MAXBUF_MESSAGE], outpacket[SNMP_MAXBUF_MESSAGE];
 #ifdef USE_LIBWRAP
     char *addr_string;
 #endif
+
+
+    /*
+     * Receive a message.
+     */
     fromlength = sizeof from;
-    length = recvfrom(sd, (char *) packet, 1500, 0, (struct sockaddr *)&from,
+    length = recvfrom(sd, (char *) packet, SNMP_MAXBUF_MESSAGE,
+		      0, (struct sockaddr *)&from,
 		      &fromlength);
     if (length == -1)
 	perror("recvfrom");
 
+
+
+    /*
+     * Log the message and/or dump the message.
+     * Optionally cache the network address of the sender.
+     */
 #ifdef USE_LIBWRAP
-	addr_string = inet_ntoa(from.sin_addr);
+    addr_string = inet_ntoa(from.sin_addr);
 
-	if(!addr_string) {
-          addr_string = STRING_UNKNOWN;
-	}
-	if(hosts_ctl("snmpd", addr_string, addr_string, STRING_UNKNOWN)) {
-          syslog(allow_severity, "Connection from %s", addr_string);
-	} else {
-          syslog(deny_severity, "Connection from %s refused", addr_string);
-          return(0);
-	}
-#endif
+    if(!addr_string) {
+      addr_string = STRING_UNKNOWN;
+    }
+    if(hosts_ctl("snmpd", addr_string, addr_string, STRING_UNKNOWN)) {
+      syslog(allow_severity, "Connection from %s", addr_string);
+    } else {
+      syslog(deny_severity, "Connection from %s refused", addr_string);
+      return(0);
+    }
+#endif	/* USE_LIBWRAP */
 
-#ifdef USING_MIBII_SNMP_MIB_MODULE       
-    snmp_inpkts++;
-#endif
+    snmp_increment_statistic(STAT_SNMPINPKTS);
+
+
     if (snmp_dump_packet){
-	printf("\nreceived %d bytes from %s:\n", length,
+	printf("\nReceived %d bytes from %s:\n", length,
 	       inet_ntoa(from.sin_addr));
 	xdump(packet, length, "");
 	printf("\n");
         fflush(stdout);
+
     } else if (log_addresses){
 	int count;
 	
@@ -850,6 +1118,7 @@ snmp_read_packet(sd)
 		&& from.sin_addr.s_addr == addrCache[count].addr)
 		break;
 	}
+
 	if (count >= ADDRCACHE || verbose){
 	    printf("%s Received SNMP packet(s) from %s\n",
 		   sprintf_stamp(NULL), inet_ntoa(from.sin_addr));
@@ -863,31 +1132,62 @@ snmp_read_packet(sd)
 	} else {
 	    addrCache[count].status = USED;
 	}
-    }
-    out_length = 1500;
+    }  /* endif -- snmp_dump_packet */
+
+
+
+    /*
+     * Parse the message and send a response.
+     * Optionally dump the response message.
+     */
+    out_length = SNMP_MAXBUF_MESSAGE;
     if (snmp_agent_parse(packet, length, outpacket, &out_length,
 			 from.sin_addr.s_addr)){
 	if (snmp_dump_packet){
-	    printf("\nsent %d bytes to %s:\n", out_length,
+	    printf("\nSent %d bytes to %s:\n", out_length,
 		   inet_ntoa(from.sin_addr));
 	    xdump(outpacket, out_length, "");
 	    printf("\n");
             fflush(stdout);
 	}
-#ifdef USING_MIBII_SNMP_MIB_MODULE       
-	snmp_outpkts++;
-#endif
+
+  	snmp_increment_statistic(STAT_SNMPOUTPKTS);
+
 	if (sendto(sd, (char *)outpacket, out_length, 0,
 		   (struct sockaddr *)&from, sizeof(from)) < 0){
 	    perror("sendto");
 	    return 0;
 	}
 
-    }
-    return 1;
-}
+    } else {
+      snmp_perror("snmp_agent_parse()");
+    }  /* endif -- snmp_agent_parse */
 
-/* deals with replies from remote alarm variables, and from inform pdus */
+    return 1;
+
+}  /* end snmp_read_packet() */
+
+
+
+
+/*******************************************************************-o-******
+ * snmp_input
+ *
+ * Parameters:
+ *	 op
+ *	*session
+ *	 requid
+ *	*pdu
+ *	*magic
+ *      
+ * Returns:
+ *	1		On success	-OR-
+ *	Passes through	Return from alarmGetResponse() when 
+ *	  		  USING_V2PARTY_ALARM_MODULE is defined.
+ *
+ * Call-back function to manage responses to traps (informs) and alarms.
+ * Not used by the agent to process other Response PDUs.
+ */
 int
 snmp_input(op, session, reqid, pdu, magic)
     int op;
@@ -917,9 +1217,13 @@ snmp_input(op, session, reqid, pdu, magic)
 	}
     }
     return 1;
-}
+
+}  /* end snmp_input() */
+
+
     
-void snmpd_parse_config_authtrap(word, cptr)
+void
+snmpd_parse_config_authtrap(word, cptr)
     char *word;
     char *cptr;
 {
@@ -932,7 +1236,8 @@ void snmpd_parse_config_authtrap(word, cptr)
 	snmp_enableauthentraps = i;
 }
 
-void snmpd_parse_config_trapsink(word, cptr)
+void
+snmpd_parse_config_trapsink(word, cptr)
     char *word;
     char *cptr;
 {
@@ -944,7 +1249,9 @@ void snmpd_parse_config_trapsink(word, cptr)
     }
 }
 
-void snmpd_parse_config_trap2sink(word, cptr)
+
+void
+snmpd_parse_config_trap2sink(word, cptr)
     char *word;
     char *cptr;
 {
@@ -956,7 +1263,8 @@ void snmpd_parse_config_trap2sink(word, cptr)
     }
 }
 
-void snmpd_parse_config_trapcommunity(word,cptr)
+void
+snmpd_parse_config_trapcommunity(word,cptr)
     char *word;
     char *cptr;
 {
@@ -965,10 +1273,12 @@ void snmpd_parse_config_trapcommunity(word,cptr)
     copy_word(cptr, snmp_trapcommunity);
 }
 
-void snmpd_free_trapcommunity __P((void))
+void
+snmpd_free_trapcommunity __P((void))
 {
     if (snmp_trapcommunity) {
 	free(snmp_trapcommunity);
 	snmp_trapcommunity = NULL;
     }
 }
+

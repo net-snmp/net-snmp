@@ -72,12 +72,31 @@ void DEBUGP __P((const char *, ...));
 void DEBUGP __P((va_alist));
 #endif
 
+#define DEBUGPL(x)	\
+	    DEBUGP("%s():%s,%d: ",__FUNCTION__,__FILE__,__LINE__); DEBUGP x ;
+
 #ifndef HAVE_STRDUP
 char *strdup __P((char *));
 #endif
 #ifndef HAVE_SETENV
 int setenv __P((char *, char *, int));
 #endif
- 
-#endif /* SNMP_SYSTEM_H */
 
+#if TIME_WITH_SYS_TIME	
+#	ifdef WIN32
+#		include <sys/timeb.h>
+#	else
+#		include <sys/time.h>
+#	endif
+#	include <time.h>
+#else
+#	if HAVE_SYS_TIME_H
+#		include <sys/time.h>
+#	else
+#		include <time.h>
+#	endif
+#endif
+ 
+int calculate_time_diff(struct timeval *, struct timeval *);
+
+#endif /* SNMP_SYSTEM_H */

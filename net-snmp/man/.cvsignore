@@ -1,4 +1,5 @@
+*.html
 Makefile
+snmp.conf.5
 snmpd.1
 snmpd.conf.5
-*.html

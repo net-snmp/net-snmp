@@ -67,15 +67,16 @@ var_sysORTable(vp, name, length, exact, var_len, write_method)
   if (!checkmib(vp, name, length, exact, var_len, write_method, numEntries))
     return NULL;
 
+  DEBUGP("sysORTable -- ");
   for(i = 1, ptr=table; ptr != NULL && i < name[*length-1];
       ptr = ptr->next, i++) {
-    DEBUGP("sysORTable -- %d != %d\n",i,name[*length-1]);
+    DEBUGP("%d!=%d ",i,name[*length-1]);
   }
   if (ptr == NULL) {
-    DEBUGP("sysORTable -- no match: %d\n",i);
+    DEBUGP("...no match: %d\n",i);
     return NULL;
   }
-  DEBUGP("sysORTable -- match: %d\n",i);
+  DEBUGP("...match: %d\n",i);
   
   switch (vp->magic){
     case SYSORTABLEINDEX:
