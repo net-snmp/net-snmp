@@ -54,7 +54,7 @@ TESTING:
       Assuming you are going to build in the source directory :
 
       $ cd SOURCE-DIR
-      $ nsb-config -x -p -s $PWD
+      $ nsb-config -x -s $PWD
 
   1) [This step is currently only for the 5.x versions]
 
