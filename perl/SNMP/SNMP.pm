@@ -720,8 +720,8 @@ sub trap {
 #             [[ifIndex, 1, 1],[sysLocation, 0, "here"]]); # optional vars
 #                                                          # always last
 # (v2) oid, uptime, <vars>
-# $sess->trap(oid => 'snmpRisingAlarm',
-#             uptime => 1234,
+# $sess->trap(uptime => 1234,
+#             trapoid => 'snmpRisingAlarm',
 #             [[ifIndex, 1, 1],[sysLocation, 0, "here"]]); # optional vars
 #                                                          # always last
    my $this = shift;
@@ -750,11 +750,9 @@ sub trap {
        @res = SNMP::_trapV1($this, $enterprise, $agent, $generic, $specific,
 			  $uptime, $varbind_list_ref);
    } else {
-#       my $dstParty = $param{dstParty};
-#       my $srcParty = $param{srcParty};
-       my $trap_oid = $param{oid};
+       my $trap_oid = $param{trapoid};
        my $uptime = $param{uptime};
-       @res = SNMP::_trapV2($this, $trap_oid, $uptime, $varbind_list_ref);
+       @res = SNMP::_trapV2($this, $uptime, $trap_oid, $varbind_list_ref);
    }
 
    return(wantarray() ? @res : $res[0]);
