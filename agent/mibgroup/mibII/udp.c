@@ -75,17 +75,11 @@
 	 *
 	 *********************/
 
-struct variable1 udpconn_variables[] = {
-    {UDPLOCALADDRESS, ASN_IPADDRESS, RONLY, var_udpEntry, 1, {1}},
-    {UDPLOCALPORT,    ASN_INTEGER,   RONLY, var_udpEntry, 1, {2}}
-};
-
 /*
  * Define the OID pointer to the top of the mib tree that we're
  * registering underneath, and the OID for the MIB module 
  */
 oid             udp_oid[]               = { SNMP_OID_MIB2, 7 };
-oid             udpconn_variables_oid[] = { SNMP_OID_MIB2, 7, 5, 1 };
 oid             udp_module_oid[]        = { SNMP_OID_MIB2, 50 };
 
 void
@@ -112,10 +106,6 @@ init_udp(void)
 					udp_oid, OID_LENGTH(udp_oid)));
 #endif
 
-    /*
-     * register (using the old-style API) to handle the UDP connection table
-     */
-    REGISTER_MIB("mibII/udpconn",  udpconn_variables, variable1, udpconn_variables_oid);
     REGISTER_SYSOR_ENTRY(udp_module_oid,
                          "The MIB module for managing UDP implementations");
 

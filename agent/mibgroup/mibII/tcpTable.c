@@ -1,111 +1,13 @@
-
 /*
- *  TCP MIB group implementation - tcp.c
+ *  TCP MIB group Table implementation - tcpTable.c
  *
  */
 
 #include <net-snmp/net-snmp-config.h>
+#include "mibII_common.h"
 
-#if HAVE_UNISTD_H
-#include <unistd.h>
-#endif
-#if HAVE_STRING_H
-#include <string.h>
-#else
-#include <strings.h>
-#endif
-
-#if HAVE_SYS_PARAM_H
-#include <sys/param.h>
-#endif
-#if HAVE_SYS_PROTOSW_H
-#include <sys/protosw.h>
-#endif
-
-#if HAVE_SYS_SYSMP_H
-#include <sys/sysmp.h>
-#endif
-#if defined(IFNET_NEEDS_KERNEL) && !defined(_KERNEL)
-#define _KERNEL 1
-#define _I_DEFINED_KERNEL
-#endif
-#if HAVE_SYS_SOCKET_H
-#include <sys/socket.h>
-#endif
-#if HAVE_WINSOCK_H
-#include <winsock.h>
-#endif
-#if HAVE_NETINET_IN_H
-#include <netinet/in.h>
-#endif
-#if HAVE_NET_IF_H
-#include <net/if.h>
-#endif
-#if HAVE_NET_IF_VAR_H
-#include <net/if_var.h>
-#endif
-#ifdef _I_DEFINED_KERNEL
-#undef _KERNEL
-#endif
-#if HAVE_SYS_STREAM_H
-#include <sys/stream.h>
-#endif
-#if HAVE_NET_ROUTE_H
-#include <net/route.h>
-#endif
-#if HAVE_NETINET_IN_SYSTM_H
-#include <netinet/in_systm.h>
-#endif
-#if HAVE_NETINET_IP_H
-#include <netinet/ip.h>
-#endif
-#if HAVE_SYS_QUEUE_H
-#include <sys/queue.h>
-#endif
-#if HAVE_NETINET_IP_VAR_H
-#include <netinet/ip_var.h>
-#endif
-#ifdef INET6
-#if HAVE_NETINET6_IP6_VAR_H
-#include <netinet6/ip6_var.h>
-#endif
-#endif
-#if HAVE_SYS_SOCKETVAR_H
-#include <sys/socketvar.h>
-#endif
-#if HAVE_NETINET_IN_PCB_H
-#include <netinet/in_pcb.h>
-#endif
-#if HAVE_INET_MIB2_H
-#include <inet/mib2.h>
-#endif
-#ifdef solaris2
-#include "kernel_sunos5.h"
-#else
-#include "kernel.h"
-#endif
-
-#if HAVE_SYS_SYSCTL_H
-#include <sys/sysctl.h>
-#endif
-#if HAVE_ARPA_INET_H
-#include <arpa/inet.h>
-#endif
-
-#if defined(osf4) || defined(aix4) || defined(hpux10)
-/*
- * these are undefed to remove a stupid warning on osf compilers
- * because they get redefined with a slightly different notation of the
- * same value.  -- Wes 
- */
-#undef TCP_NODELAY
-#undef TCP_MAXSEG
-#endif
 #if HAVE_NETINET_TCP_H
 #include <netinet/tcp.h>
-#endif
-#if HAVE_NETINET_TCPIP_H
-#include <netinet/tcpip.h>
 #endif
 #if HAVE_NETINET_TCP_TIMER_H
 #include <netinet/tcp_timer.h>
@@ -113,483 +15,440 @@
 #if HAVE_NETINET_TCP_VAR_H
 #include <netinet/tcp_var.h>
 #endif
-#if HAVE_NETINET_TCP_FSM_H
-#include <netinet/tcp_fsm.h>
-#endif
-#if HAVE_SYS_TCPIPSTATS_H
-#include <sys/tcpipstats.h>
-#endif
 
 #include <net-snmp/net-snmp-includes.h>
 #include <net-snmp/agent/net-snmp-agent-includes.h>
 #include <net-snmp/agent/auto_nlist.h>
 
-#ifdef hpux
-#include <sys/mib.h>
-#include <netinet/mib_kern.h>
-#endif                          /* hpux */
-
-#ifdef cygwin
-#define WIN32
-#include <windows.h>
-#endif
-
 #include "tcp.h"
 #include "tcpTable.h"
-
-#if HAVE_DMALLOC_H
-#include <dmalloc.h>
-#endif
-
-        /*********************
-	 *
-	 *  Kernel & interface information,
-	 *   and internal forward declarations
-	 *
-	 *********************/
-
-
-        /*********************
-	 *
-	 *  Initialisation & common implementation functions
-	 *
-	 *********************/
-
-
-        /*********************
-	 *
-	 *  System specific implementation functions
-	 *
-	 *********************/
-#ifndef WIN32
-#ifndef solaris2
-
-u_char         *
-var_tcpEntry(struct variable *vp,
-             oid * name,
-             size_t * length,
-             int exact, size_t * var_len, WriteMethod ** write_method)
-{
-    int             i;
-    oid             newname[MAX_OID_LEN], lowest[MAX_OID_LEN], *op;
-    u_char         *cp;
-#ifdef hpux11
-    int             LowState;
-    static mib_tcpConnEnt tcp, Lowtcp;
-#else
-    int             State, LowState;
-    static struct inpcb inpcb, Lowinpcb;
-#endif
-
-    /*
-     *  Allow for a kernel w/o TCP
-     */
-#ifdef TCPSTAT_SYMBOL
-#if !defined(linux) && !defined(hpux11)
-    if (auto_nlist_value(TCPSTAT_SYMBOL) == -1)
-        return (NULL);
-#endif
-#endif
-
-    memcpy((char *) newname, (char *) vp->name,
-           (int) vp->namelen * sizeof(oid));
-    lowest[0] = 9999;
-
-    /*
-     * find "next" connection 
-     */
-#ifndef hpux11
-  Again:
-#endif
-    LowState = -1;              /* Don't have one yet */
-    TCP_Scan_Init();
-    for (;;) {
-#ifdef hpux11
-        if ((i = TCP_Scan_Next(&tcp)) == 0)
-            break;              /* Done */
-        cp = (u_char *) & tcp.LocalAddress;
-#else                           /* hpux11 */
-        if ((i = TCP_Scan_Next(&State, &inpcb)) < 0)
-            goto Again;
-        if (i == 0)
-            break;              /* Done */
-#if defined(osf5) && defined(IN6_EXTRACT_V4ADDR)
-        cp = (u_char *) IN6_EXTRACT_V4ADDR(&inpcb.inp_laddr);
-#else
-        cp = (u_char *) & inpcb.inp_laddr.s_addr;
-#endif /* #if defined(osf5) && defined(IN6_EXTRACT_V4ADDR) */
-
-#endif                          /* hpux11 */
-        op = newname + 10;
-        *op++ = *cp++;
-        *op++ = *cp++;
-        *op++ = *cp++;
-        *op++ = *cp++;
+#include "sysORTable.h"
 
 #ifdef hpux11
-        newname[14] = (unsigned short) tcp.LocalPort;
-#else
-        newname[14] = ntohs(inpcb.inp_lport);
-#endif
-
-#ifdef hpux11
-        cp = (u_char *) & tcp.RemAddress;
-#else
-
-#if defined(osf5) && defined(IN6_EXTRACT_V4ADDR)
-        cp = (u_char *) IN6_EXTRACT_V4ADDR(&inpcb.inp_faddr);
-#else
-        cp = (u_char *) & inpcb.inp_faddr.s_addr;
-#endif /* #if defined(osf5) && defined(IN6_EXTRACT_V4ADDR) */
-
-#endif
-        op = newname + 15;
-        *op++ = *cp++;
-        *op++ = *cp++;
-        *op++ = *cp++;
-        *op++ = *cp++;
-
-#ifdef hpux11
-        newname[19] = (unsigned short) tcp.RemPort;
-#else
-        newname[19] = ntohs(inpcb.inp_fport);
-#endif
-
-        if (exact) {
-            if (snmp_oid_compare(newname, 20, name, *length) == 0) {
-                memcpy((char *) lowest, (char *) newname,
-                       20 * sizeof(oid));
-#ifdef hpux11
-                LowState = tcp.State;
-                Lowtcp = tcp;
-#else                           /* hpux11 */
-                LowState = State;
-                Lowinpcb = inpcb;
-#endif                          /* hpux11 */
-                break;          /* no need to search further */
-            }
-        } else {
-            if (snmp_oid_compare(newname, 20, name, *length) > 0 &&
-                snmp_oid_compare(newname, 20, lowest, 20) < 0) {
-                /*
-                 * if new one is greater than input and closer to input than
-                 * previous lowest, save this one as the "next" one.
-                 */
-                memcpy((char *) lowest, (char *) newname,
-                       20 * sizeof(oid));
-#ifdef hpux11
-                LowState = tcp.State;
-                Lowtcp = tcp;
-#else                           /* hpux11 */
-                LowState = State;
-                Lowinpcb = inpcb;
-#endif                          /* hpux11 */
-            }
-        }
-    }
-    if (LowState < 0)
-        return (NULL);
-    memcpy((char *) name, (char *) lowest,
-           (vp->namelen + 10) * sizeof(oid));
-    *length = vp->namelen + 10;
-    *write_method = 0;
-    *var_len = sizeof(long);
-    switch (vp->magic) {
-    case TCPCONNSTATE:{
-#ifdef hpux11
-            long_return = LowState;
-            return (u_char *) & long_return;
-#else                           /* hpux11 */
-#ifndef hpux
-            static int      StateMap[] =
-                { 1, 2, 3, 4, 5, 8, 6, 10, 9, 7, 11 };
-#else
-            static int      StateMap[] =
-                { 1, 2, 3, -1, 4, 5, 8, 6, 10, 9, 7, 11 };
-#endif
-            return (u_char *) & StateMap[LowState];
-#endif                          /* hpux11 */
-        }
-    case TCPCONNLOCALADDRESS:
-#ifdef hpux11
-        return (u_char *) & Lowtcp.LocalAddress;
+#define	TCPTABLE_ENTRY_TYPE	mib_tcpConnEnt 
+#define	TCPTABLE_STATE		State 
+#define	TCPTABLE_LOCALADDRESS	LocalAddress 
+#define	TCPTABLE_LOCALPORT	LocalPort 
+#define	TCPTABLE_REMOTEADDRESS	RemoteAddress 
+#define	TCPTABLE_REMOTEPORT	RemotePort 
+#define	TCPTABLE_IS_TABLE
 #else
 
-#if defined(osf5) && defined(IN6_EXTRACT_V4ADDR)
-        return (u_char *) IN6_EXTRACT_V4ADDR(&Lowinpcb.inp_laddr);
-#else
-        return (u_char *) & Lowinpcb.inp_laddr.s_addr;
-#endif /* #if defined(osf5) && defined(IN6_EXTRACT_V4ADDR) */
-
-#endif
-    case TCPCONNLOCALPORT:
-#ifdef hpux11
-        long_return = (unsigned short) Lowtcp.LocalPort;
-#else
-        long_return = ntohs(Lowinpcb.inp_lport);
-#endif
-        return (u_char *) & long_return;
-    case TCPCONNREMADDRESS:
-#ifdef hpux11
-        return (u_char *) & Lowtcp.RemAddress;
+#ifdef solaris2
+typedef struct netsnmp_tcpConnEntry_s netsnmp_tcpConnEntry;
+struct netsnmp_tcpConnEntry_s {
+    mib2_tcpConnEntry_t   entry;
+    netsnmp_tcpConnEntry *inp_next;
+};
+#define	TCPTABLE_ENTRY_TYPE	netsnmp_tcpConnEntry
+#define	TCPTABLE_STATE		entry.tcpConnState 
+#define	TCPTABLE_LOCALADDRESS	entry.tcpConnLocalAddress 
+#define	TCPTABLE_LOCALPORT	entry.tcpConnLocalPort 
+#define	TCPTABLE_REMOTEADDRESS	entry.tcpConnRemAddress 
+#define	TCPTABLE_REMOTEPORT	entry.tcpConnRemPort 
+#define	TCPTABLE_IS_LINKED_LIST
 #else
 
-#if defined(osf5) && defined(IN6_EXTRACT_V4ADDR)
-        return (u_char *) IN6_EXTRACT_V4ADDR(&Lowinpcb.inp_faddr);
+#ifdef WIN32
+#include <iphlpapi.h>
+#define	TCPTABLE_ENTRY_TYPE	MIB_TCPROW
+#define	TCPTABLE_STATE		dwState 
+#define	TCPTABLE_LOCALADDRESS	dwLocalAddr
+#define	TCPTABLE_LOCALPORT	dwLocalPort 
+#define	TCPTABLE_REMOTEADDRESS	dwRemoteAddr 
+#define	TCPTABLE_REMOTEPORT	dwRemotePort 
+#define	TCPTABLE_IS_TABLE
 #else
-        return (u_char *) & Lowinpcb.inp_faddr.s_addr;
-#endif /* #if defined(osf5) && defined(IN6_EXTRACT_V4ADDR) */
 
-#endif
-    case TCPCONNREMPORT:
-#ifdef hpux11
-        long_return = (unsigned short) Lowtcp.RemPort;
-#else
-        long_return = ntohs(Lowinpcb.inp_fport);
-#endif
-        return (u_char *) & long_return;
-    }
-    return NULL;
-}
-
-#else                           /* solaris2 - tcp */
-
-
-static int
-TCP_Cmp(void *addr, void *ep)
-{
-    if (memcmp((mib2_tcpConnEntry_t *) ep, (mib2_tcpConnEntry_t *) addr,
-               sizeof(mib2_tcpConnEntry_t)) == 0)
-        return (0);
-    else
-        return (1);
-}
-
-
-u_char         *
-var_tcpEntry(struct variable * vp,
-             oid * name,
-             size_t * length,
-             int exact, size_t * var_len, WriteMethod ** write_method)
-{
-    oid             newname[MAX_OID_LEN], lowest[MAX_OID_LEN], *op;
-    u_char         *cp;
-
-#define TCP_CONN_LENGTH	20
-#define TCP_LOCADDR_OFF	10
-#define TCP_LOCPORT_OFF	14
-#define TCP_REMADDR_OFF	15
-#define TCP_REMPORT_OFF	19
-    mib2_tcpConnEntry_t Lowentry, Nextentry, entry;
-    req_e           req_type;
-    int             Found = 0;
-
-    memset(&Lowentry, 0, sizeof(Lowentry));
-    memcpy((char *) newname, (char *) vp->name, vp->namelen * sizeof(oid));
-    if (*length == TCP_CONN_LENGTH)     /* Assume that the input name is the lowest */
-        memcpy((char *) lowest, (char *) name,
-               TCP_CONN_LENGTH * sizeof(oid));
-    for (Nextentry.tcpConnLocalAddress = (u_long) - 1, req_type =
-         GET_FIRST;; Nextentry = entry, req_type = GET_NEXT) {
-        if (getMibstat
-            (MIB_TCP_CONN, &entry, sizeof(mib2_tcpConnEntry_t), req_type,
-             &TCP_Cmp, &entry) != 0)
-            break;
-        COPY_IPADDR(cp, (u_char *) & entry.tcpConnLocalAddress, op,
-                    newname + TCP_LOCADDR_OFF);
-        newname[TCP_LOCPORT_OFF] = entry.tcpConnLocalPort;
-        COPY_IPADDR(cp, (u_char *) & entry.tcpConnRemAddress, op,
-                    newname + TCP_REMADDR_OFF);
-        newname[TCP_REMPORT_OFF] = entry.tcpConnRemPort;
-
-        if (exact) {
-            if (snmp_oid_compare(newname, TCP_CONN_LENGTH, name, *length)
-                == 0) {
-                memcpy((char *) lowest, (char *) newname,
-                       TCP_CONN_LENGTH * sizeof(oid));
-                Lowentry = entry;
-                Found++;
-                break;          /* no need to search further */
-            }
-        } else {
-            if ((snmp_oid_compare(newname, TCP_CONN_LENGTH, name, *length)
-                 > 0) && ((Nextentry.tcpConnLocalAddress == (u_long) - 1)
-                          ||
-                          (snmp_oid_compare
-                           (newname, TCP_CONN_LENGTH, lowest,
-                            TCP_CONN_LENGTH) < 0)
-                          ||
-                          (snmp_oid_compare
-                           (name, *length, lowest,
-                            TCP_CONN_LENGTH) == 0))) {
-
-                /*
-                 * if new one is greater than input and closer to input than
-                 * * previous lowest, and is not equal to it, save this one as the "next" one.
-                 */
-                memcpy((char *) lowest, (char *) newname,
-                       TCP_CONN_LENGTH * sizeof(oid));
-                Lowentry = entry;
-                Found++;
-            }
-        }
-    }
-    if (Found == 0)
-        return (NULL);
-    memcpy((char *) name, (char *) lowest,
-           (vp->namelen + TCP_CONN_LENGTH -
-            TCP_LOCADDR_OFF) * sizeof(oid));
-    *length = vp->namelen + TCP_CONN_LENGTH - TCP_LOCADDR_OFF;
-    *write_method = 0;
-    *var_len = sizeof(long);
-    switch (vp->magic) {
-    case TCPCONNSTATE:
-        long_return = Lowentry.tcpConnState;
-        return (u_char *) & long_return;
-    case TCPCONNLOCALADDRESS:
-        long_return = Lowentry.tcpConnLocalAddress;
-        return (u_char *) & long_return;
-    case TCPCONNLOCALPORT:
-        long_return = Lowentry.tcpConnLocalPort;
-        return (u_char *) & long_return;
-    case TCPCONNREMADDRESS:
-        long_return = Lowentry.tcpConnRemAddress;
-        return (u_char *) & long_return;
-    case TCPCONNREMPORT:
-        long_return = Lowentry.tcpConnRemPort;
-        return (u_char *) & long_return;
-    default:
-        DEBUGMSGTL(("snmpd", "unknown sub-id %d in var_tcpEntry\n",
-                    vp->magic));
-        return (NULL);
-    }
-}
-
-#endif                          /* solaris2 - tcp */
-
-
-        /*********************
-	 *
-	 *  Internal implementation functions
-	 *
-	 *********************/
-
-
-#ifndef solaris2
-#if !defined(linux) && !defined(hpux11)
-/*
- *      Print INTERNET connections
- */
-
-int
-TCP_Count_Connections(void)
-{
-    int             Established;
-    struct inpcb    cb;
-    register struct inpcb *next;
-#if !(defined(freebsd2) || defined(netbsd2) || defined(openbsd2))
-    register struct inpcb *prev;
-#endif
-    struct inpcb    inpcb;
-    struct tcpcb    tcpcb;
-
-  Again:                       /*
-                                 *      Prepare to scan the control blocks
-                                 */
-    Established = 0;
-
-    auto_nlist(TCP_SYMBOL, (char *) &cb, sizeof(struct inpcb));
-    inpcb = cb;
-#if !(defined(freebsd2) || defined(netbsd1) || defined(openbsd2))
-    prev = (struct inpcb *) auto_nlist_value(TCP_SYMBOL);
-#endif                          /*  !(defined(freebsd2) || defined(netbsd1) || defined(openbsd2)) */
-    /*
-     *      Scan the control blocks
-     */
-#if defined(freebsd2) || defined(netbsd1) || defined(openbsd2)
-    while ((inpcb.INP_NEXT_SYMBOL != NULL)
-           && (inpcb.INP_NEXT_SYMBOL !=
-               (struct inpcb *) auto_nlist_value(TCP_SYMBOL)))
-#else                           /*  defined(freebsd2) || defined(netbsd1) || defined(openbsd2) */
-    while (inpcb.INP_NEXT_SYMBOL !=
-           (struct inpcb *) auto_nlist_value(TCP_SYMBOL))
-#endif                          /*  defined(freebsd2) || defined(netbsd1) */
-    {
-        next = inpcb.INP_NEXT_SYMBOL;
-
-        if ((klookup((unsigned long) next, (char *) &inpcb, sizeof(inpcb))
-             == 0)) {
-            snmp_log_perror("TCP_Count_Connections - inpcb");
-            break;
-        }
-#if !(defined(freebsd2) || defined(netbsd1) || defined(openbsd2))
-        if (inpcb.INP_PREV_SYMBOL != prev) {    /* ??? */
-            sleep(1);
-            goto Again;
-        }
-#endif                          /*  !(defined(freebsd2) || defined(netbsd1) || defined(openbsd2)) */
-#if defined(IN6_IS_ADDR_UNSPECIFIED)
-        if (IN6_IS_ADDR_UNSPECIFIED(&inpcb.inp_laddr)) {
-#else
-        if (inet_lnaof(inpcb.inp_laddr) == INADDR_ANY) {
-#endif /* #if defined(IN6_IS_ADDR_UNSPECIFIED) */
-
-#if !(defined(freebsd2) || defined(netbsd1) || defined(openbsd2))
-            prev = next;
-#endif                          /*  !(defined(freebsd2) || defined(netbsd1) || defined(openbsd2)) */
-            continue;
-        }
-        if (klookup
-            ((unsigned long) inpcb.inp_ppcb, (char *) &tcpcb,
-             sizeof(tcpcb)) == 0) {
-            snmp_log_perror("TCP_Count_Connections - tcpcb");
-            break;
-        }
-
-        if ((tcpcb.t_state == TCPS_ESTABLISHED) ||
-            (tcpcb.t_state == TCPS_CLOSE_WAIT))
-            Established++;
-#if !(defined(freebsd2) || defined(netbsd1) || defined(openbsd2))
-        prev = next;
-#endif                          /*  !(defined(freebsd2) || defined(netbsd1) || defined(openbsd2)) */
-    }
-    return (Established);
-}
-#endif                          /* !linux && !hpux11 */
-
-#ifdef hpux11
-static int      tcptab_size, tcptab_current;
-static mib_tcpConnEnt *tcp = (mib_tcpConnEnt *) 0;
-#else
-static struct inpcb tcp_inpcb, *tcp_prev;
-#ifdef PCB_TABLE
-static struct inpcb *tcp_next, *tcp_head;
-#endif
 #ifdef linux
-static struct inpcb *inpcb_list;
+#define	TCPTABLE_ENTRY_TYPE	struct inpcb 
+#define	TCPTABLE_STATE		inp_state 
+#define	TCPTABLE_LOCALADDRESS	inp_laddr.s_addr 
+#define	TCPTABLE_LOCALPORT	inp_lport
+#define	TCPTABLE_REMOTEADDRESS	inp_faddr.s_addr 
+#define	TCPTABLE_REMOTEPORT	inp_fport
+#define	TCPTABLE_IS_LINKED_LIST
+
+#else			/* everything else */
+
+typedef struct netsnmp_inpcb_s netsnmp_inpcb;
+struct netsnmp_inpcb_s {
+    struct inpcb    pcb;
+    int             state;
+    netsnmp_inpcb  *inp_next;
+};
+#define	TCPTABLE_ENTRY_TYPE	netsnmp_inpcb 
+#define	TCPTABLE_STATE		state 
+#define	TCPTABLE_LOCALADDRESS	pcb.inp_laddr.s_addr 
+#define	TCPTABLE_LOCALPORT	pcb.inp_lport
+#define	TCPTABLE_REMOTEADDRESS	pcb.inp_faddr.s_addr 
+#define	TCPTABLE_REMOTEPORT	pcb.inp_fport
+#define	TCPTABLE_IS_LINKED_LIST
+
+#endif                          /* linux */
+#endif                          /* WIN32 */
+#endif                          /* solaris2 */
+#endif                          /* hpux11 */
+
+				/* Head of linked list, or root of table */
+TCPTABLE_ENTRY_TYPE	*tcp_head  = NULL;
+int                      tcp_size  = 0;	/* Only used for table-based systems */
+int                      tcp_estab = 0;
+int tcpTable_valid = 0;
+
+
+	/*
+	 *
+	 * Initialization and handler routines are common to all architectures
+	 *
+	 */
+#ifndef MIB_STATS_CACHE_TIMEOUT
+#define MIB_STATS_CACHE_TIMEOUT	5
 #endif
+#ifndef TCP_STATS_CACHE_TIMEOUT
+#define TCP_STATS_CACHE_TIMEOUT	MIB_STATS_CACHE_TIMEOUT
 #endif
 
-#if defined(CAN_USE_SYSCTL) && defined(TCPCTL_PCBLIST)
-static char    *tcpcb_buf = NULL;
-static struct xinpgen *xig = NULL;
-#endif                          /* !defined(CAN_USE_SYSCTL) || !define(TCPCTL_PCBLIST) */
+oid             tcpTable_oid[] = { SNMP_OID_MIB2, 6, 13 };
 
 void
-TCP_Scan_Init(void)
+init_tcpTable(void)
 {
-#ifdef hpux11
+    netsnmp_table_registration_info *table_info;
+    netsnmp_iterator_info           *iinfo;
+    netsnmp_handler_registration    *reginfo;
 
+    DEBUGMSGTL(("mibII/tcpTable", "Initialising TCP Table\n"));
+    /*
+     * Create the table data structure, and define the indexing....
+     */
+    table_info = SNMP_MALLOC_TYPEDEF(netsnmp_table_registration_info);
+    if (!table_info) {
+        return;
+    }
+    netsnmp_table_helper_add_indexes(table_info, ASN_IPADDRESS,
+                                                 ASN_INTEGER,
+                                                 ASN_IPADDRESS,
+                                                 ASN_INTEGER, 0);
+    table_info->min_column = TCPCONNSTATE;
+    table_info->max_column = TCPCONNREMOTEPORT;
+
+
+    /*
+     * .... and iteration information ....
+     */
+    iinfo      = SNMP_MALLOC_TYPEDEF(netsnmp_iterator_info);
+    if (!iinfo) {
+        return;
+    }
+    iinfo->get_first_data_point = tcpTable_first_entry;
+    iinfo->get_next_data_point  = tcpTable_next_entry;
+    iinfo->table_reginfo        = table_info;
+#if defined(WIN32) || defined(solaris2)
+    iinfo->flags               |= NETSNMP_ITERATOR_FLAG_SORTED;
+#endif /* WIN32 || solaris2 */
+
+
+    /*
+     * .... and register the table with the agent.
+     */
+    reginfo = netsnmp_create_handler_registration("tcpTable",
+            tcpTable_handler,
+            tcpTable_oid, OID_LENGTH(tcpTable_oid),
+            HANDLER_CAN_RONLY),
+    netsnmp_register_table_iterator(reginfo, iinfo);
+
+    /*
+     * .... with a local cache
+     *    (except for Solaris, which uses a different approach)
+     */
+    netsnmp_inject_handler( reginfo,
+		    netsnmp_get_cache_handler(TCP_STATS_CACHE_TIMEOUT,
+			   		tcpTable_load, tcpTable_free,
+					tcpTable_oid, OID_LENGTH(tcpTable_oid)));
+}
+
+
+
+int
+tcpTable_handler(netsnmp_mib_handler          *handler,
+                 netsnmp_handler_registration *reginfo,
+                 netsnmp_agent_request_info   *reqinfo,
+                 netsnmp_request_info         *requests)
+{
+    netsnmp_request_info  *request;
+    netsnmp_variable_list *requestvb;
+    TCPTABLE_ENTRY_TYPE	  *entry;
+    oid      subid;
+    long     port;
+    long     state;
+
+    DEBUGMSGTL(("mibII/tcpTable", "Handler - mode %s\n",
+                    se_find_label_in_slist("agent_mode", reqinfo->mode)));
+    switch (reqinfo->mode) {
+    case MODE_GET:
+        for (request=requests; request; request=request->next) {
+            requestvb = request->requestvb;
+            DEBUGMSGTL(( "mibII/tcpTable", "oid: "));
+            DEBUGMSGOID(("mibII/tcpTable", requestvb->name,
+                                           requestvb->name_length));
+            DEBUGMSG((   "mibII/tcpTable", "\n"));
+
+            entry = (TCPTABLE_ENTRY_TYPE *)netsnmp_extract_iterator_context(request);
+            if (!entry)
+                continue;
+            subid = requestvb->name[OID_LENGTH(tcpTable_oid)+1];
+
+            switch (subid) {
+            case TCPCONNSTATE:
+                state = entry->TCPTABLE_STATE;
+	        snmp_set_var_typed_value(requestvb, ASN_INTEGER,
+                                 (u_char *)&state, sizeof(state));
+                break;
+            case TCPCONNLOCALADDRESS:
+#if defined(osf5) && defined(IN6_EXTRACT_V4ADDR)
+	        snmp_set_var_typed_value(requestvb, ASN_IPADDRESS,
+                              (u_char*)IN6_EXTRACT_V4ADDR(entry->pcb.inp_laddr),
+                                sizeof(IN6_EXTRACT_V4ADDR(entry->pcb.inp_laddr)));
+#else
+	        snmp_set_var_typed_value(requestvb, ASN_IPADDRESS,
+                                 (u_char *)&entry->TCPTABLE_LOCALADDRESS,
+                                     sizeof(entry->TCPTABLE_LOCALADDRESS));
+#endif
+                break;
+            case TCPCONNLOCALPORT:
+                port = ntohs(entry->TCPTABLE_LOCALPORT);
+	        snmp_set_var_typed_value(requestvb, ASN_INTEGER,
+                                 (u_char *)&port, sizeof(port));
+                break;
+            case TCPCONNREMOTEADDRESS:
+#if defined(osf5) && defined(IN6_EXTRACT_V4ADDR)
+	        snmp_set_var_typed_value(requestvb, ASN_IPADDRESS,
+                              (u_char*)IN6_EXTRACT_V4ADDR(entry->pcb.inp_laddr),
+                                sizeof(IN6_EXTRACT_V4ADDR(entry->pcb.inp_laddr)));
+#else
+	        snmp_set_var_typed_value(requestvb, ASN_IPADDRESS,
+                                 (u_char *)&entry->TCPTABLE_REMOTEADDRESS,
+                                     sizeof(entry->TCPTABLE_REMOTEADDRESS));
+#endif
+                break;
+            case TCPCONNREMOTEPORT:
+                port = ntohs(entry->TCPTABLE_REMOTEPORT);
+	        snmp_set_var_typed_value(requestvb, ASN_INTEGER,
+                                 (u_char *)&port, sizeof(port));
+                break;
+	    }
+	}
+        break;
+
+    case MODE_GETNEXT:
+    case MODE_SET_RESERVE1:
+    case MODE_SET_RESERVE2:
+    case MODE_SET_ACTION:
+    case MODE_SET_COMMIT:
+    case MODE_SET_FREE:
+    case MODE_SET_UNDO:
+    default:
+        break;
+    }
+
+    return SNMP_ERR_NOERROR;
+}
+
+int
+TCP_Count_Connections( void ) {
+    return tcp_estab;
+}
+
+	/*
+	 * Two forms of iteration hook routines:
+	 *    One for when the TCP table is stored as a table
+	 *    One for when the TCP table is stored as a linked list
+	 *
+	 * Also applies to the cache-handler free routine
+	 */
+
+#ifdef	TCPTABLE_IS_TABLE
+netsnmp_variable_list *
+tcpTable_first_entry(void **loop_context,
+                     void **data_context,
+                     netsnmp_variable_list *index,
+                     netsnmp_iterator_info *data)
+{
+    if (!tcpTable_valid)
+	tcpTable_load(NULL, NULL);
+
+    if (tcp_size == 0)
+        return NULL;
+
+    /*
+     * Point to the first entry, and use the
+     * 'next_entry' hook to retrieve this row
+     */
+    *loop_context = 0;
+    return tcpTable_next_entry( loop_context, data_context, index, data );
+}
+
+netsnmp_variable_list *
+tcpTable_next_entry( void **loop_context,
+                     void **data_context,
+                     netsnmp_variable_list *index,
+                     netsnmp_iterator_info *data)
+{
+    int i = (int)*loop_context;
+    netsnmp_variable_list *idx;
+    long port;
+
+    if (tcp_size < i)
+        return NULL;
+
+    /*
+     * Set up the indexing for the specified row...
+     */
+    idx = index;
+    snmp_set_var_value(idx, (u_char *)&tcp_head[i].TCPTABLE_LOCALADDRESS,
+                                sizeof(tcp_head[i].TCPTABLE_LOCALADDRESS));
+
+    port = ntohs(tcp_head[i].TCPTABLE_LOCALPORT);
+    idx = idx->next_variable;
+    snmp_set_var_value(idx, (u_char*)&port, sizeof(port));
+
+    idx = idx->next_variable;
+    snmp_set_var_value(idx, (u_char *)&tcp_head[i].TCPTABLE_REMOTEADDRESS,
+                                sizeof(tcp_head[i].TCPTABLE_REMOTEADDRESS));
+
+    port = ntohs(tcp_head[i].TCPTABLE_REMOTEPORT);
+    idx = idx->next_variable;
+    snmp_set_var_value(idx, (u_char*)&port, sizeof(port));
+
+    /*
+     * ... return the data structure for this row,
+     * and update the loop context ready for the next one.
+     */
+    *data_context = (void*)&tcp_head[i];
+    *loop_context = (void*)++i;
+
+    return index;
+}
+
+void
+tcpTable_free(void)
+{
+    if (tcp_head)
+        free(tcp_head);
+    tcp_head  = NULL;
+    tcp_size  = 0;
+    tcp_estab = 0;
+    tcpTable_valid = 0;
+}
+#else
+#ifdef TCPTABLE_IS_LINKED_LIST
+netsnmp_variable_list *
+tcpTable_first_entry(void **loop_context,
+                     void **data_context,
+                     netsnmp_variable_list *index,
+                     netsnmp_iterator_info *data)
+{
+    if (tcp_head == 0)
+        return NULL;
+
+    /*
+     * Point to the first entry, and use the
+     * 'next_entry' hook to retrieve this row
+     */
+    *loop_context = (void*)tcp_head;
+    return tcpTable_next_entry( loop_context, data_context, index, data );
+}
+
+netsnmp_variable_list *
+tcpTable_next_entry( void **loop_context,
+                     void **data_context,
+                     netsnmp_variable_list *index,
+                     netsnmp_iterator_info *data)
+{
+    TCPTABLE_ENTRY_TYPE	 *entry = (TCPTABLE_ENTRY_TYPE *)*loop_context;
+    netsnmp_variable_list *idx;
+    long addr, port;
+
+    if (!entry)
+        return NULL;
+
+    /*
+     * Set up the indexing for the specified row...
+     */
+    idx = index;
+#if defined(osf5) && defined(IN6_EXTRACT_V4ADDR)
+    addr = ntohl(IN6_EXTRACT_V4ADDR(entry->pcb.inp_laddr));
+#else
+    addr = ntohl(entry->TCPTABLE_LOCALADDRESS);
+#endif
+    snmp_set_var_value(idx, (u_char *)&addr, sizeof(addr));
+
+    port = ntohs(entry->TCPTABLE_LOCALPORT);
+    idx = idx->next_variable;
+    snmp_set_var_value(idx, (u_char*)&port, sizeof(port));
+
+    idx = idx->next_variable;
+#if defined(osf5) && defined(IN6_EXTRACT_V4ADDR)
+    addr = ntohl(IN6_EXTRACT_V4ADDR(entry->pcb.inp_faddr));
+#else
+    addr = ntohl(entry->TCPTABLE_REMOTEADDRESS);
+#endif
+    snmp_set_var_value(idx, (u_char *)&addr, sizeof(addr));
+
+    port = ntohs(entry->TCPTABLE_REMOTEPORT);
+    idx = idx->next_variable;
+    snmp_set_var_value(idx, (u_char*)&port, sizeof(port));
+
+    /*
+     * ... return the data structure for this row,
+     * and update the loop context ready for the next one.
+     */
+    *data_context = (void*)entry;
+    *loop_context = (void*)entry->INP_NEXT_SYMBOL;
+    return index;
+}
+
+void
+tcpTable_free(void)
+{
+    TCPTABLE_ENTRY_TYPE *p;
+    while (tcp_head) {
+        p = tcp_head;
+        tcp_head = tcp_head->INP_NEXT_SYMBOL;
+        free(p);
+    }
+
+    tcp_head  = NULL;
+    tcp_size  = 0;
+    tcp_estab = 0;
+    tcpTable_valid = 0;
+}
+#endif		/* TCPTABLE_IS_LINKED_LIST */
+#endif		/* TCPTABLE_IS_TABLE */
+
+
+	/*
+	 *
+	 * The cache-handler loading routine is the main
+	 *    place for architecture-specific code
+	 *
+	 * Load into either a table structure, or a linked list
+	 *    depending on the system architecture
+	 */
+
+
+#ifdef hpux11
+int
+tcpTable_load(netsnmp_cache *cache, void *vmagic)
+{
     int             fd;
     struct nmparms  p;
-    int             val;
+    int             val = 0;
     unsigned int    ulen;
     int             ret;
 
-    if (tcp)
-        free(tcp);
-    tcp = (mib_tcpConnEnt *) 0;
-    tcptab_size = 0;
+    tcpTable_free();
 
     if ((fd = open_mib("/dev/ip", O_RDONLY, 0, NM_ASYNC_OFF)) >= 0) {
         p.objid = ID_tcpConnNumEnt;
@@ -597,86 +456,66 @@ TCP_Scan_Init(void)
         ulen = sizeof(int);
         p.len = &ulen;
         if ((ret = get_mib_info(fd, &p)) == 0)
-            tcptab_size = val;
+            tcp_size = val;
 
-        if (tcptab_size > 0) {
-            ulen = (unsigned) tcptab_size *sizeof(mib_tcpConnEnt);
-            tcp = (mib_tcpConnEnt *) malloc(ulen);
+        if (tcp_size > 0) {
+            ulen = (unsigned) tcp_size *sizeof(mib_tcpLsnEnt);
+            tcp_head = (mib_tcpConnEnt *) malloc(ulen);
             p.objid = ID_tcpConnTable;
-            p.buffer = (void *) tcp;
+            p.buffer = (void *) tcp_head;
             p.len = &ulen;
-            if ((ret = get_mib_info(fd, &p)) < 0)
-                tcptab_size = 0;
+            if ((ret = get_mib_info(fd, &p)) < 0) {
+                tcp_size = 0;
+            }
         }
 
         close_mib(fd);
     }
 
-    tcptab_current = 0;
+    /*
+     * Count the number of established connections
+     * Probably not actually necessary for HP-UX
+     */
+    for (int i = 0; i < tcp_size; i++) {
+        if (tcp_head[i].State == 5 /* established */ ||
+            tcp_head[i].State == 8 /*  closeWait  */ )
+            tcp_estab++;
+    }
 
+    if (tcp_size > 0) {
+        DEBUGMSGTL(("mibII/tcpTable", "Loaded TCP Table\n"));
+        tcpTable_valid = 1;
+        return 0;
+    }
+    DEBUGMSGTL(("mibII/tcpTable", "Failed to load TCP Table (hpux11)\n"));
+    return -1;
+}
 #else                           /* hpux11 */
 
-#if !defined(CAN_USE_SYSCTL) || !defined(TCPCTL_PCBLIST)
-#ifdef PCB_TABLE
-    struct inpcbtable table;
-#endif
-#ifndef linux
-#ifdef PCB_TABLE
-    auto_nlist(TCP_SYMBOL, (char *) &table, sizeof(table));
-    tcp_head = tcp_prev =
-        (struct inpcb *) &((struct inpcbtable *)
-                           auto_nlist_value(TCP_SYMBOL))->inpt_queue.
-        cqh_first;
-    tcp_next = table.inpt_queue.cqh_first;
-#else                           /* PCB_TABLE */
-    auto_nlist(TCP_SYMBOL, (char *) &tcp_inpcb, sizeof(tcp_inpcb));
-#if !(defined(freebsd2) || defined(netbsd1) || defined(openbsd2))
-    tcp_prev = (struct inpcb *) auto_nlist_value(TCP_SYMBOL);
-#endif
-#endif                          /* PCB_TABLE */
-#else                           /* linux */
+#ifdef linux
+int
+tcpTable_load(netsnmp_cache *cache, void *vmagic)
+{
     FILE           *in;
     char            line[256];
-    struct inpcb  **pp;
-    struct timeval  now;
-    static unsigned long Time_Of_Last_Reload = 0;
 
-    /*
-     * save some cpu-cycles, and reload after 5 secs...
-     */
-    gettimeofday(&now, (struct timezone *) 0);
-    if (Time_Of_Last_Reload + 5 > now.tv_sec) {
-        tcp_prev = inpcb_list;
-        return;
-    }
-    Time_Of_Last_Reload = now.tv_sec;
-
+    tcpTable_free();
 
     if (!(in = fopen("/proc/net/tcp", "r"))) {
+        DEBUGMSGTL(("mibII/tcpTable", "Failed to load TCP Table (linux1)\n"));
         snmp_log(LOG_ERR, "snmpd: cannot open /proc/net/tcp ...\n");
-        tcp_prev = NULL;
-        return;
+        return -1;
     }
 
     /*
-     * free old chain: 
+     * scan proc-file and build up a linked list 
+     * This will actually be built up in reverse,
+     *   but since the entries are unsorted, that doesn't matter.
      */
-    while (inpcb_list) {
-        struct inpcb   *p = inpcb_list;
-        inpcb_list = inpcb_list->INP_NEXT_SYMBOL;
-        free(p);
-    }
-
-    /*
-     * scan proc-file and append: 
-     */
-
-    pp = &inpcb_list;
-
     while (line == fgets(line, sizeof(line), in)) {
         struct inpcb    pcb, *nnew;
         static int      linux_states[12] =
-            { 0, 4, 2, 3, 6, 9, 10, 0, 5, 8, 1, 7 };
+            { 1, 5, 3, 4, 6, 7, 11, 1, 8, 9, 2, 10 };
         int             state, lp, fp, uid;
 
         if (6 != sscanf(line,
@@ -688,336 +527,305 @@ TCP_Scan_Init(void)
         pcb.inp_lport = htons((unsigned short) lp);
         pcb.inp_fport = htons((unsigned short) fp);
 
-        pcb.inp_state = (state & 0xf) < 12 ? linux_states[state & 0xf] : 1;
+        pcb.inp_state = (state & 0xf) < 12 ? linux_states[state & 0xf] : 2;
+        if (pcb.inp_state == 5 /* established */ ||
+            pcb.inp_state == 8 /*  closeWait  */ )
+            tcp_estab++;
         pcb.uid = uid;
 
-        nnew = (struct inpcb *) malloc(sizeof(struct inpcb));
+        nnew = SNMP_MALLOC_TYPEDEF(struct inpcb);
         if (nnew == NULL)
             break;
-        *nnew = pcb;
-        nnew->INP_NEXT_SYMBOL = 0;
-
-        *pp = nnew;
-        pp = &nnew->INP_NEXT_SYMBOL;
+        memcpy(nnew, &pcb, sizeof(struct inpcb));
+        nnew->inp_next = tcp_head;
+        tcp_head       = nnew;
     }
 
     fclose(in);
 
-    /*
-     * first entry to go: 
-     */
-    tcp_prev = inpcb_list;
-
-#endif                          /* linux */
-#else                           /*  !defined(CAN_USE_SYSCTL) || !defined(TCPCTL_PCBLIST) */
-    {
-        size_t          len;
-        int             sname[] =
-            { CTL_NET, PF_INET, IPPROTO_TCP, TCPCTL_PCBLIST };
-
-        if (tcpcb_buf) {
-            free(tcpcb_buf);
-            tcpcb_buf = NULL;
-        }
-        xig = NULL;
-
-        len = 0;
-        if (sysctl(sname, 4, 0, &len, 0, 0) < 0) {
-            return;
-        }
-        if ((tcpcb_buf = malloc(len)) == NULL) {
-            return;
-        }
-        if (sysctl(sname, 4, tcpcb_buf, &len, 0, 0) < 0) {
-            free(tcpcb_buf);
-            tcpcb_buf = NULL;
-            return;
-        }
-
-        xig = (struct xinpgen *) tcpcb_buf;
-        xig = (struct xinpgen *) ((char *) xig + xig->xig_len);
-        return;
-    }
-#endif                          /*  !defined(CAN_USE_SYSCTL) || !defined(TCPCTL_PCBLIST) */
-#endif                          /* hpux11 */
+    DEBUGMSGTL(("mibII/tcpTable", "Loaded TCP Table\n"));
+    tcpTable_valid = 1;
+    return 0;
 }
-
-#ifdef hpux11
-int
-TCP_Scan_Next(mib_tcpConnEnt * RetTcp)
-{
-    if (tcptab_current < tcptab_size) {
-        /*
-         * copy values 
-         */
-        *RetTcp = tcp[tcptab_current];
-        /*
-         * increment to point to next entry 
-         */
-        tcptab_current++;
-        /*
-         * return success 
-         */
-        return (1);
-    }
-
-    /*
-     * return done 
-     */
-    return (0);
-}
-#else                           /* hpux11 */
-int
-TCP_Scan_Next(int *State, struct inpcb *RetInPcb)
-{
-#if !defined(CAN_USE_SYSCTL) || !defined(TCPCTL_PCBLIST)
-    register struct inpcb *next;
-#ifndef linux
-    struct tcpcb    tcpcb;
-
-#ifdef PCB_TABLE
-    if (tcp_next == tcp_head)
-#elif defined(freebsd2) || defined(netbsd1) || defined(openbsd2)
-    if (tcp_inpcb.INP_NEXT_SYMBOL == NULL ||
-        tcp_inpcb.INP_NEXT_SYMBOL ==
-        (struct inpcb *) auto_nlist_value(TCP_SYMBOL))
-#else
-    if (tcp_inpcb.INP_NEXT_SYMBOL ==
-        (struct inpcb *) auto_nlist_value(TCP_SYMBOL))
-#endif
-    {
-        return (0);             /* "EOF" */
-    }
-#ifdef PCB_TABLE
-    klookup((unsigned long) tcp_next, (char *) &tcp_inpcb,
-            sizeof(tcp_inpcb));
-    tcp_next = tcp_inpcb.inp_queue.cqe_next;
-#else
-    next = tcp_inpcb.INP_NEXT_SYMBOL;
-    klookup((unsigned long) next, (char *) &tcp_inpcb, sizeof(tcp_inpcb));
-#if !(defined(netbsd1) || defined(freebsd2)) || defined(openbsd2)
-    if (tcp_inpcb.INP_PREV_SYMBOL != tcp_prev)  /* ??? */
-        return (-1);            /* "FAILURE" */
-#endif                          /*  !(defined(netbsd1) || defined(freebsd2) || defined(openbsd2)) */
-#endif                          /* PCB_TABLE */
-    klookup((int) tcp_inpcb.inp_ppcb, (char *) &tcpcb, sizeof(tcpcb));
-    *State = tcpcb.t_state;
 #else                           /* linux */
-    if (!tcp_prev)
-        return 0;
 
-    tcp_inpcb = *tcp_prev;
-    *State = tcp_inpcb.inp_state;
-    next = tcp_inpcb.INP_NEXT_SYMBOL;
-#endif
-
-    *RetInPcb = tcp_inpcb;
-#if !(defined(netbsd1) || defined(freebsd2) || defined(openbsd2))
-    tcp_prev = next;
-#endif
-#else                           /*  !defined(CAN_USE_SYSCTL) || !defined(TCPCTL_PCBLIST) */
-    /*
-     * Are we done? 
-     */
-    if ((xig == NULL) || (xig->xig_len <= sizeof(struct xinpgen)))
-        return (0);
-
-    *State = ((struct xtcpcb *) xig)->xt_tp.t_state;
-    *RetInPcb = ((struct xtcpcb *) xig)->xt_inp;
-
-    /*
-     * Prepare for Next read 
-     */
-    xig = (struct xinpgen *) ((char *) xig + xig->xig_len);
-#endif                          /*  !defined(CAN_USE_SYSCTL) || !defined(TCPCTL_PCBLIST) */
-    return (1);                 /* "OK" */
-}
-#endif                          /* hpux11 */
-#endif                          /* solaris2 */
-
-#else                           /* WIN32 */
-#include <iphlpapi.h>
-WriteMethod     writeTcpEntry;
-MIB_TCPROW      tcp_row;
-u_char         *
-var_tcpEntry(struct variable *vp,
-             oid * name,
-             size_t * length,
-             int exact, size_t * var_len, WriteMethod ** write_method)
+#ifdef solaris2
+static int
+TCP_Cmp(void *addr, void *ep)
 {
-    oid             newname[MAX_OID_LEN], lowest[MAX_OID_LEN], *op;
-    u_char         *cp;
-    int             LowState = -1;
-    static PMIB_TCPTABLE pTcpTable = NULL;
-    DWORD           status = NO_ERROR;
-    DWORD           dwActualSize = 0;
-    UINT            i;
-    struct timeval  now;
-    static long     Time_Of_Last_Reload = 0;
+    if (memcmp((mib2_tcpConnEntry_t *) ep, (mib2_tcpConnEntry_t *) addr,
+               sizeof(mib2_tcpConnEntry_t)) == 0)
+        return (0);
+    else
+        return (1);
+}
 
-    memcpy((char *) newname, (char *) vp->name,
-           (int) vp->namelen * sizeof(oid));
+int
+tcpTable_load(netsnmp_cache *cache, void *vmagic)
+{
+    mib2_tcpConnEntry_t   entry;
+    netsnmp_tcpConnEntry *nnew;
+    netsnmp_tcpConnEntry *prev_entry = NULL;
+
+    tcpTable_free();
+
+    if (getMibstat(MIB_TCP_CONN, &entry, sizeof(mib2_tcpConnEntry_t),
+                   GET_FIRST, &TCP_Cmp, &entry) != 0) {
+        DEBUGMSGTL(("mibII/tcpTable", "Failed to load TCP Table (solaris)\n"));
+        return -1;
+    }
+
+    while (1) {
+        /*
+         * Build up a linked list copy of the getMibstat results
+         * Note that since getMibstat returns rows in sorted order,
+         *    we need to retain this order while building the list
+         *    so new entries are added onto the end of the list.
+         */
+        nnew = SNMP_MALLOC_TYPEDEF(netsnmp_tcpConnEntry);
+        if (nnew == NULL)
+            break;
+        memcpy(&(nnew->entry), &entry, sizeof(mib2_tcpConnEntry_t));
+        if (!prev_entry)
+            tcp_head = nnew;
+        else
+            prev_entry->inp_next = nnew;
+        prev_entry = nnew;
+
+        if (getMibstat(MIB_TCP_CONN, &entry, sizeof(mib2_tcpConnEntry_t),
+                       GET_NEXT, &TCP_Cmp, &entry) != 0)
+	    break;
+    }
+
+    if (tcp_head) {
+        DEBUGMSGTL(("mibII/tcpTable", "Loaded TCP Table\n"));
+        tcpTable_valid = 1;
+        return 0;
+    }
+    DEBUGMSGTL(("mibII/tcpTable", "Failed to load TCP Table (solaris)\n"));
+    return -1;
+}
+#else                           /* solaris2 */
+
+#ifdef WIN32
+int
+tcpTable_load(netsnmp_cache *cache, void *vmagic)
+{
+    PMIB_TCPTABLE pTcpTable = NULL;
+    DWORD         dwActualSize = 0;
+    DWORD         status = NO_ERROR;
+    int           i;
 
     /*
-     * save some cpu-cycles, and reload after 5 secs...
+     * query for the buffer size needed 
      */
-    gettimeofday(&now, (struct timezone *) 0);
-    if ((Time_Of_Last_Reload + 5 <= now.tv_sec) || (pTcpTable == NULL)) {
-        if (pTcpTable != NULL)
-            free(pTcpTable);
-        Time_Of_Last_Reload = now.tv_sec;
-        /*
-         * query for buffer size needed 
-         */
-        status = GetTcpTable(pTcpTable, &dwActualSize, TRUE);
-        if (status == ERROR_INSUFFICIENT_BUFFER) {
-            pTcpTable = (PMIB_TCPTABLE) malloc(dwActualSize);
-            if (pTcpTable != NULL) {
-                /*
-                 * Get the sorted TCP table 
-                 */
-                status = GetTcpTable(pTcpTable, &dwActualSize, TRUE);
-            }
+    status = GetTcpTable(pTcpTable, &dwActualSize, TRUE);
+    if (status == ERROR_INSUFFICIENT_BUFFER) {
+        pTcpTable = (PMIB_TCPTABLE) malloc(dwActualSize);
+        if (pTcpTable != NULL) {
+            /*
+             * Get the sorted TCP table 
+             */
+            status = GetTcpTable(pTcpTable, &dwActualSize, TRUE);
         }
+    }
+
+    /*
+     * Count the number of established connections
+     * Probably not actually necessary for Windows
+     */
+    for (i = 0; i < tcp_size; i++) {
+        if (tcp_head[i].dwState == 5 /* established */ ||
+            tcp_head[i].dwState == 8 /*  closeWait  */ )
+            tcp_estab++;
     }
 
     if (status == NO_ERROR) {
-        for (i = 0; i < pTcpTable->dwNumEntries; ++i) {
-
-            cp = (u_char *) & pTcpTable->table[i].dwLocalAddr;
-            op = newname + 10;
-            *op++ = *cp++;
-            *op++ = *cp++;
-            *op++ = *cp++;
-            *op++ = *cp++;
-
-            newname[14] =
-                ntohs((unsigned short) (0x0000FFFF & pTcpTable->table[i].
-                                        dwLocalPort));
-
-            cp = (u_char *) & pTcpTable->table[i].dwRemoteAddr;
-            op = newname + 15;
-            *op++ = *cp++;
-            *op++ = *cp++;
-            *op++ = *cp++;
-            *op++ = *cp++;
-
-            newname[19] =
-                ntohs((unsigned short) (0x0000FFFF & pTcpTable->table[i].
-                                        dwRemotePort));
-
-            if (exact) {
-                if (snmp_oid_compare(newname, 20, name, *length) == 0) {
-                    memcpy((char *) lowest, (char *) newname,
-                           20 * sizeof(oid));
-                    LowState = i;
-                    break;      /* no need to search further */
-                }
-            } else {
-                if (snmp_oid_compare(newname, 20, name, *length) > 0) {
-                    memcpy((char *) lowest, (char *) newname,
-                           20 * sizeof(oid));
-                    LowState = i;
-                    break;      /* As the table is sorted, no need to search further */
-                }
-            }
-        }
+        DEBUGMSGTL(("mibII/tcpTable", "Loaded TCP Table\n"));
+        tcp_size = pTcpTable->dwNumEntries;
+        tcp_head = pTcpTable->table;
+        tcpTable_valid = 1;
+        return 0;
     }
-    if ((LowState < 0) || (status != NO_ERROR))
-        return (NULL);
-    memcpy((char *) name, (char *) lowest,
-           (vp->namelen + 10) * sizeof(oid));
-    *length = vp->namelen + 10;
-    *write_method = 0;
-    *var_len = sizeof(long);
-    switch (vp->magic) {
-    case TCPCONNSTATE:
-        *write_method = writeTcpEntry;
-        tcp_row = pTcpTable->table[i];
-        return (u_char *) & pTcpTable->table[i].dwState;
+    DEBUGMSGTL(("mibII/tcpTable", "Failed to load TCP Table (win32)\n"));
+    return -1;
+}
+#else                           /* WIN32 */
 
-    case TCPCONNLOCALADDRESS:
-        return (u_char *) & pTcpTable->table[i].dwLocalAddr;
-    case TCPCONNLOCALPORT:
-        long_return =
-            ntohs((unsigned short) (0x0000FFFF & pTcpTable->table[i].
-                                    dwLocalPort));
-        return (u_char *) & long_return;
-    case TCPCONNREMADDRESS:
-        return (u_char *) & pTcpTable->table[i].dwRemoteAddr;
-    case TCPCONNREMPORT:
-        long_return =
-            ntohs((unsigned short) (0x0000FFFF & pTcpTable->table[i].
-                                    dwRemotePort));
-        return (u_char *) & long_return;
-    default:
-        DEBUGMSGTL(("snmpd", "unknown sub-id %d in var_tcpEntry\n",
-                    vp->magic));
+#if (defined(CAN_USE_SYSCTL) && defined(TCPCTL_PCBLIST))
+int
+tcpTable_load(netsnmp_cache *cache, void *vmagic)
+{
+    size_t   len;
+    int      sname[] = { CTL_NET, PF_INET, IPPROTO_TCP, TCPCTL_PCBLIST };
+    char     *tcpcb_buf = NULL;
+    struct xinpgen *xig = NULL;
+    netsnmp_inpcb  *nnew;
+    int      StateMap[] = { 1, 2, 3, 4, 5, 8, 6, 10, 9, 7, 11 };
+
+    tcpTable_free();
+
+    /*
+     *  Read in the buffer containing the TCP table data
+     */
+    len = 0;
+    if (sysctl(sname, 4, 0, &len, 0, 0) < 0 ||
+       (tcpcb_buf = malloc(len)) == NULL)
+        return -1;
+    if (sysctl(sname, 4, tcpcb_buf, &len, 0, 0) < 0) {
+        free(tcpcb_buf);
+        return -1;
     }
-    return NULL;
+
+    /*
+     *  Unpick this into the constituent 'xinpgen' structures, and extract
+     *     the 'inpcb' elements into a linked list (built in reverse)
+     */
+    xig = (struct xinpgen *) tcpcb_buf;
+    xig = (struct xinpgen *) ((char *) xig + xig->xig_len);
+
+    while (xig && (xig->xig_len > sizeof(struct xinpgen))) {
+        nnew = SNMP_MALLOC_TYPEDEF(netsnmp_inpcb);
+        if (!nnew)
+            break;
+        nnew->state = StateMap[((struct xinpcb *) xig)->xt_tp.t_state];
+        if (nnew->state == 5 /* established */ ||
+            nnew->state == 8 /*  closeWait  */ )
+            tcp_estab++;
+        memcpy(&(nnew->pcb), ((struct xinpcb *) xig)->xt_inp, sizeof(struct inpcb));
+
+	nnew->inp_next = tcp_head;
+	tcp_head   = nnew;
+        xig = (struct xinpgen *) ((char *) xig + xig->xig_len);
+    }
+
+    free(tcpcb_buf);
+    if (tcp_head) {
+        DEBUGMSGTL(("mibII/tcpTable", "Loaded TCP Table\n"));
+        tcpTable_valid = 1;
+        return 0;
+    }
+    DEBUGMSGTL(("mibII/tcpTable", "Failed to load TCP Table (sysctl)\n"));
+    return -1;
+}
+#else		/* (defined(CAN_USE_SYSCTL) && defined(TCPCTL_PCBLIST)) */
+#ifdef PCB_TABLE
+int
+tcpTable_load(netsnmp_cache *cache, void *vmagic)
+{
+    struct inpcbtable table;
+    struct inpcb   *entry;
+    struct tcpcb   *tcpcb;
+    netsnmp_inpcb  *nnew;
+    int      StateMap[] = { 1, 2, 3, 4, 5, 8, 6, 10, 9, 7, 11 };
+
+    tcpTable_free();
+
+    if (!auto_nlist(TCB_SYMBOL, (char *) &table, sizeof(table))) {
+        DEBUGMSGTL(("mibII/tcpTable", "Failed to read inpcbtable\n"));
+        return -1;
+    }
+
+    /*
+     *  Set up a linked list
+     */
+    entry  = table.inpt_queue.cqh_first;
+    while (entry) {
+   
+        nnew = SNMP_MALLOC_TYPEDEF(netsnmp_inpcb);
+        if (!nnew)
+            break;
+        klookup((unsigned long) entry, (char *)&(nnew->pcb), sizeof(struct inpcb));
+        klookup((int) nnew->pcb.inp_ppcb, (char *)&tcpcb, sizeof(struct tcpcb));
+	nnew->state = StateMap[tcpcb.t_state];
+        if (nnew->state == 5 /* established */ ||
+            nnew->state == 8 /*  closeWait  */ )
+            tcp_estab++;
+
+        entry      = nnew->inp_queue.cqe_next;	/* Next kernel entry */
+	nnew->inp_next = tcp_head;
+	tcp_head   = nnew;
+
+        if (entry == table.inpt_queue.cqh_first)
+            break;
+    }
+
+    if (tcp_head) {
+        DEBUGMSGTL(("mibII/tcpTable", "Loaded TCP Table\n"));
+        tcpTable_valid = 1;
+        return 0;
+    }
+    DEBUGMSGTL(("mibII/tcpTable", "Failed to load TCP Table (pcb_table)\n"));
+    return -1;
 }
 
+#else				/* PCB_TABLE */
+#ifdef TCP_SYMBOL
 int
-writeTcpEntry(int action,
-              u_char * var_val,
-              u_char var_val_type,
-              size_t var_val_len,
-              u_char * statP, oid * name, size_t name_len)
+tcpTable_load(netsnmp_cache *cache, void *vmagic)
 {
-    static int      oldbuf;
-    DWORD           status = NO_ERROR;
-    /*
-     * Only tcpConnState is writable 
-     */
-    if ((char) name[9] != 1)
-        return SNMP_ERR_NOTWRITABLE;
+    struct inpcb   tcp_inpcb;
+    struct tcpcb   tcpcb;
+    netsnmp_inpcb  *nnew;
+    struct inpcb   *entry;
+#ifdef hpux
+    int      StateMap[] = { 1, 2, 3, -1, 4, 5, 8, 6, 10, 9, 7, 11 };
+#else
+    int      StateMap[] = { 1, 2, 3,     4, 5, 8, 6, 10, 9, 7, 11 };
+#endif
 
-    switch (action) {
-    case RESERVE1:             /* Check values for acceptability */
-        if (var_val_type != ASN_INTEGER) {
-            snmp_log(LOG_ERR, "not integer\n");
-            return SNMP_ERR_WRONGTYPE;
-        }
-        if (var_val_len > sizeof(int)) {
-            snmp_log(LOG_ERR, "bad length\n");
-            return SNMP_ERR_WRONGLENGTH;
-        }
-        if ((int) (*var_val) != MIB_TCP_STATE_DELETE_TCB) {
-            snmp_log(LOG_ERR, "not supported admin state\n");
-            return SNMP_ERR_WRONGVALUE;
-        }
-        break;
+    tcpTable_free();
 
-    case RESERVE2:             /* Allocate memory and similar resources */
-        /*
-         * Using static strings, so nothing needs to be done 
-         */
-
-        break;
-
-    case ACTION:
-        /*
-         * Save the old value, in case of UNDO 
-         */
-        oldbuf = tcp_row.dwState;
-        tcp_row.dwState = (int) *var_val;
-        break;
-
-    case UNDO:                 /* Reverse the SET action and free resources */
-        tcp_row.dwState = oldbuf;
-        break;
-
-    case COMMIT:               /* Confirm the SET, performing any irreversible actions,
-                                 * and free resources */
-        if ((status = SetTcpEntry(&tcp_row)) != NO_ERROR) {
-            snmp_log(LOG_ERR,
-                     "Error while trying to write connState %d, status = %d \n",
-                     tcp_row.dwState, status);
-            return SNMP_ERR_COMMITFAILED;
-        }
-    case FREE:                 /* Free any resources allocated */
-        break;
+    if (!auto_nlist(TCP_SYMBOL, (char *) &tcp_inpcb, sizeof(tcp_inpcb))) {
+        DEBUGMSGTL(("mibII/tcpTable", "Failed to read tcp_symbol\n"));
+        return -1;
     }
-    return SNMP_ERR_NOERROR;
-}                               /* end of writeTcpEntry */
+
+    /*
+     *  Set up a linked list
+     */
+    entry  = tcp_inpcb.INP_NEXT_SYMBOL;
+    while (entry) {
+   
+        nnew = SNMP_MALLOC_TYPEDEF(netsnmp_inpcb);
+        if (!nnew)
+            break;
+        klookup((unsigned long) entry, (char *)&(nnew->pcb), sizeof(struct inpcb));
+        klookup((int) nnew->pcb.inp_ppcb, (char *)&tcpcb, sizeof(struct tcpcb));
+	nnew->state    = StateMap[tcpcb.t_state];
+        if (nnew->state == 5 /* established */ ||
+            nnew->state == 8 /*  closeWait  */ )
+            tcp_estab++;
+
+        entry          = nnew->pcb.INP_NEXT_SYMBOL;	/* Next kernel entry */
+	nnew->inp_next = tcp_head;
+	tcp_head       = nnew;
+
+        if (entry == tcp_inpcb.INP_NEXT_SYMBOL)
+            break;
+    }
+
+    if (tcp_head) {
+        DEBUGMSGTL(("mibII/tcpTable", "Loaded TCP Table\n"));
+        tcpTable_valid = 1;
+        return 0;
+    }
+    DEBUGMSGTL(("mibII/tcpTable", "Failed to load TCP Table (tcp_symbol)\n"));
+    return -1;
+}
+
+#else				/* UDB_SYMBOL */
+int
+tcpTable_load(netsnmp_cache *cache, void *vmagic)
+{
+    DEBUGMSGTL(("mibII/tcpTable", "Loading TCP Table not implemented\n"));
+    tcpTable_valid = 0;
+    return -1;
+}
+#endif				/* UDB_SYMBOL */
+#endif				/* PCB_TABLE */
+#endif		/* (defined(CAN_USE_SYSCTL) && defined(TCPCTL_PCBLIST)) */
 #endif                          /* WIN32 */
+#endif                          /* linux */
+#endif                          /* solaris2 */
+#endif                          /* hpux11 */
