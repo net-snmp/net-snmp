@@ -322,6 +322,10 @@ How can I find out what other people are doing?
   To find out what the developers are doing, and to help them out, please
   read the PORTING file enclosed with the package.
 
+  There is also an net-snmp IRC channel set up on the openprojects.net
+  IRC chat servers (see http://www.openprojects.net/ for getting
+  started with irc).  Multiple core developers hang out there on a
+  regular basis.
 
 
 How do I submit a patch or bug report?
@@ -339,14 +343,20 @@ How do I submit a patch or bug report?
   number) since patch manager doesn't contain a decent description
   field.
 
-    There is also a support database at
-  http://www.net-snmp.org/support/ where "I need help with" questions
-  can be submitted.  Be advised that the people answering these kinds
-  of questions are doing so out of the goodness of their hearts, as
-  this is an otherwise unsupported package.
+    Questions about using the package should be directed at the
+  net-snmp-users@lists.sourceforge.net mailing list.  Be advised that
+  the people answering these kinds of questions are doing so out of
+  the goodness of their hearts, as this is an otherwise unsupported
+  package.  Please also be advised that posting notes using a html
+  based mailer only annoys people, and posting notes more than once
+  ("no one answered this so I'm posting it again") only annoys them
+  even more.  As long as you stay away from those two no-no's, we're a
+  rather friendly bunch.
 
-    You can also mail the net-snmp-users@lists.sourceforge.net list
-  with your questions and see if anyone there can help you.
+    There is also an net-snmp IRC channel set up on the openprojects.net
+  IRC chat servers (see http://www.openprojects.net/ for getting
+  started with irc).  Multiple core developers hang out there on a
+  regular basis.
 
     We can't promise to be able to solve the problem, but we'll
   certainly try and help.  Please *don't* mail both the coders
