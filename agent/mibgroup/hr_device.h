@@ -5,10 +5,9 @@
 #ifndef _MIBGROUP_HRDEVICE_H
 #define _MIBGROUP_HRDEVICE_H
 
-extern void	init_hr_device();
-extern u_char	*var_hrdevice();
-
-
+extern void	init_hr_device __P((void));
+extern u_char	*var_hrdevice __P((struct variable *, oid *, int *, int, int *, int (**write) __P((int, u_char *, u_char, int, u_char *, oid *, int)) ));
+;
 
 #define	HRDEV_INDEX		1
 #define	HRDEV_TYPE		2

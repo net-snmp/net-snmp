@@ -497,6 +497,8 @@ struct in_ifaddr *Retin_ifaddr;
 	 *
 	 *********************/
 
+#ifndef HAVE_NET_IF_MIB_H
+
 int header_interfaces __P((struct variable *, oid *, int *, int, int *, int (**write) __P((int, u_char *, u_char,int, u_char *, oid *, int)) ));
 int header_ifEntry __P((struct variable *, oid *, int *, int, int *, int (**write) __P((int, u_char *, u_char,int, u_char *, oid *, int)) ));
 extern u_char	*var_ifEntry __P((struct variable *, oid *, int *, int, int *, int (**write) __P((int, u_char *, u_char,int, u_char *, oid *, int)) ));
@@ -2101,3 +2103,4 @@ var_ifEntry(vp, name, length, exact, var_len, write_method)
 }
 
 #endif /* HAVE_NET_IF_MIB_H */
+#endif

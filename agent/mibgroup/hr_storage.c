@@ -85,10 +85,12 @@ extern struct mntent *HRFS_entry;
 	 *********************/
 int Get_Next_HR_Store __P((void));
 void  Init_HR_Store __P((void));
+int header_hrstore __P((struct variable *,oid *, int *, int, int *, int (**write) __P((int, u_char *, u_char, int, u_char *,oid *,int)) ));
+int header_hrstoreEntry __P((struct variable *,oid *, int *, int, int *, int (**write) __P((int, u_char *, u_char, int, u_char *,oid *,int)) ));
 
 int linux_mem __P((int, int));
 
-void	init_hr_storeage( )
+void	init_hr_storeage __P((void))
 {
   auto_nlist(PHYSMEM_SYMBOL,0,0);
   auto_nlist(TOTAL_MEMORY_SYMBOL,0,0);
@@ -105,7 +107,7 @@ header_hrstore(vp, name, length, exact, var_len, write_method)
     int     *length;	    /* IN/OUT - length of input and output oid's */
     int     exact;	    /* IN - TRUE if an exact match was requested. */
     int     *var_len;	    /* OUT - length of variable or 0 if function returned. */
-    int     (**write_method)(); /* OUT - pointer to function to set variable, otherwise 0 */
+    int     (**write_method) __P((int, u_char *,u_char, int, u_char *,oid*, int));
 {
 #define HRSTORE_NAME_LENGTH	9
     oid newname[MAX_NAME_LEN];
@@ -137,7 +139,7 @@ header_hrstoreEntry(vp, name, length, exact, var_len, write_method)
     int     *length;	    /* IN/OUT - length of input and output oid's */
     int     exact;	    /* IN - TRUE if an exact match was requested. */
     int     *var_len;	    /* OUT - length of variable or 0 if function returned. */
-    int     (**write_method)(); /* OUT - pointer to function to set variable, otherwise 0 */
+    int     (**write_method) __P((int, u_char *,u_char, int, u_char *,oid*, int));
 {
 #define HRSTORE_ENTRY_NAME_LENGTH	11
     oid newname[MAX_NAME_LEN];
@@ -222,7 +224,7 @@ var_hrstore(vp, name, length, exact, var_len, write_method)
     int     *length;
     int     exact;
     int     *var_len;
-    int     (**write_method)();
+    int     (**write_method) __P((int, u_char *,u_char, int, u_char *,oid*, int));
 {
     int store_idx=0;
 #ifndef linux

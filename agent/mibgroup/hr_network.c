@@ -18,13 +18,14 @@
 	 *
 	 *********************/
 
-void  Init_HR_Network();
-int   Get_Next_HR_Network();
-void  Save_HR_Network_Info();
+void  Init_HR_Network __P((void));
+int   Get_Next_HR_Network __P((void));
+void  Save_HR_Network_Info __P((void));
 
-char *describe_networkIF();
-int   network_status();
-int   network_errors();
+char *describe_networkIF __P((int));
+int   network_status __P((int));
+int   network_errors __P((int));
+int header_hrnet __P((struct variable *,oid *, int *, int, int *, int (**write) __P((int, u_char *, u_char, int, u_char *,oid *,int)) ));
 
 #define HRN_MONOTONICALLY_INCREASING
 
@@ -59,7 +60,7 @@ header_hrnet(vp, name, length, exact, var_len, write_method)
     int     *length;	    /* IN/OUT - length of input and output oid's */
     int     exact;	    /* IN - TRUE if an exact match was requested. */
     int     *var_len;	    /* OUT - length of variable or 0 if function returned. */
-    int     (**write_method)(); /* OUT - pointer to function to set variable, otherwise 0 */
+    int     (**write_method) __P((int, u_char *,u_char, int, u_char *,oid*, int));
 {
 #define HRNET_ENTRY_NAME_LENGTH	11
     oid newname[MAX_NAME_LEN];
@@ -129,7 +130,7 @@ var_hrnet(vp, name, length, exact, var_len, write_method)
     int     *length;
     int     exact;
     int     *var_len;
-    int     (**write_method)();
+    int     (**write_method) __P((int, u_char *,u_char, int, u_char *,oid*, int));
 {
     int  net_idx;
 
@@ -169,7 +170,7 @@ static int		HRN_savedErrors;;
 
 
 void
-Init_HR_Network()
+Init_HR_Network __P((void))
 {
 #ifndef solaris2
    Interface_Scan_Init();
@@ -177,7 +178,7 @@ Init_HR_Network()
 }
 
 int
-Get_Next_HR_Network()
+Get_Next_HR_Network __P((void))
 {
 #ifndef solaris2
 #if defined(linux) || defined(sunV3)
@@ -192,7 +193,7 @@ Get_Next_HR_Network()
 }
 
 void
-Save_HR_Network_Info()
+Save_HR_Network_Info __P((void))
 {
    strcpy( HRN_savedName, HRN_name);
    HRN_savedFlags  = HRN_ifnet.if_flags;

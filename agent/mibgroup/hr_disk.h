@@ -5,8 +5,10 @@
 #ifndef _MIBGROUP_HRDISK_H
 #define _MIBGROUP_HRDISK_H
 
-extern void	init_hr_disk();
-extern u_char	*var_hrdisk();
+extern void	init_hr_disk __P((void));
+extern void	Init_HR_Disk __P((void));
+extern int	Get_Next_HR_Disk __P((void));
+extern u_char	*var_hrdisk  __P((struct variable *, oid *, int *, int, int *, int (**write) __P((int, u_char *, u_char, int, u_char *, oid *, int)) ));
 
 
 #define	HRDISK_ACCESS		1

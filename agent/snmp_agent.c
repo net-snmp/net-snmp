@@ -60,6 +60,7 @@ SOFTWARE.
 #include "mibgroup/struct.h"
 #include "mibgroup/util_funcs.h"
 #include "snmp_agent.h"
+#include "var_struct.h"
 #include "read_config.h"
 #include "mib_module_config.h"
 #include "mibgroup/vacm_vars.h"

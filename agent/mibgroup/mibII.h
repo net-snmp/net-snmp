@@ -9,3 +9,6 @@ config_require(icmp)
 config_require(ip)
 config_require(udp)
 config_require(vacm_vars)
+
+void init_mibII  __P((void));
+  

@@ -5,11 +5,13 @@
 #ifndef _MIBGROUP_HRFSYS_H
 #define _MIBGROUP_HRFSYS_H
 
-extern void	init_hr_filesys();
-extern u_char	*var_hrfilesys();
+extern void	init_hr_filesys __P((void));
+extern void	Init_HR_FileSys __P((void));
+extern u_char	*var_hrfilesys __P((struct variable *, oid *, int *, int, int *, int (**write) __P((int, u_char *, u_char, int, u_char *, oid *, int)) ));
+extern int   Get_Next_HR_FileSys __P((void));
 
-extern int   	Get_FSIndex();
-extern int   	Get_FSSize();	/* Temporary */
+extern int   	Get_FSIndex __P((char *));
+extern int   	Get_FSSize __P((char *));	/* Temporary */
 
 
 #define HRFSYS_INDEX		1
