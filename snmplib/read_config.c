@@ -183,9 +183,9 @@ void print_config_handlers __P((void))
   struct config_line *ltmp;
 
   for(;ctmp != NULL; ctmp = ctmp->next) {
-    DEBUGP("read_conf: %s\n", ctmp->fileHeader);
+    DEBUGMSGTL(("read_config", "read_conf: %s\n", ctmp->fileHeader));
     for(ltmp = ctmp->start; ltmp != NULL; ltmp = ltmp->next)
-      DEBUGP("                   %s\n", ltmp->config_token);
+      DEBUGMSGTL(("read_config", "                   %s\n", ltmp->config_token));
   }
 }
 #endif
@@ -202,8 +202,8 @@ void read_config_with_type(filename, type)
   if (ctmp)
     read_config(filename, ctmp->start, EITHER_CONFIG);
   else
-    DEBUGP("read_config: I have no registrations for type:%s,file:%s\n",
-           type, filename);
+    DEBUGMSGTL(("read_config", "read_config: I have no registrations for type:%s,file:%s\n",
+           type, filename));
 }
 
 void read_config(filename, line_handler, when)
@@ -222,10 +222,10 @@ void read_config(filename, line_handler, when)
   curfilename = filename;
   
   if ((ifile = fopen(filename, "r")) == NULL) {
-    DEBUGP("ucd-snmp: %s: %s\n", filename, strerror(errno));
+    DEBUGMSGTL(("read_config", "ucd-snmp: %s: %s\n", filename, strerror(errno)));
     return;
   } else {
-    DEBUGP("ucd-snmp: Reading configuration %s\n", filename);
+    DEBUGMSGTL(("read_config", "ucd-snmp: Reading configuration %s\n", filename));
   }
 
   while (fgets(line, STRINGMAX, ifile) != NULL) 
