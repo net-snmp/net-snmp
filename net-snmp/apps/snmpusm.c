@@ -447,6 +447,13 @@ main(int argc, char *argv[])
       snmp_pdu_add_variable(pdu, usmUserStatus, name_length,
                             ASN_INTEGER, (u_char *) &longvar, sizeof(longvar));
     }
+	else
+	{
+	  printf("Unknown command\n");
+	  usage();
+	  exit(1);
+	}
+
 
     /* do the request */
     status = snmp_synch_response(ss, pdu, &response);
