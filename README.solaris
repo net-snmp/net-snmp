@@ -107,9 +107,15 @@ functionality is turned on by default and may be unnecessary if
 you aren't using ORACLE's Enterprise Manager.  Refer to ORACLE's
 documentation on how to disable it.
 
+C.  gnu tar
+
+At present the application will not untar properly using Sun's tar.
+The problem may be related to path length.  A working tar
+is available at www.sunfreeware.com.
+
 If you have decided to compile your own net-snmp, you will need ...
 
-C.  A compilation environment
+D.  A compilation environment
 
 -a compiler (gcc or Sun's Forte cc) or the gcc libraries
    (note, the cc in /usr/ucb is NOT a full-blown compiler)
@@ -236,6 +242,8 @@ script eg. bcc.sh in the directory below eg. /usr/local/src.
 
 (note, see the long discussion about Perl below)
 (note, subtitute "cc" for "gcc" as appropriate)
+(note, if you wish to use the new LM-SENSORS-MIB component, see
+discussion below)
 
 then call this script from the net-snmp directory ie ../bcc.sh
 
@@ -339,6 +347,8 @@ Type the following: (using the sample above)
    tar -xvf /usr/local/dist/net-snmp-5.0.9-SunOS_5.8_sun4u.tar
 
 The binaries, libraries, etc. will be installed in /usr/local.
+
+There may be a problem with Sun's tar.  See discussion above.
 
 Remove the tar file to save space.  Create an snmpd.conf (see below)
 or use an existing one from another machine.
@@ -679,6 +689,28 @@ The same methodology can presumably be used for fileName and laNames.  Your mile
 ------------------------------------------------------------
 9.  Monitoring CPU temp, fan and power supply sensors (LM-SENSORS-MIB)
 
+*********************************************************************************
+
+NOTE!!  This is a new and experimental module.  It should be considered "alpha"
+for this first release.  Use with caution as its impact on machine performance
+(ie. CPU usage) has yet to be determined.  The module works in "read only"
+mode to examine sensors.  It cannot change switch or fan settings.
+
+It has been tested on the following platforms:
+
+Enterprise 450
+V880
+280R
+
+If you have information about other platforms this is desperately needed.  For 
+example, the only "state" that I'm aware of for an i2c is "OK".  The more
+information we have, the richer the components.
+
+Please report any performance statistics, bugs or omissions to the users list.
+Please report any code suggestions to the coders list.  See links below.
+
+**********************************************************************************
+
 This component delivers information that you would normally see by typing:
 
 /usr/platform/`uname -m`/sbin/prtdiag -v
@@ -692,7 +724,8 @@ To display this information, net-snmp must be compiled with the option:
 Early Ultra servers such as the Ultra 1 or Ultra 2 did not report
 any sensor information at all.  Later servers, such as the Enterprise 450
 reported this information using kstat.  Sun's latest servers make use
-of the picld daemon to control system resources and report fan information.
+of the picld daemon to control system resources and report fan information.  This
+module reads in the information from picld.  It cannot modify settings.
 
 You can see this information by typing:
 
@@ -838,6 +871,33 @@ LM-SENSORS-MIB::lmVoltSensorsValue.9 = Gauge32: 6
 LM-SENSORS-MIB::lmVoltSensorsValue.10 = Gauge32: 4
 LM-SENSORS-MIB::lmVoltSensorsValue.11 = Gauge32: 3
 LM-SENSORS-MIB::lmVoltSensorsValue.12 = Gauge32: 4
+
+This component also reports information for switches, LEDs
+and i2c's (devices accessing the i2c bus).
+Because the MIB only allows us to display numeric
+information a certain amount of translation has been done.
+
+Switches:
+
+0 = OFF
+1 = ON
+2 = NORMAL
+3 = LOCKED
+4 = UNKNOWN
+5 = DIAG
+6 = SECURE
+99 = other
+
+LEDs:
+
+0 = OFF
+1 = ON
+2 = BLINK (this may not exist)
+99 = other
+
+i2c's:
+0 = OK
+99 = other
 
 In order to prevent inordinant consumption of machine resources,
 some sensor information is cached.  Currently, information
@@ -1289,3 +1349,4 @@ work as advertised.  See long discussion under section 8 above.
 
 For discussion or further information contact the coders and users
 lists at http://sourceforge.net/mail/?group_id=12694 .
+
