@@ -1,5 +1,5 @@
 
-install:#
+#
 # standard target definitions.  Set appropriate variables to make use of them.
 #
 # note: the strange use of the "it" variable is for shell parsing when
