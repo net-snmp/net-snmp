@@ -399,9 +399,9 @@ agentx_master_handler(
         
         /* mark the request as delayed */
         if (pdu->command != AGENTX_MSG_CLEANUPSET)
-            request->delegated = 1;
+            request->delegated = REQUEST_IS_DELEGATED;
         else
-            request->delegated = 0;
+            request->delegated = REQUEST_IS_NOT_DELEGATED;
 
         /* next... */
         request = request->next;
@@ -410,8 +410,8 @@ agentx_master_handler(
     /* send the requests out */
     DEBUGMSGTL(("agentx", "sending pdu\n"));
     snmp_async_send(ax_session, pdu, agentx_got_response,
-                    netsnmp_create_delegated_cache(handler, reginfo, reqinfo, requests,
-                                           (void *) ax_session));
+                    netsnmp_create_delegated_cache(handler, reginfo,
+                                                   reqinfo, requests,
+                                                   (void *) ax_session));
     return SNMP_ERR_NOERROR;
 }
-
