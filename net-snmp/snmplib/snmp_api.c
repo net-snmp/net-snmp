@@ -3054,8 +3054,13 @@ snmpv3_parse(
   sec_params			= data;
   pdu->contextEngineID		= (u_char *)calloc(1,SNMP_MAX_ENG_SIZE);
   pdu->contextEngineIDLen	= SNMP_MAX_ENG_SIZE;
-  pdu->securityEngineID         = (u_char *)calloc(1,SNMP_MAX_ENG_SIZE);
-  pdu->securityEngineIDLen	= SNMP_MAX_ENG_SIZE;
+
+  /*  Note: there is no length limit on the msgAuthoritativeEngineID field,
+      although we would EXPECT it to be limited to 32 (the SnmpEngineID TC
+      limit).  We'll use double that here to be on the safe side.  */
+
+  pdu->securityEngineID         = (u_char *)calloc(1, SNMP_MAX_ENG_SIZE * 2);
+  pdu->securityEngineIDLen	= SNMP_MAX_ENG_SIZE * 2;
   pdu->securityName		= (char *)calloc(1,SNMP_MAX_SEC_NAME_SIZE);
   pdu->securityNameLen		= SNMP_MAX_SEC_NAME_SIZE;
 
