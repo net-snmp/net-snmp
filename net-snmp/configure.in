@@ -1045,7 +1045,7 @@ AC_CHECK_HEADERS(winsock.h io.h)
 dnl SCO
 AC_CHECK_HEADERS(sys/stream.h)
 dnl KAME
-AC_CHECK_HEADERS(netinet6/in6_var.h netinet6/in6_pcb.h netinet6/ip6_var.h netinet6/tcp6.h netinet6/tcp6_fsm.h netinet6/nd6.h netinet6/tcp6_timer.h netinet6/tcp6_var.h)
+AC_CHECK_HEADERS(netinet/ip6.h netinet6/in6_var.h netinet6/in6_pcb.h netinet6/ip6_var.h netinet6/tcp6.h netinet6/tcp6_fsm.h netinet6/nd6.h netinet6/tcp6_timer.h netinet6/tcp6_var.h)
 
 dnl OpenSSL
 AC_CHECK_HEADERS(openssl/hmac.h openssl/evp.h)
