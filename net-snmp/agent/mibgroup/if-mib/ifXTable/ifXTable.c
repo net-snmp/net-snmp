@@ -2530,6 +2530,7 @@ _ifXTable_row_save(ifXTable_rowreq_ctx * rowreq_ctx, void *type)
      * terminate and store the line
      */
     sprintf(buf, "%c\n", LINE_TERM_CHAR);
+    DEBUGMSGTL(("ifXTable:save", "saving line '%s'\n", line));
     read_config_store((char *) type, line);
 
     /*
