@@ -179,8 +179,8 @@ int register_sysORTable_sess(oid *oidin,
   (*ptr)->OR_oidlen = oidlen;
   (*ptr)->OR_oid = (oid *) malloc(sizeof(oid)*oidlen);
   if ( (*ptr)->OR_oid == NULL ) {
-	free( *ptr );
 	free( (*ptr)->OR_descr );
+	free( *ptr );
 	return SYS_ORTABLE_REGISTRATION_FAILED;
   }
   memcpy((*ptr)->OR_oid, oidin, sizeof(oid)*oidlen);
