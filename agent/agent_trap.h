@@ -17,5 +17,6 @@ void snmpd_free_trapcommunity (void);
 
 int create_trap_session (char *, u_short, char *, int, int);
 int add_trap_session( struct snmp_session *, int, int);
+int remove_trap_session( struct snmp_session * );
 
 #endif /* AGENT_TRAP_H */
