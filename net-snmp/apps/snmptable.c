@@ -100,16 +100,7 @@ static int      localdebug;
 static int      exitval = 0;
 static int      use_getbulk = 1;
 static int      max_getbulk = 25;
-static int      nonsequential = 1;
 
-#ifdef COMMENT
-Related to the use of the "nonsequential"[-C] flag:The -
-    C option should NOT be used.It gives you the old,
-    problematic behaviour of pre -
-    4.1.Forget about it.It is just there as a safe -
-    guard in case a problem shows up.You could get away with snmptable -
-    CC host community table but again, -C should be forgotten.
-#endif
 void            usage(void);
 void            get_field_names(char *);
 void            get_table_entries(netsnmp_session * ss);
@@ -159,9 +150,6 @@ optProc(int argc, char *const *argv, int opt)
                 break;
             case 'H':
                 no_headers = 1;
-                break;
-            case 'C':
-                nonsequential = 0;
                 break;
             case 'B':
                 use_getbulk = 0;
@@ -220,7 +208,8 @@ main(int argc, char *argv[])
     char           *tblname;
 
     setvbuf(stdout, NULL, _IOLBF, 1024);
-    snmp_set_quick_print(1);
+    netsnmp_ds_set_boolean(NETSNMP_DS_LIBRARY_ID, 
+                           NETSNMP_DS_LIB_QUICK_PRINT, 1);
 
     /*
      * get the common command line arguments 
@@ -251,17 +240,15 @@ main(int argc, char *argv[])
         snmp_perror(argv[optind]);
         exit(1);
     }
-    localdebug = snmp_get_dump_packet();
-    if (nonsequential) {
-        tblname = strrchr(argv[optind], '.');
-        if (!tblname)
-            tblname = strrchr(argv[optind], ':');
-        if (tblname)
-            ++tblname;
-        else
-            tblname = argv[optind];
-    } else
-        tblname = NULL;
+    localdebug = netsnmp_ds_get_boolean(NETSNMP_DS_LIBRARY_ID, 
+                                        NETSNMP_DS_LIB_DUMP_PACKET);
+    tblname = strrchr(argv[optind], '.');
+    if (!tblname)
+        tblname = strrchr(argv[optind], ':');
+    if (tblname)
+        ++tblname;
+    else
+        tblname = argv[optind];
 
     get_field_names(tblname);
     reverse_fields();
@@ -373,17 +360,15 @@ get_field_names(char *tblname)
     struct tree    *tbl = NULL;
     int             going = 1;
 
-    if (tblname) {
-        tbl = find_tree_node(tblname, -1);
-    }
+    tbl = find_tree_node(tblname, -1);
     if (tbl) {
         tbl = tbl->child_list;
-    }
-    if (tbl) {
-        root[rootlen++] = tbl->subid;
-        tbl = tbl->child_list;
-    } else {
-        root[rootlen++] = 1;
+        if (tbl) {
+            root[rootlen++] = tbl->subid;
+            tbl = tbl->child_list;
+        } else {
+            root[rootlen++] = 1;
+        }
     }
 
     if (sprint_realloc_objid
@@ -603,24 +588,30 @@ get_table_entries(netsnmp_session * ss)
                         i = vars->name_length - rootlen + 1;
                         if (localdebug || show_index) {
                             if (netsnmp_ds_get_boolean(NETSNMP_DS_LIBRARY_ID, 
-					      NETSNMP_DS_LIB_EXTENDED_INDEX)) {
+                                              NETSNMP_DS_LIB_EXTENDED_INDEX)) {
                                 name_p = strchr(buf, '[');
                             } else {
-                                switch (snmp_get_suffix_only()) {
-                                case 2:
-                                case 0:
+                                switch (netsnmp_ds_get_int(NETSNMP_DS_LIBRARY_ID,
+                                                          NETSNMP_DS_LIB_OID_OUTPUT_FORMAT)) {
+                                case NETSNMP_OID_OUTPUT_MODULE:
                                     name_p = strrchr(buf, ':');
                                     break;
-                                case 1:
+                                case NETSNMP_OID_OUTPUT_SUFFIX:
                                     name_p = buf;
+                                    break;
+                                case NETSNMP_OID_OUTPUT_FULL:
+                                case NETSNMP_OID_OUTPUT_NUMERIC:
+                                case NETSNMP_OID_OUTPUT_UCD:
+                                    name_p = buf + strlen(table_name)+1;
+                                    name_p = strchr(name_p, '.')+1;
                                     break;
                                 }
                                 name_p = strchr(name_p, '.') + 1;
                             }
                         }
                         if (localdebug) {
-                            printf("Index: %s\n", name_p);
-			}
+                            printf("Name: %s Index: %s\n", buf, name_p);
+                        }
                         if (show_index) {
                             indices[entries - 1] = strdup(name_p);
                             i = strlen(name_p);
@@ -629,7 +620,7 @@ get_table_entries(netsnmp_session * ss)
                         }
                     }
 
-                    if (localdebug) {
+                    if (localdebug && buf) {
                         printf("%s => taken\n", buf);
                     }
                     out_len = 0;
@@ -757,16 +748,22 @@ getbulk_table_entries(netsnmp_session * ss)
                                buf ? (char *) buf : "[NIL]");
                     }
                     if (netsnmp_ds_get_boolean(NETSNMP_DS_LIBRARY_ID, 
-					      NETSNMP_DS_LIB_EXTENDED_INDEX)) {
+                                              NETSNMP_DS_LIB_EXTENDED_INDEX)) {
                         name_p = strchr(buf, '[');
-		    } else {
-                        switch (snmp_get_suffix_only()) {
-                        case 2:
-                        case 0:
+                    } else {
+                        switch (netsnmp_ds_get_int(NETSNMP_DS_LIBRARY_ID,
+                                                  NETSNMP_DS_LIB_OID_OUTPUT_FORMAT)) {
+                        case NETSNMP_OID_OUTPUT_MODULE:
                             name_p = strrchr(buf, ':');
                             break;
-                        case 1:
+                        case NETSNMP_OID_OUTPUT_SUFFIX:
                             name_p = buf;
+                            break;
+                        case NETSNMP_OID_OUTPUT_FULL:
+                        case NETSNMP_OID_OUTPUT_NUMERIC:
+                        case NETSNMP_OID_OUTPUT_UCD:
+                            name_p = buf + strlen(table_name)+1;
+                            name_p = strchr(name_p, '.')+1;
                             break;
                         }
                         name_p = strchr(name_p, '.') + 1;
