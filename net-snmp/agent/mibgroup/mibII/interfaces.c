@@ -218,6 +218,7 @@ static void     free_interface_config(void);
 
 struct variable3 interfaces_variables[] = {
     {IFNUMBER, ASN_INTEGER, RONLY, var_interfaces, 1, {1}},
+#if !defined(NETSNMP_ENABLE_MFD_REWRITES)
     {IFINDEX, ASN_INTEGER, RONLY, var_ifEntry, 3, {2, 1, 1}},
     {IFDESCR, ASN_OCTET_STR, RONLY, var_ifEntry, 3, {2, 1, 2}},
     {IFTYPE, ASN_INTEGER, RONLY, var_ifEntry, 3, {2, 1, 3}},
@@ -244,6 +245,7 @@ struct variable3 interfaces_variables[] = {
     {IFOUTERRORS, ASN_COUNTER, RONLY, var_ifEntry, 3, {2, 1, 20}},
     {IFOUTQLEN, ASN_GAUGE, RONLY, var_ifEntry, 3, {2, 1, 21}},
     {IFSPECIFIC, ASN_OBJECT_ID, RONLY, var_ifEntry, 3, {2, 1, 22}}
+#endif /* !def NETSNMP_ENABLE_MFD_REWRITES */
 };
 
 /*
@@ -878,11 +880,12 @@ var_ifEntry(struct variable *vp,
         return (u_char *) & long_return;
     case IFPHYSADDRESS:
         Interface_Get_Ether_By_Index(interface, return_buf);
-        *var_len = 6;
         if ((return_buf[0] == 0) && (return_buf[1] == 0) &&
             (return_buf[2] == 0) && (return_buf[3] == 0) &&
             (return_buf[4] == 0) && (return_buf[5] == 0))
             *var_len = 0;
+        else
+            *var_len = 6;
         return (u_char *) return_buf;
     case IFADMINSTATUS:
         long_return = ifnet.if_flags & IFF_UP ? 1 : 2;
@@ -1131,11 +1134,12 @@ var_ifEntry(struct variable *vp,
         return (u_char *) ifnet.if_entry.ifPhysAddress.o_bytes;
 #else
         Interface_Get_Ether_By_Index(interface, return_buf);
-        *var_len = 6;
         if ((return_buf[0] == 0) && (return_buf[1] == 0) &&
             (return_buf[2] == 0) && (return_buf[3] == 0) &&
             (return_buf[4] == 0) && (return_buf[5] == 0))
             *var_len = 0;
+        else
+            *var_len = 6;
         return (u_char *) return_buf;
 #endif
     case IFADMINSTATUS:
@@ -1713,12 +1717,18 @@ Interface_Scan_Init(void)
 
         nnew->if_type = 0;
 
+        /*
+         * NOTE: this ioctl does not guarantee 6 bytes of a physaddr.
+         * In particular, a 'sit0' interface only appears to get back
+         * 4 bytes of sa_data.
+         */
+        memset(ifrq.ifr_hwaddr.sa_data, (0), IFHWADDRLEN);
         strncpy(ifrq.ifr_name, ifname, sizeof(ifrq.ifr_name));
         ifrq.ifr_name[ sizeof(ifrq.ifr_name)-1 ] = 0;
         if (ioctl(fd, SIOCGIFHWADDR, &ifrq) < 0)
-            memset(nnew->if_hwaddr, (0), 6);
+            memset(nnew->if_hwaddr, (0), IFHWADDRLEN);
         else {
-            memcpy(nnew->if_hwaddr, ifrq.ifr_hwaddr.sa_data, 6);
+            memcpy(nnew->if_hwaddr, ifrq.ifr_hwaddr.sa_data, IFHWADDRLEN);
 
 #ifdef ARPHRD_LOOPBACK
             switch (ifrq.ifr_hwaddr.sa_family) {
