@@ -1,13 +1,6 @@
 #ifndef _SNMPCALLBACKDOMAIN_H
 #define _SNMPCALLBACKDOMAIN_H
 
-#if HAVE_SYS_SOCKET_H
-#include <sys/socket.h>
-#endif
-#if HAVE_SYS_UN_H
-#include <sys/un.h>
-#endif
-
 #include "snmp_transport.h"
 
 typedef struct callback_pass_s {
