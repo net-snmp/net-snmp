@@ -211,9 +211,6 @@
 /* Define if you have the getfsstat function.  */
 #undef HAVE_GETFSSTAT
 
-/* Define if you have the gethostbyname function.  */
-#undef HAVE_GETHOSTBYNAME
-
 /* Define if you have the gethostname function.  */
 #undef HAVE_GETHOSTNAME
 
@@ -222,9 +219,6 @@
 
 /* Define if you have the getpid function.  */
 #undef HAVE_GETPID
-
-/* Define if you have the getservbyname function.  */
-#undef HAVE_GETSERVBYNAME
 
 /* Define if you have the gettimeofday function.  */
 #undef HAVE_GETTIMEOFDAY
@@ -726,12 +720,6 @@
 
 /* Define if you have the mld library (-lmld).  */
 #undef HAVE_LIBMLD
-
-/* Define if you have the nsl library (-lnsl).  */
-#undef HAVE_LIBNSL
-
-/* Define if you have the socket library (-lsocket).  */
-#undef HAVE_LIBSOCKET
 
 /* Define if you have the z library (-lz).  */
 #undef HAVE_LIBZ
