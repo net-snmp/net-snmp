@@ -25,9 +25,6 @@ ARISING OUT OF OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS
 SOFTWARE.
 ******************************************************************/
 
-/* XXXWWW merge todo: incl/excl range changes in differences between
-   1.142 and 1.152 */
-
 #include <net-snmp/net-snmp-config.h>
 
 #include <sys/types.h>
