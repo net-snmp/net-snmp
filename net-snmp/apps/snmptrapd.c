@@ -451,7 +451,7 @@ int snmp_input(int op,
     char *Command = NULL, *tstr = NULL;
     tmpvar.type = ASN_OBJECT_ID;
 
-    if (op == RECEIVED_MESSAGE){
+    if (op == SNMP_CALLBACK_OP_RECEIVED_MESSAGE) {
 	if (pdu->command == SNMP_MSG_TRAP){
 	    oid trapOid[MAX_OID_LEN];
 	    int trapOidLen = pdu->enterprise_length;
@@ -630,7 +630,7 @@ int snmp_input(int op,
 		}
 	    }
 	}
-    } else if (op == TIMED_OUT){
+    } else if (op == SNMP_CALLBACK_OP_TIMED_OUT) {
 	fprintf(stderr, "Timeout: This shouldn't happen!\n");
     }
     return 1;
