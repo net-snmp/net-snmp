@@ -50,7 +50,7 @@ print_description, fprint_description - mib_api functions
 .br
 .BI "void fprint_value(FILE *" fp ", const oid *" objid ", size_t " objidlen ", struct variable_list *" variable );
 .br
-.BI "int snprint_value(char *" buf ", const oid *" objid ", size_t " objidlen ", struct variable_list *" variable );
+.BI "int snprint_value(char *" buf ", size_t " "len" ", const oid *" objid ", size_t " objidlen ", struct variable_list *" variable );
 .br
 .BI "int sprint_realloc_value(u_char **" buf ", size_t *" buf_len ", size_t *" out_len ", const oid *" objid ", size_t " objidlen ", struct variable_list *" variable );
 .PP
@@ -58,7 +58,7 @@ print_description, fprint_description - mib_api functions
 .br
 .BI "void fprint_objid(FILE *" fp ", const oid *" objid ", size_t " objidlen );
 .br
-.BI "int snprint_objid(char *" buf ", const oid *" objid ", size_t " objidlen );
+.BI "int snprint_objid(char *" buf ", size_t " "len" ", const oid *" objid ", size_t " objidlen );
 .br
 .BI "int sprint_realloc_objid(u_char **" buf ", size_t *" buf_len ", size_t *" out_len ", const oid *" objid ", size_t " objidlen );
 .PP
@@ -72,7 +72,7 @@ print_description, fprint_description - mib_api functions
 .PP
 .SH DESCRIPTION
 The functions dealing with MIB modules fall into four groups.  Those
-dealing with initialisation and shutdown , those that read in and
+dealing with initialisation and shutdown, those that read in and
 parse MIB files, those that search the MIB tree, and various output
 routines.
 .SS Initialisation and Shutdown
