@@ -1,6 +1,10 @@
 /*
  * snmptable.c - walk a table and print it nicely
  *
+ * Update: 1999-10-26 <rs-snmp@revelstone.com>
+ * Added ability to use MIB to query tables with non-sequential column OIDs
+ * Added code to handle sparse tables
+ *
  * Update: 1998-07-17 <jhy@gsu.edu>
  * Added text <special options> to usage().
  */
@@ -77,9 +81,11 @@ SOFTWARE.
 #include "default_store.h"
 #include "system.h"
 #include "apps/snmp_parse_args.h"
+#include "parse.h"
 
 struct column {
   int width;
+  int subid;
   char *label;
   char *fmt;
 } *column = NULL;
@@ -102,8 +108,9 @@ static size_t name_length;
 static oid root[MAX_OID_LEN];
 static size_t rootlen;
 static int localdebug;
+static int nonsequential = 0;
 
-void get_field_names (void);
+void get_field_names (char *);
 void get_table_entries( struct snmp_session *ss );
 void print_table (void);
 
@@ -126,6 +133,9 @@ static void optProc(int argc, char *const *argv, int opt)
     case 'H':
       no_headers = 1;
       break;
+    case 'C':
+      nonsequential = 1;
+      break;
     case 'b':
       brief = 1;
       break;
@@ -145,18 +155,20 @@ void usage(void)
   fprintf(stdout,"  -f <F>\tprint an F delimited table\n");
   fprintf(stdout,"  -b\t\tbrief field names\n");
   fprintf(stdout,"  -i\t\tprint index value\n");
+  fprintf(stderr,"  -C\t\tuse parsed mib to find the table's columns\n");
   exit(1);
 }
 
 int main(int argc, char *argv[])
 {
   struct snmp_session session, *ss;
+  char *tblname;
 
   setvbuf(stdout, NULL, _IOLBF, 1024);
   snmp_set_quick_print(1);
 
   /* get the common command line arguments */
-  snmp_parse_args(argc, argv, &session, "w:f:hHbi", optProc);
+  snmp_parse_args(argc, argv, &session, "w:f:ChHbi", optProc);
   snmp_set_suffix_only(0);
 
   /* get the initial object and subtree */
@@ -168,12 +180,21 @@ int main(int argc, char *argv[])
       exit(1);
     }
     localdebug = snmp_get_dump_packet();
+    if( nonsequential ){
+      tblname = strrchr( argv[optind], '.' );
+      if( tblname )
+        ++tblname;
+      else
+        tblname = argv[optind];
+    }
+    else
+      tblname = NULL;
   } else {
     fprintf(stderr,"Missing table name\n");
     usage();
   }
 
-  get_field_names();
+  get_field_names( tblname );
 
   /* open an SNMP session */
   SOCK_STARTUP;
@@ -246,15 +267,31 @@ void print_table (void)
   }
 }
 
-void get_field_names(void)
+void get_field_names( char* tblname )
 {
   char string_buf[SPRINT_MAX_LEN];
   char *name_p;
 
+  struct tree *tbl = NULL;
+  if( tblname )
+	  tbl = find_tree_node( tblname, -1 );
+  if( tbl )
+	  tbl = tbl->child_list;
+
+  if( tbl ) {
+	root[rootlen++] = tbl->subid;
+	tbl = tbl->child_list;
+  }
+  else
   root[rootlen++] = 1;
   fields = 0;
   while (1) {
     fields++;
+	if( tbl ) {
+		root[ rootlen ] = tbl->subid;
+		tbl = tbl->next_peer;
+	}
+	else
     root[rootlen] = fields;
     sprint_objid(string_buf, root, rootlen+1);
     name_p = strrchr(string_buf, '.');
@@ -265,6 +302,7 @@ void get_field_names(void)
     else column = (struct column *)realloc(column, fields*sizeof(*column));
     column[fields-1].label = strdup(name_p+1);
     column[fields-1].width = strlen(name_p+1);
+	column[fields-1].subid = root[ rootlen ];
   }
   if (fields == 1) {
     fprintf(stderr, "Was that a table? %s\n", string_buf);
@@ -308,12 +346,21 @@ void get_table_entries( struct snmp_session *ss )
   char  string_buf[SPRINT_MAX_LEN];
   char  *name_p = NULL;
   char  **dp;
+  int end_of_table = 0;
+  int have_current_index;
+
+  /*
+   * TODO:
+   *   1) Deal with multiple index fields
+   *   2) Deal with variable length index fields
+   *   3) optimize to remove a sparse column from get-requests
+   */
 
   while (running) {
     /* create PDU for GETNEXT request and add object name to request */
     pdu = snmp_pdu_create(SNMP_MSG_GETNEXT);
     for (i = 1; i <= fields; i++) {
-      name[rootlen] = i;
+      name[rootlen] = column[i-1].subid;
       snmp_add_null_var(pdu, name, name_length);
     }
 
@@ -323,24 +370,6 @@ void get_table_entries( struct snmp_session *ss )
       if (response->errstat == SNMP_ERR_NOERROR){
 	/* check resulting variables */
 	vars = response->variables;
-	if (vars) {
-	  name[rootlen] = 1;
-	  if (vars->name_length <= rootlen ||
-	      memcmp(name, vars->name, (rootlen+1) * sizeof(oid)) != 0) {
-	    /* not part of this subtree */
-	    if (localdebug) {
-	      printf("End of table: ");
-	      print_variable(vars->name, vars->name_length, vars);
-	    }
-	    running = 0;
-	    continue;
-	  }
-	  name_length = vars->name_length;
-	  memcpy(name, vars->name, name_length*sizeof(oid));
-	  sprint_objid(string_buf, vars->name, vars->name_length); 
-	  name_p = strrchr(string_buf, '.');
-	  if (localdebug) printf("Index: %s\n", name_p+1);
-	}
 	entries++;
 	if (entries >= allocated) {
 	  if (allocated == 0) {
@@ -357,32 +386,59 @@ void get_table_entries( struct snmp_session *ss )
 	    if (show_index) indices = (char **)realloc(indices, allocated*sizeof(char *));
 	  }
 	}
-	if (show_index) {
-	  name_p = string_buf + strlen(table_name)+1;
-	  name_p = strchr(name_p, '.')+1;
-	  name_p = strchr(name_p, '.')+1;
-	  indices[entries-1] = strdup(name_p);
-	  i = strlen(name_p);
-	  if (i > index_width) index_width = i;
-	}
 	dp = data+(entries-1)*fields;
 	col = -1;
+	end_of_table = 1; /* assume end of table */
+	have_current_index = 0;
+	name_length = rootlen+1;
 	for (vars = response->variables; vars; vars = vars->next_variable) {
 	  col++;
-	  i = name[rootlen] = vars->name[rootlen];
+	  name[rootlen] = column[col].subid;
 	  if (localdebug) sprint_variable(string_buf, vars->name, vars->name_length, vars);
-	  if (vars->name_length != name_length ||
+	  if( (vars->name_length < name_length) || (vars->name[rootlen] != column[col].subid) ||
 	      memcmp(name, vars->name, name_length * sizeof(oid)) != 0) {
 	    /* not part of this subtree */
 	    if (localdebug) printf("%s => ignored\n", string_buf);
 	    continue;
 	  }
+	  
+	  /* save index off */
+	  if ( ! have_current_index ) {
+		  end_of_table = 0;
+		  have_current_index = 1;
+		  name_length = vars->name_length;
+		  memcpy(name, vars->name, name_length*sizeof(oid));
+		  sprint_objid(string_buf, vars->name, vars->name_length); 
+		  i = vars->name_length - rootlen + 1;
+		  name_p = string_buf + strlen(table_name)+1;
+		  if( localdebug || show_index ) {
+	  		  name_p = string_buf + strlen(table_name)+1;
+			  name_p = strchr(name_p, '.')+1;
+			  name_p = strchr(name_p, '.')+1;
+		  }
+		  if (localdebug) printf("Index: %s\n", name_p);
+		if (show_index) {
+		  indices[entries-1] = strdup(name_p);
+		  i = strlen(name_p);
+		  if (i > index_width) index_width = i;
+		}
+	  }
+	  
 	  if (localdebug) printf("%s => taken\n", string_buf);
 	  sprint_value(string_buf, vars->name, vars->name_length, vars);
-	  dp[i-1] = strdup(string_buf);
+	  dp[col] = strdup(string_buf);
 	  i = strlen(string_buf);
 	  if (i > column[col].width) column[col].width = i;
 	}
+	  if( end_of_table ) {
+		--entries;
+	    /* not part of this subtree */
+	    if (localdebug) {
+	      printf("End of table: %s\n", string_buf);
+	    }
+	    running = 0;
+	    continue;
+	  }
       } else {
 	/* error in response, print it */
 	running = 0;
