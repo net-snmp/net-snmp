@@ -229,7 +229,7 @@ protopr (char *name)
     request = snmp_pdu_create(SNMP_MSG_GETNEXT);
     snmp_add_null_var(request, oid_tcpconntable, sizeof(oid_tcpconntable)/sizeof(oid));
 	status = STAT_SUCCESS;
-	}
+    }
     else status = STAT_TIMEOUT;
     while (status == STAT_SUCCESS) {
     if (response) snmp_free_pdu(response);
