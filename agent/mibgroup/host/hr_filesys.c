@@ -244,8 +244,12 @@ var_hrfilesys(struct variable *vp,
 	    case MOUNT_CD9660: fsys_type_id[fsys_type_len-1] = 12; break;
 	    case MOUNT_UNION: fsys_type_id[fsys_type_len-1] = 1; break;
 	    case MOUNT_DEVFS: fsys_type_id[fsys_type_len-1] = 1; break;
+#ifdef MOUNT_EXT2FS
 	    case MOUNT_EXT2FS: fsys_type_id[fsys_type_len-1] = 1; break;
+#endif
+#ifdef MOUNT_TFS
 	    case MOUNT_TFS: fsys_type_id[fsys_type_len-1] = 15; break;
+#endif
 	    }
 #else
 	    mnt_type = HRFS_entry->HRFS_type;
