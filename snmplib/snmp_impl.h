@@ -1,3 +1,5 @@
+#ifndef SNMP_IMPL_H
+#define SNMP_IMPL_H
 /*
 * file: snmp_impl.h
 */
@@ -172,3 +174,4 @@ u_char	*snmp_party_build __P((u_char *, int *, struct packet_info *, int,
                                  oid *, int, oid *, int, oid *, int, int *, int));
 
 int has_access __P((u_char, int, int, int));
+#endif /* SNMP_IMPL_H */

@@ -1,3 +1,5 @@
+#ifndef MD5_H
+#define MD5_H
 /* 
 ** **************************************************************************
 ** md5.h -- Header file for implementation of MD5 Message Digest Algorithm **
@@ -45,3 +47,4 @@ extern void MDprint __P((MDptr));
 /* 
 ** End of md5.h
 ****************************(cut)*****************************************/
+#endif /* MD5_H */

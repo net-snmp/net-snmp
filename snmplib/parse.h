@@ -1,3 +1,5 @@
+#ifndef PARSE_H
+#define PARSE_H
 /***********************************************************
         Copyright 1989 by Carnegie Mellon University
 
@@ -160,3 +162,4 @@ struct tree *find_node __P((char *, struct tree*));
 struct module *find_module __P((int));
 void snmp_set_mib_warnings __P((int));
 void snmp_set_save_descriptions __P((int));
+#endif /* PARSE_H */
