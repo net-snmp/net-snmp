@@ -470,9 +470,15 @@ var_hrswrun(struct variable *vp,
 	    sprintf( string, "/proc/%d/cmdline", pid );
 	    if ((fp = fopen( string, "r")) == NULL) return NULL;
 	    memset( buf, 0, sizeof(buf) );
-	    if(!fgets( buf, sizeof(buf)-2, fp ))
-		return NULL;   /* argv[0] '\0' argv[1] '\0' .... */
 
+                /* argv[0] '\0' argv[1] '\0' .... */
+	    if(!fgets( buf, sizeof(buf)-2, fp )) {
+                /* maybe be empty (even argv[0] is missing) */
+                string[0] = '\0';
+                *var_len = 0;
+                return string;
+            }
+            
 		/* Skip over argv[0] */
 	    cp = buf;
 	    while ( *cp )
