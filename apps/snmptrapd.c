@@ -671,29 +671,32 @@ void usage(void)
     fprintf(stderr,"Usage: snmptrapd [-h|-H|-V] [-D] [-p #] [-P] [-o file] [-s] [-f] [-l [d0-7]] [-e] [-d] [-n] [-a] [-m <MIBS>] [-M <MIBDIRS]\n");
     fprintf(stderr,"UCD-SNMP version: %s\n", VersionInfo);
     fprintf(stderr, "\n\
-  -h        Print this help message and exit\n\
-  -H        Read what can show up in config file\n\
-  -V        Print version and exit\n\
-  -q        Quick print mib display\n\
-  -D[TOKEN,...] turn on debugging output, optionally by the list of TOKENs.\n\
-  -p <port> Local port to listen from\n\
-  -T TCP|UDP Listen to traffic on the TCP or UDP transport.\n\
-  -P        Print to stderr\n\
-  -o file   Print to the specified file\n\
-  -F \"...\" Use custom format for logging to standard output\n\
-  -u PIDFILE create PIDFILE with process id\n\
-  -e        Print Event # (rising/falling alarm], etc.\n\
-  -s        Log syslog\n\
-  -f        Stay in foreground (don't fork)\n\
-  -l [d0-7 ]  Set syslog Facility to log daemon[d], log local 0(default) [1-7]\n\
-  -d        Dump input/output packets\n\
-  -n        Use numeric IP addresses instead of host names (no DNS)\n\
-  -a        Ignore Authentication Failture traps.\n\
-  -c CONFFILE Read CONFFILE as a configuration file.\n\
-  -C        Don't read the default configuration files.\n\
-  -m <MIBS>     Use MIBS list instead of the default mib list.\n\
-  -M <MIBDIRS>  Use MIBDIRS as the location to look for mibs.\n\
-  -O <OUTOPTS>  Toggle various options controlling output display\n");
+  -h\t\tPrint this help message and exit\n\
+  \n\
+  -a\t\tIgnore Authentication Failture traps\n\
+  -c FILE\tRead FILE as a configuration file\n\
+  -C\t\tDon't read the default configuration files\n\
+  -d\t\tDump input/output packets\n\
+  -D\t\tTurn on debugging output\n\
+  -e\t\tPrint Event # (rising/falling alarm], etc\n\
+  -f\t\tStay in foreground (don't fork)\n\
+  -F FORMAT\tUse the specified format for logging to standard error\n\
+  -H\t\tDisplay the configuration directives understood\n\
+  -l d|0-7\tSet syslog dacility to LOG_DAEMON (d) or LOG_LOCAL[0-7] (default LOG_LOCAL0)\n\
+  -m MIBLIST\tUse MIBLIST instead of the default mib list\n\
+  -M DIRLIST\tUse DIRLIST as the location to look for MIBs\n\
+  -n\t\tUse numeric IP addresses instead of attempting host name lookups (no DNS)\n\
+  -o FILE\toutput to FILE\n\
+  -p <port>\tLocal port to listen from\n\
+  -P\t\tPrint to stderr\n\
+  -q\t\tQuick print mib display\n\
+  -s\t\tLog to syslog\n\
+  -T TCP|UDP\tListen to traffic on the TCP or UDP transport\n");
+#if HAVE_GETPID
+  fprintf(stderr, "  -u PIDFILE\tcreate PIDFILE with process id\n");
+#endif
+  fprintf(stderr, "  -V\t\tdisplay version information\n");
+  fprintf(stderr, "  -O <OUTOPTS>\tToggle various options controlling output display\n");
   snmp_out_toggle_options_usage("\t\t  ", stderr);
 }
 
@@ -818,7 +821,7 @@ int main(int argc, char *argv[])
 	case 'O':
 	    cp = snmp_out_toggle_options(optarg);
 	    if (cp != NULL) {
-		fprintf(stderr, "Unknow output option passed to -O: %c\n", *cp);
+		fprintf(stderr, "Unknown output option passed to -O: %c\n", *cp);
 		usage();
 		exit(1);
 	    }

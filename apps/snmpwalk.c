@@ -91,13 +91,13 @@ void usage(void)
 {
   fprintf(stderr,"Usage: snmpwalk ");
   snmp_parse_args_usage(stderr);
-  fprintf(stderr," [<objectID>]\n\n");
+  fprintf(stderr," [OID]\n\n");
   snmp_parse_args_descriptions(stderr);
-  fprintf(stderr, "  -C <APPOPTS>  Toggle various application specific behaviour:\n");
+  fprintf(stderr, "  -C <APPOPTS>\tsnmpwalk specific options\n");
   fprintf(stderr, "\t\t  APPOPTS values:\n");
-  fprintf(stderr,"\t\t      p: Print the number of variables found.\n");
-  fprintf(stderr,"\t\t      i: Include the requested OID in the search range.\n");
-  fprintf(stderr,"\t\t      c: Don't check that the returned OID's are increasing.\n");
+  fprintf(stderr, "\t\t      c: Don't check that the returned OID's are increasing\n");
+  fprintf(stderr, "\t\t      i: Include the requested OID in the search range\n");
+  fprintf(stderr, "\t\t      p: Print the number of variables found\n");
 }
 
 void

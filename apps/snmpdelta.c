@@ -124,20 +124,21 @@ void usage (void)
   snmp_parse_args_usage(stderr);
   fprintf(stderr, " oid [oid ...]\n");
   snmp_parse_args_descriptions(stderr);
-  fprintf(stderr, "snmpdelta specific options\n");
-  fprintf(stderr, "  -Cf\t\tDon't fix errors and retry the request.\n");
-  fprintf(stderr, "  -Cl\t\twrite configuration to file\n");
-  fprintf(stderr, "  -CF config\tload configuration from file\n");
-  fprintf(stderr, "  -Cp period\tspecifies the poll period\n");
-  fprintf(stderr, "  -CP peaks\treporting period in poll periods\n");
-  fprintf(stderr, "  -Cv vars/pkt\tnumber of variables per packet\n");
-  fprintf(stderr, "  -Ck\t\tkeep seconds in output time\n");
-  fprintf(stderr, "  -Cm\t\tshow max values\n");
-  fprintf(stderr, "  -CS\t\tlog to a sum file\n");
-  fprintf(stderr, "  -Cs\t\tshow timestamps\n");
-  fprintf(stderr, "  -Ct\t\tget timing from agent\n");
-  fprintf(stderr, "  -CT\t\tprint output in tabular form\n");
-  fprintf(stderr, "  -CL sumfile\tspecifies the sum file name\n");
+  fprintf(stderr, "  -C <APPOPTS>\tsnmpdelta specific options\n");
+  fprintf(stderr, "\t\t  APPOPTS values:\n");
+  fprintf(stderr, "\t\t      f        : Don't fix errors and retry the request.\n");
+  fprintf(stderr, "\t\t      F CONFIG : load configuration from file\n");
+  fprintf(stderr, "\t\t      k        : keep seconds in output time\n");
+  fprintf(stderr, "\t\t      l        : write configuration to file\n");
+  fprintf(stderr, "\t\t      L SUMFILE: specifies the sum file name\n");
+  fprintf(stderr, "\t\t      m        : show max values\n");
+  fprintf(stderr, "\t\t      p PERIOD : specifies the poll period\n");
+  fprintf(stderr, "\t\t      P PEAKS  : reporting period in poll periods\n");
+  fprintf(stderr, "\t\t      v VAR/PKT: number of variables per packet\n");
+  fprintf(stderr, "\t\t      s        : show timestamps\n");
+  fprintf(stderr, "\t\t      S        : log to a sum file\n");
+  fprintf(stderr, "\t\t      t        : get timing from agent\n");
+  fprintf(stderr, "\t\t      T        : print output in tabular form\n");
 }
 
 static void optProc(int argc, char *const *argv, int opt)

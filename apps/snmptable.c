@@ -207,15 +207,17 @@ void usage(void)
 {
   fprintf(stdout,"Usage: snmptable ");
   snmp_parse_args_usage(stdout);
-  fprintf(stdout," <objectID>\n\n");
+  fprintf(stdout," TABLE-OID\n\n");
   snmp_parse_args_descriptions(stdout);
-  fprintf(stdout,"  -Cw <W>\tprint table in parts of W characters width\n");
-  fprintf(stdout,"  -Cf <F>\tprint an F delimited table\n");
-  fprintf(stdout,"  -Cb\t\tbrief field names\n");
-  fprintf(stdout,"  -CB\t\tdon't use GETBULK requests\n");
-  fprintf(stdout,"  -Ci\t\tprint index value\n");
-  fprintf(stdout,"  -Ch\t\tprint only the column headers\n");
-  fprintf(stdout,"  -CH\t\tprint no column headers\n");
+  fprintf(stderr, "  -C <APPOPTS>\tsnmptable specific options\n");
+  fprintf(stderr, "\t\t  APPOPTS values:\n");
+  fprintf(stderr, "\t\t      b    : brief field names\n");
+  fprintf(stderr, "\t\t      B    : don't use GETBULK requests\n");
+  fprintf(stderr, "\t\t      f STR: print the table delimited with STR\n");
+  fprintf(stderr, "\t\t      h    : print only the column headers\n");
+  fprintf(stderr, "\t\t      H    : don't print the column headers\n");
+  fprintf(stderr, "\t\t      i    : print the index values\n");
+  fprintf(stderr, "\t\t      w NUM: print the table in parts of NUM characters width\n");
   exit(1);
 }
 

@@ -103,12 +103,13 @@ static void optProc(int argc, char *const *argv, int opt)
 
 void usage(void)
 {
-  fprintf(stderr,"Usage: snmpgetnext [-Cf]");
+  fprintf(stderr,"Usage: snmpgetnext ");
   snmp_parse_args_usage(stderr);
-  fprintf(stderr," [<objectID> ...]\n\n");
+  fprintf(stderr," OID [OID]...\n\n");
   snmp_parse_args_descriptions(stderr);
-  fprintf(stderr, "snmpgetnext specific options\n");
-  fprintf(stderr, "  -Cf\t\tDon't fix errors and retry the request.\n");
+  fprintf(stderr, "  -C <APPOPTS>\tsnmpgetnext specific options\n");
+  fprintf(stderr, "\t\t  APPOPTS values:\n");
+  fprintf(stderr, "\t\t      f: Don't fix errors and retry the request.\n");
 }
 
 int main(int argc, char *argv[])

@@ -90,8 +90,9 @@ usage (void)
   snmp_parse_args_usage(stderr);
   fprintf(stderr,"\n\n");
   snmp_parse_args_descriptions(stderr);
-  fprintf(stderr, "\nsnmpdf options:\n");
-  fprintf(stderr, "\t-Cu\tUse UCD-SNMP dskTable to do the calculations.\n");
+  fprintf(stderr, "  -C <APPOPTS>\tsnmpdf specific options\n");
+  fprintf(stderr, "\t\t  APPOPTS values:\n");
+  fprintf(stderr, "\t\t      u: Use UCD-SNMP dskTable to do the calculations.\n");
   fprintf(stderr, "\t\t[Normally the HOST-RESOURCES-MIB is consulted first.]\n");
 }
 
