@@ -7,13 +7,13 @@
 
                       All Rights Reserved
 
-Permission to use, copy, modify, and distribute this software and its 
-documentation for any purpose and without fee is hereby granted, 
+Permission to use, copy, modify, and distribute this software and its
+documentation for any purpose and without fee is hereby granted,
 provided that the above copyright notice appear in all copies and that
-both that copyright notice and this permission notice appear in 
+both that copyright notice and this permission notice appear in
 supporting documentation, and that the name of CMU not be
 used in advertising or publicity pertaining to distribution of the
-software without specific, written prior permission.  
+software without specific, written prior permission.
 
 CMU DISCLAIMS ALL WARRANTIES WITH REGARD TO THIS SOFTWARE, INCLUDING
 ALL IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS, IN NO EVENT SHALL
@@ -264,18 +264,18 @@ event_input(struct variable_list *vp)
 
     vp = vp->next_variable;
     sampletype = *vp->val.integer;
-    
+
     vp = vp->next_variable;
     value= *vp->val.integer;
-    
+
     vp = vp->next_variable;
     threshold = *vp->val.integer;
-    
+
     printf("%d: 0x%02lX %d %d %d\n", eventid, destip, sampletype, value, threshold);
-    
+
 }
 
-void send_handler_data(FILE *file, struct hostent *host, 
+void send_handler_data(FILE *file, struct hostent *host,
 		       struct snmp_pdu *pdu)
 {
   struct variable_list tmpvar, *vars;
@@ -349,7 +349,7 @@ void do_external(char *cmd,
 {
   FILE *file;
   int oldquick, result;
-  
+
   DEBUGMSGTL(("snmptrapd", "Running: %s\n", cmd));
   oldquick = snmp_get_quick_print();
   snmp_set_quick_print(1);
@@ -428,7 +428,7 @@ int snmp_input(int op,
     struct variable_list tmpvar;
     char *Command = NULL;
     tmpvar.type = ASN_OBJECT_ID;
-                  
+
     if (op == RECEIVED_MESSAGE){
 	if (pdu->command == SNMP_MSG_TRAP){
 	    oid trapOid[MAX_OID_LEN];
@@ -464,7 +464,7 @@ int snmp_input(int op,
 		    if (cp) cp++;
 		    else cp = oid_buf;
 		    printf("\t%s Trap (%s) Uptime: %s\n",
-			   trap_description(pdu->trap_type), cp, 
+			   trap_description(pdu->trap_type), cp,
 			   uptime_string(pdu->time, buf));
 		}
 		else
@@ -608,6 +608,7 @@ void usage(void)
   -D[TOKEN,...] turn on debugging output, optionally by the list of TOKENs.\n\
   -p <port> Local port to listen from\n\
   -P        Print to standard output\n\
+  -u PIDFILE create PIDFILE with process id\n\
   -e        Print Event # (rising/falling alarm], etc.\n\
   -s        Log syslog\n\
   -f        Stay in foreground (don't fork)\n\
@@ -645,6 +646,10 @@ int main(int argc, char *argv[])
     int local_port = SNMP_TRAP_PORT;
     int dofork=1;
     char *cp;
+#if HAVE_GETPID
+	FILE           *PID;
+        char *pid_file = NULL;
+#endif
 
 #ifdef notused
     in_addr_t myaddr;
@@ -667,9 +672,9 @@ int main(int argc, char *argv[])
     setvbuf (stdout, NULL, _IOLBF, BUFSIZ);
 #endif
     /*
-     * usage: snmptrapd [-D] [-p #] [-P] [-s] [-l [d0-7]] [-d] [-e] [-a]
+     * usage: snmptrapd [-D] [-u PIDFILE] [-p #] [-P] [-s] [-l [d0-7]] [-d] [-e] [-a]
      */
-    while ((arg = getopt(argc, argv, "VdqRD:p:m:M:PO:esSafl:H")) != EOF){
+    while ((arg = getopt(argc, argv, "VdqRD:p:m:M:PO:esSafl:Hu:")) != EOF){
 	switch(arg) {
 	case 'V':
             fprintf(stderr,"UCD-snmp version: %s\n", VersionInfo);
@@ -752,6 +757,10 @@ int main(int argc, char *argv[])
             fprintf(stderr, "Configuration directives understood:\n");
 	    read_config_print_usage("  ");
             exit(0);
+        case 'u':
+          pid_file = optarg;
+          break;
+
 	default:
 	    fprintf(stderr,"invalid option: -%c\n", arg);
 	    usage();
@@ -766,7 +775,7 @@ int main(int argc, char *argv[])
     }
 
     if (!Print) Syslog = 1;
-    
+
     /* Initialize the world. Create initial user */
     usm_set_reportErrorOnUnknownID(1);
     init_snmpv3("snmptrapd");	/* register the v3 handlers */
@@ -795,7 +804,7 @@ int main(int argc, char *argv[])
 				   usmDESPrivProtocol,
 				   USM_LENGTH_OID_TRANSFORM);
     userListPtr = usm_add_user(user);
-        
+
     if (userListPtr == NULL) /* user already existed */
       usm_free_user(user);
 
@@ -836,6 +845,16 @@ int main(int argc, char *argv[])
       }
     }
 #endif	/* WIN32 */
+#if HAVE_GETPID
+    if (pid_file != NULL) {
+        if ((PID = fopen(pid_file, "w")) == NULL) {
+            snmp_log_perror("fopen");
+            exit(1);
+        }
+        fprintf(PID, "%d\n", (int)getpid());
+        fclose(PID);
+    }
+#endif
 
     if (Syslog) {
 	/* open syslog */
@@ -861,11 +880,11 @@ int main(int argc, char *argv[])
 
     session->retries = SNMP_DEFAULT_RETRIES;
     session->timeout = SNMP_DEFAULT_TIMEOUT;
-     
+
     session->local_port = local_port;
 
-    session->callback = snmp_input; 
-    session->callback_magic = NULL; 
+    session->callback = snmp_input;
+    session->callback_magic = NULL;
     session->authenticator = NULL;
 
     SOCK_STARTUP;
@@ -964,9 +983,9 @@ init_syslog(void)
  * trap deamon is running detatched from the console.
  *
  */
-void update_config(int a) 
+void update_config(int a)
 {
-#if 0  
+#if 0
   if (!dontReadConfigFiles) {  /* don't read if -C present on command line */
 #endif
 
@@ -975,7 +994,7 @@ void update_config(int a)
 #if 0
   }
 #endif
-  
+
   /* read all optional config files */
   /* last is -c from command line */
   /* always read this one even if -C is present (ie both -c and -C) */
@@ -983,7 +1002,7 @@ void update_config(int a)
 #if 0
   if (optconfigfile != NULL) {
     read_config_with_type (optconfigfile, "snmptrapd");
-  } 
+  }
 #endif
   snmp_call_callbacks(SNMP_CALLBACK_LIBRARY, SNMP_CALLBACK_POST_READ_CONFIG,
                       NULL);
