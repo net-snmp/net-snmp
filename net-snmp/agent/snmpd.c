@@ -1302,9 +1302,13 @@ _tmain(int argc, TCHAR * argv[])
      * Define Service Name and Description, which appears in windows SCM 
      */
     LPCTSTR         lpszServiceName = g_szAppName;      /* Service Registry Name */
-    LPCTSTR         lpszServiceDisplayName = _T("Net SNMP Agent Daemon");       /* Display Name */
+    LPCTSTR         lpszServiceDisplayName = _T("Net-SNMP Agent");       /* Display Name */
     LPCTSTR         lpszServiceDescription =
-        _T("SNMP agent for windows from Net-SNMP");
+#ifdef HAVE_WIN32_PLATFORM_SDK
+        _T("SNMPv2c / SNMPv3 command responder from Net-SNMP. Supports MIB objects for IP,ICMP,TCP,UDP, and network interface sub-layers.");
+#else
+        _T("SNMPv2c / SNMPv3 command responder from Net-SNMP");
+#endif
     InputParams     InputOptions;
 
 
