@@ -1293,6 +1293,7 @@ create_subtree_cache(struct agent_snmp_session  *asp) {
 		    *prevNext = vbptr->next_variable;
 		    vbptr->next_variable = NULL;
 		    snmp_free_varbind(vbptr);
+		    asp->vbcount--;
 		    continue;
 		}
             }
