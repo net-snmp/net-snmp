@@ -235,7 +235,7 @@ snmptrapd_register_configs( void )
                             parse_format, NULL,
 			    "[print{,1,2}|syslog{,1,2}] format");
     register_config_handler("snmptrapd", "forward",
-                            parse_forward, NULL, "destination");
+                            parse_forward, NULL, "OID|\"default\" destination");
 }
 
 
