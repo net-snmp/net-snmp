@@ -538,6 +538,71 @@ netsnmp_create_table_data_row(void)
     return row;
 }
 
+/** inserts a newly created table_data row into a request */
+NETSNMP_INLINE void
+netsnmp_insert_table_row(netsnmp_request_info *request,
+                         netsnmp_table_row *row)
+{
+    netsnmp_request_info       *req;
+    netsnmp_table_request_info *table_info = NULL;
+    netsnmp_variable_list      *this_index = NULL;
+    netsnmp_variable_list      *that_index = NULL;
+    oid      base_oid[] = {0, 0};	/* Make sure index OIDs are legal! */
+    oid      this_oid[MAX_OID_LEN];
+    oid      that_oid[MAX_OID_LEN];
+    int      this_oid_len, that_oid_len;
+
+    if (!request)
+        return;
+
+    /*
+     * We'll add the new row information to any request
+     * structure with the same index values as the request
+     * passed in (which includes that one!).
+     *
+     * So construct an OID based on these index values.
+     */
+
+    table_info = netsnmp_extract_table_info(request);
+    this_index = table_info->indexes;
+    build_oid_noalloc(this_oid, MAX_OID_LEN, &this_oid_len,
+                      base_oid, 2, this_index);
+
+    /*
+     * We need to look through the whole of the request list
+     * (as received by the current handler), as there's no
+     * guarantee that this routine will be called by the first
+     * varbind that refers to this row.
+     *   In particular, a RowStatus controlled row creation
+     * may easily occur later in the variable list.
+     *
+     * So first, we rewind to the head of the list....
+     */
+    for (req=request; req->prev; req=req->prev)
+        ;
+
+    /*
+     * ... and then start looking for matching indexes
+     * (by constructing OIDs from these index values)
+     */
+    for (; req; req=req->next) {
+        table_info = netsnmp_extract_table_info(req);
+        that_index = table_info->indexes;
+        build_oid_noalloc(that_oid, MAX_OID_LEN, &that_oid_len,
+                          base_oid, 2, that_index);
+      
+        /*
+         * This request has the same index values,
+         * so add the newly-created row information.
+         */
+        if (snmp_oid_compare(this_oid, this_oid_len,
+                             that_oid, that_oid_len) == 0) {
+            netsnmp_request_add_list_data(req,
+                netsnmp_create_data_list(TABLE_DATA_NAME, row, NULL));
+        }
+    }
+}
+
 /** extracts the row being accessed passed from the table_data helper */
 netsnmp_table_row *
 netsnmp_extract_table_row(netsnmp_request_info *request)
