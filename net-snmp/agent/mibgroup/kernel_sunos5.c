@@ -11,35 +11,6 @@
  *
  */
 
-/*************
- Sample tests were run on an idle Solaris machine:
- SunOS 5.5.1 sun4m sparc SUNW,SPARCstation-5
-
- Using snmpbulkwalk -v 2c from a remote machine on the same subnetwork,
- recent test results show 20 percent improvement when kstat_open
- and kstat_close are not frequently called.
-
- The SHARE_KSTAT_FD constant will allow this module to use
- the file descriptor "kc" opened in init_memory_solaris2,
- file : agent/mibgroup/ucd-snmp/memory_solaris2.c.
-
- Setting it to 0 will restore original functionality;
- The functions herein invoke kstat_open and kstat_close
- for each search through the kernel's statistics.
-
- This is likely the wrong fix to be made.
- Further study is needed.
-
- Michael J. Slifcak, Internet Security Systems, Inc.
-
- *************/
-
-/* set 1 to share to share kstat file descriptor;
-   set 0 to always invoke kstat_open/kstat_close */
-#if USING_UCD_SNMP_MEMORY_SOLARIS2_MODULE
-#define SHARE_KSTAT_FD 1
-#endif
-
 #include <config.h>
 #ifdef solaris2
 /*-
@@ -87,9 +58,7 @@
 
 #include "kernel_sunos5.h"
 
-#if SHARE_KSTAT_FD
-extern kstat_ctl_t *kc;
-#endif
+kstat_ctl_t *kstat_fd = 0;
 
 /*-
  * Global variable definitions (with initialization)
@@ -202,11 +171,13 @@ int getKstatInt(const char *classname, const char *statname,
     kstat_named_t *named;
     int ret = 0;  /* fail unless ... */
 
-#if SHARE_KSTAT_FD
-    if ((ksc = kc) == NULL)
-#else
-    if ((ksc = kstat_open()) == NULL)
-#endif
+    if (kstat_fd == 0) {
+        kstat_fd = kstat_open();
+        if (kstat_fd == 0) {
+          snmp_log(LOG_ERR, "kstat_open(): failed\n");
+        }
+    }
+    if ((ksc = kstat_fd) == NULL)
     {
         goto Return;
     }
@@ -253,11 +224,6 @@ int getKstatInt(const char *classname, const char *statname,
       break;
     }
 Return:
-#if SHARE_KSTAT_FD
-#else
-  if (ksc != NULL)
-    kstat_close(ksc);
-#endif
     return ret;
 }
 
@@ -277,11 +243,14 @@ getKstat(const char *statname, const char *varname, void *value)
     v = (void *)&val;
   else
     v = value;
-#if SHARE_KSTAT_FD
-  if ((ksc = kc) == NULL)
-#else
-  if ((ksc = kstat_open()) == NULL)
-#endif
+
+    if (kstat_fd == 0) {
+        kstat_fd = kstat_open();
+        if (kstat_fd == 0) {
+          snmp_log(LOG_ERR, "kstat_open(): failed\n");
+        }
+    }
+  if ((ksc = kstat_fd) == NULL)
   {
     ret = -10;
     goto Return;		/* kstat errors */
@@ -397,11 +366,6 @@ getKstat(const char *statname, const char *varname, void *value)
   }
   ret = -4;			/* Name not found */
  Return:
-#if SHARE_KSTAT_FD
-#else
-  if (ksc != NULL)
-    kstat_close(ksc);
-#endif
   return (ret);
 }
 
