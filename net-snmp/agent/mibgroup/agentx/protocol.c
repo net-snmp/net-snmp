@@ -335,8 +335,6 @@ agentx_build_varbind(u_char *bufp, size_t *out_length,
     case ASN_COUNTER:
     case ASN_GAUGE:
     case ASN_TIMETICKS:
-    case ASN_PRIV_EXCL_RANGE:
-    case ASN_PRIV_INCL_RANGE:
 	if (*out_length < 4) {
 	    return NULL;
 	}
@@ -378,7 +376,12 @@ agentx_build_varbind(u_char *bufp, size_t *out_length,
 	break;
 
     case ASN_OBJECT_ID:
+    case ASN_PRIV_EXCL_RANGE:
 	bufp = agentx_build_oid(bufp, out_length, 0, vp->val.objid,
+				vp->val_len/4, network_byte_order);
+	break;
+    case ASN_PRIV_INCL_RANGE:
+	bufp = agentx_build_oid(bufp, out_length, 1, vp->val.objid,
 				vp->val_len/4, network_byte_order);
 	break;
 
@@ -936,10 +939,18 @@ agentx_parse_string( u_char *data, size_t *length,
      *length -= ( len+4 );
      DEBUGDUMPSETUP("recv", data, (len+4));
      DEBUGIF("dumpv_recv") {
-       char *buf = (char *)malloc(1+len+4);
-       sprint_asciistring(buf, string, len+4);
-       DEBUGMSG(("dumpv_recv", "String: %s\n", buf));
-       free (buf);
+	 u_char *buf = NULL;
+	 size_t buf_len = 0, out_len = 0;
+
+	 if (sprint_realloc_asciistring(&buf, &buf_len, &out_len, 1,
+					string, len)) {
+	     DEBUGMSG(("dumpv_recv", "String: %s\n", buf));
+	 } else {
+	     DEBUGMSG(("dumpv_recv", "String: %s [TRUNCATED]\n", buf));
+	 }
+	 if (buf != NULL) {
+	     free(buf);
+	 }
      }
      return data + ( len+4 );
 }
@@ -1039,8 +1050,6 @@ agentx_parse_varbind( u_char *data, size_t *length, int *type,
      case ASN_COUNTER:
      case ASN_GAUGE:
      case ASN_TIMETICKS:
-     case ASN_PRIV_EXCL_RANGE:
-     case ASN_PRIV_INCL_RANGE:
 	 int_val = agentx_parse_int(bufp, network_byte_order);
 	 memmove(data_buf, &int_val, 4);
 	 *data_len = 4;
@@ -1059,13 +1068,19 @@ agentx_parse_varbind( u_char *data, size_t *length, int *type,
 				    network_byte_order);
 	 break;
 		
+     case ASN_PRIV_EXCL_RANGE:
      case ASN_OBJECT_ID:
 	 bufp = agentx_parse_oid(bufp, length, NULL, (oid *)data_buf, data_len,
 				 network_byte_order);
 	 *data_len *= 4;
 	 /* 'agentx_parse_oid()' returns the number of sub_ids */
 	 break;
-		
+     case ASN_PRIV_INCL_RANGE:
+	 bufp = agentx_parse_oid(bufp, length, NULL, (oid *)data_buf, data_len,
+				 network_byte_order);
+	 *data_len *= 4;
+	 break;
+
      case ASN_COUNTER64:
 	 if (network_byte_order) {
 	     c64->high = agentx_parse_int(bufp,   network_byte_order);
