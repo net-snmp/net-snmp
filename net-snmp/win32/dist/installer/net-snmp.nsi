@@ -201,6 +201,8 @@ Section "Net-SNMP Agent Service" SEC02
   File "share\snmp\snmpconf-data\snmpd-data\snmpconf-config"
   File "share\snmp\snmpconf-data\snmpd-data\system"
   File "share\snmp\snmpconf-data\snmpd-data\trapsinks"
+  SetOutPath "$INSTDIR\etc\snmp"
+  File "etc\snmp\snmpd.conf"
   
   ; If we are on an NT system then install the service batch files.
   Call IsNT
@@ -229,7 +231,9 @@ Section "Net-SNMP Trap Service" SEC03
   File "share\snmp\snmpconf-data\snmptrapd-data\authentication"
   File "share\snmp\snmpconf-data\snmptrapd-data\logging"
   File "share\snmp\snmpconf-data\snmptrapd-data\runtime"
-
+  SetOutPath "$INSTDIR\etc\snmp"
+  File "etc\snmp\snmptrapd.conf"
+  
   ; If we are on an NT system then install the service batch files.
   Call IsNT
   Pop $1
@@ -325,9 +329,19 @@ FunctionEnd
 Function CreateAgentBats
   SetOutPath "$INSTDIR\"
   ClearErrors
+  
+  ; Slash it
+  Push $INSTDIR
+  Push "\"
+  Push "/"
+  Call StrRep
+  Pop $R0
+  
   FileOpen $0 "registeragent.bat" "w"
   IfErrors cleanup
-  FileWrite $0 "$\"$INSTDIR\bin\snmpd.exe$\" -register$\r$\n"
+  FileWrite $0 "$\"$INSTDIR\bin\snmpd.exe$\" -register -C \
+               -c $\"$R0/etc/snmp/snmpd.conf$\" \
+               -Lf $\"$R0/log/snmpd.log$\"$\r$\n"
   FileWrite $0 "pause"
   
   ClearErrors
@@ -346,9 +360,19 @@ FunctionEnd
 Function CreateTrapdBats
   SetOutPath "$INSTDIR\"
   ClearErrors
+  
+  ; Slash it
+  Push $INSTDIR
+  Push "\"
+  Push "/"
+  Call StrRep
+  Pop $R0
+  
   FileOpen $0 "registertrapd.bat" "w"
   IfErrors cleanup
-  FileWrite $0 "$\"$INSTDIR\bin\snmptrapd.exe$\" -register$\r$\n"
+  FileWrite $0 "$\"$INSTDIR\bin\snmptrapd.exe$\" -register -C \
+               -c $\"$R0/etc/snmp/snmptrapd.conf$\" \
+               -Lf $\"$R0/log/snmptrapd.log$\"$\r$\n"
   FileWrite $0 "pause"
 
   ClearErrors
