@@ -211,6 +211,12 @@
 /* Define if you have the gettimeofday function.  */
 #undef HAVE_GETTIMEOFDAY
 
+/* Define if you have the if_freenameindex function.  */
+#undef HAVE_IF_FREENAMEINDEX
+
+/* Define if you have the if_nameindex function.  */
+#undef HAVE_IF_NAMEINDEX
+
 /* Define if you have the index function.  */
 #undef HAVE_INDEX
 
@@ -426,6 +432,30 @@
 
 /* Define if you have the <netinet/udp_var.h> header file.  */
 #undef HAVE_NETINET_UDP_VAR_H
+
+/* Define if you have the <netinet6/in6_pcb.h> header file.  */
+#undef HAVE_NETINET6_IN6_PCB_H
+
+/* Define if you have the <netinet6/in6_var.h> header file.  */
+#undef HAVE_NETINET6_IN6_VAR_H
+
+/* Define if you have the <netinet6/ip6_var.h> header file.  */
+#undef HAVE_NETINET6_IP6_VAR_H
+
+/* Define if you have the <netinet6/nd6.h> header file.  */
+#undef HAVE_NETINET6_ND6_H
+
+/* Define if you have the <netinet6/tcp6.h> header file.  */
+#undef HAVE_NETINET6_TCP6_H
+
+/* Define if you have the <netinet6/tcp6_fsm.h> header file.  */
+#undef HAVE_NETINET6_TCP6_FSM_H
+
+/* Define if you have the <netinet6/tcp6_timer.h> header file.  */
+#undef HAVE_NETINET6_TCP6_TIMER_H
+
+/* Define if you have the <netinet6/tcp6_var.h> header file.  */
+#undef HAVE_NETINET6_TCP6_VAR_H
 
 /* Define if you have the <nlist.h> header file.  */
 #undef HAVE_NLIST_H
@@ -999,3 +1029,5 @@
 #if defined(HAVE_NLIST) && defined(STRUCT_NLIST_HAS_N_VALUE) && !defined(DONT_USE_NLIST)
 #define CAN_USE_NLIST
 #endif
+
+#undef INET6

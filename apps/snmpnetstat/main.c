@@ -114,6 +114,10 @@ struct protox {
 } protox[] = {
 	{ 0,	protopr,    tcp_stats,	"tcp" },
 	{ 0,	protopr,    udp_stats,	"udp" },
+#ifdef INET6
+	{ 0,	protopr6,   tcp_stats,	"tcp6" },
+	{ 0,	protopr6,   udp_stats,	"udp6" },
+#endif
 	{ 0,	0,	    ip_stats,	"ip" },
 	{ 0,	0,	    icmp_stats,	"icmp" },
 	{ 0,	0,	    0,		0 }
@@ -130,6 +134,8 @@ char	*intrface;
 
 struct snmp_session *Session;
 int print_errors = 0;
+
+static struct protoent *getprotoent46(void);
 
 void usage(void)
 {
@@ -288,7 +294,7 @@ int main(int argc, char *argv[])
 	usage();
 	exit(1);
     }
-    
+
     snmp_sess_init(&session);
     session.peername = hostname;
     session.remote_port = dest_port;
@@ -339,10 +345,11 @@ int main(int argc, char *argv[])
 	;
     else {
 
-    while ((p = getprotoent())) {
-	for (tp = protox; tp->pr_name; tp++)
+    while ((p = getprotoent46())) {
+	for (tp = protox; tp->pr_name; tp++) {
 	    if (strcmp(tp->pr_name, p->p_name) == 0)
 		break;
+	}
 	if (tp->pr_name == 0 || (tp->pr_wanted == 0 && allprotos == 0))
 	    continue;
 	if (sflag) {
@@ -409,7 +416,7 @@ name2protox(const char *name)
 		return(tp);
 		
 	setprotoent(1);			/* make protocol lookup cheaper */
-	while ((p = getprotoent())) {
+	while ((p = getprotoent46())) {
 		/* assert: name not same as p->name */
 		for (alias = p->p_aliases; *alias; alias++)
 			if (strcasecmp(name, *alias) == 0) {
@@ -419,4 +426,37 @@ name2protox(const char *name)
 	}
 	endprotoent();
 	return(NULLPROTOX);
+}
+
+static struct protoent *
+getprotoent46(void)
+{
+#ifdef INET6
+	static enum {NONE, V4, V6} state = NONE;
+	static struct protoent v;
+	struct protoent *p;
+	int l;
+
+	switch (state) {
+	case NONE:
+		p = getprotoent();
+		if (!p)
+			return p;
+		memcpy(&v, p, sizeof(v));
+		state = V4;
+		break;
+	case V4:
+		strcat(v.p_name, "4");
+		state = V6;
+		break;
+	case V6:
+		l = strlen(v.p_name);
+		v.p_name[l - 1] = '6';
+		state = NONE;
+		break;
+	}
+	return &v;
+#else
+	return getprotoent();
+#endif
 }

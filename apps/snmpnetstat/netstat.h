@@ -16,8 +16,15 @@ void ip_stats (void);
 void icmp_stats (void);
 void tcp_stats (void);
 void udp_stats (void);
+#ifdef INET6
+void protopr6 (const char *);
+#endif
 
 void inetprint (struct in_addr *,u_short, const char *);
+#ifdef INET6
+void inet6print (struct in6_addr *,u_short, const char *);
+#endif
+
 void rt_stats (void);
 
 struct protox *name2protox (const char *);

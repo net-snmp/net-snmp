@@ -58,11 +58,17 @@
 #include <netinet/in_systm.h>
 #endif
 #include <netinet/ip.h>
+#ifdef INET6
+#include <netinet/ip6.h>
+#endif
 #if HAVE_SYS_QUEUE_H
 #include <sys/queue.h>
 #endif
 #if HAVE_NETINET_IP_VAR_H
 #include <netinet/ip_var.h>
+#endif
+#ifdef INET6
+#include <netinet/ip6_var.h>
 #endif
 #if HAVE_SYS_SOCKETVAR_H
 #include <sys/socketvar.h>

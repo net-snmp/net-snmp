@@ -1420,9 +1420,13 @@ Interface_Scan_Init (void)
 	nnew->if_metric = ioctl (fd, SIOCGIFMETRIC, &ifrq) < 0
 	  		? 0 : ifrq.ifr_metric;
 	    
+#ifdef SIOCGIFMTU
 	strcpy (ifrq.ifr_name, ifname);
 	nnew->if_mtu = (ioctl (fd, SIOCGIFMTU, &ifrq) < 0) 
 			  ? 0 : ifrq.ifr_mtu;
+#else
+	nnew->if_mtu = 0;
+#endif
 
 	for (if_ptr = if_list; if_ptr; if_ptr = if_ptr->next)
 	    if (! strcmp (if_ptr->name, fullname))
