@@ -1,0 +1,464 @@
+%!PS-Adobe-3.0 EPSF-3.0
+%%Title: (snmpgraph.ps)
+%%Pages: 1
+%%DocumentNeededResources: font Helvetica Courier
+%%BoundingBox:  72 252 540 720
+%%Creator: .top.graph (Tk version 2.3)
+%%CreationDate: Mon Jun 14 13:51:33 1993
+%%EndComments
+%%BeginSetup
+/Line { % Draw solid line
+   % Stack: x1 y1 x2 y2
+   /y2 exch def
+   /x2 exch def
+   /y1 exch def
+   /x1 exch def
+   newpath
+     x1 y1 moveto
+     x2 y2 lineto
+   closepath
+   stroke
+} def
+/Box { % Create filled rectangle
+  % Stack: x y w h
+  gsave
+  /h exch def
+  /w exch def
+  /y exch def
+  /x exch def
+  newpath
+    x y moveto
+    w 0 rlineto
+    0 h rlineto
+    w neg 0 rlineto
+  closepath
+  fill
+  grestore
+} def
+/RText { % Draw rotated text
+  % Stack: s x y r
+  gsave
+  /r exch def
+  /y exch def
+  /x exch def
+  /s exch def
+  x y translate
+  0 0 moveto
+  1 -1 scale
+  r 90 mul rotate
+  s show
+  grestore
+} def
+/Text { % Draw text
+  % Stack: s x y
+  gsave
+  /y exch def
+  /x exch def
+  /s exch def
+  newpath
+    x y moveto
+    1 -1 scale
+  closepath
+  s show
+  grestore
+} def
+/solidLineStyle { % Set solid line style
+  [] 0 setdash
+} def
+/dashedLineStyle { % Set dashed line style
+  [5 2] 0 setdash
+} def
+/dottedLineStyle { % Set dotted line style
+  [1 1] 0 setdash
+} def
+/solid { % Draw solid line
+   % Stack: x y r
+   /r exch def
+   /y exch def
+   /x exch def
+   [] 0 setdash
+   x r sub y moveto
+   x r add y lineto
+   stroke
+} def
+/dashed { % Draw dashed line
+   % Stack: x y r
+   /r exch def
+   /y exch def
+   /x exch def
+   [5 2] 0 setdash
+   x r sub y moveto
+   x r add y lineto
+   stroke
+} def
+/dotted { % Draw dotted line
+   % Stack: x y r
+   /r exch def
+   /y exch def
+   /x exch def
+   [1 1] 0 setdash
+   x r sub y moveto
+   x r add y lineto
+   stroke
+} def
+/cross { % Draw cross
+   % Stack: x y r
+   /r exch def
+   /y exch def
+   /x exch def
+   x r sub y r sub moveto
+   x r add y r add lineto
+   stroke
+   x r sub y r add moveto
+   x r add y r sub lineto
+   stroke
+} def
+/plus { % Draw plus
+   % Stack: x y r
+   /r exch def
+   /y exch def
+   /x exch def
+   x r sub y moveto
+   x r add y lineto
+   stroke
+   x y r sub moveto
+   x y r add lineto
+   stroke
+} def
+/square { % Draw filled square
+   % Stack: x y r
+   /r exch def
+   /y exch def
+   /x exch def
+   x r sub y r sub moveto
+   x y r r Box
+} def
+/circle { % Draw filled circle
+   % Stack: x y r
+   /r exch def
+   /y exch def
+   /x exch def
+   x y moveto
+   newpath
+     x y r 0 360 arc
+   closepath
+   fill
+} def
+/diamond { % Draw filled diamond
+   % Stack: x y r
+   /r exch def
+   /y exch def
+   /x exch def
+   newpath
+     x r sub y moveto
+     x y r sub lineto
+     x r add y lineto
+     x y r add lineto
+     x r sub y lineto
+   closepath
+   fill
+} def
+/point { % Draw filled point 
+   % Stack: x y r
+   /r exch def
+   /y exch def
+   /x exch def
+   x 0.5 sub y 0.5 sub moveto
+   x y 0.5 0.5 Box
+} def
+/SetFgColor { % Set foreground color
+  % Stack: r g b
+  isMonochrome 1 eq { 
+     0 0 0 pop pop pop
+  } if
+  setrgbcolor
+} def
+/SetBgColor { % Set background color
+  % Stack: r g b
+  isMonochrome 1 eq { 
+     1 1 1 pop pop pop
+  } if
+  setrgbcolor
+} def
+/isMonochrome 0 def
+0 setlinewidth
+1 setlinecap
+solidLineStyle
+/NewCenturySchlbk-Roman findfont 14 scalefont setfont
+72 720 translate
+1.56 -1.56 scale
+
+%%EndSetup
+0.690186 0.768616 0.870575 SetBgColor
+0 0 300 300 Box
+0 0 0.501953 SetFgColor
+0.678421 0.847046 0.901947 SetBgColor
+169 30 126 24 Box
+0 0 0.999985 SetFgColor
+175 42 2.5 solid
+0 0 0.501953 SetFgColor
+/NewCenturySchlbk-Roman findfont 14 scalefont setfont
+(ifInUcastPkts.1) 182 46 Text
+/NewCenturySchlbk-Roman findfont 14 scalefont setfont
+(cmu-default) 110 26 Text
+0 0 0 SetFgColor
+0 setlinewidth
+solidLineStyle
+51 257 264 257 Line
+/NewCenturySchlbk-Roman findfont 14 scalefont setfont
+(Seconds) 127 291 Text
+63 257 63 260 Line
+84 257 84 260 Line
+/Courier findfont 10 scalefont setfont
+(47600) 91 271 Text
+0 0 0 SetFgColor
+105 257 105 262 Line
+126 257 126 260 Line
+148 257 148 260 Line
+169 257 169 260 Line
+190 257 190 260 Line
+/Courier findfont 10 scalefont setfont
+(47700) 198 271 Text
+0 0 0 SetFgColor
+212 257 212 262 Line
+233 257 233 260 Line
+254 257 254 260 Line
+0 0 0 SetFgColor
+0 setlinewidth
+solidLineStyle
+51 257 51 40 Line
+/NewCenturySchlbk-Roman findfont 14 scalefont setfont
+0 0 0 SetFgColor
+(# Per Second) 19 194 1 RText
+/Courier findfont 10 scalefont setfont
+(100) 28 260 Text
+51 257 46 257 Line
+51 243 48 243 Line
+51 228 48 228 Line
+51 214 48 214 Line
+51 199 48 199 Line
+/Courier findfont 10 scalefont setfont
+(200) 28 188 Text
+51 185 46 185 Line
+51 170 48 170 Line
+51 156 48 156 Line
+51 141 48 141 Line
+51 127 48 127 Line
+/Courier findfont 10 scalefont setfont
+(300) 28 115 Text
+51 112 46 112 Line
+51 98 48 98 Line
+51 83 48 83 Line
+51 69 48 69 Line
+51 54 48 54 Line
+/Courier findfont 10 scalefont setfont
+(400) 28 43 Text
+51 40 46 40 Line
+0 0 0.999985 SetFgColor
+0 setlinewidth
+solidLineStyle
+51 134 moveto
+51 134 lineto
+52 130 lineto
+53 117 lineto
+54 106 lineto
+55 134 lineto
+56 179 lineto
+57 137 lineto
+58 198 lineto
+60 164 lineto
+61 144 lineto
+62 171 lineto
+63 181 lineto
+64 177 lineto
+65 176 lineto
+66 196 lineto
+67 144 lineto
+68 178 lineto
+69 174 lineto
+70 200 lineto
+71 180 lineto
+72 185 lineto
+73 179 lineto
+74 218 lineto
+75 176 lineto
+77 180 lineto
+78 141 lineto
+79 141 lineto
+80 159 lineto
+81 103 lineto
+82 126 lineto
+83 156 lineto
+84 150 lineto
+85 144 lineto
+86 156 lineto
+87 174 lineto
+88 197 lineto
+89 161 lineto
+90 206 lineto
+91 187 lineto
+92 215 lineto
+94 152 lineto
+95 144 lineto
+96 168 lineto
+97 150 lineto
+98 142 lineto
+99 137 lineto
+100 134 lineto
+101 177 lineto
+102 136 lineto
+103 200 lineto
+104 182 lineto
+105 161 lineto
+106 204 lineto
+107 180 lineto
+108 186 lineto
+109 152 lineto
+111 146 lineto
+112 169 lineto
+113 161 lineto
+114 169 lineto
+115 182 lineto
+116 140 lineto
+117 200 lineto
+118 179 lineto
+119 183 lineto
+120 211 lineto
+121 192 lineto
+122 202 lineto
+123 200 lineto
+124 216 lineto
+125 173 lineto
+126 166 lineto
+128 202 lineto
+129 185 lineto
+130 184 lineto
+131 113 lineto
+132 176 lineto
+133 140 lineto
+134 63 lineto
+135 149 lineto
+136 187 lineto
+137 190 lineto
+138 178 lineto
+139 179 lineto
+140 166 lineto
+141 182 lineto
+142 173 lineto
+143 195 lineto
+145 188 lineto
+146 158 lineto
+147 153 lineto
+148 176 lineto
+149 163 lineto
+150 174 lineto
+151 132 lineto
+152 160 lineto
+153 189 lineto
+154 155 lineto
+155 124 lineto
+156 195 lineto
+157 192 lineto
+158 191 lineto
+159 166 lineto
+161 119 lineto
+162 127 lineto
+163 173 lineto
+164 137 lineto
+165 118 lineto
+166 161 lineto
+167 176 lineto
+168 158 lineto
+169 109 lineto
+170 177 lineto
+171 166 lineto
+172 175 lineto
+173 116 lineto
+174 108 lineto
+175 219 lineto
+176 181 lineto
+178 124 lineto
+179 135 lineto
+180 118 lineto
+181 140 lineto
+182 99 lineto
+183 132 lineto
+184 164 lineto
+185 172 lineto
+186 142 lineto
+187 115 lineto
+188 168 lineto
+189 104 lineto
+190 140 lineto
+191 127 lineto
+192 168 lineto
+193 144 lineto
+195 161 lineto
+196 166 lineto
+197 206 lineto
+198 166 lineto
+199 172 lineto
+200 183 lineto
+201 198 lineto
+202 177 lineto
+203 168 lineto
+204 154 lineto
+205 180 lineto
+206 155 lineto
+207 74 lineto
+208 190 lineto
+209 204 lineto
+210 192 lineto
+212 190 lineto
+213 214 lineto
+214 173 lineto
+215 214 lineto
+216 213 lineto
+217 199 lineto
+218 156 lineto
+219 69 lineto
+220 93 lineto
+221 149 lineto
+222 158 lineto
+223 188 lineto
+224 150 lineto
+225 166 lineto
+226 182 lineto
+227 206 lineto
+229 174 lineto
+230 138 lineto
+231 183 lineto
+232 170 lineto
+233 143 lineto
+234 179 lineto
+235 173 lineto
+236 160 lineto
+237 189 lineto
+238 153 lineto
+239 141 lineto
+240 127 lineto
+241 140 lineto
+242 156 lineto
+243 209 lineto
+244 155 lineto
+246 149 lineto
+247 113 lineto
+248 138 lineto
+249 111 lineto
+250 95 lineto
+251 161 lineto
+252 148 lineto
+253 172 lineto
+254 174 lineto
+255 177 lineto
+256 165 lineto
+257 92 lineto
+258 163 lineto
+259 193 lineto
+260 195 lineto
+261 191 lineto
+263 179 lineto
+stroke
+showpage
+%%Trailer
+%%EOF

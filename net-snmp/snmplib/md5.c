@@ -1,0 +1,295 @@
+/* 
+** **************************************************************************
+** md5.c -- Implementation of MD5 Message Digest Algorithm                 **
+** Updated: 2/16/90 by Ronald L. Rivest                                    **
+** (C) 1990 RSA Data Security, Inc.                                        **
+** **************************************************************************
+*/
+
+/* 
+** To use MD5:
+**   -- Include md5.h in your program
+**   -- Declare an MDstruct MD to hold the state of the digest computation.
+**   -- Initialize MD using MDbegin(&MD)
+**   -- For each full block (64 bytes) X you wish to process, call
+**          MDupdate(&MD,X,512)
+**      (512 is the number of bits in a full block.)
+**   -- For the last block (less than 64 bytes) you wish to process,
+**          MDupdate(&MD,X,n)
+**      where n is the number of bits in the partial block. A partial
+**      block terminates the computation, so every MD computation should
+**      terminate by processing a partial block, even if it has n = 0.
+**   -- The message digest is available in MD.buffer[0] ... MD.buffer[3].
+**      (Least-significant byte of each word should be output first.)
+**   -- You can print out the digest using MDprint(&MD)
+*/
+
+/* Implementation notes:
+** This implementation assumes that ints are 32-bit quantities.
+** If the machine stores the least-significant byte of an int in the
+** least-addressed byte (eg., VAX and 8086), then LOWBYTEFIRST should be
+** set to TRUE.  Otherwise (eg., SUNS), LOWBYTEFIRST should be set to
+** FALSE.  Note that on machines with LOWBYTEFIRST FALSE the routine
+** MDupdate modifies has a side-effect on its input array (the order of bytes
+** in each word are reversed).  If this is undesired a call to MDreverse(X) can
+** reverse the bytes of X back into order after each call to MDupdate.
+*/
+#define TRUE  1
+#define FALSE 0
+#define LOWBYTEFIRST FALSE 
+
+/* Compile-time includes 
+*/
+#include <stdio.h>
+#include "md5.h"
+
+/* Compile-time declarations of MD5 ``magic constants''.
+*/
+#define I0  0x67452301       /* Initial values for MD buffer */
+#define I1  0xefcdab89
+#define I2  0x98badcfe
+#define I3  0x10325476
+#define fs1  7               /* round 1 shift amounts */
+#define fs2 12   
+#define fs3 17  
+#define fs4 22  
+#define gs1  5               /* round 2 shift amounts */
+#define gs2  9   
+#define gs3 14   
+#define gs4 20  
+#define hs1  4               /* round 3 shift amounts */
+#define hs2 11 
+#define hs3 16 
+#define hs4 23
+#define is1  6               /* round 4 shift amounts */
+#define is2 10
+#define is3 15
+#define is4 21
+
+
+/* Compile-time macro declarations for MD5.
+** Note: The ``rot'' operator uses the variable ``tmp''.
+** It assumes tmp is declared as unsigned int, so that the >>
+** operator will shift in zeros rather than extending the sign bit.
+*/
+#define	f(X,Y,Z)             ((X&Y) | ((~X)&Z))
+#define	g(X,Y,Z)             ((X&Z) | (Y&(~Z)))
+#define h(X,Y,Z)             (X^Y^Z)
+#define i_(X,Y,Z)            (Y ^ ((X) | (~Z)))
+#define rot(X,S)             (tmp=X,(tmp<<S) | (tmp>>(32-S)))
+#define ff(A,B,C,D,i,s,lp)   A = rot((A + f(B,C,D) + X[i] + lp),s) + B
+#define gg(A,B,C,D,i,s,lp)   A = rot((A + g(B,C,D) + X[i] + lp),s) + B
+#define hh(A,B,C,D,i,s,lp)   A = rot((A + h(B,C,D) + X[i] + lp),s) + B
+#define ii(A,B,C,D,i,s,lp)   A = rot((A + i_(B,C,D) + X[i] + lp),s) + B
+
+
+/* MDprint(MDp)
+** Print message digest buffer MDp as 32 hexadecimal digits.
+** Order is from low-order byte of buffer[0] to high-order byte of buffer[3].
+** Each byte is printed with high-order hexadecimal digit first.
+** This is a user-callable routine.
+*/
+void 
+MDprint(MDp)
+MDptr MDp;
+{ int i,j;
+  for (i=0;i<4;i++)
+    for (j=0;j<32;j=j+8)
+      printf("%02x",(MDp->buffer[i]>>j) & 0xFF);
+}
+
+/* MDbegin(MDp)
+** Initialize message digest buffer MDp. 
+** This is a user-callable routine.
+*/
+void 
+MDbegin(MDp)
+MDptr MDp;
+{ int i;
+  MDp->buffer[0] = I0;  
+  MDp->buffer[1] = I1;  
+  MDp->buffer[2] = I2;  
+  MDp->buffer[3] = I3; 
+  for (i=0;i<8;i++) MDp->count[i] = 0;
+  MDp->done = 0;
+}
+
+/* MDreverse(X)
+** Reverse the byte-ordering of every int in X.
+** Assumes X is an array of 16 ints.
+** The macro revx reverses the byte-ordering of the next word of X.
+*/
+#define revx { t = (*X << 16) | (*X >> 16); \
+	       *X++ = ((t & 0xFF00FF00) >> 8) | ((t & 0x00FF00FF) << 8); }
+MDreverse(X)
+unsigned int *X;
+{ register unsigned int t;
+  revx; revx; revx; revx; revx; revx; revx; revx;
+  revx; revx; revx; revx; revx; revx; revx; revx;
+}
+
+/* MDblock(MDp,X)
+** Update message digest buffer MDp->buffer using 16-word data block X.
+** Assumes all 16 words of X are full of data.
+** Does not update MDp->count.
+** This routine is not user-callable. 
+*/
+static void
+MDblock(MDp,X)
+MDptr MDp;
+unsigned int *X;
+{ 
+  register unsigned int tmp, A, B, C, D;
+#if LOWBYTEFIRST == FALSE
+  MDreverse(X);
+#endif
+  A = MDp->buffer[0];
+  B = MDp->buffer[1];
+  C = MDp->buffer[2];
+  D = MDp->buffer[3];
+
+  /* Update the message digest buffer */
+  ff(A , B , C , D ,  0 , fs1 , 3614090360); /* Round 1 */
+  ff(D , A , B , C ,  1 , fs2 , 3905402710); 
+  ff(C , D , A , B ,  2 , fs3 ,  606105819); 
+  ff(B , C , D , A ,  3 , fs4 , 3250441966); 
+  ff(A , B , C , D ,  4 , fs1 , 4118548399); 
+  ff(D , A , B , C ,  5 , fs2 , 1200080426); 
+  ff(C , D , A , B ,  6 , fs3 , 2821735955); 
+  ff(B , C , D , A ,  7 , fs4 , 4249261313); 
+  ff(A , B , C , D ,  8 , fs1 , 1770035416); 
+  ff(D , A , B , C ,  9 , fs2 , 2336552879); 
+  ff(C , D , A , B , 10 , fs3 , 4294925233); 
+  ff(B , C , D , A , 11 , fs4 , 2304563134); 
+  ff(A , B , C , D , 12 , fs1 , 1804603682); 
+  ff(D , A , B , C , 13 , fs2 , 4254626195); 
+  ff(C , D , A , B , 14 , fs3 , 2792965006); 
+  ff(B , C , D , A , 15 , fs4 , 1236535329); 
+  gg(A , B , C , D ,  1 , gs1 , 4129170786); /* Round 2 */
+  gg(D , A , B , C ,  6 , gs2 , 3225465664); 
+  gg(C , D , A , B , 11 , gs3 ,  643717713); 
+  gg(B , C , D , A ,  0 , gs4 , 3921069994); 
+  gg(A , B , C , D ,  5 , gs1 , 3593408605); 
+  gg(D , A , B , C , 10 , gs2 ,   38016083); 
+  gg(C , D , A , B , 15 , gs3 , 3634488961); 
+  gg(B , C , D , A ,  4 , gs4 , 3889429448); 
+  gg(A , B , C , D ,  9 , gs1 ,  568446438); 
+  gg(D , A , B , C , 14 , gs2 , 3275163606); 
+  gg(C , D , A , B ,  3 , gs3 , 4107603335); 
+  gg(B , C , D , A ,  8 , gs4 , 1163531501); 
+  gg(A , B , C , D , 13 , gs1 , 2850285829); 
+  gg(D , A , B , C ,  2 , gs2 , 4243563512); 
+  gg(C , D , A , B ,  7 , gs3 , 1735328473); 
+  gg(B , C , D , A , 12 , gs4 , 2368359562);  
+  hh(A , B , C , D ,  5 , hs1 , 4294588738); /* Round 3 */
+  hh(D , A , B , C ,  8 , hs2 , 2272392833); 
+  hh(C , D , A , B , 11 , hs3 , 1839030562); 
+  hh(B , C , D , A , 14 , hs4 , 4259657740); 
+  hh(A , B , C , D ,  1 , hs1 , 2763975236); 
+  hh(D , A , B , C ,  4 , hs2 , 1272893353); 
+  hh(C , D , A , B ,  7 , hs3 , 4139469664); 
+  hh(B , C , D , A , 10 , hs4 , 3200236656); 
+  hh(A , B , C , D , 13 , hs1 ,  681279174); 
+  hh(D , A , B , C ,  0 , hs2 , 3936430074); 
+  hh(C , D , A , B ,  3 , hs3 , 3572445317); 
+  hh(B , C , D , A ,  6 , hs4 ,   76029189); 
+  hh(A , B , C , D ,  9 , hs1 , 3654602809); 
+  hh(D , A , B , C , 12 , hs2 , 3873151461); 
+  hh(C , D , A , B , 15 , hs3 ,  530742520); 
+  hh(B , C , D , A ,  2 , hs4 , 3299628645);
+  ii(A , B , C , D ,  0 , is1 , 4096336452); /* Round 4 */
+  ii(D , A , B , C ,  7 , is2 , 1126891415);
+  ii(C , D , A , B , 14 , is3 , 2878612391);
+  ii(B , C , D , A ,  5 , is4 , 4237533241);
+  ii(A , B , C , D , 12 , is1 , 1700485571);
+  ii(D , A , B , C ,  3 , is2 , 2399980690);
+  ii(C , D , A , B , 10 , is3 , 4293915773);
+  ii(B , C , D , A ,  1 , is4 , 2240044497);
+  ii(A , B , C , D ,  8 , is1 , 1873313359);
+  ii(D , A , B , C , 15 , is2 , 4264355552);
+  ii(C , D , A , B ,  6 , is3 , 2734768916);
+  ii(B , C , D , A , 13 , is4 , 1309151649);
+  ii(A , B , C , D ,  4 , is1 , 4149444226);
+  ii(D , A , B , C , 11 , is2 , 3174756917);
+  ii(C , D , A , B ,  2 , is3 ,  718787259);
+  ii(B , C , D , A ,  9 , is4 , 3951481745);
+
+  MDp->buffer[0] += A; 
+  MDp->buffer[1] += B;
+  MDp->buffer[2] += C;
+  MDp->buffer[3] += D; 
+}
+
+/* MDupdate(MDp,X,count)
+** Input: MDp -- an MDptr
+**        X -- a pointer to an array of unsigned characters.
+**        count -- the number of bits of X to use.
+**                 (if not a multiple of 8, uses high bits of last byte.)
+** Update MDp using the number of bits of X given by count.
+** This is the basic input routine for an MD5 user.
+** The routine completes the MD computation when count < 512, so
+** every MD computation should end with one call to MDupdate with a
+** count less than 512.  A call with count 0 will be ignored if the
+** MD has already been terminated (done != 0), so an extra call with count
+** 0 can be given as a ``courtesy close'' to force termination if desired.
+*/
+void 
+MDupdate(MDp,X,count)
+MDptr MDp;
+unsigned char *X;
+unsigned int count;
+{ unsigned int i, tmp, bit, byte, mask;
+  unsigned char XX[64];
+  unsigned char *p;
+  /* return with no error if this is a courtesy close with count
+  ** zero and MDp->done is true.
+  */
+  if (count == 0 && MDp->done) return;
+  /* check to see if MD is already done and report error */
+  if (MDp->done) { printf("\nError: MDupdate MD already done."); return; }
+  /* Add count to MDp->count */
+  tmp = count;
+  p = MDp->count;
+  while (tmp)
+    { tmp += *p;
+      *p++ = tmp;
+      tmp = tmp >> 8;
+    }
+  /* Process data */
+  if (count == 512) 
+    { /* Full block of data to handle */
+      MDblock(MDp,(unsigned int *)X);
+    }
+  else if (count > 512) /* Check for count too large */
+    { printf("\nError: MDupdate called with illegal count value %d.",count);
+      return;
+    }
+  else /* partial block -- must be last block so finish up */
+    { /* Find out how many bytes and residual bits there are */
+      byte = count >> 3;
+      bit =  count & 7;
+      /* Copy X into XX since we need to modify it */
+      for (i=0;i<=byte;i++)   XX[i] = X[i];
+      for (i=byte+1;i<64;i++) XX[i] = 0;
+      /* Add padding '1' bit and low-order zeros in last byte */
+      mask = 1 << (7 - bit);
+      XX[byte] = (XX[byte] | mask) & ~( mask - 1);
+      /* If room for bit count, finish up with this block */
+      if (byte <= 55)
+	{ for (i=0;i<8;i++) XX[56+i] = MDp->count[i];
+	  MDblock(MDp,(unsigned int *)XX);
+	}
+      else /* need to do two blocks to finish up */
+	{ MDblock(MDp,(unsigned int *)XX);
+	  for (i=0;i<56;i++) XX[i] = 0;
+	  for (i=0;i<8;i++)  XX[56+i] = MDp->count[i];
+	  MDblock(MDp,(unsigned int *)XX);
+	}
+      /* Set flag saying we're done with MD computation */
+      MDp->done = 1;
+    }
+}
+
+/* 
+** End of md5.c
+****************************(cut)*****************************************/

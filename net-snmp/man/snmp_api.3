@@ -1,0 +1,290 @@
+.\* /***********************************************************
+.\" 	Copyright 1989 by Carnegie Mellon University
+.\" 
+.\"                       All Rights Reserved
+.\" 
+.\" Permission to use, copy, modify, and distribute this software and its 
+.\" documentation for any purpose and without fee is hereby granted, 
+.\" provided that the above copyright notice appear in all copies and that
+.\" both that copyright notice and this permission notice appear in 
+.\" supporting documentation, and that the name of CMU not be
+.\" used in advertising or publicity pertaining to distribution of the
+.\" software without specific, written prior permission.  
+.\" 
+.\" CMU DISCLAIMS ALL WARRANTIES WITH REGARD TO THIS SOFTWARE, INCLUDING
+.\" ALL IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS, IN NO EVENT SHALL
+.\" CMU BE LIABLE FOR ANY SPECIAL, INDIRECT OR CONSEQUENTIAL DAMAGES OR
+.\" ANY DAMAGES WHATSOEVER RESULTING FROM LOSS OF USE, DATA OR PROFITS,
+.\" WHETHER IN AN ACTION OF CONTRACT, NEGLIGENCE OR OTHER TORTIOUS ACTION,
+.\" ARISING OUT OF OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS
+.\" SOFTWARE.
+.\" ******************************************************************/
+.TH SNMP_API 3 "1 June, 1992"
+.UC 5
+.SH NAME
+snmp_open, snmp_close, snmp_send, snmp_read, snmp_free_pdu, snmp_select_info, snmp_timeout \- send and receive SNMP messages
+.SH SYNOPSIS
+.B "#include <sys/types>
+.br
+.B "#include <netinet/in.h>
+.br
+.B "#include <sys/time.h>
+.br
+.B #include """snmp.h""
+.br
+.B #include """snmp_impl.h""
+.br
+.B #include """asn1.h""
+.br
+.B #include """snmp_api.c""
+.PP
+.B "extern int snmp_errno;
+.PP
+.B "struct snmp_session *snmp_open(session)
+.br
+.B "struct snmp_session *session;
+.PP
+.B "int snmp_close(session)
+.br
+.B "struct snmp_session *session;
+.PP
+.B "int snmp_send(session, pdu)
+.br
+.B "struct snmp_session *session;
+.br
+.B "struct snmp_pdu *pdu;
+.PP
+.B "void snmp_read(fdset)
+.br
+.B "fd_set *fdset;
+.PP
+.B "int snmp_select_info(numfds, fdset, timeout, block)
+.br
+.B "int *numfds;
+.br
+.B "fd_set *fdset;
+.br
+.B "struct timeval *timeout;
+.br
+.B "int *block;
+.PP
+.B "void snmp_timeout()
+.PP
+.B "void snmp_free_pdu(pdu)
+.br
+.B "struct snmp_pdu *pdu;
+.PP
+.SH DESCRIPTION
+.I Snmp_open, snmp_close,
+and
+.I snmp_send
+each take as input a pointer to an object with the
+following structure.  In addition,
+.I snmp_open
+also returns a pointer to an object with this structure.
+This structure contains information for a set of transactions that
+will share similar transport characteristics.
+.RS
+.PP
+.nf
+typedef struct sockaddr_in  ipaddr;
+
+struct snmp_session {
+    u_char  *community;	/* community for outgoing requests. */
+    int	    community_len;  /* Length of community name. */
+    int	    retries;	/* Number of retries before timeout. */
+    long    timeout;    /* Number of uS until first timeout, then exponential backoff */
+    char    *peername;	/* Domain name or dotted IP address of default peer */
+    u_short remote_port;/* UDP port number of peer. */
+    u_short local_port; /* My UDP port number, 0 for default, picked randomly */
+
+    /* Authentication function or NULL if null authentication is used */
+    u_char  *(*authenticator)();
+
+    int	    (*callback)();  /* Function to interpret incoming data */
+
+    /* Pointer to data that the callback function may consider important */
+    void    *callback_magic;
+    int     version;	/* 0 for SNMP, 1 for secure SNMP */
+    oid     *srcParty;	/* partyID of source party */
+    int     srcPartyLen; /* length in subIDs of srcParty */
+    oid     *dstParty;	/* partyID of destination party */
+    int     dstPartyLen; /* length in subIDs of dstParty */
+};
+
+/*
+ * Set fields in session and pdu to the following to get a default or unconfigured value.
+ */
+#define SNMP_DEFAULT_COMMUNITY_LEN  0/* for default community name */
+#define SNMP_DEFAULT_RETRIES	    -1
+#define SNMP_DEFAULT_TIMEOUT	    -1
+#define SNMP_DEFAULT_REMPORT	    0
+#define SNMP_DEFAULT_REQID	    0
+#define SNMP_DEFAULT_ERRSTAT	    -1
+#define SNMP_DEFAULT_ERRINDEX	    -1
+#define SNMP_DEFAULT_ADDRESS	    0
+#define SNMP_DEFAULT_PEERNAME	    NULL
+#define SNMP_DEFAULT_ENTERPRISE_LENGTH	0
+#define SNMP_DEFAULT_TIME	    0
+
+/*
+ * This routine must be supplied by the application:
+ *
+ * u_char *authenticator(pdu, length, community, community_len)
+ * u_char *pdu;		The rest of the PDU to be authenticated
+ * int *length;		The length of the PDU (updated by the authenticator)
+ * u_char *community;	The community name to authenticate under.
+ * int	community_len	The length of the community name.
+ *
+ * Returns the authenticated pdu, or NULL if authentication failed.
+ * If null authentication is used, the authenticator in snmp_session can be
+ * set to NULL(0).
+ */
+
+/*
+ * This routine must be supplied by the application:
+ *
+ * int callback(operation, session, reqid, pdu, magic)
+ * int operation;
+ * struct snmp_session *session;    The session authenticated under.
+ * int reqid;			    The request id of this pdu (0 for TRAP)
+ * struct snmp_pdu *pdu;	    The pdu information.
+ * void *magic			    A link to the data for this routine.
+ *
+ * Returns 1 if request was successful, 0 if it should be kept pending.
+ * Any data in the pdu must be copied because it will be freed elsewhere.
+ * Operations are defined below:
+ */
+#define RECEIVED_MESSAGE   1
+#define TIMED_OUT	   2
+.ft R
+.ad
+.fi
+.RE
+.PP
+.I Snmp_send
+and
+.I snmp_free_pdu
+each take as input a pointer to an object with the
+following structure.
+This structure contains information that describes a transaction
+that will be performed over an open session.
+.RS
+.PP
+.nf
+struct snmp_pdu {
+    ipaddr  address;	/* Address of peer */
+
+    int	    command;	/* Type of this PDU */
+
+    u_long  reqid;	/* Request id */
+    u_long  errstat;	/* Error status */
+    u_long  errindex;	/* Error index */
+
+    /* Trap information */
+    oid	    *enterprise;/* System OID */
+    int	    enterprise_length;
+    ipaddr  agent_addr;	/* address of object generating trap */
+    int	    trap_type;	/* trap type */
+    int	    specific_type;  /* specific type */
+    u_long  time;	/* Uptime */
+
+    struct variable_list *variables;
+};
+
+
+struct variable_list {
+    struct variable_list *next_variable;    /* NULL for last variable */
+    oid	    *name;  /* Object identifier of variable */
+    int	    name_length;    /* number of subid's in name */
+    u_char  type;   /* ASN type of variable */
+    union { /* value of variable */
+	long	*integer;
+	u_char	*string;
+	oid	*objid;
+    } val;
+    int	    val_len;
+};
+.ft R
+.ad
+.fi
+.RE
+.PP
+.I Snmp_read, snmp_select_info,
+and
+.I snmp_timeout
+provide an interface for the use of the
+.IR select (2)
+system call so that SNMP transactions can occur asynchronously.
+.PP
+.I Snmp_select_info
+is given the information that would have been passed to
+.I select
+in the absence of SNMP.  For example, this might include window update information.
+This information is modified so that SNMP will get the service it requires from the
+call to
+.I select.
+In this case,
+.I numfds, fdset,
+and
+.I timeout
+correspond to the
+.I nfds, readfds,
+and
+.I timeout
+arguments to
+.I select,
+respectively.  The only exception is that timeout must always point to an allocated (but perhaps uninitialized)
+.I struct timeval.
+If
+.I timeout
+would have been passed as NULL,
+.I block
+is set to true, and
+.I timeout
+is treated as undefined.  This same rule applies upon return from
+.I snmp_select_info.
+.PP
+After calling
+.I snmp_select_info, select
+is called with the returned data.  When select returns,
+.I snmp_read
+is called with the
+.I fd_set
+returned from
+.I select.
+This will read all SNMP sockets with input.
+If
+.I select
+times out,
+.I snmp_timeout
+should be called to see if the timeout was intended for SNMP.
+.SH DIAGNOSTICS
+.PP
+Error return status from 
+.I snmp_open
+is indicated by return of a null pointer.
+Error return status from 
+.I snmp_close
+and
+.I snmp_send
+is indicated by return of 0.  A successful status will return a 1.
+The external integer
+.IR snmp_errno
+may then be checked to see what type of error has occurred
+.PP
+.IR snmp_errno
+can have the following values:
+.RS
+.IP SNMPERR_GENERR \w'SNMPERR_BAD_LOCPORT'u+2n
+A generic error occurred.
+.IP SNMPERR_BAD_LOCPORT \w'SNMPERR_BAD_LOCPORT'u+2n
+The local port was bad because it had already been
+allocated or permission was denied.
+.IP SNMPERR_BAD_ADDRESS \w'SNMPERR_BAD_LOCPORT'u+2n
+The host name or address given was not useable.
+.IP SNMPERR_BAD_SESSION \w'SNMPERR_BAD_SESSION'u+2n
+The specified session was not open.
+.RE
+.SH "SEE ALSO"
+select(2), snmp_api.h
