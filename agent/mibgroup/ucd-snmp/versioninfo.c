@@ -45,6 +45,9 @@ unsigned char *var_extensible_version(vp, name, length, exact, var_len, write_me
   char *cptr;
   time_t curtime;
   char c_oid[MAX_NAME_LEN];
+#ifdef CONFIGURE_OPTIONS
+  static char *config_opts = CONFIGURE_OPTIONS;
+#endif
 
   if (snmp_get_do_debugging()) {
     sprint_objid (c_oid, name, *length);
@@ -76,6 +79,15 @@ unsigned char *var_extensible_version(vp, name, length, exact, var_len, write_me
       sprintf(errmsg,"$Id$");
       *var_len = strlen(errmsg);
       return((u_char *) errmsg);
+    case VERCONFIG:
+#ifdef CONFIGURE_OPTIONS
+      *var_len = strlen(config_opts);
+      return (u_char *) config_opts;
+#else
+      sprintf(errmsg,"");
+      *var_len = strlen(errmsg);
+      return((u_char *) errmsg);
+#endif
     case VERCLEARCACHE:
       *write_method = clear_cache;
       long_ret = 0;

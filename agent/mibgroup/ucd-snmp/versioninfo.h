@@ -16,6 +16,7 @@ int debugging_hook __P((int, u_char *, u_char, int, u_char *, oid *,int));
 #define VERDATE 3
 #define VERCDATE 4
 #define VERIDENT 5
+#define VERCONFIG 6
 #define VERCLEARCACHE 10
 #define VERUPDATECONFIG 11
 #define VERRESTARTAGENT 12
@@ -31,6 +32,7 @@ struct variable2 extensible_version_variables[] = {
   {VERDATE, ASN_OCTET_STR, RONLY, var_extensible_version, 1, {VERDATE}},
   {VERCDATE, ASN_OCTET_STR, RONLY, var_extensible_version, 1, {VERCDATE}},
   {VERIDENT, ASN_OCTET_STR, RONLY, var_extensible_version, 1, {VERIDENT}},
+  {VERCONFIG, ASN_OCTET_STR, RONLY, var_extensible_version, 1, {VERCONFIG}},
   {VERCLEARCACHE, ASN_INTEGER, RONLY, var_extensible_version, 1, {VERCLEARCACHE}},
   {VERUPDATECONFIG, ASN_INTEGER, RWRITE, var_extensible_version, 1, {VERUPDATECONFIG}},
   {VERRESTARTAGENT, ASN_INTEGER, RWRITE, var_extensible_version, 1, {VERRESTARTAGENT}},
