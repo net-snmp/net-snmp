@@ -2,8 +2,8 @@
 # Makefile for snmplib
 #
 TARG=	libsnmp.a
-CSRCS=	snmp_client.c mib.c parse.c snmp_api.c snmp.c snmp_auth.c asn1.c md5.c party.c context.c acl.c view.c party_parse.c context_parse.c acl_parse.c system.c
-OBJS=	snmp_client.o mib.o parse.o snmp_api.o snmp.o snmp_auth.o asn1.o md5.o party.o context.o acl.o view.o party_parse.o context_parse.o acl_parse.o system.o
+CSRCS=	snmp_client.c mib.c parse.c snmp_api.c snmp.c snmp_auth.c asn1.c md5.c party.c context.c acl.c view.c party_parse.c context_parse.c acl_parse.c system.c hpux.c
+OBJS=	snmp_client.o mib.o parse.o snmp_api.o snmp.o snmp_auth.o asn1.o md5.o party.o context.o acl.o view.o party_parse.o context_parse.o acl_parse.o system.o hpux.o
 CFLAGS=-g -DDEBUG
 CC = cc
 
