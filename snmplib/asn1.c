@@ -2415,7 +2415,6 @@ asn_realloc_rbuild_objid(u_char ** pkt, size_t * pkt_len,
      * leadingbyte ::= 1 7bitvalue
      * lastbyte ::= 0 7bitvalue
      */
-    const register oid *op = objid;
     register size_t i;
     register oid    tmpint;
     size_t          start_offset = *offset;
@@ -2438,7 +2437,7 @@ asn_realloc_rbuild_objid(u_char ** pkt, size_t * pkt_len,
         *(*pkt + *pkt_len - (++*offset)) = 0;
     } else if (objid[0] > 2) {
         ERROR_MSG("build objid: bad first subidentifier");
-        return NULL;
+        return 0;
     } else if (objidlength == 1) {
         /*
          * Encode the first value.  
