@@ -507,7 +507,7 @@ void snmpd_parse_config_targetAddr(const char *token, char *char_ptr)
     snmpTargetAddrTable_dispose(newEntry);
     return;
   }
-  cptr = read_config_read_octet_string(cptr, &newEntry->tAddress,
+  cptr = read_config_read_octet_string(cptr, (u_char **)&newEntry->tAddress,
                                        &newEntry->tAddressLen);
   if (!cptr || !(newEntry->tAddress)) {
       DEBUGMSGTL(("snmpTargetAddrEntry","ERROR snmpTargetAddrEntry: no TAddress in config string\n"));
