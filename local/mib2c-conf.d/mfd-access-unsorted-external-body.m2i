@@ -66,11 +66,11 @@ ${table}_get_data( netsnmp_mfd_registration *reg, ${table}_ref_loop *loop_ref,
 $example_start
 @   foreach $node nonindex@
 @      include m2c_setup_node.m2i@
-    /** TODO: set ctx_ref->ctx->data->$node
+    /** TODO: set ctx_ref->ctx->${m2c_data_item}$node
 @      if $m2c_data_transient == 1@ # short term
      **       from loop_ref->pos (${table}_list) */
 @      else@
-     **       from orig_ctx->data->$node */
+     **       from orig_ctx->${m2c_data_item}$node */
 @      end@
 @   end@
 $example_end
@@ -241,7 +241,7 @@ $example_start
      */
 @   foreach $node nonindex@
 @      include m2c_setup_node.m2i@
-    /** TODO: set ctx_ref->ctx->data->$node
+    /** TODO: set ctx_ref->ctx->${m2c_data_item}$node
      **       from loop_ref->pos (${table}_list) */
 @   end@
 @end@
