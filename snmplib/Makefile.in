@@ -52,13 +52,13 @@ md5.o: ../config.h ../agent/extensible/struct.h
 md5.o:   md5.h
 mib.o: ../config.h ../agent/extensible/struct.h 
 mib.o: asn1.h snmp.h snmp_impl.h snmp_api.h parse.h
-parse.o:  parse.h
+parse.o:  parse.h ../config.h
 party.o: ../config.h ../agent/extensible/struct.h 
 party.o:  asn1.h party.h
 party_parse.o: ../config.h ../agent/extensible/struct.h 
 party_parse.o:   asn1.h
 party_parse.o: party.h system.h
-snmp.o:   asn1.h snmp.h
+snmp.o:   asn1.h snmp.h ../config.h
 snmp.o: snmp_impl.h  mib.h
 snmp_api.o: ../config.h ../agent/extensible/struct.h 
 snmp_api.o:   asn1.h snmp.h
