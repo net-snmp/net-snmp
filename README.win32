@@ -4,7 +4,7 @@
 *
 ***************************************************************************
 
-This guide describes building with Microsoft Visuall C++ and
+This guide describes building with Microsoft Visual C++ and
 with the gcc compiler from Cygwin.  As developers build with
 other Win32 environments, their notes will be included here.
 
@@ -12,6 +12,7 @@ other Win32 environments, their notes will be included here.
 The remainder of this guide has the following sections :
 
 Visual C++ Overview
+Status as of 10-Nov-2003 for Win32 platforms
 Status as of 18-Sep-2002 for Win32 platforms
 Status as of  5-Nov-2001 for Win32 platforms
 Installing Platform SDK
@@ -60,6 +61,27 @@ as the core development library ('libsnmp' or 'libsnmp_dll') and the
 'snmptrapd' project itself.
 
 
+***************************************************************************
+*
+* Status as of 10-Nov-2003 for Win32 platforms
+*
+***************************************************************************
+
+  -  libsnmp now creates netsnmp.lib instead of libsnmp.lib, and 
+     libsnmp_dll creates netsnmp.lib and netsnmp.dll instead of
+     libsnmp.lib and libsnmp.dll.
+  -  The debug versions follow the same naming standards, except they
+     end with a _d (such as netsnmp_d.lib and netsnmp_d.dll)
+     internal callbacks have been disabled until a fix can be found.
+  -  The callback transport still hasn't been fixes, so AgentX still
+     doesn't work for win32.
+  -  The problem with the libsnmp_dll project also remains, so build
+     the regular libsnmp instead.
+  -  The applications now seem to work with both libsnmp and libsnmp_dll,
+     but snmpd and snmptrapd may not work with libsnmp_dll.
+  -  The problems listed below for 'Status as of 18-Sep-2002' still exist
+
+ 
 ***************************************************************************
 *
 * Status as of 18-Sep-2002 for Win32 platforms
@@ -154,29 +176,31 @@ The full agent should now compile successfully.
 
 The win32 directory contains two Microsoft VC++ workspaces and project
 files to build both static and DLL versions of the library and the
-applications. Until recently it is known to build with VC++ 5.0 too,
-unfortunately none of the developers have this version around anymore.
+applications. Both VC++ 6.0 and 7.0 have been tested.  Until recently it
+was known to build with VC++ 5.0 too. Unfortunately none of the developers
+have this version around anymore.
 
 Building with earlier compiler versions has not been attempted.  Success
 stories are welcomed.
 
 A manually generated net-snmp-config.h file has been provided for use with
 the win32 build since the basic win32 environment does not support autoconf.
+
 Note: the compiled in MIB path is \usr\mibs which may be changed by
 editing win32/net-snmp/net-snmp-config.h.  Note that the install
 instructions below should be adjusted when changes are made to paths.
+
+Note: All paths must use forward slashes, even if drive letters are used.  
+For example: c:/Program Files/net-snmp/mibs.  If a drive letter is not 
+specified, the current drive letter is assumed.
 
 To build the libraries and applications, open the workspace file
 "win32\win32.dsw" from VC++.
 
 Note there is a Debug version and Release version for each subproject.
-Due to the way the libraries are organized, there are exactly two
-library versions that work :
 
-  1) libsnmp Debug ;  and 2) libsnmp_dll Release
-
-[Actaully, I'm not sure that is true anymore. I have had success with
-both libsnmp Debug and Release, and no luck with libsnmp_dll.]
+The applications seem to work with both libnetsnmp and libnetsnmp_dll, but 
+snmpd and snmptrapd may not work with libnetsnmp_dll.
 
 The projects are arranged so that ALL of the usable products,
 the .lib, .dll, and .exe files, are written to the win32\bin
@@ -223,7 +247,7 @@ Building
 To build the Release versions:
 -Click Build->Set Active Configuration and select 'libsnmp - Win32 
  Release' or 'libsnmp_dll - Win32 Release'
--Click Build->Build libsnmp.lib / libsnmp.dll
+-Click Build->Build netsnmp.lib / netsnmp.dll
 -If the library DLL link fails, add missing function names to
   libsnmp_dll/libsnmp.def.
 -Click Build->Batch Build. Uncheck all Debug, libsnmp and libsnmp_dll
@@ -232,7 +256,7 @@ To build the Release versions:
 To build the Debug versions:
 -Click Build->Set Active Configuration and select 'libsnmp - Win32 
  Debug' or 'libsnmp_dll - Win32 Debug'
--Click Build->Build snmp_d.lib / snmp_d.dll
+-Click Build->Build netsnmp_d.lib / netsnmp_d.dll
 -If the library DLL link fails, add missing function names to
  libsnmp_dll/libsnmp.def.
 -Click Build->Batch Build. Uncheck all Release, libsnmp and libsnmp_dll
@@ -241,15 +265,17 @@ To build the Debug versions:
 To build both Debug and Release versions:
 -Click Build->Set Active Configuration and select 'libsnmp - Win32 
  Release' or 'libsnmp_dll - Win32 Release'
--Click Build->Build libsnmp.lib / libsnmp.dll
+-Click Build->Build netsnmp.lib / libsnmp.dll
 -Click Build->Set Active Configuration and select 'libsnmp - Win32 
  Debug' or 'libsnmp_dll - Win32 Debug'
--Click Build->Build snmp_d.lib / snmp_d.dll
+-Click Build->Build netsnmp_d.lib / netsnmp_d.dll
 -If the library DLL link fails, add missing function names to
  libsnmp_dll/libsnmp.def.
 -Click Build->Batch Build. Uncheck all libsnmp and libsnmp_dll versions.
  Check all others.  Rebuild All. 
 
+Note: Build both using the same library (libsnmp OR libsnmp_dll).  
+      Do not attempt to mix them.
 
 ***************************************************************************
 *
