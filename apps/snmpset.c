@@ -147,6 +147,7 @@ int main(int argc, char *argv[])
         case 's':
         case 'x':
         case 'd':
+	case 'b':
 #ifdef OPAQUE_SPECIAL_TYPES
         case 'I':
         case 'U':

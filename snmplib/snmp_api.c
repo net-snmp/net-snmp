@@ -4939,6 +4939,39 @@ snmp_add_var(struct snmp_pdu *pdu,
         snmp_pdu_add_variable(pdu, name, name_length, ASN_NULL, 0, 0);
         break;
 
+      case 'b':
+	tint = 0;
+	memset(buf, 0, sizeof buf);
+	tp = get_tree(name, name_length, get_tree_head());
+	{ char *lvalue = strdup(value), *cp;
+	  for (cp = strtok(lvalue, " \t,"); cp; cp = strtok(NULL, " \t,")) {
+	    char *ecp;
+	    int ix, bit;
+	    ltmp = strtoul(cp, &ecp, 0);
+	    if (*ecp != 0) {
+	      struct enum_list *ep = tp ? tp->enums : NULL;
+	      while (ep)
+		if (strcmp(ep->label, cp)) ep = ep->next;
+		else break;
+	      if (ep) ltmp = ep->value;
+	      else {
+		result = SNMPERR_BAD_NAME;
+		snmp_set_detail(cp);
+		free(lvalue);
+		goto out;
+	      }
+	    }
+	    ix = ltmp/8;
+	    if (ix >= tint) tint = ix+1;
+	    bit = 0x80 >> ltmp%8;
+	    buf[ix] |= bit;
+	  }
+	  free(lvalue);
+	}
+	snmp_pdu_add_variable(pdu, name, name_length, ASN_OCTET_STR,
+	  		      buf, tint);
+	break;
+
 #ifdef OPAQUE_SPECIAL_TYPES
       case 'U':
         if (read64(&c64tmp, value))
@@ -4982,6 +5015,7 @@ snmp_add_var(struct snmp_pdu *pdu,
 fail:
     result = SNMPERR_VALUE;
     snmp_set_detail(value);
+out:
     SET_SNMP_ERROR(result);
     return result;
 }
