@@ -373,3 +373,4 @@ ${context}_post_request(${context}_registration_ptr user_context)
 @run mfd-interface.m2c@
 @run mfd-data-access.m2c@
 @run mfd-readme.m2c@
+@run mfd-doxygen.m2c@
