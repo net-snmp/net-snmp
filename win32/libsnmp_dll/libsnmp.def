@@ -333,12 +333,17 @@ EXPORTS
 	se_find_value_in_slist
 	se_add_pair_to_slist
 	snmp_parse_args
+	snmp_parse_args_descriptions
+	snmp_parse_args_usage
 	netsnmp_callback_open
 	netsnmp_udp_agent_config_tokens_register
 	netsnmp_udp_parse_security
 	netsnmp_udp_getSecName
 	find_sec_mod
 	NetSnmpVersionInfo
+	getopt
+	optarg
+	optind
 	Mib                     DATA
 	tree_head               DATA
 	snmp_errno              DATA
