@@ -243,14 +243,14 @@ init_snmp()
     ERROR("nlist");
     exit(1);
   }
+#else
+  nlist("/vmunix",nl);
+#endif
   for(ret = 0; nl[ret].n_name != NULL; ret++) {
     if (nl[ret].n_type == 0) {
       fprintf(stderr, "nlist err:  %s not found\n",nl[ret].n_name);
     }
   }
-#else
-  nlist("/vmunix",nl);
-#endif
   init_kmem("/dev/kmem"); 
   init_routes();
   init_wes();
