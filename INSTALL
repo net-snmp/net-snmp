@@ -100,20 +100,20 @@ The simplest way to compile this package is:
 
 Installing the Perl/SNMP Module
 ===============================
-   The Perl/SNMP Module is now bundled with the ucd-snmp package and is
-located in the ucd-snmp/perl/SNMP directory. This module is an interface
-to the ucd-snmp SNMP client side management API. The Perl package
+   The Perl/SNMP Module is now bundled with the net-snmp package and is
+located in the net-snmp/perl directory. This module is an interface
+to the net-snmp SNMP client side management API. The Perl package
 provides a high level abstract interface to these functions for rapid
 application development. Following are the steps required to build and
 install this perl module.
 
-   1.) Be sure to read the ucd-snmp/perl/SNMP/README
+   1.) Be sure to read the net-snmp/perl/SNMP/README
 
-   2.) Be sure that ucd-snmp has been sucessfully tested and installed -
+   2.) Be sure that net-snmp has been sucessfully tested and installed -
        the headers and libraries will be required to build, the
        applications and mibs will be required to test the perl module
 
-   3.) cd to ucd-snmp/perl/SNMP and run
+   3.) cd to net-snmp/perl and run
             perl Makefile.PL
             make
             make test
