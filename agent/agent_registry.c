@@ -503,3 +503,18 @@ void setup_tree (void)
      the construction of the subtree structure */
 }
 
+void dump_registry( void )
+{
+    struct subtree *myptr, *myptr2;
+    char c_oid[SPRINT_MAX_LEN];
+
+    for( myptr = subtrees ; myptr != NULL; myptr = myptr->next) {
+	sprint_objid(c_oid, myptr->name, myptr->namelen);
+	printf("%c %s %c\n",
+		( myptr->variables ? ' ' : '(' ),
+		  c_oid,
+		( myptr->variables ? ' ' : ')' ));
+	for( myptr2 = myptr ; myptr2 != NULL; myptr2 = myptr2->children) {
+	    if ( myptr2->label && myptr2->label[0] )
+		printf("\t%s\n", myptr2->label);
+}

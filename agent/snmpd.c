@@ -242,6 +242,17 @@ SnmpdReconfig(int a)
 }
 #endif
 
+#ifdef SIGUSR1
+extern void dump_registry( void );
+	RETSIGTYPE
+SnmpdDump(int a)
+{
+	dump_registry(();
+	signal(SIGUSR1, SnmpdDump);
+}
+#endif
+
+
 	static void
 SnmpTrapNodeDown(void)
 {
@@ -477,6 +488,9 @@ main(int argc, char *argv[])
 #endif
 #ifdef SIGHUP
     signal(SIGHUP, SnmpdReconfig);
+#endif
+#ifdef SIGUSR1
+    signal(SIGUSR1, SnmpdDump);
 #endif
 
     /* send coldstart trap via snmptrap(1) if possible */
