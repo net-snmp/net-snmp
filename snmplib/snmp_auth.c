@@ -366,13 +366,8 @@ md5Digest(	u_char	*start,
  * Parameters:
  *	*data		(I)   Message.
  *	*length		(I/O) Bytes left in message.
- *	*packet_info	(O)   Packet info.
- *	*srcParty	(O)   Source party.
- *	*srcPartyLength	(O)   Source party length.
- *	*dstParty	(O)   Destination party.
- *	*dstPartyLength	(O)   Destination party length.
- *	*context	(O)   Context.
- *	*contextLength	(O)   Length of context.
+ *	*pdu		(O)   Packet info.
+ *	    (includes srcParty/dstParty/context information)
  *	 pass		(I)   Which pass.
  *      
  * Returns:
@@ -384,15 +379,16 @@ md5Digest(	u_char	*start,
 u_char *
 snmp_party_parse(u_char *data,
 		 size_t *length,
-		 struct packet_info *pi,
-		 oid *srcParty,
-		 size_t *srcPartyLength,
-		 oid *dstParty,
-		 size_t *dstPartyLength,
-		 oid *context,		 
-		 size_t *contextLength,
+		 struct snmp_pdu *pdu,
 		 int pass)
 {
+    oid *srcParty       =   pdu->srcParty;
+    int *srcPartyLength = &(pdu->srcPartyLen);
+    oid *dstParty       =   pdu->dstParty;
+    int *dstPartyLength = &(pdu->dstPartyLen);
+    oid *context        =   pdu->context;
+    int *contextLength  = &(pdu->contextLen);
+
     size_t		 dstParty2Length = MAX_OID_LEN,
    			 authMsgLen,
 			 authMsgInternalLen;
@@ -438,7 +434,7 @@ snmp_party_parse(u_char *data,
 	snmp_errno = SNMPERR_BAD_DST_PARTY;
 	return NULL;
     }
-    pi->dstp = dstp;
+    pdu->dstp = dstp;
 
     /* check to see if TDomain and TAddr match here.
      * If they don't, discard the packet
@@ -473,17 +469,17 @@ snmp_party_parse(u_char *data,
     if (type == (ASN_UNIVERSAL | ASN_PRIMITIVE | ASN_OCTET_STR)){
 	/* noAuth.
 	 */
-	pi->version   = SNMP_VERSION_2p;
-	pi->sec_model = SNMP_SEC_MODEL_SNMPv2p;
-	pi->sec_level = SNMP_SEC_LEVEL_NOAUTH;
+	pdu->version   = SNMP_VERSION_2p;
+	pdu->securityModel = SNMP_SEC_MODEL_SNMPv2p;
+	pdu->securityLevel = SNMP_SEC_LEVEL_NOAUTH;
 
     } else if (type == (ASN_CONTEXT | ASN_CONSTRUCTOR | 2)){
 	/* AuthInformation.
 	 */
-	pi->version   = SNMP_VERSION_2p;
-        pi->mp_model  = SNMP_MP_MODEL_SNMPv2p;
-	pi->sec_model = SNMP_SEC_MODEL_SNMPv2p;
-	pi->sec_level = SNMP_SEC_LEVEL_AUTHNOPRIV;
+	pdu->version   = SNMP_VERSION_2p;
+        pdu->msgParseModel = SNMP_MP_MODEL_SNMPv2p;
+	pdu->securityModel = SNMP_SEC_MODEL_SNMPv2p;
+	pdu->securityLevel = SNMP_SEC_LEVEL_AUTHNOPRIV;
 
 	ismd5 = 1;
 
@@ -552,7 +548,7 @@ snmp_party_parse(u_char *data,
 	snmp_errno = SNMPERR_BAD_SRC_PARTY;
 	return NULL;
     }
-    pi->srcp = srcp;
+    pdu->srcp = srcp;
 
 
     cxp = context_getEntry(context, *contextLength);
@@ -560,7 +556,7 @@ snmp_party_parse(u_char *data,
 	snmp_errno = SNMPERR_BAD_CONTEXT;
 	return NULL;
     }
-    pi->cxp = cxp;
+    pdu->cxp = cxp;
 
 
 
@@ -568,14 +564,14 @@ snmp_party_parse(u_char *data,
      * first time called for this packet.
      */
     if (srcp->partyAuthProtocol == SNMPV2MD5AUTHPROT
-	&& pi->version != SNMP_VERSION_2p)
+	&& pdu->version != SNMP_VERSION_2p)
 	return NULL;
 
 
     if ((pass & FIRST_PASS) && (srcp->partyAuthProtocol == SNMPV2MD5AUTHPROT)){
 	/* RFC1446, Pg 18, 3.2.1
 	 */
-	pi->sec_level = SNMP_SEC_LEVEL_AUTHPRIV;
+	pdu->securityLevel = SNMP_SEC_LEVEL_AUTHPRIV;
 	if (!ismd5){
 	    /* snmpStatsBadAuths++	/ * XXX */
 	    return NULL;
@@ -677,14 +673,9 @@ snmp_party_parse(u_char *data,
  * Parameters:
  *	*data
  *	*length
- *	 packet_info
+ *	 pdu
+ *	    (includes srcParty/dstParty/context information)
  *	 messagelen
- *	*srcParty
- *	 srcPartyLen
- *	*dstParty
- *	 dstPartyLen
- *	*context
- *	 contextLen
  *	*packet_len	(O)  Length of complete packet.
  *	 pass		(I)  FIRST_PASS, LAST_PASS, none, or both.
  *      
@@ -699,17 +690,18 @@ snmp_party_parse(u_char *data,
 u_char *
 snmp_party_build(u_char *data,
 		 size_t *length,
-		 struct packet_info *pi,
+		 struct snmp_pdu *pdu,
 		 size_t messagelen,
-		 oid *srcParty,
-		 size_t srcPartyLen,
-		 oid *dstParty,
-		 size_t dstPartyLen,
-		 oid *context,
-		 size_t contextLen,
 		 size_t *packet_len,    /* OUT - length of complete packet */
 		 int pass)  /* FIRST_PASS, LAST_PASS, none, or both */
 {
+    oid *srcParty    = pdu->srcParty;
+    int  srcPartyLen = pdu->srcPartyLen;
+    oid *dstParty    = pdu->dstParty;
+    int  dstPartyLen = pdu->dstPartyLen;
+    oid *context     = pdu->context;
+    int  contextLen  = pdu->contextLen;
+
     size_t		 dummyLength;
     int			 pad;
     int			 authInfoSize = 0;
@@ -727,8 +719,8 @@ snmp_party_build(u_char *data,
     struct partyEntry	*srcp, *dstp;
     struct timeval	 now;
 
-    srcp = pi->srcp;
-    dstp = pi->dstp;
+    srcp = pdu->srcp;
+    dstp = pdu->dstp;
 
     if (!srcp || !dstp){
 	srcp = party_getEntry(srcParty, srcPartyLen);
@@ -741,8 +733,8 @@ snmp_party_build(u_char *data,
 	    snmp_errno = SNMPERR_BAD_SRC_PARTY;
 	    return NULL;
 	}
-	pi->srcp = srcp;
-	pi->dstp = dstp;
+	pdu->srcp = srcp;
+	pdu->dstp = dstp;
     }
 
 
