@@ -31,8 +31,10 @@ extern "C" {
 #define MT_LIB_SESSION     1
 #define MT_LIB_REQUESTID   2
 #define MT_LIB_MESSAGEID   3
+#define MT_LIB_SESSIONID   4
+#define MT_LIB_TRANSID     5
 
-#define MT_LIB_MAXIMUM     4  /* must be one greater than the last one */
+#define MT_LIB_MAXIMUM     6  /* must be one greater than the last one */
 
 
 #ifdef _REENTRANT
