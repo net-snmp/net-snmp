@@ -28,6 +28,7 @@ INSTALLUCDHEADERS=ucd-snmp-config.h version.h mib_module_config.h
 # other install rules.
 #
 OTHERINSTALL=copypersistentfiles @PERLINSTALLTARGS@
+OTHERUNINSTALL=@PERLUNINSTALLTARGS@
 COPY_PERSISTENT_FILES=@COPY_PERSISTENT_FILES@
 PERSISTENT_DIRECTORY=@PERSISTENT_DIRECTORY@
 UCDPERSISTENT_DIRECTORY=@UCDPERSISTENT_DIRECTORY@
@@ -138,6 +139,12 @@ perlmakefiles:
 
 perlinstall:
 	@(cd perl ; $(MAKE) install) ; \
+        if test $$? != 0 ; then \
+           exit 1 ; \
+        fi
+
+perluninstall:
+	@(cd perl ; $(MAKE) uninstall) ; \
         if test $$? != 0 ; then \
            exit 1 ; \
         fi

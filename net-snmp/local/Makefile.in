@@ -7,6 +7,7 @@ top_builddir=..
 # stuff to install
 #
 OTHERINSTALL=localinstall
+OTHERUNINSTALL=localuninstall
 
 #
 # local info
@@ -98,4 +99,11 @@ localinstall:
 	  for i in $(DATASRCS) ; do $(INSTALL_DATA) $(srcdir)/$$i $(snmplibdir)/$$i ; echo "install:  installed $$i in $(snmplibdir)" ; done ; \
 	  for i in $(CONFDIRS); do $(SHELL) $(srcdir)/../mkinstalldirs $(CONFINSTALLDIR)/$$i ; done ; \
 	  for i in $(CONFFILES); do $(INSTALL_DATA) $(srcdir)/$(CONFDATASRC)/$$i $(CONFINSTALLDIR)/$$i; echo "install:  installed $$i in $(CONFINSTALLDIR)"; done \
+	fi
+
+localuninstall:
+	@if test "x$(PERLPROG)" != "x" ; then \
+	  for i in $(PERLSCRIPTS) ; do rm -f $(bindir)/$$i ; echo "removed $$i from $(bindir)" ; done ; \
+	  for i in $(DATASRCS) ; do rm -f $(snmplibdir)/$$i ; echo "removed $$i from $(snmplibdir)" ; done ; \
+	  for i in $(CONFFILES); do rm -f $(CONFINSTALLDIR)/$$i; echo "removed $$i from $(CONFINSTALLDIR)"; done \
 	fi

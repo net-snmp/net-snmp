@@ -1581,8 +1581,10 @@ fi
 if test "x$install_perl" != "x" -a "x$install_perl" != "xno"; then
     PERLTARGS="perlmodules"
     PERLINSTALLTARGS="perlinstall"
+    PERLINSTALLTARGS="perluninstall"
     AC_SUBST(PERLTARGS)
     AC_SUBST(PERLINSTALLTARGS)
+    AC_SUBST(PERLUNINSTALLTARGS)
     AC_SUBST(PERLARGS)
     AC_MSG_CACHE_ADD(SNMP Perl modules:          enabled)
 else
@@ -1616,11 +1618,15 @@ if test "x$embed_perl" = "xyes"; then
     OTHERAGENTLIBLOBJS="snmp_perl.lo"
 
     EMBEDPERLINSTALL="embedperlinstall"
-    AC_SUBST(EMBEDPERLINSTALL)
+    EMBEDPERLUNINSTALL="embedperluninstall"
     AC_MSG_CACHE_ADD(Embedded perl support:      enabled)
 else
+    EMBEDPERLINSTALL=""
+    EMBEDPERLUNINSTALL=""
     AC_MSG_CACHE_ADD(Embedded perl support:      disabled)
 fi
+AC_SUBST(EMBEDPERLINSTALL)
+AC_SUBST(EMBEDPERLUNINSTALL)
 
 # reset libs
 AGENTLIBS=$LIBS
