@@ -28,7 +28,7 @@ _factory_free(container_type *data, void *context)
     if (data->name != NULL) {
         DEBUGMSGTL(("container", "  _factory_free_list() called for %s\n",
                     data->name));
-	free((void *)data->name); /* SNMP_FREE wasted on object about to be freed */
+	free(data->name); /* SNMP_FREE wasted on object about to be freed */
     }
     free(data); /* SNMP_FREE wasted on param */
 }
