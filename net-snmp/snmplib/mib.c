@@ -108,6 +108,11 @@ static void sprint_double (char *, struct variable_list *, struct enum_list *, c
 #endif
 void print_tree_node (FILE *f, struct tree *tp);
 
+/* helper functions for get_module_node */
+int node_to_oid(struct tree *, oid *, size_t *);
+static int _add_strings_to_oid(struct tree *, char *,
+             oid *, size_t *, size_t);
+
 extern struct tree *tree_head;
 
 struct tree *Mib;             /* Backwards compatibility */
@@ -1973,12 +1978,9 @@ get_module_node(const char *fname,
 		oid *objid,
 		size_t *objidlen)
 {
-    int modid, subid, numids;
-    struct tree *tp, *tp2;
-    oid newname[MAX_OID_LEN], *op;
-    char *cp, *cp2;
-    char *name, *oname;
-    char doingquote = 0;
+    int modid, rc = 0;
+    struct tree *tp;
+    char *name, *cp;
 
     if ( !strcmp(module, "ANY") )
         modid = -1;
@@ -1989,7 +1991,7 @@ get_module_node(const char *fname,
     }
 
 		/* Isolate the first component of the name ... */
-    name = oname = strdup(fname);
+    name = strdup(fname);
     cp = strchr( name, '.' );
     if ( cp != NULL ) {
 	*cp = '\0';
@@ -1998,25 +2000,78 @@ get_module_node(const char *fname,
 		/* ... and locate it in the tree. */
     tp = find_tree_node(name, modid);
     if (tp){
-		/* Build up the object ID, working backwards,
-		   starting from the end of the buffer. */
-	tp2 = tp;
-	for(op = newname + (MAX_OID_LEN - 1), numids = 1;
-		 op >= newname; op--, numids++){
-	    *op = tp2->subid;
-	    tp2 = tp2->parent;
-	    if (tp2 == NULL)
-		break;
-	}
-	if (numids > (int)*objidlen) {
-	    free(oname);
-	    return 0;
-	}
-	*objidlen = numids;
-	memmove(objid, op, numids * sizeof(oid));
+	size_t maxlen = *objidlen;
+
+		/* Set the first element of the object ID */
+	if (node_to_oid(tp, objid, objidlen)) {
+	    rc = 1;
 
 		/* If the name requested was more than one element,
 		   tag on the rest of the components */
+	    if (cp != NULL)
+	        rc = _add_strings_to_oid(tp, cp, objid, objidlen, maxlen);
+	}
+    }
+
+    free(name);
+    return (rc);
+}
+
+
+/*
+ * Populate object identifier from a node in the MIB hierarchy.
+ * Build up the object ID, working backwards,
+ * starting from the end of the objid buffer.
+ * When the top of the MIB tree is reached, adjust the buffer.
+ *
+ * The buffer length is set to the number of subidentifiers
+ * for the object identifier associated with the MIB node.
+ * Returns the number of subidentifiers copied.
+ *
+ * If 0 is returned, the objid buffer is too small,
+ * and the buffer contents are indeterminate.
+ * The buffer length can be used to create a larger buffer.
+ */
+int
+node_to_oid(struct tree *tp, oid *objid, size_t *objidlen)
+{
+    int numids, lenids;
+    oid *op;
+
+    if (!tp || !objid || !objidlen)
+        return 0;
+
+    lenids = (int)*objidlen;
+    op = objid + lenids;  /* points after the last element */
+
+    for(numids = 0; tp; tp = tp->parent, numids++)
+    {
+        if (numids >= lenids) continue;
+        --op;
+        *op = tp->subid;
+    }
+
+    *objidlen = (size_t)numids;
+    if (numids > lenids) {
+        return 0;
+    }
+
+    if (numids < lenids)
+        memmove(objid, op, numids * sizeof(oid));
+
+    return (numids);
+}
+
+static int
+_add_strings_to_oid(struct tree *tp, char *cp,
+             oid *objid, size_t *objidlen,
+             size_t maxlen)
+{
+    int subid;
+    struct tree *tp2 = NULL;
+    char *cp2 = NULL;
+    char doingquote = 0;
+
 	while ( cp != NULL ) {
 	    cp2 = strchr( cp, '.' );	/* Isolate the next entry */
 	    if ( cp2 != NULL ) {
@@ -2024,17 +2079,20 @@ get_module_node(const char *fname,
 		cp2++;
 	    }
 
-		  
             if ( *cp == '"' || *cp == '\'') { /* Is it the beggining
                                                  of a quoted string */
               doingquote = *cp++;
               /* insert length if requested */
               if (doingquote == '"') {
+                if (*objidlen >= maxlen)
+                    return 0;
                 objid[ *objidlen ] = (strchr(cp,doingquote) - cp);
                 (*objidlen)++;
               }
 
               while(*cp != doingquote) {
+                if (*objidlen >= maxlen)
+                    return 0;
                 objid[ *objidlen ] = *cp++;
                 (*objidlen)++;
               }
@@ -2056,6 +2114,8 @@ get_module_node(const char *fname,
 	    while ( tp2 != NULL ) {
 		if (( (int)tp2->subid == subid ) ||
 		    ( !strcasecmp( tp2->label, cp ))) {
+                        if (*objidlen >= maxlen)
+                            return 0;
 			objid[ *objidlen ] = tp2->subid;
 			(*objidlen)++;
 			tp = tp2;
@@ -2065,10 +2125,11 @@ get_module_node(const char *fname,
 	    }
 	    if ( tp2 == NULL ) {
 		if ( subid == -1 ) {
-		    free(oname);
 		    return 0;
 		}
 				/* pure numeric from now on */
+                if (*objidlen >= maxlen)
+                    return 0;
 		objid[ *objidlen ] = subid;
 		(*objidlen)++;
 		tp = NULL;
@@ -2076,12 +2137,7 @@ get_module_node(const char *fname,
 	    cp = cp2;
 	}
 
-	free(oname);
 	return 1;
-    } else {
-	free(oname);
-	return 0;
-    }
 }
 
 
