@@ -125,7 +125,9 @@ void init_memory(void)
 {
 #ifndef linux
   int pagesize;
+#ifdef PHYSMEM_SYMBOL
  auto_nlist(PHYSMEM_SYMBOL,0,0);
+#endif
  auto_nlist(TOTAL_MEMORY_SYMBOL,0,0);
  auto_nlist(MBSTAT_SYMBOL,0,0);
  auto_nlist(SWDEVT_SYMBOL,0,0);
@@ -306,8 +308,17 @@ int getswap(int rettype)
     return(0);
   DEBUGMSGTL(("ucd-snmp/memory", "%d fs swap devices: \n", nswapfs));
   for (i=0; i < nswapdev; i++) {
+#ifdef hpux11
+    DEBUGMSGTL(("ucd-snmp/memory", "swdevt[%d]: %d\n",i, swdevt[i].sw_flags & SW_ENABLE));
+#else
     DEBUGMSGTL(("ucd-snmp/memory", "swdevt[%d]: %d\n",i, swdevt[i].sw_enable));
-    if (swdevt[i].sw_enable) {
+#endif
+#ifdef hpux11
+    if (swdevt[i].sw_flags & SW_ENABLE)
+#else
+    if (swdevt[i].sw_enable)
+#endif
+    {
 #ifdef STRUCT_SWDEVT_HAS_SW_NBLKSENABLED
       DEBUGMSGTL(("ucd-snmp/memory", "  swdevt.sw_nblksenabled:     %d\n", swdevt[i].sw_nblksenabled));
       spacetotal += swdevt[i].sw_nblksenabled;
@@ -315,8 +326,8 @@ int getswap(int rettype)
       DEBUGMSGTL(("ucd-snmp/memory", "  swdevt.sw_nblks:     %d\n", swdevt[i].sw_nblks));
       spacetotal += swdevt[i].sw_nblks;
 #endif
-      spaceleft += (swdevt[i].sw_nfpgs * 4);
       DEBUGMSGTL(("ucd-snmp/memory", "  swdevt.sw_nfpgs:     %d\n", swdevt[i].sw_nfpgs));
+      spaceleft += (swdevt[i].sw_nfpgs * 4);
     }
   }
   if (auto_nlist(FSWDEVT_SYMBOL,(char *) fswdevt, sizeof(struct fswdevt)*nswapfs)
@@ -324,8 +335,17 @@ int getswap(int rettype)
     return(0);
   DEBUGMSGTL(("ucd-snmp/memory", "%d fs swap devices: \n", nswapfs));
   for (i=0; i < nswapfs; i++) {
+#ifdef hpux11
+    DEBUGMSGTL(("ucd-snmp/memory", "fswdevt[%d]: %d\n",i, fswdevt[i].fsw_flags & FSW_ENABLE));
+#else
     DEBUGMSGTL(("ucd-snmp/memory", "fswdevt[%d]: %d\n",i, fswdevt[i].fsw_enable));
-    if (fswdevt[i].fsw_enable) {
+#endif
+#ifdef hpux11
+    if (fswdevt[i].fsw_flags & FSW_ENABLE)
+#else
+    if (fswdevt[i].fsw_enable)
+#endif
+    {
       spacetotal += (fswdevt[i].fsw_limit * 2048);  /* 2048=bytes per page? */
       spaceleft += (fswdevt[i].fsw_limit * 2048 -
                     ((fswdevt[i].fsw_allocated - fswdevt[i].fsw_min) * 37));
@@ -339,7 +359,7 @@ int getswap(int rettype)
   /* this is a real hack.  I need to get the hold info from swapinfo, but
      I can't figure out how to read it out of the kernel directly
      -- Wes */
-#ifndef hpux10
+#if !defined(hpux10) && !defined(hpux11)
   strcpy(ex.command,"/etc/swapinfo -h");
 #else
   strcpy(ex.command,"/usr/sbin/swapinfo -r");
@@ -438,8 +458,12 @@ unsigned char *var_extensible_mem(struct variable *vp,
       }	
 #else
       /* long_ret = pagetok((int) total.t_rm); */
+#ifdef PHYSMEM_SYMBOL
       if(auto_nlist(PHYSMEM_SYMBOL,(char *) &result,sizeof(result)) == 0)
         return NULL;
+#else
+      return NULL;
+#endif
       long_ret = result*1000;
 #endif
 #endif

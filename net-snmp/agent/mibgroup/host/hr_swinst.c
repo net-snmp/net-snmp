@@ -167,6 +167,9 @@ oid hrswinst_variables_oid[] = { 1,3,6,1,2,1,25,6 };
 #ifdef hpux10	/* Description from HRSW_dir/.../pfiles/INDEX: title */
 #define	_PATH_HRSW_directory	"/var/adm/sw/products"
 #endif
+#ifdef hpux11	/* Description from HRSW_dir/.../pfiles/INDEX: title */
+#define	_PATH_HRSW_directory	"/var/adm/sw/products"
+#endif
 #ifdef freebsd2
 #define	_PATH_HRSW_directory	"/var/db/pkg"
 #endif

@@ -102,11 +102,11 @@ ucdExperimental       OBJECT IDENTIFIER ::= { ucdavis 13 }
 
 ucdSnmpAgent      OBJECT IDENTIFIER ::= { ucdavis 250 }
 hpux9             OBJECT IDENTIFIER ::= { ucdSnmpAgent 1 }
-hpux10            OBJECT IDENTIFIER ::= { ucdSnmpAgent 6 }
 sunos4            OBJECT IDENTIFIER ::= { ucdSnmpAgent 2 }
 solaris           OBJECT IDENTIFIER ::= { ucdSnmpAgent 3 }
 osf               OBJECT IDENTIFIER ::= { ucdSnmpAgent 4 }
 ultrix            OBJECT IDENTIFIER ::= { ucdSnmpAgent 5 }
+hpux10            OBJECT IDENTIFIER ::= { ucdSnmpAgent 6 }
 netbsd1           OBJECT IDENTIFIER ::= { ucdSnmpAgent 7 }
 freebsd           OBJECT IDENTIFIER ::= { ucdSnmpAgent 8 }
 irix              OBJECT IDENTIFIER ::= { ucdSnmpAgent 9 }
@@ -114,6 +114,7 @@ linux             OBJECT IDENTIFIER ::= { ucdSnmpAgent 10 }
 bsdi              OBJECT IDENTIFIER ::= { ucdSnmpAgent 11 }
 openbsd           OBJECT IDENTIFIER ::= { ucdSnmpAgent 12 }
 win32		  OBJECT IDENTIFIER ::= { ucdSnmpAgent 13 } -- unlucky
+hpux11            OBJECT IDENTIFIER ::= { ucdSnmpAgent 14 }
 unknown           OBJECT IDENTIFIER ::= { ucdSnmpAgent 255 }
 
 
