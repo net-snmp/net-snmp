@@ -15,7 +15,8 @@ NSB_SKIP_CONFIG=0
 NSB_SKIP_BUILD=0
 NSB_SKIP_TEST=0
 NSB_SKIP_INSTALL=0
-NSB_DIST_TRANSPORTS="UDPIPv6 TCPIPv6"
+NSB_DIST_TRANSPORTS="UDP TCP Unix"
+NSB_EXTRA_TRANSPORTS="Callback"
 NSB_DIST_MODULES="host disman/event-mib"
 NSB_EXTRA_MODULES="examples examples/example testhandler smux Rmon"
 NSB_VIEW=cat
@@ -84,10 +85,14 @@ nsb-config-all()
    case `uname -s` in
 
    Linux)
-      NSB_DIST_TRANSPORTS="$NSB_DIST_TRANSPORTS IPX"
+      NSB_EXTRA_TRANSPORTS="UDPIPv6 TCPIPv6 IPX"
+      ;;
+
+   Darwin)
       ;;
 
    *)
+      NSB_EXTRA_TRANSPORTS="UDPIPv6 TCPIPv6"
       ;;
    esac
 
@@ -96,11 +101,11 @@ nsb-config-all()
    #
    echo $ngc_src/configure  --with-defaults \
       "--with-mib-modules=$NSB_DIST_MODULES $NSB_EXTRA_MODULES" \
-      "--with-transports=$NSB_DIST_TRANSPORTS" \
+      "--with-transports=$NSB_DIST_TRANSPORTS $NSB_EXTRA_TRANSPORTS" \
        $NSB_PERL --enable-shared
    $ngc_src/configure  --with-defaults \
       "--with-mib-modules=$NSB_DIST_MODULES $NSB_EXTRA_MODULES" \
-      "--with-transports=$NSB_DIST_TRANSPORTS" \
+      "--with-transports=$NSB_DIST_TRANSPORTS $NSB_EXTRA_TRANSPORTS" \
       $NSB_PERL --enable-shared
    ngc_rc=$?
 
@@ -159,7 +164,8 @@ nsb-make()
 
    nsb_make_OUTPUT=nsb-make-$target.$DATE
    nsb-info "Making $target... (log is $nsb_make_OUTPUT)"
-   make $target 2>&1 | tee $nsb_make_OUTPUT
+   make touchit 2>&1 | tee $nsb_make_OUTPUT
+   make $target 2>&1 | tee -a $nsb_make_OUTPUT
 
    nsb-info "Checking for errors..."
    egrep "Error|FAIL|warn|No |exists" $nsb_make_OUTPUT \
