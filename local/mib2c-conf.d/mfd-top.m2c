@@ -110,9 +110,15 @@ netsnmp_container *${table}_container_init(netsnmp_mfd_registration *reg);
 @include generic-source-includes.m2i@
 
 @foreach $table table@
+@    include m2c_setup_table.m2i@
 void initialize_table_$table(void);
 int ${table}_get_values(netsnmp_mfd_registration *mfdr,
                         netsnmp_request_group *rg);
+@   if $m2c_table_writable@
+int ${context}_check_objects(netsnmp_mfd_registration *mfdr,
+                        netsnmp_request_info *requests,
+                             ${table}_ctx * ctx);
+@   end@
 @end@
 
 /* Initializes the $name module */
@@ -199,7 +205,10 @@ initialize_table_$table(void)
                           "initialize_table_$table");
         return; /** Serious error. */
     }
-    mfdr->cbsm.get_values = ${table}_get_values;
+    mfdr->cbsm.get_values = (Netsnmp_MFD_Request_Op*)${table}_get_values;
+@   if $m2c_table_writable@
+    mfdr->cbsm.object_syntax_checks = (Netsnmp_MFD_Request_Op*)${table}_check_objects;
+@   end@ 
 
     /***************************************************
      * set up container
