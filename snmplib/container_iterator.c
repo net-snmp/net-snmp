@@ -126,6 +126,13 @@ _iterator_get(iterator_info *ii, const void *key)
     return best.val;
 }
 
+/**
+ *
+ * NOTE: the returned data context can be reused, to save from
+ *   having to allocate memory repeatedly. However, in this case,
+ *   the get_data and get_pos functions must be implemented to
+ *   return unique memory that will be saved for later comparisons.
+ */
 static void *
 _iterator_get_next(iterator_info *ii, const void *key)
 {
@@ -137,57 +144,80 @@ _iterator_get_next(iterator_info *ii, const void *key)
 
     DEBUGMSGT(("container_iterator",">%s\n", __FUNCTION__));
     
+    /*
+     * initialize loop context
+     */
     if(ii->init_loop_ctx)
         ii->init_loop_ctx(ii->user_ctx, &loop_ctx);
     
+    /*
+     * get first item
+     */
     rc = ii->get_first(ii->user_ctx, &loop_ctx, &tmp);
     if(SNMP_ERR_NOERROR == rc) {
+        /*
+         * special case: if key is null, find the first item.
+         * this is each if the container is sorted, since we're
+         * already done!  Otherwise, get the next item for the
+         * first comparison in the loop below.
+         */
         if (NULL == key) {
-            if(ii->c.compare == netsnmp_compare_netsnmp_index) {
-                DEBUGMSGTL(("container_iterator:results",
-                            "  get_first oid:"));
-                DEBUGMSGSUBOID(("container_iterator:results",
-                                ((netsnmp_index*)tmp.val)->oids,
-                                ((netsnmp_index*)tmp.val)->len));
-                DEBUGMSG(("container_iterator:results", "\n"));
-            }
-            /*
-             * special case: if key is null, return first item
-             */
+            if(ii->get_data)
+                ii->save_pos(ii->user_ctx, &loop_ctx, &best_ctx, 1);
             best_val.val = tmp.val;
-            best_ctx.val = loop_ctx.val;
             if(ii->sorted)
                 tmp.val = NULL; /* so we skip for loop */
+            else
+                rc = ii->get_next(ii->user_ctx, &loop_ctx, &tmp);
         }
+        /*
+         * loop over remaining items
+         */
         for( ;
              (NULL != tmp.val) && (rc == SNMP_ERR_NOERROR);
              rc = ii->get_next(ii->user_ctx, &loop_ctx, &tmp) ) {
             
-            if(ii->c.compare == netsnmp_compare_netsnmp_index) {
-                DEBUGMSGTL(("container_iterator:results",
-                            "  get_next oid:"));
-                DEBUGMSGSUBOID(("container_iterator:results",
-                             ((netsnmp_index*)tmp.val)->oids,
-                             ((netsnmp_index*)tmp.val)->len));
-                DEBUGMSG(("container_iterator:results", "\n"));
-            }
-
             /*
-             * if key is greater, see if it is better than current
-             * best match
+             * if we have a key, this is a get-next, and we need to compare
+             * the key to the tmp value to see if the tmp value is greater
+             * than the key, but less than any previous match.
+             *
+             * if there is no key, this is a get-first, and we need to
+             * compare the best value agains the tmp value to see if the
+             * tmp value is lesser than the best match.
              */
-            cmp = ii->c.compare(tmp.val, key);
-            DEBUGMSGT(("container_iterator:results","cmp %d\n", cmp));
+            if(key) /* get next */
+                cmp = ii->c.compare(tmp.val, key);
+            else { /* get first */
+                /*
+                 * best value and tmp value should never be equal,
+                 * otherwise we'd be comparing a pointer to itself.
+                 * (see note on context reuse in comments above function.
+                 */
+                if(best_val.val == tmp.val) {
+                    snmp_log(LOG_ERR,"illegal reuse of data context in "
+                             "container_iterator\n");
+                    rc = SNMP_ERR_GENERR;
+                    break;
+                }
+                cmp = ii->c.compare(best_val.val, tmp.val);
+            }
             if(cmp > 0) {
-                if((NULL == best_val.val) ||
-                   ((cmp = ii->c.compare(tmp.val, best_val.val)) < 0) ) {
+                /*
+                 * if we don't have a key (get-first) or a current best match,
+                 * then the comparison above is all we need to know that
+                 * tmp is the best match. otherwise, compare against the
+                 * current best match.
+                 */
+                if((NULL == key) || (NULL == best_val.val) ||
+                   ((cmp=ii->c.compare(tmp.val, best_val.val)) < 0) ) {
                     DEBUGMSGT(("container_iterator:results"," best match\n"));
                     best_val.val = tmp.val;
                     if(ii->get_data)
                         ii->save_pos(ii->user_ctx, &loop_ctx, &best_ctx, 1);
                 }
             }
-            else if((cmp == 0) && (ii->sorted)) {
+            else if((cmp == 0) && ii->sorted && key) {
                 /*
                  * if keys are equal and container is sorted, then we know
                  * the next key will be the one we want.
