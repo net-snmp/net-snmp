@@ -415,6 +415,10 @@ proxy_got_response(int operation, netsnmp_session * sess, int reqid,
                                       SNMP_ERR_GENERR);
         }
 
+        /* fix bulk_to_next operations */
+        if (cache->reqinfo->mode == MODE_GETBULK)
+            netsnmp_bulk_to_next_fix_requests(request);
+        
         /*
          * free the response 
          */
