@@ -4,13 +4,13 @@
 #endif
 
 #include "mibincl.h"
-#ifdef USING_ERRORMIB_MODULE
 #include "proc.h"
+#ifdef USING_ERRORMIB_MODULE
+#include "errormib.h"
 #else
 #define setPerrorstatus(x) perror(x)
 #endif
 #include "util_funcs.h"
-#include "errormib.h"
 
 struct myproc *get_proc_instance __P((struct myproc *,int));
 struct myproc *procwatch;
@@ -419,7 +419,9 @@ int sh_count_procs(procname)
       }
 #ifdef USEERRORMIB
     if (ftell(file) < 2) {
+#ifdef USING_ERRORMIB_MODULE
       seterrorstatus("process list unreasonable short (mem?)",2);
+#endif
       ret = -1;
     }
 #endif
