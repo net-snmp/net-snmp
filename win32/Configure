@@ -316,7 +316,7 @@ foreach my $progName (@programs) {
       s/^#undef NETSNMP_USE_DLL.*/#define NETSNMP_USE_DLL 1/;
     }
     if ($openssl == 1) {
-      s/^#undef USE_OPENSSL.*/#define USE_OPENSSL 1/;
+      s/^.*#undef USE_OPENSSL.*/#define USE_OPENSSL 1/;
     }
 
     print FILE_OUT $_ . "\n";
