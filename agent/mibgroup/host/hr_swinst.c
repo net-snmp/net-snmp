@@ -177,6 +177,7 @@ oid hrswinst_variables_oid[] = { 1,3,6,1,2,1,25,6 };
 void init_hr_swinst(void)
 {
     SWI_t *swi = &_myswi;	/* XXX static for now */
+    struct stat stat_buf;
 
 	/* Read settings from config file,
 	    or take system-specific defaults */
@@ -195,7 +196,9 @@ void init_hr_swinst(void)
 #endif
 	if (swi->swi_directory != NULL)
 	    free((void *)swi->swi_directory);
-	sprintf(path, "%s/packages.rpm", swi->swi_dbpath);
+	sprintf(path, "%s/Packages", swi->swi_dbpath);
+	if (stat(path, &stat_buf) == -1)
+	    sprintf(path, "%s/packages.rpm", swi->swi_dbpath);
 	swi->swi_directory = strdup(path);
     }
 #else
@@ -355,8 +358,7 @@ var_hrswinst(struct variable *vp,
 	    if (swi->swi_directory != NULL)
 		strcpy(string, swi->swi_directory);
 
-	    if ( *string ) {
-		stat( string, &stat_buf );
+	    if ( *string && (stat( string, &stat_buf ) != -1 )) {
 		if ( stat_buf.st_mtime > starttime.tv_sec )
 			/* changed 'recently' - i.e. since this agent started */
 		    long_return = (stat_buf.st_mtime-starttime.tv_sec)*100;
@@ -459,8 +461,6 @@ static void
 Check_HRSW_cache(void *xxx)
 {
     SWI_t *swi = (SWI_t *)xxx;
-    int offset;
-    int ix;
 
     /* Make sure cache is up-to-date */
     if (swi->swi_recs != NULL) {
@@ -472,22 +472,39 @@ Check_HRSW_cache(void *xxx)
     }
 
     /* Get header offsets */
-    ix = 0;
-    for(offset = rpmdbFirstRecNum(swi->swi_rpmdb), ix = 0;
-	offset != 0;
-	offset = rpmdbNextRecNum(swi->swi_rpmdb, offset), ix++)
-    {
-	if (ix >= swi->swi_maxrec) {
-	    swi->swi_maxrec += 256;
-	    if (swi->swi_recs == NULL) {
-		swi->swi_recs = (int *) malloc(swi->swi_maxrec * sizeof(int));
-	    } else {
-		swi->swi_recs = (int *) realloc(swi->swi_recs, swi->swi_maxrec * sizeof(int));
+    {	int ix = 0;
+	int offset;
+
+#if defined(RPMDBI_PACKAGES)
+	rpmdbMatchIterator mi = NULL;
+	Header h;
+	mi = rpmdbInitIterator(swi->swi_rpmdb, RPMDBI_PACKAGES, NULL, 0);
+	while ((h = rpmdbNextIterator(mi)) != NULL) {
+	    offset = rpmdbGetIteratorOffset(mi);
+#else
+	for (offset = rpmdbFirstRecNum(swi->swi_rpmdb);
+	    offset != 0;
+	    offset = rpmdbNextRecNum(swi->swi_rpmdb, offset))
+	{
+#endif
+
+	    if (ix >= swi->swi_maxrec) {
+		swi->swi_maxrec += 256;
+		swi->swi_recs = (swi->swi_recs == NULL)
+		    ? (int *) malloc(swi->swi_maxrec * sizeof(int))
+		    : (int *) realloc(swi->swi_recs, swi->swi_maxrec * sizeof(int));
 	    }
+	    swi->swi_recs[ix++] = offset;
+
+#if !defined(RPMDBI_PACKAGES)
 	}
-	swi->swi_recs[ix] = offset;
+#else
+	}
+	rpmdbFreeIterator(mi);
+#endif
+
+	swi->swi_nrec = ix;
     }
-    swi->swi_nrec = ix;
 }
 #endif	/* HAVE_LIBRPM */
 
@@ -557,7 +574,17 @@ Save_HR_SW_info (int ix)
 	char *n, *v, *r;
 
 	offset = swi->swi_recs[ix-1];
+
+#if defined(RPMDBI_PACKAGES)
+    {   rpmdbMatchIterator mi;
+	mi = rpmdbInitIterator(swi->swi_rpmdb, RPMDBI_PACKAGES, &offset, sizeof(offset));
+	if ((h = rpmdbNextIterator(mi)) != NULL) h = headerLink(h);
+	rpmdbFreeIterator(mi);
+    }
+#else
 	h = rpmdbGetRecord(swi->swi_rpmdb, offset);
+#endif
+
 	if (h == NULL)
 	    return;
 	if (swi->swi_h != NULL)
