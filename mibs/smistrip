@@ -20,9 +20,9 @@
 #
 
 AWK=awk
-# AWK=/usr/bin/nawk	# Solaris
+[ `uname` != SunOS ] || AWK=/usr/bin/nawk
 GETOPTS=getopts
-VERSION=0.2-cvs
+VERSION=0.3-cvs
 
 
 do_version () {
@@ -34,6 +34,7 @@ do_version () {
 do_usage () {
     echo "Usage: smistrip [-Vhn] [-d dir] [-s suffix] [-m modules] file ..."
     echo "-V         show version and license information"
+    echo "-v         verbose"
     echo "-h         show usage information"
     echo "-n         do not write module files"
     echo "-d dir     write module to directory dir"
@@ -46,7 +47,23 @@ do_usage () {
 
 
 do_strip () {
-    cat $1 | $AWK -v test="$test" -v dir="$dir" -v single="$single" -v suffix="$suffix" '
+    cat $1 | $AWK -v test="$test" -v dir="$dir" -v single="$single" -v suffix="$suffix" -v verbose="$verbose" '
+
+    BEGIN {
+	if (length(single) != 0) {
+	    single = ":"single":"
+	}
+	else {
+	    single = ""
+	}
+    }
+
+    END {
+	if (single != "" && single != ":") {
+	    gsub(":", " ", single)
+	    print "WARNING: Module(s) not found:" single
+	}
+    }
 
     # start of module
     /^[ \t]*[A-Za-z0-9-]* *DEFINITIONS */ {
@@ -93,7 +110,8 @@ do_strip () {
     /^[ \t]*END[ \t\r]*$/ {
 	if (macro)
 	    macro = 0
-	else if (length(single) == 0 || match(":"single":", ":"module":")) {
+	else if (single == "" || match(single, ":"module":")) {
+	    sub(":"module, "", single)
 	    strip = 99
 	    for (i = 0 ; i < n ; i++) {
 		# find the minimum column that contains non-blank characters
@@ -111,12 +129,14 @@ do_strip () {
 		    print substr(line[i], strip) >f
 	    }
 
-	    print module ": " n " lines."
+	    if (verbose) {
+		print module ": " n " lines."
+	    }
 	    module = ""
 	    collect = 0
 	}
 	else
-	    print module ": ignored."
+	    print "NOTE: " module ": ignored."
     }
     '
 }
@@ -124,6 +144,8 @@ do_strip () {
 
 while $GETOPTS Vhnm:d:x: c ; do
     case $c in
+	v)	verbose=1
+		;;
 	n)	test=1
 		;;
 	m)	single=$OPTARG
