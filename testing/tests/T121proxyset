@@ -1,0 +1,77 @@
+#!/bin/sh
+
+. ../eval_tools.sh
+
+HEADER Proxy SET support
+
+SKIPIFNOT USING_UCD_SNMP_PROXY_MODULE
+SKIPIFNOT USING_MIBII_SYSTEM_MIB_MODULE
+
+#
+# Begin test
+#
+
+# standard V3 configuration for initial user
+. ./Sv3config
+# config the proxy
+CONFIGAGENT proxy -p 7676 -t 2 -r 1 -v 2c -c testcommunity localhost system
+
+# Start the agent without initializing the system mib.
+ORIG_AGENT_FLAGS="$AGENT_FLAGS"
+AGENT_FLAGS="$ORIG_AGENT_FLAGS -I -system_mib -Dproxy"
+STARTAGENT
+
+# test to see that the current agent doesn't support the system mib
+#CAPTURE "snmpget -t 3 $SNMP_FLAGS -v 3 -a MD5 -A initial_test_pass_auth -l anp -u initial -n xxx localhost system.sysUpTime.0"
+
+#CHECK "system.sysUpTime.0 = No Such Object"
+
+#if test "$snmp_last_test_result" = 1; then
+  # test the proxy subagent by first running it...
+
+  SNMP_SNMPD_PID_FILE_ORIG=$SNMP_SNMPD_PID_FILE
+  SNMP_SNMPD_LOG_FILE_ORIG=$SNMP_SNMPD_LOG_FILE
+  SNMP_SNMPD_PID_FILE=$SNMP_SNMPD_PID_FILE.num2
+  SNMP_SNMPD_LOG_FILE=$SNMP_SNMPD_LOG_FILE.num2
+  SNMP_CONFIG_FILE="$SNMP_TMPDIR/proxy.conf"
+  echo "rwcommunity testcommunity" >> $SNMP_CONFIG_FILE
+  echo "syscontact testcontact" >> $SNMP_CONFIG_FILE
+  AGENT_FLAGS="$ORIG_AGENT_FLAGS -Dmib_init"
+  ORIG_SNMP_FLAGS=$SNMP_FLAGS
+  SNMP_FLAGS="-d -p 7676"
+  STARTAGENT
+  SNMP_FLAGS=$ORIG_SNMP_FLAGS
+
+  # test to see that the agent now supports the system mib
+  CAPTURE "snmpget $SNMP_FLAGS -t 5 -v 3 -a MD5 -A initial_test_pass_auth -l anp -u initial -n xxx localhost sysContact.0"
+
+  CHECK "system.sysContact.0 = testcontact"
+
+  if test "$snmp_last_test_result" = 1; then
+
+    # test to see that the agent now supports the system mib
+    CAPTURE "snmpset $SNMP_FLAGS -t 5 -v 3 -a MD5 -A initial_test_pass_auth -l anp -u initial -n xxx localhost sysContact.0 s newtestcontact"
+
+    CHECK "system.sysContact.0 = newtestcontact"
+
+    if test "$snmp_last_test_result" = 1; then
+
+	# test to see that the agent now supports the system mib
+	CAPTURE "snmpget $SNMP_FLAGS -t 5 -v 3 -a MD5 -A initial_test_pass_auth -l anp -u initial -n xxx localhost sysContact.0"
+	
+	CHECK "system.sysContact.0 = newtestcontact"
+    fi
+  fi
+
+  # stop the subagent
+  STOPAGENT
+
+  SNMP_SNMPD_PID_FILE=$SNMP_SNMPD_PID_FILE_ORIG
+  SNMP_SNMPD_LOG_FILE=$SNMP_SNMPD_LOG_FILE_ORIG
+#fi
+
+# stop the master agent
+STOPAGENT
+
+# all done (whew)
+FINISHED
