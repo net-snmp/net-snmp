@@ -1,9 +1,10 @@
 /*
- *  vmstat mib groups
+ *  vmstat_solaris2.h
  *  Header file for vmstat_solaris2 module for UCD-SNMP
  *  Jochen Kmietsch <jochen.kmietsch@gmx.de>
- *  Version 0.1 initial release Dec 1999 (snapshot 19991222215300)
- *  see vmstat_solaris.c for more comments
+ *  Version 0.1 initial release (Dec 1999)
+ *  Version 0.2 added support for multiprocessor machines (Jan 2000)
+ *  see vmstat_solaris2.c for more comments
  */
 
 /* Prevent accidental double inclusions */
@@ -27,7 +28,7 @@
 #define CPUERROR 16
 
 /* MIB wants CPU_SYSTEM which is sysinfo CPU_KERNEL + CPU_WAIT */
-#define CPU_SYSTEM 4
+#define CPU_SYSTEM 4 
 
 /* Directive to include utility module */
 config_require(util_funcs)
