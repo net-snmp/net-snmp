@@ -272,17 +272,20 @@ allocate_idx_list(struct snmp_session *session, struct snmp_pdu *pdu)
     for ( vp = pdu->variables ; vp != NULL; vp = next ) {
 	next = vp->next_variable;
 	res = register_index( vp, flags, session );
-	if ( res == NULL ) {
+	if (res == NULL) {
 		/*
 		 *  If any allocations fail, we need to *fully* release
 		 *	all previous ones (i.e. remove them completely
 		 *	from the index registry)
 		 */
-	    for ( vp2 = pdu->variables ; vp2 != vp ; vp2=vp2->next_variable )
+	    for (vp2 = pdu->variables; vp2 != vp ; vp2=vp2->next_variable) {
 		remove_index( vp2, session );
+	    }
 	    return AGENTX_ERR_INDEX_NONE_AVAILABLE;	/* XXX */
+	} else {
+	    (void)snmp_clone_var(res, vp);
+	    free(res);
 	}
-	(void)snmp_clone_var( res, vp );
 	vp->next_variable = next;
     }
     return AGENTX_ERR_NOERROR;
@@ -292,7 +295,7 @@ int
 release_idx_list(struct snmp_session *session, struct snmp_pdu *pdu)
 {
     struct snmp_session *sp;
-    struct variable_list *vp, *vp2;
+    struct variable_list *vp, *vp2, *rv = NULL;
     int res;
 
     sp = find_agentx_session( session, pdu->sessid );
@@ -305,9 +308,11 @@ release_idx_list(struct snmp_session *session, struct snmp_pdu *pdu)
 		 *  If any releases fail,
 		 *	we need to reinstate all previous ones.
 		 */
-	if ( res != SNMP_ERR_NOERROR ) {
-	    for ( vp2 = pdu->variables ; vp2 != vp; vp2 = vp2->next_variable )
-		(void) register_index( vp2, ALLOCATE_THIS_INDEX, session );
+	if (res != SNMP_ERR_NOERROR) {
+	    for (vp2 = pdu->variables; vp2 != vp; vp2 = vp2->next_variable) {
+		rv = register_index(vp2, ALLOCATE_THIS_INDEX, session);
+		free(rv);
+	    }
 	    return AGENTX_ERR_INDEX_NOT_ALLOCATED;	/* Probably */
 	}
     }
@@ -409,7 +414,8 @@ handle_master_agentx_packet(int operation,
     struct timeval now;
     
     if (operation == SNMP_CALLBACK_OP_DISCONNECT) {
-      DEBUGMSGTL(("agentx/master", "transport disconnect indication\n"));
+      DEBUGMSGTL(("agentx/master", "transport disconnect on session %08p\n",
+		  session));
       /*  Shut this session down gracefully.  */
       close_agentx_session(session, -1);
       return 1;
