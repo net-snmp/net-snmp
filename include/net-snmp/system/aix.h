@@ -3,6 +3,6 @@
 #undef TOTAL_MEMORY_SYMBOL
 
 #ifndef __GNUC__
-#undef inline
-#define inline
+#  undef NETSNMP_ENABLE_INLINE
+#  define NETSNMP_ENABLE_INLINE 0
 #endif
