@@ -45,6 +45,102 @@
 #include "mibII/sysORTable.h"
 
 
+struct agent_set_info {
+    int			  transID;
+    int			  mode;
+    time_t		  uptime;
+    struct snmp_session  *sess;
+    struct variable_list *var_list;
+    struct agent_set_info *next;
+};
+
+static struct agent_set_info *Sets;
+
+void
+save_set_vars( struct snmp_session *ss, struct snmp_pdu *pdu )
+{
+    struct agent_set_info *ptr;
+    struct timeval now;
+    struct snmp_pdu *pdu2;
+    extern struct timeval starttime;
+
+    ptr = (struct agent_set_info *)malloc(sizeof(struct agent_set_info));
+    if (ptr == NULL )
+	return;
+
+	/*
+	 * Save the important information
+	 */
+    ptr->transID = pdu->transid;
+    ptr->sess    = ss;
+    ptr->mode    = RESERVE1;
+    gettimeofday(&now, NULL);
+    ptr->uptime = calculate_time_diff(&now, &starttime);
+
+		/* Lazy way to copy the variables! */
+    pdu2 = snmp_clone_pdu( pdu );
+    if ( pdu2 == NULL ) {
+	free( ptr );
+	return;
+    }
+    ptr->var_list = pdu2->variables;	
+    pdu2->variables = NULL;
+    snmp_free_pdu( pdu2 );
+
+    ptr->next = Sets;
+    Sets = ptr;
+}
+
+void
+restore_set_vars( struct agent_snmp_session *asp )
+{
+    struct agent_set_info *ptr;
+
+    for ( ptr=Sets ; ptr != NULL ; ptr=ptr->next )
+	if ( ptr->sess == asp->session && ptr->transID == asp->pdu->transid ) {
+	    if ( ptr->var_list == NULL )
+		return;
+	    asp->rw      	= WRITE;
+	    asp->pdu->variables = ptr->var_list;
+	    asp->start		= ptr->var_list;
+	    asp->end		= ptr->var_list;
+	    while ( asp->end->next_variable )
+		asp->end = asp->end->next_variable;
+	    ptr->mode		= asp->mode;
+	    return;
+	}
+    return;
+}
+
+int
+set_mode( struct snmp_session *ss, struct snmp_pdu *pdu )
+{
+    struct agent_set_info *ptr;
+
+    for ( ptr=Sets ; ptr != NULL ; ptr=ptr->next )
+	if ( ptr->sess == ss && ptr->transID == pdu->transid )
+	    return ptr->mode;
+    return -1;
+}
+
+void
+free_set_vars( struct snmp_session *ss, struct snmp_pdu *pdu )
+{
+    struct agent_set_info *ptr, *prev=NULL;
+
+    for ( ptr=Sets ; ptr != NULL ; ptr=ptr->next )
+	if ( ptr->sess == ss && ptr->transID == pdu->transid ) {
+	    if ( prev )
+		prev->next = ptr->next;
+	    else
+		Sets = ptr->next;
+	    snmp_free_varbind(ptr->var_list);
+	    free(ptr);
+	    return;
+	}
+}
+
+
 int
 handle_agentx_packet(int operation, struct snmp_session *session, int reqid,
                    struct snmp_pdu *pdu, void *magic)
@@ -138,11 +234,13 @@ handle_agentx_packet(int operation, struct snmp_session *session, int reqid,
 	asp->rw      = WRITE;
 
         asp->mode = RESERVE1;
+	save_set_vars( session, pdu );
 	status = handle_next_pass( asp );
 
 	if ( status != SNMP_ERR_NOERROR ) {
 	    asp->mode = FREE;
 	    (void) handle_next_pass( asp );
+	    free_set_vars( session, pdu );
 	    break;
 	}
 
@@ -152,6 +250,7 @@ handle_agentx_packet(int operation, struct snmp_session *session, int reqid,
 	if ( status != SNMP_ERR_NOERROR ) {
 	    asp->mode = FREE;
 	    (void) handle_next_pass( asp );
+	    free_set_vars( session, pdu );
 	}
 	break;
 
@@ -164,24 +263,54 @@ handle_agentx_packet(int operation, struct snmp_session *session, int reqid,
     case AGENTX_MSG_COMMITSET:
         DEBUGMSGTL(("agentx/subagent","  -> commitset\n"));
         asp->mode = ACTION;
-	status = handle_next_pass( asp );
+        restore_set_vars( asp );
+
+        if ( asp->pdu->variables == NULL )
+            status = AGENTX_ERR_PROCESSING_ERROR;
+        else
+	    status = handle_next_pass( asp );
 
 	if ( status != SNMP_ERR_NOERROR ) {
 	    asp->mode = UNDO;
 	    (void) handle_next_pass( asp );
+	    free_set_vars( session, pdu );
 	}
+        asp->pdu->variables = NULL;
 	break;
 
     case AGENTX_MSG_CLEANUPSET:
         DEBUGMSGTL(("agentx/subagent","  -> cleanupset\n"));
-        asp->mode = COMMIT;
-	status = handle_next_pass( asp );
+        switch ( set_mode( session, pdu )) {
+            case RESERVE1: 
+            case RESERVE2: 
+            case UNDO: 
+                asp->mode = FREE;
+                break;
+            case ACTION:
+                asp->mode = COMMIT;
+                break;
+        }
+        restore_set_vars( asp );
+
+        if ( asp->pdu->variables == NULL )
+            status = AGENTX_ERR_PROCESSING_ERROR;
+        else
+	    status = handle_next_pass( asp );
+	free_set_vars( session, pdu );
+        asp->pdu->variables = NULL;
 	break;
 
     case AGENTX_MSG_UNDOSET:
         DEBUGMSGTL(("agentx/subagent","  -> undoset\n"));
         asp->mode = UNDO;
-	status = handle_next_pass( asp );
+        restore_set_vars( asp );
+
+        if ( asp->pdu->variables == NULL )
+            status = AGENTX_ERR_PROCESSING_ERROR;
+        else
+	    status = handle_next_pass( asp );
+	free_set_vars( session, pdu );
+        asp->pdu->variables = NULL;
 	break;
 
     case AGENTX_MSG_RESPONSE:

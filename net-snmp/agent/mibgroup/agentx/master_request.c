@@ -301,6 +301,9 @@ agentx_add_request( struct agent_snmp_session *asp,
     struct ax_variable_list *ax_vlist;
     struct subtree      *sub;
 
+    if (asp->pdu->command == SNMP_MSG_SET && asp->mode == RESERVE1 )
+	return AGENTX_ERR_NOERROR;
+
 				/* Or msgid ? */
     ax_session = get_session_for_oid( vbp->name, vbp->name_length );
     if ( ax_session->flags & SNMP_FLAGS_SUBSESSION )
@@ -314,7 +317,7 @@ agentx_add_request( struct agent_snmp_session *asp,
     if ( asp->exact )
         snmp_pdu_add_variable( request->pdu,
 			   vbp->name, vbp->name_length, vbp->type,
-			   (u_char*)&(vbp->val), vbp->val_len);
+			   (u_char*)(vbp->val.string), vbp->val_len);
     else {
 	sub = find_subtree_previous( vbp->name, vbp->name_length, NULL );
         snmp_pdu_add_variable( request->pdu,
