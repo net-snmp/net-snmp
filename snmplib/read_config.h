@@ -66,6 +66,7 @@ char *read_config_save_objid(char *saveto, oid *objid, size_t len);
 char *read_config_read_data(int type, char *readfrom, void *dataptr, size_t *len);
 char *read_config_store_data(int type, char *storeto, void *dataptr, size_t *len);
 void  read_config_store(const char *type, const char *line);
+void  snmp_save_persistent(const char *type);
 void  snmp_clean_persistent(const char *type);
 
 #ifdef __cplusplus
