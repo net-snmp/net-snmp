@@ -22,16 +22,6 @@ extern          "C" {
 #include "if-mib/ifTable/ifTable.h"
 
     /*
-     * other required module components 
-     */
-    /* *INDENT-OFF*  */
-    config_require(if-mib/data_access/interface);
-    config_require(if-mib/ifXTable/ifXTable_interface);
-    config_require(if-mib/ifXTable/ifXTable_data_access);
-    config_exclude(mibII/interfaces);
-    /* *INDENT-ON*  */
-
-    /*
      * OID, column number and enum definions for  
      */
 #include "ifXTable_constants.h"
