@@ -303,7 +303,9 @@ typedef struct _conf_if_list {
 } conf_if_list;
 
 static conf_if_list *conf_list;
+#ifdef linux
 static struct ifnet *ifnetaddr_list;
+#endif
 
 static void parse_interface_config(const char *token, char *cptr)
 {
@@ -561,21 +563,21 @@ Interface_Scan_Get_Count (void)
 {
   u_char *cp;
   struct if_msghdr *ifp;
-  long n;
+  long n = 0;
 
   Interface_Scan_Init();
 
-  for (cp = if_list, n = 0;
-       cp < if_list_end;
-       cp += ifp->ifm_msglen)
-    {
-      ifp = (struct if_msghdr *)cp;
+  if (if_list_size) {
+      for (cp = if_list, n = 0;
+           cp < if_list_end;
+           cp += ifp->ifm_msglen) {
+          ifp = (struct if_msghdr *)cp;
 
-      if (ifp->ifm_type == RTM_IFINFO)
-	{
-	  ++n;
-	}
-    }
+          if (ifp->ifm_type == RTM_IFINFO) {
+	      ++n;
+	  }
+      }
+  }
   return n;
 }
 
@@ -594,16 +596,16 @@ Interface_Scan_Init (void)
     {
       if (if_list == 0 || if_list_size < size)
 	{
-	  if (if_list != 0)
-	    {
+	  if (if_list != 0) {
 	      free (if_list);
-	      if_list = 0;
-	    }
-	  if ((if_list = malloc (size)) == 0)
-	    {
-	      snmp_log(LOG_ERR,"out of memory allocating route table\n");
+	  }
+	  if_list      = NULL;
+	  if_list_size = 0;
+	  if_list_end  = 0;
+	  if ((if_list = malloc (size)) == NULL) {
+	      snmp_log(LOG_ERR,"out of memory allocating route table (size = %d)\n", size);
 	      return;
-	    }
+	  }
 	  if_list_size = size;
 	}
       else
