@@ -570,6 +570,9 @@ main(int argc, char *argv[])
 #ifdef SIGUSR1
     signal(SIGUSR1, SnmpdDump);
 #endif
+#ifdef SIGPIPE
+    signal(SIGPIPE, SIG_IGN);	/* 'Inline' failure of wayward readers */
+#endif
 
     /* send coldstart trap via snmptrap(1) if possible */
     send_easy_trap (0, 0);
