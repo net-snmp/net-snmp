@@ -37,6 +37,7 @@
 #include "snmp_client.h"
 #include "snmp.h"
 #include "system.h"
+#include "read_config.h"
 #include "snmp_debug.h"
 
 struct trap_sink {
