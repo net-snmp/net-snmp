@@ -153,7 +153,7 @@ output_files(\%filetypes, $term);
 #
 # Display the files that have been created for the user.
 #
-Print("\nThe following files were created:\n\n");
+Print("\n\nThe following files were created:\n\n");
 @didfiles = keys(%didfile);
 foreach my $i (@didfiles) {
     if ($didfile{$i} ne "1") {
@@ -369,7 +369,7 @@ sub read_config_files {
 	    }
 
 	    # read all the daat in the directory
-	    $filetypes->{$conffile} = read_config_items("$readdir/$dir", $dir);
+	    $filetypes->{$conffile} = read_config_items("$readdir/$dir", $conffile);
 	} else {
 	    # no README informatino.
 	    print STDERR "Warning: No $configfilename file found in $readdir/$dir\n";
@@ -389,7 +389,7 @@ sub read_config_items {
     my @results;
     while(defined($file = readdir(ITEMS))) {
 	next if ($file =~ /~$/);
-	next if ($file =~ /^.config$/);
+	next if ($file =~ /^snmpconf-config$/);
 	if (-f "$itemdir/$file") {
 	    my $res = read_config_item("$itemdir/$file", $type);
 	    if (scalar(keys(%$res)) > 0) {
