@@ -90,10 +90,10 @@ static struct timeval	 snmpv3starttime;
 /* 
  * Set up default snmpv3 parameter value storage.
  */
-static oid	*defaultAuthType	= NULL;
-static size_t	 defaultAuthTypeLen	= 0;
-static oid	*defaultPrivType	= NULL;
-static size_t	 defaultPrivTypeLen	= 0;
+static const oid	*defaultAuthType	= NULL;
+static size_t		 defaultAuthTypeLen	= 0;
+static const oid	*defaultPrivType	= NULL;
+static size_t		 defaultPrivTypeLen	= 0;
 
 #if defined(IFHWADDRLEN) && defined(SIOCGIFHWADDR)
 static int getHwAddress(const char * networkDevice, char * addressOut);
@@ -112,7 +112,7 @@ snmpv3_authtype_conf(const char *word, char *cptr)
   DEBUGMSGTL(("snmpv3","set default authentication type: %s\n", cptr));
 }
 
-oid *
+const oid *
 get_default_authtype(size_t *len)
 {
   if (defaultAuthType == NULL) {
@@ -135,7 +135,7 @@ snmpv3_privtype_conf(const char *word, char *cptr)
   DEBUGMSGTL(("snmpv3","set default privacy type: %s\n", cptr));
 }
 
-oid *
+const oid *
 get_default_privtype(size_t *len)
 {
   if (defaultAuthType == NULL) {

@@ -65,7 +65,11 @@
 #include <net-snmp/snmp_secmod.h>
 #include <net-snmp/snmpusm.h>
 
-#include <net-snmp/transform_oids.h>
+const oid usmNoAuthProtocol[10]		= { 1,3,6,1,6,3,10,1,1,1 };
+const oid usmHMACMD5AuthProtocol[10]	= { 1,3,6,1,6,3,10,1,1,2 };
+const oid usmHMACSHA1AuthProtocol[10]	= { 1,3,6,1,6,3,10,1,1,3 };
+const oid usmNoPrivProtocol[10]		= { 1,3,6,1,6,3,10,1,2,1 };
+const oid usmDESPrivProtocol[10]	= { 1,3,6,1,6,3,10,1,2,2 };
 
 static u_int    dummy_etime, dummy_eboot;	/* For ISENGINEKNOWN(). */
 
@@ -87,8 +91,8 @@ static struct usmUser *userList=NULL;
  */
 int
 usm_check_secLevel_vs_protocols(int level,
-                                oid *authProtocol, u_int authProtocolLen,
-                                oid *privProtocol, u_int privProtocolLen);
+                               const oid *authProtocol, u_int authProtocolLen,
+                               const oid *privProtocol, u_int privProtocolLen);
 int
 usm_calc_offsets ( size_t  globalDataLen,
         int secLevel, size_t secEngineIDLen, size_t secNameLen, size_t scopedPduLen,
@@ -772,11 +776,11 @@ usm_generate_out_msg (
 	u_int   theEngineIDLength	= 0;
 	u_char *theAuthKey		= NULL;
 	u_int   theAuthKeyLength	= 0;
-	oid    *theAuthProtocol		= NULL;
+	const oid    *theAuthProtocol		= NULL;
 	u_int   theAuthProtocolLength	= 0;
 	u_char *thePrivKey		= NULL;
 	u_int   thePrivKeyLength	= 0;
-	oid    *thePrivProtocol		= NULL;
+	const oid    *thePrivProtocol		= NULL;
 	u_int   thePrivProtocolLength	= 0;
 	int     theSecLevel		= 0;	/* No defined const for bad
 						 * value (other then err).
@@ -1266,11 +1270,11 @@ usm_rgenerate_out_msg (
     u_int   theEngineIDLength	= 0;
     u_char *theAuthKey		= NULL;
     u_int   theAuthKeyLength	= 0;
-    oid    *theAuthProtocol		= NULL;
+    const oid *theAuthProtocol		= NULL;
     u_int   theAuthProtocolLength	= 0;
     u_char *thePrivKey		= NULL;
     u_int   thePrivKeyLength	= 0;
-    oid    *thePrivProtocol		= NULL;
+    const oid    *thePrivProtocol		= NULL;
     u_int   thePrivProtocolLength	= 0;
     int     theSecLevel		= 0;	/* No defined const for bad
                                          * value (other then err). */
@@ -2587,8 +2591,8 @@ usm_check_secLevel(int level, struct usmUser *user)
  */
 int
 usm_check_secLevel_vs_protocols(int level,
-	oid *authProtocol, u_int authProtocolLen,
-	oid *privProtocol, u_int privProtocolLen)
+				const oid *authProtocol, u_int authProtocolLen,
+				const oid *privProtocol, u_int privProtocolLen)
 {
 
   if ( level == SNMP_SEC_LEVEL_AUTHPRIV
@@ -2925,8 +2929,9 @@ usm_create_user(void)
    USM document.
 */
 struct usmUser *
-usm_create_initial_user(const char *name, oid *authProtocol, size_t authProtocolLen,
-                        oid *privProtocol, size_t privProtocolLen)
+usm_create_initial_user(const char *name, 
+			const oid *authProtocol, size_t authProtocolLen,
+                        const oid *privProtocol, size_t privProtocolLen)
 {
   struct usmUser *newUser  = usm_create_user();
   if (newUser == NULL)
@@ -2948,18 +2953,18 @@ usm_create_initial_user(const char *name, oid *authProtocol, size_t authProtocol
   newUser->cloneFromLen = 2;
 
   SNMP_FREE(newUser->privProtocol);
-  if ((newUser->privProtocol = (oid *) malloc(privProtocolLen*sizeof(oid)))
-      == NULL)
+  if ((newUser->privProtocol = snmp_duplicate_objid(privProtocol, 
+						  privProtocolLen)) == NULL) {
     return usm_free_user(newUser);
+  }
   newUser->privProtocolLen = privProtocolLen;
-  memcpy(newUser->privProtocol, privProtocol, privProtocolLen*sizeof(oid));
 
   SNMP_FREE(newUser->authProtocol);
-  if ((newUser->authProtocol = (oid *) malloc(authProtocolLen*sizeof(oid)))
-      == NULL)
+  if ((newUser->authProtocol = snmp_duplicate_objid(authProtocol, 
+						  authProtocolLen)) == NULL) {
     return usm_free_user(newUser);
+  }
   newUser->authProtocolLen = authProtocolLen;
-  memcpy(newUser->authProtocol, authProtocol, authProtocolLen*sizeof(oid));
 
   newUser->userStatus = RS_ACTIVE;
   newUser->userStorageType = ST_READONLY;

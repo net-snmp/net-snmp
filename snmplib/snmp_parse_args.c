@@ -415,12 +415,14 @@ snmp_parse_args(int argc,
       session->securityAuthKeyLen = USM_AUTH_KU_LEN;
       if (session->securityAuthProto == NULL) {
           /* get .conf set default */
-          session->securityAuthProto =
-              get_default_authtype(&session->securityAuthProtoLen);
+	  const oid *def=get_default_authtype(&session->securityAuthProtoLen);
+          session->securityAuthProto = 
+	      snmp_duplicate_objid(def, session->securityAuthProtoLen);
       }
       if (session->securityAuthProto == NULL) {
           /* assume MD5 */
-          session->securityAuthProto = usmHMACMD5AuthProtocol;
+          session->securityAuthProto = 
+	      snmp_duplicate_objid(usmHMACMD5AuthProtocol, USM_AUTH_PROTO_MD5_LEN);
           session->securityAuthProtoLen = USM_AUTH_PROTO_MD5_LEN;
       }
       if (generate_Ku(session->securityAuthProto,
@@ -437,12 +439,14 @@ snmp_parse_args(int argc,
       session->securityPrivKeyLen = USM_PRIV_KU_LEN;
       if (session->securityPrivProto == NULL) {
           /* get .conf set default */
+	  const oid *def=get_default_privtype(&session->securityPrivProtoLen);
           session->securityPrivProto =
-              get_default_privtype(&session->securityPrivProtoLen);
+	      snmp_duplicate_objid(def, session->securityPrivProtoLen);
       }
       if (session->securityPrivProto == NULL) {
           /* assume DES */
-          session->securityPrivProto = usmDESPrivProtocol;
+          session->securityPrivProto = 
+	      snmp_duplicate_objid(usmDESPrivProtocol, USM_PRIV_PROTO_DES_LEN);
           session->securityPrivProtoLen = USM_PRIV_PROTO_DES_LEN;
       }
       if (generate_Ku(session->securityAuthProto,
