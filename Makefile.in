@@ -53,23 +53,35 @@ end-flag:
 # local build rules
 #
 sedscript: sedscript.in include/net-snmp/net-snmp-config.h $(srcdir)/agent/mibgroup/mibdefs.h
-	$(CPP) -DPREFIX=$(prefix) -DLIBDIR=$(libdir) -DDATADIR=$(datadir) $(srcdir)/sedscript.in | egrep '^s[/#]' | sed 's/REMOVEME//g;s# */#/#g;s/ *#/#/g;s#/ *#/#g;s/# g/#g/;' > sedscript
+	$(CPP) $(srcdir)/sedscript.in | egrep '^s[/#]' | sed 's/REMOVEME//g;s# */#/#g;s/ *#/#/g;s#/ *#/#g;s/# g/#g/;' > sedscript
+	echo 's#DATADIR#$(datadir)#g' >> sedscript
+	echo 's#LIBDIR#$(libdir)#g' >> sedscript
+	echo 's#BINDIR#$(bindir)#g' >> sedscript
+	echo 's#PERSISTENT_DIRECTORY#$(PERSISTENT_DIRECTORY)#g' >> sedscript
+	echo 's#SYSCONFDIR#$(sysconfdir)#g' >> sedscript
 
 EXAMPLE.conf: sedscript EXAMPLE.conf.def
 	$(SED) -f sedscript $(srcdir)/EXAMPLE.conf.def > EXAMPLE.conf
 
 docs: docsdir mancp
 
-docsdir: doxygen.conf
+docsdir: docsdox docsmunge
+
+docsdox: doxygen.conf
 	srcdir=$(srcdir) doxygen $(srcdir)/doxygen.conf
+
+docsmunge:
+	find docs/html -name \*.html -exec perl -p -i -e 's/Generated on/<!--#include virtual=\"\/sfbutton.html\" --><br>Generated on\n/; s/<body/<body bgcolor=white/' {} \;
+
 
 mancp:
 	@for i in docs/man/man3/* ; do \
 	     cp $$i man/netsnmp_`basename $$i` ; \
 	done
 
-net-snmp-config-x:
+net-snmp-config-x: net-snmp-config
 	chmod a+x net-snmp-config
+	touch net-snmp-config-x
 
 #
 # extra install rules
@@ -149,7 +161,7 @@ makefileclean:
 configclean: makefileclean
 	rm -f config.cache config.status config.log \
 		libtool include/net-snmp/net-snmp-config.h \
-		net-snmp-config configure-summary
+		net-snmp-config net-snmp-config-x configure-summary
 	rm -f mibs/.index
 	rm -f include/net-snmp/agent/mib_module_config.h		\
 		snmplib/snmpsm_init.h                   \
@@ -231,5 +243,5 @@ dist: version tag tar
 FAQ.html:
 	local/FAQ2HTML FAQ
 
-.PHONY: docs docsdir mancp testdirs test TAGS net-snmp-config-x
+.PHONY: docs docsdir mancp testdirs test TAGS
 # note: tags and docs are phony to force rebulding
