@@ -252,10 +252,10 @@ _load_v6(netsnmp_container *container, int idx_offset)
         extras->flags = flags;
 
         /*
-         * there is an iotcl to get an ifindex, but I'm not sure that
-         * it has the correct characteristics required to be the actual
-         * ifIndex for the mib, so we'll use the netsnmp interface method
-         * (which is based on the interface name).
+         * yyy-rks: optimization: create a socket outside the loop and use
+         * netsnmp_access_interface_ioctl_ifindex_get() here, since
+         * netsnmp_access_interface_index_find will open/close a socket
+         * every time it is called.
          */
         entry->if_index = netsnmp_access_interface_index_find(if_name);
 
