@@ -20,7 +20,11 @@ extern          "C" {
 #  ifdef PATH_MAX
 #    define SNMP_MAXPATH PATH_MAX
 #  else
-#    define SNMP_MAXPATH MAXPATHLEN
+#    ifdef MAXPATHLEN
+#      define SNMP_MAXPATH MAXPATHLEN
+#    else
+#      define SNMP_MAXPATH 1024		/* Should be safe enough */
+#    endif
 #  endif
 #endif
 
