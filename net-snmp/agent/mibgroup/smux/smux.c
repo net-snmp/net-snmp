@@ -56,10 +56,12 @@
 #define FD_COPY(f, t)   memcpy(t, f, sizeof(*(f)))
 #endif
 
+#include "../../../snmplib/system.h"
 #include "asn1.h"
+#include "mib.h"
 #include "snmp.h"
-#include "snmp_impl.h"
 #include "snmp_api.h"
+#include "snmp_impl.h"
 #include "smux.h"
 
 long smux_long;
@@ -91,7 +93,7 @@ static u_char debug_can[] = {
 
 
 u_char *smux_snmp_process __P((int, oid *, int *, int *));
-int init_smux();
+int init_smux __P((void));
 
 static u_char *smux_open_process __P((u_char *, int *));
 static u_char *smux_rreq_process __P((int, u_char *, int *));
@@ -100,6 +102,7 @@ static u_char *smux_close_process __P((int, u_char *, int *));
 static u_char *smux_parse __P((u_char *, oid *, int *, int *));
 static u_char *smux_parse_var __P((u_char *, int *, oid *, int *, int *));
 static int smux_build __P((u_char, u_long, oid *, int *, u_char *, int *));
+static void print_fdbits __P((fd_set *));
 
 int 
 init_smux __P((void))
@@ -325,7 +328,7 @@ smux_open_process(ptr, len)
         if (snmp_get_do_debugging()) {
           DEBUGP("[smux_open_process] smux peer:"); 
           for (i=0; i<oid_name_len; i++) 
-            DEBUGG(".%d", oid_name[i]);
+            DEBUGP(".%d", oid_name[i]);
           DEBUGP (" \n");
           DEBUGP("[smux_open_process] len %d, type %d\n", *len, (int)type);
         }
@@ -445,7 +448,6 @@ smux_snmp_process(exact, objid, len, return_len)
 	u_char  result[SMUXMAXPKTSIZE];
 	int length = SMUXMAXPKTSIZE;
 	u_char type;
-	int i;
         char c_oid[MAX_NAME_LEN];
 	
 	/* 
@@ -532,7 +534,7 @@ smux_parse(rsp, objid, oidlen, return_len)
 	 */ 
 	
 	ptr = asn_parse_header(ptr, &length, &type);
-	if (ptr == NULL || type != GET_RSP_MSG)
+	if (ptr == NULL || type != SNMP_MSG_RESPONSE)
 		return NULL;
 
 	ptr = asn_parse_int(ptr, &length, &type, &reqid, sizeof(reqid));
@@ -597,7 +599,7 @@ smux_parse_var(varbind, varbindlength, objid, oidlen, varlength)
 	memcpy( objid,var_name, var_name_len * sizeof(oid));
 
         if (snmp_get_do_debugging()) {
-          sprint_objid (c_oid, objid, oidlen);
+          sprint_objid (c_oid, objid, *oidlen);
           DEBUGP("[smux_parse_var] returning oid : %s\n", c_oid);
         }
 	/* XXX */
@@ -612,23 +614,23 @@ smux_parse_var(varbind, varbindlength, objid, oidlen, varlength)
 			      (long *)&smux_long, *varlength);
 		return (u_char *)&smux_long;
 		break;
-	    case COUNTER:
-	    case GAUGE:
-	    case TIMETICKS:
-	    case UINTEGER:
+	    case ASN_COUNTER:
+	    case ASN_GAUGE:
+	    case ASN_TIMETICKS:
+	    case ASN_UINTEGER:
 		*varlength = sizeof(u_long);
 		asn_parse_unsigned_int(var_val, &len, &var_val_type,
 			      (u_long *)&smux_ulong, *varlength);
 		return (u_char *)&smux_ulong;
 		break;
-	    case COUNTER64:
+	    case ASN_COUNTER64:
 		*varlength = sizeof(smux_counter64);
 		asn_parse_unsigned_int64(var_val, &len, &var_val_type,
 					 (struct counter64 *)&smux_counter64,
 					 *varlength);
 		return (u_char *)&smux_counter64;
 		break;
-	    case IPADDRESS:
+	    case ASN_IPADDRESS:
 		*varlength = 4;
 		/* 
 		 * XXX - skip tag and length. We already know this is an ip 
@@ -648,8 +650,8 @@ smux_parse_var(varbind, varbindlength, objid, oidlen, varlength)
 		*varlength = str_len;
 		return smux_str;
 		break;
-	    case ASNT_OPAQUE:
-	    case NSAP:
+	    case ASN_OPAQUE:
+	    case ASN_NSAP:
 	    case ASN_OBJECT_ID:
 		objid_len = MAX_OID_LEN;
 		asn_parse_objid(var_val, &len, &var_val_type, 

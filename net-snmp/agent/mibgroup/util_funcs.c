@@ -202,7 +202,7 @@ int get_exec_output(ex)
         *(aptr++) = NULL;
         copy_word(ex->command,ctmp);
         execv(ctmp,argv);
-        perror("execv");
+        perror(ctmp);
         exit(1);
       }
     else

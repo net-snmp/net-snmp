@@ -1,3 +1,5 @@
+#ifndef ASN1_H
+#define ASN1_H
 /*
  * Definitions for Abstract Syntax Notation One, ASN.1
  * As defined in ISO/IS 8824 and ISO/IS 8825
@@ -127,6 +129,13 @@ typedef struct counter64 unsigned64;
 
 #endif /* OPAQUE_SPECIAL_TYPES */
 
+#ifndef __P
+#ifdef __STDC__
+#define __P(p) p
+#else
+#define __P(p) ()
+#endif
+#endif
 
 u_char	*asn_parse_int __P((u_char *, int *, u_char *, long *, int));
 u_char	*asn_build_int __P((u_char *, int *, u_char, long *, int));
@@ -159,3 +168,4 @@ u_char	*asn_parse_float __P((u_char *, int *, u_char *, float *, int));
 u_char	*asn_build_double __P((u_char *, int *, u_char, double *,
                                int));
 u_char	*asn_parse_double __P((u_char *, int *, u_char *, double *, int));
+#endif /* ASN1_H */

@@ -1,3 +1,5 @@
+#ifndef VIEW_H
+#define VIEW_H
 /*
           viewIndex        INTEGER,                     -- first INDEX
           viewSubtree      OBJECT IDENTIFIER,           -- second INDEX
@@ -83,3 +85,4 @@ view_createEntry __P((int, oid *, int));
  * The status of this entry is created as invalid.
  */
 
+#endif /* VIEW_H */

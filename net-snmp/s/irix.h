@@ -14,3 +14,5 @@
 #undef ICMPSTAT_SYMBOL
 #undef TCPSTAT_SYMBOL
 #undef UDPSTAT_SYMBOL
+
+#define _KMEMUSER

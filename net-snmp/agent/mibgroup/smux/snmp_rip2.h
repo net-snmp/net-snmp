@@ -7,7 +7,8 @@
 
 config_require(smux/smux)
 
-extern u_char	*var_rip2();
+u_char  *var_rip2 __P((struct variable *, oid *, int *, int, int *, int (**write) __P((int, u_char *, u_char, int, u_char *, oid *, int)) ));
+
 
 #define RIP2GLOBALROUTECHANGES  0
 #define RIP2GLOBALQUERIES       1
@@ -53,7 +54,7 @@ struct variable13 rip2_variables[] = {
 	{RIP2IFCONFSRCADDRESS, ASN_IPADDRESS, RWRITE, var_rip2, 3, {3, 1, 9}},
 	{RIP2PEERADDRESS, ASN_IPADDRESS, RONLY, var_rip2, 3, {4, 1, 1}},
 	{RIP2PEERDOMAIN, ASN_OCTET_STR, RONLY, var_rip2, 3, {4, 1, 2}},
-	{RIP2PEERLASTUPDATE, ASN_TIMETICS, RONLY, var_rip2, 3, {4, 1, 3}},
+	{RIP2PEERLASTUPDATE, ASN_TIMETICKS, RONLY, var_rip2, 3, {4, 1, 3}},
 	{RIP2PEERVERSION, ASN_INTEGER, RONLY, var_rip2, 3, {4, 1, 4}},
 	{RIP2PEERRCVBADPKTS, ASN_COUNTER, RONLY, var_rip2, 3, {4, 1, 5}},
 	{RIP2PEERRCVBADROUTES, ASN_COUNTER, RONLY, var_rip2, 3, {4, 1, 6}}

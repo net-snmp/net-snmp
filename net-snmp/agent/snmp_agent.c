@@ -562,23 +562,23 @@ parse_var_op_list(data, length, out_data, out_length, index, pi, action)
 	/* now attempt to retrieve the variable on the local entity */
 	statP = getStatPtr(var_name, &var_name_len, &statType, &statLen, &acl,
 			   exact, &write_method, pi, &noSuchObject);
-	if (statP == NULL) {
+	if (statP == NULL && pi->pdutype != SNMP_MSG_SET) {
 	    if (verbose) fprintf (stdout, "    >> noSuchName\n");
 	    else {
 		char buf [256];
 		sprint_objid(buf, var_name, var_name_len);
-		printf("%s --  OID Doesn't exist\n", buf);
+		DEBUGP("%s(%s) --  OID Doesn't exist or access is denied\n",
+                       exact ? "GET" : "GETNEXT", buf);
 	    }
 	    return SNMP_ERR_NOSUCHNAME; 
 	}
 
 	/* Effectively, check if this variable is read-only or read-write
 	   (in the MIB sense). */
-	if ((pi->pdutype == SNMP_MSG_SET && !(acl & 2))
-	      || !vacm_in_view(pi, var_name, var_name_len)) {
+	if ((pi->pdutype == SNMP_MSG_SET && !(acl & 2))) {
 	    if (pi->version == SNMP_VERSION_1 || pi->pdutype != SNMP_MSG_SET) {
 		if (verbose) fprintf (stdout, "    >> noSuchName (read-only)\n");
-		ERROR_MSG("read-only? (ignoring)");
+		ERROR_MSG("read-only");
 		return SNMP_ERR_NOSUCHNAME;
 	    }
 	    else {

@@ -143,11 +143,17 @@
 /* Define if you have the getfsstat function.  */
 #undef HAVE_GETFSSTAT
 
+/* Define if you have the gethostbyname function.  */
+#undef HAVE_GETHOSTBYNAME
+
 /* Define if you have the gethostname function.  */
 #undef HAVE_GETHOSTNAME
 
 /* Define if you have the getloadavg function.  */
 #undef HAVE_GETLOADAVG
+
+/* Define if you have the getservbyname function.  */
+#undef HAVE_GETSERVBYNAME
 
 /* Define if you have the gettimeofday function.  */
 #undef HAVE_GETTIMEOFDAY
@@ -818,6 +824,12 @@
 
 /* define if you have librpm and libdb */
 #undef HAVE_LIBRPM
+
+/* define if you have gethostbyname */
+#undef HAVE_GETHOSTBYNAME
+
+/* define if you have getservbyname */
+#undef HAVE_GETSERVBYNAME
 
 /* Watch out for compilers that don't handle void properly. */
 #undef void
