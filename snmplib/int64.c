@@ -281,13 +281,14 @@ printI64(char * buf, /* char [I64CHARSZ+1]; */
   strcpy(buf, &aRes[(I64CHARSZ-1)-j]);
 }
 
-void
+int
 read64(U64 *i64,
        const char *string)
 {
   U64 i64p;
   unsigned int u;
   int sign = 0;
+  int ok = 0;
   
   zeroU64(i64);
   if (*string == '-') {
@@ -296,6 +297,7 @@ read64(U64 *i64,
   }
   
   while (*string && isdigit(*string)) {
+    ok = 1;
     u = *string - '0';
     multBy10(*i64, &i64p);
     memcpy(i64, &i64p, sizeof(i64p));
@@ -307,6 +309,7 @@ read64(U64 *i64,
     i64->low = ~i64->low;
     incrByU16(i64,1);
   }
+  return ok;
 }
 
 
