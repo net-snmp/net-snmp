@@ -968,6 +968,9 @@
 /* Does struct sigaction have a sa_sigaction field? */
 #undef STRUCT_SIGACTION_HAS_SA_SIGACTION
 
+/* Does struct tm have a tm_gmtoff field? */
+#undef STRUCT_TM_HAS_TM_GMTOFFF
+
 /* Does struct sockaddr have a sa_len field? */
 #undef STRUCT_SOCKADDR_HAS_SA_LEN
 

@@ -163,16 +163,20 @@ date_n_time(time_t * when, size_t * length)
     /*
      * Timezone offset
      */
-#if !defined(SYSV) && !defined(aix4) && !defined(aix5) && !defined(WIN32) && !defined(irix6)
-#define timezone tm_p->tm_gmtoff
+    {
+#ifdef STRUCT_TM_HAS_TM_GMTOFF
+    const int tzoffset = tm_p->tm_gmtoff;
+#else
+    const int tzoffset = timezone;
 #endif
-    if (timezone > 0)
+    if (tzoffset > 0)
         string[8] = '-';
     else
         string[8] = '+';
-    string[9] = abs(timezone) / 3600;
-    string[10] = (abs(timezone) - string[9] * 3600) / 60;
+    string[9] = abs(tzoffset) / 3600;
+    string[10] = (abs(tzoffset) - string[9] * 3600) / 60;
     *length = 11;
+    }
 #endif
 
 #ifdef SYSV
