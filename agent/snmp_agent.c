@@ -1719,9 +1719,6 @@ netsnmp_add_varbind_to_cache(netsnmp_agent_session *asp, int vbcount,
             break;
 
         case SNMP_MSG_SET:
-            varbind_ptr->type = SNMP_NOSUCHOBJECT;
-            break;
-
         case SNMP_MSG_GET:
             varbind_ptr->type = SNMP_NOSUCHOBJECT;
             break;
