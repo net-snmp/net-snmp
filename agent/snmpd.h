@@ -9,6 +9,7 @@ extern int agent_role;
 extern int snmp_dump_packet;
 extern int verbose;
 extern int (*sd_handlers[])(int);
+extern int smux_listen_sd;
 
 extern int snmp_read_packet (int);
 extern u_char *getStatPtr (oid *, size_t *, u_char *, size_t *,
