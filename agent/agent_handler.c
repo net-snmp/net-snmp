@@ -147,15 +147,15 @@ netsnmp_register_handler(netsnmp_handler_registration *reginfo) {
         netsnmp_inject_handler(reginfo, netsnmp_get_bulk_to_next_handler());
     }
 
-    return register_mib_context2(reginfo->handler->handler_name,
-                         NULL, 0, 0,
-                         reginfo->rootoid, reginfo->rootoid_len,
-                         reginfo->priority,
-                         reginfo->range_subid, reginfo->range_ubound,
-                         NULL,
-                         reginfo->contextName,
-                         reginfo->timeout,
-                         0, reginfo, 1);
+    return netsnmp_register_mib(reginfo->handler->handler_name,
+                                NULL, 0, 0,
+                                reginfo->rootoid, reginfo->rootoid_len,
+                                reginfo->priority,
+                                reginfo->range_subid, reginfo->range_ubound,
+                                NULL,
+                                reginfo->contextName,
+                                reginfo->timeout,
+                                0, reginfo, 1);
 }
 
 /** register a handler, as defined by the netsnmp_handler_registration pointer. */ 
@@ -187,15 +187,15 @@ netsnmp_register_handler_nocallback(netsnmp_handler_registration *reginfo)
         reginfo->modes = HANDLER_CAN_DEFAULT;
     }
 
-    return register_mib_context2(reginfo->handler->handler_name,
-                         NULL, 0, 0,
-                         reginfo->rootoid, reginfo->rootoid_len,
-                         reginfo->priority,
-                         reginfo->range_subid, reginfo->range_ubound,
-                         NULL,
-                         reginfo->contextName,
-                         reginfo->timeout,
-                         0, reginfo, 0);
+    return netsnmp_register_mib(reginfo->handler->handler_name,
+                                NULL, 0, 0,
+                                reginfo->rootoid, reginfo->rootoid_len,
+                                reginfo->priority,
+                                reginfo->range_subid, reginfo->range_ubound,
+                                NULL,
+                                reginfo->contextName,
+                                reginfo->timeout,
+                                0, reginfo, 0);
 }
 
 /** inject a new handler into the calling chain of the handlers
