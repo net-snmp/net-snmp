@@ -408,23 +408,39 @@ void vacm_parse_simple(const char *token, char *confline) {
   char viewname[SPRINT_MAX_LEN];
   char addressname[SPRINT_MAX_LEN];
   const char *rw = "none";
-  const char *model = "any";
+  char model[SPRINT_MAX_LEN];
   char *cp;
   static int num = 0;
   char secname[SPRINT_MAX_LEN];
   char authtype[SPRINT_MAX_LEN];
 
+  /* init */
+  strcpy(model,"any");
+
   /* community name or user name */
   cp = copy_word(confline, community);
 
   if (strcmp(token,"rouser") == 0 || strcmp(token,"rwuser") == 0) {
-    /* authentication type */
-    if (cp && *cp)
-      cp = copy_word(cp, authtype);
-    else
-      strcpy(authtype, "auth");
-    DEBUGMSGTL((token, "setting auth type: \"%s\"\n",authtype));
-    model = "usm";
+    /* maybe security model type */
+      if (strcmp(community, "-s") == 0) {
+          /* -s model ... */
+          if (cp)
+              cp = copy_word(cp, model);
+          if (!cp) {
+              config_perror("illegal line");
+              return;
+          }
+          if (cp)
+              cp = copy_word(cp, community);
+      } else {
+          strcpy(model, "usm");
+      }
+      /* authentication type */
+      if (cp && *cp)
+          cp = copy_word(cp, authtype);
+      else
+          strcpy(authtype, "auth");
+      DEBUGMSGTL((token, "setting auth type: \"%s\"\n",authtype));
   } else {
     /* source address */
     if (cp && *cp) {
