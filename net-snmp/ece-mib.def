@@ -485,9 +485,9 @@ Loadaves ::= SEQUENCE {
    loadaveIndex  INTEGER,
    loadaveNames  DisplayString,
    loadaveLoad   DisplayString,
-   loadaveConfig DisplayString
+   loadaveConfig DisplayString,
    loadaveError  INTEGER,
-   loadaveErrMessage  DisplayString,
+   loadaveErrMessage  DisplayString
 }
 
 loadaveIndex OBJECT-TYPE
@@ -636,7 +636,7 @@ Snmperrs ::= SEQUENCE {
    snmperrIndex  INTEGER,
    snmperrNames  DisplayString,
    snmperrError  INTEGER,
-   snmperrErrMessage  DisplayString,
+   snmperrErrMessage  DisplayString
 }
 
 snmperrIndex OBJECT-TYPE
