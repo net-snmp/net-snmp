@@ -11,16 +11,16 @@ snmpusm [ common arguments ] cloneFrom username cloneFromUser
 .br
 snmpusm [ common arguments ] passwd -O old_passphrase -N new_passphrase [-o] [-a] [-x]
 .SH DESCRIPTION
-Snmpusm is an SNMP application that can be used to do simple maintance
-on a snmp agent's User based Security Module (USM) table.  You can
-create, delete, clone, and change the pasword of users configured on a 
-running snmp agent.
+Snmpusm is an SNMP application that can be used to do simple maintenance
+on a SNMP agent's User based Security Module (USM) table.  You can
+create, delete, clone, and change the password of users configured on a 
+running SNMP agent.
 .PP
 The SNMPv3 USM specifications (see RFC2574) dictate that users are
 created and maintained by adding and modifying rows to the usmUser MIB
 table.  To create a new user you simply create the row using an
 snmpset.  User's profiles contain private keys that are never
-transmitted over the wire in clear text (regardless of weather the
+transmitted over the wire in clear text (regardless of whether the
 administration requests are in encrypted or not).  
 .PP
 The secret key for a user is initially set by cloning another user in
@@ -31,7 +31,7 @@ privacy security types are also inherited during this cloning (E.G.,
 MD5 vs SHA1).  To change the secret key for a user, you must know the
 user's old key as well as the new one.  The passwd sub-command of the
 snmpusm command, therefore, requires both the new and the old password 
-to be suplied.
+to be supplied.
 .PP
 The ucd-snmp agent comes with a few pre-configured template users
 which you can use to clone new users from after setting the template
@@ -60,7 +60,7 @@ userSetAuthPass templateMD5 * initial_MD5_pass
 .fi
 .RE
 Note: that the "initial" user's setup should be removed after creating
-a real user that you grant administrative privledges to (like the user 
+a real user that you grant administrative privileges to (like the user 
 "wes" we'll be creating in this example.
 .PP
 Note: passwords (passphrases really) must be 8 characters minimum in
@@ -68,7 +68,7 @@ length.
 .IP "snmpusm -v 3 -u initial -n none -l authNoPriv -a MD5 -A setup_password localhost create wes templateMD5"
 Creates a new user, here named "wes" using the user "initial" to do
 it.  "wes" is cloned from templateMD5 in the process, so he inherits
-that users pasword.
+that users password.
 .IP "snmpusm -v 3 -u wes -n none -l authNoPriv -a MD5 -A initial_MD5_pass localhost passwd -O initial_MD5_pass -N new_passphrase -a"
 After creating the user "wes" with the same password as the
 "templateMD5" user, we need to change his passphrase for him.  This
