@@ -79,6 +79,7 @@ int Line = 1;
 char File[300];
 int save_mib_descriptions = 0;
 int mib_warnings = 0;
+static int anonymous = 0;
 
 #define SYNTAX_MASK     0x80
 /* types of tokens
@@ -881,8 +882,11 @@ parse_objectid(fp, name)
             /* every node must have parent's name and child's name or number */
             if (op->label && (nop->label || (nop->subid != -1))){
                 np->parent = Strdup (op->label);
-                if (nop->label)
-                    np->label = Strdup (nop->label);
+                if (!nop->label) {
+		    nop->label = Malloc(20);
+		    sprintf(nop->label, "anonymous#%d", anonymous++);
+                }
+                np->label = Strdup (nop->label);
                 np->modid = nop->modid;
                 if (nop->subid != -1)
                     np->subid = nop->subid;
