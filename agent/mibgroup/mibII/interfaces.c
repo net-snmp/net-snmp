@@ -207,7 +207,9 @@
 
 /* if you want caching enabled for speed retrival purposes, set this to 5?*/
 #define MINLOADFREQ 0                     /* min reload frequency in seconds */
+#ifdef linux
 static unsigned long LastLoad = 0;        /* ET in secs at last table load */
+#endif
 
 extern struct timeval starttime;
 
