@@ -1108,7 +1108,7 @@ static struct in_ifaddr *in_ifaddraddr;
 
 Address_Scan_Init()
 {
-    KNLookup (interface_nl, N_IN_IFADDR, (char *)&in_ifaddraddr, sizeof(in_ifaddraddr));
+    KNLookup (interfaces_nl, N_IN_IFADDR, (char *)&in_ifaddraddr, sizeof(in_ifaddraddr));
 }
 
 /* NB: Index is the number of the corresponding interface, not of the address */
@@ -1135,7 +1135,7 @@ struct in_ifaddr *Retin_ifaddr;
                * this address belongs
                */
 
-              KNLookup (interface_nl, N_IFNET, (char *)&ifnetaddr, sizeof(ifnetaddr));
+              KNLookup (interfaces_nl, N_IFNET, (char *)&ifnetaddr, sizeof(ifnetaddr));
               while (ifnetaddr && ifnetaddr != in_ifaddr.ia_ifp) {
                       klookup(ifnetaddr, (char *)&ifnet, sizeof ifnet);
                       ifnetaddr = ifnet.if_next;
