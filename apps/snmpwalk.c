@@ -158,6 +158,7 @@ int main(int argc, char *argv[])
     int    count;
     int    running;
     int    status;
+    int    exitval = 0;
 
     ds_register_config(ASN_BOOLEAN, "snmpwalk", "includeRequested",
                        DS_APPLICATION_ID, DS_WALK_INCLUDE_REQUESTED);
@@ -258,14 +259,17 @@ int main(int argc, char *argv[])
                 fprint_objid(stderr, vars->name, vars->name_length);
               fprintf(stderr, "\n");
             }
+	    exitval = 2;
           }
         }
       } else if (status == STAT_TIMEOUT){
         fprintf(stderr, "Timeout: No Response from %s\n", session.peername);
         running = 0;
+	exitval = 1;
       } else {    /* status == STAT_ERROR */
         snmp_sess_perror("snmpwalk", ss);
         running = 0;
+	exitval = 1;
       }
       if (response)
         snmp_free_pdu(response);
@@ -284,5 +288,5 @@ int main(int argc, char *argv[])
     }
 
     SOCK_CLEANUP;
-    return 0;
+    return exitval;
 }
