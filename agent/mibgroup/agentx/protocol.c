@@ -1679,7 +1679,8 @@ agentx_parse(struct snmp_session *session, struct snmp_pdu *pdu, u_char *data, s
 	default:
                 DEBUGINDENTLESS();
                 DEBUGINDENTLESS();
-		DEBUGMSGTL(("agentx","Unrecognised PDU type\n"));
+		DEBUGMSGTL(("agentx","Unrecognised PDU type: %d\n",
+                            pdu->command));
 		return SNMPERR_UNKNOWN_PDU;
      }
      DEBUGINDENTLESS();
