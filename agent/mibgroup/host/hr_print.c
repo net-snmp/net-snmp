@@ -304,6 +304,7 @@ int printer_errors(int idx)
     return 0;
 }
 
+#ifdef        HAVE_LPSTAT
 /*
  * Run the lpstat command. If compiled with EXCACHE support, this
  * will actually cache the output for a while which helps a lot
@@ -323,3 +324,4 @@ run_lpstat(void)
 
     return fdopen(fd, "r");
 }
+#endif
