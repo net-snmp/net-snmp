@@ -26,6 +26,7 @@
 
 #include <net-snmp/agent/table.h>
 #include <net-snmp/agent/table_array.h>
+#include <net-snmp/library/container.h>
 
 #if HAVE_DMALLOC_H
 #include <dmalloc.h>
@@ -53,13 +54,13 @@ static const char *mode_name[] = {
 /*
  * PRIVATE structure for holding important info for each table.
  */
-typedef struct table_array_data_s {
+typedef struct table_container_data_s {
 
    /** registration info for the table */
     netsnmp_table_registration_info *tblreg_info;
 
    /** container for the table rows */
-    oid_array       array;
+   netsnmp_container          *table;
 
     /*
      * mutex_type                lock;
@@ -72,7 +73,7 @@ typedef struct table_array_data_s {
    /** callbacks for this table */
     netsnmp_table_array_callbacks *cb;
 
-} table_array_data;
+} table_container_data;
 
 /** @defgroup table_array table_array: Helps you implement a table when data can be stored locally. The data is stored in a sorted array, using a binary search for lookups.
  *  @ingroup table
@@ -157,12 +158,13 @@ typedef struct table_array_data_s {
     will be called only once, for all objects.
 */
 int
-netsnmp_register_table_array(netsnmp_handler_registration *reginfo,
+netsnmp_table_container_register(netsnmp_handler_registration *reginfo,
                              netsnmp_table_registration_info *tabreg,
                              netsnmp_table_array_callbacks *cb,
+                             netsnmp_container *container,
                              int group_rows)
 {
-    table_array_data *tad = SNMP_MALLOC_TYPEDEF(table_array_data);
+    table_container_data *tad = SNMP_MALLOC_TYPEDEF(table_container_data);
     tad->tblreg_info = tabreg;  /* we need it too, but it really is not ours */
 
     /*
@@ -170,17 +172,21 @@ netsnmp_register_table_array(netsnmp_handler_registration *reginfo,
      */
     if ((cb->can_set &&
          ((NULL==cb->duplicate_row) || (NULL==cb->delete_row) ||
-         (NULL==cb->row_copy)) ) ||
-        (cb->idx2 && (NULL==cb->row_compare))) {
+          (NULL==cb->row_copy)) )) {
         snmp_log(LOG_ERR, "table_array registration with incomplete "
                  "callback structure.\n");
         return SNMPERR_GENERR;
     }
+
+    if (NULL==container)
+        tad->table = netsnmp_container_find("table_array");
+    else
+        tad->table = container;
+    if (NULL==container->compare)
+        container->compare = netsnmp_compare_netsnmp_index;
+    if (NULL==container->ncompare)
+        container->ncompare = netsnmp_ncompare_netsnmp_index;
     
-    tad->array = netsnmp_initialize_oid_array(sizeof(void *));
-    /*
-     * netsnmp_mutex_init(&tad->lock); 
-     */
     tad->cb = cb;
 
     reginfo->handler->myvoid = tad;
@@ -209,116 +215,12 @@ netsnmp_extract_array_context(netsnmp_request_info *request)
     return netsnmp_request_get_list_data(request, TABLE_ARRAY_NAME);
 }
 
-/** search for the specified index. This routine searches for
-    modified rows first (i.e. during SET request processing).
-*/
-const netsnmp_oid_array_header *
-netsnmp_table_array_get_by_index(netsnmp_handler_registration *reginfo,
-                                 netsnmp_oid_array_header *hdr)
-{
-    table_array_data *tad;
-    netsnmp_oid_array_header *rtn = NULL;
-    netsnmp_mib_handler *mh;
-
-    if (reginfo == NULL)
-        return NULL;
-
-    mh = netsnmp_find_table_array_handler(reginfo);
-    if (mh == NULL)
-        return NULL;
-
-    tad = (table_array_data *) mh->myvoid;
-    if (tad == NULL || tad->array == NULL)
-        return NULL;
-
-    /*
-     * netsnmp_mutex_lock(&tad->lock);
-     */
-
-    rtn = netsnmp_get_oid_data(tad->array, hdr, 1);
-
-    /*
-     * netsnmp_mutex_unlock(&tad->lock);
-     */
-
-    return rtn;
-}
-
-/** returns all rows in the data set with the same prefix. This
-    is usefull when a table contains multiple indices.
-*/
-const netsnmp_oid_array_header **
-netsnmp_table_array_get_subset(netsnmp_handler_registration *reginfo,
-                               netsnmp_oid_array_header *hdr, int *len)
-{
-    table_array_data *tad;
-    const netsnmp_oid_array_header **rtn = NULL;
-    netsnmp_mib_handler *mh;
-
-    if (reginfo == NULL)
-        return NULL;
-
-    mh = netsnmp_find_table_array_handler(reginfo);
-    if (mh == NULL)
-        return NULL;
-
-    tad = (table_array_data *) mh->myvoid;
-    if (!tad->array)
-        return NULL;
-
-    /*
-     * netsnmp_mutex_lock(&tad->lock);
-     */
-
-    rtn =
-        (const netsnmp_oid_array_header **)
-        netsnmp_get_oid_data_subset(tad->array, hdr, len);
-
-    /*
-     * netsnmp_mutex_unlock(&tad->lock);
-     */
-
-    return rtn;
-}
-
-/** this function is called to remove a row from the table */
-netsnmp_oid_array_header *
-netsnmp_table_array_remove_row(netsnmp_handler_registration *reginfo,
-                               netsnmp_oid_array_header *hdr)
-{
-    table_array_data *tad;
-    netsnmp_mib_handler *mh;
-    netsnmp_oid_array_header *rtn;
-    
-    if (reginfo == NULL)
-        return NULL;
-
-    mh = netsnmp_find_table_array_handler(reginfo);
-    if (mh == NULL)
-        return NULL;
-
-    tad = (table_array_data *) mh->myvoid;
-    if (!tad->array)
-        return NULL;
-
-    /** netsnmp_mutex_lock(&tad->lock); */
-
-    netsnmp_remove_oid_data(tad, hdr, &rtn);
-    if (tad->cb->idx2)
-        tad->cb->idx2->remove_data(tad->cb->idx2,hdr);
-
-    /** netsnmp_mutex_unlock(&tad->lock); */
-
-    return rtn;
-}
-
-
 /** this function is called to validate RowStatus transitions. */
 int
 netsnmp_table_array_check_row_status(netsnmp_table_array_callbacks *cb,
-                                     netsnmp_oid_array_header *ctx_new,
-                                     netsnmp_oid_array_header *ctx_old,
-                                     netsnmp_array_group *ag,
+                                     netsnmp_index *ctx_new,
+                                     netsnmp_index *ctx_old,
+                                     netsnmp_request_group *ag,
                                      int *rs_new, int *rs_old)
 {
     /*
@@ -418,15 +320,15 @@ netsnmp_table_array_check_row_status(netsnmp_table_array_callbacks *cb,
  */
 typedef struct set_context_s {
     netsnmp_agent_request_info *agtreq_info;
-    table_array_data *tad;
+    table_container_data *tad;
     int             status;
 } set_context;
 
 static void
-release_netsnmp_array_group(netsnmp_oid_array_header *g, void *v)
+release_netsnmp_request_group(netsnmp_index *g, void *v)
 {
-    netsnmp_array_group_item *tmp;
-    netsnmp_array_group *group = (netsnmp_array_group *) g;
+    netsnmp_request_group_item *tmp;
+    netsnmp_request_group *group = (netsnmp_request_group *) g;
 
     while (group->list) {
         tmp = group->list;
@@ -438,30 +340,31 @@ release_netsnmp_array_group(netsnmp_oid_array_header *g, void *v)
 }
 
 static void
-release_netsnmp_array_groups(void *vp)
+release_netsnmp_request_groups(void *vp)
 {
-    oid_array       a = (oid_array) vp;
-    netsnmp_for_each_oid_data(a, release_netsnmp_array_group, NULL, 0);
+    netsnmp_container *c = (netsnmp_container*)vp;
+    CONTAINER_FOR_EACH(c, release_netsnmp_request_group, NULL);
+    CONTAINER_FREE(c);
 }
 
-inline netsnmp_oid_array_header *
+inline netsnmp_index *
 find_next_row(netsnmp_table_request_info *tblreq_info,
-              table_array_data * tad)
+              table_container_data * tad)
 {
-    netsnmp_oid_array_header *row = NULL;
-    netsnmp_oid_array_header index;
+    netsnmp_index *row = NULL;
+    netsnmp_index index;
 
     /*
      * below our minimum column?
      */
     if (tblreq_info->colnum < tad->tblreg_info->min_column) {
         tblreq_info->colnum = tad->tblreg_info->min_column;
-        row = netsnmp_get_oid_data(tad->array, NULL, 0);
+        row = CONTAINER_FIRST(tad->table);
     } else {
-        index.idx = tblreq_info->index_oid;
-        index.idx_len = tblreq_info->index_oid_len;
+        index.oids = tblreq_info->index_oid;
+        index.len = tblreq_info->index_oid_len;
 
-        row = netsnmp_get_oid_data(tad->array, &index, 0);
+        row = CONTAINER_NEXT(tad->table, &index);
 
         /*
          * we don't have a row, but we might be at the end of a
@@ -476,7 +379,7 @@ find_next_row(netsnmp_table_request_info *tblreq_info,
                 tblreq_info->colnum = 0;
 
             if (tblreq_info->colnum != 0)
-                row = netsnmp_get_oid_data(tad->array, NULL, 0);
+                row = CONTAINER_FIRST(tad->table);
         }
     }
 
@@ -486,7 +389,7 @@ find_next_row(netsnmp_table_request_info *tblreq_info,
 inline void
 build_new_oid(netsnmp_handler_registration *reginfo,
               netsnmp_table_request_info *tblreq_info,
-              netsnmp_oid_array_header *row, netsnmp_request_info *current)
+              netsnmp_index *row, netsnmp_request_info *current)
 {
     oid             coloid[MAX_OID_LEN];
     int             coloid_len;
@@ -501,11 +404,11 @@ build_new_oid(netsnmp_handler_registration *reginfo,
     coloid[reginfo->rootoid_len + 1] = tblreq_info->colnum;
 
     /** table.entry.column.index */
-    memcpy(&coloid[reginfo->rootoid_len + 2], row->idx,
-           row->idx_len * sizeof(oid));
+    memcpy(&coloid[reginfo->rootoid_len + 2], row->oids,
+           row->len * sizeof(oid));
 
     snmp_set_var_objid(current->requestvb, coloid,
-                       reginfo->rootoid_len + 2 + row->idx_len);
+                       reginfo->rootoid_len + 2 + row->len);
 }
 
 /**********************************************************************
@@ -521,11 +424,11 @@ inline int
 process_get_requests(netsnmp_handler_registration *reginfo,
                      netsnmp_agent_request_info *agtreq_info,
                      netsnmp_request_info *requests,
-                     table_array_data * tad)
+                     table_container_data * tad)
 {
     int             rc = SNMP_ERR_NOERROR;
     netsnmp_request_info *current;
-    netsnmp_oid_array_header *row = NULL;
+    netsnmp_index *row = NULL;
     netsnmp_table_request_info *tblreq_info;
     netsnmp_variable_list *var;
 
@@ -588,11 +491,11 @@ process_get_requests(netsnmp_handler_registration *reginfo,
 
         } /** GETNEXT/GETBULK */
         else {
-            netsnmp_oid_array_header index;
-            index.idx = tblreq_info->index_oid;
-            index.idx_len = tblreq_info->index_oid_len;
+            netsnmp_index index;
+            index.oids = tblreq_info->index_oid;
+            index.len = tblreq_info->index_oid_len;
 
-            row = netsnmp_get_oid_data(tad->array, &index, 1);
+            row = CONTAINER_FIND(tad->table, &index);
             if (!row) {
                 DEBUGMSGTL(("table_array:get", "no row found\n"));
                 netsnmp_set_request_error(agtreq_info, current,
@@ -620,30 +523,23 @@ process_get_requests(netsnmp_handler_registration *reginfo,
  *                                                                    *
  **********************************************************************
  **********************************************************************/
-inline void
+/*inline*/
+void
 group_requests(netsnmp_agent_request_info *agtreq_info,
                netsnmp_request_info *requests,
-               oid_array netsnmp_array_group_tbl, table_array_data * tad)
+               netsnmp_container *request_group, table_container_data * tad)
 {
     netsnmp_table_request_info *tblreq_info;
     netsnmp_variable_list *var;
-    netsnmp_oid_array_header *row, *tmp, index;
+    netsnmp_index *row, *tmp, index;
     netsnmp_request_info *current;
-    netsnmp_array_group *g;
-    netsnmp_array_group_item *i;
+    netsnmp_request_group *g;
+    netsnmp_request_group_item *i;
 
     for (current = requests; current; current = current->next) {
 
         var = current->requestvb;
-        /*
-         * don't log OID, helper:table already did it 
-         */
-#if 0
-        DEBUGMSGTL(("table_array:group", "  oid:"));
-        DEBUGMSGOID(("table_array:group", var->name,
-                     var->name_length));
-        DEBUGMSG(("table_array:group", "\n"));
-#endif
+
         /*
          * skip anything that doesn't need processing.
          */
@@ -668,17 +564,17 @@ group_requests(netsnmp_agent_request_info *agtreq_info,
         /*
          * search for index
          */
-        index.idx = tblreq_info->index_oid;
-        index.idx_len = tblreq_info->index_oid_len;
-        tmp = netsnmp_get_oid_data(netsnmp_array_group_tbl, &index, 1);
+        index.oids = tblreq_info->index_oid;
+        index.len = tblreq_info->index_oid_len;
+        tmp = CONTAINER_FIND(request_group, &index);
         if (tmp) {
             DEBUGMSGTL(("table_array:group",
                         "    existing group:"));
-            DEBUGMSGOID(("table_array:group", index.idx,
-                         index.idx_len));
+            DEBUGMSGOID(("table_array:group", index.oids,
+                         index.len));
             DEBUGMSG(("table_array:group", "\n"));
-            g = (netsnmp_array_group *) tmp;
-            i = SNMP_MALLOC_TYPEDEF(netsnmp_array_group_item);
+            g = (netsnmp_request_group *) tmp;
+            i = SNMP_MALLOC_TYPEDEF(netsnmp_request_group_item);
             i->ri = current;
             i->tri = tblreq_info;
             i->next = g->list;
@@ -687,13 +583,13 @@ group_requests(netsnmp_agent_request_info *agtreq_info,
         }
 
         DEBUGMSGTL(("table_array:group", "    new group"));
-        DEBUGMSGOID(("table_array:group", index.idx,
-                     index.idx_len));
+        DEBUGMSGOID(("table_array:group", index.oids,
+                     index.len));
         DEBUGMSG(("table_array:group", "\n"));
-        g = SNMP_MALLOC_TYPEDEF(netsnmp_array_group);
-        i = SNMP_MALLOC_TYPEDEF(netsnmp_array_group_item);
+        g = SNMP_MALLOC_TYPEDEF(netsnmp_request_group);
+        i = SNMP_MALLOC_TYPEDEF(netsnmp_request_group_item);
         g->list = i;
-        g->table = tad->array;
+        g->table = tad->table;
         i->ri = current;
         i->tri = tblreq_info;
 
@@ -701,7 +597,7 @@ group_requests(netsnmp_agent_request_info *agtreq_info,
          * search for row. all changes are made to the original row,
          * later, we'll make a copy in old_row before we start processing.
          */
-        row = g->new_row = netsnmp_get_oid_data(tad->array, &index, 1);
+        row = g->new_row = CONTAINER_FIND(tad->table, &index);
         if (!g->new_row) {
             if (!tad->cb->create_row) {
                 netsnmp_set_request_error(agtreq_info, current,
@@ -721,20 +617,20 @@ group_requests(netsnmp_agent_request_info *agtreq_info,
             }
         }
 
-        g->index.idx = row->idx;
-        g->index.idx_len = row->idx_len;
+        g->index.oids = row->oids;
+        g->index.len = row->len;
 
-        netsnmp_add_oid_data(netsnmp_array_group_tbl, g);
+        CONTAINER_INSERT(request_group, g);
 
     } /** for( current ... ) */
 }
 
 static void
-process_set_group(netsnmp_oid_array_header *o, void *c)
+process_set_group(netsnmp_index *o, void *c)
 {
     /* xxx-rks: should we continue processing after an error?? */
     set_context    *context = (set_context *) c;
-    netsnmp_array_group *ag = (netsnmp_array_group *) o;
+    netsnmp_request_group *ag = (netsnmp_request_group *) o;
 
     switch (context->agtreq_info->mode) {
 
@@ -779,17 +675,12 @@ process_set_group(netsnmp_oid_array_header *o, void *c)
             /** if no row, it has been deleted */
             if (!ag->new_row) {
                 /** remove deleted row */
-                netsnmp_remove_oid_data(ag->table, ag->old_row, NULL);
-                if (context->tad->cb->idx2)
-                    context->tad->cb->idx2->remove_data(context->tad->cb->idx2,
-                                                        ag->old_row);
+                CONTAINER_REMOVE(ag->table, ag->old_row);
             }
         } else {
             /** insert new row */
-            netsnmp_add_oid_data(ag->table, ag->new_row);
-            if (context->tad->cb->idx2)
-                context->tad->cb->idx2->insert_data(context->tad->cb->idx2,
-                                                    ag->new_row);
+            /** xxx-rks: error handling? */
+            CONTAINER_INSERT(ag->table, ag->new_row);
         }
 
         if (context->tad->cb->set_action)
@@ -846,20 +737,14 @@ process_set_group(netsnmp_oid_array_header *o, void *c)
                  * old_row but no new_row means a deleted row.
                  * insert old_row
                  */
-                netsnmp_add_oid_data(ag->table, ag->old_row);
-                if (context->tad->cb->idx2)
-                    context->tad->cb->idx2->insert_data(context->tad->cb->idx2,
-                                                        ag->old_row);
+                CONTAINER_INSERT(ag->table, ag->old_row);
             }
         } else {
             /*
              * if we have no old_row, this was a new row.
              */
             assert(ag->new_row != NULL);
-            netsnmp_remove_oid_data(ag->table, ag->new_row, NULL);
-            if (context->tad->cb->idx2)
-                context->tad->cb->idx2->remove_data(context->tad->cb->idx2,
-                                                    ag->new_row);
+            CONTAINER_REMOVE(ag->table, ag->new_row);
         }
 
         /** status already set - don't change it now */
@@ -891,35 +776,37 @@ process_set_group(netsnmp_oid_array_header *o, void *c)
     }
 }
 
-inline int
+/*inline*/
+int
 process_set_requests(netsnmp_agent_request_info *agtreq_info,
                      netsnmp_request_info *requests,
-                     table_array_data * tad, char *handler_name)
+                     table_container_data * tad, char *handler_name)
 {
-    set_context     context;
-    oid_array       netsnmp_array_group_tbl;
+    set_context         context;
+    netsnmp_container  *request_group;
 
     /*
      * create and save structure for set info
      */
-    netsnmp_array_group_tbl = (oid_array) netsnmp_agent_get_list_data
+    request_group = (oid_array) netsnmp_agent_get_list_data
         (agtreq_info, handler_name);
-    if (netsnmp_array_group_tbl == NULL) {
+    if (request_group == NULL) {
         netsnmp_data_list *tmp;
-        netsnmp_array_group_tbl =
-            netsnmp_initialize_oid_array(sizeof(void *));
+        request_group = netsnmp_container_find("request_group:"
+                                               "table_container");
+        request_group->compare = netsnmp_compare_netsnmp_index;
+        request_group->ncompare = netsnmp_ncompare_netsnmp_index;
 
         DEBUGMSGTL(("table_array", "Grouping requests by oid\n"));
 
         tmp = netsnmp_create_data_list(handler_name,
-                                       netsnmp_array_group_tbl,
-                                       release_netsnmp_array_groups);
+                                       request_group,
+                                       release_netsnmp_request_groups);
         netsnmp_agent_add_list_data(agtreq_info, tmp);
         /*
          * group requests.
          */
-        group_requests(agtreq_info, requests, netsnmp_array_group_tbl,
-                       tad);
+        group_requests(agtreq_info, requests, request_group, tad);
     }
 
     /*
@@ -928,8 +815,9 @@ process_set_requests(netsnmp_agent_request_info *agtreq_info,
     context.agtreq_info = agtreq_info;
     context.tad = tad;
     context.status = SNMP_ERR_NOERROR;
-    netsnmp_for_each_oid_data(netsnmp_array_group_tbl, process_set_group,
-                              &context, 0);
+    CONTAINER_FOR_EACH(request_group,
+                       (netsnmp_container_obj_func*)process_set_group,
+                       &context);
 
     return context.status;
 }
@@ -958,7 +846,7 @@ netsnmp_table_array_helper_handler(netsnmp_mib_handler *handler,
      * oid_array where the actual table data is stored.
      */
     int             rc = SNMP_ERR_NOERROR;
-    table_array_data *tad = (table_array_data *) handler->myvoid;
+    table_container_data *tad = (table_container_data *)handler->myvoid;
 
     if (agtreq_info->mode < 0 || agtreq_info->mode > 5) {
         DEBUGMSGTL(("table_array", "Mode %d, Got request:\n",
