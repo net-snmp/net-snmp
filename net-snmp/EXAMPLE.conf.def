@@ -373,8 +373,8 @@ syscontact Me <me@somewhere.org>
 
 #       sec.name  source          community
 com2sec local     localhost       private
-com2sec mynet     192.168.17.0/24 public
-com2sec myadmin   192.168.17.0/24 sysadmin
+com2sec mynet     10.10.10.0/24   public
+com2sec myadmin   10.10.10.0/24   sysadmin
 com2sec public    default         public
 
 #             sec.model  sec.name
