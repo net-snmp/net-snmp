@@ -10,6 +10,11 @@ if you have OpenSSL installed.
 Note: encryption support isn't enabled in the binary releases downloadable
 from the net-snmp web site.
 
+Note: this description assumes you're using the software compiled from
+source, and so installed using the default prefix location (/usr/local).
+If you're working with a vendor-provided system, or have configured
+things with a different prefix, you'll need to adjust locations accordingly.
+
 CREATING THE FIRST USER:
 ------------------------
   First, you need to create a new snmpv3 user and give them rights to
