@@ -319,11 +319,6 @@ pass .EXTENSIBLEDOTMIB.255 /bin/sh PREFIX/local/passtest
 # % snmpset -v 1 localhost private .EXTENSIBLEDOTMIB.255.1 s "New string"
 # local.255.1 = "New string"
 #
-# Note:  For snmpset requests you must use the 'private' community
-#        name, or else community number 2 as defined in the snmpd.conf
-#        file like the following line:
-#
-# community 2 new-private
 
 # For specific usage information, see the man/snmpd.conf.5 manual page
 # as well as the local/passtest script used in the above example.
@@ -352,3 +347,35 @@ syscontact Me <me@somewhere.org>
 
 # ----------------------------------------------------------------------
 
+#
+# Setting up the access control lists to the agent
+#
+
+# The following example matches that in the snmpd.conf manual page and 
+# sets up the access control to:
+#
+# - allow read access to the system group from anywhere (community = public).
+# - allow read access from a particular subdomain (community = public).
+# - allow read/write access to everything only from the local host
+#   (community = private).
+
+#       sec.name  source          community
+com2sec local     localhost       private
+com2sec mynet     192.168.17.0/24 public
+com2sec public    default         public
+
+#             sec.model  sec.name
+group mygroup v1         mynet
+group mygroup v2c        mynet
+group local   any        local
+group public  any        public
+
+#           incl/excl subtree                          mask
+view all    included  .1                               80
+view system included  system                           fe
+view mib2   included  .iso.org.dod.internet.mgmt.mib-2 fc
+
+#              context sec.model sec.level prefix read   write not
+access mygroup ""      any       noauth    0      mib2   none  none
+access public  ""      any       noauth    0      system none  none
+access local   ""      any       noauth    0      all    all   all
