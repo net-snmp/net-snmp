@@ -8,6 +8,9 @@
 #ifdef CAN_USE_NLIST
 
 #include <sys/types.h>
+#if HAVE_STDLIB_H
+#include <stdlib.h>
+#endif
 #if HAVE_UNISTD_H
 #include <unistd.h>
 #endif

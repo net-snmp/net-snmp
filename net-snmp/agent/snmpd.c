@@ -89,6 +89,26 @@ SOFTWARE.
 #ifdef HAVE_SYS_PARAM_H
 #include <sys/param.h>
 #endif
+#if HAVE_PROCESS_H  /* Win32-getpid */
+#include <process.h>
+#endif
+#if HAVE_LIMITS_H
+#include <limits.h>
+#endif
+#if HAVE_PWD_H
+#include <pwd.h>
+#endif
+#if HAVE_GRP_H
+#include <grp.h>
+#endif
+
+#ifndef PATH_MAX
+# ifdef _POSIX_PATH_MAX
+#  define PATH_MAX _POSIX_PATH_MAX
+# else
+#  define PATH_MAX 255
+# endif
+#endif
 
 #ifndef FD_SET
 typedef long    fd_mask;
@@ -130,8 +150,6 @@ typedef long    fd_mask;
 #include "tools.h"
 #include "lcd_time.h"
 #include "mibgroup/util_funcs.h"
-
-#include "transform_oids.h"
 
 #include "snmp_agent.h"
 #include "agent_trap.h"
@@ -182,7 +200,6 @@ extern char  *argvrestartname;
 
 #ifdef USING_SMUX_MODULE
 static int sdlist[NUM_SOCKETS], sdlen = 0;
-int smux_listen_sd;
 #endif /* USING_SMUX_MODULE */
 
 /*
@@ -229,17 +246,16 @@ static void usage(char *prog)
 	printf("-L\t\tPrint warnings/messages to stdout/err\n");
 	printf("-s\t\tLog warnings/messages to syslog\n");
 	printf("-A\t\tAppend to the logfile rather than truncating it.\n");
-	printf("-r Don't exit if root only accessible files can't be opened\n");
+	printf("-r\t\tDon't exit if root only accessible files can't be opened\n");
 	printf("-I [-]INITLIST\tList of mib modules to initialize (or not).\n");
 	printf("\t\t (run snmpd with -Dinit_mib for a list)\n");
 	printf("-l LOGFILE\tPrint warnings/messages to LOGFILE\n");
-	printf("\t\t(By default LOGFILE=%s)\n",
 #ifdef LOGFILE
-			LOGFILE
+	printf("\t\t(By default LOGFILE=%s)\n", LOGFILE);
 #else
-			"none"
+	printf("\t\t(By default LOGFILE=none)\n");
 #endif
-	      );
+
 #if HAVE_UNISTD_H
 	printf("-g \t\tChange to this gid after opening port\n");
 	printf("-u \t\tChange to this uid after opening port\n");
@@ -302,7 +318,7 @@ main(int argc, char *argv[])
 	int             arg, i;
 	int             ret;
 	int             dont_fork = 0;
-	char            logfile[SNMP_MAXBUF_SMALL];
+	char            logfile[PATH_MAX + 1] = { 0 };
 	char           *cptr, **argvptr;
 	char           *pid_file = NULL;
         char            buf[SPRINT_MAX_LEN];
@@ -314,16 +330,16 @@ main(int argc, char *argv[])
 	int             uid=0, gid=0;
         int             agent_mode=-1;
 
-	logfile[0]		= 0;
-
 #ifdef LOGFILE
-	strcpy(logfile, LOGFILE);
+	strncpy(logfile, LOGFILE, PATH_MAX);
 #endif
 
 #ifdef NO_ROOT_ACCESS
         /* default to no */
         ds_set_boolean(DS_APPLICATION_ID, DS_AGENT_NO_ROOT_ACCESS, 1);
 #endif
+			/* Default to NOT running an AgentX master */
+        ds_set_boolean(DS_APPLICATION_ID, DS_AGENT_AGENTX_MASTER, 0);
 
 	/*
 	 * usage: snmpd
@@ -357,7 +373,7 @@ main(int argc, char *argv[])
                     if (argv[arg][2] != '\0') 
                         cptr = &argv[arg][2];
                     else if (++arg>argc) {
-                        fprintf(stderr,"Need UDP or TCP after -T flag.\n");
+                        fprintf(stderr,"%s: Need UDP or TCP after -T flag.\n", argv[0]);
                         usage(argv[0]);
                         exit(1);
                     } else {
@@ -371,8 +387,8 @@ main(int argc, char *argv[])
                         /* default, do nothing */
                     } else {
                         fprintf(stderr,
-                                "Unknown transport \"%s\" after -T flag.\n",
-                                cptr);
+                                "%s: Unknown transport \"%s\" after -T flag.\n",
+                                argv[0], cptr);
                         usage(argv[0]);
                         exit(1);
                     }
@@ -398,7 +414,7 @@ main(int argc, char *argv[])
                       strcpy(buf,argv[arg]);
 
                   DEBUGMSGTL(("snmpd_ports","port spec: %s\n", buf));
-                  ds_set_string(DS_APPLICATION_ID, DS_AGENT_PORTS, strdup(buf));
+                  ds_set_string(DS_APPLICATION_ID, DS_AGENT_PORTS, buf);
                   break;
 
 #if defined(USING_AGENTX_SUBAGENT_MODULE) || defined(USING_AGENTX_MASTER_MODULE)
@@ -406,6 +422,7 @@ main(int argc, char *argv[])
                   if (++arg == argc)
                     usage(argv[0]);
                   ds_set_string(DS_APPLICATION_ID, DS_AGENT_X_SOCKET, argv[arg]);
+		  ds_set_boolean(DS_APPLICATION_ID, DS_AGENT_AGENTX_MASTER, 1 );
                   break;
 #endif
 
@@ -413,7 +430,7 @@ main(int argc, char *argv[])
 #if defined(USING_AGENTX_SUBAGENT_MODULE)
                   agent_mode = SUB_AGENT;
 #else
-                  fprintf(stderr,"Illegal argument -X: AgentX support not compiled in.\n");
+                  fprintf(stderr,"%s: Illegal argument -X: AgentX support not compiled in.\n", argv[0]);
                   usage(argv[0]);
                   exit(1);
 #endif
@@ -428,9 +445,10 @@ main(int argc, char *argv[])
                   if (++arg == argc)
                     usage(argv[0]);
                   pid_file = argv[arg];
+		  break;
 
                 case 'a':
-                      log_addresses++;
+		  log_addresses++;
                   break;
 
                 case 'V':
@@ -442,9 +460,16 @@ main(int argc, char *argv[])
                   break;
 
                 case 'l':
-                  if (++arg == argc)
+                  if (++arg == argc) {
                     usage(argv[0]);
-                  strcpy(logfile, argv[arg]);
+		  }
+		  if (strlen(argv[arg]) > PATH_MAX) {
+		    fprintf(stderr,
+			    "%s: logfile path too long (limit %d chars)\n",
+			    argv[0], PATH_MAX);
+		    exit(1);
+		  }
+                  strncpy(logfile, argv[arg], PATH_MAX);
                   break;
 
                 case 'L':
@@ -467,7 +492,24 @@ main(int argc, char *argv[])
 #if HAVE_UNISTD_H
                 case 'u':
                   if (++arg == argc) usage(argv[0]);
-                  ds_set_int(DS_APPLICATION_ID, DS_AGENT_USERID,atoi(argv[arg]));
+		  { char *ecp;
+		    int uid;
+		    uid = strtoul(argv[arg], &ecp, 10);
+		    if (*ecp) {
+#if HAVE_GETPWNAM && HAVE_PWD_H
+		      struct passwd *info;
+		      info = getpwnam(argv[arg]);
+		      if (info) uid = info->pw_uid;
+		      else {
+#endif
+			fprintf(stderr, "Bad user id: %s\n", argv[arg]);
+			exit(1);
+#if HAVE_GETPWNAM && HAVE_PWD_H
+		      }
+#endif
+		    }
+		  ds_set_int(DS_APPLICATION_ID, DS_AGENT_USERID, uid);
+		}
                   break;
                 case 'g':
                   if (++arg == argc) usage(argv[0]);
@@ -503,12 +545,16 @@ main(int argc, char *argv[])
                   }
 
                 default:
-                  printf("invalid option: %s\n", argv[arg]);
+                  fprintf(stderr, "%s: Invalid option: %s\n", argv[0], argv[arg]);
                   usage(argv[0]);
                   break;
               }
               continue;
             }
+	    else {
+	      fprintf(stderr, "%s: Bad argument: %s\n", argv[0], argv[arg]);
+	      exit(1);
+	    }
 	}  /* end-for */
 
 	/* 
@@ -575,6 +621,11 @@ main(int argc, char *argv[])
     }
 #endif
 
+    /*  Honor selection of standard error output.  */
+    if (!stderr_log) {
+      snmp_disable_stderrlog();
+    }
+
     SOCK_STARTUP;
     init_agent("snmpd");		/* do what we need to do first. */
     init_mib_modules();
@@ -615,7 +666,11 @@ main(int argc, char *argv[])
 #ifdef HAVE_SETGID
 	if ((gid = ds_get_int(DS_APPLICATION_ID, DS_AGENT_GROUPID)) != 0) {
 		DEBUGMSGTL(("snmpd", "Changing gid to %d.\n", gid));
-		if (setgid(gid)==-1) {
+		if (setgid(gid)==-1
+#ifdef HAVE_SETGROUPS
+		 || setgroups(1, &gid)==-1
+#endif
+		) {
 			snmp_log_perror("setgid failed");
 			if (!ds_get_boolean(DS_APPLICATION_ID, DS_AGENT_NO_ROOT_ACCESS))
 			    exit(1);
@@ -633,10 +688,6 @@ main(int argc, char *argv[])
 	}
 #endif
 #endif
-
-	/* honor selection of standard error output */
-	if (!stderr_log)
-		snmp_disable_stderrlog();
 
 	/* we're up, log our version number */
 	snmp_log(LOG_INFO, "UCD-SNMP version %s\n", VersionInfo);
@@ -705,6 +756,14 @@ receive(void)
 	    snmp_log(LOG_INFO, "Reconfiguring daemon\n");
 	    update_config();
         }
+
+	for (i = 0; i < NUM_EXTERNAL_SIGS; i++) {
+	    if (external_signal_scheduled[i]) {
+		external_signal_scheduled[i]--;
+		external_signal_handler[i](i);
+	    }
+	}
+
 	tvp =  &timeout;
 	tvp->tv_sec = 0;
 	tvp->tv_usec = TIMETICK;
@@ -743,13 +802,6 @@ receive(void)
 	    FD_SET(external_exceptfd[i], &exceptfds);
 	    if (external_exceptfd[i] >= numfds)
 		numfds = external_exceptfd[i] + 1;
-	}
-
-	for (i = 0; i < NUM_EXTERNAL_SIGS; i++) {
-	    if (external_signal_scheduled[i]) {
-		external_signal_scheduled[i]--;
-		external_signal_handler[i](i);
-	    }
 	}
 	
 	count = select(numfds, &readfds, &writefds, &exceptfds, tvp);

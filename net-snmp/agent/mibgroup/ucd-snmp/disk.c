@@ -24,11 +24,11 @@
 #include <sys/vmmeter.h>
 #endif
 #endif
-#if HAVE_SYS_CONF_H
-#include <sys/conf.h>
-#endif
 #if HAVE_SYS_PARAM_H
 #include <sys/param.h>
+#endif
+#if HAVE_SYS_CONF_H
+#include <sys/conf.h>
 #endif
 #if HAVE_ASM_PAGE_H
 #include <asm/page.h>
@@ -332,7 +332,7 @@ u_char *var_extensible_disk(struct variable *vp,
 #ifdef STAT_STATFS_FS_DATA
   struct fs_data fsd;
   struct {
-    u_int f_blocks, f_bfree, f_bavail;
+    u_int f_blocks, f_bfree, f_bavail, f_bsize;
   } vfs;
 #else
   struct statvfs vfs;
@@ -368,7 +368,7 @@ u_char *var_extensible_disk(struct variable *vp,
       long_ret = disks[disknum].minpercent;
       return((u_char *) (&long_ret));
   }
-#if defined(HAVE_SYS_STATVFS_H) || defined(HAVE_STATFS)
+#if defined(HAVE_STATVFS) || defined(HAVE_STATFS)
 #ifdef STAT_STATFS_FS_DATA
   if (statvfs (disks[disknum].path, &fsd) == -1) {
 #else
@@ -382,6 +382,7 @@ u_char *var_extensible_disk(struct variable *vp,
   vfs.f_blocks = fsd.fd_btot;
   vfs.f_bfree  = fsd.fd_bfree;
   vfs.f_bavail = fsd.fd_bfreen;
+  vfs.f_bsize  = 1024;	/*  Ultrix f_bsize is a VM parameter apparently.  */
 #endif
 #if defined(HAVE_ODS)
   vfs.f_blocks = vfs.f_spare[0];
@@ -391,10 +392,10 @@ u_char *var_extensible_disk(struct variable *vp,
   percent = vfs.f_bavail <= 0 ? 100 :
     (int) ((double) (vfs.f_blocks - vfs.f_bfree) /
            (double) (vfs.f_blocks - (vfs.f_bfree - vfs.f_bavail)) * 100.0 + 0.5);
-  avail = vfs.f_bavail;
+  avail = vfs.f_bavail * (vfs.f_bsize / 1024);
 #ifdef STRUCT_STATVFS_HAS_F_FRSIZE
   if (vfs.f_frsize > 255)
-    avail = avail * (vfs.f_frsize / 1024);
+    avail = vfs.f_bavail * (vfs.f_frsize / 1024);
 #endif
   iserror = (disks[disknum].minimumspace >= 0 ?
              avail < disks[disknum].minimumspace :
@@ -406,19 +407,19 @@ u_char *var_extensible_disk(struct variable *vp,
 #endif
   switch (vp->magic) {
     case DISKTOTAL:
-      long_ret = vfs.f_blocks;
+      long_ret = vfs.f_blocks * (vfs.f_bsize / 1024);
 #ifdef STRUCT_STATVFS_HAS_F_FRSIZE
       if (vfs.f_frsize > 255)
-        long_ret = long_ret * (vfs.f_frsize / 1024);
+        long_ret = vfs.f_blocks * (vfs.f_frsize / 1024);
 #endif
       return((u_char *) (&long_ret));
     case DISKAVAIL:
       return((u_char *) (&avail));
     case DISKUSED:
-      long_ret = (vfs.f_blocks - vfs.f_bfree);
+      long_ret = (vfs.f_blocks - vfs.f_bfree) * (vfs.f_bsize / 1024);
 #ifdef STRUCT_STATVFS_HAS_F_FRSIZE
       if (vfs.f_frsize > 255)
-        long_ret = long_ret * (vfs.f_frsize / 1024);
+        long_ret = (vfs.f_blocks - vfs.f_bfree) * (vfs.f_frsize / 1024);
 #endif
       return((u_char *) (&long_ret));
     case DISKPERCENT:

@@ -631,7 +631,7 @@ write_snmpTargetParamsMPModel(
   /* row exists, check if it is changeable */
   if (temp_struct->storageType == SNMP_STORAGE_READONLY) {
     DEBUGMSGTL(("snmpTargetParamsEntry","write to snmpTargetParamMPModel : row is read only\n"));
-    return SNMP_ERR_READONLY;
+    return SNMP_ERR_NOTWRITABLE;
   }
   /* check if row is active */
   if (temp_struct->rowStatus == SNMP_ROW_ACTIVE) {
@@ -692,7 +692,7 @@ write_snmpTargetParamsSecurityModel(
   /* row exists, check if it is changeable */
   if (temp_struct->storageType == SNMP_STORAGE_READONLY) {
     DEBUGMSGTL(("snmpTargetParamsEntry","write to snmpTargetParamSecurityModel : row is read only\n"));
-    return SNMP_ERR_READONLY;
+    return SNMP_ERR_NOTWRITABLE;
   }
   /* check if row active */
   if (temp_struct->rowStatus == SNMP_ROW_ACTIVE) {
@@ -757,7 +757,7 @@ write_snmpTargetParamsSecurityName(
   /* row exists, check if it is changeable */
   if (temp_struct->storageType == SNMP_STORAGE_READONLY) {
     DEBUGMSGTL(("snmpTargetParamsEntry","write to snmpTargetParamsSecurityName : row is read only\n"));
-    return SNMP_ERR_READONLY;
+    return SNMP_ERR_NOTWRITABLE;
   }
   /* check if row active */
   if (temp_struct->rowStatus == SNMP_ROW_ACTIVE) {
@@ -822,7 +822,7 @@ write_snmpTargetParamsSecurityLevel(
   /* row exists, check if it is changeable */
   if (temp_struct->storageType == SNMP_STORAGE_READONLY) {
     DEBUGMSGTL(("snmpTargetParamsEntry","write to snmpTargetParamsSecurityLevel : row is read only\n"));
-    return SNMP_ERR_READONLY;
+    return SNMP_ERR_NOTWRITABLE;
   }
   /* check if row active */
   if (temp_struct->rowStatus == SNMP_ROW_ACTIVE) {
@@ -980,7 +980,7 @@ write_snmpTargetParamsRowStatus(
     /* check if it is changeable */
     if (temp_struct->storageType == SNMP_STORAGE_READONLY) {
       DEBUGMSGTL(("snmpTargetParamsEntry","write to snmpTargetParamRowStatus : row is read only\n"));
-      return SNMP_ERR_READONLY;
+      return SNMP_ERR_NOTWRITABLE;
     }
     /* check if row is to be destroyed (note: it is ok to destroy notReady row!) */
     else if (long_ret == SNMP_ROW_DESTROY)  {

@@ -106,6 +106,8 @@
 #include "vmstat.h"
 #include "auto_nlist.h"
 
+static FindVarMethod var_extensible_vmstat;
+
 void init_vmstat(void)
 {
   struct variable2 extensible_vmstat_variables[] = {
@@ -239,6 +241,7 @@ unsigned vmstat (int iindex)
   }
 }
 
+static
 unsigned char *var_extensible_vmstat(struct variable *vp,
 				     oid *name,
 				     size_t *length,
