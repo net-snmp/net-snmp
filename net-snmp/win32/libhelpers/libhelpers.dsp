@@ -159,6 +159,10 @@ SOURCE=..\..\agent\helpers\table_iterator.c
 
 SOURCE=..\..\agent\helpers\watcher.c
 # End Source File
+# Begin Source File
+
+SOURCE=..\..\agent\helpers\stash_cache.c
+# End Source File
 # End Group
 # Begin Group "Header Files"
 
