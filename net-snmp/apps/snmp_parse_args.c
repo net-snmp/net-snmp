@@ -333,7 +333,7 @@ snmp_parse_args(int argc,
       usage();
       exit(1);
     }
-    session->community = (unsigned char *)argv[arg];
+    session->community = (unsigned char *)strdup(argv[arg]);
     session->community_len = strlen((char *)argv[arg]);
     arg++;
 #ifdef USE_V2PARTY_PROTOCOL

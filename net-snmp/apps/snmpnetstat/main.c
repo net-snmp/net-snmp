@@ -385,7 +385,7 @@ int main(int argc, char *argv[])
     session.remote_port = dest_port;
     if (version == SNMP_VERSION_1 || version == SNMP_VERSION_2c){
         session.version = version;
-        session.community = (u_char *)community;
+        session.community = (u_char *)strdup(community);
         session.community_len = strlen((char *)community);
     } else if (version == SNMP_VERSION_2p){
         session.version = version;
