@@ -60,7 +60,8 @@ $m2c_const_dcl $m2c_enum_mask $m2c_const_del ($m2c_mask)
 
 @      if ($node.enums == 1) && ("$node.perltype" ne "BITS")@
     /*
-     * TODO: value mapping (set notes at top of file)
+     * TODO:
+     * value mapping (set notes at top of file)
      */
 @         foreach $e $v enum@
 ##           # this enum should be unique per column, so always use 
