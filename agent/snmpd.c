@@ -405,6 +405,12 @@ setup_log(int restart, int dont_zero, int stderr_log, int syslog_log,
     static int stderr_log_s = 0;
     static int syslog_log_s = 0;
 
+    //
+    // this system needs rethinking, as it doesn't work
+    // well with the new linked list of log handlers..
+    // eg, there may be multiple file logs, logs to
+    // stderr and stdout, etc...
+    //
     if (restart == 0) {
 	if (logfile != NULL) {
 	    strncpy(logfile_s, logfile, PATH_MAX);
@@ -414,11 +420,14 @@ setup_log(int restart, int dont_zero, int stderr_log, int syslog_log,
 	syslog_log_s = syslog_log;
     }
 
-    if (stderr_log_s) {
-	snmp_enable_stderrlog();
-    } else {
-	snmp_disable_stderrlog();
-    }
+    // since stderr_log is never set now, and the log
+    // function now checks enabled, this disables stderr logging...
+    //
+//     if (stderr_log_s) {
+// 	snmp_enable_stderrlog();
+//     } else {
+// 	snmp_disable_stderrlog();
+//     }
 
     if (logfile_s[0]) {
 	snmp_enable_filelog(logfile_s, dont_zero_s);
