@@ -6,6 +6,7 @@ require Tk::FileSelect;
 
 $host = 'localhost';
 $community = 'public';
+$port = '161';
 
 $graphtime=5;
 $graphdelta=1;
@@ -92,6 +93,8 @@ $hostEntry = $bFrame->Entry(-textvariable => \$host, -width => 12);
 $hostEntry->pack(-side => 'left');
 $commEntry = $bFrame->Entry(-textvariable => \$community, -width => 12);
 $commEntry->pack(-side => 'left');
+$portEntry = $bFrame->Entry(-textvariable => \$port, -width => 12);
+$portEntry->pack(-side => 'left');
 $bFrame->Button(-text => 'graph', -command => \&snmpgraph)->pack(-side => 'right');
 $bFrame->Button(-text => 'table', -command => \&snmptable)->pack(-side => 'right');
 $bFrame->Button(-text => 'walk', -command => \&snmpwalk)->pack(-side => 'right');
@@ -122,6 +125,7 @@ sub snmpsetup {
     my $oid = $hlist->selectionGet();
     my $tag = SNMP::translateObj($oid);
     my $sess = new SNMP::Session(DestHost => $host, Community => $community,
+				 RemotePort => $port,
 				 UseLongNames => 1, Timeout => 5000000);
     my $var = new SNMP::Varbind([$oid]);
     initText();
