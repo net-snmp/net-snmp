@@ -896,8 +896,7 @@ wrap_up_request(struct agent_snmp_session *asp, int status)
             (asp->pdu->command == SNMP_MSG_SET ?
              STAT_SNMPINTOTALSETVARS : STAT_SNMPINTOTALREQVARS ),
             count_varbinds( asp->pdu->variables ));
-    }
-    else {
+    } else {
         /*
          * Use a copy of the original request
          *   to report failures.
@@ -1346,7 +1345,8 @@ create_subtree_cache(struct agent_snmp_session  *asp) {
 
 /* this function is only applicable in getnext like contexts */
 int
-reassign_requests(struct agent_snmp_session  *asp) {
+reassign_requests(struct agent_snmp_session  *asp)
+{
     /* assume all the requests have been filled or rejected by the
        subtrees, so reassign the rejected ones to the next subtree in
        the chain */
@@ -1358,7 +1358,7 @@ reassign_requests(struct agent_snmp_session  *asp) {
 
     /* malloc new space */
     asp->treecache =
-        (tree_cache *) calloc(asp->treecache_len, sizeof(tree_cache));
+	(tree_cache *)calloc(asp->treecache_len, sizeof(tree_cache));
     asp->treecache_num = -1;
 
     for(i = 0; i < asp->vbcount; i++) {
@@ -1366,6 +1366,9 @@ reassign_requests(struct agent_snmp_session  *asp) {
             if (!add_varbind_to_cache(asp, asp->requests[i].index,
 				      asp->requests[i].requestvb,
 				      asp->requests[i].subtree->next)) {
+		if (old_treecache != NULL) {
+		    free(old_treecache);
+		}
                 return SNMP_ERR_GENERR;
 	    }
         } else if (asp->requests[i].requestvb->type == ASN_PRIV_RETRY) {
@@ -1374,12 +1377,17 @@ reassign_requests(struct agent_snmp_session  *asp) {
             if (!add_varbind_to_cache(asp, asp->requests[i].index,
                                       asp->requests[i].requestvb,
                                       asp->requests[i].subtree)) {
+		if (old_treecache != NULL) {
+		    free(old_treecache);
+		}
                 return SNMP_ERR_GENERR;
 	    }
         }
     }
 
-    free(old_treecache);
+    if (old_treecache != NULL) {
+	free(old_treecache);
+    }
     return SNMP_ERR_NOERROR;
 }
 
