@@ -18,6 +18,7 @@
 #include <dmalloc.h>
 #endif
 
+
 /** @defgroup watcher watcher: watch a specified variable and process
  *   it as an instance or scalar object
  *  @ingroup handler
@@ -170,3 +171,76 @@ netsnmp_watcher_helper_handler(netsnmp_mib_handler *handler,
     return SNMP_ERR_NOERROR;
 }
 
+
+    /***************************
+     *
+     * A specialised form of the above, reporting
+     *   the sysUpTime indicated by a given timestamp
+     *
+     ***************************/
+
+netsnmp_mib_handler *
+netsnmp_get_watched_timestamp_handler(void)
+{
+    return netsnmp_create_handler("watcher",
+                                  netsnmp_watched_timestamp_handler);
+}
+
+int
+netsnmp_register_watched_timestamp(netsnmp_handler_registration *reginfo,
+                                   marker_t *timestamp)
+{
+    netsnmp_mib_handler *whandler;
+
+    whandler         = netsnmp_get_watched_timestamp_handler();
+    whandler->myvoid = (void *)timestamp;
+    netsnmp_inject_handler(reginfo, whandler);
+    return netsnmp_register_scalar(reginfo);   /* XXX - or instance? */
+}
+
+
+int
+netsnmp_watched_timestamp_handler(netsnmp_mib_handler *handler,
+                               netsnmp_handler_registration *reginfo,
+                               netsnmp_agent_request_info *reqinfo,
+                               netsnmp_request_info *requests)
+{
+    marker_t timestamp = (marker_t) handler->myvoid;
+    int      uptime;
+    int      cmp;
+
+    DEBUGMSGTL(("helper:watcher:timestamp",
+                               "Got request:  %d\n", reqinfo->mode));
+    cmp = snmp_oid_compare(requests->requestvb->name,
+                           requests->requestvb->name_length,
+                           reginfo->rootoid, reginfo->rootoid_len);
+
+    DEBUGMSGTL(( "helper:watcher:timestamp", "  oid:", cmp));
+    DEBUGMSGOID(("helper:watcher:timestamp", requests->requestvb->name,
+                                   requests->requestvb->name_length));
+    DEBUGMSG((   "helper:watcher:timestamp", "\n"));
+
+
+
+    switch (reqinfo->mode) {
+        /*
+         * data requests 
+         */
+    case MODE_GET:
+        uptime = netsnmp_marker_uptime( timestamp );
+        snmp_set_var_typed_value(requests->requestvb,
+                                 ASN_TIMETICKS,
+                                 (u_char *) &uptime,
+                                 sizeof(uptime));
+        break;
+
+        /*
+         * Timestamps are inherently Read-Only,
+         *  so don't need to support SET requests.
+         */
+    }
+    if (handler->next && handler->next->access_method)
+        return netsnmp_call_next_handler(handler, reginfo, reqinfo,
+                                         requests);
+    return SNMP_ERR_NOERROR;
+}
