@@ -898,7 +898,7 @@ AC_ARG_WITH(libwrap,
       AC_TRY_LINK([#include <tcpd.h>
 int allow_severity = 0;
 int deny_severity  = 0;
-],[hosts_access()],
+],[hosts_access((void *)0)],
 	  AC_MSG_RESULT(yes)
 	  AC_DEFINE(USE_LIBWRAP)
 	  test "$with_libwrap" != no && WRAPLIBS="-L$with_libwrap/lib"
@@ -911,7 +911,7 @@ int deny_severity  = 0;
 	  AC_TRY_LINK([#include <tcpd.h>
 int allow_severity = 0;
 int deny_severity  = 0;
-],[hosts_access()],
+],[hosts_access((void *)0)],
 	      AC_MSG_RESULT(yes)
 	      test "$with_libwrap" != no && WRAPLIBS="-L$with_libwrap/lib"
 	      WRAPLIBS="$WRAPLIBS -lwrap", AC_MSG_RESULT(no)),
