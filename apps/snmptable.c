@@ -274,6 +274,9 @@ void get_field_names( char* tblname )
   struct tree *tbl = NULL;
   int going = 1;
 
+  name_p = string_buf;
+  strcpy(string_buf, "");
+
   if( tblname )
     tbl = find_tree_node( tblname, -1 );
   if( tbl )
