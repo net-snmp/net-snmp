@@ -10,6 +10,7 @@ AC_PROG_INSTALL
 AC_PROG_LN_S
 AC_PROG_MAKE_SET
 AC_PROG_RANLIB
+AC_PATH_PROG(PSPROG,ps)
 
 AC_AIX
 
@@ -118,27 +119,34 @@ AC_HEADER_TIME
 
 dnl checking for alpha's ortentry vs rtentry
 AC_MSG_CHECKING(for struct rtentry)
-AC_EGREP_CPP(ortentry, [#define KERNEL
+AC_CACHE_VAL(ac_cv_struct_rtentry,
+[AC_EGREP_CPP(ortentry, [#define KERNEL
 #include<net/route.h>
-], AC_DEFINE(RTENTRY, struct ortentry) RTFOUND=ortentry, AC_DEFINE(RTENTRY,struct rtentry) RTFOUND=rtentry)
-AC_MSG_RESULT($RTFOUND)
+],  ac_cv_struct_rtentry=ortentry,  ac_cv_struct_rtentry=rtentry )
+])
+if test $ac_cv_struct_rtentry = "rtentry" ; then
+  AC_DEFINE(RTENTRY,struct rtentry)
+else
+  AC_DEFINE(RTENTRY,struct ortentry)
+fi
+AC_MSG_RESULT($ac_cv_struct_rtentry)
 
 dnl Check ps args
 AC_MSG_CHECKING(for correct flags to ps)
-if test "`(/bin/ps -e 2>&1) | egrep ' ps$' | awk '{print $NF}'`" = "ps" ; then
-  AC_DEFINE(PSCMD,"/bin/ps -e")
-  PSARGS="-e"
-elif test "`(/bin/ps -el 2>&1) | egrep ' ps$' | awk '{print $NF}''`" = "ps" ; then
-  AC_DEFINE(PSCMD,"/bin/ps -el")
-  PSARGS="-el"
-elif test "`(/bin/ps -acx 2>&1) | egrep ' ps$' | awk '{print $NF}''`" = "ps" ; then
-  AC_DEFINE(PSCMD,"/bin/ps -acx")
-  PSARGS="-acx"
+AC_CACHE_VAL(ac_cv_ps_flags,
+[if test "`($PSPROG -e 2>&1) | egrep ' ps$' | awk '{print $NF}'`" = "ps" ; then
+  ac_cv_ps_flags="-e"
+elif test "`($PSPROG -el 2>&1) | egrep ' ps$' | awk '{print $NF}''`" = "ps" ; then
+  ac_cv_ps_flags="-el"
+elif test "`($PSPROG -acx 2>&1) | egrep ' ps$' | awk '{print $NF}''`" = "ps" ; then
+  ac_cv_ps_flags="-acx"
 else
-  AC_DEFINE(PSCMD,"/bin/ps -acx")
-  PSARGS="unknown...  Guessing:  -acx"
-fi
-AC_MSG_RESULT($PSARGS)
+  AC_MSG_WARN(Unable to determine valid ps flags...  defaulting...)
+  ac_cv_ps_flags="-acx"
+fi]) dnl done checking for ps args
+AC_MSG_RESULT($ac_cv_ps_flags)
+AC_DEFINE_UNQUOTED(PSCMD, "$PSPROG $ac_cv_ps_flags")
+
 
 dnl Checks for byte order
 AC_C_BIGENDIAN
