@@ -70,6 +70,9 @@ SOFTWARE.
 #if HAVE_SYS_SOCKET_H
 #include <sys/socket.h>
 #endif
+#if HAVE_SYS_UN_H
+#include <sys/un.h>
+#endif
 #if HAVE_NETDB_H
 #include <netdb.h>
 #endif
@@ -859,7 +862,7 @@ snmp_sess_open(struct snmp_session *in_session)
     struct hostent *hp;
     struct snmp_pdu *pdu, *response;
     int status;
-    size_t i;
+    size_t i, addr_size;
 
     if (Reqid == 0)
       init_snmp_session();
@@ -911,6 +914,7 @@ snmp_sess_open(struct snmp_session *in_session)
         meIp = (struct sockaddr_in*)&(isp->me);
         meIp->sin_addr.s_addr = INADDR_ANY;
         meIp->sin_port = htons(session->local_port);
+        addr_size = sizeof( struct sockaddr_in );
     }
     else if ( isp->me.sa_family == AF_UNIX ) {
         if ( session->local_port != 0 ) {	/* 'local' implies server */
@@ -929,6 +933,10 @@ snmp_sess_open(struct snmp_session *in_session)
 #endif
 
         }
+        addr_size = sizeof( struct sockaddr_un );
+    }
+    else {
+        addr_size = sizeof( struct sockaddr );
     }
 
     /* Set up connections */
@@ -967,7 +975,7 @@ snmp_sess_open(struct snmp_session *in_session)
 
 		/* Client Unix-domain stream sockets don't need to 'bind' */
 #endif
-    if (bind(sd, (struct sockaddr *)&isp->me, sizeof(isp->me)) != 0){
+    if (bind(sd, (struct sockaddr *)&isp->me, addr_size) != 0){
 	snmp_errno = SNMPERR_BAD_LOCPORT;
 	in_session->s_snmp_errno = SNMPERR_BAD_LOCPORT;
 	in_session->s_errno = errno;
@@ -2962,7 +2970,7 @@ snmp_sess_async_send(void *sessp,
     struct sockaddr_in *isp_addr;
     struct sockaddr_in *pduIp = (struct sockaddr_in *)&(pdu->address);
     struct timeval tv;
-    int result;
+    int result, addr_size;
 
     session = slp->session; isp = slp->internal;
     session->s_snmp_errno = 0;
@@ -2998,6 +3006,12 @@ snmp_sess_async_send(void *sessp,
 	}
 	memmove(&pdu->address, &(isp->addr), sizeof(isp->addr));
     }
+    if (pdu->address.sa_family == AF_INET)
+	addr_size = sizeof( struct sockaddr_in );
+    else if (pdu->address.sa_family == AF_UNIX)
+	addr_size = sizeof( struct sockaddr_un );
+    else
+	addr_size = sizeof( struct sockaddr );
 
     /* build the message to send */
     if (isp->hook_build)
@@ -3019,7 +3033,7 @@ snmp_sess_async_send(void *sessp,
         result = send(isp->sd, (char *)packet, length, 0);
     else
         result = sendto(isp->sd, (char *)packet, length, 0,
-	       (struct sockaddr *)&pdu->address, sizeof(pdu->address));
+	       (struct sockaddr *)&pdu->address, addr_size);
     if ( result < 0){
 	snmp_errno = SNMPERR_BAD_SENDTO;
 	session->s_snmp_errno = SNMPERR_BAD_SENDTO;
