@@ -818,8 +818,8 @@ u_char *var_vacm_sec2group(struct variable *vp,
 	*cp = 0;
 	vacm_scanGroupInit();
 	while ((gp = vacm_scanGroupNext()) != NULL) {
-	    if (gp->securityModel > secmodel ||
-		(gp->securityModel == secmodel && strcmp(gp->securityName, secname) > 0))
+	    if (gp->securityModel > (int)secmodel ||
+		(gp->securityModel == (int)secmodel && strcmp(gp->securityName, secname) > 0))
 		break;
 	}
 	if (gp) {
@@ -993,9 +993,9 @@ u_char *var_vacm_access(struct variable *vp,
 	    cmp = strcmp(gp->contextPrefix, contextPrefix);
 	    if (cmp > 0) break;
 	    if (cmp < 0) continue;
-	    if (gp->securityModel > secmodel) break;
-	    if (gp->securityModel < secmodel) continue;
-	    if (gp->securityLevel > seclevel) break;
+	    if (gp->securityModel > (int)secmodel) break;
+	    if (gp->securityModel < (int)secmodel) continue;
+	    if (gp->securityLevel > (int)seclevel) break;
 	}
 	if (gp) {
 	    *length = 11;

@@ -332,12 +332,12 @@ realloc_output_temp_bfr(u_char **buf, size_t *buf_len, size_t *out_len,
   temp_to_write = temp_len;
 
   if (options->precision != UNDEF_PRECISION && 
-      temp_to_write > options->precision) {
+      (int)temp_to_write > options->precision) {
     temp_to_write = options->precision;
   }
 
   /*  Handle leading characters.  */
-  if ((!options->left_justify) && (temp_to_write < options->width)) {
+  if ((!options->left_justify) && ((int)temp_to_write < options->width)) {
     zeroes_to_write = options->precision - temp_to_write;
     if (!is_numeric_cmd(options->cmd)) {
       zeroes_to_write = 0;
@@ -370,7 +370,7 @@ realloc_output_temp_bfr(u_char **buf, size_t *buf_len, size_t *out_len,
   }
 
   /*  Handle trailing characters.  */
-  if ((options->left_justify) && (temp_to_write < options->width)) {
+  if ((options->left_justify) && ((int)temp_to_write < options->width)) {
     for (char_to_write = options->width - temp_to_write;
 	 char_to_write > 0;
 	 char_to_write--) {
