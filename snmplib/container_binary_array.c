@@ -509,28 +509,6 @@ _ba_get_subset(netsnmp_container *container, void *data)
     return va;
 }
 
-int
-netsnmp_container_get_binary_array_noalloc(netsnmp_container *c)
-{
-    if (NULL==c)
-        return -1;
-    
-    c->private = netsnmp_binary_array_initialize();
-        
-    c->get_size = _ba_size;
-    c->init = NULL;
-    c->cfree = _ba_free;
-    c->insert = _ba_insert;
-    c->remove = _ba_remove;
-    c->find = _ba_find;
-    c->find_next = _ba_find_next;
-    c->get_subset = _ba_get_subset;
-    c->get_iterator = NULL;
-    c->for_each = _ba_for_each;
-
-    return 0;
-}
-
 netsnmp_container *
 netsnmp_container_get_binary_array(void)
 {
@@ -543,10 +521,18 @@ netsnmp_container_get_binary_array(void)
         return NULL;
     }
 
-    if (0 != netsnmp_container_get_binary_array_noalloc(c)) {
-        SNMP_FREE(c);
-        return NULL;
-    }
+    c->private = netsnmp_binary_array_initialize();
+        
+    c->get_size = _ba_size;
+    c->init = NULL;
+    c->cfree = _ba_free;
+    c->insert = _ba_insert;
+    c->remove = _ba_remove;
+    c->find = _ba_find;
+    c->find_next = _ba_find_next;
+    c->get_subset = _ba_get_subset;
+    c->get_iterator = NULL;
+    c->for_each = _ba_for_each;
         
     return c;
 }
@@ -556,9 +542,7 @@ netsnmp_container_get_binary_array_factory(void)
 {
     static netsnmp_factory f = { "binary_array",
                                  (netsnmp_factory_produce_f*)
-                                 netsnmp_container_get_binary_array,
-                                 (netsnmp_factory_produce_noalloc_f*)
-                                 netsnmp_container_get_binary_array_noalloc };
+                                 netsnmp_container_get_binary_array };
     
     return &f;
 }
