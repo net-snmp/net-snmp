@@ -1,0 +1,35 @@
+.TH "baby_steps: calls your handler in baby_steps for set processing." 3 "17 Oct 2003" "net-snmp" \" -*- nroff -*-
+.ad l
+.nh
+.SH NAME
+baby_steps: calls your handler in baby_steps for set processing. \- 
+.SS "Functions"
+
+.in +1c
+.ti -1c
+.RI "netsnmp_mib_handler * \fBnetsnmp_get_baby_steps_handler\fP (u_long modes)"
+.br
+.RI "\fIreturns a baby_steps handler that can be injected into a given handler chain.\fP"
+.ti -1c
+.RI "void \fBnetsnmp_init_baby_steps_helper\fP (void)"
+.br
+.RI "\fIinitializes the baby_steps helper which then registers a baby_steps handler as a run-time injectable handler for configuration file use.\fP"
+.in -1c
+.SH "FUNCTION DOCUMENTATION"
+.PP 
+.SS "netsnmp_mib_handler* netsnmp_get_baby_steps_handler (u_long modes)"
+.PP
+returns a baby_steps handler that can be injected into a given handler chain.
+.PP
+Definition at line 49 of file baby_steps.c.
+.PP
+References netsnmp_create_handler().
+.PP
+Referenced by netsnmp_init_baby_steps_helper().
+.SS "void netsnmp_init_baby_steps_helper (void)"
+.PP
+initializes the baby_steps helper which then registers a baby_steps handler as a run-time injectable handler for configuration file use.
+.PP
+Definition at line 199 of file baby_steps.c.
+.PP
+References netsnmp_get_baby_steps_handler(), and netsnmp_register_handler_by_name().
