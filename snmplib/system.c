@@ -131,6 +131,79 @@ SOFTWARE.
 #endif
 
 
+int
+netsnmp_daemonize(int quit_immediately, int stderr_log)
+{
+    int i;
+    DEBUGMSGT(("daemonize","deamonizing...\n"));
+#if HAVE_FORK
+    /*
+     * Fork to return control to the invoking process and to
+     * guarantee that we aren't a process group leader.
+     */
+    i = fork();
+    if (i != 0) {
+        /* Parent. */
+        DEBUGMSGT(("daemonize","first fork returned %d.\n", i));
+        if(i == -1) {
+            snmp_log(LOG_ERR,"first fork failed (errno %d) in "
+                     "netsnmp_daemonize()\n", errno);
+            return -1;
+        }
+        if (quit_immediately) {
+            DEBUGMSGT(("daemonize","parent exiting\n"));
+            exit(0);
+        }
+    } else {
+        /* Child. */
+#ifdef HAVE_SETSID
+        /* Become a process/session group leader. */
+        setsid();
+#endif
+        /*
+         * Fork to let the process/session group leader exit.
+         */
+        if ((i = fork()) != 0) {
+            DEBUGMSGT(("daemonize","second fork returned %d.\n", i));
+            if(i == -1) {
+                snmp_log(LOG_ERR,"second fork failed (errno %d) in "
+                         "netsnmp_daemonize()\n", errno);
+            }
+            /* Parent. */
+            exit(0);
+        }
+#ifndef WIN32
+        else {
+            /* Child. */
+            
+            DEBUGMSGT(("daemonize","child continuing\n"));
+
+            /* Avoid keeping any directory in use. */
+            chdir("/");
+            
+            if (!stderr_log) {
+                /*
+                 * Close inherited file descriptors to avoid
+                 * keeping unnecessary references.
+                 */
+                close(0);
+                close(1);
+                close(2);
+                
+                /*
+                 * Redirect std{in,out,err} to /dev/null, just in
+                 * case.
+                 */
+                open("/dev/null", O_RDWR);
+                dup(0);
+                dup(0);
+            }
+        }
+#endif /* !WIN32 */
+    }
+#endif /* HAVE_FORK */
+    return 0;
+}
 
 /*
  * ********************************************* 
