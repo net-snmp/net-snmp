@@ -76,24 +76,43 @@ sub usage {
 }	
 
 my @origargs = @ARGV;
+my $args_done = 0;
 while($#ARGV >= 0) {
     $_ = shift;
-    $configfile = shift if (/^-c/);
-    $debug = 1 if (/^-d/);
-    if (/^-S/) {
-	my $expr = shift;
-	my ($var, $val) = ($expr =~ /([^=]*)=(.*)/);
-	die "no variable specified for -S flag." if (!$var);
+    if (/^-/) {
+      if ($args_done != 0) {
+        warn "all argument must be specified before the mibNode!\n";
+        usage;
+        exit 1;
+      } elsif (/^-c/) {
+        $configfile = shift;
+      } elsif (/^-d/) {
+        $debug = 1;
+      } elsif (/^-S/) {
+        my $expr = shift;
+        my ($var, $val) = ($expr =~ /([^=]*)=(.*)/);
+        die "no variable specified for -S flag." if (!$var);
         $assignments{$var} = $val;
-    }
-    $quiet = 1 if (/^-q/);
-    $noindent = 1 if (/^-i/);
-    usage && exit(1) if (/^-h/);
-    $outputName = shift if (/^-f/);
-    $oid = $_ if (/^[^-]/);
-    if (/^-I/) {
+      } elsif (/^-q/) {
+        $quiet = 1;
+      } elsif (/^-i/) {
+        $noindent = 1;
+      } elsif (/^-h/) {
+        usage && exit(1);
+      } elsif (/^-f/) {
+        $outputName = shift;
+      } elsif (/^-I/) {
 	my $dirs = shift;
 	push @search_dirs, split(/,/,$dirs);
+      } else {
+        warn "Unknown option '$_'\n";
+        usage;
+        exit 1;
+      }
+    } else {
+      $args_done = 1;
+      warn "Replacing previous mibNode $oid with $_\n" if ($oid);
+      $oid = $_ ;
     }
 }
  
@@ -166,7 +185,7 @@ your MIB node.  Once snmptranslate works, then come back and try mib2c
 again.
 
 ";
-exit;
+exit 1;
 }
 
 # setup
@@ -187,14 +206,14 @@ setup_data($mibnode);
 
 if(($ENV{HOME}) && (-f "$ENV{HOME}/.snmp/mib2c.conf")) {
   $fh = open_conf("$ENV{HOME}/.snmp/mib2c.conf");
-  process();
+  process("-balanced");
   $fh->close;
 }
 
 my $defaults = find_conf("default-$configfile",1);
 if (-f "$defaults" ) {
   $fh = open_conf($defaults);
-  process();
+  process("-balanced");
   $fh->close;
 }
 
@@ -206,7 +225,7 @@ if ($#theassignments != -1) {
 }
 $configfile = find_conf($configfile,0);
 $fh = open_conf($configfile);
-process();
+process("-balanced");
 $fh->close;
 
 if (!$noindent) {
@@ -216,6 +235,11 @@ if (!$noindent) {
     print STDERR "running indent on $i\n" if (!$quiet);
     system("indent -orig -nbc -bap -nut -nfca -T netsnmp_mib_handler -T netsnmp_handler_registration -T netsnmp_delegated_cache -T netsnmp_mib_handler_methods -T netsnmp_old_api_info -T netsnmp_old_api_cache -T netsnmp_set_info -T netsnmp_request_info -T netsnmp_set_info -T netsnmp_tree_cache -T netsnmp_agent_request_info -T netsnmp_cachemap -T netsnmp_agent_session -T netsnmp_array_group_item -T netsnmp_array_group -T netsnmp_table_array_callbacks -T netsnmp_table_row -T netsnmp_table_data -T netsnmp_table_data_set_storage -T netsnmp_table_data_set -T netsnmp_column_info -T netsnmp_table_registration_info -T netsnmp_table_request_info -T netsnmp_iterator_info -T netsnmp_data_list -T netsnmp_oid_array_header -T netsnmp_oid_array_header_wrapper -T netsnmp_oid_stash_node -T netsnmp_pdu -T netsnmp_request_list -T netsnmp_callback_pass -T netsnmp_callback_info -T netsnmp_transport -T netsnmp_transport_list -T netsnmp_tdomain $i");
   }
+}
+
+sub m2c_die {
+  warn "ERROR: ". $_[0] . "\n";
+  die "  at $currentfile:$currentline\n";
 }
 
 sub tocommas {
@@ -351,8 +375,10 @@ sub process_vars {
 #   @perleval STUFF@
 #     evaluates STUFF directly in perl.  Note that all mib2c variables
 #     interpereted within .conf files are in $vars{NAME}.
-#   @skip@
-#     skips everything till the appropriately matched @end@
+#   @next@
+#     restart foreach; should only be used inside a conditional.
+#     skips out of current conditional, then continues to skip to
+#     end for the current foreach clause.
 #   @if expression@
 #      evaluates expression, and if expression is true processes
 #      contained part until appropriate @end@ is reached.
@@ -366,7 +392,7 @@ sub skippart {
   while(<$fh>) {
     $currentline++;
     $_ = process_vars($_) if ($debug);
-    print "$currentfile.$currentline.S$endcount.$rtnelse:$_" if ($debug);
+    print "$currentfile.$currentline:P$currentlevel:S$endcount.$rtnelse:$_" if ($debug);
         next if ( /^\s*\#\#/ ); #                          noop, it's a comment
         next if (! /^\s*\@/ ); #                                        output
         if (! /^\s*\@.*\@/ ) {
@@ -378,6 +404,9 @@ sub skippart {
 	    return "end" if ($endcount == 1);
 	    $endcount--;
 	}
+	elsif (/\@\s*elseif.*\@/) {
+          m2c_die "use 'elsif' instead of 'elseif'\n";
+        }
 	elsif (/\@\s*else\@/) {
 	    return "else" if (($endcount == 1) && ($rtnelse == 1));
 	}
@@ -388,7 +417,9 @@ sub skippart {
 	    $endcount++;
 	}
     }
-  return "eof"
+  print "skippart EOF\n";
+  m2c_die "unbalanced code detected in skippart: EOF when $endcount levels deep" if($endcount != 1);
+  return "eof";
 }
 
 sub close_file {
@@ -422,7 +453,7 @@ sub open_file {
   }
   return if ($outputs{$name});
   $outputs{$name} = new IO::File;
-  $outputs{$name}->open(">$spec") || die "failed to open $name";
+  $outputs{$name}->open(">$spec") || m2c_die "failed to open $name";
   print STDERR "writing to $name\n" if (!$quiet && !$written{$name});
   $written{$name} = '1';
 }
@@ -442,7 +473,7 @@ sub process_file {
 
   $fh = open_conf($file);
   $currentline = 0;
-  process();
+  process("-balanced");
   $fh->close();
 
   $fh = $oldfh;
@@ -456,17 +487,25 @@ sub process_file {
 sub process {
   my $arg = shift;
   my $elseok = 0;
+  my $balanced = 0;
+  my $startlevel;
+  my $return = "eof";
   while ($arg =~ s/-(\w+)\s*//) {
     $elseok = 1 if ($1 eq "elseok");
+    $balanced = 1 if ($1 eq "balanced");
   }
 
   $currentlevel++;
+  $startlevel = $currentlevel;
+  if($balanced) {
+    $balanced = $currentlevel;
+  }
     while(<$fh>) {
       $currentline++;
       if ($debug) {
 #        my $line = process_vars($_);
 #        chop $line;
-        print "$currentfile.$currentline.P$currentlevel.$elseok:$_";
+        print "$currentfile.$currentline:P$currentlevel.$elseok:$return:$_";
       }
 
         next if (/^\s*\#\#/); #                            noop, it's a comment
@@ -492,6 +531,8 @@ sub process {
           else {
             $strict_unk_token = 0;
           }
+	} elsif (/\@\s*balanced\@/) { #                               BALANCED
+          $balanced = $currentlevel;
 	} elsif (/\@\s*open\s+([^\@]+)\@/) { #                            OPEN
 	    my $arg = $1;
 	    my ($multiple) = (0);
@@ -538,8 +579,8 @@ sub process {
             close_files;
 	    %outputs = %oldout;
 	} elsif (/\@\s*pop\s*\@/) { #                                     POP
-          $currentlevel--;
-          return "pop";
+          $return = "pop";
+          last;
 	} elsif (/\@\s*include (.*)\@/) { #                            INCLUDE
 	    my $arg = $1;
 	    my ($missingok) = (0);
@@ -557,43 +598,45 @@ sub process {
             my $file = find_conf(process_vars($arg),1); # missingok
             $ok = (-f $file);
           } else {
-            die "unknown if modifier ($type)\n";
+            m2c_die "unknown if modifier ($type)\n";
           }
-          my $rtn;
           # act on condition
           if ($ok) {
-            $rtn = process("-elseok");
+            $return = process("-elseok");
           } else {
-            $rtn = skippart("-else");
-            $rtn = process("-elseok") if ($rtn eq "else");
+            $return = skippart("-else");
+            $return = process("-elseok") if ($return eq "else");
           }
-          if ($rtn eq "break") {
-            skippart();
-            $currentlevel--;
-            return "end";
+          if ($return eq "next") {
+            $return = skippart();
+            m2c_die("unbalanced code detected while exiting next/2 (returned $return)") if ($return ne "end");
+#            $return = "next";
+            last;
           }
-	} elsif (/\@\s*els(e|if).*\@/) { #                         ELSE/ELSEIF
+          if (($return ne "end") && ($return ne "else")) {
+            m2c_die "unbalanced if / return $return\n";
+          }
+        } elsif (/\@\s*elseif.*\@/) { #                           bogus elseif
+          m2c_die "error: use 'elsif' instead of 'elseif'\n";
+	} elsif (/\@\s*els(e|if).*\@/) { #                          ELSE/ELSIF
           if ($elseok != 1) {
             chop $_;
-            warn "$currentfile:$currentline [$_]\n";
-            die "unexpected else or elsif\n";
+            m2c_die "unexpected els$1\n";
           }
-	    skippart();
-            $currentlevel--;
-            return "else";
-	} elsif (/\@\s+skipif\s+([^@]*)\@/) { #                         SKIPIF
-          if (eval(process_vars($1))) {
-            skippart();
-            $currentlevel--;
-            return "skipif";
+          $return = skippart();
+          if ($return ne "end") {
+            m2c_die "unbalanced els$1 / rtn $rtn\n";
           }
-	} elsif (/\@\s*break\s*\@/) { #                                  BREAK
-          skippart();
-          $currentlevel--;
-          return "break";
+          $return = "else";
+          last;
+	} elsif (/\@\s*next\s*\@/) { #                                  NEXT
+          $return = skippart();
+          m2c_die "unbalanced code detected while exiting next/1 (returned $return)" if ($return ne "end");
+          $return = "next";
+          last;
 	} elsif (/\@\s*end\@/) { #                                         END
-          $currentlevel--;
-          return "end";
+          $return = "end";
+          last;
 	} elsif (/\@\s*eval\s+\$(\w+)\s*=\s*([^\@]*)/) { #                EVAL
 	    my ($v, $e) = ($1, $2);
 #	    print STDERR "eval: $e\n";
@@ -622,10 +665,11 @@ sub process {
 	} elsif (/\@\s*foreach\s+\$([^\@]+)\s+scalars*\s*\@/) { #      SCALARS
 	    my $var = $1;
 	    my $startpos = $fh->tell();
+            my $startline = $currentline;
 	    my $scalar;
 	    my @thekeys = keys(%scalars);
 	    if ($#thekeys == -1) {
-	      skippart();
+	      $return = skippart();
 	    } else {
 	      if ($havenetsnmpoid) {
 		  @thekeys = sort {
@@ -634,24 +678,27 @@ sub process {
 	      }
 	      foreach $scalar (@thekeys) {
 		$fh->seek($startpos, 0); # go to top of section.
+                $currentline = $startline;
 		my $oldvar = $vars{$var};
 		$vars{$var} = $scalar;
 		my $oldscalar = $currentscalar;
 		$currentscalar = $scalar;
 		$currentvar = $scalar;
-		process();
+		$return = process();
 		$vars{$var} = $oldvar;
 		$currentscalar = $oldscalar;
 		$currentvar = $scalar;
 	      }
 	    }
+            m2c_die("foreach did not end with \@end@") if($return ne "end");
 	} elsif (/\@\s*foreach\s+\$([^\@]+)\s+notifications*\s*\@/) {
 	    my $var = $1;
 	    my $startpos = $fh->tell();
+            my $startline = $currentline;
 	    my $notify;
 	    my @thekeys = keys(%notifications);
 	    if ($#thekeys == -1) {
-	      skippart();
+	      $return = skippart();
 	    } else {
 	      if ($havenetsnmpoid) {
 		  @thekeys = sort {
@@ -660,41 +707,47 @@ sub process {
 	      }
 	      foreach $notify (@thekeys) {
 		$fh->seek($startpos, 0); # go to top of section.
+                $currentline = $startline;
 		my $oldvar = $vars{$var};
 		$vars{$var} = $notify;
 		my $oldnotify = $currentnotify;
 		$currentnotify = $notify;
-		process();
+		$return = process();
 		$vars{$var} = $oldvar;
 		$currentnotify = $oldnotify;
 	      }
 	    }
+            m2c_die("foreach did not end with \@end@") if($return ne "end");
 	  } elsif (/\@\s*foreach\s+\$([^\@]+)\s+varbinds\s*\@/) {
 	    my $var = $1;
 	    my $startpos = $fh->tell();
+            my $startline = $currentline;
 	    my $varbind;
 	    if ($#{$notifyvars{$currentnotify}} == -1) {
-	      skippart();
+	      $return = skippart();
 	    } else {
 	      foreach $varbind (@{$notifyvars{$currentnotify}}) {
 		#		print "looping on $var for $varbind\n";
 		$fh->seek($startpos, 0); # go to top of section.
+                $currentline = $startline;
 		my $oldvar = $vars{$var};
 		$vars{$var} = $varbind;
 		my $oldvarbind = $currentvarbind;
 		$currentvarbind = $varbind;
-		process();
+		$return = process();
 		$vars{$var} = $oldvar;
 		$currentvarbind = $oldvarbind;
 	      }
 	    }
+            m2c_die("foreach did not end with \@end@") if($return ne "end");
 	  } elsif (/\@\s*foreach\s+\$([^\@]+)\s+tables*\s*\@/) {
 	    my $var = $1;
 	    my $startpos = $fh->tell();
+            my $startline = $currentline;
 	    my $table;
 	    my @thekeys = keys(%tables);
 	    if ($#thekeys == -1) {
-	      skippart();
+	      $return = skippart();
 	    } else {
 	      if ($havenetsnmpoid) {
 		  @thekeys = sort {
@@ -703,39 +756,45 @@ sub process {
 	      }
 	      foreach $table (@thekeys) {
 		$fh->seek($startpos, 0); # go to top of section.
+                $currentline = $startline;
 		my $oldvar = $vars{$var};
 		$vars{$var} = $table;
 		my $oldtable = $currenttable;
 		$currenttable = $table;
-		process();
+		$return = process();
 		$vars{$var} = $oldvar;
 		$currenttable = $oldtable;
 	      }
 	    }
+            m2c_die("foreach did not end with \@end@ ($return)") if($return ne "end");
 	  } elsif (/\@\s*foreach\s+\$([^\@]+)\s+(column|index|internalindex|externalindex|nonindex)\s*\@/) {
 	    my ($var, $type) = ($1, $2);
 	    my $startpos = $fh->tell();
+            my $startline = $currentline;
 	    my $column;
 	    if ($#{$tables{$currenttable}{$type}} == -1) {
-	      skippart();
+	      $return = skippart();
 	    } else {
 	      foreach $column (@{$tables{$currenttable}{$type}}) {
 		#		print "looping on $var for $type -> $column\n";
 		$fh->seek($startpos, 0); # go to top of section.
+                $currentline = $startline;
 		my $oldvar = $vars{$var};
 		$vars{$var} = $column;
 		my $oldcolumn = $currentcolumn;
 		$currentcolumn = $column;
 		$currentvar = $column;
-		process();
+		$return = process();
 		$vars{$var} = $oldvar;
 		$currentcolumn = $oldcolumn;
 		$currentvar = $oldcolumn;
 	      }
 	    }
+            m2c_die("foreach did not end with \@end@") if($return ne "end");
 	  } elsif (/\@\s*foreach\s+\$([^\@]+)\s+\$([^\@]+)\s+range\s+([^\@]+)\@/) {
 	    my ($svar, $evar, $node) = ($1, $2, $3);
 	    my $startpos = $fh->tell();
+            my $startline = $currentline;
 	    my $range;
 	    $node = $currentcolumn if (!$node);
 	    my $mibn = $SNMP::MIB{process_vars($node)};
@@ -745,20 +804,23 @@ sub process {
 		foreach $range (@ranges) {
 		    #		print "looping on $var for $type -> $column\n";
 		    $fh->seek($startpos, 0); # go to top of section.
+                    $currentline = $startline;
 		    my $oldvars = $vars{$svar};
 		    my $oldvare = $vars{$evar};
 		    $vars{$svar} = $range->{'low'};
 		    $vars{$evar} = $range->{'high'};
-		    process();
+		    $return = process();
 		    $vars{$svar} = $oldvars;
 		    $vars{$evar} = $oldvare;
 		}
 	    } else {
-		skippart();
+		$return = skippart();
 	    }
+            m2c_die("foreach did not end with \@end@") if($return ne "end");
 	} elsif (/\@\s*foreach\s+\$([^\@,]+)\s*,*\s+\$([^\@]+)\s+(enums*)\s*\@/) {
 	    my ($varvar, $varval, $type) = ($1, $2, $3);
 	    my $startpos = $fh->tell();
+            my $startline = $currentline;
 	    my $enum;
 
 	    my @keys = sort { $SNMP::MIB{$currentvar}{'enums'}{$a} <=>
@@ -766,17 +828,19 @@ sub process {
 	    if ($#keys > -1) {
 		foreach $enum (@keys) {
 		    $fh->seek($startpos, 0); # go to top of section.
+                    $currentline = $startline;
 		    my $oldvarvar = $vars{$varvar};
 		    my $oldvarval = $vars{$varval};
 		    $vars{$varvar} = $enum;
 		    $vars{$varval} = $SNMP::MIB{$currentvar}{'enums'}{$enum};
-		    process();
+		    $return = process();
 		    $vars{$varvar} = $oldvarvar;
 		    $vars{$varval} = $oldvarval;
 		}
 	    } else {
-		skippart();
+		$return = skippart();
 	    }
+            m2c_die("foreach did not end with \@end@") if($return ne "end");
 	} elsif (/\@\s*prompt\s+\$(\S+)\s*(.*)\@/) { #                  PROMPT
 	    my ($var, $prompt) = ($1, $2);
 	    if (!$term) {
@@ -799,11 +863,22 @@ sub process {
           chop $_;
           warn "$currentfile:$currentline contained a line that started with a @ but did not match any mib2c configuration tokens.\n";
           warn "(maybe missing the trailing @?)\n";
-          warn "$currentfile:$currentline [$_]\n";
-          die if ($strict_unk_token == 1);
+          m2c_die if ($strict_unk_token == 1);
 	}
+#      $return = "eof";
     }
+    print "< Balanced $balanced / level $currentlevel / rtn $return / $_\n" if($debug);
+    if((!$_) && ($return ne "eof")) {
+#      warn "switching return of '$return' to EOF\n" if($debug);
+      $return = "eof";
+    }
+  if ($balanced) {
+    if(($balanced != $currentlevel) || ($return ne "eof")) {
+      m2c_die "\@balanced@ specified, but processing terminated with '$return' before EOF!";
+    }
+  }
   $currentlevel--;
+  return $return;
 }
 
 sub setup_data {
@@ -898,7 +973,7 @@ sub find_conf {
   print STDERR "(referenced at $currentfile:$currentline)\n" if ($currentfile);
   print STDERR "I looked in:\n";
   print "  " . join("\n  ", @search_dirs, @def_search_dirs), "\n";
-  exit;
+  exit 1;
 }
 
 sub open_conf {
@@ -906,7 +981,7 @@ sub open_conf {
 # process .conf file
     if (! -f "$configfile") {
 	print STDERR "Can't find a configuration file called $configfile\n";
-	exit;
+	exit 1;
     }
     $currentfile = $configfile;
     my $fh = new IO::File;
