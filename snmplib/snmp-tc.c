@@ -32,6 +32,9 @@
 #endif
 
 #include "snmp-tc.h"
+#include "asn1.h"
+#include "snmp.h"
+#include "snmp_api.h"
 
 u_char *
 date_n_time ( time_t *when, size_t  *length)
