@@ -83,6 +83,9 @@ LINK		= $(LIBTOOL) --mode=link $(CC)
 RANLIB		= :
 
 # libtool definitions
-.SUFFIXES: .c .o .lo
+.SUFFIXES: .c .o .lo .rc
 .c.lo:
 	$(LIBTOOL) --mode=compile $(CC) $(CPPFLAGS) $(CFLAGS) -c -o $@ $<
+.rc.lo:
+	$(LIBTOOL) --mode=compile windres -o $@ $<
+
