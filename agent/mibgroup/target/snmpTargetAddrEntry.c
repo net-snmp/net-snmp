@@ -530,12 +530,12 @@ void snmpd_parse_config_targetAddr(const char *token, char *char_ptr)
 
   newEntry = snmpTargetAddrTable_create();
   
-  cptr = copy_word(cptr, buff);
+  cptr = copy_nword(cptr, buff, sizeof(buff));
   if (snmpTargetAddr_addName(newEntry, buff) == 0) {
     snmpTargetAddrTable_dispose(newEntry);
     return;
   }
-  cptr = copy_word(cptr, buff);
+  cptr = copy_nword(cptr, buff, sizeof(buff));
   if (snmpTargetAddr_addTDomain(newEntry, buff) == 0) {
     snmpTargetAddrTable_dispose(newEntry);
     return;
@@ -547,32 +547,32 @@ void snmpd_parse_config_targetAddr(const char *token, char *char_ptr)
     snmpTargetAddrTable_dispose(newEntry);
     return;
   }
-  cptr = copy_word(cptr, buff);
+  cptr = copy_nword(cptr, buff, sizeof(buff));
   if (snmpTargetAddr_addTimeout(newEntry, buff) == 0) {
     snmpTargetAddrTable_dispose(newEntry);
     return;
   }
-  cptr = copy_word(cptr, buff);
+  cptr = copy_nword(cptr, buff, sizeof(buff));
   if (snmpTargetAddr_addRetryCount(newEntry, buff) == 0) {
     snmpTargetAddrTable_dispose(newEntry);
     return;
   }
-  cptr = copy_word(cptr, buff);
+  cptr = copy_nword(cptr, buff, sizeof(buff));
   if (snmpTargetAddr_addTagList(newEntry, buff) == 0) {
     snmpTargetAddrTable_dispose(newEntry);
     return;
   }
-  cptr = copy_word(cptr, buff);
+  cptr = copy_nword(cptr, buff, sizeof(buff));
   if (snmpTargetAddr_addParams(newEntry, buff) == 0) {
     snmpTargetAddrTable_dispose(newEntry);
     return;
   }
-  cptr = copy_word(cptr, buff);
+  cptr = copy_nword(cptr, buff, sizeof(buff));
   if (snmpTargetAddr_addStorageType(newEntry, buff) == 0) {
     snmpTargetAddrTable_dispose(newEntry);
     return;
   }
-  cptr = copy_word(cptr, buff);
+  cptr = copy_nword(cptr, buff, sizeof(buff));
   if (snmpTargetAddr_addRowStatus(newEntry, buff) == 0) {
     snmpTargetAddrTable_dispose(newEntry);
     return;

@@ -137,7 +137,7 @@ void procfix_parse_config(const char *token, char* cptr)
   struct myproc *procp;
 
   /* don't allow two entries with the same name */
-  cptr = copy_word(cptr,tmpname);
+  cptr = copy_nword(cptr,tmpname, sizeof(tmpname));
   if ((procp = get_proc_by_name(tmpname)) == NULL) {
     config_perror("No proc entry registered for this proc name yet.");
     return;
@@ -158,7 +158,7 @@ void proc_parse_config(const char *token, char* cptr)
   struct myproc **procp = &procwatch;
 
   /* don't allow two entries with the same name */
-  copy_word(cptr,tmpname);
+  copy_nword(cptr,tmpname, sizeof(tmpname));
   if (get_proc_by_name(tmpname) != NULL) {
     config_perror("Already have an entry for this process.");
     return;
@@ -173,7 +173,7 @@ void proc_parse_config(const char *token, char* cptr)
     return; /* memory alloc error */
   numprocs++;
   /* not blank and not a comment */
-  copy_word(cptr,(*procp)->name);
+  copy_nword(cptr,(*procp)->name, sizeof((*procp)->name));
   cptr = skip_not_white(cptr);
   if ((cptr = skip_white(cptr))) 
     {
@@ -656,14 +656,14 @@ int sh_count_procs(char *procname)
 	    cp = strchr(cptr, ']');
 	    if (cp) *cp = 0;
 	  }
-	  copy_word(cptr, line);
+	  copy_nword(cptr, line, sizeof(line));
 	  cp = line+strlen(line)-1;
 	  if (*cp == ':') *cp = 0;
 	}
 	else {
           if ((cptr = find_field(line,LASTFIELD)) == NULL)
             continue;
-          copy_word(cptr,line);
+          copy_nword(cptr,line, sizeof(line));
 	}
         if (!strcmp(line,procname)) ret++;
       }

@@ -223,7 +223,7 @@ void disk_parse_config(const char *token, char *cptr)
   }
   else {
     /* read disk path (eg, /1 or /usr) */
-    copy_word(cptr,disks[numdisks].path);
+    copy_nword(cptr,disks[numdisks].path, sizeof(disks[numdisks].path));
     cptr = skip_not_white(cptr);
     cptr = skip_white(cptr);
     /* read optional minimum disk usage spec */
@@ -248,7 +248,8 @@ void disk_parse_config(const char *token, char *cptr)
     disks[numdisks].device[0] = 0;
     while (mntfp && (mntent = getmntent (mntfp)))
       if (strcmp (disks[numdisks].path, mntent->mnt_dir) == 0) {
-        copy_word (mntent->mnt_fsname, disks[numdisks].device);
+        copy_nword (mntent->mnt_fsname, disks[numdisks].device,
+                                sizeof(disks[numdisks].device));
         DEBUGMSGTL(("ucd-snmp/disk", "Disk:  %s\n",mntent->mnt_fsname));
         break;
       }
@@ -273,7 +274,8 @@ void disk_parse_config(const char *token, char *cptr)
     if (mntfp)
       fclose (mntfp);
     if (i == 0) {
-      copy_word (mnttab.mnt_special, disks[numdisks].device);
+      copy_nword (mnttab.mnt_special, disks[numdisks].device,
+                              sizeof(disks[numdisks].device));
       numdisks += 1;
     }
 #endif /* HAVE_SETMNTENT */
@@ -282,13 +284,15 @@ void disk_parse_config(const char *token, char *cptr)
     stat(disks[numdisks].path,&stat1);
     setfsent();
     if ((fstab = getfsfile(disks[numdisks].path))) {
-      copy_word(fstab->fs_spec,disks[numdisks].device);
+      copy_nword(fstab->fs_spec,disks[numdisks].device,
+                        sizeof(disks[numdisks].device));
       numdisks += 1;
     }
 #else
 #if HAVE_STATFS
     if (statfs( disks[numdisks].path, &statf) == 0) {
-      copy_word(statf.f_mntfromname,disks[numdisks].device);
+      copy_nword(statf.f_mntfromname,disks[numdisks].device,
+                             sizeof(disks[numdisks].device));
       DEBUGMSGTL(("ucd-snmp/disk", "Disk:  %s\n",statf.f_mntfromname));
     } else {
       DEBUGMSGT(("ucd-snmp/disk","  %s != %s\n", disks[numdisks].path, statf.f_mntfromname));

@@ -271,7 +271,7 @@ int get_exec_output(struct extensible *ex)
           }
         while (*cptr2 != 0) cptr2++;
         *(aptr++) = NULL;
-        copy_word(ex->command,ctmp);
+        copy_nword(ex->command,ctmp, sizeof(ctmp));
         execv(ctmp,argv);
         perror(ctmp);
         exit(1);
@@ -411,7 +411,7 @@ int get_exec_pipes(char *cmd,
         }
       while (*cptr2 != 0) cptr2++;
       *(aptr++) = NULL;
-      copy_word(cmd,ctmp);
+      copy_nword(cmd,ctmp, sizeof(ctmp));
       execv(ctmp,argv);
       perror(ctmp);
       exit(1);

@@ -196,7 +196,7 @@ void extensible_parse_config(const char *token, char* cptr)
 
   /* name */
   cptr = skip_white(cptr);
-  copy_word(cptr,ptmp->name);
+  copy_nword(cptr,ptmp->name, sizeof(ptmp->name));
   cptr = skip_not_white(cptr);
   cptr = skip_white(cptr);
   /* command */
@@ -288,7 +288,7 @@ void execfix_parse_config(const char *token, char* cptr) {
   struct extensible *execp;
 
   /* don't allow two entries with the same name */
-  cptr = copy_word(cptr,tmpname);
+  cptr = copy_nword(cptr,tmpname, sizeof(tmpname));
   if ((execp = get_exec_by_name(tmpname)) == NULL) {
     config_perror("No exec entry registered for this exec name yet.");
     return;

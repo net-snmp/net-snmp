@@ -663,7 +663,7 @@ static BOOL read_sendmailcf(BOOL config)
  *    sendmail_stats_t - the time (in seconds) to cache statistics
  *    sendmail_queue_t - the time (in seconds) to cache the directory scanning results
  *
- *    For "sendmail_config", "sendmail_stats" and "sendmail_queue", the copy_word
+ *    For "sendmail_config", "sendmail_stats" and "sendmail_queue", the copy_nword
  *    function is used to copy the filename.
  *
  *  Parameters:
@@ -692,7 +692,7 @@ static void mta_sendmail_parse_config(const char *token, char *line)
     {
       line++;
     }
-    copy_word(line, sendmailst_fn);
+    copy_nword(line, sendmailst_fn, sizeof(sendmailst_fn));
 
     open_sendmailst(TRUE);
 
@@ -713,7 +713,7 @@ static void mta_sendmail_parse_config(const char *token, char *line)
     {
       line++;
     }
-    copy_word(line, sendmailcf_fn);
+    copy_nword(line, sendmailcf_fn, sizeof(sendmailcf_fn));
 
     read_sendmailcf(TRUE);
 
@@ -726,7 +726,7 @@ static void mta_sendmail_parse_config(const char *token, char *line)
     {
       line++;
     }
-    copy_word(line, mqueue_dn);
+    copy_nword(line, mqueue_dn, sizeof(mqueue_dn));
 
     if (mqueue_dp != NULL)
     {

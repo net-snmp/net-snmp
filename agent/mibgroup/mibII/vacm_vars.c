@@ -527,12 +527,12 @@ void vacm_parse_simple(const char *token, char *confline) {
   char authtype[SPRINT_MAX_LEN];
 
   /* community name or user name */
-  cp = copy_word(confline, community);
+  cp = copy_nword(confline, community, sizeof(community));
 
   if (strcmp(token,"rouser") == 0 || strcmp(token,"rwuser") == 0) {
     /* authentication type */
     if (cp && *cp)
-      cp = copy_word(cp, authtype);
+      cp = copy_nword(cp, authtype, sizeof(authtype));
     else
       strcpy(authtype, "auth");
     DEBUGMSGTL((token, "setting auth type: \"%s\"\n",authtype));
@@ -540,7 +540,7 @@ void vacm_parse_simple(const char *token, char *confline) {
   } else {
     /* source address */
     if (cp && *cp) {
-      cp = copy_word(cp, addressname);
+      cp = copy_nword(cp, addressname, sizeof(addressname));
     } else {
       strcpy(addressname, "default");
     }
@@ -550,7 +550,7 @@ void vacm_parse_simple(const char *token, char *confline) {
 
   /* oid they can touch */
   if (cp && *cp) {
-    cp = copy_word(cp, theoid);
+    cp = copy_nword(cp, theoid, sizeof(theoid));
   } else {
     strcpy(theoid, ".1");
   }

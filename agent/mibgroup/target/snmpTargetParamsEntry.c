@@ -426,37 +426,37 @@ void snmpd_parse_config_targetParams(
 
   newEntry = snmpTargetParamTable_create();
   
-  cptr = copy_word(cptr, buff);
+  cptr = copy_nword(cptr, buff, sizeof(buff));
   if (snmpTargetParams_addParamName(newEntry, buff) == 0) {
     snmpTargetParamTable_dispose(newEntry);
     return;
   }
-  cptr = copy_word(cptr, buff);
+  cptr = copy_nword(cptr, buff, sizeof(buff));
   if (snmpTargetParams_addMPModel(newEntry, buff) == 0) {
     snmpTargetParamTable_dispose(newEntry);
     return;
   }
-  cptr = copy_word(cptr, buff);
+  cptr = copy_nword(cptr, buff, sizeof(buff));
   if (snmpTargetParams_addSecModel(newEntry, buff) == 0) {
     snmpTargetParamTable_dispose(newEntry);
     return;
   }
-  cptr = copy_word(cptr, buff);
+  cptr = copy_nword(cptr, buff, sizeof(buff));
   if (snmpTargetParams_addSecName(newEntry, buff) == 0) {
     snmpTargetParamTable_dispose(newEntry);
     return;
   }
-  cptr = copy_word(cptr, buff);
+  cptr = copy_nword(cptr, buff, sizeof(buff));
   if (snmpTargetParams_addSecLevel(newEntry, buff) == 0) {
     snmpTargetParamTable_dispose(newEntry);
     return;
   }
-  cptr = copy_word(cptr, buff);
+  cptr = copy_nword(cptr, buff, sizeof(buff));
   if (snmpTargetParams_addStorageType(newEntry, buff) == 0) {
     snmpTargetParamTable_dispose(newEntry);
     return;
   }
-  cptr = copy_word(cptr, buff);
+  cptr = copy_nword(cptr, buff, sizeof(buff));
   if (snmpTargetParams_addRowStatus(newEntry, buff) == 0) {
     snmpTargetParamTable_dispose(newEntry);
     return;
