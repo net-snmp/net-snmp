@@ -111,6 +111,7 @@ irix              OBJECT IDENTIFIER ::= { ucdSnmpAgent 9 }
 linux             OBJECT IDENTIFIER ::= { ucdSnmpAgent 10 }
 bsdi              OBJECT IDENTIFIER ::= { ucdSnmpAgent 11 }
 openbsd           OBJECT IDENTIFIER ::= { ucdSnmpAgent 12 }
+win32		  OBJECT IDENTIFIER ::= { ucdSnmpAgent 13 } -- unlucky
 unknown           OBJECT IDENTIFIER ::= { ucdSnmpAgent 255 }
 
 --
