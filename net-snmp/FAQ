@@ -403,7 +403,7 @@ What traps are sent by the agent?
     The agent can also be configured to send 'authenticationFailure(4)'
   traps when it receives SNMPv1 requests using a community name that is
   not recognised.
-    This is done with the snmpd.conf entry 'authtrapsenable 1'.
+    This is done with the snmpd.conf entry 'authtrapenable 1'.
     
 
 
