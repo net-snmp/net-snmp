@@ -131,6 +131,12 @@ init_vacm_vars(void)
                                   "community [default|hostname|network/bits] [oid]");
     snmpd_register_config_handler("rocommunity", vacm_parse_simple, NULL,
                                   "community [default|hostname|network/bits] [oid]");
+#ifdef SNMP_TRANSPORT_UDPIPV6_DOMAIN
+    snmpd_register_config_handler("rwcommunity6", vacm_parse_simple, NULL,
+                                  "community [default|hostname|network/bits] [oid]");
+    snmpd_register_config_handler("rocommunity6", vacm_parse_simple, NULL,
+                                  "community [default|hostname|network/bits] [oid]");
+#endif
     snmpd_register_config_handler("rwuser", vacm_parse_simple, NULL,
                                   "user [noauth|auth|priv] [oid]");
     snmpd_register_config_handler("rouser", vacm_parse_simple, NULL,
@@ -551,7 +557,7 @@ vacm_parse_simple(const char *token, char *confline)
         sprintf(secname, "anonymousSecName%03d", num);
         sprintf(line, "%s %s %s", secname, addressname, community);
         DEBUGMSGTL((token, "passing: %s %s\n", "com2sec6", line));
-        netsnmp_udp_parse_security("com2sec6", line);
+        netsnmp_udp6_parse_security("com2sec6", line);
 
         /*
          * sec->group mapping 
