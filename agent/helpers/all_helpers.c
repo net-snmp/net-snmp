@@ -6,6 +6,7 @@
 void
 init_helpers(void) 
 {
+    init_debug_helper();
     init_serialize();
     init_read_only_helper();
 }
