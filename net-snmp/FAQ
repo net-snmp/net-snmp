@@ -965,7 +965,7 @@ I don't understand the new access control stuff - what does it mean?
   in most cases (so don't you worry your pretty little head about them).
   The syntax is
 
-	access {group} "" any noauth 0 {read-tree} {write-tree} {notify-tree}
+	access {group} "" any noauth exact {read-tree} {write-tree} {notify-tree}
 
   where the entries in braces need to be defined elsewhere (I'm coming
   to that - be patient!), and the rest can be left as shown here.
