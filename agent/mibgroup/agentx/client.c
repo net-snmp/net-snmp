@@ -135,7 +135,7 @@ agentx_open_session(netsnmp_session * ss)
     if (pdu == NULL)
         return 0;
     pdu->time = 0;
-    snmp_add_var(pdu, version_sysoid, sizeof(version_sysoid)/sizeof(oid),
+    snmp_add_var(pdu, version_sysoid, SYSTEM_DOT_MIB_LENGTH,
 		 's', "Net-SNMP AgentX sub-agent");
 
     if (agentx_synch_response(ss, pdu, &response) != STAT_SUCCESS)
