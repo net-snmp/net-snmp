@@ -3,8 +3,13 @@ the ChangeLog file for a more detailed listing of changes/bug fixes.
 
 *4.2.5*
  Bug fixes:
+    - The perl module actually works.  Sorry about that.
     - don't overwrite the PID of an already-running snmpd with the PID
       of an abortive snmpd.
+    - a 64 bit architecture socket fix
+    - smux authentication fixed for multiple connected sessions.
+    - dynamic module support testing in the configure
+    - memory values > 32bits are now reported as a maxed out 32bit number
 
 *4.2.4*
  New:

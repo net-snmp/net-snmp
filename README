@@ -20,12 +20,12 @@
   4.2.1 and any subsequent ucd-snmp releases will be bug-fixes only.
   All further developments will be released under the net-snmp name.
 
-  The 4.2.4 release is intended as a 'bug-fix' update to the earlier 4.2.3
+  The 4.2.5 release is intended as a 'bug-fix' update to the earlier 4.2.4
   code, and there are no significant changes to the APIs in this release.
 
-  The very first net-snmp release (5.0) with many new features is
-  intended to be released near the same date as this version (4.2.4)
-  of the ucd-snmp tree.
+  The very first net-snmp release (5.0) has been made which
+  incorporates many new features not available in the ucd-snmp code
+  base, so you might consider checking it out instead.
 
 DISCLAIMER
 
