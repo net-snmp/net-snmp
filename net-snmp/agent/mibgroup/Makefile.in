@@ -543,7 +543,7 @@ host/hr_system.lo:  ./../../snmplib/read_config.h
 host/hr_system.lo: ./../../snmplib/tools.h ./../agent_trap.h
 host/hr_system.lo: ./../../snmplib/callback.h host.h host_res.h
 host/hr_system.lo: ../../snmplib/system.h 
-host/hr_system.lo:  host/hr_system.h host/hr_utils.h
+host/hr_system.lo:  host/hr_system.h 
 host/hr_system.lo: ./../auto_nlist.h ../../snmplib/system.h
 host/hr_storage.lo: ../../config.h ../../s/linux.h ../../s/sysv.h
 host/hr_storage.lo: ../../s/generic.h ../../m/generic.h
@@ -643,7 +643,7 @@ host/hr_filesys.lo:  ./../../snmplib/mib.h
 host/hr_filesys.lo: ./../snmp_vars.h ./../agent_registry.h ./../var_struct.h
 host/hr_filesys.lo: ../../snmplib/system.h 
 host/hr_filesys.lo:  ./../../snmplib/snmp_debug.h
-host/hr_filesys.lo: host/hr_filesys.h host/hr_utils.h 
+host/hr_filesys.lo: host/hr_filesys.h  
 host/hr_swrun.lo: ../../config.h ../../s/linux.h ../../s/sysv.h
 host/hr_swrun.lo: ../../s/generic.h ../../m/generic.h 
 host/hr_swrun.lo:  ./../../snmplib/getopt.h
@@ -664,7 +664,7 @@ host/hr_swinst.lo: ./../../snmplib/snmp.h ./../../snmplib/snmp_api.h
 host/hr_swinst.lo: ./../../snmplib/snmp_impl.h ./../../snmplib/mib.h
 host/hr_swinst.lo: ./../snmp_vars.h ./../agent_registry.h ./../var_struct.h
 host/hr_swinst.lo: ../../snmplib/system.h ./../../snmplib/snmp_debug.h
-host/hr_swinst.lo: host/hr_swinst.h host/hr_utils.h ./../../snmplib/tools.h
+host/hr_swinst.lo: host/hr_swinst.h  ./../../snmplib/tools.h
 host/hr_utils.lo: ../../config.h ../../s/linux.h ../../s/sysv.h
 host/hr_utils.lo: ../../s/generic.h ../../m/generic.h
 host/hr_utils.lo:  host_res.h ./../../snmplib/asn1.h
@@ -674,7 +674,7 @@ host/hr_utils.lo:  ./../../snmplib/mib.h
 host/hr_utils.lo: ./../snmp_vars.h ./../agent_registry.h ./../var_struct.h
 host/hr_utils.lo: ../../snmplib/system.h 
 host/hr_utils.lo:  ./../../snmplib/snmp_debug.h
-host/hr_utils.lo: host/hr_utils.h
+host/hr_utils.lo: 
 agentx/master.lo: ../../config.h ../../s/linux.h ../../s/sysv.h
 agentx/master.lo: ../../s/generic.h ../../m/generic.h
 agentx/master.lo:  ./../../snmplib/asn1.h
