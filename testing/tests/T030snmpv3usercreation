@@ -3,6 +3,7 @@
 . ../eval_tools.sh
 
 HEADER SNMPv3 user creation and usage using snmpusm
+SKIPIFNOT USE_OPENSSL
 
 #
 # Begin test
