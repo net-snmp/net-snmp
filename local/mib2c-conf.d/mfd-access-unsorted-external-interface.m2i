@@ -64,13 +64,21 @@ _${table}_loop_get_first_wrapper($mfd_aue_wrap_param_decl,
     int rc;
     DEBUGMSGT(("mfd:table:trace:${name}", ">%s\n", __FUNCTION__));
 
-    rc = ${table}_loop_get_first($mfd_aue_wrap_param->user_ctx, loop_ref, ctx_ref);
+    rc = ${table}_loop_get_first($mfd_aue_wrap_param->user_ctx, loop_ref,
+                                 ctx_ref);
 
     /*
      * convert index to OID
      */
-    if(SNMPERR_SUCCESS == rc )
-        rc = ${table}_index_to_oid(&ctx_ref->ctx->oid_idx,&ctx_ref->ctx->tbl_idx);
+    if(SNMPERR_SUCCESS == rc ) {
+        netsnmp_assert((NULL != ctx_ref) &&
+                       (ctx_ref->ctx->oid_idx.oids == ctx_ref->ctx->oid_tmp));
+        ctx_ref->ctx->oid_idx.len = sizeof(ctx_ref->ctx->oid_tmp);
+        rc = ${table}_index_to_oid(&ctx_ref->ctx->oid_idx,
+                                   &ctx_ref->ctx->tbl_idx);
+        netsnmp_assert(ctx_ref->ctx->oid_idx.len !=
+                       sizeof(ctx_ref->ctx->oid_tmp));
+    }
 
     return rc;
 }
@@ -87,13 +95,21 @@ _${table}_loop_get_next_wrapper($mfd_aue_wrap_param_decl,
     int rc;
     DEBUGMSGT(("mfd:table:trace:${name}", ">%s\n", __FUNCTION__));
 
-    rc = ${table}_loop_get_next($mfd_aue_wrap_param->user_ctx, loop_ref, ctx_ref);
+    rc = ${table}_loop_get_next($mfd_aue_wrap_param->user_ctx, loop_ref,
+                                ctx_ref);
 
     /*
      * convert index to OID
      */
-    if(SNMPERR_SUCCESS == rc )
-        rc = ${table}_index_to_oid(&ctx_ref->ctx->oid_idx,&ctx_ref->ctx->tbl_idx);
+    if(SNMPERR_SUCCESS == rc ) {
+        netsnmp_assert((NULL != ctx_ref) &&
+                       (ctx_ref->ctx->oid_idx.oids == ctx_ref->ctx->oid_tmp));
+        ctx_ref->ctx->oid_idx.len = sizeof(ctx_ref->ctx->oid_tmp);
+        rc = ${table}_index_to_oid(&ctx_ref->ctx->oid_idx,
+                                   &ctx_ref->ctx->tbl_idx);
+        netsnmp_assert(ctx_ref->ctx->oid_idx.len !=
+                       sizeof(ctx_ref->ctx->oid_tmp));
+    }
 
     return rc;
 }
