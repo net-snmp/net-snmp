@@ -208,7 +208,29 @@ netsnmp_subtree_replace_first(netsnmp_subtree *new_tree,
     return add_subtree(new_tree, context_name);
 }
 
+NETSNMP_INLINE void
+netsnmp_subtree_change_next(netsnmp_subtree *ptr, netsnmp_subtree *thenext)
+{
+    ptr->next = thenext;
+    if (thenext)
+        netsnmp_oid_compare_ll(ptr->start_a,
+                               ptr->start_len,
+                               thenext->start_a,
+                               thenext->start_len,
+                               &thenext->oid_off);
+}
 
+NETSNMP_INLINE void
+netsnmp_subtree_change_prev(netsnmp_subtree *ptr, netsnmp_subtree *theprev)
+{
+    ptr->prev = theprev;
+    if (theprev)
+        netsnmp_oid_compare_ll(theprev->start_a,
+                               theprev->start_len,
+                               ptr->start_a,
+                               ptr->start_len,
+                               &ptr->oid_off);
+}
 
 int
 netsnmp_subtree_compare(const netsnmp_subtree *ap, const netsnmp_subtree *bp)
@@ -239,10 +261,10 @@ netsnmp_subtree_join(netsnmp_subtree *root)
 	    s->end_a      = NULL;
 
             for (c = root; c != NULL; c = c->children) {
-                c->next = s->next;
+                netsnmp_subtree_change_next(c, s->next);
             }
             for (c = s; c != NULL; c = c->children) {
-                c->prev = root;
+                netsnmp_subtree_change_prev(c, root);
             }
             DEBUGMSG(("subtree", " so new end "));
             DEBUGMSGOID(("subtree", root->end_a, root->end_len));
@@ -360,13 +382,13 @@ netsnmp_subtree_split(netsnmp_subtree *current, oid name[], int name_len)
 
     /* Retain the correct linking of the list */
     for (ptr = current; ptr != NULL; ptr = ptr->children) {
-      ptr->next = new_sub;
+        netsnmp_subtree_change_next(ptr, new_sub);
     }
     for (ptr = new_sub; ptr != NULL; ptr = ptr->children) {
-      ptr->prev = current;
+        netsnmp_subtree_change_prev(ptr, current);
     }
     for (ptr = new_sub->next; ptr != NULL; ptr=ptr->children) {
-      ptr->prev = new_sub;
+        netsnmp_subtree_change_prev(ptr, new_sub);
     }
 
     return new_sub;
@@ -431,19 +453,20 @@ netsnmp_subtree_load(netsnmp_subtree *new_sub, const char *context_name)
 	    existing registrations.  */
 
 	if (tree2) {
-	    new_sub->prev = tree2->prev;
-	    tree2->prev   = new_sub;
+            netsnmp_subtree_change_prev(new_sub, tree2->prev);
+            netsnmp_subtree_change_prev(tree2, new_sub);
 	} else {
-	    new_sub->prev = netsnmp_subtree_find_prev(new_sub->start_a,
-				      new_sub->start_len, NULL, context_name);
+            netsnmp_subtree_change_prev(new_sub,
+                                        netsnmp_subtree_find_prev(new_sub->start_a,
+                                                                  new_sub->start_len, NULL, context_name));
 
 	    if (new_sub->prev) {
-		new_sub->prev->next = new_sub;
+                netsnmp_subtree_change_next(new_sub->prev, new_sub);
 	    } else {
 		netsnmp_subtree_replace_first(new_sub, context_name);
 	    }
 
-	    new_sub->next = tree2;
+            netsnmp_subtree_change_next(new_sub, tree2);
 
 	    /* If there was any overlap, recurse to merge in the overlapping
 	       region (including anything that may follow the overlap).  */
@@ -516,19 +539,19 @@ netsnmp_subtree_load(netsnmp_subtree *new_sub, const char *context_name)
 	    if (prev) {
 		prev->children    = new_sub;
 		new_sub->children = next;
-		new_sub->prev = prev->prev;
-		new_sub->next = prev->next;
+                netsnmp_subtree_change_prev(new_sub, prev->prev);
+                netsnmp_subtree_change_next(new_sub, prev->next);
 	    } else {
 		new_sub->children = next;
-		new_sub->prev = next->prev;
-		new_sub->next = next->next;
+                netsnmp_subtree_change_prev(new_sub, next->prev);
+                netsnmp_subtree_change_next(new_sub, next->next);
 	
 		for (next = new_sub->next; next != NULL;next = next->children){
-		    next->prev = new_sub;
+                    netsnmp_subtree_change_prev(next, new_sub);
 		}
 
 		for (prev = new_sub->prev; prev != NULL;prev = prev->children){
-		    prev->next = new_sub;
+                    netsnmp_subtree_change_next(prev, new_sub);
 		}
 	    }
 	    break;
@@ -861,10 +884,12 @@ netsnmp_subtree_unload(netsnmp_subtree *sub, netsnmp_subtree *prev, const char *
      */
 
     if (sub->children == NULL) {        /* just remove this node completely */
-        for (ptr = sub->prev; ptr; ptr = ptr->children)
-            ptr->next = sub->next;
-        for (ptr = sub->next; ptr; ptr = ptr->children)
-            ptr->prev = sub->prev;
+        for (ptr = sub->prev; ptr; ptr = ptr->children) {
+            netsnmp_subtree_change_next(ptr, sub->next);
+        }
+        for (ptr = sub->next; ptr; ptr = ptr->children) {
+            netsnmp_subtree_change_prev(ptr, sub->prev);
+        }
 
 	if (sub->prev == NULL) {
 	    netsnmp_subtree_replace_first(sub->next, context);
@@ -872,9 +897,9 @@ netsnmp_subtree_unload(netsnmp_subtree *sub, netsnmp_subtree *prev, const char *
 
     } else {
         for (ptr = sub->prev; ptr; ptr = ptr->children)
-            ptr->next = sub->children;
+            netsnmp_subtree_change_next(ptr, sub->children);
         for (ptr = sub->next; ptr; ptr = ptr->children)
-            ptr->prev = sub->children;
+            netsnmp_subtree_change_prev(ptr, sub->children);
 
 	if (sub->prev == NULL) {
 	    netsnmp_subtree_replace_first(sub->children, context);
@@ -1401,6 +1426,7 @@ netsnmp_subtree_find_prev(oid *name, size_t len, netsnmp_subtree *subtree,
     lookup_cache *lookup_cache = NULL;
     netsnmp_subtree *myptr = NULL, *previous = NULL;
     int cmp = 1;
+    int ll_off = 0;
 
     if (subtree) {
         myptr = subtree;
@@ -1419,8 +1445,25 @@ netsnmp_subtree_find_prev(oid *name, size_t len, netsnmp_subtree *subtree,
         }
     }
 
+    DEBUGMSGTL(("wtest","oid in: "));
+    DEBUGMSGOID(("wtest", name, len));
+    DEBUGMSG(("wtest","\n"));
     for (; myptr != NULL; previous = myptr, myptr = myptr->next) {
-        if (snmp_oid_compare(name, len, myptr->start_a, myptr->start_len) < 0) {
+        /* Compare the incoming oid with the linked list.  If we have
+           results of previous compares, its faster to make sure the
+           length we differed in the last check is greater than the
+           length between this pointer and the last then we don't need
+           to actually perform a comparison */
+        DEBUGMSGTL(("wtest","oid cmp: "));
+        DEBUGMSGOID(("wtest", myptr->start_a, myptr->start_len));
+        DEBUGMSG(("wtest","  --- off = %d, in off = %d test = %d\n",
+                  myptr->oid_off, ll_off,
+                  !(ll_off && myptr->oid_off &&
+                    myptr->oid_off > ll_off)));
+        if (!(ll_off && myptr->oid_off && myptr->oid_off > ll_off) &&
+            netsnmp_oid_compare_ll(name, len,
+                                   myptr->start_a, myptr->start_len,
+                                   &ll_off) < 0) {
             if (lookup_cache_size && previous && cmp) {
                 if (lookup_cache) {
                     lookup_cache_replace(lookup_cache, myptr, previous);
