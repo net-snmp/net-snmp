@@ -189,7 +189,7 @@ netsnmp_container_table_register(netsnmp_handler_registration *reginfo,
     if(key_type)
         tad->key_type = key_type;
     else
-        tad->key_type = CONTAINER_KEY_NETSNMP_INDEX;
+        tad->key_type = TABLE_CONTAINER_KEY_NETSNMP_INDEX;
 
     if (NULL==container) {
         container = netsnmp_container_find(reginfo->handlerName);
@@ -227,16 +227,16 @@ _set_key( container_table_data * tad, netsnmp_request_info *request,
           netsnmp_table_request_info *tblreq_info,
           void **key, netsnmp_index *index )
 {
-    if (CONTAINER_KEY_NETSNMP_INDEX == tad->key_type) {
+    if (TABLE_CONTAINER_KEY_NETSNMP_INDEX == tad->key_type) {
         index->oids = tblreq_info->index_oid;
         index->len = tblreq_info->index_oid_len;
         *key = index;
     }
-    else if (CONTAINER_KEY_VARBIND_INDEX == tad->key_type) {
+    else if (TABLE_CONTAINER_KEY_VARBIND_INDEX == tad->key_type) {
         *key = tblreq_info->indexes;
     }
 #if 0
-    else if (CONTAINER_KEY_VARBIND_RAW == tad->key_type) {
+    else if (TABLE_CONTAINER_KEY_VARBIND_RAW == tad->key_type) {
         *key = request->requestvb;
     }
 #endif
@@ -326,17 +326,17 @@ _data_lookup(netsnmp_handler_registration *reginfo,
              * update indexes in tblreq_info (index & varbind),
              * then update request varbind oid
              */
-            if(CONTAINER_KEY_NETSNMP_INDEX == tad->key_type) {
+            if(TABLE_CONTAINER_KEY_NETSNMP_INDEX == tad->key_type) {
                 tblreq_info->index_oid_len = row->len;
                 memcpy(tblreq_info->index_oid, row->oids,
                        row->len * sizeof(oid));
                 netsnmp_update_variable_list_from_index(tblreq_info);
             }
-            else if (CONTAINER_KEY_VARBIND_INDEX == tad->key_type) {
+            else if (TABLE_CONTAINER_KEY_VARBIND_INDEX == tad->key_type) {
                 netsnmp_update_indexes_from_variable_list(tblreq_info);
             }
 
-            if (CONTAINER_KEY_VARBIND_RAW != tad->key_type) {
+            if (TABLE_CONTAINER_KEY_VARBIND_RAW != tad->key_type) {
                 netsnmp_table_build_oid_from_index(reginfo, request,
                                                    tblreq_info);
             }
