@@ -24,7 +24,7 @@ Introduction:
   sub-modules in their proper order.
 ******************************NOTE NOTE NOTE**************************
 
-Note: The perl SNMP 5.0module which comes with net-snmp 5.0 and
+Note: The perl SNMP 5.0 module which comes with net-snmp 5.0 and
 higher is different than previous versions in a number of ways.  Most
 importantly, it behaves like a proper net-snmp application and calls
 init_snmp properly, which means it will read configuration files and
@@ -109,6 +109,14 @@ Unix:
 
 cd net-snmp/perl
 perl Makefile.PL [-NET-SNMP-CONFIG="sh ../../net-snmp-config"] [-NET-SNMP-IN-SOURCE=true]
+make
+make test
+make install
+
+FreeBSD:
+
+cd net-snmp/perl
+perl Makefile.PL -NET-SNMP-CONFIG="sh ../../net-snmp-config" -NET-SNMP-IN-SOURCE=true
 make
 make test
 make install
