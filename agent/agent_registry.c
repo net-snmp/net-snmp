@@ -40,6 +40,7 @@
 #endif
 
 #include "mibincl.h"
+#include "snmp_client.h"
 #include "default_store.h"
 #include "ds_agent.h"
 #include "callback.h"
@@ -702,34 +703,34 @@ void setup_tree (void)
 
 	/*
 	 * Initial support for index allocation
-	 *
-	 *  N.B:  The final 'NULL' parameter in the register_index()
-	 *	calls below should be replaced by the 'main' session pointer.
-	 *
-	 *	  These routines (or the main 'register_index()' routine)
-	 *	should check for subagent role, and pass the request off
-	 *	to the master.
 	 */
-struct variable_list *
+extern struct snmp_session *main_session;
+
+char *
 register_string_index( oid *name, size_t name_len, char *cp )
 {
-    struct variable_list varbind;
+    struct variable_list varbind, *res;
     
     memset( &varbind, 0, sizeof(struct variable_list));
     varbind.type = ASN_OCTET_STR;
     snmp_set_var_objid( &varbind, name, name_len );
     if ( cp != ANY_STRING_INDEX ) {
         snmp_set_var_value( &varbind, cp, strlen(cp) );
-	return( register_index( &varbind, ALLOCATE_THIS_INDEX, NULL ));
+	res = register_index( &varbind, ALLOCATE_THIS_INDEX, main_session );
     }
     else
-	return( register_index( &varbind, ALLOCATE_ANY_INDEX, NULL ));
+	res = register_index( &varbind, ALLOCATE_ANY_INDEX, main_session );
+
+    if ( res == NULL )
+	return NULL;
+    else
+	return res->val.string;
 }
 
-struct variable_list *
+int
 register_int_index( oid *name, size_t name_len, int val )
 {
-    struct variable_list varbind;
+    struct variable_list varbind, *res;
     
     memset( &varbind, 0, sizeof(struct variable_list));
     varbind.type = ASN_INTEGER;
@@ -738,10 +739,15 @@ register_int_index( oid *name, size_t name_len, int val )
     if ( val != ANY_INTEGER_INDEX ) {
         varbind.val_len = sizeof(long);
         *varbind.val.integer = val;
-	return( register_index( &varbind, ALLOCATE_THIS_INDEX, NULL ));
+	res = register_index( &varbind, ALLOCATE_THIS_INDEX, main_session );
     }
     else
-	return( register_index( &varbind, ALLOCATE_ANY_INDEX, NULL ));
+	res = register_index( &varbind, ALLOCATE_ANY_INDEX, main_session );
+
+    if ( res == NULL )
+	return -1;
+    else
+	return *res->val.integer;
 }
 
 struct variable_list *
@@ -754,11 +760,11 @@ register_oid_index( oid *name, size_t name_len,
     varbind.type = ASN_OBJECT_ID;
     snmp_set_var_objid( &varbind, name, name_len );
     if ( value != ANY_OID_INDEX ) {
-        snmp_set_var_value( &varbind, value, value_len*sizeof(oid) );
-	return( register_index( &varbind, ALLOCATE_THIS_INDEX, NULL ));
+        snmp_set_var_value( &varbind, (u_char*)value, value_len*sizeof(oid) );
+	return( register_index( &varbind, ALLOCATE_THIS_INDEX, main_session ));
     }
     else
-	return( register_index( &varbind, ALLOCATE_ANY_INDEX, NULL ));
+	return( register_index( &varbind, ALLOCATE_ANY_INDEX, main_session ));
 }
 
 struct variable_list*
@@ -775,6 +781,8 @@ register_index(struct variable_list *varbind, int flags, struct snmp_session *ss
 		/* Look for the requested OID entry */
     prev_oid_ptr = NULL;
     prev_idx_ptr = NULL;
+    res  = 1;
+    res2 = 1;
     for( idxptr = snmp_index_head ; idxptr != NULL;
 			 prev_oid_ptr = idxptr, idxptr = idxptr->next_oid) {
 	if ((res = snmp_oid_compare(varbind->name, varbind->name_length,
@@ -789,14 +797,21 @@ register_index(struct variable_list *varbind, int flags, struct snmp_session *ss
 	    return NULL;		/* wrong type */
 
 			/*
-			 * If we've been asked for an arbitrary value,
+			 * If we've been asked for an arbitrary new value,
 			 *	then find the end of the list.
+			 * If we've been asked for any arbitrary value,
+			 *	then look for an unused entry, and use that.
+			 *      If there aren't any, continue as for new.
 			 * Otherwise, locate the given value in the (sorted)
 			 *	list of already allocated values
 			 */
 	if ( flags & ALLOCATE_ANY_INDEX ) {
             for(idxptr2 = idxptr ; idxptr2 != NULL;
 		 prev_idx_ptr = idxptr2, idxptr2 = idxptr2->next_idx) {
+		if ( flags == ALLOCATE_ANY_INDEX && idxptr2->session == NULL ) {
+		    idxptr2->session = ss ;
+		    return &idxptr2->varbind;
+		}
 	    }
 	}
 	else {
@@ -859,7 +874,7 @@ register_index(struct variable_list *varbind, int flags, struct snmp_session *ss
 	new_index = (struct snmp_index *)malloc( sizeof( struct snmp_index ));
 	if (new_index == NULL)
 	    return NULL;
-	if (snmp_clone_var( varbind, new_index ) != 0 ) {
+	if (snmp_clone_var( varbind, &new_index->varbind ) != 0 ) {
 	    free( new_index );
 	    return NULL;
 	}
@@ -876,7 +891,7 @@ register_index(struct variable_list *varbind, int flags, struct snmp_session *ss
 		 */
 	if ( flags & ALLOCATE_ANY_INDEX ) {
 	    if ( prev_idx_ptr ) {
-		if ( snmp_clone_var( prev_idx_ptr, new_index ) != 0 ) {
+		if ( snmp_clone_var( &prev_idx_ptr->varbind, &new_index->varbind ) != 0 ) {
 		    free( new_index );
 		    return NULL;
 		}
@@ -985,7 +1000,7 @@ register_index(struct variable_list *varbind, int flags, struct snmp_session *ss
 	    else
 	        snmp_index_head = new_index;
 	}
-    return (struct variable_list*)new_index;
+    return &new_index->varbind;
 }
 
 	/*
@@ -1008,6 +1023,17 @@ remove_index(struct variable_list *varbind, struct snmp_session *ss)
     return( unregister_index( varbind, FALSE, ss ));
 }
 
+void
+unregister_index_by_session(struct snmp_session *ss)
+{
+    struct snmp_index *idxptr, *idxptr2;
+    for(idxptr = snmp_index_head ; idxptr != NULL; idxptr = idxptr->next_oid)
+	for(idxptr2 = idxptr ; idxptr2 != NULL; idxptr2 = idxptr2->next_idx)
+	    if ( idxptr2->session == ss )
+		idxptr2->session = NULL;
+}
+
+
 int
 unregister_index(struct variable_list *varbind, int remember, struct snmp_session *ss)
 {
@@ -1022,6 +1048,8 @@ unregister_index(struct variable_list *varbind, int remember, struct snmp_sessio
 		/* Look for the requested OID entry */
     prev_oid_ptr = NULL;
     prev_idx_ptr = NULL;
+    res  = 1;
+    res2 = 1;
     for( idxptr = snmp_index_head ; idxptr != NULL;
 			 prev_oid_ptr = idxptr, idxptr = idxptr->next_oid) {
 	if ((res = snmp_oid_compare(varbind->name, varbind->name_length,
@@ -1110,11 +1138,11 @@ void dump_registry( void )
 	printf("\nIndex Allocations:\n");
     for( idxptr = snmp_index_head ; idxptr != NULL; idxptr = idxptr->next_oid) {
 	sprint_objid(start_oid, idxptr->varbind.name, idxptr->varbind.name_length);
-	printf("%s indexes:\n");
+	printf("%s indexes:\n", start_oid);
         for( idxptr2 = idxptr ; idxptr2 != NULL; idxptr2 = idxptr2->next_idx) {
 	    switch( idxptr2->varbind.type ) {
 		case ASN_INTEGER:
-		    printf("    %c %d %c\n",
+		    printf("    %c %ld %c\n",
 			( idxptr2->session ? ' ' : '(' ),
 			  *idxptr2->varbind.val.integer,
 			( idxptr2->session ? ' ' : ')' ));
@@ -1143,6 +1171,7 @@ void dump_registry( void )
 
 #ifdef TESTING
 struct variable_list varbind;
+struct snmp_session main_sess, *main_session=&main_sess;
 
 void
 test_string_register( int n, char *cp )
@@ -1156,7 +1185,7 @@ void
 test_int_register( int n, int val )
 {
     varbind.name[4] = n;
-    if (register_int_index( varbind.name, varbind.name_length, val ) == NULL )
+    if (register_int_index( varbind.name, varbind.name_length, val ) == -1 )
 	printf("allocating %d/%d failed\n", n, val);
 }
 
@@ -1179,7 +1208,8 @@ test_oid_register( int n, int subid )
 	printf("allocating %d/%d failed\n", n, subid);
 }
 
-main()
+void
+main( int argc, char argv[] )
 {
     oid name[] = { 1, 2, 3, 4, 0 };
     int i;
@@ -1217,61 +1247,61 @@ main()
 		 *	Did it all work?
 		 */
     dump_registry();
-    snmp_index_head = NULL;	/* memory leak, but we're only testing */   
+    unregister_index_by_session( main_session );
 		/*
 		 *  Now test index allocation
 		 *	a) integer values
 		 */
-    test_int_register( 10, -1 );	/* empty */
-    test_int_register( 10, -1 );	/* append */
-    test_int_register( 10, 10 );	/* append exact */
+    test_int_register( 110, -1 );	/* empty */
+    test_int_register( 110, -1 );	/* append */
+    test_int_register( 110, 10 );	/* append exact */
     printf("This next one should fail....\n");
-    test_int_register( 10, 10 );	/* exact duplicate */
+    test_int_register( 110, 10 );	/* exact duplicate */
     printf("done\n");
-    test_int_register( 10, -1 );	/* append */
-    test_int_register( 10,  5 );	/* insert exact */
+    test_int_register( 110, -1 );	/* append */
+    test_int_register( 110,  5 );	/* insert exact */
 
 		/*
 		 *	b) string values
 		 */
-    test_string_register( 20, NULL );		/* empty */
-    test_string_register( 20, NULL );		/* append */
-    test_string_register( 20, "aaaz" );
-    test_string_register( 20, NULL );		/* minor rollover */
-    test_string_register( 20, "zzzz" );
-    test_string_register( 20, NULL );		/* major rollover */
+    test_string_register( 120, NULL );		/* empty */
+    test_string_register( 120, NULL );		/* append */
+    test_string_register( 120, "aaaz" );
+    test_string_register( 120, NULL );		/* minor rollover */
+    test_string_register( 120, "zzzz" );
+    test_string_register( 120, NULL );		/* major rollover */
 
 		/*
 		 *	c) OID values
 		 */
     
-    test_oid_register( 30, -1 );	/* empty */
-    test_oid_register( 30, -1 );	/* append */
+    test_oid_register( 130, -1 );	/* empty */
+    test_oid_register( 130, -1 );	/* append */
 
     varbind.val_len = varbind.name_length*sizeof(oid);
     memcpy( varbind.buf, varbind.name, varbind.val_len);
     varbind.val.objid = (oid*) varbind.buf;
     varbind.val_len += sizeof(oid);
 
-    test_oid_register( 30, 255 );	/* append exact */
-    test_oid_register( 30, -1 );	/* minor rollover */
-    test_oid_register( 30, 100 );	/* insert exact */
+    test_oid_register( 130, 255 );	/* append exact */
+    test_oid_register( 130, -1 );	/* minor rollover */
+    test_oid_register( 130, 100 );	/* insert exact */
     printf("This next one should fail....\n");
-    test_oid_register( 30, 100 );	/* exact duplicate */
+    test_oid_register( 130, 100 );	/* exact duplicate */
     printf("done\n");
 
     varbind.val.objid = (oid*)varbind.buf;
     for ( i=0; i<6; i++ )
 	varbind.val.objid[i]=255;
     varbind.val.objid[0]=1;
-    test_oid_register( 30, 255 );	/* set up rollover  */
-    test_oid_register( 30, -1 );	/* medium rollover */
+    test_oid_register( 130, 255 );	/* set up rollover  */
+    test_oid_register( 130, -1 );	/* medium rollover */
 
     for ( i=0; i<6; i++ )
 	varbind.val.objid[i]=255;
     varbind.val.objid[0]=2;
-    test_oid_register( 30, 255 );	/* set up rollover  */
-    test_oid_register( 30, -1 );	/* major rollover */
+    test_oid_register( 130, 255 );	/* set up rollover  */
+    test_oid_register( 130, -1 );	/* major rollover */
 
 		/*
 		 *	Did it all work?
@@ -1283,18 +1313,18 @@ main()
 		 *	(unsupported types, mis-matched types, etc)
 		 */
     printf("The rest of these should fail....\n");
-    test_oid_register( 10, -1 );
-    test_oid_register( 10, 100 );
-    test_oid_register( 20, -1 );
-    test_oid_register( 20, 100 );
-    test_string_register( 10, NULL );
-    test_string_register( 10, "aaaa" );
-    test_string_register( 30, NULL );
-    test_string_register( 30, "aaaa" );
-    test_int_register( 20, -1 );
-    test_int_register( 20,  1 );
-    test_int_register( 30, -1 );
-    test_int_register( 30,  1 );
+    test_oid_register( 110, -1 );
+    test_oid_register( 110, 100 );
+    test_oid_register( 120, -1 );
+    test_oid_register( 120, 100 );
+    test_string_register( 110, NULL );
+    test_string_register( 110, "aaaa" );
+    test_string_register( 130, NULL );
+    test_string_register( 130, "aaaa" );
+    test_int_register( 120, -1 );
+    test_int_register( 120,  1 );
+    test_int_register( 130, -1 );
+    test_int_register( 130,  1 );
     printf("done - this dump should be the same as before\n");
     dump_registry();
 }
