@@ -517,4 +517,6 @@ void dump_registry( void )
 	for( myptr2 = myptr ; myptr2 != NULL; myptr2 = myptr2->children) {
 	    if ( myptr2->label && myptr2->label[0] )
 		printf("\t%s\n", myptr2->label);
+	}
+    }
 }
