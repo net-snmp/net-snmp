@@ -1,4 +1,4 @@
-#############################################################  -*- c -*-
+########################################################################
 ## generic include for XXX. Do not use directly.
 ##
 ## $Id$
@@ -38,17 +38,18 @@
 ##
 ##   allow for user override, or save defaults
 ##
-@    ifconf ${m2c_defaults_dir}table-${context}.m2d@
+@    ifconf default-table-${context}.m2d@
 @       print Warning: using defaults in current directory. Consider moving@
 @       print them to $m2c_defaults_dir.@
 @       eval $m2c_defaults_dir = "default-"@
 @    end@
 @    ifconf ${m2c_defaults_dir}table-${context}.m2d@
 @      if $mfd_interactive_setup == 1@
-@        print There are existing defaults for $context.@
-@        prompt $ans o)verwrite or u)se existing [default=u] : @
-@        if "x$ans" eq "xo"@
-@          run mfd-interactive-setup.m2c@
+@        print There are existing defaults for $context (${m2c_defaults_dir}table-${context}.m2d).@
+@        prompt $ans r)econfigure or u)se existing [default=u] : @
+@        if "x$ans" eq "xr"@
+@          eval $mfd_interactive_setup = -1@ # already asked to overwrite
+@          run -again mfd-interactive-setup.m2c@
 @        end@ 
 @      end@
 @    else@ # no existing defaults
