@@ -3177,7 +3177,6 @@ static struct arptab *at=0;
 static void ARP_Scan_Init()
 {
 #if !defined (netbsd1) && !defined(freebsd2)
-	extern char *malloc();
 
 	if (!at) {
 	    KNLookup( N_ARPTAB_SIZE, (char *)&arptab_size, sizeof arptab_size);
