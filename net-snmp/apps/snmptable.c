@@ -108,7 +108,7 @@ static size_t name_length;
 static oid root[MAX_OID_LEN];
 static size_t rootlen;
 static int localdebug;
-static int nonsequential = 0;
+static int nonsequential = 1;
 
 void get_field_names (char *);
 void get_table_entries( struct snmp_session *ss );
@@ -134,7 +134,7 @@ static void optProc(int argc, char *const *argv, int opt)
       no_headers = 1;
       break;
     case 'C':
-      nonsequential = 1;
+      nonsequential = 0;
       break;
     case 'b':
       brief = 1;
@@ -155,7 +155,6 @@ void usage(void)
   fprintf(stdout,"  -f <F>\tprint an F delimited table\n");
   fprintf(stdout,"  -b\t\tbrief field names\n");
   fprintf(stdout,"  -i\t\tprint index value\n");
-  fprintf(stderr,"  -C\t\tuse parsed mib to find the table's columns\n");
   exit(1);
 }
 
@@ -169,7 +168,6 @@ int main(int argc, char *argv[])
 
   /* get the common command line arguments */
   snmp_parse_args(argc, argv, &session, "w:f:ChHbi", optProc);
-  snmp_set_suffix_only(0);
 
   /* get the initial object and subtree */
   /* specified on the command line */
@@ -186,6 +184,8 @@ int main(int argc, char *argv[])
   localdebug = snmp_get_dump_packet();
   if( nonsequential ){
     tblname = strrchr( argv[optind], '.' );
+    if (!tblname)
+      tblname = strrchr( argv[optind], ':' );
     if( tblname )
       ++tblname;
     else
@@ -272,48 +272,60 @@ void get_field_names( char* tblname )
   char string_buf[SPRINT_MAX_LEN];
   char *name_p;
   struct tree *tbl = NULL;
+  int going = 1;
 
   if( tblname )
-	  tbl = find_tree_node( tblname, -1 );
+    tbl = find_tree_node( tblname, -1 );
   if( tbl )
-	  tbl = tbl->child_list;
+    tbl = tbl->child_list;
 
   if( tbl ) {
-	root[rootlen++] = tbl->subid;
-	tbl = tbl->child_list;
+    root[rootlen++] = tbl->subid;
+    tbl = tbl->child_list;
   }
   else
     root[rootlen++] = 1;
 
   fields = 0;
-  while (1) {
+  while (going) {
     fields++;
     if( tbl ) {
+      if (tbl->access == MIB_ACCESS_NOACCESS) {
+	fields--;
+	tbl = tbl->next_peer;
+	continue;
+      }
       root[ rootlen ] = tbl->subid;
       tbl = tbl->next_peer;
+      if (!tbl) going = 0;
     }
     else
       root[rootlen] = fields;
     sprint_objid(string_buf, root, rootlen+1);
     name_p = strrchr(string_buf, '.');
-    if (localdebug) printf("%s %c\n", string_buf, name_p[1]);
-    if ('0' <= name_p[1] && name_p[1] <= '9')
+    if (!name_p) name_p = strrchr(string_buf, ':');
+    if (!name_p) name_p = string_buf;
+    else name_p++;
+    if (localdebug) printf("%s %c\n", string_buf, name_p[0]);
+    if ('0' <= name_p[0] && name_p[0] <= '9') {
+      fields--;
       break;
+    }
     if (fields == 1) column = (struct column *)malloc(sizeof (*column));
     else column = (struct column *)realloc(column, fields*sizeof(*column));
-    column[fields-1].label = strdup(name_p+1);
-    column[fields-1].width = strlen(name_p+1);
+    column[fields-1].label = strdup(name_p);
+    column[fields-1].width = strlen(name_p);
     column[fields-1].subid = root[ rootlen ];
   }
-  if (fields == 1) {
+  if (fields == 0) {
     fprintf(stderr, "Was that a table? %s\n", string_buf);
     exit(1);
   }
-  fields--;
   *name_p = 0;
   memmove(name, root, rootlen * sizeof(oid));
   name_length = rootlen+1;
   name_p = strrchr(string_buf, '.');
+  if (!name_p) name_p = strrchr(string_buf, ':');
   if (name_p) *name_p = 0;
   table_name = strdup(string_buf);
   if (brief) {
@@ -405,24 +417,22 @@ void get_table_entries( struct snmp_session *ss )
 	  
 	  /* save index off */
 	  if ( ! have_current_index ) {
-		  end_of_table = 0;
-		  have_current_index = 1;
-		  name_length = vars->name_length;
-		  memcpy(name, vars->name, name_length*sizeof(oid));
-		  sprint_objid(string_buf, vars->name, vars->name_length); 
-		  i = vars->name_length - rootlen + 1;
-		  name_p = string_buf + strlen(table_name)+1;
-		  if( localdebug || show_index ) {
-	  		  name_p = string_buf + strlen(table_name)+1;
-			  name_p = strchr(name_p, '.')+1;
-			  name_p = strchr(name_p, '.')+1;
-		  }
-		  if (localdebug) printf("Index: %s\n", name_p);
-		if (show_index) {
-		  indices[entries-1] = strdup(name_p);
-		  i = strlen(name_p);
-		  if (i > index_width) index_width = i;
-		}
+	    end_of_table = 0;
+	    have_current_index = 1;
+	    name_length = vars->name_length;
+	    memcpy(name, vars->name, name_length*sizeof(oid));
+	    sprint_objid(string_buf, vars->name, vars->name_length); 
+	    i = vars->name_length - rootlen + 1;
+	    name_p = string_buf + strlen(table_name)+1;
+	    if (localdebug || show_index ) {
+	      name_p = strchr(name_p, '.')+1;
+	    }
+	    if (localdebug) printf("Index: %s\n", name_p);
+	    if (show_index) {
+	      indices[entries-1] = strdup(name_p);
+	      i = strlen(name_p);
+	      if (i > index_width) index_width = i;
+	    }
 	  }
 	  
 	  if (localdebug) printf("%s => taken\n", string_buf);
