@@ -372,7 +372,9 @@ Save_HR_Disk_Specific __P((void))
 #ifdef HAVE_SYS_DKIO_H
 	    HRD_savedCtrl_type = HRD_info.dki_ctype;
 	    HRD_savedFlags     = HRD_info.dki_flags;
-	    HRD_savedCapacity  = HRD_geom.dkg_ncyl*dkg_nhead*dkg_nsect; /* ??? */
+	    HRD_savedCapacity  = HRD_cap.dkg_ncyl*
+				 HRD_cap.dkg_nhead*
+				 HRD_cap.dkg_nsect; /* ??? */
 #endif
 #ifdef HAVE_LINUX_HDREG_H
 	    HRD_savedCapacity  = HRD_info.lba_capacity / 2 ;
@@ -476,7 +478,7 @@ What_Type_Disk()
 #endif
 
 #ifdef HAVE_SYS_DKIO_H
-    switch ( HRD_savedDev_type ) {
+    switch ( HRD_savedCtrl_type ) {
 	case DKC_WDC2880:
 	case DKC_DSD5215:
 	case DKC_XY450:

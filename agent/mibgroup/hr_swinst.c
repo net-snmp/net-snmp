@@ -34,6 +34,9 @@
 #  include <ndir.h>
 # endif
 #endif
+#ifdef HAVE_PKGLOCS_H
+#include <pkglocs.h>
+#endif
 
 #ifdef HAVE_LIBRPM
 #include <rpm/rpmlib.h>
@@ -59,19 +62,15 @@
 int header_hrswinst __P((struct variable *,oid *, int *, int, int *, int (**write) __P((int, u_char *, u_char, int, u_char *,oid *,int)) ));
 int header_hrswInstEntry __P((struct variable *,oid *, int *, int, int *, int (**write) __P((int, u_char *, u_char, int, u_char *,oid *,int)) ));
 
-#ifdef hpux	/* This *is* HP-UX specific, I think */
-#define	INSTALLED_SW_IN_SYSTEM
-#endif
+       char *HRSW_directory = NULL;
+extern char  HRSW_name[];
 
 extern struct timeval starttime;
-
-#ifdef	INSTALLED_SW_IN_SYSTEM
-extern char HRSW_name[];
-#endif
 
 #ifdef HAVE_LIBRPM
 static rpmdb	rpm_db;
 #endif
+
 	/*********************
 	 *
 	 *  Initialisation & common implementation functions
@@ -80,13 +79,34 @@ static rpmdb	rpm_db;
 extern void  Init_HR_SWInst __P((void));
 extern int   Get_Next_HR_SWInst __P((void));
 extern void  End_HR_SWInst __P((void));
+extern void  Save_HR_SW_info __P((void));
 
 
 void	init_hr_swinst( )
 {
-#ifdef HAVE_LIBRPM
-    rpmReadConfigFiles( NULL, NULL, NULL, 0);
+	/* Read settings from config file,
+	    or take system-specific defaults */
+
+    if ( HRSW_directory == NULL ) {
+#ifdef PKGLOC
+	HRSW_directory = PKGLOC;
+			/* Description from HRSW_dir/.../pkginfo: DESC= */
 #endif
+#ifdef hpux9
+	HRSW_directory = "/system";
+			/* Description from HRSW_dir/.../index:   fd: */
+#endif
+#ifdef hpux10
+	HRSW_directory = "/var/adm/sw/products";
+			/* Description from HRSW_dir/.../pfiles/INDEX: title */
+#endif
+
+#ifdef HAVE_LIBRPM
+	rpmReadConfigFiles( NULL, NULL, NULL, 0);
+#endif
+    }
+
+    strcpy(HRSW_name, "[installed name]");	/* default name */
 }
 
 #define MATCH_FAILED	-1
@@ -161,13 +181,13 @@ header_hrswInstEntry(vp, name, length, exact, var_len, write_method)
         result = compare(name, *length, newname, (int)vp->namelen + 1);
         if (exact && (result == 0)) {
 	    LowIndex = swinst_idx;
-	    /* Save software status information */
+	    Save_HR_SW_info();
             break;
 	}
 	if ((!exact && (result < 0)) &&
 		( LowIndex == -1 || swinst_idx < LowIndex )) {
 	    LowIndex = swinst_idx;
-	    /* Save software status information */
+	    Save_HR_SW_info();
 #ifdef HRSWINST_MONOTONICALLY_INCREASING
             break;
 #endif
@@ -210,9 +230,7 @@ var_hrswinst(vp, name, length, exact, var_len, write_method)
 {
     int sw_idx=0;
     static char string[100];
-#ifdef	INSTALLED_SW_IN_SYSTEM
     struct stat stat_buf;
-#endif
 #ifdef HAVE_LIBRPM
     Header rpm_head;
 #endif
@@ -239,37 +257,37 @@ var_hrswinst(vp, name, length, exact, var_len, write_method)
     switch (vp->magic){
 	case HRSWINST_CHANGE:
 	case HRSWINST_UPDATE:
-#if defined(INSTALLED_SW_IN_SYSTEM) || defined (HAVE_LIBRPM)
-#ifdef	INSTALLED_SW_IN_SYSTEM
-	    sprintf(string, "/system", HRSW_name);
-#endif
+	    string[0] = '\0';
 #ifdef HAVE_LIBRPM
 	    sprintf(string, "%s/packages.rpm", rpmGetVar(RPMVAR_DBPATH));
-#endif
-	    stat( string, &stat_buf );
-	    if ( stat_buf.st_mtime > starttime.tv_sec )
-			/* changed 'recently' - i.e. since this agent started */
-	        long_return = (stat_buf.st_mtime-starttime.tv_sec)*100;
-	    else
-	        long_return = 0;	/* predates this agent */
 #else
-	    long_return = 363136200;
+	    if ( HRSW_directory )
+		strcpy( string, HRSW_directory);
 #endif
+
+	    if ( *string ) {
+		stat( string, &stat_buf );
+		if ( stat_buf.st_mtime > starttime.tv_sec )
+			/* changed 'recently' - i.e. since this agent started */
+		    long_return = (stat_buf.st_mtime-starttime.tv_sec)*100;
+		else
+		    long_return = 0;	/* predates this agent */
+	    }
+	    else
+		long_return = 363136200;
 	    return (u_char *)&long_return;
 
 	case HRSWINST_INDEX:
 	    long_return = sw_idx;
 	    return (u_char *)&long_return;
 	case HRSWINST_NAME:
-#ifdef	INSTALLED_SW_IN_SYSTEM
-	    sprintf(string, HRSW_name);
-#else
 #ifdef HAVE_LIBRPM
-		/* or 'headerGetEntry? */
+			/* or 'headerGetEntry? */
 	    getEntry(rpm_head, RPMTAG_NAME, NULL, string, NULL );
 #else
-	    sprintf(string, "installed name");
-#endif
+	    sprintf(string, HRSW_name);
+			/* This will be unchanged from the initial "null"
+			   value, if HRSW_directory is not defined */
 #endif
 	    *var_len = strlen(string);
 	    return (u_char *) string;
@@ -280,21 +298,21 @@ var_hrswinst(vp, name, length, exact, var_len, write_method)
 	    long_return = 4;	/* application */
 	    return (u_char *)&long_return;
 	case HRSWINST_DATE:
-#ifdef	INSTALLED_SW_IN_SYSTEM
-	    sprintf(string, "/system/%s", HRSW_name);
-	    stat( string, &stat_buf );
-	    return ( date_n_time(&stat_buf.st_mtime, var_len));
-#else
 #ifdef HAVE_LIBRPM
-		/* or 'headerGetEntry? */
+			/* or 'headerGetEntry? */
 	    getEntry(rpm_head, RPMTAG_INSTALLTIME, NULL, string, NULL );
 			/* XXX - does this returns a string? */
 #else
-	    sprintf(string, "earlier");
+	    if ( HRSW_directory ) {
+		sprintf(string, "%s/%s", HRSW_directory, HRSW_name);
+		stat( string, &stat_buf );
+		return ( date_n_time(&stat_buf.st_mtime, var_len));
+	    }
+	    else
+		sprintf(string, "back in the mists of time");
 #endif
 	    *var_len = strlen(string);
 	    return (u_char *) string;
-#endif
 	default:
 	    ERROR_MSG("");
     }
@@ -310,25 +328,29 @@ var_hrswinst(vp, name, length, exact, var_len, write_method)
 
 static int HRSW_index;
 
-#ifdef	INSTALLED_SW_IN_SYSTEM
 static DIR *dp = NULL;
+static struct dirent *de_p;
 static char HRSW_name[100];
-#endif
 
 
 void
 Init_HR_SWInst __P((void))
 {
-   HRSW_index = 0;
+    HRSW_index = 0;
 
-#ifdef	INSTALLED_SW_IN_SYSTEM
-   if ( dp != NULL );
-	closedir( dp );
-   if ((dp = opendir("/system")) == NULL )
-	HRSW_index = -1;
-#endif
 #ifdef HAVE_LIBRPM
-   if (rpmdbOpen( "", &rpm_db, O_RDONLY, 0644) != 0 )
+    if (rpmdbOpen( "", &rpm_db, O_RDONLY, 0644) != 0 )
+	HRSW_index = -1;
+#else
+    if ( HRSW_directory ) {
+        if ( dp != NULL ) {
+            closedir( dp );
+            dp = NULL;
+        }
+        if ((dp = opendir(HRSW_directory)) == NULL )
+            HRSW_index = -1;
+    }
+    else
 	HRSW_index = -1;
 #endif
 }
@@ -336,22 +358,9 @@ Init_HR_SWInst __P((void))
 int
 Get_Next_HR_SWInst __P((void))
 {
-#ifdef	INSTALLED_SW_IN_SYSTEM
-   struct dirent *de_p;
-#endif
-
-    if (HRSW_index==-1)
+    if (HRSW_index == -1)
 	return -1;
 
-#ifdef	INSTALLED_SW_IN_SYSTEM
-    while (( de_p = readdir( dp )) != NULL ) {
-	if( de_p->d_name[0] == '.' )
-	    continue;
-
-	sprintf(  HRSW_name, de_p->d_name );
-	return ++HRSW_index;
-    }
-#endif
 #ifdef HAVE_LIBRPM
     HRSW_index = ((HRSW_index == 0) ? rpmdbFirstRecNum(rpm_db)
 				    : rpmdbNextRecNum(rpm_db, HRSW_index));
@@ -359,18 +368,36 @@ Get_Next_HR_SWInst __P((void))
 	return -1;	/* failed */
     else
 	return HRSW_index;
+#else
+    if ( HRSW_directory ) {
+	while (( de_p = readdir( dp )) != NULL ) {
+	    if( de_p->d_name[0] == '.' )
+		continue;
+
+		/* Ought to check for "properly-formed" entry */
+
+	    return ++HRSW_index;
+	}
+    }
 #endif
 
     return -1;
 }
 
 void
+Save_HR_SW_info __P((void))
+{
+#ifdef HAVE_LIBRPM
+    getEntry(rpm_head, RPMTAG_NAME, NULL, HRSW_name, NULL );
+#else
+    sprintf(  HRSW_name, de_p->d_name );
+#endif
+}
+
+void
 End_HR_SWInst __P((void))
 {
-#ifdef	INSTALLED_SW_IN_SYSTEM
    if ( dp != NULL );
 	closedir( dp );
    dp = NULL;
-#endif
-
 }
