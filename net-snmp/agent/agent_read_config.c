@@ -53,6 +53,7 @@
 #include "mib_module_config.h"
 #include "callback.h"
 #include "snmp_agent.h"
+#include "agent_trap.h"
 #include "snmpd.h"
 #include "../snmplib/system.h"
 #include "snmp_debug.h"
@@ -72,6 +73,9 @@ void init_agent_read_config (void)
                           "host [community]");
   register_config_handler("snmpd","trap2sink",
                           snmpd_parse_config_trap2sink, NULL,
+                          "host [community]");
+  register_config_handler("snmpd","informsink",
+                          snmpd_parse_config_informsink, NULL,
                           "host [community]");
   register_config_handler("snmpd","trapcommunity",
                           snmpd_parse_config_trapcommunity,
