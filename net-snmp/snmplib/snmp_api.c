@@ -2919,7 +2919,7 @@ snmp_sess_async_send(void *sessp,
 
     /* send the message */
     if (sendto(isp->sd, (char *)packet, length, 0,
-	       &pdu->address, sizeof(pdu->address)) < 0){
+	       (struct sockaddr *)&pdu->address, sizeof(pdu->address)) < 0){
 	snmp_errno = SNMPERR_BAD_SENDTO;
 	session->s_snmp_errno = SNMPERR_BAD_SENDTO;
 	session->s_errno = errno;
@@ -3040,7 +3040,7 @@ snmp_sess_read(void *sessp,
     struct snmp_session *sp;
     struct snmp_internal_session *isp;
     u_char packet[PACKET_LENGTH];
-    struct sockaddr    from;
+    snmp_ipaddr        from;
     struct sockaddr_in *fromIp = (struct sockaddr_in *)&from;
     size_t length;
     int  fromlength;
@@ -3061,7 +3061,7 @@ snmp_sess_read(void *sessp,
     fromlength = sizeof from;
     memset(&from, 0, sizeof(from));
     length = recvfrom(isp->sd, (char *)packet, PACKET_LENGTH, 0,
-		      &from, &fromlength);
+		      (struct sockaddr *)&from, &fromlength);
     if (length == -1) {
 	snmp_errno = SNMPERR_BAD_RECVFROM;
 	sp->s_snmp_errno = SNMPERR_BAD_RECVFROM;
@@ -3364,7 +3364,7 @@ snmp_resend_request(struct session_list *slp, struct request_list *rp,
   }
 
   if (sendto(isp->sd, (char *)packet, length, 0,
-	     &rp->pdu->address,
+	     (struct sockaddr *)&rp->pdu->address,
 	     sizeof(rp->pdu->address)) < 0){
     snmp_errno = SNMPERR_BAD_SENDTO;
     sp->s_snmp_errno = SNMPERR_BAD_SENDTO;
