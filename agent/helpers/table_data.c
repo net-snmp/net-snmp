@@ -498,32 +498,6 @@ netsnmp_table_data_helper_handler(netsnmp_mib_handler *handler,
         result = netsnmp_call_next_handler(handler, reginfo, reqinfo,
                                          requests);
         reqinfo->mode = oldmode;
-#ifdef DISABLED_IF_USING_SPARSE_TABLE_HELPER
-        if (oldmode == MODE_GETNEXT || oldmode == MODE_GETBULK) {       /* XXX */
-            for (request = requests; request; request = request->next) {
-                /*
-                 *  ... but if the lower-level handlers aren't dealing with
-                 *  skipping on to the next instance, then we must handle
-                 *  this situation here.
-                 *    Mark 'holes' in the table as needing to be retried.
-                 *
-                 *    This approach is less efficient than handling such
-                 *  holes directly in the table_dataset handler, but allows
-                 *  user-provided handlers to override the dataset handler
-                 *  if this proves necessary.
-                 */
-                if (request->requestvb->type == ASN_NULL ||
-                    request->requestvb->type == SNMP_NOSUCHINSTANCE) {
-                    request->requestvb->type = ASN_PRIV_RETRY;
-                }
-                    /* XXX - Move on to the next object */
-                if (request->requestvb->type == SNMP_NOSUCHOBJECT) {
-                    request->requestvb->type = ASN_PRIV_RETRY;
-                }
-            }
-            reqinfo->mode = oldmode;
-        }
-#endif
         return result;
     }
     else
