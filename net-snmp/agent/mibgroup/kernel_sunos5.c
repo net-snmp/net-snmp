@@ -36,7 +36,9 @@
 
 /* set 1 to share to share kstat file descriptor;
    set 0 to always invoke kstat_open/kstat_close */
+#if USING_UCD_SNMP_MEMORY_SOLARIS2_MODULE
 #define SHARE_KSTAT_FD 1
+#endif
 
 #include <config.h>
 #ifdef solaris2
