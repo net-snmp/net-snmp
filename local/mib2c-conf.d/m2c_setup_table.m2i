@@ -33,6 +33,7 @@
 ##// transient: 0:persistent, 1:semi-transient, 2:transient
 @    eval $m2c_data_transient = $mfd_default_data_transient@
 @    eval $m2c_include_examples = $mfd_default_include_examples@
+@    eval $m2c_irreversible_commit = 0@
 ##
 ##   allow for user override, or save defaults
 ##
