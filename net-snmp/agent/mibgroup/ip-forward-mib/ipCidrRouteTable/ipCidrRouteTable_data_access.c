@@ -202,6 +202,7 @@ int
 ipCidrRouteTable_cache_load(netsnmp_container * container)
 {
     ipCidrRouteTable_rowreq_ctx *rowreq_ctx;
+
     netsnmp_container *route_container;
 
     DEBUGMSGTL(("verbose:ipCidrRouteTable:ipCidrRouteTable_cache_load",
@@ -251,10 +252,6 @@ ipCidrRouteTable_cache_load(netsnmp_container * container)
  *
  * @note
  *  The MFD helper will take care of releasing all the row contexts.
- *  If you did not pass a data context pointer when allocating
- *  the rowreq context, the one that was allocated will be deleted.
- *  If you did pass one in, it will not be deleted and that memory
- *  is your responsibility.
  *
  */
 void

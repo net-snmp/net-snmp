@@ -61,6 +61,7 @@ usmDHUserKeyTable_init_data(usmDHUserKeyTable_registration_ptr
     /*
      * TODO:303:o: Initialize usmDHUserKeyTable data.
      */
+
     return MFD_SUCCESS;
 }                               /* usmDHUserKeyTable_init_data */
 
@@ -209,6 +210,9 @@ usmDHUserKeyTable_cache_load(netsnmp_container * container)
         /*
          * TODO:352:r: |   |-> populate usmDHUserKeyTable data context.
          * Populate data context here. (optionally, delay until row prep)
+         */
+        /*
+         * non-TRANSIENT data: no need to copy. set pointer to data 
          */
 
         /*
