@@ -20,6 +20,10 @@
 #include <net-snmp/agent/net-snmp-agent-includes.h>
 
 #include <net-snmp/agent/bulk_to_next.h>
+
+
+static netsnmp_mib_handler *_clone_handler(netsnmp_mib_handler *it);
+
 /***********************************************************************/
 /*
  * New Handler based API 
@@ -103,8 +107,12 @@ netsnmp_create_handler(const char *name,
 {
     netsnmp_mib_handler *ret = SNMP_MALLOC_TYPEDEF(netsnmp_mib_handler);
     if (ret) {
-        ret->handler_name = strdup(name);
         ret->access_method = handler_access_method;
+        if (NULL != name) {
+            ret->handler_name = strdup(name);
+            if (NULL == ret->handler_name)
+                SNMP_FREE(ret);
+        }
     }
     return ret;
 }
@@ -554,7 +562,9 @@ netsnmp_handler_free(netsnmp_mib_handler *handler)
     }
 }
 
-/** dulpicates a handler */
+/** dulpicates a handler and all subsequent handlers
+ * see also _clone_handler
+ */
 netsnmp_mib_handler *
 netsnmp_handler_dup(netsnmp_mib_handler *handler)
 {
@@ -564,27 +574,15 @@ netsnmp_handler_dup(netsnmp_mib_handler *handler)
         return NULL;
     }
 
-    h = (netsnmp_mib_handler *) calloc(1, sizeof(netsnmp_mib_handler));
+    h = _clone_handler(handler);
 
     if (h != NULL) {
         h->myvoid = handler->myvoid;
-        h->access_method = handler->access_method;
-
-        if (handler->handler_name != NULL) {
-            h->handler_name = strdup(handler->handler_name);
-            if (h->handler_name == NULL) {
-                SNMP_FREE(h);
-                return NULL;
-            }
-        }
 
         if (handler->next != NULL) {
             h->next = netsnmp_handler_dup(handler->next);
             if (h->next == NULL) {
-                if (h->handler_name) {
-                    SNMP_FREE(h->handler_name);
-                }
-                SNMP_FREE(h);
+                netsnmp_handler_free(h);
                 return NULL;
             }
             h->next->prev = h;
@@ -821,12 +819,22 @@ netsnmp_find_handler_data_by_name(netsnmp_handler_registration *reginfo,
     return NULL;
 }
 
-/** clones a mib handler (it's name and access methods onlys; not myvoid)
+/** clones a mib handler (name, flags and access methods only; not myvoid)
+ * see also netsnmp_handler_dup
  */
-netsnmp_mib_handler *
-clone_handler(netsnmp_mib_handler *it)
+static netsnmp_mib_handler *
+_clone_handler(netsnmp_mib_handler *it)
 {
-    return netsnmp_create_handler(it->handler_name, it->access_method);
+    netsnmp_mib_handler *dup;
+
+    if(NULL == it)
+        return NULL;
+
+    dup = netsnmp_create_handler(it->handler_name, it->access_method);
+    if(NULL != dup)
+        dup->flags = it->flags;
+
+    return dup;
 }
 
 static netsnmp_data_list *handler_reg = NULL;
@@ -878,14 +886,14 @@ netsnmp_inject_handler_into_subtree(netsnmp_subtree *tp, const char *name,
         if (strcmp(tptr->label_a, name) == 0) {
             DEBUGMSGTL(("injectHandler", "injecting handler %s into %s\n",
                         handler->handler_name, tptr->label_a));
-            netsnmp_inject_handler_before(tptr->reginfo, clone_handler(handler),
+            netsnmp_inject_handler_before(tptr->reginfo, _clone_handler(handler),
                                           before_what);
         } else if (tptr->reginfo != NULL &&
 		   tptr->reginfo->handlerName != NULL &&
                    strcmp(tptr->reginfo->handlerName, name) == 0) {
             DEBUGMSGTL(("injectHandler", "injecting handler into %s/%s\n",
                         tptr->label_a, tptr->reginfo->handlerName));
-            netsnmp_inject_handler_before(tptr->reginfo, clone_handler(handler),
+            netsnmp_inject_handler_before(tptr->reginfo, _clone_handler(handler),
                                           before_what);
         } else {
             for (mh = tptr->reginfo->handler; mh != NULL; mh = mh->next) {
@@ -893,7 +901,7 @@ netsnmp_inject_handler_into_subtree(netsnmp_subtree *tp, const char *name,
                     DEBUGMSGTL(("injectHandler", "injecting handler into %s\n",
                                 tptr->label_a));
                     netsnmp_inject_handler_before(tptr->reginfo,
-                                                  clone_handler(handler),
+                                                  _clone_handler(handler),
                                                   before_what);
                     break;
                 } else {
