@@ -1,6 +1,21 @@
 This file contains major changes in released revisions.  Please read
 the ChangeLog file for a more detailed listing of changes/bug fixes.
 
+*3.5*
+
+ New:
+    - agent/mibgroup directory reorganized hierarchically.
+    - use of dynamicly loadable modules now possible.
+    - new modules: misc/ipfwacc.
+    - floats, doubles, counter64s, int64s, uint64s support via opaque types.
+
+ Fixes:
+    - Solaris core dumps.
+    - Fixes for NetBSD 1.3.
+
+ Ports:
+    - host resources module should work on more platforms: NetBSD, FreeBSD.
+
 *3.4*
 
  Important:
