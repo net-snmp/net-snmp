@@ -323,7 +323,7 @@ var_smux_write(int action,
     u_char          buf[SMUXMAXPKTSIZE], *ptr, sout[3], type;
     int             reterr;
     size_t          var_len, datalen, name_length, packet_len;
-    size_t	     len;
+    ssize_t	     len;
     long            reqid, errsts, erridx;
     u_char          var_type, *dataptr;
 
@@ -418,7 +418,7 @@ var_smux_write(int action,
             packet_len = len;
             ptr = asn_parse_header(buf, &packet_len, &type);
             packet_len += (ptr - buf);
-            if (len > packet_len) {
+            if (len > (ssize_t)packet_len) {
                 /*
                  * set length to receive only the first packet 
                  */
@@ -534,7 +534,7 @@ smux_accept(int sd)
     struct timeval  tv;
     int             fail, fd, alen;
     int             length;
-    size_t 	     len;
+    ssize_t 	     len;
 
     alen = sizeof(struct sockaddr_in);
     /*
