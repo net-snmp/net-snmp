@@ -179,9 +179,11 @@ setup_engineID(u_char **eidp, const char *text)
   int		  enterpriseid	= htonl(ENTERPRISE_NUMBER),
 		  localsetup	= (eidp) ? 0 : 1;
 			/* Use local engineID if *eidp == NULL.  */
-  u_char	  buf[SNMP_MAXBUF_SMALL],
-		 *bufp = NULL;
+#ifdef HAVE_GETHOSTNAME
+  u_char	  buf[SNMP_MAXBUF_SMALL];
   struct hostent *hent;
+#endif
+  u_char	 *bufp = NULL;
   size_t	  len;
  
 
