@@ -122,7 +122,7 @@ static
 oid            *authKeyChange = authKeyOid, *privKeyChange = privKeyOid;
 oid            *dhauthKeyChange = usmDHUserAuthKeyChange,
                *dhprivKeyChange = usmDHUserPrivKeyChange;
-int             doauthkey = 0, doprivkey = 0;
+int             doauthkey = 0, doprivkey = 0, uselocalizedkey = 0;
 
 void
 usage(void)
@@ -137,10 +137,14 @@ usage(void)
     fprintf(stderr, "  cloneFrom  USER CLONEFROM-USER\n");
     fprintf(stderr, "  activate   USER\n");
     fprintf(stderr, "  deactivate USER\n");
+    fprintf(stderr, "  [-Ca] [-Cx] changekey [USER]\n");
     fprintf(stderr,
             "  [-Ca] [-Cx] passwd OLD-PASSPHRASE NEW-PASSPHRASE [USER]\n");
+    fprintf(stderr,
+            "  <-Ca | -Cx> -Ck passwd OLD-LOCALIZED-KEY NEW-PASSPHRASE [USER]\n");
     fprintf(stderr, "\t\t-Cx\t\tChange the privacy key.\n");
     fprintf(stderr, "\t\t-Ca\t\tChange the authentication key.\n");
+    fprintf(stderr, "\t\t-Ck\t\tUse old localized key instead of old passphrase.\n");
 }
 
 /*
@@ -251,6 +255,10 @@ optProc(int argc, char *const *argv, int opt)
             case 'x':
                 doprivkey = 1;
                 break;
+
+	    case 'k':
+	        uselocalizedkey = 1;
+		break;
 
             default:
                 fprintf(stderr, "Unknown flag passed to -C: %c\n",
@@ -448,33 +456,53 @@ main(int argc, char *argv[])
             exit(1);
         }
 
-        /*
-         * the old Ku is in the session, but we need the new one 
-         */
-        rval = generate_Ku(session.securityAuthProto,
-                           session.securityAuthProtoLen,
-                           (u_char *) oldpass, strlen(oldpass),
-                           oldKu, &oldKu_len);
+	if (uselocalizedkey) {
+	    /*
+	     * use the localized key from the command line
+	     */
+	    u_char *buf;
+	    size_t buf_len = SNMP_MAXBUF_SMALL;
+	    buf = (u_char *) malloc (buf_len * sizeof(u_char));
 
-        if (rval != SNMPERR_SUCCESS) {
-            snmp_perror(argv[0]);
-            fprintf(stderr, "generating the new Ku failed\n");
-            exit(1);
-        }
+	    oldkul_len = 0; /* initialize the offset */
+	    if (!snmp_hex_to_binary((u_char **) (&buf), &buf_len, &oldkul_len, 0, oldpass)) {
+	      snmp_perror(argv[0]);
+	      fprintf(stderr, "generating the old Kul from localized key failed\n");
+	      exit(1);
+	    }
+	    
+	    memcpy(oldkul, buf, oldkul_len);
+	    SNMP_FREE(buf);
+	}
+	else {
+	    /*
+	     * the old Ku is in the session, but we need the new one 
+	     */
+	    rval = generate_Ku(session.securityAuthProto,
+			       session.securityAuthProtoLen,
+			       (u_char *) oldpass, strlen(oldpass),
+			       oldKu, &oldKu_len);
+	    
+	    if (rval != SNMPERR_SUCCESS) {
+	        snmp_perror(argv[0]);
+	        fprintf(stderr, "generating the new Ku failed\n");
+	        exit(1);
+	    }
 
-        /*
-         * generate the two Kul's 
-         */
-        rval = generate_kul(session.securityAuthProto,
-                            session.securityAuthProtoLen,
-                            ss->contextEngineID, ss->contextEngineIDLen,
-                            oldKu, oldKu_len, oldkul, &oldkul_len);
-
-        if (rval != SNMPERR_SUCCESS) {
-            snmp_perror(argv[0]);
-            fprintf(stderr, "generating the old Kul failed\n");
-            exit(1);
-        }
+	    /*
+	     * generate the two Kul's 
+	     */
+	    rval = generate_kul(session.securityAuthProto,
+				session.securityAuthProtoLen,
+				ss->contextEngineID, ss->contextEngineIDLen,
+				oldKu, oldKu_len, oldkul, &oldkul_len);
+	    
+	    if (rval != SNMPERR_SUCCESS) {
+	        snmp_perror(argv[0]);
+		fprintf(stderr, "generating the old Kul failed\n");
+		exit(1);
+	    }
+	}
 
         rval = generate_kul(session.securityAuthProto,
                             session.securityAuthProtoLen,
@@ -517,18 +545,20 @@ main(int argc, char *argv[])
         /*
          * create the keychange string 
          */
-        rval = encode_keychange(session.securityAuthProto,
-                                session.securityAuthProtoLen,
-                                oldkul, oldkul_len,
-                                newkul, newkul_len,
-                                keychange, &keychange_len);
+	if (doauthkey) {
+	  rval = encode_keychange(session.securityAuthProto,
+				  session.securityAuthProtoLen,
+				  oldkul, oldkul_len,
+				  newkul, newkul_len,
+				  keychange, &keychange_len);
 
-        if (rval != SNMPERR_SUCCESS) {
-            snmp_perror(argv[0]);
+	  if (rval != SNMPERR_SUCCESS) {
+	    snmp_perror(argv[0]);
             fprintf(stderr, "encoding the keychange failed\n");
             usage();
             exit(1);
-        }
+	  }
+	}
 
         /* which is slightly different for encryption if lengths are
            different */
