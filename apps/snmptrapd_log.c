@@ -306,7 +306,7 @@ static void str_append (char * dest,
 
   /* copy characters until we hit a null or a limit */
   for (copy_count = 0;
-       (source[copy_count] != '\0') && (copy_count < limit);
+       source[copy_count] != '\0' && *tail < limit;
        copy_count++)
     {
       dest[*tail] = source[copy_count];
@@ -603,7 +603,7 @@ static void handle_trap_fmt (char * bfr,
       *    pdu     - information about this trap 
       */
 {
-#define LCL_SAFE_LEN 200                      /* length of safe buffer */
+#define LCL_SAFE_LEN 2000                       /* length of safe buffer */
   oid                    trap_oid[MAX_OID_LEN]; /* holds obj id for trap */
   unsigned long          trap_oid_len;          /* length of object ID */
   struct variable_list * vars;                  /* variables assoc with trap */
