@@ -3337,7 +3337,7 @@ read_module_replacements(const char *name)
 	    return;
 	}
     }
-    if (!ds_get_boolean(DS_LIBRARY_ID, DS_LIB_MIB_ERRORS))
+    if (ds_get_boolean(DS_LIBRARY_ID, DS_LIB_MIB_ERRORS))
 	print_module_not_found(name);
 
 }
