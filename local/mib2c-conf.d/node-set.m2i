@@ -36,7 +36,7 @@
  *@note
  * This check is only to determine if the new value
  * is \b potentially valid. This is the first check of many, and
- * is one of simplest ones.
+ * is one of the simplest ones.
  * 
  *@note
  * this is not the place to do any checks for values
