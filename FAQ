@@ -133,7 +133,7 @@ Are there binaries available?
 Where can I get the perl SNMP package?
 -------------------------------------
 
-  Joe Marot's excellent perl SNMP module, which requires the ucd-snmp
+  Joe Marzot's excellent perl SNMP module, which requires the ucd-snmp
   library, can be found at any Comprehensive Perl Archive Network
   (CPAN) site mirror in modules/by-module/SNMP.  To find the CPAN site
   nearest you, please see http://www.cpan.org/SITES.html.
