@@ -65,13 +65,19 @@ ${node}_get( ${context}_rowreq_ctx *rowreq_ctx, $m2c_node_param_ref )
 @else@
  * set $m2c_node_lh and $m2c_node_lhs from $m2c_data_item_base
 @end@
- *
- * TODO:235:M: |-> Remove log message/SKIP once you've set $node data
  */
 @    if ("$m2c_data_context" eq "generated") && ($m2c_node_skip_get != 1)@
 @        include generic-ctx-get.m2i@
 @    else@
+ /*
+  * TODO:235:M: |-> Remove log message/SKIP once you've set $node data
+  */
+@       if ($m2c_node_skip_get != 1)@
+ /*
+  * TODO:235:M: |-> Remove log message/SKIP once you've set $node data
+  */
     snmp_log(LOG_ERR,"${context} node $node not implemented: skipping\n");
+@       end@
     return MFD_SKIP;
 @    end@
 ##   ------------------------------------------------------------------
