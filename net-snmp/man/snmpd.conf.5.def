@@ -408,6 +408,12 @@ This directive prevents all devices /dev/rdsk/cXt0d0 ('X' might be any char)
 from being scanned.
 .IP
 You might use more than one such wildcard expression in any such directive.
+.IP "storageUseNFS NUMBER"
+Setting storageUseNFS to 1 causes all NFS and NFS-like file systems to be
+marked as 'Network Disks' in the hrStorageTable. This is according to RFC 2790.
+Not setting storageUseNFS or setting it to 2 causes NFS and NFS-like file
+systems to be marked as 'Fixed Disks' as it has been in previous versions of
+the ucd-snmp SNMP agent.
 .IP "authtrapenable NUMBER"
 Setting authtrapenable to 1 enables generation of authentication failure
 traps.  The default value is disabled(2).  Ordinarily the corresponding
