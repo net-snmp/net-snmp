@@ -11,6 +11,12 @@
 ##//@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
 @if $m2c_processing_type eq 'h'@
 
+/*
+ * TODO:180:o: Review $context cache timeout.
+ * The number of seconds before the cache times out
+ */
+#define $context.uc_CACHE_TIMEOUT   60
+
 void ${context}_container_init(netsnmp_container **container_ptr_ptr,
                              netsnmp_cache *cache);
 int ${context}_cache_load(netsnmp_container *container);
@@ -89,15 +95,19 @@ ${context}_container_init(netsnmp_container **container_ptr_ptr,
     *container_ptr_ptr = NULL;
 
     /*
-     * Also for advance users, you can set parameters for the
+     * TODO:345:A: Set up $context cache properties.
+     *
+     * Also for advanced users, you can set parameters for the
      * cache. Do not change the magic pointer, as it is used
      * by the MFD helper.
      */
-    cache->timeout = 30; /* seconds */
-}
+    cache->timeout = $context.uc_CACHE_TIMEOUT; /* seconds */
+} /* ${context}_container_init */
 
 /**
  * load cache data
+ *
+ * TODO:350:M: Implement $context cache load
  *
  * @param container container to which items should be inserted
  *
@@ -171,15 +181,15 @@ $example_start
 $example_end
 @end@ // example
     /*
-     * TODO: update container
-     *
-     * loop over your data, allocate, set index, insert into the container
+     * TODO:351:M: |-> Load/update data in the $context container.
+     * loop over your $context data, allocate a rowreq context,
+     * set the index(es) [and data, optionally] and insert into
+     * the container.
      */
     while( 1 ) {
 @   if $m2c_include_examples == 0@
         /*
-         * TODO: check for end of data
-         * bail out if there is no more data
+         * check for end of data; bail out if there is no more data
          */
         if( 1 )
             break;
@@ -203,14 +213,13 @@ $example_start
         break;
 
     /*
-     * TODO: parse line
      * parse line into variables
      */
 $example_end
 @    end@ # example
 
         /*
-         * allocate an row context and set the index(es)
+         * TODO:352:M: |   |-> set indexes in new $context rowreq context.
          */
 @   eval $m2c_tmp = ""@
 @   if ($m2c_data_allocate == 1) || ($m2c_data_init == 1)@
@@ -241,7 +250,8 @@ $example_end
         }
 
         /*
-         * TODO: populate data context
+         * TODO:352:r: |   |-> populate $context data context.
+         * Populate data context here. (optionally, delay until row prep)
          */
 @if $m2c_data_transient == 0@ # persistent
     /* non-TRANSIENT data: no need to copy. set pointer to data */
@@ -253,7 +263,7 @@ $example_end
 @   foreach $node nonindex@
 @      include m2c_setup_node.m2i@
     /*
-     * TODO: setup/save data for $node
+     * setup/save data for $node
      * $m2c_node_summary
      */
 @      if "$m2c_data_context" eq "generated"@
@@ -285,7 +295,7 @@ $example_end
                "inserted %d records\n", count));
 
     return MFD_SUCCESS;
-}
+} /* ${context}_cache_load */
 
 /**
  * cache clean up
@@ -304,7 +314,11 @@ void
 ${context}_cache_free(netsnmp_container *container)
 {
     DEBUGMSGTL(("verbose:${context}:${context}_cache_free","called\n"));
-}
+
+    /*
+     * TODO:380:M: Free $context cache.
+     */
+} /* ${context}_cache_free */
 
 @end@ // m2c_processing_type eq 'c'
 ########################################################################
@@ -332,7 +346,7 @@ _cache_load(netsnmp_cache *cache, void *vmagic)
      * call user code
      */
     return ${context}_cache_load((netsnmp_container*)cache->magic);
-}
+} /* _cache_load */
 
 /**
  * @internal
@@ -346,7 +360,7 @@ _cache_item_free(${context}_rowreq_ctx *rowreq_ctx, void *context)
         return;
 
     ${context}_release_rowreq_ctx(rowreq_ctx);
-}
+} /* _cache_item_free */
 
 /**
  * @internal
@@ -376,7 +390,7 @@ _cache_free(netsnmp_cache *cache, void *magic)
     CONTAINER_CLEAR(container,
                     (netsnmp_container_obj_func *)_cache_item_free,
                     NULL);
-}
+} /* _cache_free */
 
 /**
  * @internal
@@ -419,7 +433,7 @@ _${context}_container_init(${context}_interface_ctx *if_ctx)
         return;
     }
     if_ctx->cache->magic = (void*)if_ctx->container;
-}
+} /* _${context}_container_init */
 
 @end@ // m2c_processing_type eq 'i'
 ########################################################################
