@@ -197,7 +197,8 @@ register_agentx_list(struct snmp_session *session, struct snmp_pdu *pdu)
     reg = create_handler_registration(buf, agentx_master_handler,
                                       pdu->variables->name,
                                       pdu->variables->name_length,
-                                      HANDLER_CAN_RWRITE);
+                                      HANDLER_CAN_RWRITE |
+                                      HANDLER_CAN_GETBULK); /* fake it */
     reg->handler->myvoid = session;
     switch (register_mib_context2(buf, NULL, 0, 1,
 			 pdu->variables->name, pdu->variables->name_length,
