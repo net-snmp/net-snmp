@@ -5,7 +5,7 @@ $miberrflag=".100";
 $miberrmsg=".101";
 $mibheadsht=".1.3.6.1.4";
 $mibheadall="$mibheadsht.10";
-@miblist=(".1",".3",".6");
+@miblist=(".1",".3",".4",".6");
 $errlog="/net/tyfon/1/OV/log/ece-log";
 $andlog=0;
 $eraseline="                                                                           \r";
@@ -42,7 +42,8 @@ foreach $host ( @ARGV ) {
 		($name) = /\"([^\"]*)\"/;
 		$_ = `snmpget -v 1 $host public $mibheadall$mibx$miberrmsg.$mibloc`;
 		($errmsg) = /\"([^\"]*)\"/;
-		printf("%s$host\t$name:\t$result -- $errmsg\n",$eraseline);
+		printf("%s%-8.8s  %-12.12s  %2d -- %s\n",$eraseline,$host,
+		       $name,$result,$errmsg);
 	    }
 	}
 	close(OUT);
