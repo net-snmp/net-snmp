@@ -193,9 +193,18 @@ static oid oid_udptable[] = {1, 3, 6, 1, 2, 1, 7, 5, 1};
 #define UDP_ENTRY 9
 
 char *tcpstates[] = {
-    "",		    "CLOSED",	    "LISTEN",   "SYNSENT",
-    "SYNRECEIVED",  "ESTABLISHED",  "FINWAIT1", "FINWAIT2",
-    "CLOSEWAIT",    "LASTACK",	    "CLOSING",	"TIMEWAIT"
+    (char*)"",
+    (char*)"CLOSED",
+    (char*)"LISTEN",
+    (char*)"SYNSENT",
+    (char*)"SYNRECEIVED",
+    (char*)"ESTABLISHED",
+    (char*)"FINWAIT1",
+    (char*)"FINWAIT2",
+    (char*)"CLOSEWAIT",
+    (char*)"LASTACK",
+    (char*)"CLOSING",
+    (char*)"TIMEWAIT"
 };
 #define TCP_NSTATES 11
 

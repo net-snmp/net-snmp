@@ -76,6 +76,7 @@ char copyright[] =
 #include "view.h"
 #include "acl.h"
 #include "version.h"
+#include "snmp_debug.h"
 
 #include "netstat.h"
 
@@ -86,10 +87,10 @@ struct protox {
 	void	(*pr_stats) (void);	/* statistics printing routine */
 	char	*pr_name;		/* well-known name */
 } protox[] = {
-	{ 0,	protopr,    tcp_stats,	"tcp" },
-	{ 0,	protopr,    udp_stats,	"udp" },
-	{ 0,	0,	    ip_stats,	"ip" },
-	{ 0,	0,	    icmp_stats,	"icmp" },
+	{ 0,	protopr,    tcp_stats,	(char*)"tcp" },
+	{ 0,	protopr,    udp_stats,	(char*)"udp" },
+	{ 0,	0,	    ip_stats,	(char*)"ip" },
+	{ 0,	0,	    icmp_stats,	(char*)"icmp" },
 	{ 0,	0,	    0,		0 }
 };
 
@@ -468,7 +469,7 @@ char *
 plural(int n)
 {
 
-	return (n != 1 ? "s" : "");
+	return (n != 1 ? (char*)"s" : (char*)"");
 }
 
 /*

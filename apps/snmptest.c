@@ -382,7 +382,7 @@ input_variable(struct variable_list *vp)
 		if (ch == 'd'){
 		    vp->val_len = ascii_to_binary((u_char *)buf, value);
 		} else if (ch == 's'){
-		    strcpy(value, buf);
+		    strcpy((char*)value, buf);
 		    vp->val_len = strlen(buf);
 		} else if (ch == 'x'){
 		    vp->val_len = hex_to_binary((u_char *)buf, value);

@@ -270,7 +270,7 @@ int main(int argc, char *argv[])
     if (inform) status = snmp_synch_response(ss, pdu, &response);
     else status = snmp_send(ss, pdu) == 0;
     if (status) {
-        snmp_perror(inform ? "snmpinform" : "snmptrap");
+        snmp_perror(inform ? (char*)"snmpinform" : (char*)"snmptrap");
     }
     snmp_free_pdu(pdu);
 
