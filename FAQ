@@ -25,12 +25,19 @@ TABLE OF CONTENTS
    What MIBs are supported?
    How do I add a MIB?
    How do I add functionality?
+   What traps are sent by the agent?
    When I run the agent it runs and then quits without staying around. Why?
  TECHNICAL
    How do I write C code to integrate with the agent?
    What ASN.1 parser is used?
    How does the agent fetch the value of a variable from the system?
+   What is the Official Slogan of the ucd-snmp-coders list?
  PROBLEMS
+   What's this about a "party database", when I try to send a query?
+   Why can't I see values in the UCDavis 'extensible' tree?
+   Why can't I see values in the <INSERT ENTERPRISE HERE> tree?
+   I've done that, and I still can't see the values. Why not?
+   The agent is complaining about 'snmp.conf'.  Where is this?
    What does "klread:  bad address" mean?
    What does "nlist err:  wombat not found" (or similar) mean?
    How about "Can't open /dev/kmem"?
@@ -269,19 +276,23 @@ What MIBs are supported?
 How do I add a MIB?
 ------------------
 
-  The agent and tools look in a predefined directory (PREFIX/lib/snmp/mibs)
-  and regard any file held there as defining a MIB or MIBs to be included.
-  Adding a new MIB is therefore as simple as placing the relevant file
-  in this directory.
+  The tools look in a predefined directory (PREFIX/lib/snmp/mibs) and
+  regard any file held there as defining a MIB module or modules to be
+  included.  If the agent to be queried supports a particular MIB module,
+  then by placing the relevant file in this directory, all the tools
+  will be able to take advantage of this new information.
 
-  Note, however, that this is purely concerned with the syntax and
-  OID translation of the objects within that MIB.  Simply adding a file
-  to this directory does not automatically extend the functionality
-  of the agent to include this MIB.  (Would that life were so simple).
+  The UCD agent, however, does not use these MIB text files at all, and
+  will work quite happily without them.  (Actually it needs to find the
+  main MIB file, though it doesn't do anything with it!).  The values
+  returned by the agent are simple numeric (or string) responses, and
+  the syntax and scope of the variables supported are hard-coded into
+  the implementation.  The MIB text files are only used to translate
+  these responses into more meaningful terms.
 
-  However, if the agent to be queried supports the new MIB, then the
-  presence of this file is all that the query tools need to take
-  advantage of this information.
+  Adding a file to the MIB directory does not automatically extend the
+  functionality of the agent to include this MIB.  (Would that life
+  were so simple).  See the next question for how to do this.
 
 
 How do I add functionality?
@@ -291,12 +302,25 @@ How do I add functionality?
   the ability to monitor a station for the presence, absence or
   excess numbers of particular processes, or excessive use of disk
   space or CPU.
-    More flexible control can be obtained by providing a command
+    More general functionality can be added by providing a command
   (such as a shell script) to be run and report the necessary
   information, or perform the required actions. Detailed information
   and examples are provided in the snmpd(1) manual page, or the
-  EXAMPLE.conf file.
+  EXAMPLE.conf file.  Alternatively, the agent itself can be extended
+  to support additional MIB groups (see 'Technical' below).
+
+    Note that there is effectively no difference between 'pass-through'
+  MIB support, and modules implemented within the agent itself. Tools
+  querying the agent will see a single MIB structure.
  
+
+What traps are sent by the agent?
+--------------------------------
+
+  The agent will send a 'coldStart(0)' trap when it first starts up,
+  and 'authenticationFailure(4)' traps when it receives SNMPv1 requests
+  using a community name that is not recognised.
+
 
 When I run the agent it runs and then quits without staying around. Why?
 -----------------------------------------------------------------------
@@ -320,9 +344,16 @@ How do I write C code to integrate with the agent?
 -------------------------------------------------
 
   At the moment, the only technique for integrating external C code
-  with the agent is to implement it within the agent itself.
-  The place to start looking is the file 'agent/snmp_vars.c'
-  or contact the list 'ucd-snmp-coders@ece.ucdavis.edu' for advice.
+  with the agent (as opposed to using the 'pass-through' shell
+  extensibility mentioned above) is to implement it within the agent itself.
+
+  The implementation of the agent has recently been re-organised
+  to make it easier to incorporate new MIB groups.  The relevant code
+  is held in the directory 'agent/mibgroup', with one file (plus
+  header) per group in most cases.  The README file in that directory
+  gives more information as to the structure of these files, and how
+  to add a new group. 
+  Contact the list 'ucd-snmp-coders@ece.ucdavis.edu' for further advice.
 
   It is hoped to implement some form of proxy mechanism (such as the
   agentx protocols) once the specification for these have settled.
@@ -348,9 +379,62 @@ How does the agent fetch the value of a variable from the system?
   in preference.
 
 
+What is the Official Slogan of the ucd-snmp-coders list?
+-------------------------------------------------------
+
+  "The current implementation is non-obvious and may need to be improved."
+	(with thanks to Rohit Dube)
+
+
 
 PROBLEMS
 ========
+
+What's this about a "party database", when I try to send a query?
+----------------------------------------------------------------
+
+  By default, the applications send SNMPv2 (classic) queries.
+  This relies on party configuration information being available.
+  The easiest way to proceed is probably to use SNMPv1 instead.
+  Just give the option "-v 1" to any of the applications.
+
+
+Why can't I see values in the UCDavis 'extensible' tree?
+-------------------------------------------------------
+Why can't I see values in the <INSERT ENTERPRISE HERE> tree?
+-----------------------------------------------------------
+
+  If you perform an 'snmpwalk' on an agent, without specifying a
+  starting point, it will return just the values in the 'mib-2' tree.
+  The same hold for any of the other tools provided.
+    To examine anything under the 'private.enterprises' branch
+  (or anywhere else in the MIB structure) you will need to specify
+  the full specification, starting from the root of the tree - e.g:
+
+	.iso.org.dod.internet.private.enterprises.ucdavis
+
+  Alternatively, by defining the environmental variable PREFIX, the
+  tools can be told to look for non-fully specified objects in
+  a different sub-tree.
+
+
+I've done that, and I still can't see the values. Why not?
+---------------------------------------------------------
+
+  The other possibility is that there is a clash of names
+somewhere within the MIB tree.  Try running the command
+'snmptranslate -x zzz' which will inform you of any duplicates.
+
+
+The agent is complaining about 'snmp.conf'.  Where is this?
+----------------------------------------------------------
+
+  It doesn't exist in the distribution as shipped.  You need to
+  create it to reflect your local requirement.
+    To get started, you can either just create this as an empty file,
+  or try copying the EXAMPLE.conf file which will use some of the
+  UCD extensions. 
+
 
 What does "klread:  bad address" mean?
 -------------------------------------
@@ -373,7 +457,7 @@ What does "nlist err:  wombat not found" (or similar) mean?
   kernel structures it was looking for.  This may or may not
   be important - some systems provide alternative mechanisms
   for obtaining the necessary information - Solaris, for example,
-  will produce a whole slew of such messages, but still provide
+  can produce a whole slew of such messages, but still provide
   the correct information.
     This error only occurs if you have used the flag
   '--enable-debugging' as part of the initial configuration.
@@ -402,20 +486,6 @@ I cannot set any variables in the MIB.
   The main variables that can be changes are purely those within the
   'system' group, relating to general contact information.
   
-
-snmpwalk of some.textual.notation doesn't work (eg, enterprises.ucdavis).
-------------------------------------------------------------------------
-
-  The tools assume that the names of variables will normally be within
-  the main 'mib-2' tree.  In order to access a variable elsewhere within
-  the MIB structure, it is necessary to specify the full path, i.e:
-
-	.iso.org.dod......
-
-  Alternatively, by defining the environmental variable PREFIX, the
-  tools can be told to look for non-fully specified objects in
-  a different sub-tree.
-
 
 Sometimes I seem to get the wrong answers.  Why?
 -----------------------------------------------
@@ -455,6 +525,8 @@ Sometimes I seem to get the wrong answers.  Why?
 
   The following variables have 'likely guess' values, that are not
   necessarily strictly accurate.
+  The SNMP protocol standards (RFCs 1157 and 1905) could actually be
+  taken to imply that the agent should return a 'genErr' in these cases.
 
 
 	interface.ifInOctets		guess based on # of packets
@@ -467,13 +539,20 @@ Sometimes I seem to get the wrong answers.  Why?
 	ipRouteEntry.ipRouteProto	local(2) or icmp(4)
 
 	tcp.tcpRtoAlgorithm		vanJ(4)   (probably correct!)
+
+
+  The following variables are simply not implemented according to specification
+
+	system.sysUpTime                machine uptime, rather than SNMP agent
+
 	tcp.tcpAttemptFails		} actually counting
 	tcp.tcpEstabResets		} something different
+	tcp.tcpOutResets		}
+
 
   Some systems may return the correct information for these values.
   Systems that are known to have corrected some of these values are as follows:
 
 	*  FreeBSD & BSDi provide correct interface statistics
-	*  Solaris provides correct statistics throughout
-	*  Correct information for HP-UX is imminent
+	*  Solaris & HP-UX provide correct statistics throughout
 
