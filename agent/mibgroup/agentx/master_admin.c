@@ -70,7 +70,7 @@ open_agentx_session(struct snmp_session *session, struct snmp_pdu *pdu)
 int
 close_agentx_session(struct snmp_session *session, int sessid)
 {
-    struct snmp_session *sp, *prev;
+    struct snmp_session *sp, *prev = NULL;
     
     for ( sp = session->subsession ; sp != NULL ; prev = sp, sp = sp->next ) {
         if ( sp->sessid == sessid ) {
