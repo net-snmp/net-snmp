@@ -136,6 +136,8 @@ smux_parse_smux_socket(const char *token, char *cptr)
 void
 smux_parse_peer_auth(const char *token, char *cptr)
 {
+    oid  oid_buf[MAX_OID_LEN];
+    size_t oid_len;
     smux_peer_auth *aptr;
 
     if ((aptr =
@@ -164,7 +166,7 @@ smux_parse_peer_auth(const char *token, char *cptr)
     /*
      * oid 
      */
-    aptr->sa_oid_len = parse_miboid(cptr, aptr->sa_oid);
+    read_objid( cptr, aptr->sa_oid, &aptr->sa_oid_len );
 
     DEBUGMSGTL(("smux_conf", "parsing registration for: %s\n", cptr));
 
