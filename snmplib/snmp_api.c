@@ -512,12 +512,20 @@ snmp_sess_error(void *sessp,
 
 /* snmp_sess_perror(): print a error stored in a session pointer */ 
 void
-snmp_sess_perror(const char *prog_string, netsnmp_session *ss) {
+netsnmp_sess_log_error(int priority,
+                       const char *prog_string, netsnmp_session *ss) {
   char *err;
   snmp_error(ss, NULL, NULL, &err);
-  snmp_log(LOG_ERR, "%s: %s\n", prog_string, err);
+  snmp_log(priority, "%s: %s\n", prog_string, err);
   free(err);
 }
+
+/* snmp_sess_perror(): print a error stored in a session pointer */ 
+void
+snmp_sess_perror(const char *prog_string, netsnmp_session *ss) {
+    netsnmp_sess_log_error(LOG_ERR, prog_string, ss);
+}
+
 
 
 /*
