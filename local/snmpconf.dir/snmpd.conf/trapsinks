@@ -6,6 +6,8 @@ info	    A SNMPv1 trap receiver
 info	    arguments: host [community] [portnum]
 question 1  A host name that should receive the trap
 question 2  The community to be used in the trap sent [optional]
+question 3  The port number the trap should be sent to [optional]
+validanswer 3 ^\d+$
 
 token	    trap2sink
 info	    A SNMPv2c trap receiver
