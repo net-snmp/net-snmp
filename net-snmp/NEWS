@@ -1,6 +1,15 @@
 This file contains major changes in released revisions.  Please read
 the ChangeLog file for a more detailed listing of changes/bug fixes.
 
+*5.0.7*
+ New:
+    - VACM (access control) optimizations which will greatly benefit
+      people who wish to exclude large portions of the MIB tree from
+      some people.  Previously this was a large resource drain.
+
+ Fixes:
+    - A few memory leak fixes for the table_iterator agent API.
+
 *5.0.6*
 
  Fixes:
