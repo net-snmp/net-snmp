@@ -409,7 +409,7 @@ AC_ARG_WITH(perl-modules,
 Perl:
   --with-perl-modules             Install the perl modules along with the rest
                                   of the net-snmp toolkit.],
-    install_perl)
+    install_perl=yes)
 
 AC_ARG_ENABLE(embedded-perl,
 [
