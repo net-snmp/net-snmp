@@ -175,11 +175,15 @@ int		snmp_tcp_accept	(snmp_transport *t)
 
     /*  Try to make the new socket blocking.  */
 
+#ifdef WIN32
+    ioctlsocket(newsock, FIONBIO, &sockflags);
+#else
     if ((sockflags = fcntl(newsock, F_GETFL, 0)) >= 0) {
       fcntl(newsock, F_SETFL, (sockflags & ~O_NONBLOCK));
     } else {
       DEBUGMSGTL(("snmp_tcp_accept", "couldn't f_getfl of fd %d\n", newsock));
     }
+#endif
 
     return newsock;
   } else {
@@ -256,8 +260,13 @@ snmp_transport		*snmp_tcp_transport	(struct sockaddr_in *addr,
 	Programming Volume I Second Edition'', pp. 422--4, which could
 	otherwise wedge the agent.  */
 
+#ifdef WIN32
+    opt = 1;
+    ioctlsocket(t->sock, FIONBIO, &opt);
+#else
     sockflags = fcntl(t->sock, F_GETFL, 0);
     fcntl(t->sock, F_SETFL, sockflags | O_NONBLOCK);
+#endif
 
     /*  Now sit here and wait for connections to arrive.  */
 
