@@ -24,7 +24,7 @@
 .SH NAME
 snmptrapd - Receive and log snmp trap messages.
 .SH SYNOPSIS
-snmptrapd [-h] [-P] [-s] [-p port] [-d] [-e] [-D tokens] [-l [d0-7]] [-f] [-H] [-a] [-O oidopts]
+snmptrapd [-h] [-P] [-s] [-p port] [-d] [-e] [-D tokens] [-l [d0-7]] [-f] [-H] [-a] [-O oidopts] [-C] [-c confFile]
 .SH DESCRIPTION
 Snmptrapd
 is an SNMP application that receives and logs snmp trap messages
@@ -65,6 +65,10 @@ Turn debugging output on.
 Don't fork away from the caller when using syslog().
 .IP "-O oidopts"
 Set OID printing options (see snmpcmd(1))
+.IP "-C"
+Don't read the default set of configuration files.
+.IP "-c confFile"
+Force the reading of confFile as a configuration file.
 .SH EXTENSIBILITY AND CONFIGURATION
 See the snmpdtrapd.conf(5) manual page.
 .PP
