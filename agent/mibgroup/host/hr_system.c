@@ -583,6 +583,7 @@ count_users(void)
     int             total = 0;
 #if HAVE_UTMPX_H
 #define setutent setutxent
+#define pututent pututxent
 #define getutent getutxent
 #define endutent endutxent
     struct utmpx   *utmp_p;
@@ -602,7 +603,7 @@ count_users(void)
                current user */
             if (kill(utmp_p->ut_pid, 0) == -1 && errno == ESRCH) {
                 utmp_p->ut_type = DEAD_PROCESS;
-                pututxline(utmp_p);
+                pututline(utmp_p);
                 continue;
             }
 #endif
