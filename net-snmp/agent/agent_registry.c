@@ -289,7 +289,7 @@ load_subtree( struct subtree *new_sub )
 
 
 int
-register_mib_range(const char *moduleName,
+register_mib_context(const char *moduleName,
 	     struct variable *var,
 	     size_t varsize,
 	     size_t numvars,
@@ -298,7 +298,10 @@ register_mib_range(const char *moduleName,
 	     int priority,
 	     int range_subid,
 	     oid range_ubound,
-	     struct snmp_session *ss)
+	     struct snmp_session *ss,
+	     char *context,
+	     int timeout,
+	     int flags)
 {
   struct subtree *subtree, *sub2;
   int res, i;
@@ -331,6 +334,7 @@ register_mib_range(const char *moduleName,
     subtree->variables_width = varsize;
   }
   subtree->priority = priority;
+  subtree->timeout  = timeout;
   subtree->session = ss;
   res = load_subtree(subtree);
 
@@ -369,6 +373,23 @@ register_mib_range(const char *moduleName,
                       &reg_parms);
 
   return res;
+}
+
+int
+register_mib_range(const char *moduleName,
+	     struct variable *var,
+	     size_t varsize,
+	     size_t numvars,
+	     oid *mibloc,
+	     size_t mibloclen,
+	     int priority,
+	     int range_subid,
+	     oid range_ubound,
+	     struct snmp_session *ss)
+{
+  return register_mib_context( moduleName, var, varsize, numvars,
+				mibloc, mibloclen, priority,
+				range_subid, range_ubound, ss, "", -1, 0);
 }
 
 int

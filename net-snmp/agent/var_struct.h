@@ -29,6 +29,7 @@ struct subtree {
     struct snmp_session *session;
     u_char		flags;
     u_char		priority;
+    int 		timeout;
     struct subtree      *next;		/* List of 'sibling' subtrees */
     struct subtree      *prev;		/* Make siblings a doubly-linked list */
     struct subtree      *children;	/* List of 'child' subtrees */
