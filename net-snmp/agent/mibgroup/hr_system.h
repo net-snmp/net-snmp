@@ -5,6 +5,8 @@
 #ifndef _MIBGROUP_HRSYSTEM_H
 #define _MIBGROUP_HRSYSTEM_H
 
+config_require(hr_utils )
+
 extern void	init_hr_system __P((void));
 extern u_char	*var_hrsys __P((struct variable *, oid *, int *, int, int *, int (**write) __P((int, u_char *, u_char, int, u_char *, oid *, int)) ));
 

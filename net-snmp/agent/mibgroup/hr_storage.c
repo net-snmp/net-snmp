@@ -5,6 +5,7 @@
 
 #include <config.h>
 
+#include <sys/param.h>
 #if HAVE_SYS_VM_H
 #include <sys/vm.h>
 #else
@@ -42,6 +43,9 @@
 #endif
 #if HAVE_SYS_VFS_H
 #include <sys/vfs.h>
+#endif
+#if HAVE_SYS_MOUNT_H
+#include <sys/mount.h>
 #endif
 #ifdef HAVE_SYS_MBUF_H
 #include <sys/mbuf.h>
@@ -316,7 +320,7 @@ var_hrstore(vp, name, length, exact, var_len, write_method)
 			break;
 	    }
             *var_len = sizeof(storage_type_id);
-	    return (u_char *)&storage_type_id;
+	    return (u_char *)storage_type_id;
 	case HRSTORE_DESCR:
 	    if (store_idx<HRS_TYPE_FS_MAX) {
 	        strcpy(string, HRFS_entry->HRFS_mount);

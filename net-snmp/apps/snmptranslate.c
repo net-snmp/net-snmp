@@ -88,6 +88,7 @@ main(argc, argv)
 		snmp_set_save_descriptions(1);
 		break;
 	      case 'r':
+	      case 'R':
 		random_access = 1;
 		break;
               case 'w':
@@ -119,7 +120,7 @@ main(argc, argv)
     
     if (current_name == NULL && !print){
       fprintf(stderr,
-              "usage: snmptranslate [-n] [-d] [-r] [-w|-W] [-p] objectID\n");
+              "usage: snmptranslate [-n] [-d] [-R] [-w|-W] [-f|-s] [-p] objectID\n");
       exit(1);
     }
     

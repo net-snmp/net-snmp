@@ -17,3 +17,4 @@
 #undef RTNET_SYMBOL
 #undef IPSTAT_SYMBOL
 #undef TCP_TTL_SYMBOL
+#undef PROC_SYMBOL
