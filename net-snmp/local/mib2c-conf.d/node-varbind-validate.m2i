@@ -57,7 +57,7 @@ netsnmp_assert(rc == SNMP_ERR_NOERROR); /* paranoia */
  && ( *var->val.integer != $m2c_ename )
 @         end@ # for each
         ) {
-        rc = SNMP_ERR_BADVALUE;
+        rc = SNMP_ERR_WRONGVALUE;
         }
 ##------------------------------------------------------
 @      else@ # BITS
@@ -71,7 +71,7 @@ netsnmp_assert(rc == SNMP_ERR_NOERROR); /* paranoia */
         /* check that value is within enum mask */
         memcpy( &bits, var->val.string, var->val_len);
         if( (bits | $m2c_enum_mask) != $m2c_enum_mask)
-        rc = SNMP_ERR_BADVALUE;
+        rc = SNMP_ERR_WRONGVALUE;
     }
 @      end@
     }
@@ -81,7 +81,7 @@ netsnmp_assert(rc == SNMP_ERR_NOERROR); /* paranoia */
 @   elsif $node.ranges == 1@
 @      if ("$node.decl" eq "long") || ("$node.decl" eq "u_long")@
 @         eval $m2c_nvv_func = "netsnmp_check_vb_int_range"@
-##@         eval $m2c_nvv_rc = "SNMP_ERR_BADVALUE"@
+##@         eval $m2c_nvv_rc = "SNMP_ERR_WRONGVALUE"@
 @      else@
 @         eval $m2c_nvv_func = "netsnmp_check_vb_size_range"@
 ##@         eval $m2c_nvv_rc = "SNMP_ERR_WRONGLENGTH"@
