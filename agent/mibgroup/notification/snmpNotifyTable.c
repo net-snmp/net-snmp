@@ -702,6 +702,11 @@ write_snmpNotifyRowStatus(int      action,
             StorageDel == 0;
             /* XXX: free it, its dead */
           }
+          if (StorageTmp->snmpNotifyRowStatus == RS_CREATEANDGO) {
+              StorageTmp->snmpNotifyRowStatus = RS_ACTIVE;
+          } else if (StorageTmp->snmpNotifyRowStatus == RS_CREATEANDWAIT) {
+              StorageTmp->snmpNotifyRowStatus = RS_NOTINSERVICE;
+          }
           break;
   }
   return SNMP_ERR_NOERROR;
