@@ -14,6 +14,15 @@
 
 top_builddir=..
 
+# use GNU vpath, if available, to only set a path for source and headers
+# VPATH will pick up objects too, which is bad if you are sharing a
+# source dir...
+@GNU_vpath@ %.h $(srcdir)
+@GNU_vpath@ %.c $(srcdir)
+# fallback to regular VPATH for non-gnu...
+@NON_GNU_VPATH@ $(srcdir)
+
+
 #
 # Things to install
 #
@@ -169,8 +178,7 @@ LOBJS=	snmp_client.lo mib.lo parse.lo snmp_api.lo snmp.lo 		\
 TOBJS=$(LOBJS)
 
 # 
-CPPFLAGS = -I../include -I. -I.. \
-	   -I$(top_srcdir)/include -I$(srcdir) -I$(srcdir)/.. @CPPFLAGS@
+CPPFLAGS = $(TOP_INCLUDES) -I. 	$(SNMPLIB_INCLUDES) @CPPFLAGS@
 
 all: standardall
 

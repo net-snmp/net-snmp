@@ -682,6 +682,7 @@ AC_DEFINE_UNQUOTED(UNAMEPROG,"$UNAMEPROG")
 AC_C_CONST
 AC_C_INLINE
 
+
 # get version number.
 AC_MSG_CHECKING([for net-snmp version number])
 VERSION=`grep NetSnmpVersionInfo.*= $srcdir/snmplib/snmp_version.c | sed 's/";.*//;s/.*"//;s/pre/0./;'`
@@ -703,6 +704,45 @@ else
 fi
 AC_MSG_RESULT($DEVFLAGS)
 AC_SUBST(DEVFLAGS)
+
+#
+# hacks for building outside of the source directory
+#
+# 1) make sure build include paths are before source
+# 2) check for GNU make to use vpath instead of VPATH
+#
+NON_GNU_VPATH="VPATH ="
+GNU_vpath="#vpath"
+#
+# define include paths relative to top_srcdir
+# tweak includes if we're building outside of the source dir
+if test "x$srcdir" = "x."; then
+TOP_INCLUDES=SRC_TOP_INCLUDES
+SNMPLIB_INCLUDES=SRC_SNMPLIB_INCLUDES
+AGENT_INCLUDES=SRC_AGENT_INCLUDES
+HELPER_INCLUDES=SRC_HELPER_INCLUDES
+MIBGROUP_INCLUDES=SRC_MIBGROUP_INCLUDES
+else
+TOP_INCLUDES=BLD_TOP_INCLUDES
+SNMPLIB_INCLUDES=BLD_SNMPLIB_INCLUDES
+AGENT_INCLUDES=BLD_AGENT_INCLUDES
+HELPER_INCLUDES=BLD_HELPER_INCLUDES
+MIBGROUP_INCLUDES=BLD_MIBGROUP_INCLUDES
+make -v | grep GNU >/dev/null
+have_gnu_make=$?
+if test $have_gnu_make -eq 0 ; then
+    NON_GNU_VPATH="#VPATH ="
+    GNU_vpath="vpath"
+fi
+fi
+AC_SUBST(TOP_INCLUDES)
+AC_SUBST(SNMPLIB_INCLUDES)
+AC_SUBST(AGENT_INCLUDES)
+AC_SUBST(HELPER_INCLUDES)
+AC_SUBST(MIBGROUP_INCLUDES)
+AC_SUBST(GNU_vpath)
+AC_SUBST(NON_GNU_VPATH)
+
 
 # system check
 AC_CANONICAL_TARGET

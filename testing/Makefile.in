@@ -2,6 +2,14 @@
 # Makefile for testing
 #
 
+# use GNU vpath, if available, to only set a path for source and headers
+# VPATH will pick up objects too, which is bad if you are sharing a
+# source dir...
+@GNU_vpath@ %.h $(srcdir)
+@GNU_vpath@ %.c $(srcdir)
+# fallback to regular VPATH for non-gnu...
+@NON_GNU_VPATH@ $(srcdir)
+
 #TARG		= etest ktest misctest stest
 
 USELIBS		= ../snmplib/libsnmp.$(LIB_EXTENSION)$(LIB_VERSION)
@@ -9,7 +17,7 @@ LIBS		= -L../snmplib $(CC_RUNTIME_ARG) -lsnmp @LIBS@
 
 PARSEOBJS	=
 
-CPPFLAGS	= -I.. -I$(srcdir)/.. -I$(srcdir)/../snmplib @CPPFLAGS@
+CPPFLAGS	= $(SNMPLIB_INCLUDES) @CPPFLAGS@
 CC		= @CC@ $(CPPFLAGS)
 
 all: $(TARG)
