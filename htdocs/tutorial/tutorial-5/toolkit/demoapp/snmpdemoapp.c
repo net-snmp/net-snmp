@@ -2,7 +2,7 @@
 #include <net-snmp/net-snmp-includes.h>
 #include <string.h>
 
-/* change the word "undef" to "define" to try the (insecure) SNMPv1 version */
+/* change the word "define" to "undef" to try the (insecure) SNMPv1 version */
 #define DEMO_USE_SNMP_VERSION_3
 
 #ifdef DEMO_USE_SNMP_VERSION_3
