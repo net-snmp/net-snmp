@@ -835,8 +835,17 @@ handle_nsExtendConfigTable(netsnmp_mib_handler          *handler,
 
             case COLUMN_EXTCFG_RUNTYPE:
                 i = *request->requestvb->val.integer;
-                if ( i == 3 )
+                switch (i) {
+                case 1:
+                    extension->flags &= ~NS_EXTEND_FLAGS_WRITEABLE;
+                    break;
+                case 2:
+                    extension->flags |=  NS_EXTEND_FLAGS_WRITEABLE;
+                    break;
+                case 3:
                     (void)netsnmp_cache_check_and_reload( extension->cache );
+                    break;
+                }
                 break;
 
             case COLUMN_EXTCFG_EXECTYPE:
