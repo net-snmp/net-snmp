@@ -359,23 +359,49 @@ sub getcursor {
     return $cursor;
 }
 
+my %expressions;
+sub getexpr {
+    my $table = shift;
+    print "ref: ",ref($expressions{$table}),"\n" if ($verbose);
+    if (!defined($expressions{$table})) {
+	my $exprs = getcursor("SELECT * FROM errorexpressions where (tablename = '$table')");
+	while (  $expr = $exprs->fetchrow_hashref ) {
+	    push @{$expressions{$table}{'expr'}},$expr->{expression};
+	    push @{$expressions{$table}{'returnfield'}},$expr->{returnfield};
+	}
+    }
+    if (ref($expressions{$table}) ne "HASH") {
+	# no expressions for this table.
+	$expressions{$table}{'expr'} = [];
+	$expressions{$table}{'returnfield'} = [];
+    }
+    return $expressions{$table};
+}
+
 sub checkrowforerrors {
     my ($table, $host, $id) = @_;
-    my $exprs = getcursor("SELECT * FROM errorexpressions where (tablename = '$table')");
-    my $expr;
     my $error;
 
     my $lastres = 0, $lastfield = '';
-    while (  $expr = $exprs->fetchrow_hashref ) {
-	my $errors = getcursor("select * from $table where $expr->{expression} and host = '$host' and oidindex = '$id'");
-	while (  $error = $errors->fetchrow_hashref ) {
-	    print STDERR "$host: $expr->{returnfield} = $error->{$expr->{returnfield}}\n" if ($verbose);
-	    return {'retval', 1,
-		    'errfield', $expr->{'returnfield'},
-		    'errvalue', $error->{$expr->{'returnfield'}}};
+    my $expressions = getexpr($table);
+    my $i;
+    for($i=0; $i <= $#{$expressions->{'expr'}}; $i++) {
+	if (!defined($expressions->{'prepared'}[$i])) {
+	    $expressions->{'prepared'}[$i] = $dbh->prepare("select * from $table where $expressions->{'expr'}[$i] and host = ? and oidindex = ?")
+		or warn "\nnot ok: $DBI::errstr\n";
+	    print STDERR "preparing select * from $table where $expressions->{'expr'}[$i] and host = ? and oidindex = ? ==> ",ref($expressions->{'prepared'}[$i]),"\n" if($verbose);
 	}
-	$lastres = $error->{$expr->{'returnfield'}};
-	$lastfield = $expr->{'returnfield'};
+	my $prepared = $expressions->{'prepared'}[$i];
+	print STDERR "x: ",ref($prepared),"\n" if($verbose);
+	$prepared->execute($host, $id) or warn "\nnot ok: $DBI::errstr\n";
+	while (  $error = $prepared->fetchrow_hashref ) {
+	    print STDERR "$host: $expressions->{returnfield}[$i] = $error->{$expressions->{returnfield}[$i]}\n" if ($verbose);
+	    return {'retval', 1,
+		    'errfield', $expressions->{returnfield}[$i],
+		    'errvalue', $error->{$expressions->{returnfield}[$i]}};
+	}
+	$lastres = $error->{$expressions->{returnfield}[$i]};
+	$lastfield = $expressions->{returnfield}[$i];
     }
     return {'retval', 0, 
 	    'errfield', $lastfield,
