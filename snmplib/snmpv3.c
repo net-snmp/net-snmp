@@ -813,7 +813,7 @@ snmpv3_local_snmpEngineBoots(void)
  * Store engineID in buf; return the length.
  *
  */
-u_long
+size_t
 snmpv3_get_engineID(u_char *buf, size_t buflen)
 {
   /*
@@ -878,7 +878,7 @@ snmpv3_clone_engineID(u_char **dest, size_t* destlen, u_char*src, size_t srclen)
  * 'length' is set to the length of engineID  -OR-  < 0 on failure.
  */
 u_char *
-snmpv3_generate_engineID(u_long *length)
+snmpv3_generate_engineID(size_t *length)
 {
   u_char *newID;
   newID = (u_char *) malloc(engineIDLength);
