@@ -62,6 +62,11 @@
 
 #define rt_pad1 rt_refcnt
 
+#define hpux 1
+
+/*
+ * disable inline for non-gcc compiler
+ */
 #ifndef __GNUC__
 #  undef NETSNMP_ENABLE_INLINE
 #  define NETSNMP_ENABLE_INLINE 0
