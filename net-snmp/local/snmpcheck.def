@@ -17,6 +17,128 @@ $snmppath="/usr/local/etc";
 $eraseline="                                                                           \r";
 $fixit=-1;  # this should be 0 not -1, but is necissary till getc(STDIN) works
 
+#
+#  Mib Package:  Each mib has a mib number attached and can check/fix itself;
+#
+
+package Mib;
+
+sub new {
+    my $tmp = shift;
+    my $self = {};
+    $self->{'Host'} = shift;
+    $self->{'Mib'} = shift;
+    bless $self;
+}
+
+sub check {
+    my $self = shift;
+    $mibcheck="$::mibheadall$mibx";
+    printf "%sChecking %s: %s\r", $::eraseline,$self->{'Host'},$self->{'Mib'};
+    open(OUT,"$::snmppath/snmpwalk -v 1 $self->{'Host'} public $self->{'Mib'}$::miberrflag|");
+    while (<OUT>) {
+	($mibloc) = /\.([0-9]+) /;
+	if (($succ = $self->check_mib($mibloc,1)) != 0)
+	{
+	    $self->fix($mibloc);
+	}
+	elsif ($succ != 0) {
+	    printf("\n");
+	}
+    }
+    close(OUT);
+}
+
+sub check_mib {
+    my $self = shift;
+    my $mibloc = shift;
+    my $report = shift;
+    $_ = `$::snmppath/snmpget -v 1 $self->{'Host'} public $self->{'Mib'}$::miberrflag.$mibloc`;
+    ($result) = /= ([0-9]+)/;
+    if ($result > 0 && $report) {
+	$_ = `$::snmppath/snmpget -v 1 $self->{'Host'} public $self->{'Mib'}$::mibident.$mibloc`;
+	($procname) = /\"([^\"]*)\"/;
+	$_ = `$::snmppath/snmpget -v 1 $self->{'Host'} public $self->{'Mib'}$::miberrmsg.$mibloc`;
+	($errmsg) = /\"([^\"]*)\"/;
+	printf("%s%-8.8s  %-12.12s  %2d -- %-37.37s",$::eraseline,
+	       $self->{'Host'}, $procname,$result,$errmsg);
+    }
+    $result;
+}
+
+sub fix {
+# Don't fix and/or unable to
+}
+
+package FixMib;
+
+@ISA = qw( Mib );
+
+sub new {
+    my $tmp = shift;
+    my $host = shift;
+    my $mib = shift;
+    my $self = new Mib ($host,$mib);
+    bless $self;
+}
+
+sub fix {
+    my $self = shift;
+    my $mibloc = shift;
+    printf(" / Fixing...\b\b\b\b\b\b\b\b\b");
+    system("snmpset -v 1 $self->{'Host'} public $self->{'Mib'}$::mibfix.$mibloc integer 1 > /dev/null 2>&1");
+    system("snmpset -v 1 $self->{'Host'} public $::mibclearcache integer 1 > /dev/null 2>&1");
+    printf("Sleeping\b\b\b\b\b\b\b\b");
+    sleep(2);
+    printf("Checking\b\b\b\b\b\b\b\b");
+    if (($succ = $self->check_mib($mibloc,0)) != 0) {
+	printf("*failed*  \n");
+    }
+    else {
+	printf("Fixed     \n");
+    }
+}
+
+#
+#  Host Package:  Each object is a host which can check itself and display
+#                 the results
+#
+package Host;
+
+sub new {
+    my $self = {};
+    my $tmp = shift;
+    $self->{'Name'} = shift;
+    $self->{'Mibs'} = [];
+    my $i = 0;
+    foreach $mibx ( @::miblist ) {
+	if (grep(/$mibx/,@::fixitlist) && $::fixit >= 0) {
+	    $self->{'Mibs',$i++} =
+		new FixMib ($self->{'Name'},"$::mibheadall$mibx");
+	} else {
+	    $self->{'Mibs',$i++} =
+		new Mib ($self->{'Name'},"$::mibheadall$mibx");
+	}
+    }
+    $self->{'numMibs'} = $i-1;
+    bless $self->{'Mibs'};
+    bless $self
+}
+
+sub check {
+    my $self = shift;
+    for($i=0; $i<= $self->{'numMibs'}; $i++) {
+	$x = $self->{'Mibs',$i};
+	$x->check();
+    }
+}
+
+package main;
+
+#
+# Read arguments
+#
+
 if ($#ARGV != -1) {
     while ($_ = $ARGV[0], /^-/) {
 	shift;
@@ -25,6 +147,10 @@ if ($#ARGV != -1) {
 	/^-y/ && ($fixit = 1);
     }
 }
+
+#
+# If necessary check the ece-log file for problems
+#
 
 if ($andlog || $#ARGV == -1) {
     open(LOG,$errlog);
@@ -38,53 +164,16 @@ if ($andlog || $#ARGV == -1) {
     close(LOG);
 }
 
+#
+# Check all the found hosts 
+#
+
 select(STDOUT);
 $| = 1;
 foreach $host ( @ARGV ) {
-    foreach $mibx ( @miblist ) {
-	$mibcheck="$mibheadall$mibx";
-	printf "%sChecking %s: %s\r", $eraseline,$host,$mibcheck;
-	open(OUT,"$snmppath/snmpwalk -v 1 $host public $mibcheck$miberrflag|");
-	while (<OUT>) {
-	    ($mibloc) = /\.([0-9]+) /;
-	    if (($succ = &check_mib($_,1)) != 0 && grep(/$mibx/,@fixitlist) &&
-		$fixit >= 0) {
-		printf(" / Fixing...\b\b\b\b\b\b\b\b\b");
-		system("snmpset -v 1 $host public $mibcheck$mibfix.$mibloc integer 1 > /dev/null 2>&1");
-		system("snmpset -v 1 $host public $mibclearcache integer 1 > /dev/null 2>&1");
-		printf("Sleeping\b\b\b\b\b\b\b\b");
-		sleep(2);
-		printf("Checking\b\b\b\b\b\b\b\b");
-		if (($succ = &check_mib($mibcheck,0)) != 0) {
-		    printf("*failed*  \n");
-		}
-		else {
-		    printf("Fixed     \n");
-		}
-	    }
-	    elsif ($succ != 0) {
-		printf("\n");
-	    }
-	}
-	close(OUT);
-    } 
+    $chost[$#chost+1] = new Host ($host);
+    $chost[$#chost]->check;
 }
 printf("$eraseline");
 
-sub check_mib {
-    local($mib) = shift;
-    local($report) = shift;
-    if ($mib =~ /^(\.[0-9]+)+$/) {
-	$_ = `$snmppath/snmpget -v 1 $host public $mib$miberrflag.$mibloc`;
-    }
-    ($result) = /= ([0-9]+)/;
-    if ($result > 0 && $report) {
-	$_ = `$snmppath/snmpget -v 1 $host public $mibcheck$mibident.$mibloc`;
-	($procname) = /\"([^\"]*)\"/;
-	$_ = `$snmppath/snmpget -v 1 $host public $mibcheck$miberrmsg.$mibloc`;
-	($errmsg) = /\"([^\"]*)\"/;
-	printf("%s%-8.8s  %-12.12s  %2d -- %-37.37s",$eraseline,$host,
-	       $procname,$result,$errmsg);
-    }
-    $result;
-}
+
