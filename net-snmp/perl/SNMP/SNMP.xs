@@ -224,13 +224,11 @@ __libraries_init()
             return;
         have_inited = 1;
 
-        fprintf(stderr, "initalizing...\n");
         init_snmp("perlmod");
     
         snmp_set_quick_print(1);
         ds_set_boolean(DS_LIBRARY_ID, DS_LIB_DONT_BREAKDOWN_OIDS, 1);
-        fprintf(stderr, "done...\n");
-
+y
         SOCK_STARTUP;
     
     }
