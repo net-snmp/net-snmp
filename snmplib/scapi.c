@@ -505,7 +505,7 @@ sc_encrypt(const oid * privtype, size_t privtypelen,
     DES_cblock       key_struct;
 #ifdef HAVE_AES
     AES_KEY aes_key;
-    int new_ivlen = ivlen;
+    int new_ivlen = 0;
 #endif
 
     DEBUGTRACE;
@@ -720,7 +720,7 @@ sc_decrypt(const oid * privtype, size_t privtypelen,
     DES_cblock      key_struct;
     u_int           properlength, properlength_iv;
 #ifdef HAVE_AES
-    int new_ivlen = ivlen;
+    int new_ivlen = 0;
     AES_KEY aes_key;
 #endif
 
