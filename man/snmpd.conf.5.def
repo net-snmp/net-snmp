@@ -699,6 +699,35 @@ monitor	-o laNames -o laErrMessage  "laTable" laErrorFlag != 0
 monitor	-o fileName -o fileErrorMsg  "fileTable" fileErrorFlag != 0
 .fi
 .RE
+.SH "DEBUGGING AND OTHER EXTENSIBILITY NOTES"
+If you're trying to figure out aspects of the various mib modules
+(possibly some that you've added yourself), the following may help you
+spit out some useful debugging information.  First off, please read
+the snmpd manual page on the -D flag.  Then the following
+configuration snmpd.conf token, combined with the -D flag, can produce
+useful output:
+.IP "injectHandler HANDLER modulename"
+This will insert new handlers into the section of the mib tree
+referenced by "modulename".  The types of handlers available for
+insertion are:
+.RS
+.nf
+debug        - Prints out lots of debugging information when -Dhelper:debug
+               is passed to the snmpd application.
+read_only    - Forces turning off write support for the given module.
+serialize    - If a module is failing to handle multiple requests
+               properly (using the new 5.0 module API), this will force
+               the module to only receive one request at a time.
+bulk_to_next - If a module registers to handle getbulk support, but
+               for some reason is failing to implement it properly,
+               this module will convert all getbulk requests to
+               getnext requests before the final module receives it.
+.fi
+.RE
+.IP "Figuring out module names"
+To figure out which modules you can inject things into, snmpwalk the
+nsModuleTable which will give you a list of all named modules
+registered within the agent.
 .SH "EXAMPLE CONFIGURATION FILE"
 See the EXAMPLE.CONF file in the top level source directory for a more
 detailed example of how the above information is used in real
