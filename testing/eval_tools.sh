@@ -184,6 +184,10 @@ DELAY() {
     fi
 }
 
+SAVE_RESULTS() {
+   real_return_value=$return_value
+}
+
 #
 # Checks the output result against what we expect.
 #   Sets return_value to 0 or 1.
@@ -260,9 +264,11 @@ WAITFOR() {
           else
 	    CHECKFILE "$2" "$1"
 	  fi
-          if [ "$snmp_last_test_result" -gt 0 ] ; then
-	      SNMP_SLEEP=$oldsleeptime
-	      return 0;
+          if [ "$snmp_last_test_result" != "" ] ; then
+              if [ "$snmp_last_test_result" -gt 0 ] ; then
+	         SNMP_SLEEP=$oldsleeptime
+	         return 0;
+              fi
 	  fi
           DELAY
           sleeptime=`expr $sleeptime - 1`
@@ -273,6 +279,24 @@ WAITFOR() {
         fi
     fi
 }    
+
+# WAITFORORDIE "grep string" ["file"]
+WAITFORORDIE() {
+    WAITFOR "$1" "$2"
+    if [ "$snmp_last_test_result" != 0 ] ; then
+        FINISHED
+    fi
+    ECHO "."
+}
+
+# CHECKFILE "grep string" ["file"]
+CHECKORDIE() {
+    CHECKFILE "$2" "$1"
+    if [ "$snmp_last_test_result" = 0 ] ; then
+        FINISHED
+    fi
+    ECHO "."
+}
 
 #------------------------------------ -o-
 # Returns: Count of matched lines.
@@ -338,6 +362,7 @@ STARTPROGNOSLEEP() {
 
 #------------------------------------ -o-
 STARTAGENT() {
+    SNMPDSTARTED=1
     COMMAND="snmpd $SNMP_FLAGS -r -P $SNMP_SNMPD_PID_FILE -l $SNMP_SNMPD_LOG_FILE $AGENT_FLAGS"
     CFG_FILE=$SNMP_CONFIG_FILE
     LOG_FILE=$SNMP_SNMPD_LOG_FILE
@@ -349,6 +374,7 @@ STARTAGENT() {
 
 #------------------------------------ -o-
 STARTTRAPD() {
+    TRAPDSTARTED=1
     COMMAND="snmptrapd -d -u $SNMP_SNMPTRAPD_PID_FILE -o $SNMP_SNMPTRAPD_LOG_FILE"
     CFG_FILE=$SNMPTRAPD_CONFIG_FILE
     LOG_FILE=$SNMP_SNMPTRAPD_LOG_FILE
@@ -383,6 +409,7 @@ STOPPROGNOSLEEP() {
 #------------------------------------ -o-
 #
 STOPAGENT() {
+    SAVE_RESULTS
     STOPPROGNOSLEEP $SNMP_SNMPD_PID_FILE
     WAITFORAGENT "shutting down"
     if [ $SNMP_VERBOSE -gt 1 ]; then
@@ -398,6 +425,7 @@ STOPAGENT() {
 #------------------------------------ -o-
 #
 STOPTRAPD() {
+    SAVE_RESULTS
     STOPPROGNOSLEEP $SNMP_SNMPTRAPD_PID_FILE
     WAITFORTRAPD "Stopped"
     if [ $SNMP_VERBOSE -gt 1 ]; then
@@ -413,6 +441,12 @@ STOPTRAPD() {
 #------------------------------------ -o-
 #
 FINISHED() {
+    if [ "$SNMPDSTARTED" = "1" ] ; then
+      STOPAGENT
+    fi
+    if [ "$TRAPDSTARTED" = "1" ] ; then
+      STOPTRAPD
+    fi
     for pfile in $SNMP_TMPDIR/*pid* ; do
 	pid=`cat $pfile`
 	ps -e | egrep "^[ ]*$pid" > /dev/null 2>&1
@@ -424,7 +458,7 @@ FINISHED() {
 	    return_value=1
 	fi
     done
-    if [ "x$return_value" != "x0" ]; then
+    if [ "x$real_return_value" != "x0" ]; then
 	if [ -s core ] ; then
 	    # XX hope that only one prog cores !
 	    cp core $SNMP_TMPDIR/core.$$
@@ -432,7 +466,7 @@ FINISHED() {
 	fi
 	echo "FAIL"
 	echo "$headerStr...FAIL" >> $SNMP_TMPDIR/invoked
-	exit $return_value
+	exit $real_return_value
     fi
 
     echo "ok"
@@ -441,7 +475,7 @@ FINISHED() {
     if [ "x$SNMP_SAVE_TMPDIR" != "xyes" ]; then
 	REMOVETESTDATA
     fi
-    exit $return_value
+    exit $real_return_value
 }
 
 #------------------------------------ -o-
