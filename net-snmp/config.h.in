@@ -45,9 +45,9 @@
 /* If using the C implementation of alloca, define if you know the
    direction of stack growth for your system; otherwise it will be
    automatically deduced at run-time.
-	STACK_DIRECTION > 0 => grows toward higher addresses
-	STACK_DIRECTION < 0 => grows toward lower addresses
-	STACK_DIRECTION = 0 => direction of growth unknown
+ STACK_DIRECTION > 0 => grows toward higher addresses
+ STACK_DIRECTION < 0 => grows toward lower addresses
+ STACK_DIRECTION = 0 => direction of growth unknown
  */
 #undef STACK_DIRECTION
 
@@ -123,14 +123,6 @@
 
 /* tcpstat.tcps_rcvmemdrop */
 #undef HAVE_TCPSTAT_TCPS_RCVMEMDROP
-
-#ifdef DODEBUG
-#define DEBUGP(x) fprintf(stderr,x);
-#define DEBUGP1(x,y) fprintf(stderr,x,y);
-#else
-#define DEBUGP(x)
-#define DEBUGP1(x,y)
-#endif
 
 /* Define if you have the bcopy function.  */
 #undef HAVE_BCOPY
