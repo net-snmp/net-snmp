@@ -964,6 +964,7 @@ dnl
 AC_CHECK_LIB(rpm, rpmdbOpen,[
   AC_DEFINE(HAVE_LIBRPM)
   LIBS="-lrpm $LIBS"
+  CFLAGS="$CFLAGS -I/usr/include/rpm"
 ],,-lz)
 
 
