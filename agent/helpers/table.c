@@ -765,8 +765,8 @@ netsnmp_closest_column(unsigned int current,
         if (valid_columns->isRange) {
 
             if (current < valid_columns->details.range[0]) {
-                if ( (0 == closest) ||
-                     (valid_columns->details.range[0] < closest)) {
+                if ( (valid_columns->details.range[0] < closest) ||
+                     (0 == closest)) {
                     closest = valid_columns->details.range[0];
                 }
             } else if (current <= valid_columns->details.range[1]) {
@@ -778,13 +778,14 @@ netsnmp_closest_column(unsigned int current,
         else {                  /* list */
 
             if (current < valid_columns->details.list[0]) {
-                if (valid_columns->details.list[0] < closest)
+                if ((valid_columns->details.list[0] < closest) ||
+                    (0 == closest))
                     closest = valid_columns->details.list[0];
                 continue;
             }
 
             if (current >
-                valid_columns->details.list[(int)valid_columns->list_count])
+                valid_columns->details.list[(int)valid_columns->list_count - 1])
                 continue;       /* not in list range. */
 
             for (idx = 0; idx < (int)valid_columns->list_count; ++idx) {
@@ -793,10 +794,12 @@ netsnmp_closest_column(unsigned int current,
                     done = 1;   /* can not get any closer! */
                     break;      /* inner for */
                 } else if (current < valid_columns->details.list[idx]) {
-                    if (valid_columns->details.list[idx] < closest)
+                    if ((valid_columns->details.list[idx] < closest) ||
+                        (0 == closest))
                         closest = valid_columns->details.list[idx];
+                    break;      /* inner for */
+                } else
                     break;      /* list should be sorted */
-                }
             }                   /* inner for */
         }                       /* list */
     }                           /* outer for */
