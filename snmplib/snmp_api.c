@@ -3066,8 +3066,15 @@ _sess_async_send(void *sessp,
         session->s_snmp_errno = SNMPERR_NULL_PDU;
         return 0;
     }
-#if 0 /* NULL variables is actually allowed!  SNMPv3 engineID probes have no
-         variables in the PDU -- Wes */
+#if TEMPORARILY_DISABLED
+	 /*
+	  *  NULL variable are allowed in certain PDU types.
+	  *  In particular, SNMPv3 engineID probes are of this form.
+	  *  There is an internal PDU flag to indicate that this
+	  *    is acceptable, but until the construction of engineID
+	  *    probes can be amended to set this flag, we'll simply
+	  *    skip this test altogether.
+	  */
     if (pdu->variables == NULL) {
 	switch (pdu->command) {
 	case SNMP_MSG_GET:
