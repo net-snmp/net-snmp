@@ -51,11 +51,16 @@ debug_print_requests(request_info              *requests)
 {
     size_t buf_len = 256;
     size_t out_len = 0;
-    u_char *buf = malloc(buf_len) ;
-    
+    u_char *buf = malloc(buf_len);
     request_info              *request;
+    
+    if (buf == NULL) {
+	DEBUGMSGTL(("helper:debug",
+		    "malloc() failure in debug_print_requests()\n"));
+	return;
+    }
 
-    for(request = requests; request; request = request->next) {
+    for (request = requests; request; request = request->next) {
         out_len = 0;
         sprint_realloc_variable(&buf, &buf_len, &out_len, 1,
                                 request->requestvb->name,
@@ -78,6 +83,7 @@ debug_print_requests(request_info              *requests)
             DEBUGMSG(("helper:debug", "]\n"));
         }
     }
+    free(buf);
 }
 
 
