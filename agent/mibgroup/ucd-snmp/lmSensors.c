@@ -25,7 +25,7 @@
 
 #define N_TYPES      (4)
 #define MAX_NAME     (64)
-#define MAX_SENSORS  (32)
+#define MAX_SENSORS  (128)
 
 /*
  * lmSensors_variables_oid:
@@ -292,9 +292,15 @@ _sensor_load(clock_t t)
                 }
 
                 array = &sensor_array[type];
-
+                if (MAX_SENSORS >= array->n) {
+                    snmp_log(LOG_ERR, "too many sensors. ignoring %s\n", label);
+                    break;
+                }
                 strncpy(array->sensor[array->n].name, label, MAX_NAME);
                 array->sensor[array->n].value = (int) (val * mul);
+                DEBUGMSGTL(("sensors","sensor %d, value %d\n",
+                            array->sensor[array->n].name,
+                            array->sensor[array->n].value));
                 array->n++;
             }
         }
