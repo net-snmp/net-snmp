@@ -32,6 +32,7 @@ extern "C" {
 #define DS_LIB_ALARM_DONT_USE_SIG  11 /* don't use the alarm() signal */
 #define DS_LIB_PRINT_FULL_OID      12 /* print fully qualified oids */
 #define DS_LIB_QUICK_PRINT         13 /* print very brief output for parsing */
+#define DS_LIB_RANDOM_ACCESS	   14 /* random access to oid labels */
 
 /* library integers */
 #define DS_LIB_MIB_WARNINGS  0
