@@ -108,11 +108,13 @@ typedef long    fd_mask;
 #include "mibgroup/struct.h"
 #include "mibgroup/util_funcs.h"
 
+#ifdef USE_LIBWRAP
 #include <syslog.h>
 #include <tcpd.h>
 
 int allow_severity = LOG_INFO;
 int deny_severity = LOG_WARNING;
+#endif
 
 extern int  errno;
 extern char *version_descr;
@@ -693,7 +695,9 @@ main(argc, argv)
       dup(1);
       close(0);
     }
+#ifdef USE_LIBWRAP
     openlog("snmpd", LOG_CONS, LOG_AUTH|LOG_INFO);
+#endif
     setvbuf (stdout, NULL, _IOLBF, BUFSIZ);
     printf ("%s UCD-SNMP version %s\n", sprintf_stamp (NULL), VersionInfo);
     if (!dont_fork && fork() != 0)   /* detach from shell */
@@ -903,26 +907,28 @@ snmp_read_packet(sd)
     struct sockaddr_in	from;
     int length, out_length, fromlength;
     u_char  packet[1500], outpacket[1500];
-
+#ifdef USE_LIBWRAP
+    char *addr_string;
+#endif
     fromlength = sizeof from;
     length = recvfrom(sd, (char *) packet, 1500, 0, (struct sockaddr *)&from,
 		      &fromlength);
     if (length == -1)
 	perror("recvfrom");
 
-    {
-	char *addr_string = inet_ntoa(from.sin_addr);
+#ifdef USE_LIBWRAP
+	addr_string = inet_ntoa(from.sin_addr);
 
 	if(!addr_string) {
-	    addr_string = STRING_UNKNOWN;
+          addr_string = STRING_UNKNOWN;
 	}
 	if(hosts_ctl("snmpd", addr_string, addr_string, STRING_UNKNOWN)) {
-	    syslog(allow_severity, "Connection from %s", addr_string);
+          syslog(allow_severity, "Connection from %s", addr_string);
 	} else {
-	    syslog(deny_severity, "Connection from %s refused", addr_string);
-	    return(0);
+          syslog(deny_severity, "Connection from %s refused", addr_string);
+          return(0);
 	}
-    }
+#endif
 
 #ifdef USING_SNMP_MODULE       
     snmp_inpkts++;

@@ -45,6 +45,9 @@
 /* system location */
 #undef SYS_LOC
 
+/* Use libwrap to handle allow/deny hosts? */
+#undef USE_LIBWRAP
+
 /* location of UNIX kernel */
 #define KERNEL_LOC "/vmunix"
 
