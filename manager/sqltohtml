@@ -56,7 +56,13 @@ if ($dispinfo = $query->param('displayinfo')) {
 # Display a generic sql table of any kind.
 #===========================================================================
 if ($disptable = $query->param('displaytable')) {
-    displaytable($disptable);
+    if ($query->param('editable') == 1) {
+	print "<form submit=dont>\n";
+	displaytable($disptable, -editable, 1);
+	print "</form>\n";
+    } else {
+	displaytable($disptable);
+    }
     Exit(0);
 }
 
@@ -230,6 +236,7 @@ if (!defined($host)) {
 	$q =~ s/\?.*//;
 	print "<a href=\"" . addtoken($q,"group=$group&setupgroup=1") . "\">setup group $group</a>\n";
     }
+    Exit(0);
 }
 
 #===========================================================================
@@ -344,8 +351,24 @@ sub showhost {
     print "<title>ucd-snmp manager report for host: $host</title>\n";
     print "<h3>host: $host</h3>\n";
 
+    # does the host have a serious error?
+
+    my $errlist = getcursor("SELECT * FROM hosterrors where (host = '$host')");
+    if ( $dbh->do("SELECT * FROM hosterrors where (host = '$host')") ne "0E0") {
+	displaytable('hosterrors', 
+		     '-clauses', "where (host = '$host')",
+		     '-dontdisplaycol', "select * from userprefs where user = '$remuser' and groupname = '$group' and tablename = ? and columnname = ? and displayit = 'N'",
+		     '-beginhook', sub {
+			 if ($#_ < 1) {
+			     #doing header;
+			     print "<td></td>";
+			 } else {
+			     print "<td><img src=\"$redimage\"></td>\n";
+			 }});
+    }
+
     # get a list of tables we want to display
-    $tblh = getcursor("SELECT * FROM hosttables where (host = '$host' and groupname = '$group')");
+    my $tblh = getcursor("SELECT * FROM hosttables where (host = '$host' and groupname = '$group')");
 
     # table data
     my($tablelist);
@@ -475,7 +498,11 @@ sub displaytable {
 		print "<td>";
 		print "<a href=\"$ref\">" if (defined($datalink) && 
 					      defined($ref = &$datalink($key, $data->{$key})));
-		print $data->{$key};
+		if (defined($config{'-editable'})) {
+		    print "<input type=text name=\"$key.x.$data->{$key}\" value=\"$data->{$key}\">";
+		} else {
+		    print $data->{$key};
+		}
 		print "</a>" if (defined($ref));
 		print "</td>";
 	    }
