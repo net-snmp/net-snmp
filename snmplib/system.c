@@ -540,7 +540,7 @@ winsock_startup(void)
 	/* winsock 1: use MAKEWORD(1,1) */
 	/* winsock 2: use MAKEWORD(2,2) */
 
-    VersionRequested = MAKEWORD(1,1);
+    VersionRequested = MAKEWORD(2,2);
     i = WSAStartup(VersionRequested, &stWSAData);
     if (i != 0) {
         if (i == WSAVERNOTSUPPORTED)
