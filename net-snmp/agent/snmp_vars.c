@@ -153,7 +153,7 @@ void
 init_nlist(nl)
   struct nlist nl[];
 {
-#ifndef linux
+#ifdef CAN_USE_NLIST
   int ret;
 #if HAVE_KVM_OPENFILES
   kvm_t *kernel;
@@ -190,7 +190,7 @@ struct subtree *subtrees;
 void
 init_snmp __P((void))
 {
-#ifndef linux
+#ifdef CAN_USE_NLIST
   init_kmem("/dev/kmem"); 
 #endif
 
@@ -199,7 +199,7 @@ init_snmp __P((void))
   init_read_config();
 }
 
-#ifndef linux
+#ifdef CAN_USE_NLIST
 int KNLookup(nl, nl_which, buf, s)
     struct nlist nl[];
     int nl_which;

@@ -131,6 +131,9 @@
 /* swdevt.sw_nblksenabled */
 #undef STRUCT_SWDEVT_HAS_SW_NBLKSENABLED
 
+/* nlist.n_value */
+#undef STRUCT_NLIST_HAS_N_VALUE
+
 /* ifnet needs to have _KERNEL defined */
 #undef IFNET_NEEDS_KERNEL
 
@@ -381,6 +384,10 @@
 /* Watch out for compilers that don't handle void properly. */
 #undef void
 
+#if defined(HAVE_NLIST) && defined(STRUCT_NLIST_HAS_N_VALUE)
+#define CAN_USE_NLIST
+#endif
+
 /* Not-to-be-compiled macros for use by configure only */
 #define config_require(x)
 #define config_arch_require(x,y)
@@ -389,12 +396,6 @@
 #define config_add_mib(x)
   
 #include <mib_module_config.h>
-
-#ifndef linux
-#ifndef solaris2
-#define bsdlike
-#endif
-#endif
 
 #ifndef SYS_CDEFS_DEFINES___P
 #ifndef __P
