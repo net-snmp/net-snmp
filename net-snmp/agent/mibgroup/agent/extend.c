@@ -24,7 +24,7 @@ typedef struct extend_registration_block_s {
     netsnmp_table_data *dinfo;
     oid                *root_oid;
     size_t              oid_len;
-    int                 num_entries;
+    long                num_entries;
     netsnmp_extend     *ehead;
     struct extend_registration_block_s *next;
 } extend_registration_block;

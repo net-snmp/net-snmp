@@ -609,7 +609,7 @@ netsnmp_instance_int_handler(netsnmp_mib_handler *handler,
 	 */
 	tmp_it = *it;
         snmp_set_var_typed_value(requests->requestvb, ASN_INTEGER,
-                                 (u_char *) &tmp_it, sizeof(long));
+                                 (u_char *) &tmp_it, sizeof(tmp_it));
         break;
 
         /*
