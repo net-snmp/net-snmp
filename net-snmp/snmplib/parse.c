@@ -459,7 +459,7 @@ library malloc */
 static char *Strdup (s)
     char *s;
 {
-    char *ss = Malloc (strlen (s)+1);
+    char *ss = (char *) Malloc (strlen (s)+1);
     return strcpy (ss, s);
 }
 
@@ -659,7 +659,7 @@ init_tree_roots()
         base_modid = which_module("RFC1213-MIB");
 
     /* build root node */
-    tp = Malloc(sizeof(struct tree));
+    tp = (struct tree *) Malloc(sizeof(struct tree));
     tp->parent = NULL;
     tp->next_peer = NULL;
     tp->child_list = NULL;
@@ -682,7 +682,7 @@ init_tree_roots()
     root_imports[0].modid = base_modid;
 
     /* build root node */
-    tp = Malloc(sizeof(struct tree));
+    tp = (struct tree *) Malloc(sizeof(struct tree));
     tp->parent = NULL;
     tp->next_peer = lasttp;
     tp->child_list = NULL;
@@ -705,7 +705,7 @@ init_tree_roots()
     root_imports[1].modid = base_modid;
 
     /* build root node */
-    tp = Malloc(sizeof(struct tree));
+    tp = (struct tree *) Malloc(sizeof(struct tree));
     tp->parent = NULL;
     tp->next_peer = lasttp;
     tp->child_list = NULL;
@@ -892,7 +892,7 @@ do_subtree(root, nodes)
         if (tp) {
 	    if (strcmp (tp->label, np->label) == 0) {
 		    /* Update list of modules */
-                int_p = Malloc((tp->number_modules+1) * sizeof(int));
+                int_p = (int *) Malloc((tp->number_modules+1) * sizeof(int));
                 memcpy(int_p, tp->module_list, tp->number_modules*sizeof(int));
                 int_p[tp->number_modules] = np->modid;
                 if (tp->number_modules > 1 )
@@ -911,7 +911,7 @@ do_subtree(root, nodes)
 		fprintf (stderr, "Warning: %s.%ld is both %s and %s\n",
 			root->label, np->subid, tp->label, np->label);
 	}
-        tp = Malloc(sizeof(struct tree));
+        tp = (struct tree *) Malloc(sizeof(struct tree));
         tp->parent = root;
         tp->child_list = NULL;
         tp->label = np->label;
@@ -1074,7 +1074,7 @@ parse_objectid(fp, name)
     struct tree *tp;
 
     if ((length = getoid(fp, oid, 32)) != 0){
-        np = root = Malloc(sizeof(struct node));
+        np = root = (struct node *) Malloc(sizeof(struct node));
         memset(np, 0, sizeof(struct node));
 
 	/*
@@ -1098,7 +1098,7 @@ parse_objectid(fp, name)
             if (op->label && (nop->label || (nop->subid != -1))){
                 np->parent = Strdup (op->label);
                 if (!nop->label) {
-		    nop->label = Malloc(20);
+		    nop->label = (char *) Malloc(20);
  		    sprintf(nop->label, "%s%d", ANON, anonymous++);
                 }
                 np->label = Strdup (nop->label);
@@ -1109,7 +1109,7 @@ parse_objectid(fp, name)
                 np->type = 0;
                 np->enums = NULL;
                 /* set up next entry */
-                np->next = Malloc(sizeof(*np->next));
+                np->next = (struct node *) Malloc(sizeof(*np->next));
                 memset(np->next, 0, sizeof(struct node));
                 oldnp = np;
                 np = np->next;
@@ -1264,7 +1264,7 @@ parse_enumlist(fp)
             break;
         if (type == LABEL){
             /* this is an enumerated label */
-            rep = Malloc(sizeof(struct enum_list));
+            rep = (struct enum_list *) Malloc(sizeof(struct enum_list));
             rep->next = ep;
             ep = rep;
             /* a reasonable approximation for the length */
@@ -1416,7 +1416,7 @@ parse_objecttype(fp, name)
         print_error("Bad format for OBJECT-TYPE", token, type);
         return NULL;
     }
-    np = Malloc(sizeof(struct node));
+    np = (struct node *) Malloc(sizeof(struct node));
     np->next = NULL;
     np->tc_index = -1;
     np->enums = NULL;
@@ -1640,7 +1640,7 @@ parse_objectgroup(fp, name)
     char token[MAXTOKEN];
     register struct node *np, *nnp;
 
-    np = Malloc(sizeof(struct node));
+    np = (struct node *) Malloc(sizeof(struct node));
     np->tc_index = -1;
     np->type = 0;
     np->next = NULL;
@@ -1696,7 +1696,7 @@ parse_notificationDefinition(fp, name)
     char token[MAXTOKEN];
     register struct node *np, *nnp;
 
-    np = Malloc(sizeof(struct node));
+    np = (struct node *) Malloc(sizeof(struct node));
     np->tc_index = -1;
     np->type = 0;
     np->next = NULL;
@@ -1752,7 +1752,7 @@ parse_trapDefinition(fp, name)
     char token[MAXTOKEN];
     register struct node *np;
 
-    np = Malloc(sizeof(struct node));
+    np = (struct node *) Malloc(sizeof(struct node));
     np->tc_index = -1;
     np->type = 0;
     np->next = NULL;
@@ -1825,7 +1825,7 @@ parse_compliance(fp, name)
     char token[MAXTOKEN];
     register struct node *np, *nnp;
 
-    np = Malloc(sizeof(struct node));
+    np = (struct node *) Malloc(sizeof(struct node));
     np->tc_index = -1;
     np->type = 0;
     np->next = NULL;
@@ -1862,7 +1862,7 @@ parse_moduleIdentity(fp, name)
     char token[MAXTOKEN];
     register struct node *np, *nnp;
 
-    np = Malloc (sizeof (struct node));
+    np = (struct node *) Malloc (sizeof (struct node));
     np->tc_index = -1;
     np->type = 0;
     np->next = NULL;
@@ -1963,7 +1963,8 @@ parse_imports(fp)
 	if ( mp->modid == current_module) {
             if ( import_count == 0)
               return;
-            mp->imports = Malloc(import_count*sizeof(struct module_import));
+            mp->imports = (struct module_import *)
+              Malloc(import_count*sizeof(struct module_import));
 	    for ( i=0 ; i<import_count ; ++i ) {
 		mp->imports[i].label = import_list[i].label;
 		mp->imports[i].modid = import_list[i].modid;
@@ -2010,7 +2011,7 @@ module_name ( modid )
 	    return(mp->name);
 
     DEBUGP1("Module %d not found\n", modid);
-    cp = Malloc(10);	/* copes with 1e8 modules! */
+    cp = (char *) Malloc(10);	/* copes with 1e8 modules! */
     sprintf(cp, "#%d", modid);
     return(cp);
 }
@@ -2031,7 +2032,8 @@ add_module_replacement( old, new, tag, len)
 {
     struct module_compatability *mcp;
 
-    mcp =  Malloc(sizeof( struct module_compatability));
+    mcp =  (struct module_compatability *)
+      Malloc(sizeof( struct module_compatability));
 
     mcp->old_module = Strdup( old );
     mcp->new_module = Strdup( new );
@@ -2222,7 +2224,7 @@ new_module (name , file)
 	}
 
 	/* Add this module to the list */
-    mp = Malloc(sizeof(struct module));
+    mp = (struct module *) Malloc(sizeof(struct module));
     mp->name = Strdup(name);
     mp->file = Strdup(file);
     mp->imports = NULL;
@@ -2402,6 +2404,7 @@ parse(fp, root)
 static int ungotten_token = CONTINUE;
 
 static void unget_token (token)
+  int token;
 {
     if (ungotten_token != CONTINUE) {
         fprintf (stderr, "Double unget\n");
