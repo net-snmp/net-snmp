@@ -1,3 +1,14 @@
+/* Portions of this file are subject to the following copyright(s).  See
+ * the Net-SNMP's COPYING file for more details and other copyrights
+ * that may apply:
+ */
+/*
+ * Portions of this file are copyrighted by:
+ * Copyright © 2003 Sun Microsystems, Inc. All rights reserved.
+ * Use is subject to license terms specified in the COPYING file
+ * distributed with the Net-SNMP package.
+ */
+
 /*- This is a -*- C -*- compatible code file
  *
  * Code for SUNOS5_INSTRUMENTATION
@@ -1005,13 +1016,13 @@ getif(mib2_ifEntry_t *ifbuf, size_t size, req_e req_type,
 		goto Return;
 	    }
 
-	    if (getKstatInt(NULL,ifrp->ifr_name, "brdcstrcv",&ifp->ifInNUcastPkts)==0&&
-		getKstatInt(NULL,ifrp->ifr_name, "multircv", &l_tmp) == 0) {
+	    if (getKstatInt(NULL,ifrp->ifr_name, "brdcstrcv",&ifp->ifInNUcastPkts)==1&&
+		getKstatInt(NULL,ifrp->ifr_name, "multircv", &l_tmp) == 1) {
 		ifp->ifInNUcastPkts += l_tmp;
 	    }
 
-	    if (getKstatInt(NULL,ifrp->ifr_name,"brdcstxmt",&ifp->ifOutNUcastPkts)==0&&
-		getKstatInt(NULL,ifrp->ifr_name, "multixmt", &l_tmp) == 0) {
+	    if (getKstatInt(NULL,ifrp->ifr_name,"brdcstxmt",&ifp->ifOutNUcastPkts)==1&&
+		getKstatInt(NULL,ifrp->ifr_name, "multixmt", &l_tmp) == 1) {
 		ifp->ifOutNUcastPkts += l_tmp;
 	    }
 	}
