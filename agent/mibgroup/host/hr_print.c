@@ -9,9 +9,13 @@
 #else
 #include <strings.h>
 #endif
+#if HAVE_UNISTD_H
+#include <unistd.h>
+#endif
 #include "host_res.h"
 #include "hr_print.h"
 #include "struct.h"
+#include "util_funcs.h"
 
 #define HRPRINT_MONOTONICALLY_INCREASING
 
