@@ -99,8 +99,7 @@ init_kmem(const char *file)
 {
   kmem = open(file, O_RDONLY);
   if (kmem < 0){
-    snmp_log(LOG_NOTICE, "cannot open %s: ",file);
-    log_perror("init_kmem");
+    log_perror("init_kmem open file");
 #ifndef NO_ROOT_ACCESS
     exit(1);
 #endif
@@ -108,8 +107,7 @@ init_kmem(const char *file)
   fcntl(kmem,F_SETFD,1);
   mem = open("/dev/mem",O_RDONLY);    
   if (mem < 0){
-    snmp_log(LOG_NOTICE, "cannot open /dev/mem: ");
-    log_perror("init_kmem");
+    log_perror("init_kmem open /dev/mem");
 #ifndef NO_ROOT_ACCESS
     exit(1);
 #endif
@@ -118,8 +116,7 @@ init_kmem(const char *file)
 #ifdef DMEM_LOC
   swap = open(DMEM_LOC,O_RDONLY);
   if (swap < 0){
-    snmp_log(LOG_NOTICE, "cannot open %s: ",DMEM_LOC);
-    log_perror("init_kmem");
+    log_perror("init_kmem DMEM_LOC");
 #ifndef NO_ROOT_ACCESS
     exit(1);
 #endif
