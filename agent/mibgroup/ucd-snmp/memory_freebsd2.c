@@ -220,25 +220,25 @@ unsigned char *var_extensible_mem(vp, name, length, exact, var_len, write_method
     case MEMTOTALSWAP:
 	long_ret = swapTotal;
 	return((u_char *) (&long_ret));
-    case MEMUSEDSWAP: /* FREE swap memory */
+    case MEMAVAILSWAP: /* FREE swap memory */
 	long_ret = swapFree;
 	return((u_char *) (&long_ret));
     case MEMTOTALREAL:
 	long_ret = phys_mem >> 10;
 	return((u_char *) (&long_ret));
-    case MEMUSEDREAL: /* FREE real memory */
+    case MEMAVAILREAL: /* FREE real memory */
 	long_ret = ptok(mem.v_free_count);
 	return((u_char *) (&long_ret));
     case MEMTOTALSWAPTXT:
 	long_ret = -1;
 	return((u_char *) (&long_ret));
-    case MEMUSEDSWAPTXT:
+    case MEMAVAILSWAPTXT:
 	long_ret = -1;
 	return((u_char *) (&long_ret));
     case MEMTOTALREALTXT:
 	long_ret = -1;
 	return((u_char *) (&long_ret));
-    case MEMUSEDREALTXT:
+    case MEMAVAILREALTXT:
 	long_ret = -1;
 	return((u_char *) (&long_ret));
     case MEMTOTALFREE:
