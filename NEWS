@@ -1,6 +1,10 @@
 This file contains major changes in released revisions.  Please read
 the ChangeLog file for a more detailed listing of changes/bug fixes.
 
+*5.0.1*
+
+
+
 *5.0*
 
  New:
@@ -9,7 +13,7 @@ the ChangeLog file for a more detailed listing of changes/bug fixes.
       a new module API to make your life easier.  See the
       agent/mibgroup/examples directory for example code that makes
       use of some of the new functionality.
-      (Also see http://www.net-snmp.org/tutorial/new-agent/ which has
+      (Also see http://www.net-snmp.org/tutorial-5/agent/ which has
       some incomplete documentation)
     - The agent sports embedded perl, see the perl details further below.
     - The agent supports multiple SNMPv3 contexts and mib modules can
@@ -235,7 +239,7 @@ UCD-SNMP NEWS:
     - The tools support regex matching of oids on the command line.
       (see the snmpcmd(1) manual page on the -Ib option)
     - A ucd-snmp usage tutorial has been placed on the main web page.
-      (see http://ucd-snmp.ucdavis.edu/tutorial)
+      (see http://www.net-snmp.org/tutorial/)
     - snmptable is much smarter and handles sparse tables better.
     - tkmib supports snmpv3.
     - New agent libraries to embed SNMP and AgentX agents into other programs.

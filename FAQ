@@ -178,7 +178,7 @@ What documentation is available?
 	EXAMPLE.conf
 	man pages for the individual tools, files and the API
 	A guide for extending the agent
-	A Tutorial at http://www.net-snmp.org/tutorial/
+	A Tutorial at http://www.net-snmp.org/tutorial-5/
 
       Most of this documentation (plus archives of the mailing lists)
 	 is also available on our web page:
@@ -935,7 +935,7 @@ How do I send traps and notifications?
   CODING sections.
 
   You should also read the snmptrap tutorial at
-	http://www.net-snmp.org/tutorial/commands/snmptrap.html
+	http://www.net-snmp.org/tutorial-5/commands/snmptrap.html
   which will help you understand everything you need to know about traps.
 
 
@@ -970,7 +970,7 @@ How do I handle traps and notifications?
   of mapping SNMPv1 traps to SNMPv2 OIDs.
 
   There's a tutorial with more details on the web site at
-	http://www.net-snmp.org/tutorial/commands/snmptrap.html
+	http://www.net-snmp.org/tutorial-5/commands/snmptrap.html
   
 
 
@@ -1064,7 +1064,7 @@ How can I monitor my systems (disk, memory, etc)?
 
      We have also set up a page that describes in detail how MRTG
   can be set up to monitor disk, memory and cpu activity at
-  http://www.net-snmp.org/tutorial/mrtg/index.html
+  http://www.net-snmp.org/tutorial-5/mrtg/index.html
 
     The net-snmp package contains a web based manager itself that
   runs on top of a mysql database, but it is extremely beta in
@@ -1426,7 +1426,7 @@ How can I get more information about these MIB file problems?
   There are other '-P' options to control various aspects of MIB parsing.
   See the 'snmptranslate(1)' and 'snmpcmd(1)' man pages for more details,
   or the tutorial at
-	http://www.net-snmp.org/tutorial/commands/snmptranslate.html
+	http://www.net-snmp.org/tutorial-5/commands/snmptranslate.html
 
 
 
@@ -1631,7 +1631,7 @@ What about 'dlmod' - what's that about?
   module(s) to load are specified in the configuration file, and the agent
   locates the files listed, and merges them in at run time.
 
-  See http://www.net-snmp.org/tutorial/toolkit/dlmod/ for more information.
+  See http://www.net-snmp.org/tutorial-5/toolkit/dlmod/ for more information.
 
 
 
