@@ -644,6 +644,7 @@ struct variable2 eventnotifytab_variables[] = {
         {EVENTNOTIFYTABSTATUS, INTEGER, RWRITE, var_eventnotifytab, 1, {4 }},
 };
 
+#include "wes/mibdefs.h"
 #include "wes/wes.h"
 #include "wes/wes_vars.h"
 struct subtree subtrees[] = {
@@ -666,6 +667,9 @@ struct subtree subtrees[] = {
    sizeof(wes_disk_variables)/sizeof(*wes_disk_variables),
    sizeof(*wes_disk_variables)},
 #endif
+  {{WESMIB, VERSIONMIBNUM}, 7, (struct variable *)wes_version_variables,
+   sizeof(wes_version_variables)/sizeof(*wes_version_variables),
+   sizeof(*wes_version_variables)},
     {{MIB, 1}, 7, (struct variable *)system_variables,
 	 sizeof(system_variables)/sizeof(*system_variables),
 	 sizeof(*system_variables)},
