@@ -270,7 +270,7 @@ handle_agentx_response( int operation,
 
 	        if (retry_sub) {
 		    (void)snmp_set_var_objid(ax_vlist->variables[i], 
-					  retry_sub->name, retry_sub->namelen);
+				       retry_sub->start, retry_sub->start_len);
 		    asp->index = ax_vlist->variables[i]->index;
 		    asp->status = handle_one_var(asp, ax_vlist->variables[i]);
 	        } else {
