@@ -1251,9 +1251,9 @@ init_mib (void)
 
         /* link top level children (iso, ccitt, etc.)
          * so that unlink_tree always works.
-         */
         for ( tp=tree_head; tp; tp=tp->next_peer )
             tp->parent = tree_top;
+         */
     }
 }
 
