@@ -260,7 +260,7 @@ table_data_set_helper_handler(
                 if (!data) {
                     table_row *newrow;
                     table_data_set_storage *newdata = NULL;
-                    int column = table_info->colnum;
+                    unsigned int column = table_info->colnum;
                     table_data_set *datatable =
                         (table_data_set *) handler->myvoid;
 
