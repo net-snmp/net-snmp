@@ -491,6 +491,10 @@ SOFTWARE.
     int             netsnmp_str2oid(const char *S, oid * O, int L);
 
 
+#define NETSNMP_STRING_OUTPUT_GUESS  1
+#define NETSNMP_STRING_OUTPUT_ASCII  2
+#define NETSNMP_STRING_OUTPUT_HEX    3
+
 #define NETSNMP_OID_OUTPUT_SUFFIX  1
 #define NETSNMP_OID_OUTPUT_MODULE  2
 #define NETSNMP_OID_OUTPUT_FULL    3

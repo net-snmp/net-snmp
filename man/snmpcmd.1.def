@@ -322,7 +322,7 @@ The default output looks as follows:
 .br
 snmpget -c public -v 1 localhost system.sysUpTime.0
 .br
-system.sysUpTime.0 = Timeticks: (14096763) 1 day, 15:09:27.63        
+SNMPv2-MIB::sysUpTime.0 = Timeticks: (14096763) 1 day, 15:09:27.63        
 .TP
 .B -Oq
 Removes the equal sign and type information:
@@ -405,6 +405,16 @@ IPV6-MIB::ipv6RouteIfIndex.63.254.1.0.255.0.0.0.0.0.0.0.0.0.0.0.64.1 = INTEGER: 
 snmpgetnext -OSX host IPV6-MIB:ipv6RouteTable
 .br
 IPV6-MIB::ipv6RouteIfIndex[3ffe:100:ff00:0:0:0:0:0][64][1] = INTEGER: 2
+.TP
+.B -Oa
+If a string-valued object definition does not include a Display Hint,
+then the library attempts to determine whether it is an ascii or
+binary string, and displays the value accordingly.
+This flag bypasses this check, and displays all strings as ASCII.
+Note that this does not affect objects that do have a Display Hint.
+.TP
+.B -Ox
+This works similarly to '-Oa', but displays strings as Hex.
 .TP
 .B -OT
 If hexadecimal code is printed, this will also print any printable
