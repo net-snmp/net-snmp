@@ -32,7 +32,7 @@ extern          "C" {
 #define IPADDRESSTABLE_MAX_COL		COLUMN_IPADDRESSSTORAGETYPE
 
     /*
-     * change flags for writable columns 
+     * change flags for writable columns
      */
 #define FLAG_IPADDRESSIFINDEX       (0x1 << 0)
 #define FLAG_IPADDRESSTYPE       (0x1 << 1)
@@ -41,6 +41,12 @@ extern          "C" {
 #define FLAG_IPADDRESSSTORAGETYPE       (0x1 << 4)
 
 #define FLAG_MAX_IPADDRESSTABLE 5
+
+    /*
+     * required rows for row creation
+     * TODO: update, if necessary. default is writable cols w/out defaults.
+     */
+#define IPADDRESSTABLE_REQUIRED_COLS (FLAG_IPADDRESSTYPE | FLAG_IPADDRESSSTATUS | FLAG_IPADDRESSSTORAGETYPE)
 
     /*
      * required rows on creation
@@ -67,6 +73,7 @@ extern          "C" {
  *
  *************************************************************************
  *************************************************************************/
+
 
 /*************************************************************
  * constants for enums for the MIB node
@@ -97,6 +104,9 @@ extern          "C" {
 #define INTERNAL_IPADDRESSADDRTYPE_IPV4  4
 #define INTERNAL_IPADDRESSADDRTYPE_IPV6  16
 
+
+
+
 /*************************************************************
  * constants for enums for the MIB node
  * ipAddressType (INTEGER / ASN_INTEGER)
@@ -121,6 +131,8 @@ extern          "C" {
 #define INTERNAL_IPADDRESSTYPE_UNICAST  1
 #define INTERNAL_IPADDRESSTYPE_ANYCAST  2
 #define INTERNAL_IPADDRESSTYPE_BROADCAST  3
+
+
 
 /*************************************************************
  * constants for enums for the MIB node
@@ -150,6 +162,7 @@ extern          "C" {
 #define INTERNAL_IPADDRESSORIGIN_DHCP  4
 #define INTERNAL_IPADDRESSORIGIN_LINKLAYER  5
 #define INTERNAL_IPADDRESSORIGIN_RANDOM  6
+
 
 /*************************************************************
  * constants for enums for the MIB node
@@ -183,6 +196,9 @@ extern          "C" {
 #define INTERNAL_IPADDRESSSTATUS_TENTATIVE  6
 #define INTERNAL_IPADDRESSSTATUS_DUPLICATE  7
 
+
+
+
 /*************************************************************
  * constants for enums for the MIB node
  * ipAddressRowStatus (RowStatus / ASN_INTEGER)
@@ -213,6 +229,7 @@ extern          "C" {
 #define INTERNAL_IPADDRESSROWSTATUS_CREATEANDGO  4
 #define INTERNAL_IPADDRESSROWSTATUS_CREATEANDWAIT  5
 #define INTERNAL_IPADDRESSROWSTATUS_DESTROY  6
+
 
 /*************************************************************
  * constants for enums for the MIB node
@@ -248,5 +265,4 @@ extern          "C" {
 #ifdef __cplusplus
 }
 #endif
-
 #endif                          /* IPADDRESSTABLE_OIDS_H */

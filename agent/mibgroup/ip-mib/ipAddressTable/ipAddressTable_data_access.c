@@ -191,9 +191,9 @@ ipAddressTable_cache_load(netsnmp_container * container)
         netsnmp_access_ipaddress_container_load(NULL,
                                                 NETSNMP_ACCESS_IPADDRESS_INIT_ADDL_IDX_BY_ADDR);
     void *tmp_ptr[2];
-    
+
     DEBUGMSGTL(("verbose:ipAddressTable_cache_load", "called\n"));
-    
+
     if ((NULL == ipaddress_container) ||
         (NULL == ipaddress_container->next))
         return MFD_RESOURCE_UNAVAILABLE; /* msg already logged */
@@ -214,7 +214,7 @@ ipAddressTable_cache_load(netsnmp_container * container)
      */
     CONTAINER_FOR_EACH(ipaddress_container,
                        (netsnmp_container_obj_func*)_add_new_entry, container);
-    
+
     /*
      * free the container. we've either claimed each entry, or released it,
      * so the access function doesn't need to clear the container.
@@ -314,7 +314,7 @@ _add_new_entry(netsnmp_ipaddress_entry *ipaddress_entry,
     
     netsnmp_assert(NULL != ipaddress_entry);
     netsnmp_assert(NULL != container);
-    
+
     /*
      * allocate an row context and set the index(es)
      */
