@@ -77,11 +77,11 @@ init_perl(void)
                                   "PERLCODE");
 
     /* define the perlInitFile token to point to an init file */
-    ds_register_config(ASN_OCTET_STR, appid, "perlInitFile",
+    ds_register_premib(ASN_OCTET_STR, appid, "perlInitFile",
                        DS_APPLICATION_ID, DS_AGENT_PERL_INIT_FILE);
 
     /* define the perlInitFile token to point to an init file */
-    ds_register_config(ASN_BOOLEAN, appid, "disablePerl",
+    ds_register_premib(ASN_BOOLEAN, appid, "disablePerl",
                        DS_APPLICATION_ID, DS_AGENT_DISABLE_PERL);
 }
 
