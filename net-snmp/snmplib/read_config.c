@@ -1455,7 +1455,7 @@ char           *
 read_config_read_objid(char *readfrom, oid ** objid, size_t * len)
 {
 
-    if (objid == NULL || readfrom == NULL)
+    if (objid == NULL || readfrom == NULL || len == NULL)
         return NULL;
 
     if (*objid == NULL) {
