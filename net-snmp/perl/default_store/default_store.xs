@@ -12,21 +12,62 @@ not_here(char *s)
 }
 
 static double
-constant_DS_LIB_N(char *name, int len, int arg)
+constant_NETSNMP_DS_S(char *name, int len, int arg)
 {
-    switch (name[8 + 0]) {
+    if (12 + 12 >= len ) {
+	errno = EINVAL;
+	return 0;
+    }
+    switch (name[12 + 12]) {
+    case '1':
+	if (strEQ(name + 12, "NMP_VERSION_1")) {	/* NETSNMP_DS_S removed */
+#ifdef NETSNMP_DS_SNMP_VERSION_1
+	    return NETSNMP_DS_SNMP_VERSION_1;
+#else
+	    goto not_there;
+#endif
+	}
+    case '2':
+	if (strEQ(name + 12, "NMP_VERSION_2c")) {	/* NETSNMP_DS_S removed */
+#ifdef NETSNMP_DS_SNMP_VERSION_2c
+	    return NETSNMP_DS_SNMP_VERSION_2c;
+#else
+	    goto not_there;
+#endif
+	}
+    case '3':
+	if (strEQ(name + 12, "NMP_VERSION_3")) {	/* NETSNMP_DS_S removed */
+#ifdef NETSNMP_DS_SNMP_VERSION_3
+	    return NETSNMP_DS_SNMP_VERSION_3;
+#else
+	    goto not_there;
+#endif
+	}
+    }
+    errno = EINVAL;
+    return 0;
+
+not_there:
+    errno = ENOENT;
+    return 0;
+}
+
+static double
+constant_NETSNMP_DS_LIB_N(char *name, int len, int arg)
+{
+    switch (name[16 + 0]) {
     case 'O':
-	if (strEQ(name + 8, "O_TOKEN_WARNINGS")) {	/* DS_LIB_N removed */
-#ifdef DS_LIB_NO_TOKEN_WARNINGS
-	    return DS_LIB_NO_TOKEN_WARNINGS;
+	if (strEQ(name + 16, "O_TOKEN_WARNINGS")) {	/* NETSNMP_DS_LIB_N removed */
+#ifdef NETSNMP_DS_LIB_NO_TOKEN_WARNINGS
+	    return NETSNMP_DS_LIB_NO_TOKEN_WARNINGS;
 #else
 	    goto not_there;
 #endif
 	}
     case 'U':
-	if (strEQ(name + 8, "UMERIC_TIMETICKS")) {	/* DS_LIB_N removed */
-#ifdef DS_LIB_NUMERIC_TIMETICKS
-	    return DS_LIB_NUMERIC_TIMETICKS;
+	if (strEQ(name + 16, "UMERIC_TIMETICKS")) {	/* NETSNMP_DS_LIB_N removed */
+#ifdef NETSNMP_DS_LIB_NUMERIC_TIMETICKS
+	    return NETSNMP_DS_LIB_NUMERIC_TIMETICKS;
 #else
 	    goto not_there;
 #endif
@@ -41,25 +82,54 @@ not_there:
 }
 
 static double
-constant_DS_LIB_PRINT_N(char *name, int len, int arg)
+constant_NETSNMP_DS_LIB_O(char *name, int len, int arg)
 {
-    if (14 + 7 >= len ) {
+    switch (name[16 + 0]) {
+    case 'I':
+	if (strEQ(name + 16, "ID_OUTPUT_FORMAT")) {	/* NETSNMP_DS_LIB_O removed */
+#ifdef NETSNMP_DS_LIB_OID_OUTPUT_FORMAT
+	    return NETSNMP_DS_LIB_OID_OUTPUT_FORMAT;
+#else
+	    goto not_there;
+#endif
+	}
+    case 'P':
+	if (strEQ(name + 16, "PTIONALCONFIG")) {	/* NETSNMP_DS_LIB_O removed */
+#ifdef NETSNMP_DS_LIB_OPTIONALCONFIG
+	    return NETSNMP_DS_LIB_OPTIONALCONFIG;
+#else
+	    goto not_there;
+#endif
+	}
+    }
+    errno = EINVAL;
+    return 0;
+
+not_there:
+    errno = ENOENT;
+    return 0;
+}
+
+static double
+constant_NETSNMP_DS_LIB_PRINT_N(char *name, int len, int arg)
+{
+    if (22 + 7 >= len ) {
 	errno = EINVAL;
 	return 0;
     }
-    switch (name[14 + 7]) {
+    switch (name[22 + 7]) {
     case 'E':
-	if (strEQ(name + 14, "UMERIC_ENUM")) {	/* DS_LIB_PRINT_N removed */
-#ifdef DS_LIB_PRINT_NUMERIC_ENUM
-	    return DS_LIB_PRINT_NUMERIC_ENUM;
+	if (strEQ(name + 22, "UMERIC_ENUM")) {	/* NETSNMP_DS_LIB_PRINT_N removed */
+#ifdef NETSNMP_DS_LIB_PRINT_NUMERIC_ENUM
+	    return NETSNMP_DS_LIB_PRINT_NUMERIC_ENUM;
 #else
 	    goto not_there;
 #endif
 	}
     case 'O':
-	if (strEQ(name + 14, "UMERIC_OIDS")) {	/* DS_LIB_PRINT_N removed */
-#ifdef DS_LIB_PRINT_NUMERIC_OIDS
-	    return DS_LIB_PRINT_NUMERIC_OIDS;
+	if (strEQ(name + 22, "UMERIC_OIDS")) {	/* NETSNMP_DS_LIB_PRINT_N removed */
+#ifdef NETSNMP_DS_LIB_PRINT_NUMERIC_OIDS
+	    return NETSNMP_DS_LIB_PRINT_NUMERIC_OIDS;
 #else
 	    goto not_there;
 #endif
@@ -74,142 +144,53 @@ not_there:
 }
 
 static double
-constant_DS_LIB_PRIN(char *name, int len, int arg)
+constant_NETSNMP_DS_LIB_PRIN(char *name, int len, int arg)
 {
-    if (11 + 2 >= len ) {
+    if (19 + 2 >= len ) {
 	errno = EINVAL;
 	return 0;
     }
-    switch (name[11 + 2]) {
+    switch (name[19 + 2]) {
     case 'B':
-	if (strEQ(name + 11, "T_BARE_VALUE")) {	/* DS_LIB_PRIN removed */
-#ifdef DS_LIB_PRINT_BARE_VALUE
-	    return DS_LIB_PRINT_BARE_VALUE;
+	if (strEQ(name + 19, "T_BARE_VALUE")) {	/* NETSNMP_DS_LIB_PRIN removed */
+#ifdef NETSNMP_DS_LIB_PRINT_BARE_VALUE
+	    return NETSNMP_DS_LIB_PRINT_BARE_VALUE;
 #else
 	    goto not_there;
 #endif
 	}
     case 'F':
-	if (strEQ(name + 11, "T_FULL_OID")) {	/* DS_LIB_PRIN removed */
-#ifdef DS_LIB_PRINT_FULL_OID
-	    return DS_LIB_PRINT_FULL_OID;
+	if (strEQ(name + 19, "T_FULL_OID")) {	/* NETSNMP_DS_LIB_PRIN removed */
+#ifdef NETSNMP_DS_LIB_PRINT_FULL_OID
+	    return NETSNMP_DS_LIB_PRINT_FULL_OID;
 #else
 	    goto not_there;
 #endif
 	}
     case 'H':
-	if (strEQ(name + 11, "T_HEX_TEXT")) {	/* DS_LIB_PRIN removed */
-#ifdef DS_LIB_PRINT_HEX_TEXT
-	    return DS_LIB_PRINT_HEX_TEXT;
+	if (strEQ(name + 19, "T_HEX_TEXT")) {	/* NETSNMP_DS_LIB_PRIN removed */
+#ifdef NETSNMP_DS_LIB_PRINT_HEX_TEXT
+	    return NETSNMP_DS_LIB_PRINT_HEX_TEXT;
 #else
 	    goto not_there;
 #endif
 	}
     case 'N':
-	if (!strnEQ(name + 11,"T_", 2))
+	if (!strnEQ(name + 19,"T_", 2))
 	    break;
-	return constant_DS_LIB_PRINT_N(name, len, arg);
+	return constant_NETSNMP_DS_LIB_PRINT_N(name, len, arg);
     case 'S':
-	if (strEQ(name + 11, "T_SUFFIX_ONLY")) {	/* DS_LIB_PRIN removed */
-#ifdef DS_LIB_PRINT_SUFFIX_ONLY
-	    return DS_LIB_PRINT_SUFFIX_ONLY;
-#else
-	    goto not_there;
-#endif
-	}
-    }
-    errno = EINVAL;
-    return 0;
-
-not_there:
-    errno = ENOENT;
-    return 0;
-}
-
-static double
-constant_DS_LIB_PR(char *name, int len, int arg)
-{
-    if (9 + 1 >= len ) {
-	errno = EINVAL;
-	return 0;
-    }
-    switch (name[9 + 1]) {
-    case 'N':
-	if (!strnEQ(name + 9,"I", 1))
-	    break;
-	return constant_DS_LIB_PRIN(name, len, arg);
-    case 'V':
-	if (strEQ(name + 9, "IVPASSPHRASE")) {	/* DS_LIB_PR removed */
-#ifdef DS_LIB_PRIVPASSPHRASE
-	    return DS_LIB_PRIVPASSPHRASE;
-#else
-	    goto not_there;
-#endif
-	}
-    }
-    errno = EINVAL;
-    return 0;
-
-not_there:
-    errno = ENOENT;
-    return 0;
-}
-
-static double
-constant_DS_LIB_P(char *name, int len, int arg)
-{
-    switch (name[8 + 0]) {
-    case 'A':
-	if (strEQ(name + 8, "ASSPHRASE")) {	/* DS_LIB_P removed */
-#ifdef DS_LIB_PASSPHRASE
-	    return DS_LIB_PASSPHRASE;
-#else
-	    goto not_there;
-#endif
-	}
-    case 'E':
-	if (strEQ(name + 8, "ERSISTENT_DIR")) {	/* DS_LIB_P removed */
-#ifdef DS_LIB_PERSISTENT_DIR
-	    return DS_LIB_PERSISTENT_DIR;
-#else
-	    goto not_there;
-#endif
-	}
-    case 'R':
-	return constant_DS_LIB_PR(name, len, arg);
-    }
-    errno = EINVAL;
-    return 0;
-
-not_there:
-    errno = ENOENT;
-    return 0;
-}
-
-static double
-constant_DS_LIB_A(char *name, int len, int arg)
-{
-    switch (name[8 + 0]) {
-    case 'L':
-	if (strEQ(name + 8, "LARM_DONT_USE_SIG")) {	/* DS_LIB_A removed */
-#ifdef DS_LIB_ALARM_DONT_USE_SIG
-	    return DS_LIB_ALARM_DONT_USE_SIG;
-#else
-	    goto not_there;
-#endif
-	}
-    case 'P':
-	if (strEQ(name + 8, "PPTYPE")) {	/* DS_LIB_A removed */
-#ifdef DS_LIB_APPTYPE
-	    return DS_LIB_APPTYPE;
+	if (strEQ(name + 19, "T_SUFFIX_ONLY")) {	/* NETSNMP_DS_LIB_PRIN removed */
+#ifdef NETSNMP_DS_LIB_PRINT_SUFFIX_ONLY
+	    return NETSNMP_DS_LIB_PRINT_SUFFIX_ONLY;
 #else
 	    goto not_there;
 #endif
 	}
     case 'U':
-	if (strEQ(name + 8, "UTHPASSPHRASE")) {	/* DS_LIB_A removed */
-#ifdef DS_LIB_AUTHPASSPHRASE
-	    return DS_LIB_AUTHPASSPHRASE;
+	if (strEQ(name + 19, "T_UCD_STYLE_OID")) {	/* NETSNMP_DS_LIB_PRIN removed */
+#ifdef NETSNMP_DS_LIB_PRINT_UCD_STYLE_OID
+	    return NETSNMP_DS_LIB_PRINT_UCD_STYLE_OID;
 #else
 	    goto not_there;
 #endif
@@ -224,215 +205,21 @@ not_there:
 }
 
 static double
-constant_DS_LIB_RE(char *name, int len, int arg)
+constant_NETSNMP_DS_LIB_PR(char *name, int len, int arg)
 {
-    switch (name[9 + 0]) {
-    case 'G':
-	if (strEQ(name + 9, "GEX_ACCESS")) {	/* DS_LIB_RE removed */
-#ifdef DS_LIB_REGEX_ACCESS
-	    return DS_LIB_REGEX_ACCESS;
-#else
-	    goto not_there;
-#endif
-	}
-    case 'V':
-	if (strEQ(name + 9, "VERSE_ENCODE")) {	/* DS_LIB_RE removed */
-#ifdef DS_LIB_REVERSE_ENCODE
-	    return DS_LIB_REVERSE_ENCODE;
-#else
-	    goto not_there;
-#endif
-	}
-    }
-    errno = EINVAL;
-    return 0;
-
-not_there:
-    errno = ENOENT;
-    return 0;
-}
-
-static double
-constant_DS_LIB_R(char *name, int len, int arg)
-{
-    switch (name[8 + 0]) {
-    case 'A':
-	if (strEQ(name + 8, "ANDOM_ACCESS")) {	/* DS_LIB_R removed */
-#ifdef DS_LIB_RANDOM_ACCESS
-	    return DS_LIB_RANDOM_ACCESS;
-#else
-	    goto not_there;
-#endif
-	}
-    case 'E':
-	return constant_DS_LIB_RE(name, len, arg);
-    }
-    errno = EINVAL;
-    return 0;
-
-not_there:
-    errno = ENOENT;
-    return 0;
-}
-
-static double
-constant_DS_LIB_SE(char *name, int len, int arg)
-{
-    if (9 + 1 >= len ) {
+    if (17 + 1 >= len ) {
 	errno = EINVAL;
 	return 0;
     }
-    switch (name[9 + 1]) {
-    case 'L':
-	if (strEQ(name + 9, "CLEVEL")) {	/* DS_LIB_SE removed */
-#ifdef DS_LIB_SECLEVEL
-	    return DS_LIB_SECLEVEL;
-#else
-	    goto not_there;
-#endif
-	}
-    case 'M':
-	if (strEQ(name + 9, "CMODEL")) {	/* DS_LIB_SE removed */
-#ifdef DS_LIB_SECMODEL
-	    return DS_LIB_SECMODEL;
-#else
-	    goto not_there;
-#endif
-	}
+    switch (name[17 + 1]) {
     case 'N':
-	if (strEQ(name + 9, "CNAME")) {	/* DS_LIB_SE removed */
-#ifdef DS_LIB_SECNAME
-	    return DS_LIB_SECNAME;
-#else
-	    goto not_there;
-#endif
-	}
-    }
-    errno = EINVAL;
-    return 0;
-
-not_there:
-    errno = ENOENT;
-    return 0;
-}
-
-static double
-constant_DS_LIB_S(char *name, int len, int arg)
-{
-    switch (name[8 + 0]) {
-    case 'A':
-	if (strEQ(name + 8, "AVE_MIB_DESCRS")) {	/* DS_LIB_S removed */
-#ifdef DS_LIB_SAVE_MIB_DESCRS
-	    return DS_LIB_SAVE_MIB_DESCRS;
-#else
-	    goto not_there;
-#endif
-	}
-    case 'E':
-	return constant_DS_LIB_SE(name, len, arg);
-    case 'N':
-	if (strEQ(name + 8, "NMPVERSION")) {	/* DS_LIB_S removed */
-#ifdef DS_LIB_SNMPVERSION
-	    return DS_LIB_SNMPVERSION;
-#else
-	    goto not_there;
-#endif
-	}
-    }
-    errno = EINVAL;
-    return 0;
-
-not_there:
-    errno = ENOENT;
-    return 0;
-}
-
-static double
-constant_DS_LIB_CON(char *name, int len, int arg)
-{
-    switch (name[10 + 0]) {
-    case 'F':
-	if (strEQ(name + 10, "FIGURATION_DIR")) {	/* DS_LIB_CON removed */
-#ifdef DS_LIB_CONFIGURATION_DIR
-	    return DS_LIB_CONFIGURATION_DIR;
-#else
-	    goto not_there;
-#endif
-	}
-    case 'T':
-	if (strEQ(name + 10, "TEXT")) {	/* DS_LIB_CON removed */
-#ifdef DS_LIB_CONTEXT
-	    return DS_LIB_CONTEXT;
-#else
-	    goto not_there;
-#endif
-	}
-    }
-    errno = EINVAL;
-    return 0;
-
-not_there:
-    errno = ENOENT;
-    return 0;
-}
-
-static double
-constant_DS_LIB_C(char *name, int len, int arg)
-{
-    if (8 + 1 >= len ) {
-	errno = EINVAL;
-	return 0;
-    }
-    switch (name[8 + 1]) {
-    case 'M':
-	if (strEQ(name + 8, "OMMUNITY")) {	/* DS_LIB_C removed */
-#ifdef DS_LIB_COMMUNITY
-	    return DS_LIB_COMMUNITY;
-#else
-	    goto not_there;
-#endif
-	}
-    case 'N':
-	if (!strnEQ(name + 8,"O", 1))
+	if (!strnEQ(name + 17,"I", 1))
 	    break;
-	return constant_DS_LIB_CON(name, len, arg);
-    }
-    errno = EINVAL;
-    return 0;
-
-not_there:
-    errno = ENOENT;
-    return 0;
-}
-
-static double
-constant_DS_LIB_DO(char *name, int len, int arg)
-{
-    if (9 + 3 >= len ) {
-	errno = EINVAL;
-	return 0;
-    }
-    switch (name[9 + 3]) {
-    case 'B':
-	if (strEQ(name + 9, "NT_BREAKDOWN_OIDS")) {	/* DS_LIB_DO removed */
-#ifdef DS_LIB_DONT_BREAKDOWN_OIDS
-	    return DS_LIB_DONT_BREAKDOWN_OIDS;
-#else
-	    goto not_there;
-#endif
-	}
-    case 'C':
-	if (strEQ(name + 9, "NT_CHECK_RANGE")) {	/* DS_LIB_DO removed */
-#ifdef DS_LIB_DONT_CHECK_RANGE
-	    return DS_LIB_DONT_CHECK_RANGE;
-#else
-	    goto not_there;
-#endif
-	}
-    case 'R':
-	if (strEQ(name + 9, "NT_READ_CONFIGS")) {	/* DS_LIB_DO removed */
-#ifdef DS_LIB_DONT_READ_CONFIGS
-	    return DS_LIB_DONT_READ_CONFIGS;
+	return constant_NETSNMP_DS_LIB_PRIN(name, len, arg);
+    case 'V':
+	if (strEQ(name + 17, "IVPASSPHRASE")) {	/* NETSNMP_DS_LIB_PR removed */
+#ifdef NETSNMP_DS_LIB_PRIVPASSPHRASE
+	    return NETSNMP_DS_LIB_PRIVPASSPHRASE;
 #else
 	    goto not_there;
 #endif
@@ -447,168 +234,27 @@ not_there:
 }
 
 static double
-constant_DS_LIB_D(char *name, int len, int arg)
+constant_NETSNMP_DS_LIB_P(char *name, int len, int arg)
 {
-    switch (name[8 + 0]) {
-    case 'E':
-	if (strEQ(name + 8, "EFAULT_PORT")) {	/* DS_LIB_D removed */
-#ifdef DS_LIB_DEFAULT_PORT
-	    return DS_LIB_DEFAULT_PORT;
-#else
-	    goto not_there;
-#endif
-	}
-    case 'O':
-	return constant_DS_LIB_DO(name, len, arg);
-    case 'U':
-	if (strEQ(name + 8, "UMP_PACKET")) {	/* DS_LIB_D removed */
-#ifdef DS_LIB_DUMP_PACKET
-	    return DS_LIB_DUMP_PACKET;
-#else
-	    goto not_there;
-#endif
-	}
-    }
-    errno = EINVAL;
-    return 0;
-
-not_there:
-    errno = ENOENT;
-    return 0;
-}
-
-static double
-constant_DS_LIB_E(char *name, int len, int arg)
-{
-    switch (name[8 + 0]) {
-    case 'S':
-	if (strEQ(name + 8, "SCAPE_QUOTES")) {	/* DS_LIB_E removed */
-#ifdef DS_LIB_ESCAPE_QUOTES
-	    return DS_LIB_ESCAPE_QUOTES;
-#else
-	    goto not_there;
-#endif
-	}
-    case 'X':
-	if (strEQ(name + 8, "XTENDED_INDEX")) {	/* DS_LIB_E removed */
-#ifdef DS_LIB_EXTENDED_INDEX
-	    return DS_LIB_EXTENDED_INDEX;
-#else
-	    goto not_there;
-#endif
-	}
-    }
-    errno = EINVAL;
-    return 0;
-
-not_there:
-    errno = ENOENT;
-    return 0;
-}
-
-static double
-constant_DS_LIB_M(char *name, int len, int arg)
-{
-    if (8 + 3 >= len ) {
-	errno = EINVAL;
-	return 0;
-    }
-    switch (name[8 + 3]) {
-    case 'C':
-	if (strEQ(name + 8, "IB_COMMENT_TERM")) {	/* DS_LIB_M removed */
-#ifdef DS_LIB_MIB_COMMENT_TERM
-	    return DS_LIB_MIB_COMMENT_TERM;
-#else
-	    goto not_there;
-#endif
-	}
-    case 'E':
-	if (strEQ(name + 8, "IB_ERRORS")) {	/* DS_LIB_M removed */
-#ifdef DS_LIB_MIB_ERRORS
-	    return DS_LIB_MIB_ERRORS;
-#else
-	    goto not_there;
-#endif
-	}
-    case 'P':
-	if (strEQ(name + 8, "IB_PARSE_LABEL")) {	/* DS_LIB_M removed */
-#ifdef DS_LIB_MIB_PARSE_LABEL
-	    return DS_LIB_MIB_PARSE_LABEL;
-#else
-	    goto not_there;
-#endif
-	}
-    case 'R':
-	if (strEQ(name + 8, "IB_REPLACE")) {	/* DS_LIB_M removed */
-#ifdef DS_LIB_MIB_REPLACE
-	    return DS_LIB_MIB_REPLACE;
-#else
-	    goto not_there;
-#endif
-	}
-    case 'W':
-	if (strEQ(name + 8, "IB_WARNINGS")) {	/* DS_LIB_M removed */
-#ifdef DS_LIB_MIB_WARNINGS
-	    return DS_LIB_MIB_WARNINGS;
-#else
-	    goto not_there;
-#endif
-	}
-    }
-    errno = EINVAL;
-    return 0;
-
-not_there:
-    errno = ENOENT;
-    return 0;
-}
-
-static double
-constant_DS_LIB_(char *name, int len, int arg)
-{
-    switch (name[7 + 0]) {
+    switch (name[16 + 0]) {
     case 'A':
-	return constant_DS_LIB_A(name, len, arg);
-    case 'C':
-	return constant_DS_LIB_C(name, len, arg);
-    case 'D':
-	return constant_DS_LIB_D(name, len, arg);
+	if (strEQ(name + 16, "ASSPHRASE")) {	/* NETSNMP_DS_LIB_P removed */
+#ifdef NETSNMP_DS_LIB_PASSPHRASE
+	    return NETSNMP_DS_LIB_PASSPHRASE;
+#else
+	    goto not_there;
+#endif
+	}
     case 'E':
-	return constant_DS_LIB_E(name, len, arg);
-    case 'L':
-	if (strEQ(name + 7, "LOG_TIMESTAMP")) {	/* DS_LIB_ removed */
-#ifdef DS_LIB_LOG_TIMESTAMP
-	    return DS_LIB_LOG_TIMESTAMP;
-#else
-	    goto not_there;
-#endif
-	}
-    case 'M':
-	return constant_DS_LIB_M(name, len, arg);
-    case 'N':
-	return constant_DS_LIB_N(name, len, arg);
-    case 'O':
-	if (strEQ(name + 7, "OPTIONALCONFIG")) {	/* DS_LIB_ removed */
-#ifdef DS_LIB_OPTIONALCONFIG
-	    return DS_LIB_OPTIONALCONFIG;
-#else
-	    goto not_there;
-#endif
-	}
-    case 'P':
-	return constant_DS_LIB_P(name, len, arg);
-    case 'Q':
-	if (strEQ(name + 7, "QUICK_PRINT")) {	/* DS_LIB_ removed */
-#ifdef DS_LIB_QUICK_PRINT
-	    return DS_LIB_QUICK_PRINT;
+	if (strEQ(name + 16, "ERSISTENT_DIR")) {	/* NETSNMP_DS_LIB_P removed */
+#ifdef NETSNMP_DS_LIB_PERSISTENT_DIR
+	    return NETSNMP_DS_LIB_PERSISTENT_DIR;
 #else
 	    goto not_there;
 #endif
 	}
     case 'R':
-	return constant_DS_LIB_R(name, len, arg);
-    case 'S':
-	return constant_DS_LIB_S(name, len, arg);
+	return constant_NETSNMP_DS_LIB_PR(name, len, arg);
     }
     errno = EINVAL;
     return 0;
@@ -619,25 +265,29 @@ not_there:
 }
 
 static double
-constant_DS_L(char *name, int len, int arg)
+constant_NETSNMP_DS_LIB_Q(char *name, int len, int arg)
 {
-    if (4 + 2 >= len ) {
+    if (16 + 4 >= len ) {
 	errno = EINVAL;
 	return 0;
     }
-    switch (name[4 + 2]) {
-    case 'R':
-	if (strEQ(name + 4, "IBRARY_ID")) {	/* DS_L removed */
-#ifdef DS_LIBRARY_ID
-	    return DS_LIBRARY_ID;
+    switch (name[16 + 4]) {
+    case 'E':
+	if (strEQ(name + 16, "UICKE_PRINT")) {	/* NETSNMP_DS_LIB_Q removed */
+#ifdef NETSNMP_DS_LIB_QUICKE_PRINT
+	    return NETSNMP_DS_LIB_QUICKE_PRINT;
 #else
 	    goto not_there;
 #endif
 	}
     case '_':
-	if (!strnEQ(name + 4,"IB", 2))
-	    break;
-	return constant_DS_LIB_(name, len, arg);
+	if (strEQ(name + 16, "UICK_PRINT")) {	/* NETSNMP_DS_LIB_Q removed */
+#ifdef NETSNMP_DS_LIB_QUICK_PRINT
+	    return NETSNMP_DS_LIB_QUICK_PRINT;
+#else
+	    goto not_there;
+#endif
+	}
     }
     errno = EINVAL;
     return 0;
@@ -648,66 +298,517 @@ not_there:
 }
 
 static double
-constant_DS_M(char *name, int len, int arg)
+constant_NETSNMP_DS_LIB_A(char *name, int len, int arg)
 {
-    if (4 + 3 >= len ) {
+    switch (name[16 + 0]) {
+    case 'L':
+	if (strEQ(name + 16, "LARM_DONT_USE_SIG")) {	/* NETSNMP_DS_LIB_A removed */
+#ifdef NETSNMP_DS_LIB_ALARM_DONT_USE_SIG
+	    return NETSNMP_DS_LIB_ALARM_DONT_USE_SIG;
+#else
+	    goto not_there;
+#endif
+	}
+    case 'P':
+	if (strEQ(name + 16, "PPTYPE")) {	/* NETSNMP_DS_LIB_A removed */
+#ifdef NETSNMP_DS_LIB_APPTYPE
+	    return NETSNMP_DS_LIB_APPTYPE;
+#else
+	    goto not_there;
+#endif
+	}
+    case 'U':
+	if (strEQ(name + 16, "UTHPASSPHRASE")) {	/* NETSNMP_DS_LIB_A removed */
+#ifdef NETSNMP_DS_LIB_AUTHPASSPHRASE
+	    return NETSNMP_DS_LIB_AUTHPASSPHRASE;
+#else
+	    goto not_there;
+#endif
+	}
+    }
+    errno = EINVAL;
+    return 0;
+
+not_there:
+    errno = ENOENT;
+    return 0;
+}
+
+static double
+constant_NETSNMP_DS_LIB_RE(char *name, int len, int arg)
+{
+    switch (name[17 + 0]) {
+    case 'A':
+	if (strEQ(name + 17, "AD_UCD_STYLE_OID")) {	/* NETSNMP_DS_LIB_RE removed */
+#ifdef NETSNMP_DS_LIB_READ_UCD_STYLE_OID
+	    return NETSNMP_DS_LIB_READ_UCD_STYLE_OID;
+#else
+	    goto not_there;
+#endif
+	}
+    case 'G':
+	if (strEQ(name + 17, "GEX_ACCESS")) {	/* NETSNMP_DS_LIB_RE removed */
+#ifdef NETSNMP_DS_LIB_REGEX_ACCESS
+	    return NETSNMP_DS_LIB_REGEX_ACCESS;
+#else
+	    goto not_there;
+#endif
+	}
+    case 'V':
+	if (strEQ(name + 17, "VERSE_ENCODE")) {	/* NETSNMP_DS_LIB_RE removed */
+#ifdef NETSNMP_DS_LIB_REVERSE_ENCODE
+	    return NETSNMP_DS_LIB_REVERSE_ENCODE;
+#else
+	    goto not_there;
+#endif
+	}
+    }
+    errno = EINVAL;
+    return 0;
+
+not_there:
+    errno = ENOENT;
+    return 0;
+}
+
+static double
+constant_NETSNMP_DS_LIB_R(char *name, int len, int arg)
+{
+    switch (name[16 + 0]) {
+    case 'A':
+	if (strEQ(name + 16, "ANDOM_ACCESS")) {	/* NETSNMP_DS_LIB_R removed */
+#ifdef NETSNMP_DS_LIB_RANDOM_ACCESS
+	    return NETSNMP_DS_LIB_RANDOM_ACCESS;
+#else
+	    goto not_there;
+#endif
+	}
+    case 'E':
+	return constant_NETSNMP_DS_LIB_RE(name, len, arg);
+    }
+    errno = EINVAL;
+    return 0;
+
+not_there:
+    errno = ENOENT;
+    return 0;
+}
+
+static double
+constant_NETSNMP_DS_LIB_SE(char *name, int len, int arg)
+{
+    if (17 + 1 >= len ) {
 	errno = EINVAL;
 	return 0;
     }
-    switch (name[4 + 3]) {
+    switch (name[17 + 1]) {
+    case 'L':
+	if (strEQ(name + 17, "CLEVEL")) {	/* NETSNMP_DS_LIB_SE removed */
+#ifdef NETSNMP_DS_LIB_SECLEVEL
+	    return NETSNMP_DS_LIB_SECLEVEL;
+#else
+	    goto not_there;
+#endif
+	}
+    case 'M':
+	if (strEQ(name + 17, "CMODEL")) {	/* NETSNMP_DS_LIB_SE removed */
+#ifdef NETSNMP_DS_LIB_SECMODEL
+	    return NETSNMP_DS_LIB_SECMODEL;
+#else
+	    goto not_there;
+#endif
+	}
+    case 'N':
+	if (strEQ(name + 17, "CNAME")) {	/* NETSNMP_DS_LIB_SE removed */
+#ifdef NETSNMP_DS_LIB_SECNAME
+	    return NETSNMP_DS_LIB_SECNAME;
+#else
+	    goto not_there;
+#endif
+	}
+    }
+    errno = EINVAL;
+    return 0;
+
+not_there:
+    errno = ENOENT;
+    return 0;
+}
+
+static double
+constant_NETSNMP_DS_LIB_S(char *name, int len, int arg)
+{
+    switch (name[16 + 0]) {
+    case 'A':
+	if (strEQ(name + 16, "AVE_MIB_DESCRS")) {	/* NETSNMP_DS_LIB_S removed */
+#ifdef NETSNMP_DS_LIB_SAVE_MIB_DESCRS
+	    return NETSNMP_DS_LIB_SAVE_MIB_DESCRS;
+#else
+	    goto not_there;
+#endif
+	}
+    case 'E':
+	return constant_NETSNMP_DS_LIB_SE(name, len, arg);
+    case 'N':
+	if (strEQ(name + 16, "NMPVERSION")) {	/* NETSNMP_DS_LIB_S removed */
+#ifdef NETSNMP_DS_LIB_SNMPVERSION
+	    return NETSNMP_DS_LIB_SNMPVERSION;
+#else
+	    goto not_there;
+#endif
+	}
+    }
+    errno = EINVAL;
+    return 0;
+
+not_there:
+    errno = ENOENT;
+    return 0;
+}
+
+static double
+constant_NETSNMP_DS_LIB_CON(char *name, int len, int arg)
+{
+    switch (name[18 + 0]) {
+    case 'F':
+	if (strEQ(name + 18, "FIGURATION_DIR")) {	/* NETSNMP_DS_LIB_CON removed */
+#ifdef NETSNMP_DS_LIB_CONFIGURATION_DIR
+	    return NETSNMP_DS_LIB_CONFIGURATION_DIR;
+#else
+	    goto not_there;
+#endif
+	}
+    case 'T':
+	if (strEQ(name + 18, "TEXT")) {	/* NETSNMP_DS_LIB_CON removed */
+#ifdef NETSNMP_DS_LIB_CONTEXT
+	    return NETSNMP_DS_LIB_CONTEXT;
+#else
+	    goto not_there;
+#endif
+	}
+    }
+    errno = EINVAL;
+    return 0;
+
+not_there:
+    errno = ENOENT;
+    return 0;
+}
+
+static double
+constant_NETSNMP_DS_LIB_C(char *name, int len, int arg)
+{
+    if (16 + 1 >= len ) {
+	errno = EINVAL;
+	return 0;
+    }
+    switch (name[16 + 1]) {
+    case 'M':
+	if (strEQ(name + 16, "OMMUNITY")) {	/* NETSNMP_DS_LIB_C removed */
+#ifdef NETSNMP_DS_LIB_COMMUNITY
+	    return NETSNMP_DS_LIB_COMMUNITY;
+#else
+	    goto not_there;
+#endif
+	}
+    case 'N':
+	if (!strnEQ(name + 16,"O", 1))
+	    break;
+	return constant_NETSNMP_DS_LIB_CON(name, len, arg);
+    }
+    errno = EINVAL;
+    return 0;
+
+not_there:
+    errno = ENOENT;
+    return 0;
+}
+
+static double
+constant_NETSNMP_DS_LIB_DO(char *name, int len, int arg)
+{
+    if (17 + 3 >= len ) {
+	errno = EINVAL;
+	return 0;
+    }
+    switch (name[17 + 3]) {
+    case 'B':
+	if (strEQ(name + 17, "NT_BREAKDOWN_OIDS")) {	/* NETSNMP_DS_LIB_DO removed */
+#ifdef NETSNMP_DS_LIB_DONT_BREAKDOWN_OIDS
+	    return NETSNMP_DS_LIB_DONT_BREAKDOWN_OIDS;
+#else
+	    goto not_there;
+#endif
+	}
+    case 'C':
+	if (strEQ(name + 17, "NT_CHECK_RANGE")) {	/* NETSNMP_DS_LIB_DO removed */
+#ifdef NETSNMP_DS_LIB_DONT_CHECK_RANGE
+	    return NETSNMP_DS_LIB_DONT_CHECK_RANGE;
+#else
+	    goto not_there;
+#endif
+	}
+    case 'R':
+	if (strEQ(name + 17, "NT_READ_CONFIGS")) {	/* NETSNMP_DS_LIB_DO removed */
+#ifdef NETSNMP_DS_LIB_DONT_READ_CONFIGS
+	    return NETSNMP_DS_LIB_DONT_READ_CONFIGS;
+#else
+	    goto not_there;
+#endif
+	}
+    }
+    errno = EINVAL;
+    return 0;
+
+not_there:
+    errno = ENOENT;
+    return 0;
+}
+
+static double
+constant_NETSNMP_DS_LIB_D(char *name, int len, int arg)
+{
+    switch (name[16 + 0]) {
+    case 'E':
+	if (strEQ(name + 16, "EFAULT_PORT")) {	/* NETSNMP_DS_LIB_D removed */
+#ifdef NETSNMP_DS_LIB_DEFAULT_PORT
+	    return NETSNMP_DS_LIB_DEFAULT_PORT;
+#else
+	    goto not_there;
+#endif
+	}
+    case 'O':
+	return constant_NETSNMP_DS_LIB_DO(name, len, arg);
+    case 'U':
+	if (strEQ(name + 16, "UMP_PACKET")) {	/* NETSNMP_DS_LIB_D removed */
+#ifdef NETSNMP_DS_LIB_DUMP_PACKET
+	    return NETSNMP_DS_LIB_DUMP_PACKET;
+#else
+	    goto not_there;
+#endif
+	}
+    }
+    errno = EINVAL;
+    return 0;
+
+not_there:
+    errno = ENOENT;
+    return 0;
+}
+
+static double
+constant_NETSNMP_DS_LIB_E(char *name, int len, int arg)
+{
+    switch (name[16 + 0]) {
+    case 'S':
+	if (strEQ(name + 16, "SCAPE_QUOTES")) {	/* NETSNMP_DS_LIB_E removed */
+#ifdef NETSNMP_DS_LIB_ESCAPE_QUOTES
+	    return NETSNMP_DS_LIB_ESCAPE_QUOTES;
+#else
+	    goto not_there;
+#endif
+	}
+    case 'X':
+	if (strEQ(name + 16, "XTENDED_INDEX")) {	/* NETSNMP_DS_LIB_E removed */
+#ifdef NETSNMP_DS_LIB_EXTENDED_INDEX
+	    return NETSNMP_DS_LIB_EXTENDED_INDEX;
+#else
+	    goto not_there;
+#endif
+	}
+    }
+    errno = EINVAL;
+    return 0;
+
+not_there:
+    errno = ENOENT;
+    return 0;
+}
+
+static double
+constant_NETSNMP_DS_LIB_H(char *name, int len, int arg)
+{
+    if (16 + 9 >= len ) {
+	errno = EINVAL;
+	return 0;
+    }
+    switch (name[16 + 9]) {
+    case 'C':
+	if (strEQ(name + 16, "AVE_READ_CONFIG")) {	/* NETSNMP_DS_LIB_H removed */
+#ifdef NETSNMP_DS_LIB_HAVE_READ_CONFIG
+	    return NETSNMP_DS_LIB_HAVE_READ_CONFIG;
+#else
+	    goto not_there;
+#endif
+	}
+    case 'P':
+	if (strEQ(name + 16, "AVE_READ_PREMIB_CONFIG")) {	/* NETSNMP_DS_LIB_H removed */
+#ifdef NETSNMP_DS_LIB_HAVE_READ_PREMIB_CONFIG
+	    return NETSNMP_DS_LIB_HAVE_READ_PREMIB_CONFIG;
+#else
+	    goto not_there;
+#endif
+	}
+    }
+    errno = EINVAL;
+    return 0;
+
+not_there:
+    errno = ENOENT;
+    return 0;
+}
+
+static double
+constant_NETSNMP_DS_LIB_M(char *name, int len, int arg)
+{
+    if (16 + 3 >= len ) {
+	errno = EINVAL;
+	return 0;
+    }
+    switch (name[16 + 3]) {
+    case 'C':
+	if (strEQ(name + 16, "IB_COMMENT_TERM")) {	/* NETSNMP_DS_LIB_M removed */
+#ifdef NETSNMP_DS_LIB_MIB_COMMENT_TERM
+	    return NETSNMP_DS_LIB_MIB_COMMENT_TERM;
+#else
+	    goto not_there;
+#endif
+	}
+    case 'E':
+	if (strEQ(name + 16, "IB_ERRORS")) {	/* NETSNMP_DS_LIB_M removed */
+#ifdef NETSNMP_DS_LIB_MIB_ERRORS
+	    return NETSNMP_DS_LIB_MIB_ERRORS;
+#else
+	    goto not_there;
+#endif
+	}
+    case 'P':
+	if (strEQ(name + 16, "IB_PARSE_LABEL")) {	/* NETSNMP_DS_LIB_M removed */
+#ifdef NETSNMP_DS_LIB_MIB_PARSE_LABEL
+	    return NETSNMP_DS_LIB_MIB_PARSE_LABEL;
+#else
+	    goto not_there;
+#endif
+	}
+    case 'R':
+	if (strEQ(name + 16, "IB_REPLACE")) {	/* NETSNMP_DS_LIB_M removed */
+#ifdef NETSNMP_DS_LIB_MIB_REPLACE
+	    return NETSNMP_DS_LIB_MIB_REPLACE;
+#else
+	    goto not_there;
+#endif
+	}
+    case 'W':
+	if (strEQ(name + 16, "IB_WARNINGS")) {	/* NETSNMP_DS_LIB_M removed */
+#ifdef NETSNMP_DS_LIB_MIB_WARNINGS
+	    return NETSNMP_DS_LIB_MIB_WARNINGS;
+#else
+	    goto not_there;
+#endif
+	}
+    }
+    errno = EINVAL;
+    return 0;
+
+not_there:
+    errno = ENOENT;
+    return 0;
+}
+
+static double
+constant_NETSNMP_DS_LIB_(char *name, int len, int arg)
+{
+    switch (name[15 + 0]) {
+    case 'A':
+	return constant_NETSNMP_DS_LIB_A(name, len, arg);
+    case 'C':
+	return constant_NETSNMP_DS_LIB_C(name, len, arg);
+    case 'D':
+	return constant_NETSNMP_DS_LIB_D(name, len, arg);
+    case 'E':
+	return constant_NETSNMP_DS_LIB_E(name, len, arg);
+    case 'H':
+	return constant_NETSNMP_DS_LIB_H(name, len, arg);
+    case 'L':
+	if (strEQ(name + 15, "LOG_TIMESTAMP")) {	/* NETSNMP_DS_LIB_ removed */
+#ifdef NETSNMP_DS_LIB_LOG_TIMESTAMP
+	    return NETSNMP_DS_LIB_LOG_TIMESTAMP;
+#else
+	    goto not_there;
+#endif
+	}
+    case 'M':
+	return constant_NETSNMP_DS_LIB_M(name, len, arg);
+    case 'N':
+	return constant_NETSNMP_DS_LIB_N(name, len, arg);
+    case 'O':
+	return constant_NETSNMP_DS_LIB_O(name, len, arg);
+    case 'P':
+	return constant_NETSNMP_DS_LIB_P(name, len, arg);
+    case 'Q':
+	return constant_NETSNMP_DS_LIB_Q(name, len, arg);
+    case 'R':
+	return constant_NETSNMP_DS_LIB_R(name, len, arg);
+    case 'S':
+	return constant_NETSNMP_DS_LIB_S(name, len, arg);
+    }
+    errno = EINVAL;
+    return 0;
+
+not_there:
+    errno = ENOENT;
+    return 0;
+}
+
+static double
+constant_NETSNMP_DS_L(char *name, int len, int arg)
+{
+    if (12 + 2 >= len ) {
+	errno = EINVAL;
+	return 0;
+    }
+    switch (name[12 + 2]) {
+    case 'R':
+	if (strEQ(name + 12, "IBRARY_ID")) {	/* NETSNMP_DS_L removed */
+#ifdef NETSNMP_DS_LIBRARY_ID
+	    return NETSNMP_DS_LIBRARY_ID;
+#else
+	    goto not_there;
+#endif
+	}
+    case '_':
+	if (!strnEQ(name + 12,"IB", 2))
+	    break;
+	return constant_NETSNMP_DS_LIB_(name, len, arg);
+    }
+    errno = EINVAL;
+    return 0;
+
+not_there:
+    errno = ENOENT;
+    return 0;
+}
+
+static double
+constant_NETSNMP_DS_M(char *name, int len, int arg)
+{
+    if (12 + 3 >= len ) {
+	errno = EINVAL;
+	return 0;
+    }
+    switch (name[12 + 3]) {
     case 'I':
-	if (strEQ(name + 4, "AX_IDS")) {	/* DS_M removed */
-#ifdef DS_MAX_IDS
-	    return DS_MAX_IDS;
+	if (strEQ(name + 12, "AX_IDS")) {	/* NETSNMP_DS_M removed */
+#ifdef NETSNMP_DS_MAX_IDS
+	    return NETSNMP_DS_MAX_IDS;
 #else
 	    goto not_there;
 #endif
 	}
     case 'S':
-	if (strEQ(name + 4, "AX_SUBIDS")) {	/* DS_M removed */
-#ifdef DS_MAX_SUBIDS
-	    return DS_MAX_SUBIDS;
-#else
-	    goto not_there;
-#endif
-	}
-    }
-    errno = EINVAL;
-    return 0;
-
-not_there:
-    errno = ENOENT;
-    return 0;
-}
-
-static double
-constant_DS(char *name, int len, int arg)
-{
-    if (2 + 1 >= len ) {
-	errno = EINVAL;
-	return 0;
-    }
-    switch (name[2 + 1]) {
-    case 'A':
-	if (strEQ(name + 2, "_APPLICATION_ID")) {	/* DS removed */
-#ifdef DS_APPLICATION_ID
-	    return DS_APPLICATION_ID;
-#else
-	    goto not_there;
-#endif
-	}
-    case 'L':
-	if (!strnEQ(name + 2,"_", 1))
-	    break;
-	return constant_DS_L(name, len, arg);
-    case 'M':
-	if (!strnEQ(name + 2,"_", 1))
-	    break;
-	return constant_DS_M(name, len, arg);
-    case 'T':
-	if (strEQ(name + 2, "_TOKEN_ID")) {	/* DS removed */
-#ifdef DS_TOKEN_ID
-	    return DS_TOKEN_ID;
+	if (strEQ(name + 12, "AX_SUBIDS")) {	/* NETSNMP_DS_M removed */
+#ifdef NETSNMP_DS_MAX_SUBIDS
+	    return NETSNMP_DS_MAX_SUBIDS;
 #else
 	    goto not_there;
 #endif
@@ -725,23 +826,39 @@ static double
 constant(char *name, int len, int arg)
 {
     errno = 0;
-    if (0 + 1 >= len ) {
+    if (0 + 11 >= len ) {
 	errno = EINVAL;
 	return 0;
     }
-    switch (name[0 + 1]) {
-    case 'E':
-	if (strEQ(name + 0, "DEFAULT_STORE_H")) {	/*  removed */
-#ifdef DEFAULT_STORE_H
-	    return DEFAULT_STORE_H;
+    switch (name[0 + 11]) {
+    case 'A':
+	if (strEQ(name + 0, "NETSNMP_DS_APPLICATION_ID")) {	/*  removed */
+#ifdef NETSNMP_DS_APPLICATION_ID
+	    return NETSNMP_DS_APPLICATION_ID;
 #else
 	    goto not_there;
 #endif
 	}
-    case 'S':
-	if (!strnEQ(name + 0,"D", 1))
+    case 'L':
+	if (!strnEQ(name + 0,"NETSNMP_DS_", 11))
 	    break;
-	return constant_DS(name, len, arg);
+	return constant_NETSNMP_DS_L(name, len, arg);
+    case 'M':
+	if (!strnEQ(name + 0,"NETSNMP_DS_", 11))
+	    break;
+	return constant_NETSNMP_DS_M(name, len, arg);
+    case 'S':
+	if (!strnEQ(name + 0,"NETSNMP_DS_", 11))
+	    break;
+	return constant_NETSNMP_DS_S(name, len, arg);
+    case 'T':
+	if (strEQ(name + 0, "NETSNMP_DS_TOKEN_ID")) {	/*  removed */
+#ifdef NETSNMP_DS_TOKEN_ID
+	    return NETSNMP_DS_TOKEN_ID;
+#else
+	    goto not_there;
+#endif
+	}
     }
     errno = EINVAL;
     return 0;
@@ -768,29 +885,28 @@ constant(sv,arg)
     OUTPUT:
 	RETVAL
 
-
 int
-ds_get_boolean(storeid, which)
+netsnmp_ds_get_boolean(storeid, which)
 	int	storeid
 	int	which
 
 int
-ds_get_int(storeid, which)
+netsnmp_ds_get_int(storeid, which)
 	int	storeid
 	int	which
 
 char *
-ds_get_string(storeid, which)
+netsnmp_ds_get_string(storeid, which)
 	int	storeid
 	int	which
 
 void *
-ds_get_void(storeid, which)
+netsnmp_ds_get_void(storeid, which)
 	int	storeid
 	int	which
 
 int
-ds_register_config(type, ftype, token, storeid, which)
+netsnmp_ds_register_config(type, ftype, token, storeid, which)
 	unsigned char	type
 	const char *	ftype
 	const char *	token
@@ -798,7 +914,7 @@ ds_register_config(type, ftype, token, storeid, which)
 	int	which
 
 int
-ds_register_premib(type, ftype, token, storeid, which)
+netsnmp_ds_register_premib(type, ftype, token, storeid, which)
 	unsigned char	type
 	const char *	ftype
 	const char *	token
@@ -806,33 +922,33 @@ ds_register_premib(type, ftype, token, storeid, which)
 	int	which
 
 int
-ds_set_boolean(storeid, which, value)
+netsnmp_ds_set_boolean(storeid, which, value)
 	int	storeid
 	int	which
 	int	value
 
 int
-ds_set_int(storeid, which, value)
+netsnmp_ds_set_int(storeid, which, value)
 	int	storeid
 	int	which
 	int	value
 
 int
-ds_set_string(storeid, which, value)
+netsnmp_ds_set_string(storeid, which, value)
 	int	storeid
 	int	which
 	const char *	value
 
 int
-ds_set_void(storeid, which, value)
+netsnmp_ds_set_void(storeid, which, value)
 	int	storeid
 	int	which
 	void *	value
 
 void
-ds_shutdown()
+netsnmp_ds_shutdown()
 
 int
-ds_toggle_boolean(storeid, which)
+netsnmp_ds_toggle_boolean(storeid, which)
 	int	storeid
 	int	which
