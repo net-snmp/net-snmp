@@ -25,7 +25,7 @@ install:    all installdirs
         ( cd $$i ; $(MAKE) install ) ; \
 	done
 	@$(INSTALL) ucd-snmp-config.h $(includedir)
-	echo "install:  installed ucd-snmp-config.h in $(includedir)"
+	@echo "install:  installed ucd-snmp-config.h in $(includedir)"
 
 installdirs:
 	@$(SHELL) $(srcdir)/mkinstalldirs $(snmplibdir) $(mibdir) $(includedir)
