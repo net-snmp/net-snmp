@@ -129,7 +129,7 @@ intpr(interval)
 	    fprintf (stderr, "No response when requesting number of interfaces.\n");
 	    return;
 	}
-	DEBUGP ("cfg_nnets = %d\n", cfg_nnets);
+	DEBUGMSGTL (("netstat:if", "cfg_nnets = %d\n", cfg_nnets));
 	printf("%-7.7s %-4.4s %-15.15s %-15.15s %8.8s %5.5s %8.8s %5.5s %5.5s",
 		"Name", "Mtu", "Network", "Address", "Ipkts", "Ierrs",
 		"Opkts", "Oerrs", "Queue");
@@ -311,7 +311,7 @@ intpro(interval)
 	    fprintf (stderr, "No response when requesting number of interfaces.\n");
 	    return;
 	}
-	DEBUGP ("cfg_nnets = %d\n", cfg_nnets);
+	DEBUGMSGTL (("netstat:if", "cfg_nnets = %d\n", cfg_nnets));
 	printf("%-7.7s %-15.15s %-15.15s %12.12s %12.12s ",
 		"Name", "Network", "Address", "Ioctets", "Ooctets");
 	putchar('\n');

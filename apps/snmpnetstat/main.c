@@ -163,6 +163,7 @@ main(argc, argv)
 		snmp_set_quick_print(1);
 		break;
 	      case 'D':
+                debug_register_tokens(&argv[arg][2]);
 		snmp_set_do_debugging(1);
 		break;
 	      case 'p':
