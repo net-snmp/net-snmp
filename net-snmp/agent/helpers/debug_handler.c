@@ -9,7 +9,7 @@
 #include "mibincl.h"
 #include "tools.h"
 #include "snmp_agent.h"
-#include "debug_handler.h"
+#include <net-snmp/agent/debug_handler.h>
 
 #if HAVE_DMALLOC_H
 #include <dmalloc.h>

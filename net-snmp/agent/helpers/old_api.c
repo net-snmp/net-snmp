@@ -9,7 +9,7 @@
 #include "mibincl.h"
 #include "tools.h"
 #include "snmp_agent.h"
-#include "old_api.h"
+#include <net-snmp/agent/old_api.h>
 #include "agent_callbacks.h"
 
 #if HAVE_DMALLOC_H

@@ -13,6 +13,7 @@
 #include <agent_registry.h>
 #include <data_list.h>
 #include <snmp_enum.h>
+#include <net-snmp/agent/bulk_to_next.h>
 /***********************************************************************/
 /* New Handler based API */
 /***********************************************************************/

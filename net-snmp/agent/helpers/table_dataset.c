@@ -7,9 +7,9 @@
 #endif
 
 #include "mibincl.h"
-#include "table.h"
-#include "table_data.h"
-#include "table_dataset.h"
+#include <net-snmp/agent/table.h>
+#include <net-snmp/agent/table_data.h>
+#include <net-snmp/agent/table_dataset.h>
 #include "parse.h"
 #include "data_list.h"
 

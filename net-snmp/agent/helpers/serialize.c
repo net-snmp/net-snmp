@@ -9,7 +9,7 @@
 #include "mibincl.h"
 #include "tools.h"
 #include "snmp_agent.h"
-#include "serialize.h"
+#include <net-snmp/agent/serialize.h>
 
 #if HAVE_DMALLOC_H
 #include <dmalloc.h>
