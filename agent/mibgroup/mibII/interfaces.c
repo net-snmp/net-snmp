@@ -194,6 +194,10 @@
 #include "util_funcs.h"
 #include "sysORTable.h"
 
+/* if you want caching enabled for speed retrival purposes, set this to 5?*/
+#define MINLOADFREQ 0                     // min reload frequency in seconds
+static unsigned long LastLoad = 0;        // ET in secs at last table load
+
 extern struct timeval starttime;
 
 static void     parse_interface_config(const char *, char *);
@@ -1502,6 +1506,7 @@ Interface_Scan_Init(void)
     const char     *scan_line_2_0 =
         "%lu %lu %*lu %*lu %*lu %lu %lu %*lu %*lu %lu";
     const char     *scan_line_to_use;
+    struct timeval et;                              /* elapsed time */
 
 #endif
 
@@ -1509,6 +1514,15 @@ Interface_Scan_Init(void)
     auto_nlist(IFNET_SYMBOL, (char *) &ifnetaddr, sizeof(ifnetaddr));
 #endif
     saveIndex = 0;
+
+
+    /*  disallow reloading of structures too often */
+    gettimeofday ( &et, ( struct timezone * ) 0 );  /*  get time-of-day */
+    if ( et.tv_sec < LastLoad + MINLOADFREQ ) {     /*  only reload so often */
+      ifnetaddr = ifnetaddr_list;                   /*  initialize pointer */
+      return;
+    }
+    LastLoad = et.tv_sec;
 
 #ifdef linux
     /*
