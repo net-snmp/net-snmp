@@ -201,13 +201,6 @@ public:
                creation. set to non-zero to have <tags> returned by the 'get'
                methods untranslated (i.e. dotted-decimal).  Setting the
                UseLongNames value for the session is highly recommended.
- TimeStamp   - defaults to the value of SNMP::timestamp_vars at time of
-               session creation. set to non-zero to add an additional element
-               to each Varbind, containing a time(2) timestamp.  Reference
-               the Varbind timestamp through the $varbind_ref->stamp() method.
-	       Do not modify a timestamp value -- it is shared between all
-	       variables that were received at the same time.
-
  ErrorStr    - read-only, holds the error message assoc. w/ last request
  ErrorNum    - read-only, holds the snmp_err or status of last request
  ErrorInd    - read-only, holds the snmp_err_index when appropriate
@@ -406,12 +399,6 @@ SNMP package variables and functions:
  $SNMP::use_numeric   - default '0', set to non-zero to return tags as numeric
                         OID's, instead of translating them.  Also setting
                         $SNMP::use_long_names to non-zero is highly recommended.
-
- $SNMP::timestamp_vars - default '0', set to non-zero to add an additional
-			time(2)-style timestamp element to each returned
-			Varbind (as array element 4).  Do not modify a
-			timestamp value -- it is shared between all variables
-			that were received at the same time.
 
  $SNMP::save_descriptions - default '0',set non-zero to have mib parser save
                         attribute descriptions. must be set prior to mib
