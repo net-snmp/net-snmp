@@ -77,6 +77,7 @@ CLEAN :
 	-@erase "$(INTDIR)\usmUser.obj"
 	-@erase "$(INTDIR)\util_funcs.obj"
 	-@erase "$(INTDIR)\vacm_context.obj"
+	-@erase "$(INTDIR)\vacm_conf.obj"
 	-@erase "$(INTDIR)\vacm_vars.obj"
 	-@erase "$(INTDIR)\var_route.obj"
 	-@erase "$(INTDIR)\vc??.idb"
@@ -136,6 +137,7 @@ LIB32_OBJS= \
 	"$(INTDIR)\sysORTable.obj" \
 	"$(INTDIR)\system_mib.obj" \
 	"$(INTDIR)\vacm_context.obj" \
+	"$(INTDIR)\vacm_conf.obj" \
 	"$(INTDIR)\vacm_vars.obj" \
 	"$(INTDIR)\mteEventNotificationTable.obj" \
 	"$(INTDIR)\mteEventTable.obj" \
@@ -270,6 +272,7 @@ CLEAN :
 	-@erase "$(INTDIR)\usmUser.obj"
 	-@erase "$(INTDIR)\util_funcs.obj"
 	-@erase "$(INTDIR)\vacm_context.obj"
+	-@erase "$(INTDIR)\vacm_conf.obj"
 	-@erase "$(INTDIR)\vacm_vars.obj"
 	-@erase "$(INTDIR)\var_route.obj"
 	-@erase "$(INTDIR)\vc??.idb"
@@ -330,6 +333,7 @@ LIB32_OBJS= \
 	"$(INTDIR)\sysORTable.obj" \
 	"$(INTDIR)\system_mib.obj" \
 	"$(INTDIR)\vacm_context.obj" \
+	"$(INTDIR)\vacm_conf.obj" \
 	"$(INTDIR)\vacm_vars.obj" \
 	"$(INTDIR)\mteEventNotificationTable.obj" \
 	"$(INTDIR)\mteEventTable.obj" \
@@ -436,6 +440,12 @@ SOURCE=..\..\agent\mibgroup\mibII\system_mib.c
 SOURCE=..\..\agent\mibgroup\mibII\vacm_context.c
 
 "$(INTDIR)\vacm_context.obj" : $(SOURCE) "$(INTDIR)"
+	$(CPP) $(CPP_PROJ) $(SOURCE)
+
+
+SOURCE=..\..\agent\mibgroup\mibII\vacm_conf.c
+
+"$(INTDIR)\vacm_conf.obj" : $(SOURCE) "$(INTDIR)"
 	$(CPP) $(CPP_PROJ) $(SOURCE)
 
 

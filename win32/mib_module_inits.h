@@ -98,6 +98,7 @@
 #endif
 
   if (should_init("vacm_context")) init_vacm_context();
+  if (should_init("vacm_conf")) init_vacm_conf();
 
 #ifdef USING_SMUX_MODULE
   if (should_init("smux")) init_smux();

@@ -105,6 +105,10 @@ SOURCE=..\..\agent\mibgroup\mibII\vacm_context.c
 # End Source File
 # Begin Source File
 
+SOURCE=..\..\agent\mibgroup\mibII\vacm_conf.c
+# End Source File
+# Begin Source File
+
 SOURCE=..\..\agent\mibgroup\mibII\vacm_vars.c
 # End Source File
 # End Group
