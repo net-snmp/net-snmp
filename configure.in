@@ -814,7 +814,7 @@ fi
 fch=`echo $prefix | sed 's/\(.\).*/\1/'`
 if test $fch != "/" ; then
    sch=`echo $prefix | sed 's/.\(.\).*/\1/'`
-   if test -o $sch != ":" ; then
+   if test $sch != ":" ; then
       prefix=`pwd`/$prefix
       echo "adjusting prefix to $prefix"
    fi
@@ -827,7 +827,7 @@ fi
 fch=`echo $exec_prefix | sed 's/\(.\).*/\1/'`
 if test $fch != "/" ; then
    sch=`echo $exec_prefix | sed 's/.\(.\).*/\1/'`
-   if test -o $sch != ":" ; then
+   if test $sch != ":" ; then
       exec_prefix=`pwd`/$exec_prefix
       echo "adjusting exec_prefix to $exec_prefix"
    fi
@@ -1785,8 +1785,8 @@ AC_CHECK_HEADERS(winsock.h,[
         AGENTLIBS="${AGENTLIBS} -liphlpapi"
         case $target_os in
                 mingw*)
-                        LIBS="${LIBS} -lwsock32"
-                        AGENTLIBS="${AGENTLIBS} -lwsock32"
+                        LIBS="${LIBS} -lregex -lwsock32"
+                        AGENTLIBS="${AGENTLIBS} -lregex -lwsock32"
                         ;;
                 *)
                         ;;
@@ -1978,6 +1978,10 @@ elif test "`($PSPROG -o pid,tt,state,time,ucomm 2>&1) | egrep ' ps *$' | awk '{p
   ac_cv_ps_flags="-o pid,tt,state,time,ucomm"
 elif test "`($PSPROG ax 2>&1) | egrep ' (ps) *$' | awk '{print $NF}'`" = "ps" ; then
   ac_cv_ps_flags="ax"
+elif test "x$PARTIALTARGETOS" = "xcygwin"; then
+  ac_cv_ps_flags="-e"
+elif test "x$PARTIALTARGETOS" = "xmingw32"; then 
+  ac_cv_ps_flags="-e"
 else
   AC_MSG_WARN([Unable to determine valid ps flags...  defaulting...])
   ac_cv_ps_flags="-acx"
