@@ -3426,7 +3426,7 @@ snmp_pdu_parse(struct snmp_pdu *pdu, u_char  *data, size_t *length) {
       vp->val_len = sizeof(u_long);
       asn_parse_unsigned_int(var_val, &len, &vp->type,
 			     (u_long *)vp->val.integer,
-			     sizeof(vp->val.integer));
+			     vp->val_len);
       break;
 #ifdef OPAQUE_SPECIAL_TYPES
     case ASN_OPAQUE_COUNTER64:
@@ -3437,7 +3437,7 @@ snmp_pdu_parse(struct snmp_pdu *pdu, u_char  *data, size_t *length) {
       vp->val_len = sizeof(struct counter64);
       asn_parse_unsigned_int64(var_val, &len, &vp->type,
 			       (struct counter64 *)vp->val.counter64,
-			       sizeof(*vp->val.counter64));
+			       vp->val_len);
       break;
 #ifdef OPAQUE_SPECIAL_TYPES
     case ASN_OPAQUE_FLOAT:
