@@ -1405,7 +1405,6 @@ fprint_description(f, objid, objidlen)
         fprintf(f, "No description\n");
 }
 
-
 int
 get_module_node(name, module, objid, objidlen)
     char *name;
