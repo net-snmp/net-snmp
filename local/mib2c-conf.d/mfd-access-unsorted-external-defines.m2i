@@ -266,7 +266,7 @@ _${table}_container_init(${context}_interface_ctx *if_ctx)
 ##//####################################################################
 ##//@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
 ##//@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
-@if $m2c_processing_type eq 'b'@
+@if $m2c_processing_type eq 'c'@
 /**
  * unsorted-external overview
  *
@@ -333,7 +333,11 @@ ${table}_loop_init_context( $mfd_aue_param_decl, ${context}_ref_loop_ctx *loop_c
     /*
      * allocate a temporary context to use during iteration
      */
+@if $m2c_data_allocate == 1@
+    loop_ctx_ref->loop_ctx->rowreq_ctx = ${context}_allocate_rowreq_ctx(NULL);
+@else@
     loop_ctx_ref->loop_ctx->rowreq_ctx = ${context}_allocate_rowreq_ctx();
+@end@
     if(NULL == loop_ctx_ref->loop_ctx->rowreq_ctx) {
         SNMP_FREE(loop_ctx_ref->loop_ctx);
         return MFD_RESOURCE_UNAVAILABLE;
@@ -782,7 +786,7 @@ $example_end
     return MFD_SUCCESS;
 }
 
-@end@ // m2c_processing_type eq 'b'
+@end@ // m2c_processing_type eq 'c'
 ########################################################################
 ##//####################################################################
 ##//@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
