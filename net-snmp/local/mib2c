@@ -132,7 +132,7 @@ $varlen = $varLengths[$varlen];
 #============================================
 foreach $vtable (@table_list) {
     foreach $ptable (@processtable) {
-	$variables{$ptable}{'processed'} = 
+	$variables{$ptable}{'processed'} .= 
 	    (eval "\"$variables{$ptable}{'code'}\"") . "\n\n";
     }
     $var_routines .= 
