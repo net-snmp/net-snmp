@@ -19,7 +19,7 @@ STARTTRAPD
 
 STARTAGENT
 
-CAPTURE "snmpget -r 0 $SNMP_FLAGS -v 1 localhost wrongcommunity system.sysUpTime.0"
+CAPTURE "snmpget -r 1 -t 5 $SNMP_FLAGS -v 1 localhost wrongcommunity system.sysUpTime.0"
 
 STOPAGENT
 
