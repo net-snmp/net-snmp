@@ -86,8 +86,8 @@ int		snmp_tcp_recv	(snmp_transport *t, void *buf, int size,
   } else {
     return -1;
   }
-  *opaque  = NULL;
-  *olength = 0;
+  *opaque  = t->data;
+  *olength = t->data_length;
   return rc;
 }
 
