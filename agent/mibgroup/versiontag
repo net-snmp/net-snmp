@@ -1,16 +1,12 @@
 #!/bin/sh
 
-QUOTEFILES="snmplib/snmp_version.c"
-SEDFILES="sedscript.in"
-COLONFILES="README FAQ"
-PERLFILES="perl/SNMP/SNMP.pm"
 if [ "x$CVSUSER" = "x" ] ; then
   CVSUSER=hardaker
 fi
 
 DOIT=
 
-if [ $2 = "reverse" -o $2 = "tag" -o $2 = "tar" ];
+if [ $2 = "tag" -o $2 = "tar" ];
 then
     VERSIONTAG="$1"
     VERSION=`echo $1 | sed 's/Ext-*//g;s/-/./g;'`
@@ -23,14 +19,6 @@ else
 
     VERSION="$1"
     VERSIONTAG=`echo Ext-$1 | sed 's/\./-/g;'`
-fi
-
-if [ $2 = "add" -o $2 = "reverse" ]; then
-  $DOIT perl -p -i.bak -e 's/VersionInfo(\s*=\s*[^"]*)"(.*)"/VersionInfo$1"'$VERSION'"/;' $QUOTEFILES
-  $DOIT perl -p -i.bak -e 's/Version: [\.0-9a-zA-Z]+/Version: '$VERSION'/;' $COLONFILES
-  $DOIT perl -p -i.bak -e 's#^s/VERSIONINFO/.*#s/VERSIONINFO/'$VERSION'/g#;' $SEDFILES
-  $DOIT perl -p -i.bak -e "s/VERSION = \'(.*)\'/VERSION = \'$VERSION\'/;" $PERLFILES
-  $DOIT cvs commit -m "- ($QUOTEFILES $SEDFILES): version tag ( $VERSION )" $QUOTEFILES $SEDFILES $COLONFILES $PERLFILES
 fi
 
 if [ $2 = "tag" ]; then
