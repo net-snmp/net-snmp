@@ -54,7 +54,7 @@ TESTING:
       Assuming you are going to build in the source directory :
 
       $ cd SOURCE-DIR
-      $ nsb-config -x -s .
+      $ nsb-config -x -p -s $PWD
 
   1) [This step is currently only for the 5.x versions]
 
@@ -185,7 +185,7 @@ RELEASING:
           [if you did this before above, do it again if you made any
            changes to the CVS tree since creating the last revision]
 
-          $ cvs2cl -r -f ChangeLog.add --no-wrap -S
+          $ cvs2cl -r -b -f ChangeLog.add --no-wrap -S
 
           Note that if you're on a branch, add the -F option to cvs2cl
           like:
