@@ -80,6 +80,11 @@ stamp-h: config.h.in config.status
 	./config.status
 	echo timestamp > ${srcdir}/stamp-h
 
+touchit:
+	touch configure config.h.in
+	touch config.h
+	touch stamp-h stamp-h.in
+
 Makefile: Makefile.in config.status
 	$(SHELL) ./config.status
 
