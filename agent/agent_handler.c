@@ -753,6 +753,25 @@ netsnmp_request_add_list_data(netsnmp_request_info *request,
     }
 }
 
+/** remove data from a request
+ *
+ * @param requset the netsnmp request info structure
+ *
+ * @param name this is the name of the previously added data
+ *
+ * @return 0 on successful find-and-delete, 1 otherwise.
+ *
+ */
+NETSNMP_INLINE int
+netsnmp_request_remove_list_data(netsnmp_request_info *request,
+                                 const char *name)
+{
+    if ((NULL == request) || (NULL ==request->parent_data))
+        return 1;
+
+    return netsnmp_remove_list_node(&request->parent_data, name);
+}
+
 /** extract data from a request that was added previously by a parent module
  *
  * @param request the netsnmp request info function
