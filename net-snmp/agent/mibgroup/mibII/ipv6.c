@@ -1,5 +1,5 @@
 /*
- *  IP MIB group implementation - ip.c
+ *  IP MIB group implementation - ipv6.c
  *
  */
 
@@ -127,7 +127,7 @@
 #include "mibincl.h"
 #include "kernel.h"
 
-#include "../../../snmplib/system.h"
+#include "system.h"
 
 #include "util_funcs.h"
 #include "auto_nlist.h"
@@ -136,8 +136,6 @@
 #include <sys/mib.h>
 #include <netinet/mib_kern.h>
 #endif /* MIB_IPCOUNTER_SYMBOL */
-
-/* #include "../common_header.h" */
 
 #include "ipv6.h"
 #include "interfaces.h"
@@ -361,7 +359,7 @@ header_ipv6_scan(
     for (i = from; i <= to; i++) {
 	newname[(int)vp->namelen] = i;
 	result = snmp_oid_compare(name, *length, newname, (int)vp->namelen + 1);
-	if ((exact && (result == 0)) || (!exact && (result < 0)))
+	if (((exact && result == 0) || (!exact && result < 0)) && if_getname(i))
 	    break;
     }
     if (to < i)
@@ -375,13 +373,24 @@ header_ipv6_scan(
 
 static struct if_nameindex *ifnames = NULL;
 
+#ifdef linux
+static void linux_if_freenameindex(struct if_nameindex *);
+static struct if_nameindex *linux_if_nameindex(void);
+#endif
+
 static int
 if_initialize(void)
 {
 #ifndef HAVE_IF_NAMEINDEX
     return -1;
 #else
+#ifndef linux
+    if (ifnames) if_freenameindex(ifnames);
     ifnames = if_nameindex();
+#else
+    if (ifnames) linux_if_freenameindex(ifnames);
+    ifnames = linux_if_nameindex();
+#endif
     if (!ifnames) {
 	ERROR_MSG("if_nameindex() failed");
 	return -1;
@@ -408,6 +417,26 @@ if_maxifindex(void)
 	    max = p->if_index;
     }
     return max;
+#endif
+}
+
+static int
+if_countifindex(void)
+{
+#ifndef HAVE_IF_NAMEINDEX
+    return -1;
+#else
+    struct if_nameindex *p;
+    int count = 0;
+
+    if (!ifnames) {
+	if (if_initialize() < 0)
+	    return -1;
+    }
+    for (p = ifnames; p && p->if_index; p++) {
+	count++;
+    }
+    return count;
 #endif
 }
 
@@ -452,6 +481,9 @@ if_getindex(const char *name)
 #endif
 }
 
+/*------------------------------------------------------------*/
+#ifndef linux
+/* KAME dependent part */
 static int
 if_getifnet(int idx, struct ifnet *result)
 {
@@ -501,9 +533,6 @@ if_getifmibdata(int idx, struct ifmibdata *result)
 #endif
 #endif /*HAVE_NET_IF_MIB_H*/
 
-/*------------------------------------------------------------*/
-
-/* IPv6 stack dependent part */
 #ifdef __KAME__
 #define IPV6_FORWARDING_SYMBOL	"ip6_forwarding"
 #define IPV6_DEFHLIM_SYMBOL	"ip6_defhlim"
@@ -592,7 +621,7 @@ var_ipv6(
 	 * not really the right answer... we must count IPv6 capable
 	 * interfaces only.
 	 */
-	long_return = if_maxifindex();
+	long_return = if_countifindex();
 	if (long_return < 0)
 	    break;
 	return (u_char *)&long_return;
@@ -1584,4 +1613,306 @@ skip:
     ERROR_MSG("");
     return NULL;
 }
+
 #endif /*TCP6*/
+
+#else /* !linux / linux */
+
+/* Linux dependent part */
+static unsigned long linux_read_ip6_stat_ulong(const char *file){
+  FILE *f;
+  unsigned long value;
+  f = fopen(file, "r");
+  if (!f) return 0;
+  if (fscanf(f, "%lu", &value) != 1){
+    fclose(f);
+    return 0;
+  }
+  fclose(f);
+  return value;
+}
+
+void linux_read_ip6_stat(struct ip6_mib *ip6stat)
+{
+  if (!ip6stat)
+    return;
+  memset(ip6stat, 0, sizeof(*ip6stat));
+  ip6stat->Ipv6Forwarding = linux_read_ip6_stat_ulong("/proc/sys/net/ipv6/conf/all/forwarding");
+  ip6stat->Ipv6DefaultHopLimit = linux_read_ip6_stat_ulong("/proc/sys/net/ipv6/conf/default/hop_limit");
+}
+
+u_char *
+var_ipv6(
+    register struct variable *vp,
+    oid *name,
+    size_t *length,
+    int exact,
+    size_t *var_len,
+    WriteMethod **write_method)
+{
+    int i;
+    static struct ip6_mib ip6stat;
+
+    if (header_ipv6(vp, name, length, exact, var_len, write_method)
+	    == MATCH_FAILED) {
+	return NULL;
+    }
+    linux_read_ip6_stat(&ip6stat);
+
+    switch(vp->magic){
+    case IPV6DEFAULTHOPLIMIT:
+      return (u_char *)&ip6stat.Ipv6DefaultHopLimit;
+    case IPV6FORWARDING:
+      return (u_char *)&ip6stat.Ipv6Forwarding;
+    case IPV6INTERFACES:
+#ifdef HAVE_IF_NAMEINDEX
+      long_return = if_countifindex();
+      if (long_return < 0)
+	break;
+      return (u_char *)&long_return;
+#endif
+      break;
+    default:
+      DEBUGMSGTL(("snmpd", "unknonw sub-id %d in var_ipv6\n", vp->magic));
+    }
+    return NULL;
+}
+
+u_char *
+var_ifv6Entry(
+    register struct variable *vp,
+    oid *name,
+    size_t *length,
+    int exact,
+    size_t *var_len,
+    WriteMethod **write_method)
+{
+#ifndef HAVE_IF_NAMEINDEX
+    return NULL;
+#else
+    int interface;
+    int max;
+    char *p;
+    struct ifreq ifr;
+    int s;
+
+    max = if_maxifindex();
+    if (max < 0)
+	return NULL;
+
+    if (header_ipv6_scan(vp, name, length, exact, var_len, write_method, 1, max)
+            == MATCH_FAILED) {
+	return NULL;
+    }
+    interface = name[*length - 1];
+    DEBUGP("interface: %d(%s)\n", interface, if_getname(interface));
+    if (interface > max)
+	return NULL;
+
+    switch (vp->magic) {
+    case IPV6IFDESCR:
+	p = if_getname(interface);
+	if (p) {
+	    *var_len = strlen(p);
+	    return p;
+	}
+	break;
+    case IPV6IFLOWLAYER:
+      /* should check if type, this is a hard one... */
+      *var_len = nullOidLen;
+      return (u_char *)nullOid;
+    case IPV6IFEFFECTMTU:
+      {
+	p = if_getname(interface);
+	if (!p) break;
+        memset(&ifr, 0, sizeof(ifr));
+        ifr.ifr_addr.sa_family = AF_INET6;
+        strncpy(ifr.ifr_name, p, sizeof(ifr.ifr_name));
+        if ((s = socket(ifr.ifr_addr.sa_family, SOCK_DGRAM, 0)) < 0)
+	  break;
+        if (ioctl(s, SIOCGIFMTU, (caddr_t)&ifr) < 0) {
+	  close(s);
+	  break;
+        }
+	long_return = ifr.ifr_mtu;
+	close(s);
+	return (u_char *)&long_return;
+      }
+    case IPV6IFPHYSADDRESS:
+      {
+	static struct ifreq buf;
+	int ok = 0;
+	p = if_getname(interface);
+	if (!p) break;
+	memset(&ifr, 0, sizeof(ifr));
+	ifr.ifr_addr.sa_family = AF_INET6;
+	strncpy(ifr.ifr_name, p, sizeof(ifr.ifr_name));
+	if ((s = socket(ifr.ifr_addr.sa_family, SOCK_DGRAM, 0)) < 0)
+	  break;
+	if (ioctl(s, SIOCGIFHWADDR, &ifr) < 0){
+	  memset(buf.ifr_hwaddr.sa_data, 0, sizeof(buf.ifr_hwaddr.sa_data));
+	  *var_len = 0;
+	}
+	else{
+	  memcpy(buf.ifr_hwaddr.sa_data, ifr.ifr_hwaddr.sa_data, 6);
+	  *var_len = (buf.ifr_hwaddr.sa_data[0] |
+		      buf.ifr_hwaddr.sa_data[1] |
+		      buf.ifr_hwaddr.sa_data[2] |
+		      buf.ifr_hwaddr.sa_data[3] |
+		      buf.ifr_hwaddr.sa_data[4] |
+		      buf.ifr_hwaddr.sa_data[5]) ? 6 : 0;
+	  ok = 1;
+	}
+	close(s);
+	return (ok ? ((u_char *)&buf.ifr_hwaddr.sa_data) : NULL);
+      }
+    case IPV6IFADMSTATUS:
+    case IPV6IFOPERSTATUS:
+      {
+	int flag = 0;
+	p = if_getname(interface);
+	if (!p) break;
+	memset(&ifr, 0, sizeof(ifr));
+	ifr.ifr_addr.sa_family = AF_INET6;
+	strncpy(ifr.ifr_name, p, sizeof(ifr.ifr_name));
+	if ((s = socket(ifr.ifr_addr.sa_family, SOCK_DGRAM, 0)) < 0)
+	  break;
+	if (ioctl(s, SIOCGIFFLAGS, &ifr) < 0){
+	  close(s);
+	  break;
+	}
+	switch(vp->magic){
+	case IPV6IFADMSTATUS:
+	  flag = IFF_RUNNING;
+	  break;
+	case IPV6IFOPERSTATUS:
+	  flag = IFF_UP;
+	  break;
+	}
+	long_return = (ifr.ifr_flags & flag) ? 1 : 2;
+	return (u_char *)&long_return;
+      }
+    }
+    return NULL;
+#endif
+}
+
+u_char *
+var_icmpv6Entry(
+    register struct variable *vp,
+    oid *name,
+    size_t *length,
+    int exact,
+    size_t *var_len,
+    WriteMethod **write_method)
+{
+  return NULL;
+}
+
+u_char *
+var_udp6(
+    register struct variable *vp,
+    oid *name,
+    size_t *length,
+    int exact,
+    size_t *var_len,
+    WriteMethod **write_method)
+{
+  return NULL;
+}
+
+u_char *
+var_tcp6(
+    register struct variable *vp,
+    oid *name,
+    size_t *length,
+    int exact,
+    size_t *var_len,
+    WriteMethod **write_method)
+{
+  return NULL;
+}
+
+/* misc functions (against broken kernels ) */
+void linux_if_freenameindex(struct if_nameindex *ifndx){
+  int i;
+  if (!ifndx) return;
+  for (i=1; ifndx[i].if_index; i++){
+    free(ifndx[i].if_name);
+  }
+  free(ifndx);
+}
+
+#define linux_freeinternalnameindex(ifni, max)  { \
+  int i; 					\
+  for (i=1; i<=max; i++){			\
+    if (ifni[i].if_name) free(ifni[i].if_name);	\
+  }						\
+  free(ifni);					\
+}
+
+#define LINUX_PROC_NET_IFINET6 "/proc/net/if_inet6"
+struct if_nameindex *linux_if_nameindex(void){
+  FILE *f;
+  unsigned long if_index;
+  char if_name[256];
+  struct if_nameindex *ifndx = NULL, *iflist = NULL, *new;
+  int i,j;
+  int maxidx, if_count = 0;
+  
+  f = fopen(LINUX_PROC_NET_IFINET6, "r");
+  if (f){
+    if_count = 0;
+    maxidx = -1;
+    while (!feof(f)){
+      if (fscanf(f, "%*s %lx %*x %*x %*x %s",
+		 &if_index, if_name) != 2)
+	continue;
+      if (if_index == 0)
+	continue;
+      if_name[sizeof(if_name)-1] = '\0';
+      if (maxidx < 0 || maxidx < if_index){
+	
+        new = realloc(iflist, (sizeof(struct if_nameindex)) * (if_index+2));
+	if (!new){
+	  linux_freeinternalnameindex(iflist, if_index);
+	  if_count = 0;
+	  iflist = NULL;
+	  break;
+	}
+	iflist = new;
+	for (i=maxidx+1; i<=if_index; i++)
+	  memset(&iflist[i], 0, sizeof(struct if_nameindex));
+	memset(&iflist[if_index+1], 0, sizeof(struct if_nameindex));
+	maxidx = if_index;
+      }
+      if (iflist[if_index].if_index == 0){
+	if_count++;
+	iflist[if_index].if_index = if_index;
+	iflist[if_index].if_name = strdup(if_name);
+	if (!iflist[if_index].if_name){
+	  linux_freeinternalnameindex(iflist, if_index);
+	  if_count = 0;
+	  iflist = NULL;
+	  break;
+	}
+      }
+    }
+    fclose(f);
+    if (if_count > 0){
+      ifndx = malloc(sizeof(struct if_nameindex) * (if_count + 1));
+      j = 0;
+      for (i=1; i<=maxidx; i++){
+	if(iflist[i].if_index > 0 && *iflist[i].if_name){
+	  memcpy(&ifndx[j++], &iflist[i], sizeof(struct if_nameindex));
+	}
+      }
+      ifndx[j].if_index = 0;
+      ifndx[j].if_name = NULL;
+    }
+    free(iflist);
+  }
+  return (ifndx);
+}
+
+#endif /* linux */

@@ -6,6 +6,13 @@
 #ifndef _MIBGROUP_IPV6_H
 #define _MIBGROUP_IPV6_H
 
+#ifdef linux
+struct ip6_mib{
+	unsigned long	Ipv6DefaultHopLimit;
+	unsigned long	Ipv6Forwarding;
+};
+#endif
+
 config_require(mibII/interfaces mibII/at mibII/var_route mibII/route_write)
 config_add_mib(IPV6-ICMP-MIB:IPV6-MIB:IPV6-TCP-MIB:IPV6-UDP-MIB)
 config_arch_require(solaris2, kernel_sunos5)
