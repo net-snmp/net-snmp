@@ -35,11 +35,11 @@
 #endif
 #include <stdio.h>
 #include <ctype.h>
+#if HAVE_STRING_H
+#include <string.h>
+#endif
 #if HAVE_STDLIB_H
 #include <stdlib.h>
-#endif
-#if STDC_HEADERS
-#include <string.h>
 #endif
 
 #if HAVE_DMALLOC_H

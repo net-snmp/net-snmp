@@ -5,7 +5,7 @@
 
 #include <config.h>
 #include <sys/types.h>
-#if STDC_HEADERS
+#if HAVE_STDLIB_H
 #include <stdlib.h>
 #endif
 #if HAVE_NETINET_IN_H
