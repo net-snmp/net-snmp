@@ -9,12 +9,11 @@ HEADER SNMPv3 get using templateSHA/SHA of system.sysUpTime.0
 #
 
 # standard V3 configuration for templateSHA user
-. ./Sv3config
 . ./Sv3configsha
 
 STARTAGENT
 
-CAPTURE "snmpget $SNMP_FLAGS -v 3 -a SHA -A templateSHA_test_pass_auth -l anp -u templateSHA -n xxx localhost system.sysUpTime.0"
+CAPTURE "snmpget $SNMP_FLAGS -v 3 -a SHA -A initial_test_pass_auth -l anp -u initial -n xxx localhost system.sysUpTime.0"
 
 STOPAGENT
 
