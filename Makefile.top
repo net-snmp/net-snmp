@@ -51,11 +51,22 @@ EXEEXT		= @EXEEXT@
 
 # Misc Compiling Stuff
 CC	        = @CC@
-# version number is prefixed by a 0 for a better shared library version number
+
+# ok, use libtool versioning, but not quite the way they recommend.
+# The shared library version number will be:
 #
-# ok, use libtool proper versioning:
-# (This should sorta match releases, but current is off by 1.
-#   CURRENT.AGE.REVISION; eg release 5.1.2 = 6.1.2 )
+#   (CURRENT-AGE).AGE.REVISION
+#
+# *** THIS MEANS YOU MAY NEED TO DECREMENT CURRENT FOR A NEW RELEASE ***
+#
+# examples:
+#   C.A.R   library name
+#  -------  ---------------
+#   5.0.9   libxxx.so.5.0.9
+#   6.1.2   libxxx.so.5.1.2
+#   7.2.8   libxxx.so.5.2.8
+#   6.0.0   libxxx.so.6.0.0
+# 
 LIBCURRENT  = 6
 LIBAGE      = 1
 LIBREVISION = 2
