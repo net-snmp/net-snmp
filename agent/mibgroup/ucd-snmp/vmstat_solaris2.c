@@ -418,7 +418,7 @@ static void update_stats(unsigned int registrationNumber, void *clientarg)
     }
 
   /* Make the current one the first one and move the whole thing one place down */
-  memmove(&snapshot[1], &snapshot[0], (size_t)(((char *)&snapshot[POLL_VALUES - 1]) - ((char *)&snapshot[0])));
+  memmove(&snapshot[1], &snapshot[0], (size_t)(((char *)&snapshot[POLL_VALUES]) - ((char *)&snapshot[0])));
 
   /* Erase the current one */
   memset(&snapshot[0], 0, sizeof snapshot[0]);
