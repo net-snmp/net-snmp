@@ -4,6 +4,17 @@
  *
  */
 
+/* Portions of this file are subject to the following copyright(s).  See
+ * the Net-SNMP's COPYING file for more details and other copyrights
+ * that may apply:
+ */
+/*
+ * Portions of this file are copyrighted by:
+ * Copyright © 2003 Sun Microsystems, Inc. All rights reserved.
+ * Use is subject to license terms specified in the COPYING file
+ * distributed with the Net-SNMP package.
+ */
+
 #include <net-snmp/net-snmp-config.h>
 
 #if HAVE_STRING_H
@@ -313,32 +324,45 @@ var_tcp(struct variable *vp,
     switch (vp->magic) {
 #ifdef USES_SNMP_DESIGNED_TCPSTAT
     case TCPRTOALGORITHM:
-        return (u_char *) & tcpstat.tcpRtoAlgorithm;
+	long_return = tcpstat.tcpRtoAlgorithm;
+	return (u_char *) & long_return;
     case TCPRTOMIN:
-        return (u_char *) & tcpstat.tcpRtoMin;
+	long_return = tcpstat.tcpRtoMin;
+	return (u_char *) & long_return;
     case TCPRTOMAX:
-        return (u_char *) & tcpstat.tcpRtoMax;
+	long_return = tcpstat.tcpRtoMax;
+	return (u_char *) & long_return;
     case TCPMAXCONN:
-        return (u_char *) & tcpstat.tcpMaxConn;
+	long_return = tcpstat.tcpMaxConn;
+	return (u_char *) & long_return;
     case TCPACTIVEOPENS:
-        return (u_char *) & tcpstat.tcpActiveOpens;
+	long_return = tcpstat.tcpActiveOpens;
+	return (u_char *) & long_return;
     case TCPPASSIVEOPENS:
-        return (u_char *) & tcpstat.tcpPassiveOpens;
+	long_return = tcpstat.tcpPassiveOpens;
+	return (u_char *) & long_return;
     case TCPATTEMPTFAILS:
-        return (u_char *) & tcpstat.tcpAttemptFails;
+	long_return = tcpstat.tcpAttemptFails;
+	return (u_char *) & long_return;
     case TCPESTABRESETS:
-        return (u_char *) & tcpstat.tcpEstabResets;
+	long_return = tcpstat.tcpEstabResets;
+	return (u_char *) & long_return;
     case TCPCURRESTAB:
-        return (u_char *) & tcpstat.tcpCurrEstab;
+	long_return = tcpstat.tcpCurrEstab;
+	return (u_char *) & long_return;
     case TCPINSEGS:
-        return (u_char *) & tcpstat.tcpInSegs;
+	long_return = tcpstat.tcpInSegs;
+	return (u_char *) & long_return;
     case TCPOUTSEGS:
-        return (u_char *) & tcpstat.tcpOutSegs;
+	long_return = tcpstat.tcpOutSegs;
+	return (u_char *) & long_return;
     case TCPRETRANSSEGS:
-        return (u_char *) & tcpstat.tcpRetransSegs;
+	long_return = tcpstat.tcpRetransSegs;
+	return (u_char *) & long_return;
     case TCPINERRS:
 #ifdef solaris2
-        return (u_char *) & ret_value;
+	long_return = ret_value;
+	return (u_char *) & long_return;
 #elif defined(linux)
         if (tcpstat.tcpInErrsValid)
             return (u_char *) & tcpstat.tcpInErrs;
@@ -352,7 +376,8 @@ var_tcp(struct variable *vp,
             return (u_char *) & tcpstat.tcpOutRsts;
         return NULL;
 #else
-        return NULL;
+	long_return = tcpstat.tcpOutRsts;
+	return (u_char *) & long_return;
 #endif
 #endif
 
