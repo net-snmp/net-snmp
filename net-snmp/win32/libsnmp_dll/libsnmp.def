@@ -86,8 +86,11 @@ EXPORTS
 	snmp_timeout
 	snmp_set_do_debugging
 	snmp_get_do_debugging
+	snmp_disable_stderrlog
+	snmp_enable_syslog
+	snmp_enable_filelog
 	snmp_log        
-	snmp_log_perror 
+	snmp_log_perror
 	DEBUGP
 	snmp_perror     
 	snmp_sess_perror        
@@ -170,6 +173,8 @@ EXPORTS
 	register_mib_handlers
 	init_snmpv3
 	usm_set_reportErrorOnUnknownID
+	get_default_authtype
+	get_default_privtype
 	register_config_handler
 	read_configs
 	debugmsg_oid

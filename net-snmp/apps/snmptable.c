@@ -396,7 +396,7 @@ void get_table_entries( struct snmp_session *ss )
 	  col++;
 	  name[rootlen] = column[col].subid;
 	  if (localdebug) sprint_variable(string_buf, vars->name, vars->name_length, vars);
-	  if( (vars->name_length < name_length) || (vars->name[rootlen] != column[col].subid) ||
+	  if( (vars->name_length < name_length) || ((int)vars->name[rootlen] != column[col].subid) ||
 	      memcmp(name, vars->name, name_length * sizeof(oid)) != 0) {
 	    /* not part of this subtree */
 	    if (localdebug) printf("%s => ignored\n", string_buf);
