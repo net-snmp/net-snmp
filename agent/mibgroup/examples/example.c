@@ -613,8 +613,8 @@ write_exampletrap2(int	action,
     oid objid_snmptrap[] = { 1,3,6,1,6,3,1,1,4,1,0}; /* snmpTrapOID.0 */
     oid demo_trap[] = { 1,3,6,1,4,1,2021,13,990}; /*demo-trap */
     oid example_string_oid[] = { 1,3,6,1,4,1,2021,254,1,0 };
-    static struct variable_list var_trap;
-    static struct variable_list var_obj;
+    static netsnmp_variable_list var_trap;
+    static netsnmp_variable_list var_obj;
     
     DEBUGMSGTL(("example","write_exampletrap2 entered: action=%d\n",action));
     switch ( action ) {

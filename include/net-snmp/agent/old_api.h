@@ -9,7 +9,7 @@ typedef struct netsnmp_old_api_info_s {
    size_t numvars;
 
    /* old stuff */
-   struct snmp_session *ss;
+   netsnmp_session *ss;
    int flags;
 } netsnmp_old_api_info;
 
@@ -27,7 +27,7 @@ int netsnmp_register_old_api(const char *moduleName,
                      int priority,
                      int range_subid,
                      oid range_ubound,
-                     struct snmp_session *ss,
+                     netsnmp_session *ss,
                      const char *context,
                      int timeout,
                      int flags);

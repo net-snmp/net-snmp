@@ -101,7 +101,7 @@ void init_snmpNotifyFilterTable(void) {
  */
 int
 snmpNotifyFilterTable_add(struct snmpNotifyFilterTable_data *thedata) {
-  struct variable_list *vars = NULL;
+  netsnmp_variable_list *vars = NULL;
 
 
   DEBUGMSGTL(("snmpNotifyFilterTable", "adding data...  "));
@@ -501,7 +501,7 @@ write_snmpNotifyFilterRowStatus(int      action,
   size_t newlen=name_len - (sizeof(snmpNotifyFilterTable_variables_oid)/sizeof(oid) + 3 - 1);
   static int old_value;
   int set_value;
-  static struct variable_list *vars, *vp;
+  static netsnmp_variable_list *vars, *vp;
   struct header_complex_index *hciptr;
 
 

@@ -181,7 +181,7 @@ debugmsg_oid(const char *token, const oid *theoid, size_t len)
 }
 
 void
-debugmsg_var(const char *token, struct variable_list *var)
+debugmsg_var(const char *token, netsnmp_variable_list *var)
 {
   u_char *buf = NULL;
   size_t buf_len = 0, out_len = 0;

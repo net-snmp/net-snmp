@@ -119,8 +119,8 @@ but again, -C should be forgotten.
 
 void usage(void);
 void get_field_names (char *);
-void get_table_entries( struct snmp_session *ss );
-void getbulk_table_entries( struct snmp_session *ss );
+void get_table_entries( netsnmp_session *ss );
+void getbulk_table_entries( netsnmp_session *ss );
 void print_table (void);
 
 static void optProc(int argc, char *const *argv, int opt)
@@ -205,7 +205,7 @@ reverse_fields(void)
 
 int main(int argc, char *argv[])
 {
-  struct snmp_session session, *ss;
+  netsnmp_session session, *ss;
   char *tblname;
 
   setvbuf(stdout, NULL, _IOLBF, 1024);
@@ -254,7 +254,7 @@ int main(int argc, char *argv[])
   SOCK_STARTUP;
   ss = snmp_open(&session);
   if (ss == NULL){
-    /* diagnose snmp_open errors with the input struct snmp_session pointer */
+    /* diagnose snmp_open errors with the input netsnmp_session pointer */
     snmp_sess_perror("snmptable", &session);
     SOCK_CLEANUP;
     exit(1);
@@ -447,11 +447,11 @@ void get_field_names( char* tblname )
   }
 }
 
-void get_table_entries( struct snmp_session *ss )
+void get_table_entries( netsnmp_session *ss )
 {
   int running = 1;
-  struct snmp_pdu *pdu, *response;
-  struct variable_list *vars;
+  netsnmp_pdu *pdu, *response;
+  netsnmp_variable_list *vars;
   int   count;
   int   status;
   int   i;
@@ -625,11 +625,11 @@ void get_table_entries( struct snmp_session *ss )
   }
 }
 
-void getbulk_table_entries( struct snmp_session *ss )
+void getbulk_table_entries( netsnmp_session *ss )
 {
   int running = 1;
-  struct snmp_pdu *pdu, *response;
-  struct variable_list *vars, *last_var;
+  netsnmp_pdu *pdu, *response;
+  netsnmp_variable_list *vars, *last_var;
   int   count;
   int   status;
   int   i;

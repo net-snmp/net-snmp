@@ -531,7 +531,7 @@ vacm_in_view_callback(int majorID, int minorID, void *serverarg,
  * Debug output listed as follows:
  *	<securityName> <groupName> <viewName> <viewType>
  */
-int vacm_in_view (struct snmp_pdu *pdu,
+int vacm_in_view (netsnmp_pdu *pdu,
 		  oid *name,
 		  size_t namelen)
 {

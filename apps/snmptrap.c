@@ -93,9 +93,9 @@ void usage(void)
 }
 
 int snmp_input(int operation,
-	       struct snmp_session *session,
+	       netsnmp_session *session,
 	       int reqid,
-	       struct snmp_pdu *pdu,
+	       netsnmp_pdu *pdu,
 	       void *magic)
 {
   return 1;
@@ -141,8 +141,8 @@ static void optProc(int argc, char *const *argv, int opt)
 
 int main(int argc, char *argv[])
 {
-    struct snmp_session session, *ss;
-    struct snmp_pdu *pdu, *response;
+    netsnmp_session session, *ss;
+    netsnmp_pdu *pdu, *response;
     in_addr_t *pdu_in_addr_t;
     oid name[MAX_OID_LEN];
     size_t name_length;
@@ -221,7 +221,7 @@ int main(int argc, char *argv[])
 
     ss = snmp_open(&session);
     if (ss == NULL){
-      /* diagnose snmp_open errors with the input struct snmp_session pointer */
+      /* diagnose snmp_open errors with the input netsnmp_session pointer */
         snmp_sess_perror("snmptrap", &session);
         SOCK_CLEANUP;
         exit(1);

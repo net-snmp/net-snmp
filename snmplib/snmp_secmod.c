@@ -114,7 +114,7 @@ find_sec_mod(int secmod) {
 
 static int
 set_default_secmod(int major, int minor, void *serverarg, void *clientarg) {
-    struct snmp_session *sess = (struct snmp_session *) serverarg;
+    netsnmp_session *sess = (netsnmp_session *) serverarg;
     char *cptr;
     int model;
     

@@ -44,6 +44,7 @@ SOFTWARE.
 ******************************************************************/
 
 struct variable_list;
+typedef struct variable_list netsnmp_variable_list;
 struct timeval;
 struct netsnmp_transport_s;
 
@@ -51,7 +52,7 @@ struct netsnmp_transport_s;
 #define USM_PRIV_KU_LEN     32
 
 
-struct snmp_pdu {
+typedef struct snmp_pdu {
 
 	/*
 	 * Protocol-version independent fields
@@ -83,7 +84,7 @@ struct snmp_pdu {
     const oid *tDomain;
     size_t tDomainLen;
 
-    struct variable_list *variables;
+    netsnmp_variable_list *variables;
 
 
 	/*
@@ -121,10 +122,13 @@ struct snmp_pdu {
     int	    range_subid;
 
     void * securityStateRef;
-};
+} netsnmp_pdu;
 
 struct snmp_session;
-typedef int (*snmp_callback) (int, struct snmp_session *, int, struct snmp_pdu *, void *);
+typedef struct snmp_session netsnmp_session;
+    
+typedef int (*snmp_callback) (int, netsnmp_session *, int, netsnmp_pdu *, void *);
+typedef int (*netsnmp_callback) (int, netsnmp_session *, int, netsnmp_pdu *, void *);
 
 struct snmp_session {
 	/*
@@ -142,7 +146,7 @@ struct snmp_session {
     u_short local_port; /* My UDP port number, 0 for default, picked randomly */
     /* Authentication function or NULL if null authentication is used */
     u_char    *(*authenticator) (u_char *, size_t *, u_char *, size_t);
-    snmp_callback callback; /* Function to interpret incoming data */
+    netsnmp_callback callback; /* Function to interpret incoming data */
     /* Pointer to data that the callback function may consider important */
     void    *callback_magic;
 
@@ -192,20 +196,20 @@ struct snmp_session {
  * A list of all the outstanding requests for a particular session.
  */
 #ifdef SNMP_NEED_REQUEST_LIST
-struct request_list {
+typedef struct request_list {
     struct request_list *next_request;
     long  request_id;	/* request id */
     long  message_id;	/* message id */
-    snmp_callback callback; /* user callback per request (NULL if unused) */
+    netsnmp_callback callback; /* user callback per request (NULL if unused) */
     void   *cb_data;   /* user callback data per request (NULL if unused) */
     int	    retries;	/* Number of retries */
     u_long timeout;	/* length to wait for timeout */
     struct timeval time; /* Time this request was made */
     struct timeval expire;  /* time this request is due to expire */
     struct  snmp_session *session;
-    struct snmp_pdu *pdu;   /* The pdu for this request
+    netsnmp_pdu *pdu;   /* The pdu for this request
 			       (saved so it can be retransmitted */
-};
+} netsnmp_request_list;
 #endif /* SNMP_NEED_REQUEST_LIST */
 
 /*
@@ -390,8 +394,8 @@ struct variable_list {
 
 
 /*
- * struct snmp_session *snmp_open(session)
- *	struct snmp_session *session;
+ * netsnmp_session *snmp_open(session)
+ *	netsnmp_session *session;
  *
  * Sets up the session with the snmp_session information provided
  * by the user.  Then opens and binds the necessary UDP port.
@@ -399,11 +403,11 @@ struct variable_list {
  * the pointer passed to snmp_open()).  On any error, NULL is returned
  * and snmp_errno is set to the appropriate error code.
  */
-struct snmp_session *snmp_open (struct snmp_session *);
+netsnmp_session *snmp_open (netsnmp_session *);
 
 /*
  * int snmp_close(session)
- *     struct snmp_session *session;
+ *     netsnmp_session *session;
  *
  * Close the input session.  Frees all data allocated for the session,
  * dequeues any pending requests, and closes any sockets allocated for
@@ -411,14 +415,14 @@ struct snmp_session *snmp_open (struct snmp_session *);
  *
  * snmp_close_sessions() does the same thing for all open sessions
  */
-int snmp_close (struct snmp_session *);
+int snmp_close (netsnmp_session *);
 int snmp_close_sessions (void);
 
 
 /*
  * int snmp_send(session, pdu)
- *     struct snmp_session *session;
- *     struct snmp_pdu	*pdu;
+ *     netsnmp_session *session;
+ *     netsnmp_pdu	*pdu;
  *
  * Sends the input pdu on the session after calling snmp_build to create
  * a serialized packet.  If necessary, set some of the pdu data from the
@@ -428,13 +432,13 @@ int snmp_close_sessions (void);
  * On any error, 0 is returned.
  * The pdu is freed by snmp_send() unless a failure occured.
  */
-int snmp_send (struct snmp_session *, struct snmp_pdu *);
+int snmp_send (netsnmp_session *, netsnmp_pdu *);
 
 /*
  * int snmp_async_send(session, pdu, callback, cb_data)
- *     struct snmp_session *session;
- *     struct snmp_pdu	*pdu;
- *     snmp_callback callback;
+ *     netsnmp_session *session;
+ *     netsnmp_pdu	*pdu;
+ *     netsnmp_callback callback;
  *     void   *cb_data;
  *
  * Sends the input pdu on the session after calling snmp_build to create
@@ -446,8 +450,8 @@ int snmp_send (struct snmp_session *, struct snmp_pdu *);
  * On any error, 0 is returned.
  * The pdu is freed by snmp_send() unless a failure occured.
  */
-int snmp_async_send (struct snmp_session *, struct snmp_pdu *, 
-                         snmp_callback, void *);
+int snmp_async_send (netsnmp_session *, netsnmp_pdu *, 
+                         netsnmp_callback, void *);
 
 
 /*
@@ -467,15 +471,15 @@ void snmp_read (fd_set *);
 /*
  * void
  * snmp_free_pdu(pdu)
- *     struct snmp_pdu *pdu;
+ *     netsnmp_pdu *pdu;
  *
  * Frees the pdu and any malloc'd data associated with it.
  */
-void snmp_free_pdu (struct snmp_pdu *);
+void snmp_free_pdu (netsnmp_pdu *);
 
-void snmp_free_var (struct variable_list *); /* frees just this one */
+void snmp_free_var (netsnmp_variable_list *); /* frees just this one */
 
-void snmp_free_varbind(struct variable_list *var); /* frees all in list */
+void snmp_free_varbind(netsnmp_variable_list *var); /* frees all in list */
 
 /*
  * int snmp_select_info(numfds, fdset, timeout, block)
@@ -544,9 +548,9 @@ void snmp_timeout (void);
  *
  * int callback(operation, session, reqid, pdu, magic)
  * int operation;
- * struct snmp_session *session;    The session authenticated under.
+ * netsnmp_session *session;    The session authenticated under.
  * int reqid;			    The request id of this pdu (0 for TRAP)
- * struct snmp_pdu *pdu;	    The pdu information.
+ * netsnmp_pdu *pdu;	    The pdu information.
  * void *magic			    A link to the data for this routine.
  *
  * Returns 1 if request was successful, 0 if it should be kept pending.
@@ -554,11 +558,11 @@ void snmp_timeout (void);
  * Operations are defined below:
  */
 
-#define SNMP_CALLBACK_OP_RECEIVED_MESSAGE	1
-#define SNMP_CALLBACK_OP_TIMED_OUT		2
-#define SNMP_CALLBACK_OP_SEND_FAILED		3
-#define SNMP_CALLBACK_OP_CONNECT		4
-#define SNMP_CALLBACK_OP_DISCONNECT		5
+#define NETSNMP_CALLBACK_OP_RECEIVED_MESSAGE	1
+#define NETSNMP_CALLBACK_OP_TIMED_OUT		2
+#define NETSNMP_CALLBACK_OP_SEND_FAILED		3
+#define NETSNMP_CALLBACK_OP_CONNECT		4
+#define NETSNMP_CALLBACK_OP_DISCONNECT		5
 
 long snmp_get_next_msgid(void);
 long snmp_get_next_reqid(void);
@@ -569,65 +573,65 @@ int snmp_oid_compare (const oid *, size_t, const oid *, size_t);
 int snmp_oid_ncompare(const oid *, size_t, const oid *, size_t, size_t);
 int snmp_oidtree_compare (const oid *, size_t, const oid *, size_t);
 void init_snmp (const char *);
-u_char *snmp_pdu_build (struct snmp_pdu *, u_char *, size_t *);
+u_char *snmp_pdu_build (netsnmp_pdu *, u_char *, size_t *);
 #ifdef USE_REVERSE_ASNENCODING
-u_char *snmp_pdu_rbuild (struct snmp_pdu *, u_char *, size_t *);
+u_char *snmp_pdu_rbuild (netsnmp_pdu *, u_char *, size_t *);
 #endif
-int snmpv3_parse(struct snmp_pdu *, u_char *, size_t *, u_char  **, struct snmp_session *);
-int snmpv3_dparse(struct snmp_pdu *, u_char *, size_t *, u_char  **, int);
-int snmpv3_packet_build(struct snmp_session *, struct snmp_pdu *pdu, u_char *packet, size_t *out_length, u_char *pdu_data, size_t pdu_data_len);
-int snmpv3_packet_rbuild(struct snmp_session *, struct snmp_pdu *pdu, u_char *packet, size_t *out_length, u_char *pdu_data, size_t pdu_data_len);
-int snmpv3_make_report(struct snmp_pdu *pdu, int error);
-int snmpv3_get_report_type(struct snmp_pdu *pdu);
-int snmp_pdu_parse(struct snmp_pdu *pdu, u_char *data, size_t *length);
-int snmp_pdu_dparse(struct snmp_pdu *pdu, u_char *data, size_t *length, int);
-u_char* snmpv3_scopedPDU_parse(struct snmp_pdu *pdu, u_char *cp, size_t *length);
-u_char* snmpv3_scopedPDU_dparse(struct snmp_pdu *pdu, u_char *cp, size_t *length, int);
+int snmpv3_parse(netsnmp_pdu *, u_char *, size_t *, u_char  **, netsnmp_session *);
+int snmpv3_dparse(netsnmp_pdu *, u_char *, size_t *, u_char  **, int);
+int snmpv3_packet_build(netsnmp_session *, netsnmp_pdu *pdu, u_char *packet, size_t *out_length, u_char *pdu_data, size_t pdu_data_len);
+int snmpv3_packet_rbuild(netsnmp_session *, netsnmp_pdu *pdu, u_char *packet, size_t *out_length, u_char *pdu_data, size_t pdu_data_len);
+int snmpv3_make_report(netsnmp_pdu *pdu, int error);
+int snmpv3_get_report_type(netsnmp_pdu *pdu);
+int snmp_pdu_parse(netsnmp_pdu *pdu, u_char *data, size_t *length);
+int snmp_pdu_dparse(netsnmp_pdu *pdu, u_char *data, size_t *length, int);
+u_char* snmpv3_scopedPDU_parse(netsnmp_pdu *pdu, u_char *cp, size_t *length);
+u_char* snmpv3_scopedPDU_dparse(netsnmp_pdu *pdu, u_char *cp, size_t *length, int);
 void snmp_store(const char *type);
 void snmp_shutdown(const char *type);
-struct variable_list *snmp_pdu_add_variable (struct snmp_pdu *, oid *, size_t, u_char, u_char *, size_t);
-struct variable_list *snmp_varlist_add_variable(struct variable_list **varlist,
+netsnmp_variable_list *snmp_pdu_add_variable (netsnmp_pdu *, oid *, size_t, u_char, u_char *, size_t);
+netsnmp_variable_list *snmp_varlist_add_variable(netsnmp_variable_list **varlist,
 	oid *name, size_t name_length, u_char type, u_char *value, size_t len);
-int snmp_add_var (struct snmp_pdu *, oid*, size_t, char, const char *);
+int snmp_add_var (netsnmp_pdu *, oid*, size_t, char, const char *);
 oid  *snmp_duplicate_objid(const oid *objToCopy, size_t);
 u_int snmp_increment_statistic(int which);
 u_int snmp_increment_statistic_by(int which, int count);
 u_int snmp_get_statistic(int which);
 void  snmp_init_statistics(void);
-int create_user_from_session(struct snmp_session *session);
+int create_user_from_session(netsnmp_session *session);
 
 /*  New re-allocating reverse encoding functions.  */
 #ifdef USE_REVERSE_ASNENCODING
 
 int
 snmpv3_packet_realloc_rbuild(u_char **pkt, size_t *pkt_len, size_t *offset,
-			     struct snmp_session *session,
-			     struct snmp_pdu *pdu,
+			     netsnmp_session *session,
+			     netsnmp_pdu *pdu,
 			     u_char *pdu_data, size_t pdu_data_len);
 
 int
 snmp_pdu_realloc_rbuild(u_char **pkt, size_t *pkt_len, size_t *offset, 
-			struct snmp_pdu *pdu);
+			netsnmp_pdu *pdu);
 #endif
 
 
 
 /*  Extended open; fpre_parse has changed.  */
 
-struct snmp_session *snmp_open_ex (struct snmp_session *,
-				   int (*fpre_parse) (struct snmp_session *,
+netsnmp_session *snmp_open_ex (netsnmp_session *,
+				   int (*fpre_parse) (netsnmp_session *,
 						      struct netsnmp_transport_s *,
 						      void *, int),
-				   int (*fparse)     (struct snmp_session *,
-						      struct snmp_pdu *,
+				   int (*fparse)     (netsnmp_session *,
+						      netsnmp_pdu *,
 						      u_char *, size_t),
-				   int (*fpost_parse)(struct snmp_session *,
-						      struct snmp_pdu *, int),
-				   int (*fbuild)     (struct snmp_session *,
-						      struct snmp_pdu *,
+				   int (*fpost_parse)(netsnmp_session *,
+						      netsnmp_pdu *, int),
+				   int (*fbuild)     (netsnmp_session *,
+						      netsnmp_pdu *,
 						      u_char *, size_t *),
-				   int (*frbuild)    (struct snmp_session *,
-						      struct snmp_pdu *,
+				   int (*frbuild)    (netsnmp_session *,
+						      netsnmp_pdu *,
 						      u_char **, size_t *, 
 						      size_t *),
 				   int (*fcheck)     (u_char *, size_t));
@@ -645,7 +649,7 @@ int snmp_get_do_debugging (void);
  * Inputs :  address of errno, address of snmp_errno, address of string
  * Caller must free the string returned after use.
  */
-void snmp_error (struct snmp_session *, int *, int *, char **);
+void snmp_error (netsnmp_session *, int *, int *, char **);
 /*
  * single session API.
  *
@@ -655,8 +659,8 @@ void snmp_error (struct snmp_session *, int *, int *, char **);
  * Synopsis:
 
 	void * sessp;
-	struct snmp_session session, *ss;
-	struct snmp_pdu *pdu, *response;
+	netsnmp_session session, *ss;
+	netsnmp_pdu *pdu, *response;
 
 	snmp_sess_init(&session);
 	session.retries = ...
@@ -684,10 +688,10 @@ void snmp_error (struct snmp_session *, int *, int *, char **);
  *  4. Replace snmp_send(ss,pdu) with snmp_sess_send(sessp,pdu)
  */
 
-void   snmp_sess_init       (struct snmp_session *);
-void * snmp_sess_open       (struct snmp_session *);
-void * snmp_sess_pointer    (struct snmp_session *);
-struct snmp_session * snmp_sess_session    (void *);
+void   snmp_sess_init       (netsnmp_session *);
+void * snmp_sess_open       (netsnmp_session *);
+void * snmp_sess_pointer    (netsnmp_session *);
+netsnmp_session * snmp_sess_session    (void *);
 
 /*  Return the netsnmp_transport structure associated with the given opaque
     pointer.  */
@@ -707,58 +711,58 @@ void				 snmp_sess_transport_set(void *,
 
 */
 
-void	*snmp_sess_add_ex(struct snmp_session *, struct netsnmp_transport_s *,
-			  int (*fpre_parse) (struct snmp_session *,
+void	*snmp_sess_add_ex(netsnmp_session *, struct netsnmp_transport_s *,
+			  int (*fpre_parse) (netsnmp_session *,
 					     struct netsnmp_transport_s *, void *,
 					     int),
-			  int (*fparse) (struct snmp_session *, struct
+			  int (*fparse) (netsnmp_session *, struct
 					 snmp_pdu *, u_char *, size_t), 
-			  int (*fpost_parse) (struct snmp_session *, struct
+			  int (*fpost_parse) (netsnmp_session *, struct
 					      snmp_pdu *, int), 
-			  int (*fbuild) (struct snmp_session *, struct
+			  int (*fbuild) (netsnmp_session *, struct
 					 snmp_pdu *, u_char *, size_t *), 
-			  int (*frbuild)(struct snmp_session *, struct
+			  int (*frbuild)(netsnmp_session *, struct
 				   snmp_pdu *, u_char **, size_t *, size_t *), 
 			  int (*fcheck) (u_char *, size_t),
-                          struct snmp_pdu * (*fcreate_pdu) (struct netsnmp_transport_s *, void *, size_t));
+                          netsnmp_pdu * (*fcreate_pdu) (struct netsnmp_transport_s *, void *, size_t));
 
-void   *snmp_sess_add	(struct snmp_session *, struct netsnmp_transport_s *,
-			 int (*fpre_parse) (struct snmp_session *,
+void   *snmp_sess_add	(netsnmp_session *, struct netsnmp_transport_s *,
+			 int (*fpre_parse) (netsnmp_session *,
 					    struct netsnmp_transport_s *,
 					    void *, int),
-			 int (*fpost_parse) (struct snmp_session *,
-					     struct snmp_pdu *, int));
+			 int (*fpost_parse) (netsnmp_session *,
+					     netsnmp_pdu *, int));
 
-struct snmp_session *snmp_add(struct snmp_session *, struct netsnmp_transport_s *,
-			      int (*fpre_parse) (struct snmp_session *,
+netsnmp_session *snmp_add(netsnmp_session *, struct netsnmp_transport_s *,
+			      int (*fpre_parse) (netsnmp_session *,
 						 struct netsnmp_transport_s *,
 						 void *, int),
-			      int (*fpost_parse) (struct snmp_session *,
-						  struct snmp_pdu *, int));
-struct snmp_session *snmp_add_full(struct snmp_session *in_session,
+			      int (*fpost_parse) (netsnmp_session *,
+						  netsnmp_pdu *, int));
+netsnmp_session *snmp_add_full(netsnmp_session *in_session,
                                    struct netsnmp_transport_s *transport,
-                                   int (*fpre_parse) (struct snmp_session *, struct netsnmp_transport_s *, void *, int),
-                                   int (*fparse) (struct snmp_session *, struct snmp_pdu *, u_char *, size_t),
-                                   int (*fpost_parse) (struct snmp_session *, struct snmp_pdu *, int),
-                                   int (*fbuild) (struct snmp_session *, struct snmp_pdu *, u_char *, size_t *),
-                                   int (*frbuild)(struct snmp_session *, struct snmp_pdu *, u_char **, size_t *, size_t *),
+                                   int (*fpre_parse) (netsnmp_session *, struct netsnmp_transport_s *, void *, int),
+                                   int (*fparse) (netsnmp_session *, netsnmp_pdu *, u_char *, size_t),
+                                   int (*fpost_parse) (netsnmp_session *, netsnmp_pdu *, int),
+                                   int (*fbuild) (netsnmp_session *, netsnmp_pdu *, u_char *, size_t *),
+                                   int (*frbuild)(netsnmp_session *, netsnmp_pdu *, u_char **, size_t *, size_t *),
                                    int (*fcheck) (u_char *, size_t),
-                                   struct snmp_pdu * (*fcreate_pdu) (struct netsnmp_transport_s *, void *, size_t)
+                                   netsnmp_pdu * (*fcreate_pdu) (struct netsnmp_transport_s *, void *, size_t)
 );
 
 /* use return value from snmp_sess_open as void * parameter */
 
-int    snmp_sess_send       (void *, struct snmp_pdu *);
-int    snmp_sess_async_send (void *, struct snmp_pdu *,
-                                         snmp_callback, void *);
+int    snmp_sess_send       (void *, netsnmp_pdu *);
+int    snmp_sess_async_send (void *, netsnmp_pdu *,
+                             netsnmp_callback, void *);
 int    snmp_sess_select_info (void *, int *, fd_set *,
-                                         struct timeval *, int *);
+                              struct timeval *, int *);
 int    snmp_sess_read       (void *, fd_set *);
 void   snmp_sess_timeout    (void *);
 int    snmp_sess_close      (void *);
 
 void   snmp_sess_error      (void *, int *, int *, char **);
-void   snmp_sess_perror     (const char *prog_string, struct snmp_session *ss);
+void   snmp_sess_perror     (const char *prog_string, netsnmp_session *ss);
 
 /* end single session API */
 

@@ -124,7 +124,7 @@ int	sflag;
 int	interval;
 char	*intrface;
 
-struct snmp_session *Session;
+netsnmp_session *Session;
 int print_errors = 0;
 
 static struct protoent *getprotoent46(void);
@@ -159,7 +159,7 @@ int main(int argc, char *argv[])
     int allprotos = 1;
     char *community = NULL;
     char *argp;
-    struct snmp_session session;
+    netsnmp_session session;
     int dest_port = SNMP_PORT;
     int timeout = SNMP_DEFAULT_TIMEOUT;
     int version = SNMP_DEFAULT_VERSION;
@@ -314,7 +314,7 @@ int main(int argc, char *argv[])
     /* open an SNMP session */
     Session = snmp_open(&session);
     if (Session == NULL){
-      /* diagnose snmp_open errors with the input struct snmp_session pointer */
+      /* diagnose snmp_open errors with the input netsnmp_session pointer */
         snmp_sess_perror("snmpnetstat", &session);
         SOCK_CLEANUP;
 	exit(1);

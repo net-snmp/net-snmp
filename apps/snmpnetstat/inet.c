@@ -225,8 +225,8 @@ protopr (const char *name)
 {
     struct tcpconn_entry *tcpconn = NULL, *tcplast = NULL, *tp, *newtp;
     struct udp_entry *udpconn = NULL, *udplast = NULL, *up, *newup;
-    struct snmp_pdu *request = NULL, *response = NULL;
-    struct variable_list *vp;
+    netsnmp_pdu *request = NULL, *response = NULL;
+    netsnmp_variable_list *vp;
     oid *instance;
     int first, status;
 
@@ -431,7 +431,7 @@ udp_stats(void)
 {
     oid varname[MAX_OID_LEN], *udpentry;
     size_t varname_len;
-    struct variable_list *var;
+    netsnmp_variable_list *var;
     int count;
     struct stat_table *sp = udp_stattab;
 
@@ -462,7 +462,7 @@ tcp_stats(void)
 {
     oid varname[MAX_OID_LEN], *tcpentry;
     size_t varname_len;
-    struct variable_list *var;
+    netsnmp_variable_list *var;
     int count;
     struct stat_table *sp = tcp_stattab;
 
@@ -493,7 +493,7 @@ ip_stats(void)
 {
     oid varname[MAX_OID_LEN], *ipentry;
     size_t varname_len;
-    struct variable_list *var;
+    netsnmp_variable_list *var;
     int count;
     struct stat_table *sp = ip_stattab;
 
@@ -524,7 +524,7 @@ icmp_stats(void)
 {
     oid varname[MAX_OID_LEN], *icmpentry;
     size_t varname_len;
-    struct variable_list *var;
+    netsnmp_variable_list *var;
     int count, first;
     struct stat_table *sp;
 

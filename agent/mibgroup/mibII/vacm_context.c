@@ -21,9 +21,9 @@ static oid vacm_context_oid[] = {1,3,6,1,6,3,16,1,1};
  * return the index data from the first node in the agent's
  * subtree_context_cache list.
  */
-struct variable_list *
+netsnmp_variable_list *
 get_first_context(void **my_loop_context, void **my_data_context,
-                  struct variable_list *put_data, netsnmp_iterator_info *iinfo) {
+                  netsnmp_variable_list *put_data, netsnmp_iterator_info *iinfo) {
     subtree_context_cache *context_ptr;
     context_ptr = get_top_context_cache();
 
@@ -42,10 +42,10 @@ get_first_context(void **my_loop_context, void **my_data_context,
  * return the next index data from the first node in the agent's
  * subtree_context_cache list.
  */
-struct variable_list *
+netsnmp_variable_list *
 get_next_context(void **my_loop_context,
                  void **my_data_context,
-                 struct variable_list *put_data,
+                 netsnmp_variable_list *put_data,
                  netsnmp_iterator_info *iinfo) {
     subtree_context_cache *context_ptr;
 
@@ -110,7 +110,7 @@ vacm_context_handler(netsnmp_mib_handler               *handler,
     subtree_context_cache *context_ptr;
 
     while(requests) {
-        struct variable_list *var = requests->requestvb;
+        netsnmp_variable_list *var = requests->requestvb;
         
         if (requests->processed != 0)
             continue;

@@ -53,7 +53,7 @@ struct targetAddrTable_struct {
   int    storageType;
   int    rowStatus;
   struct targetAddrTable_struct *next;
-  struct snmp_session *sess; /* a snmp session to the target host */
+  netsnmp_session *sess; /* a snmp session to the target host */
   time_t sessionCreationTime;
 };
 

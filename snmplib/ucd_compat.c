@@ -9,12 +9,12 @@
 #include <net-snmp/session_api.h>
 #include <net-snmp/config_api.h>
 
-/* use <struct snmp_session *)->s_snmp_errno instead */
+/* use <netsnmp_session *)->s_snmp_errno instead */
 int  snmp_get_errno   (void)  { return SNMPERR_SUCCESS; }
 
 /* synch_reset and synch_setup are no longer used. */
-void snmp_synch_reset (struct snmp_session * notused) {}
-void snmp_synch_setup (struct snmp_session * notused) {}
+void snmp_synch_reset (netsnmp_session * notused) {}
+void snmp_synch_setup (netsnmp_session * notused) {}
 
 
 void

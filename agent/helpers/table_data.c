@@ -91,7 +91,7 @@ netsnmp_table_data_add_row(table_data *table, netsnmp_table_row *row)
 /** finds the data in "datalist" stored at "indexes" */
 netsnmp_table_row *
 netsnmp_table_data_get(table_data *table,
-               struct variable_list *indexes) {
+               netsnmp_variable_list *indexes) {
     oid searchfor[MAX_OID_LEN];
     size_t searchfor_len = MAX_OID_LEN;
     

@@ -104,9 +104,9 @@ netsnmp_table_iterator_helper_handler(
 #endif
         {
         /* XXXWWW: optimize by reversing loops (look through data only once) */
-        struct variable_list *results = NULL;
-        struct variable_list *index_search = NULL; /* WWW: move up? */
-        struct variable_list *free_this_index_search = NULL;
+        netsnmp_variable_list *results = NULL;
+        netsnmp_variable_list *index_search = NULL; /* WWW: move up? */
+        netsnmp_variable_list *free_this_index_search = NULL;
         netsnmp_table_request_info *table_info =
             netsnmp_extract_table_info(requests);
         void *callback_loop_context = NULL;

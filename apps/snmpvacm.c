@@ -210,10 +210,10 @@ static void optProc(int argc, char *const *argv, int opt)
 int
 main(int argc, char *argv[])
 {
-    struct snmp_session   session, *ss;
-    struct snmp_pdu      *pdu=NULL, *response=NULL;
+    netsnmp_session   session, *ss;
+    netsnmp_pdu      *pdu=NULL, *response=NULL;
 #ifdef notused
-    struct variable_list *vars;
+    netsnmp_variable_list *vars;
 #endif
 
     int                   arg;
@@ -255,7 +255,7 @@ main(int argc, char *argv[])
     /*   Note:  this wil obtain the engineID needed below */
     ss = snmp_open(&session);
     if (ss == NULL){
-      /* diagnose snmp_open errors with the input struct snmp_session pointer */
+      /* diagnose snmp_open errors with the input netsnmp_session pointer */
       snmp_sess_perror("snmpvacm", &session);
       exit(1);
     }

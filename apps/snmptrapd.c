@@ -204,11 +204,11 @@ trap_description(int trap)
 }
 
 
-struct snmp_pdu *
-snmp_clone_pdu2(struct snmp_pdu *pdu,
+netsnmp_pdu *
+snmp_clone_pdu2(netsnmp_pdu *pdu,
 		int command)
 {
-    struct snmp_pdu *newpdu = snmp_clone_pdu(pdu);
+    netsnmp_pdu *newpdu = snmp_clone_pdu(pdu);
     if (newpdu) newpdu->command = command;
     return newpdu;
 }
@@ -218,7 +218,7 @@ static oid fallingAlarm[] = {1, 3, 6, 1, 6, 3, 2, 1, 1, 3, 2};
 static oid unavailableAlarm[] = {1, 3, 6, 1, 6, 3, 2, 1, 1, 3, 3};
 
 void
-event_input(struct variable_list *vp)
+event_input(netsnmp_variable_list *vp)
 {
     int eventid;
     oid variable[MAX_OID_LEN];
@@ -269,9 +269,9 @@ event_input(struct variable_list *vp)
 }
 
 void send_handler_data(FILE *file, struct hostent *host,
-		       struct snmp_pdu *pdu, netsnmp_transport *transport)
+		       netsnmp_pdu *pdu, netsnmp_transport *transport)
 {
-  struct variable_list tmpvar, *vars;
+  netsnmp_variable_list tmpvar, *vars;
   static oid trapoids[] = {1,3,6,1,6,3,1,1,5,0};
   static oid snmpsysuptime[] = {1,3,6,1,2,1,1,3,0};
   static oid snmptrapoid[] = {1,3,6,1,6,3,1,1,4,1,0};
@@ -341,7 +341,7 @@ void send_handler_data(FILE *file, struct hostent *host,
 
 void do_external(char *cmd,
 		 struct hostent *host,
-		 struct snmp_pdu *pdu,
+		 netsnmp_pdu *pdu,
 		 netsnmp_transport *transport)
 {
   FILE *file;
@@ -406,19 +406,19 @@ void do_external(char *cmd,
 }
 
 int snmp_input(int op,
-	       struct snmp_session *session,
+	       netsnmp_session *session,
 	       int reqid,
-	       struct snmp_pdu *pdu,
+	       netsnmp_pdu *pdu,
 	       void *magic)
 {
-    struct variable_list *vars = NULL;
+    netsnmp_variable_list *vars = NULL;
     netsnmp_transport *transport = (netsnmp_transport *)magic;
     char buf[64], *cp;
-    struct snmp_pdu *reply;
+    netsnmp_pdu *reply;
     struct hostent *host = NULL;
     static oid trapoids[10] = {1,3,6,1,6,3,1,1,5};
     static oid snmptrapoid2[11] = {1,3,6,1,6,3,1,1,4,1,0};
-    struct variable_list tmpvar;
+    netsnmp_variable_list tmpvar;
     char *Command = NULL, *tstr = NULL;
     u_char *rbuf = NULL;
     size_t r_len = 64, o_len = 0;
@@ -426,7 +426,7 @@ int snmp_input(int op,
 
     tmpvar.type = ASN_OBJECT_ID;
 
-    if (op == SNMP_CALLBACK_OP_RECEIVED_MESSAGE) {
+    if (op == NETSNMP_CALLBACK_OP_RECEIVED_MESSAGE) {
       if ((rbuf = (u_char *)calloc(r_len, 1)) == NULL) {
 	snmp_log(LOG_ERR, "couldn't display trap -- malloc failed\n");
 	return 1;
@@ -661,7 +661,7 @@ int snmp_input(int op,
       if (rbuf != NULL) {
 	free(rbuf);
       }
-    } else if (op == SNMP_CALLBACK_OP_TIMED_OUT) {
+    } else if (op == NETSNMP_CALLBACK_OP_TIMED_OUT) {
       fprintf(stderr, "Timeout: This shouldn't happen!\n");
     }
     return 1;
@@ -749,7 +749,7 @@ RETSIGTYPE hup_handler(int sig)
 #endif
 
 static
-int pre_parse(struct snmp_session *session, netsnmp_transport *transport,
+int pre_parse(netsnmp_session *session, netsnmp_transport *transport,
 	      void *transport_data, int transport_data_length)
 {
 #if USE_LIBWRAP
@@ -779,10 +779,10 @@ int pre_parse(struct snmp_session *session, netsnmp_transport *transport,
   return 1;
 }
 
-static struct snmp_session *
+static netsnmp_session *
 snmptrapd_add_session(netsnmp_transport *t)
 {
-  struct snmp_session sess, *session = &sess, *rc = NULL;
+  netsnmp_session sess, *session = &sess, *rc = NULL;
 
   snmp_sess_init(session);
   session->peername = SNMP_DEFAULT_PEERNAME; /* Original code had NULL here */
@@ -803,9 +803,9 @@ snmptrapd_add_session(netsnmp_transport *t)
 }
 
 static void
-snmptrapd_close_sessions(struct snmp_session *sess_list)
+snmptrapd_close_sessions(netsnmp_session *sess_list)
 {
-  struct snmp_session *s = NULL, *next = NULL;
+  netsnmp_session *s = NULL, *next = NULL;
   
   for (s = sess_list; s != NULL; s = next) {
     next = s->next;
@@ -817,7 +817,7 @@ int
 main(int argc, char *argv[])
 {
     char options[128] = "ac:CdD::efF:hHl:m:M:no:PqsSvO:-:";
-    struct snmp_session *sess_list = NULL, *ss = NULL;
+    netsnmp_session *sess_list = NULL, *ss = NULL;
     netsnmp_transport *transport = NULL;
     int	arg, i = 0;
     int count, numfds, block;

@@ -1510,7 +1510,7 @@ smux_trap_process(u_char *rsp, size_t *len)
 	long trap, specific;
 	u_long timestamp;
 
-	struct variable_list *snmptrap_head, *snmptrap_ptr, *snmptrap_tmp;
+	netsnmp_variable_list *snmptrap_head, *snmptrap_ptr, *snmptrap_tmp;
 	snmptrap_head = NULL;
 	snmptrap_ptr = NULL;
 
@@ -1656,10 +1656,10 @@ smux_trap_process(u_char *rsp, size_t *len)
 				break;
 		}
 
-		snmptrap_tmp = (struct variable_list *)malloc(sizeof(struct variable_list));
+		snmptrap_tmp = (netsnmp_variable_list *)malloc(sizeof(netsnmp_variable_list));
 		if (snmptrap_tmp == NULL)
 		  return NULL;
-		memset(snmptrap_tmp, 0, sizeof(struct variable_list));
+		memset(snmptrap_tmp, 0, sizeof(netsnmp_variable_list));
 		if (snmptrap_head == NULL) {
 			snmptrap_head = snmptrap_tmp;
 			snmptrap_ptr = snmptrap_head;

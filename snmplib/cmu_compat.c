@@ -19,7 +19,7 @@ int mib_OidToTxt(oid *O, size_t OidLen, char *Buf, size_t BufLen)
 
 
 char *
-snmp_pdu_type(struct snmp_pdu *PDU)
+snmp_pdu_type(netsnmp_pdu *PDU)
 {
   switch(PDU->command) {
   case SNMP_MSG_GET:
@@ -70,8 +70,8 @@ snmp_pdu_type(struct snmp_pdu *PDU)
  */
 
 u_char *
-cmu_snmp_parse (struct snmp_session *session,
-    struct snmp_pdu *pdu,
+cmu_snmp_parse (netsnmp_session *session,
+    netsnmp_pdu *pdu,
     u_char *data,
     size_t length)
 {
@@ -100,10 +100,10 @@ cmu_snmp_parse (struct snmp_session *session,
  * clone the result.
  */
 if (1) {
-struct snmp_pdu *snmp_clone_pdu (struct snmp_pdu *);
-struct snmp_pdu *snmp_2clone_pdu(struct snmp_pdu *from_pdu, struct snmp_pdu *to_pdu);
+netsnmp_pdu *snmp_clone_pdu (netsnmp_pdu *);
+netsnmp_pdu *snmp_2clone_pdu(netsnmp_pdu *from_pdu, netsnmp_pdu *to_pdu);
 
-    struct snmp_pdu *ipdu;
+    netsnmp_pdu *ipdu;
     ipdu = snmp_clone_pdu(pdu);
     if (snmp_parse( 0, session, ipdu, data, length) != SNMP_ERR_NOERROR){
 	snmp_free_internal_pdu(ipdu);

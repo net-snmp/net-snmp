@@ -347,9 +347,9 @@ size_t sysUpTimeLen = 9;
 
 int main(int argc, char *argv[])
 {
-  struct snmp_session session, *ss;
-  struct snmp_pdu *pdu, *response;
-  struct variable_list *vars;
+  netsnmp_session session, *ss;
+  netsnmp_pdu *pdu, *response;
+  netsnmp_variable_list *vars;
   int	arg;
   char *gateway;
 
@@ -401,7 +401,7 @@ int main(int argc, char *argv[])
   /* open an SNMP session */
   ss = snmp_open(&session);
   if (ss == NULL){
-    /* diagnose snmp_open errors with the input struct snmp_session pointer */
+    /* diagnose snmp_open errors with the input netsnmp_session pointer */
     snmp_sess_perror("snmpdelta", &session);
     SOCK_CLEANUP;
     exit(1);

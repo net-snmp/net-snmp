@@ -101,9 +101,9 @@ extern int quick_print;					/* from snmp_api.h */
 
 int mib_TxtToOid (char *, oid **, size_t *);		/* from snmp.h */
 int mib_OidToTxt (oid *, size_t , char *, size_t );	/* from snmp.h */
-char   *snmp_pdu_type (struct snmp_pdu *);		/* from snmp.h */
-u_char *cmu_snmp_parse(struct snmp_session *session,
-                       struct snmp_pdu *pdu,
+char   *snmp_pdu_type (netsnmp_pdu *);		/* from snmp.h */
+u_char *cmu_snmp_parse(netsnmp_session *session,
+                       netsnmp_pdu *pdu,
                        u_char *data, size_t length);	/* from snmp.h */
 
 

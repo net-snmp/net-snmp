@@ -95,7 +95,7 @@ extern "C" {
 #include <ucd-snmp/int64.h>
 #include <ucd-snmp/version.h>
 
-#define Version version  /* struct snmp_session member */
+#define Version version  /* netsnmp_session member */
 
 #define SMI_NOSUCHOBJECT      SNMP_NOSUCHOBJECT
 #define SMI_NOSUCHINSTANCE    SNMP_NOSUCHINSTANCE
@@ -162,7 +162,7 @@ extern "C" {
 
 #define VersionInfo snmp_Version
 #define get_node read_objid
-#define version Version  /* struct snmp_session member */
+#define version Version  /* netsnmp_session member */
 
 #define SNMP_VERSION_2c SNMP_VERSION_2
 #define SNMP_VERSION_2p 129

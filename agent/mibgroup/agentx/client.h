@@ -10,15 +10,15 @@ extern "C" {
  */
 
 
-int agentx_open_session( struct snmp_session *);
-int agentx_close_session( struct snmp_session *, int);
-int agentx_register( struct snmp_session *, oid*, size_t, int, int, oid, int, u_char);
-int agentx_unregister( struct snmp_session *, oid*, size_t, int, int, oid);
-struct variable_list *agentx_register_index( struct snmp_session *, struct variable_list*, int);
-int agentx_unregister_index( struct snmp_session *, struct variable_list*);
-int agentx_add_agentcaps( struct snmp_session *, oid*, size_t, const char*);
-int agentx_remove_agentcaps( struct snmp_session *, oid*, size_t);
-int agentx_send_ping( struct snmp_session * );
+int agentx_open_session( netsnmp_session *);
+int agentx_close_session( netsnmp_session *, int);
+int agentx_register( netsnmp_session *, oid*, size_t, int, int, oid, int, u_char);
+int agentx_unregister( netsnmp_session *, oid*, size_t, int, int, oid);
+netsnmp_variable_list *agentx_register_index( netsnmp_session *, netsnmp_variable_list*, int);
+int agentx_unregister_index( netsnmp_session *, netsnmp_variable_list*);
+int agentx_add_agentcaps( netsnmp_session *, oid*, size_t, const char*);
+int agentx_remove_agentcaps( netsnmp_session *, oid*, size_t);
+int agentx_send_ping( netsnmp_session * );
 
 #define AGENTX_CLOSE_OTHER    1
 #define AGENTX_CLOSE_PARSE    2

@@ -472,7 +472,7 @@ netsnmp_config_parse_add_row(const char *token, char *line)
     size_t buf_size;
 
     data_set_tables *tables;
-    struct variable_list *vb; /* containing only types */
+    netsnmp_variable_list *vb; /* containing only types */
     netsnmp_table_row *row;
     netsnmp_table_data_set_storage *dr;
     

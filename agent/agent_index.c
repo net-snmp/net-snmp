@@ -64,15 +64,15 @@
 	 */
 
 struct snmp_index {
-    struct variable_list	*varbind;	/* or pointer to var_list ? */
+    netsnmp_variable_list	*varbind;	/* or pointer to var_list ? */
     int				 allocated;
-    struct snmp_session		*session;
+    netsnmp_session		*session;
     struct snmp_index		*next_oid;
     struct snmp_index		*prev_oid;
     struct snmp_index		*next_idx;
 } *snmp_index_head = NULL; 
 
-extern struct snmp_session *main_session;
+extern netsnmp_session *main_session;
 
 /*  The caller is responsible for free()ing the memory returned by
     this function.  */
@@ -80,9 +80,9 @@ extern struct snmp_session *main_session;
 char *
 register_string_index( oid *name, size_t name_len, char *cp )
 {
-    struct variable_list varbind, *res;
+    netsnmp_variable_list varbind, *res;
     
-    memset( &varbind, 0, sizeof(struct variable_list));
+    memset( &varbind, 0, sizeof(netsnmp_variable_list));
     varbind.type = ASN_OCTET_STR;
     snmp_set_var_objid( &varbind, name, name_len );
     if ( cp != ANY_STRING_INDEX ) {
@@ -104,9 +104,9 @@ register_string_index( oid *name, size_t name_len, char *cp )
 int
 register_int_index( oid *name, size_t name_len, int val )
 {
-    struct variable_list varbind, *res;
+    netsnmp_variable_list varbind, *res;
     
-    memset( &varbind, 0, sizeof(struct variable_list));
+    memset( &varbind, 0, sizeof(netsnmp_variable_list));
     varbind.type = ASN_INTEGER;
     snmp_set_var_objid( &varbind, name, name_len );
     varbind.val.string = varbind.buf;
@@ -130,13 +130,13 @@ register_int_index( oid *name, size_t name_len, int val )
 /*  The caller is responsible for free()ing the memory returned by
     this function.  */
 
-struct variable_list *
+netsnmp_variable_list *
 register_oid_index( oid *name, size_t name_len,
 		    oid *value, size_t value_len )
 {
-    struct variable_list varbind;
+    netsnmp_variable_list varbind;
     
-    memset( &varbind, 0, sizeof(struct variable_list));
+    memset( &varbind, 0, sizeof(netsnmp_variable_list));
     varbind.type = ASN_OBJECT_ID;
     snmp_set_var_objid( &varbind, name, name_len );
     if (value != ANY_OID_INDEX) {
@@ -150,10 +150,10 @@ register_oid_index( oid *name, size_t name_len,
 /*  The caller is responsible for free()ing the memory returned by
     this function.  */
 
-struct variable_list*
-register_index(struct variable_list *varbind, int flags, struct snmp_session *ss )
+netsnmp_variable_list*
+register_index(netsnmp_variable_list *varbind, int flags, netsnmp_session *ss )
 {
-    struct variable_list *rv = NULL;
+    netsnmp_variable_list *rv = NULL;
     struct snmp_index *new_index, *idxptr, *idxptr2;
     struct snmp_index *prev_oid_ptr, *prev_idx_ptr;
     int res, res2, i;
@@ -428,7 +428,7 @@ register_index(struct variable_list *varbind, int flags, struct snmp_session *ss
 	 *   to allow it to be used elsewhere
 	 */
 int
-release_index(struct variable_list *varbind)
+release_index(netsnmp_variable_list *varbind)
 {
     return( unregister_index( varbind, TRUE, NULL ));
 }
@@ -438,13 +438,13 @@ release_index(struct variable_list *varbind)
 	 *   due to errors in the registration process.
 	 */
 int
-remove_index(struct variable_list *varbind, struct snmp_session *ss)
+remove_index(netsnmp_variable_list *varbind, netsnmp_session *ss)
 {
     return( unregister_index( varbind, FALSE, ss ));
 }
 
 void
-unregister_index_by_session(struct snmp_session *ss)
+unregister_index_by_session(netsnmp_session *ss)
 {
     struct snmp_index *idxptr, *idxptr2;
     for(idxptr = snmp_index_head ; idxptr != NULL; idxptr = idxptr->next_oid)
@@ -457,7 +457,7 @@ unregister_index_by_session(struct snmp_session *ss)
 
 
 int
-unregister_index(struct variable_list *varbind, int remember, struct snmp_session *ss)
+unregister_index(netsnmp_variable_list *varbind, int remember, netsnmp_session *ss)
 {
     struct snmp_index *idxptr, *idxptr2;
     struct snmp_index *prev_oid_ptr, *prev_idx_ptr;
@@ -541,9 +541,9 @@ unregister_index(struct variable_list *varbind, int remember, struct snmp_sessio
 int
 unregister_string_index( oid *name, size_t name_len, char *cp )
 {
-    struct variable_list varbind;
+    netsnmp_variable_list varbind;
     
-    memset( &varbind, 0, sizeof(struct variable_list));
+    memset( &varbind, 0, sizeof(netsnmp_variable_list));
     varbind.type = ASN_OCTET_STR;
     snmp_set_var_objid( &varbind, name, name_len );
     snmp_set_var_value( &varbind, (u_char *)cp, strlen(cp) );
@@ -553,9 +553,9 @@ unregister_string_index( oid *name, size_t name_len, char *cp )
 int 
 unregister_int_index( oid *name, size_t name_len, int val )
 {
-    struct variable_list varbind;
+    netsnmp_variable_list varbind;
     
-    memset(&varbind, 0, sizeof(struct variable_list));
+    memset(&varbind, 0, sizeof(netsnmp_variable_list));
     varbind.type = ASN_INTEGER;
     snmp_set_var_objid(&varbind, name, name_len);
     varbind.val.string = varbind.buf;
@@ -568,9 +568,9 @@ int
 unregister_oid_index( oid *name, size_t name_len,
 		      oid *value, size_t value_len )
 {
-    struct variable_list varbind;
+    netsnmp_variable_list varbind;
     
-    memset( &varbind, 0, sizeof(struct variable_list));
+    memset( &varbind, 0, sizeof(netsnmp_variable_list));
     varbind.type = ASN_OBJECT_ID;
     snmp_set_var_objid( &varbind, name, name_len );
     snmp_set_var_value(&varbind, (u_char*)value, value_len*sizeof(oid));
@@ -656,8 +656,8 @@ count_indexes(oid *name, size_t namelen, int include_unallocated)
 
 
 #ifdef TESTING
-struct variable_list varbind;
-struct snmp_session main_sess, *main_session=&main_sess;
+netsnmp_variable_list varbind;
+netsnmp_session main_sess, *main_session=&main_sess;
 
 void
 test_string_register( int n, char *cp )
@@ -678,7 +678,7 @@ test_int_register( int n, int val )
 void
 test_oid_register( int n, int subid )
 {
-    struct variable_list *res;
+    netsnmp_variable_list *res;
 
     varbind->name[4] = n;
     if ( subid != -1 ) {
@@ -700,7 +700,7 @@ main( int argc, char argv[] )
     oid name[] = { 1, 2, 3, 4, 0 };
     int i;
     
-    memset( &varbind, 0, sizeof(struct variable_list));
+    memset( &varbind, 0, sizeof(netsnmp_variable_list));
     snmp_set_var_objid( &varbind, name, 5 );
     varbind->type = ASN_OCTET_STR;
 		/*

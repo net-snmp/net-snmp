@@ -73,7 +73,7 @@ struct targetAddrTable_struct
 
   newEntry->storageType = SNMP_STORAGE_NONVOLATILE;
   newEntry->rowStatus   = SNMP_ROW_NONEXISTENT;
-  newEntry->sess	= (struct snmp_session *)NULL;
+  newEntry->sess	= (netsnmp_session *)NULL;
   newEntry->next        = 0;
   }
 

@@ -383,7 +383,7 @@ netsnmp_instance_helper_handler(
     netsnmp_agent_request_info        *reqinfo,
     netsnmp_request_info              *requests) {
 
-    struct variable_list *var = requests->requestvb;
+    netsnmp_variable_list *var = requests->requestvb;
 
     int ret, cmp;
     

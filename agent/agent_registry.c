@@ -413,7 +413,7 @@ register_mib_context2(const char *moduleName,
 	     int priority,
 	     int range_subid,
 	     oid range_ubound,
-	     struct snmp_session *ss,
+	     netsnmp_session *ss,
 	     const char *context,
 	     int timeout,
 	     int flags,
@@ -621,7 +621,7 @@ register_mib_context(const char *moduleName,
                      int priority,
                      int range_subid,
                      oid range_ubound,
-                     struct snmp_session *ss,
+                     netsnmp_session *ss,
                      const char *context,
                      int timeout,
                      int flags) {
@@ -641,7 +641,7 @@ register_mib_range(const char *moduleName,
 	     int priority,
 	     int range_subid,
 	     oid range_ubound,
-	     struct snmp_session *ss)
+	     netsnmp_session *ss)
 {
   return register_mib_context( moduleName, var, varsize, numvars,
 				mibloc, mibloclen, priority,
@@ -869,7 +869,7 @@ unregister_mib(oid *name,
 }
 
 void
-unregister_mibs_by_session (struct snmp_session *ss)
+unregister_mibs_by_session (netsnmp_session *ss)
 {
   struct subtree *list, *list2;
   struct subtree *child, *prev, *next_child;
@@ -951,7 +951,7 @@ free_subtree(struct subtree *st)
 int
 in_a_view(oid		  *name,      /* IN - name of var, OUT - name matched */
           size_t	  *namelen,   /* IN -number of sub-ids in name*/
-          struct snmp_pdu *pdu,       /* IN - relevant auth info re PDU */
+          netsnmp_pdu *pdu,       /* IN - relevant auth info re PDU */
           int	           type)      /* IN - variable type being checked */
 {
 
@@ -984,7 +984,7 @@ in_a_view(oid		  *name,      /* IN - name of var, OUT - name matched */
 /* in_a_view: determines if a given snmp_pdu is ever going to be allowed to do
    anynthing or if it's not going to ever be authenticated. */
 int
-check_access(struct snmp_pdu *pdu)      /* IN - pdu being checked */
+check_access(netsnmp_pdu *pdu)      /* IN - pdu being checked */
 {
   struct view_parameters view_parms;
   view_parms.pdu = pdu;
@@ -1064,7 +1064,7 @@ struct subtree *find_subtree(oid *name,
   return NULL;
 }
 
-struct snmp_session *get_session_for_oid( oid *name, size_t len,
+netsnmp_session *get_session_for_oid( oid *name, size_t len,
                                           const char *context_name)
 {
    struct subtree *myptr;

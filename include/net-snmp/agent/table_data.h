@@ -16,7 +16,7 @@ extern "C" {
 #define TABLE_DATA_NAME "table_data"
 
 typedef struct netsnmp_table_row_s {
-   struct variable_list *indexes; /* warning: not stored permanently */
+   netsnmp_variable_list *indexes; /* warning: not stored permanently */
    oid *index_oid;
    size_t index_oid_len;
    void *data;                    /* the data to store */
@@ -25,7 +25,7 @@ typedef struct netsnmp_table_row_s {
 } netsnmp_table_row;
 
 typedef struct table_data_s {
-   struct variable_list *indexes_template; /* containing only types */
+   netsnmp_variable_list *indexes_template; /* containing only types */
    char *name;                    /* if !NULL, it's registered globally */
    int flags;                     /* not currently used */
    netsnmp_table_row *first_row;
@@ -36,7 +36,7 @@ void netsnmp_table_data_generate_index_oid(netsnmp_table_row *row);
 int netsnmp_table_data_add_row(table_data *table, netsnmp_table_row *row);
 int netsnmp_table_data_remove_row(table_data *table, netsnmp_table_row *row);
   
-netsnmp_table_row *netsnmp_table_data_get(table_data *table, struct variable_list *indexes);
+netsnmp_table_row *netsnmp_table_data_get(table_data *table, netsnmp_variable_list *indexes);
     
 netsnmp_table_row *netsnmp_table_data_get_from_oid(table_data *table,
                                     oid *searchfor, size_t searchfor_len);

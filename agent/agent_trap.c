@@ -52,7 +52,7 @@
 #include <net-snmp/agent/mib_module_config.h>
 
 struct trap_sink {
-    struct snmp_session	*sesp;
+    netsnmp_session	*sesp;
     struct trap_sink	*next;
     int			pdutype;
     int			version;
@@ -97,8 +97,8 @@ static int create_v1_trap_session (const char *, u_short, const char *);
 static int create_v2_trap_session (const char *, u_short, const char *);
 static int create_v2_inform_session (const char *, u_short, const char *);
 static void free_trap_session (struct trap_sink *sp);
-static void send_v1_trap (struct snmp_session *, int, int);
-static void send_v2_trap (struct snmp_session *, int, int, int);
+static void send_v1_trap (netsnmp_session *, int, int);
+static void send_v2_trap (netsnmp_session *, int, int, int);
  */
 
 
@@ -123,7 +123,7 @@ static void free_trap_session (struct trap_sink *sp)
     free (sp);
 }
 
-int add_trap_session( struct snmp_session *ss, int pdutype, int confirm, int version )
+int add_trap_session( netsnmp_session *ss, int pdutype, int confirm, int version )
 {
     if (snmp_callback_available(SNMP_CALLBACK_APPLICATION,
                                 SNMPD_CALLBACK_REGISTER_NOTIFICATIONS) ==
@@ -154,7 +154,7 @@ int add_trap_session( struct snmp_session *ss, int pdutype, int confirm, int ver
     return 1;
 }
 
-int remove_trap_session( struct snmp_session *ss )
+int remove_trap_session( netsnmp_session *ss )
 {
     struct trap_sink *sp = sinks, *prev = 0;
 
@@ -184,7 +184,7 @@ int create_trap_session (char *sink, u_short sinkport,
 				char *com,
 				int version, int pdutype)
 {
-    struct snmp_session	 session, *sesp;
+    netsnmp_session	 session, *sesp;
     char *peername = NULL;
     
     if ((peername = malloc(strlen(sink) + 4 + 32)) == NULL) {
@@ -193,7 +193,7 @@ int create_trap_session (char *sink, u_short sinkport,
       snprintf(peername, strlen(sink) + 4 + 32, "udp:%s:%hu", sink, sinkport);
     }
 
-    memset(&session, 0, sizeof (struct snmp_session));
+    memset(&session, 0, sizeof (netsnmp_session));
     session.peername = peername;
     session.version = version;
     if (com) {
@@ -207,7 +207,7 @@ int create_trap_session (char *sink, u_short sinkport,
 	return add_trap_session(sesp, pdutype, (pdutype==SNMP_MSG_INFORM), version);
     }
 
-    /* diagnose snmp_open errors with the input struct snmp_session pointer */
+    /* diagnose snmp_open errors with the input netsnmp_session pointer */
     snmp_sess_perror("snmpd: create_trap_session", &session);
     return 0;
 }
@@ -250,9 +250,9 @@ void snmpd_free_trapsinks (void)
 	 *
 	 *******************/
 
-void convert_v2_to_v1( struct variable_list *vars, struct snmp_pdu *template_pdu )
+void convert_v2_to_v1( netsnmp_variable_list *vars, netsnmp_pdu *template_pdu )
 {
-    struct variable_list *v, *trap_v=NULL, *ent_v=NULL;
+    netsnmp_variable_list *v, *trap_v=NULL, *ent_v=NULL;
     oid  trap_prefix[] = { SNMPV2_TRAPS_PREFIX };
     int len;
 
@@ -295,11 +295,11 @@ void convert_v2_to_v1( struct variable_list *vars, struct snmp_pdu *template_pdu
 void send_enterprise_trap_vars (int trap, 
 		     int specific,
 		     oid *enterprise, int enterprise_length,
-		     struct variable_list *vars)
+		     netsnmp_variable_list *vars)
 {
-    struct variable_list uptime_var, snmptrap_var, enterprise_var;
-    struct variable_list *v2_vars, *last_var=NULL;
-    struct snmp_pdu	*template_pdu;
+    netsnmp_variable_list uptime_var, snmptrap_var, enterprise_var;
+    netsnmp_variable_list *v2_vars, *last_var=NULL;
+    netsnmp_pdu	*template_pdu;
     struct timeval	 now;
     long uptime;
     in_addr_t *pdu_in_addr_t;
@@ -311,13 +311,13 @@ void send_enterprise_trap_vars (int trap,
 		 */
     gettimeofday(&now, NULL);
     uptime = calculate_time_diff(&now, &starttime);
-    memset (&uptime_var, 0, sizeof (struct variable_list));
+    memset (&uptime_var, 0, sizeof (netsnmp_variable_list));
     snmp_set_var_objid( &uptime_var, sysuptime_oid, OID_LENGTH(sysuptime_oid));
     snmp_set_var_value( &uptime_var, (u_char *)&uptime, sizeof(uptime) );
     uptime_var.type           = ASN_TIMETICKS;
     uptime_var.next_variable  = &snmptrap_var;
 
-    memset (&snmptrap_var, 0, sizeof (struct variable_list));
+    memset (&snmptrap_var, 0, sizeof (netsnmp_variable_list));
     snmp_set_var_objid( &snmptrap_var, snmptrap_oid, OID_LENGTH(snmptrap_oid));
 	/* value set later .... */
     snmptrap_var.type           = ASN_OBJECT_ID;
@@ -332,7 +332,7 @@ void send_enterprise_trap_vars (int trap,
     while ( last_var && last_var->next_variable )
 	last_var = last_var->next_variable;
 
-    memset (&enterprise_var, 0, sizeof (struct variable_list));
+    memset (&enterprise_var, 0, sizeof (netsnmp_variable_list));
     snmp_set_var_objid( &enterprise_var,
 		 snmptrapenterprise_oid, OID_LENGTH(snmptrapenterprise_oid));
     snmp_set_var_value( &enterprise_var, (u_char *)enterprise, enterprise_length*sizeof(oid));
@@ -498,9 +498,9 @@ void send_enterprise_trap_vars (int trap,
 
 /* send_trap_to_sess: sends a trap to a session but assumes that the
    pdu is constructed correctly for the session type. */
-void send_trap_to_sess(struct snmp_session *sess,
-                       struct snmp_pdu *template_pdu) {
-    struct snmp_pdu *pdu;
+void send_trap_to_sess(netsnmp_session *sess,
+                       netsnmp_pdu *template_pdu) {
+    netsnmp_pdu *pdu;
 
     if (!sess || !template_pdu)
         return;
@@ -527,7 +527,7 @@ void send_trap_to_sess(struct snmp_session *sess,
 
 void send_trap_vars (int trap, 
 		     int specific,
-		     struct variable_list *vars)
+		     netsnmp_variable_list *vars)
 {
     if ( trap == SNMP_TRAP_ENTERPRISESPECIFIC )
         send_enterprise_trap_vars( trap, specific, objid_enterprisetrap,
@@ -543,13 +543,13 @@ void send_easy_trap (int trap,
     send_trap_vars( trap, specific, NULL );
 }
 
-void send_v2trap ( struct variable_list *vars)
+void send_v2trap ( netsnmp_variable_list *vars)
 {
     send_trap_vars( -1, -1, vars );
 }
 
 void
-send_trap_pdu(struct snmp_pdu *pdu)
+send_trap_pdu(netsnmp_pdu *pdu)
 {
     send_trap_vars( -1, -1, pdu->variables );
 }
@@ -713,7 +713,7 @@ snmpd_parse_config_trapsess(const char *word, char *cptr)
 {
     char *argv[MAX_ARGS], *cp = cptr, tmp[SPRINT_MAX_LEN];
     int argn, arg;
-    struct snmp_session session, *ss;
+    netsnmp_session session, *ss;
 
     /* inform or trap?  default to trap */
     traptype = SNMP_MSG_TRAP2;
