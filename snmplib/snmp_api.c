@@ -1493,7 +1493,7 @@ snmp_sess_close(void *sessp)
 
     if ((sptr = find_sec_mod(slp->session->securityModel)) != NULL &&
         sptr->session_close != NULL) {
-        (*sptr->session_close)(sessp);
+        (*sptr->session_close)(sesp);
     }
 
     isp = slp->internal; slp->internal = 0;
@@ -4060,7 +4060,7 @@ _sess_process_packet(void *sessp, struct snmp_session *sp,
 		     struct snmp_internal_session *isp,
 		     snmp_transport *transport,
 		     void *opaque, int olength,
-		     char *packetptr, int length)
+		     u_char *packetptr, int length)
 		     
 {
   struct session_list *slp = (struct session_list *)sessp;
@@ -4347,7 +4347,8 @@ _sess_read(void *sessp, fd_set *fdset)
 	new_transport->sock   = data_sock;
 	new_transport->flags &= ~SNMP_TRANSPORT_FLAG_LISTEN;
 
-	nslp = snmp_sess_add_ex(sp, new_transport, isp->hook_pre,
+	nslp = (struct session_list *)snmp_sess_add_ex(sp, new_transport,
+				isp->hook_pre,
 				isp->hook_parse, isp->hook_post,
 				isp->hook_build, isp->check_packet);
 

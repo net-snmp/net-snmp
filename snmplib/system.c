@@ -390,7 +390,7 @@ in_addr_t get_myaddr (void)
 	I'', p.435.  */
     
     for (i = 8; ; i += 8) {
-      buf = calloc(i, sizeof(struct ifreq));
+      buf = (char *)calloc(i, sizeof(struct ifreq));
       if (buf == NULL) {
 	close(sd);
 	return 0;

@@ -1215,7 +1215,7 @@ char *read_config_read_data(int type, char *readfrom, void *dataptr, size_t *len
       return readfrom;
       
     case ASN_UNSIGNED:
-      uintp = (int *) dataptr;
+      uintp = (unsigned int *) dataptr;
       *uintp = strtoul(readfrom, NULL, 0);
       readfrom = skip_token(readfrom);
       return readfrom;
@@ -1257,7 +1257,7 @@ char *read_config_store_data(int type, char *storeto, void *dataptr, size_t *len
       return (storeto + strlen(storeto));
 
     case ASN_UNSIGNED:
-      uintp = (int *) dataptr;
+      uintp = (unsigned int *) dataptr;
       sprintf(storeto," %u", *uintp);
       return (storeto + strlen(storeto));
       
