@@ -455,20 +455,21 @@ dnl
 dnl Figure out shared libraries extensions.
 dnl
 
-if test "x$GCC" = "xyes"; then
-  SHLIB_CFLAGS="-fPIC -shared"
-else
-  SHLIB_CFLAGS="-KPIC"
-fi
-SHLIB_EXTENSION="so"
-SHLIB_VERSION=
-SHLIB_LD_CMD="ld -r -o"
-SHLIB_LDCONFIG_CMD=
-SHLIB_LD_LIBS=
-SHLIB_CC_RUNTIME_ARG=
-SHLIB_RANLIB=":"
+if test "x$with_shared" = "xyes"; then
+    if test "x$GCC" = "xyes"; then
+	SHLIB_CFLAGS="-fPIC -shared"
+    else
+	SHLIB_CFLAGS="-KPIC"
+    fi
+    SHLIB_EXTENSION="so"
+    SHLIB_VERSION=
+    SHLIB_LD_CMD="ld -r -o"
+    SHLIB_LDCONFIG_CMD=
+    SHLIB_LD_LIBS=
+    SHLIB_CC_RUNTIME_ARG=
+    SHLIB_RANLIB=":"
 
-case $target_os in
+    case $target_os in
 
     linux*)
 	SHLIB_LD_CMD='$(CC) -shared $(CFLAGS) -o'
@@ -537,7 +538,6 @@ yes
     solaris*)
 	SHLIB_LD_CMD="ld -G -o"
 	SHLIB_CC_RUNTIME_ARG="-R$libdir"
-	LDFLAGS="$LDFLAGS -export-dynamic"
 	;;
 
     freebsd*)
@@ -555,9 +555,8 @@ yes
 	])
 	;;
 
-esac
+    esac
 
-if test "x$with_shared" = "xyes"; then
     LIB_EXTENSION="$SHLIB_EXTENSION"
     LIB_VERSION="$SHLIB_VERSION"
     LIB_LD_CMD="$SHLIB_LD_CMD"
