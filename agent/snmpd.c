@@ -248,7 +248,6 @@ static void usage(char *prog)
 	printf("-I [-]INITLIST\tList of mib modules to initialize (or not).\n");
 	printf("\t\t (run snmpd with -Dinit_mib for a list)\n");
 	printf("-l LOGFILE\tPrint warnings/messages to LOGFILE\n");
-	printf("\t\t(By default LOGFILE=%s)\n",
 #ifdef LOGFILE
 	printf("\t\t(By default LOGFILE=%s)\n", LOGFILE);
 #else
