@@ -292,7 +292,7 @@ agentx_got_response(int operation,
                 /*
                  * ack, unknown, mark the first one 
                  */
-                netsnmp_set_request_error(cache->reqinfo, request,
+                netsnmp_set_request_error(cache->reqinfo, requests,
                                           SNMP_ERR_GENERR);
             }
             netsnmp_free_delegated_cache(cache);
