@@ -76,7 +76,7 @@ while($#ARGV >= 0) {
     $_ = shift;
     $configfile = shift if (/^-c/);
     $debug = 1 if (/^-d/);
-    if (/-S/) {
+    if (/^-S/) {
 	my $expr = shift;
 	my ($var, $val) = ($expr =~ /([^=]*)=(.*)/);
 	die "no variable specified for -S flag." if (!$var);
