@@ -305,6 +305,9 @@ netsnmp_table_data_helper_handler(netsnmp_mib_handler *handler,
         table_info = netsnmp_extract_table_info(request);
         if (!table_info)
             continue;           /* ack */
+        netsnmp_request_add_list_data(request,
+                                      netsnmp_create_data_list(
+                                          TABLE_DATA_TABLE, table, NULL));
 
         /*
          * find the row in question 
@@ -397,7 +400,7 @@ netsnmp_table_data_helper_handler(netsnmp_mib_handler *handler,
                 valid_request = 1;
                 netsnmp_request_add_list_data(request,
                                               netsnmp_create_data_list
-                                              (TABLE_DATA_NAME, row,
+                                              (TABLE_DATA_ROW, row,
                                                NULL));
                 /*
                  * Set the name appropriately, so we can pass this
@@ -448,7 +451,7 @@ netsnmp_table_data_helper_handler(netsnmp_mib_handler *handler,
                 valid_request = 1;
                 netsnmp_request_add_list_data(request,
                                               netsnmp_create_data_list
-                                              (TABLE_DATA_NAME, row,
+                                              (TABLE_DATA_ROW, row,
                                                NULL));
             }
             break;
@@ -466,7 +469,7 @@ netsnmp_table_data_helper_handler(netsnmp_mib_handler *handler,
                                                  2))) {
                 netsnmp_request_add_list_data(request,
                                               netsnmp_create_data_list
-                                              (TABLE_DATA_NAME, row,
+                                              (TABLE_DATA_ROW, row,
                                                NULL));
             }
             break;
@@ -605,7 +608,7 @@ netsnmp_insert_table_row(netsnmp_request_info *request,
         if (snmp_oid_compare(this_oid, this_oid_len,
                              that_oid, that_oid_len) == 0) {
             netsnmp_request_add_list_data(req,
-                netsnmp_create_data_list(TABLE_DATA_NAME, row, NULL));
+                netsnmp_create_data_list(TABLE_DATA_ROW, row, NULL));
         }
     }
 }
@@ -615,7 +618,15 @@ netsnmp_table_row *
 netsnmp_extract_table_row(netsnmp_request_info *request)
 {
     return (netsnmp_table_row *) netsnmp_request_get_list_data(request,
-                                                               TABLE_DATA_NAME);
+                                                               TABLE_DATA_ROW);
+}
+
+/** extracts the table being accessed passed from the table_data helper */
+netsnmp_table_data *
+netsnmp_extract_table(netsnmp_request_info *request)
+{
+    return (netsnmp_table_row *) netsnmp_request_get_list_data(request,
+                                                               TABLE_DATA_TABLE);
 }
 
 /** extracts the data from the row being accessed passed from the

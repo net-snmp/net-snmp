@@ -27,6 +27,8 @@ extern          "C" {
 #include <net-snmp/agent/table.h>
     
 #define TABLE_CONTAINER_NAME "table_container"
+#define TABLE_CONTAINER_ROW  "table_container"
+#define TABLE_CONTAINER_TABLE "table_container2"
     
 #define TABLE_CONTAINER_KEY_NETSNMP_INDEX         1 /* default */
 #define TABLE_CONTAINER_KEY_VARBIND_INDEX         2
@@ -54,6 +56,10 @@ extern          "C" {
     netsnmp_container_table_extract_context(netsnmp_request_info *request) {
         return netsnmp_request_get_list_data(request, TABLE_CONTAINER_NAME);
     }
+
+    /** retrieve the container used by the table_container helper */
+    netsnmp_container*
+    netsnmp_container_table_extract(netsnmp_request_info *request);
 
     void *
     netsnmp_container_table_find_next_row(netsnmp_request_info *request,
