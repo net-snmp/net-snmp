@@ -411,7 +411,8 @@ subagent_register_for_traps(int majorID, int minorID, void *serverarg, void *cli
   return 1;
 }
 
-void
+/* returns non-zero on error */
+int
 subagent_pre_init( void )
 {
     struct snmp_session sess;
@@ -440,12 +441,12 @@ subagent_pre_init( void )
     if ( main_session == NULL ) {
       /* diagnose snmp_open errors with the input struct snmp_session pointer */
 	snmp_sess_perror("subagent_pre_init", &sess);
-	exit(1);
+	return -1;
     }
 
     if ( agentx_open_session( main_session ) < 0 ) {
 	snmp_close( main_session );
-	exit(1);
+	return -1;
     }
 
 
@@ -468,6 +469,8 @@ subagent_pre_init( void )
                            agentx_sysOR_callback, main_session);
 #endif
     DEBUGMSGTL(("agentx/subagent","initializing....  DONE\n"));
+    
+    return 0;
 }
 
 
