@@ -3,7 +3,7 @@
 #  Quick hack at UCD bug-report script
 #
 
-bug_reports_to=ucd-snmp-coders@ucd-snmp.ucdavis.edu
+bug_reports_to=ucd-snmp-bugs@ucd-snmp.ucdavis.edu
 
 # changed automagically
 VersionInfo="4.0.pre4";
