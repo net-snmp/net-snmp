@@ -168,16 +168,15 @@ uptimeString(u_long timeticks,
 
 /* prints character pointed to if in human-readable ASCII range,
 	otherwise prints a blank space */
-static void sprint_char(char *buf,
-								const u_char ch)
+static void sprint_char(char *buf, const u_char ch)
 {
-	if ((ch >= 32 && ch <= 126) || (ch >= 160 && ch <= 255))
+	if (isprint(ch))
 	{
 		sprintf(buf, "%c", (int)ch);
 	}
 	else
 	{
-		sprintf(buf, " ");
+		sprintf(buf, ".");
 	}
 }
 
@@ -1157,6 +1156,8 @@ register_mib_handlers (void)
                        DS_LIBRARY_ID, DS_LIB_PRINT_SUFFIX_ONLY);
     ds_register_premib(ASN_BOOLEAN, "snmp","extendedIndex",
 		       DS_LIBRARY_ID, DS_LIB_EXTENDED_INDEX);
+    ds_register_premib(ASN_BOOLEAN, "snmp","printHexText",
+		       DS_LIBRARY_ID, DS_LIB_PRINT_HEX_TEXT);
 }
 
 void
