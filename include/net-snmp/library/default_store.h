@@ -59,6 +59,7 @@ extern          "C" {
 #define NETSNMP_DS_LIB_QUICKE_PRINT        28   
 #define NETSNMP_DS_LIB_DONT_PRINT_UNITS    29 /* don't print UNITS suffix */
 #define NETSNMP_DS_LIB_NO_DISPLAY_HINT     30 /* don't apply DISPLAY-HINTs */
+#define NETSNMP_DS_LIB_16BIT_IDS           31   /* restrict requestIDs, etc to 16-bit values */
 
     /*
      * library integers 
