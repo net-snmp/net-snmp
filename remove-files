@@ -1,5 +1,12 @@
-#!/bin/sh -f
+#!/bin/sh
 
-touch stamp*
+DIR="cmusnmp"
+if [ "$1" != "" ]; then
+  DIR="$1"
+fi
+
+cd $DIR
+
+touch stamp-h.in stamp-h
 rm -f local/*.conf
 rm -f remove-files
