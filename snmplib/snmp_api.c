@@ -3976,10 +3976,19 @@ _snmp_parse(void *sessp,
                  * handle reportable errors 
                  */
                 switch (result) {
+                case SNMPERR_USM_AUTHENTICATIONFAILURE:
+		  {
+                    int res = session->s_snmp_errno;
+                    session->s_snmp_errno = result;
+                    if (session->callback) {
+                       session->callback(NETSNMP_CALLBACK_OP_RECEIVED_MESSAGE,
+                            session, pdu->reqid, pdu, session->callback_magic);
+                    }
+                    session->s_snmp_errno = res;
+                  }  
                 case SNMPERR_USM_UNKNOWNENGINEID:
                 case SNMPERR_USM_UNKNOWNSECURITYNAME:
                 case SNMPERR_USM_UNSUPPORTEDSECURITYLEVEL:
-                case SNMPERR_USM_AUTHENTICATIONFAILURE:
                 case SNMPERR_USM_NOTINTIMEWINDOW:
                 case SNMPERR_USM_DECRYPTIONERROR:
 
