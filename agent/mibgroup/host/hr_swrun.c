@@ -135,6 +135,8 @@ void init_hr_swrun(void)
   auto_nlist( NPROC_SYMBOL,0,0 );
 #endif
 
+  proc_table = 0;
+
     REGISTER_MIB("host/hr_swrun", hrswrun_variables, variable4, hrswrun_variables_oid);
     REGISTER_MIB("host/hr_swrun", hrswrunperf_variables, variable4, hrswrunperf_variables_oid);
 }
