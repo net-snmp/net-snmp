@@ -740,6 +740,9 @@
 /* Does struct sockaddr have a sa_len field? */
 #undef STRUCT_SOCKADDR_HAS_SA_LEN
 
+/* Does struct sockaddr have a sa_len2 field? */
+#undef STRUCT_SOCKADDR_HAS_SA_LEN2
+
 /* rtentry structure tests */
 #undef RTENTRY_RT_NEXT
 #undef STRUCT_RTENTRY_HAS_RT_DST
