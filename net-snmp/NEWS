@@ -22,6 +22,9 @@ the ChangeLog file for a more detailed listing of changes/bug fixes.
   Misc:
     - configure script updated to autoconf 2.12.
 
+  Removed:
+    - Very ancient tk/tcl code.
+
 *3.1.2*
 
   New:
@@ -49,9 +52,6 @@ the ChangeLog file for a more detailed listing of changes/bug fixes.
     - pass scripts more throughly tested and debugged.
     - community 5 can be set now.
     - Many others.
-
-  Removed:
-    - Very ancient tk/tcl code.
 
 *3.1.0.1*
 
