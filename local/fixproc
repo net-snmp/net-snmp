@@ -1,4 +1,7 @@
 #!/usr/local/bin/perl
+#
+# A generic fix script to take a conf file, an argument, and attempt a fix
+# based on the actions in the config file.  And, thats it for docs.
 
 $database_file = '/local/etc/fixproc.conf';
 
