@@ -3391,6 +3391,10 @@ _snmp_parse(void * sessp,
         
         DEBUGDUMPSECTION("recv","PDU");
 	result = snmp_pdu_parse(pdu, data, &length);
+	if (result < 0) {
+	  /*  This indicates a parse error.  */
+	  snmp_increment_statistic(STAT_SNMPINASNPARSEERRS);
+	}
         DEBUGINDENTADD(-6); 
         break;
 
