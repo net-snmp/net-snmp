@@ -1,5 +1,5 @@
-########################################################################
-## generic include for enums. Don't use directly.
+#############################################################  -*- c -*-
+## generic include for enums. Do not use directly.
 ##
 ## $Id$
 ########################################################################
@@ -32,14 +32,29 @@
 #ifndef ${m2c_de_pfx}_ENUMS
 #define ${m2c_de_pfx}_ENUMS
 
+@      eval $m2c_mask=""@
 @      foreach $e $v enum@
 @         include m2c_setup_enum.m2i@
 @         if "$node.perltype" eq "BITS"@
+@            if $v > 31@
+@               print ** ACK! I cannot handle BITS longer than 4 bytes!@
+@               exit@
+@            end@
+@            if "x$m2c_mask" eq "x"@
+@               eval $m2c_mask="$m2c_ename"@
+@            else@
+@               eval $m2c_mask="$m2c_mask | $m2c_ename"@
+@            end@
 $m2c_const_dcl $m2c_ename $m2c_const_del (1 << (31-$v)) $m2c_const_sfx
 @         else@
 $m2c_const_dcl $m2c_ename $m2c_const_del $v $m2c_const_sfx
 @         end@
 @      end@ # for each
+
+@      if "$node.perltype" eq "BITS"@
+$m2c_const_dcl $m2c_enum_mask $m2c_const_del ($m2c_mask)
+    
+@      end@
 
 #endif /* ${m2c_de_pfx}_ENUMS */
 
@@ -49,7 +64,7 @@ $m2c_const_dcl $m2c_ename $m2c_const_del $v $m2c_const_sfx
      */
 @         foreach $e $v enum@
 ##           # this enum should be unique per column, so always use 
-##           # node name (i.e. don't use m2c_setup_enum here)
+##           # node name (i.e. do not use m2c_setup_enum here)
 @            eval $m2c_iname = "${m2c_const_pfx}${node}_${e}"@
 @            if $m2c_const_lc == 0@
 @               eval $m2c_iname = uc($m2c_iname)@
