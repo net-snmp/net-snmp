@@ -159,7 +159,6 @@ AC_ARG_WITH(out_mib_modules,
   
     mibII:                 support for the mib-II tree.
     ucd_snmp:              ucd-snmp specific extensions.
-    v2party:               support for the snmpv2 party mibs.
 
   Optional mib modules that can be built into the agent include:
     host:                  host resources mib support.
@@ -475,11 +474,6 @@ mibdir="agent/mibgroup"
 module_list=""
 module_list_code=""
 new_module_list="mibII ucd_snmp snmpv3mibs $with_mib_modules"
-trap_list_o=""
-
-case $target_os in
-  solaris*) trap_list_o="../agent/mibgroup/kernel_sunos5.o" ;;
-esac
 
 dnl Create include file list for snmp_vars.h to use.
 if test ! -d agent; then
@@ -594,7 +588,6 @@ AC_SUBST(module_list_c)
 AC_SUBST(module_list_h)
 AC_SUBST(module_list_o)
 AC_SUBST(mibgroup_list_o)
-AC_SUBST(trap_list_o)
 
 AC_MSG_RESULT(.)
 AC_MSG_CHECKING(if directories neeed to be created)
