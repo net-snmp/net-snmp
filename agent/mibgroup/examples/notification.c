@@ -32,11 +32,6 @@
 #include "notification.h"
 
 /*
- * our alarm prototype 
- */
-
-
-/*
  * our initialization routine
  * (to get called, the function name must match init_FILENAME() 
  */
