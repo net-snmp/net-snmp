@@ -40,7 +40,6 @@
 ./header_complex.lo: ../../include/net-snmp/mib_api.h
 ./header_complex.lo: ../../include/net-snmp/library/mib.h
 ./header_complex.lo: ../../include/net-snmp/library/parse.h
-./header_complex.lo: ../../include/net-snmp/library/oid_array.h
 ./header_complex.lo: ../../include/net-snmp/varbind_api.h
 ./header_complex.lo: ../../include/net-snmp/config_api.h
 ./header_complex.lo: ../../include/net-snmp/library/read_config.h
@@ -129,7 +128,6 @@
 ./testhandler.lo: ../../include/net-snmp/mib_api.h
 ./testhandler.lo: ../../include/net-snmp/library/mib.h
 ./testhandler.lo: ../../include/net-snmp/library/parse.h
-./testhandler.lo: ../../include/net-snmp/library/oid_array.h
 ./testhandler.lo: ../../include/net-snmp/varbind_api.h
 ./testhandler.lo: ../../include/net-snmp/config_api.h
 ./testhandler.lo: ../../include/net-snmp/library/read_config.h
@@ -213,7 +211,6 @@
 ./util_funcs.lo: ../../include/net-snmp/mib_api.h
 ./util_funcs.lo: ../../include/net-snmp/library/mib.h
 ./util_funcs.lo: ../../include/net-snmp/library/parse.h
-./util_funcs.lo: ../../include/net-snmp/library/oid_array.h
 ./util_funcs.lo: ../../include/net-snmp/varbind_api.h
 ./util_funcs.lo: ../../include/net-snmp/config_api.h
 ./util_funcs.lo: ../../include/net-snmp/library/read_config.h
