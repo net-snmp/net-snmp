@@ -606,16 +606,38 @@ agentx_add_request(struct agent_snmp_session *asp,
     struct snmp_session *ax_session;
     struct request_list *request;
     struct ax_variable_list *ax_vlist;
-    struct subtree      *sub;
+    struct subtree      *sub, *retry_sub = NULL;
     int			 sessid, order = 0;
 
+    sub = find_subtree_previous(vbp->name, vbp->name_length, NULL);
+
+    if (!asp->exact && !asp->inclusive && rangeType == ASN_PRIV_EXCL_RANGE &&
+	sub->flags & FULLY_QUALIFIED_INSTANCE) {
+	/*  This request will not succeed.  No way.  Not a chance.  */
+
+	DEBUGMSGTL(("agentx/master", "doomed exclusive getNext on FQI "));
+	DEBUGMSGOID(("agentx/master", vbp->name, vbp->name_length));
+	DEBUGMSG(("agentx/master", "\n"));
+
+	retry_sub = find_subtree_next(vbp->name, vbp->name_length, NULL);
+
+	if (retry_sub != NULL) {
+	    snmp_set_var_objid(vbp, retry_sub->start, retry_sub->start_len);
+	    DEBUGMSGTL(("agentx/master", "handle_one_var(%08p, ", asp));
+	    DEBUGMSGOID(("agentx/master", vbp->name, vbp->name_length));
+	    DEBUGMSG(("agentx/master", ")\n"));
+	    return handle_one_var(asp, vbp);
+	} else {
+	    vbp->type = SNMP_ENDOFMIBVIEW;
+	    return AGENTX_ERR_NOERROR;
+	}
+    }
+    
     if (asp->pdu->command == SNMP_MSG_SET && asp->mode == RESERVE1) {
 	return AGENTX_ERR_NOERROR;
     }
 
-    ax_session = get_session_for_oid(vbp->name, vbp->name_length);
-
-    if (!ax_session) {
+    if ((ax_session = get_session_for_oid(vbp->name, vbp->name_length))==NULL){
 	return SNMP_ERR_GENERR;
     }
 
@@ -625,11 +647,9 @@ agentx_add_request(struct agent_snmp_session *asp,
 	ax_session = ax_session->subsession;
     }
 
-    request = get_agentx_request(asp, ax_session, pdu->transid, vbp);
-    
-    if (!request) {
+    if ((request = get_agentx_request(asp,ax_session,pdu->transid,vbp))==NULL){
 	return SNMP_ERR_GENERR;
-    }
+    }    
 
     request->pdu->sessid = sessid;     /* Use the registered (sub)session's ID,
 					  not the main listening session ID */
@@ -646,7 +666,6 @@ agentx_add_request(struct agent_snmp_session *asp,
     vbp->index = asp->index;	/* Remember the variable index */
     ax_vlist->num_vars++;
     
-    sub = find_subtree_previous(vbp->name, vbp->name_length, NULL);
     DEBUGMSGTL(("agentx/master", "%sexact varbind: ", asp->exact?"":"in"));
     if (asp->exact) {
 	DEBUGMSGOID(("agentx/master", vbp->name, vbp->name_length));
@@ -669,6 +688,7 @@ agentx_add_request(struct agent_snmp_session *asp,
 			      (u_char*)sub->end, sub->end_len*sizeof(oid));
     }
     DEBUGMSG(("agentx/master", "\n"));
+
     if (sub->timeout > (int)request->pdu->time) {
 	request->pdu->time = sub->timeout;
 	request->pdu->flags |= UCD_MSG_FLAG_PDU_TIMEOUT;
