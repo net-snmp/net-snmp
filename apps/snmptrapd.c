@@ -640,7 +640,6 @@ RETSIGTYPE hup_handler(int sig)
 int main(int argc, char *argv[])
 {
     struct snmp_session sess, *session = &sess, *ss;
-    struct usmUser *user, *userListPtr;
     int	arg;
     int count, numfds, block;
     fd_set fdset;
