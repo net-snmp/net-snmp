@@ -1,4 +1,4 @@
-package NetSNMP::agent::netsnmp_request_info;
+package NetSNMP::agent::netsnmp_request_infoPtr;
 
 use strict;
 use Carp;
@@ -18,7 +18,7 @@ sub getOID {
 __END__
 =head1 NAME
 
-NetSNMP::agent::netsnmp_request_info - Perl extension for request information
+NetSNMP::agent::netsnmp_request_infoPtr - Perl extension for request information
 
 =head1 SYNOPSIS
 
