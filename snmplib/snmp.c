@@ -198,10 +198,10 @@ snmp_build_var_op(u_char *data,
 	return NULL;
     }
 #endif
+    if (dummyLen < 4)
+	return NULL;
     data += 4;
     dummyLen -=4;
-    if (dummyLen < 0)
-	return NULL;
 
     headerLen = data - dataPtr;
     *listlength -= headerLen;
