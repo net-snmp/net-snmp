@@ -41,7 +41,7 @@ RSC=rc.exe
 # PROP Intermediate_Dir "Release"
 # PROP Target_Dir ""
 # ADD BASE CPP /nologo /W3 /GX /O2 /D "WIN32" /D "NDEBUG" /D "_WINDOWS" /YX /FD /c
-# ADD CPP /nologo /MD /W3 /GX /O2 /I "." /I ".." /I "..\..\agent" /I "..\..\snmplib" /I "..\..\include" /I "..\..\agent\mibgroup" /I "..\.." /D "WIN32" /D "NDEBUG" /D "_WINDOWS" /YX /FD /c
+# ADD CPP /nologo /MD /W3 /GX /O2 /I "." /I ".." /I "..\..\agent" /I "..\..\snmplib" /I "..\..\include" /I "..\..\agent\mibgroup" /I "..\.." /D "WIN32" /D "NDEBUG" /D "_WINDOWS" /FR /YX /FD /c
 # ADD BASE RSC /l 0x409
 # ADD RSC /l 0x409
 BSC32=bscmake.exe
@@ -310,11 +310,6 @@ SOURCE=..\..\agent\mibgroup\agent\nsTransactionTable.c
 # PROP Default_Filter ""
 # Begin Source File
 
-SOURCE=..\..\agent\mibgroup\utilities\override.c
-# End Source File
-# End Group
-# Begin Source File
-
 SOURCE=..\..\agent\mibgroup\header_complex.c
 # End Source File
 # Begin Source File
@@ -323,7 +318,12 @@ SOURCE=..\..\agent\mib_modules.c
 # End Source File
 # Begin Source File
 
+SOURCE=..\..\agent\mibgroup\utilities\override.c
+# End Source File
+# Begin Source File
+
 SOURCE=..\..\agent\mibgroup\util_funcs.c
 # End Source File
+# End Group
 # End Target
 # End Project

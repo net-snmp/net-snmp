@@ -64,7 +64,7 @@ LIB32=link.exe -lib
 # PROP Intermediate_Dir "Debug"
 # PROP Target_Dir ""
 # ADD BASE CPP /nologo /W3 /GX /Z7 /Od /D "WIN32" /D "_DEBUG" /D "_WINDOWS" /YX /FD /c
-# ADD CPP /nologo /MTd /W3 /GX /Z7 /Od /I "..\..\agent" /I "..\..\agent\mibgroup" /I "." /I ".." /I "..\..\snmplib" /I "..\.." /I "..\..\include" /D "WIN32" /D "_DEBUG" /D "_CONSOLE" /D "_MBCS" /YX /FD /c
+# ADD CPP /nologo /MTd /W3 /GX /Z7 /Od /I "..\..\agent" /I "..\..\agent\mibgroup" /I "." /I ".." /I "..\..\snmplib" /I "..\.." /I "..\..\include" /D "WIN32" /D "_DEBUG" /D "_CONSOLE" /D "_MBCS" /FR /YX /FD /c
 # ADD BASE RSC /l 0x409
 # ADD RSC /l 0xffffffff
 BSC32=bscmake.exe
@@ -82,160 +82,62 @@ LIB32=link.exe -lib
 # Name "libhelpers - Win32 Debug"
 # Begin Group "Source Files"
 
-# PROP Default_Filter ""
+# PROP Default_Filter "cpp;c;cxx;rc;def;r;odl;idl;hpj;bat"
 # Begin Source File
 
 SOURCE=..\..\agent\helpers\all_helpers.c
-
-!IF  "$(CFG)" == "libhelpers - Win32 Release"
-
-!ELSEIF  "$(CFG)" == "libhelpers - Win32 Debug"
-
-!ENDIF 
-
 # End Source File
 # Begin Source File
 
 SOURCE=..\..\agent\helpers\bulk_to_next.c
-
-!IF  "$(CFG)" == "libhelpers - Win32 Release"
-
-!ELSEIF  "$(CFG)" == "libhelpers - Win32 Debug"
-
-!ENDIF 
-
 # End Source File
 # Begin Source File
 
 SOURCE=..\..\agent\helpers\debug_handler.c
-
-!IF  "$(CFG)" == "libhelpers - Win32 Release"
-
-!ELSEIF  "$(CFG)" == "libhelpers - Win32 Debug"
-
-!ENDIF 
-
 # End Source File
 # Begin Source File
 
 SOURCE=..\..\agent\helpers\instance.c
-
-!IF  "$(CFG)" == "libhelpers - Win32 Release"
-
-!ELSEIF  "$(CFG)" == "libhelpers - Win32 Debug"
-
-!ENDIF 
-
 # End Source File
 # Begin Source File
 
 SOURCE=..\..\agent\helpers\multiplexer.c
-
-!IF  "$(CFG)" == "libhelpers - Win32 Release"
-
-!ELSEIF  "$(CFG)" == "libhelpers - Win32 Debug"
-
-!ENDIF 
-
 # End Source File
 # Begin Source File
 
 SOURCE=..\..\agent\helpers\null.c
-
-!IF  "$(CFG)" == "libhelpers - Win32 Release"
-
-!ELSEIF  "$(CFG)" == "libhelpers - Win32 Debug"
-
-!ENDIF 
-
 # End Source File
 # Begin Source File
 
 SOURCE=..\..\agent\helpers\old_api.c
-
-!IF  "$(CFG)" == "libhelpers - Win32 Release"
-
-!ELSEIF  "$(CFG)" == "libhelpers - Win32 Debug"
-
-!ENDIF 
-
 # End Source File
 # Begin Source File
 
 SOURCE=..\..\agent\helpers\read_only.c
-
-!IF  "$(CFG)" == "libhelpers - Win32 Release"
-
-!ELSEIF  "$(CFG)" == "libhelpers - Win32 Debug"
-
-!ENDIF 
-
 # End Source File
 # Begin Source File
 
 SOURCE=..\..\agent\helpers\serialize.c
-
-!IF  "$(CFG)" == "libhelpers - Win32 Release"
-
-!ELSEIF  "$(CFG)" == "libhelpers - Win32 Debug"
-
-!ENDIF 
-
 # End Source File
 # Begin Source File
 
 SOURCE=..\..\agent\helpers\table.c
-
-!IF  "$(CFG)" == "libhelpers - Win32 Release"
-
-!ELSEIF  "$(CFG)" == "libhelpers - Win32 Debug"
-
-!ENDIF 
-
 # End Source File
 # Begin Source File
 
 SOURCE=..\..\agent\helpers\table_array.c
-
-!IF  "$(CFG)" == "libhelpers - Win32 Release"
-
-!ELSEIF  "$(CFG)" == "libhelpers - Win32 Debug"
-
-!ENDIF 
-
 # End Source File
 # Begin Source File
 
 SOURCE=..\..\agent\helpers\table_data.c
-
-!IF  "$(CFG)" == "libhelpers - Win32 Release"
-
-!ELSEIF  "$(CFG)" == "libhelpers - Win32 Debug"
-
-!ENDIF 
-
 # End Source File
 # Begin Source File
 
 SOURCE=..\..\agent\helpers\table_dataset.c
-
-!IF  "$(CFG)" == "libhelpers - Win32 Release"
-
-!ELSEIF  "$(CFG)" == "libhelpers - Win32 Debug"
-
-!ENDIF 
-
 # End Source File
 # Begin Source File
 
 SOURCE=..\..\agent\helpers\table_iterator.c
-
-!IF  "$(CFG)" == "libhelpers - Win32 Release"
-
-!ELSEIF  "$(CFG)" == "libhelpers - Win32 Debug"
-
-!ENDIF 
-
 # End Source File
 # End Group
 # Begin Group "Header Files"
@@ -243,59 +145,59 @@ SOURCE=..\..\agent\helpers\table_iterator.c
 # PROP Default_Filter "h;hpp;hxx;hm;inl"
 # Begin Source File
 
-SOURCE=..\..\agent\helpers\all_helpers.h
+SOURCE="..\..\include\net-snmp\agent\all_helpers.h"
 # End Source File
 # Begin Source File
 
-SOURCE=..\..\agent\helpers\bulk_to_next.h
+SOURCE="..\..\include\net-snmp\agent\bulk_to_next.h"
 # End Source File
 # Begin Source File
 
-SOURCE=..\..\agent\helpers\debug_handler.h
+SOURCE="..\..\include\net-snmp\agent\debug_handler.h"
 # End Source File
 # Begin Source File
 
-SOURCE=..\..\agent\helpers\instance.h
+SOURCE="..\..\include\net-snmp\agent\instance.h"
 # End Source File
 # Begin Source File
 
-SOURCE=..\..\agent\helpers\multiplexer.h
+SOURCE="..\..\include\net-snmp\agent\multiplexer.h"
 # End Source File
 # Begin Source File
 
-SOURCE=..\..\agent\helpers\null.h
+SOURCE="..\..\include\net-snmp\agent\null.h"
 # End Source File
 # Begin Source File
 
-SOURCE=..\..\agent\helpers\old_api.h
+SOURCE="..\..\include\net-snmp\agent\old_api.h"
 # End Source File
 # Begin Source File
 
-SOURCE=..\..\agent\helpers\read_only.h
+SOURCE="..\..\include\net-snmp\agent\read_only.h"
 # End Source File
 # Begin Source File
 
-SOURCE=..\..\agent\helpers\serialize.h
+SOURCE="..\..\include\net-snmp\agent\serialize.h"
 # End Source File
 # Begin Source File
 
-SOURCE=..\..\agent\helpers\table.h
+SOURCE="..\..\include\net-snmp\agent\table.h"
 # End Source File
 # Begin Source File
 
-SOURCE=..\..\agent\helpers\table_array.h
+SOURCE="..\..\include\net-snmp\agent\table_array.h"
 # End Source File
 # Begin Source File
 
-SOURCE=..\..\agent\helpers\table_data.h
+SOURCE="..\..\include\net-snmp\agent\table_data.h"
 # End Source File
 # Begin Source File
 
-SOURCE=..\..\agent\helpers\table_dataset.h
+SOURCE="..\..\include\net-snmp\agent\table_dataset.h"
 # End Source File
 # Begin Source File
 
-SOURCE=..\..\agent\helpers\table_iterator.h
+SOURCE="..\..\include\net-snmp\agent\table_iterator.h"
 # End Source File
 # End Group
 # End Target
