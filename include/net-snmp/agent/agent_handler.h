@@ -24,6 +24,12 @@ extern          "C" {
 
 struct netsnmp_handler_registration_s;
 
+/*
+ * per mib handler flags
+ */
+#define MIB_HANDLER_AUTO_NEXT                   0x01
+#define MIB_HANDLER_AUTO_NEXT_OVERRIDE_ONCE     0x02
+
 /** @typedef struct netsnmp_mib_handler_s netsnmp_mib_handler
  * Typedefs the netsnmp_mib_handler_s struct into  netsnmp_mib_handler */
 
@@ -34,6 +40,8 @@ typedef struct netsnmp_mib_handler_s {
         char           *handler_name;
 	/** for handler's internal use */
         void           *myvoid; 
+        /** for agent_handler's internal use */
+        int             flags;
 	
         int             (*access_method) (struct netsnmp_mib_handler_s *,
                                           struct
@@ -46,14 +54,20 @@ typedef struct netsnmp_mib_handler_s {
         struct netsnmp_mib_handler_s *prev;
 } netsnmp_mib_handler;
 
-#define HANDLER_CAN_GETANDGETNEXT     0x1       /* must be able to do both */
-#define HANDLER_CAN_SET               0x2
-#define HANDLER_CAN_GETBULK           0x4
-#define HANDLER_CAN_BABY_STEP         0x8
+/*
+ * per registration flags
+ */
+#define HANDLER_CAN_GETANDGETNEXT     0x01       /* must be able to do both */
+#define HANDLER_CAN_SET               0x02           /* implies create, too */
+#define HANDLER_CAN_GETBULK           0x04
+#define HANDLER_CAN_NOT_CREATE        0x08         /* auto set if ! CAN_SET */
+#define HANDLER_CAN_BABY_STEP         0x10
+
 
 #define HANDLER_CAN_RONLY   (HANDLER_CAN_GETANDGETNEXT)
 #define HANDLER_CAN_RWRITE  (HANDLER_CAN_GETANDGETNEXT | HANDLER_CAN_SET)
-#define HANDLER_CAN_DEFAULT HANDLER_CAN_RONLY
+#define HANDLER_CAN_SET_ONLY (HANDLER_CAN_SET | HANDLER_CAN_NOT_CREATE)
+#define HANDLER_CAN_DEFAULT (HANDLER_CAN_RONLY | HANDLER_CAN_NOT_CREATE)
 
 /** @typedef struct netsnmp_handler_registration_s netsnmp_handler_registration
  * Typedefs the netsnmp_handler_registration_s struct into netsnmp_handler_registration  */
@@ -91,6 +105,11 @@ typedef struct netsnmp_handler_registration_s {
         oid             range_ubound;
         int             timeout;
         int             global_cacheid;
+
+        /**
+         * void ptr for registeree
+         */
+        void *          my_reg_void;
 
 } netsnmp_handler_registration;
 
@@ -162,18 +181,16 @@ typedef int (Netsnmp_Node_Handler) (netsnmp_mib_handler *handler,
     netsnmp_mib_handler *netsnmp_create_handler(const char *name,
                                                 Netsnmp_Node_Handler *
                                                 handler_access_method);
-    netsnmp_handler_registration *netsnmp_create_handler_registration(const
-                                                                      char
-                                                                      *name,
-                                                                      Netsnmp_Node_Handler
-                                                                      *
-                                                                      handler_access_method,
-                                                                      oid *
-                                                                      reg_oid,
-                                                                      size_t
-                                                                      reg_oid_len,
-                                                                      int
-                                                                      modes);
+    netsnmp_handler_registration *
+    netsnmp_handler_registration_create(const char *name,
+                                        netsnmp_mib_handler *handler,
+                                        oid * reg_oid, size_t reg_oid_len,
+                                        int modes);
+    netsnmp_handler_registration *
+    netsnmp_create_handler_registration(const char *name, Netsnmp_Node_Handler*
+                                        handler_access_method, oid *reg_oid,
+                                        size_t reg_oid_len, int modes);
+
     NETSNMP_INLINE netsnmp_delegated_cache
         *netsnmp_create_delegated_cache(netsnmp_mib_handler *,
                                         netsnmp_handler_registration *,
