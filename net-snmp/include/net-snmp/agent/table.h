@@ -103,23 +103,23 @@ table_request_info *extract_table_info(request_info *);
 
 #define ROWSTATUS_DECLARE long *rs = NULL; request_info *rsi = NULL
 #define ROWSTATUS_VALIDATE( v, r ) do { \
-    if( ( *v->val.integer > SNMP_ROW_DESTROY ) || \
-        ( *v->val.integer < 0) ) { \
+    if( ( *(v)->val.integer > SNMP_ROW_DESTROY ) || \
+        ( *(v)->val.integer < 0) ) { \
         set_mode_request_error(MODE_SET_BEGIN, r, SNMP_ERR_BADVALUE ); \
         return; \
     } \
-    rs = v->val.integer; \
+    rs = (v)->val.integer; \
     rsi = r; \
 } while(0)
 #define ROWSTATUS_CHECK( orv, osv, ri ) do { \
-    if( orv == SNMP_ROW_NONEXISTENT ) { \
+    if( (orv) == SNMP_ROW_NONEXISTENT ) { \
         if( ! rs ) { \
             set_mode_request_error(MODE_SET_BEGIN, ri, SNMP_ERR_NOSUCHNAME );\
         } \
     } \
     else if( rs ) { \
         int rc = check_rowstatus_transition( orv, *rs, \
-                                             st ? *st : osv ); \
+                                             st ? *st : (osv) ); \
         if(rc != SNMP_ERR_NOERROR) \
             set_mode_request_error(MODE_SET_BEGIN, rsi, rc ); \
     } \
@@ -128,12 +128,12 @@ table_request_info *extract_table_info(request_info *);
 
 #define STORAGETYPE_DECLARE long *st = NULL; request_info *sti = NULL
 #define STORAGETYPE_VALIDATE( v, r ) do { \
-    if ((*v->val.integer > SNMP_STORAGE_READONLY) || \
-        (*v->val.integer < 0) ) { \
+    if ((*(v)->val.integer > SNMP_STORAGE_READONLY) || \
+        (*(v)->val.integer < 0) ) { \
         set_mode_request_error(MODE_SET_BEGIN, r, SNMP_ERR_BADVALUE ); \
         return; \
     } \
-    st = v->val.integer; sti = r; \
+    st = (v)->val.integer; sti = r; \
 } while(0)
 #define STORAGETYPE_CHECK( osv ) do { \
     if( st ) { \
