@@ -1641,7 +1641,7 @@ fi
 echo $ac_n "checking for developer flags""... $ac_c" 1>&6
 echo "configure:1643: checking for developer flags" >&5
 if test "x$developer" = "xyes" -a "x$ac_cv_prog_gcc" = "xyes"; then
-  devflags="-Wall -Wstrict-prototypes -Wwrite-strings -Wcast-qual -pedantic -Wno-unused -Wno-char-subscripts"
+  devflags="-Wall -Wstrict-prototypes -Wwrite-strings -Wcast-qual -Wno-unused -Wno-char-subscripts"
   CFLAGS="$CFLAGS $devflags"
 else
   devflags="none"
