@@ -84,6 +84,14 @@ By default, only the standard MIB-II module (RFC1213) will be loaded,
 though this can be overridden by setting the environmental variable
 .I MIBS
 to a (colon-separated) list of modules to load.
+If
+.I MIBS
+is set to
+.IR ALL ,
+.I read_all_mibs
+is called to load all the MIB files found in all the specified
+.IR MIBDIRS .
+
 
 .I read_mib
 parses the file specified, together with any modules that it imports
@@ -171,15 +179,15 @@ Note that there is no corresponding routine
 .SH "ENVIRONMENT VARIABLES"
 .TP 10
 MIBDIRS
-A colon selarated list of directories to search for MIB modules.
+A colon separated list of directories to search for MIB modules.
 Default: /usr/local/lib/snmp/mibs
 .TP 10
 MIBFILE
-A colon selarated list of files to load.
+A colon separated list of files to load.
 Default: mib.txt:/usr/local/lib/snmp/mib.txt:/etc/mib.txt
 .TP 10
 MIBS
-A colon selarated list of MIB modules to load.
+A colon separated list of MIB modules to load.
 Default: RFC1213-MIB.
 .SH "SEE ALSO"
 snmp_api(3)
