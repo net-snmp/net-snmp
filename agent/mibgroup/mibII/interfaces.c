@@ -1516,6 +1516,7 @@ Interface_Scan_Init(void)
     saveIndex = 0;
 
 
+#ifdef linux
     /*  disallow reloading of structures too often */
     gettimeofday ( &et, ( struct timezone * ) 0 );  /*  get time-of-day */
     if ( et.tv_sec < LastLoad + MINLOADFREQ ) {     /*  only reload so often */
@@ -1524,7 +1525,6 @@ Interface_Scan_Init(void)
     }
     LastLoad = et.tv_sec;
 
-#ifdef linux
     /*
      * free old list: 
      */
