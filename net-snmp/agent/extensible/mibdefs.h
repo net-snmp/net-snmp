@@ -25,7 +25,7 @@
 #define PROCERROR 6
 #define PROCERRORMSG 7
 
-#define SHELLMIBNUM 2
+#define SHELLMIBNUM 3
 #define SHELLINDEX 1
 #define SHELLNAMES 2
 #define SHELLCOMMAND 3
