@@ -265,7 +265,7 @@ AC_C_CONST
 dnl super type checking
 AC_MSG_CHECKING(for developer flags)
 if test "x$developer" = "xyes" -a "x$ac_cv_prog_gcc" = "xyes"; then
-  devflags="-Wall -Wstrict-prototypes -Wwrite-strings -Wcast-qual -pedantic -Wno-unused -Wno-char-subscripts"
+  devflags="-Wall -Wstrict-prototypes -Wwrite-strings -Wcast-qual -Wno-unused -Wno-char-subscripts"
   CFLAGS="$CFLAGS $devflags"
 else
   devflags="none"
