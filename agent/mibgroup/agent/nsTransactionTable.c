@@ -16,7 +16,7 @@ void
 initialize_table_nsTransactionTable(void)
 {
     static oid      nsTransactionTable_oid[] =
-        { 1, 3, 6, 1, 4, 1, 8072, 999, 1, 1 };
+        { 1, 3, 6, 1, 4, 1, 8072, 1, 8, 1 };
     size_t          nsTransactionTable_oid_len =
         OID_LENGTH(nsTransactionTable_oid);
     table_registration_info *table_info;
