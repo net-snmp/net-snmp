@@ -72,7 +72,7 @@ when you can't open files like /dev/kmem, etc...
 checks for the existence of and parses the following files:
 .TP 6
 .B DATADIR/snmp/snmp.conf
-Common configuration for the agend and the application. See snmp.conf(5)
+Common configuration for the agent and the application. See snmp.conf(5)
 for details.
 .TP
 .B DATADIR/snmp/snmpd.conf
