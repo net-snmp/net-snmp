@@ -1832,6 +1832,7 @@ _bulkwalk_recv_pdu(walk_context *context, netsnmp_pdu *pdu)
    bulktbl	*expect = NULL;
    int		old_numeric;
    int		old_printfull;
+   int		old_format;
    int		getlabel_flag;
    int		type;
    int		pix;
@@ -1854,10 +1855,12 @@ _bulkwalk_recv_pdu(walk_context *context, netsnmp_pdu *pdu)
    */
    old_numeric   = netsnmp_ds_get_boolean(NETSNMP_DS_LIBRARY_ID, NETSNMP_DS_LIB_PRINT_NUMERIC_OIDS);
    old_printfull = netsnmp_ds_get_boolean(NETSNMP_DS_LIBRARY_ID, NETSNMP_DS_LIB_PRINT_FULL_OID);
+   old_format = netsnmp_ds_get_int(NETSNMP_DS_LIBRARY_ID, NETSNMP_DS_LIB_OID_OUTPUT_FORMAT);
    if (context->getlabel_f & USE_NUMERIC_OIDS) {
       DBPRT(2,( "Using numeric oid's\n"));
       netsnmp_ds_set_boolean(NETSNMP_DS_LIBRARY_ID, NETSNMP_DS_LIB_PRINT_NUMERIC_OIDS, 1);
       netsnmp_ds_set_boolean(NETSNMP_DS_LIBRARY_ID, NETSNMP_DS_LIB_PRINT_FULL_OID, 1);
+      netsnmp_ds_set_int(NETSNMP_DS_LIBRARY_ID, NETSNMP_DS_LIB_OID_OUTPUT_FORMAT, NETSNMP_OID_OUTPUT_NUMERIC);
    }
 
    /* Parse through the list of variables returned, adding each return to
@@ -2095,7 +2098,10 @@ _bulkwalk_recv_pdu(walk_context *context, netsnmp_pdu *pdu)
 	 getlabel_flag |= NON_LEAF_NAME;
 	 type = __translate_asn_type(vars->type);
       }
-      __get_label_iid(str_buf, &label, &iid, getlabel_flag);
+      if (__get_label_iid(str_buf, &label, &iid, getlabel_flag) == FAILURE) {
+          label = str_buf;
+          iid = label + strlen(label);
+      }
 
       DBPRT(2,( "       save var %s.%s = ", label, iid));
 
@@ -2149,6 +2155,7 @@ _bulkwalk_recv_pdu(walk_context *context, netsnmp_pdu *pdu)
    if (context->getlabel_f & USE_NUMERIC_OIDS) {
       netsnmp_ds_set_boolean(NETSNMP_DS_LIBRARY_ID, NETSNMP_DS_LIB_PRINT_NUMERIC_OIDS, old_numeric);
       netsnmp_ds_set_boolean(NETSNMP_DS_LIBRARY_ID, NETSNMP_DS_LIB_PRINT_FULL_OID, old_printfull);
+      netsnmp_ds_set_int(NETSNMP_DS_LIBRARY_ID, NETSNMP_DS_LIB_OID_OUTPUT_FORMAT, old_format);
    }
 
    return pix;
