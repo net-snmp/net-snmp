@@ -404,7 +404,7 @@ inform notifications.
 If COMMUNITY is not specified, the string from a preceding \fItrapcommunity\fR
 directive will be used. If PORT is not specified, the well known SNMP trap
 port (162) will be used.
-.IP "trapsess [SNMPCMD_ARGS] HOST [COMMUNITY]"
+.IP "trapsess [SNMPCMD_ARGS] HOST"
 This is a more generic trap configuration token that allows any type
 of trap destination to be specified with any version of SNMP.  See the 
 .I snmpcmd(1)
