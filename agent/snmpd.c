@@ -474,6 +474,8 @@ main(int argc, char *argv[])
     netsnmp_ds_set_int(NETSNMP_DS_APPLICATION_ID,
                        NETSNMP_DS_AGENT_AGENTX_RETRIES, -1);
 
+    netsnmp_ds_set_int(NETSNMP_DS_APPLICATION_ID,
+                       NETSNMP_DS_AGENT_CACHE_TIMEOUT, 5);
     /*
      * Add some options if they are available.  
      */
@@ -1174,6 +1176,7 @@ receive(void)
                 snmp_timeout();
                 break;
             case -1:
+                DEBUGMSGTL(("snmpd/select", "  errno = %d\n", errno));
                 if (errno == EINTR) {
                     /*
                      * likely that we got a signal. Check our special signal
