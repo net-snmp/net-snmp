@@ -14,9 +14,12 @@
 
 #include "mibincl.h"
 #include "tools.h"
+/*#include "snmp_locking.h"*/
+#include "oid_array.h"
+#include "snmp-tc.h"
+
 #include <net-snmp/agent/snmp_agent.h>
 #include <net-snmp/agent/table.h>
-#include "oid_array.h"
 #include <net-snmp/agent/table_array.h>
 
 #if HAVE_DMALLOC_H
@@ -47,7 +50,10 @@ static const char *mode_name[] = {
 typedef struct table_array_data_s {
     table_registration_info * tblreg_info;
     oid_array                 array;
-    
+
+    /*    mutex_type                lock;*/
+    oid_array                 changing;
+
     int                       group_rows;
 
     table_array_callbacks     *cb;
@@ -72,6 +78,8 @@ register_table_array(handler_registration *reginfo,
     table_array_data * tad = SNMP_MALLOC_TYPEDEF(table_array_data);
     tad->tblreg_info = tabreg; /* we need it too, but it really is not ours */
     tad->array = Initialise_oid_array( sizeof(void*) );
+    /* netsnmp_mutex_init(&tad->lock); */
+    tad->changing = Initialise_oid_array( sizeof(void*) );
     tad->cb = cb;
 
     reginfo->handler->myvoid = tad;
@@ -85,16 +93,81 @@ extract_array_context(request_info *request)
     return request_get_list_data(request, TABLE_ARRAY_NAME);
 }
 
+#if 0
+
+typedef struct handler_registration_s {
+
+   char   *handlerName;  /* for mrTable listings, and other uses */
+   char   *contextName;  /* NULL = default context */
+
+   /* where are we registered at? */
+   oid    *rootoid;
+   size_t  rootoid_len;
+
+   /* handler details */
+   mib_handler *handler;
+   int modes;
+   
+   /* more optional stuff */
+   int     priority;
+   int     range_subid;
+   oid     range_ubound;
+   int     timeout;
+
+} handler_registration;
+
+
+typedef struct mib_handler_s {
+   char   *handler_name;
+   void   *myvoid;       /* for handler's internal use */
+
+   int (*access_method)(struct mib_handler_s *,
+                        struct handler_registration_s *,
+                        struct agent_request_info_s   *,
+                        struct request_info_s         *);
+
+   struct mib_handler_s *next;
+   struct mib_handler_s *prev;
+} mib_handler;
+
+
+#endif
+
 const oid_array_header*
 table_array_get_by_index(handler_registration *reginfo,
                          oid_array_header * hdr)
 {
     table_array_data* tad;
+    oid_array_header *rtn = NULL;
+    mib_handler *mh, *nx;
+    void *vd;
     
-    if(!reginfo ||
-       !reginfo->handler ||
-       ! reginfo->handler->next ||
-       ! reginfo->handler->next->myvoid )
+    if(reginfo == NULL)
+        return NULL;
+
+    mh = reginfo->handler;
+    if( mh == NULL)
+      return NULL;
+
+    nx = mh->next;
+    if( nx == NULL )
+      return NULL;
+
+    vd = nx->myvoid;
+    if(vd == NULL)
+      return NULL;
+
+    tad = (table_array_data*)vd;
+    if(tad == NULL || tad->array == NULL)
+      return NULL;
+
+    if(reginfo->handler == NULL)
+        return NULL;
+
+    if(reginfo->handler->next == NULL)
+        return NULL;
+
+    if(reginfo->handler->next->myvoid == NULL)
         return NULL;
 
     tad = (table_array_data*)
@@ -102,7 +175,113 @@ table_array_get_by_index(handler_registration *reginfo,
     if(!tad->array)
         return NULL;
 
-    return Get_oid_data( tad->array, hdr, 1 );
+    /* netsnmp_mutex_lock(&tad->lock);*/
+
+    if(tad->changing && Get_oid_data_count(tad->changing)) {
+        rtn = Get_oid_data( tad->changing, hdr, 1 );
+        if(!rtn)
+            rtn = Get_oid_data( tad->array, hdr, 1 );
+    }
+    else {
+        rtn = Get_oid_data( tad->array, hdr, 1 );
+    }
+
+    /* netsnmp_mutex_unlock(&tad->lock);*/
+
+    return rtn;
+}
+
+const oid_array_header**
+table_array_get_subset(handler_registration *reginfo,
+                       oid_array_header * hdr, int * len)
+{
+    table_array_data* tad;
+    const oid_array_header **rtn = NULL;
+    
+    if(reginfo == NULL)
+        return NULL;
+
+    if(reginfo->handler == NULL)
+        return NULL;
+
+    if(reginfo->handler->next == NULL)
+        return NULL;
+
+    if(reginfo->handler->next->myvoid == NULL)
+        return NULL;
+
+    tad = (table_array_data*)reginfo->handler->next->myvoid;
+    if(!tad->array)
+        return NULL;
+
+    /* netsnmp_mutex_lock(&tad->lock);*/
+
+    /* I really really don't want to merge two tables. so just freak
+       out if this is called during a set. */
+    assert( !tad->changing || Get_oid_data_count(tad->changing) == 0);
+
+    rtn = (const oid_array_header**)Get_oid_data_subset( tad->array, hdr, len );
+
+    /* netsnmp_mutex_unlock(&tad->lock);*/
+
+    return rtn;
+}
+
+int
+ta_check_row_status(table_array_callbacks *cb, oid_array_header* ctx_new,
+                    oid_array_header* ctx_old, array_group* ag,
+                    int* rs_new, int* rs_old)
+{
+    if (ctx_new) {
+        /*
+         * either a new row, or change to old row
+         */
+        int row_ready = cb->can_activate ? cb->can_activate(ctx_old, ctx_new, ag) : 1;
+
+        /*
+         * is it set to active?
+         */
+        if (RS_IS_GOING_ACTIVE(*rs_new)) {
+            /*
+             * is it ready to be active?
+             */
+            if (row_ready)
+                *rs_new = RS_ACTIVE;
+            else
+                return SNMP_ERR_INCONSISTENTVALUE;
+        }
+        else {
+            if (ctx_old) {
+                /*
+                 * change
+                 */
+                if (RS_IS_ACTIVE(*rs_old)) {
+                    /*
+                     * check preqs for deactivation
+                     */
+                    if (cb->can_deactivate && !cb->can_deactivate(ctx_old, ctx_new, ag)) {
+                        return SNMP_ERR_INCONSISTENTVALUE;
+                    }
+                }
+            }
+            else {
+                /*
+                 * new row
+                 */
+            }
+
+            *rs_new = row_ready ? RS_NOTINSERVICE : RS_NOTREADY;
+        }
+    } else {
+        /*
+         * check pre-reqs for delete row
+         */
+        if (cb->can_delete && !cb->can_delete(ctx_old, ctx_new, ag)) {
+            return SNMP_ERR_INCONSISTENTVALUE;
+        }
+    }
+
+    return SNMP_ERR_NOERROR;
 }
 
 /**********************************************************************
@@ -449,6 +628,9 @@ process_set_group( oid_array_header* o, void *c )
         if(context->tad->cb->set_reserve1)
             context->tad->cb->set_reserve1( ag );
 
+        /*
+         * create storage for new row
+         */
         if(!ag->new_row && context->tad->cb->duplicate_row &&
            ag->status == SNMP_ERR_NOERROR) {
             ag->new_row = context->tad->cb->duplicate_row( ag->old_row );
@@ -480,6 +662,7 @@ process_set_group( oid_array_header* o, void *c )
             Add_oid_data(ag->table,ag->new_row);
         }
         
+        Add_oid_data(context->tad->changing,ag->new_row);
         if(context->tad->cb->set_action)
             context->tad->cb->set_action( ag );
         break;
@@ -493,6 +676,7 @@ process_set_group( oid_array_header* o, void *c )
             context->tad->cb->delete_row(ag->old_row);
             ag->old_row = NULL;
         }
+        Remove_oid_data(context->tad->changing,ag->new_row,NULL);
         break;
         
     case MODE_SET_FREE: /** FINAL CHANCE ON FAILURE */
@@ -624,9 +808,12 @@ table_array_helper_handler(
      * requests. We don't need to find each row for every
      * pass of the SET processing, so we'll cache results.
      */
-    if(MODE_IS_SET(agtreq_info->mode))
+    if(MODE_IS_SET(agtreq_info->mode)) {
+        /* netsnmp_mutex_lock(&tad->lock);*/
         rc = process_set_requests( agtreq_info, requests,
                                    tad, handler->handler_name );
+        /* netsnmp_mutex_unlock(&tad->lock);*/
+    }
     else
         rc = process_get_requests( reginfo, agtreq_info, requests, tad );
 
