@@ -23,14 +23,14 @@ getopts("qadhfc:piI:r:R:g:G", \%opts);
 
 # display help
 if ($opts{'h'}) {
-    print "$0 [-h] [-d] [-f] [-c config_directory] [FILETOCREATE...]\n";
+    print "$0 [options] [FILETOCREATE...]\n";
+    print "options:\n";
     print "  -f           overwrite existing files without prompting\n";
     print "  -i           install created files into /usr/local/share/snmp.\n";
     print "  -p           install created files into $ENV{HOME}/.snmp.\n";
     print "  -I DIR       install created files into DIR.\n";
     print "  -a           Don't ask any questions, just read in current\n";
     print "                   current .conf files and comment them\n";
-    print "  -f           Overwrite existing files without asking.\n";
     print "  -r all|none  Read in all or none of the .conf files found.\n";
     print "  -R file,...  Read in a particular list of .conf files.\n";
     print "  -g GROUP     Ask a series of GROUPed questions.\n";
@@ -313,6 +313,8 @@ sub do_line {
 	    debug("after: $term, $q, ",$confline->{'validanswer'}[$i],"\n");
 	    $answers[$i] = get_answer($term, $q,
 				      $confline->{'validanswer'}[$i]);
+	    $answers[$i] =~ s/\"/\\\"/g;
+	    $answers[$i] = '"' . $answers[$i] . '"' if ($answers[$i] =~ /\s/);
 	}
     }
     if ($#{$confline->{'line'}} == -1) {
