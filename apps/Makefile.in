@@ -112,5 +112,5 @@ snmpdf$(EXEEXT):    snmpdf.$(OSUFFIX) $(USELIBS)
 	$(LINK) -o $@ snmpdf.$(OSUFFIX) $(LOCAL_LIBS) ${LDFLAGS} ${LIBS} 
 
 snmpinforminstall:
-	rm -f $(sbindir)/snmpinform$(EXEEXT)
-	$(LN_S) $(sbindir)/snmptrap$(EXEEXT) $(sbindir)/snmpinform$(EXEEXT)
+	rm -f $(bindir)/snmpinform$(EXEEXT)
+	$(LN_S) $(bindir)/snmptrap$(EXEEXT) $(bindir)/snmpinform$(EXEEXT)
