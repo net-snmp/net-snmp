@@ -822,6 +822,7 @@ netsnmp_subtree_unload(netsnmp_subtree *sub, netsnmp_subtree *prev, const char *
 
     if (prev != NULL) {         /* non-leading entries are easy */
         prev->children = sub->children;
+        invalidate_lookup_cache(context);
         return;
     }
     /*
@@ -838,7 +839,6 @@ netsnmp_subtree_unload(netsnmp_subtree *sub, netsnmp_subtree *prev, const char *
 	    netsnmp_subtree_replace_first(sub->next, context);
 	}
 
-        return;
     } else {
         for (ptr = sub->prev; ptr; ptr = ptr->children)
             ptr->next = sub->children;
@@ -848,8 +848,8 @@ netsnmp_subtree_unload(netsnmp_subtree *sub, netsnmp_subtree *prev, const char *
 	if (sub->prev == NULL) {
 	    netsnmp_subtree_replace_first(sub->children, context);
 	}
-        return;
     }
+    invalidate_lookup_cache(context);
 }
 
 /**
