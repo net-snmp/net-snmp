@@ -1050,6 +1050,9 @@ snmp_in_toggle_options(char *options)
 	case 'b':
 	    ds_toggle_boolean(DS_LIBRARY_ID, DS_LIB_REGEX_ACCESS);
 	    break;
+	case 'r':
+	    ds_toggle_boolean(DS_LIBRARY_ID, DS_LIB_DONT_CHECK_RANGE);
+	    break;
         default:
 	    return options-1;
 	}
@@ -1061,6 +1064,7 @@ void snmp_in_toggle_options_usage(const char *lead, FILE *outf)
 {
   fprintf(outf, "%sINOPTS values:\n", lead);
   fprintf(outf, "%s    R: Do random access to oid labels.\n", lead);
+  fprintf(outf, "%s    r: Don't check values for range/type legality.\n", lead);
   fprintf(outf, "%s    b: Do best/regex matching to find a MIB node.\n", lead);
 }
 

@@ -44,7 +44,7 @@ if test "$snmp_last_test_result" = 1; then
   if test "$snmp_last_test_result" = 1; then
 
     # test to see that the agent now supports setting the system mib
-    CAPTURE "snmpset $SNMP_FLAGS -t 5 -v 3 -a MD5 -A initial_test_pass_auth -l anp -u initial -n xxx localhost sysContact.0 i 4"
+    CAPTURE "snmpset -Ir $SNMP_FLAGS -t 5 -v 3 -a MD5 -A initial_test_pass_auth -l anp -u initial -n xxx localhost sysContact.0 i 4"
 
     CHECK "Wrong Type"
 
