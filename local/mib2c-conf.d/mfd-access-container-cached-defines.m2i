@@ -176,6 +176,7 @@ $example_end
      */
     while( 1 ) {
 @   if $m2c_include_examples == 0@
+@      eval $cc_tmp_idx_pfx = "TODO_FIND_"@
         /*
          * TODO: check for end of data
          * bail out if there is no more data
@@ -183,6 +184,7 @@ $example_end
         if( ${context}_TODO_CHECK_OUT_OF_DATA() )
             break;
 @   else@
+@      eval $cc_tmp_idx_pfx = ""@
 $example_start
     /*
      * get a line (skip blank lines)
@@ -227,9 +229,9 @@ $example_end
 @   foreach $node index@
 @      include m2c_setup_node.m2i@
 @        if $m2c_node_needlength == 1@
-                               , ${node}, ${node}_len
+                               , $cc_tmp_idx_pfx${node}, $cc_tmp_idx_pfx${node}_len
 @        else@
-                               , $node
+                               , $cc_tmp_idx_pfx$node
 @        end@
 @   end@ # foreach index
                )) {
