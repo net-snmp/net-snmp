@@ -4939,7 +4939,9 @@ _sess_process_packet(void *sessp, netsnmp_session * sp,
                 || callback(NETSNMP_CALLBACK_OP_RECEIVED_MESSAGE, sp,
                             pdu->reqid, pdu, magic) == 1) {
                 if (pdu->command == SNMP_MSG_REPORT) {
-                    if (sp->s_snmp_errno == SNMPERR_NOT_IN_TIME_WINDOW) {
+                    if (sp->s_snmp_errno == SNMPERR_NOT_IN_TIME_WINDOW ||
+                        snmpv3_get_report_type(pdu) ==
+                        SNMPERR_NOT_IN_TIME_WINDOW) {
                         /*
                          * trigger immediate retry on recoverable Reports 
                          * * (notInTimeWindow), incr_retries == TRUE to prevent
