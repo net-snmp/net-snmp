@@ -172,28 +172,19 @@ int add_trap_session( struct snmp_session *ss, int pdutype, int version )
 
 #ifdef HAVE_GETHOSTBYNAME
         hp = gethostbyname(ss->peername);
-        if (hp == NULL){
-            snmp_log(LOG_ERR,"failed to look up hostname: %s\n", ss->peername);
-            snmp_sess_close(ss);
-            return (0);
+        if (hp != NULL){
+            /* XXX: fix for other domain types */
+            ptr->tAddressLen = hp->h_length + 2;
+            ptr->tAddress = malloc(ptr->tAddressLen);
+            memmove(ptr->tAddress, hp->h_addr, hp->h_length);
+            ptr->tAddress[hp->h_length] = (ss->remote_port & 0xff00) >> 8;
+            ptr->tAddress[hp->h_length+1] = (ss->remote_port & 0xff);
+        } else {
+#endif /* HAVE_GETHOSTBYNAME */
+            ptr->tAddressLen = 6;
+            ptr->tAddress = calloc(1, ptr->tAddressLen);
+#ifdef HAVE_GETHOSTBYNAME
         }
-        /* XXX: fix for other domain types */
-        ptr->tAddressLen = hp->h_length + 2;
-        ptr->tAddress = malloc(ptr->tAddressLen);
-        memmove(ptr->tAddress, hp->h_addr, hp->h_length);
-        DEBUGMSGTL(("port",":%d\n",ss->remote_port));
-        ptr->tAddress[hp->h_length] = (ss->remote_port & 0xff00) >> 8;
-        ptr->tAddress[hp->h_length+1] = (ss->remote_port & 0xff);
-        DEBUGMSGTL(("port",":%d %d %d\n",ptr->tAddress[hp->h_length],
-                    ptr->tAddress[hp->h_length+1],
-                    (ptr->tAddress[hp->h_length])*256 +
-                    (ptr->tAddress[hp->h_length+1])));
-
-#else /* HAVE_GETHOSTBYNAME */
-        snmp_log(LOG_ERR,"%s:%d: _sess_open do not have get host by name - cannot resolve %s \n",
-                 __FILE__,__LINE__,
-                 ss->peername);
-        return(0);
 #endif /* HAVE_GETHOSTBYNAME */
         ptr->timeout = ss->timeout/1000;
         ptr->retryCount = ss->retries;
