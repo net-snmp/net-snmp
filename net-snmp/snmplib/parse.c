@@ -108,7 +108,11 @@ char *File;
 static int save_mib_descriptions = 0;
 static int mib_warnings = 0;
 static int anonymous = 0;
+#ifdef MIB_COMMENT_IS_EOL_TERMINATED
+static int mib_comment_term = 1; /* 0=strict, 1=EOL terminated */
+#else  /* !MIB_COMMENT_IS_EOL_TERMINATED */
 static int mib_comment_term = 0; /* 0=strict, 1=EOL terminated */
+#endif /* !MIB_COMMENT_IS_EOL_TERMINATED */
 static int mib_parse_label = 0; /* 0=strict, 1=underscore OK in label */
 
 #define SYNTAX_MASK     0x80
@@ -403,6 +407,54 @@ void snmp_set_mib_parse_label(save)
     int save;
 {
 	mib_parse_label = save; /* 0=strict, 1=underscore OK in label */
+}
+
+void snmp_mib_toggle_options_usage(char *lead, FILE *outf) {
+  fprintf(outf, "%sMIBOPTS values:\n", lead);
+  fprintf(outf, "%s    u: %sallow the usage of underlines in mib symbols.\n",
+          lead, ((mib_parse_label)?"dis":""));
+  fprintf(outf, "%s    c: %sallow the usage of \"--\" to terminate comments.\n",
+          lead, ((mib_comment_term)?"dis":""));
+  fprintf(outf, "%s    d: %s save the descriptions of the mib objects.\n",
+          lead, ((save_mib_descriptions)?"don't":""));
+  fprintf(outf, "%s    w: Enable mib warnings of MIB symbols conflicts\n",
+          lead);
+  fprintf(outf, "%s    W: Enable detailed warnings of MIB symbols conflicts\n",
+          lead);
+}
+
+char *snmp_mib_toggle_options(char *options) {
+  if (options) {
+    while(*options) {
+      switch(*options) {
+        case 'u':
+          mib_parse_label = !mib_parse_label;
+          break;
+
+        case 'c':
+          mib_comment_term = !mib_comment_term;
+          break;
+           
+        case 'w':
+          mib_warnings=1;
+          break;
+
+        case 'W':
+          mib_warnings=2;
+          break;
+          
+        case 'd':
+          save_mib_descriptions = !save_mib_descriptions;
+          break;
+
+        default:
+          /* return at the unknown option */
+          return options;
+      }
+      options++;
+    }
+  }
+  return NULL;
 }
 
 static int
