@@ -335,7 +335,7 @@ var_extensible_pass(struct variable *vp,
                     long_ret = strtol(buf2, NULL, 10);
                     vp->type = ASN_INTEGER;
                     return ((unsigned char *) &long_ret);
-                } else if (!strncasecmp(buf, "unsigned", 7)) {
+                } else if (!strncasecmp(buf, "unsigned", 8)) {
                     *var_len = sizeof(long_ret);
                     long_ret = strtoul(buf2, NULL, 10);
                     vp->type = ASN_UNSIGNED;
@@ -472,12 +472,14 @@ setPass(int action,
             }
             strncat(passthru->command, buf, sizeof(passthru->command));
             passthru->command[ sizeof(passthru->command)-1 ] = 0;
-            DEBUGMSGTL(("ucd-snmp/pass", "pass-running:  %s\n",
+            DEBUGMSGTL(("ucd-snmp/pass", "pass-running:  %s",
                         passthru->command));
             exec_command(passthru);
-            if (!strncasecmp(passthru->output, "not-writable", 11)) {
+            DEBUGMSGTL(("ucd-snmp/pass", "pass-running returned: %s",
+                        passthru->output));
+            if (!strncasecmp(passthru->output, "not-writable", 12)) {
                 return SNMP_ERR_NOTWRITABLE;
-            } else if (!strncasecmp(passthru->output, "wrong-type", 9)) {
+            } else if (!strncasecmp(passthru->output, "wrong-type", 10)) {
                 return SNMP_ERR_WRONGTYPE;
             }
             return SNMP_ERR_NOERROR;
