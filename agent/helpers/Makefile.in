@@ -1,0 +1,72 @@
+top_builddir=../..
+
+#
+# What to install
+#
+
+INSTALLLIBS=libnetsnmphelpers.$(LIB_EXTENSION)$(LIB_VERSION)
+INCLUDESUBDIR=agent
+INCLUDESUBDIRHEADERS=all_helpers.h \
+	baby_steps.h \
+	cache_handler.h \
+	instance.h \
+	scalar.h \
+	scalar_group.h \
+	watcher.h \
+        multiplexer.h \
+	bulk_to_next.h \
+        null.h \
+        debug_handler.h \
+        old_api.h \
+        read_only.h \
+        row_merge.h \
+        serialize.h \
+        set_helper.h \
+        table_data.h \
+        table_dataset.h \
+	table_array.h \
+        table.h \
+        table_iterator.h \
+	mode_end_call.h
+
+
+#
+# Build info
+#
+CPPFLAGS=-I../../include -I$(top_srcdir)/include \
+	-I. -I.. -I../.. -I$(srcdir) -I$(srcdir)/..  \
+	-I$(srcdir)/../mibgroup -I$(srcdir)/../.. -I$(srcdir)/../../snmplib \
+	@CPPFLAGS@ $(LIB_CFLAGS)
+
+SRCS =  all_helpers.c \
+	baby_steps.c \
+	cache_handler.c \
+	multiplexer.c \
+	read_only.c \
+	bulk_to_next.c \
+	instance.c \
+	scalar.c \
+	scalar_group.c \
+	watcher.c \
+	null.c \
+	debug_handler.c \
+	old_api.c \
+	row_merge.c \
+	serialize.c \
+	stash_cache.c \
+	table_array.c \
+	table_iterator.c \
+	table_data.c \
+	table_dataset.c \
+	table.c \
+	mode_end_call.c
+
+OBJS =  $(SRCS:.c=.o)
+
+LOBJS = $(SRCS:.c=.lo)
+
+all: standardall
+
+libnetsnmphelpers.$(LIB_EXTENSION)$(LIB_VERSION):    ${LOBJS}
+	$(LIB_LD_CMD) libnetsnmphelpers.$(LIB_EXTENSION)$(LIB_VERSION) ${LOBJS}  $(LIB_LD_LIBS)
+	$(RANLIB) libnetsnmphelpers.$(LIB_EXTENSION)$(LIB_VERSION)
