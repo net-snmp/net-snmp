@@ -30,6 +30,7 @@
 #include "snmp_api.h"
 #include "snmp_client.h"
 #include "snmp_impl.h"
+#include "snmp_alarm.h"
 #include "snmp.h"
 #include "system.h"
 
