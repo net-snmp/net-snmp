@@ -2,6 +2,8 @@ dnl Process this file with autoconf to produce a configure script.
 AC_INIT(agent/mibgroup/ucd-snmp/extensible.c)
 AC_CONFIG_HEADER(config.h)
 
+AC_ARG_WITH(out_mib_modules,[  --with-cc=CC                    use CC to compile .],CC=$with_cc)
+AC_ARG_WITH(out_mib_modules,[  --with-cflags=CFLAGS            use CFLAGS as compile time arguments.],CFLAGS=$with_cflags)
 AC_ARG_ENABLE(debugging,[  --enable-debugging              Outputs extra debugging information.],AC_DEFINE(DODEBUG))
 AC_ARG_ENABLE(shared,[  --enable-shared                 Compile and install shared libraries.],with_shared="yes",with_shared="no")
 AC_ARG_WITH(defaults,[  --with-defaults                 Use defaults for prompted values.],defaults="yes",defaults="no")
