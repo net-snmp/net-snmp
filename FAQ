@@ -1630,7 +1630,7 @@ What about 'dlmod' - what's that about?
   module(s) to load are specified in the configuration file, and the agent
   locates the files listed, and merges them in at run time.
 
-  See WHERE for more information.
+  See http://www.net-snmp.org/tutorial/toolkit/dlmod/ for more information.
 
 
 
