@@ -28,6 +28,7 @@ SOFTWARE.
 #include <config.h>
 #include <stdio.h>
 #include <ctype.h>
+#include <errno.h>
 
 #if HAVE_UNISTD_H
 #include <unistd.h>
@@ -114,13 +115,15 @@ SOFTWARE.
 #include "system.h"
 #include "snmp_logging.h"
 
-#define NUM_NETWORKS    32   /* max number of interfaces to check */
-
 #ifndef IFF_LOOPBACK
 #	define IFF_LOOPBACK 0
 #endif
 
-#define LOOPBACK    0x7f000001
+#ifdef  INADDR_LOOPBACK
+# define LOOPBACK    INADDR_LOOPBACK
+#else
+# define LOOPBACK    0x7f000001
+#endif
 
 
 
@@ -366,48 +369,85 @@ void winsock_cleanup (void)
 /*******************************************************************/
 
 /*
- * XXX	What if we have multiple addresses?
- * XXX	Could it be computed once then cached?
+ * XXX	What if we have multiple addresses?  Or no addresses for that matter?
+ * XXX	Could it be computed once then cached?  Probably not worth it (not
+ *                                                           used very often).
  */
 in_addr_t get_myaddr (void)
 {
-    int sd;
+    int sd, i, interfaces, lastlen = 0;
     struct ifconf ifc;
-    struct ifreq conf[NUM_NETWORKS], *ifrp, ifreq;
-    struct sockaddr_in *in_addr;
-    int count;
-    int interfaces;             /* number of interfaces returned by ioctl */
+    struct ifreq *ifrp = NULL;
+    in_addr_t addr;
+    char *buf = NULL;
 
-    if ((sd = socket(AF_INET, SOCK_DGRAM, 0)) < 0)
-        return 0;
-    ifc.ifc_len = sizeof(conf);
-    ifc.ifc_buf = (caddr_t)conf;
-    if (ioctl(sd, SIOCGIFCONF, (char *)&ifc) < 0){
-        close(sd);
-        return 0;
+    if ((sd = socket(AF_INET, SOCK_DGRAM, 0)) < 0) {
+      return 0;
     }
+
+    /*  Cope with lots of interfaces and brokenness of ioctl SIOCGIFCONF on
+	some platforms; see W. R. Stevens, ``Unix Network Programming Volume
+	I'', p.435.  */
+    
+    for (i = 8; ; i += 8) {
+      buf = calloc(i, sizeof(struct ifreq));
+      if (buf == NULL) {
+	close(sd);
+	return 0;
+      }
+      ifc.ifc_len = i * sizeof(struct ifreq);
+      ifc.ifc_buf = (caddr_t)buf;
+
+      if (ioctl(sd, SIOCGIFCONF, (char *)&ifc) < 0) {
+	if (errno != EINVAL || lastlen != 0) {
+	  /*  Something has gone genuinely wrong.  */
+	  free(buf);
+	  close(sd);
+	  return 0;
+	}
+	/*  Otherwise, it could just be that the buffer is too small.  */
+      } else {
+	if (ifc.ifc_len == lastlen) {
+	  /*  The length is the same as the last time; we're done.  */
+	  break;
+	}
+	lastlen = ifc.ifc_len;
+      }
+      free(buf);
+    }
+
     ifrp = ifc.ifc_req;
     interfaces = ifc.ifc_len / sizeof(struct ifreq);
-    for(count = 0; count < interfaces; count++, ifrp++){
-        ifreq = *ifrp;
-        if (ioctl(sd, SIOCGIFFLAGS, (char *)&ifreq) < 0)
-            continue;
-        in_addr = (struct sockaddr_in *)&ifrp->ifr_addr;
-        if ((ifreq.ifr_flags & IFF_UP)
+
+    for(i = 0; i < interfaces; i++, ifrp++) {
+        if (ifrp->ifr_addr.sa_family != AF_INET) {
+	  continue;
+	}
+        addr = ((struct sockaddr_in *)&(ifrp->ifr_addr))->sin_addr.s_addr;
+
+        if (ioctl(sd, SIOCGIFFLAGS, (char *)ifrp) < 0) {
+	  continue;
+	}
+        if ((ifrp->ifr_flags & IFF_UP)
 #ifdef IFF_RUNNING
-          && (ifreq.ifr_flags & IFF_RUNNING)
+          && (ifrp->ifr_flags & IFF_RUNNING)
 #endif /* IFF_RUNNING */
-          && !(ifreq.ifr_flags & IFF_LOOPBACK)
-          && in_addr->sin_addr.s_addr != LOOPBACK){
+          && !(ifrp->ifr_flags & IFF_LOOPBACK)
+          && addr != LOOPBACK) {
+	  /*  I *really* don't understand why this is necessary.  Perhaps for
+	      some broken platform?  Leave it for now.  JBPN  */
 #ifdef SYS_IOCTL_H_HAS_SIOCGIFADDR
-	    if (ioctl(sd, SIOCGIFADDR, (char *)&ifreq) < 0)
-		continue;
-	    in_addr = (struct sockaddr_in *)&(ifreq.ifr_addr);
+	  if (ioctl(sd, SIOCGIFADDR, (char *)ifrp) < 0) {
+	    continue;
+	  }
+	  addr = ((struct sockaddr_in *)&(ifrp->ifr_addr))->sin_addr.s_addr;
 #endif
-	    close(sd);
-	    return in_addr->sin_addr.s_addr;
+	  free(buf);
+	  close(sd);
+	  return addr;
 	}
     }
+    free(buf);
     close(sd);
     return 0;
 }
