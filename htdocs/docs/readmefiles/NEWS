@@ -1,6 +1,55 @@
 This file contains major changes in released revisions.  Please read
 the ChangeLog file for a more detailed listing of changes/bug fixes.
 
+
+*5.2.1*
+ Fixes:
+   Building:
+     - configure --disable-snmpv2c now works
+     - fix make test tests for rfc1213
+     - bug 1049607: net-snmp-config --compile-subagent broken
+
+   library:
+     - bug 1084413: Can't disable file logging
+     - bug 1072406: invalid operator precedence in opendir()
+
+   agent library:
+     - disconnected AgentX subagents now reconnect with correct context
+     - fix table_array row insert/delete during set processing
+
+   agent:
+     - don't override clientAddr setting for local trapsinks
+     - bug 1088765: Agent fails to send traps to remote target
+     - bug 1034008: memory leak using SET for table_dataset
+     - patch 1052460: fix agent deadlock on exec
+     - bug 1055781: get-next fails to step into interfaces group correctly
+     - bug 1056760: agent ignores ifspeed, type settings in snmpd.conf
+     - bug 1062986: pass and pass_persist fail and crash snmpd
+     - fix snmpd.conf table token to handle augments tables
+
+   snmptrapd:
+     - bug 1085981: snmptrapd complains about logging and access control
+     - bug 1040711: snmptrapd: SIGHUP duplicates traphandlers (repeatedly)
+
+   MFD:
+     - Misc updates to MFD templates
+     - add auto-handling of cache update for row insert/delete
+
+ Ports:
+   - Win32
+      - fixes for compiling without the Microsoft PSDK installed
+      - fix Win32 getenv crash
+   - Mac OS X compile error fix
+   - HP-UX configure now detects and won't use unavailable function
+   - Linux
+      - patch 1055036: if-mib init order fix
+      - patch 1057057: ipSystemStatsTable index fix, add ipv6
+      - patch 1073897: fix if-mib data access 64bit counter wrap detection
+
+ MIBs:
+   - update IP-FORWARD-MIB from an ID set to become an RFC
+
+
 *5.2*
  New:
     For the security parnoid (like Wes):
