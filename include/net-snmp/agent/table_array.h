@@ -129,7 +129,7 @@ extern          "C" {
 
 
     int            
-        netsnmp_register_table_array(netsnmp_handler_registration *reginfo,
+        netsnmp_table_container_register(netsnmp_handler_registration *reginfo,
                                      netsnmp_table_registration_info
                                      *tabreq,
                                      netsnmp_table_array_callbacks *cb,
