@@ -1030,9 +1030,11 @@ int	snmpv3_engineID_probe	(struct session_list *slp,
       it -- this must be done after the session is created and inserted in the
       list so that the response can handled correctly. */
 
+  if ((session->flags & SNMP_FLAGS_DONT_PROBE) != SNMP_FLAGS_DONT_PROBE)
+      return 1;
+
   if (session->version == SNMP_VERSION_3) {
-    if (session->securityEngineIDLen == 0 &&
-	(session->flags & SNMP_FLAGS_DONT_PROBE) != SNMP_FLAGS_DONT_PROBE) {
+    if (session->securityEngineIDLen == 0) {
       if (snmpv3_build_probe_pdu(&pdu) != 0) {
 	DEBUGMSGTL(("snmp_api","unable to create probe PDU\n"));
 	return 0;
