@@ -1360,7 +1360,7 @@ AC_MSG_CACHE_ADD(SNMPv3 Security Modules:   $new_with_security)
 #
 
 ac_cv_MIT_NEW_CRYPTO=no
-rebuilt_with_security=
+rebuilt_new_with_security=
 already_checked_krb5=no
 
 for sec in $new_with_security
