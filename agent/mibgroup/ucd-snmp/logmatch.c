@@ -278,7 +278,7 @@ updateLogmatch(int iindex)
     regmatch_t      myMatch;
     int             matchResultCode;
     char            inbuf[1024];
-    char            perfilename[512];
+    char            perfilename[1024];
     FILE           *perfile;
     unsigned long   pos, ccounter, counter;
     int             result;
@@ -594,7 +594,7 @@ var_logmatch_table(struct variable *vp,
                    size_t * var_len, WriteMethod ** write_method)
 {
     static long     long_ret;
-    static char     message[256];
+    static char     message[1024];
     int             iindex;
     struct logmatchstat *logmatch;
 

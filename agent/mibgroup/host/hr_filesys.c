@@ -262,7 +262,7 @@ var_hrfilesys(struct variable *vp,
               int exact, size_t * var_len, WriteMethod ** write_method)
 {
     int             fsys_idx;
-    static char     string[100];
+    static char     string[1024];
     char           *mnt_type;
 
     fsys_idx =
@@ -653,7 +653,7 @@ when_dumped(char *filesys, int level, size_t * length)
 {
     time_t          dumpdate = 0, tmp;
     FILE           *dump_fp;
-    char            line[100];
+    char            line[1024];
     char           *cp1, *cp2, *cp3;
 
     /*
