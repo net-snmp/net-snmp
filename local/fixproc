@@ -180,9 +180,9 @@ sub do_kill
     || die "$0: can't run ps-grep-awk command\n";
   while (<command>)
     {
-      # match the 4th field of ps -e
+      # match the first field of ps -e
       $! = $fixproc_error;
-      /^\s*\d+\s+\S+\s+\d+\s+(\d+)\s+/ || die "$0: can't match ps -e output\n";
+      /^\s*(\d+)\s/ || die "$0: can't match ps -e output\n";
       system "kill $1";
     }
 
@@ -194,9 +194,9 @@ sub do_kill
   $second_kill_needed = 0;
   while (<command>)
     {
-      # match the 4th field of ps -e
+      # match the first field of ps -e
       $! = $fixproc_error;
-      /^\s*\d+\s+\S+\d+\s+(\d+)\s+/ || die "$0: can't match ps -e output\n";
+      /^\s*(\d+)\s/ || die "$0: can't match ps -e output\n";
       system "kill -9 $1";
       $second_kill_needed = 1;
     }
