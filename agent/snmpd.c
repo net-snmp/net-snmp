@@ -89,6 +89,7 @@ typedef long    fd_mask;
 #include "snmp_api.h"
 #include "snmp_impl.h"
 #include "system.h"
+#include "read_config.h"
 #include "snmp.h"
 #include "mib.h"
 #include "m2m.h"
@@ -312,9 +313,7 @@ void
 send_trap_pdu(pdu)
   struct snmp_pdu *pdu;
 {
-  struct timeval now, diff;
   struct snmp_pdu *mypdu;
-  struct variable_list *trap_vars;
   
   struct trap_sink *sink = v2sinks;
 

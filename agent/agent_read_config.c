@@ -66,12 +66,6 @@ void init_agent_read_config __P((void))
 RETSIGTYPE update_config(a)
 int a;
 {
-  int i;
-  char configfile[300];
-  char *envconfpath;
-  char *cptr1, *cptr2;
-  char defaultPath[1024];
-
   if (!dontReadConfigFiles) {  /* don't read if -C present on command line */
     read_configs();
   }
@@ -249,8 +243,8 @@ snmpd_register_config_handler(token, parser, releaser)
 }
 
 void
-unregister_config_handler(token)
-  char *token
+snmpd_unregister_config_handler(token)
+  char *token;
 {
   unregister_config_handler("snmpd",token);
 }
