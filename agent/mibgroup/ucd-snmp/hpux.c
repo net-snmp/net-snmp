@@ -37,8 +37,8 @@ void int_hpux(void)
   oid hptrap_variables_oid[] = { 1,3,6,1,4,1,11,2,13,2 };
 
   /* register ourselves with the agent to handle our mib tree */
-  REGISTER_MIB("mibII/hpux:hp", hp_variables, variable2, hp_variables_oid);
-  REGISTER_MIB("mibII/hpux:hptrap", hptrap_variables, variable2, \
+  REGISTER_MIB("ucd-snmp/hpux:hp", hp_variables, variable2, hp_variables_oid);
+  REGISTER_MIB("ucd-snmp/hpux:hptrap", hptrap_variables, variable2, \
                hptrap_variables_oid);
 
 }

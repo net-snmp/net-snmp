@@ -42,7 +42,7 @@ void init_file(void)
   oid file_variables_oid[] = { EXTENSIBLEMIB,15,1 };
 
   /* register ourselves with the agent to handle our mib tree */
-  REGISTER_MIB("mibII/file", file_table, variable2, file_variables_oid);
+  REGISTER_MIB("ucd-snmp/file", file_table, variable2, file_variables_oid);
 
   snmpd_register_config_handler("file", file_parse_config, file_free_config,
                                 "file [maxsize]");

@@ -171,7 +171,7 @@ void init_memory(void)
   oid mem_variables_oid[] = { EXTENSIBLEMIB,MEMMIBNUM };
 
   /* register ourselves with the agent to handle our mib tree */
-  REGISTER_MIB("ucd_snmp/memory", extensible_mem_variables, variable2, \
+  REGISTER_MIB("ucd-snmp/memory", extensible_mem_variables, variable2, \
                mem_variables_oid);
 
   snmpd_register_config_handler("swap", memory_parse_config,
