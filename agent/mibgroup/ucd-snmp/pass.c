@@ -48,6 +48,42 @@ struct variable2 extensible_passthru_variables[] = {
   /* bogus entry.  Only some of it is actually used. */
   {MIBINDEX, ASN_INTEGER, RWRITE, var_extensible_pass, 0, {MIBINDEX}},
 };
+#define BUFMAX 4096
+
+int asc2bin(char *p)
+{
+    char *r, *q = p;
+    char c;
+    int n = 0;
+
+    for (;;) {
+        c = strtol(q, &r, 16);
+        if (r == q) break;
+        *p++ = c;
+        q = r;
+        n++;
+    }
+    return n;
+}
+
+int bin2asc(char *p, int n)
+{
+    int i, flag = 0;
+    char buffer[BUFMAX];
+
+    for (i = 0; i < n; i++) {
+        buffer[i] = p[i];
+        if (!isprint(p[i])) flag = 1;
+    }
+    if (flag == 0) return n;
+    for (i = 0; i < n; i++) {
+        sprintf(p, "%02x ", (unsigned char)(buffer[i] & 0xff));
+        p += 3;
+    }
+    *--p = 0;
+    return 3 * n - 1;
+}
+
 
 void init_pass(void) 
 {
@@ -136,11 +172,6 @@ void pass_free_config (void)
   numpassthrus = 0;
 }
 
-
-
-  
-
-
 unsigned char *var_extensible_pass(struct variable *vp,
 				   oid *name,
 				   int *length,
@@ -152,7 +183,7 @@ unsigned char *var_extensible_pass(struct variable *vp,
   oid newname[MAX_OID_LEN];
   int i, j, rtest=0, fd, newlen, last;
   static long long_ret;
-  static char buf[STRMAX], buf2[STRMAX];
+  static char buf[BUFMAX], buf2[BUFMAX];
   static oid  objid[MAX_OID_LEN];
   struct extensible *passthru;
   FILE *file;
@@ -225,6 +256,10 @@ unsigned char *var_extensible_pass(struct variable *vp,
           return((unsigned char *) &long_ret);
         } else if (!strncasecmp(buf,"counter",7)) {
           *var_len = sizeof(long_ret);
+        } else if (!strncasecmp(buf,"octet",5)) {
+          *var_len = asc2bin(buf2);
+          vp->type = ASN_OCTET_STR;
+          return((unsigned char *) buf2);
           long_ret = atoi(buf2);
           vp->type = ASN_COUNTER;
           return((unsigned char *) &long_ret);
@@ -279,7 +314,7 @@ setPass(int action,
   int i, j, rtest, last;
   struct extensible *passthru;
 
-  static char buf[STRMAX], buf2[STRMAX];
+  static char buf[BUFMAX], buf2[BUFMAX];
   static long tmp;
   static unsigned long utmp;
   static int itmp;
@@ -341,7 +376,10 @@ setPass(int action,
           memset(buf2,(0),itmp);
           memcpy(buf2, var_val, var_val_len);
           buf2[var_val_len] = 0;
-          sprintf(buf,"string %s",buf2);
+          if (bin2asc(buf2, itmp) == itmp)
+              sprintf(buf,"string %s",buf2);
+          else
+              sprintf(buf,"octet %s",buf2);
           break;
         case ASN_OBJECT_ID:
           itmp = var_val_len/sizeof(oid);
