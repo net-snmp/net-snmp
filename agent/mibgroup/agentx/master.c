@@ -47,6 +47,10 @@ real_init_master(void)
     snmp_sess_init(&sess);
     sess.version = AGENTX_VERSION_1;
     sess.flags |= SNMP_FLAGS_STREAM_SOCKET;
+    sess.timeout = netsnmp_ds_get_int(NETSNMP_DS_APPLICATION_ID,
+                                      NETSNMP_DS_AGENT_AGENTX_TIMEOUT);
+    sess.retries = netsnmp_ds_get_int(NETSNMP_DS_APPLICATION_ID,
+                                      NETSNMP_DS_AGENT_AGENTX_RETRIES);
     if (netsnmp_ds_get_string(NETSNMP_DS_APPLICATION_ID, NETSNMP_DS_AGENT_X_SOCKET))
         sess.peername =
             netsnmp_ds_get_string(NETSNMP_DS_APPLICATION_ID, NETSNMP_DS_AGENT_X_SOCKET);
