@@ -1,4 +1,4 @@
-.TH "bulk_to_next: convert GETBULK requests into GETNEXT requests for the handler." 3 "5 Oct 2002" "net-snmp" \" -*- nroff -*-
+.TH "bulk_to_next: convert GETBULK requests into GETNEXT requests for the handler." 3 "14 Dec 2002" "net-snmp" \" -*- nroff -*-
 .ad l
 .nh
 .SH NAME
@@ -35,23 +35,11 @@ It is inserted into handler chains where the handler has not set the HANDLER_CAN
 takes answered requests and decrements the repeat count and updates the requests to the next to-do varbind in the list.
 .PP
 Definition at line 39 of file bulk_to_next.c.
-.PP
-Referenced by netsnmp_bulk_to_next_helper().
-.PP
-.SS "int netsnmp_bulk_to_next_helper (netsnmp_mib_handler * handler, netsnmp_handler_registration * reginfo, netsnmp_agent_request_info * reqinfo, netsnmp_request_info * requests)"
-.PP
-.PP
-For internal use only.
-.PP
-Definition at line 61 of file bulk_to_next.c.
 .SS "netsnmp_mib_handler* netsnmp_get_bulk_to_next_handler (void)"
 .PP
 returns a bulk_to_next handler that can be injected into a given handler chain.
 .PP
 Definition at line 30 of file bulk_to_next.c.
-.PP
-Referenced by netsnmp_init_bulk_to_next_helper(), and netsnmp_register_handler().
-.PP
 .SS "void netsnmp_init_bulk_to_next_helper (void)"
 .PP
 initializes the bulk_to_next helper which then registers a bulk_to_next handler as a run-time injectable handler for configuration file use.
