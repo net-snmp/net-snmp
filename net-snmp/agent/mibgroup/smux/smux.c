@@ -186,24 +186,24 @@ init_smux(void)
 	lo_socket.sin_port = htons((u_short) SMUXPORT);
 
 	if ((smux_sd = socket (AF_INET, SOCK_STREAM, 0)) <  0) {
-		snmp_log_perror("[init_smux] socket failed\n");
+		snmp_log_perror("[init_smux] socket failed");
 		return SMUXNOTOK;
 	}
 	if (bind (smux_sd, (struct sockaddr *) &lo_socket, 
 	    sizeof (lo_socket)) < 0) {
-		snmp_log_perror("[init_smux] bind failed\n");
+		snmp_log_perror("[init_smux] bind failed");
 		close(smux_sd);
 		return SMUXNOTOK;
 	}
 
 	if (setsockopt (smux_sd, SOL_SOCKET, SO_KEEPALIVE, (char *)&one, 
 			sizeof (one)) < 0) {
-		snmp_log_perror("[init_smux] setsockopt(SO_KEEPALIVE) failed\n");
+		snmp_log_perror("[init_smux] setsockopt(SO_KEEPALIVE) failed");
 		close(smux_sd);
 		return SMUXNOTOK;
 	}
 	if(listen(smux_sd, SOMAXCONN) == -1) {
-		snmp_log_perror("[init_smux] listen failed\n");
+		snmp_log_perror("[init_smux] listen failed");
 		close(smux_sd);
 		return SMUXNOTOK;
 	}
@@ -351,7 +351,7 @@ smux_accept(int sd)
 	DEBUGMSGTL (("smux","[smux_accept] Calling accept()\n"));
 	errno = 0;
 	if((fd = accept(sd, (struct sockaddr *)&in_socket, &alen)) < 0) {
-		snmp_log_perror("[smux_accept] accept failed\n");
+		snmp_log_perror("[smux_accept] accept failed");
 		return SMUXNOTOK;
 	} else {
 	 snmp_log(LOG_ERR, "[smux_accept] accepted fd %d - errno %d\n", fd, errno);
@@ -570,7 +570,7 @@ smux_send_close(int fd, int reason)
 
     /* send a response back */ 
     if (send (fd, (char *)outpacket, 3, 0) < 0) {
-        snmp_log_perror("[smux_snmp_close] send failed\n");
+        snmp_log_perror("[smux_snmp_close] send failed");
     }
 }
         
@@ -923,7 +923,7 @@ smux_snmp_process(int exact,
         }
 
 	if (send(sd, (char *)packet, length, 0) < 0) {
-		snmp_log_perror("[smux_snmp_process] send failed\n");
+		snmp_log_perror("[smux_snmp_process] send failed");
 	}
 
 	DEBUGMSGTL(("smux",
@@ -935,7 +935,7 @@ smux_snmp_process(int exact,
 	 */
 	length = recv(sd, (char *)result, SMUXMAXPKTSIZE, 0);
 	if (length < 0) {
-		snmp_log_perror("[smux_snmp_process] recv failed\n");
+		snmp_log_perror("[smux_snmp_process] recv failed");
 		smux_peer_cleanup(sd);
 		return NULL;
 	}
