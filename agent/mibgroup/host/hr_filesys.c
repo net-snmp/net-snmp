@@ -266,13 +266,15 @@ var_hrfilesys(struct variable *vp,
         long_return = fsys_idx;
         return (u_char *) & long_return;
     case HRFSYS_MOUNT:
-        sprintf(string, HRFS_entry->HRFS_mount);
+        snprintf(string, sizeof(string), HRFS_entry->HRFS_mount);
+        string[ sizeof(string)-1 ] = 0;
         *var_len = strlen(string);
         return (u_char *) string;
     case HRFSYS_RMOUNT:
-        if (Check_HR_FileSys_NFS())
-            sprintf(string, HRFS_entry->HRFS_name);
-        else
+        if (Check_HR_FileSys_NFS()) {
+            snprintf(string, sizeof(string), HRFS_entry->HRFS_name);
+            string[ sizeof(string)-1 ] = 0;
+        } else
             string[0] = '\0';
         *var_len = strlen(string);
         return (u_char *) string;
@@ -693,13 +695,18 @@ when_dumped(char *filesys, int level, size_t * length)
 char           *
 cook_device(char *dev)
 {
-    static char     cooked_dev[SNMP_MAXPATH];
+    static char     cooked_dev[SNMP_MAXPATH+1];
 
     if (!strncmp(dev, RAW_DEVICE_PREFIX, strlen(RAW_DEVICE_PREFIX))) {
-        strcpy(cooked_dev, COOKED_DEVICE_PREFIX);
-        strcat(cooked_dev, dev + strlen(RAW_DEVICE_PREFIX));
-    } else
-        strcpy(cooked_dev, dev);
+        strncpy(cooked_dev, COOKED_DEVICE_PREFIX, sizeof(cooked_dev)-1);
+        cooked_dev[ sizeof(cooked_dev)-1 ] = 0;
+        strncat(cooked_dev, dev + strlen(RAW_DEVICE_PREFIX),
+                sizeof(cooked_dev)-strlen(cooked_dev)-1);
+        cooked_dev[ sizeof(cooked_dev)-1 ] = 0;
+    } else {
+        strncpy(cooked_dev, dev, sizeof(cooked_dev)-1);
+        cooked_dev[ sizeof(cooked_dev)-1 ] = 0;
+    }
 
     return (cooked_dev);
 }

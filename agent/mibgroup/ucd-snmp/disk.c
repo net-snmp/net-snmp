@@ -229,7 +229,8 @@ disk_parse_config(const char *token, char *cptr)
 #if HAVE_FSTAB_H || HAVE_GETMNTENT || HAVE_STATFS
     if (numdisks == MAXDISKS) {
         config_perror("Too many disks specified.");
-        sprintf(tmpbuf, "\tignoring:  %s", cptr);
+        snprintf(tmpbuf, sizeof(tmpbuf), "\tignoring:  %s", cptr);
+        tmpbuf[ sizeof(tmpbuf)-1 ] = 0;
         config_perror(tmpbuf);
     } else {
         /*
@@ -325,8 +326,10 @@ disk_parse_config(const char *token, char *cptr)
 #endif                          /* HAVE_FSTAB_H */
 #endif                          /* HAVE_GETMNTENT */
         else {
-            sprintf(tmpbuf, "Couldn't find device for disk %s",
+            snprintf(tmpbuf, sizeof(tmpbuf),
+                    "Couldn't find device for disk %s",
                     disks[numdisks].path);
+            tmpbuf[ sizeof(tmpbuf)-1 ] = 0;
             config_pwarn(tmpbuf);
             disks[numdisks].minimumspace = -1;
             disks[numdisks].minpercent = -1;
@@ -492,13 +495,16 @@ var_extensible_disk(struct variable *vp,
     case ERRORMSG:
         if (iserror) {
             if (disks[disknum].minimumspace >= 0)
-                sprintf(errmsg, "%s: less than %d free (= %d)",
+                snprintf(errmsg, sizeof(errmsg),
+                        "%s: less than %d free (= %d)",
                         disks[disknum].path, disks[disknum].minimumspace,
                         (int) avail);
             else
-                sprintf(errmsg, "%s: less than %d%% free (= %d%%)",
+                snprintf(errmsg, sizeof(errmsg),
+                        "%s: less than %d%% free (= %d%%)",
                         disks[disknum].path, disks[disknum].minpercent,
                         percent);
+            errmsg[ sizeof(errmsg)-1 ] = 0;
         } else
             errmsg[0] = 0;
         *var_len = strlen(errmsg);
@@ -555,16 +561,19 @@ var_extensible_disk(struct variable *vp,
         long_ret = iserror;
         return ((u_char *) (&long_ret));
     case ERRORMSG:
-        if (iserror)
+        if (iserror) {
             if (disks[disknum].minimumspace >= 0)
-                sprintf(errmsg, "%s: less than %d free (= %d)",
+                snprintf(errmsg, sizeof(errmsg),
+                        "%s: less than %d free (= %d)",
                         disks[disknum].path, disks[disknum].minimumspace,
                         avail * filesys.fs_fsize / 1024);
             else
-                sprintf(errmsg, "%s: less than %d%% free (= %d%%)",
+                snprintf(errmsg, sizeof(errmsg),
+                        "%s: less than %d%% free (= %d%%)",
                         disks[disknum].path, disks[disknum].minpercent,
                         percent);
-        else
+            errmsg[ sizeof(errmsg)-1 ] = 0;
+        } else
             errmsg[0] = 0;
         *var_len = strlen(errmsg);
         return ((u_char *) (errmsg));

@@ -243,7 +243,8 @@ describe_networkIF(int idx)
 {
     static char     string[100];
 
-    sprintf(string, "network interface %s", HRN_savedName);
+    snprintf(string, sizeof(string)-1), "network interface %s", HRN_savedName);
+    string[ sizeof(string)-1 ] = 0;
     return string;
 }
 

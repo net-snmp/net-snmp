@@ -353,7 +353,7 @@ print_error(va_alist)
     format = va_arg(ap, char *);
 #endif
 
-    vsprintf(buffer, format, ap);
+    vsnprintf(buffer, sizeof(buffer), format, ap);
 
     if (config) {
         config_perror(buffer);
@@ -835,7 +835,8 @@ read_sendmailcf(BOOL config)
                 }
 
                 if (strncasecmp(line + 2, "StatusFile", 10) == 0) {
-                    strcpy(sendmailst_fn, filename);
+                    strncpy(sendmailst_fn, filename, sizeof(sendmailst_fn));
+                    sendmailst_fn[ sizeof(sendmailst_fn)-1 ] = 0;
                     found_sendmailst = TRUE;
                     DEBUGMSGTL(("mibII/mta_sendmail.c:read_sendmailcf",
                                 "found statatistics file \"%s\"\n",
