@@ -265,7 +265,6 @@ char *snmp_detail = NULL;
 
 static int snmp_dump_packet = 0;
 
-static void free_request_list (struct request_list *);
 void shift_array (u_char *, int, int);
 static int snmp_build (struct snmp_session *, struct snmp_pdu *, u_char *, int *);
 static int snmp_parse (struct snmp_session *, struct internal_snmp_pdu *, u_char *, int);
@@ -680,23 +679,6 @@ snmp_sess_open(struct snmp_session *in_session)
     return (void *)slp;
 }
 
-
-/*
- * Free each element in the input request list.
- */
-static void
-free_request_list(struct request_list *rp)
-{
-    struct request_list *orp;
-
-    while(rp){
-	orp = rp;
-	rp = rp->next_request;
-	snmp_free_pdu(orp->pdu);
-	free((char *)orp);
-    }
-}
-
 static void
 _snmp_free(char * cp)
 {
@@ -713,30 +695,49 @@ int
 snmp_sess_close(void *sessp)
 {
     struct session_list *slp = (struct session_list *)sessp;
+    struct snmp_internal_session *isp;
+    struct snmp_session *sesp;
 
     if (slp == NULL)
 	return 0;
 
-    if (slp->internal) {
-	if (slp->internal->sd != -1)
+    isp = slp->internal; slp->internal = 0;
+    if (isp) {
+	struct request_list *rp, *orp;
+
+	if (isp->sd != -1)
 	{
 #ifndef HAVE_CLOSESOCKET
-	close(slp->internal->sd);
+	close(isp->sd);
 #else
-	closesocket(slp->internal->sd);
+	closesocket(isp->sd);
 #endif
 	}
-	free_request_list(slp->internal->requests);
+
+	/* Free each element in the input request list.  */
+	rp = isp->requests;
+	while(rp){
+	    orp = rp;
+	    rp = rp->next_request;
+	    if (orp->pdu)
+		snmp_free_pdu(orp->pdu);
+	    free((char *)orp);
+	}
+
+    	free((char *)isp);
     }
 
-    _snmp_free((char *)slp->session->context);
-    _snmp_free((char *)slp->session->dstParty);
-    _snmp_free((char *)slp->session->srcParty);
-    _snmp_free((char *)slp->session->peername);
-    _snmp_free((char *)slp->session->community);
-    _snmp_free((char *)slp->session);
-    _snmp_free((char *)slp->internal);
-    _snmp_free((char *)slp);
+    sesp = slp->session; slp->session = 0;
+    if (sesp) {
+	_snmp_free((char *)sesp->context);
+	_snmp_free((char *)sesp->dstParty);
+	_snmp_free((char *)sesp->srcParty);
+	_snmp_free((char *)sesp->peername);
+	_snmp_free((char *)sesp->community);
+	free((char *)sesp);
+    }
+
+    free((char *)slp);
 
     return 1;
 }
