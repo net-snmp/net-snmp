@@ -218,9 +218,9 @@ write_mteTriggerExistenceTest(int action,
 
     switch (action) {
     case RESERVE1:
-        if (var_val_type != ASN_BIT_STR) {
+        if (var_val_type != ASN_OCTET_STR) {
             fprintf(stderr,
-                    "write to mteTriggerExistenceTest not ASN_BIT_STR\n");
+                    "write to mteTriggerExistenceTest not ASN_OCTET_STR\n");
             return SNMP_ERR_WRONGTYPE;
         }
         if (StorageTmp->storageType != ST_NONVOLATILE)
@@ -310,9 +310,9 @@ write_mteTriggerExistenceStartup(int action,
 
     switch (action) {
     case RESERVE1:
-        if (var_val_type != ASN_BIT_STR) {
+        if (var_val_type != ASN_OCTET_STR) {
             fprintf(stderr,
-                    "write to mteTriggerExistenceStartup not ASN_BIT_STR\n");
+                    "write to mteTriggerExistenceStartup not ASN_OCTET_STR\n");
             return SNMP_ERR_WRONGTYPE;
         }
         if (StorageTmp->storageType != ST_NONVOLATILE)
