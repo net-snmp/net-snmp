@@ -21,7 +21,7 @@
 #include "snmpv3.h"
 #include "snmp-tc.h"
 #include "read_config.h"
-#include "agent_read_config.h"
+#include <net-snmp/agent/agent_read_config.h>
 #include "util_funcs.h"
 #include "keytools.h"
 #include "tools.h"

@@ -123,7 +123,7 @@
 #include "struct.h"
 #include "errormib.h"
 #include "util_funcs.h"
-#include "auto_nlist.h"
+#include <net-snmp/agent/auto_nlist.h>
 
 static time_t errorstatustime=0;
 static int errorstatusprior=0;

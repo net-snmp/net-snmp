@@ -54,9 +54,9 @@
 #include "read_config.h"
 #include "snmp_debug.h"
 #include "snmp_parse_args.h"
-#include "agent_trap.h"
+#include <net-snmp/agent/agent_trap.h>
 #include "callback.h"
-#include "agent_callbacks.h"
+#include <net-snmp/agent/agent_callbacks.h>
 #include "tools.h"
 #include "snmp_logging.h"
 #include "callback.h"

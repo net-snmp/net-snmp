@@ -74,7 +74,7 @@
 #define BLKGETSIZE _IO(0x12,96) /* return device size */
 #endif
 
-#include "agent_read_config.h"
+#include <net-snmp/agent/agent_read_config.h>
 #include "read_config.h"
 
 #define HRD_MONOTONICALLY_INCREASING

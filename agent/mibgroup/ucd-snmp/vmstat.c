@@ -104,7 +104,7 @@
 #include "struct.h"
 #include "util_funcs.h"
 #include "vmstat.h"
-#include "auto_nlist.h"
+#include <net-snmp/agent/auto_nlist.h>
 
 static FindVarMethod var_extensible_vmstat;
 

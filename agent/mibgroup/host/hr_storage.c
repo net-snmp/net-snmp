@@ -79,7 +79,7 @@
 #include "host_res.h"
 #include "hr_storage.h"
 #include "hr_filesys.h"
-#include "auto_nlist.h"
+#include <net-snmp/agent/auto_nlist.h>
 
 #if HAVE_MNTENT_H
 #include <mntent.h>

@@ -49,19 +49,19 @@
 #include "default_store.h"
 #include "snmp.h"
 
-#include "snmp_vars.h"
-#include "snmp_agent.h"
-#include "agent_handler.h"
-#include "var_struct.h"
+#include <net-snmp/agent/snmp_vars.h>
+#include <net-snmp/agent/snmp_agent.h>
+#include <net-snmp/agent/agent_handler.h>
+#include <net-snmp/agent/var_struct.h>
 #include "snmpd.h"
 #include "agentx/protocol.h"
 #include "agentx/client.h"
 #include "default_store.h"
-#include "ds_agent.h"
+#include <net-snmp/agent/ds_agent.h>
 #include "callback.h"
-#include "agent_registry.h"
-#include "agent_callbacks.h"
-#include "agent_trap.h"
+#include <net-snmp/agent/agent_registry.h>
+#include <net-snmp/agent/agent_callbacks.h>
+#include <net-snmp/agent/agent_trap.h>
 #include "snmp_debug.h"
 #include "mib_module_config.h"
 #ifdef USING_MIBII_SYSORTABLE_MODULE

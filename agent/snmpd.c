@@ -133,8 +133,8 @@ typedef long    fd_mask;
 #include "snmp.h"
 #include "mib.h"
 #include "m2m.h"
-#include "snmp_vars.h"
-#include "agent_read_config.h"
+#include <net-snmp/agent/snmp_vars.h>
+#include <net-snmp/agent/agent_read_config.h>
 #include "snmpv3.h"
 #include "callback.h"
 #include "snmp_alarm.h"
@@ -143,11 +143,11 @@ typedef long    fd_mask;
 
 #include "snmp_client.h"
 #include "snmpd.h"
-#include "agent_handler.h"
-#include "var_struct.h"
+#include <net-snmp/agent/agent_handler.h>
+#include <net-snmp/agent/var_struct.h>
 #include "mibgroup/struct.h"
 #include "snmp_debug.h"
-#include "mib_modules.h"
+#include <net-snmp/agent/mib_modules.h>
 
 #include "snmp_secmod.h"
 #include "snmpusm.h"
@@ -155,10 +155,10 @@ typedef long    fd_mask;
 #include "lcd_time.h"
 #include "mibgroup/util_funcs.h"
 
-#include "snmp_agent.h"
-#include "agent_trap.h"
-#include "ds_agent.h"
-#include "agent_read_config.h"
+#include <net-snmp/agent/snmp_agent.h>
+#include <net-snmp/agent/agent_trap.h>
+#include <net-snmp/agent/ds_agent.h>
+#include <net-snmp/agent/agent_read_config.h>
 #include "snmp_logging.h"
 #include "snmp_transport.h"
 

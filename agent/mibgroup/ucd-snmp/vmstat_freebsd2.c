@@ -46,7 +46,7 @@
 
 #include "vmstat.h"
 #include "vmstat_freebsd2.h"
-#include "auto_nlist.h"
+#include <net-snmp/agent/auto_nlist.h>
 
 
 /* nlist symbols */

@@ -33,11 +33,11 @@
 #include "snmp_impl.h"
 #include "snmp_client.h"
 
-#include "snmp_vars.h"
-#include "agent_read_config.h"
-#include "agent_handler.h"
-#include "agent_registry.h"
-#include "var_struct.h"
+#include <net-snmp/agent/snmp_vars.h>
+#include <net-snmp/agent/agent_read_config.h>
+#include <net-snmp/agent/agent_handler.h>
+#include <net-snmp/agent/agent_registry.h>
+#include <net-snmp/agent/var_struct.h>
 
 #include "snmp.h"
 #include "mib.h"
@@ -46,7 +46,7 @@
 #include "snmp_alarm.h"
 #include "read_config.h"
 #include "tools.h"
-#include "agent_trap.h"
+#include <net-snmp/agent/agent_trap.h>
 #include "callback.h"
 #define u_char unsigned char
 #define u_short unsigned short

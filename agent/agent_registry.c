@@ -46,10 +46,10 @@
 #include "mibincl.h"
 #include "snmp_client.h"
 #include "default_store.h"
-#include "ds_agent.h"
+#include <net-snmp/agent/ds_agent.h>
 #include "callback.h"
-#include "agent_callbacks.h"
-#include "agent_registry.h"
+#include <net-snmp/agent/agent_callbacks.h>
+#include <net-snmp/agent/agent_registry.h>
 #include "snmp_alarm.h"
 #include "snmp_secmod.h"
 #include "vacm.h"

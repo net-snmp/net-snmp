@@ -32,7 +32,7 @@
 
 #include "../util_funcs.h"
 #include "logmatch.h"
-#include "agent_read_config.h"
+#include <net-snmp/agent/agent_read_config.h>
 #include "util_funcs.h"
 
 #include <snmp_alarm.h>

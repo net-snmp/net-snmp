@@ -71,7 +71,7 @@
 #include "asn1.h"
 #include "snmp_debug.h"
 
-#include "auto_nlist.h"
+#include <net-snmp/agent/auto_nlist.h>
 
 #include "icmp.h"
 

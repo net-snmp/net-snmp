@@ -20,12 +20,12 @@
 /* minimal include directives */
 #include "mibincl.h"
 #include "snmp_api.h"
-#include "snmp_agent.h"
+#include <net-snmp/agent/snmp_agent.h>
 #include "snmp_client.h"
 #include "snmp_transport.h"
 #include "header_complex.h"
 #include "default_store.h"
-#include "ds_agent.h"
+#include <net-snmp/agent/ds_agent.h>
 #include "snmp_api.h"
 #include "mteTriggerTable.h"
 #include "mteTriggerBooleanTable.h"

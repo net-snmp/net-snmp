@@ -50,15 +50,15 @@
 #include "snmp_alarm.h"
 #include "snmp_transport.h"
 #include "snmp.h"
-#include "ds_agent.h"
+#include <net-snmp/agent/ds_agent.h>
 #include "default_store.h"
 
 #include "protocol.h"
 #include "client.h"
-#include "snmp_agent.h"
-#include "agent_handler.h"
-#include "snmp_vars.h"
-#include "var_struct.h"
+#include <net-snmp/agent/snmp_agent.h>
+#include <net-snmp/agent/agent_handler.h>
+#include <net-snmp/agent/snmp_vars.h>
+#include <net-snmp/agent/var_struct.h>
 #include "mibII/sysORTable.h"
 #include "master.h"
 #include "master_admin.h"

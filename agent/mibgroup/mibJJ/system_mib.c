@@ -45,7 +45,7 @@
 #include "system_mib.h"
 #include "struct.h"
 #include "read_config.h"
-#include "agent_read_config.h"
+#include <net-snmp/agent/agent_read_config.h>
 #include "system.h"
 #include "sysORTable.h"
 
