@@ -121,6 +121,12 @@ Equivalent to
 Disables the validation of values that is done by
 .B snmpset
 before issuing the request to the agent.
+Equivalent to
+.BR -Ir .
+.IP "noDisplayHint (1|yes|true|0|no|false)"
+Disables the use of DISPLAY-HINT information when parsing indices and
+values to set. Equivalent to
+.BR -Ih .
 .IP "dumpPacket (1|yes|true|0|no|false)"
 Whether the commands should dump packets by default.
 .IP "doDebugging (1|0)"

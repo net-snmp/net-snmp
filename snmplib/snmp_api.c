@@ -686,6 +686,8 @@ register_default_handlers(void)
 		      NETSNMP_DS_LIBRARY_ID, NETSNMP_DS_LIB_DONT_CHECK_RANGE);
     netsnmp_ds_register_config(ASN_OCTET_STR, "snmp", "persistentDir",
 	              NETSNMP_DS_LIBRARY_ID, NETSNMP_DS_LIB_PERSISTENT_DIR);
+    netsnmp_ds_register_config(ASN_BOOLEAN, "snmp", "noDisplayHint",
+	              NETSNMP_DS_LIBRARY_ID, NETSNMP_DS_LIB_NO_DISPLAY_HINT);
 }
 
 void
@@ -6092,6 +6094,27 @@ netsnmp_oid_find_prefix(const oid * in_name1, size_t len1,
     }
     return 0;
 }
+
+static int _check_range(struct tree *tp, long ltmp, int *resptr,
+	                const char *errmsg)
+{
+    int check = !netsnmp_ds_get_boolean(NETSNMP_DS_LIBRARY_ID,
+	                                NETSNMP_DS_LIB_DONT_CHECK_RANGE);
+  
+    if (check && tp->ranges) {
+	struct range_list *rp = tp->ranges;
+	while (rp) {
+	    if (rp->low <= ltmp && ltmp <= rp->high) break;
+	    rp = rp->next;
+	}
+	if (!rp) {
+	    *resptr = SNMPERR_RANGE;
+	    snmp_set_detail(errmsg);
+	    return 0;
+	}
+    }
+    return 1;
+}
         
 
 /*
@@ -6277,13 +6300,16 @@ snmp_add_var(netsnmp_pdu *pdu,
     int             result = SNMPERR_SUCCESS;
     int             check = !netsnmp_ds_get_boolean(NETSNMP_DS_LIBRARY_ID,
 					     NETSNMP_DS_LIB_DONT_CHECK_RANGE);
+    int             do_hint = !netsnmp_ds_get_boolean(NETSNMP_DS_LIBRARY_ID,
+					     NETSNMP_DS_LIB_NO_DISPLAY_HINT);
+    u_char         *hintptr;
     u_char         *buf = NULL;
     const u_char   *buf_ptr = NULL;
     size_t          buf_len = 0, value_len = 0, tint;
     long            ltmp;
+    int             itmp;
     struct tree    *tp;
     struct enum_list *ep;
-    struct range_list *rp;
 #ifdef OPAQUE_SPECIAL_TYPES
     double          dtmp;
     float           ftmp;
@@ -6359,19 +6385,8 @@ snmp_add_var(netsnmp_pdu *pdu,
             }
         }
 
-        if (check && tp->ranges) {
-            rp = tp->ranges;
-            while (rp) {
-                if (rp->low <= ltmp && ltmp <= rp->high)
-                    break;
-                rp = rp->next;
-            }
-            if (!rp) {
-                result = SNMPERR_RANGE;
-                snmp_set_detail(value);
-                break;
-            }
-        }
+        if (!_check_range(tp, ltmp, &result, value))
+            break;
         snmp_pdu_add_variable(pdu, name, name_length, ASN_INTEGER,
                               (u_char *) & ltmp, sizeof(ltmp));
         break;
@@ -6474,6 +6489,15 @@ snmp_add_var(netsnmp_pdu *pdu,
             result = SNMPERR_VALUE;
             goto type_error;
         }
+	if ('s' == type && do_hint && tp->hint && !parse_octet_hint(tp->hint, value, &hintptr, &itmp)) {
+            if (_check_range(tp, itmp, &result, "Value does not match DISPLAY-HINT")) {
+                snmp_pdu_add_variable(pdu, name, name_length,
+                                      ASN_OCTET_STR, hintptr, itmp);
+            }
+            free(hintptr);
+            hintptr = buf;
+            break;
+        }
         if (type == 'd') {
             if (!snmp_decimal_to_binary
                 (&buf, &buf_len, &value_len, 1, value)) {
@@ -6493,20 +6517,8 @@ snmp_add_var(netsnmp_pdu *pdu,
             buf_ptr = value;
             value_len = strlen(value);
         }
-        if (check && tp->ranges) {
-            rp = tp->ranges;
-            while (rp) {
-                if (rp->low <= value_len && value_len <= rp->high) {
-                    break;
-                }
-                rp = rp->next;
-            }
-            if (!rp) {
-                result = SNMPERR_RANGE;
-                snmp_set_detail("Bad string length");
-                break;
-            }
-        }
+        if (!_check_range(tp, itmp, &result, "Bad string length"))
+            break;
         snmp_pdu_add_variable(pdu, name, name_length, ASN_OCTET_STR,
                               buf_ptr, value_len);
         break;
