@@ -818,7 +818,7 @@ snmp_save_persistent(const char *type)
   file[ sizeof(file)-1 ] = 0;
   if (stat(file, &statbuf) == 0) {
     for(j=0; j <= MAX_PERSISTENT_BACKUPS; j++) {
-      snprintf(file, sizeof(file),
+      snprintf(fileold, sizeof(fileold),
                "%s/%s.%d.conf", get_persistent_directory(), type, j);
       file[ sizeof(file)-1 ] = 0;
       if (stat(fileold, &statbuf) != 0) {
