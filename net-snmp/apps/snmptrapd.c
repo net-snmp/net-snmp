@@ -331,7 +331,15 @@ int snmp_input(op, session, reqid, pdu, magic)
     int fd[2];
     int pid, result;
     FILE *file;
-    
+    int varbufidx;
+    char varbuf[2048];
+    static oid trapoids[10] = {1,3,6,1,6,3,1,1,5};
+    static oid snmpsysuptime[8] = {1,3,6,1,2,1,1,3};
+    static oid snmptrapoid[10] = {1,3,6,1,6,3,1,1,4,1};
+    static oid snmptrapent[10] = {1,3,6,1,6,3,1,1,4,3};
+    struct variable_list tmpvar;
+    tmpvar.type = ASN_OBJECT_ID;
+                  
     if (op == RECEIVED_MESSAGE){
 	if (pdu->command == SNMP_MSG_TRAP){
 	    if (Print){
@@ -368,9 +376,6 @@ int snmp_input(op, session, reqid, pdu, magic)
 		}
 	    }
 	    if (Syslog){
-	    	int varbufidx;
-	    	char varbuf[2048];
-
 	    	varbufidx=0;
 	    	varbuf[varbufidx++]=','; varbuf[varbufidx++]=' ';
 	    	varbuf[varbufidx]='\0';
@@ -427,14 +432,32 @@ int snmp_input(op, session, reqid, pdu, magic)
                 exit(0);
               } else if (pid > 0) {
                 file = fdopen(fd[1],"w");
-                fprintf(file,"%.4d-%.2d-%.2d %.2d:%.2d:%.2d %s [%s] %s:\n",
-                        tm->tm_year+1900, tm->tm_mon+1, tm->tm_mday,
-                        tm->tm_hour, tm->tm_min, tm->tm_sec,
-                        host ? host->h_name :
-                          inet_ntoa(pdu->agent_addr.sin_addr),
-                        inet_ntoa(pdu->agent_addr.sin_addr),
-                        sprint_objid (oid_buf, pdu->enterprise,
-                                      pdu->enterprise_length));
+                fprintf(file,"%s\n%s\n",
+                        host ? host->h_name : inet_ntoa(pdu->address.sin_addr),
+                        inet_ntoa(pdu->address.sin_addr));
+                tmpvar.val.integer = &pdu->time;
+                tmpvar.val_len = sizeof(pdu->time);
+                tmpvar.type = ASN_TIMETICKS;
+                sprint_variable(varbuf, snmpsysuptime, 8, &tmpvar);
+                fprintf(file,"%s\n",varbuf);
+                if (pdu->trap_type <= SNMP_TRAP_AUTHFAIL) {
+                  tmpvar.type = ASN_OBJECT_ID;
+                  trapoids[9] = pdu->trap_type+1;
+                  tmpvar.val.objid = trapoids;
+                  tmpvar.val_len = 10*sizeof(oid);
+                  sprint_variable(varbuf, snmptrapoid, 10, &tmpvar);
+                  fprintf(file,"%s\n",varbuf);
+                }
+		for(vars = pdu->variables; vars; vars = vars->next_variable) {
+                  sprint_variable(varbuf, vars->name, vars->name_length, vars);
+                  fprintf(file,"%s\n",varbuf);
+                }
+                if (pdu->trap_type <= SNMP_TRAP_AUTHFAIL) {
+                  tmpvar.val.objid = pdu->enterprise;
+                  tmpvar.val_len = pdu->enterprise_length*sizeof(oid);
+                  sprint_variable(varbuf, snmptrapent, 10, &tmpvar);
+                  fprintf(file,"%s\n",varbuf);
+                }
                 fclose(file);
                 close(fd[0]);
                 close(fd[1]);
@@ -467,6 +490,43 @@ int snmp_input(op, session, reqid, pdu, magic)
 	    if (Event) {
 		event_input(pdu->variables);
 	    }
+            if (Command) {
+              if (pipe(fd)) {
+                perror("pipe");
+                return 1;
+              }
+              if ((pid = fork()) == 0) {
+                /* child */
+                close(0);
+                if (dup(fd[0]) != 0) {
+                  perror("dup");
+                  return 1;
+                }
+                close(fd[1]);
+                close(fd[0]);
+                system(Command);
+                exit(0);
+              } else if (pid > 0) {
+                file = fdopen(fd[1],"w");
+                fprintf(file,"%s\n%s\n",
+                        host ? host->h_name : inet_ntoa(pdu->address.sin_addr),
+                        inet_ntoa(pdu->address.sin_addr));
+		for(vars = pdu->variables; vars; vars = vars->next_variable) {
+                  sprint_variable(varbuf, vars->name, vars->name_length, vars);
+                  fprintf(file,"%s\n",varbuf);
+                }
+                fclose(file);
+                close(fd[0]);
+                close(fd[1]);
+                if (waitpid(pid, &result,0) < 0) {
+                  perror("waitpid");
+                  return 1;
+                }
+              } else {
+                perror("fork");
+                return 1;
+              }
+            }
 	    if (pdu->command == SNMP_MSG_INFORM){
 		if (!(reply = snmp_clone_pdu2(pdu, SNMP_MSG_GET))){
 		    fprintf(stderr, "Couldn't clone PDU for response\n");
