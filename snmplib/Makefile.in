@@ -143,24 +143,9 @@ libsnmp.$(LIB_EXTENSION)$(LIB_VERSION):    ${TOBJS}
 	$(LIB_LD_CMD) libsnmp.$(LIB_EXTENSION)$(LIB_VERSION) ${TOBJS}
 	$(RANLIB) libsnmp.$(LIB_EXTENSION)$(LIB_VERSION)
 
-#how to build dependencies
-%.d : %.c
-	@echo "Generating makefile $@ ..."
-	@set -e; $(CC) -M $(COPTS) $(ALLFLAGS) $(CXXFLAGS) $< \
-	| sed 's/\($*\)\.o[ :]*/\1.o $@ : /g' > $@; \
-	[ -s $@ ] || rm -f $@
-
 #
 # internal test objects
 #
 parse:  mib.o parse.c
 	$(CC) $(CFLAGS) -DTEST parse.c mib.o -o parse
 
-#
-# dependencies
-#
-# This construct is not universally recognised by all versions of make
-#
-#ifeq ($(AUTO_DEPEND),y)
-#include $(SOURCES:.c=.d)
-#endif
