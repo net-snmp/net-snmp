@@ -805,8 +805,6 @@ main(int argc, char *argv[])
       exit(0);
     }
 
-    snmp_log(LOG_INFO, "UCD-SNMP version %s\n", VersionInfo);
-
     if (pid_file != NULL) {
       if ((PID = fopen(pid_file, "w")) == NULL) {
         log_perror("fopen");
@@ -888,10 +886,14 @@ main(int argc, char *argv[])
     if (!stderr_log)
       disable_stderrlog();
 
+    /* we're up, log our version number */
+    snmp_log(LOG_INFO, "UCD-SNMP version %s\n", VersionInfo);
+
     memset(addrCache, 0, sizeof(addrCache));
     /* 
      * Forever monitor the dest_port for incoming PDUs.
      */
+    DEBUGMSGTL(("snmpd", "We're up.  Starting to process data.\n"));
     receive();
 #include "mib_module_shutdown.h"
     DEBUGMSGTL(("snmpd", "sending shutdown trap\n"));
