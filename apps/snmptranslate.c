@@ -141,6 +141,13 @@ main(int argc, char *argv[])
                     netsnmp_get_version());
             exit(0);
             break;
+        case 'w':
+	    width = atoi(optarg);
+	    if (width <= 0) {
+		fprintf(stderr, "Invalid width specification: %s\n", optarg);
+		exit (1);
+	    }
+	    break;
         case 'P':
             cp = snmp_mib_toggle_options(optarg);
             if (cp != NULL) {
