@@ -273,29 +273,65 @@ register_mib(moduleName, var, varsize, numvars, mibloc, mibloclen)
 
 /* unregister_mib(oid mibloc, int mibloclen)
  */
-int
-unregister_mib(mibloc, mibloclen)
-  oid *mibloc;
-  int mibloclen;
+void
+unregister_mib(name, len)
+  oid *name;
+  int len;
 {
-  char buf[1024];
-  int i,j;
-  sprint_objid (buf, mibloc, mibloclen);
-  for(i=0; i < subtree_size; i++) {
-    if(compare_tree(subtrees[i].name, subtrees[i].namelen,
-                    mibloc, mibloclen) == 0) {
-      free(subtrees[i].variables);
-      /* I don't trust memmove to do this properly on every system */
-      for(j=i; j < subtree_size-1; j++) {
-        memcpy(&(subtrees[j]),&(subtrees[j+1]),sizeof(struct subtree));
+  unregister_mib_tree(name, len, subtrees);
+}
+
+struct subtree *
+unregister_mib_tree(name, len, subtree)
+  oid *name;
+  int len;
+  struct subtree *subtree;
+{
+  struct subtree *myptr = NULL;
+  int ret;
+
+  if ((ret = compare(name, len, subtree->name, subtree->namelen)) == 0) {
+    /* found it */
+    return subtree;
+  }
+
+  if (ret > 0) {
+    if (is_parent(subtree->name, subtree->namelen, name) &&
+        subtree->children != NULL) {
+      myptr = unregister_mib_tree(name, len, subtree->children);
+      if (myptr != NULL) {
+        /* found it, remove it as our child possibly adding the next child */
+        myptr = free_subtree(myptr);
+        subtree->children = myptr;
+        return NULL;
       }
-      subtree_size--;
-      DEBUGP("unregistered mib slot %d:  %s \n", i, buf);
-      return i;
+    }
+    if (subtree->next != NULL) {
+      myptr = unregister_mib_tree(name, len, subtree->next);
+      if (myptr != NULL) {
+        /* found it next, remove it as next and take the one after that. */
+        myptr = free_subtree(myptr);
+        subtree->next = myptr;
+        return NULL;
+      }
     }
   }
-  DEBUGP("*** unable to unregister mib %s\n", buf);
-  return -1;
+  return NULL;
+}
+
+struct subtree *
+free_subtree(st)
+  struct subtree *st;
+{
+  struct subtree *ret = NULL;
+  if (st->variables != NULL)
+    free(st->variables);
+  if (st->children != NULL)
+    free_subtree(st->children);
+  if (st->next != NULL)
+    ret = st->next;
+  free(st);
+  return ret;
 }
 
 /*
