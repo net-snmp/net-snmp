@@ -234,7 +234,7 @@ netsnmp_register_handler(netsnmp_handler_registration *reginfo)
     if (0 == reginfo->modes) {
         reginfo->modes = HANDLER_CAN_DEFAULT;
         snmp_log(LOG_WARNING, "no registration modes specified for %s. "
-                 "Defaulting to %p\n", reginfo->handlerName, reginfo->modes);
+                 "Defaulting to 0x%x\n", reginfo->handlerName, reginfo->modes);
     }
 
     /*
