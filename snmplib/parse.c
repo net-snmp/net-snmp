@@ -311,6 +311,7 @@ print_error(string, token, type)
     char *token;
     int type;
 {
+    DEBUGP("\n");
     if (type == ENDOFFILE)
 	fprintf(stderr, "%s(EOF): On or around line %d in %s\n", string, Line,
                 File);
@@ -2144,14 +2145,19 @@ tossObjectIdentifier(fp)
 {
     int type;
     char token[MAXTOKEN];
+    int bracketcount = 1;
     
     type = get_token(fp, token, MAXTOKEN);
     
     if (type != LEFTBRACKET)
 	return 0;
-    while (type != RIGHTBRACKET && type != ENDOFFILE)
+    while ((type != RIGHTBRACKET || bracketcount > 0) && type != ENDOFFILE )
     {
 	type = get_token(fp, token, MAXTOKEN);
+        if (type == LEFTBRACKET)
+          bracketcount++;
+        else if (type == RIGHTBRACKET)
+          bracketcount--;
     }
     
     if (type == RIGHTBRACKET)
