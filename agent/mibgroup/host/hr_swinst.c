@@ -248,6 +248,11 @@ var_hrswinst(struct variable *vp,
     struct stat stat_buf;
 #ifdef HAVE_LIBRPM
     Header h = NULL;
+	if (rpm_db == NULL) {
+	    Init_HR_SWInst();
+	    if (rpm_db == NULL)
+		return NULL;
+	}
 #endif
 
     if ( vp->magic < HRSWINST_INDEX ) {
@@ -261,11 +266,6 @@ var_hrswinst(struct variable *vp,
 	    return NULL;
         
 #ifdef HAVE_LIBRPM
-	if (rpm_db == NULL) {
-	    Init_HR_SWInst();
-	    if (rpm_db == NULL)
-		return NULL;
-	}
 	h = rpmdbGetRecord( rpm_db, sw_idx );
 	if ( h == NULL )
 	    return NULL;
