@@ -209,7 +209,7 @@ netsnmp_find_table_array_handler(netsnmp_handler_registration *reginfo)
 }
 
 /** find the context data used by the table_array helper */
-oid_array      *
+netsnmp_container      *
 netsnmp_extract_array_context(netsnmp_request_info *request)
 {
     return netsnmp_request_get_list_data(request, TABLE_ARRAY_NAME);
@@ -434,7 +434,7 @@ process_get_requests(netsnmp_handler_registration *reginfo,
 
     /*
      * Loop through each of the requests, and
-     * try to find the appropriate row from the oid_array.
+     * try to find the appropriate row from the container.
      */
     for (current = requests; current; current = current->next) {
 
@@ -523,7 +523,7 @@ process_get_requests(netsnmp_handler_registration *reginfo,
  *                                                                    *
  **********************************************************************
  **********************************************************************/
-/*inline*/
+inline
 void
 group_requests(netsnmp_agent_request_info *agtreq_info,
                netsnmp_request_info *requests,
@@ -776,7 +776,7 @@ process_set_group(netsnmp_index *o, void *c)
     }
 }
 
-/*inline*/
+inline
 int
 process_set_requests(netsnmp_agent_request_info *agtreq_info,
                      netsnmp_request_info *requests,
@@ -788,7 +788,7 @@ process_set_requests(netsnmp_agent_request_info *agtreq_info,
     /*
      * create and save structure for set info
      */
-    request_group = (oid_array) netsnmp_agent_get_list_data
+    request_group = (netsnmp_container*) netsnmp_agent_get_list_data
         (agtreq_info, handler_name);
     if (request_group == NULL) {
         netsnmp_data_list *tmp;
@@ -843,7 +843,7 @@ netsnmp_table_array_helper_handler(netsnmp_mib_handler *handler,
      * First off, get our pointer from the handler. This
      * lets us get to the table registration information we
      * saved in get_table_array_handler(), as well as the
-     * oid_array where the actual table data is stored.
+     * container where the actual table data is stored.
      */
     int             rc = SNMP_ERR_NOERROR;
     table_container_data *tad = (table_container_data *)handler->myvoid;
