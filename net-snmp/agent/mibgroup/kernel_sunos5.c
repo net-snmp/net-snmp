@@ -885,8 +885,8 @@ getif(mib2_ifEntry_t *ifbuf, size_t size, req_e req_type,
 	ifp->ifIndex = idx;
 	ifp->ifDescr.o_length = strlen(ifrp->ifr_name);
 	strcpy(ifp->ifDescr.o_bytes, ifrp->ifr_name);
-	ifp->ifAdminStatus = (ifrp->ifr_flags & IFF_RUNNING) ? 1 : 2;
-	ifp->ifOperStatus = (ifrp->ifr_flags & IFF_UP) ? 1 : 2;
+	ifp->ifAdminStatus = (ifrp->ifr_flags & IFF_UP) ? 1 : 2;
+	ifp->ifOperStatus = ((ifrp->ifr_flags & IFF_UP) && (ifrp->ifr_flags & IFF_RUNNING)) ? 1 : 2;
 	ifp->ifLastChange = 0;      /* Who knows ...  */
 
 	if (ioctl(ifsd, SIOCGIFMTU, ifrp) < 0) {
@@ -898,6 +898,14 @@ getif(mib2_ifEntry_t *ifbuf, size_t size, req_e req_type,
 	ifp->ifType = 1;
 	ifp->ifSpeed = 0;
 
+        /* make ifOperStatus depend on link status if available */
+	if (ifp->ifAdminStatus == 1) {
+            int i_tmp;
+            /* only UPed interfaces get correct link status - if any */
+            if (getKstat(ifrp->ifr_name,"link_up",&i_tmp) == 0) {
+                ifp->ifOperStatus = i_tmp ? 1 : 2;
+            }
+	}
 	if ((getKstat(ifrp->ifr_name, "ifspeed", &ifp->ifSpeed) == 0) &&
 	    (ifp->ifSpeed != 0)) {
 	    /*
@@ -930,6 +938,7 @@ getif(mib2_ifEntry_t *ifbuf, size_t size, req_e req_type,
 	    break;
 
 	case 'g':          /* ge (gigabit ethernet card)  */
+	case 'c':          /* ce (Cassini Gigabit-Ethernet (PCI) */
 	    if (!ifp->ifSpeed)
 		ifp->ifSpeed = 1000000000;
 	    ifp->ifType = 6;
