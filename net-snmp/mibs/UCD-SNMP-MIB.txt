@@ -1083,7 +1083,7 @@ ssIORawReceived OBJECT-TYPE
     MAX-ACCESS  read-only
     STATUS      current
     DESCRIPTION
-        "Number of interrupts processed"
+        "Number of requests received from a block device"
     ::= { systemStats 58 }
 
 ssRawInterrupts OBJECT-TYPE
@@ -1091,7 +1091,7 @@ ssRawInterrupts OBJECT-TYPE
     MAX-ACCESS  read-only
     STATUS      current
     DESCRIPTION
-        "Number of requests received from a block device"
+        "Number of interrupts processed"
     ::= { systemStats 59 }
 
 ssRawContexts OBJECT-TYPE
