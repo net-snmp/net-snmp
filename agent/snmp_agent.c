@@ -229,7 +229,7 @@ save_set_cache(netsnmp_agent_session *asp)
 {
     agent_set_cache *ptr;
 
-    if (!asp->reqinfo || !asp->pdu)
+    if (!asp || !asp->reqinfo || !asp->pdu)
         return NULL;
 
     ptr = SNMP_MALLOC_TYPEDEF(agent_set_cache);
@@ -282,6 +282,7 @@ get_set_cache(netsnmp_agent_session *asp)
             asp->treecache_num = ptr->treecache_num;
             asp->requests = ptr->requests;
             asp->vbcount = ptr->vbcount;
+#ifdef OLD_STUFF
             if (!asp->reqinfo) {
                 asp->reqinfo =
                     SNMP_MALLOC_TYPEDEF(netsnmp_agent_request_info);
@@ -290,6 +291,11 @@ get_set_cache(netsnmp_agent_session *asp)
                     asp->reqinfo->agent_data = ptr->agent_data;
                 }
             }
+#else
+            netsnmp_assert(NULL != asp->reqinfo);
+            netsnmp_assert(asp->reqinfo->asp == asp);
+            netsnmp_assert(asp->reqinfo->agent_data == ptr->agent_data);
+#endif
             SNMP_FREE(ptr);
             return SNMP_ERR_NOERROR;
         }
@@ -297,6 +303,147 @@ get_set_cache(netsnmp_agent_session *asp)
     }
     return SNMP_ERR_GENERR;
 }
+
+/* Bulkcache holds the values for the *repeating* varbinds (only),
+ *   but ordered "by column" - i.e. the repetitions for each
+ *   repeating varbind follow on immediately from one another,
+ *   rather than being interleaved, as required by the protocol.
+ *
+ * So we need to rearrange the varbind list so it's ordered "by row".
+ *
+ * In the following code chunk:
+ *     n            = # non-repeating varbinds
+ *     r            = # repeating varbinds
+ *     asp->vbcount = # varbinds in the incoming PDU
+ *         (So asp->vbcount = n+r)
+ *
+ *     repeats = Desired # of repetitions (of 'r' varbinds)
+ */
+NETSNMP_STATIC_INLINE void
+_reorder_getbulk(netsnmp_agent_session *asp)
+{
+    int             i, n = 0, r = 0;
+    int             repeats = asp->pdu->errindex;
+    int             j;
+    int             all_eoMib;
+    netsnmp_variable_list *prev = NULL;
+            
+    if (asp->pdu->errstat < asp->vbcount) {
+        n = asp->pdu->errstat;
+    } else {
+        n = asp->vbcount;
+    }
+    if ((r = asp->vbcount - n) < 0) {
+        r = 0;
+    }
+            
+    /*
+     * For each of the original repeating varbinds (except the last),
+     *  go through the block of results for that varbind,
+     *  and link each instance to the corresponding instance
+     *  in the next block.
+     */
+    for (i = 0; i < r - 1; i++) {
+        prev = NULL;
+        for (j = 0; j < repeats; j++) {
+            /*
+             *  If we don't have a valid name for a given repetition
+             *   (and probably for all the ones that follow as well),
+             *   extend the previous result to indicate 'endOfMibView'
+             */
+            if (asp->bulkcache[i * repeats + j]->name_length == 0
+                && prev) {
+                snmp_set_var_objid(
+                    asp->bulkcache[i * repeats + j],
+                    prev->name, prev->name_length);
+                snmp_set_var_typed_value(
+                    asp->bulkcache[i * repeats + j],
+                    SNMP_ENDOFMIBVIEW, NULL, 0);
+            }
+            prev = asp->bulkcache[i * repeats + j];
+
+            asp->bulkcache[i * repeats + j]->next_variable =
+                asp->bulkcache[(i + 1) * repeats + j];
+        }
+    }
+    /*
+     * For the last of the original repeating varbinds,
+     *  go through that block of results, and link each
+     *  instance to the *next* instance in the *first* block.
+     *
+     * The very last instance of this block is left untouched
+     *  since it (correctly) points to the end of the list.
+     */
+    if (r > 0) {
+        prev = NULL;
+        for (j = 0; j < repeats - 1; j++) {
+            /*
+             *  Fill in missing names with 'endOfMibView' as above...
+             */
+            if (asp->bulkcache[(r - 1) * repeats + j]->name_length == 0
+                && prev) {
+                snmp_set_var_objid(
+                    asp->bulkcache[(r - 1) * repeats + j],
+                    prev->name, prev->name_length);
+                snmp_set_var_typed_value(
+                    asp->bulkcache[(r - 1) * repeats + j],
+                    SNMP_ENDOFMIBVIEW, NULL, 0);
+            }
+            prev = asp->bulkcache[(r - 1) * repeats + j];
+            asp->bulkcache[(r - 1) * repeats + j]->next_variable =
+                asp->bulkcache[j + 1];
+        }
+        /*
+         *  ... Not forgetting the very last entry
+         */
+        if (asp->bulkcache[r * repeats - 1]->name_length == 0
+            && prev) {
+            snmp_set_var_objid(
+                asp->bulkcache[r * repeats - 1],
+                prev->name, prev->name_length);
+            snmp_set_var_typed_value(
+                asp->bulkcache[r * repeats - 1],
+                SNMP_ENDOFMIBVIEW, NULL, 0);
+        }
+    }
+
+    /*
+     * If we've got a full row of endOfMibViews, then we
+     *  can truncate the result varbind list after that.
+     *
+     * Look for endOfMibView exception values in the list of
+     *  repetitions for the first varbind, and check the 
+     *  corresponding instances for the other varbinds
+     *  (following the next_variable links).
+     *
+     * If they're all endOfMibView too, then we can terminate
+     *  the linked list there, and free any redundant varbinds.
+     */
+    all_eoMib = 0;
+    for (i = 0; i < repeats; i++) {
+        if (asp->bulkcache[i]->type == SNMP_ENDOFMIBVIEW) {
+            all_eoMib = 1;
+            for (j = 1, prev=asp->bulkcache[i];
+                 j < r;
+                 j++, prev=prev->next_variable) {
+                if (prev->type != SNMP_ENDOFMIBVIEW) {
+                    all_eoMib = 0;
+                    break;	/* Found a real value */
+                }
+            }
+            if (all_eoMib) {
+                /*
+                 * This is indeed a full endOfMibView row.
+                 * Terminate the list here & free the rest.
+                 */
+                snmp_free_varbind( prev->next_variable );
+                prev->next_variable = NULL;
+                break;
+            }
+        }
+    }
+}
+
 
 int
 getNextSessID()
@@ -936,6 +1083,7 @@ init_agent_snmp_session(netsnmp_session * session, netsnmp_pdu *pdu)
     asp->oldmode = 0;
     asp->treecache_num = -1;
     asp->treecache_len = 0;
+    asp->reqinfo = SNMP_MALLOC_TYPEDEF(netsnmp_agent_request_info);
 
     return asp;
 }
@@ -1082,8 +1230,7 @@ netsnmp_remove_delegated_requests_for_session(netsnmp_session *sess)
             /*
              * matched! mark request as done
              */
-            netsnmp_set_mode_request_error(MODE_SET_BEGIN, request,
-                                           SNMP_ERR_GENERR);
+            netsnmp_request_set_error(request, SNMP_ERR_GENERR);
             ++count;
         }
     }
@@ -1150,7 +1297,7 @@ int
 netsnmp_wrap_up_request(netsnmp_agent_session *asp, int status)
 {
     netsnmp_variable_list *var_ptr;
-    int             i, n = 0, r = 0;
+    int             i;
 
     /*
      * if this request was a set, clear the global now that we are
@@ -1170,157 +1317,23 @@ netsnmp_wrap_up_request(netsnmp_agent_session *asp, int status)
         if ( status != 0  && asp->status == 0 )
             asp->status = status;
 
-        /*
-         * some stuff needs to be saved in special subagent cases 
-         */
         switch (asp->pdu->command) {
             case SNMP_MSG_INTERNAL_SET_BEGIN:
             case SNMP_MSG_INTERNAL_SET_RESERVE1:
             case SNMP_MSG_INTERNAL_SET_RESERVE2:
             case SNMP_MSG_INTERNAL_SET_ACTION:
+                /*
+                 * some stuff needs to be saved in special subagent cases 
+                 */
                 save_set_cache(asp);
                 break;
-        }
 
-        /*
-         * if this is a GETBULK response we need to rearrange the varbinds 
-         *
-         * Bulkcache holds the values for the *repeating* varbinds (only),
-         *   but ordered "by column" - i.e. the repetitions for each
-         *   repeating varbind follow on immediately from one another,
-         *   rather than being interleaved, as required by the protocol.
-         *
-         * So we need to rearrange the varbind list so it's ordered "by row".
-         *
-         * In the following code chunk:
-         *     n            = # non-repeating varbinds
-         *     r            = # repeating varbinds
-         *     asp->vbcount = # varbinds in the incoming PDU
-         *         (So asp->vbcount = n+r)
-         *
-         *     repeats = Desired # of repetitions (of 'r' varbinds)
-         *
-         */
-        if (asp->pdu->command == SNMP_MSG_GETBULK) {
-            int             repeats = asp->pdu->errindex;
-            int             j;
-            int             all_eoMib;
-            netsnmp_variable_list *prev = NULL;
-            
-            if (asp->pdu->errstat < asp->vbcount) {
-                n = asp->pdu->errstat;
-            } else {
-                n = asp->vbcount;
-            }
-            if ((r = asp->vbcount - n) < 0) {
-                r = 0;
-            }
-            
-            /*
-             * For each of the original repeating varbinds (except the last),
-             *  go through the block of results for that varbind,
-             *  and link each instance to the corresponding instance
-             *  in the next block.
-             */
-            for (i = 0; i < r - 1; i++) {
-                prev = NULL;
-                for (j = 0; j < repeats; j++) {
-                    /*
-                     *  If we don't have a valid name for a given repetition
-                     *   (and probably for all the ones that follow as well),
-                     *   extend the previous result to indicate 'endOfMibView'
-                     */
-                    if (asp->bulkcache[i * repeats + j]->name_length == 0
-                        && prev) {
-                        snmp_set_var_objid(
-                            asp->bulkcache[i * repeats + j],
-                            prev->name, prev->name_length);
-                        snmp_set_var_typed_value(
-                            asp->bulkcache[i * repeats + j],
-                            SNMP_ENDOFMIBVIEW, NULL, 0);
-                    }
-                    prev = asp->bulkcache[i * repeats + j];
-
-                    asp->bulkcache[i * repeats + j]->next_variable =
-                        asp->bulkcache[(i + 1) * repeats + j];
-                }
-            }
-            /*
-             * For the last of the original repeating varbinds,
-             *  go through that block of results, and link each
-             *  instance to the *next* instance in the *first* block.
-             *
-             * The very last instance of this block is left untouched
-             *  since it (correctly) points to the end of the list.
-             */
-            if (r > 0) {
-                prev = NULL;
-                for (j = 0; j < repeats - 1; j++) {
-                    /*
-                     *  Fill in missing names with 'endOfMibView' as above...
-                     */
-                    if (asp->bulkcache[(r - 1) * repeats + j]->name_length == 0
-                        && prev) {
-                        snmp_set_var_objid(
-                            asp->bulkcache[(r - 1) * repeats + j],
-                            prev->name, prev->name_length);
-                        snmp_set_var_typed_value(
-                            asp->bulkcache[(r - 1) * repeats + j],
-                            SNMP_ENDOFMIBVIEW, NULL, 0);
-                    }
-                    prev = asp->bulkcache[(r - 1) * repeats + j];
-                    asp->bulkcache[(r - 1) * repeats + j]->next_variable =
-                        asp->bulkcache[j + 1];
-                }
+            case SNMP_MSG_GETBULK:
                 /*
-                 *  ... Not forgetting the very last entry
+                 * for a GETBULK response we need to rearrange the varbinds 
                  */
-                if (asp->bulkcache[r * repeats - 1]->name_length == 0
-                    && prev) {
-                    snmp_set_var_objid(
-                        asp->bulkcache[r * repeats - 1],
-                        prev->name, prev->name_length);
-                    snmp_set_var_typed_value(
-                        asp->bulkcache[r * repeats - 1],
-                        SNMP_ENDOFMIBVIEW, NULL, 0);
-                }
-            }
-
-            /*
-             * If we've got a full row of endOfMibViews, then we
-             *  can truncate the result varbind list after that.
-             *
-             * Look for endOfMibView exception values in the list of
-             *  repetitions for the first varbind, and check the 
-             *  corresponding instances for the other varbinds
-             *  (following the next_variable links).
-             *
-             * If they're all endOfMibView too, then we can terminate
-             *  the linked list there, and free any redundant varbinds.
-             */
-            all_eoMib = 0;
-            for (i = 0; i < repeats; i++) {
-                if (asp->bulkcache[i]->type == SNMP_ENDOFMIBVIEW) {
-                    all_eoMib = 1;
-                    for (j = 1, prev=asp->bulkcache[i];
-                         j < r;
-                         j++, prev=prev->next_variable) {
-                        if (prev->type != SNMP_ENDOFMIBVIEW) {
-                            all_eoMib = 0;
-                            break;	/* Found a real value */
-                        }
-                    }
-                    if (all_eoMib) {
-                        /*
-                         * This is indeed a full endOfMibView row.
-                         * Terminate the list here & free the rest.
-                         */
-                        snmp_free_varbind( prev->next_variable );
-                        prev->next_variable = NULL;
-                        break;
-                    }
-                }
-            }
+                _reorder_getbulk(asp);
+                break;
         }
 
         /*
@@ -1442,7 +1455,7 @@ netsnmp_wrap_up_request(netsnmp_agent_session *asp, int status)
         }
         snmp_increment_statistic(STAT_SNMPOUTPKTS);
         snmp_increment_statistic(STAT_SNMPOUTGETRESPONSES);
-        asp->pdu = NULL;
+        asp->pdu = NULL; /* yyy-rks: redundant, no? */
         netsnmp_remove_and_free_agent_snmp_session(asp);
     }
     return 1;
@@ -1685,6 +1698,7 @@ netsnmp_add_varbind_to_cache(netsnmp_agent_session *asp, int vbcount,
         request->processed = 0;
         request->status = 0;
         request->subtree = tp;
+        request->agent_req_info = asp->reqinfo;
         if (request->parent_data) {
             netsnmp_free_request_data_sets(request);
         }
@@ -2134,6 +2148,7 @@ netsnmp_check_requests_status(netsnmp_agent_session *asp,
      * find any errors marked in the requests 
      */
     while (requests) {
+        netsnmp_assert(requests->agent_req_info == asp->reqinfo);/* DEBUG */
         if (requests->status != SNMP_ERR_NOERROR &&
             (!look_for_specific || requests->status == look_for_specific)
             && (look_for_specific || asp->index == 0
@@ -2165,15 +2180,6 @@ handle_var_requests(netsnmp_agent_session *asp)
     int             i, retstatus = SNMP_ERR_NOERROR,
         status = SNMP_ERR_NOERROR, final_status = SNMP_ERR_NOERROR;
     netsnmp_handler_registration *reginfo;
-
-    /*
-     * create the netsnmp_agent_request_info data 
-     */
-    if (!asp->reqinfo) {
-        asp->reqinfo = SNMP_MALLOC_TYPEDEF(netsnmp_agent_request_info);
-        if (!asp->reqinfo)
-            return SNMP_ERR_GENERR;
-    }
 
     asp->reqinfo->asp = asp;
     asp->reqinfo->mode = asp->mode;
@@ -2955,23 +2961,14 @@ handle_pdu(netsnmp_agent_session *asp)
     return status;
 }
 
-int
-netsnmp_set_request_error(netsnmp_agent_request_info *reqinfo,
-                          netsnmp_request_info *request, int error_value)
-{
-    if (!request || !reqinfo)
-        return error_value;
-
-    return netsnmp_set_mode_request_error(reqinfo->mode, request,
-                                          error_value);
-}
-
-int
-netsnmp_set_mode_request_error(int mode, netsnmp_request_info *request,
-                               int error_value)
+/** set error for a request
+ * \internal external interface: netsnmp_request_set_error
+ */
+NETSNMP_STATIC_INLINE int
+_request_set_error(netsnmp_request_info *request, int mode, int error_value)
 {
     if (!request)
-        return error_value;
+        return SNMPERR_NO_VARS;
 
     request->processed = 1;
     request->delegated = REQUEST_IS_NOT_DELEGATED;
@@ -2988,7 +2985,7 @@ netsnmp_set_mode_request_error(int mode, netsnmp_request_info *request,
         switch (mode) {
         case MODE_GET:
             request->requestvb->type = error_value;
-            return error_value;
+            return SNMPERR_SUCCESS;
 
         case MODE_GETNEXT:
         case MODE_GETBULK:
@@ -2998,11 +2995,11 @@ netsnmp_set_mode_request_error(int mode, netsnmp_request_info *request,
              */
             snmp_log(LOG_ERR, "Illegal error_value %d for mode %d ignored\n",
                      error_value, mode);
-            return error_value;
+            return SNMPERR_VALUE;
 
         default:
             request->status = SNMP_ERR_NOSUCHNAME;      /* WWW: correct? */
-            return error_value;
+            return SNMPERR_SUCCESS;
         }
         break;                  /* never get here */
 
@@ -3023,21 +3020,56 @@ netsnmp_set_mode_request_error(int mode, netsnmp_request_info *request,
              */
             request->status = error_value;
         }
-        return error_value;
+        return SNMPERR_SUCCESS;
     }
-    return error_value;
+    return SNMPERR_SUCCESS;
 }
 
+/** set error for a request
+ * @param request request which has error
+ * @param error_value error value for request
+ */
 int
-netsnmp_set_all_requests_error(netsnmp_agent_request_info *reqinfo,
-                               netsnmp_request_info *requests,
-                               int error_value)
+netsnmp_request_set_error(netsnmp_request_info *request, int error_value)
 {
-    while (requests) {
-        netsnmp_set_request_error(reqinfo, requests, error_value);
-        requests = requests->next;
+    if (!request || !request->agent_req_info)
+        return SNMPERR_NO_VARS;
+
+    return _request_set_error(request, request->agent_req_info->mode,
+                              error_value);
+}
+
+/** set error for all requests
+ * @param requests request list
+ * @param error_value error value for requests
+ * @return SNMPERR_SUCCESS, or an error code
+ */
+NETSNMP_INLINE int
+netsnmp_request_set_error_all( netsnmp_request_info *requests, int error)
+{
+    int mode, rc, result = SNMPERR_SUCCESS;
+
+    if((NULL == requests) || (NULL == requests->agent_req_info))
+        return SNMPERR_NO_VARS;
+    
+    mode = requests->agent_req_info->mode; /* every req has same mode */
+    
+    for(; requests ; requests = requests->next) {
+
+        /** paranoid sanity checks */
+        netsnmp_assert(NULL != request->agent_req_info->mode);
+        netsnmp_assert(mode == request->agent_req_info->mode);
+
+        /*
+         * set error for this request. Log any errors, save the last
+         * to return to the user.
+         */
+        if((rc = _request_set_error(requests, mode, error))) {
+            snmp_log(LOG_WARNING,"got %d while setting request error\n", rc);
+            result = rc;
+        }
     }
-    return error_value;
+    return result;
 }
 
 extern struct timeval starttime;
@@ -3078,7 +3110,7 @@ netsnmp_get_agent_uptime(void)
 
 
 
-inline void
+NETSNMP_INLINE void
 netsnmp_agent_add_list_data(netsnmp_agent_request_info *ari,
                             netsnmp_data_list *node)
 {
@@ -3091,7 +3123,7 @@ netsnmp_agent_add_list_data(netsnmp_agent_request_info *ari,
     }
 }
 
-inline void    *
+NETSNMP_INLINE void    *
 netsnmp_agent_get_list_data(netsnmp_agent_request_info *ari,
                             const char *name)
 {
@@ -3101,7 +3133,7 @@ netsnmp_agent_get_list_data(netsnmp_agent_request_info *ari,
     return NULL;
 }
 
-inline void
+NETSNMP_INLINE void
 netsnmp_free_agent_data_set(netsnmp_agent_request_info *ari)
 {
     if (ari) {
@@ -3109,7 +3141,7 @@ netsnmp_free_agent_data_set(netsnmp_agent_request_info *ari)
     }
 }
 
-inline void
+NETSNMP_INLINE void
 netsnmp_free_agent_data_sets(netsnmp_agent_request_info *ari)
 {
     if (ari) {
@@ -3117,7 +3149,7 @@ netsnmp_free_agent_data_sets(netsnmp_agent_request_info *ari)
     }
 }
 
-inline void
+NETSNMP_INLINE void
 netsnmp_free_agent_request_info(netsnmp_agent_request_info *ari)
 {
     if (ari) {
@@ -3126,4 +3158,61 @@ netsnmp_free_agent_request_info(netsnmp_agent_request_info *ari)
 	}
         SNMP_FREE(ari);
     }
+}
+
+/*************************************************************************
+ *
+ * deprecated functions
+ *
+ */
+
+/** set error for a request
+ * \deprecated, use netsnmp_request_set_error instead
+ * @param reqinfo agent_request_info pointer for request
+ * @param request request_info pointer
+ * @param error_value error value for requests
+ * @return error_value
+ */
+int
+netsnmp_set_request_error(netsnmp_agent_request_info *reqinfo,
+                          netsnmp_request_info *request, int error_value)
+{
+    if (!request || !reqinfo)
+        return error_value;
+
+    _request_set_error(request, reqinfo->mode, error_value);
+    
+    return error_value;
+}
+
+/** set error for a request
+ * \deprecated, use netsnmp_request_set_error instead
+ * @param mode Net-SNMP agent processing mode
+ * @param request request_info pointer
+ * @param error_value error value for requests
+ * @return error_value
+ */
+int
+netsnmp_set_mode_request_error(int mode, netsnmp_request_info *request,
+                               int error_value)
+{
+    _request_set_error(request, mode, error_value);
+    
+    return error_value;
+}
+
+/** set error for all request
+ * \deprecated use netsnmp_request_set_error_all
+ * @param reqinfo agent_request_info pointer for requests
+ * @param requests request list
+ * @param error_value error value for requests
+ * @return error_value
+ */
+int
+netsnmp_set_all_requests_error(netsnmp_agent_request_info *reqinfo,
+                               netsnmp_request_info *requests,
+                               int error_value)
+{
+    netsnmp_request_set_error_all(requests, error_value);
+    return error_value;
 }
