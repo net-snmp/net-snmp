@@ -124,8 +124,10 @@ generate_Ku(	oid	*hashtype,	u_int  hashtype_len,
 	  EVP_DigestInit(ctx, EVP_md5());
 	else if (ISTRANSFORM(hashtype, HMACSHA1Auth))
 	  EVP_DigestInit(ctx, EVP_sha1());
-	else 
+	else  {
+	  free(ctx);
 	  return (SNMPERR_GENERR);
+	}
 #else 
         MDbegin(&MD);
 #endif /* USE_OPENSSL */
@@ -349,7 +351,6 @@ encode_keychange(	oid	*hashtype,	u_int  hashtype_len,
 	void		*context = NULL;
 
 
-
 	/*
 	 * Sanity check.
 	 */
@@ -399,26 +400,28 @@ encode_keychange(	oid	*hashtype,	u_int  hashtype_len,
 #endif /* !SNMP_TESTING_CODE */
 
         tmpbuf = (u_char *)malloc(properlength*2);
-        memcpy(tmpbuf, oldkey, properlength);
-        memcpy(tmpbuf+properlength, kcstring, properlength);
-
-        *kcstring_len -= properlength;
-        rval = sc_hash(hashtype, hashtype_len, tmpbuf, properlength*2,
-                       kcstring+properlength, kcstring_len);
-        
-	QUITFUN(rval, encode_keychange_quit);
-
-	*kcstring_len = (properlength*2);
-
-	kcstring += properlength;
-	nbytes    = 0;
-	while ((int)(nbytes++) < properlength) {
-		*kcstring++ = *kcstring ^ *newkey++;
-	}
+        if (tmpbuf) {
+            memcpy(tmpbuf, oldkey, properlength);
+            memcpy(tmpbuf+properlength, kcstring, properlength);
+    
+            *kcstring_len -= properlength;
+            rval = sc_hash(hashtype, hashtype_len, tmpbuf, properlength*2,
+                           kcstring+properlength, kcstring_len);
+            
+            QUITFUN(rval, encode_keychange_quit);
+    
+            *kcstring_len = (properlength*2);
+    
+            kcstring += properlength;
+            nbytes    = 0;
+            while ((int)(nbytes++) < properlength) {
+            	*kcstring++ = *kcstring ^ *newkey++;
+            }
+        }
 
 encode_keychange_quit:
 	if (rval != SNMPERR_SUCCESS) memset(kcstring, 0, *kcstring_len);
-        if (tmpbuf != NULL) SNMP_FREE(tmpbuf);
+        SNMP_FREE(tmpbuf);
 	SNMP_FREE(context);
 
 	return rval;
@@ -517,19 +520,21 @@ decode_keychange(	oid	*hashtype,	u_int  hashtype_len,
 	 *	. XOR hash and encoded (second) half of kcstring (into newkey).
 	 */
         tmpbuf = (u_char *)malloc(properlength*2);
-        memcpy(tmpbuf, oldkey, properlength);
-        memcpy(tmpbuf+properlength, kcstring, properlength);
-
-        rval = sc_hash(hashtype, hashtype_len, tmpbuf, properlength*2,
-                       tmp_buf, &tmp_buf_len);
-	QUITFUN(rval, decode_keychange_quit);
-
-        memcpy(newkey, tmp_buf, properlength);
-	bufp   = kcstring+properlength;
-	nbytes = 0;
-	while ((int)(nbytes++) < properlength) {
-		*newkey++ = *newkey ^ *bufp++;
-	}
+        if (tmpbuf) {
+            memcpy(tmpbuf, oldkey, properlength);
+            memcpy(tmpbuf+properlength, kcstring, properlength);
+    
+            rval = sc_hash(hashtype, hashtype_len, tmpbuf, properlength*2,
+                           tmp_buf, &tmp_buf_len);
+            QUITFUN(rval, decode_keychange_quit);
+    
+            memcpy(newkey, tmp_buf, properlength);
+            bufp   = kcstring+properlength;
+            nbytes = 0;
+            while ((int)(nbytes++) < properlength) {
+                    *newkey++ = *newkey ^ *bufp++;
+            }
+        }
 
 decode_keychange_quit:
 	if (rval != SNMPERR_SUCCESS) {

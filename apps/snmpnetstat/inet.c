@@ -269,11 +269,11 @@ protopr (const char *name)
 		    break;
 	}
 	if (tp == NULL){
-	    tp = (struct tcpconn_entry *)malloc(sizeof(struct tcpconn_entry));
+	    tp = (struct tcpconn_entry *)calloc(1, sizeof(struct tcpconn_entry));
+	    if (tp == NULL) break;
 	    if (tcplast != NULL) tcplast->next = tp;
 	    tcplast = tp;
 	    if (tcpconn == NULL) tcpconn = tp;
-	    memset(tp, 0, sizeof(*tp));
 	    memmove(tp->instance, instance, sizeof(tp->instance));
 	}
 
@@ -370,12 +370,11 @@ protopr (const char *name)
 		    break;
 	}
 	if (up == NULL){
-	    up = (struct udp_entry *)malloc(sizeof(struct udp_entry));
+	    up = (struct udp_entry *)calloc(1, sizeof(struct udp_entry));
+	    if (up == NULL) break;
 	    if (udplast != NULL) udplast->next = up;
 	    udplast = up;
 	    if (udpconn == NULL) udpconn = up;
-	    memset(up, 0, sizeof(*up));
-	    up->next = NULL;
 	    memmove(up->instance, instance, sizeof(up->instance));
 	}
 

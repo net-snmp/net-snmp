@@ -36,7 +36,7 @@ config_require(util_funcs)
 
 struct targetAddrTable_struct {
   char  *name;
-  oid    tDomain[128];
+  oid    tDomain[MAX_OID_LEN];
   int    tDomainLen;
   char  *tAddress;
   int    timeout;

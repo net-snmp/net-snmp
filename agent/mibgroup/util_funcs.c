@@ -215,6 +215,8 @@ int get_exec_output(struct extensible *ex)
         *cptr2 = 0;
         *(cptr2+1) = 0;
         argv = (char **) malloc((cnt+2) * sizeof(char *));
+        if (argv == NULL)
+          return 0; /* memory alloc error */
         aptr = argv;
         *(aptr++) = argvs;
         for (cptr2 = argvs, i=1; i != cnt; cptr2++)
@@ -349,6 +351,8 @@ int get_exec_pipes(char *cmd,
       *cptr2 = 0;
       *(cptr2+1) = 0;
       argv = (char **) malloc((cnt+2) * sizeof(char *));
+      if (argv == NULL)
+        return 0; /* memory alloc error */
       aptr = argv;
       *(aptr++) = argvs;
       for (cptr2 = argvs, i=1; i != cnt; cptr2++)

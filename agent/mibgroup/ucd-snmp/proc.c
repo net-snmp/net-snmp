@@ -170,6 +170,8 @@ void proc_parse_config(const char *token, char* cptr)
     procp = &((*procp)->next);
   
   (*procp) = (struct myproc *) malloc(sizeof(struct myproc));
+  if (*procp == NULL)
+    return; /* memory alloc error */
   (*procp)->next = NULL;
   numprocs++;
   /* not blank and not a comment */

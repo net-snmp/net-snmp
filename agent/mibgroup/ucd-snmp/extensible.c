@@ -188,6 +188,9 @@ void extensible_parse_config(const char *token, char* cptr)
       (struct extensible *) malloc(sizeof(struct extensible));
     pptmp = ppexten;
   }
+  if (pptmp == NULL)
+    return; /* XXX memory alloc error */
+
   /* the rest is pretty much handled the same */
   if (!strncasecmp(token,"sh",2)) 
     (*pptmp)->type = SHPROC;

@@ -1642,6 +1642,7 @@ static struct range_list *parse_ranges(FILE *fp, struct range_list **retp)
 	    nexttype = get_token(fp, nexttoken, MAXTOKEN);
 	}
 	*rpp = (struct range_list *)calloc (1, sizeof(struct range_list));
+	if (*rpp == NULL) break;
 	(*rpp)->low = low;
 	(*rpp)->high = high;
 	rpp = &(*rpp)->next;
@@ -3444,6 +3445,7 @@ static void print_mib_leaves(FILE *f, struct tree *tp)
     for (ntp = tp->child_list; ntp; ntp = ntp->next_peer) count++;
     if (count) {
       leaves = (struct leave *)calloc(count, sizeof(struct leave));
+      if (!leaves) return;
       for (ntp = tp->child_list, count = 0; ntp; ntp = ntp->next_peer) {
 	for (i = 0, lp = leaves; i < count; i++, lp++)
 	  if (lp->id >= ntp->subid) break;

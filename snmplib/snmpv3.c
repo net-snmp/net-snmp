@@ -363,7 +363,7 @@ usm_parse_create_usmUser(const char *token, char *line) {
   /* READ: Authentication Pass Phrase */
   if (!cp) {
     /* assume the same as the authentication key */
-    memdup(&newuser->privKey, newuser->authKey, newuser->authKeyLen);
+    memdup((void *)&newuser->privKey, newuser->authKey, newuser->authKeyLen);
   } else {
     cp = copy_word(cp, buf);
     /* And turn it into a localized key */
