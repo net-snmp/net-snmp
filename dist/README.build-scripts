@@ -48,8 +48,8 @@ Recommended Procedure
    For example, for release 5.0.3:
 
    $ cd ~/src
-   $ CVS_RSH=ssh cvs -d:pserver:anonymous@cvs.net-snmp.org:/cvsroot/net-snmp \
-         -q co -r Ext-5-0-3 -d ~/src/net-snmp-Ext-5-0-3
+   $ CVS_RSH=ssh cvs -d $USER@cvs.net-snmp.org:/cvsroot/net-snmp \
+         -q co -r Ext-5-0-3 -d ~/src/net-snmp-Ext-5-0-3 net-snmp
 
 3) Run the package script. 
 
