@@ -47,7 +47,7 @@ init_snmp_enum(const char *type)
     for (i = 0; i < SE_MAX_IDS; i++) {
         if (!snmp_enum_lists[i])
             snmp_enum_lists[i] = (struct snmp_enum_list **)
-                malloc(sizeof(struct snmp_enum_list *) * SE_MAX_SUBIDS);
+                calloc(1, sizeof(struct snmp_enum_list *) * SE_MAX_SUBIDS);
         if (!snmp_enum_lists[i])
             return SE_NOMEM;
     }
@@ -274,12 +274,10 @@ se_add_pair_to_list(struct snmp_enum_list **list, char *label, int value)
     }
 
     if (lastnode) {
-        lastnode->next = (struct snmp_enum_list *)
-            malloc(sizeof(struct snmp_enum_list));
+        lastnode->next = SNMP_MALLOC_STRUCT(snmp_enum_list);
         lastnode = lastnode->next;
     } else {
-        (*list) = (struct snmp_enum_list *)
-            malloc(sizeof(struct snmp_enum_list));
+        (*list) = SNMP_MALLOC_STRUCT(snmp_enum_list);
         lastnode = (*list);
     }
     if (!lastnode)
@@ -316,19 +314,7 @@ se_find_slist(const char *listname)
         if (sptr->name && strcmp(sptr->name, listname) == 0)
             return sptr->list;
 
-    if (lastp) {
-        lastp->next = (struct snmp_enum_list_str *)
-            malloc(sizeof(struct snmp_enum_list_str));
-        sptr = lastp->next;
-    } else {
-        sptr = (struct snmp_enum_list_str *)
-            malloc(sizeof(struct snmp_enum_list_str));
-        sliststorage = sptr;
-    }
-    sptr->list = NULL;
-    sptr->name = strdup(listname);
-    sptr->next = NULL;
-    return sptr->list;
+    return NULL;
 }
 
 
@@ -359,8 +345,8 @@ se_add_pair_to_slist(const char *listname, char *label, int value)
     int             ret = se_add_pair_to_list(&list, label, value);
 
     if (!created) {
-        struct snmp_enum_list_str *sptr = (struct snmp_enum_list_str *)
-            malloc(sizeof(struct snmp_enum_list_str));
+        struct snmp_enum_list_str *sptr =
+            SNMP_MALLOC_STRUCT(snmp_enum_list_str);
         if (!sptr)
             return SE_NOMEM;
         sptr->next = sliststorage;
@@ -413,8 +399,8 @@ se_clear_list(struct snmp_enum_list **list)
     this_entry = *list;
     while (this_entry) {
         next_entry = this_entry->next;
-        free(this_entry->label);
-        free(this_entry);
+        SNMP_FREE(this_entry->label);
+        SNMP_FREE(this_entry);
         this_entry = next_entry;
     }
     *list = NULL;
