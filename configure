@@ -2413,7 +2413,7 @@ else
   echo "$ac_t""no" 1>&6
 fi
 
-       if test "x$ac_cv_lib_nsl_gethostbyname" = "yes"; then
+       if test "x$ac_cv_lib_nsl_gethostbyname" = "xyes"; then
 	    cat >> confdefs.h <<\EOF
 #define HAVE_GETHOSTBYNAME 1
 EOF
@@ -2468,7 +2468,7 @@ else
   echo "$ac_t""no" 1>&6
 fi
 
-       if test "x$ac_cv_lib_socket_getservbyname" = "yes"; then
+       if test "x$ac_cv_lib_socket_getservbyname" = "xyes"; then
 	    cat >> confdefs.h <<\EOF
 #define HAVE_GETSERVBYNAME 1
 EOF
