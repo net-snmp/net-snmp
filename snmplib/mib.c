@@ -1584,16 +1584,54 @@ fprint_value(FILE *f,
     fprintf(f, "%s\n", tempbuf);
 }
 
+char *
+dump_oid_to_string(oid *objid,
+	   size_t objidlen,
+	   char *buf,
+	   size_t buflen)
+{
+  /* if any subidentifier might be printable, dump it as printable. */
+  if (buf)
+  { int ii, jj, kk;
+    char *scp;
+    char *cp = buf + (strlen(buf));
+    scp = cp; kk = 0;
+    for (ii= 0, jj = 0; ii < objidlen; ii++)
+    {
+	oid tst = objid[ii];
+	if (tst > 254) continue;
+	if (isprint(tst)) {
+	  if (jj == 0) { *cp++ = '"'; jj = 1; }
+	  *cp++ = (char)tst;
+	  kk++;
+	}
+	else if ((jj > 0) && (*(cp-1) != '.')) {
+	  *cp++ = '.';
+	  kk++;
+	}
+    }
+    if (jj) { *cp++ = '"'; }
+    if (kk < 2) cp = scp;
+    *cp = '\0';
+	buf = cp;
+  }
+
+  return buf;
+}
+
 struct tree *
-get_symbol(oid *objid,
+_get_symbol(oid *objid,
 	   size_t objidlen,
 	   struct tree *subtree,
-	   char *buf)
+	   char *buf,
+	   struct index_list *in_dices)
 {
     struct tree    *return_tree = NULL;
 
     for(; subtree; subtree = subtree->next_peer){
 	if (*objid == subtree->subid){
+	    if (subtree->indexes)
+                in_dices = subtree->indexes;
 	    if (!strncmp( subtree->label, ANON, ANON_LEN))
                 sprintf(buf, "%lu", subtree->subid);
 	    else
@@ -1603,6 +1641,32 @@ get_symbol(oid *objid,
     }
 
     /* subtree not found */
+
+    while (in_dices) {
+	struct tree *tp;
+	tp = find_tree_node(in_dices->ilabel, -1);
+	if (tp) {
+	    size_t buflen;
+	    switch(tp->type) {
+	    case TYPE_OCTETSTR:
+		buflen = (size_t)*objid;
+		if ( (1+buflen) > objidlen)
+		    goto finish_it;
+		buf = dump_oid_to_string(objid + 1, objidlen - 1,
+		    buf, buflen);
+		*buf++ = '\0'; /* XXX avoid trailing dot, but continue ? */
+		objid += (1+buflen);
+		objidlen -= (1+buflen);
+		break;
+	    default:
+		break;
+	    }
+	    in_dices = in_dices->next;
+	}
+    }
+
+finish_it:
+
     while(objidlen--){	/* output rest of name, uninterpreted */
 	sprintf(buf, "%lu.", *objid++);
 	while(*buf)
@@ -1617,13 +1681,23 @@ found:
 	    buf++;
 	*buf++ = '.';
 	*buf = '\0';
-	return_tree = get_symbol(objid + 1, objidlen - 1, subtree->child_list,
-				 buf);
+
+	return_tree = _get_symbol(objid + 1, objidlen - 1, subtree->child_list,
+				 buf, in_dices);
     }
     if (return_tree != NULL)
 	return return_tree;
     else
 	return subtree;
+}
+
+struct tree *
+get_symbol(oid *objid,
+	   size_t objidlen,
+	   struct tree *subtree,
+	   char *buf)
+{
+   return _get_symbol(objid,objidlen,subtree,buf,0);
 }
 
 /*
