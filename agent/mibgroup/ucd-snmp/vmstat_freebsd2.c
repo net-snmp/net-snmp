@@ -187,8 +187,8 @@ unsigned char *var_extensible_vmstat(struct variable *vp,
 #ifdef openbsd2
 	long_ret = ptok(mem_new.v_swpin - mem_old.v_swpin);
 #else
-	long_ret = ptok(mem_new.v_swapin - mem_old.v_swapin + 
-			mem_new.v_vnodein - mem_old.v_vnodein);
+	long_ret = ptok(mem_new.v_swappgsin - mem_old.v_swappgsin + 
+			mem_new.v_vnodepgsin - mem_old.v_vnodepgsin);
 #endif
 	long_ret = rate(long_ret);
 	return((u_char *) (&long_ret));
@@ -196,8 +196,8 @@ unsigned char *var_extensible_vmstat(struct variable *vp,
 #ifdef openbsd2
 	long_ret = ptok(mem_new.v_swpout - mem_old.v_swpout);
 #else
-	long_ret = ptok(mem_new.v_swapout - mem_old.v_swapout + 
-			mem_new.v_vnodeout - mem_old.v_vnodeout);
+	long_ret = ptok(mem_new.v_swappgsout - mem_old.v_swappgsout + 
+			mem_new.v_vnodepgsout - mem_old.v_vnodepgsout);
 #endif
 	long_ret = rate(long_ret);
 	return((u_char *) (&long_ret));
