@@ -121,7 +121,7 @@ int snmp_input(operation, session, reqid, pdu, magic)
 u_long parse_address(address)
     char *address;
 {
-    u_long addr;
+    in_addr_t addr;
     struct sockaddr_in saddr;
     struct hostent *hp;
 

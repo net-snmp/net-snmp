@@ -107,7 +107,7 @@ main(argc, argv)
     struct contextEntry *cxp;
     int trivialSNMPv2 = FALSE;
     struct hostent *hp;
-    u_long destAddr;
+    in_addr_t destAddr;
     char ctmp[300];
 
 

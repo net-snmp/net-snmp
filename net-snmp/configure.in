@@ -259,6 +259,7 @@ dnl Checks for typedefs, structures, and compiler characteristics.
 AC_TYPE_OFF_T
 AC_TYPE_PID_T
 AC_HEADER_TIME
+AC_CHECK_TYPE(in_addr_t, u_int)
 
 dnl Check ps args
 AC_CACHE_CHECK(for correct flags to ps, ac_cv_ps_flags,

@@ -91,7 +91,7 @@ Makefile: Makefile.in config.status
 	CONFIG_HEADERS= ./config.status
 
 config.status: configure
-	$(srcdir)/config.status --recheck
+	./config.status --recheck
 
 mib.txt: mibII.txt
 	cp $(srcdir)/mibII.txt mib.txt
