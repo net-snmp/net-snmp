@@ -559,6 +559,9 @@
 /* Define if you have the <regex.h> header file.  */
 #undef HAVE_REGEX_H
 
+/* Define if you have the <rpmio.h> header file.  */
+#undef HAVE_RPMIO_H
+
 /* Define if you have the <sgtty.h> header file.  */
 #undef HAVE_SGTTY_H
 
