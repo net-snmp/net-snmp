@@ -11,6 +11,8 @@
 #include <net-snmp/data_access/ipaddress.h>
 #include <net-snmp/data_access/interface.h>
 
+#include "ip-mib/ipAddressTable/ipAddressTable_constants.h"
+
 #include <errno.h>
 #include <sys/ioctl.h>
 
@@ -128,7 +130,7 @@ _netsnmp_access_ipaddress_container_ioctl_load_v4(netsnmp_container *container,
         }
         entry->ia_flags = ifrp->ifr_flags;
 
-        entry->ia_type = 1; /* assume unicast? */
+        entry->ia_type = IPADDRESSTYPE_UNICAST; /* assume unicast? */
 
         /** entry->ia_prefix_oid ? */
 
@@ -137,13 +139,13 @@ _netsnmp_access_ipaddress_container_ioctl_load_v4(netsnmp_container *container,
          *   In the absence of other information, an IPv4 address is
          *   always preferred(1).
          */
-        entry->ia_status = 1;
+        entry->ia_status = IPADDRESSSTATUSTC_PREFERRED;
 
         /*
          * can we figure out if an address is from DHCP?
          * use manual until then...
          */
-        entry->ia_origin = 2; /* 2 = manual */
+        entry->ia_origin = IPADDRESSORIGINTC_MANUAL;
 
         DEBUGIF("access:ipaddress:container") {
             DEBUGMSGT_NC(("access:ipaddress:container",
