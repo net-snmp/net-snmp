@@ -38,7 +38,9 @@ struct targetParamTable_struct {
   int    secLevel;
   int    storageType;
   int    rowStatus;
-  struct targetParamTable_struct *next; };
+  struct targetParamTable_struct *next;
+  time_t updateTime;
+};
 
 /* utility functions */
 struct targetParamTable_struct *get_paramEntry(char *name);

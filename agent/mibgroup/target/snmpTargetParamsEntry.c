@@ -581,6 +581,11 @@ var_snmpTargetParamsEntry(
   return 0;
 }  /* var_snmpTargetParamsEntry */
 
+/* timestamp the current entry's modification time */
+void
+update_timestamp(struct targetParamTable_struct *temp_struct) {
+    temp_struct->updateTime = time(NULL);
+}
 
 /* Assign a value to the mpModel variable */
 int
@@ -638,6 +643,7 @@ write_snmpTargetParamsMPModel(
     if ( (temp_struct->rowStatus == SNMP_ROW_NOTREADY) &&
 	 (snmpTargetParams_rowStatusCheck(temp_struct) != 0) )
       temp_struct->rowStatus = SNMP_ROW_NOTINSERVICE;
+    update_timestamp(temp_struct);
   }
   return SNMP_ERR_NOERROR;
 }  /* write_snmpTargetParamsMPModel */
@@ -700,6 +706,7 @@ write_snmpTargetParamsSecurityModel(
     if ( (temp_struct->rowStatus == SNMP_ROW_NOTREADY) &&
 	 (snmpTargetParams_rowStatusCheck(temp_struct) != 0) )
       temp_struct->rowStatus = SNMP_ROW_NOTINSERVICE;
+    update_timestamp(temp_struct);
   }
 
   return SNMP_ERR_NOERROR;
@@ -769,6 +776,7 @@ write_snmpTargetParamsSecurityName(
     if ( (temp_struct->rowStatus == SNMP_ROW_NOTREADY) &&
 	 (snmpTargetParams_rowStatusCheck(temp_struct) != 0) )
       temp_struct->rowStatus = SNMP_ROW_NOTINSERVICE;
+    update_timestamp(temp_struct);
   }
   return SNMP_ERR_NOERROR;
 }  /* write_snmpTargetParamsSecurityName */
@@ -831,6 +839,7 @@ write_snmpTargetParamsSecurityLevel(
     if ( (temp_struct->rowStatus == SNMP_ROW_NOTREADY) &&
 	 (snmpTargetParams_rowStatusCheck(temp_struct) != 0) )
       temp_struct->rowStatus = SNMP_ROW_NOTINSERVICE;
+    update_timestamp(temp_struct);
   }
   return SNMP_ERR_NOERROR;
 } /* write_snmpTargetParamsSecurityLevel */
@@ -1012,6 +1021,7 @@ write_snmpTargetParamsRowStatus(
 	DEBUGMSG(("snmpTargetParamsEntry","failed new row creation, bad OID/index value \n"));
 	return SNMP_ERR_GENERR;
       }
+      update_timestamp(temp_struct);
       break;
       
     case DESTROY:
@@ -1020,6 +1030,7 @@ write_snmpTargetParamsRowStatus(
 
     case CHANGE:
       temp_struct->rowStatus = long_ret;
+      update_timestamp(temp_struct);
       break;
 
     case NOTHING:

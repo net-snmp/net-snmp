@@ -1219,6 +1219,11 @@ write_snmpTargetAddrRowStatus(
       break;
 
     case CHANGE:
+      if (long_ret != SNMP_ROW_ACTIVE && temp_struct->sess) {
+          /* must close our session */
+          snmp_close(temp_struct->sess);
+          temp_struct->sess = NULL;
+      }
       temp_struct->rowStatus = long_ret;
       break;
 

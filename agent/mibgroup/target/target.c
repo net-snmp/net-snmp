@@ -66,56 +66,80 @@ get_target_sessions(char *taglist) {
                         DEBUGMSGTL(("target_sessions","found one: %s\n",
                                      tags[i]));
 
-                        /* create an appropriate snmp session and add
-                           it to our return list */
-                        sprintf(smbuf, "%d.%d.%d.%d",
-                                (int) targaddrs->tAddress[0],
-                                (int) targaddrs->tAddress[1],
-                                (int) targaddrs->tAddress[2],
-                                (int) targaddrs->tAddress[3]);
-                        memset(&thissess,0,sizeof(thissess));
-                        thissess.peername = strdup(smbuf);
-                        thissess.remote_port =
-                            ((int) targaddrs->tAddress[4])*256 +
-                            (int) targaddrs->tAddress[5];
-                        thissess.timeout = (targaddrs->timeout)*1000;
-                        DEBUGMSGTL(("target_sessions","timeout: %d -> %d\n",
-                                     targaddrs->timeout, thissess.timeout));
-                        thissess.retries = targaddrs->retryCount;
-
                         if (targaddrs->params) {
                             param = get_paramEntry(targaddrs->params);
-                            if (param) {
-                                if (param->mpModel == SNMP_VERSION_3 &&
-                                    param->secModel != 3) {
-                                    snmp_log(LOG_ERR,
-                                             "unsupported model/secmodel combo for target %s\n",
-                                             targaddrs->name);
-                                    /* XXX: memleak */
-                                    continue;
-                                }
-                                thissess.version = param->mpModel;
-                                if (param->mpModel == SNMP_VERSION_3) {
-                                    thissess.securityName =
-                                        strdup(param->secName);
-                                    thissess.securityNameLen =
-                                        strlen(thissess.securityName);
-                                    thissess.securityLevel = param->secLevel;
-                                } else {
-                                    thissess.community =
-                                        strdup(param->secName);
-                                    thissess.community_len =
-                                        strlen(thissess.community);
-                                }
+                            if (!param || param->rowStatus != SNMP_ROW_ACTIVE) {
+                                /* parameter entry must exist and be active */
+                                continue;
                             }
+                        } else {
+                            /* parameter entry must be specified */
+                            continue;
                         }
 
-                        ss = snmp_open(&thissess);
-                        
-                        if (ss) {
+                        if (param->updateTime >=
+                            targaddrs->sessionCreationTime) {
+                            /* parameters have changed, nuke the old session */
+                            snmp_close(targaddrs->sess);
+                            targaddrs->sess = NULL;
+                        }
+
+                        /* target session already exists? */
+                        if (targaddrs->sess == NULL) {
+
+                            /* create an appropriate snmp session and add
+                           it to our return list */
+                            sprintf(smbuf, "%d.%d.%d.%d",
+                                    (int) targaddrs->tAddress[0],
+                                    (int) targaddrs->tAddress[1],
+                                    (int) targaddrs->tAddress[2],
+                                    (int) targaddrs->tAddress[3]);
+                            memset(&thissess,0,sizeof(thissess));
+                            thissess.peername = strdup(smbuf);
+                            DEBUGMSGTL(("target_sessions","  to: %s:%d (%d*256+%d)\n",
+                                        smbuf,
+                                        (((unsigned int)
+                                          targaddrs->tAddress[4])*256 +
+                                         (unsigned int) targaddrs->tAddress[5]),
+                                        targaddrs->tAddress[4],
+                                        targaddrs->tAddress[5]));
+                            thissess.remote_port =
+                                ((unsigned int) targaddrs->tAddress[4])*256 +
+                                (unsigned int) targaddrs->tAddress[5];
+                            thissess.timeout = (targaddrs->timeout)*1000;
+                            DEBUGMSGTL(("target_sessions","timeout: %d -> %d\n",
+                                        targaddrs->timeout, thissess.timeout));
+                            thissess.retries = targaddrs->retryCount;
+
+                            if (param->mpModel == SNMP_VERSION_3 &&
+                                param->secModel != 3) {
+                                snmp_log(LOG_ERR,
+                                         "unsupported model/secmodel combo for target %s\n",
+                                         targaddrs->name);
+                                /* XXX: memleak */
+                                continue;
+                            }
+                            thissess.version = param->mpModel;
+                            if (param->mpModel == SNMP_VERSION_3) {
+                                thissess.securityName =
+                                    strdup(param->secName);
+                                thissess.securityNameLen =
+                                    strlen(thissess.securityName);
+                                thissess.securityLevel = param->secLevel;
+                            } else {
+                                thissess.community =
+                                    strdup(param->secName);
+                                thissess.community_len =
+                                    strlen(thissess.community);
+                            }
+                            
+                            targaddrs->sess = snmp_open(&thissess);
+                            targaddrs->sessionCreationTime = time(NULL);
+                        }
+                        if (targaddrs->sess) {
                             if (ret)
-                                ss->next = ret;
-                            ret = ss;
+                                targaddrs->sess->next = ret;
+                            ret = targaddrs->sess;
                         } else {
                             snmp_sess_perror("target session", &thissess);
                         }
