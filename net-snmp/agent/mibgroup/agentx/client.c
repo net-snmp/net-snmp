@@ -255,6 +255,130 @@ agentx_unregister( struct snmp_session *ss, oid start[], size_t startlen,
     return 1;
 }
 
+struct variable_list *
+agentx_register_index( struct snmp_session *ss,
+		      struct variable_list* varbind, int flags)
+{
+    struct snmp_pdu *pdu, *response;
+    struct variable_list *varbind2;
+
+    if (! IS_AGENTX_VERSION( ss->version ))
+	return NULL;
+
+		/*
+		 * Make a copy of the index request varbind
+		 *    for the AgentX request PDU
+		 *    (since the pdu structure will be freed)
+		 */
+    varbind2 = (struct variable_list *)malloc(sizeof(struct variable_list));
+    if ( varbind2 == NULL )
+	return NULL;
+    if ( snmp_clone_var( varbind, varbind2 )) {
+	free( varbind2 );
+	return NULL;
+    }
+    if ( varbind2->val.string == NULL )
+	varbind2->val.string = varbind2->buf;	/* ensure it points somewhere */
+
+    pdu = snmp_pdu_create(AGENTX_MSG_INDEX_ALLOCATE);
+    if ( pdu == NULL ) {
+	free( varbind2 );
+	return NULL;
+    }
+    pdu->time = 0;
+    pdu->sessid = ss->sessid;
+    if ( flags == ALLOCATE_ANY_INDEX )
+	pdu->flags |= AGENTX_MSG_FLAG_ANY_INSTANCE;
+    if ( flags == ALLOCATE_NEW_INDEX )
+	pdu->flags |= AGENTX_MSG_FLAG_NEW_INSTANCE;
+
+		/*
+		 *  Just send a single index request varbind.
+		 *  Although the AgentX protocol supports
+		 *    multiple index allocations in a single
+		 *    request, the model used in the UCD agent
+		 *    doesn't currently take advantage of this.
+		 *  I believe this is our prerogative - just as
+		 *    long as the master side Index request handler
+		 *    can cope with multiple index requests.
+		 */
+    pdu->variables = varbind2;
+
+    if ( agentx_synch_response(ss, pdu, &response) != STAT_SUCCESS )
+	return NULL;
+
+    if ( response->errstat != SNMP_ERR_NOERROR ) {
+	snmp_free_pdu(response);
+	return NULL;
+    }
+
+		/*
+		 * Unlink the (single) response varbind to return
+		 *  to the main driving index request routine.
+		 *
+		 * This is a memory leak, as nothing will ever
+		 *  release this varbind.  If this becomes a problem,
+		 *  we'll need to keep a list of these here, and
+		 *  free the memory in the "index release" routine.
+		 * But the master side never frees these either (by
+		 *  design, since it still needs them), so expecting
+		 *  the subagent to is discrimination, pure & simple :-)
+		 */ 
+    varbind2 = response->variables;
+    response->variables = NULL;
+    snmp_free_pdu(response);
+    return varbind2;
+}
+
+int
+agentx_unregister_index( struct snmp_session *ss,
+		      struct variable_list* varbind)
+{
+    struct snmp_pdu *pdu, *response;
+    struct variable_list *varbind2;
+
+    if (! IS_AGENTX_VERSION( ss->version ))
+	return -1;
+
+		/*
+		 * Make a copy of the index request varbind
+		 *    for the AgentX request PDU
+		 *    (since the pdu structure will be freed)
+		 */
+    varbind2 = (struct variable_list *)malloc(sizeof(struct variable_list));
+    if ( varbind2 == NULL )
+	return -1;
+    if ( snmp_clone_var( varbind, varbind2 )) {
+	free( varbind2 );
+	return -1;
+    }
+
+    pdu = snmp_pdu_create(AGENTX_MSG_INDEX_DEALLOCATE);
+    if ( pdu == NULL ) {
+	free( varbind2 );
+	return -1;
+    }
+    pdu->time = 0;
+    pdu->sessid = ss->sessid;
+
+		/*
+		 *  Just send a single index release varbind.
+		 *	(as above)
+		 */
+    pdu->variables = varbind2;
+
+    if ( agentx_synch_response(ss, pdu, &response) != STAT_SUCCESS )
+	return -1;
+
+    if ( response->errstat != SNMP_ERR_NOERROR ) {
+	snmp_free_pdu(response);
+	return -1;	/* XXX - say why */
+    }
+
+    snmp_free_pdu(response);
+    return SNMP_ERR_NOERROR;
+}
+
 int
 agentx_add_agentcaps( struct snmp_session *ss,
 		      oid* agent_cap, size_t agent_caplen, const char* descr)
