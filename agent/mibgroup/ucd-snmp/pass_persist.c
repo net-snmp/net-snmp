@@ -160,7 +160,8 @@ u_char *var_extensible_pass_persist(struct variable *vp,
   oid newname[MAX_OID_LEN];
   int i, rtest, newlen;
   static long long_ret;
-  static char buf[STRMAX], buf2[STRMAX];
+  char buf[SNMP_MAXBUF];
+  static char buf2[SNMP_MAXBUF];
   static oid  objid[MAX_OID_LEN];
   struct extensible *persistpassthru;
   FILE *file;
@@ -302,7 +303,7 @@ setPassPersist(int action,
   int i, rtest;
   struct extensible *persistpassthru;
 
-  static char buf[STRMAX], buf2[STRMAX];
+  char buf[SNMP_MAXBUF], buf2[SNMP_MAXBUF];
   long tmp;
   unsigned long utmp;
   int itmp;
@@ -487,7 +488,7 @@ static int open_persist_pipe(int iindex, char *command)
 
   /* Send test packet always so we can self-catch */
   {
-    char buf[STRMAX];
+    char buf[SNMP_MAXBUF];
     /* Should catch SIGPIPE around this call! */
     if( ! write_persist_pipe( iindex, "PING\n" ) ) {
       DEBUGMSGTL(("ucd-snmp/pass_persist", "open_persist_pipe: Error writing PING\n"));

@@ -222,7 +222,8 @@ u_char *var_extensible_pass(struct variable *vp,
   oid newname[MAX_OID_LEN];
   int i, rtest, fd, newlen;
   static long long_ret;
-  static char buf[SNMP_MAXBUF], buf2[SNMP_MAXBUF];
+  char buf[SNMP_MAXBUF];
+  static char buf2[SNMP_MAXBUF];
   static oid  objid[MAX_OID_LEN];
   struct extensible *passthru;
   FILE *file;
@@ -348,7 +349,7 @@ setPass(int action,
   int i, rtest;
   struct extensible *passthru;
 
-  static char buf[SNMP_MAXBUF], buf2[SNMP_MAXBUF];
+  char buf[SNMP_MAXBUF], buf2[SNMP_MAXBUF];
   long tmp;
   unsigned long utmp;
   size_t itmp;
