@@ -5,18 +5,11 @@
  */
 #include <net-snmp/net-snmp-config.h>
 #include <net-snmp/net-snmp-includes.h>
-//#include "mibII/mibII_common.h"
 
 #include <net-snmp/agent/net-snmp-agent-includes.h>
 #include <net-snmp/data_access/tcpConn.h>
 
 #include "tcp-mib/tcpConnTable/tcpConnTable_constants.h"
-
-//#include <errno.h>
-//#include <sys/ioctl.h>
-
-
-//#include "tcpconn_ioctl.h"
 
 /*
  * initialize arch specific storage
