@@ -1409,6 +1409,19 @@ AC_CHECK_LIB(kvm, kvm_read)
 dnl DYNAMIC MODULE SUPPORT
 AC_CHECK_LIB(dl, dlopen)
 
+AC_CHECK_FUNCS(kvm_openfiles nlist knlist kvm_getprocs)
+AC_MSG_CHECKING(whether we need -ldevstat for diskio MIB)
+echo "$with_mib_modules" | grep "ucd-snmp/diskio" >/dev/null
+if test $? -eq 0 ; then
+	AC_CHECK_FUNC(getdevs, AC_DEFINE(HAVE_GETDEVS),
+		AC_CHECK_LIB(devstat, getdevs, AC_DEFINE(HAVE_GETDEVS)
+		LIBS="${LIBS} -ldevstat"))
+	AC_MSG_RESULT(yes)
+else
+	AC_MSG_RESULT(no)
+fi
+
+
 dnl
 dnl Install the various perl modules
 dnl
@@ -1647,13 +1660,12 @@ if echo " $module_list " | grep " host/hr_swinst " > /dev/null; then
 fi
 
 AC_CHECK_FUNCS(getloadavg)
-AC_CHECK_FUNCS(kvm_openfiles nlist knlist)
 AC_CHECK_FUNCS(getaddrinfo getipnodebyname)
 dnl BSDi2 functions differ
 AC_CHECK_FUNCS(statvfs statfs)
 AC_CHECK_FUNCS(getdtablesize)
 dnl freebsd2 checks
-AC_CHECK_FUNCS(getfsstat kvm_getprocs)
+AC_CHECK_FUNCS(getfsstat)
 AC_CHECK_FUNCS(usleep)
 AC_CHECK_FUNCS(setlocale)
 AC_CHECK_FUNCS(tcgetattr)
