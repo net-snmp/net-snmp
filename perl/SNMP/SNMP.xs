@@ -206,7 +206,7 @@ static int _debug_level = 0;
 #define	DBPRT(severity, otherargs)					\
 	do {								\
 	    if (_debug_level && severity <= _debug_level) {		\
-		(void)PerlIO_fprintf(PerlIO_stderr(), otherargs);		\
+		(void)PerlIO_printf(PerlIO_stderr(), otherargs);		\
 	    }								\
 	} while (/*CONSTCOND*/0)
 
