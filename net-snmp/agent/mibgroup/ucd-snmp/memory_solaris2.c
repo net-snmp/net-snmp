@@ -145,11 +145,8 @@ var_extensible_mem(struct variable *vp,
         long_ret = kn->value.ul * (getpagesize() / 1024);
         return ((u_char *) (&long_ret));
     case MEMAVAILREAL:
-        ksp1 = kstat_lookup(kstat_fd, "unix", 0, "system_pages");
-        kstat_read(kstat_fd, ksp1, 0);
-        kn = kstat_data_lookup(ksp1, "freemem");
-
-        long_ret = kn->value.ul * (getpagesize() / 1024);
+        long_ret =
+            (getTotalFree() - getFreeSwap()) * (getpagesize() / 1024);
         return ((u_char *) (&long_ret));
     case MEMTOTALFREE:
         long_ret = getTotalFree() * (getpagesize() / 1024);
@@ -261,15 +258,16 @@ getFreeSwap(void)
 static long
 getTotalFree(void)
 {
-    long            free_mem = getFreeSwap();
+    unsigned long   free_mem, allocated, reserved, available, used_size;
+    struct anoninfo ai;
 
-    if (free_mem < 0)
-        return (free_mem);
-
-    ksp1 = kstat_lookup(kstat_fd, "unix", 0, "system_pages");
-    kstat_read(kstat_fd, ksp1, 0);
-    kn = kstat_data_lookup(ksp1, "freemem");
-
-    free_mem += kn->value.ul;
+    if (-1 == swapctl(SC_AINFO, &ai)) {
+        snmp_log(LOG_ERR, "error swapctl\n");
+    }
+    allocated = ai.ani_max - ai.ani_free;
+    reserved = (ai.ani_resv - allocated);
+    available = (ai.ani_max - ai.ani_resv);     /* K-byte */
+    free_mem = used_size = reserved + allocated;
+    free_mem = available;
     return (free_mem);
 }
