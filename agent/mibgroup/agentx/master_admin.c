@@ -238,10 +238,10 @@ unregister_agentx_list(netsnmp_session *session, netsnmp_pdu *pdu)
 
     if (pdu->range_subid != 0) {
 	oid ubound = pdu->variables->val.objid[pdu->range_subid-1];
-	rc = unnetsnmp_register_mib_table_row(pdu->variables->name,
-				      pdu->variables->name_length,
-				      pdu->priority, pdu->range_subid, ubound,
-				      (char *)pdu->community);
+	rc = netsnmp_unregister_mib_table_row(pdu->variables->name,
+                                              pdu->variables->name_length,
+                                              pdu->priority, pdu->range_subid,
+                                              ubound, (char *)pdu->community);
     } else {
 	rc = unregister_mib_context(pdu->variables->name,
 				    pdu->variables->name_length,
