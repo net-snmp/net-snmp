@@ -108,8 +108,7 @@ save_set_vars(netsnmp_session * ss, netsnmp_pdu *pdu)
     struct timeval  now;
     extern struct timeval starttime;
 
-    ptr =
-        (struct agent_netsnmp_set_info *)
+    ptr = (struct agent_netsnmp_set_info *)
         malloc(sizeof(struct agent_netsnmp_set_info));
     if (ptr == NULL)
         return NULL;
@@ -445,19 +444,36 @@ handle_subagent_set_response(int op, netsnmp_session * session, int reqid,
     }
 
     DEBUGMSGTL(("agentx/subagent",
-                "handling agentx subagent set response....\n"));
+                "handling agentx subagent set response (mode=%d)....\n",
+                pdu->command));
     pdu = snmp_clone_pdu(pdu);
 
     asi = (struct agent_netsnmp_set_info *) magic;
     retsess = asi->sess;
     asi->errstat = pdu->errstat;
 
-    if (pdu->command == SNMP_MSG_INTERNAL_SET_FREE ||
-        pdu->command == SNMP_MSG_INTERNAL_SET_UNDO ||
-        pdu->command == SNMP_MSG_INTERNAL_SET_COMMIT)
+    if (asi->mode == SNMP_MSG_INTERNAL_SET_FREE ||
+        asi->mode == SNMP_MSG_INTERNAL_SET_UNDO ||
+        asi->mode == SNMP_MSG_INTERNAL_SET_COMMIT)
         free_set_vars(retsess, pdu);
-    if (pdu->command != SNMP_MSG_INTERNAL_SET_RESERVE1)
+    if (asi->mode == SNMP_MSG_INTERNAL_SET_RESERVE1) {
+        /*
+         * reloop for RESERVE2 mode, an internal only agent mode 
+         */
+        /*
+         * XXX: check exception statuses of reserve1 first 
+         */
+        if (!pdu->errstat) {
+            asi->mode = pdu->command = SNMP_MSG_INTERNAL_SET_RESERVE2;
+            snmp_async_send(agentx_callback_sess, pdu,
+                            handle_subagent_set_response, asi);
+            DEBUGMSGTL(("agentx/subagent",
+                        "  going from RESERVE1 -> RESERVE2\n"));
+            return 1;
+        }
+    } else {
         pdu->variables = NULL;  /* the variables were added by us */
+    }
 
     pdu->command = AGENTX_MSG_RESPONSE;
     pdu->version = retsess->version;
@@ -823,10 +839,8 @@ agentx_check_session(unsigned int clientreg, void *clientarg)
         snmp_log(LOG_WARNING,
                  "AgentX master agent failed to respond to ping.  Attempting to re-register.\n");
         /*
-         * master agent disappeared?  Try and re-register 
-         */
-        /*
-         * close first, just to be sure 
+         * master agent disappeared?  Try and re-register.
+         * close first, just to be sure .
          */
         agentx_unregister_callbacks(ss);
         agentx_close_session(ss, AGENTX_CLOSE_TIMEOUT);
