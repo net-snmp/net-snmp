@@ -10,7 +10,7 @@
 #include <stdio.h>   /* sprintf */
 #include <process.h>  /* beginthreadex  */
 
-#include "winservice.h"
+#include <net-snmp/library/winservice.h>
 
 /*
  * External global variables used here

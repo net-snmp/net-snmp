@@ -70,6 +70,7 @@ typedef struct delegated_cache_s {
 } delegated_cache;
 
 /* handler API functions */
+void init_handler_conf(void);
 int register_handler(handler_registration *reginfo);
 int register_handler_nocallback(handler_registration *reginfo);
 int inject_handler(handler_registration *reginfo, mib_handler *handler);

@@ -178,7 +178,7 @@ snmpv3_secLevel_conf(const char *word, char *cptr)
 
 int
 snmpv3_options(char *optarg, struct snmp_session *session, char **Apsz, char **Xpsz,
-               int argc, char **argv)
+               int argc, char *const *argv)
 {
    char *cp = optarg;
    optarg++;

@@ -101,8 +101,8 @@ SOFTWARE.
 /* This structure holds the options for a single format command */
 typedef struct {
   char cmd;                   /* the format command itself */
-  int  width;                 /* the field's minimum width */
-  int  precision;             /* the field's precision */
+  size_t  width;              /* the field's minimum width */
+  size_t  precision;          /* the field's precision */
   int  left_justify;          /* if true, left justify this field */
   int  alt_format;            /* if true, display in alternate format */
   int  leading_zeroes;        /* if true, display with leading zeroes */
@@ -413,7 +413,7 @@ realloc_handle_time_fmt (u_char **buf, size_t *buf_len, size_t *out_len,
   char	*safe_bfr = NULL;
   char          fmt_cmd = options->cmd; /* the format command to use */
   int           offset = 0;         /* offset into string to display */
-  int           year_len;           /* length of year string */
+  size_t        year_len;           /* length of year string */
 
   if ((safe_bfr = (char *)calloc(30, 1)) == NULL) {
       return 0;
@@ -481,7 +481,7 @@ realloc_handle_time_fmt (u_char **buf, size_t *buf_len, size_t *out_len,
     case CHR_UP_YEAR:
 	sprintf(safe_bfr, "%d", parsed_time->tm_year + 1900);
 	if (options->precision != UNDEF_PRECISION) {
-	    year_len = (unsigned long)strlen(safe_bfr);
+	    year_len = (size_t)strlen(safe_bfr);
 	    if (year_len > options->precision)
 		offset = year_len - options->precision;
 	}

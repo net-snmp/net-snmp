@@ -63,7 +63,7 @@ char sysContact[    SYS_STRING_LEN ] = SYS_CONTACT;
 char sysName[       SYS_STRING_LEN ] = SYS_NAME;
 char sysLocation[   SYS_STRING_LEN ] = SYS_LOC;
 oid version_sysoid[]                 = { SYSTEM_MIB };
-int version_sysoid_len               = OID_LENGTH( version_sysoid );
+int version_sysoid_len               = 9;  /* OID_LENGTH( version_sysoid ); */
 
 char oldversion_descr[ SYS_STRING_LEN ];
 char oldsysContact[    SYS_STRING_LEN ];

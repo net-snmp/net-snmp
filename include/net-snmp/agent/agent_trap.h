@@ -6,6 +6,7 @@ struct agent_add_trap_args {
    int confirm;
 };
 
+void init_traps(void);
 void send_easy_trap (int, int);
 void send_trap_pdu(struct snmp_pdu *);
 void send_v2trap ( struct variable_list *);
