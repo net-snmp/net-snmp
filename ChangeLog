@@ -1,6 +1,865 @@
 -------------------------------------------------------------------------------
 
 Changes: V3.6 -> V3.6.1
+
+hardaker 16 Mar 99 08:15:18
+    - (dlmod.c): removed a bogus new-line.
+
+hardaker 16 Mar 99 10:34:03
+    - (hr_swrun.c): fix file descriptor leak on freebsd.
+
+mslifcak 16 Mar 99 11:23:30
+    -(snmp_api.c) consistent error return.
+
+mslifcak 16 Mar 99 11:33:52
+    - move MATCH_FAILED/MATCH_SUCCEEDED from util_funcs.h to mibincl.h
+
+mslifcak 17 Mar 99 13:53:48
+    -(hr_swrun.c) - prevent SunOS 4.1 core (sunos4 still primitive)
+
+mslifcak 18 Mar 99 08:37:45
+    - (mibII/ip.c) fix MIB_IPCOUNTER_SYMBOL usage
+
+hardaker 19 Mar 99 09:23:38
+    - (snmpget.c, snmpwalk.c): fixed initialization and usage of "failures".
+
+hardaker 23 Mar 99 10:09:47
+    - (Makefile.in): add more targets.
+
+hardaker 23 Mar 99 10:10:11
+    - (read_config.c): make copy_word() return the next token, not the
+      next space.
+
+hardaker 23 Mar 99 10:11:03
+    - (mibdefs.h, struct.h, extensible.c, extensible.h, proc.c, proc.h,
+      snmpd.conf.5.def, UCD-SNMP-MIB.txt):
+      - per-process/exec fix scripts created.
+
+hardaker 23 Mar 99 10:23:21
+    - (versiontag): regexp fix.
+
+hardaker 28 Mar 99 16:11:32
+    - (snmpTargetAddrEntry.h, snmpTargetParamsEntry.h): relocate to
+      snmpModules.12, where they should be.
+
+hardaker 28 Mar 99 16:17:24
+    - (snmpTargetAddrEntry.c, snmpTargetParamsEntry.c):
+      - when using copy_word() don't skip spaces, since it does that.
+
+mslifcak  1 Apr 99 13:10:47
+    - (libsnmp.h) Asymptotically closer to supporting CMU constants.
+
+mslifcak  5 Apr 99 11:06:27
+    - (snmp_api.c, main.c, snmp_parse_args.c) Joe Marzot's fix to copy even an empty community name.
+
+mslifcak  5 Apr 99 14:10:14
+    - build snmpnetstat with CygWin32
+
+mslifcak  5 Apr 99 14:22:43
+    - Build with CygWin32
+
+mslifcak  5 Apr 99 15:59:20
+    - Build using CygWin32 (includes Niels B.'s snmp_vars.c patch).
+
+hardaker  6 Apr 99 09:23:16
+    - (config.guess, config.sub): new versions from autoconf 2.13.
+
+mslifcak  6 Apr 99 10:59:05
+    - (extensible.c) quell warning about comparing pointer with non-pointer.
+
+mslifcak  6 Apr 99 11:33:54
+    - another round of ANSI-fying the agent completed.
+
+hardaker  6 Apr 99 15:13:40
+    - (*): Merged the 4.0 line into the 3.6.1 line.
+
+hardaker  6 Apr 99 15:38:45
+    - (mibincl.h, ucdDemoPublic.c, vacm_vars.h, snmptrapd.c, snmp_api.c,
+      Makefile.in): final merge pieces of recent v3 line changes.
+
+mslifcak  6 Apr 99 21:24:22
+    - changes for ANSI headers; POSIX(index vs strchr); minor fixes
+
+mslifcak  6 Apr 99 22:13:59
+    - (vacm_vars.c) - set global ptrs = 0.
+
+mslifcak  6 Apr 99 22:14:43
+    - (snmp_vars.c) more v2party rework needed
+
+mslifcak  7 Apr 99 06:17:28
+    - () more ANSI header fixups; touchup for M$ Win32 build
+
+hardaker  7 Apr 99 10:42:10
+    - (config.h.in, snmp_vars.c, encode_keychange.c, snmptrapd.c,
+      Makefile.in, all_general_local.h, keytools.c, keytools.h,
+      lcd_time.c, md5.c, read_config.c, scapi.c, snmp_api.c, snmpusm.c,
+      snmpv3.c, tools.c, tools.h):
+      - misc merging, including fixes and debugging statement changes to
+        newer model.
+      - a few -Wall fixes.
+
+hardaker  7 Apr 99 10:48:07
+    - (snmp_mib.c): removed unnneeded header_snmp().
+
+hardaker  7 Apr 99 11:28:02
+    - (ucdDemoPublic.c, sysORTable.c, vacm_vars.c, smux.c, snmpEngine.c,
+      usmUser.c, snmpTargetAddrEntry.c, snmpTargetParamsEntry.c):
+      - debugging statement conversion
+
+mslifcak  7 Apr 99 12:00:20
+    - (agent/snmp2p.c agent/snmp_agent.c agent/snmp_vars.h
+    agent/view_parse.c agent/mibgroup/util_funcs.c
+    agent/mibgroup/examples/ucdDemoPublic.c
+    agent/mibgroup/host/hr_filesys.c
+    agent/mibgroup/host/hr_storage.c
+    agent/mibgroup/host/hr_swrun.c agent/mibgroup/host/hr_system.c
+    agent/mibgroup/mibII/at.c agent/mibgroup/mibII/icmp.c
+    agent/mibgroup/mibII/interfaces.c agent/mibgroup/mibII/ip.c
+    agent/mibgroup/mibII/system_mib.c agent/mibgroup/mibII/tcp.c
+    agent/mibgroup/mibII/udp.c agent/mibgroup/mibII/vacm_vars.c
+    agent/mibgroup/mibII/var_route.c agent/mibgroup/misc/ipfwacc.c
+    agent/mibgroup/snmpv3/usmUser.c
+    agent/mibgroup/ucd-snmp/extensible.c
+    agent/mibgroup/ucd-snmp/hpux.c agent/mibgroup/ucd-snmp/pass.c
+    agent/mibgroup/ucd-snmp/pass_persist.c
+    agent/mibgroup/ucd-snmp/proc.c
+    agent/mibgroup/v2party/context_vars.c
+    agent/mibgroup/v2party/party_vars.c
+    agent/mibgroup/v2party/view_vars.c apps/snmpdelta.c
+    apps/snmptest.c apps/snmptrapd.c apps/snmpnetstat/route.c
+    apps/snmpnetstat/winstub.c snmplib/acl_parse.c
+    snmplib/context.h snmplib/context_parse.c snmplib/party.h
+    snmplib/party_parse.c snmplib/read_config.c snmplib/snmp_api.c
+    snmplib/snmp_auth.c snmplib/snmp_impl.h snmplib/vacm.h
+    snmplib/view.h)  fgets use sizeof mostly, oid base size is MAX_OID_LEN
+
+mslifcak  7 Apr 99 12:17:23
+    -(ipfwchains.c) remove multiple definitions of MATCH_FAILED
+
+mslifcak  7 Apr 99 15:00:39
+    -(usmUser.c,system.c) plug mem leak; (snmp_api.c) enforce array limit.
+
+hardaker 12 Apr 99 22:14:31
+    - (mibincl.h): include sys/time.h.
+
+hardaker 12 Apr 99 22:15:39
+    - (hr_utils.h): remove variable names from prototypes (was causing problems).
+
+hardaker 12 Apr 99 22:16:45
+    - (tkmib): make displayed mib node info into two columns instead of one.
+
+hardaker 12 Apr 99 22:25:09
+    - (snmp_api.c): make snmp_varlist_add_variable to possible create a
+      varlist before adding something to it.
+
+hardaker 13 Apr 99 15:19:20
+    - (configure, configure.in, Makefile.in): Patch from Daniel Hagerty:
+      - fix libwrap to only add the library to the agent.
+
+hardaker 13 Apr 99 15:20:00
+    - (system_mib.c): make sysDescr read-only.
+
+hardaker 13 Apr 99 15:32:23
+    - (pass.c): Patch from Jim Mar:
+      - add capability for binary octet strings in pass scripts.
+
+hardaker 13 Apr 99 15:36:31
+    - (SNMP-NOTIFICATION-MIB.txt, SNMP-PROXY-MIB.txt,
+      SNMP-VIEW-BASED-ACM-MIB.txt): Patch from Niels Baggesen:
+      - fix module locations for broken mibs.
+
+hardaker 13 Apr 99 15:54:48
+    - (freebsd.h, freebsd2.h): Patch from Niels Baggesen:
+      - freebsd utmp cleanups.
+
+hardaker 13 Apr 99 15:56:53
+    - (snmpd.c): Patch from Niels Baggesen:
+      - log with timestamp at shutdown.
+
+hardaker 13 Apr 99 15:57:24
+    - (vacm_vars.c): Patch from Niels Baggesen:
+      - better checking of .conf file parsing line requirements.
+
+hardaker 13 Apr 99 15:58:02
+    - (snmptranslate.c): Patch from Niels Baggesen:
+      - support -P.
+
+hardaker 13 Apr 99 15:58:27
+    - (snmp_config.5.def, snmptrap.1, snmptrapd.conf.5.def): Patch from
+      Niels Baggesen:
+      - clean up small bugs.
+
+hardaker 13 Apr 99 16:00:49
+    - (parse.c, parse.h): Patch from Niels Baggesen:
+      - nicer parser messages (include file names). Correct help for -Pc.
+      - Add FRAME-RELAY-DTE-MIB as replacement for RFC-1315
+
+hardaker 13 Apr 99 16:03:29
+    - (snmptrapd.c): Patch from Niels Baggesen:
+      - snmptrapd option to ignore auth traps, add -S option, log termination.
+
+mslifcak 14 Apr 99 15:29:58
+    - (snmptranslate.c) init_snmp takes argument; "" used.
+
+mslifcak 14 Apr 99 15:30:34
+    - (parse.c) File pointer initialized to "" before first use.
+
+hardaker 14 Apr 99 15:52:35
+    - (snmptranslate.c): init_snmp("snmpapp").
+
+mslifcak 14 Apr 99 16:31:55
+    - (snmp_agent,c, snmp_api.[ch], snmp_client.[ch]) fix variable_list with built-in storage
+
+mslifcak 14 Apr 99 16:56:37
+    - apps that use snmp_fix_pdu must clean up the response PDU !
+
+mslifcak 16 Apr 99 07:30:29
+    - (IPFWACC-MIB.txt) change module name from IPFWADM-MIB to IPFWACC-MIB.
+
+mslifcak 16 Apr 99 07:54:22
+    - (IPFWCHAINS-MIB.txt) ipfwChainTable {ipfw 1} fix
+
+mslifcak 16 Apr 99 08:33:16
+    - (mib.c) "-m" or MIBS : can specify MIB module by file name.
+
+hardaker 16 Apr 99 21:10:06
+    - (README): Added v3 team members.
+
+hardaker 16 Apr 99 21:11:48
+    - (configure.in): changed default store location to /var/ucd-snmp
+
+hardaker 16 Apr 99 21:15:14
+    - (snmp.h): SNMPADMINLENGTH definition.
+
+hardaker 16 Apr 99 21:16:16
+    - (snmp_auth.c): removed fix note.
+
+hardaker 16 Apr 99 21:27:06
+    - (NEWS): updated
+
+hardaker 16 Apr 99 21:27:41
+    - (snmptrapd.8): man patch from Niels
+
+hardaker 16 Apr 99 21:34:49
+    - (version.h bug-report sedscript.in): version tag ( 4.0.pre3 )
+
+mslifcak 18 Apr 99 06:54:26
+    - (ipfwacc.h) subdir change per Joe Pruettt : 9 -> 10
+
+hardaker 19 Apr 99 21:01:15
+    - (mib2c, mib2c.conf, mib2c.vartypes.conf):
+      - rewrote mib2c to be more dependent on .conf files.  The main .conf
+        file now contains the code itself.
+      - need to write a foreach(mibnode) type parser next.
+
+hardaker 19 Apr 99 21:09:27
+    - (mibincl.h): add read_config.h.
+
+hardaker 19 Apr 99 21:12:17
+    - (read_config.c, read_config.h):
+      - created a more convenient read_config_read_data() function to
+        generically read a token into a given variable.
+      - cleaned up persistent storage parsing routines.
+      - use previously malloced space in some routines, or malloc it for
+        them if the storage area is NULL.
+
+hardaker 19 Apr 99 21:14:28
+    - (snmp_api.c): Don't snmp_set_var_objid if name is NULL in
+      snmp_varlist_add_variable().
+
+hardaker 20 Apr 99 11:28:14
+    - (mib2c, mib2c.conf, mib2c.vartypes.conf): more updates.
+
+hardaker 20 Apr 99 15:31:35
+    - (mib2c, mib2c.conf, mib2c.vartypes.conf):
+      - completely re-hacked:
+        - entire code base is now put into the .conf files rather than in
+          the mib2c program.  This should entitle mib2c to be used more
+          generically, and could produce different types of code templates
+          based on the .conf file it is given.  In theory, it should be
+          able to produce C code for a non-ucd-snmp agent, or even better,
+          any type of code (not just C) for something else based on mib
+          information.
+        - The down side, is that the current .conf files are now ambiguous
+          again and difficult to understand without being, well, me.  The
+          up side is that I'm sure Dave Shield will go through and clean
+          it up for me like he did last time.  Ha ha.  I wonder if he'll
+          read this? (If so, see me first).
+
+hardaker 20 Apr 99 16:04:17
+    - (mib2c, mib2c.conf): variable name conversions:
+      - variableTypes -> variables
+      - cname -> NAME
+
+hardaker 20 Apr 99 16:10:44
+    - (mib2c, mib2c.conf): a little more clean up.
+
+hardaker 20 Apr 99 21:38:42
+    - (mib2c.conf): clean up skipif regexps a bit.
+
+hardaker 22 Apr 99 07:54:44
+    - (read_config.c, read_config.h): created *read_config_store_data();
+
+hardaker 22 Apr 99 07:56:03
+    - (mib2c, mib2c.conf): allow NoAccess to be processed, and use skipif:
+      directives where needed because of it.
+
+hardaker 22 Apr 99 10:51:30
+    - (snmp_client.c, snmp_api.c, snmp_api.h, keytools.c): Another v3 branch update.
+
+mslifcak 26 Apr 99 09:21:06
+    - (snmplib.c) - use request callback's data if request specifies a callback.
+
+nba 26 Apr 99 11:21:10
+    
+    (parse.h) Silly speling misteak (ACCESS_CRAETE)
+
+nba 26 Apr 99 11:48:57
+    
+    
+    - snmplib/parse.h, snmplib/parse.c: new mib printer: mib_print_tree
+      inspired by a reference to snmx in comp.protocols.snmp
+    - apps/snmptranslate: let the -p option call this new printer
+    - snmplib/snmp_api.c: some left over __P macros
+
+nba 26 Apr 99 12:03:47
+    
+    (if.c) make the width of snmpnet -i (and -o) adapt to the length of returned
+    	strings
+
+nba 26 Apr 99 12:09:35
+    
+    
+    apps/*.c: use snmp_perror to report errors from read_objid and friends
+    apps/snmptrapd.c: fix a bus error when using -S and receiving an
+    	enterprise specific trap.
+
+nba 26 Apr 99 12:13:50
+    
+    */*: replace horrible (char *)"string" with const specifiers in relevant
+    	functions.
+
+mslifcak 26 Apr 99 12:37:09
+    - (snmp_api.c) - fix other use of request's callback data
+
+mslifcak 27 Apr 99 09:51:35
+    - (interfaces.c) add if_type_from_name to convert interface name to type.
+
+hardaker 29 Apr 99 07:32:39
+    - (Makefile.in, callback.c, callback.h): callback API.
+
+hardaker 29 Apr 99 07:39:45
+    - (agent_read_config.c, snmpd.c, snmptrapd.c, snmp_api.c, snmpusm.c,
+      snmpusm.h, snmpv3.c, snmpv3.h):
+      - use the callback mechanism for post-config stuff.
+
+hardaker  3 May 99 07:07:15
+    - (agent_read_config.c, usmUser.c, usmUser.h, snmpTargetAddrEntry.c,
+      snmpTargetAddrEntry.h, snmpTargetParamsEntry.c,
+      snmpTargetParamsEntry.h, snmptrapd.c, callback.c, callback.h,
+      scapi.c, scapi.h, snmp_api.c, snmpv3.c, snmpv3.h):
+      - shutdown and store callback usage.
+
+hardaker  3 May 99 07:13:31
+    - (snmpd.c): fix -A flag, which got broken during someones changes.
+
+hardaker  3 May 99 12:58:19
+    - (Makefile.in, agent_read_config.c, Makefile.in, header_complex.c,
+      Makefile.in, encode_keychange.c, Makefile.in, Makefile.in,
+      all_general_local.h, all_system.h, keytools.c, lcd_time.c, scapi.c,
+      snmp_auth.c, snmpusm.c, tools.c, tools.h, Makefile.in, T.c,
+      etimetest.c, keymanagetest.c, misctest.c, scapitest.c):
+      - nuked all_general_local.h and all_system.h.
+      - makefileindepend as well.
+
+nba  3 May 99 15:40:11
+    (*.[ch]):	patches to types to wipe warnings from compilers
+    	with more strict noise levels. (also good when compiling
+    	with gcc -Wall -pedantic -Wwrite-strings -Wcast-qual)
+
+nba  4 May 99 00:47:44
+    (mib.c):	Fix problem (core dump) with MIBFILES environment variable.
+
+nba  4 May 99 00:51:16
+    (many):	remove const spec from FindVarMethod. That was wrong
+
+hardaker  4 May 99 11:08:55
+    - (configure, configure.in): Added --enable-developer flag.
+
+mslifcak  6 May 99 09:20:30
+    - (ucd-snmp/vmstat.c) - conditionally include limits.h per Eduard Koucky.
+
+nba 10 May 99 14:47:22
+    Fixing some more prototypes. Pointed out by Markku Laukkanen.
+
+nba 10 May 99 14:49:49
+    snmplib/snmp_api.c: Mix-up of V1_IN_V2/V2_IN_V1 error code when GETBULK
+    	inside V1 session.
+
+hardaker 11 May 99 14:02:48
+    - (util_funcs.c): read returns ssize_t not size_t.
+
+hardaker 11 May 99 14:03:25
+    - (memory.h): remove extern.
+
+hardaker 11 May 99 14:11:40
+    - (hpux.c, hpux.h): int -> size_t conversions.
+
+mslifcak 12 May 99 10:53:23
+    - (snmp_api.c snmp_client.c) call snmp_synch_reset from snmp_sess_close
+
+mslifcak 12 May 99 11:22:16
+    -(parse.c party_parse.c read_config.c) no exit() from library; return error
+
+daves 13 May 99 03:52:19
+    - (ip.c): Properly register IP module group on Free-BSD systems
+              (thanks to Mitchell Tasman)
+
+hardaker 13 May 99 09:09:18
+    - (vacm_vars.c): Set pointers to NULL after freeing them.
+
+mslifcak 14 May 99 06:54:51
+    - (agent/mibgroup/dummy/dummy.c agent/mibgroup/examples/example.c
+     agent/mibgroup/examples/example.h
+     agent/mibgroup/examples/wombat.c agent/mibgroup/misc/ipfwacc.c
+     agent/mibgroup/smux/smux.c
+     agent/mibgroup/snmpv3/snmpMPDStats.c
+     agent/mibgroup/snmpv3/usmStats.c
+     agent/mibgroup/snmpv3/usmUser.c snmplib/snmp_auth.c) more size_t fixes
+
+mslifcak 14 May 99 09:47:10
+    - (agent/mibgroup/examples/wombat.h agent/mibgroup/host/hr_disk.c
+     agent/mibgroup/mibII/interfaces.c
+     agent/mibgroup/mibII/var_route.c
+     agent/mibgroup/snmpv3/usmUser.c apps/encode_keychange.c
+     snmplib/parse.c) more ANSI-C touchups
+
+mslifcak 14 May 99 13:59:37
+    -(agent/mibgroup/mibII/interfaces.c snmplib/snmpusm.c) fixes to build HP & AIX
+
+daves 17 May 99 03:20:53
+    - (snmp_parse_args.c): Initialise session using library routine
+
+daves 17 May 99 04:34:55
+    - (snmplib/snmp_api.h snmplib/snmp_api.c snmplib/snmp_client.c
+       agent/snmpd.c agent/mibgroup/mibII/vacm_vars.c
+       agent/mibgroup/v2party/alarm.c agent/mibgroup/v2party/event.c
+       apps/snmpstatus.c apps/snmptest.c apps/snmptrap.c apps/snmptrapd.c):
+    
+      - Use the generic socket addresses 'struct sockaddr',
+        rather than the IP-specific 'struct sockaddr_in'
+
+daves 17 May 99 04:38:00
+    - (snmplib/snmp_api.h snmplib/snmp_api.c snmplib/snmp_client.c
+       agent/snmpd.c agent/mibgroup/mibII/vacm_vars.c
+       agent/mibgroup/v2party/alarm.c agent/mibgroup/v2party/event.c
+       apps/snmpstatus.c apps/snmptest.c apps/snmptrap.c apps/snmptrapd.c):
+    
+      - Use the generic socket address 'struct sockaddr',
+        rather than the IP-specific 'struct sockaddr_in'
+
+daves 17 May 99 07:18:02
+    - (snmplib/snmp_api.c snmplib/snmp_api.h agent/snmpd.c
+       apps/snmptrap.c apps/snmptrapd.c):
+    
+      - Use a single address field within the PDU structure
+                   (obsoleting 'agent_addr')
+
+daves 18 May 99 06:26:16
+    - (snmp_api.c snmp_api.h): More general handling of PDU flags
+
+mslifcak 18 May 99 09:01:46
+    - (xx/Makefile.in) remove references to as yet missing disman files.
+
+daves 18 May 99 09:23:50
+    - (configure.in snmplib/context_parse.c snmplib/read_config.c
+       snmplib/snmp_api.c snmplib/snmpv3.c snmplib/system.c
+       apps/snmp_parse_args.c apps/snmpbulkwalk.c apps/snmpdelta.c
+       apps/snmpget.c apps/snmpgetnext.c apps/snmpset.c
+       apps/snmpstatus.c apps/snmptable.c apps/snmptest.c
+       apps/snmptrap.c apps/snmpusm.c apps/snmpwalk.c
+       apps/snmpnetstat/if.c apps/snmpnetstat/inet.c
+       apps/snmpnetstat/main.c apps/snmpnetstat/route.c
+       apps/snmpnetstat/winstub.c):
+       -  Clean up conditionals protecting include files
+            ( #if HAVE_WINSOCK_H / #else / #endif )
+
+daves 19 May 99 02:33:07
+    - (config.h.in): Additional include protection entries
+
+daves 19 May 99 05:11:37
+    - (snmp_api.c): More generalised handling of socket addresses
+
+mslifcak 19 May 99 18:02:55
+    -(mibII/var_route.c) - fix Linux RouteMask c/o "Nancy" nam@cs.cmu.edu
+
+mslifcak 19 May 99 18:50:12
+    - (host_res.h) fix HAVE_NET_IF_VAR_H define (was HAVE_NET_IN_VAR_H)
+
+daves 20 May 99 03:46:24
+    - (snmp_api.h): Temporary fix to socket address problems
+
+mslifcak 21 May 99 05:24:23
+    -(read_config.c) cast fix per Markku Laukkanen
+
+daves 21 May 99 05:54:22
+    - (snmp_api.c snmp_api.h):
+      -  New API call to close down all open sessions
+         (also called on application shutdown)
+
+hardaker 21 May 99 11:10:44
+    - (mib2c.conf, mib2c.storage.conf):
+      - convert to size_t storages.
+      - misc eval fixes.
+      - more cleanup of the storage def.
+
+mslifcak 21 May 99 15:29:46
+    - library changes to build on Win32.
+
+mslifcak 24 May 99 05:36:13
+    -configure - save one which looks for netdb/socket headers
+
+hardaker 26 May 99 11:19:03
+    - (ipfwacc.h): properly locate the mib.
+
+hardaker 26 May 99 15:14:55
+    - (hr_swinst.c): make software application type unknown instead of app.
+
+hardaker 26 May 99 15:18:04
+    - (IPFWACC-MIB.txt): change to counters.
+
+hardaker 26 May 99 15:20:32
+    - (ipfwacc.h): make into counters.
+
+hardaker 26 May 99 15:56:03
+    - (acconfig.h, config.h.in): increase MAXREADCOUNT.
+
+hardaker 26 May 99 17:40:28
+    - (IPFWACC-MIB.txt): added SEQUENCE OF.
+
+mslifcak 27 May 99 05:16:25
+    -(encode_keychange, read_config, snmpusm) aCC fixes by PKY (Markku Laukkanen)
+
+hardaker 27 May 99 14:30:03
+    - (snmptrapd_handlers.c): implement the default trap handler.
+
+hardaker 27 May 99 14:30:15
+    - (snmptrapd.c): need an init_mib().
+
+hardaker 27 May 99 14:37:06
+    - (snmptrapd.conf.5.def): document default oid keyword.
+
+hardaker 27 May 99 14:37:32
+    - (snmptrapd.c): document default oid keyword in help line.
+
+daves 28 May 99 07:02:01
+    - (agent/Makefile.in agent/mibgroup/Makefile.in): fix problem with null macro
+
+daves 28 May 99 08:14:05
+    - (snmplib/snmp_api.c): save local socket address in internal session structure
+
+daves 28 May 99 08:57:19
+    - (snmplib/snmp_api.c): Unix domain (datagram) socket support
+
+daves 28 May 99 09:12:20
+    - (snmplib/snmp_api.c): Separate out copying a session and opening a new one
+
+mslifcak 28 May 99 09:24:56
+    -(snmp_api.c) -catch one more error close from snmp_sess_copy
+
+hardaker 28 May 99 16:17:13
+    - (mib.c, parse.c, parse.h): save and use index clauses.
+
+hardaker 28 May 99 16:44:42
+    - (Makefile.in, default_store.c, default_store.h):
+      - created generic default value storage space and parsers to reduce
+        the number of functions/etc created for values which configure the
+        library.
+
+daves  1 Jun 99 02:17:27
+    - (snmplib/snmp_api.c): Garbage collection for Traditional SAPI sessions
+
+daves  1 Jun 99 02:32:13
+    - (snmplib/snmp_api.c): Generalise handling of addresses (w.r.t sento/recvfrom)
+
+daves  1 Jun 99 07:30:42
+    - (snmplib/snmp_api.c snmplib/snmp_api.h): Support for stream-based sockets
+
+hardaker  1 Jun 99 17:21:53
+    - (Makefile.in, snmp_alarm.c, snmp_alarm.h, snmp_api.c):
+      - implemented a generic alarm handler to register alarm functions to
+        be called back after X period of time and it handles figuring out
+        which is next and calling alarm() and signal() appropriately.
+
+mslifcak  4 Jun 99 09:51:13
+    -(hr_filesys.c,interfaces.c,tcp.c,udp.c,freebsd3.h) fix FreeBSD3.1 incl Ken Key's tcp/udp patches
+
+mslifcak  7 Jun 99 07:44:06
+    -(interfaces.c, tcp.c, udp.c, ip.c) clone fixes from 3.6 line (FreeBSD3.1)
+
+mslifcak  7 Jun 99 13:04:21
+    -(if.c) check for valid pointer before de-referencing.
+
+mslifcak 11 May 99 14:39:58
+    - (agent/agent_read_config.c agent/snmp_vars.c agent/snmpd.c
+       agent/mibgroup/mibII/interfaces.c agent/mibgroup/mibII/ip.c
+       agent/mibgroup/mibII/vacm_vars.c
+       agent/mibgroup/mibII/vacm_vars.h apps/snmptranslate.c
+       apps/snmptrapd.c local/mib2c local/tkmib man/snmp_config.5.def
+       man/snmpd.1.def man/snmptrap.1 man/snmptrapd.8
+       man/snmptrapd.conf.5.def mibs/SNMP-NOTIFICATION-MIB.txt
+       mibs/SNMP-PROXY-MIB.txt mibs/SNMP-TARGET-MIB.txt
+       mibs/SNMP-USER-BASED-SM-MIB.txt
+       mibs/SNMP-VIEW-BASED-ACM-MIB.txt s/freebsd.h s/freebsd2.h
+       snmplib/mib.c snmplib/parse.c snmplib/parse.h
+       snmplib/snmp_api.c snmplib/vacm.c) - changes c/o Niels Baggesen
+
+mslifcak 11 May 99 18:58:37
+    -(cygwin.h) - use to build on CygWin platform.
+
+mslifcak 11 May 99 19:54:04
+    -(agent/snmp2p.c agent/snmp_vars.h agent/view_parse.c
+       agent/mibgroup/util_funcs.c agent/mibgroup/dummy/dummy.h
+       agent/mibgroup/examples/wombat.h
+       agent/mibgroup/host/hr_filesys.c
+       agent/mibgroup/host/hr_storage.c
+       agent/mibgroup/host/hr_swrun.c agent/mibgroup/host/hr_system.c
+       agent/mibgroup/ipfwchains/ipfwchains.c
+       agent/mibgroup/mibII/at.c agent/mibgroup/mibII/icmp.c
+       agent/mibgroup/mibII/interfaces.c
+       agent/mibgroup/mibII/system_mib.c agent/mibgroup/mibII/tcp.c
+       agent/mibgroup/mibII/udp.c agent/mibgroup/mibII/vacm_vars.c
+       agent/mibgroup/mibII/var_route.c agent/mibgroup/misc/ipfwacc.c
+       agent/mibgroup/misc/ipfwacc.h
+       agent/mibgroup/ucd-snmp/extensible.c
+       agent/mibgroup/ucd-snmp/hpux.c
+       agent/mibgroup/ucd-snmp/loadave.c
+       agent/mibgroup/ucd-snmp/pass.c
+       agent/mibgroup/ucd-snmp/pass_persist.c
+       agent/mibgroup/ucd-snmp/proc.c
+       agent/mibgroup/v2party/context_vars.c
+       agent/mibgroup/v2party/party_vars.c
+       agent/mibgroup/v2party/view_vars.c apps/snmpdelta.c
+       apps/snmptest.c apps/snmptrapd.c apps/snmpnetstat/if.c
+       apps/snmpnetstat/route.c apps/snmpnetstat/winstub.c
+       apps/snmpnetstat/winstub.h snmplib/acl_parse.c
+       snmplib/context.h snmplib/context_parse.c snmplib/party.h
+       snmplib/party_parse.c snmplib/read_config.c snmplib/snmp_api.c)
+      Port some of the fixes from the current development branch
+
+mslifcak 12 May 99 10:45:05
+    - (snmp_api.c snmp_client.c) call snmp_synch_reset from snmp_sess_close
+
+mslifcak 12 May 99 11:28:07
+    -(mib.c parse.c party_parse.c read_config.c) no exit() from library; return error
+
+daves 13 May 99 03:38:03
+    
+    (mib.c): Fixed minor typo
+
+daves 13 May 99 03:55:06
+    - (ip.c): Properly register IP module group on Free-BSD systems
+              (thanks to Mitchell Tasman)
+
+hardaker 13 May 99 09:07:13
+    - (vmstat.c): include limits.h.
+
+hardaker 13 May 99 09:07:39
+    - (vacm_vars.c): Set pointers to NULL after freeing them.
+
+hardaker 13 May 99 15:42:48
+    - (version.h bug-report sedscript.in): version tag ( 3.6.2 )
+
+daves 17 May 99 03:20:10
+    - (snmp_parse_args.c): Initialise session using library routine
+
+mslifcak 19 May 99 18:01:48
+    -(mibII/var_route.c) - fix Linux RouteMask c/o "Nancy" nam@cs.cmu.edu
+
+mslifcak 19 May 99 18:49:25
+    - (host_res.h) fix HAVE_NET_IF_VAR_H define (was HAVE_NET_IN_VAR_H)
+
+hardaker 25 May 99 20:20:31
+    - (version.h bug-report sedscript.in): version tag ( 3.6.2.pre1 )
+
+nba 26 May 99 07:57:42
+    
+      Tag: V3-line
+    
+    if.c: dynamic width for -i and -o option
+
+mslifcak 26 May 99 08:00:07
+    - fix-ups to build Win32 MSVisualC++
+
+nba 26 May 99 08:24:35
+    
+    
+    Some fixes for Solaris 2.7 (proc access still does not work when compiled
+    with gcc (32-bit compiler)
+
+nba 26 May 99 08:29:26
+    
+    Fixes for FreeBSD 2.1 from Derek J. Balling <dballing@yahoo-inc.com>
+
+hardaker 26 May 99 16:07:16
+    - (acconfig.h, config.h.in): increase MAXREADCOUNT.
+
+hardaker 26 May 99 16:07:42
+    - (hr_swinst.c): make swinstall be "unknown" since we can't truly know.
+
+hardaker 26 May 99 16:08:09
+    - (ipfwacc.h): move to correct location.
+
+hardaker 26 May 99 16:08:28
+    - (IPFWACC-MIB.txt): make counters.
+
+hardaker 26 May 99 17:31:25
+    - (proc.c): ultrix fixes.
+
+hardaker 26 May 99 17:38:56
+    - (IPFWACC-MIB.txt): added SEQUENCE OF.
+
+nba 27 May 99 02:56:25
+    
+    
+    host/hr_swrun.c, ucd-snmp/proc.c: Fixes for Solaris 2.7
+
+nba 27 May 99 02:59:16
+    
+    snmpd.c:	Properly handle the case of no community specified
+    	for agent traps.
+
+nba 27 May 99 23:55:09
+    
+    solaris2.?.h:	define _SLASH_PROC_METHOD_ as 1
+
+nba 27 May 99 23:55:49
+    
+    read_config.c:	complain about existing but unreadable config files.
+
+nba 27 May 99 23:59:37
+    
+    inet.c:	0 IS a valid short (and port address for remote ends of ports
+    	in LISTEN state)
+
+nba 28 May 99 03:25:29
+    
+    change the trapsink/trap2sink directives to support a community parameter.
+
+nba 29 May 99 02:49:47
+    
+    - smux.c: fix a missing ntohs in a debug message
+
+nba  1 Jun 99 00:27:36
+    
+    - proc.c: YAPBO (Yet another possible buffer overflow)
+
+nba  1 Jun 99 00:29:35
+    
+    - snmp_agent.c: change noCreation return to noAccess. There are probably
+    	situations where the former is correct, but this is less confusing
+
+nba  1 Jun 99 00:33:52
+    
+    - kernel_sunos5.?, hr_swrun.c, at.c, interfaces.c: fix at.atTable and
+    	ip.ipNetToMediaTable for Solaris. Also a tweak for getKstatInt.
+
+hardaker  2 Jun 99 07:27:46
+    - (version.h bug-report sedscript.in): version tag ( 3.6.2.pre2 )
+
+mslifcak  2 Jun 99 13:46:34
+    -(hr_filesys.c,interfaces.c,freebsd3.h) fix build on FreeBSD 3.1
+
+nba  3 Jun 99 14:31:18
+    
+    - kernel.c:	add some sanity checks when running without root access.
+
+nba  3 Jun 99 14:34:50
+    
+    - hr_swrun.c:	add a blank between process parameters
+
+nba  3 Jun 99 14:38:18
+    
+    - netbsd.h, tcp.c, udp.c:	fix socket tables for NetBSD 1.3/1.4
+
+nba  3 Jun 99 15:12:01
+    
+    - snmptrap.c: fix a bad free when calling snmpinform.
+
+nba  3 Jun 99 15:21:09
+    - tcp.c: lost a ';' for the FreeBSD case ....
+
+daves  4 Jun 99 04:51:04
+    - (agent/mibgroup/host/hr_swinst.c): Fix RPM handling
+
+daves  4 Jun 99 05:06:44
+    - (configure.in configure): Additional library for RPM handling
+
+mslifcak  4 Jun 99 09:30:12
+    -(tcp.c, udp.c) apply Ken Key's fix for FreeBSD3.1
+
+nba  4 Jun 99 11:52:38
+    - ip.c: Fix for FreeBSD 3 from Ken Key
+
+nba  4 Jun 99 11:53:32
+    - kernel_sunos5.c, asn1.c: Fixes for 64-bit Solaris 7
+
+nba  5 Jun 99 05:47:20
+    - interfaces.c,tcp.c,udp.c: cleanup of conditionals for FreeBSD
+
+nba  5 Jun 99 06:02:52
+    - configure.in: proper configure check for sys/socketvar.h
+
+mslifcak  7 Jun 99 07:45:10
+    -(ip.c, var_route.c) fix sizeof, CPP #endif
+
+hardaker  7 Jun 99 10:52:32
+    - (Makefile.in): Patch from Chris Smith:
+      - don't put CFLAGS in the link line.
+
+hardaker  7 Jun 99 10:54:21
+    - (README.win32): added to the 3.6.2 line.
+
+hardaker  7 Jun 99 11:25:27
+    - (FAQ, README): update for 3.6.2.
+
+hardaker  7 Jun 99 11:27:15
+    - (NEWS): 3.6.2 update.
+
+hardaker  7 Jun 99 11:30:40
+    - (EXAMPLE.conf.def): update for 3.6.2.
+
+hardaker  7 Jun 99 11:32:54
+    - (INSTALL): update for 3.6.2.
+
+mslifcak  7 Jun 99 13:02:10
+    -(if.c) - check for valid pointer before de-referencing.
+
+hardaker  7 Jun 99 15:46:26
+    - (configure, configure.in): check for libdb1 before libdb for rpm usage.
+
+hardaker  7 Jun 99 15:50:01
+    - (FAQ): merge
+
+hardaker  7 Jun 99 16:03:25
+    - (configure.in, configure): check for -ldb1 then -ldb for rpm usage.
+
+hardaker  7 Jun 99 16:43:50
+    - (config.h.in, configure, configure.in): check for rpmGetPath to help
+      determine which version of RPM we're using (3 or 2).
+
+pjl  7 Jun 99 17:30:33
+    Added RPM v3 support
+
+mslifcak  8 Jun 99 03:40:36
+    -(mibII/*,snmplib/*) Markku L.'s fixes to compile on HP-UX with aCC
+
+mslifcak  8 Jun 99 03:54:50
+    spell check COMMUNITY
+
+-------------------------------------------------------------------------------
+
+Changes: V3.6 -> V3.6.1
 	
 mslifcak  8 Mar 99 04:02:01
     (parse.c) - fix subid init; remove useless '-Pl' option.
