@@ -1,3 +1,22 @@
+/* wes.h:  a general config file */
+
+/* Command to generate ps output, the final column must be the process
+   name withOUT arguments */
+
+#ifdef hpux
+#define PSCMD "/bin/ps -e"
+#else
+#define PSCMD "/bin/ps -axc"
+#endif
+
+/* Should process output Cashing be used, and if so,
+   After how many seconds should the cache re-newed?
+   Note:  Don't define CASHETIME to disable cashing completely */
+
+#define CACHETIME 30
+#define CACHEFILE "/tmp/.snmp-exec-cache"
+#define MAXCACHESIZE (200*80)   /* roughly 200 lines max */
+
 /* mib pointer to my tree */
 
 #define WESMIB 1,3,6,1,4,10 /* process watch section */

@@ -287,7 +287,7 @@ int getswap(rettype)
      I can't figure out how to read it out of the kernel directly
      -- Wes */
   strcpy(ex.command,"/etc/swapinfo -h");
-  fd = get_exec_output(ex);
+  fd = get_exec_output(&ex);
   file = fdopen(fd,"r");
   for (i=1;i <= 2 && fgets(ex.output,STRMAX,file) != NULL; i++);
   if (fgets(ex.output,STRMAX,file) != NULL) {
@@ -295,7 +295,6 @@ int getswap(rettype)
   }
   fclose(file);
   close(fd);
-  while(wait3(&ex.result,0,0) > 0);
   switch
     (rettype) {
     case SWAPGETLEFT:
