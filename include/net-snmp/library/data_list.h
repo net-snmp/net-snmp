@@ -18,7 +18,8 @@
 /*
  * @file netsnmp_data_list.h
  * @addtogroup agent
- * @addtogroup library *
+ * @addtogroup library
+ */
 
 #ifndef DATA_LIST_H
 #define DATA_LIST_H

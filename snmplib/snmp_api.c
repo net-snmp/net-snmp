@@ -763,6 +763,7 @@ init_snmp_enums(void)
  * @return void
  *
  * @see init_agent
+ */
 void
 init_snmp(const char *type)
 {
@@ -831,6 +832,7 @@ snmp_store(const char *type)
  * @param type Label for the config file "type" used
  *
  * @return void
+ */
 void
 snmp_shutdown(const char *type)
 {
