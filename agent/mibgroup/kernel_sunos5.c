@@ -80,22 +80,22 @@ kstat_ctl_t    *kstat_fd = 0;
 static
 mibcache        Mibcache[MIBCACHE_SIZE] = {
     {MIB_SYSTEM, 0, (void *) -1, 0, 0, 0, 0},
-    {MIB_INTERFACES, 10 * sizeof(mib2_ifEntry_t), (void *) -1, 0, 10, 0,
+    {MIB_INTERFACES, 10 * sizeof(mib2_ifEntry_t), (void *) -1, 0, 30, 0,
      0},
     {MIB_AT, 0, (void *) -1, 0, 0, 0, 0},
-    {MIB_IP, sizeof(mib2_ip_t), (void *) -1, 0, 20, 0, 0},
-    {MIB_IP_ADDR, 20 * sizeof(mib2_ipAddrEntry_t), (void *) -1, 0, 20, 0,
+    {MIB_IP, sizeof(mib2_ip_t), (void *) -1, 0, 60, 0, 0},
+    {MIB_IP_ADDR, 20 * sizeof(mib2_ipAddrEntry_t), (void *) -1, 0, 60, 0,
      0},
-    {MIB_IP_ROUTE, 200 * sizeof(mib2_ipRouteEntry_t), (void *) -1, 0, 10,
+    {MIB_IP_ROUTE, 200 * sizeof(mib2_ipRouteEntry_t), (void *) -1, 0, 30,
      0, 0},
     {MIB_IP_NET, 100 * sizeof(mib2_ipNetToMediaEntry_t), (void *) -1, 0,
-     100, 0, 0},
-    {MIB_ICMP, sizeof(mib2_icmp_t), (void *) -1, 0, 20, 0, 0},
-    {MIB_TCP, sizeof(mib2_tcp_t), (void *) -1, 0, 20, 0, 0},
-    {MIB_TCP_CONN, 1000 * sizeof(mib2_tcpConnEntry_t), (void *) -1, 0, 15,
+     300, 0, 0},
+    {MIB_ICMP, sizeof(mib2_icmp_t), (void *) -1, 0, 60, 0, 0},
+    {MIB_TCP, sizeof(mib2_tcp_t), (void *) -1, 0, 60, 0, 0},
+    {MIB_TCP_CONN, 1000 * sizeof(mib2_tcpConnEntry_t), (void *) -1, 0, 30,
      0, 0},
-    {MIB_UDP, sizeof(mib2_udp_t), (void *) -1, 0, 15, 0, 0},
-    {MIB_UDP_LISTEN, 1000 * sizeof(mib2_udpEntry_t), (void *) -1, 0, 15, 0,
+    {MIB_UDP, sizeof(mib2_udp_t), (void *) -1, 0, 30, 0, 0},
+    {MIB_UDP_LISTEN, 1000 * sizeof(mib2_udpEntry_t), (void *) -1, 0, 30, 0,
      0},
     {MIB_EGP, 0, (void *) -1, 0, 0, 0, 0},
     {MIB_CMOT, 0, (void *) -1, 0, 0, 0, 0},
@@ -199,13 +199,20 @@ void
 init_kernel_sunos5(void)
 {
     static int creg   = 0;
-    const  int period = 5;
+    const  int period = 30;
+    int    alarm_id   = 0;
 
     if (creg == 0) {
-	creg = snmp_alarm_register(period, SA_REPEAT, kernel_sunos5_cache_age,
-				   (void *)period);
+	alarm_id = snmp_alarm_register(5, NULL, kernel_sunos5_cache_age,
+                                       NULL);
+	DEBUGMSGTL(("kernel_sunos5", "registered alarm %d with period 5s\n", 
+		    alarm_id));
+	alarm_id = snmp_alarm_register(period, SA_REPEAT, 
+                                       kernel_sunos5_cache_age,
+                                       (void *)period);
 	DEBUGMSGTL(("kernel_sunos5", "registered alarm %d with period %ds\n", 
-		    creg, period));
+		    alarm_id, period));
+        ++creg;
     }
 }
 
