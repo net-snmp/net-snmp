@@ -3829,6 +3829,7 @@ _oid_finish_printing(const oid * objid, size_t objidlen,
 
     if (*buf != NULL) {
         *(*buf + *out_len - 1) = '\0';  /* remove trailing dot */
+        *out_len = *out_len - 1;
     }
 }
 
@@ -3995,7 +3996,7 @@ _get_realloc_symbol(const oid * objid, size_t objidlen,
             } else if (tp->ranges && !tp->ranges->next
                        && tp->ranges->low == tp->ranges->high) {
                 /*
-                 * a fixed-length object string 
+                 * a fixed-length octet string 
                  */
                 numids = tp->ranges->low;
                 if (numids > objidlen)
