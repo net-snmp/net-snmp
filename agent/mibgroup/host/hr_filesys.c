@@ -6,7 +6,6 @@
 #include <config.h>
 #include "host_res.h"
 #include "hr_filesys.h"
-#include "hr_utils.h"
 
 #if HAVE_MNTENT_H
 #include <mntent.h>

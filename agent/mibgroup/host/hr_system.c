@@ -14,7 +14,6 @@
 #include "host.h"
 #include "host_res.h"
 #include "hr_system.h"
-#include "hr_utils.h"
 #include "auto_nlist.h"
 #include "../../../snmplib/system.h"
 

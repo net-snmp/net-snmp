@@ -55,7 +55,6 @@
 
 #include "host_res.h"
 #include "hr_swinst.h"
-#include "hr_utils.h"
 #include "tools.h"
 
 #define HRSWINST_MONOTONICALLY_INCREASING

@@ -155,7 +155,7 @@ agent_index.lo: mibgroup/host/hr_proc.h mibgroup/host/hr_network.h
 agent_index.lo: mibgroup/host/hr_print.h mibgroup/host/hr_disk.h
 agent_index.lo: mibgroup/host/hr_partition.h mibgroup/host/hr_filesys.h
 agent_index.lo: mibgroup/host/hr_swrun.h mibgroup/host/hr_swinst.h
-agent_index.lo: mibgroup/host/hr_utils.h mibgroup/agentx/master.h
+agent_index.lo: mibgroup/ mibgroup/agentx/master.h
 agent_index.lo: mibgroup/agentx/subagent.h mibgroup/util_funcs.h
 agent_index.lo: mibgroup/struct.h mibgroup/mibII/kernel_linux.h
 agent_index.lo: mibgroup/mibII/tcpTable.h mibgroup/mibII/ipAddr.h
@@ -214,7 +214,7 @@ agent_read_config.lo: mibgroup/host/hr_proc.h mibgroup/host/hr_network.h
 agent_read_config.lo: mibgroup/host/hr_print.h mibgroup/host/hr_disk.h
 agent_read_config.lo: mibgroup/host/hr_partition.h mibgroup/host/hr_filesys.h
 agent_read_config.lo: mibgroup/host/hr_swrun.h mibgroup/host/hr_swinst.h
-agent_read_config.lo: mibgroup/host/hr_utils.h mibgroup/agentx/master.h
+agent_read_config.lo: mibgroup/ mibgroup/agentx/master.h
 agent_read_config.lo: mibgroup/agentx/subagent.h mibgroup/util_funcs.h
 agent_read_config.lo: mibgroup/struct.h mibgroup/mibII/kernel_linux.h
 agent_read_config.lo: mibgroup/mibII/tcpTable.h mibgroup/mibII/ipAddr.h
@@ -271,7 +271,7 @@ agent_registry.lo: mibgroup/host/hr_proc.h mibgroup/host/hr_network.h
 agent_registry.lo: mibgroup/host/hr_print.h mibgroup/host/hr_disk.h
 agent_registry.lo: mibgroup/host/hr_partition.h mibgroup/host/hr_filesys.h
 agent_registry.lo: mibgroup/host/hr_swrun.h mibgroup/host/hr_swinst.h
-agent_registry.lo: mibgroup/host/hr_utils.h mibgroup/agentx/master.h
+agent_registry.lo: mibgroup/ mibgroup/agentx/master.h
 agent_registry.lo: mibgroup/agentx/subagent.h mibgroup/util_funcs.h
 agent_registry.lo: mibgroup/struct.h mibgroup/mibII/kernel_linux.h
 agent_registry.lo: mibgroup/mibII/tcpTable.h mibgroup/mibII/ipAddr.h
@@ -345,7 +345,7 @@ mib_modules.lo: mibgroup/host/hr_proc.h mibgroup/host/hr_network.h
 mib_modules.lo: mibgroup/host/hr_print.h mibgroup/host/hr_disk.h
 mib_modules.lo: mibgroup/host/hr_partition.h mibgroup/host/hr_filesys.h
 mib_modules.lo: mibgroup/host/hr_swrun.h mibgroup/host/hr_swinst.h
-mib_modules.lo: mibgroup/host/hr_utils.h mibgroup/agentx/master.h
+mib_modules.lo: mibgroup/ mibgroup/agentx/master.h
 mib_modules.lo: mibgroup/agentx/subagent.h mibgroup/util_funcs.h
 mib_modules.lo: mibgroup/struct.h mibgroup/mibII/kernel_linux.h
 mib_modules.lo: mibgroup/mibII/tcpTable.h mibgroup/mibII/ipAddr.h
@@ -413,7 +413,7 @@ snmp_vars.lo: mibgroup/host/hr_proc.h mibgroup/host/hr_network.h
 snmp_vars.lo: mibgroup/host/hr_print.h mibgroup/host/hr_disk.h
 snmp_vars.lo: mibgroup/host/hr_partition.h mibgroup/host/hr_filesys.h
 snmp_vars.lo: mibgroup/host/hr_swrun.h mibgroup/host/hr_swinst.h
-snmp_vars.lo: mibgroup/host/hr_utils.h mibgroup/agentx/master.h
+snmp_vars.lo: mibgroup/ mibgroup/agentx/master.h
 snmp_vars.lo: mibgroup/agentx/subagent.h mibgroup/util_funcs.h
 snmp_vars.lo: mibgroup/struct.h mibgroup/mibII/kernel_linux.h
 snmp_vars.lo: mibgroup/mibII/tcpTable.h mibgroup/mibII/ipAddr.h
@@ -467,7 +467,7 @@ snmpd.lo: mibgroup/host/hr_proc.h mibgroup/host/hr_network.h
 snmpd.lo: mibgroup/host/hr_print.h mibgroup/host/hr_disk.h
 snmpd.lo: mibgroup/host/hr_partition.h mibgroup/host/hr_filesys.h
 snmpd.lo: mibgroup/host/hr_swrun.h mibgroup/host/hr_swinst.h
-snmpd.lo: mibgroup/host/hr_utils.h mibgroup/agentx/master.h
+snmpd.lo: mibgroup/ mibgroup/agentx/master.h
 snmpd.lo: mibgroup/agentx/subagent.h mibgroup/mibII/kernel_linux.h
 snmpd.lo: mibgroup/mibII/tcpTable.h mibgroup/mibII/ipAddr.h
 snmpd.lo: mibgroup/mibII/var_route.h mibgroup/mibII/route_write.h
