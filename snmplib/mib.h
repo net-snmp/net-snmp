@@ -278,27 +278,35 @@ void shutdown_mib (void);
 void print_variable (oid *, size_t, struct variable_list *);
 void fprint_variable (FILE *, oid *, size_t, struct variable_list *);
 void sprint_variable (char *, oid *, size_t, struct variable_list *);
+int snprint_variable		(char *buf, size_t buf_len,
+				 const oid *objid, size_t objidlen,
+				 struct variable_list *variable);
 
 int sprint_realloc_variable(u_char **buf, size_t *buf_len,
 			    size_t *out_len, int allow_realloc,
-			    oid *objid, size_t objidlen,
+			    const oid *objid, size_t objidlen,
 			    struct variable_list *variable);
 
 int sprint_realloc_objid   (u_char **buf, size_t *buf_len,
 			    size_t *out_len, int allow_realloc, 
-			    oid *objid, size_t objidlen);
+			    const oid *objid, size_t objidlen);
 
 void print_value (oid *, size_t, struct variable_list *);
 void fprint_value (FILE *, oid *, size_t, struct variable_list *);
 void sprint_value (char *, oid *, size_t, struct variable_list *);
+int snprint_value		(char *buf, size_t buf_len,
+				 const oid *objid, size_t objidlen,
+				 struct variable_list *variable);
 int
 sprint_realloc_value(u_char **buf, size_t *buf_len,
 		     size_t *out_len, int allow_realloc,
-		     oid *objid, size_t objidlen,
+		     const oid *objid, size_t objidlen,
 		     struct variable_list *variable);
 void print_objid (oid *, size_t);
 void fprint_objid (FILE *, oid *, size_t);
 char *sprint_objid (char *, oid *, size_t);
+int snprint_objid		(char *buf, size_t buf_len,
+				 const oid *objid, size_t objidlen);
 void print_description (oid *, size_t, int);
 void fprint_description (FILE *, oid *, size_t, int);
 int get_module_node (const char *, const char *, oid *, size_t *);
@@ -306,7 +314,7 @@ int get_wild_node(const char *, oid *, size_t *);
 int get_node (const char *, oid *, size_t *);
 oid *snmp_parse_oid (const char *,oid *,size_t *);
 struct tree *get_symbol (oid *, size_t, struct tree *, char *);
-struct tree *get_tree (oid *, size_t, struct tree *);
+struct tree *get_tree (const oid *, size_t, struct tree *);
 struct tree *get_tree_head (void);
 void  set_function (struct tree *);
 

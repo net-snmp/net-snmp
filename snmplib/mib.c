@@ -86,10 +86,10 @@ SOFTWARE.
 static struct tree * _sprint_realloc_objid(u_char **buf, size_t *buf_len,
 					   size_t *out_len, int allow_realloc, 
 					   int *buf_overflow,
-					   oid *objid, size_t objidlen);
+					   const oid *objid, size_t objidlen);
 
 static char *uptimeString (u_long, char *);
-static struct tree *_get_realloc_symbol(oid *objid, size_t objidlen,
+static struct tree *_get_realloc_symbol(const oid *objid, size_t objidlen,
 					struct tree *subtree,
 					u_char **buf, size_t *buf_len,
 					size_t *out_len, int allow_realloc,
@@ -2183,7 +2183,7 @@ _sprint_objid(char *buf,
 static struct tree *
 _sprint_realloc_objid(u_char **buf, size_t *buf_len,
 		      size_t *out_len, int allow_realloc, int *buf_overflow,
-		      oid *objid, size_t objidlen)
+		      const oid *objid, size_t objidlen)
 {
   u_char *tbuf = NULL, *cp = NULL;
   size_t tbuf_len = 256, tout_len = 0;
@@ -2279,13 +2279,27 @@ _sprint_realloc_objid(u_char **buf, size_t *buf_len,
 int
 sprint_realloc_objid(u_char **buf, size_t *buf_len,
 		     size_t *out_len, int allow_realloc, 
-		     oid *objid, size_t objidlen)
+		     const oid *objid, size_t objidlen)
 {
   int buf_overflow = 0;
 
   _sprint_realloc_objid(buf, buf_len, out_len, allow_realloc, &buf_overflow,
 			objid, objidlen);
   return !buf_overflow;
+}
+
+int
+snprint_objid(char *buf, size_t buf_len,
+	      const oid *objid, size_t objidlen)
+{
+  size_t out_len = 0;
+
+  if (sprint_realloc_objid((u_char **)&buf, &buf_len, &out_len, 0, 
+			   objid, objidlen)) {
+    return (int)out_len;
+  } else {
+    return -1;
+  }
 }
 
 char * sprint_objid(char *buf, oid *objid, size_t objidlen)
@@ -2326,6 +2340,21 @@ fprint_objid(FILE *f,
   free(buf);
 }
 
+int
+snprint_variable(char *buf, size_t buf_len,
+		 const oid *objid, size_t objidlen,
+		 struct variable_list *variable)
+{
+  size_t out_len = 0;
+
+  if (sprint_realloc_variable((u_char **)&buf, &buf_len, &out_len, 0, 
+			      objid, objidlen, variable)) {
+    return (int)out_len;
+  } else {
+    return -1;
+  }
+}
+
 void
 sprint_variable(char *buf,
 		oid *objid,
@@ -2340,7 +2369,7 @@ sprint_variable(char *buf,
 int
 sprint_realloc_variable(u_char **buf, size_t *buf_len,
 			size_t *out_len, int allow_realloc,
-			oid *objid, size_t objidlen,
+			const oid *objid, size_t objidlen,
 			struct variable_list *variable)
 {
     struct tree *subtree = tree_head;
@@ -2393,6 +2422,21 @@ sprint_realloc_variable(u_char **buf, size_t *buf_len,
     }
 }
 
+int
+snprint_value(char *buf, size_t buf_len,
+	      const oid *objid, size_t objidlen,
+	      struct variable_list *variable)
+{
+  size_t out_len = 0;
+
+  if (sprint_realloc_value((u_char **)&buf, &buf_len, &out_len, 0,
+			   objid, objidlen, variable)) {
+    return (int)out_len;
+  } else {
+    return -1;
+  }
+}
+
 void
 print_variable(oid *objid,
 	       size_t objidlen,
@@ -2439,7 +2483,7 @@ sprint_value(char *buf,
 int
 sprint_realloc_value(u_char **buf, size_t *buf_len,
 		     size_t *out_len, int allow_realloc,
-		     oid *objid, size_t objidlen,
+		     const oid *objid, size_t objidlen,
 		     struct variable_list *variable)
 {
   struct tree *subtree = tree_head;
@@ -2509,7 +2553,7 @@ fprint_value(FILE *f,
  */
 
 int
-dump_realloc_oid_to_string(oid *objid, size_t objidlen,
+dump_realloc_oid_to_string(const oid *objid, size_t objidlen,
 			   u_char **buf, size_t *buf_len, size_t *out_len,
 			   int allow_realloc, char quotechar)
 {
@@ -2578,7 +2622,7 @@ dump_realloc_oid_to_string(oid *objid, size_t objidlen,
 
 
 static struct tree *
-_get_realloc_symbol(oid *objid, size_t objidlen,
+_get_realloc_symbol(const oid *objid, size_t objidlen,
 		    struct tree *subtree,
 		    u_char **buf, size_t *buf_len, size_t *out_len,
 		    int allow_realloc, int *buf_overflow,
@@ -2921,7 +2965,7 @@ get_symbol(oid *objid,
  * Clone of get_symbol that doesn't take a buffer argument
  */
 struct tree *
-get_tree(oid *objid,
+get_tree(const oid *objid,
 	 size_t objidlen,
 	 struct tree *subtree)
 {
