@@ -1515,7 +1515,7 @@ while test "x$new_module_list" != "x"; do
     else
       if test -f $srcdir/$mibdir/$i.h; then
         new_list=""
-        new_list_arch=`grep config_arch_require $srcdir/$mibdir/$i.h | sed 's/.*config_require(\(.*\),\(.*\)).*/\1-xarchx-\2/'`
+        new_list_arch=`grep config_arch_require $srcdir/$mibdir/$i.h | sed 's/.*config_arch_require(\(.*\), *\(.*\)).*/\1-xarchx-\2/'`
 	if test "x$new_list_arch" != "x"; then
           for j in $new_list_arch
 	    do
