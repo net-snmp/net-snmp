@@ -458,6 +458,8 @@ when_dumped( filesys, level, length )
 		 *   final portion of the device name only.
 		 */
 
+    if ( *filesys == '\0' )		/* No filesystem name? */
+	return date_n_time (NULL, length);
     cp1=strrchr( filesys, '/' );	/* Find the last element of the current FS */
 
     if ((dump_fp = fopen("/etc/dumpdates", "r")) == NULL )
