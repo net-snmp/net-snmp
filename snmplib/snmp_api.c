@@ -2487,6 +2487,11 @@ _snmp_parse(struct snmp_session *session,
     session->s_snmp_errno = 0;
     session->s_errno = 0;
 
+	/* Ensure all incoming PDUs have a unique means of identification 
+		(This is not restricted to AgentX handling,
+		 though that is where the need becomes visible)	*/
+    pdu->transid = snmp_get_next_transid();
+
     if (session->version != SNMP_DEFAULT_VERSION)
 	pdu->version = session->version;
     else
