@@ -20,7 +20,7 @@ struct config_line {
    struct config_line *next;
 };
 
-void read_config __P((char *));
+void read_config __P((char *, struct config_line *));
 void free_config __P((void));
 void config_perror __P((char *));
 void config_pwarn __P((char *));
