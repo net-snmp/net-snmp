@@ -31,9 +31,11 @@ else
   EXTRACPPFLAGS=""
 fi
 dnl Solaris extra cpp flags.
-case $target_os in
-  solaris*) EXTRACPPFLAGS="$EXTRACPPFLAGS -Xs" ;;
-esac
+if test "x$GCC" != "xyes"; then
+  case $target_os in
+    solaris*) EXTRACPPFLAGS="$EXTRACPPFLAGS -Xs" ;;
+  esac
+fi
 
 AC_SUBST(EXTRACPPFLAGS,$EXTRACPPFLAGS)
 AC_MSG_RESULT($EXTRACPPFLAGS)
@@ -293,9 +295,9 @@ available in the MIB-II tree.
 System Location],UCDavis Electrical Engineering Departement,1)
 
 if test -d /var/log; then
-  defaultlog = "/var/log"
+  defaultlog="/var/log/snmpd.log"
 else
-  defaultlog = "/usr/adm"
+  defaultlog="/usr/adm/snmpd.log"
 fi
   
 AC_PROMPT_USER(LOGFILE,[
