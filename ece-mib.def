@@ -14,19 +14,20 @@ IMPORTS
 	    FROM RFC1213-MIB;
 
 private	       OBJECT IDENTIFIER ::= { internet 4 }
-local          OBJECT IDENTIFIER ::= { private 10 }
--- processes      OBJECT IDENTIFIER ::= { local PROCMIBNUM }
--- exec           OBJECT IDENTIFIER ::= { local SHELLMIBNUM }
--- memory         OBJECT IDENTIFIER ::= { local MEMMIBNUM }
--- lockd          OBJECT IDENTIFIER ::= { local LOCKDMIBNUM }
--- disk           OBJECT IDENTIFIER ::= { local DISKMIBNUM }
--- load           OBJECT IDENTIFIER ::= { local LOADAVEMIBNUM }
--- version        OBJECT IDENTIFIER ::= { local VERSIONMIBNUM }
+enterprises    OBJECT IDENTIFIER ::= { private 1 }
+ucdavis          OBJECT IDENTIFIER ::= { enterprises 2021 }
+-- processes      OBJECT IDENTIFIER ::= { ucdavis PROCMIBNUM }
+-- exec           OBJECT IDENTIFIER ::= { ucdavis SHELLMIBNUM }
+-- memory         OBJECT IDENTIFIER ::= { ucdavis MEMMIBNUM }
+-- lockd          OBJECT IDENTIFIER ::= { ucdavis LOCKDMIBNUM }
+-- disk           OBJECT IDENTIFIER ::= { ucdavis DISKMIBNUM }
+-- load           OBJECT IDENTIFIER ::= { ucdavis LOADAVEMIBNUM }
+-- version        OBJECT IDENTIFIER ::= { ucdavis VERSIONMIBNUM }
 
 -- These are the returned values of the agent type.
 -- returned to:  .iso.org.dod.internet.mgmt.mib-2.system.sysObjectID.0 
 
-ucdSnmpAgent      OBJECT IDENTIFIER ::= { local AGENTID }
+ucdSnmpAgent      OBJECT IDENTIFIER ::= { ucdavis AGENTID }
 hpux9             OBJECT IDENTIFIER ::= { ucdSnmpAgent HPUX9ID }
 hpux10            OBJECT IDENTIFIER ::= { ucdSnmpAgent HPUX10ID }
 sunos4            OBJECT IDENTIFIER ::= { ucdSnmpAgent SUNOS4ID }
@@ -44,7 +45,7 @@ processes OBJECT-TYPE
 	DESCRIPTION
 		"A set of information on running programs/daemons."
 	INDEX { processIndex }
-	::= { local PROCMIBNUM }
+	::= { ucdavis PROCMIBNUM }
 
 
 Processes ::= SEQUENCE {
@@ -135,7 +136,7 @@ extensible OBJECT-TYPE
 	DESCRIPTION
 		"Extensible commands returning output and result codes."
 	INDEX { extensibleIndex }
-	::= { local SHELLMIBNUM }
+	::= { ucdavis SHELLMIBNUM }
 
 Extensible ::= SEQUENCE {
    extensibleIndex   INTEGER,
@@ -200,7 +201,7 @@ memory OBJECT-TYPE
 	STATUS mandatory
 	DESCRIPTION
 		"Miscellanous stuff -- memory related."
-	::= { local MEMMIBNUM }
+	::= { ucdavis MEMMIBNUM }
 
 Memory ::= SEQUENCE {
    memIndex        INTEGER,
@@ -337,7 +338,7 @@ lockd OBJECT-TYPE
 	DESCRIPTION
 		"Tests the functionality of the rpc.lockd/rpc.statd pair."
 	INDEX { lockdIndex }
-	::= { local LOCKDMIBNUM }
+	::= { ucdavis LOCKDMIBNUM }
 
 Lockd ::= SEQUENCE {
    lockdIndex   INTEGER,
@@ -376,7 +377,7 @@ disk 	OBJECT-TYPE
 	DESCRIPTION
 		"Disk watching information."
 	INDEX { diskIndex }
-	::= { local DISKMIBNUM }
+	::= { ucdavis DISKMIBNUM }
 
 Disk ::= SEQUENCE {
    diskIndex   INTEGER,
@@ -478,7 +479,7 @@ loadaves OBJECT-TYPE
 	DESCRIPTION
 		"Load average information."
 	INDEX { loadaveIndex }
-	::= { local LOADAVEMIBNUM }
+	::= { ucdavis LOADAVEMIBNUM }
 
 
 Loadaves ::= SEQUENCE {
@@ -546,7 +547,7 @@ version	OBJECT-TYPE
 	DESCRIPTION
 		"ece-snmpd version info."
 	INDEX { versionIndex }
-	::= { local VERSIONMIBNUM }
+	::= { ucdavis VERSIONMIBNUM }
 
 Version ::= SEQUENCE {
    versionIndex   INTEGER,
@@ -629,7 +630,7 @@ snmperrs OBJECT-TYPE
 	DESCRIPTION
 		"A place for the agent to report problems."
 	INDEX { snmperrIndex }
-	::= { local ERRORMIBNUM }
+	::= { ucdavis ERRORMIBNUM }
 
 
 Snmperrs ::= SEQUENCE {
