@@ -31,7 +31,7 @@ netsnmp_access_arp_container_arch_load(netsnmp_container *container)
         return rc;
     }
 
-#if defined (INET6) && 0 // arp for v6?
+#if defined (INET6) && 0 /* xx-rks: arp for v6? */
     idx_offset = rc;
 
     rc = _load_v6(container, idx_offset);
@@ -162,7 +162,7 @@ _load_v4(netsnmp_container *container, int idx_offset)
         /*
          * parse mask
          */
-        // xxx-rks: what is mask? how to interpret '*'?
+        /* xxx-rks: what is mask? how to interpret '*'? */
 
 
         /*

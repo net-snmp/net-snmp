@@ -5,7 +5,6 @@
  */
 #include <net-snmp/net-snmp-config.h>
 #include <net-snmp/net-snmp-includes.h>
-//#include "mibII/mibII_common.h"
 #include "ip-mib/ipSystemStatsTable/ipSystemStatsTable_constants.h"
 
 #include <net-snmp/agent/net-snmp-agent-includes.h>
