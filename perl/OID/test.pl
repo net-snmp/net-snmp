@@ -6,7 +6,7 @@
 # change 'tests => 1' to 'tests => last_test_to_print';
 
 use Test;
-BEGIN { plan tests => 36 ; $ENV{'SNMPCONFPATH'} = 'nopath'};
+BEGIN { plan tests => 38 ; $ENV{'SNMPCONFPATH'} = 'nopath'};
 use NetSNMP::OID;
 use Data::Dumper;
 
