@@ -174,7 +174,7 @@
 #include <netinet/mib_kern.h>
 #undef  OBJID
 #define OBJID                   ASN_OBJECT_ID
-#endif hpux
+#endif /* hpux */
 
 void init_nlist __P((struct nlist *));
 int compare __P((oid *, int, oid *, int));
