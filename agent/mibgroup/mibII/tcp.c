@@ -68,9 +68,7 @@
 #include <netinet/ip_var.h>
 #endif
 #ifdef INET6
-#if 0
 #include <netinet/ip6_var.h>
-#endif
 #endif
 #if HAVE_SYS_SOCKETVAR_H
 #include <sys/socketvar.h>
