@@ -1,9 +1,15 @@
 #ifndef _SNMPCALLBACKDOMAIN_H
 #define _SNMPCALLBACKDOMAIN_H
 
+#ifndef NET_SNMP_CONFIG_H
+#error "Please include <netsnmp/net-snmp-config.h> before this file"
+#endif
+
 #ifdef __cplusplus
 extern          "C" {
 #endif
+
+#ifdef SNMP_TRANSPORT_CALLBACK_DOMAIN
 
 #include <net-snmp/library/snmp_transport.h>
 
@@ -50,6 +56,13 @@ netsnmp_session *netsnmp_callback_open(int attach_to,
                                                            netsnmp_pdu *,
                                                            int));
 void             netsnmp_clear_callback_list(void);
+
+#else
+
+#define netsnmp_clear_callback_list()
+
+     
+#endif /*SNMP_TRANSPORT_CALLBACK_DOMAIN*/
 
 #ifdef __cplusplus
 }
