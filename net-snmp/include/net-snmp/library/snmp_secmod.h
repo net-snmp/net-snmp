@@ -77,6 +77,7 @@ typedef int     (Secmod2PduCallback) (netsnmp_pdu *, netsnmp_pdu *);
 typedef int     (SecmodOutMsg) (struct snmp_secmod_outgoing_params *);
 typedef int     (SecmodInMsg) (struct snmp_secmod_incoming_params *);
 typedef void    (SecmodFreeState) (void *);
+typedef void    (SecmodHandleReport) (void *sessp, netsnmp_session *, int result, netsnmp_pdu *origpud);
 
 /*
  * definition of a security module
@@ -107,6 +108,11 @@ struct snmp_secmod_def {
     SecmodOutMsg   *encode_reverse;     /* encode packet back to front */
     SecmodOutMsg   *encode_forward;     /* encode packet forward */
     SecmodInMsg    *decode;     /* decode & validate incoming */
+
+   /*
+    * error and report handling
+    */
+   SecmodHandleReport *handle_report;
 };
 
 
