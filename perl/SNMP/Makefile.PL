@@ -24,12 +24,12 @@ sub InitMakeParams {
 
     my $snmp_lib, $snmp_llib, $sep;
     if ($Config{'osname'} eq 'MSWin32') {
-	$snmp_lib = 'libsnmp.lib';
-	$snmp_link_lib = 'libsnmp';
+	$snmp_lib = 'libnetsnmp.lib';
+	$snmp_link_lib = 'libnetsnmp';
 	$sep = '\\';
     } else {
-	$snmp_lib = 'libsnmp.a';
-	$snmp_link_lib = 'snmp';
+	$snmp_lib = 'libnetsnmp.a';
+	$snmp_link_lib = 'netsnmp';
 	$sep = '/';
     }
     $prefix="${sep}usr${sep}local";
@@ -40,28 +40,24 @@ sub InitMakeParams {
     my $lib_path1 = "${prefix}${sep}lib";
     my $lib_path2 = "${sep}usr${sep}lib";
 
-    my @IncludeFiles = qw[ucd-snmp/ucd-snmp-config.h
-			  ucd-snmp/asn1.h ucd-snmp/mib.h ucd-snmp/parse.h
-			  ucd-snmp/snmp.h ucd-snmp/snmp_api.h
-			  ucd-snmp/snmp_client.h ucd-snmp/snmp_impl.h
-			  ucd-snmp/scapi.h ucd-snmp/keytools.h
-			  ucd-snmp/snmpv3.h ucd-snmp/transform_oids.h];
+    my @IncludeFiles = qw[net-snmp/net-snmp-config.h
+			  net-snmp/net-snmp-includes.h];
 
     my @IncludeDirs = ($inc_path2, $inc_path1);
 
     my $IncludeDir = find_files(\@IncludeFiles,\@IncludeDirs) ||
-	prompt("Where are the ucd-snmp include files?","$inc_path1");
+	prompt("Where are the net-snmp include files?","$inc_path1");
 
     my @LibDirs = ($lib_path1, $lib_path2);
 
     my $LibDir = find_files(["$snmp_lib"],\@LibDirs) ||
-	prompt("Where is the ucd-snmp library installed?","$lib_path2");
+	prompt("Where is the net-snmp library installed?","$lib_path2");
 
     @IncludeFiles = map {"$IncludeDir$sep$_";} @IncludeFiles;
     $ssl_lib = ($^O =~ /win32/i ? 'libeay32.lib' : 'libcrypto.a');
     $ssl_link_lib = ($^O =~ /win32/i ? 'libeay32' : 'crypto');
     my $ssl_link_libs;
-    if (HasSSL("$IncludeDir${sep}ucd-snmp/ucd-snmp-config.h")) {
+    if (HasSSL("$IncludeDir${sep}net-snmp/net-snmp-config.h")) {
 	my @SSLLibDirs = ("/usr/local/lib", "/usr/local/ssl/lib", "/usr/lib");
 	my $SSLLibDir = find_files([$ssl_lib], \@SSLLibDirs) ||
 	    prompt("Where is the SSL library installed?", $SSLLibDirs[1]);
