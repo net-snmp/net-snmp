@@ -424,7 +424,7 @@ long get_uptime (void)
 #if !defined(hpux)
 	    { (char*)"_boottime" },
 #else
-	    { "boottime" },
+	    { (char*)"boottime" },
 #endif
 	    { (char*)"" }
 	};

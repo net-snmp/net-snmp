@@ -165,7 +165,7 @@ main(int argc, char *argv[])
     oid                  *authKeyChange   = authKeyOid,
                          *privKeyChange   = privKeyOid;
 
-    u_int                 oldKu_len       = SNMP_MAXBUF_SMALL,
+    size_t                oldKu_len       = SNMP_MAXBUF_SMALL,
                           newKu_len       = SNMP_MAXBUF_SMALL,
                           oldkul_len      = SNMP_MAXBUF_SMALL,
                           newkul_len      = SNMP_MAXBUF_SMALL,

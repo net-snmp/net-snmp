@@ -110,7 +110,7 @@ struct tc {     /* textual conventions */
 } tclist[MAXTC];
 
 int Line = 1;
-char *File = (char *)"(none)";
+const char *File = "(none)";
 static int anonymous = 0;
 
 #define SYNTAX_MASK     0x80
