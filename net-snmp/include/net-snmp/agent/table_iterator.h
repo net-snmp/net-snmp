@@ -16,12 +16,15 @@ typedef struct variable_list * (NextDataPoint)(void **loop_context,
                                                void **data_context,
                                                struct variable_list *,
                                                struct iterator_info_s *);
+typedef void *                 (MakeDataContext)(void *loop_context,
+                                                 struct iterator_info_s *);
 typedef void (FreeLoopContext)(void *, struct iterator_info_s *);
 typedef void (FreeDataContext)(void *, struct iterator_info_s *);
 
 typedef struct iterator_info_s {
    FirstDataPoint  *get_first_data_point;
    NextDataPoint   *get_next_data_point;
+   MakeDataContext *make_data_context;
    FreeLoopContext *free_loop_context;
    FreeDataContext *free_data_context;
    FreeLoopContext *free_loop_context_at_end;
