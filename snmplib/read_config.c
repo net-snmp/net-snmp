@@ -326,7 +326,7 @@ void read_config(const char *filename,
 
   FILE *ifile;
   char line[STRINGMAX], token[STRINGMAX], tmpbuf[STRINGMAX];
-  char *cptr;
+  char *cptr, *cp;
   int i, done;
   struct config_line *lptr;
 
@@ -404,6 +404,13 @@ void read_config(const char *filename,
                 if (when == EITHER_CONFIG || lptr->config_time == when) {
                     DEBUGMSGTL(("read_config", "%s:%d Parsing: %s\n",
                                 filename, linecount, line));
+               	    /*
+               	     * Stomp on any trailing whitespace
+               	     */
+               	    cp = &(cptr[strlen(cptr)-1]);
+                    while (isspace(*cp)) {
+                        *(cp--) = '\0';
+                    }
                     (*(lptr->parse_line))(token,cptr);
                 }
                 done = 1;
