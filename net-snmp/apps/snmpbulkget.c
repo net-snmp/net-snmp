@@ -36,6 +36,7 @@ SOFTWARE.
 #else
 #include <strings.h>
 #endif
+#include <getopt.h>
 #include <sys/types.h>
 #if HAVE_NETINET_IN_H
 #include <netinet/in.h>
