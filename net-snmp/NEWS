@@ -8,6 +8,8 @@ the ChangeLog file for a more detailed listing of changes/bug fixes.
       and the mailing lists.
     - The configure --help output has been greatly improved for better
       readability and has been broken into sections.
+    - The agent's SMUX support has been greatly improved and should
+      function with applications other than gated now.
     - The snmptrapd has been make extensible so you can call other
       programs and scripts when a trap has been received.
       (see snmptrapd.conf(5))
