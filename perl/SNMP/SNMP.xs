@@ -979,7 +979,12 @@ __add_var_val_str(pdu, name, name_length, val, len, type)
       case TYPE_INTEGER32:
         vars->type = ASN_INTEGER;
         vars->val.integer = (long *)malloc(sizeof(long));
-        *(vars->val.integer) = strtol(val,NULL,0);
+        if (val)
+            *(vars->val.integer) = strtol(val,NULL,0);
+        else {
+            ret = FAILURE;
+            *(vars->val.integer) = 0;
+        }
         vars->val_len = sizeof(long);
         break;
 
@@ -997,7 +1002,12 @@ __add_var_val_str(pdu, name, name_length, val, len, type)
         vars->type = ASN_UINTEGER;
 UINT:
         vars->val.integer = (long *)malloc(sizeof(long));
-        sscanf(val,"%lu",vars->val.integer);
+        if (val)
+            sscanf(val,"%lu",vars->val.integer);
+        else {
+            ret = FAILURE;
+            *(vars->val.integer) = 0;
+        }
         vars->val_len = sizeof(long);
         break;
 
@@ -1006,7 +1016,7 @@ UINT:
 	goto OCT;
 
       case TYPE_BITSTRING:
-	vars->type = ASN_BIT_STR;
+	vars->type = ASN_OCTET_STR;
 	goto OCT;
 
       case TYPE_OPAQUE:
@@ -1014,13 +1024,24 @@ UINT:
 OCT:
         vars->val.string = (u_char *)malloc(len);
         vars->val_len = len;
-        memcpy((char *)vars->val.string, val, len);
+        if (val && len)
+            memcpy((char *)vars->val.string, val, len);
+        else {
+            ret = FAILURE;
+            vars->val.string = strdup("");
+            vars->val_len = 0;
+        }
         break;
 
       case TYPE_IPADDR:
         vars->type = ASN_IPADDRESS;
         vars->val.integer = (long *)malloc(sizeof(long));
-        *(vars->val.integer) = inet_addr(val);
+        if (val)
+            *(vars->val.integer) = inet_addr(val);
+        else {
+            ret = FAILURE;
+            *(vars->val.integer) = 0;
+        }
         vars->val_len = sizeof(long);
         break;
 
@@ -1028,15 +1049,14 @@ OCT:
         vars->type = ASN_OBJECT_ID;
 	vars->val_len = MAX_OID_LEN;
         /* if (read_objid(val, oidbuf, &(vars->val_len))) { */
-	tp = __tag2oid(val,NULL,oidbuf,&(vars->val_len),NULL,0);
-
-        if (vars->val_len) {
-        	vars->val_len *= sizeof(oid);
-		vars->val.objid = (oid *)malloc(vars->val_len);
-		memcpy((char *)vars->val.objid, (char *)oidbuf, vars->val_len);
-        } else {
+	/* tp = __tag2oid(val,NULL,oidbuf,&(vars->val_len),NULL,0); */
+        if (!val || !snmp_parse_oid(val, oidbuf, &vars->val_len)) {
             vars->val.objid = NULL;
 	    ret = FAILURE;
+        } else {
+            vars->val_len *= sizeof(oid);
+            vars->val.objid = (oid *)malloc(vars->val_len);
+            memcpy((char *)vars->val.objid, (char *)oidbuf, vars->val_len);
         }
         break;
 
