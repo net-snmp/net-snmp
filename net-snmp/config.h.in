@@ -493,6 +493,9 @@
 /* ifnet.if_mtu */
 #undef STRUCT_IFNET_HAS_IF_MTU
 
+/* swdevt.sw_nblksenabled */
+#undef STRUCT_SWDEVT_HAS_SW_NBLKSENABLED
+
 /* ifnet needs to have _KERNEL defined */
 #undef IFNET_NEEDS_KERNEL
 
