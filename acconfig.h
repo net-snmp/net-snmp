@@ -108,7 +108,7 @@
 
 /*   disk DISK MINSIZE            */
 #define DISKMIBNUM 6
-#if (HAVE_FSTAB_H || HAVE_STATVFS_H)
+#if (HAVE_FSTAB_H || HAVE_SYS_STATVFS_H)
 #define USEDISKMIB
 #endif
 
