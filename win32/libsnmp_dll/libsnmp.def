@@ -154,6 +154,10 @@ EXPORTS
 	setup_engineID
 	binary_to_hex
 	hex_to_binary2
+	snmp_res_init
+	snmp_res_lock
+	snmp_res_unlock
+	snmp_res_destroy_mutex
 	Mib			DATA
 	tree_head		DATA
 	snmp_errno		DATA

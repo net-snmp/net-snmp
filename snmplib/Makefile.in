@@ -30,14 +30,14 @@ CSRCS=	snmp_client.c mib.c parse.c snmp_api.c snmp.c 		\
 	system.c vacm.c int64.c read_config.c 			\
 	snmp_debug.c tools.c  snmp_logging.c			\
 	snmpv3.c snmpusm.c lcd_time.c keytools.c		\
-	scapi.c callback.c default_store.c snmp_alarm.c	
+	scapi.c callback.c default_store.c snmp_alarm.c	mt_support.c
 
 OBJS=	snmp_client.o mib.o parse.o snmp_api.o snmp.o 		\
 	snmp_auth.o asn1.o md5.o 				\
 	system.o vacm.o int64.o read_config.o 			\
 	snmp_debug.o tools.o  snmp_logging.o			\
 	snmpv3.o snmpusm.o lcd_time.o keytools.o		\
-	scapi.o callback.o default_store.o snmp_alarm.o	
+	scapi.o callback.o default_store.o snmp_alarm.o	mt_support.o
 
 CFLAGS	 = @CFLAGS@ @SHLIB_CFLAGS@
 CPPFLAGS = -I. -I.. -I$(srcdir) -I$(srcdir)/.. @CPPFLAGS@

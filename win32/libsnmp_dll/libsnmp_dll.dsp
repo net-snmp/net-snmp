@@ -127,6 +127,10 @@ SOURCE=..\..\snmplib\mib.c
 # End Source File
 # Begin Source File
 
+SOURCE=..\..\snmplib\mt_support.c
+# End Source File
+# Begin Source File
+
 SOURCE=..\..\snmplib\parse.c
 # End Source File
 # Begin Source File

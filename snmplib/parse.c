@@ -535,11 +535,20 @@ init_node_hash(struct node *nodes)
      }
 }
 
+static int errenousMibs = 0;
+
+int get_mib_parse_error_count(void)
+{
+    return errenousMibs;
+}
+
+
 static void
 print_error(const char *string,
 	    const char *token,
 	    int type)
 {
+    errenousMibs++;
     DEBUGMSGTL(("parse-mibs", "\n"));
     if (type == ENDOFFILE)
         snmp_log(LOG_ERR, "%s(EOF): At line %d in %s\n", string, Line,
