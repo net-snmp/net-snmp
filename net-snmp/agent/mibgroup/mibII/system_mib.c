@@ -147,6 +147,7 @@ int system_module_count    = 0;
 
 void init_system_mib(void)
 {
+  struct extensible extmp;
 
 #ifdef HAVE_UNAME
   struct utsname utsName;
@@ -156,7 +157,6 @@ void init_system_mib(void)
           utsName.release, utsName.version, utsName.machine);
 #else
 #if HAVE_EXECV
-  struct extensible extmp;
 
   /* set default values of system stuff */
   sprintf(extmp.command,"%s -a",UNAMEPROG);
