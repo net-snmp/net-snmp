@@ -92,6 +92,11 @@ extern int      callback_master_num;
 void
 init_subagent(void)
 {
+#ifndef SNMP_TRANSPORT_CALLBACK_DOMAIN
+    snmp_log(LOG_WARNING,"AgentX subagent has been disabled because "
+               "the callback transport is not available.\n");
+    return;
+#else
     if (agentx_callback_sess == NULL) {
         agentx_callback_sess = netsnmp_callback_open(callback_master_num,
                                                      handle_subagent_response,
@@ -99,6 +104,7 @@ init_subagent(void)
         DEBUGMSGTL(("agentx/subagent", "init_subagent sess %08x\n",
                     agentx_callback_sess));
     }
+#endif /* SNMP_TRANSPORT_CALLBACK_DOMAIN */
 }
 
 
@@ -504,6 +510,7 @@ handle_subagent_set_response(int op, netsnmp_session * session, int reqid,
             asi->mode == SNMP_MSG_INTERNAL_SET_COMMIT) {
             free_set_vars(retsess, pdu);
         }
+        snmp_free_varbind(pdu->variables);
         pdu->variables = NULL;  /* the variables were added by us */
     }
 
@@ -667,8 +674,8 @@ subagent_open_master_session(void)
     sess.timeout = SNMP_DEFAULT_TIMEOUT;
     sess.flags |= SNMP_FLAGS_STREAM_SOCKET;
     if (netsnmp_ds_get_string(NETSNMP_DS_APPLICATION_ID, NETSNMP_DS_AGENT_X_SOCKET)) {
-        sess.peername =
-            netsnmp_ds_get_string(NETSNMP_DS_APPLICATION_ID, NETSNMP_DS_AGENT_X_SOCKET);
+        sess.peername = strdup(
+            netsnmp_ds_get_string(NETSNMP_DS_APPLICATION_ID, NETSNMP_DS_AGENT_X_SOCKET));
     } else {
         sess.peername = strdup(AGENTX_SOCKET);
     }
@@ -696,8 +703,14 @@ subagent_open_master_session(void)
                      &sess);
             }
         }
+        if (sess.peername)
+            /* was memduped above and is no longer needed */
+            free(sess.peername);
         return -1;
     }
+    if (sess.peername)
+        /* was memduped above and is no longer needed */
+        free(sess.peername);
 
     /*
      * I don't know why 1 is success instead of the usual 0 = noerr, 
@@ -743,9 +756,16 @@ subagent_pre_init(void)
      * set up callbacks to initiate master agent pings for this session 
      */
     netsnmp_ds_register_config(ASN_INTEGER,
-                       netsnmp_ds_get_string(NETSNMP_DS_LIBRARY_ID, NETSNMP_DS_LIB_APPTYPE),
-                       "agentxPingInterval",
-                       NETSNMP_DS_APPLICATION_ID, NETSNMP_DS_AGENT_AGENTX_PING_INTERVAL);
+                               netsnmp_ds_get_string(NETSNMP_DS_LIBRARY_ID,
+                                                     NETSNMP_DS_LIB_APPTYPE),
+                               "agentxPingInterval",
+                               NETSNMP_DS_APPLICATION_ID,
+                               NETSNMP_DS_AGENT_AGENTX_PING_INTERVAL);
+
+    
+    /* ping and/or reconnect by default every 15 seconds */
+    netsnmp_ds_set_int(NETSNMP_DS_APPLICATION_ID,
+                       NETSNMP_DS_AGENT_AGENTX_PING_INTERVAL, 15);
 
 
     if (netsnmp_ds_get_boolean(NETSNMP_DS_APPLICATION_ID, NETSNMP_DS_AGENT_ROLE) != SUB_AGENT) {
@@ -754,8 +774,8 @@ subagent_pre_init(void)
 
     /*
      * if a valid ping interval has been defined, call agentx_reopen_session
-     * * to try to connect to master or setup a ping alarm if it couldn't
-     * * succeed 
+     * to try to connect to master or setup a ping alarm if it couldn't
+     * succeed
      */
     if (netsnmp_ds_get_int(NETSNMP_DS_APPLICATION_ID, NETSNMP_DS_AGENT_AGENTX_PING_INTERVAL) > 0)
         agentx_reopen_session(0, NULL);
@@ -823,7 +843,8 @@ subagent_register_ping_alarm(int majorID, int minorID,
 
     netsnmp_session *ss = (netsnmp_session *) clientarg;
     int             ping_interval =
-        netsnmp_ds_get_int(NETSNMP_DS_APPLICATION_ID, NETSNMP_DS_AGENT_AGENTX_PING_INTERVAL);
+        netsnmp_ds_get_int(NETSNMP_DS_APPLICATION_ID,
+                           NETSNMP_DS_AGENT_AGENTX_PING_INTERVAL);
 
     if (!ping_interval)         /* don't do anything if not setup properly */
         return 0;
