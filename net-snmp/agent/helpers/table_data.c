@@ -260,7 +260,7 @@ netsnmp_register_table_data(netsnmp_handler_registration *reginfo,
                             netsnmp_table_registration_info *table_info)
 {
     netsnmp_inject_handler(reginfo, netsnmp_get_table_data_handler(table));
-    return netsnmp_register_sparse_table(reginfo, table_info);
+    return netsnmp_register_table(reginfo, table_info);
 }
 
 /** registers a handler as a read-only data table
