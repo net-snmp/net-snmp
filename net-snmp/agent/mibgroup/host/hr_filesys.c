@@ -693,7 +693,7 @@ when_dumped(char *filesys, int level, size_t * length)
 char           *
 cook_device(char *dev)
 {
-    static char     cooked_dev[MAXPATHLEN];
+    static char     cooked_dev[SNMP_MAXPATH];
 
     if (!strncmp(dev, RAW_DEVICE_PREFIX, strlen(RAW_DEVICE_PREFIX))) {
         strcpy(cooked_dev, COOKED_DEVICE_PREFIX);
