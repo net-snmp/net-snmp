@@ -98,6 +98,10 @@
 
 @BOTTOM@
 
+/* define if you are using linux and /proc/net/dev has the compressed
+   field, which exists in linux kernels 2.2 and greater. */
+#undef PROC_NET_DEV_HAS_COMPRESSED
+
 /* define rtentry to ortentry on SYSV machines (alphas) */
 #undef RTENTRY
 
