@@ -10,6 +10,7 @@
 #include "tools.h"
 #include "snmp_agent.h"
 #include "old_api.h"
+#include "agent_callbacks.h"
 
 #if HAVE_DMALLOC_H
 #include <dmalloc.h>
@@ -94,20 +95,117 @@ register_old_api(const char *moduleName,
 
         /* register ourselves in the mib tree */
         if (register_handler(reginfo) != MIB_REGISTERED_OK) {
-	  /*  There SHOULD be a call snmp_handler_free() that I can
-	      call to do these first two for me.  */
-	  SNMP_FREE(reginfo->handler->handler_name);
-	  SNMP_FREE(reginfo->handler);
-
-	  SNMP_FREE(reginfo->rootoid);
-	  SNMP_FREE(reginfo->contextName);
-	  SNMP_FREE(reginfo->handlerName);
-	  SNMP_FREE(reginfo);
-	  SNMP_FREE(vp);
+	    snmp_handler_registration_free(reginfo);
+	    SNMP_FREE(vp);
 	}
     }
     SNMP_FREE(old_info);
     return SNMPERR_SUCCESS;
+}
+
+int 
+register_mib_table_row(const char *moduleName,
+                       struct variable *var,
+                       size_t varsize,
+                       size_t numvars,
+                       oid *mibloc,
+                       size_t mibloclen,
+                       int priority,
+                       int var_subid,
+                       struct snmp_session *ss,
+                       const char *context,
+                       int timeout,
+                       int flags)
+{
+    int i = 0, rc = 0;
+    oid ubound = 0;
+
+    for (i = 0; i < numvars; i++) {
+	struct variable *vr = (struct variable *)((char *)var+(i*varsize));
+	handler_registration *r = SNMP_MALLOC_TYPEDEF(handler_registration);
+	
+	if (r == NULL) {
+	    /*  Unregister whatever we have registered so far, and
+		return an error.  */
+	    rc = MIB_REGISTRATION_FAILED;
+	    break;
+	}
+	memset(r, 0, sizeof(handler_registration));
+	
+        r->handler = get_old_api_handler();
+        r->handlerName = strdup(moduleName);
+
+	if (r->handlerName == NULL) {
+	    snmp_handler_registration_free(r);
+	    break;
+	}
+
+        r->rootoid_len = mibloclen;
+        r->rootoid = (oid *)malloc(r->rootoid_len * sizeof(oid));
+
+        if (r->rootoid == NULL) {
+	    snmp_handler_registration_free(r);
+	    rc = MIB_REGISTRATION_FAILED;
+	    break;
+	}
+        memcpy(r->rootoid, mibloc, mibloclen*sizeof(oid));
+	memcpy((u_char *)(r->rootoid + (var_subid - 1)), vr->name, 
+	       vr->namelen * sizeof(oid));
+	DEBUGMSGTL(("register_mib_table_row", "rootoid "));
+	DEBUGMSGOID(("register_mib_table_row", r->rootoid, r->rootoid_len));
+	DEBUGMSG(("register_mib_table_row", "\n"));
+        r->handler->myvoid = (void *)malloc(varsize);
+	
+	if (r->handler->myvoid == NULL) {
+	    snmp_handler_registration_free(r);
+	    rc = MIB_REGISTRATION_FAILED;
+	    break;
+	}
+	memcpy((char *)r->handler->myvoid, vr, varsize);
+
+        r->contextName = (context) ? strdup(context) : NULL;
+
+	if (context != NULL && r->contextName == NULL) {
+	    snmp_handler_registration_free(r);
+	    rc = MIB_REGISTRATION_FAILED;
+	    break;
+	}
+
+        r->priority = priority;
+        r->range_subid = 0; // var_subid;
+        r->range_ubound = 0; // range_ubound;
+        r->timeout = timeout;
+        r->modes = HANDLER_CAN_RWRITE;
+
+        /*  Register this column and row  */
+        if ((rc = register_handler_nocallback(r)) != MIB_REGISTERED_OK) {
+	    DEBUGMSGTL(("register_mib_table_row", "register failed %d\n", rc));
+	    snmp_handler_registration_free(r);
+	    break;
+	}
+
+	if (vr->namelen > 0) {
+	    if (vr->name[vr->namelen - 1] > ubound) {
+		ubound = vr->name[vr->namelen - 1];
+	    }
+	}
+    }
+
+    if (rc == MIB_REGISTERED_OK) {
+	struct register_parameters reg_parms;
+
+	reg_parms.name = mibloc;
+	reg_parms.namelen = mibloclen;
+	reg_parms.priority = priority;
+	reg_parms.flags = (u_char)flags;
+	reg_parms.range_subid  = var_subid;
+	reg_parms.range_ubound = ubound;
+	reg_parms.timeout = timeout;
+	rc = snmp_call_callbacks(SNMP_CALLBACK_APPLICATION,
+				 SNMPD_CALLBACK_REGISTER_OID, &reg_parms);
+    }
+
+    return rc;
 }
 
 /** implements the old_api handler */
