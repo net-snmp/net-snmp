@@ -82,8 +82,9 @@ SOFTWARE.
 
 static struct tree * _sprint_objid(char *buf, oid *objid, size_t objidlen);
 static char *uptimeString (u_long, char *);
-static struct tree *_get_symbol(oid *objid, size_t objidlen, struct tree *subtree, char *buf, struct index_list *in_dices, char **end_of_known);
-
+static struct tree *_get_symbol(oid *objid, size_t objidlen, struct tree *subtree,
+    			char *buf, struct index_list *in_dices, char **end_of_known);
+  
 static void print_tree_node (FILE *, struct tree *, int);
 
 /* helper functions for get_module_node */
@@ -2326,9 +2327,17 @@ _add_strings_to_oid(struct tree *tp, char *cp,
 		doingquote = *cp++;
 		/* insert length if requested */
 		if (!in_dices->isimplied && len == -1) {
+		    if (doingquote == '\'') {
+		        snmp_set_detail("'-quote is for fixed length strings");
+			return 0;
+		    }
 		    if (*objidlen >= maxlen) goto bad_id;
 		    len_index = *objidlen;
 		    (*objidlen)++;
+		}
+		else if (doingquote == '"') {
+		    snmp_set_detail("\"-quote is for variable length strings");
+		    return 0;
 		}
 
 		while(*cp && *cp != doingquote) {
@@ -2426,7 +2435,7 @@ bad_id:
     {   char buf[256];
 	if (in_dices) sprintf(buf, "Index out of range: %s (%s)",
 				fcp, in_dices->ilabel);
-	else if (tp) sprintf(buf, "Node not found: %s -> %s", tp->label, fcp);
+	else if (tp) sprintf(buf, "Sub-id not found: %s -> %s", tp->label, fcp);
 	else sprintf(buf, "%s", fcp);
 
 	snmp_set_detail(buf);
