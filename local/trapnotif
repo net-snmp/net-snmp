@@ -126,7 +126,7 @@ MIBLOC=`echo $MIBERRFLAG | sed 's/\.[^.]*$//'`
 ERRTABLENO="$3"
 MIBPROC=$MIBLOC.2.$ERRTABLENO
 MIBERRMSG=$MIBLOC.101.$ERRTABLENO
-PROC=`snmpget -t 5 -r 3 $FULLHOST $MIBPROC | sed 's/^.*: *//'`
+PROC=`snmpget -t 30 -r 3 $FULLHOST $MIBPROC | sed 's/^.*: *//'`
 if [ $PROC = "" ]; then
   PROC="traperr"
 fi
@@ -137,7 +137,7 @@ if [ $TYPE = "err" ];   then
   
   # The problem is an error
   
-  ERROR=`snmpget -t 5 -r 3 $FULLHOST $MIBERRMSG | sed 's/^.*: *//'`
+  ERROR=`snmpget -t 30 -r 3 $FULLHOST $MIBERRMSG | sed 's/^.*: *//'`
   if [ "$ERROR" = "" ]; then
     ERROR="Error MSG disappeared."
     total_log
