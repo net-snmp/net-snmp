@@ -19,7 +19,7 @@ SHELL = /bin/sh
 NAME = net-snmp
 
 # Define the default RPM release number.
-VERSION = 5.0.6
+VERSION = 5.0.8
 RELEASE = 1
 
 VERSION_TAG=`echo Ext-$(VERSION) | sed 's/\./-/g;'`
@@ -40,7 +40,7 @@ RPM_TREE := \
     $(RPM_BASE)/SPECS \
     $(RPM_BASE)/SRPMS
 
-.PHONY:	all clean gzip_tar rpm_files binary_rpm source_rpm
+.PHONY:	all clean rpm_files binary_rpm source_rpm
 
 all:	rpm_files
 
@@ -61,7 +61,7 @@ GZIP_TAR := $(RPM_BASE)/SOURCES/$(PKG_VER).tar.gz
 
 gzip_tar:	$(GZIP_TAR)
 
-$(GZIP_TAR):	$(RPM_BASE)/SOURCES
+$(GZIP_TAR):
 	@echo "Creating a compressed archive of the package's source files..."
 	(cd $(RPM_BASE)/SOURCES; \
 	cvs -d$(CVSROOT) login; \
