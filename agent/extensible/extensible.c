@@ -36,6 +36,15 @@ unsigned char *var_wes_proc(vp, name, length, exact, var_len, write_method)
   char errmsg[300];
 
 
+  for(i=0,rtest=0; i < *length-1; i++) {
+    if (name[i] != vp->name[i]) {
+      rtest = 1;
+    }
+  }
+  if (rtest) {
+    *var_len = NULL;
+    return NULL;
+  }
   if (*length == 8) {
     bcopy((char *) vp->name, (char *)newname,
           (int)vp->namelen * sizeof (oid));
@@ -48,12 +57,8 @@ unsigned char *var_wes_proc(vp, name, length, exact, var_len, write_method)
   }
   else {
     bcopy((char *) vp->name, (char *)newname, (int)vp->namelen * sizeof (oid));
-    for(i=0,rtest=0; i < *length-1; i++) {
-      if (name[i] != vp->name[i]) {
-        rtest = 1;
-      }
-    }
-    if (rtest || name[8] >= numprocs) {
+    if (name[8] >= numprocs) {
+      *var_len = NULL;
       return NULL;
     }
 
@@ -139,6 +144,15 @@ unsigned char *var_wes_shell(vp, name, length, exact, var_len, write_method)
   long long_ret;
   char errmsg[300];
 
+  for(i=0,rtest=0; i < *length-1; i++) {
+    if (name[i] != vp->name[i]) {
+      rtest = 1;
+    }
+  }
+  if (rtest) {
+    *var_len = NULL;
+    return NULL;
+  }
   if (*length == 8) {
     bcopy((char *) vp->name, (char *)newname,
           (int)vp->namelen * sizeof (oid));
@@ -151,18 +165,12 @@ unsigned char *var_wes_shell(vp, name, length, exact, var_len, write_method)
   }
   else {
     bcopy((char *) vp->name, (char *)newname, (int)vp->namelen * sizeof (oid));
-    for(i=0,rtest=0; i < 7; i++) {
-/*      printf(".%d",name[i]); */
-      if (name[i] != vp->name[i]) {
-        rtest = 1;
-      }
-    }
 /*    printf("\nrtest:  %d, name[8]:  %d, num:  %d, exact:  %d\n",rtest,name[8],numextens,exact); */
     if (exact)
       newname[8] = name[8];
     else
       newname[8] = name[8] + 1;
-    if (rtest || newname[8] > numextens)
+    if (newname[8] > numextens)
       return NULL;
 
   }  
