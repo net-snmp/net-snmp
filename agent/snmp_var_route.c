@@ -394,7 +394,7 @@ init_routes(){
 
 static int qsort_compare();
 
-#if (!defined(HAVE_SYS_MBUF_H) || defined(RTENTRY_4_4)) && !defined(solaris2)
+#if defined(RTENTRY_4_4) || defined(RTENTRY_RT_NEXT)
 
 #ifdef RTENTRY_4_4
 load_rtentries(pt)
