@@ -487,17 +487,18 @@ parse_config_doNotLogTraps(const char *token, char *cptr)
 }
 
 void
-parse_config_pidFile(const char *token, char *cptr)
-{
-  free_config_pidFile();
-  pid_file = strdup (cptr);
-}
-void
 free_config_pidFile(void)
 {
   if (pid_file)
     free(pid_file);
   pid_file = NULL;
+}
+
+void
+parse_config_pidFile(const char *token, char *cptr)
+{
+  free_config_pidFile();
+  pid_file = strdup (cptr);
 }
 
 void
@@ -532,6 +533,7 @@ parse_config_ignoreAuthFailure(const char *token, char *cptr)
     dropauth = 1;
 }
 
+void
 parse_config_outputOption(const char *token, char *cptr)
 {
   char *cp;
@@ -825,7 +827,7 @@ main(int argc, char *argv[])
                     "Warning: -u option is deprecated; use -p instead\n");
         case 'p':
             if (optarg != NULL) {
-                pid_file = parse_config_pidFile(NULL, optarg);
+                parse_config_pidFile(NULL, optarg);
             } else {
                 usage();
                 exit(1);
