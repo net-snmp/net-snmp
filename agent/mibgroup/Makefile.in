@@ -74,7 +74,7 @@ host/hr_device.lo: ../snmp_vars.h
 host/hr_device.lo: ../var_struct.h
 host/hr_disk.lo: ../agent_registry.h host/hr_disk.h host_res.h ../snmp_vars.h
 host/hr_disk.lo: ../var_struct.h
-host/hr_filesys.lo: ../agent_registry.h host/hr_filesys.h host/hr_utils.h
+host/hr_filesys.lo: ../agent_registry.h host/hr_filesys.h 
 host/hr_filesys.lo: host_res.h ../snmp_vars.h 
 host/hr_filesys.lo: ../var_struct.h
 host/hr_network.lo: ../agent_registry.h host/hr_network.h host_res.h
@@ -95,18 +95,16 @@ host/hr_proc.lo: ../var_struct.h
 host/hr_storage.lo: ../agent_registry.h ../auto_nlist.h host/hr_filesys.h
 host/hr_storage.lo: host/hr_storage.h host_res.h ../snmp_vars.h
 host/hr_storage.lo: ../var_struct.h
-host/hr_swinst.lo: ../agent_registry.h host/hr_swinst.h host/hr_utils.h
+host/hr_swinst.lo: ../agent_registry.h host/hr_swinst.h 
 host/hr_swinst.lo: host_res.h ../snmp_vars.h 
 host/hr_swinst.lo: ../var_struct.h
 host/hr_swrun.lo: ../agent_registry.h ../auto_nlist.h host/hr_swrun.h
 host/hr_swrun.lo: host_res.h ../kernel.h ../snmp_vars.h 
 host/hr_swrun.lo: ../var_struct.h
 host/hr_system.lo: ../agent_read_config.h ../agent_registry.h ../agent_trap.h
-host/hr_system.lo: ../auto_nlist.h host.h host/hr_system.h host/hr_utils.h
+host/hr_system.lo: ../auto_nlist.h host.h host/hr_system.h 
 host/hr_system.lo: host_res.h mibincl.h ../snmp_vars.h 
 host/hr_system.lo: ../var_struct.h
-host/hr_utils.lo: ../agent_registry.h host/hr_utils.h host_res.h ../snmp_vars.h
-host/hr_utils.lo: ../var_struct.h
 mibII/at.lo: ../agent_read_config.h ../agent_registry.h ../agent_trap.h
 mibII/at.lo: ../auto_nlist.h mibII/at.h mibII/interfaces.h mibincl.h
 mibII/at.lo: ../snmp_vars.h  

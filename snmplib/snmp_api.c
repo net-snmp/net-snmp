@@ -4506,10 +4506,25 @@ _sess_read(void *sessp, fd_set *fdset)
 	isp->packet_len = 0;
       }
     } else {
-        length = recvfrom(isp->sd, (char *)packet, PACKET_LENGTH, 0,
-		      (struct sockaddr *)&from, &fromlength);
-        if (from.sa_family == AF_UNSPEC)
-            from.sa_family = AF_INET; /* bad bad bad OS, no bone! */
+      /*  We have saved a partial packet from last time.  Extend that, if
+	  necessary, and receive new data after the old data.  */
+      u_char *newbuf;
+
+      if (isp->packet_size < isp->packet_len + rxbuf_len) {
+	newbuf = (u_char *)realloc(isp->packet, isp->packet_len + rxbuf_len);
+	if (newbuf == NULL) {
+	  DEBUGMSGTL(("sess_read","can't malloc %d more for rxbuf (%d tot)\n",
+		      rxbuf_len, isp->packet_len + rxbuf_len));
+	  return 0;
+	} else {
+	  isp->packet = newbuf;
+	  isp->packet_size = isp->packet_len + rxbuf_len;
+	  rxbuf = isp->packet + isp->packet_len;
+	}
+      } else {
+	rxbuf = isp->packet + isp->packet_len;
+	rxbuf_len = isp->packet_size - isp->packet_len;
+      }
     }
   } else {
     if ((rxbuf = (u_char *)malloc(rxbuf_len)) == NULL) {

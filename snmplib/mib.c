@@ -530,198 +530,6 @@ sprint_realloc_octet_string(u_char **buf, size_t *buf_len, size_t *out_len,
 
   if (var->type != ASN_OCTET_STR) {
     const char str[] = "Wrong Type (should be OCTET STRING): ";
-    if (snmp_strcat(buf, buf_len, out_len, allow_realloc, str)) {
-      return sprint_realloc_by_type(buf, buf_len, out_len, allow_realloc,
-				    var, NULL, NULL, NULL);
-    } else {
-      return 0;
-    }
-  }
-
-  if (hint) {
-    int repeat, width = 1;
-    long value;
-    char code = 'd', separ = 0, term = 0, ch, intbuf[16];
-    u_char *ecp;
-
-    cp = var->val.string;
-    ecp = cp + var->val_len;
-
-    while (cp < ecp) {
-      repeat = 1;
-      if (*hint) {
-	if (*hint == '*') {
-	  repeat = *cp++;
-	  hint++;
-	}
-	width = 0;
-	while ('0' <= *hint && *hint <= '9')
-	  width = (width * 10) + (*hint++ - '0');
-	code = *hint++;
-	if ((ch = *hint) && ch != '*' && (ch < '0' || ch > '9')
-	    && (width != 0 || (ch != 'x' && ch != 'd' && ch != 'o')))
-	  separ = *hint++;
-	else separ = 0;
-	if ((ch = *hint) && ch != '*' && (ch < '0' || ch > '9')
-	    && (width != 0 || (ch != 'x' && ch != 'd' && ch != 'o')))
-	  term = *hint++;
-	else term = 0;
-	if (width == 0) width = 1;
-      }
-
-      while (repeat && cp < ecp) {
-	value = 0;
-	if (code != 'a') {
-	  for (x = 0; x < width; x++) {
-	    value = value * 256 + *cp++;
-	  }
-	}
-	switch (code) {
-	case 'x':
-	  sprintf(intbuf, "%lx", value);
-	  if (!snmp_strcat(buf, buf_len, out_len, allow_realloc, intbuf)) {
-	    return 0;
-	  }
-	  break;
-	case 'd':
-	  sprintf (intbuf, "%ld", value);
-	  if (!snmp_strcat(buf, buf_len, out_len, allow_realloc, intbuf)) {
-	    return 0;
-	  }
-	  break;
-	case 'o':
-	  sprintf (intbuf, "%lo", value);
-	  if (!snmp_strcat(buf, buf_len, out_len, allow_realloc, intbuf)) {
-	    return 0;
-	  }
-	  break;
-	case 'a':
-	  while ((*out_len + width + 1) >= *buf_len) {
-	    if (!(allow_realloc && snmp_realloc(buf, buf_len))) {
-	      return 0;
-	    }
-	  }
-	  for (x = 0; x < width && cp < ecp; x++) {
-	    *(*buf + *out_len) = *cp++;
-	    (*out_len)++;
-	  }
-	  *(*buf + *out_len) = '\0';
-	  break;
-	default:
-	  *out_len = saved_out_len;
-	  if (snmp_strcat(buf, buf_len, out_len, allow_realloc, 
-			  "(Bad hint ignored: ") &&
-	      snmp_strcat(buf, buf_len, out_len, allow_realloc, 
-			  saved_hint) &&
-	      snmp_strcat(buf, buf_len, out_len, allow_realloc, 
-			  ") ")) {
-	    return sprint_realloc_octet_string(buf, buf_len, out_len,
-					       allow_realloc, var,
-					       enums, NULL, NULL);
-	  } else {
-	    return 0;
-	  }
-	}
-
-	if (cp < ecp && separ) {
-	  while ((*out_len + 1) >= *buf_len) {
-	    if (!(allow_realloc && snmp_realloc(buf, buf_len))) {
-	      return 0;
-	    }
-	  }
-	  *(*buf + *out_len) = separ;
-	  (*out_len)++;
-	  *(*buf + *out_len) = '\0';
-	}
-	repeat--;
-      }
-
-      if (term && cp < ecp) {
-	while ((*out_len + 1) >= *buf_len) {
-	  if (!(allow_realloc && snmp_realloc(buf, buf_len))) {
-	    return 0;
-	  }
-	}
-	*(*buf + *out_len) = term;
-	(*out_len)++;
-	*(*buf + *out_len) = '\0';
-      }
-    }
-
-    if (units) {
-      return (snmp_strcat(buf, buf_len, out_len, allow_realloc, " ") &&
-	      snmp_strcat(buf, buf_len, out_len, allow_realloc, units));
-    }
-    return 1;
-  }
-
-  hex = 0;
-  for(cp = var->val.string, x = 0; x < (int)var->val_len; x++, cp++) {
-    if (!(isprint(*cp) || isspace(*cp))) {
-      hex = 1;
-    }
-  }
-
-  if (var->val_len == 0) {
-    return snmp_strcat(buf, buf_len, out_len, allow_realloc, "\"\"");
-  }
-
-  if (hex) {
-    if (ds_get_boolean(DS_LIBRARY_ID, DS_LIB_QUICK_PRINT)) {
-      if (!snmp_strcat(buf, buf_len, out_len, allow_realloc, "\"")) {
-	return 0;
-      }
-    } else {
-      if (!snmp_strcat(buf, buf_len, out_len, allow_realloc, " Hex: ")) {
-	return 0;
-      }
-    }
-
-    if (!sprint_realloc_hexstring(buf, buf_len, out_len, allow_realloc,
-				  var->val.string, var->val_len)) {
-      return 0;
-    }
-
-    if (ds_get_boolean(DS_LIBRARY_ID, DS_LIB_QUICK_PRINT)) {
-      if (!snmp_strcat(buf, buf_len, out_len, allow_realloc, "\"")) {
-	return 0;
-      }
-    }
-  } else {
-    if (!snmp_strcat(buf, buf_len, out_len, allow_realloc, "\"")) {
-      return 0;
-    }
-    if (!sprint_realloc_asciistring(buf, buf_len, out_len, allow_realloc,
-				     var->val.string, var->val_len)) {
-      return 0;
-    }
-    if (!snmp_strcat(buf, buf_len, out_len, allow_realloc, "\"")) {
-      return 0;
-    }
-  } 
-
-  if (units) {
-    return (snmp_strcat(buf, buf_len, out_len, allow_realloc, " ") &&
-	    snmp_strcat(buf, buf_len, out_len, allow_realloc, units));
-  }
-  return 1;
-}
-
-int
-sprint_realloc_octet_string(u_char **buf, size_t *buf_len, size_t *out_len,
-			    int allow_realloc,
-			    struct variable_list *var,
-			    struct enum_list *enums,
-			    const char *hint,
-			    const char *units)
-{
-  size_t saved_out_len = *out_len;
-  const char *saved_hint = hint;
-  int hex = 0, x = 0;
-  u_char *cp;
-
-  if (var->type != ASN_OCTET_STR) {
-    const char str[] = "Wrong Type (should be OCTET STRING): ";
     if (snmp_strcat(buf, buf_len, out_len, allow_realloc, (const u_char*)str)) {
       return sprint_realloc_by_type(buf, buf_len, out_len, allow_realloc,
 				    var, NULL, NULL, NULL);
@@ -1492,6 +1300,69 @@ sprint_integer(char *buf,
 	sprintf(buf, "%s(%ld)", enum_string, *var->val.integer);
     buf += strlen (buf);
     if (units) sprintf (buf, " %s", units);
+}
+
+int
+sprint_realloc_integer(u_char **buf, size_t *buf_len, size_t *out_len,
+		       int allow_realloc,
+		       struct variable_list *var,
+		       struct enum_list *enums,
+		       const char *hint,
+		       const char *units)
+{
+  char *enum_string = NULL;
+
+  if (var->type != ASN_INTEGER) {
+    u_char str[] = "Wrong Type (should be INTEGER): ";
+    if (snmp_strcat(buf, buf_len, out_len, allow_realloc, str)) {
+      return sprint_realloc_by_type(buf, buf_len, out_len, allow_realloc,
+				    var, NULL, NULL, NULL);
+    } else {
+      return 0;
+    }
+  }
+  for (; enums; enums = enums->next) {
+    if (enums->value == *var->val.integer) {
+      enum_string = enums->label;
+      break;
+    }
+  }
+
+  if (enum_string == NULL ||
+      ds_get_boolean(DS_LIBRARY_ID, DS_LIB_PRINT_NUMERIC_ENUM)) {
+    if (hint) {
+      if (!(sprint_realloc_hinted_integer(buf, buf_len, out_len,
+					 allow_realloc, *var->val.integer,
+					  'd', hint, units))) {
+	return 0;
+      }
+    } else {
+      char str[16];
+      sprintf(str, "%ld", *var->val.integer);
+      if (!snmp_strcat(buf, buf_len, out_len, allow_realloc, (const u_char*)str)) {
+	return 0;
+      }
+    }
+  } else if (ds_get_boolean(DS_LIBRARY_ID, DS_LIB_QUICK_PRINT)) {
+    if (!snmp_strcat(buf, buf_len, out_len, allow_realloc, (const u_char*)enum_string)) {
+      return 0;
+    }
+  } else {
+    char str[16];
+    sprintf(str, "(%ld)", *var->val.integer);
+    if (!snmp_strcat(buf, buf_len, out_len, allow_realloc, (const u_char*)enum_string)) {
+      return 0;
+    }
+    if (!snmp_strcat(buf, buf_len, out_len, allow_realloc, (const u_char*)str)) {
+      return 0;
+    }
+  }
+  
+  if (units) {
+    return (snmp_strcat(buf, buf_len, out_len, allow_realloc, (const u_char*)" ") &&
+	    snmp_strcat(buf, buf_len, out_len, allow_realloc, (const u_char*)units));
+  }
+  return 1;
 }
 
 void
