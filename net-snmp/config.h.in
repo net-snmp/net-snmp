@@ -414,6 +414,9 @@
 /* Define if you have the <sys/sysctl.h> header file.  */
 #undef HAVE_SYS_SYSCTL_H
 
+/* Define if you have the <sys/sysmp.h> header file.  */
+#undef HAVE_SYS_SYSMP_H
+
 /* Define if you have the <sys/tcpipstats.h> header file.  */
 #undef HAVE_SYS_TCPIPSTATS_H
 
