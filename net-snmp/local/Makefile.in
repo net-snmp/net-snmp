@@ -17,23 +17,23 @@ clean:
 
 snmpcheck.made: snmpcheck
 	touch snmpcheck.made
-	$(PERLPROG) -i -p -e 's@^#!.*/perl@#!$(PERLPROG)@' $<
+	$(PERLPROG) -i -p -e 's@^#!.*/perl@#!$(PERLPROG)@' snmpcheck
 
 tkmib.made: tkmib
-	touch $@
-	$(PERLPROG) -i -p -e 's@^#!.*/perl@#!$(PERLPROG)@' $<
+	touch tkmib.made
+	$(PERLPROG) -i -p -e 's@^#!.*/perl@#!$(PERLPROG)@' tkmib
 
 mib2c.made: mib2c
-	touch $@
-	$(PERLPROG) -i -p -e 's@^#!.*/perl@#!$(PERLPROG)@' $<
+	touch mib2c.made
+	$(PERLPROG) -i -p -e 's@^#!.*/perl@#!$(PERLPROG)@' mib2c
 
 ipf-mod.pl.made: ipf-mod.pl
-	touch $@
-	$(PERLPROG) -i -p -e 's@^#!.*/perl@#!$(PERLPROG)@' $<
+	touch ipf-mod.pl.made
+	$(PERLPROG) -i -p -e 's@^#!.*/perl@#!$(PERLPROG)@' ipf-mod.pl
 
 fixproc.made: fixproc
-	touch $@
-	$(PERLPROG) -i -p -e 's@^#!.*/perl@#!$(PERLPROG)@' $<
+	touch fixproc.made
+	$(PERLPROG) -i -p -e 's@^#!.*/perl@#!$(PERLPROG)@' fixproc
 
 install:
 	@if test "x$(PERLPROG)" != "x"; then \
