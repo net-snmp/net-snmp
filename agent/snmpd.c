@@ -459,6 +459,7 @@ char *prog;
   printf("-c CONFFILE\tRead CONFFILE as a configuration file.\n");
   printf("-C\t\tDon't read the default configuration files.\n");
   printf("-L\t\tPrint warnings/messages to stdout/err rather than a logfile\n");
+  printf("-L\t\tAppend to the logfile rather than truncating it.\n");
   printf("-l LOGFILE\tPrint warnings/messages to LOGFILE\n");
   printf("\t\t(By default LOGFILE=%s)\n",
 #ifdef LOGFILE
