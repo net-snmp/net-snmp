@@ -2,13 +2,13 @@
  * Contributed by Ragnar Kjørstad, ucd@ragnark.vestdata.no 1999-06-26 */
 
 #include "config.h"
-#if HAVE_SYSLOG_H
-#include <syslog.h>
-#endif
 #include <stdio.h>
 #include <sys/types.h>
 #include <sys/stat.h>
 #include <fcntl.h>
+#if HAVE_SYSLOG_H
+#include <syslog.h>
+#endif
 
 #ifdef STDC_HEADERS
 #include <stdarg.h>
@@ -16,6 +16,8 @@
 #include <varargs.h>
 #endif
 
+#include "asn1.h"
+#include "snmp_impl.h"
 #include "snmp_logging.h"
 
 int do_syslogging=0;
@@ -90,12 +92,11 @@ vlog_syslog (int priority, const char *format, va_list ap)
 {
   if (do_syslogging) {
 #ifndef WIN32
-    char xbuf[256];
-#ifdef hpux9
-    vsprintf(xbuf, format, ap);
-#else
+    char xbuf[SPRINT_MAX_LEN];
+/* HP-UX 9 and Solaris 2.5.1 do not have this *
     vsnprintf(xbuf, sizeof(xbuf), format, ap);
-#endif
+*/
+    vsprintf(xbuf, format, ap);
     syslog(priority, xbuf);
 #endif
   }
