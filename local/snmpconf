@@ -21,7 +21,10 @@ getopts("dhfc:", \%opts);
 
 # display help
 if ($opts{'h'}) {
-    print "$0 [-h] [-d] [-f] [-c config_directory] [FILETOCREATE]\n";
+    print "$0 [-h] [-d] [-f] [-c config_directory] [FILETOCREATE...]\n";
+    print "  -c config_directory  use alternate configuration directory.\n";
+    print "  -f                   overwrite existing files without prompting\n";
+    print "  -d                   turn on debugging output\n";
     exit;
 }
 
@@ -123,14 +126,24 @@ sub do_section {
     my $confsect = shift;
     my @lines;
     while(1) {
+	print "\nSection: $confsect->{'title'}[0]\n";
+	print "Description:\n";
+	print "  ", join("\n  ",@{$confsect->{'description'}}),"\n";
 	my $line =
 	    display_menu(-head => "Select from:\n",
-			 -otheranswers => ['finished','f'],
+			 -otheranswers => ['finished','f','list','l'],
 			 -question => 'Select section',
 			 -descriptions => [map { $confsect->{$_}{info}[0] } 
 					   keys(%{$confsect->{'thetokens'}})],
 			 keys(%{$confsect->{'thetokens'}}));
 	return @lines if ($line eq "finished" || $line eq "f");
+	if ($line eq "list" || $line eq "l") {
+	    print "Lines defined for section \"$confsect->{title}[0]\" so far:\n";
+	    foreach my $i (keys(%{$confsect->{'thetokens'}})) {
+		print "  ",join("\n  ",@{$confsect->{$i}{'results'}}),"\n";
+	    }
+	    next;
+	}
 	do_line($line, $confsect->{$line});
     }
     return;
@@ -141,6 +154,8 @@ sub do_line {
     my $confline = shift;
     my (@answers, $counter, $i);
 #    debug(Dumper($confline));
+    print "\nConfiguring: $token\n";
+    print "Description:\n  ",join("\n    ",@{$confline->{'info'}}),"\n\n";
     for($i=0; $i <= $#{$confline->{'question'}}; $i++) {
 	if (defined($confline->{'question'}[$i]) &&
 	    $confline->{'question'}[$i] ne "") {
@@ -169,7 +184,7 @@ sub do_line {
 	    debug("eval results: $finished\n");
 	}
 	$finished = $token . " " . $finished;
-	debug("line: $finished\n");
+	print "\nFinished Output: $finished\n";
 	push @{$confline->{'results'}},$finished;
     }
 }
@@ -289,13 +304,13 @@ sub output_files {
 	    foreach my $token (keys(%{$sect->{'thetokens'}})) {
 		if ($#{$sect->{$token}{'results'}} >= 0) {
 		    if ($secthelp++ == 0) {
-			print O "#" x 75,"\n# SECTION:",
+			print O "#" x 75,"\n# SECTION: ",
 			join("\n#          ", @{$sect->{title}}), "\n#\n";
 			print O "#   ", join("\n#   ",@{$sect->{description}}),
 			"\n";
 		    }
-		    print O "\n# $token: ",join("\n#   ",@{$sect->{$token}{info}}),
-		    "\n";
+		    print O "\n# $token: ",
+		    join("\n#   ",@{$sect->{$token}{info}}), "\n\n";
 		    foreach my $result (@{$sect->{$token}{'results'}}) {
 			print O "$result\n";
 		    }
