@@ -11,6 +11,9 @@ struct header_complex_index {
    struct header_complex_index *prev;
 };
 
+/* Function pointer called by the header_comlpex functions when a client pointer (void * to us) needs to be cleaned. */
+
+typedef void (HeaderComplexCleaner)(void *);
 void *header_complex(struct header_complex_index *datalist, struct variable *vp,
                      oid *name, size_t *length, int exact, size_t *var_len,
                      WriteMethod **write_method);
@@ -23,6 +26,13 @@ void header_complex_generate_oid(oid *name, size_t *length, oid *prefix,
                                  struct header_complex_index *data);
 int header_complex_var_compare(struct variable_list *varl,
                                struct variable_list *varr);
+void header_complex_free_all(struct header_complex_index *thestuff,
+                             HeaderComplexCleaner *cleaner);
+void header_complex_free_entry(struct header_complex_index *theentry,
+                               HeaderComplexCleaner *cleaner);
+void *header_complex_extract_entry(struct header_complex_index **thetop,
+                                   struct header_complex_index *thespot);
+
 struct header_complex_index *
   header_complex_add_data(struct header_complex_index **thedata,
                           struct variable_list *var, void *data);

@@ -34,7 +34,7 @@ header_complex_generate_varoid(struct variable_list *var) {
       case ASN_OPAQUE:
       case ASN_OCTET_STR:
         var->name_length = var->val_len+1;
-        var->name = (oid *) malloc(sizeof(oid) * var->val_len);
+        var->name = (oid *) malloc(sizeof(oid) * var->val_len + 1);
         var->name[0] = var->val_len;
         for(i=0; i < var->val_len; i++)
           var->name[i+1] = var->val.string[i];
@@ -46,6 +46,12 @@ header_complex_generate_varoid(struct variable_list *var) {
         return SNMPERR_GENERR;
     }
   }
+  if (var->name_length > 128) {
+    DEBUGMSGTL(("header_complex_generate_varoid",
+                "Something terribly wrong, namelen = %s\n", var->name_length));
+    return SNMPERR_GENERR;
+  }
+
   return SNMPERR_SUCCESS;
 }
 
@@ -262,7 +268,65 @@ header_complex_add_data(struct header_complex_index **thedata,
 
   *thedata = hciptrp;
   DEBUGMSGTL(("header_complex_add_data", "adding something...\n"));
+
   return hciptrp;
+}
+
+/* extracts an entry from the storage space (removing it from future
+   accesses) and returns the data stored there
+
+   Modifies "thetop" pointer as needed (and if present) if were
+   extracting the first node.
+*/
+
+void *
+header_complex_extract_entry(struct header_complex_index **thetop,
+                             struct header_complex_index *thespot) {
+  struct header_complex_index *hciptrp, *hciptrn;
+  void *retdata = thespot->data;
+
+  if (thespot == NULL) {
+    DEBUGMSGTL(("header_complex_extract_entry",
+                "Null pointer asked to be extracted\n"));
+    return NULL;
+  }
+  
+  hciptrp = thespot->prev;
+  hciptrn = thespot->next;
+
+  if (hciptrp)
+    hciptrp->next = hciptrn;
+  else if (thetop)
+    *thetop = hciptrn;
+
+  if (hciptrn)
+    hciptrn->prev = hciptrp;
+
+  if (thespot->vars)
+    snmp_free_varbind(thespot->vars);
+
+  free(thespot);
+  return retdata;
+}
+
+/* wipe out a single entry */
+void
+header_complex_free_entry(struct header_complex_index *theentry,
+                          HeaderComplexCleaner *cleaner) {
+  void *data;
+  data = header_complex_extract_entry(NULL, theentry);
+  (*cleaner)(data);
+}
+
+/* completely wipe out all entries in our data store */
+void
+header_complex_free_all(struct header_complex_index *thestuff,
+                         HeaderComplexCleaner *cleaner) {
+  struct header_complex_index *hciptr;  
+
+  for(hciptr = thestuff; hciptr != NULL; hciptr = hciptr->next) {
+    header_complex_free_entry(hciptr, cleaner);
+  }
 }
 
 void
