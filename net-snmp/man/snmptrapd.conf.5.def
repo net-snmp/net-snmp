@@ -1,7 +1,7 @@
 .TH SNMPTRAPD.CONF 5 "28 Aug 2001" VVERSIONINFO "Net-SNMP"
 .UC 4
 .SH NAME
-SYSCONFDIR/snmp/snmptrapd.conf - configuration file for the Net-SNMP trap daemon.
+snmptrapd.conf - configuration file for the Net-SNMP trap daemon
 .SH DESCRIPTION
 .B snmptrapd.conf
 is the configuration file(s) which define how the Net-SNMP SNMP trap
@@ -115,6 +115,8 @@ What file to store the process id in
 The daemon blocks on the executing traphandle commands.  (This should
 be fixed in the future with an appropriate signal catch and wait()
 combination).
+.SH FILES
+SYSCONFDIR/snmp/snmptrapd.conf
 .SH "SEE ALSO"
 snmp_config(5), snmptrapd(8), syslog(8), variables(5), snmpd.conf(5), read_config(3).
 
