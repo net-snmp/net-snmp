@@ -233,12 +233,17 @@ RELEASING:
            auto-run by people who have extracted the tar file.
         e) Runs tar xzf ...
 
-  8) At this point the sources are tagged.  If you need to make any
+     At this point the sources are tagged.  If you need to make any
      changes, do so *before* you publish the tar ball to the web site.
      You'll likely need to move the tag using "cvs -F tag Ext-VERSION file.c".
      Then, you'll have to re-extract the code and tar it up.  You can
      do this by just running "make tar VERSION=Ext-5-0-3 CVSUSER=hardaker".
      (which is just like "make dist" above without first tagging things).
+
+  8) Sign the packages:
+
+     $ md5sum net-snmp-5.0.3.tar.gz > net-snmp-5.0.3.tar.gz.md5
+     $ gpg -a --detach-sign net-snmp-5.0.3.tar.gz
 
   9) It's worth doing a round of testing directly with the tarred
      sources just to be sure.  I often haven't had time at this point,
