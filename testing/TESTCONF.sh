@@ -96,7 +96,7 @@ fi
 if [ -x $NETSTAT ]; then
     while :
     do
-        IN_USE=`$NETSTAT -l --protocol=inet --extend --program 2>/dev/null | grep ":$BASE_PORT"`
+        IN_USE=`$NETSTAT -a 2>/dev/null | grep "[\.:]$BASE_PORT "`
         if [ $? -eq 0 ]; then
             #echo "Port $BASE_PORT in use:"
             #echo "->$IN_USE"
