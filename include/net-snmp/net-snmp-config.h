@@ -139,10 +139,10 @@
 /* #undef WORDS_BIGENDIAN */
 
 /* define the system type include file here */
-#define SYSTEM_INCLUDE_FILE "s/linux.h"
+#define SYSTEM_INCLUDE_FILE "net-snmp/system/linux.h"
 
 /* define the machine (cpu) type include file here */
-#define MACHINE_INCLUDE_FILE "m/generic.h"
+#define MACHINE_INCLUDE_FILE "net-snmp/machine/generic.h"
 
 #define SNMPLIBPATH "/usr/local/lib/snmp"
 #define SNMPSHAREPATH "/usr/local/share/snmp"
@@ -155,7 +155,7 @@
 #define LOGFILE "/var/log/snmpd.log"
 
 /* default system contact */
-#define SYS_CONTACT "hardaker@"
+#define SYS_CONTACT "hardaker@hardakers.net"
 
 /* system location */
 #define SYS_LOC "Unknown"
@@ -786,7 +786,7 @@
 #define HAVE_LIBDL 1
 
 /* Define if you have the efence library (-lefence).  */
-#define HAVE_LIBEFENCE 1
+/* #undef HAVE_LIBEFENCE */
 
 /* Define if you have the elf library (-lelf).  */
 /* #undef HAVE_LIBELF */
@@ -1105,7 +1105,7 @@
 #define LASTFIELD -1      /* internal define */
 
 /* configure options specified */
-#define CONFIGURE_OPTIONS " '--with-cflags=-g -I/home/hardaker/src/smip/iptables/include' '--with-libs=-L/home/hardaker/src/smip/iptables/libiptc -liptc' '--with-mib-modules=testhandler testdelayed examples/example agent/nsTransactionTable policy host' --with-defaults"
+#define CONFIGURE_OPTIONS " '--with-cflags=-g -I/home/hardaker/src/smip/iptables/include' '--with-libs=-L/home/hardaker/src/smip/iptables/libiptc -liptc' '--with-mib-modules=testhandler testdelayed examples/example agent/nsTransactionTable policy host' --without-efence"
 
 #ifndef HAVE_STRCHR
 #ifdef HAVE_INDEX
