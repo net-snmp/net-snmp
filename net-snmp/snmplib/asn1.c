@@ -41,6 +41,9 @@ SOFTWARE.
 #endif
 
 #include <sys/types.h>
+#ifdef HAVE_STDLIB_H
+#include <stdlib.h>
+#endif
 #if HAVE_WINSOCK_H
 #include <winsock.h>
 #endif
@@ -56,6 +59,7 @@ SOFTWARE.
 #include "asn1.h"
 #include "int64.h"
 #include "snmp_debug.h"
+#include "mib.h"
 
 #ifndef NULL
 #define NULL	0
@@ -202,7 +206,7 @@ asn_parse_int(u_char *data,
     while(asn_length--)
 	value = (value << 8) | *bufp++;
 
-    DEBUGMSG(("dump_recv", "  ASN Integer:\t%ld (%.2x)\n", value, value));
+    DEBUGMSG(("dump_recv", "  ASN Integer:\t%ld (0x%.2X)\n", value, value));
 
     *intp = value;
     return bufp;
@@ -264,7 +268,7 @@ asn_parse_unsigned_int(u_char *data,
     while(asn_length--)
 	value = (value << 8) | *bufp++;
 
-    DEBUGMSG(("dump_recv", "  ASN UInteger:\t%ld (%.2x)\n", value, value));
+    DEBUGMSG(("dump_recv", "  ASN UInteger:\t%ld (0x%.2X)\n", value, value));
 
     *intp = value;
     return bufp;
@@ -463,7 +467,12 @@ asn_parse_string(u_char *data,
     *strlength = (int)asn_length;
     *datalength -= (int)asn_length + (bufp - data);
 
-    DEBUGMSG(("dump_recv", "  ASN String:\t%s\n", string));
+    DEBUGIF("dump_recv") {
+      char *buf = malloc(asn_length);
+      sprint_asciistring(buf, string, asn_length);
+      DEBUGMSG(("dump_recv", "  ASN String:\t%s\n", buf));
+    }
+        
     return bufp + asn_length;
 }
 
@@ -547,10 +556,11 @@ asn_parse_header(u_char	*data,
 	ERROR_MSG("can't process ID >= 30");
 	return NULL;
     }
-    DEBUGDUMPSETUP("dump_recv", data, 1);
-    DEBUGMSG(("dump_recv", "  ASN Header: 0x%.2x\n", *bufp));
     *type = *bufp;
     bufp = asn_parse_length(bufp + 1, &asn_length);
+    DEBUGDUMPSETUP("dump_recv", data, (bufp-data));
+    DEBUGMSG(("dump_recv", "  ASN Header: 0x%.2X, len = %d (0x%X)\n", *bufp,
+              asn_length, asn_length));
     if (_asn_parse_length_check("parse header", bufp, data, asn_length, *datalength))
 	return NULL;
 
@@ -738,14 +748,9 @@ asn_parse_length(u_char  *data,
 	*length = ntohl(*length);
 	*length >>= (8 * ((sizeof(u_long)) - lengthbyte));
 
-        DEBUGDUMPSETUP("dump_recv", data, lengthbyte+1);
-        DEBUGMSG(("dump_recv", "  ASN Length: %ld (0x%.2x)\n", *length, *length));
-
 	return data + lengthbyte + 1;
     } else { /* short asnlength */
 	*length = (long)lengthbyte;
-        DEBUGDUMPSETUP("dump_recv", data, 1);
-        DEBUGMSG(("dump_recv", "  ASN Length: %ld (0x%.2x)\n", *length, *length));
 	return data + 1;
     }
 }

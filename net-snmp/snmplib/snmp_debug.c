@@ -200,6 +200,23 @@ debugmsg_hex(const char *token, u_char *thedata, size_t len) {
 }
 
 void
+debugmsg_hextli(const char *token, u_char *thedata, size_t len) {
+  char buf[SPRINT_MAX_LEN];
+  
+  DEBUGTRACE;
+  DEBUGIF(token) {
+    for(;len > 16; len -= 16, thedata += 16) {
+      DEBUGPRINTINDENT(token);
+      sprint_hexstring(buf, thedata, 16);
+      debugmsg(token, buf);
+    }
+    DEBUGPRINTINDENT(token);
+    sprint_hexstring(buf, thedata, len);
+    debugmsg(token, buf);
+  }
+}
+
+void
 #ifdef STDC_HEADERS
 debugmsgtoken(const char *token, const char *format, ...)
 #else
