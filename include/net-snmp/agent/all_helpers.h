@@ -13,6 +13,7 @@ extern          "C" {
 #include <net-snmp/agent/read_only.h>
 #include <net-snmp/agent/serialize.h>
 #include <net-snmp/agent/bulk_to_next.h>
+#include <net-snmp/agent/mode_end_call.h>
 /*
  * #include <net-snmp/agent/set_helper.h> 
  */
