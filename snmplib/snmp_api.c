@@ -3185,10 +3185,10 @@ snmp_sess_read(void *sessp,
 
             sp  = new_slp->session;
             isp = new_slp->internal;
+            memcpy((u_char *)isp,
+                   (u_char *)slp->internal,
+                   sizeof(*slp->internal));
             isp->sd = new_sd;
-            memcpy((u_char *)&(isp->me),
-                   (u_char *)&(slp->internal->me),
-                   sizeof(slp->internal->me));
             isp->addr.sa_family = isp->me.sa_family;
             sp->flags &= (~SNMP_FLAGS_LISTENING);
         }
