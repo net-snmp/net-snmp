@@ -190,148 +190,28 @@ header_tcp(vp, name, length, exact, var_len, write_method)
 
 #ifndef solaris2
 
+u_char *
+var_tcp(vp, name, length, exact, var_len, write_method)
+    register struct variable *vp;
+    oid     *name;
+    int     *length;
+    int     exact;
+    int     *var_len;
+    int     (**write_method) __P((int, u_char *, u_char, int, u_char *, oid *, int));
+{
 #ifdef HAVE_SYS_TCPIPSTATS_H
-
-u_char *
-var_tcp(vp, name, length, exact, var_len, write_method)
-    register struct variable *vp;
-    oid     *name;
-    int     *length;
-    int     exact;
-    int     *var_len;
-    int     (**write_method) __P((int, u_char *, u_char, int, u_char *, oid *, int));
-{
     static struct kna tcpipstats;
-
-    /*
-     *	Allow for a kernel w/o TCP
-     */
-
-	if (header_tcp(vp, name, length, exact, var_len, write_method) == MATCH_FAILED )
-	    return NULL;
-
-	/*
-	 *  Get the TCP statistics from the kernel...
-	 */
-
-    if (sysmp (MP_SAGET, MPSA_TCPIPSTATS, &tcpipstats, sizeof tcpipstats) == -1) {
-	perror ("sysmp(MP_SAGET)(MPSA_TCPIPSTATS)");
-    }
-#define tcpstat tcpipstats.tcpstat
-
-	switch (vp->magic){
-	    case TCPRTOALGORITHM:
-#ifndef linux
-		long_return = 4;	/* Van Jacobsen's algorithm *//* XXX */
 #else
-                if (! tcpstat.TcpRtoAlgorithm) {
-		    /* 0 is illegal: assume `other' algorithm: */
-		    long_return = 1;
-		    return (u_char *) &long_return;
-                }
-                return (u_char *) &tcpstat.TcpRtoAlgorithm;
-#endif
-		return (u_char *) &long_return;
-	    case TCPRTOMIN:
-#ifndef linux
-		long_return = TCPTV_MIN / PR_SLOWHZ * 1000;
-		return (u_char *) &long_return;
-#else
-		return (u_char *) &tcpstat.TcpRtoMin;
-#endif
-	    case TCPRTOMAX:
-#ifndef linux
-		long_return = TCPTV_REXMTMAX / PR_SLOWHZ * 1000;
-		return (u_char *) &long_return;
-#else
-		return (u_char *) &tcpstat.TcpRtoMax;
-#endif
-	    case TCPMAXCONN:
-#ifndef linux
-		long_return = -1;
-		return (u_char *) &long_return;
-#else
-		return (u_char *) &tcpstat.TcpMaxConn;
-#endif
-	    case TCPACTIVEOPENS:
-		return (u_char *) &tcpstat.tcps_connattempt;
-	    case TCPPASSIVEOPENS:
-		return (u_char *) &tcpstat.tcps_accepts;
-	    case TCPATTEMPTFAILS:
-#ifdef hpux
-		long_return = MIB_tcpcounter[7];
-#else
-		long_return = tcpstat.tcps_conndrops;	/* XXX */
-#endif
-		return (u_char *) &long_return;
-	    case TCPESTABRESETS:
-#ifdef hpux
-		long_return = MIB_tcpcounter[8];
-#else
-		long_return = tcpstat.tcps_drops;	/* XXX */
-#endif
-		return (u_char *) &long_return;
-		/*
-		 * NB:  tcps_drops is actually the sum of the two MIB
-		 *	counters tcpAttemptFails and tcpEstabResets.
-		 */
-	    case TCPCURRESTAB:
-#ifndef linux
-		long_return = TCP_Count_Connections();
-		return (u_char *) &long_return;
-#else
-		return (u_char *) &tcpstat.TcpCurrEstab;
-#endif
-	    case TCPINSEGS:
-		return (u_char *) &tcpstat.tcps_rcvtotal;
-	    case TCPOUTSEGS:
-		long_return = tcpstat.tcps_sndtotal
-			    - tcpstat.tcps_sndrexmitpack;
-		/*
-		 * RFC 1213 defines this as the number of segments sent
-		 * "excluding those containing only retransmitted octets"
-		 */
-		return (u_char *) &long_return;
-	    case TCPRETRANSSEGS:
-		return (u_char *) &tcpstat.tcps_sndrexmitpack;
-#ifndef linux
-	    case TCPINERRS:
-		long_return = tcpstat.tcps_rcvbadsum + tcpstat.tcps_rcvbadoff 
-#ifdef STRUCT_TCPSTAT_HAS_TCPS_RCVMEMDROP
-                  + tcpstat.tcps_rcvmemdrop
-#endif
-                  + tcpstat.tcps_rcvshort;
-		return (u_char *) &long_return;
-	    case TCPOUTRSTS:
-		long_return = tcpstat.tcps_sndctrl - tcpstat.tcps_closed;
-		return (u_char *) &long_return;
-#endif linux
-	    default:
-		ERROR_MSG("");
-	}
-    return NULL;
-}
-
-#else /* not HAVE_SYS_TCPIPSTATS_H */
-
-u_char *
-var_tcp(vp, name, length, exact, var_len, write_method)
-    register struct variable *vp;
-    oid     *name;
-    int     *length;
-    int     exact;
-    int     *var_len;
-    int     (**write_method) __P((int, u_char *, u_char, int, u_char *, oid *, int));
-{
     static struct tcpstat tcpstat;
 #ifdef hpux
     static	counter MIB_tcpcounter[MIB_tcpMAXCTR+1];
 #endif
+#endif
 
     /*
      *	Allow for a kernel w/o TCP
      */
-#ifndef linux
+#if !defined(linux) && !defined(HAVE_SYS_TCPIPSTATS_H)
 #ifndef TCPSTAT_SYMBOL
     return NULL;
 #else
@@ -345,6 +225,12 @@ var_tcp(vp, name, length, exact, var_len, write_method)
 	/*
 	 *  Get the TCP statistics from the kernel...
 	 */
+#ifdef HAVE_SYS_TCPIPSTATS_H
+    if (sysmp (MP_SAGET, MPSA_TCPIPSTATS, &tcpipstats, sizeof tcpipstats) == -1) {
+	perror ("sysmp(MP_SAGET)(MPSA_TCPIPSTATS)");
+    }
+#define tcpstat tcpipstats.tcpstat
+#else
 #if !defined(CAN_USE_SYSCTL) || !defined(TCPCTL_STATS)
 #ifndef linux
 	auto_nlist(TCPSTAT_SYMBOL, (char *)&tcpstat, sizeof (tcpstat));
@@ -364,6 +250,7 @@ var_tcp(vp, name, length, exact, var_len, write_method)
 		if (sysctl(sname, 4, &tcpstat, &len, 0, 0) < 0)
 			return NULL;
 	}
+#endif
 #endif
 
 	switch (vp->magic) {
@@ -441,25 +328,31 @@ var_tcp(vp, name, length, exact, var_len, write_method)
 		return (u_char *) &long_return;
 	    case TCPRETRANSSEGS:
 		return (u_char *) &tcpstat.tcps_sndrexmitpack;
-#ifndef linux
 	    case TCPINERRS:
+#ifndef linux
 		long_return = tcpstat.tcps_rcvbadsum + tcpstat.tcps_rcvbadoff 
 #ifdef STRUCT_TCPSTAT_HAS_TCPS_RCVMEMDROP
                   + tcpstat.tcps_rcvmemdrop
 #endif
                   + tcpstat.tcps_rcvshort;
+#else
+		long_return = tcpstat.TcpInErrs;
+#endif
 		return (u_char *) &long_return;
 	    case TCPOUTRSTS:
+#ifndef linux
 		long_return = tcpstat.tcps_sndctrl - tcpstat.tcps_closed;
+#else
+		long_return = tcpstat.TcpOutRsts;
+#endif
 		return (u_char *) &long_return;
-#endif /* linux */
 	    default:
 		ERROR_MSG("");
 	}
     return NULL;
 }
 
-#endif /* not HAVE_SYS_TCPIPSTATS_H */
+#endif 
 
 u_char *
 var_tcpEntry(vp, name, length, exact, var_len, write_method)
@@ -635,6 +528,9 @@ int     (**write_method) __P((int, u_char *, u_char, int, u_char *, oid *, int))
 	return (NULL);		/* Things are ugly ... */
       long_return = ipstat.tcpInErrs;
       return(u_char *) &long_return;
+    case TCPOUTRSTS:
+      long_return = tcpstat.tcpOutRsts;
+      return(u_char *) &long_return;
     default:
       ERROR_MSG("");
       return (NULL);
@@ -759,12 +655,24 @@ struct tcp_mib *tcpstat;
 
   while (line == fgets (line, 1024, in))
     {
-      if (12 == sscanf (line, "Tcp: %lu %lu %lu %lu %lu %lu %lu %lu %lu %lu %lu %lu\n",
+      int ret;
+      ret = sscanf (line, "Tcp: %lu %lu %lu %lu %lu %lu %lu %lu %lu %lu %lu %lu\n %lu %lu",
 	&tcpstat->TcpRtoAlgorithm, &tcpstat->TcpRtoMin, &tcpstat->TcpRtoMax, 
 	&tcpstat->TcpMaxConn, &tcpstat->TcpActiveOpens, &tcpstat->TcpPassiveOpens,
 	&tcpstat->TcpAttemptFails, &tcpstat->TcpEstabResets, &tcpstat->TcpCurrEstab, 
-	&tcpstat->TcpInSegs, &tcpstat->TcpOutSegs, &tcpstat->TcpRetransSegs))
+	&tcpstat->TcpInSegs, &tcpstat->TcpOutSegs, &tcpstat->TcpRetransSegs,
+	&tcpstat->TcpInErrs, &tcpstat->TcpOutRsts);
+
+      if ( ret == 12 ) {
+		/* Current kernel statistics */
+	tcpstat->TcpInErrs = 0;
+	tcpstat->TcpInRsts = 0;
 	break;
+      }
+      else if ( ret == 14 ) {
+		/* Rumoured new kernel statistics */
+	break;
+      }
     }
   fclose (in);
 }
