@@ -15,6 +15,7 @@ struct netsnmp_trapd_handler_s {
      char *format;		/* Formatting string */
      int   version;		/* ??? */
      Netsnmp_Trap_Handler *handler;
+     void *handler_data;
 
      netsnmp_trapd_handler *nexth;	/* Next handler for this trap */
              /* Doubly-linked list of traps with registered handlers */
