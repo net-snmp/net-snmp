@@ -36,7 +36,7 @@ struct variable2 extensible_extensible_variables[] = {
   {ERRORFIX, INTEGER, RWRITE, var_extensible_shell, 1, {ERRORFIX }}
 };
 
-config_load_mib(EXTENSIBLEMIB.SHELLMIBNUM, EXTENSIBLENUM+1, extensible_extensible_variables)
+config_load_mib(EXTENSIBLEMIB.SHELLMIBNUM.1, EXTENSIBLENUM+2, extensible_extensible_variables)
 
 #endif
 #endif /* _MIBGROUP_EXTENSIBLE_H */

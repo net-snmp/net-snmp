@@ -44,18 +44,33 @@ bsdi              OBJECT IDENTIFIER ::= { ucdSnmpAgent 11 }
 unknown           OBJECT IDENTIFIER ::= { ucdSnmpAgent 255 }
 
 
+PRIndex ::= TEXTUAL-CONVENTION
+    STATUS       current
+    DESCRIPTION
+	"A unique value, greater than zero, for each OID registered in 
+	the agent's processes table"
+    SYNTAX INTEGER
+
 processes OBJECT-TYPE
-	SYNTAX Processes
+	SYNTAX SEQUENCE OF prEntry
 	ACCESS not-accessible
-	STATUS mandatory
+	STATUS current
 	DESCRIPTION
 		"A set of information on running programs/daemons."
-	INDEX { processIndex }
 	::= { ucdavis 1 }
 
+prEntry OBJECT-TYPE
+    SYNTAX     PREntry
+    MAX-ACCESS not-accessible
+    STATUS     current
+    DESCRIPTION
+        "An entry containing a process and its statistics."
+    INDEX      { processIndex }
+    ::= { processes  1 }
 
-Processes ::= SEQUENCE {
-   processIndex  INTEGER,
+
+PREntry ::= SEQUENCE {
+   processIndex  PRIndex,
    processNames  DisplayString,
    processMin    INTEGER,
    processMax    INTEGER,
@@ -66,12 +81,12 @@ Processes ::= SEQUENCE {
 }
 
 processIndex OBJECT-TYPE
-	SYNTAX INTEGER
+	SYNTAX PRIndex
 	ACCESS read-only
 	STATUS mandatory
 	DESCRIPTION
 		"Reference Index for each observed process."
-	::= { processes 1 }
+	::= { prEntry 1 }
 
 processNames OBJECT-TYPE
 	SYNTAX DisplayString  (SIZE (0..255))
@@ -79,7 +94,7 @@ processNames OBJECT-TYPE
 	STATUS mandatory
 	DESCRIPTION
 		"The table of process names we're Counting."
-	::= { processes 2 }
+	::= { prEntry 2 }
 
 processMin OBJECT-TYPE
 	SYNTAX INTEGER
@@ -89,7 +104,7 @@ processMin OBJECT-TYPE
 		"The minimum number of processes that should be
 		running.  An error flag is generated if the number of
 		running processes is < the minimum."
-	::= { processes 3 }
+	::= { prEntry 3 }
 
 processMax OBJECT-TYPE
 	SYNTAX INTEGER
@@ -99,7 +114,7 @@ processMax OBJECT-TYPE
 		"The maximum number of processes that should be
 		running.  An error flag is generated if the number of
 		running processes is > the maximum."
-	::= { processes 4 }
+	::= { prEntry 4 }
 
 processCount OBJECT-TYPE
 	SYNTAX INTEGER
@@ -108,7 +123,7 @@ processCount OBJECT-TYPE
 	DESCRIPTION
 		"The number of current processes running with the name
 		in question."
-	::= { processes 5 }
+	::= { prEntry 5 }
 
 processErrorFlag OBJECT-TYPE
 	SYNTAX INTEGER
@@ -117,7 +132,7 @@ processErrorFlag OBJECT-TYPE
 	DESCRIPTION
 		"A Error flag to indicate trouble with a process.  It
 		goes to 1 if there is an error, 0 if no error."
-	::= { processes 100 }
+	::= { prEntry 100 }
 
 processErrMessage OBJECT-TYPE
 	SYNTAX DisplayString  (SIZE (0..255))
@@ -125,7 +140,7 @@ processErrMessage OBJECT-TYPE
 	STATUS mandatory
 	DESCRIPTION
 		"An error message describing the problem (if one exists)."
-	::= { processes 101 }
+	::= { prEntry 101 }
 
 processErrFix OBJECT-TYPE
 	SYNTAX INTEGER
@@ -133,19 +148,36 @@ processErrFix OBJECT-TYPE
 	STATUS mandatory
 	DESCRIPTION
 		"Setting this to one will try to fix the problem if possible."
-	::= { processes 102 }
+	::= { prEntry 102 }
+
+ExtIndex ::= TEXTUAL-CONVENTION
+    STATUS       current
+    DESCRIPTION
+	"A unique value, greater than zero, for each OID registered in 
+	the agent's extensible table"
+    SYNTAX INTEGER
 
 extensible OBJECT-TYPE
-	SYNTAX Extensible
+	SYNTAX SEQUENCE OF extEntry
 	ACCESS not-accessible
-	STATUS mandatory
+	STATUS current
 	DESCRIPTION
-		"Extensible commands returning output and result codes."
+		"A table of extensible commands returning output and
+		 result codes."
 	INDEX { extensibleIndex }
 	::= { ucdavis 3 }
 
+extEntry OBJECT-TYPE
+    SYNTAX     ExtEntry
+    MAX-ACCESS not-accessible
+    STATUS     current
+    DESCRIPTION
+        "An entry containing an extensible script and its output."
+    INDEX      { extensibleIndex }
+    ::= { extensible  1 }
+
 Extensible ::= SEQUENCE {
-   extensibleIndex   INTEGER,
+   extensibleIndex   ExtIndex,
    extensibleNames   DisplayString,
    extensibleCommand DisplayString,
    extensibleResult  INTEGER,
@@ -154,12 +186,12 @@ Extensible ::= SEQUENCE {
 }
 
 extensibleIndex OBJECT-TYPE
-	SYNTAX INTEGER
+	SYNTAX ExtIndex
 	ACCESS read-only
 	STATUS mandatory
 	DESCRIPTION
 		"Reference Index for extensible calls."
-	::= { extensible 1 }
+	::= { extEntry 1 }
 
 extensibleNames OBJECT-TYPE
 	SYNTAX DisplayString  (SIZE (0..255))
@@ -167,7 +199,7 @@ extensibleNames OBJECT-TYPE
 	STATUS mandatory
 	DESCRIPTION
 		"Short, one name descriptions of the extensible commands."
-	::= { extensible 2 }
+	::= { extEntry 2 }
 
 extensibleCommand OBJECT-TYPE
 	SYNTAX DisplayString  (SIZE (0..255))
@@ -175,7 +207,7 @@ extensibleCommand OBJECT-TYPE
 	STATUS mandatory
 	DESCRIPTION
 		"The command line to be executed."
-	::= { extensible 3 }
+	::= { extEntry 3 }
 
 extensibleResult OBJECT-TYPE
 	SYNTAX INTEGER
@@ -183,7 +215,7 @@ extensibleResult OBJECT-TYPE
 	STATUS mandatory
 	DESCRIPTION
 		"The result code from the executed command."
-	::= { extensible 100 }
+	::= { extEntry 100 }
 
 extensibleOutput OBJECT-TYPE
 	SYNTAX DisplayString (SIZE (0..255))
@@ -191,7 +223,7 @@ extensibleOutput OBJECT-TYPE
 	STATUS mandatory
 	DESCRIPTION
 		"The output of the extensible command (top line only)."
-	::= { extensible 101 }
+	::= { extEntry 101 }
 
 extensibleErrFix OBJECT-TYPE
 	SYNTAX INTEGER
@@ -199,7 +231,7 @@ extensibleErrFix OBJECT-TYPE
 	STATUS mandatory
 	DESCRIPTION
 		"Set to 1 to fix the problem, if possible."
-	::= { extensible 102 }
+	::= { extEntry 102 }
 	
 memory OBJECT-TYPE
 	SYNTAX Memory
@@ -403,17 +435,32 @@ lockdErrorMsg OBJECT-TYPE
 		"Error message if something is wrong"
 	::= { lockd 101 }
 
+DiskIndex ::= TEXTUAL-CONVENTION
+    STATUS       current
+    DESCRIPTION
+	"A unique value, greater than zero, for each OID registered in 
+	the agent's disk table"
+    SYNTAX INTEGER
+
 disk 	OBJECT-TYPE
-	SYNTAX Disk
+	SYNTAX SEQUENCE OF diskEntry
 	ACCESS not-accessible
-	STATUS mandatory
+	STATUS current
 	DESCRIPTION
 		"Disk watching information."
-	INDEX { diskIndex }
 	::= { ucdavis 6 }
 
-Disk ::= SEQUENCE {
-   diskIndex   INTEGER,
+diskEntry OBJECT-TYPE
+    SYNTAX     DiskEntry
+    MAX-ACCESS not-accessible
+    STATUS     current
+    DESCRIPTION
+        "An entry containing a disk and its statistics."
+    INDEX      { diskIndex }
+    ::= { disk  1 }
+
+DiskEntry ::= SEQUENCE {
+   diskIndex   DiskIndex,
    diskPath  DisplayString,
    diskDevice  DisplayString,
    diskMinimum  INTEGER,
@@ -427,12 +474,12 @@ Disk ::= SEQUENCE {
 }
 
 diskIndex OBJECT-TYPE
-	SYNTAX INTEGER
+	SYNTAX DiskIndex
 	ACCESS read-only
-	STATUS mandatory
+	STATUS current
 	DESCRIPTION
 		"Reference number for the Disk Mib."
-	::= { disk 1 }
+	::= { diskEntry 1 }
 	
 diskPath OBJECT-TYPE
      SYNTAX  DisplayString
@@ -440,7 +487,7 @@ diskPath OBJECT-TYPE
      STATUS  mandatory
      DESCRIPTION  
           "Path where disk is mounted."
-     ::= { disk 2 } 
+     ::= { diskEntry 2 } 
 
 diskDevice OBJECT-TYPE
      SYNTAX  DisplayString
@@ -448,7 +495,7 @@ diskDevice OBJECT-TYPE
      STATUS  mandatory
      DESCRIPTION  
           "Device path"
-     ::= { disk 3 } 
+     ::= { diskEntry 3 } 
 
 diskMinimum OBJECT-TYPE
      SYNTAX  INTEGER
@@ -456,7 +503,7 @@ diskMinimum OBJECT-TYPE
      STATUS  mandatory
      DESCRIPTION  
           "Minimum space required on the disk."
-     ::= { disk 4 } 
+     ::= { diskEntry 4 } 
 
 diskMinPercent OBJECT-TYPE
      SYNTAX  INTEGER
@@ -464,7 +511,7 @@ diskMinPercent OBJECT-TYPE
      STATUS  mandatory
      DESCRIPTION  
           "Minimum percentage of space required on the disk."
-     ::= { disk 5 } 
+     ::= { diskEntry 5 } 
 
 diskTotal OBJECT-TYPE
      SYNTAX  INTEGER
@@ -472,7 +519,7 @@ diskTotal OBJECT-TYPE
      STATUS  mandatory
      DESCRIPTION  
           "Total Disk Size (kbytes)"
-     ::= { disk 6 } 
+     ::= { diskEntry 6 } 
 
 diskAvail OBJECT-TYPE
      SYNTAX  INTEGER
@@ -480,7 +527,7 @@ diskAvail OBJECT-TYPE
      STATUS  mandatory
      DESCRIPTION  
           "Available disk Space"
-     ::= { disk 7 } 
+     ::= { diskEntry 7 } 
 
 diskUsed OBJECT-TYPE
      SYNTAX  INTEGER
@@ -488,7 +535,7 @@ diskUsed OBJECT-TYPE
      STATUS  mandatory
      DESCRIPTION  
           "Used Space on Disk"
-     ::= { disk 8 } 
+     ::= { diskEntry 8 } 
 
 diskPercent OBJECT-TYPE
      SYNTAX  INTEGER
@@ -496,7 +543,7 @@ diskPercent OBJECT-TYPE
      STATUS  mandatory
      DESCRIPTION  
           "Percentage of space used on disk"
-     ::= { disk 9 } 
+     ::= { diskEntry 9 } 
 
 diskErrorFlag OBJECT-TYPE
      SYNTAX  INTEGER
@@ -504,7 +551,7 @@ diskErrorFlag OBJECT-TYPE
      STATUS  mandatory
      DESCRIPTION  
           "Error flag signaling disk is over minimum required space"
-     ::= { disk 100 } 
+     ::= { diskEntry 100 } 
      
 diskErrorMsg OBJECT-TYPE
      SYNTAX  DisplayString
@@ -512,20 +559,34 @@ diskErrorMsg OBJECT-TYPE
      STATUS  mandatory
      DESCRIPTION  
           "A text description of what caused the error flag to be set."
-     ::= { disk 101 } 
+     ::= { diskEntry 101 } 
      
+LoadIndex ::= TEXTUAL-CONVENTION
+    STATUS       current
+    DESCRIPTION
+	"A unique value, greater than zero, for each load average
+	registered in the agent's load average table"
+    SYNTAX INTEGER
+
 loadaves OBJECT-TYPE
-	SYNTAX Loadaves
+	SYNTAX SEQUENCE OF loadEntry
 	ACCESS not-accessible
-	STATUS mandatory
+	STATUS current
 	DESCRIPTION
 		"Load average information."
-	INDEX { loadaveIndex }
 	::= { ucdavis 7 }
 
+loadEntry OBJECT-TYPE
+    SYNTAX     LoadEntry
+    MAX-ACCESS not-accessible
+    STATUS     current
+    DESCRIPTION
+        "An entry containing a load average and its values."
+    INDEX      { loadIndex }
+    ::= { loadaves  1 }
 
 Loadaves ::= SEQUENCE {
-   loadaveIndex  INTEGER,
+   loadaveIndex  LoadIndex,
    loadaveNames  DisplayString,
    loadaveLoad   DisplayString,
    loadaveConfig DisplayString,
@@ -534,12 +595,12 @@ Loadaves ::= SEQUENCE {
 }
 
 loadaveIndex OBJECT-TYPE
-	SYNTAX INTEGER
+	SYNTAX LoadIndex
 	ACCESS read-only
 	STATUS mandatory
 	DESCRIPTION
 		"Reference Index for each observed loadave."
-	::= { loadaves 1 }
+	::= { loadEntry 1 }
 
 loadaveNames OBJECT-TYPE
 	SYNTAX DisplayString (SIZE (0..255))
@@ -547,7 +608,7 @@ loadaveNames OBJECT-TYPE
 	STATUS mandatory
 	DESCRIPTION
 		"The list of loadave names we're Counting."
-	::= { loadaves 2 }
+	::= { loadEntry 2 }
 
 loadaveLoad OBJECT-TYPE
 	SYNTAX DisplayString
@@ -555,7 +616,7 @@ loadaveLoad OBJECT-TYPE
 	STATUS mandatory
 	DESCRIPTION
 		"The 1,5 and 10 minute load averages."
-	::= { loadaves 3 }
+	::= { loadEntry 3 }
 
 loadaveConfig OBJECT-TYPE
 	SYNTAX DisplayString
@@ -563,7 +624,7 @@ loadaveConfig OBJECT-TYPE
 	STATUS mandatory
 	DESCRIPTION
 		"The watch point for loadaverages to signal an error."
-	::= { loadaves 4 }
+	::= { loadEntry 4 }
 
 loadaveErrorFlag OBJECT-TYPE
 	SYNTAX INTEGER
@@ -572,7 +633,7 @@ loadaveErrorFlag OBJECT-TYPE
 	DESCRIPTION
 		"A Error flag to indicate trouble with a loadave.  It
 		goes to 1 if there is an error, 0 if no error."
-	::= { loadaves 100 }
+	::= { loadEntry 100 }
 
 loadaveErrMessage OBJECT-TYPE
 	SYNTAX DisplayString (SIZE (0..255))
@@ -580,7 +641,7 @@ loadaveErrMessage OBJECT-TYPE
 	STATUS mandatory
 	DESCRIPTION
 		"An error message describing the problem (if one exists)."
-	::= { loadaves 101 }
+	::= { loadEntry 101 }
 
 vmstat OBJECT-TYPE
 	SYNTAX Vmstat
@@ -855,8 +916,6 @@ snmperrErrMessage OBJECT-TYPE
 		"An error message describing the problem (if one exists)."
 	::= { snmperrs 101 }
 
-END
-
 MRIndex ::= TEXTUAL-CONVENTION
     DISPLAY-HINT "d"
     STATUS       current
@@ -880,7 +939,7 @@ mrEntry OBJECT-TYPE
     STATUS     current
     DESCRIPTION
         "An entry containing a registered mib oid."
-    INDEX      { ifIndex }
+    INDEX      { mrIndex }
     ::= { mibRegistryTable  1 }
 
 MREntry ::=
@@ -907,3 +966,4 @@ mrModuleName OBJECT-TYPE
 	"The module name that registered this OID."
     ::= { mrEntry  2 }
 
+END

@@ -36,7 +36,7 @@ struct variable2 extensible_proc_variables[] = {
   {ERRORFIX, INTEGER, RWRITE, var_extensible_proc, 1, {ERRORFIX }}
 };
 
-config_load_mib(EXTENSIBLEMIB.PROCMIBNUM, EXTENSIBLENUM+1, extensible_proc_variables)
+config_load_mib(EXTENSIBLEMIB.PROCMIBNUM.1, EXTENSIBLENUM+2, extensible_proc_variables)
 
 #endif
 #endif /* _MIBGROUP_PROC_H */
