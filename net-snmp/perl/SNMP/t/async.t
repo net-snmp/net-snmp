@@ -26,11 +26,12 @@ sub cbDummy;
 $SNMP::verbose = 0;
 $SNMP::dump_packet = 0;
 
-$sess = new SNMP::Session(DestHost => $agent_host, Community=>$comm, RemotePort=>$agent_port);
+my $sess = new SNMP::Session(DestHost => $agent_host, 
+			  Community => $comm, 
+			  RemotePort => $agent_port);
 
 # try getting unregistered OID.
 my $result = $sess->get([["HooHaaHooHaa","0"]], [\&cbDummy, $sess]);
-#print("result = $result\n");
 ok(!defined($result));
 
 # this get should work

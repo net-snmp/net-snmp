@@ -700,6 +700,7 @@ oldengineID_conf(const char *word, char *cptr)
  */
 void
 init_snmpv3(const char *type) {
+
   gettimeofday(&snmpv3starttime, NULL);
 
   /* we need to be called back later */

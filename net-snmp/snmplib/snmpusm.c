@@ -795,7 +795,7 @@ usm_generate_out_msg (
 				== NULL &&
                      			secLevel != SNMP_SEC_LEVEL_NOAUTH)
 		{
-			DEBUGMSGTL(("usm","Unknown User\n"));
+			DEBUGMSGTL(("usm","Unknown User(%s)\n",secName));
 			usm_free_usmStateReference (secStateRef);
 			return SNMPERR_USM_UNKNOWNSECURITYNAME;
 		}
@@ -2197,12 +2197,12 @@ usm_process_in_msg (
 		usm_get_user(secEngineID, *secEngineIDLen, secName))
 			== NULL )
 	{
-		DEBUGMSGTL(("usm","Unknown User.\n"));
-		if (snmp_increment_statistic (STAT_USMSTATSUNKNOWNUSERNAMES)==0)
-		{
-			DEBUGMSGTL(("usm","%s\n", "Failed to increment statistic."));
-		}
-		return SNMPERR_USM_UNKNOWNSECURITYNAME;
+	  DEBUGMSGTL(("usm","Unknown User(%s)\n",secName));		
+	  if (snmp_increment_statistic (STAT_USMSTATSUNKNOWNUSERNAMES)==0)
+	    {
+	      DEBUGMSGTL(("usm","%s\n", "Failed to increment statistic."));
+	    }
+	  return SNMPERR_USM_UNKNOWNSECURITYNAME;
 	}
 
 
@@ -2436,6 +2436,7 @@ init_usm_post_config(int majorid, int minorid, void *serverarg,
                                         USM_LENGTH_OID_TRANSFORM,
                                         usmDESPrivProtocol,
                                         USM_LENGTH_OID_TRANSFORM);
+
   SNMP_FREE(noNameUser->engineID);
   noNameUser->engineIDLen = 0;
 
@@ -2562,6 +2563,7 @@ usm_get_user_from_list(u_char *engineID, size_t engineIDLen,
           memcmp(ptr->engineID, engineID, engineIDLen) == 0)))
       return ptr;
   }
+
   /* return "" user used to facilitate engineID discovery */
   if (use_default && !strcmp(name, "")) return noNameUser;
   return NULL;

@@ -1303,20 +1303,22 @@ snmp_sess_open(struct snmp_session *pss)
 
 /* create_user_from_session(struct snmp_session *session):
 
-   creates a user in the usm table from the information in a session
+   creates a user in the usm table from the information in a session.
+   If the user already exists, it is updated with the current
+   information from the session
 
    Parameters:
         session -- IN: pointer to the session to use when creating the user.
 
    Returns:
         SNMPERR_SUCCESS
-        SNMPERR_GENERR
+        SNMPERR_GENERR 
 */
 int
 create_user_from_session(struct snmp_session *session)
 {
   struct usmUser *user;
-
+  int user_just_created = 0;
 
   /* now that we have the engineID, create an entry in the USM list
      for this user using the information in the session */
@@ -1336,80 +1338,87 @@ create_user_from_session(struct snmp_session *session)
       user->name = strdup(session->securityName);
       user->secName = strdup(session->securityName);
       if (user->name == NULL || user->secName == NULL) {
-        usm_free_user(user);
-        return SNMPERR_GENERR;
+	usm_free_user(user);
+	return SNMPERR_GENERR;
       }
     }
 
     /* copy in the engineID */
     if (memdup(&user->engineID, session->securityEngineID,
-               session->securityEngineIDLen) != SNMPERR_SUCCESS) {
+	       session->securityEngineIDLen) != SNMPERR_SUCCESS) {
       usm_free_user(user);
       return SNMPERR_GENERR;
     }
     user->engineIDLen = session->securityEngineIDLen;
 
+    user_just_created = 1;
+  }
     /* copy the auth protocol */
-    if (session->securityAuthProto != NULL) {
-      user->authProtocol =
-        snmp_duplicate_objid(session->securityAuthProto,
-                             session->securityAuthProtoLen);
-      if (user->authProtocol == NULL) {
-        usm_free_user(user);
-        return SNMPERR_GENERR;
-      }
-      user->authProtocolLen = session->securityAuthProtoLen;
+  if (session->securityAuthProto != NULL) {
+    SNMP_FREE(user->authProtocol);
+    user->authProtocol =
+      snmp_duplicate_objid(session->securityAuthProto,
+			   session->securityAuthProtoLen);
+    if (user->authProtocol == NULL) {
+      usm_free_user(user);
+      return SNMPERR_GENERR;
     }
+    user->authProtocolLen = session->securityAuthProtoLen;
+  }
 
-    /* copy the priv protocol */
-    if (session->securityPrivProto != NULL) {
-      user->privProtocol =
-        snmp_duplicate_objid(session->securityPrivProto,
-                             session->securityPrivProtoLen);
-      if (user->privProtocol == NULL) {
-        usm_free_user(user);
-        return SNMPERR_GENERR;
-      }
-      user->privProtocolLen = session->securityPrivProtoLen;
+  /* copy the priv protocol */
+  if (session->securityPrivProto != NULL) {
+    SNMP_FREE(user->privProtocol);
+    user->privProtocol =
+      snmp_duplicate_objid(session->securityPrivProto,
+			   session->securityPrivProtoLen);
+    if (user->privProtocol == NULL) {
+      usm_free_user(user);
+      return SNMPERR_GENERR;
     }
+    user->privProtocolLen = session->securityPrivProtoLen;
+  }
 
-    /* copy in the authentication Key, and convert to the localized version */
-    if (session->securityAuthKey != NULL && session->securityAuthKeyLen != 0) {
-      user->authKey = (u_char *)calloc(1,USM_LENGTH_KU_HASHBLOCK);
-      if (user->authKey == NULL) {
-        usm_free_user(user);
-        return SNMPERR_GENERR;
-      }
-      user->authKeyLen = USM_LENGTH_KU_HASHBLOCK;
-      if (generate_kul( user->authProtocol, user->authProtocolLen,
-                        session->securityEngineID, session->securityEngineIDLen,
-                        session->securityAuthKey, session->securityAuthKeyLen,
-                        user->authKey, &user->authKeyLen ) != SNMPERR_SUCCESS) {
-        usm_free_user(user);
-        return SNMPERR_GENERR;
-      }
+  /* copy in the authentication Key, and convert to the localized version */
+  if (session->securityAuthKey != NULL && session->securityAuthKeyLen != 0) {
+    SNMP_FREE(user->authKey);
+    user->authKey = (u_char *)calloc(1,USM_LENGTH_KU_HASHBLOCK);
+    if (user->authKey == NULL) {
+      usm_free_user(user);
+      return SNMPERR_GENERR;
     }
-
-    /* copy in the privacy Key, and convert to the localized version */
-    if (session->securityPrivKey != NULL && session->securityPrivKeyLen != 0) {
-      user->privKey = (u_char *)calloc(1,USM_LENGTH_KU_HASHBLOCK);
-      if (user->privKey == NULL) {
-        usm_free_user(user);
-        return SNMPERR_GENERR;
-      }
-      user->privKeyLen = USM_LENGTH_KU_HASHBLOCK;
-      if (generate_kul( user->authProtocol, user->authProtocolLen,
-                        session->securityEngineID, session->securityEngineIDLen,
-                        session->securityPrivKey, session->securityPrivKeyLen,
-                        user->privKey, &user->privKeyLen ) != SNMPERR_SUCCESS) {
-        usm_free_user(user);
-        return SNMPERR_GENERR;
-      }
+    user->authKeyLen = USM_LENGTH_KU_HASHBLOCK;
+    if (generate_kul( user->authProtocol, user->authProtocolLen,
+		      session->securityEngineID, session->securityEngineIDLen,
+		      session->securityAuthKey, session->securityAuthKeyLen,
+		      user->authKey, &user->authKeyLen ) != SNMPERR_SUCCESS) {
+      usm_free_user(user);
+      return SNMPERR_GENERR;
     }
+  }
 
-    user->userStatus = RS_ACTIVE;
-    user->userStorageType = ST_READONLY;
+  /* copy in the privacy Key, and convert to the localized version */
+  if (session->securityPrivKey != NULL && session->securityPrivKeyLen != 0) {
+    SNMP_FREE(user->privKey);
+    user->privKey = (u_char *)calloc(1,USM_LENGTH_KU_HASHBLOCK);
+    if (user->privKey == NULL) {
+      usm_free_user(user);
+      return SNMPERR_GENERR;
+    }
+    user->privKeyLen = USM_LENGTH_KU_HASHBLOCK;
+    if (generate_kul( user->authProtocol, user->authProtocolLen,
+		      session->securityEngineID, session->securityEngineIDLen,
+		      session->securityPrivKey, session->securityPrivKeyLen,
+		      user->privKey, &user->privKeyLen ) != SNMPERR_SUCCESS) {
+      usm_free_user(user);
+      return SNMPERR_GENERR;
+    }
+  }
 
+  user->userStatus = RS_ACTIVE;
+  user->userStorageType = ST_READONLY;
+
+  if (user_just_created) {
     /* add the user into the database */
     usm_add_user(user);
   }
