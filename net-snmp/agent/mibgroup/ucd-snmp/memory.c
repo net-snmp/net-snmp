@@ -272,7 +272,7 @@ int getswap(rettype)
       DEBUGP("  swdevt.sw_nblksenabled:     %d\n", swdevt[i].sw_nblksenabled);
       spacetotal += swdevt[i].sw_nblksenabled;
 #else
-      DEBUGP("  swdevt.sw_nblks:     %d\n", swdevt[i].nblks);
+      DEBUGP("  swdevt.sw_nblks:     %d\n", swdevt[i].sw_nblks);
       spacetotal += swdevt[i].sw_nblks;
 #endif
       spaceleft += (swdevt[i].sw_nfpgs * 4);
@@ -293,7 +293,6 @@ int getswap(rettype)
       DEBUGP("  fswdevt[i].fsw_allocated: %d\n", fswdevt[i].fsw_allocated);
       DEBUGP("  fswdevt[i].fsw_min:       %d\n", fswdevt[i].fsw_min);
       DEBUGP("  fswdevt[i].fsw_reserve:   %d\n", fswdevt[i].fsw_reserve);
-      DEBUGP("  fswdevt[i].fsw_bsize:     %d\n", fswdevt[i].fsw_bsize);
       /* 37 = calculated value I know it makes no sense, nor is it accurate */
     }
   }
