@@ -99,13 +99,38 @@
 
         <a href="/related.html" title="Links to Net-SNMP related information and software">Related Info/SW</a><br />
 
+        <br />
       </div>
       <br />
-      <!--#if expr="$hidelogo != yes" -->
-      <a href="http://www.sourceforge.net/projects/net-snmp" target="sourceforge" title="Net-SNMP SourceForge project page"> <img src="http://sflogo.sourceforge.net/sflogo.php?group_id=12694&amp;type=2" width="125" height="37" border="0" alt="SourceForge.net Net-SNMP Project" /></a>
-      <!--#endif -->
-    </div>
-    
 
-    <div id="Content">
+      <div id="ListSearch">
+          <form method="post" action="http://sourceforge.net/search/">
+          <span class="small">Archive Search:</span>
+       
+          <select name="forum_id">
+            <option value="4959">Users</option>
+            <option value="7152">Coders</option>
+            <option value="12455">Announce</option>
+            <option value="7153">Bugs</option>
+            <option value="7151">Patches</option>
+            <option value="33108">CVS</option>
+          </select>
+       
+          <input type="hidden" name="type_of_search" value="mlists">
+          <input type="hidden" name="group_id" value="12694">
+          <input type="text" name="words" size=15 id="Words" value=""><br />
+          <input type="submit" name="Search" value="Search"><br />
+          <input type="checkbox" name="exact" value="1" checked>
+          <span id="Label">Require all words?</span>   
+        </form>
+      </div>
+
+      <!--#if expr="$hidelogo != yes" -->
+      <div id="MenuSFLogo">
+        <a href="http://www.sourceforge.net/projects/net-snmp" target="sourceforge" title="Net-SNMP SourceForge project page"> <img src="http://sflogo.sourceforge.net/sflogo.php?group_id=12694&amp;type=2" width="125" height="37" border="0" alt="SourceForge.net Net-SNMP Project" /></a>
+        <!--#endif -->
+      </div>
+  </div>
+    
+  <div id="Content">
 
