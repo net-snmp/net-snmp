@@ -1,4 +1,4 @@
-		      ucd-snmp Version: 4.1.1
+		      ucd-snmp Version: EXT.4.2.pre0
 DISCLAIMER
 
   The Authors, the University of California, and the University of
@@ -289,6 +289,8 @@ THANKS
     Ragnar Kjørstad <ucd@ragnark.vestdata.no>
     Jochen Kmietsch <jochen.kmietsch@tu-clausthal.de>
     Jun-ichiro itojun Hagino <itojun@iijlab.net>
+    John L Villalovos <john.l.villalovos@intel.com>
+    Christoph Mammitzsch <Christoph.Mammitzsch@tu-clausthal.de>
 
   We've probably forgotten people on this list.  Let us know if you've
   contributed code and we've left you out.
