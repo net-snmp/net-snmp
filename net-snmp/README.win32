@@ -15,9 +15,10 @@ Status as of 21-Feb-2004 for Win32 platforms
 Interactions with Other Vendor's Products
 Installing Platform SDK
 Microsoft Visual C++ - Overview
-Microsoft Visual C++ - Building
-Microsoft Visual C++ - Building the Perl SNMP modules
-Microsoft Visual C++ - Installing
+Microsoft Visual C++ - Configure / nmake - Building
+Microsoft Visual C++ - Workspace - Building
+Microsoft Visual C++ - Workspace - Building the Perl SNMP modules
+Microsoft Visual C++ - Workspace - Installing
 Microsoft Visual C++ - Building with OpenSSL
 Microsoft Visual C++ - Building your own applications with snmplib
 Microsoft Visual C++ - Extending the Agent
@@ -53,7 +54,6 @@ Environment 2003 (MSVC 7.0/7.1), gcc under Cygwin, and gcc under MinGW.
   -  Snmpd can be registered as a Windows NT/2000 service.
   -  Snmptrapd cannot register as a Windows service.
 
-
 The next subsection relates to items that are built using Visual Studio
 
   -  All Visual Studio project (.dsp) files are cleaned, and 
@@ -70,6 +70,9 @@ The next subsection relates to items that are built using Visual Studio
 
   -  All Debug and Release targets linked with libsnmp project targets
      build without errors, and are fully functional.
+
+  -  Both the Workspace graphical environment and command line nmake is 
+     supported for building under MSVC.
 
 
 ***************************************************************************
@@ -134,9 +137,26 @@ Otherwise, see the Building section below in order to build the agent.
 *
 ***************************************************************************
 
-There are two main Win32 workspaces ('win32.dsw' and 'win32sdk.dsw'), 
-containing more or less the same set of projects, plus 'libdll.dsw' which 
-contains a minimal set of projects for use with the Perl module only.  
+There are two ways to build Net-SNMP using Microsoft Visual C++.  The first
+and easiest method is using Configure and nmake on the command line, and the 
+second is using the Workspace files with the graphical interface.
+
+To use nmake on the command line, the Configure script is run first to create
+the various make files.  Once they are created, nmake is used to build the 
+applications.  Perl is required to use this method, as the Configure script
+is written in Perl.  ActiveState ActivePerl is available at:
+
+        http://www.activestate.com/Products/ActivePerl/
+
+The make file system is based on and uses the directory structure of the 
+projects contained in the Workspace files which are described below.  It is
+recommended that you read and understand how the workspaces are configured
+even if you will only be using the command line Configure / nmake system.
+
+For the graphical interface, there are two main Win32 workspaces 
+('win32.dsw' and 'win32sdk.dsw'), containing more or less the same set 
+of projects, plus 'libdll.dsw' which contains a minimal set of projects 
+for use with the Perl module only.  
 
 Win32.dsw is for developers who have not installed the Platform SDK from 
 Microsoft's MSDN SDK Update site.  Win32sdk.dsw is for those who have.   
@@ -178,9 +198,11 @@ Note:  Compiling Net-SNMP using MSVC 2003 .NET (MSVC 7.1) will add a
 OpenSSL is required to support the encryption capabilities in SNMPv3
 and will also support MD5 authentication.
 
-Since the MSVC build environment does not use "configure" nor "make" to
-generate the various pathnames that the programs require, several header
-files and an install script are provided.
+Since the MSVC build environment does not natively use "configure" nor "make"
+to generate the various pathnames that the programs require, the header files 
+need to be manually modified when using the graphical build system, and an 
+install script is provided.  When using the Perl Configure / nmake system, 
+the header files are automatically modified and require no manual editing.
 
 The projects are arranged so that ALL of the usable products, the .exe files,
 are written to the win32\bin directory.  The win32\lib directory is used only 
@@ -202,7 +224,168 @@ make sure the library debug option is set to 'Program Database' or "/Zi".
 
 ***************************************************************************
 *
-* Microsoft Visual C++ - Building
+* Microsoft Visual C++ - Configure / nmake - Building
+*
+***************************************************************************
+
+There are two ways to build Net-SNMP using the Configure / nmake system.  
+The first and easiest method is by running the win32\build.bat script.  The
+second is manually running Configure and nmake.
+
+Note:  Perl is required to use this method as the Configure script is 
+       written in Perl.  ActiveState ActivePerl is available at:
+
+        http://www.activestate.com/Products/ActivePerl/
+
+
+Win32\build.bat script
+======================
+
+The build.bat script is an easy menu driven system that allows you to select
+how Net-SNMP should be built, and where it should be installed.  Follow these
+steps to build using build.bat:
+
+1.  Open a command prompt
+
+2.  Initialize the Visual Studio build environment by running VCVARS32.bat
+    which can be found in the bin folder of your Visual Studio install folder.
+
+3.  Run win32\build.bat
+
+4.  The following screen will appear:
+
+    Net-SNMP build options
+    ======================
+    
+    1. Install path:         c:/Program Files/Net-SNMP
+    2. OpenSSL:              disabled
+    3. Platform SDK:         disabled
+    4. Perl modules:         disabled
+    5. Quiet build (logged): enabled
+    6. Debug mode:           disabled
+    
+    F. Finished - start build
+    Q. Quit - abort build
+
+5.  Toggle the options on and off as desired by typing the line number 
+    followed by <enter>.  
+
+    To compile with OpenSSL, the OpenSSL library and header files must 
+    already be installed.  See the section 'Microsoft Visual C++ - Building 
+    with OpenSSL' for details.
+
+    To compile with the Platform SDK, the Platform SDK must already be 
+    installed.  See the section 'Installing Platform SDK' for details.
+
+    If Quiet mode is enabled, all build activity is stored in various *.out 
+    files inside of the win32 folder.
+
+    When you are ready to build, type f <enter>
+
+6.  Building will begin.  Following is a sample screen shot of a quiet build:
+
+    Building...
+    
+    Deleting old log files...
+    Running Configure...
+    Cleaning...
+    Building main package...
+    Installing main package...
+    Running Configure for DLL...
+    Cleaning libraries...
+    Building DLL libraries...
+    Installing DLL libraries...
+    Cleaning Perl....
+    Building Perl modules...
+    Testing Perl modules...
+    Installing Perl modules...
+    
+    See perlmake.out for Perl test results
+    
+    Done!
+
+
+Manual build using Configure / nmake
+====================================
+
+To build using nmake on the command line, the make files need to be generated
+first by the Configure script.  Following are sample steps to:
+
+  -enable Platform SDK support
+  -enable OpenSSL support
+  -enable debug mode
+  -build Net-SNMP
+  -install to 'c:\Program Files\Net-SNMP'
+  -compile the Perl modules
+  -test the Perl modules
+  -install the Perl modules
+
+1.  Open a command prompt
+
+2.  Initialize the Visual Studio build environment by running VCVARS32.bat
+    which can be found in the bin folder of your Visual Studio install folder.
+
+3.  Type (all on one line):
+
+      perl Configure --with-sdk --with-ssl --config=debug
+           --prefix="c:/Program Files/Net-SNMP"
+
+4.  The make files will be generated, and a configuration summary will appear:
+
+    ---------------------------------------------------------
+                Net-SNMP configuration summary:
+    ---------------------------------------------------------
+    
+      Config type:                debug
+      SDK:                        enabled
+      Link type:                  static
+      Prefix / Destdir:           c:/Program Files/Net-SNMP
+      OpenSSL:                    enabled
+
+5.  Type:
+
+      nmake clean
+      nmake
+      nmake install
+
+      perl Configure --with-sdk --with-ssl --config=debug --linktype=dynamic
+           --prefix="c:/Program Files/Net-SNMP"
+
+      nmake libs_clean
+      nmake libs
+      nmake install
+
+      nmake perl_clean
+      nmake perl
+      nmake perl_test
+      nmake perl_install
+
+For a complete list of Configure options, run:
+
+  perl Configure --help
+
+For a complete list of possible build targets, after generating the make files
+using Configure, run:
+
+  nmake help
+      
+Note:  The Configure option --linktype=static (or not specifying a linktype)
+       will result in libsnmp being compiled and all other components being 
+       statically linked to it.
+
+       The Configure option --linktype=dynamic will result in libsnmp_dll 
+       (netsnmp.dll) being compiled and all other components being dynamically 
+       linked to it.
+
+       Building netsnmp.dll is only supported for compiling libagent, 
+       libhelpers, libsnmp_dll and netsnmpmibs for use with the Perl module.
+       Using netsnmp.dll for other components is not supported as the DLL does
+       not prevent corruption of dynamically changing shared data.
+
+
+***************************************************************************
+*
+* Microsoft Visual C++ - Workspace - Building
 *
 ***************************************************************************
 
@@ -267,7 +450,7 @@ workspace if you don't have or don't need these features.
 
 ***************************************************************************
 *
-* Microsoft Visual C++ - Building the Perl SNMP modules
+* Microsoft Visual C++ - Workspace - Building the Perl SNMP modules
 *
 ***************************************************************************
 
@@ -337,7 +520,7 @@ not be possible.  For example, the conf module tests will fail.
 
 ***************************************************************************
 *
-* Microsoft Visual C++ - Installing
+* Microsoft Visual C++ - Workspace - Installing
 *
 ***************************************************************************
 
