@@ -205,7 +205,7 @@ snmp_alarm_register(unsigned int when, unsigned int flags,
 
   *sa_pptr = SNMP_MALLOC_STRUCT(snmp_alarm);
   if (*sa_pptr == NULL)
-    return SNMPERR_GENERR;
+    return 0;
 
   (*sa_pptr)->seconds = when;
   (*sa_pptr)->flags = flags;
@@ -219,5 +219,5 @@ snmp_alarm_register(unsigned int when, unsigned int flags,
 
   if (start_alarms)
     set_an_alarm();
-  return SNMPERR_SUCCESS;
+  return (*sa_pptr)->clientreg;
 } 
