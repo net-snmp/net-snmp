@@ -8,8 +8,10 @@ HEADER SNMPv3 get using initial of system.sysUpTime.0
 # Begin test
 #
 
-# standard V3 configuration for initial user
-. ./Sv3config
+# configure the agent to accept user initial with noAuthNoPriv
+CONFIGAGENT group   testinitialgroup  usm     initial
+CONFIGAGENT view    all     included .1 80
+CONFIGAGENT 'access  testinitialgroup  "" any noauth 0 all all all'
 
 STARTAGENT
 
