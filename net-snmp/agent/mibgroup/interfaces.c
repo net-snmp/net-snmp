@@ -62,10 +62,6 @@
 
 #include "mibincl.h"
 
-#ifdef HAVE_NLIST_H
-#include <nlist.h>
-#endif
-
 #ifdef hpux
 #undef OBJID
 #include <sys/mib.h>
@@ -88,6 +84,7 @@
 #include "struct.h"
 #include "util_funcs.h"
 #include "snmp_api.h"
+#include "auto_nlist.h"
 
 #ifdef HAVE_SYS_SYSCTL_H
 # ifdef CTL_NET
@@ -473,26 +470,6 @@ struct in_ifaddr *Retin_ifaddr;
 	 *
 	 *********************/
 
-
-#ifndef linuxs
-static struct nlist interfaces_nl[] = {
-#define N_IFNET		0
-#define N_IN_IFADDR    	1
-#if !defined(hpux) && !defined(solaris2) && !defined(__sgi)
-        { "_ifnet"},
-#ifdef freebsd3
-        { "_in_ifaddrhead"},
-#else
-        { "_in_ifaddr"},
-#endif
-#else
-        { "ifnet"},
-        { "in_ifaddr"},
-#endif
-        { 0 },
-};
-#endif
-
 int header_interfaces __P((struct variable *, oid *, int *, int, int *, int (**write) __P((int, u_char *, u_char,int, u_char *, oid *, int)) ));
 int header_ifEntry __P((struct variable *, oid *, int *, int, int *, int (**write) __P((int, u_char *, u_char,int, u_char *, oid *, int)) ));
 extern u_char	*var_ifEntry __P((struct variable *, oid *, int *, int, int *, int (**write) __P((int, u_char *, u_char,int, u_char *, oid *, int)) ));
@@ -515,9 +492,8 @@ static int Interface_Get_Ether_By_Index __P((int, u_char *));
 
 void	init_interfaces( )
 {
-#ifndef linux
-    init_nlist( interfaces_nl );
-#endif
+  auto_nlist( IFNET_SYMBOL,0,0 );
+  auto_nlist( IFADDR_SYMBOL,0,0 );
 }
 
 #define MATCH_FAILED	-1
@@ -1158,10 +1134,7 @@ static char saveName[16];
 void
 Interface_Scan_Init()
 {
-#ifndef linux
-    KNLookup (interfaces_nl, N_IFNET, (char *)&ifnetaddr, sizeof(ifnetaddr));
-    saveIndex=0;
-#else
+#ifdef linux
     char line [128], fullname [20], ifname_buf [20], *ifname, *ptr;
     struct ifreq ifrq;
     struct ifnet **ifnetaddr_ptr;
@@ -1169,9 +1142,12 @@ Interface_Scan_Init()
     int a, b, c, d, e, i, fd;
     extern conf_if_list *if_list;
     conf_if_list *if_ptr;
+#endif  
 
-    saveIndex = 0;
+    auto_nlist(IFNET_SYMBOL, (char *)&ifnetaddr, sizeof(ifnetaddr));
+    saveIndex=0;
 
+#ifdef linux
     /* free old list: */
     while (ifnetaddr_list)
       {
@@ -1414,10 +1390,10 @@ struct in_ifaddr *Retin_ifaddr;
 #ifdef freebsd3
 		TAILQ_HEAD(, in_ifaddr) iah;
 
-		KNLookup(interfaces_nl, N_IN_IFADDR, (char *)&iah, sizeof(iah));
+		auto_nlist(IFADDR_SYMBOL, (char *)&iah, sizeof(iah));
 		ia = iah.tqh_first;
 #else
-		KNLookup(interfaces_nl, N_IN_IFADDR, (char *)&ia, sizeof(ia));
+		auto_nlist(IFADDR_SYMBOL, (char *)&ia, sizeof(ia));
 #endif
 		while (ia) {
 		    klookup((unsigned long)ia ,  (char *)&in_ifaddr, sizeof(in_ifaddr));
@@ -1611,7 +1587,7 @@ static struct in_ifaddr *in_ifaddraddr;
 
 Address_Scan_Init()
 {
-    KNLookup (interfaces_nl, N_IN_IFADDR, (char *)&in_ifaddraddr, sizeof(in_ifaddraddr));
+    auto_nlist(IFADDR_SYMBOL, (char *)&in_ifaddraddr, sizeof(in_ifaddraddr));
 }
 
 /* NB: Index is the number of the corresponding interface, not of the address */
@@ -1638,7 +1614,7 @@ struct in_ifaddr *Retin_ifaddr;
                * this address belongs
                */
 
-              KNLookup (interfaces_nl, N_IFNET, (char *)&ifnetaddr, sizeof(ifnetaddr));
+              auto_nlist(IFNET_SYMBOL, (char *)&ifnetaddr, sizeof(ifnetaddr));
               while (ifnetaddr && ifnetaddr != in_ifaddr.ia_ifp) {
                       klookup((unsigned long)ifnetaddr, (char *)&ifnet, sizeof ifnet);
                       ifnetaddr = ifnet.if_next;

@@ -33,7 +33,6 @@
 #include <sys/types.h>
 #define _SYS_USER_H
 #include <kvm.h>
-#include <nlist.h>
 #include <sys/fcntl.h>
 #include <kstat.h>
 #include <errno.h>

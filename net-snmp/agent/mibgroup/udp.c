@@ -68,9 +68,7 @@
 
 #include "mibincl.h"
 #include "snmp_api.h"
-#ifdef HAVE_NLIST_H
-#include <nlist.h>
-#endif
+#include "auto_nlist.h"
 
 #ifdef hpux
 #undef OBJID
@@ -94,29 +92,6 @@
 	 *
 	 *********************/
 
-#ifndef linux
-static struct nlist udp_nl[] = {
-#define N_UDPSTAT	0
-#define N_UDB		1
-#define N_HP_UDPMIB	2
-#if !defined(hpux) && !defined(solaris2) && !defined(__sgi)
-	{ "_udpstat" },
-#ifdef netbsd1
-	{ "_udbtable" },
-#else
-	{ "_udb" },
-#endif
-#else
-	{ "udpstat" },
-	{ "udb" },
-#ifdef hpux
-	{ "MIB_udpcounter" },
-#endif
-#endif
-        { 0 },
-};
-#endif
-
 static int header_udp __P((struct variable *, oid *, int *, int, int *, int (**write) __P((int, u_char *, u_char, int, u_char *, oid *, int)) ));
 
 #ifndef solaris2
@@ -136,9 +111,8 @@ static void linux_read_udp_stat __P((struct udp_mib *));
 
 void	init_udp( )
 {
-#ifndef linux
-    init_nlist( udp_nl );
-#endif
+  auto_nlist( UDPSTAT_SYMBOL,0,0 );
+  auto_nlist( UDB_SYMBOL,0,0 );
 }
 
 
@@ -185,7 +159,7 @@ header_udp(vp, name, length, exact, var_len, write_method)
 
 
 #ifndef solaris2 
-#ifndef hpux 
+#ifndef MIB_UDPCOUNTER_SYMBOL
 #ifndef HAVE_SYS_TCPIPSTATS_H
 
 u_char *
@@ -211,7 +185,7 @@ var_udp(vp, name, length, exact, var_len, write_method)
      */
 
 #ifndef linux
-    KNLookup(udp_nl, N_UDPSTAT, (char *)&udpstat, sizeof (udpstat));
+    auto_nlist(UDPSTAT_SYMBOL, (char *)&udpstat, sizeof (udpstat));
 #else
     linux_read_udp_stat(&udpstat);
 #endif
@@ -333,8 +307,8 @@ var_udp(vp, name, length, exact, var_len, write_method)
      *        Get the UDP statistics from the kernel...
      */
 
-    KNLookup(udp_nl, N_UDPSTAT, (char *)&udpstat, sizeof (udpstat));
-    KNLookup(udp_nl, N_HP_UDPMIB, (char *)&MIB_udpcounter,
+    auto_nlist(UDPSTAT_SYMBOL, (char *)&udpstat, sizeof (udpstat));
+    auto_nlist(UDPMIB_SYMBOL, (char *)&MIB_udpcounter,
 	(MIB_udpMAXCTR+1)*sizeof (counter));
 
     switch (vp->magic){
@@ -511,7 +485,7 @@ static struct inpcb udp_inpcb, *udp_prev;
 static void UDP_Scan_Init()
 {
 #ifndef linux
-    KNLookup(udp_nl, N_UDB, (char *)&udp_inpcb, sizeof(udp_inpcb));
+    auto_nlist(UDB_SYMBOL, (char *)&udp_inpcb, sizeof(udp_inpcb));
 #if !(defined(freebsd2) || defined(netbsd1))
     udp_prev = (struct inpcb *) udp_nl[N_UDB].n_value;
 #endif

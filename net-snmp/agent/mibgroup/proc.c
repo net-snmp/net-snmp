@@ -256,7 +256,6 @@ static int getstruct __P((off_t, char *, off_t, int));
 
 extern int kmem, mem, swap;
 
-#include <nlist.h>
 /* #include <sys/param.h> */
 /* #include <sys/types.h> */
 #include <sys/user.h>
@@ -288,11 +287,6 @@ sh_count_procs(procname)
 	unsigned bitmap;
 	struct proc procs[NPROCS], *procsp;
 	static int inited = 0;
-
-	if (inited == 0) {
-		init_nlist(proc_nl);
-		inited++;
-	}
 
 	procp = (struct proc *)getword(proc_nl[X_PROC].n_value);
 	nproc = getword(proc_nl[X_NPROC].n_value);

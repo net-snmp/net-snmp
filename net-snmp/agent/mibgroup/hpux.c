@@ -3,7 +3,6 @@
 #include <config.h>
 
 #include <signal.h>
-#include <nlist.h>
 #if HAVE_MACHINE_PARAM_H
 #include <machine/param.h>
 #endif

@@ -51,14 +51,9 @@
 
 
 #include "mibincl.h"
-#ifdef HAVE_NLIST_H
-#include <nlist.h>
-#endif
-
-/* #include "../common_header.h" */
-
 #include "at.h"
 #include "interfaces.h"
+#include "auto_nlist.h"
 #include "../../snmplib/system.h"
 
 #if defined(HAVE_SYS_SYSCTL_H) && !defined(CAN_USE_SYSCTL)
@@ -74,26 +69,6 @@
 	 *
 	 *********************/
 
-
-#ifndef linux
-static struct nlist at_nl[] = {
-#define N_ARPTAB_SIZE	0
-#define N_ARPTAB        1
-#if !defined(hpux) && !defined(solaris2) && !defined(__sgi)
-	{ "_arptab_size" }, 
-	{ "_arptab" },      
-#else
-#if defined(__sgi)
-	{ "arptab_size" }, 
-	{ "arptab" },      
-#else
-	{ "arptab_nb" }, 
-	{ "arphd" },      
-#endif
-#endif
-        { 0 },
-};
-#endif
 
 #ifndef solaris2
 static void ARP_Scan_Init __P((void));
@@ -114,9 +89,8 @@ static int ARP_Scan_Next __P((u_long *, char *, u_long *));
 
 void	init_at( )
 {
-#ifndef DONT_USE_NLIST
-    init_nlist( at_nl );
-#endif
+  auto_nlist( ARPTAB_SYMBOL,0,0 );
+  auto_nlist( ARPTAB_SIZE_SYMBOL,0,0 );
 }
 
 
@@ -407,7 +381,7 @@ static void ARP_Scan_Init __P((void))
 #ifndef CAN_USE_SYSCTL
 #ifndef linux
 	if (!at) {
-	    KNLookup(at_nl, N_ARPTAB_SIZE, (char *)&arptab_size, sizeof arptab_size);
+	    auto_nlist(ARPTAB_SIZE_SYMBOL, (char *)&arptab_size, sizeof arptab_size);
 #ifdef STRUCT_ARPHD_HAS_AT_NEXT
           at = (struct arphd  *) malloc(arptab_size * sizeof(struct arphd));
 #else
@@ -416,10 +390,10 @@ static void ARP_Scan_Init __P((void))
 	}
 
 #ifdef STRUCT_ARPHD_HAS_AT_NEXT
-      KNLookup(at_nl,  N_ARPTAB, (char *)at, arptab_size * sizeof(struct arphd));
-      at_ptr = at[0].at_next;
+        auto_nlist(ARPTAB_SYMBOL, (char *)at, arptab_size * sizeof(struct arphd));
+        at_ptr = at[0].at_next;
 #else
-	KNLookup(at_nl,  N_ARPTAB, (char *)at, arptab_size * sizeof(struct arptab));
+        auto_nlist(ARPTAB_SYMBOL, (char *)at, arptab_size * sizeof(struct arptab));
 #endif
 	arptab_current = 0;
 #else /* linux */

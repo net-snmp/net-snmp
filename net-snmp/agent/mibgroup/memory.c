@@ -11,9 +11,6 @@
 #endif
 #include <ctype.h>
 #include <signal.h>
-#ifdef HAVE_NLIST_H
-#include <nlist.h>
-#endif
 #if HAVE_MACHINE_PARAM_H
 #include <machine/param.h>
 #endif
@@ -96,6 +93,7 @@
 #include "struct.h"
 #include "util_funcs.h"
 #include "memory.h"
+#include "auto_nlist.h"
 
 int minimumswap;
 #ifndef linux
@@ -190,48 +188,25 @@ unsigned memswap(int index)
           return -1;
 }
 #else
-#define  KNLookup(nl_which, buf, s)   (klookup((int) memory_nl[nl_which].n_value, buf, s))
 #define pagetok(size) ((size) << pageshift)
-
-#define NL_TOTAL 0
-#define NL_SWDEVT 1
-#define NL_FSWDEVT 2
-#define NL_NSWAPFS 3
-#define NL_NSWAPDEV 4
-#define NL_PHYSMEM 5
-
-static struct nlist memory_nl[] = {
-#if !defined(hpux) && !defined(solaris2) && !defined(__sgi)
-  { "_total"},
-  { "_swdevt"},
-  { "_fswdevt"},
-  { "_nswapfs"},
-  { "_nswapdev"},
-  { "_physmem"},
-#else
-  { "total"},
-  { "swdevt"},
-  { "fswdevt"},
-  { "nswapfs"},
-  { "nswapdev"},
-  { "physmem"},
-#endif
-  { 0 }
-};
 #endif
 
 void init_memory()
 {
 #ifndef linux
   int pagesize;
-  init_nlist( memory_nl );
+ auto_nlist(PHYSMEM_SYMBOL,0,0)
+ auto_nlist(TOTAL_MEMORY_SYMBOL,0,0)
+ auto_nlist(MBSTAT_SYMBOL,0,0)
+ auto_nlist(SWDEVT_SYMBOL,0,0)
+ auto_nlist(FSWDEVT_SYMBOL,0,0)
+ auto_nlist(NSWAPFS_SYMBOL,0,0)
+ auto_nlist(NSWAPDEV_SYMBOL,0,0)
 
 #ifndef bsdi2
-  if (KNLookup(NL_NSWAPDEV,(int *) &nswapdev, sizeof(nswapdev))
-      == NULL)
+  if (auto_nlist(NSWAPDEV_SYMBOL,(int *) &nswapdev, sizeof(nswapdev)) == 0)
     return;
-  if (KNLookup(NL_NSWAPFS,(int *) &nswapfs, sizeof(nswapfs))
-      == NULL)
+  if (auto_nlist(NSWAPFS_SYMBOL,(int *) &nswapfs, sizeof(nswapfs)) == 0)
     return;
 #endif
   pagesize = 1 << PGSHIFT;
@@ -273,8 +248,8 @@ int getswap(rettype)
   struct extensible ex;
   int i, fd;
   
-  if (KNLookup(NL_SWDEVT,(int *) swdevt, sizeof(struct swdevt)*nswapdev)
-      == NULL)
+  if (auto_nlist(SWDEVT_SYMOBL,(int *) swdevt, sizeof(struct swdevt)*nswapdev)
+      == 0)
     return(0);
   for (i=0; i < nswapdev; i++) {
     if (swdevt[i].sw_enable) {
@@ -286,8 +261,8 @@ int getswap(rettype)
       spaceleft += (swdevt[i].sw_nfpgs * 4);
     }
   }
-  if (KNLookup(NL_FSWDEVT,(int *) fswdevt, sizeof(struct fswdevt)*nswapfs)
-      == NULL)
+  if (auto_nlist(FSWDEVT_SYMBOL,(int *) fswdevt, sizeof(struct fswdevt)*nswapfs)
+      == 0)
     return(0);
   for (i=0; i < nswapfs; i++) {
     if (fswdevt[i].fsw_enable) {
@@ -360,7 +335,7 @@ unsigned char *var_extensible_mem(vp, name, length, exact, var_len, write_method
 	if (sysctl(mib, 2, &total, &size, NULL, 0) < 0) return (0);
     }
 #else
-  if (KNLookup(NL_TOTAL, (int *)&total, sizeof(total)) == NULL) {
+  if (auto_nlist(TOTAL_MEMORY_SYMBOL, (int *)&total, sizeof(total)) == 0) {
     return(0);
   }
 #endif
@@ -395,7 +370,7 @@ unsigned char *var_extensible_mem(vp, name, length, exact, var_len, write_method
       }	
 #else
       /* long_ret = pagetok((int) total.t_rm); */
-      if(KNLookup(NL_PHYSMEM,(int *) &result,sizeof(result)) == NULL)
+      if(auto_nlist(PHYSMEM_SYMBOL,(int *) &result,sizeof(result)) == 0)
         return NULL;
       long_ret = result*1000;
 #endif

@@ -5,10 +5,6 @@
 
 #include <config.h>
 
-#ifdef HAVE_NLIST_H
-#include <nlist.h>
-#endif
-
 #if HAVE_SYS_VM_H
 #include <sys/vm.h>
 #else
@@ -36,6 +32,7 @@
 #include "host_res.h"
 #include "hr_storage.h"
 #include "hr_filesys.h"
+#include "auto_nlist.h"
 
 #if HAVE_MNTENT_H
 #include <mntent.h>
@@ -73,25 +70,6 @@
 	 *********************/
 
 
-#ifndef linux
-static struct nlist hrstore_nl[] = {
-#define N_PHYSMEM     0
-#define N_MEMTOTAL    1
-#define N_MBUFSTAT    2
-#if !defined(hpux) && !defined(solaris2) && !defined(__sgi)
-        { "_physmem"},
-        { "_total"},
-        { "_mbstat"},
-#else
-        { "physmem"},
-        { "total"},
-        { "mbstat"},
-#endif
-        { 0 },
-};
-#endif
-
-
 #ifdef solaris2
 extern struct mnttab *HRFS_entry;
 #else
@@ -110,9 +88,9 @@ int linux_mem __P((int, int));
 
 void	init_hr_storeage( )
 {
-#ifndef linux
-    init_nlist( hrstore_nl );
-#endif
+  auto_nlist(PHYSMEM_SYMBOL,0,0);
+  auto_nlist(TOTAL_MEMORY_SYMBOL,0,0);
+  auto_nlist(MBSTAT_SYMBOL,0,0);
 }
 
 #define MATCH_FAILED	-1
@@ -265,7 +243,7 @@ var_hrstore(vp, name, length, exact, var_len, write_method)
         if (header_hrstore(vp, name, length, exact, var_len, write_method) == MATCH_FAILED )
 	    return NULL;
 #ifndef linux
-	KNLookup(hrstore_nl, N_PHYSMEM, (char *)&physmem, sizeof (int));
+	auto_nlist(PHYSMEM_SYMBOL, (char *)&physmem, sizeof (int));
 #endif
     }
     else {
@@ -286,10 +264,10 @@ var_hrstore(vp, name, length, exact, var_len, write_method)
 	else switch ( store_idx ) {
 		case HRS_TYPE_MEM:
 		case HRS_TYPE_SWAP:
-			KNLookup(hrstore_nl, N_MEMTOTAL, (char *)&memory_totals, sizeof (struct vmtotal));
+			auto_nlist(TOTAL_MEMORY_SYMBOL, (char *)&memory_totals, sizeof (struct vmtotal));
 			break;
 		case HRS_TYPE_MBUF:
-			KNLookup(hrstore_nl, N_MBUFSTAT, (char *)&mbstat, sizeof (struct mbstat));
+			auto_nlist(MBUFSTAT_SYMBOL, (char *)&mbstat, sizeof (struct mbstat));
 			break;
 		default:
 			break;
