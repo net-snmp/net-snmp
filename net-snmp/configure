@@ -6234,12 +6234,12 @@ fi
 
 
 ac_safe_struct=`echo "sockaddr" | sed 'y%./+-%__p_%'`
-ac_safe_member=`echo "sa_union.sa_generic.sa_len2" | sed 'y%./+-%__p_%'`
+ac_safe_member=`echo "sa_union.sa_generic.sa_family2" | sed 'y%./+-%__p_%'`
 ac_safe_all="ac_cv_struct_${ac_safe_struct}_has_${ac_safe_member}"
   ac_uc_define=STRUCT_`echo "${ac_safe_struct}_HAS_${ac_safe_member}" | sed 'y%abcdefghijklmnopqrstuvwxyz./-%ABCDEFGHIJKLMNOPQRSTUVWXYZ___%'`
 
-echo $ac_n "checking for sockaddr.sa_union.sa_generic.sa_len2""... $ac_c" 1>&6
-echo "configure:6243: checking for sockaddr.sa_union.sa_generic.sa_len2" >&5
+echo $ac_n "checking for sockaddr.sa_union.sa_generic.sa_family2""... $ac_c" 1>&6
+echo "configure:6243: checking for sockaddr.sa_union.sa_generic.sa_family2" >&5
 if eval "test \"`echo '$''{'$ac_safe_all'+set}'`\" = set"; then
   echo $ac_n "(cached) $ac_c" 1>&6
 else
@@ -6267,7 +6267,7 @@ cat > conftest.$ac_ext <<EOF
 int main() {
 
 struct sockaddr testit; 
-testit.sa_union.sa_generic.sa_len2 $defineit;
+testit.sa_union.sa_generic.sa_family2 $defineit;
 
 ; return 0; }
 EOF
@@ -6297,9 +6297,9 @@ fi
 
 
 
-#ifdef STRUCT_SOCKADDR_HAS_SA_UNION_SA_GENERIC_SA_LEN2
+#ifdef STRUCT_SOCKADDR_HAS_SA_UNION_SA_GENERIC_SA_FAMILY2
 cat >> confdefs.h <<EOF
-#define STRUCT_SOCKADDR_HAS_SA_LEN2 1
+#define STRUCT_SOCKADDR_HAS_SA_FAMILY2 1
 EOF
 #endif
 
