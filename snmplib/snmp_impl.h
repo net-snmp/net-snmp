@@ -37,15 +37,6 @@ SOFTWARE.
 
 #include<stdio.h>
 
-/*
- * Error codes:
- */
-/*
- * These must not clash with SNMP error codes (all positive).
- */
-#define PARSE_ERROR	-1
-#define BUILD_ERROR	-2
-
 #define COMMUNITY_MAX_LEN	256
 
 /* Space for character representation of an object identifier */
@@ -119,15 +110,6 @@ SOFTWARE.
 #define COUNTER64   ASN_COUNTER64
 #define UINTEGER    ASN_UINTEGER
 #endif /* CMU_COMPATIBLE */
-
-struct trapVar {
-    oid	    *varName;
-    int	    varNameLen;
-    u_char  varType;
-    int	    varLen;
-    u_char  *varVal;
-    struct trapVar *next;  
-};
 
 /* changed to ERROR_MSG to eliminate conflict with other includes */
 #define ERROR_MSG(string)	snmp_set_detail(string)
