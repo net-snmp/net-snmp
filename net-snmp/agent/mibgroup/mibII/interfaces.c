@@ -1228,7 +1228,8 @@ Interface_Scan_Init (void)
 	char *stats, *ifstart = line;
 
 	while (*ifstart == ' ') ifstart++;
-	stats = strrchr(ifstart, ':');
+	if ((stats = strrchr(ifstart, ':')) == NULL)  /* /proc/net/dev bug */
+            continue;
 	*stats++ = 0;
 	strcpy(ifname_buf, ifstart);
 	while (*stats == ' ') stats++;
