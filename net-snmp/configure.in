@@ -72,12 +72,13 @@ AC_ARG_WITH(efence,
 
 AC_ARG_WITH(openssl,
 [  --with-openssl=PATH             Look for openssl in PATH/lib.],
+    tryopenssl=$withval
     if test "x$withval" = "xyes"; then
       AC_ADD_SEARCH_PATH(/usr/local/ssl)
     elif test -d "$withval"; then
       AC_ADD_SEARCH_PATH($withval)
-    fi
-    tryopenssl=yes,
+      tryopenssl=yes
+    fi,
     AC_ADD_SEARCH_PATH(/usr/local/ssl)
 )
 
