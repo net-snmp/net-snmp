@@ -103,13 +103,6 @@ extern          "C" {
 
 #endif                          /* INETVERSION_ENUMS */
 
-    /*
-     * TODO:
-     * value mapping (see notes at top of file)
-     */
-#define INTERNAL_IPSYSTEMSTATSIPVERSION_UNKNOWN  0
-#define INTERNAL_IPSYSTEMSTATSIPVERSION_IPV4  1
-#define INTERNAL_IPSYSTEMSTATSIPVERSION_IPV6  2
 
 
 
