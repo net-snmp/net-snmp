@@ -28,7 +28,7 @@
 @foreach $table table@
 @    include m2c_setup_table.m2i@
 @    if $m2c_table_settable == 0@
-@        break@ # skip to next table
+@        next@ # skip to next table
 @    end@
 @    include details-table.m2i@
 @    foreach $node externalindex@
@@ -52,7 +52,7 @@ int ${node}_undo( ${context}_rowreq_ctx *rowreq_ctx );
 @    end@ # foreach nonindex
 
 int ${context}_check_dependencies(${context}_rowreq_ctx *ctx);
-@end@
+@end@ # foreach table
 
 @eval $m2c_save = "$name"@
 @eval $name = "${name}_DATA_SET"
@@ -70,7 +70,7 @@ int ${context}_check_dependencies(${context}_rowreq_ctx *ctx);
 @foreach $table table@
 @    include m2c_setup_table.m2i@
 @    if $m2c_table_settable == 0@
-@        break@ # skip to next table
+@        next@ # skip to next table
 @    end@
 @    include details-table.m2i@
 ########################################################################
@@ -151,7 +151,7 @@ ${node}_check_index( ${context}_rowreq_ctx *rowreq_ctx )
 @    foreach $node nonindex@
 @        include m2c_setup_node.m2i@
 @        if $node.settable == 0@
-@            break@ # skip to next column
+@            next@ # skip to next column
 @        end@
 @        print | |   +-> Processing nonindex $node@
 @        include details-node.m2i@
