@@ -567,7 +567,9 @@ var_ipv6(
 	    namestr = "IPV6CTL_FORWARDING";
 	    if (sysctl(name, sizeof(name)/sizeof(name[0]), &result, &resultsiz,
 		    0, 0) < 0) {
-		DEBUGP("sysctl(CTL_NET,PF_INET6,IPPROTO_IPV6,%s)\n", namestr);
+		DEBUGMSGTL(("mibII/ipv6",
+			    "sysctl(CTL_NET, PF_INET6, IPPROTO_IPV6, %s)\n",
+			    namestr));
 		break;
 	    } else {
 		if (result)
@@ -582,7 +584,9 @@ var_ipv6(
 	    namestr = "IPV6CTL_DEFHLIM";
 	    if (sysctl(name, sizeof(name)/sizeof(name[0]), &result, &resultsiz,
 		    0, 0) < 0) {
-		DEBUGP("sysctl(CTL_NET,PF_INET6,IPPROTO_IPV6,%s)\n", namestr);
+		DEBUGMSGTL(("mibII/ipv6",
+			    "sysctl(CTL_NET, PF_INET6, IPPROTO_IPV6, %s)\n",
+			    namestr));
 		break;
 	    } else {
 		long_return = result;
@@ -662,7 +666,8 @@ var_ifv6Entry(
 	return NULL;
     }
     interface = name[*length - 1];
-    DEBUGP("interface: %d(%s)\n", interface, if_getname(interface));
+    DEBUGMSGTL(("mibII/ipv6", "interface: %d(%s)\n", 
+		interface, if_getname(interface)));
     if (interface > max)
 	return NULL;
 
@@ -801,7 +806,8 @@ var_ifv6Entry(
 	    }
 	}
 #endif
-	DEBUGP("lastchange=%d %d\n", lastchange.tv_sec, lastchange.tv_usec);
+	DEBUGMSGTL(("mibII/ipv6", "lastchange = { %d.%06d }\n",
+		    lastchange.tv_sec, lastchange.tv_usec));
 	if (lastchange.tv_sec == 0 && lastchange.tv_usec == 0)
 	    long_return = 0;
 	else {
@@ -929,7 +935,8 @@ var_icmpv6Entry(
 	return NULL;
     }
     interface = name[*length - 1];
-    DEBUGP("interface: %d(%s)\n", interface, if_getname(interface));
+    DEBUGMSGTL(("mibII/ipv6", "interface: %d(%s)\n",
+		interface, if_getname(interface)));
     if (interface >= max)
 	return NULL;
 
@@ -1115,7 +1122,7 @@ var_udp6(
 #endif
     found = hitnext = 0;
     memcpy((char *)newname, (char *)vp->name, (int)vp->namelen * sizeof(oid));
-    DEBUGP("start: p=%x\n", p);
+    DEBUGMSGTL(("mibII/ipv6", "start: p=%x\n", p));
     while (
 #if !(defined(__FreeBSD__) && __FreeBSD__ >= 3)
 	   p && (u_long)p != auto_nlist_value("udb6")
@@ -1123,7 +1130,7 @@ var_udp6(
 	   xig->xig_len > sizeof(struct xinpgen)
 #endif
 	   ) {
-	DEBUGP("looping: p=%x\n", p);
+	DEBUGMSGTL(("mibII/ipv6", "looping: p=%x\n", p));
 
 #if !(defined(__FreeBSD__) && __FreeBSD__ >= 3)
 	klookup((u_long)p, (char *)&in6pcb, sizeof(in6pcb));
@@ -1292,11 +1299,11 @@ var_tcp6(
 	  xig->xig_len > sizeof(struct xinpgen)
 #endif
 	  ) {
-	DEBUGP("looping: p=%x\n", p);
+	DEBUGMSGTL(("mibII/ipv6", "looping: p=%x\n", p));
 
 #if !(defined(__FreeBSD__) && __FreeBSD__ >= 3)
 	if (klookup((u_long)p, (char *)&in6pcb, sizeof(in6pcb)) < 0) {
-	    DEBUGP("klookup fail for in6pcb at %x\n", p);
+	    DEBUGMSGTL(("mibII/ipv6", "klookup fail for in6pcb at %x\n", p));
 	    break;
         }
 #else
@@ -1304,7 +1311,8 @@ var_tcp6(
 #endif
 	if (klookup((u_long)in6pcb.in6p_ppcb, (char *)&tcp6cb, sizeof(tcp6cb))
 		< 0) {
-	    DEBUGP("klookup fail for tcp6cb at %x\n", in6pcb.in6p_ppcb);
+	    DEBUGMSGTL(("mibII/ipv6", "klookup fail for tcp6cb at %x\n", 
+			in6pcb.in6p_ppcb));
 	    break;
         }
 	j = (int)vp->namelen;
@@ -1377,7 +1385,7 @@ skip:
 #if defined(__FreeBSD__) && __FreeBSD__ >= 3
     free(sysctl_buf);
 #endif
-    DEBUGP("found=%d\n", found);
+    DEBUGMSGTL(("mibII/ipv6", "found=%d\n", found));
     if (!found)
 	return NULL;
     *length = j;
@@ -1386,7 +1394,7 @@ skip:
     *var_len = sizeof(long);	/* default to 'long' results */
 
     /* try looking into the kernel variable */
-    DEBUGP("magic=%d\n", vp->magic);
+    DEBUGMSGTL(("mibII/ipv6", "magic=%d\n", vp->magic));
     switch (vp->magic) {
     case IPV6TCPLOCALADDR:
 	*var_len = sizeof(struct in6_addr);
@@ -1490,7 +1498,7 @@ var_tcp6(
 	   xig->xig_len > sizeof(struct xinpgen)
 #endif
 	  ) {
-	DEBUGP("looping: p=%x\n", p);
+	DEBUGMSGTL(("mibII/ipv6", "looping: p=%x\n", p));
 
 #if !(defined(__FreeBSD__) && __FreeBSD__ >= 3)
 	if (klookup((u_long)p, (char *)&in6pcb, sizeof(in6pcb)) < 0)
@@ -1498,12 +1506,13 @@ var_tcp6(
 	in6pcb = ((struct xinpcb *)xig)->xi_inp;
 #endif
 	{
-	    DEBUGP("klookup fail for in6pcb at %x\n", p);
+	    DEBUGMSGTL(("mibII/ipv6", "klookup fail for in6pcb at %x\n", p));
 	    break;
         }
 	if (klookup((u_long)in6pcb.in6p_ppcb, (char *)&tcpcb, sizeof(tcpcb))
 		< 0) {
-	    DEBUGP("klookup fail for tcpcb at %x\n", in6pcb.in6p_ppcb);
+	    DEBUGMSGTL(("mibII/ipv6", "klookup fail for tcpcb at %x\n", 
+			in6pcb.in6p_ppcb));
 	    break;
         }
 	j = (int)vp->namelen;
@@ -1573,7 +1582,7 @@ skip:
 	xig = (struct xinpgen *)((char *)xig + xig->xig_len);
 #endif
     }
-    DEBUGP("found=%d\n", found);
+    DEBUGMSGTL(("mibII/ipv6", "found=%d\n", found));
     if (!found)
 	return NULL;
     *length = j;
@@ -1582,7 +1591,7 @@ skip:
     *var_len = sizeof(long);	/* default to 'long' results */
 
     /* try looking into the kernel variable */
-    DEBUGP("magic=%d\n", vp->magic);
+    DEBUGMSGTL(("mibII/ipv6", "magic=%d\n", vp->magic));
     switch (vp->magic) {
     case IPV6TCPLOCALADDR:
 	*var_len = sizeof(struct in6_addr);
@@ -1703,7 +1712,8 @@ var_ifv6Entry(
 	return NULL;
     }
     interface = name[*length - 1];
-    DEBUGP("interface: %d(%s)\n", interface, if_getname(interface));
+    DEBUGMSGTL(("mibII/ipv6", "interface: %d(%s)\n", 
+		interface, if_getname(interface)));
     if (interface > max)
 	return NULL;
 
