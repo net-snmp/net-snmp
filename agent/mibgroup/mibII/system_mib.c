@@ -4,8 +4,6 @@
  */
 
 #include <config.h>
-#include "mibincl.h"
-#include "util_funcs.h"
 
 #if HAVE_STDLIB_H
 #include <stdlib.h>
@@ -42,6 +40,8 @@
 #include <dmalloc.h>
 #endif
 
+#include "mibincl.h"
+#include "util_funcs.h"
 #include "system_mib.h"
 #include "struct.h"
 #include "read_config.h"
