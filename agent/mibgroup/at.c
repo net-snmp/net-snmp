@@ -4,7 +4,36 @@
  */
 
 #include "mib_module_config.h"
-#include "../common_header.h"
+
+#include <config.h>
+#include <sys/types.h>
+#include <sys/socket.h>
+
+#if HAVE_NETINET_IN_H
+#include <netinet/in.h>
+#endif
+#if defined(IFNET_NEEDS_KERNEL) && !defined(_KERNEL)
+#define _KERNEL 1
+#define _I_DEFINED_KERNEL
+#endif
+#include <net/if.h>
+#if HAVE_NET_IF_VAR_H
+#include <net/if_var.h>
+#endif
+#ifdef _I_DEFINED_KERNEL
+#undef _KERNEL
+#endif
+
+#if HAVE_NETINET_IF_ETHER_H
+#include <netinet/if_ether.h>
+#endif
+
+
+#include "mibincl.h"
+#include <nlist.h>
+
+/* #include "../common_header.h" */
+
 #include "at.h"
 #include "interfaces.h"
 

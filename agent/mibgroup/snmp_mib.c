@@ -3,7 +3,12 @@
  *
  */
 
-#include "../common_header.h"
+#include <config.h>
+#include <sys/types.h>
+
+#include "mibincl.h"
+
+/* #include "../common_header.h" */
 #include "snmp_mib.h"
 
 
