@@ -329,7 +329,6 @@ nsahr_register(me)
         CODE:
             {
                 reginfo = (netsnmp_handler_registration *) SvIV(SvRV(me));
-                netsnmp_set_tricky_debugging(1);
                 RETVAL = netsnmp_register_handler(reginfo);
                 if (!RETVAL) {
                     /* the agent now has a "reference" to this reg pointer */
