@@ -69,6 +69,10 @@ SOFTWARE.
 #include <dmalloc.h>
 #endif
 
+#ifdef USE_LIBWRAP
+#include <tcpd.h>
+#endif
+
 #define SNMP_NEED_REQUEST_LIST
 #include "mibincl.h"
 #include "snmp_client.h"
