@@ -1,6 +1,10 @@
 #ifndef SNMPSECMOD_H
 #define SNMPSECMOD_H
 
+#ifdef __cplusplus
+extern          "C" {
+#endif
+
 struct snmp_secmod_def;
 
 /*
@@ -131,4 +135,7 @@ struct snmp_secmod_def *find_sec_mod(int);
 int             unregister_sec_mod(int);        /* register a security service */
 void            init_secmod(void);
 
+#ifdef __cplusplus
+}
+#endif
 #endif                          /* SNMPSECMOD_H */

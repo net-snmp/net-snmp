@@ -1,6 +1,10 @@
 #ifndef _SNMPIPXDOMAIN_H
 #define _SNMPIPXDOMAIN_H
 
+#ifdef __cplusplus
+extern          "C" {
+#endif
+
 #include <net-snmp/library/snmp_transport.h>
 #include <net-snmp/library/asn1.h>
 #if HAVE_NETIPX_IPX_H
@@ -26,4 +30,7 @@ int             netsnmp_sockaddr_ipx(struct sockaddr_ipx *addr,
 
 void            netsnmp_ipx_ctor(void);
 
+#ifdef __cplusplus
+}
+#endif
 #endif/*_SNMPIPXDOMAIN_H*/

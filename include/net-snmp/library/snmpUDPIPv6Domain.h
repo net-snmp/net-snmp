@@ -1,6 +1,10 @@
 #ifndef _SNMPUDPIPV6DOMAIN_H
 #define _SNMPUDPIPV6DOMAIN_H
 
+#ifdef __cplusplus
+extern          "C" {
+#endif
+
 #include <net-snmp/library/snmp_transport.h>
 #include <net-snmp/library/asn1.h>
 
@@ -34,4 +38,7 @@ int             netsnmp_udp6_getSecName(void *opaque, int olength,
 
 void            snmp_udp6_ctor(void);
 
+#ifdef __cplusplus
+}
+#endif
 #endif/*_SNMPUDPIPV6DOMAIN_H*/

@@ -9,6 +9,10 @@
 #ifndef NET_SNMP_CMU_COMPAT_H
 #define NET_SNMP_CMU_COMPAT_H
 
+#ifdef __cplusplus
+extern          "C" {
+#endif
+
     /*
      * ============================
      * *
@@ -270,4 +274,7 @@ struct mib_egpNeighEntry {
     u_int           egpNeighAddr;       /* IP address of this entry's neighbor */
 };
 
+#ifdef __cplusplus
+}
+#endif
 #endif                          /* NET_SNMP_CMU_COMPAT_H */

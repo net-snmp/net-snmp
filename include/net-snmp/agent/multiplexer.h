@@ -1,5 +1,10 @@
 #ifndef NETSNMP_MULTIPLEXER_H
 #define NETSNMP_MULTIPLEXER_H
+
+#ifdef __cplusplus
+extern          "C" {
+#endif
+
 /*
  * The multiplexer helper 
  */
@@ -28,4 +33,7 @@ netsnmp_mib_handler
 
 Netsnmp_Node_Handler netsnmp_multiplexer_helper_handler;
 
+#ifdef __cplusplus
+}
+#endif
 #endif                          /* NETSNMP_MULTIPLEXER_H */

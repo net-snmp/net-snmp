@@ -1,3 +1,10 @@
+#ifndef AGENT_NULL_H
+#define AGENT_NULL_H
+
+#ifdef __cplusplus
+extern          "C" {
+#endif
+
 /*
  * null.h 
  */
@@ -11,3 +18,8 @@
 int             netsnmp_register_null(oid *, size_t);
 
 Netsnmp_Node_Handler netsnmp_null_handler;
+
+#ifdef __cplusplus
+}
+#endif
+#endif

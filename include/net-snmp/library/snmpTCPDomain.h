@@ -3,6 +3,10 @@
 
 #ifdef SNMP_TRANSPORT_TCP_DOMAIN
 
+#ifdef __cplusplus
+extern          "C" {
+#endif
+
 #include <net-snmp/library/snmp_transport.h>
 #include <net-snmp/library/asn1.h>
 
@@ -24,6 +28,9 @@ netsnmp_transport *netsnmp_tcp_transport(struct sockaddr_in *addr,
 
 void            netsnmp_tcp_ctor(void);
 
+#ifdef __cplusplus
+}
+#endif
 #endif                          /*SNMP_TRANSPORT_TCP_DOMAIN */
 
 #endif/*_SNMPTCPDOMAIN_H*/
