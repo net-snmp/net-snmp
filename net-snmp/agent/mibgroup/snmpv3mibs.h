@@ -9,5 +9,6 @@
 config_require(snmpv3/snmpEngine)
 config_require(snmpv3/snmpMPDStats)
 config_require(snmpv3/usmStats)
+config_require(snmpv3/usmConf)
 config_require(snmpv3/usmUser)
 #endif                          /* NSMPV3MIBS_H */
