@@ -194,7 +194,7 @@ equivalent to the following entries:
 .nf
 com2sec	public	default	public
 group	public	any	public
-view 	all	.1
+view 	all	included	.1
 access	public	""	any	noauth	all	none	none
 .SH SNMPv3 CONFIGURATION
 .PP
