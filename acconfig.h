@@ -518,9 +518,13 @@
     available.  */
 #undef SNMP_TRANSPORT_IPX_DOMAIN
 
-/*  This is defined if support for the UDPIPv6 transport domain is
+/*  This is defined if support for the UDP/IPv6 transport domain is
     available.  */
 #undef SNMP_TRANSPORT_UDPIPV6_DOMAIN
+
+/*  This is defined if support for the TCP/IPv6 transport domain is
+    available.  */
+#undef SNMP_TRANSPORT_TCPIPV6_DOMAIN
 
 /* define this if the USM security module is available */
 #undef SNMP_SECMOD_USM

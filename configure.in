@@ -232,6 +232,10 @@ AC_ARG_WITH(out_transports,
     		This transport is available for Linux, Solaris,
 		FreeBSD.
 		It is never compiled in by default.
+    TCPIPv6	support for SNMP over UDP/IPv6.
+    		This transport is available for Linux, Solaris,
+		FreeBSD.
+		It is never compiled in by default.
     TCP         support for SNMP over TCP/IP.
     		This transport is compiled in by default, but may be ommitted.
     Unix        support for SNMP over Unix domain protocols.
