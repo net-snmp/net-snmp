@@ -452,7 +452,7 @@ main(int argc, char *argv[])
     }
 	else
 	{
-	  printf("Unknown command\n");
+	  fprintf(stderr,"Unknown command\n");
 	  usage();
 	  exit(1);
 	}
