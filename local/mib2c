@@ -51,17 +51,22 @@ $currentline = 0;
 $currentlevel = -1;
 %assignments;
 %outputs;
+@def_search_dirs = (".",
+		    $ENV{MIB2C_DIR},
+		    "/usr/local/share/snmp/");
+@search_dirs = ();
 
 sub usage {
     print "$0 [-h] [-c configfile] [-f prefix] mibNode\n\n";
     print "  -h\t\tThis message.\n\n";
     print "  -c configfile\tSpecifies the configuration file to use\n\t\tthat dictates what the output of mib2c will look like.\n\n";
+    print "  -I PATH\tSpecifies a path to look for configuration files in\n\n";
     print "  -f prefix\tSpecifies the output prefix to use.  All code\n\t\twill be put into prefix.c and prefix.h\n\n";
-    print "  mibNode\tThe name of the top level mib node you want to\n\t\tgenerate code for.  By default, the code will be stored in\n\t\tmibNode.c and mibNode.h (use the -f flag to change this)\n\n";
     print "  -d\t\tdebugging output (dont do it.  trust me.)\n\n";
     print "  -s\t\tDon't display statistics at the end\n\n";
-    print "  -S VAR=VAL\tSet $VAR variable to $VAL\n";
+    print "  -S VAR=VAL\tSet $VAR variable to $VAL\n\n";
     print "  -i Don't run indent on the resulting code\n";
+    print "  mibNode\tThe name of the top level mib node you want to\n\t\tgenerate code for.  By default, the code will be stored in\n\t\tmibNode.c and mibNode.h (use the -f flag to change this)\n\n";
     1;
 }	
 
@@ -81,6 +86,10 @@ while($#ARGV >= 0) {
     usage && exit(1) if (/^-h/);
     $outputName = shift if (/^-f/);
     $oid = $_ if (/^[^-]/);
+    if (/^-I/) {
+	my $dirs = shift;
+	push @search_dirs, split(/,/,$dirs);
+    }
 }
  
 #
@@ -776,15 +785,16 @@ sub max {
 sub find_conf {
   my ($configfile, $missingok) = (@_);
 
+  foreach my $d (@search_dirs, @def_search_dirs) {
+      return "$d/$configfile" if (-f "$d/$configfile");
+  }
   return $configfile if (-f "$configfile");
-  return "$ENV{MIB2C_DIR}/$configfile" if (-f "$ENV{MIB2C_DIR}/$configfile");
-  return "/usr/local/share/snmp/$configfile" if (-f "/usr/local/share/snmp/$configfile");
-
   return if ($missingok);
 
   print STDERR "Can't find a configuration file called $configfile\n";
-  print STDERR "(referenced at $currentfile:$currentline)\n";
-  print STDERR "I looked in ., $ENV{MIB2C_DIR} and /usr/local/share/snmp\n";
+  print STDERR "(referenced at $currentfile:$currentline)\n" if ($currentfile);
+  print STDERR "I looked in:\n";
+  print "  " . join("\n  ", @search_dirs, @def_search_dirs), "\n";
   exit;
 }
 
