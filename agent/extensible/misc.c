@@ -132,7 +132,7 @@ int get_exec_output(ex)
   static struct extensible excompare;
   static char lastcmd[STRMAX];
   int cfd;
-  int lastresult;
+  int lastresult, fpid;
 #endif
 
 #ifdef CACHETIME
@@ -150,7 +150,7 @@ int get_exec_output(ex)
       {
         perror("pipe");
       }
-    if (fork() == 0) 
+    if ((fpid = fork()) == 0) 
       {
         close(1);
         if (dup(fd[1]) != 1)
@@ -201,7 +201,9 @@ int get_exec_output(ex)
         close(cfd);
         close(fd[0]);
         /* wait for the child to finish */
-        while(wait3(&ex->result,0,0) > 0);
+        if (waitpid(fpid,&ex->result,0) < 0) {
+          perror("waitpid():");
+        }
         ex->result = WEXITSTATUS(ex->result);
         lastresult = ex->result;
 #else
