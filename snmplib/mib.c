@@ -593,7 +593,8 @@ sprint_integer(char *buf,
 	    enum_string = enums->label;
 	    break;
 	}
-    if (enum_string == NULL) {
+    if (enum_string == NULL ||
+        ds_get_boolean(DS_LIBRARY_ID,DS_LIB_PRINT_NUMERIC_ENUM)) {
 	if (hint) sprint_hinted_integer(buf, *var->val.integer, hint, units);
 	else sprintf(buf, "%ld", *var->val.integer);
     }
@@ -625,7 +626,8 @@ sprint_uinteger(char *buf,
 	    enum_string = enums->label;
 	    break;
 	}
-    if (enum_string == NULL)
+    if (enum_string == NULL ||
+        ds_get_boolean(DS_LIBRARY_ID,DS_LIB_PRINT_NUMERIC_ENUM))
 	sprintf(buf, "%lu", *var->val.integer);
     else if (quick_print)
 	sprintf(buf, "%s", enum_string);
@@ -778,7 +780,8 @@ sprint_bitstring(char *buf,
 			    enum_string = enums->label;
 			    break;
 			}
-		    if (enum_string == NULL)
+		    if (enum_string == NULL ||
+                        ds_get_boolean(DS_LIBRARY_ID,DS_LIB_PRINT_NUMERIC_ENUM))
 			sprintf(buf, "%d ", (len * 8) + bit);
 		    else
 			sprintf(buf, "%s(%d) ", enum_string, (len * 8) + bit);
@@ -1034,6 +1037,11 @@ register_mib_handlers (void)
                        DS_LIBRARY_ID, DS_LIB_MIB_WARNINGS);
     ds_register_premib(ASN_BOOLEAN, "snmp","mibReplaceWithLatest",
                        DS_LIBRARY_ID, DS_LIB_MIB_REPLACE);
+
+    ds_register_premib(ASN_BOOLEAN, "snmp","printNumericEnums",
+                       DS_LIBRARY_ID, DS_LIB_PRINT_NUMERIC_ENUM);
+    ds_register_premib(ASN_BOOLEAN, "snmp","printNumericOids",
+                       DS_LIBRARY_ID, DS_LIB_PRINT_NUMERIC_OIDS);
     
     /* setup the default parser configurations, as specified by configure */
 #ifdef MIB_COMMENT_IS_EOL_TERMINATED
@@ -1440,7 +1448,9 @@ sprint_objid(char *buf,
 
     *tempbuf = '.';	/* this is a fully qualified name */
     subtree = get_symbol(objid, objidlen, subtree, tempbuf + 1);
-    if (suffix_only){
+    if (ds_get_boolean(DS_LIBRARY_ID,DS_LIB_PRINT_NUMERIC_OIDS)) {
+        cp = tempbuf;
+    } else if (suffix_only){
 	for(cp = tempbuf; *cp; cp++)
 	    ;
 	while(cp >= tempbuf){
@@ -1654,7 +1664,8 @@ _get_symbol(oid *objid,
 	if (*objid == subtree->subid){
 	    if (subtree->indexes)
                 in_dices = subtree->indexes;
-	    if (!strncmp( subtree->label, ANON, ANON_LEN))
+	    if (!strncmp( subtree->label, ANON, ANON_LEN) ||
+                ds_get_boolean(DS_LIBRARY_ID,DS_LIB_PRINT_NUMERIC_OIDS))
                 sprintf(buf, "%lu", subtree->subid);
 	    else
                 strcpy(buf, subtree->label);
@@ -1664,7 +1675,8 @@ _get_symbol(oid *objid,
 
     /* subtree not found */
 
-    while (in_dices) {
+    while (in_dices &&
+           !ds_get_boolean(DS_LIBRARY_ID,DS_LIB_PRINT_NUMERIC_OIDS)) {
 	size_t numids;
 	struct tree *tp;
 	tp = find_tree_node(in_dices->ilabel, -1);
