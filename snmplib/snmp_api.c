@@ -2290,9 +2290,9 @@ snmpv3_parse(
 
   /* securtityParameters OCTET STRING begins after msgGlobalData */
   sec_params			= data;
-  pdu->contextEngineID		= calloc(1,SNMP_MAX_ENG_SIZE);
+  pdu->contextEngineID		= (u_char *)calloc(1,SNMP_MAX_ENG_SIZE);
   pdu->contextEngineIDLen	= SNMP_MAX_ENG_SIZE;
-  pdu->securityEngineID         = calloc(1,SNMP_MAX_ENG_SIZE);
+  pdu->securityEngineID         = (u_char *)calloc(1,SNMP_MAX_ENG_SIZE);
   pdu->securityEngineIDLen	= SNMP_MAX_ENG_SIZE;
   pdu->securityName		= (char *)calloc(1,SNMP_MAX_SEC_NAME_SIZE);
   pdu->securityNameLen		= SNMP_MAX_SEC_NAME_SIZE;
