@@ -788,8 +788,8 @@ init_master_agent(void)
     char           *cptr;
     char            buf[SPRINT_MAX_LEN];
 
-    /* turn on lookup caching */
-    netsnmp_set_lookup_cache_size(-1);
+    /* default to turning off lookup caching */
+    netsnmp_set_lookup_cache_size(0);
 
     if (netsnmp_ds_get_boolean(NETSNMP_DS_APPLICATION_ID, 
 			       NETSNMP_DS_AGENT_ROLE) != MASTER_AGENT) {
