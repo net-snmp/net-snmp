@@ -313,7 +313,7 @@ int snmp_input(op, session, reqid, pdu, magic)
 		printf("%.4d-%.2d-%.2d %.2d:%.2d:%.2d %s: %s Trap (%d) Uptime: %s\n",
 		       tm->tm_year+1900, tm->tm_mon+1, tm->tm_mday,
 		       tm->tm_hour, tm->tm_min, tm->tm_sec,
-		       inet_ntoa(pdu->agent_addr.sin_addr),
+		       inet_ntoa(ntohl(pdu->agent_addr.sin_addr.s_addr)),
 		       trap_description(pdu->trap_type), pdu->specific_type,
 		       uptime_string(pdu->time, buf));
 		for(vars = pdu->variables; vars; vars = vars->next_variable) {
