@@ -59,6 +59,8 @@ init_versioninfo(void)
          {VERUPDATECONFIG}},
         {VERRESTARTAGENT, ASN_INTEGER, RWRITE, var_extensible_version, 1,
          {VERRESTARTAGENT}},
+        {VERSAVEPERSISTENT, ASN_INTEGER, RWRITE, var_extensible_version, 1,
+         {VERSAVEPERSISTENT}},
         {VERDEBUGGING, ASN_INTEGER, RWRITE, var_extensible_version, 1,
          {VERDEBUGGING}}
     };
@@ -148,6 +150,10 @@ var_extensible_version(struct variable *vp,
         *write_method = restart_hook;
         long_ret = 0;
         return ((u_char *) & long_ret);
+    case VERSAVEPERSISTENT:
+        *write_method = save_persistent;
+        long_ret = 0;
+        return ((u_char *) & long_ret);
     case VERDEBUGGING:
         *write_method = debugging_hook;
         long_ret = snmp_get_do_debugging();
@@ -192,6 +198,27 @@ debugging_hook(int action,
     tmp = *((long *) var_val);
     if (action == COMMIT) {
         snmp_set_do_debugging(tmp);
+    }
+    return SNMP_ERR_NOERROR;
+}
+
+int
+save_persistent(int action,
+               u_char * var_val,
+               u_char var_val_type,
+               size_t var_val_len,
+               u_char * statP, oid * name, size_t name_len)
+{
+    long            tmp = 0;
+
+    if (var_val_type != ASN_INTEGER) {
+        DEBUGMSGTL(("versioninfo", "Wrong type != int\n"));
+        return SNMP_ERR_WRONGTYPE;
+    }
+    tmp = *((long *) var_val);
+    if (action == COMMIT) {
+        snmp_store(netsnmp_ds_get_string(NETSNMP_DS_LIBRARY_ID,
+                                         NETSNMP_DS_LIB_APPTYPE));
     }
     return SNMP_ERR_NOERROR;
 }
