@@ -41,7 +41,7 @@ proc sendmail 10 1
 
 #  A snmpwalk of the process mib tree would look something like this:
 # 
-# % snmpwalk -v 1 localhost public .EXTENSIBLEDOTMIB.PROCMIBNUM
+# % snmpwalk -v 1 localhost private .EXTENSIBLEDOTMIB.PROCMIBNUM
 # enterprises.ucdavis.procTable.prEntry.prIndex.1 = 1
 # enterprises.ucdavis.procTable.prEntry.prIndex.2 = 2
 # enterprises.ucdavis.procTable.prEntry.prIndex.3 = 3
@@ -110,7 +110,7 @@ exec echotest /bin/echo hello world
 #exec shelltest /bin/sh /tmp/shtest
 
 # Then, 
-# % snmpwalk -v 1 localhost public .EXTENSIBLEDOTMIB.SHELLMIBNUM
+# % snmpwalk -v 1 localhost private .EXTENSIBLEDOTMIB.SHELLMIBNUM
 # enterprises.ucdavis.extTable.extEntry.extIndex.1 = 1
 # enterprises.ucdavis.extTable.extEntry.extIndex.2 = 2
 # enterprises.ucdavis.extTable.extEntry.extNames.1 = "echotest"
@@ -146,7 +146,7 @@ exec echotest /bin/echo hello world
 
 disk / 10000
 
-# % snmpwalk -v 1 localhost public .EXTENSIBLEDOTMIB.DISKMIBNUM
+# % snmpwalk -v 1 localhost private .EXTENSIBLEDOTMIB.DISKMIBNUM
 # enterprises.ucdavis.diskTable.dskEntry.diskIndex.1 = 0
 # enterprises.ucdavis.diskTable.dskEntry.diskPath.1 = "/" Hex: 2F 
 # enterprises.ucdavis.diskTable.dskEntry.diskDevice.1 = "/dev/dsk/c201d6s0"
@@ -174,7 +174,7 @@ disk / 10000
 # Check for loads:
 load 12 14 14
 
-# % snmpwalk -v 1 localhost public .EXTENSIBLEDOTMIB.LOADAVEMIBNUM
+# % snmpwalk -v 1 localhost private .EXTENSIBLEDOTMIB.LOADAVEMIBNUM
 # enterprises.ucdavis.loadTable.laEntry.loadaveIndex.1 = 1
 # enterprises.ucdavis.loadTable.laEntry.loadaveIndex.2 = 2
 # enterprises.ucdavis.loadTable.laEntry.loadaveIndex.3 = 3
@@ -208,7 +208,7 @@ load 12 14 14
 
 # Here's an example of a badly configured disk check:
 
-# % snmpwalk -v 1 localhost public .EXTENSIBLEDOTMIB.ERRORMIBNUM
+# % snmpwalk -v 1 localhost private .EXTENSIBLEDOTMIB.ERRORMIBNUM
 # enterprises.ucdavis.Snmperrs.snmperrIndex.1 = 1
 # enterprises.ucdavis.Snmperrs.snmperrNames.1 = "snmp" Hex: 73 6E 6D 70 
 # enterprises.ucdavis.Snmperrs.snmperrErrorFlag.1 = 1
@@ -234,7 +234,7 @@ load 12 14 14
 #       If set to 1: restart the agent.
 
 
-# % snmpwalk -v 1 localhost public .EXTENSIBLEDOTMIB.VERSIONMIBNUM
+# % snmpwalk -v 1 localhost private .EXTENSIBLEDOTMIB.VERSIONMIBNUM
 # enterprises.ucdavis.Version.versionIndex.1 = 1
 # enterprises.ucdavis.Version.versionTag.1 = "3.1"
 # enterprises.ucdavis.Version.versionDate.1 = "$Date$"
@@ -263,7 +263,7 @@ load 12 14 14
 #
 # exec .EXTENSIBLEDOTMIB.50 shelltest /bin/sh /tmp/shtest
 
-# % snmpwalk -v 1 localhost public .EXTENSIBLEDOTMIB.50
+# % snmpwalk -v 1 localhost private .EXTENSIBLEDOTMIB.50
 # enterprises.ucdavis.50.1.1 = 1
 # enterprises.ucdavis.50.2.1 = "shelltest"
 # enterprises.ucdavis.50.3.1 = "/bin/sh /tmp/shtest"
@@ -305,7 +305,7 @@ load 12 14 14
 
 # pass .EXTENSIBLEDOTMIB.255 /bin/sh PREFIX/local/passtest
 
-# % snmpwalk -v 1 localhost public .EXTENSIBLEDOTMIB.255
+# % snmpwalk -v 1 localhost private .EXTENSIBLEDOTMIB.255
 # enterprises.ucdavis.255.1 = "life the universe and everything"
 # enterprises.ucdavis.255.2.1 = 42
 # enterprises.ucdavis.255.2.2 = OID: 42.42.42
@@ -314,7 +314,7 @@ load 12 14 14
 # enterprises.ucdavis.255.5 = 42
 # enterprises.ucdavis.255.6 = Gauge: 42
 #
-# % snmpget -v 1 localhost public .EXTENSIBLEDOTMIB.255.5
+# % snmpget -v 1 localhost private .EXTENSIBLEDOTMIB.255.5
 # enterprises.ucdavis.255.5 = 42
 #
 # % snmpset -v 1 localhost private .EXTENSIBLEDOTMIB.255.1 s "New string"
@@ -336,7 +336,7 @@ load 12 14 14
 syslocation Right here, right now.
 syscontact Me <me@somewhere.org>
 
-# % snmpwalk -v 1 localhost public system
+# % snmpwalk -v 1 localhost private system
 # system.sysDescr.0 = "SunOS name sun4c"
 # system.sysObjectID.0 = OID: enterprises.ucdavis.ucdSnmpAgent.sunos4
 # system.sysUpTime.0 = Timeticks: (595637548) 68 days, 22:32:55
