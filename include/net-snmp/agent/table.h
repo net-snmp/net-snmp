@@ -150,7 +150,6 @@ extern          "C" {
     netsnmp_index * netsnmp_table_index_find_next_row(netsnmp_container *c,
                                                       netsnmp_table_request_info *tblreq);
 
-    unsigned int    netsnmp_table_next_column(netsnmp_table_request_info *table_info);
     unsigned int    netsnmp_closest_column(unsigned int current,
                                            netsnmp_column_info
                                            *valid_columns);
