@@ -118,7 +118,7 @@ AC_CHECK_STRUCT_FOR([
 #endif
 #ifdef linux
 struct ifnet {
-	char	*if_name;		/* name, e.g. ``en'' or ``lo'' */
+	char	*if_name;		/* name, e.g. "en" or ``lo'' */
 	short	if_unit;		/* sub-unit for lower level driver */
 	short	if_mtu;			/* maximum transmission unit */
 	short	if_flags;		/* up/down, broadcast, etc. */

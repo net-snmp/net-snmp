@@ -34,6 +34,9 @@
 #endif
 #if HAVE_SYS_SOCKET_H
 #include <sys/socket.h>
+#if HAVE_SYS_SOCKETVAR_H
+#include <sys/socketvar.h>
+#endif
 #endif
 
 #if TIME_WITH_SYS_TIME

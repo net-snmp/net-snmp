@@ -22,7 +22,11 @@
 #include <sys/sysctl.h>
 #include <sys/vmmeter.h>
 
+#if HAVE_SYS_VMPARAM_H
+#include <sys/vmparam.h>
+#else
 #include <vm/vm_param.h>
+#endif
 
 #include <time.h>
 #include <nlist.h>
@@ -81,8 +85,8 @@ void init_vmstat_freebsd2(void)
     {CPURAWIDLE, ASN_COUNTER, RONLY, var_extensible_vmstat, 1, {CPURAWIDLE}},
     {CPURAWKERNEL, ASN_COUNTER, RONLY, var_extensible_vmstat, 1, {CPURAWKERNEL}},
     {CPURAWINTR, ASN_COUNTER, RONLY, var_extensible_vmstat, 1, {CPURAWINTR}},
-    {SYSRAWINTERRUPTS, ASN_INTEGER, RONLY, var_extensible_vmstat, 1, {SYSRAWINTERRUPTS}},
-    {SYSRAWCONTEXT, ASN_INTEGER, RONLY, var_extensible_vmstat, 1, {SYSRAWCONTEXT}},
+    {SYSRAWINTERRUPTS, ASN_COUNTER, RONLY, var_extensible_vmstat, 1, {SYSRAWINTERRUPTS}},
+    {SYSRAWCONTEXT, ASN_COUNTER, RONLY, var_extensible_vmstat, 1, {SYSRAWCONTEXT}},
 /* Future use: */
 /*
   {ERRORFLAG, ASN_INTEGER, RONLY, var_extensible_vmstat, 1, {ERRORFLAG }},
@@ -188,7 +192,7 @@ unsigned char *var_extensible_vmstat(struct variable *vp,
 	*var_len = strlen(errmsg);
 	return((u_char *) (errmsg));
     case SWAPIN:
-#ifdef openbsd2
+#if defined(openbsd2) || defined(darwin)
 	long_ret = ptok(mem_new.v_swpin - mem_old.v_swpin);
 #else
 	long_ret = ptok(mem_new.v_swappgsin - mem_old.v_swappgsin + 
@@ -197,7 +201,7 @@ unsigned char *var_extensible_vmstat(struct variable *vp,
 	long_ret = rate(long_ret);
 	return((u_char *) (&long_ret));
     case SWAPOUT:
-#ifdef openbsd2
+#if defined(openbsd2) || defined(darwin)
 	long_ret = ptok(mem_new.v_swpout - mem_old.v_swpout);
 #else
 	long_ret = ptok(mem_new.v_swappgsout - mem_old.v_swappgsout + 

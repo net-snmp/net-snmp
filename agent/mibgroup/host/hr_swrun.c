@@ -916,7 +916,7 @@ var_hrswrun(struct variable *vp,
 	    long_return = proc_buf->p_swrss;
 #endif
 #elif HAVE_KVM_GETPROCS
-#ifdef freebsd3
+#if defined(freebsd3) && !defined(darwin)
 	    long_return = proc_table[LowProcIndex].kp_eproc.e_vm.vm_map.size/1024;
 #else
 	    long_return = proc_table[LowProcIndex].kp_eproc.e_vm.vm_tsize +

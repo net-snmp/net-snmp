@@ -23,7 +23,11 @@
 #include <sys/sysctl.h>
 #include <sys/vmmeter.h>
  
+#if HAVE_SYS_VMPARAM_H
+#include <sys/vmparam.h>
+#else
 #include <vm/vm_param.h>
+#endif
  
 #include <time.h>
 #include <nlist.h>
@@ -311,7 +315,11 @@ static unsigned char *var_extensible_mem(struct variable *vp,
 #endif
 #ifndef openbsd2
     case MEMCACHED:
+#ifdef darwin
+	long_ret = ptok(mem.v_lookups);
+#else
 	long_ret = ptok(mem.v_cache_count);
+#endif
 	return((u_char *) (&long_ret));
 #endif
     case ERRORFLAG:
