@@ -524,7 +524,7 @@ char **argv;
 	    if (tableForm) sprintf(valueStr, "\t%.2f", printvalue);
 	    else sprintf(valueStr, " /sec: %.2f", printvalue);
 	  } else {
-	    printvalue = value;
+	    printvalue = (float)value;
 	    sprintf(valueStr, " /%d sec: %.0f",
 		    period, printvalue);
 	  }

@@ -235,7 +235,7 @@ closedir(DIR *dirp)
     return 1;
 }
 
-
+#ifndef HAVE_GETTIMEOFDAY
 
 int gettimeofday(tv, tz)
 struct timeval *tv;
@@ -248,7 +248,7 @@ struct timezone *tz;
     tv->tv_sec = timebuffer.time;
     return(1);
 }
-
+#endif
 
 in_addr_t get_myaddr()
 {
@@ -372,7 +372,7 @@ in_addr_t get_myaddr __P((void))
  */
 long get_uptime __P((void))
 {
-#ifdef bsdlike
+#if defined(bsdlike) && !defined(solaris2) && !defined(linux)
     struct timeval boottime, now, diff;
 #ifndef CAN_USE_SYSCTL
     int kmem;

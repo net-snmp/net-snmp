@@ -94,7 +94,37 @@ static void sprint_float __P((char *, struct variable_list *, struct enum_list *
 static void sprint_double __P((char *, struct variable_list *, struct enum_list *, char *, char *));
 #endif
 
-int quick_print = 0;
+extern struct tree *tree_head;
+
+struct tree *Mib;             /* Backwards compatibility */
+
+oid RFC1213_MIB[] = { 1, 3, 6, 1, 2, 1 };
+static char Standard_Prefix[] = ".1.3.6.1.2.1";
+
+/* Set default here as some uses of read_objid require valid pointer. */
+static char *Prefix = &Standard_Prefix[0];
+typedef struct _PrefixList {
+	char * str;
+	int len;
+} *PrefixListPtr, PrefixList;
+
+/*
+ * Here are the prefix strings.
+ * Note that the first one finds the value of Prefix or Standard_Prefix.
+ * Any of these MAY start with period; all will NOT end with period.
+ * Period is added where needed.  See use of Prefix in this module.
+ */
+PrefixList mib_prefixes[] = {
+	{ &Standard_Prefix[0] }, // placeholder for Prefix data
+	{ ".iso.org.dod.internet.mgmt.mib-2" },
+	{ ".iso.org.dod.internet.experimental" },
+	{ ".iso.org.dod.internet.private" },
+	{ ".iso.org.dod.internet.snmpParties" },
+	{ ".iso.org.dod.internet.snmpSecrets" },
+	{ NULL, 0 }  /* end of list */
+};
+
+static int quick_print = 0;
 static int full_objid = 0;
 static int suffix_only = 0;
 
@@ -789,6 +819,8 @@ sprint_counter64(buf, var, enums, hint, units)
     char *hint;
     char *units;
 {
+    char a64buf[I64CHARSZ+1];
+
   if (var->type != ASN_COUNTER64
 #ifdef OPAQUE_SPECIAL_TYPES
       && var->type != ASN_OPAQUE_COUNTER64
@@ -828,10 +860,16 @@ sprint_counter64(buf, var, enums, hint, units)
     }
 #ifdef OPAQUE_SPECIAL_TYPES
     if (var->type == ASN_OPAQUE_I64)
-      sprintf(buf, printI64(var->val.counter64));
+    {
+      printI64(a64buf, var->val.counter64);
+      sprintf(buf, a64buf);
+    }
     else
 #endif
-      sprintf(buf, printU64(var->val.counter64));
+    {
+      printU64(a64buf, var->val.counter64);
+      sprintf(buf, a64buf);
+    }
     buf += strlen (buf);
     if (units) sprintf (buf, " %s", units);
 }
@@ -922,19 +960,6 @@ sprint_by_type(buf, var, enums, hint, units)
 }
 
 
-oid RFC1213_MIB[] = { 1, 3, 6, 1, 2, 1 };
-unsigned char RFC1213_MIB_text[] = ".iso.org.dod.internet.mgmt.mib-2";
-unsigned char EXPERIMENTAL_MIB_text[] = ".iso.org.dod.internet.experimental";
-unsigned char PRIVATE_MIB_text[] = ".iso.org.dod.internet.private";
-unsigned char PARTY_MIB_text[] = ".iso.org.dod.internet.snmpParties";
-unsigned char SECRETS_MIB_text[] = ".iso.org.dod.internet.snmpSecrets";
-extern struct tree *tree_head;
-struct tree *Mib;             /* Backwards compatibility */
-
-static char Standard_Prefix[] = ".1.3.6.1.2.1.";
-static char *Prefix;
-
-
 struct tree *get_tree_head __P((void))
 {
    return(tree_head);
@@ -986,6 +1011,7 @@ init_mib __P((void))
 {
     char *prefix;
     char  *env_var, *entry, path[300];
+    PrefixListPtr pp = &mib_prefixes[0];
 
     if (Mib) return;
 
@@ -1080,11 +1106,20 @@ init_mib __P((void))
 
     if (!prefix)
         prefix = Standard_Prefix;
-    if (prefix[0] == '.') prefix++;    /* get past leading dot. */
+
     Prefix = malloc(strlen(prefix)+2);
     strcpy(Prefix, prefix);
-    if (Prefix[strlen(Prefix) - 1] != '.')
-        strcat(Prefix, ".");  /* add a trailing dot in case user didn't */ 
+
+    /* remove trailing dot */
+    env_var = &Prefix[strlen(Prefix) - 1];
+    if (*env_var == '.') *env_var = '\0';
+
+    pp->str = Prefix;	/* fixup first mib_prefix entry */
+    /* now that the list of prefixes is built, save each string length. */
+    while (pp->str) {
+	pp->len = strlen(pp->str);
+	pp++;
+    }
 
     if (getenv("SUFFIX"))
 	suffix_only = 1;
@@ -1175,7 +1210,12 @@ int read_objid(input, output, out_len)
     if (*input == '.')
 	input++;
     else {
-        strcpy(buf, Prefix);
+    /* get past leading '.', append '.' to Prefix. */
+	if (*Prefix == '.')
+	    strcpy(buf, Prefix+1);
+	else
+            strcpy(buf, Prefix);
+	strcat(buf, ".");
 	strcat(buf, input);
 	input = buf;
     }
@@ -1301,7 +1341,8 @@ sprint_objid(buf, objid, objidlen)
 	}
 	cp++;
 	if (suffix_only == 2 && cp > tempbuf) {
-	    char *mod = module_name(subtree->modid);
+	    char modbuf[256];
+	    char *mod = module_name(subtree->modid, modbuf);
 	    int len = strlen(mod);
 	    if (len >= cp-tempbuf) {
 		memmove(tempbuf+len+1, cp, strlen(cp)+1);
@@ -1313,25 +1354,19 @@ sprint_objid(buf, objid, objidlen)
 	}
     }
     else if (!full_objid) {
-	cp = tempbuf;
-	if (strlen(tempbuf) > strlen(Prefix)
-	    && !memcmp(tempbuf+1, Prefix, strlen(Prefix)-1))
-            cp += strlen(Prefix) + 1;
-	else if (strlen(tempbuf) > strlen(RFC1213_MIB_text)
-	    && !memcmp(tempbuf, RFC1213_MIB_text, strlen(RFC1213_MIB_text)))
-	    cp += sizeof(RFC1213_MIB_text);
-	else if (strlen(tempbuf) > strlen(EXPERIMENTAL_MIB_text)
-	    && !memcmp(tempbuf, EXPERIMENTAL_MIB_text, strlen(EXPERIMENTAL_MIB_text)))
-            cp += sizeof(EXPERIMENTAL_MIB_text);
-	else if (strlen(tempbuf) > strlen(PRIVATE_MIB_text)
-	    && !memcmp(tempbuf, PRIVATE_MIB_text, strlen(PRIVATE_MIB_text)))
-            cp += sizeof(PRIVATE_MIB_text);
-	else if (strlen(tempbuf) > strlen(PARTY_MIB_text)
-	    && !memcmp(tempbuf, PARTY_MIB_text, strlen(PARTY_MIB_text)))
-            cp += sizeof(PARTY_MIB_text);
-	else if (strlen(tempbuf) > strlen(SECRETS_MIB_text)
-	    && !memcmp(tempbuf, SECRETS_MIB_text, strlen(SECRETS_MIB_text)))
-            cp += sizeof(SECRETS_MIB_text);
+	PrefixListPtr pp = &mib_prefixes[0];
+	int ii, ilen, tlen;
+	char * testcp;
+	cp = tempbuf; tlen = strlen(tempbuf);
+	ii = 0;
+	while (pp->str) {
+	    ilen = pp->len; testcp = pp->str;
+	    if ((tlen > ilen) && !memcmp(tempbuf, testcp, ilen)) {
+		cp += (ilen + 1);
+		break;
+	    }
+	    pp++;
+	}
     }
     else cp = tempbuf;
     strcpy(buf, cp);
@@ -1671,7 +1706,7 @@ get_module_node(name, module, objid, objidlen)
 	    if ( tp != NULL )
 	        tp2 = tp->child_list;
 	    while ( tp2 != NULL ) {
-		if (( tp2->subid == subid ) ||
+		if (( (int)tp2->subid == subid ) ||
 		    ( !strcasecmp( tp2->label, cp ))) {
 			objid[ *objidlen ] = tp2->subid;
 			(*objidlen)++;

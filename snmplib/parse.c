@@ -21,6 +21,10 @@ SOFTWARE.
 ******************************************************************/
 /*
  * parse.c
+ *
+ * Notes
+ * The functions in this module make use of static and global data.
+ * Take precaution in thread-safe applications before using these functions.
  */
 #include <config.h>
 
@@ -67,7 +71,6 @@ SOFTWARE.
 #include "mib.h"
 
 /* A quoted string value-- too long for a general "token" */
-char quoted_string_buffer[MAXQUOTESTR];
 
 /*
  * This is one element of an object identifier with either an integer
@@ -256,28 +259,28 @@ struct tok tokens[] = {
 
 struct module_compatability *module_map_head;
 struct module_compatability module_map[] = {
-    {"RFC1065-SMI", 	"RFC1155-SMI", 	NULL, 	0},
-    {"RFC1066-MIB", 	"RFC1156-MIB", 	NULL, 	0},
-			  /* 'mib' -> 'mib-2' */
-    {"RFC1156-MIB", 	"RFC1158-MIB", 	NULL, 	0},
-			  /* 'snmpEnableAuthTraps' -> 'snmpEnableAuthenTraps' */
-    {"RFC1158-MIB", 	"RFC1213-MIB", 	NULL, 	0},
-			  /* 'nullOID' -> 'zeroDotZero' */
-    {"RFC1155-SMI", 	"SNMPv2-SMI", 	NULL, 	0},
-    {"RFC1213-MIB", 	"SNMPv2-SMI", 	"mib-2", 0},
-    {"RFC1213-MIB", 	"SNMPv2-MIB", 	"sys", 	3},
-    {"RFC1213-MIB", 	"IF-MIB", 	"if", 	2},
-    {"RFC1213-MIB", 	"IP-MIB", 	"ip", 	2},
-    {"RFC1213-MIB", 	"IP-MIB", 	"icmp", 	4},
-    {"RFC1213-MIB", 	"TCP-MIB", 	"tcp", 	3},
-    {"RFC1213-MIB", 	"UDP-MIB", 	"udp", 	3},
-    {"RFC1213-MIB", 	"SNMPv2-SMI", 	"tranmission", 0},
-    {"RFC1213-MIB", 	"SNMPv2-MIB", 	"snmp", 	4},
-    {"RFC1271-MIB", 	"RMON-MIB", 	NULL, 	0},
-    {"RFC1286-MIB", 	"SOURCE-ROUTING-MIB", 	"dot1dSr", 7},
-    {"RFC1286-MIB", 	"BRIDGE-MIB", 	NULL, 	0},
-    {"RFC1316-MIB", 	"CHARACTER-MIB", NULL, 	0},
-  };
+	{"RFC1065-SMI",	"RFC1155-SMI",	NULL,	0},
+	{"RFC1066-MIB",	"RFC1156-MIB",	NULL,	0},
+				/* 'mib' -> 'mib-2' */
+	{"RFC1156-MIB",	"RFC1158-MIB",	NULL,	0},
+				/* 'snmpEnableAuthTraps' -> 'snmpEnableAuthenTraps' */
+	{"RFC1158-MIB",	"RFC1213-MIB",	NULL,	0},
+				/* 'nullOID' -> 'zeroDotZero' */
+	{"RFC1155-SMI",	"SNMPv2-SMI",	NULL,	0},
+	{"RFC1213-MIB",	"SNMPv2-SMI",	"mib-2", 0},
+	{"RFC1213-MIB",	"SNMPv2-MIB",	"sys",	3},
+	{"RFC1213-MIB",	"IF-MIB",	"if",	2},
+	{"RFC1213-MIB",	"IP-MIB",	"ip",	2},
+	{"RFC1213-MIB",	"IP-MIB",	"icmp",	4},
+	{"RFC1213-MIB",	"TCP-MIB",	"tcp",	3},
+	{"RFC1213-MIB",	"UDP-MIB",	"udp",	3},
+	{"RFC1213-MIB",	"SNMPv2-SMI",	"tranmission", 0},
+	{"RFC1213-MIB",	"SNMPv2-MIB",	"snmp",	4},
+	{"RFC1271-MIB",	"RMON-MIB",	NULL,	0},
+	{"RFC1286-MIB",	"SOURCE-ROUTING-MIB",	"dot1dSr", 7},
+	{"RFC1286-MIB",	"BRIDGE-MIB",	NULL,	0},
+	{"RFC1316-MIB",	"CHARACTER-MIB", NULL,	0},
+};
 #define MODULE_NOT_FOUND	0
 #define MODULE_LOADED_OK	1
 #define MODULE_ALREADY_LOADED	2
@@ -291,12 +294,13 @@ struct module_compatability module_map[] = {
 #define NHASHSIZE    128
 #define NBUCKET(x)   (x & (NHASHSIZE-1))
 
-struct tok      *buckets[HASHSIZE];
+static struct tok      *buckets[HASHSIZE];
 
-struct node *nbuckets[NHASHSIZE];
-struct tree *tbuckets[NHASHSIZE];
+static struct node *nbuckets[NHASHSIZE];
+static struct tree *tbuckets[NHASHSIZE];
+static struct module *module_head = NULL;
+
 struct node *orphan_nodes = NULL;
-struct module *module_head = NULL;
 struct tree   *tree_head = NULL;
 
 #define	NUMBER_OF_ROOT_NODES	3
@@ -329,6 +333,7 @@ static void free_node __P((struct node *));
 static void print_nodes __P((FILE *, struct node *));
 #endif
 static void build_translation_table __P((void));
+char *module_name __P((int, char *));
 static void init_tree_roots __P((void));
 static void merge_anon_children __P((struct tree *, struct tree *));
 static int getoid __P((FILE *, struct subid *, int));
@@ -453,6 +458,7 @@ print_error(string, token, type)
 
 static long xmalloc_calls = 0;
 static long xmalloc_bytes = 0;
+static long xmalloc_errors = 0;
 
 #ifndef xmalloc
 static void *
@@ -469,7 +475,12 @@ library malloc */
     p = malloc(num);
     if (!p) {
         print_error("Out of memory", NULL, CONTINUE);
+	xmalloc_errors++;
+#ifdef NO_EXCEPTION
         exit (1);
+#else
+        return (NULL);
+#endif
     }
     xmalloc_calls++;
     xmalloc_bytes += num;
@@ -482,6 +493,8 @@ static char *xstrdup (s)
     char *s;
 {
     char *ss = (char *) xmalloc (strlen (s)+1);
+    if (ss == NULL)
+	return (NULL);
     return strcpy (ss, s);
 }
 #endif
@@ -490,7 +503,7 @@ static void xmalloc_stats(fp)
     FILE *fp;
 {
 #ifndef xmalloc
-    fprintf (fp, "xmalloc: %ld calls, %ld bytes\n", xmalloc_calls, xmalloc_bytes);
+    fprintf (fp, "xmalloc: %ld calls, %ld bytes, %ld errors\n", xmalloc_calls, xmalloc_bytes, xmalloc_errors);
 #endif
 }
 
@@ -591,6 +604,7 @@ print_subtree(f, tree, count)
 {
     struct tree *tp;
     int i;
+    char modbuf[256];
 
     for(i = 0; i < count; i++)
         fprintf(f, "  ");
@@ -599,15 +613,16 @@ print_subtree(f, tree, count)
     for(tp = tree->child_list; tp; tp = tp->next_peer){
         for(i = 0; i < count; i++)
             fprintf(f, "  ");
-        fprintf(f, "%s:%s(%ld) type=%d", module_name(tp->module_list[0]),
-		tp->label, tp->subid, tp->type);
+        fprintf(f, "%s:%s(%ld) type=%d",
+                module_name(tp->module_list[0], modbuf),
+                tp->label, tp->subid, tp->type);
         if (tp->tc_index != -1) fprintf(f, " tc=%d", tp->tc_index);
         if (tp->hint) fprintf(f, " hint=%s", tp->hint);
         if (tp->units) fprintf(f, " units=%s", tp->units);
 	if (tp->number_modules > 1) {
 	    fprintf(f, " modules:");
 	    for (i = 1; i < tp->number_modules; i++)
-		fprintf(f, " %s", module_name(tp->module_list[i]));
+		fprintf(f, " %s", module_name(tp->module_list[i], modbuf));
 	}
 	fprintf(f, "\n");
     }
@@ -644,7 +659,7 @@ print_ascii_dump_tree(f, tree, count)
     }
 }
 
-int translation_table[256];
+static int translation_table[256];
 
 static void
 build_translation_table(){
@@ -716,6 +731,7 @@ init_tree_roots()
 
     /* build root node */
     tp = (struct tree *) xmalloc(sizeof(struct tree));
+    if (tp == NULL) return;
     tp->parent = NULL;
     tp->next_peer = NULL;
     tp->child_list = NULL;
@@ -739,6 +755,7 @@ init_tree_roots()
 
     /* build root node */
     tp = (struct tree *) xmalloc(sizeof(struct tree));
+    if (tp == NULL) return;
     tp->parent = NULL;
     tp->next_peer = lasttp;
     tp->child_list = NULL;
@@ -762,6 +779,7 @@ init_tree_roots()
 
     /* build root node */
     tp = (struct tree *) xmalloc(sizeof(struct tree));
+    if (tp == NULL) return;
     tp->parent = NULL;
     tp->next_peer = lasttp;
     tp->child_list = NULL;
@@ -950,6 +968,7 @@ do_subtree(root, nodes)
 	    if (strcmp (tp->label, np->label) == 0) {
 		    /* Update list of modules */
                 int_p = (int *) xmalloc((tp->number_modules+1) * sizeof(int));
+                if (int_p == NULL) return;
                 memcpy(int_p, tp->module_list, tp->number_modules*sizeof(int));
                 int_p[tp->number_modules] = np->modid;
                 if (tp->number_modules > 1 )
@@ -969,13 +988,14 @@ do_subtree(root, nodes)
 			root->label, np->subid, tp->label, np->label);
 	}
         tp = (struct tree *) xmalloc(sizeof(struct tree));
+        if (tp == NULL) return;
         tp->parent = root;
         tp->child_list = NULL;
         tp->label = np->label;
         np->label = NULL;
         tp->modid = np->modid;
         tp->number_modules = 1;
-        tp->module_list = &tp->modid;
+        tp->module_list = &(tp->modid);
         tp->subid = np->subid;
         tp->tc_index = np->tc_index;
         tp->type = translation_table[np->type];
@@ -1074,13 +1094,14 @@ static void do_linkup(mp, np)
 	 */
     init_node_hash( np );
     for ( i=0, mip=mp->imports ; i < mp->no_imports ; ++i, ++mip ) {
+	char modbuf[256];
 	DEBUGP ("  Processing import: %s\n", mip->label);
 	if (get_tc_index( mip->label, mip->modid ) != -1)
 	    continue;
 	tp = find_tree_node( mip->label, mip->modid );
 	if (!tp) {
 	    fprintf(stderr, "Did not find '%s' in module %s\n",
-		mip->label, module_name(mip->modid));
+		mip->label, module_name(mip->modid, modbuf));
 	    continue;
 	}
 	do_subtree( tp, &np );
@@ -1194,6 +1215,7 @@ parse_objectid(fp, name)
 
     if ((length = getoid(fp, loid, 32)) != 0){
         np = root = (struct node *) xmalloc(sizeof(struct node));
+        if (np == NULL) return(NULL);
         memset(np, 0, sizeof(struct node));
 
 	/*
@@ -1218,6 +1240,7 @@ parse_objectid(fp, name)
                 np->parent = xstrdup (op->label);
                 if (!nop->label) {
 		    nop->label = (char *) xmalloc(20);
+		    if (nop->label == NULL) return(NULL);
  		    sprintf(nop->label, "%s%d", ANON, anonymous++);
                 }
                 np->label = xstrdup (nop->label);
@@ -1229,6 +1252,7 @@ parse_objectid(fp, name)
                 np->enums = NULL;
                 /* set up next entry */
                 np->next = (struct node *) xmalloc(sizeof(*np->next));
+		if (np->next == NULL) return(NULL);
                 memset(np->next, 0, sizeof(struct node));
                 oldnp = np;
                 np = np->next;
@@ -1396,6 +1420,7 @@ parse_enumlist(fp)
         if (type == LABEL){
             /* this is an enumerated label */
             rep = (struct enum_list *) xmalloc(sizeof(struct enum_list));
+            if (rep == NULL) return(NULL);
             rep->next = ep;
             ep = rep;
             /* a reasonable approximation for the length */
@@ -1438,6 +1463,7 @@ parse_asntype(fp, name, ntype, ntoken)
 {
     int type, i;
     char token[MAXTOKEN];
+    char quoted_string_buffer[MAXQUOTESTR];
     char *hint = NULL;
     char *tmp_hint;
     struct enum_list *ep;
@@ -1541,8 +1567,9 @@ parse_objecttype(fp, name)
 {
     register int type;
     char token[MAXTOKEN];
-    int nexttype, tctype;
     char nexttoken[MAXTOKEN];
+    char quoted_string_buffer[MAXQUOTESTR];
+    int nexttype, tctype;
     register struct node *np, *nnp;
 
     type = get_token(fp, token, MAXTOKEN);
@@ -1551,6 +1578,7 @@ parse_objecttype(fp, name)
         return NULL;
     }
     np = (struct node *) xmalloc(sizeof(struct node));
+    if (np == NULL) return(NULL);
     memset(np, 0, sizeof(struct node));
     np->tc_index = -1;
     np->modid = current_module;
@@ -1772,9 +1800,11 @@ parse_objectgroup(fp, name)
 {
     register int type;
     char token[MAXTOKEN];
+    char quoted_string_buffer[MAXQUOTESTR];
     register struct node *np, *nnp;
 
     np = (struct node *) xmalloc(sizeof(struct node));
+    if (np == NULL) return(NULL);
     memset(np, 0, sizeof(struct node));
     np->tc_index = -1;
     np->modid = current_module;
@@ -1832,9 +1862,11 @@ parse_notificationDefinition(fp, name)
 {
     register int type;
     char token[MAXTOKEN];
+    char quoted_string_buffer[MAXQUOTESTR];
     register struct node *np, *nnp;
 
     np = (struct node *) xmalloc(sizeof(struct node));
+    if (np == NULL) return(NULL);
     memset(np, 0, sizeof(struct node));
     np->tc_index = -1;
     np->modid = current_module;
@@ -1883,9 +1915,11 @@ parse_trapDefinition(fp, name)
 {
     register int type;
     char token[MAXTOKEN];
+    char quoted_string_buffer[MAXQUOTESTR];
     register struct node *np;
 
     np = (struct node *) xmalloc(sizeof(struct node));
+    if (np == NULL) return(NULL);
     memset(np, 0, sizeof(struct node));
     np->tc_index = -1;
     np->modid = current_module;
@@ -1935,12 +1969,17 @@ parse_trapDefinition(fp, name)
         return NULL;
     }
     np->subid = atoi(token);
-    np->next = xmalloc(sizeof (struct node));
+    np->next = (struct node *)xmalloc(sizeof (struct node));
+    if (np->next == NULL) return(NULL);
     memset(np->next, 0, sizeof(struct node));
     np->next->parent = np->parent;
     np->next->modid = current_module;
     np->next->tc_index = -1;
-    np->parent = xmalloc(strlen(np->parent)+2);
+    np->parent = (char *)xmalloc(strlen(np->parent)+2);
+    if (np->parent == NULL) {
+	free(np->next); free(np);
+	return(NULL);
+    }
     strcpy(np->parent, np->next->parent);
     strcat(np->parent, "#");
     np->next->label = xstrdup(np->parent);
@@ -1959,9 +1998,11 @@ parse_compliance(fp, name)
 {
     register int type;
     char token[MAXTOKEN];
+    char quoted_string_buffer[MAXQUOTESTR];
     register struct node *np, *nnp;
 
     np = (struct node *) xmalloc(sizeof(struct node));
+    if (np == NULL) return(NULL);
     memset(np, 0, sizeof(struct node));
     np->tc_index = -1;
     np->modid = current_module;
@@ -1994,9 +2035,11 @@ parse_moduleIdentity(fp, name)
 {
     register int type;
     char token[MAXTOKEN];
+    char quoted_string_buffer[MAXQUOTESTR];
     register struct node *np, *nnp;
 
     np = (struct node *) xmalloc (sizeof (struct node));
+    if (np == NULL) return(NULL);
     memset(np, 0, sizeof(struct node));
     np->tc_index = -1;
     np->modid = current_module;
@@ -2027,6 +2070,7 @@ parse_imports(fp)
 {
     register int type;
     char token[MAXTOKEN];
+    char modbuf[256];
 #define MAX_IMPORTS	256
     struct module_import import_list[MAX_IMPORTS];
     int this_module, old_current_module;
@@ -2047,7 +2091,14 @@ parse_imports(fp)
 	if (type == LABEL ) {
 	    if (import_count == MAX_IMPORTS ) {
 		print_error("Too many imported symbols", token, type);
+#ifdef NO_EXCEPTION
 		exit(1);
+#else
+		do {
+		    type = get_token(fp, token, MAXTOKEN);
+		} while (type != SEMI && type != ENDOFFILE);
+		return;
+#endif
 	    }
 	    import_list[import_count++].label = xstrdup(token);
 	}
@@ -2096,6 +2147,7 @@ parse_imports(fp)
 		return;
             mp->imports = (struct module_import *)
               xmalloc(import_count*sizeof(struct module_import));
+            if (mp->imports == NULL) return;
 	    for ( i=0 ; i<import_count ; ++i ) {
 		mp->imports[i].label = import_list[i].label;
 		mp->imports[i].modid = import_list[i].modid;
@@ -2107,8 +2159,12 @@ parse_imports(fp)
 	/*
 	 * Shouldn't get this far
 	 */
-    print_error("Cannot find module", module_name(current_module), CONTINUE);
+    print_error("Cannot find module", module_name(current_module,modbuf), CONTINUE);
+#ifdef NO_EXCEPTION
     exit(1);
+#else
+    return;
+#endif
 }
 
 
@@ -2139,22 +2195,27 @@ which_module(name)
 	    return(mp->modid);
 
     DEBUGP("Module %s not found\n", name);
-    return -1;
+    return(-1);
 }
 
+/*
+ * module_name - copy module name to user buffer, return ptr to same.
+ */
 char *
-module_name ( modid )
+module_name ( modid, cp )
     int modid;
+    char *cp;
 {
     struct module *mp;
-    char *cp;
 
     for ( mp=module_head ; mp ; mp=mp->next )
 	if ( mp->modid == modid )
-	    return(mp->name);
+	{
+	    strcpy(cp, mp->name);
+	    return(cp);
+	}
 
     DEBUGP("Module %d not found\n", modid);
-    cp = (char *) xmalloc(10);	/* copes with 1e8 modules! */
     sprintf(cp, "#%d", modid);
     return(cp);
 }
@@ -2167,9 +2228,9 @@ module_name ( modid )
  *	plus an interface to add new replacement requirements
  */
 void
-add_module_replacement( old, new, tag, len)
-    char *old;
-    char *new;
+add_module_replacement( old_module, new_module, tag, len)
+    char *old_module;
+    char *new_module;
     char *tag;
     int len;
 {
@@ -2177,9 +2238,11 @@ add_module_replacement( old, new, tag, len)
 
     mcp =  (struct module_compatability *)
       xmalloc(sizeof( struct module_compatability));
+    if (mcp == NULL) return;
 
-    mcp->old_module = xstrdup( old );
-    mcp->new_module = xstrdup( new );
+    mcp->old_module = xstrdup( old_module );
+    mcp->new_module = xstrdup( new_module );
+	if (tag)
     mcp->tag	    = xstrdup( tag );
     mcp->tag_len = len;
 
@@ -2320,9 +2383,11 @@ adopt_orphans __P((void))
 		onp = orphan_nodes = nbuckets[i];
 	    nbuckets[i] = NULL;
 	    while (onp) {
+        	char modbuf[256];
         	fprintf (stderr, "Unlinked OID in %s: %s ::= { %s %ld }\n",
-		    module_name(onp->modid), onp->label,
-				 onp->parent, onp->subid);
+        	    module_name(onp->modid, modbuf),
+        	    onp->label, onp->parent, onp->subid);
+
 		np = onp;
 		onp = onp->next;
 	    }
@@ -2364,6 +2429,7 @@ new_module (name , file)
 	/* Add this module to the list */
     DEBUGP("  Module %s is in %s\n", name, file);
     mp = (struct module *) xmalloc(sizeof(struct module));
+    if (mp == NULL) return;
     mp->name = xstrdup(name);
     mp->file = xstrdup(file);
     mp->imports = NULL;
@@ -2471,8 +2537,8 @@ parse(fp, root)
             DEBUGP ("Parsing MIB: %s\n", name);
             current_module = which_module( name );
             if ( current_module == -1 ) {
-		new_module(name, File);
-		current_module = which_module(name);
+                new_module(name, File);
+                current_module = which_module(name);
             }
             while ((type = get_token (fp, token, MAXTOKEN)) != ENDOFFILE)
                 if (type == BEGIN) break;
@@ -2561,8 +2627,12 @@ static void unget_token (token)
   int token;
 {
     if (ungotten_token != CONTINUE) {
+#ifdef NO_EXCEPTION
         fprintf (stderr, "Double unget\n");
         exit (1);
+#else
+        print_error("Double unget", "ungotten_token", CONTINUE);
+#endif
     }
     ungotten_token = token;
 }
@@ -2736,7 +2806,8 @@ add_mibdir( dirname )
 
     DEBUGP("Scanning directory %s\n", dirname);
     sprintf(token, "%s/%s", dirname, ".index");
-    if (stat (token, &idx_stat) == 0 && stat(dirname, &dir_stat) == 0) {
+    if ((stat(token, &idx_stat) == 0) &&
+	(stat(dirname, &dir_stat) == 0)) {
 	if (dir_stat.st_mtime < idx_stat.st_mtime) {
 	    DEBUGP("The index is good\n");
 	    if ((ip = fopen(token, "r")) != NULL) {
@@ -2802,7 +2873,7 @@ read_mib(filename)
 
     fp = fopen(filename, "r");
     if (fp == NULL) {
-	perror(filename);
+        perror(filename);
         return NULL;
     }
     Line = 1;
@@ -2857,7 +2928,7 @@ main(argc, argv)
 #endif /* TEST */
 
 static int
-parseQuoteString(fp, token, maxtlen)
+parseQuoteString(fp, token,maxtlen)
     register FILE *fp;
     register char *token;
     int maxtlen;
@@ -2875,8 +2946,14 @@ parseQuoteString(fp, token, maxtlen)
         else if (ch == '"') {
             *token = '\0';
             if (too_long && mib_warnings > 1)
+            {
+                /* show short form for brevity sake */
+                char ch_save = *(token_start + 50);
+                *(token_start + 50) = '\0';
                 print_error ("Warning: string too long",
                              token_start, QUOTESTRING);
+                *(token_start + 50) = ch_save;
+            }
             return QUOTESTRING;
         }
         /* maximum description length check.  If greater, keep parsing
@@ -2943,3 +3020,4 @@ find_module(mid)
     return mp;
   return NULL;
 }
+

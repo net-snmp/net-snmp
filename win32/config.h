@@ -741,7 +741,7 @@
 
 #ifndef SYS_CDEFS_DEFINES___P
 #ifndef __P
-#ifdef __STDC__
+#ifdef STDC_HEADERS
 #define __P(params) params
 #else
 #define __P(params) ()
@@ -762,3 +762,11 @@
 #define ENV_SEPARATOR ":"
 #define ENV_SEPARATOR_CHAR ':'
 #endif
+
+/* comment the next line if you are compiling with libsnmp.h 
+   and are not using the UC-Davis SNMP library. */
+#define UCD_SNMP_LIBRARY 1
+
+/* comment the next line if you do not want SNMPv2 party-based auth. */
+#define USE_V2PARTY_PROTOCOL 1
+

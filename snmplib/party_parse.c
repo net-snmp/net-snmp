@@ -159,7 +159,7 @@ read_party_database(filename)
 		fclose(fp);
 		return -1;
 	    }
-	    if ((addr = inet_addr(buf2)) == -1) {
+	    if ((int)(addr = inet_addr(buf2)) == -1) {
 		error_exit("Bad IP address", linenumber, filename);
 		fclose(fp);
 		return -1;

@@ -1,5 +1,7 @@
+ 
 #ifndef SNMP_CLIENT_H
 #define SNMP_CLIENT_H
+
 /*
  * snmp_client.h
  */
@@ -40,14 +42,18 @@ struct synch_state {
     struct snmp_pdu *pdu;
 };
 
-extern struct synch_state snmp_synch_state;
-
 struct variable_list* snmp_add_null_var __P((struct snmp_pdu *, oid *, int));
 struct snmp_pdu	*snmp_pdu_create __P((int));
 struct snmp_pdu *snmp_fix_pdu __P((struct snmp_pdu *, int));
 struct snmp_pdu *snmp_clone_pdu __P((struct snmp_pdu *));
 char *snmp_errstring __P((int));
+void snmp_synch_reset __P((struct snmp_session *));
 void snmp_synch_setup __P((struct snmp_session *));
 int snmp_synch_response __P((struct snmp_session *, struct snmp_pdu *, struct snmp_pdu **));
 int ms_party_init __P((in_addr_t, oid *, int *, oid *, int *, oid *, int *));
+
+/* single session API - see snmp_api.h for full details */
+int    snmp_sess_synch_response __P((void *, struct snmp_pdu *, struct snmp_pdu **));
+ 
 #endif /* SNMP_CLIENT_H */
+
