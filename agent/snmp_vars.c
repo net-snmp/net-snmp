@@ -36,12 +36,28 @@ PERFORMANCE OF THIS SOFTWARE.
 #endif
 #include <sys/types.h>
 #include <sys/socket.h>
+#if HAVE_SYS_SOCKIO_H
+#include <sys/sockio.h>
+#endif
 #include <sys/param.h>
 #if HAVE_SYS_DIR_H
 #include <sys/dir.h>
 #endif
+/*
+#ifdef solaris2
+#define __EXTENSIONS__
+#endif
+*/
+#include <sys/signal.h>
+/*
+#ifdef solaris2
+#undef __EXTENSIONS__
+#endif
+*/
+#ifndef solaris2
 #include <sys/user.h>
 #include <sys/proc.h>
+#endif
 #ifdef HAVE_SYS_DMAP_H
 #include <sys/dmap.h>
 #endif
@@ -82,6 +98,9 @@ PERFORMANCE OF THIS SOFTWARE.
 #include <netinet/icmp_var.h>
 #include <nlist.h>
 #include <sys/protosw.h>
+#if HAVE_INET_MIB2_H
+#include <inet/mib2.h>
+#endif
 
 #ifndef NULL
 #define NULL 0
@@ -100,6 +119,9 @@ PERFORMANCE OF THIS SOFTWARE.
 #include "snmp_vars_m2m.h"
 #include "alarm.h"
 #include "event.h"
+#if solaris2
+#include "kernel_sunos5.h"
+#endif
 
 #define PROCESSSLOTINDEX  0
 #define PROCESSID         4
@@ -194,7 +216,11 @@ static struct nlist nl[] = {
 	{ "arptab_nb" }, 
 	{ "arphd" },      
 	{ "in_ifaddr" },
+#ifdef solaris2
+        { "system_misc_kstat" },
+#else
 	{ "boottime" },
+#endif
 	{ "proc" },
 	{ "nproc" },
 	{ "dmmin" },
@@ -1457,6 +1483,7 @@ var_ifEntry(vp, name, length, exact, var_len, write_method)
  * Read the ARP table
  */
 
+#ifndef solaris2
 u_char *
 var_atEntry(vp, name, length, exact, var_len, write_method)
     register struct variable *vp;	/* IN - pointer to variable entry that points here */
@@ -1538,6 +1565,137 @@ var_atEntry(vp, name, length, exact, var_len, write_method)
    return NULL;
 }
 
+#else          /* solaris2 */
+
+static int
+AT_Cmp(void *addr, void *ep)
+{
+  if (((mib2_ipNetToMediaEntry_t *)ep)->ipNetToMediaNetAddress ==
+      *(IpAddress *)addr)
+    return (0);
+  else
+    return (1);
+}
+
+int
+Interface_Index_By_Name(Name, Len)
+char *Name;
+int Len;
+{
+	int i, sd, ret;
+	char buf[1024];
+	struct ifconf ifconf;
+	struct ifreq *ifrp;
+
+	if (Name == 0)
+	  return (0);
+	if ((sd = socket(AF_INET, SOCK_DGRAM, 0)) < 0)
+	  return (0);
+	ifconf.ifc_buf = buf;
+	ifconf.ifc_len = 1024;
+	if (ioctl(sd, SIOCGIFCONF, &ifconf) == -1) {
+	  ret = 0;
+	  goto Return;
+	}
+	for (i = 1, ifrp = ifconf.ifc_req, ret = 0;
+	     (char *)ifrp < (char *)ifconf.ifc_buf + ifconf.ifc_len; i++, ifrp++)
+	  if (strncmp(Name, ifrp->ifr_name, Len) == 0) {
+	    ret = i;
+	    break;
+	  } else
+	    ret = 0;
+      Return:
+	close(sd);
+	return (ret);	/* DONE */
+}
+
+u_char *
+var_atEntry(struct variable *vp, oid *name, int *length, int exact,
+	    int *var_len, int (**write_method)(void))
+{
+    /*
+     * object identifier is of form:
+     * 1.3.6.1.2.1.3.1.1.1.interface.1.A.B.C.D,  where A.B.C.D is IP address.
+     * Interface is at offset 10,
+     * IPADDR starts at offset 12.
+     */
+#define AT_NAME_LENGTH	16
+#define AT_IFINDEX_OFF	10
+#define	AT_IPADDR_OFF	12
+    u_char	*cp;
+    oid		*op;
+    oid		lowest[AT_NAME_LENGTH];
+    oid		current[AT_NAME_LENGTH];
+    char	PhysAddr[6], LowPhysAddr[6];
+    IpAddress	NextAddr;
+    mib2_ipNetToMediaEntry_t entry, Lowentry;
+    int		Found = 0;
+    req_e	req_type;
+
+    /* fill in object part of name for current (less sizeof instance part) */
+
+    bcopy((char *)vp->name, (char *)current, (int)vp->namelen * sizeof(oid));
+    if (*length == AT_NAME_LENGTH) /* Assume that the input name is the lowest */
+      bcopy((char *)name, (char *)lowest, AT_NAME_LENGTH * sizeof(oid));
+    for (NextAddr = (u_long)-1, req_type = GET_FIRST;
+	 ;
+	 NextAddr = entry.ipNetToMediaNetAddress, req_type = GET_NEXT) {
+      if (getMibstat(MIB_IP_NET, &entry, sizeof(mib2_ipNetToMediaEntry_t),
+		 req_type, &AT_Cmp, &NextAddr) != 0)
+		break;
+      	current[AT_IFINDEX_OFF] = 1;	/* IfIndex == 1 (ethernet) XXX */
+	current[AT_IFINDEX_OFF+1] = 1;
+        COPY_IPADDR(cp,(u_char *)&entry.ipNetToMediaNetAddress, op, current+AT_IPADDR_OFF);  
+	if (exact){
+	    if (compare(current, AT_NAME_LENGTH, name, *length) == 0){
+		bcopy((char *)current, (char *)lowest, AT_NAME_LENGTH * sizeof(oid));
+		Lowentry = entry;
+		Found++;
+		break;	/* no need to search further */
+	    }
+	} else {
+	  if ((compare(current, AT_NAME_LENGTH, name, *length) > 0)
+	      && (((NextAddr == (u_long)-1))
+		  || (compare(current, AT_NAME_LENGTH, lowest, AT_NAME_LENGTH) < 0)
+		  || (compare(name, AT_NAME_LENGTH, lowest, AT_NAME_LENGTH) == 0))){
+		/*
+		 * if new one is greater than input and closer to input than
+		 * previous lowest, and is not equal to it, save this one as the "next" one.
+		 */
+		bcopy((char *)current, (char *)lowest, AT_NAME_LENGTH * sizeof(oid));
+		Lowentry = entry;
+		Found++;
+	    }
+	}
+    }
+    if (Found == 0)
+      return(NULL);
+    bcopy((char *)lowest, (char *)name, AT_NAME_LENGTH * sizeof(oid));
+    *length = AT_NAME_LENGTH;
+    *write_method = 0;
+    switch(vp->magic){
+	case ATIFINDEX:
+	    *var_len = sizeof long_return;
+	    long_return = Interface_Index_By_Name(Lowentry.ipNetToMediaIfIndex.o_bytes,
+						  Lowentry.ipNetToMediaIfIndex.o_length);
+	    return (u_char *)&long_return;
+	case ATPHYSADDRESS:
+	    *var_len = Lowentry.ipNetToMediaPhysAddress.o_length;
+	    (void)memcpy(return_buf, Lowentry.ipNetToMediaPhysAddress.o_bytes, *var_len);
+	    return (u_char *)return_buf;
+	case ATNETADDRESS:
+	    *var_len = sizeof long_return;
+	    long_return = Lowentry.ipNetToMediaNetAddress;
+	    return (u_char *)&long_return;
+	default:
+	    ERROR("");
+   }
+   return NULL;
+}
+
+#endif /* solaris */
+
+#ifndef solaris2
 u_char *
 var_ip(vp, name, length, exact, var_len, write_method)
     register struct variable *vp;   /* IN - pointer to variable entry that points here */
@@ -1762,6 +1920,202 @@ var_ipAddrEntry(vp, name, length, exact, var_len, write_method)
     return NULL;
 }
 
+#else /* solaris2 */
+
+u_char *
+var_ip(vp, name, length, exact, var_len, write_method)
+    register struct variable *vp;   /* IN - pointer to variable entry that points here */
+    oid     *name;	    /* IN/OUT - input name requested, output name found */
+    int     *length;	    /* IN/OUT - length of input and output oid's */
+    int     exact;	    /* IN - TRUE if an exact match was requested. */
+    int     *var_len;	    /* OUT - length of variable or 0 if function returned. */
+    int     (**write_method)(); /* OUT - pointer to function to set variable, otherwise 0 */
+{
+#define IP_NAME_LENGTH	8
+    mib2_ip_t ipstat;
+    oid newname[MAX_NAME_LEN];
+    int result;
+    u_char *ret = (u_char *)&long_return;	/* Successful completion */
+
+    bcopy((char *)vp->name, (char *)newname, (int)vp->namelen * sizeof(oid));
+    newname[IP_NAME_LENGTH] = 0;
+    result = compare(name, *length, newname, (int)vp->namelen + 1);
+    if ((exact && (result != 0)) || (!exact && (result >= 0)))
+	return NULL;
+    bcopy((char *)newname, (char *)name, ((int)vp->namelen + 1) * sizeof(oid));
+    *length = vp->namelen + 1;
+
+    *write_method = 0;
+    *var_len = sizeof(long);	/* default length */
+    /*
+     *	Get the IP statistics from the kernel...
+     */
+    if (getMibstat(MIB_IP, &ipstat, sizeof(mib2_ip_t), GET_FIRST, &Get_everything, NULL) < 0)
+      return (NULL);		/* Things are ugly ... */
+    
+    switch (vp->magic){
+	case IPFORWARDING:
+	    long_return = ipstat.ipForwarding;
+      	    break;
+	case IPDEFAULTTTL:
+	    long_return = ipstat.ipDefaultTTL;
+      	    break;
+	case IPINRECEIVES:
+	    long_return = ipstat.ipInReceives;      
+      	    break;
+	case IPINHDRERRORS:
+	    long_return = ipstat.ipInHdrErrors;	    
+      	    break;
+	case IPINADDRERRORS:
+	    long_return = ipstat.ipInAddrErrors;	    
+      	    break;
+	case IPFORWDATAGRAMS:
+	    long_return = ipstat.ipForwDatagrams;	    
+      	    break;
+	case IPINUNKNOWNPROTOS:
+	    long_return = ipstat.ipInUnknownProtos;	    
+      	    break;
+	case IPINDISCARDS:
+	    long_return = ipstat.ipInDiscards;	    
+      	    break;
+	case IPINDELIVERS:
+	    long_return = ipstat.ipInDelivers;
+      	    break;
+	case IPOUTREQUESTS:
+	    long_return = ipstat.ipOutRequests;	    
+      	    break;
+	case IPOUTDISCARDS:
+	    long_return = ipstat.ipOutDiscards;	    
+      	    break;
+	case IPOUTNOROUTES:
+	    long_return = ipstat.ipOutNoRoutes;	    
+      	    break;
+	case IPREASMTIMEOUT:
+	    long_return = ipstat.ipReasmTimeout;	    
+      	    break;
+	case IPREASMREQDS:
+	    long_return = ipstat.ipReasmReqds;	    
+      	    break;
+	case IPREASMOKS:
+	    long_return = ipstat.ipReasmOKs;	    
+      	    break;
+	case IPREASMFAILS:
+	    long_return = ipstat.ipReasmFails;	    
+      	    break;
+	case IPFRAGOKS:
+	    long_return = ipstat.ipFragOKs;	    
+      	    break;
+	case IPFRAGFAILS:
+	    long_return = ipstat.ipFragFails;	    
+      	    break;
+	case IPFRAGCREATES:
+	    long_return = ipstat.ipFragCreates;	    
+      	    break;
+	default:
+	    ret = NULL;		/* Failure */
+	    ERROR("");
+    }
+    return (ret);
+}
+
+
+static int
+IP_Cmp(void *addr, void *ep)
+{
+  if (((mib2_ipAddrEntry_t *)ep)->ipAdEntAddr ==
+      *(IpAddress *)addr)
+    return (0);
+  else
+    return (1);
+}
+
+u_char *
+var_ipAddrEntry(vp, name, length, exact, var_len, write_method)
+    register struct variable *vp;    /* IN - pointer to variable entry that points here */
+    register oid	*name;	    /* IN/OUT - input name requested, output name found */
+    register int	*length;    /* IN/OUT - length of input and output oid's */
+    int			exact;	    /* IN - TRUE if an exact match was requested. */
+    int			*var_len;   /* OUT - length of variable or 0 if function returned. */
+    int			(**write_method)(); /* OUT - pointer to function to set variable, otherwise 0 */
+{
+    /*
+     * object identifier is of form:
+     * 1.3.6.1.2.1.4.20.1.?.A.B.C.D,  where A.B.C.D is IP address.
+     * IPADDR starts at offset 10.
+     */
+#define IP_ADDRNAME_LENGTH	14
+#define IP_ADDRINDEX_OFF	10
+    oid			    lowest[IP_ADDRNAME_LENGTH];
+    oid			    current[IP_ADDRNAME_LENGTH], *op;
+    u_char		    *cp;
+    IpAddress		    NextAddr;
+    mib2_ipAddrEntry_t	    entry, Lowentry;
+    int			    Found = 0;
+    req_e		    req_type;
+    
+    /* fill in object part of name for current (less sizeof instance part) */
+
+    bcopy((char *)vp->name, (char *)current, (int)vp->namelen * sizeof(oid));
+    if (*length == IP_ADDRNAME_LENGTH) /* Assume that the input name is the lowest */
+      bcopy((char *)name, (char *)lowest, IP_ADDRNAME_LENGTH * sizeof(oid));
+    for (NextAddr = (u_long)-1, req_type = GET_FIRST;
+	 ;
+	 NextAddr = entry.ipAdEntAddr, req_type = GET_NEXT) {
+      if (getMibstat(MIB_IP_ADDR, &entry, sizeof(mib2_ipAddrEntry_t),
+		     req_type, &IP_Cmp, &NextAddr) != 0)
+	break;
+      COPY_IPADDR(cp, (u_char *)&entry.ipAdEntAddr, op, current + IP_ADDRINDEX_OFF);
+      if (exact){
+	if (compare(current, IP_ADDRNAME_LENGTH, name, *length) == 0){
+	  bcopy((char *)current, (char *)lowest, IP_ADDRNAME_LENGTH * sizeof(oid));
+	  Lowentry = entry;
+	  Found++;
+	  break;	/* no need to search further */
+	}
+      } else {
+	if ((compare(current, IP_ADDRNAME_LENGTH, name, *length) > 0) 
+	    && (((NextAddr == (u_long)-1))
+		|| (compare(current, IP_ADDRNAME_LENGTH, lowest, IP_ADDRNAME_LENGTH) < 0)
+		|| (compare(name, IP_ADDRNAME_LENGTH, lowest, IP_ADDRNAME_LENGTH) == 0))){
+	  /*
+	   * if new one is greater than input and closer to input than
+	   * previous lowest, and is not equal to it, save this one as the "next" one.
+	   */
+	  Lowentry = entry;
+	  Found++;
+	  bcopy((char *)current, (char *)lowest, IP_ADDRNAME_LENGTH * sizeof(oid));
+	}
+      }
+    }
+    if (Found == 0)
+      return(NULL);
+    bcopy((char *)lowest, (char *)name, IP_ADDRNAME_LENGTH * sizeof(oid));
+    *length = IP_ADDRNAME_LENGTH;
+    *write_method = 0;
+    *var_len = sizeof(long_return);
+    switch(vp->magic){
+	case IPADADDR:
+      	    long_return = Lowentry.ipAdEntAddr;
+	    return(u_char *) &long_return;
+	case IPADIFINDEX:
+	    long_return = Interface_Index_By_Name(Lowentry.ipAdEntIfIndex.o_bytes,
+						  Lowentry.ipAdEntIfIndex.o_length);
+	    return(u_char *) &long_return;
+	case IPADNETMASK:
+	    long_return = Lowentry.ipAdEntNetMask;
+	    return(u_char *) &long_return;
+	case IPADBCASTADDR:
+	    long_return = Lowentry.ipAdEntBcastAddr;
+	    return(u_char *) &long_return;	   
+	default:
+	    ERROR("");
+    }
+    return NULL;
+}
+
+#endif /* solaris2 */
+
+#ifndef solaris2
 
 u_char *
 var_icmp(vp, name, length, exact, var_len, write_method)
@@ -1863,7 +2217,128 @@ var_icmp(vp, name, length, exact, var_len, write_method)
     return NULL;
 }
 
+#else /* solaris2 */
 
+u_char *
+var_icmp(vp, name, length, exact, var_len, write_method)
+    register struct variable *vp;    /* IN - pointer to variable entry that points here */
+    oid     *name;	    /* IN/OUT - input name requested, output name found */
+    int     *length;	    /* IN/OUT - length of input and output oid's */
+    int     exact;	    /* IN - TRUE if an exact match was requested. */
+    int     *var_len;	    /* OUT - length of variable or 0 if function returned. */
+    int     (**write_method)(); /* OUT - pointer to function to set variable, otherwise 0 */
+{
+#define ICMP_NAME_LENGTH	8
+    register int i;
+    mib2_icmp_t icmpstat;
+    oid newname[MAX_NAME_LEN];
+    int result;
+    u_char *ret = (u_char *)&long_return;	/* Successful completion */
+
+    bcopy((char *)vp->name, (char *)newname, (int)vp->namelen * sizeof(oid));
+    newname[ICMP_NAME_LENGTH] = 0;
+    result = compare(name, *length, newname, (int)vp->namelen + 1);
+    if ((exact && (result != 0)) || (!exact && (result >= 0)))
+        return NULL;
+    bcopy((char *)newname, (char *)name, ((int)vp->namelen + 1) * sizeof(oid));
+    *length = vp->namelen + 1;
+    *write_method = 0;
+    *var_len = sizeof(long); /* all following variables are sizeof long */
+    /*
+     *	Get the ICMP statistics from the kernel...
+     */
+    if (getMibstat(MIB_ICMP, &icmpstat, sizeof(mib2_icmp_t), GET_FIRST, &Get_everything, NULL) < 0)
+      return (NULL);		/* Things are ugly ... */
+
+    switch (vp->magic){
+	case ICMPINMSGS:
+      		long_return = icmpstat.icmpInMsgs;
+      		break;
+	case ICMPINERRORS:
+      		long_return = icmpstat.icmpInErrors;
+      		break;
+	case ICMPINDESTUNREACHS:
+      		long_return = icmpstat.icmpInDestUnreachs;
+      		break;
+	case ICMPINTIMEEXCDS:
+      		long_return = icmpstat.icmpInTimeExcds;
+      		break;
+	case ICMPINPARMPROBS:
+      		long_return = icmpstat.icmpInParmProbs;
+      		break;
+	case ICMPINSRCQUENCHS:
+      		long_return = icmpstat.icmpInSrcQuenchs;
+      		break;
+	case ICMPINREDIRECTS:
+      		long_return = icmpstat.icmpInRedirects;
+      		break;
+	case ICMPINECHOS:
+      		long_return = icmpstat.icmpInEchos;
+      		break;
+	case ICMPINECHOREPS:
+      		long_return = icmpstat.icmpInEchoReps;
+      		break;
+	case ICMPINTIMESTAMPS:
+      		long_return = icmpstat.icmpInTimestamps;
+      		break;
+	case ICMPINTIMESTAMPREPS:
+      		long_return = icmpstat.icmpInTimestampReps;
+      		break;
+	case ICMPINADDRMASKS:
+      		long_return = icmpstat.icmpInAddrMasks;
+      		break;
+	case ICMPINADDRMASKREPS:
+      		long_return = icmpstat.icmpInAddrMaskReps;
+      		break;
+	case ICMPOUTMSGS:
+      		long_return = icmpstat.icmpOutMsgs;
+      		break;
+	case ICMPOUTERRORS:
+      		long_return = icmpstat.icmpOutErrors;
+      		break;
+	case ICMPOUTDESTUNREACHS:
+      		long_return = icmpstat.icmpOutDestUnreachs;
+      		break;
+	case ICMPOUTTIMEEXCDS:
+      		long_return = icmpstat.icmpOutTimeExcds;
+      		break;
+	case ICMPOUTPARMPROBS:
+      		long_return = icmpstat.icmpOutParmProbs;
+      		break;
+	case ICMPOUTSRCQUENCHS:
+      		long_return = icmpstat.icmpOutSrcQuenchs;
+      		break;
+	case ICMPOUTREDIRECTS:
+      		long_return = icmpstat.icmpOutRedirects;
+      		break;
+	case ICMPOUTECHOS:
+      		long_return = icmpstat.icmpOutEchos;
+      		break;
+	case ICMPOUTECHOREPS:
+      		long_return = icmpstat.icmpOutEchoReps;
+      		break;
+	case ICMPOUTTIMESTAMPS:
+      		long_return = icmpstat.icmpOutTimestamps;
+      		break;
+	case ICMPOUTTIMESTAMPREPS:
+      		long_return = icmpstat.icmpOutTimestampReps;
+      		break;
+	case ICMPOUTADDRMASKS:
+      		long_return = icmpstat.icmpOutAddrMasks;
+      		break;
+	case ICMPOUTADDRMASKREPS:
+      		long_return = icmpstat.icmpOutAddrMaskReps;
+      		break;
+	default:
+		ret = NULL;
+		ERROR("");
+    }
+    return (ret);
+}
+
+#endif /* solaris2 - icmp */
+
+#ifndef solaris2 
 u_char *
 var_udp(vp, name, length, exact, var_len, write_method)
     register struct variable *vp;    /* IN - pointer to variable entry that points here */
@@ -1908,6 +2383,59 @@ var_udp(vp, name, length, exact, var_len, write_method)
     }
     return NULL;
 }
+
+#else /* solaris2 - udp */
+
+u_char *
+var_udp(vp, name, length, exact, var_len, write_method)
+    register struct variable *vp;    /* IN - pointer to variable entry that points here */
+    oid     *name;	    /* IN/OUT - input name requested, output name found */
+    int     *length;	    /* IN/OUT - length of input and output oid's */
+    int     exact;	    /* IN - TRUE if an exact match was requested. */
+    int     *var_len;	    /* OUT - length of variable or 0 if function returned. */
+    int     (**write_method)(); /* OUT - pointer to function to set variable, otherwise 0 */
+{
+#define UDP_NAME_LENGTH	8
+    mib2_udp_t udpstat;
+    oid newname[MAX_NAME_LEN];
+    int result;
+    u_char *ret = (u_char *)&long_return;	/* Successful completion */
+
+    bcopy((char *)vp->name, (char *)newname, (int)vp->namelen * sizeof(oid));
+    newname[UDP_NAME_LENGTH] = 0;
+    result = compare(name, *length, newname, (int)vp->namelen + 1);
+    if ((exact && (result != 0)) || (!exact && (result >= 0)))
+        return NULL;
+    bcopy((char *)newname, (char *)name, ((int)vp->namelen + 1) * sizeof(oid));
+    *length = vp->namelen + 1;
+    *write_method = 0;
+    *var_len = sizeof(long);	/* default length */
+    /*
+     *	Get the UDP statistics from the kernel...
+     */
+    if (getMibstat(MIB_UDP, &udpstat, sizeof(mib2_udp_t), GET_FIRST, &Get_everything, NULL) < 0)
+      return (NULL);		/* Things are ugly ... */
+
+    switch (vp->magic){
+	case UDPINDATAGRAMS:
+	case UDPNOPORTS:
+      		long_return = udpstat.udpInDatagrams;
+      		break;
+	case UDPOUTDATAGRAMS:
+      		long_return = udpstat.udpOutDatagrams;
+      		break;
+	case UDPINERRORS:
+      		long_return = udpstat.udpInErrors;
+      		break;
+	default:
+		ret = NULL;
+		ERROR("");
+    }
+    return (ret);
+}
+#endif /* solaris2 - udp */
+
+#ifndef solaris2
 
 u_char *
 var_tcp(vp, name, length, exact, var_len, write_method)
@@ -2064,6 +2592,174 @@ LowState = -1;	    /* Don't have one yet */
     }
     return NULL;
 }
+
+#else  /* solaris2 - tcp */
+
+
+static int
+TCP_Cmp(void *addr, void *ep)
+{
+  if (memcmp((mib2_tcpConnEntry_t *)ep,(mib2_tcpConnEntry_t *)addr,
+	     sizeof(mib2_tcpConnEntry_t))  == 0)
+    return (0);
+  else
+    return (1);
+}
+
+u_char *
+var_tcp(vp, name, length, exact, var_len, write_method)
+register struct variable *vp;    /* IN - pointer to variable entry that points here */
+oid     *name;	    /* IN/OUT - input name requested, output name found */
+int     *length;	    /* IN/OUT - length of input and output oid's */
+int     exact;	    /* IN - TRUE if an exact match was requested. */
+int     *var_len;	    /* OUT - length of variable or 0 if function returned. */
+int     (**write_method)(); /* OUT - pointer to function to set variable, otherwise 0 */
+{
+#define TCP_NAME_LENGTH	8
+  int i;
+  mib2_tcp_t tcpstat;
+  oid newname[MAX_NAME_LEN], lowest[MAX_NAME_LEN], *op;
+  u_char *cp;
+  int State, LowState;
+  int result;
+  u_char *ret = (u_char *)&long_return;	/* Successful completion */
+
+  if (vp->magic < TCPCONNSTATE) {
+    bcopy((char *)vp->name, (char *)newname,
+	  (int)vp->namelen * sizeof(oid));
+    newname[TCP_NAME_LENGTH] = 0;
+    result = compare(name, *length, newname, (int)vp->namelen + 1);
+    if ((exact && (result != 0)) || (!exact && (result >= 0)))
+      return NULL;
+    bcopy((char *)newname, (char *)name,
+	  ((int)vp->namelen + 1) * sizeof(oid));
+    *length = vp->namelen + 1;
+    *write_method = 0;
+    *var_len = sizeof(long);    /* default length */
+    /*
+     *  Get the TCP statistics from the kernel...
+     */
+    if (getMibstat(MIB_TCP, &tcpstat, sizeof(mib2_tcp_t), GET_FIRST, &Get_everything, NULL) < 0)
+      return (NULL);		/* Things are ugly ... */
+
+    switch (vp->magic){
+    case TCPRTOALGORITHM:
+      long_return = tcpstat.tcpRtoAlgorithm;
+      return(u_char *) &long_return;
+    case TCPRTOMIN:
+      long_return = tcpstat.tcpRtoMin;
+      return(u_char *) &long_return;
+    case TCPRTOMAX:
+      long_return = tcpstat.tcpRtoMax;
+      return(u_char *) &long_return;
+    case TCPMAXCONN:
+      long_return = tcpstat.tcpMaxConn;
+      return(u_char *) &long_return;
+    case TCPACTIVEOPENS:
+      long_return = tcpstat.tcpActiveOpens;
+      return(u_char *) &long_return;
+    case TCPPASSIVEOPENS:
+      long_return = tcpstat.tcpPassiveOpens;
+      return(u_char *) &long_return;
+    case TCPATTEMPTFAILS:
+      long_return = tcpstat.tcpAttemptFails;
+      return(u_char *) &long_return;
+    case TCPESTABRESETS:
+      long_return = tcpstat.tcpEstabResets;
+      return(u_char *) &long_return;
+    case TCPCURRESTAB:
+      long_return = tcpstat.tcpCurrEstab;
+      return(u_char *) &long_return;
+    case TCPINSEGS:
+      long_return = tcpstat.tcpInSegs;
+      return(u_char *) &long_return;
+    case TCPOUTSEGS:
+      long_return = tcpstat.tcpOutSegs;
+      return(u_char *) &long_return;
+    case TCPRETRANSSEGS:
+      long_return = tcpstat.tcpRetransSegs;
+      return(u_char *) &long_return;
+    default:
+      ERROR("");
+      return (NULL);
+    }
+  } else {	/* Info about a particular connection */
+#define TCP_CONN_LENGTH	20
+#define TCP_LOCADDR_OFF	10
+#define TCP_LOCPORT_OFF	14
+#define TCP_REMADDR_OFF	15
+#define TCP_REMPORT_OFF	19
+    mib2_tcpConnEntry_t	Lowentry, Nextentry, entry;
+    req_e  		req_type;
+    int			Found = 0;
+    
+    bcopy((char *)vp->name, (char *)newname, (int)vp->namelen * sizeof(oid));
+    if (*length == TCP_CONN_LENGTH) /* Assume that the input name is the lowest */
+      bcopy((char *)name, (char *)lowest, TCP_CONN_LENGTH * sizeof(oid));
+    for (Nextentry.tcpConnLocalAddress = (u_long)-1, req_type = GET_FIRST;
+	 ;
+	 Nextentry = entry, req_type = GET_NEXT) {
+      if (getMibstat(MIB_TCP_CONN, &entry, sizeof(mib2_tcpConnEntry_t),
+		 req_type, &TCP_Cmp, &entry) != 0)
+	break;
+      COPY_IPADDR(cp, (u_char *)&entry.tcpConnLocalAddress, op, newname + TCP_LOCADDR_OFF);
+      newname[TCP_LOCPORT_OFF] = entry.tcpConnLocalPort;
+      COPY_IPADDR(cp, (u_char *)&entry.tcpConnRemAddress, op, newname + TCP_REMADDR_OFF);
+      newname[TCP_REMPORT_OFF] = entry.tcpConnRemPort;
+
+      if (exact){
+	if (compare(newname, TCP_CONN_LENGTH, name, *length) == 0){
+	  bcopy((char *)newname, (char *)lowest, TCP_CONN_LENGTH * sizeof(oid));
+	  Lowentry = entry;
+	  Found++;
+	  break;  /* no need to search further */
+	}
+      } else {
+	if ((compare(newname, TCP_CONN_LENGTH, name, *length) > 0) &&
+	    ((Nextentry.tcpConnLocalAddress == (u_long)-1)
+	     || (compare(newname, TCP_CONN_LENGTH, lowest, TCP_CONN_LENGTH) < 0)
+	     || (compare(name, TCP_CONN_LENGTH, lowest, TCP_CONN_LENGTH) == 0))){
+
+	  /* if new one is greater than input and closer to input than
+	   * previous lowest, and is not equal to it, save this one as the "next" one.
+	   */
+	  bcopy((char *)newname, (char *)lowest, TCP_CONN_LENGTH * sizeof(oid));
+	  Lowentry = entry;
+	  Found++;
+	}
+      }
+    }
+    if (Found == 0)
+      return(NULL);
+    bcopy((char *)lowest, (char *)name,
+	  ((int)vp->namelen + TCP_CONN_LENGTH - TCP_LOCADDR_OFF) * sizeof(oid));
+    *length = vp->namelen + TCP_CONN_LENGTH - TCP_LOCADDR_OFF;
+    *write_method = 0;
+    *var_len = sizeof(long);
+    switch (vp->magic) {
+    case TCPCONNSTATE:
+      long_return = Lowentry.tcpConnState;
+      return(u_char *) &long_return;
+    case TCPCONNLOCALADDRESS:
+      long_return = Lowentry.tcpConnLocalAddress;
+      return(u_char *) &long_return;
+    case TCPCONNLOCALPORT:
+      long_return = Lowentry.tcpConnLocalPort;
+      return(u_char *) &long_return;
+    case TCPCONNREMADDRESS:
+      long_return = Lowentry.tcpConnRemAddress;
+      return(u_char *) &long_return;
+    case TCPCONNREMPORT:
+      long_return = Lowentry.tcpConnRemPort;
+      return(u_char *) &long_return;
+    default:
+      ERROR("");
+      return (NULL);
+    }
+  }
+}
+
+#endif /* solaris2 - tcp */
 
 /*
  *	Print INTERNET connections

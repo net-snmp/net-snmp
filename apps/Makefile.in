@@ -3,7 +3,7 @@
 # snmptrapd, snmptable, snmpset, snmpgetnext
 #
 TARG=	snmpwalk snmpbulkwalk snmptest snmptranslate snmpget snmptrapd snmpset snmpgetnext
-LIBS=	../lib/libsnmp.a
+LIBS=	@LIBS@ ../lib/libsnmp.a
 
 CFLAGS=@CFLAGS@
 CPPFLAGS=@CPPFLAGS@ -I.. -I../snmplib
@@ -13,29 +13,29 @@ CC = @CC@ $(CPPFLAGS)
 
 all: $(TARG)
 
-snmpwalk:    snmpwalk.o ${LIBS}
-	${CC} -o $@ snmpwalk.o ${LIBS} ${LDFLAGS}
+snmpwalk:    snmpwalk.o
+	${CC} -o $@ snmpwalk.o ${LDFLAGS} ${LIBS} 
 
-snmpbulkwalk:    snmpbulkwalk.o ${LIBS}
-	${CC} -o $@ snmpbulkwalk.o ${LIBS} ${LDFLAGS}
+snmpbulkwalk:    snmpbulkwalk.o
+	${CC} -o $@ snmpbulkwalk.o ${LDFLAGS} ${LIBS} 
 
-snmptranslate:    snmptranslate.o ${LIBS}
-	${CC} -o $@ snmptranslate.o ${LIBS} ${LDFLAGS}
+snmptranslate:    snmptranslate.o
+	${CC} -o $@ snmptranslate.o ${LDFLAGS} ${LIBS} 
 
-snmpget:    snmpget.o ${LIBS}
-	${CC} -o $@ snmpget.o ${LIBS} ${LDFLAGS}
+snmpget:    snmpget.o
+	${CC} -o $@ snmpget.o ${LDFLAGS} ${LIBS} 
 
-snmptest:    snmptest.o ${LIBS}
-	${CC} -o $@ snmptest.o ${LIBS} ${LDFLAGS}
+snmptest:    snmptest.o
+	${CC} -o $@ snmptest.o ${LDFLAGS} ${LIBS} 
 
-snmptrapd:    snmptrapd.o ${LIBS}
-	${CC} -o $@ snmptrapd.o ${LIBS} ${LDFLAGS}
+snmptrapd:    snmptrapd.o
+	${CC} -o $@ snmptrapd.o ${LDFLAGS} ${LIBS} 
 
-snmpset:    snmpset.o ${LIBS}
-	${CC} -o $@ snmpset.o ${LIBS} ${LDFLAGS}
+snmpset:    snmpset.o
+	${CC} -o $@ snmpset.o ${LDFLAGS} ${LIBS} 
 
-snmpgetnext:    snmpgetnext.o ${LIBS}
-	${CC} -o $@ snmpgetnext.o ${LIBS} ${LDFLAGS}
+snmpgetnext:    snmpgetnext.o
+	${CC} -o $@ snmpgetnext.o ${LDFLAGS} ${LIBS} 
 
 clean:
 	rm -f *.o ${TARG}

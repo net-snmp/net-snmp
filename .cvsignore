@@ -4,5 +4,3 @@ config.h
 config.log
 config.status
 mib.txt
-stamp-h
-stamp-h.in
