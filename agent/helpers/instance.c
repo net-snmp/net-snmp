@@ -107,7 +107,8 @@ get_reg(const char *name,
         oid * reg_oid, size_t reg_oid_len,
         void *it,
         int modes,
-        Netsnmp_Node_Handler * scalarh, Netsnmp_Node_Handler * subhandler)
+        Netsnmp_Node_Handler * scalarh, Netsnmp_Node_Handler * subhandler,
+        const char *contextName)
 {
     netsnmp_handler_registration *myreg;
     netsnmp_mib_handler *myhandler;
@@ -129,6 +130,8 @@ get_reg(const char *name,
                                                 modes);
         myreg->handler->myvoid = (void *) it;
     }
+    if (contextName)
+        myreg->contextName = strdup(contextName);
     return myreg;
 }
 
@@ -143,7 +146,7 @@ netsnmp_register_read_only_ulong_instance(const char *name,
 
     myreg = get_reg(name, "ulong_handler", reg_oid, reg_oid_len, it,
                     HANDLER_CAN_RONLY, netsnmp_instance_ulong_handler,
-                    subhandler);
+                    subhandler, NULL);
     return netsnmp_register_read_only_instance(myreg);
 }
 
@@ -157,7 +160,7 @@ netsnmp_register_ulong_instance(const char *name,
 
     myreg = get_reg(name, "ulong_handler", reg_oid, reg_oid_len, it,
                     HANDLER_CAN_RWRITE, netsnmp_instance_ulong_handler,
-                    subhandler);
+                    subhandler, NULL);
     return netsnmp_register_instance(myreg);
 }
 
@@ -173,7 +176,7 @@ netsnmp_register_read_only_counter32_instance(const char *name,
 
     myreg = get_reg(name, "counter32_handler", reg_oid, reg_oid_len, it,
                     HANDLER_CAN_RWRITE, netsnmp_instance_counter32_handler,
-                    subhandler);
+                    subhandler, NULL);
     return netsnmp_register_read_only_instance(myreg);
 }
 
@@ -187,7 +190,7 @@ netsnmp_register_read_only_long_instance(const char *name,
 
     myreg = get_reg(name, "long_handler", reg_oid, reg_oid_len, it,
                     HANDLER_CAN_RONLY, netsnmp_instance_long_handler,
-                    subhandler);
+                    subhandler, NULL);
     return netsnmp_register_read_only_instance(myreg);
 }
 
@@ -200,7 +203,7 @@ netsnmp_register_long_instance(const char *name,
 
     myreg = get_reg(name, "long_handler", reg_oid, reg_oid_len, it,
                     HANDLER_CAN_RWRITE, netsnmp_instance_long_handler,
-                    subhandler);
+                    subhandler, NULL);
     return netsnmp_register_instance(myreg);
 }
 
@@ -213,7 +216,7 @@ netsnmp_register_read_only_int_instance(const char *name,
 
     myreg = get_reg(name, "int_handler", reg_oid, reg_oid_len, it,
                     HANDLER_CAN_RONLY, netsnmp_instance_int_handler,
-                    subhandler);
+                    subhandler, NULL);
     return netsnmp_register_read_only_instance(myreg);
 }
 
@@ -228,6 +231,123 @@ register_read_only_int_instance(const char *name,
   return netsnmp_register_read_only_int_instance(name,
                                 reg_oid, reg_oid_len,
                                 it, subhandler);
+}
+
+/*
+ * Context registrations
+ */
+
+int
+netsnmp_register_read_only_ulong_instance_context(const char *name,
+                                                  oid * reg_oid,
+                                                  size_t reg_oid_len,
+                                                  u_long * it,
+                                                  Netsnmp_Node_Handler *
+                                                  subhandler,
+                                                  const char *contextName)
+{
+    netsnmp_handler_registration *myreg;
+
+    myreg = get_reg(name, "ulong_handler", reg_oid, reg_oid_len, it,
+                    HANDLER_CAN_RONLY, netsnmp_instance_ulong_handler,
+                    subhandler, contextName);
+    return netsnmp_register_read_only_instance(myreg);
+}
+
+int
+netsnmp_register_ulong_instance_context(const char *name,
+                                        oid * reg_oid, size_t reg_oid_len,
+                                        u_long * it,
+                                        Netsnmp_Node_Handler * subhandler,
+                                        const char *contextName)
+{
+    netsnmp_handler_registration *myreg;
+
+    myreg = get_reg(name, "ulong_handler", reg_oid, reg_oid_len, it,
+                    HANDLER_CAN_RWRITE, netsnmp_instance_ulong_handler,
+                    subhandler, contextName);
+    return netsnmp_register_instance(myreg);
+}
+
+int
+netsnmp_register_read_only_counter32_instance_context(const char *name,
+                                                      oid * reg_oid,
+                                                      size_t reg_oid_len,
+                                                      u_long * it,
+                                                      Netsnmp_Node_Handler *
+                                                      subhandler,
+                                                      const char *contextName)
+{
+    netsnmp_handler_registration *myreg;
+
+    myreg = get_reg(name, "counter32_handler", reg_oid, reg_oid_len, it,
+                    HANDLER_CAN_RWRITE, netsnmp_instance_counter32_handler,
+                    subhandler, contextName);
+    return netsnmp_register_read_only_instance(myreg);
+}
+
+int
+netsnmp_register_read_only_long_instance_context(const char *name,
+                                                 oid * reg_oid,
+                                                 size_t reg_oid_len,
+                                                 long *it,
+                                                 Netsnmp_Node_Handler
+                                                 *subhandler,
+                                                 const char *contextName)
+{
+    netsnmp_handler_registration *myreg;
+
+    myreg = get_reg(name, "long_handler", reg_oid, reg_oid_len, it,
+                    HANDLER_CAN_RONLY, netsnmp_instance_long_handler,
+                    subhandler, contextName);
+    return netsnmp_register_read_only_instance(myreg);
+}
+
+int
+netsnmp_register_long_instance_context(const char *name,
+                                       oid * reg_oid, size_t reg_oid_len,
+                                       long *it,
+                                       Netsnmp_Node_Handler * subhandler,
+                                       const char *contextName)
+{
+    netsnmp_handler_registration *myreg;
+
+    myreg = get_reg(name, "long_handler", reg_oid, reg_oid_len, it,
+                    HANDLER_CAN_RWRITE, netsnmp_instance_long_handler,
+                    subhandler, contextName);
+    return netsnmp_register_instance(myreg);
+}
+
+int
+netsnmp_register_read_only_int_instance_context(const char *name,
+                                                oid * reg_oid,
+                                                size_t reg_oid_len,
+                                                int *it,
+                                                Netsnmp_Node_Handler * subhandler,
+                                                const char *contextName)
+{
+    netsnmp_handler_registration *myreg;
+
+    myreg = get_reg(name, "int_handler", reg_oid, reg_oid_len, it,
+                    HANDLER_CAN_RONLY, netsnmp_instance_int_handler,
+                    subhandler, contextName);
+    return netsnmp_register_read_only_instance(myreg);
+}
+
+/*
+ * Compatibility with earlier (inconsistently named) routine
+ */
+int
+register_read_only_int_instance_context(const char *name,
+                                        oid * reg_oid, size_t reg_oid_len,
+                                        int *it,
+                                        Netsnmp_Node_Handler * subhandler,
+                                        const char *contextName)
+{
+    return netsnmp_register_read_only_int_instance_context(name,
+                                                           reg_oid, reg_oid_len,
+                                                           it, subhandler,
+                                                           contextName);
 }
 
 /**
@@ -257,7 +377,7 @@ netsnmp_register_int_instance(const char *name,
 
     myreg = get_reg(name, "int_handler", reg_oid, reg_oid_len, it,
                     HANDLER_CAN_RWRITE, netsnmp_instance_int_handler,
-                    subhandler);
+                    subhandler, NULL);
     return netsnmp_register_instance(myreg);
 }
 
