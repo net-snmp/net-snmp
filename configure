@@ -6549,7 +6549,7 @@ echo "configure:6549: checking for developer gcc flags" >&5
 if test "x$developer" = "xyes" -a "x$ac_cv_prog_gcc" = "xyes"; then
   DEVFLAGS="-Wall -Wstrict-prototypes -Wwrite-strings -Wcast-qual -Wno-char-subscripts"
 else
-  DEVFLAGS="none"
+  DEVFLAGS=""
 fi
 echo "$ac_t""$DEVFLAGS" 1>&6
 

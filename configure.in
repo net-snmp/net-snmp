@@ -558,7 +558,7 @@ AC_MSG_CHECKING(for developer gcc flags)
 if test "x$developer" = "xyes" -a "x$ac_cv_prog_gcc" = "xyes"; then
   DEVFLAGS="-Wall -Wstrict-prototypes -Wwrite-strings -Wcast-qual -Wno-char-subscripts"
 else
-  DEVFLAGS="none"
+  DEVFLAGS=""
 fi
 AC_MSG_RESULT($DEVFLAGS)
 AC_SUBST(DEVFLAGS)
