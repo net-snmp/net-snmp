@@ -39,8 +39,26 @@ extern "C" {
    privacy support. */
 #define SCAPI_AUTHPRIV 1
 
+
+#ifdef USE_OPENSSL
+/* Define to 1 if you have the <openssl/aes.h> header file. */
+#define HAVE_OPENSSL_AES_H 1
+
+/* Define to 1 if you have the <openssl/des.h> header file. */
+#define HAVE_OPENSSL_DES_H 1
+
+/* Define to 1 if you have the <openssl/evp.h> header file. */
+#define HAVE_OPENSSL_EVP_H 1
+
+/* Define to 1 if you have the <openssl/hmac.h> header file. */
+#define HAVE_OPENSSL_HMAC_H 1
+
+#else /* ! USE_OPENSSL */
+
 /* define if you are using the internal MD5 code */
 #define USE_INTERNAL_MD5 1
+
+#endif /* ! USE_OPENSSL */
 
 /* add in recent CMU library extensions (not complete) */
 #define CMU_COMPATIBLE 1
