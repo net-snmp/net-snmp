@@ -53,7 +53,8 @@ Recommended Procedure
 
 3) Run the package script. 
 
-   $ nsb-package -p Ext-5-0-3
+   $ $HOME/src/net-snmp-cvs/dist/nsb-package -p -r \
+        -s $HOME/src/net-snmp-5.0.5 5.0.5
 
 4) Create tarball (assuming no errors; see next section if there are errors)
 
@@ -69,7 +70,7 @@ Recommended Procedure
 
 7) Upload to Sourceforge
 
-   $ ftp incoming.sourceforge.net
+   $ ftp upload.sourceforge.net
      >bin
      >put *.gz
 
