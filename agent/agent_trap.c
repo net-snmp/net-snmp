@@ -335,13 +335,17 @@ void send_enterprise_trap_vars (int trap,
 		 *  Create a template PDU, ready for sending
 		 */
     template_pdu = snmp_pdu_create( SNMP_MSG_TRAP );
-    if ( template_pdu == NULL )
+    if ( template_pdu == NULL ) {
+		/* Free memory if value stored dynamically */
+	snmp_set_var_value( &enterprise_var, NULL, 0);
 	return;
+    }
     template_pdu->trap_type     = trap;
     template_pdu->specific_type = specific;
     if ( snmp_clone_mem((void **)&template_pdu->enterprise,
 				enterprise, enterprise_length*sizeof(oid))) {
 	snmp_free_pdu( template_pdu );
+	snmp_set_var_value( &enterprise_var, NULL, 0);
 	return;
     }
     template_pdu->enterprise_length = enterprise_length;
@@ -402,6 +406,7 @@ void send_enterprise_trap_vars (int trap,
 	case SNMP_TRAP_AUTHFAIL:
 		if (snmp_enableauthentraps == SNMP_AUTHENTICATED_TRAPS_DISABLED) {
 		    snmp_free_pdu(template_pdu);
+		    snmp_set_var_value( &enterprise_var, NULL, 0);
 		    return;
 		}
 		snmp_set_var_value( &snmptrap_var,
@@ -471,6 +476,9 @@ void send_enterprise_trap_vars (int trap,
     snmp_call_callbacks(SNMP_CALLBACK_APPLICATION, SNMPD_CALLBACK_SEND_TRAP1,
                         template_pdu);
 
+		/* Free memory if values stored dynamically */
+    snmp_set_var_value( &enterprise_var, NULL, 0);
+    snmp_set_var_value( &snmptrap_var, NULL, 0);
 	/* Ensure we don't free anything we shouldn't */
     if ( last_var )
 	last_var->next_variable = NULL;
