@@ -127,14 +127,18 @@ AC_ARG_WITH(logfile,
 AC_ARG_WITH(libwrap,
 [  --with-libwrap[=LIBPATH]        Compile in libwrap (tcp_wrappers) support.],
     if test "x$withval" != "x" -a -d "$withval"; then
-        LIBS="-L$withval -lwrap $LIBS"
+        WRAPLIBS="-L$withval -lwrap"
     elif test "x$withval" = "xyes"; then
-        LIBS="-lwrap $LIBS"
+        WRAPLIBS="-lwrap"
     else
-        LIBS="$withval $LIBS"
+        WRAPLIBS="$withval $LIBS"
     fi
     AC_DEFINE(USE_LIBWRAP)
 )
+
+dnl This can't be within AC_ARG_WITH.  I don't want to read autoconf m4
+dnl to find out why.
+AC_SUBST(WRAPLIBS)
 
 AC_ARG_WITH(mib_modules,
 [  --with-mib-modules=\"item1 ...\"  Compile with additional mib modules
