@@ -75,6 +75,7 @@ PERFORMANCE OF THIS SOFTWARE.
 #include "mibincl.h"
 #include "snmpv3.h"
 #include "snmpusm.h"
+#include "agentx.h"
 #include "m2m.h"
 #include "snmp_vars_m2m.h"
 #include "../snmplib/system.h"
@@ -299,6 +300,9 @@ register_mib(const char *moduleName,
   subtree->variables_len = numvars;
   subtree->variables_width = varsize;
   load_subtree(subtree);
+
+  if ( agent_role == SUB_AGENT )
+    agentx_register( agentx_session, mibloc, mibloclen );
 }
 
 /* unregister_mib(oid mibloc, int mibloclen)
@@ -308,6 +312,8 @@ unregister_mib(oid *name,
 	       size_t len)
 {
   unregister_mib_tree(name, len, subtrees);
+  if ( agent_role == SUB_AGENT )
+    agentx_unregister( agentx_session, name, len );
 }
 
 struct subtree *
