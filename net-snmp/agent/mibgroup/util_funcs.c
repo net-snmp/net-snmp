@@ -92,10 +92,12 @@ int shell_command(ex)
   ex->result = system(shellline);
   ex->result = WEXITSTATUS(ex->result);
   shellout = fopen("/tmp/shoutput","r");
-  if (fgets(ex->output,STRMAX,shellout) == NULL) {
-    ex->output[0] = 0;
+  if((shellout = fopen("/tmp/shoutput","r")) != NULL) {
+    if (fgets(ex->output,STRMAX,shellout) == NULL) {
+      ex->output[0] = 0;
+    }
+    fclose(shellout);
   }
-  fclose(shellout);
   unlink("/tmp/shoutput");
   return(ex->result);
 }
