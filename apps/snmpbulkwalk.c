@@ -74,10 +74,6 @@ SOFTWARE.
 #include "mib.h"
 #include "snmp.h"
 #include "snmp_impl.h"
-#include "party.h"
-#include "context.h"
-#include "view.h"
-#include "acl.h"
 #include "system.h"
 #include "snmp_parse_args.h"
 
@@ -136,7 +132,7 @@ main(argc, argv)
     snmp_synch_setup(&session);
     ss = snmp_open(&session);
     if (ss == NULL){
-      snmp_perror("snmpbulkwalk: Couldn't open snmp");
+      snmp_perror("snmpbulkwalk");
       SOCK_CLEANUP;
       exit(1);
     }
@@ -202,7 +198,7 @@ main(argc, argv)
         fprintf(stderr, "No Response from %s\n", session.peername);
         running = 0;
       } else {    /* status == STAT_ERROR */
-        snmp_perror("snmpbulkwalk: An error occurred: ");
+        snmp_perror("snmpbulkwalk");
         running = 0;
       }
 

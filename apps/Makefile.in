@@ -76,7 +76,7 @@ snmpgetnext:    snmpgetnext.o $(PARSEOBJS) $(USELIBS)
 	${CC} -o $@ snmpgetnext.o $(PARSEOBJS) ${LDFLAGS} ${LIBS} 
 
 clean:
-	rm -f *.o ${TARG}
+	rm -f *.o $(TARG) $(SBINTARG)
 	for i in $(SUBDIRS) ; do \
 	( cd $$i ; $(MAKE) clean ) ; \
 	done

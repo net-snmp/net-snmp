@@ -71,10 +71,6 @@ SOFTWARE.
 #include "mib.h"
 #include "snmp.h"
 #include "snmp_impl.h"
-#include "party.h"
-#include "context.h"
-#include "view.h"
-#include "acl.h"
 #include "system.h"
 #include "apps/snmp_parse_args.h"
 
@@ -283,7 +279,7 @@ void get_table_entries __P((void))
   snmp_synch_setup(&session);
   ss = snmp_open(&session);
   if (ss == NULL){
-    snmp_perror("snmptable: Couldn't open snmp");
+    snmp_perror("snmptable");
     SOCK_CLEANUP;
     exit(1);
   }
@@ -373,7 +369,7 @@ void get_table_entries __P((void))
       fprintf(stderr, "No Response from %s\n", session.peername);
       running = 0;
     } else {    /* status == STAT_ERROR */
-      snmp_perror("snmpwalk");
+      snmp_perror("snmptable");
       running = 0;
     }
     if (response)
