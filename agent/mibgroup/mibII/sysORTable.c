@@ -32,9 +32,6 @@
 
 extern struct timeval starttime;
 
-
-
-
 struct timeval sysOR_lastchange;
 static struct sysORTable *table=NULL;
 static int numEntries=0;

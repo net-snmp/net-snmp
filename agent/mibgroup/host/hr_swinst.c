@@ -5,7 +5,6 @@
 
 #include <config.h>
 #include "host_res.h"
-#include "util_funcs.h"
 #include "hr_swinst.h"
 #include "hr_utils.h"
 
@@ -114,9 +113,6 @@ void init_hr_swinst(void)
     strcpy(HRSW_name, "[installed name]");	/* default name */
 #endif
 }
-
-
-
 
 /*
   header_hrswinst(...

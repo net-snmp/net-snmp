@@ -16,11 +16,9 @@
 #endif
 
 #include "host_res.h"
-#include "util_funcs.h"
 #include "hr_partition.h"
 #include "hr_filesys.h"
 #include "hr_disk.h"
-
 
 #include <sys/stat.h>
 
@@ -52,9 +50,6 @@ void  Save_HR_Partition (int, int);
 void  Init_HR_Partition (void);
 int   Get_Next_HR_Partition (void);
 int header_hrpartition (struct variable *,oid *, int *, int, int *, WriteMethod **);
-
-
-
 
 /*
   header_hrpartition(...

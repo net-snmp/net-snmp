@@ -7,7 +7,6 @@
 #include "../mibincl.h"
 #include "../struct.h"
 #include "../../../snmplib/system.h"
-#include "util_funcs.h"
 #include "dummy.h"
 
 /*  
@@ -96,9 +95,6 @@ void dummy_parse_config(char *token,
 
 void dummy_free_config (void) {
 }
-
-
-
 
 
 /* header_dummy(...

@@ -93,5 +93,9 @@ int compare_tree (oid *, int, oid *, int);
                theoid, sizeof(theoid)/sizeof(oid));
 
 
+/* fail overloads non-negative integer value. it must be -1 ! */
+#define MATCH_FAILED	(-1)
+#define MATCH_SUCCEEDED	0
+
 #endif /* _SNMP_VARS_H_ */
 

@@ -6,7 +6,6 @@
 #include <config.h>
 
 #include "host_res.h"
-#include "util_funcs.h"
 #include "mibII/interfaces.h"
 #include "hr_network.h"
 
@@ -49,9 +48,6 @@ void init_hr_network(void)
     device_status[ HRDEV_NETWORK ] = network_status;
     device_errors[ HRDEV_NETWORK ] = network_errors;
 }
-
-
-
 
 /*
   header_hrnet(...

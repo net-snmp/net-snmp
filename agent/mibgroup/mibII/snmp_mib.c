@@ -10,7 +10,6 @@
 #endif
 
 #include "../mibincl.h"
-#include "util_funcs.h"
 #include "../../../snmplib/system.h"
 
 /* #include "../common_header.h" */
@@ -103,9 +102,6 @@ init_snmp_mib(void) {
   /* register ourselves with the agent to handle our mib tree */
   REGISTER_MIB("mibII/snmp", snmp_variables, variable2, snmp_variables_oid);
 }
-
-
-
 
 /*
   header_snmp(...

@@ -192,9 +192,6 @@ static u_char * if_list = 0;
 static const u_char * if_list_end;
 static size_t if_list_size = 0;
 
-
-
-
 /*
   header_ifEntry(...
   Arguments:
@@ -250,7 +247,7 @@ header_ifEntry(struct variable *vp,
     DEBUGMSGTL(("mibII/interfaces", "... get I/F stats %s\n", c_oid));
 
     return interface;
-};
+}
 
 
 /*
@@ -1691,9 +1688,6 @@ Interface_Index_By_Name(char *Name,
 #include <net/if_dl.h>
 #include <net/if_mib.h>
 #include <net/route.h>
-
-
-
 
 static	char *physaddrbuf;
 static	int nphysaddrs;

@@ -4,9 +4,9 @@
  */
 
 #include <config.h>
+
 #include "host.h"
 #include "host_res.h"
-#include "util_funcs.h"
 #include "hr_system.h"
 #include "hr_utils.h"
 #include "auto_nlist.h"
@@ -54,10 +54,6 @@ void init_hr_system(void)
   auto_nlist(NPROC_SYMBOL,0,0);
 #endif
 }
-
-
-
-
 
 /*
   header_hrsys(...

@@ -80,7 +80,6 @@
 #include "snmp_debug.h"
 
 #include "mibincl.h"
-#include "util_funcs.h"
 #include "auto_nlist.h"
 
 #ifdef MIB_IPCOUNTER_SYMBOL
@@ -197,9 +196,6 @@ void init_ip()
   auto_nlist(MIB_IPCOUNTER_SYMBOL,0,0);
 #endif
 }
-
-
-
 
 
 /*
@@ -1041,10 +1037,6 @@ void init_ip(void)
 {
 	;
 }
-
-
-
-
 
 static int
 header_ip(struct variable *vp,

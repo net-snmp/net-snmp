@@ -5,7 +5,6 @@
 
 #include <config.h>
 #include "host_res.h"
-#include "util_funcs.h"
 #include "hr_disk.h"
 
 #include <fcntl.h>
@@ -153,9 +152,6 @@ void init_hr_disk(void)
     for ( i=0 ; i<HRDEV_TYPE_MASK ; ++i )
 	HRD_history[i] = 0;
 }
-
-
-
 
 /*
   header_hrdisk(...
