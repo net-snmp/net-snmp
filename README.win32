@@ -32,28 +32,19 @@ Acknowledgements
 All applications build with MS VC++, gcc under Cygwin, and gcc under MinGW.
 
   -  All of the applications work
-  -  The system, snmp, ip, tcp, udp, icmp mibgroups work
+     (snmpwalk, snmpget, snmpset, snmptrap, etc...)
+  -  The system, snmp, ip, tcp, udp, icmp mibgroups function
          (when agent is built using the snmpdsdk project).
-  -  The target, agentx, smux, notification, disman/mte groups compile
-  -  Extending the agent to support enterprise-specific MIBs works
-  -  Running the agent on a non-standard UDP or TCP port works
-  -  Running the Net-SNMP agent instead of the MS supplied one "works"
-         (at the loss of most of the functionality).
-  -  The Net-SNMP agent does not use the MS SNMP.dll,
-         therefore it cannot run as an extensible part of the MS agent.
   -  The Net-SNMP agent runs as an AgentX master agent or as subagent
          when the callback transport patch is compiled.
+  -  smux is working
+  -  The target, notification, disman/mte groups compile but are not tested
+         
+  -  Extending the agent to support enterprise-specific MIBs works
+  -  Running the agent on a non-standard UDP or TCP port works
   -  Snmpd can be registered as a Windows NT/2000 service
          (the procedure is included later in this document).
   -  Snmptrapd cannot register as a Windows service.
-  -  Snmptrapd does not "share" nor multiplex traps with SNMPTRAP.EXE,
-         a program that is available from Microsoft or ACE#COMM.
-
-  -  Running the Net-SNMP Agent or trap receiver on Windows 9X/ME/Ce
-         is not supported.
-
-  -  Callback transport using winpipe provides one way of circumventing
-     problems that were seen with select().  AgentX now runs.
 
 
 The next subsection relates to items that are built using Visual Studio
@@ -70,7 +61,29 @@ The next subsection relates to items that are built using Visual Studio
 
   -  All Debug and Release targets linked with libsnmp project targets
         build without errors, and are fully functional.
-  -  NOTE: snmptrapd will not build when using the win32sdk.dsw workspace.
+
+
+***************************************************************************
+*
+* Interactions with Other Vendor's Products
+*
+***************************************************************************
+
+  -  Running the Net-SNMP Agent or trap receiver on Windows 95 or Win3.1
+         is not supported.
+
+  -  The Net-SNMP agent and trap receiver will fail to start
+	if either cannot bind to their connect port
+	 (161 for agent, 162 for trap receiver).
+
+  -  Running the Net-SNMP agent instead of the MS supplied one "works"
+         (at the loss of most of the functionality).
+
+  -  The Net-SNMP agent does not use the MS SNMP.dll,
+         therefore it cannot run as an extensible part of the MS agent.
+
+  -  Snmptrapd does not "share" nor multiplex traps with SNMPTRAP.EXE,
+         a program that is available from Microsoft or ACE#COMM.
 
 
 ***************************************************************************
@@ -253,7 +266,7 @@ from:
 
 http://www.kernel.org/pub/software/devel/nasm
 
-You will also need to change the win32/config.h file from
+You will also need to change the win32/net-snmp/net-snmp-config.h file from
 
 ---
 /* define if you are using the internal MD5 code */
@@ -437,10 +450,6 @@ Requirements:
 
   Windows NT/2000 or later: Requires Windows NT 4.0 SP4 or later. 
   Windows 95/98/Me: Requires Windows 98 or later. 
-  Library: Use IPHLPAPI.LIB 
-
-Note: IPHLPAPI.LIB is part of the "Microsoft Platform SDK", which may be
-      freely downloaded from www.microsoft.com.  See above for details.
 
 Windows support for SET on following groups:
 
@@ -555,5 +564,5 @@ please accept our apologies, and tell us so we can add your name.
 
 David Perkins, Joe Marzot, Wes Hardaker, Niels Baggesen, Dave Shield,
 Robert Story, Suvrit Sra, Mike Slifcak, Latha Prabhu, Nikolai Devereaux,
-Alex Burger, and Bernhard Penz.
+Alex Burger, Bernhard Penz, and Andy Smith.
 
