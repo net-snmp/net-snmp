@@ -78,41 +78,6 @@ To print multiple pieces to a single line in one call, use:
 */
 
 #ifndef SNMP_NO_DEBUGGING  /* make sure we're wanted */
-#if COMMENT
-{ Previous version for comparison only
-#define DEBUGMSG(x)    debugmsg x
-#define DEBUGMSGT(x)   debugmsgtoken x; debugmsg x
-#ifdef  HAVE_CPP_UNDERBAR_FUNCTION_DEFINED
-#define DEBUGTRACE     DEBUGMSGT(("trace","%s(): %s, %d\n",__FUNCTION__,\
-                                 __FILE__,__LINE__));
-#else
-#define DEBUGTRACE     DEBUGMSGT(("trace"," %s, %d\n", __FILE__,__LINE__));
-#endif
-
-#define DEBUGMSGL(x)       DEBUGTRACE; debugmsg x
-#define DEBUGMSGTL(x)      DEBUGTRACE; debugmsgtoken x; debugmsg x
-#define DEBUGL(x)          DEBUGTRACE; debugmsg x
-#define DEBUGMSGOID(x)     debugmsg_oid x
-#define DEBUGMSGHEX(x)     debugmsg_hex x
-#define DEBUGMSGHEXTLI(x)  debugmsg_hextli x
-#define DEBUGIF(x)         if (debug_is_token_registered(x) == SNMPERR_SUCCESS)
-#define DEBUGINDENT()      debug_indent()
-#define DEBUGINDENTMORE()  debug_indent_add(2)
-#define DEBUGINDENTLESS()  debug_indent_add(-2)
-#define DEBUGINDENTADD(x)  debug_indent_add(x)
-#define DEBUGPRINTINDENT(token) DEBUGMSGTL((token, "%s", DEBUGINDENT()))
-
-#define DEBUGDUMPHEADER(token,x) \
-        DEBUGPRINTINDENT(token); \
-        DEBUGMSG((token,x)); \
-        DEBUGINDENTMORE()
-
-#define DEBUGDUMPSETUP(token, buf, len) \
-        DEBUGMSGHEXTLI((token, buf, len)); \
-        DEBUGMSG   ((token, "\n")); \
-        DEBUGPRINTINDENT(token)
-}
-#endif /* COMMENT */
 
 /*
  * define two macros : one macro with, one without,
@@ -162,25 +127,27 @@ To print multiple pieces to a single line in one call, use:
 /*****************************************************************/
 /********************Start public  macros ************************/
 
-#define DEBUGMSG(x)        if (_DBG_IF_) {debugmsg x;}
-#define DEBUGMSGT(x)       if (_DBG_IF_) {__DBGMSGT(x);}
-#define DEBUGTRACE         if (_DBG_IF_) {__DBGTRACE;}
-#define DEBUGMSGL(x)       if (_DBG_IF_) {__DBGMSGL(x);}
-#define DEBUGMSGTL(x)      if (_DBG_IF_) {__DBGMSGTL(x);}
-#define DEBUGMSGOID(x)     if (_DBG_IF_) {__DBGMSGOID(x);}
-#define DEBUGMSGHEX(x)     if (_DBG_IF_) {__DBGMSGHEX(x);}
-#define DEBUGMSGHEXTLI(x)  if (_DBG_IF_) {__DBGMSGHEXTLI(x);}
-#define DEBUGINDENT()      if (_DBG_IF_) {__DBGINDENT();}
-#define DEBUGINDENTADD(x)  if (_DBG_IF_) {__DBGINDENTADD(x);}
-#define DEBUGINDENTMORE()  if (_DBG_IF_) {__DBGINDENTMORE();}
-#define DEBUGINDENTLESS()  if (_DBG_IF_) {__DBGINDENTLESS();}
-#define DEBUGPRINTINDENT(token) if (_DBG_IF_) {__DBGPRINTINDENT(token);}
+#define DEBUGMSG(x)        do {if (_DBG_IF_) {debugmsg x;} }while(0)
+#define DEBUGMSGT(x)       do {if (_DBG_IF_) {__DBGMSGT(x);} }while(0)
+#define DEBUGTRACE         do {if (_DBG_IF_) {__DBGTRACE;} }while(0)
+#define DEBUGMSGL(x)       do {if (_DBG_IF_) {__DBGMSGL(x);} }while(0)
+#define DEBUGMSGTL(x)      do {if (_DBG_IF_) {__DBGMSGTL(x);} }while(0)
+#define DEBUGMSGOID(x)     do {if (_DBG_IF_) {__DBGMSGOID(x);} }while(0)
+#define DEBUGMSGHEX(x)     do {if (_DBG_IF_) {__DBGMSGHEX(x);} }while(0)
+#define DEBUGMSGHEXTLI(x)  do {if (_DBG_IF_) {__DBGMSGHEXTLI(x);} }while(0)
+#define DEBUGINDENT()      do {if (_DBG_IF_) {__DBGINDENT();} }while(0)
+#define DEBUGINDENTADD(x)  do {if (_DBG_IF_) {__DBGINDENTADD(x);} }while(0)
+#define DEBUGINDENTMORE()  do {if (_DBG_IF_) {__DBGINDENTMORE();} }while(0)
+#define DEBUGINDENTLESS()  do {if (_DBG_IF_) {__DBGINDENTLESS();} }while(0)
+#define DEBUGPRINTINDENT(token) \
+	do {if (_DBG_IF_) {__DBGPRINTINDENT(token);} }while(0)
 
 
-#define DEBUGDUMPHEADER(token,x) if (_DBG_IF_) {__DBGDUMPHEADER(token,x);}
+#define DEBUGDUMPHEADER(token,x) \
+	do {if (_DBG_IF_) {__DBGDUMPHEADER(token,x);} }while(0)
 
 #define DEBUGDUMPSETUP(token,buf,len) \
-                                 if (_DBG_IF_) {__DBGDUMPSETUP(token,buf,len);}
+	do {if (_DBG_IF_) {__DBGDUMPSETUP(token,buf,len);} }while(0)
 
 #else /* SNMP_NO_DEBUGGING := enable streamlining of the code */
 
