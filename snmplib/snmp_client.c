@@ -44,6 +44,8 @@ SOFTWARE.
 #include "view.h"
 #include "acl.h"
 
+#include "../config.h"
+
 #ifndef BSD4_3
 #define BSD4_2
 #endif
@@ -427,7 +429,7 @@ snmp_synch_response(ss, pdu, response)
     while(state->waiting){
 	numfds = 0;
 	FD_ZERO(&fdset);
-	block = 1;
+	block = SNMPBLOCK;
 	tvp = &timeout;
 	timerclear(tvp);
 	snmp_select_info(&numfds, &fdset, tvp, &block);
