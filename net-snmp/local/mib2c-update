@@ -21,6 +21,16 @@
 
 #----------------------------------------------------------------------
 #
+# defaults
+#
+UPDATE_ORIG=.orig
+UPDATE_NEW=.new
+UPDATE_MERGED=.merged
+UPDATE_BACKUP=.backup
+UPDATE_PATCH=.patch
+
+#----------------------------------------------------------------------
+#
 debug()
 {
     if [ $UPDATE_DEBUG -ge 1 ]; then
@@ -47,12 +57,20 @@ safecd()
     fi
 }
 
+safecp()
+{
+    cp $@
+    if [ $? -ne 0 ]; then
+        die "'cp $@' failed!"
+    fi
+}
+
 #----------------------------------------------------------------------
 #
 check_setup()
 {
     rc=1
-    for d in orig new curr merged patch backup backup/curr backup/orig
+    for d in $UPDATE_ORIG $UPDATE_NEW $UPDATE_MERGED $UPDATE_PATCH $UPDATE_BACKUP $UPDATE_BACKUP/curr $UPDATE_BACKUP/orig
     do
         if [ ! -d $d ]; then
             echo "Creating missing directory $d"
@@ -100,10 +118,11 @@ do_diff()
     # w     ignore white space
     # p     Show which C function each change is in.
     # d     smaller changes
-    #    --exclude='*Makefile' 
+    #    --exclude='*Makefile' --unidirectional-new-file
     diff -cp -C 5 \
         --exclude='default-*' --exclude='*.orig' --exclude='*.rej' \
-        --exclude='*~' --exclude='*.bak' --exclude='.#*' \
+        --exclude='*~' --exclude='*.bak' --exclude='.*' --exclude="#*" \
+        --exclude="*.deps" \
         --exclude='*.o' --exclude='*.lo' --exclude='*.a' --exclude='*.la' \
         --new-file $1 $2 > $3
     local rc=$?
@@ -120,27 +139,28 @@ do_cp()
     src=$1
     dest=$2
     if [ ! -d $dest ]; then
-        die "$dest is not a directory"
+        die "dest $dest is not a directory in $PWD"
     fi
-    shift 2
-    start=$PWD
-    cd $src
-    if [ "$PWD" != "$start/$src" ]; then
-        die "cd $src did not work ($PWD != $start/$src)"
+    if [ "x$src" = "x." ]; then
+        DOCPREL=
+    else
+        if [ ! -d $src ]; then
+            die "src $src is not a directory in $PWD"
+        fi
+        DOCPREL=../
+        safecd $src
     fi
     files=`ls *$UPDATE_OID* 2>/dev/null| egrep "(file|onf|m2d|txt|\.c|\.h)$"`
     if [ -z "$files" ]; then
        echo "   no files to copy from $src"
     else
-#       echo "cp $src($files) ../$dest"
-       cp $files ../$dest
+       safecp $files $DOCPREL$dest
        if [ $? -ne 0 ]; then
-           die "error while copying files from $src to $dest"
+           die "error while copying files from $src to $dest in $PWD"
        fi
     fi
-    cd -
-    if [ "$PWD" != "$start" ]; then
-        die "cd - did not work ($PWD != $start)"
+    if [ "x$src" != "x." ]; then
+        safecd -
     fi
 }
 
@@ -148,17 +168,16 @@ do_cp()
 #
 save_diff()
 {
-    echo "Creating patch for your custom code..."
-    cnt=`ls curr 2>/dev/null | grep -v "^default-" | wc -l`
+    echo "Creating patch for your custom code"
+    cnt=`ls 2>/dev/null | grep -v "^default-" | wc -l`
     if [ $cnt -eq 0 ]; then
         echo "   no custom code!"
         return
     fi
 
-    do_diff orig/ curr/ patch/custom.$UPDATE_DATE
+    do_diff $UPDATE_ORIG/ ./ $UPDATE_PATCH/custom.$UPDATE_DATE
     if [ $? -eq 0 ]; then
         echo "   no custom code changes found."
-        exit 0
     fi
 }
 
@@ -166,19 +185,13 @@ save_diff()
 #
 gen_code()
 {
+    OLD_PWD=$PWD
     files=`ls default-* 2>/dev/null `
     if [ ! -z "$files" ]; then
-       cp $files curr/ 
+       safecp $files $UPDATE_NEW/
     fi
 
-    safecd curr
-    files=`ls default-* 2>/dev/null `
-    if [ ! -z "$files" ]; then
-       cp $files ../new/
-    fi
-    safecd -
-
-    safecd new
+    safecd $UPDATE_NEW
     files=`ls *$UPDATE_OID* 2>/dev/null | grep -v "^default-"`
     if [ ! -z "$files" ]; then
        rm -f $files > /dev/null 2>&1 
@@ -195,11 +208,11 @@ gen_code()
 #
 check_new()
 {
-    echo "Checking for updates to generated code..."
-    do_diff orig/ new/ patch/generated.$UPDATE_DATE
+    echo "Checking for updates to generated code"
+    do_diff $UPDATE_ORIG/ $UPDATE_NEW/ $UPDATE_PATCH/generated.$UPDATE_DATE
     if [ $? -eq 0 ]; then
         echo "Generated code has not changed."
-        safecd patch
+        safecd $UPDATE_PATCH
         files=`ls *.$UPDATE_DATE 2>/dev/null `
         if [ ! -z "$files" ]; then
            rm $files
@@ -212,19 +225,19 @@ check_new()
 #
 merge_code()
 {
-    files=`ls merged/* 2>/dev/null `
+    files=`ls $UPDATE_MERGED/* 2>/dev/null `
     if [ ! -z "$files" ]; then
-       rm merged/*
+       rm $UPDATE_MERGED/*
     fi
-    do_cp new merged
+    do_cp $UPDATE_NEW $UPDATE_MERGED
 
-    if [ -f patch/custom.$UPDATE_DATE ]; then
+    if [ -f $UPDATE_PATCH/custom.$UPDATE_DATE ]; then
        touch .M2C-UPDATE-MERGE-FAILED
-       echo "Patching new generated code..."
-       patch -N -d merged -p1 -i ../patch/custom.$UPDATE_DATE
+       echo "Patching new generated code"
+       patch -N -d $UPDATE_MERGED -p1 -i ../$UPDATE_PATCH/custom.$UPDATE_DATE
        if [ $? -ne 0 ]; then
            error "Could not apply custom code patch to new generated code"
-           die   "You must fix the problem in merged, and then re-run mib2c-update."
+           die   "You must fix the problem in $UPDATE_MERGED, and then re-run mib2c-update."
        fi
        rm .M2C-UPDATE-MERGE-FAILED
     fi
@@ -232,19 +245,23 @@ merge_code()
 
 copy_merged()
 {
-    echo "Backing up curr..."
-    do_cp curr backup/curr/
-    echo "Copying merged code to curr..."
-    do_cp merged curr/
+    echo "Backing up current code to $UPDATE_BACKUP/curr"
+    do_cp . $UPDATE_BACKUP/curr/
+    echo "Copying merged code to $UPDATE_CURR"
+    do_cp $UPDATE_MERGED $UPDATE_CURR/
 
-    echo "Backing up orig..."
-    do_cp orig backup/orig/
-    echo "Copying new code to orig..."
-    do_cp new orig/
+    echo "Backing up original code to $UPDATE_BACKUP/orig"
+    do_cp $UPDATE_ORIG $UPDATE_BACKUP/orig/
+    echo "Copying new code to $UPDATE_ORIG"
+    do_cp $UPDATE_NEW $UPDATE_ORIG/
 }
 
 #----------------------------------------------------------------------
 UPDATE_NOPROBE=0
+
+if [ -f $HOME/.mib2c-updaterc ]; then
+    . $HOME/.mib2c-updaterc
+fi
 
 if [ -f .mib2c-updaterc ]; then
     . .mib2c-updaterc
@@ -256,14 +273,14 @@ if [ $? -ne 1 ]; then
 fi
 
 UPDATE_DATE=`date "+%F_%R"`
-echo "Starting regneration of $UPDATE_OID using $UPDATE_CONF at $UPDATE_DATE..."
+echo "Starting regneration of $UPDATE_OID using $UPDATE_CONF at $UPDATE_DATE"
 
 if [ -f .M2C-UPDATE-MERGE-FAILED ]; then
     echo "It appears that the last run of mib2c-update was not able to merge"
     echo "your changes automatically. Do you want to:"
     echo
     while : ; do
-        echo "[c)opy merged files to curr]"
+        echo "[c)opy merged files to $UPDATE_CURR]"
         echo "[r)e-run from scratch]"
         echo "[q)uit]"
         echo "(c|r|q) ?"
