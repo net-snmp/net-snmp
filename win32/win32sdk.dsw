@@ -285,7 +285,7 @@ Package=<4>
 
 ###############################################################################
 
-Project: "snmptrapdsdk"=".\snmptrapdsdk\snmptrapd.dsp" - Package Owner=<4>
+Project: "snmptrapd"=".\snmptrapd\snmptrapd.dsp" - Package Owner=<4>
 
 Package=<5>
 {{{
