@@ -150,50 +150,6 @@ extern          "C" {
                                                 const u_char *
                                                 storage_name);
 
-
-#define NETSNMP_ROWSTATUS_DECLARE long *rs = NULL; netsnmp_request_info *rsi = NULL
-#define NETSNMP_ROWSTATUS_VALIDATE( v, r ) do { \
-    if( ( *(v)->val.integer > SNMP_ROW_DESTROY ) || \
-        ( *(v)->val.integer < 0) ) { \
-        netsnmp_set_mode_request_error(MODE_SET_BEGIN, r, SNMP_ERR_BADVALUE ); \
-        return; \
-    } \
-    rs = (v)->val.integer; \
-    rsi = r; \
-} while(0)
-#define NETSNMP_ROWSTATUS_CHECK( orv, osv, ri ) do { \
-    if( (orv) == SNMP_ROW_NONEXISTENT ) { \
-        if( ! rs ) { \
-            netsnmp_set_mode_request_error(MODE_SET_BEGIN, ri, SNMP_ERR_NOSUCHNAME );\
-        } \
-    } \
-    else if( rs ) { \
-        int rc = check_rowstatus_transition( orv, *rs, \
-                                             st ? *st : (osv) ); \
-        if(rc != SNMP_ERR_NOERROR) \
-            netsnmp_set_mode_request_error(MODE_SET_BEGIN, rsi, rc ); \
-    } \
-} while(0)
-
-
-#define NETSNMP_STORAGETYPE_DECLARE long *st = NULL; netsnmp_request_info *sti = NULL
-#define NETSNMP_STORAGETYPE_VALIDATE( v, r ) do { \
-    if ((*(v)->val.integer > SNMP_STORAGE_READONLY) || \
-        (*(v)->val.integer < 0) ) { \
-        netsnmp_set_mode_request_error(MODE_SET_BEGIN, r, SNMP_ERR_BADVALUE ); \
-        return; \
-    } \
-    st = (v)->val.integer; sti = r; \
-} while(0)
-#define NETSNMP_STORAGETYPE_CHECK( osv ) do { \
-    if( st ) { \
-        int rc = check_storage_transition( osv, *st ); \
-        if(rc != SNMP_ERR_NOERROR) \
-            netsnmp_set_mode_request_error(MODE_SET_BEGIN, sti, rc ); \
-    } \
-} while(0)
-
-
 #ifdef __cplusplus
 };
 #endif
