@@ -82,6 +82,20 @@ netsnmp_register_cache_handler(netsnmp_handler_registration *reginfo,
     return netsnmp_register_handler(reginfo);
 }
 
+/** Extract the cache information for a given request */
+netsnmp_cache  *
+netsnmp_extract_cache_info(netsnmp_agent_request_info *reqinfo)
+{
+    return netsnmp_agent_get_list_data(reqinfo, CACHE_NAME);
+}
+
+/** Is the cache valid for a given request? */
+int
+netsnmp_is_cache_valid(netsnmp_agent_request_info *reqinfo)
+{
+    netsnmp_cache  *cache = netsnmp_extract_cache_info(reqinfo);
+    return (cache && cache->valid);
+}
 
 /** Implements the cache handler */
 int
@@ -92,23 +106,35 @@ netsnmp_cache_helper_handler(netsnmp_mib_handler *handler,
 {
     netsnmp_cache       *cache = NULL;
     long cache_timeout;
+    int  ret;
 
     DEBUGMSGTL(("helper:cache_handler", "Got request: "));
     DEBUGMSGOID(("helper:cache_handler", reginfo->rootoid, reginfo->rootoid_len));
 
     cache = (netsnmp_cache *)handler->myvoid;
     /*
-     * If the cache is out-of-date (or invalid),
-     * call the load hook, and update the cache timestamp
+     * If caching is active, and the cache is out-of-date (or invalid),
+     * call the load hook, and update the cache timestamp.
      */
     if (caching_enabled && cache && cache->enabled) {
         cache_timeout = cache->timeout;
         if (cache_timeout == 0)
             cache_timeout = cache_default_timeout;
-        if (!cache->timestamp ||
+        if (!cache->valid || !cache->timestamp ||
              atime_ready(cache->timestamp, 1000*cache_timeout)) {
-	    		/* XXX - what if this fails? */
-            cache->load_cache(cache, cache->magic);
+            /*
+             * If we've got a valid cache, then release it before reloading
+             */
+            if (cache->valid) {
+                cache->free_cache(cache, cache->magic);
+                cache->valid = 0;
+            }
+            ret = cache->load_cache(cache, cache->magic);
+            if (ret < 0) {
+                DEBUGMSG(("helper:cache_handler", " load failed (%d)\n", ret));
+                goto done;	/* XXX - or return ? */
+            }
+            cache->valid = 1;
             if (cache->timestamp)
        	        atime_setMarker(cache->timestamp);
 	    else
@@ -117,10 +143,14 @@ netsnmp_cache_helper_handler(netsnmp_mib_handler *handler,
         } else {
             DEBUGMSG(("helper:cache_handler", " cached (%d)\n", cache_timeout));
         }
+        netsnmp_agent_add_list_data(reqinfo,
+                                    netsnmp_create_data_list(CACHE_NAME,
+                                                             cache, NULL));
     } else {
         DEBUGMSG(("helper:cache_handler", " skipped\n"));
     }
 
+done:
     return netsnmp_call_next_handler(handler, reginfo, reqinfo,
                                      requests);
 }
