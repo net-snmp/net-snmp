@@ -652,6 +652,10 @@
 /* Number of community strings to store */
 #define NUM_COMMUNITIES	5
 
+/* UNdefine to allow specifying zero-length community string */
+/* #define NO_ZEROLENGTH_COMMUNITY 1 */
+
+ 
 /* #define EXIT_ON_BAD_KLREAD  */
 /* define to exit the agent on a bad kernel read */
 
