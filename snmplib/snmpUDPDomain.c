@@ -387,7 +387,8 @@ void		snmp_udp_parse_security		(const char *token,
 						 char *param)
 {
   char *secName = NULL, *community = NULL, *source = NULL;
-  char *cp = NULL, *strmask = NULL;
+  char *cp = NULL;
+  const char *strmask = NULL;
   com2SecEntry *e = NULL;
   unsigned long network = 0, mask = 0;
 
@@ -435,7 +436,7 @@ void		snmp_udp_parse_security		(const char *token,
 
   if ((strcmp(source, "default") == 0) || (strcmp(source, "0.0.0.0") == 0)) {
     network = 0;
-    strmask = (char *)"0.0.0.0";
+    strmask = "0.0.0.0";
   } else {
     /*  Try interpreting as a dotted quad.  */
     network = inet_addr(source);
