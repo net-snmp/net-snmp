@@ -142,8 +142,8 @@ static void _init_snmp (void);
  * Globals.
  */
 #define MAX_PACKET_LENGTH	(0x7fffffff)
-#ifndef SNMP_STREAM_QUEUE_LEN
-#define SNMP_STREAM_QUEUE_LEN  5
+#ifndef NETSNMP_STREAM_QUEUE_LEN
+#define NETSNMP_STREAM_QUEUE_LEN  5
 #endif
 
 #ifndef BSD4_3
@@ -659,7 +659,7 @@ init_snmp(const char *type)
   init_callbacks();
   init_snmp_logging();
   snmp_init_statistics();
-  register_mib_handlers();
+  register_netsnmp_mib_handlers();
   register_default_handlers();
   init_snmpv3(type);
   init_snmp_alarm();
@@ -1143,10 +1143,10 @@ _sess_open(struct snmp_session *in_session)
 
     if (session->flags & SNMP_FLAGS_STREAM_SOCKET) {
       slp->transport = netsnmp_tdomain_transport(session->peername,
-						 session->local_port, "tcp");
+					      session->local_port, "tcp");
     } else {
       slp->transport = netsnmp_tdomain_transport(session->peername,
-						 session->local_port, "udp");
+					      session->local_port, "udp");
     }
 
     if (slp->transport == NULL) {
@@ -5819,7 +5819,7 @@ snmp_sess_session(void *sessp)
     netsnmp_transport pointer (or NULL if the opaque pointer does not correspond
     to an active internal session).  */
 
-struct netsnmp_transport_s *
+netsnmp_transport *
 snmp_sess_transport	(void *sessp)
 {
   struct session_list *slp = (struct session_list *)sessp;
@@ -5836,7 +5836,7 @@ snmp_sess_transport	(void *sessp)
     session pointer sp.  */
 
 void
-snmp_sess_transport_set	(void *sp, struct netsnmp_transport_s *t)
+snmp_sess_transport_set	(void *sp, netsnmp_transport *t)
 {
   struct session_list *slp = (struct session_list *)sp;
   if (slp != NULL) {

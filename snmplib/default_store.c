@@ -287,15 +287,15 @@ ds_register_premib(u_char type, const char *ftype, const char *token,
 
   switch (type) {
     case ASN_BOOLEAN:
-      register_premib_handler(ftype, token, ds_handle_config, NULL,"(1|yes|true|0|no|false)");
+      register_prenetsnmp_mib_handler(ftype, token, ds_handle_config, NULL,"(1|yes|true|0|no|false)");
       break;
 
     case ASN_INTEGER:
-      register_premib_handler(ftype, token, ds_handle_config, NULL,"integerValue");
+      register_prenetsnmp_mib_handler(ftype, token, ds_handle_config, NULL,"integerValue");
       break;
 
     case ASN_OCTET_STR:
-      register_premib_handler(ftype, token, ds_handle_config, NULL,"string");
+      register_prenetsnmp_mib_handler(ftype, token, ds_handle_config, NULL,"string");
       break;
     
   }

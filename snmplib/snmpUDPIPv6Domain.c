@@ -37,12 +37,12 @@
 #include <net-snmp/library/snmpUDPIPv6Domain.h>
 
 const oid ucdSnmpUDPIPv6Domain[9] = { UCDAVIS_MIB, 251, 4 };
-static snmp_tdomain udp6Domain;
+static netsnmp_tdomain udp6Domain;
 
 /*  Return a string representing the address in data, or else the "far end"
     address if data is NULL.  */
 
-char	       *snmp_udp6_fmtaddr	(snmp_transport *t,
+char	       *snmp_udp6_fmtaddr	(netsnmp_transport *t,
 					 void *data, int len)
 {
   struct sockaddr_in6 *to = NULL;
@@ -71,7 +71,7 @@ char	       *snmp_udp6_fmtaddr	(snmp_transport *t,
     to your send function if you like.  For instance, you might want to
     remember where a PDU came from, so that you can send a reply there...  */
 
-int		snmp_udp6_recv	(snmp_transport *t, void *buf, int size,
+int		snmp_udp6_recv	(netsnmp_transport *t, void *buf, int size,
 				 void **opaque, int *olength) 
 {
   int rc = -1, fromlen = sizeof(struct sockaddr_in6);
@@ -106,7 +106,7 @@ int		snmp_udp6_recv	(snmp_transport *t, void *buf, int size,
 
 
 
-int		snmp_udp6_send	(snmp_transport *t, void *buf, int size,
+int		snmp_udp6_send	(netsnmp_transport *t, void *buf, int size,
 				 void **opaque, int *olength)
 {
   int rc = 0;
@@ -135,7 +135,7 @@ int		snmp_udp6_send	(snmp_transport *t, void *buf, int size,
 
 
 
-int		snmp_udp6_close	(snmp_transport *t)
+int		snmp_udp6_close	(netsnmp_transport *t)
 {
   int rc = 0;
   if (t != NULL && t->sock >= 0) {
@@ -158,10 +158,10 @@ int		snmp_udp6_close	(snmp_transport *t)
     local address to bind to (i.e. this is a server-type session); otherwise
     addr is the remote address to send things to.  */
 
-snmp_transport		*snmp_udp6_transport	(struct sockaddr_in6 *addr,
+netsnmp_transport		*snmp_udp6_transport	(struct sockaddr_in6 *addr,
 						 int local)
 {
-  snmp_transport *t = NULL;
+  netsnmp_transport *t = NULL;
   int rc = 0, udpbuf = (1 << 17);
   char *string = NULL;
 
@@ -169,7 +169,7 @@ snmp_transport		*snmp_udp6_transport	(struct sockaddr_in6 *addr,
     return NULL;
   }
 
-  t = (snmp_transport *)malloc(sizeof(snmp_transport));
+  t = (netsnmp_transport *)malloc(sizeof(netsnmp_transport));
   if (t == NULL) {
     return NULL;
   }
@@ -178,14 +178,14 @@ snmp_transport		*snmp_udp6_transport	(struct sockaddr_in6 *addr,
   DEBUGMSGTL(("snmp_udp6", "open %s %s\n", local?"local":"remote", string));
   free(string);
 
-  memset(t, 0, sizeof(snmp_transport));
+  memset(t, 0, sizeof(netsnmp_transport));
 
   t->domain = ucdSnmpUDPIPv6Domain;
   t->domain_length = sizeof(ucdSnmpUDPIPv6Domain)/sizeof(ucdSnmpUDPIPv6Domain[0]);
 
   t->sock = socket(PF_INET6, SOCK_DGRAM, 0);
   if (t->sock < 0) {
-    snmp_transport_free(t);
+    netsnmp_transport_free(t);
     return NULL;
   }
 
@@ -226,13 +226,13 @@ snmp_transport		*snmp_udp6_transport	(struct sockaddr_in6 *addr,
     rc = bind(t->sock, (struct sockaddr *)addr, sizeof(struct sockaddr_in6));
     if (rc != 0) {
       snmp_udp6_close(t);
-      snmp_transport_free(t);
+      netsnmp_transport_free(t);
       return NULL;
     }
     t->local = malloc(18);
     if (t->local == NULL) {
       snmp_udp6_close(t);
-      snmp_transport_free(t);
+      netsnmp_transport_free(t);
     }
     memcpy(t->local, addr->sin6_addr.s6_addr, 16);
     t->local[16] = (addr->sin6_port & 0xff00) >> 8;
@@ -246,7 +246,7 @@ snmp_transport		*snmp_udp6_transport	(struct sockaddr_in6 *addr,
 
     t->data = malloc(sizeof(struct sockaddr_in6));
     if (t->data == NULL) {
-      snmp_transport_free(t);
+      netsnmp_transport_free(t);
       return NULL;
     }
     memcpy(t->data, addr, sizeof(struct sockaddr_in6));
@@ -254,7 +254,7 @@ snmp_transport		*snmp_udp6_transport	(struct sockaddr_in6 *addr,
     t->remote = malloc(18);
     if (t->remote == NULL) {
       snmp_udp6_close(t);
-      snmp_transport_free(t);
+      netsnmp_transport_free(t);
       return NULL;
     }
     memcpy(t->remote, addr->sin6_addr.s6_addr, 16);
@@ -277,7 +277,7 @@ snmp_transport		*snmp_udp6_transport	(struct sockaddr_in6 *addr,
 
 
 
-int			snmp_sockaddr_in6	(struct sockaddr_in6 *addr,
+int			netsnmp_sockaddr_in6	(struct sockaddr_in6 *addr,
 						 const char *inpeername,
 						 int remote_port)
 {
@@ -298,7 +298,7 @@ int			snmp_sockaddr_in6	(struct sockaddr_in6 *addr,
     return 0;
   }
 
-  DEBUGMSGTL(("snmp_sockaddr_in6", "addr %p, peername \"%s\"\n",
+  DEBUGMSGTL(("netsnmp_sockaddr_in6", "addr %p, peername \"%s\"\n",
 	      addr, inpeername?inpeername:"[NIL]"));
 
   memset(addr, 0, sizeof(struct sockaddr_in6));
@@ -325,7 +325,7 @@ int			snmp_sockaddr_in6	(struct sockaddr_in6 *addr,
     for (cp = peername; *cp && isdigit((int)*cp); cp++);
     if (!*cp && atoi(peername) != 0) {
       /*  Okay, it looks like JUST a port number.  */
-      DEBUGMSGTL(("snmp_sockaddr_in6","totally numeric: %d\n",atoi(peername)));
+      DEBUGMSGTL(("netsnmp_sockaddr_in6","totally numeric: %d\n",atoi(peername)));
       addr->sin6_port = htons(atoi(peername));
       goto resolved;
     } 
@@ -336,7 +336,7 @@ int			snmp_sockaddr_in6	(struct sockaddr_in6 *addr,
       *cp = '\0';
       if (atoi(cp + 1) != 0 &&
 	  inet_pton(AF_INET6, peername, (void *)&(addr->sin6_addr))) {
-	DEBUGMSGTL(("snmp_sockaddr_in6", "IPv6 address with port suffix :%d\n",
+	DEBUGMSGTL(("netsnmp_sockaddr_in6", "IPv6 address with port suffix :%d\n",
 		    atoi(cp + 1)));
 	addr->sin6_port = htons(atoi(cp + 1));
 	goto resolved;
@@ -346,7 +346,7 @@ int			snmp_sockaddr_in6	(struct sockaddr_in6 *addr,
 
     /*  See if it is JUST an IPv6 address.  */
     if (inet_pton(AF_INET6, peername, (void *)&(addr->sin6_addr))) {
-      DEBUGMSGTL(("snmp_sockaddr_in6", "just IPv6 address\n"));
+      DEBUGMSGTL(("netsnmp_sockaddr_in6", "just IPv6 address\n"));
       goto resolved;
     } 
 
@@ -357,14 +357,14 @@ int			snmp_sockaddr_in6	(struct sockaddr_in6 *addr,
     if (cp != NULL) {
       *cp = '\0';
       if (atoi(cp + 1) != 0) {
-	DEBUGMSGTL(("snmp_sockaddr_in6", "hostname(?) with port suffix :%d\n",
+	DEBUGMSGTL(("netsnmp_sockaddr_in6", "hostname(?) with port suffix :%d\n",
 		    atoi(cp + 1)));
 	addr->sin6_port = htons(atoi(cp + 1));
       } else {
 	/*  No idea, looks bogus but we might as well pass the full thing to
 	    the name resolver below.  */
 	*cp = ':';
-	DEBUGMSGTL(("snmp_sockaddr_in6", "hostname(?) with embedded ':'?\n"));
+	DEBUGMSGTL(("netsnmp_sockaddr_in6", "hostname(?) with embedded ':'?\n"));
       }
       /*  Fall through.  */
     }
@@ -382,30 +382,30 @@ int			snmp_sockaddr_in6	(struct sockaddr_in6 *addr,
       free(peername);
       return 0;
     }
-    DEBUGMSGTL(("snmp_sockaddr_in6", "hostname (resolved okay)\n"));
+    DEBUGMSGTL(("netsnmp_sockaddr_in6", "hostname (resolved okay)\n"));
     memcpy(&addr->sin6_addr, &((struct sockaddr_in6 *)addrs->ai_addr)->sin6_addr, sizeof(struct in6_addr));
 #elif HAVE_GETIPNODEBYNAME
     hp = getipnodebyname(peername, AF_INET6, 0, &err);
     if (hp == NULL) {
-      DEBUGMSGTL(("snmp_sockaddr_in6", "hostname (couldn't resolve = %d)\n", err));
+      DEBUGMSGTL(("netsnmp_sockaddr_in6", "hostname (couldn't resolve = %d)\n", err));
       free(peername);
       return 0;
     }
-    DEBUGMSGTL(("snmp_sockaddr_in6", "hostname (resolved okay)\n"));
+    DEBUGMSGTL(("netsnmp_sockaddr_in6", "hostname (resolved okay)\n"));
     memcpy(&(addr->sin6_addr), hp->h_addr, hp->h_length);
 #elif HAVE_GETHOSTBYNAME
     hp = gethostbyname(peername);
     if (hp == NULL) {
-      DEBUGMSGTL(("snmp_sockaddr_in6", "hostname (couldn't resolve)\n"));
+      DEBUGMSGTL(("netsnmp_sockaddr_in6", "hostname (couldn't resolve)\n"));
       free(peername);
       return 0;
     } else {
       if (hp->h_addrtype != AF_INET6) {
-	DEBUGMSGTL(("snmp_sockaddr_in6", "hostname (not AF_INET6!)\n"));
+	DEBUGMSGTL(("netsnmp_sockaddr_in6", "hostname (not AF_INET6!)\n"));
 	free(peername);
 	return 0;
       } else {
-	DEBUGMSGTL(("snmp_sockaddr_in6", "hostname (resolved okay)\n"));
+	DEBUGMSGTL(("netsnmp_sockaddr_in6", "hostname (resolved okay)\n"));
 	memcpy(&(addr->sin6_addr), hp->h_addr, hp->h_length);
       }
     }
@@ -416,12 +416,12 @@ int			snmp_sockaddr_in6	(struct sockaddr_in6 *addr,
     return 0;
 #endif/*HAVE_GETHOSTBYNAME*/
   } else {
-    DEBUGMSGTL(("snmp_sockaddr_in6", "NULL peername"));
+    DEBUGMSGTL(("netsnmp_sockaddr_in6", "NULL peername"));
     return 0;
   }
 
 resolved:
-  DEBUGMSGTL(("snmp_sockaddr_in6", "return { AF_INET6, [%s]:%hu }\n",
+  DEBUGMSGTL(("netsnmp_sockaddr_in6", "return { AF_INET6, [%s]:%hu }\n",
 	      inet_ntop(AF_INET6, &addr->sin6_addr, debug_addr,
 		        sizeof(debug_addr)), ntohs(addr->sin6_port)));
   free(peername);
@@ -430,11 +430,11 @@ resolved:
 
 
 
-snmp_transport	*snmp_udp6_create_tstring       (const char *string, int local)
+netsnmp_transport	*snmp_udp6_create_tstring       (const char *string, int local)
 {
   struct sockaddr_in6 addr;
 
-  if (snmp_sockaddr_in6(&addr, string, 0)) {
+  if (netsnmp_sockaddr_in6(&addr, string, 0)) {
     return snmp_udp6_transport(&addr, local);
   } else {
     return NULL;
@@ -449,7 +449,7 @@ snmp_transport	*snmp_udp6_create_tstring       (const char *string, int local)
     (or newer equivalent) for details of the TC which we are using for
     the mapping here.  */
 
-snmp_transport	*snmp_udp6_create_ostring	(const u_char *o, size_t o_len,
+netsnmp_transport	*snmp_udp6_create_ostring	(const u_char *o, size_t o_len,
 						 int local)
 {
   struct sockaddr_in6 addr;
@@ -477,5 +477,5 @@ void		snmp_udp6_ctor			(void)
   udp6Domain.prefix[2] 	 = "udpv6";
   udp6Domain.prefix[3] 	 = "udpipv6";
 
-  snmp_tdomain_register(&udp6Domain);
+  netsnmp_tdomain_register(&udp6Domain);
 }

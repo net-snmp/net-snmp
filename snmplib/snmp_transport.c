@@ -21,7 +21,7 @@
 #include <net-snmp/library/snmpTCPDomain.h>
 #endif
 #ifdef SNMP_TRANSPORT_IPX_DOMAIN
-#include <net-snmp/library/snmpIPXDomain.h>
+#include <net-snmp/library/netsnmpIPXDomain.h>
 #endif
 #ifdef SNMP_TRANSPORT_UNIX_DOMAIN
 #include <net-snmp/library/snmpUnixDomain.h>
@@ -40,34 +40,34 @@
 
 /*  Our list of supported transport domains.  */
 
-static snmp_tdomain *domain_list = NULL;
+static netsnmp_tdomain *domain_list = NULL;
 
 
 
 /*  The standard SNMP domains.  */
 
-const oid snmpUDPDomain[]	= { 1, 3, 6, 1, 6, 1, 1 };
-const oid snmpCLNSDomain[]	= { 1, 3, 6, 1, 6, 1, 2 };
-const oid snmpCONSDomain[]	= { 1, 3, 6, 1, 6, 1, 3 };
-const oid snmpDDPDomain[]	= { 1, 3, 6, 1, 6, 1, 4 };
-const oid snmpIPXDomain[]	= { 1, 3, 6, 1, 6, 1, 5 };
+const oid netsnmpUDPDomain[]	= { 1, 3, 6, 1, 6, 1, 1 };
+const oid netsnmpCLNSDomain[]	= { 1, 3, 6, 1, 6, 1, 2 };
+const oid netsnmpCONSDomain[]	= { 1, 3, 6, 1, 6, 1, 3 };
+const oid netsnmpDDPDomain[]	= { 1, 3, 6, 1, 6, 1, 4 };
+const oid netsnmpIPXDomain[]	= { 1, 3, 6, 1, 6, 1, 5 };
 
 
 
-static void		snmp_tdomain_dump	(void);
+static void		netsnmp_tdomain_dump	(void);
 
 
-/*  Make a deep copy of an snmp_transport.  */
+/*  Make a deep copy of an netsnmp_transport.  */
 
-snmp_transport	       *snmp_transport_copy	(snmp_transport *t)
+netsnmp_transport	       *netsnmp_transport_copy	(netsnmp_transport *t)
 {
-  snmp_transport *n = NULL;
+  netsnmp_transport *n = NULL;
 
-  n = (snmp_transport *)malloc(sizeof(snmp_transport));
+  n = (netsnmp_transport *)malloc(sizeof(netsnmp_transport));
   if (n == NULL) {
     return NULL;
   }
-  memset(n, 0, sizeof(snmp_transport));
+  memset(n, 0, sizeof(netsnmp_transport));
 
   if (t->domain != NULL) {
     n->domain = t->domain;
@@ -80,7 +80,7 @@ snmp_transport	       *snmp_transport_copy	(snmp_transport *t)
   if (t->local != NULL) {
     n->local = (u_char *)malloc(t->local_length);
     if (n->local == NULL) {
-      snmp_transport_free(n);
+      netsnmp_transport_free(n);
       return NULL;
     }
     n->local_length = t->local_length;
@@ -93,7 +93,7 @@ snmp_transport	       *snmp_transport_copy	(snmp_transport *t)
   if (t->remote != NULL) {
     n->remote = (u_char *)malloc(t->remote_length);
     if (n->remote == NULL) {
-      snmp_transport_free(n);
+      netsnmp_transport_free(n);
       return NULL;
     }
     n->remote_length = t->remote_length;
@@ -106,7 +106,7 @@ snmp_transport	       *snmp_transport_copy	(snmp_transport *t)
   if (t->data != NULL && t->data_length > 0) {
     n->data = malloc(t->data_length);
     if (n->data == NULL) {
-      snmp_transport_free(n);
+      netsnmp_transport_free(n);
       return NULL;
     }
     n->data_length = t->data_length;
@@ -130,7 +130,7 @@ snmp_transport	       *snmp_transport_copy	(snmp_transport *t)
 
 
 
-void		     	snmp_transport_free	(snmp_transport *t)
+void		     	netsnmp_transport_free	(netsnmp_transport *t)
 {
   if (t->local != NULL) {
     free(t->local);
@@ -146,12 +146,12 @@ void		     	snmp_transport_free	(snmp_transport *t)
 
 
 
-int		       snmp_tdomain_support	(const oid *in_oid,
+int		       netsnmp_tdomain_support	(const oid *in_oid,
 						 size_t in_len,
 						 const oid **out_oid,
 						 size_t *out_len)
 {
-  snmp_tdomain *d = NULL;
+  netsnmp_tdomain *d = NULL;
   
   for (d = domain_list; d != NULL; d = d->next) {
     if (snmp_oid_compare(in_oid, in_len, d->name, d->name_length) == 0) {
@@ -167,35 +167,35 @@ int		       snmp_tdomain_support	(const oid *in_oid,
 
 
 
-void			snmp_tdomain_init	(void)
+void			netsnmp_tdomain_init	(void)
 {
-  DEBUGMSGTL(("tdomain", "snmp_tdomain_init() called\n"));
-  snmp_udp_ctor();
+  DEBUGMSGTL(("tdomain", "netsnmp_tdomain_init() called\n"));
+  netsnmp_udp_ctor();
 #ifdef SNMP_TRANSPORT_TCP_DOMAIN
-  snmp_tcp_ctor();
+  netsnmp_tcp_ctor();
 #endif
 #ifdef SNMP_TRANSPORT_IPX_DOMAIN
-  snmp_ipx_ctor();
+  netsnmp_ipx_ctor();
 #endif
 #ifdef SNMP_TRANSPORT_UNIX_DOMAIN
-  snmp_unix_ctor();
+  netsnmp_unix_ctor();
 #endif
 #ifdef SNMP_TRANSPORT_AAL5PVC_DOMAIN
-  snmp_aal5pvc_ctor();
+  netsnmp_aal5pvc_ctor();
 #endif
 #ifdef SNMP_TRANSPORT_UDPIPV6_DOMAIN
   snmp_udp6_ctor();
 #endif
 #ifdef SNMP_TRANSPORT_TCPIPV6_DOMAIN
-  snmp_tcp6_ctor();
+  netsnmp_tcp6_ctor();
 #endif
-  snmp_tdomain_dump();
+  netsnmp_tdomain_dump();
 }
 
 
-static void		snmp_tdomain_dump	(void)
+static void		netsnmp_tdomain_dump	(void)
 {
-  snmp_tdomain *d;
+  netsnmp_tdomain *d;
   int i = 0;
 
   DEBUGMSGTL(("tdomain", "domain_list -> "));
@@ -213,9 +213,9 @@ static void		snmp_tdomain_dump	(void)
 
 
 
-int			snmp_tdomain_register	(snmp_tdomain *n)
+int			netsnmp_tdomain_register	(netsnmp_tdomain *n)
 {
-  snmp_tdomain **prevNext = &domain_list, *d;
+  netsnmp_tdomain **prevNext = &domain_list, *d;
 
   if (n != NULL) {
     for (d = domain_list; d != NULL; d = d->next) {
@@ -236,9 +236,9 @@ int			snmp_tdomain_register	(snmp_tdomain *n)
 
 
 
-int			snmp_tdomain_unregister	(snmp_tdomain *n)
+int			netsnmp_tdomain_unregister	(netsnmp_tdomain *n)
 {
-  snmp_tdomain **prevNext = &domain_list, *d;
+  netsnmp_tdomain **prevNext = &domain_list, *d;
 
   if (n != NULL) {
     for (d = domain_list; d != NULL; d = d->next) {
@@ -257,11 +257,11 @@ int			snmp_tdomain_unregister	(snmp_tdomain *n)
 
 
 
-snmp_transport	       *snmp_tdomain_transport	(const char *string, int local,
+netsnmp_transport	       *netsnmp_tdomain_transport	(const char *string, int local,
 						 const char *default_domain)
 {
-  snmp_tdomain *d;
-  snmp_transport *t = NULL;
+  netsnmp_tdomain *d;
+  netsnmp_transport *t = NULL;
   const char *spec, *addr;
   char *cp, *mystring;
   int i;
@@ -338,12 +338,12 @@ snmp_transport	       *snmp_tdomain_transport	(const char *string, int local,
 }
 
 
-snmp_transport	       *snmp_tdomain_transport_oid(const oid *dom,
+netsnmp_transport	       *netsnmp_tdomain_transport_oid(const oid *dom,
 						   size_t dom_len,
 						   const u_char *o,
 						   size_t o_len, int local)
 {
-  snmp_tdomain *d;
+  netsnmp_tdomain *d;
   int i;
 
   DEBUGMSGTL(("tdomain", "domain \""));
@@ -366,9 +366,9 @@ snmp_transport	       *snmp_tdomain_transport_oid(const oid *dom,
 /** adds a transport to a linked list of transports.
     Returns 1 on failure, 0 on success */
 int
-snmp_transport_add_to_list(snmp_transport_list **transport_list,
-                           snmp_transport *transport) {
-    snmp_transport_list *newptr = SNMP_MALLOC_TYPEDEF(snmp_transport_list);
+netsnmp_transport_add_to_list(netsnmp_transport_list **transport_list,
+                           netsnmp_transport *transport) {
+    netsnmp_transport_list *newptr = SNMP_MALLOC_TYPEDEF(netsnmp_transport_list);
 
     if (!newptr)
         return 1;
@@ -385,9 +385,9 @@ snmp_transport_add_to_list(snmp_transport_list **transport_list,
 /**  removes a transport from a linked list of transports.
      Returns 1 on failure, 0 on success */
 int
-snmp_transport_remove_from_list(snmp_transport_list **transport_list,
-                                snmp_transport *transport) {
-    snmp_transport_list *ptr = *transport_list, *lastptr = NULL;
+netsnmp_transport_remove_from_list(netsnmp_transport_list **transport_list,
+                                netsnmp_transport *transport) {
+    netsnmp_transport_list *ptr = *transport_list, *lastptr = NULL;
 
     while(ptr && ptr->transport != transport) {
         lastptr = ptr;
