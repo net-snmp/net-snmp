@@ -295,6 +295,9 @@
 /* Define if you have the <machine/pte.h> header file.  */
 #undef HAVE_MACHINE_PTE_H
 
+/* Define if you have the <machine/types.h> header file.  */
+#undef HAVE_MACHINE_TYPES_H
+
 /* Define if you have the <malloc.h> header file.  */
 #undef HAVE_MALLOC_H
 
