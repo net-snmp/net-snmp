@@ -261,7 +261,8 @@ register_mib_priority(const char *moduleName,
 	     size_t numvars,
 	     oid *mibloc,
 	     size_t mibloclen,
-	     int priority)
+	     int priority,
+	     struct snmp_session *ss)
 {
   struct subtree *subtree;
   char c_oid[SPRINT_MAX_LEN];
@@ -292,6 +293,7 @@ register_mib_priority(const char *moduleName,
     subtree->variables_width = varsize;
   }
   subtree->priority = priority;
+  subtree->session = ss;
   res = load_subtree(subtree);
 
   reg_parms.name = mibloc;
@@ -312,7 +314,7 @@ register_mib(const char *moduleName,
 	     size_t mibloclen)
 {
   return register_mib_priority( moduleName, var, varsize, numvars,
-				mibloc, mibloclen, DEFAULT_MIB_PRIORITY );
+				mibloc, mibloclen, DEFAULT_MIB_PRIORITY, NULL );
 }
 
 
@@ -406,12 +408,36 @@ unregister_mib(oid *name,
   return unregister_mib_priority( name, len, DEFAULT_MIB_PRIORITY );
 }
 
+int
+unregister_mibs_by_session (struct snmp_session *ss)
+{
+  struct subtree *list, *list2;
+  struct subtree *child, *prev, *next_child;
+
+  for( list = subtrees; list != NULL; list = list2) {
+    list2 = list->next;
+    for ( child=list, prev=NULL;  child != NULL; child=next_child ) {
+
+      next_child = child->children;
+      if (( (ss->flags & SNMP_FLAGS_SUBSESSION) && child->session == ss ) ||
+          (!(ss->flags & SNMP_FLAGS_SUBSESSION) &&
+                                      child->session->subsession == ss )) {
+              unload_subtree( child, prev );
+              free_subtree( child );
+      }
+      else
+          prev = child;
+    }
+  }
+}
+
 
 struct subtree *
 free_subtree(struct subtree *st)
 {
   struct subtree *ret = NULL;
-  if (st->variables != NULL)
+  if ((snmp_oid_compare(st->name, st->namelen, st->start, st->start_len) == 0
+	&& (st->variables != NULL)
     free(st->variables);
   if (st->next != NULL)
     ret = st->next;

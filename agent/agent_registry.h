@@ -26,7 +26,8 @@ struct register_parameters {
 #define MIB_UNREGISTRATION_FAILED	-2
 
 void setup_tree (void);
-int register_mib_priority (const char *, struct variable *, size_t , size_t , oid *, size_t, int);
+int register_mib_priority (const char *, struct variable *, size_t , size_t , oid *, size_t, int, struct snmp_session *);
 int unregister_mib_priority (oid *, size_t, int);
+int unregister_mibs_by_session (struct snmp_session *);
 
 #endif /* AGENT_REGISTRY_H */
