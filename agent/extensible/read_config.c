@@ -1,7 +1,11 @@
 #include <config.h>
 
 #include <stdio.h>
+#ifdef SVR4
+#include <string.h>
+#else
 #include <strings.h>
+#endif
 #include <sys/types.h>
 #include <sys/stat.h>
 #if HAVE_FSTAB_H

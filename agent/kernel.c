@@ -103,7 +103,7 @@ klookup(off, target, siz)
 #ifdef EXIT_ON_BAD_KLREAD
     exit(-1);
 #endif
-    return (NULL);
+    return (0);
   }
   if (klread(target, siz) != siz ) { 
     perror("klread");
@@ -111,7 +111,7 @@ klookup(off, target, siz)
 #ifdef EXIT_ON_BAD_KLREAD
     exit(-1);
 #endif
-    return(NULL);
+    return(0);
   }
   return (1);
 }
