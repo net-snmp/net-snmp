@@ -1,0 +1,9 @@
+group basic_setup
+filetype snmpd.conf 1
+message **************************************
+message *** BEGINNING ACCESS CONTROL SETUP ***
+message **************************************
+multiple rwuser Do you want to allow SNMPv3 read-write user based access
+multiple rouser Do you want to allow SNMPv3 read-only user based access
+multiple rwcommunity Do you want to allow SNMPv1/v2c read-write community access
+multiple rocommunity Do you want to allow SNMPv1/v2c read-only community access
