@@ -602,6 +602,12 @@ SOFTWARE.
                                       size_t, size_t);
     int             snmp_oidtree_compare(const oid *, size_t, const oid *,
                                          size_t);
+    int             netsnmp_oid_equals(const oid *, size_t, const oid *,
+                                       size_t);
+    int             netsnmp_oid_tree_equals(const oid *, size_t, const oid *,
+                                            size_t);
+    int             netsnmp_oid_is_subtree(const oid *, size_t, const oid *,
+                                           size_t);
     void            init_snmp(const char *);
     u_char         *snmp_pdu_build(netsnmp_pdu *, u_char *, size_t *);
 #ifdef USE_REVERSE_ASNENCODING
