@@ -3316,112 +3316,119 @@ int parse_one_oid_index(oid **oidStart, size_t *oidLen,
 {
   struct variable_list *var = data;
   oid tmpout[MAX_OID_LEN];
-  int i, itmp;
+  int i;
+  unsigned int uitmp;
 
   oid *oidIndex = *oidStart;
 
   if (var == NULL || ( (*oidLen == 0) && (complete==0) ) )
       return SNMPERR_GENERR;
   else {
-    switch(var->type) {
-      case ASN_INTEGER:
-      case ASN_COUNTER:
-      case ASN_GAUGE:
-      case ASN_TIMETICKS:
-          if (*oidLen) {
-          snmp_set_var_value(var, (u_char *) oidIndex++, sizeof(long));
-			--(*oidLen);
-		  } else {
-			snmp_set_var_value(var, (u_char *) oidLen, sizeof(long));
-		  }
-          DEBUGMSGTL(("parse_oid_indexes",
-                      "Parsed int(%d): %d\n", var->type, *var->val.integer));
-          break;
+      switch(var->type) {
+          case ASN_INTEGER:
+          case ASN_COUNTER:
+          case ASN_GAUGE:
+          case ASN_TIMETICKS:
+              if (*oidLen) {
+                  snmp_set_var_value(var, (u_char *) oidIndex++, sizeof(long));
+                  --(*oidLen);
+              } else {
+                  snmp_set_var_value(var, (u_char *) oidLen, sizeof(long));
+              }
+              DEBUGMSGTL(("parse_oid_indexes",
+                          "Parsed int(%d): %d\n", var->type, *var->val.integer));
+              break;
 
-        case ASN_OBJECT_ID:
-        case ASN_PRIV_IMPLIED_OBJECT_ID:
-            if (var->type == ASN_PRIV_IMPLIED_OBJECT_ID) {
-                itmp = *oidLen;
-            } else {
-							if (*oidLen) {
-                itmp = (long) *oidIndex++;
-                --(*oidLen);
-							} else {
-								itmp = 0;
-							}
-                if ( (itmp > (int)*oidLen) && (complete==0) )
-                    return SNMPERR_GENERR;
-            }
+          case ASN_OBJECT_ID:
+          case ASN_PRIV_IMPLIED_OBJECT_ID:
+              if (var->type == ASN_PRIV_IMPLIED_OBJECT_ID) {
+                  uitmp = *oidLen;
+              } else {
+                  if (*oidLen) {
+                      uitmp = *oidIndex++;
+                      --(*oidLen);
+                  } else {
+                      uitmp = 0;
+                  }
+                  if ( (uitmp > *oidLen) && (complete==0) )
+                      return SNMPERR_GENERR;
+              }
 
-			if (itmp > (int)*oidLen) {
-			  memcpy( tmpout, oidIndex, sizeof(oid)*(*oidLen) );
-			  memset( &tmpout[ *oidLen ], 0x00, sizeof(oid)*(itmp-*oidLen) );
-			  snmp_set_var_value(var, (u_char *) tmpout, sizeof(oid)*itmp);
-				oidIndex += *oidLen;
-				(*oidLen) = 0;
-			} else {
-            snmp_set_var_value(var, (u_char *) oidIndex, sizeof(oid)*itmp);
-						oidIndex += itmp;
-						(*oidLen) -= itmp;
-			}
+              if (uitmp > MAX_OID_LEN)
+                  return SNMPERR_GENERR; /* too big and illegal */
 
-            DEBUGMSGTL(("parse_oid_indexes", "Parsed oid: "));
-            DEBUGMSGOID(("parse_oid_indexes",
-                         var->val.objid, var->val_len/sizeof(oid)));
-            DEBUGMSG(("parse_oid_indexes", "\n"));
-            break;
+              if (uitmp > *oidLen) {
+                  memcpy( tmpout, oidIndex, sizeof(oid)*(*oidLen) );
+                  memset( &tmpout[ *oidLen ], 0x00, sizeof(oid)*(uitmp-*oidLen) );
+                  snmp_set_var_value(var, (u_char *) tmpout, sizeof(oid)*uitmp);
+                  oidIndex += *oidLen;
+                  (*oidLen) = 0;
+              } else {
+                  snmp_set_var_value(var, (u_char *) oidIndex, sizeof(oid)*uitmp);
+                  oidIndex += uitmp;
+                  (*oidLen) -= uitmp;
+              }
 
-        case ASN_OPAQUE:
-        case ASN_OCTET_STR:
-        case ASN_PRIV_IMPLIED_OCTET_STR:
-            if (var->type == ASN_PRIV_IMPLIED_OCTET_STR) {
-                itmp = *oidLen;
-            } else {
-							if (*oidLen) {
-                itmp = (long) *oidIndex++;
-                --(*oidLen);
-							} else {
-								itmp = 0;
-							}
-                if ( (itmp > (int)*oidLen) && (complete==0) )
-                    return SNMPERR_GENERR;
-            }
+              DEBUGMSGTL(("parse_oid_indexes", "Parsed oid: "));
+              DEBUGMSGOID(("parse_oid_indexes",
+                           var->val.objid, var->val_len/sizeof(oid)));
+              DEBUGMSG(("parse_oid_indexes", "\n"));
+              break;
 
-            /* we handle this one ourselves since we don't have
-               pre-allocated memory to copy from using
-               snmp_set_var_value() */
+          case ASN_OPAQUE:
+          case ASN_OCTET_STR:
+          case ASN_PRIV_IMPLIED_OCTET_STR:
+              if (var->type == ASN_PRIV_IMPLIED_OCTET_STR) {
+                  uitmp = *oidLen;
+              } else {
+                  if (*oidLen) {
+                      uitmp = *oidIndex++;
+                      --(*oidLen);
+                  } else {
+                      uitmp = 0;
+                  }
+                  if ( (uitmp > *oidLen) && (complete==0) )
+                      return SNMPERR_GENERR;
+              }
 
-            if (itmp == 0)
-                break;        /* zero length strings shouldn't malloc */
+              /* we handle this one ourselves since we don't have
+                 pre-allocated memory to copy from using
+                 snmp_set_var_value() */
+
+              if (uitmp == 0)
+                  break;        /* zero length strings shouldn't malloc */
         
-            /* malloc by size+1 to allow a null to be appended. */
-            var->val_len = itmp;
-            var->val.string = (u_char *) calloc(1,itmp+1);
-            if (var->val.string == NULL)
-                return SNMPERR_GENERR;
+              if (uitmp > MAX_OID_LEN)
+                  return SNMPERR_GENERR; /* too big and illegal */
 
-						if (itmp > (int)(*oidLen) ) {
-            for(i = 0; i < *oidLen; ++i)
-                var->val.string[i] = (u_char) *oidIndex++;
-            for(i = 0; i < itmp; ++i)
-			  var->val.string[i] = '\0';
-						(*oidLen) = 0;
-						} else {
-							for(i = 0; i < itmp; ++i)
-                var->val.string[i] = (u_char) *oidIndex++;
-							(*oidLen) -= itmp;
-						}
-            var->val.string[itmp] = '\0';
+              /* malloc by size+1 to allow a null to be appended. */
+              var->val_len = uitmp;
+              var->val.string = (u_char *) calloc(1,uitmp+1);
+              if (var->val.string == NULL)
+                  return SNMPERR_GENERR;
 
-            DEBUGMSGTL(("parse_oid_indexes",
-                        "Parsed str(%d): %s\n", var->type, var->val.string));
-            break;
+              if (uitmp > (int)(*oidLen) ) {
+                  for(i = 0; i < *oidLen; ++i)
+                      var->val.string[i] = (u_char) *oidIndex++;
+                  for(i = 0; i < uitmp; ++i)
+                      var->val.string[i] = '\0';
+                  (*oidLen) = 0;
+              } else {
+                  for(i = 0; i < uitmp; ++i)
+                      var->val.string[i] = (u_char) *oidIndex++;
+                  (*oidLen) -= uitmp;
+              }
+              var->val.string[uitmp] = '\0';
 
-        default:
-            DEBUGMSGTL(("parse_oid_indexes",
-                        "invalid asn type: %d\n", var->type));
-            return SNMPERR_GENERR;
-    }
+              DEBUGMSGTL(("parse_oid_indexes",
+                          "Parsed str(%d): %s\n", var->type, var->val.string));
+              break;
+
+          default:
+              DEBUGMSGTL(("parse_oid_indexes",
+                          "invalid asn type: %d\n", var->type));
+              return SNMPERR_GENERR;
+      }
   }
   (*oidStart) = oidIndex;
   return SNMPERR_SUCCESS;
