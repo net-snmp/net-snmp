@@ -91,7 +91,6 @@ SOFTWARE.
 #include "snmp_debug.h"
 #include "snmp_logging.h"
 #include "default_store.h"
-#include "read_config.h"
 #include "tools.h"
 
 /*
@@ -3485,7 +3484,6 @@ unload_all_mibs()
     current_module = 0;
     module_map_head = NULL;
     SNMP_FREE(last_err_module);
-    free_config();
 }
 
 static void

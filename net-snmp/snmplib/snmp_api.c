@@ -663,6 +663,9 @@ snmp_shutdown(const char *type) {
   snmp_store(type);
   snmp_call_callbacks(SNMP_CALLBACK_LIBRARY, SNMP_CALLBACK_SHUTDOWN, NULL);
   snmp_close_sessions();
+  shutdown_mib();
+  unregister_all_config_handlers();
+  ds_shutdown();
 }
 
 

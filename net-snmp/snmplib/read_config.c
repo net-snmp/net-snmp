@@ -248,6 +248,8 @@ unregister_all_config_handlers()
   struct config_files *ctmp, *save;
   struct config_line *ltmp;
 
+  free_config();
+
   /* Keep using config_files until there are no more! */
   for (ctmp = config_files; ctmp;) {
       for (ltmp = ctmp->start; ltmp; ltmp = ctmp->start) {
