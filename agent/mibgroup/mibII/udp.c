@@ -3,6 +3,17 @@
  *
  */
 
+/* Portions of this file are subject to the following copyright(s).  See
+ * the Net-SNMP's COPYING file for more details and other copyrights
+ * that may apply:
+ */
+/*
+ * Portions of this file are copyrighted by:
+ * Copyright © 2003 Sun Microsystems, Inc. All rights reserved.
+ * Use is subject to license terms specified in the COPYING file
+ * distributed with the Net-SNMP package.
+ */
+
 #include <net-snmp/net-snmp-config.h>
 
 #if HAVE_STRING_H
@@ -258,7 +269,8 @@ var_udp(struct variable *vp,
     switch (vp->magic) {
 #ifdef USES_SNMP_DESIGNED_UDPSTAT
     case UDPINDATAGRAMS:
-        return (u_char *) & udpstat.udpInDatagrams;
+	long_return = udpstat.udpInDatagrams;
+	return (u_char *) & long_return;
     case UDPNOPORTS:
 #ifdef solaris2
         /*
@@ -266,14 +278,17 @@ var_udp(struct variable *vp,
          * the IP Mib structure, so this value is returned
          * via the return value of the read_udp_stats routine 
          */
-        return (u_char *) & ret_value;
+	long_return = ret_value;
+	return (u_char *) & long_return;
 #else
         return (u_char *) & udpstat.udpNoPorts;
 #endif
     case UDPOUTDATAGRAMS:
-        return (u_char *) & udpstat.udpOutDatagrams;
+	long_return = udpstat.udpOutDatagrams;
+	return (u_char *) & long_return;
     case UDPINERRORS:
-        return (u_char *) & udpstat.udpInErrors;
+	long_return = udpstat.udpInErrors;
+	return (u_char *) & long_return;
 #endif                          /* SNMP_DESIGNED_UDPSTAT */
 
 
