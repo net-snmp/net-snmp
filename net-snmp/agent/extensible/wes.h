@@ -4,13 +4,20 @@
 
 /* process mib names def numbers */
 
-#define WESINDEX 1
-#define WESNAMES 2
-#define WESMIN   3
-#define WESMAX   4
-#define WESCOUNT 5
-#define WESERROR 6
-#define WESERRORMSG 7
+#define PROCINDEX 1
+#define PROCNAMES 2
+#define PROCMIN   3
+#define PROCMAX   4
+#define PROCCOUNT 5
+#define PROCERROR 6
+#define PROCERRORMSG 7
+
+#define SHELLINDEX 1
+#define SHELLNAMES 2
+#define SHELLCOMMAND 3
+#define SHELLRESULT 4
+#define SHELLOUTPUT 5
+
 
 unsigned char *var_wes_proc();
 
