@@ -302,7 +302,7 @@ init_snmp()
   }
   for(ret = 0; nl[ret].n_name != NULL; ret++) {
     if (nl[ret].n_type == 0) {
-      fprintf(stderr, "nlist err:  %s not found\n",nl[ret].n_name);
+/*      fprintf(stderr, "nlist err:  %s not found\n",nl[ret].n_name); */
     }
   }
   init_kmem("/dev/kmem"); 
