@@ -84,7 +84,7 @@ int sh_count_procs(procname)
 #endif
   struct extensible ex;
   
-  if (fd = get_ps_output(&ex)) {
+  if ((fd = get_ps_output(&ex)) > 0) {
     if ((file = fdopen(fd,"r")) == NULL) {
       setPerrorstatus("fdopen");
       return (-1);
