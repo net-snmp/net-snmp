@@ -1303,8 +1303,8 @@ agentx_parse(struct snmp_session *session, struct snmp_pdu *pdu, u_char *data, s
 			*length -= 4;
 
 				/* Construct the end-OID */
-			memmove( &end_oid_buf, oid_buffer, oid_buf_len*4 );
-			end_oid_buf_len = oid_buf_len*4;
+			end_oid_buf_len = oid_buf_len*sizeof(oid);
+			memmove( &end_oid_buf, oid_buffer, end_oid_buf_len );
 			end_oid_buf[ pdu->range_subid-1 ] = range_bound;
 			
 			snmp_pdu_add_variable( pdu, oid_buffer, oid_buf_len,
@@ -1355,7 +1355,7 @@ agentx_parse(struct snmp_session *session, struct snmp_pdu *pdu, u_char *data, s
                             DEBUGINDENTLESS();
 			    return SNMPERR_ASN_PARSE_ERR;
                     }
-		    end_oid_buf_len *= 4;
+		    end_oid_buf_len *= sizeof(oid);
 			/* 'agentx_parse_oid()' returns the number of sub_ids */
 
 		    if ( inc )
