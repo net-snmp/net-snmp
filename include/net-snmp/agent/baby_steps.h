@@ -104,6 +104,6 @@ typedef struct netsnmp_baby_steps_access_methods_s {
 
 
 #ifdef __cplusplus
-};
+}
 #endif
 #endif /* baby_steps */

@@ -83,7 +83,7 @@ netsnmp_access_systemstats_entry_update(netsnmp_systemstats_entry *old,
 /**---------------------------------------------------------------------*/
 
 # ifdef __cplusplus
-};
+}
 #endif
 
 #endif /* NETSNMP_ACCESS_SYSTEMSTATS_H */

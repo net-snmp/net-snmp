@@ -241,7 +241,7 @@ extern          "C" {
 
 
 #ifdef __cplusplus
-};
+}
 #endif
 
 #endif                          /* IPADDRESSTABLE_OIDS_H */

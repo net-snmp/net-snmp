@@ -78,7 +78,7 @@ extern          "C" {
 
 
 #ifdef __cplusplus
-};
+}
 #endif
 
 #endif                          /* INETCIDRROUTETABLE_INTERFACE_H */

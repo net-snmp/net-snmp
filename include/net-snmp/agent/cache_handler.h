@@ -106,6 +106,6 @@ extern          "C" {
 
 
 #ifdef __cplusplus
-};
+}
 #endif
 #endif /* NETSNMP_CACHE_HANDLER_H */

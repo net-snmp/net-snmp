@@ -183,7 +183,7 @@ config_require(snmp-usm-dh-objects-mib/usmDHUserKeyTable/usmDHUserKeyTable_data_
 #endif
 
 #ifdef __cplusplus
-};
+}
 #endif
 
 #endif                          /* USMDHUSERKEYTABLE_H */

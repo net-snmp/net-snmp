@@ -251,7 +251,7 @@ extern          "C" {
 
 
 #ifdef __cplusplus
-};
+}
 #endif
 
 #endif                          /* INETCIDRROUTETABLE_OIDS_H */

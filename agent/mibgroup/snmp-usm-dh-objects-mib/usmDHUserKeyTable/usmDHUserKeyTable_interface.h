@@ -77,7 +77,7 @@ extern          "C" {
 
 
 #ifdef __cplusplus
-};
+}
 #endif
 
 #endif                          /* USMDHUSERKEYTABLE_INTERFACE_H */

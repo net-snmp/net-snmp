@@ -121,7 +121,7 @@ netsnmp_access_ipaddress_entry_update(netsnmp_ipaddress_entry *old,
 /**---------------------------------------------------------------------*/
 
 # ifdef __cplusplus
-};
+}
 #endif
 
 #endif /* NETSNMP_ACCESS_IPADDRESS_H */

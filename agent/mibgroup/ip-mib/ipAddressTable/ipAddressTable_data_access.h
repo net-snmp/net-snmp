@@ -53,7 +53,7 @@ extern          "C" {
 
 
 #ifdef __cplusplus
-};
+}
 #endif
 
 #endif                          /* IPADDRESSTABLE_DATA_ACCESS_H */
