@@ -455,8 +455,10 @@ handle_snmp_packet(int operation, struct snmp_session *session, int reqid,
 		    while ( --i > 0 ) 
 			if ( asp->end )
 			    asp->end = asp->end->next_variable;
-		    snmp_free_varbind(asp->end->next_variable);
-		    asp->end->next_variable = NULL;
+                    if ( asp->end )
+                        snmp_free_varbind(asp->end->next_variable);
+                        asp->end->next_variable = NULL;
+                    }
 		}
 	    }
 
@@ -821,11 +823,11 @@ handle_var_list(struct agent_snmp_session  *asp)
 
     count = 0;
     varbind_ptr = asp->start;
-    if ( !varbind_ptr ) {
-	return SNMP_ERR_NOERROR;
-    }
 
     while (1) {
+        if ( !varbind_ptr ) {
+	    break;
+        }
 	count++;
 	asp->index = count;
 	status = handle_one_var(asp, varbind_ptr);
