@@ -371,6 +371,13 @@ extern char **argvrestartp, *argvrestartname;
 RETSIGTYPE restart_doit(a)
 int a;
 {
+  int i;
+  
+  /* close everything open */
+  for (i=0; i<= 2; i++)
+    close(i);
+
+  /* do the exec */
   execv(argvrestartname,argvrestartp);
   setPerrorstatus("execv");
 }
