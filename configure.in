@@ -57,6 +57,42 @@ AC_ARG_ENABLE(mini_agent,
 [  --enable-mini-agent             Build a minimal agent.],
     mini_agent="yes",mini_agent="no")
 
+AC_ARG_ENABLE(applications,
+[  --disable-applications          Do not build the apps (snmpget, ...).])
+if test "x$enable_applications" != "xno"; then
+   MAINSUBS="$MAINSUBS apps"
+fi
+
+AC_ARG_ENABLE(agent,
+[  --disable-agent                 Do not build the agent (snmpd).])
+if test "x$enable_agent" != "xno"; then
+   MAINSUBS="$MAINSUBS agent"
+fi
+
+AC_ARG_ENABLE(manuals,
+[  --disable-manuals               Do not install the manuals.])
+if test "x$enable_manuals" != "xno"; then
+   MAINSUBS="$MAINSUBS man"
+fi
+
+AC_ARG_ENABLE(scripts,
+[  --disable-scripts               Do not install the scripts (mib2c, ...).])
+if test "x$enable_scripts" != "xno"; then
+   MAINSUBS="$MAINSUBS local"
+fi
+
+AC_ARG_ENABLE(mibs,
+[  --disable-mibs                  Do not install the mib files.])
+if test "x$enable_mibs" != "xno"; then
+   MAINSUBS="$MAINSUBS mibs"
+fi
+
+
+AC_SUBST(MAINSUBS)
+AC_MSG_CHECKING([what to build and install])
+AC_MSG_RESULT([$MAINSUBS])
+
+
 AC_ARG_ENABLE(ipv6,
 [  --enable-ipv6                   Generate IPv6 ready version.],
     [if test "x$enable_ipv6" = "xyes"; then
@@ -1493,6 +1529,8 @@ if test "x$install_perl" = "xyes" -o "x$embed_perl" = "xyes"; then
     AC_SUBST(PERLTARGS)
     AC_SUBST(PERLINSTALLTARGS)
     AC_MSG_CACHE_ADD(SNMP Perl modules:          enabled)
+else
+    AC_MSG_CACHE_ADD(SNMP Perl modules:          disabled)
 fi
 
 #
@@ -1524,6 +1562,8 @@ if test "x$embed_perl" = "xyes"; then
     EMBEDPERLINSTALL="embedperlinstall"
     AC_SUBST(EMBEDPERLINSTALL)
     AC_MSG_CACHE_ADD(Embedded perl support:      enabled)
+else
+    AC_MSG_CACHE_ADD(Embedded perl support:      disabled)
 fi
 
 # reset libs
