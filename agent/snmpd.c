@@ -377,11 +377,7 @@ SnmpdCatchRandomSignal(int a)
     /* Disable all logs and log the error via syslog */
     snmp_disable_log();
     snmp_enable_syslog();
-#if HAVE_STRING_H
-    snmp_log(LOG_ERR, "Exiting on signal %d: %s\n", a, strsignal(a));
-#else
     snmp_log(LOG_ERR, "Exiting on signal %d\n", a);
-#endif
     snmp_disable_syslog();
     exit(1);
 }
