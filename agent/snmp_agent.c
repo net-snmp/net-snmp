@@ -890,6 +890,7 @@ init_agent_snmp_session(netsnmp_session * session, netsnmp_pdu *pdu)
         return NULL;
     }
 
+    DEBUGMSGTL(("snmp_agent","agent_sesion %08p created\n", asp));
     asp->session = session;
     asp->pdu = snmp_clone_pdu(pdu);
     asp->orig_pdu = snmp_clone_pdu(pdu);
@@ -913,6 +914,8 @@ free_agent_snmp_session(netsnmp_agent_session *asp)
 {
     if (!asp)
         return;
+
+    DEBUGMSGTL(("snmp_agent","agent_sesion %08p released\n", asp));
 
     netsnmp_remove_from_delegated(asp);
     
@@ -1017,6 +1020,53 @@ netsnmp_remove_from_delegated(netsnmp_agent_session *asp)
     }
 
     return 0;
+}
+
+/*
+ * netsnmp_remove_delegated_requests_for_session
+ *
+ * called when a session is being closed. Check all delegated requests to
+ * see if the are waiting on this session, and if set, set the status for
+ * that request to GENERR.
+ */
+int
+netsnmp_remove_delegated_requests_for_session(netsnmp_session *sess)
+{
+    netsnmp_agent_session *asp;
+    int count = 0;
+    
+    for (asp = agent_delegated_list; asp; asp = asp->next) {
+        /*
+         * check each request
+         */
+        netsnmp_request_info *request;
+        for(request = asp->requests; request; request = request->next) {
+            /*
+             * check session
+             */
+            netsnmp_assert(NULL!=request->subtree);
+            if(request->subtree->session != sess)
+                continue;
+
+            /*
+             * matched! mark request as done
+             */
+            netsnmp_set_mode_request_error(MODE_SET_BEGIN, request,
+                                           SNMP_ERR_GENERR);
+            ++count;
+        }
+    }
+
+    /*
+     * if we found any, that request may be finished now
+     */
+    if(count) {
+        DEBUGMSGTL(("snmp_agent", "removed %d delegated request(s) for session "
+                    "%08p\n", count, sess));
+        netsnmp_check_outstanding_agent_requests();
+    }
+    
+    return count;
 }
 
 int
@@ -2688,6 +2738,7 @@ netsnmp_set_mode_request_error(int mode, netsnmp_request_info *request,
         return error_value;
 
     request->processed = 1;
+    request->delegated = REQUEST_IS_NOT_DELEGATED;
 
     switch (error_value) {
     case SNMP_NOSUCHOBJECT:
