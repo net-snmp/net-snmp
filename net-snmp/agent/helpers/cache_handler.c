@@ -152,12 +152,10 @@ netsnmp_get_cache_handler(int timeout, NetsnmpCacheLoad * load_hook,
     netsnmp_mib_handler *ret = NULL;
     netsnmp_cache  *cache = NULL;
 
-    ret = netsnmp_create_handler("cache_handler",
-                                 netsnmp_cache_helper_handler);
+    ret = netsnmp_cache_handler_get(NULL);
     if (ret) {
         cache = netsnmp_cache_create(timeout, load_hook, free_hook,
                                      rootoid, rootoid_len);
-        ret->flags |= MIB_HANDLER_AUTO_NEXT;
         ret->myvoid = (void *) cache;
     }
     return ret;
