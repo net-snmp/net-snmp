@@ -32,8 +32,8 @@
 #endif
 
 #include <net-snmp/types.h>	
-#include <net-snmp/snmp-tc.h>	/* for "internal" definitions */
-#include <net-snmp/snmp_api.h>
+#include <net-snmp/library/snmp-tc.h>	/* for "internal" definitions */
+#include <net-snmp/library/snmp_api.h>
 
 u_char *
 date_n_time ( time_t *when, size_t  *length)

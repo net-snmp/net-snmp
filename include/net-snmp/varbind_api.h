@@ -18,8 +18,8 @@
      *  to allow application writers to adopt the new header file names.
      */
 
-#include <net-snmp/snmp_api.h>
-#include <net-snmp/snmp_client.h>
-#include <net-snmp/mib.h>
+#include <net-snmp/library/snmp_api.h>
+#include <net-snmp/library/snmp_client.h>
+#include <net-snmp/library/mib.h>
 
 #endif /* NET_SNMP_VARBIND_API_H */

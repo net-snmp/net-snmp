@@ -51,9 +51,9 @@
 #include <net-snmp/utilities.h>
 #include <net-snmp/tools.h>		/* for "internal" definitions */
 
-#include <net-snmp/snmp_api.h>
-#include <net-snmp/mib.h>
-#include <net-snmp/scapi.h> 
+#include <net-snmp/library/snmp_api.h>
+#include <net-snmp/library/mib.h>
+#include <net-snmp/library/scapi.h> 
 
 
 /*  snmp_realloc:

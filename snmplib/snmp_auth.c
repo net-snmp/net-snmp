@@ -79,11 +79,11 @@ SOFTWARE.
 #include <net-snmp/output_api.h>
 #include <net-snmp/utilities.h>
 
-#include <net-snmp/asn1.h>
-#include <net-snmp/snmp_api.h>
-#include <net-snmp/mib.h>
-#include <net-snmp/md5.h>
-#include <net-snmp/scapi.h>
+#include <net-snmp/library/asn1.h>
+#include <net-snmp/library/snmp_api.h>
+#include <net-snmp/library/mib.h>
+#include <net-snmp/library/md5.h>
+#include <net-snmp/library/scapi.h>
 
 /*
  * Globals.

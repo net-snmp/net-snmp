@@ -25,8 +25,8 @@
 #include <net-snmp/output_api.h>
 #include <net-snmp/config_api.h>
 
-#include <net-snmp/snmp_transport.h>
-#include <net-snmp/snmpAAL5PVCDomain.h>
+#include <net-snmp/library/snmp_transport.h>
+#include <net-snmp/library/snmpAAL5PVCDomain.h>
 
 
 const oid ucdSnmpAAL5PVCDomain[9] = { UCDAVIS_MIB, 251, 3 };

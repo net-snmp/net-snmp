@@ -29,19 +29,19 @@
 #include <net-snmp/output_api.h>
 #include <net-snmp/utilities.h>
 
-#include <net-snmp/snmp_api.h>
+#include <net-snmp/library/snmp_api.h>
 #ifdef USE_OPENSSL
 #	include <openssl/hmac.h>
 #else 
 #ifdef USE_INTERNAL_MD5
-#include <net-snmp/md5.h>
+#include <net-snmp/library/md5.h>
 #endif
 #endif
 
-#include <net-snmp/scapi.h>
-#include <net-snmp/keytools.h>
+#include <net-snmp/library/scapi.h>
+#include <net-snmp/library/keytools.h>
 
-#include <net-snmp/transform_oids.h>
+#include <net-snmp/library/transform_oids.h>
 
 /*******************************************************************-o-******
  * generate_Ku

@@ -63,15 +63,15 @@ SOFTWARE.
 #include <net-snmp/output_api.h>
 #include <net-snmp/utilities.h>
 
-#include <net-snmp/asn1.h>
-#include <net-snmp/int64.h>
-#include <net-snmp/mib.h>
+#include <net-snmp/library/asn1.h>
+#include <net-snmp/library/int64.h>
+#include <net-snmp/library/mib.h>
 
 #ifndef NULL
 #define NULL	0
 #endif
 
-#include <net-snmp/snmp_api.h>
+#include <net-snmp/library/snmp_api.h>
 
 static
 void _asn_size_err(const char *str, size_t wrongsize, size_t rightsize)

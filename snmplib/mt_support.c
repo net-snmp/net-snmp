@@ -10,7 +10,7 @@
 
 #include <net-snmp/net-snmp-config.h>
 #include <errno.h>
-#include <net-snmp/mt_support.h>
+#include <net-snmp/library/mt_support.h>
 
 #ifdef __cplusplus
 extern "C" {

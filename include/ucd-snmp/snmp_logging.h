@@ -1,6 +1,6 @@
 #ifdef UCD_COMPATIBLE
 
-#include <net-snmp/snmp_logging.h>
+#include <net-snmp/library/snmp_logging.h>
 
 #else
 

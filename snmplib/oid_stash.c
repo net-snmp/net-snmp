@@ -8,8 +8,8 @@
 #include <net-snmp/types.h>	
 #include <net-snmp/utilities.h>
 
-#include <net-snmp/snmp_api.h>
-#include <net-snmp/oid_stash.h>
+#include <net-snmp/library/snmp_api.h>
+#include <net-snmp/library/oid_stash.h>
 
 oid_stash_node *
 oid_stash_create_sized_node(size_t mysize) 

@@ -77,10 +77,10 @@ SOFTWARE.
 
 #include <net-snmp/types.h>	
 
-#include <net-snmp/snmp_api.h>
-#include <net-snmp/snmp_client.h>
-#include <net-snmp/snmp_secmod.h>
-#include <net-snmp/mib.h>
+#include <net-snmp/library/snmp_api.h>
+#include <net-snmp/library/snmp_client.h>
+#include <net-snmp/library/snmp_secmod.h>
+#include <net-snmp/library/mib.h>
 
 
 #ifndef BSD4_3

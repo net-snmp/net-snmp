@@ -46,14 +46,14 @@
 #include <net-snmp/output_api.h>
 #include <net-snmp/utilities.h>
 
-#include <net-snmp/snmp_api.h>
-#include <net-snmp/callback.h>
-#include <net-snmp/snmp_secmod.h>
-#include <net-snmp/snmpusm.h>
-#include <net-snmp/lcd_time.h>
-#include <net-snmp/scapi.h>
+#include <net-snmp/library/snmp_api.h>
+#include <net-snmp/library/callback.h>
+#include <net-snmp/library/snmp_secmod.h>
+#include <net-snmp/library/snmpusm.h>
+#include <net-snmp/library/lcd_time.h>
+#include <net-snmp/library/scapi.h>
 
-#include <net-snmp/transform_oids.h>
+#include <net-snmp/library/transform_oids.h>
 
 
 /*

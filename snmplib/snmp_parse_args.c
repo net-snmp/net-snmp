@@ -57,15 +57,15 @@
 #include <net-snmp/snmp_parse_args.h>	/* for "internal" definitions */
 #include <net-snmp/utilities.h>
 
-#include <net-snmp/snmp_api.h>
-#include <net-snmp/snmp_client.h>
-#include <net-snmp/mib.h>
-#include <net-snmp/scapi.h>
-#include <net-snmp/keytools.h>
+#include <net-snmp/library/snmp_api.h>
+#include <net-snmp/library/snmp_client.h>
+#include <net-snmp/library/mib.h>
+#include <net-snmp/library/scapi.h>
+#include <net-snmp/library/keytools.h>
 
-#include <net-snmp/version.h>
-#include <net-snmp/parse.h>
-#include <net-snmp/snmpv3.h>
+#include <net-snmp/library/version.h>
+#include <net-snmp/library/parse.h>
+#include <net-snmp/library/snmpv3.h>
 
 int random_access = 0;
 

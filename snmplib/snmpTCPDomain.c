@@ -31,9 +31,9 @@
 #include <net-snmp/types.h>	
 #include <net-snmp/output_api.h>
 
-#include <net-snmp/snmp_transport.h>
-#include <net-snmp/snmpUDPDomain.h>
-#include <net-snmp/snmpTCPDomain.h>
+#include <net-snmp/library/snmp_transport.h>
+#include <net-snmp/library/snmpUDPDomain.h>
+#include <net-snmp/library/snmpTCPDomain.h>
 
 
 const oid snmpTCPDomain[8] = { 1, 3, 6, 1, 3, 91, 1, 1 };

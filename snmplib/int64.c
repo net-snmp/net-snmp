@@ -20,7 +20,7 @@
 #endif
 
 #include <net-snmp/types.h>	
-#include <net-snmp/int64.h>
+#include <net-snmp/library/int64.h>
 
 #define TRUE 1
 #define FALSE 0
