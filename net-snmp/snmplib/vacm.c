@@ -886,7 +886,7 @@ vacm_destroyAccessEntry(const char *groupName,
     struct vacm_accessEntry *vp, *lastvp = NULL;
 
     if (accessList && accessList->securityModel == securityModel
-        && accessList->securityModel == securityModel
+        && accessList->securityLevel == securityLevel
         && !strcmp(accessList->groupName + 1, groupName)
         && !strcmp(accessList->contextPrefix + 1, contextPrefix)) {
         vp = accessList;
