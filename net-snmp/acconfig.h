@@ -611,8 +611,11 @@
 /* define this if we're using the new MIT crypto API */
 #undef MIT_NEW_CRYPTO
 
-/* define if you want to build with reentrant/threaded code */
+/* define if you want to build with reentrant/threaded code (incomplete)*/
 #undef NS_REENTRANT
+
+/* define if you want to build MFD module rewrites*/
+#undef NETSNMP_ENABLE_MFD_REWRITES
 
 /* on aix, if you have perfstat */
 #undef HAVE_PERFSTAT
