@@ -484,8 +484,9 @@ smux_open_process(int fd, u_char *ptr, int *len, int *fail)
 		*fail = TRUE;
 		return((ptr += *len));
 	}
-	DEBUGP("[smux_open_process] version %d, len %d, type %d\n", 
-		version, *len, (int)type);
+	DEBUGMSGTL(("smux",
+                    "[smux_open_process] version %d, len %d, type %d\n", 
+                    version, *len, (int)type));
 
 	oid_name_len = MAX_OID_LEN;
 	if ((ptr = asn_parse_objid(ptr, len, &type, oid_name,
@@ -920,8 +921,9 @@ smux_snmp_process(int exact,
 		perror("[smux_snmp_process] send failed\n");
 	}
 
-	DEBUGP("[smux_snmp_process] Sent %d request to peer; %d bytes\n", 
-		(int)type, length);
+	DEBUGMSGTL(("smux",
+                    "[smux_snmp_process] Sent %d request to peer; %d bytes\n", 
+                    (int)type, length));
 	/* 
 	 * receive 
 	 * XXX the RCVTIMEO could return a short result.
@@ -1040,8 +1042,9 @@ smux_parse_var(u_char *varbind,
         }
 	/* XXX */
 	len = SMUXMAXPKTSIZE;
-        DEBUGP("[smux_parse_var] Asn coded len of var %d, type %d\n", 
-		var_val_len, (int)*vartype);
+        DEBUGMSGTL(("smux",
+                    "[smux_parse_var] Asn coded len of var %d, type %d\n", 
+                    var_val_len, (int)*vartype));
 
 	switch((short)*vartype){
 	case ASN_INTEGER:
