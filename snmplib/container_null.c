@@ -124,28 +124,6 @@ _null_get_subset(netsnmp_container *container, void *data)
  * factory
  *
  */
-int
-netsnmp_container_get_null_noalloc(netsnmp_container *c)
-{
-    DEBUGMSGTL(("container:null:get_null_noalloc","in\n"));
-    if (NULL==c)
-        return -1;
-    
-    c->private = NULL;
-        
-    c->get_size = _null_size;
-    c->init = _null_init;
-    c->cfree = _null_free;
-    c->insert = _null_insert;
-    c->remove = _null_remove;
-    c->find = _null_find;
-    c->find_next = _null_find_next;
-    c->get_subset = _null_get_subset;
-    c->get_iterator = 0; /* _null_iterator; */
-    c->for_each = _null_for_each;
-
-    return 0;
-}
 
 netsnmp_container *
 netsnmp_container_get_null(void)
@@ -161,11 +139,19 @@ netsnmp_container_get_null(void)
         return NULL;
     }
 
-    if (0 != netsnmp_container_get_null_noalloc(c)) {
-        free(c);
-        return NULL;
-    }
+    c->container_data = NULL;
         
+    c->get_size = _null_size;
+    c->init = _null_init;
+    c->cfree = _null_free;
+    c->insert = _null_insert;
+    c->remove = _null_remove;
+    c->find = _null_find;
+    c->find_next = _null_find_next;
+    c->get_subset = _null_get_subset;
+    c->get_iterator = 0; /* _null_iterator; */
+    c->for_each = _null_for_each;
+       
     return c;
 }
 
@@ -174,9 +160,7 @@ netsnmp_container_get_null_factory(void)
 {
     static netsnmp_factory f = { "null",
                                  (netsnmp_factory_produce_f*)
-                                 netsnmp_container_get_null,
-                                 (netsnmp_factory_produce_noalloc_f*)
-                                 netsnmp_container_get_null_noalloc };
+                                 netsnmp_container_get_null};
     
     DEBUGMSGTL(("container:null:get_null_factory","in\n"));
     return &f;
