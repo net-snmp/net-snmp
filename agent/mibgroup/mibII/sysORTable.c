@@ -33,6 +33,7 @@
 #include "default_store.h"
 #include "ds_agent.h"
 #include "callback.h"
+#include "agent_callbacks.h"
 
 #ifdef USING_AGENTX_SUBAGENT_MODULE
 #include "agentx/subagent.h"
@@ -64,7 +65,8 @@ init_sysORTable(void) {
 
 #ifdef USING_AGENTX_SUBAGENT_MODULE
   if ( ds_get_boolean(DS_APPLICATION_ID, DS_AGENT_ROLE) == MASTER_AGENT )
-	(void)register_mib_priority("mibII/sysORTable", sysORTable_variables,
+	(void)register_mib_priority("mibII/sysORTable",
+		(struct variable *) sysORTable_variables,
 		sizeof(struct variable2),
 		sizeof(sysORTable_variables)/sizeof(struct variable2),
 		sysORTable_variables_oid,
@@ -143,12 +145,14 @@ var_sysORTable(struct variable *vp,
 }
 
 
-int register_sysORTable(oid *oidin,
+int register_sysORTable_sess(oid *oidin,
 			 size_t oidlen,
-			 const char *descr)
+			 const char *descr,
+			 struct snmp_session *ss)
 {
   char c_oid[SPRINT_MAX_LEN];
   struct sysORTable **ptr=&table;
+  struct register_sysOR_parameters reg_sysOR_parms;
 
   if (snmp_get_do_debugging()) {
     sprint_objid (c_oid, oidin, oidlen);
@@ -159,12 +163,12 @@ int register_sysORTable(oid *oidin,
     ptr = &((*ptr)->next);
   *ptr = (struct sysORTable *) malloc(sizeof(struct sysORTable));
   if ( *ptr == NULL ) {
-	return -1;
+	return SYS_ORTABLE_REGISTRATION_FAILED;
   }
   (*ptr)->OR_descr = (char *) malloc(strlen(descr)+1);
   if ( (*ptr)->OR_descr == NULL ) {
 	free( *ptr );
-	return -1;
+	return SYS_ORTABLE_REGISTRATION_FAILED;
   }
   strcpy((*ptr)->OR_descr, descr);
   (*ptr)->OR_oidlen = oidlen;
@@ -172,28 +176,40 @@ int register_sysORTable(oid *oidin,
   if ( (*ptr)->OR_oid == NULL ) {
 	free( *ptr );
 	free( (*ptr)->OR_descr );
-	return -1;
+	return SYS_ORTABLE_REGISTRATION_FAILED;
   }
   memcpy((*ptr)->OR_oid, oidin, sizeof(oid)*oidlen);
   gettimeofday(&((*ptr)->OR_uptime), NULL);
+  (*ptr)->OR_sess = ss;
   (*ptr)->next = NULL;
   numEntries++;
 
-#ifdef USING_AGENTX_SUBAGENT_MODULE
-  if ( ds_get_boolean(DS_APPLICATION_ID, DS_AGENT_ROLE) == SUB_AGENT )
-     agentx_add_agentcaps( agentx_session, oidin, oidlen, descr);
-#endif
+  reg_sysOR_parms.name    = oidin;
+  reg_sysOR_parms.namelen = oidlen;
+  reg_sysOR_parms.descr   = (char *)descr;
+  snmp_call_callbacks(SNMP_CALLBACK_APPLICATION, SNMPD_CALLBACK_REG_SYSOR,
+                                       &reg_sysOR_parms);
 
-  return 0;
+  return SYS_ORTABLE_REGISTERED_OK;
+}
+
+int register_sysORTable(oid *oidin,
+			 size_t oidlen,
+			 const char *descr)
+{
+    return register_sysORTable_sess( oidin, oidlen, descr, NULL );
 }
 
 
-int unregister_sysORTable(oid *oidin,
-			 size_t oidlen)
+
+int unregister_sysORTable_sess(oid *oidin,
+			 size_t oidlen,
+			 struct snmp_session *ss)
 {
   char c_oid[SPRINT_MAX_LEN];
   struct sysORTable **ptr=&table, *prev=NULL;
-  int found = -1;
+  int found = SYS_ORTABLE_NO_SUCH_REGISTRATION;
+  struct register_sysOR_parameters reg_sysOR_parms;
 
   if (snmp_get_do_debugging()) {
     sprint_objid (c_oid, oidin, oidlen);
@@ -202,6 +218,8 @@ int unregister_sysORTable(oid *oidin,
 
   while(*ptr != NULL) {
     if ( snmp_oid_compare( oidin, oidlen, (*ptr)->OR_oid, (*ptr)->OR_oidlen) == 0 ) {
+      if ( (*ptr)->OR_sess != ss )
+	continue;	/* different session */
       if ( prev == NULL )
         table      = (*ptr)->next;
       else 
@@ -211,17 +229,50 @@ int unregister_sysORTable(oid *oidin,
       free( (*ptr)->OR_oid );
       free( (*ptr) );
       numEntries--;
-      found = 0;
+      found = SYS_ORTABLE_UNREGISTERED_OK;
       break;
     }
     prev = *ptr;
     ptr = &((*ptr)->next);
   }
 
-#ifdef USING_AGENTX_SUBAGENT_MODULE
-  if ( ds_get_boolean(DS_APPLICATION_ID, DS_AGENT_ROLE) == SUB_AGENT )
-     agentx_remove_agentcaps( agentx_session, oidin, oidlen);
-#endif
+  reg_sysOR_parms.name    = oidin;
+  reg_sysOR_parms.namelen = oidlen;
+  snmp_call_callbacks(SNMP_CALLBACK_APPLICATION, SNMPD_CALLBACK_UNREG_SYSOR,
+                                       &reg_sysOR_parms);
 
   return found;
 }
+
+
+int unregister_sysORTable(oid *oidin,
+                       size_t oidlen)
+{
+    return unregister_sysORTable_sess( oidin, oidlen, NULL );
+}
+
+int unregister_sysORTable_by_session(struct snmp_session *ss)
+{
+  struct sysORTable *ptr=table, *prev=NULL, *next;
+
+  while ( ptr != NULL  ) {
+    next = ptr->next;
+    if (( (ss->flags & SNMP_FLAGS_SUBSESSION) && ptr->OR_sess == ss ) ||
+        (!(ss->flags & SNMP_FLAGS_SUBSESSION) &&
+                              ptr->OR_sess->subsession == ss )) {
+      if ( prev == NULL )
+          table = next;
+      else
+          prev->next = next;
+        free( ptr->OR_descr );
+        free( ptr->OR_oid );
+        free( ptr );
+        numEntries--;
+
+    } 
+    else
+      prev = ptr;
+    ptr = next;
+  }
+}
+

@@ -104,6 +104,7 @@ close_agentx_session(struct snmp_session *session, int sessid)
         if ( sp->sessid == sessid ) {
 
 	    unregister_mibs_by_session( sp );
+	    unregister_sysORTable_by_session( sp );
 	    if ( prev )
 	        prev->next = sp->next;
 	    else
@@ -183,9 +184,9 @@ add_agent_caps_list(struct snmp_session *session, struct snmp_pdu *pdu)
     if ( sp == NULL )
         return AGENTX_ERR_NOT_OPEN;
 
-    register_sysORTable(pdu->variables->name,
+    register_sysORTable_sess(pdu->variables->name,
     			pdu->variables->name_length,
-			(char *)pdu->variables->val.string);
+			(char *)pdu->variables->val.string, sp);
     return AGENTX_ERR_NOERROR;
 }
 
@@ -198,8 +199,8 @@ remove_agent_caps_list(struct snmp_session *session, struct snmp_pdu *pdu)
     if ( sp == NULL )
         return AGENTX_ERR_NOT_OPEN;
 
-    if ( unregister_sysORTable(pdu->variables->name,
-    			       pdu->variables->name_length) < 0 )
+    if ( unregister_sysORTable_sess(pdu->variables->name,
+    			       pdu->variables->name_length, sp) < 0 )
         return AGENTX_ERR_UNKNOWN_AGENTCAPS;
     else
         return AGENTX_ERR_NOERROR;

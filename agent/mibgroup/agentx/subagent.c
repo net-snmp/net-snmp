@@ -7,6 +7,16 @@
 #ifdef HAVE_STDLIB_H
 #include <stdlib.h>
 #endif
+#if TIME_WITH_SYS_TIME
+# include <sys/time.h>
+# include <time.h>
+#else
+# if HAVE_SYS_TIME_H
+#  include <sys/time.h>
+# else
+#  include <time.h>
+# endif
+#endif
 #if HAVE_STRING_H
 #include <string.h>
 #else
@@ -32,6 +42,7 @@
 #include "agent_registry.h"
 #include "agent_callbacks.h"
 #include "snmp_debug.h"
+#include "mibII/sysORTable.h"
 
 
 int
@@ -221,6 +232,24 @@ agentx_registration_callback(int majorID, int minorID, void *serverarg,
 }
 
 
+int
+agentx_sysOR_callback(int majorID, int minorID, void *serverarg,
+                         void *clientarg) {
+  struct register_sysOR_parameters *reg_parms =
+    (struct register_sysOR_parameters *) serverarg;
+  struct snmp_session *agentx_ss =
+    (struct snmp_session *) clientarg;
+
+  if (minorID == SNMPD_CALLBACK_REG_SYSOR)
+    agentx_add_agentcaps(agentx_ss,
+		    reg_parms->name, reg_parms->namelen,
+		    reg_parms->descr);
+  else
+    agentx_remove_agentcaps(agentx_ss,
+		    reg_parms->name, reg_parms->namelen);
+}
+
+
 static int
 subagent_shutdown(int majorID, int minorID, void *serverarg, void *clientarg) {
   struct snmp_session *thesession = (struct snmp_session *) clientarg;
@@ -280,6 +309,12 @@ pre_init_subagent( void )
     snmp_register_callback(SNMP_CALLBACK_APPLICATION,
                            SNMPD_CALLBACK_UNREGISTER_OID,
                            agentx_registration_callback, agentx_session);
+    snmp_register_callback(SNMP_CALLBACK_APPLICATION,
+                           SNMPD_CALLBACK_REG_SYSOR,
+                           agentx_sysOR_callback, agentx_session);
+    snmp_register_callback(SNMP_CALLBACK_APPLICATION,
+                           SNMPD_CALLBACK_UNREG_SYSOR,
+                           agentx_sysOR_callback, agentx_session);
     DEBUGMSGTL(("agentx/subagent","initializing....  DONE\n"));
 }
 
