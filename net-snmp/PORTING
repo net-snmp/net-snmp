@@ -49,6 +49,21 @@ In source code:
     /* use it */
   #endif
 
+--- STRUCTURE MEMBER CHECKS
+
+In configure.in:
+  AC_CHECK_STRUCT_FOR([
+#include lines
+], structure, member)
+
+In acconfig.h:
+  #undef STRUCT_STRUCTURE_HAS_MEMBER
+                ^^^^^^^^^     ^^^^^^  (change)
+
+In source code:
+  #ifdef STRUCT_STRUCTURE_HAS_MEMBER
+    /* use it */
+  #endif
 
 --- READ THE MANUAL
 
