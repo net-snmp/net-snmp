@@ -52,10 +52,14 @@
 #include "snmp_client.h"
 #include "mib.h"
 #include "snmp.h"
+
+#ifdef USE_V2PARTY_PROTOCOL
 #include "party.h"
 #include "context.h"
 #include "view.h"
 #include "acl.h"
+#endif /* USE_V2PARTY_PROTOCOL */
+
 #include "snmp_parse_args.h"
 #include "version.h"
 #include "system.h"
@@ -103,18 +107,20 @@ snmp_parse_args(argc, argv, session)
   struct snmp_session *session;
 {
   int arg;
+  char *psz;
+#ifdef USE_V2PARTY_PROTOCOL
   static oid src[MAX_NAME_LEN];
   static oid dst[MAX_NAME_LEN];
   static oid context[MAX_NAME_LEN];
+  struct partyEntry *pp;
+  struct contextEntry *cxp;
+  struct hostent *hp;
+  char ctmp[300];
+  in_addr_t destAddr;
   int clock_flag = 0;
   u_long srcclock = 0;
   u_long dstclock = 0;
-  struct partyEntry *pp;
-  struct contextEntry *cxp;
-  char ctmp[300];
-  char *psz;
-  struct hostent *hp;
-  in_addr_t destAddr;
+#endif
 
   /* initialize session to default values */
   memset(session, 0, sizeof(struct snmp_session));
@@ -215,6 +221,7 @@ snmp_parse_args(argc, argv, session)
         }
         break;
 
+#ifdef USE_V2PARTY_PROTOCOL
       case 'c':
         clock_flag++;
         if (isdigit(argv[arg][2]))
@@ -234,6 +241,7 @@ snmp_parse_args(argc, argv, session)
           exit(1);
         }
         break;
+#endif /* USE_V2PARTY_PROTOCOL */
 
       case 'V':
         fprintf(stderr,"UCD-snmp version: %s\n", VersionInfo);
@@ -300,6 +308,7 @@ snmp_parse_args(argc, argv, session)
     session->community = (unsigned char *)argv[arg];
     session->community_len = strlen((char *)argv[arg]);
     arg++;
+#ifdef USE_V2PARTY_PROTOCOL
   } else {
     /* v2p - so get party info */
     if (arg == argc) {
@@ -439,6 +448,7 @@ snmp_parse_args(argc, argv, session)
         }
       }
     }
+#endif /* USE_V2PARTY_PROTOCOL */
   }
   return arg;
 }

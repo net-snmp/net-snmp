@@ -71,7 +71,7 @@ SOFTWARE.
 #include <netdb.h>
 #endif
 #include <errno.h>
-#ifdef __STDC__
+#ifdef STDC_HEADERS
 #include <stdarg.h>
 #else
 #include <varargs.h>
@@ -104,7 +104,7 @@ typedef long	fd_mask;
 #define FD_ZERO(p)	memset((p), 0, sizeof(*(p)))
 #endif
 
-oid default_enterprise[] = {1, 3, 6, 1, 4, 1, 3, 1, 1};
+static oid default_enterprise[] = {1, 3, 6, 1, 4, 1, 3, 1, 1};
 /* enterprises.cmu.systems.cmuSNMP */
 
 #define DEFAULT_COMMUNITY   "public"
@@ -207,12 +207,6 @@ struct session_list {
     struct snmp_internal_session *internal;
 };
 
-struct session_list *Sessions = NULL;
-
-long Reqid = 0;
-int snmp_errno = 0;
-char *snmp_detail = NULL;
-
 static char *api_errors[-SNMPERR_MAX+1] = {
     "No error",
     "Generic error",
@@ -239,19 +233,35 @@ static char *api_errors[-SNMPERR_MAX+1] = {
     "Session abort failure",
     "Unknown PDU type",
     "Timeout",
+    "Failure in recvfrom",
 };
 
-struct timeval Now;
-struct snmp_pdu *SavedPdu = NULL;
-struct internal_variable_list *SavedVars = NULL;
+/*
+ * Multiple threads may changes these variables.
+ * Suggest using the Single API, which does not use Sessions.
+ *
+ * Reqid may need to be protected. Time will tell...
+ *
+ */
+/*MTCRITICAL_RESOURCE*/
+struct session_list *Sessions = NULL;
+long Reqid = 0;
+/*END MTCRITICAL_RESOURCE*/
 
-int snmp_dump_packet = 0;
+/*struct timeval Now;*/
+static struct servent *servp = NULL;
+int snmp_errno = 0;
+char *snmp_detail = NULL;
+
+static int snmp_dump_packet = 0;
 
 static void free_request_list __P((struct request_list *));
 void shift_array __P((u_char *, int, int));
 static int snmp_build __P((struct snmp_session *, struct snmp_pdu *, u_char *, int *));
 static int snmp_parse __P((struct snmp_session *, struct internal_snmp_pdu *, u_char *, int));
 static void snmp_free_internal_pdu __P((struct snmp_pdu *));
+
+static void * snmp_sess_pointer __P((struct snmp_session *));
 
 #ifndef HAVE_STRERROR
 char *strerror(err)
@@ -289,15 +299,15 @@ snmp_perror(prog_string)
 }
 
 void
-snmp_set_detail(string)
-  char *string;
+snmp_set_detail(detail_string)
+  char *detail_string;
 {
   if (snmp_detail != NULL) {
     free(snmp_detail);
     snmp_detail = NULL;
   }
-  if (string != NULL)
-    snmp_detail = strdup(string);
+  if (detail_string != NULL)
+    snmp_detail = (char *)strdup(detail_string);
 }
 
 char *
@@ -331,19 +341,76 @@ init_snmp __P((void)) {
   read_premib_configs();
   init_mib();
   read_configs();
+  init_snmp_session();
 }
 
 /*
+ * snmp_error - return error data
+ * Inputs :  address of errno, address of snmp_errno, address of string
+ * Caller must free the string returned after use.
+ */
+void
+snmp_error(psess, p_errno, p_snmp_errno, p_str)
+    struct snmp_session *psess;
+    int * p_errno;
+    int * p_snmp_errno;
+    char ** p_str;
+{
+    char buf[512];
+    int snmp_errnumber;
+
+    if (p_errno) *p_errno = psess->s_errno;
+    if (p_snmp_errno) *p_snmp_errno = psess->s_snmp_errno;
+    if (p_str == NULL) return;
+
+    snmp_errnumber = psess->s_snmp_errno;
+    if (snmp_errnumber >= SNMPERR_MAX && snmp_errnumber <= SNMPERR_GENERR){
+	strcpy(buf, api_errors[-snmp_errnumber]);
+    } else {
+	sprintf(buf, "Unknown Error %d", snmp_errnumber);
+    }
+
+    /* append a useful system errno interpretation. */
+    if (psess->s_errno)
+        sprintf (&buf[strlen(buf)], " (%s)", strerror(psess->s_errno));
+    *p_str = (char *)strdup(buf);
+}
+
+/*
+ * snmp_sess_error - same as snmp_error for single session API use.
+ */
+void
+snmp_sess_error(sessp, p_errno, p_snmp_errno, p_str)
+    void * sessp;
+    int * p_errno;
+    int * p_snmp_errno;
+    char ** p_str;
+{
+    struct session_list *slp = (struct session_list*)sessp;
+
+    if ((slp) && (slp->session))
+	snmp_error(slp->session, p_errno, p_snmp_errno, p_str);
+}
+
+
+/*
  * Gets initial request ID for all transactions.
+ * and finds which port SNMP over UDP uses.
  */
 static void
 init_snmp_session __P((void))
 {
     struct timeval tv;
 
-    gettimeofday(&tv,(struct timezone *)0);
+    if (Reqid) return;
+    Reqid = 1;
 
-    Now = tv;
+    if (! servp)
+      servp = getservbyname("snmp", "udp");
+
+    gettimeofday(&tv,(struct timezone *)0);
+    /*Now = tv;*/
+
 #ifdef SVR4
     srand48(tv.tv_sec ^ tv.tv_usec);
     Reqid = lrand48();
@@ -351,6 +418,24 @@ init_snmp_session __P((void))
     srandom(tv.tv_sec ^ tv.tv_usec);
     Reqid = random();
 #endif
+}
+
+void
+snmp_sess_init(session)
+    struct snmp_session * session;
+{
+extern int init_mib_internals();
+
+    init_snmp();
+    init_mib_internals();
+
+    /* initialize session to default values */
+ 
+    memset(session, 0, sizeof(struct snmp_session));
+    session->remote_port = SNMP_DEFAULT_REMPORT;
+    session->timeout = SNMP_DEFAULT_TIMEOUT;
+    session->retries = SNMP_DEFAULT_RETRIES;
+    session->version = SNMP_VERSION_1;
 }
 
 /*
@@ -365,18 +450,33 @@ snmp_open(session)
     struct snmp_session *session;
 {
     struct session_list *slp;
+    slp = (struct session_list *)snmp_sess_open(session);
+    if (slp)
+    { /*MTCRITICAL_RESOURCE*/
+	slp->next = Sessions;
+	Sessions = slp;
+    }
+    return (slp->session);
+}
+
+/* The "spin-free" version of snmp_open */
+void *
+snmp_sess_open(in_session)
+    struct snmp_session *in_session;
+{
+    struct session_list *slp;
     struct snmp_internal_session *isp;
-    u_char *cp, *comp;
+    struct snmp_session *session;
+    u_char *cp;
     oid *op;
-    int sd, comlen;
+    int sd;
     in_addr_t addr;
     struct sockaddr_in	me;
     struct hostent *hp;
-    static struct servent *servp = NULL;
-
 
     if (Reqid == 0)
-	init_snmp_session();
+      init_snmp();
+
 
     if (! servp)
       servp = getservbyname("snmp", "udp");
@@ -385,24 +485,30 @@ snmp_open(session)
     slp = (struct session_list *)malloc(sizeof(struct session_list));
     if (slp == NULL) { 
       snmp_errno = SNMPERR_GENERR;
+      in_session->s_snmp_errno = SNMPERR_GENERR;
       return(NULL);
     }
-    slp->internal = isp = (struct snmp_internal_session *)malloc(sizeof(struct snmp_internal_session));
+    memset(slp, 0, sizeof(struct session_list));
+
+    isp = (struct snmp_internal_session *)malloc(sizeof(struct snmp_internal_session));
     if (isp == NULL) { 
-      free(slp);
       snmp_errno = SNMPERR_GENERR;
+      in_session->s_snmp_errno = SNMPERR_GENERR;
+      snmp_sess_close(slp);
       return(NULL);
     }
     memset(isp, 0, sizeof(struct snmp_internal_session));
+
+    slp->internal = isp;
     slp->internal->sd = -1; /* mark it not set */
     slp->session = (struct snmp_session *)malloc(sizeof(struct snmp_session));
     if (slp->session == NULL) { 
-      free(isp);
-      free(slp);
       snmp_errno = SNMPERR_GENERR;
+      in_session->s_snmp_errno = SNMPERR_GENERR;
+      snmp_sess_close(slp);
       return(NULL);
     }
-    memmove(slp->session, session, sizeof(struct snmp_session));
+    memmove(slp->session, in_session, sizeof(struct snmp_session));
     session = slp->session;
 
     /*
@@ -413,11 +519,10 @@ snmp_open(session)
 
     if (session->peername != NULL){
 	cp = (u_char *)malloc((unsigned)strlen(session->peername) + 1);
-        if (cp == NULL) { 
-          free(slp->session);
-          free(isp);
-          free(slp);
+	if (cp == NULL) {
           snmp_errno = SNMPERR_GENERR;
+          in_session->s_snmp_errno = SNMPERR_GENERR;
+          snmp_sess_close(slp);
           return(NULL);
         }
 	strcpy((char *)cp, session->peername);
@@ -425,28 +530,33 @@ snmp_open(session)
     }
 
     /* Fill in defaults if necessary */
-    comp = session->community;
-    comlen = session->community_len;
-    if (comlen == SNMP_DEFAULT_COMMUNITY_LEN) {
-	comp = DEFAULT_COMMUNITY;
-	comlen = strlen(comp);
+    if (session->community_len != SNMP_DEFAULT_COMMUNITY_LEN){
+	cp = (u_char *)malloc((unsigned)session->community_len);
+	if (cp)
+	memmove(cp, session->community, session->community_len);
+    } else {
+	session->community_len = strlen(DEFAULT_COMMUNITY);
+	cp = (u_char *)malloc((unsigned)session->community_len);
+	if (cp)
+	memmove(cp, DEFAULT_COMMUNITY, session->community_len);
     }
-    cp = (u_char *)malloc(comlen);
-    if (cp == NULL) { 
-      free(session->peername);
-      free(slp->session);
-      free(isp);
-      free(slp);
+    if (cp == NULL) {
       snmp_errno = SNMPERR_GENERR;
+      in_session->s_snmp_errno = SNMPERR_GENERR;
+      snmp_sess_close(slp);
       return(NULL);
     }
-    memcpy(cp, comp, comlen);
+
     session->community = cp;	/* replace pointer with pointer to new data */
-    session->community_len = comlen;
 
     if (session->srcPartyLen > 0){
 	op = (oid *)malloc((unsigned)session->srcPartyLen * sizeof(oid));
-	if (op) /* XX else NO MEMORY */
+	if (op == NULL) {
+	    snmp_errno = SNMPERR_GENERR;
+	    in_session->s_snmp_errno = SNMPERR_GENERR;
+	    snmp_sess_close(slp);
+	    return(NULL);
+	}
 	memmove(op, session->srcParty, session->srcPartyLen * sizeof(oid));
 	session->srcParty = op;
     } else {
@@ -455,7 +565,12 @@ snmp_open(session)
 
     if (session->dstPartyLen > 0){
 	op = (oid *)malloc((unsigned)session->dstPartyLen * sizeof(oid));
-	if (op) /* XX else NO MEMORY */
+	if (op == NULL) {
+	    snmp_errno = SNMPERR_GENERR;
+	    in_session->s_snmp_errno = SNMPERR_GENERR;
+	    snmp_sess_close(slp);
+	    return(NULL);
+	}
 	memmove(op, session->dstParty, session->dstPartyLen * sizeof(oid));
 	session->dstParty = op;
     } else {
@@ -464,7 +579,12 @@ snmp_open(session)
 
     if (session->contextLen > 0){
 	op = (oid *)malloc((unsigned)session->contextLen * sizeof(oid));
-	if (op) /* XX else NO MEMORY */
+	if (op == NULL) {
+	    snmp_errno = SNMPERR_GENERR;
+	    in_session->s_snmp_errno = SNMPERR_GENERR;
+	    snmp_sess_close(slp);
+	    return(NULL);
+	}
 	memmove(op, session->context, session->contextLen * sizeof(oid));
 	session->context = op;
     } else {
@@ -476,19 +596,14 @@ snmp_open(session)
     if (session->timeout == SNMP_DEFAULT_TIMEOUT)
 	session->timeout = DEFAULT_TIMEOUT;
 
-    /* now link it in. */
-    slp->next = Sessions;
-    Sessions = slp;
-
     /* Set up connections */
     sd = socket(AF_INET, SOCK_DGRAM, 0);
     if (sd < 0){
-	snmp_set_detail(strerror(errno));
 	snmp_errno = SNMPERR_NO_SOCKET;
-	if (!snmp_close(session)){
-	    snmp_errno = SNMPERR_ABORT;
-	    snmp_set_detail(api_errors[-SNMPERR_NO_SOCKET]);
-	}
+	in_session->s_snmp_errno = SNMPERR_NO_SOCKET;
+	in_session->s_errno = errno;
+	snmp_set_detail(strerror(errno));
+	snmp_sess_close(slp);
 	return 0;
     }
 
@@ -505,17 +620,16 @@ snmp_open(session)
 
     isp->sd = sd;
     if (session->peername != SNMP_DEFAULT_PEERNAME){
-	if ((addr = inet_addr(session->peername)) != -1){
+	if ((int)(addr = inet_addr(session->peername)) != -1){
 	    memmove(&isp->addr.sin_addr, &addr, sizeof(isp->addr.sin_addr));
 	} else {
 	    hp = gethostbyname(session->peername);
 	    if (hp == NULL){
 		snmp_errno = SNMPERR_BAD_ADDRESS;
+		in_session->s_snmp_errno = SNMPERR_BAD_ADDRESS;
+		in_session->s_errno = errno;
 		snmp_set_detail(session->peername);
-		if (!snmp_close(session)){
-		    snmp_errno = SNMPERR_ABORT;
-		    snmp_set_detail(api_errors[-SNMPERR_BAD_ADDRESS]);
-		}
+		snmp_sess_close(slp);
 		return 0;
 	    } else {
 		memmove(&isp->addr.sin_addr, hp->h_addr, hp->h_length);
@@ -540,15 +654,14 @@ snmp_open(session)
     me.sin_addr.s_addr = INADDR_ANY;
     me.sin_port = htons(session->local_port);
     if (bind(sd, (struct sockaddr *)&me, sizeof(me)) != 0){
-	snmp_set_detail(strerror(errno));
 	snmp_errno = SNMPERR_BAD_LOCPORT;
-	if (!snmp_close(session)){
-	    snmp_errno = SNMPERR_ABORT;
-	    snmp_set_detail(api_errors[-SNMPERR_BAD_LOCPORT]);
-	}
+	in_session->s_snmp_errno = SNMPERR_BAD_LOCPORT;
+	in_session->s_errno = errno;
+	snmp_set_detail(strerror(errno));
+	snmp_sess_close(slp);
 	return 0;
     }
-    return session;
+    return (void *)slp;
 }
 
 
@@ -570,17 +683,59 @@ free_request_list(rp)
     }
 }
 
+static void
+_snmp_free(cp)
+    char * cp;
+{
+    if (cp)
+	free(cp);
+}
+
 /*
  * Close the input session.  Frees all data allocated for the session,
  * dequeues any pending requests, and closes any sockets allocated for
  * the session.  Returns 0 on error, 1 otherwise.
  */
+int
+snmp_sess_close(sessp)
+    void *sessp;
+{
+    struct session_list *slp = (struct session_list *)sessp;
+
+    if (slp == NULL)
+	return 0;
+
+    if (slp->internal) {
+	if (slp->internal->sd != -1)
+	{
+#ifndef HAVE_CLOSESOCKET
+	close(slp->internal->sd);
+#else
+	closesocket(slp->internal->sd);
+#endif
+	}
+	free_request_list(slp->internal->requests);
+    }
+
+    _snmp_free((char *)slp->session->context);
+    _snmp_free((char *)slp->session->dstParty);
+    _snmp_free((char *)slp->session->srcParty);
+    _snmp_free((char *)slp->session->peername);
+    _snmp_free((char *)slp->session->community);
+    _snmp_free((char *)slp->session);
+    _snmp_free((char *)slp->internal);
+    _snmp_free((char *)slp);
+
+    return 1;
+}
+
 int 
 snmp_close(session)
     struct snmp_session *session;
 {
     struct session_list *slp = NULL, *oslp = NULL;
 
+    { /*MTCRITICAL_RESOURCE*/
     if (Sessions->session == session){	/* If first entry */
 	slp = Sessions;
 	Sessions = slp->next;
@@ -594,37 +749,16 @@ snmp_close(session)
 	    oslp = slp;
 	}
     }
-    /* If we found the session, free all data associated with it */
-    if (slp){
-	if (slp->session->community != NULL)
-	    free((char *)slp->session->community);
-	if(slp->session->peername != NULL)
-	    free((char *)slp->session->peername);
-	if (slp->session->srcParty != NULL)
-	    free((char *)slp->session->srcParty);
-	if (slp->session->dstParty != NULL)
-	    free((char *)slp->session->dstParty);
-	if (slp->session->context != NULL)
-	    free((char *)slp->session->context);
-	free((char *)slp->session);
-	if (slp->internal->sd != -1)
-	{
-#ifndef HAVE_CLOSESOCKET
-	    close(slp->internal->sd);
-#else
-	    closesocket(slp->internal->sd);
-#endif
-	}
-	free_request_list(slp->internal->requests);
-	free((char *)slp->internal);
-	free((char *)slp);
-    } else {
+    } /*END MTCRITICAL_RESOURCE*/
+
+    if (slp == NULL){
 	snmp_errno = SNMPERR_BAD_SESSION;
 	return 0;
     }
-    return 1;
+    return snmp_sess_close((void *)slp);
 }
 
+#ifdef notused
 void
 shift_array(begin, length, shift_amount)
     u_char          *begin;
@@ -647,6 +781,7 @@ shift_array(begin, length, shift_amount)
             *newer++ = *old++;
     }
 }
+#endif
 
 /*
  * Takes a session and a pdu and serializes the ASN PDU into the area
@@ -665,10 +800,14 @@ snmp_build(session, pdu, packet, out_length)
     register u_char  *cp;
     struct variable_list *vp;
     struct  packet_info pkt, *pi = &pkt;
-    int length, packet_length;
+    int length;
+#ifdef USE_V2PARTY_PROTOCOL
+    int packet_length;
+#endif /* USE_V2PARTY_PROTOCOL */
     long version;
 
     snmp_errno = SNMPERR_BAD_ASN1_BUILD;
+    session->s_snmp_errno = SNMPERR_BAD_ASN1_BUILD;
 
     /* save length */
     length = *out_length;
@@ -707,6 +846,7 @@ snmp_build(session, pdu, packet, out_length)
         break;
 
     case SNMP_VERSION_2p:
+#ifdef USE_V2PARTY_PROTOCOL
         pi->version = session->version;
         pi->srcp = NULL;
         pi->dstp = NULL;
@@ -718,6 +858,7 @@ snmp_build(session, pdu, packet, out_length)
         if (cp == NULL)
             return -1;
         break;
+#endif /* USE_V2PARTY_PROTOCOL */
 
     case SNMP_VERSION_sec:
     case SNMP_VERSION_2u:
@@ -839,6 +980,7 @@ snmp_build(session, pdu, packet, out_length)
         break;
 
     case SNMP_VERSION_2p:
+#ifdef USE_V2PARTY_PROTOCOL
         /* add potentially encryption and digest calculation */
 /*?? cleanup length parameters in call */
         snmp_party_build(packet, &length, pi, cp - h1,
@@ -849,6 +991,7 @@ snmp_build(session, pdu, packet, out_length)
 	/* encryption might bump length of packet */
 	cp = packet + packet_length;
 	break;
+#endif /* USE_V2PARTY_PROTOCOL */
 
     case SNMP_VERSION_sec:
     case SNMP_VERSION_2u:
@@ -859,6 +1002,7 @@ snmp_build(session, pdu, packet, out_length)
     }
     *out_length = cp - packet;
     snmp_errno = 0;
+    session->s_snmp_errno = 0;
     return 0;
 }
 
@@ -878,13 +1022,17 @@ snmp_parse(session, pdu, data, length)
     u_char  type;
     struct packet_info pkt, *pi = &pkt;
     u_char  *var_val;
-    int     version;
+    int     version, badtype;
     int	    len, four;
     u_char community[COMMUNITY_MAX_LEN];
     int community_length = COMMUNITY_MAX_LEN;
     struct internal_variable_list *vp = NULL;
     oid objid[MAX_NAME_LEN];
-    char err[128];
+    char err[256];
+
+    badtype = 0;
+    snmp_errno = SNMPERR_BAD_PARSE;
+    session->s_snmp_errno = SNMPERR_BAD_PARSE;
 
     /* get the message tag */
     len = length;
@@ -896,8 +1044,10 @@ snmp_parse(session, pdu, data, length)
 	version = session->version;
     else if (type == (ASN_SEQUENCE | ASN_CONSTRUCTOR))
 	version = SNMP_VERSION_1;
+#ifdef USE_V2PARTY_PROTOCOL
     else
 	version = SNMP_VERSION_2p;
+#endif /* USE_V2PARTY_PROTOCOL */
     switch (version) {
     case SNMP_VERSION_1:
     case SNMP_VERSION_2c:
@@ -921,11 +1071,12 @@ snmp_parse(session, pdu, data, length)
 					  (char *)community,
                                           community_length);
 	    if (data == NULL)
-		return 0;
+		return 0; /* COMMENT OR CHANGE YYXX not an error ? */
 	}
         break;
 
     case SNMP_VERSION_2p:
+#ifdef USE_V2PARTY_PROTOCOL
         /* message tag is a tagged context specific sequence
            that is,  "[1] IMPLICIT SEQUENCE" */
         if (type != (ASN_CONTEXT | ASN_CONSTRUCTOR | 1))
@@ -949,6 +1100,7 @@ snmp_parse(session, pdu, data, length)
 	    return -1;
 	version = pi->version;
         break;
+#endif /* USE_V2PARTY_PROTOCOL */
 
     case SNMP_VERSION_sec:
     case SNMP_VERSION_2u:
@@ -1042,24 +1194,13 @@ snmp_parse(session, pdu, data, length)
     /* get each varBind sequence */
     while((int)length > 0){
 	if (vp == NULL){
-	    if (SavedVars){
-		vp = SavedVars;
-		SavedVars =
-		    (struct internal_variable_list *)SavedVars->next_variable;
-	    } else {
-		vp = (struct internal_variable_list *)malloc(sizeof(struct internal_variable_list));
-	    }
+	    vp = (struct internal_variable_list *)malloc(sizeof(struct internal_variable_list));
 	    pdu->variables = (struct variable_list *)vp;
 	} else {
-	    if (SavedVars){
-		vp->next_variable = (struct variable_list *)SavedVars;
-		SavedVars =
-		    (struct internal_variable_list *)SavedVars->next_variable;
-	    } else {
-		vp->next_variable = (struct variable_list *)malloc(sizeof(struct internal_variable_list));
-	    }
+	    vp->next_variable = (struct variable_list *)malloc(sizeof(struct internal_variable_list));
 	    vp = (struct internal_variable_list *)vp->next_variable;
 	}
+
 	vp->next_variable = NULL;
 	vp->val.string = NULL;
 	vp->name_length = MAX_NAME_LEN;
@@ -1162,9 +1303,13 @@ snmp_parse(session, pdu, data, length)
 		break;
 	    default:
 		fprintf(stderr,"bad type returned (%x)\n", vp->type);
-		snmp_errno = SNMPERR_BAD_PARSE;
+		badtype = 1;
 		break;
 	}
+    }
+    if (badtype == 0) {
+	snmp_errno = 0;
+	session->s_snmp_errno = 0;
     }
     return 0;
 }
@@ -1183,7 +1328,15 @@ snmp_send(session, pdu)
     struct snmp_session *session;
     struct snmp_pdu	*pdu;
 {
-    return snmp_async_send(session, pdu, NULL, NULL);
+  return snmp_async_send(session, pdu, NULL, NULL);
+}
+
+int
+snmp_sess_send(sessp, pdu)
+    void	        *sessp;
+    struct snmp_pdu	*pdu;
+{
+  return snmp_sess_async_send(sessp, pdu, NULL, NULL);
 }
 
 /*
@@ -1209,8 +1362,23 @@ snmp_async_send(session, pdu, callback, cb_data)
     snmp_callback	callback;
     void	        *cb_data;
 {
-    struct session_list *slp;
-    struct snmp_internal_session *isp = NULL;
+    void *sessp = snmp_sess_pointer(session);
+
+    if (sessp == NULL) return 0;
+
+    return snmp_sess_async_send(sessp, pdu, callback, cb_data);
+}
+
+int
+snmp_sess_async_send(sessp, pdu, callback, cb_data)
+    void	        *sessp;
+    struct snmp_pdu	*pdu;
+    snmp_callback	callback;
+    void	        *cb_data;
+{
+    struct session_list *slp = (struct session_list *)sessp;
+    struct snmp_session *session;
+    struct snmp_internal_session *isp;
     u_char  packet[PACKET_LENGTH];
     int length = PACKET_LENGTH;
     struct request_list *rp;
@@ -1219,7 +1387,7 @@ snmp_async_send(session, pdu, callback, cb_data)
 
 
     /* find the internal session for the caller */
-    for(slp = Sessions; slp; slp = slp->next){
+/*    for(slp = Sessions; slp; slp = slp->next){
 	if (slp->session == session){
 	    isp = slp->internal;
 	    break;
@@ -1228,12 +1396,16 @@ snmp_async_send(session, pdu, callback, cb_data)
     if (isp == NULL){
 	snmp_errno = SNMPERR_BAD_SESSION;
 	return 0;
-    }
+        } */
+    session = slp->session; isp = slp->internal;
+    session->s_snmp_errno = 0;
+    session->s_errno = 0;
 
     /* check/setup the version */
     if (pdu->version == SNMP_DEFAULT_VERSION) {
         if (session->version == SNMP_DEFAULT_VERSION) {
 	    snmp_errno = SNMPERR_BAD_VERSION;
+	    session->s_snmp_errno = SNMPERR_BAD_VERSION;
 	    return 0;
         }
         pdu->version = session->version;
@@ -1241,6 +1413,7 @@ snmp_async_send(session, pdu, callback, cb_data)
 	/* It's OK */
     } else if (pdu->version != session->version) {
         snmp_errno = SNMPERR_BAD_VERSION;
+        session->s_snmp_errno = SNMPERR_BAD_VERSION;
         return 0;
     }
 
@@ -1252,7 +1425,9 @@ snmp_async_send(session, pdu, callback, cb_data)
         /* all versions support these PDU types */
         /* initialize defaulted PDU fields */
 	if (pdu->reqid == SNMP_DEFAULT_REQID)
+	{ /*MTCRITICAL_RESOURCE*/
 	    pdu->reqid = ++Reqid;
+	}
 	if (pdu->errstat == SNMP_DEFAULT_ERRSTAT)
 	    pdu->errstat = 0;
 	if (pdu->errindex == SNMP_DEFAULT_ERRINDEX)
@@ -1260,17 +1435,20 @@ snmp_async_send(session, pdu, callback, cb_data)
         if (pdu->command == SNMP_MSG_RESPONSE)
             /* don't expect a response */
             expect_response = 0;
-    } else if (pdu->command == SNMP_MSG_INFORM ||
-               pdu->command == SNMP_MSG_TRAP2) {
+    } else if ((pdu->command == SNMP_MSG_INFORM) ||
+               (pdu->command == SNMP_MSG_TRAP2)) {
         /* not supported in SNMPv1 and SNMPsec */
-	if (pdu->version == SNMP_VERSION_1 ||
-                pdu->version == SNMP_VERSION_sec) {
+	if ((pdu->version == SNMP_VERSION_1) ||
+                (pdu->version == SNMP_VERSION_sec)) {
 	    snmp_errno = SNMPERR_V2_IN_V1;
+	    session->s_snmp_errno = SNMPERR_V2_IN_V1;
 	    return 0;
 	}
         /* initialize defaulted PDU fields */
 	if (pdu->reqid == SNMP_DEFAULT_REQID)
+	{ /*MTCRITICAL_RESOURCE*/
 	    pdu->reqid = ++Reqid;
+	}
 	if (pdu->errstat == SNMP_DEFAULT_ERRSTAT)
 	    pdu->errstat = 0;
 	if (pdu->errindex == SNMP_DEFAULT_ERRINDEX)
@@ -1279,23 +1457,28 @@ snmp_async_send(session, pdu, callback, cb_data)
             expect_response = 0;
     } else if (pdu->command == SNMP_MSG_GETBULK) {
         /* not supported in SNMPv1 and SNMPsec */
-	if (pdu->version == SNMP_VERSION_1 ||
-                pdu->version == SNMP_VERSION_sec) {
+	if ((pdu->version == SNMP_VERSION_1) ||
+                (pdu->version == SNMP_VERSION_sec)) {
 	    snmp_errno = SNMPERR_V1_IN_V2;
+	    session->s_snmp_errno = SNMPERR_V1_IN_V2;
 	    return 0;
 	}
         /* initialize defaulted PDU fields */
 	if (pdu->reqid == SNMP_DEFAULT_REQID)
+	{ /*MTCRITICAL_RESOURCE*/
 	    pdu->reqid = ++Reqid;
+	}
 	if ((pdu->max_repetitions < 0) || (pdu->non_repeaters < 0)){
 	    snmp_errno = SNMPERR_BAD_REPETITIONS;
+	    session->s_snmp_errno = SNMPERR_BAD_REPETITIONS;
 	    return 0;
 	}
 	    
     } else if (pdu->command == SNMP_MSG_TRAP) {
-        if (pdu->version != SNMP_VERSION_1 &&
-            pdu->version != SNMP_VERSION_sec) {
+        if ((pdu->version != SNMP_VERSION_1) &&
+            (pdu->version != SNMP_VERSION_sec)) {
           snmp_errno = SNMPERR_V2_IN_V1;
+          session->s_snmp_errno = SNMPERR_V2_IN_V1;
           return 0;
         }
         /* initialize defaulted Trap PDU fields */
@@ -1312,7 +1495,8 @@ snmp_async_send(session, pdu, callback, cb_data)
         expect_response = 0;
     } else {
         /* some unknown PDU type */
-        snmp_errno = SNMPERR_UNKNOWN_PDU;
+        snmp_errno = SNMPERR_UNKNOWN_PDU; 
+        session->s_snmp_errno = SNMPERR_UNKNOWN_PDU;
         return 0;
     }
 
@@ -1321,6 +1505,7 @@ snmp_async_send(session, pdu, callback, cb_data)
 	    memmove(&pdu->address, &isp->addr, sizeof(pdu->address));
 	} else {
 	    snmp_errno = SNMPERR_BAD_ADDRESS;
+	    session->s_snmp_errno = SNMPERR_BAD_ADDRESS;
 	    return 0;
 	}
     }
@@ -1341,6 +1526,7 @@ snmp_async_send(session, pdu, callback, cb_data)
 	if (pdu->community_len == 0){
 	    if (session->community_len == 0){
 		snmp_errno = SNMPERR_BAD_ADDRESS;
+		session->s_snmp_errno = SNMPERR_BAD_ADDRESS;
 		return 0;
 	    }
 	    pdu->community = (u_char *)malloc(session->community_len);
@@ -1351,9 +1537,11 @@ snmp_async_send(session, pdu, callback, cb_data)
         break;
 
     case SNMP_VERSION_2p:
+#ifdef USE_V2PARTY_PROTOCOL
 	if (pdu->srcPartyLen == 0){
 	    if (session->srcPartyLen == 0){
 		snmp_errno = SNMPERR_BAD_SRC_PARTY;
+		session->s_snmp_errno = SNMPERR_BAD_SRC_PARTY;
 		return 0;
 	    }
 	    pdu->srcParty = (oid *)malloc(session->srcPartyLen * sizeof(oid));
@@ -1364,6 +1552,7 @@ snmp_async_send(session, pdu, callback, cb_data)
 	if (pdu->dstPartyLen == 0){
 	    if (session->dstPartyLen == 0){
 		snmp_errno = SNMPERR_BAD_DST_PARTY;
+		session->s_snmp_errno = SNMPERR_BAD_DST_PARTY;
 		return 0;
 	    }
 	    pdu->dstParty = (oid *)malloc(session->dstPartyLen * sizeof(oid));
@@ -1374,6 +1563,7 @@ snmp_async_send(session, pdu, callback, cb_data)
 	if (pdu->contextLen == 0){
 	    if (session->contextLen == 0){
 		snmp_errno = SNMPERR_BAD_CONTEXT;
+		session->s_snmp_errno = SNMPERR_BAD_CONTEXT;
 		return 0;
 	    }
 	    pdu->context = (oid *)malloc(session->contextLen * sizeof(oid));
@@ -1382,6 +1572,7 @@ snmp_async_send(session, pdu, callback, cb_data)
 	    pdu->contextLen = session->contextLen;
 	}
         break;
+#endif /* USE_V2PARTY_PROTOCOL */
 
     case SNMP_VERSION_sec:
     case SNMP_VERSION_2u:
@@ -1389,6 +1580,7 @@ snmp_async_send(session, pdu, callback, cb_data)
     case SNMP_VERSION_3:
     default:
         snmp_errno = SNMPERR_BAD_VERSION;
+        session->s_snmp_errno = SNMPERR_BAD_VERSION;
 	return -1;
     }
 
@@ -1407,6 +1599,8 @@ snmp_async_send(session, pdu, callback, cb_data)
     if (sendto(isp->sd, (char *)packet, length, 0,
 	       (struct sockaddr *)&pdu->address, sizeof(pdu->address)) < 0){
 	snmp_errno = SNMPERR_BAD_SENDTO;
+	session->s_snmp_errno = SNMPERR_BAD_SENDTO;
+	session->s_errno = errno;
 	return 0;
     }
 
@@ -1418,6 +1612,7 @@ snmp_async_send(session, pdu, callback, cb_data)
 	rp = (struct request_list *)malloc(sizeof(struct request_list));
 	if (rp == NULL) {
 	    snmp_errno = SNMPERR_GENERR;
+	    session->s_snmp_errno = SNMPERR_GENERR;
 	    return 0;
 	}
 	memset(rp, 0, sizeof(struct request_list));
@@ -1501,18 +1696,12 @@ snmp_free_internal_pdu(pdu)
 	    free((char *)vp->val.string);
 	ovp = vp;
 	vp = (struct internal_variable_list *)vp->next_variable;
-	ovp->next_variable = (struct variable_list *)SavedVars;
-	SavedVars = ovp;
+	free(ovp);
     }
     if (pdu->enterprise) free(pdu->enterprise);
     if (pdu->community) free(pdu->community);
-    if (!SavedPdu)
-	SavedPdu = pdu;
-    else
-	free((char *)pdu);
-    
+    free((char *)pdu);
 }
-
 
 /*
  * Checks to see if any of the fd's set in the fdset belong to
@@ -1526,6 +1715,19 @@ snmp_read(fdset)
     fd_set  *fdset;
 {
     struct session_list *slp;
+
+    for(slp = Sessions; slp; slp = slp->next){
+        if (FD_ISSET(slp->internal->sd, fdset))
+	    snmp_sess_read((void *)slp);
+    }
+}
+
+/* Same as snmp_read, but works just one session. */
+void
+snmp_sess_read(sessp)
+    void *sessp;
+{
+    struct session_list *slp = (struct session_list*)sessp;
     struct snmp_session *sp;
     struct snmp_internal_session *isp;
     u_char packet[PACKET_LENGTH];
@@ -1536,81 +1738,79 @@ snmp_read(fdset)
     snmp_callback callback;
     void *magic;
 
-    for(slp = Sessions; slp; slp = slp->next){
-	if (FD_ISSET(slp->internal->sd, fdset)){
-	    sp = slp->session;
-	    isp = slp->internal;
-	    callback = sp->callback;
-	    magic = sp->callback_magic;
-	    fromlength = sizeof from;
-	    length = recvfrom(isp->sd, (char *)packet, PACKET_LENGTH, 0,
-			      (struct sockaddr *)&from, &fromlength);
-	    if (length == -1) {
-		snmp_set_detail(strerror(errno));
-		continue;
-	    }
-	    if (snmp_dump_packet){
-		printf("\nreceived %d bytes from %s:%hu:\n", length,
-		       inet_ntoa(from.sin_addr), ntohs(from.sin_port));
-		xdump(packet, length, "");
-                printf("\n");
-	    }
-
-	    if (SavedPdu){
-		pdu = SavedPdu;
-		SavedPdu = NULL;
-	    } else {
-		pdu = (struct snmp_pdu *)malloc(sizeof(struct internal_snmp_pdu));
-	    }
-	    memset (pdu, 0, sizeof(*pdu));
-	    pdu->address = from;
-	    if (snmp_parse(sp, (struct internal_snmp_pdu *)pdu, packet, length) != SNMP_ERR_NOERROR){
-		fprintf(stderr, "Unrecognizable or unauthentic packet received (%s)\n", snmp_detail);
-		snmp_free_internal_pdu(pdu);
-		return;
-	    }
-
-	    if (pdu->command == SNMP_MSG_RESPONSE){
-		for(rp = isp->requests; rp; rp = rp->next_request){
-		    if (rp->request_id == pdu->reqid){
-			if (rp->callback) callback = rp->callback;
-			if (rp->cb_data) magic = rp->cb_data;
-		        if (callback == NULL || callback(RECEIVED_MESSAGE, sp, pdu->reqid,
-					 pdu, magic) == 1){
-			    /* successful, so delete request */
-			    if (isp->requests == rp){
-				/* first in list */
-				isp->requests = rp->next_request;
-				if (isp->requestsEnd == rp)
-				    isp->requestsEnd = NULL;
-			    } else {
-				orp->next_request = rp->next_request;
-				if (isp->requestsEnd == rp)
-				    isp->requestsEnd = orp;
-			    }
-			    snmp_free_pdu(rp->pdu);
-			    free((char *)rp);
-			    /* there shouldn't be any more requests with the
-			       same reqid */
-			    break;
-			}
-		    }
-		    orp = rp;
-		}
-	    } else if (pdu->command == SNMP_MSG_GET
-		       || pdu->command == SNMP_MSG_GETNEXT
-		       || pdu->command == SNMP_MSG_TRAP
-		       || pdu->command == SNMP_MSG_SET
-		       || pdu->command == SNMP_MSG_GETBULK
-		       || pdu->command == SNMP_MSG_INFORM
-		       || pdu->command == SNMP_MSG_TRAP2){
-		sp->callback(RECEIVED_MESSAGE, sp, pdu->reqid, pdu,
-			     sp->callback_magic);
-	    }
-	    snmp_free_internal_pdu(pdu);
-	}
+    sp = slp->session; isp = slp->internal;
+    sp->s_snmp_errno = 0;
+    sp->s_errno = 0;
+    callback = sp->callback;
+    magic = sp->callback_magic;
+    fromlength = sizeof from;
+    length = recvfrom(isp->sd, (char *)packet, PACKET_LENGTH, 0,
+		      (struct sockaddr *)&from, &fromlength);
+    if (length == -1) {
+	snmp_errno = SNMPERR_BAD_RECVFROM;
+	sp->s_snmp_errno = SNMPERR_BAD_RECVFROM;
+	sp->s_errno = errno;
+	snmp_set_detail(strerror(errno));
+	return;
     }
+    if (snmp_dump_packet){
+	printf("\nreceived %d bytes from %s:%hu:\n", length,
+	       inet_ntoa(from.sin_addr), ntohs(from.sin_port));
+	xdump(packet, length, "");
+                printf("\n");
+    }
+
+    pdu = (struct snmp_pdu *)malloc(sizeof(struct internal_snmp_pdu));
+    memset (pdu, 0, sizeof(*pdu));
+    pdu->address = from;
+    if (snmp_parse(sp, (struct internal_snmp_pdu *)pdu, packet, length) != SNMP_ERR_NOERROR){
+	snmp_free_internal_pdu(pdu);
+	return;
+    }
+
+    if (pdu->command == SNMP_MSG_RESPONSE){
+	for(rp = isp->requests; rp; rp = rp->next_request){
+	    if (rp->request_id == pdu->reqid){
+		callback = sp->callback;
+		magic = sp->callback_magic;
+		if (rp->callback) callback = rp->callback;
+		if (rp->cb_data) magic = rp->cb_data;
+	        if (callback == NULL || callback(RECEIVED_MESSAGE, sp, pdu->reqid,
+				 pdu, magic) == 1){
+		    /* successful, so delete request */
+		    if (isp->requests == rp){
+			/* first in list */
+			isp->requests = rp->next_request;
+			if (isp->requestsEnd == rp)
+			    isp->requestsEnd = NULL;
+		    } else {
+			orp->next_request = rp->next_request;
+			if (isp->requestsEnd == rp)
+			    isp->requestsEnd = orp;
+		    }
+		    snmp_free_pdu(rp->pdu);
+		    free((char *)rp);
+		    /* there shouldn't be any more requests with the
+		       same reqid */
+		    break;
+		}
+	    }
+	    orp = rp;
+	}
+    } else if (pdu->command == SNMP_MSG_GET
+	       || pdu->command == SNMP_MSG_GETNEXT
+	       || pdu->command == SNMP_MSG_TRAP
+	       || pdu->command == SNMP_MSG_SET
+	       || pdu->command == SNMP_MSG_GETBULK
+	       || pdu->command == SNMP_MSG_INFORM
+	       || pdu->command == SNMP_MSG_TRAP2){
+	if (sp->callback)
+	    sp->callback(RECEIVED_MESSAGE, sp, pdu->reqid, pdu,
+		     sp->callback_magic);
+    }
+    snmp_free_internal_pdu(pdu);
 }
+
 
 /*
  * Returns info about what snmp requires from a select statement.
@@ -1634,6 +1834,7 @@ snmp_read(fdset)
  * snmp_select_info returns the number of open sockets.  (i.e. The number of
  * sessions open)
  */
+
 int
 snmp_select_info(numfds, fdset, timeout, block)
     int	    *numfds;
@@ -1644,6 +1845,19 @@ snmp_select_info(numfds, fdset, timeout, block)
                     /* output: set to 1 if output timeout value is undefined */
                     /*         set to 0 if output rimeout vlaue id defined   */
 {
+    return snmp_sess_select_info((void *)0, numfds, fdset, timeout, block);
+}
+
+/* Same as snmp_select_info, but works just one session. */
+int
+snmp_sess_select_info(sessp, numfds, fdset, timeout, block)
+    void    *sessp;
+    int	    *numfds;
+    fd_set  *fdset;
+    struct timeval *timeout;
+    int	    *block;
+{
+    struct session_list *slptest = (struct session_list *)sessp;
     struct session_list *slp;
     struct snmp_internal_session *isp;
     struct request_list *rp;
@@ -1654,8 +1868,10 @@ snmp_select_info(numfds, fdset, timeout, block)
     /*
      * For each request outstanding, add it's socket to the fdset,
      * and if it is the earliest timeout to expire, mark it as lowest.
+     * If a single session is specified, do just for that session.
      */
-    for(slp = Sessions; slp; slp = slp->next){
+    if (slptest) slp = slptest; else slp = Sessions;
+    for(; slp; slp = slp->next){
 	active++;
 	isp = slp->internal;
 	if ((isp->sd + 1) > *numfds)
@@ -1670,6 +1886,7 @@ snmp_select_info(numfds, fdset, timeout, block)
 		    earliest = rp->expire;
 	    }
 	}
+	if (slp == slptest) break;
     }
     if (requests == 0) { /* if none are active, skip arithmetic */
        *block = 1; /* can block - timeout value is undefined if no requests*/
@@ -1682,7 +1899,7 @@ snmp_select_info(numfds, fdset, timeout, block)
      * time left until the select should timeout.
      */
     gettimeofday(&now,(struct timezone *)0);
-    Now = now;
+    /*Now = now;*/
 
     if (earliest.tv_sec < now.tv_sec) {
        earliest.tv_sec  = 0;
@@ -1725,90 +1942,100 @@ void
 snmp_timeout __P((void))
 {
     struct session_list *slp;
+
+    for(slp = Sessions; slp; slp = slp->next){
+	snmp_sess_timeout((void *)slp);
+    }
+}
+
+void
+snmp_sess_timeout(sessp)
+    void       *sessp;
+{
+    struct session_list *slp = (struct session_list*)sessp;
     struct snmp_session *sp;
     struct snmp_internal_session *isp;
-    struct request_list *rp, *orp, *freeme = NULL;
+    struct request_list *rp, *orp = NULL, *freeme = NULL;
     struct timeval now;
     snmp_callback callback;
     void *magic;
+
+    sp = slp->session; isp = slp->internal;
 
     gettimeofday(&now,(struct timezone *)0);
 
     /*
      * For each request outstanding, check to see if it has expired.
      */
-    for(slp = Sessions; slp; slp = slp->next){
-	sp = slp->session;
-	isp = slp->internal;
-	orp = NULL;
-	for(rp = isp->requests; rp; rp = rp->next_request){
-	    if (freeme != NULL){
-		/* frees rp's after the for loop goes on to the next_request */
-		free((char *)freeme);
-		freeme = NULL;
-	    }
-	    if (timercmp(&rp->expire, &now, <)){
-		/* this timer has expired */
-		if (rp->retries >= sp->retries){
-		    callback = (rp->callback ? rp->callback : sp->callback);
-		    magic = (rp->cb_data ? rp->cb_data : sp->callback_magic);
-		    /* No more chances, delete this entry */
-		    if (callback)
-			callback(TIMED_OUT, sp, rp->pdu->reqid, rp->pdu, magic);
-		    if (orp == NULL){
-			isp->requests = rp->next_request;
-			if (isp->requestsEnd == rp)
-			    isp->requestsEnd = NULL;
-		    } else {
-			orp->next_request = rp->next_request;
-			if (isp->requestsEnd == rp)
-			    isp->requestsEnd = orp;
-		    }
-		    snmp_free_pdu(rp->pdu);
-		    freeme = rp;
-		    continue;	/* don't update orp below */
-		} else {
-		    u_char  packet[PACKET_LENGTH];
-		    int length = PACKET_LENGTH;
-		    struct timeval tv;
+    for(rp = isp->requests; rp; rp = rp->next_request){
+        if (freeme != NULL){
+    	/* frees rp's after the for loop goes on to the next_request */
+    	free((char *)freeme);
+    	freeme = NULL;
+        }
+        if (timercmp(&rp->expire, &now, <)){
+    	/* this timer has expired */
+    	if (rp->retries >= sp->retries){
+    	    callback = (rp->callback ? rp->callback : sp->callback);
+    	    magic = (rp->cb_data ? rp->cb_data : sp->callback_magic);
+    	    /* No more chances, delete this entry */
+    	    if (callback)
+		callback(TIMED_OUT, sp, rp->pdu->reqid, rp->pdu, magic);
+    	    if (orp == NULL){
+    		isp->requests = rp->next_request;
+    		if (isp->requestsEnd == rp)
+    		    isp->requestsEnd = NULL;
+    	    } else {
+    		orp->next_request = rp->next_request;
+    		if (isp->requestsEnd == rp)
+    		    isp->requestsEnd = orp;
+    	    }
+    	    snmp_free_pdu(rp->pdu);
+    	    freeme = rp;
+    	    continue;	/* don't update orp below */
+    	} else {
+    	    u_char  packet[PACKET_LENGTH];
+    	    int length = PACKET_LENGTH;
+    	    struct timeval tv;
 
-		    /* retransmit this pdu */
-		    rp->retries++;
-		    if (snmp_build(sp, rp->pdu, packet, &length) < 0){
-			fprintf(stderr, "Error re-building packet (%s)\n",
-				snmp_detail);
-			/* this should never happen */
-			abort();
-		    }
-		    if (snmp_dump_packet){
-			printf("\nsending %d bytes to %s:%hu:\n", length,
-			       inet_ntoa(rp->pdu->address.sin_addr), ntohs(rp->pdu->address.sin_port));
-			xdump(packet, length, "");
-			printf("\n");
-		    }
+    	    /* retransmit this pdu */
+    	    rp->retries++;
+    	    if (snmp_build(sp, rp->pdu, packet, &length) < 0){
+    		/* this should never happen */
+    		break;
+    	    }
+    	    if (snmp_dump_packet){
+    		printf("\nsending %d bytes to %s:%hu:\n", length,
+    		       inet_ntoa(rp->pdu->address.sin_addr), ntohs(rp->pdu->address.sin_port));
+    		xdump(packet, length, "");
+    		printf("\n");
+    	    }
 
-		    if (sendto(isp->sd, (char *)packet, length, 0,
-			       (struct sockaddr *)&rp->pdu->address,
-			       sizeof(rp->pdu->address)) < 0){
-			snmp_set_detail(strerror(errno));
-		    }
-
-/* XX time does not stand still for build/send processing */
-		    gettimeofday(&tv, (struct timezone *)0);
-
-		    rp->time = tv;
-		    tv.tv_usec += rp->timeout;
-		    tv.tv_sec += tv.tv_usec / 1000000L;
-		    tv.tv_usec %= 1000000L;
-		    rp->expire = tv;
-		}
-	    }
-	    orp = rp;
-	}
-	if (freeme != NULL){
-	    free((char *)freeme);
-	    freeme = NULL;
-	}
+    	    if (sendto(isp->sd, (char *)packet, length, 0,
+    		       (struct sockaddr *)&rp->pdu->address,
+    		       sizeof(rp->pdu->address)) < 0){
+		snmp_errno = SNMPERR_BAD_SENDTO;
+		sp->s_snmp_errno = SNMPERR_BAD_SENDTO;
+		sp->s_errno = errno;
+    		snmp_set_detail(strerror(errno));
+    		break;
+    	    }
+    	    else {
+		gettimeofday(&now, (struct timezone *)0);
+		tv = now;
+		rp->time = tv;
+		tv.tv_usec += rp->timeout;
+		tv.tv_sec += tv.tv_usec / 1000000L;
+		tv.tv_usec %= 1000000L;
+		rp->expire = tv;
+    	    }
+    	}
+        }
+        orp = rp;
+    }
+    if (freeme != NULL){
+        free((char *)freeme);
+        freeme = NULL;
     }
 }
 
@@ -1816,7 +2043,7 @@ snmp_timeout __P((void))
 static int dodebug = DODEBUG;
 
 void
-#ifdef __STDC__
+#ifdef STDC_HEADERS
 DEBUGP(const char *first, ...)
 #else
 DEBUGP(va_alist)
@@ -1824,7 +2051,7 @@ DEBUGP(va_alist)
 #endif
 {
   va_list args;
-#ifndef __STDC__
+#ifndef STDC_HEADERS
   const char *first;
   va_start(args);
   first = va_arg(args, const char *);
@@ -2133,4 +2360,40 @@ snmp_add_var(pdu, name, name_length, type, value)
         return 1;
     }
     return 0;
+}
+
+/*
+ * returns NULL or internal pointer to session
+ * use this pointer for the other snmp_sess* routines,
+ * which guarantee action will occur ONLY for this given session.
+ */
+void *
+snmp_sess_pointer(session)
+    struct snmp_session *session;
+{
+    struct session_list *slp;
+
+    for(slp = Sessions; slp; slp = slp->next){
+	if (slp->session == session){
+	    break;
+	}
+    }
+    if (slp == NULL){
+	snmp_errno = SNMPERR_BAD_SESSION;
+	return(NULL);
+    }
+    return((void *)slp);
+}
+
+/*
+ * Input : an opaque pointer, returned by snmp_sess_open.
+ * returns NULL or pointer to session.
+ */
+struct snmp_session *
+snmp_sess_session(sessp)
+    void *sessp;
+{
+    struct session_list *slp = (struct session_list *)sessp;
+    if (slp == NULL) return(NULL);
+    return (slp->session);
 }

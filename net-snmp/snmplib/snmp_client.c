@@ -101,7 +101,6 @@ typedef long	fd_mask;
 #define PARTY_MIB_BASE	".1.3.6.1.6.3.3.1.3.127.0.0.1.1"
 
 _CRTIMP extern int errno;
-struct synch_state snmp_synch_state;
 
 int
 snmp_synch_input __P((int, struct snmp_session *, int, struct snmp_pdu *, void *));
@@ -175,11 +174,15 @@ snmp_synch_input(op, session, reqid, pdu, magic)
 	/* clone the pdu */
 	state->pdu = snmp_clone_pdu(pdu);
 	state->status = STAT_SUCCESS;
+	snmp_errno = 0;  /* XX all OK when msg received ? */
+	session->s_snmp_errno = 0;
     } else if (op == TIMED_OUT){
 	state->pdu = NULL;
 	state->status = STAT_TIMEOUT;
-        snmp_errno = SNMPERR_TIMEOUT;
+	snmp_errno = SNMPERR_TIMEOUT;
+	session->s_snmp_errno = SNMPERR_TIMEOUT;
     }
+
     return 1;
 }
 
@@ -321,7 +324,8 @@ snmp_clone_pdu(pdu)
 		newvar->name = (oid *)malloc(var->name_length * sizeof(oid));
 		memmove(newvar->name, var->name, var->name_length * sizeof(oid));
 	    }
-	    if (var->val.string != NULL){
+/* XX CISCO Catalyst 2900 returns NULL strings as data of length 0. */
+	    if ((var->val.string != NULL) && (var->val_len)) {
 		newvar->val.string = (u_char *)malloc(var->val_len);
 		memmove(newvar->val.string, var->val.string, var->val_len);
 	    }
@@ -358,7 +362,7 @@ snmp_synch_response(ss, pdu, response)
     struct snmp_pdu *pdu;
     struct snmp_pdu **response;
 {
-    struct synch_state *state = &snmp_synch_state;
+    struct synch_state *state = ss->snmp_synch_state;
     int numfds, count;
     fd_set fdset;
     struct timeval timeout, *tvp;
@@ -391,8 +395,77 @@ snmp_synch_response(ss, pdu, response)
 		if (errno == EINTR){
 		    continue;
 		} else {
-		    snmp_set_detail(strerror(errno));
 		    snmp_errno = SNMPERR_GENERR;
+		/* CAUTION! if another thread closed the socket(s)
+		   waited on here, the session structure was freed.
+		   It would be nice, but we can't rely on the pointer.
+		    ss->s_snmp_errno = SNMPERR_GENERR;
+		    ss->s_errno = errno;
+		 */
+		    snmp_set_detail(strerror(errno));
+		}
+	    /* FALLTHRU */
+	    default:
+		snmp_free_pdu(pdu);
+		*response = NULL;
+		return STAT_ERROR;
+	}
+    }
+    *response = state->pdu;
+    return state->status;
+}
+
+int
+snmp_sess_synch_response(sessp, pdu, response)
+    void *sessp;
+    struct snmp_pdu *pdu;
+    struct snmp_pdu **response;
+{
+    struct snmp_session *ss;
+    struct synch_state *state;
+    int numfds, count;
+    fd_set fdset;
+    struct timeval timeout, *tvp;
+    int block;
+
+    ss = snmp_sess_session(sessp);
+    state = ss->snmp_synch_state;
+
+    if ((state->reqid = snmp_sess_send(sessp, pdu)) == 0){
+	*response = NULL;
+	snmp_free_pdu(pdu);
+	return STAT_ERROR;
+    }
+    state->waiting = 1;
+
+    while(state->waiting){
+	numfds = 0;
+	FD_ZERO(&fdset);
+	block = SNMPBLOCK;
+	tvp = &timeout;
+	timerclear(tvp);
+	snmp_sess_select_info(sessp, &numfds, &fdset, tvp, &block);
+	if (block == 1)
+	    tvp = NULL;	/* block without timeout */
+	count = select(numfds, &fdset, 0, 0, tvp);
+	if (count > 0){
+	    snmp_sess_read(sessp);
+	} else switch(count){
+	    case 0:
+		snmp_sess_timeout(sessp);
+		break;
+	    case -1:
+		if (errno == EINTR){
+		    continue;
+		} else {
+		    snmp_errno = SNMPERR_GENERR;
+		/* CAUTION! if another thread closed the socket(s)
+		   waited on here, the session structure was freed.
+		   It would be nice, but we can't rely on the pointer.
+		    ss->s_snmp_errno = SNMPERR_GENERR;
+		    ss->s_errno = errno;
+		 */
+		    snmp_set_detail(strerror(errno));
 		}
 	    /* FALLTHRU */
 	    default:
@@ -406,11 +479,24 @@ snmp_synch_response(ss, pdu, response)
 }
 
 void
+snmp_synch_reset(session)
+    struct snmp_session *session;
+{
+    if (session && session->snmp_synch_state)
+       free(session->snmp_synch_state);
+}
+
+void
 snmp_synch_setup(session)
     struct snmp_session *session;
 {
+    struct synch_state *rp = (struct synch_state *)malloc(sizeof(struct synch_state));
+    rp->waiting = 0;
+    rp->pdu = NULL;
+    session->snmp_synch_state = rp;
+
     session->callback = snmp_synch_input;
-    session->callback_magic = (void *)&snmp_synch_state;
+    session->callback_magic = (void *)rp;
 }
 
 char	*error_string[19] = {
@@ -445,6 +531,8 @@ snmp_errstring(errstat)
 	return "Unknown Error";
     }
 }
+
+#ifdef USE_V2PARTY_PROTOCOL
 
 /*
  * In: Dest IP address, src, dst parties and lengths and context and contextlen
@@ -590,4 +678,6 @@ ms_party_init(destaddr, src, srclen, dst, dstlen, context, contextlen)
     }
     return 0; /* SUCCESS */
 }
+
+#endif /* USE_V2PARTY_PROTOCOL */
 

@@ -1,8 +1,10 @@
 ;	@(#)snmp.def	1.0 10/26/97 (gmarzot@baynetworks.com)
+;	Single session API mods by M. Slifcak, Internet Security Systems, Inc.
+;   USE_V2PARTY_PROTOCOL must be defined in config.h
 
 DESCRIPTION     'UCD SNMP Library'
-CODE            SHARED READ EXECUTE
-DATA            SHARED READ WRITE
+;CODE            SHARED READ EXECUTE
+;DATA            SHARED READ WRITE
 EXPORTS
 	acl_destroyEntry
 	acl_getEntry
@@ -120,12 +122,24 @@ EXPORTS
 	view_scanInit
 	view_scanNext
 	view_createEntry
- 	get_tc_descriptor
+	get_tc_descriptor
 	setenv
 	find_module
- 	snmp_async_send
+	snmp_async_send
+	snmp_synch_reset
+	snmp_error
+	snmp_sess_init
+	snmp_sess_open
+	snmp_sess_session
+	snmp_sess_send
+	snmp_sess_async_send
+	snmp_sess_select_info
+	snmp_sess_read
+	snmp_sess_timeout
+	snmp_sess_close
+	snmp_sess_error
+	snmp_sess_synch_response
 	Mib			DATA
 	tree_head		DATA
 	snmp_errno		DATA
-
 
