@@ -149,7 +149,7 @@ snmp_synch_input(int op,
     struct synch_state *state = (struct synch_state *)magic;
     int rpt_type;
 
-    if (reqid != state->reqid && pdu->command != SNMP_MSG_REPORT)
+    if (reqid != state->reqid && pdu && pdu->command != SNMP_MSG_REPORT)
 	return 0;
 
     state->waiting = 0;
@@ -542,6 +542,15 @@ snmp_set_var_objid (struct variable_list *vp,
 
     if (!vp)
         return 1;
+
+    if (vp->name != vp->name_loc && vp->name != NULL &&
+        vp->name_length > (sizeof(vp->name_loc) / sizeof(oid))) {
+        /*
+         * Probably previously-allocated "big storage".  Better free it
+         * else memory leaks possible.  
+         */
+        free(vp->name);
+    }
     
     /* use built-in storage for smaller values */
     if (len <= sizeof(vp->name_loc)) {
