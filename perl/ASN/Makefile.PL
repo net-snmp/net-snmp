@@ -18,9 +18,14 @@ sub InitMakeParams {
 		  'XSPROTOARG'          => '-prototypes',
 		  'PREREQ_PM'           => {},
 		  );
+
+    if ($ENV{'OSTYPE'} eq 'msys') {
+      $Params{'DEFINE'} = "-DMINGW_PERL";
+    }
+                  
     my ($snmp_lib, $snmp_llib, $sep);
 
-    if ($Config{'osname'} eq 'MSWin32') {
+    if (($Config{'osname'} eq 'MSWin32' && $ENV{'OSTYPE'} ne 'msys')) {
       $opts = NetSNMPGetOpts();	
       $snmp_lib = 'netsnmp.lib';
       $snmp_link_lib = 'netsnmp';
@@ -84,7 +89,7 @@ sub NetSNMPGetOpts {
     $rootpath = "../" if (!$rootpath);
     $rootpath .= '/' if ($rootpath !~ /\/$/);
     
-    if ($Config{'osname'} eq 'MSWin32') {
+    if (($Config{'osname'} eq 'MSWin32' && $ENV{'OSTYPE'} ne 'msys')) {
       if ($ENV{'NET-SNMP-IN-SOURCE'})
       {
 	$ret{'insource'} = $ENV{'NET-SNMP-IN-SOURCE'};
