@@ -60,6 +60,10 @@
 #define SNMP_ALWAYS_DEBUG 0        /* Always print debugging information and
                                       ignore the -D flag passed to the cmds */
 
+/* reverse encoding BER packets is both faster and more efficient in space. */
+#define USE_REVERSE_ASNENCODING       1
+#define DEFAULT_ASNENCODING_DIRECTION 1 /* 1 = reverse, 0 = forwards */
+
 /* PERSISTENT_DIRECTORY: If defined, the library is capabile of saving
    persisant information to this directory in the form of configuration
    lines: PERSISTENT_DIRECTORY/NAME.persistent.conf */
@@ -1101,3 +1105,4 @@
 #endif
 
 #undef INET6
+
