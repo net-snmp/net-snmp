@@ -365,8 +365,8 @@ AC_ARG_WITH(enterprise-sysoid,
 [
   --with-enterprise-sysoid           The base OID for the sysObjectID
                                      of the system group
-                                     (default .1.6.3.1.4.1.8072... = 
-                                      "enterprise.net-snmp...")],[
+                                     (default .1.6.3.1.4.1.2021... = 
+                                      "enterprise.ucdavis...")],[
   sys_oid=`echo "$withval" | sed 's/^\.//' | sed 's/\./\,/g'`
   AC_DEFINE_UNQUOTED(SYSTEM_MIB, $sys_oid)
   sys_dot_oid=`echo "$withval" | sed 's/^\.//'`
@@ -375,14 +375,14 @@ AC_ARG_WITH(enterprise-sysoid,
   AC_DEFINE_UNQUOTED(SYSTEM_DOT_MIB_LENGTH, $sysoid_len)
   AC_MSG_RESULT($withval)
 ],[
-  AC_MSG_RESULT(using default "enterprise.net-snmp...")
+  AC_MSG_RESULT(using default "enterprise.ucdavis...")
 ])
 
 AC_ARG_WITH(enterprise-notification-oid,
 [
   --with-enterprise-notification-oid The OID used for the root of
 				     enterprise specific notifications.
-                                     (default .1.6.3.1.4.1.8072 = "enterprise.net-snmp")],[
+                                     (default .1.6.3.1.4.1.2021 = "enterprise.ucdavis")],[
   notification_oid=`echo "$withval" | sed 's/^\.//' | sed 's/\./\,/g'`
   AC_DEFINE_UNQUOTED(NOTIFICATION_MIB, $notification_oid)
   notification_dot_oid=`echo "$withval" | sed 's/^\.//'`
@@ -391,7 +391,7 @@ AC_ARG_WITH(enterprise-notification-oid,
   AC_DEFINE_UNQUOTED(NOTIFICATION_DOT_MIB_LENGTH, $notificationoid_len)
   AC_MSG_RESULT($withval)
 ],[
-  AC_MSG_RESULT(using default "enterprise.net-snmp")
+  AC_MSG_RESULT(using default "enterprise.ucdavis")
 ])
 dnl
 dnl Catch common mistakes in configure options
