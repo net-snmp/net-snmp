@@ -552,11 +552,9 @@ void	deregister_agent_nsap	(int handle)
 int
 init_master_agent(void)
 {
-  struct snmp_session sess, *session;
   snmp_transport *transport;
   char *cptr, *cptr2;
   char buf[SPRINT_MAX_LEN];
-  int flags;
 
   if (ds_get_boolean(DS_APPLICATION_ID, DS_AGENT_ROLE) != MASTER_AGENT) {
     DEBUGMSGTL(("snmp_agent", "init_master_agent; not master agent\n"));
