@@ -1,6 +1,9 @@
 #include <stdio.h>
 #include <sys/types.h>
 
+#include <netinet/in.h>
+#include <sys/time.h>
+
 /* uncomment if you don't have in_addr_t in netinet/in.h */
 /* typedef u_int in_addr_t; */
 
