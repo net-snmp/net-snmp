@@ -1492,20 +1492,19 @@ snmp_out_toggle_options(char *options)
 
 void snmp_out_toggle_options_usage(const char *lead, FILE *outf)
 {
-  fprintf(outf, "%sOUTOPTS values:\n", lead);
-  fprintf(outf, "%s    n: Print oids numerically.\n", lead);
-  fprintf(outf, "%s    e: Print enums numerically.\n", lead);
-  fprintf(outf, "%s    E: Escape quotes in string indices.\n", lead);
-  fprintf(outf, "%s    X: Extended index format\n", lead);
-  fprintf(outf, "%s    b: Dont break oid indexes down.\n", lead);
-  fprintf(outf, "%s    q: Quick print for easier parsing.\n", lead);
-  fprintf(outf, "%s    f: Print full oids on output.\n", lead);
-  fprintf(outf, "%s    s: Print only last symbolic element of oid.\n", lead);
-  fprintf(outf, "%s    S: Print MIB module-id plus last element.\n", lead);
-  fprintf(outf, "%s    t: Print timeticks unparsed as numeric integers.\n", lead);
-  fprintf(outf, "%s    u: Print OIDs using UCD-style prefix suppression.\n", lead);
-  fprintf(outf, "%s    v: Print values only (not OID = value).\n", lead);
-  fprintf(outf, "%s    T: Print human-readable text along with hex strings.\n", lead);
+  fprintf(outf, "%sb:  do not break OID indexes down\n", lead);
+  fprintf(outf, "%se:  print enums numerically\n", lead);
+  fprintf(outf, "%sE:  escape quotes in string indices\n", lead);
+  fprintf(outf, "%sf:  print full OIDs on output\n", lead);
+  fprintf(outf, "%sn:  print OIDs numerically\n", lead);
+  fprintf(outf, "%sq:  quick print for easier parsing\n", lead);
+  fprintf(outf, "%ss:  print only last symbolic element of OID\n", lead);
+  fprintf(outf, "%sS:  print MIB module-id plus last element\n", lead);
+  fprintf(outf, "%st:  print timeticks unparsed as numeric integers\n", lead);
+  fprintf(outf, "%sT:  print human-readable text along with hex strings\n", lead);
+  fprintf(outf, "%su:  print OIDs using UCD-style prefix suppression\n", lead);
+  fprintf(outf, "%sv:  print values only (not OID = value)\n", lead);
+  fprintf(outf, "%sX:  extended index format\n", lead);
 }
 
 char *
@@ -1534,11 +1533,10 @@ snmp_in_toggle_options(char *options)
 
 void snmp_in_toggle_options_usage(const char *lead, FILE *outf)
 {
-  fprintf(outf, "%sINOPTS values:\n", lead);
-  fprintf(outf, "%s    R: Do random access to oid labels.\n", lead);
-  fprintf(outf, "%s    r: Don't check values for range/type legality.\n", lead);
-  fprintf(outf, "%s    b: Do best/regex matching to find a MIB node.\n", lead);
-  fprintf(outf, "%s    u: Require top-level OIDs to be prefixed with '.' (UCD-style)\n", lead);
+  fprintf(outf, "%sb:  do best/regex matching to find a MIB node\n", lead);
+  fprintf(outf, "%sr:  do not check values for range/type legality\n", lead);
+  fprintf(outf, "%sR:  do random access to OID labels\n", lead);
+  fprintf(outf, "%su:  top-level OIDs must have '.' prefix (UCD-style)\n", lead);
 }
 
 void

@@ -73,46 +73,47 @@ int random_access = 0;
 void
 snmp_parse_args_usage(FILE *outf)
 {
-  fprintf(outf, "[options...] <hostname> {<community>}");
+  fprintf(outf, "[OPTIONS] AGENT");
 }
 
 void
 snmp_parse_args_descriptions(FILE *outf)
 {
-  fprintf(outf,"NET-SNMP version: %s\n", netsnmp_get_version());
-  fprintf(outf, "  -h\t\tthis help message.\n");
-  fprintf(outf, "  -H\t\tDisplay configuration file directives understood.\n");
-  fprintf(outf, "  -V\t\tdisplay version number.\n");
-  fprintf(outf, "  -v 1|2c|3\tspecifies snmp version to use.\n");
+  fprintf(outf, "  Version:  %s\n", netsnmp_get_version());
+  fprintf(outf, "  Web:      http://www.net-snmp.org/\n");
+  fprintf(outf, "  Email:    net-snmp-coders@lists.sourceforge.net\n\nOPTIONS:\n");
+  fprintf(outf, "  -h, --help\t\tdisplay this help message\n");
+  fprintf(outf, "  -H\t\t\tdisplay configuration file directives understood\n");
+  fprintf(outf, "  -v 1|2c|3\t\tspecifies SNMP version to use\n");
+  fprintf(outf, "  -V, --version\t\tdisplay package version number\n");
   fprintf(outf, "SNMP Version 1 or 2c specific\n");
-  fprintf(outf, "  -c <c>\tset the community name (v1 or v2c)\n");
+  fprintf(outf, "  -c COMMUNITY\t\tset the community string\n");
   fprintf(outf, "SNMP Version 3 specific\n");
-  fprintf(outf, "  -Z <B,T>\tset the destination engine boots/time for v3 requests.\n");
-  fprintf(outf, "  -e <E>\tsecurity engine ID (e.g., 800000020109840301).\n");
-  fprintf(outf, "  -E <E>\tcontext engine ID (e.g., 800000020109840301).\n");
-  fprintf(outf, "  -n <N>\tcontext name (e.g., bridge1).\n");
-  fprintf(outf, "  -u <U>\tsecurity name (e.g., bert).\n");
-  fprintf(outf, "  -l <L>\tsecurity level (noAuthNoPriv|authNoPriv|authPriv).\n");
-  fprintf(outf, "  -a <A>\tauthentication protocol (MD5|SHA)\n");
-  fprintf(outf, "  -A <P>\tauthentication protocol pass phrase.\n");
-  fprintf(outf, "  -x <X>\tprivacy protocol (DES).\n");
-  fprintf(outf, "  -X <P>\tprivacy protocol pass phrase\n");
+  fprintf(outf, "  -a PROTOCOL\t\tset authentication protocol (MD5|SHA)\n");
+  fprintf(outf, "  -A PASSPHRASE\t\tset authentication protocol pass phrase\n");
+  fprintf(outf, "  -e ENGINE-ID\t\tset security engine ID (e.g. 800000020109840301)\n");
+  fprintf(outf, "  -E ENGINE-ID\t\tset context engine ID (e.g. 800000020109840301)\n");
+  fprintf(outf, "  -l LEVEL\t\tset security level (noAuthNoPriv|authNoPriv|authPriv)\n");
+  fprintf(outf, "  -n CONTEXT\t\tset context name (e.g. bridge1)\n");
+  fprintf(outf, "  -u USER-NAME\t\tset security name (e.g. bert)\n");
+  fprintf(outf, "  -x PROTOCOL\t\tset privacy protocol (DES)\n");
+  fprintf(outf, "  -X PASSPHRASE\t\tset privacy protocol pass phrase\n");
+  fprintf(outf, "  -Z BOOTS,TIME\t\tset destination engine boots/time\n");
   fprintf(outf, "General communication options\n");
-  fprintf(outf, "  -t <T>\tset the request timeout to T.\n");
-  fprintf(outf, "  -r <R>\tset the number of retries to R.\n");
+  fprintf(outf, "  -r RETRIES\t\tset the number of retries\n");
+  fprintf(outf, "  -t TIMEOUT\t\tset the request timeout (in seconds)\n");
   fprintf(outf, "Debugging\n");
-  fprintf(outf, "  -d\t\tdump input/output packets.\n");
-  fprintf(outf, "  -D all | <TOKEN[,TOKEN,...]> \tturn on debugging output for the specified TOKENs.\n");
+  fprintf(outf, "  -d\t\t\tdump input/output packets in hexadecimal\n");
+  fprintf(outf, "  -D TOKEN[,...]\tturn on debugging output for the specified TOKENs\n\t\t\t   (ALL gives extremely verbose debugging output)\n");
   fprintf(outf, "General options\n");
-  fprintf(outf, "  -m all | <MIBS>\tuse MIBS list instead of the default mib list.\n");
-  fprintf(outf, "  -M <MIBDIRS>\tuse MIBDIRS as the location to look for mibs.\n");
-  fprintf(outf, "  -P <MIBOPTS>\tToggle various defaults controlling mib parsing:\n");
-  snmp_mib_toggle_options_usage("\t\t  ", outf);
-  fprintf(outf, "  -O <OUTOPTS>\tToggle various defaults controlling output display:\n");
-  snmp_out_toggle_options_usage("\t\t  ", outf);
-  fprintf(outf, "  -I <INOPTS>\tToggle various defaults controlling input parsing:\n");
-  snmp_in_toggle_options_usage("\t\t  ", outf);
-  fprintf(outf, "Note that the <hostname> parameter can include transport and port information\n");
+  fprintf(outf, "  -m MIB[:...]\t\tload given list of MIBs (ALL loads everything)\n");
+  fprintf(outf, "  -M DIR[:...]\t\tlook in given list of directories for MIBs\n");
+  fprintf(outf, "  -P MIBOPTS\t\tToggle various defaults controlling MIB parsing:\n");
+  snmp_mib_toggle_options_usage("\t\t\t  ", outf);
+  fprintf(outf, "  -O OUTOPTS\t\tToggle various defaults controlling output display:\n");
+  snmp_out_toggle_options_usage("\t\t\t  ", outf);
+  fprintf(outf, "  -I INOPTS\t\tToggle various defaults controlling input parsing:\n");
+  snmp_in_toggle_options_usage("\t\t\t  ", outf);
   fflush(outf);
 }
 
@@ -483,19 +484,17 @@ snmp_parse_args(int argc,
   }
   session->peername = argv[optind++];     /* hostname */
 
-  /* get community */
-  if ((session->version == SNMP_VERSION_1) ||
-      (session->version == SNMP_VERSION_2c)) {
-    /* v1 and v2c - so get community string */
-    if (!Cpsz) {
-      if ((Cpsz = ds_get_string(DS_LIBRARY_ID, DS_LIB_COMMUNITY)) != NULL)
-	;
-      else if (optind == argc) {
-        fprintf(stderr,"No community name specified.\n");
-        return(-1);
-      }
-      else
-	Cpsz = argv[optind++];
+  /*  If v1 or v2c, check community has been set, either by a -c option above,
+      or via a default token somewhere.  */
+
+  if (session->version == SNMP_VERSION_1  ||
+      session->version == SNMP_VERSION_2c) {
+    if (Cpsz == NULL) {
+      Cpsz = ds_get_string(DS_LIBRARY_ID, DS_LIB_COMMUNITY);
+    }
+    if (Cpsz == NULL) {
+      fprintf(stderr,"No community name specified.\n");
+      return(-1);
     }
     session->community = (unsigned char *)Cpsz;
     session->community_len = strlen(Cpsz);
