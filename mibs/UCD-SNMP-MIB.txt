@@ -1,28 +1,53 @@
 UCD-SNMP-MIB DEFINITIONS ::= BEGIN
 
 --
---  Change as necessary
+--  UCD-SNMP-MIB:
+--    A private enterprise mib (enterprise #2021)
 --
 
+-- Design notes:
+--
+-- The design of this mib may seem unusual in parts, as it was
+-- designed for ease of numerical management routines.
+-- 
+-- In that light, most sub-sections of this mib have four common
+-- numerical oid consistencies:
+--
+-- 2021.ID.1     : an integer index value.  In scalers, this is always
+--                 of value 1.  In tables it is a row index.
+-- 2021.ID.2     : a name of the script, process, etc. that this row represents.
+-- 2021.ID.100   : An error flag indicating if an error is present on
+--                 that row (a threshold value was crossed, etc).
+-- 2021.ID.101   : An error string describing why the error flag is non-0.
+--
+-- These conventions enable managers to easy examine portions of the
+-- mib by setting the ID to the sub-section they are interested in
+-- monitoring, and then scanning the .100 value to check for an
+-- error(s), and get a more specific error message from .101 for the
+-- named check found in .2.
+--
+-- Row numbers between 2 and 100 are sub-section specific.
+--
+-- Mib sections utilizing the above conventions:
+--   Tables:  	procTable, execTable, diskTable, loadTable
+--   Scalers: 	memory, snmperrs
+
+
 IMPORTS
-        enterprises, OBJECT-TYPE 				
-	    FROM SNMPv2-SMI
-	DisplayString 				
-	    FROM SNMPv2-TC
-	Integer32
-            FROM SNMPv2-SMI;
+        enterprises
+	    FROM RFC1155-SMI
+        OBJECT-TYPE
+	    FROM RFC1212;
 
 -- numerical definitions:
--- 
 ucdavis           OBJECT IDENTIFIER ::= { enterprises 2021 }
 
 -- Local tables:
+--   procTable      OBJECT IDENTIFIER ::= { ucdavis 2 }
 --   memory         OBJECT IDENTIFIER ::= { ucdavis 4 }
---   vmstat         OBJECT IDENTIFIER ::= { ucdavis 8 }
---   procTable      OBJECT IDENTIFIER ::= { ucdavis 11 }
---   execTable      OBJECT IDENTIFIER ::= { ucdavis 12 }
---   diskTable      OBJECT IDENTIFIER ::= { ucdavis 13 }
---   loadTable      OBJECT IDENTIFIER ::= { ucdavis 14 }
+--   extTable       OBJECT IDENTIFIER ::= { ucdavis 8 }
+--   diskTable      OBJECT IDENTIFIER ::= { ucdavis 9 }
+--   loadTable      OBJECT IDENTIFIER ::= { ucdavis 10 }
 --   version        OBJECT IDENTIFIER ::= { ucdavis 100 }
 --   snmperrs       OBJECT IDENTIFIER ::= { ucdavis 101 }
 --   mibRegistryTable    OBJECT IDENTIFIER ::= { ucdavis 102 }
@@ -35,7 +60,6 @@ ucdavis           OBJECT IDENTIFIER ::= { enterprises 2021 }
 
 -- Never implemented and removed from the mib:
 --   lockd           OBJECT IDENTIFIER ::= { ucdavis 5 }
-
 
 -- These are the returned values of the agent type.
 -- returned to:  .iso.org.dod.internet.mgmt.mib-2.system.sysObjectID.0 
@@ -55,41 +79,37 @@ bsdi              OBJECT IDENTIFIER ::= { ucdSnmpAgent 11 }
 openbsd           OBJECT IDENTIFIER ::= { ucdSnmpAgent 12 }
 unknown           OBJECT IDENTIFIER ::= { ucdSnmpAgent 255 }
 
+DisplayString ::= OCTET STRING
 
-PRIndex ::= TEXTUAL-CONVENTION
-    STATUS       current
-    DESCRIPTION
-	"A unique value, greater than zero, for each OID registered in 
-	the agent's processes table"
-    SYNTAX INTEGER
+PrIndex ::= INTEGER
 
 procTable OBJECT-TYPE
-	SYNTAX SEQUENCE OF prEntry
+	SYNTAX SEQUENCE OF PrEntry
 	ACCESS not-accessible
-	STATUS current
+	STATUS mandatory
 	DESCRIPTION
 		"A set of information on running programs/daemons."
-	::= { ucdavis 11 }
+	::= { ucdavis 2 }
 
 prEntry OBJECT-TYPE
-    SYNTAX     PREntry
-    MAX-ACCESS not-accessible
-    STATUS     current
+    SYNTAX PrEntry
+    ACCESS not-accessible
+    STATUS mandatory
     DESCRIPTION
         "An entry containing a process and its statistics."
-    INDEX      { prIndex }
+    INDEX      { PrIndex }
     ::= { procTable  1 }
 
 
-PREntry ::= SEQUENCE {
-   prIndex  PRIndex,
-   prNames  DisplayString,
-   prMin    INTEGER,
-   prMax    INTEGER,
-   prCount  INTEGER,
-   prErrorFlag  INTEGER,
+PrEntry ::= SEQUENCE {
+   prIndex  	 PrIndex,
+   prNames  	 DisplayString,
+   prMin    	 INTEGER,
+   prMax    	 INTEGER,
+   prCount  	 INTEGER,
+   prErrorFlag   INTEGER,
    prErrMessage  DisplayString,
-   prErrFix  INTEGER
+   prErrFix      INTEGER
 }
 
 prIndex OBJECT-TYPE
@@ -162,27 +182,21 @@ prErrFix OBJECT-TYPE
 		"Setting this to one will try to fix the problem if possible."
 	::= { prEntry 102 }
 
-ExtIndex ::= TEXTUAL-CONVENTION
-    STATUS       current
-    DESCRIPTION
-	"A unique value, greater than zero, for each OID registered in 
-	the agent's extensible table"
-    SYNTAX INTEGER
+ExtIndex ::= INTEGER
 
 extTable OBJECT-TYPE
-	SYNTAX SEQUENCE OF extEntry
+	SYNTAX SEQUENCE OF ExtEntry
 	ACCESS not-accessible
-	STATUS current
+	STATUS mandatory
 	DESCRIPTION
 		"A table of extensible commands returning output and
 		 result codes."
-	INDEX { extIndex }
-	::= { ucdavis 12 }
+	::= { ucdavis 9 }
 
 extEntry OBJECT-TYPE
     SYNTAX     ExtEntry
-    MAX-ACCESS not-accessible
-    STATUS     current
+    ACCESS not-accessible
+    STATUS     mandatory
     DESCRIPTION
         "An entry containing an extensible script and its output."
     INDEX      { extIndex }
@@ -246,31 +260,11 @@ extErrFix OBJECT-TYPE
 	::= { extEntry 102 }
 	
 memory OBJECT-TYPE
-	SYNTAX Memory
 	ACCESS not-accessible
 	STATUS mandatory
 	DESCRIPTION
-		"Miscellanous stuff -- memory related."
+		"Memory information, warning flags, and errors."
 	::= { ucdavis 4 }
-
-Memory ::= SEQUENCE {
-   memIndex        INTEGER,
-   memErrorName    DisplayString,
-   memTotalSwap     INTEGER,
-   memAvailSwap     INTEGER,
-   memTotalReal     INTEGER,
-   memAvailReal     INTEGER,
-   memTotalSwapTXT     INTEGER,
-   memAvailSwapTXT     INTEGER,
-   memTotalRealTXT     INTEGER,
-   memAvailRealTXT     INTEGER,
-   memTotalFree       INTEGER,
-   memMinimumSwap       INTEGER,
-   memSwapError       DisplayString,
-   memShared          INTEGER,
-   memBuffer          INTEGER,
-   memCached          INTEGER
-}
 
 memIndex OBJECT-TYPE
      SYNTAX  INTEGER
@@ -409,25 +403,20 @@ memSwapErrorMsg OBJECT-TYPE
           "Error message describing the errorflag condition"
      ::= { memory 101 } 
 
-DiskIndex ::= TEXTUAL-CONVENTION
-    STATUS       current
-    DESCRIPTION
-	"A unique value, greater than zero, for each OID registered in 
-	the agent's disk table"
-    SYNTAX INTEGER
+DiskIndex ::= INTEGER
 
 diskTable	OBJECT-TYPE
-	SYNTAX SEQUENCE OF diskEntry
+	SYNTAX SEQUENCE OF DiskEntry
 	ACCESS not-accessible
-	STATUS current
+	STATUS mandatory
 	DESCRIPTION
 		"Disk watching information."
-	::= { ucdavis 13 }
+	::= { ucdavis 10 }
 
 diskEntry OBJECT-TYPE
     SYNTAX     DiskEntry
-    MAX-ACCESS not-accessible
-    STATUS     current
+    ACCESS not-accessible
+    STATUS     mandatory
     DESCRIPTION
         "An entry containing a disk and its statistics."
     INDEX      { diskIndex }
@@ -450,7 +439,7 @@ DiskEntry ::= SEQUENCE {
 dskIndex OBJECT-TYPE
 	SYNTAX DiskIndex
 	ACCESS read-only
-	STATUS current
+	STATUS mandatory
 	DESCRIPTION
 		"Reference number for the Disk Mib."
 	::= { diskEntry 1 }
@@ -535,25 +524,20 @@ dskErrorMsg OBJECT-TYPE
           "A text description of what caused the error flag to be set."
      ::= { diskEntry 101 } 
      
-LoadIndex ::= TEXTUAL-CONVENTION
-    STATUS       current
-    DESCRIPTION
-	"A unique value, greater than zero, for each load average
-	registered in the agent's load average table"
-    SYNTAX INTEGER
+LoadIndex ::= INTEGER
 
 loadTable OBJECT-TYPE
-	SYNTAX SEQUENCE OF loadEntry
+	SYNTAX SEQUENCE OF LoadEntry
 	ACCESS not-accessible
-	STATUS current
+	STATUS mandatory
 	DESCRIPTION
 		"Load average information."
-	::= { ucdavis 14 }
+	::= { ucdavis 11 }
 
 loadEntry OBJECT-TYPE
     SYNTAX     LoadEntry
-    MAX-ACCESS not-accessible
-    STATUS     current
+    ACCESS not-accessible
+    STATUS     mandatory
     DESCRIPTION
         "An entry containing a load average and its values."
     INDEX      { loadIndex }
@@ -617,157 +601,13 @@ laErrMessage OBJECT-TYPE
 		"An error message describing the problem (if one exists)."
 	::= { loadEntry 101 }
 
-vmstat OBJECT-TYPE
-	SYNTAX Vmstat
-	ACCESS not-accessible
-	STATUS mandatory
-	DESCRIPTION
-		"Paging, block IO and cpu information."
-	INDEX { vmstatIndex }
-	::= { ucdavis 8 }
-
-
-Vmstat ::= SEQUENCE {
-   vmstatIndex  INTEGER,
-   vmstatErrorName  DisplayString,
-   vmstatSwapin  INTEGER,
-   vmstatSwapout  INTEGER,
-   vmstatIosent  INTEGER,
-   vmstatIoreceive  INTEGER,
-   vmstatsysinterrupts  INTEGER,
-   vmstatsyscontext  INTEGER,
-   vmstatcpuuser  INTEGER,
-   vmstatcpusystem  INTEGER,
-   vmstatcpuidle  INTEGER,
-   vmstatErrorFlag  INTEGER,
-   vmstatErrMessage  DisplayString
-}
-
-vmstatIndex OBJECT-TYPE
-	SYNTAX INTEGER
-	ACCESS read-only
-	STATUS mandatory
-	DESCRIPTION
-		"Reference Index for each observed vmstat."
-	::= { vmstat 1 }
-
-vmstatErrorName OBJECT-TYPE
-	SYNTAX DisplayString (SIZE (0..255))
-	ACCESS read-only
-	STATUS mandatory
-	DESCRIPTION
-		"The list of vmstat names we're Counting."
-	::= { vmstat 2 }
-
-vmstatSwapin OBJECT-TYPE
-	SYNTAX INTEGER
-	ACCESS read-only
-	STATUS mandatory
-	DESCRIPTION
-		"Amount of memory swapped in from disk (kB/s)."
-	::= { vmstat 3 }
-
-vmstatSwapout OBJECT-TYPE
-	SYNTAX INTEGER
-	ACCESS read-only
-	STATUS mandatory
-	DESCRIPTION
-		"Amount of memory swapped to disk (kB/s)."
-	::= { vmstat 4 }
-
-vmstatIosent OBJECT-TYPE
-	SYNTAX INTEGER
-	ACCESS read-only
-	STATUS mandatory
-	DESCRIPTION
-		"Blocks sent to a block device (blocks/s)."
-	::= { vmstat 5 }
-
-vmstatIoreceive OBJECT-TYPE
-	SYNTAX INTEGER
-	ACCESS read-only
-	STATUS mandatory
-	DESCRIPTION
-		"Blocks received from a block device (blocks/s)."
-	::= { vmstat 6 }
-
-vmstatsysinterrupts OBJECT-TYPE
-	SYNTAX INTEGER
-	ACCESS read-only
-	STATUS mandatory
-	DESCRIPTION
-		"The number of interrupts per second, including the clock."
-	::= { vmstat 7 }
-
-vmstatsyscontext OBJECT-TYPE
-	SYNTAX INTEGER
-	ACCESS read-only
-	STATUS mandatory
-	DESCRIPTION
-		"The number of context switches per second."
-	::= { vmstat 8 }
-
-vmstatcpuuser OBJECT-TYPE
-	SYNTAX INTEGER
-	ACCESS read-only
-	STATUS mandatory
-	DESCRIPTION
-		"percentages of user CPU time."
-	::= { vmstat 9 }
-
-vmstatcpusystem OBJECT-TYPE
-	SYNTAX INTEGER
-	ACCESS read-only
-	STATUS mandatory
-	DESCRIPTION
-		"percentages of system CPU time."
-	::= { vmstat 10 }
-
-vmstatcpuidle OBJECT-TYPE
-	SYNTAX INTEGER
-	ACCESS read-only
-	STATUS mandatory
-	DESCRIPTION
-		"percentages of idle CPU time."
-	::= { vmstat 11 }
-
-vmstatErrorFlag OBJECT-TYPE
-        SYNTAX INTEGER
-        ACCESS read-only
-        STATUS mandatory
-        DESCRIPTION
-                "Error flag."
-        ::= { vmstat 100 }
-
-vmstatErrMessage OBJECT-TYPE
-     SYNTAX  DisplayString
-     ACCESS  read-only
-     STATUS  mandatory
-     DESCRIPTION  
-          "Error message describing the errorflag condition"
-     ::= { vmstat 101 } 
-
-
 version	OBJECT-TYPE
-	SYNTAX Version
 	ACCESS not-accessible
 	STATUS mandatory
 	DESCRIPTION
-		"ece-snmpd version info."
-	INDEX { versionIndex }
+		"ucd-snmpd version specific information."
 	::= { ucdavis 100 }
 
-Version ::= SEQUENCE {
-   versionIndex   INTEGER,
-   versionTag  DisplayString,
-   versionDate  DisplayString,
-   versionCDate  DisplayString,
-   versionIdent  DisplayString,
-   versionClearCache  INTEGER,
-   versionUpdateConfig  INTEGER,
-   versionDoDebugging  INTEGER
-}
-   
 versionIndex OBJECT-TYPE
      SYNTAX  INTEGER
      ACCESS  read-only
@@ -841,28 +681,19 @@ versionDoDebugging OBJECT-TYPE
      ::= { version 20 } 
 
 snmperrs OBJECT-TYPE
-	SYNTAX Snmperrs
 	ACCESS not-accessible
 	STATUS mandatory
 	DESCRIPTION
 		"A place for the agent to report problems."
-	INDEX { snmperrIndex }
 	::= { ucdavis 101 }
 
-
-Snmperrs ::= SEQUENCE {
-   snmperrIndex  INTEGER,
-   snmperrNames  DisplayString,
-   snmperrErrorFlag  INTEGER,
-   snmperrErrMessage  DisplayString
-}
 
 snmperrIndex OBJECT-TYPE
 	SYNTAX INTEGER
 	ACCESS read-only
 	STATUS mandatory
 	DESCRIPTION
-		"Reference Index for each observed snmperr."
+		"Bogus Index for snmperrs (always 1)."
 	::= { snmperrs 1 }
 
 snmperrNames OBJECT-TYPE
@@ -890,18 +721,12 @@ snmperrErrMessage OBJECT-TYPE
 		"An error message describing the problem (if one exists)."
 	::= { snmperrs 101 }
 
-MRIndex ::= TEXTUAL-CONVENTION
-    DISPLAY-HINT "d"
-    STATUS       current
-    DESCRIPTION
-	"A unique value, greater than zero, for each OID registered in 
-	the agent's mibRegisteryTable"
-    SYNTAX OBJECT IDENTIFIER
+MRIndex ::= OBJECT IDENTIFIER
 
 mibRegistryTable OBJECT-TYPE
-    SYNTAX     SEQUENCE OF mibRegistryEntry
-    MAX-ACCESS not-accessible
-    STATUS     current
+    SYNTAX SEQUENCE OF MrEntry
+    ACCESS not-accessible
+    STATUS mandatory
     DESCRIPTION
         "A table displaying all the oid's registered by mib modules in
         the agent."
@@ -909,8 +734,8 @@ mibRegistryTable OBJECT-TYPE
 
 mrEntry OBJECT-TYPE
     SYNTAX     MREntry
-    MAX-ACCESS not-accessible
-    STATUS     current
+    ACCESS not-accessible
+    STATUS     mandatory
     DESCRIPTION
         "An entry containing a registered mib oid."
     INDEX      { mrIndex }
@@ -926,16 +751,16 @@ MREntry ::=
 
 mrIndex OBJECT-TYPE
     SYNTAX     MRIndex
-    MAX-ACCESS read-only
-    STATUS     current
+    ACCESS read-only
+    STATUS     mandatory
     DESCRIPTION
 	"The registry slot of a mibmodule."
     ::= { mrEntry  1 }
 
 mrModuleName OBJECT-TYPE
     SYNTAX     DisplayString
-    MAX-ACCESS read-only
-    STATUS     current
+    ACCESS read-only
+    STATUS     mandatory
     DESCRIPTION
 	"The module name that registered this OID."
     ::= { mrEntry  2 }
