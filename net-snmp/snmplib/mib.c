@@ -961,7 +961,7 @@ sprint_by_type(buf, var, enums, hint, units)
 	    break;
 #endif /* OPAQUE_SPECIAL_TYPES */
 	default:
-            DEBUGP("bad type: %d\n", var->type);
+            DEBUGMSGTL(("sprint_by_type", "bad type: %d\n", var->type));
 	    sprint_badtype(buf, var, enums, hint, units);
 	    break;
     }
@@ -984,7 +984,7 @@ handle_mibdirs_conf(word, line)
   if (confmibdir)
     free(confmibdir);
   confmibdir=strdup(line);
-  DEBUGP("using mibdir path: %s\n",line);
+  DEBUGMSGTL(("read_config:initmib", "using mibdir path: %s\n", line));
 }
 
 void
@@ -995,7 +995,7 @@ handle_mibs_conf(word, line)
   if (confmibs)
     free(confmibs);
   confmibs=strdup(line);
-  DEBUGP("using mibs: %s\n",line);
+  DEBUGMSGTL(("read_config:initmib", "using mibs: %s\n", line));
 }
 
 void
@@ -1003,7 +1003,7 @@ handle_mibfile_conf(word, line)
   char *word;
   char *line;
 {
-  DEBUGP("reading mibfile: %s\n",line);
+  DEBUGMSGTL(("read_config:initmib", "reading mibfile: %s\n", line));
   read_mib(line);
 }
 
@@ -1050,7 +1050,7 @@ init_mib __P((void))
       env_var = entry;
     }
 
-    DEBUGP("Looking in %s for mibs...\n",env_var);
+    DEBUGMSGTL(("init_mib","Looking in %s for mibs...\n",env_var));
 
     entry = strtok( env_var, ENV_SEPARATOR );
     while ( entry ) {
@@ -1079,7 +1079,7 @@ init_mib __P((void))
       env_var = entry;
     }
 
-    DEBUGP("Looking for mibs... %s\n",env_var);
+    DEBUGMSGTL(("init_mib","Looking for mibs... %s\n",env_var));
     if (strcmp (env_var, "ALL") == 0) {
 	read_all_mibs();
     } else {
