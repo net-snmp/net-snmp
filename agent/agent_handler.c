@@ -429,6 +429,10 @@ netsnmp_handler_free(netsnmp_mib_handler *handler)
             netsnmp_handler_free(handler->next);
             handler->next = NULL;
         }
+        /** XXX : segv here at shutdown if SHUTDOWN_AGENT_CLEANLY
+         *  defined. About 30 functions down the stack, starting
+         *  in clear_context() -> clear_subtree()
+         */
         SNMP_FREE(handler->handler_name);
         SNMP_FREE(handler);
     }
