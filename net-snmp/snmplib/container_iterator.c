@@ -427,7 +427,7 @@ netsnmp_container_iterator_get(void *iterator_user_ctx,
     ii->c.init = NULL;
     ii->c.insert = (netsnmp_container_op*)_iterator_insert;
     ii->c.remove = (netsnmp_container_op*)_iterator_remove;
-    ii->c.release = (netsnmp_container_op*)_iterator_release;
+/*     ii->c.release = (netsnmp_container_op*)_iterator_release; */
     ii->c.find = (netsnmp_container_rtn*)_iterator_find;
     ii->c.find_next = (netsnmp_container_rtn*)_iterator_find_next;
     ii->c.get_subset = NULL;
