@@ -847,7 +847,11 @@ main(int argc, char *argv[])
 	void  init_subagent(void);
         init_subagent();
 #endif
+        /* register the notification log table */
         init_notification_log();
+
+        /* register ourselves as having a USM user database */
+        init_register_usmUser_context("snmptrapd");
     }
 
 #ifdef NETSNMP_EMBEDDED_PERL
