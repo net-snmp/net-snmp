@@ -153,8 +153,12 @@ int
 snmp_tcp6_accept(netsnmp_transport *t)
 {
     struct sockaddr_in6 *farend = NULL;
-    int             newsock = -1, farendlen =
-        sizeof(struct sockaddr_in6), sockflags = 0;
+    int             newsock = -1, sockflags = 0;
+#ifdef HAVE_SOCKLEN_T
+    socklen_t       farendlen = sizeof(struct sockaddr_in6);
+#else   /* HAVE_SOCKLEN_T */
+    size_t          farendlen = sizeof(struct sockaddr_in6);
+#endif
     char           *string = NULL;
 
     farend = (struct sockaddr_in6 *) malloc(sizeof(struct sockaddr_in6));
@@ -413,8 +417,7 @@ void
 netsnmp_tcp6_ctor(void)
 {
     tcp6Domain.name = netsnmp_TCPIPv6Domain;
-    tcp6Domain.name_length =
-        sizeof(netsnmp_TCPIPv6Domain) / sizeof(oid);
+    tcp6Domain.name_length = sizeof(netsnmp_TCPIPv6Domain) / sizeof(oid);
     tcp6Domain.f_create_from_tstring = snmp_tcp6_create_tstring;
     tcp6Domain.f_create_from_ostring = snmp_tcp6_create_ostring;
     tcp6Domain.prefix = calloc(4, sizeof(char *));
