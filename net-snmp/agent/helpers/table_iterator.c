@@ -651,8 +651,6 @@ netsnmp_table_iterator_helper_handler(netsnmp_mib_handler *handler,
     /* reverse the previously saved mode if we were a getnext */
     if (oldmode == MODE_GETNEXT) {
         for(request = requests ; request; request = request->next) {
-            if (request->processed)
-                continue;
             if (request->requestvb->type == ASN_NULL ||
                 request->requestvb->type == SNMP_NOSUCHINSTANCE) {
                 /*
