@@ -18,11 +18,17 @@ else
   mdir=
 fi
 
+if [ "$1" = "-x" ]; then
+    exact=1; shift
+else
+    exact=0
+fi
+
 host=$1
 dir=$2
 rfc=$3
 
-if [ `echo $rfc | sed 's/\.//'` = $rfc ]; then
+if [ $exact = 0 -a `echo $rfc | sed 's/\.//'` = $rfc ]; then
   file=rfc$rfc.txt
 else
   file=$rfc
@@ -33,7 +39,7 @@ if [ -n "$4" ]; then
 fi
 
 # ncftpget -FV ftp://$host/$dir/$file
-wget -O - -nv ftp://$host/$dir/$file | tr -d \\r > $file
+wget -O - -nv $host/$dir/$file | tr -d \\r > $file
 
 ./smistrip -x .txt $mdir $mibs $file
 
