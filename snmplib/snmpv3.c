@@ -424,13 +424,13 @@ usm_parse_create_usmUser(const char *token, char *line) {
   if (strcmp(buf,"-e") == 0) {
       /* get the specified engineid from the line */
       cp = copy_word(cp, buf);
-      newuser->engineIDLen = hex_to_binary(buf, buf2);
+      newuser->engineIDLen = hex_to_binary(buf, (u_char *)buf2);
       if (newuser->engineIDLen <= 0) {
           usm_free_user(newuser);
           config_perror("invalid EngineID argument to -e");
           return;
       }
-      memdup(&newuser->engineID, buf2, newuser->engineIDLen);
+      memdup(&newuser->engineID, (u_char *)buf2, newuser->engineIDLen);
       cp = copy_word(cp, buf);
   } else {
       newuser->engineID = snmpv3_generate_engineID(&ret);

@@ -827,7 +827,7 @@ char *copy_word(char *from, char *to)
    followed by a string of hex */
 char *read_config_save_octet_string(char *saveto, u_char *str, size_t len) {
   int i;
-  char *cp;
+  u_char *cp;
 
   /* is everything easily printable */
   for(i=0, cp=str; i < (int)len && cp &&

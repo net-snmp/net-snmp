@@ -139,7 +139,7 @@ main(int argc, char **argv)
 	int       arg = 1;
 
  	local_progname = argv[0];
-	local_passphrase_filename = malloc(sizeof(PASSPHRASE_DIR) +
+	local_passphrase_filename = (char *)malloc(sizeof(PASSPHRASE_DIR) +
 					   sizeof(PASSPHRASE_FILE) + 4);
 	sprintf(local_passphrase_filename, "%s/%s",
 					   PASSPHRASE_DIR, PASSPHRASE_FILE);
