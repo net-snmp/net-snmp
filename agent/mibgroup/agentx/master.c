@@ -213,6 +213,8 @@ agentx_got_response(int operation,
         CLEAR_SNMP_STRIKE_FLAGS(session->flags);
         break;
     default:
+        snmp_log(LOG_ERR, "Unknown operation %d in agentx_got_response\n",
+                 operation);
         netsnmp_free_delegated_cache(cache);
         return 0;
     }
