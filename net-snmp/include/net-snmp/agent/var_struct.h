@@ -18,39 +18,30 @@
 #define FULLY_QUALIFIED_INSTANCE    0x01
 #define SUBTREE_ATTACHED	    	0x02
 
-struct subtree {
-    oid             name[UCD_REGISTRY_OID_MAX_LEN];
-    /*
-     * objid prefix of registered subtree 
-     */
+typedef struct netsnmp_subtree_s {
+    oid		   *name_a;	/* objid prefix of registered subtree */
     u_char          namelen;    /* number of subid's in name above */
-    oid             start[UCD_REGISTRY_OID_MAX_LEN];
-    /*
-     * objid of start of covered range 
-     */
+    oid            *start_a;	/* objid of start of covered range */
     u_char          start_len;  /* number of subid's in start name */
-    oid             end[UCD_REGISTRY_OID_MAX_LEN];
-    /*
-     * objid of end of covered range 
-     */
+    oid            *end_a;	/* objid of end of covered range   */
     u_char          end_len;    /* number of subid's in end name */
     struct variable *variables; /* pointer to variables array */
     int             variables_len;      /* number of entries in above array */
     int             variables_width;    /* sizeof each variable entry */
-    char            label[256]; /* calling module's label */
+    char           *label_a;	/* calling module's label */
     netsnmp_session *session;
     u_char          flags;
     u_char          priority;
     int             timeout;
-    struct subtree *next;       /* List of 'sibling' subtrees */
-    struct subtree *prev;       /* Make siblings a doubly-linked list */
-    struct subtree *children;   /* List of 'child' subtrees */
+    struct netsnmp_subtree_s *next;       /* List of 'sibling' subtrees */
+    struct netsnmp_subtree_s *prev;       /* (doubly-linked list) */
+    struct netsnmp_subtree_s *children;   /* List of 'child' subtrees */
     int             range_subid;
     oid             range_ubound;
     netsnmp_handler_registration *reginfo;      /* new API */
     int             cacheid;
     int             global_cacheid;
-};
+} netsnmp_subtree;
 
 /*
  * This is a new variable structure that doesn't have as much memory
