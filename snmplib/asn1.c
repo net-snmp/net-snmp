@@ -805,7 +805,7 @@ asn_parse_bitstring(data, datalength, type, string, strlength)
 	ERROR("Invalid bitstring");
 	return NULL;
     }
-    if (*bufp < 0 || *bufp > 7){
+    if (*bufp > 7){
 	ERROR("Invalid bitstring");
 	return NULL;
     }
@@ -842,7 +842,7 @@ asn_build_bitstring(data, datalength, type, string, strlength)
 /*
  * ASN.1 bit string ::= 0x03 asnlength unused {byte}*
  */
-    if (strlength < 1 || *string < 0 || *string > 7){
+    if (strlength < 1 || *string > 7){
 	ERROR("Building invalid bitstring");
 	return NULL;
     }
