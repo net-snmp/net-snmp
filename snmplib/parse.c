@@ -3360,7 +3360,7 @@ static int leave_was_simple;
 static void print_mib_leaves(FILE *f, struct tree *tp)
 { struct tree *ntp;
   char *ip = leave_indent+strlen(leave_indent)-1;
-  char last = *ip;
+  char last_ipch = *ip;
 
   *ip = '+';
   if (tp->type == 0)
@@ -3396,7 +3396,7 @@ static void print_mib_leaves(FILE *f, struct tree *tp)
     }
     if (tp->enums)		typ = "EnumVal  ";
     fprintf(f, "%s-- %s %s %s(%ld)\n", leave_indent, acc, typ, tp->label, tp->subid);
-    *ip = last;
+    *ip = last_ipch;
     if (tp->enums) {
       struct enum_list *ep = tp->enums;
       fprintf(f, "%s        Values: ", leave_indent);
@@ -3420,7 +3420,7 @@ static void print_mib_leaves(FILE *f, struct tree *tp)
       fprintf(f, "\n");
     }
   }
-  *ip = last;
+  *ip = last_ipch;
   strcat(leave_indent, "  |");
   leave_was_simple = tp->type != 0;
 
