@@ -57,6 +57,7 @@ typedef struct _smux_reg {
 } smux_reg;
 
 extern void     init_smux(void);
+extern void     real_init_smux(void);
 extern int      smux_accept(int);
 extern u_char  *smux_snmp_process(int, oid *, size_t *, size_t *, u_char *,
                                   int);

@@ -127,6 +127,13 @@ struct variable2 smux_variables[] = {
 
 
 void
+smux_parse_smux_socket(const char *token, char *cptr)
+{
+    DEBUGMSGTL(("smux", "port spec: %s\n", cptr));
+    netsnmp_ds_set_string(NETSNMP_DS_APPLICATION_ID, NETSNMP_DS_SMUX_SOCKET, cptr);
+}
+
+void
 smux_parse_peer_auth(const char *token, char *cptr)
 {
     smux_peer_auth *aptr;
@@ -189,8 +196,19 @@ smux_free_peer_auth(void)
 void
 init_smux(void)
 {
+    snmpd_register_config_handler("smuxpeer", smux_parse_peer_auth,
+                                  smux_free_peer_auth,
+                                  "OID-IDENTITY PASSWORD");
+    snmpd_register_config_handler("smuxsocket",
+                                  smux_parse_smux_socket, NULL,
+                                  "SMUX bind address");
+}
 
+void
+real_init_smux(void)
+{
     struct sockaddr_in lo_socket;
+    char           *smux_socket;
     int             one = 1;
 
     if (netsnmp_ds_get_boolean(NETSNMP_DS_APPLICATION_ID, NETSNMP_DS_AGENT_ROLE) == SUB_AGENT) {
@@ -198,9 +216,6 @@ init_smux(void)
         return;
     }
 
-    snmpd_register_config_handler("smuxpeer", smux_parse_peer_auth,
-                                  smux_free_peer_auth,
-                                  "OID-IDENTITY PASSWORD");
     /*
      * Reqid 
      */
@@ -218,7 +233,12 @@ init_smux(void)
      */
     memset(&lo_socket, (0), sizeof(lo_socket));
     lo_socket.sin_family = AF_INET;
-    lo_socket.sin_port = htons((u_short) SMUXPORT);
+
+    smux_socket = netsnmp_ds_get_string(NETSNMP_DS_APPLICATION_ID, 
+					NETSNMP_DS_SMUX_SOCKET);
+    if (!smux_socket)
+        smux_socket = "127.0.0.1";   /* By default, listen on localhost only */
+    netsnmp_sockaddr_in( &lo_socket, smux_socket, SMUXPORT );
 
     if ((smux_listen_sd = socket(AF_INET, SOCK_STREAM, 0)) < 0) {
         snmp_log_perror("[init_smux] socket failed");
