@@ -196,7 +196,7 @@ Note:  A temporary location of /tmp/net-snmp is used.
 
     mandir2html
     readme2html
-    readme2html
+    poddir2html
 
     Note:  mandir2html will process ALL man pages in c:\temp\net-snmp while
            readme2html and poddir2html will only process files listed in the
@@ -335,6 +335,8 @@ Requirements
 
     echo . > c:\usr\registeragent.bat
     echo . > c:\usr\unregisteragent.bat
+    echo . > c:\usr\registertrapd.bat
+    echo . > c:\usr\unregistertrapd.bat
     echo . > c:\usr\etc\snmp\snmp.conf
 
 4.  Edit the following variables in c:\usr\net-snmp.nsi:
