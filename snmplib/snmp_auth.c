@@ -82,6 +82,7 @@ SOFTWARE.
 #include "md5.h"
 #include "acl.h"
 #include "system.h"
+#include "snmp_api.h"
 
 static void md5Digest __P((u_char *, int, u_char *));
 
@@ -269,12 +270,14 @@ int		pass;       /* IN - which pass */
     if (!srcp) {
 	snmp_errno = SNMPERR_BAD_SRC_PARTY;
 	return NULL;
+    }
     pi->srcp = srcp;
 
     cxp = context_getEntry(context, *contextLength);
     if (!cxp) {
 	snmp_errno = SNMPERR_BAD_CONTEXT;
 	return NULL;
+    }
     pi->cxp = cxp;
 
     /* Only perform the following authentication checks if this is the
