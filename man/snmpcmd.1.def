@@ -187,12 +187,12 @@ pathname
 .IR "" "udp6 " or " udpv6 " or " udpipv6"
 hostname[:port]
 .I or
-IPv6-address[:port]
+'['IPv6-address']'[:port]
 .TP 28
 .IR "" "tcp6 " or " tcpv6 " or " tcpipv6"
 hostname[:port]
 .I or
-IPv6-address[:port]
+'['IPv6-address']'[:port]
 .RE
 .PP
 Note that <transport-specifier> strings are case-insensitive so that,
