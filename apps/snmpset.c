@@ -158,20 +158,17 @@ int main(int argc, char *argv[])
           types[current_type++] = *argv[arg++];
           break;
         default:
-          fprintf(stderr, "Bad object type: %c\n", *argv[arg]);
-          usage();
+          fprintf(stderr, "%s: Bad object type: %c\n", argv[arg-1], *argv[arg]);
           exit(1);
         }
       } else {
-        fprintf(stderr, "Need value type\n");
-        usage();
+        fprintf(stderr, "%s: Needs type and value\n", argv[arg-1]);
         exit(1);
       }
       if (arg < argc)
         values[current_value++] = argv[arg];
       else {
-        fprintf(stderr, "Need value\n");
-        usage();
+        fprintf(stderr, "%s: Needs value\n", argv[arg-2]);
         exit(1);
       }
     }

@@ -137,6 +137,7 @@ int main(int argc, char *argv[])
     int status;
     char *trap = NULL, *specific = NULL, *description = NULL, *agent = NULL;
     char *prognam;
+    int exitval = 0;
 
     prognam = strrchr(argv[0], '/');
     if (prognam) prognam++;
@@ -340,10 +341,11 @@ int main(int argc, char *argv[])
     if (status) {
         snmp_sess_perror(inform ? "snmpinform" : "snmptrap", ss);
 	if (!inform) snmp_free_pdu(pdu);
+	exitval = 1;
     }
     else if (inform) snmp_free_pdu(response);
 
     snmp_close(ss);
     SOCK_CLEANUP;
-    return (0);
+    return exitval;
 }
