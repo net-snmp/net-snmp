@@ -812,7 +812,7 @@ init_mib __P((void))
 
     env_var = getenv("MIBDIRS");
     if ( env_var == NULL ) {
-        sprintf(path, "%s/mibs", SNMPLIBPATH );
+        strcpy(path, DEFAULT_MIBDIRS);
 	env_var = path;
     }
     entry = strtok( env_var, ":" );
@@ -841,10 +841,13 @@ init_mib __P((void))
 	}
     }
 
-    env_var = getenv("MIBFILE");
+    env_var = getenv("MIBFILES");
     if ( env_var == NULL ) {
-        strcpy(path, "mib.txt:/usr/local/lib/mib.txt:/etc/mib.txt");
+      env_var = getenv("MIBFILE");  /* backwards compatibility */
+      if ( env_var == NULL ) {
+        strcpy(path, DEFAULT_MIBFILES);
 	env_var = path;
+      }
     }
     entry = strtok( env_var, ":" );
     while ( entry ) {
