@@ -17,17 +17,10 @@ extern          "C" {
 #include <net-snmp/library/snmp_transport.h>
 #include <net-snmp/library/asn1.h>
 
-extern oid      netsnmp_UnixDomain[10];   /*  = { ENTERPRISE_MIB, 3, 3, 2 };  */
+extern oid netsnmp_UnixDomain[10];   /*  = { ENTERPRISE_MIB, 3, 3, 2 };  */
 
 netsnmp_transport *netsnmp_unix_transport(struct sockaddr_un *addr,
                                           int local);
-int             netsnmp_unix_recv(netsnmp_transport *t, void *buf,
-                                  int size, void **opaque, int *olength);
-int             netsnmp_unix_send(netsnmp_transport *t, void *buf,
-                                  int size, void **opaque, int *olength);
-int             netsnmp_unix_close(netsnmp_transport *t);
-int             netsnmp_unix_accept(netsnmp_transport *t);
-
 /*
  * "Constructor" for transport domain object.  
  */
