@@ -5,7 +5,7 @@
 #ifndef _MIBGROUP_VAR_ROUTE_H
 #define _MIBGROUP_VAR_ROUTE_H
 
-config_require(util_funcs mibJJ/route_write mibJJ/interfaces)
+config_require(util_funcs mibJJ/interfaces)
 config_arch_require(solaris2, kernel_sunos5)
 
 extern void  init_ipRoute (void);
