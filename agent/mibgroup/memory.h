@@ -42,7 +42,7 @@ struct variable2 extensible_mem_variables[] = {
   {ERRORMSG, STRING, RONLY, var_extensible_mem, 1, {ERRORMSG }}
 };
 
-config_load_mib({EXTENSIBLEMIB.MEMMIBNUM}, EXTENSIBLENUM+1, extensible_mem_variables)
+config_load_mib(EXTENSIBLEMIB.MEMMIBNUM, EXTENSIBLENUM+1, extensible_mem_variables)
 
 #endif
 #endif /* _MIBGROUP_MEMORY_H */

@@ -34,7 +34,7 @@ struct variable2 system_variables[] = {
     {SYSSERVICES, INTEGER, RONLY, var_system, 1, {7}}
 };
 
-config_load_mib({MIB.1}, 7, system_variables)
+config_load_mib(MIB.1, 7, system_variables)
 
 #endif
 #endif /* _MIBGROUP_SYSTEM_H */

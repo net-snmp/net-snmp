@@ -20,7 +20,7 @@ struct variable2 wombat_variables[] = {
     { WOMBATCURRENT,   COUNTER, RONLY, var_wombat, 1, {2}},
     { WOMBATHIGHWATER, COUNTER, RONLY, var_wombat, 1, {3}}
 };
-config_load_mib({ MIB.99}, 7, wombat_variables)
+config_load_mib( MIB.99, 7, wombat_variables)
 
 #endif
 #endif /* _MIBGROUP_WOMBAT_H */

@@ -33,7 +33,7 @@ struct variable2 extensible_disk_variables[] = {
   {ERRORMSG, STRING, RONLY, var_extensible_disk, 1, {ERRORMSG }}
 };
 
-config_load_mib({EXTENSIBLEMIB.DISKMIBNUM}, EXTENSIBLENUM+1, extensible_disk_variables)
+config_load_mib(EXTENSIBLEMIB.DISKMIBNUM, EXTENSIBLENUM+1, extensible_disk_variables)
 
 #endif
 #endif /* _MIBGROUP_DISK_H */

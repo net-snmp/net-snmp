@@ -66,7 +66,7 @@ struct variable4 interfaces_variables[] = {
     {IFSPECIFIC, OBJID, RONLY, var_ifEntry, 3, {2, 1, 22}}
 };
 
-config_load_mib({MIB.2}, 7, interfaces_variables)
+config_load_mib(MIB.2, 7, interfaces_variables)
 #endif
 
 #endif /* _MIBGROUP_INTERFACES_H */

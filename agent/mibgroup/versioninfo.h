@@ -33,7 +33,7 @@ struct variable2 extensible_version_variables[] = {
   {VERRESTARTAGENT, INTEGER, RWRITE, var_extensible_version, 1, {VERRESTARTAGENT}}
 };
 
-config_load_mib({EXTENSIBLEMIB.VERSIONMIBNUM}, EXTENSIBLENUM+1, extensible_version_variables)
+config_load_mib(EXTENSIBLEMIB.VERSIONMIBNUM, EXTENSIBLENUM+1, extensible_version_variables)
 
 #endif
 #endif /* _MIBGROUP_VERSIONINFO_H */

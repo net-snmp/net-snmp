@@ -25,7 +25,7 @@ struct variable2 extensible_loadave_variables[] = {
     {ERRORMSG, STRING, RONLY, var_extensible_loadave, 1, {ERRORMSG}}
 };
 
-config_load_mib({EXTENSIBLEMIB.LOADAVEMIBNUM}, EXTENSIBLENUM+1, extensible_loadave_variables)
+config_load_mib(EXTENSIBLEMIB.LOADAVEMIBNUM, EXTENSIBLENUM+1, extensible_loadave_variables)
 
 #endif
 #endif /* _MIBGROUP_LOADAVE_H */
