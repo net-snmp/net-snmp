@@ -266,8 +266,7 @@ var_smux(struct variable *vp,
 	u_char *valptr, val_type;
 	smux_reg *rptr;
 
-	*write_method = NULL;
-
+	*write_method = var_smux_write; 
 	/* search the active registration list */
 	for (rptr = ActiveRegs; rptr; rptr = rptr->sr_next) {
 		if (!compare_tree(vp->name, vp->namelen, rptr->sr_name,
@@ -279,7 +278,6 @@ var_smux(struct variable *vp,
 	else if (exact && (*length < rptr->sr_name_len))
 		return NULL;
 
-	*write_method = var_smux_write; 
 	valptr = smux_snmp_process(exact, name, length,
 	    var_len, &val_type, rptr->sr_fd);
 

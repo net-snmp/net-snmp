@@ -524,7 +524,7 @@ int main(int argc, char *argv[])
 	    vip->type = vars->type;
             if (vars->type == ASN_COUNTER64) {
               u64Subtract(vars->val.counter64, &vip->c64value, &c64value);
-              memcpy(&vip->c64value, &vars->val.counter64,
+              memcpy(&vip->c64value, vars->val.counter64,
                      sizeof(struct counter64));
             } else {
               value = *(vars->val.integer) - vip->value;

@@ -816,6 +816,7 @@ var_ipRouteEntry(struct variable *vp,
     return (u_char *)&long_return;
   case IPROUTEPROTO:
     long_return = Lowentry.ipRouteProto;
+    if (long_return == -1) long_return = 1;
     return (u_char *)&long_return;
   case IPROUTEAGE:
     long_return = Lowentry.ipRouteAge;
