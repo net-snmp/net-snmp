@@ -155,6 +155,13 @@ extern struct mnttab *HRFS_entry;
 #define HRFS_mount	mnt_mountp
 #define HRFS_statfs	statvfs
 
+#elif defined(HAVE_STATVFS) && defined(__NetBSD__)
+
+extern struct statvfs *HRFS_entry;
+extern int      fscount;
+#define HRFS_statfs	statvfs
+#define HRFS_mount	f_mntonname
+
 #elif defined(HAVE_STATVFS)
 
 extern struct mntent *HRFS_entry;
