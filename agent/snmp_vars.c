@@ -377,6 +377,56 @@ static struct nlist nl[] = {
 	{ 0 },
 };
 
+#ifdef hpux
+/*
+ * HP-UX has separate kernel structures implementing the MIB-2 counters.
+ * These provide correct information for those variables otherwise
+ * unsupportable with a traditional BSD-based kernel.
+ *
+ * This implementation just uses these counters to "fill in the gaps"
+ * though it would be possible to use them exclusively.
+ * This approach might well simplify the implementation overall.
+ *
+ * There is also an interface to the network management information
+ * through a special device '/dev/netman'.
+ * This is used here to determine interface information, though it
+ * could also be used for the other groups as an alternative to delving
+ * directly into the kernel.
+ */
+
+/*
+ * Unfortunately, the HP-UX internal definition of OBJID is incompatible
+ * with that used elsewhere within this package. Temporarily switch to
+ * use this definition, and then restore the original state.
+ *  We'll need to do this again later, so ideally, we should store the
+ * HP definition for use then.  The 'obvious' method led to recursive
+ * definitions, so simply repeat the two definitions.
+ */
+#undef	OBJID
+#include <sys/mib.h>
+#include <netinet/mib_kern.h>
+#undef	OBJID
+#define	OBJID			ASN_OBJECT_ID
+
+static struct nlist hpnl[] = {
+#define HP_N_IPSTAT   0
+	{ "MIB_ipcounter" },
+#define HP_N_ICMPSTAT 1
+	{ "MIB_icmpcounter" },
+#define HP_N_UDPSTAT  2
+	{ "MIB_udpcounter" },
+#define HP_N_TCPSTAT  3
+	{ "MIB_tcpcounter" },
+	0
+};
+#define HPKNLookup(nl_which, buf, s) (klookup(hpnl[nl_which].n_value, buf, s))
+static	counter MIB_ipcounter[MIB_ipMAXCTR+1];
+static	counter MIB_icmpcounter[MIB_icmpMAXCTR+1];
+static	counter MIB_udpcounter[MIB_udpMAXCTR+1];
+static	counter MIB_tcpcounter[MIB_tcpMAXCTR+1];
+
+#endif /* hpux */
+
 /*
  *	Each variable name is placed in the variable table, without the
  * terminating substring that determines the instance of the variable.  When
@@ -467,6 +517,27 @@ init_snmp()
 #endif
       }
   }
+
+#ifdef hpux
+	/*
+	 * Initialise the HP-UX specific kernel structure name list
+	 */
+  if ((ret = nlist(KERNEL_LOC,hpnl)) == -1) {
+    ERROR("nlist (hp)");
+    exit(1);
+  }
+  for(ret = 0; hpnl[ret].n_name != NULL; ret++) {
+    if (hpnl[ret].n_type == 0) {
+#ifdef DODEBUG
+        DEBUGP1("hp nlist err:  %s not found\n",hpnl[ret].n_name);
+      } else {
+        fprintf(stderr, "hp nlist: %s 0x%X\n", hpnl[ret].n_name,
+                (unsigned int)hpnl[ret].n_value);
+#endif
+      }
+  }
+#endif /* hpux */
+
   init_kmem("/dev/kmem"); 
   init_routes();
   init_extensible();
@@ -1739,6 +1810,13 @@ var_ifEntry(vp, name, length, exact, var_len, write_method)
 #if STRUCT_IFNET_HAS_IF_LASTCHANGE_TV_SEC
           struct timeval now;
 #endif
+#ifdef hpux
+    struct nmparms hp_nmparms;
+    mib_ifEntry hp_ifEntry;
+    int  hp_fd;
+    int  hp_len=sizeof(hp_ifEntry);
+#endif
+
 
     bcopy((char *)vp->name, (char *)newname, (int)vp->namelen * sizeof(oid));
     /* find "next" interface */
@@ -1762,6 +1840,32 @@ var_ifEntry(vp, name, length, exact, var_len, write_method)
 #else 
     Interface_Scan_By_Index(interface, Name, &ifnet, &in_ifaddr);
 #endif
+
+#ifdef hpux
+	/*
+	 * Additional information about the interfaces is available under
+	 * HP-UX through the network management interface '/dev/netman'
+	 */
+#undef		OBJID
+	/* Re-instate the HP-UX definition of 'OBJID' */
+#define		OBJID(x,y)	((x)<<16) + (y)
+    hp_ifEntry.ifIndex = interface;
+    hp_nmparms.objid  = ID_ifEntry;
+    hp_nmparms.buffer = &hp_ifEntry;
+    hp_nmparms.len    = &hp_len;
+    if ((hp_fd=open("/dev/netman", O_RDONLY)) != -1 ) {
+      if (ioctl(hp_fd, NMIOGET, &hp_nmparms) != -1 ) {
+          close(hp_fd);
+      }
+      else {
+          close(hp_fd);
+          hp_fd = -1;         /* failed */
+      }
+    };
+#undef		OBJID
+#define		OBJID		ASN_OBJECT_ID
+#endif /* hpux */
+
     switch (vp->magic){
 	case IFINDEX:
 	    long_return = interface;
@@ -1769,6 +1873,11 @@ var_ifEntry(vp, name, length, exact, var_len, write_method)
 	case IFDESCR:
 #define USE_NAME_AS_DESCRIPTION
 #ifdef USE_NAME_AS_DESCRIPTION
+#ifdef hpux
+	  if ( hp_fd != -1 )
+	    cp = hp_ifEntry.ifDescr;
+	  else
+#endif
 	    cp = Name;
 #else  USE_NAME_AS_DESCRIPTION
 	    cp = Lookup_Device_Annotation(Name, "snmp-descr");
@@ -1787,6 +1896,11 @@ var_ifEntry(vp, name, length, exact, var_len, write_method)
 #if STRUCT_IFNET_HAS_IF_TYPE
 		long_return = ifnet.if_type;
 #else
+#ifdef hpux
+	      if ( hp_fd != -1 )
+		long_return = hp_ifEntry.ifType;
+	      else
+#endif
 		long_return = 1;	/* OTHER */
 #endif
 	    return (u_char *) &long_return;
@@ -1803,6 +1917,11 @@ var_ifEntry(vp, name, length, exact, var_len, write_method)
 #if STRUCT_IFNET_HAS_IF_BAUDRATE
 	    long_return = ifnet.if_baudrate;
 #else
+#ifdef hpux
+	    if ( hp_fd != -1 )
+		long_return = hp_ifEntry.ifSpeed;
+	    else
+#endif
 	    long_return = (u_long)  1;	/* OTHER */
 #endif
 #if STRUCT_IFNET_HAS_IF_TYPE
@@ -1855,6 +1974,11 @@ var_ifEntry(vp, name, length, exact, var_len, write_method)
                + (now.tv_usec - ifnet.if_lastchange.tv_usec) / 10000);
           }
 #else
+#ifdef hpux
+	  if ( hp_fd != -1 )
+	    long_return = hp_ifEntry.ifLastChange;
+	  else
+#endif
           long_return = 0; /* XXX */
 #endif
           return (u_char *) &long_return;
@@ -1862,19 +1986,36 @@ var_ifEntry(vp, name, length, exact, var_len, write_method)
 #ifdef STRUCT_IFNET_HAS_IF_IBYTES
           long_return = (u_long)  ifnet.if_ibytes;
 #else
+#ifdef hpux
+	  if ( hp_fd != -1 )
+	    long_return = hp_ifEntry.ifInOctets;
+	  else
+#endif
 	    long_return = (u_long)  ifnet.if_ipackets * 308; /* XXX */
 #endif
 	    return (u_char *) &long_return;
 	case IFINUCASTPKTS:
+#ifdef hpux
+	  if ( hp_fd != -1 )
+	    long_return = hp_ifEntry.ifInUcastPkts;
+	  else
+#endif
+	    {
 	    long_return = (u_long)  ifnet.if_ipackets;
 #if STRUCT_IFNET_HAS_IF_IMCASTS
 	    long_return -= (u_long) ifnet.if_imcasts;
 #endif
+	    }
 	    return (u_char *) &long_return;
 	case IFINNUCASTPKTS:
 #if STRUCT_IFNET_HAS_IF_IMCASTS
 	    long_return = (u_long)  ifnet.if_imcasts;
 #else
+#ifdef hpux
+	  if ( hp_fd != -1 )
+	    long_return = hp_ifEntry.ifInNUcastPkts;
+	  else
+#endif
 	    long_return = (u_long)  0; /* XXX */
 #endif
 	    return (u_char *) &long_return;
@@ -1882,6 +2023,11 @@ var_ifEntry(vp, name, length, exact, var_len, write_method)
 #if STRUCT_IFNET_HAS_IF_IQDROPS
 	    long_return = (u_long)  ifnet.if_iqdrops;
 #else
+#ifdef hpux
+	  if ( hp_fd != -1 )
+	    long_return = hp_ifEntry.ifInDiscards;
+	  else
+#endif
 	    long_return = (u_long)  0; /* XXX */
 #endif
 	    return (u_char *) &long_return;
@@ -1891,6 +2037,11 @@ var_ifEntry(vp, name, length, exact, var_len, write_method)
 #if STRUCT_IFNET_HAS_IF_NOPROTO
 	    long_return = (u_long)  ifnet.if_noproto;
 #else
+#ifdef hpux
+	  if ( hp_fd != -1 )
+	    long_return = hp_ifEntry.ifInUnknownProtos;
+	  else
+#endif
 	    long_return = (u_long)  0; /* XXX */
 #endif
 	    return (u_char *) &long_return;
@@ -1898,19 +2049,36 @@ var_ifEntry(vp, name, length, exact, var_len, write_method)
 #ifdef STRUCT_IFNET_HAS_IF_OBYTES
           long_return = (u_long)  ifnet.if_obytes;
 #else
+#ifdef hpux
+	  if ( hp_fd != -1 )
+	    long_return = hp_ifEntry.ifOutOctets;
+	  else
+#endif
 	    long_return = (u_long)  ifnet.if_opackets * 308; /* XXX */
 #endif
 	    return (u_char *) &long_return;
 	case IFOUTUCASTPKTS:
+#ifdef hpux
+	  if ( hp_fd != -1 )
+	    long_return = hp_ifEntry.ifOutUcastPkts;
+	  else
+#endif
+	    {
 	    long_return = (u_long)  ifnet.if_opackets;
 #if STRUCT_IFNET_HAS_IF_OMCASTS
 	    long_return -= (u_long) ifnet.if_omcasts;
 #endif
+	    }
 	    return (u_char *) &long_return;
 	case IFOUTNUCASTPKTS:
 #if STRUCT_IFNET_HAS_IF_OMCASTS
 	    long_return = (u_long)  ifnet.if_omcasts;
 #else
+#ifdef hpux
+	  if ( hp_fd != -1 )
+	    long_return = hp_ifEntry.ifOutNUcastPkts;
+	  else
+#endif
 	    long_return = (u_long)  0; /* XXX */
 #endif
 	    return (u_char *) &long_return;
@@ -2415,6 +2583,10 @@ var_ip(vp, name, length, exact, var_len, write_method)
      */
 #ifndef linux
     KNLookup(N_IPSTAT, (char *)&ipstat, sizeof (ipstat));
+#ifdef hpux
+    HPKNLookup(HP_N_IPSTAT, (char *)&MIB_ipcounter,
+	(MIB_ipMAXCTR+1)*sizeof (counter));
+#endif
 
     switch (vp->magic){
 	case IPFORWARDING:
@@ -2453,10 +2625,18 @@ var_ip(vp, name, length, exact, var_len, write_method)
 	    return (u_char *) &ipstat.ips_forward;
 
 	case IPINUNKNOWNPROTOS:
+#ifdef hpux
+	    long_return = MIB_ipcounter[7];
+#else
 	    long_return = 0;
+#endif
 	    return (u_char *) &long_return;
 	case IPINDISCARDS:
+#ifdef hpux
+	    long_return = MIB_ipcounter[8];
+#else
 	    long_return = 0;
+#endif
 	    return (u_char *) &long_return;
 	case IPINDELIVERS:
 
@@ -2467,10 +2647,18 @@ var_ip(vp, name, length, exact, var_len, write_method)
 	    return (u_char *) &long_return;
 
 	case IPOUTREQUESTS:
+#ifdef hpux
+	    long_return = MIB_ipcounter[10];
+#else
 	    long_return = 0;
+#endif
 	    return (u_char *) &long_return;
 	case IPOUTDISCARDS:
+#ifdef hpux
+	    long_return = MIB_ipcounter[11];
+#else
 	    long_return = 0;
+#endif
 	    return (u_char *) &long_return;
 	case IPOUTNOROUTES:
 	    return (u_char *) &ipstat.ips_cantforward;
@@ -2482,11 +2670,15 @@ var_ip(vp, name, length, exact, var_len, write_method)
 	    return (u_char *) &ipstat.ips_fragments;
 
 	case IPREASMOKS:
+#ifdef hpux
+	    long_return = MIB_ipcounter[15];
+#else
 	    long_return = ipstat.ips_fragments;		/* XXX */
 		/*
 		 * NB: This is the count of fragments received, rather than
 		 *	"the number of IP datagrams successfully reassembled"
 		 */
+#endif
 	    return (u_char *) &long_return;
 
 	case IPREASMFAILS:
@@ -2494,13 +2686,25 @@ var_ip(vp, name, length, exact, var_len, write_method)
 	    return (u_char *) &long_return;
 
 	case IPFRAGOKS:
+#ifdef hpux
+	    long_return = MIB_ipcounter[17];
+#else
 	    long_return = 0;
+#endif
 	    return (u_char *) &long_return;
 	case IPFRAGFAILS:
+#ifdef hpux
+	    long_return = MIB_ipcounter[18];
+#else
 	    long_return = 0;
+#endif
 	    return (u_char *) &long_return;
 	case IPFRAGCREATES:
+#ifdef hpux
+	    long_return = MIB_ipcounter[19];
+#else
 	    long_return = 0;
+#endif
 	    return (u_char *) &long_return;
 	case IPROUTEDISCARDS:
 	    long_return = 0;
@@ -2960,6 +3164,11 @@ var_icmp(vp, name, length, exact, var_len, write_method)
      */
 #ifndef linux
     KNLookup( N_ICMPSTAT, (char *)&icmpstat, sizeof (icmpstat));
+#ifdef hpux
+	/* Never actually needed! */
+    HPKNLookup(HP_N_ICMPSTAT, (char *)&MIB_icmpcounter,
+	(MIB_icmpMAXCTR+1)*sizeof (counter));
+#endif
 
     switch (vp->magic){
 	case ICMPINMSGS:
@@ -3237,27 +3446,43 @@ var_udp(vp, name, length, exact, var_len, write_method)
      */
 
     KNLookup( N_UDPSTAT, (char *)&udpstat, sizeof (udpstat));
+#ifdef hpux
+    HPKNLookup(HP_N_UDPSTAT, (char *)&MIB_udpcounter,
+	(MIB_udpMAXCTR+1)*sizeof (counter));
+#endif
 
     switch (vp->magic){
 	case UDPINDATAGRAMS:
 #if defined(freebsd2) || defined(netbsd1)
 	    long_return = udpstat.udps_ipackets;
 #else
+#ifdef hpux
+	    long_return = MIB_udpcounter[1];
+#else
 	    long_return = 0;
+#endif
 #endif
 	    return (u_char *) &long_return;
 	case UDPNOPORTS:
 #if defined(freebsd2) || defined(netbsd1)
 	    long_return = udpstat.udps_noport;
 #else
+#ifdef hpux
+	    long_return = MIB_udpcounter[2];
+#else
 	    long_return = 0;
+#endif
 #endif
 	    return (u_char *) &long_return;
 	case UDPOUTDATAGRAMS:
 #if defined(freebsd2) || defined(netbsd1)
 	    long_return = udpstat.udps_opackets;
 #else
+#ifdef hpux
+	    long_return = MIB_udpcounter[3];
+#else
 	    long_return = 0;
+#endif
 #endif
 	    return (u_char *) &long_return;
 	case UDPINERRORS:
@@ -3475,6 +3700,10 @@ var_tcp(vp, name, length, exact, var_len, write_method)
 
 #ifndef linux
 	KNLookup( N_TCPSTAT, (char *)&tcpstat, sizeof (tcpstat));
+#ifdef hpux
+	HPKNLookup(HP_N_TCPSTAT, (char *)&MIB_tcpcounter,
+	    (MIB_tcpMAXCTR+1)*sizeof (counter));
+#endif
 #else /* linux */
 	linux_read_tcp_stat (&tcpstat);
 #endif /* linux */
@@ -3517,10 +3746,18 @@ var_tcp(vp, name, length, exact, var_len, write_method)
 	    case TCPPASSIVEOPENS:
 		return (u_char *) &tcpstat.tcps_accepts;
 	    case TCPATTEMPTFAILS:
+#ifdef hpux
+		long_return = MIB_tcpcounter[7];
+#else
 		long_return = tcpstat.tcps_conndrops;	/* XXX */
+#endif
 		return (u_char *) &long_return;
 	    case TCPESTABRESETS:
+#ifdef hpux
+		long_return = MIB_tcpcounter[8];
+#else
 		long_return = tcpstat.tcps_drops;	/* XXX */
+#endif
 		return (u_char *) &long_return;
 		/*
 		 * NB:  tcps_drops is actually the sum of the two MIB
