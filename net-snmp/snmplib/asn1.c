@@ -2074,7 +2074,7 @@ asn_rbuild_unsigned_int (u_char *data,
 		       size_t intsize)
 {
     static const char *errpre = "build uint";
-    register long integer;
+    register u_long integer;
     register u_long mask;
     u_char *initdatap = data;
     
