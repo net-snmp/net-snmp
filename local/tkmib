@@ -1,5 +1,7 @@
 #!/usr/local/bin/perl -w
 
+require 5;
+
 require Tk::Table;
 require Tk::HList;
 require Tk::FileSelect;
@@ -22,7 +24,7 @@ $graphtime=5;
 $graphdelta=1;
 @graphcolors=qw(blue red green yellow purple);
 
-@displayInfo=qw(type access status units hint moduleID enums);
+@displayInfo=qw(type access status units hint moduleID enums indexes);
 
 use Tk;
 require Tk::HList;
@@ -496,6 +498,8 @@ sub updateInfo {
 		foreach $j (sort { $hash{$a} <=> $hash{$b} } keys(%hash)) {
 		    $dpyInfo[$i] .= "$j = $hash{$j},";
 		}
+	    } elsif (ref($dpyInfo[$i]) eq ARRAY) {
+		$dpyInfo[$i] = join(", ", @{$dpyInfo[$i]});
 	    }
 	}
     }
