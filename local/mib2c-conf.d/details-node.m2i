@@ -1,5 +1,5 @@
-########################################################################
-## Generic include for columns. Don't use directly.
+#############################################################  -*- c -*-
+## Generic include for columns. Do not use directly.
 ##
 ## $Id$
 ########################################################################
@@ -21,7 +21,7 @@
  * node.subid    -- last oid component   $node.subid
  * node.oidlength-- length of the oid    $node.oidlength
  * node.syntax   -- node's syntax        $node.syntax
- * node.perltype -- node's ASN_XXX type  $node.perltype
+ * node.perltype -- node's perl type     $node.perltype
  * node.type     -- node's ASN_XXX type  $node.type
  * node.decl     -- C data type          $m2c_decl ($node.decl)
  * node.settable -- 1 if it's writable   $node.settable
