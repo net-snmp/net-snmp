@@ -460,7 +460,7 @@ var_hrstore(struct variable *vp,
     struct mbstat   mbstat;
 #endif
 #endif                          /* !linux */
-    static char     string[100];
+    static char     string[1024];
     struct HRFS_statfs stat_buf;
 
     if (vp->magic == HRSTORE_MEMSIZE) {
@@ -816,7 +816,7 @@ int
 linux_mem(int mem_type, int size_or_used)
 {
     FILE           *fp;
-    char            buf[100];
+    char            buf[1024];
     int             size = -1, free = -1;
 
     if ((fp = fopen("/proc/meminfo", "r")) == NULL)

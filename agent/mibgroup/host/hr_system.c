@@ -162,7 +162,7 @@ var_hrsys(struct variable * vp,
           size_t * length,
           int exact, size_t * var_len, WriteMethod ** write_method)
 {
-    static char     string[100];
+    static char     string[1024];
     time_t          now;
 #ifndef NR_TASKS
     int             nproc = 0;
