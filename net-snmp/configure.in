@@ -504,7 +504,17 @@ fi
 
 dnl disable --enable-shared by default in cvs/developer cases.
 if test "x$developer" = "xyes"; then
-  AC_DISABLE_SHARED
+  dnl don't do anything if option set via cmdline
+  if test "${enable_shared+set}" != set; then
+    enable_shared=no
+  fi
+fi
+
+dnl perl requires shared libs
+if test "x$embed_perl" = "xyes"; then
+    if test "x$enable_shared" != "xyes"; then
+      AC_MSG_ERROR(--enable-embedded-perl requires --enable-shared)
+    fi
 fi
 
 AC_PROG_CC
