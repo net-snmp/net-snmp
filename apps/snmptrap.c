@@ -81,6 +81,7 @@ SOFTWARE.
 #include "snmp.h"
 #include "party.h"
 #include "system.h"
+#include "version.h"
 
 extern int  errno;
 int main __P((int, char **));
@@ -311,6 +312,10 @@ main(argc, argv)
     for(arg = 1; arg < argc; arg++){
 	if (argv[arg][0] == '-'){
 	    switch(argv[arg][1]){
+		case 'V':
+                  fprintf(stderr,"UCD-snmp version: %s\n", VersionInfo);
+                  exit(0);
+                  break;
 		case 'a':
 		    agent = argv[++arg];
 		    break;

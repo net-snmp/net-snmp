@@ -72,6 +72,7 @@ char copyright[] =
 #include "context.h"
 #include "view.h"
 #include "acl.h"
+#include "version.h"
 
 #include "netstat.h"
 
@@ -147,6 +148,10 @@ main(argc, argv)
     for(arg = 1; arg < argc; arg++){
 	if (argv[arg][0] == '-'){
 	    switch(argv[arg][1]){
+              case 'V':
+                fprintf(stderr,"UCD-snmp version: %s\n", VersionInfo);
+                exit(0);
+                break;
 	      case 'd':
 		snmp_set_dump_packet(1);
 		break;
