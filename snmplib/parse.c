@@ -1004,9 +1004,7 @@ compute_match(const char *search_base, const char *key) {
 struct tree *
 find_best_tree_node(const char *name, struct tree *tree_top, u_int *match)
 {
-    
     struct tree *tp, *best_so_far = NULL, *retptr;
-    int count, *int_p;
     u_int old_match=MAX_BAD, new_match;
 
     if (!name || !*name)
