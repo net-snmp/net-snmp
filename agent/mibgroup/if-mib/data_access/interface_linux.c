@@ -232,7 +232,8 @@ netsnmp_access_interface_container_arch_load(netsnmp_container* container,
         netsnmp_access_interface_ioctl_physaddr_get(fd, entry);
 
         /*
-         * physaddr should have set name. make some guesses if not
+         * physaddr should have set type. make some guesses (based
+         * on if_name) if not.
          */
         if(0 == entry->if_type) {
             typedef struct _match_if {
@@ -246,6 +247,7 @@ netsnmp_access_interface_container_arch_load(netsnmp_container* container,
                 {IANAIFTYPE_ISO88025TOKENRING, "tr"},
                 {IANAIFTYPE_PPP, "ppp"},
                 {IANAIFTYPE_SLIP, "sl"},
+                {IANAIFTYPE_TUNNEL, "sit"},
                 {0, 0}                  /* end of list */
             };
 
