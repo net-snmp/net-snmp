@@ -121,25 +121,34 @@ make
 make test
 make install
 
-Win32:
+Win32 (MSVC):
 
-This package only builds on NT as far as I know. Thes directions are
-fo VC++ 5.0-6.0 (I will be interested to hear of success with cygwin).
+This package only builds on NT / 2000 as far as I know. These directions are
+for VC++ 5.0-6.0 with ActiveState Perl.  See below for Cygwin.
 
-First  run vcvars32.bat
+Install the regex win32 package (gnu_regex.exe).  It is available from
+http://people.delphiforums.com/gjc/gnu_regex.html
 
-for ActiveState Perl  (not tested with the latest net-snmp 5.0 code)
+Run vcvars32.bat.
 
-perl net-snmp/Makefile.PL CAPI=TRUE [-NET-SNMP-PATH=/usr]
+cd net-snmp\perl
+perl Makefile.PL CAPI=TRUE -NET-SNMP-IN-SOURCE=TRUE
 nmake
 nmake test
 nmake install
+
+Note:  The --NET-SNMP-IN-SOURCE=TRUE causes the Makefile to use the library files
+from the net-snmp source directory.  To specify the installed Net-SNMP directory,
+use:
+
+perl Makefile.PL CAPI=TRUE -NET-SNMP-PATH=c:\usr
 
 OpenSSL note: see the net-snmp/README.win32 to compile libsnmp with
               libeay32 and see that libeay.lib is in usr\lib
 
 for the older perl5.004_02 distribution by gsarathy
 
+cd net-snmp\perl
 perl Makefile.PL
 nmake
 nmake test
@@ -152,6 +161,20 @@ Win32 Testing Note:
 are running. Before running 'nmake test' start these servers using the
 config file provided (t/snmpd.conf). You will be asked for the test host
 and port numbers by Makefile.PL
+
+
+Win32 (Cygwin):
+
+cd net-snmp\perl
+perl Makefile.PL -NET-SNMP-IN-SOURCE=true
+make
+make test
+make install
+
+If you get an error saying your system can't compile, you are probably missing
+the regex library.  Install regex from 
+http://mirrors.sunsite.dk/cygwin/release/regex/regex-4.4-2-src.tar.bz2
+
 
 Operational Description:
 
