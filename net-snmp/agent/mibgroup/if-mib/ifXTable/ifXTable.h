@@ -54,6 +54,16 @@ extern          "C" {
      * It's status is Current.
      * OID: .1.3.6.1.2.1.31.1.1, length: 9
      */
+#ifdef USING_IF_MIB_IFTABLE_IFTABLE_MODULE
+#include "if-mib/ifTable/ifTable.h"
+
+    typedef ifTable_registration_ptr ifXTable_registration_ptr;
+    typedef ifTable_data ifXTable_data;
+    typedef ifTable_undo_data ifXTable_undo_data;
+    typedef ifTable_mib_index ifXTable_mib_index;
+    typedef ifTable_rowreq_ctx ifXTable_rowreq_ctx;
+    typedef ifTable_ref_rowreq_ctx ifXTable_ref_rowreq_ctx;
+#else
     /*
      *********************************************************************
      * When you register your mib, you get to provide a generic
@@ -126,6 +136,7 @@ extern          "C" {
     typedef struct ifXTable_ref_rowreq_ctx_s {
         ifXTable_rowreq_ctx *rowreq_ctx;
     } ifXTable_ref_rowreq_ctx;
+#endif /*  USING_IF_MIB_IFTABLE_IFTABLE_MODULE */
 
     /*
      *********************************************************************
