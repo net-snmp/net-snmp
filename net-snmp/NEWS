@@ -39,6 +39,13 @@ the ChangeLog file for a more detailed listing of changes/bug fixes.
     - Significant improvements to the AgentX support.
       (Code is still beta, but probably safe for use on non-critical systems).
 
+ Perl:
+    - bulkwalk functionality for the SNMP perl module.
+    - entirely numeric OID support.
+    - support for best guess mode for OIDs.
+    - range and default value access added.
+    - build can now be targeted against a non-standard net-snmp install path.
+
  Fixes:
     - v3 traps/informs handled properly now.
     - Many more misc bug fixes.
