@@ -49,6 +49,7 @@ SOFTWARE.
 #endif
 #include <stdio.h>
 #include <ctype.h>
+#include <getopt.h>
 
 #if HAVE_WINSOCK_H
 #include <winsock.h>
@@ -98,32 +99,22 @@ void usage(void)
   fprintf(stderr,
           "  \tt\tEnable alternately formatted symbolic suffix report.\n");
   fprintf(stderr,
-          "  -w\t\tEnable warnings of MIB symbol conflicts. (Obsolete, use -Pw)\n");
-  fprintf(stderr,
-          "  -W\t\tEnable detailed warnings of MIB symbol conflicts. (Obsolete, use -PW)\n");
-  fprintf(stderr,
           "  -R\t\tUse \"random access\" to access objectID.\n");
-  fprintf(stderr,
-          "  -r\t\tUse \"random access\" to access objectID. (Obsolete, -R preferred)\n");
   fprintf(stderr,
           "  -n\t\tDisplay OID in symbolic form for objectID.\n");
   fprintf(stderr,
           "  -d\t\tDisplay detailed information for objectID.\n");
-  fprintf(stderr,
-          "  -f\t\tDisplay full OID for objectID.\n");
-  fprintf(stderr,
-          "  -s\t\tDisplay last symbolic part of OID for objectID.\n");
-  fprintf(stderr,
-          "  -S\t\tDisplay MIB and last symbolic part of OID for objectID.\n");
   fprintf(stderr, "  -P <MIBOPTS>\tToggle various defaults controlling mib parsing:\n");
   snmp_mib_toggle_options_usage("\t\t", stderr);
+  fprintf(stderr, "  -O <OIDOPTS>\tToggle various defaults controlling oid printing:\n");
+  snmp_oid_toggle_options_usage("\t\t", stderr);
   exit(1);
 }
 
 int main(int argc, char *argv[])
 {
     int	arg, count;
-    char *current_name = NULL;
+    char *current_name = NULL, *cp;
     oid name[MAX_OID_LEN];
     size_t name_length;
     int tosymbolic = 0;
@@ -135,154 +126,119 @@ int main(int argc, char *argv[])
     /*
      * usage: snmptranslate name
      */
-    for(arg = 1; arg < argc; arg++){
-	if (argv[arg][0] == '-'){
-	    switch(argv[arg][1]){
-	      case 'h':
+    while ((arg = getopt(argc, argv, "VhndRrwWbpafsSm:M:D:P:tT:O:")) != EOF){
+	switch(arg) {
+	case 'h':
+	    usage();
+            exit(1);
+	case 'b':
+            find_best = 1;
+            break;
+	case 'n':
+	    tosymbolic = 1;
+	    break;	     
+	case 'd':
+	    description = 1;
+	    snmp_set_save_descriptions(1);
+	    break;
+	case 'r':
+	case 'R':
+	    random_access = 1;
+	    break;
+        case 'w':
+            snmp_set_mib_warnings(1);
+            break;
+        case 'W':
+            snmp_set_mib_warnings(2);
+            break;
+        case 'p':
+            print = 1;
+            break;
+        case 'a':
+            print = 2;
+            break;
+	case 'f':
+	    snmp_set_full_objid(1);
+	    break;
+	case 's':
+	    snmp_set_suffix_only(1);
+	    tosymbolic = 1;
+	    break;
+	case 'S':
+	    snmp_set_suffix_only(2);
+	    tosymbolic = 1;
+	    break;
+        case 'm':
+            setenv("MIBS", optarg, 1);
+            break;
+        case 'M':
+            setenv("MIBDIRS", optarg, 1);
+            break;
+	case 'D':
+            debug_register_tokens(optarg);
+	    snmp_set_do_debugging(1);
+	    break;
+        case 'V':
+            fprintf(stderr,"UCD-snmp version: %s\n", VersionInfo);
+            exit(0);
+            break;
+	case 'P':
+	    cp = snmp_mib_toggle_options(optarg);
+	    if (cp != NULL) {
+		fprintf(stderr,"Unknown parser option to -P: %c.\n", *cp);
 		usage();
-                exit(1);
-	      case 'b':
-                find_best = 1;
-                break;
-	      case 'n':
-		tosymbolic = 1;
-		break;	     
-	      case 'd':
-		description = 1;
-		snmp_set_save_descriptions(1);
-		break;
-	      case 'r':
-	      case 'R':
-		random_access = 1;
-		break;
-              case 'w':
-                snmp_set_mib_warnings(1);
-                break;
-              case 'W':
-                snmp_set_mib_warnings(2);
-                break;
-              case 'p':
-                print = 1;
-                break;
-              case 'a':
-                print = 2;
-                break;
-	      case 'f':
-		snmp_set_full_objid(1);
-		break;
-	      case 's':
-		snmp_set_suffix_only(1);
-		tosymbolic = 1;
-		break;
-	      case 'S':
-		snmp_set_suffix_only(2);
-		tosymbolic = 1;
-		break;
-              case 'm':
-                if (argv[arg][2] != 0)
-                  setenv("MIBS",&argv[arg][2], 1);
-                else if (++arg < argc)
-                  setenv("MIBS",argv[arg], 1);
-                else {
-                  fprintf(stderr,"Need MIBS after -m flag.\n");
-                  usage();
-                  exit(1);
-                }
-                break;
-              case 'M':
-                if (argv[arg][2] != 0)
-                  setenv("MIBDIRS",&argv[arg][2], 1);
-                else if (++arg < argc)
-                  setenv("MIBDIRS",argv[arg], 1);
-                else {
-                  fprintf(stderr,"Need MIBDIRS after -M flag.\n");
-                  usage();
-                  exit(1);
-                }
-                break;
-	      case 'D':
-                debug_register_tokens(&argv[arg][2]);
-		snmp_set_do_debugging(1);
-		break;
-              case 'V':
-                fprintf(stderr,"UCD-snmp version: %s\n", VersionInfo);
-                exit(0);
-                break;
-	      case 'P':
-		{ char *cp;
-		  if (argv[arg][2] != 0)
-		    cp = &argv[arg][2];
-		  else if (++arg<argc)
-		    cp = &argv[arg][2];
-		  else {
-		    fprintf(stderr,"Need option arguments after -P flag.\n");
-		    usage();
-		    exit(1);
-		  }
-		  cp = snmp_mib_toggle_options(cp);
-		  if (cp != NULL) {
-		    fprintf(stderr,"Unknown parsing option passed to -P: %c.\n", *cp);
-		    usage();
-		    exit(1);
-		  }
-		}
-		break;
-	      case 't':
-                print = 3;
-                print_oid_report_enable_suffix();
-                break;
-              case 'T':
-              {
-                char *tPtr=NULL;
-                print = 3;
-                if (argv[arg][2] != 0)
-                    tPtr = &argv[arg][2];
-                else if (++arg < argc)
-                    tPtr = argv[arg];
-                else {
-                    fprintf(stderr, "Need <lost> after -T flag.\n");
-                    usage(); 
-                    exit(1);
-                }
-                for(;*tPtr; (tPtr)++)
-                {
-                    switch(*tPtr)
-                    {
-                      case 'l':
-                        print_oid_report_enable_labeledoid();
-                        break;
-                      case 'o':
-                        print_oid_report_enable_oid();
-                        break;
-                      case 's':
-                        print_oid_report_enable_symbolic();
-                        break;
-                      case 't':
-                        print_oid_report_enable_suffix();
-                        break;
-                      default:
-                        fprintf(stderr,"Invalid <lost> character: %c\n", *tPtr);
-                        usage();
-                        exit(1);
-                        break;
-                    }
-                }
-                break;
-              }
-	      default:
-		fprintf(stderr,"invalid option: -%c\n", argv[arg][1]);
-                usage();
-                exit(1);
-		break;
+		exit(1);
 	    }
-	    continue;
+	    break;
+	case 'O':
+	    cp = snmp_oid_toggle_options(optarg);
+	    if (cp != NULL) {
+		fprintf(stderr, "Unknown OID option to -O: %c.\n", *cp);
+		usage();
+		exit(1);
+	    }
+	case 't':
+            print = 3;
+            print_oid_report_enable_suffix();
+            break;
+        case 'T':
+            for(cp = optarg; *cp; cp++)
+            {
+                switch(*cp)
+                {
+                  case 'l':
+                    print_oid_report_enable_labeledoid();
+                    break;
+                  case 'o':
+                    print_oid_report_enable_oid();
+                    break;
+                  case 's':
+                    print_oid_report_enable_symbolic();
+                    break;
+                  case 't':
+                    print_oid_report_enable_suffix();
+                    break;
+                  default:
+                    fprintf(stderr,"Invalid <lost> character: %c\n", *cp);
+                    usage();
+                    exit(1);
+                    break;
+                }
+            }
+            break;
+        default:
+	    fprintf(stderr,"invalid option: -%c\n", arg);
+            usage();
+            exit(1);
+	    break;
 	}
-	current_name = argv[arg];
     }
     
-    if (current_name == NULL && !print){
+    if (optind < argc)
+	current_name = argv[optind];
+    else if (!print) {
         usage(); 
-      exit(1);
+        exit(1);
     }
     
     init_snmp("snmpapp");
@@ -293,7 +249,7 @@ int main(int argc, char *argv[])
     if (!current_name) exit (0);
 
     name_length = MAX_OID_LEN;
-    if (random_access){
+    if (random_access || strchr(current_name, ':')){
 	if (!get_node(current_name, name, &name_length)){
 	    fprintf(stderr, "Unknown object identifier: %s\n", current_name);
 	    exit(2);

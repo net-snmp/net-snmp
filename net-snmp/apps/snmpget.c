@@ -205,7 +205,7 @@ retry:
       snmp_free_pdu(response);
     snmp_close(ss);
     SOCK_CLEANUP;
-    exit (0);
+    return 0;
 
 }  /* end main() */
 

@@ -1012,6 +1012,54 @@ handle_mibfile_conf(char *token,
   read_mib(line);
 }
 
+char *
+snmp_oid_toggle_options(char *options)
+{
+    while(*options) {
+        switch(*options++) {
+        case 'o':
+            ds_set_boolean(DS_LIBRARY_ID,
+                           DS_LIB_PRINT_NUMERIC_OIDS, 1);
+            break;
+        case 'e':
+            ds_set_boolean(DS_LIBRARY_ID,
+                           DS_LIB_PRINT_NUMERIC_ENUM, 1);
+            break;
+        case 'b':
+            ds_set_boolean(DS_LIBRARY_ID,
+                           DS_LIB_DONT_BREAKDOWN_OIDS, 1);
+            break;
+	case 'q':
+	    snmp_set_quick_print(1);
+	    break;
+        case 'f':
+	    snmp_set_full_objid(1);
+	    break;
+        case 's':
+	    snmp_set_suffix_only(1);
+	    break;
+        case 'S':
+	    snmp_set_suffix_only(2);
+	    break;
+        default:
+	    return options-1;
+	}
+    }
+    return NULL;
+}
+
+void snmp_oid_toggle_options_usage(const char *lead, FILE *outf)
+{
+  fprintf(outf, "%sOIDOPTS values:\n", lead);
+  fprintf(outf, "%s    o: Print oids numerically.\n", lead);
+  fprintf(outf, "%s    e: Print enums numerically.\n", lead);
+  fprintf(outf, "%s    b: Dont break oid indexes down.\n", lead);
+  fprintf(outf, "%s    q: Quick print for easier parsing.\n", lead);
+  fprintf(outf, "%s    f: Print full oids on output.\n", lead);
+  fprintf(outf, "%s    s: Print only last symbolic element of oid.\n", lead);
+  fprintf(outf, "%s    S: Print MIB module-id plus last element.\n", lead);
+}
+
 void
 register_mib_handlers (void) 
 {
@@ -1060,7 +1108,7 @@ init_mib (void)
     const char *prefix;
     char  *env_var, *entry;
     PrefixListPtr pp = &mib_prefixes[0];
-    char *new_mibdirs, *homepath, *cp_home, *cp_end_home;
+    char *new_mibdirs, *homepath, *cp_home;
     
     if (Mib) return;
 

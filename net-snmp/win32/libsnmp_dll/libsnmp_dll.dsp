@@ -17,10 +17,8 @@ CFG=libsnmp_dll - Win32 Debug
 !MESSAGE 
 !MESSAGE Possible choices for configuration are:
 !MESSAGE 
-!MESSAGE "libsnmp_dll - Win32 Release" (based on\
- "Win32 (x86) Dynamic-Link Library")
-!MESSAGE "libsnmp_dll - Win32 Debug" (based on\
- "Win32 (x86) Dynamic-Link Library")
+!MESSAGE "libsnmp_dll - Win32 Release" (based on "Win32 (x86) Dynamic-Link Library")
+!MESSAGE "libsnmp_dll - Win32 Debug" (based on "Win32 (x86) Dynamic-Link Library")
 !MESSAGE 
 
 # Begin Project
