@@ -69,6 +69,7 @@ CONFFILES=snmpd-data/system snmpd-data/acl snmpd-data/trapsinks \
 	snmp-data/authopts snmp-data/debugging snmp-data/output snmp-data/mibs \
 	snmp-data/snmpconf-config \
 	snmptrapd-data/formatting snmptrapd-data/traphandle \
+	snmptrapd-data/authentication snmptrapd-data/logging snmptrapd-data/runtime \
 	snmptrapd-data/snmpconf-config
 
 OTHERCLEANTARGETS=snmpcheck $(SCRIPTSMADEFORPERL)

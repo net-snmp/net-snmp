@@ -148,6 +148,12 @@ int             reconfig = 0;
 u_long          num_received = 0;
 char            ddefault_port[] = "udp:162";	/* Default default port */
 char           *default_port = ddefault_port;
+#if HAVE_GETPID
+    FILE           *PID;
+    char           *pid_file = NULL;
+#endif
+char           *trap1_fmt_str_remember = NULL;
+int             dofork = 1;
 
 /*
  * These definitions handle 4.2 systems without additional syslog facilities.
@@ -473,6 +479,69 @@ free_trapd_address(void)
     }
 }
 
+void
+parse_config_doNotLogTraps(const char *token, char *cptr)
+{
+  if (atoi(cptr) > 0)
+    SyslogTrap++;
+}
+
+void
+parse_config_pidFile(const char *token, char *cptr)
+{
+  pid_file = strdup (cptr);
+}
+void
+free_config_pidFile(void)
+{
+  if (pid_file)
+    free(pid_file);
+}
+
+void
+parse_config_logOption(const char *token, char *cptr)
+{
+  int my_argc = 0 ;
+  char **my_argv = NULL;
+
+  if  (snmp_log_options( cptr, my_argc, my_argv ) >= 0 ) {
+    Log++;
+  }
+}
+
+void
+parse_config_doNotFork(const char *token, char *cptr)
+{
+  if (atoi(cptr) == 1)
+    dofork = 0;
+}
+
+void
+parse_config_printEventNumbers(const char *token, char *cptr)
+{
+  if (atoi(cptr) == 1)
+    Event++;
+}
+
+void
+parse_config_ignoreAuthFailure(const char *token, char *cptr)
+{
+  if (atoi(cptr) == 1)
+    dropauth = 1;
+}
+
+parse_config_outputOption(const char *token, char *cptr)
+{
+  char *cp;
+
+  cp = snmp_out_toggle_options(cptr);
+  if (cp != NULL) {
+    fprintf(stderr, "Unknown output option passed to -O: %c\n",
+        *cp);
+  }
+}
+
+
 /*******************************************************************-o-******
  * main - Non Windows
  * SnmpTrapdMain - Windows to support windows serivce
@@ -503,14 +572,8 @@ main(int argc, char *argv[])
     int             count, numfds, block;
     fd_set          fdset;
     struct timeval  timeout, *tvp;
-    int             dofork = 1;
     char           *cp, *listen_ports = NULL;
-    char           *trap1_fmt_str_remember = NULL;
     int             agentx_subagent = 1, depmsg = 0;
-#if HAVE_GETPID
-    FILE           *PID;
-    char           *pid_file = NULL;
-#endif
 
     /*
      * register our configuration handlers now so -H properly displays them 
@@ -518,8 +581,30 @@ main(int argc, char *argv[])
     snmptrapd_register_configs( );
     init_usm_conf( "snmptrapd" );
     register_config_handler("snmptrapd", "snmptrapdaddr",
-                            parse_trapd_address, free_trapd_address, NULL);
+                            parse_trapd_address, free_trapd_address, "string");
 
+    register_config_handler("snmptrapd", "doNotLogTraps",
+                            parse_config_doNotLogTraps, NULL, "(1|yes|true|0|no|false)");
+#if HAVE_GETPID
+    register_config_handler("snmptrapd", "pidFile",
+                            parse_config_pidFile, free_config_pidFile, "string");
+#endif
+    
+    register_config_handler("snmptrapd", "logOption",
+                            parse_config_logOption, NULL, "string");
+
+    register_config_handler("snmptrapd", "doNotFork",
+                            parse_config_doNotFork, NULL, "(1|yes|true|0|no|false)");
+
+    register_config_handler("snmptrapd", "printEventNumbers",
+                            parse_config_printEventNumbers, NULL, "(1|yes|true|0|no|false)");
+
+    register_config_handler("snmptrapd", "ignoreAuthFailure",
+                            parse_config_ignoreAuthFailure, NULL, "(1|yes|true|0|no|false)");
+
+    register_config_handler("snmptrapd", "outputOption",
+                            parse_config_outputOption, NULL, "string");
+    
 #ifdef WIN32
     setvbuf(stdout, NULL, _IONBF, BUFSIZ);
 #else
