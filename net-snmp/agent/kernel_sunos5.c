@@ -318,16 +318,36 @@ getMibstat(mibgroup_e grid,  void *resp, int entrysize,
     if (cachep->cache_size == 0) { /* Memory allocation problems */
 	cachep->cache_addr = resp; /* So use caller supplied address instead of cache */
 	cachep->cache_size = entrysize;
+        cachep->cache_last_found = 0;
     }
+    if (req_type != GET_NEXT)
+      cachep->cache_last_found = 0;
     cache_valid = (time(NULL) - cachep->cache_time) > cachep->cache_ttl ? 0 : 1;
 #ifdef DODEBUG
+	cachep->cache_last_found = 0;
     printf ("... cache_valid %d time %ld ttl %d now %ld\n",
+    if (req_type != GET_NEXT)
+	cachep->cache_last_found = 0;
             cache_valid, cachep->cache_time, cachep->cache_ttl, time (NULL));
 #endif
     if (cache_valid) {
-	/* Entry is valid, let's try to find a match */
-	result = getentry(req_type, cachep->cache_addr, cachep->cache_length,
+	/* Is it really? */
+	if (cachep->cache_comp != (void *) comp ||
+	    cachep->cache_arg != arg)
+		cache_valid = 0;	/* Nope. */
+    }
+
+    if (cache_valid) {
+      /* Entry is valid, let's try to find a match */
+      if (req_type == GET_NEXT) {
+        result = getentry(req_type,
+                          (void *) ((char *) cachep->cache_addr + (cachep->cache_last_found * entrysize)),
+                          cachep->cache_length - (cachep->cache_last_found * entrysize),
+                          entrysize, &ep, comp, arg);
+      } else {
+        result = getentry(req_type, cachep->cache_addr, cachep->cache_length,
 			  entrysize, &ep, comp, arg);
+      }
     }
     if ((cache_valid == 0)
 	|| (result == NOT_FOUND)
@@ -350,6 +370,11 @@ getMibstat(mibgroup_e grid,  void *resp, int entrysize,
 		cachep->cache_flags |= CACHE_MOREDATA;
 	    else
 		cachep->cache_flags &= ~CACHE_MOREDATA;
+	    cachep->cache_comp = (void *) comp;
+	    cachep->cache_arg = arg;
+	} else {
+	    cachep->cache_comp = NULL;
+	    cachep->cache_arg = NULL;
 	}
     }
 #ifdef DODEBUG
@@ -360,6 +385,7 @@ getMibstat(mibgroup_e grid,  void *resp, int entrysize,
 	if (resp != (void *)NULL) 
 	    (void)memcpy(resp, ep, entrysize);
 	ret = 0;
+	cachep->cache_last_found = ((char *) ep - (char *) cachep->cache_addr) / entrysize;
     } else
 	ret = 1;		/* Not found */
  Return:
@@ -378,6 +404,8 @@ getentry(req_e req_type, void *bufaddr, int len, int entrysize,
 {     
     void *bp = bufaddr, **rp = resp;
     int previous_found = 0;
+    cp->cache_comp = NULL;
+    cp->cache_arg = NULL;
     
     /* Here we have to perform address arithmetic with
        pointer to void. Ugly... */
@@ -414,6 +442,8 @@ init_mibcache_element(mibcache *cp)
     if (cp->cache_size)
 	    cp->cache_addr = malloc(cp->cache_size);
     cp->cache_time = time(NULL) - 100*cp->cache_ttl; /* In the past */
+    cp->cache_comp = NULL;
+    cp->cache_arg = NULL;
 }
 
 /* Get MIB-II statistics from the Solaris kernel.
