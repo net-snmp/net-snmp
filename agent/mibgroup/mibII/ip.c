@@ -3,6 +3,17 @@
  *
  */
 
+/* Portions of this file are subject to the following copyright(s).  See
+ * the Net-SNMP's COPYING file for more details and other copyrights
+ * that may apply:
+ */
+/*
+ * Portions of this file are copyrighted by:
+ * Copyright © 2003 Sun Microsystems, Inc. All rights reserved.
+ * Use is subject to license terms specified in the COPYING file
+ * distributed with the Net-SNMP package.
+ */
+
 #include <net-snmp/net-snmp-config.h>
 
 #if defined(IFNET_NEEDS_KERNEL) && !defined(_KERNEL)
@@ -320,45 +331,65 @@ var_ip(struct variable *vp,
     switch (vp->magic) {
 #ifdef USES_SNMP_DESIGNED_IPSTAT
     case IPFORWARDING:
-        return (u_char *) & ipstat.ipForwarding;
+	long_return = ipstat.ipForwarding;
+        return (u_char *) & long_return;
     case IPDEFAULTTTL:
-        return (u_char *) & ipstat.ipDefaultTTL;
+	long_return = ipstat.ipDefaultTTL;
+        return (u_char *) & long_return;
     case IPINRECEIVES:
-        return (u_char *) & ipstat.ipInReceives;
+	long_return = ipstat.ipInReceives;
+        return (u_char *) & long_return;
     case IPINHDRERRORS:
-        return (u_char *) & ipstat.ipInHdrErrors;
+	long_return = ipstat.ipInHdrErrors;
+        return (u_char *) & long_return;
     case IPINADDRERRORS:
-        return (u_char *) & ipstat.ipInAddrErrors;
+	long_return = ipstat.ipInAddrErrors;
+        return (u_char *) & long_return;
     case IPFORWDATAGRAMS:
-        return (u_char *) & ipstat.ipForwDatagrams;
+	long_return = ipstat.ipForwDatagrams;
+        return (u_char *) & long_return;
     case IPINUNKNOWNPROTOS:
-        return (u_char *) & ipstat.ipInUnknownProtos;
+	long_return = ipstat.ipInUnknownProtos;
+        return (u_char *) & long_return;
     case IPINDISCARDS:
-        return (u_char *) & ipstat.ipInDiscards;
+	long_return = ipstat.ipInDiscards;
+        return (u_char *) & long_return;
     case IPINDELIVERS:
-        return (u_char *) & ipstat.ipInDelivers;
+ 	long_return = ipstat.ipInDelivers;	
+        return (u_char *) & long_return;
     case IPOUTREQUESTS:
-        return (u_char *) & ipstat.ipOutRequests;
+	long_return = ipstat.ipOutRequests;
+        return (u_char *) & long_return;
     case IPOUTDISCARDS:
-        return (u_char *) & ipstat.ipOutDiscards;
+	long_return = ipstat.ipOutDiscards;
+        return (u_char *) & long_return;
     case IPOUTNOROUTES:
-        return (u_char *) & ipstat.ipOutNoRoutes;
+	long_return = ipstat.ipOutNoRoutes; 
+        return (u_char *) & long_return;
     case IPREASMTIMEOUT:
-        return (u_char *) & ipstat.ipReasmTimeout;
+	long_return = ipstat.ipReasmTimeout;
+        return (u_char *) & long_return;
     case IPREASMREQDS:
-        return (u_char *) & ipstat.ipReasmReqds;
+	long_return = ipstat.ipReasmReqds;
+        return (u_char *) & long_return;
     case IPREASMOKS:
-        return (u_char *) & ipstat.ipReasmOKs;
+	long_return = ipstat.ipReasmOKs;
+        return (u_char *) & long_return;
     case IPREASMFAILS:
-        return (u_char *) & ipstat.ipReasmFails;
+	long_return = ipstat.ipReasmFails;
+        return (u_char *) & long_return;
     case IPFRAGOKS:
-        return (u_char *) & ipstat.ipFragOKs;
+	long_return = ipstat.ipFragOKs;
+        return (u_char *) & long_return;
     case IPFRAGFAILS:
-        return (u_char *) & ipstat.ipFragFails;
+	long_return = ipstat.ipFragFails;
+        return (u_char *) & long_return;
     case IPFRAGCREATES:
-        return (u_char *) & ipstat.ipFragCreates;
+	long_return = ipstat.ipFragCreates;
+        return (u_char *) & long_return;
     case IPROUTEDISCARDS:
-        return (u_char *) & ipstat.ipRoutingDiscards;
+	long_return = ipstat.ipRoutingDiscards;
+        return (u_char *) & long_return;
 #endif
 
 
