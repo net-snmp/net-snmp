@@ -398,3 +398,9 @@
 #define __P(params) ()
 #endif /* __STDC__ */
 #endif /* __P */
+
+#ifdef WIN32
+#define ENV_SEPARATOR ";"
+#else
+#define ENV_SEPARATOR ":"
+#endif
