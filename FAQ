@@ -146,6 +146,7 @@ TABLE OF CONTENTS
    How can I support a large table, with more than 256 column objects?
    How can I get the agent to generate a trap (or inform)?
    What if I'm using an AgentX sub-agent instead?
+   How can I register a MIB module in a different (SNMPv3) context?
  MISC
    Why are packets requesting the same information larger with UC-Davis SNMP?
    What ASN.1 parser is used?
@@ -3226,6 +3227,57 @@ What if I'm using an AgentX sub-agent instead?
     In fact, the main agent supplied as part of the package can indeed
   be run as an SNMP agent or an AgentX subagent, simply based on command
   line flags (or similar configuration options).
+
+
+
+How can I register a MIB module in a different (SNMPv3) context?
+---------------------------------------------------------------
+
+    Contexts are a mechanism within SNMPv3 (and AgentX) whereby
+  an agent can support parallel versions of the same MIB objects,
+  referring to different underlying data sets.  By default, a MIB
+  module registrations will use the default empty context of "".
+  But it's also possible to explicitly register an individual MIB
+  module using a different context.
+
+    With the v4 API, this uses the call 'register_mib_context()'
+  rather than the REGISTER_MIB macro.  This is significantly more
+  detailed, but most of the additional parameters can take fixed
+  values, if all that's needed is to change the registration context.
+
+  Instead of the macro call:
+        REGISTER_MIB("my_token", my_variables, variable1, my_variables_oid);
+  use the function call:
+        register_mib_context( "my_token",
+                               my_variables, sizeof(variable1),
+                               sizeof(my_variables)/sizeof(variable1),
+                               my_variables_oid,
+                               sizeof(my_variables_oid)/sizeof(oid),
+                               DEFAULT_MIB_PRIORITY, 0, 0, NULL,
+                               "my_context", -1, 0);
+
+    Things are much easier with the v5 helper-based API.  Having
+  created the registration structure, this just requires setting the
+  'contextName' field before actually registering the MIB module:
+        netsnmp_handler_registration *reg;
+        reg = netsnmp_create_handler_registration(.....);
+        reg->contextName = strdup("my_context");
+        netsnmp_register_handler(reg);
+
+    In either case, it will also be necessary to define suitable
+  access control entries to cover requests using the new context.
+  This can either list each context explicitly:
+
+	access {group} "my_context" any noauth exact  ......
+
+  or use a single entry to cover all possible contexts:
+
+	access {group} ""           any noauth prefix ......
+
+  But note that *both* steps are required.  Changing the access
+  control settings won't affect the default context used for MIB
+  registrations, and registering a MIB in a non-default context
+  won't automatically configure the necessary access control settings.
 
 
 
