@@ -280,14 +280,11 @@ usage(char *prog)
     printf("  -H\t\t\tdisplay configuration file directives understood\n");
     printf("  -I [-]INITLIST\tlist of mib modules to initialize (or not)\n");
     printf("\t\t\t  (run snmpd with -Dmib_init for a list)\n");
-    printf("  -l FILE\t\tprint warnings/messages to FILE\n");
-#ifdef LOGFILE
-    printf("\t\t\t  (by default FILE=%s)\n", LOGFILE);
-#else
-    printf("\t\t\t  (by default FILE=none)\n");
-#endif
-    printf("  -L\t\t\tprint warnings/messages to stdout/err\n");
-    printf("  -P FILE\t\tstore process id in FILE\n");
+    printf("  -L <LOGOPTS>\t\ttoggle options controlling where to log to\n");
+    snmp_log_options_usage("\t", stdout);
+    printf("  -m MIBLIST\t\tuse MIBLIST instead of the default MIB list\n");
+    printf("  -M DIRLIST\t\tuse DIRLIST as the list of locations\n\t\t\t  to look for MIBs\n");
+    printf("  -p FILE\t\tstore process id in FILE\n");
     printf("  -q\t\t\tprint information in a more parsable format\n");
     printf("  -r\t\t\tdo not exit if files only accessible to root\n"
 	   "\t\t\t  cannot be opened\n");
@@ -296,8 +293,6 @@ usage(char *prog)
     printf("  \t\t\t  (followed by the startup parameter list)\n");
     printf("  \t\t\t  Note that not all parameters are relevant when running as a service\n");
 #endif
-    printf("  -s\t\t\tlog warnings/messages to syslog\n");
-    printf("  -S d|i|0-7\t\tset syslog facility to LOG_DAEMON (d), LOG_INFO (i)\n\t\t\t  or LOG_LOCAL[0-7] (default LOG_DAEMON)\n");
 #if HAVE_UNISTD_H
     printf("  -u UID\t\tchange to this uid (numeric or textual) after\n"
 	   "\t\t\t  opening transport endpoints\n");
@@ -314,6 +309,12 @@ usage(char *prog)
     printf("  -X\t\t\trun as an AgentX subagent rather than as an\n"
 	   "\t\t\t  SNMP master agent\n");
 #endif
+
+    printf("\nDeprecated options:\n");
+    printf("  -l FILE\t\tuse -Lf <FILE> instead\n");
+    printf("  -P\t\t\tuse -p instead\n");
+    printf("  -s\t\t\tuse -Lsd instead\n");
+    printf("  -S d|i|0-7\t\tuse -Ls <facility> instead\n");
 
     printf("\n");
     exit(1);
@@ -430,7 +431,7 @@ SnmpDaemonMain(int argc, TCHAR * argv[])
 main(int argc, char *argv[])
 #endif
 {
-    const char      options[128] = "aAc:CdD::fhHI:l:L:P:qrsS:UvV-:";
+    const char      options[128] = "aAc:CdD::fhHI:l:L:m:M:p:P:qrsS:UvV-:";
     int             arg, i, ret;
     int             dont_fork = 0;
     int             dont_zero_log = 0;
@@ -576,6 +577,7 @@ main(int argc, char *argv[])
             break;
 
         case 'l':
+            printf("Warning: -l option is deprecated, use -Lf <file> instead\n");
             if (optarg != NULL) {
                 if (strlen(optarg) > PATH_MAX) {
                     fprintf(stderr,
@@ -598,7 +600,25 @@ main(int argc, char *argv[])
             }
             break;
 
+        case 'm':
+            if (optarg != NULL) {
+                setenv("MIBS", optarg, 1);
+            } else {
+                usage(argv[0]);
+            }
+            break;
+
+        case 'M':
+            if (optarg != NULL) {
+                setenv("MIBDIRS", optarg, 1);
+            } else {
+                usage(argv[0]);
+            }
+            break;
+
         case 'P':
+            printf("Warning: -P option is deprecated, use -p instead\n");
+        case 'p':
             if (optarg != NULL) {
                 pid_file = optarg;
             } else {
@@ -616,10 +636,12 @@ main(int argc, char *argv[])
             break;
 
         case 's':
+            printf("Warning: -s option is deprecated, use -Lsd instead\n");
             syslog_log = 1;
             break;
 
         case 'S':
+            printf("Warning: -S option is deprecated, use -Ls <facility> instead\n");
             if (optarg != NULL) {
                 switch (*optarg) {
                 case 'd':
