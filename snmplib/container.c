@@ -256,6 +256,8 @@ int CONTAINER_FREE(netsnmp_container *x)
     while(x) {
         netsnmp_container *tmp;
         tmp = x->prev;
+        if (NULL != x->container_name)
+            SNMP_FREE(x->container_name);
         rc2 = x->cfree(x);
         if (rc2) {
             snmp_log(LOG_ERR,"error on subcontainer cfree (%d)\n", rc2);
@@ -287,6 +289,31 @@ void CONTAINER_CLEAR(netsnmp_container *x, netsnmp_container_obj_func *f,
         x = x->prev;
     }
     x->clear(x, f, c);
+}
+
+/*------------------------------------------------------------------
+ * These functions should EXACTLY match the function version in
+ * container.c. If you change one, change them both.
+ */
+/*
+ * Find a sub-container with the given name
+ */
+NETSNMP_STATIC_INLINE /* gcc docs recommend static w/inline */
+netsnmp_container *SUBCONTAINER_FIND(netsnmp_container *x,
+                                     const char* name)
+{
+    if ((NULL == x) || (NULL == name))
+        return NULL;
+    
+    /** start at first container */
+    while(x->prev)
+        x = x->prev;
+    while(x) {
+        if ((NULL != x->name) && (0 == strcmp(name,x->name)))
+            break;
+        x = x->next;
+    }
+    return x;
 }
 #endif
 
