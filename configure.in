@@ -321,7 +321,7 @@ dnl Checks for header files.
 AC_HEADER_STDC
 AC_HEADER_DIRENT
 AC_HEADER_SYS_WAIT
-AC_CHECK_HEADERS(strings.h fcntl.h limits.h sys/file.h sys/ioctl.h syslog.h unistd.h netinet/tcpip.h netinet/in.h sys/dmap.h machine/pte.h xti.h sys/sockio.h fstab.h sys/fs.h mtab.h ufs/fs.h ufs/ffs/fs.h sys/fixpoint.h machine/param.h sys/vm.h vm/vm.h sys/vmmeter.h sys/vmparam.h sys/vmmac.h sys/vmsystm.h sys/mbuf.h sys/time.h sys/swap.h inet/mib2.h sys/statvfs.h sys/vfs.h sys/mnttab.h sys/user.h sys/proc.h sys/select.h mntent.h kstat.h utsname.h sys/utsname.h)
+AC_CHECK_HEADERS(strings.h fcntl.h limits.h sys/file.h sys/ioctl.h syslog.h unistd.h netinet/tcpip.h netinet/in.h sys/dmap.h machine/pte.h xti.h sys/sockio.h fstab.h sys/fs.h mtab.h ufs/fs.h ufs/ffs/fs.h sys/fixpoint.h machine/param.h sys/vm.h vm/vm.h sys/vmmeter.h sys/vmparam.h sys/vmmac.h sys/vmsystm.h sys/mbuf.h sys/time.h sys/swap.h inet/mib2.h sys/statvfs.h sys/vfs.h sys/mnttab.h sys/user.h sys/proc.h sys/select.h mntent.h kstat.h utsname.h sys/utsname.h sys/cdefs.h)
 dnl FreeBSD required headers
 AC_CHECK_HEADERS(malloc.h sys/param.h net/if_dl.h sys/sysctl.h stdlib.h net/if_types.h net/if_var.h sys/queue.h osreldate.h)
 dnl Linux (lame) doesn't have these
@@ -351,16 +351,18 @@ AC_TYPE_PID_T
 AC_HEADER_TIME
 
 AC_MSG_CHECKING([for __P in sys/cdefs.h])
-AC_CACHE_VAL(cv_sys_cdefs_h_has_P,
+AC_CACHE_VAL(ac_cv_sys_cdefs_h_has_P,
 [ AC_EGREP_CPP(xxxyesxxx,
 [
+#ifdef HAVE_SYS_CDEFS_H
 #include <sys/cdefs.h>
+#endif
 #ifdef __P
 xxxyesxxx
 #endif
-], cv_sys_cdefs_h_has_P=yes, cv_sys_cdefs_h_has_P=no)])
-AC_MSG_RESULT($cv_sys_cdefs_h_has_P)
-if test $cv_sys_cdefs_h_has_P = yes; then
+], ac_cv_sys_cdefs_h_has_P=yes, ac_cv_sys_cdefs_h_has_P=no)])
+AC_MSG_RESULT($ac_cv_sys_cdefs_h_has_P)
+if test $ac_cv_sys_cdefs_h_has_P = yes; then
   AC_DEFINE(SYS_CDEFS_DEFINES___P)
 fi
 
