@@ -760,12 +760,15 @@ getif(mib2_ifEntry_t *ifbuf, size_t size, req_e req_type,
 		ifp->ifSpeed = 155000000;
 		ifp->ifType = 37;
 		break;
-	case 'q': /* qe (QuadEther) / qa (Fore ATM) */
+	case 'q': /* qe (QuadEther) / qa (Fore ATM) / qfe (QuadFastEther) */
 		if (ifrp->ifr_name[1] == 'a') {
 			ifp->ifSpeed = 155000000;
 			ifp->ifType = 37;
 		} else if (ifrp->ifr_name[1] == 'e') {
 			ifp->ifSpeed = 10000000;
+			ifp->ifType = 6;
+		} else if (ifrp->ifr_name[1] == 'f') {
+			ifp->ifSpeed = 100000000;
 			ifp->ifType = 6;
 		}
 		break;
