@@ -242,7 +242,7 @@ dnl Checks for header files.
 AC_HEADER_STDC
 AC_HEADER_DIRENT
 AC_HEADER_SYS_WAIT
-AC_CHECK_HEADERS(strings.h fcntl.h limits.h sys/file.h sys/ioctl.h syslog.h unistd.h netinet/tcpip.h netinet/in.h sys/dmap.h machine/pte.h xti.h sys/sockio.h fstab.h sys/fs.h mtab.h ufs/fs.h ufs/ffs/fs.h sys/fixpoint.h machine/param.h sys/vm.h vm/vm.h sys/vmmeter.h sys/vmparam.h sys/vmmac.h sys/vmsystm.h sys/mbuf.h sys/time.h sys/swap.h inet/mib2.h sys/statvfs.h sys/vfs.h sys/mnttab.h sys/user.h sys/proc.h sys/select.h mntent.h kstat.h)
+AC_CHECK_HEADERS(strings.h fcntl.h limits.h sys/file.h sys/ioctl.h syslog.h unistd.h netinet/tcpip.h netinet/in.h sys/dmap.h machine/pte.h xti.h sys/sockio.h fstab.h sys/fs.h mtab.h ufs/fs.h ufs/ffs/fs.h sys/fixpoint.h machine/param.h sys/vm.h vm/vm.h sys/vmmeter.h sys/vmparam.h sys/vmmac.h sys/vmsystm.h sys/mbuf.h sys/time.h sys/swap.h inet/mib2.h sys/statvfs.h sys/vfs.h sys/mnttab.h sys/user.h sys/proc.h sys/select.h mntent.h kstat.h utsname.h sys/utsname.h)
 dnl FreeBSD required headers
 AC_CHECK_HEADERS(malloc.h sys/param.h net/if_dl.h sys/sysctl.h stdlib.h net/if_types.h)
 dnl Linux (lame) doesn't have these
@@ -294,6 +294,7 @@ AC_CHECK_FUNCS(getloadavg)
 AC_CHECK_FUNCS(kvm_openfiles)
 dnl BSDi2 functions differ
 AC_CHECK_FUNCS(statvfs statfs)
+AC_CHECK_FUNCS(gethostname uname)
 
 dnl check if compiler accepts void pointers
 AC_CACHE_CHECK(if $CC allows pointers to void,ac_cv_PTR_TO_VOID,
@@ -416,6 +417,9 @@ AC_CHECK_STRUCT_FOR([
 if test "x$ac_cv_struct_ifnet_has_if_mtu" = "xno"; then
 AC_CACHE_CHECK(if _KERNEL needs to be defined for if_mtu, ac_cv_IFNET_NEEDS_KERNEL,
 [
+if test "x$ac_cv_struct_ifnet_has_if_mtu" = "xyes"; then
+  ac_cv_IFNET_NEEDS_KERNEL=no
+else
 AC_TRY_COMPILE([
 #define _KERNEL 1
 #include <sys/types.h>
@@ -424,7 +428,9 @@ AC_TRY_COMPILE([
 ],[
 struct ifnet testit;
 testit.if_mtu = 0;
-], ac_cv_IFNET_NEEDS_KERNEL=yes, ac_cv_IFNET_NEEDS_KERNEL=no)])
+], ac_cv_IFNET_NEEDS_KERNEL=yes, ac_cv_IFNET_NEEDS_KERNEL=no)
+fi
+])
 
 if test "x$ac_cv_IFNET_NEEDS_KERNEL" = "xyes"; then
   AC_DEFINE(IFNET_NEEDS_KERNEL)
@@ -451,6 +457,7 @@ AC_CHECK_IFNET_FOR(if_xname,no)
 AC_CHECK_IFNET_FOR(if_lastchange.tv_sec)
 AC_CHECK_IFNET_FOR(if_obytes)
 AC_CHECK_IFNET_FOR(if_ibytes)
+AC_CHECK_IFNET_FOR(if_addrlist)
 
 AC_CHECK_STRUCT_FOR([
 #if HAVE_NETINET_UDP_VAR_H

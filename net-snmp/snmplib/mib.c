@@ -926,7 +926,7 @@ main(argc, argv)
     }
 }
 
-#endif testing
+#endif /* testing */
 
 int read_objid(input, output, out_len)
     char *input;

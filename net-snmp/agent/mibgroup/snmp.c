@@ -91,7 +91,7 @@ header_snmp(vp, name, length, exact, var_len, write_method)
     *write_method = 0;
     *var_len = sizeof(long);	/* default to 'long' results */
     return(MATCH_SUCCEEDED);
-};
+}
 
 
 	/*********************

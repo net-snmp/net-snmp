@@ -94,7 +94,7 @@ header_ip(vp, name, length, exact, var_len, write_method)
     *write_method = 0;
     *var_len = sizeof(long);	/* default to 'long' results */
     return(MATCH_SUCCEEDED);
-};
+}
 
 
 	/*********************
@@ -362,7 +362,7 @@ var_ipAddrEntry(vp, name, length, exact, var_len, write_method)
 
 #endif
 
-#if !defined(linux) && !defined(freebsd2)
+#if !defined(linux) && !defined(freebsd2) && !defined(STRUCT_IFNET_HAS_IF_ADDRLIST)
       if ( ifnet.if_addrlist == 0 )
           continue;                   /* No address found for interface */
 #endif /* linux/freebsd2 */

@@ -83,6 +83,7 @@
 #undef STRUCT_IFNET_HAS_IF_XNAME
 #undef STRUCT_IFNET_HAS_IF_OBYTES
 #undef STRUCT_IFNET_HAS_IF_IBYTES
+#undef STRUCT_IFNET_HAS_IF_ADDRLIST
 
 /* tcpstat.tcps_rcvmemdrop */
 #undef STRUCT_TCPSTAT_HAS_TCPS_RCVMEMDROP
@@ -97,7 +98,7 @@
 #undef STRUCT_IFADDR_HAS_IFA_NEXT
 
 /* ifnet.if_mtu */
-#undef STRUCT_IFNET_IF_MTU
+#undef STRUCT_IFNET_HAS_IF_MTU
 
 /* ifnet needs to have _KERNEL defined */
 #undef IFNET_NEEDS_KERNEL
@@ -355,7 +356,7 @@
 #endif
 #endif
 
-#if !(defined( __P) || defined(netbsd1) || defined(irix6))
+#if !(defined( __P) || defined(netbsd1))
 #ifdef __STDC__
 #define __P(params) params
 #else

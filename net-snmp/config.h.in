@@ -188,6 +188,9 @@
 /* Define if you have the strtol function.  */
 #undef HAVE_STRTOL
 
+/* Define if you have the uname function.  */
+#undef HAVE_UNAME
+
 /* Define if you have the <arpa/inet.h> header file.  */
 #undef HAVE_ARPA_INET_H
 
@@ -344,6 +347,9 @@
 /* Define if you have the <sys/user.h> header file.  */
 #undef HAVE_SYS_USER_H
 
+/* Define if you have the <sys/utsname.h> header file.  */
+#undef HAVE_SYS_UTSNAME_H
+
 /* Define if you have the <sys/vfs.h> header file.  */
 #undef HAVE_SYS_VFS_H
 
@@ -373,6 +379,9 @@
 
 /* Define if you have the <unistd.h> header file.  */
 #undef HAVE_UNISTD_H
+
+/* Define if you have the <utsname.h> header file.  */
+#undef HAVE_UTSNAME_H
 
 /* Define if you have the <vm/swap_pager.h> header file.  */
 #undef HAVE_VM_SWAP_PAGER_H
@@ -415,6 +424,7 @@
 #undef STRUCT_IFNET_HAS_IF_XNAME
 #undef STRUCT_IFNET_HAS_IF_OBYTES
 #undef STRUCT_IFNET_HAS_IF_IBYTES
+#undef STRUCT_IFNET_HAS_IF_ADDRLIST
 
 /* tcpstat.tcps_rcvmemdrop */
 #undef STRUCT_TCPSTAT_HAS_TCPS_RCVMEMDROP
@@ -429,7 +439,7 @@
 #undef STRUCT_IFADDR_HAS_IFA_NEXT
 
 /* ifnet.if_mtu */
-#undef STRUCT_IFNET_IF_MTU
+#undef STRUCT_IFNET_HAS_IF_MTU
 
 /* ifnet needs to have _KERNEL defined */
 #undef IFNET_NEEDS_KERNEL
@@ -687,7 +697,7 @@
 #endif
 #endif
 
-#if !(defined( __P) || defined(netbsd1) || defined(irix6))
+#if !(defined( __P) || defined(netbsd1))
 #ifdef __STDC__
 #define __P(params) params
 #else

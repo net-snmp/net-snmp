@@ -43,8 +43,13 @@
 #include "snmp_vars.h"
 #include "mibgroup/ip.h"
 
-#if defined(osf3) || defined(netbsd1) || defined(freebsd2) || defined(bsdi2)
+#if defined(irix6) || defined(osf3) || defined(netbsd1) || defined(freebsd2) || defined(bsdi2)
 #define rt_dst rt_nodes->rn_key
+#endif
+
+#ifdef irix6
+#define SIOCADDRT SIOCADDMULTI
+#define SIOCDELRT SIOCDELMULTI
 #endif
 
 int  addRoute(dstip, gwip, iff, flags)
@@ -133,7 +138,7 @@ u_short  flags;
 }
 
 
-#if defined(osf3) || defined(netbsd1) || defined(freebsd2) || defined(bsdi2)
+#if defined(irix6) || defined(osf3) || defined(netbsd1) || defined(freebsd2) || defined(bsdi2)
 #undef rt_dst
 #endif
 
