@@ -1715,6 +1715,9 @@ _get_symbol(oid *objid,
 {
     struct tree    *return_tree = NULL;
 
+    if (!objid || !subtree || !buf)
+        return NULL;
+
     for(; subtree; subtree = subtree->next_peer){
 	if (*objid == subtree->subid){
 	    if (subtree->indexes)
