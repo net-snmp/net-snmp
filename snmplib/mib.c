@@ -5381,7 +5381,7 @@ snmp_parse_oid(const char *argv, oid * root, size_t * rootlen)
             tmpbuf = realloc(tmpbuf, tmpbuf_len);
         }
         snprintf(tmpbuf, tmpbuf_len, "%s%s%s%s", prefix, argv,
-                 ((suffix[0] == '.') ? "" : "."),
+                 ((suffix[0] == '.' || suffix[0] == '\0') ? "" : "."),
                  suffix);
         argv = tmpbuf;
         DEBUGMSGTL(("snmp_parse_oid","Parsing: %s\n",argv));
