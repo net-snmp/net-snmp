@@ -1463,7 +1463,7 @@ snmp_sess_close(void *sessp)
 	return 0;
     }
 
-    if ((sptr = find_sec_mod(pdu->securityModel)) != NULL &&
+    if ((sptr = find_sec_mod(slp->session->securityModel)) != NULL &&
         sptr->free_session != NULL) {
         (*sptr->free_session)(sessp);
     }
