@@ -12,7 +12,7 @@ use AutoLoader;
 use NetSNMP::OID (':all');
 
 sub getOID {
-  return NetSNMP::OID::newwithptr(getOIDptr($_[0]));
+  return NetSNMP::OID::newwithptr("NetSNMP::OID", getOIDptr($_[0]));
 }
 
 
