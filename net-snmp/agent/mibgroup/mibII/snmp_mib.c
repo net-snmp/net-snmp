@@ -14,6 +14,10 @@
 #include <netinet/in.h>
 #endif
 
+#if HAVE_WINSOCK_H
+#include <winsock.h>
+#endif
+
 #include "../mibincl.h"
 #include "system.h"
 #include "util_funcs.h"
