@@ -183,8 +183,8 @@ struct internal_snmp_pdu {
     oid     *enterprise;/* System OID */
     int     enterprise_length;
     snmp_ipaddr  agent_addr; /* address of object generating trap */
-    int     trap_type;  /* trap type */
-    int     specific_type;  /* specific type */
+    long     trap_type;  /* trap type */
+    long     specific_type;  /* specific type */
     u_long  time;       /* Uptime */
 
     struct variable_list *variables;
