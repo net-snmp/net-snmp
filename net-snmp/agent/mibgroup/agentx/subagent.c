@@ -455,10 +455,6 @@ handle_subagent_set_response(int op, netsnmp_session * session, int reqid,
     retsess = asi->sess;
     asi->errstat = pdu->errstat;
 
-    if (asi->mode == SNMP_MSG_INTERNAL_SET_FREE ||
-        asi->mode == SNMP_MSG_INTERNAL_SET_UNDO ||
-        asi->mode == SNMP_MSG_INTERNAL_SET_COMMIT)
-        free_set_vars(retsess, pdu);
     if (asi->mode == SNMP_MSG_INTERNAL_SET_RESERVE1) {
         /*
          * reloop for RESERVE2 mode, an internal only agent mode 
@@ -475,6 +471,11 @@ handle_subagent_set_response(int op, netsnmp_session * session, int reqid,
             return 1;
         }
     } else {
+        if (asi->mode == SNMP_MSG_INTERNAL_SET_FREE ||
+            asi->mode == SNMP_MSG_INTERNAL_SET_UNDO ||
+            asi->mode == SNMP_MSG_INTERNAL_SET_COMMIT) {
+            free_set_vars(retsess, pdu);
+        }
         pdu->variables = NULL;  /* the variables were added by us */
     }
 
