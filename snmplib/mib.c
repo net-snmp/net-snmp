@@ -947,7 +947,7 @@ sprint_objid(buf, objid, objidlen)
 
     } else {
 	cp = tempbuf;
-	if ((strlen(tempbuf) > strlen((char *)RFC1213_MIB_text))
+	if (((int) (strlen(tempbuf)) > ((int) strlen((char *)RFC1213_MIB_text)))
 #ifdef SVR4
 	    && !memcmp(tempbuf, (char *)RFC1213_MIB_text,
 		     strlen((char *)RFC1213_MIB_text))){
@@ -957,7 +957,8 @@ sprint_objid(buf, objid, objidlen)
 #endif
 	    cp += sizeof(RFC1213_MIB_text);
 	}
-	if ((strlen(tempbuf) > strlen((char *)EXPERIMENTAL_MIB_text))
+	if (((int) (strlen(tempbuf))) >
+                   ((int)strlen((char *)EXPERIMENTAL_MIB_text))
 #ifdef SVR4
 	    && !memcmp(tempbuf, (char *) EXPERIMENTAL_MIB_text,
 		     strlen((char *)EXPERIMENTAL_MIB_text))){
@@ -967,7 +968,7 @@ sprint_objid(buf, objid, objidlen)
 #endif
             cp += sizeof(EXPERIMENTAL_MIB_text);
 	}
-	if ((strlen(tempbuf) > strlen((char *)PRIVATE_MIB_text))
+	if (((int)(strlen(tempbuf))) > ((int)strlen((char *)PRIVATE_MIB_text))
 #ifdef SVR4
 	    && !memcmp(tempbuf, (char *) PRIVATE_MIB_text,
 		     strlen((char *)PRIVATE_MIB_text))){
@@ -977,7 +978,7 @@ sprint_objid(buf, objid, objidlen)
 #endif
             cp += sizeof(PRIVATE_MIB_text);
 	}
-	if ((strlen(tempbuf) > strlen((char *)PARTY_MIB_text))
+	if (((int)(strlen(tempbuf)) > ((int)strlen((char *)PARTY_MIB_text)))
 #ifdef SVR4
 	    && !memcmp(tempbuf, (char *) PARTY_MIB_text,
 		     strlen((char *)PARTY_MIB_text))){
@@ -987,7 +988,7 @@ sprint_objid(buf, objid, objidlen)
 #endif
             cp += sizeof(PARTY_MIB_text);
 	}
-	if ((strlen(tempbuf) > strlen((char *)SECRETS_MIB_text))
+	if (((int)(strlen(tempbuf)) > ((int)strlen((char *)SECRETS_MIB_text)))
 #ifdef SVR4
 	    && !memcmp(tempbuf, (char *) SECRETS_MIB_text,
 		     strlen((char *)SECRETS_MIB_text))){

@@ -109,7 +109,7 @@ unsigned char *var_extensible_pass(vp, name, length, exact, var_len, write_metho
           buf2[strlen(buf2)-1] = NULL;  /* zap the linefeed */
           *var_len = strlen(buf2);
           vp->type = STRING;
-          return(buf2);
+          return((unsigned char *) buf2);
         } else if (!strncasecmp(buf,"integer",7)) {
           DEBUGP("parsed as: int\n");
           *var_len = sizeof(long_ret);

@@ -1310,7 +1310,7 @@ writeVersion(action, var_val, var_val_type, var_val_len, statP, name, name_len)
     }
     buf[size] = 0;
     if (action == COMMIT){
-	strcpy(version_descr, buf);
+	strcpy(version_descr, (char *) buf);
 	
     }
     return SNMP_ERR_NOERROR;
@@ -1351,16 +1351,16 @@ writeSystem(action, var_val, var_val_type, var_val_len, statP, name, name_len)
     if (action == COMMIT){
 	switch((char)name[7]){
 	  case 1:
-	    strcpy(version_descr, buf);
+	    strcpy(version_descr, (char *) buf);
 	    break;
 	  case 4:
-	    strcpy(sysContact, buf);
+	    strcpy(sysContact, (char *) buf);
 	    break;
 	  case 5:
-	    strcpy(sysName, buf);
+	    strcpy(sysName, (char *) buf);
 	    break;
 	  case 6:
-	    strcpy(sysLocation, buf);
+	    strcpy(sysLocation, (char *) buf);
 	    break;
 	}
     }
@@ -1665,7 +1665,8 @@ var_atEntry(vp, name, length, exact, var_len, write_method)
     ARP_Scan_Init();
     for (;;) {
 	if (ARP_Scan_Next(&Addr, PhysAddr) == 0) break;
-	current[10] = 1;	/* IfIndex == 1 (ethernet???) XXX */
+	/* IfIndex == 1 (ethernet?) XXX */
+	current[10] = 1;
 	current[11] = 1;
 	cp = (u_char *)&Addr;
 	op = current + 12;
