@@ -98,13 +98,11 @@ int
 ${table}_${node}_check_index( ${context}_ctx *ctx )
 {
     netsnmp_assert(NULL != ctx);
-@if $m2c_node_needlength == 1@
-    netsnmp_assert(NULL != ${node}_ptr);
-@end@
 
     /*
      * TODO:
-     * check that index value is legal
+     * check that index value in the table context (ctx)
+     * for the external index $node is legal
      */
 
     /* if everything looks ok, return MFD_SUCCESS */
@@ -132,13 +130,11 @@ int
 ${node}_check_index( ${context}_ctx *ctx )
 {
     netsnmp_assert(NULL != ctx);
-@if $m2c_node_needlength == 1@
-    netsnmp_assert(NULL != ${node}_ptr);
-@end@
 
     /*
      * TODO:
-     * check that index value is legal
+     * check that index value in the table context (ctx)
+     * for $node is legal
      */
 
     /* if everything looks ok, return MFD_SUCCESS */
