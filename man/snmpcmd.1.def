@@ -437,7 +437,7 @@ force it to only use one method.
 The
 .B -IR
 flag specifies random access lookup, so that if the entire OID path is
-not specified, it will search for a node in the mib tree with the given
+not specified, it will search for a node in the MIB tree with the given
 name.  Normally, you'd have to specify the vacmSecurityModel OID above
 as .iso.org.dod.internet.snmpV2.snmpModules.snmpVacmMIB.vacmMIBObjects.vacmSecurityToGroupTable.vacmSecurityToGroupEntry.vacmSecurityModel.0."wes",
 but the use of the

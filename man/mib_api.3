@@ -125,7 +125,7 @@ Note that
 must first be called to add the directory containing the file with the
 module definition, if this is not in the standard path.
 .br
-By default, the following mib modules will be loaded:  IP-MIB, IF-MIB,
+By default, the following MIB modules will be loaded:  IP-MIB, IF-MIB,
 TCP-MIB, UDP-MIB, SNMPv2-MIB, RFC1213-MIB, UCD-SNMP-MIB.
 This can be overridden by setting the environment variable
 .I MIBS
@@ -155,7 +155,7 @@ directories initialised by
 .br
 The environment variable
 .I MIBFILES
-can be set to a (colon-separated) list of files containing mibs to load.
+can be set to a (colon-separated) list of files containing MIBs to load.
 
 .I read_objid
 takes a string containing a textual version of an object identifier
@@ -240,7 +240,7 @@ In order to be able to print them, you must call
 .IR "snmp_set_save_descriptions(1)" .
 
 In general the parser is silent about what strangenesses it sees
-in the mib files. To get warnings reported, call
+in the MIB files. To get warnings reported, call
 .I snmp_set_mib_warnings
 with a parameter of \fI1\fR (or \fI2\fR for even more warnings).
 
