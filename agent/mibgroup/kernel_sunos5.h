@@ -152,6 +152,9 @@ extern          "C" {
                                 const char *statname, const char *varname,
                                 int *value);
 
+    int             getKstatString(const char *statname, const char *varname,
+                                   char *value, size_t value_len);
+
 #ifdef _STDC_COMPAT
 #ifdef __cplusplus
 }
