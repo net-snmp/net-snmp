@@ -1,6 +1,6 @@
 #include "bsd.h"
 
-#define CHECK_RT_FLAGS
+#define CHECK_RT_FLAGS 1
 
 /* udp_inpcb list symbol */
 #undef INP_NEXT_SYMBOL

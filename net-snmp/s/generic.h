@@ -1,5 +1,5 @@
 
-#define bsdlike
+#define bsdlike 1
 
 /* nlist symbols in ip.c */
 #define IPSTAT_SYMBOL "ipstat"

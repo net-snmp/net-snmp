@@ -1,6 +1,6 @@
 #include "sysv.h"
 
-#define DONT_USE_NLIST
+#define DONT_USE_NLIST 1
 
 #undef bsdlike
 

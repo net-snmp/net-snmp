@@ -1,2 +1,2 @@
 #include "generic.h"
-#define SYSV
+#define SYSV 1
