@@ -1,6 +1,11 @@
 How to setup SNMPv3, a very brief document for Dave to elaborate and
 do a better job on since I suck and he doesn't ;-) --Wes:
 
+Note: Currently only MD5 support for authentication is available for
+snmpv3.  SHA support is coming shortly.  Also, due to U.S. export
+restrictions, which I haven't figured out how to handle yet,
+encryption support is not possible at this time.
+
 First, there are 3 users that exist in the agent already:
 
   initial:  something to start with, but probably shouldn't be used in 
