@@ -30,7 +30,7 @@ UCD-SNMP-MIB DEFINITIONS ::= BEGIN
 
 IMPORTS
     OBJECT-TYPE, NOTIFICATION-TYPE, MODULE-IDENTITY,
-    Integer32, Opaque, enterprises
+    Integer32, Opaque, enterprises, Counter32
         FROM SNMPv2-SMI
 
     TEXTUAL-CONVENTION, DisplayString, TruthValue

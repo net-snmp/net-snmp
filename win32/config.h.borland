@@ -245,6 +245,12 @@
 /* Define if you have the strchr function.  */
 #define HAVE_STRCHR 1
 
+/* Define if you have the strcasecmp function */
+#define HAVE_STRCASECMP 1
+
+/* Define if you have the snprintf function */
+#define HAVE_SNPRINTF 1
+
 /* use win32 strdup */
 #define strdup _strdup
 
@@ -725,7 +731,7 @@
 #define LASTFIELD -1      /* internal define */
 
 /* Define if you have the strdup function.  */
-#define HAVE_STRDUP 1
+#undef HAVE_STRDUP
 
 /* Define if you have the strerror function.  */
 #define HAVE_STRERROR 1
@@ -805,13 +811,19 @@
 #endif
 #endif
 
+/* detect Borland C++ WIN32 definition, add Visual C++ define */
+#ifdef __WIN32__
+#ifndef WIN32
+#define WIN32
+#endif /* WIN32 */
+#endif /* __WIN32__ */
+
 #ifdef WIN32
 
 #define HAVE_GETPID 1
 
 int strcasecmp(const char *s1, const char *s2);
 #define vsnprintf _vsnprintf
-#define snprintf  _snprintf
 
 #define EADDRINUSE	WSAEADDRINUSE
 
@@ -826,7 +838,7 @@ int strcasecmp(const char *s1, const char *s2);
 
 #endif
 
-typedef unsigned short mode_t;
+/* typedef unsigned short mode_t; */
 
 #define AGENT_DIRECTORY_MODE 0700
 
