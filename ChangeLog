@@ -1,7 +1,182 @@
 -------------------------------------------------------------------------------
 
+Changes: V5.0.4.pre1 -> V5.0.4.pre2
+
+2002-09-02 22:22  rstory
+
+   * man/netsnmp_handler.3:
+
+   updated docs
+   
+2002-09-02 22:19  rstory
+
+   * agent/Makefile.depend, agent/helpers/Makefile.depend,
+   agent/mibgroup/Makefile.depend, apps/Makefile.depend,
+   apps/snmpnetstat/Makefile.depend, snmplib/Makefile.depend
+:
+
+   make depend
+   
+2002-09-02 22:16  rstory
+
+   * dist/nsb-config:
+
+   try and guess at src dir if not specified
+   
+2002-09-02 22:15  rstory
+
+   * dist/README.build-scripts:
+
+   add note about err when building in and out of source tree
+   
+2002-09-02 21:55  rstory
+
+   * Makefile.in:
+
+   full path to versiontag, in case we are buildint outside of src directory
+   
+2002-09-02 21:37  rstory
+
+   * dist/nsb-functions:
+
+   remove forced prompt on errors
+   
+2002-09-02 21:36  rstory
+
+   * Makefile.in:
+
+   add warnings when VERSION is required; add tarclean target; add tarclean to
+   distclean target
+   
+2002-09-02 21:34  rstory
+
+   * agent/mibgroup/versiontag:
+
+   add msg on error; add clean target
+   
+2002-09-02 20:27  rstory
+
+   * NEWS:
+
+   update win32 & AgentX status
+   
+2002-09-02 20:20  rstory
+
+   * agent/snmp_agent.c, agent/mibgroup/agentx/master_admin.c
+, include/net-snmp/agent/snmp_agent.h:
+
+   fix to avoid locking up the agent when a sugagent dies during a set request. We
+   must clean up the delegated requests when the session(s) are closed, so that
+   they will be processed and removed, allowing further requests to be processed.
+   
+2002-09-01 13:43  rstory
+
+   * snmplib/container_binary_array.c:
+
+   change result type back to int, as it may receive a negative value
+   
+   PLEASE check the use of a variable before changing is signedness, especially
+   areound release time!
+   
+2002-08-30 15:18  rstory
+
+   * include/net-snmp/utilities.h:
+
+   include check_varbind.h
+   
+2002-08-30 15:18  rstory
+
+   * agent/helpers/table_array.c:
+
+   change NOSUCHNAME to NOSUCHINSTANCE again, as it seems the agentX fix also
+   correctly deals with this error code
+   
+2002-08-30 09:14  hardaker
+
+   * FAQ, README:
+
+   - delete sunsite.cnlab-switch.ch mirror, as it isn't one anymore.
+   
+2002-08-29 13:32  rstory
+
+   * dist/nsb-functions:
+
+   check for modules before configuring them
+   
+2002-08-29 10:52  hardaker
+
+   * snmplib/scapi.c:
+
+   Fix the last AES bug I know of.  AES128 works great.
+     I still Need to fix 192/256 for longer key generation from MD5/SHA
+   
+2002-08-29 10:52  hardaker
+
+   * perl/agent/agent.pm:
+
+   use the right perl module name in the use line.
+   
+2002-08-29 06:47  dts12
+
+   * agent/agent_handler.c, agent/mibgroup/agentx/master.c
+, include/net-snmp/agent/agent_registry.h,
+   win32/config.h:
+
+   More Win32-related tidying up.
+   The agent now compiles with relatively few warnings.
+   
+2002-08-29 04:50  dts12
+
+   * agent/agent_trap.c, agent/mibgroup/agentx/client.c,
+   agent/mibgroup/mibII/vacm_vars.c,
+   agent/mibgroup/snmpv3/usmUser.c,
+   agent/mibgroup/utilities/override.h,
+   include/net-snmp/agent/snmp_agent.h,
+   include/net-snmp/agent/table_dataset.h,
+   include/net-snmp/library/mt_support.h,
+   snmplib/container_binary_array.c, snmplib/snmpusm.c,
+   win32/config.h, win32/libsnmp_dll/libsnmp.def:
+
+   Declare new routine 'netsnmp_oid_equals', and assorted Win32 cleanup fixes.
+   
+2002-08-28 14:15  rstory
+
+   * dist/RELEASE-INSTRUCTIONS:
+
+   clarify cvs2cl script name; remove -b flag from cvs2cl per Dave; a little
+   reorganization; put commands on separate lines prefixed with $; note 5.x/4.x
+   differences per Dave's email; plug my new scripts where appropriate
+   
+2002-08-27 14:48  rstory
+
+   * dist/RELEASE-INSTRUCTIONS:
+
+   add URL for cvs2cl; update cvs2cl cmds to cvs2cl.pl, since that's the file
+   that's actually distributed
+   
+-------------------------------------------------------------------------------
+
 Changes: V5.0.3 -> V5.0.4.pre1
 	
+2002-08-27 00:59  rstory
+
+   * Makefile.top:
+
+   update for release 5.0.4.pre1
+   
+2002-08-27 00:25  rstory
+
+   * snmplib/snmp_version.c, FAQ, README,
+   sedscript.in, perl/SNMP/SNMP.pm:
+
+   - (snmplib/snmp_version.c sedscript.in): version tag ( 5.0.4.pre1 )
+   
+2002-08-27 00:24  rstory
+
+   * ChangeLog:
+
+   update for release 5.0.4.pre1
+   
 2002-08-27 00:19  rstory
 
    * agent/Makefile.depend (5.6), agent/helpers/Makefile.depend (5.5),
