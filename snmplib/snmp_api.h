@@ -327,8 +327,11 @@ struct snmp_session *snmp_open (struct snmp_session *);
  * Close the input session.  Frees all data allocated for the session,
  * dequeues any pending requests, and closes any sockets allocated for
  * the session.  Returns 0 on error, 1 otherwise.
+ *
+ * snmp_close_sessions() does the same thing for all open sessions
  */
 int snmp_close (struct snmp_session *);
+int snmp_close_sessions (void);
 
 
 /*

@@ -509,6 +509,7 @@ void
 snmp_shutdown(const char *type) {
   snmp_store(type);
   snmp_call_callbacks(SNMP_CALLBACK_LIBRARY, SNMP_CALLBACK_SHUTDOWN, NULL);
+  snmp_close_sessions();
 }
 
 
@@ -1164,6 +1165,15 @@ snmp_close(struct snmp_session *session)
 	return 0;
     }
     return snmp_sess_close((void *)slp);
+}
+
+int
+snmp_close_sessions( void )
+{
+    while ( Sessions )
+        if ( snmp_close( Sessions->session ) == 0 )
+            return 0;
+    return 1;
 }
 
 #ifdef notused	/* XXX */
