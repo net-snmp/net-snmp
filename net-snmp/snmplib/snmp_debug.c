@@ -464,6 +464,33 @@ debugmsgtoken(va_alist)
     va_end(debugargs);
 }
 
+void
+#if HAVE_STDARG_H
+debug_combo_nc(const char *token, const char *format, ...)
+#else
+debugmsgtoken(va_alist)
+     va_dcl
+#endif
+{
+    va_list         debugargs;
+
+#if HAVE_STDARG_H
+    va_start(debugargs, format);
+#else
+    const char     *format;
+    const char     *token;
+
+    va_start(debugargs);
+    token = va_arg(debugargs, const char *);
+    format = va_arg(debugargs, const char *);   /* ??? */
+#endif
+
+    snmp_log(LOG_DEBUG, "%s: ", token);
+    snmp_vlog(LOG_DEBUG, format, debugargs);
+
+    va_end(debugargs);
+}
+
 /*
  * for speed, these shouldn't be in default_storage space 
  */
