@@ -229,6 +229,7 @@ extern          "C" {
     void            usm_set_user_password(struct usmUser *user,
                                           const char *token, char *line);
     void            init_usm(void);
+    void            init_usm_conf(const char *app);
     int             init_usm_post_config(int majorid, int minorid,
                                          void *serverarg, void *clientarg);
     int             deinit_usm_post_config(int majorid, int minorid, void *serverarg,

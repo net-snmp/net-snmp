@@ -58,18 +58,7 @@ static unsigned int usmUserSpinLock = 0;
 void
 init_usmUser(void)
 {
-    snmpd_register_config_handler("usmUser",
-                                  usm_parse_config_usmUser, NULL, NULL);
-    snmpd_register_config_handler("createUser",
-                                  usm_parse_create_usmUser, NULL,
-                                  "username (MD5|SHA) passphrase [DES [passphrase]]");
-
-    /*
-     * we need to be called back later 
-     */
-    snmp_register_callback(SNMP_CALLBACK_LIBRARY, SNMP_CALLBACK_STORE_DATA,
-                           usm_store_users, NULL);
-
+    init_usm_conf(NULL);
     REGISTER_MIB("snmpv3/usmUser", usmUser_variables, variable4,
                  usmUser_variables_oid);
 }
