@@ -1,6 +1,19 @@
 This file contains major changes in released revisions.  Please read
 the ChangeLog file for a more detailed listing of changes/bug fixes.
 
+*3.1.1*
+
+  New:
+    - init_mib() now reads all files in PREFIX/lib/snmp/mibs as mibs.
+    - sysContact and sysLocation settable in snmpd.conf.
+    - TC information retained (from Joe Marzot).
+
+  Fixes:
+    - snmpset on a pass script works now.
+    - pass scripts more throughly tested and debugged.
+    - community 5 can be set now.
+    - Many others.
+
 *3.1.0.1*
 
   Ported:

@@ -1,5 +1,153 @@
 -------------------------------------------------------------------------------
 
+Changes: V3.1.0.1 -> V3.1.1
+
+whardake 11 Sep 96 08:49:14
+    - (read_config.c): Fixed community number checks.
+
+whardake 24 Sep 96 16:54:59
+    - (config*, snmp_api.c, snmp_client.c): Added sys/select.h for AIX.
+
+whardake 24 Sep 96 16:59:26
+    - (snmp_var_route.c, snmp_vars.c): typos.
+
+whardake 24 Sep 96 17:02:47
+    - (snmp_vars.c): Moved a variable declairation.
+
+whardake 24 Sep 96 17:16:58
+    - (snmp_var_route.c): typo fixing a typo (sigh..).
+
+whardake 25 Sep 96 14:14:53
+    - (snmp_var_route.c): freebsd2 typecast.
+
+whardake  1 Oct 96 15:30:46
+    - (parse.c, parse.h): From Joe Marzot:
+      - allows the CMU lib to retain the TC information associated with a
+        particular object. In particular this allows DisplayStrings to be
+        differentiated from OctetStrings when they are looked up in the
+        Mib Tree.
+
+whardake  1 Oct 96 15:54:22
+    - (extensible.c): int -> double to support larger disk sizes.
+
+whardake  1 Oct 96 16:28:52
+    - (config*, read_config.c):
+      - Check for mntent.h and include it.
+      - Check for /etc/mnttab or /etc/mtab and use appropriately.
+    - (read_config.c):
+      - pick getmntent over getfsfile if both are available.
+      - debug cleanup (ofile -> stderr, check for DODEBUG instead of const var).
+
+whardake  3 Oct 96 16:05:47
+    - (snmp_agent.c):
+      - Make agent properly check snmpset exit codes and use them (on COMMIT).
+
+whardake  3 Oct 96 16:08:59
+    - (pass.c):
+      - Check for passthru existance before returning ERR_NOERROR, else
+        return ERR_NOSUCHNAME.
+      - Correctly check for and pass "not-writable" and "wrong-type" pass returns.
+
+whardake  3 Oct 96 16:10:38
+    - (snmp_impl.h):  Turn on old CMU debugging statments with --enable-debugging.
+
+whardake  4 Oct 96 09:43:40
+    - (EXAMPLE.conf.def): Added snmpget/set to pass example.
+
+whardake  4 Oct 96 09:44:26
+    - (Makefile.in): Remove spaces from sedscript when using broken cpp (gcc).
+
+whardake  4 Oct 96 09:46:09
+    - (snmpd.conf.5.def):
+      - Cleaned up man page formatting.
+      - Added note about SNMPset community strings.
+      - minor proof-reading (major proofing needed still).
+      - Re-organized a bit.
+
+whardake  4 Oct 96 10:01:20
+    - (snmpd.conf.5.def): lib -> lib/snmp path correction in FILES section.
+    - (snmpd.1.def):
+      - Added a FILES section.
+      - General clean up.
+
+whardake  7 Oct 96 07:41:40
+    - (parse.c):  Now loads all mibs (files) in the directory SNMPLIB/mibs.
+
+whardake  7 Oct 96 07:49:59
+    - (parse.c):  Proper autoconf dirent headers.
+
+whardake  7 Oct 96 08:01:43
+    - (Makefile.in): Mib installation changed to reflect new mib directory.
+
+whardake  7 Oct 96 08:53:06
+    - (config*): check correctly for get/setmntent.
+
+whardake  7 Oct 96 09:11:43
+    - (snmp_agent.c): Removed snmp version check on error return from set.
+
+whardake  7 Oct 96 09:12:23
+    - (read_config.c): Use getmntent correctly.  Pain.
+
+whardake  7 Oct 96 10:22:47
+    - (Makefile.in):
+      - added --recheck to config.status call to regenerate self.
+      - Changed ece-mib.txt -> ucd-snmp.txt and install (and generate) properly.
+
+whardake  7 Oct 96 10:23:32
+    - (extensible.c): Chomp newline on uname output.
+
+whardake  7 Oct 96 10:24:12
+    - (read_config.c): Added 'syscontact' and 'syslocation' parsing.
+
+whardake  7 Oct 96 11:00:10
+    - (configure.in):
+      - timestamp stamp-h at end.
+      - emacs local vars.
+
+whardake  7 Oct 96 11:01:25
+    - (read_config.c): Remove extra args from strcpy (was strncpy).
+
+whardake  7 Oct 96 11:02:46
+    - (configure.in):
+      - timestamp stamp-h at end.
+      - emacs local vars.
+
+whardake  7 Oct 96 12:23:05
+    - (snmpd.1.def): Changed to reflect SNMPLIB/mibs.
+
+whardake  7 Oct 96 12:23:27
+    - (snmpd.conf.5.def): Added syscontact and syslocation.
+
+whardake  9 Oct 96 08:04:14
+    - (parse.c):
+      - Parse OBJECT-IDENTY as OBJECT-GROUP (saves only description).
+      - Change print_error(), read_mib() to reflect file and correct line number.
+
+whardake  9 Oct 96 08:30:29
+    - (parse.c):
+      - print a new line in print_error() if debugging is turned on.
+      - tossObjectIdentifier(): catch multiple bracket clauses (IE { {0 0} } ).
+
+whardake  9 Oct 96 14:36:03
+    - (read_config.c):
+      - strncmp -> strncasecmp.
+      - NULL -> 0.
+
+whardake  9 Oct 96 14:38:05
+    - (extensible.c):
+      - sort pass thrus by miboid to prevent passing off to wrong one.
+      - typos:  exsten -> exten.
+      - init_extensible() calls update_config() to reduce duplications.
+
+whardake  9 Oct 96 15:18:42
+    - (snmp_api.c): From: gah@bellcore.com (Gary A. Hayward)
+      - Free pdu community to quelch purify.
+
+whardake  9 Oct 96 15:22:23
+    - (README): Added thanks name.
+
+-------------------------------------------------------------------------------
+
 Changes: V3.1 -> V3.1.0.1
 
 whardake 26 Aug 96 10:36:08
