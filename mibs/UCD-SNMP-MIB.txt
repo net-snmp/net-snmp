@@ -41,6 +41,7 @@ IMPORTS
 
 -- numerical definitions:
 ucdavis           OBJECT IDENTIFIER ::= { enterprises 2021 }
+ucdInternal       OBJECT IDENTIFIER ::= { ucdavis 12 }
 
 -- Local tables:
 --   procTable      OBJECT IDENTIFIER ::= { ucdavis 2 }
@@ -60,7 +61,11 @@ ucdavis           OBJECT IDENTIFIER ::= { enterprises 2021 }
 --   load           OBJECT IDENTIFIER ::= { ucdavis 7 }
 
 -- Never implemented and removed from the mib:
---   lockd           OBJECT IDENTIFIER ::= { ucdavis 5 }
+--   lockd          OBJECT IDENTIFIER ::= { ucdavis 5 }
+
+-- Reserved
+--   ucdInternal    OBJECT IDENTIFIER ::= { ucdavis 12 }
+
 
 -- These are the returned values of the agent type.
 -- returned to:  .iso.org.dod.internet.mgmt.mib-2.system.sysObjectID.0 
@@ -201,7 +206,7 @@ extTable OBJECT-TYPE
 		"A table of extensible commands returning output and
 		 result codes.  These commands are configured via the
 		 agent's snmpd.conf file."
-	::= { ucdavis 9 }
+	::= { ucdavis 8 }
 
 extEntry OBJECT-TYPE
     SYNTAX     ExtEntry
@@ -422,7 +427,7 @@ diskTable	OBJECT-TYPE
 	DESCRIPTION
 		"Disk watching information.  Partions to be watched
 		are configured by the snmpd.conf file of the agent."
-	::= { ucdavis 10 }
+	::= { ucdavis 9 }
 
 dskEntry OBJECT-TYPE
     SYNTAX     DskEntry
@@ -549,7 +554,7 @@ loadTable OBJECT-TYPE
 	STATUS mandatory
 	DESCRIPTION
 		"Load average information."
-	::= { ucdavis 11 }
+	::= { ucdavis 10 }
 
 laEntry OBJECT-TYPE
     SYNTAX     LaEntry
