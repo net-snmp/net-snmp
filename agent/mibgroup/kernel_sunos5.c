@@ -125,7 +125,7 @@ mibmap          Mibmap[MIBCACHE_SIZE] = {
     {0},
 };
 
-static int      sd = -1;        /* /dev/ip stream descriptor. */
+static int      sd = -2;        /* /dev/ip stream descriptor. */
 
 /*-
  * Static function prototypes (use void as argument type if there are none)
@@ -807,24 +807,32 @@ getmib(int groupname, int subgroupname, void *statbuf, size_t size,
      * Open the stream driver and push all MIB-related modules 
      */
 
-    if (sd == -1) {         /* First time */
+    if (sd == -2) {         /* First time */
 	if ((sd = open(STREAM_DEV, O_RDWR)) == -1) {
+	    snmp_log_perror(STREAM_DEV);
 	    ret = -1;
 	    goto Return;
 	}
 	if (ioctl(sd, I_PUSH, "arp") == -1) {
+	    snmp_log_perror("I_PUSH arp");
 	    ret = -1;
 	    goto Return;
 	}
 	if (ioctl(sd, I_PUSH, "tcp") == -1) {
+	    snmp_log_perror("I_PUSH tcp");
 	    ret = -1;
 	    goto Return;
 	}
 	if (ioctl(sd, I_PUSH, "udp") == -1) {
+	    snmp_log_perror("I_PUSH udp");
 	    ret = -1;
 	    goto Return;
 	}
 	DEBUGMSGTL(("kernel_sunos5", "...... modules pushed OK\n"));
+    }
+    if (sd == -1) {
+	ret = -1;
+	goto Return;
     }
 
     /*
@@ -943,7 +951,7 @@ getmib(int groupname, int subgroupname, void *statbuf, size_t size,
 	}
     }
  Return:
-    ioctl(sd, I_FLUSH, FLUSHRW);
+    if (sd >= 0) ioctl(sd, I_FLUSH, FLUSHRW);
     DEBUGMSGTL(("kernel_sunos5", "...... getmib returns %d\n", ret));
     return ret;
 }
