@@ -24,6 +24,8 @@ ARISING OUT OF OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS
 SOFTWARE.
 ******************************************************************/
 
+#include <config.h>
+
 #ifdef KINETICS
 #include "gw.h"
 #include "ab.h"

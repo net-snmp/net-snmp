@@ -22,6 +22,8 @@ SOFTWARE.
 /*
  * parse.c
  */
+#include <config.h>
+
 #include <stdio.h>
 #include <ctype.h>
 #include <sys/types.h>
