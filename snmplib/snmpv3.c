@@ -99,6 +99,10 @@ snmpv3_authtype_conf(const char *word, char *cptr)
 oid *
 get_default_authtype(size_t *len)
 {
+  if (defaultAuthType == NULL) {
+    defaultAuthType = SNMP_DEFAULT_AUTH_PROTO;
+    defaultAuthTypeLen = SNMP_DEFAULT_AUTH_PROTOLEN;
+  }
   if (len)
     *len = defaultAuthTypeLen;
   return defaultAuthType;
@@ -108,16 +112,20 @@ void
 snmpv3_privtype_conf(const char *word, char *cptr)
 {
   if (strcmp(cptr,"DES") == 0)
-    defaultPrivType = usmDESPrivProtocol;
+    defaultPrivType = SNMP_DEFAULT_PRIV_PROTO;
   else
     config_perror("unknown privacy type");
-  defaultPrivTypeLen = USM_LENGTH_OID_TRANSFORM;
+  defaultPrivTypeLen = SNMP_DEFAULT_PRIV_PROTOLEN;
   DEBUGMSGTL(("snmpv3","set default privacy type: %s\n", cptr));
 }
 
 oid *
 get_default_privtype(size_t *len)
 {
+  if (defaultAuthType == NULL) {
+    defaultAuthType = usmDESPrivProtocol;
+    defaultPrivTypeLen = USM_LENGTH_OID_TRANSFORM;
+  }
   if (len)
     *len = defaultPrivTypeLen;
   return defaultPrivType;
