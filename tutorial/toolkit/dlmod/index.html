@@ -38,7 +38,7 @@
       <table border=1>
 	<tr bgcolor="#d0d0ff"><th>File</th><th>Description</th></tr>
 	<tr bgcolor="#d0d0ff"><td><a
-	href="../mib-modules/Makefile">Makefile</a></td><td>A simple makefile 
+	href="../demoapp/Makefile">Makefile</a></td><td>A simple makefile 
 	used to build the projects</td>
 	<tr bgcolor="#d0d0ff"><td><a
 	href="../mib_module/UCD-SNMP-TUTORIAL-MIB.txt">UCD-SNMP-TUTORIAL-MIB.txt</a></td><td>The MIB we'll be writing
@@ -71,7 +71,8 @@ href="../mib_module/ustScalarSet.c">ustScalarSet.c</a> file.
       <ol>
       <li> Start the snmpd and watch the dlmod and ustScalarSet
       modules interact using the debugging flag (this assumes you
-      already have <a href="http://ucd-snmp.ucdavis.edu/FAQ.html#I_don_t_understand_the_new_access_control_stuff___what_does_it_mean_">access control</a> set up properly for your agent):
+      already have <a
+      href="http://www.net-snmp.org/FAQ.html#I_don_t_understand_the_new_access_control_stuff___what_does_it_mean_">access control</a> set up properly for your agent):
 	<p><ul>
 	  <li> % <b>snmpd -f -L -DustScalarSet,dlmod </b>
 	</ul><p>
