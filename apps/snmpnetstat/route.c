@@ -507,6 +507,12 @@ getvarbyname(netsnmp_session * sp, oid * name, size_t len)
                         }
                     }
                 }
+                if (var->type == SNMP_NOSUCHOBJECT ||
+                    var->type == SNMP_NOSUCHINSTANCE ||
+                    var->type == SNMP_ENDOFMIBVIEW) {
+                       snmp_free_var(var);
+                       var =  NULL;
+                }
             }
         }
     } else if (status != STAT_TIMEOUT)
