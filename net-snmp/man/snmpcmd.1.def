@@ -220,7 +220,7 @@ file.
 Display version information for the application and then exit.
 .TP
 .BI -x " privProtocol"
-Set the privacy protocol (DES) used for encrypted SNMPv3 messages.
+Set the privacy protocol (DES or AES, but only if OpenSSL is available) used for encrypted SNMPv3 messages.
 .TP
 .BI -X " privPassword"
 Set the privacy pass phrase used for encrypted SNMPv3 messages.
