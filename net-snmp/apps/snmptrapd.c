@@ -179,7 +179,7 @@ char           *trap1_fmt_str = NULL, *trap2_fmt_str = NULL;    /* how to format
  * Include an extra Facility variable to allow command line adjustment of
  * syslog destination 
  */
-int             Facility = LOG_INFO;
+int             Facility = LOG_DAEMON;
 
 struct timeval  Now;
 
@@ -795,7 +795,7 @@ usage(void)
     fprintf(stderr,
             "  -H\t\t\tdisplay configuration file directives understood\n");
     fprintf(stderr,
-            "  -l d|0-7\t\tset syslog facility to LOG_DAEMON (d)\n\t\t\t  or LOG_LOCAL[0-7] (default LOG_LOCAL0)\n");
+            "  -l d|i|0-7\t\tset syslog facility to LOG_DAEMON (d), LOG_INFO (i)\n\t\t\t  or LOG_LOCAL[0-7] (default LOG_DAEMON)\n");
     fprintf(stderr,
             "  -m MIBLIST\t\tuse MIBLIST instead of the default MIB list\n");
     fprintf(stderr,
@@ -1043,6 +1043,10 @@ main(int argc, char *argv[])
                 case 'd':
                 case 'D':
                     Facility = LOG_DAEMON;
+                    break;
+                case 'i':
+                case 'I':
+                    Facility = LOG_INFO;
                     break;
                 case '0':
                     Facility = LOG_LOCAL0;
@@ -1305,7 +1309,7 @@ main(int argc, char *argv[])
 #endif
 
     if (Syslog) {
-        snmp_enable_syslog_ident("snmptrapd");
+        snmp_enable_syslog_ident("snmptrapd", Facility);
         snmp_log(LOG_INFO, "Starting snmptrapd %s\n",
                  netsnmp_get_version());
     }
