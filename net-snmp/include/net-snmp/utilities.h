@@ -34,7 +34,7 @@
 #include <net-snmp/library/int64.h>
 
 #include <net-snmp/library/mt_support.h>
-#include <net-snmp/library/snmp_locking.h>
+/*  #include <net-snmp/library/snmp_locking.h>  */
 #include <net-snmp/library/snmp_alarm.h>
 #include <net-snmp/library/data_list.h>
 #include <net-snmp/library/oid_stash.h>
