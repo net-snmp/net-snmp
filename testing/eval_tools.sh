@@ -30,6 +30,11 @@ if [ "x$EVAL_TOOLS_SH_EVALED" != "xyes" ]; then
 failcount=0
 junkoutputfile="$SNMP_TMPDIR/output-`basename $0`$$"
 seperator="-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-="
+if [ -z "$OK_TO_SAVE_RESULT" ] ; then
+OK_TO_SAVE_RESULT=1
+export OK_TO_SAVE_RESULT
+fi
+
 
 #
 # HEADER: returns a single line when SNMP_HEADERONLY mode and exits.
@@ -193,11 +198,13 @@ SAVE_RESULTS() {
 #   Sets return_value to 0 or 1.
 #
 EXPECTRESULT() {
+  if [ $OK_TO_SAVE_RESULT -ne 0 ] ; then
     if [ "$snmp_last_test_result" = "$1" ]; then
 	return_value=0
     else
 	return_value=1
     fi
+  fi
 }
 
 #------------------------------------ -o-
@@ -248,6 +255,11 @@ WAITFORTRAPD() {
 }
 
 WAITFOR() {
+  ## save the previous save state and test result
+    save_state=$OK_TO_SAVE_RESULT
+    save_test=$snmp_last_test_result
+    OK_TO_SAVE_RESULT=0
+
     sleeptime=$SNMP_SLEEP
     oldsleeptime=$SNMP_SLEEP
     if [ "$1" != "" ] ; then
@@ -266,8 +278,7 @@ WAITFOR() {
 	  fi
           if [ "$snmp_last_test_result" != "" ] ; then
               if [ "$snmp_last_test_result" -gt 0 ] ; then
-	         SNMP_SLEEP=$oldsleeptime
-	         return 0;
+	         break;
               fi
 	  fi
           DELAY
@@ -279,6 +290,10 @@ WAITFOR() {
 	    sleep $SNMP_SLEEP
         fi
     fi
+
+  ## restore the previous save state and test result
+    OK_TO_SAVE_RESULT=$save_state
+    snmp_last_test_result=$save_test
 }    
 
 # WAITFORORDIE "grep string" ["file"]
@@ -459,6 +474,10 @@ STOPTRAPD() {
 #------------------------------------ -o-
 #
 FINISHED() {
+
+    ## no more changes to test result.
+    OK_TO_SAVE_RESULT=0
+
     if [ "$SNMPDSTARTED" = "1" ] ; then
       STOPAGENT
     fi
