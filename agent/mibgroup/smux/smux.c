@@ -113,10 +113,10 @@ smux_parse_peer_auth(word, cptr)
 {
 	smux_peer_auth *aptr;
 
-	if(*cptr == '.')
+	if(cptr && *cptr == '.')
 		cptr++;
 
-	if (!isdigit(*cptr)) {
+	if (cptr && !isdigit(*cptr)) {
 		config_perror("second token is not an OID");
 		return;
 	}
@@ -127,17 +127,21 @@ smux_parse_peer_auth(word, cptr)
 	/* oid */
 	Auths[nauths]->sa_oid_len = parse_miboid(cptr, Auths[nauths]->sa_oid);
 
+        DEBUGMSGTL(("smux_conf", "parsing registration for: %s\n", cptr));
+
 	while (isdigit(*cptr) || *cptr == '.')
 		 cptr++;
 	cptr = skip_white(cptr);
 
-	/* password */
+        /* password */
 	if (cptr == NULL) {
-		config_perror("no password specified");
-		return;
-	}
-	Auths[nauths]->sa_active_fd = -1;
-	strcpy(Auths[nauths++]->sa_passwd, cptr);
+                /* null passwords ok (sigh) */
+                strcpy(Auths[nauths]->sa_passwd, "");
+        } else {
+                strcpy(Auths[nauths]->sa_passwd, cptr);
+        }
+        
+	Auths[nauths++]->sa_active_fd = -1;
 }
 
 void
@@ -344,7 +348,7 @@ int sd;
 		perror("[smux_accept] accept failed\n");
 		return;
 	} else {
-		fprintf(stderr, "[smux_accept] accepted fd %d\n errno %d", fd, errno);
+		fprintf(stderr, "[smux_accept] accepted fd %d - errno %d\n", fd, errno);
 		if (npeers + 1 == SMUXMAXPEERS) {
 			DEBUGMSGTL (("smux","[smux_accept] denied peer on fd %d, limit reached", fd));
 			close(sd);
@@ -366,7 +370,7 @@ int sd;
 		} else if (type != (u_char)SMUX_OPEN) {
 			smux_send_close(fd, SMUXC_PROTOCOLERROR);
 			close(fd);
-			DEBUGMSGTL (("smux","[smux_accept] peer on %d did not send open"));
+			DEBUGMSGTL (("smux","[smux_accept] peer on %d did not send open: (%d)\n", type));
 			return SMUXNOTOK;
 		}
 		ptr = smux_open_process(fd, ptr, &len, &fail);
@@ -379,7 +383,7 @@ int sd;
 
 		/* he's OK */
 		if (setsockopt(fd, SOL_SOCKET, SO_RCVTIMEO, (void *)&tv, sizeof(tv)) < 0) 
-			DEBUGMSGTL (("smux","[smux_accept] setsockopt(SO_RCVTIMEO) failed fd %d", fd));
+			DEBUGMSGTL (("smux","[smux_accept] setsockopt(SO_RCVTIMEO) failed fd %d\n", fd));
 
 		npeers++;
 		sdlist[sdlen] = fd;
