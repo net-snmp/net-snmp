@@ -92,6 +92,17 @@ SOFTWARE.
 #if HAVE_PROCESS_H  /* Win32-getpid */
 #include <process.h>
 #endif
+#if HAVE_LIMITS_H
+#include <limits.h>
+#endif
+
+#ifndef PATH_MAX
+# ifdef _POSIX_PATH_MAX
+#  define PATH_MAX _POSIX_PATH_MAX
+# else
+#  define PATH_MAX 255
+# endif
+#endif
 
 #ifndef FD_SET
 typedef long    fd_mask;
@@ -290,7 +301,7 @@ main(int argc, char *argv[])
 	int             arg, i;
 	int             ret;
 	int             dont_fork = 0;
-	char            logfile[SNMP_MAXBUF_SMALL];
+	char            logfile[PATH_MAX + 1] = { 0 };
 	char           *cptr, **argvptr;
 	char           *pid_file = NULL;
         char            buf[SPRINT_MAX_LEN];
@@ -302,10 +313,8 @@ main(int argc, char *argv[])
 	int             uid=0, gid=0;
         int             agent_mode=-1;
 
-	logfile[0]		= 0;
-
 #ifdef LOGFILE
-	strcpy(logfile, LOGFILE);
+	strncpy(logfile, LOGFILE, PATH_MAX);
 #endif
 
 #ifdef NO_ROOT_ACCESS
@@ -434,9 +443,16 @@ main(int argc, char *argv[])
                   break;
 
                 case 'l':
-                  if (++arg == argc)
+                  if (++arg == argc) {
                     usage(argv[0]);
-                  strcpy(logfile, argv[arg]);
+		  }
+		  if (strlen(argv[arg]) > PATH_MAX) {
+		    fprintf(stderr,
+			    "%s: logfile path too long (limit %d chars)\n",
+			    argv[0], PATH_MAX);
+		    exit(1);
+		  }
+                  strncpy(logfile, argv[arg], PATH_MAX);
                   break;
 
                 case 'L':
