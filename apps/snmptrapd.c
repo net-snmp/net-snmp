@@ -251,8 +251,18 @@ event_input(struct variable_list *vp)
     int sampletype;
     int value;
     int threshold;
+    int i;
+    struct variable_list *vp2=vp;
 
     oid *op;
+
+    /* Make sure there are 5 variables.  Otherwise, don't bother */
+    for (i=1; i <= 5; i++) {
+      vp2 = vp2->next_variable;
+      if (!vp2) {
+        return;
+      }
+    }
 
     vp = vp->next_variable;	/* skip sysUptime */
     if (vp->val_len != sizeof(risingAlarm)
@@ -287,7 +297,6 @@ event_input(struct variable_list *vp)
 
     vp = vp->next_variable;
     threshold = *vp->val.integer;
-
     printf("%d: 0x%02lX %d %d %d\n", eventid, destip, sampletype, value, threshold);
 
 }
