@@ -34,6 +34,9 @@
 #if HAVE_SYS_CONF_H
 #include <sys/conf.h>
 #endif
+#if HAVE_ASM_PAGE_H
+#include <asm/page.h>
+#endif
 #if HAVE_SYS_SWAP_H
 #include <sys/swap.h>
 #endif
