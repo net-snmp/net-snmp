@@ -132,6 +132,9 @@ PERFORMANCE OF THIS SOFTWARE.
 #if HAVE_SYS_SYSCTL_H
 #include <sys/sysctl.h>
 #endif
+#if HAVE_NET_IF_DL_H
+#include <net/if_dl.h>
+#endif
 
 #if solaris2
 #include "kernel_sunos5.h"
@@ -401,7 +404,11 @@ get_address (const void * _ap, int addresses, int wanted)
 	      length = sizeof (struct sockaddr_un);
 	      break;
 	    case AF_LINK:
+#ifdef _MAX_SA_LEN
 	      length = _MAX_SA_LEN;
+#else
+	      length = sizeof (struct sockaddr_dl);
+#endif
 	      break;
 	    case AF_INET:
 	    default:

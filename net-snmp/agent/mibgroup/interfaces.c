@@ -9,6 +9,9 @@
 #include <sys/types.h>
 #include <sys/socket.h>
 
+#if HAVE_SYS_SOCKIO_H
+#include <sys/sockio.h>
+#endif
 #if HAVE_FCNTL_H
 #include <fcntl.h>
 #endif
@@ -40,6 +43,19 @@
 #if HAVE_NETINET_IF_ETHER_H
 #include <netinet/if_ether.h>
 #endif
+#if HAVE_NET_IF_TYPES_H
+#include <net/if_types.h>
+#endif
+#if HAVE_NET_IF_DL_H
+#include <net/if_dl.h>
+#endif
+#if HAVE_INET_MIB2_H
+#include <inet/mib2.h>
+#endif
+
+#ifdef solaris2
+#include "kernel_sunos5.h"
+#endif
 
 #include "mibincl.h"
 
@@ -54,6 +70,8 @@
 #endif /* hpux */
 
 /* #include "../common_header.h" */
+
+#include "../../snmplib/system.h"
 
 #ifdef HAVE_OSRELDATE_H
 #include <osreldate.h>
