@@ -313,7 +313,8 @@ getKstat(const char *statname, const char *varname, void *value)
     goto Return;		/* kstat errors */
   }
   if (kstat_read(kstat_fd, ks, NULL) <= 0) {
-    ret = -10;
+    DEBUGMSGTL(("kernel_sunos5", "cannot read kstat %s %s\n",
+		"unix", "kstat_headers"));
     goto Return;		/* kstat errors */
   }
   kstat_data = ks->ks_data;
@@ -337,13 +338,13 @@ getKstat(const char *statname, const char *varname, void *value)
   }
   /* Get the named statistics */
   if ((ks = kstat_lookup(kstat_fd, module_name, instance, statname)) == NULL) {
-    DEBUGMSGTL(("kernel_sunos5", "cannot lookup kstat %s %s\n",
-		module_name, statname));
-    ret = -10;
+    DEBUGMSGTL(("kernel_sunos5", "cannot lookup kstat %s %u %s\n",
+		module_name, instance, statname));
     goto Return;		/* kstat errors */
   }
   if (kstat_read(kstat_fd, ks, NULL) <= 0) {
-    ret = -10;
+    DEBUGMSGTL(("kernel_sunos5", "cannot read kstat %s %u %s\n",
+		module_name, instance, statname));
     goto Return;		/* kstat errors */
   }
   /* This function expects only name/value type of statistics,
@@ -414,7 +415,7 @@ getKstat(const char *statname, const char *varname, void *value)
     }
   }
   ret = -4;			/* Name not found */
- Return:
+Return:
   return (ret);
 }
 
