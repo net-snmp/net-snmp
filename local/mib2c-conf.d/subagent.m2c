@@ -45,6 +45,7 @@ static void usage(void) {
           "\t\tNote: You can't put a space between the -D and the TOKENs.\n"
           "\t-H\tDisplay a list of configuration file directives\n"
           "\t\tunderstood by the agent and then exit.\n"
+          "\t-M\tRun as a normal SNMP Agent instead of an AgentX sub-agent.\n"
           "\t-L\tDo not open a log file; print all messages to stderr.\n");
   exit(0);
 }
@@ -84,6 +85,34 @@ main (int argc, char **argv) {
     default:
       fprintf(stderr,"unknown option %c\n", ch);
       usage();
+  }
+
+  if (optind < argc) {
+      /*
+       * There are optional transport addresses on the command line.  
+       */
+      DEBUGMSGTL(("snmpd/main", "optind %d, argc %d\n", optind, argc));
+      for (i = optind; i < argc; i++) {
+          char *c, *astring;
+          if ((c = netsnmp_ds_get_string(NETSNMP_DS_APPLICATION_ID, 
+                                         NETSNMP_DS_AGENT_PORTS))) {
+              astring = malloc(strlen(c) + 2 + strlen(argv[i]));
+              if (astring == NULL) {
+                  fprintf(stderr, "malloc failure processing argv[%d]\n", i);
+                  exit(1);
+              }
+              sprintf(astring, "%s,%s", c, argv[i]);
+              netsnmp_ds_set_string(NETSNMP_DS_APPLICATION_ID, 
+                                    NETSNMP_DS_AGENT_PORTS, astring);
+              SNMP_FREE(astring);
+          } else {
+              netsnmp_ds_set_string(NETSNMP_DS_APPLICATION_ID, 
+                                    NETSNMP_DS_AGENT_PORTS, argv[i]);
+          }
+      }
+      DEBUGMSGTL(("snmpd/main", "port spec: %s\n",
+                  netsnmp_ds_get_string(NETSNMP_DS_APPLICATION_ID, 
+                                        NETSNMP_DS_AGENT_PORTS)));
   }
 
   /* we're an agentx subagent? */

@@ -27,6 +27,9 @@
  */
 @foreach $table table@
 @    include m2c_setup_table.m2i@
+@    if $m2c_table_settable == 0@
+@        break@ # skip to next table
+@    end@
 @    include details-table.m2i@
 @    foreach $node externalindex@
 @        include m2c_setup_node.m2i@
@@ -48,8 +51,8 @@ int ${node}_undo( ${context}_rowreq_ctx *rowreq_ctx );
 
 @    end@ # foreach nonindex
 
-@end@
 int ${context}_check_dependencies(${context}_rowreq_ctx *ctx);
+@end@
 
 @eval $m2c_save = "$name"@
 @eval $name = "${name}_DATA_SET"
