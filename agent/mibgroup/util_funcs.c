@@ -257,7 +257,7 @@ int get_exec_output(struct extensible *ex)
         unlink(cachefile);
 	/* XXX  Use SNMP_FILEMODE_CLOSED instead of 644? */
         if ((cfd = open(cachefile,O_WRONLY|O_TRUNC|O_CREAT,0644)) < 0) {
-          setPerrorstatus("open");
+          setPerrorstatus(cachefile);
           cachetime = 0;
           return 0;
         }
@@ -305,7 +305,7 @@ int get_exec_output(struct extensible *ex)
       ex->result = lastresult;
   }
   if ((cfd = open(cachefile,O_RDONLY)) < 0) {
-    setPerrorstatus("open");
+    setPerrorstatus(cachefile);
     return 0;
   }
   return(cfd);
@@ -336,13 +336,13 @@ int get_exec_pipes(char *cmd,
       close(0);
       if (dup(fd[0][0]) != 0)
         {
-          setPerrorstatus("dup");
+          setPerrorstatus("dup 0");
           return 0;
         }
       close(1);
       if (dup(fd[1][1]) != 1)
         {
-          setPerrorstatus("dup");
+          setPerrorstatus("dup 1");
           return 0;
         }
 
@@ -378,7 +378,7 @@ int get_exec_pipes(char *cmd,
       *(aptr++) = NULL;
       copy_word(cmd,ctmp);
       execv(ctmp,argv);
-      perror("execv");
+      perror(ctmp);
       exit(1);
     }
   else
@@ -436,7 +436,7 @@ RETSIGTYPE restart_doit(int a)
   /* do the exec */
 #if HAVE_EXECV
   execv(argvrestartname,argvrestartp);
-  setPerrorstatus("execv");
+  setPerrorstatus(argvrestartname);
 #endif
 }
 
