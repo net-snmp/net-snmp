@@ -575,11 +575,7 @@ var_ipRouteEntry(struct variable *vp,
 	    sa = klgetsa((struct sockaddr_in *) rthead[RtIndex]->rt_dst);
 	    cp = (u_char *) &(sa->sin_addr.s_addr);
 #else
-#ifdef linux
-	    cp = (u_char *) rthead[RtIndex]->rt_dst.sa_data;
-#else
 	    cp = (u_char *)&(((struct sockaddr_in *) &(rthead[RtIndex]->rt_dst))->sin_addr.s_addr);
-#endif
 #endif
 	    op = Current + 10;
 	    *op++ = *cp++;
@@ -617,11 +613,7 @@ var_ipRouteEntry(struct variable *vp,
 	    sa = klgetsa((struct sockaddr_in *) rthead[RtIndex]->rt_dst);
 	    return(u_char *) &(sa->sin_addr.s_addr);
 #else
-#ifdef linux
-            return (u_char *)rthead[RtIndex]->rt_dst.sa_data;
-#else
 	    return(u_char *) &((struct sockaddr_in *) &rthead[RtIndex]->rt_dst)->sin_addr.s_addr;
-#endif
 #endif
 	case IPROUTEIFINDEX:
 	    long_return = (u_long)rthead[RtIndex]->rt_unit;
@@ -658,11 +650,7 @@ var_ipRouteEntry(struct variable *vp,
 	    sa = klgetsa((struct sockaddr_in *) rthead[RtIndex]->rt_gateway);
 	    return(u_char *) &(sa->sin_addr.s_addr);
 #else
-#ifdef linux
-	    return(u_char *) rthead[RtIndex]->rt_gateway.sa_data;
-#else
 	    return(u_char *) &((struct sockaddr_in *) &rthead[RtIndex]->rt_gateway)->sin_addr.s_addr;
-#endif /* linux */
 #endif /* *bsd */
 	case IPROUTETYPE:
 	    long_return = (rthead[RtIndex]->rt_flags & RTF_GATEWAY) ? 4 : 3;
@@ -685,11 +673,7 @@ var_ipRouteEntry(struct variable *vp,
 #endif
 	    long_return = 0;
 #else /*  NEED_KLGETSA */
-  #ifndef linux
 	    if ( ((struct sockaddr_in *) &rthead[RtIndex]->rt_dst)->sin_addr.s_addr == 0 )
-  #else
-	    if (rthead[RtIndex]->rt_dst.sa_data == 0)
-  #endif
 		long_return = 0;	/* Default route */
 	    else {
 #ifndef linux
@@ -700,7 +684,8 @@ var_ipRouteEntry(struct variable *vp,
 
 		long_return = rt_ifnetaddr.ia_subnetmask;
 #else /* linux */
-                return (u_char *) rthead[RtIndex]->rt_genmask.sa_data;
+	    cp = (u_char *)&(((struct sockaddr_in *) &(rthead[RtIndex]->rt_dst))->sin_addr.s_addr);
+                return (u_char *) &(((struct sockaddr_in *) &(rthead[RtIndex]->rt_genmask))->sin_addr.s_addr);
 #endif /* linux */
 	    }
 #endif /* NEED_KLGETSA */
@@ -1215,13 +1200,13 @@ static void Route_Scan_Reload (void)
 	     * Iface Dest GW Flags RefCnt Use Metric Mask MTU Win IRTT
 	     * eth0 0A0A0A0A 00000000 05 0 0 0 FFFFFFFF 1500 0 0 
 	     */
-	    if (8 != sscanf (line, "%s %lx %lx %x %u %d %d %lx %*d %*d %*d\n",
+	    if (8 != sscanf (line, "%s %x %x %x %u %d %d %x %*d %*d %*d\n",
 			     rt->rt_dev,
-			     (unsigned long *) rt->rt_dst.sa_data,
-			     (unsigned long *) rt->rt_gateway.sa_data,
+			     &(((struct sockaddr_in *) &(rtent.rt_dst))->sin_addr.s_addr),
+			     &(((struct sockaddr_in *) &(rtent.rt_gateway))->sin_addr.s_addr),
 /* XXX: fix type of the args */
 			     &flags, &refcnt, &use, &metric,
-			     (unsigned long *) &rt->rt_genmask.sa_data))
+			     &(((struct sockaddr_in *) &(rtent.rt_genmask))->sin_addr.s_addr)))
 	      continue;
 	    
 	    strcpy (name, rt->rt_dev);
@@ -1286,13 +1271,8 @@ static int qsort_compare(RTENTRY **r1,
 	register u_long dst1 = ntohl(klgetsa((struct sockaddr_in *)(*r1)->rt_dst)->sin_addr.s_addr);
 	register u_long dst2 = ntohl(klgetsa((struct sockaddr_in *)(*r2)->rt_dst)->sin_addr.s_addr);
 #else
-#if !defined(linux)
 	register u_long dst1 = ntohl(((struct sockaddr_in *) &((*r1)->rt_dst))->sin_addr.s_addr);
 	register u_long dst2 = ntohl(((struct sockaddr_in *) &((*r2)->rt_dst))->sin_addr.s_addr);
-#else
-	register u_long dst1 = ntohl(*(unsigned long *)&(*r1)->rt_dst.sa_data);
-	register u_long dst2 = ntohl(*(unsigned long *)&(*r2)->rt_dst.sa_data);
-#endif /* defined(linux) */
 #endif /* NEED_KLGETSA */
 
 	/*
