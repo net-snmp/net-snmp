@@ -1,4 +1,4 @@
-.TH SNMP_ALARM 3 "29 Mar 2001" "" "Net-SNMP"
+.TH SNMP_ALARM 3 "29 Mar 2001" VVERSIONINFO "Net-SNMP"
 .UC 5
 .SH NAME
 snmp_alarm_register, snmp_alarm_register_hr, snmp_alarm_unregister, init_snmp_alarm, init_alarm_post_config, run_alarms - alarm functions
