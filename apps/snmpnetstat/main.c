@@ -99,10 +99,6 @@ char copyright[] =
 #include "snmp_api.h"
 #include "snmp_impl.h"
 #include "snmp_client.h"
-#include "party.h"
-#include "context.h"
-#include "view.h"
-#include "acl.h"
 #include "version.h"
 #include "snmp_debug.h"
 #include "system.h"
@@ -213,8 +209,6 @@ int main(int argc, char *argv[])
 		    version = SNMP_VERSION_1;
 		else if (!strcmp(community,"2c"))
 		    version = SNMP_VERSION_2c;
-		else if (!strcmp(community,"2p"))
-		    version = SNMP_VERSION_2p;
 		else {
 		    fprintf(stderr, "Invalid version: %s\n", community);
 		    usage();
@@ -283,81 +277,6 @@ int main(int argc, char *argv[])
 	} else if ((version == SNMP_VERSION_1 || version == SNMP_VERSION_2c)
                    && community == NULL){
 	    community = argv[arg]; 
-	} else if (version == SNMP_VERSION_2p && srclen == 0 && !trivialSNMPv2){
-	    sprintf(ctmp, "%s/party.conf", SNMPSHAREPATH);
-	    if (read_party_database(ctmp) > 0){
-		snmp_perror(argv[0]);
-		exit(1);
-	    }
-	    sprintf(ctmp, "%s/context.conf", SNMPSHAREPATH);
-	    if (read_context_database(ctmp) > 0){
-		snmp_perror(argv[0]);
-		exit(1);
-	    }
-	    sprintf(ctmp, "%s/acl.conf", SNMPSHAREPATH);
-	    if (read_acl_database(ctmp) > 0){
-		snmp_perror(argv[0]);
-		exit(1);
-	    }
-	    
-	    if (!strcasecmp(argv[arg], "noauth")){
-		trivialSNMPv2 = TRUE;
-	    } else {
-		party_scanInit();
-		for(pp = party_scanNext(); pp; pp = party_scanNext()){
-		    if (!strcasecmp(pp->partyName, argv[arg])){
-			srclen = pp->partyIdentityLen;
-			memmove(src, pp->partyIdentity, srclen * sizeof(oid));
-			break;
-		    }
-		}
-		if (!pp){
-		    srclen = MAX_OID_LEN;
-		    if (!read_objid(argv[arg], src, &srclen)){
-			printf("Invalid source party: %s\n", argv[arg]);
-			srclen = 0;
-			usage();
-			exit(1);
-		    }
-		}
-	    }
-	} else if (version == SNMP_VERSION_2p && dstlen == 0 && !trivialSNMPv2){
-	    dstlen = MAX_OID_LEN;
-	    party_scanInit();
-	    for(pp = party_scanNext(); pp; pp = party_scanNext()){
-		if (!strcasecmp(pp->partyName, argv[arg])){
-		    dstlen = pp->partyIdentityLen;
-		    memmove(dst, pp->partyIdentity, dstlen * sizeof(oid));
-		    break;
-		}
-	    }
-	    if (!pp){
-		if (!read_objid(argv[arg], dst, &dstlen)){
-		    printf("Invalid destination party: %s\n", argv[arg]);
-		    dstlen = 0;
-		    usage();
-		    exit(1);
-		}
-	    }
-	} else if (version == SNMP_VERSION_2p && contextlen == 0 && !trivialSNMPv2){
-	    contextlen = MAX_OID_LEN;
-	    context_scanInit();
-	    for(cxp = context_scanNext(); cxp; cxp = context_scanNext()){
-		if (!strcasecmp(cxp->contextName, argv[arg])){
-		    contextlen = cxp->contextIdentityLen;
-		    memmove(context, cxp->contextIdentity,
-			  contextlen * sizeof(oid));
-		    break;
-		}
-	    }
-	    if (!cxp){
-		if (!read_objid(argv[arg], context, &contextlen)){
-		    printf("Invalid context: %s\n", argv[arg]);
-		    contextlen = 0;
-		    usage();
-		    exit(1);
-		}
-	    }
 	} else if (isdigit(argv[arg][0])) {
             interval = atoi(argv[arg]);
             if (interval <= 0){
@@ -379,37 +298,6 @@ int main(int argc, char *argv[])
 	exit(1);
     }
     
-    if (trivialSNMPv2){
-	if ((destAddr = inet_addr(hostname)) == -1){
-	    hp = gethostbyname(hostname);
-	    if (hp == NULL){
-		fprintf(stderr, "unknown host: %s\n", hostname);
-		exit(1);
-	    } else {
-              memmove(&destAddr, hp->h_addr, hp->h_length);
-	    }
-	}
-	srclen = dstlen = contextlen = MAX_OID_LEN;
-	ms_party_init(destAddr, src, &srclen, dst, &dstlen,
-		      context, &contextlen);
-    }
-    
-    if (clock_flag){
-	pp = party_getEntry(src, srclen);
-	if (pp){
-            pp->partyAuthClock = srcclock;
-            gettimeofday(&pp->tv, (struct timezone *)0);
-            pp->tv.tv_sec -= pp->partyAuthClock;
-	}
-	pp = party_getEntry(dst, dstlen);
-	if (pp){
-            pp->partyAuthClock = dstclock;
-            gettimeofday(&pp->tv, (struct timezone *)0);
-            pp->tv.tv_sec -= pp->partyAuthClock;
-	}
-    }
-    
-    
     memset(&session, 0, sizeof(struct snmp_session));
     session.peername = hostname;
     session.remote_port = dest_port;
@@ -417,14 +305,6 @@ int main(int argc, char *argv[])
         session.version = version;
         session.community = (u_char *)community;
         session.community_len = strlen((char *)community);
-    } else if (version == SNMP_VERSION_2p){
-        session.version = version;
-        session.srcParty = src;
-        session.srcPartyLen = srclen;
-        session.dstParty = dst;
-        session.dstPartyLen = dstlen;
-        session.context = context;
-        session.contextLen = contextlen;
     }
 
     SOCK_STARTUP;

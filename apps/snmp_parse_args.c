@@ -60,13 +60,6 @@
 #include "scapi.h"
 #include "keytools.h"
 
-#ifdef USE_V2PARTY_PROTOCOL
-#include "party.h"
-#include "context.h"
-#include "view.h"
-#include "acl.h"
-#endif /* USE_V2PARTY_PROTOCOL */
-
 #include "snmp_parse_args.h"
 #include "version.h"
 #include "system.h"
@@ -89,9 +82,6 @@ void
 snmp_parse_args_usage(FILE *outf)
 {
   fprintf(outf, "[-v 1|2c|2p|3] [-h] [-H] [-d] [-q] [-R] [-D] [-m <MIBS>] [-M <MIDDIRS>] [-p <P>] [-t <T>] [-r <R>] ");
-#ifdef USE_V2PARTY_PROTOCOL
-  fprintf(outf, "[-c <S> <D>] ");
-#endif
   fprintf(outf, "[-T <B> <T>] [-e <E>] [-E <E>] [-n <N>] [-u <U>] [-l <L>] [-a <A>] [-A <P>] [-x <X>] [-X <P>] <hostname> {<community>|{<srcParty> <dstParty> <context>|}");
 }
 
@@ -114,10 +104,6 @@ snmp_parse_args_descriptions(FILE *outf)
   fprintf(outf, "  -p <P>\tuse port P instead of the default port.\n");
   fprintf(outf, "  -t <T>\tset the request timeout to T.\n");
   fprintf(outf, "  -r <R>\tset the number of retries to R.\n");
-#ifdef USE_V2PARTY_PROTOCOL
-  fprintf(outf,
-          "  -c <S> <D>\tset the source/destination clocks for v2p requests.\n");
-#endif
   fprintf(outf,
           "  -T <B> <T>\tset the destination engine boots/time for v3 requests.\n");
   fprintf(outf, "  -e <E>\tsecurity engine ID (e.g., 800000020109840301).\n");
@@ -144,19 +130,6 @@ snmp_parse_args(int argc,
   char *Xpsz = NULL;
   u_char buf[BUF_SIZE];
   size_t bsize;
-#ifdef USE_V2PARTY_PROTOCOL
-  static oid src[MAX_OID_LEN];
-  static oid dst[MAX_OID_LEN];
-  static oid context[MAX_OID_LEN];
-  struct partyEntry *pp;
-  struct contextEntry *cxp;
-  struct hostent *hp;
-  char ctmp[300];
-  in_addr_t destAddr;
-  int clock_flag = 0;
-  u_long srcclock = 0;
-  u_long dstclock = 0;
-#endif
 
   /* initialize session to default values */
   snmp_sess_init( session );
@@ -252,28 +225,6 @@ snmp_parse_args(int argc,
           exit(1);
         }
         break;
-
-#ifdef USE_V2PARTY_PROTOCOL
-      case 'c':
-        clock_flag++;
-        if (isdigit(argv[arg][2]))
-          srcclock = (u_long)(atol(&(argv[arg][2])));
-        else if ((++arg<argc) && isdigit(argv[arg][0]))
-          srcclock = (u_long)(atol(argv[arg]));
-        else {
-          fprintf(stderr,"Need source clock value after -c flag.\n");
-          usage();
-          exit(1);
-        }
-        if ((++arg<argc) && isdigit(argv[arg][0]))
-          dstclock = (u_long)(atol(argv[arg]));
-        else {
-          fprintf(stderr,"Need destination clock value after -c flag.\n");
-          usage();
-          exit(1);
-        }
-        break;
-#endif /* USE_V2PARTY_PROTOCOL */
 
       case 'T':
         if (isdigit(argv[arg][2]))
@@ -573,146 +524,6 @@ snmp_parse_args(int argc,
     session->community = (unsigned char *)argv[arg];
     session->community_len = strlen((char *)argv[arg]);
     arg++;
-#ifdef USE_V2PARTY_PROTOCOL
-  } else if (session->version == SNMP_VERSION_2p) {
-    /* v2p - so get party info */
-    if (arg == argc) {
-      fprintf(stderr,"Neither a source party nor noAuth was specified.\n");
-      usage();
-      exit(1);
-    }
-
-    session->srcParty = src;
-    session->dstParty = dst;
-    session->context = context;
-
-    if (!strcasecmp(argv[arg], "noauth")){
-      if ((destAddr = inet_addr(session->peername)) == -1){
-        hp = gethostbyname(session->peername);
-        if (hp == NULL){
-          fprintf(stderr, "unknown host: %s\n", session->peername);
-          exit(1);
-        } else {
-          memmove(&destAddr, hp->h_addr, hp->h_length);
-        }
-      }
-      session->srcPartyLen = session->dstPartyLen =
-                    session->contextLen = MAX_OID_LEN;
-      ms_party_init(destAddr, session->srcParty, &(session->srcPartyLen),
-                    session->dstParty, &(session->dstPartyLen),
-                    session->context, &(session->contextLen));
-      arg++;
-    } else {
-      sprintf(ctmp,"%s/party.conf",SNMPSHAREPATH);
-      if (read_party_database(ctmp) != 0){
-	snmp_perror(argv[0]);
-        exit(1);
-      }
-      sprintf(ctmp,"%s/context.conf",SNMPSHAREPATH);
-      if (read_context_database(ctmp) != 0){
-	snmp_perror(argv[0]);
-        exit(1);
-      }
-      sprintf(ctmp,"%s/acl.conf",SNMPSHAREPATH);
-      if (read_acl_database(ctmp) != 0){
-	snmp_perror(argv[0]);
-        exit(1);
-      }
-
-      /* source party */
-
-      party_scanInit();
-      session->srcPartyLen = MAX_OID_LEN;
-      for(pp = party_scanNext(); pp; pp = party_scanNext()){
-        if (!strcasecmp(pp->partyName, argv[arg])){
-          session->srcPartyLen = pp->partyIdentityLen;
-          memmove(session->srcParty, pp->partyIdentity,
-                  session->srcPartyLen * sizeof(oid));
-          break;
-        }
-      }
-      if (!pp){
-        session->srcPartyLen = MAX_OID_LEN;
-        if (!read_objid(argv[arg], session->srcParty, &(session->srcPartyLen))){
-          snmp_perror(argv[arg]);
-          session->srcPartyLen = 0;
-          usage();
-          exit(1);
-        }
-      }
-      arg++;
-
-      if (arg == argc) {
-        fprintf(stderr,"No destination party specified.\n");
-        usage();
-        exit(1);
-      }
-
-      /* destination party */
-      session->dstPartyLen = MAX_OID_LEN;
-      party_scanInit();
-      for(pp = party_scanNext(); pp; pp = party_scanNext()){
-        if (!strcasecmp(pp->partyName, argv[arg])){
-          session->dstPartyLen = pp->partyIdentityLen;
-          memmove(session->dstParty, pp->partyIdentity,
-                  session->dstPartyLen * sizeof(oid));
-          break;
-        }
-      }
-      if (!pp){
-        if (!read_objid(argv[arg], session->dstParty, &(session->dstPartyLen))){
-          snmp_perror(argv[arg]);
-          session->dstPartyLen = 0;
-          usage();
-          exit(1);
-        }
-      }
-      arg++;
-
-      /* context */
-
-      if (arg == argc) {
-        fprintf(stderr,"No context specified.\n");
-        usage();
-        exit(1);
-      }
-
-      session->contextLen = MAX_OID_LEN;
-      context_scanInit();
-      for(cxp = context_scanNext(); cxp; cxp = context_scanNext()){
-        if (!strcasecmp(cxp->contextName, argv[arg])){
-          session->contextLen = cxp->contextIdentityLen;
-          memmove(session->context, cxp->contextIdentity,
-                  session->contextLen * sizeof(oid));
-          break;
-        }
-      }
-      if (!cxp){
-        if (!read_objid(argv[arg], session->context, &(session->contextLen))){
-          snmp_perror(argv[arg]);
-          session->contextLen = 0;
-          usage();
-          exit(1);
-        }
-      }
-      arg++;
-
-      if (clock_flag){
-        pp = party_getEntry(session->srcParty, session->srcPartyLen);
-        if (pp){
-            pp->partyAuthClock = srcclock;
-            gettimeofday(&pp->tv, (struct timezone *)0);
-            pp->tv.tv_sec -= pp->partyAuthClock;
-        }
-        pp = party_getEntry(session->dstParty, session->dstPartyLen);
-        if (pp){
-            pp->partyAuthClock = dstclock;
-            gettimeofday(&pp->tv, (struct timezone *)0);
-            pp->tv.tv_sec -= pp->partyAuthClock;
-        }
-      }
-    }
-#endif /* USE_V2PARTY_PROTOCOL */
   }
   return arg;
 }
