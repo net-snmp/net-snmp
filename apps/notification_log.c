@@ -326,7 +326,10 @@ log_notification(struct hostent *host, struct snmp_pdu *pdu,
     static oid snmptrapoid[] = {1,3,6,1,6,3,1,1,4,1,0};
     size_t snmptrapoid_len = OID_LENGTH(snmptrapoid);
     struct variable_list *vptr;
-
+    u_char *logdate;
+    size_t logdate_size;
+    time_t timetnow;
+    
     u_long vbcount = 0;
     u_long tmpul;
     int col;
@@ -347,9 +350,10 @@ log_notification(struct hostent *host, struct snmp_pdu *pdu,
     tmpl = timeval_uptime( &now );
     set_row_column(row, COLUMN_NLMLOGTIME, ASN_TIMETICKS,
                    (u_char *) &tmpl, sizeof(tmpl));
-/* XXX: do after merge to main line
-    set_row_column(row, COLUMN_NLMLOGDATEANDTIME, , );
-*/
+    time(&timetnow);
+    logdate = date_n_time(&timetnow, &logdate_size);
+    set_row_column(row, COLUMN_NLMLOGDATEANDTIME, ASN_OCTET_STR,
+                   logdate, logdate_size);
     set_row_column(row, COLUMN_NLMLOGENGINEID, ASN_OCTET_STR,
                    pdu->securityEngineID, pdu->securityEngineIDLen);
     if (transport &&
