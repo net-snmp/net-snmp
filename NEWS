@@ -50,6 +50,9 @@ the ChangeLog file for a more detailed listing of changes/bug fixes.
     - community 5 can be set now.
     - Many others.
 
+  Removed:
+    - Very ancient tk/tcl code.
+
 *3.1.0.1*
 
   Ported:
