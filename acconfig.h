@@ -225,27 +225,50 @@ sure to end it in -1.*/
 #endif
 
 #ifndef HAVE_STRCHR
+#ifdef HAVE_INDEX
 # define strchr index
 # define strrchr rindex
 #endif
+#endif
 
 #ifndef HAVE_INDEX
+#ifdef HAVE_STRCHR
 # define index strchr
 # define rindex strrchr
 #endif
+#endif
 
 #ifndef HAVE_MEMCPY
+#ifdef HAVE_BCOPY
 # define memcpy(d, s, n) bcopy ((s), (d), (n))
 # define memmove(d, s, n) bcopy ((s), (d), (n))
 # define memcmp bcmp
 #endif
+#endif
 
 #ifndef HAVE_BCOPY
+#ifdef HAVE_MEMCPY
 # define bcopy(s, d, n) memcpy ((d), (s), (n))
 # define bzero(p,n) memset((p),(0),(n))
 # define bcmp memcmp
 #endif
+#endif
 
+/* define random functions */
+
+#ifdef HAVE_LRAND48
+#define random lrand48
+#define srandom(s) srand48(s)
+#endif
+
+#ifndef HAVE_LRAND48
+#ifndef HAVE_RANDOM
+#ifdef HAVE_RAND
+#define random rand
+#define srandom(s) srand(s)
+#endif
+#endif
+#endif
 
 #ifndef DONT_INC_STRUCTS
 #include "agent/extensible/struct.h"
