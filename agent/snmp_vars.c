@@ -43,7 +43,7 @@ PERFORMANCE OF THIS SOFTWARE.
 #if HAVE_NET_IF_DL_H
 #include <net/if_dl.h>
 #endif
-#if HAVE_SYS_SYSTCL_H
+#if HAVE_SYS_SYSCTL_H
 #include <sys/sysctl.h>
 #endif
 #if HAVE_STDLIB_H
