@@ -48,6 +48,9 @@
 /* define if you are using the MD5 code ...*/
 #undef USE_INTERNAL_MD5
 
+/* define if you are using the codeS11 library ...*/
+#undef USE_PKCS
+
 /* add in recent CMU library extensions (not complete) */
 #undef CMU_COMPATIBLE
 
