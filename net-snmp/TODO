@@ -1,12 +1,10 @@
 V3.2
   snmpv2c support.
-  Gnu Auto-conf
-    AC_FUNC_MEMCMP
-  Continue to add and improve manual pages/documentation.
-  more snmpset'able variables
-  Should be able to set the fix script line in the .conf files per type.
-  agent should send traps to a trap daemon.  
-    (it might all ready, just needs configuration)
+  split agent/snmp_vars.c in to manageable pieces.
+  merge similar apps/* code into one file linked by all apps.
+  continue to add and improve manual pages/documentation.
+  more snmpset'able variables.
+  should be able to set the fix script line in the .conf files per type.
 
 Ideas:
   Make the mib parser figure out which of the above files it needs to
