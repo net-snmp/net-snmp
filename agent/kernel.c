@@ -31,10 +31,10 @@ init_kmem(file)
 	perror("/dev/mem");
 	exit(1);
     }
-#ifndef hpux
-    swap = open("/dev/drum",0);
-#else
+#ifdef hpux
     swap = open("/dev/dmem",0);
+#else
+    swap = open("/dev/drum",0);
 #endif
     if (swap < 0){
 	fprintf(stderr, "cannot open ");
