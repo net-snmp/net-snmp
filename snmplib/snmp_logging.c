@@ -977,6 +977,16 @@ log_handler_callback(netsnmp_log_handler* logh, int pri, const char *string)
     return 1;
 }
 
+int
+log_handler_null(    netsnmp_log_handler* logh, int pri, const char *string)
+{
+    /*
+     * Dummy log handler - just throw away the error completely
+     * You probably don't really want to do this!
+     */
+    return 1;
+}
+
 void
 snmp_log_string(int priority, const char *string)
 {
