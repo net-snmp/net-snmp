@@ -1,9 +1,19 @@
 #include <stdio.h>
+#include <unistd.h>
+#include <sys/fcntl.h>
 #include <sys/types.h>
 #include <signal.h>
 #include <nlist.h>
 #include <machine/param.h>
 #include <sys/vmmeter.h>
+#include <sys/conf.h>
+#include <sys/swap.h>
+#include <sys/param.h>
+#include <sys/fs.h>
+#include <sys/stat.h>
+#include <errno.h>
+#include <fstab.h>
+#include <mtab.h>
 #include "../../snmplib/asn1.h"
 #include "../../snmplib/snmp_impl.h"
 #include "../snmp_vars.h"
@@ -13,8 +23,9 @@
 
 #include "wes.h"
 
-static struct myproc *procwatch;
-static struct exstensible *extens;
+static struct myproc *procwatch=NULL;
+static struct exstensible *extens=NULL;
+int minimumswap;
 int numprocs, numextens;
 static int pageshift;           /* log base 2 of the pagesize */
 
@@ -108,7 +119,7 @@ unsigned char *var_wes_proc(vp, name, length, exact, var_len, write_method)
       case PROCCOUNT:
         long_ret = sh_count_procs(proc->name);
         return ((u_char *) (& long_ret));
-      case PROCERROR:
+      case ERRORFLAG:
         long_ret = sh_count_procs(proc->name);
         if ((proc->min && long_ret < proc->min) || 
             (proc->max && long_ret > proc->max) ||
@@ -119,14 +130,14 @@ unsigned char *var_wes_proc(vp, name, length, exact, var_len, write_method)
           long_ret = 0;
         }
         return ((u_char *) (& long_ret));
-      case PROCERRORMSG:
+      case ERRORMSG:
         long_ret = sh_count_procs(proc->name);
         if (proc->min && long_ret < proc->min) {
-          sprintf(errmsg,"Too few copies of %s running (# = %d)",
+          sprintf(errmsg,"Too few %s running (# = %d)",
                   proc->name, long_ret);
         }
         else if (proc->max && long_ret > proc->max) {
-          sprintf(errmsg,"Too many copies of %s running (# = %d)",
+          sprintf(errmsg,"Too many %s running (# = %d)",
                   proc->name, long_ret);
         }
         else if (proc->min == 0 && proc->max == 0 && long_ret < 1) {
@@ -179,14 +190,14 @@ unsigned char *var_wes_shell(vp, name, length, exact, var_len, write_method)
       case SHELLCOMMAND:
         *var_len = strlen(exten->command);
         return((u_char *) (exten->command));
-      case SHELLRESULT:
+      case ERRORFLAG:  /* return code from the process */
         if (exten->type == EXECPROC)
           exec_command(exten);
         else
           shell_command(exten);
         return((u_char *) (&exten->result));
         return((u_char *) (&long_ret));
-      case SHELLOUTPUT:
+      case ERRORMSG:   /* first line of text returned from the process */
         if (exten->type == EXECPROC)
           exec_command(exten);
         else
@@ -201,15 +212,91 @@ unsigned char *var_wes_shell(vp, name, length, exact, var_len, write_method)
 
 #define pagetok(size) ((size) << pageshift)
 #define NL_TOTAL 0
+#define NL_SWDEVT 1
+#define NL_FSWDEVT 2
+#define NL_NSWAPFS 3
+#define NL_NSWAPDEV 4
+#define NL_PHYSMEM 5
 #define  KNLookup(nl_which, buf, s)   (klookup((int) nl[nl_which].n_value, buf, s))
 
 static struct nlist nl[] = {
 #ifndef hpux
-  { "_total"}
+  { "_total"},
+  { "_swdevt"},
+  { "_fswdevt"},
+  { "_nswapfs"},
+  { "_nswapdev"},
+  { "_physmem"},
 #else
-  { "total"}
+  { "total"},
+  { "swdevt"},
+  { "fswdevt"},
+  { "nswapfs"},
+  { "nswapdev"},
+  { "physmem"},
 #endif
+  { 0 }
 };
+
+#define SWAPGETLEFT 0
+#define SWAPGETTOTAL 1
+
+int nswapdev=10;            /* taken from <machine/space.h> */
+int nswapfs=10;            /* taken from <machine/space.h> */
+
+int getswap(rettype)
+  int rettype;
+{
+
+  struct swdevt swdevt[100];
+  struct fswdevt fswdevt[100];
+  int spaceleft=0, spacetotal=0, i, fd;
+  FILE *file;
+  struct extensible ex;
+  
+  if (KNLookup(NL_SWDEVT,(int *) swdevt, sizeof(struct swdevt)*nswapdev)
+      == NULL)
+    return(0);
+  for (i=0; i < nswapdev; i++) {
+    if (swdevt[i].sw_enable) {
+      spacetotal += swdevt[i].sw_nblks;
+      spaceleft += (swdevt[i].sw_nfpgs * 4);
+    }
+  }
+  if (KNLookup(NL_FSWDEVT,(int *) fswdevt, sizeof(struct fswdevt)*nswapfs)
+      == NULL)
+    return(0);
+  for (i=0; i < nswapfs; i++) {
+    if (fswdevt[i].fsw_enable) {
+      spacetotal += (fswdevt[i].fsw_limit * 2048);  /* 2048=bytes per page? */
+      spaceleft += (fswdevt[i].fsw_limit * 2048 -
+                    ((fswdevt[i].fsw_allocated - fswdevt[i].fsw_min) * 37));
+      /* 37 = calculated value I know it makes no sense, nor is it accurate */
+    }
+  }
+  /* this is a real hack.  I need to get the hold info from swapinfo, but
+     I can't figure out how to read it out of the kernel directly
+     -- Wes */
+  strcpy(ex.command,"/etc/swapinfo -h");
+  fd = get_exec_output(ex);
+  file = fdopen(fd,"r");
+  for (i=1;i <= 2 && fgets(ex.output,STRMAX,file) != NULL; i++);
+  if (fgets(ex.output,STRMAX,file) != NULL) {
+    spaceleft -= atoi(&ex.output[14]);
+  }
+  fclose(file);
+  close(fd);
+  while(wait3(&ex.result,0,0) > 0);
+  switch
+    (rettype) {
+    case
+      SWAPGETLEFT:
+    return(spaceleft);
+    case
+      SWAPGETTOTAL:
+    return(spacetotal);
+  }
+}
 
 unsigned char *var_wes_mem(vp, name, length, exact, var_len, write_method)
     register struct variable *vp;
@@ -242,13 +329,19 @@ unsigned char *var_wes_mem(vp, name, length, exact, var_len, write_method)
   }
   switch (vp->magic) {
     case MEMTOTALSWAP:
-      long_ret = pagetok(total.t_vm);
+      long_ret = getswap(SWAPGETTOTAL);
       return((u_char *) (&long_ret));
     case MEMUSEDSWAP:
-      long_ret = pagetok(total.t_avm);
+      long_ret = getswap(SWAPGETLEFT);
+      return((u_char *) (&long_ret));
+    case MEMSWAPMINIMUM:
+      long_ret = minimumswap;
       return((u_char *) (&long_ret));
     case MEMTOTALREAL:
-      long_ret = pagetok((int) total.t_rm);
+      /* long_ret = pagetok((int) total.t_rm); */
+      if(KNLookup(NL_PHYSMEM,(int *) &result,sizeof(result)) == NULL)
+        return(0);
+      long_ret = result*1000;
       return((u_char *) (&long_ret));
     case MEMUSEDREAL:
       long_ret = pagetok((int) total.t_arm);
@@ -268,13 +361,227 @@ unsigned char *var_wes_mem(vp, name, length, exact, var_len, write_method)
     case MEMTOTALFREE:
       long_ret = pagetok(total.t_free);
       return((u_char *) (&long_ret));
+    case ERRORFLAG:
+      long_ret = getswap(SWAPGETLEFT);
+      long_ret = (long_ret > minimumswap)?0:1;
+      return((u_char *) (&long_ret));
+    case ERRORMSG:
+      sprintf(errmsg,"Running out of swap space");
+      *var_len = strlen(errmsg);
+      return((u_char *) (errmsg));
   }
 }
 
+static int numdisks;
+struct diskpart disks[MAXDISKS];
+
+unsigned char *var_wes_disk(vp, name, length, exact, var_len, write_method)
+    register struct variable *vp;
+/* IN - pointer to variable entry that points here */
+    register oid	*name;
+/* IN/OUT - input name requested, output name found */
+    register int	*length;
+/* IN/OUT - length of input and output oid's */
+    int			exact;
+/* IN - TRUE if an exact match was requested. */
+    int			*var_len;
+/* OUT - length of variable or 0 if function returned. */
+    int			(**write_method)();
+/* OUT - pointer to function to set variable, otherwise 0 */
+{
+
+  oid newname[30];
+  int count, result,i, rtest=0, disknum=0;
+  int totalblks, free, used, avail, availblks;
+  register int interface;
+  struct myproc *proc;
+  long long_ret;
+  char errmsg[300];
+
+  int file;
+  union {
+     struct fs iu_fs;
+     char dummy[SBSIZE];
+  } sb;
+#define filesys sb.iu_fs
+
+  if (!checkmib(vp,name,length,exact,var_len,write_method,newname,numdisks))
+    return(NULL);
+  disknum = newname[*length - 1] - 1;
+  switch (vp->magic) {
+    case DISKINDEX:
+      long_ret = disknum;
+      return((u_char *) (&long_ret));
+    case DISKPATH:
+      *var_len = strlen(disks[disknum].path);
+      return((u_char *) disks[disknum].path);
+    case DISKDEVICE:
+      *var_len = strlen(disks[disknum].device);
+      return((u_char *) disks[disknum].device);
+    case DISKMINIMUM:
+      long_ret = disks[disknum].minimumspace;
+      return((u_char *) (&long_ret));
+  }
+  /* read the disk information */
+  if ((file = open(disks[disknum].device,0)) < 0) {
+    fprintf(stderr,"Couldn't open device %s\n",disks[disknum].device);
+    perror("open dev/disk");
+    return(NULL);
+  }
+  lseek(file, (long) (SBLOCK * DEV_BSIZE), 0);
+  if (read(file,(char *) &filesys, SBSIZE) != SBSIZE) {
+    perror("open dev/disk");
+    fprintf(stderr,"Error reading device %s\n",disks[disknum].device);
+    close(file);
+    return(NULL);
+  }
+  close(file);
+  totalblks = filesys.fs_dsize;
+  free = filesys.fs_cstotal.cs_nbfree * filesys.fs_frag +
+    filesys.fs_cstotal.cs_nffree;
+  used = totalblks - free;
+  availblks = totalblks * (100 - filesys.fs_minfree) / 100;
+  avail = availblks > used ? availblks - used : 0;
+  switch (vp->magic) {
+    case DISKTOTAL:
+      long_ret = (totalblks * filesys.fs_fsize / 1024);
+      return((u_char *) (&long_ret));
+    case DISKAVAIL:
+      long_ret = avail * filesys.fs_fsize/1024;
+      return((u_char *) (&long_ret));
+    case DISKUSED:
+      long_ret = used * filesys.fs_fsize/1024;
+      return((u_char *) (&long_ret));
+    case DISKPERCENT:
+      long_ret = (int) (availblks == 0 ? 0 :
+                        ((double) used / (double) availblks) * 100);
+      return ((u_char *) (&long_ret));
+    case ERRORFLAG:
+      long_ret = (avail * filesys.fs_fsize/1024 < disks[disknum].minimumspace)
+        ? 1 : 0;
+      return((u_char *) (&long_ret));
+    case ERRORMSG:
+      if (avail * filesys.fs_fsize/1024 < disks[disknum].minimumspace) 
+        sprintf(errmsg,"%s: under %d left",disks[disknum].path,
+                disks[disknum].minimumspace);
+      else
+        errmsg[0] = NULL;
+      *var_len = strlen(errmsg);
+      return((u_char *) (errmsg));
+  }
+}
+
+#define NOERR 0
+#define LOCKDBROKE 1
+#define OPENERR 2
+
+/*
+static int locktimeouttest;
+
+int lockd_timeout()
+{
+  locktimeouttest=1;
+}
+*/
+
+long lockd_test(msg)
+  char *msg;
+{
+
+  int file, ret;
+  
+/*  signal(SIGALRM,update_config); */
+  
+  file = open(LOCKDNFSFILE,O_RDONLY);
+  if (file < 0) {
+    /* needs to be created */
+    file = open(LOCKDNFSFILE,O_WRONLY|O_CREAT,0644);
+    if (file < 0) {
+      sprintf(msg,"open() - %s\terrno:%d",LOCKDNFSFILE,errno);
+      return (OPENERR);
+    }
+  }
+  ret = lockf(file,F_TLOCK,0);
+  if (ret) {
+    sprintf(msg,"Lockd not functioning:  couldn't lock %s",LOCKDNFSFILE);
+    close(file);
+/*    unlink(LOCKDREALFILE); */
+    return(LOCKDBROKE);
+  }
+  ret = lockf(file,F_ULOCK,0);
+  if (ret) {
+    sprintf(msg,"Lockd not functioning:  couldn't unlock %s",LOCKDNFSFILE);
+    close(file);
+/*    unlink(LOCKDREALFILE);*/
+    return(LOCKDBROKE);
+  }
+  close(file);
+  /* remove the real file, not the nfs file */
+  /* unlink(LOCKDREALFILE); */
+  return (NOERR);
+}
+
+unsigned char *var_wes_lockd_test(vp, name, length, exact, var_len, write_method)
+    register struct variable *vp;
+/* IN - pointer to variable entry that points here */
+    register oid	*name;
+/* IN/OUT - input name requested, output name found */
+    register int	*length;
+/* IN/OUT - length of input and output oid's */
+    int			exact;
+/* IN - TRUE if an exact match was requested. */
+    int			*var_len;
+/* OUT - length of variable or 0 if function returned. */
+    int			(**write_method)();
+/* OUT - pointer to function to set variable, otherwise 0 */
+{
+
+  oid newname[30];
+  int count, result,i, rtest=0;
+  register int interface;
+  struct myproc *proc;
+  long long_ret;
+  char errmsg[300];
+
+
+  if (!checkmib(vp,name,length,exact,var_len,write_method,newname,1))
+    return(NULL);
+
+  errmsg[0] = NULL;
+  
+  switch (vp->magic) {
+    case LOCKDINDEX:
+      long_ret = newname[*length - 1];
+      return((u_char *) (&long_ret));
+    case ERRORFLAG:
+      long_ret = lockd_test(errmsg);
+      return((u_char *) (&long_ret));
+    case ERRORMSG:
+      long_ret = lockd_test(errmsg);
+      *var_len = strlen(errmsg);
+      return((u_char *) errmsg);
+  }
+  return NULL;
+}
+
+
 int update_config()
 {
+  int i;
   free_config(&procwatch,&extens);
-  read_config (DEFPROCFILE,&procwatch,&numprocs,&extens,&numextens);
+  /* restore defaults */
+  minimumswap = DEFAULTMINIMUMSWAP;
+  numdisks = 0;
+  for(i=0;i<MAXDISKS;i++) {           /* init/erase disk db */
+    disks[i].device[0] = NULL;
+    disks[i].path[0] = NULL;
+    disks[i].minimumspace = -1;
+  }
+  /* read the config files */
+  read_config (CONFIGFILE,&procwatch,&numprocs,&extens,&numextens,&minimumswap,disks,&numdisks);
+#ifdef CONFIGFILETWO
+  read_config (CONFIGFILETWO,&procwatch,&numprocs,&extens,&numextens,&minimumswap,disks,&numdisks);
+#endif  
   signal(SIGHUP,update_config);
 }
 
@@ -283,7 +590,7 @@ extern char version_descr[];
 init_wes() {
   
   struct extensible extmp;
-  int ret,pagesize;
+  int ret,pagesize,i;
 
   
 #ifdef mips
@@ -291,10 +598,25 @@ init_wes() {
 #else
   strcpy(extmp.command,"/bin/uname -m -n -r -s -v -i");
 #endif
+  /* setup defaults */
   extmp.type = EXECPROC;
   extmp.next = NULL;
 
-  read_config (DEFPROCFILE,&procwatch,&numprocs,&extens,&numextens);
+  minimumswap = DEFAULTMINIMUMSWAP;
+  numdisks = 0;
+  for(i=0;i<MAXDISKS;i++) {           /* init/erase disk db */
+    disks[i].device[0] = NULL;
+    disks[i].path[0] = NULL;
+    disks[i].minimumspace = -1;
+  }
+
+  /* read config file(s) */
+  /* read the config files */
+  read_config (CONFIGFILE,&procwatch,&numprocs,&extens,&numextens,&minimumswap,disks,&numdisks);
+#ifdef CONFIGFILETWO
+  read_config (CONFIGFILETWO,&procwatch,&numprocs,&extens,&numextens,&minimumswap,disks,&numdisks);
+#endif  
+  
   /* set default values of system stuff */
   exec_command(&extmp);
   strcpy(version_descr,extmp.output);
@@ -311,6 +633,13 @@ init_wes() {
       fprintf(stderr, "nlist err:  %s not found\n",nl[ret].n_name);
     }
   }
+
+  if (KNLookup(NL_NSWAPDEV,(int *) &nswapdev, sizeof(nswapdev))
+      == NULL)
+    return(0);
+  if (KNLookup(NL_NSWAPFS,(int *) &nswapfs, sizeof(nswapfs))
+      == NULL)
+    return(0);
 
   pagesize = 1 << PGSHIFT;
   pageshift = 0;

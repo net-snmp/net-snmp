@@ -31,3 +31,9 @@ struct mibinfo
 };
 
 
+struct diskpart
+{
+   char device[STRMAX];
+   char path[STRMAX];
+   int minimumspace;
+};
