@@ -302,6 +302,7 @@ netsnmp_iterator_remember(netsnmp_request_info *request,
     return ti_info;
 }    
 
+#define TABLE_ITERATOR_NOTAGAIN 255
 /** implements the table_iterator helper */
 int
 netsnmp_table_iterator_helper_handler(netsnmp_mib_handler *handler,
@@ -387,7 +388,7 @@ netsnmp_table_iterator_helper_handler(netsnmp_mib_handler *handler,
                    and take it, comparing to nothing from the request */
                 table_info->colnum = tbl_info->min_column - 1;
             } else if (table_info->colnum > tbl_info->max_column) {
-                request->processed = 1;
+                request->processed = TABLE_ITERATOR_NOTAGAIN;
             }
 
             ti_info =
@@ -610,7 +611,7 @@ netsnmp_table_iterator_helper_handler(netsnmp_mib_handler *handler,
                             coloid[reginfo->rootoid_len+1] = table_info->colnum+1;
                             snmp_set_var_objid(request->requestvb,
                                                coloid, reginfo->rootoid_len+2);
-                            request->processed = 1;
+                            request->processed = TABLE_ITERATOR_NOTAGAIN;
                             break;
                         } else {
                             table_info->colnum++;
@@ -703,7 +704,10 @@ netsnmp_table_iterator_helper_handler(netsnmp_mib_handler *handler,
                  * get next skipped this value for this column, we
                  * need to keep searching forward 
                  */
-                request->requestvb->type = ASN_PRIV_RETRY;
+                if (request->processed != TABLE_ITERATOR_NOTAGAIN)
+                    request->requestvb->type = ASN_PRIV_RETRY;
+                else
+                    request->processed = 1;
             }
         }
         reqinfo->mode = oldmode;
