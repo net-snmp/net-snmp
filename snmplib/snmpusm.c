@@ -1408,13 +1408,13 @@ usm_check_and_update_timeliness(
 	int    *error)
 {
 	u_char	myID[USM_MAX_ID_LENGTH];
-	int	myIDLength = snmpv3_get_engineID(myID, USM_MAX_ID_LENGTH);
+	u_long	myIDLength = snmpv3_get_engineID(myID, USM_MAX_ID_LENGTH);
 	u_int	myBoots;
 	u_int	myTime;
 
 
 
-	if ( (myIDLength > USM_MAX_ID_LENGTH) || (myIDLength < 0) )
+	if ( (myIDLength > USM_MAX_ID_LENGTH) || (myIDLength == 0) )
 	{
 		/* We're probably already screwed...buffer overwrite.  XXX? */
 		DEBUGMSGTL(("usm","Buffer overflow.\n"));
