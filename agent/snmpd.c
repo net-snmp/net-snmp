@@ -320,7 +320,7 @@ send_trap_pdu(pdu)
   if ((snmp_enableauthentraps == 1) && sink != NULL) {
     while (sink) {
       mypdu = snmp_clone_pdu(pdu);
-      if (snmp_send(sink->sesp, pdu) == 0) {
+      if (snmp_send(sink->sesp, mypdu) == 0) {
         snmp_perror ("snmpd: send_trap_pdu");
       }
 #ifdef USING_MIBII_SNMP_MIB_MODULE       
