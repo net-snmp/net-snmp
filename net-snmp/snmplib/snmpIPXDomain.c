@@ -30,7 +30,7 @@
 #include "snmpIPXDomain.h"
 
 #define SNMP_IPX_DEFAULT_PORT	36879		/*  Specified in RFC 1420.  */
-
+static snmp_tdomain ipxDomain;
 
 /*  Return a string representing the address in data, or else the "far end"
     address if data is NULL.  */
@@ -314,4 +314,17 @@ int			snmp_sockaddr_ipx	(struct sockaddr_ipx *addr,
   }
 
   return 1;
+}
+
+
+
+snmp_transport	*snmp_ipx_create		(const char *string, int local)
+{
+  struct sockaddr_ipx addr;
+
+  if (snmp_sockaddr_ipx(&addr, string)) {
+    return snmp_ipx_transport(&addr, local);
+  } else {
+    return NULL;
+  }
 }

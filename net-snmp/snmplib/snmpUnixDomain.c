@@ -26,6 +26,7 @@
 #include "asn1.h"
 #include "snmp.h"
 #include "snmp_debug.h"
+#include "snmp_logging.h"
 #include "default_store.h"
 #include "snmp_transport.h"
 #include "snmpUnixDomain.h"
@@ -42,6 +43,7 @@
 #endif
 
 const oid ucdSnmpUnixDomain[9] = { UCDAVIS_MIB, 251, 2 };
+static snmp_tdomain unixDomain;
 
 
 /*  This is the structure we use to hold transport-specific data.  */
@@ -311,4 +313,32 @@ snmp_transport		*snmp_unix_transport	(struct sockaddr_un *addr,
   t->f_fmtaddr   = snmp_unix_fmtaddr;
 
   return t;
+}
+
+snmp_transport	*snmp_unix_create		(const char *string, int local)
+{
+  struct sockaddr_un addr;
+
+  if ((string != NULL) && (strlen(string) < sizeof(addr.sun_path))) {
+    addr.sun_family = AF_UNIX;
+    memset(addr.sun_path, 0, sizeof(addr.sun_path));
+    strncpy(addr.sun_path, string, sizeof(addr.sun_path) - 1);
+    return snmp_unix_transport(&addr, local);
+  } else {
+    if (string != NULL) {
+      snmp_log(LOG_ERR, "Path too long for Unix domain transport\n");
+    }
+    return NULL;
+  }
+}
+
+void		snmp_unix_ctor			(void)
+{
+  unixDomain.name        = ucdSnmpUnixDomain;
+  unixDomain.name_length = sizeof(ucdSnmpUnixDomain)/sizeof(oid);
+  unixDomain.f_create    = snmp_unix_create;
+  unixDomain.prefix      = calloc(2, sizeof(char *));
+  unixDomain.prefix[0]   = "unix";
+
+  snmp_tdomain_register(&unixDomain);
 }

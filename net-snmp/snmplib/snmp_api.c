@@ -554,6 +554,7 @@ _init_snmp (void)
 
     snmp_res_init();	/* initialize the mt locking structures */
     init_mib_internals();
+    snmp_tdomain_init();
 
     gettimeofday(&tv,(struct timezone *)0);
     /*Now = tv;*/
@@ -1142,76 +1143,21 @@ _sess_open(struct snmp_session *in_session)
     session = slp->session;
     slp->transport = NULL;
 
-    if (session->peername && session->peername[0] == '/') {
-#ifdef SNMP_TRANSPORT_UNIX_DOMAIN
-      struct sockaddr_un addr;
-
-      addr.sun_family = AF_UNIX;
-      strcpy(addr.sun_path, session->peername);
-      slp->transport = snmp_unix_transport(&addr, session->local_port);
-#else
-      snmp_log(LOG_ERR,
-	       "No support for requested Unix domain session (\"%s\")\n",
-	       session->peername);
-#endif
-    } else if (session->peername && session->peername[0] == '#') {
-#ifdef SNMP_TRANSPORT_AAL5PVC_DOMAIN
-      struct sockaddr_atmpvc addr;
-
-      addr.sap_family = AF_ATMPVC;
-      addr.sap_addr.itf = 0;
-      addr.sap_addr.vpi = 0;
-      addr.sap_addr.vci = atoi(&(session->peername[1]));
-      slp->transport = snmp_aal5pvc_transport(&addr, session->local_port);
-#else
-      snmp_log(LOG_ERR,
-	       "No support for requested AAL5 PVC domain session (\"%s\")\n",
-	       session->peername);
-#endif
-    } else if (session->peername && session->peername[0] == '^') {
-#ifdef SNMP_TRANSPORT_IPX_DOMAIN
-      struct sockaddr_ipx addr;
-      
-      if (snmp_sockaddr_ipx(&addr, &(session->peername[1]))) {
-	slp->transport = snmp_ipx_transport(&addr, session->local_port);
-      }
-#else
-      snmp_log(LOG_ERR,
-	       "No support for requested IPX domain session (\"%s\")\n",
-	       session->peername);
-#endif
+    if (session->flags & SNMP_FLAGS_STREAM_SOCKET) {
+      slp->transport = snmp_tdomain_transport(session->peername,
+					      session->local_port, "tcp");
     } else {
-      struct sockaddr_in addr;
-
-      if (snmp_sockaddr_in(&addr, session->peername, session->remote_port)) {
-	DEBUGMSGTL(("_sess_open", "interpreted peername okay\n"));
-	if (session->flags & SNMP_FLAGS_STREAM_SOCKET) {
-#ifdef SNMP_TRANSPORT_TCP_DOMAIN
-	  slp->transport = snmp_tcp_transport(&addr, session->local_port);
-#else
-	  snmp_log(LOG_ERR,
-		   "No support for requested TCP domain session (\"%s\")\n",
-		   session->peername);
-#endif
-	} else {
-	  slp->transport = snmp_udp_transport(&addr, session->local_port);
-	}
-      } else {
-	DEBUGMSGTL(("_sess_open", "couldn't interpret peername\n"));
-	in_session->s_snmp_errno = SNMPERR_BAD_ADDRESS;
-	in_session->s_errno = errno;
-	snmp_set_detail(session->peername);
-	snmp_sess_close(slp);
-	return NULL;
-      }
+      slp->transport = snmp_tdomain_transport(session->peername,
+					      session->local_port, "udp");
     }
-   
+
     if (slp->transport == NULL) {
-      in_session->s_snmp_errno = SNMPERR_BAD_LOCPORT;
+      DEBUGMSGTL(("_sess_open", "couldn't interpret peername\n"));
+      in_session->s_snmp_errno = SNMPERR_BAD_ADDRESS;
       in_session->s_errno = errno;
-      snmp_set_detail(strerror(errno));
+      snmp_set_detail(session->peername);
       snmp_sess_close(slp);
-      return 0;
+      return NULL;
     }
 
     session->rcvMsgMaxSize = slp->transport->msgMaxSize;

@@ -79,6 +79,15 @@ typedef struct _snmp_transport {
   char *(*f_fmtaddr) (struct _snmp_transport *, void *, int);
 } snmp_transport;
 
+typedef struct _snmp_tdomain {
+  const oid		*name;
+  size_t		 name_length;
+  const char 	       **prefix;
+
+  snmp_transport	*(*f_create)(const char *, int);
+
+  struct _snmp_tdomain	*next;
+} snmp_tdomain;
 
 
 /*  Some utility functions.  */
@@ -103,10 +112,22 @@ void		     	snmp_transport_free	(snmp_transport *t);
 
 int			snmp_transport_support	(const oid *in_oid,
 						 size_t in_len,
-						 oid **out_oid,
+						 const oid **out_oid,
 						 size_t *out_len);
 						 
+int			snmp_tdomain_support	(const oid *in_oid,
+						 size_t in_len,
+						 const oid **out_oid,
+						 size_t *out_len);
+						 
+int			snmp_tdomain_register	(snmp_tdomain *domain);
 
+int			snmp_tdomain_unregister	(snmp_tdomain *domain);
+
+void			snmp_tdomain_init	(void);
+
+snmp_transport	       *snmp_tdomain_transport	(const char *string, int local,
+						 const char *default_domain);
 
 #ifdef __cplusplus
 }
