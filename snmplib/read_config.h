@@ -48,6 +48,7 @@ char *skip_white (char *);
 char *skip_not_white (char *);
 char *skip_token(char *);
 char *copy_word (char *, char *);
+char *copy_nword (char *, char *, int);
 void read_config_with_type (const char *, const char *);
 struct config_line *register_config_handler (const char *, const char *,
                                              void (*parser)(const char *, char *),
