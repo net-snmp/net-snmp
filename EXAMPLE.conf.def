@@ -394,3 +394,17 @@ access mygroup ""      any       noauth    0      mib2   none   none
 #access admin  ""      any       noauth    0      mib2   system none
 access public  ""      any       noauth    0      system none   none
 access local   ""      any       noauth    0      all    all    all
+
+#
+# If you want to get back to the functionality of previous versions,
+# where the public community could read anything from anywhere and the 
+# private community could write anything from anywhere, use these
+# lines instead:
+#
+# com2sec public  default public
+# com2sec private default private
+# group   public  any     public
+# group   private any     private
+# view    all     included .1 80
+# access  public  "" any noauth 0 all none none
+# access  private "" any noauth 0 all all none
