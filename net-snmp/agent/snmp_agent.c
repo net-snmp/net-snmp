@@ -147,6 +147,7 @@ int             handle_set_loop(netsnmp_agent_session *asp);
 
 int             netsnmp_check_queued_chain_for(netsnmp_agent_session *asp);
 int             netsnmp_add_queued(netsnmp_agent_session *asp);
+int             netsnmp_remove_from_delegated(netsnmp_agent_session *asp);
 
 
 static int      current_globalid = 0;
@@ -921,6 +922,9 @@ free_agent_snmp_session(netsnmp_agent_session *asp)
 {
     if (!asp)
         return;
+
+    netsnmp_remove_from_delegated(asp);
+    
     if (asp->orig_pdu)
         snmp_free_pdu(asp->orig_pdu);
     if (asp->pdu)
@@ -993,6 +997,30 @@ netsnmp_check_for_delegated_and_add(netsnmp_agent_session *asp)
         }
         return 1;
     }
+    return 0;
+}
+
+int
+netsnmp_remove_from_delegated(netsnmp_agent_session *asp)
+{
+    netsnmp_agent_session *next_asp, *curr, *prev_asp = NULL;
+    
+    for (curr = agent_delegated_list; curr; prev_asp = curr, curr = next_asp) {
+        next_asp = asp->next;   /* save in case we clean up asp */
+        if (curr != asp)
+            continue;
+        
+        /*
+         * remove from queue 
+         */
+        if (prev_asp != NULL)
+            prev_asp->next = asp->next;
+        else
+            agent_delegated_list = asp->next;
+        
+        return 1;
+    }
+
     return 0;
 }
 
