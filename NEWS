@@ -16,7 +16,7 @@ the ChangeLog file for a more detailed listing of changes/bug fixes.
     - SNMP over TCP is supported.
       (-T TCP as on the command line)
     - OpenSSL has replaced KMT for SHA authentication and DES encryption.
-      (encryption support is still not exportable though, sorry).
+      (Get OpenSSL from http://www.openssl.org/).
     - Some easier-to-use access-control snmpd.conf directives for simple setups.
       (see the snmpd.conf(5) manual page)
     - Easier to setup SNMPv3 support for the agent.
