@@ -14,6 +14,10 @@
 #define SYS_NAME    "unknown"
 #define SYS_LOC     "UCDavis Electrical Engineering Departement"
 
+/* Logfile.  If defined it closes stdout/err and opens this in their place */
+
+#define LOGFILE "/usr/adm/ece-snmpd.log"
+
 /* mib pointer to my tree */
 
 #define EXTENSIBLEMIB 1,3,6,1,4,10 /* location of the extensible mib tree */
@@ -32,8 +36,10 @@
 
 #define VERSIONMIBNUM 100  /* which version are you using?
                               This mibloc will tell you */
+#define ERRORMIBNUM 101
+#define ERRORTIMELENGTH 600 /* how long to wait for error querys */
 
-#ifdef SYSV
+#if defined(hpux) || defined(SYSV)
 #define PSCMD "/bin/ps -e"
 #else
 #define PSCMD "/bin/ps -axc"
