@@ -176,18 +176,18 @@ static void optProc(int argc, char *const *argv, int opt)
 
 void usage(void)
 {
-  fprintf(stdout,"Usage: snmptable ");
-  snmp_parse_args_usage(stdout);
-  fprintf(stdout," <objectID>\n\n");
-  snmp_parse_args_descriptions(stdout);
-  fprintf(stdout,"  -Cw <W>\tprint table in parts of W characters width\n");
-  fprintf(stdout,"  -Cf <F>\tprint an F delimited table\n");
-  fprintf(stdout,"  -Cb\t\tbrief field names\n");
-  fprintf(stdout,"  -CB\t\tdon't use GETBULK requests\n");
-  fprintf(stdout,"  -Ci\t\tprint index value\n");
-  fprintf(stdout,"  -Ch\t\tprint only the column headers\n");
-  fprintf(stdout,"  -CH\t\tprint no column headers\n");
-  exit(1);
+  fprintf(stderr, "USAGE: snmptable ");
+  snmp_parse_args_usage(stderr);
+  fprintf(stderr," TABLE-OID\n\n");
+  snmp_parse_args_descriptions(stderr);
+  fprintf(stderr, "  -C APPOPTS\t\tSet various application specific behaviours:\n");
+  fprintf(stderr, "\t\t\t  b:       brief field names\n");
+  fprintf(stderr, "\t\t\t  B:       do not use GETBULK requests\n");
+  fprintf(stderr, "\t\t\t  f<STR>:  print table delimitied with <STR>\n");
+  fprintf(stderr, "\t\t\t  h:       print only the column headers\n");
+  fprintf(stderr, "\t\t\t  H:       print no column headers\n");
+  fprintf(stderr, "\t\t\t  i:       print index values\n");
+  fprintf(stderr, "\t\t\t  w<NUM>:  print table in parts of <NUM> chars width\n");
 }
 
 void

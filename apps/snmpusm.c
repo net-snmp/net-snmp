@@ -99,10 +99,10 @@ usage (void)
   fprintf(stderr," COMMAND\n\n");
   snmp_parse_args_descriptions(stderr);
   fprintf(stderr, "\nsnmpusm commands:\n");
-  fprintf(stderr, "  create    USER [CLONEFROM]\n");
+  fprintf(stderr, "  create    USER [CLONEFROM-USER]\n");
   fprintf(stderr, "  delete    USER\n");
-  fprintf(stderr, "  cloneFrom USER FROM\n");
-  fprintf(stderr, "  passwd    [-Co] [-Ca] [-Cx] old_passphrase new_passphrase\n");
+  fprintf(stderr, "  cloneFrom USER CLONEFROM-USER\n");
+  fprintf(stderr, "  passwd    [-Co] [-Ca] [-Cx] OLD-PASSPHRASE NEW-PASSPHRASE\n");
   fprintf(stderr, "\t\t-Co\t\tUse the ownKeyChange objects.\n");
   fprintf(stderr, "\t\t-Cx\t\tChange the privacy key.\n");
   fprintf(stderr, "\t\t-Ca\t\tChange the authentication key.\n");

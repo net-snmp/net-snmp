@@ -79,7 +79,7 @@ int input_variable (struct variable_list *);
 
 void usage(void)
 {
-  fprintf(stderr,"Usage: snmptest ");
+  fprintf(stderr,"USAGE: snmptest ");
   snmp_parse_args_usage(stderr);
   fprintf(stderr,"\n\n");
   snmp_parse_args_descriptions(stderr);
