@@ -41,7 +41,7 @@ int     get_default_secLevel(void);
 oid    *get_default_authtype(size_t *);
 oid    *get_default_privtype(size_t *);
 void    snmpv3_set_engineBootsAndTime(int boots, int ttime); 
-static int getLinuxNicHwAddress(const char * networkDevice, char * addressOut);
+static int getHwAddress(const char * networkDevice, char * addressOut);
 
 #ifdef __cplusplus
 }
