@@ -215,6 +215,26 @@ char	_debugx[1024];	/* Space to sprintf() into - used by sprint_objid(). */
 
 #endif	/* DEBUGGING */
 
+void
+__libraries_init()
+    {
+        static int have_inited = 0;
+
+        if (have_inited)
+            return;
+        have_inited = 1;
+
+        fprintf(stderr, "initalizing...\n");
+        init_snmp("perlmod");
+    
+        snmp_set_quick_print(1);
+        ds_set_boolean(DS_LIBRARY_ID, DS_LIB_DONT_BREAKDOWN_OIDS, 1);
+        fprintf(stderr, "done...\n");
+
+        SOCK_STARTUP;
+    
+    }
+
 static void
 __recalc_timeout (tvp, ctvp, ltvp, itvp, block)
 struct timeval* tvp;
@@ -527,7 +547,6 @@ char *buf;
 SnmpMibNode *tp;
 {
    oid newname[MAX_OID_LEN], *op;
-   int newname_len = 0;
    /* code taken from get_node in snmp_client.c */
    for (op = newname + MAX_OID_LEN - 1; op >= newname; op--) {
       *op = tp->subid;
@@ -1136,17 +1155,14 @@ void *cb_data;
   AV *varlist;
   SV *varbind_ref;
   AV *varbind;
-  SV *traplist_ref;
-  AV *traplist;
+  SV *traplist_ref = NULL;
+  AV *traplist = NULL;
   netsnmp_variable_list *vars;
   struct tree *tp;
   int len;
-  oid *oid_arr;
-  int oid_arr_len = MAX_OID_LEN;
   SV *tmp_sv;
   int type;
   char tmp_type_str[MAX_TYPE_NAME_LEN];
-  int status;
   char str_buf[STR_BUF_SIZE];
   char *label;
   char *iid;
@@ -1814,7 +1830,6 @@ _bulkwalk_recv_pdu(walk_context *context, netsnmp_pdu *pdu)
    AV		*varbind;
    SV		*rv;
    SV **sess_ptr_sv = hv_fetch((HV*)SvRV(context->sess_ref), "SessPtr", 7, 1);
-   netsnmp_session *ss = (SnmpSession *)SvIV((SV*)SvRV(*sess_ptr_sv));
    SV **err_str_svp = hv_fetch((HV*)SvRV(context->sess_ref), "ErrorStr", 8, 1);
    SV **err_num_svp = hv_fetch((HV*)SvRV(context->sess_ref), "ErrorNum", 8, 1);
    SV **err_ind_svp = hv_fetch((HV*)SvRV(context->sess_ref), "ErrorInd", 8, 1);
@@ -2414,7 +2429,9 @@ int arg;
     errno = EINVAL;
     return 0;
 
+#ifndef NETSNMP_CALLBACK_OP_TIMED_OUT
 not_there:
+#endif
     errno = ENOENT;
     return 0;
 }
@@ -2424,14 +2441,7 @@ MODULE = SNMP		PACKAGE = SNMP		PREFIX = snmp
 
 BOOT:
 # first blank line terminates bootstrap code
-SOCK_STARTUP;
-Mib = 0;
-snmp_set_do_debugging(0); /* overrides lib dflt - silence init_mib_internals */
-snmp_set_quick_print(1);
-init_snmpv3("snmpapp");
-snmp_call_callbacks(SNMP_CALLBACK_LIBRARY,SNMP_CALLBACK_POST_READ_CONFIG,NULL);
-snmp_call_callbacks(SNMP_CALLBACK_LIBRARY,SNMP_CALLBACK_POST_PREMIB_READ_CONFIG,NULL);
-ds_set_boolean(DS_LIBRARY_ID, DS_LIB_DONT_BREAKDOWN_OIDS, 1);
+    Mib = 0;
 
 
 double
@@ -2461,6 +2471,8 @@ snmp_new_session(version, community, peer, port, lport, retries, timeout)
 	   SnmpSession *ss = NULL;
            int verbose = SvIV(perl_get_sv("SNMP::verbose", 0x01 | 0x04));
 
+           __libraries_init();
+           
 	   if (!strcmp(version, "1")) {
 		session.version = SNMP_VERSION_1;
            } else if ((!strcmp(version, "2")) || (!strcmp(version, "2c"))) {
@@ -2513,12 +2525,13 @@ snmp_new_v3_session(version, peer, port, retries, timeout, sec_name, sec_level, 
 	int     eng_time
 	CODE:
 	{
-           u_char sec_eng_id_buf[ENG_ID_BUF_SIZE];
-           u_char context_eng_id_buf[ENG_ID_BUF_SIZE];
+/*             u_char sec_eng_id_buf[ENG_ID_BUF_SIZE]; */
+/*             u_char context_eng_id_buf[ENG_ID_BUF_SIZE]; */
 	   SnmpSession session = {0};
 	   SnmpSession *ss = NULL;
            int verbose = SvIV(perl_get_sv("SNMP::verbose", 0x01 | 0x04));
-           char *  tmpc = NULL;
+
+           __libraries_init();
 
 	   if (version == 3) {
 		session.version = SNMP_VERSION_3;
@@ -2773,15 +2786,11 @@ snmp_set(sess_ref, varlist_ref, perl_callback)
            AV *varbind;
 	   I32 varlist_len;
 	   I32 varlist_ind;
-	   I32 varbind_len;
            SnmpSession *ss;
            netsnmp_pdu *pdu, *response;
-           netsnmp_variable_list *vars;
-           netsnmp_variable_list *last_vars;
            struct tree *tp;
 	   oid *oid_arr;
 	   int oid_arr_len = MAX_OID_LEN;
-           SV *tmp_sv;
            char *tag_pv;
            snmp_xs_cb_data *xs_cb_data;
            SV **sess_ptr_sv;
@@ -2969,14 +2978,13 @@ snmp_get(sess_ref, retry_nosuch, varlist_ref, perl_callback)
            AV *varbind;
            I32 varlist_len;
            I32 varlist_ind;
-           I32 varbind_len;
            netsnmp_session *ss;
            netsnmp_pdu *pdu, *response;
            netsnmp_variable_list *vars;
            netsnmp_variable_list *last_vars;
            struct tree *tp;
            int len;
-           oid *oid_arr;
+           oid *oid_arr = NULL;
            int oid_arr_len = MAX_OID_LEN;
            SV *tmp_sv;
            char *tag_pv;
@@ -3123,11 +3131,9 @@ snmp_getnext(sess_ref, varlist_ref, perl_callback)
            AV *varbind;
            I32 varlist_len;
            I32 varlist_ind;
-           I32 varbind_len;
            netsnmp_session *ss;
            netsnmp_pdu *pdu, *response;
            netsnmp_variable_list *vars;
-           netsnmp_variable_list *last_vars;
            struct tree *tp;
            int len;
 	   oid *oid_arr;
@@ -3144,7 +3150,6 @@ snmp_getnext(sess_ref, varlist_ref, perl_callback)
 	   char str_buf[STR_BUF_SIZE];
            char *label;
            char *iid;
-           char *cp;
            int getlabel_flag = NO_FLAGS;
            int sprintval_flag = USE_BASIC;
            int verbose = SvIV(perl_get_sv("SNMP::verbose", 0x01 | 0x04));
@@ -3313,11 +3318,9 @@ snmp_getbulk(sess_ref, nonrepeaters, maxrepetitions, varlist_ref, perl_callback)
            AV *varbind;
 	   I32 varlist_len;
 	   I32 varlist_ind;
-	   I32 varbind_len;
            netsnmp_session *ss;
            netsnmp_pdu *pdu, *response;
            netsnmp_variable_list *vars;
-           netsnmp_variable_list *last_vars;
            struct tree *tp;
            int len;
 	   oid *oid_arr;
@@ -3334,7 +3337,6 @@ snmp_getbulk(sess_ref, nonrepeaters, maxrepetitions, varlist_ref, perl_callback)
 	   char str_buf[STR_BUF_SIZE];
            char *label;
            char *iid;
-           char *cp;
            int getlabel_flag = NO_FLAGS;
            int sprintval_flag = USE_BASIC;
            int verbose = SvIV(perl_get_sv("SNMP::verbose", 0x01 | 0x04));
@@ -3825,22 +3827,15 @@ snmp_trapV1(sess_ref,enterprise,agent,generic,specific,uptime,varlist_ref)
            AV *varbind;
 	   I32 varlist_len;
 	   I32 varlist_ind;
-	   I32 varbind_len;
            SnmpSession *ss;
            netsnmp_pdu *pdu = NULL;
-           netsnmp_pdu *response;
-           netsnmp_variable_list *vars;
-           netsnmp_variable_list *last_vars;
            struct tree *tp;
 	   oid *oid_arr;
 	   int oid_arr_len = MAX_OID_LEN;
-           SV *tmp_sv;
-           snmp_xs_cb_data *xs_cb_data;
            SV **sess_ptr_sv;
            SV **err_str_svp;
            SV **err_num_svp;
            SV **err_ind_svp;
-           int status = 0;
            int type;
            int res;
            int verbose = SvIV(perl_get_sv("SNMP::verbose", 0x01 | 0x04));
@@ -3969,22 +3964,15 @@ snmp_trapV2(sess_ref,uptime,trap_oid,varlist_ref)
            AV *varbind;
 	   I32 varlist_len;
 	   I32 varlist_ind;
-	   I32 varbind_len;
            SnmpSession *ss;
            netsnmp_pdu *pdu = NULL;
-           netsnmp_pdu *response;
-           netsnmp_variable_list *vars;
-           netsnmp_variable_list *last_vars;
            struct tree *tp;
 	   oid *oid_arr;
 	   int oid_arr_len = MAX_OID_LEN;
-           SV *tmp_sv;
-           snmp_xs_cb_data *xs_cb_data;
            SV **sess_ptr_sv;
            SV **err_str_svp;
            SV **err_num_svp;
            SV **err_ind_svp;
-           int status = 0;
            int type;
            int res;
            int verbose = SvIV(perl_get_sv("SNMP::verbose", 0x01 | 0x04));
@@ -4110,16 +4098,12 @@ snmp_inform(sess_ref,uptime,trap_oid,varlist_ref,perl_callback)
            AV *varbind;
 	   I32 varlist_len;
 	   I32 varlist_ind;
-	   I32 varbind_len;
            SnmpSession *ss;
            netsnmp_pdu *pdu = NULL;
            netsnmp_pdu *response;
-           netsnmp_variable_list *vars;
-           netsnmp_variable_list *last_vars;
            struct tree *tp;
 	   oid *oid_arr;
 	   int oid_arr_len = MAX_OID_LEN;
-           SV *tmp_sv;
            snmp_xs_cb_data *xs_cb_data;
            SV **sess_ptr_sv;
            SV **err_str_svp;
@@ -4543,12 +4527,10 @@ void
 snmp_get_select_info()
 	PPCODE:
 	{
-        int numfds, fd_count;
+        int numfds;
         fd_set fdset;
         struct timeval time_val, *tvp;
         int block;
-	int timeout_sec;
-	int timeout_usec;
 	int i;
 
         numfds = 0;
@@ -4603,6 +4585,7 @@ snmp_mib_node_TIEHASH(class,key,tp=0)
         IV tp
 	CODE:
 	{
+            __libraries_init();
            if (!tp) tp = (IV)__tag2oid(key, NULL, NULL, NULL, NULL,0);
            if (tp) {
               ST(0) = sv_newmortal();
