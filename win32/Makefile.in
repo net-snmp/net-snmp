@@ -30,8 +30,8 @@ libsnmp : libsnmp_dll_
 libsnmp_clean : libsnmp_dll_clean_
 !ENDIF
 
-libs : libagent libhelpers libsnmp netsnmpmibs
-libs_clean : libagent_clean libhelpers_clean libsnmp_clean netsnmpmibs_clean
+libs : libagent libhelpers libsnmp libnetsnmptrapd netsnmpmibs 
+libs_clean : libagent_clean libhelpers_clean libsnmp_clean libnetsnmptrapd_clean netsnmpmibs_clean
 
 apps : snmpdf snmpset snmpusm snmptest snmptrap snmpvacm snmpwalk snmpdelta snmptable snmpstatus snmpbulkget snmpget snmpgetnext snmpbulkwalk snmptranslate encode_keychange snmpnetstat
 
@@ -129,6 +129,11 @@ libsnmp_dll_ ::
 	$(NMAKE) all
 	cd ..
 	
+libnetsnmptrapd ::
+	cd libnetsnmptrapd
+	$(NMAKE) all
+	cd ..
+
 netsnmpmibs_ ::
 	cd netsnmpmibs
 	$(NMAKE) all
@@ -263,6 +268,11 @@ libsnmp_dll_clean_ ::
 	$(NMAKE) clean
 	cd ..
 
+libnetsnmptrapd_clean ::
+	cd libnetsnmptrapd
+	$(NMAKE) clean
+	cd ..
+
 netsnmpmibs_clean_ ::
 	cd netsnmpmibs
 	$(NMAKE) clean
@@ -382,8 +392,10 @@ help ::
         @-echo "all             libs apps snmptrapd snmpd                     "
         @-echo "clean           libs_clean apps_clean snmptrapd_clean         "
         @-echo "                snmpd_clean                                   "
-        @-echo "libs            libagent libhelpers libsnmp netsnmpmibs       "
-        @-echo "libs_clean      libagent_clean libhelpers_clean libsnmp_clean "
+        @-echo "libs            libagent libhelpers libsnmp libnetsnmptrapd   "
+        @-echo "                netsnmpmibs                                   "
+        @-echo "libs_clean      libagent_clean libhelpers_clean               "
+        @-echo "                libnetsnmptrapd_clean libsnmp_clean           "
         @-echo "                netsnmpmibs_clean                             "
         @-echo "                                                              "
         @-echo "apps            encode_keychange snmpbulkget snmpbulkwalk     "

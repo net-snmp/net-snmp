@@ -2,10 +2,11 @@ use ExtUtils::MakeMaker;
 require 5;
 use Config;
 use Getopt::Long;
+my %MakeParams = ();
 
 %MakeParams = InitMakeParams();
-WriteMakefile(%MakeParams);
 
+WriteMakefile(%MakeParams);
 
 if  (eval {require ExtUtils::Constant; 1}) {
   # If you edit these definitions to change the constants used by this module,
@@ -57,6 +58,48 @@ sub InitMakeParams {
       $opts = NetSNMPGetOpts();	
       $Params{'DEFINE'} = "-DMSVC_PERL";
       $sep = '\\';
+      $snmp_lib_file = 'netsnmp.lib';
+      $snmp_link_lib = 'netsnmp';
+      $agent_link_lib = 'netsnmpagent';
+      $helpers_link_lib = 'netsnmphelpers';
+      $mibs_link_lib = 'netsnmpmibs';
+      $trapd_link_lib = 'netsnmptrapd';
+
+      if (lc($opts->{'debug'}) eq "true") {
+        $lib_dir = 'lib\\debug';
+      }
+      else {
+        $lib_dir = 'lib\\release';
+      }
+    
+      if (lc($opts->{'insource'}) eq "true") {
+	$Params{'LIBS'} = "-L$basedir\\win32\\$lib_dir\\ -l$snmp_link_lib -l$agent_link_lib -l$helpers_link_lib " .
+                "-l$mibs_link_lib -l$trapd_link_lib ";
+      }
+      else {
+	my @LibDirs = split (';',$ENV{LIB});
+        my $LibDir;
+	if ($opts->{'prefix'}) {
+	  push (@LibDirs,"$ENV{'NET-SNMP-PATH'}${sep}lib");
+	}
+	$noLibDir = 1;
+	while ($noLibDir) {
+	  $LibDir = find_files(["$snmp_lib_file"],\@LibDirs);
+	  if ($LibDir ne '') {
+	    $noLibDir = 0;
+            # Put quotes around LibDir to allow spaces in paths
+            $LibDir = '"' . $LibDir . '"';          
+	  }
+	  else
+	  {
+	    @LibDirs = ();
+	    @LibDirs[0] = prompt("The Net-SNMP library ($snmp_lib_file) could not be found.\nPlease enter the directory where it is located:");
+	    @LibDirs[0] =~ s/\\$//;
+	  }
+	}
+	$Params{LIBS} = "-L$LibDir -l$snmp_link_lib -l$agent_link_lib -l$helpers_link_lib -l$mibs_link_lib -l$trapd_link_lib ";
+      }
+
       $Params{'INC'} = "-I$basedir\\include\\ -I$basedir\\include\\net-snmp\\ -I$basedir\\win32\\ ";
     }
     else {

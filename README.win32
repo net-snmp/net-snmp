@@ -65,9 +65,10 @@ The next subsection relates to items that are built using Visual Studio
      e) Provide consistent include search paths.
 
   -  Building netsnmp.dll is only supported for compiling libagent, 
-     libhelpers, libsnmp_dll and netsnmpmibs for use with the Perl module.
-     Using netsnmp.dll for other components is not supported as the DLL does
-     not prevent corruption of dynamically changing shared data.
+     libhelpers, libsnmp_dll, libnetsnmptrapd and netsnmpmibs for use with 
+     the Perl module.  Using netsnmp.dll for other components is not 
+     supported as the DLL does not prevent corruption of dynamically changing 
+     shared data.
 
   -  All Debug and Release targets linked with libsnmp project targets
      build without errors, and are fully functional.
@@ -379,9 +380,10 @@ Note:  The Configure option --linktype=static (or not specifying a linktype)
        linked to it.
 
        Building netsnmp.dll is only supported for compiling libagent, 
-       libhelpers, libsnmp_dll and netsnmpmibs for use with the Perl module.
-       Using netsnmp.dll for other components is not supported as the DLL does
-       not prevent corruption of dynamically changing shared data.
+       libhelpers, libsnmp_dll, libnetsnmptrapd and netsnmpmibs for use with 
+       the Perl module.  Using netsnmp.dll for other components is not 
+       supported as the DLL does not prevent corruption of dynamically changing 
+       shared data.
 
 
 ***************************************************************************
@@ -432,15 +434,17 @@ workspace if you don't have or don't need these features.
        'Active Solution Configuration' and click "Close"
    d.  Right-click the "libagent" project, and select "Rebuild"
    e.  Right-click the "libhelpers" project, and select "Rebuild"
-   f.  Right-click the "snmplib" project, and select "Rebuild"
-   g.  Right-click the "netsnmpmibs(sdk)" project, and select "Rebuild"
-   h.  Click "Build->Batch Build..." 
-   i.  Set Release and/or Debug in 'Project configurations' to suit making
-       sure libagent, libhelpers, snmplib and netsnmpmibs are NOT selected.
-   j.  Click "Rebuild".
-   k.  When building is done, View the Output window, clip and
+   f.  Right-click the "libnetsnmptrapd" project, and select "Rebuild"
+   g.  Right-click the "snmplib" project, and select "Rebuild"
+   h.  Right-click the "netsnmpmibs(sdk)" project, and select "Rebuild"
+   i.  Click "Build->Batch Build..." 
+   j.  Set Release and/or Debug in 'Project configurations' to suit making
+       sure libagent, libhelpers, libnetsnmptrapd, snmplib and netsnmpmibs are 
+       NOT selected.
+   k.  Click "Rebuild".
+   l.  When building is done, View the Output window, clip and
        save to a text file if there is some information to share.
-   l.  Click "File->Close Solution".
+   m.  Click "File->Close Solution".
   
 4.  If the Perl modules are required, continue with the next section:
     'Microsoft Visual C++ - Building the Perl SNMP modules'.
@@ -697,7 +701,7 @@ Project changes
    ------------
    a.  Click Project->Settings.  
    b.  Highlight the names of all projects except libsnmp, libagent, libhelpers,
-       netsnmpmibs, netsnmpmibssdk.
+       libnetsnmptrapd, netsnmpmibs, netsnmpmibssdk.
    c.  Select the Link section.
    d.  Add the next line to the 'Object/Library Modules' list for Debug and 
        Release versions:
@@ -706,7 +710,7 @@ Project changes
 
    MS VC++ 7.0+:
    -------------
-   a.  For each project (except libsnmp, libagent, libhelpers,
+   a.  For each project (except libsnmp, libagent, libhelpers, libnetsnmptrapd,
        netsnmpmibs, netsnmpmibssdk), click Project->Properties. 
    b.  For Configuration, select 'Release'
    c.  Click Linker and then Input

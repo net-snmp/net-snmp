@@ -28,10 +28,7 @@ ALL : "..\bin\$(OUTDIR)\$(PROGNAME).exe" "$(INTDIR)"
 
 
 CLEAN :
-	-@erase "$(INTDIR)\notification_log.obj"
 	-@erase "$(INTDIR)\$(PROGNAME).obj"
-	-@erase "$(INTDIR)\$(PROGNAME)_handlers.obj"
-	-@erase "$(INTDIR)\$(PROGNAME)_log.obj"
 	-@erase "$(INTDIR)\vc??.idb"
 	-@erase "$(INTDIR)\$(PROGNAME).pch"
 	-@erase "..\bin\$(OUTDIR)\$(PROGNAME).exe"
@@ -81,12 +78,9 @@ BSC32_FLAGS=/nologo /o"$(INTDIR)\$(PROGNAME).bsc"
 BSC32_SBRS= \
 	
 LINK32=link.exe
-LINK32_FLAGS=$(OPENSSL) netsnmp.lib netsnmpagent.lib netsnmpmibs.lib netsnmphelpers.lib advapi32.lib ws2_32.lib kernel32.lib user32.lib /nologo /subsystem:console /pdb:none /machine:I386 /out:"..\bin\$(OUTDIR)/$(PROGNAME).exe" /libpath:"../lib/release" 
+LINK32_FLAGS=$(OPENSSL) netsnmp.lib netsnmpagent.lib netsnmpmibs.lib netsnmphelpers.lib netsnmptrapd.lib advapi32.lib ws2_32.lib kernel32.lib user32.lib /nologo /subsystem:console /pdb:none /machine:I386 /out:"..\bin\$(OUTDIR)/$(PROGNAME).exe" /libpath:"../lib/release" 
 LINK32_OBJS= \
-	"$(INTDIR)\notification_log.obj" \
 	"$(INTDIR)\$(PROGNAME).obj" \
-	"$(INTDIR)\$(PROGNAME)_handlers.obj" \
-	"$(INTDIR)\$(PROGNAME)_log.obj"
 
 "..\bin\$(OUTDIR)\$(PROGNAME).exe" : "..\bin\$(OUTDIR)" $(DEF_FILE) $(LINK32_OBJS)
 !IF "$(LINKTYPE)" == "static" || "$(ALLOW_DLL)" == "1"
@@ -105,14 +99,8 @@ ALL : "..\bin\$(OUTDIR)\$(PROGNAME).exe" "$(INTDIR)\$(PROGNAME).bsc" "$(INTDIR)"
 
 
 CLEAN :
-	-@erase "$(INTDIR)\notification_log.obj"
-	-@erase "$(INTDIR)\notification_log.sbr"
 	-@erase "$(INTDIR)\$(PROGNAME).obj"
 	-@erase "$(INTDIR)\$(PROGNAME).sbr"
-	-@erase "$(INTDIR)\$(PROGNAME)_handlers.obj"
-	-@erase "$(INTDIR)\$(PROGNAME)_handlers.sbr"
-	-@erase "$(INTDIR)\$(PROGNAME)_log.obj"
-	-@erase "$(INTDIR)\$(PROGNAME)_log.sbr"
 	-@erase "$(INTDIR)\vc??.idb"
 	-@erase "$(INTDIR)\vc??.pdb"
 	-@erase "$(INTDIR)\$(PROGNAME).pch"
@@ -163,10 +151,7 @@ RSC=rc.exe
 BSC32=bscmake.exe
 BSC32_FLAGS=/nologo /o"$(INTDIR)\$(PROGNAME).bsc" 
 BSC32_SBRS= \
-	"$(INTDIR)\notification_log.sbr" \
 	"$(INTDIR)\$(PROGNAME).sbr" \
-	"$(INTDIR)\$(PROGNAME)_handlers.sbr" \
-	"$(INTDIR)\$(PROGNAME)_log.sbr"
 
 "$(INTDIR)\$(PROGNAME).bsc" : "..\bin\$(OUTDIR)" $(BSC32_SBRS)
     $(BSC32) @<<
@@ -174,12 +159,9 @@ BSC32_SBRS= \
 <<
 
 LINK32=link.exe
-LINK32_FLAGS=$(OPENSSL) netsnmp.lib netsnmpagent.lib netsnmpmibs.lib netsnmphelpers.lib advapi32.lib ws2_32.lib kernel32.lib user32.lib /nologo /subsystem:console /incremental:no /pdb:"$(INTDIR)\$(PROGNAME).pdb" /debug /machine:I386 /out:"..\bin\$(OUTDIR)/$(PROGNAME).exe" /pdbtype:sept /libpath:"../lib/debug" 
+LINK32_FLAGS=$(OPENSSL) netsnmp.lib netsnmpagent.lib netsnmpmibs.lib netsnmphelpers.lib netsnmptrapd.lib advapi32.lib ws2_32.lib kernel32.lib user32.lib /nologo /subsystem:console /incremental:no /pdb:"$(INTDIR)\$(PROGNAME).pdb" /debug /machine:I386 /out:"..\bin\$(OUTDIR)/$(PROGNAME).exe" /pdbtype:sept /libpath:"../lib/debug" 
 LINK32_OBJS= \
-	"$(INTDIR)\notification_log.obj" \
 	"$(INTDIR)\$(PROGNAME).obj" \
-	"$(INTDIR)\$(PROGNAME)_handlers.obj" \
-	"$(INTDIR)\$(PROGNAME)_log.obj"
 
 "..\bin\$(OUTDIR)\$(PROGNAME).exe" : "..\bin\$(OUTDIR)" $(DEF_FILE) $(LINK32_OBJS)
 !IF "$(LINKTYPE)" == "static" || "$(ALLOW_DLL)" == "1"
