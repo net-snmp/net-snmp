@@ -89,10 +89,10 @@ foreach my $file (@files)
    #print "$1-$2\n";
 
    if ($separator eq '/') {
-     $command = "man $man_dir\/$1\/$2 | $man2html -topm 0 -cgiurl=\'..\/man\$section/\$title.\$section\$subsection.html\' | $tidy > $man_dir_html/$1/$2.html";
+     $command = "man $man_dir\/$1\/$2 | $man2html -topm 0 -botm 0 -cgiurl=\'..\/man\$section/\$title.\$section\$subsection.html\' | $tidy > $man_dir_html/$1/$2.html";
    }
    else {
-     $command = "man $man_dir\/$1\/$2 | $man2html -topm 0 -cgiurl=\'man\$section".$separator."\$title.\$section\$subsection.html\' | $tidy > $man_dir_html/$1$separator$2.html";
+     $command = "man $man_dir\/$1\/$2 | $man2html -topm 0 -botm 0 -cgiurl=\'man\$section".$separator."\$title.\$section\$subsection.html\' | $tidy > $man_dir_html/$1$separator$2.html";
    }
  
    print "executing: $command\n";
