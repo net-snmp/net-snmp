@@ -131,7 +131,7 @@ void register_sysORTable(oid *oidin,
 			 int oidlen,
 			 char *descr)
 {
-  char c_oid[MAX_NAME_LEN];
+  char c_oid[SPRINT_MAX_LEN];
   struct sysORTable **ptr=&table;
 
   if (snmp_get_do_debugging()) {

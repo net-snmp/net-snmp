@@ -525,7 +525,7 @@ var_context(struct variable *vp,
 	    int *var_len,
 	    WriteMethod **write_method)
 {
-    oid newname[MAX_NAME_LEN], lowname[MAX_NAME_LEN];
+    oid newname[MAX_OID_LEN], lowname[MAX_OID_LEN];
     int newnamelen, lownamelen=0;
     struct contextEntry *cp, *lowcp = NULL;
     u_long mask;

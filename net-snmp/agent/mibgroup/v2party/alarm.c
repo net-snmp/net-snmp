@@ -478,7 +478,7 @@ alarmCommitRow(struct alarmEntry *alarm)
     ((u_char *)&destAddr)[3] = (u_char)alarm->contextID[12];
 
     alarm->srcPartyLength
-	= alarm->dstPartyLength = alarm->contextLength= MAX_NAME_LEN;
+	= alarm->dstPartyLength = alarm->contextLength= MAX_OID_LEN;
     ms_party_init(destAddr, alarm->srcPartyID, &(alarm->srcPartyLength),
 		  alarm->dstPartyID, &(alarm->dstPartyLength),
                     alarm->contextID, &(alarm->contextLength));
@@ -1097,7 +1097,7 @@ var_alarmtab(struct variable *vp,
 	     int *var_len,
 	     WriteMethod **write_method)
 {
-    oid newname[MAX_NAME_LEN];
+    oid newname[MAX_OID_LEN];
     int result;
     int mask;
     struct alarmEntry *alarm;

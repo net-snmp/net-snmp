@@ -256,7 +256,7 @@ input_variable(struct variable_list *vp)
 {
     char  buf[256];
     u_char value[256], ch;
-    oid name[MAX_NAME_LEN];
+    oid name[MAX_OID_LEN];
 
     printf("Variable: ");
     fflush(stdout);
@@ -329,7 +329,7 @@ input_variable(struct variable_list *vp)
 	}
 	return -1;
     }
-    vp->name_length = MAX_NAME_LEN;
+    vp->name_length = MAX_OID_LEN;
     if (!snmp_parse_oid(buf, name, &vp->name_length))
 	return -1;
     vp->name = (oid *)malloc(vp->name_length * sizeof(oid));
@@ -395,7 +395,7 @@ input_variable(struct variable_list *vp)
 		vp->val.string = NULL;
 		break;
 	    case ASN_OBJECT_ID:
-		vp->val_len = MAX_NAME_LEN;;
+		vp->val_len = MAX_OID_LEN;;
 		read_objid(buf, (oid *)value, &vp->val_len);
 		vp->val_len *= sizeof(oid);
 		vp->val.objid = (oid *)malloc(vp->val_len);

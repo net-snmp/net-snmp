@@ -207,9 +207,9 @@ header_tcp(struct variable *vp,
 	   WriteMethod **write_method)
 {
 #define TCP_NAME_LENGTH	8
-    oid newname[MAX_NAME_LEN];
+    oid newname[MAX_OID_LEN];
     int result;
-    char c_oid[MAX_NAME_LEN];
+    char c_oid[SPRINT_MAX_LEN];
 
     if (snmp_get_do_debugging()) {
       sprint_objid (c_oid, name, *length);
@@ -523,7 +523,7 @@ var_tcpEntry(struct variable *vp,
 	     WriteMethod **write_method)
 {
     int i;
-    oid newname[MAX_NAME_LEN], lowest[MAX_NAME_LEN], *op;
+    oid newname[MAX_OID_LEN], lowest[MAX_OID_LEN], *op;
     u_char *cp;
     int State, LowState;
     static struct inpcb inpcb, Lowinpcb;
@@ -701,7 +701,7 @@ var_tcpEntry(struct variable *vp,
 	     int *var_len,
 	     WriteMethod **write_method)
 {
-  oid newname[MAX_NAME_LEN], lowest[MAX_NAME_LEN], *op;
+  oid newname[MAX_OID_LEN], lowest[MAX_OID_LEN], *op;
   u_char *cp;
 
 #define TCP_CONN_LENGTH	20

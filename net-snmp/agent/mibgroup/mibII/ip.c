@@ -222,9 +222,9 @@ header_ip(struct variable *vp,
 	  WriteMethod **write_method)
 {
 #define IP_NAME_LENGTH	8
-    oid newname[MAX_NAME_LEN];
+    oid newname[MAX_OID_LEN];
     int result;
-    char c_oid[MAX_NAME_LEN];
+    char c_oid[SPRINT_MAX_LEN];
 
     if (snmp_get_do_debugging()) {
       sprint_objid (c_oid, name, *length);
@@ -920,7 +920,7 @@ var_ipAddrEntry(struct variable *vp,
     mib2_ipAddrEntry_t	    entry, Lowentry;
     int			    Found = 0;
     req_e		    req_type;
-    char		    c_oid[1024];
+    char		    c_oid[SPRINT_MAX_LEN];
     
     /* fill in object part of name for current (less sizeof instance part) */
 
@@ -1054,7 +1054,7 @@ header_ip(struct variable *vp,
 	  WriteMethod **write_method)
 {
 #define IP_NAME_LENGTH	8
-    oid newname[MAX_NAME_LEN];
+    oid newname[MAX_OID_LEN];
     int result;
 
 

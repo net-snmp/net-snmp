@@ -96,9 +96,9 @@ static int brief = 0;
 static int show_index = 0;
 static char *field_separator = NULL;
 static char *table_name;
-static oid name[MAX_NAME_LEN];
+static oid name[MAX_OID_LEN];
 static int name_length;
-static oid root[MAX_NAME_LEN];
+static oid root[MAX_OID_LEN];
 static int rootlen;
 static int localdebug;
 static struct snmp_session session;
@@ -172,7 +172,7 @@ int main(int argc, char *argv[])
   /* get the initial object and subtree */
   /* specified on the command line */
   if (arg+1 == argc) {
-    rootlen = MAX_NAME_LEN;
+    rootlen = MAX_OID_LEN;
     if (!snmp_parse_oid(argv[arg], root, &rootlen)){
       fprintf(stderr, "Invalid object identifier: %s\n", argv[arg]);
       exit(1);
@@ -205,7 +205,7 @@ void print_table (void)
 {
   int entry, field, first_field, last_field = 0, width, part = 0;
   char **dp;
-  char string_buf[1024];
+  char string_buf[SPRINT_MAX_LEN];
   char *index_fmt = NULL;
 
   if (!no_headers) printf("SNMP table: %s\n\n", table_name);
@@ -254,7 +254,7 @@ void print_table (void)
 
 void get_field_names(void)
 {
-  char string_buf[1024];
+  char string_buf[SPRINT_MAX_LEN];
   char *name_p;
 
   root[rootlen++] = 1;
@@ -312,7 +312,7 @@ void get_table_entries(void)
   int   status;
   int   i;
   int   col;
-  char  string_buf[1024];
+  char  string_buf[SPRINT_MAX_LEN];
   char  *name_p = NULL;
   char  **dp;
 

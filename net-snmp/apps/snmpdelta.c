@@ -165,7 +165,7 @@ void print_log(char *file, char *message)
 void sprint_descriptor(char *buffer,
 		       struct varInfo *vip)
 {
-  char buf[256], *cp;
+  char buf[SPRINT_MAX_LEN], *cp;
 
   sprint_objid(buf, vip->info_oid, vip->oidlen);
   for(cp = buf; *cp; cp++)
@@ -394,7 +394,7 @@ int main(int argc, char *argv[])
   for(count = 0; count < current_name; count++){
     vip = varinfo + count;
     if (vip->name){
-      vip->oidlen = MAX_NAME_LEN;
+      vip->oidlen = MAX_OID_LEN;
       vip->info_oid = (oid *)malloc(sizeof(oid) * vip->oidlen);
       if (snmp_parse_oid(vip->name, vip->info_oid, &vip->oidlen) == NULL) {
 	fprintf(stderr, "Invalid object identifier: %s\n", vip->name);

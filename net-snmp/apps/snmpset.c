@@ -112,7 +112,7 @@ int main(int argc, char *argv[])
     char *names[128];
     char types[128];
     char *values[128];
-    oid name[MAX_NAME_LEN];
+    oid name[MAX_OID_LEN];
     int name_length;
     int status;
 
@@ -172,7 +172,7 @@ int main(int argc, char *argv[])
     /* create PDU for SET request and add object names and values to request */
     pdu = snmp_pdu_create(SNMP_MSG_SET);
     for(count = 0; count < current_name; count++){
-      name_length = MAX_NAME_LEN;
+      name_length = MAX_OID_LEN;
       if (snmp_parse_oid(names[count], name, &name_length) == NULL) {
         fprintf(stderr, "Invalid object identifier: %s\n", names[count]);
         failures++;

@@ -209,7 +209,7 @@ var_view(struct variable *vp,
 	 int *var_len,
 	 WriteMethod **write_method)
 {
-    oid newname[MAX_NAME_LEN], lowname[MAX_NAME_LEN], *np;
+    oid newname[MAX_OID_LEN], lowname[MAX_OID_LEN], *np;
     int newnamelen, lownamelen=0;
     struct viewEntry *vwp, *lowvwp = NULL;
     u_long mask;

@@ -405,7 +405,7 @@ protopr (char *name)
 void
 udp_stats(void)
 {
-    oid varname[MAX_NAME_LEN], *udpentry;
+    oid varname[MAX_OID_LEN], *udpentry;
     int varname_len;
     struct variable_list *var;
     int count;
@@ -436,7 +436,7 @@ udp_stats(void)
 void
 tcp_stats(void)
 {
-    oid varname[MAX_NAME_LEN], *tcpentry;
+    oid varname[MAX_OID_LEN], *tcpentry;
     int varname_len;
     struct variable_list *var;
     int count;
@@ -467,7 +467,7 @@ tcp_stats(void)
 void
 ip_stats(void)
 {
-    oid varname[MAX_NAME_LEN], *ipentry;
+    oid varname[MAX_OID_LEN], *ipentry;
     int varname_len;
     struct variable_list *var;
     int count;
@@ -498,7 +498,7 @@ ip_stats(void)
 void
 icmp_stats(void)
 {
-    oid varname[MAX_NAME_LEN], *icmpentry;
+    oid varname[MAX_OID_LEN], *icmpentry;
     int varname_len;
     struct variable_list *var;
     int count, first;

@@ -95,9 +95,9 @@ int main(int argc, char *argv[])
     struct snmp_pdu *pdu, *response;
     struct variable_list *vars;
     int   arg;
-    oid   name[MAX_NAME_LEN];
+    oid   name[MAX_OID_LEN];
     int   name_length;
-    oid   root[MAX_NAME_LEN];
+    oid   root[MAX_OID_LEN];
     int   rootlen;
     int   count;
     int   running;
@@ -112,7 +112,7 @@ int main(int argc, char *argv[])
     /* get the initial object and subtree */
     if (arg < argc) {
       /* specified on the command line */
-      rootlen = MAX_NAME_LEN;
+      rootlen = MAX_OID_LEN;
       if (snmp_parse_oid(argv[arg], root, &rootlen) == NULL) {
         fprintf(stderr, "Invalid object identifier: %s\n", argv[arg]);
         exit(1);

@@ -20,7 +20,7 @@ extern void eventTimer (struct timeval *);
 struct eventEntry {
 	struct eventEntry *next;
 	int index;				/* 1..65535 */
-	oid id[MAX_NAME_LEN];
+	oid id[MAX_OID_LEN];
 	int idLen;
 	char description[MAX_DESCRIPTION_LEN];		/* 0..127 */
 	int descriptionLen;
@@ -36,11 +36,11 @@ struct eventEntry {
 struct eventNotifyEntry {
     struct eventNotifyEntry *next;
     int index;
-    oid srcParty[MAX_NAME_LEN];
+    oid srcParty[MAX_OID_LEN];
     int srcPartyLen;
-    oid dstParty[MAX_NAME_LEN];
+    oid dstParty[MAX_OID_LEN];
     int dstPartyLen;
-    oid context[MAX_NAME_LEN];
+    oid context[MAX_OID_LEN];
     int contextLen;
     int interval;
     int retransmissions;

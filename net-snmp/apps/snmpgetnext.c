@@ -95,7 +95,7 @@ int main(int argc, char *argv[])
     int   count;
     int   current_name = 0;
     char  *names[128];
-    oid   name[MAX_NAME_LEN];
+    oid   name[MAX_OID_LEN];
     int   name_length;
     int   status;
     int   failures = 0;
@@ -122,7 +122,7 @@ int main(int argc, char *argv[])
     pdu = snmp_pdu_create(SNMP_MSG_GETNEXT);
 
     for(count = 0; count < current_name; count++){
-      name_length = MAX_NAME_LEN;
+      name_length = MAX_OID_LEN;
       if (snmp_parse_oid(names[count], name, &name_length) == NULL) {
         fprintf(stderr, "Invalid object identifier: %s\n", names[count]);
         failures++;

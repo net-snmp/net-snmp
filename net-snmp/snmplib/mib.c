@@ -1190,7 +1190,7 @@ int read_objid(char *input,
 {
     struct tree *root = tree_head;
     oid *op = output;
-    char buf[512];
+    char buf[SPRINT_MAX_LEN];
 
 
     if (*input == '.')
@@ -1225,7 +1225,7 @@ parse_subtree(struct tree *subtree,
 	      oid *output,
 	      int *out_len)   /* number of subid's */
 {
-    char buf[128], *to = buf;
+    char buf[SPRINT_MAX_LEN], *to = buf;
     u_long subid = 0;
     struct tree *tp;
 
@@ -1305,7 +1305,7 @@ sprint_objid(char *buf,
 	     oid *objid,
 	     int objidlen)	/* number of subidentifiers */
 {
-    char    tempbuf[2048], *cp;
+    char    tempbuf[SPRINT_MAX_LEN], *cp;
     struct tree    *subtree = tree_head;
 
     *tempbuf = '.';	/* this is a fully qualified name */
@@ -1361,10 +1361,7 @@ void
 print_objid(oid *objid,
 	    int objidlen)	/* number of subidentifiers */
 {
-    char    buf[4096];
-
-    sprint_objid(buf, objid, objidlen);
-    printf("%s\n", buf);
+  fprint_objid(stdout, objid, objidlen);
 }
 
 void
@@ -1372,7 +1369,7 @@ fprint_objid(FILE *f,
 	     oid *objid,
 	     int objidlen)	/* number of subidentifiers */
 {
-    char    buf[4096];
+    char    buf[SPRINT_MAX_LEN];
 
     sprint_objid(buf, objid, objidlen);
     fprintf(f, "%s\n", buf);
@@ -1384,7 +1381,7 @@ sprint_variable(char *buf,
 		int objidlen,
 		struct variable_list *variable)
 {
-    char    tempbuf[2048];
+    char    tempbuf[SPRINT_MAX_LEN];
     struct tree    *subtree = tree_head;
 
     sprint_objid(buf, objid, objidlen);
@@ -1418,7 +1415,7 @@ print_variable(oid *objid,
 	       int objidlen,
 	       struct variable_list *variable)
 {
-    char    buf[2048];
+    char    buf[SPRINT_MAX_LEN];
 
     sprint_variable(buf, objid, objidlen, variable);
     printf("%s\n", buf);
@@ -1430,10 +1427,7 @@ fprint_variable(FILE *f,
 		int objidlen,
 		struct variable_list *variable)
 {
-    char    buf[2048];
-
-    sprint_variable(buf, objid, objidlen, variable);
-    fprintf(f, "%s\n", buf);
+  fprint_variable(stdout, objid, objidlen, variable);
 }
 
 void
@@ -1442,7 +1436,7 @@ sprint_value(char *buf,
 	     int objidlen,
 	     struct variable_list *variable)
 {
-    char    tempbuf[2048];
+    char    tempbuf[SPRINT_MAX_LEN];
     struct tree    *subtree = tree_head;
 
     if (variable->type == SNMP_NOSUCHOBJECT)
@@ -1466,10 +1460,7 @@ print_value(oid *objid,
 	    int objidlen,
 	    struct variable_list *variable)
 {
-    char    tempbuf[2048];
-
-    sprint_value(tempbuf, objid, objidlen, variable);
-    printf("%s\n", tempbuf);
+    fprint_value(stdout, objid, objidlen, variable);
 }
 
 void
@@ -1478,7 +1469,7 @@ fprint_value(FILE *f,
 	     int objidlen,
 	     struct variable_list *variable)
 {
-    char    tempbuf[2048];
+    char    tempbuf[SPRINT_MAX_LEN];
 
     sprint_value(tempbuf, objid, objidlen, variable);
     fprintf(f, "%s\n", tempbuf);

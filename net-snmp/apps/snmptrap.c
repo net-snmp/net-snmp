@@ -124,7 +124,7 @@ int main(int argc, char *argv[])
 {
     struct snmp_session session, *ss;
     struct snmp_pdu *pdu, *response;
-    oid name[MAX_NAME_LEN];
+    oid name[MAX_OID_LEN];
     int name_length;
     int	arg;
     int status, inform = 0;
@@ -169,7 +169,7 @@ int main(int argc, char *argv[])
 	    pdu->enterprise_length = sizeof(objid_enterprise)/sizeof (oid);
 	}
 	else {
-	    name_length = MAX_NAME_LEN;
+	    name_length = MAX_OID_LEN;
 	    if (!snmp_parse_oid(argv[arg], name, &name_length)) {
 		fprintf (stderr, "Invalid enterprise id: %s\n", argv[arg]);
 		usage ();
@@ -258,7 +258,7 @@ int main(int argc, char *argv[])
     while (arg < argc) {
 	arg += 3;
 	if (arg > argc) break;
-	name_length = MAX_NAME_LEN;
+	name_length = MAX_OID_LEN;
 	if (!snmp_parse_oid(argv [arg-3], name, &name_length)) {
 	    fprintf (stderr, "Invalid object identifier: %s\n", argv [arg-3]);
             SOCK_CLEANUP;

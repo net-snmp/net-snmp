@@ -100,7 +100,7 @@ static oid oid_ipadentaddr[] =	{1, 3, 6, 1, 2, 1, 4,20, 1, 1, 0, 0, 0, 0};
 void
 intpr(int interval)
 {
-	oid varname[MAX_NAME_LEN], *instance, *ifentry;
+	oid varname[MAX_OID_LEN], *instance, *ifentry;
 	int varname_len;
 	int ifnum, cfg_nnets;
 	oid curifip [4];
@@ -282,7 +282,7 @@ intpr(int interval)
 void
 intpro(int interval)
 {
-	oid varname[MAX_NAME_LEN], *instance, *ifentry;
+	oid varname[MAX_OID_LEN], *instance, *ifentry;
 	int varname_len;
 	int ifnum, cfg_nnets;
 	oid curifip [4];
@@ -465,7 +465,7 @@ sidewaysintpr(unsigned int interval)
 	int oldmask;
 #endif
 	struct variable_list *var;
-	oid varname[MAX_NAME_LEN], *instance, *ifentry;
+	oid varname[MAX_OID_LEN], *instance, *ifentry;
 	int varname_len;
 	int ifnum, cfg_nnets;
 
