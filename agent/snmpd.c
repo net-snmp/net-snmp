@@ -381,7 +381,7 @@ SnmpDaemonMain(int argc, TCHAR * argv[])
 main(int argc, char *argv[])
 #endif
 {
-    char            options[128] = "aAc:CdD::fhHI:l:LP:qrsvV-:";
+    char            options[128] = "aAc:CdD::fhHI:l:LP:qrsUvV-:";
     int             arg, i, ret;
     int             dont_fork = 0;
     int             dont_zero_log = 0;
@@ -553,6 +553,11 @@ main(int argc, char *argv[])
 
         case 's':
             syslog_log = 1;
+            break;
+
+        case 'U':
+            netsnmp_ds_toggle_boolean(NETSNMP_DS_APPLICATION_ID, 
+				      NETSNMP_DS_AGENT_LEAVE_PIDFILE);
             break;
 
 #if HAVE_UNISTD_H
@@ -824,7 +829,9 @@ main(int argc, char *argv[])
     SnmpTrapNodeDown();
     DEBUGMSGTL(("snmpd/main", "Bye...\n"));
     snmp_shutdown("snmpd");
-    if (pid_file != NULL) {
+    if(!netsnmp_ds_get_boolean(NETSNMP_DS_APPLICATION_ID, 
+			       NETSNMP_DS_AGENT_LEAVE_PIDFILE) &&
+       (pid_file != NULL)) {
         unlink(pid_file);
     }
 #ifdef WIN32
