@@ -18,11 +18,24 @@
 #include "snmpMPDStats.h"
 #include "util_funcs.h"
 
+
+struct variable2 snmpMPDStats_variables[] = {
+  { SNMPUNKNOWNSECURITYMODELS, ASN_COUNTER, RONLY, var_snmpMPDStats, 1, { 1 } },
+  { SNMPINVALIDMSGS,           ASN_COUNTER, RONLY, var_snmpMPDStats, 1, { 2 } },
+  { SNMPUNKNOWNPDUHANDLERS,    ASN_COUNTER, RONLY, var_snmpMPDStats, 1, { 3 } },
+};
+
+/* now load this mib into the agents mib table */
+oid snmpMPDStats_variables_oid[] = {1,3,6,1,6,3,11,2,1};
+
 void init_snmpMPDStats(void) {
 #ifdef USING_MIBII_SYSORTABLE_MODULE
   static oid reg[] = {1,3,6,1,6,3,11,3,1,1};
   register_sysORTable(reg,10,"The MIB for Message Processing and Dispatching.");
 #endif
+
+  REGISTER_MIB("snmpv3/snmpMPDStats", snmpMPDStats_variables, variable2, \
+			snmpMPDStats_variables_oid);
 }
 
 u_char *

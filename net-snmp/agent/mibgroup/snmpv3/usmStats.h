@@ -28,25 +28,4 @@ extern void           init_usmStats(void);
 extern FindVarMethod  var_usmStats;
 
 
-/* Only load this structure when this .h file is called in the snmp_vars.c 
-   file in tha agent subdirectory of the source tree */
-
-#ifdef IN_SNMP_VARS_C
-
-/* this variable defines function callbacks and type return information 
-   for the usmStats mib */
-
-struct variable2 usmStats_variables[] = {
-  { USMSTATSUNSUPPORTEDSECLEVELS, ASN_COUNTER, RONLY, var_usmStats, 1, { 1 } },
-  { USMSTATSNOTINTIMEWINDOWS,     ASN_COUNTER, RONLY, var_usmStats, 1, { 2 } },
-  { USMSTATSUNKNOWNUSERNAMES,     ASN_COUNTER, RONLY, var_usmStats, 1, { 3 } },
-  { USMSTATSUNKNOWNENGINEIDS,     ASN_COUNTER, RONLY, var_usmStats, 1, { 4 } },
-  { USMSTATSWRONGDIGESTS,         ASN_COUNTER, RONLY, var_usmStats, 1, { 5 } },
-  { USMSTATSDECRYPTIONERRORS,     ASN_COUNTER, RONLY, var_usmStats, 1, { 6 } },
-};
-
-/* now load this mib into the agents mib table */
-config_load_mib(1.3.6.1.6.3.15.1.1, 9, usmStats_variables)
-
-#endif /* IN_SNMP_VARS_C */
 #endif /* _MIBGROUP_USMSTATS_H */

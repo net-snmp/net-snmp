@@ -55,32 +55,4 @@ WriteMethod write_usmUserPublic;
 WriteMethod write_usmUserStorageType;
 WriteMethod write_usmUserStatus;
 
-/* Only load this structure when this .h file is called in the snmp_vars.c 
-   file in tha agent subdirectory of the source tree */
-
-#ifdef IN_SNMP_VARS_C
-
-/* this variable defines function callbacks and type return information 
-   for the usmUser mib */
-
-struct variable4 usmUser_variables[] = {
-  { USMUSERSPINLOCK     , ASN_INTEGER   , RWRITE, var_usmUser, 1, { 1 } },
-  { USMUSERSECURITYNAME , ASN_OCTET_STR , RONLY , var_usmUser, 3, { 2,1,3 } },
-  { USMUSERCLONEFROM    , ASN_OBJECT_ID , RWRITE, var_usmUser, 3, { 2,1,4 } },
-  { USMUSERAUTHPROTOCOL , ASN_OBJECT_ID , RWRITE, var_usmUser, 3, { 2,1,5 } },
-  { USMUSERAUTHKEYCHANGE, ASN_OCTET_STR , RWRITE, var_usmUser, 3, { 2,1,6 } },
-  { USMUSEROWNAUTHKEYCHANGE, ASN_OCTET_STR , RWRITE, var_usmUser, 3, { 2,1,7 } },
-  { USMUSERPRIVPROTOCOL , ASN_OBJECT_ID , RWRITE, var_usmUser, 3, { 2,1,8 } },
-  { USMUSERPRIVKEYCHANGE, ASN_OCTET_STR , RWRITE, var_usmUser, 3, { 2,1,9 } },
-  { USMUSEROWNPRIVKEYCHANGE, ASN_OCTET_STR , RWRITE, var_usmUser, 3, { 2,1,10 } },
-  { USMUSERPUBLIC       , ASN_OCTET_STR , RWRITE, var_usmUser, 3, { 2,1,11 } },
-  { USMUSERSTORAGETYPE  , ASN_INTEGER   , RWRITE, var_usmUser, 3, { 2,1,12 } },
-  { USMUSERSTATUS       , ASN_INTEGER   , RWRITE, var_usmUser, 3, { 2,1,13 } },
-
-};
-
-/* now load this mib into the agents mib table */
-config_load_mib(1.3.6.1.6.3.15.1.2, 9, usmUser_variables)
-
-#endif /* IN_SNMP_VARS_C */
 #endif /* _MIBGROUP_USMUSER_H */

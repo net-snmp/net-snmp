@@ -32,6 +32,25 @@
 #include "usmUser.h"
 #include "transform_oids.h"
 
+struct variable4 usmUser_variables[] = {
+  { USMUSERSPINLOCK     , ASN_INTEGER   , RWRITE, var_usmUser, 1, { 1 } },
+  { USMUSERSECURITYNAME , ASN_OCTET_STR , RONLY , var_usmUser, 3, { 2,1,3 } },
+  { USMUSERCLONEFROM    , ASN_OBJECT_ID , RWRITE, var_usmUser, 3, { 2,1,4 } },
+  { USMUSERAUTHPROTOCOL , ASN_OBJECT_ID , RWRITE, var_usmUser, 3, { 2,1,5 } },
+  { USMUSERAUTHKEYCHANGE, ASN_OCTET_STR , RWRITE, var_usmUser, 3, { 2,1,6 } },
+  { USMUSEROWNAUTHKEYCHANGE, ASN_OCTET_STR , RWRITE, var_usmUser, 3, { 2,1,7 } },
+  { USMUSERPRIVPROTOCOL , ASN_OBJECT_ID , RWRITE, var_usmUser, 3, { 2,1,8 } },
+  { USMUSERPRIVKEYCHANGE, ASN_OCTET_STR , RWRITE, var_usmUser, 3, { 2,1,9 } },
+  { USMUSEROWNPRIVKEYCHANGE, ASN_OCTET_STR , RWRITE, var_usmUser, 3, { 2,1,10 } },
+  { USMUSERPUBLIC       , ASN_OCTET_STR , RWRITE, var_usmUser, 3, { 2,1,11 } },
+  { USMUSERSTORAGETYPE  , ASN_INTEGER   , RWRITE, var_usmUser, 3, { 2,1,12 } },
+  { USMUSERSTATUS       , ASN_INTEGER   , RWRITE, var_usmUser, 3, { 2,1,13 } },
+
+};
+
+oid usmUser_variables_oid[] = {1,3,6,1,6,3,15,1,2};
+
+
 /* needed for the write_ functions to find the start of the index */
 #define USM_MIB_LENGTH 12
 
@@ -40,6 +59,9 @@ static unsigned int usmUserSpinLock=0;
 int
 store_usmUser(int majorID, int minorID, void *serverarg, void *clientarg)
 {
+  REGISTER_MIB("snmpv3/usmUser", usmUser_variables, variable4, \
+				 usmUser_variables_oid);
+
   /* save the user base */
   usm_save_users("usmUser", "snmpd");
   return SNMPERR_SUCCESS;

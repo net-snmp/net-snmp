@@ -19,12 +19,31 @@
 #include "../mibII/sysORTable.h"
 #include "snmpEngine.h"
 
+struct variable2 snmpEngine_variables[] = {
+  { SNMPENGINEID        , ASN_OCTET_STR  , RONLY , var_snmpEngine, 1, { 1 } },
+#ifdef SNMP_TESTING_CODE 
+  { SNMPENGINEBOOTS     , ASN_INTEGER    , RWRITE, var_snmpEngine, 1, { 2 } },
+  { SNMPENGINETIME      , ASN_INTEGER    , RWRITE, var_snmpEngine, 1, { 3 } },
+#else /* !SNMP_TESTING_CODE */ 
+  { SNMPENGINEBOOTS     , ASN_INTEGER    , RONLY , var_snmpEngine, 1, { 2 } },
+  { SNMPENGINETIME      , ASN_INTEGER    , RONLY , var_snmpEngine, 1, { 3 } },
+#endif /* SNMP_TESTING_CODE */
+  { SNMPENGINEMAXMESSAGESIZE, ASN_INTEGER, RONLY , var_snmpEngine, 1, { 4 } },
+};
+
+/* now load this mib into the agents mib table */
+oid snmpEngine_variables_oid[] = {1,3,6,1,6,3,10,2,1};
+
 void init_snmpEngine (void) {
-/* place any initialization routines needed here */
 #ifdef USING_MIBII_SYSORTABLE_MODULE
   static oid reg[] = {1,3,6,1,6,3,10,3,1,1};
   register_sysORTable(reg,10,"The SNMP Management Architecture MIB.");
 #endif
+
+  REGISTER_MIB("snmpv3/snmpEngine", snmpEngine_variables, variable2, \
+		 snmpEngine_variables_oid);
+
+/* place any initialization routines needed here */
 }
 
 extern struct timeval starttime;

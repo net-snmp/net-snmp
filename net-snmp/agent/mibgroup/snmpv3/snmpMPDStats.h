@@ -21,22 +21,4 @@ config_add_mib(SNMP-MPD-MIB)
 void           init_snmpMPDStats(void);
 extern FindVarMethod  var_snmpMPDStats;
 
-/* Only load this structure when this .h file is called in the snmp_vars.c 
-   file in tha agent subdirectory of the source tree */
-
-#ifdef IN_SNMP_VARS_C
-
-/* this variable defines function callbacks and type return information 
-   for the snmpMPDStats mib */
-
-struct variable2 snmpMPDStats_variables[] = {
-  { SNMPUNKNOWNSECURITYMODELS, ASN_COUNTER, RONLY, var_snmpMPDStats, 1, { 1 } },
-  { SNMPINVALIDMSGS,           ASN_COUNTER, RONLY, var_snmpMPDStats, 1, { 2 } },
-  { SNMPUNKNOWNPDUHANDLERS,    ASN_COUNTER, RONLY, var_snmpMPDStats, 1, { 3 } },
-};
-
-/* now load this mib into the agents mib table */
-config_load_mib(1.3.6.1.6.3.11.2.1, 9, snmpMPDStats_variables)
-
-#endif /* IN_SNMP_VARS_C */
 #endif /* _MIBGROUP_SNMPMPDSTATS_H */
