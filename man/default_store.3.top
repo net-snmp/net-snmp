@@ -1,4 +1,4 @@
-.TH SNMP_AGENT_API 3 "27 Oct 1999" "" "Net-SNMP"
+.TH DEFAULT_STORE 3 "27 Oct 1999" VVERSIONINFO "Net-SNMP"
 .UC 5
 .SH NAME
 default_store \- generic storage of global data.
@@ -38,8 +38,8 @@ the application in question.
 .PP
 The functions defined here implement these goals.
 .PP
-Currently, three data types are supported: boolean's, integers, and
-strings. Each of based trade data types have separate storage
+Currently, three data types are supported: booleans, integers, and
+strings. Each of these data types have separate storage
 spaces. In addition, the storage space for each data type is divided
 further by the application level.   Currently, there are two storage
 spaces. The first is reserved for the SNMP library itself. The second 
