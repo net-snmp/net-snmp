@@ -5,8 +5,6 @@
  */
 
 #include <config.h>
-#include "mibincl.h"
-#include "util_funcs.h"
 
 #include <unistd.h>
 
@@ -119,6 +117,8 @@
 #include <dmalloc.h>
 #endif
 
+#include "mibincl.h"
+#include "util_funcs.h"
 #include "auto_nlist.h"
 #include "tools.h"
 

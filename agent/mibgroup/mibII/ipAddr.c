@@ -4,7 +4,6 @@
  */
 
 #include <config.h>
-#include "mibincl.h"
 
 #if defined(IFNET_NEEDS_KERNEL) && !defined(_KERNEL)
 #define _KERNEL 1
@@ -78,6 +77,7 @@
 #include "kernel.h"
 #endif
 
+#include "mibincl.h"
 #include "system.h"
 #include "auto_nlist.h"
 

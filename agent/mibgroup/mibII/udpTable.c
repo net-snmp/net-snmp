@@ -4,7 +4,6 @@
  */
 
 #include <config.h>
-#include "mibincl.h"
 
 #if HAVE_STRING_H
 #include <string.h>
@@ -95,6 +94,7 @@
 #include "snmp_debug.h"
 
 #include "auto_nlist.h"
+#include "mibincl.h"
 
 #ifdef hpux
 #include <sys/mib.h>

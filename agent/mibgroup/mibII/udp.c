@@ -4,8 +4,6 @@
  */
 
 #include <config.h>
-#include "mibincl.h"
-#include "util_funcs.h"
 
 #if HAVE_STRING_H
 #include <string.h>
@@ -93,6 +91,8 @@
 #include "kernel_linux.h"
 #endif
 
+#include "mibincl.h"
+#include "util_funcs.h"
 #include "system.h"
 #include "asn1.h"
 #include "snmp_debug.h"

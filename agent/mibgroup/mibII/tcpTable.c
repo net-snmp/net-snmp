@@ -5,7 +5,6 @@
  */
 
 #include <config.h>
-#include "mibincl.h"
 
 #include <unistd.h>
 
@@ -115,6 +114,7 @@
 #endif
 
 #include "auto_nlist.h"
+#include "mibincl.h"
 
 #ifdef hpux
 #include <sys/mib.h>
