@@ -347,7 +347,7 @@ static int  name_hash (const char *);
 static void init_node_hash (struct node *);
 static void print_error (const char *, const char *, int);
 static void free_tree (struct tree *);
-static void free_partial_tree (struct tree *);
+static void free_partial_tree (struct tree *, int);
 static void free_node (struct node *);
 static void build_translation_table (void);
 static void init_tree_roots (void);
@@ -583,7 +583,7 @@ alloc_node(int modid)
 }
 
 static void
-free_partial_tree(struct tree *tp)
+free_partial_tree(struct tree *tp, int keep_label)
 {
     if ( !tp)
         return;
@@ -592,7 +592,8 @@ free_partial_tree(struct tree *tp)
     free_enums(&tp->enums);
     free_ranges(&tp->ranges);
     free_indexes(&tp->indexes);
-    SNMP_FREE(tp->label);
+    if (!keep_label)
+	SNMP_FREE(tp->label);
     SNMP_FREE(tp->hint);
     SNMP_FREE(tp->units);
     SNMP_FREE(tp->description);
@@ -609,7 +610,7 @@ free_tree(struct tree *Tree)
     if (Tree->number_modules > 1 )
         free((char*)Tree->module_list);
 
-    free_partial_tree (Tree);
+    free_partial_tree (Tree, FALSE);
     free ((char*)Tree);
 }
 
@@ -1190,7 +1191,7 @@ do_subtree(struct tree *root,
 			 *  and fill in the full information.
 			 */
                 merge_anon_children( anon_tp, tp );
-                free_partial_tree(anon_tp);
+                free_partial_tree(anon_tp, FALSE);
                 anon_tp->label = tp->label;  tp->label=NULL;
                 anon_tp->child_list = tp->child_list;  tp->child_list=NULL;
                 anon_tp->modid = tp->modid;
@@ -2587,24 +2588,71 @@ void
 unload_module_by_ID( int modID, struct tree *tree_top )
 {
     struct tree *tp, *prev, *next;
+    int i;
 
     prev = NULL;
     for ( tp=tree_top ; tp ; tp=next ) {
 	next = tp->next_peer;
-	if ( tp->modid == modID ) {	/* XXX - Need to search the full module list  */
-	    tp->modid = -1;		/* Mark for unloading */
-	    tp->number_modules--;
+		/*
+		 * This next section looks rather complex.
+		 * Essentially, this is equivalent to the code fragment:
+		 *  	if (tp->modID = modID)
+		 *	    tp->number_modules--;
+		 * but handles one tree node being part of several modules.
+		 */
+	for ( i=0 ; i<tp->number_modules ; i++ ) {
+	    if ( tp->module_list[i] == modID ) {
+		tp->number_modules--;
+		switch ( tp->number_modules ) {
+
+		    case 0:	/* That was the only module */
+			tp->modid = -1;		/* Mark as unused */
+			break;
+
+		    case 1:	/* We did have a list of two, but this is no
+				   longer needed.  Transfer the other entry
+				   ( i.e. module_list[1-i] - think about it! )
+				   to the 'single' slot tp->modid, and discard
+				   the list.
+				 */
+			tp->modid = tp->module_list[1-i];
+			free(tp->module_list);
+			tp->module_list = NULL;		/* let's be tidy */
+			break;
+
+		    default:	/* We still need the list, so shuffle down
+				   all following entries to close up the gap */
+			while ( i < tp->number_modules ) {
+			   tp->module_list[i] = tp->module_list[i+1];
+			   i++;
+			}
+			break;
+		}
+		break;	/* Don't need to look through the rest of the list */
+	    }
 	}
-	if ( tp->child_list )		/* Handle subtree first */
+
+		/*
+		 *  OK - that's dealt with *this* node.
+		 *	Now let's look at the children.
+		 *	(Isn't recursion wonderful!)
+		 */
+	if ( tp->child_list )
 	    unload_module_by_ID( modID, tp->child_list );
 		
-				/* Remove node if it's no longer needed */
-	if ( tp->number_modules == 0 && tp->child_list == NULL ) {
-	    if ( prev )
-		prev->next_peer = tp->next_peer;
-	    else
-		tp->parent->child_list = tp->next_peer;
-	    free_tree( tp );
+
+	if ( tp->number_modules == 0 ) {
+			/* This node isn't needed any more (except perhaps
+				for the sake of the children) */
+ 	    if ( tp->child_list == NULL ) {
+		if ( prev )
+		    prev->next_peer = tp->next_peer;
+		else
+		    tp->parent->child_list = tp->next_peer;
+		free_tree( tp );
+	   }
+	   else
+		free_partial_tree( tp, TRUE );
 	}
 	else
 	    prev = tp;
@@ -3580,7 +3628,7 @@ merge_parse_objectid(struct node *np,
 static void
 tree_from_node(struct tree *tp, struct node *np)
 {
-    free_partial_tree(tp);
+    free_partial_tree(tp, FALSE);
 
     tp->label = np->label;  np->label = NULL;
     tp->enums = np->enums;  np->enums = NULL;
