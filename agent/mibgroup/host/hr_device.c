@@ -44,6 +44,24 @@ int header_hrdevice (struct variable *,oid *, size_t *, int, size_t *, WriteMeth
 	 *
 	 *********************/
 
+#define	HRDEV_INDEX		1
+#define	HRDEV_TYPE		2
+#define	HRDEV_DESCR		3
+#define	HRDEV_ID		4
+#define	HRDEV_STATUS		5
+#define	HRDEV_ERRORS		6
+
+struct variable4 hrdevice_variables[] = {
+    { HRDEV_INDEX,     ASN_INTEGER, RONLY, var_hrdevice, 2, {1,1}},
+    { HRDEV_TYPE,    ASN_OBJECT_ID, RONLY, var_hrdevice, 2, {1,2}},
+    { HRDEV_DESCR,   ASN_OCTET_STR, RONLY, var_hrdevice, 2, {1,3}},
+    { HRDEV_ID,      ASN_OBJECT_ID, RONLY, var_hrdevice, 2, {1,4}},
+    { HRDEV_STATUS,    ASN_INTEGER, RONLY, var_hrdevice, 2, {1,5}},
+    { HRDEV_ERRORS,    ASN_COUNTER, RONLY, var_hrdevice, 2, {1,6}}
+};
+oid hrdevice_variables_oid[] = { 1,3,6,1,2,1,25,3,2 };
+
+
 void init_hr_device(void)
 {
     int i;
@@ -66,6 +84,8 @@ void init_hr_device(void)
 	device_status[i]=NULL;
 	device_errors[i]=NULL;
     }
+
+    REGISTER_MIB("host/hr_device", hrdevice_variables, variable4, hrdevice_variables_oid);
 }
 
 

@@ -86,6 +86,26 @@ extern void  End_HR_SWInst (void);
 extern void  Save_HR_SW_info (void);
 
 
+#define	HRSWINST_CHANGE		1
+#define	HRSWINST_UPDATE		2
+#define	HRSWINST_INDEX		3
+#define	HRSWINST_NAME		4
+#define	HRSWINST_ID		5
+#define	HRSWINST_TYPE		6
+#define	HRSWINST_DATE		7
+
+struct variable4 hrswinst_variables[] = {
+    { HRSWINST_CHANGE,  ASN_TIMETICKS, RONLY, var_hrswinst, 1, {1}},
+    { HRSWINST_UPDATE,  ASN_TIMETICKS, RONLY, var_hrswinst, 1, {2}},
+    { HRSWINST_INDEX,     ASN_INTEGER, RONLY, var_hrswinst, 3, {3,1,1}},
+    { HRSWINST_NAME,    ASN_OCTET_STR, RONLY, var_hrswinst, 3, {3,1,2}},
+    { HRSWINST_ID,      ASN_OBJECT_ID, RONLY, var_hrswinst, 3, {3,1,3}},
+    { HRSWINST_TYPE,      ASN_INTEGER, RONLY, var_hrswinst, 3, {3,1,4}},
+    { HRSWINST_DATE,    ASN_OCTET_STR, RONLY, var_hrswinst, 3, {3,1,5}}
+};
+oid hrswinst_variables_oid[] = { 1,3,6,1,2,1,25,6 };
+
+
 void init_hr_swinst(void)
 {
 	/* Read settings from config file,
@@ -120,6 +140,8 @@ void init_hr_swinst(void)
 #ifndef HAVE_LIBRPM
     strcpy(HRSW_name, "[installed name]");	/* default name */
 #endif
+
+    REGISTER_MIB("host/hr_swinst", hrswinst_variables, variable4, hrswinst_variables_oid);
 }
 
 /*
