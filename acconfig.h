@@ -425,7 +425,7 @@
 #define CONFIGURE_OPTIONS ""
 
 /* have socklen_t */
-#undef HAVE_SOCKLEN_T
+#undef socklen_t
 
 #ifndef HAVE_STRCHR
 #ifdef HAVE_INDEX
