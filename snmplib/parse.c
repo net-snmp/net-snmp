@@ -2524,7 +2524,9 @@ adopt_orphans (void)
         	snmp_log (LOG_WARNING,
                           "Unlinked OID in %s: %s ::= { %s %ld }\n",
                           module_name(onp->modid, modbuf),
-                          onp->label, onp->parent, onp->subid);
+                          (onp->label ? onp->label : "<no label>"),
+                          (onp->parent ? onp->parent : "<no parent>"),
+                          onp->subid);
 
 		np = onp;
 		onp = onp->next;
