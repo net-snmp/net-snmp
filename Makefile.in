@@ -181,6 +181,7 @@ configclean: makefileclean
 		net-snmp-config net-snmp-config-x configure-summary
 	rm -f mibs/.index
 	rm -f include/net-snmp/agent/mib_module_config.h		\
+		include/net-snmp/library/snmpv3-security-includes.h \
 		snmplib/snmpsm_init.h                   \
 		agent/mibgroup/mib_module_includes.h 	\
 		agent/mibgroup/mib_module_inits.h 	\
