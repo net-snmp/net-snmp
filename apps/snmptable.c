@@ -142,21 +142,31 @@ static void optProc(int argc, char *const *argv, int opt)
 	while (*optarg) {
           switch (*optarg++) {
           case 'w':
-	    if ( argv[optind] )
-               max_width = atoi(argv[optind]);
-            if (max_width == 0) {
-               fprintf(stderr, "Bad -Cw option: %s\n", argv[optind]);
+	    if ( optind < argc ) {
+	       if ( argv[optind] )
+                  max_width = atoi(argv[optind]);
+               if (max_width == 0) {
+                  fprintf(stderr, "Bad -Cw option: %s\n", argv[optind]);
+                  usage();
+               }
+	       optind++;
+	    } else {
+               fprintf(stderr, "Bad -Cw option: no argument given\n");
                usage();
-            }
-	    optind++;
+	    }
             break;
           case 'f':
-            field_separator = argv[optind];
-            if ( !field_separator ) {
-               fprintf(stderr, "Bad -Cf option: %s\n", argv[optind]);
+	    if ( optind < argc ) {
+               field_separator = argv[optind];
+               if ( !field_separator ) {
+                  fprintf(stderr, "Bad -Cf option: %s\n", argv[optind]);
+                  usage();
+               }
+	       optind++;
+	    } else {
+               fprintf(stderr, "Bad -Cf option: no argument given\n");
                usage();
-            }
-	    optind++;
+	    }
             break;
           case 'h':
             headers_only = 1;
