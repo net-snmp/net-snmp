@@ -334,7 +334,7 @@ sub snmpwalk {
 	my $val = $sess->getnext($var);
 	last if (!defined($var->tag) ||
 		 $sess->{ErrorStr} ||
-	         SNMP::translateObj($var->tag) !~ /^$oid/);
+	         SNMP::translateObj($var->tag) !~ /^$oid$/);
 	insertvar($var);
 	$top->update();
     }

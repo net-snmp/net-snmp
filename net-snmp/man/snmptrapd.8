@@ -74,7 +74,7 @@ When logging to standard output, use the format in the string FORMAT.
 .PP
 FORMAT is a printf-like string. 
 .I Snmptrapd 
-interprets the following command sequences:
+interprets the following formatting sequences:
 .TP
 %%
 a literal %
@@ -144,6 +144,10 @@ Trap description
 .TP
 %q
 Trap sub-type (numeric, in decimal)
+.TP
+%P
+Security information from the PDU (community name for v1/v2c,
+user and context for v3)
 .TP
 %v
 list of trap's variables

@@ -1,8 +1,21 @@
 #!/bin/sh
 
+# Usage: mibfetch host directory rfc [mibs]
+#
+# If "rfc" contains a "." it is expected to be a complete file name,
+# otherwise it is assumed to be just the rfc number.
+# If "mibs" is specified, it is a ":" separated list of mibs to extract,
+# otherwise all mibs are extracted.
+#
+# The script fetches the file from the givn directory on the given
+# host, and then runs the file through smistrip to extract the mibs.
+
+set -e
+
 host=$1
 dir=$2
 rfc=$3
+
 if [ `echo $rfc | sed 's/\.//'` = $rfc ]; then
   file=rfc$rfc.txt
 else
@@ -10,9 +23,12 @@ else
 fi
 
 if [ -n "$4" ]; then
-  mib="-m $4"
+  mibs="-m $4"
 fi
 
-ncftpget -FV ftp://$host/$dir/$file
-./smistrip -x .txt $mib $file
+# ncftpget -FV ftp://$host/$dir/$file
+wget -O - -nv ftp://$host/$dir/$file | tr -d \\r > $file
+
+./smistrip -x .txt $mibs $file
+
 rm $file

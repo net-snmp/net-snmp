@@ -264,8 +264,10 @@ var_hrfilesys(struct variable *vp,
 #else
 	    if (HRFS_entry->HRFS_type == MOUNT_NFS)
 #endif
-#else
+#elif defined(MNTTYPE_NFS)
 	    if (!strcmp( HRFS_entry->HRFS_type, MNTTYPE_NFS))
+#else
+	    if (0)
 #endif
 	        sprintf(string, HRFS_entry->HRFS_name);
 	    else
@@ -385,6 +387,8 @@ var_hrfilesys(struct variable *vp,
 	case HRFSYS_ACCESS:
 #if HAVE_GETFSSTAT
 	    long_return = HRFS_entry->f_flags & MNT_RDONLY ? 2 : 1;
+#elif defined(cygwin)
+	    long_return = 1;
 #else
 	    if ( hasmntopt( HRFS_entry, "ro" ) != NULL )
 	        long_return = 2;	/* Read Only */
@@ -435,7 +439,7 @@ Init_HR_FileSys (void)
       free((char *)fsstats);
     fsstats = NULL;
     fsstats = malloc(fscount*sizeof(*fsstats));
-    HRFS_index = getfsstat(fsstats, fscount*sizeof(*fsstats), MNT_NOWAIT);
+    getfsstat(fsstats, fscount*sizeof(*fsstats), MNT_NOWAIT);
     HRFS_index = 0;
 #else
    HRFS_index = 1;
@@ -465,7 +469,7 @@ Get_Next_HR_FileSys (void)
 #if HAVE_GETFSSTAT
     if (HRFS_index >= fscount) return -1;
     HRFS_entry = fsstats+HRFS_index;
-    return HRFS_index++;
+    return ++HRFS_index;
 #else
     const char **cpp;
 		/*

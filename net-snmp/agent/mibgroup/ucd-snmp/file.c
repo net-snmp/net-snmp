@@ -19,6 +19,9 @@
 #if HAVE_WINSOCK_H
 #include <winsock.h>
 #endif
+#if HAVE_STRING_H
+#include <string.h>
+#endif
 
 #if HAVE_DMALLOC_H
 #include <dmalloc.h>

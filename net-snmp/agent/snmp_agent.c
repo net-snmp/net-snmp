@@ -28,6 +28,9 @@ SOFTWARE.
 #include <config.h>
 
 #include <sys/types.h>
+#ifdef HAVE_LIMITS_H
+#include <limits.h>
+#endif
 #ifdef HAVE_STDLIB_H
 #include <stdlib.h>
 #endif
@@ -85,6 +88,10 @@ SOFTWARE.
 #include "agentx/protocol.h"
 #endif
 
+#ifdef USING_AGENTX_MASTER_MODULE
+#include "agentx/master.h"
+#endif
+
 static int snmp_vars_inc;
 
 static struct agent_snmp_session *agent_session_list = NULL;
@@ -121,35 +128,41 @@ int
 agent_check_and_process(int block) {
   int numfds;
   fd_set fdset;
-  struct timeval	timeout, *tvp = &timeout;
+  struct timeval timeout = { LONG_MAX, 0 }, *tvp = &timeout;
   int count;
   int fakeblock=0;
   
-  tvp =  &timeout;
-
   numfds = 0;
   FD_ZERO(&fdset);
   snmp_select_info(&numfds, &fdset, tvp, &fakeblock);
-  if (block == 1)
-    tvp = NULL; /* block without timeout */
-  else if (block == 0) {
-      tvp->tv_sec = 0;
-      tvp->tv_usec = 0;
+  if (block != 0 && fakeblock != 0) {
+    /*  There are no alarms registered, and the caller asked for blocking, so
+	let select() block forever.  */
+
+    tvp = NULL;
+  } else if (block != 0 && fakeblock == 0) {
+    /*  The caller asked for blocking, but there is an alarm due sooner than
+	LONG_MAX seconds from now, so use the modified timeout returned by
+	snmp_select_info as the timeout for select().  */
+
+  } else if (block == 0) {
+    /*  The caller does not want us to block at all.  */
+
+    tvp->tv_sec  = 0;
+    tvp->tv_usec = 0;
   }
 
   count = select(numfds, &fdset, 0, 0, tvp);
 
-  if (count > 0){
+  if (count > 0) {
     /* packets found, process them */
     snmp_read(&fdset);
-  } else switch(count){
+  } else switch(count) {
     case 0:
       snmp_timeout();
       break;
     case -1:
-      if (errno == EINTR){
-        return -1;
-      } else {
+      if (errno != EINTR) {
         snmp_log_perror("select");
       }
       return -1;
@@ -158,7 +171,7 @@ agent_check_and_process(int block) {
       return -1;
   }  /* endif -- count>0 */
 
-  /* run requested alarms */
+  /*  Run requested alarms.  */
   run_alarms();
 
   return count;
@@ -194,6 +207,11 @@ init_master_agent(int dest_port,
 
     if ( ds_get_boolean(DS_APPLICATION_ID, DS_AGENT_ROLE) != MASTER_AGENT )
 	return 0; /* no error if ! MASTER_AGENT */
+
+#ifdef USING_AGENTX_MASTER_MODULE
+    if ( ds_get_boolean(DS_APPLICATION_ID, DS_AGENT_AGENTX_MASTER) == 1 )
+        real_init_master();
+#endif
 
     /* has something been specified before? */
     cptr = ds_get_string(DS_APPLICATION_ID, DS_AGENT_PORTS);
@@ -282,7 +300,7 @@ init_agent_snmp_session( struct snmp_session *session, struct snmp_pdu *pdu )
 {
     struct agent_snmp_session  *asp;
 
-    asp = malloc( sizeof( struct agent_snmp_session ));
+    asp = (struct agent_snmp_session *) malloc( sizeof( struct agent_snmp_session ));
     if ( asp == NULL )
 	return NULL;
     asp->session = session;
@@ -568,7 +586,8 @@ handle_snmp_packet(int operation, struct snmp_session *session, int reqid,
 		 * May need to "dumb down" a SET error status for a
 		 *  v1 query.  See RFC2576 - section 4.3
 		 */
-	if (( asp->pdu->command == SNMP_MSG_SET ) &&
+	if (( asp->pdu                          ) &&
+	    ( asp->pdu->command == SNMP_MSG_SET ) &&
 	    ( asp->pdu->version == SNMP_VERSION_1 )) {
 	    switch ( status ) {
 		case SNMP_ERR_WRONGVALUE:
@@ -597,7 +616,8 @@ handle_snmp_packet(int operation, struct snmp_session *session, int reqid,
 		 *  types to throw an error for a v1 query.
 		 *  See RFC2576 - section 4.1.2.3
 		 */
-	if (( asp->pdu->command != SNMP_MSG_SET ) &&
+	if (( asp->pdu                          ) &&
+	    ( asp->pdu->command != SNMP_MSG_SET ) &&
 	    ( asp->pdu->version == SNMP_VERSION_1 )) {
 		for ( var_ptr = asp->pdu->variables, i=1 ;
 			var_ptr != NULL ;
@@ -613,7 +633,7 @@ handle_snmp_packet(int operation, struct snmp_session *session, int reqid,
 		    }
 	    }
 	}
-	if ( status == SNMP_ERR_NOERROR ) {
+	if (( status == SNMP_ERR_NOERROR ) && ( asp->pdu )) {
 	    snmp_increment_statistic_by(
 		(asp->pdu->command == SNMP_MSG_SET ?
 			STAT_SNMPINTOTALSETVARS : STAT_SNMPINTOTALREQVARS ),
@@ -628,15 +648,17 @@ handle_snmp_packet(int operation, struct snmp_session *session, int reqid,
 	    asp->pdu = asp->orig_pdu;
 	    asp->orig_pdu = NULL;
 	}
-	asp->pdu->command  = SNMP_MSG_RESPONSE;
-	asp->pdu->errstat  = status;
-	asp->pdu->errindex = asp->index;
-	if (! snmp_send( asp->session, asp->pdu ))
-	    snmp_free_pdu(asp->pdu);
-	snmp_increment_statistic(STAT_SNMPOUTPKTS);
-	snmp_increment_statistic(STAT_SNMPOUTGETRESPONSES);
-	asp->pdu = NULL;
-	free_agent_snmp_session( asp );
+	if ( asp->pdu ) {
+	    asp->pdu->command  = SNMP_MSG_RESPONSE;
+	    asp->pdu->errstat  = status;
+	    asp->pdu->errindex = asp->index;
+	    if (! snmp_send( asp->session, asp->pdu ))
+	        snmp_free_pdu(asp->pdu);
+	    snmp_increment_statistic(STAT_SNMPOUTPKTS);
+	    snmp_increment_statistic(STAT_SNMPOUTGETRESPONSES);
+	    asp->pdu = NULL;
+	    free_agent_snmp_session( asp );
+	}
     }
 
     return 1;
@@ -669,6 +691,7 @@ handle_next_pass(struct agent_snmp_session  *asp)
 					 req_p->pdu->reqid,
 					 req_p->pdu,
 					 req_p->cb_data );
+			return SNMP_ERR_GENERR;
 		    }
 		}
 	    }
@@ -794,8 +817,9 @@ statp_loop:
 		 * In all other situations, this indicates failure.
 		 */
 	if (statP == NULL && (asp->rw != WRITE || write_method == NULL)) {
-	    	varbind_ptr->val.integer   = NULL;
-	    	varbind_ptr->val_len = 0;
+	        /*  Careful -- if the varbind was lengthy, it will have
+		    allocated some memory.  */
+	        snmp_set_var_value(varbind_ptr, NULL, 0);
 		if ( asp->exact ) {
 	            if ( noSuchObject == TRUE ){
 		        statType = SNMP_NOSUCHOBJECT;
