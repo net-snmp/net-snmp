@@ -113,6 +113,7 @@ void init_diskio(void)
 int get_disk(int disknr) {
   time_t now;
   int i=0;
+  kstat_t *tksp;
   now=time(NULL);
   if (disknr==cache_disknr && cache_time + CACHE_TIMEOUT > now) {
     return 1;
@@ -122,11 +123,12 @@ int get_disk(int disknr) {
      if so, just reread the data - not going through the whole chain
      from kc->kc_chain */
 
-  for (ksp = kc->kc_chain; ksp != NULL; ksp = ksp->ks_next) {
-    if (ksp->ks_type==KSTAT_TYPE_IO && !strcmp(ksp->ks_class, "disk")) {
+  for (tksp = kc->kc_chain; tksp != NULL; tksp = tksp->ks_next) {
+    if (tksp->ks_type==KSTAT_TYPE_IO && !strcmp(tksp->ks_class, "disk")) {
       if (i==disknr) {
-        if (kstat_read(kc, ksp, &kio)==-1)
+        if (kstat_read(kc, tksp, &kio)==-1)
 	  snmp_log(LOG_ERR, "diskio: kstat_read failed\n");
+        ksp=tksp;
         cache_time=now;
 	cache_disknr=disknr;
 	return 1;
