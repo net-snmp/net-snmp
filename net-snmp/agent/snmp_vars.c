@@ -416,6 +416,8 @@ search_subtree_vars(tp, name, namelen, type, len, acl, exact, write_method, pi,
                          (pi->version == SNMP_VERSION_2p &&
                           !in_view(name, *namelen, pi->cxp->contextViewIndex)) ||
 #endif
+                         (pi->version == SNMP_VERSION_1 &&
+                          cvp->type == ASN_COUNTER64) ||
                          !vacm_in_view(pi, name, *namelen)) ) {
                       access = NULL;
 			*write_method = NULL;
