@@ -36,9 +36,10 @@ the ChangeLog file for a more detailed listing of changes/bug fixes.
     - The "make test" suite contains a lot of new tests.
     - cross-compiling support.
     - snmpset checks types and range values for legality.
+    - Significant improvements to the AgentX support.
+      (Code is still beta, but probably safe for use on non-critical systems).
 
  Fixes:
-    - Yet more AgentX improvements and bug fixes.
     - v3 traps/informs handled properly now.
     - Many more misc bug fixes.
     - snmpv3 engineIDs not IP address specific.
