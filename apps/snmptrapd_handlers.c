@@ -627,13 +627,14 @@ send_handler_data(FILE * file, struct hostent *host,
     static oid      snmptrapcom[] = { 1, 3, 6, 1, 6, 3, 18, 1, 4, 0 };
     oid             enttrapoid[MAX_OID_LEN];
     int             enttraplen = pdu->enterprise_length;
-    char           *tstr = NULL;
 
     if (transport != NULL && transport->f_fmtaddr != NULL) {
-        tstr = transport->f_fmtaddr(transport, pdu->transport_data,
-                                    pdu->transport_data_length);
-        fprintf(file, "%s\n%s\n", host ? host->h_name : tstr, tstr);
-        free(tstr);
+        char *tstr = transport->f_fmtaddr(transport, pdu->transport_data,
+                                          pdu->transport_data_length);
+        if (tstr != NULL) {
+            fprintf(file, "%s\n%s\n", host ? host->h_name : tstr, tstr);
+            free(tstr);
+        }
     } else {
         fprintf(file, "%s\n<UNKNOWN>\n", host ? host->h_name : "<UNKNOWN>");
     }

@@ -1344,13 +1344,20 @@ realloc_format_plain_trap(u_char ** buf, size_t * buf_len,
         if (!snmp_strcat
             (buf, buf_len, out_len, allow_realloc,
              (const u_char *) "(via ")) {
+            if (tstr != NULL) {
+                free(tstr);
+            }
             return 0;
         }
         if (!snmp_strcat(buf, buf_len, out_len, allow_realloc, tstr)) {
-            free(tstr);
+            if (tstr != NULL) {
+                free(tstr);
+            }
             return 0;
         }
-        free(tstr);
+        if (tstr != NULL) {
+            free(tstr);
+        }
         if (!snmp_strcat
             (buf, buf_len, out_len, allow_realloc,
              (const u_char *) ") ")) {
