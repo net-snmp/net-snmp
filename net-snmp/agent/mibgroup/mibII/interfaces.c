@@ -126,7 +126,11 @@
 #include <net/if_types.h>
 #endif
 #if HAVE_NET_IF_DL_H
+#ifndef dynix
 #include <net/if_dl.h>
+#else
+#include <sys/net/if_dl.h>
+#endif
 #endif
 #if HAVE_INET_MIB2_H
 #include <inet/mib2.h>

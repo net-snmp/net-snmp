@@ -89,6 +89,7 @@
 
 int addRoute(u_long dstip, u_long gwip, u_long iff, u_short flags)
 {
+#ifndef dynix
     struct sockaddr_in     dst;
     struct sockaddr_in     gateway;
     int                    s;
@@ -123,13 +124,31 @@ int addRoute(u_long dstip, u_long gwip, u_long iff, u_short flags)
     return (ioctl(s, SIOCADDRT , (caddr_t)&route));
 #endif
 
+#else  /* dynix */
+    /*
+     *  Throws up the following errors:
+     *
+     * "mibII/route_write.c", line 113: undefined struct/union member: rt_nodes
+     * "mibII/route_write.c", line 113: undefined struct/union member: rn_key
+     * "mibII/route_write.c", line 113: left operand of "->" must be pointer to struct/union
+     * "mibII/route_write.c", line 118: undefined struct/union member: rt_pad1
+     * "mibII/route_write.c", line 123: undefined symbol: SIOCADDRT
+     * "mibII/route_write.c", line 155: undefined struct/union member: rt_nodes
+     * "mibII/route_write.c", line 155: undefined struct/union member: rn_key
+     * "mibII/route_write.c", line 155: left operand of "->" must be pointer to struct/union
+     * "mibII/route_write.c", line 160: undefined struct/union member: rt_pad1
+     * "mibII/route_write.c", line 166: undefined symbol: SIOCDELRT
+     */
+    return 0;
+#endif
+
 }
 
 
 
 int delRoute(u_long dstip, u_long gwip, u_long iff, u_short flags)
 {
-
+#ifndef dynix
 
     struct sockaddr_in     dst;
     struct sockaddr_in     gateway;
@@ -166,6 +185,12 @@ int delRoute(u_long dstip, u_long gwip, u_long iff, u_short flags)
     return (ioctl(s, SIOCDELRT , (caddr_t)&route));
 #endif
 
+#else /* dynix */
+    /*
+     * See 'addRoute' for the list of errors.
+     */
+    return 0;
+#endif
 }
 
 

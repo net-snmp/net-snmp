@@ -23,6 +23,7 @@
 #  include <time.h>
 # endif
 #endif
+#ifndef dynix
 #if HAVE_SYS_VM_H
 #include <sys/vm.h>
 #if (!defined(KERNEL) || defined(MACH_USER_API)) && defined(HAVE_SYS_VMMETER_H) /*OS X does not #include <sys/vmmeter.h> if (defined(KERNEL) && !defined(MACH_USER_API))*/
@@ -75,6 +76,7 @@
 #define USE_SYSCTL_VM
 #endif
 #endif
+#endif /* ifndef dynix */
 
 #include "host_res.h"
 #include "hr_storage.h"
@@ -224,7 +226,11 @@ void init_hr_storage (void)
 #ifdef _SC_PHYS_PAGES
     physmem = sysconf(_SC_PHYS_PAGES);
 #else
+#ifdef dynix
+    physmem = sysconf(_SC_PHYSMEM);
+#else
     auto_nlist(PHYSMEM_SYMBOL, (char *)&physmem, sizeof (physmem));
+#endif
 #endif
 #endif	/* USE_SYSCTL */
 #ifdef TOTAL_MEMORY_SYMBOL
