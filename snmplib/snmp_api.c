@@ -4725,6 +4725,7 @@ snmp_sess_timeout(void *sessp)
     struct timeval now;
     snmp_callback callback;
     void *magic;
+    struct snmp_secmod_def *sptr;
 
     sp = slp->session; isp = slp->internal;
     if (!sp || !isp) {
@@ -4744,6 +4745,11 @@ snmp_sess_timeout(void *sessp)
     	freeme = NULL;
         }
         if ((timercmp(&rp->expire, &now, <))){
+        if ((sptr = find_sec_mod(rp->pdu->securityModel)) != NULL &&
+            sptr->pdu_timeout != NULL) {
+            /* call security model if it needs to know about this */
+            (*sptr->pdu_timeout)(rp->pdu);
+        }
     	/* this timer has expired */
     	if (rp->retries >= sp->retries){
             if (rp->callback) {
