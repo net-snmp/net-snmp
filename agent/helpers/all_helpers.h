@@ -15,6 +15,6 @@
 #include "table_iterator.h"
 /* #include "table_array.h" */
 
-void init_handlers(void);
+void init_helpers(void);
 
 #endif /* ALL_HANDLERS_H */
