@@ -772,7 +772,7 @@ snmp_check_packet(struct snmp_session *session,
     struct sockaddr_in *fromIp = (struct sockaddr_in *)&from;
 
 #ifdef USE_LIBWRAP
-    char *addr_string;
+    const char *addr_string;
     /*
      * Log the message and/or dump the message.
      * Optionally cache the network address of the sender.
