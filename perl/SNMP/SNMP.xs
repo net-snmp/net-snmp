@@ -351,6 +351,8 @@ char* typestr;
 	    return(TYPE_COUNTER64);
 	if (!strncasecmp(typestr,"NULL",3))
 	    return(TYPE_NULL);
+	if (!strncasecmp(typestr,"BITS",3))
+	    return(TYPE_BITSTRING);
 	if (!strncasecmp(typestr,"ENDOFMIBVIEW",3))
 	    return(SNMP_ENDOFMIBVIEW);
 	if (!strncasecmp(typestr,"NOSUCHOBJECT",7))
@@ -393,6 +395,9 @@ int type;
 	    break;
 	case ASN_IPADDRESS:
             return(TYPE_IPADDR);
+	    break;
+	case ASN_BIT_STR:
+            return(TYPE_BITSTRING);
 	    break;
 	case ASN_NULL:
             return(TYPE_NULL);
@@ -496,6 +501,10 @@ int flag;
           break;
 
         case ASN_BIT_STR:
+            sprint_bitstring(buf, var, NULL, NULL, NULL);
+            len = strlen(buf);
+            break;
+
         case ASN_NSAP:
         default:
            warn("sprint_value: asn type not handled %d\n",var->type);
@@ -624,8 +633,10 @@ char * str;
 	case TYPE_NOTIFTYPE:
 		strcpy(str, "NOTIF");
 		break;
-	case TYPE_OTHER: /* not sure if this is a valid leaf type?? */
 	case TYPE_BITSTRING:
+		strcpy(str, "BITS");
+		break;
+	case TYPE_OTHER: /* not sure if this is a valid leaf type?? */
 	case TYPE_NSAPADDRESS:
         default: /* unsupported types for now */
            strcpy(str, "");
@@ -976,6 +987,11 @@ UINT:
       case TYPE_OCTETSTR:
 	vars->type = ASN_OCTET_STR;
 	goto OCT;
+
+      case TYPE_BITSTRING:
+	vars->type = ASN_BIT_STR;
+	goto OCT;
+
       case TYPE_OPAQUE:
         vars->type = ASN_OCTET_STR;
 OCT:
