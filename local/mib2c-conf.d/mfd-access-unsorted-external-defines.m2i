@@ -634,7 +634,11 @@ ${table}_loop_save_position($mfd_aue_param_decl,
         /*
          * allocate a new context to replace the one you just took.
          */
+@if $m2c_data_allocate == 1@
+        loop_ctx_ref->loop_ctx->rowreq_ctx = ${context}_allocate_rowreq_ctx(NULL);
+@else@
         loop_ctx_ref->loop_ctx->rowreq_ctx = ${context}_allocate_rowreq_ctx();
+@end@
         if(NULL == loop_ctx_ref->loop_ctx->rowreq_ctx) {
             SNMP_FREE(loop_ctx_ref->loop_ctx);
             return MFD_ERROR;
