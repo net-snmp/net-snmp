@@ -54,7 +54,7 @@ initialize_table_nsModuleTable(void)
      */
     iinfo->get_first_data_point = nsModuleTable_get_first_data_point;
     iinfo->get_next_data_point = nsModuleTable_get_next_data_point;
-
+    iinfo->free_loop_context_at_end = free;
     iinfo->table_reginfo = table_info;
 
     /***************************************************
