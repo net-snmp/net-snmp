@@ -30,10 +30,10 @@ DLFLAGS=-fPIC -shared
 all: $(TARGETS)
 
 snmpdemoapp: $(OBJS1)
-	$(CC) -o snmpdemoapp $(OBJS1) -lsnmp $(SYSLIBS)
+	$(CC) -o snmpdemoapp $(OBJS1) -lsnmp $(SYSLIBS) $(CRYPTO)
 
 asyncapp: $(OBJS3)
-	$(CC) -o asyncapp $(OBJS3) -lsnmp $(SYSLIBS)
+	$(CC) -o asyncapp $(OBJS3) -lsnmp $(SYSLIBS) $(CRYPTO)
 
 ustMain: $(OBJS2)
 	$(CC) -o ustMain $(OBJS2) -lucdagent -lucdmibs -lsnmp $(SYSLIBS) $(CRYPTO)
