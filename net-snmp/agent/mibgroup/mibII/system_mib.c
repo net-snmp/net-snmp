@@ -63,7 +63,6 @@ char            sysContact[SYS_STRING_LEN] = SYS_CONTACT;
 char            sysName[SYS_STRING_LEN] = SYS_NAME;
 char            sysLocation[SYS_STRING_LEN] = SYS_LOC;
 oid             version_sysoid[] = { SYSTEM_MIB };
-int             version_sysoid_len = 9; /* OID_LENGTH( version_sysoid ); */
 
 char            oldversion_descr[SYS_STRING_LEN];
 char            oldsysContact[SYS_STRING_LEN];
@@ -406,7 +405,7 @@ var_system(struct variable *vp,
         *var_len = strlen(version_descr);
         return (u_char *) version_descr;
     case VERSIONID:
-        *var_len = version_sysoid_len * sizeof(version_sysoid[0]);
+        *var_len = sizeof(version_sysoid);
         return (u_char *) version_sysoid;
     case UPTIME:
         ulret = netsnmp_get_agent_uptime();
