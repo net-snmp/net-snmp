@@ -20,12 +20,15 @@
                                        /*      kernel data structures*/
 #include "system.h"
 
+#include "memory.h"                     /* the module-specific header*/
 #include "memory_solaris2.h"                     /* the module-specific header*/
 
 #include <kstat.h>
 #include <sys/stat.h>
 #include <sys/swap.h>
 #include <unistd.h>
+
+#define MAXSTRSIZE	80
 
 int minimumswap;
 static char errmsg[300];
@@ -35,6 +38,10 @@ static char errmsg[300];
 extern kstat_ctl_t *kstat_fd;  /* defined in kernel_sunos5.c */
 kstat_t *ksp1, *ksp2;
 kstat_named_t *kn, *kn2;
+
+static FindVarMethod var_extensible_mem;
+static long getFreeSwap(void);
+static long getTotalFree(void);
 
 void init_memory_solaris2(void)
 {
@@ -78,7 +85,7 @@ void init_memory_solaris2(void)
   }
 }
 
-u_char *var_extensible_mem(
+static u_char *var_extensible_mem(
     struct variable *vp,
     oid        *name,
     size_t     *length,
@@ -195,7 +202,7 @@ long getTotalSwap(void)
 /*
  * returns -1 if malloc fails.
  */
-long getFreeSwap(void)
+static long getFreeSwap(void)
 {
   long free_mem = -1;
 
@@ -227,7 +234,7 @@ long getFreeSwap(void)
   return (free_mem);
 }
 
-long getTotalFree(void)
+static long getTotalFree(void)
 {
   long free_mem = getFreeSwap();
 

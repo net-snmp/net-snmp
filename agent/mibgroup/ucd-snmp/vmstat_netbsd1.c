@@ -47,6 +47,8 @@
 #define CPTIME_SYMBOL	"cp_time"
 #define BOOTTIME_SYMBOL	"boottime"
 
+static FindVarMethod var_extensible_vmstat;
+
 void init_vmstat_netbsd1(void) 
 {
 
@@ -102,6 +104,7 @@ getuptime(void )
 	return(uptime);
 }
 
+static
 unsigned char *var_extensible_vmstat(struct variable *vp,
 				     oid *name,
 				     size_t *length,

@@ -122,6 +122,9 @@ static int take_snapshot(struct cpu_stat_snapshot *css);
 /* Init function for this module, from prototype */
 /* Defines variables handled by this module, defines root OID for */
 /* this module and registers it with the agent */
+
+static FindVarMethod var_extensible_vmstat;
+
 void init_vmstat_solaris2(void) 
 {
   

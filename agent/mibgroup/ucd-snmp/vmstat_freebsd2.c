@@ -41,6 +41,7 @@
 #include "util_funcs.h"
 
 #include "vmstat.h"
+#include "vmstat_freebsd2.h"
 #include "auto_nlist.h"
 
 
@@ -56,6 +57,8 @@
 
 /* CPU percentage */
 #define CPU_PRC         100
+
+static FindVarMethod var_extensible_vmstat;
 
 void init_vmstat_freebsd2(void) 
 {
@@ -113,6 +116,7 @@ getuptime(void )
 	return(uptime);
 }
 
+static
 unsigned char *var_extensible_vmstat(struct variable *vp,
 				     oid *name,
 				     size_t *length,

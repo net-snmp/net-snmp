@@ -7,7 +7,6 @@
 
 #include "mibdefs.h"
 
-static FindVarMethod var_extensible_vmstat;
 void init_vmstat(void);
 
 #define SWAPIN 3
