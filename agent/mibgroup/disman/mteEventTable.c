@@ -11,7 +11,7 @@
 #include "mteEventNotificationTable.h"
 #include "mteObjectsTable.h"
 
-netsnmp_table_data_set *table_set = NULL;
+static netsnmp_table_data_set *table_set = NULL;
 
 /** Initialize the mteEventTable table by defining its contents and how it's structured */
 void
@@ -83,6 +83,14 @@ init_mteEventTable(void)
      * here we initialize all the tables we're planning on supporting 
      */
     initialize_table_mteEventTable();
+
+    snmpd_register_config_handler("trapEvent", parse_trapevent,
+                                  NULL,
+                                  "trapEvent NAME TRAP_OID [[-w] EXTRA_OID ...]");
+
+    snmpd_register_config_handler("linkUpDownTraps", parse_linkUpDownTraps,
+                                  NULL,
+                                  "linkUpDownTraps (yes|no)");
 }
 
 /** handles requests for the mteEventTable table, if anything else needs to be done */
@@ -102,6 +110,127 @@ mteEventTable_handler(netsnmp_mib_handler *handler,
     /* XXX: on rowstatus = destroy, remove the corresponding rows from the
        other tables: snmpEventNotificationTable and the set table */
     return SNMP_ERR_NOERROR;
+}
+
+void
+parse_linkUpDownTraps(const char *token, char *line) {
+    if (strncmp(line, "y", 1) == 0) {
+        parse_trapevent("trapEvent", "linkUpTrap   	 linkUp     ifIndex ifAdminStatus ifOperStatus");
+        parse_trapevent("trapEvent", "linkDownTrap 	 linkDown   ifIndex ifAdminStatus ifOperStatus");
+
+        parse_simple_monitor("monitor", "-r 60 -e linkUpTrap \"Generate linkUp\" ifOperStatus != 2");
+        parse_simple_monitor("monitor", "-r 60 -e linkDownTrap \"Generate linkDown\" ifOperStatus == 2");
+    }
+}
+
+void
+parse_trapevent(const char *token, char *line) {
+    char            name_buf[64];
+    char            oid_name_buf[SPRINT_MAX_LEN];
+    oid             oid_buf[MAX_OID_LEN];
+    size_t          oid_buf_len = sizeof(oid_buf);
+    int             wild = 1;
+    netsnmp_table_row *row;
+    long tlong;
+    char tc;
+
+    /* get the owner */
+    const char *owner = "snmpd.conf";
+
+    /* get the name */
+    char *cp = copy_nword(line, name_buf, SPRINT_MAX_LEN);
+
+    if (!cp || name_buf[0] == '\0') {
+        config_perror("syntax error.");
+        return;
+    }
+
+    for(row = table_set->table->first_row; row; row = row->next) {
+        if (strcmp(row->indexes->val.string, owner) == 0 &&
+            strcmp(row->indexes->next_variable->val.string,
+                   name_buf) == 0) {
+            config_perror("An eventd by that name has already been defined.");
+            return;
+        }
+    }
+
+    /* now, get all the trap oid */
+    cp = copy_nword(cp, oid_name_buf, SPRINT_MAX_LEN);
+
+    if (oid_name_buf[0] == '\0') {
+        config_perror("syntax error.");
+        return;
+    }
+    if (!snmp_parse_oid(oid_name_buf, oid_buf, &oid_buf_len)) {
+        snmp_log(LOG_ERR,"namebuf: %s\n",oid_name_buf);
+        config_perror("unable to parse trap oid");
+        return;
+    }
+
+    /*
+     * add to the mteEventNotificationtable to point to the
+     * notification and the objects.
+     */
+    row = netsnmp_create_table_data_row();
+
+    /* indexes */
+    netsnmp_table_row_add_index(row, ASN_OCTET_STR, owner, strlen(owner));
+    netsnmp_table_row_add_index(row, ASN_PRIV_IMPLIED_OCTET_STR,
+                                name_buf, strlen(name_buf));
+
+
+    /* columns */
+    netsnmp_set_row_column(row, COLUMN_MTEEVENTNOTIFICATION, ASN_OBJECT_ID,
+                           (char *) oid_buf, oid_buf_len * sizeof(oid));
+    netsnmp_set_row_column(row, COLUMN_MTEEVENTNOTIFICATIONOBJECTSOWNER,
+                           ASN_OCTET_STR, owner, strlen(owner));
+    netsnmp_set_row_column(row, COLUMN_MTEEVENTNOTIFICATIONOBJECTS,
+                           ASN_OCTET_STR, name_buf, strlen(name_buf));
+
+    netsnmp_table_data_add_row(mteEventNotif_table_set->table, row);
+
+    /*
+     * add to the mteEventTable to make it a notification to trigger
+     * notification and the objects.
+     */
+    row = netsnmp_create_table_data_row();
+
+    /* indexes */
+    netsnmp_table_row_add_index(row, ASN_OCTET_STR, owner, strlen(owner));
+    netsnmp_table_row_add_index(row, ASN_PRIV_IMPLIED_OCTET_STR,
+                                name_buf, strlen(name_buf));
+
+
+    /* columns */
+    tc = 0x80;
+    netsnmp_set_row_column(row, COLUMN_MTEEVENTACTIONS, ASN_OCTET_STR,
+                           &tc, 1);
+    tlong = MTETRIGGERENABLED_TRUE;
+    netsnmp_set_row_column(row, COLUMN_MTEEVENTENABLED,
+                           ASN_INTEGER, (char *) &tlong, sizeof(tlong));
+    tlong = RS_ACTIVE;
+    netsnmp_set_row_column(row, COLUMN_MTEEVENTENTRYSTATUS,
+                           ASN_INTEGER, (char *) &tlong, sizeof(tlong));
+
+    netsnmp_table_data_add_row(table_set->table, row);
+    
+    /*
+     * now all the objects to put into the trap's object row
+     */
+    while(cp) {
+        cp = copy_nword(cp, oid_name_buf, SPRINT_MAX_LEN);
+        if (strcmp(oid_name_buf, "-w") == 0) {
+            wild = 0;
+            continue;
+        }
+        if (!snmp_parse_oid(oid_name_buf, oid_buf, &oid_buf_len)) {
+            config_perror("unable to parse an object oid");
+            return;
+        }
+        mte_add_object_to_table("snmpd.conf", name_buf,
+                                oid_buf, oid_buf_len, wild);
+        wild = 1;
+    }
 }
 
 /*
@@ -176,13 +305,25 @@ run_mte_events(struct mteTriggerTable_data *item,
                                               tc->data_len);
 
                     /* XXX: add objects from the mteObjectsTable */
+                    DEBUGMSGTL(("mteEventTable:send_events", "no: %x, no->data: %s", no, no->data.string));
+                    DEBUGMSGTL(("mteEventTable:send_events", "noo: %x, noo->data: %s", noo, noo->data.string));
+                    DEBUGMSGTL(("mteEventTable:send_events", "name_oid: %x",name_oid));
                     if (no && no->data.string &&
                         noo && noo->data.string && name_oid) {
+                        char *tmpowner =
+                            netsnmp_strdup_and_null(noo->data.string,
+                                                    noo->data_len);
+                        char *tmpname =
+                            netsnmp_strdup_and_null(no->data.string,
+                                                    no->data_len);
+
+                        DEBUGMSGTL(("mteEventTable:send_events", "Adding objects for owner=%s name=%s", tmpowner, tmpname));
                         mte_add_objects(var_list, item,
-                                        noo->data.string,
-                                        no->data.string,
-                                        name_oid + item->mteTriggerValueIDLen,
+                                        tmpowner, tmpname, 
+                                       name_oid + item->mteTriggerValueIDLen,
                                         name_oid_len - item->mteTriggerValueIDLen);
+                        free(tmpowner);
+                        free(tmpname);
                     }
 
                     DEBUGMSGTL(("mteEventTable:send_events", "sending an event "));

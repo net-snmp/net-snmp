@@ -363,12 +363,14 @@ static int      monitor_call_count = 0;
 void
 parse_simple_monitor(const char *token, char *line)
 {
-    char            buf[SPRINT_MAX_LEN], *cp, ebuf[SPRINT_MAX_LEN];
+    char            buf[SPRINT_MAX_LEN], *cp, ebuf[SPRINT_MAX_LEN],
+                    eventname[64];
     oid             obuf[MAX_OID_LEN];
     size_t          obufLen;
     struct mteTriggerTable_data *StorageNew;
 
     monitor_call_count++;
+    eventname[0] = '\0';
 
     StorageNew = create_mteTriggerTable_data();
     StorageNew->storageType = ST_READONLY;
@@ -417,6 +419,17 @@ parse_simple_monitor(const char *token, char *line)
                 StorageNew->pdu_securityNameLen = strlen(buf);
             } else {
                 config_perror("No parameter after -u given\n");
+                /*
+                 * XXX: free StorageNew 
+                 */
+                return;
+            }
+            break;
+        case 'e':
+            if (cp) {
+                cp = copy_nword(cp, eventname, sizeof(eventname));
+            } else {
+                config_perror("No parameter after -e given\n");
                 /*
                  * XXX: free StorageNew 
                  */
@@ -526,6 +539,16 @@ parse_simple_monitor(const char *token, char *line)
          */
         if (!cp) {
             StorageNew->mteTriggerTest[0] = MTETRIGGERTEST_EXISTENCE;
+            if (eventname[0] != '\0') {
+                StorageNew->mteTriggerExistenceEventOwner =
+                    strdup("snmpd.conf");
+                StorageNew->mteTriggerExistenceEventOwnerLen =
+                    strlen(StorageNew->mteTriggerExistenceEventOwner);
+                StorageNew->mteTriggerExistenceEvent =
+                    strdup(eventname);
+                StorageNew->mteTriggerExistenceEventLen =
+                    strlen(eventname);
+            }
             mteTriggerTable_add(StorageNew);
             return;
         }
@@ -554,6 +577,17 @@ parse_simple_monitor(const char *token, char *line)
 
         cp = copy_nword(cp, buf, sizeof(buf));
         StorageNew->mteTriggerBooleanValue = strtol(buf, NULL, 0);
+
+        if (eventname[0] != '\0') {
+            StorageNew->mteTriggerBooleanEventOwner =
+                strdup("snmpd.conf");
+            StorageNew->mteTriggerBooleanEventOwnerLen =
+                strlen(StorageNew->mteTriggerBooleanEventOwner);
+            StorageNew->mteTriggerBooleanEvent =
+                strdup(eventname);
+            StorageNew->mteTriggerBooleanEventLen =
+                strlen(eventname);
+        }
     }
     mteTriggerTable_add(StorageNew);
     mte_enable_trigger(StorageNew);
