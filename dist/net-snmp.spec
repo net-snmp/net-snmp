@@ -1,7 +1,22 @@
-%{?with_embedded_perl:%define embed_perl 1}
-%{!?with_embedded_perl:%define embed_perl 0}
-%{?with_perl_modules:%define perl_modules 1}
-%{!?with_perl_modules:%define perl_modules 0}
+#
+# Default to no perl
+#
+%define include_perl 0
+#
+# Check for -with embedded_perl
+#
+%{?_with_embedded_perl:%define embedded_perl 1}
+%{!?_with_embedded_perl:%define embedded_perl 0}
+#
+# check for -with perl_modules
+#
+%{?_with_perl_modules:%define perl_modules 1}
+%{!?_with_perl_modules:%define perl_modules 0}
+#
+# if embedded_perl or perl_modules specified, include some perl stuff
+#
+%{?_with_embedded_perl:%define include_perl 1}
+%{?_with_perl_modules:%define include_perl 1}
 #
 Summary: Tools and servers for the SNMP protocol
 Name: net-snmp
@@ -11,8 +26,9 @@ URL: http://net-snmp.sourceforge.net/
 Copyright: BSDish
 Group: System Environment/Daemons
 Source: http://prdownloads.sourceforge.net/net-snmp/net-snmp-%{version}.tar.gz
-Patch0: net-snmp-5.0.9-with-perl.patch
-Patch1: net-snmp-5.0.9-use-numeric.patch
+Patch0: net-snmp-5.0.9-p01-with-perl.patch
+Patch1: net-snmp-5.0.9-p02-use-numeric.patch
+Patch2: net-snmp-5.0.9-p03b-blank-line.patch
 Prereq: openssl
 Obsoletes: cmu-snmp ucd-snmp ucd-snmp-utils
 BuildRoot: /tmp/%{name}-root
@@ -29,7 +45,7 @@ generate and handle SNMP traps, etc.  Using SNMP you can check the
 status of a network of computers, routers, switches, servers, ... to
 evaluate the state of your network.
 
-%if %{embed_perl}
+%if %{embedded_perl}
 This package includes embedded perl support within the agent
 %endif
 
@@ -43,7 +59,7 @@ Obsoletes: cmu-snmp-devel ucd-snmp-devel
 The net-snmp-devel package contains headers and libraries which are
 useful for building SNMP applications, agents, and sub-agents.
 
-%if %{perl_modules}
+%if %{include_perl}
 %package perlmods
 Group: System Environment/Libraries
 Summary: The perl modules provided with Net-SNMP
@@ -51,26 +67,30 @@ Requires: net-snmp = %{version}, perl
 
 %description perlmods
 Net-SNMP provides a number of perl modules useful when using the SNMP
-protocol.  Both client and agent support modules are provided, along
-with embedded perl support within the agent.
+protocol.  Both client and agent support modules are provided.
+%if %{embedded_perl}
+Embedded perl support has also been enabled within the agent.
+%endif
 %endif
 
 %prep
 %setup -q
 %patch0 -p0
 %patch1 -p0
+%patch2 -p0
 
 %build
+CONFIG="--enable-shared"
+%if %{perl_modules}
+CONFIG="$CONFIG --with-perl-modules='PREFIX=$RPM_BUILD_ROOT/usr INSTALLDIRS=vendor'"
+%endif
+%if %{embedded_perl}
+CONFIG="$CONFIG --enable-embedded-perl"
+%endif
 %configure --with-defaults --with-sys-contact="Unknown" \
 	--with-mib-modules="host disman/event-mib smux" \
 	--with-sysconfdir="/etc/net-snmp"               \
-	--enable-shared					\
-%if %{perl_modules}
-	--with-perl-modules="PREFIX=$RPM_BUILD_ROOT/usr INSTALLDIRS=vendor"  \
-%endif
-%if %{embed_perl}
-	--enable-embedded-perl                          \
-%endif
+	$CONFIG \
 	--with-cflags="$RPM_OPT_FLAGS"
 
 make
