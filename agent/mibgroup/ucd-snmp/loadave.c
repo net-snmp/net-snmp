@@ -172,19 +172,20 @@ void loadave_free_config (void)
  */
 int try_getloadavg(double *r_ave, size_t s_ave)
 {
+  double *pave = r_ave;
 #ifdef HAVE_SYS_FIXPOINT_H
   fix favenrun[3];
 #endif
-#if defined(ultrix) || defined(sun4) || defined(__alpha)
-#if defined(sun4) || defined(__alpha)
+#if defined(ultrix) || defined(sun) || defined(__alpha)
   int i;
+#if defined(sun) || defined(__alpha)
   long favenrun[3];
   if (s_ave > 3) /* bounds check */
     return (-1); 
 #define FIX_TO_DBL(_IN) (((double) _IN)/((double) FSCALE))
 #endif
 #endif
-  double *pave = r_ave;
+
 
 #ifdef HAVE_GETLOADAVG
   if (getloadavg(pave, s_ave) == -1)
@@ -198,7 +199,7 @@ int try_getloadavg(double *r_ave, size_t s_ave)
     fscanf(in, "%lf %lf %lf", pave, (pave + 1), (pave + 2));
     fclose(in);
   }
-#elif defined(ultrix) || defined(sun4) || defined(__alpha)
+#elif defined(ultrix) || defined(sun) || defined(__alpha)
   if (auto_nlist(LOADAVE_SYMBOL,(char *) favenrun, sizeof(favenrun)) == 0)
     return(-1);
   for(i=0;i<s_ave;i++)
