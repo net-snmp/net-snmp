@@ -37,6 +37,11 @@ names will be deleted.
 .TP 
 .B -CB
 Do not use GETBULK requests to retrieve data, only GETNEXT.
+.TP 
+.BI -Cc " CHARS"
+Print table in columns of
+.I CHARS
+characters width.
 .TP
 .BI -Cf " STRING"
 The string
@@ -56,6 +61,16 @@ Do not display the column headings.
 .TP
 .B -Ci
 This option prepends the index of the entry to all printed lines.
+.TP
+.B -Cl
+Left justify the data in each column.
+.TP 
+.BI -Cr " REPEATERS"
+For GETBULK requests, 
+.I REPEATERS
+specifies the max-repeaters value to use.  For GETNEXT requests,
+.I REPEATERS
+specifies the number of entries to retrieve at a time.
 .TP 
 .BI -Cw " WIDTH"
 Specifies the width of the lines when the table is printed.
@@ -83,6 +98,34 @@ SNMP table: at.atTable
 
 atIfIndex+atPhysAddress+atNetAddress
 1+8:0:20:20:0:ab+130.225.243.33
+.PP
+.nf
+$ snmptable localhost -Cl -CB -Ci -OX -Cb -Cc 16 -Cw 64 ifTable
+
+SNMP table: ifTable
+
+Index           Descr           Type            Mtu             
+Speed           PhysAddress     AdminStatus     OperStatus      
+LastChange      InOctets        InUcastPkts     InNUcastPkts    
+InDiscards      InErrors        InUnknownProtos OutOctets       
+OutUcastPkts    OutNUcastPkts   OutDiscards     OutErrors       
+OutQLen         Specific        
+
+index: [1]
+1               lo              softwareLoopbac 16436           
+10000000                        up              up              
+?               2837283786      3052466         ?               
+0               0               ?               2837283786      
+3052466         ?               0               0               
+0               zeroDotZero     
+
+index: [2]
+2               eth0            ethernetCsmacd  1500            
+10000000        0:5:5d:d1:f7:cf up              up              
+?               2052604234      44252973        ?               
+0               0               ?               149778187       
+65897282        ?               0               0               
+0               zeroDotZero     
 .PP
 .SH "BUGS"
 The test for
