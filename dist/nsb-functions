@@ -251,10 +251,10 @@ nsb-upload()
 {
    build_dir=$1
    target=$2
-   nsb-flow upload to $target: config.log configure-summary nsb-make-all.*$NSB_DATE
+   nsb-flow upload to $target: config.log configure-summary nsb-make-all.$NSB_DATE nsb-make-test.$NSB_DATE
    dir=$PWD
    cd $build_dir
-   /usr/bin/scp config.log configure-summary nsb-make-all.*$NSB_DATE \
+   /usr/bin/scp config.log configure-summary nsb-make-all.$NSB_DATE nsb-make-test.$NSB_DATE\
                  $target
    cd $dir
 }
