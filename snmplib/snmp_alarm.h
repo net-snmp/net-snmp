@@ -7,7 +7,8 @@ extern "C" {
 
 typedef void (SNMPAlarmCallback)(unsigned int clientreg, void *clientarg);
 
-#define SA_REPEAT 0x01
+/* alarm flags */
+#define SA_REPEAT 0x01  /* keep repeating every X seconds */
 
 struct snmp_alarm {
    unsigned int seconds;
@@ -35,6 +36,7 @@ struct snmp_alarm *sa_find_next(void);
 void run_alarms(void);
 RETSIGTYPE alarm_handler(int a);
 void set_an_alarm(void);
+int get_next_alarm_delay_time(void);
 
 #ifdef __cplusplus
 }

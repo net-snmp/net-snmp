@@ -3587,6 +3587,7 @@ snmp_sess_select_info(void *sessp,
     struct timeval now, earliest;
     int timer_set = 0;
     int active = 0, requests = 0;
+    int next_alarm = 0;
 
     timerclear(&earliest);
     /*
@@ -3633,7 +3634,11 @@ snmp_sess_select_info(void *sessp,
 	prev = slp;
 	next = slp->next;
     }
-    if (requests == 0) { /* if none are active, skip arithmetic */
+
+    if (ds_get_boolean(DS_LIBRARY_ID, DS_LIB_ALARM_DONT_USE_SIG)) {
+      next_alarm = get_next_alarm_delay_time();
+    }
+    if (next_alarm == 0 && requests == 0) { /* if none are active, skip arithmetic */
        *block = 1; /* can block - timeout value is undefined if no requests*/
 	return active;
     }
@@ -3645,6 +3650,11 @@ snmp_sess_select_info(void *sessp,
      */
     gettimeofday(&now,(struct timezone *)0);
     /*Now = now;*/
+
+    if (next_alarm != 0 && earliest.tv_sec > next_alarm) {
+      earliest.tv_sec = next_alarm;
+      earliest.tv_usec = 0;
+    }
 
     if (timer_set || earliest.tv_sec < now.tv_sec) {
        earliest.tv_sec  = 0;
