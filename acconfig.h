@@ -53,6 +53,14 @@
 #define SNMP_ALWAYS_DEBUG 0        /* Always print debugging information and
                                       ignore the -D flag passed to the cmds */
 
+/* PERSISTENT_DIRECTORY: If defined, the library is capabile of saving
+   persisant information to this directory in the form of configuration
+   lines: PERSISTENT_DIRECTORY/NAME.persistent.conf */
+#define PERSISTENT_DIRECTORY "/var/snmp"
+
+/* PERSISTENT_MASK: the umask permissions to set up the persistent files with */
+#define PERSISTENT_MASK 077
+
 @TOP@
 
 /* define the system type include file here */
@@ -70,11 +78,6 @@
    place.  (stdin is closed so that sh scripts won't wait for it) */
 
 #undef LOGFILE
-
-/* PERSISTENT_DIRECTORY: If defined, the library is capabile of saving
-   persisant information to this directory in the form of configuration
-   lines: PERSISTENT_DIRECTORY/NAME.persistent.conf */
-#define PERSISTENT_DIRECTORY "/var/snmp"
 
 /* default system contact */
 #undef SYS_CONTACT
