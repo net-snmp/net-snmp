@@ -1119,6 +1119,7 @@ snmp_sess_close(void *sessp)
         SNMP_FREE(sesp->securityName);
         SNMP_FREE(sesp->securityAuthProto);
         SNMP_FREE(sesp->securityPrivProto);
+        snmp_synch_reset(sesp);
         free((char *)sesp);
     }
 
