@@ -558,6 +558,8 @@ dnl AC_CHECK_LIB(ucb, bzero)
 AC_CHECK_LIB(rpm, rpmdbOpen,[
   AC_DEFINE(HAVE_LIBRPM)
   LIBS="$LIBS -lrpm -ldb"
+  dnl zlib is required for newer versions of rpm
+  AC_CHECK_LIB(z, zlibVersion)
 ],,-ldb)
 
 dnl Replace `main' with a function in -lkstat:
