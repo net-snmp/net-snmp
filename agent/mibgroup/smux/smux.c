@@ -1527,6 +1527,7 @@ smux_trap_process(u_char *rsp, size_t *len)
 				      var_val_len);
 				var_val = (u_char *)&(smux_sa.sin_addr.s_addr);
 				break;
+		    case ASN_OPAQUE:
 		    case ASN_OCTET_STR:
 				/* XXX */
 				if (len == 0)
@@ -1536,12 +1537,11 @@ smux_trap_process(u_char *rsp, size_t *len)
 						 smux_str, &var_val_len);
 				var_val = smux_str;
 				break;
-		    case ASN_OPAQUE:
-		    case ASN_NSAP:
 		    case ASN_OBJECT_ID:
 				var_val_len = MAX_OID_LEN;
 				asn_parse_objid(var_val, &maxlen, &vartype, 
 						smux_objid, &var_val_len);
+                                var_val_len *= sizeof(oid);
 				var_val = (u_char *)smux_objid;
 				break;
 		    case SNMP_NOSUCHOBJECT:
@@ -1559,6 +1559,7 @@ smux_trap_process(u_char *rsp, size_t *len)
 						 smux_str, &var_val_len);
 				var_val = (u_char *)smux_str;
 				break;
+		    case ASN_NSAP:
 		    default:
 				 snmp_log(LOG_ERR, "bad type returned (%x)\n", vartype);
 				var_val = NULL;
