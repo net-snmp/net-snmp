@@ -542,8 +542,12 @@ getMibstat(mibgroup_e grid, void *resp, size_t entrysize,
 	    cachep->cache_length = length;
 	    if (rc == 1)    /* Found but there are more unread data */
 		cachep->cache_flags |= CACHE_MOREDATA;
-	    else
+	    else {
 		cachep->cache_flags &= ~CACHE_MOREDATA;
+                if (rc > 1)  {
+                    cachep->cache_time = 0;
+                    }
+                 }
 	    cachep->cache_comp = (void *) comp;
 	    cachep->cache_arg = arg;
 	} else {
@@ -589,7 +593,7 @@ getentry(req_e req_type, void *bufaddr, size_t len,
      * Here we have to perform address arithmetic with pointer to void. Ugly...
      */
 
-    for (; len != 0; len -= entrysize, bp = (char *) bp + entrysize) {
+    for (; len > 0; len -= entrysize, bp = (char *) bp + entrysize) {
 	if (rp != (void *) NULL) {
 	    *rp = bp;
 	}
