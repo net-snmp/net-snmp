@@ -14,24 +14,27 @@
 
 #define BABY_STEPS_PER_MODE_MAX     4
 
-static u_short mode_map[SNMP_MSG_INTERNAL_SET_MAX][BABY_STEPS_PER_MODE_MAX] = {
+static u_short get_mode_map[BABY_STEPS_PER_MODE_MAX] = {
+    MODE_BSTEP_PRE_REQUEST, MODE_BSTEP_OBJECT_LOOKUP, 0xffff, MODE_BSTEP_POST_REQUEST };
+
+static u_short set_mode_map[SNMP_MSG_INTERNAL_SET_MAX][BABY_STEPS_PER_MODE_MAX] = {
     /*R1*/
-    { BABY_STEP_PRE_REQUEST, BABY_STEP_DATA_LOOKUP, BABY_STEP_CHECK_OBJECT,
-      BABY_STEP_ROW_CREATE},
+    { MODE_BSTEP_PRE_REQUEST, MODE_BSTEP_OBJECT_LOOKUP, MODE_BSTEP_CHECK_VALUE,
+      MODE_BSTEP_ROW_CREATE},
     /*R2*/
-    { BABY_STEP_UNDO_SETUP, BABY_STEP_NONE, BABY_STEP_NONE, BABY_STEP_NONE },
+    { MODE_BSTEP_UNDO_SETUP, BABY_STEP_NONE, BABY_STEP_NONE, BABY_STEP_NONE },
     /*A */
-    { BABY_STEP_SET_VALUES,BABY_STEP_CHECK_CONSISTENCY,
-      BABY_STEP_UNDOABLE_COMMIT, BABY_STEP_NONE },
+    { MODE_BSTEP_SET_VALUE,MODE_BSTEP_CHECK_CONSISTENCY,
+      MODE_BSTEP_COMMIT, BABY_STEP_NONE },
     /*C */
-    { BABY_STEP_FINAL_COMMIT, BABY_STEP_UNDO_CLEANUP, BABY_STEP_POST_REQUEST,
+    { MODE_BSTEP_IRREVERSIBLE_COMMIT, MODE_BSTEP_UNDO_CLEANUP, MODE_BSTEP_POST_REQUEST,
       BABY_STEP_NONE},
     /*F */
-    { BABY_STEP_UNDO_CLEANUP, BABY_STEP_POST_REQUEST, BABY_STEP_NONE,
+    { MODE_BSTEP_UNDO_CLEANUP, MODE_BSTEP_POST_REQUEST, BABY_STEP_NONE,
       BABY_STEP_NONE },
     /*U */
-    { BABY_STEP_UNDO_COMMIT, BABY_STEP_UNDO_SETS, BABY_STEP_UNDO_CLEANUP,
-      BABY_STEP_POST_REQUEST}
+    { MODE_BSTEP_UNDO_COMMIT, MODE_BSTEP_UNDO_SET, MODE_BSTEP_UNDO_CLEANUP,
+      MODE_BSTEP_POST_REQUEST}
 };
     
 /** @defgroup baby_steps baby_steps: calls your handler in baby_steps for set processing.
@@ -64,6 +67,7 @@ netsnmp_baby_steps_helper(netsnmp_mib_handler *handler,
                          netsnmp_request_info *requests)
 {
     int save_mode, i, rc = SNMP_ERR_NOERROR;
+    u_short *mode_map_ptr;
     
     DEBUGMSGTL(("helper:baby_steps", "Got request, mode %d\n", reqinfo->mode));
 
@@ -75,11 +79,11 @@ netsnmp_baby_steps_helper(netsnmp_mib_handler *handler,
     case MODE_SET_COMMIT:
     case MODE_SET_FREE:
     case MODE_SET_UNDO:
+        mode_map_ptr = set_mode_map[reqinfo->mode];
         break;
             
     default:
-        return netsnmp_call_next_handler(handler, reginfo, reqinfo,
-                                         requests);
+        mode_map_ptr = get_mode_map;
     }
 
     /* Legend: (test) [optional] <required>
@@ -138,19 +142,30 @@ netsnmp_baby_steps_helper(netsnmp_mib_handler *handler,
         /*
          * break if we run out of baby steps for this mode
          */
-        if(mode_map[save_mode][i] == BABY_STEP_NONE)
+        if(mode_map_ptr[i] == BABY_STEP_NONE)
             break;
 
         /*
          * skip modes the handler didn't register for
-         */
-        if(!(mode_map[save_mode][i] & (u_long)handler->myvoid))
+        if(!(mode_map_ptr[i] & (u_long)handler->myvoid))
             continue;
+         */
         
         /*
          * call handlers for baby step
          */
-        reqinfo->mode = mode_map[save_mode][i];
+        if(0xffff == mode_map_ptr[i]) /** use original mode */
+            reqinfo->mode = save_mode;
+        else
+            reqinfo->mode = mode_map_ptr[i];
+        if((BABY_STEPS_PER_MODE_MAX - 1) == i)
+            reqinfo->next_mode_ok = BABY_STEP_NONE;
+        else {
+            if(0xffff == mode_map_ptr[i+1])
+                reqinfo->next_mode_ok = save_mode;
+            else
+                reqinfo->next_mode_ok = mode_map_ptr[i+1];
+        }
         rc = netsnmp_call_next_handler(handler, reginfo, reqinfo,
                                        requests);
 
