@@ -59,7 +59,7 @@ extern          "C" {
     netsnmp_oid_stash_node *netsnmp_oid_stash_create_node(void);        /* returns a malloced node */
 
     void netsnmp_oid_stash_store(netsnmp_oid_stash_node *root,
-                                 char *tokenname, NetSNMPStashDump *dumpfn,
+                                 const char *tokenname, NetSNMPStashDump *dumpfn,
                                  oid *curoid, size_t curoid_len);
 
 #ifdef __cplusplus
