@@ -8,12 +8,20 @@
 @end@ # ;
 ########################################################################
 ##
-/*
- * TODO:
+/**
  * check dependencies
  *
- * return SNMP_ERR_NOERROR if the all the changes to the row are legal,
- *        an SNMP error code otherwise.
+ * Should you need different behavior depending on which columns were
+ * set, rowreq_ctx->set_flags will indicate which writeable columns were
+ * set. The definitions for the FLAG_* bits can be found in
+@if $m2c_create_fewer_files != 1@
+ * ${context}_oids.h.
+@else@
+ * ${context}.h.
+@end@
+ *
+ * @retval MFD_SUCCESS all the changes to the row are legal
+ * @retval MFD_ERROR   one or more changes are not legal
  *
  * (see README-table-${table} if you don't have dependencies)
  */
@@ -29,13 +37,10 @@ ${context}_check_dependencies(${context}_rowreq_ctx *rowreq_ctx)
      * check that all new value are legal.
      *
      * This is useful for for tables which have dependencies
-     * between columns.
+     * between columns (or rows, or tables).
      *
      * For example, two columns allocating a percentage of something
      * should add up to 100%.
-     *
-     * At this point in the error checking, if anything goes
-     * wrong, SNMP_ERR_GENERR is probably the best error code.
      */
 ## }
 @foreach $node nonindex@
