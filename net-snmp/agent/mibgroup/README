@@ -21,6 +21,7 @@ Each group consists of two files:
 		and OID sub-identifiers within the group,
 		accessibility information, and the relevant
 		function for retrieving this variable's value.
+                They *must* be listed in the mib-descending order.
 	- a call to 'config_load_mib', identifying the location of
 		this MIB group within the general MIB structure.
 	- a call to 'config_require' to identify any other files
