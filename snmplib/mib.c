@@ -531,7 +531,7 @@ sprint_realloc_octet_string(u_char **buf, size_t *buf_len, size_t *out_len,
 
   if (var->type != ASN_OCTET_STR) {
     const char str[] = "Wrong Type (should be OCTET STRING): ";
-    if (snmp_strcat(buf, buf_len, out_len, allow_realloc, (u_char*)str)) {
+    if (snmp_strcat(buf, buf_len, out_len, allow_realloc, (const u_char*)str)) {
       return sprint_realloc_by_type(buf, buf_len, out_len, allow_realloc,
 				    var, NULL, NULL, NULL);
     } else {
@@ -611,11 +611,11 @@ sprint_realloc_octet_string(u_char **buf, size_t *buf_len, size_t *out_len,
 	default:
 	  *out_len = saved_out_len;
 	  if (snmp_strcat(buf, buf_len, out_len, allow_realloc, 
-			  (u_char*)"(Bad hint ignored: ") &&
+			  (const u_char*)"(Bad hint ignored: ") &&
 	      snmp_strcat(buf, buf_len, out_len, allow_realloc, 
-			  (u_char*)saved_hint) &&
+			  (const u_char*)saved_hint) &&
 	      snmp_strcat(buf, buf_len, out_len, allow_realloc, 
-			  (u_char*)") ")) {
+			  (const u_char*)") ")) {
 	    return sprint_realloc_octet_string(buf, buf_len, out_len,
 					       allow_realloc, var,
 					       enums, NULL, NULL);
@@ -650,8 +650,8 @@ sprint_realloc_octet_string(u_char **buf, size_t *buf_len, size_t *out_len,
     }
 
     if (units) {
-      return (snmp_strcat(buf, buf_len, out_len, allow_realloc, (u_char*)" ") &&
-	      snmp_strcat(buf, buf_len, out_len, allow_realloc, (u_char*)units));
+      return (snmp_strcat(buf, buf_len, out_len, allow_realloc, (const u_char*)" ") &&
+	      snmp_strcat(buf, buf_len, out_len, allow_realloc, (const u_char*)units));
     }
     return 1;
   }
@@ -664,16 +664,16 @@ sprint_realloc_octet_string(u_char **buf, size_t *buf_len, size_t *out_len,
   }
 
   if (var->val_len == 0) {
-    return snmp_strcat(buf, buf_len, out_len, allow_realloc, (u_char*)"\"\"");
+    return snmp_strcat(buf, buf_len, out_len, allow_realloc, (const u_char*)"\"\"");
   }
 
   if (hex) {
     if (ds_get_boolean(DS_LIBRARY_ID, DS_LIB_QUICK_PRINT)) {
-      if (!snmp_strcat(buf, buf_len, out_len, allow_realloc, (u_char*)"\"")) {
+      if (!snmp_strcat(buf, buf_len, out_len, allow_realloc, (const u_char*)"\"")) {
 	return 0;
       }
     } else {
-      if (!snmp_strcat(buf, buf_len, out_len, allow_realloc, (u_char*)" Hex: ")) {
+      if (!snmp_strcat(buf, buf_len, out_len, allow_realloc, (const u_char*)" Hex: ")) {
 	return 0;
       }
     }
@@ -684,26 +684,26 @@ sprint_realloc_octet_string(u_char **buf, size_t *buf_len, size_t *out_len,
     }
 
     if (ds_get_boolean(DS_LIBRARY_ID, DS_LIB_QUICK_PRINT)) {
-      if (!snmp_strcat(buf, buf_len, out_len, allow_realloc, (u_char*)"\"")) {
+      if (!snmp_strcat(buf, buf_len, out_len, allow_realloc, (const u_char*)"\"")) {
 	return 0;
       }
     }
   } else {
-    if (!snmp_strcat(buf, buf_len, out_len, allow_realloc, (u_char*)"\"")) {
+    if (!snmp_strcat(buf, buf_len, out_len, allow_realloc, (const u_char*)"\"")) {
       return 0;
     }
     if (!sprint_realloc_asciistring(buf, buf_len, out_len, allow_realloc,
 				     var->val.string, var->val_len)) {
       return 0;
     }
-    if (!snmp_strcat(buf, buf_len, out_len, allow_realloc, (u_char*)"\"")) {
+    if (!snmp_strcat(buf, buf_len, out_len, allow_realloc, (const u_char*)"\"")) {
       return 0;
     }
   } 
 
   if (units) {
-    return (snmp_strcat(buf, buf_len, out_len, allow_realloc, (u_char*)" ") &&
-	    snmp_strcat(buf, buf_len, out_len, allow_realloc, (u_char*)units));
+    return (snmp_strcat(buf, buf_len, out_len, allow_realloc, (const u_char*)" ") &&
+	    snmp_strcat(buf, buf_len, out_len, allow_realloc, (const u_char*)units));
   }
   return 1;
 }
@@ -751,7 +751,7 @@ sprint_realloc_float(u_char **buf, size_t *buf_len,
   }
 
   if (!ds_get_boolean(DS_LIBRARY_ID, DS_LIB_QUICK_PRINT)) {
-    if (!snmp_strcat(buf, buf_len, out_len, allow_realloc,(u_char*)"Opaque: Float: ")) {
+    if (!snmp_strcat(buf, buf_len, out_len, allow_realloc,(const u_char*)"Opaque: Float: ")) {
       return 0;
     }
   }
@@ -769,8 +769,8 @@ sprint_realloc_float(u_char **buf, size_t *buf_len,
   *out_len += strlen((char*)(*buf + *out_len));
 
   if (units) {
-    return (snmp_strcat(buf, buf_len, out_len, allow_realloc, (u_char*)" ") &&
-	    snmp_strcat(buf, buf_len, out_len, allow_realloc, (u_char*)units));
+    return (snmp_strcat(buf, buf_len, out_len, allow_realloc, (const u_char*)" ") &&
+	    snmp_strcat(buf, buf_len, out_len, allow_realloc, (const u_char*)units));
   }
   return 1;
 }
@@ -807,7 +807,7 @@ sprint_realloc_double(u_char **buf, size_t *buf_len,
 {
   if (var->type != ASN_OPAQUE_DOUBLE) {
     const char str[] = "Wrong Type (should be Double): ";
-    if (snmp_strcat(buf, buf_len, out_len, allow_realloc, (u_char*)str)) {
+    if (snmp_strcat(buf, buf_len, out_len, allow_realloc, (const u_char*)str)) {
       return sprint_realloc_by_type(buf, buf_len, out_len, allow_realloc,
 				    var, NULL, NULL, NULL);
     } else {
@@ -816,7 +816,7 @@ sprint_realloc_double(u_char **buf, size_t *buf_len,
   }
 
   if (!ds_get_boolean(DS_LIBRARY_ID, DS_LIB_QUICK_PRINT)) {
-    if (!snmp_strcat(buf, buf_len, out_len, allow_realloc,(u_char*)"Opaque: Float: ")) {
+    if (!snmp_strcat(buf, buf_len, out_len, allow_realloc,(const u_char*)"Opaque: Float: ")) {
       return 0;
     }
   }
@@ -833,8 +833,8 @@ sprint_realloc_double(u_char **buf, size_t *buf_len,
   *out_len += strlen((char*)(*buf + *out_len));
 
   if (units) {
-    return (snmp_strcat(buf, buf_len, out_len, allow_realloc, (u_char*)" ") &&
-	    snmp_strcat(buf, buf_len, out_len, allow_realloc, (u_char*)units));
+    return (snmp_strcat(buf, buf_len, out_len, allow_realloc, (const u_char*)" ") &&
+	    snmp_strcat(buf, buf_len, out_len, allow_realloc, (const u_char*)units));
   }
   return 1;
 }
@@ -922,7 +922,7 @@ sprint_realloc_counter64(u_char **buf, size_t *buf_len, size_t *out_len,
   if (!ds_get_boolean(DS_LIBRARY_ID, DS_LIB_QUICK_PRINT)) {
 #ifdef OPAQUE_SPECIAL_TYPES
     if (var->type != ASN_COUNTER64) {
-      if (!snmp_strcat(buf, buf_len, out_len, allow_realloc, (u_char*)"Opaque: ")) {
+      if (!snmp_strcat(buf, buf_len, out_len, allow_realloc, (const u_char*)"Opaque: ")) {
 	return 0;
       }
     }
@@ -930,19 +930,19 @@ sprint_realloc_counter64(u_char **buf, size_t *buf_len, size_t *out_len,
 #ifdef OPAQUE_SPECIAL_TYPES
     switch(var->type) {
     case ASN_OPAQUE_U64:
-      if (!snmp_strcat(buf, buf_len, out_len, allow_realloc, (u_char*)"UInt64: ")) {
+      if (!snmp_strcat(buf, buf_len, out_len, allow_realloc, (const u_char*)"UInt64: ")) {
 	return 0;
       }
       break;
     case ASN_OPAQUE_I64:
-      if (!snmp_strcat(buf, buf_len, out_len, allow_realloc, (u_char*)"Int64: ")) {
+      if (!snmp_strcat(buf, buf_len, out_len, allow_realloc, (const u_char*)"Int64: ")) {
 	return 0;
       }
       break;
     case ASN_COUNTER64:
     case ASN_OPAQUE_COUNTER64:
 #endif
-      if (!snmp_strcat(buf, buf_len, out_len, allow_realloc, (u_char*)"Counter64: ")) {
+      if (!snmp_strcat(buf, buf_len, out_len, allow_realloc, (const u_char*)"Counter64: ")) {
 	return 0;
       }
 #ifdef OPAQUE_SPECIAL_TYPES
@@ -953,13 +953,13 @@ sprint_realloc_counter64(u_char **buf, size_t *buf_len, size_t *out_len,
 #ifdef OPAQUE_SPECIAL_TYPES
   if (var->type == ASN_OPAQUE_I64) {
     printI64(a64buf, var->val.counter64);
-    if (!snmp_strcat(buf, buf_len, out_len, allow_realloc, (u_char*)a64buf)) {
+    if (!snmp_strcat(buf, buf_len, out_len, allow_realloc, (const u_char*)a64buf)) {
       return 0;
     }
   } else {
 #endif
     printU64(a64buf, var->val.counter64);
-    if (!snmp_strcat(buf, buf_len, out_len, allow_realloc, (u_char*)a64buf)) {
+    if (!snmp_strcat(buf, buf_len, out_len, allow_realloc, (const u_char*)a64buf)) {
       return 0;
     }
 #ifdef OPAQUE_SPECIAL_TYPES
@@ -967,8 +967,8 @@ sprint_realloc_counter64(u_char **buf, size_t *buf_len, size_t *out_len,
 #endif
 
   if (units) {
-    return (snmp_strcat(buf, buf_len, out_len, allow_realloc, (u_char*)" ") &&
-	    snmp_strcat(buf, buf_len, out_len, allow_realloc, (u_char*)units));
+    return (snmp_strcat(buf, buf_len, out_len, allow_realloc, (const u_char*)" ") &&
+	    snmp_strcat(buf, buf_len, out_len, allow_realloc, (const u_char*)units));
   }
   return 1;
 }
@@ -1034,8 +1034,8 @@ sprint_realloc_opaque(u_char **buf, size_t *buf_len,
   }
 #endif
   if (units) {
-    return (snmp_strcat(buf, buf_len, out_len, allow_realloc, (u_char*)" ") &&
-	    snmp_strcat(buf, buf_len, out_len, allow_realloc, (u_char*)units));
+    return (snmp_strcat(buf, buf_len, out_len, allow_realloc, (const u_char*)" ") &&
+	    snmp_strcat(buf, buf_len, out_len, allow_realloc, (const u_char*)units));
   }
   return 1;
 }
@@ -1097,8 +1097,8 @@ sprint_realloc_object_identifier(u_char **buf, size_t *buf_len,
   }
 
   if (units) {
-    return (snmp_strcat(buf, buf_len, out_len, allow_realloc, (u_char*)" ") &&
-	    snmp_strcat(buf, buf_len, out_len, allow_realloc, (u_char*)units));
+    return (snmp_strcat(buf, buf_len, out_len, allow_realloc, (const u_char*)" ") &&
+	    snmp_strcat(buf, buf_len, out_len, allow_realloc, (const u_char*)units));
   }
   return 1;
 }
@@ -1154,24 +1154,24 @@ sprint_realloc_timeticks(u_char **buf, size_t *buf_len, size_t *out_len,
   if (ds_get_boolean(DS_LIBRARY_ID, DS_LIB_NUMERIC_TIMETICKS)) {
       char str[16];
       sprintf(str, "%lu", *(u_long *)var->val.integer);
-    if (!snmp_strcat(buf, buf_len, out_len, allow_realloc, (u_char*)str)) {
+    if (!snmp_strcat(buf, buf_len, out_len, allow_realloc, (const u_char*)str)) {
       return 0;
     }
   }
   if (!ds_get_boolean(DS_LIBRARY_ID, DS_LIB_QUICK_PRINT)) {
     char str[32];
     sprintf(str, "Timeticks: (%lu) ", *(u_long *)var->val.integer);
-    if (!snmp_strcat(buf, buf_len, out_len, allow_realloc, (u_char*)str)) {
+    if (!snmp_strcat(buf, buf_len, out_len, allow_realloc, (const u_char*)str)) {
       return 0;
     }
   }
   uptimeString(*(u_long *)(var->val.integer), timebuf);
-  if (!snmp_strcat(buf, buf_len, out_len, allow_realloc, (u_char*)timebuf)) {
+  if (!snmp_strcat(buf, buf_len, out_len, allow_realloc, (const u_char*)timebuf)) {
     return 0;
   }
   if (units) {
-    return (snmp_strcat(buf, buf_len, out_len, allow_realloc, (u_char*)" ") &&
-	    snmp_strcat(buf, buf_len, out_len, allow_realloc, (u_char*)units));
+    return (snmp_strcat(buf, buf_len, out_len, allow_realloc, (const u_char*)" ") &&
+	    snmp_strcat(buf, buf_len, out_len, allow_realloc, (const u_char*)units));
   }
   return 1;
 }
@@ -1267,7 +1267,7 @@ sprint_realloc_hinted_integer (u_char **buf, size_t *buf_len, size_t *out_len,
       tmp[0] = '.';
     }
   }
-  return snmp_strcat(buf, buf_len, out_len, allow_realloc, (u_char*)tmp);
+  return snmp_strcat(buf, buf_len, out_len, allow_realloc, (const u_char*)tmp);
 }
 
 void
@@ -1341,28 +1341,28 @@ sprint_realloc_integer(u_char **buf, size_t *buf_len, size_t *out_len,
     } else {
       char str[16];
       sprintf(str, "%ld", *var->val.integer);
-      if (!snmp_strcat(buf, buf_len, out_len, allow_realloc, (u_char*)str)) {
+      if (!snmp_strcat(buf, buf_len, out_len, allow_realloc, (const u_char*)str)) {
 	return 0;
       }
     }
   } else if (ds_get_boolean(DS_LIBRARY_ID, DS_LIB_QUICK_PRINT)) {
-    if (!snmp_strcat(buf, buf_len, out_len, allow_realloc, (u_char*)enum_string)) {
+    if (!snmp_strcat(buf, buf_len, out_len, allow_realloc, (const u_char*)enum_string)) {
       return 0;
     }
   } else {
     char str[16];
     sprintf(str, "(%ld)", *var->val.integer);
-    if (!snmp_strcat(buf, buf_len, out_len, allow_realloc, (u_char*)enum_string)) {
+    if (!snmp_strcat(buf, buf_len, out_len, allow_realloc, (const u_char*)enum_string)) {
       return 0;
     }
-    if (!snmp_strcat(buf, buf_len, out_len, allow_realloc, (u_char*)str)) {
+    if (!snmp_strcat(buf, buf_len, out_len, allow_realloc, (const u_char*)str)) {
       return 0;
     }
   }
   
   if (units) {
-    return (snmp_strcat(buf, buf_len, out_len, allow_realloc, (u_char*)" ") &&
-	    snmp_strcat(buf, buf_len, out_len, allow_realloc, (u_char*)units));
+    return (snmp_strcat(buf, buf_len, out_len, allow_realloc, (const u_char*)" ") &&
+	    snmp_strcat(buf, buf_len, out_len, allow_realloc, (const u_char*)units));
   }
   return 1;
 }
@@ -1436,28 +1436,28 @@ sprint_realloc_uinteger(u_char **buf, size_t *buf_len, size_t *out_len,
     } else {	
       char str[16];
       sprintf(str, "%lu", *var->val.integer);
-      if (!snmp_strcat(buf, buf_len, out_len, allow_realloc, (u_char*)str)) {
+      if (!snmp_strcat(buf, buf_len, out_len, allow_realloc, (const u_char*)str)) {
 	return 0;
       }
     }
   } else if (ds_get_boolean(DS_LIBRARY_ID, DS_LIB_QUICK_PRINT)) {
-    if (!snmp_strcat(buf, buf_len, out_len, allow_realloc, (u_char*)enum_string)) {
+    if (!snmp_strcat(buf, buf_len, out_len, allow_realloc, (const u_char*)enum_string)) {
       return 0;
     }
   } else {
     char str[16];
     sprintf(str, "(%lu)", *var->val.integer);
-    if (!snmp_strcat(buf, buf_len, out_len, allow_realloc, (u_char*)enum_string)) {
+    if (!snmp_strcat(buf, buf_len, out_len, allow_realloc, (const u_char*)enum_string)) {
       return 0;
     }
-    if (!snmp_strcat(buf, buf_len, out_len, allow_realloc, (u_char*)str)) {
+    if (!snmp_strcat(buf, buf_len, out_len, allow_realloc, (const u_char*)str)) {
       return 0;
     }
   }
   
   if (units) {
-    return (snmp_strcat(buf, buf_len, out_len, allow_realloc, (u_char*)" ") &&
-	    snmp_strcat(buf, buf_len, out_len, allow_realloc, (u_char*)units));
+    return (snmp_strcat(buf, buf_len, out_len, allow_realloc, (const u_char*)" ") &&
+	    snmp_strcat(buf, buf_len, out_len, allow_realloc, (const u_char*)units));
   }
   return 1;
 }
@@ -1517,13 +1517,13 @@ sprint_realloc_gauge(u_char **buf, size_t *buf_len, size_t *out_len,
     }
   } else { 
     sprintf(tmp, "%lu", *var->val.integer);
-    if (!snmp_strcat(buf, buf_len, out_len, allow_realloc, (u_char*)tmp)) {
+    if (!snmp_strcat(buf, buf_len, out_len, allow_realloc, (const u_char*)tmp)) {
       return 0;
     }
   }
   if (units) {
-    return (snmp_strcat(buf, buf_len, out_len, allow_realloc, (u_char*)" ") &&
-	    snmp_strcat(buf, buf_len, out_len, allow_realloc, (u_char*)units));
+    return (snmp_strcat(buf, buf_len, out_len, allow_realloc, (const u_char*)" ") &&
+	    snmp_strcat(buf, buf_len, out_len, allow_realloc, (const u_char*)units));
   }
   return 1;
 }
@@ -1576,12 +1576,12 @@ sprint_realloc_counter(u_char **buf, size_t *buf_len, size_t *out_len,
     }
   }
   sprintf(tmp, "%lu", *var->val.integer);
-  if (!snmp_strcat(buf, buf_len, out_len, allow_realloc, (u_char*)tmp)) {
+  if (!snmp_strcat(buf, buf_len, out_len, allow_realloc, (const u_char*)tmp)) {
       return 0;
   }
   if (units) {
-    return (snmp_strcat(buf, buf_len, out_len, allow_realloc, (u_char*)" ") &&
-	    snmp_strcat(buf, buf_len, out_len, allow_realloc, (u_char*)units));
+    return (snmp_strcat(buf, buf_len, out_len, allow_realloc, (const u_char*)" ") &&
+	    snmp_strcat(buf, buf_len, out_len, allow_realloc, (const u_char*)units));
   }
   return 1;
 }
@@ -1870,16 +1870,16 @@ sprint_realloc_bitstring(u_char **buf, size_t *buf_len, size_t *out_len,
 	      ds_get_boolean(DS_LIBRARY_ID, DS_LIB_PRINT_NUMERIC_ENUM)) {
 	    char str[16];
 	    sprintf(str, "%d ", (len * 8) + bit);
-	    if (!snmp_strcat(buf, buf_len, out_len, allow_realloc, (u_char*)str)) {
+	    if (!snmp_strcat(buf, buf_len, out_len, allow_realloc, (const u_char*)str)) {
 	      return 0;
 	    }
 	  } else {
 	    char str[16];
 	    sprintf(str, "(%d) ", (len * 8) + bit);
-	    if (!snmp_strcat(buf, buf_len,out_len,allow_realloc,(u_char*)enum_string)) {
+	    if (!snmp_strcat(buf, buf_len,out_len,allow_realloc,(const u_char*)enum_string)) {
 	      return 0;
 	    }
-	    if (!snmp_strcat(buf, buf_len, out_len, allow_realloc, (u_char*)str)) {
+	    if (!snmp_strcat(buf, buf_len, out_len, allow_realloc, (const u_char*)str)) {
 	      return 0;
 	    }
 	  }
@@ -2816,8 +2816,8 @@ _sprint_realloc_objid(u_char **buf, size_t *buf_len,
       char modbuf[256], *mod = module_name(subtree->modid, modbuf);
 
       if (!*buf_overflow) {
-	if (!snmp_strcat(buf, buf_len, out_len, allow_realloc, (u_char*)mod) ||
-	    !snmp_strcat(buf, buf_len, out_len, allow_realloc, (u_char*)"::")) {
+	if (!snmp_strcat(buf, buf_len, out_len, allow_realloc, (const u_char*)mod) ||
+	    !snmp_strcat(buf, buf_len, out_len, allow_realloc, (const u_char*)"::")) {
 	  *buf_overflow = 1;
 	}
       }
@@ -2956,11 +2956,11 @@ sprint_realloc_variable(u_char **buf, size_t *buf_len,
 
     if (!ds_get_boolean(DS_LIBRARY_ID, DS_LIB_PRINT_BARE_VALUE)) {
 	if (ds_get_boolean(DS_LIBRARY_ID, DS_LIB_QUICK_PRINT)) {
-	    if (!snmp_strcat(buf, buf_len, out_len, allow_realloc, (u_char*)" ")) {
+	    if (!snmp_strcat(buf, buf_len, out_len, allow_realloc, (const u_char*)" ")) {
 		return 0;
 	    }
 	} else {
-	    if (!snmp_strcat(buf, buf_len, out_len, allow_realloc, (u_char*)" = ")) {
+	    if (!snmp_strcat(buf, buf_len, out_len, allow_realloc, (const u_char*)" = ")) {
 		return 0;
 	    }
 	}
@@ -2970,13 +2970,13 @@ sprint_realloc_variable(u_char **buf, size_t *buf_len,
 
     if (variable->type == SNMP_NOSUCHOBJECT) {
 	return snmp_strcat(buf, buf_len, out_len, allow_realloc,
-			   (u_char*)"No Such Object available on this agent");
+			   (const u_char*)"No Such Object available on this agent");
     } else if (variable->type == SNMP_NOSUCHINSTANCE) {
 	return snmp_strcat(buf, buf_len, out_len, allow_realloc,
-			   (u_char*)"No Such Instance currently exists");
+			   (const u_char*)"No Such Instance currently exists");
     } else if (variable->type == SNMP_ENDOFMIBVIEW) {
 	return snmp_strcat(buf, buf_len, out_len, allow_realloc,
-			   (u_char*)"No more variables left in this MIB View");
+			   (const u_char*)"No more variables left in this MIB View");
     } else if (subtree) {
 	if (subtree->printomat) {
 	    return (*subtree->printomat)(buf, buf_len, out_len, allow_realloc,
@@ -3062,13 +3062,13 @@ sprint_realloc_value(u_char **buf, size_t *buf_len,
 
   if (variable->type == SNMP_NOSUCHOBJECT) {
     return snmp_strcat(buf, buf_len, out_len, allow_realloc,
-		       (u_char*)"No Such Object available on this agent");
+		       (const u_char*)"No Such Object available on this agent");
   } else if (variable->type == SNMP_NOSUCHINSTANCE) {
     return snmp_strcat(buf, buf_len, out_len, allow_realloc,
-		       (u_char*)"No Such Instance currently exists");
+		       (const u_char*)"No Such Instance currently exists");
   } else if (variable->type == SNMP_ENDOFMIBVIEW) {
     return snmp_strcat(buf, buf_len, out_len, allow_realloc,
-		       (u_char*)"No more variables left in this MIB View");
+		       (const u_char*)"No more variables left in this MIB View");
   } else {
     subtree = get_symbol(objid, objidlen, subtree, tempbuf);
     if (subtree && subtree->printomat) {
@@ -3467,19 +3467,19 @@ _get_realloc_symbol(oid *objid, size_t objidlen,
 	      ds_get_boolean(DS_LIBRARY_ID, DS_LIB_PRINT_NUMERIC_OIDS)) {
 	    sprintf(intbuf, "%lu", subtree->subid);
 	    if (!*buf_overflow && !snmp_strcat(buf, buf_len, out_len,
-					       allow_realloc, (u_char*)intbuf)) {
+					       allow_realloc, (const u_char*)intbuf)) {
 	      *buf_overflow = 1;
 	    }
 	  } else {
 	    if (!*buf_overflow && !snmp_strcat(buf, buf_len, out_len,
-					      allow_realloc, (u_char*)subtree->label)) {
+					      allow_realloc, (const u_char*)subtree->label)) {
 	      *buf_overflow = 1;
 	    }
 	  }
 
 	  if (objidlen > 1) {
 	    if (!*buf_overflow && !snmp_strcat(buf, buf_len, out_len,
-					       allow_realloc, (u_char*)".")) {
+					       allow_realloc, (const u_char*)".")) {
 	      *buf_overflow = 1;
 	    }
 
@@ -3523,7 +3523,7 @@ _get_realloc_symbol(oid *objid, size_t objidlen,
 	    (*out_len)--;
 	  }
 	  if (!*buf_overflow && !snmp_strcat(buf, buf_len, out_len,
-					     allow_realloc, (u_char*)"[")) {
+					     allow_realloc, (const u_char*)"[")) {
 	    *buf_overflow = 1;
 	  }
 	}
@@ -3595,22 +3595,22 @@ _get_realloc_symbol(oid *objid, size_t objidlen,
 		if (numids == 1) {
 		  if (ds_get_boolean(DS_LIBRARY_ID, DS_LIB_ESCAPE_QUOTES)) {
 		    if (!*buf_overflow && !snmp_strcat(buf, buf_len, out_len,
-						       allow_realloc, (u_char*)"\\")) {
+						       allow_realloc, (const u_char*)"\\")) {
 		      *buf_overflow = 1;
 		    }
 		  }
 		  if (!*buf_overflow && !snmp_strcat(buf, buf_len, out_len,
-						     allow_realloc, (u_char*)"\"")) {
+						     allow_realloc, (const u_char*)"\"")) {
 		    *buf_overflow = 1;
 		  }
 		  if (ds_get_boolean(DS_LIBRARY_ID, DS_LIB_ESCAPE_QUOTES)) {
 		    if (!*buf_overflow && !snmp_strcat(buf, buf_len, out_len,
-						       allow_realloc, (u_char*)"\\")) {
+						       allow_realloc, (const u_char*)"\\")) {
 		      *buf_overflow = 1;
 		    }
 		  }
 		  if (!*buf_overflow && !snmp_strcat(buf, buf_len, out_len,
-						     allow_realloc, (u_char*)"\"")) {
+						     allow_realloc, (const u_char*)"\"")) {
 		    *buf_overflow = 1;
 		  }
 		} else {
@@ -3638,20 +3638,20 @@ _get_realloc_symbol(oid *objid, size_t objidlen,
 		}
 		if (ep) {
 		  if (!*buf_overflow && !snmp_strcat(buf, buf_len, out_len,
-						  allow_realloc, (u_char*)ep->label)) {
+						  allow_realloc, (const u_char*)ep->label)) {
 		    *buf_overflow = 1;
 		  }
 		} else {
 		  sprintf(intbuf, "%lu", *objid);
 		  if (!*buf_overflow && !snmp_strcat(buf, buf_len, out_len,
-						     allow_realloc, (u_char*)intbuf)) {
+						     allow_realloc, (const u_char*)intbuf)) {
 		    *buf_overflow = 1;
 		  }
 		}
 	    } else {
 	      sprintf(intbuf, "%lu", *objid);
 	      if (!*buf_overflow && !snmp_strcat(buf, buf_len, out_len,
-						 allow_realloc, (u_char*)intbuf)) {
+						 allow_realloc, (const u_char*)intbuf)) {
 		*buf_overflow = 1;
 	      }
 	    }
@@ -3695,7 +3695,7 @@ _get_realloc_symbol(oid *objid, size_t objidlen,
 	    objid += 4;
 	    objidlen -= 4;
 	    if (!*buf_overflow && !snmp_strcat(buf, buf_len, out_len,
-					       allow_realloc, (u_char*)intbuf)) {
+					       allow_realloc, (const u_char*)intbuf)) {
 	      *buf_overflow = 1;
 	    }
 	    break;
@@ -3706,7 +3706,7 @@ _get_realloc_symbol(oid *objid, size_t objidlen,
 	    objidlen--;
 	    sprintf(intbuf, "%lu.", ntype);
 	    if (!*buf_overflow && !snmp_strcat(buf, buf_len, out_len,
-					       allow_realloc, (u_char*)intbuf)) {
+					       allow_realloc, (const u_char*)intbuf)) {
 	      *buf_overflow = 1;
 	    }
 
@@ -3714,7 +3714,7 @@ _get_realloc_symbol(oid *objid, size_t objidlen,
 	      sprintf(intbuf, "%lu.%lu.%lu.%lu",
 		      objid[0], objid[1], objid[2], objid[3]);
 	      if (!*buf_overflow && !snmp_strcat(buf, buf_len, out_len,
-						 allow_realloc, (u_char*)intbuf)) {
+						 allow_realloc, (const u_char*)intbuf)) {
 		*buf_overflow = 1;
 	      }
 	      objid += 4;
@@ -3733,12 +3733,12 @@ _get_realloc_symbol(oid *objid, size_t objidlen,
 
 	if (extended_index) {
 	  if (!*buf_overflow && !snmp_strcat(buf, buf_len, out_len,
-					     allow_realloc, (u_char*)"]")) {
+					     allow_realloc, (const u_char*)"]")) {
 	    *buf_overflow = 1;
 	  }
 	} else {
 	  if (!*buf_overflow && !snmp_strcat(buf, buf_len, out_len,
-					     allow_realloc, (u_char*)".")) {
+					     allow_realloc, (const u_char*)".")) {
 	    *buf_overflow = 1;
 	  }
 	}
@@ -3748,7 +3748,7 @@ _get_realloc_symbol(oid *objid, size_t objidlen,
 finish_it:
     if (*(*buf + *out_len - 1) != '.') {
       if (!*buf_overflow && !snmp_strcat(buf, buf_len, out_len,
-					 allow_realloc, (u_char*)".")) {
+					 allow_realloc, (const u_char*)".")) {
 	*buf_overflow = 1;
       }
     }
@@ -3756,7 +3756,7 @@ finish_it:
     while(objidlen-- > 0) {	/* output rest of name, uninterpreted */
 	sprintf(intbuf, "%lu.", *objid++);
 	if (!*buf_overflow && !snmp_strcat(buf, buf_len, out_len,
-					   allow_realloc, (u_char*)intbuf)) {
+					   allow_realloc, (const u_char*)intbuf)) {
 	  *buf_overflow = 1;
 	}
     }

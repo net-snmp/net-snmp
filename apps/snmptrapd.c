@@ -482,7 +482,7 @@ int snmp_input(int op,
 					  vars->name, vars->name_length, vars);
 	    if (!trunc) {
 	      /*  Add a trailing , ...  */
-	      trunc = !snmp_strcat(&rbuf, &r_len, &o_len, 1, (u_char*)", ");
+	      trunc = !snmp_strcat(&rbuf, &r_len, &o_len, 1, (const u_char*)", ");
 	    }
 	    if (trunc) {
 	      break;
@@ -567,7 +567,7 @@ int snmp_input(int op,
 	    trunc = !sprint_realloc_variable(&rbuf, &r_len, &o_len, 1, 
 					  vars->name, vars->name_length, vars);
 	    if (!trunc) {
-	      trunc = !snmp_strcat(&rbuf, &r_len, &o_len, 1, (u_char*)", ");
+	      trunc = !snmp_strcat(&rbuf, &r_len, &o_len, 1, (const u_char*)", ");
 	    }
 	    if (trunc) {
 	      break;
