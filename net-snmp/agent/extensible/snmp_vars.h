@@ -5,8 +5,8 @@ u_char *var_wes_lockd_test();
 
 /* the variable that stores the process watching mib info */
 struct variable2 wes_proc_variables[] = {
-  {PROCINDEX, INTEGER, RONLY, var_wes_proc, 1, {PROCINDEX}},
-  {PROCNAMES, STRING, RONLY, var_wes_proc, 1, {PROCNAMES}}, 
+  {MIBINDEX, INTEGER, RONLY, var_wes_proc, 1, {MIBINDEX}},
+  {ERRORNAME, STRING, RONLY, var_wes_proc, 1, {ERRORNAME}}, 
     {PROCMIN, INTEGER, RONLY, var_wes_proc, 1, {PROCMIN}}, 
     {PROCMAX, INTEGER, RONLY, var_wes_proc, 1, {PROCMAX}},
     {PROCCOUNT, INTEGER, RONLY, var_wes_proc, 1, {PROCCOUNT}},
@@ -16,8 +16,8 @@ struct variable2 wes_proc_variables[] = {
 
 /* the extensible commands variables */
 struct variable2 wes_extensible_variables[] = {
-  {SHELLINDEX, INTEGER, RONLY, var_wes_shell, 1, {SHELLINDEX}},
-  {SHELLNAMES, STRING, RONLY, var_wes_shell, 1, {SHELLNAMES}}, 
+  {MIBINDEX, INTEGER, RONLY, var_wes_shell, 1, {MIBINDEX}},
+  {ERRORNAME, STRING, RONLY, var_wes_shell, 1, {ERRORNAME}}, 
     {SHELLCOMMAND, STRING, RONLY, var_wes_shell, 1, {SHELLCOMMAND}}, 
     {ERRORFLAG, INTEGER, RONLY, var_wes_shell, 1, {ERRORFLAG}},
     {ERRORMSG, STRING, RONLY, var_wes_shell, 1, {ERRORMSG}}
@@ -25,12 +25,14 @@ struct variable2 wes_extensible_variables[] = {
 
 /* the lockd test variables */
 struct variable2 wes_lockd_variables[] = {
-  {LOCKDINDEX, INTEGER, RONLY, var_wes_lockd_test, 1, {LOCKDINDEX}},
+  {MIBINDEX, INTEGER, RONLY, var_wes_lockd_test, 1, {MIBINDEX}},
     {ERRORFLAG, INTEGER, RONLY, var_wes_lockd_test, 1, {ERRORFLAG}},
     {ERRORMSG, STRING, RONLY, var_wes_lockd_test, 1, {ERRORMSG}}
 };
 
 struct variable2 wes_mem_variables[] = {
+  {MIBINDEX, INTEGER, RONLY, var_wes_mem,1,{MIBINDEX}},
+  {ERRORNAME, STRING, RONLY, var_wes_mem, 1, {ERRORNAME }},
   {MEMTOTALSWAP, INTEGER, RONLY, var_wes_mem, 1, {MEMTOTALSWAP}},
   {MEMUSEDSWAP, INTEGER, RONLY, var_wes_mem, 1, {MEMUSEDSWAP}},
   {MEMTOTALREAL, INTEGER, RONLY, var_wes_mem, 1, {MEMTOTALREAL}},
@@ -45,8 +47,8 @@ struct variable2 wes_mem_variables[] = {
 };
 
 struct variable2 wes_disk_variables[] = {
-  {DISKINDEX, INTEGER, RONLY, var_wes_disk, 1, {DISKINDEX}},
-  {DISKPATH, STRING, RONLY, var_wes_disk, 1, {DISKPATH}},
+  {MIBINDEX, INTEGER, RONLY, var_wes_disk, 1, {MIBINDEX}},
+  {ERRORNAME, STRING, RONLY, var_wes_disk, 1, {ERRORNAME}},
   {DISKDEVICE, STRING, RONLY, var_wes_disk, 1, {DISKDEVICE}},
   {DISKMINIMUM, INTEGER, RONLY, var_wes_disk, 1, {DISKMINIMUM}},
   {DISKTOTAL, INTEGER, RONLY, var_wes_disk, 1, {DISKTOTAL}},
