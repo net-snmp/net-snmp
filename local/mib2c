@@ -238,6 +238,7 @@ sub read_config() {
     my $configfile = shift;
     my ($type, $lasttoken);
     my $fh = new FileHandle;
+    $configfile = "/usr/local/share/snmp/" . $configfile if (!(-f $configfile));
     if ( $fh->open("<$configfile") ) {
 	while(<$fh>) {
 	    next if (/^\s*\#/ || /^\s*$/);
