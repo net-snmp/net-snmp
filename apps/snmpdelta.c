@@ -93,6 +93,7 @@ int Argc;
 struct varInfo {
   char *name;
   oid *info_oid;
+  int type;
   size_t oidlen;
   char descriptor[64];
   u_int value;
@@ -489,6 +490,7 @@ int main(int argc, char *argv[])
 	      fprintf(stderr, "Missing variable in reply\n");
 	      break;
 	    }
+	    vip->type = vars->type;
             if (vars->type == ASN_COUNTER64) {
               u64Subtract(vars->val.counter64, &vip->c64value, &c64value);
               memcpy(&vip->c64value, &vars->val.counter64,
@@ -510,7 +512,7 @@ int main(int argc, char *argv[])
 	  if (last_time == 0)
 	    continue;
 
-	  if (vip->oidlen && vars->type != ASN_COUNTER64) {
+	  if (vip->oidlen && vip->type != ASN_COUNTER64) {
             sum += value;
           }
 
@@ -522,7 +524,7 @@ int main(int argc, char *argv[])
 	    sprintf(outstr, "%s %s", timestring, vip->descriptor);
 
 	  if (deltat || tableForm){
-            if (vars->type == ASN_COUNTER64) {
+            if (vip->type == ASN_COUNTER64) {
               fprintf(stderr, "time delta and table form not supported for counter64s\n");
               exit(1);
             } else {
