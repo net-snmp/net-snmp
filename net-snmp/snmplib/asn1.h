@@ -36,7 +36,6 @@ ARISING OUT OF OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS
 SOFTWARE.
 ******************************************************************/
 
-#define OID_LENGTH(x)  ((x)?(sizeof(x)/sizeof(x[0])):0)
 
 #ifndef EIGHTBIT_SUBIDS
 typedef u_long	oid;
@@ -52,7 +51,7 @@ typedef u_char	oid;
 #define MAX_NAME_LEN	    MAX_OID_LEN   /* obsolete. use MAX_OID_LEN */
 #endif
 
-#define OID_LENGTH(x)  (sizeof(x)/sizeof(oid))
+#define OID_LENGTH(x)  ((x)?(sizeof(x)/sizeof(oid)):0)
 
 
 #define ASN_BOOLEAN	    ((u_char)0x01)
