@@ -9,6 +9,10 @@
      *    particular O/S distributiones.
      */
 
+#ifndef NET_SNMP_CONFIG_H
+#error "Please include <net-snmp/net-snmp-config.h> before this file"
+#endif
+
 #include <net-snmp/types.h>
 
     /*
@@ -43,6 +47,12 @@
 #include <net-snmp/library/snmp_impl.h>
 #include <net-snmp/library/snmp-tc.h>
 #include <net-snmp/library/check_varbind.h>
+#include <net-snmp/library/container.h>
+#include <net-snmp/library/container_binary_array.h>
+#include <net-snmp/library/container_list_ssll.h>
+#include <net-snmp/library/container_iterator.h>
+
+#include <net-snmp/library/snmp_assert.h>
 
 #include <net-snmp/version.h>
 
