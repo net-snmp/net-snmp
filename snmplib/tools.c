@@ -2,10 +2,27 @@
  * tools.c
  */
 
-#include "all_system.h"
-#include "all_general_local.h"
+#include <config.h>
 
+#include <ctype.h>
+#include <sys/types.h>
+#ifdef HAVE_STDLIB_H
+#include <stdlib.h>
+#endif
+#if HAVE_STRING_H
+#include <string.h>
+#else
+#include <strings.h>
+#endif
+#ifdef HAVE_NETINET_IN_H
+#include <netinet/in.h>
+#endif
+
+#include "asn1.h" 
+#include "snmp_api.h"
 #include "snmp_debug.h"
+#include "tools.h" 
+#include "scapi.h" 
 
 
 /*******************************************************************-o-******

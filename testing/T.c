@@ -12,12 +12,15 @@
  * FIX	Short test description/table of contents.	SUCCESSes: FIX
  */
 
-static char *rcsid = "$Id$";	/* */
+#include <config.h>
 
-#include "all_system.h"
-#include "all_general_local.h"
-
+#include <sys/types.h>
+#include <stdio.h>
+#ifdef HAVE_STDLIB_H
 #include <stdlib.h>
+#endif
+
+/* #include ... */
 
 extern char     *optarg;
 extern int      optind, optopt, opterr;

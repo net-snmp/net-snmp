@@ -20,10 +20,29 @@
  * FIX	This is slow...
  */
 
-static char rcsid[] = "$Id$";	/* */
+#include <config.h>
 
-#include "../snmplib/all_system.h"
-#include "../snmplib/all_general_local.h"
+#include <stdio.h>
+#include <ctype.h>
+#include <sys/stat.h>
+#include <unistd.h>
+#if HAVE_STRING_H
+#include <string.h>
+#else
+#include <strings.h>
+#endif
+#ifdef HAVE_NETINET_IN_H
+#include <netinet/in.h>
+#endif
+
+#include "asn1.h"
+#include "snmp_api.h"
+#include "tools.h"
+#include "scapi.h"
+#include "snmpv3.h"
+#include "keytools.h"
+#include "snmp_debug.h"
+#include "callback.h"
 
 #include "../snmplib/transform_oids.h"
 
@@ -304,7 +323,9 @@ main(int argc, char **argv)
 	 * Cleanup.
 	 */
 main_quit:
-	sc_shutdown();
+	snmp_call_callbacks(SNMP_CALLBACK_LIBRARY, SNMP_CALLBACK_SHUTDOWN,
+                            NULL);
+        
 
 	SNMP_ZERO(oldpass,	strlen(oldpass));
 	SNMP_ZERO(newpass,	strlen(newpass));
@@ -648,7 +669,7 @@ snmp_ttyecho(const int fd, const int echo)
 char *
 snmp_getpassphrase(const char *prompt, int visible)
 {
-	int		 ti,
+	int		 ti=0,
 			 len;
 
 	char		*bufp = NULL;

@@ -20,10 +20,20 @@
 
 static char *rcsid = "$Id$";	/* */
 
-#include "all_system.h"
-#include "all_general_local.h"
+#include <config.h>
 
+#include <stdio.h>
+#ifdef HAVE_NETINET_IN_H
+#include <netinet/in.h>
+#endif
+
+#include "asn1.h"
+#include "snmp_api.h"
+#include "keytools.h"
+#include "tools.h"
+#include "scapi.h"
 #include "transform_oids.h"
+#include "callback.h"
 
 #include <stdlib.h>
 
@@ -112,8 +122,6 @@ main(int argc, char **argv)
 	local_progname = argv[0];
 	optarg = NULL;
 
-EM(-1);	/* */
-
 	/*
 	 * Parse.
 	 */
@@ -178,7 +186,8 @@ EM(-1);	/* */
 	/*
 	 * Cleanup.
 	 */
-	rval = sc_shutdown();
+	rval = sc_shutdown(SNMP_CALLBACK_LIBRARY, SNMP_CALLBACK_SHUTDOWN,
+                           NULL, NULL);
 	FAILED(rval, "sc_shutdown().");
 
 	return failcount;
@@ -261,9 +270,6 @@ test_genKu(void)
 			*s;
 	u_char		 Ku[LOCAL_MAXBUF];
 	oid		*hashtype =  usmHMACMD5AuthProtocol;
-
-EM(-1); /* */
-
 
 	OUTPUT("Test of generate_Ku --");
 	
@@ -354,9 +360,6 @@ test_genkul(void)
 
 	oid		*hashtype_Ku =  usmHMACMD5AuthProtocol,
 			*hashtype_kul;
-
-EM(-1); /* */
-
 
 	OUTPUT("Test of generate_kul --");
 	
@@ -527,9 +530,6 @@ test_keychange(void)
 
 	oid		*hashtype =  usmHMACMD5AuthProtocol;
 
-EM(-1); /* */
-
-
 	OUTPUT("Test of KeyChange TC --");
 	
 
@@ -576,8 +576,8 @@ test_keychange_again:
 	memset(keychange_buf,	0, LOCAL_MAXBUF);
 	memset(temp_buf,	0, LOCAL_MAXBUF);
 
-	memcpy(oldkey_buf,	oldkey, MIN(oldkey_len, properlength));
-	memcpy(newkey_buf,	newkey, MIN(newkey_len, properlength));
+	memcpy(oldkey_buf,	oldkey, SNMP_MIN(oldkey_len, properlength));
+	memcpy(newkey_buf,	newkey, SNMP_MIN(newkey_len, properlength));
 	keychange_len = LOCAL_MAXBUF;
 
 
