@@ -414,6 +414,7 @@ extend_parse_config(const char *token, char *cptr)
      *  Compatability with the UCD extTable
      */
     if (!strcmp( token, "execFix"  )) {
+        int  i;
         for ( i=0; i < num_compatability_entries; i++ ) {
             if (!strcmp( exec_name,
                     compatability_entries[i].exec_entry->token))
