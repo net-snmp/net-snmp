@@ -87,7 +87,8 @@ SOFTWARE.
 #include "acl.h"
 #include "system.h"
 #include "version.h"
-
+#include "snmptrapd_handlers.h"
+#include "read_config.h"
 #ifndef BSD4_3
 #define BSD4_2
 #endif
@@ -106,7 +107,6 @@ typedef long	fd_mask;
 int main __P((int, char **));
 int Print = 0;
 int Event = 0;
-char *Command = NULL;
 
 int Syslog = 0;
 /*
@@ -339,6 +339,8 @@ int snmp_input(op, session, reqid, pdu, magic)
     static oid snmptrapoid[10] = {1,3,6,1,6,3,1,1,4,1};
     static oid snmptrapent[10] = {1,3,6,1,6,3,1,1,4,3};
     struct variable_list tmpvar;
+    char *Command = NULL;
+    int i;
     tmpvar.type = ASN_OBJECT_ID;
                   
     if (op == RECEIVED_MESSAGE){
@@ -414,6 +416,9 @@ int snmp_input(op, session, reqid, pdu, magic)
 		       uptime_string(pdu->time, buf),varbuf);
 		}
 	    }
+            trapoids[9] = pdu->trap_type+1;
+            Command = snmptrapd_get_traphandler(trapoids, 10);
+            DEBUGP("Running: %s", Command);
             if (Command) {
               if (pipe(fd)) {
                 perror("pipe");
@@ -485,41 +490,48 @@ int snmp_input(op, session, reqid, pdu, magic)
 	    if (Event) {
 		event_input(pdu->variables);
 	    }
-            if (Command) {
-              if (pipe(fd)) {
-                perror("pipe");
-                return 1;
-              }
-              if ((pid = fork()) == 0) {
-                /* child */
-                close(0);
-                if (dup(fd[0]) != 0) {
-                  perror("dup");
+            for(i = 0, vars = pdu->variables; vars && i < 2;
+                vars = vars->next_variable, i++);
+            if (vars->type == ASN_OBJECT_ID) {
+              Command = snmptrapd_get_traphandler(vars->val.objid,
+                                                  vars->val_len/sizeof(oid));
+              DEBUGP("Running: %s", Command);
+              if (Command) {
+                if (pipe(fd)) {
+                  perror("pipe");
                   return 1;
                 }
-                close(fd[1]);
-                close(fd[0]);
-                system(Command);
-                exit(0);
-              } else if (pid > 0) {
-                file = fdopen(fd[1],"w");
-                fprintf(file,"%s\n%s\n",
-                        host ? host->h_name : inet_ntoa(pdu->address.sin_addr),
-                        inet_ntoa(pdu->address.sin_addr));
-		for(vars = pdu->variables; vars; vars = vars->next_variable) {
-                  sprint_variable(varbuf, vars->name, vars->name_length, vars);
-                  fprintf(file,"%s\n",varbuf);
-                }
-                fclose(file);
-                close(fd[0]);
-                close(fd[1]);
-                if (waitpid(pid, &result,0) < 0) {
-                  perror("waitpid");
+                if ((pid = fork()) == 0) {
+                  /* child */
+                  close(0);
+                  if (dup(fd[0]) != 0) {
+                    perror("dup");
+                    return 1;
+                  }
+                  close(fd[1]);
+                  close(fd[0]);
+                  system(Command);
+                  exit(0);
+                } else if (pid > 0) {
+                  file = fdopen(fd[1],"w");
+                  fprintf(file,"%s\n%s\n",
+                          host ? host->h_name : inet_ntoa(pdu->address.sin_addr),
+                          inet_ntoa(pdu->address.sin_addr));
+                  for(vars = pdu->variables; vars; vars = vars->next_variable) {
+                    sprint_variable(varbuf, vars->name, vars->name_length, vars);
+                    fprintf(file,"%s\n",varbuf);
+                  }
+                  fclose(file);
+                  close(fd[0]);
+                  close(fd[1]);
+                  if (waitpid(pid, &result,0) < 0) {
+                    perror("waitpid");
+                    return 1;
+                  }
+                } else {
+                  perror("fork");
                   return 1;
                 }
-              } else {
-                perror("fork");
-                return 1;
               }
             }
 	    if (pdu->command == SNMP_MSG_INFORM){
@@ -592,13 +604,6 @@ main(argc, argv)
 		    }
                     local_port = atoi(argv[arg]);
                     break;
-		case 'C':
-		    if (++arg == argc) {
-			usage();
-			exit(2);
-		    }
-		    Command = argv[arg];
-		    break;
 		case 'P':
 		    Print++;
 		    break;
@@ -654,7 +659,9 @@ main(argc, argv)
 	}
     }
 
+    register_config_handler("snmptrapd","traphandle",snmptrapd_traphandle,NULL);
     init_mib();
+    read_configs();
 
     myaddr = get_myaddr();
     srclen = dstlen = contextlen = MAX_NAME_LEN;

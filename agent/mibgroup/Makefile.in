@@ -68,7 +68,7 @@ mibII/system.o: ../../snmplib/snmp.h ../../snmplib/mib.h
 mibII/system.o:  
 mibII/system.o:  
 mibII/system.o: mibII/system.h ./../var_struct.h struct.h util_funcs.h
-mibII/system.o: struct.h ./../read_config.h ../../snmplib/system.h
+mibII/system.o: struct.h ./../../snmplib/read_config.h ../../snmplib/system.h
 mibII/sysORTable.o: ../../config.h ../../mib_module_config.h
 mibII/sysORTable.o:  
 mibII/sysORTable.o:  ../../s/linux.h ../../s/sysv.h
@@ -316,7 +316,7 @@ mibII/vacm_vars.o:
 mibII/vacm_vars.o:  ../../snmplib/asn1.h
 mibII/vacm_vars.o: ../../snmplib/snmp_api.h ../../snmplib/snmp_impl.h
 mibII/vacm_vars.o: ../snmp_vars.h ../var_struct.h ../../snmplib/snmp.h
-mibII/vacm_vars.o: ../../snmplib/mib.h ./../read_config.h
+mibII/vacm_vars.o: ../../snmplib/mib.h ./../../snmplib/read_config.h
 mibII/vacm_vars.o: ../../snmplib/system.h ./../../snmplib/vacm.h
 mibII/vacm_vars.o: mibII/vacm_vars.h ../../mib_module_config.h
 mibII/vacm_vars.o:  mibII/sysORTable.h
@@ -430,7 +430,7 @@ ucd-snmp/proc.o:  ../../snmplib/asn1.h
 ucd-snmp/proc.o: ../../snmplib/snmp_api.h ../../snmplib/snmp_impl.h
 ucd-snmp/proc.o: ../snmp_vars.h ../var_struct.h ../../snmplib/snmp.h
 ucd-snmp/proc.o: ../../snmplib/mib.h struct.h ucd-snmp/proc.h mibdefs.h
-ucd-snmp/proc.o: ucd-snmp/errormib.h util_funcs.h ./../read_config.h
+ucd-snmp/proc.o: ucd-snmp/errormib.h util_funcs.h ./../../snmplib/read_config.h
 ucd-snmp/proc.o: ../../snmplib/system.h
 ucd-snmp/versioninfo.o: ../../config.h ../../mib_module_config.h
 ucd-snmp/versioninfo.o:  
@@ -452,7 +452,7 @@ ucd-snmp/versioninfo.o:  ../../snmplib/asn1.h
 ucd-snmp/versioninfo.o: ../../snmplib/snmp_api.h ../../snmplib/snmp_impl.h
 ucd-snmp/versioninfo.o: ../snmp_vars.h ../var_struct.h ../../snmplib/snmp.h
 ucd-snmp/versioninfo.o: ../../snmplib/mib.h struct.h ucd-snmp/versioninfo.h
-ucd-snmp/versioninfo.o: mibdefs.h util_funcs.h ./../read_config.h
+ucd-snmp/versioninfo.o: mibdefs.h util_funcs.h ./../../snmplib/read_config.h
 ucd-snmp/versioninfo.o: ../../snmplib/system.h ../../version.h
 ucd-snmp/pass.o: ../../config.h ../../mib_module_config.h
 ucd-snmp/pass.o:  
@@ -476,7 +476,7 @@ ucd-snmp/pass.o:  mibincl.h ../../snmplib/asn1.h
 ucd-snmp/pass.o: ../../snmplib/snmp_api.h ../../snmplib/snmp_impl.h
 ucd-snmp/pass.o: ../snmp_vars.h ../var_struct.h ../../snmplib/snmp.h
 ucd-snmp/pass.o: ../../snmplib/mib.h struct.h ucd-snmp/pass.h mibdefs.h
-ucd-snmp/pass.o: ucd-snmp/extensible.h util_funcs.h ./../read_config.h
+ucd-snmp/pass.o: ucd-snmp/extensible.h util_funcs.h ./../../snmplib/read_config.h
 ucd-snmp/pass.o: ../../snmplib/system.h
 ucd-snmp/disk.o: ../../config.h ../../mib_module_config.h
 ucd-snmp/disk.o:  
@@ -521,7 +521,7 @@ ucd-snmp/disk.o:  mibincl.h ../../snmplib/asn1.h
 ucd-snmp/disk.o: ../../snmplib/snmp_api.h ../../snmplib/snmp_impl.h
 ucd-snmp/disk.o: ../snmp_vars.h ../var_struct.h ../../snmplib/snmp.h
 ucd-snmp/disk.o: ../../snmplib/mib.h struct.h ucd-snmp/disk.h mibdefs.h
-ucd-snmp/disk.o: util_funcs.h ./../read_config.h ./../auto_nlist.h
+ucd-snmp/disk.o: util_funcs.h ./../../snmplib/read_config.h ./../auto_nlist.h
 ucd-snmp/disk.o: ucd-snmp/errormib.h ../../snmplib/system.h
 ucd-snmp/loadave.o: ../../config.h ../../mib_module_config.h
 ucd-snmp/loadave.o:  
@@ -565,7 +565,7 @@ ucd-snmp/loadave.o: ../../snmplib/asn1.h ../../snmplib/snmp_api.h
 ucd-snmp/loadave.o: ../../snmplib/snmp_impl.h ../snmp_vars.h ../var_struct.h
 ucd-snmp/loadave.o: ../../snmplib/snmp.h ../../snmplib/mib.h struct.h
 ucd-snmp/loadave.o: ucd-snmp/loadave.h mibdefs.h util_funcs.h ../kernel.h
-ucd-snmp/loadave.o: ./../read_config.h ./../auto_nlist.h
+ucd-snmp/loadave.o: ./../../snmplib/read_config.h ./../auto_nlist.h
 ucd-snmp/extensible.o: ../../config.h ../../mib_module_config.h
 ucd-snmp/extensible.o:  
 ucd-snmp/extensible.o:  ../../s/linux.h
@@ -611,7 +611,7 @@ ucd-snmp/extensible.o: ../../snmplib/asn1.h ../../snmplib/snmp_api.h
 ucd-snmp/extensible.o: ../../snmplib/snmp_impl.h ../snmp_vars.h
 ucd-snmp/extensible.o: ../var_struct.h ../../snmplib/snmp.h
 ucd-snmp/extensible.o: ../../snmplib/mib.h struct.h ucd-snmp/extensible.h
-ucd-snmp/extensible.o: mibdefs.h util_funcs.h ./../read_config.h
+ucd-snmp/extensible.o: mibdefs.h util_funcs.h ./../../snmplib/read_config.h
 ucd-snmp/extensible.o: ./../auto_nlist.h
 ucd-snmp/errormib.o: ../../config.h ../../mib_module_config.h
 ucd-snmp/errormib.o:  
@@ -1149,7 +1149,7 @@ util_funcs.o: ../../snmplib/asn1.h ../../snmplib/snmp_api.h
 util_funcs.o: ../../snmplib/snmp_impl.h ../snmp_vars.h ../var_struct.h
 util_funcs.o: ../../snmplib/snmp.h ../../snmplib/mib.h struct.h util_funcs.h
 util_funcs.o: ../../snmplib/system.h ucd-snmp/errormib.h mibdefs.h
-util_funcs.o: ./../read_config.h
+util_funcs.o: ./../../snmplib/read_config.h
 mibII/var_route.o: ../../config.h ../../mib_module_config.h
 mibII/var_route.o:  
 mibII/var_route.o:  ../../s/linux.h ../../s/sysv.h

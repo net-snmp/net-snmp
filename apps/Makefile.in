@@ -47,8 +47,8 @@ snmptable:    snmptable.o $(PARSEOBJS) $(USELIBS)
 snmptest:    snmptest.o $(PARSEOBJS) $(USELIBS)
 	${CC} -o $@ snmptest.o $(PARSEOBJS) ${LDFLAGS} ${LIBS} 
 
-snmptrapd:    snmptrapd.o $(USELIBS)
-	${CC} -o $@ snmptrapd.o ${LDFLAGS} ${LIBS} 
+snmptrapd:    snmptrapd.o snmptrapd_handlers.o $(USELIBS)
+	${CC} -o $@ snmptrapd.o snmptrapd_handlers.o ${LDFLAGS} ${LIBS} 
 
 snmptrap:    snmptrap.o $(TRAPSPECIAL) $(PARSEOBJS) $(USELIBS)
 	${CC} -o $@ snmptrap.o $(TRAPSPECIAL) $(PARSEOBJS) ${LDFLAGS} ${LIBS} 

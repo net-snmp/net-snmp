@@ -45,7 +45,6 @@ struct variable {
     oid		    name[32];	    /* object identifier of variable */
 };
 
-int compare __P((oid *, int, oid *, int));
 int subtree_old_size __P((void));
 void sort_tree __P((void));
 struct subtree *find_subtree __P((oid *, int, struct subtree *));
