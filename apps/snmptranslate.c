@@ -96,6 +96,9 @@ main(argc, argv)
               case 'p':
                 print = 1;
                 break;
+              case 'a':
+                print = 2;
+                break;
 	      default:
 		fprintf(stderr,"invalid option: -%c\n", argv[arg][1]);
 		break;
@@ -112,7 +115,8 @@ main(argc, argv)
     }
     
     init_mib();
-    if (print) print_mib (stdout);
+    if (print == 1) print_mib (stdout);
+    if (print == 2) print_ascii_dump (stdout);
     if (!current_name) exit (0);
 
     name_length = MAX_NAME_LEN;

@@ -131,3 +131,4 @@ struct tree *read_all_mibs __P((void));
 int  add_mibdir __P((char *));
 void add_module_replacement __P(( char *, char *, char *, int));
 void print_subtree __P((FILE *, struct tree *, int));
+void print_ascii_dump_tree __P((FILE *, struct tree *, int));

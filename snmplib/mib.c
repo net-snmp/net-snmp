@@ -888,6 +888,15 @@ print_mib (fp)
 }
 
 void
+print_ascii_dump (fp)
+    FILE *fp;
+{
+  fprintf(fp, "dump DEFINITIONS ::= BEGIN\n");
+  print_ascii_dump_tree (fp, tree_head, 0);
+  fprintf(fp, "END\n");
+}
+
+void
 set_function(subtree)
     struct tree *subtree;
 {
