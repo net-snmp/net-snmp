@@ -22,6 +22,7 @@ usage()
    echo " -m : skip 'make all'"
    echo " -p : don't pause at prompts in between stages"
    echo " -r : remove bulid dir (rm -fR) before build"
+   echo " -R : remove bulid dir (rm -fR) after successful build"
    echo " -t : skip 'make test'"
    exit 1
 }
@@ -50,8 +51,10 @@ fi
 ########################################################################
 ########################################################################
 
+REMOVE_SUCCESS=0
+
 #      x)  x=$OPTARG ;;
-while getopts b:cdi:mprs:tx opt
+while getopts b:cdi:mprRs:tx opt
 do
     case "$opt" in
       b)  BUILDD=$OPTARG ;;
@@ -61,6 +64,7 @@ do
       m)  NSB_SKIP_BUILD=1 ;;
       p)  NSB_PROMPT=0 ;;
       r)  NSB_CLEAN=2 ;;
+      R)  REMOVE_SUCCESS=1 ;;
       s)  SRCD=$OPTARG ;;
       t)  NSB_SKIP_TEST=1 ;;
       x)  NSB_CONFIG_ALL=1;;
@@ -102,4 +106,10 @@ if [ $SRCD != $BUILDD ];then
 fi
 nsb-prompt "press enter to build $SRCD in $BUILDD, and install in $INSTALLD"
 nsb-build $VERSION $SRCD $BUILDD $INSTALLD $NSB_CONFIG_ALL
-exit $?
+rc=$?
+if [ $rc -eq 0 ] && [ $REMOVE_SUCCESS -eq 1 ];then
+    nsb-prompt "press enter to remove $BUILDD"
+    /bin/rm -fR $BUILDD > /dev/null 2>&1
+fi
+
+exit $rc
