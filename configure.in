@@ -798,7 +798,7 @@ fi
 AC_SUBST(EXTRACPPFLAGS)
 AC_MSG_RESULT($EXTRACPPFLAGS)
 
-# Prefixes must begin with "/"
+# Prefixes must begin with "/" or [A-Z] followed by colon.
 
 if test "x$prefix" = "xNONE"; then
   prefix=/usr/local
@@ -806,8 +806,11 @@ fi
 
 fch=`echo $prefix | sed 's/\(.\).*/\1/'`
 if test $fch != "/" ; then
-   prefix=`pwd`/$prefix
-   echo "adjusting prefix to $prefix"
+   sch=`echo $prefix | sed 's/.\(.\).*/\1/'`
+   if test -o $sch != ":" ; then
+      prefix=`pwd`/$prefix
+      echo "adjusting prefix to $prefix"
+   fi
 fi
 
 if test "x$exec_prefix" = "xNONE"; then
@@ -816,8 +819,11 @@ fi
 
 fch=`echo $exec_prefix | sed 's/\(.\).*/\1/'`
 if test $fch != "/" ; then
-   exec_prefix=`pwd`/$exec_prefix
-   echo "adjusting exec_prefix to $exec_prefix"
+   sch=`echo $exec_prefix | sed 's/.\(.\).*/\1/'`
+   if test -o $sch != ":" ; then
+      exec_prefix=`pwd`/$exec_prefix
+      echo "adjusting exec_prefix to $exec_prefix"
+   fi
 fi
 
 # Set SNMPLIBPATH & SNMPSHAREPATH
