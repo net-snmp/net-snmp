@@ -425,6 +425,7 @@ unsigned char *var_extensible_disk(vp, name, length, exact, var_len, write_metho
 #endif
 #if HAVE_STATVFS_H
   if (statvfs (disks[disknum].device, &vfs) == -1) {
+    fprintf(stderr,"Couldn't open device %s\n",disks[disknum].device);
     setPerrorstatus("statvfs dev/disk");
     return NULL;
   }
