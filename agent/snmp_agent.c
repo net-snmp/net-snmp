@@ -299,6 +299,7 @@ handle_snmp_packet(int operation, struct snmp_session *session, int reqid,
     
 	    while ( asp->pdu->errstat-- > 0 )	/* Skip non-repeaters */
 	        asp->start = asp->start->next_variable;
+	    asp->pdu->errindex--;           /* Handled first repetition */
 
 	    if ( asp->outstanding_requests != NULL )
 		return 1;

@@ -188,6 +188,7 @@ handle_agentx_packet(int operation, struct snmp_session *session, int reqid,
 
 	while ( asp->pdu->errstat-- > 0 )	/* Skip non-repeaters */
 	    asp->start = asp->start->next_variable;
+	asp->pdu->errindex--;           /* First repetition was handled above */
 
 	while ( asp->pdu->errindex-- > 0 ) {	/* Process repeaters */
 		/*
