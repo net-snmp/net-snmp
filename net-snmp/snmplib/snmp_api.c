@@ -40,6 +40,9 @@ SOFTWARE.
 #if HAVE_NETINET_IN_H
 #include <netinet/in.h>
 #endif
+#if HAVE_SYS_SELECT_H
+#include <sys/select.h>
+#endif
 #include <sys/socket.h>
 #include <netdb.h>
 #include "asn1.h"
