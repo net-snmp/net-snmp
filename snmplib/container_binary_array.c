@@ -81,7 +81,7 @@ array_qsort(void **data, int first, int last, netsnmp_container_compare *f)
 static int
 Sort_Array(netsnmp_container *c)
 {
-    binary_array_table *t = (binary_array_table*)c->private;
+    binary_array_table *t = (binary_array_table*)c->container_data;
     netsnmp_assert(t!=NULL);
     netsnmp_assert(c->compare!=NULL);
     
@@ -100,7 +100,7 @@ Sort_Array(netsnmp_container *c)
 static int
 binary_search(const void *val, netsnmp_container *c, int exact)
 {
-    binary_array_table *t = (binary_array_table*)c->private;
+    binary_array_table *t = (binary_array_table*)c->container_data;
     size_t             len = t->count;
     size_t             half;
     size_t             middle = 0;
@@ -174,7 +174,7 @@ netsnmp_binary_array_initialize(void)
 void
 netsnmp_binary_array_release(netsnmp_container *c)
 {
-    binary_array_table *t = (binary_array_table*)c->private;
+    binary_array_table *t = (binary_array_table*)c->container_data;
     if (t->data != NULL) {
 	SNMP_FREE(t->data);
     }
@@ -185,7 +185,7 @@ netsnmp_binary_array_release(netsnmp_container *c)
 size_t
 netsnmp_binary_array_count(netsnmp_container *c)
 {
-    binary_array_table *t = (binary_array_table*)c->private;
+    binary_array_table *t = (binary_array_table*)c->container_data;
     /*
      * return count
      */
@@ -195,7 +195,7 @@ netsnmp_binary_array_count(netsnmp_container *c)
 void           *
 netsnmp_binary_array_get(netsnmp_container *c, const void *key, int exact)
 {
-    binary_array_table *t = (binary_array_table*)c->private;
+    binary_array_table *t = (binary_array_table*)c->container_data;
     int             index = 0;
 
     /*
@@ -224,7 +224,7 @@ netsnmp_binary_array_get(netsnmp_container *c, const void *key, int exact)
 int
 netsnmp_binary_array_replace(netsnmp_container *c, void *entry)
 {
-    binary_array_table *t = (binary_array_table*)c->private;
+    binary_array_table *t = (binary_array_table*)c->container_data;
     int             index = 0;
 
     /*
@@ -253,7 +253,7 @@ netsnmp_binary_array_replace(netsnmp_container *c, void *entry)
 int
 netsnmp_binary_array_remove(netsnmp_container *c, const void *key, void **save)
 {
-    binary_array_table *t = (binary_array_table*)c->private;
+    binary_array_table *t = (binary_array_table*)c->container_data;
     int             index = 0;
 
     if (save)
@@ -302,7 +302,7 @@ netsnmp_binary_array_for_each(netsnmp_container *c,
                               netsnmp_container_obj_func *fe,
                               void *context, int sort)
 {
-    binary_array_table *t = (binary_array_table*)c->private;
+    binary_array_table *t = (binary_array_table*)c->container_data;
     size_t             i;
 
     if (sort && t->dirty)
@@ -315,7 +315,7 @@ netsnmp_binary_array_for_each(netsnmp_container *c,
 int
 netsnmp_binary_array_insert(netsnmp_container *c, const void *entry)
 {
-    binary_array_table *t = (binary_array_table*)c->private;
+    binary_array_table *t = (binary_array_table*)c->container_data;
     int             new_max;
     void           *new_data;   /* Used for * a) extending the data table
                                  * * b) the next entry to use */
@@ -351,7 +351,7 @@ netsnmp_binary_array_insert(netsnmp_container *c, const void *entry)
 void           *
 netsnmp_binary_array_retrieve(netsnmp_container *c, int *max_oids, int sort)
 {
-    binary_array_table *t = (binary_array_table*)c->private;
+    binary_array_table *t = (binary_array_table*)c->container_data;
     if (sort && t->dirty)
         Sort_Array(c);
 
@@ -367,7 +367,7 @@ netsnmp_binary_array_retrieve(netsnmp_container *c, int *max_oids, int sort)
 static int
 binary_search_for_start(netsnmp_index *val, netsnmp_container *c)
 {
-    binary_array_table *t = (binary_array_table*)c->private;
+    binary_array_table *t = (binary_array_table*)c->container_data;
     size_t             len = t->count;
     size_t             half;
     size_t             middle;
@@ -402,7 +402,7 @@ binary_search_for_start(netsnmp_index *val, netsnmp_container *c)
 void          **
 netsnmp_binary_array_get_subset(netsnmp_container *c, void *key, int *len)
 {
-    binary_array_table *t = (binary_array_table*)c->private;
+    binary_array_table *t = (binary_array_table*)c->container_data;
     void          **subset;
     int             start, end;
     size_t          i;
@@ -521,7 +521,7 @@ netsnmp_container_get_binary_array(void)
         return NULL;
     }
 
-    c->private = netsnmp_binary_array_initialize();
+    c->container_data = netsnmp_binary_array_initialize();
         
     c->get_size = _ba_size;
     c->init = NULL;
@@ -568,11 +568,11 @@ netsnmp_binary_array_iterator_first(netsnmp_iterator *it)
         netsnmp_assert(NULL != it->container);
         return NULL;
     }
-    if(NULL == it->container->private) {
-        netsnmp_assert(NULL != it->container->private);
+    if(NULL == it->container->container_data) {
+        netsnmp_assert(NULL != it->container->container_data);
         return NULL;
     }
-    t = (binary_array_table*)(it->container->private);
+    t = (binary_array_table*)(it->container->container_data);
     
     (int)(it->context) = 0;
 
@@ -592,11 +592,11 @@ netsnmp_binary_array_iterator_next(netsnmp_iterator *it)
         netsnmp_assert(NULL != it->container);
         return NULL;
     }
-    if(NULL == it->container->private) {
-        netsnmp_assert(NULL != it->container->private);
+    if(NULL == it->container->container_data) {
+        netsnmp_assert(NULL != it->container->container_data);
         return NULL;
     }
-    t = (binary_array_table*)(it->container->private);
+    t = (binary_array_table*)(it->container->container_data);
 
     ++(int)(it->context);
 
@@ -618,11 +618,11 @@ netsnmp_binary_array_iterator_last(netsnmp_iterator *it)
         netsnmp_assert(NULL != it->container);
         return NULL;
     }
-    if(NULL == it->container->private) {
-        netsnmp_assert(NULL != it->container->private);
+    if(NULL == it->container->container_data) {
+        netsnmp_assert(NULL != it->container->container_data);
         return NULL;
     }
-    t = (binary_array_table*)(it->container->private);
+    t = (binary_array_table*)(it->container->container_data);
     
     return t->data[ t->count - 1 ];
 }
@@ -638,11 +638,11 @@ netsnmp_binary_array_iterator_last(netsnmp_iterator *it)
 /*          netsnmp_assert(NULL != it->container); */
 /*          return NULL; */
 /*      } */
-/*      if(NULL == it->container->private) { */
-/*          netsnmp_assert(NULL != it->container->private); */
+/*      if(NULL == it->container->container_data) { */
+/*          netsnmp_assert(NULL != it->container->container_data); */
 /*          return NULL; */
 /*      } */
-/*      t = (binary_array_table*)(it->container->private); */
+/*      t = (binary_array_table*)(it->container->container_data); */
     
 /*  } */
 
