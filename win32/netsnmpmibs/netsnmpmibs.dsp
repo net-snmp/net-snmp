@@ -205,10 +205,6 @@ SOURCE="..\..\agent\mibgroup\ucd-snmp\proxy.c"
 # End Source File
 # Begin Source File
 
-SOURCE="..\..\agent\mibgroup\ucd-snmp\registry.c"
-# End Source File
-# Begin Source File
-
 SOURCE="..\..\agent\mibgroup\ucd-snmp\versioninfo.c"
 # End Source File
 # End Group
