@@ -1,6 +1,11 @@
 This file contains major changes in released revisions.  Please read
 the ChangeLog file for a more detailed listing of changes/bug fixes.
 
+*4.2.5*
+ Bug fixes:
+    - don't overwrite the PID of an already-running snmpd with the PID
+      of an abortive snmpd.
+
 *4.2.4*
  New:
     - badCommunityNames and badCommunityUses Counters supported.
