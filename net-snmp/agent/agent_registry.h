@@ -29,6 +29,14 @@ struct register_parameters {
 
 #define DEFAULT_MIB_PRIORITY		127
 
+#define	ALLOCATE_THIS_INDEX		0x0
+#define	ALLOCATE_ANY_INDEX		0x1
+#define	ALLOCATE_NEW_INDEX		0x3
+
+#define	ANY_INTEGER_INDEX		-1
+#define	ANY_STRING_INDEX		NULL
+#define	ANY_OID_INDEX			NULL
+
 void setup_tree (void);
 struct subtree *find_subtree (oid *, size_t, struct subtree *);
 struct subtree *find_subtree_next (oid *, size_t, struct subtree *);
@@ -43,6 +51,8 @@ int unregister_mib (oid *, size_t);
 int unregister_mib_priority (oid *, size_t, int);
 int unregister_mib_range (oid *, size_t, int, int, oid);
 void unregister_mibs_by_session (struct snmp_session *);
+
+struct variable_list* register_index(struct variable_list *, int, struct snmp_session *);
 
 struct subtree *free_subtree (struct subtree *);
 int compare_tree (oid *, size_t, oid *, size_t);
