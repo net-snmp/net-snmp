@@ -5,7 +5,8 @@
 #define _MIBGROUP_HEADER_COMPLEX_H
 
 struct header_complex_index {
-   struct variable_list *vars;
+   oid *name;
+   size_t namelen;
    void *data;
    struct header_complex_index *next;
    struct header_complex_index *prev;
@@ -23,9 +24,7 @@ int header_complex_parse_oid(oid *oidIndex, size_t oidLen,
                              struct variable_list *data);
 void header_complex_generate_oid(oid *name, size_t *length, oid *prefix,
                                  size_t prefix_len,
-                                 struct header_complex_index *data);
-int header_complex_var_compare(struct variable_list *varl,
-                               struct variable_list *varr);
+                                 struct variable_list *data);
 void header_complex_free_all(struct header_complex_index *thestuff,
                              HeaderComplexCleaner *cleaner);
 void header_complex_free_entry(struct header_complex_index *theentry,
