@@ -163,7 +163,7 @@ print DOTH "
 #ifndef _MIBGROUP_${OUTPUTNAME}_H
 #define _MIBGROUP_${OUTPUTNAME}_H
 
-/* we may use header_generic and checkmib from the util_funcs module */
+/* we may use header_generic and header_simple_table from the util_funcs module */
 
 config_require(util_funcs)
 
@@ -256,11 +256,9 @@ var_$outputName(vp, name, length, exact, var_len, write_method)
 
 $varInits
 
-  *write_method = 0;           /* assume it isn\'t writable for the time being */
-  *var_len = sizeof(long_ret); /* assume an integer and change later if not */
-
-  if (header_generic(vp,name,length,exact,var_len,write_method))
-    return 0;
+  if (header_generic(vp,name,length,exact,var_len,write_method)
+					== MATCH_FAILED )
+    return NULL;
 
   /* 
    * this is where we do the value assignments for the mib results.
@@ -270,7 +268,7 @@ $caseStatements{$outputName}\n
     default:
       ERROR_MSG(\"\");
   }
-  return 0;
+  return NULL;
 }
 
 
@@ -300,9 +298,6 @@ var_$vtable(vp, name, length, exact, var_len, write_method)
 
 $varInits
 
-  *write_method = 0;           /* assume it isn\'t writable for the time being */
-  *var_len = sizeof(long_ret); /* assume an integer and change later if not */
-
   /* 
    * This assumes that the table is a \'simple\' table.
    *	See the implementation documentation for the meaning of this.
@@ -313,8 +308,9 @@ $varInits
    *	Mib2c is not smart enough to write this for you.
    *    Again, see the implementation documentation for what is required.
    */
-  if (!checkmib(vp,name,length,exact,var_len,write_method, TABLE_SIZE))
-    return 0;
+  if (header_simple_table(vp,name,length,exact,var_len,write_method, TABLE_SIZE)
+						== MATCH_FAILED )
+    return NULL;
 
   /* 
    * this is where we do the value assignments for the mib results.
@@ -324,7 +320,7 @@ $caseStatements{$vtable}\n
     default:
       ERROR_MSG(\"\");
   }
-  return 0;
+  return NULL;
 }
 
 
@@ -451,22 +447,47 @@ write_$name(action, var_val, var_val_type, var_val_len, statP, name, name_len)
    int      name_len;
 {
   $variableTypes{$type}{writeInit}
-  int size, bigsize=1000;
+  int size, bigsize=SNMP_MAX_LEN;
 
-  if (var_val_type != $variableTypes{$type}{asnType}){
-      fprintf(stderr, \"write to $name not $variableTypes{$type}{asnType}\\n\");
-      return SNMP_ERR_WRONGTYPE;
-  }
-  if (var_val_len > sizeof($variableTypes{$type}{variable})){
-      fprintf(stderr,\"write to $name: bad length\\n\");
-      return SNMP_ERR_WRONGLENGTH;
-  }
-  if (action == COMMIT){
-      size = sizeof($variableTypes{$type}{variable});
-      $variableTypes{$type}{parser}(var_val, &bigsize, &var_val_type, $variableTypes{$type}{variablePtr}, size);
-      /* Here, the variable has been stored in $variableTypes{$type}{variable} for
-      you to use, and you have just been asked to do something with
-      it... Your code goes here. */
+  switch ( action ) {
+	case RESERVE1:
+	  if (var_val_type != $variableTypes{$type}{asnType}){
+	      fprintf(stderr, \"write to $name not $variableTypes{$type}{asnType}\\n\");
+	      return SNMP_ERR_WRONGTYPE;
+	  }
+	  if (var_val_len > sizeof($variableTypes{$type}{variable})){
+	      fprintf(stderr,\"write to $name: bad length\\n\");
+	      return SNMP_ERR_WRONGLENGTH;
+	  }
+	  break;
+
+	case RESERVE2:
+	  size = sizeof($variableTypes{$type}{variable});
+	  if ($variableTypes{$type}{parser}(var_val, &bigsize, &var_val_type, $variableTypes{$type}{variablePtr}, size)
+			== NULL )
+	      return SNMP_ERR_WRONGENCODING;	/* Probably not the correct error */
+
+	      /* Any other checks on the value being acceptable go here */
+	  break;
+
+	case FREE:
+	     /* Release any resources that have been allocated */
+	  break;
+
+	case ACTION:
+	     /* The variable has been stored in $variableTypes{$type}{variable} for
+	     you to use, and you have just been asked to do something with
+	     it.  Note that anything done here must be reversable in the UNDO case */
+	  break;
+
+	case UNDO:
+	     /* Back out any changes made in the ACTION case */
+	  break;
+
+	case COMMIT:
+	     /* Things are working well, so it's now safe to make the change
+	     permanently.  Make sure that anything done here can't fail! */
+	  break;
   }
   return SNMP_ERR_NOERROR;
 }\n\n";
