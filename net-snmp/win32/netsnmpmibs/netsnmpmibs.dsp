@@ -1,24 +1,24 @@
-# Microsoft Developer Studio Project File - Name="libucdmibs" - Package Owner=<4>
+# Microsoft Developer Studio Project File - Name="netsnmpmibs" - Package Owner=<4>
 # Microsoft Developer Studio Generated Build File, Format Version 6.00
 # ** DO NOT EDIT **
 
 # TARGTYPE "Win32 (x86) Static Library" 0x0104
 
-CFG=libucdmibs - Win32 Debug
+CFG=netsnmpmibs - Win32 Debug
 !MESSAGE This is not a valid makefile. To build this project using NMAKE,
 !MESSAGE use the Export Makefile command and run
 !MESSAGE 
-!MESSAGE NMAKE /f "libucdmibs.mak".
+!MESSAGE NMAKE /f "netsnmpmibs.mak".
 !MESSAGE 
 !MESSAGE You can specify a configuration when running NMAKE
 !MESSAGE by defining the macro CFG on the command line. For example:
 !MESSAGE 
-!MESSAGE NMAKE /f "libucdmibs.mak" CFG="libucdmibs - Win32 Debug"
+!MESSAGE NMAKE /f "netsnmpmibs.mak" CFG="netsnmpmibs - Win32 Debug"
 !MESSAGE 
 !MESSAGE Possible choices for configuration are:
 !MESSAGE 
-!MESSAGE "libucdmibs - Win32 Release" (based on "Win32 (x86) Static Library")
-!MESSAGE "libucdmibs - Win32 Debug" (based on "Win32 (x86) Static Library")
+!MESSAGE "netsnmpmibs - Win32 Release" (based on "Win32 (x86) Static Library")
+!MESSAGE "netsnmpmibs - Win32 Debug" (based on "Win32 (x86) Static Library")
 !MESSAGE 
 
 # Begin Project
@@ -28,7 +28,7 @@ CFG=libucdmibs - Win32 Debug
 CPP=cl.exe
 RSC=rc.exe
 
-!IF  "$(CFG)" == "libucdmibs - Win32 Release"
+!IF  "$(CFG)" == "netsnmpmibs - Win32 Release"
 
 # PROP BASE Use_MFC 0
 # PROP BASE Use_Debug_Libraries 0
@@ -49,9 +49,9 @@ BSC32=bscmake.exe
 # ADD BSC32 /nologo
 LIB32=link.exe -lib
 # ADD BASE LIB32 /nologo
-# ADD LIB32 /nologo /out:"../lib/ucdmibs.lib"
+# ADD LIB32 /nologo
 
-!ELSEIF  "$(CFG)" == "libucdmibs - Win32 Debug"
+!ELSEIF  "$(CFG)" == "netsnmpmibs - Win32 Debug"
 
 # PROP BASE Use_MFC 0
 # PROP BASE Use_Debug_Libraries 1
@@ -72,14 +72,14 @@ BSC32=bscmake.exe
 # ADD BSC32 /nologo
 LIB32=link.exe -lib
 # ADD BASE LIB32 /nologo
-# ADD LIB32 /nologo /out:"../lib/ucdmibs_d.lib"
+# ADD LIB32 /nologo /out:"../lib/netsnmpmibs_d.lib"
 
 !ENDIF 
 
 # Begin Target
 
-# Name "libucdmibs - Win32 Release"
-# Name "libucdmibs - Win32 Debug"
+# Name "netsnmpmibs - Win32 Release"
+# Name "netsnmpmibs - Win32 Debug"
 # Begin Group "mibII"
 
 # PROP Default_Filter ""
@@ -267,9 +267,9 @@ SOURCE=..\..\agent\mibgroup\target\target.c
 
 SOURCE=..\..\agent\mibgroup\agentx\client.c
 
-!IF  "$(CFG)" == "libucdmibs - Win32 Release"
+!IF  "$(CFG)" == "netsnmpmibs - Win32 Release"
 
-!ELSEIF  "$(CFG)" == "libucdmibs - Win32 Debug"
+!ELSEIF  "$(CFG)" == "netsnmpmibs - Win32 Debug"
 
 # PROP Exclude_From_Build 1
 
@@ -280,9 +280,9 @@ SOURCE=..\..\agent\mibgroup\agentx\client.c
 
 SOURCE=..\..\agent\mibgroup\agentx\master.c
 
-!IF  "$(CFG)" == "libucdmibs - Win32 Release"
+!IF  "$(CFG)" == "netsnmpmibs - Win32 Release"
 
-!ELSEIF  "$(CFG)" == "libucdmibs - Win32 Debug"
+!ELSEIF  "$(CFG)" == "netsnmpmibs - Win32 Debug"
 
 # PROP Exclude_From_Build 1
 
@@ -293,9 +293,9 @@ SOURCE=..\..\agent\mibgroup\agentx\master.c
 
 SOURCE=..\..\agent\mibgroup\agentx\master_admin.c
 
-!IF  "$(CFG)" == "libucdmibs - Win32 Release"
+!IF  "$(CFG)" == "netsnmpmibs - Win32 Release"
 
-!ELSEIF  "$(CFG)" == "libucdmibs - Win32 Debug"
+!ELSEIF  "$(CFG)" == "netsnmpmibs - Win32 Debug"
 
 # PROP Exclude_From_Build 1
 
@@ -306,9 +306,9 @@ SOURCE=..\..\agent\mibgroup\agentx\master_admin.c
 
 SOURCE=..\..\agent\mibgroup\agentx\master_request.c
 
-!IF  "$(CFG)" == "libucdmibs - Win32 Release"
+!IF  "$(CFG)" == "netsnmpmibs - Win32 Release"
 
-!ELSEIF  "$(CFG)" == "libucdmibs - Win32 Debug"
+!ELSEIF  "$(CFG)" == "netsnmpmibs - Win32 Debug"
 
 # PROP Exclude_From_Build 1
 
@@ -319,9 +319,9 @@ SOURCE=..\..\agent\mibgroup\agentx\master_request.c
 
 SOURCE=..\..\agent\mibgroup\agentx\protocol.c
 
-!IF  "$(CFG)" == "libucdmibs - Win32 Release"
+!IF  "$(CFG)" == "netsnmpmibs - Win32 Release"
 
-!ELSEIF  "$(CFG)" == "libucdmibs - Win32 Debug"
+!ELSEIF  "$(CFG)" == "netsnmpmibs - Win32 Debug"
 
 # PROP Exclude_From_Build 1
 
@@ -332,9 +332,9 @@ SOURCE=..\..\agent\mibgroup\agentx\protocol.c
 
 SOURCE=..\..\agent\mibgroup\agentx\subagent.c
 
-!IF  "$(CFG)" == "libucdmibs - Win32 Release"
+!IF  "$(CFG)" == "netsnmpmibs - Win32 Release"
 
-!ELSEIF  "$(CFG)" == "libucdmibs - Win32 Debug"
+!ELSEIF  "$(CFG)" == "netsnmpmibs - Win32 Debug"
 
 # PROP Exclude_From_Build 1
 
@@ -344,19 +344,11 @@ SOURCE=..\..\agent\mibgroup\agentx\subagent.c
 # End Group
 # Begin Source File
 
-SOURCE=..\..\agent\agent_handler.c
-# End Source File
-# Begin Source File
-
 SOURCE=..\..\agent\mibgroup\header_complex.c
 # End Source File
 # Begin Source File
 
 SOURCE=..\..\agent\mib_modules.c
-# End Source File
-# Begin Source File
-
-SOURCE=..\..\agent\mibgroup\smux\smux.c
 # End Source File
 # Begin Source File
 
