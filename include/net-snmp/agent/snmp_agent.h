@@ -147,9 +147,9 @@ int netsnmp_set_request_error(netsnmp_agent_request_info *reqinfo, netsnmp_reque
                        int error_value);
 int netsnmp_set_all_requests_error(netsnmp_agent_request_info *reqinfo, netsnmp_request_info *requests,
                            int error_value);
-int netsnmp_marker_uptime( marker_t pm );
-int netsnmp_timeval_uptime( struct timeval *tv );
-int netsnmp_get_agent_uptime(void);
+u_long netsnmp_marker_uptime( marker_t pm );
+u_long netsnmp_timeval_uptime( struct timeval *tv );
+u_long netsnmp_get_agent_uptime(void);
 int netsnmp_check_transaction_id(int transaction_id);
 int netsnmp_agent_check_packet(netsnmp_session*, struct netsnmp_transport_s *,
 		      void *, int);
