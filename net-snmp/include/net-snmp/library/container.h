@@ -111,7 +111,7 @@ extern "C" {
         * memory, you are responsible for releasing that
         * memory before calling this function!
         */
-       netsnmp_container_rc    *free;
+       netsnmp_container_rc    *cfree;
 
        /*
         * add an entry to the container
@@ -307,13 +307,13 @@ extern "C" {
             while(tmp->next)
                 tmp = tmp->next;
             while(tmp) {
-                rc = tmp->free(tmp);
+                rc = tmp->cfree(tmp);
                 if (rc)
                     snmp_log(LOG_ERR,"error on subcontainer free (%d)", rc);
                 tmp = tmp->prev;
             }
         }
-        return x->free(x);
+        return x->cfree(x);
     }
 #endif
 
