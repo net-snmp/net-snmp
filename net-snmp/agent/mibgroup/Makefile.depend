@@ -23,6 +23,7 @@
 ./header_complex.lo: ../../include/net-snmp/library/snmp_alarm.h
 ./header_complex.lo: ../../include/net-snmp/library/data_list.h
 ./header_complex.lo: ../../include/net-snmp/library/oid_stash.h
+./header_complex.lo: ../../include/net-snmp/library/check_varbind.h
 ./header_complex.lo: ../../include/net-snmp/version.h
 ./header_complex.lo: ../../include/net-snmp/session_api.h
 ./header_complex.lo: ../../include/net-snmp/library/callback.h
@@ -107,6 +108,7 @@
 ./testhandler.lo: ../../include/net-snmp/library/snmp_alarm.h
 ./testhandler.lo: ../../include/net-snmp/library/data_list.h
 ./testhandler.lo: ../../include/net-snmp/library/oid_stash.h
+./testhandler.lo: ../../include/net-snmp/library/check_varbind.h
 ./testhandler.lo: ../../include/net-snmp/version.h
 ./testhandler.lo: ../../include/net-snmp/session_api.h
 ./testhandler.lo: ../../include/net-snmp/library/callback.h
@@ -186,6 +188,7 @@
 ./util_funcs.lo: ../../include/net-snmp/library/snmp_alarm.h
 ./util_funcs.lo: ../../include/net-snmp/library/data_list.h
 ./util_funcs.lo: ../../include/net-snmp/library/oid_stash.h
+./util_funcs.lo: ../../include/net-snmp/library/check_varbind.h
 ./util_funcs.lo: ../../include/net-snmp/version.h
 ./util_funcs.lo: ../../include/net-snmp/session_api.h
 ./util_funcs.lo: ../../include/net-snmp/library/callback.h

@@ -23,6 +23,7 @@
 ./agent_handler.lo: ../include/net-snmp/library/snmp_alarm.h
 ./agent_handler.lo: ../include/net-snmp/library/data_list.h
 ./agent_handler.lo: ../include/net-snmp/library/oid_stash.h
+./agent_handler.lo: ../include/net-snmp/library/check_varbind.h
 ./agent_handler.lo: ../include/net-snmp/version.h
 ./agent_handler.lo: ../include/net-snmp/session_api.h
 ./agent_handler.lo: ../include/net-snmp/library/callback.h
@@ -101,6 +102,7 @@
 ./agent_index.lo: ../include/net-snmp/library/snmp_alarm.h
 ./agent_index.lo: ../include/net-snmp/library/data_list.h
 ./agent_index.lo: ../include/net-snmp/library/oid_stash.h
+./agent_index.lo: ../include/net-snmp/library/check_varbind.h
 ./agent_index.lo: ../include/net-snmp/version.h
 ./agent_index.lo: ../include/net-snmp/session_api.h
 ./agent_index.lo: ../include/net-snmp/library/callback.h
@@ -161,8 +163,7 @@
 ./agent_index.lo: mibgroup/mibII.h mibgroup/ucd_snmp.h mibgroup/snmpv3mibs.h
 ./agent_index.lo: mibgroup/notification.h mibgroup/target.h
 ./agent_index.lo: mibgroup/agent_mibs.h mibgroup/agentx.h
-./agent_index.lo: mibgroup/utilities.h mibgroup/host.h
-./agent_index.lo: mibgroup/disman/event-mib.h mibgroup/mibII/system_mib.h
+./agent_index.lo: mibgroup/utilities.h mibgroup/mibII/system_mib.h
 ./agent_index.lo: mibgroup/mibII/sysORTable.h mibgroup/mibII/at.h
 ./agent_index.lo: mibgroup/mibII/interfaces.h mibgroup/mibII/snmp_mib.h
 ./agent_index.lo: mibgroup/mibII/tcp.h mibgroup/mibII/icmp.h
@@ -188,24 +189,13 @@
 ./agent_index.lo: mibgroup/agent/nsTransactionTable.h
 ./agent_index.lo: mibgroup/agent/nsModuleTable.h mibgroup/agentx/master.h
 ./agent_index.lo: mibgroup/agentx/subagent.h mibgroup/utilities/override.h
-./agent_index.lo: mibgroup/host/hr_system.h mibgroup/host/hr_storage.h
-./agent_index.lo: mibgroup/host/hr_device.h mibgroup/host/hr_other.h
-./agent_index.lo: mibgroup/host/hr_proc.h mibgroup/host/hr_network.h
-./agent_index.lo: mibgroup/host/hr_print.h mibgroup/host/hr_disk.h
-./agent_index.lo: mibgroup/host/hr_partition.h mibgroup/host/hr_filesys.h
-./agent_index.lo: mibgroup/host/hr_swrun.h mibgroup/host/hr_swinst.h
-./agent_index.lo: mibgroup/disman/mteTriggerTable.h
-./agent_index.lo: mibgroup/disman/mteTriggerDeltaTable.h
-./agent_index.lo: mibgroup/disman/mteTriggerExistenceTable.h
-./agent_index.lo: mibgroup/disman/mteTriggerBooleanTable.h
-./agent_index.lo: mibgroup/disman/mteTriggerThresholdTable.h
-./agent_index.lo: mibgroup/disman/mteObjectsTable.h mibgroup/util_funcs.h
-./agent_index.lo: mibgroup/struct.h mibgroup/mibII/kernel_linux.h
-./agent_index.lo: mibgroup/mibII/tcpTable.h mibgroup/mibII/ipAddr.h
-./agent_index.lo: mibgroup/mibII/var_route.h mibgroup/mibII/route_write.h
-./agent_index.lo: mibgroup/mibII/udpTable.h mibgroup/mibII/vacm_context.h
-./agent_index.lo: mibgroup/header_complex.h mibgroup/agentx/protocol.h
-./agent_index.lo: mibgroup/agentx/client.h mibgroup/agentx/master_admin.h
+./agent_index.lo: mibgroup/util_funcs.h mibgroup/struct.h
+./agent_index.lo: mibgroup/mibII/kernel_linux.h mibgroup/mibII/tcpTable.h
+./agent_index.lo: mibgroup/mibII/ipAddr.h mibgroup/mibII/var_route.h
+./agent_index.lo: mibgroup/mibII/route_write.h mibgroup/mibII/udpTable.h
+./agent_index.lo: mibgroup/mibII/vacm_context.h mibgroup/header_complex.h
+./agent_index.lo: mibgroup/agentx/protocol.h mibgroup/agentx/client.h
+./agent_index.lo: mibgroup/agentx/master_admin.h
 ./agent_index.lo: mibgroup/agentx/agentx_config.h
 ./agent_index.lo: ./mibgroup/agentx/subagent.h ./mibgroup/agentx/client.h
 ./agent_read_config.lo: ../include/net-snmp/net-snmp-config.h
@@ -231,6 +221,7 @@
 ./agent_read_config.lo: ../include/net-snmp/library/snmp_alarm.h
 ./agent_read_config.lo: ../include/net-snmp/library/data_list.h
 ./agent_read_config.lo: ../include/net-snmp/library/oid_stash.h
+./agent_read_config.lo: ../include/net-snmp/library/check_varbind.h
 ./agent_read_config.lo: ../include/net-snmp/version.h
 ./agent_read_config.lo: ../include/net-snmp/session_api.h
 ./agent_read_config.lo: ../include/net-snmp/library/callback.h
@@ -292,9 +283,7 @@
 ./agent_read_config.lo: mibgroup/ucd_snmp.h mibgroup/snmpv3mibs.h
 ./agent_read_config.lo: mibgroup/notification.h mibgroup/target.h
 ./agent_read_config.lo: mibgroup/agent_mibs.h mibgroup/agentx.h
-./agent_read_config.lo: mibgroup/utilities.h mibgroup/host.h
-./agent_read_config.lo: mibgroup/disman/event-mib.h
-./agent_read_config.lo: mibgroup/mibII/system_mib.h
+./agent_read_config.lo: mibgroup/utilities.h mibgroup/mibII/system_mib.h
 ./agent_read_config.lo: mibgroup/mibII/sysORTable.h mibgroup/mibII/at.h
 ./agent_read_config.lo: mibgroup/mibII/interfaces.h mibgroup/mibII/snmp_mib.h
 ./agent_read_config.lo: mibgroup/mibII/tcp.h mibgroup/mibII/icmp.h
@@ -324,22 +313,8 @@
 ./agent_read_config.lo: mibgroup/agent/nsTransactionTable.h
 ./agent_read_config.lo: mibgroup/agent/nsModuleTable.h
 ./agent_read_config.lo: mibgroup/agentx/master.h mibgroup/agentx/subagent.h
-./agent_read_config.lo: mibgroup/utilities/override.h
-./agent_read_config.lo: mibgroup/host/hr_system.h mibgroup/host/hr_storage.h
-./agent_read_config.lo: mibgroup/host/hr_device.h mibgroup/host/hr_other.h
-./agent_read_config.lo: mibgroup/host/hr_proc.h mibgroup/host/hr_network.h
-./agent_read_config.lo: mibgroup/host/hr_print.h mibgroup/host/hr_disk.h
-./agent_read_config.lo: mibgroup/host/hr_partition.h
-./agent_read_config.lo: mibgroup/host/hr_filesys.h mibgroup/host/hr_swrun.h
-./agent_read_config.lo: mibgroup/host/hr_swinst.h
-./agent_read_config.lo: mibgroup/disman/mteTriggerTable.h
-./agent_read_config.lo: mibgroup/disman/mteTriggerDeltaTable.h
-./agent_read_config.lo: mibgroup/disman/mteTriggerExistenceTable.h
-./agent_read_config.lo: mibgroup/disman/mteTriggerBooleanTable.h
-./agent_read_config.lo: mibgroup/disman/mteTriggerThresholdTable.h
-./agent_read_config.lo: mibgroup/disman/mteObjectsTable.h
-./agent_read_config.lo: mibgroup/util_funcs.h mibgroup/struct.h
-./agent_read_config.lo: mibgroup/mibII/kernel_linux.h
+./agent_read_config.lo: mibgroup/utilities/override.h mibgroup/util_funcs.h
+./agent_read_config.lo: mibgroup/struct.h mibgroup/mibII/kernel_linux.h
 ./agent_read_config.lo: mibgroup/mibII/tcpTable.h mibgroup/mibII/ipAddr.h
 ./agent_read_config.lo: mibgroup/mibII/var_route.h
 ./agent_read_config.lo: mibgroup/mibII/route_write.h
@@ -373,6 +348,7 @@
 ./agent_registry.lo: ../include/net-snmp/library/snmp_alarm.h
 ./agent_registry.lo: ../include/net-snmp/library/data_list.h
 ./agent_registry.lo: ../include/net-snmp/library/oid_stash.h
+./agent_registry.lo: ../include/net-snmp/library/check_varbind.h
 ./agent_registry.lo: ../include/net-snmp/version.h
 ./agent_registry.lo: ../include/net-snmp/session_api.h
 ./agent_registry.lo: ../include/net-snmp/library/callback.h
@@ -433,18 +409,17 @@
 ./agent_registry.lo: mibgroup/mibII.h mibgroup/ucd_snmp.h
 ./agent_registry.lo: mibgroup/snmpv3mibs.h mibgroup/notification.h
 ./agent_registry.lo: mibgroup/target.h mibgroup/agent_mibs.h
-./agent_registry.lo: mibgroup/agentx.h mibgroup/utilities.h mibgroup/host.h
-./agent_registry.lo: mibgroup/disman/event-mib.h mibgroup/mibII/system_mib.h
-./agent_registry.lo: mibgroup/mibII/sysORTable.h mibgroup/mibII/at.h
-./agent_registry.lo: mibgroup/mibII/interfaces.h mibgroup/mibII/snmp_mib.h
-./agent_registry.lo: mibgroup/mibII/tcp.h mibgroup/mibII/icmp.h
-./agent_registry.lo: mibgroup/mibII/ip.h mibgroup/mibII/var_route.h
-./agent_registry.lo: mibgroup/mibII/route_write.h mibgroup/mibII/at.h
-./agent_registry.lo: mibgroup/mibII/udp.h mibgroup/mibII/vacm_vars.h
-./agent_registry.lo: mibgroup/mibII/setSerialNo.h mibgroup/ucd-snmp/memory.h
-./agent_registry.lo: ./mibgroup/mibdefs.h mibgroup/ucd-snmp/vmstat.h
-./agent_registry.lo: mibgroup/ucd-snmp/proc.h mibgroup/ucd-snmp/versioninfo.h
-./agent_registry.lo: mibgroup/ucd-snmp/pass.h
+./agent_registry.lo: mibgroup/agentx.h mibgroup/utilities.h
+./agent_registry.lo: mibgroup/mibII/system_mib.h mibgroup/mibII/sysORTable.h
+./agent_registry.lo: mibgroup/mibII/at.h mibgroup/mibII/interfaces.h
+./agent_registry.lo: mibgroup/mibII/snmp_mib.h mibgroup/mibII/tcp.h
+./agent_registry.lo: mibgroup/mibII/icmp.h mibgroup/mibII/ip.h
+./agent_registry.lo: mibgroup/mibII/var_route.h mibgroup/mibII/route_write.h
+./agent_registry.lo: mibgroup/mibII/at.h mibgroup/mibII/udp.h
+./agent_registry.lo: mibgroup/mibII/vacm_vars.h mibgroup/mibII/setSerialNo.h
+./agent_registry.lo: mibgroup/ucd-snmp/memory.h ./mibgroup/mibdefs.h
+./agent_registry.lo: mibgroup/ucd-snmp/vmstat.h mibgroup/ucd-snmp/proc.h
+./agent_registry.lo: mibgroup/ucd-snmp/versioninfo.h mibgroup/ucd-snmp/pass.h
 ./agent_registry.lo: mibgroup/ucd-snmp/pass_persist.h
 ./agent_registry.lo: mibgroup/ucd-snmp/disk.h mibgroup/ucd-snmp/loadave.h
 ./agent_registry.lo: mibgroup/ucd-snmp/extensible.h
@@ -463,24 +438,13 @@
 ./agent_registry.lo: mibgroup/agent/nsTransactionTable.h
 ./agent_registry.lo: mibgroup/agent/nsModuleTable.h mibgroup/agentx/master.h
 ./agent_registry.lo: mibgroup/agentx/subagent.h mibgroup/utilities/override.h
-./agent_registry.lo: mibgroup/host/hr_system.h mibgroup/host/hr_storage.h
-./agent_registry.lo: mibgroup/host/hr_device.h mibgroup/host/hr_other.h
-./agent_registry.lo: mibgroup/host/hr_proc.h mibgroup/host/hr_network.h
-./agent_registry.lo: mibgroup/host/hr_print.h mibgroup/host/hr_disk.h
-./agent_registry.lo: mibgroup/host/hr_partition.h mibgroup/host/hr_filesys.h
-./agent_registry.lo: mibgroup/host/hr_swrun.h mibgroup/host/hr_swinst.h
-./agent_registry.lo: mibgroup/disman/mteTriggerTable.h
-./agent_registry.lo: mibgroup/disman/mteTriggerDeltaTable.h
-./agent_registry.lo: mibgroup/disman/mteTriggerExistenceTable.h
-./agent_registry.lo: mibgroup/disman/mteTriggerBooleanTable.h
-./agent_registry.lo: mibgroup/disman/mteTriggerThresholdTable.h
-./agent_registry.lo: mibgroup/disman/mteObjectsTable.h mibgroup/util_funcs.h
-./agent_registry.lo: mibgroup/struct.h mibgroup/mibII/kernel_linux.h
-./agent_registry.lo: mibgroup/mibII/tcpTable.h mibgroup/mibII/ipAddr.h
-./agent_registry.lo: mibgroup/mibII/var_route.h mibgroup/mibII/route_write.h
-./agent_registry.lo: mibgroup/mibII/udpTable.h mibgroup/mibII/vacm_context.h
-./agent_registry.lo: mibgroup/header_complex.h mibgroup/agentx/protocol.h
-./agent_registry.lo: mibgroup/agentx/client.h mibgroup/agentx/master_admin.h
+./agent_registry.lo: mibgroup/util_funcs.h mibgroup/struct.h
+./agent_registry.lo: mibgroup/mibII/kernel_linux.h mibgroup/mibII/tcpTable.h
+./agent_registry.lo: mibgroup/mibII/ipAddr.h mibgroup/mibII/var_route.h
+./agent_registry.lo: mibgroup/mibII/route_write.h mibgroup/mibII/udpTable.h
+./agent_registry.lo: mibgroup/mibII/vacm_context.h mibgroup/header_complex.h
+./agent_registry.lo: mibgroup/agentx/protocol.h mibgroup/agentx/client.h
+./agent_registry.lo: mibgroup/agentx/master_admin.h
 ./agent_registry.lo: mibgroup/agentx/agentx_config.h
 ./agent_registry.lo: ./mibgroup/agentx/subagent.h ./mibgroup/agentx/client.h
 ./agent_trap.lo: ../include/net-snmp/net-snmp-config.h
@@ -504,6 +468,7 @@
 ./agent_trap.lo: ../include/net-snmp/library/snmp_alarm.h
 ./agent_trap.lo: ../include/net-snmp/library/data_list.h
 ./agent_trap.lo: ../include/net-snmp/library/oid_stash.h
+./agent_trap.lo: ../include/net-snmp/library/check_varbind.h
 ./agent_trap.lo: ../include/net-snmp/version.h
 ./agent_trap.lo: ../include/net-snmp/net-snmp-includes.h
 ./agent_trap.lo: ../include/net-snmp/session_api.h
@@ -537,6 +502,7 @@
 ./agent_trap.lo: ../include/net-snmp/library/snmpv3-security-includes.h
 ./agent_trap.lo: ../include/net-snmp/library/snmpusm.h
 ./agent_trap.lo: ../include/net-snmp/agent/agent_trap.h
+./agent_trap.lo: ../include/net-snmp/agent/snmp_agent.h
 ./agent_trap.lo: ../include/net-snmp/agent/agent_callbacks.h
 ./agent_trap.lo: ../include/net-snmp/agent/mib_module_config.h
 ./auto_nlist.lo: ../include/net-snmp/net-snmp-config.h
@@ -573,6 +539,7 @@
 ./mib_modules.lo: ../include/net-snmp/library/snmp_alarm.h
 ./mib_modules.lo: ../include/net-snmp/library/data_list.h
 ./mib_modules.lo: ../include/net-snmp/library/oid_stash.h
+./mib_modules.lo: ../include/net-snmp/library/check_varbind.h
 ./mib_modules.lo: ../include/net-snmp/version.h
 ./mib_modules.lo: ../include/net-snmp/session_api.h
 ./mib_modules.lo: ../include/net-snmp/library/callback.h
@@ -631,8 +598,7 @@
 ./mib_modules.lo: mibgroup/ucd_snmp.h mibgroup/snmpv3mibs.h
 ./mib_modules.lo: mibgroup/notification.h mibgroup/target.h
 ./mib_modules.lo: mibgroup/agent_mibs.h mibgroup/agentx.h
-./mib_modules.lo: mibgroup/utilities.h mibgroup/host.h
-./mib_modules.lo: mibgroup/disman/event-mib.h mibgroup/mibII/system_mib.h
+./mib_modules.lo: mibgroup/utilities.h mibgroup/mibII/system_mib.h
 ./mib_modules.lo: mibgroup/mibII/sysORTable.h mibgroup/mibII/at.h
 ./mib_modules.lo: mibgroup/mibII/interfaces.h mibgroup/mibII/snmp_mib.h
 ./mib_modules.lo: mibgroup/mibII/tcp.h mibgroup/mibII/icmp.h
@@ -658,24 +624,13 @@
 ./mib_modules.lo: mibgroup/agent/nsTransactionTable.h
 ./mib_modules.lo: mibgroup/agent/nsModuleTable.h mibgroup/agentx/master.h
 ./mib_modules.lo: mibgroup/agentx/subagent.h mibgroup/utilities/override.h
-./mib_modules.lo: mibgroup/host/hr_system.h mibgroup/host/hr_storage.h
-./mib_modules.lo: mibgroup/host/hr_device.h mibgroup/host/hr_other.h
-./mib_modules.lo: mibgroup/host/hr_proc.h mibgroup/host/hr_network.h
-./mib_modules.lo: mibgroup/host/hr_print.h mibgroup/host/hr_disk.h
-./mib_modules.lo: mibgroup/host/hr_partition.h mibgroup/host/hr_filesys.h
-./mib_modules.lo: mibgroup/host/hr_swrun.h mibgroup/host/hr_swinst.h
-./mib_modules.lo: mibgroup/disman/mteTriggerTable.h
-./mib_modules.lo: mibgroup/disman/mteTriggerDeltaTable.h
-./mib_modules.lo: mibgroup/disman/mteTriggerExistenceTable.h
-./mib_modules.lo: mibgroup/disman/mteTriggerBooleanTable.h
-./mib_modules.lo: mibgroup/disman/mteTriggerThresholdTable.h
-./mib_modules.lo: mibgroup/disman/mteObjectsTable.h mibgroup/util_funcs.h
-./mib_modules.lo: mibgroup/struct.h mibgroup/mibII/kernel_linux.h
-./mib_modules.lo: mibgroup/mibII/tcpTable.h mibgroup/mibII/ipAddr.h
-./mib_modules.lo: mibgroup/mibII/var_route.h mibgroup/mibII/route_write.h
-./mib_modules.lo: mibgroup/mibII/udpTable.h mibgroup/mibII/vacm_context.h
-./mib_modules.lo: mibgroup/header_complex.h mibgroup/agentx/protocol.h
-./mib_modules.lo: mibgroup/agentx/client.h mibgroup/agentx/master_admin.h
+./mib_modules.lo: mibgroup/util_funcs.h mibgroup/struct.h
+./mib_modules.lo: mibgroup/mibII/kernel_linux.h mibgroup/mibII/tcpTable.h
+./mib_modules.lo: mibgroup/mibII/ipAddr.h mibgroup/mibII/var_route.h
+./mib_modules.lo: mibgroup/mibII/route_write.h mibgroup/mibII/udpTable.h
+./mib_modules.lo: mibgroup/mibII/vacm_context.h mibgroup/header_complex.h
+./mib_modules.lo: mibgroup/agentx/protocol.h mibgroup/agentx/client.h
+./mib_modules.lo: mibgroup/agentx/master_admin.h
 ./mib_modules.lo: mibgroup/agentx/agentx_config.h
 ./mib_modules.lo: ./mibgroup/mib_module_inits.h
 ./object_monitor.lo: ../include/net-snmp/net-snmp-config.h
@@ -701,6 +656,7 @@
 ./object_monitor.lo: ../include/net-snmp/library/snmp_alarm.h
 ./object_monitor.lo: ../include/net-snmp/library/data_list.h
 ./object_monitor.lo: ../include/net-snmp/library/oid_stash.h
+./object_monitor.lo: ../include/net-snmp/library/check_varbind.h
 ./object_monitor.lo: ../include/net-snmp/version.h
 ./object_monitor.lo: ../include/net-snmp/session_api.h
 ./object_monitor.lo: ../include/net-snmp/library/callback.h
@@ -783,6 +739,7 @@
 ./snmp_agent.lo: ../include/net-snmp/library/snmp_alarm.h
 ./snmp_agent.lo: ../include/net-snmp/library/data_list.h
 ./snmp_agent.lo: ../include/net-snmp/library/oid_stash.h
+./snmp_agent.lo: ../include/net-snmp/library/check_varbind.h
 ./snmp_agent.lo: ../include/net-snmp/version.h
 ./snmp_agent.lo: ../include/net-snmp/session_api.h
 ./snmp_agent.lo: ../include/net-snmp/library/callback.h
@@ -862,6 +819,7 @@
 ./snmpd.lo: ../include/net-snmp/library/snmp_alarm.h
 ./snmpd.lo: ../include/net-snmp/library/data_list.h
 ./snmpd.lo: ../include/net-snmp/library/oid_stash.h
+./snmpd.lo: ../include/net-snmp/library/check_varbind.h
 ./snmpd.lo: ../include/net-snmp/version.h ../include/net-snmp/session_api.h
 ./snmpd.lo: ../include/net-snmp/library/callback.h
 ./snmpd.lo: ../include/net-snmp/library/snmp_transport.h
@@ -920,11 +878,10 @@
 ./snmpd.lo: ./mibgroup/mib_module_includes.h mibgroup/mibII.h
 ./snmpd.lo: mibgroup/ucd_snmp.h mibgroup/snmpv3mibs.h mibgroup/notification.h
 ./snmpd.lo: mibgroup/target.h mibgroup/agent_mibs.h mibgroup/agentx.h
-./snmpd.lo: mibgroup/utilities.h mibgroup/host.h mibgroup/disman/event-mib.h
-./snmpd.lo: mibgroup/mibII/system_mib.h mibgroup/mibII/sysORTable.h
-./snmpd.lo: mibgroup/mibII/at.h mibgroup/mibII/interfaces.h
-./snmpd.lo: mibgroup/mibII/snmp_mib.h mibgroup/mibII/tcp.h
-./snmpd.lo: mibgroup/mibII/icmp.h mibgroup/mibII/ip.h
+./snmpd.lo: mibgroup/utilities.h mibgroup/mibII/system_mib.h
+./snmpd.lo: mibgroup/mibII/sysORTable.h mibgroup/mibII/at.h
+./snmpd.lo: mibgroup/mibII/interfaces.h mibgroup/mibII/snmp_mib.h
+./snmpd.lo: mibgroup/mibII/tcp.h mibgroup/mibII/icmp.h mibgroup/mibII/ip.h
 ./snmpd.lo: mibgroup/mibII/var_route.h mibgroup/mibII/route_write.h
 ./snmpd.lo: mibgroup/mibII/at.h mibgroup/mibII/udp.h
 ./snmpd.lo: mibgroup/mibII/vacm_vars.h mibgroup/mibII/setSerialNo.h
@@ -946,24 +903,13 @@
 ./snmpd.lo: mibgroup/agent/nsTransactionTable.h
 ./snmpd.lo: mibgroup/agent/nsModuleTable.h mibgroup/agentx/master.h
 ./snmpd.lo: mibgroup/agentx/subagent.h mibgroup/utilities/override.h
-./snmpd.lo: mibgroup/host/hr_system.h mibgroup/host/hr_storage.h
-./snmpd.lo: mibgroup/host/hr_device.h mibgroup/host/hr_other.h
-./snmpd.lo: mibgroup/host/hr_proc.h mibgroup/host/hr_network.h
-./snmpd.lo: mibgroup/host/hr_print.h mibgroup/host/hr_disk.h
-./snmpd.lo: mibgroup/host/hr_partition.h mibgroup/host/hr_filesys.h
-./snmpd.lo: mibgroup/host/hr_swrun.h mibgroup/host/hr_swinst.h
-./snmpd.lo: mibgroup/disman/mteTriggerTable.h
-./snmpd.lo: mibgroup/disman/mteTriggerDeltaTable.h
-./snmpd.lo: mibgroup/disman/mteTriggerExistenceTable.h
-./snmpd.lo: mibgroup/disman/mteTriggerBooleanTable.h
-./snmpd.lo: mibgroup/disman/mteTriggerThresholdTable.h
-./snmpd.lo: mibgroup/disman/mteObjectsTable.h mibgroup/mibII/kernel_linux.h
-./snmpd.lo: mibgroup/mibII/tcpTable.h mibgroup/mibII/ipAddr.h
-./snmpd.lo: mibgroup/mibII/var_route.h mibgroup/mibII/route_write.h
-./snmpd.lo: mibgroup/mibII/udpTable.h mibgroup/mibII/vacm_context.h
-./snmpd.lo: mibgroup/header_complex.h mibgroup/agentx/protocol.h
-./snmpd.lo: mibgroup/agentx/client.h mibgroup/agentx/master_admin.h
-./snmpd.lo: mibgroup/agentx/agentx_config.h ./mibgroup/mib_module_shutdown.h
+./snmpd.lo: mibgroup/mibII/kernel_linux.h mibgroup/mibII/tcpTable.h
+./snmpd.lo: mibgroup/mibII/ipAddr.h mibgroup/mibII/var_route.h
+./snmpd.lo: mibgroup/mibII/route_write.h mibgroup/mibII/udpTable.h
+./snmpd.lo: mibgroup/mibII/vacm_context.h mibgroup/header_complex.h
+./snmpd.lo: mibgroup/agentx/protocol.h mibgroup/agentx/client.h
+./snmpd.lo: mibgroup/agentx/master_admin.h mibgroup/agentx/agentx_config.h
+./snmpd.lo: ./mibgroup/mib_module_shutdown.h
 ./snmp_perl.lo: ../include/net-snmp/net-snmp-config.h
 ./snmp_perl.lo: ../include/net-snmp/system/linux.h
 ./snmp_perl.lo: ../include/net-snmp/system/sysv.h
@@ -986,6 +932,7 @@
 ./snmp_perl.lo: ../include/net-snmp/library/snmp_alarm.h
 ./snmp_perl.lo: ../include/net-snmp/library/data_list.h
 ./snmp_perl.lo: ../include/net-snmp/library/oid_stash.h
+./snmp_perl.lo: ../include/net-snmp/library/check_varbind.h
 ./snmp_perl.lo: ../include/net-snmp/version.h
 ./snmp_perl.lo: ../include/net-snmp/session_api.h
 ./snmp_perl.lo: ../include/net-snmp/library/callback.h
@@ -1062,6 +1009,7 @@
 ./snmp_vars.lo: ../include/net-snmp/library/snmp_alarm.h
 ./snmp_vars.lo: ../include/net-snmp/library/data_list.h
 ./snmp_vars.lo: ../include/net-snmp/library/oid_stash.h
+./snmp_vars.lo: ../include/net-snmp/library/check_varbind.h
 ./snmp_vars.lo: ../include/net-snmp/version.h
 ./snmp_vars.lo: ../include/net-snmp/session_api.h
 ./snmp_vars.lo: ../include/net-snmp/library/callback.h
@@ -1120,7 +1068,6 @@
 ./snmp_vars.lo: mibgroup/mibII.h mibgroup/ucd_snmp.h mibgroup/snmpv3mibs.h
 ./snmp_vars.lo: mibgroup/notification.h mibgroup/target.h
 ./snmp_vars.lo: mibgroup/agent_mibs.h mibgroup/agentx.h mibgroup/utilities.h
-./snmp_vars.lo: mibgroup/host.h mibgroup/disman/event-mib.h
 ./snmp_vars.lo: mibgroup/mibII/system_mib.h mibgroup/mibII/sysORTable.h
 ./snmp_vars.lo: mibgroup/mibII/at.h mibgroup/mibII/interfaces.h
 ./snmp_vars.lo: mibgroup/mibII/snmp_mib.h mibgroup/mibII/tcp.h
@@ -1146,22 +1093,11 @@
 ./snmp_vars.lo: mibgroup/agent/nsTransactionTable.h
 ./snmp_vars.lo: mibgroup/agent/nsModuleTable.h mibgroup/agentx/master.h
 ./snmp_vars.lo: mibgroup/agentx/subagent.h mibgroup/utilities/override.h
-./snmp_vars.lo: mibgroup/host/hr_system.h mibgroup/host/hr_storage.h
-./snmp_vars.lo: mibgroup/host/hr_device.h mibgroup/host/hr_other.h
-./snmp_vars.lo: mibgroup/host/hr_proc.h mibgroup/host/hr_network.h
-./snmp_vars.lo: mibgroup/host/hr_print.h mibgroup/host/hr_disk.h
-./snmp_vars.lo: mibgroup/host/hr_partition.h mibgroup/host/hr_filesys.h
-./snmp_vars.lo: mibgroup/host/hr_swrun.h mibgroup/host/hr_swinst.h
-./snmp_vars.lo: mibgroup/disman/mteTriggerTable.h
-./snmp_vars.lo: mibgroup/disman/mteTriggerDeltaTable.h
-./snmp_vars.lo: mibgroup/disman/mteTriggerExistenceTable.h
-./snmp_vars.lo: mibgroup/disman/mteTriggerBooleanTable.h
-./snmp_vars.lo: mibgroup/disman/mteTriggerThresholdTable.h
-./snmp_vars.lo: mibgroup/disman/mteObjectsTable.h mibgroup/util_funcs.h
-./snmp_vars.lo: mibgroup/struct.h mibgroup/mibII/kernel_linux.h
-./snmp_vars.lo: mibgroup/mibII/tcpTable.h mibgroup/mibII/ipAddr.h
-./snmp_vars.lo: mibgroup/mibII/var_route.h mibgroup/mibII/route_write.h
-./snmp_vars.lo: mibgroup/mibII/udpTable.h mibgroup/mibII/vacm_context.h
-./snmp_vars.lo: mibgroup/header_complex.h mibgroup/agentx/protocol.h
-./snmp_vars.lo: mibgroup/agentx/client.h mibgroup/agentx/master_admin.h
+./snmp_vars.lo: mibgroup/util_funcs.h mibgroup/struct.h
+./snmp_vars.lo: mibgroup/mibII/kernel_linux.h mibgroup/mibII/tcpTable.h
+./snmp_vars.lo: mibgroup/mibII/ipAddr.h mibgroup/mibII/var_route.h
+./snmp_vars.lo: mibgroup/mibII/route_write.h mibgroup/mibII/udpTable.h
+./snmp_vars.lo: mibgroup/mibII/vacm_context.h mibgroup/header_complex.h
+./snmp_vars.lo: mibgroup/agentx/protocol.h mibgroup/agentx/client.h
+./snmp_vars.lo: mibgroup/agentx/master_admin.h
 ./snmp_vars.lo: mibgroup/agentx/agentx_config.h

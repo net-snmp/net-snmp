@@ -28,6 +28,7 @@
 ./bulk_to_next.lo: ../../include/net-snmp/library/snmp_alarm.h
 ./bulk_to_next.lo: ../../include/net-snmp/library/data_list.h
 ./bulk_to_next.lo: ../../include/net-snmp/library/oid_stash.h
+./bulk_to_next.lo: ../../include/net-snmp/library/check_varbind.h
 ./bulk_to_next.lo: ../../include/net-snmp/version.h
 ./bulk_to_next.lo: ../../include/net-snmp/session_api.h
 ./bulk_to_next.lo: ../../include/net-snmp/library/callback.h
@@ -106,6 +107,7 @@
 ./debug_handler.lo: ../../include/net-snmp/library/snmp_alarm.h
 ./debug_handler.lo: ../../include/net-snmp/library/data_list.h
 ./debug_handler.lo: ../../include/net-snmp/library/oid_stash.h
+./debug_handler.lo: ../../include/net-snmp/library/check_varbind.h
 ./debug_handler.lo: ../../include/net-snmp/version.h
 ./debug_handler.lo: ../../include/net-snmp/session_api.h
 ./debug_handler.lo: ../../include/net-snmp/library/callback.h
@@ -184,6 +186,7 @@
 ./instance.lo: ../../include/net-snmp/library/snmp_alarm.h
 ./instance.lo: ../../include/net-snmp/library/data_list.h
 ./instance.lo: ../../include/net-snmp/library/oid_stash.h
+./instance.lo: ../../include/net-snmp/library/check_varbind.h
 ./instance.lo: ../../include/net-snmp/version.h
 ./instance.lo: ../../include/net-snmp/session_api.h
 ./instance.lo: ../../include/net-snmp/library/callback.h
@@ -262,6 +265,7 @@
 ./multiplexer.lo: ../../include/net-snmp/library/snmp_alarm.h
 ./multiplexer.lo: ../../include/net-snmp/library/data_list.h
 ./multiplexer.lo: ../../include/net-snmp/library/oid_stash.h
+./multiplexer.lo: ../../include/net-snmp/library/check_varbind.h
 ./multiplexer.lo: ../../include/net-snmp/version.h
 ./multiplexer.lo: ../../include/net-snmp/session_api.h
 ./multiplexer.lo: ../../include/net-snmp/library/callback.h
@@ -340,6 +344,7 @@
 ./null.lo: ../../include/net-snmp/library/snmp_alarm.h
 ./null.lo: ../../include/net-snmp/library/data_list.h
 ./null.lo: ../../include/net-snmp/library/oid_stash.h
+./null.lo: ../../include/net-snmp/library/check_varbind.h
 ./null.lo: ../../include/net-snmp/version.h
 ./null.lo: ../../include/net-snmp/session_api.h
 ./null.lo: ../../include/net-snmp/library/callback.h
@@ -417,6 +422,7 @@
 ./old_api.lo: ../../include/net-snmp/library/snmp_alarm.h
 ./old_api.lo: ../../include/net-snmp/library/data_list.h
 ./old_api.lo: ../../include/net-snmp/library/oid_stash.h
+./old_api.lo: ../../include/net-snmp/library/check_varbind.h
 ./old_api.lo: ../../include/net-snmp/version.h
 ./old_api.lo: ../../include/net-snmp/session_api.h
 ./old_api.lo: ../../include/net-snmp/library/callback.h
@@ -496,6 +502,7 @@
 ./read_only.lo: ../../include/net-snmp/library/snmp_alarm.h
 ./read_only.lo: ../../include/net-snmp/library/data_list.h
 ./read_only.lo: ../../include/net-snmp/library/oid_stash.h
+./read_only.lo: ../../include/net-snmp/library/check_varbind.h
 ./read_only.lo: ../../include/net-snmp/version.h
 ./read_only.lo: ../../include/net-snmp/session_api.h
 ./read_only.lo: ../../include/net-snmp/library/callback.h
@@ -574,6 +581,7 @@
 ./scalar1.lo: ../../include/net-snmp/library/snmp_alarm.h
 ./scalar1.lo: ../../include/net-snmp/library/data_list.h
 ./scalar1.lo: ../../include/net-snmp/library/oid_stash.h
+./scalar1.lo: ../../include/net-snmp/library/check_varbind.h
 ./scalar1.lo: ../../include/net-snmp/version.h
 ./scalar1.lo: ../../include/net-snmp/session_api.h
 ./scalar1.lo: ../../include/net-snmp/library/callback.h
@@ -653,6 +661,7 @@
 ./scalar.lo: ../../include/net-snmp/library/snmp_alarm.h
 ./scalar.lo: ../../include/net-snmp/library/data_list.h
 ./scalar.lo: ../../include/net-snmp/library/oid_stash.h
+./scalar.lo: ../../include/net-snmp/library/check_varbind.h
 ./scalar.lo: ../../include/net-snmp/version.h
 ./scalar.lo: ../../include/net-snmp/session_api.h
 ./scalar.lo: ../../include/net-snmp/library/callback.h
@@ -732,6 +741,7 @@
 ./serialize.lo: ../../include/net-snmp/library/snmp_alarm.h
 ./serialize.lo: ../../include/net-snmp/library/data_list.h
 ./serialize.lo: ../../include/net-snmp/library/oid_stash.h
+./serialize.lo: ../../include/net-snmp/library/check_varbind.h
 ./serialize.lo: ../../include/net-snmp/version.h
 ./serialize.lo: ../../include/net-snmp/session_api.h
 ./serialize.lo: ../../include/net-snmp/library/callback.h
@@ -810,6 +820,7 @@
 ./table_array.lo: ../../include/net-snmp/library/snmp_alarm.h
 ./table_array.lo: ../../include/net-snmp/library/data_list.h
 ./table_array.lo: ../../include/net-snmp/library/oid_stash.h
+./table_array.lo: ../../include/net-snmp/library/check_varbind.h
 ./table_array.lo: ../../include/net-snmp/version.h
 ./table_array.lo: ../../include/net-snmp/session_api.h
 ./table_array.lo: ../../include/net-snmp/library/callback.h
@@ -892,6 +903,7 @@
 ./table.lo: ../../include/net-snmp/library/snmp_alarm.h
 ./table.lo: ../../include/net-snmp/library/data_list.h
 ./table.lo: ../../include/net-snmp/library/oid_stash.h
+./table.lo: ../../include/net-snmp/library/check_varbind.h
 ./table.lo: ../../include/net-snmp/version.h
 ./table.lo: ../../include/net-snmp/session_api.h
 ./table.lo: ../../include/net-snmp/library/callback.h
@@ -970,6 +982,7 @@
 ./table_data.lo: ../../include/net-snmp/library/snmp_alarm.h
 ./table_data.lo: ../../include/net-snmp/library/data_list.h
 ./table_data.lo: ../../include/net-snmp/library/oid_stash.h
+./table_data.lo: ../../include/net-snmp/library/check_varbind.h
 ./table_data.lo: ../../include/net-snmp/version.h
 ./table_data.lo: ../../include/net-snmp/session_api.h
 ./table_data.lo: ../../include/net-snmp/library/callback.h
@@ -1048,6 +1061,7 @@
 ./table_dataset.lo: ../../include/net-snmp/library/snmp_alarm.h
 ./table_dataset.lo: ../../include/net-snmp/library/data_list.h
 ./table_dataset.lo: ../../include/net-snmp/library/oid_stash.h
+./table_dataset.lo: ../../include/net-snmp/library/check_varbind.h
 ./table_dataset.lo: ../../include/net-snmp/version.h
 ./table_dataset.lo: ../../include/net-snmp/session_api.h
 ./table_dataset.lo: ../../include/net-snmp/library/callback.h
@@ -1126,6 +1140,7 @@
 ./table_iterator.lo: ../../include/net-snmp/library/snmp_alarm.h
 ./table_iterator.lo: ../../include/net-snmp/library/data_list.h
 ./table_iterator.lo: ../../include/net-snmp/library/oid_stash.h
+./table_iterator.lo: ../../include/net-snmp/library/check_varbind.h
 ./table_iterator.lo: ../../include/net-snmp/version.h
 ./table_iterator.lo: ../../include/net-snmp/session_api.h
 ./table_iterator.lo: ../../include/net-snmp/library/callback.h
@@ -1204,6 +1219,7 @@
 ./watcher.lo: ../../include/net-snmp/library/snmp_alarm.h
 ./watcher.lo: ../../include/net-snmp/library/data_list.h
 ./watcher.lo: ../../include/net-snmp/library/oid_stash.h
+./watcher.lo: ../../include/net-snmp/library/check_varbind.h
 ./watcher.lo: ../../include/net-snmp/version.h
 ./watcher.lo: ../../include/net-snmp/session_api.h
 ./watcher.lo: ../../include/net-snmp/library/callback.h
