@@ -78,9 +78,7 @@ SOFTWARE.
 
 #endif                          /* WIN32 */
 
-#if HAVE_NETINET_IN_H
-#include <netinet/in.h>		/* For definition of in_addr_t */
-#endif
+#include <net-snmp/types.h>     /* For definition of in_addr_t */
 
     in_addr_t       get_myaddr(void);
     long            get_uptime(void);
