@@ -288,12 +288,12 @@ sub process {
 		$vars{$var} = $oldvar;
 		$currentcolumn = $oldcolumn;
 	    }
-	} elsif (/\@\s*foreach\s+\$([^\@]+)\s+\$([^\@]+)\s+(enum)\s*\@/) {
+	} elsif (/\@\s*foreach\s+\$([^\@]+)\s+\$([^\@]+)\s+(enums*)\s*\@/) {
 	    my ($varvar, $varval, $type) = ($1, $2, $3);
 	    my $startpos = $fh->tell();
 	    my $enum;
 	    my @keys = sort { $SNMP::MIB{$currentcolumn}{'enums'}{$a} <=>
-				  $SNMP::MIB{$currentcolumn}{'enums'}{$b} } (%{$SNMP::MIB{$currentcolumn}{'enums'}});
+				  $SNMP::MIB{$currentcolumn}{'enums'}{$b} } (keys(%{$SNMP::MIB{$currentcolumn}{'enums'}}));
 	    if ($#keys > -1) {
 		foreach $enum (@keys) {
 		    $fh->seek($startpos, 0); # go to top of section.
