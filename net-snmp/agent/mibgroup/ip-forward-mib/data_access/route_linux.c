@@ -11,17 +11,10 @@
 #include <net-snmp/data_access/interface.h>
 #include <net-snmp/data_access/route.h>
 
-#include "ip-forward-mib/ipCidrRouteTable/ipCidrRouteTable_constants.h"
+#include "ip-forward-mib/inetCidrRouteTable/inetCidrRouteTable_constants.h"
 
-/**
- *
- * @retval  0 success
- * @retval -1 no container specified
- * @retval -2 could not open /proc/net/route
- */
-int
-netsnmp_access_route_container_arch_load(netsnmp_container* container,
-                                         u_int load_flags)
+static int
+_load_ipv4(netsnmp_container* container, u_long *index )
 {
     FILE           *in;
     char            line[256];
@@ -29,12 +22,9 @@ netsnmp_access_route_container_arch_load(netsnmp_container* container,
     char            name[16];
 
     DEBUGMSGTL(("access:route:container",
-                "route_container_arch_load (flags %p)\n", load_flags));
+                "route_container_arch_load ipv4\n"));
 
-    if (NULL == container) {
-        snmp_log(LOG_ERR, "no container specified/found for access_if\n");
-        return -1;
-    }
+    assert(NULL != container);
 
     /*
      * fetch routes from the proc file-system:
@@ -49,6 +39,7 @@ netsnmp_access_route_container_arch_load(netsnmp_container* container,
     while (fgets(line, sizeof(line), in)) {
         char            rtent_name[32];
         int             refcnt, flags, rc;
+        u_int32_t       dest, nexthop, mask;
         unsigned        use;
 
         entry = netsnmp_access_route_entry_create();
@@ -59,12 +50,12 @@ netsnmp_access_route_container_arch_load(netsnmp_container* container,
          * eth0  0A0A0A0A 00000000 05    0      0   0      FFFFFFFF 1500 0   0 
          */
         rc = sscanf(line, "%s %x %x %x %u %d %d %x %*d %*d %*d\n",
-                    rtent_name, &entry->rt_dest, &entry->rt_nexthop,
+                    rtent_name, &dest, &nexthop,
                     /*
                      * XXX: fix type of the args 
                      */
                     &flags, &refcnt, &use, &entry->rt_metric1,
-                    &entry->rt_mask);
+                    &mask);
         DEBUGMSGTL(("9:access:route:container", "line |%s|\n", line));
         if (8 != rc) {
             snmp_log(LOG_ERR,
@@ -73,11 +64,14 @@ netsnmp_access_route_container_arch_load(netsnmp_container* container,
             continue;
         }
 
+        /*
+         * temporary null terminated name
+         */
         strncpy(name, rtent_name, sizeof(name));
         name[ sizeof(name)-1 ] = 0;
         /*
          * linux says ``lo'', but the interface is stored as ``lo0'': 
-         * xxx-rks: sez who? not on 2.4.20?
+         * xxx-rks: sez who? stored where? not on 2.4.20...
          */
         //if (!strcmp(name, "lo"))
         //   strcat(name, "0");
@@ -90,25 +84,109 @@ netsnmp_access_route_container_arch_load(netsnmp_container* container,
             netsnmp_access_route_entry_free(entry);
             continue;
         }
+         /*
+         * arbitrary index
+         */
+        entry->ns_rt_index = ++(*index);
 
+#ifdef USING_IP_FORWARD_MIB_IPCIDRROUTETABLE_IPCIDRROUTETABLE_MODULE
+        entry->rt_mask = mask;
+        /** entry->rt_tos = XXX; */
+        /** rt info ?? */
+#endif
+        /*
+         * copy dest & next hop
+         */
+        entry->rt_dest_type = INETADDRESSTYPE_IPV4;
+        entry->rt_dest_len = 4;
+        dest = htonl(dest);
+        memcpy(entry->rt_dest, &dest, 4);
+
+        entry->rt_nexthop_type = INETADDRESSTYPE_IPV4;
+        entry->rt_nexthop_len = 4;
+        nexthop = htonl(nexthop);
+        memcpy(entry->rt_nexthop, &nexthop, 4);
+
+        /*
+         * count bits in mask
+         */
+        while (0x80000000 & mask) {
+            ++entry->rt_pfx_len;
+            mask = mask << 1;
+        }
+
+#ifdef USING_IP_FORWARD_MIB_INETCIDRROUTETABLE_INETCIDRROUTETABLE_MODULE
+        /** policy info ?? */
+#endif
+
+        /*
+         * get protocol and type from flags
+         */
         if (flags & RTF_UP) {
             if (flags & RTF_GATEWAY) {
-                entry->rt_type = IPCIDRROUTETYPE_REMOTE;
+                entry->rt_type = INETCIDRROUTETYPE_REMOTE;
             } else {
-                entry->rt_type = IPCIDRROUTETYPE_LOCAL;
+                entry->rt_type = INETCIDRROUTETYPE_LOCAL;
             }
         } else 
-            entry->rt_type = IPCIDRROUTETYPE_REJECT;
+            entry->rt_type = INETCIDRROUTETYPE_REJECT;
         
         entry->rt_proto = (flags & RTF_DYNAMIC)
-            ? IPCIDRROUTEPROTO_ICMP : IPCIDRROUTEPROTO_LOCAL;
+            ? IANAIPROUTEPROTOCOL_ICMP : IANAIPROUTEPROTOCOL_LOCAL;
 
-        // xxx-rks: does this belong here? probably not...
-        entry->row_status = ROWSTATUS_ACTIVE;
-
+        /*
+         * insert into container
+         */
         CONTAINER_INSERT(container, entry);
     }
 
     fclose(in);
     return 0;
+}
+
+#ifdef INET6
+static int
+_load_ipv6(netsnmp_container* container, u_long *index )
+{
+    DEBUGMSGTL(("access:route:container",
+                "route_container_arch_load ipv6\n"));
+
+    assert(NULL != container);
+
+    return 0;
+}
+#endif
+
+/** arch specific load
+ * @internal
+ *
+ * @retval  0 success
+ * @retval -1 no container specified
+ * @retval -2 could not open data file
+ */
+int
+netsnmp_access_route_container_arch_load(netsnmp_container* container,
+                                         u_int load_flags)
+{
+    u_long          count = 0;
+    int             rc;
+
+    DEBUGMSGTL(("access:route:container",
+                "route_container_arch_load (flags %p)\n", load_flags));
+
+    if (NULL == container) {
+        snmp_log(LOG_ERR, "no container specified/found for access_route\n");
+        return -1;
+    }
+
+    rc = _load_ipv4(container, &count);
+    
+#ifdef INET6
+    if((0 != rc) || (load_flags & NETSNMP_ACCESS_ROUTE_LOAD_IPV4_ONLY))
+        return rc;
+
+    rc = _load_ipv6(container, &count);
+#endif
+
+    return rc;
 }
