@@ -449,6 +449,11 @@ unsigned char *var_extensible_disk(vp, name, length, exact, var_len, write_metho
     setPerrorstatus("statvfs dev/disk");
     return NULL;
   }
+#if defined(HAVE_ODS)
+  vfs.f_blocks = vfs.f_spare[0];
+  vfs.f_bfree  = vfs.f_spare[1];
+  vfs.f_bavail = vfs.f_spare[2];
+#endif
   switch (vp->magic) {
     case DISKTOTAL:
       long_ret = vfs.f_blocks;
