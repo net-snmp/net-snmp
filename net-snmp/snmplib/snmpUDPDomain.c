@@ -494,7 +494,9 @@ com2SecEntry   *com2SecList = NULL, *com2SecListLast = NULL;
 void
 netsnmp_udp_parse_security(const char *token, char *param)
 {
-    char           *secName = NULL, *community = NULL, *source = NULL;
+    char            secName[VACMSTRINGLEN];
+    char            community[VACMSTRINGLEN];
+    char            source[VACMSTRINGLEN];
     char           *cp = NULL;
     const char     *strmask = NULL;
     com2SecEntry   *e = NULL;
@@ -504,16 +506,16 @@ netsnmp_udp_parse_security(const char *token, char *param)
      * Get security, source address/netmask and community strings.  
      */
 
-    secName = strtok(param, "\t\n ");
-    if (secName == NULL) {
+    cp = copy_nword( param, secName, sizeof(secName));
+    if (secName[0] == '\0') {
         config_perror("missing NAME parameter");
         return;
     } else if (strlen(secName) > (VACMSTRINGLEN - 1)) {
         config_perror("security name too long");
         return;
     }
-    source = strtok(NULL, "\t\n ");
-    if (source == NULL) {
+    cp = copy_nword( cp, source, sizeof(source));
+    if (source[0] == '\0') {
         config_perror("missing SOURCE parameter");
         return;
     } else if (strncmp(source, EXAMPLE_NETWORK, strlen(EXAMPLE_NETWORK)) ==
@@ -521,8 +523,8 @@ netsnmp_udp_parse_security(const char *token, char *param)
         config_perror("example config NETWORK not properly configured");
         return;
     }
-    community = strtok(NULL, "\t\n ");
-    if (community == NULL) {
+    cp = copy_nword( cp, community, sizeof(community));
+    if (community[0] == '\0') {
         config_perror("missing COMMUNITY parameter\n");
         return;
     } else
