@@ -797,7 +797,7 @@ netsnmp_table_helper_add_indexes(va_alist)
     netsnmp_table_registration_info *tinfo;
 
     va_start(debugargs);
-    tinfo = va_arg(debugargs, table_info *);
+    tinfo = va_arg(debugargs, netsnmp_table_registration_info *);
 #endif
 
     while ((type = va_arg(debugargs, int)) != 0) {
