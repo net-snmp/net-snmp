@@ -5,6 +5,8 @@ MAN5 = variables.5
 MAN5G = snmpd.conf.5
 MAN8 = snmptrapd.8
 
+MANALL = $(MAN1) $(MAN1G) $(MAN3) $(MAN5) $(MAN5G) $(MAN8)
+
 TARGETS = snmpd.conf.5 snmpd.1
 
 all: $(TARGETS)
