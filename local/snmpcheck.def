@@ -13,21 +13,21 @@ $mibheadall=".EXTENSIBLEDOTMIB";
 $mibclearcache="$mibheadall.VERSIONMIBNUM.VERCLEARCACHE";
 $mibrestartagent="$mibheadall.VERSIONMIBNUM.VERRESTARTAGENT";
 $mibupdateconfig="$mibheadall.VERSIONMIBNUM.VERUPDATECONFIG";
-%miblist=(    '.PROCMIBNUM' => 'processes',
-	      '.SHELLMIBNUM' => 'scripts',
+%miblist=(    '.PROCMIBNUM.1' => 'processes',
+	      '.SHELLMIBNUM.1' => 'scripts',
 	      '.MEMMIBNUM' => 'swap space',
-	      '.DISKMIBNUM' => 'disks',
-	      '.LOADAVEMIBNUM' => 'load-average',
+	      '.DISKMIBNUM.1' => 'disks',
+	      '.LOADAVEMIBNUM.1' => 'load-average',
 	      '.ERRORMIBNUM' => 'snmp-agent-errors');
-@fixitlist=('.PROCMIBNUM','.SHELLMIBNUM');
-%mibchecklist = ('.PROCMIBNUM' => 1,
-		 '.SHELLMIBNUM' => 1,
+@fixitlist=('.PROCMIBNUM.1','.SHELLMIBNUM.1');
+%mibchecklist = ('.PROCMIBNUM.1' => 1,
+		 '.SHELLMIBNUM.1' => 1,
 		 '.MEMMIBNUM' => 1,
-		 '.DISKMIBNUM' => 1,
-		 '.LOADAVEMIBNUM' => 1,
+		 '.DISKMIBNUM.1' => 1,
+		 '.LOADAVEMIBNUM.1' => 1,
 		 '.ERRORMIBNUM' => 1);
 $errlog="/net/tyfon/1/OV/log/ece-log";
-$default_get_args = "-v 1 %s public";
+$default_get_args = "-v 1 %s private";
 $default_set_args = "-v 1 %s private";
 $andlog=0;
 $snmppath="BINDIR";
@@ -58,7 +58,12 @@ sub new {
     $self->{'Host'} = $self->{'HostId'}->{'Name'};
     $_ = shift;
     $self->{'Mib'} = $_;
+    print "test: $_\n";
     ($self->{'MibSuffix'}) = /(\.[0-9]+)$/;
+    if (!defined($mibchecklist{$self->{'MibSuffix'}})) {
+	($self->{'MibSuffix'}) = /(\.[0-9]+\.1)$/;
+    }
+    print "suff: $self->{'MibSuffix'}\n";
     $self->{'MibDesc'} = shift;
     $self->{'Frame'} = shift;
     bless $self;
@@ -73,7 +78,9 @@ sub snmp_walk {
     my $self = shift;
     $self->{'Frame'}->toplevel->Busy() if ($::display);
     my $mib = shift;
-    open(OUT,"$::snmppath/snmpwalk $self->{'Host'} ecemgr eceagent ececontext $mib|");
+    my $cmd = "$::snmppath/snmpwalk " . sprintf($::default_get_args, $self->{'Host'}) . " $mib|";
+    ::addToLog("running:  $cmd",5);
+    open(OUT,"$cmd");
     my $outcount = 0;
     my @result = [];
     while (<OUT>) {
@@ -156,7 +163,7 @@ sub snmp_get {
     my $self = shift;
     $self->{'Frame'}->toplevel->Busy() if ($::display);
     my $mib = shift;
-    my $args = sprint($::default_get_args, $self->{'Host'});
+    my $args = sprintf($::default_get_args, $self->{'Host'});
     $_ = `$::snmppath/snmpget $args $mib`;
     my ($result) = /= (.*)$/;
     if (!defined($result) || $result =~ /No Response/) {
