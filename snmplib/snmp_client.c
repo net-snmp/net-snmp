@@ -148,47 +148,14 @@ snmp_synch_input(op, session, reqid, pdu, magic)
     struct snmp_pdu *pdu;
     void *magic;
 {
-    struct variable_list *var, *newvar;
     struct synch_state *state = (struct synch_state *)magic;
-    struct snmp_pdu *newpdu;
 
     if (reqid != state->reqid)
 	return 0;
     state->waiting = 0;
     if (op == RECEIVED_MESSAGE && pdu->command == GET_RSP_MSG){
 	/* clone the pdu */
-	state->pdu = newpdu = (struct snmp_pdu *)malloc(sizeof(struct snmp_pdu));
-	memmove(newpdu, pdu, sizeof(struct snmp_pdu));
-	newpdu->variables = 0;
-	var = pdu->variables;
-	if (var != NULL){
-	    newpdu->variables = newvar = (struct variable_list *)malloc(sizeof(struct variable_list));
-	    memmove(newvar, var, sizeof(struct variable_list));
-	    if (var->name != NULL){
-		newvar->name = (oid *)malloc(var->name_length * sizeof(oid));
-		memmove(newvar->name, var->name, var->name_length * sizeof(oid));
-	    }
-	    if (var->val.string != NULL){
-		newvar->val.string = (u_char *)malloc(var->val_len);
-		memmove(newvar->val.string, var->val.string, var->val_len);
-	    }
-	    newvar->next_variable = 0;
-	    while(var->next_variable){
-		newvar->next_variable = (struct variable_list *)malloc(sizeof(struct variable_list));
-		var = var->next_variable;
-		newvar = newvar->next_variable;
-		memmove(newvar, var, sizeof(struct variable_list));
-		if (var->name != NULL){
-		    newvar->name = (oid *)malloc(var->name_length * sizeof(oid));
-		    memmove(newvar->name, var->name, var->name_length * sizeof(oid));
-		}
-		if (var->val.string != NULL){
-		    newvar->val.string = (u_char *)malloc(var->val_len);
-		    memmove(newvar->val.string, var->val.string, var->val_len);
-		}
-		newvar->next_variable = 0;
-	    }
-	}
+	state->pdu = snmp_clone_pdu(pdu);
 	state->status = STAT_SUCCESS;
     } else if (op == TIMED_OUT){
 	state->pdu = NULL;
@@ -228,6 +195,14 @@ snmp_fix_pdu(pdu, command)
     newpdu->reqid = SNMP_DEFAULT_REQID;
     newpdu->errstat = SNMP_DEFAULT_ERRSTAT;
     newpdu->errindex = SNMP_DEFAULT_ERRINDEX;
+    if (pdu->enterprise){
+	newpdu->enterprise = (oid *)malloc(pdu->enterprise_length);
+	memmove(newpdu->enterprise, pdu->enterprise, pdu->enterprise_length);
+    }
+    if (pdu->community){
+	newpdu->community = malloc(pdu->community_len);
+	memmove(newpdu->community, pdu->community, pdu->community_len);
+    }
     var = pdu->variables;
     index = 1;
     if (pdu->errindex == index){	/* skip first variable */
@@ -286,14 +261,12 @@ snmp_clone_pdu(pdu)
 {
     struct variable_list *var, *newvar;
     struct snmp_pdu *newpdu;
-    int index;
 
     /* clone the pdu */
     newpdu = (struct snmp_pdu *)malloc(sizeof(struct snmp_pdu));
     memmove(newpdu, pdu, sizeof(struct snmp_pdu));
     newpdu->variables = 0;
     var = pdu->variables;
-    index = 1;
     if (var != NULL){
 	newpdu->variables = newvar =
 	    (struct variable_list *)malloc(sizeof(struct variable_list));
@@ -324,6 +297,14 @@ snmp_clone_pdu(pdu)
 	    }
 	    newvar->next_variable = 0;
 	}
+    }
+    if (pdu->enterprise){
+	newpdu->enterprise = (oid *)malloc(pdu->enterprise_length);
+	memmove(newpdu->enterprise, pdu->enterprise, pdu->enterprise_length);
+    }
+    if (pdu->community){
+	newpdu->community = malloc(pdu->community_len);
+	memmove(newpdu->community, pdu->community, pdu->community_len);
     }
     return newpdu;
 }
