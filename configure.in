@@ -834,10 +834,8 @@ while test "x$new_module_list" != "x"; do
 		fi
 		if test -f $srcdir/mibs/$j.txt; then
 		    if echo $default_mibs_install | grep " $j " > /dev/null; then
-			    echo "************** not adding $j ($default_mibs_install)"
 			    :
 		    else
-			    echo "-------------- adding $j"
 			    default_mibs_install="$default_mibs_install $j.txt"
 		    fi
 		fi
