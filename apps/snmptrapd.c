@@ -744,7 +744,7 @@ snmptrapd_close_sessions(netsnmp_session * sess_list)
 int
 main(int argc, char *argv[])
 {
-    char            options[128] = "ac:CdD::efF:hHl:m:M:no:PqsS:tvO:-:";
+    char            options[128] = "ac:CdD::efF:hHl:L:m:M:no:PqsS:tvO:-:";
     netsnmp_session *sess_list = NULL, *ss = NULL;
     netsnmp_transport *transport = NULL;
     int             arg, i = 0;
@@ -958,6 +958,14 @@ main(int argc, char *argv[])
                 exit(1);
             }
             break;
+
+        case 'L':
+	    if  (snmp_log_options( optarg, argc, argv ) < 0 ) {
+                usage();
+                exit(1);
+            }
+            break;
+
         case 'P':
             dofork = 0;
             snmp_enable_stderrlog();

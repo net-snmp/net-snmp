@@ -13,6 +13,7 @@
 #else
 #include <strings.h>
 #endif
+#include <ctype.h>
 #if HAVE_STDLIB_H
 #include <stdlib.h>
 #endif
@@ -106,6 +107,235 @@ init_snmp_logging(void)
 }
 
 int
+decode_priority( char *optarg, int *pri_max )
+{
+    int pri_low = LOG_DEBUG;
+
+    switch (*optarg) {
+        case '0': 
+        case '!': 
+            pri_low = LOG_EMERG;
+            break;
+        case '1': 
+        case 'a': 
+        case 'A': 
+            pri_low = LOG_ALERT;
+            break;
+        case '2': 
+        case 'c': 
+        case 'C': 
+            pri_low = LOG_CRIT;
+            break;
+        case '3': 
+        case 'e': 
+        case 'E': 
+            pri_low = LOG_ERR;
+            break;
+        case '4': 
+        case 'w': 
+        case 'W': 
+            pri_low = LOG_WARNING;
+            break;
+        case '5': 
+        case 'n': 
+        case 'N': 
+            pri_low = LOG_NOTICE;
+            break;
+        case '6': 
+        case 'i': 
+        case 'I': 
+            pri_low = LOG_INFO;
+            break;
+        case '7': 
+        case 'd': 
+        case 'D': 
+            pri_low = LOG_DEBUG;
+            break;
+    }
+
+    if (pri_max && *(optarg+1)=='-') {
+        *pri_max = decode_priority( optarg+2, NULL );
+    }
+    return pri_low;
+}
+
+int
+decode_facility( char *optarg )
+{
+    if (optarg == NULL)
+        return -1;
+
+    switch (*optarg) {
+    case 'd':
+    case 'D':
+        return LOG_DAEMON;
+    case 'i':
+    case 'I':
+        return LOG_INFO;
+    case '0':
+        return LOG_LOCAL0;
+    case '1':
+        return LOG_LOCAL1;
+    case '2':
+        return LOG_LOCAL2;
+    case '3':
+        return LOG_LOCAL3;
+    case '4':
+        return LOG_LOCAL4;
+    case '5':
+        return LOG_LOCAL5;
+    case '6':
+        return LOG_LOCAL6;
+    case '7':
+        return LOG_LOCAL7;
+    default:
+        fprintf(stderr, "invalid syslog facility: -S%c\n",*optarg);
+        return -1;
+    }
+}
+
+int
+snmp_log_options(char *optarg, int argc, char *const *argv)
+{
+    char           *cp = optarg;
+    char            missing_opt = 'e';	/* old -L is new -Le */
+    int             priority = LOG_DEBUG;
+    int             pri_max  = LOG_EMERG;
+    int             inc_optind = 0;
+    netsnmp_log_handler *logh;
+
+    optarg++;
+    if (!*cp)
+        cp = &missing_opt;
+
+    /*
+     * Support '... -Lx=value ....' syntax
+     */
+    if (*optarg == '=') {
+        optarg++;
+    }
+    /*
+     * and '.... "-Lx value" ....'  (*with* the quotes)
+     */
+    while (*optarg && isspace(*optarg)) {
+        optarg++;
+    }
+    /*
+     * Finally, handle ".... -Lx value ...." syntax
+     *   (*without* surrounding quotes)
+     */
+    if (!*optarg) {
+        /*
+         * We've run off the end of the argument
+         *  so move on to the next.
+         * But we might not actually need it, so don't
+	 *  increment optind just yet!
+         */
+        optarg = argv[optind];
+        inc_optind = 1;
+    }
+
+    switch (*cp) {
+
+    /*
+     * Log to Standard Error
+     */
+    case 'E':
+        priority = decode_priority( optarg, &pri_max );
+        if (inc_optind)
+            optind++;
+        /* Fallthrough */
+    case 'e':
+        logh = netsnmp_register_loghandler(NETSNMP_LOGHANDLER_STDERR, priority);
+        if (logh)
+            logh->pri_max = pri_max;
+        break;
+
+    /*
+     * Log to Standard Output
+     */
+    case 'O':
+        priority = decode_priority( optarg, &pri_max );
+        if (inc_optind)
+            optind++;
+        /* Fallthrough */
+    case 'o':
+        logh = netsnmp_register_loghandler(NETSNMP_LOGHANDLER_STDERR, priority);
+        if (logh) {
+            logh->pri_max = pri_max;
+            logh->imagic  = 1;	    /* stdout, not stderr */
+	}
+        break;
+
+    /*
+     * Log to a named file
+     */
+    case 'F':
+        priority = decode_priority( optarg, &pri_max );
+        optarg = argv[++optind];
+        /* Fallthrough */
+    case 'f':
+        if (inc_optind)
+            optind++;
+        if (!optarg) {
+            fprintf(stderr, "Missing log file\n");
+            return -1;
+        }
+        logh = netsnmp_register_loghandler(NETSNMP_LOGHANDLER_FILE, priority);
+        if (logh) {
+            logh->pri_max = pri_max;
+            logh->token   = strdup(optarg);
+	}
+        break;
+
+    /*
+     * Log to syslog
+     */
+    case 'S':
+        priority = decode_priority( optarg, &pri_max );
+        optarg = argv[++optind];
+        /* Fallthrough */
+    case 's':
+        if (inc_optind)
+            optind++;
+        if (!optarg) {
+            fprintf(stderr, "Missing syslog facility\n");
+            return -1;
+        }
+        logh = netsnmp_register_loghandler(NETSNMP_LOGHANDLER_SYSLOG, priority);
+        if (logh) {
+            logh->pri_max = pri_max;
+            logh->token   = strdup(DEFAULT_LOG_ID);	/*  ident string  */
+#ifndef WIN32
+            logh->imagic  = decode_facility(optarg);
+#endif
+	}
+        break;
+
+    default:
+        fprintf(stderr, "Unknown logging option passed to -L: %c.\n", *cp);
+        return -1;
+    }
+    return 0;
+}
+
+void
+snmp_log_options_usage(const char *lead, FILE * outf)
+{
+    const char *pri1_msg = " for level 'pri' and above";
+    const char *pri2_msg = " for levels 'p1' to 'p2'";
+    fprintf(outf, "%se:           log to standard error\n", lead);
+    fprintf(outf, "%so:           log to standard output\n", lead);
+    fprintf(outf, "%sf file:      log to the specified file\n", lead);
+    fprintf(outf, "%ss facility:  log to syslog (via the specified facility)\n", lead);
+    fprintf(outf, "\n%s(variants)\n", lead);
+    fprintf(outf, "%s[EO] pri:    log to standard error/output%s\n", lead, pri1_msg);
+    fprintf(outf, "%s[EO] p1-p2:  log to standard error/output%s\n", lead, pri2_msg);
+    fprintf(outf, "%s[FS] pri token:    log to file/syslog%s\n", lead, pri1_msg);
+    fprintf(outf, "%s[FS] p1-p2 token:  log to file/syslog%s\n", lead, pri2_msg);
+}
+
+int
 snmp_get_do_logging(void)
 {
     netsnmp_log_handler *logh;
@@ -167,7 +397,8 @@ snmp_disable_syslog(void)
 
     for (logh = logh_head; logh; logh = logh->next)
         if (logh->enabled && logh->type == NETSNMP_LOGHANDLER_SYSLOG) {
-            /* closelog();	Ummm... probably not? */
+            closelog();
+            logh->imagic  = 0;
             logh->enabled = 0;
 	}
 }
@@ -180,9 +411,11 @@ snmp_disable_filelog(void)
 
     for (logh = logh_head; logh; logh = logh->next)
         if (logh->enabled && logh->type == NETSNMP_LOGHANDLER_FILE) {
-            fputs("\n", (FILE*)logh->magic);	/* XXX - why? */
-            fclose((FILE*)logh->magic);
-            logh->magic   = NULL;
+            if (logh->magic) {
+                fputs("\n", (FILE*)logh->magic);	/* XXX - why? */
+                fclose((FILE*)logh->magic);
+                logh->magic   = NULL;
+	    }
             logh->enabled = 0;
 	}
 }
@@ -260,6 +493,7 @@ snmp_enable_syslog_ident(const char *ident, const int facility)
     for (logh = logh_head; logh; logh = logh->next)
         if (logh->type == NETSNMP_LOGHANDLER_SYSLOG) {
             logh->magic   = (void*)eventlog_h;
+            logh->imagic  = enable;	/* syslog open */
             logh->enabled = enable;
             found         = 1;
 	}
@@ -380,8 +614,11 @@ netsnmp_log_handler *
 netsnmp_find_loghandler( char *token )
 {
     netsnmp_log_handler *logh;
+    if (!token)
+        return NULL;
+
     for (logh = logh_head; logh; logh = logh->next)
-        if (!strcmp( token, logh->token ))
+        if (logh->token && !strcmp( token, logh->token ))
             break;
 
     return logh;
@@ -430,7 +667,7 @@ netsnmp_add_loghandler( netsnmp_log_handler *logh )
      */
     for (i=LOG_EMERG; i<=logh->priority; i++)
         if (!logh_priorities[i] ||
-             logh_priorities[i]->priority > logh->priority)
+             logh_priorities[i]->priority >= logh->priority)
              logh_priorities[i] = logh;
 
     return 1;
@@ -600,8 +837,20 @@ int
 log_handler_syslog(  netsnmp_log_handler* logh, int pri, const char *string)
 {
 	/*
-	 * XXX - Possibly try to do something with log facilities?
+	 * XXX
+	 * We've got three items of information to work with:
+	 *     Is the syslog currently open?
+	 *     What ident string to use?
+	 *     What facility to log to?
+	 *
+	 * We've got two "magic" locations (imagic & magic) plus the token
 	 */
+    if (!(logh->imagic)) {
+        char *ident    = logh->token;
+        int   facility = (int)logh->magic;
+        openlog(ident, LOG_CONS | LOG_PID, facility);
+        logh->imagic = 1;
+    }
     syslog( pri, "%s", string );
     return 1;
 }
@@ -637,6 +886,7 @@ log_handler_file(    netsnmp_log_handler* logh, int pri, const char *string)
         logh->magic = (void*)fhandle;
     }
     fprintf(fhandle, "%s%s", sbuf, string);
+fflush(fhandle);
     return 1;
 }
 
