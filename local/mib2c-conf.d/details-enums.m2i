@@ -58,16 +58,18 @@ $m2c_const_dcl $m2c_enum_mask $m2c_const_del ($m2c_mask)
 
 #endif /* ${m2c_de_pfx}_ENUMS */
 
+@     if $m2c_node_skip_mapping == 0@
 @      if ($node.enums == 1) && ("$node.perltype" ne "BITS")@
     /*
-     * TODO:
-     * value mapping (see notes at top of file)
+     * TODO:140:o: Define interal representation of $node enums.
+     * (used for value mapping; see notes at top of file)
      */
 @         foreach $e $v enum@
 @            include m2c_setup_enum.m2i@
 $m2c_const_dcl INTERNAL_$m2c_iname $m2c_const_del $v $m2c_const_sfx
 @         end@
-@      end@
+@      end@ // enums, ! BITS
+@     end@ // skip mapping
 @end@ # ! syntax include
 
 ########################################################################
