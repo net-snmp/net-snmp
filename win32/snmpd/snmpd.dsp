@@ -102,15 +102,15 @@ SOURCE=..\..\snmplib\snmp_parse_args.c
 
 SOURCE=..\..\agent\snmpd.c
 # End Source File
-# End Target
+# Begin Source File
 
 SOURCE=..\..\snmplib\winservice.c
 # End Source File
-# End Target
+# Begin Source File
 
 SOURCE=..\..\include\net-snmp\library\winservice.h
 # End Source File
-# End Target
+# Begin Source File
 
 SOURCE=..\..\snmplib\winservice.rc
 # End Source File
