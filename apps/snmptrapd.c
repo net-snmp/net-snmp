@@ -70,6 +70,10 @@ SOFTWARE.
 #if HAVE_ARPA_INET_H
 #include <arpa/inet.h>
 #endif
+#if HAVE_FCNTL_H
+#include <fcntl.h>
+#endif
+#include <errno.h>
 
 #include "asn1.h"
 #include "snmp_impl.h"
@@ -102,7 +106,45 @@ typedef long	fd_mask;
 int main __P((int, char **));
 int Print = 0;
 int Event = 0;
+
 int Syslog = 0;
+/*
+ * These definitions handle 4.2 systems without additional syslog facilities.
+ */
+#ifndef LOG_CONS
+#define LOG_CONS	0	/* Don't bother if not defined... */
+#endif
+#ifndef LOG_PID
+#define LOG_PID		0	/* Don't bother if not defined... */
+#endif
+#ifndef LOG_LOCAL0
+#define LOG_LOCAL0	0
+#endif
+#ifndef LOG_LOCAL1
+#define LOG_LOCAL1	0
+#endif
+#ifndef LOG_LOCAL2
+#define LOG_LOCAL2	0
+#endif
+#ifndef LOG_LOCAL3
+#define LOG_LOCAL3	0
+#endif
+#ifndef LOG_LOCAL4
+#define LOG_LOCAL4	0
+#endif
+#ifndef LOG_LOCAL5
+#define LOG_LOCAL5	0
+#endif
+#ifndef LOG_LOCAL6
+#define LOG_LOCAL6	0
+#endif
+#ifndef LOG_LOCAL7
+#define LOG_LOCAL7	0
+#endif
+/* Include an extra Facility variable to allow command line adjustment of
+   syslog destination */
+int Facility = LOG_LOCAL0;
+
 struct timeval Now;
 
 void init_syslog __P((void));
@@ -319,10 +361,46 @@ int snmp_input(op, session, reqid, pdu, magic)
 		}
 	    }
 	    if (Syslog){
-		syslog(LOG_WARNING, "%s: %s Trap (%d) Uptime: %s\n",
+	    	int varbufidx;
+	    	char varbuf[2048];
+
+	    	varbufidx=0;
+	    	varbuf[varbufidx++]=','; varbuf[varbufidx++]=' ';
+	    	varbuf[varbufidx]='\0';
+
+	    	for(vars = pdu->variables; vars; vars = vars->next_variable) {
+			sprint_variable(varbuf+varbufidx, vars->name, vars->name_length, vars);
+			/* Update the length of the string with the new variable */
+			varbufidx += strlen(varbuf+varbufidx);
+			/* And add a trailing , ... */
+	        	varbuf[varbufidx++]=',';
+	        	varbuf[varbufidx++]=' ';
+	        	varbuf[varbufidx]='\0';
+	    	}
+	    	if ( varbufidx == 2 ) {
+			varbufidx -= 2; varbuf[varbufidx]='\0';
+	    	}
+	    	if ( varbufidx ) {
+			varbufidx -= 2; varbuf[varbufidx]='\0';
+	    	}
+		if (pdu->trap_type == SNMP_TRAP_ENTERPRISESPECIFIC) {
+		    oid trapOid[64];
+		    int trapOidLen = pdu->enterprise_length;
+		    memcpy(trapOid, pdu->enterprise, sizeof(oid)*trapOidLen);
+		    if (trapOid[trapOidLen-1] != 0) trapOid[trapOidLen++] = 0;
+		    trapOid[trapOidLen++] = pdu->specific_type;
+		    sprint_objid(oid_buf, trapOid, trapOidLen);
+
+		    syslog(LOG_WARNING, "%s: %s Trap (%s) Uptime: %s%s",
+		       inet_ntoa(pdu->agent_addr.sin_addr),
+		       trap_description(pdu->trap_type),strrchr(oid_buf, '.')+1,
+		       uptime_string(pdu->time, buf),varbuf);
+		} else {
+		    syslog(LOG_WARNING, "%s: %s Trap (%d) Uptime: %s%s",
 		       inet_ntoa(pdu->agent_addr.sin_addr),
 		       trap_description(pdu->trap_type), pdu->specific_type,
-		       uptime_string(pdu->time, buf));
+		       uptime_string(pdu->time, buf),varbuf);
+		}
 	    }
 	} else if (pdu->command == TRP2_REQ_MSG
 		   || pdu->command == INFORM_REQ_MSG){
@@ -366,7 +444,7 @@ int snmp_input(op, session, reqid, pdu, magic)
 
 void usage __P((void))
 {
-    fprintf(stderr,"Usage: snmptrapd [-V] [-q] [-p #] [-P] [-s] [-e] [-d]\n");
+    fprintf(stderr,"Usage: snmptrapd [-V] [-q] [-p #] [-P] [-s] [-f [d0-7]] [-e] [-d]\n");
 }
 
 
@@ -388,7 +466,7 @@ main(argc, argv)
 
     setvbuf (stdout, NULL, _IOLBF, BUFSIZ);
     /*
-     * usage: snmptrapd [-v 1] [-q] [-p #] [-P] [-s] [-d] [-e]
+     * usage: snmptrapd [-v 1] [-q] [-p #] [-P] [-s] [-f [d0-7]] [-d] [-e]
      */
     for(arg = 1; arg < argc; arg++){
 	if (argv[arg][0] == '-'){
@@ -419,6 +497,35 @@ main(argc, argv)
 		case 's':
 		    Syslog++;
 		    break;
+		case 'f':
+		    arg++;
+		    switch(argv[arg][0]) {
+			case 'd':
+			   Facility = LOG_DAEMON; break;
+			case '0':
+			   Facility = LOG_LOCAL0; break;
+			case '1':
+			   Facility = LOG_LOCAL1; break;
+			case '2':
+			   Facility = LOG_LOCAL2; break;
+			case '3':
+			   Facility = LOG_LOCAL3; break;
+			case '4':
+			   Facility = LOG_LOCAL4; break;
+			case '5':
+			   Facility = LOG_LOCAL5; break;
+			case '6':
+			   Facility = LOG_LOCAL6; break;
+			case '7':
+			   Facility = LOG_LOCAL7; break;
+			default:
+		    	   fprintf(stderr,"invalid  syslog facility: -f %c\n",
+							argv[arg][0]);
+		    	   usage();
+		    	   exit (1);
+		           break;
+		    }
+		    break;
 		default:
 		    fprintf(stderr,"invalid option: -%c\n", argv[arg][1]);
 		    usage();
@@ -433,7 +540,6 @@ main(argc, argv)
 	}
     }
 
-    if (Syslog) init_syslog();
     init_mib();
 
     myaddr = get_myaddr();
@@ -454,6 +560,41 @@ main(argc, argv)
 		"Warning: Couldn't read v2party's access control database from %s\n",ctmp);
     }
 
+    /* fork the process to the background if we are not printing to stdout */
+    if (!Print) {
+      int fd, fdnum;
+
+      switch (fork()) {
+	case -1:
+		fprintf(stderr,"bad fork - %s\n",strerror(errno));
+		_exit(1);
+
+	case 0:
+		/* become process group leader */
+		if (setsid() == -1) {
+			fprintf(stderr,"bad setsid - %s\n",strerror(errno));
+			_exit(1);
+		}
+
+        /* if we are forked, we don't want to print out to stdout or stderr */
+		fd=open("/dev/null", O_RDWR);
+		dup2(fd, STDIN_FILENO);
+		dup2(fd, STDOUT_FILENO);
+		dup2(fd, STDERR_FILENO);
+		close(fd);
+
+        /* Close all unnecessary file descriptors and open syslog */
+		fdnum = getdtablesize();
+		for ( fd = (STDERR_FILENO + 1); fd < fdnum; fd++ )
+			close(fd);
+    		init_syslog();
+		break;
+
+	default:
+		_exit(0);
+      }
+    }
+
     memset(&session, 0, sizeof(struct snmp_session));
     session.peername = NULL;
     session.version = SNMP_DEFAULT_VERSION;
@@ -468,6 +609,11 @@ main(argc, argv)
     ss = snmp_open(&session);
     if (ss == NULL){
         snmp_perror("snmptrapd: Couldn't open snmp");
+	if (Print) {
+	    fprintf(stderr,"couldn't open snmp - %s\n",strerror(errno));
+	} else {
+	    syslog(LOG_ERR,"couldn't open snmp - %m");
+	}
 	exit(1);
     }
 
@@ -502,19 +648,10 @@ main(argc, argv)
 void
 init_syslog __P((void))
 {
-/*
- * These definitions handle 4.2 systems without additional syslog facilities.
- */
-#ifndef LOG_CONS
-#define LOG_CONS	0	/* Don't bother if not defined... */
-#endif
-#ifndef LOG_LOCAL0
-#define LOG_LOCAL0	0
-#endif
     /*
      * All messages will be logged to the local0 facility and will be sent to
      * the console if syslog doesn't work.
      */
-    openlog("snmptrapd", LOG_CONS, LOG_LOCAL0);
+    openlog("snmptrapd", LOG_CONS|LOG_PID, Facility);
     syslog(LOG_INFO, "Starting snmptrapd");
 }
