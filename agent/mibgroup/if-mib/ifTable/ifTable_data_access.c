@@ -174,6 +174,9 @@ ifTable_cache_load(netsnmp_container * container)
     
     DEBUGMSGTL(("ifTable:access:cache_load","loading cache\n"));
     
+    if(NULL == ifcontainer)
+        return MFD_RESOURCE_UNAVAILABLE; /* msg already logged */
+    
     /*
      * we just got a fresh copy of interface data. compare it to
      * what we've already got, and make any adjustements...
@@ -269,6 +272,9 @@ _check_interface_entry_for_updates(ifTable_rowreq_ctx *rowreq_ctx,
 
 }
 
+/**
+ * add new entry
+ */
 static void
 _add_new_interface(netsnmp_interface_entry *ifentry,
                    netsnmp_container * container)
@@ -292,8 +298,11 @@ _add_new_interface(netsnmp_interface_entry *ifentry,
                      "ifTable cache.\n");
             ifTable_release_rowreq_ctx(rowreq_ctx);
         }
-        else
+        else {
+            snmp_log(LOG_ERR, "memory allocation failed while loading "
+                     "ifTable cache.\n");
             netsnmp_access_interface_entry_free(ifentry);
+        }
     }
 }
 
