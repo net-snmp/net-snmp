@@ -1257,11 +1257,20 @@ static void
 do_subtree(struct tree *root,
 	   struct node **nodes)
 {
-    register struct tree *tp, *anon_tp=NULL;
-    register struct node *np, **headp;
+    struct tree *tp, *anon_tp=NULL;
+    struct tree *xroot = root;
+    struct node *np, **headp;
     struct node *oldnp = NULL, *child_list = NULL, *childp = NULL;
     int hash;
     int *int_p;
+
+    while (xroot->next_peer && xroot->next_peer->subid == root->subid) {
+#if 0
+    	printf("xroot: %s.%s => %s\n", xroot->parent->label, xroot->label,
+		xroot->next_peer->label);
+#endif
+    	xroot = xroot->next_peer;
+    }
 
     tp = root;
     headp = &nbuckets[NBUCKET(name_hash(tp->label))];
@@ -1291,11 +1300,16 @@ do_subtree(struct tree *root,
      * Take each element in the child list and place it into the tree.
      */
     for(np = child_list; np; np = np->next){
+	struct tree *otp = NULL;
 	anon_tp = NULL;
-        tp = root->child_list;
-        while (tp)
+        tp = xroot->child_list;
+        while (tp) {
             if (tp->subid == np->subid) break;
-            else tp = tp->next_peer;
+            else {
+	    	otp = tp;
+		tp = tp->next_peer;
+	    }
+	}
         if (tp) {
 	    if (!label_compare (tp->label, np->label)) {
 		    /* Update list of modules */
@@ -1327,19 +1341,19 @@ do_subtree(struct tree *root,
 
         tp = (struct tree *) calloc(1, sizeof(struct tree));
         if (tp == NULL) return;
-        tp->parent = root;
+        tp->parent = xroot;
         tp->modid = np->modid;
         tp->number_modules = 1;
         tp->module_list = &(tp->modid);
         tree_from_node(tp, np);
-        tp->next_peer = root->child_list;
-        root->child_list = tp;
+        tp->next_peer = otp ? otp->next_peer : xroot->child_list;
+        if (otp) otp->next_peer = tp;
+	else xroot->child_list = tp;
         hash = NBUCKET(name_hash(tp->label));
         tp->next = tbuckets[hash];
         tbuckets[hash] = tp;
-/*      if (tp->type == TYPE_OTHER) */
-            do_subtree(tp, nodes);      /* recurse on this child if it isn't
-                                           an end node */
+	do_subtree(tp, nodes);
+
         if ( anon_tp ) {
             if (!strncmp( tp->label, ANON, ANON_LEN)) {
 			/*

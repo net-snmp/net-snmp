@@ -1722,6 +1722,8 @@ _get_symbol(oid *objid,
         return NULL;
 
     for(; subtree; subtree = subtree->next_peer){
+	while (subtree->next_peer && subtree->next_peer->subid == *objid)
+	    subtree = subtree->next_peer;
 	if (*objid == subtree->subid){
 	    if (subtree->indexes)
 		in_dices = subtree->indexes;
@@ -1942,6 +1944,8 @@ get_tree(oid *objid,
     return NULL;
 
 found:
+    while (subtree->next_peer && subtree->next_peer->subid == *objid)
+	subtree = subtree->next_peer;
     if (objidlen > 1)
         return_tree = get_tree(objid + 1, objidlen - 1, subtree->child_list);
     if (return_tree != NULL)
@@ -1989,6 +1993,8 @@ fprint_description(FILE *f,
     while (objidlen > 1) {
 	for(; subtree; subtree = subtree->next_peer){
 	    if (*objid == subtree->subid){
+		while (subtree->next_peer && subtree->next_peer->subid == *objid)
+		    subtree = subtree->next_peer;
 		if (strncmp( subtree->label, ANON, ANON_LEN))
 		    sprintf(buf, " %s(%lu)", subtree->label, subtree->subid);
 		else
@@ -2300,6 +2306,9 @@ _add_strings_to_oid(struct tree *tp, char *cp,
 	    if (!tp2) goto bad_id;
 	    subid = tp2->subid;
 	}
+	if (tp2)
+	    while (tp2->next_peer && tp2->next_peer->subid == subid)
+	    	tp2 = tp2->next_peer;
 	if (*objidlen >= maxlen) goto bad_id;
 	objid[ *objidlen ] = subid;
 	(*objidlen)++;
