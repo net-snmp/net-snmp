@@ -32,10 +32,6 @@
 #define SNMP_IPX_DEFAULT_PORT	36879		/*  Specified in RFC 1420.  */
 static netsnmp_tdomain ipxDomain;
 
-oid netsnmpIPXDomain[]	 = { 1, 3, 6, 1, 6, 1, 5 };
-size_t netsnmpIPXDomain_len = OID_LENGTH(netsnmpIPXDomain);
-
-
 /*  Return a string representing the address in data, or else the "far end"
     address if data is NULL.  */
 
@@ -176,7 +172,7 @@ netsnmp_transport		*netsnmp_ipx_transport	(struct sockaddr_ipx *addr,
   memset(t, 0, sizeof(netsnmp_transport));
 
   t->domain = netsnmpIPXDomain;
-  t->domain_length = sizeof(netsnmpIPXDomain)/sizeof(netsnmpIPXDomain[0]);
+  t->domain_length = netsnmpIPXDomain_len;
 
   t->sock = socket(AF_IPX, SOCK_DGRAM, AF_IPX);
   if (t->sock < 0) {
@@ -375,7 +371,7 @@ netsnmp_transport	*snmp_ipx_create_ostring	(const u_char *o, size_t o_len,
 void		netsnmp_ipx_ctor			(void)
 {
   ipxDomain.name        = netsnmpIPXDomain;
-  ipxDomain.name_length = sizeof(netsnmpIPXDomain)/sizeof(oid);
+  ipxDomain.name_length = netsnmpIPXDomain_len;
   ipxDomain.prefix	= calloc(2, sizeof(char *));
   ipxDomain.prefix[0] 	= "ipx";
 
