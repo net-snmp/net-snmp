@@ -3,9 +3,15 @@ the ChangeLog file for a more detailed listing of changes/bug fixes.
 
 *3.3*
 
+  Path changes:
+    - the default paths to the installed mibs and snmpd.conf file have
+      changed to /usr/local/share/snmp (set differently using --datadir).
+    - the default path of the snmpd and snmptrapd have changed to
+      /usr/local/sbin (set differently using --sbindir).
+
   New:
     - basic SNMPV2c support.  
-      - Not fully complete in all apps.  Not fully tested.  
+      - Not fully complete in all apps.  Not fully tested (feedback please!)
       - all apps require '-v 2' for v2c and '-v 2p' for the older party code.
     - basic host-resources mib support for linux, and hpux.
     - All environment variables can be set with a preceding '+' for
@@ -19,6 +25,8 @@ the ChangeLog file for a more detailed listing of changes/bug fixes.
     - irix should be more complete.
     - aix 4.1.5.
     - fixes for hpux 10.20.
+    - linux 2.1.x support
+    - library and apps supported under 32bit windows systems.
 
 *3.2*
 
