@@ -383,6 +383,9 @@ init_mib_internals __P((void))
     register int        b, i;
     int			max_modc;
 
+    if (tree_head)
+	return;
+
 	/*
 	 * Set up hash list of pre-defined tokens
 	 */
