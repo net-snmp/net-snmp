@@ -13,11 +13,9 @@ config_add_mib(SNMP-VIEW-BASED-ACM-MIB)
 config_add_mib(SNMP-COMMUNITY-MIB)
 
      void            init_vacm_vars(void);
-     void            vacm_free_security(void);
      void            vacm_free_group(void);
      void            vacm_free_access(void);
      void            vacm_free_view(void);
-     void            vacm_parse_security(const char *, char *);
      void            vacm_parse_group(const char *, char *);
      void            vacm_parse_access(const char *, char *);
      void            vacm_parse_view(const char *, char *);
