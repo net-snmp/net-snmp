@@ -1832,6 +1832,7 @@ set_function(struct tree *subtree)
 
 /*
  * Read an object identifier from input string into internal OID form.
+ * When called, out_len must hold the maximum length of the output array.
  * Returns 1 if successful.
  * If an error occurs, this function returns 0 and MAY set snmp_errno.
  * snmp_errno is NOT set if SET_SNMP_ERROR evaluates to nothing.
