@@ -16,6 +16,7 @@ IMPORTS
 
 scriptMIB MODULE-IDENTITY
     LAST-UPDATED "9902221800Z"
+
     ORGANIZATION "IETF Distributed Management Working Group"
     CONTACT-INFO
         "David B. Levi
@@ -112,6 +113,7 @@ smLangVersion OBJECT-TYPE
         "The version number of the language. The zero-length string
          shall be used if the language does not have a version
          number.
+
          It is suggested that the version number consist of one or
          more decimal numbers separated by dots, where the first
          number is called the major version number."
@@ -152,7 +154,6 @@ smLangDescr OBJECT-TYPE
         "A textual description of the language."
     ::= { smLangEntry 6 }
 
-
 smExtsnTable OBJECT-TYPE
     SYNTAX      SEQUENCE OF SmExtsnEntry
     MAX-ACCESS  not-accessible
@@ -183,7 +184,6 @@ smExtsnIndex OBJECT-TYPE
     SYNTAX      Integer32 (1..2147483647)
     MAX-ACCESS  not-accessible
     STATUS      current
-
     DESCRIPTION
         "The locally arbitrary, but unique identifier associated
          with this language extension entry.
@@ -208,6 +208,7 @@ smExtsnVersion OBJECT-TYPE
     STATUS      current
     DESCRIPTION
         "The version number of the language extension.
+
          It is suggested that the version number consist of one or
          more decimal numbers separated by dots, where the first
          number is called the major version number."
@@ -248,7 +249,6 @@ smExtsnDescr OBJECT-TYPE
         "A textual description of the language extension."
     ::= { smExtsnEntry 6 }
 
-
 --
 -- Scripts known by the Script MIB implementation.
 --
@@ -256,6 +256,7 @@ smExtsnDescr OBJECT-TYPE
 -- Scripts can be added and removed through manipulation of the
 -- smScriptTable.
 --
+
 smScriptObjects OBJECT IDENTIFIER ::= { smObjects 3 }
 
 smScriptTable OBJECT-TYPE
@@ -304,6 +305,7 @@ smScriptName OBJECT-TYPE
         "The locally-unique, administratively assigned name for this
          script. This object allows an smScriptOwner to have multiple
          entries in the smScriptTable.
+
          This value of this object may be used to derive the name
          (e.g. a file name) which is used by the Script MIB
          implementation to access the script in non-volatile
@@ -351,6 +353,7 @@ smScriptSource OBJECT-TYPE
          the Script MIB implementation will `pull' the script
          source from the URL contained in this object if the URL
          is not empty.
+
          An empty URL indicates that the script source is loaded
          from local storage. The script is read from the smCodeTable
          if the value of smScriptStorageType is volatile. Otherwise,
@@ -447,6 +450,7 @@ smScriptOperStatus OBJECT-TYPE
 
          - `unknownProtocol' indicates that the script could not be
            loaded from the smScriptSource because the requested
+
            protocol is not supported.
 
          - `protocolFailure' indicates that the script could not be
@@ -495,6 +499,7 @@ smScriptStorageType OBJECT-TYPE
          inconsistentValue error.
 
          The value of smScriptStorageType is only meaningful if the
+
          value of the corresponding RowStatus object is `active'.
 
          If smScriptStorageType has the value permanent(4), then all
@@ -535,7 +540,6 @@ smScriptRowStatus OBJECT-TYPE
          `permanent' or `readOnly' will result in an
          inconsistentValue error."
     ::= { smScriptEntry 9 }
-
 
 --
 -- Access to script code via SNMP
@@ -592,6 +596,7 @@ smCodeRowStatus OBJECT-TYPE
     STATUS      current
     DESCRIPTION
         "A control that allows entries to be added and removed from
+
          this table."
     ::= { smCodeEntry 3 }
 
@@ -648,7 +653,6 @@ smLaunchOwner OBJECT-TYPE
     MAX-ACCESS  not-accessible
     STATUS      current
     DESCRIPTION
-
         "The manager who owns this row in the smLaunchTable. Every
          instance of a running script started from a particular entry
          in the smLaunchTable (i.e. entries in the smRunTable) will be
@@ -784,6 +788,7 @@ smLaunchStart OBJECT-TYPE
          set-request in addition to the value of smLaunchOwner and
          smLaunchName. An unused value can be obtained by reading
          the smLaunchRunIndexNext object.
+
          Setting this object to the special value 0 will start
          the script with a self-generated smRunIndex value. The
          consequence is that the script invoker has no reliable
@@ -832,6 +837,7 @@ smLaunchStart OBJECT-TYPE
          of smLaunchArgument will be copied into smRunArgument,
          the value of smLaunchLifeTime will be copied to
          smRunLifeTime, and the value of smLaunchExpireTime
+
          will be copied to smRunExpireTime.
 
          The smRunStartTime will be set to the current time and
@@ -962,7 +968,6 @@ smLaunchRowStatus OBJECT-TYPE
          `permanent' or `readOnly' will result in an
          inconsistentValue error."
     ::= { smLaunchEntry 16 }
-
 
 smRunTable OBJECT-TYPE
     SYNTAX      SEQUENCE OF SmRunEntry
@@ -1120,6 +1125,7 @@ smRunExitCode OBJECT-TYPE
 
          - `lifeTimeExceeded', which indicates that the script
             exited because a time limit was exceeded;
+
          - `noResourcesLeft', which indicates that the script
             exited because it ran out of resources (e.g. memory);
 
@@ -1168,6 +1174,7 @@ smRunControl OBJECT-TYPE
          script execution defined by this row.
 
          Setting this object to `abort' will abort execution if the
+
          value of smRunState is `initializing', `executing',
          `suspending', `suspended' or `resuming'. Setting this object
          to `abort' when the value of smRunState is `aborting' or

@@ -42,9 +42,7 @@ EtherLike-MIB DEFINITIONS ::= BEGIN
                   Tel: +1 408 571 2699
                   Fax: +1 408 571 2698
                E-Mail: jeff@redbacknetworks.com"
-
         DESCRIPTION "The MIB module to describe generic objects for
-
 
                     Ethernet-like network interfaces.
 
@@ -77,9 +75,7 @@ EtherLike-MIB DEFINITIONS ::= BEGIN
 
         REVISION    "9402030400Z"
         DESCRIPTION "Initial version, published as RFC 1650."
-
         ::= { mib-2 35 }
-
 
     etherMIBObjects OBJECT IDENTIFIER ::= { etherMIB 1 }
 
@@ -94,7 +90,6 @@ EtherLike-MIB DEFINITIONS ::= BEGIN
         DESCRIPTION "Statistics for a collection of ethernet-like
                     interfaces attached to a particular system.
                     There will be one row in this table for each
-
 
                     ethernet-like interface in the system."
         ::= { dot3 2 }
@@ -144,8 +139,6 @@ EtherLike-MIB DEFINITIONS ::= BEGIN
         SYNTAX      Counter32
         MAX-ACCESS  read-only
         STATUS      current
-
-
         DESCRIPTION "A count of frames received on a particular
                     interface that are not an integral number of
                     octets in length and do not pass the FCS check.
@@ -194,7 +187,6 @@ EtherLike-MIB DEFINITIONS ::= BEGIN
                     frame to fail the FCS check.
                     Discontinuities in the value of this counter can
                     occur at re-initialization of the management
-
 
                     system, and at other times as indicated by the
                     value of ifCounterDiscontinuityTime."
@@ -245,7 +237,6 @@ EtherLike-MIB DEFINITIONS ::= BEGIN
                     instance of the dot3StatsSingleCollisionFrames
                     object.
 
-
                     This counter does not increment when the
                     interface is operating in full-duplex mode.
 
@@ -295,7 +286,6 @@ EtherLike-MIB DEFINITIONS ::= BEGIN
                     This counter does not increment when the
                     interface is operating in full-duplex mode.
 
-
                     Discontinuities in the value of this counter can
                     occur at re-initialization of the management
                     system, and at other times as indicated by the
@@ -344,8 +334,6 @@ EtherLike-MIB DEFINITIONS ::= BEGIN
                     system, and at other times as indicated by the
                     value of ifCounterDiscontinuityTime."
         REFERENCE   "[IEEE 802.3 Std.], 30.3.1.1.11,
-
-
                     aFramesAbortedDueToXSColls."
         ::= { dot3StatsEntry 9 }
 
@@ -394,7 +382,6 @@ EtherLike-MIB DEFINITIONS ::= BEGIN
 
                     This counter does not increment when the
                     interface is operating in full-duplex mode.
-
 
                     Discontinuities in the value of this counter can
                     occur at re-initialization of the management
@@ -445,7 +432,6 @@ EtherLike-MIB DEFINITIONS ::= BEGIN
                     counted by an instance of this object if it is
                     not counted by the corresponding instance of
 
-
                     either the dot3StatsFrameTooLongs object, the
                     dot3StatsAlignmentErrors object, or the
                     dot3StatsFCSErrors object.
@@ -494,8 +480,6 @@ EtherLike-MIB DEFINITIONS ::= BEGIN
 
     dot3StatsSymbolErrors OBJECT-TYPE
         SYNTAX      Counter32
-
-
         MAX-ACCESS  read-only
         STATUS      current
         DESCRIPTION "For an interface operating at 100 Mb/s, the
@@ -544,7 +528,6 @@ EtherLike-MIB DEFINITIONS ::= BEGIN
         DESCRIPTION "The current mode of operation of the MAC
                     entity.  'unknown' indicates that the current
                     duplex mode could not be determined.
-
 
                     Management control of the duplex mode is
                     accomplished through the MAU MIB.  When
@@ -595,7 +578,6 @@ EtherLike-MIB DEFINITIONS ::= BEGIN
                     the transmission (successful or otherwise) on a
                     particular interface is accompanied by a
 
-
                     particular number of media collisions."
         INDEX       { ifIndex, dot3CollCount }
         ::= { dot3CollTable 1 }
@@ -645,7 +627,6 @@ EtherLike-MIB DEFINITIONS ::= BEGIN
                     value of ifCounterDiscontinuityTime."
         ::= { dot3CollEntry 3 }
 
-
     dot3ControlTable OBJECT-TYPE
         SYNTAX      SEQUENCE OF Dot3ControlEntry
         MAX-ACCESS  not-accessible
@@ -694,8 +675,6 @@ EtherLike-MIB DEFINITIONS ::= BEGIN
         SYNTAX      Counter32
         MAX-ACCESS  read-only
         STATUS      current
-
-
         DESCRIPTION "A count of MAC Control frames received on this
                     interface that contain an opcode that is not
                     supported by this device.
@@ -745,7 +724,6 @@ EtherLike-MIB DEFINITIONS ::= BEGIN
             dot3InPauseFrames                   Counter32,
             dot3OutPauseFrames                  Counter32
 
-
         }
 
     dot3PauseAdminMode OBJECT-TYPE
@@ -794,8 +772,6 @@ EtherLike-MIB DEFINITIONS ::= BEGIN
         ::= { dot3PauseEntry 1 }
 
     dot3PauseOperMode OBJECT-TYPE
-
-
         SYNTAX      INTEGER {
                         disabled(1),
                         enabledXmit(2),
@@ -845,7 +821,6 @@ EtherLike-MIB DEFINITIONS ::= BEGIN
         DESCRIPTION "A count of MAC Control frames transmitted on
                     this interface with an opcode indicating the
 
-
                     PAUSE operation.
 
                     This counter does not increment when the
@@ -893,8 +868,6 @@ EtherLike-MIB DEFINITIONS ::= BEGIN
         ::= { dot3Tests 1 }
 
     -- Loopback Test
-
-
 
     dot3TestLoopBack OBJECT-IDENTITY
         STATUS      current
@@ -945,7 +918,6 @@ EtherLike-MIB DEFINITIONS ::= BEGIN
                     entities which have ethernet-like network
                     interfaces.
 
-
                     This compliance is deprecated and replaced by
                     dot3Compliance."
 
@@ -995,7 +967,6 @@ EtherLike-MIB DEFINITIONS ::= BEGIN
                         capable of operating in full-duplex mode.
                         It is highly recommended for all
 
-
                         ethernet-like network interfaces."
 
             GROUP       etherStatsLowSpeedGroup
@@ -1026,7 +997,6 @@ EtherLike-MIB DEFINITIONS ::= BEGIN
                         half-duplex mode and have the necessary
                         metering. Implementation in systems with
                         such interfaces is highly recommended."
-
         ::= { etherCompliances 3 }
 
     -- units of conformance
@@ -1044,8 +1014,6 @@ EtherLike-MIB DEFINITIONS ::= BEGIN
                       dot3StatsInternalMacTransmitErrors,
                       dot3StatsCarrierSenseErrors,
                       dot3StatsFrameTooLongs,
-
-
                       dot3StatsInternalMacReceiveErrors,
                       dot3StatsEtherChipSet
                     }
@@ -1095,7 +1063,6 @@ EtherLike-MIB DEFINITIONS ::= BEGIN
 
                     This object group has been deprecated and
 
-
                     replaced by etherStatsBaseGroup and
                     etherStatsHighSpeedGroup."
         ::= { etherGroups 3 }
@@ -1127,7 +1094,6 @@ EtherLike-MIB DEFINITIONS ::= BEGIN
                     applicable to ethernet-like network interfaces
                     capable of operating at 10 Mb/s or slower in
                     half-duplex mode."
-
         ::= { etherGroups 5 }
 
     etherStatsHighSpeedGroup OBJECT-GROUP
@@ -1144,8 +1110,6 @@ EtherLike-MIB DEFINITIONS ::= BEGIN
         DESCRIPTION "A collection of objects providing information
                     about the duplex mode of an ethernet-like
                     network interface."
-
-
         ::= { etherGroups 7 }
 
     etherControlGroup OBJECT-GROUP

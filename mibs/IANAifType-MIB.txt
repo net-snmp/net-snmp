@@ -1,34 +1,43 @@
-
    IANAifType-MIB DEFINITIONS ::= BEGIN
 
    IMPORTS
-       MODULE-IDENTITY,
-       mib-2				   FROM SNMPv2-SMI
-       TEXTUAL-CONVENTION                  FROM SNMPv2-TC;
+       MODULE-IDENTITY, mib-2      FROM SNMPv2-SMI
+       TEXTUAL-CONVENTION          FROM SNMPv2-TC;
 
    ianaifType MODULE-IDENTITY
-       LAST-UPDATED "9910081430Z"  --  October 8, 1999
+       LAST-UPDATED "200004250000Z"  -- Apr 25, 2000
        ORGANIZATION "IANA"
-       CONTACT-INFO
+       CONTACT-INFO "        Internet Assigned Numbers Authority
 
-                  "        Internet Assigned Numbers Authority
+                     Postal: ICANN
+                             4676 Admiralty Way, Suite 330
+                             Marina del Rey, CA 90292
 
-                   Postal: ICANN
-                           4676 Admiralty Way, Suite 330
-			   Marina del Rey, CA 90292
+                     Tel:    +1 310 823 9358 x20
+                     E-Mail: iana@iana.org"
+       DESCRIPTION  "This MIB module defines the IANAifType Textual
+                     Convention, and thus the enumerated values of
+                     the ifType object defined in MIB-II's ifTable."
 
-                   Tel:    +1 310 823 9358 x20
-                   E-Mail: iana@iana.org"
-       DESCRIPTION
-               "The MIB module which defines the IANAifType textual
-               convention, and thus the enumerated values of the
-               ifType object defined in MIB-II's ifTable."
-       REVISION "9910081430Z"  -- August 31, 1999
-       DESCRIPTION
-               "Updated to include new name assignments up to cnr(85).
-               This is the first version available via the WWW."
+       REVISION     "200004250000Z"  -- Apr 25, 2000
+       DESCRIPTION  "Registration of new IANAifTypes 168 and 169."       
+
+       REVISION     "200003060000Z"  -- Mar 6, 2000
+       DESCRIPTION  "Fixed a missing semi-colon in the IMPORT.
+                     Also cleaned up the REVISION log a bit.
+                     It is not complete, but from now on it will
+                     be maintained and kept up to date with each
+                     change to this MIB module."
+
+       REVISION     "199910081430Z"  -- Oct 08, 1999
+       DESCRIPTION  "Include new name assignments up to cnr(85).
+                     This is the first version available via the WWW
+                     at: ftp://ftp.isi.edu/mib/ianaiftype.mib"
+
+       REVISION     "199401310000Z"  -- Jan 31, 1994
+       DESCRIPTION  "Initial version of this MIB as published in
+                     RFC 1573."
        ::= { mib-2 30 }
-
 
    IANAifType ::= TEXTUAL-CONVENTION
        STATUS       current
@@ -221,7 +230,15 @@
 		   frForward (158),    -- Frame Forward Interface
 		   rfc1483 (159),	-- Multiprotocol over ATM AAL5
 		   usb (160),		-- USB Interface
-		   ieee8023adLag(161)  -- IEEE 802.3ad Link Aggregate
+		   ieee8023adLag(161),  -- IEEE 802.3ad Link Aggregate
+                   bgppolicyaccounting(162), -- BGP Policy Accounting
+                   frf16MfrBundle (163), -- FRF .16 Multilink Frame Relay 
+                   h323Gatekeeper (164), -- H323 Gatekeeper
+                   h323Proxy (165), -- H323 Voice and Video Proxy
+                   mpls (166), -- MPLS                   
+                   mfSigLink (167), -- Multi-frequency signaling link
+                   hdsl2 (168), -- High Bit-Rate DSL - 2nd generation
+                   shdsl (169) -- Multirate HDSL2
 }
 
    END
