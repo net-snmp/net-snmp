@@ -286,6 +286,7 @@ var_ip(struct variable *vp,
                (MIB_ipMAXCTR+1)*sizeof (counter));
 #endif
 
+    long_return = 0;
     switch (vp->magic){
 	case IPFORWARDING:
 #ifndef sparc	  
@@ -299,7 +300,6 @@ var_ip(struct variable *vp,
 #if NO_DUMMY_VALUES
 	    return NULL;
 #endif
-	    long_return = 0;
 #endif /* sparc */
 
 	    return (u_char *) &long_return;
@@ -313,6 +313,9 @@ var_ip(struct variable *vp,
 	      return NULL;
 #else
               long_return = 60;	    /* XXX */
+#endif
+#ifdef hpux
+	    long_return = (u_char)long_return;
 #endif
 	    return (u_char *) &long_return;
 	case IPINRECEIVES:
@@ -338,7 +341,6 @@ var_ip(struct variable *vp,
 #if NO_DUMMY_VALUES
 	    return NULL;
 #endif
-	    long_return = 0;
 #endif
 	    return (u_char *) &long_return;
 	case IPINDISCARDS:
@@ -348,7 +350,6 @@ var_ip(struct variable *vp,
 #if NO_DUMMY_VALUES
 	    return NULL;
 #endif
-	    long_return = 0;
 #endif
 	    return (u_char *) &long_return;
 	case IPINDELIVERS:
@@ -366,7 +367,6 @@ var_ip(struct variable *vp,
 #if NO_DUMMY_VALUES
 	    return NULL;
 #endif
-	    long_return = 0;
 #endif
 	    return (u_char *) &long_return;
 	case IPOUTDISCARDS:
@@ -376,7 +376,6 @@ var_ip(struct variable *vp,
 #if NO_DUMMY_VALUES
 	    return NULL;
 #endif
-	    long_return = 0;
 #endif
 	    return (u_char *) &long_return;
 	case IPOUTNOROUTES:
@@ -416,7 +415,6 @@ var_ip(struct variable *vp,
 #if NO_DUMMY_VALUES
 	    return NULL;
 #endif
-	    long_return = 0;
 #endif
 	    return (u_char *) &long_return;
 	case IPFRAGFAILS:
@@ -426,7 +424,6 @@ var_ip(struct variable *vp,
 #if NO_DUMMY_VALUES
 	    return NULL;
 #endif
-	    long_return = 0;
 #endif
 	    return (u_char *) &long_return;
 	case IPFRAGCREATES:
@@ -436,14 +433,12 @@ var_ip(struct variable *vp,
 #if NO_DUMMY_VALUES
 	    return NULL;
 #endif
-	    long_return = 0;
 #endif
 	    return (u_char *) &long_return;
 	case IPROUTEDISCARDS:
 #if NO_DUMMY_VALUES
 	    return NULL;
 #endif
-	    long_return = 0;
 	    return (u_char *) &long_return;
 	default:
 	    DEBUGMSGTL(("snmpd", "unknown sub-id %d in var_ip\n", vp->magic));
@@ -475,6 +470,7 @@ var_ip(struct variable *vp,
     }
 #define ipstat tcpipstats.ipstat
 
+    long_return = 0;
     switch (vp->magic){
 	case IPFORWARDING:
 #if defined(HAVE_SYS_SYSCTL_H) && defined(CTL_NET)
@@ -506,8 +502,6 @@ var_ip(struct variable *vp,
 	    } else {
 		long_return = 2;	    /* HOST    */
 	    }
-#else /* sparc */
-	    long_return = 0;
 #endif /* sparc */
 #endif /* not (HAVE_SYS_SYSCTL_H && CTL_NET) */
 
@@ -576,7 +570,6 @@ var_ip(struct variable *vp,
 #if NO_DUMMY_VALUES
 	    return NULL;
 #endif
-	    long_return = 0;
 	    return (u_char *) &long_return;
 	case IPFRAGCREATES:
           long_return = ipstat.ips_ofragments;
