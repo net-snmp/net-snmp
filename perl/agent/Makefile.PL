@@ -32,7 +32,7 @@ sub InitMakeParams {
       $Params{'DEFINE'} = "-DMSVC_PERL";
       
       if ($opts->{'insource'}) {
-	$Params{'LIBS'} = "-L$basedir\\win32\\lib\\ -l$snmp_link_lib -lnetsnmpagent -lnetsnmphelpers -lnetsnmpmibs";
+	$Params{'LIBS'} = "-L$basedir\\win32\\lib\\ -l$snmp_link_lib -lnetsnmpagent -lnetsnmphelpers -lnetsnmpmibssdk -lnetsnmpmibs";
       }
       else {
 	my @LibDirs = split (';',$ENV{LIB});
@@ -52,7 +52,7 @@ sub InitMakeParams {
 	    @LibDirs[0] =~ s/\\$//;
 	  }
 	}
-	$Params{LIBS} = "-L$LibDir -l$snmp_link_lib -lnetsnmpagent -lnetsnmphelpers -lnetsnmpmibs";
+	$Params{LIBS} = "-L$LibDir -l$snmp_link_lib -lnetsnmpagent -lnetsnmphelpers -lnetsnmpmibssdk -lnetsnmpmibs";
       }
 
       $Params{'INC'} = "-I$basedir\\include\\ -I$basedir\\include\\net-snmp\\ -I$basedir\\win32\\ ";
