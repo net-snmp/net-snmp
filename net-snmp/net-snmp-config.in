@@ -47,6 +47,97 @@ else
     --exec-prefix)
       echo @exec_prefix@
       ;;
+    --create-snmpv3-user)
+      if @PSCMD@ | egrep ' snmpd *$' > /dev/null 2>&1 ; then
+         echo "Apparently at least one snmpd demon is already running."
+         echo "You must stop them in order to use this command."
+         exit 1
+      fi
+
+      Aalgorithm="MD5"
+      Xalgorithm="DES"
+      token=rwuser
+      shift
+      arg=$1
+      shift
+      while test "x$done" = "x" -a "x$arg" != "x" ; do
+	case $arg in
+	    -A)
+		Aalgorithm=$1
+		shift
+		;;
+	    -X)
+		Xalgorithm=$1
+		shift
+		;;
+	    -a)
+		apassphrase=$1
+		shift
+		;;
+	    -x)
+		xpassphrase=$1
+		shift
+		;;
+	    -ro)
+	        token="rouser"
+		;;
+ 	    -*)
+		echo "unknown suboption to --create-snmpv3-user: $arg"
+		exit 1
+		;;
+	    *)
+	        done=1
+		;;
+	esac
+	if test "x$done" = "x" ; then
+          arg=$1
+          shift
+	fi
+      done
+      
+      user=$arg
+      if test "x$user" = "x" ; then
+          prompt=yes
+	  echo "Enter a SNMPv3 user name to create: "
+	  read user
+      fi
+      if test "x$user" = "x" ; then
+          echo "You must specify a user name"
+	  exit 1
+      fi
+
+      apassphrase=$1
+      if test "x$apassphrase" = "x" ; then
+          prompt=yes
+	  echo "Enter authentication pass-phrase: "
+	  read apassphrase
+      else
+	  shift
+      fi
+      if test "x$apassphrase" = "x" ; then
+          echo "You must specify an authentication pass-phrase"
+	  exit 1
+      fi
+
+      if test "x$prompt" = "xyes" -a "x$xpassphrase" = "x" ; then
+	  echo "Enter encryption pass-phrase: "
+	  echo "  [press return to reuse the authentication pass-phrase]"
+	  read xpassphrase
+      fi
+
+      outfile="@PERSISTENT_DIRECTORY@/snmpd.conf"
+      line="createUser $user $Aalgorithm \"$apassphrase\" $Xalgorithm $xpassphrase"
+      echo "adding the following line to $outfile:"
+      echo "  " $line
+      echo $line >> $outfile
+
+      outfile="@datadir@/snmp/snmpd.conf"
+      line="$token $user"
+      echo "adding the following line to $outfile:"
+      echo "  " $line
+      echo $line >> $outfile
+      ;;
+
     --compile-subagent)
       shift
       outname=$1
@@ -148,6 +239,11 @@ if test "x$usage" = "xyes"; then
   echo "                  [--compile-subagent outputname mibmodule1.c [...]]"
   echo ""
   echo "    --version         displays the net-snmp version number"
+  echo ""
+  echo "  SNMP Setup commands:"
+  echo ""
+  echo "    --create-snmpv3-user [-ro] [-a authpass] [-x privpass] [-X DES]"
+  echo "                         [-A MD5|SHA] [username]"
   echo ""
   echo "  These options produce the various compilation flags needed when"
   echo "  building external SNMP applications:"
