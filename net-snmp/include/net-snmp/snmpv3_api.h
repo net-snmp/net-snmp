@@ -33,7 +33,6 @@
 #endif
 
 #include <net-snmp/library/snmp_secmod.h>
-#include <net-snmp/library/snmpksm.h>
-#include <net-snmp/library/snmpusm.h>
+#include <net-snmp/library/snmpv3-security-includes.h>
 
 #endif /* NET_SNMP_SNMPV3_H */
