@@ -72,9 +72,6 @@ Note:  All shell steps are using the Window CMD prompt unless otherwise stated.
     8. Debug mode:           disabled
     9. IPv6 transports:      disabled
 
-Note:  c:/usr must be used for 5.1.x.
-       c:/Program Files/Net-SNMP must be used for 5.2+
-    
 7.  F to start the build and verify everything was built ok
 
 8.  Delete any generated config files from c:\usr\snmp\persist

@@ -55,6 +55,10 @@ Environment 2003 (MSVC 7.0/7.1), gcc under Cygwin, and gcc under MinGW.
   -  Running the agent on a non-standard UDP or TCP port works.
   -  Snmpd can be registered as a Windows NT/2000 service.
   -  Snmptrapd can be registered as a Windows NT/2000 service.
+  -  Some build environments allow long pathnames that contain
+     embedded spaces.  As this is not true for Cygwin "configure",
+     the documented example scripts will refer to "c:/usr"
+     as the base directory for installed Net-SNMP software.
 
 The next subsection relates to items that are built using Visual Studio
 
@@ -267,7 +271,7 @@ steps to build using build.bat:
     1. OpenSSL support:      disabled
     2. Platform SDK support: disabled
 
-    3. Install path:         c:/Program Files/Net-SNMP
+    3. Install path:         c:/usr
     4. Install after build:  enabled
 
     5. Perl modules:         disabled
@@ -334,7 +338,7 @@ first by the Configure script.  Following are sample steps to:
   -enable OpenSSL support
   -enable debug mode
   -build Net-SNMP
-  -install to 'c:\Program Files\Net-SNMP'
+  -install to 'c:\usr'
   -compile the Perl modules
   -test the Perl modules
   -install the Perl modules
@@ -347,7 +351,7 @@ first by the Configure script.  Following are sample steps to:
 3.  Type (all on one line):
 
       perl Configure --with-sdk --with-ssl --config=debug
-           --prefix="c:/Program Files/Net-SNMP"
+           --prefix="c:/usr"
 
 4.  The make files will be generated, and a configuration summary will appear:
 
@@ -358,7 +362,7 @@ first by the Configure script.  Following are sample steps to:
       Config type:                debug
       SDK:                        enabled
       Link type:                  static
-      Prefix / Destdir:           c:/Program Files/Net-SNMP
+      Prefix / Destdir:           c:/usr
       OpenSSL:                    enabled
 
 5.  Type:
@@ -368,7 +372,7 @@ first by the Configure script.  Following are sample steps to:
       nmake install
 
       perl Configure --with-sdk --with-ssl --config=debug --linktype=dynamic
-           --prefix="c:/Program Files/Net-SNMP"
+           --prefix="c:/usr"
 
       nmake libs_clean
       nmake libs
@@ -429,7 +433,7 @@ workspace if you don't have or don't need these features.
       All paths in net-snmp-config.h use the "/" UNIX pathname delimiter.
       If a drive letter is not specified, the current drive letter is assumed.
 
-      For example: #define INSTALL_BASE "c:/Program Files/Net-SNMP".  
+      For example: #define INSTALL_BASE "c:/usr".  
 
 3. Build the applications
 
@@ -559,13 +563,13 @@ components to an install directory named in the INSTALL_BASE variable.
 
     a.  All paths in install-net-snmp.bat use the "\" DOS pathname delimiter.
 
-        Example: set INSTALL_BASE="c:\Program Files\Net-SNMP".  
+        Example: set INSTALL_BASE="c:\usr".  
 
     b.  All paths in net-snmp-config.h use the "/" UNIX pathname delimiter.
         If a drive letter is not specified, the current drive letter is 
         assumed.
 
-        Example: #define INSTALL_BASE "c:/Program Files/Net-SNMP".  
+        Example: #define INSTALL_BASE "c:/usr".  
 
     Note: You may also modify "install-net-snmp.bat" in order to not install 
           the linking libraries, or the header files.
@@ -584,42 +588,42 @@ components to an install directory named in the INSTALL_BASE variable.
     
     C:\net-snmp-5.1.1>    win32\install-net-snmp
     Remember to run this script from the base of the source directory.
-    Creating "c:\Program Files\Net-SNMP" sub-directories
-    A subdirectory or file c:\Program Files\Net-SNMP already exists.
-    A subdirectory or file c:\Program Files\Net-SNMP\bin already exists.
-    A subdirectory or file c:\Program Files\Net-SNMP\etc\snmp already exists.
-    A subdirectory or file c:\Program Files\Net-SNMP\share\snmp\snmpconf-data
+    Creating "c:\usr" sub-directories
+    A subdirectory or file c:\usr already exists.
+    A subdirectory or file c:\usr\bin already exists.
+    A subdirectory or file c:\usr\etc\snmp already exists.
+    A subdirectory or file c:\usr\share\snmp\snmpconf-data
          already exists
-    A subdirectory or file c:\Program Files\Net-SNMP\share\snmp\snmpconf-data\
+    A subdirectory or file c:\usr\share\snmp\snmpconf-data\
          snmp-data already exists.
-    A subdirectory or file c:\Program Files\Net-SNMP\share\snmp\snmpconf-data\
+    A subdirectory or file c:\usr\share\snmp\snmpconf-data\
          snmpd-data already exists.
-    A subdirectory or file c:\Program Files\Net-SNMP\share\snmp\snmpconf-data\
+    A subdirectory or file c:\usr\share\snmp\snmpconf-data\
          snmptrapd-data already exists.
-    A subdirectory or file c:\Program Files\Net-SNMP\lib already exists.
-    A subdirectory or file c:\Program Files\Net-SNMP\mibs already exists.
-    A subdirectory or file c:\Program Files\Net-SNMP\include already exists.
-    A subdirectory or file c:\Program Files\Net-SNMP\include\net-snmp already 
+    A subdirectory or file c:\usr\lib already exists.
+    A subdirectory or file c:\usr\mibs already exists.
+    A subdirectory or file c:\usr\include already exists.
+    A subdirectory or file c:\usr\include\net-snmp already 
          exists
     .
-    A subdirectory or file c:\Program Files\Net-SNMP\include\ucd-snmp already 
+    A subdirectory or file c:\usr\include\ucd-snmp already 
          exists
     .
-    Copying MIB files to "c:\Program Files\Net-SNMP"\mibs
-    Copying compiled programs to "c:\Program Files\Net-SNMP"\bin
-    Copying snmpconf files to "c:\Program Files\Net-SNMP"\share\snmp\snmpconf-
+    Copying MIB files to "c:\usr"\mibs
+    Copying compiled programs to "c:\usr"\bin
+    Copying snmpconf files to "c:\usr"\share\snmp\snmpconf-
          data\snmp-data
-    Copying link libraries to "c:\Program Files\Net-SNMP"\lib
-    Copying header files to "c:\Program Files\Net-SNMP"\include
-    Deleting debugging files from "c:\Program Files\Net-SNMP"
-    Copying DLL files to "c:\Program Files\Net-SNMP"
+    Copying link libraries to "c:\usr"\lib
+    Copying header files to "c:\usr"\include
+    Deleting debugging files from "c:\usr"
+    Copying DLL files to "c:\usr"
     The system cannot find the file specified.
-    Done copying files to "c:\Program Files\Net-SNMP"
+    Done copying files to "c:\usr"
     C:\net-snmp-5.1.1>
     
     ## END sample output from install-net-snmp.bat
 
-6.  Add the bin folder (c:\Program Files\Net-SNMP\bin in the above example) to
+6.  Add the bin folder (c:\usr\bin in the above example) to
     your system path.
 
 7.  Test the installation.  For a simple test to see if Net-SNMP is working, 
@@ -937,13 +941,13 @@ builds under MinGW with MSyS is available at:
           with MinGW configure. Use the DOS 8.3 form of the path,
 
     For example:  Say that you want to install the programs in
-    the directory "C:\Program Files\Net-SNMP".  
+    the directory "C:\usr".  
 
-    Use BASEDIR=c:/progra~1/Net-SNMP
+    Use BASEDIR=c:/usr
 
 4.  Configure net-snmp using the configure flags as shown:
 
-	BASEDIR=c:/progra~1/Net-SNMP
+	BASEDIR=c:/usr
 
 	./configure --prefix="$BASEDIR" \
 		--with-mibdirs="$BASEDIR/share/snmp/mibs" \
@@ -1006,7 +1010,7 @@ http://www.net-snmp.org/#Documentation
 
 All configuration files should be placed in the INSTALL_BASE\etc\snmp folder.
 The INSTALL_BASE folder is defined in the win32\net-snmp\net-snmp-config.h
-file.  For example, c:\Program Files\Net-SNMP\etc\snmp.
+file.  For example, c:\usr\etc\snmp.
 
 Included is a Perl script called snmpconf which can be used to create 
 configuration files.  Full documentation on using snmpconf is available from the
@@ -1016,7 +1020,7 @@ To run snmpconf, first modify snmpconf.bat located in the bin folder where
 Net-SNMP is installed.  Modify the set MYPERLPROGRAM= line to contain the full 
 path to the snmpconf Perl script.  For example:
 
-  set MYPERLPROGRAM=c:\Program Files\Net-SNMP\bin\snmpconf
+  set MYPERLPROGRAM=c:\usr\bin\snmpconf
 
 You can now run snmpconf using the standard command line such as:
 
