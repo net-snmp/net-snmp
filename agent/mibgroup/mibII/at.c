@@ -139,7 +139,7 @@ var_atEntry(struct variable *vp,
 	    int *length,
 	    int exact,
 	    int *var_len,
-	    int (**write_method) (int, u_char *,u_char, int, u_char *,oid*, int))
+	    WriteMethod **write_method)
 {
     /*
      * Address Translation table object identifier is of form:
@@ -295,8 +295,12 @@ AT_Cmp(void *addr, void *ep)
 }
 
 u_char *
-var_atEntry(struct variable *vp, oid *name, int *length, int exact,
-	    int *var_len, int (**write_method)(int, u_char *, u_char, int, u_char *, oid *, int))
+var_atEntry(struct variable *vp,
+	    oid *name,
+	    int *length,
+	    int exact,
+	    int *var_len,
+	    WriteMethod **write_method)
 {
     /*
      * object identifier is of form:

@@ -6,7 +6,7 @@
 #define _MIBGROUP_HRSTORAGE_H
 
 extern void	init_hrstore (void);
-extern u_char	*var_hrstore (struct variable *, oid *, int *, int, int *, int (**write) (int, u_char *, u_char, int, u_char *, oid *, int));
+extern FindVarMethod var_hrstore;
 
 #define	HRSTORE_MEMSIZE		1
 

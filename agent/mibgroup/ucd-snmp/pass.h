@@ -6,8 +6,8 @@
 
 config_require(ucd-snmp/extensible util_funcs)
 
-int setPass (int, u_char *, u_char, int, u_char *,oid *, int);
-unsigned char *var_extensible_pass (struct variable *, oid *, int *, int, int *, int (**write) (int, u_char *, u_char, int, u_char *, oid *, int) );
+extern FindVarMethod var_extensible_pass;
+WriteMethod setPass;
 int pass_compare (void *, void *);
 
 /* config file parsing routines */

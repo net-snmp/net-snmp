@@ -7,10 +7,7 @@
 
 config_require(smux/smux)
 
-    u_char  *var_rip2 (struct variable *, oid *, int *, int, int *, int
-		       (**write) (int, u_char *, u_char, int, u_char *, oid *,
-				  int));
-
+extern FindVarMethod var_rip2;;
 
 
 #define RIP2GLOBALROUTECHANGES  0

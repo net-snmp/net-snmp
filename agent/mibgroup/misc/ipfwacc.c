@@ -147,7 +147,7 @@ unsigned char * var_ipfwacc(struct variable *vp,
 			    int *length,
 			    int exact,
 			    int *var_len,
-			    int (**write_method) (int, u_char *,u_char, int, u_char *,oid*, int))    
+			    WriteMethod **write_method)    
 {
   *write_method = 0;           /* assume it isnt writable for the time being */
   *var_len = sizeof(ret_val);  /* assume an integer and change later if not */

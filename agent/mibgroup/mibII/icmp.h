@@ -40,7 +40,7 @@ struct icmp_mib
 #endif
 
 extern void	init_icmp (void);
-extern u_char	*var_icmp (struct variable *, oid *, int *, int, int *, int (**write) (int, u_char *, u_char, int, u_char*, oid *, int));
+extern FindVarMethod var_icmp;
 
 #define ICMPINMSGS	     0
 #define ICMPINERRORS	     1

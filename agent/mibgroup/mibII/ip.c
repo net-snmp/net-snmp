@@ -76,6 +76,8 @@
 #endif
 
 #include "../../../snmplib/system.h"
+#include "asn1.h"
+#include "snmp_debug.h"
 
 #include "mibincl.h"
 #include "auto_nlist.h"
@@ -217,7 +219,7 @@ header_ip(struct variable *vp,
 	  int *length,
 	  int exact,
 	  int *var_len,
-	  int (**write_method) (int, u_char *,u_char, int, u_char *,oid*, int))
+	  WriteMethod **write_method)
 {
 #define IP_NAME_LENGTH	8
     oid newname[MAX_NAME_LEN];
@@ -261,7 +263,7 @@ var_ip(struct variable *vp,
        int *length,
        int exact,
        int *var_len,
-       int (**write_method) (int, u_char *,u_char, int, u_char *,oid*, int))
+       WriteMethod **write_method)
 {
     static struct ipstat ipstat;
 #ifdef MIB_IP_COUNTER_SYMBOL
@@ -423,7 +425,7 @@ var_ip(struct variable *vp,
        int *length,
        int exact,
        int *var_len,
-       int (**write_method) (int, u_char *,u_char, int, u_char *,oid*, int))
+       WriteMethod **write_method)
 {
     static struct kna tcpipstats;
     int i;
@@ -557,7 +559,7 @@ var_ip(struct variable *vp,
        int *length,
        int exact,
        int *var_len,
-       int (**write_method) (int, u_char *,u_char, int, u_char *,oid*, int))
+       WriteMethod **write_method)
 {
     static struct ip_mib ipstat;
 
@@ -623,7 +625,7 @@ var_ipAddrEntry(struct variable *vp,
 		int *length,
 		int exact,
 		int *var_len,
-		int (**write_method) (int, u_char *,u_char, int, u_char *,oid*, int))
+		WriteMethod **write_method)
 {
     /*
      * object identifier is of form:
@@ -806,7 +808,7 @@ var_ip(struct variable *vp,
 		int *length,
 		int exact,
 		int *var_len,
-		int (**write_method) (int, u_char *,u_char, int, u_char *,oid*, int))
+		WriteMethod **write_method)
 {
     mib2_ip_t ipstat;
     u_char *ret = (u_char *)&long_return;	/* Successful completion */
@@ -902,7 +904,7 @@ var_ipAddrEntry(struct variable *vp,
 		int *length,
 		int exact,
 		int *var_len,
-		int (**write_method) (int, u_char *,u_char, int, u_char *,oid*, int))
+		WriteMethod **write_method)
 {
     /*
      * object identifier is of form:
@@ -1049,7 +1051,7 @@ header_ip(struct variable *vp,
 	  int *length,
 	  int exact,
 	  int *var_len,
-	  int (**write_method) (int, u_char *,u_char, int, u_char *,oid*, int))
+	  WriteMethod **write_method)
 {
 #define IP_NAME_LENGTH	8
     oid newname[MAX_NAME_LEN];
@@ -1079,7 +1081,7 @@ var_ip(struct variable *vp,
        int *length,
        int exact,
        int *var_len,
-       int (**write_method) (int, u_char *,u_char, int, u_char *,oid*, int))
+       WriteMethod **write_method)
 {
 	struct ipstat ipstat;
 	int i;
@@ -1328,7 +1330,7 @@ var_ipAddrEntry(struct variable *vp,
 		int *length,
 		int exact,
 		int *var_len,
-		int (**write_method) (int, u_char *,u_char, int, u_char *,oid*, int))
+		WriteMethod **write_method)
 {
 	/*
 	 * object identifier is of form:

@@ -111,8 +111,8 @@ extern struct mntent *HRFS_entry;
 	 *********************/
 int Get_Next_HR_Store (void);
 void  Init_HR_Store (void);
-int header_hrstore (struct variable *,oid *, int *, int, int *, int (**write) (int, u_char *, u_char, int, u_char *,oid *,int) );
-int header_hrstoreEntry (struct variable *,oid *, int *, int, int *, int (**write) (int, u_char *, u_char, int, u_char *,oid *,int) );
+int header_hrstore (struct variable *,oid *, int *, int, int *, WriteMethod **);
+int header_hrstoreEntry (struct variable *,oid *, int *, int, int *, WriteMethod **);
 
 int linux_mem (int, int);
 
@@ -146,7 +146,7 @@ header_hrstore(struct variable *vp,
 	       int *length,
 	       int exact,
 	       int *var_len,
-	       int (**write_method) (int, u_char *, u_char, int, u_char *, oid *, int))
+	       WriteMethod **write_method)
 {
 #define HRSTORE_NAME_LENGTH	9
     oid newname[MAX_NAME_LEN];
@@ -177,7 +177,7 @@ header_hrstoreEntry(struct variable *vp,
 		    int *length,
 		    int exact,
 		    int *var_len,
-		    int (**write_method) (int, u_char *, u_char, int, u_char *, oid *, int))
+		    WriteMethod **write_method)
 {
 #define HRSTORE_ENTRY_NAME_LENGTH	11
     oid newname[MAX_NAME_LEN];
@@ -261,7 +261,7 @@ var_hrstore(struct variable *vp,
 	    int *length,
 	    int exact,
 	    int *var_len,
-	    int (**write_method) (int, u_char *, u_char, int, u_char *, oid *, int))
+	    WriteMethod **write_method)
 {
     int store_idx=0;
 #ifndef linux

@@ -118,6 +118,7 @@
 #include "disk.h"
 #include "util_funcs.h"
 #include "read_config.h"
+#include "agent_read_config.h"
 #include "mib_module_config.h"
 #include "auto_nlist.h"
 #if USING_UCD_SNMP_ERRORMIB_MODULE
@@ -294,7 +295,7 @@ unsigned char *var_extensible_disk(struct variable *vp,
 				   int *length,
 				   int exact,
 				   int *var_len,
-				   int (**write_method) (int, u_char *,u_char, int, u_char *,oid*, int))
+				   WriteMethod **write_method)
 {
 
   int percent, iserror, disknum=0;

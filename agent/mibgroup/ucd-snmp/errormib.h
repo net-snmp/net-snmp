@@ -8,7 +8,7 @@ config_require(util_funcs)
 
 void setPerrorstatus (char *);
 void seterrorstatus (char *, int);
-unsigned char *var_extensible_errors (struct variable *, oid *, int *, int, int *, int (**write) (int, u_char *, u_char, int, u_char *, oid *, int) );
+extern FindVarMethod var_extensible_errors;
 
 #include "mibdefs.h"
 

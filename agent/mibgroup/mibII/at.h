@@ -9,9 +9,7 @@
 config_arch_require(solaris2, kernel_sunos5)
 
 extern void	init_at (void);
-extern u_char	*var_atEntry (struct variable *, oid *, int *, int, int *, int
-			      (**write) (int, u_char *, u_char, int, u_char *,
-					 oid *, int));
+extern FindVarMethod var_atEntry;
 
 
 #define ATIFINDEX	0

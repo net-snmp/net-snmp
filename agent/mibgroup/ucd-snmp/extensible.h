@@ -8,9 +8,9 @@
 config_require(util_funcs)
   
 struct extensible *get_exten_instance (struct extensible *, int);
-unsigned char *var_extensible_shell (struct variable *, oid *, int *, int, int *, int (**write) (int, u_char *, u_char, int, u_char *, oid *, int) );
-int fixExecError (int, u_char *, u_char, int, u_char *, oid *,int);
-unsigned char *var_extensible_relocatable (struct variable *, oid *, int *, int, int *, int (**write) (int, u_char *, u_char, int, u_char *, oid *, int) );
+extern FindVarMethod var_extensible_shell;
+extern WriteMethod fixExecError;
+extern FindVarMethod var_extensible_relocatable;
 struct subtree *find_extensible (struct subtree *, oid *, int, int);
 
 /* config file parsing routines */

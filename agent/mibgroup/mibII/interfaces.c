@@ -213,7 +213,7 @@ header_ifEntry(struct variable *vp,
 	       int *length,
 	       int exact,
 	       int *var_len,
-	       int (**write_method) (int, u_char *,u_char, int, u_char *,oid*, int))
+	       WriteMethod **write_method)
 {
 #define IFENTRY_NAME_LENGTH	10
     oid newname[MAX_NAME_LEN];
@@ -271,7 +271,7 @@ header_interfaces(struct variable *vp,
 		  int *length,
 		  int exact,
 		  int *var_len,
-		  int (**write_method) (int, u_char *,u_char, int, u_char *,oid*, int))
+		  WriteMethod **write_method)
 {
 #define INTERFACES_NAME_LENGTH	8
   oid newname[MAX_NAME_LEN];
@@ -302,7 +302,7 @@ var_interfaces(struct variable *vp,
 	       int *length,
 	       int exact,
 	       int *var_len,
-	       int (**write_method) (int, u_char *,u_char, int, u_char *,oid*, int))
+	       WriteMethod **write_method)
 {
   if (header_interfaces(vp, name, length, exact, var_len, write_method) == MATCH_FAILED )
     return NULL;
@@ -486,7 +486,7 @@ var_ifEntry(struct variable *vp,
 	    int *length,
 	    int exact,
 	    int *var_len,
-	    int (**write_method) (int, u_char *,u_char, int, u_char *,oid*, int))
+	    WriteMethod **write_method)
 {
   int interface;
   struct if_msghdr if_msg;
@@ -623,7 +623,7 @@ header_interfaces(struct variable *vp,
 		  int *length,
 		  int exact,
 		  int *var_len,
-		  int (**write_method) (int, u_char *,u_char, int, u_char *,oid*, int))
+		  WriteMethod **write_method)
 {
 #define INTERFACES_NAME_LENGTH	8
     oid newname[MAX_NAME_LEN];
@@ -656,7 +656,7 @@ header_ifEntry(struct variable *vp,
 	       int *length,
 	       int exact,
 	       int *var_len,
-	       int (**write_method) (int, u_char *,u_char, int, u_char *,oid*, int))
+	       WriteMethod **write_method)
 {
 #define IFENTRY_NAME_LENGTH	10
     oid newname[MAX_NAME_LEN];
@@ -711,7 +711,7 @@ var_interfaces(struct variable *vp,
 	       int *length,
 	       int exact,
 	       int *var_len,
-	       int (**write_method) (int, u_char *,u_char, int, u_char *,oid*, int))
+	       WriteMethod **write_method)
 {
     if (header_interfaces(vp, name, length, exact, var_len, write_method) == MATCH_FAILED )
 	return NULL;
@@ -736,7 +736,7 @@ var_ifEntry(struct variable *vp,
 	    int *length,
 	    int exact,
 	    int *var_len,
-	    int (**write_method) (int, u_char *,u_char, int, u_char *,oid*, int))
+	    WriteMethod **write_method)
 {
     static struct ifnet ifnet;
     register int interface;
@@ -913,7 +913,7 @@ var_ifEntry(struct variable *vp,
 	    int *length,
 	    int exact,
 	    int *var_len,
-	    int (**write_method) (int, u_char *,u_char, int, u_char *,oid*, int))
+	    WriteMethod **write_method)
 {
     static struct ifnet ifnet;
     register int interface;
@@ -1085,7 +1085,7 @@ var_ifEntry(struct variable *vp,
 	    int *length,
 	    int exact,
 	    int *var_len,
-	    int (**write_method) (int, u_char *,u_char, int, u_char *,oid*, int))
+	    WriteMethod **write_method)
 {
     int        interface;
     mib2_ifEntry_t      ifstat;
@@ -1796,7 +1796,7 @@ header_interfaces(struct variable *vp,
 		  int *length,
 		  int exact,
 		  int *var_len,
-		  int (**write_method) (int, u_char *,u_char, int, u_char *,oid*, int))
+		  WriteMethod **write_method)
 {
 #define INTERFACES_NAME_LENGTH	8
     oid newname[MAX_NAME_LEN];
@@ -1828,7 +1828,7 @@ header_ifEntry(struct variable *vp,
 	       int *length,
 	       int exact,
 	       int *var_len,
-		int (**write_method) (int, u_char *,u_char, int, u_char *,oid*, int))
+	       WriteMethod **write_method)
 {
 #define IFENTRY_NAME_LENGTH	10
     oid newname[MAX_NAME_LEN];
@@ -1883,7 +1883,7 @@ var_interfaces(struct variable *vp,
 		int *length,
 		int exact,
 		int *var_len,
-		int (**write_method) (int, u_char *,u_char, int, u_char *,oid*, int))
+		WriteMethod **write_method)
 {
     size_t len;
     int count;
@@ -1911,7 +1911,7 @@ var_ifEntry(struct variable *vp,
 	    int *length,
 	    int exact,
 	    int *var_len,
-	    int (**write_method) (int, u_char *,u_char, int, u_char *,oid*, int))
+	    WriteMethod **write_method)
 {
 	int interface;
 	static int sname[6] = { CTL_NET, PF_LINK, NETLINK_GENERIC,

@@ -31,6 +31,7 @@
 
 #include "mibincl.h"
 #include "read_config.h"
+#include "agent_read_config.h"
 #include "../../../snmplib/system.h"
 #include "vacm.h"
 #include "vacm_vars.h"
@@ -243,7 +244,7 @@ void vacm_free_group (void)
 
 void vacm_parse_access (char *word, char *param)
 {
-    char *name, *context, *model, *level, *prefix, *read, *write, *notify;
+    char *name, *context, *model, *level, *prefix, *pread, *pwrite, *notify;
     int imodel, ilevel;
     struct vacm_accessEntry *ap;
 
@@ -252,8 +253,8 @@ void vacm_parse_access (char *word, char *param)
     model = strtok(NULL, " \t\n");
     level = strtok(NULL, " \t\n");
     prefix = strtok(NULL, " \t\n");
-    read = strtok(NULL, " \t\n");
-    write = strtok(NULL, " \t\n");
+    pread = strtok(NULL, " \t\n");
+    pwrite = strtok(NULL, " \t\n");
     notify = strtok(NULL, " \t\n");
     if (strcmp(context, "\"\"") == 0) *context = 0;
     if (strcasecmp(model, "any") == 0) imodel = SNMP_SEC_MODEL_ANY;
@@ -276,8 +277,8 @@ void vacm_parse_access (char *word, char *param)
 	return;
     }
     ap = vacm_createAccessEntry (name, context, imodel, ilevel);
-    strcpy(ap->readView, read);
-    strcpy(ap->writeView, write);
+    strcpy(ap->readView, pread);
+    strcpy(ap->writeView, pwrite);
     strcpy(ap->notifyView, notify);
     ap->storageType = SNMP_STORAGE_PERMANENT;
     ap->status = SNMP_ROW_ACTIVE;
@@ -428,7 +429,7 @@ u_char *var_vacm_sec2group(struct variable *vp,
 			   int *length,
 			   int exact,
 			   int *var_len,
-			   int (**write_method) (int, u_char *,u_char, int, u_char *,oid*, int))
+			   WriteMethod **write_method)
 {
     struct vacm_groupEntry *gp;
     oid *groupSubtree;
@@ -508,7 +509,7 @@ u_char *var_vacm_access(struct variable *vp,
 			int *length,
 			int exact,
 			int *var_len,
-			int (**write_method) (int, u_char *,u_char, int, u_char *,oid*, int))
+			WriteMethod **write_method)
 {
     struct vacm_accessEntry *gp;
     int secmodel;
@@ -651,7 +652,7 @@ u_char *var_vacm_view(struct variable *vp,
 		      int *length,
 		      int exact,
 		      int *var_len,
-		      int (**write_method) (int, u_char *,u_char, int, u_char *,oid*, int))
+		      WriteMethod **write_method)
 {
     struct vacm_viewEntry *gp;
     char viewName[32];

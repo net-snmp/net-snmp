@@ -7,10 +7,7 @@
 #define _MIBGROUP_HRSWRUN_H
 
 extern void	init_hr_swrun (void);
-extern u_char	*var_hrswrun  (struct variable *, oid *, int *, int, int *,
-			       int (**write) (int, u_char *, u_char, int,
-					      u_char *, oid *, int));
-
+extern FindVarMethod var_hrswrun;
 
 
 #define	HRSWRUN_OSINDEX		1

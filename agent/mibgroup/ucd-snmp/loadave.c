@@ -108,6 +108,7 @@
 #include "util_funcs.h"
 #include "../kernel.h"
 #include "read_config.h"
+#include "agent_read_config.h"
 #include "auto_nlist.h"
 
 double maxload[3];
@@ -166,7 +167,7 @@ unsigned char *var_extensible_loadave(struct variable *vp,
 				      int *length,
 				      int exact,
 				      int *var_len,
-				      int (**write_method) (int, u_char *,u_char, int, u_char *,oid*, int))
+				      WriteMethod **write_method)
 {
 
   static long long_ret;

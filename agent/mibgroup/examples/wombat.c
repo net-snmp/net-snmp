@@ -128,7 +128,7 @@ header_wombat(struct variable *vp,
 	      int *length,
 	      int exact,
 	      int *var_len,
-	      int (**write_method) (int, u_char *,u_char, int, u_char *,oid*, int))
+	      WriteMethod **write_method)
 {
 #define WOMBAT_NAME_LENGTH	8
     oid newname[MAX_NAME_LEN];
@@ -166,7 +166,7 @@ var_wombat(struct variable *vp,
 	   int *length,
 	   int exact,
 	   int *var_len,
-	   int (**write_method) (int, u_char *,u_char, int, u_char *,oid*, int))
+	   WriteMethod **write_method)
 {
     if (header_wombat(vp, name, length, exact, var_len, write_method) == MATCH_FAILED )
 	return NULL;

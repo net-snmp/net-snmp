@@ -5,8 +5,8 @@
 #ifndef _MIBGROUP_PARTY_VARS_H
 #define _MIBGROUP_PARTY_VARS_H
 
-u_char *var_party (struct variable *, oid *, int *, int, int *, int (**write) (int, u_char *, u_char, int, u_char *, oid *, int) );
-int write_party (int, u_char *, u_char, int, u_char *, oid *, int);
+extern FindVarMethod var_party;
+extern WriteMethod write_party;
 struct partyEntry *party_rowCreate (oid *, int);
 void party_rowDelete (oid *, int);
 

@@ -15,6 +15,7 @@ void load_rtentries (struct radix_node *);
 #if defined(freebsd2) || defined(netbsd1) || defined(bsdi2) || defined(openbsd2)
 struct sockaddr_in *klgetsa (struct sockaddr_in *);
 #endif
-u_char	*var_ipRouteEntry (struct variable*, oid *, int *, int, int *, int (**write) (int, u_char *, u_char, int, u_char *, oid *, int) );
+
+extern FindVarMethod var_ipRouteEntry;
 
 #endif /* _MIBGROUP_VAR_ROUTE_H */

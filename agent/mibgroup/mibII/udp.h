@@ -18,8 +18,8 @@ struct udp_mib
 config_arch_require(solaris2, kernel_sunos5)
 
 extern void	init_udp (void);
-extern u_char	*var_udp (struct variable *, oid *, int *, int, int *, int (**write) (int, u_char *, u_char, int, u_char *, oid *, int) );
-extern u_char	*var_udpEntry (struct variable *, oid *, int *, int, int *, int (**write) (int, u_char *, u_char, int, u_char *, oid *, int) );
+extern FindVarMethod var_udp;
+extern FindVarMethod var_udpEntry;
 
 
 #define UDPINDATAGRAMS	    0

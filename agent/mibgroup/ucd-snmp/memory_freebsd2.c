@@ -212,7 +212,7 @@ unsigned char *var_extensible_mem(struct variable *vp,
 				  int *length,
 				  int exact,
 				  int *var_len,
-				  int (**write_method) (int, u_char *,u_char, int, u_char *,oid*, int))
+				  WriteMethod **write_method)
 {
     static long long_ret;
     static char errmsg[300];

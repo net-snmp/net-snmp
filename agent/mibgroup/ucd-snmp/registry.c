@@ -52,7 +52,7 @@ header_registry(struct variable *vp,
 		int *length,
 		int exact,
 		int *var_len,
-		int (**write_method) (int, u_char *,u_char, int, u_char *,oid*, int))
+		WriteMethod **write_method)
 {
 #define REGISTRY_NAME_LENGTH	10
     oid newname[MAX_NAME_LEN];
@@ -97,7 +97,7 @@ var_registry(struct variable *vp,
 	     int *length,
 	     int exact,
 	     int *var_len,
-	     int (**write_method) (int, u_char *,u_char, int, u_char *,oid*, int))
+	     WriteMethod **write_method)
 {
   struct subtree *index;
     if ((index =

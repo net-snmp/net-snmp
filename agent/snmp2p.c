@@ -61,6 +61,7 @@ SOFTWARE.
 #include "snmp_impl.h"
 #include "system.h"
 #include "snmp.h"
+#include "snmp_vars.h"
 
 #include "m2m.h"
 #include "party.h"

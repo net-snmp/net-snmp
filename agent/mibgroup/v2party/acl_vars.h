@@ -7,8 +7,8 @@
 
 #include "acl.h"
 
-extern u_char *var_acl (struct variable *, oid *, int *, int, int *, int (**write) (int, u_char *, u_char, int, u_char *, oid *, int));
-extern int write_acl (int, u_char *, u_char, int, u_char *, oid *, int);
+extern FindVarMethod var_acl;
+extern WriteMethod write_acl;
 
 #define ACLTABLE	PARTYMIB, 2, 3, 1, 1
 

@@ -50,6 +50,7 @@
 #include "mib.h"
 #include "snmp_api.h"
 #include "snmp_impl.h"
+#include "snmp_debug.h"
 #include "snmp_vars.h"
 #include "smux.h"
 #include "snmp_rip2.h"
@@ -64,7 +65,7 @@ var_rip2(struct variable *vp,
 	 int *length,
 	 int exact,
 	 int *var_len,
-	 int (**write_method) (int, u_char *,u_char, int, u_char *,oid*, int))
+	 WriteMethod **write_method)
 {
 	u_char *var;
 	int result;

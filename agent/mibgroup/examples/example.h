@@ -19,9 +19,7 @@ config_require(util_funcs);
 /* These functions are then defined in the example.c file */
 
 void	init_example();
-u_char	*var_example (struct variable *, oid *, int *, int, int *, int
-		      (**write) (int, u_char *, u_char, int, u_char *, oid *,
-				 int));
+FindVarMethod var_example;
 
 
 /* Magic number definitions.  These numbers are the last oid index

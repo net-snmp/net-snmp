@@ -6,8 +6,7 @@
 #define _MIBGROUP_HRDEVICE_H
 
 extern void	init_hr_device (void);
-extern u_char	*var_hrdevice (struct variable *, oid *, int *, int, int *, int (**write) (int, u_char *, u_char, int, u_char *, oid *, int));
-;
+extern FindVarMethod var_hrdevice;
 
 #define	HRDEV_INDEX		1
 #define	HRDEV_TYPE		2

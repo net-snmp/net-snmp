@@ -7,7 +7,7 @@
 config_require(util_funcs)
 
 void	init_loadave (void);
-unsigned char *var_extensible_loadave (struct variable *, oid *, int *, int, int *, int (**write) (int, u_char *, u_char, int, u_char *, oid *, int) );
+extern FindVarMethod var_extensible_loadave;
 
 /* config file parsing routines */
 void loadave_parse_config (char *, char *);

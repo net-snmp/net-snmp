@@ -7,7 +7,7 @@
 
 extern void	init_hr_filesys (void);
 extern void	Init_HR_FileSys (void);
-extern u_char	*var_hrfilesys (struct variable *, oid *, int *, int, int *, int (**write) (int, u_char *, u_char, int, u_char *, oid *, int) );
+extern FindVarMethod var_hrfilesys;
 extern int   Get_Next_HR_FileSys (void);
 
 extern int   	Get_FSIndex (char *);

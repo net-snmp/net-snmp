@@ -31,8 +31,8 @@
 #include "snmp.h"
 #include "snmp_api.h"
 #include "snmp_impl.h"
-#include "snmp_vars.h"
 #include "../../../snmplib/system.h"
+#include "snmp_vars.h"
 
 #include "acl.h"
 #include "view.h"
@@ -115,7 +115,7 @@ write_party(int action,
 {
     struct partyEntry *pp, *rp = NULL;
     int var, indexlen, len;
-    oid *index;
+    oid *indexoid;
     long val;
     oid buf[32];
     int bigsize = 1000, size;
@@ -125,15 +125,15 @@ write_party(int action,
 	return SNMP_ERR_NOCREATION;  
     var = name[11];
     indexlen = name[12];
-    index = name + 13;
+    indexoid = name + 13;
     if (length != 13 + indexlen)
 	return SNMP_ERR_NOCREATION;
 
-    pp = party_getEntry(index, indexlen);
+    pp = party_getEntry(indexoid, indexlen);
     if (pp)
 	rp = pp->reserved;
     if (action == RESERVE1 && !pp){
-	if ((pp = party_rowCreate(index, indexlen)) == NULL)
+	if ((pp = party_rowCreate(indexoid, indexlen)) == NULL)
 	    return SNMP_ERR_RESOURCEUNAVAILABLE;
 	rp = pp->reserved;
 	/* create default vals here in reserve area
@@ -188,7 +188,7 @@ write_party(int action,
 	}
     } else if (action == FREE){
 	if (pp && pp->partyStatus == SNMP_ROW_NONEXISTENT){
-	    party_rowDelete(index, indexlen);
+	    party_rowDelete(indexoid, indexlen);
 	    pp = rp = NULL;
 	}
 	if (pp)	/* satisfy postcondition for bitMask */
@@ -540,7 +540,7 @@ var_party(struct variable *vp,
 	  int *length,
 	  int exact,
 	  int *var_len,
-	  int (**write_method) (int, u_char *,u_char, int, u_char *,oid*, int))
+	  WriteMethod **write_method)
 {
     oid newname[MAX_NAME_LEN], lowname[MAX_NAME_LEN];
     int newnamelen, lownamelen=0;

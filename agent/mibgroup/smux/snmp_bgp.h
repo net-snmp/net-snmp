@@ -7,9 +7,7 @@
 
 config_require(smux/smux)
 
-    u_char  *var_bgp (struct variable *, oid *, int *, int, int *, int
-		      (**write) (int, u_char *, u_char, int, u_char *, oid *,
-				 int));
+extern FindVarMethod var_bgp;
 
 
 #define BGPVERSION			0
