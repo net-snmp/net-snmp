@@ -240,7 +240,7 @@ void snmpd_free_trapsinks (void)
 	 *
 	 *******************/
 
-void convert_v2_to_v1( struct variable_list *vars, struct snmp_pdu *template )
+void convert_v2_to_v1( struct variable_list *vars, struct snmp_pdu *template_pdu )
 {
     struct variable_list *v, *trap_v=NULL, *ent_v=NULL;
     oid  trap_prefix[] = { SNMPV2_TRAPS_PREFIX };
@@ -265,13 +265,13 @@ void convert_v2_to_v1( struct variable_list *vars, struct snmp_pdu *template )
 		 */
     if ( snmp_oid_compare( trap_v->val.objid, OID_LENGTH(trap_prefix), 
     			   trap_prefix,       OID_LENGTH(trap_prefix)) == 0 ) {
-	template->trap_type     = trap_v->val.objid[OID_LENGTH(trap_prefix)]-1;
-	template->specific_type = 0;
+	template_pdu->trap_type     = trap_v->val.objid[OID_LENGTH(trap_prefix)]-1;
+	template_pdu->specific_type = 0;
     }
     else {
 	len = trap_v->val_len /sizeof( oid );
-	template->trap_type     = 6;	/* enterprise specific */
-	template->specific_type = trap_v->val.objid[len-1];
+	template_pdu->trap_type     = 6;	/* enterprise specific */
+	template_pdu->specific_type = trap_v->val.objid[len-1];
     }
 
 		/*
@@ -712,7 +712,7 @@ void
 snmpd_parse_config_trapcommunity(const char *word, char *cptr)
 {
     if (snmp_trapcommunity) free(snmp_trapcommunity);
-    snmp_trapcommunity = malloc (strlen(cptr)+1);
+    snmp_trapcommunity = (char *)malloc (strlen(cptr)+1);
     copy_nword(cptr, snmp_trapcommunity, strlen(cptr)+1);
 }
 

@@ -342,7 +342,7 @@ int snmpTargetAddr_addTAddress(
 	  return(0);
       } */
     SNMP_FREE(entry->tAddress);
-    entry->tAddress = (char *)malloc(len);
+    entry->tAddress = (u_char *)malloc(len);
     entry->tAddressLen = len;
     memcpy(entry->tAddress, cptr, len);
   }
@@ -816,7 +816,7 @@ write_snmpTargetAddrTAddress(
   /* Finally, we're golden, check if we should save value */
   if (action == COMMIT)  {    
     SNMP_FREE(temp_struct->tAddress);
-    temp_struct->tAddress = (char *)malloc(var_val_len);
+    temp_struct->tAddress = (u_char *)malloc(var_val_len);
     temp_struct->tAddressLen = var_val_len;
     memcpy(temp_struct->tAddress, var_val, var_val_len);
     

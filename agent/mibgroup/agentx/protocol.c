@@ -938,7 +938,7 @@ agentx_parse_opaque(u_char *data, size_t *length, int *type,
     } fu;
     int tmp;
     u_char *buf;
-    char *cp;
+    u_char *cp;
 
     cp = agentx_parse_string( data, length,
 				opaque_buf, opaque_len, network_byte_order);
