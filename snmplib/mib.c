@@ -5154,6 +5154,8 @@ _add_strings_to_oid(void *tp, char *cp,
 			goto bad_id;
 		    objid[*objidlen++] = subid;
 		    cp = cp2;
+                    if (!cp)
+                        goto bad_id;
 		}
 	    }
 	    else {
@@ -5912,10 +5914,10 @@ mib_to_asn_type(int mib_type)
         return ASN_OBJECT_ID;
 
     case TYPE_OCTETSTR:
-    case TYPE_IPADDR:
         return ASN_OCTET_STR;
 
     case TYPE_NETADDR:
+    case TYPE_IPADDR:
         return ASN_IPADDRESS;
 
     case TYPE_INTEGER32:
