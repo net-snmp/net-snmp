@@ -29,7 +29,7 @@ $example_start
         /* `active', which indicates that the conceptual row is
               available for use by the managed device */
     case INTERNAL_$node.uc_ACTIVE:
-        $m2c_node_lh = ROWSTATUS_ACTIVE;
+        $m2c_node_lh = RowStatus_ACTIVE;
         break;
 
         /* `notInService', which indicates that the conceptual
@@ -39,7 +39,7 @@ $example_start
                  the row, availability of resources, or consistency with
                  the current state of the managed device */
     case INTERNAL_$node.uc_NOTINSERVICE:
-        $m2c_node_lh = ROWSTATUS_NOTINSERVICE;
+        $m2c_node_lh = RowStatus_NOTINSERVICE;
         break;
 
         /* `notReady', which indicates that the conceptual row
@@ -48,7 +48,7 @@ $example_start
                  managed device (i.e., one or more required columns in
                  the conceptual row have not been instanciated) */
     case INTERNAL_$node.uc_NOTREADY:
-        $m2c_node_lh = ROWSTATUS_NOTREADY;
+        $m2c_node_lh = RowStatus_NOTREADY;
         break;
 
     default:
