@@ -659,15 +659,11 @@ not_there:
 }
 
 static double
-constant_NETSNMP_DS_LIB_M(char *name, int len, int arg)
+constant_NETSNMP_DS_LIB_MIB_(char *name, int len, int arg)
 {
-    if (16 + 3 >= len ) {
-	errno = EINVAL;
-	return 0;
-    }
-    switch (name[16 + 3]) {
+    switch (name[19 + 0]) {
     case 'C':
-	if (strEQ(name + 16, "IB_COMMENT_TERM")) {	/* NETSNMP_DS_LIB_M removed */
+	if (strEQ(name + 19, "COMMENT_TERM")) {	/* NETSNMP_DS_LIB_MIB_ removed */
 #ifdef NETSNMP_DS_LIB_MIB_COMMENT_TERM
 	    return NETSNMP_DS_LIB_MIB_COMMENT_TERM;
 #else
@@ -675,7 +671,7 @@ constant_NETSNMP_DS_LIB_M(char *name, int len, int arg)
 #endif
 	}
     case 'E':
-	if (strEQ(name + 16, "IB_ERRORS")) {	/* NETSNMP_DS_LIB_M removed */
+	if (strEQ(name + 19, "ERRORS")) {	/* NETSNMP_DS_LIB_MIB_ removed */
 #ifdef NETSNMP_DS_LIB_MIB_ERRORS
 	    return NETSNMP_DS_LIB_MIB_ERRORS;
 #else
@@ -683,7 +679,7 @@ constant_NETSNMP_DS_LIB_M(char *name, int len, int arg)
 #endif
 	}
     case 'P':
-	if (strEQ(name + 16, "IB_PARSE_LABEL")) {	/* NETSNMP_DS_LIB_M removed */
+	if (strEQ(name + 19, "PARSE_LABEL")) {	/* NETSNMP_DS_LIB_MIB_ removed */
 #ifdef NETSNMP_DS_LIB_MIB_PARSE_LABEL
 	    return NETSNMP_DS_LIB_MIB_PARSE_LABEL;
 #else
@@ -691,7 +687,7 @@ constant_NETSNMP_DS_LIB_M(char *name, int len, int arg)
 #endif
 	}
     case 'R':
-	if (strEQ(name + 16, "IB_REPLACE")) {	/* NETSNMP_DS_LIB_M removed */
+	if (strEQ(name + 19, "REPLACE")) {	/* NETSNMP_DS_LIB_MIB_ removed */
 #ifdef NETSNMP_DS_LIB_MIB_REPLACE
 	    return NETSNMP_DS_LIB_MIB_REPLACE;
 #else
@@ -699,13 +695,42 @@ constant_NETSNMP_DS_LIB_M(char *name, int len, int arg)
 #endif
 	}
     case 'W':
-	if (strEQ(name + 16, "IB_WARNINGS")) {	/* NETSNMP_DS_LIB_M removed */
+	if (strEQ(name + 19, "WARNINGS")) {	/* NETSNMP_DS_LIB_MIB_ removed */
 #ifdef NETSNMP_DS_LIB_MIB_WARNINGS
 	    return NETSNMP_DS_LIB_MIB_WARNINGS;
 #else
 	    goto not_there;
 #endif
 	}
+    }
+    errno = EINVAL;
+    return 0;
+
+not_there:
+    errno = ENOENT;
+    return 0;
+}
+
+static double
+constant_NETSNMP_DS_LIB_M(char *name, int len, int arg)
+{
+    if (16 + 2 >= len ) {
+	errno = EINVAL;
+	return 0;
+    }
+    switch (name[16 + 2]) {
+    case 'D':
+	if (strEQ(name + 16, "IBDIRS")) {	/* NETSNMP_DS_LIB_M removed */
+#ifdef NETSNMP_DS_LIB_MIBDIRS
+	    return NETSNMP_DS_LIB_MIBDIRS;
+#else
+	    goto not_there;
+#endif
+	}
+    case '_':
+	if (!strnEQ(name + 16,"IB", 2))
+	    break;
+	return constant_NETSNMP_DS_LIB_MIB_(name, len, arg);
     }
     errno = EINVAL;
     return 0;

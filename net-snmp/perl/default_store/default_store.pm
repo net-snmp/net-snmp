@@ -72,6 +72,7 @@ our %EXPORT_TAGS = ( 'all' => [ qw(
 				   NETSNMP_DS_LIB_PERSISTENT_DIR
 				   NETSNMP_DS_LIB_CONFIGURATION_DIR
 				   NETSNMP_DS_LIB_SECMODEL
+				   NETSNMP_DS_LIB_MIBDIRS
 	netsnmp_ds_get_boolean
 	netsnmp_ds_get_int
 	netsnmp_ds_get_string
@@ -142,6 +143,7 @@ our @EXPORT = qw(
 				   NETSNMP_DS_LIB_PERSISTENT_DIR
 				   NETSNMP_DS_LIB_CONFIGURATION_DIR
 				   NETSNMP_DS_LIB_SECMODEL
+				   NETSNMP_DS_LIB_MIBDIRS
 );
 our $VERSION = '0.01';
 
@@ -262,6 +264,7 @@ None by default.
 				   NETSNMP_DS_LIB_PERSISTENT_DIR
 				   NETSNMP_DS_LIB_CONFIGURATION_DIR
 				   NETSNMP_DS_LIB_SECMODEL
+				   NETSNMP_DS_LIB_MIBDIRS
 
 =head2 Exportable functions
 
