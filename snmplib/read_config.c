@@ -491,7 +491,7 @@ read_config_files (int when)
     cptr1 = cptr2 = envconfpath;
     i = 1;
     while (i && *cptr2 != 0) {
-      while(*cptr1 != 0 && *cptr1 != ':')
+      while(*cptr1 != 0 && *cptr1 != ENV_SEPARATOR_CHAR)
         cptr1++;
       if (*cptr1 == 0)
         i = 0;
