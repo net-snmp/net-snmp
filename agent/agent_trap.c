@@ -510,7 +510,7 @@ convert_v1pdu_to_v2( netsnmp_pdu* template_v1pdu )
                  community_oid, community_oid_len,
                  ASN_OCTET_STR,
                  template_v1pdu->community, 
-                 strlen(template_v1pdu->community)))
+                 template_v1pdu->community_len))
             snmp_log(LOG_WARNING,
                  "send_trap: failed to append snmpTrapCommunity varbind\n");
     }
