@@ -345,6 +345,7 @@ static void *xmalloc (size_t);
 static char *xstrdup (const char *);
 #endif
 static void free_tree (struct tree *);
+static void free_partial_tree (struct tree *);
 static void free_node (struct node *);
 #ifdef TEST
 static void xmalloc_stats (FILE *);
@@ -650,6 +651,22 @@ alloc_node(int modid)
 }
 
 static void
+free_partial_tree(struct tree *tp)
+{
+    if ( !tp)
+        return;
+
+    /* remove the data from this tree node */
+    free_enums(&tp->enums);
+    free_ranges(&tp->ranges);
+    free_indexes(&tp->indexes);
+    SNMP_FREE(tp->label);
+    SNMP_FREE(tp->hint);
+    SNMP_FREE(tp->units);
+    SNMP_FREE(tp->description);
+}
+
+static void
 free_tree(struct tree *Tree)
 {
     if (Tree == NULL)
@@ -657,39 +674,26 @@ free_tree(struct tree *Tree)
         return;
     }
 
-    free_enums(&Tree->enums);
-    free_ranges(&Tree->ranges);
-    free_indexes(&Tree->indexes);
-    if (Tree->description)
-        free(Tree->description);
-    if (Tree->label)
-        free(Tree->label);
-
     if (Tree->number_modules > 1 )
         free((char*)Tree->module_list);
 
-    /* free_tree(Tree->child_list); */
+    free_partial_tree (Tree);
     free ((char*)Tree);
 }
 
 static void
 free_node(struct node *np)
 {
-    if (np->tc_index == -1) {
-        free_enums(&np->enums);
-        free_ranges(&np->ranges);
-    }
+    if ( !np) return;
+
+    free_enums(&np->enums);
+    free_ranges(&np->ranges);
     free_indexes(&np->indexes);
-    if (np->description)
-        free(np->description);
-    if (np->label)
-        free(np->label);
-
-    if (np->units)
-        free(np->units);
-    if (np->parent)
-        free(np->parent);
-
+    if (np->label) free(np->label);
+    if (np->hint) free(np->hint);
+    if (np->units) free(np->units);
+    if (np->description) free(np->description);
+    if (np->parent) free(np->parent);
     free((char*)np);
 }
 
@@ -1157,16 +1161,14 @@ do_subtree(struct tree *root,
 			 *  and fill in the full information.
 			 */
                 merge_anon_children( anon_tp, tp );
+                free_partial_tree(anon_tp);
                 anon_tp->label = tp->label;  tp->label=NULL;
                 anon_tp->child_list = tp->child_list;  tp->child_list=NULL;
                 anon_tp->modid = tp->modid;
                 anon_tp->tc_index = tp->tc_index;
                 anon_tp->type = tp->type;
-                free_enums(&anon_tp->enums);
                 anon_tp->enums = tp->enums;  tp->enums=NULL;
-                free_indexes(&anon_tp->indexes);
                 anon_tp->indexes = tp->indexes;  tp->indexes=NULL;
-                free_ranges(&anon_tp->ranges);
                 anon_tp->ranges = tp->ranges;  tp->ranges=NULL;
                 anon_tp->hint = tp->hint;  tp->hint=NULL;
                 anon_tp->units = tp->units;  tp->units = NULL;
@@ -1469,6 +1471,7 @@ get_tc(const char *descriptor,
 	    *rp = copy_ranges(tcp->ranges);
 	}
 	if (hint) {
+	    if (*hint) free(*hint);
 	    *hint = (tcp->hint ? xstrdup(tcp->hint) : NULL);
 	}
 	return tcp->type;
@@ -1695,17 +1698,19 @@ parse_asntype(FILE *fp,
 
         if (i == MAXTC){
             print_error("Too many textual conventions", token, type);
+            SNMP_FREE(hint);
+            return NULL;
+        }
+        if (!(type & SYNTAX_MASK)){
+            print_error("Textual convention doesn't map to real type", token,
+                        type);
+            SNMP_FREE(hint);
             return NULL;
         }
         tcp = &tclist[i];
         tcp->modid = current_module;
         tcp->descriptor = xstrdup(name);
         tcp->hint = hint;
-        if (!(type & SYNTAX_MASK)){
-            print_error("Textual convention doesn't map to real type", token,
-                        type);
-            return NULL;
-        }
         tcp->type = type;
         *ntype = get_token(fp, ntoken, MAXTOKEN);
         if (*ntype == LEFTPAREN){
@@ -2170,23 +2175,22 @@ parse_macro(FILE *fp,
 {
     register int type;
     char token[MAXTOKEN];
-    char quoted_string_buffer[MAXQUOTESTR];
     struct node *np;
     int iLine = Line;
 
-    np = (struct node *)1;  /* alloc_node(current_module); */
+    np = alloc_node(current_module);
     if (np == NULL) return(NULL);
-    type = get_token(fp, token, MAXTOKEN);
+    type = get_token(fp, token, sizeof(token));
     while (type != EQUALS && type != ENDOFFILE) {
-        type = get_token(fp, quoted_string_buffer, MAXQUOTESTR);
+        type = get_token(fp, token, sizeof(token));
     }
     if (type != EQUALS) return NULL;
     while (type != BEGIN && type != ENDOFFILE) {
-        type = get_token(fp, quoted_string_buffer, MAXQUOTESTR);
+        type = get_token(fp, token, sizeof(token));
     }
     if (type != BEGIN) return NULL;
     while (type != END && type != ENDOFFILE) {
-        type = get_token(fp, quoted_string_buffer, MAXQUOTESTR);
+        type = get_token(fp, token, sizeof(token));
     }
     if (type != END) return NULL;
 
@@ -2273,12 +2277,24 @@ parse_imports(FILE *fp)
 	if ( mp->modid == current_module) {
             if ( import_count == 0)
 		return;
+            if (mp->imports && (mp->imports != root_imports))
+	    {
+		/* this can happen if all modules are in one source file. */
+		for ( i=0 ; i<mp->no_imports; ++i ) {
+	DEBUGMSGTL(("parse-mibs",  "#### freeing Module %d '%s' %d\n",
+	mp->modid, mp->imports[i].label, mp->imports[i].modid));
+		    free((char *)mp->imports[i].label);
+		}
+		free((char*)mp->imports);
+	    }
             mp->imports = (struct module_import *)
               xcalloc(import_count, sizeof(struct module_import));
             if (mp->imports == NULL) return;
 	    for ( i=0 ; i<import_count ; ++i ) {
 		mp->imports[i].label = import_list[i].label;
 		mp->imports[i].modid = import_list[i].modid;
+	DEBUGMSGTL(("parse-mibs",  "#### adding Module %d '%s' %d\n",
+	mp->modid, mp->imports[i].label, mp->imports[i].modid));
 	    }
 	    mp->no_imports = import_count;
 	    return;
@@ -2721,9 +2737,9 @@ parse(FILE *fp,
             nnp = parse_macro(fp, name);
             if (nnp == NULL){
                 print_error("Bad parse of MACRO", NULL, type);
-                return NULL;
+                /*return NULL;*/
             }
-            nnp = NULL; /* IGNORE MACRO */
+            free_node(nnp); /* IGNORE */
             break;
         case MODULEIDENTITY:
             nnp = parse_moduleIdentity(fp, name);
@@ -3466,14 +3482,7 @@ merge_parse_objectid(struct node *np,
 static void
 tree_from_node(struct tree *tp, struct node *np)
 {
-    free_enums(&tp->enums);
-    free_ranges(&tp->ranges);
-    free_indexes(&tp->indexes);
-
-    SNMP_FREE(tp->label);
-    SNMP_FREE(tp->hint);
-    SNMP_FREE(tp->units);
-    SNMP_FREE(tp->description);
+    free_partial_tree(tp);
 
     tp->label = np->label;  np->label = NULL;
     tp->enums = np->enums;  np->enums = NULL;
