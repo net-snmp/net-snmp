@@ -16,6 +16,7 @@ TABLE OF CONTENTS
   Availability
 * Installation
   Copying And Copyrights
+* Frequently Asked Questions
 * Code Update Announcements / Mailing List(S)
   Extensibility
   Example Usage 
@@ -31,12 +32,13 @@ INTRO
 
   This package contains a port and modified code of the CMU 2.1.2.1
   snmp agent.  It has been modified to allow extensibility quickly
-  and easily.  It is far from the best and most configurable systems;
-  but hey: its free.
+  and easily.  It is far from the best and most configurable system;
+  but hey: it's free.
   
 SUPPORTED ARCHITECTURES
 
-  It has been know to work on the following architectures:  
+  It has been known to work on the following architectures:  
+  (Please see the FAQ file for more details)
 
      hppa1.1-hp-hpux9.05
        - known to work under 9.03, 9.01
@@ -44,8 +46,8 @@ SUPPORTED ARCHITECTURES
        - known to work under 10.01
      mips-dec-ultrix4.4
        - known to work under 4.2, 4.3
-     sparc-sun-solaris2.4
-       - known to work under 2.3, 2.5
+     sparc-sun-solaris2.5
+       - known to work under 2.3, 2.4
      sparc-sun-sunos4.1.4
        - known to work under 4.1.2, 4.1.3
      *-netbsd1.1
@@ -55,8 +57,8 @@ SUPPORTED ARCHITECTURES
      *-freebsd2.?
      bsdi?
 
-  Please let me know if you compile it on other OS versions and it
-  works for you so I can add them to the above list.
+  Please let us know if you compile it on other OS versions and it
+  works for you so we can add them to the above list.
 
   Porting:  Please! read the PORTING file.
 
@@ -65,9 +67,10 @@ AVAILABILITY
   ftp.ece.ucdavis.edu:/pub/snmp/ucd-snmp.README
   ftp.ece.ucdavis.edu:/pub/snmp/ucd-snmp.tar.gz
 
-  This file will always point to the latest revision.  If you see
-  newer revisions in the directory marked with a -A[1-9] or -B[1-9]
-  please note that these are alpha ports of the next release.  Beware.
+  or [European mirror]:
+
+  sunsite.cnlab-switch.ch:/mirror/ucd-snmp/ucd-snmp.README
+  sunsite.cnlab-switch.ch:/mirror/ucd-snmp/ucd-snmp.tar.gz
 
 INSTALLATION
 
@@ -77,18 +80,22 @@ COPYING AND COPYRIGHTS
   
   See the COPYING file distributed with this package.
 
+FREQUENTLY ASKED QUESTIONS
+
+  See the FAQ file distributed with this package.
+
 CODE UPDATE ANNOUNCEMENTS / MAILING LIST(S)
 
-  See the NEWS file and the ChangeLog file for details on what changes
-  between releases.
+  See the NEWS file and the ChangeLog file for details on what has
+  changed between releases.
 
-  I hate broadcasting announce messages to other mailing lists and
-  newsgroups, so there is a mailing list setup to handle release
-  announcements.  Anytime I put new software out for ftp, I'll mail it
-  to ucd-snmp-announce@ece.ucdavis.edu.  To subscribe/unsubscribe
-  yourself to/from this list, mail a note to
+  We hate broadcasting announce messages to other mailing lists and
+  newsgroups, so there is a mailing list set up to handle release
+  announcements.  Anytime we put new software out for ftp, we'll mail
+  this fact to ucd-snmp-announce@ece.ucdavis.edu.  To
+  subscribe/unsubscribe yourself to/from this list, mail a note to
   ucd-snmp-announce-request@ece.ucdavis.edu with a subject line of
-  'subscribe' or 'unsubscribe'.  I will post new announcements on a
+  'subscribe' or 'unsubscribe'.  We will post new announcements on a
   very infrequent basis to the other channels (the snmp mailing lists
   and comp.protocols.snmp), but only for major code revisions and not
   for bug-fix patches or small feature upgrades.
@@ -102,7 +109,7 @@ CODE UPDATE ANNOUNCEMENTS / MAILING LIST(S)
   In addition, there is yet another mailing list called
   ucd-snmp-coders@ece.ucdavis.edu, which is where all bug reports,
   questions and patches should be sent to.  The traffic volume is a
-  bit higher and is really only of interest to those who intend to
+  lot higher and is really only of interest to those who intend to
   work on the code and submit patches frequently.  To join it, mail a
   "subscribe" request to ucd-snmp-coders-request@ece.ucdavis.edu.
 
@@ -114,7 +121,8 @@ EXTENSIBILITY
 
   Note:  This agent uses its own API for extensibility.  The IETF's
   agentx working group is working on developing a common API for
-  subagent extensibility.  See them for details.
+  subagent extensibility.  When they have finished the developement of
+  their specifications, we will begin working on implementing them.
 
 EXAMPLE USAGE 
 
@@ -128,21 +136,24 @@ CONFIGURATION
 
 SNMPv1 vs. SNMPv2
 
-  Typically, I doubt you want people to look at most of your mib tree.
+  Typically, we doubt you want people to look at most of your mib tree.
   By defining GLOBALSECURITY in the config.h file, you can restrict
-  access to any of the mibs implemented in this package to the
-  security type you define it to.  I define mine to SNMPV2AUTH, or
-  authenticated requests only.  I then define the SECURITYEXCEPTIONS
-  to allow .100 requests, since HP Openview can only use SNMPv1
-  protocols.  The CMU code does not have hooks for privacy protocols,
-  so nothing is mentioned about it here.  If you don't understand
-  anything I have said here, change GLOBALSECURITY to SNMPV1 and you
-  shouldn't have problems.
+  access to any of the mibs implemented in this package to this
+  security type.  I define mine to SNMPV2AUTH, for authenticated
+  requests only.  I then define the SECURITYEXCEPTIONS to allow .100
+  requests, since HP Openview can only use SNMPv1 protocols.  The CMU
+  code does not support enscryption due to export regulation in the
+  United States, so it is not possible to restrict access to encrypted
+  transmittions.
+
+  If you don't understand anything we have said here, select the
+  default security model of SNMPV1 when prompted by the configure
+  script and you shouldn't have problems.
 
 THANKS
 
   The following people have contributed various patches and
-  improvements.  To them I owe my deepest thanks (and you do too!):
+  improvements.  To them we owe our deepest thanks (and you do too!):
 
     Dan A. Dickey <ddickey@transition.com>
     Dave Shield <D.T.Shield@csc.liv.ac.uk>
@@ -155,10 +166,15 @@ THANKS
     Marc G. Fournier <scrappy@ki.net>
     Gary A. Hayward <gah@bellcore.com>
 
-  I've probably forgotten people on this list.  Let me know if you've
-  contributed code and I've left you out.
+  We've probably forgotten people on this list.  Let us know if you've
+  contributed code and we've left you out.
 
 SUBMITTING BUG REPORTS
+
+  The best way to submit a bug report is to use the enclosed
+  "bug-report" script.  Please run the script on the architecture you
+  are having problems with, as it automatically mails us with uname
+  output for our usage.
 
   Please submit all bug reports and patches to
   ucd-snmp-coders@ece.ucdavis.edu.  *Please* include what version of
@@ -169,12 +185,12 @@ SUBMITTING BUG REPORTS
 
 CLOSING
 
-  I love patches.   Send some to me!  But before you do, please see
-  the 'PORTING' file for information on helping me out with the
+  we love patches.  Send some to us!  But before you do, please see
+  the 'PORTING' file for information on helping us out with the
   process of integrating your patches.
 
-  Also, We're interested if anyone actually uses/likes/hates/whatever this
-  package...  Mail us a note and let us know what you think of it!
+  Also, We're interested if anyone actually uses/likes/hates/whatever
+  this package...  Mail us a note and let us know what you think of it!
 
   Have fun,
 
