@@ -8,7 +8,19 @@
 #endif
 
 #include "snmp_transport.h"
-
+#ifdef SNMP_TRANSPORT_TCP_DOMAIN
+#include "snmpTCPDomain.h"
+#endif
+#ifdef SNMP_TRANSPORT_IPX_DOMAIN
+#include "snmpIPXDomain.h"
+#endif
+#ifdef SNMP_TRANSPORT_UNIX_DOMAIN
+#include "snmpUnixDomain.h"
+#endif
+#ifdef SNMP_TRANSPORT_AAL5PVC_DOMAIN
+#include "snmpAAL5PVCDomain.h"
+#endif
+#include "snmp_api.h"
 
 
 /*  The standard SNMP domains.  */
@@ -105,4 +117,67 @@ void		     	snmp_transport_free	(snmp_transport *t)
     free(t->data);
   }
   free(t);
+}
+
+
+
+int		       snmp_transport_support	(const oid *in_oid,
+						 size_t in_len,
+						 oid **out_oid,
+						 size_t *out_len)
+{
+  if (snmp_oid_compare(snmpUDPDomain,
+		       sizeof(snmpUDPDomain)/sizeof(snmpUDPDomain[0]),
+		       in_oid, in_len) == 0) {
+    if (out_oid != NULL && out_len != NULL) {
+      *out_oid = (oid *)snmpUDPDomain;
+      *out_len = sizeof(snmpUDPDomain)/sizeof(snmpUDPDomain[0]);
+    }
+    return 1;
+  }
+#ifdef SNMP_TRANSPORT_TCP_DOMAIN
+  if (snmp_oid_compare(snmpTCPDomain,
+		       sizeof(snmpTCPDomain)/sizeof(snmpTCPDomain[0]),
+		       in_oid, in_len) == 0) {
+    if (out_oid != NULL && out_len != NULL) {
+      *out_oid = (oid *)snmpTCPDomain;
+      *out_len = sizeof(snmpTCPDomain)/sizeof(snmpTCPDomain[0]);
+    }
+    return 1;
+  }
+#endif
+#ifdef SNMP_TRANSPORT_IPX_DOMAIN
+  if (snmp_oid_compare(snmpIPXDomain,
+		       sizeof(snmpIPXDomain)/sizeof(snmpIPXDomain[0]),
+		       in_oid, in_len) == 0) {
+    if (out_oid != NULL && out_len != NULL) {
+      *out_oid = (oid *)snmpIPXDomain;
+      *out_len = sizeof(snmpIPXDomain)/sizeof(snmpIPXDomain[0]);
+    }
+    return 1;
+  }   
+#endif
+#ifdef SNMP_TRANSPORT_UNIX_DOMAIN
+  if (snmp_oid_compare(ucdSnmpUnixDomain,
+		       sizeof(ucdSnmpUnixDomain)/sizeof(ucdSnmpUnixDomain[0]),
+		       in_oid, in_len) == 0) {
+    if (out_oid != NULL && out_len != NULL) {
+      *out_oid = (oid *)ucdSnmpUnixDomain;
+      *out_len = sizeof(ucdSnmpUnixDomain)/sizeof(ucdSnmpUnixDomain[0]);
+    }
+    return 1;
+  }   
+#endif
+#ifdef SNMP_TRANSPORT_AAL5PVC_DOMAIN
+  if (snmp_oid_compare(ucdSnmpAal5PvcDomain,
+		 sizeof(ucdSnmpAal5PvcDomain)/sizeof(ucdSnmpAal5PvcDomain[0]),
+		       in_oid, in_len) == 0) {
+    if (out_oid != NULL && out_len != NULL) {
+      *out_oid = (oid *)ucdSnmpAal5PvcDomain;
+      *out_len = sizeof(ucdSnmpAal5PvcDomain)/sizeof(ucdSnmpAal5PvcDomain[0]);
+    }
+    return 1;
+  }   
+#endif
+  return 0;
 }
