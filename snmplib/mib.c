@@ -3860,7 +3860,7 @@ fprint_description(FILE *f,
     fprintf(f, " %lu }\n", *objid);
 }
 
-void
+static void
 print_tree_node(FILE *f,
 		struct tree *tp, int width)
 {
