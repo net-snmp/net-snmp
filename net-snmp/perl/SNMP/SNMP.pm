@@ -95,8 +95,8 @@ $use_enums = 0; # non-zero to return integers as enums and allow sets
 $use_numeric = 0; # non-zero to return object tags as numeric OID's instead
                   # of converting to textual representations.  use_long_names,
                   # if non-zero, returns the entire OID, otherwise, return just
-                  # the label portion.  Probably want to use_long_names in most
-                  # cases.
+                  # the label portion.  use_long_names is also set if the
+		  # use_numeric variable is set.
 %MIB = ();      # tied hash to access libraries internal mib tree structure
                 # parsed in from mib files
 $verbose = 0;   # controls warning/info output of SNMP module,
@@ -463,6 +463,9 @@ sub new {
    $this->{UseNumeric} ||= $SNMP::use_numeric;
    $this->{TimeStamp} ||= $SNMP::timestamp_vars;
 
+   # Force UseLongNames if UseNumeric is in use.
+   $this->{UseLongNames}++  if $this->{UseNumeric};
+
    bless $this, $type;
 }
 
@@ -501,6 +504,9 @@ sub update {
    $this->{UseEnums} ||= $SNMP::use_enums;
    $this->{UseNumeric} ||= $SNMP::use_numeric;
    $this->{TimeStamp} ||= $SNMP::timestamp_vars;
+
+   # Force UseLongNames if UseNumeric is in use.
+   $this->{UseLongNames}++  if $this->{UseNumeric};
 
    SNMP::_update_session($this->{Version},
 		 $this->{Community},
@@ -1210,9 +1216,8 @@ will also be acceptable when supplied to 'set' operations
 
 defaults to the value of SNMP::use_numeric at time of session
 creation. set to non-zero to have <tags> for get methods returned
-as numeric OID's rather than descriptions.  if UseLongNames is
-set, returns the entire OID as given, otherwise just the last two
-octets.
+as numeric OID's rather than descriptions.  UseLongNames will be
+set so that the full OID is returned to the caller.
 
 =item TimeStamp
 
@@ -1630,10 +1635,8 @@ set on a per session basis (see UseEnums)
 
 default to '0',set to non-zero to have <tags> for 'get'
 methods returned as numeric OID's rather than descriptions.
-if UseLongNames is set, returns the entire OID as given,
-otherwise just the last two octets. setting 'UseLongNames'
-is highly recommended.  Set on a per-session basis (see
-UseNumeric).
+UseLongNames will be set so that the entire OID will be
+returned.  Set on a per-session basis (see UseNumeric).
 
 =item $SNMP::timestamp_vars
 
