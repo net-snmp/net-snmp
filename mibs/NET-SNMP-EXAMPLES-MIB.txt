@@ -30,6 +30,7 @@ netSnmpExamples MODULE-IDENTITY
 netSnmpExampleScalars       OBJECT IDENTIFIER ::= { netSnmpExamples 1 }
 netSnmpExampleTables        OBJECT IDENTIFIER ::= { netSnmpExamples 2 }
 netSnmpExampleNotifications OBJECT IDENTIFIER ::= { netSnmpExamples 3 }
+-- netSnmpTutorial          OBJECT IDENTIFIER ::= { netSnmpExamples 4 }
 
 --
 -- Example scalars
