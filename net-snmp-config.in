@@ -306,7 +306,7 @@ if test "x$usage" = "xyes"; then
   echo ""
   echo "    --base-cflags     lists additional compilation flags needed"
   echo "                      for external applications (excludes -I. and"
-  echo "                      extra developer warning flags, if any)
+  echo "                      extra developer warning flags, if any)"
   echo "    --cflags          lists additional compilation flags needed"
   echo "    --libs            lists libraries needed for building applications"
   echo "    --agent-libs      lists libraries needed for building subagents"
