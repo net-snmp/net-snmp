@@ -25,7 +25,7 @@
 snmpset - communicates with a network entity using SNMP SET Requests.
 .SH SYNOPSIS
 .B snmpset
-[COMMON OPTIONS] OID type value [OID type value]...
+[COMMON OPTIONS] OID TYPE VALUE [OID TYPE VALUE]...
 .SH DESCRIPTION
 .B snmpset
 is an SNMP application that uses the SNMP SET request to set
@@ -35,7 +35,9 @@ value to be set must accompany each object identifier.  Each variable
 name is given in the format specified in
 .IR variables(5) .
 .PP
-The type is a single character, one of:
+The
+.I TYPE
+is a single character, one of:
 .RS
 .PD 0
 .TP 3
