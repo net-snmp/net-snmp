@@ -148,7 +148,8 @@ makefileclean:
 
 configclean: makefileclean
 	rm -f config.cache config.status config.log \
-		libtool include/net-snmp/net-snmp-config.h configure-summary
+		libtool include/net-snmp/net-snmp-config.h \
+		net-snmp-config configure-summary
 	rm -f mibs/.index
 	rm -f include/net-snmp/agent/mib_module_config.h		\
 		snmplib/snmpsm_init.h                   \
