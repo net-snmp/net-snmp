@@ -7,6 +7,7 @@
  *  Some comments paraphrased from the SUN man pages 
  *  Version 0.1 initial release (Dec 1999)
  *  Version 0.2 added support for multiprocessor machines (Jan 2000)
+ *  Version 0.3 some reliability enhancements and compile time fixes (Feb 2000)
  *
  */
 
@@ -68,6 +69,9 @@ static ulong (*cpu_state_old)[CPU_STATES];
 /* Since MIB wants CPU_SYSTEM, see getCPU function */
 static float (*cpu_perc)[CPU_STATES+1];
 
+/* To get rid of compiler warnings b/c prototype is inaccurate. */ 
+static char string_cpu_stat[] = "cpu_stat";
+
 /* Global variables end here */
 
 
@@ -80,9 +84,14 @@ ulong countCPU(kstat_ctl_t *kstat_fd)
   /* A "Named Kstat", see "man kstat" (Named Statistics) for description of structure */
   kstat_named_t *n_cpus;
   kstat_t *ksp_count;
+
+  /* To get rid of compiler warnings b/c prototype is inaccurate */
+  static char string_unix[]="unix";
+  static char string_system_misc[]="system_misc";
+  static char string_ncpus[]="ncpus";
   
   /* Look for a kstat by name */
-  ksp_count = kstat_lookup(kstat_fd, "unix", 0, "system_misc"); 
+  ksp_count = kstat_lookup(kstat_fd, string_unix, 0, string_system_misc); 
   
   if (ksp_count == NULL)
     {
@@ -95,7 +104,7 @@ ulong countCPU(kstat_ctl_t *kstat_fd)
   
   /* kstat_data_lookup looks in the kstat specified by arg 1 for the */
   /* string specified by arg 2.  Works only for named kstats. */
-  n_cpus = kstat_data_lookup(ksp_count, "ncpus");
+  n_cpus = kstat_data_lookup(ksp_count, string_ncpus);
   
   if (n_cpus == NULL)
     {
@@ -246,7 +255,7 @@ long getMisc(int what)
 	  /* If ksp is NULL we don't have a CPU :) */
 	  /* For MP machines: We hit an empty CPU board, trying next one... */
 	  /* kstat_lookup: look for a kstat by module, instance and name */
-	  if ((ksp = kstat_lookup(kstat_fd, "cpu_stat", cpu_slot, NULL)) != NULL)
+	  if ((ksp = kstat_lookup(kstat_fd, string_cpu_stat, cpu_slot, NULL)) != NULL)
 	    {
 	      /* Yeah, we found a CPU. */  
 	      /* Read data from kstat into cs structure */
@@ -294,7 +303,7 @@ long getMisc(int what)
       
       for (cpu_slot=0;cpu_num<num_cpu;cpu_slot++)
 	{ 
-	  if ((ksp = kstat_lookup(kstat_fd, "cpu_stat", cpu_slot, NULL)) != NULL)
+	  if ((ksp = kstat_lookup(kstat_fd, string_cpu_stat, cpu_slot, NULL)) != NULL)
 	    {
 	      /* Yeah, we found a CPU. */
 	      /* Update cs structure with new kstat values after we are awake again. */
@@ -437,7 +446,7 @@ long getCPU(int state)
 	{ 
 	  /* If ksp is NULL we don't have a CPU :) */
 	  /* For MP machines: We hit an empty CPU board, trying next one... */
-	  if ((ksp = kstat_lookup(kstat_fd, "cpu_stat", cpu_slot, NULL)) != NULL)
+	  if ((ksp = kstat_lookup(kstat_fd, string_cpu_stat, cpu_slot, NULL)) != NULL)
 	    {
 	      /* Yeah, we found a CPU. */
 	      /* Read data from kstat into cs structure */
@@ -487,7 +496,7 @@ long getCPU(int state)
 
        	  /* If ksp is NULL we don't have a CPU :) */
 	  /* For MP machines: We hit an empty CPU board, trying next one... */
-	  if ((ksp = kstat_lookup(kstat_fd, "cpu_stat", cpu_slot, NULL)) != NULL)
+	  if ((ksp = kstat_lookup(kstat_fd, string_cpu_stat, cpu_slot, NULL)) != NULL)
 	    {
 	      /* Yeah, we found a CPU. */
 	      /* Read data from kstat into cs structure */
