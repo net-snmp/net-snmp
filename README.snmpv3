@@ -97,7 +97,7 @@ put this in your ~/.snmp/snmp.conf file:
   defContext none
   defAuthType MD5
   defSecurityLevel authNoPriv
-  defPassphrase new_passphrase
+  defAuthPassphrase new_passphrase
 
 And then the above line boils down to:
 
