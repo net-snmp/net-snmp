@@ -9,6 +9,8 @@
 #endif
 #include <getopt.h>
 
+#include <netinet/in.h>
+
 #include "mibincl.h"
 #include "proxy.h"
 #include "snmp_api.h"
