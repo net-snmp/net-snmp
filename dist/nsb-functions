@@ -39,8 +39,8 @@ nsb-prompt()
 #
 nsb-get-config()
 {
-#   echo src/configure --prefix=usr/local --with-sys-location=\"Location\" --with-sys-contact=\"System Administrator\" --disable-privacy --with-defaults --with-mib-modules=\"host disman/event-mib\"
-   src/configure --prefix=usr/local --with-sys-location=Location \
+   ngc_dir=$1
+   src/configure --prefix=$ngc_dir --with-sys-location=Location \
       --with-sys-contact='System Administrator' --disable-privacy \
       --with-defaults --with-mib-modules='host disman/event-mib'
 }
@@ -91,7 +91,7 @@ nsb-zip()
 nsb-build()
 {
 
-   if [ $# -ne 3 ]; then
+   if [ $# -ne 4 ]; then
       echo "usage: $0 release src_dir build_directory dest_dir"
       exit
    fi
@@ -99,28 +99,28 @@ nsb-build()
    release=$1
    src_dir=$2
    build_dir=$3
-#   dest_dir=$4
+   dest_dir=$4
 
    if [ ! -d $src_dir ]; then
       echo "$src_dir does not exist!"
       exit
    fi
 
-   platform=`nsb-sysname`
-   build=$build_dir/$platform
-
-   if [ ! -d $build ]; then
-      mkdir $build
-      if [ ! -d $build ]; then
-         echo "$build directory does not exist!"
+   if [ ! -d $build_dir ]; then
+      mkdir $build_dir
+      if [ ! -d $build_dir ]; then
+         echo "$build_dir directory does not exist!"
          exit;
       fi
    fi
 
-   nsb-info "Changing directories to $build"
-   cd $build
+   nsb-info "Changing directories to $build_dir"
+   cd $build_dir
 
-   if [ ! -h $build/src  ]; then
+   if [ -h src  ]; then
+      rm -f src
+   fi
+   if [ ! -h src  ]; then
       ln -s $src_dir src
    fi
 
@@ -134,7 +134,7 @@ nsb-build()
 
    if [ $NSB_SKIP_CONFIG -ne 1 ]; then
       nsb-info "Configuring... (log is nsb-out-config.$DATE)"
-      nsb-get-config | tee nsb-out-config.$DATE
+      nsb-get-config $dest_dir | tee nsb-out-config.$DATE
       nsb-prompt "press enter to continue"
    fi
 
