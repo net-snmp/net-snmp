@@ -4255,7 +4255,8 @@ _sess_read(void *sessp,
         if (callback == NULL || 
             callback(RECEIVED_MESSAGE,sp,pdu->reqid,pdu,magic) == 1){
           if (pdu->command == SNMP_MSG_REPORT) {
-            if (sp->s_snmp_errno == SNMPERR_NOT_IN_TIME_WINDOW) {
+            if (sp->s_snmp_errno == SNMPERR_NOT_IN_TIME_WINDOW ||
+                snmpv3_get_report_type(pdu) == SNMPERR_NOT_IN_TIME_WINDOW) {
               /* trigger immediate retry on recoverable Reports 
                * (notInTimeWindow), incr_retries == TRUE to prevent
                * inifinite resend 		       */
