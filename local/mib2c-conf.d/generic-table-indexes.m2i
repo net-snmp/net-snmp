@@ -17,7 +17,7 @@ typedef struct ${table}_idx {
 @foreach $node index@
 @    include m2c_setup_node.m2i@
 ##@    include details-node.m2i@
-        /** $node.syntax = $node.perltype = $node.type */
+        /** $m2c_node_summary */
 @    if $m2c_node_needlength == 1@
 @        eval $m2c_gi_maxlen = (126 - $node.oidlength - $m2c_gi_others)@
 @        if $m2c_node_maxlen > $m2c_gi_maxlen@
