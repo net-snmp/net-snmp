@@ -649,7 +649,9 @@ sc_encrypt(const oid * privtype, size_t privtypelen,
     memset(pad_block, 0, sizeof(pad_block));
     memset(key_struct, 0, sizeof(key_struct));
 #ifdef OLD_DES
-    memset(key_sch, 0, sizeof(key_sch));
+    memset(&key_sch, 0, sizeof(key_sch));
+#else
+    memset(&key_sched_store, 0, sizeof(key_sched_store));
 #endif
 #ifdef HAVE_AES
     memset(&aes_key,0,sizeof(aes_key));
@@ -813,7 +815,11 @@ sc_decrypt(const oid * privtype, size_t privtypelen,
      * exit cond 
      */
   sc_decrypt_quit:
-    memset(key_sch, 0, sizeof(key_sch));
+#ifdef OLD_DES
+    memset(&key_sch, 0, sizeof(key_sch));
+#else
+    memset(&key_sched_store, 0, sizeof(key_sched_store));
+#endif
     memset(key_struct, 0, sizeof(key_struct));
     memset(my_iv, 0, sizeof(my_iv));
     return rval;
