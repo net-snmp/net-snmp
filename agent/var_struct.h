@@ -10,8 +10,12 @@
  * 1.2.0
  */
 struct subtree {
-    oid			name[16];	/* objid prefix of subtree */
+    oid			name[16];	/* objid prefix of registered subtree */
     u_char 		namelen;	/* number of subid's in name above */
+    oid			start[16];	/* objid of start of covered range */
+    u_char 		start_len;	/* number of subid's in start name */
+    oid			end[16];	/* objid of end of covered range */
+    u_char 		end_len;	/* number of subid's in end name */
     struct variable	*variables;   /* pointer to variables array */
     int			variables_len;	/* number of entries in above array */
     int			variables_width; /* sizeof each variable entry */
@@ -20,6 +24,7 @@ struct subtree {
     u_char		flags;
     u_char		priority;
     struct subtree      *next;		/* List of 'sibling' subtrees */
+    struct subtree      *prev;		/* Make siblings a doubly-linked list */
     struct subtree      *children;	/* List of 'child' subtrees */
 };
 
