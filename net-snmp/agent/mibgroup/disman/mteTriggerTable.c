@@ -2080,12 +2080,6 @@ mte_discontinuity_occurred(struct mteTriggerTable_data *item)
   struct snmp_pdu *pdu = NULL, *response = NULL;
   unsigned long discoTicks = 0;  /*  cool var name  */
 
-  if (item->mteTriggerValueIDWildcard == TV_TRUE) {
-    pdu = snmp_pdu_create(SNMP_MSG_GETNEXT);
-  } else {
-    pdu = snmp_pdu_create(SNMP_MSG_GET);
-  }
-
   if (item->mteTriggerDeltaDiscontinuityIDLen == 0 ||
       (snmp_oid_compare(item->mteTriggerDeltaDiscontinuityID,
 			item->mteTriggerDeltaDiscontinuityIDLen,
@@ -2093,6 +2087,11 @@ mte_discontinuity_occurred(struct mteTriggerTable_data *item)
 			sizeof(sysUpTimeInstance)/sizeof(oid)) == 0)) {
     DEBUGMSGTL(("mte_disco", "discoID either zero-length or sysUpTimeInstance\n"));
   } else {
+    if (item->mteTriggerValueIDWildcard == TV_TRUE) {
+      pdu = snmp_pdu_create(SNMP_MSG_GETNEXT);
+    } else {
+      pdu = snmp_pdu_create(SNMP_MSG_GET);
+    }
     snmp_add_null_var(pdu, item->mteTriggerDeltaDiscontinuityID,
 		      item->mteTriggerDeltaDiscontinuityIDLen);
     response = mte_get_response(item, pdu);
