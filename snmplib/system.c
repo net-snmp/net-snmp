@@ -130,11 +130,32 @@ SOFTWARE.
 # define LOOPBACK    0x7f000001
 #endif
 
-
+/**
+ * fork current process into the background.
+ *
+ * This function forks a process into the background, in order to
+ * become a daemon process. It does a few things along the way:
+ *
+ * - becoming a process/session group leader, and  forking a second time so
+ *   that process/session group leader can exit.
+ *
+ * - changing the working directory to /
+ *
+ * - closing stdin, stdout and stderr (unless stderr_log is set) and
+ *   redirecting them to /dev/null
+ *
+ * @param quit_immediately : indicates if the parent process should
+ *                           exit after a successful fork.
+ * @param stderr_log       : indicates if stderr is being used for
+ *                           logging and shouldn't be closed
+ * @returns -1 : fork error
+ *           0 : child process returning
+ *          >0 : parent process returning. returned value is the child PID.
+ */
 int
 netsnmp_daemonize(int quit_immediately, int stderr_log)
 {
-    int i;
+    int i = 0;
     DEBUGMSGT(("daemonize","deamonizing...\n"));
 #if HAVE_FORK
     /*
@@ -202,7 +223,7 @@ netsnmp_daemonize(int quit_immediately, int stderr_log)
 #endif /* !WIN32 */
     }
 #endif /* HAVE_FORK */
-    return 0;
+    return i;
 }
 
 /*
