@@ -105,15 +105,18 @@ AC_ARG_WITH(rsaref,
 )
 
 tryopenssl=defaultyes
+askedopenssl=no
 AC_ARG_WITH(openssl,
 [  --with-openssl=PATH             Look for openssl in PATH/lib.],
     if test "x$withval" = "xyes"; then
       tryopenssl=yes
+      askedopenssl=yes
     elif test "x$withval" = "xno"; then
       tryopenssl=no
     elif test -d "$withval"; then
       AC_ADD_SEARCH_PATH($withval)
       tryopenssl=yes
+      askedopenssl=yes
     fi,
 )
 if test "x$tryopenssl" = "xdefaultyes"; then
@@ -1123,8 +1126,8 @@ if test "x$ac_cv_lib_crypto_EVP_md5" != "xyes" -o "x$ac_cv_header_openssl_hmac_h
 dnl if OpenSSL is not found, default to using internal md5 support.
     AC_DEFINE(USE_INTERNAL_MD5)
     AC_MSG_RESULT(Internal MD5 Support)
-    if test "x$tryopenssl" = "xyes"; then
-	AC_MSG_WARN(Asked to use OpenSSL but I couldn't find it.)
+    if test "x$askedopenssl" = "xyes"; then
+	AC_MSG_ERROR(Asked to use OpenSSL but I couldn't find it.)
     fi
 else
     if test "x$tryopenssl" = "xno"; then
