@@ -53,7 +53,12 @@
 #include <winsock.h>
 #endif
 
+#if HAVE_STDLIB_H
+#include <stdlib.h>
+#endif
+
 #include "md5.h"
+#include "tools.h"
 
 /* Compile-time declarations of MD5 ``magic constants''.
 */
@@ -371,7 +376,7 @@ MDsign(u_char *data, size_t len, u_char *mac, size_t maclen,
   u_char   extendedAuthKey[HASHKEYLEN];
   u_char   buf[HASHKEYLEN];
   size_t   i;
-  u_char  *cp;
+  u_char  *cp, *newdata = 0;
   int      rc = 0;
 
 /*
@@ -399,7 +404,15 @@ MDsign(u_char *data, size_t len, u_char *mac, size_t maclen,
   if (rc) goto update_end;
 
   i = len;
-  cp = data;
+  if (((unsigned int)data)%32 != 0) {
+      /* this relies on the ability to use integer math and thus we
+         must rely on data that aligns on 32-bit-word-boundries */
+      memdup(&newdata, data, len);
+      cp = newdata;
+  } else {
+      cp = data;
+  }
+  
   while (i >= 64) {
     rc = MDupdate(&MD, cp, 64*8);
 	if (rc) goto update_end;
@@ -429,6 +442,8 @@ update_end:
   memset(extendedAuthKey, 0, HASHKEYLEN);
   memset(&MD, 0, sizeof(MD));
 
+  if (newdata)
+      free(newdata);
   return rc;
 }
 
