@@ -182,11 +182,6 @@ unsigned char *var_extensible_loadave(vp, name, length, exact, var_len, write_me
 #ifdef HAVE_GETLOADAVG
   if (getloadavg(avenrun, sizeof(avenrun) / sizeof(avenrun[0])) == -1)
     return(0);
-#elif defined(ultrix) || defined(sun) || defined(__alpha)
-  if (auto_nlist(LOADAVE_SYMBOL,(char *) favenrun, sizeof(favenrun)) == 0)
-    return(0);
-  for(i=0;i<3;i++)
-    avenrun[i] = FIX_TO_DBL(favenrun[i]);
 #elif defined(linux)
   { FILE *in = fopen("/proc/loadavg", "r");
     if (!in) {
@@ -196,6 +191,11 @@ unsigned char *var_extensible_loadave(vp, name, length, exact, var_len, write_me
     fscanf(in, "%lf %lf %lf", &avenrun[0], &avenrun[1], &avenrun[2]);
     fclose(in);
   }
+#elif defined(ultrix) || defined(sun) || defined(__alpha)
+  if (auto_nlist(LOADAVE_SYMBOL,(char *) favenrun, sizeof(favenrun)) == 0)
+    return(0);
+  for(i=0;i<3;i++)
+    avenrun[i] = FIX_TO_DBL(favenrun[i]);
 #else
   if (auto_nlist(LOADAVE_SYMBOL,(char *) avenrun, sizeof(double)*3) == 0)
     return NULL;
