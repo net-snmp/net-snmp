@@ -15,6 +15,10 @@
 /* default location to look for mibs to load */
 #undef DEFAULT_MIBFILES
 
+/* should we compile to use special opaque types: float, double,
+   counter64, i64, ui64, union? */
+#define OPAQUE_SPECIAL_TYPES 1
+
 /* typedef for abreviated types */
 /* typedef unsigned char u_char; */
 /* typedef unsigned long u_long; */
@@ -79,6 +83,7 @@
    byte first (like Motorola and SPARC, unlike Intel and VAX).  */
 #undef WORDS_BIGENDIAN
 
+#define SNMPLIBPATH "\\USR\\LIB"
 #define SNMPSHAREPATH "\\USR"
 
 /* SNMPPATH contains (more) important files */
@@ -769,4 +774,5 @@
 
 /* comment the next line if you do not want SNMPv2 party-based auth. */
 #define USE_V2PARTY_PROTOCOL 1
+
 

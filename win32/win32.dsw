@@ -99,6 +99,19 @@ Package=<4>
 
 ###############################################################################
 
+Project: "snmptable"=".\snmptable\snmptable.dsp" - Package Owner=<4>
+
+Package=<5>
+{{{
+}}}
+
+Package=<4>
+{{{
+}}}
+
+##############################################################################
+
+
 Project: "snmptest"=".\snmptest\snmptest.dsp" - Package Owner=<4>
 
 Package=<5>
