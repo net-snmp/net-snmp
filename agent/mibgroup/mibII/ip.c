@@ -535,7 +535,7 @@ var_ip(struct variable *vp,
 long
 read_ip_stat(IP_STAT_STRUCTURE * ipstat, int magic)
 {
-    long            ret_value;
+    long            ret_value = 0;
 #if (defined(CAN_USE_SYSCTL) && defined(IPCTL_STATS))
     int             i;
 #endif
@@ -548,8 +548,7 @@ read_ip_stat(IP_STAT_STRUCTURE * ipstat, int magic)
     unsigned int    ulen;
 #endif
 
-#if ((defined(HAVE_SYS_SYSCTL_H) && defined(CTL_NET)) ||	\
-     (defined(CAN_USE_SYSCTL) && defined(IPCTL_STATS)))
+#if (defined(CAN_USE_SYSCTL) && defined(IPCTL_STATS))
     static int      sname[4] = { CTL_NET, PF_INET, IPPROTO_IP, 0 };
     size_t          len;
 #endif

@@ -654,14 +654,22 @@ ARP_Scan_Init(void)
 
     if (at)
         free(at);
+    rtnext = lim = at = 0;
+
     if (sysctl(mib, 6, NULL, &needed, NULL, 0) < 0)
         snmp_log_perror("route-sysctl-estimate");
-    if ((at = malloc(needed ? needed : 1)) == NULL)
-        snmp_log_perror("malloc");
-    if (sysctl(mib, 6, at, &needed, NULL, 0) < 0)
-        snmp_log_perror("actual retrieval of routing table");
-    lim = at + needed;
-    rtnext = at;
+    else {
+        if ((at = malloc(needed ? needed : 1)) == NULL)
+            snmp_log_perror("malloc");
+        else {
+            if (sysctl(mib, 6, at, &needed, NULL, 0) < 0)
+                snmp_log_perror("actual retrieval of routing table");
+            else {
+                lim = at + needed;
+                rtnext = at;
+            }
+        }
+    }
 
 #endif                          /* CAN_USE_SYSCTL */
 }
