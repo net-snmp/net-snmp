@@ -13,7 +13,7 @@ QUICK INSTRUCTIONS
 
   3) make
 
-  4) make install
+  4) as root:  make install
 
 Note: By default, everything will be installed in /usr/local.
       (see below for more instructions)
