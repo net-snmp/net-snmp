@@ -65,6 +65,7 @@ mibII/sysORTable.o: ../../snmplib/snmp_debug.h ../../snmplib/snmp_logging.h
 mibII/sysORTable.o: ../../snmplib/read_config.h ../../snmplib/tools.h
 mibII/sysORTable.o: ../../snmplib/system.h mibII/sysORTable.h struct.h
 mibII/sysORTable.o: util_funcs.h struct.h ../snmpd.h agentx/subagent.h
+mibII/sysORTable.o: agentx/client.h
 mibII/at.o: ../../mib_module_config.h ../../config.h ../../s/linux.h
 mibII/at.o: ../../s/sysv.h ../../s/generic.h ../../m/generic.h
 mibII/at.o:  mibincl.h 
@@ -809,16 +810,16 @@ target/snmpTargetParamsEntry.o: ./../../snmplib/read_config.h
 target/snmpTargetParamsEntry.o: ./../../snmplib/callback.h
 agentx/master.o: ../../config.h ../../mib_module_config.h ../../s/linux.h
 agentx/master.o: ../../s/sysv.h ../../s/generic.h ../../m/generic.h
-agentx/master.o:  ./../../snmplib/asn1.h
-agentx/master.o: ./../../snmplib/snmp_api.h ./../../snmplib/snmp_impl.h
+agentx/master.o: ./../../snmplib/asn1.h ./../../snmplib/snmp_api.h
+agentx/master.o: ./../../snmplib/snmp_impl.h 
 agentx/master.o:  ./../../snmplib/snmp.h
 agentx/master.o: ./../snmp_vars.h ./../var_struct.h ./../snmpd.h
 agentx/master.o: agentx/protocol.h agentx/master_admin.h
-agentx/master.o: agentx/master_request.h
+agentx/master.o: agentx/master_request.h ./../../snmplib/snmp_debug.h
 agentx/subagent.o: ../../config.h ../../mib_module_config.h ../../s/linux.h
 agentx/subagent.o: ../../s/sysv.h ../../s/generic.h ../../m/generic.h
-agentx/subagent.o:  ./../../snmplib/asn1.h
-agentx/subagent.o: ./../../snmplib/snmp_api.h ./../../snmplib/snmp_impl.h
+agentx/subagent.o: ./../../snmplib/asn1.h ./../../snmplib/snmp_api.h
+agentx/subagent.o: ./../../snmplib/snmp_impl.h 
 agentx/subagent.o: ./../../snmplib/snmp_client.h ./../../snmplib/snmp.h
 agentx/subagent.o: ./../snmp_vars.h ./../snmp_agent.h ./../var_struct.h
 agentx/subagent.o: ./../snmpd.h agentx/protocol.h agentx/client.h
@@ -878,6 +879,6 @@ agentx/master_request.o: ./../../snmplib/snmp_api.h
 agentx/master_request.o: ./../../snmplib/snmp_impl.h
 agentx/master_request.o: ./../../snmplib/snmp_client.h
 agentx/master_request.o: ./../../snmplib/snmp_debug.h ./../../snmplib/snmp.h
-agentx/master_request.o: agentx/protocol.h agentx/client.h ./../snmp_agent.h
-agentx/master_request.o: ./../snmp_vars.h ./../var_struct.h
+agentx/master_request.o: agentx/protocol.h agentx/client.h agentx/master.h
+agentx/master_request.o: ./../snmp_agent.h ./../snmp_vars.h ./../var_struct.h
 agentx/master_request.o: mibII/sysORTable.h
