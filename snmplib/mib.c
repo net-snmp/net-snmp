@@ -73,6 +73,7 @@ SOFTWARE.
 #include "system.h"
 #include "read_config.h"
 #include "snmp_debug.h"
+#include "default_store.h"
 
 static void sprint_by_type (char *, struct variable_list *, struct enum_list *, const char *, const char *);
 static int parse_subtree (struct tree *, const char *, oid *, size_t *);
@@ -993,6 +994,25 @@ register_mib_handlers (void)
     register_config_handler("snmp","mibfile",
 			    handle_mibfile_conf, NULL,
 			    "mibfile-to-read");
+
+    /* register the snmp.conf configuration handlers for default
+       parsing behaviour */
+    
+    ds_register_premib(ASN_BOOLEAN, "snmp","showMibErrors",
+                       DS_LIBRARY_ID, DS_LIB_MIB_ERRORS);
+    ds_register_premib(ASN_BOOLEAN, "snmp","strictCommentTerm",
+                       DS_LIBRARY_ID, DS_LIB_MIB_COMMENT_TERM);
+    ds_register_premib(ASN_BOOLEAN, "snmp","mibAllowUnderline",
+                       DS_LIBRARY_ID, DS_LIB_MIB_PARSE_LABEL);
+    ds_register_premib(ASN_INTEGER, "snmp","mibWarningLevel",
+                       DS_LIBRARY_ID, DS_LIB_MIB_WARNINGS);
+    
+    /* setup the default parser configurations, as specified by configure */
+#ifdef MIB_COMMENT_IS_EOL_TERMINATED
+    ds_set_boolean(DS_LIBRARY_ID, DS_LIB_MIB_COMMENT_TERM, 1);
+#else  /* !MIB_COMMENT_IS_EOL_TERMINATED */
+    ds_set_boolean(DS_LIBRARY_ID, DS_LIB_MIB_COMMENT_TERM, 0);
+#endif /* !MIB_COMMENT_IS_EOL_TERMINATED */
 }
 
 void

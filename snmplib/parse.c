@@ -86,6 +86,7 @@ SOFTWARE.
 #include "mib.h"
 #include "snmp_api.h"
 #include "snmp_debug.h"
+#include "default_store.h"
 
 /*
  * This is one element of an object identifier with either an integer
@@ -110,16 +111,7 @@ struct tc {     /* textual conventions */
 
 int Line = 1;
 char *File = (char *)"(none)";
-static int save_mib_descriptions = 0;
-static int mib_warnings = 0;
-static int mib_errors = 1;
 static int anonymous = 0;
-#ifdef MIB_COMMENT_IS_EOL_TERMINATED
-static int mib_comment_term = 1; /* 0=strict, 1=EOL terminated */
-#else  /* !MIB_COMMENT_IS_EOL_TERMINATED */
-static int mib_comment_term = 0; /* 0=strict, 1=EOL terminated */
-#endif /* !MIB_COMMENT_IS_EOL_TERMINATED */
-static int mib_parse_label = 0; /* 0=strict, 1=underscore OK in label */
 
 #define SYNTAX_MASK     0x80
 /* types of tokens
@@ -392,39 +384,43 @@ static struct node *merge_parse_objectid (struct node *, FILE *, char *);
 static struct index_list *getIndexes(FILE *fp);
 static void free_indexes(struct index_list *idxs);
 
+/* backwards compatibility wrappers */
 void snmp_set_mib_errors(int err)
 {
-    mib_errors = err;
+  ds_set_boolean(DS_LIBRARY_ID, DS_LIB_MIB_ERRORS, err);
 }
 
 void snmp_set_mib_warnings(int warn)
 {
-    mib_warnings = warn;
+  ds_set_int(DS_LIBRARY_ID, DS_LIB_MIB_WARNINGS, warn);
 }
 
 void snmp_set_save_descriptions(int save)
 {
-    save_mib_descriptions = save;
+  ds_set_boolean(DS_LIBRARY_ID, DS_LIB_SAVE_MIB_DESCRS, save);
 }
 
 void snmp_set_mib_comment_term(int save)
 {
-	mib_comment_term = save; /* 0=strict, 1=EOL terminated */
+  /* 0=strict, 1=EOL terminated */
+  ds_set_boolean(DS_LIBRARY_ID, DS_LIB_MIB_COMMENT_TERM, save);
 }
 
 void snmp_set_mib_parse_label(int save)
 {
-	mib_parse_label = save; /* 0=strict, 1=underscore OK in label */
+  /* 0=strict, 1=underscore OK in label */
+  ds_set_boolean(DS_LIBRARY_ID, DS_LIB_MIB_PARSE_LABEL, save);
 }
+/* end wrappers */
 
 void snmp_mib_toggle_options_usage(const char *lead, FILE *outf) {
   fprintf(outf, "%sMIBOPTS values:\n", lead);
   fprintf(outf, "%s    u: %sallow the usage of underlines in mib symbols.\n",
-          lead, ((mib_parse_label)?"dis":""));
+          lead, ((ds_get_boolean(DS_LIBRARY_ID, DS_LIB_MIB_PARSE_LABEL))?"dis":""));
   fprintf(outf, "%s    c: %sallow the usage of \"--\" to terminate comments.\n",
-          lead, ((mib_comment_term)?"":"dis"));
+          lead, ((ds_get_boolean(DS_LIBRARY_ID, DS_LIB_MIB_COMMENT_TERM))?"":"dis"));
   fprintf(outf, "%s    d: %ssave the descriptions of the mib objects.\n",
-          lead, ((save_mib_descriptions)?"don't ":""));
+          lead, ((ds_get_boolean(DS_LIBRARY_ID, DS_LIB_SAVE_MIB_DESCRS))?"don't ":""));
   fprintf(outf, "%s    e: Disable mib errors of MIB symbols conflicts\n",
           lead);
   fprintf(outf, "%s    w: Enable mib warnings of MIB symbols conflicts\n",
@@ -438,27 +434,31 @@ char *snmp_mib_toggle_options(char *options) {
     while(*options) {
       switch(*options) {
         case 'u':
-          mib_parse_label = !mib_parse_label;
+          ds_set_boolean(DS_LIBRARY_ID, DS_LIB_MIB_PARSE_LABEL, !ds_get_boolean(DS_LIBRARY_ID, DS_LIB_MIB_PARSE_LABEL));
           break;
 
         case 'c':
-          mib_comment_term = !mib_comment_term;
+          ds_set_boolean(DS_LIBRARY_ID, DS_LIB_MIB_COMMENT_TERM,
+                         !ds_get_boolean(DS_LIBRARY_ID,
+                                         DS_LIB_MIB_COMMENT_TERM));
           break;
            
         case 'e':
-          mib_errors = !mib_errors;
+          ds_set_boolean(DS_LIBRARY_ID, DS_LIB_MIB_ERRORS,
+                         !ds_get_boolean(DS_LIBRARY_ID, DS_LIB_MIB_ERRORS));
           break;
            
         case 'w':
-          mib_warnings=1;
+          ds_set_int(DS_LIBRARY_ID, DS_LIB_MIB_WARNINGS, 1);
           break;
 
         case 'W':
-          mib_warnings=2;
+          ds_set_int(DS_LIBRARY_ID, DS_LIB_MIB_WARNINGS, 2);
           break;
           
         case 'd':
-          save_mib_descriptions = !save_mib_descriptions;
+          ds_set_boolean(DS_LIBRARY_ID, DS_LIB_SAVE_MIB_DESCRS,
+                         !ds_get_boolean(DS_LIBRARY_ID, DS_LIB_SAVE_MIB_DESCRS));
           break;
 
         default:
@@ -1016,7 +1016,7 @@ merge_anon_children(struct tree *tp1,
                     break;
                 }
 		else if ( !label_compare( child1->label, child2->label) ) {
-	            if (mib_warnings)
+	            if (ds_get_int(DS_LIBRARY_ID, DS_LIB_MIB_WARNINGS))
 		        fprintf (stderr, "Warning: %s.%ld is both %s and %s (%s)\n",
 			        tp2->label, child1->subid,
                                 child1->label, child2->label, File);
@@ -1129,7 +1129,7 @@ do_subtree(struct tree *root,
                 !strncmp( tp->label, ANON, ANON_LEN)) {
                 anon_tp = tp;	/* Need to merge these two trees later */
             }
-	    else if (mib_warnings)
+	    else if (ds_get_int(DS_LIBRARY_ID, DS_LIB_MIB_WARNINGS))
 		fprintf (stderr, "Warning: %s.%ld is both %s and %s (%s)\n",
 			root->label, np->subid, tp->label, np->label, File);
 	}
@@ -1195,7 +1195,7 @@ do_subtree(struct tree *root,
             }
             else {
                 /* Uh?  One of these two should have been anonymous! */
-	        if (mib_warnings)
+	        if (ds_get_int(DS_LIBRARY_ID, DS_LIB_MIB_WARNINGS))
 		    fprintf (stderr, "Warning: expected anonymous node (either %s or %s) in %s\n",
 			tp->label, anon_tp->label, File);
             }
@@ -1277,7 +1277,7 @@ static void do_linkup(struct module *mp,
 		onp = orphan_nodes = nbuckets[i];
 	    nbuckets[i] = NULL;
 	    while (onp) {
-		if (mib_warnings)
+		if (ds_get_int(DS_LIBRARY_ID, DS_LIB_MIB_WARNINGS))
 		    fprintf (stderr, "Unlinked OID in %s: %s ::= { %s %ld }\n",
 			    mp->name, onp->label, onp->parent, onp->subid);
 		np = onp;
@@ -1746,7 +1746,8 @@ parse_objecttype(FILE *fp,
     type = get_token(fp, token, MAXTOKEN);
     if (type == LABEL){
         tctype = get_tc(token, current_module, &np->enums, &np->ranges, &np->hint);
-        if (tctype == LABEL && mib_warnings > 1){
+        if (tctype == LABEL &&
+            ds_get_int(DS_LIBRARY_ID, DS_LIB_MIB_WARNINGS) > 1){
             print_error("Warning: No known translation for type", token, type);
         }
         type = tctype;
@@ -1871,7 +1872,7 @@ parse_objecttype(FILE *fp,
               free_node(np);
               return NULL;
           }
-          if (save_mib_descriptions) {
+          if (ds_get_boolean(DS_LIBRARY_ID, DS_LIB_SAVE_MIB_DESCRS)) {
               np->description = xstrdup (quoted_string_buffer);
           }
           break;
@@ -1947,7 +1948,7 @@ parse_objectgroup(FILE *fp,
               free_node(np);
               return NULL;
           }
-          if (save_mib_descriptions) {
+          if (ds_get_boolean(DS_LIBRARY_ID, DS_LIB_SAVE_MIB_DESCRS)) {
               np->description = xstrdup (quoted_string_buffer);
           }
           break;
@@ -1995,7 +1996,7 @@ parse_notificationDefinition(FILE *fp,
               free_node(np);
               return NULL;
           }
-          if (save_mib_descriptions) {
+          if (ds_get_boolean(DS_LIBRARY_ID, DS_LIB_SAVE_MIB_DESCRS)) {
               np->description = xstrdup (quoted_string_buffer);
           }
           break;
@@ -2034,7 +2035,7 @@ parse_trapDefinition(FILE *fp,
                     free_node(np);
                     return NULL;
                 }
-                if (save_mib_descriptions) {
+                if (ds_get_boolean(DS_LIBRARY_ID, DS_LIB_SAVE_MIB_DESCRS)) {
                     np->description = xstrdup (quoted_string_buffer);
                 }
                 break;
@@ -2317,14 +2318,14 @@ read_module_replacements(const char *name)
 
     for ( mcp=module_map_head ; mcp; mcp=mcp->next ) {
 	if ( !label_compare( mcp->old_module, name )) {
-	    if (mib_warnings)
+	    if (ds_get_int(DS_LIBRARY_ID, DS_LIB_MIB_WARNINGS))
 		fprintf (stderr, "Loading replacement module %s for %s (%s)\n",
 			mcp->new_module, name, File);
 	    (void)read_module( mcp->new_module );
 	    return;
 	}
     }
-    if (mib_errors) 
+    if (ds_get_boolean(DS_LIBRARY_ID, DS_LIB_MIB_ERRORS)) 
 	print_error("Cannot find module", name, CONTINUE);
 
 }
@@ -2350,7 +2351,7 @@ read_import_replacements(const char *old_module_name,
 		    !strncmp( mcp->tag, node_identifier, mcp->tag_len ))
 	   ) {
 
-	    if (mib_warnings)
+	    if (ds_get_int(DS_LIBRARY_ID, DS_LIB_MIB_WARNINGS))
 	        fprintf (stderr, "Importing %s from replacement module %s instead of %s (%s)\n",
 			node_identifier, mcp->new_module, old_module_name, File);
 	    (void)read_module( mcp->new_module );
@@ -2402,7 +2403,7 @@ read_module_internal (const char *name)
 	    return MODULE_LOADED_OK;
 	}
 
-    if (mib_warnings > 1)
+    if (ds_get_int(DS_LIBRARY_ID, DS_LIB_MIB_WARNINGS) > 1)
 	fprintf(stderr, "Module %s not found\n", name);
     return MODULE_NOT_FOUND;
 }
@@ -2477,7 +2478,7 @@ new_module (const char *name,
 	    DEBUGMSGTL(("parse-mibs", "Module %s already noted\n", name));
 			/* Not the same file */
 	    if (label_compare(mp->file, file)) {
-		if (mib_warnings)
+		if (ds_get_int(DS_LIBRARY_ID, DS_LIB_MIB_WARNINGS))
 		    fprintf(stderr, "Warning: Module %s in both %s and %s\n",
 			    name, mp->file, file);
 
@@ -2556,7 +2557,8 @@ parse(FILE *fp,
 	    }
             state = BETWEEN_MIBS;
 #ifdef TEST
-            if (mib_warnings) xmalloc_stats (stderr);
+            if (ds_get_int(DS_LIBRARY_ID, DS_LIB_MIB_WARNINGS))
+              xmalloc_stats (stderr);
 #endif
             continue;
         case IMPORTS:
@@ -2700,7 +2702,7 @@ is_labelchar (int ich)
 {
     if ((isalnum(ich)) || (ich == '-'))
 	    return 1;
-    if (ich == '_' && mib_parse_label)
+    if (ich == '_' && ds_get_boolean(DS_LIBRARY_ID, DS_LIB_MIB_PARSE_LABEL))
 	    return 1;
 
     return 0;
@@ -2804,7 +2806,7 @@ get_token(FILE *fp,
     case '-':
 	ch_next = getc(fp);
 	if (ch_next == '-') {
-	  if (mib_comment_term) {
+	  if (ds_get_boolean(DS_LIBRARY_ID, DS_LIB_MIB_COMMENT_TERM)) {
 	    /* Treat the rest of this line as a comment. */
 	    last = ' '; /* skip last char next time. */
 	    while ((ch_next != EOF) && (ch_next != '\n'))
@@ -2982,7 +2984,7 @@ main(int argc, char *argv[])
 {
     int i;
     struct tree *tp;
-    mib_warnings = 2;
+    ds_set_int(DS_LIBRARY_ID, DS_LIB_MIB_WARNINGS, ) = 2;
 
     init_mib();
 
@@ -3017,7 +3019,8 @@ parseQuoteString(FILE *fp,
         }
         else if (ch == '"') {
             *token = '\0';
-            if (too_long && mib_warnings > 1)
+            if (too_long &&
+                ds_get_int(DS_LIBRARY_ID, DS_LIB_MIB_WARNINGS) > 1)
             {
                 /* show short form for brevity sake */
                 char ch_save = *(token_start + 50);
