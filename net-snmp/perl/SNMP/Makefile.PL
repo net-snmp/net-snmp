@@ -17,7 +17,7 @@ sub InitMakeParams {
     my %Params = (
 		  NAME         => 'SNMP',
 		  dist         => { SUFFIX => "gz", COMPRESS => "gzip -9f"},
-		  MAN3PODS     => 'SNMP',  # Pods will be built by installman.
+		  MAN3PODS     => {'SNMP.pm' => 'SNMP.pod'},
 		  XSPROTOARG   => '-noprototypes', 	# XXX remove later?
 		  VERSION_FROM => 'SNMP.pm',
 		  realclean        => { FILES => 'host' },
