@@ -131,8 +131,8 @@ ifType_map(u_long * mib_ifType_val_ptr, u_long raw_ifType_val)
             
         default:
             snmp_log(LOG_ERR, "couldn't map value %d for ifType\n",
-                     raw_ifType_val);</font>
-            (*mib_ifType_val_ptr) = IANAIFTYPE_OTHER;
+                     raw_ifType_val);
+            (*mib_ifType_val_ptr) = IANAIFTYPE_OTHER;</font>
     }
 
     return MFD_SUCCESS;
@@ -163,7 +163,7 @@ ifType_map(u_long * mib_ifType_val_ptr, u_long raw_ifType_val)
     <p>
     <h3>Skipping ifMtu</h3>
     <p>
-      Even thoug we've eliminated some columns from the valid columns, here
+      Even though we've eliminated some columns from the valid columns, here
       is a simple example if skipping a column:
     </p>
     <table><tr><td></td><td bgcolor=CCCCCC><pre>
@@ -205,7 +205,7 @@ ifMtu_get(ifTable_rowreq_ctx * rowreq_ctx, long *ifMtu_ptr)
 Version $Revision$
 <!-- Created: Fri Oct 24 10:41:49 EDT 2003 -->
 <!-- hhmts start -->
-Last modified: Tue Jun 22 17:38:04 EDT 2004
+Last modified: Sun Aug 29 00:12:13 EDT 2004
 <!-- hhmts end -->
 <!--#include virtual="/sfbutton.html" -->
   </body>
