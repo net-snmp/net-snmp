@@ -3,7 +3,11 @@
 #  Quick hack at UCD bug-report script
 #
 
-bug_reports_to=ucd-snmp-coders@ece.ucdavis.edu
+#bug_reports_to=ucd-snmp-coders@ece.ucdavis.edu
+bug_reports_to=Wesley.Hardaker@sphys.unil.ch
+
+# changed automagically
+VersionInfo="3.1.3.pre1";
 
 #
 #   Check how to do echo without a new line
@@ -22,10 +26,21 @@ else
 fi
 
 
+echo "You are about to compose a mail message to the"
+echo "ucd-snmp-coders@ece.ucdavis.edu.  Please write a detailed"
+echo "description of your problem.  At the end you will be given"
+echo "the opertunity to include optional text files, such as"
+echo "patches, make output, error files, etc..."
+echo ""
+echo "Note:  If at all possible, this should be run on the machine that"
+echo "       that you are having problems with.  If this is not the case,"
+echo "       please include the architecture you are having problems on."
+echo ""
+
 #
 #   Ask for subject and 'From:' field
 #
-subject="UCD-SNMP version X.X.X bug report"
+subject="UCD-SNMP version $VersionInfo bug report"
 echo $n "Subject [$subject]: $c"
 read answer
 if [ "$answer" != "" ]
@@ -33,7 +48,15 @@ then
     subject=$answer
 fi
 
-email=`whoami`@`hostname`
+# attempt to figure out domain name.
+domain=`grep domain /etc/resolv.conf`;
+if [ $? ]; then
+  domain=`echo $domain | awk '{print $2}'`
+else
+  domain=""
+fi
+
+email=`whoami`@`hostname`.$domain
 echo $n "Your email address [$email]: $c"
 read answer
 if [ "$answer" != "" ]
@@ -44,23 +67,12 @@ fi
 #
 #    Start to build the bug report
 #
-echo "UCD-SNMP version X.X.X bug report" >  $msg_file
-echo "---------------------------------" >> $msg_file
+echo "UCD-SNMP version $VersionInfo bug report" >  $msg_file
+echo "-------------------------------------------------" >> $msg_file
+
 echo $n "Press return to edit bug report file $c"
 read pause
 ${EDITOR:-vi} $msg_file
-
-#
-#    Add some potentially useful information
-#
-echo                                     >> $msg_file
-echo "System configuration:"             >> $msg_file
-uname -a                                 >> $msg_file
-if [ -f config.cache ]
-then
-    cat  config.cache                    >> $msg_file
-fi
-
 
 #
 #    Start to create the mail message
@@ -72,41 +84,65 @@ echo "Subject: $subject"                   >> ${msg_file}.2
 echo "MIME-Version: 1.0"                   >> ${msg_file}.2
 
 #
+#  Make this a multipart message
+#
+
+#boundary="`hostname`.$$.`date | tr "  " .`"
+boundary="temp-boundary.$$"
+
+echo "Content-Type: multipart/mixed;"              >> ${msg_file}.2
+echo "        boundary=\"$boundary\""           >> ${msg_file}.2
+echo                                            >> ${msg_file}.2
+echo "--$boundary"                              >> ${msg_file}.2
+
+#
+#  and add the bug report so far
+#
+echo "Content-Description: Bug Report"          >> ${msg_file}.2
+echo                                            >> ${msg_file}.2
+cat  ${msg_file}                                >> ${msg_file}.2
+echo                                            >> ${msg_file}.2
+
+#
+#    Add some potentially useful information
+#
+echo "--$boundary"                              >> ${msg_file}.2
+echo "Content-Description: Version Information" >> ${msg_file}.2
+echo                                     	>> ${msg_file}.2
+echo "ucd-snmp Version:  $VersionInfo"   	>> ${msg_file}.2
+echo $n "System configuration:  $c"            	>> ${msg_file}.2
+uname -a                                 	>> ${msg_file}.2
+if [ -f ./config.guess ]
+then
+  echo $n "config.guess:  $c"                   >> ${msg_file}.2
+  ./config.guess                                >> ${msg_file}.2
+fi
+echo                                     	>> ${msg_file}.2
+
+#
+# Add config.cache file
+#
+if [ -f config.cache ]
+then
+  echo "--$boundary"                              >> ${msg_file}.2
+  echo "Content-Description: config.cache"        >> ${msg_file}.2
+  echo                                            >> ${msg_file}.2
+  cat  config.cache                               >> ${msg_file}.2
+  echo                                            >> ${msg_file}.2
+fi
+
+#
 #    Any other files to add?
 #
 
-multipart=no
-boundary=""
-
+echo "You may now include optional text files (patches, make -k output, etc)."
 echo $n "Enter a file to include [RETURN if none]: $c"
 read answer
 while [ "$answer" != "" ]
 do
-    if [ "$multipart" = "no" ]
-    then
-		#
-		#  Make this a multipart message
-		#
-	multipart=yes
-	#boundary="`hostname`.$$.`date | tr "  " .`"
-	boundary="temp-boundary.$$"
-	echo "MIME-Type: multipart/mixed;"              >> ${msg_file}.2
-	echo "        boundary=\"$boundary\""           >> ${msg_file}.2
-	echo                                            >> ${msg_file}.2
-	echo "--$boundary"                              >> ${msg_file}.2
-		#
-		#  and add the bug report so far
-		#
-	echo "Content-Description: Bug Report"          >> ${msg_file}.2
-	echo                                            >> ${msg_file}.2
-	cat  ${msg_file}                                >> ${msg_file}.2
-	echo                                            >> ${msg_file}.2
-    fi
-
-
-		#
-		#  Include the specified file
-		#
+    #
+    #  Include the specified file
+    #   
     if [ -f "$answer" ]
     then
 	echo "--$boundary"                              >> ${msg_file}.2
@@ -127,12 +163,7 @@ done
 #  Finish off the message, send it and tidy up.
 #
 #
-if [ "$multipart" = "no" ]
-then
-	cat  ${msg_file}                                >> ${msg_file}.2
-else
-	echo "--$boundary--"                            >> ${msg_file}.2
-fi
+echo "--$boundary--"                            >> ${msg_file}.2
 
 if [ -x /usr/lib/sendmail ]
 then
