@@ -41,7 +41,9 @@
 #  include <time.h>
 # endif
 #endif
+#ifdef HAVE_MALLOC_H
 #include <malloc.h>
+#endif
 #include <asn1.h>
 #include <snmp_impl.h>
 #include <snmp.h>
