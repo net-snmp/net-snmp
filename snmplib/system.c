@@ -550,6 +550,10 @@ int strncasecmp(const char *s1, const char *s2, size_t nch)
         if (res != 0) break;
     }
 
+    if ( ii == nch ) {
+        *s1--; *s2--;
+    }
+
     if (! *s1) {
         if (! *s2)  return 0;
         return (-1);
