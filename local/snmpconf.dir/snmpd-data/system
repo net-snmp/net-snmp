@@ -4,11 +4,21 @@ description  the "system" mib group in the mibII tree.
 
 token syslocation
 info  The [typically physical] location of the system.
+info  Note that setting this value here means that when trying to
+info  perform an snmp SET operation to the sysLocation.0 variable will make
+info  the agent return the "notWritable" error code.  IE, including
+info  this token in the snmpd.conf file will disable write access to
+info  the variable.
 info  arguments:  location_string
 question 1 The location of the system
 
 token syscontact
 info  The contact information for the administrator
+info  Note that setting this value here means that when trying to
+info  perform an snmp SET operation to the sysContact.0 variable will make
+info  the agent return the "notWritable" error code.  IE, including
+info  this token in the snmpd.conf file will disable write access to
+info  the variable.
 info  arguments:  contact_string
 question 1 The contact information
 
