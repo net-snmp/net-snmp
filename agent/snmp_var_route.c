@@ -56,6 +56,8 @@ PERFORMANCE OF THIS SOFTWARE.
 #define  MIN(a,b)                     (((a) < (b)) ? (a) : (b))
 #endif
 
+static	    Route_Scan_Reload();
+
 static struct rtentry **rthead=0;
 static int rtsize=0, rtalloc=0;
 
@@ -222,6 +224,7 @@ int ret;
 #endif
 }
 
+static int qsort_compare();
 #if defined(mips) || defined(hpux)
 
 static Route_Scan_Reload()
