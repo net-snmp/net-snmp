@@ -93,12 +93,12 @@ if [ -x /bin/netstat ]; then
         if [ $? -eq 0 ]; then
             #echo "Port $BASE_PORT in use:"
             #echo "->$IN_USE"
-            (( BASE_PORT = $BASE_PORT + ($RANDOM % 100) ))
+            BASE_PORT=`expr $BASE_PORT + \( $RANDOM % 100 \)`
         else
             #echo "Using port $BASE_PORT"
             break
         fi
-        (( MAX_RETRIES = $MAX_RETRIES - 1 ))
+        MAX_RETRIES=`expr $MAX_RETRIES - 1`
         if [ $MAX_RETRIES -eq 0 ]; then
             echo "ERROR: Could not find available port."
             exit 255
