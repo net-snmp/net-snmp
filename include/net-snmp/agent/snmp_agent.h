@@ -46,8 +46,8 @@ extern          "C" {
         int             processed;
         int             inclusive;
         int             status;
-        int             index;
-        int             repeat;
+        int             index; /* index in original pdu */
+        int             repeat; /* get-bulk */
 
         struct netsnmp_request_info_s *next;
         struct netsnmp_request_info_s *prev;
