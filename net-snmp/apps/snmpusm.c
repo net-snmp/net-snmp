@@ -188,7 +188,7 @@ get_USM_DH_key(netsnmp_variable_list *vars, netsnmp_variable_list *dhvar,
     size_t key_len;
     unsigned char *cp;
             
-    dhkeychange = malloc(2 * vars->val_len);
+    dhkeychange = (char *) malloc(2 * vars->val_len * sizeof(char));
     memcpy(dhkeychange, vars->val.string, vars->val_len);
 
     cp = dhvar->val.string;
@@ -207,12 +207,12 @@ get_USM_DH_key(netsnmp_variable_list *vars, netsnmp_variable_list *dhvar,
         return SNMPERR_GENERR;
     }
 
-    BN_bn2bin(dh->pub_key, vars->val.string + vars->val_len);
+    BN_bn2bin(dh->pub_key, dhkeychange + vars->val_len);
 
     key_len = DH_size(dh);
     if (!key_len)
         return SNMPERR_GENERR;
-    key = malloc(key_len);
+    key = (u_char *) malloc(key_len * sizeof(u_char));
 
     other_pub = BN_bin2bn(vars->val.string, vars->val_len, NULL);
     if (!other_pub)
@@ -230,7 +230,7 @@ get_USM_DH_key(netsnmp_variable_list *vars, netsnmp_variable_list *dhvar,
     }
 
     snmp_pdu_add_variable(pdu, keyoid, keyoid_len,
-                          ASN_OCTET_STR, vars->val.string,
+                          ASN_OCTET_STR, dhkeychange,
                           2 * vars->val_len);
 
     return SNMPERR_SUCCESS;
@@ -802,9 +802,20 @@ main(int argc, char *argv[])
             vars = vars->next_variable;
         }
         if (doprivkey) {
+	    size_t dhprivKeyLen = 0;
+#ifndef DISABLE_DES
+	    if (ISTRANSFORM(ss->securityPrivProto, DESPriv)) {
+                /* DES uses a 128 bit key, 64 bits of which is a salt */
+	        dhprivKeyLen = 16;
+	    }
+#endif
+#ifdef HAVE_AES
+	    if (ISTRANSFORM(ss->securityPrivProto, AESPriv)) {
+	        dhprivKeyLen = 16;
+	    }
+#endif
             if (get_USM_DH_key(vars, dhvar,
-                               sc_get_properlength(ss->securityAuthProto,
-                                                   ss->securityAuthProtoLen),
+                               dhprivKeyLen,
                                pdu, "priv",
                                dhprivKeyChange, name_length2)
                 != SNMPERR_SUCCESS)
