@@ -53,8 +53,8 @@ Environment 2003 (MSVC 7.0/7.1), gcc under Cygwin, and gcc under MinGW.
          
   -  Extending the agent to support enterprise-specific MIBs works.
   -  Running the agent on a non-standard UDP or TCP port works.
-  -  Snmpd can be registered as a Windows NT/2000 service.
-  -  Snmptrapd can be registered as a Windows NT/2000 service.
+  -  Snmpd can be registered as a Windows NT/2000/XP service.
+  -  Snmptrapd can be registered as a Windows NT/2000/XP service.
   -  Some build environments allow long pathnames that contain
      embedded spaces.  As this is not true for Cygwin "configure",
      the documented example scripts will refer to "c:/usr"
@@ -1091,7 +1091,7 @@ You can now run snmpconf using the standard command line such as:
 
 Requirements:
 
-  Windows NT/2000 or later: Requires Windows NT 4.0 SP4 or later. 
+  Windows NT/2000/XP or later: Requires Windows NT 4.0 SP4 or later. 
   Windows 95/98/Me: Requires Windows 98 or later. 
 
 Windows support for SET on following groups:

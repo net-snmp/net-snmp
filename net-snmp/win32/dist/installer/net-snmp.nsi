@@ -189,7 +189,7 @@ Section "Base Components" SEC01
   Call CreateSnmpConf
 SectionEnd
 
-Section "Net-SNMP Agent" SEC02
+Section "Net-SNMP Agent Service" SEC02
   SetOutPath "$INSTDIR\bin"
   File "bin\snmpd.exe"
   SetOutPath "$INSTDIR\share\snmp\snmpconf-data\snmpd-data"
@@ -219,7 +219,7 @@ Section "Net-SNMP Agent" SEC02
   NoService:
 SectionEnd
 
-Section "Net-SNMP Trap Handler" SEC03
+Section "Net-SMNP Trap Service" SEC03
   SetOutPath "$INSTDIR\bin"
   File "bin\snmptrapd.exe"
   SetOutPath "$INSTDIR\share\snmp\snmpconf-data\snmptrapd-data"
@@ -262,13 +262,13 @@ SectionEnd
                include the command-line client applications, a short list of Management \
                Information Base MIB files, and a user-friendly Help subsystem"
   !insertmacro MUI_DESCRIPTION_TEXT ${SEC02} \
-               "The Agent Services provide information to a remote management system."
+               "The Net-SNMP Agent Service provides information to a remote management system."
   !insertmacro MUI_DESCRIPTION_TEXT ${SEC03} \
-               "The Notification/Trap Services receive SNMP notifications traps and informs) \
-               from other SNMP agents."
+               "The Net-SNMP Trap Service receives SNMP notifications traps and informs) \
+               from other SNMP-enabled devices."
   !insertmacro MUI_DESCRIPTION_TEXT ${SEC04} \
                "The Perl SNMP Modules can be used if this computer will be used to \
-               run or develop Perl-based SNMP programs (e.g. 'mib2c' or 'snmpconf')"
+               run or develop Perl-based SNMP programs (e.g. 'mib2c')"
 !insertmacro MUI_FUNCTION_DESCRIPTION_END
 
 Function CreateSnmpConf
