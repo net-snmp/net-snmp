@@ -8,5 +8,7 @@
 #include <net-snmp/data_access/interface.h>
 #include <net-snmp/data_access/ipaddress.h>
 #include <net-snmp/data_access/route.h>
+#include <net-snmp/data_access/ipstats.h>
+#include <net-snmp/data_access/systemstats.h>
 
 #endif /* NETSNMP_DATA_ACCESS_INCLUDES */
