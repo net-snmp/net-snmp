@@ -54,7 +54,7 @@ extern FindVarMethod var_ifEntry;
 
 struct ifnet {
 	char	*if_name;		/* name, e.g. ``en'' or ``lo'' */
-	short	if_unit;		/* sub-unit for lower level driver */
+	char	*if_unit;		/* sub-unit for lower level driver */
 	short	if_mtu;			/* maximum transmission unit */
 	short	if_flags;		/* up/down, broadcast, etc. */
 	int	if_metric;		/* routing metric (external only) */
@@ -71,13 +71,13 @@ struct ifnet {
 		int	ifq_len;
 		int	ifq_drops;
 	} if_snd;			/* output queue */
-	int	if_ibytes;		/* octets received on interface */
-	int	if_ipackets;		/* packets received on interface */
-	int	if_ierrors;		/* input errors on interface */
-	int	if_obytes;		/* octets sent on interface */
-	int	if_opackets;		/* packets sent on interface */
-	int	if_oerrors;		/* output errors on interface */
-	int	if_collisions;		/* collisions on csma interfaces */
+	u_long	if_ibytes;		/* octets received on interface */
+	u_long	if_ipackets;		/* packets received on interface */
+	u_long	if_ierrors;		/* input errors on interface */
+	u_long	if_obytes;		/* octets sent on interface */
+	u_long	if_opackets;		/* packets sent on interface */
+	u_long	if_oerrors;		/* output errors on interface */
+	u_long	if_collisions;		/* collisions on csma interfaces */
 /* end statistics */
 	struct	ifnet *if_next;
 };

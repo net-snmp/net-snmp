@@ -1265,11 +1265,12 @@ Interface_Scan_Init (void)
     struct ifreq ifrq;
     struct ifnet **ifnetaddr_ptr;
     FILE *devin;
-    int a, b, c, d, e, f, g, i, fd;
+    unsigned long rec_pkt, rec_oct, rec_err, snd_pkt, snd_oct, snd_err, coll;
+    int i, fd;
     extern conf_if_list *if_list;
     conf_if_list *if_ptr;
-    const char *scan_line_2_2="%[^:]: %d %d %d %*d %*d %*d %*d %*d %d %d %d %*d %*d %d";
-    const char *scan_line_2_0="%[^:]: %d %d %*d %*d %*d %d %d %*d %*d %d";
+    const char *scan_line_2_2="%lu %lu %lu %*lu %*lu %*lu %*lu %*lu %lu %lu %lu %*lu %*lu %lu";
+    const char *scan_line_2_0="%lu %lu %*lu %*lu %*lu %lu %lu %*lu %*lu %lu";
     const char *scan_line_to_use;
     
 #endif  
@@ -1328,13 +1329,19 @@ Interface_Scan_Init (void)
     while (fgets (line, sizeof(line), devin))
       {
 	struct ifnet *nnew;
+	char *stats, *ifstart = line;
+
+	while (*ifstart == ' ') ifstart++;
+	stats = strrchr(ifstart, ':');
+	*stats++ = 0;
+	strcpy(ifname_buf, ifstart);
+	while (*stats == ' ') stats++;
+	printf("ifname: %s\nstats: %s\n", ifname_buf, stats);
 
 	if ((scan_line_to_use == scan_line_2_2 &&
-	    sscanf (line, scan_line_to_use,
-		    ifname_buf, &f, &a, &b, &g, &c, &d, &e) != 8) ||
+	    sscanf (stats, scan_line_to_use, &rec_oct, &rec_pkt, &rec_err, &snd_oct, &snd_pkt, &snd_err, &coll) != 7) ||
 	    (scan_line_to_use == scan_line_2_0 && 
-	    sscanf (line, scan_line_to_use,
-		    ifname_buf, &a, &b, &c, &d, &e) != 6))
+	    sscanf (stats, scan_line_to_use, &rec_pkt, &rec_err, &snd_pkt, &snd_err, &coll) != 5))
 	  continue;
 	
 	nnew = (struct ifnet *) malloc (sizeof (struct ifnet));	    
@@ -1346,16 +1353,19 @@ Interface_Scan_Init (void)
 	i++;
 	
 	/* linux previous to 1.3.~13 may miss transmitted loopback pkts: */
-	if (! strcmp (ifname_buf, "lo") && a > 0 && ! c)
-	  c = a;
+	if (! strcmp (ifname_buf, "lo") && rec_pkt > 0 && ! snd_pkt)
+	  snd_pkt = rec_pkt;
 
-	nnew->if_ipackets = a, nnew->if_ierrors = b, nnew->if_opackets = c,
-	nnew->if_oerrors = d, nnew->if_collisions = e;
+	nnew->if_ipackets = rec_pkt;
+	nnew->if_ierrors = rec_err;
+	nnew->if_opackets = snd_pkt;
+	nnew->if_oerrors = snd_err;
+	nnew->if_collisions = coll;
 	if (scan_line_to_use == scan_line_2_2) {
-	  nnew->if_ibytes = f; nnew->if_obytes = g;
+	  nnew->if_ibytes = rec_oct; nnew->if_obytes = snd_oct;
 	}
 	else {
-	  nnew->if_ibytes = a*308; nnew->if_obytes = c*308;
+	  nnew->if_ibytes = rec_pkt*308; nnew->if_obytes = snd_pkt*308;
 	}
 	
 	/* ifnames are given as ``   eth0'': split in ``eth'' and ``0'': */
@@ -1365,10 +1375,11 @@ Interface_Scan_Init (void)
 	nnew->if_name = (char *) strdup (ifname);
 	for (ptr = nnew->if_name; *ptr && (*ptr < '0' || *ptr > '9'); 
 	     ptr++) ;
-	nnew->if_unit = (*ptr) ? atoi (ptr) : 0;
+	nnew->if_unit = strdup(*ptr ? ptr : "0");
 	*ptr = 0;
 
-	sprintf (fullname, "%s%d", nnew->if_name, nnew->if_unit);
+	sprintf (fullname, "%s%s", nnew->if_name, nnew->if_unit);
+	printf("fullname: %s\n", fullname);
 
 	strcpy (ifrq.ifr_name, ifname);
 	if (ioctl (fd, SIOCGIFADDR, &ifrq) < 0)
@@ -1476,7 +1487,11 @@ int Interface_Scan_Next(short *Index,
 
  	    saveName[sizeof (saveName)-1] = '\0';
 	    cp = (char *) strchr(saveName, '\0');
+#ifdef linux
+	    strcat (cp, ifnet.if_unit);
+#else
 	    string_append_int (cp, ifnet.if_unit);
+#endif
 	    if (1 || strcmp(saveName,"lo0") != 0) {  /* XXX */
 
 		if (Index)
