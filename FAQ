@@ -160,11 +160,13 @@ Where can I get it?
   Download:
     - http://www.net-snmp.org/download/
     - ftp://ftp.net-snmp.org/pub/sourceforge/net-snmp/
+  MD5 Sums:
+    - http://www.net-snmp.org/md5/
   Web page:
     - http://www.net-snmp.org/
   Sourceforge Project page:
     - http://www.net-snmp.org/project/
-  Mirrors:
+  Mirrors (note that sourceforge download servers are mirrored themselves):
     - US:          ftp://ftp.freesnmp.com/mirrors/net-snmp/
     - Bulgaria:    http://rtfm.uni-svishtov.bg/net-snmp/
     - Japan:       ftp://ftp.ayamura.org/pub/net-snmp/
