@@ -294,6 +294,48 @@ void  set_function (struct tree *);
 void sprint_hexstring (char *, const u_char *, size_t);
 void sprint_asciistring(char *buf, const u_char *cp, size_t len);
 
+void sprint_by_type (char *, struct variable_list *, struct enum_list *,
+                     const char *, const char *);
+void sprint_octet_string (char *, struct variable_list *, struct enum_list *,
+                          const char *, const char *);
+void sprint_opaque (char *, struct variable_list *, struct enum_list *,
+                    const char *, const char *);
+void sprint_object_identifier (char *, struct variable_list *,
+                               struct enum_list *, const char *, const char *);
+void sprint_timeticks (char *, struct variable_list *, struct enum_list *,
+                       const char *, const char *);
+void sprint_hinted_integer (char *, long, const char *, const char *);
+void sprint_integer (char *, struct variable_list *, struct enum_list *,
+                     const char *, const char *);
+void sprint_uinteger (char *, struct variable_list *, struct enum_list *,
+                      const char *, const char *);
+void sprint_gauge (char *, struct variable_list *, struct enum_list *,
+                   const char *, const char *);
+void sprint_counter (char *, struct variable_list *, struct enum_list *,
+                     const char *, const char *);
+void sprint_networkaddress (char *, struct variable_list *,
+                            struct enum_list *, const char *, const char *);
+void sprint_ipaddress (char *, struct variable_list *, struct enum_list *,
+                       const char *, const char *);
+void sprint_null (char *, struct variable_list *, struct enum_list *,
+                  const char *, const char *);
+void sprint_bitstring (char *, struct variable_list *, struct enum_list *,
+                       const char *, const char *);
+void sprint_nsapaddress (char *, struct variable_list *, struct enum_list *,
+                         const char *, const char *);
+void sprint_counter64 (char *, struct variable_list *, struct enum_list *,
+                       const char *, const char *);
+void sprint_unknowntype (char *, struct variable_list *, struct enum_list *,
+                         const char *, const char *);
+void sprint_badtype (char *, struct variable_list *, struct enum_list *,
+                     const char *, const char *);
+#ifdef OPAQUE_SPECIAL_TYPES
+void sprint_float (char *, struct variable_list *, struct enum_list *,
+                   const char *, const char *);
+void sprint_double (char *, struct variable_list *, struct enum_list *,
+                    const char *, const char *);
+#endif
+
 void print_oid_report (FILE *);
 void print_oid_report_enable_labeledoid (void);
 void print_oid_report_enable_oid (void);

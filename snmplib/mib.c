@@ -70,43 +70,22 @@ SOFTWARE.
 
 #include "asn1.h"
 #include "snmp_api.h"
+#include "parse.h"
 #include "mib.h"
 #include "snmp.h"
 #include "snmp_impl.h"
-#include "parse.h"
 #include "int64.h"
 #include "system.h"
 #include "read_config.h"
 #include "snmp_debug.h"
 #include "default_store.h"
 
-static void sprint_by_type (char *, struct variable_list *, struct enum_list *, const char *, const char *);
 static int parse_subtree (struct tree *, const char *, oid *, size_t *);
-static struct tree * _sprint_objid(char *buf, oid *objid, size_t objidlen);
 static char *uptimeString (u_long, char *);
-static void sprint_octet_string (char *, struct variable_list *, struct enum_list *, const char *, const char *);
-static void sprint_opaque (char *, struct variable_list *, struct enum_list *, const char *, const char *);
-static void sprint_object_identifier (char *, struct variable_list *, struct enum_list *, const char *, const char *);
-static void sprint_timeticks (char *, struct variable_list *, struct enum_list *, const char *, const char *);
-static void sprint_hinted_integer (char *, long, const char *, const char *);
-static void sprint_integer (char *, struct variable_list *, struct enum_list *, const char *, const char *);
-static void sprint_uinteger (char *, struct variable_list *, struct enum_list *, const char *, const char *);
-static void sprint_gauge (char *, struct variable_list *, struct enum_list *, const char *, const char *);
-static void sprint_counter (char *, struct variable_list *, struct enum_list *, const char *, const char *);
-static void sprint_networkaddress (char *, struct variable_list *, struct enum_list *, const char *, const char *);
-static void sprint_ipaddress (char *, struct variable_list *, struct enum_list *, const char *, const char *);
-static void sprint_null (char *, struct variable_list *, struct enum_list *, const char *, const char *);
-static void sprint_bitstring (char *, struct variable_list *, struct enum_list *, const char *, const char *);
-static void sprint_nsapaddress (char *, struct variable_list *, struct enum_list *, const char *, const char *);
-static void sprint_counter64 (char *, struct variable_list *, struct enum_list *, const char *, const char *);
-static void sprint_unknowntype (char *, struct variable_list *, struct enum_list *, const char *, const char *);
-static void sprint_badtype (char *, struct variable_list *, struct enum_list *, const char *, const char *);
+static struct tree * _sprint_objid(char *buf, oid *objid, size_t objidlen);
+
 struct tree *_get_symbol(oid *objid, size_t objidlen, struct tree *subtree, char *buf, struct index_list *in_dices, char **end_of_known);
   
-#ifdef OPAQUE_SPECIAL_TYPES
-static void sprint_float (char *, struct variable_list *, struct enum_list *, const char *, const char *);
-static void sprint_double (char *, struct variable_list *, struct enum_list *, const char *, const char *);
-#endif
 static void print_tree_node (FILE *, struct tree *, int);
 
 /* helper functions for get_module_node */
@@ -242,7 +221,7 @@ void sprint_asciistring(char *buf,
 
   */
 
-static void
+void
 sprint_octet_string(char *buf,
 		    struct variable_list *var,
 		    struct enum_list *enums,
@@ -359,7 +338,7 @@ sprint_octet_string(char *buf,
 
 #ifdef OPAQUE_SPECIAL_TYPES
 
-static void
+void
 sprint_float(char *buf,
 	     struct variable_list *var,
 	     struct enum_list *enums,
@@ -381,7 +360,7 @@ sprint_float(char *buf,
     if (units) sprintf (buf, " %s", units);
 }
 
-static void
+void
 sprint_double(char *buf,
 	      struct variable_list *var,
 	      struct enum_list *enums,
@@ -405,7 +384,7 @@ sprint_double(char *buf,
 
 #endif /* OPAQUE_SPECIAL_TYPES */
 
-static void
+void
 sprint_opaque(char *buf,
 	      struct variable_list *var,
 	      struct enum_list *enums,
@@ -457,7 +436,7 @@ sprint_opaque(char *buf,
     if (units) sprintf (buf, " %s", units);
 }
 
-static void
+void
 sprint_object_identifier(char *buf,
 			 struct variable_list *var,
 			 struct enum_list *enums,
@@ -479,7 +458,7 @@ sprint_object_identifier(char *buf,
     if (units) sprintf (buf, " %s", units);
 }
 
-static void
+void
 sprint_timeticks(char *buf,
 		 struct variable_list *var,
 		 struct enum_list *enums,
@@ -507,7 +486,7 @@ sprint_timeticks(char *buf,
     if (units) sprintf (buf, " %s", units);
 }
 
-static void
+void
 sprint_hinted_integer (char *buf,
 		       long val,
 		       const char *hint,
@@ -551,7 +530,7 @@ sprint_hinted_integer (char *buf,
     strcpy (buf, tmp);
 }
 
-static void
+void
 sprint_integer(char *buf,
 	       struct variable_list *var,
 	       struct enum_list *enums,
@@ -584,7 +563,7 @@ sprint_integer(char *buf,
     if (units) sprintf (buf, " %s", units);
 }
 
-static void
+void
 sprint_uinteger(char *buf,
 		struct variable_list *var,
 		struct enum_list *enums,
@@ -615,7 +594,7 @@ sprint_uinteger(char *buf,
     if (units) sprintf (buf, " %s", units);
 }
 
-static void
+void
 sprint_gauge(char *buf,
 	     struct variable_list *var,
 	     struct enum_list *enums,
@@ -636,7 +615,7 @@ sprint_gauge(char *buf,
     if (units) sprintf (buf, " %s", units);
 }
 
-static void
+void
 sprint_counter(char *buf,
 	       struct variable_list *var,
 	       struct enum_list *enums,
@@ -654,7 +633,7 @@ sprint_counter(char *buf,
     if (units) sprintf (buf, " %s", units);
 }
 
-static void
+void
 sprint_networkaddress(char *buf,
 		      struct variable_list *var,
 		      struct enum_list *enums,
@@ -678,7 +657,7 @@ sprint_networkaddress(char *buf,
     }
 }
 
-static void
+void
 sprint_ipaddress(char *buf,
 		 struct variable_list *var,
 		 struct enum_list *enums,
@@ -700,7 +679,7 @@ sprint_ipaddress(char *buf,
 	sprintf(buf, "IpAddress: %d.%d.%d.%d",ip[0], ip[1], ip[2], ip[3]);
 }
 
-static void
+void
 sprint_null(char *buf,
 	    struct variable_list *var,
 	    struct enum_list *enums,
@@ -716,7 +695,7 @@ sprint_null(char *buf,
     sprintf(buf, "NULL");
 }
 
-static void
+void
 sprint_bitstring(char *buf,
 		 struct variable_list *var,
 		 struct enum_list *enums,
@@ -771,7 +750,7 @@ sprint_bitstring(char *buf,
     }
 }
 
-static void
+void
 sprint_nsapaddress(char *buf,
 		   struct variable_list *var,
 		   struct enum_list *enums,
@@ -791,7 +770,7 @@ sprint_nsapaddress(char *buf,
     sprint_hexstring(buf, var->val.string, var->val_len);
 }
 
-static void
+void
 sprint_counter64(char *buf,
 		 struct variable_list *var,
 		 struct enum_list *enums,
@@ -852,7 +831,7 @@ sprint_counter64(char *buf,
     if (units) sprintf (buf, " %s", units);
 }
 
-static void
+void
 sprint_unknowntype(char *buf,
 		   struct variable_list *var,
 		   struct enum_list *enums,
@@ -863,7 +842,7 @@ sprint_unknowntype(char *buf,
     sprint_by_type(buf, var, NULL, NULL, NULL);
 }
 
-static void
+void
 sprint_badtype(char *buf,
 	       struct variable_list *var,
 	       struct enum_list *enums,
@@ -873,7 +852,7 @@ sprint_badtype(char *buf,
     sprintf(buf, "Variable has bad type");
 }
 
-static void
+void
 sprint_by_type(char *buf,
 	       struct variable_list *var,
 	       struct enum_list *enums,
