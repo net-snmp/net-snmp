@@ -6,9 +6,20 @@
 #include <net-snmp/net-snmp-config.h>
 #include <net-snmp/net-snmp-includes.h>
 #include "mibII/mibII_common.h"
+#include "if-mib/ifTable/ifTable_constants.h"
 
 #include <net-snmp/agent/net-snmp-agent-includes.h>
+
+#if HAVE_SYS_IOCTL_H
+#include <sys/ioctl.h>
+#else
+#error "linux should have sys/ioctl header"
+#endif
+
 #include <net-snmp/data_access/interface.h>
+#include "interface_ioctl.h"
+
+static unsigned int _get_if_speed(int fd, netsnmp_interface_entry *entry);
 
 /*
  *
@@ -29,7 +40,7 @@ netsnmp_access_interface_container_arch_load(netsnmp_container* container,
         "%llu %llu %*llu %*llu %*llu %llu %llu %*llu %*llu %llu";
     static const char     *scan_line_to_use = NULL;
     static char     scan_expected;
-    int             scan_count;
+    int             scan_count, fd;
     unsigned long long rec_pkt, rec_oct, rec_err, rec_drop;
     unsigned long long snd_pkt, snd_oct, snd_err, snd_drop, coll;
     netsnmp_interface_entry *entry = NULL;
@@ -42,10 +53,22 @@ netsnmp_access_interface_container_arch_load(netsnmp_container* container,
         return -1;
     }
 
+    // xxx-rks: need to augment this with ioctl processing, as
+    // /proc/net/dev lists interfaces which are down...
+
     if (!(devin = fopen("/proc/net/dev", "r"))) {
         DEBUGMSGTL(("access:interface",
                     "Failed to load Interface Table (linux1)\n"));
-        snmp_log(LOG_ERR, "snmpd: cannot open /proc/net/dev ...\n");
+        snmp_log(LOG_ERR, "cannot open /proc/net/dev ...\n");
+        return -2;
+    }
+
+    /*
+     * create socket for ioctls
+     */
+    fd = socket(AF_INET, SOCK_DGRAM, 0);
+    if(fd < 0) {
+        snmp_log(LOG_ERR, "could not create socket\n");
         return -2;
     }
 
@@ -114,11 +137,9 @@ netsnmp_access_interface_container_arch_load(netsnmp_container* container,
             netsnmp_access_interface_container_free(container,
                                                     NETSNMP_ACCESS_INTERFACE_FREE_NOFLAGS);
             fclose(devin);
+            close(fd);
             return -3;
         }
-        entry->if_speed = 10000000; // xxx-rks: lookup token?
-        entry->if_type = 6;
-
 
         /*
          * OK - we've now got (or created) the data structure for
@@ -192,12 +213,168 @@ netsnmp_access_interface_container_arch_load(netsnmp_container* container,
         entry->if_oerrors = snd_err;
         entry->if_odiscards = snd_drop;
         entry->if_collisions = coll;
+
+        /*
+         * use ioctls for some stuff
+         *  (ignore rc, so we get as much info as possible)
+         */
+        netsnmp_access_interface_ioctl_physaddr_get(fd, entry);
+
+        /*
+         * physaddr should have set name. make some guesses if not
+         */
+        if(0 == entry->if_type) {
+            typedef struct _match_if {
+               int             mi_type;
+               const char     *mi_name;
+            }              *pmatch_if, match_if;
+            
+            static match_if lmatch_if[] = {
+                {IANAIFTYPE_SOFTWARELOOPBACK, "lo"},
+                {IANAIFTYPE_ETHERNETCSMACD, "eth"},
+                {IANAIFTYPE_ISO88025TOKENRING, "tr"},
+                {IANAIFTYPE_PPP, "ppp"},
+                {IANAIFTYPE_SLIP, "sl"},
+                {0, 0}                  /* end of list */
+            };
+
+            int             ii, len;
+            register pmatch_if pm;
+            
+            for (ii = 0, pm = lmatch_if; pm->mi_name; pm++) {
+                len = strlen(pm->mi_name);
+                if (0 == strncmp(entry->if_name, pm->mi_name, len)) {
+                    entry->if_type = pm->mi_type;
+                    break;
+                }
+            }
+            if(NULL == pm->mi_name)
+                entry->if_type = IANAIFTYPE_OTHER;
+        }
+
+        if (entry->if_type == IANAIFTYPE_ETHERNETCSMACD)
+            entry->if_speed =
+                netsnmp_access_interface_linux_get_if_speed(fd,
+                                                            entry->if_name);
+        else
+            netsnmp_access_interface_entry_guess_speed(entry);
+
+        netsnmp_access_interface_ioctl_flags_get(fd, entry);
+
+        /*
+         * Zero speed means link problem.
+         * -i'm not sure this is always true...
+         */
+        if(entry->if_speed == 0 && entry->if_flags & IFF_UP){
+            entry->if_flags &= ~IFF_RUNNING;
+        }
+        if(entry->if_flags & IFF_RUNNING)
+            entry->if_oper_status = IFOPERSTATUS_UP;
+        else
+            entry->if_oper_status = IFOPERSTATUS_UNKNOWN;
+
         
+
+        netsnmp_access_interface_entry_overrides(entry);
+
         /*
          * add to container
          */
         CONTAINER_INSERT(container, entry);
     }
     fclose(devin);
+    close(fd);
     return 0;
+}
+
+/**
+ * Determines network interface speed.
+ */
+unsigned int
+netsnmp_access_interface_linux_get_if_speed(int fd, const char *name)
+{
+    unsigned int retspeed = 10000000;
+    struct ifreq ifr;
+
+    /* the code is based on mii-diag utility by Donald Becker
+     * see ftp://ftp.scyld.com/pub/diag/mii-diag.c
+     */
+    ushort *data = (ushort *)(&ifr.ifr_data);
+    unsigned phy_id;
+    unsigned char new_ioctl_nums = 0;
+    int mii_reg, i;
+    ushort mii_val[32];
+    ushort bmcr, bmsr, nway_advert, lkpar;
+    const unsigned int media_speeds[] = {10000000, 10000000, 100000000, 100000000, 10000000, 0};	
+    /* It corresponds to "10baseT", "10baseT-FD", "100baseTx", "100baseTx-FD", "100baseT4", "Flow-control", 0, */
+
+    strncpy(ifr.ifr_name, name, sizeof(ifr.ifr_name));
+    ifr.ifr_name[ sizeof(ifr.ifr_name)-1 ] = 0;
+    data[0] = 0;
+    
+    if (ioctl(fd, 0x8947, &ifr) >= 0) {
+        new_ioctl_nums = 1;
+    } else if (ioctl(fd, SIOCDEVPRIVATE, &ifr) >= 0) {
+        new_ioctl_nums = 0;
+    } else {
+        DEBUGMSGTL(("mibII/interfaces", "SIOCGMIIPHY on %s failed\n",
+                    ifr.ifr_name));
+        return retspeed;
+    }
+
+    /* Begin getting mii register values */
+    phy_id = data[0];
+    for (mii_reg = 0; mii_reg < 8; mii_reg++){
+        data[0] = phy_id;
+        data[1] = mii_reg;
+        if(ioctl(fd, new_ioctl_nums ? 0x8948 : SIOCDEVPRIVATE+1, &ifr) <0){
+            DEBUGMSGTL(("mibII/interfaces", "SIOCGMIIREG on %s failed\n", ifr.ifr_name));
+        }
+        mii_val[mii_reg] = data[3];		
+    }
+    /*Parsing of mii values*/
+    /*Invalid basic mode control register*/
+    if (mii_val[0] == 0xffff  ||  mii_val[1] == 0x0000) {
+        DEBUGMSGTL(("mibII/interfaces", "No MII transceiver present!.\n"));
+        return retspeed;
+    }
+    /* Descriptive rename. */
+    bmcr = mii_val[0]; 	  /*basic mode control register*/
+    bmsr = mii_val[1]; 	  /* basic mode status register*/
+    nway_advert = mii_val[4]; /* autonegotiation advertisement*/
+    lkpar = mii_val[5]; 	  /*link partner ability*/
+    
+    /*Check for link existence, returns 0 if link is absent*/
+    if ((bmsr & 0x0016) != 0x0004){
+        DEBUGMSGTL(("mibII/interfaces", "No link...\n"));
+        retspeed = 0;
+        return retspeed;
+    }
+    
+    if(!(bmcr & 0x1000) ){
+        DEBUGMSGTL(("mibII/interfaces", "Auto-negotiation disabled.\n"));
+        retspeed = bmcr & 0x2000 ? 100000000 : 10000000;
+        return retspeed;
+    }
+    /* Link partner got our advertised abilities */	
+    if (lkpar & 0x4000) {
+        int negotiated = nway_advert & lkpar & 0x3e0;
+        int max_capability = 0;
+        /* Scan for the highest negotiated capability, highest priority
+           (100baseTx-FDX) to lowest (10baseT-HDX). */
+        int media_priority[] = {8, 9, 7, 6, 5}; 	/* media_names[i-5] */
+        for (i = 0; media_priority[i]; i++){
+            if (negotiated & (1 << media_priority[i])) {
+                max_capability = media_priority[i];
+                break;
+            }
+        }
+        if (max_capability)
+            retspeed = media_speeds[max_capability - 5];
+        else
+            DEBUGMSGTL(("mibII/interfaces", "No common media type was autonegotiated!\n"));
+    }else if(lkpar & 0x00A0){
+        retspeed = (lkpar & 0x0080) ? 100000000 : 10000000;
+    }
+    return retspeed;
 }

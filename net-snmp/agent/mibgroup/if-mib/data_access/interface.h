@@ -20,6 +20,7 @@
 config_require(if-mib/data_access/interface_common)
 #if defined( linux )
 config_require(if-mib/data_access/interface_linux);
+config_require(if-mib/data_access/interface_ioctl);
 #elif defined ( solaris )
 config_require(if-mib/data_access/interface_solaris);
 #elif defined ( hpux )
