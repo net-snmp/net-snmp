@@ -3,7 +3,9 @@
  * previous versions of the UCD library only.
  */
 
+#include <net-snmp/net-snmp-config.h>
 
+#include <net-snmp/types.h>
 #include <net-snmp/session_api.h>
 #include <net-snmp/config_api.h>
 

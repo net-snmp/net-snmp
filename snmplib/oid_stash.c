@@ -45,7 +45,7 @@ oid_stash_add_data(oid_stash_node **root,
                    oid *lookup, size_t lookup_len, void *mydata) 
 {
     oid_stash_node *curnode, *tmpp, *loopp;
-    int i;
+    unsigned int i;
 
     if (!root || !lookup || lookup_len == 0)
         return SNMPERR_GENERR;
@@ -95,7 +95,7 @@ oid_stash_get_node(oid_stash_node *root,
                    oid *lookup, size_t lookup_len) 
 {
     oid_stash_node *curnode, *tmpp, *loopp;
-    int i;
+    unsigned int i;
     
     if (!root)
         return NULL;
@@ -138,7 +138,7 @@ oid_stash_dump(oid_stash_node *root, char *prefix)
     char myprefix[MAX_OID_LEN * 4];
     oid_stash_node *tmpp;
     int prefix_len = strlen(prefix) + 1; /* actually it's +2 */
-    int i;
+    unsigned int i;
     
     memset(myprefix, ' ', MAX_OID_LEN * 4);
     myprefix[prefix_len] = '\0';
