@@ -2195,7 +2195,7 @@ asn_realloc_rbuild_unsigned_int (u_char **pkt, size_t *pkt_len,
     if (((*pkt_len - *offset) < 1) && !(r && asn_realloc(pkt, pkt_len))) {
       return 0; 
     }
-    *(*pkt + *pkt_len - (*++offset)) = 0;
+    *(*pkt + *pkt_len - (++*offset)) = 0;
   }
 
   if (asn_realloc_rbuild_header(pkt, pkt_len, offset, r, type, 
