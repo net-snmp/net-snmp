@@ -282,6 +282,13 @@ int gettimeofday(struct timeval *tv,
 }
 #endif	/* !HAVE_GETTIMEOFDAY */
 
+#ifndef HAVE_STRNCASECMP
+int strncasecmp(const char *s1, const char *s2, size_t n)
+{
+  return _strnicmp(s1, s2, n);
+}
+#endif /* HAVE_STRNCASECMP */
+
 in_addr_t get_myaddr(void)
 {
   char local_host[130];

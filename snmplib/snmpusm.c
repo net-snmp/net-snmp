@@ -14,6 +14,9 @@
 #include <config.h>
 
 #include <sys/types.h>
+#if HAVE_WINSOCK_H
+#include <winsock.h>
+#endif
 #include <stdio.h>
 #ifdef HAVE_STDLIB_H
 #include <stdlib.h>
@@ -617,7 +620,7 @@ usm_set_salt (	u_char		*iv,
 	 * Turn the salt into an IV: XOR <boots, salt_int> with salt
 	 * portion of priv_key.
 	 */
-	for (iindex = 0; iindex < propersize_salt; iindex++)
+	for (iindex = 0; iindex < (int)propersize_salt; iindex++)
 		iv[iindex] ^= priv_salt[iindex];
 
 

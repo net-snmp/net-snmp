@@ -53,7 +53,7 @@ view_getEntry(int viewIndex,
 
     for(vp = List; vp; vp = vp->next){
         if (viewIndex == vp->viewIndex
-	    && viewSubtreeLen == vp->viewSubtreeLen
+	    && viewSubtreeLen == (int)vp->viewSubtreeLen
 	    && !memcmp((char *)vp->viewSubtree, (char *)viewSubtree,
 		     viewSubtreeLen * sizeof(oid)))
 	  return vp;

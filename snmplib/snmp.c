@@ -70,9 +70,11 @@ xdump(const u_char *cp,
     int col, count;
 
     count = 0;
-    while(count < length){
+    while(count < (int)length){
 	printf("%s", prefix);
-	for(col = 0; count + col < length && col < 16; col++){
+	for(col = 0;
+	  ((count + col) < (int)length) && col < 16;
+	  col++){
 	    if (col == 0) printf ("%.4d: ", count);
 	    else if (col % 4 == 0) printf(" ");
 	    printf("%02X ", cp[count + col]);
@@ -83,7 +85,9 @@ xdump(const u_char *cp,
 	    printf("   ");
 	}
 	printf("  ");
-	for(col = 0; count + col < length && col < 16; col++){
+	for(col = 0;
+	  ((count + col) < (int)length) && col < 16;
+	  col++){
 	    if (isprint(cp[count + col]))
 		printf("%c", cp[count + col]);
 	    else

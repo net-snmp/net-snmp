@@ -264,7 +264,7 @@ SOFTWARE.
 #define SMI_COUNTER64   ASN_COUNTER64
 
 int mib_TxtToOid (char *, oid **, size_t *);
-int mib_OidToTxt (oid *, size_t , char *, int );
+int mib_OidToTxt (oid *, size_t , char *, size_t );
 
 struct snmp_pdu;
 char *snmp_pdu_type (struct snmp_pdu *);
