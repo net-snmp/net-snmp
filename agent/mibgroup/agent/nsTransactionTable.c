@@ -20,7 +20,7 @@ initialize_table_nsTransactionTable(void)
     size_t          nsTransactionTable_oid_len =
         OID_LENGTH(nsTransactionTable_oid);
     table_registration_info *table_info;
-    handler_registration *my_handler;
+    netsnmp_handler_registration *my_handler;
     iterator_info *iinfo;
 
     /*
@@ -33,7 +33,7 @@ initialize_table_nsTransactionTable(void)
      * if your table is read only, it's easiest to change the
      * HANDLER_CAN_RWRITE definition below to HANDLER_CAN_RONLY 
      */
-    my_handler = create_handler_registration("nsTransactionTable",
+    my_handler = netsnmp_create_handler_registration("nsTransactionTable",
                                              nsTransactionTable_handler,
                                              nsTransactionTable_oid,
                                              sizeof(nsTransactionTable_oid)
@@ -94,7 +94,7 @@ init_nsTransactionTable(void)
     each appropriately according to the data matching the first row
     and return the put_index_data variable at the end of the function.
 */
-extern struct agent_snmp_session *agent_delegated_list;
+extern netsnmp_agent_session *agent_delegated_list;
 
 struct variable_list *
 nsTransactionTable_get_first_data_point(void **my_loop_context,
@@ -136,7 +136,7 @@ nsTransactionTable_get_next_data_point(void **my_loop_context,
 {
 
     struct variable_list *vptr;
-    struct agent_snmp_session *alist = (struct agent_snmp_session *)
+    netsnmp_agent_session *alist = (netsnmp_agent_session *)
         *my_loop_context;
 
     if (!alist->next)
@@ -157,15 +157,15 @@ nsTransactionTable_get_next_data_point(void **my_loop_context,
 /** handles requests for the nsTransactionTable table, if anything
    else needs to be done */
 int
-nsTransactionTable_handler(mib_handler * handler,
-                           handler_registration * reginfo,
-                           agent_request_info * reqinfo,
-                           request_info * requests)
+nsTransactionTable_handler(netsnmp_mib_handler * handler,
+                           netsnmp_handler_registration * reginfo,
+                           netsnmp_agent_request_info * reqinfo,
+                           netsnmp_request_info * requests)
 {
 
-    table_request_info *table_info;
+    table_netsnmp_request_info *table_info;
     struct variable_list *var;
-    struct agent_snmp_session *asp;
+    netsnmp_agent_session *asp;
     
     while (requests) {
         var = requests->requestvb;
@@ -185,9 +185,9 @@ nsTransactionTable_handler(mib_handler * handler,
          * return data for the columns of the nsTransactionTable table in
          * question 
          */
-        asp = ( struct agent_snmp_session *)extract_iterator_context(requests);
+        asp = ( netsnmp_agent_session *)extract_iterator_context(requests);
         if ( asp == NULL) {
-            set_request_error(reqinfo, requests, SNMP_NOSUCHINSTANCE);
+            netsnmp_set_request_error(reqinfo, requests, SNMP_NOSUCHINSTANCE);
         }
 
         /*

@@ -31,7 +31,7 @@ typedef struct table_data_s {
    table_row *first_row;
 } table_data;
 
-mib_handler *get_table_data_handler(table_data *table);
+netsnmp_mib_handler *get_table_data_handler(table_data *table);
 void table_data_generate_index_oid(table_row *row);
 int table_data_add_row(table_data *table, table_row *row);
 int table_data_remove_row(table_data *table, table_row *row);
@@ -41,20 +41,20 @@ table_row *table_data_get(table_data *table, struct variable_list *indexes);
 table_row *table_data_get_from_oid(table_data *table,
                                     oid *searchfor, size_t searchfor_len);
 
-int register_table_data(handler_registration *reginfo, table_data *table,
+int register_table_data(netsnmp_handler_registration *reginfo, table_data *table,
                         table_registration_info *table_info);
-int register_read_only_table_data(handler_registration *reginfo,
+int register_read_only_table_data(netsnmp_handler_registration *reginfo,
                                   table_data *table,
                                   table_registration_info *table_info);
 
-table_row *extract_table_row(request_info *);
-void *extract_table_row_data(request_info *);
+table_row *extract_table_row(netsnmp_request_info *);
+void *extract_table_row_data(netsnmp_request_info *);
 table_data *create_table_data(const char *name);
 table_row *create_table_data_row(void);
 
-int table_data_build_result(handler_registration *reginfo,
-                            agent_request_info   *reqinfo,
-                            request_info *request,
+int table_data_build_result(netsnmp_handler_registration *reginfo,
+                            netsnmp_agent_request_info   *reqinfo,
+                            netsnmp_request_info *request,
                             table_row *row,
                             int column,
                             u_char type,
@@ -65,7 +65,7 @@ int table_data_build_result(handler_registration *reginfo,
 #define table_row_add_index(row, type, value, value_len) snmp_varlist_add_variable(&row->indexes, NULL, 0, type, (u_char *) value, value_len)
 
 
-NodeHandler table_data_helper_handler;
+Netsnmp_Node_Handler table_data_helper_handler;
 
 #ifdef __cplusplus
 };

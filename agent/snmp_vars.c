@@ -229,8 +229,8 @@ init_agent (const char *app)
 
   /* always register a callback transport for internal use */
   callback_master_sess = snmp_callback_open(0, handle_snmp_packet,
-                                            snmp_check_packet,
-                                            snmp_check_parse);
+                                            netsnmp_agent_check_packet,
+                                            netsnmp_agent_check_parse);
   if (callback_master_sess)
       callback_master_num = callback_master_sess->local_port;
   else

@@ -69,7 +69,7 @@ typedef struct _net_snmpsubagent_magic_s {
     struct variable_list *ovars;
 } ns_subagent_magic;
 
-struct agent_set_info {
+struct agent_netsnmp_set_info {
     int			  transID;
     int			  mode;
     int                   errstat;
@@ -77,10 +77,10 @@ struct agent_set_info {
     struct snmp_session  *sess;
     struct variable_list *var_list;
     
-    struct agent_set_info *next;
+    struct agent_netsnmp_set_info *next;
 };
 
-static struct agent_set_info *Sets = NULL;
+static struct agent_netsnmp_set_info *Sets = NULL;
 
 struct snmp_session *agentx_callback_sess = NULL;
 extern int callback_master_num;
@@ -97,14 +97,14 @@ init_subagent(void) {
 }
 
 
-struct agent_set_info *
+struct agent_netsnmp_set_info *
 save_set_vars( struct snmp_session *ss, struct snmp_pdu *pdu )
 {
-    struct agent_set_info *ptr;
+    struct agent_netsnmp_set_info *ptr;
     struct timeval now;
     extern struct timeval starttime;
 
-    ptr = (struct agent_set_info *)malloc(sizeof(struct agent_set_info));
+    ptr = (struct agent_netsnmp_set_info *)malloc(sizeof(struct agent_netsnmp_set_info));
     if (ptr == NULL )
 	return NULL;
 
@@ -129,10 +129,10 @@ save_set_vars( struct snmp_session *ss, struct snmp_pdu *pdu )
     return ptr;
 }
 
-struct agent_set_info *
+struct agent_netsnmp_set_info *
 restore_set_vars( struct snmp_session *sess, struct snmp_pdu *pdu )
 {
-    struct agent_set_info *ptr;
+    struct agent_netsnmp_set_info *ptr;
 
     for ( ptr=Sets ; ptr != NULL ; ptr=ptr->next )
 	if ( ptr->sess == sess && ptr->transID == pdu->transid )
@@ -152,7 +152,7 @@ restore_set_vars( struct snmp_session *sess, struct snmp_pdu *pdu )
 void
 free_set_vars( struct snmp_session *ss, struct snmp_pdu *pdu )
 {
-    struct agent_set_info *ptr, *prev=NULL;
+    struct agent_netsnmp_set_info *ptr, *prev=NULL;
 
     for ( ptr=Sets ; ptr != NULL ; ptr=ptr->next ) {
 	if ( ptr->sess == ss && ptr->transID == pdu->transid ) {
@@ -174,7 +174,7 @@ int
 handle_agentx_packet(int operation, struct snmp_session *session, int reqid,
                    struct snmp_pdu *pdu, void *magic)
 {
-    struct agent_set_info *asi = NULL;
+    struct agent_netsnmp_set_info *asi = NULL;
     snmp_callback mycallback;
     struct snmp_pdu *internal_pdu = NULL;
     void *retmagic = NULL;
@@ -398,7 +398,7 @@ handle_subagent_set_response(int op, struct snmp_session *session, int reqid,
                              struct snmp_pdu *pdu, void *magic) 
 {
     struct snmp_session *retsess;
-    struct agent_set_info *asi;
+    struct agent_netsnmp_set_info *asi;
     
     if (op != SNMP_CALLBACK_OP_RECEIVED_MESSAGE || magic == NULL) {
         return 1;
@@ -408,7 +408,7 @@ handle_subagent_set_response(int op, struct snmp_session *session, int reqid,
                 "handling agentx subagent set response....\n"));
     pdu = snmp_clone_pdu(pdu);
 
-    asi = (struct agent_set_info *) magic;
+    asi = (struct agent_netsnmp_set_info *) magic;
     retsess = asi->sess;
     asi->errstat = pdu->errstat;
     

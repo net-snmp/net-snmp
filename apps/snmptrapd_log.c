@@ -533,7 +533,7 @@ static int
 realloc_handle_ip_fmt(u_char **buf, size_t *buf_len, size_t *out_len,
 		      int allow_realloc,
 		      options_type *options, struct snmp_pdu *pdu,
-		      snmp_transport *transport)
+		      netsnmp_transport *transport)
 
      /*
       * Function:
@@ -628,10 +628,10 @@ realloc_handle_ip_fmt(u_char **buf, size_t *buf_len, size_t *out_len,
 	for the UDP and TCP transport domains (we don't want to try to be
 	too clever here).  */
 #ifdef SNMP_TRANSPORT_TCP_DOMAIN
-    if (transport != NULL && (transport->domain == snmpUDPDomain ||
+    if (transport != NULL && (transport->domain == netsnmpUDPDomain ||
 			      transport->domain == snmpTCPDomain)) {
 #else
-    if (transport != NULL && transport->domain == snmpUDPDomain) {
+    if (transport != NULL && transport->domain == netsnmpUDPDomain) {
 #endif
       /*  This is kind of bletcherous -- it breaks the opacity of
 	  transport_data but never mind -- the alternative is a lot of
@@ -1000,7 +1000,7 @@ static int
 realloc_dispatch_format_cmd(u_char **buf, size_t *buf_len, size_t *out_len,
 			    int allow_realloc,
 			    options_type *options, struct snmp_pdu *pdu,
-			    snmp_transport *transport)
+			    netsnmp_transport *transport)
 
      /*
       * Function:
@@ -1096,7 +1096,7 @@ realloc_handle_backslash(u_char **buf, size_t *buf_len, size_t *out_len,
 int
 realloc_format_plain_trap (u_char **buf, size_t *buf_len, size_t *out_len,
 			   int allow_realloc,
-			   struct snmp_pdu *pdu, snmp_transport *transport)
+			   struct snmp_pdu *pdu, netsnmp_transport *transport)
 
      /*
       * Function:
@@ -1288,7 +1288,7 @@ realloc_format_plain_trap (u_char **buf, size_t *buf_len, size_t *out_len,
 int
 realloc_format_trap (u_char **buf, size_t *buf_len, size_t *out_len,
 		     int allow_realloc, const char *format_str,
-		     struct snmp_pdu *pdu, snmp_transport *transport)
+		     struct snmp_pdu *pdu, netsnmp_transport *transport)
 
      /*
       * Function:

@@ -50,7 +50,7 @@ typedef struct table_data_set_s {
    table_data_set_storage *default_row;
 } table_data_set;
 
-NodeHandler table_data_set_helper_handler;
+Netsnmp_Node_Handler table_data_set_helper_handler;
 
 /* to set, add column, type, (writable) ? 1 : 0 */
 int table_set_add_default_row(table_data_set *, unsigned int, int, int);
@@ -63,12 +63,12 @@ void table_set_multi_add_default_row(va_alist);
 int set_row_column(table_row *, unsigned int, int, const char *, size_t);
 table_data_set_storage *table_data_set_find_column(table_data_set_storage *,
                                                    unsigned int);
-int register_table_data_set(handler_registration *, table_data_set *,
+int register_table_data_set(netsnmp_handler_registration *, table_data_set *,
                             table_registration_info *);
-mib_handler *get_table_data_set_handler(table_data_set *);
+netsnmp_mib_handler *get_table_data_set_handler(table_data_set *);
 table_data_set *create_table_data_set(const char *);
 int mark_row_column_writable(table_row *row, int column, int writable);
-inline table_data_set *extract_table_data_set(request_info *request);
+inline table_data_set *extract_table_data_set(netsnmp_request_info *request);
 void config_parse_table_set(const char *token, char *line);
 void config_parse_add_row(const char *token, char *line);
 inline void table_dataset_add_index(table_data_set *table, u_char type);

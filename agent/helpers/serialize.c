@@ -30,35 +30,35 @@
 /** returns a serialize handler that can be injected into a given
  *  handler chain.  
  */
-mib_handler *
+netsnmp_mib_handler *
 get_serialize_handler(void) {
-    return create_handler("serialize", serialize_helper_handler);
+    return netsnmp_create_handler("serialize", serialize_helper_handler);
 }
 
-/** functionally the same as calling register_handler() but also
+/** functionally the same as calling netsnmp_register_handler() but also
  * injects a serialize handler at the same time for you. */
 int
-register_serialize(handler_registration *reginfo) {
-    inject_handler(reginfo, get_serialize_handler());
-    return register_handler(reginfo);
+register_serialize(netsnmp_handler_registration *reginfo) {
+    netsnmp_inject_handler(reginfo, get_serialize_handler());
+    return netsnmp_register_handler(reginfo);
 }
 
 /** Implements the serial handler */
 int
 serialize_helper_handler(
-    mib_handler               *handler,
-    handler_registration      *reginfo,
-    agent_request_info        *reqinfo,
-    request_info              *requests) {
+    netsnmp_mib_handler               *handler,
+    netsnmp_handler_registration      *reginfo,
+    netsnmp_agent_request_info        *reqinfo,
+    netsnmp_request_info              *requests) {
 
-    request_info              *request;
+    netsnmp_request_info              *request;
 
     DEBUGMSGTL(("helper:serialize", "Got request\n"));
     /* loop through requests */
     for(request = requests; request; request = request->next) {
         int ret;
         
-        ret = call_next_handler(handler, reginfo, reqinfo, requests);
+        ret = netsnmp_call_next_handler(handler, reginfo, reqinfo, requests);
         if (ret != SNMP_ERR_NOERROR)
             return ret;
     }
@@ -74,5 +74,5 @@ serialize_helper_handler(
 void
 init_serialize(void) 
 {
-    register_handler_by_name("serialize", get_serialize_handler());
+    netsnmp_register_handler_by_name("serialize", get_serialize_handler());
 }

@@ -417,7 +417,7 @@ register_mib_context2(const char *moduleName,
 	     const char *context,
 	     int timeout,
 	     int flags,
-             handler_registration *reginfo,
+             netsnmp_handler_registration *reginfo,
 	     int perform_callback)
 {
   struct subtree *subtree, *sub2;
@@ -498,7 +498,7 @@ register_mib_context2(const char *moduleName,
 
 	/*  Note: have to deep copy reginfo here also.  */
 	if (subtree->reginfo != NULL) {
-	  sub2->reginfo = snmp_handler_registration_dup(subtree->reginfo);
+	  sub2->reginfo = snmp_netnetsnmp_handler_registration_dup(subtree->reginfo);
 	  if (sub2->reginfo == NULL) {
 	    free(sub2);
 	    unregister_mib_context(mibloc, mibloclen, priority,
@@ -905,7 +905,7 @@ unregister_mibs_by_session (struct snmp_session *ss)
 		  if (child->reginfo != NULL) {
 		    /*  Don't let's free the session pointer just yet!  */
 		    child->reginfo->handler->myvoid = NULL;
-		    snmp_handler_registration_free(child->reginfo);
+		    snmp_netnetsnmp_handler_registration_free(child->reginfo);
 		  }
 
                   unload_subtree(child, prev);

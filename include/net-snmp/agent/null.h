@@ -7,5 +7,5 @@
 
 int register_null(oid *, size_t);
    
-NodeHandler null_handler;
+Netsnmp_Node_Handler null_handler;
 

@@ -70,11 +70,11 @@ init_vacm_context(void) {
     /*
      * table vacm_context
      */
-    handler_registration *my_handler;
+    netsnmp_handler_registration *my_handler;
     table_registration_info *table_info;
     iterator_info *iinfo;
 
-    my_handler = create_handler_registration("vacm_context",
+    my_handler = netsnmp_create_handler_registration("vacm_context",
                                           vacm_context_handler,
                                           vacm_context_oid,
                                           sizeof(vacm_context_oid)/sizeof(oid),
@@ -103,10 +103,10 @@ init_vacm_context(void) {
  */
 
 int
-vacm_context_handler(mib_handler               *handler,
-                     handler_registration      *reginfo,
-                     agent_request_info        *reqinfo,
-                     request_info              *requests) {
+vacm_context_handler(netsnmp_mib_handler               *handler,
+                     netsnmp_handler_registration      *reginfo,
+                     netsnmp_agent_request_info        *reqinfo,
+                     netsnmp_request_info              *requests) {
     subtree_context_cache *context_ptr;
 
     while(requests) {

@@ -31,7 +31,7 @@ u_long my_ulong=0;
 void
 init_testhandler(void) {
     /* we're registering at .1.2.3.4 */
-    handler_registration *my_test;
+    netsnmp_handler_registration *my_test;
     table_registration_info *table_info;
     u_long ind1;
     table_data *table;
@@ -43,7 +43,7 @@ init_testhandler(void) {
     /*
      * basic handler test
      */
-    register_handler(create_handler_registration("myTest", my_test_handler,
+    netsnmp_register_handler(netsnmp_create_handler_registration("myTest", my_test_handler,
                                                  my_test_oid, 4,
                                                  HANDLER_CAN_RONLY));
 
@@ -51,20 +51,20 @@ init_testhandler(void) {
      * instance handler test
      */
 
-    register_instance(create_handler_registration("myInstance",
+    register_instance(netsnmp_create_handler_registration("myInstance",
                                                   my_test_instance_handler,
                                                   my_instance_oid, 5,
                                                   HANDLER_CAN_RWRITE));
 
     register_ulong_instance("myulong",
                             my_data_ulong_instance, 4,
-                            &my_ulong);
+                            &my_ulong, NULL);
     
     /*
      * table helper test
      */
 
-    my_test = create_handler_registration("myTable",
+    my_test = netsnmp_create_handler_registration("myTable",
                                           my_test_table_handler,
                                           my_table_oid, 4,
                                           HANDLER_CAN_RONLY);
@@ -118,7 +118,7 @@ init_testhandler(void) {
     table_info->max_column = 3;
 
     register_read_only_table_data(
-        create_handler_registration("12days",
+        netsnmp_create_handler_registration("12days",
                                     my_data_table_handler,
                                     my_data_table_oid,
                                     4, HANDLER_CAN_RONLY),
@@ -144,7 +144,7 @@ init_testhandler(void) {
                                     3, ASN_OCTET_STR, 1);
 
     /* register the table */
-    register_table_data_set(create_handler_registration("chairs",
+    register_table_data_set(netsnmp_create_handler_registration("chairs",
                                                         NULL,
                                                         my_data_table_set_oid,
                                                         4, HANDLER_CAN_RWRITE),
@@ -176,10 +176,10 @@ init_testhandler(void) {
 
 int
 my_test_handler(
-    mib_handler               *handler,
-    handler_registration      *reginfo,
-    agent_request_info        *reqinfo,
-    request_info              *requests) {
+    netsnmp_mib_handler               *handler,
+    netsnmp_handler_registration      *reginfo,
+    netsnmp_agent_request_info        *reqinfo,
+    netsnmp_request_info              *requests) {
 
     oid myoid1[] = {1,2,3,4,5,6};
     static u_long accesses = 0;
@@ -217,7 +217,7 @@ my_test_handler(
                 break;
                 
             default:
-                set_request_error(reqinfo, requests, SNMP_ERR_GENERR);
+                netsnmp_set_request_error(reqinfo, requests, SNMP_ERR_GENERR);
                 break;
         }
 
@@ -234,14 +234,14 @@ my_test_handler(
 #define MAX_COLTWO 12
 #define RESULT_COLUMN 3
 int
-my_test_table_handler(mib_handler               *handler,
-                      handler_registration      *reginfo,
-                      agent_request_info        *reqinfo,
-                      request_info              *requests) {
+my_test_table_handler(netsnmp_mib_handler               *handler,
+                      netsnmp_handler_registration      *reginfo,
+                      netsnmp_agent_request_info        *reqinfo,
+                      netsnmp_request_info              *requests) {
 
     table_registration_info
         *handler_reg_info = (table_registration_info *) handler->prev->myvoid;
-    table_request_info *table_info;
+    table_netsnmp_request_info *table_info;
     u_long result;
     int x, y;
     
@@ -331,10 +331,10 @@ my_test_table_handler(mib_handler               *handler,
 #define TESTHANDLER_SET_NAME "my_test"
 int
 my_test_instance_handler(
-    mib_handler               *handler,
-    handler_registration      *reginfo,
-    agent_request_info        *reqinfo,
-    request_info              *requests) {
+    netsnmp_mib_handler               *handler,
+    netsnmp_handler_registration      *reginfo,
+    netsnmp_agent_request_info        *reqinfo,
+    netsnmp_request_info              *requests) {
 
     static u_long accesses = 0;
     u_long *accesses_cache = NULL;
@@ -351,7 +351,7 @@ my_test_instance_handler(
 
         case MODE_SET_RESERVE1:
             if (requests->requestvb->type != ASN_UNSIGNED)
-                set_request_error(reqinfo, requests, SNMP_ERR_WRONGTYPE);
+                netsnmp_set_request_error(reqinfo, requests, SNMP_ERR_WRONGTYPE);
             break;
 
         case MODE_SET_RESERVE2:
@@ -359,11 +359,11 @@ my_test_instance_handler(
             memdup((u_char **) &accesses_cache,
                    (u_char *) &accesses, sizeof(accesses));
             if (accesses_cache == NULL) {
-                set_request_error(reqinfo, requests,
+                netsnmp_set_request_error(reqinfo, requests,
                                   SNMP_ERR_RESOURCEUNAVAILABLE);
                 return SNMP_ERR_NOERROR;
             }
-            request_add_list_data(requests,
+            netsnmp_request_add_list_data(requests,
                                   create_data_list(TESTHANDLER_SET_NAME,
                                                    accesses_cache, free));
             break;
@@ -376,7 +376,7 @@ my_test_instance_handler(
             
         case MODE_SET_UNDO:
             accesses =
-                *((u_long *) request_get_list_data(requests,
+                *((u_long *) netsnmp_request_get_list_data(requests,
                                                    TESTHANDLER_SET_NAME));
             break;
 
@@ -391,13 +391,13 @@ my_test_instance_handler(
 
 int
 my_data_table_handler(
-    mib_handler               *handler,
-    handler_registration      *reginfo,
-    agent_request_info        *reqinfo,
-    request_info              *requests) {
+    netsnmp_mib_handler               *handler,
+    netsnmp_handler_registration      *reginfo,
+    netsnmp_agent_request_info        *reqinfo,
+    netsnmp_request_info              *requests) {
 
     char *column3;
-    table_request_info *table_info;
+    table_netsnmp_request_info *table_info;
     table_row *row;
     
     while(requests) {

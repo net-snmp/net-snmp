@@ -67,11 +67,11 @@ struct config_line *register_app_config_handler (const char *,
                                              void (*parser)(const char *, char *),
                                              void (*releaser) (void),
                                              const char *);
-struct config_line *register_premib_handler (const char *, const char *,
+struct config_line *register_prenetsnmp_mib_handler (const char *, const char *,
                                              void (*parser)(const char *, char *),
                                              void (*releaser) (void),
                                              const char *);
-struct config_line *register_app_premib_handler (const char *,
+struct config_line *register_app_prenetsnmp_mib_handler (const char *,
                                              void (*parser)(const char *, char *),
                                              void (*releaser) (void),
                                              const char *);

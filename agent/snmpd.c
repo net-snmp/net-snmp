@@ -716,7 +716,7 @@ main(int argc, char *argv[])
 #ifdef WIN32
     agent_status = AGENT_RUNNING;
 #endif
-    snmp_addrcache_initialise();
+    netsnmp_snmp_addrcache_initialise();
 
     /*  Forever monitor the dest_port for incoming PDUs.  */
     DEBUGMSGTL(("snmpd/main", "We're up.  Starting to process data.\n"));
@@ -923,14 +923,14 @@ receive(void)
                 svp->tv_sec++;
             }
             if (log_addresses && lastAddrAge++ > 600) {
-	      snmp_addrcache_age();
+	      netsnmp_addrcache_age();
             }
         }  /* endif -- now>sched */
 
         /* run requested alarms */
         run_alarms();
         
-        check_outstanding_agent_requests(SNMP_ERR_NOERROR);
+        netsnmp_check_outstanding_agent_requests(SNMP_ERR_NOERROR);
 
     }  /* endwhile */
 

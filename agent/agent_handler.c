@@ -31,8 +31,8 @@
  *  memory and speed overheads of OO languages like C++).
  *
  *  Functionally, the notion of what a handler does is the same as the
- *  older api: A handler is @link create_handler() created@endlink and
- *  then @link register_handler() registered@endlink with the main
+ *  older api: A handler is @link netsnmp_create_handler() created@endlink and
+ *  then @link netsnmp_register_handler() registered@endlink with the main
  *  agent at a given OID in the OID tree and gets called any time a
  *  request is made that it should respond to.  You probably should
  *  use one of the convenience helpers instead of doing anything else
@@ -68,15 +68,15 @@
  * @{
  */
 
-/** creates a mib_handler structure given a name and a access method.
- *  The returned handler should then be @link register_handler()
+/** creates a netsnmp_mib_handler structure given a name and a access method.
+ *  The returned handler should then be @link netsnmp_register_handler()
  *  registered.@endlink
- *  @see create_handler_registration()
- *  @see register_handler()
+ *  @see netsnmp_create_handler_registration()
+ *  @see netsnmp_register_handler()
  */
-mib_handler *
-create_handler(const char *name, NodeHandler *handler_access_method) {
-    mib_handler *ret = SNMP_MALLOC_TYPEDEF(mib_handler);
+netsnmp_mib_handler *
+netsnmp_create_handler(const char *name, Netsnmp_Node_Handler *handler_access_method) {
+    netsnmp_mib_handler *ret = SNMP_MALLOC_TYPEDEF(netsnmp_mib_handler);
     ret->handler_name = strdup(name);
     ret->access_method = handler_access_method;
     return ret;
@@ -87,17 +87,17 @@ create_handler(const char *name, NodeHandler *handler_access_method) {
  *  the handler supports. If modes == 0, then modes will automatically
  *  be set to the default value of only HANDLER_CAN_DEFAULT, which is
  *  by default read-only GET and GETNEXT requests.
- *  @note This ends up calling create_handler(name, handler_access_method)
- *  @see create_handler()
- *  @see register_handler()
+ *  @note This ends up calling netsnmp_create_handler(name, handler_access_method)
+ *  @see netsnmp_create_handler()
+ *  @see netsnmp_register_handler()
  */
-handler_registration *
-create_handler_registration(const char *name,
-                            NodeHandler *handler_access_method,
+netsnmp_handler_registration *
+netsnmp_create_handler_registration(const char *name,
+                            Netsnmp_Node_Handler *handler_access_method,
                             oid *reg_oid, size_t reg_oid_len,
                             int modes) {
-    handler_registration *the_reg;
-    the_reg = SNMP_MALLOC_TYPEDEF(handler_registration);
+    netsnmp_handler_registration *the_reg;
+    the_reg = SNMP_MALLOC_TYPEDEF(netsnmp_handler_registration);
     if (!the_reg)
         return NULL;
 
@@ -106,17 +106,17 @@ create_handler_registration(const char *name,
     else
         the_reg->modes = HANDLER_CAN_DEFAULT;
 
-    the_reg->handler = create_handler(name, handler_access_method);
+    the_reg->handler = netsnmp_create_handler(name, handler_access_method);
     memdup((u_char **) &the_reg->rootoid, (const u_char *) reg_oid,
            reg_oid_len * sizeof(oid));
     the_reg->rootoid_len = reg_oid_len;
     return the_reg;
 }
 
-/** register a handler, as defined by the handler_registration pointer. */ 
+/** register a handler, as defined by the netsnmp_handler_registration pointer. */ 
 int
-register_handler(handler_registration *reginfo) {
-    mib_handler *handler;
+netsnmp_register_handler(netsnmp_handler_registration *reginfo) {
+    netsnmp_mib_handler *handler;
     DEBUGIF("handler::register") {
         DEBUGMSGTL(("handler::register", "Registering "));
         for(handler = reginfo->handler; handler;
@@ -144,7 +144,7 @@ register_handler(handler_registration *reginfo) {
 
     /* for handlers that can't GETBULK, force a conversion handler on them */
     if (!(reginfo->modes & HANDLER_CAN_GETBULK)) {
-        inject_handler(reginfo, get_bulk_to_next_handler());
+        netsnmp_inject_handler(reginfo, get_bulk_to_next_handler());
     }
 
     return register_mib_context2(reginfo->handler->handler_name,
@@ -158,11 +158,11 @@ register_handler(handler_registration *reginfo) {
                          0, reginfo, 1);
 }
 
-/** register a handler, as defined by the handler_registration pointer. */ 
+/** register a handler, as defined by the netsnmp_handler_registration pointer. */ 
 int
-register_handler_nocallback(handler_registration *reginfo)
+netsnmp_register_handler_nocallback(netsnmp_handler_registration *reginfo)
 {
-    mib_handler *handler;
+    netsnmp_mib_handler *handler;
     DEBUGIF("handler::register") {
         DEBUGMSGTL(("handler::register", "Registering (with no callback) "));
         for (handler = reginfo->handler; handler; handler = handler->next) {
@@ -199,11 +199,11 @@ register_handler_nocallback(handler_registration *reginfo)
 }
 
 /** inject a new handler into the calling chain of the handlers
-   definedy by the handler_registration pointer.  The new handler is
+   definedy by the netsnmp_handler_registration pointer.  The new handler is
    injected at the top of the list and hence will be the new handler
    to be called first.*/ 
 int
-inject_handler(handler_registration *reginfo, mib_handler *handler) {
+netsnmp_inject_handler(netsnmp_handler_registration *reginfo, netsnmp_mib_handler *handler) {
     DEBUGMSGTL(("handler:inject", "injecting %s before %s\n", \
                 handler->handler_name, reginfo->handler->handler_name));
     handler->next = reginfo->handler;
@@ -216,14 +216,14 @@ inject_handler(handler_registration *reginfo, mib_handler *handler) {
 /** @internal
  *  calls all the handlers for a given mode.
  */
-int call_handlers(handler_registration *reginfo,
-                  agent_request_info   *reqinfo,
-                  request_info         *requests) {
-    NodeHandler *nh;
+int netsnmp_call_handlers(netsnmp_handler_registration *reginfo,
+                  netsnmp_agent_request_info   *reqinfo,
+                  netsnmp_request_info         *requests) {
+    Netsnmp_Node_Handler *nh;
     int status;
     
     if (reginfo == NULL || reqinfo == NULL || requests == NULL) {
-        snmp_log(LOG_ERR, "call_handlers() called illegally");
+        snmp_log(LOG_ERR, "netsnmp_call_handlers() called illegally");
         return  SNMP_ERR_GENERR;
     }
 
@@ -248,14 +248,14 @@ int call_handlers(handler_registration *reginfo,
         case MODE_SET_UNDO:
             if (!(reginfo->modes & HANDLER_CAN_SET)) {
                 for(; requests; requests = requests->next) {
-                    set_request_error(reqinfo, requests, SNMP_ERR_NOTWRITABLE);
+                    netsnmp_set_request_error(reqinfo, requests, SNMP_ERR_NOTWRITABLE);
                 }
                 return SNMP_ERR_NOERROR;
             }
             break;
 
         default:
-            snmp_log(LOG_ERR, "unknown mode in call_handlers! bug!\n");
+            snmp_log(LOG_ERR, "unknown mode in netsnmp_call_handlers! bug!\n");
             return SNMP_ERR_GENERR;
     }
     DEBUGMSGTL(("handler:calling", "calling main handler %s\n",
@@ -274,16 +274,16 @@ int call_handlers(handler_registration *reginfo,
 }
 
 /** calls a handler with with appropriate NULL checking of arguments, etc. */
-inline int call_handler(mib_handler          *next_handler,
-                        handler_registration *reginfo,
-                        agent_request_info   *reqinfo,
-                        request_info         *requests) {
-    NodeHandler *nh;
+inline int netsnmp_call_handler(netsnmp_mib_handler          *next_handler,
+                        netsnmp_handler_registration *reginfo,
+                        netsnmp_agent_request_info   *reqinfo,
+                        netsnmp_request_info         *requests) {
+    Netsnmp_Node_Handler *nh;
     int ret;
     
     if (next_handler == NULL || reginfo == NULL || reqinfo == NULL ||
         requests == NULL) {
-        snmp_log(LOG_ERR, "call_next_handler() called illegally");
+        snmp_log(LOG_ERR, "netsnmp_call_next_handler() called illegally");
         return  SNMP_ERR_GENERR;
     }
 
@@ -307,27 +307,27 @@ inline int call_handler(mib_handler          *next_handler,
 
 /** calls the next handler in the chain after the current one with
    with appropriate NULL checking, etc. */
-inline int call_next_handler(mib_handler          *current,
-                             handler_registration *reginfo,
-                             agent_request_info   *reqinfo,
-                             request_info         *requests) {
+inline int netsnmp_call_next_handler(netsnmp_mib_handler          *current,
+                             netsnmp_handler_registration *reginfo,
+                             netsnmp_agent_request_info   *reqinfo,
+                             netsnmp_request_info         *requests) {
 
     if (current == NULL || reginfo == NULL || reqinfo == NULL ||
         requests == NULL) {
-        snmp_log(LOG_ERR, "call_next_handler() called illegally");
+        snmp_log(LOG_ERR, "netsnmp_call_next_handler() called illegally");
         return  SNMP_ERR_GENERR;
     }
 
-    return call_handler(current->next, reginfo, reqinfo, requests);
+    return netsnmp_call_handler(current->next, reginfo, reqinfo, requests);
 }
 
 /** free's the resourceses associated with a given handler */
 void
-snmp_handler_free(mib_handler *handler)
+netsnmp_handler_free(netsnmp_mib_handler *handler)
 {
     if (handler != NULL) {
 	if (handler->next != NULL) {
-	    snmp_handler_free(handler->next);
+	    netsnmp_handler_free(handler->next);
 	    handler->next = NULL;
 	}
 	SNMP_FREE(handler->handler_name);
@@ -336,16 +336,16 @@ snmp_handler_free(mib_handler *handler)
 }
 
 /** dulpicates a handler */
-mib_handler *
-snmp_handler_dup(mib_handler *handler)
+netsnmp_mib_handler *
+netsnmp_handler_dup(netsnmp_mib_handler *handler)
 {
-    mib_handler *h = NULL;
+    netsnmp_mib_handler *h = NULL;
 
     if (handler == NULL) {
 	return NULL;
     }
 
-    h = (mib_handler *)calloc(1, sizeof(mib_handler));
+    h = (netsnmp_mib_handler *)calloc(1, sizeof(netsnmp_mib_handler));
 
     if (h != NULL) {
 	h->myvoid = handler->myvoid;
@@ -360,7 +360,7 @@ snmp_handler_dup(mib_handler *handler)
 	}
 
 	if (handler->next != NULL) {
-	    h->next = snmp_handler_dup(handler->next);
+	    h->next = netsnmp_handler_dup(handler->next);
 	    if (h->next == NULL) {
 		if (h->handler_name) {
 		    free(h->handler_name);
@@ -378,10 +378,10 @@ snmp_handler_dup(mib_handler *handler)
 
 /** free the resources associated with a handler registration object */
 void
-snmp_handler_registration_free(handler_registration *reginfo)
+snmp_netnetsnmp_handler_registration_free(netsnmp_handler_registration *reginfo)
 {
     if (reginfo != NULL) {
-	snmp_handler_free(reginfo->handler);
+	netsnmp_handler_free(reginfo->handler);
 	SNMP_FREE(reginfo->handlerName);
 	SNMP_FREE(reginfo->contextName);
 	SNMP_FREE(reginfo->rootoid);    
@@ -390,17 +390,17 @@ snmp_handler_registration_free(handler_registration *reginfo)
 }
 
 /** duplicates the handler registration object */
-handler_registration *
-snmp_handler_registration_dup(handler_registration *reginfo)
+netsnmp_handler_registration *
+snmp_netnetsnmp_handler_registration_dup(netsnmp_handler_registration *reginfo)
 {
-    handler_registration *r = NULL;
+    netsnmp_handler_registration *r = NULL;
 
     if (reginfo == NULL) {
 	return NULL;
     }
 
 
-    r = (handler_registration *)calloc(1, sizeof(handler_registration));
+    r = (netsnmp_handler_registration *)calloc(1, sizeof(netsnmp_handler_registration));
 
     if (r != NULL) {
 	r->modes       = reginfo->modes;
@@ -413,7 +413,7 @@ snmp_handler_registration_dup(handler_registration *reginfo)
 	if (reginfo->handlerName != NULL) {
 	    r->handlerName = strdup(reginfo->handlerName);
 	    if (r->handlerName == NULL) {
-		snmp_handler_registration_free(r);
+		snmp_netnetsnmp_handler_registration_free(r);
 		return NULL;
 	    }
 	}
@@ -421,7 +421,7 @@ snmp_handler_registration_dup(handler_registration *reginfo)
 	if (reginfo->contextName != NULL) {
 	    r->contextName = strdup(reginfo->contextName);
 	    if (r->contextName == NULL) {
-		snmp_handler_registration_free(r);
+		snmp_netnetsnmp_handler_registration_free(r);
 		return NULL;
 	    }
 	}
@@ -430,14 +430,14 @@ snmp_handler_registration_dup(handler_registration *reginfo)
 	    memdup((u_char **)&(r->rootoid), (const u_char *)reginfo->rootoid,
 		   reginfo->rootoid_len * sizeof(oid));
 	    if (r->rootoid == NULL) {
-		snmp_handler_registration_free(r);
+		snmp_netnetsnmp_handler_registration_free(r);
 		return NULL;
 	    }
 	}
 
-	r->handler = snmp_handler_dup(reginfo->handler);
+	r->handler = netsnmp_handler_dup(reginfo->handler);
 	if (r->handler == NULL) {
-	    snmp_handler_registration_free(r);
+	    snmp_netnetsnmp_handler_registration_free(r);
 	    return NULL;
 	}
 	return r;
@@ -447,17 +447,17 @@ snmp_handler_registration_dup(handler_registration *reginfo)
 }
 
 /** creates a cache of information which can be saved for future
-   reference.  Use handler_check_cache() later to make sure it's still
+   reference.  Use netsnmp_handler_check_cache() later to make sure it's still
    valid before referencing it in the future. */
-inline delegated_cache *
-create_delegated_cache(mib_handler               *handler,
-                       handler_registration      *reginfo,
-                       agent_request_info        *reqinfo,
-                       request_info              *requests,
+inline netsnmp_delegated_cache *
+netsnmp_create_delegated_cache(netsnmp_mib_handler               *handler,
+                       netsnmp_handler_registration      *reginfo,
+                       netsnmp_agent_request_info        *reqinfo,
+                       netsnmp_request_info              *requests,
                        void                      *localinfo) {
-    delegated_cache *ret;
+    netsnmp_delegated_cache *ret;
 
-    ret = SNMP_MALLOC_TYPEDEF(delegated_cache);
+    ret = SNMP_MALLOC_TYPEDEF(netsnmp_delegated_cache);
     if (ret) {
         ret->transaction_id = reqinfo->asp->pdu->transid;
         ret->handler = handler;
@@ -472,13 +472,13 @@ create_delegated_cache(mib_handler               *handler,
 /** check's a given cache and returns it if it is still valid (ie, the
    agent still considers it to be an outstanding request.  Returns
    NULL if it's no longer valid. */
-inline delegated_cache *
-handler_check_cache(delegated_cache *dcache)
+inline netsnmp_delegated_cache *
+netsnmp_handler_check_cache(netsnmp_delegated_cache *dcache)
 {
     if (!dcache)
         return dcache;
     
-    if (check_transaction_id(dcache->transaction_id) == SNMPERR_SUCCESS)
+    if (netsnmp_check_transaction_id(dcache->transaction_id) == SNMPERR_SUCCESS)
         return dcache;
 
     return NULL;
@@ -486,7 +486,7 @@ handler_check_cache(delegated_cache *dcache)
 
 /** frees a cache once you're finished using it */
 inline void
-free_delegated_cache(delegated_cache *dcache)
+netsnmp_free_delegated_cache(netsnmp_delegated_cache *dcache)
 {
     /* right now, no extra data is there that needs to be freed */
     if (dcache)
@@ -498,7 +498,7 @@ free_delegated_cache(delegated_cache *dcache)
 
 /** marks a list of requests as delegated (or not if isdelegaded = 0) */
 void
-handler_mark_requests_as_delegated(request_info *requests, int isdelegated) 
+netsnmp_handler_mark_requests_as_delegated(netsnmp_request_info *requests, int isdelegated) 
 {
     while(requests) {
         requests->delegated = isdelegated;
@@ -508,7 +508,7 @@ handler_mark_requests_as_delegated(request_info *requests, int isdelegated)
 
 /** add data to a request that can be extracted later by submodules */
 inline void
-request_add_list_data(request_info *request, data_list *node) 
+netsnmp_request_add_list_data(netsnmp_request_info *request, data_list *node) 
 {
   if (request) {
     if (request->parent_data)
@@ -520,7 +520,7 @@ request_add_list_data(request_info *request, data_list *node)
 
 /** extract data from a request that was added previously by a parent module */
 inline void *
-request_get_list_data(request_info *request, const char *name)
+netsnmp_request_get_list_data(netsnmp_request_info *request, const char *name)
 {
   if (request)
     return get_list_data(request->parent_data,name);
@@ -529,7 +529,7 @@ request_get_list_data(request_info *request, const char *name)
 
 /** Free the extra data stored in a request */
 inline void
-free_request_data_set(request_info *request)
+netsnmp_free_request_data_set(netsnmp_request_info *request)
 {
   if (request)
     free_list_data(request->parent_data);
@@ -537,7 +537,7 @@ free_request_data_set(request_info *request)
 
 /** Free the extra data stored in a bunch of requests (all data in the chain) */
 inline void
-free_request_data_sets(request_info *request) 
+netsnmp_free_request_data_sets(netsnmp_request_info *request) 
 {
     if (request && request->parent_data) {
         free_all_list_data(request->parent_data);
@@ -546,10 +546,10 @@ free_request_data_sets(request_info *request)
 }
 
 /** Returns a handler from a chain based on the name */
-mib_handler *
-find_handler_by_name(handler_registration *reginfo, const char *name) 
+netsnmp_mib_handler *
+netsnmp_find_handler_by_name(netsnmp_handler_registration *reginfo, const char *name) 
 {
-    mib_handler *it;
+    netsnmp_mib_handler *it;
     for(it = reginfo->handler; it; it = it->next) {
         if (strcmp(it->handler_name, name) == 0) {
             return it;
@@ -563,10 +563,10 @@ find_handler_by_name(handler_registration *reginfo, const char *name)
  data may change as a handler evolves.  Handlers should really
  advertise some function for you to use instead. */
 void *
-find_handler_data_by_name(handler_registration *reginfo,
+netsnmp_find_handler_data_by_name(netsnmp_handler_registration *reginfo,
                           const char *name) 
 {
-    mib_handler *it = find_handler_by_name(reginfo, name);
+    netsnmp_mib_handler *it = netsnmp_find_handler_by_name(reginfo, name);
     if (it)
         return it->myvoid;
     return NULL;
@@ -574,10 +574,10 @@ find_handler_data_by_name(handler_registration *reginfo,
 
 /** clones a mib handler (it's name and access methods onlys; not myvoid)
  */
-mib_handler *
-clone_handler(mib_handler *it) 
+netsnmp_mib_handler *
+clone_handler(netsnmp_mib_handler *it) 
 {
-    return create_handler(it->handler_name, it->access_method);
+    return netsnmp_create_handler(it->handler_name, it->access_method);
 }
 
 static data_list *handler_reg = NULL;
@@ -585,7 +585,7 @@ static data_list *handler_reg = NULL;
 /** registers a given handler by name so that it can be found easily later.
  */
 void
-register_handler_by_name(const char *name, mib_handler *handler) 
+netsnmp_register_handler_by_name(const char *name, netsnmp_mib_handler *handler) 
 {
     add_list_data(&handler_reg, create_data_list(name, (void *) handler, NULL));
     DEBUGMSGTL(("handler_registry", "registering helper %s\n", name));
@@ -596,33 +596,33 @@ register_handler_by_name(const char *name, mib_handler *handler)
  *  subtrees name matches a passed in name.
  */
 void
-inject_handler_into_subtree(struct subtree *tp, const char *name,
-                            mib_handler *handler) 
+netsnmp_inject_handler_into_subtree(struct subtree *tp, const char *name,
+                            netsnmp_mib_handler *handler) 
 {
     struct subtree *tptr;
-    mib_handler *mh;
+    netsnmp_mib_handler *mh;
     
     for(tptr = tp; tptr; tptr = tptr->next) {
 /*         if (tptr->children) { */
-/*             inject_handler_into_subtree(tptr->children, name, handler); */
+/*             netsnmp_inject_handler_into_subtree(tptr->children, name, handler); */
 /*         } */
         if (strcmp(tptr->label, name) == 0) {
             DEBUGMSGTL(("injectHandler", "injecting handler %s into %s\n",
                         handler->handler_name,
                         tptr->label));
-            inject_handler(tptr->reginfo, clone_handler(handler));
+            netsnmp_inject_handler(tptr->reginfo, clone_handler(handler));
         } else if (tptr->reginfo &&
                    tptr->reginfo->handlerName &&
                    strcmp(tptr->reginfo->handlerName, name) == 0) {
             DEBUGMSGTL(("injectHandler", "injecting handler into %s/%s\n",
                         tptr->label, tptr->reginfo->handlerName));
-            inject_handler(tptr->reginfo, clone_handler(handler));
+            netsnmp_inject_handler(tptr->reginfo, clone_handler(handler));
         } else {
             for(mh = tptr->reginfo->handler; mh; mh = mh->next) {
                 if (strcmp(mh->handler_name, name) == 0) {
                     DEBUGMSGTL(("injectHandler", "injecting handler into %s\n",
                                 tptr->label));
-                    inject_handler(tptr->reginfo, clone_handler(handler));
+                    netsnmp_inject_handler(tptr->reginfo, clone_handler(handler));
                     break;
                 } else {
                     DEBUGMSGTL(("yyyinjectHandler", "not injecting handler into %s\n",
@@ -642,7 +642,7 @@ parse_injectHandler_conf(const char *token, char *cptr)
 {
     char handler_to_insert[256];
     subtree_context_cache *stc;
-    mib_handler *handler;
+    netsnmp_mib_handler *handler;
     
     /* XXXWWW: ensure instead that handler isn't inserted twice */
     if (doneit) /* we only do this once without restart the agent */
@@ -662,7 +662,7 @@ parse_injectHandler_conf(const char *token, char *cptr)
     for(stc = get_top_context_cache(); stc; stc = stc->next) {
         DEBUGMSGTL(("injectHandler", "Checking context tree %s\n",
                     stc->context_name));
-        inject_handler_into_subtree(stc->first_subtree, cptr, handler);
+        netsnmp_inject_handler_into_subtree(stc->first_subtree, cptr, handler);
     }
 }
 
@@ -681,7 +681,7 @@ handler_mark_doneit(int majorID, int minorID,
  *  register's the injectHandle parser token.
  */
 void
-init_handler_conf(void) 
+netsnmp_init_handler_conf(void) 
 {
     snmpd_register_config_handler("injectHandler",
                                   parse_injectHandler_conf,

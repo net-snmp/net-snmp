@@ -117,7 +117,7 @@ notifyTable_register_notifications(int major, int minor,
     struct snmpNotifyTable_data *nptr;
     int confirm, i;
     char buf[SNMP_MAXBUF_SMALL];
-    snmp_transport *t = NULL;
+    netsnmp_transport *t = NULL;
     struct agent_add_trap_args *args = (struct agent_add_trap_args *)serverarg;
     struct snmp_session *ss;
 

@@ -128,7 +128,7 @@ int main(int argc, char *argv[])
     struct snmp_session session, *ss;
     struct snmp_pdu *pdu, *response;
     struct variable_list *vars;
-    snmp_transport *transport = NULL;
+    netsnmp_transport *transport = NULL;
     char *sysdescr = NULL;
     u_long uptime = 0;
     int status;

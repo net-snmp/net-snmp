@@ -28,11 +28,11 @@ extern "C" {
 
 /*
  * group_item is to allow us to keep a list of requests without
- * disrupting the actual request_info list.
+ * disrupting the actual netsnmp_request_info list.
  */
 typedef struct array_group_item_s {
-    request_info              *ri;
-    table_request_info        *tri;
+    netsnmp_request_info              *ri;
+    table_netsnmp_request_info        *tri;
     struct array_group_item_s *next;
 } array_group_item;
 
@@ -55,8 +55,8 @@ typedef struct array_group_s {
 } array_group;
 
 typedef int (UserOidCompare)(void *lhs, void *rhs);
-typedef int (UserGetProcessor)(request_info *, oid_array_header *,
-                               table_request_info *);
+typedef int (UserGetProcessor)(netsnmp_request_info *, oid_array_header *,
+                               table_netsnmp_request_info *);
 typedef oid_array_header * (UserRowMethod)(oid_array_header *);
 typedef int (UserRowAction)(oid_array_header *, oid_array_header *, array_group *);
 typedef void (UserGroupMethod)( array_group * );
@@ -88,21 +88,21 @@ typedef struct table_array_callbacks_s {
 } table_array_callbacks;
 
 
-int register_table_array(handler_registration *reginfo,
+int register_table_array(netsnmp_handler_registration *reginfo,
                          table_registration_info *tabreq,
                          table_array_callbacks   *cb,
                          int                     group_rows);
 
-oid_array *extract_array_context(request_info *);
+oid_array *extract_array_context(netsnmp_request_info *);
 
-NodeHandler table_array_helper_handler;
+Netsnmp_Node_Handler table_array_helper_handler;
 
 const oid_array_header*
-table_array_get_by_index(handler_registration *reginfo,
+table_array_get_by_index(netsnmp_handler_registration *reginfo,
                          oid_array_header * hdr);
 
 const oid_array_header**
-table_array_get_subset(handler_registration *reginfo,
+table_array_get_subset(netsnmp_handler_registration *reginfo,
                        oid_array_header * hdr, int * len);
 
 

@@ -171,7 +171,7 @@ register_agentx_list(struct snmp_session *session, struct snmp_pdu *pdu)
     char buf[128];
     oid ubound = 0;
     u_long flags = 0;
-    handler_registration *reg;
+    netsnmp_handler_registration *reg;
     int rc = 0;
     
     DEBUGMSGTL(("agentx/master","in register_agentx_list\n"));
@@ -194,7 +194,7 @@ register_agentx_list(struct snmp_session *session, struct snmp_pdu *pdu)
       flags = FULLY_QUALIFIED_INSTANCE;
     }
 
-    reg = create_handler_registration(buf, agentx_master_handler,
+    reg = netsnmp_create_handler_registration(buf, agentx_master_handler,
                                       pdu->variables->name,
                                       pdu->variables->name_length,
                                       HANDLER_CAN_RWRITE |
@@ -220,7 +220,7 @@ register_agentx_list(struct snmp_session *session, struct snmp_pdu *pdu)
 	rc = AGENTX_ERR_REQUEST_DENIED;
 	DEBUGMSGTL(("agentx/master", "failed registration\n"));
     }
-    snmp_handler_registration_free(reg);
+    snmp_netnetsnmp_handler_registration_free(reg);
     return rc;
 }
 
@@ -426,7 +426,7 @@ handle_master_agentx_packet(int operation,
 			    struct snmp_pdu *pdu,
 			    void *magic)
 {
-    struct agent_snmp_session  *asp;
+    netsnmp_agent_session  *asp;
     struct timeval now;
     
     if (operation == SNMP_CALLBACK_OP_DISCONNECT) {
@@ -443,7 +443,7 @@ handle_master_agentx_packet(int operation,
     /*  Okay, it's a SNMP_CALLBACK_OP_RECEIVED_MESSAGE op.  */
 
     if (magic) {
-        asp = (struct agent_snmp_session *)magic;
+        asp = (netsnmp_agent_session *)magic;
     } else {
     	asp = init_agent_snmp_session(session, pdu);
     }

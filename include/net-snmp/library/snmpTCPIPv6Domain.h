@@ -6,7 +6,7 @@
 
 const oid ucdSnmpTCPIPv6Domain[9];  /* = { UCDAVIS_MIB, 251, 5 }; */
 
-snmp_transport	*snmp_tcp6_transport	(struct sockaddr_in6 *addr,
+netsnmp_transport	*snmp_tcp6_transport	(struct sockaddr_in6 *addr,
 					 int local);
 
 /*  "Constructor" for transport domain object.  */

@@ -66,7 +66,7 @@ typedef struct table_array_data_s {
  **********************************************************************
  **********************************************************************/
 int
-register_table_array(handler_registration *reginfo,
+register_table_array(netsnmp_handler_registration *reginfo,
                      table_registration_info *tabreg,
                      table_array_callbacks   *cb,
                      int                     group_rows)
@@ -83,10 +83,10 @@ register_table_array(handler_registration *reginfo,
     return register_table(reginfo, tabreg);
 }
 
-mib_handler*
-find_table_array_handler(handler_registration *reginfo)
+netsnmp_mib_handler*
+find_table_array_handler(netsnmp_handler_registration *reginfo)
 {
-    mib_handler *mh = reginfo->handler;
+    netsnmp_mib_handler *mh = reginfo->handler;
     while( mh ) {
         if(mh->access_method == table_array_helper_handler)
             break;
@@ -97,18 +97,18 @@ find_table_array_handler(handler_registration *reginfo)
 }
 
 oid_array *
-extract_array_context(request_info *request) 
+extract_array_context(netsnmp_request_info *request) 
 {
-    return request_get_list_data(request, TABLE_ARRAY_NAME);
+    return netsnmp_request_get_list_data(request, TABLE_ARRAY_NAME);
 }
 
 const oid_array_header*
-table_array_get_by_index(handler_registration *reginfo,
+table_array_get_by_index(netsnmp_handler_registration *reginfo,
                          oid_array_header * hdr)
 {
     table_array_data* tad;
     oid_array_header *rtn = NULL;
-    mib_handler *mh;
+    netsnmp_mib_handler *mh;
     
     if(reginfo == NULL)
         return NULL;
@@ -138,12 +138,12 @@ table_array_get_by_index(handler_registration *reginfo,
 }
 
 const oid_array_header**
-table_array_get_subset(handler_registration *reginfo,
+table_array_get_subset(netsnmp_handler_registration *reginfo,
                        oid_array_header * hdr, int * len)
 {
     table_array_data* tad;
     const oid_array_header **rtn = NULL;
-    mib_handler *mh;
+    netsnmp_mib_handler *mh;
     
     if(reginfo == NULL)
         return NULL;
@@ -257,7 +257,7 @@ ta_check_row_status(table_array_callbacks *cb, oid_array_header* ctx_new,
  * context info for SET requests
  */
 typedef struct set_context_s {
-    agent_request_info *agtreq_info;
+    netsnmp_agent_request_info *agtreq_info;
     table_array_data   *tad;
     int                status;
 } set_context;
@@ -285,7 +285,7 @@ release_array_groups( void * vp )
 }
 
 inline oid_array_header *
-find_next_row( table_request_info *tblreq_info, table_array_data *tad)
+find_next_row( table_netsnmp_request_info *tblreq_info, table_array_data *tad)
 {
     oid_array_header *row = NULL;
     oid_array_header index;
@@ -326,10 +326,10 @@ find_next_row( table_request_info *tblreq_info, table_array_data *tad)
 }
 
 inline void
-build_new_oid( handler_registration *reginfo,
-               table_request_info   *tblreq_info,
+build_new_oid( netsnmp_handler_registration *reginfo,
+               table_netsnmp_request_info   *tblreq_info,
                oid_array_header     *row,
-               request_info         *current )
+               netsnmp_request_info         *current )
 {
     oid coloid[MAX_OID_LEN];
     int coloid_len;        
@@ -361,15 +361,15 @@ build_new_oid( handler_registration *reginfo,
  **********************************************************************
  **********************************************************************/
 inline int
-process_get_requests(handler_registration  *reginfo,
-                     agent_request_info    *agtreq_info,
-                     request_info          *requests,
+process_get_requests(netsnmp_handler_registration  *reginfo,
+                     netsnmp_agent_request_info    *agtreq_info,
+                     netsnmp_request_info          *requests,
                      table_array_data      *tad )
 {
     int rc = SNMP_ERR_NOERROR;
-    request_info * current;
+    netsnmp_request_info * current;
     oid_array_header *row = NULL;
-    table_request_info *tblreq_info;
+    table_netsnmp_request_info *tblreq_info;
     struct variable_list * var;
 
     /*
@@ -438,7 +438,7 @@ process_get_requests(handler_registration  *reginfo,
             row = Get_oid_data( tad->array, &index, 1 );
             if(!row) {
                 DEBUGMSGTL(("helper:table_array:get", "no row found\n"));
-                set_request_error(agtreq_info, current, SNMP_ERR_NOSUCHNAME);
+                netsnmp_set_request_error(agtreq_info, current, SNMP_ERR_NOSUCHNAME);
                 continue;
             }
         } /** GET */
@@ -463,13 +463,13 @@ process_get_requests(handler_registration  *reginfo,
  **********************************************************************
  **********************************************************************/
 inline void
-group_requests( agent_request_info *agtreq_info, request_info * requests,
+group_requests( netsnmp_agent_request_info *agtreq_info, netsnmp_request_info * requests,
                 oid_array array_group_tbl, table_array_data *tad )
 {
-    table_request_info *tblreq_info;
+    table_netsnmp_request_info *tblreq_info;
     struct variable_list * var;
     oid_array_header *row, *tmp, index;
-    request_info * current;
+    netsnmp_request_info * current;
     array_group * g;
     array_group_item * i;
 
@@ -536,7 +536,7 @@ group_requests( agent_request_info *agtreq_info, request_info * requests,
         row = g->old_row = Get_oid_data( tad->array, &index, 1 );
         if(!g->old_row){
             if(! tad->cb->create_row) {
-                set_request_error(agtreq_info, current, SNMP_ERR_NOSUCHNAME);
+                netsnmp_set_request_error(agtreq_info, current, SNMP_ERR_NOSUCHNAME);
                 free(g);
                 free(i);
                 continue;
@@ -544,7 +544,7 @@ group_requests( agent_request_info *agtreq_info, request_info * requests,
 
             row = g->new_row = tad->cb->create_row( &index );
             if( !row ) {
-                set_request_error(agtreq_info, current, SNMP_ERR_GENERR);
+                netsnmp_set_request_error(agtreq_info, current, SNMP_ERR_GENERR);
                 free(g);
                 free(i);
                 continue;
@@ -581,7 +581,7 @@ process_set_group( oid_array_header* o, void *c )
            ag->status == SNMP_ERR_NOERROR) {
             ag->new_row = context->tad->cb->duplicate_row( ag->old_row );
             if(!ag->new_row) {
-                set_mode_request_error(MODE_SET_BEGIN, ag->list->ri,
+                netsnmp_set_mode_request_error(MODE_SET_BEGIN, ag->list->ri,
                                        SNMP_ERR_RESOURCEUNAVAILABLE);
                 return;
             }
@@ -671,8 +671,8 @@ process_set_group( oid_array_header* o, void *c )
 }
 
 inline int
-process_set_requests( agent_request_info *agtreq_info,
-                      request_info       *requests,
+process_set_requests( netsnmp_agent_request_info *agtreq_info,
+                      netsnmp_request_info       *requests,
                       table_array_data   *tad,
                       char               *handler_name)
 {
@@ -682,7 +682,7 @@ process_set_requests( agent_request_info *agtreq_info,
     /*
      * create and save structure for set info
      */
-    array_group_tbl = (oid_array)agent_get_list_data
+    array_group_tbl = (oid_array)netsnmp_agent_get_list_data
         (agtreq_info, handler_name);
     if(array_group_tbl == NULL) {
         data_list *tmp;
@@ -693,7 +693,7 @@ process_set_requests( agent_request_info *agtreq_info,
         tmp = create_data_list(handler_name,
                                array_group_tbl,
                                release_array_groups);
-        agent_add_list_data(agtreq_info, tmp);
+        netsnmp_agent_add_list_data(agtreq_info, tmp);
         /*
          * group requests.
          */
@@ -723,10 +723,10 @@ process_set_requests( agent_request_info *agtreq_info,
  **********************************************************************/
 int
 table_array_helper_handler(
-    mib_handler               *handler,
-    handler_registration      *reginfo,
-    agent_request_info        *agtreq_info,
-    request_info              *requests) {
+    netsnmp_mib_handler               *handler,
+    netsnmp_handler_registration      *reginfo,
+    netsnmp_agent_request_info        *agtreq_info,
+    netsnmp_request_info              *requests) {
   
     /*
      * First off, get our pointer from the handler. This
@@ -767,7 +767,7 @@ table_array_helper_handler(
      * Now we should have row pointers for each request. Call the
      * next handler to process the row.
      *
-     * rc = call_next_handler(handler, reginfo, agtreq_info, requests);
+     * rc = netsnmp_call_next_handler(handler, reginfo, agtreq_info, requests);
      */
 
     return rc;
