@@ -508,19 +508,23 @@ void get_table_entries( struct snmp_session *ss )
 	    sprint_objid(string_buf, vars->name, vars->name_length); 
 	    i = vars->name_length - rootlen + 1;
 	    if (localdebug || show_index ) {
-	      switch (snmp_get_suffix_only()) {
-	      case 2:
-		name_p = strrchr(string_buf, ':');
-		break;
-	      case 1:
-		name_p = string_buf;
-		break;
-	      case 0:
-		name_p = string_buf + strlen(table_name)+1;
+	      if (ds_get_boolean(DS_LIBRARY_ID, DS_LIB_EXTENDED_INDEX))
+		name_p = strchr(string_buf, '[');
+	      else {
+		switch (snmp_get_suffix_only()) {
+		case 2:
+		  name_p = strrchr(string_buf, ':');
+		  break;
+		case 1:
+		  name_p = string_buf;
+		  break;
+		case 0:
+		  name_p = string_buf + strlen(table_name)+1;
+		  name_p = strchr(name_p, '.')+1;
+		  break;
+		}
 		name_p = strchr(name_p, '.')+1;
-		break;
 	      }
-	      name_p = strchr(name_p, '.')+1;
 	    }
 	    if (localdebug) printf("Index: %s\n", name_p);
 	    if (show_index) {
@@ -617,19 +621,23 @@ void getbulk_table_entries( struct snmp_session *ss )
 	    break;
 	  }
 	  if (localdebug) printf("%s => taken\n", string_buf);
-	  switch (snmp_get_suffix_only()) {
-	  case 2:
-	    name_p = strrchr(string_buf, ':');
-	    break;
-	  case 1:
-	    name_p = string_buf;
-	    break;
-	  case 0:
-	    name_p = string_buf + strlen(table_name)+1;
+	  if (ds_get_boolean(DS_LIBRARY_ID, DS_LIB_EXTENDED_INDEX))
+	    name_p = strchr(string_buf, '[');
+	  else {
+	    switch (snmp_get_suffix_only()) {
+	    case 2:
+	      name_p = strrchr(string_buf, ':');
+	      break;
+	    case 1:
+	      name_p = string_buf;
+	      break;
+	    case 0:
+	      name_p = string_buf + strlen(table_name)+1;
+	      name_p = strchr(name_p, '.')+1;
+	      break;
+	    }
 	    name_p = strchr(name_p, '.')+1;
-	    break;
 	  }
-	  name_p = strchr(name_p, '.')+1;
 	  for (row = 0; row < entries; row++)
 	    if (strcmp(name_p, indices[row]) == 0) break;
 	  if (row == entries) {
