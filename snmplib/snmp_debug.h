@@ -151,6 +151,7 @@ To print multiple pieces to a single line in one call, use:
         __DBGINDENTMORE()
 
 #define __DBGDUMPSETUP(token,buf,len) \
+        __DBGTRACE, \
         __DBGMSGHEXTLI((token,buf,len)), \
         debugmsg(token,"\n"), \
         __DBGPRINTINDENT(token)
