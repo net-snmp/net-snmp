@@ -57,7 +57,7 @@ init_vacm_vars (void)
 {
 
 #ifdef USING_MIBII_SYSORTABLE_MODULE
-  static oid reg[] = {1,3,6,1,6,3,13};
+  static oid reg[] = {1,3,6,1,6,3,16,2,2,1};
 #endif
   
 #define PRIVRW	(SNMPV2ANY | 0x5000)
@@ -113,7 +113,7 @@ init_vacm_vars (void)
                                 "name type subtree [mask]");
 
 #ifdef USING_MIBII_SYSORTABLE_MODULE
-  register_sysORTable(reg,7,"View-based Access Control Model for SNMP.");
+  register_sysORTable(reg,10,"View-based Access Control Model for SNMP.");
 #endif
 }
 
