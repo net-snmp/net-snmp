@@ -102,9 +102,10 @@ u_char          *data;      /* IN - message */
 int             *length;    /* IN/OUT - bytes left in message */
 u_char          *sid;       /* OUT - community string */
 int             *slen;      /* OUT - length of community string */
-long            *version;   /* OUT - message version */
+int             *version;   /* OUT - message version */
 {
     u_char    type;
+    long ver;
 
     /* message is an ASN.1 SEQUENCE */
     data = asn_parse_header(data, length, &type);
@@ -118,7 +119,8 @@ long            *version;   /* OUT - message version */
     }
 
     /* first field is the version */
-    data = asn_parse_int(data, length, &type, version, sizeof(*version));
+    data = asn_parse_int(data, length, &type, &ver, sizeof(ver));
+    *version = ver;
     if (data == NULL){
         ERROR_MSG("bad parse of version");
         return NULL;
@@ -379,7 +381,7 @@ snmp_comstr_build(data, length, sid, slen, version, messagelen)
     int         *length;
     u_char      *sid;
     int         *slen;
-    long        *version;
+    int         *version;
     int         messagelen;
 {
   /* version is an 'int' (CMU had it as a long, but was passing in a *int.
