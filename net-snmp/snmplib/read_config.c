@@ -429,7 +429,7 @@ read_config_files (int when)
   
   if (config_errors) {
     fprintf(stderr, "ucd-snmp: errors in config file - abort.\n");
-    exit(1);
+/*    exit(1); */
   }
 }
 
