@@ -5,6 +5,7 @@
 
 #include <config.h>
 #include <sys/types.h>
+#include <ctype.h>
 
 #include <stdio.h>
 #if HAVE_STDLIB_H
@@ -58,6 +59,7 @@
 #include "snmp_impl.h"
 #include "smux.h"
 #include "var_struct.h"
+#include "util_funcs.h"
 #include "mibdefs.h"
 
 long smux_long;
@@ -71,7 +73,7 @@ extern int sdlist[];
 extern int sdlen;
 extern int (*sd_handlers[])(int);
 
-static u_short smux_port;
+//XX notused static u_short smux_port;
 static struct timeval smux_rcv_timeout;
 static u_long smux_reqid;
 
@@ -107,25 +109,32 @@ struct variable2 smux_variables[] = {
 };
 
 void
-smux_parse_peer_auth(word, cptr)
-    char *word;
-    char *cptr;
+smux_parse_peer_auth( char *token, char *cptr)
 {
 	smux_peer_auth *aptr;
 
-	if(cptr && *cptr == '.')
-		cptr++;
-
-	if (cptr && !isdigit(*cptr)) {
-		config_perror("second token is not an OID");
-		return;
-	}
-	if ((Auths[nauths] = malloc(sizeof(smux_peer_auth))) == NULL) {
+	if ((aptr = (smux_peer_auth *)calloc(1, sizeof(smux_peer_auth))) == NULL) {
 		perror("smux_parse_peer_auth: malloc");
 		return;
 	}
+	aptr->sa_active_fd = -1;
+	if (!cptr) {
+		/* null passwords OK */
+		Auths[nauths++] = aptr;
+        	DEBUGMSGTL(("smux_conf", "null password\n"));
+		return;
+	}
+
+	if(*cptr == '.')
+		cptr++;
+
+	if (!isdigit(*cptr)) {
+		config_perror("second token is not an OID");
+		free((char *)aptr);
+		return;
+	}
 	/* oid */
-	Auths[nauths]->sa_oid_len = parse_miboid(cptr, Auths[nauths]->sa_oid);
+	aptr->sa_oid_len = parse_miboid(cptr, aptr->sa_oid);
 
         DEBUGMSGTL(("smux_conf", "parsing registration for: %s\n", cptr));
 
@@ -134,14 +143,9 @@ smux_parse_peer_auth(word, cptr)
 	cptr = skip_white(cptr);
 
         /* password */
-	if (cptr == NULL) {
-                /* null passwords ok (sigh) */
-                strcpy(Auths[nauths]->sa_passwd, "");
-        } else {
-                strcpy(Auths[nauths]->sa_passwd, cptr);
-        }
+        strcpy(aptr->sa_passwd, cptr);
         
-	Auths[nauths++]->sa_active_fd = -1;
+	Auths[nauths++] = aptr;
 }
 
 void
@@ -222,7 +226,7 @@ var_smux(vp, name, length, exact, var_len, write_method)
 {
 	u_char *valptr, val_type;
 	smux_reg *rptr;
-	int fd;
+//XX notused	int fd;
 
 	*write_method = NULL;
 
@@ -267,7 +271,7 @@ var_smux_write(action, var_val, var_val_type, var_val_len,
 {
 	smux_reg *rptr;
 	u_char buf[SMUXMAXPKTSIZE], *ptr, sout[6], type;
-	int len, err;
+	int len, reterr;
 	u_long reqid, errsts, erridx;
 
 	len = SMUXMAXPKTSIZE;
@@ -281,7 +285,7 @@ var_smux_write(action, var_val, var_val_type, var_val_len,
 	if (action == COMMIT) {
 		if ((smux_build((u_char)SMUX_SET, smux_reqid, name,
 		    &name_len, var_val_type, statP, var_val_len,
-		     buf, &len)) == NULL) {
+		     buf, &len)) == 0) {
 			DEBUGMSGTL (("smux","[var_smux_write] smux build failed\n"));
 			return SNMP_ERR_GENERR;	/* ? */
 		}
@@ -315,16 +319,16 @@ var_smux_write(action, var_val, var_val_type, var_val_len,
 
 	if((errsts == 0) && (erridx == 0)) {
 		*ptr = (u_char)0;
-		err = SNMP_ERR_NOERROR;
+		reterr = SNMP_ERR_NOERROR;
 	} else {
 		*ptr = (u_char)1;
-		err = SNMP_ERR_COMMITFAILED;
+		reterr = SNMP_ERR_COMMITFAILED;
 	}
 	if ((send(rptr->sr_fd, sout, 6, 0)) < 0) {
 		DEBUGMSGTL (("smux","[var_smux_write] send sout failed\n"));
 		return SNMP_ERR_GENERR;
 	}
-	return err;
+	return reterr;
 }
 
 int
@@ -334,7 +338,7 @@ int sd;
 	u_char data[SMUXMAXPKTSIZE], *ptr, type;
 	struct sockaddr_in in_socket;
 	struct timeval tv;
-	int count, fail, fd, len;
+	int /*XX notused count,*/ fail, fd, len;
 
 	len = sizeof(struct sockaddr_in);
 	/* this may be too high */
@@ -346,7 +350,7 @@ int sd;
 	errno = 0;
 	if((fd = accept(sd, (struct sockaddr *)&in_socket, &len)) < 0) {
 		perror("[smux_accept] accept failed\n");
-		return;
+		return SMUXNOTOK;
 	} else {
 		fprintf(stderr, "[smux_accept] accepted fd %d - errno %d\n", fd, errno);
 		if (npeers + 1 == SMUXMAXPEERS) {
@@ -382,8 +386,12 @@ int sd;
 		}
 
 		/* he's OK */
-		if (setsockopt(fd, SOL_SOCKET, SO_RCVTIMEO, (void *)&tv, sizeof(tv)) < 0) 
+#ifdef SO_RCVTIMEO
+		if (setsockopt(fd, SOL_SOCKET, SO_RCVTIMEO, (void *)&tv, sizeof(tv)) < 0) {
 			DEBUGMSGTL (("smux","[smux_accept] setsockopt(SO_RCVTIMEO) failed fd %d\n", fd));
+                        perror("smux/setsockopt");
+                }
+#endif
 
 		npeers++;
 		sdlist[sdlen] = fd;
@@ -391,13 +399,15 @@ int sd;
 
 		DEBUGMSGTL (("smux","[smux_accept] fd %d, sdlen %d\n", fd, sdlen));
 	}
+
+	return SMUXOK; //XX ??
 }
 
 int
 smux_process(fd)
 	int fd;
 {
-	int error, authd, i, len, length;
+	int error, /*XX notused authd, i,*/ len, length;
 	u_char data[SMUXMAXPKTSIZE], *ptr, type;
 
 	length = recv(fd, data, SMUXMAXPKTSIZE, 0);
@@ -627,8 +637,8 @@ smux_rreq_process(sd, ptr, len)
 	oid oid_name[MAX_OID_LEN];
 	int oid_name_len, i, result;
 	u_char type;
-        char c_oid[MAX_NAME_LEN];
-	smux_reg *rptr, *nrptr, **which;
+        char c_oid[SPRINT_MAX_LEN];
+	smux_reg *rptr, *nrptr; //XX notused , **which;
 
 	oid_name_len = MAX_OID_LEN;
 	ptr = asn_parse_objid(ptr, len, &type, oid_name, &oid_name_len); 
@@ -694,7 +704,7 @@ smux_rreq_process(sd, ptr, len)
 		}
 		if((nrptr = malloc(sizeof(smux_reg))) == NULL) {
 			perror("[smux_rreq_process] malloc");
-			return;
+			return NULL;
 		}
 		nrptr->sr_priority = priority;
 		nrptr->sr_name_len = oid_name_len;
@@ -762,6 +772,9 @@ done:
 			DEBUGMSGTL (("smux","[smux_rreq_process]  send failed\n"));
 		return ptr;
 	}
+
+	DEBUGMSGTL (("smux","[smux_rreq_process] unknown operation\n"));
+	return NULL;
 }
 
 static void
@@ -782,9 +795,9 @@ smux_replace_active(actptr, pasptr)
 }
 
 static void
-smux_list_detach(head, remove)
+smux_list_detach(head, m_remove)
 	smux_reg **head;
-	smux_reg **remove;
+	smux_reg **m_remove;
 {
 
 	smux_reg *rptr, *rptr2;
@@ -793,15 +806,15 @@ smux_list_detach(head, remove)
 		DEBUGMSGTL (("smux","[smux_list_detach] Ouch!"));
 		return;
 	}
-	if (*head == *remove) {
-		*remove = *head;
+	if (*head == *m_remove) {
+		*m_remove = *head;
 		*head = (*head)->sr_next;
 		return;
 	}
 	for (rptr = *head, rptr2 = rptr->sr_next; rptr2;
 	    rptr2 = rptr2->sr_next, rptr = rptr->sr_next) {
-		if(rptr2 == *remove) {
-			*remove = rptr2;
+		if(rptr2 == *m_remove) {
+			*m_remove = rptr2;
 			rptr->sr_next = rptr2->sr_next;
 			return;
 		}
@@ -905,7 +918,7 @@ smux_snmp_process(exact, objid, len, return_len, return_type, sd)
 	u_char packet[SMUXMAXPKTSIZE], *ptr, result[SMUXMAXPKTSIZE];
 	int length = SMUXMAXPKTSIZE;
 	u_char type;
-        char c_oid[MAX_NAME_LEN];
+        char c_oid[SPRINT_MAX_LEN];
 	
 	/* 
 	 * Send the query to the peer
@@ -917,7 +930,7 @@ smux_snmp_process(exact, objid, len, return_len, return_type, sd)
 	else
 		type = SMUX_GETNEXT;
 
-	if (smux_build(type, smux_reqid, objid, len, NULL, NULL, 
+	if (smux_build(type, smux_reqid, objid, len, 0, NULL, 
 	    *len, packet, &length) != SMUXOK) {
 		printf("[smux_snmp_process]: smux_build failed\n");
 		return NULL;
@@ -951,6 +964,8 @@ smux_snmp_process(exact, objid, len, return_len, return_type, sd)
 		smux_send_close(sd, SMUXC_PACKETFORMAT);
 		return NULL;
 	}
+
+	return ptr; //XX OK ??
 }
 
 static u_char *
@@ -1021,7 +1036,7 @@ smux_parse_var(varbind, varbindlength, objid, oidlen, varlength, vartype)
 	int len;
 	u_char *ptr;
 	u_char type;
-        char c_oid[MAX_NAME_LEN];
+        char c_oid[SPRINT_MAX_LEN];
         
 	ptr = varbind;
 	len = *varbindlength;
@@ -1143,7 +1158,7 @@ smux_build(type, reqid, objid, oidlen, val_type, val, val_len, packet, length)
 	int *length;
 {
 	u_char *ptr, *save1, *save2;
-	int len, len1, len2, len3;
+	int len; //XX notused , len1, len2, len3;
 	long errstat = 0;
 	long errindex = 0;
 
@@ -1197,7 +1212,7 @@ static void
 smux_peer_cleanup(sd)
 	int sd;
 {
-	smux_reg *nrptr, *rptr, *rptr2, *found[SMUX_MAX_PEERS];
+	smux_reg *nrptr, *rptr, *rptr2; //XX notused , *found[SMUX_MAX_PEERS];
 	int nfound, i;
 
 	nfound = 0;
@@ -1267,7 +1282,7 @@ smux_send_rrsp(sd, pri)
 	*(ptr++) = (u_char) SMUX_RRSP;
 	*ptr = (u_char) 4;
 
-	for(i = 0; i < 4; i++, mask >> 8)
+	for(i = 0; i < 4; i++, mask >>= 8)
 		*(++ptr) = (u_char)(pri & mask);
 
 	if((send(sd, outdata, 6, 0)) < 0)
