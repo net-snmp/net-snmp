@@ -19,6 +19,8 @@
 #include "host_res.h"
 #include "hr_print.h"
 #include "struct.h"
+#include "tools.h"
+#include "util_funcs.h"
 
 #define HRPRINT_MONOTONICALLY_INCREASING
 
@@ -37,8 +39,9 @@ int printer_status(int);
 int printer_detail_status(int);
 int printer_errors(int);
 int header_hrprint (struct variable *,oid *, size_t *, int, size_t *, WriteMethod **);
+#ifdef HAVE_LPSTAT
 FILE * run_lpstat(void);
-
+#endif
 
 	/*********************
 	 *
