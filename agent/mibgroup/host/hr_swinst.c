@@ -178,6 +178,7 @@ void init_hr_swinst(void)
 #if defined(HAVE_LIBRPM) || defined(_PATH_HRSW_directory)
     SWI_t *swi = &_myswi;	/* XXX static for now */
 #endif
+    struct stat stat_buf;
 
 	/* Read settings from config file,
 	    or take system-specific defaults */
@@ -196,7 +197,9 @@ void init_hr_swinst(void)
 #endif
 	if (swi->swi_directory != NULL)
 	    free((void *)swi->swi_directory);
-	sprintf(path, "%s/packages.rpm", swi->swi_dbpath);
+	sprintf(path, "%s/Packages", swi->swi_dbpath);
+	if (stat(path, &stat_buf) == -1)
+	    sprintf(path, "%s/packages.rpm", swi->swi_dbpath);
 	swi->swi_directory = strdup(path);
     }
 #else
@@ -356,8 +359,7 @@ var_hrswinst(struct variable *vp,
 	    if (swi->swi_directory != NULL)
 		strcpy(string, swi->swi_directory);
 
-	    if ( *string ) {
-		stat( string, &stat_buf );
+	    if ( *string && (stat( string, &stat_buf ) != -1 )) {
 		if ( stat_buf.st_mtime > starttime.tv_sec )
 			/* changed 'recently' - i.e. since this agent started */
 		    long_return = (stat_buf.st_mtime-starttime.tv_sec)*100;
