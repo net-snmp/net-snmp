@@ -135,7 +135,7 @@ $fh->close;
 foreach $i (keys(%written)) {
     next if ($i eq "-");
     print STDERR "running indent on $i\n" if (!$quiet);
-    system("indent -orig -nbc -bap -nut $i");
+    system("indent -orig -nbc -bap -nut -nfca $i");
 }
 
 sub tocommas {
