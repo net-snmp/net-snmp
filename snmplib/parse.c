@@ -997,10 +997,23 @@ parse_objectid(fp, name)
     int length;
     struct subid oid[32];
     struct node *np, *root, *oldnp = NULL;
+    struct tree *tp;
 
     if ((length = getoid(fp, oid, 32)) != 0){
         np = root = Malloc(sizeof(struct node));
         memset(np, 0, sizeof(struct node));
+
+	/*
+	 * Handle numeric-only object identifiers,
+	 *  by labelling the first sub-identifier
+	 */
+        if ( !oid->label )
+           for ( tp = tree_head ; tp ; tp=tp->next_peer )
+               if ( tp->subid == oid->subid ) {
+                   oid->label = Strdup(tp->label);
+                   break;
+               }
+
         /*
          * For each parent-child subid pair in the subid array,
          * create a node and link it into the node list.
@@ -2423,6 +2436,7 @@ main(argc, argv)
     char *argv[];
 {
     int i;
+    mib_warnings = 2;
 
     init_mib();
 
