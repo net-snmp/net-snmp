@@ -16,3 +16,5 @@ mib_module_config.h
 sedscript
 ucd-snmp.txt
 targets
+bin
+lib
