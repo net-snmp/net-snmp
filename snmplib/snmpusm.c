@@ -2526,6 +2526,13 @@ usm_read_user(char *line)
   line = skip_token(line);
   line = read_config_read_octet_string(line, &user->engineID,
                                        &user->engineIDLen);
+
+  /* set the lcd entry for this engineID to the minimum boots/time
+     values so that its a known engineid and won't return a report pdu.
+     This is mostly important when receiving v3 traps so that the usm
+     will at least continue processing them. */
+  set_enginetime(user->engineID, user->engineIDLen, 1, 0, 0);
+
   line = read_config_read_octet_string(line, (u_char **)&user->name,
                                        &len);
   line = read_config_read_octet_string(line, (u_char **)&user->secName,
