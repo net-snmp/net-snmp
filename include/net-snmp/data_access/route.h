@@ -30,9 +30,7 @@ NETSNMP_CPP_WRAP_START  /* no semi-colon */
 
 /*
  * netsnmp_route_entry
- * 
  *   - primary route structure for both ipv4 & ipv6
- *   - kept sorted by inetCidrRoute indexes
  */
 typedef struct netsnmp_route_s {
 
