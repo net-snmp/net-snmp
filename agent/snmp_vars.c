@@ -370,7 +370,8 @@ search_subtree_vars(struct subtree *tp,
                     /* check for permission to view this part of the OID tree */
 		    if ((access != NULL || (*write_method != NULL && exact)) &&
                         in_a_view(name, namelen, pdu, cvp->type)) {
-			if ( access && !exact ) {
+			if ( access && !exact &&
+                             (access!=agentx_add_request) ) {
 				/*
 				 * We've got an answer, but shouldn't use it.
 				 * But we *might* be able to use a later
