@@ -33,12 +33,13 @@ $m2c_node_get_comments
  *        NOTE: DO NOT free the previous pointer.
  *        NOTE: The agent will release the memory you allocate.
 @end@
-*
- * @return SNMP_ERR_NOERROR on success.
- *         SNMP_ERR_GENERR for any other error
+ *
+ * @return MFD_SUCCESS         : success
+ *         MFD_SKIP            : skip this node (no value for now)
+ *         MFD_ERROR           : Any other error
  */
 int
-${node}_get( ${context}_ctx *ctx, $m2c_node_get_parms )
+${node}_get( ${context}_ctx *ctx, $m2c_node_param_ref )
 {
 @ifconf syntax-$node.syntax-get.m2i@
 @    include syntax-$node.syntax-get.m2i@
@@ -46,8 +47,6 @@ ${node}_get( ${context}_ctx *ctx, $m2c_node_get_parms )
     /** syntax-$node.syntax-get.m2i not found */
 @    include generic-get-decl.m2i@
     netsnmp_assert(NULL != ctx);
-    netsnmp_assert(NULL != ctx->reg);
-    netsnmp_assert(NULL != ctx->data);
 @    if $m2c_node_skip_get != 1@
 @        include generic-ctx-get.m2i@
 @    end@
@@ -58,6 +57,8 @@ ${node}_get( ${context}_ctx *ctx, $m2c_node_get_parms )
 @       include generic-get-char.m2i@
 @    elsif $node.decl =~ /oid/i@ #                    ASN_OBJECT_ID
 @       include generic-get-oid.m2i@
+@    elsif $node.decl =~ /counter64/i@ #              ASN_COUNTER64
+@       include generic-get-counter64.m2i@
 @    else@
 @        print ERROR: unknown node.decl: $node.decl@
 @        exit@
