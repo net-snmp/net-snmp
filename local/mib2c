@@ -361,6 +361,20 @@ sub setup_data {
 	    # store by numeric key so we can sort them later
 	    push @{$tables{$tablename}{'column'}}, $col->{'label'};
 	}
+        my $augments = $entry->[0]{'augments'};
+        if ($augments) {
+           my $mib = $SNMP::MIB{$augments} || 
+		die "can't find info about augmented table $augments in table $tablename\n";
+           $mib = $mib->{parent} || 
+		die "can't find info about augmented table $augments in table $tablename\n";
+	   my $entry = $mib->{children};
+	   foreach my $index (@{$entry->[0]{'indexes'}}) {
+	       my $node = $SNMP::MIB{$index} || 
+		   die "can't find info about index $index in table $tablename\n";
+	       push @{$tables{$tablename}{'index'}}, $index;
+	   }
+           my $columns = $entry->[0]{children};
+        }
 	foreach my $index (@{$entry->[0]{'indexes'}}) {
 	    my $node = $SNMP::MIB{$index} || 
 		die "can't find info about index $index in table $tablename\n";
