@@ -573,7 +573,8 @@ int vacm_in_view (struct snmp_pdu *pdu,
 	if (pdu->tDomain == snmpUDPDomain || pdu->tDomain == snmpTCPDomain) {
 	  if (!snmp_udp_getSecName(pdu->transport_data,
 				   pdu->transport_data_length,
-				   pdu->community, pdu->community_len, &sn)) {
+				   pdu->community, pdu->community_len, &sn) &&
+              !vacm_is_configured()) {
 	    /*  There are no com2sec entries.  */
 	    DEBUGMSGTL(("mibII/vacm_vars",
 			"vacm_in_view: accepted with no com2sec entries\n"));
