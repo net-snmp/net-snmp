@@ -84,14 +84,6 @@ LINK32=link.exe
 # Name "snmpgetnext - Win32 Debug"
 # Begin Source File
 
-SOURCE=..\..\snmplib\getopt.c
-# End Source File
-# Begin Source File
-
-SOURCE=..\..\snmplib\snmp_parse_args.c
-# End Source File
-# Begin Source File
-
 SOURCE=..\..\apps\snmpgetnext.c
 # End Source File
 # End Target

@@ -84,10 +84,6 @@ LINK32=link.exe
 # Name "snmptrapd - Win32 Debug"
 # Begin Source File
 
-SOURCE=..\..\snmplib\getopt.c
-# End Source File
-# Begin Source File
-
 SOURCE=..\..\apps\notification_log.c
 # End Source File
 # Begin Source File
