@@ -136,7 +136,7 @@ void
 usage(void)
 {
     fprintf(stderr,
-            "Usage: snmpnetstat [options...] hostname [ community ] [interval]\n");
+            "Usage: snmpnetstat [options...] hostname [interval]\n");
     fprintf(stderr, "NET-SNMP version: %s\n", netsnmp_get_version());
     fprintf(stderr, "  -v [1 | 2c ]   SNMP version\n");
     fprintf(stderr, "  -V             display version number\n");
