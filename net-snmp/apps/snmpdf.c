@@ -146,9 +146,13 @@ int main(int argc, char *argv[])
     int running;
     
     /* get the common command line arguments */
-    if ((arg = snmp_parse_args(argc, argv, &session, NULL, NULL)) < 0) {
+    switch (arg = snmp_parse_args(argc, argv, &session, NULL, NULL)) {
+    case -2:
+     	exit(0);
+    case -1:
         usage();
         exit(1);
+    default:
     }
 
     SOCK_STARTUP;

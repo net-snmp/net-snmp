@@ -126,9 +126,13 @@ int main(int argc, char *argv[])
     int status;
 
     /* get the common command line arguments */
-    if ((arg = snmp_parse_args(argc, argv, &session, "C:", optProc)) < 0) { 
+    switch (arg = snmp_parse_args(argc, argv, &session, "C:", optProc)) {
+    case -2:
+	exit(0);
+    case -1:
         usage();
         exit(1);
+    default:
     }
 
     if (arg >= argc) {
