@@ -22,6 +22,7 @@ interface or route information can be had from this agent.
 The remainder of this guide has the following sections :
 
 Building with MS VC++
+Building with OpenSSL with MS VC++
 Installing from MS VC++ build
 Building with Cygwin
 Installing with Cygwin
@@ -62,6 +63,7 @@ there is no further use for the files in the win32\lib directory.
 The Debug product .exe files have "_d" appended to the basename
 of the applications.  This is so the Debug and Release versions
 of an application can be built and tested separately.
+
 
 Runtime libraries
 -----------------
@@ -109,6 +111,46 @@ Click Build->Batch Build.  Check all versions.  Uncheck
 Then click Release All.
 
 ----
+Building with OpenSSL with MS VC++
+
+OpenSSL is required to support the encryption capabilities in SNMPv3
+(and will also support MD5 authentication). The win32 version of OpenSSL
+can be built from the source at:
+
+ftp://ftp.openssl.org/source/
+
+Follow the instructions for building on win32 in that package. if you do
+not have the M$ assembler installed (MASM) you can get a free one(NASM)
+from:
+
+http://www.kernel.org/pub/software/devel/nasm
+
+You will also need to change the win32/config.h file from
+
+---
+/* define if you are using the internal MD5 code */
+#define USE_INTERNAL_MD5 1
+---
+to
+---
+/* define if you are using the internal MD5 code */
+#undef USE_INTERNAL_MD5
+
+/* define if you are using OpenSSL */
+#define USE_OPENSSL 1
+---
+
+now you will need to edit the VC++ Project settings for the libraries
+and applications. Change the Settings->Link->'Object/Library Modules' to
+include
+
+libeay32.lib
+
+when installing be sure to place libeay32.dll on your search path (e.g.,
+usr\bin)
+
+
+----
 Installing from MS VC++ build
 
 Create these subdirectories on the root directory of the
@@ -121,6 +163,9 @@ Copy win32\bin\*.* to usr\bin
 Copy win32\lib\*.* to usr\lib
 Copy snmplib\*.h to usr\include\ucd-snmp
 Copy win32\config.h to usr\include\ucd-snmp\ucd-snmp-config.h
+
+if using OpenSSL
+Copy libeay32.dll to usr\bin
 
 Installing is complete.  You may want to create a compressed
 archive of the \usr hierarchy.
