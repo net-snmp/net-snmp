@@ -19,6 +19,11 @@ void            send_enterprise_trap_vars(int trap, int specific,
                                           oid * enterprise,
                                           int enterprise_length,
                                           netsnmp_variable_list * vars);
+int             netsnmp_send_traps(int trap, int specific,
+                          oid * enterprise, int enterprise_length,
+                          netsnmp_variable_list * vars,
+                          /* These next two are currently unused */
+                          char * context, int flags);
 void            snmpd_parse_config_authtrap(const char *, char *);
 void            snmpd_parse_config_trapsink(const char *, char *);
 void            snmpd_parse_config_trap2sink(const char *, char *);
