@@ -3558,7 +3558,7 @@ _get_realloc_symbol(oid *objid, size_t objidlen,
                     goto finish_it;
 
 		if (!*buf_overflow) {
-		  if (dump_realloc_oid_to_string(objid, numids, buf, buf_len,
+		  if (!dump_realloc_oid_to_string(objid, numids, buf, buf_len,
 					       out_len, allow_realloc, '\'')) {
 		    *buf_overflow = 1;
 		  }
@@ -3571,7 +3571,7 @@ _get_realloc_symbol(oid *objid, size_t objidlen,
                     goto finish_it;
 
 		if (!*buf_overflow) {
-		  if (dump_realloc_oid_to_string(objid, numids, buf, buf_len,
+		  if (!dump_realloc_oid_to_string(objid, numids, buf, buf_len,
 					       out_len, allow_realloc, '\'')) {
 		    *buf_overflow = 1;
 		  }
@@ -3603,7 +3603,7 @@ _get_realloc_symbol(oid *objid, size_t objidlen,
 		  }
 		} else {
 		  if (!*buf_overflow) {
-		    if (dump_realloc_oid_to_string(objid+1, numids-1, buf,
+		    if (!dump_realloc_oid_to_string(objid+1, numids-1, buf,
 				       buf_len, out_len, allow_realloc, '"')) {
 		      *buf_overflow = 1;
 		    }
