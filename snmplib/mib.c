@@ -2108,7 +2108,7 @@ snmp_out_toggle_options_usage(const char *lead, FILE * outf)
     fprintf(outf, "%sf:  print full OIDs on output\n", lead);
     fprintf(outf, "%sn:  print OIDs numerically\n", lead);
     fprintf(outf, "%sq:  quick print for easier parsing\n", lead);
-    fprintf(outf, "%sQ:  quick print with equal-signs\n", lead);        /* @@JDW */
+    fprintf(outf, "%sQ:  quick print with equal-signs\n", lead);    /* @@JDW */
     fprintf(outf, "%ss:  print only last symbolic element of OID\n", lead);
     fprintf(outf, "%sS:  print MIB module-id plus last element\n", lead);
     fprintf(outf, "%st:  print timeticks unparsed as numeric integers\n",
@@ -2236,27 +2236,34 @@ register_mib_handlers(void)
 void
 netsnmp_set_mib_directory(const char *dir)
 {
-    char *newdir;
-    char *olddir;
+    const char *newdir;
+    char *olddir, *tmpdir = NULL;
 
     DEBUGTRACE;
-    if (dir) {
-        olddir = netsnmp_ds_get_string(NETSNMP_DS_LIBRARY_ID, NETSNMP_DS_LIB_MIBDIRS);
-        if (olddir) {
-            if (*dir == '+') {
-                /* New dir starts with '+', thus we add it. */
-                newdir = malloc(strlen(dir) + strlen(olddir) + 1);
-                sprintf(newdir, "%s%c%s", ++dir, ENV_SEPARATOR_CHAR, olddir);
-            } else {
-                newdir = dir;
-            }
-            netsnmp_ds_set_string(NETSNMP_DS_LIBRARY_ID, NETSNMP_DS_LIB_MIBDIRS, newdir);
+    if (NULL == dir)
+        return;
+    
+    olddir = netsnmp_ds_get_string(NETSNMP_DS_LIBRARY_ID,
+                                   NETSNMP_DS_LIB_MIBDIRS);
+    if (olddir) {
+        if (*dir == '+') {
+            /** New dir starts with '+', thus we add it. */
+            tmpdir = malloc(strlen(dir) + strlen(olddir) + 1);
+            sprintf(tmpdir, "%s%c%s", ++dir, ENV_SEPARATOR_CHAR, olddir);
+            newdir = tmpdir;
         } else {
-            /* If dir starts with '+' skip '+' it. */
-            newdir = ((*dir == '+') ? ++dir : dir);
+            newdir = dir;
         }
-        netsnmp_ds_set_string(NETSNMP_DS_LIBRARY_ID, NETSNMP_DS_LIB_MIBDIRS, newdir);
+    } else {
+        /** If dir starts with '+' skip '+' it. */
+        newdir = ((*dir == '+') ? ++dir : dir);
     }
+    netsnmp_ds_set_string(NETSNMP_DS_LIBRARY_ID, NETSNMP_DS_LIB_MIBDIRS,
+                          newdir);
+
+    /** set_string calls strdup, so if we allocated memory, free it */
+    if (tmpdir == newdir)
+        free(tmpdir);
 }
 
 /*
@@ -2282,11 +2289,11 @@ netsnmp_get_mib_directory()
     if (dir == NULL) {
         DEBUGMSGTL(("get_mib_directory", "no mib directories set\n"));
 
-        /* Check if the environment variable is set */
+        /** Check if the environment variable is set */
         dir = getenv("MIBDIRS");
         if (dir == NULL) {
             DEBUGMSGTL(("get_mib_directory", "no mib directories set by environment\n"));
-            /* Not set use hard coded path */
+            /** Not set use hard coded path */
            netsnmp_set_mib_directory(DEFAULT_MIBDIRS);
         } else if (*dir == '+') {
             DEBUGMSGTL(("get_mib_directory", "mib directories set by environment (but added)\n"));
@@ -2325,7 +2332,7 @@ netsnmp_fixup_mib_directory()
                 *ptr_home = 0; /* null out the spot where we stop copying */
                 sprintf(new_mibpath, "%s%s%s", mibpath, homepath,
                       ptr_home + strlen("$HOME"));
-                /* swap in the new value and repeat */
+                /** swap in the new value and repeat */
                 mibpath = new_mibpath;
             } else {
                 break;
