@@ -308,7 +308,7 @@ vacm_getViewEntry(const char *viewName,
             }
 	}
     }
-    DEBUGMSGTL(("vacm:getView", ", %s", (vpret)?"found":"none"));
+    DEBUGMSGTL(("vacm:getView", ", %s\n", (vpret)?"found":"none"));
     return vpret;
 }
 
