@@ -14,7 +14,42 @@ OBJS=	snmp_client.o mib.o parse.o snmp_api.o snmp.o \
 	party_parse.o context_parse.o acl_parse.o \
 	system.o vacm.o int64.o read_config.o
 
-INSTALLHEADERS=asn1.h snmp_api.h snmp_client.h snmp_impl.h snmp.h parse.h mib.h
+ALLHEADERS=\
+	acl.h \
+	asn1.h \
+	context.h \
+	int64.h \
+	libsnmp.h \
+	md5.h \
+	mib.h \
+	parse.h \
+	party.h \
+	snmp.h \
+	snmp_api.h \
+	snmp_client.h \
+	snmp_impl.h \
+	system.h \
+	vacm.h \
+	view.h
+
+#INSTALLHEADERS=asn1.h snmp_api.h snmp_client.h snmp_impl.h snmp.h parse.h mib.h
+
+#all but md5.h and vacm.h are copied to the installed include directory
+INSTALLHEADERS=\
+	acl.h \
+	asn1.h \
+	context.h \
+	int64.h \
+	libsnmp.h \
+	mib.h \
+	parse.h \
+	party.h \
+	snmp.h \
+	snmp_api.h \
+	snmp_client.h \
+	snmp_impl.h \
+	system.h \
+	view.h
 
 CFLAGS=@CFLAGS@ @SHLIB_CFLAGS@
 CPPFLAGS=@CPPFLAGS@ -I. -I.. -I$(srcdir) -I$(srcdir)/..
