@@ -362,17 +362,19 @@ snmp_agent_parse(u_char	*data,
     	    /*
 	     * SETS require 3-4 passes through the var_op_list.  The first two
 	     * passes verify that all types, lengths, and values are valid
-	     * and may reserve resources and the third does the set and a
-	     * fourth executes any actions.  Then the identical GET RESPONSE
+	     * and may reserve resources and the third does the set provisionally
+	     * and a fourth confirms this.  Then the identical GET RESPONSE
 	     * packet is returned.
 	     * If either of the first two passes returns an error, another
 	     * pass is made so that any reserved resources can be freed.
+	     * If the third passes returns an error, another pass is made so
+	     * that the changes can be backed out.
 	     */
               errstat = parse_var_op_list(data, length, out_data, *out_length,
-				&dummyindex, pi, COMMIT);
+				&dummyindex, pi, ACTION);
 	      parse_var_op_list(data, length, out_data, *out_length,
 				&dummyindex, pi,
-                                (errstat == SNMP_ERR_NOERROR) ? ACTION : FREE);
+                                (errstat == SNMP_ERR_NOERROR) ? COMMIT : UNDO);
               if (errstat == SNMP_ERR_NOERROR) {
                 if (create_identical(startData, out_auth, startLength, 0L, 0L, pi)){
 		  *out_length = pi->packet_end - out_auth;
