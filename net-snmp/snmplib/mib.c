@@ -9,13 +9,13 @@
 
                       All Rights Reserved
 
-Permission to use, copy, modify, and distribute this software and its 
-documentation for any purpose and without fee is hereby granted, 
+Permission to use, copy, modify, and distribute this software and its
+documentation for any purpose and without fee is hereby granted,
 provided that the above copyright notice appear in all copies and that
-both that copyright notice and this permission notice appear in 
+both that copyright notice and this permission notice appear in
 supporting documentation, and that the name of CMU not be
 used in advertising or publicity pertaining to distribution of the
-software without specific, written prior permission.  
+software without specific, written prior permission.
 
 CMU DISCLAIMS ALL WARRANTIES WITH REGARD TO THIS SOFTWARE, INCLUDING
 ALL IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS, IN NO EVENT SHALL
@@ -71,11 +71,12 @@ SOFTWARE.
 #include "parse.h"
 #include "int64.h"
 #include "system.h"
+#include "read_config.h"
 
 static void sprint_by_type __P((char *, struct variable_list *, struct enum_list *, char *, char *));
 static int parse_subtree __P((struct tree *, char *, oid *, int *));
 static char *uptimeString __P((u_long, char *));
-static void sprint_hexstring __P((char *, u_char *, int));
+void sprint_hexstring __P((char *, u_char *, int));
 static void sprint_asciistring __P((char *, u_char *, int));
 static void sprint_octet_string __P((char *, struct variable_list *, struct enum_list *, char *, char *));
 static void sprint_opaque __P((char *, struct variable_list *, struct enum_list *, char *, char *));
@@ -94,7 +95,7 @@ static void sprint_nsapaddress __P((char *, struct variable_list *, struct enum_
 static void sprint_counter64 __P((char *, struct variable_list *, struct enum_list *, char *, char *));
 static void sprint_unknowntype __P((char *, struct variable_list *, struct enum_list *, char *, char *));
 static void sprint_badtype __P((char *, struct variable_list *, struct enum_list *, char *, char *));
-  
+
 #ifdef OPAQUE_SPECIAL_TYPES
 static void sprint_float __P((char *, struct variable_list *, struct enum_list *, char *, char *));
 static void sprint_double __P((char *, struct variable_list *, struct enum_list *, char *, char *));
@@ -121,7 +122,7 @@ typedef struct _PrefixList {
  * Period is added where needed.  See use of Prefix in this module.
  */
 PrefixList mib_prefixes[] = {
-	{ &Standard_Prefix[0] }, // placeholder for Prefix data
+	{ &Standard_Prefix[0] }, /* placeholder for Prefix data */
 	{ ".iso.org.dod.internet.mgmt.mib-2" },
 	{ ".iso.org.dod.internet.experimental" },
 	{ ".iso.org.dod.internet.private" },
@@ -203,7 +204,10 @@ uptimeString(timeticks, buf)
     return buf;
 }
 
-static void sprint_hexstring(buf, cp, len)
+
+
+void
+sprint_hexstring(buf, cp, len)
     char *buf;
     u_char  *cp;
     int	    len;
@@ -223,6 +227,8 @@ static void sprint_hexstring(buf, cp, len)
     }
     *buf = '\0';
 }
+
+
 
 static void sprint_asciistring(buf, cp, len)
     char *buf;
@@ -455,7 +461,7 @@ sprint_opaque(buf, var, enums, hint, units)
       case ASN_OPAQUE_I64:
         sprint_counter64(buf, var, enums, hint, units);
         break;
-        
+
       case ASN_OPAQUE_FLOAT:
         sprint_float(buf, var, enums, hint, units);
         break;
@@ -691,7 +697,7 @@ sprint_networkaddress(buf, var, enums, hint, units)
 	sprintf(buf, "Network Address: ");
 	buf += strlen(buf);
     }
-    cp = var->val.string;    
+    cp = var->val.string;
     len = var->val_len;
     for(x = 0; x < len; x++){
 	sprintf(buf, "%02X", *cp++);
@@ -792,7 +798,7 @@ sprint_bitstring(buf, var, enums, hint, units)
 		}
 	    }
 	}
-	cp ++;	    
+	cp ++;
     }
 }
 
@@ -839,7 +845,6 @@ sprint_counter64(buf, var, enums, hint, units)
 	sprint_by_type(buf, var, NULL, NULL, NULL);
 	return;
     }
-/* XXX */
     if (!quick_print){
 #ifdef OPAQUE_SPECIAL_TYPES
       if (var->type != ASN_COUNTER64) {
@@ -1099,7 +1104,7 @@ init_mib __P((void))
     } else {
       env_var = strdup(env_var);
     }
-    
+
     if ( env_var != 0 ) {
       entry = strtok( env_var, ENV_SEPARATOR );
       while ( entry ) {
@@ -1550,7 +1555,7 @@ found:
 	*buf = '\0';
 	return_tree = get_symbol(objid + 1, objidlen - 1, subtree->child_list,
 				 buf);
-    } 
+    }
     if (return_tree != NULL)
 	return return_tree;
     else
@@ -1703,7 +1708,7 @@ get_module_node(name, module, objid, objidlen)
 	    }
 
 					/* Is it numeric ? */
-	    if ( isdigit( *cp ) ) 
+	    if ( isdigit( *cp ) )
 		subid=(atoi(cp));
 	    else
 		subid = -1;
@@ -1731,7 +1736,7 @@ get_module_node(name, module, objid, objidlen)
 	    }
 	    cp = cp2;
 	}
-		
+
 	return 1;
     } else {
 	return 0;

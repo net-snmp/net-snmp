@@ -1,7 +1,12 @@
 /*
- * snmp_auth.c -
- *   Authentication for SNMP.
+ * snmp_auth.c
  *
+ * Community name parse/build routines.
+ * v2p parse/build routines with authentication and verification checks.
+ *
+ *
+ * NOTE: All code bounded by USE_V2PARTY_PROTOCOL as been collected
+ *	 at the end of the file.
  */
 /**********************************************************************
     Copyright 1988, 1989, 1991, 1992 by Carnegie Mellon University
@@ -25,89 +30,82 @@ ARISING OUT OF OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS
 SOFTWARE.
 ******************************************************************/
 
-#include <config.h>
 
-#ifdef KINETICS
-#include "gw.h"
-#include "fp4/cmdmacro.h"
-#endif
+#include "all_system.h"
+#include "all_general_local.h"
 
-#include <stdio.h>
-#if HAVE_STRING_H
-#include <string.h>
-#else
-#include <strings.h>
-#endif
-#include <sys/types.h>
-#if TIME_WITH_SYS_TIME
-# ifdef WIN32
-#  include <sys/timeb.h>
-# else
-#  include <sys/time.h>
-# endif
-# include <time.h>
-#else
-# if HAVE_SYS_TIME_H
-#  include <sys/time.h>
-# else
-#  include <time.h>
-# endif
-#endif
-#if HAVE_SYS_SELECT_H
-#include <sys/select.h>
-#endif
-#if HAVE_NETINET_IN_H
-#include <netinet/in.h>
-#endif
-#if HAVE_ARPA_INET_H
-#include <arpa/inet.h>
-#endif
-
-#ifndef NULL
-#define NULL 0
-#endif
-
-#if HAVE_WINSOCK_H
-#include <winsock.h>
-#endif
-
-
-#ifdef vms
-#include <in.h>
-#endif
-
-#include "asn1.h"
-#include "snmp.h"
-#include "snmp_api.h"
-#include "snmp_impl.h"
 #include "party.h"
 #include "context.h"
-#include "mib.h"
-#include "md5.h"
 #include "acl.h"
-#include "system.h"
 
+
+
+/*
+ * Globals.
+ */
+#ifdef	USE_V2PARTY_PROTOCOL
+
+#	ifdef			USE_INTERNAL_MD5
 static void md5Digest __P((u_char *, int, u_char *));
 
-/** snmp_comstr_parse - parse the header of a community string-based message
-*                       such as that found in SNMPv1 and SNMPv2c.
-*
-*  NOTE: this function will need to be changed to support SNMPv2u and SNMPv3,
-*        since the version field must first be examined to see
-*        if the message contains a community string.
-*/
-u_char *
-snmp_comstr_parse(data, length, sid, slen, version)
-u_char          *data;      /* IN - message */
-int             *length;    /* IN/OUT - bytes left in message */
-u_char          *sid;       /* OUT - community string */
-int             *slen;      /* OUT - length of community string */
-int             *version;   /* OUT - message version */
-{
-    u_char    type;
-    long ver;
+#	elif			HAVE_LIBKMT
+/* No problem.  SCAPI and KMT stuff defined elsewhere... */
 
-    /* message is an ASN.1 SEQUENCE */
+#	else
+#	error \
+	"
+
+	***  Lacking MD5 transform.  ***
+
+	SNMP v2p requires an MD5 transform to create message hashes.
+	Be sure that KMT is available or compile with the implementation 
+	bundled with UCD SNMP (See configure option --enable-internal-md5).
+
+	"
+#	endif
+
+#endif	/* USE_V2PARTY_PROTOCOL */
+
+
+
+
+
+/*******************************************************************-o-******
+ * snmp_comstr_parse
+ *
+ * Parameters:
+ *	*data		(I)   Message.
+ *	*length		(I/O) Bytes left in message.
+ *	*sid		(O)   Community string.
+ *	*slen		(O)   Length of community string.
+ *	*version	(O)   Message version.
+ *      
+ * Returns:
+ *	Pointer to the remainder of data.
+ *
+ *
+ * Parse the header of a community string-based message such as that found
+ * in SNMPv1 and SNMPv2c.
+ *
+ * NOTE:	This function will need to be changed to support SNMPv2u
+ *		and SNMPv3, since the version field must first be examined
+ *		to see if the message contains a community string.
+ *
+ *		FIX -- Status of this note?
+ */
+u_char *
+snmp_comstr_parse(	u_char	*data,
+			int	*length,
+			u_char	*sid,
+			int	*slen,
+			int	*version)
+{
+    u_char   	type;
+    long	ver;
+
+
+    /* Message is an ASN.1 SEQUENCE.
+     */
     data = asn_parse_header(data, length, &type);
     if (data == NULL){
         ERROR_MSG("bad header");
@@ -118,7 +116,9 @@ int             *version;   /* OUT - message version */
         return NULL;
     }
 
-    /* first field is the version */
+
+    /* First field is the version.
+     */
     data = asn_parse_int(data, length, &type, &ver, sizeof(ver));
     *version = ver;
     if (data == NULL){
@@ -126,45 +126,254 @@ int             *version;   /* OUT - message version */
         return NULL;
     }
 
-    /* second field is the community string for SNMPv1 & SNMPv2c */
+
+    /* Second field is the community string for SNMPv1 & SNMPv2c.
+     */
     data = asn_parse_string(data, length, &type, sid, slen);
     if (data == NULL){
         ERROR_MSG("bad parse of community");
         return NULL;
     }
     sid[*slen] = '\0';
+
+
     return (u_char *)data;
-}
+
+}  /* end snmp_comstr_parse() */
+
+
+
+
+/*******************************************************************-o-******
+ * snmp_comstr_build
+ *
+ * Parameters:
+ *	*data
+ *	*length
+ *	*sid
+ *	*slen
+ *	*version
+ *	 messagelen
+ *      
+ * Returns:
+ *	Pointer into 'data' after built section.
+ *
+ *
+ * Build the header of a community string-based message such as that found
+ * in SNMPv1 and SNMPv2c.
+ *
+ * NOTE:	The length of the message will have to be inserted later,
+ *		if not known.
+ *
+ * NOTE:	Version is an 'int'.  (CMU had it as a long, but was passing
+ *		in a *int.  Grrr.)  Assign version to verfix and pass in
+ *		that to asn_build_int instead which expects a long.  -- WH
+ */
+u_char *
+snmp_comstr_build(	u_char	*data,
+			int	*length,
+			u_char	*sid,
+			int	*slen,
+			int	*version,
+			int	messagelen)
+{
+    long	 verfix	 = *version;
+    u_char	*h1	 = data;
+    u_char	*h1e;
+    int		 hlength = *length;
+
+
+    /* Build the the message wrapper (note length will be inserted later).
+     */
+    data = asn_build_sequence(data, length, (u_char)(ASN_SEQUENCE | ASN_CONSTRUCTOR), 0);
+    if (data == NULL){
+        ERROR_MSG("buildheader");
+        return NULL;
+    }
+    h1e = data;
+
+
+    /* Store the version field.
+     */
+    data = asn_build_int(data, length,
+            (u_char)(ASN_UNIVERSAL | ASN_PRIMITIVE | ASN_INTEGER),
+            &verfix, sizeof(verfix));
+    if (data == NULL){
+        ERROR_MSG("buildint");
+        return NULL;
+    }
+
+
+    /* Store the community string.
+     */
+    data = asn_build_string(data, length,
+            (u_char)(ASN_UNIVERSAL | ASN_PRIMITIVE | ASN_OCTET_STR),
+            sid, *slen);
+    if (data == NULL){
+        ERROR_MSG("buildstring");
+        return NULL;
+    }
+
+
+    /* Insert length.
+     */
+    asn_build_sequence(h1, &hlength, (u_char)(ASN_SEQUENCE | ASN_CONSTRUCTOR),
+                       data-h1e + messagelen);
+
+
+    return data;
+
+}  /* end snmp_comstr_build() */
+
+
+
+
+/*******************************************************************-o-******
+ * has_access
+ *
+ * Parameters:
+ *	msg_type
+ *	target
+ *	subject
+ *	resources
+ *      
+ * Returns:
+ *	TRUE	If access is allowed for <target, subject, resourcess>
+ *			for this msg_type.
+ *	FALSE	Otherwise.
+ */
+int
+has_access(	u_char	msg_type, 
+		int	target, 
+		int	subject, 
+		int	resources)
+{
+    struct aclEntry *ap;
+
+    ap = acl_getEntry(target, subject, resources);
+    if (!ap)
+	return FALSE;
+    if (ap->aclPriveleges & (1 << (msg_type & 0x1F)))
+	return TRUE;
+
+    return FALSE;
+
+}  /* end has_access() */
+
+
+
+#ifdef USE_INTERNAL_MD5
+
+static void
+md5Digest(	u_char	*start,
+		int	 length,
+		u_char	*digest)
+{
+    MDstruct	 MD;
+
+    int		 i, j;
+    u_char	*cp;
+#if WORDS_BIGENDIAN
+    u_char	*buf;
+    u_char	 buffer[SNMP_MAX_LEN];
+#endif
+
+
+#if 0
+    int count, sum;
+
+    sum = 0;
+    for(count = 0; count < length; count++)
+	sum += start[count];
+    printf("sum %d (%d)\n", sum, length);
+#endif
+
+
+#if WORDS_BIGENDIAN
+    /* Do the computation in an array.
+     */
+    cp = buf = buffer;
+    memmove(buf, start, length);
+#else
+    /* Do the computation in place.
+     */
+    cp = start;
+#endif
+
+
+    MDbegin(&MD);
+    while(length >= 64){
+	MDupdate(&MD, cp, 64 * 8);
+	cp += 64;
+	length -= 64;
+    }
+    MDupdate(&MD, cp, length * 8);
+    /* MDprint(&MD); /* */
+
+   for (i=0;i<4;i++)
+     for (j=0;j<32;j=j+8)
+	 *digest++ = (MD.buffer[i]>>j) & 0xFF;
+
+}  /* end md5Digest() */
+
+#endif /* USE_INTERNAL_MD5 */
+
+
+
 
 #ifdef USE_V2PARTY_PROTOCOL
-/** snmp_party_parse - parse the header of a party-based message
-*                      such as that found in SNMPv2p
-*/
+
+/*******************************************************************-o-******
+ * snmp_party_parse
+ *
+ * Parameters:
+ *	*data		(I)   Message.
+ *	*length		(I/O) Bytes left in message.
+ *	*packet_info	(O)   Packet info.
+ *	*srcParty	(O)   Source party.
+ *	*srcPartyLength	(O)   Source party length.
+ *	*dstParty	(O)   Destination party.
+ *	*dstPartyLength	(O)   Destination party length.
+ *	*context	(O)   Context.
+ *	*contextLength	(O)   Length of context.
+ *	 pass		(I)   Which pass.
+ *      
+ * Returns:
+ *	Pointer into 'data' beyond the parsed section.
+ *
+ *
+ * Parse the header of a party-based message such as that found in SNMPv2p.
+ */
 u_char *
-snmp_party_parse(data, length,  pi, srcParty, srcPartyLength,
-                 dstParty, dstPartyLength, context, contextLength, pass)
-u_char          *data;      /* IN - message */
-int		*length;    /* IN/OUT - bytes left in message */
-struct packet_info *pi;     /* OUT - packet info */
-oid		*srcParty;  /* OUT - source party */
-oid             *dstParty;  /* OUT - dest party */
-oid             *context;   /* OUT - context */
-int		*srcPartyLength; /* OUT - length of source party */
-int             *dstPartyLength; /* OUT - length of dest party */
-int             *contextLength;  /* OUT - length of context */
-int		pass;       /* IN - which pass */
+snmp_party_parse(	u_char	*data,		 	int	*length,
+			struct packet_info	*pi,
+			oid	*srcParty,		int	*srcPartyLength,
+                 	oid	*dstParty,		int	*dstPartyLength,
+			oid	*context,		int	*contextLength,
+			int			 pass)
 {
-    u_char    type;
-    oid	dstParty2[64];
-    int dstParty2Length = 64, authMsgLen, authMsgInternalLen;
-    u_long authSrcTimeStamp, authDstTimeStamp;
-    u_char authDigest[16], digest[16];
-    int authDigestLen;
-    u_char *authMsg, *digestStart = NULL, *digestEnd = NULL;
-    struct partyEntry *srcp, *dstp;
-    struct contextEntry *cxp;
-    int biglen, ismd5 = 0;
-    struct timeval now;
+    int			 dstParty2Length = 64,
+   			 authMsgLen,
+			 authMsgInternalLen;
+    int			 authDigestLen;
+    int			 biglen,
+			 ismd5 = 0;
+
+    u_char   		 type;
+    u_char		 authDigest[MD5_HASHSIZE_BYTES],
+			 digest[MD5_HASHSIZE_BYTES];
+    u_char		*authMsg,
+			*digestStart = NULL,
+			*digestEnd   = NULL;
+    oid			 dstParty2[64];
+
+    u_long		 authSrcTimeStamp, authDstTimeStamp;
+
+    struct partyEntry	*srcp, *dstp;
+    struct contextEntry	*cxp;
+    struct timeval	 now;
+
+
 
     data = asn_parse_header(data, length, &type);
     if (data == NULL){
@@ -175,6 +384,8 @@ int		pass;       /* IN - which pass */
         ERROR_MSG("wrong auth header type");
         return NULL;
     }
+
+
     data = asn_parse_objid(data, length, &type, dstParty, dstPartyLength);
     if (data == NULL){
 	ERROR_MSG("bad parse of dstParty");
@@ -186,10 +397,11 @@ int		pass;       /* IN - which pass */
 	return NULL;
     }
     pi->dstp = dstp;
+
     /* check to see if TDomain and TAddr match here.
      * If they don't, discard the packet
      * This might be best handled by adding a user-supplied
-     * function to the API that would validate the address.
+     * function to the API that would validate the address.	XXX
      */
 
     data = asn_parse_header(data, length, &type);
@@ -198,11 +410,15 @@ int		pass;       /* IN - which pass */
 	return NULL;
     }
     authMsg = data;
+
+
     data = asn_parse_header(data, length, &type);
     if (data == NULL || type != (ASN_CONTEXT | ASN_CONSTRUCTOR | 1)){
 	ERROR_MSG("bad parse of snmpAuthMsg (DES decode probably failed!)");
 	return NULL;
     }
+
+
     authMsgLen = *length + data - authMsg;
     authMsgInternalLen = *length;
     data = asn_parse_header(data, &authMsgInternalLen, &type);
@@ -210,17 +426,23 @@ int		pass;       /* IN - which pass */
 	ERROR_MSG("bad parse of snmpAuthMsg");
 	return NULL;
     }
+
+
     if (type == (ASN_UNIVERSAL | ASN_PRIMITIVE | ASN_OCTET_STR)){
-	/* noAuth */
-	pi->version = SNMP_VERSION_2p;
+	/* noAuth.
+	 */
+	pi->version   = SNMP_VERSION_2p;
 	pi->sec_model = SNMP_SEC_MODEL_SNMPv2p;
 	pi->sec_level = SNMP_SEC_LEVEL_NOAUTH;
+
     } else if (type == (ASN_CONTEXT | ASN_CONSTRUCTOR | 2)){
-	/* AuthInformation */
-	pi->version = SNMP_VERSION_2p;
-        pi->mp_model = SNMP_MP_MODEL_SNMPv2p;
+	/* AuthInformation.
+	 */
+	pi->version   = SNMP_VERSION_2p;
+        pi->mp_model  = SNMP_MP_MODEL_SNMPv2p;
 	pi->sec_model = SNMP_SEC_MODEL_SNMPv2p;
 	pi->sec_level = SNMP_SEC_LEVEL_AUTHNOPRIV;
+
 	ismd5 = 1;
 
 	digestStart = data;
@@ -246,15 +468,21 @@ int		pass;       /* IN - which pass */
 	    ERROR_MSG("SrcTimeStamp");
 	    return NULL;
 	}
+
     } else {
 	ERROR_MSG("Bad format for authData");
 	return NULL;
-    }
+
+    }  /* endif -- Parse crypto bytes out of message */
+
+
     data = asn_parse_header(data, length, &type);
     if (data == NULL){
 	ERROR_MSG("bad parse of snmpMgmtCom");
 	return NULL;
     }
+
+
     data = asn_parse_objid(data, length, &type, dstParty2, &dstParty2Length);
     if (data == NULL){
 	ERROR_MSG("bad parse of dstParty");
@@ -276,12 +504,14 @@ int		pass;       /* IN - which pass */
 	return NULL;
     }
 
+
     srcp = party_getEntry(srcParty, *srcPartyLength);
     if (!srcp) {
 	snmp_errno = SNMPERR_BAD_SRC_PARTY;
 	return NULL;
     }
     pi->srcp = srcp;
+
 
     cxp = context_getEntry(context, *contextLength);
     if (!cxp) {
@@ -290,17 +520,22 @@ int		pass;       /* IN - which pass */
     }
     pi->cxp = cxp;
 
+
+
     /* Only perform the following authentication checks if this is the
      * first time called for this packet.
      */
     if (srcp->partyAuthProtocol == SNMPV2MD5AUTHPROT
 	&& pi->version != SNMP_VERSION_2p)
 	return NULL;
+
+
     if ((pass & FIRST_PASS) && (srcp->partyAuthProtocol == SNMPV2MD5AUTHPROT)){
-	/* RFC1446, Pg 18, 3.2.1 */
+	/* RFC1446, Pg 18, 3.2.1
+	 */
 	pi->sec_level = SNMP_SEC_LEVEL_AUTHPRIV;
 	if (!ismd5){
-	    /* snmpStatsBadAuths++ */
+	    /* snmpStatsBadAuths++	/* XXX */
 	    return NULL;
 	}
 
@@ -308,15 +543,19 @@ int		pass;       /* IN - which pass */
 
 	srcp->partyAuthClock = now.tv_sec - srcp->tv.tv_sec;
 	dstp->partyAuthClock = now.tv_sec - dstp->tv.tv_sec;
-	/* RFC1446, Pg 18, 3.2.3 */
+
+	/* RFC1446, Pg 18, 3.2.3
+	 */
 	if (authSrcTimeStamp + srcp->partyAuthLifetime < srcp->partyAuthClock){
 	    ERROR_MSG("Late message");
-	    /* snmpStatsNotInLifetimes */
+	    /* snmpStatsNotInLifetimes 	/* XXX */
 	    return NULL;
 	}
 
-	/* RFC1446, Pg 18, 3.2.5 */
-	biglen = 5000;
+	/* RFC1446, Pg 18, 3.2.5
+	 */
+	biglen = SNMP_MAXBUF;
+
 	if (digestEnd != asn_build_string(digestStart, &biglen,
 					  (u_char)(ASN_UNIVERSAL
 						   | ASN_PRIMITIVE
@@ -326,32 +565,68 @@ int		pass;       /* IN - which pass */
 	    ERROR_MSG("couldn't stuff digest");
 	    return NULL;
 	}
+
+
+	/*
+	 * Create a hash of the message.
+	 */
+#ifdef							USE_INTERNAL_MD5
 	md5Digest(authMsg, authMsgLen, digest);
 
-	/* RFC1446, Pg 19, 3.2.6 */
-	if (authDigestLen != 16 || memcmp(authDigest, digest, 16)){
+#else
+{
+	void		*context	= NULL;
+	int		 digest_len	= MD5_HASHSIZE_BYTES,
+			 rval		= SNMPERR_SUCCESS;
+	u_int8_t	*bufp		= (u_int8_t *) digest;
+
+	SET_HASH_TRANSFORM(kmt_s_md5);		/* FIX -- Broken KMT API. */
+
+        rval = kmt_hash(KMT_CRYPT_MODE_ALL, &context,
+                        authMsg, authMsgLen,
+                        &bufp, &digest_len);
+
+	SNMP_FREE(context);
+	if (rval != SNMPERR_SUCCESS) {
+	    	ERROR_MSG(	"snmp_party_parse(): "
+				"kmt_hash() did not return SNMPERR_SUCCESS.");
+		return NULL;
+	}
+}
+#endif							/* USE_INTERNAL_MD5 */
+
+
+	/* RFC1446, Pg 19, 3.2.6
+	 */
+	if (authDigestLen != MD5_HASHSIZE_BYTES
+		|| memcmp(authDigest, digest, MD5_HASHSIZE_BYTES))
+	{
 	    ERROR_MSG("unauthentic");
 	    /* snmpStatsWrongDigestValues++ */
 	    return NULL;
 	}
-	/* As per RFC1446, Pg 19, 3.2.7, the message is authentic */
 
-	biglen = 5000;
+
+	/* As per RFC1446, Pg 19, 3.2.7, the message is authentic
+	 */
+	biglen = SNMP_MAXBUF;
 	if (digestEnd != asn_build_string(digestStart, &biglen,
 					  (u_char)(ASN_UNIVERSAL
 						   | ASN_PRIMITIVE
 						   | ASN_OCTET_STR),
-					  authDigest, 16)){
+					  authDigest, MD5_HASHSIZE_BYTES)){
 	    ERROR_MSG("couldn't stuff digest back");
 	    return NULL;
 	}
+
 
 	/* Now that we know the message is authentic, update
 	 * the lastTimeStamp.
 	 * As per RFC1446, Pg 19, 3.2.8, we should check that there is an
 	 * acl.
 	 */
-	/*  RFC1446, Pg 19, 3.2.8 */
+	/*  RFC1446, Pg 19, 3.2.8
+	 */
 	if (srcp->partyAuthClock < authSrcTimeStamp){
 	    srcp->partyAuthClock = authSrcTimeStamp;
 	    gettimeofday(&srcp->tv,(struct timezone *)0);
@@ -362,110 +637,79 @@ int		pass;       /* IN - which pass */
 	    gettimeofday(&dstp->tv,(struct timezone *)0);
 	    dstp->tv.tv_sec -= dstp->partyAuthClock;
 	}
+
     } else if ((pass & FIRST_PASS) && dstp->partyPrivProtocol == DESPRIVPROT){
-	/* noAuth and desPriv */
+	/* noAuth and desPriv
+	 */
 	ERROR_MSG("noAuth and desPriv");
 	return NULL;
-    }
-    return data;
-}
-#endif /* USE_V2PARTY_PROTOCOL */
 
-/** snmp_comstr_build - build the header of a community string-based message
-*                       such as that found in SNMPv1 and SNMPv2c.
-*
-*  NOTE: the length of the message will have to be inserted
-*        later, if not known.
-*/
-u_char *
-snmp_comstr_build(data, length, sid, slen, version, messagelen)
-    u_char      *data;
-    int         *length;
-    u_char      *sid;
-    int         *slen;
-    int         *version;
-    int         messagelen;
-{
-  /* version is an 'int' (CMU had it as a long, but was passing in a *int.
-     Grrr.) assign version to verfix and pass in that to asn_build_int
-     instead which expects a long
-     -- WH */
+    }  /* endif -- first pass  -AND-  (src authProtocol==SNMPV2MD5AUTHPROT) */
 
-    long verfix = *version;
-    u_char *h1 = data;
-    u_char *h1e;
-    int hlength = *length;
-
-    /* build the the message wrapper
-       (note length will be inserted later) */
-    data = asn_build_sequence(data, length, (u_char)(ASN_SEQUENCE | ASN_CONSTRUCTOR), 0);
-    if (data == NULL){
-        ERROR_MSG("buildheader");
-        return NULL;
-    }
-    h1e = data;
-
-    /* store the version field */
-    data = asn_build_int(data, length,
-            (u_char)(ASN_UNIVERSAL | ASN_PRIMITIVE | ASN_INTEGER),
-            &verfix, sizeof(verfix));
-    if (data == NULL){
-        ERROR_MSG("buildint");
-        return NULL;
-    }
-
-    /* store the community string */
-    data = asn_build_string(data, length,
-            (u_char)(ASN_UNIVERSAL | ASN_PRIMITIVE | ASN_OCTET_STR),
-            sid, *slen);
-    if (data == NULL){
-        ERROR_MSG("buildstring");
-        return NULL;
-    }
-
-    /* insert length */
-    asn_build_sequence(h1, &hlength, (u_char)(ASN_SEQUENCE | ASN_CONSTRUCTOR),
-                       data-h1e + messagelen);
 
     return data;
-}
 
-#ifdef USE_V2PARTY_PROTOCOL
-/** snmp_party_build - build the header for a party-based security message.
-*                      In the first pass allocate and store all the fields.
-*                      In the second pass, actually do the encryption and
-*                      message digest creation.
-*/
+}  /* end snmp_party_parse() */
+
+
+
+
+/*******************************************************************-o-******
+ * snmp_party_build
+ *
+ * Parameters:
+ *	*data
+ *	*length
+ *	 packet_info
+ *	 messagelen
+ *	*srcParty
+ *	 srcPartyLen
+ *	*dstParty
+ *	 dstPartyLen
+ *	*context
+ *	 contextLen
+ *	*packet_len	(O)  Length of complete packet.
+ *	 pass		(I)  FIRST_PASS, LAST_PASS, none, or both.
+ *      
+ * Returns:
+ *	Pointer into 'data' at the end of the message.
+ *
+ *
+ *  Build the header for a party-based security message.  In the first pass
+ *  allocate and store all the fields.  In the second pass, actually do the
+ *  encryption and message digest creation.
+ */
 u_char *
-snmp_party_build(data, length, pi, messagelen, srcParty, srcPartyLen,
-		   dstParty, dstPartyLen, context, contextLen,
-		   packet_len, pass)
-    u_char	    *data;
-    int		    *length;
-    struct packet_info *pi;
-    int		    messagelen;
-    oid		    *srcParty;
-    int		    srcPartyLen;
-    oid		    *dstParty;
-    int		    dstPartyLen;
-    oid		    *context;
-    int             contextLen;
-    int		    *packet_len;    /* OUT - length of complete packet */
-    int		    pass;  /* FIRST_PASS, LAST_PASS, none, or both */
+snmp_party_build(	u_char	*data,			int	*length,
+			struct packet_info	*pi,
+			int			 messagelen,
+			oid	*srcParty,		int	 srcPartyLen,
+		   	oid	*dstParty,		int	 dstPartyLen,
+			oid	*context,		int	 contextLen,
+		   	int			*packet_len,
+			int			 pass)
 {
-    struct partyEntry *srcp, *dstp;
-    struct timeval now;
-    u_char *endOfPacket;
-    int dummyLength;
-    u_char *digestStart = NULL, *digestEnd = NULL, *authMsgStart;
-    u_char authDigest[16];
-    u_char *h1, *h2, *h3 = NULL, *h5;
-    int pad;
-    int authInfoSize = 0;
+    int			 dummyLength;
+    int			 pad;
+    int			 authInfoSize = 0;
+
+    u_char		*endOfPacket;
+    u_char		*digestStart = NULL,
+			*digestEnd   = NULL,
+			*authMsgStart;
+    u_char		 authDigest[MD5_HASHSIZE_BYTES];
+    u_char		*h1, *h2,
+			*h3 = NULL,
+			*h5;
+
+    struct partyEntry	*srcp, *dstp;
+    struct timeval	 now;
+
 
 
     srcp = pi->srcp;
     dstp = pi->dstp;
+
     if (!srcp || !dstp){
 	srcp = party_getEntry(srcParty, srcPartyLen);
 	if (!srcp) {
@@ -480,6 +724,8 @@ snmp_party_build(data, length, pi, messagelen, srcParty, srcPartyLen,
 	pi->srcp = srcp;
 	pi->dstp = dstp;
     }
+
+
     if (srcp->partyAuthProtocol == SNMPV2MD5AUTHPROT){
 	if (pass & FIRST_PASS){
 	    /* get timestamp now because they are needed for the
@@ -494,6 +740,7 @@ snmp_party_build(data, length, pi, messagelen, srcParty, srcPartyLen,
 	 * due to some error detected in the software protocol layers
 	 * between here and the network.
 	 */
+
     } else {
 	/* Don't send noAuth/desPriv. User interface should check for
 	 * this so that it can give a reasonable error message
@@ -503,6 +750,8 @@ snmp_party_build(data, length, pi, messagelen, srcParty, srcPartyLen,
 	    return NULL;
 	}
     }
+
+
     h1 = data;
     data = asn_build_sequence(data, length,
 			    (u_char)(ASN_CONTEXT | ASN_CONSTRUCTOR | 1), 0);
@@ -510,11 +759,15 @@ snmp_party_build(data, length, pi, messagelen, srcParty, srcPartyLen,
 	ERROR_MSG("build_header2");
 	return NULL;
     }
+
+
     data = asn_build_objid(data, length, (u_char)(ASN_UNIVERSAL | ASN_PRIMITIVE | ASN_OBJECT_ID), dstParty, dstPartyLen);
     if (data == NULL){
 	ERROR_MSG("build_objid");
 	return NULL;
     }
+
+
     h2 = data;
     data = asn_build_sequence(data, length,
 			    (u_char)(ASN_CONTEXT | 1), 0);
@@ -522,6 +775,8 @@ snmp_party_build(data, length, pi, messagelen, srcParty, srcPartyLen,
 	ERROR_MSG("build_header2");
 	return NULL;
     }
+
+
     authMsgStart = data;
     data = asn_build_sequence(data, length,
 			    (u_char)(ASN_CONTEXT | ASN_CONSTRUCTOR | 1), 0);
@@ -529,6 +784,8 @@ snmp_party_build(data, length, pi, messagelen, srcParty, srcPartyLen,
 	ERROR_MSG("build_header2");
 	return NULL;
     }
+
+
     if (srcp->partyAuthProtocol == SNMPV2MD5AUTHPROT){
 	h3 = data;
 	data = asn_build_sequence(data, length,
@@ -569,6 +826,7 @@ snmp_party_build(data, length, pi, messagelen, srcParty, srcPartyLen,
 	    return NULL;
 	}
 	authInfoSize = data - digestStart;
+
     } else {
 	data = asn_build_string(data, length, (u_char)(ASN_UNIVERSAL
 						       | ASN_PRIMITIVE
@@ -578,7 +836,10 @@ snmp_party_build(data, length, pi, messagelen, srcParty, srcPartyLen,
 	    ERROR_MSG("build_string");
 	    return NULL;
 	}
-    }
+
+    }  /* endif -- (srcp->partyAuthProtocol == SNMPV2MD5AUTHPROT) */
+
+
     h5 = data;
     data = asn_build_sequence(data, length,
 			    (u_char)(ASN_CONTEXT | ASN_CONSTRUCTOR | 2),
@@ -587,6 +848,8 @@ snmp_party_build(data, length, pi, messagelen, srcParty, srcPartyLen,
 	ERROR_MSG("build_header2");
 	return NULL;
     }
+
+
     data = asn_build_objid(data, length,
 			   (u_char)(ASN_UNIVERSAL
 				    | ASN_PRIMITIVE | ASN_OBJECT_ID),
@@ -595,6 +858,8 @@ snmp_party_build(data, length, pi, messagelen, srcParty, srcPartyLen,
 	ERROR_MSG("build_objid");
 	return NULL;
     }
+
+
     data = asn_build_objid(data, length,
 			   (u_char)(ASN_UNIVERSAL
 				    | ASN_PRIMITIVE | ASN_OBJECT_ID),
@@ -603,6 +868,8 @@ snmp_party_build(data, length, pi, messagelen, srcParty, srcPartyLen,
 	ERROR_MSG("build_objid");
 	return NULL;
     }
+
+
     data = asn_build_objid(data, length,
 			   (u_char)(ASN_UNIVERSAL
 				    | ASN_PRIMITIVE | ASN_OBJECT_ID),
@@ -611,8 +878,12 @@ snmp_party_build(data, length, pi, messagelen, srcParty, srcPartyLen,
 	ERROR_MSG("build_objid");
 	return NULL;
     }
+
     endOfPacket = data;
-    /* if not last pass, skip md5 and des computation */
+
+
+    /* If not last pass, skip md5 and des computation.
+     */
     if (!(pass & LAST_PASS))
 	return (u_char *)endOfPacket;
 
@@ -628,22 +899,57 @@ snmp_party_build(data, length, pi, messagelen, srcParty, srcPartyLen,
 		       (u_char)(ASN_CONTEXT | ASN_CONSTRUCTOR | 1),
 		       (endOfPacket - authMsgStart) + messagelen - 4);
 
+
     if (srcp->partyAuthProtocol == SNMPV2MD5AUTHPROT){
 	asn_build_sequence(h3, length,
 			   (u_char)(ASN_CONTEXT |ASN_CONSTRUCTOR | 2),
 			   authInfoSize);
     }
+
+
     asn_build_sequence(h5, length,
 		       (u_char)(ASN_CONTEXT | ASN_CONSTRUCTOR | 2),
 		       (endOfPacket - h5) + messagelen - 4);
 
-    /* if it isn't MD5, we'll never do DES, so we're done */
+
+    /* If it isn't MD5, we'll never do DES, so we're done.
+     */
     if (srcp->partyAuthProtocol != SNMPV2MD5AUTHPROT)
 	return (u_char *)endOfPacket;
-/*    xdump(srcp->partyAuthPrivate, 16, "authPrivate: "); */
-    md5Digest(authMsgStart, (endOfPacket - authMsgStart) + messagelen,
-	      authDigest);
-    dummyLength = 5000;
+    /* xdump(srcp->partyAuthPrivate, MD5_HASHSIZE_BYTES, "authPrivate: "); /* */
+
+
+	/*
+	 * Create a hash of the message.
+	 */
+#ifdef							USE_INTERNAL_MD5
+    md5Digest(	authMsgStart,
+		(endOfPacket - authMsgStart) + messagelen,
+	      	authDigest );
+#else
+{
+	void		*context	= NULL;
+	int		 digest_len	= MD5_HASHSIZE_BYTES,
+			 rval		= SNMPERR_SUCCESS;
+	u_int8_t	*bufp		= (u_int8_t *) authDigest;
+
+	SET_HASH_TRANSFORM(kmt_s_md5);		/* FIX -- Broken KMT API. */
+
+        rval = kmt_hash(KMT_CRYPT_MODE_ALL, &context,
+                        authMsgStart, (endOfPacket-authMsgStart)+messagelen,
+                        &bufp, &digest_len);
+
+	SNMP_FREE(context);
+	if (rval != SNMPERR_SUCCESS) {
+	    	ERROR_MSG(	"snmp_party_build(): "
+				"kmt_hash() did not return SNMPERR_SUCCESS.");
+		return NULL;
+	}
+}
+#endif							/* USE_INTERNAL_MD5 */
+
+
+    dummyLength = SNMP_MAXBUF;
     data = asn_build_string(digestStart, &dummyLength,
 			    (u_char)(ASN_UNIVERSAL | ASN_PRIMITIVE
 				     | ASN_OCTET_STR),
@@ -652,69 +958,11 @@ snmp_party_build(data, length, pi, messagelen, srcParty, srcPartyLen,
 	ERROR_MSG("stuffing digest");
 	return NULL;
     }
+
+
     return (u_char *)endOfPacket;
-}
+
+}  /* end snmp_party_build() */
+
 #endif /* USE_V2PARTY_PROTOCOL */
-
-static void
-md5Digest(start, length, digest)
-    u_char *start;
-    int length;
-    u_char *digest;
-{
-    u_char *cp;
-    MDstruct MD;
-    int i, j;
-#if WORDS_BIGENDIAN
-    u_char *buf;
-    u_char buffer[SNMP_MAX_LEN];
-#endif
-
-#if 0
-    int count, sum;
-
-    sum = 0;
-    for(count = 0; count < length; count++)
-	sum += start[count];
-    printf("sum %d (%d)\n", sum, length);
-#endif
-
-#if WORDS_BIGENDIAN
-    /* do the computation in an array */
-    cp = buf = buffer;
-    memmove(buf, start, length);
-#else
-    /* do the computation in place */
-    cp = start;
-#endif
-
-    MDbegin(&MD);
-    while(length >= 64){
-	MDupdate(&MD, cp, 64 * 8);
-	cp += 64;
-	length -= 64;
-    }
-    MDupdate(&MD, cp, length * 8);
-/*    MDprint(&MD); */
-   for (i=0;i<4;i++)
-     for (j=0;j<32;j=j+8)
-	 *digest++ = (MD.buffer[i]>>j) & 0xFF;
-}
-
-#ifdef USE_V2PARTY_PROTOCOL
-int
-has_access(msg_type, target, subject, resources)
-    u_char msg_type;
-    int target, subject, resources;
-{
-    struct aclEntry *ap;
-
-    ap = acl_getEntry(target, subject, resources);
-    if (!ap)
-	return 0;
-    if (ap->aclPriveleges & (1 << (msg_type & 0x1F)))
-	return 1;
-    return 0;
-}
-#endif
 

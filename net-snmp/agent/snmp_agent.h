@@ -1,4 +1,9 @@
-/* external definitions for functions in snmp_agent.c */
+/*
+ * snmp_agent.h
+ *
+ * External definitions for functions in snmp_agent.c.
+ */
+
 #ifndef SNMP_AGENT_H
 #define SNMP_AGENT_H
 

@@ -3157,7 +3157,7 @@ print_subtree_oid_report(f, tree, count)
     count++;
     current_subid = 0;
 
-    while(tp = get_next_subid(&current_subid, tree->child_list))
+    while( (tp = get_next_subid(&current_subid, tree->child_list)) )
     {
         if(print_subtree_oid_report_labeledoid)
         {

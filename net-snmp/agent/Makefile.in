@@ -2,51 +2,61 @@
 # Makefile for snmpd
 #
 
-TARG=	 snmpd
-USELIBS= ../snmplib/libsnmp.$(SHLIB_EXTENSION)$(SHLIB_VERSION)
-LIBS=	 -L../snmplib $(CC_RUNTIME_ARG) -lsnmp @LIBS@
+TARG		= snmpd
+USELIBS		= ../snmplib/libsnmp.$(SHLIB_EXTENSION)$(SHLIB_VERSION)
+LOCAL_LIBS	= -L../snmplib
+LIBS		= $(CC_RUNTIME_ARG) -lsnmp @LIBS@
 
-CPPFLAGS=@CPPFLAGS@ -I.. -I$(srcdir)/.. -I$(srcdir)/../snmplib \
-	-I$(srcdir) -I. -I$(srcdir)/mibgroup -Imibgroup
+CPPFLAGS	= -I.. -I$(srcdir)/.. -I$(srcdir)/../snmplib		\
+			-I$(srcdir) -I. -I$(srcdir)/mibgroup -Imibgroup	\
+			@CPPFLAGS@
 
-CC = @CC@ $(CPPFLAGS)
+CC		= @CC@ $(CPPFLAGS)
 
-MIBOBJS=@mibgroup_list_o@
+MIBOBJS		= @mibgroup_list_o@
+
 
 all: subdirs snmpd
 
+
 subdirs:
 	cd mibgroup; $(MAKE); cd ..
-	cd dlmods; $(MAKE); cd ..
+#	cd dlmods; $(MAKE); cd ..
+
 
 getkstat: getkstat.o
-	$(CC) $(CFLAGS) -o $@ $? $(LIBS)
+	$(CC) $(CFLAGS) -o $@ $? $(LOCAL_LIBS) $(LIBS)
 
 getkstat.o: mibgroup/kernel_sunos5.c
 	$(CC) $(CFLAGS) -o $@ -D_GETKSTAT_TEST -DDODEBUG -c $? 
 
 getmibstat: getmibstat.o
-	$(CC) $(CFLAGS) -o $@ $? $(LIBS)
+	$(CC) $(CFLAGS) -o $@ $? $(LOCAL_LIBS) $(LIBS)
 
 getmibstat.o: mibgroup/kernel_sunos5.c
 	$(CC) $(CFLAGS) -o $@ -D_GETMIBSTAT_TEST -DDODEBUG -c $? 
 
+
 AGENTOBJS=snmpd.o snmp2p.o kernel.o snmp_agent.o snmp_vars.o view_parse.o agent_read_config.o auto_nlist.o
 
+
 snmpd:	${MIBOBJS} ${AGENTOBJS} $(USELIBS)
-	${CC} -o $@ ${AGENTOBJS} ${MIBOBJS} ${LDFLAGS} ${LIBS}  
+	${CC} -o $@ ${AGENTOBJS} ${MIBOBJS} $(LOCAL_LIBS) ${LDFLAGS} ${LIBS}  
+
 
 clean:
 	rm -f *.o ${TARG}
 	cd dlmods; make clean; cd ..
 	cd mibgroup; make clean
 
+
 install:  installdirs
-	cd dlmods ; $(MAKE) install; cd ..
+#	cd dlmods ; $(MAKE) install; cd ..
 	@$(INSTALL) $(TARG) $(sbindir) ; echo "install:  installed $(TARG) in $(sbindir) "
 
 installdirs:
 	@$(SHELL) $(srcdir)/../mkinstalldirs $(sbindir) $(snmplibdir) 
+
 
 dependlocal: 
 	makedepend $(CPPFLAGS) $(srcdir)/*.c

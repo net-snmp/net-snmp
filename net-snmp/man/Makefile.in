@@ -2,17 +2,20 @@ MAN1 = snmpcmd.1 snmpget.1 snmpset.1 snmpwalk.1 snmpbulkwalk.1 snmpgetnext.1 snm
 MAN1G = snmpd.1
 MAN3 = snmp_api.3 mib_api.3
 MAN5 = variables.5
-MAN5G = snmpd.conf.5
+MAN5G = snmpd.conf.5 snmp.conf.5
 MAN8 = snmptrapd.8
 
 MANALL = $(MAN1) $(MAN1G) $(MAN3) $(MAN5) $(MAN5G) $(MAN8)
 
-TARGETS = snmpd.conf.5 snmpd.1
+TARGETS = snmpd.conf.5 snmpd.1 snmp.conf.5
 
 all: $(TARGETS)
 
 snmpd.conf.5: snmpd.conf.5.def ../sedscript
 	$(SED) -f ../sedscript < $(srcdir)/snmpd.conf.5.def > snmpd.conf.5
+
+snmp.conf.5: snmp.conf.5.def ../sedscript
+	$(SED) -f ../sedscript < $(srcdir)/snmp.conf.5.def > snmp.conf.5
 
 snmpd.1: snmpd.1.def ../sedscript
 	$(SED) -f ../sedscript < $(srcdir)/snmpd.1.def > snmpd.1
