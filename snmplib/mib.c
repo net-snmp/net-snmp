@@ -5556,7 +5556,7 @@ uptime_string(u_long timeticks, char *buf)
     if (cp)
         *cp = '\0';
 #endif
-    strlcpy(buf, tbuf, sizeof(buf));
+    strlcpy(buf, tbuf, sizeof(tbuf));
     return buf;
 }
 
