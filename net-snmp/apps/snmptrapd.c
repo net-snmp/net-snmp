@@ -427,8 +427,7 @@ int snmp_input(int op,
 	       struct snmp_pdu *pdu,
 	       void *magic)
 {
-#define LCL_OUT_BFR_LEN 1000
-    char out_bfr[LCL_OUT_BFR_LEN];
+    char out_bfr[SPRINT_MAX_LEN];
     struct variable_list *vars;
     struct sockaddr_in *pduIp   = (struct sockaddr_in *)&(pdu->address);
     char buf[64], oid_buf [SPRINT_MAX_LEN], *cp;
@@ -461,9 +460,9 @@ int snmp_input(int op,
 	    }
 	    if (Print && (pdu->trap_type != SNMP_TRAP_AUTHFAIL || dropauth == 0)) {
 	        if ((log_fmt_str == (char *) NULL) || (log_fmt_str[0] == '\0'))
-	            (void) format_plain_trap (out_bfr, LCL_OUT_BFR_LEN, pdu);
+	            (void) format_plain_trap (out_bfr, SPRINT_MAX_LEN, pdu);
 	        else
-		    (void) format_trap (out_bfr, LCL_OUT_BFR_LEN, log_fmt_str, pdu);
+		    (void) format_trap (out_bfr, SPRINT_MAX_LEN, log_fmt_str, pdu);
 	        printf ("%s", out_bfr);
 	    }
 	    if (Syslog && (pdu->trap_type != SNMP_TRAP_AUTHFAIL || dropauth == 0)) {
@@ -518,7 +517,7 @@ int snmp_input(int op,
 				  sizeof (pduIp->sin_addr), AF_INET);
 	    if (Print) {
 	        (void) format_trap (out_bfr, 
-				    LCL_OUT_BFR_LEN, 
+				    SPRINT_MAX_LEN, 
 				    "%.4y-%.2m-%.2d %.2h:%.2n:%.2s %h [%i]:\n%v\n",
 				    pdu);
 	        printf ("%s", out_bfr);
@@ -582,7 +581,6 @@ int snmp_input(int op,
 	fprintf(stderr, "Timeout: This shouldn't happen!\n");
     }
     return 1;
-#undef LCL_OUT_BFR_LEN
 }
 
 
