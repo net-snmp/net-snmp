@@ -223,6 +223,7 @@ static char *api_errors[-SNMPERR_MAX+1] = {
     "Bad ACL definition",
     "Bad Party definition",
     "Session abort failure",
+    "Unknown PDU type",
 };
 
 struct timeval Now;
@@ -1070,14 +1071,12 @@ snmp_send(session, pdu)
     /* check/setup the version */
     if (pdu->version == SNMP_DEFAULT_VERSION) {
         if (session->version == SNMP_DEFAULT_VERSION) {
-	    fprintf(stderr, "No version specified\n");
-	    snmp_errno = SNMPERR_BAD_ADDRESS;
+	    snmp_errno = SNMPERR_BAD_VERSION;
 	    return 0;
         }
         pdu->version = session->version;
     } else if (pdu->version != session->version) {
-        fprintf(stderr, "PDU version does not match session version\n");
-        snmp_errno = SNMPERR_BAD_ADDRESS;
+        snmp_errno = SNMPERR_BAD_VERSION;
         return 0;
     }
 
@@ -1152,9 +1151,7 @@ snmp_send(session, pdu)
         expect_response = 0;
     } else {
         /* some unknown PDU type */
-        fprintf(stderr,
-                "Unknown PDU type.\n");
-        snmp_errno = SNMPERR_GENERR;/* Fix this XXXXX */
+        snmp_errno = SNMPERR_UNKNOWN_PDU;
         return 0;
     }
 

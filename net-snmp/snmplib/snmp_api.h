@@ -127,7 +127,8 @@ extern void snmp_perror __P((char *));
 #define SNMPERR_BAD_ACL		(-20)
 #define SNMPERR_BAD_PARTY	(-21)
 #define SNMPERR_ABORT		(-22)
-#define SNMPERR_MAX		(-22)
+#define SNMPERR_UNKNOWN_PDU	(-23)
+#define SNMPERR_MAX		(-23)
 
 #define non_repeaters	errstat
 #define max_repetitions errindex
