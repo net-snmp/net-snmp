@@ -2914,7 +2914,7 @@ usm_add_user(struct usmUser *user)
 struct usmUser *
 usm_add_user_to_list(struct usmUser *user, struct usmUser *puserList)
 {
-    struct usmUser *nptr, *pptr;
+    struct usmUser *nptr, *pptr, *optr;
 
     /*
      * loop through puserList till we find the proper, sorted place to
@@ -2955,11 +2955,26 @@ usm_add_user_to_list(struct usmUser *user, struct usmUser *puserList)
                  memcmp(nptr->engineID, user->engineID,
                         user->engineIDLen) == 0)
                 && strlen(nptr->name) == strlen(user->name)
-                && strcmp(nptr->name, user->name) == 0)
+                && strcmp(nptr->name, user->name) == 0) {
                 /*
-                 * the user is an exact match of a previous entry.  Bail 
+                 * the user is an exact match of a previous entry.
+                 * Credentials may be different, though, so remove
+                 * the old entry (and add the new one)!
                  */
-                return NULL;
+                if (pptr) { /* change prev's next pointer */
+                  pptr->next = nptr->next;
+                }
+                if (nptr->next) { /* change next's prev pointer */
+                  nptr->next->prev = pptr;
+                } 
+                optr = nptr;
+                nptr = optr->next; /* add new user at this position */
+                /* free the old user */
+                optr->next=NULL;
+                optr->prev=NULL;
+                usm_free_user(optr); 
+                break; /* new user will be added below */
+            }
         }
     }
 
@@ -3039,7 +3054,7 @@ usm_remove_user_from_list(struct usmUser *user,
         }
     } else {
         /*
-         * user didn't exit 
+         * user didn't exist 
          */
         return NULL;
     }
