@@ -112,6 +112,7 @@ DLL_IMPORT extern struct tree *Mib;
 
 #define SYS_UPTIME_OID_LEN 9
 #define SNMP_TRAP_OID_LEN 11
+#define NO_RETRY_NOSUCH 0
 static oid sysUpTime[SYS_UPTIME_OID_LEN] = {1,3,6,1,2,1,1,3,0};
 static oid snmpTrapOID[SNMP_TRAP_OID_LEN] = {1, 3, 6, 1, 6, 3, 1, 1, 4, 1, 0};
 
@@ -856,7 +857,6 @@ UINT:
      return ret;
 }
 
-#define NO_RETRY_NOSUCH 0
 /* takes ss and pdu as input and updates the 'response' argument */
 /* the input 'pdu' argument will be freed */
 static int
