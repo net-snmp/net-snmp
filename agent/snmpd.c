@@ -139,7 +139,7 @@ typedef long    fd_mask;
 #include <net-snmp/callback.h>
 #include <net-snmp/snmp_alarm.h>
 #include <net-snmp/default_store.h>
-#include "mib_module_config.h"
+#include <net-snmp/agent/mib_module_config.h>
 
 #include <net-snmp/snmp_client.h>
 #include "snmpd.h"

@@ -1,5 +1,31 @@
 top_builddir=../..
 
+#
+# What to install
+#
+
+INSTALLLIBS=libnetsnmphelpers.$(LIB_EXTENSION)$(LIB_VERSION)
+INSTALLSUBDIR=agent
+INSTALLSUBDIRHEADERS=all_helpers.h \
+	instance.h \
+        multiplexer.h \
+	bulk_to_next.h \
+        null.h \
+        debug_handler.h \
+        old_api.h \
+        read_only.h \
+        serialize.h \
+        set_helper.h \
+        table_data.h \
+        table_dataset.h \
+	table_array.h \
+        table.h \
+        table_iterator.h
+
+
+#
+# Build info
+#
 CPPFLAGS=-I ../../include -I$(top_srcdir)/include \
 	-I. -I.. -I../.. -I$(srcdir) -I$(srcdir)/..  \
 	-I$(srcdir)/../mibgroup -I$(srcdir)/../.. -I$(srcdir)/../../snmplib \
@@ -50,54 +76,8 @@ SRCS =  all_helpers.c \
 	table_dataset.c \
 	table.c
 
-INSTALLHEADERS=$(top_srcdir)/include/net-snmp/agent/all_helpers.h \
-	$(top_srcdir)/include/net-snmp/agent/instance.h \
-        $(top_srcdir)/include/net-snmp/agent/multiplexer.h \
-	$(top_srcdir)/include/net-snmp/agent/bulk_to_next.h \
-        $(top_srcdir)/include/net-snmp/agent/null.h \
-        $(top_srcdir)/include/net-snmp/agent/debug_handler.h \
-        $(top_srcdir)/include/net-snmp/agent/old_api.h \
-        $(top_srcdir)/include/net-snmp/agent/read_only.h \
-        $(top_srcdir)/include/net-snmp/agent/serialize.h \
-        $(top_srcdir)/include/net-snmp/agent/set_helper.h \
-        $(top_srcdir)/include/net-snmp/agent/table_data.h \
-        $(top_srcdir)/include/net-snmp/agent/table_dataset.h \
-	$(top_srcdir)/include/net-snmp/agent/table_array.h \
-        $(top_srcdir)/include/net-snmp/agent/table.h \
-        $(top_srcdir)/include/net-snmp/agent/table_iterator.h
-
-LIBTARG=libnetsnmphelpers.$(LIB_EXTENSION)$(LIB_VERSION)
-
-all: $(LIBTARG)
+all: standardall
 
 libnetsnmphelpers.$(LIB_EXTENSION)$(LIB_VERSION):    ${LOBJS}
 	$(LIB_LD_CMD) libnetsnmphelpers.$(LIB_EXTENSION)$(LIB_VERSION) ${LOBJS}  $(LIB_LD_LIBS)
 	$(RANLIB) libnetsnmphelpers.$(LIB_EXTENSION)$(LIB_VERSION)
-
-install: installdirs
-	@$(INSTALL) $(INSTALLHEADERS) $(includedir)/agent
-	@for i in $(INSTALLHEADERS) ; do echo "install:  installed $$i in $(includedir)" ; done
-	@$(INSTALL) $(LIBTARG) $(libdir)
-	@for i in $(LIBTARG) ; do $(RANLIB) $(libdir)/$$i ; echo "install:  installed $$i in $(libdir)" ; done
-	$(LIB_LDCONFIG_CMD)
-
-installdirs:
-	@$(SHELL) $(top_srcdir)/mkinstalldirs $(snmplibdir) $(includedir) $(includedir)/agent
-
-clean:
-	rm -f ${LOBJS} ${OBJS} ${LIBTARG}
-	rm -rf .libs
-
-depend: 
-	makedepend $(CPPFLAGS) -o.lo $(SRCS)
-
-nosysdepend:
-	makedepend $(CPPFLAGS) -o.lo $(SRCS)
-	perl -n -i.bak $(top_srcdir)/makenosysdepend.pl Makefile
-
-makefileindepend: nosysdepend
-	perl $(top_srcdir)/makefileindepend.pl
-
-
-# DO NOT DELETE THIS LINE -- make depend depends on it.
-

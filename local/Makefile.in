@@ -1,13 +1,22 @@
+#
+# local (scripts) directory Makefile
+#
 top_builddir=..
 
-SNMPCONFPATH=@SNMPCONFPATH@
+#
+# stuff to install
+#
+OTHERINSTALL=localinstall
 
-SCRIPTS=snmpcheck tkmib mib2c snmpconf traptoemail
+#
+# local info
+#
+SNMPCONFPATH=@SNMPCONFPATH@
 PERLSCRIPTS=snmpcheck tkmib fixproc ipf-mod.pl rsnmp
 SCRIPTSMADEFORPERL=snmpcheck.made tkmib.made mib2c.made fixproc.made \
 	ipf-mod.pl.made rsnmp.made snmpconf.made traptoemail.made
 PERLPROG=@PERLPROG@
-DATASRCS=mib2c.conf mib2c.iterator.conf mib2c.create-dataset.conf \
+DATASRCS=mib2c.conf mib2c.iterate.conf mib2c.create-dataset.conf \
 	mib2c.array-auto.conf mib2c.array-user.conf
 CONFINSTALLDIR=$(snmplibdir)/snmpconf
 CONFDATASRC=snmpconf.dir
@@ -18,30 +27,29 @@ CONFFILES=snmpd.conf/system snmpd.conf/acl snmpd.conf/trapsinks \
 	snmp.conf/authopts snmp.conf/debugging snmp.conf/output snmp.conf/mibs \
 	snmptrapd.conf/formatting snmptrapd.conf/traphandle
 
-all: $(SCRIPTSMADEFORPERL)
+OTHERCLEANTARGETS=snmpcheck $(SCRIPTSMADEFORPERL)
+
+all: $(SCRIPTSMADEFORPERL) standardall
 
 snmpcheck: $(srcdir)/snmpcheck.def ../sedscript
 	$(SED) -f ../sedscript $(srcdir)/snmpcheck.def > snmpcheck
 
-clean:
-	rm -f snmpcheck $(SCRIPTSMADEFORPERL)
-
 snmpcheck.made: snmpcheck
-	if test "x$(PERLPROG)" != "x"; then \
-	  $(PERLPROG) -p -e 's%^#!.*/perl.*%#!$(PERLPROG)%' snmpcheck > snmpcheck.made; \
+	if test "x$(PERLPROG)" != "x" ; then \
+	  $(PERLPROG) -p -e 's%^#!.*/perl.*%#!$(PERLPROG)%' snmpcheck > snmpcheck.made ; \
 	else \
-	  touch snmpcheck.made; \
+	  touch snmpcheck.made ; \
         fi
 
 tkmib.made: $(srcdir)/tkmib
-	if test "x$(PERLPROG)" != "x"; then \
+	if test "x$(PERLPROG)" != "x" ; then \
 	  $(PERLPROG) -p -e 's%^#!.*/perl.*%#!$(PERLPROG)%' ${srcdir}/tkmib > tkmib.made; \
 	else \
 	  touch tkmib.made; \
         fi
 
 mib2c.made: $(srcdir)/mib2c
-	if test "x$(PERLPROG)" != "x"; then \
+	if test "x$(PERLPROG)" != "x" ; then \
 	  $(PERLPROG) -p -e 's%^#!.*/perl.*%#!$(PERLPROG)%;s#/usr/local/share/snmp#$(snmplibdir)#;' ${srcdir}/mib2c > mib2c.made; \
 	else \
 	  touch mib2c.made; \
@@ -49,45 +57,44 @@ mib2c.made: $(srcdir)/mib2c
 
 
 ipf-mod.pl.made: $(srcdir)/ipf-mod.pl
-	if test "x$(PERLPROG)" != "x"; then \
+	if test "x$(PERLPROG)" != "x" ; then \
 	  $(PERLPROG) -p -e 's%^#!.*/perl.*%#!$(PERLPROG)%' ${srcdir}/ipf-mod.pl > ipf-mod.pl.made; \
 	else \
 	  touch ipf-mod.pl.made; \
         fi
 
 fixproc.made: $(srcdir)/fixproc
-	if test "x$(PERLPROG)" != "x"; then \
+	if test "x$(PERLPROG)" != "x" ; then \
 	  $(PERLPROG) -p -e 's%^#!.*/perl.*%#!$(PERLPROG)%' ${srcdir}/fixproc > fixproc.made; \
 	else \
 	  touch fixproc.made; \
         fi
 
 rsnmp.made: $(srcdir)/rsnmp
-	if test "x$(PERLPROG)" != "x"; then \
+	if test "x$(PERLPROG)" != "x" ; then \
 	  $(PERLPROG) -p -e 's%^#!.*/perl.*%#!$(PERLPROG)%; s#/usr/local/share#$(datadir)#g;' ${srcdir}/rsnmp > rsnmp.made; \
 	else \
 	  touch rsnmp.made; \
         fi
 
 snmpconf.made: $(srcdir)/snmpconf
-	if test "x$(PERLPROG)" != "x"; then \
+	if test "x$(PERLPROG)" != "x" ; then \
 	  $(PERLPROG) -p -e 's%^#!.*/perl.*%#!$(PERLPROG)%; s#/usr/local/share#$(datadir)#g; s#/usr/local/etc/snmp#$(SNMPCONFPATH)#g' ${srcdir}/snmpconf > snmpconf.made; \
 	else \
 	  touch snmpconf.made; \
         fi
 
 traptoemail.made: $(srcdir)/traptoemail
-	if test "x$(PERLPROG)" != "x"; then \
+	if test "x$(PERLPROG)" != "x" ; then \
 	  $(PERLPROG) -p -e 's%^#!.*/perl.*%#!$(PERLPROG)%; s#/usr/local/share#$(datadir)#g; s#/usr/local/etc/snmp#$(TRAPTOEMAILPATH)#g' ${srcdir}/traptoemail > traptoemail.made; \
 	else \
 	  touch traptoemail.made; \
         fi
 
-
-install: all
-	@if test "x$(PERLPROG)" != "x"; then \
-	  for i in $(SCRIPTS) ; do $(INSTALL) $$i.made $(bindir)/$$i ; echo "install:  installed $$i in $(bindir)" ; done; \
-	  for i in $(DATASRCS) ; do $(INSTALL) $(srcdir)/$$i $(snmplibdir)/$$i ; echo "install:  installed $$i in $(snmplibdir)" ; done; \
-	  for i in $(CONFDIRS); do $(SHELL) $(srcdir)/../mkinstalldirs $(CONFINSTALLDIR)/$$i; done; \
+localinstall:
+	@if test "x$(PERLPROG)" != "x" ; then \
+	  for i in $(PERLSCRIPTS) ; do $(INSTALL) $$i.made $(bindir)/$$i ; echo "install:  installed $$i in $(bindir)" ; done ; \
+	  for i in $(DATASRCS) ; do $(INSTALL) $(srcdir)/$$i $(snmplibdir)/$$i ; echo "install:  installed $$i in $(snmplibdir)" ; done ; \
+	  for i in $(CONFDIRS); do $(SHELL) $(srcdir)/../mkinstalldirs $(CONFINSTALLDIR)/$$i ; done ; \
 	  for i in $(CONFFILES); do $(INSTALL) $(srcdir)/$(CONFDATASRC)/$$i $(CONFINSTALLDIR)/$$i; echo "install:  installed $$i in $(CONFINSTALLDIR)"; done \
 	fi

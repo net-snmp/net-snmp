@@ -20,7 +20,7 @@
 #include <net-snmp/default_store.h>
 #include <net-snmp/agent/ds_agent.h>
 #include <net-snmp/snmp_logging.h>
-#include "mib_module_config.h"
+#include <net-snmp/agent/mib_module_config.h>
 #include <net-snmp/read_config.h>
 #include <net-snmp/agent/agent_read_config.h>
 #include "agentx/agentx_config.h"

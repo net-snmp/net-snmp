@@ -62,7 +62,7 @@
 #include <net-snmp/callback.h>
 #include <net-snmp/snmp_transport.h>
 
-#include "mib_module_config.h"
+#include <net-snmp/agent/mib_module_config.h>
 
 struct trap_sink {
     struct snmp_session	*sesp;

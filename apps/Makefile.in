@@ -3,21 +3,41 @@
 # snmptrapd, snmptable, snmpset, snmpgetnext, and other utilities.
 #
 
-top_builddir 	= ..
+top_builddir=..
 
-TARG		= snmpget$(EXEEXT) snmpgetnext$(EXEEXT) snmpset$(EXEEXT) snmpusm$(EXEEXT)			\
-			snmpwalk$(EXEEXT) snmpbulkwalk$(EXEEXT) snmptable$(EXEEXT)			\
-			snmptrap$(EXEEXT) snmpbulkget$(EXEEXT)				\
-			snmptranslate$(EXEEXT) snmpstatus$(EXEEXT) snmpdelta$(EXEEXT) snmptest$(EXEEXT)	\
-			encode_keychange$(EXEEXT) snmpdf$(EXEEXT) snmpvacm$(EXEEXT)
+#
+# Things to install
+#
 
-SBINTARG	= snmptrapd$(EXEEXT)
+INSTALLBINPROGS	= snmpget$(EXEEXT) 			\
+		snmpgetnext$(EXEEXT) 			\
+		snmpset$(EXEEXT) 			\
+		snmpusm$(EXEEXT)			\
+		snmpwalk$(EXEEXT) 			\
+		snmpbulkwalk$(EXEEXT) 			\
+		snmptable$(EXEEXT)			\
+		snmptrap$(EXEEXT) 			\
+		snmpinform$(EXEEXT) 			\
+		snmpbulkget$(EXEEXT)			\
+		snmptranslate$(EXEEXT) 			\
+		snmpstatus$(EXEEXT) 			\
+		snmpdelta$(EXEEXT) 			\
+		snmptest$(EXEEXT)			\
+		encode_keychange$(EXEEXT) 		\
+		snmpdf$(EXEEXT) 			\
+		snmpvacm$(EXEEXT)			\
+
+INSTALLSBINPROGS = snmptrapd$(EXEEXT)
+
 SUBDIRS		= snmpnetstat
 
-USELIBS		= ../snmplib/libsnmp.$(LIB_EXTENSION)$(LIB_VERSION) 
+#
+# build variables.
+#
+
+USELIBS		= ../snmplib/libnetsnmp.$(LIB_EXTENSION)$(LIB_VERSION) 
 USETRAPLIBS	= ../agent/libnetsnmpagent.$(LIB_EXTENSION)$(LIB_VERSION) ../agent/libnetsnmpmibs.$(LIB_EXTENSION)$(LIB_VERSION) ../agent/helpers/libnetsnmphelpers.$(LIB_EXTENSION)$(LIB_VERSION) $(USELIBS)
 LOCAL_LIBS	= -L../snmplib -L../agent -L../agent/helpers
-#LIBS		= $(CC_RUNTIME_ARG) -lsnmp @LIBS@
 LIBS		= $(USELIBS) @LIBS@
 TRAPLIBS	= $(USETRAPLIBS) @AGENTLIBS@
 
@@ -28,14 +48,11 @@ CPPFLAGS	= -I$(top_srcdir)/include -I../include \
 OSUFFIX		= lo
 TRAPD_OBJECTS   = snmptrapd.$(OSUFFIX) snmptrapd_handlers.$(OSUFFIX) snmptrapd_log.$(OSUFFIX) notification_log.$(OSUFFIX)
 
-all: $(TARG) $(SBINTARG) subdirs
+all: standardall
 
-
-subdirs:
-	for i in $(SUBDIRS) ; do \
-        ( cd $$i ; $(MAKE) ) ; \
-	done
-
+#
+# build rules
+#
 snmpwalk$(EXEEXT):    snmpwalk.$(OSUFFIX) $(USELIBS)
 	$(LINK) -o $@ snmpwalk.$(OSUFFIX) $(LOCAL_LIBS) ${LDFLAGS} ${LIBS} 
 
@@ -68,8 +85,10 @@ snmptrapd$(EXEEXT):    $(TRAPD_OBJECTS) $(USETRAPLIBS)
 
 snmptrap$(EXEEXT):    snmptrap.$(OSUFFIX) $(USELIBS)
 	$(LINK) -o $@ snmptrap.$(OSUFFIX) $(LOCAL_LIBS) ${LDFLAGS} ${LIBS} 
+
+snmpinform$(EXEEXT): snmptrap$(EXEEXT)
 	rm -f snmpinform
-	$(LN_S) snmptrap snmpinform
+	$(LN_S) snmptrap$(EXEEXT) snmpinform$(EXEEXT)
 
 snmpset$(EXEEXT):    snmpset.$(OSUFFIX) $(USELIBS)
 	$(LINK) -o $@ snmpset.$(OSUFFIX) $(LOCAL_LIBS) ${LDFLAGS} ${LIBS} 
@@ -88,50 +107,3 @@ encode_keychange$(EXEEXT):    encode_keychange.$(OSUFFIX) $(USELIBS)
 
 snmpdf$(EXEEXT):    snmpdf.$(OSUFFIX) $(USELIBS)
 	$(LINK) -o $@ snmpdf.$(OSUFFIX) $(LOCAL_LIBS) ${LDFLAGS} ${LIBS} 
-
-
-clean:
-	rm -f core *.o *.lo *.exe $(TARG) $(SBINTARG)
-	rm -f snmpinform
-	rm -rf .libs
-	for i in $(SUBDIRS) ; do \
-	( cd $$i ; $(MAKE) clean ) ; \
-	done
-
-
-install: installdirs subdirs $(TARG)
-	for i in $(SUBDIRS) ; do \
-        ( cd $$i ; $(MAKE) install ) ; \
-	done
-	@$(INSTALL) $(TARG) $(bindir)
-	@for i in $(TARG) ; do echo "install:  installed $$i in $(bindir)" ; done
-	rm -f $(bindir)/snmpinform
-	(cd $(bindir) && $(LN_S) snmptrap snmpinform)
-	@$(INSTALL) $(SBINTARG) $(sbindir)
-	@for i in $(SBINTARG) ; do echo "install:  installed $$i in $(sbindir)" ; done
-
-installdirs:
-	@$(SHELL) $(srcdir)/../mkinstalldirs $(snmplibdir) $(bindir) $(sbindir)
-
-
-dependlocal: 
-	makedepend $(CPPFLAGS) -o.lo $(srcdir)/*.c
-
-depend: dependlocal
-	for i in $(SUBDIRS) ; do \
-        ( cd $$i ; $(MAKE) depend ) ; \
-	done
-
-nosysdepend: 
-	for i in $(SUBDIRS) ; do \
-        ( cd $$i ; $(MAKE) nosysdepend ) ; \
-	done
-	makedepend $(CPPFLAGS) -o.lo *.c
-	perl -n -i.bak $(top_srcdir)/makenosysdepend.pl Makefile
-
-makefileindepend: nosysdepend
-	cd snmpnetstat; $(MAKE) makefileindepend; cd ..
-	perl $(top_srcdir)/makefileindepend.pl
-
-# DO NOT DELETE THIS LINE -- make depend depends on it.
-
