@@ -77,6 +77,7 @@ void unregister_mib (oid *, int);
 struct subtree *unregister_mib_tree (oid *, int, struct subtree *);
 struct subtree *free_subtree (struct subtree *);
 void init_agent(void);
+int compare_tree (oid *, int, oid *, int);
 
 /* REGISTER_MIB(): This macro simply loads register_mib with less pain:
 
