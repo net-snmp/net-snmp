@@ -5,7 +5,7 @@
  * Author:       Simon Leinen  <simon@switch.ch>
  */
 
-#include "generic.h"
+#include <net-snmp/system/generic.h>
 
 #undef TCP_TTL_SYMBOL
 #define TCP_TTL_SYMBOL "tcp_ttl"

@@ -1,4 +1,4 @@
-#include "generic.h"
+#include <net-snmp/system/generic.h>
 
 /*
  * the bsd route symbol adds an 's' at the end to this symbol name 

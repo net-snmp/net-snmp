@@ -1,4 +1,4 @@
-#include "generic.h"
+#include <net-snmp/system/generic.h>
 
 #ifdef HAVE_STDINT_H
 #include <stdint.h>	/* uint32_t */
