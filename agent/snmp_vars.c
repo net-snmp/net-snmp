@@ -776,13 +776,31 @@ struct subtree *find_subtree_next(name, len, subtree)
   int len;
   struct subtree *subtree;
 {
-  struct subtree *myptr;
-  myptr = find_subtree(name,len,subtree);
-  if (myptr == NULL)
-    return myptr;
-  if (myptr->children)
-    return myptr->children;
-  return myptr->next;
+  struct subtree *myptr = NULL;
+  int ret;
+  char c_oid[MAX_NAME_LEN];
+
+  if ((ret = compare(name, len, subtree->name, subtree->namelen)) == 0) {
+    if (subtree->children != NULL)
+      return subtree->children;
+    if (subtree->next != NULL)
+      return subtree->next;
+    return NULL;
+  }
+
+  if (ret > 0) {
+    if (is_parent(subtree->name, subtree->namelen, name) &&
+        subtree->children != NULL) {
+      myptr = find_subtree_next(name, len, subtree->children);
+      if (myptr != NULL)
+        return myptr;
+      return subtree->next;
+    }
+    if (subtree->next != NULL)
+      return find_subtree_next(name, len, subtree->next);
+  }
+
+  return NULL;
 }
 
 struct subtree *find_subtree(name, len, subtree)
@@ -791,13 +809,9 @@ struct subtree *find_subtree(name, len, subtree)
   struct subtree *subtree;
 {
   struct subtree *myptr;
-   char c_oid[MAX_NAME_LEN];
+  char c_oid[MAX_NAME_LEN];
 
-   sprint_objid (c_oid, name, len);
-   DEBUGP("searching for %s\n", c_oid);
   for(myptr = subtree; myptr != NULL; myptr = myptr->next) {
-    sprint_objid (c_oid, myptr->name, myptr->namelen);
-    DEBUGP(" checking %s\n", c_oid);
     if (compare(name, len, myptr->name, myptr->namelen) == 0)
       return myptr;
   }

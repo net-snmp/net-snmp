@@ -40,7 +40,6 @@ char dontReadConfigFiles;
 char *optconfigfile;
 int config_errors;
 
-static int is_parent __P((oid *, int, oid *));
 static struct subtree* insert_in_children_list __P((struct subtree *, struct subtree *));
 
 struct config_line config_handlers[] = {
@@ -220,7 +219,7 @@ int tree_compare(a, b)
   return compare(ap->name,ap->namelen,bp->name,bp->namelen);
 }
 
-static int is_parent(name1, len1, name2)
+int is_parent(name1, len1, name2)
     register oid	    *name1, *name2;
     register int	    len1;
 {

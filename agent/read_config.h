@@ -23,5 +23,6 @@ void copy_word __P((char *, char *));
 int tree_compare __P((const void *, const void *));
 void setup_tree __P((void));
 void load_subtree __P((struct subtree *));
+int is_parent __P((oid *, int, oid *));
 
 #endif /* _MIBGROUP_READ_CONFIG_H */
