@@ -376,7 +376,7 @@ var_hrswinst(struct variable * vp,
 
         if (swi->swi_directory != NULL) {
             strncpy(string, swi->swi_directory, sizeof(string));
-            string[ sizeof(string)-1 ] = 0);
+            string[ sizeof(string)-1 ] = 0;
         }
 
         if (*string && (stat(string, &stat_buf) != -1)) {
