@@ -19,7 +19,7 @@
 .\" ARISING OUT OF OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS
 .\" SOFTWARE.
 .\" ******************************************************************/
-.TH VARIABLES 5 "02 Mar 1999" "" "Net-SNMP"
+.TH VARIABLES 5 "02 Mar 1999" VVERSIONINFO "Net-SNMP"
 .UC 4
 .SH NAME
     variables - Format of specifying variable names to SNMP tools.
