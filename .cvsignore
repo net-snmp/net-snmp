@@ -1,7 +1,7 @@
 *.made
 .index
 .software.db.sh
-ChangeLog.add
+Change[Ll]og\.*
 EXAMPLE.conf
 FAQ.html
 Makefile
