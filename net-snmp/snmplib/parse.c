@@ -296,7 +296,7 @@ static struct module_compatability module_map[] = {
 	{ "RFC1213-MIB",	"IP-MIB",	"icmp",	4},
 	{ "RFC1213-MIB",	"TCP-MIB",	"tcp",	3},
 	{ "RFC1213-MIB",	"UDP-MIB",	"udp",	3},
-	{ "RFC1213-MIB",	"SNMPv2-SMI",	"tranmission", 0},
+	{ "RFC1213-MIB",	"SNMPv2-SMI",	"transmission", 0},
 	{ "RFC1213-MIB",	"SNMPv2-MIB",	"snmp",	4},
 	{ "RFC1271-MIB",	"RMON-MIB",	NULL,	0},
 	{ "RFC1286-MIB",	"SOURCE-ROUTING-MIB",	"dot1dSr", 7},
