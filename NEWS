@@ -5,6 +5,7 @@ the ChangeLog file for a more detailed listing of changes/bug fixes.
  New:
     - configure is now generated using autoconf 2.57.
     - The make system now supports "make uninstall"
+    - configure & make supports a --with-install-prefix option
     - linkUp and linkDown notifications can be enabled
       (see the linkUpDownNotifications snmpd.conf token documentation)
     - notifications (traps) can be generated for disman events.

@@ -128,13 +128,13 @@ libnetsnmpmibs.$(LIB_EXTENSION)$(LIB_VERSION):    ${LMIBOBJS}
 	$(RANLIB) libnetsnmpmibs.$(LIB_EXTENSION)$(LIB_VERSION)
 
 embedperlinstall:
-	  @$(SHELL) $(srcdir)/../mkinstalldirs $(snmplibdir)
-	  @$(INSTALL) $(srcdir)/snmp_perl.pl $(snmplibdir)/snmp_perl.pl
-	  @echo "install:  installed snmp_perl.pl in $(snmplibdir)"
+	  @$(SHELL) $(srcdir)/../mkinstalldirs $(INSTALL_PREFIX)$(snmplibdir)
+	  @$(INSTALL) $(srcdir)/snmp_perl.pl $(INSTALL_PREFIX)$(snmplibdir)/snmp_perl.pl
+	  @echo "install:  installed snmp_perl.pl in $(INSTALL_PREFIX)$(snmplibdir)"
 
 embedperluninstall:
-	  @rm -f $(snmplibdir)/snmp_perl.pl
-	  @echo "removed snmp_perl.pl from $(snmplibdir)"
+	  @rm -f $(INSTALL_PREFIX)$(snmplibdir)/snmp_perl.pl
+	  @echo "removed snmp_perl.pl from $(INSTALL_PREFIX)$(snmplibdir)"
 
 snmp_vars.lo: @module_list_h@
 read_config.lo: @module_list_h@
