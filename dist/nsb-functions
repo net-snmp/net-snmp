@@ -3,13 +3,23 @@
 # $Id$
 # Author: Robert Story <rstory@freesnmp.com>
 
+nsb-sysname()
+{
+   echo `uname -mrs | tr ' /' '__'`
+}
+
 #----------------------------------------------------------------------
 #
 # Utility vars
 #
+NSB_VERSION=${NSB_VERSION:=""}
 NSB_BUILD_DIR=${NSB_BUILD_DIR:=""}
+NSB_BUILD_SUFFIX=${NSB_BUILD_SUFFIX:=""}
 NSB_SRC_DIR=${NSB_SRC_DIR:=""}
 NSB_INSTALL_DIR=${NSB_INSTALL_DIR:=""}
+NSB_PLATFORM=${NSB_PLATFORM:=`nsb-sysname`}
+# sun doesn't support hostname -s
+NSB_HOST=${NSB_HOST:=`hostname | cut -f1 -d.`}
 NSB_QUIET=${NSB_QUIET:=0}
 NSB_PROMPT=${NSB_PROMPT:=0}
 NSB_CLEAN=${NSB_CLEAN:=1}
@@ -18,8 +28,8 @@ NSB_SKIP_CONFIG=${NSB_SKIP_CONFIG:=0}
 NSB_SKIP_BUILD=${NSB_SKIP_BUILD:=0}
 NSB_SKIP_TEST=${NSB_SKIP_TEST:=0}
 NSB_SKIP_INSTALL=${NSB_SKIP_INSTALL:=0}
-NSB_DIST_TRANSPORTS="UDP TCP Unix"
-NSB_EXTRA_TRANSPORTS="Callback UDPIPv6 TCPIPv6 IPX"
+NSB_DIST_TRANSPORTS="UDP TCP Unix Callback"
+NSB_EXTRA_TRANSPORTS=""
 NSB_DIST_MODULES="host disman/event-mib smux"
 NSB_EXTRA_MODULES="examples examples/example testhandler smux Rmon disman/event-mib"
 NSB_EXTRA_CONFIG=${NSB_EXTRA_CONFIG:=""}
@@ -150,6 +160,13 @@ nsb-config-all()
    esac
 
    #
+   # use libwrap if we can find the header
+   #
+   if [ -f /usr/include/tcpd.h ]; then
+      NSB_EXTRA_CONFIG="--with-libwrap"
+   fi
+
+   #
    # some modules might be release specific, so make sure they
    # exist before we send them off to configure
    #
@@ -171,23 +188,18 @@ nsb-config-all()
       --disable-developer $NSB_EXTRA_CONFIG \
       "--with-mib-modules=$NSB_FINAL_MODULES" \
       "--with-transports=$NSB_DIST_TRANSPORTS $NSB_EXTRA_TRANSPORTS" \
-       $NSB_PERL --enable-shared --with-libwrap
+       $NSB_PERL --enable-shared 
    $ngc_src/configure  --with-defaults \
       --disable-developer $NSB_EXTRA_CONFIG \
       "--with-mib-modules=$NSB_FINAL_MODULES" \
       "--with-transports=$NSB_DIST_TRANSPORTS $NSB_EXTRA_TRANSPORTS" \
-      $NSB_PERL --enable-shared --with-libwrap
+      $NSB_PERL --enable-shared
    # I'd like to add ' | tee nsb-config.$NSB_DATE' to save output, but then
    # I'd lose the rc from configure, which I need... sigh
    ngc_rc=$?
    if [ $ngc_rc -ne 0 ];then
       nsb-abort "Error during configure all (rc=$ngc_rc)"
    fi
-}
-
-nsb-sysname()
-{
-   echo `uname -mrs | tr ' /' '__'`
 }
 
 nsb-zip()
@@ -200,8 +212,7 @@ nsb-zip()
    build_dir=$2
    dest_dir=$3
 
-   platform=`nsb-sysname`
-   build=$build_dir/$platform
+   build=$build_dir/$NSB_PLATFORM
 
    if [ ! -d $build ]; then
       nsb-abort "$build directory does not exist!"
@@ -213,12 +224,12 @@ nsb-zip()
 
    cd $build
 
-   rm -f $dest_dir/$release-$platform.tar
-   nsb-info "tar cf $dest_dir/$release-$platform.tar usr"
-   tar cf $dest_dir/$release-$platform.tar usr
+   rm -f $dest_dir/$release-$NSB_PLATFORM.tar
+   nsb-info "tar cf $dest_dir/$release-$NSB_PLATFORM.tar usr"
+   tar cf $dest_dir/$release-$NSB_PLATFORM.tar usr
 
-   nsb-info "gzip --best $dest_dir/$release-$platform.tar"
-   gzip --best $dest_dir/$release-$platform.tar
+   nsb-info "gzip --best $dest_dir/$release-$NSB_PLATFORM.tar"
+   gzip --best $dest_dir/$release-$NSB_PLATFORM.tar
 
    if [ $NSB_QUIET -ne 1 ]; then
       ls -lt $dest_dir
@@ -300,11 +311,32 @@ nsb-make()
 
 nsb-default-paths()
 {
+   #
+   # System specific additions
+   #
+   case `uname -s` in
+
+   Darwin)
+      # the version of apple's gcc on the sf cf munges -E output in
+      # a way that breaks mib config_require, so use cpp..
+      export CPP=${CPP:=cpp}
+      ;;
+
+   *)
+      ;;
+   esac
+
+   if [ -z "$NSB_VERSION" ]; then
+      NSB_VERSION="unknown-version"
+   fi
    if [ -z "$NSB_SRC_DIR" ]; then
-      NSB_SRC_DIR=$HOME/src/net-snmp-$VERSION
+      NSB_SRC_DIR=$HOME/src/net-snmp-$NSB_VERSION
    fi
    if [ -z "$NSB_BUILD_DIR" ]; then
-      NSB_BUILD_DIR=$HOME/build
+      NSB_BUILD_DIR=$HOME/build/$NSB_VERSION
+   fi
+   if [ ! -z "$NSB_SUFFIX" ]; then
+      NSB_BUILD_DIR=$NSB_BUILD_DIR/$NSB_SUFFIX
    fi
    if [ -z "$NSB_INSTALL_DIR" ]; then
       NSB_INSTALL_DIR=$NSB_BUILD_DIR/usr/local
@@ -326,7 +358,8 @@ nsb-build()
    shift 5
 
    nsb-flow build in $build_dir
-   nsb-flow `uname -a`
+   nsb-flow host $NSB_HOST
+   nsb-flow platform $NSB_PLATFORM
 
    if [ ! -d $src_dir ]; then
       nsb-abort "$src_dir does not exist!"
