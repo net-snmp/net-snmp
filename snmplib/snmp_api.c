@@ -3316,6 +3316,7 @@ _sess_read(void *sessp,
             struct session_list *new_slp;
             int new_sd;
 
+            addrlen = sizeof(struct sockaddr);
             new_sd = accept(isp->sd, (struct sockaddr *)&(isp->addr), &addrlen);
             if ( new_sd == -1 ) {
 	        sp->s_snmp_errno = SNMPERR_BAD_RECVFROM;
