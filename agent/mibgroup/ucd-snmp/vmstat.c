@@ -108,7 +108,7 @@
 #include "util_funcs.h"
 #include "vmstat.h"
 
-static FindVarMethod var_extensible_vmstat;
+FindVarMethod var_extensible_vmstat;
 
 void
 init_vmstat(void)
@@ -303,7 +303,6 @@ vmstat(int iindex)
     }
 }
 
-static
 unsigned char  *
 var_extensible_vmstat(struct variable *vp,
                       oid * name,

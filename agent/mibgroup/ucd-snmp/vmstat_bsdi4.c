@@ -50,7 +50,7 @@
 #define CPU_PRC         100
 #define BOOTTIME_SYMBOL	"boottime"
 
-static FindVarMethod var_extensible_vmstat;
+FindVarMethod var_extensible_vmstat;
 
 void
 init_vmstat_bsdi4(void)
@@ -125,7 +125,6 @@ getuptime(void)
     return (uptime);
 }
 
-static
 unsigned char  *
 var_extensible_vmstat(struct variable *vp,
                       oid * name,
