@@ -751,6 +751,28 @@ receive(void)
 
 	if (count > 0) {
 
+#ifdef USING_SMUX_MODULE 
+            /* handle the SMUX sd's */ 
+            if (smux_listen_sd >= 0) { 
+                for (i = 0; i < sdlen; i++) { 
+                    if (FD_ISSET(sdlist[i], &readfds)) { 
+                        if (smux_process(sdlist[i]) < 0) { 
+                            for (; i < (sdlen - 1); i++) { 
+                                sdlist[i] = sdlist[i+1]; 
+                            } 
+                            sdlen--; 
+                        } 
+                    } 
+                } 
+                /* new connection */ 
+                if (FD_ISSET(smux_listen_sd, &readfds)) { 
+                    if ((sd = smux_accept(smux_listen_sd)) >= 0) { 
+                        sdlist[sdlen++] = sd; 
+                    } 
+                } 
+            } 
+#endif /* USING_SMUX_MODULE */ 
+
 	    snmp_read(&readfds);
 
 	    for (i = 0; count && (i < external_readfdlen); i++) {
@@ -794,27 +816,6 @@ receive(void)
 		return -1;
 	}  /* endif -- count>0 */
 
-#ifdef USING_SMUX_MODULE 
-        /* handle the SMUX sd's */ 
-        if (smux_listen_sd >= 0) { 
-            for (i = 0; i < sdlen; i++) { 
-                if (FD_ISSET(sdlist[i], &readfds)) { 
-                    if (smux_process(sdlist[i]) < 0) { 
-                        for (; i < (sdlen - 1); i++) { 
-                            sdlist[i] = sdlist[i+1]; 
-                        } 
-                        sdlen--; 
-                    } 
-                } 
-            } 
-            /* new connection */ 
-            if (FD_ISSET(smux_listen_sd, &readfds)) { 
-                if ((sd = smux_accept(smux_listen_sd)) >= 0) { 
-                    sdlist[sdlen++] = sd; 
-                } 
-            } 
-        } 
-#endif /* USING_SMUX_MODULE */ 
 
 
 
