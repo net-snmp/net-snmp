@@ -5009,7 +5009,7 @@ snmp_add_var(struct snmp_pdu *pdu,
         break;
 
       case 'b':
-        if (check && (tp->type != TYPE_OCTETSTR || !tp->enums)) {
+        if (check && (tp->type != TYPE_BITSTRING || !tp->enums)) {
 	    value = "BITS";
 	    result = SNMPERR_VALUE;
 	    goto type_error;
