@@ -208,6 +208,9 @@
 /* Define if you have the setenv function.  */
 #undef HAVE_SETENV
 
+/* Define if you have the setlocale function.  */
+#undef HAVE_SETLOCALE
+
 /* Define if you have the setmntent function.  */
 #undef HAVE_SETMNTENT
 
@@ -288,6 +291,9 @@
 
 /* Define if you have the <linux/hdreg.h> header file.  */
 #undef HAVE_LINUX_HDREG_H
+
+/* Define if you have the <locale.h> header file.  */
+#undef HAVE_LOCALE_H
 
 /* Define if you have the <machine/param.h> header file.  */
 #undef HAVE_MACHINE_PARAM_H
