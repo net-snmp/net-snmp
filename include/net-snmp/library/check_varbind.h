@@ -11,6 +11,9 @@ extern          "C" {
      */
 
     int netsnmp_check_vb_type(netsnmp_variable_list *var, int type);
+    int netsnmp_check_vb_size(netsnmp_variable_list *var, size_t size );
+    int netsnmp_check_vb_size_range(netsnmp_variable_list *var,
+                                    size_t low, size_t high );
 
     int netsnmp_check_vb_type_and_size(netsnmp_variable_list *var, int type,
                                        size_t size);
@@ -20,6 +23,7 @@ extern          "C" {
 
     int netsnmp_check_vb_truthvalue(netsnmp_variable_list *var);
 
+    int netsnmp_check_vb_rowstatus_value(netsnmp_variable_list *var);
     int netsnmp_check_vb_rowstatus(netsnmp_variable_list *var, int old_val);
 
     int netsnmp_check_vb_storagetype(netsnmp_variable_list *var, int old_val);
