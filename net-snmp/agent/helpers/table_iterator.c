@@ -262,7 +262,9 @@ netsnmp_table_iterator_helper_handler(netsnmp_mib_handler *handler,
                     /*
                      * XXX: free old contexts first? 
                      */
+		    snmp_free_varbind(free_this_index_search);
                     index_search = snmp_clone_varbind(table_info->indexes);
+		    free_this_index_search = index_search;
                     index_search =
                         (iinfo->
                          get_first_data_point) (&callback_loop_context,
