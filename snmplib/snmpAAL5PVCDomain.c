@@ -198,9 +198,14 @@ snmp_transport		*snmp_aal5pvc_transport	(struct sockaddr_atmpvc *addr,
       snmp_transport_free(t);
       return NULL;
     }
-    memcpy(&(t->local[0]), (u_char *)&(addr->sap_addr.itf), 2);
-    memcpy(&(t->local[2]), (u_char *)&(addr->sap_addr.vpi), 2);
-    memcpy(&(t->local[4]), (u_char *)&(addr->sap_addr.vci), 4);
+    t->local[0] = (addr->sap_addr.itf & 0xff00) >> 8;
+    t->local[1] = (addr->sap_addr.itf & 0x00ff) >> 0;
+    t->local[2] = (addr->sap_addr.vpi & 0xff00) >> 8;
+    t->local[3] = (addr->sap_addr.vpi & 0x00ff) >> 0;
+    t->local[4] = (addr->sap_addr.vci & 0xff000000) >> 24;
+    t->local[5] = (addr->sap_addr.vci & 0x00ff0000) >> 16;
+    t->local[6] = (addr->sap_addr.vci & 0x0000ff00) >>  8;
+    t->local[7] = (addr->sap_addr.vci & 0x000000ff) >>  0;
     t->local_length = 8;
 
     if (bind(t->sock, (struct sockaddr *)addr,
@@ -216,9 +221,14 @@ snmp_transport		*snmp_aal5pvc_transport	(struct sockaddr_atmpvc *addr,
       snmp_transport_free(t);
       return NULL;
     }
-    memcpy(&(t->remote[0]), (u_char *)&(addr->sap_addr.itf), 2);
-    memcpy(&(t->remote[2]), (u_char *)&(addr->sap_addr.vpi), 2);
-    memcpy(&(t->remote[4]), (u_char *)&(addr->sap_addr.vci), 4);
+    t->remote[0] = (addr->sap_addr.itf & 0xff00) >> 8;
+    t->remote[1] = (addr->sap_addr.itf & 0x00ff) >> 0;
+    t->remote[2] = (addr->sap_addr.vpi & 0xff00) >> 8;
+    t->remote[3] = (addr->sap_addr.vpi & 0x00ff) >> 0;
+    t->remote[4] = (addr->sap_addr.vci & 0xff000000) >> 24;
+    t->remote[5] = (addr->sap_addr.vci & 0x00ff0000) >> 16;
+    t->remote[6] = (addr->sap_addr.vci & 0x0000ff00) >>  8;
+    t->remote[7] = (addr->sap_addr.vci & 0x000000ff) >>  0;
     t->remote_length = 8;
 
     if (connect(t->sock, (struct sockaddr *)addr,
