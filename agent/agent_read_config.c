@@ -78,8 +78,15 @@
 #include <dmalloc.h>
 #endif
 
+#if HAVE_UNISTD_H
+#include <unistd.h>
+#endif
+#ifdef HAVE_PWD_H
 #include <pwd.h>
+#endif
+#ifdef HAVE_GRP_H
 #include <grp.h>
+#endif
 
 #include "mibincl.h"
 #include "snmpusm.h"
@@ -101,31 +108,39 @@
 char dontReadConfigFiles;
 char *optconfigfile;
 
+#ifdef HAVE_UNISTD_H
 void snmpd_set_agent_user(const char *token, char *cptr)
 {
+#if defined(HAVE_GETPWNAM) && defined(HAVE_PWD_H)
 struct passwd *info;
+#endif
  
     if (cptr[0] == '#')
         ds_set_int(DS_APPLICATION_ID, DS_AGENT_USERID, atoi(&cptr[1]));
 
+#ifdef if defined(HAVE_GETPWNAM) && defined(HAVE_PWD_H)
     if ((info = getpwnam(cptr)) != NULL) {
         ds_set_int(DS_APPLICATION_ID, DS_AGENT_USERID, info->pw_uid);
     }
+#endif
 }
-
 
 void snmpd_set_agent_group(const char *token, char *cptr)
 {
+#if defined(HAVE_GETGRNAM) && defined(HAVE_GRP_H)
 struct group *info;
-
+#endif
+ 
     if (cptr[0] == '#')
         ds_set_int(DS_APPLICATION_ID, DS_AGENT_GROUPID, atoi(&cptr[1]));
 
+#if defined(HAVE_GETGRNAM) && defined(HAVE_GRP_H)
     if ((info = getgrnam(cptr)) != NULL) {
         ds_set_int(DS_APPLICATION_ID, DS_AGENT_GROUPID, info->gr_gid);
     }
+#endif
 }
-
+#endif
 
 void snmpd_set_agent_address(const char *token, char *cptr)
 {
@@ -173,12 +188,14 @@ void init_agent_read_config (const char *app)
                           snmpd_parse_config_trapcommunity,
                           snmpd_free_trapcommunity,
                           "community-string");
+#ifdef HAVE_UNISTD_H
   register_app_config_handler("agentuser",
                           snmpd_set_agent_user, NULL,
                           "userid");
   register_app_config_handler("agentgroup",
                           snmpd_set_agent_group, NULL,
                           "groupid");
+#endif
   register_app_config_handler("agentaddress",
                           snmpd_set_agent_address, NULL,
                           "SNMP bind address");
