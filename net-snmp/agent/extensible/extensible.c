@@ -44,7 +44,7 @@
 #include "mibincl.h"
 #include "mibdefs.h"
 
-void update_config();
+RETSIGTYPE update_config();
 struct extensible *get_exten_instance();
 unsigned char *var_extensible_relocatable();
 
@@ -745,7 +745,8 @@ void setup_tree()
 
 }
 
-void update_config()
+RETSIGTYPE update_config(a)
+int a;
 {
   extern struct subtree *subtrees;
   int i;
