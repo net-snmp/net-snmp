@@ -320,7 +320,6 @@ void get_table_entries(void)
   SOCK_STARTUP;
 
   /* open an SNMP session */
-  snmp_synch_setup(&session);
   ss = snmp_open(&session);
   if (ss == NULL){
     snmp_perror("snmptable");

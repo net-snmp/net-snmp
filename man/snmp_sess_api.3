@@ -164,7 +164,6 @@ struct snmp_session {
     int     srcPartyLen; /* length in subIDs of srcParty */
     oid     *dstParty;	/* partyID of destination party */
     int     dstPartyLen; /* length in subIDs of dstParty */
-    struct synch_state * snmp_synch_state;
     int     s_errno;     /* copy of system errno */
     int     s_snmp_errno; /* copy of library errno */
 };

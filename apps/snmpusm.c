@@ -186,7 +186,6 @@ main(int argc, char *argv[])
 
     /* open an SNMP session */
     /*   Note:  this wil obtain the engineID needed below */
-    snmp_synch_setup(&session);
     ss = snmp_open(&session);
     if (ss == NULL){
       snmp_perror("snmpusm");
