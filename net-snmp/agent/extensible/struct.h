@@ -1,7 +1,7 @@
 #define STRMAX 1000
 #define SHPROC 1
 #define EXECPROC 2
-
+#define MIBMAX 30
 
 struct extensible
 {
@@ -11,6 +11,7 @@ struct extensible
    long result;
    char output[STRMAX];
    struct extensible *next;
+   int miboid[MIBMAX];
 };
 
 struct myproc
