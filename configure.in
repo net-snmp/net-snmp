@@ -205,6 +205,8 @@ AC_ARG_WITH(out_mib_modules,
     ucd-snmp/pass_persist: Persistent pass scripts that stay around.
                            Not currently included by default solely because
                            it needs more testing.
+    vestinternett/diskio:  Table of io-devices and how much data they have
+                           read/written.  (only tested on Solaris)
 
   AgentX support:  (warning: alpha code)
     agentx/client:         allows the agent to run as either a snmp agent
@@ -224,7 +226,7 @@ dnl
 AC_ARG_WITH(defaults,
 [
 Miscellaneous:
-  --with-defaults         Use defaults for prompted values.],
+  --with-defaults          Use defaults for prompted values.],
     defaults="yes",defaults="no")
 
 dnl Only define if specifically chosen as --without (ie, default to true). 
@@ -918,7 +920,7 @@ _ldflags="${LDFLAGS}"
 
 use_wrap="false"
 AC_ARG_WITH(libwrap,
-[  --with-libwrap[=LIBPATH]        Compile in libwrap (tcp_wrappers) support.],
+[  --with-libwrap[=LIBPATH] Compile in libwrap (tcp_wrappers) support.],
     if test -d "$withval"; then
         WRAPLIBS="-L$withval -lwrap"
         AC_DEFINE(USE_LIBWRAP)
@@ -945,7 +947,7 @@ _cppflags="${CPPFLAGS}"
 _ldflags="${LDFLAGS}"
 
 AC_ARG_WITH(zlib,
-[  --with-zlib[=DIR]       use libz in DIR],[
+[  --with-zlib[=DIR]        use libz in DIR],[
   if test -d "$withval"; then
     CPPFLAGS="${CPPFLAGS} -I$withval/include"
     LDFLAGS="${LDFLAGS} -L$withval/lib"
@@ -970,7 +972,7 @@ _cppflags="${CPPFLAGS}"
 _ldflags="${LDFLAGS}"
 
 AC_ARG_WITH(db,
-[  --with-db[=DIR]         use db in DIR],[
+[  --with-db[=DIR]          use db in DIR],[
   if test -d "$withval"; then
     CPPFLAGS="${CPPFLAGS} -I$withval/include"
     LDFLAGS="${LDFLAGS} -L$withval/lib"
