@@ -225,7 +225,7 @@ void read_config(char *filename,
     DEBUGMSGTL(("read_config", "Reading configuration %s\n", filename));
   }
 
-  while (fgets(line, STRINGMAX, ifile) != NULL) 
+  while (fgets(line, sizeof(line), ifile) != NULL) 
     {
       lptr = line_handler;
       linecount++;
@@ -337,7 +337,7 @@ read_config_files (int when)
   
   if (config_errors) {
     fprintf(stderr, "snmpd: errors in config file - abort.\n");
-    exit(1);
+/*    exit(1); */
   }
 }
 

@@ -137,7 +137,7 @@ var_hrsys(struct variable *vp,
 	case HRSYS_LOAD_PARAM:
 #ifdef linux
 	    fp = fopen("/proc/cmdline", "r");
-	    fgets( string, 100, fp);
+	    fgets( string, sizeof(string), fp);
 	    fclose(fp);
 #else
 	    sprintf(string, "ask Dave");	/* XXX */

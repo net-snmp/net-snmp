@@ -473,8 +473,10 @@ snmp_sess_synch_response(void *sessp,
 
 void snmp_synch_reset(struct snmp_session *session)
 {
-    if (session && session->snmp_synch_state)
+    if (session && session->snmp_synch_state) {
        free((char*)session->snmp_synch_state);
+       session->snmp_synch_state = 0;
+    }
 }
 
 void

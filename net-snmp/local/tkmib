@@ -1,5 +1,7 @@
 #!/usr/local/bin/perl -w
 
+require 5;
+
 require Tk::Table;
 require Tk::HList;
 require Tk::FileSelect;

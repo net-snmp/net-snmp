@@ -151,7 +151,7 @@ struct module_compatability {
 #define ACCESS_WRITEONLY	MIB_ACCESS_WRITEONLY
 #define ACCESS_NOACCESS		MIB_ACCESS_NOACCESS
 #define ACCESS_NOTIFY		MIB_ACCESS_NOTIFY
-#define ACCESS_CRAETE		MIB_ACCESS_CREATE
+#define ACCESS_CREATE		MIB_ACCESS_CREATE
 #define STATUS_MANDATORY	MIB_STATUS_MANDATORY
 #define STATUS_OPTIONAL		MIB_STATUS_OPTIONAL
 #define STATUS_OBSOLETE		MIB_STATUS_OBSOLETE
@@ -172,6 +172,7 @@ int  which_module (char *);
 char *module_name (int, char *);
 void print_subtree (FILE *, struct tree *, int);
 void print_ascii_dump_tree (FILE *, struct tree *, int);
+void print_mib_tree(FILE *, struct tree *);
 struct tree *find_tree_node (char *, int);
 char *get_tc_descriptor (int);
  /* backwards compatability */
@@ -179,6 +180,7 @@ struct tree *find_node (char *, struct tree*);
 struct module *find_module (int);
 void adopt_orphans (void);
 void snmp_set_mib_warnings (int);
+void snmp_set_mib_errors (int);
 void snmp_set_save_descriptions (int);
 void snmp_set_mib_comment_term (int);
 void snmp_set_mib_parse_label (int);

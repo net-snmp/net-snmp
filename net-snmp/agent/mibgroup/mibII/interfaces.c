@@ -186,6 +186,41 @@ void init_interfaces(void)
 #endif
 }
 
+/*
+ * if_type_from_name
+ * Return interface type using the interface name as a clue.
+ * Returns 1 to imply "other" type if name not recognized. 
+ */
+static int
+if_type_from_name( const char *pcch)
+{
+    typedef struct _match_if {
+    	int mi_type;
+    	const char *mi_name;
+    } *pmatch_if, match_if;
+    
+    static match_if lmatch_if[] = {
+      { 24, "lo" },
+      {  6, "eth" },
+      { 23, "ppp" },
+      { 28, "sl" },
+      {  0, 0 }  /* end of list */
+    };
+
+    int ii, len;
+    register pmatch_if pm;
+
+    for (ii = 0, pm=lmatch_if; pm->mi_name; pm++) {
+        len = strlen(pm->mi_name);
+        if (0 == strncmp(pcch, pm->mi_name, len))
+        {
+            return (pm->mi_type);
+        }
+    }
+    return (1); /* in case search fails */
+}
+
+
 #ifdef USE_SYSCTL_IFLIST
 
 static u_char * if_list = 0;
@@ -1193,7 +1228,7 @@ void
 Interface_Scan_Init (void)
 {
 #ifdef linux
-    char line [128], fullname [20], ifname_buf [20], *ifname, *ptr;
+    char line [256], fullname [64], ifname_buf [64], *ifname, *ptr;
     struct ifreq ifrq;
     struct ifnet **ifnetaddr_ptr;
     FILE *devin;
@@ -1246,8 +1281,8 @@ Interface_Scan_Init (void)
        should read from.  This should be done in a better way by
        actually looking for the field names we want.  But thats too
        much work for today.  -- Wes */
-    fgets(line, 256, devin);
-    fgets(line, 256, devin);
+    fgets(line, sizeof(line), devin);
+    fgets(line, sizeof(line), devin);
     if (strstr(line, "compressed")) {
       scan_line_to_use = scan_line_2_2;
       DEBUGMSGTL(("mibII/interfaces", "using linux 2.2 kernel /proc/net/dev\n"));
@@ -1257,7 +1292,7 @@ Interface_Scan_Init (void)
     }
     
       
-    while (fgets (line, 256, devin))
+    while (fgets (line, sizeof(line), devin))
       {
 	struct ifnet *nnew;
 
@@ -1337,10 +1372,7 @@ Interface_Scan_Init (void)
 	    nnew->if_speed = if_ptr->speed;
 	}
 	else {
-	  nnew->if_type = ! strcmp (nnew->if_name, "lo") ? 24 :
-	    ! strcmp (nnew->if_name, "eth") ? 6 :
-	      ! strcmp (nnew->if_name, "sl") ? 28 : 1;
-	  
+	  nnew->if_type = if_type_from_name(nnew->if_name);
 	  nnew->if_speed = nnew->if_type == 6 ? 10000000 : 
 	    nnew->if_type == 24 ? 10000000 : 0;
 	}
@@ -1497,7 +1529,7 @@ int Interface_Scan_Next(short *Index,
 }
 
 
-#endif sunV3
+#endif /* sunV3 */
 
 static int Interface_Scan_By_Index(int Index,
 				   char *Name,

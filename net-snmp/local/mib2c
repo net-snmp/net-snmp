@@ -13,6 +13,8 @@
 # it returns.
 #
 
+require 5;
+
 use SNMP;
 #use strict 'vars';
 $SNMP::save_descriptions=1;
