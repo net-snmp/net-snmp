@@ -421,6 +421,13 @@ sub process {
 	} ####################################################################
         elsif (/\@\s*exit\@/) { #                                         EXIT
 	    die "exiting at conf file ($currentfile:$currentline) request\n";
+	} elsif (/\@\s*debug\s+([^\@]+)\@/) { #                          DEBUG
+          if ($1 eq "on") {
+            $debug = 1;
+          }
+          else {
+            $debug = 0;
+          }
 	} elsif (/\@\s*open\s+([^\@]+)\@/) { #                            OPEN
 	    my $arg = $1;
 	    my ($multiple) = (0);
@@ -518,11 +525,17 @@ sub process {
 #	    print STDERR "eval: $e\n";
 	    my $e = process_vars($e);
 	    $vars{$v} = eval($e);
-	    warn "$@" if (!defined($vars{$v}));
+            if (!defined($vars{$v})) {
+              warn "$@";
+              warn "$currentfile:$currentline [$_]\n";
+            }
 	} elsif (/\@\s*perleval\s*(.*)\@/) { #                        PERLEVAL
 	    print STDERR "perleval: $1\n";
 	    my $res = eval($1);
-	    warn "$@" if ($res);
+            if ($res) {
+              warn "$@";
+              warn "$currentfile:$currentline [$_]\n";
+            }
 	} elsif (/\@\s*foreach\s+\$([^\@]+)\s+scalars*\s*\@/) { #      SCALARS
 	    my $var = $1;
 	    my $startpos = $fh->tell();
@@ -770,6 +783,7 @@ sub find_conf {
   return if ($missingok);
 
   print STDERR "Can't find a configuration file called $configfile\n";
+  print STDERR "(referenced at $currentfile:$currentline)\n";
   print STDERR "I looked in ., $ENV{MIB2C_DIR} and /usr/local/share/snmp\n";
   exit;
 }
