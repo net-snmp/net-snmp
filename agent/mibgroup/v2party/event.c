@@ -753,15 +753,16 @@ eventSendTrap(event, eventType, generic)
 	vp->next_variable->next_variable = NULL;
 	
 	/* event->id should override the eventType that was passed in */
-	if (!memcmp(trapRisingAlarmOid, event->id, trapRisingAlarmOidLen)) {
+	if (!memcmp(trapRisingAlarmOid, event->id,
+                    trapRisingAlarmOidLen * sizeof(oid))) {
 	    eventType = EVENT_TYPE_RISING;
 	}
 	else if (!memcmp(trapFallingAlarmOid, event->id,
-		       trapFallingAlarmOidLen)) {
+		       trapFallingAlarmOidLen * sizeof(oid))) {
 	    eventType = EVENT_TYPE_FALLING;
 	}
 	else if (!memcmp(trapObjUnavailAlarmOid, event->id,
-		       trapObjUnavailAlarmOidLen)) {
+		       trapObjUnavailAlarmOidLen * sizeof(oid))) {
 	    eventType = EVENT_TYPE_UNAVAILABLE;
 	}
 	
