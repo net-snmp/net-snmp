@@ -361,11 +361,13 @@ sub read_config {
 	chomp;
 	my ($token, $rest) = /^\s*(\w+)\s+(.*)/;
 	$token = lc($token);
+	next if (defined($alllines{$_})); # drop duplicate lines
 	if (defined($tokenmap{$token})) {
 	    push @{$tokenmap{$token}{'results'}},$_;
 	} else {
 	    push @{$unknown{$filetype}},$_;
 	}
+	$alllines{$_}++;
     }
 }
 
