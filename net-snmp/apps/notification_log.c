@@ -45,7 +45,14 @@ check_log_size(unsigned int clientreg, void *clientarg)
         DEBUGMSGTL(("notification_log", "missing log table\n"));
         return;
     }
-    for (row = nlmLogTable->table->first_row; row; row = row->next) {
+
+    /* check max allowed count */
+    if (netsnmp_table_dataset_num_rows(nlmLogTable) < max_logged)
+        return;
+
+    for (row = netsnmp_table_data_set_get_first_row(nlmLogTable);
+         row;
+         row = netsnmp_table_data_set_get_next_row(nlmLogTable, row)) {
         /*
          * check max allowed count 
          */
@@ -71,17 +78,19 @@ check_log_size(unsigned int clientreg, void *clientarg)
      * we've reached the limit, so keep looping but start deleting
      * from the beginning 
      */
-    for (deleterow = nlmLogTable->table->first_row, row = row->next; row;
-         row = row->next) {
+    for (deleterow = netsnmp_table_data_set_get_first_row(nlmLogTable),
+         row = netsnmp_table_data_set_get_next_row(nlmLogTable, deleterow);
+         row;
+         row = netsnmp_table_data_set_get_next_row(nlmLogTable, row)) {
         DEBUGMSGTL(("notification_log", "deleting a log entry\n"));
 
         /*
          * delete contained varbinds 
          */
-        for (deletevarrow = nlmLogVarTable->table->first_row;
+        for (deletevarrow = netsnmp_table_data_set_get_first_row(nlmLogVarTable);
              deletevarrow; deletevarrow = tmprow) {
 
-            tmprow = deletevarrow->next;
+            tmprow = netsnmp_table_data_set_get_next_row(nlmLogTable, deletevarrow);
 
             if (deleterow->index_oid_len ==
                 deletevarrow->index_oid_len - 1 &&
@@ -97,7 +106,7 @@ check_log_size(unsigned int clientreg, void *clientarg)
         /*
          * delete the master row 
          */
-        tmprow = deleterow->next;
+        tmprow = netsnmp_table_data_set_get_next_row(nlmLogTable, deleterow);
         netsnmp_table_dataset_remove_and_delete_row(nlmLogTable,
                                                     deleterow);
         deleterow = tmprow;
