@@ -1,7 +1,7 @@
-.TH SNMP_ALARM 3 "26 Jan 2000"
+.TH SNMP_ALARM 3 "29 Mar 2001"
 .UC 5
 .SH NAME
-snmp_alarm_register, snmp_alarm_unregister, init_snmp_alarm, int init_alarm_post_config - alarm functions
+snmp_alarm_register, snmp_alarm_register_hr, snmp_alarm_unregister, init_snmp_alarm, init_alarm_post_config, run_alarms - alarm functions
 .SH SYNOPSIS
 .B #include <snmp_alarm.h>
 .PP
@@ -13,19 +13,33 @@ snmp_alarm_register, snmp_alarm_unregister, init_snmp_alarm, int init_alarm_post
 .br
 .B "                      SNMPAlarmCallback *thecallback,"
 .br
-.B "                      void *clientarg)"
+.B "                      void *clientarg);"
+.PP
+.B "  unsigned int"
+.br
+.B "  snmp_alarm_register_hr(struct timeval t,"
+.br
+.B "                         unsigned int flags,"
+.br
+.B "                         SNMPAlarmCallback *thecallback,"
+.br
+.B "                         void *clientarg);"
 .PP
 .B "  void
 .br
-.B "  snmp_alarm_unregister(unsigned int registrationNumber)"
+.B "  snmp_alarm_unregister(unsigned int registrationNumber);"
 .PP
 .B "  void
 .br
-.B "  init_snmp_alarm(void)"
+.B "  init_snmp_alarm(void);"
 .PP
 .B "  void"
 .br
 .B "  init_alarm_post_config(0,0,NULL,NULL);"
+.PP
+.B "  void"
+.br
+.B "  run_alarms(void);"
 .PP
 .SH DESCRIPTION
 .PP
@@ -39,15 +53,15 @@ function you want called back at some point in the future.  The
 function definition should be similar to:
 .PP
 .nf
-void my_callback_func(unsigned int registrationNumber, void *clientarg);
+void my_callback(unsigned int registrationNumber, void *clientarg);
 .fi
 .PP
 Then, call
 .B snmp_alarm_register()
 to register your callback to be called
-.B seconds
+.I seconds
 from now.  The
-.B flags
+.I flags
 field should either be 
 .B SA_REPEAT
 or
@@ -55,29 +69,53 @@ or
 If flags is set with
 .B SA_REPEAT,
 then the registered callback function will be called every
-.B seconds.
+.I seconds.
 If the
 .B SA_REPEAT
 flag is not set, then the function will only be called once and
-removed from the alarm system registration.
+then removed from the alarm system registration.
 .PP
 The
-.B clientarg
-parameter in the registration function is used only be
-th client function and is stored and passed back directly to them on
+.I clientarg
+parameter in the registration function is used only by
+the client function and is stored and passed back directly to them on
 every call to the system.
 .PP
 The 
 .B snmp_alarm_register()
 function returns a unique
 .I "unsigned int"
-(which is also passed to the callback function on each call), which
+(which is also passed as the first argument of each callback), which
 can then be used to remove the callback from the queue at a later
 point in the future using the
 .B snmp_alarm_unregister()
 function. If the
 .B snmp_alarm_register()
-call fails it returns zero.
+call fails it returns zero.  In particular, note that it is entirely
+permissible for an alarm function to unregister itself.
+.PP
+The
+.B snmp_alarm_register_hr()
+function is identical in operation to the
+.B snmp_alarm_register
+function, but takes a
+.I "struct timeval"
+as a first parameter, and schedules the callback after the period
+represented by
+.I t
+(the letters
+.B hr
+stand for "high resolution").  The operation of this function is
+dependent on the provision of the
+.BR "setitimer"(2)
+system call by the operating system.  If this system call is not
+available, the alarm will be scheduled as if
+.B snmp_alarm_register()
+had been called with a first argument equal to the value of the
+.I tv_sec
+member of
+.IR "t".
+See, however, the notes below.
 .SH INITIALIZATION
 The
 .B init_snmp_alarm()
@@ -89,11 +127,58 @@ should not be used directly by applications, but are instead used by the
 .B init_snmp()
 function which you should call instead.
 .SH "NOTES"
-Internally, the snmp_alarm system uses the SIGALRM signal and
-therefore no other part of the application should be using the regular 
-system based alarm() function.
+The default behaviour of the snmp_alarm subsystem is to request
+.B SIGALRM
+signals from the operating system via the
+.BR "alarm"(2)
+or
+.BR "setitimer"(2)
+system calls.  This has the disadvantage, however, that no other part
+of the application can use the
+.B SIGLARM
+functionality (or, if some other part of the application
+.I does
+use the
+.B SIGALRM
+functionality, the snmp_alarm subsystem will not work correctly).
+.PP
+If your application runs a 
+.BR "select"(2)-based
+event loop, however, there is no need to use
+.BR "SIGALRM"
+for the snmp_alarm subsystem, leaving it available for other parts of
+the application.  This is done by making the following call:
+.PP
+.nf
+ds_set_boolean(DS_LIBRARY_ID, DS_LIB_ALARM_DONT_USE_SIG, 1);
+.fi
+.PP
+before calling
+.BR "init_snmp()".
+Then, 
+.BR snmp_select_info()
+takes alarms into account when calculating the timeout value to be
+used for
+.BR "select"(2).
+All you need to do is call
+.BR run_alarms()
+when
+.BR "select"(2)
+times out (return value of zero).  This is the approach taken in the
+agent; see
+.IR "snmpd.c".
+Furthermore, when using this method, high resolution alarms do not
+depend on the presence of the
+.BR "setitimer"(2)
+system call, although overall precision is of course still determined
+by the underlying operating system.  Recommended.
 .SH "SEE ALSO"
-snmp_api(3)
+.BR "snmp_api"(3),
+.BR "default_store"(3),
+.BR "snmp_select_info"(3),
+.BR "alarm"(2),
+.BR "setitimer"(2),
+.BR "select"(2)
 .\" Local Variables:
 .\"  mode: nroff
 .\" End:
