@@ -82,7 +82,9 @@ extern          "C" {
 
 
         Netsnmp_User_Row_Action *can_activate;
+        Netsnmp_User_Row_Action *activated;
         Netsnmp_User_Row_Action *can_deactivate;
+        Netsnmp_User_Row_Action *deactivated;
         Netsnmp_User_Row_Action *can_delete;
 
         UserRowMethod  *create_row;
