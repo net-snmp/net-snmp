@@ -44,6 +44,13 @@ installheaders:
 	                echo "installing $$i in $(includedir)/$(INCLUDESUBDIR)" ; \
 	        done \
 	fi
+	@if test "$(SUBDIRS)" != ""; then \
+		it="$(SUBDIRS)" ; \
+		for i in $$it ; do       \
+			echo "making installheaders in `pwd`/$$i"; \
+	                ( cd $$i ; $(MAKE) installheaders) ;   \
+	        done \
+	fi
 	@if test "$(INSTALLUCDHEADERS)" != "" ; then \
 		echo creating directory $(ucdincludedir) ; \
 		it="$(INSTALLUCDHEADERS)" ; \
@@ -65,6 +72,13 @@ installlibs: $(INSTALLLIBS)
 	        done ; \
 		$(LIB_LDCONFIG_CMD) ; \
 	fi
+	@if test "$(SUBDIRS)" != ""; then \
+		it="$(SUBDIRS)" ; \
+		for i in $$it ; do       \
+			echo "making installlibs in `pwd`/$$i"; \
+	                ( cd $$i ; $(MAKE) installlibs) ;   \
+	        done \
+	fi
 
 installbin: $(INSTALLBINPROGS)
 	@if test "$(INSTALLBINPROGS)" != ""; then \
@@ -75,6 +89,13 @@ installbin: $(INSTALLBINPROGS)
 	                echo "installing $$i in $(bindir)"; \
 	        done \
 	fi
+	@if test "$(SUBDIRS)" != ""; then \
+		it="$(SUBDIRS)" ; \
+		for i in $$it ; do       \
+			echo "making installbin in `pwd`/$$i"; \
+	                ( cd $$i ; $(MAKE) installbin) ;   \
+	        done \
+	fi
 
 installsbin: $(INSTALLSBINPROGS)
 	@if test "$(INSTALLSBINPROGS)" != ""; then \
@@ -83,6 +104,13 @@ installsbin: $(INSTALLSBINPROGS)
 	        $(INSTALL) $(INSTALLSBINPROGS) $(sbindir) ;              \
 	        for i in $$it ; do   \
 	                echo "installing $$i in $(sbindir)"; \
+	        done \
+	fi
+	@if test "$(SUBDIRS)" != ""; then \
+		it="$(SUBDIRS)" ; \
+		for i in $$it ; do       \
+			echo "making installsbin in `pwd`/$$i"; \
+	                ( cd $$i ; $(MAKE) installsbin) ;   \
 	        done \
 	fi
 
