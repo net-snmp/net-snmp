@@ -47,6 +47,22 @@ void	init_wombat( )
     init_nlist( wombat_nl );
 }
 
+/* function which scans a given snmpd.conf line for information */
+
+void wombat_parse_config(word,line)
+  char *word;
+  char *line;
+{
+}
+
+/* function which frees resources allocated by the .conf parser above
+   and resets all values to defaults.  It called just before the agent
+   re-reads all the .conf files. */
+
+void wombat_free_config __P((null)) {
+}
+
+
 #define MATCH_FAILED	1
 #define MATCH_SUCCEEDED	0
 
