@@ -51,8 +51,10 @@ REM
 REM If built with OpenSSL, we need the DLL library, too.
 REM
 echo Copying DLL files to %INSTALL_BASE%
-
 Copy win32\bin\*.dll %INSTALL_BASE%\bin > NUL:
+
+echo Copying DLL files to %SYSTEMROOT%\System32
+Copy win32\bin\*.dll %SYSTEMROOT%\System32 > NUL:
 
 echo Done copying files to %INSTALL_BASE%
 
