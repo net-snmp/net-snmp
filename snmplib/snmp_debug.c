@@ -97,7 +97,7 @@ void debug_config_turn_on_debugging(char *configtoken, char *line) {
 
 void
 snmp_debug_init(void) {
-  debugindentchars[0] = '\0'; // zero out the debugging indent array.
+  debugindentchars[0] = '\0'; /* zero out the debugging indent array. */
   register_premib_handler("snmp","doDebugging",
                           debug_config_turn_on_debugging, NULL,
                           "(1|0)");

@@ -32,22 +32,22 @@ SOFTWARE.
 #ifdef WIN32
 #include <sys/timeb.h>
 #include <time.h>
-// structure of a directory entry
+/* structure of a directory entry */
 typedef struct direct 
 {
-	long	d_ino;		// inode number (not used by MS-DOS) 
-	int	d_namlen;		// Name length 
-	char	d_name[257];// file name 
+	long	d_ino;		/* inode number (not used by MS-DOS) */
+	int	d_namlen;		/* Name length */
+	char	d_name[257];/* file name */
 } _DIRECT;
 
-// structure for dir operations 
+/* structure for dir operations */
 typedef struct _dir_struc
 {
-	char	*start;			// Starting position
-	char	*curr;			// Current position
-	long	size;			// Size of string table
-	long	nfiles;			// number if filenames in table
-	struct direct dirstr;	// Directory structure to return
+	char	*start;			/* Starting position */
+	char	*curr;			/* Current position */
+	long	size;			/* Size of string table */
+	long	nfiles;			/* number if filenames in table */
+	struct direct dirstr;	/* Directory structure to return */
 } DIR;
 
 DIR *opendir (char *filename);
