@@ -338,7 +338,7 @@ snmp_unregister_callback(int major, int minor, SNMPCallback * target,
 static void
 _remove_duplicates(void *ptr, int i, int j)
 {
-    struct snmp_gen_callback *scp = NULL, *next = NULL;
+    struct snmp_gen_callback *scp = NULL;
 
     for (; i < MAX_CALLBACK_IDS; i++) {
 	for (; j < MAX_CALLBACK_SUBIDS; j++) {
@@ -360,7 +360,7 @@ void
 clear_callback(void)
 {
     unsigned int i = 0, j = 0; 
-    struct snmp_gen_callback *scp = NULL, *next = NULL;
+    struct snmp_gen_callback *scp = NULL;
 
     if(++_lock > 1) {
         snmp_log(LOG_WARNING,
