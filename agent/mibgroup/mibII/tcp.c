@@ -809,8 +809,7 @@ Again:	/*
 		next = inpcb.INP_NEXT_SYMBOL;
 
 		if((klookup((unsigned long)next, (char *)&inpcb, sizeof (inpcb)) == 0)) {
-			perror("TCP_Count_Connections - inpcb");
-			break;
+		    perror("TCP_Count_Connections - inpcb");
 		}
 #if !(defined(freebsd2) || defined(netbsd1) || defined(openbsd2))
 		if (inpcb.INP_PREV_SYMBOL != prev) {	    /* ??? */
@@ -840,10 +839,7 @@ Again:	/*
 }
 #endif
 
-static struct inpcb tcp_inpcb, *tcp_next, *tcp_prev, *tcp_head, *tcp_tail;
-#if HAVE_INPCBTABLE
-static struct inpcbtable tcp_table;
-#endif
+static struct inpcb tcp_inpcb, *tcp_prev;
 #ifdef linux
 static struct inpcb *inpcb_list;
 #endif
@@ -851,21 +847,10 @@ static struct inpcb *inpcb_list;
 void TCP_Scan_Init __P((void))
 {
 #ifndef linux
-#if HAVE_INPCBTABLE
-    auto_nlist(TCP_SYMBOL, (char *)&tcp_table, sizeof(tcp_table));
-    tcp_next = tcp_table.inpt_queue.cqh_first;
-    tcp_tail = tcp_table.inpt_queue.cqh_last;
-    tcp_prev = NULL;
-#else	/* HAVE_INPCBTABLE */
-    tcp_head = tcp_next = tcp_prev = (struct inpcb *) auto_nlist_value(TCP_SYMBOL);
-#if !(defined(freebsd2) || defined(netbsd1) || defined(openbsd2))
-    tcp_tail = NULL;
-#else
     auto_nlist(TCP_SYMBOL, (char *)&tcp_inpcb, sizeof(tcp_inpcb));
-    tcp_tail = tcp_inpcb.INP_PREV_SYMBOL;
+#if !(defined(freebsd2) || defined(netbsd1) || defined(openbsd2))
+    tcp_prev = (struct inpcb *) auto_nlist_value(TCP_SYMBOL);
 #endif
-    printf("TCPinit: head=%p, tail=%p, next=%p, prev=%p\n", tcp_head, tcp_tail, tcp_next, tcp_prev);
-#endif	/* HAVE_INPCBTABLE */
 #else
     FILE *in;
     char line [256];
@@ -943,46 +928,41 @@ int TCP_Scan_Next(State, RetInPcb)
 int *State;
 struct inpcb *RetInPcb;
 {
+	register struct inpcb *next;
 #ifndef linux
 	struct tcpcb tcpcb;
 
-Again:
-
 #if defined(freebsd2) || defined(netbsd1) || defined(openbsd2)
-	if (tcp_next == NULL || tcp_prev == tcp_tail) {
+	if ((tcp_inpcb.INP_NEXT_SYMBOL == NULL) ||
+	    (tcp_inpcb.INP_NEXT_SYMBOL == (struct inpcb *) auto_nlist_value(TCP_SYMBOL))) {
 #else
-	if (tcp_next == NULL) {
+	if (tcp_inpcb.INP_NEXT_SYMBOL == (struct inpcb *) auto_nlist_value(TCP_SYMBOL)) {
 #endif
-	    return 0;	    /* "EOF" */
+	    return(0);	    /* "EOF" */
 	}
 
-	klookup((unsigned long)tcp_next, (char *)&tcp_inpcb, sizeof (tcp_inpcb));
-printf("TCP: head=%p tail=%p prev=%p next=%p tcpcb=%p\n", tcp_head, tcp_tail,
-      tcp_prev, tcp_next, tcp_inpcb.inp_ppcb);
-#if 0 && !(defined(netbsd1) || defined(freebsd2)) || defined(openbsd2)
-	if (tcp_inpcb.INP_PREV_SYMBOL != tcp_prev) {	   /* ??? */
-	    printf("TCP: INP_PREV=%p\n", tcp_inpcb.INP_PREV_SYMBOL);
-            return -1; /* "FAILURE" */
-	}
-#endif	/* !(defined(netbsd1) || defined(freebsd2) || defined(openbsd2)) */
-	tcp_prev = tcp_next;
-	tcp_next = tcp_inpcb.INP_NEXT_SYMBOL;
-	if (tcp_inpcb.inp_ppcb == NULL) goto Again;
+	next = tcp_inpcb.INP_NEXT_SYMBOL;
+
+	klookup((unsigned long)next, (char *)&tcp_inpcb, sizeof (tcp_inpcb));
+#if !(defined(netbsd1) || defined(freebsd2)) || defined(openbsd2)
+	if (tcp_inpcb.INP_PREV_SYMBOL != tcp_prev)	   /* ??? */
+          return(-1); /* "FAILURE" */
+#endif /*  !(defined(netbsd1) || defined(freebsd2) || defined(openbsd2)) */
 	klookup ( (int)tcp_inpcb.inp_ppcb, (char *)&tcpcb, sizeof (tcpcb));
 	*State = tcpcb.t_state;
-#else	/* linux */
+#else /* linux */
 	if (! tcp_prev)
 	  return 0;
 
 	tcp_inpcb = *tcp_prev;
 	*State = tcp_inpcb.inp_state;
-	tcp_next = tcp_inpcb.INP_NEXT_SYMBOL;
-#endif	/* linux */
+	next = tcp_inpcb.INP_NEXT_SYMBOL;
+#endif
 
 	*RetInPcb = tcp_inpcb;
 #if !(defined(netbsd1) || defined(freebsd2) || defined(openbsd2))
-	tcp_prev = tcp_next;
+	tcp_prev = next;
 #endif
-	return 1;	/* "OK" */
+	return(1);	/* "OK" */
 }
 #endif /* solaris2 */
