@@ -89,6 +89,10 @@ SOFTWARE.
 #include "snmp_agent.h"
 #include "agent_trap.h"
 
+#ifdef USING_AGENTX_PROTOCOL_MODULE
+#include "agentx/protocol.h"
+#endif
+
 static int snmp_vars_inc;
 
 static struct agent_snmp_session *agent_session_list = NULL;
@@ -632,7 +636,7 @@ int
 handle_var_list(struct agent_snmp_session  *asp)
 {
     struct variable_list *varbind_ptr;
-    u_char  status;
+    int     status;
     int     count;
 
     count = 0;
@@ -672,6 +676,9 @@ handle_one_var(struct agent_snmp_session  *asp, struct variable_list *varbind_pt
     AddVarMethod *add_method;
     int	    noSuchObject = TRUE;
     int     view;
+    int     status;
+    oid	    save[MAX_OID_LEN];
+    size_t  savelen = 0;
     
 statp_loop:
 	if ( asp->rw == WRITE && varbind_ptr->data != NULL ) {
@@ -699,6 +706,9 @@ statp_loop:
 	    else
 		view = 0;	/* Assume accessible */
 	    
+            memcpy(save, varbind_ptr->name,
+			varbind_ptr->name_length*sizeof(oid));
+            savelen = varbind_ptr->name_length;
 	    if ( view == 0 )
 	        statP = getStatPtr(  varbind_ptr->name,
 			   &varbind_ptr->name_length,
@@ -757,6 +767,23 @@ statp_loop:
 		if (view != 5) send_easy_trap(SNMP_TRAP_AUTHFAIL, 0);
 		goto statp_loop;
 	}
+#ifdef USING_AGENTX_PROTOCOL_MODULE
+		/*
+		 * AgentX GETNEXT/GETBULK requests need to take
+		 *   account of the end-of-range value
+		 *
+		 * This doesn't really belong here, but it works!
+		 */
+	else if (!asp->exact && asp->pdu->version == AGENTX_VERSION_1 &&
+		 snmp_oid_compare( varbind_ptr->name,
+			  	   varbind_ptr->name_length,
+				   varbind_ptr->val.objid,
+				   varbind_ptr->val_len/sizeof(oid)) > 0 ) {
+            	memcpy(varbind_ptr->name, save, savelen*sizeof(oid));
+            	varbind_ptr->name_length = savelen;
+		varbind_ptr->type = SNMP_ENDOFMIBVIEW;
+	}
+#endif
 		/*
 		 * Other access problems are permanent
 		 *   (i.e. writing to non-writeable objects)
