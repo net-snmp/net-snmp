@@ -1462,9 +1462,6 @@ if test $? -eq 0 ; then
 	AC_CHECK_FUNC(getdevs, AC_DEFINE(HAVE_GETDEVS),
 		AC_CHECK_LIB(devstat, getdevs, AC_DEFINE(HAVE_GETDEVS)
 		LIBS="${LIBS} -ldevstat"))
-	AC_MSG_RESULT(yes)
-else
-	AC_MSG_RESULT(no)
 fi
 
 
