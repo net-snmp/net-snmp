@@ -13,6 +13,7 @@
 
 #include "mibdefs.h"
 #include "mibincl.h"
+#include "extproto.h"
 
 char *VersionInfo="3.1.1";
 
@@ -36,9 +37,6 @@ unsigned char *var_extensible_version(vp, name, length, exact, var_len, write_me
 {
 
   oid newname[30];
-  int count, result,i, rtest=0;
-  register int interface;
-  struct myproc *proc;
   static long long_ret;
   static char errmsg[300];
   char *cptr;

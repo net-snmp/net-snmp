@@ -1,7 +1,22 @@
 #include <config.h>
 
+#if HAVE_STDLIB_H
+#include <stdlib.h>
+#endif
+#include <stdio.h>
+#if HAVE_STRINGS_H
+#include <strings.h>
+#else
+#if STDC_HEADERS
+#include <string.h>
+#endif
+#endif
+#if HAVE_UNISTD_H
+#include <unistd.h>
+#endif
 #include "mibincl.h"
 #include "mibdefs.h"
+#include "extproto.h"
 
 #ifdef USEPASSMIB
 
@@ -34,14 +49,11 @@ unsigned char *var_extensible_pass(vp, name, length, exact, var_len, write_metho
 {
 
   oid newname[30];
-  int count, result,i, j, rtest=0, fd, newlen, last;
-  register int interface;
-  struct myproc *proc;
+  int i, j, rtest=0, fd, newlen, last;
   static long long_ret;
   static char buf[300], buf2[300];
   static oid  objid[30];
   struct extensible *passthru;
-  char arg1[3];
   FILE *file;
 
   long_ret = *length;
@@ -70,7 +82,7 @@ unsigned char *var_extensible_pass(vp, name, length, exact, var_len, write_metho
         sprintf(passthru->command,"%s -n %s",passthru->name,buf);
       DEBUGP1("pass-running:  %s\n",passthru->command);
       /* valid call.  Exec and get output */
-      if (fd = get_exec_output(passthru)) {
+      if ((fd = get_exec_output(passthru))) {
         file = fdopen(fd,"r");
         if (fgets(buf,STRMAX,file) == NULL) {
           *var_len = 0;
@@ -162,7 +174,6 @@ setPass(action, var_val, var_val_type, var_val_len, statP, name, name_len)
    int      name_len;
 {
   int i, j, rtest, tmplen=1000, last;
-  char cmdline[300];
   struct extensible *passthru;
 
   static char buf[300], buf2[300];
@@ -202,16 +213,16 @@ setPass(action, var_val, var_val_type, var_val_len, statP, name, name_len)
                         sizeof(tmp));
           switch (var_val_type) {
             case INTEGER:
-              sprintf(buf,"integer %d",tmp);
+              sprintf(buf,"integer %d",(int) tmp);
               break;
             case COUNTER:
-              sprintf(buf,"counter %d",tmp);
+              sprintf(buf,"counter %d",(int) tmp);
               break;
             case GAUGE:
-              sprintf(buf,"gauge %d",tmp);
+              sprintf(buf,"gauge %d",(int) tmp);
               break;
             case TIMETICKS:
-              sprintf(buf,"timeticks %d",tmp);
+              sprintf(buf,"timeticks %d",(int) tmp);
               break;
           }
           break;
@@ -219,10 +230,10 @@ setPass(action, var_val, var_val_type, var_val_len, statP, name, name_len)
           asn_parse_unsigned_int(var_val,&tmplen,&var_val_type, &utmp,
                                  sizeof(utmp));
           sprintf(buf,"ipaddress %d.%d.%d.%d",
-                  ((utmp & 0xff000000) >> (8*3)),
-                  ((utmp & 0xff0000) >> (8*2)),
-                  ((utmp & 0xff00) >> (8)),
-                  ((utmp & 0xff)));
+                  (int) ((utmp & 0xff000000) >> (8*3)),
+                  (int) ((utmp & 0xff0000) >> (8*2)),
+                  (int) ((utmp & 0xff00) >> (8)),
+                  (int) ((utmp & 0xff)));
           break;
         case STRING:
           itmp = sizeof(buf);
