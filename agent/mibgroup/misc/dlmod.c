@@ -25,6 +25,7 @@
 #include "mibincl.h"
 #include "struct.h"
 #include "read_config.h"
+#include "agent_read_config.h"
 
 #include "dlmod.h"
 
@@ -41,7 +42,8 @@ init_dlmod __P((void)) {
 	char *p;
 	int l;
 
-	register_config_handler("dlmod", dlmod_parse_config, dlmod_free_config);
+	snmpd_register_config_handler("dlmod", dlmod_parse_config,
+                                      dlmod_free_config);
 
 	p = getenv("SNMP_DLMOD_PATH");
 	strncpy(dlmod_path, DLMOD_DEFAULT_PATH, sizeof(dlmod_path));
@@ -63,7 +65,7 @@ init_dlmod __P((void)) {
 
 void 
 deinit_dlmod __P((void)) {
-	unregister_config_handler("dlmod");
+	snmpd_unregister_config_handler("dlmod");
 }
 
 static void 
