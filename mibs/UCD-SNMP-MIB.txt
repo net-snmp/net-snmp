@@ -822,7 +822,7 @@ versionIdent OBJECT-TYPE
     ::= { version 5 } 
 
 versionConfigureOptions OBJECT-TYPE
-    SYNTAX	LongDisplayString
+    SYNTAX	UCDLongDisplayString
     MAX-ACCESS	read-only
     STATUS	current
     DESCRIPTION  
