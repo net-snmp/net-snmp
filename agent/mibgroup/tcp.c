@@ -314,7 +314,7 @@ var_tcp(vp, name, length, exact, var_len, write_method)
      *	Allow for a kernel w/o TCP
      */
 #ifndef linux
-    if (tcp_nl[N_TCPSTAT].n_value == 0) return(NULL);
+    if (auto_nlist_value(TCPSTAT_SYMBOL) == -1) return(NULL);
 #endif
 
 	if (header_tcp(vp, name, length, exact, var_len, write_method) == MATCH_FAILED )
@@ -447,7 +447,7 @@ var_tcpEntry(vp, name, length, exact, var_len, write_method)
      *	Allow for a kernel w/o TCP
      */
 #ifndef linux
-    if (tcp_nl[N_TCPSTAT].n_value == 0) return(NULL);
+    if (auto_nlist_value(TCPSTAT_SYMBOL) == -1) return(NULL);
 #endif
 
 	bcopy((char *)vp->name, (char *)newname, (int)vp->namelen * sizeof(oid));
@@ -766,18 +766,18 @@ Again:	/*
 	 */
 	Established = 0;
 
-	auto_nlist(TCB_SYMBOL, (char *)&cb, sizeof(struct inpcb));
+	auto_nlist(TCP_SYMBOL, (char *)&cb, sizeof(struct inpcb));
 	inpcb = cb;
 #if !(defined(freebsd2) || defined(netbsd1))
-	prev = (struct inpcb *) tcp_nl[N_TCB].n_value;
+	prev = (struct inpcb *) auto_nlist_value(TCP_SYMBOL);
 #endif /*  !(defined(freebsd2) || defined(netbsd1)) */
 	/*
 	 *	Scan the control blocks
 	 */
 #if defined(freebsd2) || defined(netbsd1)
-	while ((inpcb.inp_next != NULL) && (inpcb.inp_next != (struct inpcb *) tcp_nl[N_TCB].n_value)) {
+	while ((inpcb.inp_next != NULL) && (inpcb.inp_next != (struct inpcb *) auto_nlist_value(TCP_SYMBOL))) {
 #else /*  defined(freebsd2) || defined(netbsd1) */
-	while (inpcb.inp_next != (struct inpcb *) tcp_nl[N_TCB].n_value) {
+	while (inpcb.inp_next != (struct inpcb *) auto_nlist_value(TCP_SYMBOL)) {
 #endif /*  defined(freebsd2) || defined(netbsd1) */
 		next = inpcb.inp_next;
 
@@ -820,9 +820,9 @@ static struct inpcb *inpcb_list;
 void TCP_Scan_Init __P((void))
 {
 #ifndef linux
-    auto_nlist(TCB_SYMBOL, (char *)&tcp_inpcb, sizeof(tcp_inpcb));
+    auto_nlist(TCP_SYMBOL, (char *)&tcp_inpcb, sizeof(tcp_inpcb));
 #if !(defined(freebsd2) || defined(netbsd1))
-    tcp_prev = (struct inpcb *) tcp_nl[N_TCB].n_value;
+    tcp_prev = (struct inpcb *) auto_nlist_value(TCP_SYMBOL);
 #endif
 #else
     FILE *in;
@@ -907,9 +907,9 @@ struct inpcb *RetInPcb;
 
 #if defined(freebsd2) || defined(netbsd1)
 	if ((tcp_inpcb.inp_next == NULL) ||
-	    (tcp_inpcb.inp_next == (struct inpcb *) tcp_nl[N_TCB].n_value)) {
+	    (tcp_inpcb.inp_next == (struct inpcb *) auto_nlist_value(TCP_SYMBOL))) {
 #else
-	if (tcp_inpcb.inp_next == (struct inpcb *) tcp_nl[N_TCB].n_value) {
+	if (tcp_inpcb.inp_next == (struct inpcb *) auto_nlist_value(TCP_SYMBOL)) {
 #endif
 	    return(0);	    /* "EOF" */
 	}
