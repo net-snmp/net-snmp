@@ -895,6 +895,48 @@ wrap_up_request(struct agent_snmp_session *asp, int status)
             }
         }
     }
+
+        /*
+         * Update the snmp error-count statistics
+         *   XXX - should we include the V2 errors in this or not?
+         */
+#define INCLUDE_V2ERRORS_IN_V1STATS
+
+    switch ( status ) {
+#ifdef INCLUDE_V2ERRORS_IN_V1STATS
+	case SNMP_ERR_WRONGVALUE:
+	case SNMP_ERR_WRONGENCODING:
+	case SNMP_ERR_WRONGTYPE:
+	case SNMP_ERR_WRONGLENGTH:
+	case SNMP_ERR_INCONSISTENTVALUE:
+#endif
+	case SNMP_ERR_BADVALUE:
+            snmp_increment_statistic(STAT_SNMPOUTBADVALUES);
+	    break;
+#ifdef INCLUDE_V2ERRORS_IN_V1STATS
+	case SNMP_ERR_NOACCESS:
+	case SNMP_ERR_NOTWRITABLE:
+	case SNMP_ERR_NOCREATION:
+	case SNMP_ERR_INCONSISTENTNAME:
+	case SNMP_ERR_AUTHORIZATIONERROR:
+#endif
+	case SNMP_ERR_NOSUCHNAME:
+            snmp_increment_statistic(STAT_SNMPOUTNOSUCHNAMES);
+	    break;
+#ifdef INCLUDE_V2ERRORS_IN_V1STATS
+	case SNMP_ERR_RESOURCEUNAVAILABLE:
+	case SNMP_ERR_COMMITFAILED:
+	case SNMP_ERR_UNDOFAILED:
+#endif
+	case SNMP_ERR_GENERR:
+            snmp_increment_statistic(STAT_SNMPOUTGENERRS);
+	    break;
+
+	case SNMP_ERR_TOOBIG:
+            snmp_increment_statistic(STAT_SNMPOUTTOOBIGS);
+	    break;
+    }
+
     if (( status == SNMP_ERR_NOERROR ) && ( asp->pdu )) {
         snmp_increment_statistic_by(
             (asp->pdu->command == SNMP_MSG_SET ?
