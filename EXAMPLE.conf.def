@@ -300,9 +300,10 @@ load 12 14 14
 # source directory or install it in the given location.
 # 
 # Example:  (see the script for details)
-#
+#           (commented out here since it requires that you place the
+#           script in the right location. (its not installed by default))
 
-pass .EXTENSIBLEDOTMIB.255 /bin/sh PREFIX/local/passtest
+# pass .EXTENSIBLEDOTMIB.255 /bin/sh PREFIX/local/passtest
 
 # % snmpwalk -v 1 localhost public .EXTENSIBLEDOTMIB.255
 # enterprises.ucdavis.255.1 = "life the universe and everything"
