@@ -1779,8 +1779,8 @@ AC_CHECK_HEADERS(winsock.h,[
         AGENTLIBS="${AGENTLIBS} -liphlpapi"
         case $target_os in
                 mingw*)
-                        LIBS="${LIBS} -lwsock32"
-                        AGENTLIBS="${AGENTLIBS} -lwsock32"
+                        LIBS="${LIBS} -lws2_32"
+                        AGENTLIBS="${AGENTLIBS} -lws2_32"
                         ;;
                 *)
                         ;;
