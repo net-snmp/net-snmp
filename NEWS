@@ -1,6 +1,15 @@
 This file contains major changes in released revisions.  Please read
 the ChangeLog file for a more detailed listing of changes/bug fixes.
 
+*4.0*
+ New:
+    - SNMPv3 supported!!!
+    - Per-process/per-exec-script based fix scripts implemented.
+      (see snmpd.conf(5) for details)
+
+ API Change:
+    - A small change to the write functions in mib modules.
+
 *3.6.1*
  Fixes:
     - Minor last second fixes mostly.
