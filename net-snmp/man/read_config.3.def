@@ -1,4 +1,4 @@
-.TH READ_CONFIG 3 "02 Mar 1999" "" "Net-SNMP"
+.TH READ_CONFIG 3 "07 Mar 2002" "" "Net-SNMP"
 .UC 5
 .SH NAME
 register_config_handler, register_premib_handler
@@ -9,59 +9,84 @@ read_premib_configs, config_perror, config_pwarn - read_config functions
 .PP
 .B struct config_line *
 .br
-.B "  register_config_handler(char *filePrefix, char *token,"
+.BI "  register_config_handler(const char *" filePrefix ",
 .br
-.B "            void (*parser)(char *, char *) handler, "
+.BI "                     const char *" token ,
 .br
-.B "            void (*releaser) (void) freefunc,"
+.BI "                     void (*" parser ")(const char *, char *),"
 .br
-.B "            char *usageLine)"
+.BI "                     void (*" releaser ")(void),"
+.br
+.BI "                     const char *"usageLine ");"
 .PP
 .B struct config_line *
 .br
-.B "  register_premib_handler(char *filePrefix, char *token,"
+.BI "  register_premib_handler(const char *" filePrefix ", 
 .br
-.B "            void (*parser)(char *, char *) handler, "
+.BI "                     const char *" token ,
 .br
-.B "            void (*releaser) (void) freefunc,"
+.BI "                     void (*" parser ")(const char *, char *),"
 .br
-.B "            char *usageLine)"
+.BI "                     void (*" releaser ")(void),"
+.br
+.BI "                     const char *" usageLine ");"
+.PP
+.BI "void unregister_config_handler(const char *" filePrefix ","
+.br
+.BI "                     const char *" token ");"
 .PP
 .B struct config_line *
 .br
-.B "  snmpd_register_config_handler(char *token,"
+.BI "  register_app_config_handler(const char *" token ,
 .br
-.B "            void (*parser)(char *, char *) handler, "
+.BI "                     void (*" parser ")(const char *, char *),"
 .br
-.B "            void (*releaser) (void) freefunc,"
+.BI "                     void (*" releaser ")(void),"
 .br
-.B "            char *usageLine)"
+.BI "                     const char *"usageLine ");"
 .PP
-.B "void unregister_config_handler(char *filePrefix, "
+.B struct config_line *
 .br
-.B "            char *token)"
+.BI "  register_app_premib_handler(const char *" token ,
+.br
+.BI "                     void (*" parser ")(const char *, char *),"
+.br
+.BI "                     void (*" releaser ")(void),"
+.br
+.BI "                     const char *" usageLine ");"
 .PP
-.B "void read_config_print_usage(char *lead)"
+.BI "void unregister_app_config_handler(const char *" token ");"
 .PP
-.B "void read_configs(void)"
+.BI "void read_config_print_usage(char *" lead ");"
 .PP
-.B "void read_premib_configs(void)"
+.B "void read_configs(void);"
 .PP
+.B "void read_premib_configs(void);"
+.PP
+.BI "void config_pwarn(const char *" string ");"
+.br
+.BI "void config_perror(const char *" string ");"
+
 .SH DESCRIPTION
 The functions are a fairly extensible system of parsing various
 configuration files at the run time of an application.  The
 configuration file flow is broken into the following phases:
-.RS
-.PP
-registration of handlers.
-.PP
-reading of the configuration files for pre-MIB parsing requirements.
-.PP
-reading of the textual MIB files.
-.PP
-reading of the configuration files for configuration directives.
-.PP
-optionally re-reading of the configuration files at a future date.
+.RS 4
+.TP 4
+1.
+Registration of handlers.
+.TP
+2.
+Reading of the configuration files for pre-MIB parsing requirements.
+.TP
+3.
+Reading and parsing of the textual MIB files.
+.TP
+4.
+Reading of the configuration files for configuration directives.
+.TP
+5.
+Optionally re-reading the configuration files at a future date.
 .RE
 .PP
 The idea is that the calling application is able to register
@@ -75,12 +100,12 @@ The
 function can then be called to look for all the files that it has
 registrations for, find the first word on each line, and pass the
 remainder to the appropriately registered handler.
-.SH Token Handlers
+.SH TOKEN HANDLERS
 .PP
-Handler functions should be of the following type:
+Handler functions should have the following signature:
 .PP
 .RS
-void handler(char *token, char *line);
+.BI "void handler(const char *" token ", char *" line ");"
 .RE
 .PP
 The function will be called with two arguments, the first being the
@@ -88,40 +113,48 @@ token that triggered the call to this function (which would be one of
 the tokens that the function had been registered for), and the second
 being the remainder of the configuration file line beyond the white
 space following the token.
-.SH Resource Freeing Handlers
+.SH RESOURCE FREEING HANDLERS
 .PP
-If the read_config configuration system is called a second time to
-re-read the configuration files, the optional second handler 
+If the parameter
 .I freefunc
-will be called, if registered as non-NULL, to free any resources and
-reset its notions to defaults before the config handlers are called
-again.  It is not called with any arguments.
-.SH Registering A Handler
-.IP register_config_handler()
-The handler above could then be registered for the configuration file
+passed to
+.B register_config_handler
+is non-NULL, then the function specified is called if and when the
+configuration files are re-read.  This function should free any
+resources allocated by the token handler function and reset its notion
+of the configuration to its default.  The token handler function will
+then be called again.  No arguments are passed to the resource freeing
+handler.
+.SH REGISTERING A HANDLER
+.TP
+.B register_config_handler()
+The
+.B handler()
+function above could be registered for the configuration file
 .I snmp.conf,
 with the token
 .I genericToken
 and the help string (discussed later)
-.I ARG1 ARG2
+.I """ARG1 [ARG2]"""
 using the following call to the 
 .B register_config_handler()
 function:
 .PP
 .RS
 .RS
-register_config_handler("snmp", "genericToken", handler, NULL, "ARG1 ARG2");
+register_config_handler("snmp", "genericToken", handler, NULL, "ARG1 [ARG2]");
 .RE
 .RE
 .IP
 This would register the
 .B handler()
-function so that it will get called every time the first word in the 
+function so that it will get called every time the first word of a
+line in the 
 .I snmp.conf
 configuration file(s) matches "genericToken" (see 
 .B read_configs() 
 below).
-.IP register_premib_handler()
+.B register_premib_handler()
 The 
 .B register_premib_handler()
 function works identically to the 
@@ -130,38 +163,46 @@ function but is intended for config file tokens that need to be read
 in before the textual MIBs are read in, probably because they will be
 used to configure the MIB parser.  It is rarely the case that anything 
 but the SNMP library itself should need to use this function.
-.IP snmpd_register_config_handler()
-This function performs exactly the same job as the
-.B register_config_handler()
-function, but doesn't require the file type argument (which is filled
-in by the snmpd agent).  It is intended that MIB modules written for
-the agent use this function instead of the 
-.B register_config_handler()
-function directly to allow the agent to have more control over which
-files the MIB modules will read (which should be the 
-.I snmpd.conf
-files).
-.IP unregister_config_handler()
+.TP
+.B unregister_config_handler()
 Removes the registered configuration handler for the
 .I filePrefix
 and
-.I token
-.IP 
-.SH Help Strings
+.IR token .
+
+.TP
+.B register_app_config_handler()
+.TP
+.B register_app_premib_handler()
+.TP
+.B unregister_app_config_handler()
+These functions are analagous to 
+.BR register_config_handler() ", " register_premib_handler() " and "
+.B unregister_config_handler()
+but don't require the file type argument (which is filled in by the
+application).  It is intended that MIB modules written for the agent
+use these functions to allow the agent to have more control over which
+configuration files are read (typically the
+.I snmpd.conf
+files).
+.SH HELP STRINGS
 .PP
 The
 .I usageLine
-token passed to the register_config_handler(), and similar calls, is
-used to display help information when the
+parameter passed to
+.B register_config_handler()
+and similar calls, is used to display help information when the
 .B read_config_print_usage()
 function is called.  This function is used by all of the applications
 when the 
 .B -H
-flag is passed to the command line.  It prints a summary of all of the 
+flag is passed on the command line.  It prints a summary of all of the
 configuration file lines, and the associated files, that the
-configuration system understands.  The usageLine parameter should be a 
-list of arguments expected after the token, and not a lengthy
-description (which should go into a manual page instead).  The
+configuration system understands.  The
+.I usageLine
+parameter should be a list of arguments expected after the token, and
+not a lengthy description (which should go into a manual page
+instead).  The
 .I lead
 prefix will be prepended to each line that the function prints to
 stderr, where it displays its output.
@@ -174,40 +215,42 @@ function is called, so that the library can register its configuration
 file directives as well for the 
 .B read_config_print_usage()
 function to display.
-.SH Reading Configuration Files
-.IP init_snmp()
-The 
+.SH READING CONFIGURATION FILES
+.TP
 .B init_snmp()
-function call should be called after registrations to appropriately
-register parser configuration tokens, parse the configuration file
-tokens registered with
+Once the relevant configuration token parsers have been registered,
+.B init_snmp()
+should be called.  It will parse the configuration file tokens
+registered with
 .B register_premib_handler(),
 read in the textual MIB files using
 .B init_mib(),
 and finally parse the configuration file tokens registered with 
-.B register_config_handler().  
+.BR register_config_handler() .
 .PP
 If the 
 .B init_snmp()
 function is used, none of the following functions need to be called by 
 the application:
-.PP
-.IP register_mib_handlers()
-The SNMP library's routine to register it's configuration file
+.TP
+.B register_mib_handlers()
+The SNMP library's routine to register its configuration file
 handlers.
-.IP read_premib_configs()
+.TP
+.B read_premib_configs()
 The routine that parses the configuration files for tokens registered
 to be dealt with before the textual MIBs are read in.  See 
 .B read_configs()
 below.
-.IP read_configs()
+.TP
+.B read_configs()
 Reads all the configuration files it can find in the 
 .I SNMPCONFPATH
 environment variable (or its default value) for tokens and
 appropriately calls the handlers registered to it, or prints a
 "Unknown token" warning message.  It looks for any file that it has
 previously received a registration request for.
-.SH Configuration Files Read
+.SH CONFIGURATION FILES READ
 .PP
 The configuration files read are found by using the colon separated
 .I SNMPCONFPATH
@@ -219,10 +262,11 @@ the two suffixes
 and
 .I .local.conf.
 The idea behind the two different suffixes is that the first file can
-be rdisted across a large number of machines and the second file can
-be used to configure local settings for one particular machine.  They
-do not need to be present, and will only be read if found.
-.SH Error Handling Functions
+be shared (via rdist or an NFS mount) across a large number of
+machines and the second file can be used to configure local settings
+for one particular machine.  They do not need to be present, and will
+only be read if found.
+.SH ERROR HANDLING FUNCTIONS
 .PP
 The two functions
 .B config_pwarn()
@@ -230,9 +274,10 @@ and
 .B config_perror()
 both take an error string as an argument and print it to stderr along
 with the file and line number that caused the error.  A call to the
-second function will also force read_configs() to eventually return
-with an error code indicating to it's calling function that it should
-abort the operation of the application.
+second function will also force 
+.B read_configs() 
+to eventually return with an error code indicating to it's calling
+function that it should abort the operation of the application.
 .SH "ENVIRONMENT VARIABLES"
 .TP 10
 SNMPCONFPATH
@@ -240,7 +285,7 @@ A colon separated list of directories to search for configuration
 files in.
 Default: DATADIR/snmp:LIBDIR/snmp:$HOME/.snmp
 .SH "SEE ALSO"
-mib_api(3), snmp_api(3)
+.BR mib_api "(3), " snmp_api (3)
 .\" Local Variables:
 .\"  mode: nroff
 .\" End:
