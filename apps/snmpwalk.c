@@ -78,21 +78,22 @@ SOFTWARE.
 oid objid_mib[] = {1, 3, 6, 1, 2, 1};
 int numprinted = 0;
 
-void usage(void)
+void
+usage(void)
 {
-  fprintf(stderr,"Usage: snmpwalk ");
+  fprintf(stderr, "USAGE: snmpwalk ");
   snmp_parse_args_usage(stderr);
-  fprintf(stderr," [<objectID>]\n\n");
+  fprintf(stderr, " [OID]\n\n");
   snmp_parse_args_descriptions(stderr);
-  fprintf(stderr, "  -C <APPOPTS>  Toggle various application specific behaviour:\n");
-  fprintf(stderr, "\t\t  APPOPTS values:\n");
-  fprintf(stderr,"\t\t      p: Print the number of variables found.\n");
-  fprintf(stderr,"\t\t      i: Include the requested OID in the search range.\n");
-  fprintf(stderr,"\t\t      c: Don't check that the returned OID's are increasing.\n");
+  fprintf(stderr, "  -C APPOPTS\t\tSet various application specific behaviours:\n");
+  fprintf(stderr,"\t\t\t  p:  print the number of variables found\n");
+  fprintf(stderr,"\t\t\t  i:  include given OID in the search range\n");
+  fprintf(stderr,"\t\t\t  c:  do not check returned OIDs are increasing\n");
 }
 
 void
-snmp_get_and_print(struct snmp_session *ss, oid *theoid, size_t theoid_len) {
+snmp_get_and_print(struct snmp_session *ss, oid *theoid, size_t theoid_len)
+{
     struct snmp_pdu *pdu, *response;
     struct variable_list *vars;
     int status;
@@ -102,46 +103,48 @@ snmp_get_and_print(struct snmp_session *ss, oid *theoid, size_t theoid_len) {
 
     status = snmp_synch_response(ss, pdu, &response);
     if (status == STAT_SUCCESS && response->errstat == SNMP_ERR_NOERROR) {
-        for(vars = response->variables; vars; vars = vars->next_variable) {
+        for (vars = response->variables; vars; vars = vars->next_variable) {
             numprinted++;
             print_variable(vars->name, vars->name_length, vars);
         }
     }
-    if (response)
+    if (response) {
         snmp_free_pdu(response);
-}
-
-static void optProc(int argc, char *const *argv, int opt)
-{
-    switch (opt) {
-        case 'C':
-            while (*optarg) {
-                switch (*optarg++) {
-                    case 'i':
-                        ds_toggle_boolean(DS_APPLICATION_ID,
-                                          DS_WALK_INCLUDE_REQUESTED);
-                        break;
-
-                    case 'p':
-                        ds_toggle_boolean(DS_APPLICATION_ID,
-                                          DS_WALK_PRINT_STATISTICS);
-                        break;
-
-		    case 'c':
-                        ds_toggle_boolean(DS_APPLICATION_ID,
-                                          DS_WALK_DONT_CHECK_LEXICOGRAPHIC);
-			break;
-                    default:
-                        fprintf(stderr,
-                                "Unknown flag passed to -C: %c\n", optarg[-1]);
-                        exit(1);
-                }
-            }
-            break;
     }
 }
 
-int main(int argc, char *argv[])
+static void
+optProc(int argc, char *const *argv, int opt)
+{
+    switch (opt) {
+    case 'C':
+	while (*optarg) {
+	    switch (*optarg++) {
+	    case 'i':
+		ds_toggle_boolean(DS_APPLICATION_ID,
+				  DS_WALK_INCLUDE_REQUESTED);
+		break;
+
+	    case 'p':
+		ds_toggle_boolean(DS_APPLICATION_ID,
+				  DS_WALK_PRINT_STATISTICS);
+		break;
+
+	    case 'c':
+		ds_toggle_boolean(DS_APPLICATION_ID,
+				  DS_WALK_DONT_CHECK_LEXICOGRAPHIC);
+		break;
+	    default:
+		fprintf(stderr, "Unknown flag passed to -C: %c\n", optarg[-1]);
+		exit(1);
+	    }
+	}
+	break;
+    }
+}
+
+int
+main(int argc, char *argv[])
 {
     struct snmp_session  session, *ss;
     struct snmp_pdu *pdu, *response;

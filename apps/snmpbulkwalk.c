@@ -83,17 +83,16 @@ int reps = 10, non_reps = 0;
 void
 usage (void)
 {
-  fprintf(stderr,"Usage: snmpbulkwalk ");
+  fprintf(stderr, "USAGE: snmpbulkwalk ");
   snmp_parse_args_usage(stderr);
-  fprintf(stderr," [<objectID>]\n\n");
+  fprintf(stderr, " [OID]\n\n");
   snmp_parse_args_descriptions(stderr);
-  fprintf(stderr, "  -C <APPOPTS>  Set various application specific behaviours:\n");
-  fprintf(stderr, "\t\t  APPOPTS values:\n");
-  fprintf(stderr,"\t\t      c:       do not check that returned OIDs are increasing\n");
-  fprintf(stderr,"\t\t      i:       include given OIDs in the search range\n");
-  fprintf(stderr,"\t\t      n<NUM>:  set non-repeaters to <NUM>\n");
-  fprintf(stderr,"\t\t      p:       print the number of variables found\n");
-  fprintf(stderr,"\t\t      r<NUM>:  set max-repeaters to <NUM>\n");
+  fprintf(stderr, "  -C APPOPTS\t\tSet various application specific behaviours:\n");
+  fprintf(stderr, "\t\t\t  c:       do not check returned OIDs are increasing\n");
+  fprintf(stderr, "\t\t\t  i:       include given OIDs in the search range\n");
+  fprintf(stderr, "\t\t\t  n<NUM>:  set non-repeaters to <NUM>\n");
+  fprintf(stderr, "\t\t\t  p:       print the number of variables found\n");
+  fprintf(stderr, "\t\t\t  r<NUM>:  set max-repeaters to <NUM>\n");
 }
 
 static void
