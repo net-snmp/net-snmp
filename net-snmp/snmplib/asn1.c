@@ -251,17 +251,18 @@ asn_build_unsigned_int(data, datalength, type, intp, intsize)
 	/* if MSB is set */
 	add_null_byte = 1;
 	intsize++;
-    }
-    /*
-     * Truncate "unnecessary" bytes off of the most significant end of this 2's complement integer.
-     * There should be no sequence of 9 consecutive 1's or 0's at the most significant end of the
-     * integer.
-     */
-    mask = ((u_long) 0x1FF) << ((8 * (sizeof(long) - 1)) - 1);
-    /* mask is 0xFF800000 on a big-endian machine */
-    while((((integer & mask) == 0) || ((integer & mask) == mask)) && intsize > 1){
-	intsize--;
-	integer <<= 8;
+    } else {
+	/*
+	 * Truncate "unnecessary" bytes off of the most significant end of this 2's complement integer.
+	 * There should be no sequence of 9 consecutive 1's or 0's at the most significant end of the
+	 * integer.
+	 */
+	mask = ((u_long) 0x1FF) << ((8 * (sizeof(long) - 1)) - 1);
+	/* mask is 0xFF800000 on a big-endian machine */
+	while(((integer & mask) == 0) && intsize > 1){
+	    intsize--;
+	    integer <<= 8;
+	}
     }
     data = asn_build_header(data, datalength, type, intsize);
     if (data == NULL)
@@ -960,21 +961,21 @@ asn_build_unsigned_int64(data, datalength, type, cp, countersize)
 	/* if MSB is set */
 	add_null_byte = 1;
 	intsize++;
-    }
-    /*
-     * Truncate "unnecessary" bytes off of the most significant end of this 2's
-     * complement integer.
-     * There should be no sequence of 9 consecutive 1's or 0's at the most
-     * significant end of the integer.
-     */
-    mask2 = ((u_long) 0x1FF) << ((8 * (sizeof(long) - 1)) - 1);
-    /* mask2 is 0xFF800000 on a big-endian machine */
-    while((((high & mask2) == 0) || ((high & mask2) == mask2))
-	  && intsize > 1){
-	intsize--;
-	high = (high << 8)
-	    | ((low & mask) >> (8 * (sizeof(long) - 1)));
-	low <<= 8;
+    } else {
+	/*
+	 * Truncate "unnecessary" bytes off of the most significant end of this 2's
+	 * complement integer.
+	 * There should be no sequence of 9 consecutive 1's or 0's at the most
+	 * significant end of the integer.
+	 */
+	mask2 = ((u_long) 0x1FF) << ((8 * (sizeof(long) - 1)) - 1);
+	/* mask2 is 0xFF800000 on a big-endian machine */
+	while(((high & mask2) == 0) && intsize > 1){
+	    intsize--;
+	    high = (high << 8)
+		| ((low & mask) >> (8 * (sizeof(long) - 1)));
+	    low <<= 8;
+	}
     }
     data = asn_build_header(data, datalength, type, intsize);
     if (data == NULL)
@@ -995,5 +996,3 @@ asn_build_unsigned_int64(data, datalength, type, cp, countersize)
     }
     return data;
 }
-
-
