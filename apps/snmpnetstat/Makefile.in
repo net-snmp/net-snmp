@@ -3,7 +3,7 @@
 #
 
 top_builddir=../..
-INSTALLBINPROGS=snmpnetstat
+INSTALLBINPROGS=snmpnetstat$(EXEEXT)
 
 #
 # build info
