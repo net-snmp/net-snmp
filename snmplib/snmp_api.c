@@ -251,7 +251,7 @@ long Reqid = 0;
 /*END MTCRITICAL_RESOURCE*/
 
 /*struct timeval Now;*/
-static struct servent *servp = NULL;
+static int default_s_port = 0;
 int snmp_errno = 0;
 char *snmp_detail = NULL;
 
@@ -389,13 +389,15 @@ snmp_sess_error(sessp, p_errno, p_snmp_errno, p_str)
 static void
 init_snmp_session __P((void))
 {
+    struct servent *servp;
     struct timeval tv;
 
     if (Reqid) return;
     Reqid = 1;
 
-    if (! servp)
-      servp = getservbyname("snmp", "udp");
+    servp = getservbyname("snmp", "udp");
+    if (servp)
+      default_s_port = servp->s_port;
 
     gettimeofday(&tv,(struct timezone *)0);
     /*Now = tv;*/
@@ -444,11 +446,11 @@ init_snmp __P((void)) {
   if (done_init)
     return;
   done_init = 1;
+  init_snmp_session();
   register_mib_handlers();
   read_premib_configs();
   init_mib();
   read_configs();
-  init_snmp_session();
 }
 
 /*
@@ -647,8 +649,8 @@ snmp_sess_open(in_session)
 	}
 	isp->addr.sin_family = AF_INET;
 	if (session->remote_port == SNMP_DEFAULT_REMPORT){
-	    if (servp != NULL){
-		isp->addr.sin_port = servp->s_port;
+	    if (default_s_port){
+		isp->addr.sin_port = default_s_port;
 	    } else {
 		isp->addr.sin_port = htons(SNMP_PORT);
 	    }
