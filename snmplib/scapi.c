@@ -1,19 +1,6 @@
 /*
  * scapi.c
  *
- * ASSUMES KMT.
- *
- * Keys are stored in the KMT cache using names derived from the key
- * material itself.  This assumes that if two entities configure the same
- * key, there is no state that carries over in the cache for that key
- * from use to use.  Partial hashes/crypts are not allowed, and IVs must
- * be reset each time.
- *
- * Functions specific to KMT, per se, are listed at the end of the file.
- *
- *
- * XXX	Decide whether to return SNMPERR_* codes, or whether to pass through
- *	KMT_ERR_* codes.  Must be all of one or the other...
  */
 
 #include <config.h>
@@ -64,6 +51,10 @@
 
 #include "transform_oids.h"
 
+#ifdef USE_OPENSSL
+#include <openssl/hmac.h>
+#include <openssl/evp.h>
+#endif
 
 #ifdef QUITFUN
 #undef QUITFUN
@@ -86,61 +77,16 @@
 int
 sc_get_properlength(oid *hashtype, u_int hashtype_len)
 {
+  DEBUGTRACE;
   /*
    * Determine transform type hash length.
    */
   if ( ISTRANSFORM(hashtype, HMACMD5Auth)) {
     return BYTESIZE(SNMP_TRANS_AUTHLEN_HMACMD5);
   }
-#ifdef HAVE_LIBKMT 
   else if ( ISTRANSFORM(hashtype, HMACSHA1Auth) ) {
     return BYTESIZE(SNMP_TRANS_AUTHLEN_HMACSHA1);
   }
-#endif
-  return SNMPERR_GENERR;
-}
-
-/*
-  sc_get_transform_type(oid *hashtype, u_int hashtype_len):
-
-  Given a hashing type ("hashtype" and its length hashtype_len), return
-  the transform type (hash library dependent).
-
-  If KMT is being used, it sets up the appropriate hashing function pointer
-  as well.
-
-  Returns either the transform type or SNMERR_GENERR for an unknown hashing
-  type.
-*/
-int
-sc_get_transform_type(oid *hashtype, u_int hashtype_len,
-                      int (**hash_fn)(
-                        const int	  mode,		void  	 **context,
-                        const u_int8_t	 *data,		const int  data_len,
-                        u_int8_t	**digest,	size_t  *digest_len))
-{
-  /*
-   * Determine transform type.
-   */
-#ifdef HAVE_LIBKMT
-  if ( ISTRANSFORM(hashtype, HMACMD5Auth)) {
-    if (hash_fn)
-      *hash_fn  = kmt_s_md5;
-    return KMT_ALG_HMAC_MD5;	
-
-  } else if ( ISTRANSFORM(hashtype, HMACSHA1Auth) ) {
-    if (hash_fn)
-      *hash_fn  = kmt_s_sha1;
-    return  KMT_ALG_HMAC_SHA1;
-  }
-#else
-  if ( ISTRANSFORM(hashtype, HMACMD5Auth)) {
-    return INTERNAL_MD5;
-  }
-#endif                
-
-  if (hash_fn)
-    *hash_fn = NULL;
   return SNMPERR_GENERR;
 }
 
@@ -150,71 +96,30 @@ sc_get_transform_type(oid *hashtype, u_int hashtype_len,
  *
  * Returns:
  *	SNMPERR_SUCCESS			Success.
- *	SNMPERR_SC_NOT_CONFIGURED	If KMT is not available.
  */
 int
 sc_init(void)
 {
-	int		rval = SNMPERR_SUCCESS;
+  int		rval = SNMPERR_SUCCESS;
 
-#ifdef HAVE_LIBKMT
-	kmt_init();
+#ifndef USE_OPENSSL
+#ifdef defined(USE_INTERNAL_MD5)
+  struct timeval tv;
+  
+  DEBUGTRACE;
+
+  gettimeofday(&tv,(struct timezone *)0);
+  
+  srandom(tv.tv_sec ^ tv.tv_usec);
 #else
-#ifdef USE_INTERNAL_MD5
-        struct timeval tv;
-
-        gettimeofday(&tv,(struct timezone *)0);
-
-        srandom(tv.tv_sec ^ tv.tv_usec);
-#else
-	rval = SNMPERR_SC_NOT_CONFIGURED;
+  rval = SNMPERR_SC_NOT_CONFIGURED;
 #endif
-#endif
-
-#if		!defined(USE_INTERNAL_MD5) 
-	snmp_register_callback(SNMP_CALLBACK_LIBRARY, SNMP_CALLBACK_SHUTDOWN,
-                               sc_shutdown, NULL);
-#endif		/* !USE_INTERNAL_MD5 */
-
+  /* XXX ogud: The only reason to do anything here with openssl is to 
+   * XXX ogud: seed random number generator 
+   */
+#endif  /* ifndef USE_OPENSSL */
 	return rval;
-
 }  /* end sc_init() */
-
-
-
-
-/*******************************************************************-o-******
- * sc_shutdown
- *
- * Returns:
- *	SNMPERR_SUCCESS			Success.
- *	SNMPERR_SC_NOT_CONFIGURED	If KMT is not available.
- *
- * 
- * kmt_close() is most critical because it deletes (and zeros) all key
- * bits stored in the KMT cache.
- */
-int
-sc_shutdown(int majorID, int minorID, void *serverarg, void *clientarg) {
-	int		rval = SNMPERR_SUCCESS;
-
-#ifdef HAVE_LIBKMT
-	kmt_close();
-#else
-
-#	ifdef USE_INTERNAL_MD5
-		/* EMPTY */
-#	else
-		rval = SNMPERR_SC_NOT_CONFIGURED;
-#	endif
-#endif
-
-	return rval;
-
-}  /* end sc_shutdown() */
-
-
-
 
 /*******************************************************************-o-******
  * sc_random
@@ -225,54 +130,45 @@ sc_shutdown(int majorID, int minorID, void *serverarg, void *clientarg) {
  *      
  * Returns:
  *	SNMPERR_SUCCESS			Success.
- *	SNMPERR_SC_GENERAL_FAILURE	Any KMT error.
  */
 int
 sc_random(u_char *buf, size_t *buflen)
-#if defined(HAVE_LIBKMT) || defined(USE_INTERNAL_MD5)
+#if defined(USE_INTERNAL_MD5) || defined(USE_OPENSSL)
 {
-	int		rval = SNMPERR_SUCCESS;
-
+  int		rval = SNMPERR_SUCCESS;
 #ifdef USE_INTERNAL_MD5
-        int i;
-        int rndval;
-        u_char *ucp = buf;
+  int i;
+  int rndval;
+  u_char *ucp = buf;
 #endif
 
+  DEBUGTRACE;
 
-#ifdef	HAVE_LIBKMT
-	rval = kmt_random(buf, *buflen);
-	if (rval < 0) {
-		rval = SNMPERR_SC_GENERAL_FAILURE;
-	} else {
-		*buflen = rval;
-		rval = SNMPERR_SUCCESS;
-	}
-
+#ifdef USE_OPENSSL
+  RAND_bytes(buf, *buflen); /* will never fail */
 #else	/* USE_INTERNAL_MD5 */
-        /* fill the buffer with random integers.  Note that random()
-           is defined in config.h and may not be truly the random()
-           system call if something better existed */
-		rval = *buflen - *buflen%sizeof(rndval);
-        for(i = 0; i < rval; i += sizeof(rndval)) {
-          rndval = random();
-          memcpy(ucp, &rndval, sizeof(rndval));
-          ucp += sizeof(rndval);
-        }
-
-        rndval = random();
-        memcpy(ucp, &rndval, *buflen%sizeof(rndval));
-
-        rval = SNMPERR_SUCCESS;
-#endif	/* !HAVE_LIBKMT == USE_INTERNAL_MD5 */
-
-	return rval;
+  /* fill the buffer with random integers.  Note that random()
+     is defined in config.h and may not be truly the random()
+     system call if something better existed */
+  rval = *buflen - *buflen%sizeof(rndval);
+  for(i = 0; i < rval; i += sizeof(rndval)) {
+    rndval = random();
+    memcpy(ucp, &rndval, sizeof(rndval));
+    ucp += sizeof(rndval);
+  }
+  
+  rndval = random();
+  memcpy(ucp, &rndval, *buflen%sizeof(rndval));
+  
+  rval = SNMPERR_SUCCESS;
+#endif  /* USE_OPENSSL */
+  return rval;
 
 }  /* end sc_random() */
 
 #else
 _SCAPI_NOT_CONFIGURED
-#endif							/* HAVE_LIBKMT */
+#endif							/*  */
 
 
 
@@ -292,7 +188,7 @@ _SCAPI_NOT_CONFIGURED
  *      
  * Returns:
  *	SNMPERR_SUCCESS			Success.
- *	SNMPERR_GENERR			All errs, including KMT errors.
+ *	SNMPERR_GENERR			All errs
  *
  *
  * A hash of the first msglen bytes of message using a keyed hash defined
@@ -308,114 +204,95 @@ sc_generate_keyed_hash(	oid	*authtype,	size_t authtypelen,
 			u_char	*key,		u_int  keylen,
 			u_char	*message,	u_int  msglen,
 			u_char	*MAC,		size_t *maclen)
-#if defined(HAVE_LIBKMT) || defined(USE_INTERNAL_MD5)
+#if  defined(USE_INTERNAL_MD5) || defined(USE_OPENSSL)
 {
-	int		 rval	 = SNMPERR_SUCCESS;
-	int		 transform,
-			 properlength;
+  int		 rval	 = SNMPERR_SUCCESS;
+  int		 transform, properlength;
 
-	u_int8_t	 buf[SNMP_MAXBUF_SMALL];
-#ifdef HAVE_LIBKMT
-	int		 buf_len = SNMP_MAXBUF_SMALL;
-	u_int8_t	*bufp = buf;
-	KMT_KEY_LIST	*kmtkeylist	= NULL;
+  u_int8_t	 buf[SNMP_MAXBUF_SMALL];
+#if  defined(USE_OPENSSL)
+  int		 buf_len = sizeof(buf);
+  u_int8_t	*bufp = buf;
 #endif
-
-
+  
+  DEBUGTRACE;
 
 #ifdef SNMP_TESTING_CODE
 {
-	int i;
-	DEBUGMSG(("sc_generate_keyed_hash", "sc_generate_keyed_hash(): key=0x"));
-        for(i=0; i< keylen; i++)
-          DEBUGMSG(("sc_generate_keyed_hash", "%02x", key[i] & 0xff));
-	DEBUGMSG(("sc_generate_keyed_hash"," (%d)\n", keylen));
+  int i;
+  DEBUGMSG(("sc_generate_keyed_hash", "sc_generate_keyed_hash(): key=0x"));
+  for(i=0; i< keylen; i++)
+    DEBUGMSG(("sc_generate_keyed_hash", "%02x", key[i] & 0xff));
+  DEBUGMSG(("sc_generate_keyed_hash"," (%d)\n", keylen));
 }
 #endif /* SNMP_TESTING_CODE */
 
-	/*
-	 * Sanity check.
-	 */
-	if ( !authtype || !key || !message || !MAC || !maclen
-		|| (keylen<=0) || (msglen<=0) || (*maclen<=0)
-		|| (authtypelen != USM_LENGTH_OID_TRANSFORM) )
-	{
-		QUITFUN(SNMPERR_GENERR, sc_generate_keyed_hash_quit);
-	}
+/*
+ * Sanity check.
+ */
+ if ( !authtype || !key || !message || !MAC || !maclen
+      || (keylen<=0) || (msglen<=0) || (*maclen<=0)
+      || (authtypelen != USM_LENGTH_OID_TRANSFORM) )
+   {
+     QUITFUN(SNMPERR_GENERR, sc_generate_keyed_hash_quit);
+   }
+ 
+ properlength = sc_get_properlength(authtype, authtypelen);
+ if (properlength == SNMPERR_GENERR)
+   return properlength;
+ 
+ if ( ((int)keylen < properlength) ) {
+   QUITFUN(SNMPERR_GENERR, sc_generate_keyed_hash_quit);
+ }
+ 
 
-
-	/*
-	 * Determine transform type.
-	 */
-        transform = sc_get_transform_type(authtype, authtypelen, &kmt_hash);
-        if (transform == SNMPERR_GENERR)
-          return transform;
-
-        properlength = sc_get_properlength(authtype, authtypelen);
-        if (properlength == SNMPERR_GENERR)
-          return properlength;
-
-	if ( ((int)keylen < properlength) ) {
-		QUITFUN(SNMPERR_GENERR, sc_generate_keyed_hash_quit);
-	}
-
-
-#ifdef HAVE_LIBKMT
-	/*
-	 * Lookup key in KMT.
-	 * Perform the keyed hash over message.
-	 * Store the result in MAC, possibly truncating the result.
-	 */
-	rval = sc_internal_kmtlookup(	transform,
-					key, keylen, properlength,
-					&kmtkeylist, TRUE);
-	QUITFUN(rval, sc_generate_keyed_hash_quit);
-		
-	rval = kmt_sign_data(	KMT_CRYPT_MODE_ALL,
-				kmt_keylist_key(kmtkeylist), NULL,
-				message, msglen,
-				&bufp, &buf_len);
-	QUITFUN(rval, sc_generate_keyed_hash_quit);
-
-	if (*maclen > buf_len) {
-		*maclen = buf_len;
-	}
-	memcpy(MAC, buf, *maclen);
-
-#else /* ! HAVE_LIBKMT */
-
-        if ((int)*maclen > properlength)
-          *maclen = properlength;
-        if (MDsign(message, msglen, MAC, *maclen, key, keylen)) {
-            rval = SNMPERR_GENERR;
-            goto sc_generate_keyed_hash_quit;
-        }
-
-#endif /* ! HAVE_LIBKMT */
+#ifdef USE_OPENSSL
+ /*
+  * Determine transform type.
+  */
+   if (ISTRANSFORM(authtype, HMACMD5Auth))
+     HMAC(EVP_md5(), key, keylen, message, msglen,  
+	  buf, &buf_len);
+   else if (ISTRANSFORM(authtype, HMACSHA1Auth)) 
+     HMAC(EVP_sha1(), key, keylen, message, msglen,  
+	  buf, &buf_len);
+   else {
+     QUITFUN(SNMPERR_GENERR, sc_generate_keyed_hash_quit);
+   }
+   if (buf_len != properlength) {
+     QUITFUN(rval, sc_generate_keyed_hash_quit);
+   }
+   if (*maclen > buf_len) 
+     *maclen = buf_len;
+   memcpy(MAC, buf, *maclen);
+#else 
+ if ((int)*maclen > properlength)
+   *maclen = properlength;
+ if (MDsign(message, msglen, MAC, *maclen, key, keylen)) {
+   rval = SNMPERR_GENERR;
+   goto sc_generate_keyed_hash_quit;
+ }
+#endif /* USE_OPENSSL */
 
 #ifdef SNMP_TESTING_CODE
-{
-	char    *s;
-	int      len = binary_to_hex(MAC, *maclen, &s);
-
-	DEBUGMSGTL(("scapi","Full v3 message hash: %s\n", s));
-	SNMP_ZERO(s, len);
-	SNMP_FREE(s);
-}
+ {
+   char    *s;
+   int      len = binary_to_hex(MAC, *maclen, &s);
+   
+   DEBUGMSGTL(("scapi","Full v3 message hash: %s\n", s));
+   SNMP_ZERO(s, len);
+   SNMP_FREE(s);
+ }
 #endif
-        
-sc_generate_keyed_hash_quit:
-#ifdef HAVE_LIBKMT
-	kmt_release_keylist(&kmtkeylist);
-#endif
-	SNMP_ZERO(buf, SNMP_MAXBUF_SMALL);
-	return rval;
-
+ 
+ sc_generate_keyed_hash_quit:
+ SNMP_ZERO(buf, SNMP_MAXBUF_SMALL);
+ return rval;
 }  /* end sc_generate_keyed_hash() */
 
 #else
 _SCAPI_NOT_CONFIGURED
-#endif							/* HAVE_LIBKMT */
+#endif							/* */
 
 
 /* sc_hash(): a generic wrapper around whatever hashing package we are using.
@@ -436,36 +313,46 @@ _SCAPI_NOT_CONFIGURED
      SNMP_SC_GENERAL_FAILURE	Any error.
 */
 
-#if defined(HAVE_LIBKMT) || defined(USE_INTERNAL_MD5)
 int
 sc_hash(oid *hashtype, size_t hashtypelen, u_char *buf, size_t buf_len,
         u_char *MAC, size_t *MAC_len)
+#if defined(USE_INTERNAL_MD5) || defined(USE_OPENSSL)
 {
-
-
-#ifdef HAVE_LIBKMT
   int   rval       = SNMPERR_SUCCESS;
-  void *context    = NULL;
+
+#ifdef USE_OPENSSL 
+  EVP_MD *hash();
+  HMAC_CTX *c = NULL; 
 #endif
 
+  DEBUGTRACE;
+
+  if (hashtype == NULL || hashtypelen < 0 || buf == NULL ||
+      buf_len < 0 || MAC == NULL ||  MAC_len == NULL ||
+      *MAC_len <= sc_get_properlength(hashtype, hashtypelen))
+    return (SNMPERR_GENERR);
+
+#ifdef USE_OPENSSL 
   /*
    * Determine transform type.
    */
+  c = malloc(sizeof(HMAC_CTX));
+  if (c == NULL)
+    return (SNMPERR_GENERR);
 
-  int transform = sc_get_transform_type(hashtype, hashtypelen, &kmt_hash);
-  if (transform == SNMPERR_GENERR)
-    return transform;
-
-#if defined(HAVE_LIBKMT)
-
-  rval = kmt_hash(KMT_CRYPT_MODE_ALL, &context, buf, buf_len, &MAC, MAC_len);
-
-  if (rval != SNMPERR_SUCCESS) {
-    return SNMPERR_SC_GENERAL_FAILURE;
+  if (ISTRANSFORM(hashtype, HMACMD5Auth)) {
+    EVP_DigestInit(&c->md_ctx, (const EVP_MD *) EVP_md5());
   }
-
-  return rval;
-
+  else if (ISTRANSFORM(hashtype, HMACSHA1Auth)) {
+    EVP_DigestInit(&c->md_ctx, (const EVP_MD *) EVP_sha1());
+  }
+  else {
+    return(SNMPERR_GENERR);
+  }
+  EVP_DigestUpdate(&c->md_ctx, buf, buf_len);
+  EVP_DigestFinal(&(c->md_ctx), MAC, MAC_len);
+  free(c);
+  return (rval);
 #else /* USE_INTERNAL_MD5 */
 
   if (MDchecksum(buf, buf_len, MAC, *MAC_len)) {
@@ -475,11 +362,11 @@ sc_hash(oid *hashtype, size_t hashtypelen, u_char *buf, size_t buf_len,
     *MAC_len = 16;
   return SNMPERR_SUCCESS;
 
-#endif
+#endif /* USE_OPENSSL */
 }
-#else /* !defined(HAVE_LIBKMT) && !defined(USE_INTERNAL_MD5) */
+#else /* !defined(USE_OPENSSL) && !defined(USE_INTERNAL_MD5) */
 _SCAPI_NOT_CONFIGURED
-#endif /* !defined(HAVE_LIBKMT) && !defined(USE_INTERNAL_MD5) */
+#endif /* !defined(USE_OPENSSL) && !defined(USE_INTERNAL_MD5) */
 
 
 
@@ -498,7 +385,7 @@ _SCAPI_NOT_CONFIGURED
  *				given hash transform.
  * Returns:
  *	SNMPERR_SUCCESS		Success.
- *	SNMP_SC_GENERAL_FAILURE	Any error, including KMT errs.
+ *	SNMP_SC_GENERAL_FAILURE	Any error
  *
  *
  * Check the hash given in MAC against the hash of message.  If the length
@@ -511,14 +398,14 @@ sc_check_keyed_hash(	oid	*authtype,	size_t authtypelen,
 			u_char	*key,		u_int keylen,
 			u_char	*message,	u_int msglen,
 			u_char	*MAC,		u_int maclen)
-#if defined(USE_INTERNAL_MD5) || defined(HAVE_LIBKMT)
+#if defined(USE_INTERNAL_MD5) || defined(USE_OPENSSL)
 {
 	int		 rval	 = SNMPERR_SUCCESS;
 	size_t		 buf_len = SNMP_MAXBUF_SMALL;
 
 	u_int8_t	 buf[SNMP_MAXBUF_SMALL];
 
-
+        DEBUGTRACE;
 
 #ifdef SNMP_TESTING_CODE
 {
@@ -569,7 +456,7 @@ sc_check_keyed_hash_quit:
 
 #else
 _SCAPI_NOT_CONFIGURED
-#endif	/* HAVE_LIBKMT || USE_INTERNAL_MD5 */
+#endif	/* USE_INTERNAL_MD5 */
 
 
 
@@ -590,7 +477,7 @@ _SCAPI_NOT_CONFIGURED
  * Returns:
  *	SNMPERR_SUCCESS			Success.
  *	SNMPERR_SC_NOT_CONFIGURED	Encryption is not supported.
- *	SNMPERR_SC_GENERAL_FAILURE	Any other error, including KMT errs.
+ *	SNMPERR_SC_GENERAL_FAILURE	Any other error
  *
  *
  * Encrypt plaintext into ciphertext using key and iv.
@@ -604,16 +491,17 @@ sc_encrypt(	oid    *privtype,	size_t privtypelen,
 		u_char *iv,		u_int  ivlen,
 		u_char *plaintext,	u_int  ptlen,
 		u_char *ciphertext,	size_t *ctlen)
-#ifdef								HAVE_LIBKMT
+#if defined(USE_OPENSSL) 
 {
 	int		rval	= SNMPERR_SUCCESS;
 	u_int		transform,
 			properlength,
 			properlength_iv;
+	u_char		pad_block[32];  /* bigger than anything I need */
+	u_char          my_iv[32];      /* ditto */
+	int		pad, plast, pad_size;
 
-	KMT_KEY_LIST	*kmtkeylist = NULL;
-
-
+        DEBUGTRACE;
 
 	/*
 	 * Sanity check.
@@ -626,6 +514,9 @@ sc_encrypt(	oid    *privtype,	size_t privtypelen,
 		|| (keylen<=0) || (ivlen<=0) || (ptlen<=0) || (*ctlen<=0)
 		|| (privtypelen != USM_LENGTH_OID_TRANSFORM) )
 	{
+		QUITFUN(SNMPERR_GENERR, sc_encrypt_quit);
+	}
+	else if ( ptlen >= *ctlen) { 
 		QUITFUN(SNMPERR_GENERR, sc_encrypt_quit);
 	}
 
@@ -649,10 +540,9 @@ sc_encrypt(	oid    *privtype,	size_t privtypelen,
 	 * Determine privacy transform.
 	 */
 	if ( ISTRANSFORM(privtype, DESPriv) ) {
-		transform	= KMT_ALG_DES;	
 		properlength	= BYTESIZE(SNMP_TRANS_PRIVLEN_1DES);
 		properlength_iv	= BYTESIZE(SNMP_TRANS_PRIVLEN_1DES_IV);
-
+		pad_size = properlength;
 	} else {
 		QUITFUN(SNMPERR_GENERR, sc_encrypt_quit);
 	}
@@ -661,31 +551,36 @@ sc_encrypt(	oid    *privtype,	size_t privtypelen,
 		QUITFUN(SNMPERR_GENERR, sc_encrypt_quit);
 	}
 
+	else if ( (keylen<properlength) || (ivlen<properlength_iv) ) {
+		QUITFUN(SNMPERR_GENERR, sc_encrypt_quit);
+	}
 
-	/*
-	 * Lookup key in KMT.
-	 * Encrypt plaintext into ciphertext.
-	 */
-	rval = sc_internal_kmtlookup(	transform,
-					key, keylen, properlength,
-					&kmtkeylist, TRUE);
-	QUITFUN(rval, sc_encrypt_quit);
+/* now calculate the padding needed */
+	pad = pad_size - (ptlen % pad_size);
+	if (ptlen + pad > *ctlen) { 
+		QUITFUN(SNMPERR_GENERR, sc_encrypt_quit); /* not enough space */
+	}
+	memset(pad_block, 0, sizeof(pad_block));
+	plast = (int) ptlen - (pad_size - pad);
+	if (pad > 0)  /* copy data into pad block if needed */
+		memcpy( pad_block, plaintext + plast, pad_size - pad);
+	memset(&pad_block[pad_size-pad], pad, pad); /* filling in padblock */
 
-	rval = kmt_encrypt_data(KMT_CRYPT_MODE_ALL,
-				kmt_keylist_key(kmtkeylist), NULL,
-				plaintext, ptlen,
-				&ciphertext, ctlen,
-                                iv);
-	QUITFUN(rval, sc_encrypt_quit);
+	memset(my_iv, 0, sizeof(my_iv));
 
-
+	if ( ISTRANSFORM(privtype, DESPriv) ) {
+          /* removed due to U.S. exportation regulations */
+	}
 sc_encrypt_quit:
-	kmt_release_keylist(&kmtkeylist);
+	/* clear memory just in case */
+	memset(my_iv, 0, sizeof(my_iv));
+	memset(pad_block, 0, sizeof(pad_block));
 	return rval;
 
 }  /* end sc_encrypt() */
 
 #else
+{
 #	if USE_INTERNAL_MD5
 	{
 		DEBUGMSGTL(("scapi","Encrypt function not defined.\n"));
@@ -696,7 +591,8 @@ sc_encrypt_quit:
 		_SCAPI_NOT_CONFIGURED
 
 #	endif /* USE_INTERNAL_MD5 */
-#endif							/* HAVE_LIBKMT */
+			}
+#endif							/* */
 
 
 
@@ -717,7 +613,7 @@ sc_encrypt_quit:
  * Returns:
  *	SNMPERR_SUCCESS			Success.
  *	SNMPERR_SC_NOT_CONFIGURED	Encryption is not supported.
- *      SNMPERR_SC_GENERAL_FAILURE      Any other error, including KMT errs.
+ *      SNMPERR_SC_GENERAL_FAILURE      Any other error
  *
  *
  * Decrypt ciphertext into plaintext using key and iv.
@@ -731,26 +627,19 @@ sc_decrypt(	oid    *privtype,	size_t privtypelen,
 		u_char *iv,		u_int  ivlen,
 		u_char *ciphertext,	u_int  ctlen,
 		u_char *plaintext,	size_t *ptlen)
-#ifdef								HAVE_LIBKMT
+#ifdef USE_OPENSSL
 {
-	int		rval	= SNMPERR_SUCCESS;
-	u_int		transform,
-			properlength,
+
+	int rval = SNMPERR_SUCCESS;
+	int i, j; 
+	u_char *my_iv[32];
+	u_int		properlength,
 			properlength_iv;
 
-	KMT_KEY_LIST	*kmtkeylist = NULL;
-
-
-
-	/*
-	 * Sanity check.
-	 */
-#if	!defined(SCAPI_AUTHPRIV)
-		return SNMPERR_SC_NOT_CONFIGURED;
-#endif
+        DEBUGTRACE;
 
 	if ( !privtype || !key || !iv || !plaintext || !ciphertext || !ptlen
-		|| (ctlen<=0) || (*ptlen<=0)
+		|| (ctlen<=0) || (*ptlen<=0) || (*ptlen < ctlen)
 		|| (privtypelen != USM_LENGTH_OID_TRANSFORM) )
 	{
 		QUITFUN(SNMPERR_GENERR, sc_decrypt_quit);
@@ -768,12 +657,10 @@ sc_decrypt(	oid    *privtype,	size_t privtypelen,
 }
 #endif /* SNMP_TESTING_CODE */
 
-
 	/*
 	 * Determine privacy transform.
 	 */
 	if ( ISTRANSFORM(privtype, DESPriv) ) {
-		transform	= KMT_ALG_DES;	
 		properlength	= BYTESIZE(SNMP_TRANS_PRIVLEN_1DES);
 		properlength_iv	= BYTESIZE(SNMP_TRANS_PRIVLEN_1DES_IV);
 
@@ -784,32 +671,28 @@ sc_decrypt(	oid    *privtype,	size_t privtypelen,
 	if ( (keylen<properlength) || (ivlen<properlength_iv) ) {
 		QUITFUN(SNMPERR_GENERR, sc_decrypt_quit);
 	}
+	
+	memset(my_iv, 0, sizeof(my_iv));
+	if (ISTRANSFORM(privtype, DESPriv)) {
+          /* removed due to U.S. exportation regulations */
+	}
+/* remove padding */
+	i = plaintext[ctlen-1]; /* stip pad off plaintext */
+	for (j =i; j > 0; j--)
+		if(plaintext[ctlen-j] != i) {/* check if pad is bad */
+			QUITFUN(SNMPERR_GENERR, sc_decrypt_quit);
+		}
+	*ptlen = ctlen-i; /* set the out put lenght of the pad */
 
-
-	/*
-	 * Lookup key in KMT.
-	 * Decrypt ciphertext into plaintext.
-	 */
-	rval = sc_internal_kmtlookup(	transform,
-					key, keylen, properlength,
-					&kmtkeylist, TRUE);
-	QUITFUN(rval, sc_decrypt_quit);
-
-	rval = kmt_decrypt_data(KMT_CRYPT_MODE_ALL,
-				kmt_keylist_key(kmtkeylist), NULL,
-				ciphertext, ctlen,
-				&plaintext, ptlen,
-				iv);
-
-	QUITFUN(rval, sc_decrypt_quit);
-
-
+/* exit cond */
 sc_decrypt_quit:
-	kmt_release_keylist(&kmtkeylist);
+	memset(my_iv, 0, sizeof(my_iv));
 	return rval;
-
-}  /* end sc_decrypt() */
-
+}  
+#else   /* USE OPEN_SSL */
+{
+#if	!defined(SCAPI_AUTHPRIV)
+		return SNMPERR_SC_NOT_CONFIGURED;
 #else
 #	if USE_INTERNAL_MD5
 	{
@@ -821,86 +704,7 @@ sc_decrypt_quit:
 		_SCAPI_NOT_CONFIGURED
 
 #	endif /* USE_INTERNAL_MD5 */
-#endif							/* HAVE_LIBKMT */
-
-	
-
-#ifdef								HAVE_LIBKMT
-
-/*******************************************************************-o-******
- * sc_internal_kmtlookup
- *
- * Parameters:
- *	  transform		Cryptographic algorithm associated with key.
- *	 *key			Key bits in a string of bytes.
- *	  keylen		Number of bytes in key.
- *	  properlen		Number of bytes in a properly formed key.
- *	**kmtkeylist		Hook to return KMT_KEY_LIST with key entry.
- *	  dospecify		TRUE if a new key should be added to KMT cache.
- *      
- * Returns:
- *	SNMPERR_SUCCESS			Success.
- *	SNMPERR_SC_GENERAL_FAILURE	Any err, including KMT errors.
- *
- * Lookup the key in the KMT cache.
- * Add a new key if the requested key is not found.
- * Always returns one or 0 keys.
- *
- * NOTE  Default "mode" is proper for all currently known SNMPv3 algorithms.
- * NOTE  Identical keys may be instantiated with different transforms.
- *
- * ASSUME	No transform has more than one mode of use in the SNMP context.
- */
-int
-sc_internal_kmtlookup(	u_int 	 transform, 
-			u_char	*key,		u_int		  keylen,
-			u_int	 properlength,	KMT_KEY_LIST	**kmtkeylist,
-			int	 dospecify)
-{
-	int	 rval		 = SNMPERR_SUCCESS,
-		 tmode		 = 0,			/* KMT default. */
-		 keyname_len;
-	char	*keyname	 = NULL;
-
-	KMT_ATTRIBUTE	kmt_attr;
-        kmt_attr.type = KMT_ATTR_ALG;
-        kmt_attr.value = (int) transform;
-
-
-
-	/*
-	 * Sanity check.
-	 */
-	if ( !key || !kmtkeylist || (keylen <= 0) || (properlength <= 0) ) {
-		return SNMPERR_SC_GENERAL_FAILURE;
-	}
-
-
-	*kmtkeylist = NULL;
-	keyname_len = binary_to_hex(key, keylen, &keyname);
-
-	rval = kmt_get_keylist_from_cache(
-				kmtkeylist, keyname, &kmt_attr, 1);
-
-	if (dospecify && rval != KMT_ERR_SUCCESS) {
-		rval = kmt_specify_key(	keyname, properlength * 8,
-					transform, tmode,
-					NULL, key, keylen,
-					kmtkeylist);
-
-		if (rval != KMT_ERR_SUCCESS) {
-			rval = SNMPERR_SC_GENERAL_FAILURE;
-
-		} else {
-			kmt_set_expiry(kmt_keylist_key(*kmtkeylist), 0, 0);
-		}
-	}
-
-        free_zero(keyname, keyname_len);
-
-	return rval;
-
-}  /* end sc_internal_kmtlookup() */
-
-#endif							/* HAVE_LIBKMT */
+#endif							/*  */
+			}
+#endif /* USE_OPENSSL */
 

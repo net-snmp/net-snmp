@@ -33,8 +33,11 @@
    privacy support. */
 #undef SCAPI_AUTHPRIV
 
-/* define if you are using the MD5 code */
+/* define if you are using the MD5 code ...*/
 #undef USE_INTERNAL_MD5
+
+/* ... or define this if you're using openssl support */
+#undef USE_OPENSSL
 
 /* add in recent CMU library extensions (not complete) */
 #undef CMU_COMPATIBLE
