@@ -77,8 +77,6 @@ SOFTWARE.
 #include "system.h"
 #include "snmp_parse_args.h"
 
-int failures;
-
 oid objid_mib[] = {1, 3, 6, 1, 2, 1};
 
 void usage(void)
