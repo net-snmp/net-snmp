@@ -10,6 +10,7 @@
 /* strings */
 #define DS_AGENT_PROGNAME 0        /* argv[0] */
 #define DS_AGENT_X_SOCKET 1        /* AF_UNIX or ip:port socket addr */
+#define DS_AGENT_PORTS    2        /* localhost:9161,tcp:localhost:9161... */
 
 /* integers */
 #define DS_AGENT_FLAGS    0       /* session.flags */
