@@ -86,8 +86,12 @@ int		snmp_tcp_recv	(snmp_transport *t, void *buf, int size,
   } else {
     return -1;
   }
-  *opaque  = t->data;
-  *olength = t->data_length;
+  if ((*opaque = malloc(t->data_length)) != NULL) {
+    memcpy(*opaque, t->data, t->data_length);
+    *olength = t->data_length;
+  } else {
+    *olength = 0;
+  }
   return rc;
 }
 
@@ -130,7 +134,7 @@ int		snmp_tcp_close	(snmp_transport *t)
 int		snmp_tcp_accept	(snmp_transport *t)
 {
   struct sockaddr *farend = NULL;
-  int newsock = -1, farendlen = sizeof(struct sockaddr_in);
+  int newsock = -1, farendlen = sizeof(struct sockaddr_in), sockflags = 0;
   char *string = NULL;
 
   farend = (struct sockaddr *)malloc(sizeof(struct sockaddr_in));
@@ -159,6 +163,12 @@ int		snmp_tcp_accept	(snmp_transport *t)
     string = snmp_tcp_fmtaddr(NULL, farend, farendlen);
     DEBUGMSGTL(("snmp_tcp_accept", "accept succeeded (from %s)\n", string));
     free(string);
+
+    /*  Try to make the new socket n0n-blocking.  */
+
+    sockflags = fcntl(newsock, F_GETFL, 0);
+    fcntl(newsock, F_SETFL, (sockflags & ~O_NONBLOCK));
+
     return newsock;
   } else {
     free(farend);
