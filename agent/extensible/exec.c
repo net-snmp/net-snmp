@@ -192,6 +192,8 @@ unsigned char *var_extensible_relocatable(vp, name, length, exact, var_len, writ
           for (i=0;i != name[*length-1];i++) {
             if (fgets(errmsg,STRMAX,file) == NULL) {
               *var_len = NULL;
+              fclose(file);
+              close(fd);
               return(NULL);
             }
           }
