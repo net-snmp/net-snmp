@@ -1398,18 +1398,6 @@ snmp_sess_async_send(sessp, pdu, callback, cb_data)
     struct timeval tv;
     int expect_response = 1;
 
-
-    /* find the internal session for the caller */
-/*    for(slp = Sessions; slp; slp = slp->next){
-	if (slp->session == session){
-	    isp = slp->internal;
-	    break;
-	}
-    }
-    if (isp == NULL){
-	snmp_errno = SNMPERR_BAD_SESSION;
-	return 0;
-        } */
     session = slp->session; isp = slp->internal;
     session->s_snmp_errno = 0;
     session->s_errno = 0;
