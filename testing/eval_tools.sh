@@ -87,8 +87,9 @@ GRONIK
 #------------------------------------ -o-
 #
 SKIPIFNOT() {
-	grep "define $1" $SNMP_BASEDIR/../../config.h
+	grep "define $1" $SNMP_UPDIR/config.h
 	if [ $? != 0 ]; then
+	    REMOVETESTDATA
 	    echo "SKIPPED"
 	    exit 0;
 	fi
@@ -126,6 +127,14 @@ STARTTEST() {
 #
 STOPTEST() {
 	rm -rf "$junkoutputfile"
+}
+
+
+#------------------------------------ -o- 
+#
+REMOVETESTDATA() {
+#	ECHO "removing $SNMP_TMPDIR  "
+	rm -rf $SNMP_TMPDIR
 }
 
 
@@ -235,14 +244,19 @@ STOPAGENT() {
 }
 
 FINISHED() {
-    if [ "x$SNMP_SAVE_TMPDIR" != "xyes" ]; then
-	rm -rf $SNMP_TMPDIR
-    fi
-    if [ "x$return_value" = "x0" ]; then
-	echo "ok"
-    else
+    if [ "x$return_value" != "x0" ]; then
+	if [ -s core ] ; then
+		cp core $SNMP_TMPDIR
+		rm -f core
+	fi
 	echo "FAIL"
+	exit $return_value
     fi
+
+    if [ "x$SNMP_SAVE_TMPDIR" != "xyes" ]; then
+	REMOVETESTDATA
+    fi
+    echo "ok"
     exit $return_value
 	
 }
