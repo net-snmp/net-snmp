@@ -2092,6 +2092,7 @@ print_tree_node(FILE *f,
 	    fprintf(f," }\n");
 	}
 	if (tp->description) fprintf(f, "  DESCRIPTION\t\"%s\"\n", tp->description);
+	if (tp->defaultValue) fprintf(f, "  DEFVAL\t{ %s }\n", tp->defaultValue);
     }
     else
         fprintf(f, "No description\n");
