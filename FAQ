@@ -175,8 +175,6 @@ Where can I get it?
   Download:
     - http://www.net-snmp.org/download/
     - ftp://ftp.net-snmp.org/pub/sourceforge/net-snmp/
-  MD5 Sums:
-    - http://www.net-snmp.org/md5/
   Web page:
     - http://www.net-snmp.org/
   Sourceforge Project page:
@@ -1894,12 +1892,12 @@ Can I use AgentX when running under Windows?
   socket '/var/agentx/master', which doesn't work under Windows.
   You'll need to tell it to listen on a TCP port, either by using
   the command-line option "-x localhost:705",  or by adding the
-  directive "agentxAddress localhost:705" to the snmpd.conf file.
+  directive "agentxSocket localhost:705" to the snmpd.conf file.
 
   Secondly, be aware that the security of AgentX connectivity is not
   particularly strong.  The examples given here would allow any process
   running on the local machine to register as an AgentX subagent.  The
-  more obvious settings "-x 705" or "agentxAddress 705" would allow
+  more obvious settings "-x 705" or "agentxSocket 705" would allow
   a system *anywhere* on the network (or even from remote networks) to
   register as an AgentX subagent.  This could potentially be used to
   hijack the agent, or provide false information.
