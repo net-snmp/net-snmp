@@ -12,3 +12,6 @@
 #include <ucd-snmp/snmp_client.h>
 #include <ucd-snmp/mib.h>
 #include <ucd-snmp/snmp.h>
+
+#include <ucd-snmp/default_store.h>
+#include <ucd-snmp/snmp_logging.h>
