@@ -5,10 +5,14 @@ NET-SNMP-AGENT-MIB DEFINITIONS ::= BEGIN
 --
 
 IMPORTS
-    netSnmpObjects, netSnmpModuleIDs FROM NET-SNMP-MIB
+    netSnmpObjects, netSnmpModuleIDs, netSnmpNotifications, netSnmpGroups
+	FROM NET-SNMP-MIB
 
     OBJECT-TYPE, NOTIFICATION-TYPE, MODULE-IDENTITY, Integer32
         FROM SNMPv2-SMI
+
+    OBJECT-GROUP, NOTIFICATION-GROUP
+	FROM SNMPv2-CONF
 
     DisplayString FROM SNMPv2-TC;
 
@@ -63,8 +67,8 @@ nsTransactionEntry OBJECT-TYPE
     ::= {nsTransactionTable 1 }
 
 NsTransactionEntry ::= SEQUENCE {
-  nsTransactionID   INTEGER,
-  nsTransactionMode Integer32
+    nsTransactionID   INTEGER,
+    nsTransactionMode Integer32
 }
 
 nsTransactionID OBJECT-TYPE
@@ -82,6 +86,12 @@ nsTransactionMode OBJECT-TYPE
     DESCRIPTION
 	"The mode number for the current operation being performed."
     ::= { nsTransactionEntry 2 }
+
+
+--
+--  Monitoring the MIB modules currently registered in the agent
+--    (an updated version of UCD-SNMP-MIB::mrTable)
+--
 
 nsModuleTable OBJECT-TYPE
     SYNTAX	SEQUENCE OF NsModuleEntry
@@ -104,9 +114,12 @@ nsModuleEntry OBJECT-TYPE
     ::= { nsModuleTable 1 }
 
 NsModuleEntry ::= SEQUENCE {
-    nsmContextName         OCTET STRING,
-    nsmRegistrationPoint   OBJECT IDENTIFIER,
-    nsmName	           DisplayString
+    nsmContextName          OCTET STRING,
+    nsmRegistrationPoint    OBJECT IDENTIFIER,
+    nsmRegistrationPriority INTEGER,
+    nsModuleName	    DisplayString,
+    nsModuleModes           BITS,
+    nsModuleTimeout         Integer32
 }
 
 nsmContextName OBJECT-TYPE
@@ -159,5 +172,64 @@ nsModuleTimeout OBJECT-TYPE
 	 that expect to return results at a later date (subagents,
 	 etc)"
     ::= { nsModuleEntry  6 }
+
+
+--
+--  Notifications relating to the basic operation of the agent
+--
+
+nsNotifyStart        NOTIFICATION-TYPE
+    STATUS	current
+    DESCRIPTION
+	"An indication that the agent has started running."
+    ::= { netSnmpNotifications 1 }
+    
+nsNotifyShutdown     NOTIFICATION-TYPE
+    STATUS current
+    DESCRIPTION
+	"An indication that the agent is in the process of being shut down."
+    ::= { netSnmpNotifications 2 }
+
+nsNotifyRestart      NOTIFICATION-TYPE
+    STATUS	current
+    DESCRIPTION
+	"An indication that the agent has been restarted.
+	 This does not imply anything about whether the configuration has
+	 changed or not (unlike the standard coldStart or warmStart traps)"
+    ::= { netSnmpNotifications 3 }
+    
+
+--
+-- Conformance-related definitions
+--
+
+nsModuleGroup  OBJECT-GROUP
+    OBJECTS {
+        nsmContextName, nsmRegistrationPoint, nsmRegistrationPriority
+        nsModuleName, nsModuleModes, nsModuleTimeout
+    }
+    STATUS	current
+    DESCRIPTION
+	"The objects relating to the list of MIB modules registered
+	 with the Net-SNMP agent."
+    ::= { netSnmpGroups 2 }
+
+nsTransctionGroup  OBJECT-GROUP
+    OBJECTS {
+        nsTransactionID, nsTransactionMode
+    }
+    STATUS	current
+    DESCRIPTION
+	"The objects relating to transaction monitoring in the Net-SNMP agent."
+    ::= { netSnmpGroups 8 }
+
+nsAgentNotifyGroup NOTIFICATION-GROUP
+    NOTIFICATIONS { nsNotifyStart, nsNotifyShutdown, nsNotifyRestart }
+    STATUS	current
+    DESCRIPTION
+	"The notifications relating to the basic operation of the Net-SNMP agent."
+    ::= { netSnmpGroups 9 }
+
+    
 
 END
