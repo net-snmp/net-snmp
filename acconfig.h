@@ -17,6 +17,7 @@
  doesn't overlap with other mibs you are using on the system */
 
 #define EXTENSIBLEMIB 1,3,6,1,4,10 /* location of the extensible mib tree */
+#define EXTENSIBLEDOTMIB 1.3.6.1.4.10 /* location of the extensible mib tree */
 #define EXTENSIBLENUM 6            /* count the above numbers */
 
 /* LOGFILE:  If defined it closes stdout/err/in and opens this in out/err's
@@ -131,5 +132,7 @@ sure to end it in -1.*/
 
 #define LASTFIELD -1      /* internal define */
 
+#ifndef DONT_INC_STRUCTS
 #include "agent/extensible/struct.h"
+#endif
 
