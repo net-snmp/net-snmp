@@ -7,13 +7,13 @@
 
                       All Rights Reserved
 
-Permission to use, copy, modify, and distribute this software and its 
-documentation for any purpose and without fee is hereby granted, 
+Permission to use, copy, modify, and distribute this software and its
+documentation for any purpose and without fee is hereby granted,
 provided that the above copyright notice appear in all copies and that
-both that copyright notice and this permission notice appear in 
+both that copyright notice and this permission notice appear in
 supporting documentation, and that the name of CMU not be
 used in advertising or publicity pertaining to distribution of the
-software without specific, written prior permission.  
+software without specific, written prior permission.
 
 CMU DISCLAIMS ALL WARRANTIES WITH REGARD TO THIS SOFTWARE, INCLUDING
 ALL IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS, IN NO EVENT SHALL
@@ -293,7 +293,9 @@ main(argc, argv)
      * usage: snmptrap gateway-name srcParty dstParty trap-type specific-type device-description [ -a agent-addr ]
      */
     arg = snmp_parse_args(argc, argv, &session);
- 
+
+    SOCK_STARTUP;
+
     session.callback = snmp_input;
     session.callback_magic = NULL;
     if (session.remote_port == SNMP_DEFAULT_REMPORT)
@@ -302,7 +304,8 @@ main(argc, argv)
     ss = snmp_open(&session);
     if (ss == NULL){
         snmp_perror("snmptrap");
-	exit(1);
+        SOCK_CLEANUP;
+        exit(1);
     }
 #ifdef _DEBUG_MALLOC_INC
     orig_size = malloc_inuse(&histid1);
@@ -313,6 +316,7 @@ main(argc, argv)
 	if (arg == argc) {
 	    fprintf(stderr, "No enterprise oid\n");
 	    usage();
+            SOCK_CLEANUP;
 	    exit(1);
 	}
 	if (argv[arg][0] == 0) {
@@ -325,6 +329,7 @@ main(argc, argv)
 	    if (!snmp_parse_oid(argv[arg], name, &name_length)) {
 		fprintf (stderr, "Invalid enterprise id: %s\n", argv[arg]);
 		usage ();
+                SOCK_CLEANUP;
 		exit (1);
 	    }
 	    pdu->enterprise = (oid *)malloc(name_length * sizeof(oid));
@@ -334,6 +339,7 @@ main(argc, argv)
 	if (++arg >= argc) {
 	    fprintf (stderr, "Missing agent parameter\n");
 	    usage ();
+            SOCK_CLEANUP;
 	    exit (1);
 	}
 	agent = argv [arg];
@@ -344,6 +350,7 @@ main(argc, argv)
 	if (++arg == argc) {
 	    fprintf (stderr, "Missing generic-trap parameter\n");
 	    usage ();
+            SOCK_CLEANUP;
 	    exit (1);
 	}
 	trap = argv [arg];
@@ -351,6 +358,7 @@ main(argc, argv)
 	if (++arg == argc) {
 	    fprintf (stderr, "Missing specific-trap parameter\n");
 	    usage ();
+            SOCK_CLEANUP;
 	    exit (1);
 	}
 	specific = argv [arg];
@@ -358,6 +366,7 @@ main(argc, argv)
 	if (++arg == argc) {
 	    fprintf (stderr, "Missing uptime parameter\n");
 	    usage ();
+            SOCK_CLEANUP;
 	    exit (1);
 	}
 	description = argv [arg];
@@ -380,6 +389,7 @@ main(argc, argv)
 	if (arg == argc) {
 	    fprintf(stderr, "Missing up-time parameter\n");
 	    usage();
+            SOCK_CLEANUP;
 	    exit(1);
 	}
 	trap = argv[arg];
@@ -393,6 +403,7 @@ main(argc, argv)
 	if (++arg == argc) {
 	    fprintf (stderr, "Missing trap-oid parameter\n");
 	    usage ();
+            SOCK_CLEANUP;
 	    exit (1);
 	}
 	snmp_add_var (pdu, objid_snmptrap, sizeof (objid_snmptrap)/sizeof(oid),
@@ -406,6 +417,7 @@ main(argc, argv)
 	name_length = MAX_NAME_LEN;
 	if (!snmp_parse_oid(argv [arg-3], name, &name_length)) {
 	    fprintf (stderr, "Invalid object identifier: %s\n", argv [arg-3]);
+            SOCK_CLEANUP;
 	    exit(1);
 	}
 	snmp_add_var (pdu, name, name_length, argv [arg-2][0], argv [arg-1]);
@@ -423,5 +435,6 @@ main(argc, argv)
     if (current_size != orig_size) malloc_list(2, histid1, histid2);
 #endif
     snmp_close(ss);
+    SOCK_CLEANUP;
     return (0);
 }
