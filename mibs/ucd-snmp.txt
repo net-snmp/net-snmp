@@ -70,7 +70,7 @@ processIndex OBJECT-TYPE
 	::= { processes 1 }
 
 processNames OBJECT-TYPE
-	SYNTAX DisplayString (SIZE (0..255))
+	SYNTAX DisplayString  (SIZE (0..255))
 	ACCESS read-only
 	STATUS mandatory
 	DESCRIPTION
@@ -116,7 +116,7 @@ processErrorFlag OBJECT-TYPE
 	::= { processes 100 }
 
 processErrMessage OBJECT-TYPE
-	SYNTAX DisplayString (SIZE (0..255))
+	SYNTAX DisplayString  (SIZE (0..255))
 	ACCESS read-only
 	STATUS mandatory
 	DESCRIPTION
@@ -158,7 +158,7 @@ extensibleIndex OBJECT-TYPE
 	::= { extensible 1 }
 
 extensibleNames OBJECT-TYPE
-	SYNTAX DisplayString (SIZE (0..255))
+	SYNTAX DisplayString  (SIZE (0..255))
 	ACCESS read-only
 	STATUS mandatory
 	DESCRIPTION
@@ -166,7 +166,7 @@ extensibleNames OBJECT-TYPE
 	::= { extensible 2 }
 
 extensibleCommand OBJECT-TYPE
-	SYNTAX DisplayString (SIZE (0..255))
+	SYNTAX DisplayString  (SIZE (0..255))
 	ACCESS read-only
 	STATUS mandatory
 	DESCRIPTION
