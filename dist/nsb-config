@@ -20,12 +20,19 @@ usage()
 #set -x
 
 
-if [ -f nsb-functions ];then
-   source nsb-functions
+#
+# find nsb-platform based on te path to this script
+#
+EXE_PATH=${0%nsb-config}
+EXE_PATH=${EXE_PATH%/}
+if [ -f $EXE_PATH/nsb-functions ];then
+   source $EXE_PATH/nsb-functions
 elif [ -f $HOME/bin/nsb-functions ]; then
    source $HOME/bin/nsb-functions
+elif [ -f nsb-functions ];then
+   source nsb-functions
 else
-   echo "Cannot find nsb-functions"
+   echo "Cannot find nsb-functions in $EXE_PATH, $HOME/bin or $PWD"
    exit 1
 fi
 
