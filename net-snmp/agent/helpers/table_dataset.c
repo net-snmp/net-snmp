@@ -328,8 +328,8 @@ netsnmp_table_data_set_helper_handler(
     netsnmp_request_info              *requests) {
 
     netsnmp_table_data_set_storage *data = NULL;
-    newrow_stash *newrowstash;
-    netsnmp_table_row *row, *newrow;
+    newrow_stash *newrowstash = NULL;
+    netsnmp_table_row *row, *newrow = NULL;
     netsnmp_table_request_info *table_info;
     netsnmp_request_info *request;
     oid *suffix;
@@ -585,7 +585,29 @@ netsnmp_table_data_set_helper_handler(
         netsnmp_call_next_handler(handler, reginfo, reqinfo, requests);
     return SNMP_ERR_NOERROR;
 }
-    
+
+/** registers a table_dataset so that the "add_row" snmpd.conf token
+  * can be used to add data to this table.  If registration_name is
+  * NULL then the name used when the table was created will be used
+  * instead.
+  *
+  * @todo create a properly free'ing registeration pointer for the
+  * datalist, and get the datalist freed at shutdown.
+  */
+void
+netsnmp_register_auto_data_table(netsnmp_table_data_set *table_set,
+                                 char *registration_name) {
+    data_set_tables *tables;
+    tables = SNMP_MALLOC_TYPEDEF(data_set_tables);
+    tables->table_set = table_set;
+    if (!registration_name) {
+        registration_name = table_set->table->name;
+    }
+    netsnmp_add_list_data(&auto_tables,
+                          netsnmp_create_data_list(registration_name, tables,
+                                                   NULL)); /* XXX */
+}
+
 /** @internal */
 void
 netsnmp_config_parse_table_set(const char *token, char *line) 
@@ -596,7 +618,6 @@ netsnmp_config_parse_table_set(const char *token, char *line)
     netsnmp_table_data_set *table_set;
     struct index_list *index;
     unsigned int mincol = 0xffffff, maxcol = 0;
-    data_set_tables *tables;
     u_char type;
     
     /* instatiate a fake table based on MIB information */
@@ -678,9 +699,7 @@ netsnmp_config_parse_table_set(const char *token, char *line)
                                     HANDLER_CAN_RWRITE),
         table_set, NULL);
 
-    tables = SNMP_MALLOC_TYPEDEF(data_set_tables);
-    tables->table_set = table_set;
-    netsnmp_add_list_data(&auto_tables, netsnmp_create_data_list(line, tables, NULL));
+    netsnmp_register_auto_data_table(table_set, NULL);
 }
 
 /** @internal */
@@ -776,7 +795,7 @@ netsnmp_table_dataset_delete_data(netsnmp_table_data_set_storage *data)
     return nextPtr;
 }
 
-/* deletes all the data from this node and beyond in the linked list */
+/** deletes all the data from this node and beyond in the linked list */
 inline void
 netsnmp_table_dataset_delete_all_data(netsnmp_table_data_set_storage *data)
 {
@@ -786,7 +805,7 @@ netsnmp_table_dataset_delete_all_data(netsnmp_table_data_set_storage *data)
     }
 }
 
-/* deletes all the data from this node and beyond in the linked list */
+/** deletes all the data from this node and beyond in the linked list */
 inline void
 netsnmp_table_dataset_delete_row(netsnmp_table_row *row)
 {
