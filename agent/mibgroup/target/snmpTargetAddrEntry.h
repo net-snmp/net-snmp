@@ -44,6 +44,7 @@ struct targetAddrTable_struct {
   oid    tDomain[MAX_OID_LEN];
   int    tDomainLen;
   char  *tAddress;
+  size_t tAddressLen;
   int    timeout;
   int    retryCount;
   char  *tagList;
@@ -60,6 +61,8 @@ void          init_snmpTargetAddrEntry(void);
 int           store_snmpTargetAddrEntry(int majorID, int minorID,
                                         void *serverarg, void *clientarg);
 FindVarMethod var_snmpTargetAddrEntry;
+
+struct targetAddrTable_struct *get_addrTable(void);
 
 void snmpd_parse_config_targetAddr(const char *, char *);
 

@@ -40,6 +40,8 @@ struct targetParamTable_struct {
   int    rowStatus;
   struct targetParamTable_struct *next; };
 
+/* utility functions */
+struct targetParamTable_struct *get_paramEntry(char *name);
 
 /* function definitions */
 

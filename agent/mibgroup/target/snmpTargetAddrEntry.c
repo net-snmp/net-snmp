@@ -32,7 +32,10 @@ static struct targetAddrTable_struct *aAddrTable=0;
 
 
 /* Utility routines */
-
+struct targetAddrTable_struct *
+get_addrTable(void) {
+    return aAddrTable;
+}
 
 /* TargetAddrTable_create creates and returns a pointer
    to a targetAddrTable_struct with default values set */
@@ -70,12 +73,12 @@ struct targetAddrTable_struct
    targetAddrTable_struct */
 void snmpTargetAddrTable_dispose(struct targetAddrTable_struct *reaped)
 {
-  free(reaped->name);
-  free(reaped->tAddress);
-  free(reaped->tagList);
-  free(reaped->params);
+  SNMP_FREE(reaped->name);
+  SNMP_FREE(reaped->tAddress);
+  SNMP_FREE(reaped->tagList);
+  SNMP_FREE(reaped->params);
   
-  free(reaped);
+  SNMP_FREE(reaped);
 }  /* snmpTargetAddrTable_dispose  */
 
 
@@ -311,24 +314,23 @@ int snmpTargetAddr_addTDomain(
 
 int snmpTargetAddr_addTAddress(
      struct targetAddrTable_struct *entry,
-     char   *cptr)
+     char   *cptr,
+     size_t len)
 {
-  size_t len;
   if (cptr == 0) {
     DEBUGMSGTL(("snmpTargetAddrEntry","ERROR snmpTargetAddrEntry: no tAddress in config string\n"));
     return(0);
   }
   else {
-    len = strlen(cptr);    
     /* spec check for string 1-32 */
     /*    if (len < 1 || len > 32)  {
 	  DEBUGMSGTL(("snmpTargetAddrEntry","ERROR snmpTargetAddrEntry: name out of range in config string\n"));
 	  return(0);
       } */
-    free(entry->tAddress);
-    entry->tAddress = (char *)malloc(len + 1);
-    strncpy(entry->tAddress, cptr, len);
-    entry->tAddress[len] = '\0';
+    SNMP_FREE(entry->tAddress);
+    entry->tAddress = (char *)malloc(len);
+    entry->tAddressLen = len;
+    memcpy(entry->tAddress, cptr, len);
   }
   return(1);
 } /* snmpTargetAddr_addTAddress */
@@ -396,7 +398,7 @@ int snmpTargetAddr_addTagList(
       DEBUGMSGTL(("snmpTargetAddrEntry","ERROR snmpTargetAddrEntry: tag list out of range in config string\n"));
       return(0);
     } 
-    free(entry->tagList);
+    SNMP_FREE(entry->tagList);
     entry->tagList = (char *)malloc(len + 1);
     strncpy(entry->tagList, cptr, len);
     entry->tagList[len] = '\0';
@@ -505,8 +507,10 @@ void snmpd_parse_config_targetAddr(const char *token, char *char_ptr)
     snmpTargetAddrTable_dispose(newEntry);
     return;
   }
-  cptr = copy_word(cptr, buff);
-  if (snmpTargetAddr_addTAddress(newEntry, buff) == 0) {
+  cptr = read_config_read_octet_string(cptr, &newEntry->tAddress,
+                                       &newEntry->tAddressLen);
+  if (!cptr || !(newEntry->tAddress)) {
+      DEBUGMSGTL(("snmpTargetAddrEntry","ERROR snmpTargetAddrEntry: no TAddress in config string\n"));
     snmpTargetAddrTable_dispose(newEntry);
     return;
   }
@@ -580,8 +584,13 @@ store_snmpTargetAddrEntry(int majorID, int minorID, void *serverarg,
 	for(i=0; i < curr_struct->tDomainLen; i++) {
 	  sprintf(&line[strlen(line)], ".%i", (int)curr_struct->tDomain[i]);
 	}
-	sprintf(&line[strlen(line)], " %s %i %i \"%s\" %s %i %i", 
-			 curr_struct->tAddress,    curr_struct->timeout, 
+        sprintf(&line[strlen(line)], " ");
+        read_config_save_octet_string(&line[strlen(line)],
+                                      curr_struct->tAddress,
+                                      curr_struct->tAddressLen);
+
+	sprintf(&line[strlen(line)], " %i %i \"%s\" %s %i %i", 
+			 curr_struct->timeout, 
 			 curr_struct->retryCount,  curr_struct->tagList,
 			 curr_struct->params,      curr_struct->storageType, 
 			 curr_struct->rowStatus);
@@ -650,9 +659,8 @@ var_snmpTargetAddrEntry(
   case SNMPTARGETADDRTADDRESS:
     *write_method = write_snmpTargetAddrTAddress;
     if (temp_struct->tAddress == 0)  return(0);
-    strcpy(string, temp_struct->tAddress);
-    *var_len = strlen(string);
-    return (unsigned char *) string;
+    *var_len = temp_struct->tAddressLen;
+    return (unsigned char *) temp_struct->tAddress;
     
   case SNMPTARGETADDRTIMEOUT:
     *write_method = write_snmpTargetAddrTimeout;
@@ -766,7 +774,6 @@ write_snmpTargetAddrTAddress(
    oid      *name,
    size_t   name_len)
 {
-  static unsigned char           string[1500];
   size_t                         size=1500, bigsize=1000;
   struct targetAddrTable_struct *temp_struct;
 
@@ -774,15 +781,7 @@ write_snmpTargetAddrTAddress(
       DEBUGMSGTL(("snmpTargetAddrEntry","write to snmpTargetAddrTAddress not ASN_OCTET_STR\n"));
       return SNMP_ERR_WRONGTYPE;
   }
-  if (var_val_len > (size = sizeof(string))) {
-      DEBUGMSGTL(("snmpTargetAddrEntry","write to snmpTargetAddrTAddress: bad length\n"));
-      return SNMP_ERR_WRONGLENGTH;
-  }
 
-  /* spec check, ??? */
-  size = var_val_len;
-  memcpy(string, var_val, var_val_len);
-  
   snmpTargetAddrOID[snmpTargetAddrOIDLen-1] = SNMPTARGETADDRTADDRESSCOLUMN;
   if ( (temp_struct = search_snmpTargetAddrTable(snmpTargetAddrOID, 
 						 snmpTargetAddrOIDLen,
@@ -803,10 +802,10 @@ write_snmpTargetAddrTAddress(
   
   /* Finally, we're golden, check if we should save value */
   if (action == COMMIT)  {    
-    free(temp_struct->tAddress);
-    temp_struct->tAddress = (char *)malloc(size + 1);
-    memcpy(temp_struct->tAddress, string, size);
-    temp_struct->tAddress[size] = '\0';
+    SNMP_FREE(temp_struct->tAddress);
+    temp_struct->tAddress = (char *)malloc(var_val_len);
+    temp_struct->tAddressLen = var_val_len;
+    memcpy(temp_struct->tAddress, var_val, var_val_len);
     
     /* If row is new, check if its status can be updated */
     if ( (temp_struct->rowStatus == SNMP_ROW_NOTREADY) &&
@@ -962,7 +961,7 @@ write_snmpTargetAddrTagList(
   
   /* Finally, we're golden, check if we should save value */
   if (action == COMMIT)  {    
-    free(temp_struct->tagList);
+    SNMP_FREE(temp_struct->tagList);
     temp_struct->tagList = (char *)malloc(size + 1);
     memcpy(temp_struct->tagList, string, size);
     temp_struct->tagList[size] = '\0';
@@ -1014,7 +1013,7 @@ write_snmpTargetAddrParams(
   
   /* Finally, we're golden, check if we should save value */
   if (action == COMMIT)  {    
-    free(temp_struct->params);
+    SNMP_FREE(temp_struct->params);
     temp_struct->params = (char *)malloc(size + 1);
     memcpy(temp_struct->params, string, size);
     temp_struct->params[size] = '\0';
