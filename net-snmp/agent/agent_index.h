@@ -21,6 +21,10 @@ int                   register_int_index( oid *, size_t, int);
 struct variable_list* register_oid_index( oid *, size_t, oid *, size_t);
 struct variable_list* register_index( struct variable_list *, int, struct snmp_session*);
 
+int unregister_string_index( oid *, size_t, char *);
+int unregister_int_index( oid *, size_t, int);
+int unregister_oid_index( oid *, size_t, oid *, size_t);
+
 int  release_index( struct variable_list *);
 int  remove_index( struct variable_list *, struct snmp_session*);
 void unregister_index_by_session(struct snmp_session *);
