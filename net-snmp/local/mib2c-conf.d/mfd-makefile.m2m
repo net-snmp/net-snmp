@@ -93,7 +93,7 @@ clean:
 @if "$mfd_netsnmp_dir" ne ""@
 
 ${name}.deps ${name}_subagent.deps ${name}_interface.deps: ${name}_Makefile
-${name}_data_access.deps                                   ${name}_Makefile
+${name}_data_access.deps:                                  ${name}_Makefile
 @if $m2c_create_fewer_files != 1@
 ${name}_data_get.deps:                                     ${name}_Makefile
 ${name}_data_set.deps:                                     ${name}_Makefile
