@@ -102,11 +102,11 @@ u_char		return_buf[258];
 u_char		return_buf[256]; /* nee 64 */
 #endif
  
-#ifndef linux
 void
 init_nlist(nl)
   struct nlist nl[];
 {
+#ifndef linux
   int ret;
 #if HAVE_KVM_OPENFILES
   kvm_t *kernel;
@@ -137,8 +137,8 @@ init_nlist(nl)
 #endif
       }
   }
-}
 #endif
+}
 
 void
 init_snmp __P((void))
