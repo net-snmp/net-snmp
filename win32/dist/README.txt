@@ -24,7 +24,10 @@ TABLE OF CONTENTS
 
 INTRODUCTION
 
-  This package contains a compiled binary release of Net-SNMP for Windows NT/2000.
+  This package contains a compiled binary release of Net-SNMP for Windows NT/2000/XP.
+  The binaries run unmodified on Windows 98.
+  The "snmpd" and "snmptrapd" program cannot run as services on Windows 98,
+  as Windows 98 does not provide a Service Control Manager.
 
   Documentation for using the applications is available in the Windows help file
   (Net-SNMP.chm) located in the docs directory of the installed package.  Help is also
