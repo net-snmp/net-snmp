@@ -26,4 +26,7 @@ int  remove_index( struct variable_list *, struct snmp_session*);
 void unregister_index_by_session(struct snmp_session *);
 int  unregister_index(struct variable_list *, int, struct snmp_session *);
 
+unsigned long	count_indexes		(oid *name, size_t namelen,
+					 int include_unallocated);
+
 #endif /* AGENT_INDEX_H */

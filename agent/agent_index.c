@@ -588,6 +588,26 @@ void dump_idx_registry( void )
     }
 }
 
+unsigned long
+count_indexes(oid *name, size_t namelen, int include_unallocated)
+{
+    struct snmp_index *i = NULL, *j = NULL;
+    unsigned long n = 0;
+
+    for (i = snmp_index_head; i != NULL; i = i->next_oid) {
+	if (snmp_oid_compare(name, namelen,
+			     i->varbind->name, i->varbind->name_length) == 0) {
+	    for (j = i; j != NULL; j = j->next_idx) {
+		if (j->allocated || include_unallocated) {
+		    n++;
+		}
+	    }
+	}
+    }
+    return n;
+}
+
+
 #ifdef TESTING
 struct variable_list varbind;
 struct snmp_session main_sess, *main_session=&main_sess;
