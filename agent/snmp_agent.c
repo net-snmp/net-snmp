@@ -1477,8 +1477,8 @@ netsnmp_add_varbind_to_cache(netsnmp_agent_session *asp, int vbcount,
     DEBUGMSG(("snmp_agent", ", %8p)\n", tp));
 
     if (tp &&
-        asp->pdu->command == SNMP_MSG_GETNEXT ||
-        asp->pdu->command == SNMP_MSG_GETBULK) {
+        (asp->pdu->command == SNMP_MSG_GETNEXT ||
+         asp->pdu->command == SNMP_MSG_GETBULK)) {
         int result;
         int prefix_len;
 
