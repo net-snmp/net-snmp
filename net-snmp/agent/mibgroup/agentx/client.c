@@ -197,7 +197,7 @@ agentx_register(struct snmp_session *ss, oid start[], size_t startlen,
     struct snmp_pdu *pdu, *response;
 
     DEBUGMSGTL(("agentx/subagent","registering: "));
-    DEBUGMSGOID(("agentx/subagent", start, startlen));
+    DEBUGMSGOIDRANGE(("agentx/subagent", start, startlen, range_subid, range_ubound));
     DEBUGMSG(("agentx/subagent","\n"));
 
     if (ss == NULL || !IS_AGENTX_VERSION(ss->version)) {
@@ -243,7 +243,7 @@ agentx_register(struct snmp_session *ss, oid start[], size_t startlen,
 }
 
 int
-agentx_unregister( struct snmp_session *ss, oid start[], size_t startlen,
+agentx_unregister(struct snmp_session *ss, oid start[], size_t startlen,
 		   int priority, int range_subid, oid range_ubound)
 {
     struct snmp_pdu *pdu, *response;
@@ -253,22 +253,23 @@ agentx_unregister( struct snmp_session *ss, oid start[], size_t startlen,
     }
 
     DEBUGMSGTL(("agentx/subagent","unregistering: "));
-    DEBUGMSGOID(("agentx/subagent", start, startlen));
+    DEBUGMSGOIDRANGE(("agentx/subagent", start, startlen, range_subid, range_ubound));
     DEBUGMSG(("agentx/subagent","\n"));
     pdu = snmp_pdu_create(AGENTX_MSG_UNREGISTER);
-    if ( pdu == NULL )
+    if (pdu == NULL) {
 	return 0;
+    }
     pdu->time = 0;
     pdu->priority = priority;
     pdu->sessid = ss->sessid;
     pdu->range_subid = range_subid;
-    if ( range_subid ) {
-	snmp_pdu_add_variable( pdu, start, startlen,
-				ASN_OBJECT_ID, (u_char *)start, startlen*sizeof(oid));
-	pdu->variables->val.objid[ range_subid-1 ] = range_ubound;
+    if (range_subid) {
+	snmp_pdu_add_variable(pdu, start, startlen, ASN_OBJECT_ID,
+			      (u_char *)start, startlen * sizeof(oid));
+	pdu->variables->val.objid[range_subid - 1] = range_ubound;
+    } else {
+	snmp_add_null_var(pdu, start, startlen);
     }
-    else
-	snmp_add_null_var( pdu, start, startlen);
 
     if ( agentx_synch_response(ss, pdu, &response) != STAT_SUCCESS )
 	return 0;
