@@ -30,6 +30,8 @@
 #include "snmp_client.h"
 #include "snmp_debug.h"
 #include "snmp.h"
+#include "ds_agent.h"
+#include "default_store.h"
 
 #include "agentx/protocol.h"
 #include "agentx/client.h"
@@ -54,8 +56,6 @@ struct ax_variable_list {
 #endif
 };
 
-extern int verbose;
-
 	/*
 	 * Handle the response from an AgentX subagent,
 	 *   merging the answers back into the original query
@@ -78,7 +78,7 @@ handle_agentx_response( int operation,
     for ( i = 0, vbp = pdu->variables ;
 		i < ax_vlist->num_vars ; i++, vbp = vbp->next_variable ) {
 
-	if ( verbose ) {
+	if ( ds_get_boolean(DS_APPLICATION_ID, DS_AGENT_VERBOSE) ) {
 	    sprint_variable (buf, vbp->name, vbp->name_length, vbp);
 	    DEBUGMSGTL(("snmp_agent", "    >> %s\n", buf));
 	}
