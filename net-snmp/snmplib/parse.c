@@ -309,7 +309,7 @@ static int tossObjectIdentifier __P((FILE *));
        void init_mib_internals __P((void));	/* called from 'mib.c' */
 static int  name_hash __P((char *));
 static void init_node_hash __P((struct node *));
-static void print_error __P((char *, char *, int));
+static void print_rror __P((char *, char *, int));
 static void *Malloc __P((unsigned));
 static char *Strdup __P((char *));
 static void Malloc_stats __P((FILE *));
@@ -585,6 +585,33 @@ print_subtree(f, tree, count)
     for(tp = tree->child_list; tp; tp = tp->next_peer){
         if (tp->child_list)
             print_subtree(f, tp, count);
+    }
+}
+
+print_ascii_dump_tree(f, tree, count)
+    FILE *f;
+    struct tree *tree;
+    int count;
+{
+    struct tree *tp;
+    int i;
+
+/*    fprintf(f, "Children of %s(%ld):\n", tree->label, tree->subid); */
+    count++;
+    for(tp = tree->child_list; tp; tp = tp->next_peer){
+/*        fprintf(f, "%s(%ld) type=%d",
+                tp->label, tp->subid, tp->type); */
+          fprintf(f, "%s ::= { %s %d }\n", tp->label, tree->label, tp->subid);
+/*
+        if (tp->tc_index != -1) fprintf(f, " tc=%d", tp->tc_index);
+        if (tp->hint) fprintf(f, " hint=%s", tp->hint);
+        if (tp->units) fprintf(f, " units=%s", tp->units);
+	fprintf(f, "\n");
+        */
+    }
+    for(tp = tree->child_list; tp; tp = tp->next_peer){
+        if (tp->child_list)
+            print_ascii_dump_tree(f, tp, count);
     }
 }
 
@@ -2074,7 +2101,8 @@ read_import_replacements( module_name, node_identifier )
 
 	if (	/* exact match */
 	  	  ( mcp->tag_len==0 &&
-		    !strcmp( mcp->tag, node_identifier )) ||
+		    (mcp->tag == NULL ||
+                     !strcmp( mcp->tag, node_identifier ))) ||
 		/* prefix match */
 	          ( mcp->tag_len!=0 && 
 		    !strncmp( mcp->tag, node_identifier, mcp->tag_len ))
