@@ -1,4 +1,4 @@
-.TH SNMP_AGENT_API 3 "27 October, 1999"
+.TH SNMP_AGENT_API 3 "27 Oct 1999"
 .UC 5
 .SH NAME
 default_store \- generic storage of global data.
