@@ -41,7 +41,7 @@
                       + strlen ((ptr)->sun_path))
 #endif
 
-const oid ucdSnmpUnixDomain[9] = { 1, 3, 6, 1, 4, 1, 2021, 251, 2 };
+const oid ucdSnmpUnixDomain[9] = { UCDAVIS_MIB, 251, 2 };
 
 
 /*  This is the structure we use to hold transport-specific data.  */

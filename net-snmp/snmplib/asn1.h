@@ -36,6 +36,8 @@ ARISING OUT OF OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS
 SOFTWARE.
 ******************************************************************/
 
+#define OID_LENGTH(x)  ((x)?(sizeof(x)/sizeof(x[0])):0)
+
 #ifndef EIGHTBIT_SUBIDS
 typedef u_long	oid;
 #define MAX_SUBID   0xFFFFFFFF

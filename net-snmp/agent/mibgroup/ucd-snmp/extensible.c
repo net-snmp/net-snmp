@@ -147,7 +147,7 @@ void init_extensible(void)
 
 /* Define the OID pointer to the top of the mib tree that we're
    registering underneath */
-  oid extensible_variables_oid[] = { EXTENSIBLEMIB,SHELLMIBNUM,1 };
+  oid extensible_variables_oid[] = { UCDAVIS_MIB,SHELLMIBNUM,1 };
 
   /* register ourselves with the agent to handle our mib tree */
   REGISTER_MIB("ucd-snmp/extensible", extensible_extensible_variables, variable2,

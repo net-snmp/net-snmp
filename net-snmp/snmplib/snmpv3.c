@@ -207,7 +207,8 @@ snmpv3_secLevel_conf(const char *word, char *cptr)
 int
 setup_engineID(u_char **eidp, const char *text)
 {
-  int		  enterpriseid	= htonl(ENTERPRISE_NUMBER),
+  int		  enterpriseid	= htonl(ENTERPRISE_OID),
+                  ucdavisid     = htonl(UCDAVIS_OID),
 		  localsetup	= (eidp) ? 0 : 1;
 
 			/* Use local engineID if *eidp == NULL.  */
@@ -301,7 +302,12 @@ setup_engineID(u_char **eidp, const char *text)
     snmp_log_perror("setup_engineID malloc");
     return -1;
   }
-  memcpy(bufp, &enterpriseid, sizeof(enterpriseid)); /* XXX Must be 4 bytes! */
+  if (localEngineIDType == ENGINEID_TYPE_UCD_RND)
+      /* we must use the net-snmp enterprise id here, regardless */
+      memcpy(bufp, &ucdavisid, sizeof(ucdavisid)); /* XXX Must be 4 bytes! */
+  else
+      memcpy(bufp, &enterpriseid, sizeof(enterpriseid)); /* XXX Must be 4 bytes! */
+
   bufp[0] |= 0x80;
   
 

@@ -91,7 +91,7 @@ void init_proc(void)
 
 /* Define the OID pointer to the top of the mib tree that we're
    registering underneath */
-  oid proc_variables_oid[] = { EXTENSIBLEMIB,PROCMIBNUM,1 };
+  oid proc_variables_oid[] = { UCDAVIS_MIB,PROCMIBNUM,1 };
 
   /* register ourselves with the agent to handle our mib tree */
   REGISTER_MIB("ucd-snmp/proc", extensible_proc_variables, variable2,
