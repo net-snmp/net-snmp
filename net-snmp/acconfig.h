@@ -143,6 +143,7 @@
 #define ULTRIXID 5
 #define HPUX10ID 6
 #define NETBSD1ID 7
+#define FREEBSD2ID 8
 #define UNKNOWNID 255
 
 #ifdef hpux9
@@ -165,6 +166,9 @@
 #endif
 #ifdef netbsd1
 #define OSTYPE NETBSD1ID
+#endif
+#ifdef freebsd2
+#define OSTYPE FREEBSD2ID
 #endif
 /* unknown */
 #ifndef OSTYPE
