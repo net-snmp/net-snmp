@@ -60,7 +60,7 @@ $example_end
  *  definitions are used in examples later on.
  *
  */
-typedef struct ${table}_loop_context_s {
+typedef struct ${context}_loop_context_s {
     /*
      * temporary context used during iteration
      */
@@ -74,7 +74,7 @@ typedef struct ${table}_loop_context_s {
     FILE *filep;
     char line[MAX_LINE_SIZE];
 @end@
-} ${table}_loop_context;
+} ${context}_loop_context;
 
 /*
  * define a reference to the loop context
@@ -82,19 +82,19 @@ typedef struct ${table}_loop_context_s {
  * NOTE: DO NOT ADD ITEMS TO THIS STRUCTURE!
  */
 typedef struct ${context}_ref_loop_ctx_s {
-    ${table}_loop_context *loop_ctx;
+    ${context}_loop_context *loop_ctx;
 } ${context}_ref_loop_ctx;
 
-int ${table}_loop_get_first( $mfd_aue_param_decl, ${context}_ref_loop_ctx *loop_ctx_ref,
+int ${context}_loop_get_first( $mfd_aue_param_decl, ${context}_ref_loop_ctx *loop_ctx_ref,
                     ${context}_ref_rowreq_ctx *rowreq_ctx_ref);
-int ${table}_loop_get_next( $mfd_aue_param_decl, ${context}_ref_loop_ctx *loop_ctx_ref,
+int ${context}_loop_get_next( $mfd_aue_param_decl, ${context}_ref_loop_ctx *loop_ctx_ref,
                         ${context}_ref_rowreq_ctx *rowreq_ctx_ref);
-int ${table}_loop_get_data( $mfd_aue_param_decl, ${context}_ref_loop_ctx *loop_ctx_ref,
+int ${context}_loop_get_data( $mfd_aue_param_decl, ${context}_ref_loop_ctx *loop_ctx_ref,
                         ${context}_ref_rowreq_ctx *rowreq_ctx_ref);
-int ${table}_loop_save_position($mfd_aue_param_decl,
+int ${context}_loop_save_position($mfd_aue_param_decl,
                        ${context}_ref_loop_ctx *loop_ctx_ref,
                        ${context}_ref_loop_ctx *save_loop_ctx_ref, int reuse);
-int ${table}_loop_cleanup_context( $mfd_aue_param_decl, ${context}_ref_loop_ctx *ref);
+int ${context}_loop_cleanup_context( $mfd_aue_param_decl, ${context}_ref_loop_ctx *ref);
 
 ##
 @end@ // m2c_processing_type eq 'h'
@@ -108,12 +108,12 @@ int ${table}_loop_cleanup_context( $mfd_aue_param_decl, ${context}_ref_loop_ctx 
  * wrapper around clean up a loop reference
  */
 static int
-_${table}_loop_cleanup_context( $mfd_aue_wrap_param_decl,
+_${context}_loop_cleanup_context( $mfd_aue_wrap_param_decl,
                             ${context}_ref_loop_ctx *ref)
 {
-   DEBUGMSGTL(("internal:${context}:_${table}_loop_cleanup_context","called\n"));
+   DEBUGMSGTL(("internal:${context}:_${context}_loop_cleanup_context","called\n"));
 
-   return ${table}_loop_cleanup_context($mfd_aue_wrap_param->user_ctx, ref);
+   return ${context}_loop_cleanup_context($mfd_aue_wrap_param->user_ctx, ref);
 }
 
 /**
@@ -121,12 +121,12 @@ _${table}_loop_cleanup_context( $mfd_aue_wrap_param_decl,
  * wrapper around save position
  */
 static int
-_${table}_loop_save_position( $mfd_aue_wrap_param_decl, ${context}_ref_loop_ctx *ref,
+_${context}_loop_save_position( $mfd_aue_wrap_param_decl, ${context}_ref_loop_ctx *ref,
                          ${context}_ref_loop_ctx *ref_copy, int reuse)
 {
-   DEBUGMSGTL(("internal:${context}:_${table}_loop_save_position","called\n"));
+   DEBUGMSGTL(("internal:${context}:_${context}_loop_save_position","called\n"));
 
-   return ${table}_loop_save_position($mfd_aue_wrap_param->user_ctx, ref,
+   return ${context}_loop_save_position($mfd_aue_wrap_param->user_ctx, ref,
                                  ref_copy, reuse);
 }
 
@@ -135,14 +135,14 @@ _${table}_loop_save_position( $mfd_aue_wrap_param_decl, ${context}_ref_loop_ctx 
  * wrapper around user get_first to setup the index oid
  */
 static int
-_${table}_loop_get_first_wrapper($mfd_aue_wrap_param_decl,
+_${context}_loop_get_first_wrapper($mfd_aue_wrap_param_decl,
                            ${context}_ref_loop_ctx * loop_ctx_ref,
                            ${context}_ref_rowreq_ctx * rowreq_ctx_ref)
 {
     int rc;
-    DEBUGMSGTL(("internal:${context}:_${table}_loop_get_first_wrapper","called\n"));
+    DEBUGMSGTL(("internal:${context}:_${context}_loop_get_first_wrapper","called\n"));
 
-    rc = ${table}_loop_get_first($mfd_aue_wrap_param->user_ctx, loop_ctx_ref,
+    rc = ${context}_loop_get_first($mfd_aue_wrap_param->user_ctx, loop_ctx_ref,
                                  rowreq_ctx_ref);
     /*
      * convert index to OID
@@ -151,7 +151,7 @@ _${table}_loop_get_first_wrapper($mfd_aue_wrap_param_decl,
         netsnmp_assert((NULL != rowreq_ctx_ref) &&
                        (rowreq_ctx_ref->rowreq_ctx->oid_idx.oids == rowreq_ctx_ref->rowreq_ctx->oid_tmp));
         rowreq_ctx_ref->rowreq_ctx->oid_idx.len = sizeof(rowreq_ctx_ref->rowreq_ctx->oid_tmp);
-        rc = ${table}_index_to_oid(&rowreq_ctx_ref->rowreq_ctx->oid_idx,
+        rc = ${context}_index_to_oid(&rowreq_ctx_ref->rowreq_ctx->oid_idx,
                                    &rowreq_ctx_ref->rowreq_ctx->tbl_idx);
         netsnmp_assert(rowreq_ctx_ref->rowreq_ctx->oid_idx.len !=
                        sizeof(rowreq_ctx_ref->rowreq_ctx->oid_tmp));
@@ -165,14 +165,14 @@ _${table}_loop_get_first_wrapper($mfd_aue_wrap_param_decl,
  * wrapper around user get_next to setup the index oid
  */
 static int
-_${table}_loop_get_next_wrapper($mfd_aue_wrap_param_decl,
+_${context}_loop_get_next_wrapper($mfd_aue_wrap_param_decl,
                           ${context}_ref_loop_ctx * loop_ctx_ref,
                           ${context}_ref_rowreq_ctx * rowreq_ctx_ref)
 {
     int rc;
-    DEBUGMSGTL(("internal:${context}:_${table}_loop_get_next_wrapper","called\n"));
+    DEBUGMSGTL(("internal:${context}:_${context}_loop_get_next_wrapper","called\n"));
 
-    rc = ${table}_loop_get_next($mfd_aue_wrap_param->user_ctx, loop_ctx_ref,
+    rc = ${context}_loop_get_next($mfd_aue_wrap_param->user_ctx, loop_ctx_ref,
                                 rowreq_ctx_ref);
     /*
      * convert index to OID
@@ -181,7 +181,7 @@ _${table}_loop_get_next_wrapper($mfd_aue_wrap_param_decl,
         netsnmp_assert((NULL != rowreq_ctx_ref) &&
                        (rowreq_ctx_ref->rowreq_ctx->oid_idx.oids == rowreq_ctx_ref->rowreq_ctx->oid_tmp));
         rowreq_ctx_ref->rowreq_ctx->oid_idx.len = sizeof(rowreq_ctx_ref->rowreq_ctx->oid_tmp);
-        rc = ${table}_index_to_oid(&rowreq_ctx_ref->rowreq_ctx->oid_idx,
+        rc = ${context}_index_to_oid(&rowreq_ctx_ref->rowreq_ctx->oid_idx,
                                    &rowreq_ctx_ref->rowreq_ctx->tbl_idx);
         netsnmp_assert(rowreq_ctx_ref->rowreq_ctx->oid_idx.len !=
                        sizeof(rowreq_ctx_ref->rowreq_ctx->oid_tmp));
@@ -196,15 +196,15 @@ _${table}_loop_get_next_wrapper($mfd_aue_wrap_param_decl,
  * get data wrapper to allocate context for the user
  */
 static int
-_${table}_loop_get_data_wrapper($mfd_aue_wrap_param_decl,
+_${context}_loop_get_data_wrapper($mfd_aue_wrap_param_decl,
                            ${context}_ref_loop_ctx * loop_ctx_ref,
                            ${context}_ref_rowreq_ctx * rowreq_ctx_ref)
 {
 //    ${context}_rowreq_ctx *orig_ctx = rowreq_ctx_ref->rowreq_ctx;
 
-    DEBUGMSGTL(("internal:${context}:_${table}_loop_get_data_wrapper","called\n"));
+    DEBUGMSGTL(("internal:${context}:_${context}_loop_get_data_wrapper","called\n"));
 
-    return ${table}_loop_get_data($mfd_aue_wrap_param->user_ctx, loop_ctx_ref, rowreq_ctx_ref);
+    return ${context}_loop_get_data($mfd_aue_wrap_param->user_ctx, loop_ctx_ref, rowreq_ctx_ref);
 }
 
 @end@ // transient != 0
@@ -213,30 +213,30 @@ _${table}_loop_get_data_wrapper($mfd_aue_wrap_param_decl,
  * initialize the iterator container with functions or wrappers
  */
 void
-_${table}_container_init(${context}_interface_ctx *if_ctx)
+_${context}_container_init(${context}_interface_ctx *if_ctx)
 {
-    DEBUGMSGTL(("internal:${context}:_${table}_container_init","called\n"));
+    DEBUGMSGTL(("internal:${context}:_${context}_container_init","called\n"));
     
     if_ctx->container = netsnmp_container_iterator_get(/** registration */
         if_ctx,
         /** compare */
         NULL,
         /** get_first */
-        (Netsnmp_Iterator_Loop_Key*)_${table}_loop_get_first_wrapper,
+        (Netsnmp_Iterator_Loop_Key*)_${context}_loop_get_first_wrapper,
         /** get_next */
-        (Netsnmp_Iterator_Loop_Key*)_${table}_loop_get_next_wrapper,
+        (Netsnmp_Iterator_Loop_Key*)_${context}_loop_get_next_wrapper,
         /** get_data */
 @if $m2c_data_transient != 0@ # 
-        (Netsnmp_Iterator_Loop_Data*)_${table}_loop_get_data_wrapper,
+        (Netsnmp_Iterator_Loop_Data*)_${context}_loop_get_data_wrapper,
 @else@
         NULL,
 @end@
         /** save_pos */
-        (Netsnmp_Iterator_Ctx_Dup*)_${table}_loop_save_position,
+        (Netsnmp_Iterator_Ctx_Dup*)_${context}_loop_save_position,
         /** init_context */
         (Netsnmp_Iterator_Ctx*)NULL,
         /** cleanup_context */
-        (Netsnmp_Iterator_Ctx*)_${table}_loop_cleanup_context,
+        (Netsnmp_Iterator_Ctx*)_${context}_loop_cleanup_context,
         /** free_user_ctx */
         NULL,
         /** sorted */
@@ -244,7 +244,7 @@ _${table}_container_init(${context}_interface_ctx *if_ctx)
 }
 
 ##
-@end@
+@end@ // m2c_processing_type eq 'i'
 ########################################################################
 ##//####################################################################
 ##//@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
@@ -260,14 +260,14 @@ _${table}_container_init(${context}_interface_ctx *if_ctx)
  *
  * A simplified version of the pseudo-code looks like this:
  *
- *    ${table}_loop_get_first(loop,data)
+ *    ${context}_loop_get_first(loop,data)
  *    while( no_error ) {
  *       if( best_match(data, key)
- *          ${table}_loop_save_position(loop,pos);
- *       ${table}_loop_get_next(loop,data)
+ *          ${context}_loop_save_position(loop,pos);
+ *       ${context}_loop_get_next(loop,data)
  *    }
- *    ${table}_loop_get_data(pos,data)
- *    ${table}_loop_cleanup_context(loop)
+ *    ${context}_loop_get_data(pos,data)
+ *    ${context}_loop_cleanup_context(loop)
  */
 
 /***********************************************************************
@@ -283,7 +283,7 @@ _${table}_container_init(${context}_interface_ctx *if_ctx)
  * -------
  *  This function is called to initialize the iterator loop context for a
  *  new iteration loop and return the index(es) for the first
- *  ${table}_data in the data set.
+ *  ${context}_data in the data set.
  *
  *  Note that during the loop, the only important thing is the indexes.
  *  If access to your data is cheap/fast (e.g. you have a pointer to a
@@ -292,7 +292,7 @@ _${table}_container_init(${context}_interface_ctx *if_ctx)
  *  some other existing data, or peforming calculations to derive the data),
  *  then you should limit yourself to setting the indexes. Extracting the
  *  can be put off until the desired row is found. See the notes on
- *  ${table}_loop_get_data().
+ *  ${context}_loop_get_data().
  *
  *  Note that this function does not correspond to a SNMP GET pdu, and
  *  you should return data items in whatever order they are already in.
@@ -309,13 +309,13 @@ _${table}_container_init(${context}_interface_ctx *if_ctx)
  *
  *  rowreq_ctx_ref->rowreq_ctx will be NULL. You should allocate a new context
  *  for this loop. [Alternatively, you could allocate one in
- *  ${table}_loop_init_context, save it in your
+ *  ${context}_loop_init_context, save it in your
  *  ${context}_ref_loop_ctx, and use it here.]
  *
  *  Once you have your context pointer, you should set the index (or indexes)
  *  in rowreq_ctx_ref->rowreq_ctx->tbl_idx to the appropriate value for this row. [If you
  *  use your loop_ctx_ref cleverly, you might be able to put this work in
- *  ${table}_loop_get_next, and simply call that function.]
+ *  ${context}_loop_get_next, and simply call that function.]
  *
  * @param $mfd_aue_param_cmt
  * @param loop_ctx_ref  Pointer to your loop reference.
@@ -326,10 +326,10 @@ _${table}_container_init(${context}_interface_ctx *if_ctx)
  * @retval MFD_ERROR       : error.
  */
 int
-${table}_loop_get_first( $mfd_aue_param_decl, ${context}_ref_loop_ctx *loop_ctx_ref,
+${context}_loop_get_first( $mfd_aue_param_decl, ${context}_ref_loop_ctx *loop_ctx_ref,
                     ${context}_ref_rowreq_ctx *rowreq_ctx_ref)
 {
-    DEBUGMSGTL(("verbose:${table}_loop_get_first","called\n"));
+    DEBUGMSGTL(("verbose:${context}_loop_get_first","called\n"));
 
     netsnmp_assert(rowreq_ctx_ref);
     netsnmp_assert(loop_ctx_ref);
@@ -337,7 +337,7 @@ ${table}_loop_get_first( $mfd_aue_param_decl, ${context}_ref_loop_ctx *loop_ctx_
     /*
      * allocate memory for new structure
      */
-    loop_ctx_ref->loop_ctx = SNMP_MALLOC_TYPEDEF(${table}_loop_context);
+    loop_ctx_ref->loop_ctx = SNMP_MALLOC_TYPEDEF(${context}_loop_context);
     if(NULL == loop_ctx_ref->loop_ctx)
         return MFD_ERROR;
 
@@ -380,7 +380,7 @@ $example_start
      * in this example, after opening the file, get next does the same thing
      * as get first, we let's just call get next...
      */
-    return ${table}_loop_get_next($mfd_aue_param, loop_ctx_ref, rowreq_ctx_ref);
+    return ${context}_loop_get_next($mfd_aue_param, loop_ctx_ref, rowreq_ctx_ref);
 $example_end
 @   else@
     /*
@@ -448,7 +448,7 @@ $example_end
  *
  * More Details
  * ------------
- * rowreq_ctx_ref->rowreq_ctx will have been set in ${table}_loop_get_first.
+ * rowreq_ctx_ref->rowreq_ctx will have been set in ${context}_loop_get_first.
  *
  * If there is currently no data available, return MFD_END_OF_DATA.
  * Otherwise, you should set the indexes in rowreq_ctx_ref->rowreq_ctx->tbl_idx.
@@ -465,10 +465,10 @@ $example_end
  * @retval MFD_ERROR       : error.
  */
 int
-${table}_loop_get_next( $mfd_aue_param_decl, ${context}_ref_loop_ctx *loop_ctx_ref,
+${context}_loop_get_next( $mfd_aue_param_decl, ${context}_ref_loop_ctx *loop_ctx_ref,
                         ${context}_ref_rowreq_ctx *rowreq_ctx_ref)
 {
-    DEBUGMSGTL(("verbose:${table}_loop_get_next","called\n"));
+    DEBUGMSGTL(("verbose:${context}_loop_get_next","called\n"));
 
     netsnmp_assert(loop_ctx_ref && loop_ctx_ref->loop_ctx);
     netsnmp_assert(rowreq_ctx_ref);
@@ -557,7 +557,7 @@ $example_end
  *
  *  At the end of the loop, when the best match has been found, the saved
  *  loop context will be used to get the data for the row by calling
- *  ${table}_loop_get_data().
+ *  ${context}_loop_get_data().
 @if $m2c_data_transient != 0@ # persistent
  *
  *  Since your data is transient, you need to make a copy of it before
@@ -570,7 +570,7 @@ $example_end
 @   if $m2c_data_transient == 1@ # short term
  *  Since your data is semi-TRANSIENT data, you could just keep a pointer
  *  to the data in the loop reference. The data should then be copied in
- *  ${table}_loop_get_data().
+ *  ${context}_loop_get_data().
 @   else@ # $m2c_data_transient == 2@ # copy immediately
  *  One idea would be to copy it space allocated in the loop reference
  *  structure. Another would be to simply have a pointer in the loop
@@ -592,12 +592,12 @@ $example_end
  * @retval MFD_ERROR   : error.
  */
 int
-${table}_loop_save_position($mfd_aue_param_decl,
+${context}_loop_save_position($mfd_aue_param_decl,
                        ${context}_ref_loop_ctx *loop_ctx_ref,
                        ${context}_ref_loop_ctx *save_loop_ctx_ref,
                        int reuse)
 {
-    DEBUGMSGTL(("verbose:${table}_loop_save_position","called\n"));
+    DEBUGMSGTL(("verbose:${context}_loop_save_position","called\n"));
 
     netsnmp_assert(loop_ctx_ref && save_loop_ctx_ref);
 
@@ -607,7 +607,7 @@ ${table}_loop_save_position($mfd_aue_param_decl,
      * 2) save information for the position of loop_ctx_ref in save_loop_ctx_ref.
      */
     if((0 == reuse) || (NULL == save_loop_ctx_ref->loop_ctx))
-        save_loop_ctx_ref->loop_ctx = SNMP_MALLOC_TYPEDEF(${table}_loop_context);
+        save_loop_ctx_ref->loop_ctx = SNMP_MALLOC_TYPEDEF(${context}_loop_context);
     if(NULL == save_loop_ctx_ref->loop_ctx) {
         snmp_log(LOG_ERR, "could not allocate memory\n");
         return MFD_ERROR;
@@ -676,13 +676,13 @@ $example_end
 
 @if $m2c_data_transient != 0@ # semi-transient
 /**
- * set ${table}_data from a data context
+ * set ${context}_data from a data context
  *
  * Summary
  * -------
  *  At the end of the loop, when the best match has been found, the saved
  *  loop context will be used to get the data for the row by calling
- *  ${table}_loop_get_data().
+ *  ${context}_loop_get_data().
  *
  *  You should return a fully populated row request context in
  *  rowreq_ctx_ref->rowreq_ctx.
@@ -694,10 +694,10 @@ $example_end
  * @param rowreq_ctx_ref pointer to a context reference.
  */
 int
-${table}_loop_get_data( $mfd_aue_param_decl, ${context}_ref_loop_ctx *loop_ctx_ref,
+${context}_loop_get_data( $mfd_aue_param_decl, ${context}_ref_loop_ctx *loop_ctx_ref,
                            ${context}_ref_rowreq_ctx *rowreq_ctx_ref)
 {
-    DEBUGMSGTL(("verbose:${table}_loop_get_data","called\n"));
+    DEBUGMSGTL(("verbose:${context}_loop_get_data","called\n"));
 
     netsnmp_assert((NULL != loop_ctx_ref) && (NULL != loop_ctx_ref->loop_ctx));
     netsnmp_assert(NULL != rowreq_ctx_ref);
@@ -750,9 +750,9 @@ ${table}_loop_get_data( $mfd_aue_param_decl, ${context}_ref_loop_ctx *loop_ctx_r
  * @retval MFD_ERROR   : error.
  */
 int
-${table}_loop_cleanup_context( $mfd_aue_param_decl, ${context}_ref_loop_ctx *loop_ctx_ref)
+${context}_loop_cleanup_context( $mfd_aue_param_decl, ${context}_ref_loop_ctx *loop_ctx_ref)
 {
-    DEBUGMSGTL(("verbose:${table}_loop_cleanup_context","called\n"));
+    DEBUGMSGTL(("verbose:${context}_loop_cleanup_context","called\n"));
     
     netsnmp_assert(loop_ctx_ref);
     
@@ -857,15 +857,15 @@ $example_end
 
   A simplified version of the pseudo-code looks like this:
 
-     ${table}_loop_init_context(loop)
-     ${table}_loop_get_first(loop,data)
+     ${context}_loop_init_context(loop)
+     ${context}_loop_get_first(loop,data)
      while( no_error ) {
         if( best_match(data, key)
-           ${table}_loop_save_position(loop,pos);
-        ${table}_loop_get_next(loop,data)
+           ${context}_loop_save_position(loop,pos);
+        ${context}_loop_get_next(loop,data)
      }
-     ${table}_loop_get_data(pos,data)
-     ${table}_loop_cleanup_context(loop)
+     ${context}_loop_get_data(pos,data)
+     ${context}_loop_cleanup_context(loop)
 ##
 ## end sync
 ##
@@ -876,7 +876,7 @@ $example_end
 ########################################################################
   Defining context for the loop
   -----------------------------
-    TODO : typedef ${table}_loop_context
+    TODO : typedef ${context}_loop_context
     WHERE: ${table}_data_access.h
 
     @if $mfd_readme_verbose != 0@
@@ -907,19 +907,19 @@ $example_end
 
       Linked list
       -----------
-          typedef list_node ${table}_loop_context;
+          typedef list_node ${context}_loop_context;
 
       Array
       -----
-          typedef integer ${table}_loop_context;
+          typedef integer ${context}_loop_context;
 
       File
       ----
-          typedef struct ${table}_loop_context_s {
+          typedef struct ${context}_loop_context_s {
                char *      file_name;
                FILE *      f;
                char        line[128];
-          } ${table}_loop_context;
+          } ${context}_loop_context;
 
   @end@
 
@@ -927,11 +927,11 @@ $example_end
   Initialization
   --------------
     TODO : Initialization
-    FUNC : ${table}_loop_init_data
+    FUNC : ${context}_loop_init_data
     WHERE: ${table}_data_access.c
 
     @if $mfd_readme_verbose != 0@
-    The ${table}_loop_init_data function will be called during startup to
+    The ${context}_loop_init_data function will be called during startup to
     allow for any initialization needed for the data access routines.
 
     @end@
@@ -940,7 +940,7 @@ $example_end
   Preparing for the loop
   ----------------------
     TODO : initialize loop context
-    FUNC : ${table}_loop_init_context
+    FUNC : ${context}_loop_init_context
     WHERE: ${table}_data_access.c
 
     @if $mfd_readme_verbose != 0@
@@ -951,7 +951,7 @@ $example_end
 ##
     This function will be called before the start of a new itertion over
     the data. The loop context that is initialized here will be passed to
-    ${table}_loop_get_first and ${table}_loop_get_next.
+    ${context}_loop_get_first and ${context}_loop_get_next.
   
     Set the loop context variable ref->loop_ctx so that the iteration
     functions (get_first and get_next) can locate the apropriate data
@@ -976,7 +976,7 @@ $example_end
 
       File
       ----
-          ref->loop_ctx = SNMP_MALLOC_TYPEDEF(${table}_loop_context);
+          ref->loop_ctx = SNMP_MALLOC_TYPEDEF(${context}_loop_context);
           /* error checking here */
           ref->loop_ctx->file_name = (char*) reg->mfd_user_ctx;
           ref->loop_ctx->f = fopen( ref->loop_ctx->file_name, "r+" );
@@ -987,7 +987,7 @@ $example_end
   The Loop
   --------
     TODO : return raw data
-    FUNC : ${table}_loop_get_first
+    FUNC : ${context}_loop_get_first
     WHERE: ${table}_data_access.c
 
     @if $mfd_readme_verbose != 0@
@@ -997,7 +997,7 @@ $example_end
 ## the comments here and replace " * " with "   ".
 ##
     This function is called to return set the index(es) for the first
-    ${table}_data in the data set.
+    ${context}_data in the data set.
 
     Note that during the loop, the only important thing is the indexes.
     If access to your data is cheap/fast (e.g. you have a pointer to a
@@ -1006,7 +1006,7 @@ $example_end
     some other existing data, or peforming calculations to derive the data),
     then you should limit yourslef to setting the indexes. Extracting the
     can be put off until the desired row is found See the notes on
-    ${table}_loop_get_data().
+    ${context}_loop_get_data().
 
     Note that this function does not correspond to a SNMP GET pdu, and
     you should return data items in whatever order they are already in.
@@ -1037,7 +1037,7 @@ $example_end
     @end@
 
     TODO : return raw data
-    FUNC : ${table}_loop_get_next
+    FUNC : ${context}_loop_get_next
     WHERE: ${table}_data_access.c
 
     @if $mfd_readme_verbose != 0@
@@ -1081,7 +1081,7 @@ $example_end
   Updating the Index
   ------------------
     TODO : update index for the raw data
-    FUNC : ${table}_indexes_set
+    FUNC : ${context}_indexes_set
     WHERE: ${table}_data_access.c
 
     This is a convenience function for setting the index context from
@@ -1097,7 +1097,7 @@ $example_end
   Saving a position in the loop
   -----------------------------
     TODO : Saving a position in the loop
-    FUNC : ${table}_loop_save_position
+    FUNC : ${context}_loop_save_position
     WHERE: ${table}_data_access.c
 
     @if $mfd_readme_verbose != 0@
@@ -1115,7 +1115,7 @@ $example_end
   
     At the end of the loop, when the best match has been found, the saved
     loop context will be used to get the data for the row by calling
-    ${table}_loop_get_data().
+    ${context}_loop_get_data().
 @if $m2c_data_transient != 0@ # persistent
   
     Since your data is transient, you need to make a copy of it before
@@ -1131,7 +1131,7 @@ $example_end
   Returning Data For an Index
   ---------------------------
     TODO : copy transient raw data to generated structure
-    FUNC : ${table}_loop_get_data
+    FUNC : ${context}_loop_get_data
     WHERE: ${table}_data_access.c
 
     @if $mfd_readme_verbose != 0@
@@ -1142,7 +1142,7 @@ $example_end
 ##
     At the end of the loop, when the best match has been found, the saved
     loop context will be used to get the data for the row by calling
-    ${table}_loop_get_data().
+    ${context}_loop_get_data().
 ##
 ## end sync
 ##
@@ -1153,7 +1153,7 @@ $example_end
   Cleaning up after the loop
   --------------------------
     TODO : release any allocated memory
-    FUNC : ${table}_loop_cleanup_context
+    FUNC : ${context}_loop_cleanup_context
     WHERE: ${table}_data_access.c
 
     @if $mfd_readme_verbose != 0@
