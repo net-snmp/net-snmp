@@ -23,13 +23,16 @@ extern "C" {
 #define LOG_NOTICE      5       /* normal but significant condition */
 #define LOG_INFO        6       /* informational */
 #define LOG_DEBUG       7       /* debug-level messages */
-
 #endif
 
 struct snmp_log_message {
    int priority;
    const char *msg;
 };
+
+#ifndef DEFAULT_LOG_ID
+#define DEFAULT_LOG_ID "net-snmp"
+#endif
 
 void init_snmp_logging(void);
 int  snmp_get_do_logging(void);
@@ -39,6 +42,7 @@ void snmp_disable_stderrlog(void);
 void snmp_disable_calllog(void);
 void snmp_disable_log(void);
 void snmp_enable_syslog(void);
+void snmp_enable_syslog_ident(char *ident);
 void snmp_enable_filelog(const char *logfilename, int dont_zero_log);
 void snmp_enable_stderrlog(void);
 void snmp_enable_calllog(void);
