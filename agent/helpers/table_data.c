@@ -53,6 +53,9 @@ netsnmp_table_data_add_row(netsnmp_table_data *table,
 {
     netsnmp_table_row *nextrow, *prevrow;
 
+    if (!row || !table)
+        return SNMPERR_GENERR;
+
     if (row->indexes)
         netsnmp_table_data_generate_index_oid(row);
 
@@ -216,6 +219,9 @@ netsnmp_table_data_get_from_oid(netsnmp_table_data *table,
                                 oid * searchfor, size_t searchfor_len)
 {
     netsnmp_table_row *row;
+    if (!table)
+        return NULL;
+
     for (row = table->first_row; row != NULL; row = row->next) {
         if (row->index_oid &&
             snmp_oid_compare(searchfor, searchfor_len,
@@ -476,7 +482,7 @@ netsnmp_table_data *
 netsnmp_create_table_data(const char *name)
 {
     netsnmp_table_data *table = SNMP_MALLOC_TYPEDEF(netsnmp_table_data);
-    if (name)
+    if (name && table)
         table->name = strdup(name);
     return table;
 }
@@ -523,6 +529,9 @@ netsnmp_table_data_build_result(netsnmp_handler_registration *reginfo,
 {
     oid             build_space[MAX_OID_LEN];
 
+    if (!reginfo || !reqinfo || !request)
+        return SNMPERR_GENERR;
+
     if (reqinfo->mode == MODE_GETNEXT || reqinfo->mode == MODE_GETBULK) {
         /*
          * only need to do this for getnext type cases where oid is changing 
@@ -546,6 +555,9 @@ netsnmp_table_row *
 netsnmp_table_data_clone_row(netsnmp_table_row *row)
 {
     netsnmp_table_row *newrow = NULL;
+    if (!row)
+        return NULL;
+
     memdup((u_char **) & newrow, (u_char *) row,
            sizeof(netsnmp_table_row));
     if (!newrow)

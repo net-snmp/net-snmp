@@ -60,6 +60,9 @@ netsnmp_register_table_iterator(netsnmp_handler_registration *reginfo,
 {
     netsnmp_inject_handler(reginfo,
                            netsnmp_get_table_iterator_handler(iinfo));
+    if (!iinfo)
+        return SNMPERR_GENERR;
+
 #ifndef NOT_SERIALIZED
     netsnmp_inject_handler(reginfo, netsnmp_get_serialize_handler());
 #endif
@@ -92,6 +95,9 @@ netsnmp_table_iterator_helper_handler(netsnmp_mib_handler *handler,
     netsnmp_iterator_info *iinfo;
 
     iinfo = (netsnmp_iterator_info *) handler->myvoid;
+    if (!iinfo || !reginfo || !reqinfo)
+        return SNMPERR_GENERR;
+
     tbl_info = iinfo->table_reginfo;
 
     /*
