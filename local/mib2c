@@ -145,6 +145,7 @@ sub oidlength {
 #   $var.oidlength     -- length of the oid
 #   $var.type          -- node's ASN_XXX type
 #   $var.settable      -- 1 if it's writable, 0 if not
+#   $var.noaccess      -- 1 if not-accessible, 0 if not
 #   $var.access        -- node's access type
 #   $var.status        -- node's status
 #   $var.syntax        -- node's syntax
@@ -159,6 +160,7 @@ sub process_vars {
     $it =~ s/\$(\w+)\.(type)/$perltoctypes{$SNMP::MIB{$vars{$1}}{$2}}/g; # lowercase
     $it =~ s/\$(\w+)\.(subid)/$SNMP::MIB{$vars{$1}}{subID}/g; # lowercase
     $it =~ s/\$(\w+)\.(settable)/(($SNMP::MIB{$vars{$1}}{access} =~ \/(ReadWrite|Create|Writeonly)\/)?1:0)/eg; # lowercase
+    $it =~ s/\$(\w+)\.(noaccess)/(($SNMP::MIB{$vars{$1}}{access} =~ \/(NoAccess)\/)?1:0)/eg; # lowercase
     $it =~ s/\$(\w+)\.(objectID|label|subID|access|status|syntax)/$SNMP::MIB{$vars{$1}}{$2}/g;
 
     # normal variable substitions
