@@ -90,7 +90,6 @@ DLL_IMPORT extern struct tree *Mib;
 #define VARBIND_IID_F 1
 #define VARBIND_VAL_F 2
 #define VARBIND_TYPE_F 3
-#define VARBIND_TIME_F 4
 
 #define TYPE_UNKNOWN 0
 #define MAX_TYPE_NAME_LEN 16
@@ -1160,7 +1159,6 @@ void *cb_data;
   int sprintval_flag = USE_BASIC;
   struct snmp_pdu *reply_pdu;
   int old_numeric, old_printfull;
-  SV *sv_timestamp = NULL;
 
   SV* cb = ((struct snmp_xs_cb_data*)cb_data)->perl_cb;
   SV* sess_ref = ((struct snmp_xs_cb_data*)cb_data)->sess_ref;
@@ -1215,9 +1213,6 @@ void *cb_data;
       /* FALLTHRU */
     case SNMP_MSG_RESPONSE:
       {
-      if (SvIV(*hv_fetch((HV*)SvRV(sess_ref),"TimeStamp", 9, 1)))
-         sv_timestamp = newSViv((IV)time(NULL));
-
       varlist = newAV();
       varlist_ref = newRV_noinc((SV*)varlist);
 
@@ -1264,11 +1259,6 @@ void *cb_data;
          len = __sprint_value(str_buf, vars, tp, type, sprintval_flag);
          tmp_sv = newSVpv((char*)str_buf, len);
          av_store(varbind, VARBIND_VAL_F, tmp_sv);
-
-	 /* If requested, store a timestamp for this var in the Varbind. */
-	 if (sv_timestamp)
-	     av_store(varbind, VARBIND_TIME_F, SvREFCNT_inc(sv_timestamp));
-
       } /* for */
 
       /* Reset the library's behavior for numeric/symbolic OID's. */
@@ -1818,7 +1808,6 @@ _bulkwalk_recv_pdu(walk_context *context, struct snmp_pdu *pdu)
    int		i;
    AV		*varbind;
    SV		*rv;
-   SV		*sv_timestamp = NULL;
    SV **sess_ptr_sv = hv_fetch((HV*)SvRV(context->sess_ref), "SessPtr", 7, 1);
    struct snmp_session *ss = (SnmpSession *)SvIV((SV*)SvRV(*sess_ptr_sv));
    SV **err_str_svp = hv_fetch((HV*)SvRV(context->sess_ref), "ErrorStr", 8, 1);
@@ -1827,9 +1816,6 @@ _bulkwalk_recv_pdu(walk_context *context, struct snmp_pdu *pdu)
 
    DBPRT(3, "bulkwalk: sess_ref = 0x%p, sess_ptr_sv = 0x%p, ss = 0x%p\n",
 					    context->sess_ref, sess_ptr_sv, ss);
-
-   if (SvIV(*hv_fetch((HV*)SvRV(context->sess_ref),"TimeStamp", 9, 1)))
-      sv_timestamp = newSViv((IV)time(NULL));
 
    /* Set up for numeric OID's, if necessary.  Save the old values
    ** so that they can be restored when we finish -- these are
@@ -2089,10 +2075,6 @@ _bulkwalk_recv_pdu(walk_context *context, struct snmp_pdu *pdu)
 
       str_buf[len] = '\0';
       DBPRT(3, "'%s' (%s)\n", str_buf, type_str);
-
-      /* If necessary, store a timestamp as the semi-documented 5th element. */
-      if (sv_timestamp)
-	  av_store(varbind, VARBIND_TIME_F, SvREFCNT_inc(sv_timestamp));
 
       /* Push ref to the varbind onto the list of vars for OID. */
       rv = newRV_noinc((SV *)varbind);

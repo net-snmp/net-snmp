@@ -111,7 +111,6 @@ $save_descriptions = 0; #tied scalar to control saving descriptions during
                # mib parsing - must be set prior to mib loading
 $best_guess = 0;  # determine whether or not to enable best-guess regular
                   # expression object name translation
-$timestamp_vars = 0; # Add a timestamp to each Varbind
 
 sub setMib {
 # loads mib from file name provided
@@ -461,7 +460,6 @@ sub new {
    $this->{UseSprintValue} ||= $SNMP::use_sprint_value;
    $this->{UseEnums} ||= $SNMP::use_enums;
    $this->{UseNumeric} ||= $SNMP::use_numeric;
-   $this->{TimeStamp} ||= $SNMP::timestamp_vars;
 
    # Force UseLongNames if UseNumeric is in use.
    $this->{UseLongNames}++  if $this->{UseNumeric};
@@ -503,7 +501,6 @@ sub update {
    $this->{UseSprintValue} ||= $SNMP::use_sprint_value;
    $this->{UseEnums} ||= $SNMP::use_enums;
    $this->{UseNumeric} ||= $SNMP::use_numeric;
-   $this->{TimeStamp} ||= $SNMP::timestamp_vars;
 
    # Force UseLongNames if UseNumeric is in use.
    $this->{UseLongNames}++  if $this->{UseNumeric};
@@ -867,10 +864,6 @@ sub name {
    return $_[0]->[$tag_f];
 }
 
-sub stamp {
-   $_[0]->[$time_f];
-}
-
 sub fmt {
     my $self = shift;
     return $self->name . " = \"" . $self->val . "\" (" . $self->type . ")";
@@ -1218,15 +1211,6 @@ defaults to the value of SNMP::use_numeric at time of session
 creation. set to non-zero to have <tags> for get methods returned
 as numeric OID's rather than descriptions.  UseLongNames will be
 set so that the full OID is returned to the caller.
-
-=item TimeStamp
-
-defaults to the value of SNMP::timestamp_vars at time of session
-creation. set to non-zero to have an additional element added to
-each Varbind containing the time(2) timestamp.  Reference this
-timestamp through the $varbind_ref->stamp() method.  Do not modify
-the value of a timestamp -- it is shared between all variables
-received at the same time.
 
 =item ErrorStr
 
@@ -1637,13 +1621,6 @@ default to '0',set to non-zero to have <tags> for 'get'
 methods returned as numeric OID's rather than descriptions.
 UseLongNames will be set so that the entire OID will be
 returned.  Set on a per-session basis (see UseNumeric).
-
-=item $SNMP::timestamp_vars
-
-defaults to 0, set to non-zero to have an additional element
-added to each Varbind containing the time(2) timestamp.
-Reference the timestamps through the $varbind_ref->stamp()
-object method.
 
 =item $SNMP::save_descriptions
 
