@@ -12,6 +12,9 @@ the ChangeLog file for a more detailed listing of changes/bug fixes.
       community names now.
     - The header file #defines have changed.  You may have to compile
       third party applications with -DCMU_COMPATIBLE (like perl-SNMP <= V1.7).
+    - The parser is more strict about unlinked OIDs and end-of-comment
+      conditions.  You may see problems in a few broken mibs that used
+      to parse ok with the older parser.
 
  New:
     - dynamic library support:  configure with --enable-shared.
@@ -22,6 +25,8 @@ the ChangeLog file for a more detailed listing of changes/bug fixes.
     - a new mib module displays a list of all loaded mib modules.
     - the internal structure of the agent's mib modules is now hierarchical.
     - the agent looks for .conf files in both the lib/ and share/ directories.
+    - more improvements/options to snmptable.
+    - new vmstat module to report vmstat related information under linux.
 
  Fixes:
     - The code was run through purify for memory leaks and a few were found.
