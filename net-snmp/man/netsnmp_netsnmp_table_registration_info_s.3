@@ -1,0 +1,82 @@
+.TH "netsnmp_table_registration_info_s" 3 "15 Mar 2004" "net-snmp" \" -*- nroff -*-
+.ad l
+.nh
+.SH NAME
+netsnmp_table_registration_info_s \- Table registration structure. 
+.SH SYNOPSIS
+.br
+.PP
+\fC#include <table.h>\fP
+.PP
+.SS "Data Fields"
+
+.in +1c
+.ti -1c
+.RI "netsnmp_variable_list * \fBindexes\fP"
+.br
+.RI "\fIlist of varbinds with only 'type' set\fP"
+.ti -1c
+.RI "unsigned int \fBnumber_indexes\fP"
+.br
+.RI "\fIcalculated automatically\fP"
+.ti -1c
+.RI "unsigned int \fBmin_column\fP"
+.br
+.RI "\fIthe minimum and maximum columns numbers.\fP"
+.ti -1c
+.RI "unsigned int \fBmax_column\fP"
+.br
+.RI "\fIthe maximum columns number\fP"
+.ti -1c
+.RI "netsnmp_column_info * \fBvalid_columns\fP"
+.br
+.RI "\fImore details on columns\fP"
+.in -1c
+.SH "DETAILED DESCRIPTION"
+.PP 
+Table registration structure.
+.PP
+Definition at line 74 of file table.h.
+.SH "FIELD DOCUMENTATION"
+.PP 
+.SS "netsnmp_variable_list* netsnmp_table_registration_info_s::indexes"
+.PP
+list of varbinds with only 'type' set
+.PP
+Definition at line 76 of file table.h.
+.PP
+Referenced by netsnmp_get_table_handler(), netsnmp_register_table_data_set(), and table_helper_handler().
+.SS "unsigned int netsnmp_table_registration_info_s::max_column"
+.PP
+the maximum columns number
+.PP
+Definition at line 87 of file table.h.
+.PP
+Referenced by netsnmp_register_table_data_set(), netsnmp_table_data_helper_handler(), netsnmp_table_iterator_helper_handler(), and table_helper_handler().
+.SS "unsigned int netsnmp_table_registration_info_s::min_column"
+.PP
+the minimum and maximum columns numbers.
+.PP
+If there are columns in-between which are not valid, use valid_columns to get automatic column range checking. 
+.PP
+Definition at line 85 of file table.h.
+.PP
+Referenced by netsnmp_register_table_data_set(), netsnmp_table_data_helper_handler(), netsnmp_table_iterator_helper_handler(), and table_helper_handler().
+.SS "unsigned int netsnmp_table_registration_info_s::number_indexes"
+.PP
+calculated automatically
+.PP
+Definition at line 78 of file table.h.
+.PP
+Referenced by netsnmp_get_table_handler(), and table_helper_handler().
+.SS "netsnmp_column_info* netsnmp_table_registration_info_s::valid_columns"
+.PP
+more details on columns
+.PP
+Definition at line 90 of file table.h.
+.PP
+Referenced by table_helper_handler().
+
+.SH "AUTHOR"
+.PP 
+Generated automatically by Doxygen for net-snmp from the source code.

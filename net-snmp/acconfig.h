@@ -1,3 +1,14 @@
+/* Portions of this file are subject to the following copyright(s).  See
+ * the Net-SNMP's COPYING file for more details and other copyrights
+ * that may apply:
+ */
+/*
+ * Portions of this file are copyrighted by:
+ * Copyright © 2003 Sun Microsystems, Inc. All rights reserved.
+ * Use is subject to license terms specified in the COPYING file
+ * distributed with the Net-SNMP package.
+ */
+
 #ifndef NET_SNMP_CONFIG_H
 #define NET_SNMP_CONFIG_H
 
@@ -36,6 +47,9 @@
 
 /* define if you are using the MD5 code ...*/
 #undef USE_INTERNAL_MD5
+
+/* define if you are using the codeS11 library ...*/
+#undef USE_PKCS
 
 /* add in recent CMU library extensions (not complete) */
 #undef CMU_COMPATIBLE
@@ -368,6 +382,9 @@
 #ifdef openbsd2
 #define OSTYPE OPENBSDID
 #endif
+#ifdef WIN32
+#define OSTYPE WIN32ID
+#endif
 /* unknown */
 #ifndef OSTYPE
 #define OSTYPE UNKNOWNID
@@ -654,6 +671,10 @@
 #   define NETSNMP_STATIC_INLINE static
 #endif
 
+#ifndef NETSNMP_IMPORT
+#  define NETSNMP_IMPORT extern
+#endif
+
 #if defined(HAVE_NLIST) && defined(STRUCT_NLIST_HAS_N_VALUE) && !defined(DONT_USE_NLIST) && !defined(NO_KMEM_USAGE)
 #define CAN_USE_NLIST
 #endif
@@ -664,5 +685,8 @@
 
 #undef INET6
 #undef LOCAL_SMUX
+
+/* define if agentx transport is to use domain sockets only */
+#undef AGENTX_DOM_SOCK_ONLY
 
 #endif /* NET_SNMP_CONFIG_H */

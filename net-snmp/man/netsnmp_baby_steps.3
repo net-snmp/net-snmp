@@ -1,4 +1,4 @@
-.TH "baby_steps: calls your handler in baby_steps for set processing." 3 "13 Nov 2003" "net-snmp" \" -*- nroff -*-
+.TH "baby_steps: calls your handler in baby_steps for set processing." 3 "15 Mar 2004" "net-snmp" \" -*- nroff -*-
 .ad l
 .nh
 .SH NAME
@@ -7,7 +7,7 @@ baby_steps: calls your handler in baby_steps for set processing. \-
 
 .in +1c
 .ti -1c
-.RI "netsnmp_mib_handler * \fBnetsnmp_get_baby_steps_handler\fP (u_long modes)"
+.RI "\fBnetsnmp_mib_handler\fP * \fBnetsnmp_get_baby_steps_handler\fP (u_long modes)"
 .br
 .RI "\fIreturns a baby_steps handler that can be injected into a given handler chain.\fP"
 .ti -1c
@@ -17,13 +17,13 @@ baby_steps: calls your handler in baby_steps for set processing. \-
 .in -1c
 .SH "FUNCTION DOCUMENTATION"
 .PP 
-.SS "netsnmp_mib_handler* netsnmp_get_baby_steps_handler (u_long modes)"
+.SS "\fBnetsnmp_mib_handler\fP* netsnmp_get_baby_steps_handler (u_long modes)"
 .PP
 returns a baby_steps handler that can be injected into a given handler chain.
 .PP
 Definition at line 49 of file baby_steps.c.
 .PP
-References netsnmp_create_handler().
+References netsnmp_mib_handler_s::myvoid, and netsnmp_create_handler().
 .PP
 Referenced by netsnmp_init_baby_steps_helper().
 .SS "void netsnmp_init_baby_steps_helper (void)"

@@ -13,7 +13,7 @@ HEADER for failure of SNMPv1 get against SNMPv2c agent
 
 STARTAGENT
 
-CAPTURE "snmpget -On $SNMP_FLAGS -c notavalidcommunity -v 1 udp:localhost:$SNMP_SNMPD_PORT .1.3.6.1.2.1.1.3.0"
+CAPTURE "snmpget -On $SNMP_FLAGS -c notavalidcommunity -v 1 $SNMP_TRANSPORT_SPEC:$SNMP_TEST_DEST$SNMP_SNMPD_PORT .1.3.6.1.2.1.1.3.0"
 
 STOPAGENT
 

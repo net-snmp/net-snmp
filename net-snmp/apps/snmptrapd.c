@@ -99,8 +99,10 @@ SOFTWARE.
 #if USE_LIBWRAP
 #include <tcpd.h>
 
+/* fix 706903 - these are defined in agent/snmp_agent.c *-
 int             allow_severity = LOG_INFO;
 int             deny_severity = LOG_WARNING;
+ */
 #endif
 
 /*
@@ -778,6 +780,7 @@ main(int argc, char *argv[])
      */
     if (agentx_subagent) {
 #ifdef USING_AGENTX_SUBAGENT_MODULE
+	void  init_subagent(void);
         init_subagent();
 #endif
         init_notification_log();
@@ -881,10 +884,21 @@ main(int argc, char *argv[])
             *sep = 0;
         }
 
-        transport = netsnmp_tdomain_transport(cp, 1, "udp");
+           /*
+            * Make sure this defaults to listening on port 162
+            */
+        char  listen_name[128];
+        char *cp2 = strchr(cp, ':');
+        if (!cp2) {
+            snprintf(listen_name, sizeof(listen_name), "%s:162", cp);
+            cp2 = listen_name;
+        } else {
+            cp2 = cp;
+        }
+        transport = netsnmp_tdomain_transport(cp2, 1, "udp");
         if (transport == NULL) {
             snmp_log(LOG_ERR, "couldn't open %s -- errno %d (\"%s\")\n",
-                     cp, errno, strerror(errno));
+                     cp2, errno, strerror(errno));
             snmptrapd_close_sessions(sess_list);
             SOCK_CLEANUP;
             exit(1);

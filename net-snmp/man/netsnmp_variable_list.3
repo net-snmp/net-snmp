@@ -1,0 +1,141 @@
+.TH "variable_list" 3 "15 Mar 2004" "net-snmp" \" -*- nroff -*-
+.ad l
+.nh
+.SH NAME
+variable_list \- The netsnmp variable list binding structure, it's typedef'd to netsnmp_variable_list. 
+.SH SYNOPSIS
+.br
+.PP
+\fC#include <snmp_api.h>\fP
+.PP
+.SS "Data Fields"
+
+.in +1c
+.ti -1c
+.RI "variable_list * \fBnext_variable\fP"
+.br
+.RI "\fINULL for last variable.\fP"
+.ti -1c
+.RI "oid * \fBname\fP"
+.br
+.RI "\fIObject identifier of variable.\fP"
+.ti -1c
+.RI "size_t \fBname_length\fP"
+.br
+.RI "\fInumber of subid's in name\fP"
+.ti -1c
+.RI "u_char \fBtype\fP"
+.br
+.RI "\fIASN type of variable.\fP"
+.ti -1c
+.RI "netsnmp_vardata \fBval\fP"
+.br
+.RI "\fIvalue of variable\fP"
+.ti -1c
+.RI "size_t \fBval_len\fP"
+.br
+.RI "\fIthe length of the value to be copied into buf\fP"
+.ti -1c
+.RI "oid \fBname_loc\fP [MAX_OID_LEN]"
+.br
+.RI "\fI90 percentile < 24.\fP"
+.ti -1c
+.RI "u_char \fBbuf\fP [40]"
+.br
+.RI "\fI90 percentile < 40.\fP"
+.ti -1c
+.RI "void * \fBdata\fP"
+.br
+.RI "\fI(Opaque) hook for additional data\fP"
+.ti -1c
+.RI "void(* \fBdataFreeHook\fP )(void *)"
+.br
+.RI "\fIcallback to free above\fP"
+.in -1c
+.SH "DETAILED DESCRIPTION"
+.PP 
+The netsnmp variable list binding structure, it's typedef'd to netsnmp_variable_list.
+.PP
+\fBExamples: \fP
+.in +1c
+.PP
+\fBnotification.c\fP.
+.PP
+Definition at line 492 of file snmp_api.h.
+.SH "FIELD DOCUMENTATION"
+.PP 
+.SS "u_char variable_list::buf[40]"
+.PP
+90 percentile < 40.
+.PP
+Definition at line 508 of file snmp_api.h.
+.SS "void* variable_list::data"
+.PP
+(Opaque) hook for additional data
+.PP
+Definition at line 510 of file snmp_api.h.
+.SS "void(* variable_list::dataFreeHook)(void *)"
+.PP
+callback to free above
+.PP
+.SS "oid* variable_list::name"
+.PP
+Object identifier of variable.
+.PP
+Definition at line 496 of file snmp_api.h.
+.PP
+Referenced by build_oid_segment(), check_acm(), check_getnext_results(), netsnmp_bulk_to_next_fix_requests(), netsnmp_check_getnext_reply(), netsnmp_old_api_helper(), netsnmp_row_merge_helper_handler(), netsnmp_table_build_oid(), netsnmp_table_build_oid_from_index(), netsnmp_table_build_result(), netsnmp_table_data_helper_handler(), netsnmp_table_data_set_helper_handler(), netsnmp_table_iterator_helper_handler(), and table_helper_handler().
+.SS "size_t variable_list::name_length"
+.PP
+number of subid's in name
+.PP
+Definition at line 498 of file snmp_api.h.
+.PP
+Referenced by build_oid_segment(), check_acm(), check_getnext_results(), netsnmp_bulk_to_next_fix_requests(), netsnmp_check_getnext_reply(), netsnmp_old_api_helper(), netsnmp_row_merge_helper_handler(), netsnmp_table_build_oid(), netsnmp_table_build_oid_from_index(), netsnmp_table_data_helper_handler(), netsnmp_table_data_set_helper_handler(), netsnmp_table_iterator_helper_handler(), and table_helper_handler().
+.SS "oid variable_list::name_loc[MAX_OID_LEN]"
+.PP
+90 percentile < 24.
+.PP
+Definition at line 506 of file snmp_api.h.
+.PP
+Referenced by build_oid_segment(), netsnmp_table_build_oid_from_index(), netsnmp_table_build_result(), and table_helper_handler().
+.SS "struct variable_list* variable_list::next_variable"
+.PP
+NULL for last variable.
+.PP
+Definition at line 494 of file snmp_api.h.
+.PP
+Referenced by check_acm(), handle_getnext_loop(), handle_pdu(), netsnmp_bulk_to_next_fix_requests(), parse_oid_indexes(), and table_helper_handler().
+.SS "u_char variable_list::type"
+.PP
+ASN type of variable.
+.PP
+\fBExamples: \fP
+.in +1c
+\fBdelayed_instance.c\fP.
+.PP
+Definition at line 500 of file snmp_api.h.
+.PP
+Referenced by _request_set_error(), build_oid_segment(), check_acm(), check_getnext_results(), handle_pdu(), netsnmp_bulk_to_next_fix_requests(), netsnmp_check_getnext_reply(), netsnmp_old_api_helper(), netsnmp_table_data_helper_handler(), netsnmp_table_data_set_helper_handler(), netsnmp_table_iterator_helper_handler(), snmp_set_var_typed_value(), sprint_realloc_bitstring(), sprint_realloc_by_type(), sprint_realloc_counter(), sprint_realloc_counter64(), sprint_realloc_gauge(), sprint_realloc_integer(), sprint_realloc_ipaddress(), sprint_realloc_networkaddress(), sprint_realloc_null(), sprint_realloc_object_identifier(), sprint_realloc_octet_string(), sprint_realloc_opaque(), sprint_realloc_timeticks(), sprint_realloc_uinteger(), and table_helper_handler().
+.SS "netsnmp_vardata variable_list::val"
+.PP
+value of variable
+.PP
+\fBExamples: \fP
+.in +1c
+\fBdelayed_instance.c\fP.
+.PP
+Definition at line 502 of file snmp_api.h.
+.PP
+Referenced by build_oid_segment(), netsnmp_check_getnext_reply(), netsnmp_old_api_helper(), netsnmp_table_data_set_helper_handler(), sprint_realloc_bitstring(), sprint_realloc_counter(), sprint_realloc_counter64(), sprint_realloc_gauge(), sprint_realloc_integer(), sprint_realloc_ipaddress(), sprint_realloc_networkaddress(), sprint_realloc_object_identifier(), sprint_realloc_octet_string(), sprint_realloc_opaque(), sprint_realloc_timeticks(), and sprint_realloc_uinteger().
+.SS "size_t variable_list::val_len"
+.PP
+the length of the value to be copied into buf
+.PP
+Definition at line 504 of file snmp_api.h.
+.PP
+Referenced by build_oid_segment(), netsnmp_check_getnext_reply(), netsnmp_old_api_helper(), netsnmp_table_data_set_helper_handler(), sprint_realloc_bitstring(), sprint_realloc_networkaddress(), sprint_realloc_object_identifier(), sprint_realloc_octet_string(), and sprint_realloc_opaque().
+
+.SH "AUTHOR"
+.PP 
+Generated automatically by Doxygen for net-snmp from the source code.

@@ -348,9 +348,13 @@ STARTPROG() {
     if [ "x$PORT_SPEC" != "x" ]; then
         COMMAND="$COMMAND $PORT_SPEC"
     fi
-    echo $COMMAND >> $SNMP_TMPDIR/invoked
-    $COMMAND > $LOG_FILE.stdout 2>&1
-
+    if [ "x$OSTYPE" = "xmsys" ]; then
+      echo $COMMAND \& >> $SNMP_TMPDIR/invoked
+      $COMMAND > $LOG_FILE.stdout 2>&1 &
+    else
+      echo $COMMAND >> $SNMP_TMPDIR/invoked
+      $COMMAND > $LOG_FILE.stdout 2>&1
+    fi
     DELAY
 }
 
@@ -364,11 +368,13 @@ STARTPROGNOSLEEP() {
 #------------------------------------ -o-
 STARTAGENT() {
     SNMPDSTARTED=1
-    COMMAND="snmpd $SNMP_FLAGS -r -U -P $SNMP_SNMPD_PID_FILE -l $SNMP_SNMPD_LOG_FILE $AGENT_FLAGS"
+    COMMAND="snmpd $SNMP_FLAGS -r -U -p $SNMP_SNMPD_PID_FILE -Lf $SNMP_SNMPD_LOG_FILE $AGENT_FLAGS"
     CFG_FILE=$SNMP_CONFIG_FILE
     LOG_FILE=$SNMP_SNMPD_LOG_FILE
     PORT_SPEC="$SNMP_SNMPD_PORT"
-
+    if [ "x$SNMP_TRANSPORT_SPEC" != "x" ]; then
+        PORT_SPEC="$SNMP_TRANSPORT_SPEC:$PORT_SPEC"
+    fi
     STARTPROGNOSLEEP
     WAITFORAGENT "NET-SNMP version"
 }
@@ -376,11 +382,13 @@ STARTAGENT() {
 #------------------------------------ -o-
 STARTTRAPD() {
     TRAPDSTARTED=1
-    COMMAND="snmptrapd -d -u $SNMP_SNMPTRAPD_PID_FILE -o $SNMP_SNMPTRAPD_LOG_FILE"
+    COMMAND="snmptrapd -d -p $SNMP_SNMPTRAPD_PID_FILE -Lf $SNMP_SNMPTRAPD_LOG_FILE"
     CFG_FILE=$SNMPTRAPD_CONFIG_FILE
     LOG_FILE=$SNMP_SNMPTRAPD_LOG_FILE
     PORT_SPEC="$SNMP_SNMPTRAPD_PORT"
-
+    if [ "x$SNMP_TRANSPORT_SPEC" != "x" ]; then
+        PORT_SPEC="$SNMP_TRANSPORT_SPEC:$PORT_SPEC"
+    fi
     STARTPROGNOSLEEP
     WAITFORTRAPD "NET-SNMP version"
 }
@@ -392,7 +400,11 @@ STARTTRAPD() {
 #    master agent and sub agent.
 STOPPROG() {
     if [ -f $1 ]; then
-	COMMAND="kill -TERM `cat $1`"
+        if [ "x$OSTYPE" = "xmsys" ]; then
+          COMMAND="kill.exe `cat $1`"
+        else
+          COMMAND="kill -TERM `cat $1`"
+        fi
 	echo $COMMAND >> $SNMP_TMPDIR/invoked
 
 	DELAY
@@ -453,7 +465,11 @@ FINISHED() {
 	ps -e | egrep "^[ ]*$pid" > /dev/null 2>&1
 	if [ $? = 0 ] ; then
 	    SNMP_SAVE_TMPDIR=yes
-	    COMMAND="kill -9 $pid"
+            if [ "x$OSTYPE" = "xmsys" ]; then
+              COMMAND="kill -9 $pid"
+            else
+              COMMAND="kill.exe $pid"
+            fi
 	    echo $COMMAND "($pfile)" >> $SNMP_TMPDIR/invoked
 	    $COMMAND > /dev/null 2>&1
 	    return_value=1

@@ -1,4 +1,4 @@
-.TH "table_array: Helps you implement a table when data can be stored locally. The data is stored in a sorted array, using a binary search for lookups." 3 "13 Nov 2003" "net-snmp" \" -*- nroff -*-
+.TH "table_array: Helps you implement a table when data can be stored locally. The data is stored in a sorted array, using a binary search for lookups." 3 "15 Mar 2004" "net-snmp" \" -*- nroff -*-
 .ad l
 .nh
 .SH NAME
@@ -8,11 +8,11 @@ More...
 
 .in +1c
 .ti -1c
-.RI "int \fBnetsnmp_table_container_register\fP (netsnmp_handler_registration *reginfo, netsnmp_table_registration_info *tabreg, netsnmp_table_array_callbacks *cb, netsnmp_container *container, int group_rows)"
+.RI "int \fBnetsnmp_table_container_register\fP (\fBnetsnmp_handler_registration\fP *reginfo, netsnmp_table_registration_info *tabreg, netsnmp_table_array_callbacks *cb, netsnmp_container *container, int group_rows)"
 .br
 .RI "\fIregister specified callbacks for the specified table/oid.\fP"
 .ti -1c
-.RI "netsnmp_mib_handler * \fBnetsnmp_find_table_array_handler\fP (netsnmp_handler_registration *reginfo)"
+.RI "\fBnetsnmp_mib_handler\fP * \fBnetsnmp_find_table_array_handler\fP (\fBnetsnmp_handler_registration\fP *reginfo)"
 .br
 .RI "\fIfind the handler for the table_array helper.\fP"
 .ti -1c
@@ -60,17 +60,19 @@ find the context data used by the table_array helper
 Definition at line 213 of file table_array.c.
 .PP
 References netsnmp_request_get_list_data().
-.SS "netsnmp_mib_handler* netsnmp_find_table_array_handler (netsnmp_handler_registration * reginfo)"
+.SS "\fBnetsnmp_mib_handler\fP* netsnmp_find_table_array_handler (\fBnetsnmp_handler_registration\fP * reginfo)"
 .PP
 find the handler for the table_array helper.
 .PP
 Definition at line 196 of file table_array.c.
+.PP
+References netsnmp_mib_handler_s::access_method, netsnmp_handler_registration_s::handler, and netsnmp_mib_handler_s::next.
 .SS "int netsnmp_table_array_check_row_status (netsnmp_table_array_callbacks * cb, netsnmp_request_group * ag, long * rs_new, long * rs_old)"
 .PP
 this function is called to validate RowStatus transitions.
 .PP
 Definition at line 220 of file table_array.c.
-.SS "int netsnmp_table_container_register (netsnmp_handler_registration * reginfo, netsnmp_table_registration_info * tabreg, netsnmp_table_array_callbacks * cb, netsnmp_container * container, int group_rows)"
+.SS "int netsnmp_table_container_register (\fBnetsnmp_handler_registration\fP * reginfo, netsnmp_table_registration_info * tabreg, netsnmp_table_array_callbacks * cb, netsnmp_container * container, int group_rows)"
 .PP
 register specified callbacks for the specified table/oid.
 .PP
@@ -78,4 +80,4 @@ If the group_rows parameter is set, the row related callbacks will be called onc
 .PP
 Definition at line 152 of file table_array.c.
 .PP
-References netsnmp_register_table(), and SNMP_MALLOC_TYPEDEF.
+References netsnmp_handler_registration_s::handler, netsnmp_mib_handler_s::myvoid, netsnmp_register_table(), snmp_log(), and SNMP_MALLOC_TYPEDEF.

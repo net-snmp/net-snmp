@@ -3,18 +3,6 @@ Microsoft Developer Studio Workspace File, Format Version 6.00
 
 ###############################################################################
 
-Project: "encode_keychange"=".\encode_keychange\encode_keychange.dsp" - Package Owner=<4>
-
-Package=<5>
-{{{
-}}}
-
-Package=<4>
-{{{
-}}}
-
-###############################################################################
-
 Project: "libagent"=".\libagent\libagent.dsp" - Package Owner=<4>
 
 Package=<5>
@@ -51,7 +39,7 @@ Package=<4>
 
 ###############################################################################
 
-Project: "libsnmp_dll"=".\libsnmp_dll\libsnmp_dll.dsp" - Package Owner=<4>
+Project: "netsnmpmibssdk"=".\netsnmpmibssdk\netsnmpmibssdk.dsp" - Package Owner=<4>
 
 Package=<5>
 {{{
@@ -63,7 +51,7 @@ Package=<4>
 
 ###############################################################################
 
-Project: "netsnmpmibssdk"=".\netsnmpmibssdk\netsnmpmibssdk.dsp" - Package Owner=<4>
+Project: "encode_keychange"=".\encode_keychange\encode_keychange.dsp" - Package Owner=<4>
 
 Package=<5>
 {{{
@@ -99,6 +87,18 @@ Package=<4>
 
 ###############################################################################
 
+Project: "snmpdsdk"=".\snmpdsdk\snmpd.dsp" - Package Owner=<4>
+
+Package=<5>
+{{{
+}}}
+
+Package=<4>
+{{{
+}}}
+
+###############################################################################
+
 Project: "snmpdelta"=".\snmpdelta\snmpdelta.dsp" - Package Owner=<4>
 
 Package=<5>
@@ -119,27 +119,6 @@ Package=<5>
 
 Package=<4>
 {{{
-}}}
-
-###############################################################################
-
-Project: "snmpdsdk"=".\snmpdsdk\snmpd.dsp" - Package Owner=<4>
-
-Package=<5>
-{{{
-}}}
-
-Package=<4>
-{{{
-    Begin Project Dependency
-    Project_Dep_Name libagent
-    End Project Dependency
-    Begin Project Dependency
-    Project_Dep_Name libhelpers
-    End Project Dependency
-    Begin Project Dependency
-    Project_Dep_Name netsnmpmibssdk
-    End Project Dependency
 }}}
 
 ###############################################################################
@@ -260,15 +239,6 @@ Package=<5>
 
 Package=<4>
 {{{
-    Begin Project Dependency
-    Project_Dep_Name libagent
-    End Project Dependency
-    Begin Project Dependency
-    Project_Dep_Name libhelpers
-    End Project Dependency
-    Begin Project Dependency
-    Project_Dep_Name netsnmpmibssdk
-    End Project Dependency
 }}}
 
 ###############################################################################

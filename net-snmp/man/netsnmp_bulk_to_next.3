@@ -1,4 +1,4 @@
-.TH "bulk_to_next: convert GETBULK requests into GETNEXT requests for the handler." 3 "13 Nov 2003" "net-snmp" \" -*- nroff -*-
+.TH "bulk_to_next: convert GETBULK requests into GETNEXT requests for the handler." 3 "15 Mar 2004" "net-snmp" \" -*- nroff -*-
 .ad l
 .nh
 .SH NAME
@@ -16,7 +16,7 @@ More...
 
 .in +1c
 .ti -1c
-.RI "netsnmp_mib_handler * \fBnetsnmp_get_bulk_to_next_handler\fP (void)"
+.RI "\fBnetsnmp_mib_handler\fP * \fBnetsnmp_get_bulk_to_next_handler\fP (void)"
 .br
 .RI "\fIreturns a bulk_to_next handler that can be injected into a given handler chain.\fP"
 .ti -1c
@@ -36,7 +36,9 @@ It is inserted into handler chains where the handler has not set the HANDLER_CAN
 takes answered requests and decrements the repeat count and updates the requests to the next to-do varbind in the list
 .PP
 Definition at line 39 of file bulk_to_next.c.
-.SS "netsnmp_mib_handler* netsnmp_get_bulk_to_next_handler (void)"
+.PP
+References variable_list::name, variable_list::name_length, netsnmp_request_info_s::next, variable_list::next_variable, netsnmp_request_info_s::repeat, netsnmp_request_info_s::requestvb, and variable_list::type.
+.SS "\fBnetsnmp_mib_handler\fP* netsnmp_get_bulk_to_next_handler (void)"
 .PP
 returns a bulk_to_next handler that can be injected into a given handler chain.
 .PP

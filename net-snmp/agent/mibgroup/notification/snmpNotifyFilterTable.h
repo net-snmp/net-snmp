@@ -67,8 +67,6 @@ config_require(header_complex)
      WriteMethod     write_snmpNotifyFilterStorageType;
      WriteMethod     write_snmpNotifyFilterRowStatus;
 
-     WriteMethod     write_snmpNotifyFilterRowStatus;
-
 
 
 #endif                          /* _MIBGROUP_SNMPNOTIFYFILTERTABLE_H */

@@ -1,0 +1,41 @@
+.TH "netsnmp_mib_handler_s" 3 "15 Mar 2004" "net-snmp" \" -*- nroff -*-
+.ad l
+.nh
+.SH NAME
+netsnmp_mib_handler_s \- the mib handler structure to be registered 
+.SH SYNOPSIS
+.br
+.PP
+\fC#include <agent_handler.h>\fP
+.PP
+.SS "Data Fields"
+
+.in +1c
+.ti -1c
+.RI "void * \fBmyvoid\fP"
+.br
+.RI "\fIfor handler's internal use\fP"
+.in -1c
+.SH "DETAILED DESCRIPTION"
+.PP 
+the mib handler structure to be registered
+.PP
+\fBExamples: \fP
+.in +1c
+.PP
+\fBdelayed_instance.c\fP.
+.PP
+Definition at line 33 of file agent_handler.h.
+.SH "FIELD DOCUMENTATION"
+.PP 
+.SS "void* netsnmp_mib_handler_s::myvoid"
+.PP
+for handler's internal use
+.PP
+Definition at line 36 of file agent_handler.h.
+.PP
+Referenced by netsnmp_cache_helper_handler(), netsnmp_find_handler_data_by_name(), netsnmp_get_baby_steps_handler(), netsnmp_get_cache_handler(), netsnmp_get_mode_end_call_handler(), netsnmp_get_multiplexer_handler(), netsnmp_get_row_merge_handler(), netsnmp_get_stash_cache_handler(), netsnmp_get_table_data_handler(), netsnmp_get_table_data_set_handler(), netsnmp_get_table_handler(), netsnmp_get_table_iterator_handler(), netsnmp_handler_dup(), netsnmp_multiplexer_helper_handler(), netsnmp_row_merge_helper_handler(), netsnmp_table_container_register(), netsnmp_table_data_helper_handler(), netsnmp_table_data_set_helper_handler(), netsnmp_table_iterator_helper_handler(), and table_helper_handler().
+
+.SH "AUTHOR"
+.PP 
+Generated automatically by Doxygen for net-snmp from the source code.
