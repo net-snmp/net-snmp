@@ -1,5 +1,10 @@
 #!/bin/sh
 
+case "$1" in
+  Ext*) ;;
+  *) exit 0 ;;
+esac
+
 VERSION=`echo $1 | sed 's/Ext-*//g;s/-/./g;'`
 
 if [ $2 = "add" ]; then
