@@ -284,7 +284,7 @@ input_variable(struct variable_list *vp)
 	return 0;
     }
     if (buf[val_len-1] == '\n')
-    	buf[val_len-1] = 0;
+    	buf[--val_len] = 0;
     if (*buf == '$'){
 	switch(toupper(buf[1])){
 	    case 'G':
