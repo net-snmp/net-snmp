@@ -26,15 +26,23 @@ extern "C" {
 
 #endif
 
+typedef void (*snmp_log_callback)(int level, const char* text);
+struct snmp_log_message {
+   int priority;
+   const char *msg;
+};
+
 void init_snmp_logging(void);
 int  snmp_get_do_logging(void);
 void snmp_disable_syslog(void);
 void snmp_disable_filelog(void);
 void snmp_disable_stderrlog(void);
+void snmp_disable_calllog(void);
 void snmp_disable_log(void);
 void snmp_enable_syslog(void);
 void snmp_enable_filelog(const char *logfilename, int dont_zero_log);
 void snmp_enable_stderrlog(void);
+void snmp_enable_calllog(void);
 
 #if HAVE_STDARG_H
 int snmp_log(int priority, const char *format, ...);
