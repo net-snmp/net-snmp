@@ -38,7 +38,9 @@ PERFORMANCE OF THIS SOFTWARE.
 #include <sys/user.h>
 #include <sys/proc.h>
 #include <sys/types.h>
-#include <machine/pte.h>
+/*
+  #include <machine/pte.h>
+  */
 #include <sys/vm.h>
 #include <netinet/in.h>
 #include <syslog.h>
@@ -203,7 +205,7 @@ static struct nlist nl[] = {
 
 long		long_return;
 #ifndef ibm032
-u_char		return_buf[CLSIZE*NBPG];  
+u_char		return_buf[258];  
 #else
 u_char		return_buf[256]; /* nee 64 */
 #endif
@@ -211,7 +213,7 @@ u_char		return_buf[256]; /* nee 64 */
 init_snmp()
 {
 	nlist("/vmunix",nl);
-	init_kmem("/dev/kmem");
+	init_kmem("/dev/kmem"); 
 	init_routes();
 }
 
@@ -522,12 +524,14 @@ struct variable2 udp_variables[] = {
     {UDPOUTDATAGRAMS, COUNTER, RONLY, var_udp, 1, {4}}
 };
 
+#ifndef hpux
 #ifndef sparc
 struct variable2 process_variables[] = {
     {PROCESSSLOTINDEX, INTEGER, RONLY, var_process, 1, {1}},
-    {PROCESSID, INTEGER, RONLY, var_proces, 1, {2}},
+    {PROCESSID, INTEGER, RONLY, var_process, 1, {2}},
     {PROCESSCOMMAND, STRING, RONLY, var_process, 1, {3}}
 };
+#endif
 #endif
 
 /*
@@ -657,7 +661,12 @@ struct variable2 eventnotifytab_variables[] = {
         {EVENTNOTIFYTABSTATUS, INTEGER, RWRITE, var_eventnotifytab, 1, {4 }},
 };
 
+#include "wes/wes.c"
+
 struct subtree subtrees[] = {
+  {{WESMIB,1}, 8, (struct variable *)wes_proc_variables,
+   sizeof(wes_proc_variables)/sizeof(*wes_proc_variables),
+   sizeof(wes_proc_variables)},
     {{MIB, 1}, 7, (struct variable *)system_variables,
 	 sizeof(system_variables)/sizeof(*system_variables),
 	 sizeof(*system_variables)},
@@ -1012,8 +1021,9 @@ var_hosttimetab(vp, name, length, exact, var_len, write_method)
 
         switch (vp->magic) {
                 case HOSTTIMETABADDRESS:
-                        *var_len = sizeof(struct ether_addr);
-                        return (u_char *) "RMONRULES";
+/*                  *var_len = sizeof(struct ether_addr); */
+                  *var_len = 6*sizeof(u_char);
+                  return (u_char *) "RMONRULES";
                 case HOSTTIMETABCREATIONORDER:
 			long_return = creationOrder;
 			return (u_char *) &long_return;
@@ -1064,7 +1074,7 @@ var_system(vp, name, length, exact, var_len, write_method)
 	    *var_len = sizeof(version_id);
 	    return (u_char *)version_id;
 	case UPTIME:
-	    (u_long)long_return = sysUpTime();
+	    long_return = (u_long)  sysUpTime();
 	    return (u_char *)&long_return;
 	case IFNUMBER:
 	    long_return = Interface_Scan_Get_Count();
@@ -1303,7 +1313,7 @@ var_ifEntry(vp, name, length, exact, var_len, write_method)
 	    if (cp) long_return = atoi(cp);
 	    else
 #endif
-	    (u_long)long_return = 1;	/* OTHER */
+	    long_return = (u_long)  1;	/* OTHER */
 	    return (u_char *) &long_return;
 	case IFPHYSADDRESS:
 #if 0
@@ -1329,30 +1339,30 @@ var_ifEntry(vp, name, length, exact, var_len, write_method)
 	    long_return = 0; /* XXX */
 	    return (u_char *) &long_return;
 	case IFINOCTETS:
-	    (u_long)long_return = ifnet.if_ipackets * 308; /* XXX */
+	    long_return = (u_long)  ifnet.if_ipackets * 308; /* XXX */
 	    return (u_char *) &long_return;
 	case IFINUCASTPKTS:
-	    (u_long)long_return = ifnet.if_ipackets;
+	    long_return = (u_long)  ifnet.if_ipackets;
 	    return (u_char *) &long_return;
 	case IFINNUCASTPKTS:
-	    (u_long)long_return = 0; /* XXX */
+	    long_return = (u_long)  0; /* XXX */
 	    return (u_char *) &long_return;
 	case IFINDISCARDS:
-	    (u_long)long_return = 0; /* XXX */
+	    long_return = (u_long)  0; /* XXX */
 	    return (u_char *) &long_return;
 	case IFINERRORS:
 	    return (u_char *) &ifnet.if_ierrors;
 	case IFINUNKNOWNPROTOS:
-	    (u_long)long_return = 0; /* XXX */
+	    long_return = (u_long)  0; /* XXX */
 	    return (u_char *) &long_return;
 	case IFOUTOCTETS:
-	    (u_long)long_return = ifnet.if_opackets * 308; /* XXX */
+	    long_return = (u_long)  ifnet.if_opackets * 308; /* XXX */
 	    return (u_char *) &long_return;
 	case IFOUTUCASTPKTS:
-	    (u_long)long_return = ifnet.if_opackets;
+	    long_return = (u_long)  ifnet.if_opackets;
 	    return (u_char *) &long_return;
 	case IFOUTNUCASTPKTS:
-	    (u_long)long_return = 0; /* XXX */
+	    long_return = (u_long)  0; /* XXX */
 	    return (u_char *) &long_return;
 	case IFOUTDISCARDS:
 	    return (u_char *) &ifnet.if_snd.ifq_drops;
@@ -1463,7 +1473,7 @@ var_ip(vp, name, length, exact, var_len, write_method)
 {
     static struct ipstat ipstat;
     oid newname[MAX_NAME_LEN];
-    int result;
+    int result, i;
 
     bcopy((char *)vp->name, (char *)newname, (int)vp->namelen * sizeof(oid));
     newname[8] = 0;
@@ -2345,7 +2355,7 @@ u_char *EtherAddr;
 
 
 
-#if defined(mips) || defined(ibm032) || defined(sunV3)
+#if defined(mips) || defined(ibm032) || defined(sunV3) || defined(hpuxx)
 
 
 /*
@@ -2356,8 +2366,7 @@ u_char *EtherAddr;
 struct proc procbuf[PROCBLOC];
 
 
-u_char *
-var_process(vp, name, length, exact, var_len, write_method)
+u_char *var_process(vp, name, length, exact, var_len, write_method)
     register struct variable *vp;   /* IN - pointer to variable entry that points here */
     register oid	*name;	    /* IN/OUT - input name requested, output name found */
     register int	*length;    /* IN/OUT - length of input and output oid's */
