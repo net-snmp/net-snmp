@@ -208,7 +208,19 @@ unsigned char *var_wes_shell(vp, name, length, exact, var_len, write_method)
   return NULL;
 }
 
-
+extern char version_descr[];
 init_wes() {
+  struct extensible extmp;
+#ifdef mips
+  strcpy(extmp.command,"/bin/uname -m -n -r -s -v");
+#else
+  strcpy(extmp.command,"/bin/uname -m -n -r -s -v -i");
+#endif
+  extmp.type = EXECPROC;
+  extmp.next = NULL;
+
   read_config (DEFPROCFILE,&procwatch,&numprocs,&extens,&numextens);
+  /* set default values of system stuff */
+  exec_command(&extmp);
+  strcpy(version_descr,extmp.output);
 }
