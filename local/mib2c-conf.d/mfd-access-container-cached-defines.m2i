@@ -11,12 +11,12 @@
 ##//@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
 @if $m2c_processing_type eq 'h'@
 
-void ${table}_container_init(netsnmp_container **container_ptr_ptr,
+void ${context}_container_init(netsnmp_container **container_ptr_ptr,
                              netsnmp_cache *cache);
 int ${context}_cache_load(netsnmp_container *container);
 void ${context}_cache_free(netsnmp_container *container);
 
-@if $m2c_include_examples == 1@
+@   if $m2c_include_examples == 1@
 $example_start
 /* *********************************************************************
  * Since we have no idea how you really access your data, we'll go with
@@ -29,7 +29,7 @@ $example_start
  */
 #define MAX_LINE_SIZE 256
 $example_end
-@end@ // example
+@   end@ // example
 @end@ // m2c_processing_type eq 'h'
 ##//####################################################################
 ##//@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
@@ -72,13 +72,13 @@ $example_end
  *  process that will supply the data, opening a database, etc.
  */
 void
-${table}_container_init(netsnmp_container **container_ptr_ptr,
+${context}_container_init(netsnmp_container **container_ptr_ptr,
                         netsnmp_cache *cache)
 {
-    DEBUGMSGTL(("verbose:${table}_container_init","called\n"));
+    DEBUGMSGTL(("verbose:${context}_container_init","called\n"));
     
     if((NULL == cache) || (NULL == container_ptr_ptr)) {
-        snmp_log(LOG_ERR,"bad params to ${table}_container_init\n");
+        snmp_log(LOG_ERR,"bad params to ${context}_container_init\n");
         return;
     }
 
@@ -136,9 +136,14 @@ ${context}_cache_load(netsnmp_container *container)
      */
     FILE *filep;
     char line[MAX_LINE_SIZE];
-@foreach $node index@
+    /*
+     * temporary storage for index values
+     */
+@  foreach $node index@
 @    include m2c_setup_node.m2i@
-        /** $m2c_node_summary */
+        /*
+         * $m2c_node_summary
+         */
 @    if $m2c_node_needlength == 1@
 @        eval $m2c_gi_maxlen = (126 - $node.oidlength - $m2c_gi_others)@
 @        if $m2c_node_maxlen > $m2c_gi_maxlen@
@@ -147,7 +152,7 @@ ${context}_cache_load(netsnmp_container *container)
 @        end@
 @    end@ # needlength
 @    include node-storage.m2i@
-@end@ // foreach
+@  end@ // foreach
 @end@ // examples
 
     DEBUGMSGTL(("verbose:${context}_cache_load","called\n"));
@@ -170,13 +175,12 @@ $example_end
      * loop over your data, allocate, set index, insert into the container
      */
     while( 1 ) {
+@   if $m2c_include_examples == 0@
         /*
          * TODO: check for end of data
-         *
          * bail out if there is no more data
          */
-@   if $m2c_include_examples == 0@
-        if( ${context}_OUT_OF_DATA() )
+        if( ${context}_TODO_CHECK_OUT_OF_DATA() )
             break;
 @   else@
 $example_start
@@ -199,7 +203,7 @@ $example_start
 
     /*
      * TODO: parse line
-     * parse line into variables *
+     * parse line into variables
      */
 $example_end
 @    end@ # example
@@ -236,11 +240,24 @@ $example_end
 @else@
     /*
      * TRANSIENT or semi-TRANSIENT data:
-     * can copy data in row_prep or here, depending on when you
-     * want to take the hit. Either copy the data now, or save
-     * any info needed and do it in row_prep.
+     * copy data or save any info needed to do it in row_prep.
      */
-@end@
+@   foreach $node nonindex@
+@      include m2c_setup_node.m2i@
+    /*
+     * TODO: setup/save data for $node
+     * $m2c_node_summary
+     */
+@      if "$m2c_data_context" eq "generated"@
+@         eval $m2c_ctx_lh = "$m2c_ctx_rh"@
+@         eval $m2c_ctx_lhs = "$m2c_ctx_rhs"@
+@         eval $m2c_ctx_rh = "TODO_FIND_$node"@
+@         eval $m2c_ctx_rhs = "TODO_FIND_${node}_len"@
+@         include generic-value-map.m2i@
+    
+@      end@ # data_context ! generated
+@   end@ // for each
+@end@ # transient
         
         /*
          * insert into table container
@@ -292,7 +309,7 @@ _cache_load(netsnmp_cache *cache, void *vmagic)
     DEBUGMSGTL(("internal:${context}:_cache_load","called\n"));
 
     if((NULL == cache) || (NULL == cache->magic)) {
-        snmp_log(LOG_ERR, "invalid cache for ${table}_cache_load\n");
+        snmp_log(LOG_ERR, "invalid cache for ${context}_cache_load\n");
         return -1;
     }
 
@@ -302,7 +319,7 @@ _cache_load(netsnmp_cache *cache, void *vmagic)
     /*
      * call user code
      */
-    return ${table}_cache_load((netsnmp_container*)cache->magic);
+    return ${context}_cache_load((netsnmp_container*)cache->magic);
 }
 
 /**
@@ -339,7 +356,7 @@ _cache_free(netsnmp_cache *cache, void *magic)
     /*
      * call user code
      */
-    ${table}_cache_free(container);
+    ${context}_cache_free(container);
     
     /*
      * free all items. inefficient, but easy.
@@ -354,9 +371,9 @@ _cache_free(netsnmp_cache *cache, void *magic)
  * initialize the iterator container with functions or wrappers
  */
 void
-_${table}_container_init(${context}_interface_ctx *if_ctx)
+_${context}_container_init(${context}_interface_ctx *if_ctx)
 {
-    DEBUGMSGTL(("internal:${context}:_${table}_container_init","called\n"));
+    DEBUGMSGTL(("internal:${context}:_${context}_container_init","called\n"));
     
 @    if 0@
     /*
@@ -379,12 +396,12 @@ _${table}_container_init(${context}_interface_ctx *if_ctx)
         return;
     }
 
-    ${table}_container_init(&if_ctx->container, if_ctx->cache);
+    ${context}_container_init(&if_ctx->container, if_ctx->cache);
     if(NULL == if_ctx->container)
-        if_ctx->container = netsnmp_container_find("${table}:table_container");
+        if_ctx->container = netsnmp_container_find("${context}:table_container");
     if(NULL == if_ctx->container) {
         snmp_log(LOG_ERR,"error creating container in "
-                 "${table}_container_init\n");
+                 "${context}_container_init\n");
         return;
     }
     if_ctx->cache->magic = (void*)if_ctx->container;
@@ -409,8 +426,8 @@ _${table}_container_init(${context}_interface_ctx *if_ctx)
   Updating the Index
   ------------------
     TODO : update index for the raw data
-    FUNC : ${table}_indexes_set
-    WHERE: ${table}_data_access.c
+    FUNC : ${context}_indexes_set
+    WHERE: ${context}_data_access.c
 
     This is a convenience function for setting the index context from
     the native C data. Where necessary, value mapping should be done.
