@@ -112,8 +112,8 @@ ${node}_undo_setup( ${context}_ctx *ctx )
 {
     DEBUGMSGT(("${name}:trace",">%s\n",__FUNCTION__));
 
-@ifconf syntax-$node.syntax-set.m2i@
-@    include syntax-$node.syntax-set.m2i@
+@ifconf syntax-$node.syntax-undo-setup.m2i@
+@    include syntax-$node.syntax-undo-setup.m2i@
 @else@
     /** should never get a NULL pointer */
     netsnmp_assert(NULL != ctx);
@@ -192,10 +192,11 @@ ${node}_undo( ${context}_ctx *ctx )
     /** syntax-$node.syntax-undo.m2i not found */
     netsnmp_assert(NULL != ctx);
 
-##@    if ($node.enums != 1) || ("$node.perltype" ne "BITS")@
-##@        include generic-ctx-set.m2i@
-##@    end@ # ! enums & bits
+@   eval $m2c_ctx_rh = "$m2c_undo_item"@
+@   eval $m2c_ctx_lh = "$m2c_data_item"@
+@   include generic-ctx-copy.m2i@
 @end@ # no syntax include
+    
     return MFD_SUCCESS;
 }
 
