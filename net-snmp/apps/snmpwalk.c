@@ -104,7 +104,6 @@ main(argc, argv)
     struct snmp_pdu *pdu, *response;
     struct variable_list *vars;
     int   arg;
-    int   gotroot = 0;
     oid   name[MAX_NAME_LEN];
     int   name_length;
     oid   root[MAX_NAME_LEN];
