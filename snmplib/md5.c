@@ -259,8 +259,11 @@ MDblock(MDptr MDp,
 ** count less than 512.  A call with count 0 will be ignored if the
 ** MD has already been terminated (done != 0), so an extra call with count
 ** 0 can be given as a ``courtesy close'' to force termination if desired.
+** Returns : 0 if processing succeeds or was already done;
+**          -1 if processing was already done
+**          -2 if count was too large
 */
-void 
+int 
 MDupdate(MDptr MDp,
 	 unsigned char *X,
 	 unsigned int count)
@@ -271,9 +274,12 @@ MDupdate(MDptr MDp,
     /* return with no error if this is a courtesy close with count
   ** zero and MDp->done is true.
   */
-    if (count == 0 && MDp->done) return;
+    if (count == 0 && MDp->done) return 0;
     /* check to see if MD is already done and report error */
+    if (MDp->done) { return -1; }
+/*
     if (MDp->done) { fprintf(stderr,"\nError: MDupdate MD already done."); return; }
+*/
     /* Add count to MDp->count */
     tmp = count;
     p = MDp->count;
@@ -288,9 +294,12 @@ MDupdate(MDptr MDp,
 	MDblock(MDp,(unsigned int *)X);
     }
     else if (count > 512) /* Check for count too large */
+    return -2;
+/*
     { fprintf(stderr,"\nError: MDupdate called with illegal count value %d.",count);
     return;
     }
+*/
     else /* partial block -- must be last block so finish up */
     { /* Find out how many bytes and residual bits there are */
 	byte = count >> 3;
@@ -315,25 +324,33 @@ MDupdate(MDptr MDp,
 	/* Set flag saying we're done with MD computation */
 	MDp->done = 1;
     }
+    return 0;
 }
 
 /* MDchecksum(data, len, MD5): do a checksum on an arbirtrary amount of data */
-void
+int
 MDchecksum(u_char *data, size_t len, u_char *mac, size_t maclen)
 {
   MDstruct md;
   MDstruct *MD = &md;
+  int rc = 0;
   
   MDbegin(MD);
   while (len >= 64) {
-    MDupdate(MD, data, 64*8);
+    rc = MDupdate(MD, data, 64*8);
+    if (rc) goto check_end;
     data += 64;
     len -= 64;
   }
-  MDupdate(MD, data, len*8);
+  rc = MDupdate(MD, data, len*8);
+  if (rc) goto check_end;
 
   /* copy the checksum to the outgoing data (all of it that is requested). */
   MDget(MD, mac, maclen);
+
+check_end:
+  memset(&md,0,sizeof(md));
+  return rc;
 }
 
 
@@ -352,11 +369,14 @@ MDsign(u_char *data, size_t len, u_char *mac, size_t maclen,
   u_char   buf[HASHKEYLEN];
   size_t   i;
   u_char  *cp;
+  int      rc = 0;
 
+/*
   memset(K1,0,HASHKEYLEN);
   memset(K2,0,HASHKEYLEN);
   memset(buf,0,HASHKEYLEN);
   memset(extendedAuthKey,0,HASHKEYLEN);
+*/
 
   if (secretlen != 16 || secret == NULL || mac == NULL || data == NULL ||
     len <= 0 || maclen <= 0) {
@@ -372,32 +392,41 @@ MDsign(u_char *data, size_t len, u_char *mac, size_t maclen,
   }
 
   MDbegin(&MD);
-  MDupdate(&MD, K1, HASHKEYLEN*8);
+  rc = MDupdate(&MD, K1, HASHKEYLEN*8);
+  if (rc) goto update_end;
 
   i = len;
   cp = data;
   while (i >= 64) {
-    MDupdate(&MD, cp, 64*8);
+    rc = MDupdate(&MD, cp, 64*8);
+	if (rc) goto update_end;
     cp += 64;
     i -= 64;
   }
-  MDupdate(&MD, cp, i*8);
 
+  rc = MDupdate(&MD, cp, i*8);
+  if (rc) goto update_end;
+
+  memset(buf,0,HASHKEYLEN);
   MDget(&MD, buf, HASHKEYLEN);
 
   MDbegin(&MD);
-  MDupdate(&MD, K2, HASHKEYLEN*8);
-  MDupdate(&MD, buf, 16*8);
+  rc = MDupdate(&MD, K2, HASHKEYLEN*8);
+  if (rc) goto update_end;
+  rc = MDupdate(&MD, buf, 16*8);
+  if (rc) goto update_end;
   
   /* copy the sign checksum to the outgoing pointer */
   MDget(&MD, mac, maclen);
 
+update_end:
   memset(buf, 0, HASHKEYLEN);
   memset(K1, 0, HASHKEYLEN);
   memset(K2, 0, HASHKEYLEN);
   memset(extendedAuthKey, 0, HASHKEYLEN);
+  memset(&MD, 0, sizeof(MD));
 
-  return 0;
+  return rc;
 }
 
 void

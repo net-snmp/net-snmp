@@ -40,7 +40,7 @@ extern void MDbegin (MDptr);
 ** every MD computation should end with one call to MDupdate with a
 ** count less than 512.  Zero is OK for a count.
 */
-extern void MDupdate (MDptr, unsigned char *, unsigned int);
+extern int MDupdate (MDptr, unsigned char *, unsigned int);
 
 /* MDprint(MD)
 ** Input: MD -- an MDptr
@@ -50,7 +50,7 @@ extern void MDupdate (MDptr, unsigned char *, unsigned int);
 */
 extern void MDprint (MDptr);
 
-void MDchecksum(u_char *data, size_t len, u_char *mac, size_t maclen);
+int MDchecksum(u_char *data, size_t len, u_char *mac, size_t maclen);
 int  MDsign(u_char *data, size_t len, u_char *mac, size_t maclen,
             u_char *secret, size_t secretlen);
 void MDget(MDstruct *MD, u_char *buf, size_t buflen);
