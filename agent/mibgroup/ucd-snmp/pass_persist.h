@@ -11,7 +11,7 @@ extern WriteMethod setPassPersist;
 
 /* config file parsing routines */
 void pass_persist_free_config (void);
-void pass_persist_parse_config (char *, char *);
+void pass_persist_parse_config (const char *, char *);
 int pass_persist_compare (const void *, const void *);
 
 #include "mibdefs.h"

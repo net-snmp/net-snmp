@@ -17,6 +17,12 @@
 #if HAVE_NETINET_IN_H
 #include <netinet/in.h>
 #endif
+#if HAVE_SYS_WAIT_H
+# include <sys/wait.h>
+#endif
+#if HAVE_WINSOCK_H
+#include <winsock.h>
+#endif
 
 #if HAVE_DMALLOC_H
 #include <dmalloc.h>
@@ -41,10 +47,10 @@ struct persist_pipe_type {
   int pid;
 } *persist_pipes = ( struct persist_pipe_type * ) NULL;
 static int init_persist_pipes (void);
-static int close_persist_pipe (int iindex);
+static void close_persist_pipe (int iindex);
 static int open_persist_pipe (int iindex, char *command);
 static void destruct_persist_pipes (void);
-static int write_persist_pipe (int iindex, char *data);
+static int write_persist_pipe (int iindex, const char *data);
 
 /*  These are defined in pass.c */
 extern int asc2bin(char *p);
@@ -62,7 +68,7 @@ void init_pass_persist(void)
                                 pass_persist_free_config,"miboid program");
 }
 
-void pass_persist_parse_config(char *token, char* cptr)
+void pass_persist_parse_config(const char *token, char* cptr)
 {
   struct extensible **ppass = &persistpassthrus, **etmp, *ptmp;
   char *tcptr;
@@ -143,7 +149,7 @@ void pass_persist_free_config (void)
   numpersistpassthrus = 0;
 }
 
-unsigned char *var_extensible_pass_persist(struct variable *vp,
+u_char *var_extensible_pass_persist(struct variable *vp,
 					   oid *name,
 					   size_t *length,
 					   int exact,
@@ -417,9 +423,9 @@ setPassPersist(int action,
 
 int pass_persist_compare(const void *a, const void *b)
 {
-  struct extensible **ap, **bp;
-  ap = (struct extensible **) a;
-  bp = (struct extensible **) b;
+  const struct extensible **ap, **bp;
+  ap = (const struct extensible **) a;
+  bp = (const struct extensible **) b;
   return snmp_oid_compare((*ap)->miboid,(*ap)->miblen,(*bp)->miboid,(*bp)->miblen);
 }
 
@@ -541,7 +547,7 @@ void sigpipe_handler (int sig, siginfo_t *sip, void *uap)
   return;
 }
 
-static int write_persist_pipe(int iindex,  char *data)
+static int write_persist_pipe(int iindex, const char *data)
 {
   struct sigaction sa, osa;
   int wret = 0, werrno = 0;
@@ -581,7 +587,7 @@ static int write_persist_pipe(int iindex,  char *data)
   return 1;
 }
 
-static int close_persist_pipe(int iindex)
+static void close_persist_pipe(int iindex)
 {
 
   /* Check and nix every item */
