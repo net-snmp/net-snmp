@@ -887,7 +887,7 @@ unregister_mib_context(oid * name, size_t len, int priority,
                        const char *context)
 {
     netsnmp_subtree *list, *myptr;
-    netsnmp_subtree *prev, *child;       /* loop through children */
+    netsnmp_subtree *prev, *child, *next; /* loop through children */
     struct register_parameters reg_parms;
     int old_lookup_cache_val = netsnmp_get_lookup_cache_size();
     netsnmp_set_lookup_cache_size(0);
@@ -927,7 +927,8 @@ unregister_mib_context(oid * name, size_t len, int priority,
      *  This should also serve to register ranges.
      */
 
-    for (list = myptr->next; list != NULL; list = list->next) {
+    for (list = myptr->next; list != NULL; list = next) {
+        next = list->next; /* list gets freed sometimes; cache next */
         for (child = list, prev = NULL; child != NULL;
              prev = child, child = child->children) {
             if ((netsnmp_oid_equals(child->name_a, child->namelen,
@@ -1057,7 +1058,7 @@ unregister_mibs_by_session(netsnmp_session * ss)
     subtree_context_cache *contextptr;
 
     DEBUGMSGTL(("register_mib", "unregister_mibs_by_session(%p) ctxt \"%s\"\n",
-		ss, ss->contextName ? ss->contextName : "[NIL]"));
+		ss, (ss && ss->contextName) ? ss->contextName : "[NIL]"));
 
     for (contextptr = get_top_context_cache(); contextptr != NULL;
          contextptr = contextptr->next) {
@@ -1067,9 +1068,9 @@ unregister_mibs_by_session(netsnmp_session * ss)
             for (child = list, prev = NULL; child != NULL; child = next_child){
                 next_child = child->children;
 
-                if (((ss->flags & SNMP_FLAGS_SUBSESSION) &&
+                if (((!ss || ss->flags & SNMP_FLAGS_SUBSESSION) &&
 		     child->session == ss) ||
-                    (!(ss->flags & SNMP_FLAGS_SUBSESSION) && child->session &&
+                    (!(!ss || ss->flags & SNMP_FLAGS_SUBSESSION) && child->session &&
                      child->session->subsession == ss)) {
 
                     rp.name = child->name_a;
