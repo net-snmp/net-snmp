@@ -73,18 +73,9 @@ char copyright[] =
 #include "view.h"
 #include "acl.h"
 
-int main __P((int, char **));
-char *plural __P((int));
+#include "netstat.h"
 
-/* internet protocols */
-extern	void protopr __P((void));
-extern	void tcp_stats __P((void));
-extern void udp_stats __P((void));
-extern void ip_stats __P((void));
-extern void icmp_stats __P((void));
-extern	void routepr __P((void));
-extern	void rt_stats __P((void));
-extern	void intpr __P((int));
+int main __P((int, char **));
 
 #define NULLPROTOX	((struct protox *) 0)
 struct protox {
@@ -100,11 +91,9 @@ struct protox {
 	{ 0,	0,	    0,		0 }
 };
 
-struct protox *name2protox __P((char *));
-struct protox *knownname __P((char *));
-
 int	aflag;
 int	iflag;
+int	oflag;
 int	nflag;
 int	rflag;
 int	sflag;
@@ -186,6 +175,10 @@ main(argc, argv)
 
                 case 'i':
                         iflag++;
+                        break;
+
+                case 'o':
+                        oflag++;
                         break;
 
                 case 'n':
@@ -399,6 +392,10 @@ main(argc, argv)
     setnetent(1);
     if (iflag) {
 	intpr(interval);
+	exit(0);
+    }
+    if (oflag) {
+	intpro(interval);
 	exit(0);
     }
     if (rflag) {

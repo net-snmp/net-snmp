@@ -784,7 +784,7 @@ snmp_parse(session, pdu, data, length)
 		SavedVars =
 		    (struct internal_variable_list *)SavedVars->next_variable;
 	    } else {
-		vp = malloc(sizeof(struct internal_variable_list));
+		vp = (struct internal_variable_list *)malloc(sizeof(struct internal_variable_list));
 	    }
 	    pdu->variables = (struct variable_list *)vp;
 	} else {
@@ -793,7 +793,7 @@ snmp_parse(session, pdu, data, length)
 		SavedVars =
 		    (struct internal_variable_list *)SavedVars->next_variable;
 	    } else {
-		vp->next_variable = malloc(sizeof(struct internal_variable_list));
+		vp->next_variable = (struct variable_list *)malloc(sizeof(struct internal_variable_list));
 	    }
 	    vp = (struct internal_variable_list *)vp->next_variable;
 	}
@@ -1097,10 +1097,11 @@ snmp_free_pdu(pdu)
 	vp = vp->next_variable;
 	free((char *)ovp);
     }
-    if (pdu->enterprise)
-	free((char *)pdu->enterprise);
-    if (pdu->community)
-      free((char *) pdu->community);
+    if (pdu->enterprise) free((char *)pdu->enterprise);
+    if (pdu->community) free((char *) pdu->community);
+    if (pdu->srcParty) free((char *)pdu->srcParty);
+    if (pdu->dstParty) free((char *)pdu->dstParty);
+    if (pdu->context) free((char *)pdu->context);
     free((char *)pdu);
 }
 

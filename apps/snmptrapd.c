@@ -341,7 +341,6 @@ int snmp_input(op, session, reqid, pdu, magic)
 void usage __P((void))
 {
     fprintf(stderr,"Usage: snmptrapd [-v 1] [-q] [-P #] [-p] [-s] [-e] [-d]\n");
-    exit (1);
 }
 
 
@@ -410,11 +409,15 @@ main(argc, argv)
 		default:
 		    fprintf(stderr,"invalid option: -%c\n", argv[arg][1]);
 		    usage();
+		    exit (1);
 		    break;
 	    }
 	    continue;
 	}
-	else usage();
+	else {
+	    usage();
+	    exit (1);
+	}
     }
 
     myaddr = get_myaddr();

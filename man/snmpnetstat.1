@@ -43,7 +43,7 @@ snmpnetstat \- show network status using SNMP
 .SH SYNOPSIS
 snmpnetstat -v 1 hostname community [-an]
 .br
-snmpnetstat -v 1 hostname community [-inrs]
+snmpnetstat -v 1 hostname community [-ionrs]
 .br
 snmpnetstat -v 1 hostname community [-p protocol]
 .br
@@ -51,7 +51,7 @@ snmpnetstat\ -v\ 1 hostname community [\-n] [\-I interface] interval
 .PP
 snmpnetstat [-v 2] hostname noAuth [-an]
 .br
-snmpnetstat [-v 2] hostname noAuth [-inrs]
+snmpnetstat [-v 2] hostname noAuth [-ionrs]
 .br
 snmpnetstat [-v 2] hostname noAuth [-p protocol]
 .br
@@ -59,7 +59,7 @@ snmpnetstat\ [-v\ 2] hostname noAuth [\-n] [\-I interface] interval
 .PP
 snmpnetstat [-v 2] hostname srcParty dstParty [-an]
 .br
-snmpnetstat [-v 2] hostname srcParty dstParty [-inrs]
+snmpnetstat [-v 2] hostname srcParty dstParty [-ionrs]
 .br
 snmpnetstat [-v 2] hostname srcParty dstParty [-p protocol]
 .br
@@ -109,6 +109,11 @@ server processes are not shown.
 .TP
 .B \-i
 Show the state of all of the interfaces.
+.TP
+.B \-o
+Show an abbreviated interface status, giving octets in place of packets.
+This is useful when enquiring virtual interfaces (such as Frame-Relay circuits)
+on a Cisco router.
 .TP
 .BI \-I " interface"
 Show information only about this interface;

@@ -62,21 +62,17 @@ SOFTWARE.
 #include "snmp_client.h"
 #include "mib.h"
 
-extern	int nflag;
-char *routename __P((struct in_addr));
-char *netname __P((struct in_addr, u_long));
-char *plural __P((int));
-extern	struct snmp_session *Session;
-extern	struct variable_list *getvarbyname __P((struct snmp_session *, oid *, int));
-extern	int print_errors;
+#include "netstat.h"
 
-void get_ifname __P((char *, int));
-void routepr __P((void));
+static u_long forgemask __P((u_long));
+static void domask __P((char *, u_long, u_long));
 
 struct route_entry {
     oid	    instance[4];
     struct in_addr  destination;
     int	    set_destination;
+    struct in_addr  mask;
+    int	    set_mask;
     struct in_addr  gateway;
     int	    set_gateway;
     int	    interface;
@@ -89,21 +85,22 @@ struct route_entry {
     int	    set_name;
 };
 
-
-
 #define RTDEST	    1
 #define RTIFINDEX   2
 #define RTNEXTHOP   7
 #define RTTYPE	    8
 #define RTPROTO	    9
-static oid oid_rttable[] = {1, 3, 6, 1, 2, 1, 4, 21, 1};
-static oid oid_rtdest[] = {1, 3, 6, 1, 2, 1, 4, 21, 1, 1};
-static oid oid_rtifindex[] = {1, 3, 6, 1, 2, 1, 4, 21, 1, 2};
-static oid oid_rtnexthop[] = {1, 3, 6, 1, 2, 1, 4, 21, 1, 7};
-static oid oid_rttype[] = {1, 3, 6, 1, 2, 1, 4, 21, 1, 8};
-static oid oid_rtproto[] = {1, 3, 6, 1, 2, 1, 4, 21, 1, 9};
-static oid oid_ifdescr[] = {1, 3, 6, 1, 2, 1, 2, 2, 1, 2};
-static oid oid_ipnoroutes[] = {1, 3, 6, 1, 2, 1, 4, 12, 0};
+#define RTMASK	   11
+
+static oid oid_rttable[] =	{1, 3, 6, 1, 2, 1, 4, 21, 1};
+static oid oid_rtdest[]	=	{1, 3, 6, 1, 2, 1, 4, 21, 1, 1};
+static oid oid_rtifindex[] =	{1, 3, 6, 1, 2, 1, 4, 21, 1, 2};
+static oid oid_rtnexthop[] =	{1, 3, 6, 1, 2, 1, 4, 21, 1, 7};
+static oid oid_rttype[] =	{1, 3, 6, 1, 2, 1, 4, 21, 1, 8};
+static oid oid_rtproto[] =	{1, 3, 6, 1, 2, 1, 4, 21, 1, 9};
+static oid oid_rtmask[] =	{1, 3, 6, 1, 2, 1, 4, 21, 1, 11};
+static oid oid_ifdescr[] =	{1, 3, 6, 1, 2, 1, 2, 2, 1, 2};
+static oid oid_ipnoroutes[] =	{1, 3, 6, 1, 2, 1, 4, 12, 0};
 
 
 /*
@@ -121,7 +118,7 @@ routepr()
 	char ch;
 
 	printf("Routing tables\n");
-	printf("%-16.16s %-18.18s %-6.6s  %s\n",
+	printf("%-26.26s %-18.18s %-6.6s  %s\n",
 		"Destination", "Gateway",
 		"Flags", "Interface");
 
@@ -129,6 +126,7 @@ routepr()
 	request = snmp_pdu_create(GETNEXT_REQ_MSG);
 
 	snmp_add_null_var(request, oid_rtdest, sizeof(oid_rtdest)/sizeof(oid));
+	snmp_add_null_var(request, oid_rtmask, sizeof(oid_rtmask)/sizeof(oid));
 	snmp_add_null_var(request, oid_rtifindex, sizeof(oid_rtifindex)/sizeof(oid));
 	snmp_add_null_var(request, oid_rtnexthop, sizeof(oid_rtnexthop)/sizeof(oid));
 	snmp_add_null_var(request, oid_rttype, sizeof(oid_rttype)/sizeof(oid));
@@ -143,6 +141,7 @@ routepr()
 	    instance = NULL;
 	    request = NULL;
 	    rp->set_destination = 0;
+	    rp->set_mask = 0;
 	    rp->set_interface = 0;
 	    rp->set_gateway = 0;
 	    rp->set_type = 0;
@@ -180,8 +179,12 @@ routepr()
 		type = vp->name[9];
 		switch ((char)type){
 		    case RTDEST:
-                      memmove(&rp->destination, vp->val.string, sizeof(u_long));
+                        memmove(&rp->destination, vp->val.string, sizeof(u_long));
 			rp->set_destination = 1;
+			break;
+		    case RTMASK:
+                        memmove(&rp->mask, vp->val.string, sizeof(u_long));
+			rp->set_mask = 1;
 			break;
 		    case RTIFINDEX:
 			rp->interface = *vp->val.integer;
@@ -209,10 +212,11 @@ routepr()
 		    continue;
 	    }
 	    toloopback = *(char *)&rp->gateway == LOOPBACKNET;
-	    printf("%-16.16s ",
-		(rp->destination.s_addr == 0) ? "default" :
-		(toloopback) ?
-		routename(rp->destination) : netname(rp->destination, 0L));
+	    printf("%-26.26s ",
+		(rp->destination.s_addr == INADDR_ANY) ? "default" :
+		(toloopback) ?  routename(rp->destination) :
+		rp->set_mask ? netname(rp->destination, rp->mask.s_addr) :
+		netname(rp->destination, 0L));
 	    printf("%-18.18s ", routename(rp->gateway));
 	    flags = name;
 	    *flags++ = 'U'; /* route is in use */
@@ -280,6 +284,46 @@ get_ifname(name, index)
     strcpy(name, ip->name);
 }
 
+static u_long
+forgemask (a)
+	u_long a;
+{
+	u_long m;
+	if (IN_CLASSA(a))
+		m = IN_CLASSA_NET;
+	else if (IN_CLASSB(a))
+		m = IN_CLASSB_NET;
+	else
+		m = IN_CLASSC_NET;
+	return m;
+}
+
+static void
+domask(dst, addr, mask)
+	char *dst;
+	u_long addr, mask;
+{
+	int b, i;
+	if (!mask || forgemask(addr) == mask) {
+		*dst = '\0';
+		return;
+	}
+	i = 0;
+	for (b = 0; b < 32; b++)
+		if (mask & (1 << b)) {
+			int bb;
+			i = b;
+			for (bb = b+1; bb < 32; bb++)
+				if (! (mask & (1 << bb))) {
+					i = -1; /* non-contig */
+					break;
+				}
+			break;
+		}
+	if (i == -1) sprintf(dst, "&0x%lx", mask);
+	else sprintf(dst, "/%d", 32-i);
+}
+
 char *
 routename(in)
 	struct in_addr in;
@@ -329,16 +373,17 @@ netname(in, mask)
 	struct in_addr in;
 	u_long mask;
 {
-	char *cp = 0;
+	char *cp = NULL;
 	static char line[MAXHOSTNAMELEN + 1];
 	struct netent *np = 0;
-	u_long net;
-	register i;
+	u_long net, omask;
+	u_long i;
 	int subnetshift;
 
 	i = ntohl(in.s_addr);
-	if (!nflag && i) {
-		if (mask == 0) {
+	omask = mask = ntohl(mask);
+	if (!nflag && i != INADDR_ANY) {
+		if (mask == INADDR_ANY) {
 			if (IN_CLASSA(i)) {
 				mask = IN_CLASSA_NET;
 				subnetshift = 8;
@@ -376,6 +421,7 @@ netname(in, mask)
 	else
 		sprintf(line, "%u.%u.%u.%u", C(i >> 24),
 			C(i >> 16), C(i >> 8), C(i));
+	domask(line+strlen(line), i, omask);
 	return (line);
 }
 

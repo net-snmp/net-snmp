@@ -85,6 +85,7 @@
 
 double maxload[3];
 
+#ifndef linux
 static struct nlist loadave_nl[] = {
 #define NL_AVENRUN 0
 #if !defined(hpux) && !defined(solaris2)
@@ -94,10 +95,13 @@ static struct nlist loadave_nl[] = {
 #endif
   { 0 }
 };
+#endif
 
 void	init_loadave( )
 {
+#ifndef linux
     init_nlist( loadave_nl );
+#endif
 }
 
 unsigned char *var_extensible_loadave(vp, name, length, exact, var_len, write_method)
@@ -116,7 +120,6 @@ unsigned char *var_extensible_loadave(vp, name, length, exact, var_len, write_me
 {
 
   oid newname[30];
-  int i;
   static long long_ret;
   static char errmsg[300];
 #ifdef HAVE_SYS_FIXPOINT_H
@@ -124,6 +127,7 @@ unsigned char *var_extensible_loadave(vp, name, length, exact, var_len, write_me
 #endif
 #if defined(sun) || defined(__alpha)
   long favenrun[3];
+  int i;
 #define FIX_TO_DBL(_IN) (((double) _IN)/((double) FSCALE))
 #endif
   double avenrun[3];
@@ -151,8 +155,19 @@ unsigned char *var_extensible_loadave(vp, name, length, exact, var_len, write_me
   for(i=0;i<3;i++)
     avenrun[i] = FIX_TO_DBL(favenrun[i]);
 #else
+#ifdef linux
+  { FILE *in = fopen("/proc/loadavg", "r");
+    if (!in) {
+      fprintf (stderr, "snmpd: cannot open /proc/loadavg\n");
+      return NULL;
+    }
+    fscanf(in, "%lf %lf %lf", &avenrun[0], &avenrun[1], &avenrun[2]);
+    fclose(in);
+  }
+#else
   if (KNLookup(NL_AVENRUN,(char *) avenrun, sizeof(double)*3) == 0)
     return(0);
+#endif /* !linux */
 #endif /* !HAVE_GETLOADAVG */
 #endif /* HAVE_GETLOADAVG */
   switch (vp->magic) {

@@ -100,10 +100,10 @@ u_char		return_buf[258];
 u_char		return_buf[256]; /* nee 64 */
 #endif
  
+#ifndef linux
 void
 init_nlist(nl)
   struct nlist nl[];
-
 {
   int ret;
 #if HAVE_KVM_OPENFILES
@@ -136,15 +136,19 @@ init_nlist(nl)
       }
   }
 }
+#endif
 
 void
 init_snmp __P((void))
 {
+#ifndef linux
   init_kmem("/dev/kmem"); 
+#endif
 
 #include "mibgroup/mib_module_inits.h"
 }
 
+#ifndef linux
 int KNLookup(nl, nl_which, buf, s)
     struct nlist nl[];
     int nl_which;
@@ -162,6 +166,7 @@ int KNLookup(nl, nl_which, buf, s)
 
     return klookup(nlp->n_value, buf, s);
 }
+#endif
 
 
 #define CMUMIB 1, 3, 6, 1, 4, 1, 3

@@ -105,6 +105,7 @@ extern char *version_descr;
 extern oid version_id[];
 extern int version_id_len;
 int log_addresses = 0;
+int verbose = 0;
 
 struct addrCache {
     u_long addr;
@@ -558,6 +559,7 @@ main(argc, argv)
                     break;
 		case 'd':
 		    snmp_dump_packet++;
+		    verbose = 1;
 		    break;
 		case 'q':
 		    snmp_set_quick_print(1);
@@ -569,8 +571,11 @@ main(argc, argv)
 		case 'a':
 		    log_addresses++;
 		    break;
+		case 'V':
+		    verbose = 1;
+		    break;
 		case 'f':
-		    dont_fork=1;
+		    dont_fork = 1;
 		    break;
                 case 'l':
                     strcpy(logfile,argv[++arg]);
@@ -836,10 +841,10 @@ snmp_read_packet(sd)
 	perror("recvfrom");
     snmp_inpkts++;
     if (snmp_dump_packet){
-	printf("recieved %d bytes from %s:\n", length,
+	printf("\nrecieved %d bytes from %s:\n", length,
 	       inet_ntoa(from.sin_addr));
 	xdump(packet, length, "");
-	printf("\n\n");
+	printf("\n");
         fflush(stdout);
     } else if (log_addresses){
 	int count;
@@ -867,10 +872,10 @@ snmp_read_packet(sd)
     if (snmp_agent_parse(packet, length, outpacket, &out_length,
 			 from.sin_addr.s_addr)){
 	if (snmp_dump_packet){
-	    printf("sent %d bytes to %s:\n", out_length,
+	    printf("\nsent %d bytes to %s:\n", out_length,
 		   inet_ntoa(from.sin_addr));
 	    xdump(outpacket, out_length, "");
-	    printf("\n\n");
+	    printf("\n");
             fflush(stdout);
 	}
 	snmp_outpkts++;

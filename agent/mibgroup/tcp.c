@@ -15,6 +15,7 @@
 	 *
 	 *********************/
 
+#ifndef linux
 static struct nlist tcp_nl[] = {
 #define N_TCPSTAT	0
 #define N_TCB		1
@@ -35,10 +36,10 @@ static struct nlist tcp_nl[] = {
 #endif
         { 0 },
 };
-
+#endif
 
 #ifdef linux
-static void linux_read_tcp_stat ();
+static void linux_read_tcp_stat __P((struct tcp_mib *));
 #endif
 static int TCP_Count_Connections __P((void));
 static void TCP_Scan_Init __P((void));
@@ -54,7 +55,9 @@ static int TCP_Scan_Next __P((int *, struct inpcb *));
 
 void	init_tcp( )
 {
+#ifndef linux
     init_nlist( tcp_nl );
+#endif
 }
 
 #define MATCH_FAILED	1
@@ -613,15 +616,90 @@ Again:	/*
 	return(Established);
 }
 #endif
-static struct inpcb tcp_inpcb, *tcp_prev;
 
+static struct inpcb tcp_inpcb, *tcp_prev;
+#ifdef linux
+static struct inpcb *inpcb_list;
+#endif
 
 static void TCP_Scan_Init __P((void))
 {
+#ifndef linux
     KNLookup(tcp_nl, N_TCB, (char *)&tcp_inpcb, sizeof(tcp_inpcb));
 #if !(defined(freebsd2) || defined(netbsd1))
     tcp_prev = (struct inpcb *) tcp_nl[N_TCB].n_value;
 #endif
+#else
+    FILE *in;
+    char line [256];
+    struct inpcb **pp;
+    struct timeval now;
+    static unsigned long Time_Of_Last_Reload = 0;
+
+    /*
+     * save some cpu-cycles, and reload after 5 secs...
+     */
+    gettimeofday (&now, (struct timezone *) 0);
+    if (Time_Of_Last_Reload + 5 > now.tv_sec)
+      {
+	tcp_prev = inpcb_list;
+	return;
+      }
+    Time_Of_Last_Reload = now.tv_sec;
+
+
+    if (! (in = fopen ("/proc/net/tcp", "r")))
+      {
+	fprintf (stderr, "snmpd: cannot open /proc/net/tcp ...\n");
+	tcp_prev = NULL;
+	return;
+      }
+
+    /* free old chain: */
+    while (inpcb_list)
+      {
+	struct inpcb *p = inpcb_list;
+	inpcb_list = inpcb_list->inp_next;
+	free (p);
+      }
+
+    /* scan proc-file and append: */
+
+    pp = &inpcb_list;
+    
+    while (line == fgets (line, 256, in))
+      {
+	struct inpcb pcb, *nnew;
+	static int linux_states [12] = { 0, 4, 2, 3, 6, 9, 10, 0, 5, 8, 1, 7 };
+	int state, lp, fp, uid;
+
+	if (6 != sscanf (line,
+			 "%*d: %x:%x %x:%x %x %*X:%*X %*X:%*X %*X %d",
+			 &pcb.inp_laddr.s_addr, &lp,
+			 &pcb.inp_faddr.s_addr, &fp,
+			 &state, &uid))
+	  continue;
+
+	pcb.inp_lport = htons ((unsigned short) lp);
+	pcb.inp_fport = htons ((unsigned short) fp);
+
+	pcb.inp_state = (state & 0xf) < 12 ? linux_states [state & 0xf] : 1;
+	pcb.uid = uid;
+    
+	nnew = (struct inpcb *) malloc (sizeof (struct inpcb));
+	*nnew = pcb;
+	nnew->inp_next = 0;
+
+	*pp = nnew;
+	pp = & nnew->inp_next;
+      }
+
+    fclose (in);
+
+    /* first entry to go: */
+    tcp_prev = inpcb_list;
+
+#endif /* linux */
 }
 
 static int TCP_Scan_Next(State, RetInPcb)

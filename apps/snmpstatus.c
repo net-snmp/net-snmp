@@ -100,7 +100,6 @@ usage __P((void))
     fprintf(stderr, "Usage: snmpstatus -v 1 [-q] hostname community               or:\n");
     fprintf(stderr, "Usage: snmpstatus [-v 2] [-q] hostname noAuth                or:\n");
     fprintf(stderr, "Usage: snmpstatus [-v 2] [-q] hostname srcParty dstParty context\n");
-    exit (1);
 }
 
 char *uptime_string(timeticks, buf)
@@ -210,6 +209,7 @@ u_long srcclock, dstclock;
 		fprintf(stderr,"Invalid source party: %s\n", srcparty);
 		srclen = 0;
 		usage();
+		exit (1);
 	    }
 	}
 
@@ -227,6 +227,7 @@ u_long srcclock, dstclock;
 		fprintf(stderr,"Invalid destination party: %s\n", dstparty);
 		dstlen = 0;
 		usage();
+		exit (1);
 	    }
 	}
 
@@ -244,6 +245,7 @@ u_long srcclock, dstclock;
 		fprintf(stderr,"Invalid context: %s\n", context);
 		cxtlen = 0;
 		usage();
+		exit (1);
 	    }
 	}
     }
@@ -331,25 +333,39 @@ main(argc, argv)
 		if (version < 1 || version > 2){
 		    fprintf(stderr, "Invalid version\n");
 		    usage();
+		    exit (1);
 		}
 		break;
 	    default:
 		usage();
+		exit (1);
 		break;
 	}
 
-    if (optind == argc) usage ();
+    if (optind == argc) {
+	usage ();
+	exit(1);
+    }
     hostname = argv[optind++];
     if (version == 1){
-	if (optind == argc) usage ();
+	if (optind == argc) {
+	    usage ();
+	    exit(1);
+	}
 	community = argv[optind++];
     } else if (version == 2) {
-	if (optind == argc) usage ();
+	if (optind == argc) {
+	    usage ();
+	    exit(1);
+	}
 	srcparty = argv[optind++];
 	if (strcasecmp(srcparty, "noauth")){
 	    dstparty = argv[optind++];
 	    context = argv[optind++];
-	    if (optind > argc) usage();
+	    if (optind > argc) {
+		usage();
+		exit(1);
+	    }
 	}
     }
 
