@@ -24,6 +24,7 @@ void disk_parse_config (char *, char *);
 #define DISKAVAIL 7
 #define DISKUSED 8
 #define DISKPERCENT 9
+#define DISKPERCENTNODE 10
 
 struct diskpart
 {
