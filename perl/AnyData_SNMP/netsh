@@ -17,7 +17,49 @@ BEGIN {
 # This is really ugly, but if you pass colorized strings directly to
 # Text::FormatTable then it calculates the string lengths incorrectly.
 # Children: don't try this at home.  We're trained professionals.
-if ($opts{'t'} == 0 && $ansicolor) {
+if ($colorize) {
+   eval {
+        #
+	# colorized strings.
+	#
+	package color_string;
+
+	require Term::ANSIColor;
+
+	use overload
+	    '""' => \&string_it
+	;
+
+	sub string_it {
+	    if ($_[0][3]) {
+		if ($_[0][3] == 1) {
+		    return color_it();
+		} else {
+		    $_[0][3] -= 1;
+		    return $_[0][1];
+		}
+	    }
+	    return $_[0][1];
+	}
+
+        sub colorize_next {
+	    $_[0][3] = 2;
+	}
+
+	sub color_it {
+	    my $str = $_[1] || $_[0][1];
+	    return $_[0][0] . $str . $_[0][2];
+	}
+
+	sub new {
+	    my $this = [Term::ANSIColor::color($_[2]), $_[1],
+		      Term::ANSIColor::color('reset')];
+	    return bless($this, $_[0]);
+	}
+    }
+}
+
+if ($opts{'t'} == 0 && $colorize) {
     eval {
 	package Text::FormatTable;
 
@@ -49,31 +91,6 @@ if ($opts{'t'} == 0 && $ansicolor) {
 	    return $lines;
 	}
 
-        #
-	# colorized strings.
-	#
-	package color_string;
-
-	require Term::ANSIColor;
-
-	use overload
-	    '""' => \&string_it
-	;
-
-	sub string_it {
-	    return $_[0][1];
-	}
-
-	sub color_it {
-	    my $str = $_[1] || $_[0][1];
-	    return $_[0][0] . $str . $_[0][2];
-	}
-
-	sub new {
-	    my $this = [Term::ANSIColor::color($_[2]), $_[1],
-		      Term::ANSIColor::color('reset')];
-	    return bless($this, $_[0]);
-	}
     }
 }
 
@@ -397,12 +414,6 @@ sub netsh {
 	    my $oldcount = 0;
 	    while($row = $sth->fetchrow_arrayref) {
 		
-		# self printing;
-		if (ref($subfn) eq "CODE") {
-		    &$subfn($printfmt,@$row);
-		    next;
-		}
-
 		if ($running_watch) {
 		    $newrow=[];
 		    my $count;
@@ -425,6 +436,12 @@ sub netsh {
 		    $oldcount++;
 		    $row = $newrow;
  		}
+
+		# self printing;
+		if (ref($subfn) eq "CODE") {
+		    &$subfn($printfmt,@$row);
+		    next;
+		}
 
 		if ($opts{'t'}) {
 		    print join($opts{'d'},@$row),"\n";
@@ -524,11 +541,11 @@ END
 }
 
 sub my_printf {
-    my @args = @_;
-#    print "begin: $args[0]\n";
-    $args[0] = eval $args[0];
-#    print "result: $args[0]\n";
-    printf(@args);
+    # drop quotes
+    my $fmt = shift;
+    $fmt = eval $fmt;
+    map { if (ref($_) eq "color_string") { $_->colorize_next(); } } @_;
+    printf($fmt, @_);
 }
 
 sub display_alias {
@@ -761,7 +778,8 @@ To list all the aliases defined in the system, just type "alias" by itself.
 Continually watches the results of the COMMAND being run, which is run
 every TIME seconds.  For select statements, it will attempt to mark
 the changing values from one screen to the next by surrounding them
-with "*"s for easy picking out on the screen.
+with "*"s or color (assuming you have the Term::ANSIColor perl module
+installed) for easy picking out on the screen.
 
 =item rehash
 
