@@ -376,7 +376,10 @@ sub read_config_items {
     while(defined($file = readdir(ITEMS))) {
 	next if ($file =~ /~$/);
 	if (-f "$itemdir/$file") {
-	    push @results, read_config_item("$itemdir/$file", $type);
+	    my $res = read_config_item("$itemdir/$file", $type);
+	    if (scalar(keys(%$res)) > 0) {
+		push @results, $res;
+	    }
 	}
     }
     closedir(ITEMS);
