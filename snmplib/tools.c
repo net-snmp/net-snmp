@@ -300,7 +300,7 @@ int
 hex_to_binary2(const u_char *input, size_t len, char **output)
 {
 	u_int	olen	= (len/2) + (len%2);
-	char	*s	= (char *)calloc (1,olen),
+	char	*s	= (char *)calloc (1,(olen)?olen:1),
 		*op	= s;
 	const u_char *ip	= input;
 
