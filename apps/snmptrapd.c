@@ -535,7 +535,7 @@ int snmp_input(int op,
 
 void usage(void)
 {
-    fprintf(stderr,"Usage: snmptrapd [-V] [-q] [-D] [-p #] [-P] [-s] [-f] [-l [d0-7]] [-e] [-d]\n");
+    fprintf(stderr,"Usage: snmptrapd [-V] [-q] [-D] [-p #] [-P] [-s] [-f] [-l [d0-7]] [-e] [-d] [-h] [-H]\n");
 }
 
 
@@ -552,6 +552,9 @@ int main(int argc, char *argv[])
     int local_port = SNMP_TRAP_PORT;
     char ctmp[300];
     int dofork=1;
+
+    /* register our configuration handlers now so -H properly displays them */
+    register_config_handler("snmptrapd","traphandle",snmptrapd_traphandle,NULL,"oid program [args ...] ");
 
     setvbuf (stdout, NULL, _IOLBF, BUFSIZ);
     /*
@@ -644,6 +647,11 @@ int main(int argc, char *argv[])
 		           break;
 		    }
 		    break;
+                case 'H':
+                    init_snmp();
+                    fprintf(stderr, "Configuration directives understood:\n");
+                    read_config_print_usage("  ");
+                    exit(0);
 		default:
 		    fprintf(stderr,"invalid option: -%c\n", argv[arg][1]);
 		    usage();
@@ -658,7 +666,6 @@ int main(int argc, char *argv[])
 	}
     }
 
-    register_config_handler("snmptrapd","traphandle",snmptrapd_traphandle,NULL,"script");
     init_mib();
     read_configs();
     if (!Print) Syslog = 1;
