@@ -10,6 +10,12 @@ struct ifnet;
 
 int Interface_Scan_Get_Count __P((void));
 int Interface_Index_By_Name __P((char *, int));
+void Interface_Scan_Init __P((void));
+#ifdef sunV3
+int Interface_Scan_Next __P((short *, char *, struct ifnet *));
+#else
+int Interface_Scan_Next __P((short *, char *, struct ifnet *, struct in_ifaddr *));
+#endif
 
 extern void	init_interfaces __P((void));
 extern u_char	*var_interfaces __P((struct variable *, oid *, int *, int, int *, int (**write) __P((int, u_char *, u_char,int, u_char *, oid *, int)) ));

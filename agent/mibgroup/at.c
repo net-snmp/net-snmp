@@ -16,6 +16,7 @@
 	 *********************/
 
 
+#ifndef linux
 static struct nlist at_nl[] = {
 #define N_ARPTAB_SIZE	0
 #define N_ARPTAB        1
@@ -28,7 +29,7 @@ static struct nlist at_nl[] = {
 #endif
         { 0 },
 };
-
+#endif
 
 static void ARP_Scan_Init __P((void));
 #if defined(freebsd2) || defined (netbsd1) || defined (hpux) || defined (bsdi2)
@@ -47,7 +48,9 @@ static int ARP_Scan_Next __P((u_long *, char *, u_long *));
 
 void	init_at( )
 {
+#ifndef linux
     init_nlist( at_nl );
+#endif
 }
 
 
@@ -344,7 +347,7 @@ static struct arptab *at=0;
 static void ARP_Scan_Init __P((void))
 {
 #ifndef CAN_USE_SYSCTL
-
+#ifndef linux
 	if (!at) {
 	    KNLookup(at_nl, N_ARPTAB_SIZE, (char *)&arptab_size, sizeof arptab_size);
 #ifdef STRUCT_ARPHD_HAS_AT_NEXT
@@ -361,7 +364,44 @@ static void ARP_Scan_Init __P((void))
 	KNLookup(at_nl,  N_ARPTAB, (char *)at, arptab_size * sizeof(struct arptab));
 #endif
 	arptab_current = 0;
-#else
+#else /* linux */
+	FILE *in = fopen ("/proc/net/arp", "r");
+	int i, n = 0;
+        char line [128];
+	int za, zb, zc, zd, ze, zf, zg, zh, zi, zj;
+
+	if (!in) {
+		fprintf (stderr, "snmpd: Cannot open /proc/net/arp\n");
+		arptab_current = 0;
+		return;
+	}
+	for (n = -1; fgets (line, sizeof line, in); n++)
+		;
+	fclose (in);
+	in = fopen ("/proc/net/arp", "r");
+	if (at) free (at);
+	arptab_size = n;
+	if (arptab_size > 0)
+		at = malloc (arptab_size * sizeof (struct arptab));
+	else
+		at = NULL;
+	for (i = 0; i < arptab_size; i++) {
+		while (line == fgets (line, sizeof line, in) &&
+			11 != sscanf (line, "%d.%d.%d.%d 0x%*x 0x%x %x:%x:%x:%x:%x:%x",
+			&za, &zb, &zc, &zd, &at[i].at_flags,
+			&ze, &zf, &zg, &zh, &zi, &zj))
+			continue;
+		at [i].at_enaddr[0] = ze;
+		at [i].at_enaddr[1] = zf;
+		at [i].at_enaddr[2] = zg;
+		at [i].at_enaddr[3] = zh;
+		at [i].at_enaddr[4] = zi;
+		at [i].at_enaddr[5] = zj;
+		at [i].at_iaddr.s_addr = (zd << 24) | (zc << 16) | (zb << 8) | za;
+	}
+	fclose (in);
+#endif /* linux */
+#else /* CAN_USE_SYSCTL */
 	int mib[6];
 	size_t needed;
 

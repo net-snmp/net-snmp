@@ -14,6 +14,7 @@
 	 *
 	 *********************/
 
+#ifndef linux
 static struct nlist icmp_nl[] = {
 #define N_ICMPSTAT	0
 #if !defined(hpux) && !defined(solaris2)
@@ -23,11 +24,12 @@ static struct nlist icmp_nl[] = {
 #endif
         { 0 },
 };
+#endif
 
 
 #ifdef linux
 static void
-linux_read_icmp_stat ();
+linux_read_icmp_stat __P((struct icmp_mib *));
 #endif
 
 
@@ -40,7 +42,9 @@ linux_read_icmp_stat ();
 
 void	init_icmp( )
 {
+#ifndef linux
     init_nlist( icmp_nl );
+#endif
 }
 
 #define MATCH_FAILED	1
@@ -189,7 +193,6 @@ var_icmp(vp, name, length, exact, var_len, write_method)
     int     *var_len;
     int     (**write_method) __P((int, u_char *, u_char, int, u_char *, oid *, int));
 {
-    register int i;
     static struct icmp_mib icmpstat;
 
    if (header_icmp(vp, name, length, exact, var_len, write_method) == MATCH_FAILED )

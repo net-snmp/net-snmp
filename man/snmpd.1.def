@@ -5,7 +5,7 @@
 .SH NAME
 snmpd - daemon to respond to SNMP request packets.
 .SH SYNOPSIS
-.B "snmpd [-a] [-d] [-q] [-p port] [-f] [-l logfile] [-L]"
+.B "snmpd [-a] [-V] [-d] [-q] [-p port] [-f] [-l logfile] [-L]"
 .SH DESCRIPTION
 .B snmpd
 is a SNMP agent which binds to a port and awaits requests from
@@ -17,6 +17,9 @@ requested opperation(s) and returns the information to the sender.
 .TP 6
 .B -a
 Dumps the addresses the agent corresponds with to stderr or logfile.
+.TP
+.B -V
+Makes af symbolic dump of the protocol transaction.
 .TP
 .B -d
 Dumps the sent and received UDP packets to stderr or logfile.

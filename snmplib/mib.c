@@ -40,6 +40,10 @@ SOFTWARE.
 #if STDC_HEADERS
 #include <string.h>
 #include <stdlib.h>
+#else
+#if HAVE_STDLIB_H
+#include <stdlib.h>
+#endif
 #endif
 
 #include "asn1.h"
@@ -49,11 +53,12 @@ SOFTWARE.
 #include "snmp_impl.h"
 #include "parse.h"
 
+char *sprint_objid __P((char *, oid *, int));
+
 static void sprint_by_type __P((char *, struct variable_list *, struct enum_list *, char *, char *));
 static parse_subtree __P((struct tree *, char *, oid *, int *));
 static void set_functions __P((struct tree *));
 static int lc_cmp __P((char *, char *));
-char *sprint_objid __P((char *, oid *, int));
 static char *uptimeString __P((u_long, char *));
 static void sprint_hexstring __P((char *, u_char *, int));
 static void sprint_asciistring __P((char *, u_char *, int));
@@ -75,9 +80,9 @@ static void sprint_counter64 __P((char *, struct variable_list *, struct enum_li
 static void sprint_unknowntype __P((char *, struct variable_list *, struct enum_list *, char *, char *));
 static void sprint_badtype __P((char *, struct variable_list *, struct enum_list *, char *, char *));
   
-struct tree *get_symbol __P((oid *, int, struct tree *, char *));
-struct tree *get_tree __P((oid *, int, struct tree *));
-char *get_description __P((oid *, int));
+static struct tree *get_symbol __P((oid *, int, struct tree *, char *));
+static struct tree *get_tree __P((oid *, int, struct tree *));
+static char *get_description __P((oid *, int));
 struct tree *find_node __P((char *, struct tree *));
 
 static int quick_print = 0;
@@ -1168,11 +1173,11 @@ sprint_variable(buf, objid, objidlen, variable)
     buf += strlen(buf);
 
     if (variable->type == SNMP_NOSUCHOBJECT)
-	sprintf(buf, "No Such Object available on this agent\n");
+	sprintf(buf, "No Such Object available on this agent");
     else if (variable->type == SNMP_NOSUCHINSTANCE)
-	sprintf(buf, "No Such Instance currently exists\n");
+	sprintf(buf, "No Such Instance currently exists");
     else if (variable->type == SNMP_ENDOFMIBVIEW)
-	sprintf(buf, "No more variables left in this MIB View\n");
+	sprintf(buf, "No more variables left in this MIB View");
     else {
 	*tempbuf = '.';	/* this is a fully qualified name */
 	subtree = get_symbol(objid, objidlen, subtree, tempbuf + 1);
@@ -1182,7 +1187,6 @@ sprint_variable(buf, objid, objidlen, variable)
 	else {
 	    sprint_by_type(buf, variable, subtree->enums, subtree->hint, subtree->units);
 	}
-	strcat(buf, "\n");
     }
 }
 
@@ -1196,7 +1200,7 @@ print_variable(objid, objidlen, variable)
     char    buf[2048];
 
     sprint_variable(buf, objid, objidlen, variable);
-    printf("%s", buf);
+    printf("%s\n", buf);
 }
 
 void
@@ -1237,7 +1241,7 @@ print_value(objid, objidlen, variable)
     printf("%s\n", tempbuf);
 }
 
-struct tree *
+static struct tree *
 get_symbol(objid, objidlen, subtree, buf)
     oid	    *objid;
     int	    objidlen;
@@ -1309,7 +1313,7 @@ lc_cmp(s1, s2)
 /*
  * Clone of get_symbol that doesn't take a buffer argument
  */
-struct tree *
+static struct tree *
 get_tree(objid, objidlen, subtree)
     oid     *objid;
     int     objidlen;
@@ -1333,7 +1337,8 @@ found:
         return subtree;
 }
 
-char *get_description(objid, objidlen)
+static char *
+get_description(objid, objidlen)
     oid     *objid;
     int     objidlen;   /* number of subidentifiers */
 {
@@ -1359,7 +1364,7 @@ print_description(objid, objidlen)
         printf("No description\n");
 }
 
-struct tree *
+static struct tree *
 find_node(name, subtree)
     char *name;
     struct tree *subtree;

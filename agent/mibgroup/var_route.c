@@ -81,7 +81,9 @@ PERFORMANCE OF THIS SOFTWARE.
 #else
 #define rt_unit rt_refcnt	       /* Reuse this field for device # */
 #endif
+#ifndef linux
 #include <nlist.h>
+#endif
 #ifndef NULL
 #define NULL 0
 #endif
@@ -137,12 +139,13 @@ static RTENTRY **rthead=0;
 static int rtsize=0, rtallocate=0;
 
 
+#if !(defined(linux) || defined(solaris2))
 static struct nlist nl_var_route[] = {
 #define N_RTHOST	0
 #define N_RTNET		1
 #define N_RTHASHSIZE	2
 #define N_RTTABLES	3
-#if defined(hpux) || defined(solaris2)
+#if defined(hpux)
 	{ "rthost" },
 	{ "rtnet" },
 	{ "rthashsize" },
@@ -159,10 +162,13 @@ static struct nlist nl_var_route[] = {
 #endif
 	{ 0 },
 };
+#endif
 
 void	init_var_route( )
 {
+#if !(defined(solaris2) || defined(linux))
     init_nlist( nl_var_route );
+#endif
 }
 
 
@@ -280,7 +286,11 @@ var_ipRouteEntry(vp, name, length, exact, var_len, write_method)
 	    sa = klgetsa((struct sockaddr_in *) rthead[RtIndex]->rt_dst);
 	    cp = (u_char *) &(sa->sin_addr.s_addr);
 #else
+#ifdef linux
+	    cp = (u_char *) rthead[RtIndex]->rt_dst.sa_data;
+#else
 	    cp = (u_char *)&(((struct sockaddr_in *) &(rthead[RtIndex]->rt_dst))->sin_addr.s_addr);
+#endif
 #endif
 	    op = Current + 10;
 	    *op++ = *cp++;
@@ -298,7 +308,7 @@ var_ipRouteEntry(vp, name, length, exact, var_len, write_method)
 	 *  Save in the 'cache'
 	 */
 	bcopy((char *) name, (char *) saveName, *length * sizeof(oid));
-	saveName[9] = '\0';
+	saveName[9] = 0;
 	saveNameLen = *length;
 	saveExact = exact;
 	saveRtIndex = RtIndex;
@@ -318,7 +328,11 @@ var_ipRouteEntry(vp, name, length, exact, var_len, write_method)
 	    sa = klgetsa((struct sockaddr_in *) rthead[RtIndex]->rt_dst);
 	    return(u_char *) &(sa->sin_addr.s_addr);
 #else
+#ifdef linux
+            return rthead[RtIndex]->rt_dst.sa_data;
+#else
 	    return(u_char *) &((struct sockaddr_in *) &rthead[RtIndex]->rt_dst)->sin_addr.s_addr;
+#endif
 #endif
 	case IPROUTEIFINDEX:
 	    long_return = (u_long)rthead[RtIndex]->rt_unit;
@@ -342,8 +356,13 @@ var_ipRouteEntry(vp, name, length, exact, var_len, write_method)
 #if defined(freebsd2) || defined(netbsd1) || defined(bsdi2)
 	    sa = klgetsa((struct sockaddr_in *) rthead[RtIndex]->rt_gateway);
 	    return(u_char *) &(sa->sin_addr.s_addr);
-#endif
+#else
+#ifdef linux
+	    return(u_char *) rthead[RtIndex]->rt_gateway.sa_data;
+#else
 	    return(u_char *) &((struct sockaddr_in *) &rthead[RtIndex]->rt_gateway)->sin_addr.s_addr;
+#endif /* linux */
+#endif /* *bsd */
 	case IPROUTETYPE:
 	    long_return = (rthead[RtIndex]->rt_flags & RTF_GATEWAY) ? 4 : 3;
 	    return (u_char *)&long_return;
@@ -368,7 +387,7 @@ var_ipRouteEntry(vp, name, length, exact, var_len, write_method)
 
 		long_return = rt_ifnetaddr.ia_subnetmask;
 #else /* linux */
-                long_return =  (long)rthead[RtIndex]->rt_genmask.sa_data;
+                return (u_char *) rthead[RtIndex]->rt_genmask.sa_data;
 #endif /* linux */
 	    }
 #endif /* defined(freebsd2) || defined(netbsd1) || defined(bsdi2) */
@@ -507,6 +526,9 @@ int		(**write_method) __P((int, u_char *, u_char, int, u_char *, oid *, int));
   case IPROUTEAGE:
     long_return = Lowentry.ipRouteAge;
     return (u_char *)&long_return;
+  case IPROUTEMASK:
+    long_return = Lowentry.ipRouteMask;
+    return (u_char *)&long_return;
   default:
     ERROR("");
   };
@@ -552,17 +574,21 @@ struct radix_node *pt;
     if (rt.rt_ifp != 0) {
       klookup((unsigned long)rt.rt_ifp, (char *)&ifnet, sizeof (ifnet));
 #if STRUCT_IFNET_HAS_IF_XNAME
-      klookup((unsigned long)ifnet.if_xname, name, 16);
-      name[15] = '\0';
+#ifdef netbsd1
+      strncpy(name, ifnet.if_xname, sizeof name);
 #else
-      klookup( ifnet.if_name, name, 16);
-      name[15] = '\0';
+      klookup((unsigned long)ifnet.if_xname, name, sizeof name);
+#endif
+      name[sizeof (name)-1] = '\0';
+#else
+      klookup( ifnet.if_name, name, sizeof name);
+      name[sizeof (name) - 1] = '\0';
       cp = (char *) index(name, '\0');
       string_append_int (cp, ifnet.if_unit);
 #endif
       Interface_Scan_Init();
       rt.rt_unit = 0;
-      while (Interface_Scan_Next((short *) &(rt.rt_unit), temp, 0, 0) != 0) {
+      while (Interface_Scan_Next((short *) &(rt.rt_unit), temp, NULL, NULL) != 0) {
         if (strcmp(name, temp) == 0) break;
       }
     }
@@ -594,7 +620,7 @@ struct radix_node *pt;
       load_rtentries(node.rn_dupedkey);
   }
 }
-#endif
+#endif /* RTENTRY_4_4 */
 
 static void Route_Scan_Reload()
 {
@@ -678,7 +704,7 @@ static void Route_Scan_Reload()
 	  string_append_int (cp, ifnet.if_unit);
 
           Interface_Scan_Init();
-          while (Interface_Scan_Next((short *)&rt->rt_unit, temp, 0, 0) != 0) {
+          while (Interface_Scan_Next((short *)&rt->rt_unit, temp, NULL, NULL) != 0) {
             if (strcmp(name, temp) == 0) break;
           }
         }
@@ -778,7 +804,7 @@ static void Route_Scan_Reload()
 			if (strcmp(name,"lo0") == 0) continue; 
 
 			Interface_Scan_Init();
-			while (Interface_Scan_Next((short *)&rt->rt_unit, temp, 0, 0) != 0) {
+			while (Interface_Scan_Next((short *)&rt->rt_unit, temp, NULL, NULL) != 0) {
 			    if (strcmp(name, temp) == 0) break;
 			}
 		    }
@@ -808,9 +834,112 @@ static void Route_Scan_Reload()
 	qsort((char *)rthead,rtsize,sizeof(rthead[0]),qsort_compare);
 }
 #else
+#ifdef linux
 static void Route_Scan_Reload __P((void))
 {
+	FILE *in;
+	char line [256];
+	struct rtentry *rt;
+	char name[16], temp[16];
+	static int Time_Of_Last_Reload=0;
+	struct timeval now;
+
+	/* allow 20 seconds in cache: */
+	gettimeofday(&now, (struct timezone *)0);
+	if (Time_Of_Last_Reload + 20 > now.tv_sec)
+	    return;
+	Time_Of_Last_Reload =  now.tv_sec;
+
+	/*
+	 *  Makes sure we have SOME space allocated for new routing entries
+	 */
+	if (! rthead) {
+	    rthead = (struct rtentry **) calloc(100, sizeof(struct rtentry *));
+	    if (! rthead) {
+		ERROR("malloc");
+		return;
+	    }
+	    rtallocate = 100;
+	}
+
+	/*
+	 * fetch routes from the proc file-system:
+	 */
+
+	rtsize = 0;
+
+	if (! (in = fopen ("/proc/net/route", "r")))
+	  {
+	    fprintf (stderr, "cannot open /proc/net/route - burps\n");
+	    return;
+	  }
+
+	while (fgets (line, sizeof line, in))
+	  {
+	    struct rtentry rtent;
+	    char rtent_name [32];
+	    int refcnt, flags, metric;
+	    unsigned use;
+	    
+	    rt = &rtent;
+	    bzero ((char *) rt, sizeof(*rt));
+	    rt->rt_dev = rtent_name;
+
+	    /*
+	     * as with 1.99.14:
+	     * Iface Dest GW Flags RefCnt Use Metric Mask MTU Win IRTT
+	     * eth0 0A0A0A0A 00000000 05 0 0 0 FFFFFFFF 1500 0 0 
+	     */
+	    if (8 != sscanf (line, "%s %lx %lx %x %u %d %d %lx %*d %*d %*d\n",
+			     rt->rt_dev,
+			     (unsigned long *) rt->rt_dst.sa_data,
+			     (unsigned long *) rt->rt_gateway.sa_data,
+/* XXX: fix type of the args */
+			     &flags, &refcnt, &use, &metric,
+			     (unsigned long *) &rt->rt_genmask.sa_data))
+	      continue;
+	    
+	    strcpy (name, rt->rt_dev);
+	    /* linux says ``lo'', but the interface is stored as ``lo0'': */
+	    if (! strcmp (name, "lo"))
+	      strcat (name, "0");
+	    
+	    name[15] = '\0';
+
+	    rt->rt_flags = flags, rt->rt_refcnt = refcnt;
+	    rt->rt_use = use, rt->rt_metric = metric;
+
+	    Interface_Scan_Init();
+	    while (Interface_Scan_Next((short *)&rt->rt_unit, temp, NULL) != 0)
+		if (strcmp(name, temp) == 0) break;
+
+	    /*
+	     *	Allocate a block to hold it and add it to the database
+	     */
+	    if (rtsize >= rtallocate) {
+	      rthead = (struct rtentry **) realloc((char *)rthead, 
+				   2 * rtallocate * sizeof(struct rtentry *));
+	      bzero((char *) &rthead[rtallocate], rtallocate 
+		    		   * sizeof(struct rtentry *));
+	      rtallocate *= 2;
+	    }
+	    if (! rthead[rtsize])
+	      rthead[rtsize] = (struct rtentry *) malloc(sizeof(struct rtentry));
+	    /*
+	     *	Add this to the database
+	     */
+	    bcopy((char *)rt, (char *)rthead[rtsize], sizeof(struct rtentry));
+	    rtsize++;
+	  }
+
+	fclose (in);
+
+	/*
+	 *  Sort it!
+	 */
+	qsort((char *)rthead,rtsize,sizeof(rthead[0]),qsort_compare);
 }
+#endif
 #endif
 #endif
 
@@ -821,12 +950,17 @@ static void Route_Scan_Reload __P((void))
 static int qsort_compare(r1,r2)
 RTENTRY **r1, **r2;
 {
-#if defined(freebsd2) || defined(bsdi2)
+#if defined(freebsd2) || defined(bsdi2) || defined(netbsd1)
 	register u_long dst1 = ntohl(klgetsa((struct sockaddr_in *)(*r1)->rt_dst)->sin_addr.s_addr);
 	register u_long dst2 = ntohl(klgetsa((struct sockaddr_in *)(*r2)->rt_dst)->sin_addr.s_addr);
 #else
+#if !defined(linux)
 	register u_long dst1 = ntohl(((struct sockaddr_in *) &((*r1)->rt_dst))->sin_addr.s_addr);
 	register u_long dst2 = ntohl(((struct sockaddr_in *) &((*r2)->rt_dst))->sin_addr.s_addr);
+#else
+	register u_long dst1 = ntohl(*(unsigned long *)&(*r1)->rt_dst.sa_data);
+	register u_long dst2 = ntohl(*(unsigned long *)&(*r2)->rt_dst.sa_data);
+#endif!
 #endif
 
 	/*

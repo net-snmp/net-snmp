@@ -105,7 +105,6 @@ usage __P((void))
     fprintf(stderr, "snmptrap -v 1 manager community enterprise-oid agent trap-type specific-type uptime [ var ]...\n");
     fprintf(stderr, "or\n");
     fprintf(stderr, "snmptrap [-v 2] gateway srcParty dstParty [ var ] ...\n");
-    exit (1);
 }
 
 int snmp_input(operation, session, reqid, pdu, magic)
@@ -323,11 +322,13 @@ main(argc, argv)
 		    if (version < 1 || version > 2) {
 			fprintf (stderr, "invalid version: %s\n", argv [arg]);
 			usage ();
+			exit (1);
 		    }
 		    break;
 		default:
 		    fprintf(stderr, "invalid option: -%c\n", argv[arg][1]);
 		    usage ();
+		    exit (1);
 		    break;
 	    }
 	    continue;
@@ -360,6 +361,7 @@ main(argc, argv)
 			fprintf(stderr, "Invalid source party: %s\n", argv[arg]);
 			srclen = 0;
 			usage();
+			exit (1);
 		    }
 		}
             }
@@ -378,6 +380,7 @@ main(argc, argv)
 		    fprintf(stderr, "Invalid destination party: %s\n", argv[arg]);
 		    dstlen = 0;
 		    usage ();
+		    exit (1);
 		}
 	    }
 	} else if (trap == NULL){
@@ -388,6 +391,7 @@ main(argc, argv)
 
     if (trap == NULL) {
 	usage ();
+	exit (1);
     }
  
     if (trivialSNMPv2){
@@ -436,6 +440,7 @@ main(argc, argv)
 	    if (!read_objid (trap, name, &name_length)) {
 		fprintf (stderr, "invalid interprise id: %s\n", trap);
 		usage ();
+		exit (1);
 	    }
 	    pdu->enterprise = (oid *)malloc(name_length * sizeof(oid));
 	    memcpy(pdu->enterprise, name, name_length * sizeof(oid));
@@ -444,6 +449,7 @@ main(argc, argv)
 	if (++arg >= argc) {
 	    fprintf (stderr, "Missing agent parameter\n");
 	    usage ();
+	    exit (1);
 	}
 	agent = argv [arg];
 	if (agent != NULL && strlen (agent) != 0)
@@ -453,18 +459,21 @@ main(argc, argv)
 	if (++arg == argc) {
 	    fprintf (stderr, "Missing generic-trap parameter\n");
 	    usage ();
+	    exit (1);
 	}
 	trap = argv [arg];
 	pdu->trap_type = atoi(trap);
 	if (++arg == argc) {
 	    fprintf (stderr, "Missing specific-trap parameter\n");
 	    usage ();
+	    exit (1);
 	}
 	specific = argv [arg];
 	pdu->specific_type = atoi(specific);
 	if (++arg == argc) {
 	    fprintf (stderr, "Missing uptime parameter\n");
 	    usage ();
+	    exit (1);
 	}
 	description = argv [arg];
 	if (description == NULL || *description == 0)
@@ -488,6 +497,7 @@ main(argc, argv)
 	if (++arg == argc) {
 	    fprintf (stderr, "Missing trap-oid parameter\n");
 	    usage ();
+	    exit (1);
 	}
 	snmp_add_var (pdu, objid_snmptrap, sizeof (objid_snmptrap)/sizeof(oid),
 		      'o', argv [arg]);

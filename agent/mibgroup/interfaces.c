@@ -15,6 +15,7 @@
 	 *********************/
 
 
+#ifndef linux
 static struct nlist interfaces_nl[] = {
 #define N_IFNET		0
 #define N_IN_IFADDR    	1
@@ -27,6 +28,7 @@ static struct nlist interfaces_nl[] = {
 #endif
         { 0 },
 };
+#endif
 
 int header_interfaces __P((struct variable *, oid *, int *, int, int *, int (**write) __P((int, u_char *, u_char,int, u_char *, oid *, int)) ));
 int header_ifEntry __P((struct variable *, oid *, int *, int, int *, int (**write) __P((int, u_char *, u_char,int, u_char *, oid *, int)) ));
@@ -48,12 +50,25 @@ static int Interface_Get_Ether_By_Index __P((int, u_char *));
 
 void	init_interfaces( )
 {
+#ifndef linux
     init_nlist( interfaces_nl );
+#endif
 }
 
 #define MATCH_FAILED	-1
 #define MATCH_SUCCEEDED	0
 
+#ifdef linux
+typedef struct _conf_if_list {
+    char *name;
+    int type;
+    int speed;
+    struct _conf_if_list *next;
+} conf_if_list;
+
+conf_if_list *if_list;
+struct ifnet *ifnetaddr_list;
+#endif /* linux */
 
 int
 header_interfaces(vp, name, length, exact, var_len, write_method)
@@ -369,7 +384,7 @@ var_ifEntry(vp, name, length, exact, var_len, write_method)
 	    return (u_char *) &ifnet.if_snd.ifq_len;
 	case IFSPECIFIC:
 	    *var_len = nullOidLen;
-	    return (u_char *) &nullOid;
+	    return (u_char *) nullOid;
 	default:
 	    ERROR("");
     }
@@ -535,7 +550,7 @@ var_ifEntry(vp, name, length, exact, var_len, write_method)
 	    return (u_char *) &ifnet.if_snd.ifq_len;
 	case IFSPECIFIC:
 	    *var_len = nullOidLen;
-	    return (u_char *) &nullOid;
+	    return (u_char *) nullOid;
 	default:
 	    ERROR("");
     }
@@ -676,8 +691,158 @@ static char saveName[16];
 void
 Interface_Scan_Init()
 {
+#ifndef linux
     KNLookup (interfaces_nl, N_IFNET, (char *)&ifnetaddr, sizeof(ifnetaddr));
     saveIndex=0;
+#else
+    char line [128], fullname [20], ifname_buf [20], *ifname, *ptr;
+    struct ifreq ifrq;
+    struct ifnet **ifnetaddr_ptr;
+    FILE *devin;
+    int a, b, c, d, e, i, fd;
+    extern conf_if_list *if_list;
+    conf_if_list *if_ptr;
+
+    saveIndex = 0;
+
+    /* free old list: */
+    while (ifnetaddr_list)
+      {
+	struct ifnet *old = ifnetaddr_list;
+	ifnetaddr_list = ifnetaddr_list->if_next;
+	free (old->if_name);
+	free (old);
+      }
+
+    ifnetaddr = 0;
+    ifnetaddr_ptr = &ifnetaddr_list;
+
+    if ((fd = socket (AF_INET, SOCK_DGRAM, 0)) < 0)
+      {
+	fprintf (stderr, "cannot open inet/dgram socket - continuing...\n");
+	return; /** exit (1); **/
+      }
+
+    /*
+     * build up ifnetaddr list by hand: 
+     */
+    
+    /* at least linux v1.3.53 says EMFILE without reason... */
+    if (! (devin = fopen ("/proc/net/dev", "r")))
+      {
+	close (fd);
+	fprintf (stderr, "cannot open /proc/net/dev - continuing...\n");
+	return; /** exit (1); **/
+      }
+
+    i = 0;
+    while (fgets (line, 256, devin))
+      {
+	struct ifnet *nnew;
+
+	if (6 != sscanf (line, "%[^:]: %d %d %*d %*d %*d %d %d %*d %*d %d",
+			 ifname_buf, &a, &b, &c, &d, &e))
+	  continue;
+	
+	nnew = (struct ifnet *) malloc (sizeof (struct ifnet));	    
+	memset ( nnew, 0, sizeof (struct ifnet));
+	
+	/* chain in: */
+	*ifnetaddr_ptr = nnew;
+	ifnetaddr_ptr = &nnew->if_next;
+	i++;
+	
+	/* linux previous to 1.3.~13 may miss transmitted loopback pkts: */
+	if (! strcmp (ifname_buf, "lo") && a > 0 && ! c)
+	  c = a;
+
+	nnew->if_ipackets = a, nnew->if_ierrors = b, nnew->if_opackets = c,
+	nnew->if_oerrors = d, nnew->if_collisions = e;
+	
+	/* ifnames are given as ``   eth0'': split in ``eth'' and ``0'': */
+	for (ifname = ifname_buf; *ifname && *ifname == ' '; ifname++) ;
+	
+	/* set name and interface# : */
+	nnew->if_name = strdup (ifname);
+	for (ptr = nnew->if_name; *ptr && (*ptr < '0' || *ptr > '9'); 
+	     ptr++) ;
+	nnew->if_unit = (*ptr) ? atoi (ptr) : 0;
+	*ptr = 0;
+
+	sprintf (fullname, "%s%d", nnew->if_name, nnew->if_unit);
+
+	strcpy (ifrq.ifr_name, ifname);
+	if (ioctl (fd, SIOCGIFADDR, &ifrq) < 0)
+	  memset ((char *) &nnew->if_addr, 0, sizeof (nnew->if_addr));
+	else
+	  nnew->if_addr = ifrq.ifr_addr;
+
+	strcpy (ifrq.ifr_name, ifname);
+	if (ioctl (fd, SIOCGIFBRDADDR, &ifrq) < 0)
+	  memset ((char *)&nnew->ifu_broadaddr, 0, sizeof(nnew->ifu_broadaddr));
+	else
+	  nnew->ifu_broadaddr = ifrq.ifr_broadaddr;
+
+	strcpy (ifrq.ifr_name, ifname);
+	if (ioctl (fd, SIOCGIFNETMASK, &ifrq) < 0)
+ 	  memset ((char *)&nnew->ia_subnetmask, 0, sizeof(nnew->ia_subnetmask));
+	else
+	  nnew->ia_subnetmask = ifrq.ifr_netmask;
+	  
+	strcpy (ifrq.ifr_name, ifname);
+	nnew->if_flags = ioctl (fd, SIOCGIFFLAGS, &ifrq) < 0 
+	  		? 0 : ifrq.ifr_flags;
+	
+	strcpy (ifrq.ifr_name, ifname);
+	if (ioctl(fd, SIOCGIFHWADDR, &ifrq) < 0)
+	  bzero (nnew->if_hwaddr, 6);
+	else
+	  bcopy (ifrq.ifr_hwaddr.sa_data, nnew->if_hwaddr, 6);
+	    
+	strcpy (ifrq.ifr_name, ifname);
+	nnew->if_metric = ioctl (fd, SIOCGIFMETRIC, &ifrq) < 0
+	  		? 0 : ifrq.ifr_metric;
+	    
+	strcpy (ifrq.ifr_name, ifname);
+	nnew->if_mtu = (ioctl (fd, SIOCGIFMTU, &ifrq) < 0) 
+			  ? 0 : ifrq.ifr_mtu;
+
+	for (if_ptr = if_list; if_ptr; if_ptr = if_ptr->next)
+	    if (! strcmp (if_ptr->name, fullname))
+	      break;
+
+	if (if_ptr) {
+	    nnew->if_type = if_ptr->type;
+	    nnew->if_speed = if_ptr->speed;
+	}
+	else {
+	  nnew->if_type = ! strcmp (nnew->if_name, "lo") ? 24 :
+	    ! strcmp (nnew->if_name, "eth") ? 6 :
+	      ! strcmp (nnew->if_name, "sl") ? 28 : 1;
+	  
+	  nnew->if_speed = nnew->if_type == 6 ? 10000000 : 
+	    nnew->if_type == 24 ? 10000000 : 0;
+	}
+
+      } /* while (fgets ... */
+
+      ifnetaddr = ifnetaddr_list;
+
+#if DODEBUG
+    { struct ifnet *x = ifnetaddr;
+      printf ("* see: known interfaces:");
+      while (x)
+	{
+	  printf (" %s", x->if_name);
+	  x = x->if_next;
+	}
+      printf ("\n");
+    } /* XXX */
+#endif
+
+    fclose (devin);
+    close (fd);
+#endif /* linux */
 }
 
 
@@ -699,8 +864,13 @@ struct ifnet *Retifnet;
 	    /*
 	     *	    Get the "ifnet" structure and extract the device name
 	     */
+#ifndef linux
 	    klookup((unsigned long)ifnetaddr, (char *)&ifnet, sizeof ifnet);
-	    klookup((unsigned long)ifnet.if_name, (char *)saveName, 16);
+	    klookup((unsigned long)ifnet.if_name, (char *)saveName, sizeof saveName);
+#else
+	    ifnet = *ifnetaddr;
+	    strcpy (saveName, ifnet.if_name);
+#endif
 	    if (strcmp(saveName, "ip") == 0) {
 		ifnetaddr = ifnet.if_next;
 		continue;
@@ -708,8 +878,8 @@ struct ifnet *Retifnet;
 
 
 
- 	    saveName[15] = '\0';
-	    cp = index(saveName, '\0');
+ 	    saveName[sizeof (saveName)-1] = '\0';
+	    cp = strchr(saveName, '\0');
 	    string_append_int (cp, ifnet.if_unit);
 	    if (1 || strcmp(saveName,"lo0") != 0) {  /* XXX */
 
@@ -756,12 +926,16 @@ struct in_ifaddr *Retin_ifaddr;
 	     */
 	    klookup((unsigned long)ifnetaddr, (char *)&ifnet, sizeof ifnet);
 #if STRUCT_IFNET_HAS_IF_XNAME
-	    klookup((unsigned long)ifnet.if_xname, (char *)saveName, 16);
-	    saveName[15] = '\0';
+#ifdef netbsd1
+            strncpy(saveName, ifnet.if_xname, sizeof saveName);
 #else
-	    klookup((unsigned long)ifnet.if_name, (char *)saveName, 16);
+	    klookup((unsigned long)ifnet.if_xname, (char *)saveName, sizeof saveName);
+#endif
+	    saveName[sizeof (saveName)-1] = '\0';
+#else
+	    klookup((unsigned long)ifnet.if_name, (char *)saveName, sizeof saveName);
 
-	    saveName[15] = '\0';
+	    saveName[sizeof (saveName)-1] = '\0';
 	    cp = index(saveName, '\0');
 	    string_append_int (cp, ifnet.if_unit);
 #endif
@@ -870,7 +1044,13 @@ int Index;
 u_char *EtherAddr;
 {
 	short i;
+#ifndef linux
 	struct arpcom arpcom;
+#else
+	struct arpcom {
+	  char ac_enaddr[6];
+	} arpcom;
+#endif
 
 	if (saveIndex != Index) {	/* Optimization! */
 
@@ -897,12 +1077,16 @@ u_char *EtherAddr;
 	 *  the arpcom structure is an extended ifnet structure which
 	 *  contains the ethernet address.
 	 */
+#ifndef linux
 	klookup((unsigned long)saveifnetaddr, (char *)&arpcom, sizeof (struct arpcom));
+#else
+	memcpy(arpcom.ac_enaddr, saveifnetaddr->if_hwaddr, 6);
+#endif
 	if (strncmp("lo", saveName, 2) == 0) {
 	    /*
 	     *  Loopback doesn't have a HW addr, so return 00:00:00:00:00:00
 	     */
-	    bzero(EtherAddr, sizeof(arpcom.ac_enaddr));
+	    memset(EtherAddr, 0, sizeof(arpcom.ac_enaddr));
 
 	} else {
 

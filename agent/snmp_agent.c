@@ -43,6 +43,7 @@ SOFTWARE.
 
 #include "asn1.h"
 #include "snmp_impl.h"
+#include "snmp_api.h"
 #include "snmp.h"
 #include "acl.h"
 #include "party.h"
@@ -51,15 +52,16 @@ SOFTWARE.
 #include "mibgroup/snmp_mib.h"
 #include "snmpd.h"
 
-int	create_identical __P((u_char *, u_char *, int, long, long, struct packet_info *));
-int	parse_var_op_list __P((u_char *, int, u_char *, int, long *, struct packet_info *, int));
-int	snmp_access __P((u_short, int, int));
+static int create_identical __P((u_char *, u_char *, int, long, long, struct packet_info *));
+static int parse_var_op_list __P((u_char *, int, u_char *, int, long *, struct packet_info *, int));
+static int snmp_access __P((u_short, int, int));
 static int snmp_vars_inc;
 static int get_community __P((u_char *, int));
 static int bulk_var_op_list __P((u_char *, int, u_char *, int, int, int, long *, struct packet_info *));
 static int create_toobig __P((u_char *, int, long, struct packet_info *));
 static int goodValue __P((u_char, int, u_char, int));
 static void setVariable __P((u_char *, u_char, int, u_char *, int));
+static void dump_var __P((oid *, int, int, void *, int));
 
 
 char	communities[NUM_COMMUNITIES][COMMUNITY_MAX_LEN] = {
@@ -69,6 +71,23 @@ char	communities[NUM_COMMUNITIES][COMMUNITY_MAX_LEN] = {
     "proxy",
     "core"
 };
+
+static void dump_var (var_name, var_name_len, statType, statP, statLen)
+    oid *var_name;
+    int var_name_len;
+    int statType;
+    void *statP;
+    int statLen;
+{
+    char buf [2560];
+    struct variable_list temp_var;
+
+    temp_var.type = statType;
+    temp_var.val.string = statP;
+    temp_var.val_len = statLen;
+    sprint_variable (buf, var_name, var_name_len, &temp_var);
+    fprintf (stdout, "    >> %s\n", buf);
+}
 
 int
 snmp_agent_parse(data, length, out_data, out_length, sourceip)
@@ -249,7 +268,7 @@ snmp_agent_parse(data, length, out_data, out_length, sourceip)
 	return 0;
     }
 
-    if (snmp_dump_packet) {
+    if (verbose) {
 	fprintf (stdout, "    ");
 	switch (pi->pdutype) {
 	case GET_REQ_MSG:
@@ -431,7 +450,7 @@ reterr:
  * should be FREE'd.
  * If any error occurs, an error code is returned.
  */
-int
+static int
 parse_var_op_list(data, length, out_data, out_length, index, pi, action)
     register u_char	*data;
     int			length;
@@ -490,7 +509,7 @@ parse_var_op_list(data, length, out_data, out_length, index, pi, action)
 	if (data == NULL)
 	    return PARSE_ERROR;
 
-	if (snmp_dump_packet && action == RESERVE1) {
+	if (verbose && action == RESERVE1) {
 	    char buf [256];
 	    sprint_objid (buf, var_name, var_name_len);
 	    fprintf (stdout, "    -- %s\n", buf);
@@ -501,10 +520,12 @@ parse_var_op_list(data, length, out_data, out_length, index, pi, action)
 			   exact, &write_method, pi, &noSuchObject);
 	if (pi->version != SNMP_VERSION_2 && statP == NULL
 	      && (pi->pdutype != SET_REQ_MSG || !write_method)){
-	    if (snmp_dump_packet) fprintf (stdout, "    >> noSuchName\n");
-            print_mib_oid(var_name,var_name_len);
-            printf(" -- ");
-	    printf("OID Doesn't exist\n");
+	    if (verbose) fprintf (stdout, "    >> noSuchName\n");
+	    else {
+		char buf [256];
+		sprint_objid(buf, var_name, var_name_len);
+		printf("%s --  OID Doesn't exist\n", buf);
+	    }
 	    return SNMP_ERR_NOSUCHNAME; 
 	}
 
@@ -512,16 +533,17 @@ parse_var_op_list(data, length, out_data, out_length, index, pi, action)
 	   (in the MIB sense). */
 	if (pi->pdutype == SET_REQ_MSG && pi->version != SNMP_VERSION_2
 	      && !snmp_access(acl, pi->community_id, rw)){
-	    if (snmp_dump_packet) fprintf (stdout, "    >> noSuchName (read-only)\n");
+	    if (verbose) fprintf (stdout, "    >> noSuchName (read-only)\n");
 	    ERROR("read-only? (ignoring)");
 	    return SNMP_ERR_NOSUCHNAME;
 	}
 	if (pi->pdutype == SET_REQ_MSG && pi->version == SNMP_VERSION_2
 	      && !snmp_access(acl, pi->community_id, rw)){
-	    if (snmp_dump_packet) fprintf (stdout, "    >> notWritable\n");
+	    if (verbose) fprintf (stdout, "    >> notWritable\n");
 	    ERROR("Not Writable");
 	    return SNMP_ERR_NOTWRITABLE;
 	}
+
 	/* Its bogus to check here on getnexts - the whole packet shouldn't
 	   be dumped - this should should be the loop in getStatPtr
 	   luckily no objects are set unreadable.  This can still be
@@ -572,6 +594,8 @@ parse_var_op_list(data, length, out_data, out_length, index, pi, action)
 		    statType = SNMP_ENDOFMIBVIEW;
 		}
 	    }
+	    if (verbose)
+		dump_var(var_name, var_name_len, statType, statP, statLen);
             out_data = snmp_build_var_op(out_data, var_name, &var_name_len,
 					 statType, statLen, statP,
 					 &out_length);
@@ -682,7 +706,7 @@ bulk_var_op_list(data, length, out_data, out_length, non_repeaters,
 	if (data == NULL)
 	    return PARSE_ERROR;
 
-	if (snmp_dump_packet) {
+	if (verbose) {
 	    char buf [256];
 	    sprint_objid (buf, var_name, var_name_len);
 	    fprintf (stdout, "    non-rep -- %s\n", buf);
@@ -700,6 +724,8 @@ bulk_var_op_list(data, length, out_data, out_length, non_repeaters,
 
 	/* retrieve the value of the variable and place it into the
 	 * outgoing packet */
+	if (verbose)
+	    dump_var(var_name, var_name_len, statType, statP, statLen);
 	out_data = snmp_build_var_op(out_data, var_name, &var_name_len,
 				     statType, statLen, statP,
 				     &out_length);
@@ -726,9 +752,9 @@ bulk_var_op_list(data, length, out_data, out_length, non_repeaters,
 	if (data == NULL)
 	    return PARSE_ERROR;
 
-	if (snmp_dump_packet) {
+	if (verbose) {
 	    char buf [256];
-	    sprint_objid (buf, var_name, var_name_len);
+	    sprint_objid (buf, rl->name, rl->length);
 	    fprintf (stdout, "    rep -- %s\n", buf);
 	}
 
@@ -744,6 +770,8 @@ bulk_var_op_list(data, length, out_data, out_length, non_repeaters,
 	out_length_save = out_length;
 	/* retrieve the value of the variable and place it into the
 	 * outgoing packet */
+	if (verbose)
+	    dump_var(rl->name, rl->length, statType, statP, statLen);
 	out_data = snmp_build_var_op(out_data, rl->name, &rl->length,
 				     statType, statLen, statP,
 				     &out_length);
@@ -790,6 +818,8 @@ bulk_var_op_list(data, length, out_data, out_length, non_repeaters,
 	    out_length_save = out_length;
 	    /* retrieve the value of the variable and place it into the
 	     * Outgoing packet */
+	    if (verbose)
+		dump_var(rl->name, rl->length, statType, statP, statLen);
 	    out_data = snmp_build_var_op(out_data, rl->name, &rl->length,
 					 statType, statLen, statP,
 					 &out_length);
@@ -823,7 +853,7 @@ bulk_var_op_list(data, length, out_data, out_length, non_repeaters,
  * and the error index which are set according to the input variables.
  * Returns 1 upon success and 0 upon failure.
  */
-int
+static int
 create_identical(snmp_in, snmp_out, snmp_length, errstat, errindex, pi)
     u_char	    	*snmp_in;
     u_char	    	*snmp_out;
@@ -1016,7 +1046,7 @@ create_toobig(snmp_out, snmp_length, reqid, pi)
     return 1;
 }
 
-int
+static int
 snmp_access(acl, community, rw)
     u_short 	acl;
     int		community;

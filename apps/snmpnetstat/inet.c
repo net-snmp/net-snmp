@@ -62,17 +62,9 @@ SOFTWARE.
 #include "mib.h"
 #include "snmp.h"
 
-extern	int aflag;
-extern	int nflag;
-extern	char *plural __P((int));
-extern	struct snmp_session *Session;
-extern	struct variable_list *getvarbyname __P((struct snmp_session *, oid *, int));
-void tcp_stats __P((void));
-void ip_stats __P((void));
-void icmp_stats __P((void));
+#include "netstat.h"
 
-char	*inetname __P((struct in_addr));
-void	inetprint __P((struct in_addr *,u_short, char *));
+static char *inetname __P((struct in_addr));
 
 struct stat_table {
     int	    entry;  /* entry number in table */
@@ -478,11 +470,11 @@ inetprint(in, port, proto)
 	sprintf(line, "%.*s.", 16, inetname(*in));
 	cp = (char *) strchr(line, '\0');
 	if (!nflag && port)
-		sp = getservbyport((int)port, proto);
+		sp = getservbyport(htons(port), proto);
 	if (sp || port == 0)
 		sprintf(cp, "%.8s", sp ? sp->s_name : "*");
 	else
-		sprintf(cp, "%d", ntohs((u_short)port));
+		sprintf(cp, "%d", port);
 	width = 22;
 	printf(" %-*.*s", width, width, line);
 }
@@ -492,7 +484,7 @@ inetprint(in, port, proto)
  * If the nflag has been supplied, give 
  * numeric value, otherwise try for symbolic name.
  */
-char *
+static char *
 inetname(in)
 	struct in_addr in;
 {

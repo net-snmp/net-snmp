@@ -5,6 +5,8 @@
 
 #include <config.h>
 
+#ifndef linux
+
 #include <sys/types.h>
 #if HAVE_UNISTD_H
 #include <unistd.h>
@@ -124,4 +126,4 @@ klookup(off, target, siz)
   return (1);
 }
 
-
+#endif /* linux */
