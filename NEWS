@@ -13,6 +13,8 @@ the ChangeLog file for a more detailed listing of changes/bug fixes.
     - snmp_open calls getservbyname only once now, at the request of Gary
       Hayward <gah@dirac.bellcore.com>.  Mainly for Perl users.
 
+  New example file:  EXAMPLE.conf file (created at build time).
+
   local/snmpcheck has drastically improved, and now requires Tk-b8.
 
   You can now mung with all sorts of numbers in config.h and the
