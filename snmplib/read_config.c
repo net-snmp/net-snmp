@@ -1013,8 +1013,11 @@ char *read_config_save_octet_string(char *saveto, u_char *str, size_t len) {
           (isalpha(*cp) || isdigit(*cp) || *cp == ' '); cp++, i++);
 
   if (len != 0 && i == (int)len) {
-      sprintf(saveto, "\"%s\"", str);
-      saveto += strlen(saveto);
+      *saveto++ = '"';
+      memcpy(saveto, str, len);
+      saveto += len;
+      *saveto++ = '"';
+      *saveto = '\0';
   } else {
       if (str != NULL) {
           sprintf(saveto, "0x");
@@ -1088,7 +1091,7 @@ char *read_config_read_octet_string(char *readfrom, u_char **str, size_t *len) {
       readfrom = copy_nword(readfrom, buf, sizeof(buf));
 
       *len = strlen(buf);
-      if (*len > 0 && ((cptr = (u_char *) malloc(*len + 1)) == NULL))
+      if ((cptr = (u_char *) malloc(*len + 1)) == NULL)
         return NULL;
       *str = cptr;
       if (cptr)
