@@ -776,14 +776,42 @@ sub trap {
        my $specific = $param{specific} || 0;
        @res = SNMP::_trapV1($this, $enterprise, $agent, $generic, $specific,
 			  $uptime, $varbind_list_ref);
-   } elsif (($this->{Version} eq '2') || ($this->{Version} eq '2c')) {
+   } elsif  (($this->{Version} eq '2')|| ($this->{Version} eq '2c')) {
        my $trap_oid = $param{trapoid};
        my $uptime = $param{uptime};
        @res = SNMP::_trapV2($this, $uptime, $trap_oid, $varbind_list_ref);
+   } 
+
+   return(wantarray() ? @res : $res[0]);
+}
+
+sub inform {
+# (v2|v3) oid, uptime, <vars>
+# $sess->informv3(uptime => 1234,
+#             trapoid => 'snmpRisingAlarm',
+#             [[ifIndex, 1, 1],[sysLocation, 0, "here"]]); # optional vars
+#                                                          # always last
+
+
+   my $this = shift;
+   my $vars = pop if ref($_[$#_]); # last arg may be varbind or varlist
+   my %param = @_;
+   my ($varbind_list_ref, @res);
+
+   if (ref($vars) =~ /SNMP::VarList/) {
+     $varbind_list_ref = $vars;
+   } elsif (ref($vars) =~ /SNMP::Varbind/) {
+     $varbind_list_ref = [$vars];
+   } elsif (ref($vars) =~ /ARRAY/) {
+     $varbind_list_ref = [$vars];
+     $varbind_list_ref = $vars if ref($$vars[0]) =~ /ARRAY/;
+   }
+
+if (($this->{Version} eq '2') || ($this->{Version} eq '2c')) {
+       my $trap_oid = $param{trapoid};
+       my $uptime = $param{uptime};
+       @res = SNMP::_informV2($this, $uptime, $trap_oid, $varbind_list_ref);
    } else {
-# Should the parent subroutine be called "notification" instead of "trap"?
-# in v2 and v3, we have 2 childs...trap and inform. How do we make it
-# unambiguous?
        my $trap_oid = $param{trapoid};
        my $uptime = $param{uptime};
        @res = SNMP::_informV3($this, $uptime, $trap_oid, $varbind_list_ref);
@@ -793,7 +821,7 @@ sub trap {
    return(wantarray() ? @res : $res[0]);
 }
 
-
+###################################################################
 package SNMP::Varbind;
 
 $tag_f = 0;
