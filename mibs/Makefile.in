@@ -1,0 +1,27 @@
+#
+# Makefile to install mib files.
+#
+
+SHELL = /bin/sh
+srcdir = @srcdir@
+VPATH = @srcdir@
+@SET_MAKE@
+
+prefix = @prefix@
+exec_prefix = @exec_prefix@
+bindir = $(exec_prefix)/bin
+libdir = $(exec_prefix)/lib
+snmplibdir = $(prefix)/lib/snmp
+mibdir = $(snmplibdir)/mibs
+
+INSTALL = @INSTALL@
+
+MIBS=ucd-snmp.txt rfc1271.txt snmpv2.txt
+
+all:
+
+install: installdirs
+	@for i in $(MIBS) ; do $(INSTALL) $(srcdir)/$$i $(mibdir) ; echo "install: installed $$i in $(mibdir)" ; done
+
+installdirs:
+	@$(SHELL) $(srcdir)/../mkinstalldirs $(mibdir)
