@@ -6,11 +6,14 @@ EXAMPLE.conf
 FAQ.html
 Makefile
 bin
+autom4te.cache
+autoscan.log
 config.cache
 config.h
 config.log
 config.out
 config.status
+configure.scan
 configure-summary
 docs
 ece-mib.txt

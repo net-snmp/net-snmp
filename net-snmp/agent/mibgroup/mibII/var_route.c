@@ -1974,7 +1974,7 @@ var_ipRouteEntry(struct variable * vp,
          * (less sizeof instance part) 
          */
 
-        memcpy(Current, vp->name, (int) (vp->namelen) * sizeof(oid));
+        memcpy(Current, vp->name, SNMP_MIN(sizeof(Current), (int)(vp->namelen) * sizeof(oid)));
 
         suck_krt(0);
 
@@ -1996,7 +1996,7 @@ var_ipRouteEntry(struct variable * vp,
         /*
          *  Save in the 'cache'
          */
-        memcpy(saveName, name, *length * sizeof(oid));
+        memcpy(saveName, name, SNMP_MIN(sizeof(saveName), *length * sizeof(oid)));
         saveName[9] = 0;
         saveNameLen = *length;
         saveExact = exact;

@@ -887,7 +887,7 @@ snmptrapd_close_sessions(netsnmp_session * sess_list)
 int
 main(int argc, char *argv[])
 {
-    char            options[128] = "ac:CdD::efF:hHl:m:M:no:PqsSvO:-:";
+    char            options[128] = "ac:CdD::efF:hHl:m:M:no:PqsS:vO:-:";
     netsnmp_session *sess_list = NULL, *ss = NULL;
     netsnmp_transport *transport = NULL;
     int             arg, i = 0;
@@ -1269,7 +1269,7 @@ main(int argc, char *argv[])
 #if HAVE_GETPID
     if (pid_file != NULL) {
         if ((PID = fopen(pid_file, "w")) == NULL) {
-            snmp_log_perror("fopen");
+            snmp_log_perror(pid_file);
             exit(1);
         }
         fprintf(PID, "%d\n", (int) getpid());
@@ -1358,12 +1358,23 @@ main(int argc, char *argv[])
                 time_t          timer;
                 time(&timer);
                 tm = localtime(&timer);
-                printf
-                    ("%.4d-%.2d-%.2d %.2d:%.2d:%.2d NET-SNMP version %s Reconfigured.\n",
-                     tm->tm_year + 1900, tm->tm_mon + 1, tm->tm_mday,
-                     tm->tm_hour, tm->tm_min, tm->tm_sec,
-                     netsnmp_get_version());
+
+                /*
+                 * If we are logging to a file, receipt of SIGHUP also
+                 * indicates the the log file should be closed and re-opened.
+                 * This is useful for users that want to rotate logs in a more
+                 * predictable manner.
+                 */
+                if (logfile) {
+                    snmp_enable_filelog(logfile, 1);
+                }
+                snmp_log(LOG_INFO,"%.4d-%.2d-%.2d %.2d:%.2d:%.2d "
+                         "NET-SNMP version %s Reconfigured.\n",
+                         tm->tm_year + 1900, tm->tm_mon + 1, tm->tm_mday,
+                         tm->tm_hour, tm->tm_min, tm->tm_sec,
+                         netsnmp_get_version());
             }
+
             if (Syslog)
                 snmp_log(LOG_INFO, "Snmptrapd reconfiguring");
             trapd_update_config();

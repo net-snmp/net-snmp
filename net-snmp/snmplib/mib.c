@@ -470,7 +470,7 @@ sprint_realloc_octet_string(u_char ** buf, size_t * buf_len,
 
             while (repeat && cp < ecp) {
                 value = 0;
-                if (code != 'a') {
+                if (code != 'a' && code != 't') {
                     for (x = 0; x < width; x++) {
                         value = value * 256 + *cp++;
                     }
@@ -4835,7 +4835,8 @@ _add_strings_to_oid(struct tree *tp, char *cp,
 			goto bad_id;
 		    if (subid > 255)
 			goto bad_id;
-		    objid[*objidlen++] = subid;
+		    objid[*objidlen] = subid;
+	            (*objidlen)++;
 		    cp = cp2;
 		}
 	    }

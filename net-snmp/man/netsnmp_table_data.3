@@ -1,4 +1,4 @@
-.TH "table_data: Helps you implement a table with datamatted storage." 3 "10 Jan 2003" "net-snmp" \" -*- nroff -*-
+.TH "table_data: Helps you implement a table with datamatted storage." 3 "5 Mar 2003" "net-snmp" \" -*- nroff -*-
 .ad l
 .nh
 .SH NAME
@@ -101,7 +101,7 @@ It can be used to store a list of rows, where a row consists of the indexes to t
 .PP
 creates and returns a pointer to table data set.
 .PP
-Definition at line 523 of file table_data.c.
+Definition at line 525 of file table_data.c.
 .SS "netsnmp_table_row* netsnmp_create_table_data_row (void)"
 .PP
 creates and returns a pointer to table data set.
@@ -110,17 +110,17 @@ creates and returns a pointer to table data set.
 .in +1c
 \fBdata_set.c\fP.
 .PP
-Definition at line 533 of file table_data.c.
+Definition at line 535 of file table_data.c.
 .SS "netsnmp_table_row* netsnmp_extract_table_row (netsnmp_request_info * request)"
 .PP
 extracts the row being accessed passed from the table_data helper.
 .PP
-Definition at line 541 of file table_data.c.
+Definition at line 543 of file table_data.c.
 .SS "void* netsnmp_extract_table_row_data (netsnmp_request_info * request)"
 .PP
 extracts the data from the row being accessed passed from the table_data helper.
 .PP
-Definition at line 550 of file table_data.c.
+Definition at line 552 of file table_data.c.
 .SS "netsnmp_mib_handler* netsnmp_get_table_data_handler (netsnmp_table_data * table)"
 .PP
 Creates a table_data handler and returns it.
@@ -149,14 +149,14 @@ Definition at line 51 of file table_data.c.
 .PP
 builds a result given a row, a varbind to set and the data.
 .PP
-Definition at line 562 of file table_data.c.
+Definition at line 564 of file table_data.c.
 .SS "netsnmp_table_row* netsnmp_table_data_clone_row (netsnmp_table_row * row)"
 .PP
 clones a data row.
 .PP
 DOES NOT CLONE THE CONTAINED DATA. 
 .PP
-Definition at line 596 of file table_data.c.
+Definition at line 598 of file table_data.c.
 .SS "void* netsnmp_table_data_delete_row (netsnmp_table_row * row)"
 .PP
 deletes a row's memory.

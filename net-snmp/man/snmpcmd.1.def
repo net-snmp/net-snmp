@@ -546,15 +546,15 @@ Overridden by the
 .B -m
 option.
 .IP MIBDIRS
-The list of directories to search for MIBs. Defaults to PREFIX/share/snmp/mibs.
+The list of directories to search for MIBs. Defaults to DATADIR/snmp/mibs.
 Overridden by the
 .B -M
 option.
 .SH FILES
-.IP PREFIX/share/snmp/snmpd.conf
+.IP SYSCONFDIR/snmp/snmpd.conf
 Agent configuration file. See
 .IR snmpd.conf(5) .
-.IP PREFIX/share/snmp/snmp.conf
+.IP SYSCONFDIR/snmp/snmp.conf
 .IP ~/.snmp/snmp.conf
 Application configuration files. See 
 .IR snmp.conf(5) .
