@@ -290,7 +290,7 @@ int main(int argc, char *argv[])
       exit(1);
     }
     
-    init_snmp("");
+    init_snmp("snmpapp");
     if (print == 1) print_mib (stdout);
     if (print == 2) print_ascii_dump (stdout);
     if (print == 3) print_oid_report (stdout);
