@@ -140,6 +140,7 @@ ds_get_string(int storeid, int which) {
 void
 ds_handle_config(const char *token, char *line) {
   struct ds_read_config *drsp;
+  char buf[SNMP_MAXBUF];
   int itmp;
 
   DEBUGMSGTL(("ds_handle_config", "handling %s\n", token));
@@ -171,7 +172,12 @@ ds_handle_config(const char *token, char *line) {
         break;
 
       case ASN_OCTET_STR:
-        ds_set_string(drsp->storeid, drsp->which, line);
+        if (*line == '"') {
+            copy_word(line, buf);
+            ds_set_string(drsp->storeid, drsp->which, buf);
+        } else {
+            ds_set_string(drsp->storeid, drsp->which, line);
+        }
         DEBUGMSGTL(("ds_handle_config", "string: %s\n", line));
         break;
 
