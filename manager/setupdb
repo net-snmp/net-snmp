@@ -55,6 +55,13 @@ $dbh->do("create table hostgroups (id integer auto_increment primary key,
                              host varchar(16), 
                              groupname varchar(32))");
 
+$dbh->do("create table oncall (id integer auto_increment primary key, 
+                               user varchar(16),
+                               groupname varchar(32),
+                               email varchar(64),
+                               days  varchar(64),
+                               hours varchar(64))");
+
 $dbh->do("create table errorexpressions (id integer auto_increment primary key, 
                                    tablename varchar(64), 
                                    expression varchar(255),
