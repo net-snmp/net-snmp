@@ -970,9 +970,7 @@ _sess_open(struct snmp_session *in_session)
         if ( session->peername && session->peername[0] == '/' ) {
 #ifdef AF_UNIX
             isp->addr.sa__family = AF_UNIX;
-            if ( session->local_port == 0 ) {	/* 'remote' implies client */
-                strcpy( isp->addr.sa__data, session->peername);
-            }
+            strcpy( isp->addr.sa__data, session->peername);
 #else /* AF_UNIX */
             snmp_log(LOG_ERR,"%s:%d: _sess_open invalid session name %s- unix sockets not supported  \n",
                     __FILE__,__LINE__,
@@ -1019,32 +1017,58 @@ _sess_open(struct snmp_session *in_session)
         }
     }
 
-    memset(&isp->me, '\0', sizeof(isp->me));
-    isp->me.sa__family = isp->addr.sa__family;
-    if ( isp->me.sa__family == AF_INET ) {
-        meIp = (struct sockaddr_in*)&(isp->me);
-        meIp->sin_addr.s_addr = INADDR_ANY;
-        meIp->sin_port = htons(session->local_port);
+
+    if ( session->local_port ) {
+	/*
+	 *  If the session structure includes a non-null value for
+	 *    local_port, then this session is intended as a server.
+	 *    This means that the isp->addr structure will not be 
+	 *    needed to contact a remote entity.
+	 *
+	 *  By using this address as the local address to bind to,
+	 *    we can provide a facility for listening on selected
+	 *    (rather than all) interfaces.
+	 */
+	memcpy( &isp->me, &isp->addr, sizeof(isp->me));
+
+	if ( isp->addr.sa__family == AF_INET ) {
+			/*
+			 * Remember to use the specified local port,
+			 *   rather than the (default?) remote one.
+			 * If no local interface address is specified,
+			 *   default to listening on all interfaces,
+			 *   rather than the default connection host
+			 *   (SNMP_DEFAULT_ADDRESS)
+			 */
+	    meIp = (struct sockaddr_in*)&(isp->me);
+	    meIp->sin_port = htons(session->local_port);
+            if (session->peername == SNMP_DEFAULT_PEERNAME)
+                meIp->sin_addr.s_addr = INADDR_ANY;
+	}
     }
-#ifdef AF_UNIX
-    else if ( isp->me.sa__family == AF_UNIX ) {
-        if ( session->local_port != 0 ) {	/* 'local' implies server */
-            strcpy( isp->me.sa__data, session->peername);
+    else {
+        memset(&isp->me, '\0', sizeof(isp->me));
+        isp->me.sa__family = isp->addr.sa__family;
+        if ( isp->me.sa__family == AF_INET ) {
+	    meIp = (struct sockaddr_in*)&(isp->me);
+            meIp->sin_addr.s_addr = INADDR_ANY;
+            meIp->sin_port = htons(session->local_port);
         }
-        else {
-		/* Need a unique socket name */
+#ifdef AF_UNIX
+        else if ( isp->me.sa__family == AF_UNIX ) {
+    		/* Need a unique socket name */
 #ifndef UNIX_SOCKET_BASE_NAME
 #define UNIX_SOCKET_BASE_NAME  "/tmp/s."
 #endif
-
+    
 #ifndef WIN32
-            strcpy( isp->me.sa__data, UNIX_SOCKET_BASE_NAME );
-            strcat( isp->me.sa__data, "XXXXXX" );
-            mktemp( isp->me.sa__data );
+                strcpy( isp->me.sa__data, UNIX_SOCKET_BASE_NAME );
+                strcat( isp->me.sa__data, "XXXXXX" );
+                mktemp( isp->me.sa__data );
 #endif
         }
-    }
 #endif /* AF_UNIX */
+    }
     addr_size = snmp_socket_length(isp->me.sa__family);
 
     /* Set up connections */
