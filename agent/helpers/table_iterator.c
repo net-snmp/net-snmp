@@ -187,8 +187,10 @@ netsnmp_table_iterator_helper_handler(netsnmp_mib_handler *handler,
                 (iinfo->get_first_data_point) (&callback_loop_context,
                                                &callback_data_context,
                                                index_search, iinfo);
-            if (iinfo->free_loop_context)
+            if (iinfo->free_loop_context) {
                 (iinfo->free_loop_context) (callback_loop_context, iinfo);
+		callback_loop_context = NULL;
+	    }
             goto got_results;
         }
 
@@ -234,6 +236,7 @@ netsnmp_table_iterator_helper_handler(netsnmp_mib_handler *handler,
                     if (callback_data_keep && iinfo->free_data_context) {
                         (iinfo->free_data_context) (callback_data_keep,
                                                     iinfo);
+                        callback_data_keep = NULL;
                     }
                     if (iinfo->make_data_context && !callback_data_context) {
                         callback_data_context =
@@ -248,6 +251,7 @@ netsnmp_table_iterator_helper_handler(netsnmp_mib_handler *handler,
                     if (callback_data_context && iinfo->free_data_context)
                         (iinfo->free_data_context) (callback_data_context,
                                                     iinfo);
+                    callback_data_context = NULL;
                 }
 
                 /*
@@ -265,12 +269,33 @@ netsnmp_table_iterator_helper_handler(netsnmp_mib_handler *handler,
                      */
                     table_info->colnum++;
                     coloid[reginfo->rootoid_len + 1] = table_info->colnum;
-                    /*
-                     * XXX: free old contexts first? 
-                     */
 		    snmp_free_varbind(free_this_index_search);
                     index_search = snmp_clone_varbind(table_info->indexes);
 		    free_this_index_search = index_search;
+
+                    if (callback_loop_context &&
+                        iinfo->free_loop_context_at_end) {
+                        (iinfo->free_loop_context_at_end)(callback_loop_context,
+                                                          iinfo);
+                        callback_loop_context = NULL;
+                    }
+                    if (iinfo->free_loop_context && callback_loop_context) {
+                        (iinfo->free_loop_context) (callback_loop_context,
+                                                    iinfo);
+                        callback_loop_context = NULL;
+                    }
+                    if (callback_data_context && iinfo->free_data_context) {
+                        (iinfo->free_data_context) (callback_data_context,
+                                                    iinfo);
+                        callback_data_context = NULL;
+                    }
+
+                    if (callback_data_context && iinfo->free_data_context) {
+                        (iinfo->free_data_context) (callback_data_keep,
+                                                    iinfo);
+                        callback_data_keep = NULL;
+                    }
+                    
                     index_search =
                         (iinfo->
                          get_first_data_point) (&callback_loop_context,
@@ -313,9 +338,12 @@ netsnmp_table_iterator_helper_handler(netsnmp_mib_handler *handler,
                     /*
                      * free not-needed data context 
                      */
-                    if (callback_data_context && iinfo->free_data_context)
+                    if (callback_data_context && iinfo->free_data_context) {
                         (iinfo->free_data_context) (callback_data_context,
                                                     iinfo);
+                        callback_data_context = NULL;
+                    }
+
                 }
 
                 /*
@@ -339,11 +367,21 @@ netsnmp_table_iterator_helper_handler(netsnmp_mib_handler *handler,
          * XXX: free index_search? 
          */
         if (callback_loop_context && iinfo->free_loop_context) {
-            callback_loop_context = NULL;
             (iinfo->free_loop_context) (callback_loop_context, iinfo);
         }
 
       got_results:             /* not milk */
+   
+       /*
+        * This free_data_context call is required in the event that your
+        * get_next_data_point method allocates new memory, even during the
+        * calls where it eventually returns a NULL
+        */
+        if (callback_data_context && iinfo->free_data_context) {
+               (iinfo->free_data_context) (callback_data_context,
+                                           iinfo);
+               callback_data_context = NULL;
+        }
 
         if (!results && !MODE_IS_SET(reqinfo->mode)) {
             /*
@@ -355,9 +393,11 @@ netsnmp_table_iterator_helper_handler(netsnmp_mib_handler *handler,
 #ifdef NOT_SERIALIZED
             break;
 #else
-            if (callback_loop_context && iinfo->free_loop_context_at_end)
+            if (callback_loop_context && iinfo->free_loop_context_at_end) {
                 (iinfo->free_loop_context_at_end) (callback_loop_context,
                                                    iinfo);
+		callback_loop_context = NULL;
+	    }
             if (free_this_index_search != NULL) {
                 snmp_free_varbind(free_this_index_search);
             }
@@ -422,14 +462,19 @@ netsnmp_table_iterator_helper_handler(netsnmp_mib_handler *handler,
             reqinfo->mode == MODE_SET_FREE ||
             reqinfo->mode == MODE_SET_UNDO ||
             reqinfo->mode == MODE_SET_COMMIT) {
-            if (callback_data_keep && iinfo->free_data_context)
+            if (callback_data_keep && iinfo->free_data_context) {
                 (iinfo->free_data_context) (callback_data_keep, iinfo);
+                callback_data_keep = NULL;
+            }
+
             if (free_this_index_search)
                 snmp_free_varbind(free_this_index_search);
 #ifndef NOT_SERIALIZED
-            if (callback_loop_context && iinfo->free_loop_context_at_end)
+            if (callback_loop_context && iinfo->free_loop_context_at_end) {
                 (iinfo->free_loop_context_at_end) (callback_loop_context,
                                                    iinfo);
+ 		callback_loop_context = NULL;
+            }
 #endif
         }
 #ifdef NOT_SERIALIZED
@@ -443,9 +488,11 @@ netsnmp_table_iterator_helper_handler(netsnmp_mib_handler *handler,
         reqinfo->mode == MODE_SET_FREE ||
         reqinfo->mode == MODE_SET_UNDO ||
         reqinfo->mode == MODE_SET_COMMIT) {
-        if (callback_loop_context && iinfo->free_loop_context_at_end)
+        if (callback_loop_context && iinfo->free_loop_context_at_end) {
             (iinfo->free_loop_context_at_end) (callback_loop_context,
                                                iinfo);
+	    callback_loop_context = NULL;
+	}
     }
 #endif
     return SNMP_ERR_NOERROR;
