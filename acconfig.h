@@ -645,7 +645,9 @@
 #if NETSNMP_ENABLE_INLINE && !defined(NETSNMP_NO_INLINE)
 #   define NETSNMP_USE_INLINE
 #else
+#   undef NETSNMP_INLINE
 #   define NETSNMP_INLINE 
+#   undef NETSNMP_STATIC_INLINE
 #   define NETSNMP_STATIC_INLINE static
 #endif
 
