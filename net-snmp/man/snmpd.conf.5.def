@@ -324,6 +324,8 @@ group	public	v2c	public
 group	public	usm	public
 view 	all	included	.1
 access	public	""	any	noauth	exact	all	none	none
+.fi
+.RE
 .SH SNMPv3 CONFIGURATION
 .PP
 .IP "engineID STRING"
@@ -558,6 +560,8 @@ proxy -v 1 -c public remotehost .1.3.6.1.4.1.2021
 # oid to local .1.3.6.1.3.10 oid (another way to access mulitple hosts
 # without using contexts)
 proxy -v 3 -l noAuthNoPriv -u user remotehost .1.3.6.1.3.10 .1.3.6.1.2.1.1
+.fi
+.RE
 .SH "PASS-THROUGH CONTROL"
 .IP "pass MIBOID EXEC"
 (If you're writing perl scripts, please see the embedded perl support
@@ -813,8 +817,9 @@ out alright.
 .nf
 rouser me
 monitor -u me -o sysUpTime.0 -o hrSWRunName "high process memory" hrSWRunPerfMem > 10000
-.RE
 .fi
+.fi
+.RE
 .IP
 The above line would produce a trap which, when formated by snmptrapd, would
 look like:
@@ -823,8 +828,8 @@ look like:
 .nf
 2002-04-05 13:33:53 localhost.localdomain [udp:127.0.0.1:32931]:
         sysUpTimeInstance = Timeticks: (1629) 0:00:16.29        snmpTrapOID.0 = OID: mteTriggerFired    mteHotTrigger = high process memory     mteHotTargetName =      mteHotContextName =     mteHotOID = OID: hrSWRunPerfMem.1968    mteHotValue = 28564     hrSWRunName.1968 = "xemacs"
-.RE
 .fi
+.RE
 .IP
 This shows my xemacs process using 28Mb of resident memory.  Which,
 considering it's xemacs, is not that surprising.
