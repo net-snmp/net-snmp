@@ -1474,8 +1474,8 @@ Route_Scan_Reload(void)
 static int
 qsort_compare(const void *v1, const void *v2)
 {
-    mib_ipRouteEnt **r1 = (mib_ipRouteEnt **) v1;
-    mib_ipRouteEnt **r2 = (mib_ipRouteEnt **) v2;
+    mib_ipRouteEnt * const *r1 = (mib_ipRouteEnt * const *) v1;
+    mib_ipRouteEnt * const *r2 = (mib_ipRouteEnt * const *) v2;
     /*
      *      Do the comparison
      */
@@ -1489,8 +1489,8 @@ qsort_compare(const void *v1, const void *v2)
 static int
 qsort_compare(const void *v1, const void *v2)
 {
-    const RTENTRY **r1 = (const RTENTRY **) v1;
-    const RTENTRY **r2 = (const RTENTRY **) v2;
+    RTENTRY * const *r1 = (RTENTRY * const *) v1;
+    RTENTRY * const *r2 = (RTENTRY * const *) v2;
 #if NEED_KLGETSA
     register u_long dst1 =
         ntohl(klgetsa((const struct sockaddr_in *) (*r1)->rt_dst)->

@@ -34,7 +34,7 @@
 
 #include <net-snmp/library/snmp_api.h>
 
-static char * stores [NETSNMP_DS_MAX_IDS] = { "LIB", "APP", "TOK" };
+static const char * stores [NETSNMP_DS_MAX_IDS] = { "LIB", "APP", "TOK" };
 
 typedef struct netsnmp_ds_read_config_s {
   u_char          type;
