@@ -300,8 +300,11 @@ initialize_table_$context(void)
  * @retval MFD_SUCCESS  : no errors
  * @retval MFD_ERROR    : error (context allocate will fail)
  */
-    int ${context}_rowreq_ctx_init(${context}_rowreq_ctx *rowreq_ctx, void *user_init_ctx)
+int ${context}_rowreq_ctx_init(${context}_rowreq_ctx *rowreq_ctx,
+                               void *user_init_ctx)
 {
+    DEBUGMSGTL(("verbose:$context:${context}_rowreq_ctx_init","called\n"));
+
     /*
      * TODO:
      * extra initialization
@@ -316,6 +319,8 @@ initialize_table_$context(void)
  */
 void ${context}_rowreq_ctx_cleanup(${context}_rowreq_ctx *rowreq_ctx)
 {
+    DEBUGMSGTL(("verbose:$context:${context}_rowreq_ctx_cleanup","called\n"));
+
     /*
      * TODO:
      * extra cleanup
