@@ -44,12 +44,14 @@ SOFTWARE.
 #include <stdio.h>
 #include <ctype.h>
 
-#include "snmp.h"
-#include "mib.h"
 #include "asn1.h"
 #include "snmp_impl.h"
 #include "snmp_api.h"
 #include "snmp_client.h"
+#include "mib.h"
+#include "snmp.h"
+
+int main __P((int, char **));
 
 extern int  errno;
 extern int save_mib_descriptions;

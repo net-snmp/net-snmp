@@ -60,28 +60,29 @@ typedef u_char	oid;
 #define IS_CONSTRUCTOR(byte)	((byte) & ASN_CONSTRUCTOR)
 #define IS_EXTENSION_ID(byte)	(((byte) & ASN_EXTENSION_ID) == ASN_EXTENSION_ID)
 
-u_char	*asn_parse_int();
-u_char	*asn_build_int();
-u_char	*asn_parse_unsigned_int();
-u_char	*asn_build_unsigned_int();
-u_char	*asn_parse_string();
-u_char	*asn_build_string();
-u_char	*asn_parse_header();
-u_char	*asn_build_header();
-u_char	*asn_build_sequence();
-u_char	*asn_parse_length();
-u_char	*asn_build_length();
-u_char	*asn_parse_objid();
-u_char	*asn_build_objid();
-u_char	*asn_parse_null();
-u_char	*asn_build_null();
-u_char	*asn_parse_bitstring();
-u_char	*asn_build_bitstring();
-u_char	*asn_parse_unsigned_int64();
-u_char	*asn_build_unsigned_int64();
-
 struct counter64 {
     u_long high;
     u_long low;
 };
 
+u_char	*asn_parse_int __P((u_char *, int *, u_char *, long *, int));
+u_char	*asn_build_int __P((u_char *, int *, u_char, long *, int));
+u_char	*asn_parse_unsigned_int __P((u_char *, int *, u_char *, u_long *, int));
+u_char	*asn_build_unsigned_int __P((u_char *, int *, u_char, u_long *, int));
+u_char	*asn_parse_string __P((u_char *, int *, u_char *, u_char *, int *));
+u_char	*asn_build_string __P((u_char *, int *, u_char, u_char *, int));
+u_char	*asn_parse_header __P((u_char *, int *, u_char *));
+u_char	*asn_build_header __P((u_char *, int *, u_char, int));
+u_char	*asn_build_sequence __P((u_char *, int *, u_char, int));
+u_char	*asn_parse_length __P((u_char *, u_long *));
+u_char	*asn_build_length __P((u_char *, int *, int));
+u_char	*asn_parse_objid __P((u_char *, int *, u_char *, oid *, int *));
+u_char	*asn_build_objid __P((u_char *, int *, u_char, oid *, int));
+u_char	*asn_parse_null __P((u_char *, int *, u_char *));
+u_char	*asn_build_null __P((u_char *, int *, u_char));
+u_char	*asn_parse_bitstring __P((u_char *, int *, u_char *, u_char *, int *));
+u_char	*asn_build_bitstring __P((u_char *, int *, u_char, u_char *, int));
+u_char	*asn_parse_unsigned_int64 __P((u_char *, int *, u_char *,
+                                       struct counter64 *, int));
+u_char	*asn_build_unsigned_int64 __P((u_char *, int *, u_char,
+                                       struct counter64 *, int));

@@ -25,16 +25,16 @@ SOFTWARE.
 ******************************************************************/
 #include <config.h>
 
-#if HAVE_STDLIB_H
+#ifdef STDC_HEADERS
 #include <stdlib.h>
-#endif
-#if HAVE_UNISTD_H
 #include <unistd.h>
-#endif
-#if HAVE_STRINGS_H
-#include <strings.h>
-#else
 #include <string.h>
+#else
+#include <strings.h>
+extern char getopt();
+extern char *optarg;
+extern int optind;
+extern void *malloc();
 #endif
 #include <sys/types.h>
 #if HAVE_NETINET_IN_H
@@ -57,7 +57,6 @@ SOFTWARE.
 #include <arpa/inet.h>
 #endif
 
-#include "snmp.h"
 #include "asn1.h"
 #include "snmp_impl.h"
 #include "snmp_api.h"
@@ -67,6 +66,7 @@ SOFTWARE.
 #include "view.h"
 #include "acl.h"
 #include "mib.h"
+#include "snmp.h"
 
 extern int  errno;
 
@@ -89,8 +89,14 @@ int	length_ipInReceives = sizeof(objid_ipInReceives)/sizeof(oid);
 oid	objid_ipOutRequests[] = {1, 3, 6, 1, 2, 1, 4, 10, 0};
 int	length_ipOutRequests = sizeof(objid_ipOutRequests)/sizeof(oid);
 
+int main __P((int, char **));
+char *uptime_string __P((u_long, char *));
+void snmp_v1_setup __P((struct snmp_session*, char *, char *));
+void snmp_v2_setup __P((struct snmp_session*, char *, char *, char *, char *, u_long, u_long));
+
 void
-usage(){
+usage __P((void))
+{
     fprintf(stderr, "Usage: snmpstatus -v 1 [-q] hostname community               or:\n");
     fprintf(stderr, "Usage: snmpstatus [-v 2] [-q] hostname noAuth                or:\n");
     fprintf(stderr, "Usage: snmpstatus [-v 2] [-q] hostname srcParty dstParty context\n");
@@ -296,10 +302,6 @@ main(argc, argv)
     char buf[40];
     int index, count;
     int c;
-
-    extern int getopt ();
-    extern char *optarg;
-    extern int optind;
 
     init_mib();
     while ((c = getopt (argc, argv, "dqp:v:t:r:")) != -1)

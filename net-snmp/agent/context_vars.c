@@ -22,6 +22,8 @@
 #include "acl.h"
 #include "view.h"
 
+#include "mibgroup/snmpv2_vars.h"
+
 static oid currentTime[] = {1, 3, 6, 1, 6, 3, 3, 1, 2, 1};
 static oid restartTime[] = {1, 3, 6, 1, 6, 3, 3, 1, 2, 2};
 static oid cacheTime[] = {1, 3, 6, 1, 6, 3, 3, 1, 2, 3};
@@ -42,6 +44,9 @@ static oid cacheTime[] = {1, 3, 6, 1, 6, 3, 3, 1, 2, 3};
 #define CONTEXTSTATUS_MASK		0x0200
 
 #define CONTEXTCOMPLETE_MASK		0x03FF	/* all collumns */
+
+struct contextEntry *context_rowCreate __P((oid *, int));
+void context_rowDelete __P((oid *, int));
 
 struct contextEntry *
 context_rowCreate(contextID, contextIDLen)
@@ -65,6 +70,7 @@ context_rowCreate(contextID, contextIDLen)
     return cp;
 }
 
+void
 context_rowDelete(contextID, contextIDLen)
     oid *contextID;
     int contextIDLen;
@@ -97,7 +103,7 @@ write_context(action, var_val, var_val_type, var_val_len, statP, name, length)
     int bigsize = 1000, size;
     struct aclEntry *ap;
     struct viewEntry *vp;
-    u_long get_myaddr(), myaddr;
+    u_long myaddr;
     
 #if 0
     if (length < 13)  /* maybe this should be 15 to guarantee oidlength >= 2 */
@@ -520,7 +526,7 @@ var_context(vp, name, length, exact, var_len, write_method)
     register int *length;    /* IN/OUT - length of input and output oid's */
     int          exact;      /* IN - TRUE if an exact match was requested. */
     int          *var_len;   /* OUT - length of variable or 0 if function returned. */
-    int          (**write_method)(); /* OUT - pointer to function to set variable, otherwise 0 */
+    int          (**write_method) __P((int, u_char *, u_char, int, u_char *, oid *, int ));
 {
     oid newname[MAX_NAME_LEN], lowname[MAX_NAME_LEN];
     int newnamelen, lownamelen;

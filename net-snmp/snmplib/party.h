@@ -93,11 +93,8 @@ struct partyEntry {
     struct timeval tv;
 };
 
-u_char *var_party();
-int write_party();
-
 struct partyEntry *
-party_getEntry(/* oid *partyID, int partyIDLen */);
+party_getEntry __P((oid *partyID, int partyIDLen));
 /*
  * Returns a pointer to the partyEntry with the
  * same identity as partyID.
@@ -105,7 +102,7 @@ party_getEntry(/* oid *partyID, int partyIDLen */);
  */
 
 void
-party_scanInit();
+party_scanInit __P((void));
 /*
  * Initialized the scan routines so that they will begin at the
  * beginning of the list of partyEntries.
@@ -114,7 +111,7 @@ party_scanInit();
 
 
 struct partyEntry *
-party_scanNext();
+party_scanNext __P((void));
 /*
  * Returns a pointer to the next partyEntry.
  * These entries are returned in no particular order,
@@ -125,12 +122,12 @@ party_scanNext();
  */
 
 struct partyEntry *
-party_createEntry(/* oid *partyID, int partyIDLen */);
+party_createEntry __P((oid *partyID, int partyIDLen));
 /*
  * Creates a partyEntry with the given index
  * and returns a pointer to it.
  * The status of this entry is created as invalid.
  */
 
-void party_destroyEntry();
-int read_party_database();
+void party_destroyEntry __P((oid *, int));
+int read_party_database __P((char *));

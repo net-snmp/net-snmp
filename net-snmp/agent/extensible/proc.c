@@ -4,9 +4,8 @@
 #include "mibdefs.h"
 #include "extproto.h"
 
-int fixProcError();
 
-struct myproc *get_proc_instance();
+struct myproc *get_proc_instance __P((struct myproc *,int));
 struct myproc *procwatch;
 static struct extensible fixproc;
 int numprocs=0;
@@ -23,7 +22,7 @@ unsigned char *var_extensible_proc(vp, name, length, exact, var_len, write_metho
 /* IN - TRUE if an exact match was requested. */
     int			*var_len;
 /* OUT - length of variable or 0 if function returned. */
-    int			(**write_method)();
+    int			(**write_method) __P((int, u_char *,u_char, int, u_char *, oid *, int));
 /* OUT - pointer to function to set variable, otherwise 0 */
 {
 
@@ -107,7 +106,8 @@ fixProcError(action, var_val, var_val_type, var_val_len, statP, name, name_len)
 {
   
   struct myproc *proc;
-  int tmp=0, tmplen=1000;
+  long tmp=0;
+  int tmplen=1000;
 
   if ((proc = get_proc_instance(procwatch,name[8]))) {
     if (var_val_type != INTEGER) {

@@ -70,11 +70,11 @@ SOFTWARE.
  */
 u_char *
 asn_parse_int(data, datalength, type, intp, intsize)
-    register u_char	    *data;	/* IN - pointer to start of object */
-    register int	    *datalength;/* IN/OUT - number of valid bytes left in buffer */
-    u_char		    *type;	/* OUT - asn type of object */
-    long		    *intp;	/* IN/OUT - pointer to start of output buffer */
-    int			    intsize;    /* IN - size of output buffer */
+    register u_char	*data;	/* IN - pointer to start of object */
+    register int	*datalength;/* IN/OUT - number of valid bytes left in buffer */
+    u_char		*type;	/* OUT - asn type of object */
+    long		*intp;	/* IN/OUT - pointer to start of output buffer */
+    int			intsize;    /* IN - size of output buffer */
 {
 /*
  * ASN.1 integer ::= 0x02 asnlength byte {byte}*
@@ -383,9 +383,9 @@ asn_build_string(data, datalength, type, string, strlength)
  */
 u_char *
 asn_parse_header(data, datalength, type)
-    u_char	    *data;	/* IN - pointer to start of object */
-    int		    *datalength;/* IN/OUT - number of valid bytes left in buffer */
-    u_char	    *type;	/* OUT - ASN type of object */
+    u_char	*data;	/* IN - pointer to start of object */
+    int		*datalength;/* IN/OUT - number of valid bytes left in buffer */
+    u_char	*type;	/* OUT - ASN type of object */
 {
     register u_char *bufp = data;
     register	    header_len;
@@ -554,11 +554,11 @@ asn_build_length(data, datalength, length)
  */
 u_char *
 asn_parse_objid(data, datalength, type, objid, objidlength)
-    u_char	    *data;	    /* IN - pointer to start of object */
-    int		    *datalength;    /* IN/OUT - number of valid bytes left in buffer */
-    u_char	    *type;	    /* OUT - ASN type of object */
-    oid		    *objid;	    /* IN/OUT - pointer to start of output buffer */
-    int		    *objidlength;     /* IN/OUT - number of sub-id's in objid */
+    u_char	*data;		/* IN - pointer to start of object */
+    int		*datalength;	/* IN/OUT - number of valid bytes left in buffer */
+    u_char	*type;		/* OUT - ASN type of object */
+    oid		*objid;		/* IN/OUT - pointer to start of output buffer */
+    int		*objidlength;	/* IN/OUT - number of sub-id's in objid */
 {
 /*
  * ASN.1 objid ::= 0x06 asnlength subidentifier {subidentifier}*

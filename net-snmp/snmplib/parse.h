@@ -27,7 +27,7 @@ SOFTWARE.
 #define MAXTOKEN        128     /* maximum characters in a token */
 #define MAXQUOTESTR     4096    /* maximum characters in a quoted string */
 
-
+struct variable_list;
 
 /*
  * A linked list of tag-value pairs for enumerated integers.
@@ -49,6 +49,8 @@ struct node {
     int tc_index;               /* index into tclist (-1 if NA) */
     int type;                   /* The type of object this represents */
     struct enum_list *enums;    /* (optional) list of enumerated integers */
+    char *hint;
+    char *units;
     char *description;          /* description (a quoted string) */
 };
 
@@ -64,7 +66,10 @@ struct tree {
     int tc_index;               /* index into tclist (-1 if NA) */
     int type;                   /* This node's object type */
     struct enum_list *enums;    /* (optional) list of enumerated integers */
-    void (*printer)();          /* Value printing function */
+    char *hint;
+    char *units;
+    void (*printer) __P((char *, struct variable_list *, struct enum_list *,
+                         char *, char *));	/* Value printing function */
     char *description;          /* description (a quoted string) */
 };
 
@@ -85,5 +90,5 @@ struct tree {
 #define TYPE_NSAPADDRESS    13
 #define TYPE_UINTEGER       14
 
-struct tree *read_mib();
-void print_subtree();
+struct tree *read_mib __P((char *));
+void print_subtree __P((FILE *, struct tree *, int));

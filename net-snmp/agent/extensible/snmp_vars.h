@@ -1,8 +1,6 @@
-u_char *var_extensible_relocatable();
 
 #ifdef USEPROCMIB
 /* the variable that stores the process watching mib info */
-u_char *var_extensible_proc();
 
 struct variable2 extensible_proc_variables[] = {
   {MIBINDEX, INTEGER, RONLY, var_extensible_proc, 1, {MIBINDEX}},
@@ -18,7 +16,6 @@ struct variable2 extensible_proc_variables[] = {
 
 #ifdef USESHELLMIB
 /* the extensible commands variables */
-u_char *var_extensible_shell();
 
 struct variable2 extensible_extensible_variables[] = {
   {MIBINDEX, INTEGER, RONLY, var_extensible_shell, 1, {MIBINDEX}},
@@ -32,7 +29,6 @@ struct variable2 extensible_extensible_variables[] = {
 
 #ifdef USELOCKDMIB
 /* the lockd test variables */
-u_char *var_extensible_lockd_test();
 
 struct variable2 extensible_lockd_variables[] = {
   {MIBINDEX, INTEGER, RONLY, var_extensible_lockd_test, 1, {MIBINDEX}},
@@ -42,7 +38,6 @@ struct variable2 extensible_lockd_variables[] = {
 #endif
 
 #ifdef USEMEMMIB
-u_char *var_extensible_mem();
 
 struct variable2 extensible_mem_variables[] = {
   {MIBINDEX, INTEGER, RONLY, var_extensible_mem,1,{MIBINDEX}},
@@ -62,7 +57,6 @@ struct variable2 extensible_mem_variables[] = {
 #endif
 
 #ifdef USEDISKMIB
-u_char *var_extensible_disk();
 
 struct variable2 extensible_disk_variables[] = {
   {MIBINDEX, INTEGER, RONLY, var_extensible_disk, 1, {MIBINDEX}},
@@ -79,7 +73,6 @@ struct variable2 extensible_disk_variables[] = {
 #endif
 
 #ifdef USEVERSIONMIB
-u_char *var_extensible_version();
 
 struct variable2 extensible_version_variables[] = {
   {MIBINDEX, INTEGER, RONLY, var_extensible_version, 1, {MIBINDEX}},
@@ -94,7 +87,6 @@ struct variable2 extensible_version_variables[] = {
 #endif
 
 #ifdef USELOADAVEMIB
-u_char *var_extensible_loadave();
 
 struct variable2 extensible_loadave_variables[] = {
   {MIBINDEX, INTEGER, RONLY, var_extensible_loadave, 1, {MIBINDEX}},
@@ -107,7 +99,6 @@ struct variable2 extensible_loadave_variables[] = {
 #endif
 
 #ifdef USEERRORMIB
-u_char *var_extensible_errors();
 
 struct variable2 extensible_error_variables[] = {
   {MIBINDEX, INTEGER, RONLY, var_extensible_errors, 1, {MIBINDEX}},
@@ -119,7 +110,6 @@ struct variable2 extensible_error_variables[] = {
 
 /* mimics part of the hpux tree */
 #ifdef hpux  
-u_char *var_extensible_hp();
 
 struct variable2 extensible_hp_variables[] = {
   {HPCONF, INTEGER, RWRITE, var_extensible_hp, 1, {HPCONF}},

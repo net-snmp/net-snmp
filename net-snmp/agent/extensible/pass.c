@@ -23,9 +23,7 @@
 struct extensible *passthrus=NULL;
 int numpassthrus=0;
 
-unsigned char *var_extensible_pass();
-struct extensible *get_exten_instance();
-int setPass();
+int setPass __P((int, u_char *, u_char, int, u_char *,oid *, int));
 
 /* the relocatable extensible commands variables */
 struct variable2 extensible_passthru_variables[] = {
@@ -44,7 +42,7 @@ unsigned char *var_extensible_pass(vp, name, length, exact, var_len, write_metho
 /* IN - TRUE if an exact match was requested. */
     int			*var_len;
 /* OUT - length of variable or 0 if function returned. */
-    int			(**write_method)();
+    int			(**write_method) __P((int, u_char *, u_char, int, u_char *,oid *, int));
 /* OUT - pointer to function to set variable, otherwise 0 */
 {
 

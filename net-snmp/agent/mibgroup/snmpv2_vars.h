@@ -1,3 +1,14 @@
+extern u_char *var_party __P((struct variable *, oid *, int *, int, int *, int (**write) __P((int, u_char *, u_char, int, u_char *, oid *, int)) ));
+extern int write_party __P((int, u_char *, u_char, int, u_char *, oid *, int));
+extern u_char *var_context __P((struct variable *, oid *, int *, int, int *, int (**write) __P((int, u_char *, u_char, int, u_char *, oid *, int)) ));
+extern int write_context __P((int, u_char *, u_char, int, u_char *, oid *, int));
+extern u_char *var_acl __P((struct variable *, oid *, int *, int, int *, int (**write) __P((int, u_char *, u_char, int, u_char *, oid *, int)) ));
+extern int write_acl __P((int, u_char *, u_char, int, u_char *, oid *, int));
+extern u_char *var_view __P((struct variable *, oid *, int *, int, int *, int (**write) __P((int, u_char *, u_char, int, u_char *, oid *, int)) ));
+extern int write_view __P((int, u_char *, u_char, int, u_char *, oid *, int));
+
+#ifdef IN_SNMP_VARS_C
+
 struct variable2 party_variables[] = {
     {PARTYINDEX, INTEGER, RONLY, var_party, 1, {2}},
     {PARTYTDOMAIN, OBJID, RWRITE, var_party, 1, {3}},
@@ -94,3 +105,5 @@ struct variable2 eventnotifytab_variables[] = {
         {EVENTNOTIFYTABLIFETIME, INTEGER, RWRITE, var_eventnotifytab, 1, {3 }},
         {EVENTNOTIFYTABSTATUS, INTEGER, RWRITE, var_eventnotifytab, 1, {4 }},
 };
+
+#endif

@@ -53,7 +53,7 @@ header_icmp(vp, name, length, exact, var_len, write_method)
     int     *length;	    /* IN/OUT - length of input and output oid's */
     int     exact;	    /* IN - TRUE if an exact match was requested. */
     int     *var_len;	    /* OUT - length of variable or 0 if function returned. */
-    int     (**write_method)(); /* OUT - pointer to function to set variable, otherwise 0 */
+    int     (**write_method) __P((int, u_char *, u_char, int, u_char *, oid *, int));
 {
 #define ICMP_NAME_LENGTH	8
     oid newname[MAX_NAME_LEN];
@@ -94,7 +94,7 @@ var_icmp(vp, name, length, exact, var_len, write_method)
     int     *length;
     int     exact;
     int     *var_len;
-    int     (**write_method)();
+    int     (**write_method) __P((int, u_char *, u_char, int, u_char *, oid *, int));
 {
     register int i;
     static struct icmpstat icmpstat;
@@ -187,7 +187,7 @@ var_icmp(vp, name, length, exact, var_len, write_method)
     int     *length;
     int     exact;
     int     *var_len;
-    int     (**write_method)();
+    int     (**write_method) __P((int, u_char *, u_char, int, u_char *, oid *, int));
 {
     register int i;
     static struct icmp_mib icmpstat;
@@ -242,9 +242,8 @@ var_icmp(vp, name, length, exact, var_len, write_method)
     int     *length;
     int     exact;
     int     *var_len;
-    int     (**write_method)();
+    int     (**write_method) __P((int, u_char *, u_char, int, u_char *, oid *, int));
 {
-    register int i;
     mib2_icmp_t icmpstat;
 
     if (header_icmp(vp, name, length, exact, var_len, write_method) == MATCH_FAILED )

@@ -65,11 +65,14 @@ SOFTWARE.
 
 extern	int nflag;
 extern	char *interface;
-extern	char *routename(), *netname();
+extern	char *routename __P((struct in_addr));
+extern char *netname __P((struct in_addr, u_long));
 extern	struct snmp_session *Session;
-extern	struct variable_list *getvarbyname();
+extern	struct variable_list *getvarbyname __P((struct snmp_session *, oid *, int));
 
-static void sidewaysintpr();
+static void sidewaysintpr __P((unsigned int));
+void intpr __P((int));
+RETSIGTYPE catchalarm __P((int));
 
 oid oid_ifname[] =		{1, 3, 6, 1, 2, 1, 2, 2, 1, 2, 1};
 static oid oid_ifinucastpkts[] ={1, 3, 6, 1, 2, 1, 2, 2, 1,11, 1};
@@ -292,15 +295,16 @@ u_char	signalled;			/* set if alarm goes off "early" */
  * collected over that interval.  Assumes that interval is non-zero.
  * First line printed at top of screen is always cumulative.
  */
-void
+static void
 sidewaysintpr(interval)
 	unsigned interval;
 {
 	register struct iftot *ip, *total;
 	register int line;
 	struct iftot *lastif, *sum, *interesting, ifnow, *now = &ifnow;
+#ifndef HAVE_SIGHOLD
 	int oldmask;
-	RETSIGTYPE catchalarm();
+#endif
 	struct variable_list *var;
 	oid varname[MAX_NAME_LEN], *instance, *ifentry;
 	int varname_len;
@@ -465,7 +469,8 @@ loop:
  * Sets a flag to not wait for the alarm.
  */
 RETSIGTYPE
-catchalarm()
+catchalarm(sig)
+    int sig;
 {
 	signalled = YES;
 }

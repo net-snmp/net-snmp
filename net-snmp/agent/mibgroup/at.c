@@ -5,6 +5,7 @@
 
 #include "../common_header.h"
 #include "at.h"
+#include "interfaces.h"
 
 
 	/*********************
@@ -29,8 +30,12 @@ static struct nlist at_nl[] = {
 };
 
 
-static void ARP_Scan_Init();
-static int ARP_Scan_Next();
+static void ARP_Scan_Init __P((void));
+#if defined(freebsd2) || defined (netbsd1) || defined (hpux) || defined (bsdi2)
+static int ARP_Scan_Next __P((u_long *, char *, u_long *, u_short *));
+#else
+static int ARP_Scan_Next __P((u_long *, char *, u_long *));
+#endif
 
 
 	/*********************
@@ -54,7 +59,7 @@ var_atEntry(vp, name, length, exact, var_len, write_method)
     register int	    *length;	/* IN/OUT - length of input and output oid's */
     int			    exact;	/* IN - TRUE if an exact match was requested. */
     int			    *var_len;	/* OUT - length of variable or 0 if function returned. */
-    int			    (**write_method)(); /* OUT - pointer to function to set variable, otherwise 0 */
+    int			    (**write_method) __P((int, u_char *, u_char, int, u_char *, oid *, int));
 {
     /*
      * Address Translation table object identifier is of form:
@@ -215,7 +220,7 @@ AT_Cmp(void *addr, void *ep)
 
 u_char *
 var_atEntry(struct variable *vp, oid *name, int *length, int exact,
-	    int *var_len, int (**write_method)(void))
+	    int *var_len, int (**write_method)(int, u_char *, u_char, int, u_char *, oid *, int))
 {
     /*
      * object identifier is of form:
@@ -336,7 +341,7 @@ static struct arptab *at=0;
 #endif
 #endif /* CAN_USE_SYSCTL */
 
-static void ARP_Scan_Init()
+static void ARP_Scan_Init __P((void))
 {
 #ifndef CAN_USE_SYSCTL
 

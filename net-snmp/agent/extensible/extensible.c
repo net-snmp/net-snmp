@@ -107,7 +107,7 @@ int checkmib(vp,name,length,exact,var_len,write_method,newname,max)
     register int	*length;
     int			exact;
     int			*var_len;
-    int			(**write_method)();
+    int			(**write_method)__P((int, u_char *, u_char, int, u_char *, oid *, int));
     oid                 *newname;
     int                 max;
 {
@@ -124,8 +124,8 @@ int checkmib(vp,name,length,exact,var_len,write_method,newname,max)
   if (rtest > 0 || (rtest == 0 && (int) vp->namelen+1 < (int) *length) ||
     (exact == -1 && rtest)) {
     if (var_len)
-	*var_len = NULL;
-    return NULL;
+	*var_len = 0;
+    return 0;
   }
 /*  printf("%d/ck:  vp=%d  ln=%d lst=%d\n",exact,
          vp->namelen,*length,name[*length-1]); */
@@ -144,8 +144,8 @@ int checkmib(vp,name,length,exact,var_len,write_method,newname,max)
   }  
   if (max >= 0 && newname[*length-1] > max) {
     if(var_len)
-      *var_len = NULL;
-    return NULL;
+      *var_len = 0;
+    return 0;
   }
   memmove(name, newname, (*length) * sizeof(oid)); 
   if (write_method)
@@ -401,7 +401,7 @@ unsigned char *var_extensible_disk(vp, name, length, exact, var_len, write_metho
 /* IN - TRUE if an exact match was requested. */
     int			*var_len;
 /* OUT - length of variable or 0 if function returned. */
-    int			(**write_method)();
+    int			(**write_method) __P((int, u_char *, u_char, int, u_char *, oid *, int));
 /* OUT - pointer to function to set variable, otherwise 0 */
 {
 
@@ -647,7 +647,7 @@ unsigned char *var_extensible_loadave(vp, name, length, exact, var_len, write_me
 /* IN - TRUE if an exact match was requested. */
     int			*var_len;
 /* OUT - length of variable or 0 if function returned. */
-    int			(**write_method)();
+    int			(**write_method) __P((int, u_char *, u_char, int, u_char *, oid *, int));
 /* OUT - pointer to function to set variable, otherwise 0 */
 {
 
@@ -682,12 +682,12 @@ unsigned char *var_extensible_loadave(vp, name, length, exact, var_len, write_me
     return(0);
 #else
 #if defined(ultrix) || defined(sun) || defined(__alpha)
-  if (KNLookup(NL_AVENRUN,(int *) favenrun, sizeof(favenrun)) == NULL)
+  if (KNLookup(NL_AVENRUN,(char *) favenrun, sizeof(favenrun)) == 0)
     return(0);
   for(i=0;i<3;i++)
     avenrun[i] = FIX_TO_DBL(favenrun[i]);
 #else
-  if (KNLookup(NL_AVENRUN,(int *) avenrun, sizeof(double)*3) == NULL)
+  if (KNLookup(NL_AVENRUN,(char *) avenrun, sizeof(double)*3) == 0)
     return(0);
 #endif /* !HAVE_GETLOADAVG */
 #endif /* HAVE_GETLOADAVG */
@@ -711,12 +711,12 @@ unsigned char *var_extensible_loadave(vp, name, length, exact, var_len, write_me
                 (newname[*length-1] == 1)?1:((newname[*length-1] == 2)?5:15),
                 avenrun[newname[*length-1]-1]);
       } else {
-        errmsg[0] = NULL;
+        errmsg[0] = 0;
       }
       *var_len = strlen(errmsg);
       return((u_char *) errmsg);
   }
-  return ((u_char *) 0);
+  return NULL;
 }
 
 #endif
@@ -766,7 +766,7 @@ unsigned char *var_extensible_errors(vp, name, length, exact, var_len, write_met
 /* IN - TRUE if an exact match was requested. */
     int			*var_len;
 /* OUT - length of variable or 0 if function returned. */
-    int			(**write_method)();
+    int			(**write_method) __P((int, u_char *, u_char, int, u_char *, oid *, int));
 /* OUT - pointer to function to set variable, otherwise 0 */
 {
 
@@ -778,7 +778,7 @@ unsigned char *var_extensible_errors(vp, name, length, exact, var_len, write_met
   if (!checkmib(vp,name,length,exact,var_len,write_method,newname,1))
     return(NULL);
 
-  errmsg[0] = NULL;
+  errmsg[0] = 0;
   
   switch (vp->magic) {
     case MIBINDEX:
@@ -795,7 +795,7 @@ unsigned char *var_extensible_errors(vp, name, length, exact, var_len, write_met
       if ((ERRORTIMELENGTH >= time(NULL)-errorstatustime) ? 1 : 0) 
         strcpy(errmsg,errorstring);
       else
-        errmsg[0] = NULL;
+        errmsg[0] = 0;
       *var_len = strlen(errmsg);
       return((u_char *) errmsg);
   }
@@ -811,7 +811,10 @@ extern struct subtree *subtrees,subtrees_old[];
 extern struct variable2 extensible_relocatable_variables[];
 extern struct variable2 extensible_passthru_variables[];
 
-extern int compare();
+extern int compare __P((oid *,int, oid *, int));
+int tree_compare __P((void *, void *));
+int pass_compare __P((void *, void *));
+void setup_tree __P((void));
 
 int tree_compare(a, b)
   void *a, *b;
@@ -823,7 +826,7 @@ int tree_compare(a, b)
   return compare(ap->name,ap->namelen,bp->name,bp->namelen);
 }
 
-void setup_tree()
+void setup_tree __P((void))
 {
   extern struct subtree *subtrees,subtrees_old[];
   extern struct variable2 extensible_relocatable_variables[];
@@ -903,8 +906,8 @@ int a;
     maxload[i] = DEFMAXLOADAVE;
   numdisks = 0;
   for(i=0;i<MAXDISKS;i++) {           /* init/erase disk db */
-    disks[i].device[0] = NULL;
-    disks[i].path[0] = NULL;
+    disks[i].device[0] = 0;
+    disks[i].path[0] = 0;
     disks[i].minimumspace = -1;
   }
 
@@ -919,13 +922,13 @@ int a;
       envconfpath = strdup(envconfpath);  /* prevent actually writting in env */
       cptr1 = cptr2 = envconfpath;
       i = 1;
-      while (i && *cptr2 != NULL) {
-        while(*cptr1 != NULL && *cptr1 != ':')
+      while (i && *cptr2 != 0) {
+        while(*cptr1 != 0 && *cptr1 != ':')
           cptr1++;
-        if (*cptr1 == NULL)
+        if (*cptr1 == 0)
           i = 0;
         else
-          *cptr1 = NULL;
+          *cptr1 = 0;
         sprintf(configfile,"%s/snmpd.conf",cptr2);
         read_config (configfile,&procwatch,&numprocs,&relocs,&numrelocs,&passthrus,&numpassthrus,&extens,&numextens,&minimumswap,disks,&numdisks,maxload);
         sprintf(configfile,"%s/snmpd.local.conf",cptr2);
@@ -988,7 +991,7 @@ init_extensible() {
   extmp.next = NULL;
   exec_command(&extmp);
   strncpy(version_descr,extmp.output, 128);
-  version_descr[strlen(version_descr)-1] = NULL; /* chomp new line */
+  version_descr[strlen(version_descr)-1] = 0; /* chomp new line */
 
   sprintf(extmp.command,"%s -n",UNAMEPROG);
   /* setup defaults */
@@ -996,7 +999,7 @@ init_extensible() {
   extmp.next = NULL;
   exec_command(&extmp);
   strncpy(sysName,extmp.output, 128);
-  sysName[strlen(sysName)-1] = NULL; /* chomp new line */
+  sysName[strlen(sysName)-1] = 0; /* chomp new line */
 
   signal(SIGHUP,update_config);
 

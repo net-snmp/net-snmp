@@ -10,11 +10,10 @@
 
 #define MAXMSGLINES 1000
 
-struct extensible *get_exten_instance();
-int fixExecError();
+struct subtree *find_extensible __P((struct subtree *, oid *, int, int));
 
-struct exstensible *extens=NULL;  /* In exec.c */
-struct exstensible *relocs=NULL;  /* In exec.c */
+struct extensible *extens=NULL;  /* In exec.c */
+struct extensible *relocs=NULL;  /* In exec.c */
 int numextens=0,numrelocs=0;                    /* ditto */
 
 #ifdef USESHELLMIB
@@ -30,7 +29,7 @@ unsigned char *var_extensible_shell(vp, name, length, exact, var_len, write_meth
 /* IN - TRUE if an exact match was requested. */
     int			*var_len;
 /* OUT - length of variable or 0 if function returned. */
-    int			(**write_method)();
+    int			(**write_method) __P((int, u_char *, u_char, int, u_char *, oid *, int));
 /* OUT - pointer to function to set variable, otherwise 0 */
 {
 
@@ -90,7 +89,8 @@ fixExecError(action, var_val, var_val_type, var_val_len, statP, name, name_len)
 {
   
   struct extensible *exten;
-  int tmp=0, tmplen=1000, fd;
+  long tmp=0;
+  int tmplen=1000, fd;
   static struct extensible ex;
   FILE *file;
 
@@ -128,7 +128,7 @@ unsigned char *var_extensible_relocatable(vp, name, length, exact, var_len, writ
 /* IN - TRUE if an exact match was requested. */
     int			*var_len;
 /* OUT - length of variable or 0 if function returned. */
-    int			(**write_method)();
+    int			(**write_method) __P((int, u_char *, u_char, int, u_char *, oid *, int));
 /* OUT - pointer to function to set variable, otherwise 0 */
 {
 

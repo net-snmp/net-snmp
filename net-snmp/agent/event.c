@@ -59,6 +59,8 @@
 static struct eventEntry *eventTab = NULL;
 static struct eventNotifyEntry *eventNotifyTab = NULL;
 static long eventNextIndex = 1;
+static int write_eventtab __P((int, u_char *, u_char, int, u_char *, oid *,int));
+static int write_eventnotifytab __P((int, u_char *, u_char, int, u_char *, oid *,int));
 
 #define MIN_INTERVAL	1	/* one second */
 #define MAX_RETRANSMISSIONS	20
@@ -847,7 +849,7 @@ write_eventtab(action, var_val, var_val_type, var_val_len, statP,
     register int variable;
     register struct eventEntry *event;
     int size;
-    int int_value;
+    long int_value;
     u_char string_value[MAX_OWNER_STR_LEN];
     oid id_value[MAX_NAME_LEN];
     int buffersize = 1000;
@@ -1059,7 +1061,7 @@ write_eventnotifytab(action, var_val, var_val_type, var_val_len, statP,
     register int index;
     register int variable;
     register struct eventNotifyEntry *event;
-    int int_value;
+    long int_value;
     int buffersize = 1000;
     oid *context;
     int contextLen;
@@ -1230,9 +1232,7 @@ var_eventnextindex(vp, name, length, exact, var_len, write_method)
     register int *length;	/* IN/OUT - length of input and output oid's */
     int exact;		/* IN - TRUE if an exact match was requested. */
     int *var_len;   /* OUT - length of variable or 0 if function returned. */
-    int			(**write_method)(); /* OUT - pointer to function to set
-					     ** variable, otherwise 0
-					     */
+    int	(**write_method) __P((int, u_char *, u_char, int, u_char *, oid *, int));
 {
     int result;
 
@@ -1268,9 +1268,7 @@ var_eventtab(vp, name, length, exact, var_len, write_method)
     register int *length;	/* IN/OUT - length of input and output oid's */
     int exact;		/* IN - TRUE if an exact match was requested. */
     int *var_len;   /* OUT - length of variable or 0 if function returned. */
-    int			(**write_method)(); /* OUT - pointer to function to set
-					     ** variable, otherwise 0
-					     */
+    int	(**write_method) __P((int, u_char *, u_char, int, u_char *, oid *, int));
 {
     oid newname[MAX_NAME_LEN];
     int result;
@@ -1342,9 +1340,7 @@ var_eventnotifyvars(vp, name, length, exact, var_len, write_method)
     register int *length;	/* IN/OUT - length of input and output oid's */
     int exact;		/* IN - TRUE if an exact match was requested. */
     int *var_len;   /* OUT - length of variable or 0 if function returned. */
-    int			(**write_method)(); /* OUT - pointer to function to set
-					     ** variable, otherwise 0
-					     */
+    int	(**write_method) __P((int, u_char *, u_char, int, u_char *, oid *, int));
 {
     int result;
 
@@ -1384,9 +1380,7 @@ var_eventnotifytab(vp, name, length, exact, var_len, write_method)
     register int *length;	/* IN/OUT - length of input and output oid's */
     int exact;		/* IN - TRUE if an exact match was requested. */
     int *var_len;   /* OUT - length of variable or 0 if function returned. */
-    int			(**write_method)(); /* OUT - pointer to function to set
-					     ** variable, otherwise 0
-					     */
+    int	(**write_method) __P((int, u_char *, u_char, int, u_char *, oid *, int));
 {
     oid newname[MAX_NAME_LEN];
     int result;

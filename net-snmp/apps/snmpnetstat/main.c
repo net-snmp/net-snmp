@@ -39,13 +39,9 @@ char copyright[] =
  All rights reserved.\n";
 #endif not lint
 
-#ifdef HAVE_STDLIB_H
+#ifdef STDC_HEADERS
 #include <stdlib.h>
-#endif
-#ifdef HAVE_UNISTD_H
 #include <unistd.h>
-#endif
-#ifdef HAVE_STRING_H
 #include <string.h>
 #endif
 
@@ -62,6 +58,9 @@ char copyright[] =
 #if HAVE_NETINET_IN_H
 #include <netinet/in.h>
 #endif
+#if HAVE_ARPA_INET_H
+#include <arpa/inet.h>
+#endif
 
 #include "asn1.h"
 #include "mib.h"
@@ -74,18 +73,24 @@ char copyright[] =
 #include "view.h"
 #include "acl.h"
 
+int main __P((int, char **));
+char *plural __P((int));
+
 /* internet protocols */
-extern	int protopr();
-extern	int tcp_stats(), udp_stats(), ip_stats(), icmp_stats();
-extern	void routepr();
-extern	void rt_stats();
-extern	void intpr();
+extern	void protopr __P((void));
+extern	void tcp_stats __P((void));
+extern void udp_stats __P((void));
+extern void ip_stats __P((void));
+extern void icmp_stats __P((void));
+extern	void routepr __P((void));
+extern	void rt_stats __P((void));
+extern	void intpr __P((int));
 
 #define NULLPROTOX	((struct protox *) 0)
 struct protox {
 	u_char	pr_wanted;		/* 1 if wanted, 0 otherwise */
-	int	(*pr_cblocks)();	/* control blocks printing routine */
-	int	(*pr_stats)();		/* statistics printing routine */
+	void	(*pr_cblocks) __P((void));	/* control blocks printing routine */
+	void	(*pr_stats) __P((void));	/* statistics printing routine */
 	char	*pr_name;		/* well-known name */
 } protox[] = {
 	{ 1,	protopr,    tcp_stats,	"tcp" },
@@ -95,10 +100,12 @@ struct protox {
 	{ 0,	0,	    0,		0 }
 };
 
+struct protox *name2protox __P((char *));
+struct protox *knownname __P((char *));
+
 int	aflag;
 int	iflag;
 int	nflag;
-int	pflag;
 int	rflag;
 int	sflag;
 int	interval;
@@ -111,7 +118,8 @@ struct snmp_session *Session;
 int print_errors = 0;
 
 void
-usage(){
+usage __P((void))
+{
     fprintf(stderr, "Usage: snmpnetstat -v 1 [-q] hostname community [-ainrs] [-p proto] [-I interface] [interval]      or:\n");
     fprintf(stderr, "Usage: snmpnetstat [-v 2] [-q] hostname noAuth [-ainrs] [-p proto] [-I interface] [interval]       or:\n");
     fprintf(stderr, "Usage: snmpnetstat [-v 2] [-q] hostname srcParty dstParty context [-ainrs] [-p proto] [-I interface] [interval]\n");
@@ -122,18 +130,15 @@ main(argc, argv)
 	int argc;
 	char *argv[];
 {
-    char *name;
     char *hostname = NULL;
     register struct protoent *p;
-    register struct protox *tp;	/* for printing cblocks & stats */
-    struct protox *name2protox();	/* for -p */
+    register struct protox *tp = NULL;	/* for printing cblocks & stats */
     char *community = NULL;
     struct snmp_session session;
     
-    int port_flag = 0;
-    int dest_port = 0;
+    int dest_port = SNMP_PORT;
     int clock_flag = 0;
-    u_long	srcclock, dstclock;
+    u_long	srcclock = 0, dstclock = 0;
     int version = 2;
     struct partyEntry *pp;
     struct contextEntry *cxp;
@@ -160,7 +165,6 @@ main(argc, argv)
 		snmp_set_quick_print(1);
 		break;
 	      case 'p':
-		port_flag++;
 		dest_port = atoi(argv[++arg]);
 		break;
 	      case 'c':
@@ -203,7 +207,6 @@ main(argc, argv)
                                         argv [arg]);
                                 exit(10);
                         }
-                        pflag++;
                         break;
 
                 case 'I':
@@ -354,8 +357,7 @@ main(argc, argv)
     
     memset(&session, 0, sizeof(struct snmp_session));
     session.peername = hostname;
-    if (port_flag)
-        session.remote_port = dest_port;
+    session.remote_port = dest_port;
     if (version == 1){
         session.version = SNMP_VERSION_1;
         session.community = (u_char *)community;
@@ -379,7 +381,7 @@ main(argc, argv)
 	printf("Couldn't open snmp\n");
 	exit(-1);
     }
-    if (pflag) {
+    if (tp) {
 	if (tp->pr_stats)
 	    (*tp->pr_stats)();
 	else

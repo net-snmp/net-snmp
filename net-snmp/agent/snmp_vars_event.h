@@ -24,8 +24,6 @@ OTHER TORTIOUS ACTION, ARISING OUT OF OR IN CONNECTION WITH THE USE OR
 PERFORMANCE OF THIS SOFTWARE.
 ******************************************************************/
 
-u_char	*var_event();
-u_char	*getStatPtr();
 
 extern long long_return;
 extern u_char return_buf[];

@@ -1,5 +1,10 @@
 #include <config.h>
 
+#if STDC_HEADERS
+#include <stdlib.h>
+#include <unistd.h>
+#include <string.h>
+#endif
 #include <sys/types.h>
 #include <stdio.h>
 #if TIME_WITH_SYS_TIME
@@ -81,7 +86,7 @@ view_destroyEntry(viewIndex, viewSubtree, viewSubtreeLen)
     oid *viewSubtree;
     int viewIndex, viewSubtreeLen;
 {
-    struct viewEntry *vp, *lastvp;
+    struct viewEntry *vp, *lastvp = NULL;
 
     if (List->viewIndex == viewIndex
 	&& List->viewSubtreeLen == viewSubtreeLen

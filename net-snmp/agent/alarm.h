@@ -1,9 +1,13 @@
 /* include file for alarm module */
 
-extern u_char *var_alarmtab();
-extern u_char *var_alarmnextindex();
-extern void alarmTimer();
-extern int alarmGetResponse();
+struct snmp_session;
+struct snmp_pdu;
+struct variable;
+
+extern u_char *var_alarmtab __P((struct variable *, oid *, int *, int, int *, int (**write) __P((int, u_char *, u_char, int, u_char *, oid *, int)) ));
+extern u_char *var_alarmnextindex __P((struct variable *, oid *, int *, int, int *, int (**write) __P((int, u_char *, u_char, int, u_char *, oid *, int)) ));
+extern void alarmTimer __P((struct timeval *));
+extern int alarmGetResponse __P((struct snmp_pdu *, struct get_req_state *, int, struct snmp_session *));
 
 /* defines for values of alarmEntry.sampleType */
 #define ALARM_ABSOLUTE_VALUE 1

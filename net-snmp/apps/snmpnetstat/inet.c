@@ -35,6 +35,8 @@ SOFTWARE.
 
 #if STDC_HEADERS
 #include <string.h>
+#include <stdlib.h>
+#include <unistd.h>
 #endif
 
 #include <stdio.h>
@@ -46,26 +48,31 @@ SOFTWARE.
 #include <netinet/in.h>
 #endif
 
+#if HAVE_ARPA_INET_H
+#include <arpa/inet.h>
+#endif
+
 #include <netdb.h>
 
 #include "main.h"
 #include "asn1.h"
-#include "snmp.h"
 #include "snmp_impl.h"
 #include "snmp_api.h"
 #include "snmp_client.h"
 #include "mib.h"
+#include "snmp.h"
 
 extern	int aflag;
 extern	int nflag;
-extern	char *plural();
-extern	char *malloc();
+extern	char *plural __P((int));
 extern	struct snmp_session *Session;
-extern	struct variable_list *getvarbyname();
+extern	struct variable_list *getvarbyname __P((struct snmp_session *, oid *, int));
+void tcp_stats __P((void));
+void ip_stats __P((void));
+void icmp_stats __P((void));
 
-
-char	*inetname();
-void	inetprint();
+char	*inetname __P((struct in_addr));
+void	inetprint __P((struct in_addr *,u_short, char *));
 
 struct stat_table {
     int	    entry;  /* entry number in table */
@@ -188,7 +195,8 @@ char *tcpstates[] = {
  * protocol (currently only TCP).  For TCP, also give state of connection.
  */
 void
-protopr(){
+protopr __P((void))
+{
     struct tcpconn_entry *tcpconn = NULL, *tp, *newp;
     struct snmp_pdu *request, *response;
     struct variable_list *vp;
@@ -301,7 +309,7 @@ protopr(){
  * Dump UDP statistics structure.
  */
 void
-udp_stats()
+udp_stats __P((void))
 {
     oid varname[MAX_NAME_LEN], *udpentry;
     int varname_len;
@@ -331,7 +339,7 @@ udp_stats()
  * Dump TCP statistics structure.
  */
 void
-tcp_stats()
+tcp_stats __P((void))
 {
     oid varname[MAX_NAME_LEN], *tcpentry;
     int varname_len;
@@ -361,7 +369,7 @@ tcp_stats()
  * Dump IP statistics structure.
  */
 void
-ip_stats()
+ip_stats __P((void))
 {
     oid varname[MAX_NAME_LEN], *ipentry;
     int varname_len;
@@ -391,7 +399,7 @@ ip_stats()
  * Dump ICMP statistics.
  */
 void
-icmp_stats()
+icmp_stats __P((void))
 {
     oid varname[MAX_NAME_LEN], *icmpentry;
     int varname_len;
@@ -529,8 +537,8 @@ inetname(in)
 		strcpy(line, cp);
 	else {
 		in.s_addr = ntohl(in.s_addr);
-#define C(x)	((x) & 0xff)
-		sprintf(line, "%lu.%lu.%lu.%lu", C(in.s_addr >> 24),
+#define C(x)	(unsigned)((x) & 0xff)
+		sprintf(line, "%u.%u.%u.%u", C(in.s_addr >> 24),
 			C(in.s_addr >> 16), C(in.s_addr >> 8), C(in.s_addr));
 	}
 	return (line);

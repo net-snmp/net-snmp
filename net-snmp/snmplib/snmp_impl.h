@@ -124,8 +124,6 @@ struct trapVar {
 /* from snmp.c*/
 extern u_char	sid[];	/* size SID_MAX_LEN */
 
-u_char	*snmp_parse_var_op();
-u_char	*snmp_build_var_op();
 
 /*
  * For calling secauth_build, FIRST_PASS is an indication that a new nonce
@@ -138,11 +136,13 @@ u_char	*snmp_build_var_op();
  */
 #define FIRST_PASS	1
 #define	LAST_PASS	2
-u_char	*snmp_auth_parse();
-u_char	*snmp_auth_build();
+u_char	*snmp_auth_parse __P((u_char *, int *, u_char *, int *, long *));
+u_char	*snmp_auth_build __P((u_char *, int *, u_char *, int *, int *, int));
 
-u_char	*snmp_secauth_parse();
-u_char	*snmp_secauth_build();
+u_char	*snmp_secauth_parse __P((u_char *, int *, struct packet_info *,
+                                 oid *, int *, oid *, int *, oid *, int *, int));
+u_char	*snmp_secauth_build __P((u_char *, int *, struct packet_info *, int,
+                                 oid *, int, oid *, int, oid *, int, int *, int));
 
 
-int has_access();
+int has_access __P((u_char, int, int, int));
