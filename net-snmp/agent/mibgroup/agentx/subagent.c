@@ -182,8 +182,6 @@ handle_agentx_packet(int operation, struct snmp_session *session, int reqid,
 
 struct snmp_session *agentx_session;
 
-#ifdef notused
-
 void
 init_subagent( void )
 {
@@ -220,7 +218,5 @@ init_subagent( void )
 	exit(1);
     }
 }
-
-#endif /* notused */
 
 
