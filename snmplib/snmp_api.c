@@ -2800,7 +2800,8 @@ snmp_parse_version (u_char *data, size_t length)
                         (ASN_SEQUENCE | ASN_CONSTRUCTOR), "version");
   if (data) {
     data = asn_parse_int(data, &length, &type, &version, sizeof(version));
-    if (!data) return SNMPERR_BAD_VERSION;
+    if (!data || type != ASN_INTEGER)
+        return SNMPERR_BAD_VERSION;
   }
   return version;
 }
