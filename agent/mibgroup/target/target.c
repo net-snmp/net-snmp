@@ -8,16 +8,17 @@
 
 #include "mibincl.h"
 
-#include "target.h"
 #include "snmp.h"
 #include "tools.h"
 #include "snmpTargetAddrEntry.h"
 #include "snmpTargetParamsEntry.h"
+#include "target.h"
 
 #define MAX_TAGS 128
 
 struct snmp_session *
-get_target_sessions(char *taglist) {
+get_target_sessions(char *taglist, TargetFilterFunction *filterfunct,
+                    void *filterArg) {
     struct snmp_session *ret = NULL, thissess, *ss;
     struct targetAddrTable_struct *targaddrs;
     char buf[SPRINT_MAX_LEN], smbuf[64];
@@ -74,6 +75,13 @@ get_target_sessions(char *taglist) {
                             }
                         } else {
                             /* parameter entry must be specified */
+                            continue;
+                        }
+
+                        /* last chance for caller to opt-out.  Call
+                           filtering function */
+                        if (filterfunct &&
+                            (*(filterfunct))(targaddrs, param, filterArg)) {
                             continue;
                         }
 

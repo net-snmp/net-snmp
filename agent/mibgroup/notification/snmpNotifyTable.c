@@ -19,10 +19,12 @@
 #include "header_complex.h"
 #include "snmpNotifyTable.h"
 #include "snmp-tc.h"
+#include "target/snmpTargetParamsEntry.h"
+#include "target/snmpTargetAddrEntry.h"
 #include "target/target.h"
 #include "agent_callbacks.h"
 
-void store_snmpNotifyTable(void);
+SNMPCallback store_snmpNotifyTable;
 
 /* 
  * snmpNotifyTable_variables_oid:
@@ -60,32 +62,7 @@ struct variable2 snmpNotifyTable_variables[] = {
 /* global storage of our data, saved in and configured by header_complex() */
 static struct header_complex_index *snmpNotifyTableStorage = NULL;
 
-void
-register_trap_sessions(void) {
-    struct header_complex_index *hptr;
-    struct snmpNotifyTable_data *nptr;
-    struct snmp_session *sess, *sptr;
-    
-    for(hptr = snmpNotifyTableStorage; hptr; hptr = hptr->next) {
-        nptr = (struct snmpNotifyTable_data *) hptr->data;
-        if (nptr->snmpNotifyRowStatus != RS_ACTIVE)
-            continue;
-        if (!nptr->snmpNotifyTag)
-            continue;
-
-        sess = get_target_sessions(nptr->snmpNotifyTag);
-        for(sptr=sess; sptr; sptr = sptr->next) {
-            add_trap_session(sptr,
-                             ((sptr->version == SNMP_VERSION_1) ?
-                              SNMP_MSG_TRAP2 :
-                              ((nptr->snmpNotifyType == SNMPNOTIFYTYPE_INFORM) ?
-                               SNMP_MSG_INFORM : SNMP_MSG_TRAP2)),
-                             sptr->version);
-        }
-    }
-}
-
-void
+int
 send_notifications(int major, int minor, void *serverarg, void *clientarg) {
     struct header_complex_index *hptr;
     struct snmpNotifyTable_data *nptr;
@@ -102,7 +79,10 @@ send_notifications(int major, int minor, void *serverarg, void *clientarg) {
         if (!nptr->snmpNotifyTag)
             continue;
 
-        sess = get_target_sessions(nptr->snmpNotifyTag);
+        sess = get_target_sessions(nptr->snmpNotifyTag, NULL, NULL);
+
+        /* XXX: filter appropriately */
+        
         for(sptr=sess; sptr; sptr = sptr->next) {
             if (sptr->version == SNMP_VERSION_1 &&
                 minor == SNMPD_CALLBACK_SEND_TRAP1) {
@@ -116,6 +96,7 @@ send_notifications(int major, int minor, void *serverarg, void *clientarg) {
             }
         }
     }
+    return 0;
 }
 
 /*
@@ -140,10 +121,6 @@ void init_snmpNotifyTable(void) {
   /* we need to be called back later to store our data */
   snmp_register_callback(SNMP_CALLBACK_LIBRARY, SNMP_CALLBACK_STORE_DATA,
                          store_snmpNotifyTable, NULL);
-
-  /* we need to be called back later to register our traps with the master */
-/*  snmp_register_callback(SNMP_CALLBACK_LIBRARY, SNMP_CALLBACK_POST_READ_CONFIG,
-    register_trap_sessions, NULL); */
 
   snmp_register_callback(SNMP_CALLBACK_APPLICATION, SNMPD_CALLBACK_SEND_TRAP1,
                          send_notifications, NULL);
@@ -188,7 +165,7 @@ snmpNotifyTable_add(struct snmpNotifyTable_data *thedata) {
  *   parses .conf file entries needed to configure the mib.
  */
 void
-parse_snmpNotifyTable(char *token, char *line) {
+parse_snmpNotifyTable(const char *token, char *line) {
   size_t tmpint;
   struct snmpNotifyTable_data *StorageTmp = SNMP_MALLOC_STRUCT(snmpNotifyTable_data);
   struct variable_list *vars = NULL;
@@ -236,8 +213,9 @@ parse_snmpNotifyTable(char *token, char *line) {
  * store_snmpNotifyTable():
  *   stores .conf file entries needed to configure the mib.
  */
-void
-store_snmpNotifyTable(void) {
+int
+store_snmpNotifyTable(int majorID, int minorID, void *serverarg,
+                      void *clientarg) {
   char line[SNMP_MAXBUF];
   char *cptr;
   size_t tmpint;
@@ -268,6 +246,7 @@ store_snmpNotifyTable(void) {
     }
   }
   DEBUGMSGTL(("snmpNotifyTable", "done.\n"));
+  return 0;
 }
 
 
