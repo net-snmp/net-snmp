@@ -18,6 +18,7 @@ sub InitMakeParams {
 		  dist         => { SUFFIX => "gz", COMPRESS => "gzip -9f"},
 		  MAN3PODS     => 'SNMP',  # Pods will be built by installman.
 		  XSPROTOARG   => '-noprototypes', 	# XXX remove later?
+		  'PREREQ_PM'  => { NetSNMP::default_store => 0.01 },
 		  VERSION_FROM => 'SNMP.pm',
 		  realclean        => { FILES => 'host' },
 		  );
