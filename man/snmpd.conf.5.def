@@ -145,7 +145,19 @@ For v1 or v2c access, LEVEL will be noauth, and CONTEXT will be empty.
 The defines the named view. TYPE is either \fIincluded\fR or \fIexcluded\fR.
 MASK is a list of hex octets, separated by '.' or ':'.  The MASK
 defaults to "ff" if not specified.
-.IP Examples:
+.IP
+The reason for the mask is, that it allows you to control access to
+one row in a table, in a relatively simple way. As an example, as an ISP
+you might consider giving each customer access to hos own interface:
+.IP
+.nf
+view cust1 included interfaces.ifTable.ifEntry.ifIndex.1 ff.a0
+view cust2 included interfaces.ifTable.ifEntry.ifIndex.2 ff.a0
+.IP
+(interfaces.ifTable.ifEntry.ifIndex.1 == .1.3.6.1.2.1.2.2.1.1.1,
+ff.a0 == 11111111.10100000. which nicely covers up and including
+the row index, but lets the user vary the field of the row)
+.IP "VACM Examples:"
 .nf
 #       sec.name  source          community
 com2sec local     localhost       private
