@@ -452,7 +452,7 @@ winsock_cleanup(void)
 in_addr_t
 get_myaddr(void)
 {
-    int             sd, i, interfaces, lastlen = 0;
+    int             sd, i, lastlen = 0;
     struct ifconf   ifc;
     struct ifreq   *ifrp = NULL;
     in_addr_t       addr;
@@ -501,10 +501,16 @@ get_myaddr(void)
         free(buf);
     }
 
-    ifrp = ifc.ifc_req;
-    interfaces = ifc.ifc_len / sizeof(struct ifreq);
-
-    for (i = 0; i < interfaces; i++, ifrp++) {
+    for (ifrp = ifc.ifc_req;
+        (char *)ifrp < (char *)ifc.ifc_req + ifc.ifc_len;
+#ifdef STRUCT_SOCKADDR_HAS_SA_LEN
+        ifrp = (struct ifreq *)(((char *) ifrp) +
+                                sizeof(ifrp->ifr_name) +
+                                ifrp->ifr_addr.sa_len)
+#else
+        ifrp++
+#endif
+        ) {
         if (ifrp->ifr_addr.sa_family != AF_INET) {
             continue;
         }
