@@ -52,7 +52,14 @@ typedef struct table_data_set_s {
 
 NodeHandler table_data_set_helper_handler;
 
+/* to set, add column, type, (writable) ? 1 : 0 */
 int table_set_add_default_row(table_data_set *, unsigned int, int, int);
+/* to set, add column, type, (writable) ? 1 : 0, ... */
+#if HAVE_STDARG_H
+int table_set_multi_add_default_row(table_data_set *, ...);
+#else
+void table_set_multi_add_default_row(va_alist);
+#endif
 int set_row_column(table_row *, unsigned int, int, const char *, size_t);
 table_data_set_storage *table_data_set_find_column(table_data_set_storage *,
                                                    int);
