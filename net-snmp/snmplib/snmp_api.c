@@ -3041,6 +3041,7 @@ snmp_build(u_char ** pkt, size_t * pkt_len, size_t * offset,
     if (rc) {
         if (!pss->s_snmp_errno) {
             pss->s_snmp_errno = SNMPERR_BAD_ASN1_BUILD;
+            netsnmp_assert(pss->s_snmp_errno != SNMPERR_BAD_ASN1_BUILD);
         }
         SET_SNMP_ERROR(pss->s_snmp_errno);
         rc = -1;
