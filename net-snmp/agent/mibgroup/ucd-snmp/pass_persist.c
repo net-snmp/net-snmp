@@ -47,10 +47,10 @@ struct persist_pipe_type {
   int pid;
 } *persist_pipes = ( struct persist_pipe_type * ) NULL;
 static int init_persist_pipes (void);
-static int close_persist_pipe (int index);
-static int open_persist_pipe (int index, char *command);
+static int close_persist_pipe (int iindex);
+static int open_persist_pipe (int iindex, char *command);
 static void destruct_persist_pipes (void);
-static int write_persist_pipe (int index, char *data);
+static int write_persist_pipe (int iindex, char *data);
 
 /* the relocatable extensible commands variables */
 struct variable2 extensible_persist_passthru_variables[] = {
@@ -334,7 +334,7 @@ setPassPersist(int action,
         case ASN_COUNTER:
         case ASN_GAUGE:
         case ASN_TIMETICKS:
-          tmp = *((long) var_val);
+          tmp = *((long *) var_val);
           switch (var_val_type) {
             case ASN_INTEGER:
               sprintf(buf,"integer %d",(int) tmp);
@@ -351,7 +351,7 @@ setPassPersist(int action,
           }
           break;
         case ASN_IPADDRESS:
-          utmp = *((u_long) var_val);
+          utmp = *((u_long *) var_val);
           sprintf(buf,"ipaddress %d.%d.%d.%d",
                   (int) ((utmp & 0xff000000) >> (8*3)),
                   (int) ((utmp & 0xff0000) >> (8*2)),
@@ -461,13 +461,13 @@ static void destruct_persist_pipes (void)
 }
 
 /* returns 0 on failure, 1 on success */
-static int open_persist_pipe(int index, char *command)
+static int open_persist_pipe(int iindex, char *command)
 {
   static int recurse = 0;  /* used to allow one level of recursion */
 
-  DEBUGMSGTL(("ucd-snmp/pass_persist", "open_persist_pipe(%d,'%s')\n",index, command));
+  DEBUGMSGTL(("ucd-snmp/pass_persist", "open_persist_pipe(%d,'%s')\n",iindex, command));
   /* Open if it's not already open */
-  if( persist_pipes[index].pid == -1 ) {
+  if( persist_pipes[iindex].pid == -1 ) {
     int fdIn, fdOut, pid;
     get_exec_pipes( command, &fdIn, &fdOut, &pid );
 
@@ -479,41 +479,41 @@ static int open_persist_pipe(int index, char *command)
     }
 
     /* If not, fill out our structure */
-    persist_pipes[index].pid = pid;
-    persist_pipes[index].fdIn = fdIn;
-    persist_pipes[index].fdOut = fdOut;
-    persist_pipes[index].fIn = fdopen(fdIn,"r");
-    persist_pipes[index].fOut = fdopen(fdOut,"w");
+    persist_pipes[iindex].pid = pid;
+    persist_pipes[iindex].fdIn = fdIn;
+    persist_pipes[iindex].fdOut = fdOut;
+    persist_pipes[iindex].fIn = fdopen(fdIn,"r");
+    persist_pipes[iindex].fOut = fdopen(fdOut,"w");
 
     /* Setup our -non-buffered-io- */
-    setbuf( persist_pipes[index].fOut, (char *)0 );
+    setbuf( persist_pipes[iindex].fOut, (char *)0 );
   }
 
   /* Send test packet always so we can self-catch */
   {
     char buf[STRMAX];
     /* Should catch SIGPIPE around this call! */	/* XXX */
-    if( ! write_persist_pipe( index, "PING\n" ) ) {
+    if( ! write_persist_pipe( iindex, "PING\n" ) ) {
       DEBUGMSGTL(("ucd-snmp/pass_persist", "open_persist_pipe: Error writing PING\n"));
-      close_persist_pipe(index);
+      close_persist_pipe(iindex);
 
       /* Recurse one time if we get a SIGPIPE */
       if( ! recurse ) {
         recurse = 1;
-        return open_persist_pipe(index,command);
+        return open_persist_pipe(iindex,command);
       }
       recurse = 0;
       return 0;
     }
-    if (fgets(buf,STRMAX-1,persist_pipes[index].fIn) == NULL) {
+    if (fgets(buf,STRMAX-1,persist_pipes[iindex].fIn) == NULL) {
       DEBUGMSGTL(("ucd-snmp/pass_persist", "open_persist_pipe: Error reading for PONG\n"));
-      close_persist_pipe(index);
+      close_persist_pipe(iindex);
       recurse = 0;
       return 0;
     }
     if ( strncmp( buf, "PONG", 4 ) ) {
       DEBUGMSGTL(("ucd-snmp/pass_persist", "open_persist_pipe: PONG not received!\n"));
-      close_persist_pipe(index);
+      close_persist_pipe(iindex);
       recurse = 0;
       return 0;
     }
@@ -529,13 +529,13 @@ void sigpipe_handler (int sig, siginfo_t *sip, void *uap)
   return;
 }
 
-static int write_persist_pipe(int index,  char *data)
+static int write_persist_pipe(int iindex,  char *data)
 {
   struct sigaction sa, osa;
   int wret = 0, werrno = 0;
 
   /* Don't write to a non-existant process */
-  if( persist_pipes[index].pid == -1 ) {
+  if( persist_pipes[iindex].pid == -1 ) {
     return 0;
   }
 
@@ -550,7 +550,7 @@ static int write_persist_pipe(int index,  char *data)
   }
 
   /* Do the write */
-  wret = write( persist_pipes[index].fdOut, data, strlen(data) );
+  wret = write( persist_pipes[iindex].fdOut, data, strlen(data) );
   werrno = errno;
 
   /* Reset the signal handler */
@@ -562,36 +562,36 @@ static int write_persist_pipe(int index,  char *data)
                   "write_persist_pipe: write returned unknown error %d\n",
                   errno));
     }
-    close_persist_pipe(index);
+    close_persist_pipe(iindex);
     return 0;
   }
 
   return 1;
 }
 
-static int close_persist_pipe(int index)
+static int close_persist_pipe(int iindex)
 {
 
   /* Check and nix every item */
-  if( persist_pipes[index].fOut ) {
-    fclose( persist_pipes[index].fOut );
-    persist_pipes[index].fOut = (FILE *) 0;
+  if( persist_pipes[iindex].fOut ) {
+    fclose( persist_pipes[iindex].fOut );
+    persist_pipes[iindex].fOut = (FILE *) 0;
   }
-  if( persist_pipes[index].fdOut != -1 ) {
-    close( persist_pipes[index].fdOut );
-    persist_pipes[index].fdOut = -1;
+  if( persist_pipes[iindex].fdOut != -1 ) {
+    close( persist_pipes[iindex].fdOut );
+    persist_pipes[iindex].fdOut = -1;
   }
-  if( persist_pipes[index].fIn ) {
-    fclose( persist_pipes[index].fIn );
-    persist_pipes[index].fIn = (FILE *) 0;
+  if( persist_pipes[iindex].fIn ) {
+    fclose( persist_pipes[iindex].fIn );
+    persist_pipes[iindex].fIn = (FILE *) 0;
   }
-  if( persist_pipes[index].fdIn != -1 ) {
-    close( persist_pipes[index].fdIn );
-    persist_pipes[index].fdIn = -1;
+  if( persist_pipes[iindex].fdIn != -1 ) {
+    close( persist_pipes[iindex].fdIn );
+    persist_pipes[iindex].fdIn = -1;
   }
-  if( persist_pipes[index].pid != -1 ) {
-    waitpid(persist_pipes[index].pid,0,0);
-    persist_pipes[index].pid = -1;
+  if( persist_pipes[iindex].pid != -1 ) {
+    waitpid(persist_pipes[iindex].pid,0,0);
+    persist_pipes[iindex].pid = -1;
   }
 
 }

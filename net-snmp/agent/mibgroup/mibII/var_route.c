@@ -853,7 +853,7 @@ load_rtentries(struct radix_node *pt)
 #else
       klookup((unsigned long)ifnet.if_name, name, sizeof name);
       name[sizeof (name) - 1] = '\0';
-      cp = (char *) index(name, '\0');
+      cp = (char *) strchr(name, '\0');
       string_append_int (cp, ifnet.if_unit);
 #endif
       Interface_Scan_Init();
@@ -969,7 +969,7 @@ static void Route_Scan_Reload (void)
           klookup( rt->rt_ifp, (char *)&ifnet, sizeof (ifnet));
           klookup( ifnet.if_name, name, 16);
           name[15] = '\0';
-          cp = (char *) index(name, '\0');
+          cp = (char *) strchr(name, '\0');
 	  string_append_int (cp, ifnet.if_unit);
 
           Interface_Scan_Init();
@@ -1074,7 +1074,7 @@ static void Route_Scan_Reload (void)
 				sizeof (ifnet));
 			klookup((unsigned long) ifnet.if_name, name, 16);
 			name[15] = '\0';
-			cp = (char *) index(name, '\0');
+			cp = (char *) strchr(name, '\0');
 			string_append_int (cp, ifnet.if_unit);
 			if (strcmp(name,"lo0") == 0) continue; 
 
@@ -1608,12 +1608,12 @@ const struct sockaddr *
 get_address (const void * _ap, int addresses, int wanted)
 {
   const struct sockaddr *ap = (struct sockaddr *) _ap;
-  int index;
+  int iindex;
   int bitmask;
 
-  for (index = 0, bitmask = 1;
-       index < RTAX_MAX;
-       ++index, bitmask <<= 1)
+  for (iindex = 0, bitmask = 1;
+       iindex < RTAX_MAX;
+       ++iindex, bitmask <<= 1)
     {
       if (bitmask == wanted)
 	{

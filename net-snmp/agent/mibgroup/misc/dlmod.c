@@ -262,12 +262,12 @@ dlmod_get_next_index (void)
 }
 
 struct dlmod *
-dlmod_get_by_index (int index)
+dlmod_get_by_index (int iindex)
 {
     struct dlmod *dlmod;
   
     for (dlmod = dlmods; dlmod; dlmod=dlmod->next) 
-	if (dlmod->index == index)
+	if (dlmod->index == iindex)
 	    return dlmod;
 
     return NULL;

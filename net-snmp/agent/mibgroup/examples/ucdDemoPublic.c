@@ -44,13 +44,13 @@ void init_ucdDemoPublic(void) {
 unsigned char publicString[MYMAX];
 
 unsigned char *
-var_ucdDemoPublic(vp, name, length, exact, var_len, write_method)
-    struct variable *vp;
-    oid     *name;
-    int     *length;
-    int     exact;
-    int     *var_len;
-    int     (**write_method) (int, unsigned char *,unsigned char, int, unsigned char *,oid*, int);
+var_ucdDemoPublic(
+    struct variable *vp,
+    oid     *name,
+    int     *length,
+    int     exact,
+    int     *var_len,
+    WriteMethod **write_method)
 {
 
   static long long_ret;
@@ -96,14 +96,14 @@ var_ucdDemoPublic(vp, name, length, exact, var_len, write_method)
 }
 
 int
-write_ucdDemoResetKeys(action, var_val, var_val_type, var_val_len, statP, name, name_len)
-   int      action;
-   u_char   *var_val;
-   u_char   var_val_type;
-   int      var_val_len;
-   u_char   *statP;
-   oid      *name;
-   int      name_len;
+write_ucdDemoResetKeys(
+   int      action,
+   u_char   *var_val,
+   u_char   var_val_type,
+   int      var_val_len,
+   u_char   *statP,
+   oid      *name,
+   int      name_len)
 {
   /* variables we may use later */
   static long long_ret;
@@ -142,14 +142,14 @@ write_ucdDemoResetKeys(action, var_val, var_val_type, var_val_len, statP, name, 
 }
 
 int
-write_ucdDemoPublicString(action, var_val, var_val_type, var_val_len, statP, name, name_len)
-   int      action;
-   u_char   *var_val;
-   u_char   var_val_type;
-   int      var_val_len;
-   u_char   *statP;
-   oid      *name;
-   int      name_len;
+write_ucdDemoPublicString(
+   int      action,
+   u_char   *var_val,
+   u_char   var_val_type,
+   int      var_val_len,
+   u_char   *statP,
+   oid      *name,
+   int      name_len)
 {
   /* variables we may use later */
   static long long_ret;

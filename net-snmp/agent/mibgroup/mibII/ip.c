@@ -760,7 +760,7 @@ struct in_ifaddr *Retin_ifaddr;
 {
       struct in_ifaddr in_ifaddr;
       struct ifnet ifnet,*ifnetaddr;  /* NOTA: same name as another one */
-      short index=1;
+      short iindex=1;
 
       while (in_ifaddraddr) {
           /*
@@ -781,13 +781,13 @@ struct in_ifaddr *Retin_ifaddr;
 	  while (ifnetaddr && ifnetaddr != in_ifaddr.ia_ifp) {
 	      klookup((unsigned long)ifnetaddr, (char *)&ifnet, sizeof ifnet);
 	      ifnetaddr = ifnet.if_next;
-	      index++;
+	      iindex++;
 	  }
 
 	  /* XXX - might not find it? */
 
 	  if (Index)
-                  *Index = index;
+                  *Index = iindex;
 
           return(1);  /* DONE */
       }

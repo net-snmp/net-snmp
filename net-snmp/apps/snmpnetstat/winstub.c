@@ -4,7 +4,7 @@
 
 #include <config.h>
 
-#if (defined(WIN32) || defined(cygwin32))
+#if (defined(WIN32) || defined(cygwin))
 
 #include <stdio.h>
 #include <sys/types.h>
@@ -190,5 +190,5 @@ inet_lnaof(struct in_addr in)
 
 #else
 static int module_dummy = 0;
-#endif /* WIN32 or cygwin32 */
+#endif /* WIN32 or cygwin */
 

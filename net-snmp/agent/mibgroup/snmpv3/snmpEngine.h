@@ -24,7 +24,7 @@ config_add_mib(SNMP-FRAMEWORK-MIB)
 /* function definitions */
 
 extern void   init_snmpEngine (void);
-extern unsigned char *var_snmpEngine (struct variable *, oid *, int *, int, int *, WriteMethod **write_method );
+extern FindVarMethod var_snmpEngine;
 
 
 /* Only load this structure when this .h file is called in the snmp_vars.c 

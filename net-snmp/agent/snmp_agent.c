@@ -84,12 +84,12 @@ static void dump_var(oid *, int, int, void *, int);
 static int goodValue(u_char, int, u_char, int);
 static void setVariable(u_char *, u_char, int, u_char *, int);
 
-static void dump_var (var_name, var_name_len, statType, statP, statLen)
-    oid *var_name;
-    int var_name_len;
-    int statType;
-    void *statP;
-    int statLen;
+static void dump_var (
+    oid *var_name,
+    int var_name_len,
+    int statType,
+    void *statP,
+    int statLen)
 {
     char buf [2560];
     struct variable_list temp_var;
@@ -155,12 +155,11 @@ handle_snmp_packet(int operation, struct snmp_session *session, int reqid,
 
     handle_next_pass( asp );
     return 1;
- }
+}
 
 
 void
-handle_next_pass( asp )
-    struct agent_snmp_session  *asp;
+handle_next_pass(struct agent_snmp_session  *asp)
 {
     int status, allDone, i;
     struct variable_list *var_ptr, *vp2;
@@ -349,8 +348,7 @@ handle_next_pass( asp )
 
 
 int
-handle_var_list( asp )
-    struct agent_snmp_session  *asp;
+handle_var_list(struct agent_snmp_session  *asp)
 {
     struct variable_list *varbind_ptr;
     u_char  statType;
@@ -486,9 +484,10 @@ statp_loop:
 
 
 static int
-goodValue(inType, inLen, actualType, actualLen)
-    u_char	inType, actualType;
-    int		inLen, actualLen;
+goodValue(u_char inType, 
+	  int inLen,
+	  u_char actualType,
+	  int actualLen)
 {
     if (inLen > actualLen)
 	return FALSE;
@@ -496,12 +495,11 @@ goodValue(inType, inLen, actualType, actualLen)
 }
 
 static void
-setVariable(var_val, var_val_type, var_val_len, statP, statLen)
-    u_char  *var_val;
-    u_char  var_val_type;
-    int	    var_val_len;
-    u_char  *statP;
-    int	    statLen;
+setVariable(u_char *var_val,
+	    u_char var_val_type,
+	    int var_val_len,
+	    u_char *statP,
+	    int statLen)
 {
     int	    buffersize = 1000;
 

@@ -540,15 +540,15 @@ cook_device(char *dev)
 int
 Get_FSIndex(char *dev)
 {
-    int lindex;
+    int iindex;
 
     Init_HR_FileSys();
 
-    while ((lindex=Get_Next_HR_FileSys()) != -1 )
+    while ((iindex=Get_Next_HR_FileSys()) != -1 )
 	if (!strcmp( HRFS_entry->HRFS_name,  cook_device(dev)))
 	{
 	    End_HR_FileSys();
-	    return lindex;
+	    return iindex;
 	}
 
     End_HR_FileSys();
