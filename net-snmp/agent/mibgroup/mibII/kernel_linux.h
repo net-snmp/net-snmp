@@ -89,6 +89,5 @@ int             linux_read_ip_stat(struct ip_mib *);
 int             linux_read_icmp_stat(struct icmp_mib *);
 int             linux_read_udp_stat(struct udp_mib *);
 int             linux_read_tcp_stat(struct tcp_mib *);
-extern marker_t linux_mibII_stats_cache_marker;
 
 #endif                          /* _MIBGROUP_KERNEL_LINUX_H */
