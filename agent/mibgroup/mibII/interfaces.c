@@ -348,8 +348,8 @@ header_ifEntry(struct variable *vp,
     /*
      * find "next" interface 
      */
-     count = Interface_Scan_Get_Count();
-     for (interface = 1; interface <= count; interface++) {
+    count = Interface_Scan_Get_Count();
+    for (interface = 1; interface <= count; interface++) {
         newname[IFENTRY_NAME_LENGTH] = (oid) interface;
         result =
             snmp_oid_compare(name, *length, newname,
@@ -1544,17 +1544,6 @@ Interface_Scan_Init(void)
         /*
          * set name and interface# : 
          */
-        strncpy(ifrq.ifr_name, ifname, sizeof(ifrq.ifr_name));
-        ifrq.ifr_name[ sizeof(ifrq.ifr_name)-1 ] = 0;
-        if(ioctl(fd, SIOCGIFINDEX, &ifrq) < 0) {
-            snmp_log(LOG_ERR,"cannot find ifIndex for '%s', skipping\n",
-                     ifname);
-            free(nnew);
-            continue;
-        }
-        else
-            nnew->if_index = ifrq.ifr_ifindex;
-
         nnew->if_name = (char *) strdup(ifname);
         for (ptr = nnew->if_name; *ptr && (*ptr < '0' || *ptr > '9');
              ptr++);
@@ -1755,7 +1744,7 @@ Interface_Scan_Next(short *Index,
         if (1 || strcmp(saveName, "lo0") != 0) {        /* XXX */
 
             if (Index)
-                *Index = ifnet.if_index;
+                *Index = ++saveIndex;
             if (Retifnet)
                 *Retifnet = ifnet;
             if (Name)
