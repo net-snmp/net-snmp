@@ -19,23 +19,10 @@
 #define NEED_USMDH_FUNCTIONS
 #include "usmDHUserKeyTable.h"
 
-static DH *dh_params = NULL;
-
-void
-init_dh_params(void) {
-    /* currently hard coded to the IKE oakly group 2 set */
-    if (!dh_params) {
-        dh_params = DH_new();
-        dh_params->g = BN_new();
-        BN_hex2bn(&dh_params->g, "02");
-        BN_hex2bn(&dh_params->p, "ffffffffffffffffc90fdaa22168c234c4c6628b80dc1cd129024e088a67cc74020bbea63b139b22514a08798e3404ddef9519b3cd3a431b302b0a6df25f14374fe1356d6d51c245e485b576625e7ec6f44c42e9a637ed6b0bff5cb6f406b7edee386bfb5a899fa5ae9f24117c4b1fe649286651ece65381ffffffffffffffff");
-    }
-}
-
 DH *
 usmDHGetUserDHptr(struct usmUser *user, int for_auth_key)
 {
-    DH *dh;
+    DH *dh, *dh_params;
     void **theptr;
 
     if (user == NULL)
@@ -50,6 +37,9 @@ usmDHGetUserDHptr(struct usmUser *user, int for_auth_key)
         /* copy the system parameters to the local ones */
         dh = DH_new();
         if (!dh)
+            return NULL;
+        dh_params = get_dh_params();
+        if (!dh_params)
             return NULL;
         dh->g = BN_dup(dh_params->g);
         dh->p = BN_dup(dh_params->p);
