@@ -83,7 +83,7 @@ int failures = 0;
 
 void usage(void)
 {
-  fprintf(stderr,"Usage: snmpset");
+  fprintf(stderr,"Usage: snmpset ");
   snmp_parse_args_usage(stderr);
   fprintf(stderr," [<objectID> <type> <value> ...]\n\n");
   snmp_parse_args_descriptions(stderr);
