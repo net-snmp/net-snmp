@@ -381,7 +381,7 @@ getOID(me)
         XPUSHs(rarg);
 
         PUTBACK;
-        i = call_pv("NetSNMP::OID::newwithptr", G_SCALAR);
+        i = perl_call_pv("NetSNMP::OID::newwithptr", G_SCALAR);
         SPAGAIN;
         if (i != 1) {
             fprintf(stderr, "unhandled OID error.\n");
