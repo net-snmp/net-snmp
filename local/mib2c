@@ -23,7 +23,7 @@ ERROR: You don't have the SNMP perl module installed.  Please obtain
 this by getting the latest source release of the net-snmp toolkit from
 http://www.net-snmp.org/download/ .  Once you download the source and
 unpack it, the perl module is contained in the perl/SNMP directory.
-See the INSTALL file there for instructions.
+See the README file there for instructions.
 
 ";
     exit;
