@@ -131,28 +131,6 @@ int check_delayed_request(struct agent_snmp_session  *asp);
 int handle_getnext_loop(struct agent_snmp_session  *asp);
 int handle_set_loop(struct agent_snmp_session  *asp);
 
-static void dump_var (
-    oid *var_name,
-    size_t var_name_len,
-    int statType,
-    void *statP,
-    size_t statLen)
-{
-  size_t buf_len = SPRINT_MAX_LEN, out_len = 0;
-  struct variable_list temp_var;
-  u_char *buf = (u_char *)malloc(SPRINT_MAX_LEN);
-  
-  if (buf) {
-    temp_var.type = statType;
-    temp_var.val.string = (u_char *)statP;
-    temp_var.val_len = statLen;
-    sprint_realloc_variable(&buf, &buf_len, &out_len, 1,
-			    var_name, var_name_len, &temp_var);
-    snmp_log(LOG_INFO, "    >> %s\n", buf);
-    free(buf);
-  }
-}
-
 typedef struct agent_set_cache_s {
    /* match on these 2 */
    int			  transID;
