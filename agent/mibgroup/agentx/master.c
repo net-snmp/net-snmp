@@ -1,6 +1,17 @@
 /*
  *  AgentX master agent
  */
+/* Portions of this file are subject to the following copyright(s).  See
+ * the Net-SNMP's COPYING file for more details and other copyrights
+ * that may apply:
+ */
+/*
+ * Portions of this file are copyrighted by:
+ * Copyright © 2003 Sun Microsystems, Inc. All rights reserved.
+ * Use is subject to license terms specified in the COPYING file
+ * distributed with the Net-SNMP package.
+ */
+
 
 #include <net-snmp/net-snmp-config.h>
 #if HAVE_IO_H
@@ -63,6 +74,26 @@ real_init_master(void)
     if (netsnmp_ds_get_boolean(NETSNMP_DS_APPLICATION_ID, NETSNMP_DS_AGENT_ROLE) != MASTER_AGENT)
         return;
 
+    if (netsnmp_ds_get_string(NETSNMP_DS_APPLICATION_ID,
+                              NETSNMP_DS_AGENT_X_SOCKET)) {
+       agentx_sockets = netsnmp_ds_get_string(NETSNMP_DS_APPLICATION_ID,
+                                              NETSNMP_DS_AGENT_X_SOCKET);
+#ifdef AGENTX_DOM_SOCK_ONLY
+       if (agentx_sockets[0] != '/') {
+           /* unix:/path */
+           if (agentx_sockets[5] != '/') {
+               snmp_log(LOG_ERR,
+                    "Error: %s transport is not supported, disabling agentx/master.\n", agentx_sockets);
+               SNMP_FREE(agentx_sockets);
+               return;
+           }
+       }
+#endif
+    } else {
+        agentx_sockets = strdup(AGENTX_SOCKET);
+    }
+
+
     DEBUGMSGTL(("agentx/master", "initializing...\n"));
     snmp_sess_init(&sess);
     sess.version = AGENTX_VERSION_1;
@@ -71,15 +102,6 @@ real_init_master(void)
                                       NETSNMP_DS_AGENT_AGENTX_TIMEOUT);
     sess.retries = netsnmp_ds_get_int(NETSNMP_DS_APPLICATION_ID,
                                       NETSNMP_DS_AGENT_AGENTX_RETRIES);
-
-    if (netsnmp_ds_get_string(NETSNMP_DS_APPLICATION_ID, 
-			      NETSNMP_DS_AGENT_X_SOCKET)) {
-	agentx_sockets = netsnmp_ds_get_string(NETSNMP_DS_APPLICATION_ID, 
-					       NETSNMP_DS_AGENT_X_SOCKET);
-    } else {
-        agentx_sockets = strdup(AGENTX_SOCKET);
-    }
-
     cp1 = agentx_sockets;
     while (1) {
         /*

@@ -1,3 +1,14 @@
+/* Portions of this file are subject to the following copyright(s).  See
+ * the Net-SNMP's COPYING file for more details and other copyrights
+ * that may apply:
+ */
+/*
+ * Portions of this file are copyrighted by:
+ * Copyright © 2003 Sun Microsystems, Inc. All rights reserved.
+ * Use is subject to license terms specified in the COPYING file
+ * distributed with the Net-SNMP package.
+ */
+
 #ifndef NET_SNMP_CONFIG_H
 #define NET_SNMP_CONFIG_H
 
@@ -667,5 +678,8 @@
 
 #undef INET6
 #undef LOCAL_SMUX
+
+/* define if agentx transport is to use domain sockets only */
+#undef AGENTX_DOM_SOCK_ONLY
 
 #endif /* NET_SNMP_CONFIG_H */
