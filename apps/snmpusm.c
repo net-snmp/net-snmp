@@ -116,10 +116,10 @@ usage (void)
   fprintf(stderr, "  create    USER [CLONEFROM]\n");
   fprintf(stderr, "  delete    USER\n");
   fprintf(stderr, "  cloneFrom USER FROM\n");
-  fprintf(stderr, "  passwd    old_passphrase new_passphrase [-o] [-a] [-x]\n");
-  fprintf(stderr, "\t\t-o\t\tUse the ownKeyChange objects.\n");
-  fprintf(stderr, "\t\t-x\t\tChange the privacy key.\n");
-  fprintf(stderr, "\t\t-a\t\tChange the authentication key.\n");
+  fprintf(stderr, "  passwd    [-Co] [-Ca] [-Cx] old_passphrase new_passphrase\n");
+  fprintf(stderr, "\t\t-Co\t\tUse the ownKeyChange objects.\n");
+  fprintf(stderr, "\t\t-Cx\t\tChange the privacy key.\n");
+  fprintf(stderr, "\t\t-Ca\t\tChange the authentication key.\n");
 }
 
 /* setup_oid appends to the oid the index for the engineid/user */
