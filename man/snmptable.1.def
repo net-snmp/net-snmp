@@ -15,13 +15,19 @@
 .\" ARISING OUT OF OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS
 .\" SOFTWARE.
 .\" ******************************************************************/
-.TH SNMPTABLE 1 "08 Feb 2002" VVERSIONINFO "Net-SNMP"
+.\" Portions of this file are copyrighted by:
+.\" Copyright Copyright 2003 Sun Microsystems, Inc. All rights reserved.
+.\" Use is subject to license terms specified in the COPYING file
+.\" distributed with the Net-SNMP package.
+.\" ******************************************************************/
+.TH SNMPTABLE 1 "25 Jul 2003" VVERSIONINFO "Net-SNMP"
 .UC 4
 .SH NAME
 snmptable - obtain and print an SNMP table
 .SH SYNOPSIS
 .B snmptable
-[COMMON OPTIONS] TABLE-OID
+[COMMON OPTIONS] [-Cb] [-CB] [-Ch] [-CH] [-Ci] [-Cf STRING] [-Cw WIDTH]
+AGENT TABLE-OID
 .SH DESCRIPTION
 .B snmptable
 is an SNMP application that repeatedly uses the SNMP GETNEXT or
@@ -29,8 +35,29 @@ GETBULK requests to query for information on a network entity.  The
 parameter
 .I TABLE-OID
 must specify an SNMP table.
+.PP
+snmptable is an SNMP application that repeatedly uses the
+SNMP GETNEXT or GETBULK requests to query for  information
+on a network entity.  The parameter TABLE-OID must specify
+an SNMP table.
+
+AGENT identifies a target SNMP agent, which is instrumented
+to monitor the gievn objects.  At its simplest, the AGENT
+specification will consist of a hostname or an IPv4
+address.  In this situation, the command will attempt
+communication with the agent, using UDP/IPv4 to port 161
+of the given target host. See
+.I  snmpcmd(1)
+for a full list of
+the possible formats for AGENT.
 .SH OPTIONS
 .TP 8
+.B COMMON OPTIONS
+Please see
+.I snmpcmd(1)
+for a list of possible values for COMMON OPTIONS
+as well as their descriptions.
+.TP
 .B -Cb
 Display only a brief heading. Any common prefix of the table field
 names will be deleted.
@@ -77,22 +104,20 @@ Specifies the width of the lines when the table is printed.
 If the lines will be longer, the table will be printed in sections of
 at most 
 .I WIDTH 
-characters.
+characters.  If
+.I WIDTH
+is less than the length of the contents of
+a single column, then that single column will still be printed.
 .PP
-In addition to these options,
-.B snmptable
-takes the common options described in the 
-.I snmpcmd(1)
-manual page.
 .SH EXAMPLES
-$ snmptable localhost public at.attable
+$ snmptable -v 2c -c public localhost at.atTable
 
-SNMP table: at.atTable
+SNMP table: at.atTable RFC1213-MIB::atTable
 
 atIfIndex   atPhysAddress   atNetAddress
         1  8:0:20:20:0:ab 130.225.243.33
 .PP
-$ snmptable localhost public -Cf + at.attable
+$ snmptable -v 2c -c public -Cf + localhost at.atTable
 
 SNMP table: at.atTable
 
