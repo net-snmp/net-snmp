@@ -1029,7 +1029,7 @@ char *copy_nword(char *from, char *to, int len)
    It returns a pointer to first non-white space after the end of the token
    being copied or to 0 if we reach the end.*/
 
-static have_warned = 0;
+static int have_warned = 0;
 char *copy_word(char *from, char *to)
 {
     if (!have_warned) {
