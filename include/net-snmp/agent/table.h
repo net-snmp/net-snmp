@@ -39,7 +39,7 @@ typedef struct netsnmp_column_info_t {
 
 } netsnmp_column_info;
 
-typedef struct _netsnmp_table_registration_info {
+typedef struct netsnmp_table_registration_info_s {
    netsnmp_variable_list *indexes; /* list of varbinds with only 'type' set */
    unsigned int number_indexes;   /* calculated automatically */
 
@@ -54,7 +54,7 @@ typedef struct _netsnmp_table_registration_info {
 
 } netsnmp_table_registration_info;
 
-typedef struct _netsnmp_table_request_info {
+typedef struct netsnmp_table_request_info_s {
    unsigned int colnum;            /* 0 if OID not long enough */
    unsigned int number_indexes;    /* 0 if failure to parse any */
    netsnmp_variable_list *indexes; /* contents freed by helper upon exit */
