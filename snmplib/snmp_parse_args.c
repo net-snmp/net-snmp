@@ -489,15 +489,10 @@ snmp_parse_args(int argc, char **argv, netsnmp_session *session,
                 session->securityPrivProto = usmDESPrivProtocol;
                 session->securityPrivProtoLen = USM_PRIV_PROTO_DES_LEN;
 #ifdef HAVE_AES
-            } else if (!strcasecmp(optarg, "AES128")) {
-                session->securityPrivProto = usmAES128PrivProtocol;
-                session->securityPrivProtoLen = USM_PRIV_PROTO_AES128_LEN;
-            } else if (!strcasecmp(optarg, "AES192")) {
-                session->securityPrivProto = usmAES192PrivProtocol;
-                session->securityPrivProtoLen = USM_PRIV_PROTO_AES192_LEN;
-            } else if (!strcasecmp(optarg, "AES256")) {
-                session->securityPrivProto = usmAES256PrivProtocol;
-                session->securityPrivProtoLen = USM_PRIV_PROTO_AES256_LEN;
+            } else if (!strcasecmp(optarg, "AES128") ||
+                       !strcasecmp(optarg, "AES")) {
+                session->securityPrivProto = usmAESPrivProtocol;
+                session->securityPrivProtoLen = USM_PRIV_PROTO_AES_LEN;
 #endif
             } else {
                 fprintf(stderr,
