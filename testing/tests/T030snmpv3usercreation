@@ -2,7 +2,7 @@
 
 . ../eval_tools.sh
 
-HEADER SNMPv3 user creation using initial/MD5 to create user newtestuser
+HEADER SNMPv3 user creation and usage using snmpusm
 
 #
 # Begin test
