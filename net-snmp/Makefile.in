@@ -77,7 +77,7 @@ stamp-h.in: configure.in acconfig.h
 
 config.h: stamp-h
 stamp-h: config.h.in config.status
-	./config.status
+	CONFIG_FILES= ./config.status
 	echo timestamp > ${srcdir}/stamp-h
 
 touchit:
@@ -87,7 +87,7 @@ touchit:
 	touch Makefile
 
 Makefile: Makefile.in config.status
-	./config.status
+	CONFIG_HEADERS= ./config.status
 
 config.status: configure
 	$(srcdir)/config.status --recheck
