@@ -144,7 +144,7 @@ ifXTable_allocate_data(void)
      * allocate memory for the context
      */
     /** this might not be right for netsnmp_interface_entry */
-    ifXTable_data  *rtn = SNMP_MALLOC_TYPEDEF(netsnmp_interface_entry);
+    ifXTable_data  *rtn = netsnmp_access_interface_entry_create(NULL);
 
     DEBUGTRACE;
 
@@ -169,7 +169,7 @@ ifXTable_release_data(ifXTable_data * data)
     /*
      * release memory for the context
      */
-    free(data);
+    netsnmp_access_interface_entry_free(data);
 }
 
 
