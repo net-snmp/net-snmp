@@ -161,7 +161,7 @@ static struct nlist nl[] = {
 int nswapdev=10;            /* taken from <machine/space.h> */
 int nswapfs=10;            /* taken from <machine/space.h> */
 
-#ifdef MEMMIBNUM
+#ifdef USEMEMMIB
 
 int getswap(rettype)
   int rettype;
@@ -308,7 +308,7 @@ unsigned char *var_extensible_mem(vp, name, length, exact, var_len, write_method
 static int numdisks;
 struct diskpart disks[MAXDISKS];
 
-#if DISKMIBNUM && HAVE_FSTAB_H
+#if defined(USEDISKMIB) && HAVE_FSTAB_H
 
 unsigned char *var_extensible_disk(vp, name, length, exact, var_len, write_method)
     register struct variable *vp;
@@ -422,7 +422,7 @@ int lockd_timeout()
 }
 */
 
-#ifdef LOCKDMIBNUM
+#ifdef USELOCKDMIB
 long lockd_test(msg)
   char *msg;
 {
@@ -505,7 +505,7 @@ unsigned char *var_extensible_lockd_test(vp, name, length, exact, var_len, write
 }
 
 #endif
-#ifdef LOADAVEMIBNUM
+#ifdef USELOADAVEMIB
 
 unsigned char *var_extensible_loadave(vp, name, length, exact, var_len, write_method)
     register struct variable *vp;
@@ -589,8 +589,6 @@ unsigned char *var_extensible_loadave(vp, name, length, exact, var_len, write_me
 
 #endif
 
-#ifdef ERRORMIBNUM
-
 static time_t errorstatustime=0;
 static int errorstatusprior=0;
 static char errorstring[STRMAX];
@@ -619,6 +617,8 @@ seterrorstatus(to,prior)
   }
 }
   
+#ifdef USEERRORMIB
+
 unsigned char *var_extensible_errors(vp, name, length, exact, var_len, write_method)
     register struct variable *vp;
 /* IN - pointer to variable entry that points here */
@@ -813,7 +813,7 @@ init_extensible() {
     }
   }
 
-#ifdef MEMMIBNUM
+#ifdef USEMEMMIB
   if (KNLookup(NL_NSWAPDEV,(int *) &nswapdev, sizeof(nswapdev))
       == NULL)
     return(0);

@@ -12,7 +12,7 @@ struct exstensible *extens=NULL;  /* In exec.c */
 struct exstensible *relocs=NULL;  /* In exec.c */
 int numextens=0,numrelocs=0;                    /* ditto */
 
-#ifdef SHELLMIBNUM
+#ifdef USESHELLMIB
 
 unsigned char *var_extensible_shell(vp, name, length, exact, var_len, write_method)
     register struct variable *vp;
