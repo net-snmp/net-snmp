@@ -12,7 +12,9 @@
 #if HAVE_STDLIB_H
 #include <stdlib.h>
 #endif
+#if HAVE_UNISTD_H
 #include <unistd.h>
+#endif
 
 #if HAVE_SYS_PARAM_H
 #include <sys/param.h>
@@ -103,7 +105,9 @@
 #undef TCP_NODELAY
 #undef TCP_MAXSEG
 #endif
+#if HAVE_NETINET_TCP_H
 #include <netinet/tcp.h>
+#endif
 #if HAVE_NETINET_TCPIP_H
 #include <netinet/tcpip.h>
 #endif
@@ -132,6 +136,11 @@
 #include <sys/mib.h>
 #include <netinet/mib_kern.h>
 #endif /* hpux */
+
+#ifdef cygwin
+#define WIN32
+#include <windows.h>
+#endif
 
 #include "tcp.h"
 #include "tcpTable.h"
@@ -181,7 +190,11 @@ struct variable13 tcp_variables[] = {
     {TCPOUTSEGS, ASN_COUNTER, RONLY, var_tcp, 1, {11} },
     {TCPRETRANSSEGS, ASN_COUNTER, RONLY, var_tcp, 1, {12}},
 #endif
+#ifdef WIN32
+    {TCPCONNSTATE, ASN_INTEGER, RWRITE, var_tcpEntry, 3, {13, 1, 1}},
+#else
     {TCPCONNSTATE, ASN_INTEGER, RONLY, var_tcpEntry, 3, {13, 1, 1}},
+#endif
     {TCPCONNLOCALADDRESS, ASN_IPADDRESS, RONLY, var_tcpEntry, 3, {13, 1, 2}},
     {TCPCONNLOCALPORT, ASN_INTEGER, RONLY, var_tcpEntry, 3, {13, 1, 3}},
     {TCPCONNREMADDRESS, ASN_IPADDRESS, RONLY, var_tcpEntry, 3, {13, 1, 4}},
@@ -356,7 +369,6 @@ var_tcp(struct variable *vp,
 					    - tcpstat.tcps_closed;
 				return (u_char *) &long_return;
 #endif
-
 #ifdef WIN32
        case TCPRTOALGORITHM:   return (u_char *) &tcpstat.dwRtoAlgorithm;
        case TCPRTOMIN:         return (u_char *) &tcpstat.dwRtoMin;
@@ -373,7 +385,6 @@ var_tcp(struct variable *vp,
        case TCPINERRS:   return (u_char *) &tcpstat.dwInErrs;
        case TCPOUTRSTS:  return (u_char *) &tcpstat.dwOutRsts;
 #endif
-
 	default:
 		DEBUGMSGTL(("snmpd", "unknown sub-id %d in var_tcp\n", vp->magic));
     }

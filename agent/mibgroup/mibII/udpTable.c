@@ -14,6 +14,7 @@
 #if HAVE_WINSOCK_H
 #include <winsock.h>
 #endif
+
 #if HAVE_SYS_PARAM_H
 #include <sys/param.h>
 #endif
@@ -73,7 +74,9 @@
 #if HAVE_NETINET_IN_PCB_H
 #include <netinet/in_pcb.h>
 #endif
+#if HAVE_NETINET_UDP_H
 #include <netinet/udp.h>
+#endif
 #if HAVE_NETINET_UDP_VAR_H
 #include <netinet/udp_var.h>
 #endif
@@ -85,16 +88,21 @@
 #include <dmalloc.h>
 #endif
 
-
 #ifdef solaris2
 #include "kernel_sunos5.h"
 #else
 #include "kernel.h"
 #endif
 
+#ifdef cygwin
+#define WIN32
+#include <windows.h>
+#endif
+
 #include "system.h"
 #include "asn1.h"
 #include "snmp_debug.h"
+
 
 #include "mibincl.h"
 #include "auto_nlist.h"
@@ -139,7 +147,6 @@ static int UDP_Scan_Next (struct inpcb *);
 	 *  System specific implementation functions
 	 *
 	 *********************/
-
 
 #ifndef WIN32 
 #ifndef solaris2 
@@ -491,6 +498,7 @@ static int UDP_Scan_Next(struct inpcb *RetInPcb)
 	return(1);	/* "OK" */
 }
 #endif /* solaris2 */
+
 #else /* WIN32 */
 #include <iphlpapi.h>
 
@@ -587,4 +595,5 @@ var_udpEntry(struct variable *vp,
     }
     return  NULL;
 }
+
 #endif /* WIN32 */

@@ -188,6 +188,11 @@ void init_icmp(void)
 #define USES_SNMP_DESIGNED_ICMPSTAT
 #endif
 
+#ifdef cygwin
+#define WIN32
+#include <windows.h>
+#endif
+
 #ifdef WIN32
 #include <iphlpapi.h>
 #define ICMP_STAT_STRUCTURE MIB_ICMP

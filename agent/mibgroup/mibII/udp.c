@@ -14,6 +14,7 @@
 #if HAVE_WINSOCK_H
 #include <winsock.h>
 #endif
+
 #if HAVE_SYS_PARAM_H
 #include <sys/param.h>
 #endif
@@ -73,7 +74,9 @@
 #if HAVE_NETINET_IN_PCB_H
 #include <netinet/in_pcb.h>
 #endif
+#ifdef HAVE_NETINET_UDP_H
 #include <netinet/udp.h>
+#endif
 #if HAVE_NETINET_UDP_VAR_H
 #include <netinet/udp_var.h>
 #endif
@@ -86,13 +89,20 @@
 #endif
 
 #include "tools.h"
+
 #ifdef solaris2
 #include "kernel_sunos5.h"
 #else
 #include "kernel.h"
 #endif
+
 #ifdef linux
 #include "kernel_linux.h"
+#endif
+
+#ifdef cygwin
+#define WIN32
+#include <windows.h>
 #endif
 
 #include "mibincl.h"
@@ -200,6 +210,7 @@ void init_udp(void)
 #define USES_TRADITIONAL_UDPSTAT
 #endif
 
+
 #if !defined(UDP_STAT_STRUCTURE)
 #define UDP_STAT_STRUCTURE	struct udpstat
 #define USES_TRADITIONAL_UDPSTAT
@@ -285,7 +296,6 @@ var_udp(struct variable *vp,
 				return (u_char *) &long_return;
 
 #endif		/* USES_TRADITIONAL_UDPSTAT */
-
 #ifdef WIN32
        case UDPINDATAGRAMS:
     return (u_char *) &udpstat.dwInDatagrams;
@@ -307,13 +317,11 @@ var_udp(struct variable *vp,
 #endif
 }
 
-
 	/*********************
 	 *
 	 *  Internal implementation functions
 	 *
 	 *********************/
-
 
 long
 read_udp_stat( UDP_STAT_STRUCTURE *udpstat, int magic )

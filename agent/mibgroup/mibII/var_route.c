@@ -48,7 +48,11 @@ PERFORMANCE OF THIS SOFTWARE.
 #include <sys/socket.h>
 #endif
 #if TIME_WITH_SYS_TIME
+# ifdef WIN32
+#  include <sys/timeb.h>
+# else
 # include <sys/time.h>
+# endif
 # include <time.h>
 #else
 # if HAVE_SYS_TIME_H
@@ -148,6 +152,7 @@ PERFORMANCE OF THIS SOFTWARE.
 #if HAVE_NET_IF_DL_H
 #include <net/if_dl.h>
 #endif
+
 #if HAVE_WINSOCK_H
 #include <winsock.h>
 #endif
@@ -174,16 +179,25 @@ PERFORMANCE OF THIS SOFTWARE.
 #include <dmalloc.h>
 #endif
 
+#ifdef cygwin
+#define WIN32
+#include <windows.h>
+#endif
 
 #define CACHE_TIME (120)	    /* Seconds */
 
 #include "mibincl.h"
-
+#include "system.h"
 #include "ip.h"
 #include "../kernel.h"
 #include "interfaces.h"
 #include "struct.h"
 #include "util_funcs.h"
+
+/* Write is supported only for Windows. Thats why route_write.h included under WIN32 */
+#ifdef WIN32
+#include "route_write.h"
+#endif
 
 #ifndef  MIN
 #define  MIN(a,b)                     (((a) < (b)) ? (a) : (b))
@@ -193,6 +207,7 @@ PERFORMANCE OF THIS SOFTWARE.
 extern WriteMethod write_rte;
 
 #ifndef WIN32
+
 #ifdef USE_SYSCTL_ROUTE_DUMP
 
 static void Route_Scan_Reload (void);
@@ -1280,6 +1295,15 @@ static int qsort_compare(void *v1,
 
 #else /* WIN32 */
 #include <iphlpapi.h>
+#ifndef MIB_IPPROTO_NETMGMT
+#define MIB_IPPROTO_NETMGMT 3
+#endif
+
+PMIB_IPFORWARDROW route_row;
+int create_flag;
+void init_var_route(void)
+{
+}
 
 u_char *
 var_ipRouteEntry(struct variable *vp,
@@ -1304,6 +1328,8 @@ var_ipRouteEntry(struct variable *vp,
     static PMIB_IPFORWARDTABLE pIpRtrTable = NULL;
     struct timeval now;
     static long Time_Of_Last_Reload = 0;
+    u_char dest_addr[4];
+    MIB_IPFORWARDROW temp_row;
 
 
     /** 
@@ -1313,7 +1339,12 @@ var_ipRouteEntry(struct variable *vp,
 #if NO_DUMMY_VALUES
       saveNameLen = 0;
 #endif
-    if (rtsize <= 1)
+    if(route_row == NULL){
+        /* Free allocated memory in case of SET request's FREE phase */
+        route_row = (PMIB_IPFORWARDROW)malloc(sizeof(MIB_IPFORWARDROW));
+    }
+    gettimeofday (&now, (struct timezone *) 0);
+    if ((rtsize <= 1) || (Time_Of_Last_Reload + 5 <= now.tv_sec))
       Save_Valid = 0;
     else
     /*
@@ -1339,11 +1370,11 @@ var_ipRouteEntry(struct variable *vp,
 	*length = 14;
 	RtIndex = saveRtIndex;
     } else {
-	/* fill in object part of name for current (less sizeof instance part) */
+	/* fill in object part of name for current(less sizeof instance part) */
 
 	memcpy( (char *)Current,(char *)vp->name, (int)(vp->namelen) * sizeof(oid));
 
-  gettimeofday (&now, (struct timezone *) 0);
+
     if ((Time_Of_Last_Reload + 5 <= now.tv_sec) || (pIpRtrTable == NULL) )
     {
         if(pIpRtrTable != NULL)
@@ -1377,11 +1408,25 @@ var_ipRouteEntry(struct variable *vp,
       }
     }
   if (RtIndex >= rtsize){
+        /* for creation of new row, only ipNetToMediaTable case is considered */
+            if(*length == 14){
+                create_flag = 1; 
+                *write_method = write_rte;        
+                dest_addr[0] = (u_char)name[10];
+                dest_addr[1] = (u_char)name[11];
+                dest_addr[2] = (u_char)name[12];
+                dest_addr[3] = (u_char) name[13];
+                temp_row.dwForwardDest = *((DWORD *)dest_addr);             
+                temp_row.dwForwardPolicy = 0; 
+                temp_row.dwForwardProto = MIB_IPPROTO_NETMGMT;
+                *route_row = temp_row;
+            }  
     free(pIpRtrTable);
     pIpRtrTable = NULL;
     rtsize = 0;
 	  return(NULL);
   }
+        create_flag = 0;
 	/*
 	 *  Save in the 'cache'
 	 */
@@ -1391,51 +1436,62 @@ var_ipRouteEntry(struct variable *vp,
 	saveNameLen = *length;
 	saveExact = exact;
 	saveRtIndex = RtIndex;
+
 	/*
 	 *  Return the name
 	 */
 	memcpy( (char *) name,(char *) Current, 14 * sizeof(oid));
 	*length = 14;
     }
-   /*******Write method is not implemented*/
-  /*  *write_method = write_rte; */
     *var_len = sizeof(long_return);
+    *route_row = pIpRtrTable->table[RtIndex];
 
     switch(vp->magic){
 	    case IPROUTEDEST:
+	    *write_method = write_rte;
 	      long_return = pIpRtrTable->table[RtIndex].dwForwardDest;
 		    return (u_char *)&long_return;
 	    case IPROUTEIFINDEX:
+	    *write_method = write_rte;
 	      long_return = pIpRtrTable->table[RtIndex].dwForwardIfIndex;
 		    return (u_char *)&long_return;
     	case IPROUTEMETRIC1:
+	    *write_method = write_rte;       
 	      long_return = pIpRtrTable->table[RtIndex].dwForwardMetric1;
 		    return (u_char *)&long_return;
 	    case IPROUTEMETRIC2:
+	    *write_method = write_rte;
         long_return = pIpRtrTable->table[RtIndex].dwForwardMetric2;
 		    return (u_char *)&long_return;
 	    case IPROUTEMETRIC3:
+	    *write_method = write_rte;
         long_return = pIpRtrTable->table[RtIndex].dwForwardMetric3;
 		    return (u_char *)&long_return;
 	    case IPROUTEMETRIC4:
+	    *write_method = write_rte;
         long_return = pIpRtrTable->table[RtIndex].dwForwardMetric4;
 		    return (u_char *)&long_return;
 	    case IPROUTEMETRIC5:
+	    *write_method = write_rte;
         long_return = pIpRtrTable->table[RtIndex].dwForwardMetric5;
 		    return (u_char *)&long_return;
 	    case IPROUTENEXTHOP:
+	    *write_method = write_rte;
         long_return = pIpRtrTable->table[RtIndex].dwForwardNextHop;
 		    return (u_char *)&long_return;
 	    case IPROUTETYPE:
+	    *write_method = write_rte; 
 	      long_return = pIpRtrTable->table[RtIndex].dwForwardType;
 		    return (u_char *)&long_return;
 	    case IPROUTEPROTO:
 	      long_return = pIpRtrTable->table[RtIndex].dwForwardProto;
 		    return (u_char *)&long_return;
 	    case IPROUTEAGE:
+	    *write_method = write_rte;
         long_return = pIpRtrTable->table[RtIndex].dwForwardAge;
 		    return (u_char *)&long_return;
 	    case IPROUTEMASK:
+	    *write_method = write_rte;
         long_return = pIpRtrTable->table[RtIndex].dwForwardMask;
 		    return (u_char *)&long_return;
     	case IPROUTEINFO:
@@ -1447,7 +1503,7 @@ var_ipRouteEntry(struct variable *vp,
    return NULL;
 }
 
-#endif
+#endif /* WIN32 */
  
 #else /* CAN_USE_SYSCTL */
 
@@ -1634,7 +1690,7 @@ var_ipRouteEntry(struct variable *vp,
 	struct snmprt *rt;
 	static struct snmprt *savert;
 	static int saveNameLen, saveExact;
-	static oid saveName[MAX_OID_LEN], Current[MAX_OID_LEN];
+	static oid saveName[14], Current[14];
 
 #if 0
 	/*
@@ -1689,8 +1745,7 @@ var_ipRouteEntry(struct variable *vp,
 		/*
 		 *  Save in the 'cache'
 		 */
-		memcpy(saveName, name,
-                       SNMP_MIN(*length,MAX_OID_LEN) * sizeof(oid));
+		memcpy(saveName, name, *length * sizeof(oid));
 		saveName[9] = 0;
 		saveNameLen = *length;
 		saveExact = exact;

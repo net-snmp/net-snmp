@@ -97,7 +97,7 @@
 #define STDC_HEADERS 1
 
 /* Define if you can safely include both <sys/time.h> and <time.h>.  */
-#define TIME_WITH_SYS_TIME 1
+#undef TIME_WITH_SYS_TIME
 
 /* Define if you have the gettimeofday function.  */
 #undef HAVE_GETTIMEOFDAY
@@ -187,6 +187,7 @@
 
 /* Define if you have the vsnprintf function.  */
 #define HAVE_VSNPRINTF 1
+#define HAVE_SNPRINTF 1
 
 /* Define if you have the index function.  */
 #undef HAVE_INDEX
