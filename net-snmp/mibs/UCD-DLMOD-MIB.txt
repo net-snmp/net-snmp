@@ -69,10 +69,10 @@ DlmodEntry ::= SEQUENCE {
 
 dlmodIndex OBJECT-TYPE
     SYNTAX	Integer32 (1..65535)
-    MAX-ACCESS	read-only
+    MAX-ACCESS	not-accessible
     STATUS	current
     DESCRIPTION
-	"An index that uniqely indenties an entry in the dlmodTable."
+	"An index that uniqely indentifies an entry in the dlmodTable."
     ::= { dlmodEntry 1 }
 
 dlmodName OBJECT-TYPE
