@@ -440,24 +440,20 @@ int snmp_input(op, session, reqid, pdu, magic)
                 tmpvar.type = ASN_TIMETICKS;
                 sprint_variable(varbuf, snmpsysuptime, 8, &tmpvar);
                 fprintf(file,"%s\n",varbuf);
-                if (pdu->trap_type <= SNMP_TRAP_AUTHFAIL) {
-                  tmpvar.type = ASN_OBJECT_ID;
-                  trapoids[9] = pdu->trap_type+1;
-                  tmpvar.val.objid = trapoids;
-                  tmpvar.val_len = 10*sizeof(oid);
-                  sprint_variable(varbuf, snmptrapoid, 10, &tmpvar);
-                  fprintf(file,"%s\n",varbuf);
-                }
+                tmpvar.type = ASN_OBJECT_ID;
+                trapoids[9] = pdu->trap_type+1;
+                tmpvar.val.objid = trapoids;
+                tmpvar.val_len = 10*sizeof(oid);
+                sprint_variable(varbuf, snmptrapoid, 10, &tmpvar);
+                fprintf(file,"%s\n",varbuf);
 		for(vars = pdu->variables; vars; vars = vars->next_variable) {
                   sprint_variable(varbuf, vars->name, vars->name_length, vars);
                   fprintf(file,"%s\n",varbuf);
                 }
-                if (pdu->trap_type <= SNMP_TRAP_AUTHFAIL) {
-                  tmpvar.val.objid = pdu->enterprise;
-                  tmpvar.val_len = pdu->enterprise_length*sizeof(oid);
-                  sprint_variable(varbuf, snmptrapent, 10, &tmpvar);
-                  fprintf(file,"%s\n",varbuf);
-                }
+                tmpvar.val.objid = pdu->enterprise;
+                tmpvar.val_len = pdu->enterprise_length*sizeof(oid);
+                sprint_variable(varbuf, snmptrapent, 10, &tmpvar);
+                fprintf(file,"%s\n",varbuf);
                 fclose(file);
                 close(fd[0]);
                 close(fd[1]);
