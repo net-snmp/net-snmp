@@ -1,0 +1,5 @@
+#!/bin/sh -f
+
+touch stamp*
+rm -f local/*.conf
+rm -f remove-files
