@@ -50,7 +50,7 @@ extern u_char return_buf[];
  */
 
 #define VERSION_DESCR	0
-#define VERSION_ID	1
+#define VERSIONID	1
 #define IFNUMBER	2
 #define UPTIME		3
 #define SYSCONTACT	4
