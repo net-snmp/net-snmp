@@ -11,11 +11,11 @@ netSnmp MODULE-IDENTITY
     LAST-UPDATED "200201300000Z"
     ORGANIZATION "www.net-snmp.org"
     CONTACT-INFO    
-	 "postal:    Wes Hardaker
+	 "postal:   Wes Hardaker
                     P.O. Box 382
                     Davis CA  95617
 
-         email:     net-snmp-coders@lists.sourceforge.net"
+          email:    net-snmp-coders@lists.sourceforge.net"
     DESCRIPTION
 	"Top-level infrastructure of the Net-SNMP project enterprise MIB tree"
     REVISION     "200201300000Z"

@@ -15,11 +15,11 @@ netSnmpTCs MODULE-IDENTITY
     LAST-UPDATED "200202090000Z"
     ORGANIZATION "www.net-snmp.org"
     CONTACT-INFO    
-	 "postal:    Wes Hardaker
+	 "postal:   Wes Hardaker
                     P.O. Box 382
                     Davis CA  95617
 
-         email:     net-snmp-coders@lists.sourceforge.net"
+          email:    net-snmp-coders@lists.sourceforge.net"
     DESCRIPTION
 	"Textual conventions and enumerations for the Net-SNMP project"
     REVISION     "200202120000Z"
@@ -74,7 +74,7 @@ Float ::= TEXTUAL-CONVENTION
 -- System Object ID values
 --
 --	XXX - do we want to distinguish between O/S versions ?
--		(as is currently done with HP-UX)
+--	(as is currently done with HP-UX)
 --
 
 hpux9             OBJECT IDENTIFIER ::= { netSnmpAgentOIDs 1 }
