@@ -118,6 +118,8 @@ handle_nsDebugEnabled(netsnmp_mib_handler *handler,
 	if ( enabled==0 )
 	    enabled=2;		/* false */
 	for (request = requests; request; request=request->next) {
+            if (requests->processed != 0)
+                continue;
 	    snmp_set_var_typed_value(request->requestvb, ASN_INTEGER,
                                      (u_char*)&enabled, sizeof(enabled));
 	}
@@ -126,6 +128,8 @@ handle_nsDebugEnabled(netsnmp_mib_handler *handler,
 
     case MODE_SET_RESERVE1:
 	for (request = requests; request; request=request->next) {
+            if (requests->processed != 0)
+                continue;
             if ( request->status != 0 ) {
                 return SNMP_ERR_NOERROR;	/* Already got an error */
             }
@@ -169,6 +173,8 @@ handle_nsDebugOutputAll(netsnmp_mib_handler *handler,
 	if ( enabled==0 )
 	    enabled=2;		/* false */
 	for (request = requests; request; request=request->next) {
+            if (requests->processed != 0)
+                continue;
 	    snmp_set_var_typed_value(request->requestvb, ASN_INTEGER,
                                      (u_char*)&enabled, sizeof(enabled));
 	}
@@ -177,6 +183,8 @@ handle_nsDebugOutputAll(netsnmp_mib_handler *handler,
 
     case MODE_SET_RESERVE1:
 	for (request = requests; request; request=request->next) {
+            if (requests->processed != 0)
+                continue;
             if ( request->status != 0 ) {
                 return SNMP_ERR_NOERROR;	/* Already got an error */
             }
@@ -221,6 +229,8 @@ handle_nsDebugDumpPdu(netsnmp_mib_handler *handler,
 	if ( enabled==0 )
 	    enabled=2;		/* false */
 	for (request = requests; request; request=request->next) {
+            if (requests->processed != 0)
+                continue;
 	    snmp_set_var_typed_value(request->requestvb, ASN_INTEGER,
                                      (u_char*)&enabled, sizeof(enabled));
 	}
@@ -229,6 +239,8 @@ handle_nsDebugDumpPdu(netsnmp_mib_handler *handler,
 
     case MODE_SET_RESERVE1:
 	for (request = requests; request; request=request->next) {
+            if (requests->processed != 0)
+                continue;
             if ( request->status != 0 ) {
                 return SNMP_ERR_NOERROR;	/* Already got an error */
             }
@@ -320,6 +332,8 @@ handle_nsDebugTable(netsnmp_mib_handler *handler,
 
     case MODE_GET:
         for (request=requests; request; request=request->next) {
+            if (requests->processed != 0)
+                continue;
             debug_entry = (netsnmp_token_descr*)
                            netsnmp_extract_iterator_context(request);
             if (!debug_entry)
@@ -333,6 +347,8 @@ handle_nsDebugTable(netsnmp_mib_handler *handler,
 
     case MODE_SET_RESERVE1:
 	for (request = requests; request; request=request->next) {
+            if (requests->processed != 0)
+                continue;
             if ( request->status != 0 ) {
                 return SNMP_ERR_NOERROR;	/* Already got an error */
             }
@@ -386,6 +402,8 @@ handle_nsDebugTable(netsnmp_mib_handler *handler,
 
     case MODE_SET_COMMIT:
 	for (request = requests; request; request=request->next) {
+            if (requests->processed != 0)
+                continue;
             if ( request->status != 0 ) {
                 return SNMP_ERR_NOERROR;	/* Already got an error */
             }
