@@ -53,6 +53,8 @@ TABLE OF CONTENTS
    When I run the agent it runs and then quits without staying around. Why?
    How can I stop other people getting at my agent?
    I don't understand the new access control stuff - what does it mean?
+   I'm getting errors about "bad security model" - why?
+   I'm getting errors about "bad prefix match parameter" - why?
    What ASN.1 parser is used?
    How does the agent fetch the value of a variable from the system?
    Why can't I see values in the UCDavis 'extensible' tree?
@@ -1022,16 +1024,18 @@ I don't understand the new access control stuff - what does it mean?
     That's dealt with the "what" - now for the "who".
   This is the role of the "group" and "com2sec" entries.
 
-  The "group" keyword gives general control, by mapping between a
-  "security name" (and possibly a particular protocol version), and the
-  internal name used in the access line.  This will really only come into
-  play once the full features of SNMP v3 are available.
+  The "group" keyword gives general control, by mapping between a "security
+  name" (for a particular protocol version), and the internal name used in the
+  access line.  Note that the token "any" is no longer acceptable for the
+  security model - the original support for this was due due to a misreading
+  of the RFC.  You should replace any such line with separate versions for
+  each of the desired security models ('v1', 'v2c' & 'usm').
 
-    At the moment, it's just an intermediate step between the "access" line
-  and the "com2sec" line, which is the last bit of the jigsaw.
-  The "com2sec" entry is used to determine a "security name" from the
-  traditional community string, taking into account where the request has
-  come from.  Thus the same community string can give access to  different
+    For SNMPv1 and SNMPv2c, the group line is just an intermediate step
+  between the "access" line and the "com2sec" line, which is the last bit
+  of the jigsaw.  The "com2sec" entry is used to determine a "security name"
+  from the traditional community string, taking into account where the request
+  has come from.  Thus the same community string can give access to  different
   portions of the tree, depending on where the request is sent from.
 
      For example, in the example config file, there are two com2sec lines
@@ -1054,12 +1058,39 @@ I don't understand the new access control stuff - what does it mean?
   of these as a group name (or vice versa), unless you set up suitable
   entries to map one name onto the other.
 
+    With SNMPv3, the security name is part of the basic protocol, and can
+  be used directly.
 
   And here concludes our tour of the view-based access control mechanism.
   Phew!
 
 
 
+I'm getting errors about "bad security model" - why?
+----------------------------------------------------
+
+  Until release 4.2, the access control handling accepted the token "any" 
+  to cover all of the recognised security models.  This is explicitly
+  forbidden in the relevant RFC, so support for this is being withdrawn.
+    As an interim measure, it is currently accepted (with the warning you
+  see), but this will not be the case in future releases of the agent.
+ 
+    You should replace the token 'any' with 'v1', 'v2c' or 'usm' as
+  appropriate.  If you want to support all three of these security models,
+  you'll need to use three distinct group lines, one for each. See the
+  example snmpd.conf file for details.
+
+  
+
+I'm getting errors about "bad prefix match parameter" - why?
+------------------------------------------------------------
+
+  This is similar to the previous question.  With 4.2, the syntax of the
+  'access' configure line has changed, and a value of '0' is no longer
+  acceptable for the sixth field.  Simply replace this with the word 'exact'.
+
+
+  
 What ASN.1 parser is used?
 -------------------------
 
