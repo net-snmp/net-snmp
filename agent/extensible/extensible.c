@@ -929,7 +929,7 @@ init_extensible() {
   update_config(0);
   
   /* set default values of system stuff */
-  strcpy(extmp.command,"UNAMEPROG -a");
+  sprintf(extmp.command,"%s -a",UNAMEPROG);
   /* setup defaults */
   extmp.type = EXECPROC;
   extmp.next = NULL;
@@ -937,7 +937,7 @@ init_extensible() {
   strcpy(version_descr,extmp.output);
   version_descr[strlen(version_descr)-1] = NULL; /* chomp new line */
 
-  strcpy(extmp.command,"UNAMEPROG -n");
+  sprintf(extmp.command,"%s -n",UNAMEPROG);
   /* setup defaults */
   extmp.type = EXECPROC;
   extmp.next = NULL;
