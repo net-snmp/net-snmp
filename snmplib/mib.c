@@ -318,7 +318,7 @@ sprint_opaque(buf, var, enums, hint, units)
     char *units;
 {
 
-    if (var->type != ASNT_OPAQUE){
+    if (var->type != ASN_OPAQUE){
 	sprintf(buf, "Wrong Type (should be Opaque): ");
 	buf += strlen(buf);
 	sprint_by_type(buf, var, NULL, NULL, NULL);
@@ -366,7 +366,7 @@ sprint_timeticks(buf, var, enums, hint, units)
 {
     char timebuf[32];
 
-    if (var->type != TIMETICKS){
+    if (var->type != ASN_TIMETICKS){
 	sprintf(buf, "Wrong Type (should be Timeticks): ");
 	buf += strlen(buf);
 	sprint_by_type(buf, var, NULL, NULL, NULL);
@@ -469,7 +469,7 @@ sprint_uinteger(buf, var, enums, hint, units)
 {
     char    *enum_string = NULL;
 
-    if (var->type != UINTEGER){
+    if (var->type != ASN_UINTEGER){
 	sprintf(buf, "Wrong Type (should be UInteger32): ");
 	buf += strlen(buf);
 	sprint_by_type(buf, var, NULL, NULL, NULL);
@@ -498,7 +498,7 @@ sprint_gauge(buf, var, enums, hint, units)
     char *hint;
     char *units;
 {
-    if (var->type != GAUGE){
+    if (var->type != ASN_GAUGE){
 	sprintf(buf, "Wrong Type (should be Gauge): ");
 	buf += strlen(buf);
 	sprint_by_type(buf, var, NULL, NULL, NULL);
@@ -520,7 +520,7 @@ sprint_counter(buf, var, enums, hint, units)
     char *hint;
     char *units;
 {
-    if (var->type != COUNTER){
+    if (var->type != ASN_COUNTER){
 	sprintf(buf, "Wrong Type (should be Counter): ");
 	buf += strlen(buf);
 	sprint_by_type(buf, var, NULL, NULL, NULL);
@@ -566,7 +566,7 @@ sprint_ipaddress(buf, var, enums, hint, units)
 {
     u_char *ip;
 
-    if (var->type != IPADDRESS){
+    if (var->type != ASN_IPADDRESS){
 	sprintf(buf, "Wrong Type (should be Ipaddress): ");
 	buf += strlen(buf);
 	sprint_by_type(buf, var, NULL, NULL, NULL);
@@ -659,7 +659,7 @@ sprint_nsapaddress(buf, var, enums, hint, units)
     char *hint;
     char *units;
 {
-    if (var->type != NSAP){
+    if (var->type != ASN_NSAP){
 	sprintf(buf, "Wrong Type (should be NsapAddress): ");
 	buf += strlen(buf);
 	sprint_by_type(buf, var, NULL, NULL, NULL);
@@ -680,7 +680,7 @@ sprint_counter64(buf, var, enums, hint, units)
     char *hint;
     char *units;
 {
-    if (var->type != COUNTER64){
+    if (var->type != ASN_COUNTER64){
 	sprintf(buf, "Wrong Type (should be Counter64): ");
 	buf += strlen(buf);
 	sprint_by_type(buf, var, NULL, NULL, NULL);
@@ -739,28 +739,28 @@ sprint_by_type(buf, var, enums, hint, units)
 	case ASN_OCTET_STR:
 	    sprint_octet_string(buf, var, enums, hint, units);
 	    break;
-	case ASNT_OPAQUE:
+	case ASN_OPAQUE:
 	    sprint_opaque(buf, var, enums, hint, units);
 	    break;
 	case ASN_OBJECT_ID:
 	    sprint_object_identifier(buf, var, enums, hint, units);
 	    break;
-	case TIMETICKS:
+	case ASN_TIMETICKS:
 	    sprint_timeticks(buf, var, enums, hint, units);
 	    break;
-	case GAUGE:
+	case ASN_GAUGE:
 	    sprint_gauge(buf, var, enums, hint, units);
 	    break;
-	case COUNTER:
+	case ASN_COUNTER:
 	    sprint_counter(buf, var, enums, hint, units);
 	    break;
-	case IPADDRESS:
+	case ASN_IPADDRESS:
 	    sprint_ipaddress(buf, var, enums, hint, units);
 	    break;
 	case ASN_NULL:
 	    sprint_null(buf, var, enums, hint, units);
 	    break;
-	case UINTEGER:
+	case ASN_UINTEGER:
 	    sprint_uinteger(buf, var, enums, hint, units);
 	    break;
 	default:

@@ -291,7 +291,7 @@ fixExecError(action, var_val, var_val_type, var_val_len, statP, name, name_len)
   FILE *file;
 
   if ((exten = get_exten_instance(extens,name[8]))) {
-    if (var_val_type != INTEGER) {
+    if (var_val_type != ASN_INTEGER) {
       printf("Wrong type != int\n");
       return SNMP_ERR_WRONGTYPE;
     }
@@ -314,12 +314,12 @@ fixExecError(action, var_val, var_val_type, var_val_len, statP, name, name_len)
 
 /* the relocatable extensible commands variables */
 struct variable2 extensible_relocatable_variables[] = {
-  {MIBINDEX, INTEGER, RONLY, var_extensible_relocatable, 1, {MIBINDEX}},
-  {ERRORNAME, STRING, RONLY, var_extensible_relocatable, 1, {ERRORNAME}}, 
-    {SHELLCOMMAND, STRING, RONLY, var_extensible_relocatable, 1, {SHELLCOMMAND}}, 
-    {ERRORFLAG, INTEGER, RONLY, var_extensible_relocatable, 1, {ERRORFLAG}},
-    {ERRORMSG, STRING, RONLY, var_extensible_relocatable, 1, {ERRORMSG}},
-  {ERRORFIX, INTEGER, RWRITE, var_extensible_relocatable, 1, {ERRORFIX }}
+  {MIBINDEX, ASN_INTEGER, RONLY, var_extensible_relocatable, 1, {MIBINDEX}},
+  {ERRORNAME, ASN_OCTET_STR, RONLY, var_extensible_relocatable, 1, {ERRORNAME}}, 
+  {SHELLCOMMAND, ASN_OCTET_STR, RONLY, var_extensible_relocatable, 1, {SHELLCOMMAND}}, 
+  {ERRORFLAG, ASN_INTEGER, RONLY, var_extensible_relocatable, 1, {ERRORFLAG}},
+  {ERRORMSG, ASN_OCTET_STR, RONLY, var_extensible_relocatable, 1, {ERRORMSG}},
+  {ERRORFIX, ASN_INTEGER, RWRITE, var_extensible_relocatable, 1, {ERRORFIX }}
 };
 
 unsigned char *var_extensible_relocatable(vp, name, length, exact, var_len, write_method)

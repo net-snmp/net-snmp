@@ -18,11 +18,11 @@ extern u_char	*var_hrpartition();
 #ifdef IN_SNMP_VARS_C
 
 struct variable4 hrpartition_variables[] = {
-    { HRPART_INDEX,     INTEGER, RONLY, var_hrpartition, 2, {1,1}},
-    { HRPART_LABEL,      STRING, RONLY, var_hrpartition, 2, {1,2}},
-    { HRPART_ID,         STRING, RONLY, var_hrpartition, 2, {1,3}},
-    { HRPART_SIZE,      INTEGER, RONLY, var_hrpartition, 2, {1,4}},
-    { HRPART_FSIDX,     INTEGER, RONLY, var_hrpartition, 2, {1,5}}
+    { HRPART_INDEX,     ASN_INTEGER, RONLY, var_hrpartition, 2, {1,1}},
+    { HRPART_LABEL,   ASN_OCTET_STR, RONLY, var_hrpartition, 2, {1,2}},
+    { HRPART_ID,      ASN_OCTET_STR, RONLY, var_hrpartition, 2, {1,3}},
+    { HRPART_SIZE,      ASN_INTEGER, RONLY, var_hrpartition, 2, {1,4}},
+    { HRPART_FSIDX,     ASN_INTEGER, RONLY, var_hrpartition, 2, {1,5}}
 };
 config_load_mib( MIB.25.3.7, 9, hrpartition_variables)
 

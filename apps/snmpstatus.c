@@ -170,7 +170,7 @@ main(argc, argv)
     strcpy(name, "No System Description Available");
 
     /* create PDU for GET request and add object names to request */
-    pdu = snmp_pdu_create(GET_REQ_MSG);
+    pdu = snmp_pdu_create(SNMP_MSG_GET);
     snmp_add_null_var(pdu, objid_sysDescr, length_sysDescr);
     snmp_add_null_var(pdu, objid_sysUpTime, length_sysUpTime);
     snmp_add_null_var(pdu, objid_ipInReceives, length_ipInReceives);
@@ -214,7 +214,7 @@ retry:
             fprint_objid(stderr, vars->name, vars->name_length);
           fprintf(stderr, "\n");
         }
-        if ((pdu = snmp_fix_pdu(response, GET_REQ_MSG)) != NULL)
+        if ((pdu = snmp_fix_pdu(response, SNMP_MSG_GET)) != NULL)
           goto retry;
       }
     } else if (status == STAT_TIMEOUT){
@@ -234,7 +234,7 @@ retry:
       snmp_free_pdu(response);
 
     /* create PDU for GET request and add object names to request */
-    pdu = snmp_pdu_create(GETNEXT_REQ_MSG);
+    pdu = snmp_pdu_create(SNMP_MSG_GETNEXT);
     snmp_add_null_var(pdu, objid_ifOperStatus, length_ifOperStatus);
     snmp_add_null_var(pdu, objid_ifInUCastPkts, length_ifInUCastPkts);
     snmp_add_null_var(pdu, objid_ifInNUCastPkts, length_ifInNUCastPkts);
@@ -249,7 +249,7 @@ retry:
       status = snmp_synch_response(ss, pdu, &response);
       if (status == STAT_SUCCESS){
         if (response->errstat == SNMP_ERR_NOERROR){
-          pdu = snmp_pdu_create(GETNEXT_REQ_MSG);
+          pdu = snmp_pdu_create(SNMP_MSG_GETNEXT);
           for(vars = response->variables; vars; vars = vars->next_variable){
             if (vars->name_length >= length_ifOperStatus &&
                 !memcmp(objid_ifOperStatus, vars->name,

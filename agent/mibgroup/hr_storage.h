@@ -30,14 +30,14 @@ extern u_char	*var_hrstore();
 #ifdef IN_SNMP_VARS_C
 
 struct variable4 hrstore_variables[] = {
-    { HRSTORE_MEMSIZE,   INTEGER, RONLY, var_hrstore, 1, {2}},
-    { HRSTORE_INDEX,     INTEGER, RONLY, var_hrstore, 3, {3,1,1}},
-    { HRSTORE_TYPE,        OBJID, RONLY, var_hrstore, 3, {3,1,2}},
-    { HRSTORE_DESCR,      STRING, RONLY, var_hrstore, 3, {3,1,3}},
-    { HRSTORE_UNITS,     INTEGER, RONLY, var_hrstore, 3, {3,1,4}},
-    { HRSTORE_SIZE,      INTEGER, RONLY, var_hrstore, 3, {3,1,5}},
-    { HRSTORE_USED,      INTEGER, RONLY, var_hrstore, 3, {3,1,6}},
-    { HRSTORE_FAILS,     COUNTER, RONLY, var_hrstore, 3, {3,1,7}}
+    { HRSTORE_MEMSIZE,   ASN_INTEGER, RONLY, var_hrstore, 1, {2}},
+    { HRSTORE_INDEX,     ASN_INTEGER, RONLY, var_hrstore, 3, {3,1,1}},
+    { HRSTORE_TYPE,    ASN_OBJECT_ID, RONLY, var_hrstore, 3, {3,1,2}},
+    { HRSTORE_DESCR,   ASN_OCTET_STR, RONLY, var_hrstore, 3, {3,1,3}},
+    { HRSTORE_UNITS,     ASN_INTEGER, RONLY, var_hrstore, 3, {3,1,4}},
+    { HRSTORE_SIZE,      ASN_INTEGER, RONLY, var_hrstore, 3, {3,1,5}},
+    { HRSTORE_USED,      ASN_INTEGER, RONLY, var_hrstore, 3, {3,1,6}},
+    { HRSTORE_FAILS,     ASN_COUNTER, RONLY, var_hrstore, 3, {3,1,7}}
 };
 config_load_mib( MIB.25.2, 8, hrstore_variables)
 

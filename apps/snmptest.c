@@ -72,7 +72,7 @@ int main __P((int, char **));
 int ascii_to_binary __P((u_char *, u_char *));
 int hex_to_binary __P((u_char *, u_char *));
 
-int command = GET_REQ_MSG;
+int command = SNMP_MSG_GET;
 
 int input_variable __P((struct variable_list *));
 
@@ -142,7 +142,7 @@ main(argc, argv)
 		    free((char *)vp->val.string);
 		free((char *)vp);
 
-		if (command == BULK_REQ_MSG){
+		if (command == SNMP_MSG_GETBULK){
 		    if (nonRepeaters == -1){
 			nonRepeaters = varcount;
 			ret = -1;	/* so we collect more variables */
@@ -168,7 +168,7 @@ main(argc, argv)
 	    }
 	}
 	copy = snmp_clone_pdu(pdu);
-	if (command == TRP2_REQ_MSG){
+	if (command == SNMP_MSG_TRAP2){
 	    /* No response needed */
 	    if (!snmp_send(ss, pdu)){
                 snmp_perror("snmptest");
@@ -176,33 +176,33 @@ main(argc, argv)
 	} else {
 	    status = snmp_synch_response(ss, pdu, &response);
 	    if (status == STAT_SUCCESS){
-		if (command == INFORM_REQ_MSG &&
+		if (command == SNMP_MSG_INFORM &&
 		    response->errstat == SNMP_ERR_NOERROR){
 		    printf("Inform Acknowledged\n");
 		} else {
 		    switch(response->command){
-		      case GET_REQ_MSG:
+		      case SNMP_MSG_GET:
 			printf("Received Get Request ");
 			break;
-		      case GETNEXT_REQ_MSG:
+		      case SNMP_MSG_GETNEXT:
 			printf("Received Getnext Request ");
 			break;
-		      case GET_RSP_MSG:
+		      case SNMP_MSG_RESPONSE:
 			printf("Received Get Response ");
 			break;
-		      case SET_REQ_MSG:
+		      case SNMP_MSG_SET:
 			printf("Received Set Request ");
 			break;
-		      case TRP_REQ_MSG:
+		      case SNMP_MSG_TRAP:
 			printf("Received Trap Request ");
 			break;
-		      case BULK_REQ_MSG:
+		      case SNMP_MSG_GETBULK:
 			printf("Received Bulk Request ");
 			break;
-		      case INFORM_REQ_MSG:
+		      case SNMP_MSG_INFORM:
 			printf("Received Inform Request ");
 			break;
-		      case TRP2_REQ_MSG:
+		      case SNMP_MSG_TRAP2:
 			printf("Received SNMPv2 Trap Request ");
 			break;
 		    }
@@ -322,30 +322,30 @@ input_variable(vp)
     if (*buf == '$'){
 	switch(toupper(buf[1])){
 	    case 'G':
-		command = GET_REQ_MSG;
+		command = SNMP_MSG_GET;
 		printf("Request type is Get Request\n");
 		break;
 	    case 'N':
-		command = GETNEXT_REQ_MSG;
+		command = SNMP_MSG_GETNEXT;
 		printf("Request type is Getnext Request\n");
 		break;
 	    case 'S':
-		command = SET_REQ_MSG;
+		command = SNMP_MSG_SET;
 		printf("Request type is Set Request\n");
 		break;
 	    case 'B':
-		command = BULK_REQ_MSG;
+		command = SNMP_MSG_GETBULK;
 		printf("Request type is Bulk Request\n");
 		printf("Enter a blank line to terminate the list of non-repeaters\n");
 		printf("and to begin the repeating variables\n");
 		break;
 	    case 'I':
-		command = INFORM_REQ_MSG;
+		command = SNMP_MSG_INFORM;
 		printf("Request type is Inform Request\n");
 		printf("(Are you sending to the right port?)\n");
 		break;
 	    case 'T':
-		command = TRP2_REQ_MSG;
+		command = SNMP_MSG_TRAP2;
 		printf("Request type is SNMPv2 Trap Request\n");
 		printf("(Are you sending to the right port?)\n");
 		break;
@@ -387,36 +387,36 @@ input_variable(vp)
     vp->name = (oid *)malloc(vp->name_length * sizeof(oid));
     memmove(vp->name, name, vp->name_length * sizeof(oid));
 
-    if (command == SET_REQ_MSG || command == INFORM_REQ_MSG
-	|| command == TRP2_REQ_MSG){
+    if (command == SNMP_MSG_SET || command == SNMP_MSG_INFORM
+	|| command == SNMP_MSG_TRAP2){
 	printf("Type [i|s|x|d|n|o|t|a]: ");
 	fflush(stdout);
 	fgets(buf, sizeof buf, stdin);
 	ch = *buf;
 	switch(ch){
 	    case 'i':
-		vp->type = INTEGER;
+		vp->type = ASN_INTEGER;
 		break;
 	    case 's':
-		vp->type = STRING;
+		vp->type = ASN_OCTET_STR;
 		break;
 	    case 'x':
-		vp->type = STRING;
+		vp->type = ASN_OCTET_STR;
 		break;
 	    case 'd':
-		vp->type = STRING;
+		vp->type = ASN_OCTET_STR;
 		break;
 	    case 'n':
-		vp->type = NULLOBJ;
+		vp->type = ASN_NULL;
 		break;
 	    case 'o':
-		vp->type = OBJID;
+		vp->type = ASN_OBJECT_ID;
 		break;
 	    case 't':
-		vp->type = TIMETICKS;
+		vp->type = ASN_TIMETICKS;
 		break;
 	    case 'a':
-		vp->type = IPADDRESS;
+		vp->type = ASN_IPADDRESS;
 		break;
 	    default:
 		printf("bad type \"%c\", use \"i\", \"s\", \"x\", \"d\", \"n\", \"o\", \"t\", or \"a\".\n", *buf);
@@ -425,12 +425,12 @@ input_variable(vp)
 	printf("Value: "); fflush(stdout);
 	fgets(buf, sizeof buf, stdin);
 	switch(vp->type){
-	    case INTEGER:
+	    case ASN_INTEGER:
 		vp->val.integer = (long *)malloc(sizeof(long));
 		*(vp->val.integer) = atoi(buf);
 		vp->val_len = sizeof(long);
 		break;
-	    case STRING:
+	    case ASN_OCTET_STR:
 		if (ch == 'd'){
 		    vp->val_len = ascii_to_binary((u_char *)buf, value);
 		} else if (ch == 's'){
@@ -440,25 +440,25 @@ input_variable(vp)
 		    vp->val_len = hex_to_binary((u_char *)buf, value);
 		}
 		vp->val.string = (u_char *)malloc(vp->val_len);
-              memmove(vp->val.string, value, vp->val_len);
+		memmove(vp->val.string, value, vp->val_len);
 		break;
-	    case NULLOBJ:
+	    case ASN_NULL:
 		vp->val_len = 0;
 		vp->val.string = NULL;
 		break;
-	    case OBJID:
+	    case ASN_OBJECT_ID:
 		vp->val_len = MAX_NAME_LEN;;
 		read_objid(buf, (oid *)value, &vp->val_len);
 		vp->val_len *= sizeof(oid);
 		vp->val.objid = (oid *)malloc(vp->val_len);
-              memmove(vp->val.objid, value, vp->val_len);
+		memmove(vp->val.objid, value, vp->val_len);
 		break;
-	    case TIMETICKS:
+	      case ASN_TIMETICKS:
 		vp->val.integer = (long *)malloc(sizeof(long));
 		*(vp->val.integer) = atoi(buf);
 		vp->val_len = sizeof(long);
 		break;
-	    case IPADDRESS:
+	    case ASN_IPADDRESS:
 		vp->val.integer = (long *)malloc(sizeof(long));
 		*(vp->val.integer) = inet_addr(buf);
 		vp->val_len = sizeof(long);
@@ -468,7 +468,7 @@ input_variable(vp)
 		break;
 	}
     } else {	/* some form of get message */
-	vp->type = NULLOBJ;
+	vp->type = ASN_NULL;
 	vp->val_len = 0;
     }
     return 1;

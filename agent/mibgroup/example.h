@@ -66,12 +66,12 @@ struct variable2 example_variables[] = {
     */
 
     /* Now do the rest.  The next two are the sub-table, at .2.1 and .2.2: */
-    { EXAMPLEINTEGER,   INTEGER,   RONLY, var_example, 2, {2,1}},
-    { EXAMPLEOBJECTID,  OBJID,     RONLY, var_example, 2, {2,2}},
-    { EXAMPLETIMETICKS, TIMETICKS, RONLY, var_example, 1, {3}},
-    { EXAMPLEIPADDRESS, IPADDRESS, RONLY, var_example, 1, {4}},
-    { EXAMPLECOUNTER,   COUNTER,   RONLY, var_example, 1, {5}},
-    { EXAMPLEGAUGE,     GAUGE,     RONLY, var_example, 1, {6}}
+    { EXAMPLEINTEGER,   ASN_INTEGER,   RONLY, var_example, 2, {2,1}},
+    { EXAMPLEOBJECTID,  ASN_OBJECT_ID, RONLY, var_example, 2, {2,2}},
+    { EXAMPLETIMETICKS, ASN_TIMETICKS, RONLY, var_example, 1, {3}},
+    { EXAMPLEIPADDRESS, ASN_IPADDRESS, RONLY, var_example, 1, {4}},
+    { EXAMPLECOUNTER,   ASN_COUNTER,   RONLY, var_example, 1, {5}},
+    { EXAMPLEGAUGE,     ASN_GAUGE,     RONLY, var_example, 1, {6}}
 };
 
 /* Now, load the above table at our requested location: */

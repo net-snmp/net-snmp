@@ -28,12 +28,12 @@ config_parse_dot_conf("sh", extensible_parse_config, extensible_free_config)
 #ifdef IN_SNMP_VARS_C
 
 struct variable2 extensible_extensible_variables[] = {
-  {MIBINDEX, INTEGER, RONLY, var_extensible_shell, 1, {MIBINDEX}},
-  {ERRORNAME, STRING, RONLY, var_extensible_shell, 1, {ERRORNAME}}, 
-    {SHELLCOMMAND, STRING, RONLY, var_extensible_shell, 1, {SHELLCOMMAND}}, 
-    {ERRORFLAG, INTEGER, RONLY, var_extensible_shell, 1, {ERRORFLAG}},
-    {ERRORMSG, STRING, RONLY, var_extensible_shell, 1, {ERRORMSG}},
-  {ERRORFIX, INTEGER, RWRITE, var_extensible_shell, 1, {ERRORFIX }}
+  {MIBINDEX, ASN_INTEGER, RONLY, var_extensible_shell, 1, {MIBINDEX}},
+  {ERRORNAME, ASN_OCTET_STR, RONLY, var_extensible_shell, 1, {ERRORNAME}}, 
+  {SHELLCOMMAND, ASN_OCTET_STR, RONLY, var_extensible_shell, 1, {SHELLCOMMAND}}, 
+  {ERRORFLAG, ASN_INTEGER, RONLY, var_extensible_shell, 1, {ERRORFLAG}},
+  {ERRORMSG, ASN_OCTET_STR, RONLY, var_extensible_shell, 1, {ERRORMSG}},
+  {ERRORFIX, ASN_INTEGER, RWRITE, var_extensible_shell, 1, {ERRORFIX }}
 };
 
 config_load_mib(EXTENSIBLEMIB.SHELLMIBNUM.1, EXTENSIBLENUM+2, extensible_extensible_variables)

@@ -27,19 +27,19 @@ extern u_char	*var_hrswrun();
 #ifdef IN_SNMP_VARS_C
 
 struct variable4 hrswrun_variables[] = {
-    { HRSWRUN_OSINDEX,   INTEGER, RONLY, var_hrswrun, 1, {1}},
-    { HRSWRUN_INDEX,     INTEGER, RONLY, var_hrswrun, 3, {2,1,1}},
-    { HRSWRUN_NAME,       STRING, RONLY, var_hrswrun, 3, {2,1,2}},
-    { HRSWRUN_ID,          OBJID, RONLY, var_hrswrun, 3, {2,1,3}},
-    { HRSWRUN_PATH,       STRING, RONLY, var_hrswrun, 3, {2,1,4}},
-    { HRSWRUN_PARAMS,     STRING, RONLY, var_hrswrun, 3, {2,1,5}},
-    { HRSWRUN_TYPE,      INTEGER, RONLY, var_hrswrun, 3, {2,1,6}},
-    { HRSWRUN_STATUS,    INTEGER, RONLY, var_hrswrun, 3, {2,1,7}}
+    { HRSWRUN_OSINDEX,   ASN_INTEGER, RONLY, var_hrswrun, 1, {1}},
+    { HRSWRUN_INDEX,     ASN_INTEGER, RONLY, var_hrswrun, 3, {2,1,1}},
+    { HRSWRUN_NAME,    ASN_OCTET_STR, RONLY, var_hrswrun, 3, {2,1,2}},
+    { HRSWRUN_ID,      ASN_OBJECT_ID, RONLY, var_hrswrun, 3, {2,1,3}},
+    { HRSWRUN_PATH,    ASN_OCTET_STR, RONLY, var_hrswrun, 3, {2,1,4}},
+    { HRSWRUN_PARAMS,  ASN_OCTET_STR, RONLY, var_hrswrun, 3, {2,1,5}},
+    { HRSWRUN_TYPE,      ASN_INTEGER, RONLY, var_hrswrun, 3, {2,1,6}},
+    { HRSWRUN_STATUS,    ASN_INTEGER, RONLY, var_hrswrun, 3, {2,1,7}}
 };
 
 struct variable4 hrswrunperf_variables[] = {
-    { HRSWRUNPERF_CPU,   INTEGER, RONLY, var_hrswrun, 3, {1,1,1}},
-    { HRSWRUNPERF_MEM,   INTEGER, RONLY, var_hrswrun, 3, {1,1,2}}
+    { HRSWRUNPERF_CPU,   ASN_INTEGER, RONLY, var_hrswrun, 3, {1,1,1}},
+    { HRSWRUNPERF_MEM,   ASN_INTEGER, RONLY, var_hrswrun, 3, {1,1,2}}
 };
 
 config_load_mib( MIB.25.4, 8, hrswrun_variables)

@@ -33,12 +33,12 @@ extern u_char	*var_udpEntry __P((struct variable *, oid *, int *, int, int *, in
 #ifdef IN_SNMP_VARS_C
 
 struct variable8 udp_variables[] = {
-    {UDPINDATAGRAMS, COUNTER, RONLY, var_udp, 1, {1}},
-    {UDPNOPORTS, COUNTER, RONLY, var_udp, 1, {2}},
-    {UDPINERRORS, COUNTER, RONLY, var_udp, 1, {3}},
-    {UDPOUTDATAGRAMS, COUNTER, RONLY, var_udp, 1, {4}},
-    {UDPLOCALADDRESS, IPADDRESS, RONLY, var_udpEntry, 3, {5, 1, 1}},
-    {UDPLOCALPORT, INTEGER, RONLY, var_udpEntry, 3, {5, 1, 2}}
+    {UDPINDATAGRAMS, ASN_COUNTER, RONLY, var_udp, 1, {1}},
+    {UDPNOPORTS, ASN_COUNTER, RONLY, var_udp, 1, {2}},
+    {UDPINERRORS, ASN_COUNTER, RONLY, var_udp, 1, {3}},
+    {UDPOUTDATAGRAMS, ASN_COUNTER, RONLY, var_udp, 1, {4}},
+    {UDPLOCALADDRESS, ASN_IPADDRESS, RONLY, var_udpEntry, 3, {5, 1, 1}},
+    {UDPLOCALPORT, ASN_INTEGER, RONLY, var_udpEntry, 3, {5, 1, 2}}
 };
 
 config_load_mib(MIB.7, 7,udp_variables)

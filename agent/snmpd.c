@@ -480,7 +480,7 @@ send_v1_trap (ss, trap, specific)
 	diff.tv_sec++;
     }
 
-    pdu = snmp_pdu_create (TRP_REQ_MSG);
+    pdu = snmp_pdu_create (SNMP_MSG_TRAP);
     pdu->enterprise = version_id;
     pdu->enterprise_length = version_id_len;
     pdu->agent_addr.sin_addr.s_addr = get_myaddr();
@@ -966,7 +966,7 @@ snmp_input(op, session, reqid, pdu, magic)
     struct get_req_state *state = (struct get_req_state *)magic;
     
     if (op == RECEIVED_MESSAGE) {
-	if (pdu->command == GET_RSP_MSG) {
+	if (pdu->command == SNMP_MSG_GET) {
 	    if (state->type == EVENT_GET_REQ) {
 		/* this is just the ack to our inform pdu */
 		return 1;

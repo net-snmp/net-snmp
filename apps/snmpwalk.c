@@ -149,7 +149,7 @@ main(argc, argv)
     running = 1;
     while(running){
       /* create PDU for GETNEXT request and add object name to request */
-      pdu = snmp_pdu_create(GETNEXT_REQ_MSG);
+      pdu = snmp_pdu_create(SNMP_MSG_GETNEXT);
       snmp_add_null_var(pdu, name, name_length);
 
       /* do the request */

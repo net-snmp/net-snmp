@@ -22,13 +22,13 @@ extern u_char	*var_hrswinst();
 #ifdef IN_SNMP_VARS_C
 
 struct variable4 hrswinst_variables[] = {
-    { HRSWINST_CHANGE,  TIMETICKS, RONLY, var_hrswinst, 1, {1}},
-    { HRSWINST_UPDATE,  TIMETICKS, RONLY, var_hrswinst, 1, {2}},
-    { HRSWINST_INDEX,     INTEGER, RONLY, var_hrswinst, 3, {3,1,1}},
-    { HRSWINST_NAME,       STRING, RONLY, var_hrswinst, 3, {3,1,2}},
-    { HRSWINST_ID,          OBJID, RONLY, var_hrswinst, 3, {3,1,3}},
-    { HRSWINST_TYPE,      INTEGER, RONLY, var_hrswinst, 3, {3,1,4}},
-    { HRSWINST_DATE,       STRING, RONLY, var_hrswinst, 3, {3,1,5}}
+    { HRSWINST_CHANGE,  ASN_TIMETICKS, RONLY, var_hrswinst, 1, {1}},
+    { HRSWINST_UPDATE,  ASN_TIMETICKS, RONLY, var_hrswinst, 1, {2}},
+    { HRSWINST_INDEX,     ASN_INTEGER, RONLY, var_hrswinst, 3, {3,1,1}},
+    { HRSWINST_NAME,    ASN_OCTET_STR, RONLY, var_hrswinst, 3, {3,1,2}},
+    { HRSWINST_ID,      ASN_OBJECT_ID, RONLY, var_hrswinst, 3, {3,1,3}},
+    { HRSWINST_TYPE,      ASN_INTEGER, RONLY, var_hrswinst, 3, {3,1,4}},
+    { HRSWINST_DATE,    ASN_OCTET_STR, RONLY, var_hrswinst, 3, {3,1,5}}
 };
 
 config_load_mib( MIB.25.6, 8, hrswinst_variables)

@@ -125,7 +125,7 @@ main (argc, argv)
     }
 
     /* create PDU for GET request and add object names to request */
-    pdu = snmp_pdu_create(GET_REQ_MSG);
+    pdu = snmp_pdu_create(SNMP_MSG_GET);
     for(count = 0; count < current_name; count++){
       name_length = MAX_NAME_LEN;
       if (!snmp_parse_oid(names[count], name, &name_length)) {
@@ -159,7 +159,7 @@ retry:
             fprint_objid(stderr, vars->name, vars->name_length);
           fprintf(stderr, "\n");
         }
-        if ((pdu = snmp_fix_pdu(response, GET_REQ_MSG)) != NULL)
+        if ((pdu = snmp_fix_pdu(response, SNMP_MSG_GET)) != NULL)
           goto retry;
       }
     } else if (status == STAT_TIMEOUT){

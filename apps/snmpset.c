@@ -167,7 +167,7 @@ main(argc, argv)
     }
 
     /* create PDU for SET request and add object names and values to request */
-    pdu = snmp_pdu_create(SET_REQ_MSG);
+    pdu = snmp_pdu_create(SNMP_MSG_SET);
     for(count = 0; count < current_name; count++){
       name_length = MAX_NAME_LEN;
       if (snmp_parse_oid(names[count], name, &name_length) == NULL) {
@@ -202,7 +202,7 @@ retry:
               fprint_objid(stderr, vars->name, vars->name_length);
             fprintf(stderr, "\n");
           }
-          if ((pdu = snmp_fix_pdu(response, SET_REQ_MSG)) != NULL)
+          if ((pdu = snmp_fix_pdu(response, SNMP_MSG_SET)) != NULL)
             goto retry;
         }
       } else if (status == STAT_TIMEOUT){
@@ -259,35 +259,35 @@ snmp_add_var(pdu, name, name_length, type, value)
 
     switch(type){
     case 'i':
-      vars->type = INTEGER;
+      vars->type = ASN_INTEGER;
       vars->val.integer = (long *)malloc(sizeof(long));
       *(vars->val.integer) = atol(value);
       vars->val_len = sizeof(long);
       break;
 
     case 'u':
-      vars->type = UNSIGNED;
+      vars->type = ASN_UNSIGNED;
       vars->val.integer = (long *)malloc(sizeof(long));
       sscanf(value, "%lu", vars->val.integer);
       vars->val_len = sizeof(long);
       break;
 
     case 't':
-      vars->type = TIMETICKS;
+      vars->type = ASN_TIMETICKS;
       vars->val.integer = (long *)malloc(sizeof(long));
       sscanf(value, "%lu", vars->val.integer);
       vars->val_len = sizeof(long);
       break;
 
     case 'a':
-      vars->type = IPADDRESS;
+      vars->type = ASN_IPADDRESS;
       vars->val.integer = (long *)malloc(sizeof(long));
       *(vars->val.integer) = inet_addr(value);
       vars->val_len = sizeof(long);
       break;
 
     case 'o':
-      vars->type = OBJID;
+      vars->type = ASN_OBJECT_ID;
       vars->val_len = MAX_NAME_LEN;
       read_objid(value, (oid *)buf, &vars->val_len);
       vars->val_len *= sizeof(oid);
@@ -298,7 +298,7 @@ snmp_add_var(pdu, name, name_length, type, value)
     case 's':
     case 'x':
     case 'd':
-      vars->type = STRING;
+      vars->type = ASN_OCTET_STR;
       if (type == 'd'){
         vars->val_len = ascii_to_binary((u_char *)value, buf);
       } else if (type == 's'){
@@ -317,7 +317,7 @@ snmp_add_var(pdu, name, name_length, type, value)
       break;
 
     case 'n':
-      vars->type = NULLOBJ;
+      vars->type = ASN_NULL;
       vars->val_len = 0;
       vars->val.string = NULL;
       break;
