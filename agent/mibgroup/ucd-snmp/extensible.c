@@ -224,6 +224,7 @@ extensible_parse_config(const char *token, char *cptr)
         /*
          * its a relocatable extensible mib 
          */
+        config_perror("Warning: relocatable 'exec' format will change in a future release - See 'NET-SNMP-EXTEND-MIB' for an alternative" );
         for (pp = &relocs, numrelocs++; *pp; pp = &((*pp)->next));
         (*pp) = ptmp;
         pp = &relocs; scount = numrelocs;

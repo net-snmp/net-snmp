@@ -98,6 +98,14 @@ maintain consistency of information for consecutive table queries.
 The cache can be flushed by a snmp-set request of integer(1) to
 EXTENSIBLEDOTMIB.VERSIONMIBNUM.VERCLEARCACHE.
 .RE
+.IP "extend NAME PROG ARGS"
+.IP "extend MIBNUM NAME PROG ARGS"
+.IP
+This is similar to the 'exec' directive, but uses a different MIB output
+structure (for both forms) which covers multi-line output as standard.
+See NET-SNMP-EXTEND-MIB for details.
+Output is cached for each entry separately, controlled by the
+NET-SNMP-AGENT-MIB::nsCacheTable.
 .IP "execfix NAME PROG ARGS"
 This registers a command that knows how to fix errors with the given
 exec or sh NAME.  When EXTENSIBLEDOTMIB.SHELLMIBNUM.1.ERRORFIX for a
