@@ -5,7 +5,7 @@ INSTALLDIRS = snmplib agent apps local man mibs
 
 CPP = @CPP@ -I$(srcdir)/agent/mibgroup -I. -I$(srcdir) -DDONT_INC_STRUCTS -DBINDIR=$(bindir) $(EXTRACPPFLAGS)
 
-INSTALLHEADERS=ucd-snmp-config.h version.h
+INSTALLHEADERS=ucd-snmp-config.h $(srcdir)/version.h
 
 all:	sedscript EXAMPLE.conf subdirs ucd-snmp-config.h
 
@@ -27,8 +27,8 @@ install:    all installdirs
         ( cd $$i ; $(MAKE) install ) ; \
 	done
 	for i in $(INSTALLHEADERS) ; do \
-		@$(INSTALL) $$i $(includedir) ; \
-		@echo "install:  installed $$i in $(includedir)";\
+		$(INSTALL) $$i $(includedir) ; \
+		echo "install:  installed $$i in $(includedir)";\
 	done
 
 installdirs:
