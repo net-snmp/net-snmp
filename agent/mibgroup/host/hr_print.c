@@ -203,11 +203,11 @@ Init_HR_Print(void)
 {
 #if HAVE_LPSTAT || HAVE_CGETNEXT || HAVE_PRINTCAP
     int             i, fd;
-#if HAVE_LPSTAT
+#if HAVE_PRINTCAP
     FILE           *p;
 #elif HAVE_CGETNEXT
     const char     *caps[] = { "/etc/printcap", NULL };
-#elif HAVE_PRINTCAP
+#elif HAVE_LPSTAT
     FILE           *p;
 #endif
 
@@ -222,21 +222,7 @@ Init_HR_Print(void)
             return;
     }
 
-#if HAVE_LPSTAT
-    if ((p = run_lpstat(&fd)) != NULL) {
-        char            buf[BUFSIZ], ptr[BUFSIZ];
-        while (fgets(buf, sizeof buf, p)) {
-            sscanf(buf, "%*s %*s %[^:]", ptr);
-#elif HAVE_CGETNEXT
-    {
-        char           *buf = NULL, *ptr;
-        while (cgetnext(&buf, caps)) {
-            if ((ptr = strchr(buf, ':')))
-                *ptr = 0;
-            if ((ptr = strchr(buf, '|')))
-                *ptr = 0;
-            ptr = buf;
-#elif HAVE_PRINTCAP
+#if HAVE_PRINTCAP
     if ((p = fopen("/etc/printcap", "r")) != NULL) {
         char            buf[BUFSIZ], *ptr;
         while (fgets(buf, sizeof buf, p)) {
@@ -251,6 +237,20 @@ Init_HR_Print(void)
             if ((ptr = strchr(buf, '|')))
                 *ptr = 0;
             ptr = buf;
+#elif HAVE_CGETNEXT
+    {
+        char           *buf = NULL, *ptr;
+        while (cgetnext(&buf, caps)) {
+            if ((ptr = strchr(buf, ':')))
+                *ptr = 0;
+            if ((ptr = strchr(buf, '|')))
+                *ptr = 0;
+            ptr = buf;
+#elif HAVE_LPSTAT
+    if ((p = run_lpstat(&fd)) != NULL) {
+        char            buf[BUFSIZ], ptr[BUFSIZ];
+        while (fgets(buf, sizeof buf, p)) {
+            sscanf(buf, "%*s %*s %[^:]", ptr);
 #endif
             if (HRP_names == HRP_maxnames) {
                 char          **tmp;
