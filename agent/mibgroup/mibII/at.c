@@ -482,7 +482,19 @@ static struct arpcom at_com;
 #elif defined(hpux11)
 static mib_ipNetToMediaEnt *at = (mib_ipNetToMediaEnt *) 0;
 #else
-static struct arptab *at = 0;
+
+/*
+ * at used to be allocated every time we needed to look at the arp cache.
+ * This cause us to parse /proc/net/arp twice for each request and didn't
+ * allow us to filter things like we'd like to.  So now we use it 
+ * semi-statically.  We initialize it to size 0 and if we need more room
+ * we realloc room for ARP_CACHE_INCR more entries in the table.
+ * We never release what we've taken . . .
+ */
+#define ARP_CACHE_INCR 1024
+static struct arptab *at = NULL;
+static int      arptab_curr_max_size = 0;
+
 #endif
 #endif                          /* CAN_USE_SYSCTL */
 
@@ -551,40 +563,66 @@ ARP_Scan_Init(void)
 #endif                          /* hpux11 */
 #else                           /* linux */
 
-    FILE           *in = fopen("/proc/net/arp", "r");
-    int             i, n = 0;
+    static time_t   tm = 0;     /* Time of last scan */
+    FILE           *in;
+    int             i;
     char            line[128];
     int             za, zb, zc, zd, ze, zf, zg, zh, zi, zj;
     char            ifname[20];
 
-    if (!in) {
-        snmp_log(LOG_ERR, "snmpd: Cannot open /proc/net/arp\n");
-        arptab_current = 0;
+    arptab_current = 0;         /* Anytime this is called we need to reset 'current' */
+
+    if (time(NULL) < tm + 1) {  /*Our cool one second cache implementation :-) */
         return;
     }
-    for (n = -1; fgets(line, sizeof(line), in); n++);
-    fclose(in);
+
     in = fopen("/proc/net/arp", "r");
-    fgets(line, sizeof(line), in);      /* skip header */
-    if (at)
-        free(at);
-    arptab_current = 0;         /* it was missing, bug??? */
-    arptab_size = n;
-    if (arptab_size > 0)
-        at = (struct arptab *)
-            malloc(arptab_size * sizeof(struct arptab));
-    else
-        at = NULL;
-    for (i = 0; i < arptab_size; i++) {
+    if (!in) {
+        snmp_log(LOG_ERR, "snmpd: Cannot open /proc/net/arp\n");
+        arptab_size = 0;
+        return;
+    }
+
+    /*
+     * Get rid of the header line 
+     */
+    fgets(line, sizeof(line), in);
+
+    i = 0;
+    while (fgets(line, sizeof(line), in)) {
         u_long          tmp_a;
-        while (line == fgets(line, sizeof(line), in) &&
-               12 != sscanf(line,
-                            "%d.%d.%d.%d 0x%*x 0x%x %x:%x:%x:%x:%x:%x %*[^ ] %20s\n",
-                            &za, &zb, &zc, &zd, &at[i].at_flags, &ze, &zf,
-                            &zg, &zh, &zi, &zj, ifname)) {
+        int             tmp_flags;
+        if (i >= arptab_curr_max_size) {
+            struct arptab  *newtab = (struct arptab *)
+                realloc(at, (sizeof(struct arptab) *
+                             (arptab_curr_max_size + ARP_CACHE_INCR)));
+            if (newtab == at) {
+                snmp_log(LOG_ERR,
+                         "Error allocating more space for arpcache.  "
+                         "Cache will continue to be limited to %d entries",
+                         arptab_curr_max_size);
+                break;
+            } else {
+                arptab_curr_max_size += ARP_CACHE_INCR;
+                at = newtab;
+            }
+        }
+        if (12 !=
+            sscanf(line,
+                   "%d.%d.%d.%d 0x%*x 0x%x %x:%x:%x:%x:%x:%x %*[^ ] %20s\n",
+                   &za, &zb, &zc, &zd, &tmp_flags, &ze, &zf, &zg, &zh, &zi,
+                   &zj, ifname)) {
             snmp_log(LOG_ERR, "Bad line in /proc/net/arp: %s", line);
             continue;
         }
+        /*
+         * Invalidated entries have their flag set to 0.
+         * * We want to ignore them 
+         */
+        if (tmp_flags == 0) {
+            continue;
+        }
+        at[i].at_flags = tmp_flags;
         at[i].at_enaddr[0] = ze;
         at[i].at_enaddr[1] = zf;
         at[i].at_enaddr[2] = zg;
@@ -595,9 +633,12 @@ ARP_Scan_Init(void)
             ((u_long) zb << 16) | ((u_long) zc << 8) | ((u_long) zd);
         at[i].at_iaddr.s_addr = htonl(tmp_a);
         at[i].if_index = Interface_Index_By_Name(ifname, strlen(ifname));
+        i++;
     }
-    fclose(in);
+    arptab_size = i;
 
+    fclose(in);
+    time(&tm);
 #endif                          /* linux */
 #else                           /* CAN_USE_SYSCTL */
 
