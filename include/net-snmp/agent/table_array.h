@@ -128,7 +128,7 @@ extern          "C" {
                                      netsnmp_container *container,
                                      int group_rows);
 
-    oid_array      *netsnmp_extract_array_context(netsnmp_request_info *);
+    netsnmp_container * netsnmp_extract_array_context(netsnmp_request_info *);
 
     Netsnmp_Node_Handler netsnmp_table_array_helper_handler;
 
