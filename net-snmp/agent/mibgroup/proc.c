@@ -21,6 +21,7 @@
 #endif
 #include "util_funcs.h"
 #include "read_config.h"
+#include "mib_module_config.h"
 
 struct myproc *get_proc_instance __P((struct myproc *,int));
 struct myproc *procwatch = NULL;
