@@ -349,10 +349,6 @@ SOURCE="..\..\include\net-snmp\library\snmp-tc.h"
 # End Source File
 # Begin Source File
 
-SOURCE="C:\Program Files\Microsoft SDK\include\Snmp.h"
-# End Source File
-# Begin Source File
-
 SOURCE="..\..\include\net-snmp\library\snmp_alarm.h"
 # End Source File
 # Begin Source File
