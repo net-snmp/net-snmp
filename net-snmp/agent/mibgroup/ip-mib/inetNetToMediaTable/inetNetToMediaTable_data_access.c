@@ -164,7 +164,7 @@ inetNetToMediaTable_cache_load(netsnmp_container * container)
     DEBUGMSGTL(("verbose:inetNetToMediaTable_cache_load", "called\n"));
     
     if(NULL == arp_container)
-        return MFD_ERROR; /* msg already logged */
+        return MFD_RESOURCE_UNAVAILABLE; /* msg already logged */
     
     /*
      * we just got a fresh copy of data. snarf data
