@@ -1,0 +1,25 @@
+.TH "null_container: Helps you implement specialized" 3 "17 Oct 2003" "net-snmp" \" -*- nroff -*-
+.ad l
+.nh
+.SH NAME
+null_container: Helps you implement specialized \- containers. 
+More...
+.SS "Modules"
+
+.in +1c
+.ti -1c
+.RI "\fBnull_container: Helps you implement specialized\fP"
+.br
+.RI "\fIcontainers.\fP"
+.PP
+
+.in -1c
+.SH "DETAILED DESCRIPTION"
+.PP 
+containers.
+.PP
+This is a simple container that doesn't actually contain anything. All the methods simply log a debug message and return.
+.PP
+The original intent for this container is as a wrapper for a specialized container. Implement the functions you need, create a null_container, and override the default functions with your specialized versions.
+.PP
+You can use the 'container:null' debug token to see what functions are being called, to help determine if you need to implement them. 

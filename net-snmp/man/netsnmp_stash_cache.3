@@ -1,0 +1,69 @@
+.TH "stash_cache: automatically caches data for certain handlers." 3 "17 Oct 2003" "net-snmp" \" -*- nroff -*-
+.ad l
+.nh
+.SH NAME
+stash_cache: automatically caches data for certain handlers. \- This handler caches data in an optimized way which may aleviate the need for the lower level handlers to perform as much optimization. 
+More...
+.SS "handler"
+
+.in +1c
+.ti -1c
+.RI "void \fBnetsnmp_init_stash_cache_helper\fP (void)"
+.br
+.RI "\fIinitializes the stash_cache helper which then registers a stash_cache handler as a run-time injectable handler for configuration file use.\fP"
+.in -1c
+.SS "Functions"
+
+.in +1c
+.ti -1c
+.RI "netsnmp_mib_handler * \fBnetsnmp_get_stash_cache_handler\fP (void)"
+.br
+.RI "\fIreturns a stash_cache handler that can be injected into a given handler chain.\fP"
+.ti -1c
+.RI "netsnmp_oid_stash_node ** \fBnetsnmp_extract_stash_cache\fP (netsnmp_agent_request_info *reqinfo)"
+.br
+.RI "\fIextracts a pointer to the stash_cache info from the reqinfo structure.\fP"
+.ti -1c
+.RI "int \fBnetsnmp_stash_cache_update\fP (netsnmp_mib_handler *handler, netsnmp_handler_registration *reginfo, netsnmp_agent_request_info *reqinfo, netsnmp_request_info *requests, netsnmp_stash_cache_info *cinfo)"
+.br
+.RI "\fIupdates a given cache depending on whether it needs to or not.\fP"
+.in -1c
+.SH "DETAILED DESCRIPTION"
+.PP 
+This handler caches data in an optimized way which may aleviate the need for the lower level handlers to perform as much optimization.
+.PP
+Specifically, somewhere in the lower level handlers must be a handler that supports the MODE_GET_STASH operation. Note that the table_iterator helper supports this. 
+.SH "FUNCTION DOCUMENTATION"
+.PP 
+.SS "netsnmp_oid_stash_node** netsnmp_extract_stash_cache (netsnmp_agent_request_info * reqinfo)"
+.PP
+extracts a pointer to the stash_cache info from the reqinfo structure.
+.PP
+Definition at line 64 of file stash_cache.c.
+.PP
+Referenced by netsnmp_table_iterator_helper_handler().
+.SS "netsnmp_mib_handler* netsnmp_get_stash_cache_handler (void)"
+.PP
+returns a stash_cache handler that can be injected into a given handler chain.
+.PP
+Definition at line 42 of file stash_cache.c.
+.PP
+References netsnmp_create_handler().
+.PP
+Referenced by netsnmp_init_stash_cache_helper().
+.SS "void netsnmp_init_stash_cache_helper (void)"
+.PP
+initializes the stash_cache helper which then registers a stash_cache handler as a run-time injectable handler for configuration file use.
+.PP
+Definition at line 188 of file stash_cache.c.
+.PP
+References netsnmp_get_stash_cache_handler(), and netsnmp_register_handler_by_name().
+.PP
+Referenced by netsnmp_init_helpers().
+.SS "int netsnmp_stash_cache_update (netsnmp_mib_handler * handler, netsnmp_handler_registration * reginfo, netsnmp_agent_request_info * reqinfo, netsnmp_request_info * requests, netsnmp_stash_cache_info * cinfo)"
+.PP
+updates a given cache depending on whether it needs to or not.
+.PP
+Definition at line 143 of file stash_cache.c.
+.PP
+References atime_newMarker(), atime_ready(), atime_setMarker(), netsnmp_call_next_handler(), netsnmp_create_data_list(), and netsnmp_oid_stash_free().

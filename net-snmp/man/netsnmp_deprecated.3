@@ -1,0 +1,16 @@
+.TH "deprecated" 3 "17 Oct 2003" "net-snmp" \" -*- nroff -*-
+.ad l
+.nh
+.SH NAME
+deprecated \- Deprecated List
+.IP "Global \fBnetsnmp_add_list_data\fP(netsnmp_data_list **head, netsnmp_data_list *node) " 1c
+use netsnmp_data_list_add_node instead
+.PP
+.IP "Global \fBnetsnmp_set_all_requests_error\fP(netsnmp_agent_request_info *reqinfo, netsnmp_request_info *requests, int error_value) " 1c
+use netsnmp_request_set_error_all
+.PP
+.IP "Global \fBnetsnmp_set_mode_request_error\fP(int mode, netsnmp_request_info *request, int error_value) " 1c
+, use netsnmp_request_set_error instead
+.PP
+.IP "Global \fBnetsnmp_set_request_error\fP(netsnmp_agent_request_info *reqinfo, netsnmp_request_info *request, int error_value) " 1c
+, use netsnmp_request_set_error instead 
