@@ -99,6 +99,19 @@ int minimumswap;
 static int pageshift;           /* log base 2 of the pagesize */
 #endif
 
+#define DEFAULTMINIMUMSWAP 16000  /* kilobytes */
+
+void memory_parse_config(word, cptr)
+  char *word;
+  char *cptr;
+{
+  minimumswap = atoi(cptr);
+}
+
+void memory_free_config __P((void)) {
+  minimumswap = DEFAULTMINIMUMSWAP;
+}
+
 #ifdef linux
 enum meminfo_row { meminfo_main = 0,
 		   meminfo_swap };

@@ -142,7 +142,9 @@ var_hrproc(vp, name, length, exact, var_len, write_method)
 #if defined(sun) || defined(__alpha)
   long   avenrun[3];
 #else
+#ifndef linux
   double avenrun[3];
+#endif
 #endif
  
 

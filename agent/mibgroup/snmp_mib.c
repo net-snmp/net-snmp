@@ -43,10 +43,7 @@ int snmp_outsetrequests = 0;
 int snmp_outgetresponses = 0;
 int snmp_outtraps = 0;
 
-
-int snmp_enableauthentraps = 2;		/* default: 2 == disabled */
-char *snmp_trapsink;
-char *snmp_trapcommunity;
+extern int snmp_enableauthentraps;
 
 static int header_snmp __P((struct variable *, oid *, int *, int, int *, int (**write) __P((int, u_char *, u_char, int, u_char *, oid *, int)) ));
 
@@ -247,8 +244,6 @@ write_snmp (action, var_val, var_val_type, var_val_len, statP, name, name_len)
     }
     return SNMP_ERR_NOERROR;
 }
-
-
 
 	/*********************
 	 *

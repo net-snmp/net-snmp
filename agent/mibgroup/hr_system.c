@@ -10,6 +10,8 @@
 #include "host.h"
 #include "host_res.h"
 #include "hr_system.h"
+#include "hr_utils.h"
+#include "../../snmplib/system.h"
 
 #ifdef HAVE_SYS_PROC_H
 #include "sys/proc.h"

@@ -9,6 +9,11 @@ config_require(util_funcs read_config)
 
 unsigned char *var_extensible_disk __P((struct variable *, oid *, int *, int, int *, int (**write) __P((int, u_char *, u_char, int, u_char *, oid *, int)) ));
 
+/* config file parsing routines */
+void disk_free_config __P((void));
+void disk_parse_config __P((char *, char *));
+config_parse_dot_conf("disk", disk_parse_config, disk_free_config);
+
 #include "mibdefs.h"
 
 #define DISKDEVICE 3
