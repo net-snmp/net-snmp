@@ -13,6 +13,9 @@
 #if HAVE_FSTAB_H
 #include <fstab.h>
 #endif
+#if HAVE_GETMNTENT
+#include <sys/mnttab.h>
+#endif
 #include <math.h>
 #include <snmp.h>
 #include <asn1.h>
@@ -50,6 +53,10 @@ int read_config(filename, procp, numps, pprelocs, numrelocs, pppassthrus,
   struct stat stat1, stat2;
 #if HAVE_FSTAB_H
   struct fstab *fstab;
+#endif
+#if HAVE_GETMNTENT
+  struct mnttab mnttab;
+  FILE *mntfp;
 #endif
   struct extensible **pptmp;
   
@@ -128,10 +135,10 @@ int read_config(filename, procp, numps, pprelocs, numrelocs, pppassthrus,
               fprintf(stderr,"No command specified on line:  %s\n",line);
               fflush(stderr);
             } else {
-              for(tcptr=cptr;*tcptr != NULL && *tcptr != '#' && *tcptr != ';';
+              for(tcptr=cptr; *tcptr != 0 && *tcptr != '#' && *tcptr != ';';
                   tcptr++);
               strncpy((*pptmp)->command,cptr,tcptr-cptr);
-              (*pptmp)->command[tcptr-cptr-1]=NULL;
+              (*pptmp)->command[tcptr-cptr-1] = 0;
               (*pptmp)->next = NULL;
             }
             if ((*pptmp)->type == PASSTHRU) {
@@ -139,7 +146,7 @@ int read_config(filename, procp, numps, pprelocs, numrelocs, pppassthrus,
             }
           }
           else if (!strncmp(word,"disk",4)) {
-#if HAVE_FSTAB_H
+#if HAVE_FSTAB_H || HAVE_GETMNTENT
             if (*numdisks == MAXDISKS) {
               fprintf(stderr,"Too many disks specified in %s\n",filename);
               fprintf(stderr,"\tignoring:  %s\n",cptr);
@@ -157,19 +164,36 @@ int read_config(filename, procp, numps, pprelocs, numrelocs, pppassthrus,
                 disk[*numdisks].minimumspace = DEFDISKMINIMUMSPACE;
               }
               /* find the device associated with the directory */
+#if HAVE_FSTAB_H
               stat(disk[*numdisks].path,&stat1);
               setfsent();
               if (fstab = getfsfile(disk[*numdisks].path)) {
                 copy_word(fstab->fs_spec,disk[*numdisks].device);
                 *numdisks += 1;
               }
+#elif HAVE_GETMNTENT
+	      mntfp = fopen ("/etc/mnttab", "r");
+
+	      while ((i = getmntent (mntfp, &mnttab)) == 0)
+		if (strcmp (disk[*numdisks].path, mnttab.mnt_mountp) == 0)
+		  break;
+		else printf ("%s != %s\n", disk[*numdisks].path, mnttab.mnt_mountp);
+	      if (i == 0) {
+		copy_word (mnttab.mnt_special, disk[*numdisks].device);
+		*numdisks += 1;
+	      }
+#endif
               else {
                 fprintf(stderr,"Error:  couldn't find device for disk %s\n",
                         disk[*numdisks].path);
                 disk[*numdisks].minimumspace = -1;
-                disk[*numdisks].path[0] = NULL;
+                disk[*numdisks].path[0] = 0;
               }
+#if HAVE_FSTAB_H
               endfsent();
+#elif HAVE_GETMNTENT
+	      fclose (mntfp);
+#endif
             }
 #else
             fprintf(stderr,
@@ -288,8 +312,8 @@ char *skip_white(ptr)
 {
 
   if (ptr == NULL) return (NULL);
-  while (*ptr != NULL && isspace(*ptr)) ptr++;
-  if (*ptr == NULL || *ptr == '#') return (NULL);
+  while (*ptr != 0 && isspace(*ptr)) ptr++;
+  if (*ptr == 0 || *ptr == '#') return (NULL);
   return (ptr);
 }
 
@@ -298,16 +322,16 @@ char *skip_not_white(ptr)
 {
   
   if (ptr == NULL) return (NULL);
-  while (*ptr != NULL && !isspace(*ptr)) ptr++;
-  if (*ptr == NULL || *ptr == '#') return (NULL);
+  while (*ptr != 0 && !isspace(*ptr)) ptr++;
+  if (*ptr == 0 || *ptr == '#') return (NULL);
   return (ptr);
 }
 
 void copy_word(from, to)
      char *from, *to;
 {
-  while (*from != NULL && !isspace(*from)) *(to++) = *(from++);
-  *to = NULL;
+  while (*from != 0 && !isspace(*from)) *(to++) = *(from++);
+  *to = 0;
 }
 
 char *find_field(ptr,field)
@@ -322,19 +346,19 @@ char *find_field(ptr,field)
     while (*ptr++);
     ptr = ptr - 2;
     /* rewind a field length */
-    while (*ptr != NULL && isspace(*ptr) && init <= ptr) ptr--;
-    while (*ptr != NULL && !isspace(*ptr) && init <= ptr) ptr--;
+    while (*ptr != 0 && isspace(*ptr) && init <= ptr) ptr--;
+    while (*ptr != 0 && !isspace(*ptr) && init <= ptr) ptr--;
     if (isspace(*ptr)) ptr++;  /* past space */
     if (ptr < init) ptr = init;
-    if (!isspace(*ptr) && *ptr != NULL) return(ptr);
+    if (!isspace(*ptr) && *ptr != 0) return(ptr);
   } else {
     if ((ptr = skip_white(ptr)) == NULL) return(NULL);
-    for (i=1; *ptr != NULL && i != field; i++) 
+    for (i=1; *ptr != 0 && i != field; i++) 
       {
         if ((ptr = skip_not_white(ptr)) == NULL) return (NULL);
         if ((ptr = skip_white(ptr)) == NULL) return (NULL);
       }
-    if (*ptr != NULL && i == field) return(ptr);
+    if (*ptr != 0 && i == field) return(ptr);
     return (NULL);
   }
 }
@@ -346,7 +370,7 @@ oid *oidout;
   int i;
   
   if (!buf)
-    return NULL;
+    return 0;
   if (*buf == '.') buf++;
   for(i=0;isdigit(*buf);i++) {
     oidout[i] = atoi(buf);
