@@ -246,9 +246,9 @@ netsnmp_access_interface_entry_create(const char *name)
      * until we can get actual description, leave descr NULL.
      * The end user can decide what to do with it.
      */
-    // entry->descr = strdup("unknown");
+    /* entry->descr = strdup("unknown"); */
 
-    // xxx-rks: alias? supposed to be persistent
+    /* xxx-rks: alias? supposed to be persistent */
 
     /*
      * make some assumptions

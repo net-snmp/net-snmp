@@ -227,7 +227,7 @@ netsnmp_access_interface_container_arch_load(netsnmp_container* container,
             snd_pkt = rec_pkt;
 
         /*
-         * //xxx-rks: get descr by linking mem from /proc/pci and /proc/iomem
+         * xxx-rks: get descr by linking mem from /proc/pci and /proc/iomem
          */
 
 

@@ -380,7 +380,7 @@ ipCidrRouteType_map(u_long * mib_ipCidrRouteType_ptr,
 
     DEBUGTRACE;
 
-    // xxx-rks: delete or move to access_route_*
+    /* xxx-rks: delete or move to access_route_* */
     /*
      * TODO:
      * value mapping
@@ -486,7 +486,7 @@ ipCidrRouteProto_map(u_long * mib_ipCidrRouteProto_ptr,
 
     DEBUGTRACE;
 
-    // xxx-rks: delete or move to access_route_*
+    /* xxx-rks: delete or move to access_route_* */
     /*
      * TODO:
      * value mapping

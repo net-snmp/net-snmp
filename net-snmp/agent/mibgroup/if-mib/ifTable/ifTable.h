@@ -68,8 +68,6 @@ extern          "C" {
          * ifDescr(2)/DisplayString/ASN_OCTET_STR/char(char)//L/A/w/e/R/d/H
          */
 #define ifDescr ifentry->descr
-//        char            ifDescr[255];
-//        size_t          ifDescr_len;    /* # of char elements, not bytes */
 
         /*
          * ifType(3)/IANAifType/ASN_INTEGER/long(u_long)//l/A/w/E/r/d/h
