@@ -3624,6 +3624,7 @@ parse_one_oid_index(oid ** oidStart, size_t * oidLen,
                 oidIndex += 4;
                 (*oidLen) -= 4;
             }
+            uitmp = htonl(uitmp); /* put it in proper order for byte copies */
             uitmp = 
                 snmp_set_var_value(var, (u_char *) &uitmp, 4);
             DEBUGMSGTL(("parse_oid_indexes",
