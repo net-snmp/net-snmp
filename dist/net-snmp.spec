@@ -21,9 +21,9 @@
 Summary: Tools and servers for the SNMP protocol
 Name: net-snmp
 <<<<<<< net-snmp.spec
-Version: 5.2.pre3
+Version: 5.2.rc1
 =======
-Version: 5.2.pre3
+Version: 5.2.rc1
 >>>>>>> 1.18
 # update release for vendor release. (eg 1.rh9, 1.rh72, 1.ydl3, 1.ydl23)
 Release: 1
