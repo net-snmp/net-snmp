@@ -46,4 +46,4 @@ typedef long ssize_t;
 struct timezone {
 	int tz_minuteswest;
 	int tz_dsttime;
-}
+};

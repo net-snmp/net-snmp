@@ -993,6 +993,8 @@ new_with_out_transport_list=`echo $with_out_transports | sed 's/,/ /g;'`
 #
 if test "x$PARTIALTARGETOS" = "xcygwin"; then
   transport_default_list="UDP TCP Callback"
+elif test "x$PARTIALTARGETOS" = "xmingw32"; then 
+  transport_default_list="UDP TCP Callback"
 else
   transport_default_list="UDP TCP Unix Callback"
 fi
@@ -1032,6 +1034,9 @@ for i in $new_transport_list; do
     fi
     if test "x$i" = "xUnix"; then
       if test "x$PARTIALTARGETOS" = "xcygwin"; then
+        echo
+        AC_MSG_ERROR(Unix domain protocol support unavailable for this platform)
+      elif test "x$PARTIALTARGETOS" = "xmingw32"; then
         echo
         AC_MSG_ERROR(Unix domain protocol support unavailable for this platform)
       fi
@@ -1708,7 +1713,19 @@ case $target_os in
         ;;
 esac
 # WIN32
-AC_CHECK_HEADERS(winsock.h, AGENTLIBS="${AGENTLIBS} -liphlpapi")
+-AC_CHECK_HEADERS(winsock.h, AGENTLIBS="${AGENTLIBS} -liphlpapi")
+# (mingw32 must link winsock explicitly)
+AC_CHECK_HEADERS(winsock.h,[
+        AGENTLIBS="${AGENTLIBS} -liphlpapi"
+        case $target_os in
+                mingw*)
+                        LIBS="${LIBS} -lwsock32"
+                        AGENTLIBS="${AGENTLIBS} -lwsock32"
+                        ;;
+                *)
+                        ;;
+        esac
+])
 AC_CHECK_HEADERS(io.h)
 # SCO
 AC_CHECK_HEADERS(sys/stream.h)
