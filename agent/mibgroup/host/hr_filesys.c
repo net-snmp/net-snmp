@@ -474,7 +474,7 @@ when_dumped(char *filesys,
     if ((dump_fp = fopen("/etc/dumpdates", "r")) == NULL )
 	return date_n_time (NULL, length);
 
-    while ( fgets( line, 100, dump_fp ) != NULL ) {
+    while ( fgets( line, sizeof(line), dump_fp ) != NULL ) {
         cp2=strchr( line, ' ' );	/* Start by looking at the device name only */
 	if ( cp2!=NULL ) {
 	    *cp2 = '\0';

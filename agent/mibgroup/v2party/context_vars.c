@@ -56,7 +56,7 @@ context_rowCreate(oid *contextID, int contextIDLen)
 {
     struct contextEntry *cp;
 
-    if (contextIDLen > 32)
+    if (contextIDLen > MAX_OID_LEN)
 	return NULL;
     cp = context_createEntry(contextID, contextIDLen);
     cp->contextBitMask = 0;
@@ -98,7 +98,7 @@ write_context(int action,
     int var, indexlen, len;
     oid *index;
     long val;
-    oid buf[32];
+    oid buf[MAX_OID_LEN];
     int bigsize = 1000, size;
     struct aclEntry *ap;
     struct viewEntry *vp;

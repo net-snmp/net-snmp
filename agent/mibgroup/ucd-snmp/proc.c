@@ -621,7 +621,7 @@ int sh_count_procs(char *procname)
       setPerrorstatus("fdopen");
       return (-1);
     }
-    while(fgets(line,STRMAX,file) != NULL)
+    while(fgets(line,sizeof(line),file) != NULL)
       {
         if ((cptr = find_field(line,LASTFIELD)) == NULL)
           continue;

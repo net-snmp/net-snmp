@@ -117,7 +117,7 @@ init_vacm_vars (void)
 #endif
 }
 
-static struct vacm_securityEntry *securityFirst, *securityLast;
+static struct vacm_securityEntry *securityFirst =0, *securityLast =0;
 
 void vacm_parse_security (char *token, 
 			  char *param)
@@ -712,7 +712,7 @@ u_char *var_vacm_view(struct variable *vp,
 {
     struct vacm_viewEntry *gp;
     char viewName[32];
-    oid subtree[32];
+    oid subtree[MAX_OID_LEN];
     int subtreeLen = 0;
     oid *op, *op1;
     int len;

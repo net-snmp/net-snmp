@@ -1259,7 +1259,7 @@ snmp_parse(struct snmp_session *session,
 	    case ASN_IPADDRESS:
 	    case ASN_OPAQUE:
 	    case ASN_NSAP:
-		if (vp->val_len < 32){
+		if (vp->val_len < sizeof(vp->buf)){
 		    vp->val.string = (u_char *)vp->buf;
 		    vp->usedBuf = TRUE;
 		} else {
@@ -2248,7 +2248,7 @@ snmp_add_var(struct snmp_pdu *pdu,
         break;
 
       case 'o':
-        tint = MAX_OID_LEN;
+        tint = sizeof(buf) / sizeof(oid);
         read_objid(value, (oid *)buf, &tint);
         snmp_pdu_add_variable(pdu, name, name_length, ASN_OBJECT_ID, buf,
                               sizeof(oid)*tint);

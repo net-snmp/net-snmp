@@ -225,7 +225,7 @@ void read_config(char *filename,
     DEBUGMSGTL(("read_config", "Reading configuration %s\n", filename));
   }
 
-  while (fgets(line, STRINGMAX, ifile) != NULL) 
+  while (fgets(line, sizeof(line), ifile) != NULL) 
     {
       lptr = line_handler;
       linecount++;

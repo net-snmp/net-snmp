@@ -66,7 +66,7 @@ unsigned char *var_hp(struct variable *vp,
 		      WriteMethod **write_method)
 {
 
-  oid newname[30];
+  oid newname[MAX_OID_LEN];
   int result;
   static long long_ret;
 

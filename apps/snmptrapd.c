@@ -423,7 +423,7 @@ int snmp_input(int op,
                        inet_ntoa(pdu->agent_addr.sin_addr),
  		       sprint_objid (oid_buf, pdu->enterprise, pdu->enterprise_length));
 		if (pdu->trap_type == SNMP_TRAP_ENTERPRISESPECIFIC) {
-		    oid trapOid[64];
+		    oid trapOid[MAX_OID_LEN];
 		    int trapOidLen = pdu->enterprise_length;
 		    memcpy(trapOid, pdu->enterprise, sizeof(oid)*trapOidLen);
 		    if (trapOid[trapOidLen-1] != 0) trapOid[trapOidLen++] = 0;
@@ -466,7 +466,7 @@ int snmp_input(int op,
 			varbufidx -= 2; varbuf[varbufidx]='\0';
 	    	}
 		if (pdu->trap_type == SNMP_TRAP_ENTERPRISESPECIFIC) {
-		    oid trapOid[64];
+		    oid trapOid[MAX_OID_LEN];
 		    int trapOidLen = pdu->enterprise_length;
 		    memcpy(trapOid, pdu->enterprise, sizeof(oid)*trapOidLen);
 		    if (trapOid[trapOidLen-1] != 0) trapOid[trapOidLen++] = 0;

@@ -438,8 +438,7 @@ int header_simple_table(struct variable *vp, oid *name, int *length,
                         WriteMethod **write_method, int max)
 {
   int i, rtest;
-#define MAX_NEWNAME_LEN 100
-  oid newname[MAX_NEWNAME_LEN];
+  oid newname[MAX_OID_LEN];
 
   for(i=0,rtest=0; i < (int) vp->namelen && i < (int)(*length) && !rtest; i++) {
     if (name[i] != vp->name[i]) {
@@ -458,7 +457,7 @@ int header_simple_table(struct variable *vp, oid *name, int *length,
   }
 /*  printf("%d/ck:  vp=%d  ln=%d lst=%d\n",exact,
          vp->namelen,*length,name[*length-1]); */
-  memset((char *) newname,(0),MAX_NEWNAME_LEN*sizeof(oid));
+  memset(newname, 0, sizeof(newname));
   if (((int) *length) <= (int) vp->namelen || rtest == -1) {
     memmove(newname, vp->name, (int)vp->namelen * sizeof (oid));
     newname[vp->namelen] = 1;
@@ -581,7 +580,7 @@ int parse_miboid(char *buf,
     while(isdigit(*buf++));
     if (*buf == '.') buf++;
   }
-  oidout[i] = -1;
+  /* oidout[i] = -1; hmmm */
   return i;
 }
 

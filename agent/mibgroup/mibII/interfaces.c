@@ -186,6 +186,41 @@ void init_interfaces(void)
 #endif
 }
 
+/*
+ * if_type_from_name
+ * Return interface type using the interface name as a clue.
+ * Returns 1 to imply "other" type if name not recognized. 
+ */
+static int
+if_type_from_name( const char *pcch)
+{
+    typedef struct _match_if {
+    	int mi_type;
+    	const char *mi_name;
+    } *pmatch_if, match_if;
+    
+    static match_if lmatch_if[] = {
+      { 24, "lo" },
+      {  6, "eth" },
+      { 23, "ppp" },
+      { 28, "sl" },
+      {  0, 0 }  /* end of list */
+    };
+
+    int ii, len;
+    register pmatch_if pm;
+
+    for (ii = 0, pm=lmatch_if; pm->mi_name; pm++) {
+        len = strlen(pm->mi_name);
+        if (0 == strncmp(pcch, pm->mi_name, len))
+        {
+            return (pm->mi_type);
+        }
+    }
+    return (1); /* in case search fails */
+}
+
+
 #ifdef USE_SYSCTL_IFLIST
 
 static u_char * if_list = 0;
@@ -1337,10 +1372,7 @@ Interface_Scan_Init (void)
 	    nnew->if_speed = if_ptr->speed;
 	}
 	else {
-	  nnew->if_type = ! strcmp (nnew->if_name, "lo") ? 24 :
-	    ! strcmp (nnew->if_name, "eth") ? 6 :
-	      ! strcmp (nnew->if_name, "sl") ? 28 : 1;
-	  
+	  nnew->if_type = if_type_from_name(nnew->if_name);
 	  nnew->if_speed = nnew->if_type == 6 ? 10000000 : 
 	    nnew->if_type == 24 ? 10000000 : 0;
 	}
