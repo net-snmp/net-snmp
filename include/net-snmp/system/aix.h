@@ -1,4 +1,4 @@
-#include "generic.h"
+#include <net-snmp/system/generic.h>
 #include <sys/select.h>
 #undef TOTAL_MEMORY_SYMBOL
 
