@@ -2,13 +2,14 @@ title Monitor Various Aspects of the Running Host
 description The following check up on various aspects of a host.
 
 token proc
-info The following check for processes running on the host.
+info Check for processes that should be running.
 info #  proc NAME [MAX=0] [MIN=0]
 info #
 info #  NAME:  the name of the process to check for.  It must match
 info #         exactly (ie, http will not find httpd processes).
 info #  MAX:   the maximum number allowed to be running.  Defaults to 0.
 info #  MIN:   the minimum number to be running.  Defaults to 0.
+info #
 info The results are reported in the prTable section of the UCD-SNMP-MIB tree
 info Special Case:  When the min and max numbers are both 0, it assumes
 info you want a max of infinity and a min of 1.
@@ -18,8 +19,8 @@ question 3 The minimum number that should be running [default = 0]
 
 token disk
 info Check for disk space usage of a partition.
-info # The agent can check the amount of available disk space, and make
-info # sure it is above a set limit.  
+info The agent can check the amount of available disk space, and make
+info sure it is above a set limit.  
 info
 info # disk PATH [MIN=100000]
 info #
@@ -27,6 +28,7 @@ info # PATH:  mount path to the disk in question.
 info # MIN:   Disks with space below this value will have the Mib's errorFlag set.
 info #        Can be a raw byte value or a percentage followed by the %
 info #        symbol.  Default value = 100000.
+info #
 info The results are reported in the dskTable section of the UCD-SNMP-MIB tree
 question 1 Enter the mount point for the disk partion to be checked on
 question 2 Enter the minimum amount of space that should be available
@@ -41,6 +43,7 @@ info # 1MAX:   If the 1 minute load average is above this limit at query
 info #         time, the errorFlag will be set.
 info # 5MAX:   Similar, but for 5 min average.
 info # 15MAX:  Similar, but for 15 min average.
+info #
 info The results are reported in the laTable section of the UCD-SNMP-MIB tree
 question 1 Enter the maximum allowable value for the 1 minute load average
 question 2 Enter the maximum allowable value for the 5 minute load average
