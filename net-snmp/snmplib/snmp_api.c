@@ -1053,8 +1053,7 @@ snmp_send(session, pdu)
 	snmp_errno = SNMPERR_GENERR;
 	return 0;
     }
-/*    gettimeofday(&tv, (struct timezone *)0); */
-    tv = Now;
+    gettimeofday(&tv, (struct timezone *)0);
     if (pdu->command == GET_REQ_MSG || pdu->command == GETNEXT_REQ_MSG
 	|| pdu->command == SET_REQ_MSG || pdu->command == BULK_REQ_MSG
 	|| pdu->command == INFORM_REQ_MSG){
