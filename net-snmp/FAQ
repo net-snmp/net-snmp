@@ -46,6 +46,7 @@ TABLE OF CONTENTS
    What's this about "too many imported symbols"?
    What about "Did not find 'removed' in module SNMPv2-SMI" and similar?
    Why can't I see values in the UCDavis 'extensible' tree?
+   Why can't I see values in the UCDavis 'memory' tree on Solaris, or...?
    Why can't I see values in the <INSERT ENTERPRISE HERE> tree?
    I've done that, and I still can't see the values. Why not?
    I've done that, and I'm *still* not getting anything back. Why not?
@@ -817,6 +818,15 @@ Why can't I see values in the UCDavis 'extensible' tree?
 
   Also see the answer to the next few questions.
 
+
+Why can't I see values in the UCDavis 'memory' tree on Solaris, or...?
+---------------------------------------------------------------------
+
+  The memory mib is not supported on all operating systems.  More
+  specifically, it is only supported on linux, hpux9, hpux10, bsdi2,
+  bsdi3, and freebsd2 and is not compiled in on any other
+  architectures.  If you want to help port it to other systems, let us 
+  know.
 
 
 Why can't I see values in the <INSERT ENTERPRISE HERE> tree?
