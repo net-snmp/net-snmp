@@ -500,7 +500,11 @@ long get_uptime (void)
 	    if (kid != -1) {
 		named = kstat_data_lookup(ks, "lbolt");
 		if (named) {
+#ifdef KSTAT_DATA_INT32
 		    lbolt = named->value.ul;
+#else
+		    lbolt = named->value.ul;
+#endif
 		}
 	    }
 	}
