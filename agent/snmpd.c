@@ -436,6 +436,7 @@ main(int argc, char *argv[])
     char            logfile[PATH_MAX + 1] = { 0 };
     char           *cptr, **argvptr;
     char           *pid_file = NULL;
+    char           *option_compatability = "-Le";
 #if HAVE_GETPID
     int fd;
     FILE           *PID;
@@ -476,9 +477,17 @@ main(int argc, char *argv[])
 #endif
 
     /*
+     * This is incredibly ugly, but it's probably the simplest way
+     *  to handle the old '-L' option as well as the new '-Lx' style
+     */
+    for (i=0; i<argc; i++) {
+        if (!strcmp(argv[i], "-L"))
+            argv[i] = option_compatability;            
+    }
+
+    /*
      * Now process options normally.  
      */
-
     while ((arg = getopt(argc, argv, options)) != EOF) {
         switch (arg) {
         case '-':
