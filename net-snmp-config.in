@@ -1,10 +1,27 @@
 #!/bin/sh
-
+#
+# $Id$
+#
 # this shell script is designed to merely dump the configuration
 # information about how the net-snmp package was compiled.  The
 # information is particularily useful for applications that need to
 # link against the net-snmp libraries and hence must know about any
 # other libraries that must be linked in as well.
+
+check_build_dir()
+{
+      build_dir=$1
+
+      if test "x$build_dir" = "x" ; then
+         echo "You must specify a build directory."
+         exit 1
+      fi
+      # make sure we can find build dir
+      if ! test -d $build_dir/snmplib/.libs ; then
+         echo "$build_dir does not appear to be a build directory."
+         exit 1
+      fi
+}
 
 prefix=@prefix@
 exec_prefix=@exec_prefix@
@@ -17,6 +34,7 @@ NSC_EXEC_PREFIC=@exec_prefix@
 NSC_SRCDIR=@srcdir@
 NSC_BASE_SUBAGENT_LIBS="-lnetsnmpagent -lnetsnmphelpers -lnetsnmp"
 NSC_BASE_AGENT_LIBS="-lnetsnmpagent -lnetsnmpmibs -lnetsnmphelpers -lnetsnmp"
+NSC_SRC_LIBDIRS="agent/.libs snmplib/.libs agent/helpers/.libs"
 NSC_SRC_LIBDEPS="agent/.libs/libnetsnmpagent.a agent/.libs/libnetsnmpmibs.a snmplib/.libs/libnetsnmp.a agent/helpers/.libs/libnetsnmphelpers.a"
 
 if test "x$1" = "x"; then
@@ -55,15 +73,7 @@ else
     --build-lib-dirs)
       shift
       build_dir=$1
-      if test "x$build_dir" = "x" ; then
-         echo "You must specify a build directory."
-         exit 1
-      fi
-      # make sure we can find build dir
-      if ! test -d $build_dir/snmplib/.libs ; then
-         echo "$build_dir does not appear to be a build directory."
-         exit 1
-      fi
+      check_build_dir $build_dir
       for dir in $NSC_SRC_LIBDIRS; do
           result="$result -L$build_dir/$dir"
       done
@@ -72,18 +82,20 @@ else
     --build-lib-deps)
       shift
       build_dir=$1
-      if test "x$build_dir" = "x" ; then
-         echo "You must specify a build directory."
-         exit 1
-      fi
-      # make sure we can find build dir
-      if ! test -d $build_dir/snmplib/.libs ; then
-         echo "$build_dir does not appear to be a build directory."
-         exit 1
-      fi
+      check_build_dir $build_dir
       for dir in $NSC_SRC_LIBDEPS; do
           result="$result $build_dir/$dir"
       done
+      echo $result
+      ;;
+    --build-includes)
+      shift
+      build_dir=$1
+      check_build_dir $build_dir
+      result="-I$build_dir/include"
+      if ! test "$build_dir" = "$NSC_SRCDIR" ; then
+          result="$result -I$NSC_SRCDIR/include"
+      fi
       echo $result
       ;;
     #################################################### client lib
@@ -452,6 +464,7 @@ if test "x$usage" = "xyes"; then
   echo "  These options produce various link flags used when linking an"
   echo "  external application against an uninstalled build directory."
   echo ""
+  echo "    --build-includes      include path to build/source includes"
   echo "    --build-lib-dirs      link path to libraries"
   echo "    --build-lib-deps      path to libraries for dependency target"
   echo ""
