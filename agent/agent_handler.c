@@ -128,7 +128,10 @@ register_handler(handler_registration *reginfo) {
         }
             
         DEBUGMSG(("handler::register", " at "));
-        if (reginfo->rootoid) {
+        if (reginfo->rootoid && reginfo->range_subid) {
+            DEBUGMSGOIDRANGE(("handler::register", reginfo->rootoid,
+	     reginfo->rootoid_len, reginfo->range_subid, reginfo->range_ubound));
+	} else if (reginfo->rootoid) {
             DEBUGMSGOID(("handler::register", reginfo->rootoid,
                          reginfo->rootoid_len));
         } else {
