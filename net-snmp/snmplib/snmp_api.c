@@ -638,14 +638,6 @@ _init_snmp(void)
 			   NETSNMP_DS_LIB_REVERSE_ENCODE,
 			   DEFAULT_ASNENCODING_DIRECTION);
 #endif
-    /*
-     * Default to MIB::node style output 
-     */
-    if (!netsnmp_ds_get_int(NETSNMP_DS_LIBRARY_ID, 
-			    NETSNMP_DS_LIB_PRINT_SUFFIX_ONLY)) {
-	netsnmp_ds_set_int(NETSNMP_DS_LIBRARY_ID, 
-			   NETSNMP_DS_LIB_PRINT_SUFFIX_ONLY, 2);
-    }
 }
 
 /*

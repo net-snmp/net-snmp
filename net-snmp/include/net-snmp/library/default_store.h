@@ -65,8 +65,8 @@ extern          "C" {
 #define NETSNMP_DS_LIB_SECLEVEL      1
 #define NETSNMP_DS_LIB_SNMPVERSION   2
 #define NETSNMP_DS_LIB_DEFAULT_PORT  3
-#define NETSNMP_DS_LIB_PRINT_SUFFIX_ONLY 4      /* print out only a single oid node  == 1.
-                                         * like #1 but supply mib module too == 2. */
+#define NETSNMP_DS_LIB_OID_OUTPUT_FORMAT  4
+#define NETSNMP_DS_LIB_PRINT_SUFFIX_ONLY  NETSNMP_DS_LIB_OID_OUTPUT_FORMAT
 
     /*
      * special meanings for the default SNMP version slot (NETSNMP_DS_LIB_SNMPVERSION) 

@@ -8,6 +8,7 @@
 #include <net-snmp/types.h>
 #include <net-snmp/session_api.h>
 #include <net-snmp/config_api.h>
+#include <net-snmp/library/mib.h>	/* for OID O/P format enums */
 
 /*
  * use <netsnmp_session *)->s_snmp_errno instead 
@@ -64,28 +65,28 @@ void
 snmp_set_suffix_only(int x)
 {
     netsnmp_ds_set_int(NETSNMP_DS_LIBRARY_ID,
-		       NETSNMP_DS_LIB_PRINT_SUFFIX_ONLY, x);
+		       NETSNMP_DS_LIB_OID_OUTPUT_FORMAT, x);
 }
 
 int
 snmp_get_suffix_only(void)
 {
     return netsnmp_ds_get_int(NETSNMP_DS_LIBRARY_ID,
-			      NETSNMP_DS_LIB_PRINT_SUFFIX_ONLY);
+			      NETSNMP_DS_LIB_OID_OUTPUT_FORMAT);
 }
 
 void
 snmp_set_full_objid(int x)
 {
-    netsnmp_ds_set_boolean(NETSNMP_DS_LIBRARY_ID, 
-			   NETSNMP_DS_LIB_PRINT_FULL_OID, x);
+    netsnmp_ds_set_int(NETSNMP_DS_LIBRARY_ID, NETSNMP_DS_LIB_OID_OUTPUT_FORMAT,
+                                              NETSNMP_OID_OUTPUT_FULL);
 }
 
 int
 snmp_get_full_objid(void)
 {
-    return netsnmp_ds_get_boolean(NETSNMP_DS_LIBRARY_ID, 
-				  NETSNMP_DS_LIB_PRINT_FULL_OID);
+    return (NETSNMP_OID_OUTPUT_FULL ==
+        netsnmp_ds_get_int(NETSNMP_DS_LIBRARY_ID, NETSNMP_DS_LIB_OID_OUTPUT_FORMAT));
 }
 
 void

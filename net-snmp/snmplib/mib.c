@@ -2024,13 +2024,29 @@ handle_mibfile_conf(const char *token, char *line)
     read_mib(line);
 }
 
+static void
+handle_print_numeric(const char *token, char *line)
+{
+    char           *value;
+
+    value = strtok(line, " \t\n");
+    if ((strcasecmp(value, "yes")  == 0) || 
+	(strcasecmp(value, "true") == 0) ||
+	(*value == '1')) {
+
+        netsnmp_ds_set_int(NETSNMP_DS_LIBRARY_ID, NETSNMP_DS_LIB_OID_OUTPUT_FORMAT,
+                                                  NETSNMP_OID_OUTPUT_NUMERIC);
+    }
+}
+
 char           *
 snmp_out_toggle_options(char *options)
 {
     while (*options) {
         switch (*options++) {
         case 'n':
-            netsnmp_ds_toggle_boolean(NETSNMP_DS_LIBRARY_ID, NETSNMP_DS_LIB_PRINT_NUMERIC_OIDS);
+            netsnmp_ds_set_int(NETSNMP_DS_LIBRARY_ID, NETSNMP_DS_LIB_OID_OUTPUT_FORMAT,
+                                                      NETSNMP_OID_OUTPUT_NUMERIC);
             break;
         case 'e':
             netsnmp_ds_toggle_boolean(NETSNMP_DS_LIBRARY_ID, NETSNMP_DS_LIB_PRINT_NUMERIC_ENUM);
@@ -2052,28 +2068,26 @@ snmp_out_toggle_options(char *options)
             netsnmp_ds_toggle_boolean(NETSNMP_DS_LIBRARY_ID, NETSNMP_DS_LIB_QUICK_PRINT);
             break;
         case 'f':
-            netsnmp_ds_set_int(NETSNMP_DS_LIBRARY_ID, NETSNMP_DS_LIB_PRINT_SUFFIX_ONLY, 0);
-            netsnmp_ds_set_boolean(NETSNMP_DS_LIBRARY_ID, NETSNMP_DS_LIB_PRINT_NUMERIC_OIDS, 0);
-            netsnmp_ds_toggle_boolean(NETSNMP_DS_LIBRARY_ID, NETSNMP_DS_LIB_PRINT_FULL_OID);
+            netsnmp_ds_set_int(NETSNMP_DS_LIBRARY_ID, NETSNMP_DS_LIB_OID_OUTPUT_FORMAT,
+                                                      NETSNMP_OID_OUTPUT_FULL);
             break;
         case 't':
             netsnmp_ds_toggle_boolean(NETSNMP_DS_LIBRARY_ID, NETSNMP_DS_LIB_NUMERIC_TIMETICKS);
             break;
         case 'u':
-            netsnmp_ds_set_int(NETSNMP_DS_LIBRARY_ID, NETSNMP_DS_LIB_PRINT_SUFFIX_ONLY, 0);
-            netsnmp_ds_set_boolean(NETSNMP_DS_LIBRARY_ID, NETSNMP_DS_LIB_PRINT_NUMERIC_OIDS, 0);
-            netsnmp_ds_toggle_boolean(NETSNMP_DS_LIBRARY_ID, NETSNMP_DS_LIB_PRINT_UCD_STYLE_OID);
+            netsnmp_ds_set_int(NETSNMP_DS_LIBRARY_ID, NETSNMP_DS_LIB_OID_OUTPUT_FORMAT,
+                                                      NETSNMP_OID_OUTPUT_UCD);
             break;
         case 'v':
             netsnmp_ds_toggle_boolean(NETSNMP_DS_LIBRARY_ID, NETSNMP_DS_LIB_PRINT_BARE_VALUE);
             break;
         case 's':
-            netsnmp_ds_set_int(NETSNMP_DS_LIBRARY_ID, NETSNMP_DS_LIB_PRINT_SUFFIX_ONLY, 1);
-            netsnmp_ds_set_boolean(NETSNMP_DS_LIBRARY_ID, NETSNMP_DS_LIB_PRINT_NUMERIC_OIDS, 0);
+            netsnmp_ds_set_int(NETSNMP_DS_LIBRARY_ID, NETSNMP_DS_LIB_OID_OUTPUT_FORMAT,
+                                                      NETSNMP_OID_OUTPUT_SUFFIX);
             break;
         case 'S':
-            netsnmp_ds_set_int(NETSNMP_DS_LIBRARY_ID, NETSNMP_DS_LIB_PRINT_SUFFIX_ONLY, 2);
-            netsnmp_ds_set_boolean(NETSNMP_DS_LIBRARY_ID, NETSNMP_DS_LIB_PRINT_NUMERIC_OIDS, 0);
+            netsnmp_ds_set_int(NETSNMP_DS_LIBRARY_ID, NETSNMP_DS_LIB_OID_OUTPUT_FORMAT,
+                                                      NETSNMP_OID_OUTPUT_MODULE);
             break;
         case 'T':
             netsnmp_ds_toggle_boolean(NETSNMP_DS_LIBRARY_ID, NETSNMP_DS_LIB_PRINT_HEX_TEXT);
@@ -2186,8 +2200,8 @@ register_mib_handlers(void)
 
     netsnmp_ds_register_premib(ASN_BOOLEAN, "snmp", "printNumericEnums",
                        NETSNMP_DS_LIBRARY_ID, NETSNMP_DS_LIB_PRINT_NUMERIC_ENUM);
-    netsnmp_ds_register_premib(ASN_BOOLEAN, "snmp", "printNumericOids",
-                       NETSNMP_DS_LIBRARY_ID, NETSNMP_DS_LIB_PRINT_NUMERIC_OIDS);
+    register_prenetsnmp_mib_handler("snmp", "printNumericOids",
+                       handle_print_numeric, NULL, "(1|yes|true|0|no|false)");
     netsnmp_ds_register_premib(ASN_BOOLEAN, "snmp", "escapeQuotes",
                        NETSNMP_DS_LIBRARY_ID, NETSNMP_DS_LIB_ESCAPE_QUOTES);
     netsnmp_ds_register_premib(ASN_BOOLEAN, "snmp", "dontBreakdownOids",
@@ -2196,8 +2210,10 @@ register_mib_handlers(void)
                        NETSNMP_DS_LIBRARY_ID, NETSNMP_DS_LIB_QUICK_PRINT);
     netsnmp_ds_register_premib(ASN_BOOLEAN, "snmp", "numericTimeticks",
                        NETSNMP_DS_LIBRARY_ID, NETSNMP_DS_LIB_NUMERIC_TIMETICKS);
+    netsnmp_ds_register_premib(ASN_INTEGER, "snmp", "oidOutputFormat",
+                       NETSNMP_DS_LIBRARY_ID, NETSNMP_DS_LIB_OID_OUTPUT_FORMAT);
     netsnmp_ds_register_premib(ASN_INTEGER, "snmp", "suffixPrinting",
-                       NETSNMP_DS_LIBRARY_ID, NETSNMP_DS_LIB_PRINT_SUFFIX_ONLY);
+                       NETSNMP_DS_LIBRARY_ID, NETSNMP_DS_LIB_OID_OUTPUT_FORMAT);
     netsnmp_ds_register_premib(ASN_BOOLEAN, "snmp", "extendedIndex",
                        NETSNMP_DS_LIBRARY_ID, NETSNMP_DS_LIB_EXTENDED_INDEX);
     netsnmp_ds_register_premib(ASN_BOOLEAN, "snmp", "printHexText",
@@ -2591,6 +2607,7 @@ netsnmp_sprint_realloc_objid_tree(u_char ** buf, size_t * buf_len,
     struct tree    *subtree = tree_head;
     size_t          midpoint_offset = 0;
     int             tbuf_overflow = 0;
+    int             output_format;
 
     if ((tbuf = (u_char *) calloc(tbuf_len, 1)) == NULL) {
         tbuf_overflow = 1;
@@ -2613,9 +2630,18 @@ netsnmp_sprint_realloc_objid_tree(u_char ** buf, size_t * buf_len,
         return subtree;
     }
 
-    if (netsnmp_ds_get_boolean(NETSNMP_DS_LIBRARY_ID, NETSNMP_DS_LIB_PRINT_NUMERIC_OIDS)) {
+    output_format = netsnmp_ds_get_int(NETSNMP_DS_LIBRARY_ID, NETSNMP_DS_LIB_OID_OUTPUT_FORMAT);
+    if (0 == output_format) {
+        output_format = NETSNMP_OID_OUTPUT_MODULE;
+    }
+    switch (output_format) {
+    case NETSNMP_OID_OUTPUT_FULL:
+    case NETSNMP_OID_OUTPUT_NUMERIC:
         cp = tbuf;
-    } else if (netsnmp_ds_get_int(NETSNMP_DS_LIBRARY_ID, NETSNMP_DS_LIB_PRINT_SUFFIX_ONLY)) {
+        break;
+
+    case NETSNMP_OID_OUTPUT_SUFFIX:
+    case NETSNMP_OID_OUTPUT_MODULE:
         for (cp = tbuf; *cp; cp++);
 
         if (midpoint_offset != 0) {
@@ -2638,7 +2664,7 @@ netsnmp_sprint_realloc_objid_tree(u_char ** buf, size_t * buf_len,
 
         cp++;
 
-        if (netsnmp_ds_get_int(NETSNMP_DS_LIBRARY_ID, NETSNMP_DS_LIB_PRINT_SUFFIX_ONLY) == 2
+        if ((NETSNMP_OID_OUTPUT_MODULE == output_format)
             && cp > tbuf) {
             char            modbuf[256] = { 0 }, *mod =
                 module_name(subtree->modid, modbuf);
@@ -2658,7 +2684,10 @@ netsnmp_sprint_realloc_objid_tree(u_char ** buf, size_t * buf_len,
                 }
             }
         }
-    } else if (netsnmp_ds_get_boolean(NETSNMP_DS_LIBRARY_ID, NETSNMP_DS_LIB_PRINT_UCD_STYLE_OID)) {
+        break;
+
+    case NETSNMP_OID_OUTPUT_UCD:
+    {
         PrefixListPtr   pp = &mib_prefixes[0];
         size_t          ilen, tlen;
         const char     *testcp;
@@ -2676,8 +2705,12 @@ netsnmp_sprint_realloc_objid_tree(u_char ** buf, size_t * buf_len,
             }
             pp++;
         }
-    } else {
-        cp = tbuf;
+        break;
+    }
+
+    case NETSNMP_OID_OUTPUT_NONE:
+    default:
+        cp = NULL;
     }
 
     if (!*buf_overflow &&
@@ -3364,6 +3397,8 @@ _get_realloc_symbol(const oid * objid, size_t objidlen,
     struct tree    *return_tree = NULL;
     int             extended_index =
         netsnmp_ds_get_boolean(NETSNMP_DS_LIBRARY_ID, NETSNMP_DS_LIB_EXTENDED_INDEX);
+    int             output_format =
+        netsnmp_ds_get_int(NETSNMP_DS_LIBRARY_ID, NETSNMP_DS_LIB_OID_OUTPUT_FORMAT);
     char            intbuf[64];
 
     if (!objid || !buf) {
@@ -3383,7 +3418,7 @@ _get_realloc_symbol(const oid * objid, size_t objidlen,
             }
 
             if (!strncmp(subtree->label, ANON, ANON_LEN) ||
-                netsnmp_ds_get_boolean(NETSNMP_DS_LIBRARY_ID, NETSNMP_DS_LIB_PRINT_NUMERIC_OIDS)) {
+                (NETSNMP_OID_OUTPUT_NUMERIC == output_format)) {
                 sprintf(intbuf, "%lu", subtree->subid);
                 if (!*buf_overflow && !snmp_strcat(buf, buf_len, out_len,
                                                    allow_realloc,
@@ -3433,7 +3468,7 @@ _get_realloc_symbol(const oid * objid, size_t objidlen,
      */
 
     while (in_dices && (objidlen > 0) &&
-           !netsnmp_ds_get_boolean(NETSNMP_DS_LIBRARY_ID, NETSNMP_DS_LIB_PRINT_NUMERIC_OIDS) &&
+           (NETSNMP_OID_OUTPUT_NUMERIC != output_format) &&
            !netsnmp_ds_get_boolean(NETSNMP_DS_LIBRARY_ID, NETSNMP_DS_LIB_DONT_BREAKDOWN_OIDS)) {
         size_t          numids;
         struct tree    *tp;
