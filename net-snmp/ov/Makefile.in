@@ -1,0 +1,30 @@
+SHELL = /bin/sh
+srcdir = @srcdir@
+VPATH = @srcdir@
+@SET_MAKE@
+
+prefix = @prefix@
+exec_prefix = @exec_prefix@
+bindir = $(exec_prefix)/bin
+libdir = $(exec_prefix)/lib
+snmplibdir = $(prefix)/lib/snmp
+
+SED = @SED@
+
+INSTALL = @INSTALL@
+
+TARG = oid_to_type oid_to_sym
+
+all: $(TARG)
+
+oid_to_type: oid_to_type.in ../sedscript
+	$(SED) -f ../sedscript oid_to_type.in > oid_to_type
+
+oid_to_sym: oid_to_sym.in ../sedscript
+	$(SED) -f ../sedscript oid_to_sym.in > oid_to_sym
+
+clean:
+	rm -f $(TARG)
+
+install:
+

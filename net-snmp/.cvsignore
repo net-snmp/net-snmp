@@ -3,6 +3,9 @@ Makefile
 config.cache
 config.h
 config.log
+config.out
 config.status
+ece-mib.txt
+make.out
 mib.txt
 sedscript
