@@ -536,21 +536,8 @@ snmp_open(struct snmp_session *session)
 }
 
 
-
-/*******************************************************************-o-******
- * snmp_sess_open
- *
- * Parameters:
- *	*in_session
- *
- * Returns:
- *      Pointer to a session in the session list   -OR-		FIX -- right?
- *	NULL on failure.
- *
- * The "spin-free" version of snmp_open.
- */
-void *
-snmp_sess_open(struct snmp_session *in_session)
+struct session_list *
+snmp_sess_copy( struct snmp_session *in_session)
 {
     struct session_list *slp;
     struct snmp_internal_session *isp;
@@ -558,16 +545,7 @@ snmp_sess_open(struct snmp_session *in_session)
     char *cp;
     u_char *ucp;
     oid *op;
-    int sd;
-    in_addr_t addr;
-    struct sockaddr_in *isp_addr, *meIp;
-    struct hostent *hp;
-    struct snmp_pdu *pdu, *response;
-    int status;
     size_t i;
-
-    if (Reqid == 0)
-      init_snmp_session();
 
     /* Copy session structure and link into list */
     slp = (struct session_list *)calloc(1,sizeof(struct session_list));
@@ -847,6 +825,42 @@ snmp_sess_open(struct snmp_session *in_session)
     if (session->timeout == SNMP_DEFAULT_TIMEOUT)
 	session->timeout = DEFAULT_TIMEOUT;
 
+    return( slp );
+}
+
+/*******************************************************************-o-******
+ * snmp_sess_open
+ *
+ * Parameters:
+ *	*in_session
+ *
+ * Returns:
+ *      Pointer to a session in the session list   -OR-		FIX -- right?
+ *	NULL on failure.
+ *
+ * The "spin-free" version of snmp_open.
+ */
+void *
+snmp_sess_open(struct snmp_session *in_session)
+{
+    struct session_list *slp;
+    struct snmp_internal_session *isp;
+    struct snmp_session *session;
+    int sd;
+    in_addr_t addr;
+    struct sockaddr_in *isp_addr, *meIp;
+    struct hostent *hp;
+    struct snmp_pdu *pdu, *response;
+    int status;
+    size_t i;
+
+    if (Reqid == 0)
+      init_snmp_session();
+
+    if ((slp = snmp_sess_copy( in_session )) == NULL )
+        return( NULL );
+    isp     = slp->internal;
+    session = slp->session;
 
     if ( isp->addr.sa_family == AF_UNSPEC ) {
         if ( session->peername && session->peername[0] == '/' ) {
