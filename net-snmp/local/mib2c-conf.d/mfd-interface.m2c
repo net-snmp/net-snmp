@@ -1,5 +1,5 @@
-########################################################################
-## generic include for XXX. Don't use directly.
+#############################################################  -*- c -*-
+## generic include for XXX. Do not use directly.
 ##
 ## $Id$
 ########################################################################
@@ -14,60 +14,130 @@
  *       version $Revision$ of $RCSfile$ 
  */
 @include generic-source-includes.m2i@
+
+#include <net-snmp/agent/table_mfd.h>
+
 @foreach $table table@
-@    include generic-table.m2d@
-@    include details-table.m2i@
+@   include m2c_setup_table.m2i@
+@   include details-table.m2i@
 ########################################################################
 ##
+int
+${table}_get_values(netsnmp_mfd_registration *mfdr,
+                    netsnmp_request_group *rg)
+{
+    ${table}_ctx * ctx;
+    netsnmp_request_group_item *rgi;
+    u_char * old_string;
+    void    (*dataFreeHook)(void *);
+
+    DEBUGMSGT(("${name}:trace",">%s\n",__FUNCTION__));
+
+    netsnmp_assert(rg && rg->existing_row);
+    
+    ctx = (${table}_ctx *)rg->existing_row;
+    rgi = rg->list;
+
+    while(rgi) {
+        /*
+         * save old pointer, so we can free it if replaced
+         */
+        old_string = rgi->ri->requestvb->val.string;
+        dataFreeHook = rgi->ri->requestvb->dataFreeHook;
+        if(NULL == rgi->ri->requestvb->val.string) { /* xxx-rks: move this up to mfd helper? */
+            rgi->ri->requestvb->val.string = rgi->ri->requestvb->buf;
+            rgi->ri->requestvb->val_len = sizeof(rgi->ri->requestvb->buf);
+        }
+
+        /*
+         * get column data
+         */
+        ${table}_get_column(ctx, rgi->ri->requestvb,
+                            rgi->tri->colnum);
+
+        /*
+         * if the buffer wasn't used previously for the old data,
+         * and the get routine replaced the pointer, we need to free
+         * the previous pointer.
+         */
+        if((old_string != rgi->ri->requestvb->buf) &&
+           (rgi->ri->requestvb->val.string != old_string)) {
+            if(dataFreeHook)
+                (*dataFreeHook)(old_string);
+            else
+                free(old_string);
+        }
+
+        /*
+         * next, please.
+         */
+        rgi = rgi->next;
+    }
+
+    return SNMP_ERR_NOERROR;
+}
+
 /*
  * Retrieve the value for a particular column
  */
 int
-${context}_get_column( ${context}_reg *reg, ${context}_ctx *ctx,
+${context}_get_column( ${context}_ctx *ctx,
                        netsnmp_variable_list *var, int column )
 {
-    int rc;
-    u_char * old_string = var->val.string;
-    void    (*dataFreeHook)(void *) = var->dataFreeHook;
-    if(NULL == var->val.string) {
-        var->val.string = var->buf;
-        var->val_len = sizeof(var->buf);
-    }
+    int rc = SNMPERR_SUCCESS;
     
-    switch(column) {
+    DEBUGMSGT(("${name}:trace",">%s %d\n",__FUNCTION__, column));
 
-@    foreach $node column@
-@        include m2c_setup_node.m2i@
-@        if $node.accessible == 1@
+    switch(column) {
+@   foreach $node index@
+@      include m2c_setup_node.m2i@
+@      if $node.accessible == 1@
+
+        /** (INDEX) $node.syntax = $node.perltype = $node.type */
+    case COLUMN_$node.uc:
+    var->type = $node.type;
+@         if $m2c_node_needlength == 1@
+        if (var->val_len < ctx->tbl_idx.${node}_len) {
+           var->val.string = malloc(ctx->tbl_idx.${node}_len);
+        }
+        var->val_len = ctx->tbl_idx.${node}_len;
+        memcpy( var->val.string, ctx->tbl_idx.$node, var->val_len );
+@         else@
+        (*var->val.integer) = ctx->tbl_idx.$node;
+@         end@
+        break;
+@      end@ ## accessible
+@   end@ ## index
+@   foreach $node nonindex@
+@      include m2c_setup_node.m2i@
+@      if $node.accessible == 1@
+
         /** $node.syntax = $node.perltype = $node.type */
     case COLUMN_$node.uc:
-        @    if $m2c_gc_needlength == 1@
-        @        eval $m2c_temp = "($m2c_decl **)&var->val.string, &var->val_len"@
-        @    else@
-        @        eval $m2c_temp = "($m2c_decl *)&var->val.string"@
-        @    end@
-        rc = get_$node(reg, ctx, $m2c_temp );
+    var->type = $node.type;
+@        if $m2c_test == 1@
+@         eval $m2c_temp = "(netsnmp_varref)&var->val.string"@
+@         if $m2c_node_needlength == 1@
+@            eval $m2c_temp = "$m2c_temp, (netsnmp_ref_size_t*)&var->val_len"@
+@         end@
+@        else@
+@         if $m2c_node_needlength == 1@
+@            eval $m2c_temp = "($m2c_decl **)&var->val.string, &var->val_len"@
+@         else@
+@            eval $m2c_temp = "($m2c_decl *)var->val.string"@
+@         end@
+@        end@ # test
+        rc = ${node}_get(ctx, $m2c_temp );
         break;
- 
-@        end@ # accessible
-@    end@ # for each column
-    }
+ @      end@ # accessible
+@   end@ # for each column
 
-    /*
-     * if the buffer wasn't used previously for the old data,
-     * and the get routine replaced the pointer, we need to free
-     * the previous pointer.
-     */
-    if((old_string != var->buf) && (var->val.string != old_string)) {
-        if(dataFreeHook)
-            (*dataFreeHook)(old_string);
-        else
-            free(old_string);
     }
 
     return rc;
 }
 
+@    include mfd-access-${m2c_table_access}-interface.m2i@
 @end@ # foreach table
 ##
 ########################################################################
