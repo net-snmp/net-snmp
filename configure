@@ -17557,10 +17557,12 @@ command line usage has changed as well.).
 the default version for the command tools (snmpget, ...) to use.  This
 can always be overridden at runtime using the -v flag to the tools, or
 by using the \"defVersion\" token in your snmp.conf file.
+   Providing the --with-default-snmp-version=\"x\" parameter to ./configure
+will avoid this prompt.
 
 Default version of SNMP to use" | tail -1`
 echo $ac_n "checking $MSG_CHECK""... $ac_c" 1>&6
-echo "configure:17564: checking $MSG_CHECK" >&5
+echo "configure:17566: checking $MSG_CHECK" >&5
 if eval "test \"`echo '$''{'ac_cv_user_prompt_DEFAULT_SNMP_VERSION'+set}'`\" = set"; then
   echo $ac_n "(cached) $ac_c" 1>&6
 else
@@ -17584,6 +17586,8 @@ command line usage has changed as well.).
 the default version for the command tools (snmpget, ...) to use.  This
 can always be overridden at runtime using the -v flag to the tools, or
 by using the \"defVersion\" token in your snmp.conf file.
+   Providing the --with-default-snmp-version=\"x\" parameter to ./configure
+will avoid this prompt.
 
 Default version of SNMP to use (3): $ac_c"
 read tmpinput
@@ -17631,10 +17635,12 @@ MSG_CHECK=`echo "
 running on.  This information is available in the MIB-II tree.  This
 can also be over-ridden using the \"syscontact\" syntax in the agent's
 configuration files.
+  Providing the --with-sys-contact=\"contact\" parameter to ./configure
+will avoid this prompt.
 
 System Contact Information" | tail -1`
 echo $ac_n "checking $MSG_CHECK""... $ac_c" 1>&6
-echo "configure:17638: checking $MSG_CHECK" >&5
+echo "configure:17644: checking $MSG_CHECK" >&5
 if eval "test \"`echo '$''{'ac_cv_user_prompt_SYS_CONTACT'+set}'`\" = set"; then
   echo $ac_n "(cached) $ac_c" 1>&6
 else
@@ -17649,6 +17655,8 @@ echo $ac_n "
 running on.  This information is available in the MIB-II tree.  This
 can also be over-ridden using the \"syscontact\" syntax in the agent's
 configuration files.
+  Providing the --with-sys-contact=\"contact\" parameter to ./configure
+will avoid this prompt.
 
 System Contact Information ($ME@$LOC): $ac_c"
 read tmpinput
@@ -17691,10 +17699,12 @@ MSG_CHECK=`echo "
 	Describes the location of the system.  This information is
 available in the MIB-II tree.  this can also be over-ridden using the
 \"syslocation\" syntax in the agent's configuration files.
+  Providing the --with-sys-location=\"location\" parameter to ./configure
+will avoid this prompt.
 
 System Location" | tail -1`
 echo $ac_n "checking $MSG_CHECK""... $ac_c" 1>&6
-echo "configure:17698: checking $MSG_CHECK" >&5
+echo "configure:17708: checking $MSG_CHECK" >&5
 if eval "test \"`echo '$''{'ac_cv_user_prompt_SYS_LOC'+set}'`\" = set"; then
   echo $ac_n "(cached) $ac_c" 1>&6
 else
@@ -17708,6 +17718,8 @@ echo $ac_n "
 	Describes the location of the system.  This information is
 available in the MIB-II tree.  this can also be over-ridden using the
 \"syslocation\" syntax in the agent's configuration files.
+  Providing the --with-sys-location=\"location\" parameter to ./configure
+will avoid this prompt.
 
 System Location (Unknown): $ac_c"
 read tmpinput
@@ -17757,10 +17769,12 @@ MSG_CHECK=`echo "
 information & errors to.  If not defined (enter the keyword \"none\"
 at the prompt below) the agent will use stdout and stderr instead.
 (Note: This value can be over-ridden using command line options.)
+  Providing the --with-logfile=\"path\" parameter to ./configure
+will avoid this prompt.
 
 Location to write logfile" | tail -1`
 echo $ac_n "checking $MSG_CHECK""... $ac_c" 1>&6
-echo "configure:17764: checking $MSG_CHECK" >&5
+echo "configure:17778: checking $MSG_CHECK" >&5
 if eval "test \"`echo '$''{'ac_cv_user_prompt_LOGFILE'+set}'`\" = set"; then
   echo $ac_n "(cached) $ac_c" 1>&6
 else
@@ -17775,6 +17789,8 @@ echo $ac_n "
 information & errors to.  If not defined (enter the keyword \"none\"
 at the prompt below) the agent will use stdout and stderr instead.
 (Note: This value can be over-ridden using command line options.)
+  Providing the --with-logfile=\"path\" parameter to ./configure
+will avoid this prompt.
 
 Location to write logfile ($defaultlog): $ac_c"
 read tmpinput
@@ -17830,10 +17846,12 @@ copy your files over to the new location (once only).  If you pick
 some other path than the default, you'll have to copy them yourself.
 There is nothing wrong with picking the old path ($ucddefaultstore) if
 you'd rather.
+  Providing the --with-persistent-directory=\"path\" parameter to
+./configure will avoid this prompt.
 
 Location to write persistent information" | tail -1`
 echo $ac_n "checking $MSG_CHECK""... $ac_c" 1>&6
-echo "configure:17837: checking $MSG_CHECK" >&5
+echo "configure:17855: checking $MSG_CHECK" >&5
 if eval "test \"`echo '$''{'ac_cv_user_prompt_PERSISTENT_DIRECTORY'+set}'`\" = set"; then
   echo $ac_n "(cached) $ac_c" 1>&6
 else
@@ -17852,6 +17870,8 @@ copy your files over to the new location (once only).  If you pick
 some other path than the default, you'll have to copy them yourself.
 There is nothing wrong with picking the old path ($ucddefaultstore) if
 you'd rather.
+  Providing the --with-persistent-directory=\"path\" parameter to
+./configure will avoid this prompt.
 
 Location to write persistent information ($defaultstore): $ac_c"
 read tmpinput
@@ -17893,7 +17913,7 @@ UCDPERSISTENT_DIRECTORY=$ucddefaultstore
 
 if test $PERSISTENT_DIRECTORY = "$defaultstore" -a -d "$ucddefaultstore" -a ! -d "$defaultstore" ; then
 echo $ac_n "checking If we should copy the old persistent directory""... $ac_c" 1>&6
-echo "configure:17897: checking If we should copy the old persistent directory" >&5
+echo "configure:17917: checking If we should copy the old persistent directory" >&5
 if eval "test \"`echo '$''{'ac_cv_user_prompt_COPY_PERSISTENT_FILES'+set}'`\" = set"; then
   echo $ac_n "(cached) $ac_c" 1>&6
 else
@@ -17909,6 +17929,8 @@ into your new net-snmp persistent file path?  This will functionally
 save all your ucd-snmp data and let it be used within the net-snmp
 tools.  This will only be done once when you run make install.  If you
 wish to do this, enter "yes" at the prompt.
+  Providing the --with-copy-persistent-files=\"no\" (or \"yes\")
+parameters to ./configure will avoid this prompt.
 
 Copy ucd-snmp data into the net-snmp data directory ("yes"): $ac_c"
 read tmpinput
