@@ -236,7 +236,7 @@ static const char *api_errors[-SNMPERR_MAX + 1] = {
     "Bad destination party specified",  /* SNMPERR_BAD_DST_PARTY */
     "Bad context specified",    /* SNMPERR_BAD_CONTEXT */
     "Bad community specified",  /* SNMPERR_BAD_COMMUNITY */
-    "Cannot send noAuth/desPriv",       /* SNMPERR_NOAUTH_DESPRIV */
+    "Cannot send noAuth/Priv",       /* SNMPERR_NOAUTH_DESPRIV */
     "Bad ACL definition",       /* SNMPERR_BAD_ACL */
     "Bad Party definition",     /* SNMPERR_BAD_PARTY */
     "Session abort failure",    /* SNMPERR_ABORT */
