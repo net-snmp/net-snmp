@@ -49,8 +49,15 @@ sedscript: sedscript.in include/net-snmp/net-snmp-config.h $(srcdir)/agent/mibgr
 EXAMPLE.conf: sedscript EXAMPLE.conf.def
 	$(SED) -f sedscript $(srcdir)/EXAMPLE.conf.def > EXAMPLE.conf
 
-docs: doxygen.conf
+docs: docsdir mancp
+
+docsdir: doxygen.conf
 	srcdir=$(srcdir) doxygen $(srcdir)/doxygen.conf
+
+mancp:
+	@for i in docs/man/man3/* ; do \
+	     cp $$i man/netsnmp_`basename $$i` ; \
+	done
 
 net-snmp-config-x:
 	chmod a+x net-snmp-config
@@ -177,5 +184,5 @@ dist: version tag tar
 FAQ.html:
 	local/FAQ2HTML FAQ
 
-.PHONY: docs testdirs test TAGS net-snmp-config-x
+.PHONY: docs docsdir mancp testdirs test TAGS net-snmp-config-x
 # note: tags and docs are phony to force rebulding
