@@ -5,7 +5,7 @@
 # Description: 
 #
 # This program, given an OID reference as an argument, creates some
-# template mib module files to be used with the ucd-snmp agent.  It is
+# template mib module files to be used with the net-snmp agent.  It is
 # far from perfect and will not generate working modules, but it
 # significantly shortens development time by outlining the basic
 # structure.
@@ -20,7 +20,7 @@ my $havesnmp = eval {require SNMP;};
 if (!$havesnmp) {
     print "
 ERROR: You don't have the SNMP perl module installed.  Please obtain
-this by getting the latest source release of the ucd-snmp toolkit from
+this by getting the latest source release of the net-snmp toolkit from
 http://www.net-snmp.org/download/ .  The perl module is contained in
 the perl/SNMP directory.  See the INSTALL file there for instructions.
 
