@@ -37,7 +37,8 @@ int snmp_register_callback(int major, int minor, SNMPCallback *new_callback,
 int snmp_call_callbacks(int major, int minor, void *caller_arg);
 int snmp_callback_available(int major, int minor); /* is >1 available */
 int snmp_count_callbacks(int major, int minor); /* ret the number registered */
-    
+int snmp_unregister_callback(int major, int minor, SNMPCallback *new_callback,
+                             void *arg, int matchargs);
 
 #ifdef __cplusplus
 }

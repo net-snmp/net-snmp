@@ -125,8 +125,6 @@ snmp_count_callbacks(int major, int minor) {
 
 int
 snmp_callback_available(int major, int minor) {
-    int count = 0;
-
     if (major >= MAX_CALLBACK_IDS || minor >= MAX_CALLBACK_SUBIDS) {
         return SNMPERR_GENERR;
     }
@@ -138,3 +136,35 @@ snmp_callback_available(int major, int minor) {
     return SNMPERR_GENERR;
 }
 
+int
+snmp_unregister_callback(int major, int minor, SNMPCallback *new_callback,
+                         void *arg, int matchargs) {
+    struct snmp_gen_callback *scp, *last = NULL, *freeit = NULL;
+    int count = 0;
+    
+    /* for each registered callback of type major and minor */
+    for(scp = thecallbacks[major][minor]; scp != NULL; scp = scp->next) {
+        /* free it */
+        if (freeit)
+            SNMP_FREE(freeit);
+        /* remove the requested one */
+        if (scp->sc_callback == new_callback &&
+            (!matchargs || scp->sc_client_arg == arg)) {
+
+            DEBUGMSGTL(("callback","unregistering a callback maj=%d min=%d\n",
+                        major, minor));
+            /* match found, remove it */
+            if (last)
+                last->next = scp->next;
+            else
+                thecallbacks[major][minor] = scp->next;
+            count++;
+            freeit = scp;
+        }
+    }
+    if (freeit)
+        SNMP_FREE(freeit);
+    return count;
+}
+
+            
