@@ -40,6 +40,7 @@
 #include <fcntl.h>
 #endif
 #include <errno.h>
+#include <signal.h>
 
 #include "mibincl.h"
 
@@ -367,6 +368,12 @@ update_hook(action, var_val, var_val_type, var_val_len, statP, name, name_len)
 
 extern char **argvrestartp, *argvrestartname;
 
+void restart_doit()
+{
+  execv(argvrestartname,argvrestartp);
+  setPerrorstatus("execv");
+}
+
 restart_hook(action, var_val, var_val_type, var_val_len, statP, name, name_len)
    int      action;
    u_char   *var_val;
@@ -385,8 +392,8 @@ restart_hook(action, var_val, var_val_type, var_val_len, statP, name, name_len)
   }
   asn_parse_int(var_val,&tmplen,&var_val_type,&tmp,sizeof(int));
   if (tmp == 1 && action == COMMIT) {
-    execv(argvrestartname,argvrestartp);
-    setPerrorstatus("execv");
+    signal(SIGALRM,restart_doit);
+    alarm(RESTARTSLEEP);
   } 
   return SNMP_ERR_NOERROR;
 }

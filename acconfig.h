@@ -171,6 +171,12 @@ sure to end it in -1.*/
                              timeout.  Original CMU code had this
                              hardcoded into the code as = 1 */
 
+#define RESTARTSLEEP 5    /* How long to wait after a snmpset to
+                             EXTENSIBLEMIB.VERSIONMIBNUM.VERRESTARTAGENT
+                             before restarting the agent.  This is
+                             necessary to finish the snmpset reply
+                             before restarting. */
+
 /* #define EXIT_ON_BAD_KLREAD  */
 /* define to exit the agent on a bad kernel read */
 
