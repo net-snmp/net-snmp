@@ -49,15 +49,15 @@ extern          "C" {
      * OID: .1.3.6.1.2.1.31.1.1, length: 9
      *
      * we share data structures (data too, in fact) with ifTable
-         */
+     */
 #include "if-mib/ifTable/ifTable.h"
 
     typedef ifTable_registration_ptr ifXTable_registration_ptr;
-    typedef ifTable_data             ifXTable_data;
-    typedef ifTable_undo_data        ifXTable_undo_data;
-    typedef ifTable_mib_index        ifXTable_mib_index;
-    typedef ifTable_rowreq_ctx       ifXTable_rowreq_ctx;
-    typedef ifTable_ref_rowreq_ctx   ifXTable_ref_rowreq_ctx;
+    typedef ifTable_data ifXTable_data;
+    typedef ifTable_undo_data ifXTable_undo_data;
+    typedef ifTable_mib_index ifXTable_mib_index;
+    typedef ifTable_rowreq_ctx ifXTable_rowreq_ctx;
+    typedef ifTable_ref_rowreq_ctx ifXTable_ref_rowreq_ctx;
 
 #define ifXTable_data_list           ifTable_data_list
 #define ifXTable_reg                 ifTable_reg
@@ -407,13 +407,11 @@ extern          "C" {
                                 size_t ifAlias_val_ptr_len);
     int             ifAlias_undo(ifXTable_rowreq_ctx * rowreq_ctx);
 
-    int            
-        ifCounterDiscontinuityTime_check_value(ifXTable_rowreq_ctx *
+    int ifCounterDiscontinuityTime_check_value(ifXTable_rowreq_ctx *
                                                rowreq_ctx,
                                                u_long
                                                ifCounterDiscontinuityTime_val);
-    int            
-        ifCounterDiscontinuityTime_undo_setup(ifXTable_rowreq_ctx *
+    int ifCounterDiscontinuityTime_undo_setup(ifXTable_rowreq_ctx *
                                               rowreq_ctx);
     int             ifCounterDiscontinuityTime_set(ifXTable_rowreq_ctx *
                                                    rowreq_ctx,
