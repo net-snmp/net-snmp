@@ -69,6 +69,7 @@ SOFTWARE.
 #define SNMP_NEED_REQUEST_LIST
 #include "mibincl.h"
 #include "snmp_client.h"
+#include "snmp_alarm.h"
 
 #include "snmpd.h"
 #include "mibgroup/struct.h"
@@ -415,7 +416,7 @@ handle_snmp_packet(int operation, struct snmp_session *session, int reqid,
 	    while ( asp->pdu->errstat-- > 0 )	/* Skip non-repeaters */
 	    {
 	        if ( NULL != asp->start )	/* if there are variables ... */
-	        asp->start = asp->start->next_variable;
+		    asp->start = asp->start->next_variable;
 	    }
 	    asp->pdu->errindex--;           /* Handled first repetition */
 
@@ -436,12 +437,11 @@ handle_snmp_packet(int operation, struct snmp_session *session, int reqid,
 		  var_ptr = var_ptr->next_variable ) {
 				/* XXX: we don't know the size of the next
 					OID, so assume the maximum length */
-		if ( var_ptr->type != SNMP_ENDOFMIBVIEW )
-		{
-		var_ptr2 = snmp_add_null_var(asp->pdu, var_ptr->name, MAX_OID_LEN);
-		for ( i=var_ptr->name_length ; i<MAX_OID_LEN ; i++)
-		    var_ptr2->name[i] = 0;
-		var_ptr2->name_length = var_ptr->name_length;
+		if ( var_ptr->type != SNMP_ENDOFMIBVIEW ) {
+		    var_ptr2 = snmp_add_null_var(asp->pdu, var_ptr->name, MAX_OID_LEN);
+		    for ( i=var_ptr->name_length ; i<MAX_OID_LEN ; i++)
+			var_ptr2->name[i] = 0;
+		    var_ptr2->name_length = var_ptr->name_length;
 
 		    allDone = FALSE;
 		}
