@@ -806,8 +806,8 @@ u_char *var_vacm_access(struct variable *vp,
 {
     struct vacm_accessEntry *gp;
     unsigned long secmodel, seclevel;
-    char groupName[VACMSTRINGLEN];
-    char contextPrefix[VACMSTRINGLEN];
+    char groupName[VACMSTRINGLEN]= { 0 };
+    char contextPrefix[VACMSTRINGLEN] = { 0 };
     oid *op;
     unsigned long len, i = 0;
     char *cp;
@@ -876,6 +876,7 @@ u_char *var_vacm_access(struct variable *vp,
 	    return NULL;
 	}
 
+	DEBUGMSGTL(("mibII/vacm_vars", "exact %d groupName \"%s\" contextPrefix \"%s\" secmodel %d seclevel %d\n", exact, groupName, contextPrefix, secmodel, seclevel));
 	gp = vacm_getAccessEntry(groupName, contextPrefix, secmodel, seclevel);
     } else {
 	secmodel = seclevel = 0;
@@ -945,75 +946,51 @@ u_char *var_vacm_access(struct variable *vp,
 	}
     }
 
-    if (!gp  && !exact) return NULL;
-	
-	
+    DEBUGMSGTL(("mibII/vacm_vars", "final name "));
+    DEBUGMSGOID(("mibII/vacm_vars", name, *length));
+    DEBUGMSG(("mibII/vacm_vars", " gp %p\n", gp));
 
-    *var_len =sizeof(long_return);
+    if (!gp) {
+	return NULL;
+    }
+
+    *var_len = sizeof(long_return);
     switch (vp->magic) {
     case ACCESSMATCH:
-	  if(gp)
-	  {
 	long_return = gp->contextMatch;
 	return (u_char *)&long_return;
-	  }
-	  return NULL;
+
     case ACCESSLEVEL:
-	  if(gp)
-	  {
 	long_return = gp->securityLevel;
 	return (u_char *)&long_return;
-	  }
-	  return NULL;
+
     case ACCESSMODEL:
-	  if(gp)
-	  {
 	long_return = gp->securityModel;
 	return (u_char *)&long_return;
-	  }
-	  return NULL;
+
     case ACCESSPREFIX:
-	  if(gp)
-	  {
 	*var_len = *gp->contextPrefix;
 	return (u_char *)&gp->contextPrefix[1];
-	  }
-	  return NULL;
+
     case ACCESSREAD:
-	  if(gp)
-	  {
 	*var_len = strlen(gp->readView);
 	return (u_char *)gp->readView;
-	  }
-	  return NULL;
+
     case ACCESSWRITE:
-	  if(gp)
-	  {
 	*var_len = strlen(gp->writeView);
 	return (u_char *)gp->writeView;
-	  }
-	  return NULL;
+
     case ACCESSNOTIFY:
-	  if(gp)
-	  {
 	*var_len = strlen(gp->notifyView);
 	return (u_char *)gp->notifyView;
-	  }
-	  return NULL;
+
     case ACCESSSTORAGE:
-	  if(gp)
-	  {
 	long_return = gp->storageType;
 	return (u_char *)&long_return;
-	  }
-	  return NULL;
+
     case ACCESSSTATUS:
-	  if(gp)
-	  {
 	long_return = gp->status;
 	return (u_char *)&long_return;
-    }
-    return NULL;
     }
     return NULL;
 }
@@ -1288,24 +1265,17 @@ write_vacmGroupName(int      action,
     static unsigned char string[VACMSTRINGLEN];
     struct vacm_groupEntry *geptr;
 
-    DEBUGMSGTL(("mibII/vacm_vars", "name action %d\n", action));
     if (action == RESERVE1) {
 	if (var_val_type != ASN_OCTET_STR) {
-	    DEBUGMSGTL(("mibII/vacm_vars",
-			"write to vacmGroupName not ASN_OCTET_STR\n"));
 	    return SNMP_ERR_WRONGTYPE;
 	}
 	if (var_val_len < 1 || var_val_len > 32) {
-	    DEBUGMSGTL(("mibII/vacm_vars",
-			"write_vacmGroupName: bad length %d\n", var_val_len));
 	    return SNMP_ERR_WRONGLENGTH;
 	}
     } else if (action == RESERVE2) {
 	if ((geptr = sec2group_parse_groupEntry(name, name_len)) == NULL) {
-	    DEBUGMSGTL(("mibII/vacm_vars", "name RES2 geptr NULL\n"));
 	    return SNMP_ERR_INCONSISTENTNAME;
 	} else {
-	    DEBUGMSGTL(("mibII/vacm_vars", "name RES2 %p\n",geptr));
 	    memcpy(string, geptr->groupName, VACMSTRINGLEN);
 	    memcpy(geptr->groupName, var_val, var_val_len);
 	    geptr->groupName[var_val_len] = 0;
@@ -1335,13 +1305,10 @@ write_vacmSecurityToGroupStorageType(int      action,
   static long long_ret;
   struct vacm_groupEntry *geptr;
   
-  DEBUGMSGTL(("mibII/vacm_vars", "type action %d\n", action));
   if (var_val_type != ASN_INTEGER){
-      DEBUGMSGTL(("mibII/vacm_vars","write to vacmSecurityToGroupStorageType not ASN_INTEGER\n"));
       return SNMP_ERR_WRONGTYPE;
   }
   if (var_val_len > sizeof(long_ret)){
-      DEBUGMSGTL(("mibII/vacm_vars","write to vacmSecurityToGroupStorageType: bad length\n"));
       return SNMP_ERR_WRONGLENGTH;
   }
   if (action == COMMIT){
@@ -1378,17 +1345,11 @@ write_vacmSecurityToGroupStatus(int      action,
     size_t nameLen;
     struct vacm_groupEntry *geptr;
 
-    DEBUGMSGTL(("mibII/vacm_vars", " status action %d\n", action));
-
     if (action == RESERVE1) {
 	if (var_val_type != ASN_INTEGER){
-	    DEBUGMSGTL(("mibII/vacm_vars",
-			"write to vacmSecurityToGroupStatus not ASN_INTEGER\n"));
 	    return SNMP_ERR_WRONGTYPE;
 	}
 	if (var_val_len != sizeof(long_ret)){
-	    DEBUGMSGTL(("mibII/vacm_vars",
-			"write to vacmSecurityToGroupStatus: bad length\n"));
 	    return SNMP_ERR_WRONGLENGTH;
 	}
 	if (long_ret == RS_NOTREADY || long_ret < 1 || long_ret > 6) {
@@ -1411,9 +1372,6 @@ write_vacmSecurityToGroupStatus(int      action,
 	/*  Now see if a group already exists with these index values.  */
 	geptr = vacm_getGroupEntry(model, newName);
 
-	DEBUGMSGTL(("mibII/vacm_vars", "RESERVE1 geptr %p long_ret %d\n",
-		    geptr, long_ret));
-
 	if (geptr != NULL) {
 	    if (long_ret == RS_CREATEANDGO || long_ret == RS_CREATEANDWAIT) {
 		free(newName);
@@ -1432,8 +1390,6 @@ write_vacmSecurityToGroupStatus(int      action,
 		    return SNMP_ERR_GENERR;
 		}
 
-		DEBUGMSGTL(("mibII/vacm_vars", "row created %p\n", geptr));
-
 		/*  Set defaults.  */
 		geptr->storageType = ST_NONVOLATILE;
 		geptr->status = RS_NOTREADY;
@@ -1447,15 +1403,10 @@ write_vacmSecurityToGroupStatus(int      action,
 
 	geptr = vacm_getGroupEntry(model, newName);
 
-	DEBUGMSGTL(("mibII/vacm_vars", "ACTION geptr %p long_ret %d\n",
-		    geptr, long_ret));
-
 	if (geptr != NULL) {
 	    if (long_ret == RS_CREATEANDGO || long_ret == RS_ACTIVE) {
 		/* Check that all the mandatory objects have been set by now,
 		   otherwise return inconsistentValue.  */
-		DEBUGMSGTL(("mibII/vacm_vars",
-			    "vacmSecurityToGroupStatus check mandatory\n"));
 		if (geptr->groupName[0] == 0) {
 		    free(newName);
 		    return SNMP_ERR_INCONSISTENTVALUE;
@@ -1638,29 +1589,21 @@ write_vacmAccessStatus(int      action,
             oid      *name,
             size_t   name_len)
 {
+  long long_ret = *((long *) var_val);
+  int model, level;
+  char *newGroupName, *newContextPrefix;
+  size_t groupNameLen, contextPrefixLen;
+  struct vacm_accessEntry *aptr = NULL;
 
-  /* variables we may use later */
-  static long long_ret;
-  int model,level;
-  char *newGroupName,*newContextPrefix;
-  size_t groupNameLen,contextPrefixLen;
-  struct vacm_accessEntry *aptr;
-
-  if (var_val_type != ASN_INTEGER){
-      DEBUGMSGTL(("mibII/vacm_vars","write to vacmSecurityToGroupStatus not ASN_INTEGER\n"));
-      return SNMP_ERR_WRONGTYPE;
-  }
-  if (var_val_len > sizeof(long_ret)){
-      DEBUGMSGTL(("mibII/vacm_vars","write to vacmSecurityToGroupStatus: bad length\n"));
-      return SNMP_ERR_WRONGLENGTH;
-  }
   if (action == RESERVE1) {
-      long_ret = *((long *) var_val);
-      /* ditch illegal values now */
-      /* notReady can not be used, but the return error code is not
-	 mentioned */
+      if (var_val_type != ASN_INTEGER) {
+	  return SNMP_ERR_WRONGTYPE;
+      }
+      if (var_val_len != sizeof(long_ret)) {
+	  return SNMP_ERR_WRONGLENGTH;
+      }
       if (long_ret == RS_NOTREADY || long_ret < 1 || long_ret > 6) {
-	  return SNMP_ERR_INCONSISTENTVALUE;
+	  return SNMP_ERR_WRONGVALUE;
       }
     
       /*  See if we can parse the oid for model/name first.  */
@@ -1669,13 +1612,11 @@ write_vacmAccessStatus(int      action,
 			   (u_char **)&newGroupName, &groupNameLen,
 			   (u_char **)&newContextPrefix, &contextPrefixLen,
 			   &model, &level)) {
-	  DEBUGMSGTL(("mibII/vacm_vars", "access_parse_oid failure\n"));
 	  return SNMP_ERR_INCONSISTENTNAME;
       }
       
-      DEBUGMSGTL(("mibII/vacm_vars", "groupnamelen %d cplen %d\n", groupNameLen, contextPrefixLen));
-
-      if (groupNameLen < 1 || groupNameLen > 32 || contextPrefixLen > 32) {
+      if (model < 1 || groupNameLen < 1 || groupNameLen > 32 || 
+	  contextPrefixLen > 32) {
 	  free(newGroupName);
 	  free(newContextPrefix);
 	  return SNMP_ERR_NOCREATION;
@@ -1683,65 +1624,92 @@ write_vacmAccessStatus(int      action,
       
       /*  Now see if a group already exists with these index values.  */
       aptr = vacm_getAccessEntry(newGroupName, newContextPrefix, model, level);
-      free(newGroupName);
-      free(newContextPrefix);
-      if (aptr) {
+
+      if (aptr != NULL) {
 	  if (long_ret == RS_CREATEANDGO || long_ret == RS_CREATEANDWAIT) {
+	      free(newGroupName);
+	      free(newContextPrefix);
 	      return SNMP_ERR_INCONSISTENTVALUE;
 	  }
       } else {
 	  if (long_ret == RS_ACTIVE || long_ret == RS_NOTINSERVICE) {
+	      free(newGroupName);
+	      free(newContextPrefix);
 	      return SNMP_ERR_INCONSISTENTVALUE;
 	  }
-      }
-  } else if (action == COMMIT) {
-    long_ret = *((long *) var_val);
+	  if (long_ret == RS_CREATEANDGO || long_ret == RS_CREATEANDWAIT) {
+	      if ((aptr = vacm_createAccessEntry(newGroupName,
+						 newContextPrefix,
+						 model, level)) == NULL) {
+		  free(newGroupName);
+		  free(newContextPrefix);
+		  return SNMP_ERR_GENERR;
+	      }
 
-    access_parse_oid(&name[ACCESS_MIB_LENGTH], name_len-ACCESS_MIB_LENGTH,
-		     (u_char **)&newGroupName, &groupNameLen,
-		     (u_char **)&newContextPrefix, &contextPrefixLen,
-		     &model,&level);
-
-    /* Now see if a group already exists with these index values */
-    aptr = vacm_getAccessEntry(newGroupName,newContextPrefix,model,level);
-
-
-    if (aptr) {			/* If so, we set the appropriate value... */
-      if (long_ret == RS_DESTROY) {
-        vacm_destroyAccessEntry(newGroupName,newContextPrefix,model,level);
-      } else {
-        aptr->status = long_ret;
+	      /*  Set defaults.  */
+	      aptr->contextMatch = 1;  /*  exact(1) is the DEFVAL  */
+	      aptr->storageType = ST_NONVOLATILE;
+	      aptr->status = RS_NOTREADY;
+	  }
       }
       free(newGroupName);
       free(newContextPrefix);
-    } else {			/* ...else we create a new group entry */
-      /* check for a valid status column set */
-      if (long_ret == RS_DESTROY) {
-        /* destroying a non-existent row is actually legal */
-        free(newGroupName);
-        free(newContextPrefix);
-        return SNMP_ERR_NOERROR;
+  } else if (action == ACTION) {
+      access_parse_oid(&name[ACCESS_MIB_LENGTH], name_len-ACCESS_MIB_LENGTH,
+		       (u_char **)&newGroupName, &groupNameLen,
+		       (u_char **)&newContextPrefix, &contextPrefixLen,
+		       &model, &level);
+      aptr = vacm_getAccessEntry(newGroupName, newContextPrefix, model, level);
+
+      if (aptr != NULL) {
+	  if (long_ret == RS_CREATEANDGO || long_ret == RS_ACTIVE) {
+	      aptr->status = RS_ACTIVE;
+	    } else if (long_ret == RS_CREATEANDWAIT) {
+		aptr->status = RS_NOTINSERVICE;
+	    } else if (long_ret == RS_NOTINSERVICE) {
+		if (aptr->status == RS_ACTIVE) {
+		    aptr->status = RS_NOTINSERVICE;
+		} else if (aptr->status == RS_NOTREADY) {
+		    free(newGroupName);
+		    free(newContextPrefix);
+		    return SNMP_ERR_INCONSISTENTVALUE;
+		}
+	    }
       }
+      free(newGroupName);
+      free(newContextPrefix);
+  } else if (action == COMMIT) {
+      access_parse_oid(&name[ACCESS_MIB_LENGTH], name_len-ACCESS_MIB_LENGTH,
+		       (u_char **)&newGroupName, &groupNameLen,
+		       (u_char **)&newContextPrefix, &contextPrefixLen,
+		       &model, &level);
+      aptr = vacm_getAccessEntry(newGroupName, newContextPrefix, model, level);
 
-      /* generate a new group entry */
-      if ((aptr = vacm_createAccessEntry(newGroupName,newContextPrefix,model,level)) == NULL) {
-        free(newGroupName);
-        free(newContextPrefix);
-        return SNMP_ERR_GENERR;
+      if (aptr) {
+	  if (long_ret == RS_DESTROY) {
+	      vacm_destroyAccessEntry(newGroupName, newContextPrefix,
+				      model, level);
+	  }
       }
-
-	  /*set default storage type*/
-	  /*This version only supports volatile storage*/
-	  aptr->storageType = ST_NONVOLATILE;
-
-      /* set the status of the row based on the request */
-      if (long_ret == RS_CREATEANDGO)
-        aptr->status = RS_ACTIVE;
-      else if (long_ret == RS_CREATEANDWAIT)
-        aptr->status = RS_NOTINSERVICE;
-
-    }  /* endif -- uptr */
-  }  /* endif -- action==COMMIT */
+      free(newGroupName);
+      free(newContextPrefix);
+  } else if (action == UNDO) {
+      if (long_ret == RS_CREATEANDGO || long_ret == RS_CREATEANDWAIT) {
+	  access_parse_oid(&name[ACCESS_MIB_LENGTH], 
+			   name_len-ACCESS_MIB_LENGTH,
+			   (u_char **)&newGroupName, &groupNameLen,
+			   (u_char **)&newContextPrefix, &contextPrefixLen,
+			   &model, &level);
+	  aptr = vacm_getAccessEntry(newGroupName, newContextPrefix, 
+				     model, level);
+	  if (aptr != NULL) {
+	      vacm_destroyAccessEntry(newGroupName, newContextPrefix,
+				      model, level);
+	  }
+      }
+      free(newGroupName);
+      free(newContextPrefix);
+  }
 
   return SNMP_ERR_NOERROR;
 }
@@ -1830,27 +1798,33 @@ write_vacmAccessReadViewName(int      action,
             oid      *name,
             size_t   name_len)
 {
-  /* variables we may use later */
   static unsigned char string[VACMSTRINGLEN];
-  struct vacm_accessEntry *aptr;
+  struct vacm_accessEntry *aptr = NULL;
   
-  if (var_val_type != ASN_OCTET_STR){
-      DEBUGMSGTL(("mibII/vacm_vars","write to vacmAccessReadViewName not ASN_OCTET_STR\n"));
-      return SNMP_ERR_WRONGTYPE;
-  }
-  if (var_val_len > sizeof(string)){
-      DEBUGMSGTL(("mibII/vacm_vars","write to vacmAccessReadViewName: bad length\n"));
-      return SNMP_ERR_WRONGLENGTH;
-  }
-  if (action == COMMIT){
-      /* don't allow creations here */
-      if ((aptr = access_parse_accessEntry(name, name_len)) == NULL) {
-        return SNMP_ERR_NOSUCHNAME;
+  if (action == RESERVE1) {
+      if (var_val_type != ASN_OCTET_STR) {
+	  DEBUGMSGTL(("mibII/vacm_vars",
+		      "write to vacmAccessReadViewName not ASN_OCTET_STR\n"));
+	  return SNMP_ERR_WRONGTYPE;
       }
-      
-      memcpy(aptr->readView, var_val, var_val_len);
+      if (var_val_len > 32) {
+	  DEBUGMSGTL(("mibII/vacm_vars",
+		      "write to vacmAccessReadViewName: bad length\n"));
+	  return SNMP_ERR_WRONGLENGTH;
+      }
+  } else if (action == RESERVE2) {
+      if ((aptr = access_parse_accessEntry(name, name_len)) == NULL) {
+	  return SNMP_ERR_INCONSISTENTNAME;
+      } else {
+	  memcpy(string, aptr->readView, VACMSTRINGLEN);
+	  memcpy(aptr->readView, var_val, var_val_len);
 	  aptr->readView[var_val_len] = 0;
-           
+      }
+  } else if (action == FREE) {
+	/*  Try to undo the SET here (abnormal usage of FREE clause)  */
+      if ((aptr = access_parse_accessEntry(name, name_len)) != NULL) {
+	  memcpy(aptr->readView, string, var_val_len);
+      }
   }
   return SNMP_ERR_NOERROR;
 }
@@ -1864,27 +1838,33 @@ write_vacmAccessWriteViewName(int      action,
             oid      *name,
             size_t   name_len)
 {
-  /* variables we may use later */
   static unsigned char string[VACMSTRINGLEN];
-  struct vacm_accessEntry *aptr;
+  struct vacm_accessEntry *aptr = NULL;
   
-  if (var_val_type != ASN_OCTET_STR){
-      DEBUGMSGTL(("mibII/vacm_vars","write to vacmAccessWriteViewName not ASN_OCTET_STR\n"));
-      return SNMP_ERR_WRONGTYPE;
-  }
-  if (var_val_len > sizeof(string)){
-      DEBUGMSGTL(("mibII/vacm_vars","write to vacmAccessWriteViewName: bad length\n"));
-      return SNMP_ERR_WRONGLENGTH;
-  }
-  if (action == COMMIT){
-      /* don't allow creations here */
-      if ((aptr = access_parse_accessEntry(name, name_len)) == NULL) {
-        return SNMP_ERR_NOSUCHNAME;
+  if (action == RESERVE1) {
+      if (var_val_type != ASN_OCTET_STR) {
+	  DEBUGMSGTL(("mibII/vacm_vars",
+		      "write to vacmAccessWriteViewName not ASN_OCTET_STR\n"));
+	  return SNMP_ERR_WRONGTYPE;
       }
-      
-      memcpy(aptr->writeView, var_val, var_val_len);
+      if (var_val_len > 32) {
+	  DEBUGMSGTL(("mibII/vacm_vars",
+		      "write to vacmAccessWriteViewName: bad length\n"));
+	  return SNMP_ERR_WRONGLENGTH;
+      }
+  } else if (action == RESERVE2) {
+      if ((aptr = access_parse_accessEntry(name, name_len)) == NULL) {
+	  return SNMP_ERR_INCONSISTENTNAME;
+      } else {
+	  memcpy(string, aptr->writeView, VACMSTRINGLEN);
+	  memcpy(aptr->writeView, var_val, var_val_len);
 	  aptr->writeView[var_val_len] = 0;
-   
+      }
+  } else if (action == FREE) {
+	/*  Try to undo the SET here (abnormal usage of FREE clause)  */
+      if ((aptr = access_parse_accessEntry(name, name_len)) != NULL) {
+	  memcpy(aptr->writeView, string, var_val_len);
+      }
   }
   return SNMP_ERR_NOERROR;
 }
@@ -1898,27 +1878,33 @@ write_vacmAccessNotifyViewName(int      action,
             oid      *name,
             size_t   name_len)
 {
-  /* variables we may use later */
   static unsigned char string[VACMSTRINGLEN];
-  struct vacm_accessEntry *aptr;
+  struct vacm_accessEntry *aptr = NULL;
   
-  if (var_val_type != ASN_OCTET_STR){
-      DEBUGMSGTL(("mibII/vacm_vars","write to vacmAccessNotifyViewName not ASN_OCTET_STR\n"));
-      return SNMP_ERR_WRONGTYPE;
-  }
-  if (var_val_len > sizeof(string)){
-      DEBUGMSGTL(("mibII/vacm_vars","write to vacmAccessNotifyViewName: bad length\n"));
-      return SNMP_ERR_WRONGLENGTH;
-  }
-  if (action == COMMIT){
-      /* don't allow creations here */
-      if ((aptr = access_parse_accessEntry(name, name_len)) == NULL) {
-        return SNMP_ERR_NOSUCHNAME;
+  if (action == RESERVE1) {
+      if (var_val_type != ASN_OCTET_STR) {
+	  DEBUGMSGTL(("mibII/vacm_vars",
+		     "write to vacmAccessNotifyViewName not ASN_OCTET_STR\n"));
+	  return SNMP_ERR_WRONGTYPE;
       }
-      
-      memcpy(aptr->notifyView, var_val, var_val_len);
+      if (var_val_len > 32) {
+	  DEBUGMSGTL(("mibII/vacm_vars",
+		      "write to vacmAccessNotifyViewName: bad length\n"));
+	  return SNMP_ERR_WRONGLENGTH;
+      }
+  } else if (action == RESERVE2) {
+      if ((aptr = access_parse_accessEntry(name, name_len)) == NULL) {
+	  return SNMP_ERR_INCONSISTENTNAME;
+      } else {
+	  memcpy(string, aptr->notifyView, VACMSTRINGLEN);
+	  memcpy(aptr->notifyView, var_val, var_val_len);
 	  aptr->notifyView[var_val_len] = 0;
-      
+      }
+  } else if (action == FREE) {
+	/*  Try to undo the SET here (abnormal usage of FREE clause)  */
+      if ((aptr = access_parse_accessEntry(name, name_len)) != NULL) {
+	  memcpy(aptr->notifyView, string, var_val_len);
+      }
   }
   return SNMP_ERR_NOERROR;
 }
