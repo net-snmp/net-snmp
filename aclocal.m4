@@ -1,5 +1,12 @@
-dnl AC_PROMPT_USER_NO_DEFINE(VARIABLE,PROMPT,[DEFAULT])
-AC_DEFUN(AC_PROMPT_USER_NO_DEFINE,
+dnl @synopsis AC_PROMPT_USER_NO_DEFINE(VARIABLENAME,QUESTION,[DEFAULT])
+dnl
+dnl Asks a QUESTION and puts the results in VARIABLENAME with an optional
+dnl DEFAULT value if the user merely hits return.
+dnl
+dnl @version 1.15
+dnl @author Wes Hardaker <wjhardaker@ucdavis.edu>
+dnl
+AC_DEFUN([AC_PROMPT_USER_NO_DEFINE],
 dnl changequote(<<, >>) dnl
 dnl <<
 [
@@ -19,7 +26,17 @@ dnl >>
 dnl changequote([, ])
 ) dnl done AC_PROMPT_USER
 
-AC_DEFUN(AC_PROMPT_USER,
+dnl @synopsis AC_PROMPT_USER(VARIABLENAME,QUESTION,[DEFAULT])
+dnl
+dnl Asks a QUESTION and puts the results in VARIABLENAME with an optional
+dnl DEFAULT value if the user merely hits return.  Also calls 
+dnl AC_DEFINE_UNQUOTED() on the VARIABLENAME for VARIABLENAMEs that should
+dnl be entered into the config.h file as well.
+dnl
+dnl @version 1.15
+dnl @author Wes Hardaker <wjhardaker@ucdavis.edu>
+dnl
+AC_DEFUN([AC_PROMPT_USER],
 [
 MSG_CHECK=`echo "$2" | tail -1`
 AC_CACHE_CHECK($MSG_CHECK, ac_cv_user_prompt_$1,
@@ -37,7 +54,13 @@ if test "$ac_cv_user_prompt_$1" != "none"; then
 fi
 ]) dnl
 
-dnl AC_CHECK_STRUCT_FOR(INCLUDES,STRUCT,MEMBER,DEFINE,[no])
+dnl @synopsis AC_CHECK_STRUCT_FOR(INCLUDES,STRUCT,MEMBER,DEFINE,[no])
+dnl
+dnl Checks STRUCT for MEMBER and defines DEFINE if found.
+dnl
+dnl @version 1.15
+dnl @author Wes Hardaker <wjhardaker@ucdavis.edu>
+dnl
 AC_DEFUN(AC_CHECK_STRUCT_FOR,[
 
 ac_safe_struct=`echo "$2" | sed 'y%./+-%__p_%'`
