@@ -138,8 +138,9 @@ int _asn_build_header_check(const char *str, u_char *data,
 
 /* checks the incoming packet for validity and returns its size or 0 */
 int
-asn_check_packet (u_char *pkt, size_t len) {
-  long asn_length;
+asn_check_packet (u_char *pkt, size_t len)
+{
+  u_long asn_length;
   
   if (len < 2)
     return 0;      /* always too short */
