@@ -16,7 +16,7 @@ REQUIREMENTS
       CGI
       DBI
       DBD::mSQL
-      PNGgraph
+      GD::Graph
 
     You may need more modules depending on your perl version, so sorry
     in advance if I missed some.
