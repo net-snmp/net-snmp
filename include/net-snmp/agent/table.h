@@ -33,7 +33,7 @@ extern          "C" {
      */
     typedef struct netsnmp_column_info_t {
         char            isRange;
-        char            list_count;     /* only useful if isRange == 0 */
+        unsigned short  list_count;     /* only useful if isRange == 0 */
 
         union {
             unsigned int    range[2];
