@@ -49,7 +49,7 @@ $remuser = "guest" if (!defined($remuser) || $remuser eq "");
 #===========================================================================
 # Connect to the mSQL database with the appropriate driver
 #===========================================================================
-( $dbh = DBI->connect("DBI:mysql:database=$dbname;host=$hostname", $user, $pass))
+($dbh = DBI->connect("DBI:mysql:database=$dbname;host=$hostname", $user, $pass))
     or die "\tConnect not ok: $DBI::errstr\n";
 
 #===========================================================================
@@ -110,7 +110,7 @@ if ((param('displaygraph') || param('dograph')) && param('table')) {
 	my $handle = getcursor($dbh, "SELECT distinct(oidindex) FROM $table where host = '$host'");
 	my @cols;
 	while (  $row = $handle->fetchrow_hashref ) {
-	    print "<tr><td>$row->{oidindex}</td><td><input type=checkbox value=1 name=graph_" . displaytable::to_unique_key($row->{'oidindex'}) . "></td></tr>\n";
+	    print "<tr><td>$row->{oidindex}</td><td><input type=checkbox value=1 name=" . 'graph_' . displaytable::to_unique_key($row->{'oidindex'}) . "></td></tr>\n";
 	}
 	print "</table>\n";
 
@@ -163,6 +163,7 @@ if ((param('displaygraph') || param('dograph')) && param('table')) {
 	    $r->send_http_header();
 	    print "<body bgcolor=\"#ffffff\">\n";
 	    print "<h1>No Data to Graph</h1>\n";
+	    print STDERR "No data to graph: $clause, $#columns\n";
 	    return Exit($dbh, "$group");
 	}
 	$clause .= " and host = '$host'";
@@ -175,12 +176,13 @@ if ((param('displaygraph') || param('dograph')) && param('table')) {
     $r->content_type("image/png");
     $r->send_http_header();
 
-#    print STDERR "graphing clause: $clause, columns: ", join(", ",@columns), "\n";
+    print STDERR "graphing clause: $clause, columns: ", join(", ",@columns), "\n";
     my @args;
     push (@args, '-rate', '60') if (param('graph_as_rate'));
     push (@args, '-max', param('max_y')) if (param('max_y') && param('max_y') =~ /^[-.\d]+$/);
     push (@args, '-min', param('min_y')) if (param('min_y') && param('min_y') =~ /^[-.\d]+$/);
 
+    my $ret = 
     displaygraph($dbh, $table,
 #		 '-xcol', "date_format(updated,'%m-%d-%y %h:%i')",
 		 '-xcol', "unix_timestamp(updated)",
@@ -196,6 +198,7 @@ if ((param('displaygraph') || param('dograph')) && param('table')) {
 		 @args,
 		 '-columns', \@columns,
 		 '-indexes', ['oidindex']);
+    print STDERR "$ret rows graphed\n";
     return OK();
 }
 
