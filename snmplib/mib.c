@@ -1429,27 +1429,78 @@ get_module_node(name, module, objid, objidlen)
     oid *objid;
     int *objidlen;
 {
-    int modid;
-    struct tree *tp;
+    int modid, subid;
+    struct tree *tp, *tp2;
     oid newname[64], *op;
+    char *cp, *cp2;
 
     if ( !strcmp(module, "ANY") )
         modid = -1;
     else
         modid = which_module( module );
 
+		/* Isolate the first component of the name ... */
+    cp = strchr( name, '.' );
+    if ( cp != NULL ) {
+	*cp = '\0';
+	cp++;
+    }
+		/* ... and locate it in the tree. */
     tp = find_tree_node(name, modid);
     if (tp){
+		/* Build up the object ID, working backwards,
+		   starting from the end of the buffer. */
+	tp2 = tp;
 	for(op = newname + 63; op >= newname; op--){
-	    *op = tp->subid;
-	    tp = tp->parent;
-	    if (tp == NULL)
+	    *op = tp2->subid;
+	    tp2 = tp2->parent;
+	    if (tp2 == NULL)
 		break;
 	}
 	if (newname + 64 - op > *objidlen)
 	    return 0;
 	*objidlen = newname + 64 - op;
 	memmove(objid, op, (newname + 64 - op) * sizeof(oid));
+
+		/* If the name requested was more than one element,
+		   tag on the rest of the components */
+	while ( cp != NULL ) {
+	    cp2 = strchr( cp, '.' );	/* Isolate the next entry */
+	    if ( cp2 != NULL ) {
+		*cp2 = '\0';
+		cp2++;
+	    }
+
+					/* Is it numeric ? */
+	    if ( isdigit( *cp ) ) 
+		subid=(atoi(cp));
+	    else
+		subid = -1;
+
+					/* Search for the appropriate child */
+	    if ( tp != NULL )
+	        tp2 = tp->child_list;
+	    while ( tp2 != NULL ) {
+		if (( tp2->subid == subid ) ||
+		    ( !strcasecmp( tp2->label, cp ))) {
+			objid[ *objidlen ] = tp2->subid;
+			(*objidlen)++;
+			tp = tp2;
+			break;
+		}
+		tp2 = tp2->next_peer;
+	    }
+	    if ( tp2 == NULL ) {
+		if ( subid == -1 )
+		    return 0;
+				/* pure numeric from now on */
+		objid[ *objidlen ] = subid;
+		(*objidlen)++;
+		tp = NULL;
+	    }
+	    cp = cp2;
+	}
+		
 	return 1;
     } else {
 	return 0;
