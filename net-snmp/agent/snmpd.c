@@ -276,6 +276,7 @@ version(void)
 	RETSIGTYPE
 SnmpdShutDown(int a)
 {
+        extern struct snmp_session main_session;
 	running = 0;
 #ifdef WIN32
 	/*
@@ -283,7 +284,7 @@ SnmpdShutDown(int a)
 	 * on signal. Thats why following function is called, which closes the 
 	 * socket descriptors and causes the select() to return
 	 */
-	snmp_close_sessions();
+	snmp_close(main_session);
 #endif
 }
 
@@ -722,13 +723,13 @@ main(int argc, char *argv[])
     if (!ds_get_boolean(DS_APPLICATION_ID, DS_AGENT_QUIT_IMMEDIATELY))
         receive();
 #include "mib_module_shutdown.h"
-#ifdef WIN32
-    agent_status = AGENT_STOPPED;
-#endif
     DEBUGMSGTL(("snmpd/main", "sending shutdown trap\n"));
     SnmpTrapNodeDown();
     DEBUGMSGTL(("snmpd/main", "Bye...\n"));
     snmp_shutdown("snmpd");
+#ifdef WIN32
+    agent_status = AGENT_STOPPED;
+#endif
     return 0;
 }  /* End main() -- snmpd */
 
