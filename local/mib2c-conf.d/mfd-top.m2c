@@ -51,9 +51,12 @@ void init_$name(void);
  * pointer that will be passed back to you for most of the
  * functions calls.
  */
-@    if "$m2c_context_reg" eq ""@
-    /** TODO: update typedef to correct pointer type.
-     * (or add @eval $@m2c_context_reg = "TYPE"@ and regenerate code) */
+@    if "x$m2c_context_reg" eq "x"@
+    /*
+     * TODO:
+     * update typedef to correct pointer type.
+     * (or add @eval $@m2c_context_reg = "TYPE"@ and regenerate code)
+     */
 @        eval $m2c_context_reg = "void *"@
 @    end@
 typedef $m2c_context_reg ${context}_registration_ptr;
@@ -95,7 +98,8 @@ typedef struct ${context}_ctx_s {
     int                         request_mode;
 
     /*
-     * TODO: add any other useful data
+     * TODO:
+     * add any other useful data
      *       (e.g. flags for when a column has been set)
      */
     
@@ -123,7 +127,7 @@ typedef struct ${table}_ref_ctx_s {
     int ${context}_init_ctx(${context}_ctx *ctx);
     void ${context}_cleanup_ctx(${context}_ctx *ctx);
 @   end@
-@    if $m2c_data_context ne "generated"@
+@    if "$m2c_data_context" ne "generated"@
 @        if $m2c_data_allocate == 1@
     ${context}_data *${context}_allocate_data(void);
 @        end@
@@ -191,7 +195,7 @@ init_$name(void)
 void
 initialize_table_$table(void)
 {
-    ${context}_registration_ptr * user_context;
+    ${context}_registration_ptr user_context;
     u_long flags;
 
     DEBUGMSGT(("${name}:trace",">%s\n",__FUNCTION__));
@@ -224,7 +228,8 @@ initialize_table_$table(void)
 int ${context}_ctx_init(${context}_ctx *ctx)
 {
     /*
-     * TODO: extra initialization
+     * TODO:
+     * extra initialization
      */
 
     return MFD_SUCCESS;
@@ -237,7 +242,8 @@ int ${context}_ctx_init(${context}_ctx *ctx)
 void ${context}_ctx_cleanup(${context}_ctx *ctx)
 {
     /*
-     * TODO: extra cleanup
+     * TODO:
+     * extra cleanup
      */
 }
 
@@ -263,7 +269,8 @@ ${context}_pre_request( ${context}_registration_ptr reg,
     DEBUGMSGT(("${name}:trace",">%s\n",__FUNCTION__));
 
     /*
-     * TODO: pre-request setup
+     * TODO:
+     * pre-request setup
      */
 
     return MFD_SUCCESS;
@@ -289,7 +296,8 @@ ${context}_post_request(${context}_registration_ptr reg,
     DEBUGMSGT(("${name}:trace",">%s\n",__FUNCTION__));
 
     /*
-     * TODO: post-request cleanup
+     * TODO:
+     * post-request cleanup
      */
 
     return MFD_SUCCESS;
