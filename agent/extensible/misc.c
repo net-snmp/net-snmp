@@ -72,30 +72,33 @@ int sh_count_procs(procname)
 #endif
   struct extensible ex;
   
-  fd = get_ps_output(&ex);
-  file = fdopen(fd,"r");
-  while(fgets(line,STRMAX,file) != NULL)
-    {
-      if ((cptr = find_field(line,LASTFIELD)) == NULL)
-        continue;
-      copy_word(cptr,line);
-      if (!strcmp(line,procname)) ret++;
-    }
+  if (fd = get_ps_output(&ex)) {
+    file = fdopen(fd,"r");
+    while(fgets(line,STRMAX,file) != NULL)
+      {
+        if ((cptr = find_field(line,LASTFIELD)) == NULL)
+          continue;
+        copy_word(cptr,line);
+        if (!strcmp(line,procname)) ret++;
+      }
 #ifdef ERRORMIBNUM
-  if (ftell(file) < 2) {
-    seterrorstatus("process list unreasonable short (mem?)");
+    if (ftell(file) < 2) {
+      seterrorstatus("process list unreasonable short (mem?)");
+      ret = -1;
+    }
+#endif
+    fclose(file);
+    close(fd);
+#ifndef EXCACHETIME
+    printf("waitpid:  %d\n",ex.pid);
+    if (ex.pid && waitpid(ex.pid,&ex.result,0) < 0) {
+      perror("waitpid():");
+    }
+    ex.pid = 0;
+#endif
+  } else {
     ret = -1;
   }
-#endif
-  fclose(file);
-  close(fd);
-#ifndef EXCACHETIME
-  printf("waitpid:  %d\n",ex.pid);
-  if (ex.pid && waitpid(ex.pid,&ex.result,0) < 0) {
-    perror("waitpid():");
-  }
-  ex.pid = 0;
-#endif
   return(ret);
 }
 
@@ -131,19 +134,24 @@ int exec_command(ex)
   union wait status;
 #endif
   
-  fd = get_exec_output(ex);
-  file = fdopen(fd,"r");
-  if (fgets(ex->output,STRMAX,file) == NULL) {
-    ex->output[0] = NULL;
-  }
-  fclose(file);
-  close(fd);
+  if (fd = get_exec_output(ex)) {
+    
+    file = fdopen(fd,"r");
+    if (fgets(ex->output,STRMAX,file) == NULL) {
+      ex->output[0] = NULL;
+    }
+    fclose(file);
+    close(fd);
 #ifndef EXCACHETIME
-  if (ex->pid && waitpid(ex->pid,&ex->result,0) < 0) {
-    perror("waitpid():");
-  }
-  ex->pid = 0;
+    if (ex->pid && waitpid(ex->pid,&ex->result,0) < 0) {
+      perror("waitpid():");
+    }
+    ex->pid = 0;
 #endif
+  } else {
+    ex->output[0] = NULL;
+    ex->result = 0;
+  }
   return(ex->result);
 }
 
@@ -176,14 +184,16 @@ int get_exec_output(ex)
 #endif
     if (pipe(fd)) 
       {
-        perror("pipe");
+        setPerrorstatus("pipe");
+        return NULL;
       }
     if ((ex->pid = fork()) == 0) 
       {
         close(1);
         if (dup(fd[1]) != 1)
           {
-            perror("dup");
+            setPerrorstatus("dup");
+            return NULL;
           }
         close(fd[1]);
         close(fd[0]);
@@ -217,11 +227,15 @@ int get_exec_output(ex)
     else
       {
         close(fd[1]);
+        if (ex->pid < 0) {
+          setPerrorstatus("fork");
+          return (NULL);
+        }
 /*      ret = fdopen(fd[0],"r"); */
 #ifdef EXCACHETIME
         unlink(CACHEFILE);
         if ((cfd = open(CACHEFILE,O_WRONLY|O_TRUNC|O_CREAT,0644)) < 0) {
-          perror("open");
+          setPerrorstatus("open");
           return(NULL);
         }
         fcntl(fd[0],F_SETFL,O_NONBLOCK);  /* don't block on reads */
@@ -231,7 +245,7 @@ int get_exec_output(ex)
           if (cachebytes > 0)
             write(cfd,(void *) cache, cachebytes);
           else if (cachebytes == -1 && errno != EAGAIN) {
-            perror("read");
+            setPerrorstatus("read");
             break;
           }
           else
@@ -241,7 +255,7 @@ int get_exec_output(ex)
         close(fd[0]);
         /* wait for the child to finish */
         if (ex->pid && waitpid(ex->pid,&ex->result,0) < 0) {
-          perror("waitpid():");
+          setPerrorstatus("waitpid()");
         }
         ex->pid = 0;
         ex->result = WEXITSTATUS(ex->result);
@@ -256,7 +270,7 @@ int get_exec_output(ex)
       ex->result = lastresult;
   }
   if ((cfd = open(CACHEFILE,O_RDONLY)) < 0) {
-    perror("open");
+    setPerrorstatus("open");
     return(NULL);
   }
   return(cfd);

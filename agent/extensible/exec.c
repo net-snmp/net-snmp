@@ -98,11 +98,12 @@ fixExecError(action, var_val, var_val_type, var_val_len, statP, name, name_len)
 #ifdef EXECFIXCMD
     if (tmp == 1 && action == COMMIT) {
       sprintf(ex.command,EXECFIXCMD,exten->name);
-      fd = get_exec_output(&ex);
-      file = fdopen(fd,"r");
-      while (fgets(ex.output,STRMAX,file) != NULL);
-      fclose(file);
-      close(fd);
+      if (fd = get_exec_output(&ex)) {
+        file = fdopen(fd,"r");
+        while (fgets(ex.output,STRMAX,file) != NULL);
+        fclose(file);
+        close(fd);
+      }
     } 
 #endif
     return SNMP_ERR_NOERROR;
@@ -181,16 +182,18 @@ unsigned char *var_extensible_relocatable(vp, name, length, exact, var_len, writ
       return((u_char *) (&exten->result));
     case ERRORMSG:   /* first line of text returned from the process */
       if (exten->type == EXECPROC) {
-        fd = get_exec_output(exten);
-        file = fdopen(fd,"r");
-        for (i=0;i != name[*length-1];i++) {
-          if (fgets(errmsg,STRMAX,file) == NULL) {
-            *var_len = NULL;
-            return(NULL);
+        if (fd = get_exec_output(exten)){
+          file = fdopen(fd,"r");
+          for (i=0;i != name[*length-1];i++) {
+            if (fgets(errmsg,STRMAX,file) == NULL) {
+              *var_len = NULL;
+              return(NULL);
+            }
           }
-        }
-        fclose(file);
-        close(fd);
+          fclose(file);
+          close(fd);
+        } else
+          errmsg[0] = NULL;
       }
       else {
         if (*length > 1) {

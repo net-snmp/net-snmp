@@ -180,14 +180,17 @@ int getswap(rettype)
      I can't figure out how to read it out of the kernel directly
      -- Wes */
   strcpy(ex.command,"/etc/swapinfo -h");
-  fd = get_exec_output(&ex);
-  file = fdopen(fd,"r");
-  for (i=1;i <= 2 && fgets(ex.output,STRMAX,file) != NULL; i++);
-  if (fgets(ex.output,STRMAX,file) != NULL) {
-    spaceleft -= atoi(&ex.output[14]);
+  if (fd = get_exec_output(&ex)) {
+    file = fdopen(fd,"r");
+    for (i=1;i <= 2 && fgets(ex.output,STRMAX,file) != NULL; i++);
+    if (fgets(ex.output,STRMAX,file) != NULL) {
+      spaceleft -= atoi(&ex.output[14]);
+    }
+    fclose(file);
+    close(fd);
+  } else {
+    return(NULL);
   }
-  fclose(file);
-  close(fd);
   switch
     (rettype) {
     case SWAPGETLEFT:
@@ -343,12 +346,12 @@ unsigned char *var_extensible_disk(vp, name, length, exact, var_len, write_metho
   /* read the disk information */
   if ((file = open(disks[disknum].device,0)) < 0) {
     fprintf(stderr,"Couldn't open device %s\n",disks[disknum].device);
-    perror("open dev/disk");
+    setPerrorstatus("open dev/disk");
     return(NULL);
   }
   lseek(file, (long) (SBLOCK * DEV_BSIZE), 0);
   if (read(file,(char *) &filesys, SBSIZE) != SBSIZE) {
-    perror("open dev/disk");
+    setPerrorstatus("open dev/disk");
     fprintf(stderr,"Error reading device %s\n",disks[disknum].device);
     close(file);
     return(NULL);
@@ -576,6 +579,18 @@ unsigned char *var_extensible_loadave(vp, name, length, exact, var_len, write_me
 
 static time_t errorstatustime=0;
 static char errorstring[STRMAX];
+
+extern char *sys_errlist[];
+
+setPerrorstatus(to)
+  char *to;
+{
+  char buf[STRMAX];
+  extern char *sys_errlist[];
+  
+  sprintf(buf,"%s: %s",to,sys_errlist[errno]);
+  seterrorstatus(to);
+}
 
 seterrorstatus(to)
   char *to;
