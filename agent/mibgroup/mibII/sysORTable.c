@@ -271,7 +271,7 @@ void unregister_sysORTable_by_session(struct snmp_session *ss)
   while ( ptr != NULL  ) {
     next = ptr->next;
     if (( (ss->flags & SNMP_FLAGS_SUBSESSION) && ptr->OR_sess == ss ) ||
-        (!(ss->flags & SNMP_FLAGS_SUBSESSION) &&
+        (!(ss->flags & SNMP_FLAGS_SUBSESSION) && ptr->OR_sess &&
                               ptr->OR_sess->subsession == ss )) {
       if ( prev == NULL )
           table = next;
