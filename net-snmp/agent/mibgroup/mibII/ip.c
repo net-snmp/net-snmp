@@ -263,7 +263,7 @@ var_ip(struct variable *vp,
        WriteMethod **write_method)
 {
     static struct ipstat ipstat;
-#ifdef MIB_IP_COUNTER_SYMBOL
+#ifdef MIB_IPCOUNTER_SYMBOL
     static	counter MIB_ipcounter[MIB_ipMAXCTR+1];
 #endif
     int i;
@@ -277,7 +277,7 @@ var_ip(struct variable *vp,
 #ifdef IPSTAT_SYMBOL
     auto_nlist(IPSTAT_SYMBOL, (char *)&ipstat, sizeof (ipstat));
 #endif
-#ifdef MIB_IP_COUNTER_SYMBOL
+#ifdef MIB_IPCOUNTER_SYMBOL
     auto_nlist(MIB_IPCOUNTER_SYMBOL, (char *)&MIB_ipcounter,
                (MIB_ipMAXCTR+1)*sizeof (counter));
 #endif
@@ -322,14 +322,14 @@ var_ip(struct variable *vp,
           return (u_char *) &long_return;
 
 	case IPINUNKNOWNPROTOS:
-#ifdef MIB_IP_COUNTER_SYMBOL
+#ifdef MIB_IPCOUNTER_SYMBOL
 	    long_return = MIB_ipcounter[7];
 #else
 	    long_return = 0;
 #endif
 	    return (u_char *) &long_return;
 	case IPINDISCARDS:
-#ifdef MIB_IP_COUNTER_SYMBOL
+#ifdef MIB_IPCOUNTER_SYMBOL
 	    long_return = MIB_ipcounter[8];
 #else
 	    long_return = 0;
@@ -344,14 +344,14 @@ var_ip(struct variable *vp,
 	    return (u_char *) &long_return;
 
 	case IPOUTREQUESTS:
-#ifdef MIB_IP_COUNTER_SYMBOL
+#ifdef MIB_IPCOUNTER_SYMBOL
 	    long_return = MIB_ipcounter[10];
 #else
 	    long_return = 0;
 #endif
 	    return (u_char *) &long_return;
 	case IPOUTDISCARDS:
-#ifdef MIB_IP_COUNTER_SYMBOL
+#ifdef MIB_IPCOUNTER_SYMBOL
 	    long_return = MIB_ipcounter[11];
 #else
 	    long_return = 0;
@@ -369,7 +369,7 @@ var_ip(struct variable *vp,
           return (u_char *) &long_return;
 
 	case IPREASMOKS:
-#ifdef MIB_IP_COUNTER_SYMBOL
+#ifdef MIB_IPCOUNTER_SYMBOL
 	    long_return = MIB_ipcounter[15];
 #else
 	    long_return = ipstat.ips_fragments;		/* XXX */
@@ -385,21 +385,21 @@ var_ip(struct variable *vp,
 	    return (u_char *) &long_return;
 
 	case IPFRAGOKS:
-#ifdef MIB_IP_COUNTER_SYMBOL
+#ifdef MIB_IPCOUNTER_SYMBOL
 	    long_return = MIB_ipcounter[17];
 #else
 	    long_return = 0;
 #endif
 	    return (u_char *) &long_return;
 	case IPFRAGFAILS:
-#ifdef MIB_IP_COUNTER_SYMBOL
+#ifdef MIB_IPCOUNTER_SYMBOL
 	    long_return = MIB_ipcounter[18];
 #else
 	    long_return = 0;
 #endif
 	    return (u_char *) &long_return;
 	case IPFRAGCREATES:
-#ifdef MIB_IP_COUNTER_SYMBOL
+#ifdef MIB_IPCOUNTER_SYMBOL
 	    long_return = MIB_ipcounter[19];
 #else
 	    long_return = 0;
