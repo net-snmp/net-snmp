@@ -9,13 +9,12 @@ bindir = $(exec_prefix)/bin
 libdir = $(exec_prefix)/lib
 snmplibdir = $(prefix)/lib/snmp
 
-# @target_cpu@ @target_vendor@ @target_os@
-
 INSTALL = @INSTALL@
 
 TARG = bin/snmpget bin/snmpgetnext bin/snmpset bin/snmptranslate bin/snmpwalk bin/snmpbulkwalk bin/snmptest bin/snmptrapd bin/snmpnetstat bin/snmpd
 
 SUBDIRS = snmplib agent apps
+INSTALLDIRS = $(SUBDIRS) man
 
 all:	subdirs mib.txt
 
@@ -26,33 +25,17 @@ subdirs:
 
 distall: ${srcdir}/configure ${srcdir}/config.h 
 
-install:    subdirs apps/snmpget apps/snmpgetnext apps/snmpset apps/snmptranslate apps/snmpwalk apps/snmpbulkwalk apps/snmptest apps/snmptrapd apps/snmpnetstat/snmpnetstat agent/snmpd
-	$(INSTALL) apps/snmpget $(bindir)/snmpget
-	$(INSTALL) apps/snmpgetnext $(bindir)/snmpgetnext
-	$(INSTALL) apps/snmpset $(bindir)/snmpset
-	$(INSTALL) apps/snmptranslate $(bindir)/snmptranslate
-	$(INSTALL) apps/snmpwalk $(bindir)/snmpwalk
-	$(INSTALL) apps/snmpbulkwalk $(bindir)/snmpwalk
-	$(INSTALL) apps/snmptest $(bindir)/snmptest
-	$(INSTALL) apps/snmptrapd $(bindir)/snmptrapd
-	$(INSTALL) apps/snmpnetstat/snmpnetstat $(bindir)/snmpnetstat
-	$(INSTALL) agent/snmpd $(bindir)/snmpd
-#	$(INSTALL) snmptcl/wish $(bindir)/wish
-	$(INSTALL) snmptcl/snmpgraph $(bindir)/snmpgraph
+install:    subdirs installdirs
+	for i in $(INSTALLDIRS) ; do \
+        ( cd $$i ; $(MAKE) install ) \
+	done
+	$(INSTALL) mib.txt $(smplibdir)
+
+installdirs:
+	$(SHELL) $(srcdir)/mkinstalldirs $(snmplibdir)
+
 
 apps/snmpget apps/snmpgetnext apps/snmpset apps/snmptranslate apps/snmpwalk apps/snmpbulkwalk apps/snmptest apps/snmptrapd apps/snmpnetstat/snmpnetstat agent/snmpd: makeall
-
-makeall:
-	cd snmplib; make all install
-	cd agent; make all
-	cd apps; make
-	cd apps/snmpnetstat; make
-
-solaris:
-	cd snmplib; make OSFLAGS="-DSVR4" all install
-	cd apps; make OSFLAGS="-DSVR4" LDFLAGS="-lnsl -lsocket -lelf"
-	cd apps/snmpnetstat; make OSFLAGS="-DSVR4" LDFLAGS="-lnsl -lsocket -lelf"
-#	cd agent; make OSFLAGS="-DSVR4" LDFLAGS="-lnsl -lsocket -lelf" all
 
 depend:
 	cd snmplib; make depend

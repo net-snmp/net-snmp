@@ -1,0 +1,34 @@
+SHELL = /bin/sh
+srcdir = @srcdir@
+VPATH = @srcdir@
+@SET_MAKE@
+
+prefix = @prefix@
+exec_prefix = @exec_prefix@
+mandir = $(prefix)/man
+man1dir = $(mandir)/man1
+man3dir = $(mandir)/man3
+man5dir = $(mandir)/man5
+man8dir = $(mandir)/man8
+bindir = $(exec_prefix)/bin
+libdir = $(exec_prefix)/lib
+snmplibdir = $(prefix)/lib/snmp
+
+INSTALL = @INSTALL@
+
+MAN1 = snmpget.1 snmpset.1 snmpwalk.1 snmpbulkwalk.1 snmpgetnext.1 snmptest.1 snmpd.1 snmpnetstat.1 snmptranslate.1 
+MAN3 = snmp_api.3
+MAN5 = variables.5
+MAN8 = snmptrapd.8
+
+all:
+	echo "nothing to make"
+
+install:  installdirs $(MAN1) $(MAN3) $(MAN5) $(MAN8)
+	for i in $(MAN1) ; do $(INSTALL) $$i $(man1dir) ; done
+	for i in $(MAN3) ; do $(INSTALL) $$i $(man3dir) ; done
+	for i in $(MAN5) ; do $(INSTALL) $$i $(man5dir) ; done
+	for i in $(MAN8) ; do $(INSTALL) $$i $(man8dir) ; done
+	
+installdirs:
+	$(SHELL) $(srcdir)/../mkinstalldirs $(man1dir) $(man3dir) $(man5dir) $(man8dir)
