@@ -303,7 +303,7 @@ shutdown_agent(void) {
     netsnmp_clear_callback_list();
     netsnmp_clear_tdomain_list();
     netsnmp_clear_handler_list();
-    netsnmp_clear_container();
+    netsnmp_container_free_list();
     clear_sec_mod();
     clear_snmp_enum();
     clear_callback();
