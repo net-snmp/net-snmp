@@ -219,7 +219,12 @@ void read_config(char *filename,
   curfilename = filename;
   
   if ((ifile = fopen(filename, "r")) == NULL) {
-    DEBUGMSGTL(("read_config", "%s: %s\n", filename, strerror(errno)));
+    if (errno != ENOENT) {
+      perror(filename);
+    }
+    else {
+      DEBUGMSGTL(("read_config", "%s: %s\n", filename, strerror(errno)));
+    }
     return;
   } else {
     DEBUGMSGTL(("read_config", "Reading configuration %s\n", filename));
