@@ -94,7 +94,6 @@ typedef long    fd_mask;
 #include "acl.h"
 #include "mib.h"
 #include "mibgroup/snmp.h"
-#include "extensible/extproto.h"
 #include "snmp_client.h"
 #include "snmpd.h"
 
