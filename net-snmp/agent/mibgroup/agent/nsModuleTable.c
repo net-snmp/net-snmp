@@ -117,8 +117,6 @@ nsModuleTable_get_first_data_point(void **my_loop_context,
 
     ctree = SNMP_MALLOC_TYPEDEF(context_tree_ptr);
 
-    /*  THIS LEAKS MEMORY. ^^^^^^^^^^^^^^^^^^^^^^^^  */
-
     ctree->context_ptr = get_top_context_cache();
     ctree->tree = ctree->context_ptr->first_subtree;
 
