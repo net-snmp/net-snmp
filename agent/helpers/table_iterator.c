@@ -138,6 +138,7 @@ int
 netsnmp_register_table_iterator(netsnmp_handler_registration *reginfo,
                                 netsnmp_iterator_info *iinfo)
 {
+    reginfo->modes |= HANDLER_CAN_STASH;
     netsnmp_inject_handler(reginfo,
                            netsnmp_get_table_iterator_handler(iinfo));
     if (!iinfo)
