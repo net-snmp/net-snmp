@@ -944,7 +944,8 @@ _sess_copy( struct snmp_session *in_session)
     }
 
     if ((in_session->securityAuthKeyLen <= 0) &&
-	(cp = ds_get_string(DS_LIBRARY_ID, DS_LIB_AUTHPASSPHRASE))) {
+	((cp = ds_get_string(DS_LIBRARY_ID, DS_LIB_AUTHPASSPHRASE)) ||
+	 (cp = ds_get_string(DS_LIBRARY_ID, DS_LIB_PASSPHRASE)))) {
       session->securityAuthKeyLen = USM_AUTH_KU_LEN;
       if (generate_Ku(session->securityAuthProto,
                       session->securityAuthProtoLen,
@@ -958,7 +959,8 @@ _sess_copy( struct snmp_session *in_session)
     }
 
     if ((in_session->securityPrivKeyLen <= 0) && 
-	       (cp = ds_get_string(DS_LIBRARY_ID, DS_LIB_PRIVPASSPHRASE))) {
+	       ((cp = ds_get_string(DS_LIBRARY_ID, DS_LIB_PRIVPASSPHRASE)) ||
+	        (cp = ds_get_string(DS_LIBRARY_ID, DS_LIB_PASSPHRASE)))) {
       session->securityPrivKeyLen = USM_PRIV_KU_LEN;
       if (generate_Ku(session->securityAuthProto,
                       session->securityAuthProtoLen,
