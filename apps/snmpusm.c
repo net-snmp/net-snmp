@@ -433,11 +433,13 @@ main(int argc, char *argv[])
     /* do the request */
     status = snmp_synch_response(ss, pdu, &response);
     if (status == STAT_SUCCESS){
-      if (response->errstat == SNMP_ERR_NOERROR){
-        fprintf(stderr, "%s\n", successNotes[command-1]);
-      } else {
-        fprintf(stderr, "Error in packet.\nReason: %s\n",
-                snmp_errstring(response->errstat));
+      if (response) {
+        if (response->errstat == SNMP_ERR_NOERROR){
+          fprintf(stderr, "%s\n", successNotes[command-1]);
+        } else {
+          fprintf(stderr, "Error in packet.\nReason: %s\n",
+                  snmp_errstring(response->errstat));
+        }
       }
     } else if (status == STAT_TIMEOUT){
       fprintf(stderr,"Timeout: No Response from %s\n", session.peername);
