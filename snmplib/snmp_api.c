@@ -2921,7 +2921,7 @@ snmpv3_parse(
 		       sizeof(msg_sec_model));
   DEBUGINDENTADD(-4); /* return from global data indent */
   if (data == NULL || type != ASN_INTEGER ||
-      msg_sec_model < 0 || msg_sec_model > 0x7fffffff) {
+      msg_sec_model < 1 || msg_sec_model > 0x7fffffff) {
     ERROR_MSG("error parsing msgSecurityModel");
     snmp_increment_statistic(STAT_SNMPINASNPARSEERRS);
     DEBUGINDENTLESS();
