@@ -488,7 +488,7 @@ var_hrstore(struct variable *vp,
             return NULL;
     } else {
 
-try_next:
+really_try_next:
 	store_idx = header_hrstoreEntry(vp, name, length, exact, var_len,
 					write_method);
 	if (store_idx == MATCH_FAILED)
@@ -780,6 +780,12 @@ try_next:
         DEBUGMSGTL(("snmpd", "unknown sub-id %d in var_hrstore\n",
                     vp->magic));
     }
+    return NULL;
+
+  try_next:
+    if (!exact)
+        goto really_try_next;
+
     return NULL;
 }
 
