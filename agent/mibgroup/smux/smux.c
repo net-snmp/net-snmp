@@ -165,8 +165,14 @@ smux_parse_peer_auth(const char *token, char *cptr)
 	cptr = skip_white(cptr);
 
         /* password */
-        if (cptr)
-          strcpy(aptr->sa_passwd, cptr);
+        if (cptr) {
+	    if (strlen(cptr) > SMUXMAXSTRLEN - 1) {
+		config_perror("password (third token) is too long");
+		free((char *)aptr);
+		return;
+	    }
+	    strcpy(aptr->sa_passwd, cptr);
+	}
         
 	Auths[nauths++] = aptr;
 }
