@@ -18,6 +18,10 @@ defined by the EXTENSIBLE-MIB section below.
 These files must be found in the PREFIX/lib/snmp directory.  Neither
 of these files are required for the agent to operate and report mib
 entries defined by rfc-1156.
+.SS Comments
+.PP
+Any line beginning with the character '#' is treated as a comment and
+is not parsed.
 .SH EXTENSIBLE-MIB
 .PP
 The ucd-snmp SNMP agent reports its information through queries to the
