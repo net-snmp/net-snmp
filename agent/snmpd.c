@@ -382,8 +382,10 @@ send_trap_pdu(pdu)
   struct trap_sink *sink = sinks;
 
   if ((snmp_enableauthentraps == 1) && sink != NULL) {
+    DEBUGP("sending v2 trap pdu...\n");
     while (sink) {
       if (sink->ses.version == SNMP_VERSION_2c) {
+        DEBUGP(" found v2 session...\n");
         mypdu = snmp_clone_pdu(pdu);
         if (snmp_send(sink->sesp, mypdu) == 0) {
           snmp_perror ("snmpd: send_trap_pdu");
@@ -394,6 +396,7 @@ send_trap_pdu(pdu)
       }
       sink = sink->next;
     }
+    DEBUGP("  done\n");
   }
 }
 
