@@ -6,6 +6,7 @@
 #include <sys/types.h>
 #include <sys/stat.h>
 #include <fcntl.h>
+#include <errno.h>
 #if HAVE_SYSLOG_H
 #include <syslog.h>
 #endif
@@ -22,6 +23,7 @@
 #include "asn1.h"
 #include "snmp_impl.h"
 #include "snmp_logging.h"
+#include "tools.h"
 
 int do_syslogging=0;
 int do_filelogging=0;
@@ -31,8 +33,8 @@ FILE *logfile;
 
 void
 disable_syslog(void) {
+#if HAVE_SYSLOG_H
   if (do_syslogging)
-#ifndef WIN32
     closelog();
 #endif
   do_syslogging=0;
@@ -66,7 +68,7 @@ void
 enable_syslog(void) 
 {
   disable_syslog();
-#ifndef WIN32
+#if HAVE_SYSLOG_H
   openlog("ucd-snmp", LOG_CONS|LOG_PID, LOG_DAEMON);
   do_syslogging=1;
 #endif
@@ -93,16 +95,16 @@ enable_stderrlog(void) {
 void
 vlog_syslog (int priority, const char *format, va_list ap) 
 {
+#if HAVE_SYSLOG_H
   if (do_syslogging) {
-#ifndef WIN32
     char xbuf[SPRINT_MAX_LEN];
 /* HP-UX 9 and Solaris 2.5.1 do not have this *
     vsnprintf(xbuf, sizeof(xbuf), format, ap);
 */
     vsprintf(xbuf, format, ap);
     syslog(priority, xbuf);
-#endif
   }
+#endif
 }
 
 void
@@ -234,32 +236,33 @@ snmp_log (int priority, va_alist)
   va_end(ap);
 }
 
-
-void
-log_perror_syslog(const char *s)
-{
-  log_syslog(LOG_ERR, "System error - check logfile (if any) for details");
-}
-
-void
-log_perror_filelog(const char *s)
-{
-  log_filelog(LOG_ERR, "System error - detail error reporting not implemented");
-}
-
-void
-log_perror_stderrlog(const char *s)
-{
-  log_stderrlog(LOG_ERR, "System error: ");
-  perror(s);
-}
-
-
+/*
+ * log a critical error.
+ * Use small messages, please !
+ */
 void
 log_perror(const char *s)
 {
-  log_perror_syslog(s);
-  log_perror_filelog(s);
-  log_perror_stderrlog(s);
+    char zbuf[SNMP_MAXBUF_SMALL];
+    int sav_errno = errno;
+
+    if (s && *s)
+        sprintf(zbuf, "%s: %s\n", s, strerror(sav_errno));
+    else
+        sprintf(zbuf, "%s\n", strerror(sav_errno));
+
+    if (do_filelogging) {
+        fprintf(logfile, zbuf);
+        fflush(logfile);
+    }
+#if HAVE_SYSLOG_H
+    if (do_syslogging) {
+        syslog(LOG_ERR, zbuf);
+    }
+#endif
+    if (do_stderrlogging) {
+        fprintf(stderr, zbuf);
+        fflush(stderr);
+    }
 }
 
