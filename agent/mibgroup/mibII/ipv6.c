@@ -124,19 +124,17 @@
 #include <syslog.h>
 #endif
 
-#include "mibincl.h"
-#include "kernel.h"
-
-#include <net-snmp/system.h>
-
-#include "util_funcs.h"
-#include <net-snmp/agent/auto_nlist.h>
-
 #ifdef MIB_IPCOUNTER_SYMBOL
 #include <sys/mib.h>
 #include <netinet/mib_kern.h>
 #endif /* MIB_IPCOUNTER_SYMBOL */
 
+#include <net-snmp/net-snmp-includes.h>
+#include <net-snmp/agent/net-snmp-agent-includes.h>
+#include <net-snmp/agent/auto_nlist.h>
+
+#include "kernel.h"
+#include "util_funcs.h"
 #include "ipv6.h"
 #include "interfaces.h"
 

@@ -37,24 +37,14 @@
 #if HAVE_WINSOCK_H
 #include <winsock.h>
 #endif
-#include <net-snmp/snmp-tc.h>
-#include "mibincl.h"
-#include <net-snmp/read_config.h>
-#include <net-snmp/agent/agent_read_config.h>
-#include <net-snmp/system.h>
-#include <net-snmp/vacm.h>
-#include <net-snmp/callback.h>
-#include <net-snmp/agent/agent_registry.h>
+
+#include <net-snmp/net-snmp-includes.h>
+#include <net-snmp/agent/net-snmp-agent-includes.h>
+
 #include <net-snmp/agent/agent_callbacks.h>
 #include "vacm_vars.h"
 #include "util_funcs.h"
-#include <net-snmp/snmp_enum.h>
-#include <net-snmp/snmp_secmod.h>
-#include <net-snmp/snmp_transport.h>
-#include <net-snmp/snmpUDPDomain.h>
-#ifdef SNMP_TRANSPORT_TCP_DOMAIN
-# include <net-snmp/snmpTCPDomain.h>
-#endif
+
 #ifdef USING_MIBII_SYSORTABLE_MODULE
 #if TIME_WITH_SYS_TIME
 # ifdef WIN32

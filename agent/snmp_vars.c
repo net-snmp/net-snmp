@@ -111,31 +111,11 @@ PERFORMANCE OF THIS SOFTWARE.
 #include <dmalloc.h>
 #endif
 
-#include "mibincl.h"
-#include <net-snmp/snmpv3.h>
-#include <net-snmp/snmp_secmod.h>
-#include <net-snmp/snmpusm.h>
-#include <net-snmp/snmpusm.h>
-#include <net-snmp/system.h>
+#include <net-snmp/net-snmp-includes.h>
+#include <net-snmp/agent/net-snmp-agent-includes.h>
 #include "kernel.h"
-#include <net-snmp/agent/snmp_vars.h>
-#include <net-snmp/default_store.h>
-#include <net-snmp/agent/ds_agent.h>
-#ifdef SNMP_TRANSPORT_UDP_DOMAIN
-#include <net-snmp/snmpUDPDomain.h>
-#endif
-#ifdef SNMP_TRANSPORT_CALLBACK_DOMAIN
-#include <net-snmp/snmpCallbackDomain.h>
-#endif
 
 #include "mibgroup/struct.h"
-#include <net-snmp/read_config.h>
-#include <net-snmp/agent/snmp_vars.h>
-#include <net-snmp/agent/agent_read_config.h>
-#include <net-snmp/agent/agent_registry.h>
-#include <net-snmp/transform_oids.h>
-#include <net-snmp/callback.h>
-#include <net-snmp/snmp_alarm.h>
 #include "snmpd.h"
 #include "net-snmp/agent/all_helpers.h"
 #include "mib_module_includes.h"

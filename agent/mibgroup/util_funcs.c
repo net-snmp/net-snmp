@@ -77,10 +77,13 @@
 #if HAVE_RAISE
 #define alarm raise
 #endif
-#include "mibincl.h"
+
+#include <net-snmp/net-snmp-includes.h>
+#include <net-snmp/agent/net-snmp-agent-includes.h>
+
 #include "struct.h"
 #include "util_funcs.h"
-#include <net-snmp/system.h>
+
 #if HAVE_LIMITS_H
 #include "limits.h"
 #endif
@@ -89,7 +92,7 @@
 #else
 #define setPerrorstatus(x) snmp_log_perror(x)
 #endif
-#include <net-snmp/read_config.h>
+
 
 #ifdef EXCACHETIME
 static long cachetime;

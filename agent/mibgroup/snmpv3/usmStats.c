@@ -7,9 +7,11 @@
 #include <winsock.h>
 #endif
 
-#include "mibincl.h"
+#include <net-snmp/net-snmp-includes.h>
+#include <net-snmp/agent/net-snmp-agent-includes.h>
+
 #include "util_funcs.h"
-#include "../mibII/sysORTable.h"
+#include "mibII/sysORTable.h"
 #include "usmStats.h"
 
 struct variable2 usmStats_variables[] = {

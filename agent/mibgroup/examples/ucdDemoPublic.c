@@ -21,12 +21,9 @@
 #include <winsock.h>
 #endif
 
-#include "mibincl.h"
-#include <net-snmp/snmpv3.h>
-#include <net-snmp/snmp_secmod.h>
-#include <net-snmp/snmpusm.h>
-#include <net-snmp/snmpusm.h>
-#include <net-snmp/agent/agent_read_config.h>
+#include <net-snmp/net-snmp-includes.h>
+#include <net-snmp/agent/net-snmp-agent-includes.h>
+
 #include "util_funcs.h"
 #include "ucdDemoPublic.h"
 

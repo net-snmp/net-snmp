@@ -80,17 +80,7 @@
 #if HAVE_INET_MIB2_H
 #include <inet/mib2.h>
 #endif
-#include <net-snmp/tools.h>
-#ifdef solaris2
-#include "kernel_sunos5.h"
-#else
-#include "kernel.h"
-#endif
-#ifdef linux
-#include "kernel_linux.h"
-#endif
 
-#include <net-snmp/system.h>
 #if HAVE_SYS_SYSCTL_H
 #include <sys/sysctl.h>
 #endif
@@ -128,9 +118,19 @@
 #include <dmalloc.h>
 #endif
 
-#include "mibincl.h"
-#include "util_funcs.h"
+#include <net-snmp/net-snmp-includes.h>
+#include <net-snmp/agent/net-snmp-agent-includes.h>
 #include <net-snmp/agent/auto_nlist.h>
+
+#ifdef solaris2
+#include "kernel_sunos5.h"
+#else
+#include "kernel.h"
+#endif
+#ifdef linux
+#include "kernel_linux.h"
+#endif
+#include "util_funcs.h"
 
 #ifdef hpux
 #include <sys/mib.h>

@@ -43,20 +43,15 @@
 #include <dmalloc.h>
 #endif
 
-#include "mibincl.h"
-#include <net-snmp/snmp_client.h>
-#include <net-snmp/default_store.h>
-#include <net-snmp/agent/ds_agent.h>
-#include <net-snmp/callback.h>
+#include <net-snmp/net-snmp-includes.h>
+#include <net-snmp/agent/net-snmp-agent-includes.h>
 #include <net-snmp/agent/agent_callbacks.h>
 #include <net-snmp/agent/agent_index.h>
-#include <net-snmp/snmp_alarm.h>
-#include <net-snmp/snmp_secmod.h>
 
 #include "snmpd.h"
 #include "mibgroup/struct.h"
-#include "net-snmp/agent/table.h"
-#include "net-snmp/agent/table_iterator.h"
+#include <net-snmp/agent/table.h>
+#include <net-snmp/agent/table_iterator.h>
 #include "mib_module_includes.h"
 
 #ifdef USING_AGENTX_SUBAGENT_MODULE

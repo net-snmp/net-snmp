@@ -4,9 +4,10 @@
  */
 
 #include <net-snmp/net-snmp-config.h>
-#include "mibincl.h"
+#include <net-snmp/net-snmp-includes.h>
+#include <net-snmp/agent/net-snmp-agent-includes.h>
+
 #include "util_funcs.h"
-#include <net-snmp/tools.h>
 
 #if HAVE_STRING_H
 #include <string.h>

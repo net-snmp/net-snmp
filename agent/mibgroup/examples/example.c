@@ -37,14 +37,11 @@
 #include <netinet/in.h>
 #endif
 
-/* mibincl.h contains all the snmp specific headers to define the
-   return types and various defines and structures. */
-#include "mibincl.h"
+#include <net-snmp/net-snmp-includes.h>
+#include <net-snmp/agent/net-snmp-agent-includes.h>
 
 /* header_generic() comes from here */
 #include "util_funcs.h"
-
-#include <net-snmp/agent/agent_read_config.h>
 
 /* include our .h file */
 #include "example.h"

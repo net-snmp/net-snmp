@@ -80,20 +80,20 @@
 #include <syslog.h>
 #endif
 
+#if defined(MIB_IPCOUNTER_SYMBOL) || defined(hpux11)
+#include <sys/mib.h>
+#include <netinet/mib_kern.h>
+#endif /* MIB_IPCOUNTER_SYMBOL || hpux11 */
+
 #ifdef solaris2
 #include "kernel_sunos5.h"
 #else
 #include "kernel.h"
 #endif
 
-#include "mibincl.h"
-#include <net-snmp/system.h>
+#include <net-snmp/net-snmp-includes.h>
+#include <net-snmp/agent/net-snmp-agent-includes.h>
 #include <net-snmp/agent/auto_nlist.h>
-
-#if defined(MIB_IPCOUNTER_SYMBOL) || defined(hpux11)
-#include <sys/mib.h>
-#include <netinet/mib_kern.h>
-#endif /* MIB_IPCOUNTER_SYMBOL || hpux11 */
 
 #include "ip.h"
 #include "interfaces.h"

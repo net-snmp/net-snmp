@@ -38,16 +38,14 @@
 #include <dmalloc.h>
 #endif
 
-#include "mibincl.h"
-#include <net-snmp/system.h>
-#include "../struct.h"
-#include "../util_funcs.h"
-#include "sysORTable.h"
-#include "../../snmpd.h"
-#include <net-snmp/default_store.h>
-#include <net-snmp/agent/ds_agent.h>
-#include <net-snmp/callback.h>
+#include <net-snmp/net-snmp-includes.h>
+#include <net-snmp/agent/net-snmp-agent-includes.h>
 #include <net-snmp/agent/agent_callbacks.h>
+
+#include "struct.h"
+#include "util_funcs.h"
+#include "sysORTable.h"
+#include "snmpd.h"
 
 #ifdef USING_AGENTX_SUBAGENT_MODULE
 #include "agentx/subagent.h"

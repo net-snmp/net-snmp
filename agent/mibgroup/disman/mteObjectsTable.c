@@ -15,13 +15,12 @@
 
 
 /* minimal include directives */
-#include "mibincl.h"
-#include <net-snmp/snmp_api.h>
-#include <net-snmp/snmp_client.h>
+#include <net-snmp/net-snmp-includes.h>
+#include <net-snmp/agent/net-snmp-agent-includes.h>
+
 #include "header_complex.h"
 #include "mteTriggerTable.h"
 #include "mteObjectsTable.h"
-#include <net-snmp/snmp-tc.h>
 
 
 /* 

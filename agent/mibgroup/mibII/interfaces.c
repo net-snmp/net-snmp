@@ -143,8 +143,6 @@
 #include <dmalloc.h>
 #endif
 
-#include "mibincl.h"
-
 #ifdef solaris2
 # include <errno.h>
 #include "kernel_sunos5.h"
@@ -180,22 +178,20 @@
 #endif /* defined(freebsd3) */
 #endif /* HAVE_SYS_SYSCTL_H */
 
-/* #include "../common_header.h" */
-
-#include <net-snmp/system.h>
-#include <net-snmp/snmp_logging.h>
-#include <net-snmp/read_config.h>
-
 #if HAVE_OSRELDATE_H
 #include <osreldate.h>
 #endif
 #ifdef CAN_USE_SYSCTL
 #include <sys/sysctl.h>
 #endif
+
+#include <net-snmp/net-snmp-includes.h>
+#include <net-snmp/agent/net-snmp-agent-includes.h>
+#include <net-snmp/agent/auto_nlist.h>
+
 #include "interfaces.h"
 #include "struct.h"
 #include "util_funcs.h"
-#include <net-snmp/agent/auto_nlist.h>
 #include "sysORTable.h"
 
 extern struct timeval starttime;

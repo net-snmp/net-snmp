@@ -20,6 +20,11 @@
 
 /*
  * $Log$
+ * Revision 1.3  2002/02/08 15:45:09  dts12
+ * Use the new 'net-snmp-includes' single-include header files,
+ * in place of the (uninstalled) 'mibincl.h'.
+ *   Wheeeee......
+ *
  * Revision 1.2  2002/01/04 20:50:31  hardaker
  * beginnings of ucd-snmp -> net-snmp structural changes.
  *   - config.h -> include/net-snmp/net-snmp-config.h
@@ -35,7 +40,9 @@
  */
 
 #include <net-snmp/net-snmp-config.h>
-#include "mibincl.h"
+#include <net-snmp/net-snmp-includes.h>
+#include <net-snmp/agent/net-snmp-agent-includes.h>
+
 #include "util_funcs.h"
 
 #include "agutil.h"

@@ -51,9 +51,8 @@
  * Includes of local application header files 
  */
 
-#include <net-snmp/asn1.h>
-#include <net-snmp/snmp_debug.h>
-#include "mibincl.h"
+#include <net-snmp/net-snmp-includes.h>
+#include <net-snmp/agent/net-snmp-agent-includes.h>
 
 #include "kernel_sunos5.h"
 

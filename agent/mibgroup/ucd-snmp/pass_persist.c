@@ -33,13 +33,13 @@
 #include <signal.h>
 #include <errno.h>
 
-#include "mibincl.h"
+#include <net-snmp/net-snmp-includes.h>
+#include <net-snmp/agent/net-snmp-agent-includes.h>
+
 #include "struct.h"
 #include "pass_persist.h"
 #include "extensible.h"
 #include "util_funcs.h"
-#include <net-snmp/read_config.h>
-#include <net-snmp/system.h>
 
 struct extensible *persistpassthrus=NULL;
 int numpersistpassthrus=0;
