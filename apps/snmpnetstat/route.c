@@ -283,7 +283,7 @@ routename(in)
 	if (first) {
 		first = 0;
 		if (gethostname(domain, MAXHOSTNAMELEN) == 0 &&
-                  (cp = strchr(domain, '.')))
+                  (cp = (char *) strchr(domain, '.')))
 			(void) strcpy(domain, cp + 1);
 		else
 			domain[0] = 0;
@@ -293,7 +293,7 @@ routename(in)
 		hp = gethostbyaddr((char *)&in, sizeof (struct in_addr),
 			AF_INET);
 		if (hp) {
-                      if ((cp = strchr(hp->h_name, '.')) &&
+                      if ((cp = (char *) strchr(hp->h_name, '.')) &&
 			    !strcmp(cp + 1, domain))
 				*cp = 0;
 			cp = hp->h_name;

@@ -478,7 +478,7 @@ main(argc, argv)
     session.peername = gateway;
     if (version == 1 ){
 	session.version = SNMP_VERSION_1;
-	session.community = community;
+	session.community = (u_char *) community;
 	session.community_len = strlen(community);
     } else if (version == 1 || version == 2){
 	session.version = SNMP_VERSION_2;
