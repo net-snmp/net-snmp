@@ -200,6 +200,7 @@ struct snmp_session {
 	/*
 	 * SNMPv3 fields
 	 */
+    u_char  isAuthoritative;    /* are we the authoritative engine? */
     u_char  *contextEngineID;	/* authoritative snmpEngineID */
     size_t  contextEngineIDLen; /* Length of contextEngineID */
     u_int   engineBoots;        /* initial engineBoots for remote engine */
@@ -277,6 +278,12 @@ extern void snmp_set_detail (const char *);
 
 /* set to one to ignore unauthenticated Reports */
 #define SNMPV3_IGNORE_UNAUTH_REPORTS 0
+
+/* authoritative engine definitions */
+#define SNMP_SESS_NONAUTHORITATIVE 0 /* should be 0 to default to this */
+#define SNMP_SESS_AUTHORITATIVE    1 /* don't learn engineIDs */
+#define SNMP_SESS_UNKNOWNAUTH      2 /* sometimes (like NRs) */
+
 /* to determine type of Report from varbind_list */
 #define REPORT_STATS_LEN 9
 #define REPORT_snmpUnknownSecurityModels_NUM 1
@@ -602,7 +609,7 @@ int snmp_get_random_access(void);
 int snmp_oid_compare (const oid *, size_t, const oid *, size_t);
 void init_snmp (const char *);
 u_char *snmp_pdu_build (struct snmp_pdu *, u_char *, size_t *);
-int snmpv3_parse(struct snmp_pdu *, u_char *, size_t *, u_char  **);
+int snmpv3_parse(struct snmp_pdu *, u_char *, size_t *, u_char  **, struct snmp_session *);
 int snmpv3_dparse(struct snmp_pdu *, u_char *, size_t *, u_char  **, int);
 int snmpv3_packet_build(struct snmp_pdu *pdu, u_char *packet, size_t *out_length, u_char *pdu_data, size_t pdu_data_len);
 int snmpv3_make_report(struct snmp_pdu *pdu, int error);
