@@ -26,7 +26,7 @@
     <h3> A simple scalar with the value returned from code </h3>
     <p>
       Here is <a
-		 href="http://www.net-snmp.org/tutorial-5/agent/">some
+		 href="http://www.net-snmp.org/tutorial-5/agent/delayed__instance_8c-example.html">some
 	example</a> code that describes how to implement a generic
       instance (not tied to a variable, like the above example) as
       well has how to delay answering queries for a bit (in the
@@ -34,9 +34,13 @@
     <h3> A table of data, stored within the agent </h3>
     <p>
       Here is a more complex <a
-				href="http://www.net-snmp.org/tutorial-5/agent/"> example</a>
+				href="http://www.net-snmp.org/tutorial-5/agent/data__set_8c-example.html"> example</a>
       example that implements a table, where the table data is
       completely contained within the agent.
+    <h3> Sending SNMP notifications (traps and informs) from inside the agent. </h3>
+    <p>
+      Here is an <a href="http://www.net-snmp.org/tutorial-5/agent/notification_8c-example.html">example</a> of how to use the agent's internal notification
+      sending API to send a notification to all of the agent's trap receivers.
     <h3> The older (and thus backward compatible) ucd-snmp 4.X API </h3>
     <p>
       Of course, you can continue to write code using the older API
@@ -48,8 +52,8 @@
     <p>
       The new API is documented more completely <a
       href="http://www.net-snmp.org/tutorial-5/agent/group__handler.html#_details">here</a>.
-      Additionally, see the complete list of documented available
-      helpers <a
+      Additionally, see the complete list of (mostly) documented
+      available helpers and other information <a
       href="http://www.net-snmp.org/tutorial-5/agent/modules.html">here</a>
       <hr>
     <h2>Compiling in your new MIB module</h2>
@@ -167,7 +171,7 @@ NET-SNMP-TUTORIAL-MIB::nstAgentModuleObject.0 = INTEGER: 5
     <address><a href="mailto:Wes Hardaker <hardaker@users.sourceforge.net>"></a></address>
 <!-- Created: Fri Nov  5 12:09:03 PST 1999 -->
 <!-- hhmts start -->
-Last modified: Tue Jun 18 23:15:10 PDT 2002
+Last modified: Wed Jun 19 14:29:21 PDT 2002
 <!-- hhmts end -->
   </body>
 </html>
