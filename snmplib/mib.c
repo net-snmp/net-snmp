@@ -2341,7 +2341,6 @@ netsnmp_fixup_mib_directory()
             }
         }
         netsnmp_set_mib_directory(mibpath);
-	SNMP_FREE(mibpath);
     }
 
 }
