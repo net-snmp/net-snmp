@@ -41,7 +41,7 @@
 #include <net-snmp/library/snmpTCPIPv6Domain.h>
 #endif
 #ifdef SNMP_TRANSPORT_IPX_DOMAIN
-#include <net-snmp/library/netsnmpIPXDomain.h>
+#include <net-snmp/library/snmpIPXDomain.h>
 #endif
 #ifdef SNMP_TRANSPORT_AAL5PVC_DOMAIN
 #include <net-snmp/library/snmpAAL5PVCDomain.h>
