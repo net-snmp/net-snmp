@@ -181,73 +181,11 @@ init_agent (void)
 }  /* end init_agent() */
 
 
-#define CMUMIB 1, 3, 6, 1, 4, 1, 3
-#define       CMUUNIXMIB  CMUMIB, 2, 2
-
-#define SNMPV2 			1, 3, 6, 1, 6
-#define SNMPV2M2M		SNMPV2, 3, 2
-
-#define SNMPV2ALARMEVENTS	SNMPV2M2M, 1, 1, 3
-
-#define RMONMIB 1, 3, 6, 1, 2, 1, 16
-
-#define HOST                    RMONMIB, 4
-#define HOSTCONTROL             HOST, 1, 1                      /* hostControlEntry */
-#define HOSTTAB                 HOST, 2, 1                      /* hostEntry */
-#define HOSTTIMETAB             HOST, 3, 1                      /* hostTimeEntry */
-#define HOSTTOPN                RMONMIB, 5
-#define HOSTTOPNCONTROL HOSTTOPN, 1, 1          /* hostTopNControlEntry */
-#define HOSTTOPNTAB             HOSTTOPN, 2, 1          /* hostTopNEntry */
-#define HOSTTIMETABADDRESS                                      1
-#define HOSTTIMETABCREATIONORDER                        2
-#define HOSTTIMETABINDEX                                        3
-#define HOSTTIMETABINPKTS                                       4
-#define HOSTTIMETABOUTPKTS                                      5
-#define HOSTTIMETABINOCTETS                                     6
-#define HOSTTIMETABOUTOCTETS                            7
-#define HOSTTIMETABOUTERRORS                            8
-#define HOSTTIMETABOUTBCASTPKTS                         9
-#define HOSTTIMETABOUTMCASTPKTS                         10
-
-#if 0
-#define RMONMIB 1, 3, 6, 1, 2, 1, 16
-
-#define ALARM                   RMONMIB, 3
-#define ALARMTAB                ALARM, 1, 1                 /* alarmEntry */
-#define EVENT                   RMONMIB, 9
-#define EVENTTAB                EVENT, 1, 1                 /* eventEntry */
-#endif
-
-
-/* various OIDs that are needed throughout the agent */
-#ifdef USING_V2PARTY_ALARM_MODULE
-Export oid alarmVariableOid[] = {SNMPV2ALARMENTRY, ALARMTABVARIABLE};
-Export int alarmVariableOidLen = sizeof(alarmVariableOid) / sizeof(oid);
-Export oid alarmSampleTypeOid[] = {SNMPV2ALARMENTRY, ALARMTABSAMPLETYPE};
-Export int alarmSampleTypeOidLen = sizeof(alarmSampleTypeOid) / sizeof(oid);
-Export oid alarmValueOid[] = {SNMPV2ALARMENTRY, ALARMTABVALUE};
-Export int alarmValueOidLen = sizeof(alarmValueOid) / sizeof(oid);
-Export oid alarmFallingThreshOid[] = {SNMPV2ALARMENTRY, ALARMTABFALLINGTHRESH};
-Export int alarmFallingThreshOidLen = sizeof(alarmFallingThreshOid)/sizeof(oid);
-Export oid alarmRisingThreshOid[] = {SNMPV2ALARMENTRY, ALARMTABRISINGTHRESH};
-Export int alarmRisingThreshOidLen = sizeof(alarmRisingThreshOid)/sizeof(oid);
-#endif
 
 Export oid nullOid[] = {0,0};
 Export int nullOidLen = sizeof(nullOid)/sizeof(oid);
 Export oid sysUpTimeOid[] = {1,3,6,1,2,1,1,3,0};
 Export int sysUpTimeOidLen = sizeof(sysUpTimeOid)/sizeof(oid);
-#ifdef USING_V2PARTY_EVENT_MODULE
-Export oid eventIdOid[] = {SNMPV2EVENTENTRY, EVENTTABID};
-Export int eventIdOidLen = sizeof(eventIdOid)/sizeof(oid);
-Export oid trapRisingAlarmOid[] = {SNMPV2ALARMEVENTS, 1};
-Export int trapRisingAlarmOidLen = sizeof(trapRisingAlarmOid)/sizeof(oid);
-Export oid trapFallingAlarmOid[] = {SNMPV2ALARMEVENTS, 2};
-Export int trapFallingAlarmOidLen = sizeof(trapFallingAlarmOid)/sizeof(oid);
-Export oid trapObjUnavailAlarmOid[] = {SNMPV2ALARMEVENTS, 3};
-Export int trapObjUnavailAlarmOidLen = sizeof(trapObjUnavailAlarmOid)/sizeof(oid);
-#endif
-
 
 /*
  * getStatPtr - return a pointer to the named variable, as well as it's

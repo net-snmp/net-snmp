@@ -101,9 +101,7 @@ int main(int argc, char *argv[])
     char	input[128];
     int varcount, nonRepeaters = -1, maxRepetitions;
 
-    /* Usage: snmptest -v 1 [-q] hostname community [objectID]      or:
-     * Usage: snmptest [-v 2] [-q] hostname noAuth [objectID]       or:
-     * Usage: snmptest [-v 2] [-q] hostname srcParty dstParty context [objectID]
+    /* Usage: snmptest -v 1 [-q] hostname community [objectID]
      */
 
     snmp_parse_args(argc, argv, &session);

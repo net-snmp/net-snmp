@@ -82,14 +82,14 @@ static oid usmDESPrivProtocol[]      = { 1,3,6,1,6,3,10,1,2,2 };
 void
 snmp_parse_args_usage(FILE *outf)
 {
-  fprintf(outf, "[-v 1|2c|2p|3] [-h] [-H] [-d] [-q] [-R] [-D] [-m <MIBS>] [-M <MIDDIRS>] [-p <P>] [-t <T>] [-r <R>] ");
-  fprintf(outf, "[-T <B> <T>] [-e <E>] [-E <E>] [-n <N>] [-u <U>] [-l <L>] [-a <A>] [-A <P>] [-x <X>] [-X <P>] <hostname> {<community>|{<srcParty> <dstParty> <context>|}");
+  fprintf(outf, "[-v 1|2c|3] [-h] [-H] [-d] [-q] [-R] [-D] [-m <MIBS>] [-M <MIDDIRS>] [-p <P>] [-t <T>] [-r <R>] ");
+  fprintf(outf, "[-T <B> <T>] [-e <E>] [-E <E>] [-n <N>] [-u <U>] [-l <L>] [-a <A>] [-A <P>] [-x <X>] [-X <P>] <hostname> {<community>}");
 }
 
 void
 snmp_parse_args_descriptions(FILE *outf)
 {
-  fprintf(outf, "  -v 1|2c|2p|3\tspecifies snmp version to use.\n");
+  fprintf(outf, "  -v 1|2c|3\tspecifies snmp version to use.\n");
   fprintf(outf, "  -h\t\tthis help message.\n");
   fprintf(outf, "  -H\t\tDisplay configuration file directives understood.\n");
   fprintf(outf, "  -V\t\tdisplay version number.\n");
@@ -265,8 +265,6 @@ snmp_parse_args(int argc,
           session->version = SNMP_VERSION_1;
         } else if (!strcasecmp(psz,"2c")) {
           session->version = SNMP_VERSION_2c;
-        } else if (!strcasecmp(psz,"2p")) {
-          session->version = SNMP_VERSION_2p;
         } else if (!strcasecmp(psz,"3")) {
           session->version = SNMP_VERSION_3;
         } else {
@@ -514,7 +512,7 @@ snmp_parse_args(int argc,
   }
   session->peername = argv[arg++];     /* hostname */
 
-  /* get community or party */
+  /* get community */
   if ((session->version == SNMP_VERSION_1) ||
       (session->version == SNMP_VERSION_2c)) {
     /* v1 and v2c - so get community string */
