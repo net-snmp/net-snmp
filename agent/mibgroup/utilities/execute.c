@@ -45,6 +45,7 @@ run_shell_command( char *command, char *input,
         return -1;
 
     DEBUGMSGTL(("run_shell_command", "running %s\n", command));
+    DEBUGMSGTL(("run:shell", "running '%s'\n", command));
 
     /*
      * Set up the command to run....
@@ -198,6 +199,7 @@ run_exec_command( char *command, char *input,
     char **argv;
     int argc;
 
+    DEBUGMSGTL(("run:exec", "running '%s'\n", command));
     pipe(ipipe);
     pipe(opipe);
     if ((pid = fork()) == 0) {
