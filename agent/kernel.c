@@ -88,7 +88,7 @@ klookup(unsigned long off,
 #else
  snmp_log(LOG_ERR,"kvm_read(*, %lx, %p, %d) = %d: ", off, target, siz,
 		result);
-	log_perror("klookup");
+	snmp_log_perror("klookup");
 #endif
 	return 0;
     }
@@ -106,7 +106,7 @@ init_kmem(const char *file)
 {
   kmem = open(file, O_RDONLY);
   if (kmem < 0){
-    log_perror(file);
+    snmp_log_perror(file);
 #ifndef NO_ROOT_ACCESS
     exit(1);
 #endif
@@ -114,7 +114,7 @@ init_kmem(const char *file)
   fcntl(kmem,F_SETFD,1);
   mem = open("/dev/mem",O_RDONLY);    
   if (mem < 0){
-    log_perror("/dev/mem");
+    snmp_log_perror("/dev/mem");
 #ifndef NO_ROOT_ACCESS
     exit(1);
 #endif
@@ -123,7 +123,7 @@ init_kmem(const char *file)
 #ifdef DMEM_LOC
   swap = open(DMEM_LOC,O_RDONLY);
   if (swap < 0){
-    log_perror(DMEM_LOC);
+    snmp_log_perror(DMEM_LOC);
 #ifndef NO_ROOT_ACCESS
     exit(1);
 #endif
@@ -176,7 +176,7 @@ klookup(unsigned long off,
 
   if ((retsiz = klseek((off_t) off)) != off) {
     snmp_log(LOG_ERR, "klookup(%lx, %p, %d): ", off, target, siz);
-    log_perror("klseek");
+    snmp_log_perror("klseek");
 #ifdef EXIT_ON_BAD_KLREAD
     exit(1);
 #endif
@@ -187,7 +187,7 @@ klookup(unsigned long off,
     /* these happen too often on too many architectures to print them
        unless we're in debugging mode. People get very full log files. */
       snmp_log(LOG_ERR, "klookup(%lx, %p, %d): ", off, target, siz);
-      log_perror("klread");
+      snmp_log_perror("klread");
     }
 #ifdef EXIT_ON_BAD_KLREAD
     exit(1);

@@ -115,7 +115,7 @@ smux_parse_peer_auth(char *token, char *cptr)
 	smux_peer_auth *aptr;
 
 	if ((aptr = (smux_peer_auth *)calloc(1, sizeof(smux_peer_auth))) == NULL) {
-		log_perror("smux_parse_peer_auth: malloc");
+		snmp_log_perror("smux_parse_peer_auth: malloc");
 		return;
 	}
 	aptr->sa_active_fd = -1;
@@ -186,24 +186,24 @@ init_smux(void)
 	lo_socket.sin_port = htons((u_short) SMUXPORT);
 
 	if ((smux_sd = socket (AF_INET, SOCK_STREAM, 0)) <  0) {
-		log_perror("[init_smux] socket failed\n");
+		snmp_log_perror("[init_smux] socket failed\n");
 		return SMUXNOTOK;
 	}
 	if (bind (smux_sd, (struct sockaddr *) &lo_socket, 
 	    sizeof (lo_socket)) < 0) {
-		log_perror("[init_smux] bind failed\n");
+		snmp_log_perror("[init_smux] bind failed\n");
 		close(smux_sd);
 		return SMUXNOTOK;
 	}
 
 	if (setsockopt (smux_sd, SOL_SOCKET, SO_KEEPALIVE, (char *)&one, 
 			sizeof (one)) < 0) {
-		log_perror("[init_smux] setsockopt(SO_KEEPALIVE) failed\n");
+		snmp_log_perror("[init_smux] setsockopt(SO_KEEPALIVE) failed\n");
 		close(smux_sd);
 		return SMUXNOTOK;
 	}
 	if(listen(smux_sd, SOMAXCONN) == -1) {
-		log_perror("[init_smux] listen failed\n");
+		snmp_log_perror("[init_smux] listen failed\n");
 		close(smux_sd);
 		return SMUXNOTOK;
 	}
@@ -351,7 +351,7 @@ smux_accept(int sd)
 	DEBUGMSGTL (("smux","[smux_accept] Calling accept()\n"));
 	errno = 0;
 	if((fd = accept(sd, (struct sockaddr *)&in_socket, &alen)) < 0) {
-		log_perror("[smux_accept] accept failed\n");
+		snmp_log_perror("[smux_accept] accept failed\n");
 		return SMUXNOTOK;
 	} else {
 	 snmp_log(LOG_ERR, "[smux_accept] accepted fd %d - errno %d\n", fd, errno);
@@ -391,7 +391,7 @@ smux_accept(int sd)
 #ifdef SO_RCVTIMEO
 		if (setsockopt(fd, SOL_SOCKET, SO_RCVTIMEO, (void *)&tv, sizeof(tv)) < 0) {
 			DEBUGMSGTL (("smux","[smux_accept] setsockopt(SO_RCVTIMEO) failed fd %d\n", fd));
-                        log_perror("smux/setsockopt");
+                        snmp_log_perror("smux/setsockopt");
                 }
 #endif
 
@@ -570,7 +570,7 @@ smux_send_close(int fd, int reason)
 
     /* send a response back */ 
     if (send (fd, (char *)outpacket, 3, 0) < 0) {
-        log_perror("[smux_snmp_close] send failed\n");
+        snmp_log_perror("[smux_snmp_close] send failed\n");
     }
 }
         
@@ -695,7 +695,7 @@ smux_rreq_process(int sd, u_char *ptr, size_t *len)
 			return NULL;
 		}
 		if((nrptr = malloc(sizeof(smux_reg))) == NULL) {
-                        log_perror("[smux_rreq_process] malloc");
+                        snmp_log_perror("[smux_rreq_process] malloc");
 			return NULL;
 		}
 		nrptr->sr_priority = priority;
@@ -923,7 +923,7 @@ smux_snmp_process(int exact,
         }
 
 	if (send(sd, (char *)packet, length, 0) < 0) {
-		log_perror("[smux_snmp_process] send failed\n");
+		snmp_log_perror("[smux_snmp_process] send failed\n");
 	}
 
 	DEBUGMSGTL(("smux",
@@ -935,7 +935,7 @@ smux_snmp_process(int exact,
 	 */
 	length = recv(sd, (char *)result, SMUXMAXPKTSIZE, 0);
 	if (length < 0) {
-		log_perror("[smux_snmp_process] recv failed\n");
+		snmp_log_perror("[smux_snmp_process] recv failed\n");
 		smux_peer_cleanup(sd);
 		return NULL;
 	}

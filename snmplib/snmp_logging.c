@@ -31,14 +31,14 @@
 #include "snmp_logging.h"
 #define LOGLENGTH 1024
 
-int do_syslogging=0;
-int do_filelogging=0;
-int do_stderrlogging=0;
-FILE *logfile;
+static int do_syslogging=0;
+static int do_filelogging=0;
+static int do_stderrlogging=1;
+static FILE *logfile;
 
 
 void
-disable_syslog(void) {
+snmp_disable_syslog(void) {
 #if HAVE_SYSLOG_H
   if (do_syslogging)
     closelog();
@@ -48,7 +48,7 @@ disable_syslog(void) {
 
 
 void
-disable_filelog(void) {
+snmp_disable_filelog(void) {
   if (do_filelogging)
     fclose(logfile);
   do_filelogging=0;
@@ -56,23 +56,23 @@ disable_filelog(void) {
 
 
 void
-disable_stderrlog(void) {
+snmp_disable_stderrlog(void) {
   do_stderrlogging=0;
 }
 
 
 void
-disable_log(void) {
-  disable_syslog();
-  disable_filelog();
-  disable_stderrlog();
+snmp_disable_log(void) {
+  snmp_disable_syslog();
+  snmp_disable_filelog();
+  snmp_disable_stderrlog();
 }
 
 
 void 
-enable_syslog(void) 
+snmp_enable_syslog(void) 
 {
-  disable_syslog();
+  snmp_disable_syslog();
 #if HAVE_SYSLOG_H
   openlog("ucd-snmp", LOG_CONS|LOG_PID, LOG_DAEMON);
   do_syslogging=1;
@@ -81,25 +81,27 @@ enable_syslog(void)
 
 
 void
-enable_filelog(const char *logfilename, int dont_zero_log) 
+snmp_enable_filelog(const char *logfilename, int dont_zero_log) 
 {
-  disable_filelog();
+  snmp_disable_filelog();
   logfile=fopen(logfilename, dont_zero_log ? "a" : "w");
-  if (logfile)
+  if (logfile) {
     do_filelogging=1;
+    setvbuf(logfile, NULL, _IOLBF, BUFSIZ);
+  }
   else
     do_filelogging=0;
 }
 
 
 void
-enable_stderrlog(void) {
+snmp_enable_stderrlog(void) {
   do_stderrlogging=1;
 }
 
 
 void
-log_syslog (int priority, const char *string)
+snmp_log_syslog (int priority, const char *string)
 {
 #if HAVE_SYSLOG_H
   if (do_syslogging) {
@@ -110,35 +112,33 @@ log_syslog (int priority, const char *string)
 
 
 void
-log_filelog (int priority, const char *string)
+snmp_log_filelog (int priority, const char *string)
 {
   if (do_filelogging) {
     fputs(string, logfile);
-    fflush(logfile);
   }
 }
 
 
 void
-log_stderrlog (int priority, const char *string)
+snmp_log_stderrlog (int priority, const char *string)
 {
   if (do_stderrlogging) {
     fputs(string, stderr);
-    fflush(stderr);
   }
 }
 
 void 
-log_string (int priority, const char *string)
+snmp_log_string (int priority, const char *string)
 {
-  log_syslog(priority, string);
-  log_filelog(priority, string);
-  log_stderrlog(priority, string);
+  snmp_log_syslog(priority, string);
+  snmp_log_filelog(priority, string);
+  snmp_log_stderrlog(priority, string);
 }
 
 
 int
-vlog (int priority, const char *format, va_list ap)
+snmp_vlog (int priority, const char *format, va_list ap)
 {
   char buffer[LOGLENGTH];
   int length; 
@@ -152,31 +152,31 @@ vlog (int priority, const char *format, va_list ap)
 #endif
 
   if (length < 0 ) {
-    log_string(LOG_ERR, "Could not format log-string\n");
+    snmp_log_string(LOG_ERR, "Could not format log-string\n");
     return(-1);
   }
 
   if (length < LOGLENGTH) {
-    log_string(priority, buffer);
+    snmp_log_string(priority, buffer);
     return(0);
   } 
 
 #if HAVE_VSNPRINTF
   dynamic=malloc(length+1);
   if (dynamic==NULL) {
-    log_string(LOG_ERR, "Could not allocate memory for log-message\n");
-    log_string(priority, buffer);
+    snmp_log_string(LOG_ERR, "Could not allocate memory for log-message\n");
+    snmp_log_string(priority, buffer);
     return(-2);
   }
 
   vsnprintf(dynamic, length+1, format, ap);
-  log_string(priority, dynamic);
+  snmp_log_string(priority, dynamic);
   free(dynamic);
   return(0);
 
 #else
-  log_string(priority, buffer);
-  log_string(LOG_ERR, "Log-message too long!\n");
+  snmp_log_string(priority, buffer);
+  snmp_log_string(LOG_ERR, "Log-message too long!\n");
   return(-3);
 #endif
 }
@@ -199,7 +199,7 @@ snmp_log (int priority, va_alist)
   va_start(ap);
   format = va_arg(ap, const char *);
 #endif
-  ret=vlog(priority, format, ap);
+  ret=snmp_vlog(priority, format, ap);
   va_end(ap);
   return(ret);
 }
@@ -208,7 +208,7 @@ snmp_log (int priority, va_alist)
  * log a critical error.
  */
 void
-log_perror(const char *s)
+snmp_log_perror(const char *s)
 {
   char *error  = strerror(errno);
   if (s) {

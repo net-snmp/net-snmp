@@ -26,25 +26,25 @@ extern "C" {
 
 #endif
 
-void disable_syslog(void);
-void disable_filelog(void);
-void disable_stderrlog(void);
-void disable_log(void);
-void enable_syslog(void);
-void enable_filelog(const char *logfilename, int dont_zero_log);
-void enable_stderrlog(void);
-void log_syslog(int priority, const char *string);
-void log_filelog(int priority, const char *string);
-void log_stderrlog(int priority, const char *string);
+void snmp_disable_syslog(void);
+void snmp_disable_filelog(void);
+void snmp_disable_stderrlog(void);
+void snmp_disable_log(void);
+void snmp_enable_syslog(void);
+void snmp_enable_filelog(const char *logfilename, int dont_zero_log);
+void snmp_enable_stderrlog(void);
+void snmp_log_syslog(int priority, const char *string);
+void snmp_log_filelog(int priority, const char *string);
+void snmp_log_stderrlog(int priority, const char *string);
 
 int snmp_log(int priority, const char *format, ...);
-int vlog(int priority, const char *format, va_list ap);
+int snmp_vlog(int priority, const char *format, va_list ap);
    /*  0 - successful message formatting */
    /* -1 - Could not format log-string */
    /* -2 - Could not allocate memory for log-message */
    /* -3 - Log-message too long! */
 
-void log_perror(const char *s);
+void snmp_log_perror(const char *s);
 
 #ifdef __cplusplus
 }

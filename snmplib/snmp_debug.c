@@ -178,7 +178,7 @@ debugmsg(va_alist)
 #endif
 
   if (debug_is_token_registered(token) == SNMPERR_SUCCESS) {
-    vlog(LOG_DEBUG, format, debugargs);
+    snmp_vlog(LOG_DEBUG, format, debugargs);
   }
   va_end(debugargs);
 }
