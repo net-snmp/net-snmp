@@ -1,7 +1,7 @@
       Frequently Asked Questions (FAQ) for the UCD/Net-SNMP package
       =============================================================
 		       FAQ Author: Dave Shield
-		        net-snmp Version: 5.1.1.pre1
+		        net-snmp Version: main CVS branch
 	    net-snmp/ucd-snmp Project Leader: Wes Hardaker
 	     Email: net-snmp-coders@lists.sourceforge.net
 
@@ -23,7 +23,7 @@ TABLE OF CONTENTS
    How do I submit a patch or bug report?
    Can I reuse the code in my commercial application?
    What's the difference between SNMPv1, SNMPv2 and SNMPv3?
-   What are all these different SNMPv2's anyway?
+   What's the difference between SNMPv2 and SNMPv2c?
    Which versions of SNMP are supported in this package?
    Can I use SNMPv1 requests with an SNMPv2 MIB (or vice versa)?
    Where can I find more information about network management?
@@ -87,6 +87,7 @@ TABLE OF CONTENTS
    What about 'dlmod' - what's that about?
    Which should I use?
    Can I use AgentX when running under Windows?
+   Can I use AgentX (or an embedded SNMP agent) in a threaded application?
    How can I run AgentX with a different socket address?
    How can I combine two copies of the 'mib2' tree from separate subagents?
    What traps are sent by the agent?
@@ -113,6 +114,7 @@ TABLE OF CONTENTS
    What about multi-processor systems?
    The speed/type of my network interfaces is wrong - how can I fix it?
    The interface statistics for my subinterfaces are all zero - why?
+   Does the agent support the RMON-MIB?
    What does "klread:  bad address" mean?
    What does "nlist err:  wombat not found" (or similar) mean?
    How about "Can't open /dev/kmem"?
@@ -145,6 +147,7 @@ TABLE OF CONTENTS
    How can I support a large table, with more than 256 column objects?
    How can I get the agent to generate a trap (or inform)?
    What if I'm using an AgentX sub-agent instead?
+   How can I register a MIB module in a different (SNMPv3) context?
  MISC
    Why are packets requesting the same information larger with UC-Davis SNMP?
    What ASN.1 parser is used?
@@ -443,50 +446,64 @@ do so.
 
 What's the difference between SNMPv1, SNMPv2 and SNMPv3?
 -------------------------------------------------------
-What are all these different SNMPv2's anyway?
---------------------------------------------
+What's the difference between SNMPv2 and SNMPv2c?
+------------------------------------------------
 
 
   A full description is probably beyond the scope of this FAQ.
   Very briefly, the original protocol and framework was described
   in RFCs 1155-1157, and is now known as SNMPv1.
 
-    Practical experience showed up various problems and
-  deficiencies with this, and a revised framework was developed to
-  try and address these.  This was described in RFCs 1441-1452, and
-  known as "SNMPv2 classic".
-  The changes proposed include:
+    Practical experience showed up various problems and deficiencies
+  with this, and a number of revised frameworks were developed to try
+  and address these problems.  Unfortunately, it proved difficult to
+  achieve any sort of agreement - particularly over the administrative
+  framework to use.
 
-	* new ways of defining information (MIB structure)
-		(SMI, Textual conventions, conformance statements)
-	* new protocol packet types and transport mappings
-	* new mechanisms for administration and security
-	* mechanisms for remote configuration
+    There was less disagreement over the proposed changes to the
+  protocol operations.  These included:
+        * increasing the range of errors that could be reported
+        * introducing "exception values"
+            (so a single missing value didn't affect
+             the other varbinds in the same request)
+        * a new GETBULK operation
+            (a supercharged GETNEXT)
+        * new notification PDUs
+            (closer in structure to the other request PDUs)
 
-  Unfortunately, while many of these were generally accepted, there
-  was some disagreement in these last two areas, security/admin
-  and remote configuration.  This resulted in a number of variants and
-  alternative proposals:
+  Strictly speaking, it's this revised protocol (originally defined
+  in RFC 1905, and most recently in RFC 3416) that is "SNMPv2".
 
-	SNMPv2c		Contains the new protocol and MIB structure elements,
-			using the existing SNMPv1 administration structure.
-			This is the de-facto SNMPv2 standard (described in
-			RFCs 1901-1908), superseding SNMPv2 classic, and is
-			known as "Community-based SNMPv2" or simply "SNMPv2".
+  The only framework based on this protocol that saw a significant
+  level of use was "Community-based SNMPv2" or "SNMPv2c" (defined in
+  RFCs 1901-1908). This retained the same administrative framework
+  as SNMPv1 (with all of the accompanying deficiencies), but using
+  the new protocol operations.
+
+  More recently, a new administrative framework has been developed,
+  building on the various competing SNMPv2 proposals, and using the
+  same SNMPv2 protocol operations.  This is SNMPv3, which is defined
+  in RFCs 3411-3418.    It addresses some of the deficiencies of the
+  community-based versions, including significant improvements to
+  the security of SNMP requests (like it finally has some!).
+     SNMPv3 is now a full IETF standard protocol.
+
+  Strictly speaking, SNMPv3 just defines a fairly abstract framework,
+  based around the idea of "Security Models" and "Access Control Models".
+  It's this combination of SNMPv3 plus accompanying models that actually
+  provides a working SNMP system.
+     However, the only models in common use are the "User-based Security
+  Model" (RFC 3414) and the "View-based Access Control Model" (RFC 3415).
+  So "SNMPv3" is frequently used to mean the combination of the basic
+  SNMPv3 framework with these two particular models.
+     This is also sometimes described as "SNMPv3/USM".
 
 
-	SNMPv2 usec	} Alternative proposals to address the
-	SNMPv2*		} limitations of SNMPv1 administration
-			} These are both super-sets of SNMPv2c
-
-			
-	SNMP-NG		An attempt to reach agreement between
-			the proponents of usec and v2star.
-
-  The formal successor to the SNMP-NG work has been termed SNMPv3.
-  This has now been effectively finalised, and is described in RFCs
-  2571-2575.  This is currently a Proposed Standard, but is likely
-  to progress to full Standard in the relatively near future.
+  So in brief:
+        - SNMPv2c updated the protocol operations
+                  but left the administrative framework unchanged.
+        - SNMPv3  updated the administrative framework
+                  but left the protocol operations unchanged.
 
 
 
@@ -494,7 +511,7 @@ Which versions of SNMP are supported in this package?
 ----------------------------------------------------
 
   This package currently supports the original SNMPv1, Community-based
-  SNMPv2 (i.e. RFCs 1901-1908), and SNMPv3 (i.e. RFCs 2571-2575).
+  SNMPv2 (i.e. RFCs 1901-1908), and SNMPv3 (i.e. RFCs 3411-3418).
     The agent will respond to requests using any of these protocols,
   and all the tools take a command-line option to determine which
   version to use.
@@ -712,15 +729,15 @@ Requests always seem to timeout, and don't give me anything back.  Why?
 	- is there an SNMP agent running on it?
 		(Run 'ps -ef | grep snmp' or 'netstat -an | grep 161')
 	- are the requests arriving, or being blocked (e.g. by a firewall)?
-		(Restart the agent using 'snmpd -f -L -d'
+		(Restart the agent using 'snmpd -f -Le -d'
 		 and see if it shows the incoming packet dumps)
 	- is the agent simply taking a long time to respond?
-		(The 'snmpd -f -L -d' command should show a series of
+		(The 'snmpd -f -Le -d' command should show a series of
  		 incoming PDUs, followed eventually by the outgoing PDUs.
 		 Try the request again with a long timeout value,
 		 e.g. 'snmpcmd -t 120 ....')
 	- does the agent's control settings allow this request?
-		(The 'snmpd -f -L -d' command will show a series of
+		(The 'snmpd -f -Le -d' command will show a series of
  		 incoming PDUs with *no* corresponding outgoing PDUs)
 
   Note that if the agent is not configured to allow access for a
@@ -1665,14 +1682,24 @@ What MIBs are supported?
   The following MIBs are supported (at least in part and on some systems):
 
 	- MIB-2  General network statistics (RFC 1213)
-	- UCD agent extensions
-		(processes, disks, memory, load average,
-		 shell commands, error handling)
 	- Host Resources (RFC 1514 and 2790)
-	- SNMPv3 MIBS (RFCs 2571-6)
+	- SNMPv3 MIBS (RFCs 2571-5, 3411-3418)
+		(including USM, VACM, Target
+		 and Notification MIBs)
+	- DisMan EVENT-MIB
+	- MTA-MIB (sendmail)
+	- private agent extensions
+		(monitor specified processes and disks,
+		 memory, CPU, load average, plus extend
+		 the agent using shell commands)
 
-  The SNMPv2 Party and Manager-to-Manager MIBs (RFCs 1447 & 1451) have been
-  withdrawn.
+  The Host Resources MIB, the Event MIB and the MTA MIB are not
+  included by default, and need to be explicitly requested when
+  the suite is first configured and built.
+
+  There are a few other MIB implementations distributed as part of the
+  source tarball, but these are basically unsupported and most of the
+  core developers have little or no experience with using them.
 
 
 
@@ -1798,7 +1825,9 @@ What's the difference between AgentX, SMUX and proxied SNMP?
   agent includes the possibility of acting as a SMUX master agent, but the
   suite does not include a subagent API.   Note that the SMUX protocol has
   essentially been superceded by AgentX, but is still provided in order to
-  support existing SMUX subagents.
+  support existing SMUX subagents.  However the core developers have little
+  experience (and even less interest!) in this code, so assistance with
+  SMUX-related problems is likely to be somewhat limited.
     See the file 'agent/mibgroup/README.smux' for details.
 
     AgentX uses a more compact (and simpler) packet format, with a richer
@@ -1911,6 +1940,30 @@ Can I use AgentX when running under Windows?
   a system *anywhere* on the network (or even from remote networks) to
   register as an AgentX subagent.  This could potentially be used to
   hijack the agent, or provide false information.
+
+
+
+Can I use AgentX (or an embedded SNMP agent) in a threaded application?
+-----------------------------------------------------------------------
+
+  With care.
+
+  As mentioned in the earlier "thread-safe" FAQ entry, the Net-SNMP
+  agent (including the AgentX subagent) has not been designed for
+  threaded operation.  In particular, it makes use of various global
+  variables without attempting to protect them against simultaneous
+  use.  This means that it is *NOT* safe to have SNMP or AgentX
+  related processing in two separate threads.  This also applies to
+  handling GET (and SET) processing in one thread, and generating traps
+  in another.  This is still vulnerable to the usual threading problems.
+
+    However, as long as *all* of the SNMP-related activity is limited
+  to the one thread, then there should be no reason why this cannot
+  safely communicate with other threads within the same application,
+  using private (thread-safe) mechanisms.
+
+    But in terms of the Net-SNMP-provided code, the agent (and AgentX
+  subagent) should *not* be regarded as thread-safe.
 
 
 
@@ -2086,12 +2139,28 @@ When I run the agent it runs and then quits without staying around. Why?
   On the other hand, if 'ps' shows that the agent is not running, then
   this is an error, and probably show that something went wrong in
   starting the agent up.  Check the agent log file for any error messages,
-  or run it with '-f -L' and see what it reports.
+  or run it with '-f -Le' and see what it reports.
 
   One known example of this is the 'ucd-snmp' RPM distributed by RedHat.
   This agent crashes if there is a 'disk' configuration entry in the
   snmpd.conf file.  It is not currently known what causes this, as this
   setting works correctly if the agent is compiled from source.
+
+  Another possible cause might be an existing agent (or some other process)
+  that's already listening on the SNMP port.  Trying to start a second
+  agent will fail with an error about "opening the specified endpoint".
+
+  If you're starting the agent as a non-root user, then this may also
+  fail with the very same error.  By default, the agent (and trap handler)
+  will attempt to listen on the standard SNMP port 161 (or 162 for the
+  trap handler).  These are defined as "privileged ports", and processes
+  will need to be running as root in order to open them.
+
+  One way to tackle this is to start the agent as root, but use the -u
+  option to switch to run as another user once the port has been opened.
+  Alternatively, you can specify a different port to use instead.
+  Anything greater than 1024 is available to non-root users.  In this case,
+  you'll also need to specify the same port when issuing client commands.
 
 
 
@@ -2134,17 +2203,22 @@ How can I stop other people getting at my agent?
   specified.  You will need to set appropriate values for both NETWORK
   and COMMUNITY in this file before using it.
     This mechanism can also be used to control access much more precisely.
-  (see the next questions for details)
+  (see the next few questions for details)
 
   Other options include:
 	- Blocking access to port 161 from outside your organisation
 		(using filters on network routers)
+	- Using kernel-level network filtering on the system itself
+		(such as IPTables)
 	- Configuring TCP wrapper support ("--with-libwrap")
 		This uses the TCP 'libwrap' library (available separately)
 		to allow/deny access via /etc/hosts.{allow,deny}
 
   For strict security you should use only SNMPv3, which is the secure
-  form of the protocol.
+  form of the protocol.  However, note that the agent access control
+  mechanisms does not restrict SNMPv3 traffic by location - an SNMPv3
+  request will be accepted or rejected based purely on the user
+  authentication, irrespective of where it originated.
 
 
 
@@ -2558,6 +2632,36 @@ The interface statistics for my subinterfaces are all zero - why?
   report such values as it can find out.  If the kernel doesn't
   keep track of these figures, the agent can't report them.
     Sorry!
+
+
+
+Does the agent support the RMON-MIB?
+-----------------------------------
+
+    Not really.
+
+    There is an "Rmon" code module included within the agent source
+  code tree, but this is best thought of as a template for the
+  RMON-MIB statistics groups, rather than a full implementation.
+
+    With most MIBs, the hardest part of implementing the MIB is often
+  getting hold of the data to report.  This is definitely true of the
+  RMON-MIB, which relies on gathering (and analysing) a potentially
+  large quantity of network traffic.   The Rmon code distributed with
+  the Net-SNMP agent code avoids this problem, by using random data.
+
+    Some of the functionality of the RMON-MIB, such as the alarm and
+  event groups, has since been superceded by the work of the DisMan
+  IETF working group.  The Net-SNMP agent does implement these (more
+  general) MIB modules.  But the statistics gathering aspects of
+  the RMON-MIB are not readily available.
+
+    Note too that none of the core developers have any significant
+  experience with this code, and the person who originally wrote it
+  is no longer active on the mailing lists.  So there's no point in
+  asking on the lists whether these modules work or not.  You've got
+  the source - how badly do you need this functionality?
+
 
 
 What does "klread:  bad address" mean?
@@ -3181,6 +3285,57 @@ What if I'm using an AgentX sub-agent instead?
     In fact, the main agent supplied as part of the package can indeed
   be run as an SNMP agent or an AgentX subagent, simply based on command
   line flags (or similar configuration options).
+
+
+
+How can I register a MIB module in a different (SNMPv3) context?
+---------------------------------------------------------------
+
+    Contexts are a mechanism within SNMPv3 (and AgentX) whereby
+  an agent can support parallel versions of the same MIB objects,
+  referring to different underlying data sets.  By default, a MIB
+  module registrations will use the default empty context of "".
+  But it's also possible to explicitly register an individual MIB
+  module using a different context.
+
+    With the v4 API, this uses the call 'register_mib_context()'
+  rather than the REGISTER_MIB macro.  This is significantly more
+  detailed, but most of the additional parameters can take fixed
+  values, if all that's needed is to change the registration context.
+
+  Instead of the macro call:
+        REGISTER_MIB("my_token", my_variables, variable1, my_variables_oid);
+  use the function call:
+        register_mib_context( "my_token",
+                               my_variables, sizeof(variable1),
+                               sizeof(my_variables)/sizeof(variable1),
+                               my_variables_oid,
+                               sizeof(my_variables_oid)/sizeof(oid),
+                               DEFAULT_MIB_PRIORITY, 0, 0, NULL,
+                               "my_context", -1, 0);
+
+    Things are much easier with the v5 helper-based API.  Having
+  created the registration structure, this just requires setting the
+  'contextName' field before actually registering the MIB module:
+        netsnmp_handler_registration *reg;
+        reg = netsnmp_create_handler_registration(.....);
+        reg->contextName = strdup("my_context");
+        netsnmp_register_handler(reg);
+
+    In either case, it will also be necessary to define suitable
+  access control entries to cover requests using the new context.
+  This can either list each context explicitly:
+
+	access {group} "my_context" any noauth exact  ......
+
+  or use a single entry to cover all possible contexts:
+
+	access {group} ""           any noauth prefix ......
+
+  But note that *both* steps are required.  Changing the access
+  control settings won't affect the default context used for MIB
+  registrations, and registering a MIB in a non-default context
+  won't automatically configure the necessary access control settings.
 
 
 
