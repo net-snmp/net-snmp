@@ -566,6 +566,7 @@ sub updateInfo {
 	    $mib->{'description'} ne "") {
 	    my $desc = $mib->{'description'};
 	    $desc =~ s/\n[ \t]+/\n/g;
+ 	    $desc =~ s/^\n//;
 	    $descr->insert('end',$desc);
 	}
 	for($i=0; $i<= $#displayInfo;$i++) {
