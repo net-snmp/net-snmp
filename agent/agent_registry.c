@@ -1488,7 +1488,7 @@ int register_signal(int sig, void (*func)(int)) {
     external_signal_handler[sig] = func;
     switch (sig) {
     case SIGCHLD:
-#if 0
+#if HAVE_SIGNAL
 	signal(SIGCHLD, (void *)agent_SIGCHLD_handler);
 #else
 	act.sa_handler = agent_SIGCHLD_handler;
