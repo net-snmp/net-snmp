@@ -656,7 +656,9 @@ sub gettable {
     $vbl = $varbinds;
 	
     my $repeatcount;
-    if ($options->{'repeat'}) {
+    if ($opts->{nogetbulk}) {
+	$repeatcount = 1;
+    } elsif ($options->{'repeat'}) {
 	$repeatcount = $options->{'repeat'};
     } else {
 	# experimentally determined maybe guess at a best repeat value
