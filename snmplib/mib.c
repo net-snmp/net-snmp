@@ -1762,8 +1762,7 @@ _get_symbol(oid *objid,
 
     while (in_dices &&
            !ds_get_boolean(DS_LIBRARY_ID,DS_LIB_PRINT_NUMERIC_OIDS) &&
-           !ds_get_boolean(DS_LIBRARY_ID,DS_LIB_DONT_BREAKDOWN_OIDS) &&
-           !ds_get_boolean(DS_LIBRARY_ID, DS_LIB_QUICK_PRINT)) {
+           !ds_get_boolean(DS_LIBRARY_ID,DS_LIB_DONT_BREAKDOWN_OIDS)) {
 	size_t numids;
 	struct tree *tp;
 	tp = find_tree_node(in_dices->ilabel, -1);
@@ -1782,7 +1781,11 @@ _get_symbol(oid *objid,
                 numids = (size_t)*objid+1;
                 if (numids > objidlen)
                     goto finish_it;
-                buf = dump_oid_to_string(objid+1, numids-1, buf, '"');
+		if (numids == 1) {
+		    *buf++ = '"'; *buf++ = '"';
+		}
+		else
+		    buf = dump_oid_to_string(objid+1, numids-1, buf, '"');
             }
             objid += (numids);
             objidlen -= (numids);
@@ -1834,11 +1837,6 @@ found:
 	*buf++ = '.';
 	*buf = '\0';
 
-	if (subtree->child_list == NULL) {
-	    objidlen--;
-	    objid++;
-	    goto finish_it;
-	}
 	return_tree = _get_symbol(objid + 1, objidlen - 1, subtree->child_list,
 				 buf, in_dices, end_of_known);
     }
