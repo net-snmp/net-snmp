@@ -373,10 +373,16 @@ handle_agentx_packet(int operation, struct snmp_session *session, int reqid,
 	    asp->pdu = asp->orig_pdu;
 	    asp->orig_pdu = NULL;
 	}
-	asp->pdu->command = AGENTX_MSG_RESPONSE;
-	asp->pdu->errstat  = status;
-	asp->pdu->errindex = asp->index;
-	if (!snmp_send(asp->session, asp->pdu)) {
+
+	if (pdu->command != AGENTX_MSG_CLEANUPSET) {
+	    asp->pdu->command = AGENTX_MSG_RESPONSE;
+	    asp->pdu->errstat  = status;
+	    asp->pdu->errindex = asp->index;
+	    if (!snmp_send(asp->session, asp->pdu)) {
+		snmp_free_pdu(asp->pdu);
+	    }
+	} else {
+	    DEBUGMSGTL(("agentx/subagent","send no response to cleanupSet\n"));
 	    snmp_free_pdu(asp->pdu);
 	}
 	asp->pdu = NULL;

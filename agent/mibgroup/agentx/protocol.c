@@ -516,6 +516,11 @@ _agentx_build(struct snmp_session        *session,
      if ( bufp == NULL )
      	return -1;
      
+     /*  Everything causes a response, except for agentx-Response-PDU
+	 and agentx-CleanupSet-PDU.  */
+     
+     pdu->flags |= UCD_MSG_FLAG_EXPECT_RESPONSE;
+     
      DEBUGDUMPHEADER("send", "AgentX Payload");
      switch ( pdu->command ) {
      	case AGENTX_MSG_OPEN:
@@ -699,9 +704,12 @@ _agentx_build(struct snmp_session        *session,
 	    
 	case AGENTX_MSG_COMMITSET:
 	case AGENTX_MSG_UNDOSET:
-	case AGENTX_MSG_CLEANUPSET:
 	case AGENTX_MSG_PING:
 	    /* "Empty" packet */
+	    break;
+
+        case AGENTX_MSG_CLEANUPSET:
+	    pdu->flags &= ~(UCD_MSG_FLAG_EXPECT_RESPONSE);
 	    break;
 	    
 	case AGENTX_MSG_ADD_AGENT_CAPS:
