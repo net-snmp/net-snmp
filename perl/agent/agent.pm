@@ -98,11 +98,11 @@ sub AUTOLOAD {
 	snmp_enable_stderrlog();
 	my $flags = $_[0];
 	if ($flags->{'AgentX'}) {
-	    ds_set_boolean(DS_APPLICATION_ID, DS_AGENT_ROLE, 1);
+	    netsnmp_ds_set_boolean(NETSNMP_DS_APPLICATION_ID, NETSNMP_DS_AGENT_ROLE, 1);
 	}
 	init_agent($flags->{'Name'} || "perl");
 	if ($flags->{'Ports'}) {
-	    ds_set_string(DS_APPLICATION_ID, DS_AGENT_PORTS, $flags->{'Ports'});
+	    netsnmp_ds_set_string(NETSNMP_DS_APPLICATION_ID, NETSNMP_DS_AGENT_PORTS, $flags->{'Ports'});
 	}
 	init_mib();
     }
@@ -121,7 +121,7 @@ sub AUTOLOAD {
 
 	my $flags = $_[0];
 	init_snmp($flags->{'Name'} || "perl");
-	if (ds_get_boolean(DS_APPLICATION_ID, DS_AGENT_ROLE) != 1) {
+	if (netsnmp_ds_get_boolean(NETSNMP_DS_APPLICATION_ID, NETSNMP_DS_AGENT_ROLE) != 1) {
 	    init_master_agent();
 	}
     }
