@@ -251,8 +251,11 @@ sure to end it in -1.*/
 #define ERRORMIBNUM 101     /* Reports errors the agent runs into */
 #define USEERRORMIB         /* (typically its "can't fork, no mem" problems) */
 
-#define ERRORTIMELENGTH 600 /* how long to wait (seconds) for error querys
-                               before reseting the error trap.*/
+#define AGENTID 250  /* The sub id of EXENSIBLEMIB returned to queries of
+                        .iso.org.dod.internet.mgmt.mib-2.system.sysObjectID.0 */
+
+/* how long to wait (seconds) for error querys before reseting the error trap.*/
+#define ERRORTIMELENGTH 600 
 
 /* Exec command to fix PROC problems */
 /* %s will be replaced by the process name in error */
