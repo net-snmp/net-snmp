@@ -90,7 +90,7 @@ nsExtendCommand OBJECT-TYPE
     MAX-ACCESS  read-create
     STATUS      current
     DESCRIPTION
-      "The command binary (or script) to run"
+      "The full path of the command binary (or script) to run"
     ::= { nsExtendConfigEntry 2 }
 
 nsExtendArgs    OBJECT-TYPE
@@ -156,7 +156,6 @@ nsExtendRunType OBJECT-TYPE
        The command for a 'run-on-set' entry will only be invoked
        on receipt of a SET assignment for this object with the
        value 'run-command'.
-       This is the only valid value for a SET assignment on this object.
        Reading an instance of this object will always return either
        'run-on-read' or 'run-on-set'.
       "
@@ -178,7 +177,7 @@ nsExtendStorage OBJECT-TYPE
 
 nsExtendStatus  OBJECT-TYPE
     SYNTAX      RowStatus
-    MAX-ACCESS  read-write
+    MAX-ACCESS  read-create
     STATUS      current
     DESCRIPTION
       "Used to create new rows in the table, in the standard manner.
