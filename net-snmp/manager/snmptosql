@@ -117,6 +117,12 @@ nexthost: while (  $hostrow = $cursor->fetchrow_hashref ) {
 
     $dbh->do("update hostgroups set sysObjectId = '$sysId', sysDescr = '$sysDescr', versionTag = '$versiontag', sysUpTime = '$sysuptime' where host = '$host'");
 
+    # translate the sysUpTime to a real number for future use:
+    {
+	my ($d,$h,$m,$s,$fs) = ($sysuptime =~ /^(\d+):(\d+):(\d+):(\d+)\.(\d+)$/);
+	$sysuptime = $fs + $s*100 + $m*100*60 + $h*100*60*60 + $d*100*60*60*24;
+    }
+
     # get a list of tables we want to store
     $cmd = "SELECT * FROM hosttables where (host = '$host')";
     print STDERR " $cmd\n" if ($verbose);
@@ -208,9 +214,9 @@ nexthost: while (  $hostrow = $cursor->fetchrow_hashref ) {
 		or warn "\nnot ok: $cmd => $DBI::errstr\n" if ($doit);
 
 	    if ($tablelist->{'keephistory'} > 0) {
-		$cmd = "insert into $tablelist->{'tablename'}hist (host, oidindex, " 
+		$cmd = "insert into $tablelist->{'tablename'}hist (host, oidindex, sysUpTime, " 
 		    . join(", ",keys(%vals))
-		    . ") values('$host', '$id', '"
+		    . ") values('$host', '$id', $sysuptime, '"
 		    . join("', '",values(%vals)). "')";
 		print STDERR "  $cmd\n" if ($verbose);
 		$dbh->do("$cmd")
@@ -228,7 +234,7 @@ nexthost: while (  $hostrow = $cursor->fetchrow_hashref ) {
 
 	# delete the data beyond the number of days requested.
 	if ($tablelist->{'keephistory'} > 0) {
-	    $dbh->do("delete from $tablelist->{'tablename'}hist where (unix_timestamp()-unix_timestamp(updated)) > $tablelist->{'keephistory'}*24*60*60 and host = '$host'") or warn "\nnot ok: $DBI::errstr\n" if ($doit);
+	    $dbh->do("delete from $tablelist->{'tablename'}hist where (unix_timestamp() - unix_timestamp(updated)) > $tablelist->{'keephistory'}*24*60*60 and host = '$host'") or warn "\nnot ok: $DBI::errstr\n" if ($doit);
 	}
 
 	my $curs = getcursor("select oidindex from $tablelist->{tablename} where host = '$host'");
@@ -286,7 +292,7 @@ sub setuptable {
     print STDERR "show tables like $mib->{label}$suffix: $ret\n" if($verbose);
     print STDERR " creating table for $mibnode ($mib->{label}$suffix)\n" if ($verbose);
     
-    $cmd = "create table $mib->{label}$suffix (id integer auto_increment primary key, host varchar(64), oidindex varchar(254)";
+    $cmd = "create table $mib->{label}$suffix (id integer auto_increment primary key, host varchar(32) not null, oidindex varchar(32) not null";
     foreach $j (sort { $a->{'subID'} <=> $b->{'subID'} } @$children) {
 	if (!defined($conversions{$j->{type}})) {
 	    print STDERR "no conversion for $j->{label} = ". $j->{type} . "!\n";
@@ -294,7 +300,9 @@ sub setuptable {
 	}
 	$cmd .= ", $j->{label} $conversions{$j->{type}}";
     }
-    $cmd .= ", updated timestamp)";
+    $cmd .= ", updated timestamp";
+    $cmd .= ", sysUpTime integer" if (defined($suffix));
+    $cmd .= ",key oidindex (oidindex), key host (host))";
 
     print STDERR "cmd: $cmd\n" if ($verbose);
     $dbh->do("$cmd")
