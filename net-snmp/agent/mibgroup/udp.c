@@ -68,7 +68,9 @@
 
 #include "mibincl.h"
 #include "snmp_api.h"
+#ifdef HAVE_NLIST_H
 #include <nlist.h>
+#endif
 
 #ifdef hpux
 #undef OBJID
