@@ -14,6 +14,16 @@ extern "C" {
 /* 
  * General acros and constants.
  */
+#ifdef WIN32
+#  define SNMP_MAXPATH MAX_PATH
+#else
+#  ifdef PATH_MAX
+#    define SNMP_MAXPATH PATH_MAX
+#  else
+#    define SNMP_MAXPATH MAXPATHLEN
+#  endif
+#endif
+
 #define SNMP_MAXBUF		(1024 * 4)
 #define SNMP_MAXBUF_MEDIUM	1024
 #define SNMP_MAXBUF_SMALL	512
