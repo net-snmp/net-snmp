@@ -1,8 +1,10 @@
 u_char *var_wes_shell();
+u_char *var_wes_relocatable();
 u_char *var_wes_disk();
 u_char *var_wes_version();
 u_char *var_wes_hp();
 u_char *var_wes_lockd_test();
+u_char *var_wes_loadave();
 
 /* the variable that stores the process watching mib info */
 struct variable2 wes_proc_variables[] = {
@@ -73,6 +75,16 @@ struct variable2 wes_version_variables[] = {
   {VERCDATE, STRING, RONLY, var_wes_version, 1, {VERCDATE}},
   {VERIDENT, STRING, RONLY, var_wes_version, 1, {VERIDENT}},
   {VERCLEARCACHE, INTEGER, RONLY, var_wes_version, 1, {VERCLEARCACHE}}
+};
+
+/* the lockd test variables */
+struct variable2 wes_loadave_variables[] = {
+  {MIBINDEX, INTEGER, RONLY, var_wes_loadave, 1, {MIBINDEX}},
+  {ERRORNAME, STRING, RONLY, var_wes_loadave, 1, {ERRORNAME}},
+  {LOADAVE, STRING, RONLY, var_wes_loadave, 1, {LOADAVE}},
+  {LOADMAXVAL, STRING, RONLY, var_wes_loadave, 1, {LOADMAXVAL}},
+    {ERRORFLAG, INTEGER, RONLY, var_wes_loadave, 1, {ERRORFLAG}},
+    {ERRORMSG, STRING, RONLY, var_wes_loadave, 1, {ERRORMSG}}
 };
 
 struct variable2 wes_hp_variables[] = {

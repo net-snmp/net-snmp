@@ -28,9 +28,12 @@
 extern struct myproc *procwatch;  /* moved to proc.c */
 extern int numprocs;                     /* ditto */
 extern struct exstensible *extens;  /* In exec.c */
+extern struct exstensible *relocs;  /* In exec.c */
 extern int numextens;                    /* ditto */
+extern int numrelocs;                    /* ditto */
 
 int minimumswap;
+double maxload[3];
 static int pageshift;           /* log base 2 of the pagesize */
 
 int checkmib(vp,name,length,exact,var_len,write_method,newname,max)
@@ -44,16 +47,19 @@ int checkmib(vp,name,length,exact,var_len,write_method,newname,max)
     int                 max;
 {
   int i, rtest;
-  
-  for(i=0,rtest=0; i < *length-1; i++) {
+
+  for(i=0,rtest=0; i < vp->namelen; i++) {
     if (name[i] != vp->name[i]) {
       rtest = 1;
     }
   }
   if (rtest) {
-    *var_len = NULL;
+    if (var_len)
+	*var_len = NULL;
     return NULL;
   }
+/*  printf("%d/ck:  vp=%d  ln=%d lst=%d\n",exact,
+         vp->namelen,*length,name[*length-1]); */
   if (*length == vp->namelen) {
     bcopy((char *) vp->name, (char *)newname,
           (int)vp->namelen * sizeof (oid));
@@ -61,7 +67,8 @@ int checkmib(vp,name,length,exact,var_len,write_method,newname,max)
     *length = vp->namelen+1;
   }
   else if (*length != vp->namelen+1) {
-    *var_len = NULL;
+    if(var_len)
+      *var_len = NULL;
     return NULL;
   }
   else {
@@ -71,13 +78,16 @@ int checkmib(vp,name,length,exact,var_len,write_method,newname,max)
     else
       newname[*length-1] = name[*length-1];
     if (newname[*length-1] > max) {
-      *var_len = NULL;
+      if(var_len)
+        *var_len = NULL;
       return NULL;
     }
   }  
   bcopy((char *)newname, (char *)name, (*length) * sizeof(oid));
-  *write_method = 0;
-  *var_len = sizeof(long);   /* default */
+  if (write_method)
+    *write_method = 0;
+  if (var_len)
+    *var_len = sizeof(long);   /* default */
   return(1);
 }
 
@@ -90,6 +100,7 @@ int checkmib(vp,name,length,exact,var_len,write_method,newname,max)
 #define NL_NSWAPFS 3
 #define NL_NSWAPDEV 4
 #define NL_PHYSMEM 5
+#define NL_AVENRUN 6
 #define  KNLookup(nl_which, buf, s)   (klookup((int) nl[nl_which].n_value, buf, s))
 
 static struct nlist nl[] = {
@@ -100,6 +111,7 @@ static struct nlist nl[] = {
   { "_nswapfs"},
   { "_nswapdev"},
   { "_physmem"},
+  { "_avenrun"},
 #else
   { "total"},
   { "swdevt"},
@@ -107,6 +119,7 @@ static struct nlist nl[] = {
   { "nswapfs"},
   { "nswapdev"},
   { "physmem"},
+  { "avenrun"},
 #endif
   { 0 }
 };
@@ -451,13 +464,79 @@ unsigned char *var_wes_lockd_test(vp, name, length, exact, var_len, write_method
   return NULL;
 }
 
+unsigned char *var_wes_loadave(vp, name, length, exact, var_len, write_method)
+    register struct variable *vp;
+/* IN - pointer to variable entry that points here */
+    register oid	*name;
+/* IN/OUT - input name requested, output name found */
+    register int	*length;
+/* IN/OUT - length of input and output oid's */
+    int			exact;
+/* IN - TRUE if an exact match was requested. */
+    int			*var_len;
+/* OUT - length of variable or 0 if function returned. */
+    int			(**write_method)();
+/* OUT - pointer to function to set variable, otherwise 0 */
+{
+
+  oid newname[30];
+  int count, result,i, rtest=0;
+  register int interface;
+  struct extensible *exten;
+  long long_ret;
+  char errmsg[300];
+  double avenrun[3];
+  oid loadave[3];
+  
+  if (!checkmib(vp,name,length,exact,var_len,write_method,newname,3))
+    return(NULL);
+
+  switch (vp->magic) {
+    case MIBINDEX:
+      long_ret = newname[8];
+      return((u_char *) (&long_ret));
+    case ERRORNAME:
+      sprintf(errmsg,"Load-%d",newname[8]*5);
+      *var_len = strlen(errmsg);
+      return((u_char *) (errmsg));
+  }
+  if (KNLookup(NL_AVENRUN,(int *) &avenrun, sizeof(double)*3) == NULL)
+    return(0);
+  switch (vp->magic) {
+    case LOADAVE:
+      sprintf(errmsg,"%.2f",avenrun[newname[8]-1]);
+      *var_len = strlen(errmsg);
+      return((u_char *) (errmsg));
+    case LOADMAXVAL:
+      sprintf(errmsg,"%.2f",maxload[newname[8]-1]);
+      *var_len = strlen(errmsg);
+      return((u_char *) (errmsg));
+    case ERRORFLAG:
+      long_ret = (maxload[newname[8]-1] != 0 &&
+                  avenrun[newname[8]-1] >= maxload[newname[8]-1]) ? 1 : 0;
+      return((u_char *) (&long_ret));
+    case ERRORMSG:
+      if (maxload[newname[8]-1] != 0 &&
+          avenrun[newname[8]-1] >= maxload[newname[8]-1]) {
+        sprintf(errmsg,"%d min Load Average too high (= %.2f)",newname[8]*5,
+               avenrun[newname[8]-1]);
+      } else {
+        errmsg[0] = NULL;
+      }
+      *var_len = strlen(errmsg);
+      return((u_char *) errmsg);
+  }
+}
 
 int update_config()
 {
   int i;
-  free_config(&procwatch,&extens);
+  free_config(&procwatch,&extens,&relocs);
+  numprocs = numextens = numrelocs = 0;
   /* restore defaults */
   minimumswap = DEFAULTMINIMUMSWAP;
+  for (i=0; i<=2;i++)
+    maxload[i] = DEFMAXLOADAVE;
   numdisks = 0;
   for(i=0;i<MAXDISKS;i++) {           /* init/erase disk db */
     disks[i].device[0] = NULL;
@@ -465,9 +544,9 @@ int update_config()
     disks[i].minimumspace = -1;
   }
   /* read the config files */
-  read_config (CONFIGFILE,&procwatch,&numprocs,&extens,&numextens,&minimumswap,disks,&numdisks);
+  read_config (CONFIGFILE,&procwatch,&numprocs,&relocs,&numrelocs,&extens,&numextens,&minimumswap,disks,&numdisks,maxload);
 #ifdef CONFIGFILETWO
-  read_config (CONFIGFILETWO,&procwatch,&numprocs,&extens,&numextens,&minimumswap,disks,&numdisks);
+  read_config (CONFIGFILETWO,&procwatch,&numprocs,&relocs,&numrelocs,&extens,&numextens,&minimumswap,disks,&numdisks,maxload);
 #endif  
   signal(SIGHUP,update_config);
 }
@@ -490,6 +569,8 @@ init_wes() {
   extmp.next = NULL;
 
   minimumswap = DEFAULTMINIMUMSWAP;
+  for (i=0; i<=2;i++)
+    maxload[i] = DEFMAXLOADAVE;
   numdisks = 0;
   for(i=0;i<MAXDISKS;i++) {           /* init/erase disk db */
     disks[i].device[0] = NULL;
@@ -499,12 +580,13 @@ init_wes() {
 
   procwatch = NULL;   /* initialize to NULL */
   extens = NULL;
+  relocs = NULL;
 
   /* read config file(s) */
   /* read the config files */
-  read_config (CONFIGFILE,&procwatch,&numprocs,&extens,&numextens,&minimumswap,disks,&numdisks);
+  read_config (CONFIGFILE,&procwatch,&numprocs,&relocs,&numrelocs,&extens,&numextens,&minimumswap,disks,&numdisks,maxload);
 #ifdef CONFIGFILETWO
-  read_config (CONFIGFILETWO,&procwatch,&numprocs,&extens,&numextens,&minimumswap,disks,&numdisks);
+  read_config (CONFIGFILETWO,&procwatch,&numprocs,&relocs,&numrelocs,&extens,&numextens,&minimumswap,disks,&numdisks,maxload);
 #endif  
   
   /* set default values of system stuff */
