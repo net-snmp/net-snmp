@@ -14,7 +14,7 @@
 #endif
 #if HAVE_UNISTD_H
 #ifdef irix6
-#define _STANDALONE
+#define _STANDALONE 1
 #endif
 #include <unistd.h>
 #endif
