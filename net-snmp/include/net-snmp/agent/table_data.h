@@ -21,8 +21,9 @@ extern          "C" {
 #define TABLE_DATA_TABLE "table_data_table"
 
     typedef struct netsnmp_table_row_s {
+        netsnmp_index   oid_index;      /* table_container index format */
         netsnmp_variable_list *indexes; /* stored permanently if store_indexes = 1 */
-        oid            *index_oid;
+        oid            *index_oid;      /* backwards compatability */
         size_t          index_oid_len;
         void           *data;   /* the data to store */
 
@@ -34,8 +35,7 @@ extern          "C" {
         char           *name;   /* if !NULL, it's registered globally */
         int             flags;  /* not currently used */
         int             store_indexes;
-        netsnmp_table_row *first_row;
-        netsnmp_table_row *last_row;
+        netsnmp_container *container;
     } netsnmp_table_data;
 
     netsnmp_mib_handler *netsnmp_get_table_data_handler(netsnmp_table_data
