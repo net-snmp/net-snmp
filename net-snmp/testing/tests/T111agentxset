@@ -15,7 +15,11 @@ SKIPIFNOT USING_MIBII_SYSTEM_MIB_MODULE
 . ./Sv3config
 
 # Start the agent without initializing the system mib.
+if [ "x$SNMP_TRANSPORT_SPEC" = "xunix" ];then
 ORIG_AGENT_FLAGS="$AGENT_FLAGS -x $SNMP_TMPDIR/agentx_socket"
+else
+ORIG_AGENT_FLAGS="$AGENT_FLAGS -x tcp:${SNMP_TEST_DEST}7676"
+fi
 AGENT_FLAGS="$ORIG_AGENT_FLAGS -I -system_mib -DAgentX"
 STARTAGENT
 
