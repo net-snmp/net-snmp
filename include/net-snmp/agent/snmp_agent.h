@@ -106,7 +106,7 @@ extern          "C" {
 #define MODE_SET_COMMIT       SNMP_MSG_INTERNAL_SET_COMMIT
 #define MODE_SET_FREE         SNMP_MSG_INTERNAL_SET_FREE
 #define MODE_SET_UNDO         SNMP_MSG_INTERNAL_SET_UNDO
-#define MODE_IS_SET(x)         ((x < 128) || (x == -1))
+#define MODE_IS_SET(x)         ((x < 128) || (x == -1) || (x == SNMP_MSG_SET))
     /* #define MODE_IS_SET(x)         (!MODE_IS_GET(x)) */
 
 #define MODE_BSTEP_PRE_REQUEST   SNMP_MSG_INTERNAL_PRE_REQUEST
