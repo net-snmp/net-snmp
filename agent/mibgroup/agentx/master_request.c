@@ -46,18 +46,20 @@
 #include "var_struct.h"
 #include "mibII/sysORTable.h"
 
-#define MAX_VARS	64
+#define VARLIST_ITERATION	10
 
 struct ax_variable_list {
     struct agent_snmp_session	*asp;
     int				num_vars;
+    int				max_vars;
 #ifdef ONE_IDEA
     {
 	struct variable_list    *entry;
 	int		        index;
     }				variables[MAX_VARS];
 #else
-    struct variable_list*        variables[MAX_VARS];
+		/* Placeholder for dynamically-resized list of variables */
+    struct variable_list*       variables[1];
 #endif
 };
 
@@ -230,19 +232,38 @@ get_agentx_request(struct agent_snmp_session *asp,
     struct request_list     *req;
     struct snmp_pdu         *pdu;
     struct ax_variable_list *vlist;
+    int			    new_size;
 
     DEBUGMSGTL(("agentx/master","processing request...\n"));
 
     for (req = asp->outstanding_requests ; req != NULL ; req = req->next_request ) {
-	if ( req->message_id == transID && req->session == ax_session)
+	if ( req->message_id == transID && req->session == ax_session) {
+		/*
+		 * Check if there's room in this request for another variable.
+		 * If not, then expand it by 'VARLIST_ITERATION' variables.
+		 */
+	    vlist = (struct ax_variable_list *)req->cb_data;
+	    if ( vlist->num_vars > vlist->max_vars ) {		/* i.e. full */
+		DEBUGMSGTL(("agentx/master", "increasing ax_variable list...\n"));
+		new_size = sizeof(struct ax_variable_list) +
+		    (vlist->max_vars + VARLIST_ITERATION) * sizeof(struct variable_list);
+		vlist = (struct ax_variable_list *)realloc(vlist, new_size);
+		if ( !vlist )
+		    break; 
+		vlist->max_vars += VARLIST_ITERATION;
+		req->cb_data = (void *)vlist;
+	    }
 	    return req;
+	}
     }
 
 		/*
 		 * No existing request found, so create a new one
 		 */
     req   = (struct request_list     *)calloc( 1, sizeof(struct request_list));
-    vlist = (struct ax_variable_list *)calloc( 1, sizeof(struct ax_variable_list));
+    new_size = sizeof(struct ax_variable_list) +
+		VARLIST_ITERATION * sizeof(struct variable_list);
+    vlist = (struct ax_variable_list *)calloc( 1, new_size);
     pdu   = snmp_pdu_create( 0 );
     if ( req == NULL || pdu == NULL || vlist == NULL ) {
 	free( pdu );
