@@ -45,7 +45,7 @@ depend:
 
 nosysdepend:
 	makedepend $(CPPFLAGS) *.c
-	perl -n -i.bak -e ' if (/^# DO NOT DELETE THIS LINE/) {$$doit=1;} if ($$doit == 1) {s#/usr/include/[^\s]+##g ; print if (! /^[\w]+\.o:\s*$$/);} else {print;}' Makefile
+	perl -n -i.bak -e ' if (/^# DO NOT DELETE THIS LINE/) {$$doit=1;} if ($$doit == 1) {s#/usr/(include|lib)/[^\s]+##g ; print if (! /^[\w]+\.o:\s*$$/);} else {print;}' Makefile
 
 makefileindepend: nosysdepend
 	perl -e ' rename("Makefile.in","Makefile.in.bak"); open(F,"Makefile.in.bak"); open(G,"Makefile"); open(O,">Makefile.in"); $$_ = <F>; while(!/^# DO NOT DELETE THIS LINE/) { print O $$_; $$_ = <F>; } print O $$_; $$_ = <G>; while(!/^# DO NOT DELETE THIS LINE/) { $$_ = <G>; } while (<G>) {print O $$_;} '
@@ -54,25 +54,20 @@ makefileindepend: nosysdepend
 
 acl.o: ../config.h ../mib_module_config.h 
 acl.o: ../s/linux.h ../s/generic.h ../m/i686.h ../m/i586.h ../m/i386.h
-acl.o: /usr/lib/gcc-lib/i486-linux/2.7.2.2/include/stddef.h
 acl.o: asn1.h acl.h
 acl_parse.o: ../config.h ../mib_module_config.h 
 acl_parse.o: ../s/linux.h ../s/generic.h ../m/i686.h ../m/i586.h ../m/i386.h
-acl_parse.o: /usr/lib/gcc-lib/i486-linux/2.7.2.2/include/stddef.h
 acl_parse.o:   asn1.h
 acl_parse.o: acl.h party.h context.h snmp_impl.h snmp_api.h mib.h
 asn1.o: ../config.h ../mib_module_config.h 
 asn1.o: ../s/linux.h ../s/generic.h ../m/i686.h ../m/i586.h ../m/i386.h
-asn1.o: /usr/lib/gcc-lib/i486-linux/2.7.2.2/include/stddef.h
 asn1.o:  asn1.h snmp_impl.h 
 context.o: ../config.h ../mib_module_config.h 
 context.o: ../s/linux.h ../s/generic.h ../m/i686.h ../m/i586.h ../m/i386.h
-context.o: /usr/lib/gcc-lib/i486-linux/2.7.2.2/include/stddef.h
 context.o:  asn1.h context.h
 context_parse.o: ../config.h ../mib_module_config.h 
 context_parse.o: ../s/linux.h ../s/generic.h ../m/i686.h ../m/i586.h
 context_parse.o: ../m/i386.h  
-context_parse.o: /usr/lib/gcc-lib/i486-linux/2.7.2.2/include/stddef.h
 context_parse.o:  asn1.h context.h system.h
 context_parse.o: snmp_impl.h snmp_api.h mib.h
 md5.o: ../config.h ../mib_module_config.h 
@@ -80,22 +75,18 @@ md5.o: ../s/linux.h ../s/generic.h ../m/i686.h ../m/i586.h ../m/i386.h
 md5.o:   md5.h
 mib.o: ../config.h ../mib_module_config.h 
 mib.o: ../s/linux.h ../s/generic.h ../m/i686.h ../m/i586.h ../m/i386.h
-mib.o: /usr/lib/gcc-lib/i486-linux/2.7.2.2/include/stddef.h
 mib.o:   asn1.h snmp_api.h mib.h
 mib.o: snmp.h snmp_impl.h parse.h
 parse.o: ../config.h ../mib_module_config.h 
 parse.o: ../s/linux.h ../s/generic.h ../m/i686.h ../m/i586.h ../m/i386.h
-parse.o: /usr/lib/gcc-lib/i486-linux/2.7.2.2/include/stddef.h
 parse.o:   system.h
 parse.o: parse.h
 party.o: ../config.h ../mib_module_config.h 
 party.o: ../s/linux.h ../s/generic.h ../m/i686.h ../m/i586.h ../m/i386.h
-party.o: /usr/lib/gcc-lib/i486-linux/2.7.2.2/include/stddef.h
 party.o:  asn1.h party.h
 party_parse.o: ../config.h ../mib_module_config.h 
 party_parse.o: ../s/linux.h ../s/generic.h ../m/i686.h ../m/i586.h
 party_parse.o: ../m/i386.h  
-party_parse.o: /usr/lib/gcc-lib/i486-linux/2.7.2.2/include/stddef.h
 party_parse.o:   asn1.h
 party_parse.o: mib.h party.h system.h snmp_impl.h snmp_api.h
 snmp.o: ../config.h ../mib_module_config.h 
@@ -104,26 +95,21 @@ snmp.o:   asn1.h snmp.h
 snmp.o: snmp_impl.h mib.h
 snmp_api.o: ../config.h ../mib_module_config.h 
 snmp_api.o: ../s/linux.h ../s/generic.h ../m/i686.h ../m/i586.h ../m/i386.h
-snmp_api.o: /usr/lib/gcc-lib/i486-linux/2.7.2.2/include/stddef.h
 snmp_api.o:   asn1.h snmp.h
 snmp_api.o: snmp_impl.h snmp_api.h party.h context.h system.h
 snmp_auth.o: ../config.h ../mib_module_config.h 
 snmp_auth.o: ../s/linux.h ../s/generic.h ../m/i686.h ../m/i586.h ../m/i386.h
-snmp_auth.o: /usr/lib/gcc-lib/i486-linux/2.7.2.2/include/stddef.h
 snmp_auth.o:   asn1.h
 snmp_auth.o: snmp.h snmp_impl.h party.h context.h mib.h md5.h acl.h system.h
 snmp_auth.o: snmp_api.h
 snmp_client.o: ../config.h ../mib_module_config.h 
 snmp_client.o: ../s/linux.h ../s/generic.h ../m/i686.h ../m/i586.h
 snmp_client.o: ../m/i386.h  
-snmp_client.o: /usr/lib/gcc-lib/i486-linux/2.7.2.2/include/stddef.h
 snmp_client.o:  asn1.h snmp.h snmp_impl.h snmp_api.h
 snmp_client.o: snmp_client.h party.h context.h view.h acl.h mib.h
 system.o: ../config.h ../mib_module_config.h 
 system.o: ../s/linux.h ../s/generic.h ../m/i686.h ../m/i586.h ../m/i386.h
-system.o: /usr/lib/gcc-lib/i486-linux/2.7.2.2/include/stddef.h
-system.o: /usr/lib/gcc-lib/i486-linux/2.7.2.2/include/stdarg.h system.h
+system.o:  system.h
 view.o: ../config.h ../mib_module_config.h 
 view.o: ../s/linux.h ../s/generic.h ../m/i686.h ../m/i586.h ../m/i386.h
-view.o: /usr/lib/gcc-lib/i486-linux/2.7.2.2/include/stddef.h
 view.o:   asn1.h view.h
