@@ -19,10 +19,10 @@ ${context}_allocate_data(void)
     /*
      * allocate memory for the context
      */
-@if $m2c_data_allocate != "generated"@
+@if $m2c_data_context != "generated"@
     /** this might not be right for $m2c_data_context */
 @end@
-    ${context}_data *rtn = SNMP_MALLOC_TYPEDEF($m2c_data_context);
+    ${context}_data *rtn = SNMP_MALLOC_TYPEDEF(${context}_data);
 
     DEBUGMSGTL(("verbose:${context}_allocate_data","called\n"));
 
@@ -35,9 +35,9 @@ ${context}_allocate_data(void)
 }
 
 /*
- * ${context}_allocate_data
+ * ${context}_release_data
  *
- * Purpose: release data data.
+ * Purpose: release ${context} data.
  */
 void
 ${context}_release_data(${context}_data *data)
