@@ -311,8 +311,8 @@ snmp_parse_args(int argc,
           usage();
           exit(1);
         }
-        cp = strchr(optarg,',')+1;
-        if (cp && *cp && isdigit(*cp))
+        cp = strchr(optarg,',');
+        if (cp && *(++cp) && isdigit(*cp))
           session->engineTime = strtoul(cp, NULL, 10);
         else {
           fprintf(stderr,"Need engine time value after -Z flag.\n");
