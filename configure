@@ -6740,6 +6740,9 @@ cat > conftest.$ac_ext <<EOF
 #include "confdefs.h"
 
 
+#ifdef HAVE_SYS_STAT_H
+#include <sys/stat.h>
+#endif
 #if HAVE_SYS_STATFS_H
 #include <sys/statfs.h>
 #endif
@@ -6755,7 +6758,7 @@ testit.f_frsize $defineit;
 
 ; return 0; }
 EOF
-if { (eval echo configure:6759: \"$ac_compile\") 1>&5; (eval $ac_compile) 2>&5; }; then
+if { (eval echo configure:6762: \"$ac_compile\") 1>&5; (eval $ac_compile) 2>&5; }; then
   rm -rf conftest*
   eval "${ac_safe_all}=yes"
 else
@@ -6789,7 +6792,7 @@ ac_safe_all="ac_cv_struct_${ac_safe_struct}_has_${ac_safe_member}"
   ac_uc_define=STRUCT_`echo "${ac_safe_struct}_HAS_${ac_safe_member}" | sed 'y%abcdefghijklmnopqrstuvwxyz./-%ABCDEFGHIJKLMNOPQRSTUVWXYZ___%'`
 
 echo $ac_n "checking for nlist.n_value""... $ac_c" 1>&6
-echo "configure:6793: checking for nlist.n_value" >&5
+echo "configure:6796: checking for nlist.n_value" >&5
 if eval "test \"`echo '$''{'$ac_safe_all'+set}'`\" = set"; then
   echo $ac_n "(cached) $ac_c" 1>&6
 else
@@ -6802,7 +6805,7 @@ else
   defineit=""
 fi
 cat > conftest.$ac_ext <<EOF
-#line 6806 "configure"
+#line 6809 "configure"
 #include "confdefs.h"
 
 
@@ -6818,7 +6821,7 @@ testit.n_value $defineit;
 
 ; return 0; }
 EOF
-if { (eval echo configure:6822: \"$ac_compile\") 1>&5; (eval $ac_compile) 2>&5; }; then
+if { (eval echo configure:6825: \"$ac_compile\") 1>&5; (eval $ac_compile) 2>&5; }; then
   rm -rf conftest*
   eval "${ac_safe_all}=yes"
 else
@@ -6846,7 +6849,7 @@ fi
 
 
 echo $ac_n "checking if sysctl can read kernel information""... $ac_c" 1>&6
-echo "configure:6850: checking if sysctl can read kernel information" >&5
+echo "configure:6853: checking if sysctl can read kernel information" >&5
 if eval "test \"`echo '$''{'ac_cv_CAN_USE_SYSCTL'+set}'`\" = set"; then
   echo $ac_n "(cached) $ac_c" 1>&6
 else
@@ -6854,7 +6857,7 @@ else
     { echo "configure: error: can not run test program while cross compiling" 1>&2; exit 1; }
 else
   cat > conftest.$ac_ext <<EOF
-#line 6858 "configure"
+#line 6861 "configure"
 #include "confdefs.h"
 
 #if TIME_WITH_SYS_TIME
@@ -6892,7 +6895,7 @@ main() {
 }
 
 EOF
-if { (eval echo configure:6896: \"$ac_link\") 1>&5; (eval $ac_link) 2>&5; } && test -s conftest && (./conftest; exit) 2>/dev/null
+if { (eval echo configure:6899: \"$ac_link\") 1>&5; (eval $ac_link) 2>&5; } && test -s conftest && (./conftest; exit) 2>/dev/null
 then
   ac_cv_CAN_USE_SYSCTL=yes
 else
@@ -6917,7 +6920,7 @@ fi
 
 if test "x$ac_cv_user_prompt_LOGFILE" = "x" -o "x$ac_cv_user_prompt_SYS_LOC" = "x" -o "x$ac_cv_user_prompt_SYS_CONTACT" = "x"; then
 echo $ac_n "checking if you have run configure before""... $ac_c" 1>&6
-echo "configure:6921: checking if you have run configure before" >&5
+echo "configure:6924: checking if you have run configure before" >&5
 if eval "test \"`echo '$''{'ac_cv_have_warned'+set}'`\" = set"; then
   echo $ac_n "(cached) $ac_c" 1>&6
 else
@@ -6972,7 +6975,7 @@ Configuration Files.
 
 System Contact Information" | tail -1`
 echo $ac_n "checking $MSG_CHECK""... $ac_c" 1>&6
-echo "configure:6976: checking $MSG_CHECK" >&5
+echo "configure:6979: checking $MSG_CHECK" >&5
 if eval "test \"`echo '$''{'ac_cv_user_prompt_SYS_CONTACT'+set}'`\" = set"; then
   echo $ac_n "(cached) $ac_c" 1>&6
 else
@@ -7032,7 +7035,7 @@ available in the MIB-II tree.  This Can Also Be Over-Ridden Using The
 
 System Location" | tail -1`
 echo $ac_n "checking $MSG_CHECK""... $ac_c" 1>&6
-echo "configure:7036: checking $MSG_CHECK" >&5
+echo "configure:7039: checking $MSG_CHECK" >&5
 if eval "test \"`echo '$''{'ac_cv_user_prompt_SYS_LOC'+set}'`\" = set"; then
   echo $ac_n "(cached) $ac_c" 1>&6
 else
@@ -7098,7 +7101,7 @@ at the prompt below) the agent will use stdout and stderr instead.
 
 Location to write logfile" | tail -1`
 echo $ac_n "checking $MSG_CHECK""... $ac_c" 1>&6
-echo "configure:7102: checking $MSG_CHECK" >&5
+echo "configure:7105: checking $MSG_CHECK" >&5
 if eval "test \"`echo '$''{'ac_cv_user_prompt_LOGFILE'+set}'`\" = set"; then
   echo $ac_n "(cached) $ac_c" 1>&6
 else
