@@ -8,7 +8,7 @@ extern "C" {
 #endif
 
 #define MAX_CALLBACK_IDS    2
-#define MAX_CALLBACK_SUBIDS 4
+#define MAX_CALLBACK_SUBIDS 8
 
 /* Callback Major Types */
 #define SNMP_CALLBACK_LIBRARY     0
