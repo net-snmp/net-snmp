@@ -93,6 +93,7 @@
 
 #include "mibincl.h"
 #include "mibdefs.h"
+#include "struct.h"
 #include "util_funcs.h"
 #include "memory.h"
 

@@ -80,6 +80,7 @@
 #include <sys/queue.h>
 #endif
 #include "interfaces.h"
+#include "struct.h"
 #include "util_funcs.h"
 
 #ifdef HAVE_SYS_SYSCTL_H

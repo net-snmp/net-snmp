@@ -21,6 +21,7 @@
 #endif
 
 #include "system.h"
+#include "struct.h"
 #include "util_funcs.h"
 #include "read_config.h"
 #include "../../snmplib/system.h"

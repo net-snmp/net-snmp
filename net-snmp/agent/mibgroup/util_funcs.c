@@ -57,6 +57,7 @@
 #include <ctype.h>
 
 #include "mibincl.h"
+#include "struct.h"
 #include "util_funcs.h"
 #ifdef USING_ERRORMIB_MODULE
 #include "errormib.h"
