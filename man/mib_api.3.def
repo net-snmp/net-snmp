@@ -307,7 +307,7 @@ of 1 (or 2 for even more warnings).
 .TP 10
 MIBDIRS
 A colon separated list of directories to search for MIB modules.
-Default: LIBDIR/snmp/mibs
+Default: DATADIR/snmp/mibs
 .TP 10
 MIBFILES
 A colon separated list of files to load.
