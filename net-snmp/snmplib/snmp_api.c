@@ -2856,7 +2856,10 @@ snmp_sess_async_send(void *sessp,
 	pdu->securityLevel = session->securityLevel;
       }
       DEBUGP("Building SNMPv3 message (secName:\"%s\", secLevel:%s)...\n",
-	     pdu->securityName, usmSecLevelName[pdu->securityLevel]);
+	     ((session->securityName) ? session->securityName :
+	      ((pdu->securityName) ? pdu->securityName : 
+                (unsigned char *)"ERROR: undefined")),
+	     usmSecLevelName[pdu->securityLevel]);
       break;
 
     case SNMP_VERSION_sec:

@@ -162,7 +162,6 @@ void init_syslog(void);
 
 void update_config (int a);
 
-
 char *
 trap_description(int trap)
 {
@@ -678,9 +677,8 @@ int main(int argc, char *argv[])
     }
 
     if (!Print) Syslog = 1;
-    myaddr = get_myaddr();
-    srclen = dstlen = contextlen = MAX_OID_LEN;
-    ms_party_init(myaddr, src, &srclen, dst, &dstlen, context, &contextlen);
+    
+    register_config_handler("snmptrapd","traphandle",snmptrapd_traphandle,NULL,"script");
 
     /* Initialize the world. Create initial user */
     usm_set_reportErrorOnUnknownID(1);
@@ -689,21 +687,21 @@ int main(int argc, char *argv[])
     register_mib_handlers();/* snmplib .conf handlers */
     read_premib_configs();	/* read pre-mib-reading .conf handlers */
 
+#ifdef TESTING
+    print_config_handlers();
+#endif
+
     /* create the initial and template users */
     user = usm_create_initial_user("initial", usmHMACMD5AuthProtocol,
 				   USM_LENGTH_OID_TRANSFORM,
 				   usmDESPrivProtocol,
 				   USM_LENGTH_OID_TRANSFORM);
     userListPtr = usm_add_user(user);
-    if (userListPtr == NULL) /* user already existed */
-      usm_free_user(user);
     user = usm_create_initial_user("templateMD5", usmHMACMD5AuthProtocol,
 				   USM_LENGTH_OID_TRANSFORM,
 				   usmDESPrivProtocol,
 				   USM_LENGTH_OID_TRANSFORM);
     userListPtr = usm_add_user(user);
-    if (userListPtr == NULL) /* user already existed */
-      usm_free_user(user);
     user = usm_create_initial_user("templateSHA", usmHMACSHA1AuthProtocol,
 				   USM_LENGTH_OID_TRANSFORM,
 				   usmDESPrivProtocol,
@@ -713,14 +711,16 @@ int main(int argc, char *argv[])
     if (userListPtr == NULL) /* user already existed */
       usm_free_user(user);
 
-    register_config_handler("snmptrapd","traphandle",snmptrapd_traphandle,NULL,"script");
-    init_snmp("snmp");
-    read_configs();
+#if 0
+    init_mib();		/* initialize the mib structures */
+#endif
 
+    update_config(0);	/* read in config files and register HUP */
     init_usm_post_config();
     init_snmpv3_post_config();
 
-#ifdef USE_V2PARTY_PROTOCOL
+
+#if 0
 
     sprintf(ctmp,"%s/party.conf",SNMPSHAREPATH);
     if (read_party_database(ctmp) != 0){

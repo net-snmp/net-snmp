@@ -24,8 +24,7 @@ extern FindVarMethod var_vacm_sec2group;
 extern FindVarMethod var_vacm_access;
 extern FindVarMethod var_vacm_view;
 
-
-#define OID_SNMPVACMMIB		SNMP_OID_SNMPMODULES, 13
+#define OID_SNMPVACMMIB		SNMP_OID_SNMPMODULES, 16
 #define OID_VACMMIBOBJECTS	OID_SNMPVACMMIB, 1
 
 #define OID_VACMCONTEXTTABLE	OID_VACMMIBOBJECTS, 1
