@@ -5,6 +5,8 @@
 extern          "C" {
 #endif
 
+#include <net-snmp/library/snmp_transport.h>
+
 struct snmp_secmod_def;
 
 /*
@@ -77,7 +79,11 @@ typedef int     (Secmod2PduCallback) (netsnmp_pdu *, netsnmp_pdu *);
 typedef int     (SecmodOutMsg) (struct snmp_secmod_outgoing_params *);
 typedef int     (SecmodInMsg) (struct snmp_secmod_incoming_params *);
 typedef void    (SecmodFreeState) (void *);
-typedef void    (SecmodHandleReport) (void *sessp, netsnmp_session *, int result, netsnmp_pdu *origpud);
+typedef void    (SecmodHandleReport) (void *sessp,
+                                      netsnmp_transport *transport,
+                                      netsnmp_session *,
+                                      int result,
+                                      netsnmp_pdu *origpdu);
 
 /*
  * definition of a security module
