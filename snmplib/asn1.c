@@ -422,6 +422,8 @@ asn_dparse_string(u_char *data,
     DEBUGDUMPSETUP("dump_recv", data, bufp - data + asn_length);
 
     memmove(string, bufp, asn_length);
+    if (strlength > asn_length)
+      string[asn_length] = 0;
     *strlength = (int)asn_length;
     *datalength -= (int)asn_length + (bufp - data);
 
