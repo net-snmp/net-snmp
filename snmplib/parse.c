@@ -2993,7 +2993,7 @@ read_mib(const char *filename)
         return NULL;
     }
     Line = 1;
-    File = filename;
+    File = (char *)filename;
     DEBUGMSGTL(("parse-mibs", "Parsing file: %s...\n", filename));
     get_token( fp, token, MAXTOKEN);
     fclose(fp);
