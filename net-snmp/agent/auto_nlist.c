@@ -24,7 +24,7 @@
 struct autonlist *nlists = 0;
 static void init_nlist __P((struct nlist *));
 
-int
+unsigned long
 auto_nlist_value(string)
   char *string;
 {
@@ -79,7 +79,7 @@ auto_nlist(string, var, size)
   char *var;
   int size;
 {
-  int result;
+  unsigned long result;
   int ret;
 
   result = auto_nlist_value(string);
