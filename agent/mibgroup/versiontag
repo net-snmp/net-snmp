@@ -22,7 +22,7 @@ fi
 
 if [ $2 = "add" -o $2 = "reverse" ]; then
   $DOIT perl -p -i.bak -e 's/VersionInfo=([^"]*)"(.*)"/VersionInfo=$1"'$VERSION'"/;' $QUOTEFILES
-  $DOIT perl -p -i.bak -e 's/Version: [\.0-9a-zA-Z]+/Version: $VERSION/;' $COLONFILES
+  $DOIT perl -p -i.bak -e 's/Version: [\.0-9a-zA-Z]+/Version: '$VERSION'/;' $COLONFILES
   $DOIT perl -p -i.bak -e 's#^s/VERSIONINFO/.*#s/VERSIONINFO/'$VERSION'/g#;' $SEDFILES
   $DOIT cvs commit -m "- ($QUOTEFILES $SEDFILES): version tag ( $VERSION )" $QUOTEFILES $SEDFILES $COLONFILES
 fi
