@@ -481,6 +481,7 @@ int   syslog_handler(  netsnmp_pdu           *pdu,
             trunc = !realloc_format_trap(&rbuf, &r_len, &o_len, 1,
                                      handler->format, pdu, transport);
         } else {
+            free(rbuf);
             return NETSNMPTRAPD_HANDLER_OK;    /* A 0-length format string means don't log */
         }
 
@@ -567,6 +568,7 @@ int   print_handler(   netsnmp_pdu           *pdu,
             trunc = !realloc_format_trap(&rbuf, &r_len, &o_len, 1,
                                      handler->format, pdu, transport);
         } else {
+            free(rbuf);
             return NETSNMPTRAPD_HANDLER_OK;    /* A 0-length format string means don't log */
         }
 
@@ -604,6 +606,7 @@ int   print_handler(   netsnmp_pdu           *pdu,
         }
     }
     snmp_log(LOG_INFO, "%s%s", rbuf, (trunc?" [TRUNCATED]\n":""));
+    free(rbuf);
     return NETSNMPTRAPD_HANDLER_OK;
 }
 
@@ -808,8 +811,9 @@ int   command_handler( netsnmp_pdu           *pdu,
          */
         run_exec_command(handler->token, rbuf, NULL, 0);   /* Not interested in output */
         snmp_set_quick_print(oldquick);
-	if (pdu->command == SNMP_MSG_TRAP)
-	    snmp_free_pdu(v2_pdu);
+        if (pdu->command == SNMP_MSG_TRAP)
+            snmp_free_pdu(v2_pdu);
+        free(rbuf);
     }
     return NETSNMPTRAPD_HANDLER_OK;
 }
