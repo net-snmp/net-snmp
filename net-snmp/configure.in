@@ -99,6 +99,11 @@ AC_ARG_ENABLE(testing-code,
                                   be turned on for production use.  Ever.],
     AC_DEFINE(SNMP_TESTING_CODE))
 
+AC_ARG_ENABLE(developer,
+[  --enable-developer              Turns on super-duper-extra-compile-warnings
+                                  when using gcc.],
+    developer=yes)
+
 AC_ARG_WITH(root-access,
 [
 Configuring the agent:
@@ -224,6 +229,16 @@ AC_DEFINE_UNQUOTED(UNAMEPROG,"$UNAMEPROG")
 AC_AIX
 
 AC_C_CONST
+
+dnl super type checking
+AC_MSG_CHECKING(for developer flags)
+if test "x$developer" = "xyes" -a "x$ac_cv_prog_gcc" = "xyes"; then
+  devflags="-Wall -Wstrict-prototypes -Wwrite-strings -Wcast-qual -pedantic -Wno-unused -Wno-char-subscripts"
+  CFLAGS="$CFLAGS $devflags"
+else
+  devflags="none"
+fi
+AC_MSG_RESULT($devflags)
 
 dnl system check
 AC_CANONICAL_SYSTEM
