@@ -61,7 +61,7 @@ netsnmp_access_interface_container_arch_load(netsnmp_container* container,
         " %*" SCNuMAX " %"  SCNuMAX " %"  SCNuMAX " %*" SCNuMAX
         " %*" SCNuMAX " %"  SCNuMAX;
 #else
-    unsigned long   rec_pkt, rec_oct, rec_err, rec_drop;
+    unsigned long   rec_pkt, rec_oct, rec_err, rec_drop, rec_mcast;
     unsigned long   snd_pkt, snd_oct, snd_err, snd_drop, coll;
     const char     *scan_line_2_2 =
         "%lu %lu %lu %lu %*lu %*lu %*lu %*lu %lu %lu %lu %lu %*lu %lu";
