@@ -880,6 +880,11 @@ if test "x$ac_cv_DMEM_LOC" != "xnone"; then
   AC_DEFINE_UNQUOTED(DMEM_LOC,"$ac_cv_DMEM_LOC")
 fi
 
+dnl efence
+if test "x$use_efence" = "xtrue" -o "x$developer" = "xyes"; then
+    AC_CHECK_LIB(efence, EF_Exit)
+fi
+
 dnl Checks for libraries.
 dnl AC_CHECK_LIB(des, main)
 AC_CHECK_LIB(elf, nlist)
@@ -935,11 +940,6 @@ dnl Check for nlist in mld (irix)
 AC_CHECK_LIB(mld, nlist)
 dnl Check for security related functions
 AC_CHECK_LIB(crypto, EVP_md5)
-
-dnl efence
-if test "x$use_efence" = "xtrue" -o "x$developer" = "xyes"; then
-    AC_CHECK_LIB(efence, EF_Exit)
-fi
 
 dnl Checks for header files.
 AC_HEADER_STDC
