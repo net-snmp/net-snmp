@@ -948,8 +948,9 @@ char *read_config_read_octet_string(char *readfrom, u_char **str, size_t *len) {
       if (*len > 0 && ((cptr = (u_char *) malloc(*len + 1)) == NULL))
         return NULL;
       *str = cptr;
-      if (cptr)
-        memcpy(cptr, buf, (*len+1));
+      if (cptr) {
+        memcpy(cptr, buf, *len+1);
+      }
     } else {
       readfrom = copy_word(readfrom, (char *)*str);
     }
@@ -1020,6 +1021,7 @@ char *read_config_read_data(int type, char *readfrom, void *dataptr, size_t *len
   int *intp;
   char **charpp;
   oid  **oidpp;
+  unsigned int *uintp;
 
   if (dataptr && readfrom)
   switch(type) {
@@ -1029,7 +1031,14 @@ char *read_config_read_data(int type, char *readfrom, void *dataptr, size_t *len
       readfrom = skip_token(readfrom);
       return readfrom;
       
+    case ASN_UNSIGNED:
+      uintp = (int *) dataptr;
+      *uintp = strtoul(readfrom, NULL, 0);
+      readfrom = skip_token(readfrom);
+      return readfrom;
+
     case ASN_OCTET_STR:
+    case ASN_BIT_STR:
       charpp = (char **) dataptr;
       return read_config_read_octet_string(readfrom, (u_char **) charpp, len);
 
@@ -1054,6 +1063,7 @@ char *read_config_read_data(int type, char *readfrom, void *dataptr, size_t *len
 char *read_config_store_data(int type, char *storeto, void *dataptr, size_t *len) {
   int *intp;
   u_char **charpp;
+  unsigned int *uintp;
   oid  **oidpp;
 
   if (dataptr && storeto)
@@ -1062,8 +1072,14 @@ char *read_config_store_data(int type, char *storeto, void *dataptr, size_t *len
       intp = (int *) dataptr;
       sprintf(storeto," %d", *intp);
       return (storeto + strlen(storeto));
+
+    case ASN_UNSIGNED:
+      uintp = (int *) dataptr;
+      sprintf(storeto," %u", *uintp);
+      return (storeto + strlen(storeto));
       
     case ASN_OCTET_STR:
+    case ASN_BIT_STR:
       *storeto++ = ' ';
       charpp = (u_char **) dataptr;
       return read_config_save_octet_string(storeto, *charpp, *len);
