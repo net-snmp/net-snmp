@@ -79,6 +79,12 @@ oid netsnmp_UDPIPv6Domain[] = { TRANSPORT_DOMAIN_UDP_IPV6 };
 static netsnmp_tdomain udp6Domain;
 
 /*
+ * from snmpUDPDomain. not static, but not public, either.
+ * (ie don't put it in a public header.)
+ */
+extern void _netsnmp_udp_sockopt_set(int fd, int server);
+
+/*
  * Return a string representing the address in data, or else the "far end"
  * address if data is NULL.  
  */
@@ -220,7 +226,7 @@ netsnmp_transport *
 netsnmp_udp6_transport(struct sockaddr_in6 *addr, int local)
 {
     netsnmp_transport *t = NULL;
-    int             rc = 0, udpbuf = (1 << 17);
+    int             rc = 0;
     char           *string = NULL;
 
     if (addr == NULL || addr->sin6_family != AF_INET6) {
@@ -249,38 +255,8 @@ netsnmp_udp6_transport(struct sockaddr_in6 *addr, int local)
         netsnmp_transport_free(t);
         return NULL;
     }
-#ifdef  SO_BSDCOMPAT
-    /*
-     * Patch for Linux.  Without this, UDP packets that fail get an ICMP
-     * response.  Linux turns the failed ICMP response into an error message
-     * and return value, unlike all other OS's.  
-     */
-    {
-        int             one = 1;
-        setsockopt(t->sock, SOL_SOCKET, SO_BSDCOMPAT, &one, sizeof(one));
-    }
-#endif                          /*SO_BSDCOMPAT */
 
-    /*
-     * Try to set the send and receive buffers to a reasonably large value, so
-     * that we can send and receive big PDUs (defaults to 8192 bytes (!) on
-     * Solaris, for instance).  Don't worry too much about errors -- just
-     * plough on regardless.  
-     */
-
-#ifdef  SO_SNDBUF
-    if (setsockopt(t->sock, SOL_SOCKET, SO_SNDBUF, (void *)&udpbuf, sizeof(int)) != 0){
-        DEBUGMSGTL(("netsnmp_udp6", "couldn't set SO_SNDBUF to %d bytes: %s\n",
-		    udpbuf, strerror(errno)));
-    }
-#endif                          /*SO_SNDBUF */
-
-#ifdef  SO_RCVBUF
-    if (setsockopt(t->sock, SOL_SOCKET, SO_RCVBUF, (void *)&udpbuf, sizeof(int)) != 0){
-        DEBUGMSGTL(("netsnmp_udp6", "couldn't set SO_RCVBUF to %d bytes: %s\n",
-		    udpbuf, strerror(errno)));
-    }
-#endif                          /*SO_RCVBUF */
+    _netsnmp_udp_sockopt_set(t->sock, local);
 
     if (local) {
         /*
