@@ -5220,6 +5220,7 @@ snmp_varlist_add_variable(struct variable_list **varlist,
       case ASN_OPAQUE_DOUBLE:
         vars->val_len = sizeof(double);
         memmove(vars->val.doubleVal, value, vars->val_len);
+	break;
 
 #endif /* OPAQUE_SPECIAL_TYPES */
       
