@@ -1,4 +1,4 @@
-# SNMP.pm -- Perl 5 interface to the UCD SNMP toolkit
+# SNMP.pm -- Perl 5 interface to the net-snmp toolkit
 #
 # written by G. S. Marzot (gmarzot@nortelnetworks.com)
 #
@@ -1903,8 +1903,8 @@ Sometimes compiling the UCD SNMP library with
 'position-independent-code' enabled is required (HPUX specifically).
 
 If you cannot resolve the problem you can post to
-comp.lang.perl.modules or email me at gmarzot@nortelnetworks.com
-and/or ucd-snmp-coders@ucd-snmp.ucdavis.edu.
+comp.lang.perl.modules or
+net-snmp-users@net-snmp-users@lists.sourceforge.net
 
 please give sufficient information to analyze the problem (OS type,
 versions for OS/Perl/UCD/compiler, complete error output, etc.)
@@ -1914,7 +1914,8 @@ versions for OS/Perl/UCD/compiler, complete error output, etc.)
 Many thanks to all those who supplied patches, suggestions and
 feedback.
 
- Wes Hardaker and the ucd-coders
+ Joe Marzot (the original author)
+ Wes Hardaker and the net-snmp-coders
  Dave Perkins
  Marcel Wiget
  David Blackburn
@@ -1938,7 +1939,7 @@ the fact that I have more time to work on it than in the past.
 
 =head1 AUTHOR
 
-bugs, comments, questions to gmarzot@nortelnetworks.com
+bugs, comments, questions to net-snmp-users@lists.sourceforge.net
 
 =head1 Copyright
 
@@ -1946,4 +1947,8 @@ bugs, comments, questions to gmarzot@nortelnetworks.com
      This program is free software; you can redistribute it and/or
      modify it under the same terms as Perl itself.
 
+     Copyright (c) 2001-2002 Networks Associates Technology, Inc.  All
+     Rights Reserved.  This program is free software; you can
+     redistribute it and/or modify it under the same terms as Perl
+     itself.
 =cut
