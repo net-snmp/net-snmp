@@ -89,7 +89,7 @@ agent_read_config.o: ./../snmplib/snmpusm.h mibgroup/struct.h
 agent_read_config.o: ./../snmplib/read_config.h agent_read_config.h
 agent_read_config.o: ./mibgroup/mib_module_includes.h mibgroup/mibII.h
 agent_read_config.o: mibgroup/ucd_snmp.h mibgroup/snmpv3mibs.h
-agent_read_config.o: mibgroup/host.h mibgroup/target.h mibgroup/agentxx.h
+agent_read_config.o: mibgroup/host.h mibgroup/target.h
 agent_read_config.o: mibgroup/mibII/system_mib.h mibgroup/mibII/sysORTable.h
 agent_read_config.o: mibgroup/mibII/at.h mibgroup/mibII/interfaces.h
 agent_read_config.o: mibgroup/mibII/snmp_mib.h mibgroup/mibII/tcp.h
@@ -135,7 +135,7 @@ agent_registry.o:  ./../snmplib/read_config.h
 agent_registry.o: ./../snmplib/tools.h m2m.h snmp_vars_m2m.h snmpd.h
 agent_registry.o: mibgroup/struct.h mibgroup/mib_module_includes.h
 agent_registry.o: mibgroup/mibII.h mibgroup/ucd_snmp.h mibgroup/snmpv3mibs.h
-agent_registry.o: mibgroup/host.h mibgroup/target.h mibgroup/agentxx.h
+agent_registry.o: mibgroup/host.h mibgroup/target.h
 agent_registry.o: mibgroup/mibII/system_mib.h mibgroup/mibII/sysORTable.h
 agent_registry.o: mibgroup/mibII/at.h mibgroup/mibII/interfaces.h
 agent_registry.o: mibgroup/mibII/snmp_mib.h mibgroup/mibII/tcp.h
@@ -194,7 +194,7 @@ snmp_vars.o: ./../snmplib/snmpv3.h ./../snmplib/snmpusm.h m2m.h
 snmp_vars.o: snmp_vars_m2m.h ../snmplib/system.h kernel.h snmp_vars.h
 snmp_vars.o: mibgroup/struct.h mibgroup/mib_module_includes.h
 snmp_vars.o: mibgroup/mibII.h mibgroup/ucd_snmp.h mibgroup/snmpv3mibs.h
-snmp_vars.o: mibgroup/host.h mibgroup/target.h mibgroup/agentxx.h
+snmp_vars.o: mibgroup/host.h mibgroup/target.h
 snmp_vars.o: mibgroup/mibII/system_mib.h mibgroup/mibII/sysORTable.h
 snmp_vars.o: mibgroup/mibII/at.h mibgroup/mibII/interfaces.h
 snmp_vars.o: mibgroup/mibII/snmp_mib.h mibgroup/mibII/tcp.h
@@ -240,7 +240,7 @@ snmpd.o: ../snmplib/snmp_logging.h
 snmpd.o:  ../version.h
 snmpd.o: ./mibgroup/mib_module_includes.h mibgroup/mibII.h
 snmpd.o: mibgroup/ucd_snmp.h mibgroup/snmpv3mibs.h mibgroup/host.h
-snmpd.o: mibgroup/target.h mibgroup/agentxx.h mibgroup/mibII/system_mib.h
+snmpd.o: mibgroup/target.h mibgroup/mibII/system_mib.h
 snmpd.o: mibgroup/mibII/sysORTable.h mibgroup/mibII/at.h
 snmpd.o: mibgroup/mibII/interfaces.h mibgroup/mibII/snmp_mib.h
 snmpd.o: mibgroup/mibII/tcp.h mibgroup/mibII/icmp.h mibgroup/mibII/ip.h

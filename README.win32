@@ -185,11 +185,11 @@ rm -f nohup.out
 nohup make install prefix=`pwd`/usr/local exec_prefix=`pwd`/usr/local
 #
 # check for errors, but not in system headers
-egrep "Error|warning" nohup.out > allerrs
-egrep -v "/usr/include" allerrs > nerrs
+egrep "Error|warning|No rule|exists" nohup.out > allerrs
+egrep -v "^/usr" allerrs > nerrs
 #
 # show any errors. if user sees prompt, the build/install didn't find errors.
-egrep "Error" nerrs
+egrep -v "warn" nerrs
 #
 # do optional verification of installation.
 # check recent install adds

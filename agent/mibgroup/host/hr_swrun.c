@@ -16,6 +16,9 @@
 #include "host_res.h"
 #include "hr_swrun.h"
 #include "auto_nlist.h"
+#if solaris2
+#include "kernel_sunos5.h"
+#endif
 
 #include <sys/param.h>
 #include <ctype.h>
