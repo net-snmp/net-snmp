@@ -139,6 +139,9 @@
 /* If you don't have root access don't exit upon kmem errors */
 #undef NO_ROOT_ACCESS
 
+/* If we don't want to use kmem. */
+#undef NO_KMEM_USAGE
+
 /* If you don't want the agent to report on variables it doesn't have data for */
 #undef NO_DUMMY_VALUES
 
@@ -594,7 +597,7 @@
 #include SYSTEM_INCLUDE_FILE
 #include MACHINE_INCLUDE_FILE
 
-#if defined(HAVE_NLIST) && defined(STRUCT_NLIST_HAS_N_VALUE) && !defined(DONT_USE_NLIST)
+#if defined(HAVE_NLIST) && defined(STRUCT_NLIST_HAS_N_VALUE) && !defined(NO_KMEM_USAGE)
 #define CAN_USE_NLIST
 #endif
 

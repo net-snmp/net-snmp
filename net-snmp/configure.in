@@ -190,6 +190,13 @@ Configuring the agent:
                                   run it.  The information it returns in the
                                   mib-II tree may not be correct, however.])
 
+AC_ARG_WITH(kmem-usage,
+[
+Configuring the agent:
+  --without-kmem-usage            Do not include any code related to the use
+                                  of kmem. This option can only be used with
+                                  the option --enable-mini-agent.])
+
 AC_ARG_WITH(dummy-values,
 [  --with-dummy-values             Provide 'placeholder' dummy values where
                                   the necessary information is not available.
@@ -450,6 +457,11 @@ AC_SUBST(installucdlibs)
 dnl Only define if specifically chosen as --without (i.e., default to true). 
 if test "x$with_root_access" = "xno"; then
   AC_DEFINE(NO_ROOT_ACCESS)
+fi
+
+dnl Only define if specifically chosen as --without (i.e., default to true).
+if test "x$with_kmem_usage" = "xno"; then
+  AC_DEFINE(NO_KMEM_USAGE)
 fi
 
 dnl Define unless specifically suppressed (i.e., option defaults to false). 
