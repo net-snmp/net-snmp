@@ -7720,69 +7720,6 @@ EOF
 fi
 
 
-if test -d /var; then
-  defaultstore="/var/snmp/snmpd.persistent.conf"
-else
-  defaultstore="/etc/snmp/snmpd.persistent.conf"
-fi
-  
-
-MSG_CHECK=`echo "
-
-*** snmpd persistent storage location:
-
-	Enter the location for the snmpd agent to store persistent
-data in the form of a configuration file.
-
-Location to write persistent information" | tail -1`
-echo $ac_n "checking $MSG_CHECK""... $ac_c" 1>&6
-echo "configure:7740: checking $MSG_CHECK" >&5
-if eval "test \"`echo '$''{'ac_cv_user_prompt_PERSISTENTFILE'+set}'`\" = set"; then
-  echo $ac_n "(cached) $ac_c" 1>&6
-else
-  echo ""
-
-if test "x$defaults" = "xno"; then
-echo $ac_n "
-
-*** snmpd persistent storage location:
-
-	Enter the location for the snmpd agent to store persistent
-data in the form of a configuration file.
-
-Location to write persistent information ($defaultstore): $ac_c"
-read tmpinput
-if test "$tmpinput" = "" -a "$defaultstore" != ""; then
-  tmpinput="$defaultstore"
-fi
-eval PERSISTENTFILE=\"$tmpinput\"
-else
-tmpinput="$defaultstore"
-eval PERSISTENTFILE=\"$tmpinput\"
-fi
-
-
-eval ac_cv_user_prompt_PERSISTENTFILE=\$PERSISTENTFILE
-echo $ac_n "setting $MSG_CHECK to...  $ac_c"
-
-fi
-
-echo "$ac_t""$ac_cv_user_prompt_PERSISTENTFILE" 1>&6
-if test "$ac_cv_user_prompt_PERSISTENTFILE" != "none"; then
-  if test "1" != ""; then
-    cat >> confdefs.h <<EOF
-#define PERSISTENTFILE "$ac_cv_user_prompt_PERSISTENTFILE"
-EOF
-
-  else
-    cat >> confdefs.h <<EOF
-#define PERSISTENTFILE $ac_cv_user_prompt_PERSISTENTFILE
-EOF
-
-  fi
-fi
-
-
 trap '' 1 2 15
 cat > confcache <<\EOF
 # This file is a shell script that caches the results of configure
