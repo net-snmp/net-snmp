@@ -1307,7 +1307,9 @@ Interface_Scan_Init (void)
 	  switch (ifrq.ifr_hwaddr.sa_family) {
 	  case ARPHRD_TUNNEL:
 	  case ARPHRD_TUNNEL6:
+#ifdef ARPHRD_IPGRE
 	  case ARPHRD_IPGRE:
+#endif
 	  case ARPHRD_SIT:
 	      nnew->if_type = 131; break; /* tunnel */
 	  case ARPHRD_SLIP:
