@@ -21,6 +21,8 @@
 # undef NETSNMP_TMP_NDEBUG
 #endif
 
+#include <search.h>
+
 #include <net-snmp/net-snmp-includes.h>
 #include <net-snmp/agent/net-snmp-agent-includes.h>
 
@@ -113,6 +115,12 @@ typedef struct table_array_data_s {
  *  out the #define <PREFIX>_SET_HANDLING (where <PREFIX> is your
  *  table name) in the header file.
  *
+ *  SET processing modifies the row in-place. The duplicate_row
+ *  callback will be called to save a copy of the original row.
+ *  In the event of a failure before the commite phase, the
+ *  row_copy callback will be called to restore the original row
+ *  from the copy.
+ *
  *  Code will be generated to handle row creation. This code may be
  *  disabled by commenting out the #define <PREFIX>_ROW_CREATION
  *  in the header file.
@@ -161,6 +169,19 @@ netsnmp_register_table_array(netsnmp_handler_registration *reginfo,
 {
     table_array_data *tad = SNMP_MALLOC_TYPEDEF(table_array_data);
     tad->tblreg_info = tabreg;  /* we need it too, but it really is not ours */
+
+    /*
+     * check for required callbacks
+     */
+    if ((cb->can_set &&
+         ((NULL==cb->duplicate_row) || (NULL==cb->delete_row) ||
+         (NULL==cb->row_copy)) ) ||
+        (cb->tree && (NULL==cb->row_compare))) {
+        snmp_log(LOG_ERR, "table_array registration with incomplete "
+                 "callback structure.\n");
+        return SNMPERR_GENERR;
+    }
+    
     tad->array = netsnmp_initialize_oid_array(sizeof(void *));
     /*
      * netsnmp_mutex_init(&tad->lock); 
@@ -287,15 +308,13 @@ netsnmp_table_array_check_row_status(netsnmp_table_array_callbacks *cb,
                                      netsnmp_array_group *ag,
                                      int *rs_new, int *rs_old)
 {
+    /*
+     * xxx-rks: revisit row delete scenario
+     */
     if (ctx_new) {
         /*
          * either a new row, or change to old row
          */
-        int             row_ready = 1;
-                           /** assume true */
-        if (cb->can_activate)
-            row_ready = cb->can_activate(ctx_old, ctx_new, ag);
-
         /*
          * is it set to active?
          */
@@ -303,18 +322,22 @@ netsnmp_table_array_check_row_status(netsnmp_table_array_callbacks *cb,
             /*
              * is it ready to be active?
              */
-            if (row_ready)
+            if ((NULL==cb->can_activate) ||
+                cb->can_activate(ctx_old, ctx_new, ag))
                 *rs_new = RS_ACTIVE;
             else
                 return SNMP_ERR_INCONSISTENTVALUE;
         } else {
+            /*
+             * not going active
+             */
             if (ctx_old) {
                 /*
                  * change
                  */
                 if (RS_IS_ACTIVE(*rs_old)) {
                     /*
-                     * check preqs for deactivation
+                     * check pre-reqs for deactivation
                      */
                     if (cb->can_deactivate &&
                         !cb->can_deactivate(ctx_old, ctx_new, ag)) {
@@ -327,7 +350,13 @@ netsnmp_table_array_check_row_status(netsnmp_table_array_callbacks *cb,
                  */
             }
 
-            *rs_new = row_ready ? RS_NOTINSERVICE : RS_NOTREADY;
+            if (*rs_new != RS_DESTROY) {
+                if ((NULL==cb->can_activate) ||
+                    cb->can_activate(ctx_old, ctx_new, ag))
+                    *rs_new = RS_NOTINSERVICE;
+                else
+                    *rs_new = RS_NOTREADY;
+            }
         }
     } else {
         /*
@@ -494,17 +523,17 @@ process_get_requests(netsnmp_handler_registration *reginfo,
     for (current = requests; current; current = current->next) {
 
         var = current->requestvb;
-        DEBUGMSGTL(("helper:table_array:get",
+        DEBUGMSGTL(("table_array:get",
                     "  process_get_request oid:"));
-        DEBUGMSGOID(("helper:table_array:get", var->name,
+        DEBUGMSGOID(("table_array:get", var->name,
                      var->name_length));
-        DEBUGMSG(("helper:table_array:get", "\n"));
+        DEBUGMSG(("table_array:get", "\n"));
 
         /*
          * skip anything that doesn't need processing.
          */
         if (current->processed != 0) {
-            DEBUGMSGTL(("helper:table_array:get", "already processed\n"));
+            DEBUGMSGTL(("table_array:get", "already processed\n"));
             continue;
         }
 
@@ -530,7 +559,7 @@ process_get_requests(netsnmp_handler_registration *reginfo,
                  * xxx-rks: how do we skip this entry for the next handler,
                  * but still allow it a chance to hit another handler?
                  */
-                DEBUGMSGTL(("helper:table_array:get", "no row found\n"));
+                DEBUGMSGTL(("table_array:get", "no row found\n"));
                 continue;
             }
 
@@ -552,7 +581,7 @@ process_get_requests(netsnmp_handler_registration *reginfo,
 
             row = netsnmp_get_oid_data(tad->array, &index, 1);
             if (!row) {
-                DEBUGMSGTL(("helper:table_array:get", "no row found\n"));
+                DEBUGMSGTL(("table_array:get", "no row found\n"));
                 netsnmp_set_request_error(agtreq_info, current,
                                           SNMP_ERR_NOSUCHNAME);
                 continue;
@@ -597,16 +626,16 @@ group_requests(netsnmp_agent_request_info *agtreq_info,
          * don't log OID, helper:table already did it 
          */
 #if 0
-        DEBUGMSGTL(("helper:table_array:group", "  oid:"));
-        DEBUGMSGOID(("helper:table_array:group", var->name,
+        DEBUGMSGTL(("table_array:group", "  oid:"));
+        DEBUGMSGOID(("table_array:group", var->name,
                      var->name_length));
-        DEBUGMSG(("helper:table_array:group", "\n"));
+        DEBUGMSG(("table_array:group", "\n"));
 #endif
         /*
          * skip anything that doesn't need processing.
          */
         if (current->processed != 0) {
-            DEBUGMSGTL(("helper:table_array:group",
+            DEBUGMSGTL(("table_array:group",
                         "already processed\n"));
             continue;
         }
@@ -630,11 +659,11 @@ group_requests(netsnmp_agent_request_info *agtreq_info,
         index.idx_len = tblreq_info->index_oid_len;
         tmp = netsnmp_get_oid_data(netsnmp_array_group_tbl, &index, 1);
         if (tmp) {
-            DEBUGMSGTL(("helper:table_array:group",
+            DEBUGMSGTL(("table_array:group",
                         "    existing group:"));
-            DEBUGMSGOID(("helper:table_array:group", index.idx,
+            DEBUGMSGOID(("table_array:group", index.idx,
                          index.idx_len));
-            DEBUGMSG(("helper:table_array:group", "\n"));
+            DEBUGMSG(("table_array:group", "\n"));
             g = (netsnmp_array_group *) tmp;
             i = SNMP_MALLOC_TYPEDEF(netsnmp_array_group_item);
             i->ri = current;
@@ -644,10 +673,10 @@ group_requests(netsnmp_agent_request_info *agtreq_info,
             continue;
         }
 
-        DEBUGMSGTL(("helper:table_array:group", "    new group"));
-        DEBUGMSGOID(("helper:table_array:group", index.idx,
+        DEBUGMSGTL(("table_array:group", "    new group"));
+        DEBUGMSGOID(("table_array:group", index.idx,
                      index.idx_len));
-        DEBUGMSG(("helper:table_array:group", "\n"));
+        DEBUGMSG(("table_array:group", "\n"));
         g = SNMP_MALLOC_TYPEDEF(netsnmp_array_group);
         i = SNMP_MALLOC_TYPEDEF(netsnmp_array_group_item);
         g->list = i;
@@ -656,10 +685,11 @@ group_requests(netsnmp_agent_request_info *agtreq_info,
         i->tri = tblreq_info;
 
         /*
-         * search for row
+         * search for row. all changes are made to the original row,
+         * later, we'll make a copy in old_row before we start processing.
          */
-        row = g->old_row = netsnmp_get_oid_data(tad->array, &index, 1);
-        if (!g->old_row) {
+        row = g->new_row = netsnmp_get_oid_data(tad->array, &index, 1);
+        if (!g->new_row) {
             if (!tad->cb->create_row) {
                 netsnmp_set_request_error(agtreq_info, current,
                                           SNMP_ERR_NOSUCHNAME);
@@ -667,8 +697,8 @@ group_requests(netsnmp_agent_request_info *agtreq_info,
                 free(i);
                 continue;
             }
-
-            row = g->new_row = tad->cb->create_row(&index);
+            /** use old_row temporarily */
+            row = g->old_row = tad->cb->create_row(&index);
             if (!row) {
                 netsnmp_set_request_error(agtreq_info, current,
                                           SNMP_ERR_GENERR);
@@ -696,22 +726,29 @@ process_set_group(netsnmp_oid_array_header *o, void *c)
     switch (context->agtreq_info->mode) {
 
     case MODE_SET_RESERVE1:/** -> SET_RESERVE2 || SET_FREE */
-        if (context->tad->cb->set_reserve1)
-            context->tad->cb->set_reserve1(ag);
 
         /*
-         * create storage for new row
+         * if no row, copy new row from old_row
          */
-        if (!ag->new_row && context->tad->cb->duplicate_row &&
-            ag->status == SNMP_ERR_NOERROR) {
-            ag->new_row = context->tad->cb->duplicate_row(ag->old_row);
-            if (!ag->new_row) {
+        if (!ag->new_row) {
+            ag->new_row = ag->old_row;
+            ag->old_row = NULL;
+        }
+        else {
+            /*
+             * save a copy of row in old_row (undo info)
+             */
+            ag->old_row = context->tad->cb->duplicate_row(ag->new_row);
+            if (!ag->old_row) {
                 netsnmp_set_mode_request_error(MODE_SET_BEGIN,
                                                ag->list->ri,
                                                SNMP_ERR_RESOURCEUNAVAILABLE);
                 return;
             }
         }
+        
+        if (context->tad->cb->set_reserve1)
+            context->tad->cb->set_reserve1(ag);
         break;
 
     case MODE_SET_RESERVE2:/** -> SET_ACTION || SET_FREE */
@@ -720,16 +757,26 @@ process_set_group(netsnmp_oid_array_header *o, void *c)
         break;
 
     case MODE_SET_ACTION:/** -> SET_COMMIT || SET_UNDO */
+        /*
+         * if we have and old_row, this row existed before.
+         * if we have no old_row, this is a new row.
+         * if table has secondary index, update it
+         */
         if (ag->old_row) {
-            /** remove or replace */
-            if (ag->new_row) {
-                netsnmp_replace_oid_data(ag->table, ag->new_row);
-            } else {
+            /** if no row, it has been deleted */
+            if (!ag->new_row) {
+                /** remove deleted row */
                 netsnmp_remove_oid_data(ag->table, ag->old_row, NULL);
+                if (context->tad->cb->tree)
+                    tdelete(ag->old_row,context->tad->cb->tree,
+                            context->tad->cb->row_compare);
             }
         } else {
             /** insert new row */
             netsnmp_add_oid_data(ag->table, ag->new_row);
+            if (context->tad->cb->tree)
+                tsearch(ag->new_row,context->tad->cb->tree,
+                        context->tad->cb->row_compare);
         }
 
         netsnmp_add_oid_data(context->tad->changing, ag->new_row);
@@ -741,43 +788,86 @@ process_set_group(netsnmp_oid_array_header *o, void *c)
         if (context->tad->cb->set_commit)
             context->tad->cb->set_commit(ag);
 
-        /** old row inserted in action, so delete old one */
-        if (ag->old_row && context->tad->cb->delete_row) {
+        /** no more use for old_row, so free it */
+        if (ag->old_row) {
             context->tad->cb->delete_row(ag->old_row);
             ag->old_row = NULL;
         }
         netsnmp_remove_oid_data(context->tad->changing, ag->new_row, NULL);
+
+
+#if 0
+        /* XXX-rks: finish row cooperative notifications
+         * if the table has requested it, send cooperative notifications
+         * for row operations.
+         */
+        if (context->tad->notifications) {
+            if (ag->old_row) {
+                if (!ag->new_row)
+                    netsnmp_monitor_notify(EVENT_ROW_DEL);
+                else
+                    netsnmp_monitor_notify(EVENT_ROW_MOD);
+            }
+            else
+                netsnmp_monitor_notify(EVENT_ROW_ADD);
+        }
+#endif
         break;
 
     case MODE_SET_FREE:/** FINAL CHANCE ON FAILURE */
         if (context->tad->cb->set_free)
             context->tad->cb->set_free(ag);
 
-        if (ag->old_row && context->tad->cb->delete_row) {
-            context->tad->cb->delete_row(ag->new_row);
-            ag->new_row = NULL;
+        /** no more use for old_row, so free it */
+        if (ag->old_row) {
+            context->tad->cb->delete_row(ag->old_row);
+            ag->old_row = NULL;
         }
         break;
 
     case MODE_SET_UNDO:/** FINAL CHANCE ON FAILURE */
-        if (ag->new_row) {
-            /** remove or replace */
-            if (ag->old_row) {
-                netsnmp_replace_oid_data(ag->table, ag->old_row);
-            } else {
-                netsnmp_remove_oid_data(ag->table, ag->new_row, NULL);
+        if (ag->old_row) {
+            /*
+             * if we have old_row, this row existed before.
+             */
+            if (!ag->new_row) {
+                /*
+                 * old_row but no new_row means a deleted row.
+                 * insert old_row
+                 */
+                netsnmp_add_oid_data(ag->table, ag->old_row);
+                if (context->tad->cb->tree)
+                    tsearch(ag->old_row,context->tad->cb->tree,
+                            context->tad->cb->row_compare);
             }
         } else {
-            /** there better be an old row! */
-            assert(ag->old_row != NULL);
-            /** insert old row */
-            netsnmp_add_oid_data(ag->table, ag->old_row);
+            /*
+             * if we have no old_row, this was a new row.
+             */
+            assert(ag->new_row != NULL);
+            netsnmp_remove_oid_data(ag->table, ag->new_row, NULL);
+            if (context->tad->cb->tree)
+                tdelete(ag->new_row,context->tad->cb->tree,
+                        context->tad->cb->row_compare);
         }
+        netsnmp_remove_oid_data(context->tad->changing, ag->new_row, NULL);
+
         /** status already set - don't change it now */
         if (context->tad->cb->set_undo)
             context->tad->cb->set_undo(ag);
 
-        if (ag->new_row && context->tad->cb->delete_row) {
+        /** no more use for old_row, so free it */
+        if (ag->old_row) {
+            if (ag->new_row) {
+                /*
+                 * copy old_row to new_row (restore values)
+                 */
+                context->tad->cb->row_copy(ag->new_row, ag->old_row);
+            }
+            context->tad->cb->delete_row(ag->old_row);
+            ag->old_row = NULL;
+        }
+        else {
             context->tad->cb->delete_row(ag->new_row);
             ag->new_row = NULL;
         }
@@ -809,7 +899,7 @@ process_set_requests(netsnmp_agent_request_info *agtreq_info,
         netsnmp_array_group_tbl =
             netsnmp_initialize_oid_array(sizeof(void *));
 
-        DEBUGMSGTL(("helper:table_array", "Grouping requests by oid\n"));
+        DEBUGMSGTL(("table_array", "Grouping requests by oid\n"));
 
         tmp = netsnmp_create_data_list(handler_name,
                                        netsnmp_array_group_tbl,
@@ -861,10 +951,10 @@ netsnmp_table_array_helper_handler(netsnmp_mib_handler *handler,
     table_array_data *tad = (table_array_data *) handler->myvoid;
 
     if (agtreq_info->mode < 0 || agtreq_info->mode > 5) {
-        DEBUGMSGTL(("helper:table_array", "Mode %d, Got request:\n",
+        DEBUGMSGTL(("table_array", "Mode %d, Got request:\n",
                     agtreq_info->mode));
     } else {
-        DEBUGMSGTL(("helper:table_array", "Mode %s, Got request:\n",
+        DEBUGMSGTL(("table_array", "Mode %s, Got request:\n",
                     mode_name[agtreq_info->mode]));
     }
 
