@@ -131,6 +131,8 @@ CONFIGURATION
 
 MISC
 
+  snmpd now detaches from the shell unless -f is specified (don't fork)
+
   the "local" directory has some scripts I use a lot.  
     -- trapnotif -- called from OV upon detection of an error
     -- snmpcheck -- pre-pre-alpha of a perl5.001/Tkb4 script to fix problems
