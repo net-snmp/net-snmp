@@ -748,7 +748,7 @@ sprint_bitstring(char *buf,
 	*buf++ = '"';
 	*buf = '\0';
     } else {
-	sprintf(buf, "BIT_STRING: ");
+	sprintf(buf, "BITS: ");
 	buf += strlen(buf);
     }
     sprint_hexstring(buf, var->val.bitstring, var->val_len);
