@@ -93,9 +93,9 @@ extern "C" {
     typedef struct netsnmp_container_s {
        
        /*
-        * pointer for container
+        * pointer for container implementation
         */
-       void *         private;
+       void *         container_data;
 
        /*
         * returns the number of items in a container
