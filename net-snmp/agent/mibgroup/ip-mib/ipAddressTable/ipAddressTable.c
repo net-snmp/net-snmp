@@ -145,7 +145,7 @@ ipAddressTable_allocate_data(void)
      */
     /** this might not be right for netsnmp_ipaddress_entry */
     ipAddressTable_data *rtn =
-        SNMP_MALLOC_TYPEDEF(netsnmp_ipaddress_entry);
+        netsnmp_access_ipaddress_entry_create();
 
     DEBUGTRACE;
 
@@ -170,7 +170,7 @@ ipAddressTable_release_data(ipAddressTable_data * data)
     /*
      * release memory for the context
      */
-    free(data);
+    netsnmp_access_ipaddress_entry_free(data);
 }
 
 
