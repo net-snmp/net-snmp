@@ -383,8 +383,8 @@ sub new {
    $this->{ErrorNum} = 0;  # contains SNMP error return
 
    $this->{Version} ||= 
-     NetSNMP::default_store::ds_get_int(NetSNMP::default_store::DS_LIBRARY_ID, 
-				      NetSNMP::default_store::DS_LIB_SNMPVERSION) ||
+     NetSNMP::default_store::netsnmp_ds_get_int(NetSNMP::default_store::NETSNMP_DS_LIBRARY_ID, 
+				      NetSNMP::default_store::NETSNMP_DS_LIB_SNMPVERSION) ||
 					SNMP::SNMP_DEFAULT_VERSION;
    if ($this->{Version} eq 128) {
        # special handling of the bogus v1 definition.
@@ -398,8 +398,8 @@ sub new {
    $this->{DestHost} ||= 'localhost';
 
    # community defaults to public
-   $this->{Community} ||= NetSNMP::default_store::ds_get_string(NetSNMP::default_store::DS_LIBRARY_ID(), 
-				        NetSNMP::default_store::DS_LIB_COMMUNITY()) || 'public';
+   $this->{Community} ||= NetSNMP::default_store::netsnmp_ds_get_string(NetSNMP::default_store::NETSNMP_DS_LIBRARY_ID(), 
+				        NetSNMP::default_store::NETSNMP_DS_LIB_COMMUNITY()) || 'public';
 
    # number of retries before giving up, defaults to SNMP_DEFAULT_RETRIES
    $this->{Retries} = SNMP::SNMP_DEFAULT_RETRIES() unless defined($this->{Retries});
@@ -425,13 +425,13 @@ sub new {
 					     );
    } elsif ($this->{Version} eq '3' ) {
        $this->{SecName} ||= 
-	   NetSNMP::default_store::ds_get_string(NetSNMP::default_store::DS_LIBRARY_ID(), 
-		         NetSNMP::default_store::DS_LIB_SECNAME()) || 
+	   NetSNMP::default_store::netsnmp_ds_get_string(NetSNMP::default_store::NETSNMP_DS_LIBRARY_ID(), 
+		         NetSNMP::default_store::NETSNMP_DS_LIB_SECNAME()) || 
 			   'initial';
        if (!$this->{SecLevel}) {
 	   $this->{SecLevel} = 
-	       NetSNMP::default_store::ds_get_int(NetSNMP::default_store::DS_LIBRARY_ID(), 
-			  NetSNMP::default_store::DS_LIB_SECLEVEL()) || 
+	       NetSNMP::default_store::netsnmp_ds_get_int(NetSNMP::default_store::NETSNMP_DS_LIBRARY_ID(), 
+			  NetSNMP::default_store::NETSNMP_DS_LIB_SECLEVEL()) || 
 			      $SNMP::V3_SEC_LEVEL_MAP{'noAuthNoPriv'};
        } elsif ($this->{SecLevel} !~ /^\d+$/) {
 	   $this->{SecLevel} = $SNMP::V3_SEC_LEVEL_MAP{$this->{SecLevel}};
@@ -439,20 +439,20 @@ sub new {
        $this->{SecEngineId} ||= '';
        $this->{ContextEngineId} ||= $this->{SecEngineId};
        $this->{Context} ||= 
-	   NetSNMP::default_store::ds_get_string(NetSNMP::default_store::DS_LIBRARY_ID(), 
-		         NetSNMP::default_store::DS_LIB_CONTEXT()) || '';
+	   NetSNMP::default_store::netsnmp_ds_get_string(NetSNMP::default_store::NETSNMP_DS_LIBRARY_ID(), 
+		         NetSNMP::default_store::NETSNMP_DS_LIB_CONTEXT()) || '';
        $this->{AuthProto} ||= 'MD5'; # defaults XXX
        $this->{AuthPass} ||=
-       NetSNMP::default_store::ds_get_string(NetSNMP::default_store::DS_LIBRARY_ID(), 
-		     NetSNMP::default_store::DS_LIB_AUTHPASSPHRASE()) ||
-       NetSNMP::default_store::ds_get_string(NetSNMP::default_store::DS_LIBRARY_ID(), 
-		     NetSNMP::default_store::DS_LIB_PASSPHRASE()) || '';
+       NetSNMP::default_store::netsnmp_ds_get_string(NetSNMP::default_store::NETSNMP_DS_LIBRARY_ID(), 
+		     NetSNMP::default_store::NETSNMP_DS_LIB_AUTHPASSPHRASE()) ||
+       NetSNMP::default_store::netsnmp_ds_get_string(NetSNMP::default_store::NETSNMP_DS_LIBRARY_ID(), 
+		     NetSNMP::default_store::NETSNMP_DS_LIB_PASSPHRASE()) || '';
        $this->{PrivProto} ||= 'DES';  # defaults XXX
        $this->{PrivPass} ||=
-       NetSNMP::default_store::ds_get_string(NetSNMP::default_store::DS_LIBRARY_ID(), 
-		     NetSNMP::default_store::DS_LIB_PRIVPASSPHRASE()) ||
-       NetSNMP::default_store::ds_get_string(NetSNMP::default_store::DS_LIBRARY_ID(), 
-		     NetSNMP::default_store::DS_LIB_PASSPHRASE()) || '';
+       NetSNMP::default_store::netsnmp_ds_get_string(NetSNMP::default_store::NETSNMP_DS_LIBRARY_ID(), 
+		     NetSNMP::default_store::NETSNMP_DS_LIB_PRIVPASSPHRASE()) ||
+       NetSNMP::default_store::netsnmp_ds_get_string(NetSNMP::default_store::NETSNMP_DS_LIBRARY_ID(), 
+		     NetSNMP::default_store::NETSNMP_DS_LIB_PASSPHRASE()) || '';
        $this->{EngineBoots} = 0 if not defined $this->{EngineBoots};
        $this->{EngineTime} = 0 if not defined $this->{EngineTime};
 
