@@ -71,13 +71,14 @@ read_config.o: @module_list_h@
 agent_read_config.o: ../config.h ../mib_module_config.h ../s/hpux.h
 agent_read_config.o: ../s/sysv.h ../s/generic.h ../m/generic.h
 agent_read_config.o:  m2m.h ./mibgroup/mibincl.h
-agent_read_config.o: ./../snmplib/asn1.h ./../snmplib/snmp_api.h
-agent_read_config.o: ./../snmplib/snmp_impl.h ./snmp_vars.h ./var_struct.h
-agent_read_config.o: ./../snmplib/snmp.h ./../snmplib/mib.h
-agent_read_config.o: ./../snmplib/snmp_debug.h ./agent_read_config.h
-agent_read_config.o: mibgroup/struct.h ./../snmplib/read_config.h
-agent_read_config.o: agent_read_config.h ./mibgroup/mib_module_includes.h
-agent_read_config.o: mibgroup/mibII.h mibgroup/ucd_snmp.h mibgroup/v2party.h
+agent_read_config.o:  ./../snmplib/asn1.h
+agent_read_config.o: ./../snmplib/snmp_api.h ./../snmplib/snmp_impl.h
+agent_read_config.o: ./snmp_vars.h ./var_struct.h ./../snmplib/snmp.h
+agent_read_config.o: ./../snmplib/mib.h ./../snmplib/snmp_debug.h
+agent_read_config.o: ./agent_read_config.h mibgroup/struct.h
+agent_read_config.o: ./../snmplib/read_config.h agent_read_config.h
+agent_read_config.o: ./mibgroup/mib_module_includes.h mibgroup/mibII.h
+agent_read_config.o: mibgroup/ucd_snmp.h mibgroup/v2party.h
 agent_read_config.o: mibgroup/examples/example.h mibgroup/examples/wombat.h
 agent_read_config.o: mibgroup/host.h mibgroup/smux.h mibgroup/target.h
 agent_read_config.o: mibgroup/mibII/system_mib.h mibgroup/mibII/sysORTable.h
@@ -143,7 +144,7 @@ snmp_agent.o: ./../snmplib/snmp_debug.h mibgroup/mibII/vacm_vars.h
 snmp_vars.o: ../config.h ../mib_module_config.h ../s/hpux.h ../s/sysv.h
 snmp_vars.o: ../s/generic.h ../m/generic.h 
 snmp_vars.o:  ./mibgroup/mibincl.h
-snmp_vars.o: ./../snmplib/asn1.h ./../snmplib/snmp_api.h
+snmp_vars.o:  ./../snmplib/asn1.h ./../snmplib/snmp_api.h
 snmp_vars.o: ./../snmplib/snmp_impl.h ./snmp_vars.h ./var_struct.h
 snmp_vars.o: ./../snmplib/snmp.h ./../snmplib/mib.h ./../snmplib/snmp_debug.h
 snmp_vars.o: ./agent_read_config.h m2m.h snmp_vars_m2m.h ../snmplib/system.h
