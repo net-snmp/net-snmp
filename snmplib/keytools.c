@@ -238,7 +238,6 @@ generate_kul(	oid	*hashtype,	u_int  hashtype_len,
         size_t           properlength;
 
 	u_char		 buf[SNMP_MAXBUF];
-	void		*context = NULL;
 #ifdef SNMP_TESTING_CODE
         int		 i;
 #endif
@@ -286,7 +285,6 @@ generate_kul(	oid	*hashtype,	u_int  hashtype_len,
 		
 
 generate_kul_quit:
-	SNMP_FREE(context);
 	return rval;
 
 }  /* end generate_kul() */
@@ -348,7 +346,6 @@ encode_keychange(	oid	*hashtype,	u_int  hashtype_len,
         size_t            nbytes  = 0;
 
         u_char          *tmpbuf = NULL;
-	void		*context = NULL;
 
 
 	/*
@@ -422,7 +419,6 @@ encode_keychange(	oid	*hashtype,	u_int  hashtype_len,
 encode_keychange_quit:
 	if (rval != SNMPERR_SUCCESS) memset(kcstring, 0, *kcstring_len);
         SNMP_FREE(tmpbuf);
-	SNMP_FREE(context);
 
 	return rval;
 
@@ -481,7 +477,6 @@ decode_keychange(	oid	*hashtype,	u_int  hashtype_len,
 	u_char		*bufp,
 			 tmp_buf[SNMP_MAXBUF];
         size_t           tmp_buf_len = SNMP_MAXBUF;
-	void		*context = NULL;
         u_char          *tmpbuf = NULL;
 
 
@@ -541,7 +536,6 @@ decode_keychange_quit:
 		memset(newkey, 0, properlength);
 	}
 	memset(tmp_buf, 0, SNMP_MAXBUF);
-	SNMP_FREE(context);
         if (tmpbuf != NULL) SNMP_FREE(tmpbuf);
 
 	return rval;
