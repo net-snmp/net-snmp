@@ -160,7 +160,6 @@
 ./notification_log.lo: ../include/net-snmp/agent/table_data.h
 ./notification_log.lo: ../include/net-snmp/agent/table_dataset.h
 ./notification_log.lo: ../include/net-snmp/agent/table_iterator.h
-./notification_log.lo: ../include/net-snmp/agent/table_mfd.h
 ./notification_log.lo: ../include/net-snmp/agent/table_array.h
 ./notification_log.lo: ../include/net-snmp/agent/mib_module_config.h
 ./notification_log.lo: snmptrapd_handlers.h snmptrapd_log.h
@@ -1008,7 +1007,6 @@
 ./snmptrapd.lo: ../include/net-snmp/agent/table_data.h
 ./snmptrapd.lo: ../include/net-snmp/agent/table_dataset.h
 ./snmptrapd.lo: ../include/net-snmp/agent/table_iterator.h
-./snmptrapd.lo: ../include/net-snmp/agent/table_mfd.h
 ./snmptrapd.lo: ../include/net-snmp/agent/table_array.h
 ./snmptrapd.lo: ../include/net-snmp/agent/mib_module_config.h
 ./snmptrapd.lo: snmptrapd_handlers.h snmptrapd_log.h notification_log.h
@@ -1106,7 +1104,6 @@
 ./snmptrapd_handlers.lo: ../include/net-snmp/agent/table_data.h
 ./snmptrapd_handlers.lo: ../include/net-snmp/agent/table_dataset.h
 ./snmptrapd_handlers.lo: ../include/net-snmp/agent/table_iterator.h
-./snmptrapd_handlers.lo: ../include/net-snmp/agent/table_mfd.h
 ./snmptrapd_handlers.lo: ../include/net-snmp/agent/table_array.h
 ./snmptrapd_handlers.lo: ../include/net-snmp/agent/mib_module_config.h
 ./snmptrapd_handlers.lo: ../agent/mibgroup/utilities/execute.h
