@@ -9,9 +9,6 @@
 #if STDC_HEADERS
 #include <stdlib.h>
 #endif
-#if HAVE_UNISTD_H
-#include <unistd.h>
-#endif
 #if defined(IFNET_NEEDS_KERNEL) && !defined(_KERNEL)
 #define _KERNEL 1
 #define _I_DEFINED_KERNEL
@@ -74,6 +71,9 @@
 #if HAVE_STDLIB_H
 #include <stdlib.h>
 #endif
+#endif
+#if HAVE_UNISTD_H
+#include <unistd.h>
 #endif
 
 #ifdef solaris2
