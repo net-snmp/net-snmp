@@ -187,7 +187,6 @@ static void optProc(int argc, char *const *argv, int opt)
 		break;
 	    default:
 		fprintf(stderr, "Bad -C options: %c\n", opt);
-		usage();
 		exit(1);
 	    }
 	}
