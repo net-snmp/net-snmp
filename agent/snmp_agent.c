@@ -85,6 +85,10 @@ SOFTWARE.
 #include "agentx/protocol.h"
 #endif
 
+#ifdef USING_AGENTX_MASTER_MODULE
+#include "agentx/master.h"
+#endif
+
 static int snmp_vars_inc;
 
 static struct agent_snmp_session *agent_session_list = NULL;
@@ -194,6 +198,11 @@ init_master_agent(int dest_port,
 
     if ( ds_get_boolean(DS_APPLICATION_ID, DS_AGENT_ROLE) != MASTER_AGENT )
 	return 0; /* no error if ! MASTER_AGENT */
+
+#ifdef USING_AGENTX_MASTER_MODULE
+    if ( ds_get_boolean(DS_APPLICATION_ID, DS_AGENT_AGENTX_MASTER) == 1 )
+        real_init_master();
+#endif
 
     /* has something been specified before? */
     cptr = ds_get_string(DS_APPLICATION_ID, DS_AGENT_PORTS);

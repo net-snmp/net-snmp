@@ -26,11 +26,16 @@ production systems, it should prove sufficiently reliable for
 general-purpose use.
 
 
-  To configure AgentX support into the UCD agent, run configure with
-the flag --with-mib-module="agentx", and compile the library and agent.
-Copy (or link) the 'snmpd' binary (the main master agent) to 'agentxd',
-which will run as a subagent.  Alternatively, the '-X' command-line
-option will also invoke the agent in an AgentX subagent role.
+  AgentX support is now included in the agent by default, but needs
+to be explicitly enabled before use.  (This *is* still beta code
+after all).  Activate this using by putting a line
+
+		master	agentx
+
+in the snmpd.conf file.  This support is also enabled automatically
+when the '-x' flag is given (to specify a different master AgentX socket),
+or when the agent is invoked as an AgentX subagent (i.e. via the name
+'agentxd' or with the '-X' flag).
 
   See the main project web page for an examples of a simple stand-alone
 subagent.  (http://net-snmp.sourceforge.net/tutorial/toolkit/)

@@ -325,6 +325,8 @@ main(int argc, char *argv[])
         /* default to no */
         ds_set_boolean(DS_APPLICATION_ID, DS_AGENT_NO_ROOT_ACCESS, 1);
 #endif
+			/* Default to NOT running an AgentX master */
+        ds_set_boolean(DS_APPLICATION_ID, DS_AGENT_AGENTX_MASTER, 0);
 
 	/*
 	 * usage: snmpd
@@ -407,6 +409,7 @@ main(int argc, char *argv[])
                   if (++arg == argc)
                     usage(argv[0]);
                   ds_set_string(DS_APPLICATION_ID, DS_AGENT_X_SOCKET, argv[arg]);
+		  ds_set_boolean(DS_APPLICATION_ID, DS_AGENT_AGENTX_MASTER, 1 );
                   break;
 #endif
 
