@@ -59,7 +59,7 @@
 /* #undef USING_HOST_MODULE */
  
 /* CFG Define if compiling with the Rmon module files.  */
-#define USING_RMON_MODULE 1
+/* #undef USING_RMON_MODULE */
 
 /* CFG Define if compiling with the disman/event-mib module files.  */
 #define USING_DISMAN_EVENT_MIB_MODULE 1

@@ -108,34 +108,6 @@ SOURCE=..\..\agent\mibgroup\mibII\vacm_context.c
 SOURCE=..\..\agent\mibgroup\mibII\vacm_vars.c
 # End Source File
 # End Group
-# Begin Group "Rmon"
-
-# PROP Default_Filter ""
-# Begin Source File
-
-SOURCE=..\..\agent\mibgroup\Rmon\agutil.c
-# End Source File
-# Begin Source File
-
-SOURCE=..\..\agent\mibgroup\Rmon\alarm.c
-# End Source File
-# Begin Source File
-
-SOURCE=..\..\agent\mibgroup\Rmon\event.c
-# End Source File
-# Begin Source File
-
-SOURCE=..\..\agent\mibgroup\Rmon\history.c
-# End Source File
-# Begin Source File
-
-SOURCE=..\..\agent\mibgroup\Rmon\rows.c
-# End Source File
-# Begin Source File
-
-SOURCE=..\..\agent\mibgroup\Rmon\statistics.c
-# End Source File
-# End Group
 # Begin Group "disman"
 
 # PROP Default_Filter ""
