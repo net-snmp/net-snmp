@@ -144,9 +144,15 @@ snmp_disable_log(void) {
 void
 snmp_enable_syslog(void)
 {
+  snmp_enable_syslog_ident("ucd-snmp", LOG_DAEMON);
+}
+
+void
+snmp_enable_syslog_ident(const char* ident, const int facility)
+{
   snmp_disable_syslog();
 #if HAVE_SYSLOG_H
-  openlog("ucd-snmp", LOG_CONS|LOG_PID, LOG_DAEMON);
+  openlog(ident, LOG_CONS|LOG_PID, facility);
   do_syslogging=1;
 #endif
 }
