@@ -123,6 +123,11 @@ usmDHUserKeyTable_allocate_data(void)
         snmp_log(LOG_ERR, "unable to malloc memory for new "
                  "usmDHUserKeyTable_data.\n");
     }
+    /*
+     * not real user, not in a list. mark for testing
+     */
+    rtn->next = (struct usmUser*)-1;
+    rtn->prev = (struct usmUser*)-1;
 
     return rtn;
 }                               /* usmDHUserKeyTable_allocate_data */
@@ -135,10 +140,13 @@ usmDHUserKeyTable_allocate_data(void)
 void
 usmDHUserKeyTable_release_data(usmDHUserKeyTable_data * data)
 {
-    struct usmUser *user = *data;
+    struct usmUser *user = data;
 
     DEBUGMSGTL(("verbose:usmDHUserKeyTable:usmDHUserKeyTable_release_data",
                 "called\n"));
+
+    netsnmp_assert(user->next == (struct usmUser*)-1);
+    netsnmp_assert(user->prev == (struct usmUser*)-1);
 
     /*
      * TODO:202:r: |-> release memory for the usmDHUserKeyTable data context.
@@ -180,7 +188,7 @@ usmDHUserKeyTable_indexes_set_tbl_idx(usmDHUserKeyTable_mib_index *
      * usmUserEngineID(1)/SnmpEngineID/ASN_OCTET_STR/char(char)//L/a/w/e/R/d/h 
      */
     tbl_idx->usmUserEngineID_len = sizeof(tbl_idx->usmUserEngineID);
-    /** WARNING: this code might not work for struct usmUser * */
+    /** WARNING: this code might not work for struct usmUser */
     /*
      * make sure there is enough space for usmUserEngineID data
      */
@@ -199,7 +207,7 @@ usmDHUserKeyTable_indexes_set_tbl_idx(usmDHUserKeyTable_mib_index *
      */
     tbl_idx->usmUserName_len = sizeof(tbl_idx->usmUserName);
 
-    /** WARNING: this code might not work for struct usmUser * */
+    /** WARNING: this code might not work for struct usmUser */
     /*
      * make sure there is enough space for usmUserName data
      */
@@ -330,7 +338,7 @@ usmDHUserAuthKeyChange_get(usmDHUserKeyTable_rowreq_ctx * rowreq_ctx,
 
     /*
      * TODO:231:o: |-> Extract the current value of the usmDHUserAuthKeyChange data.
-     * set (* usmDHUserAuthKeyChange_val_ptr_ptr ) and (* usmDHUserAuthKeyChange_val_ptr_len_ptr ) from rowreq_ctx->data.
+     * set (* usmDHUserAuthKeyChange_val_ptr_ptr ) and (* usmDHUserAuthKeyChange_val_ptr_len_ptr ) from rowreq_ctx->data
      */
     if (!rowreq_ctx || !usmDHUserAuthKeyChange_val_ptr_len_ptr ||
         !usmDHUserAuthKeyChange_val_ptr_ptr ||
@@ -416,7 +424,7 @@ usmDHUserOwnAuthKeyChange_get(usmDHUserKeyTable_rowreq_ctx * rowreq_ctx,
 
     /*
      * TODO:231:o: |-> Extract the current value of the usmDHUserOwnAuthKeyChange data.
-     * set (* usmDHUserOwnAuthKeyChange_val_ptr_ptr ) and (* usmDHUserOwnAuthKeyChange_val_ptr_len_ptr ) from rowreq_ctx->data.
+     * set (* usmDHUserOwnAuthKeyChange_val_ptr_ptr ) and (* usmDHUserOwnAuthKeyChange_val_ptr_len_ptr ) from rowreq_ctx->data
      */
     if (!rowreq_ctx || !usmDHUserOwnAuthKeyChange_val_ptr_len_ptr ||
         !usmDHUserOwnAuthKeyChange_val_ptr_ptr ||
@@ -501,7 +509,7 @@ usmDHUserPrivKeyChange_get(usmDHUserKeyTable_rowreq_ctx * rowreq_ctx,
 
     /*
      * TODO:231:o: |-> Extract the current value of the usmDHUserPrivKeyChange data.
-     * set (* usmDHUserPrivKeyChange_val_ptr_ptr ) and (* usmDHUserPrivKeyChange_val_ptr_len_ptr ) from rowreq_ctx->data.
+     * set (* usmDHUserPrivKeyChange_val_ptr_ptr ) and (* usmDHUserPrivKeyChange_val_ptr_len_ptr ) from rowreq_ctx->data
      */
     if (!rowreq_ctx || !usmDHUserPrivKeyChange_val_ptr_len_ptr ||
         !usmDHUserPrivKeyChange_val_ptr_ptr ||
@@ -587,7 +595,7 @@ usmDHUserOwnPrivKeyChange_get(usmDHUserKeyTable_rowreq_ctx * rowreq_ctx,
 
     /*
      * TODO:231:o: |-> Extract the current value of the usmDHUserOwnPrivKeyChange data.
-     * set (* usmDHUserOwnPrivKeyChange_val_ptr_ptr ) and (* usmDHUserOwnPrivKeyChange_val_ptr_len_ptr ) from rowreq_ctx->data.
+     * set (* usmDHUserOwnPrivKeyChange_val_ptr_ptr ) and (* usmDHUserOwnPrivKeyChange_val_ptr_len_ptr ) from rowreq_ctx->data
      */
     if (!rowreq_ctx || !usmDHUserOwnPrivKeyChange_val_ptr_len_ptr ||
         !usmDHUserOwnPrivKeyChange_val_ptr_ptr ||
