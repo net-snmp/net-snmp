@@ -232,6 +232,9 @@ var_hrswinst(vp, name, length, exact, var_len, write_method)
     static char string[100];
     struct stat stat_buf;
 #ifdef HAVE_LIBRPM
+    char *cp;
+    int_32 *rpm_data;
+    time_t installTime;
     Header rpm_head;
 #endif
 
@@ -282,8 +285,8 @@ var_hrswinst(vp, name, length, exact, var_len, write_method)
 	    return (u_char *)&long_return;
 	case HRSWINST_NAME:
 #ifdef HAVE_LIBRPM
-			/* or 'headerGetEntry? */
-	    getEntry(rpm_head, RPMTAG_NAME, NULL, string, NULL );
+	    headerGetEntry(rpm_head, RPMTAG_NAME, NULL,(void **) &cp, NULL );
+	    strcpy(string, cp);
 #else
 	    sprintf(string, HRSW_name);
 			/* This will be unchanged from the initial "null"
@@ -299,9 +302,9 @@ var_hrswinst(vp, name, length, exact, var_len, write_method)
 	    return (u_char *)&long_return;
 	case HRSWINST_DATE:
 #ifdef HAVE_LIBRPM
-			/* or 'headerGetEntry? */
-	    getEntry(rpm_head, RPMTAG_INSTALLTIME, NULL, string, NULL );
-			/* XXX - does this returns a string? */
+	    headerGetEntry(rpm_head, RPMTAG_INSTALLTIME, NULL,(void **) &rpm_data, NULL );
+	    installTime = *rpm_data;
+	    return ( date_n_time(&installTime, var_len));
 #else
 	    if ( HRSW_directory ) {
 		sprintf(string, "%s/%s", HRSW_directory, HRSW_name);
@@ -387,9 +390,7 @@ Get_Next_HR_SWInst __P((void))
 void
 Save_HR_SW_info __P((void))
 {
-#ifdef HAVE_LIBRPM
-    getEntry(rpm_head, RPMTAG_NAME, NULL, HRSW_name, NULL );
-#else
+#ifndef HAVE_LIBRPM
     sprintf(  HRSW_name, de_p->d_name );
 #endif
 }
