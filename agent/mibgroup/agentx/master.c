@@ -56,7 +56,7 @@ real_init_master(void)
         sess.peername =
             netsnmp_ds_get_string(NETSNMP_DS_APPLICATION_ID, NETSNMP_DS_AGENT_X_SOCKET);
     else
-        sess.peername = AGENTX_SOCKET;
+        sess.peername = strdup(AGENTX_SOCKET);
 
     if (sess.peername[0] == '/') {
         /*

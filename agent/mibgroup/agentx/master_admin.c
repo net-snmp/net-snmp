@@ -146,7 +146,7 @@ close_agentx_session(netsnmp_session * session, int sessid)
          */
         netsnmp_remove_delegated_requests_for_session(session);
         if (session->subsession != NULL) {
-            netsnmp_session *subsession = session->subsession, *tmpsub;
+            netsnmp_session *subsession = session->subsession;
             for(; subsession; subsession = subsession->next) {
                 netsnmp_remove_delegated_requests_for_session(subsession);
             }
