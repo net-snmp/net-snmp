@@ -2538,5 +2538,4 @@ u_char	*asn_rbuild_signed_int64 (u_char *data,
 }
 #endif /* OPAQUE_SPECIAL_TYPES */
 
-u_char	*asn_rbuild_bitstring (u_char *, size_t *, u_char, u_char *, size_t);
 #endif
