@@ -52,7 +52,6 @@ sub displaygraph {
 	join(",",@{$config{'-columns'}},
 	     @{$config{'-indexes'}}, $datecol) .
 		 " FROM $tablename $config{'-clauses'}";
-    print STDERR "$cmd\n";
     ( $thetable = $dbh->prepare($cmd))
 	or return -1;
     ( $thetable->execute )
@@ -111,19 +110,26 @@ sub displaygraph {
     }
 
     my @pngdata;
-    push @pngdata, \@xdata;
 
-    my @datakeys = keys(%data);
+    if (defined($config{'-createdata'})) {
+	print STDERR "calling\n";
+	&{$config{'-createdata'}}(\@pngdata, \@xdata, \%data);
+    } else {
+	print STDERR "not calling\n";
+	push @pngdata, \@xdata;
+
+	my @datakeys = keys(%data);
 
 #    open(O,">/tmp/data");
-    foreach my $i (@datakeys) {
-	foreach my $j (@{$config{'-columns'}}) {
-	    my @newrow;
-	    foreach my $k (@xdata) {
+	foreach my $i (@datakeys) {
+	    foreach my $j (@{$config{'-columns'}}) {
+		my @newrow;
+		foreach my $k (@xdata) {
 #		print O "i=$i k=$k j=$j :: $data{$i}{$k}{$j}\n";
-		push @newrow, ($data{$i}{$k}{$j} || 0);
+		    push @newrow, ($data{$i}{$k}{$j} || 0);
+		}
+		push @pngdata,\@newrow;
 	    }
-	    push @pngdata,\@newrow;
 	}
     }
 #    close O;
@@ -133,8 +139,18 @@ sub displaygraph {
 	my $graph = new PNGgraph::lines($x, $y);
 	$graph->set('bgclr' => $bgcolor);
 #	print STDERR "columns: ", join(",",@{$config{'-columns'}}), "\n";
-	$graph->set_legend(@{$config{'-columns'}});
+ 	if (defined($config{'-legend'})) {
+# 	    print STDERR "legend: ", join(",",@{$config{'-legend'}}), "\n";
+ 	    $graph->set_legend(@{$config{'-legend'}});
+ 	} else {
+ 	    my @legend;
+ 	    foreach my $xxx (@{$config{'-columns'}}) {
+ 		push @legend, "$xxx = $config{'-indexes'}[0]";
+ 	    }
+ 	    $graph->set_legend(@legend);
+ 	}
 	foreach my $i (qw(title x_label_skip x_labels_vertical x_tick_number x_number_format y_number_format x_min_value x_max_value y_min_value y_max_value)) {
+#	    print STDERR "setting $i from -$i = " . $config{"-$i"} . "\n";
 	    $graph->set("$i" => $config{"-$i"}) if ($config{"-$i"});
 	}
 	if ($config{'-pngparms'}) {
