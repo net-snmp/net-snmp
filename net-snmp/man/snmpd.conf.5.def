@@ -315,7 +315,7 @@ respond to SNMPv3 messages.  With this configuration file line, the
 engineID will be configured from STRING.  The default value of the
 engineID is configured with the first IP address found for the
 hostname of the machine.
-.IP "createUser username (MD5|SHA) authpassphrase [DES] [privpassphrase]"
+.IP "createUser [-e ENGINEID] username (MD5|SHA) authpassphrase [DES] [privpassphrase]"
 .IP
 MD5 and SHA are the authentication types to use, but you must have
 built the package with openssl installed in order to use SHA.  The
@@ -343,6 +343,10 @@ password for that user) and replaced with the key that is derived from
 it.  This key is a localized key, so that if it is stolen it can not
 be used to access other agents.  If the password is stolen, however,
 it can be.
+.IP
+If you need to localize the user to a particular EngineID (this is
+useful mostly in the similar snmptrapd.conf file), you can use the -e
+argument to specify an EngineID as a hex value (EG, "0x01020304").
 .IP
 .SH SETTING SYSTEM INFORMATION
 .IP "syslocation STRING"
