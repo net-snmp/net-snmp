@@ -37,8 +37,14 @@
 
 static int      dodebug = SNMP_ALWAYS_DEBUG;
 static int      debug_num_tokens = 0;
-static char    *debug_tokens[MAX_DEBUG_TOKENS];
 static int      debug_print_everything = 0;
+
+typedef struct token_dscr {
+    char *token_name;
+    char  enabled;
+} token_descr_t;
+
+static struct token_dscr dbg_tokens[MAX_DEBUG_TOKENS];
 
 /*
  * indent debugging:  provide a space padded section to return an indent for 
@@ -88,6 +94,15 @@ void
 snmp_debug_init(void)
 {
     debugindentchars[0] = '\0'; /* zero out the debugging indent array. */
+    /*
+     * Hmmm....
+     *   this "init" routine seems to be called *after* processing
+     *   the command line options.   So we can't clear the debug
+     *   token array here, and will just have to rely on it being
+     *   initialised to 0 automatically.
+     * So much for trying to program responsibly :-)
+     */
+/*  memset(dbg_tokens, 0, MAX_DEBUG_TOKENS*sizeof(struct token_dscr));  */
     register_prenetsnmp_mib_handler("snmp", "doDebugging",
                                     debug_config_turn_on_debugging, NULL,
                                     "(1|0)");
@@ -108,14 +123,89 @@ debug_register_tokens(char *tokens)
     cp = strtok(newp, DEBUG_TOKEN_DELIMITER);
     while (cp) {
         if (strlen(cp) < MAX_DEBUG_TOKEN_LEN) {
-            if (strcasecmp(cp, DEBUG_ALWAYS_TOKEN) == 0)
+            if (strcasecmp(cp, DEBUG_ALWAYS_TOKEN) == 0) {
                 debug_print_everything = 1;
-            else if (debug_num_tokens < MAX_DEBUG_TOKENS)
-                debug_tokens[debug_num_tokens++] = strdup(cp);
+            } else if (debug_num_tokens < MAX_DEBUG_TOKENS) {
+                dbg_tokens[debug_num_tokens].token_name = strdup(cp);
+                dbg_tokens[debug_num_tokens++].enabled  = 1;
+            } else {
+                snmp_log(LOG_NOTICE, "Unable to register debug token %s", cp);
+            }
+        } else {
+            snmp_log(LOG_NOTICE, "Debug token %s over length", cp);
         }
         cp = strtok(NULL, DEBUG_TOKEN_DELIMITER);
     }
     free(newp);
+}
+
+
+/* 
+ * Print all registered tokens along with their current status
+ */
+void 
+debug_print_registered_tokens(void) {
+    int i;
+
+    snmp_log(LOG_INFO, "%d tokens registered :\n", debug_num_tokens);
+    for (i=0; i<debug_num_tokens; i++) {
+        snmp_log( LOG_INFO, "%d) %s : %d\n", 
+                 i, dbg_tokens [i].token_name, dbg_tokens [i].enabled);
+    }
+}
+
+
+/*
+ * Enable logs on a given token
+ */
+int
+debug_enable_token_logs (const char *token) {
+    int i;
+
+    /* debugging flag is on or off */
+    if (!dodebug)
+        return SNMPERR_GENERR;
+
+    if (debug_num_tokens == 0 || debug_print_everything) {
+        /* no tokens specified, print everything */
+        return SNMPERR_SUCCESS;
+    } else {
+        for(i=0; i < debug_num_tokens; i++) {
+            if (dbg_tokens[i].token_name &&
+                strncmp(dbg_tokens[i].token_name, token, 
+                        strlen(dbg_tokens[i].token_name)) == 0) {
+                dbg_tokens[i].enabled = 1;
+                return SNMPERR_SUCCESS;
+            }
+        }
+    }
+    return SNMPERR_GENERR;
+}
+
+/*
+ * Diable logs on a given token
+ */
+int
+debug_disable_token_logs (const char *token) {
+    int i;
+
+    /* debugging flag is on or off */
+    if (!dodebug)
+        return SNMPERR_GENERR;
+
+    if (debug_num_tokens == 0 || debug_print_everything) {
+        /* no tokens specified, print everything */
+        return SNMPERR_SUCCESS;
+    } else {
+        for(i=0; i < debug_num_tokens; i++) {
+            if (strncmp(dbg_tokens[i].token_name, token, 
+                  strlen(dbg_tokens[i].token_name)) == 0) {
+                dbg_tokens[i].enabled = 0;
+                return SNMPERR_SUCCESS;
+            }
+        }
+    }
+    return SNMPERR_GENERR;
 }
 
 
@@ -145,8 +235,9 @@ debug_is_token_registered(const char *token)
         return SNMPERR_SUCCESS;
     } else {
         for (i = 0; i < debug_num_tokens; i++) {
-            if (strncmp(debug_tokens[i], token, strlen(debug_tokens[i])) ==
-                0) {
+            if (dbg_tokens[i].token_name &&
+                strncmp(dbg_tokens[i].token_name, token,
+                        strlen(dbg_tokens[i].token_name)) == 0) {
                 return SNMPERR_SUCCESS;
             }
         }
