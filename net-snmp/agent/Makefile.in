@@ -46,7 +46,7 @@ getmibstat.o: mibgroup/kernel_sunos5.c
 	$(CC) $(CFLAGS) -o $@ -D_GETMIBSTAT_TEST -DDODEBUG -c $? 
 
 snmpd:	${AGENTOBJS} $(USELIBS) $(LIBTARG)
-	${SPCC} -o $@ ${AGENTOBJS} $(LOCAL_LIBS) ${LDFLAGS} ${AGENT_LIBS}  
+	${SPCC} $(CFLAGS) -o $@ ${AGENTOBJS} $(LOCAL_LIBS) ${LDFLAGS} ${AGENT_LIBS}  
 
 
 libucdagent.$(SHLIB_EXTENSION)$(SHLIB_VERSION):    ${LIBAGENTOBJS} libucdmibs.$(SHLIB_EXTENSION)$(SHLIB_VERSION)
