@@ -203,7 +203,7 @@ sub loadMib {
 	    }
 	}
 	if (defined($mib->{'indexes'})) {
-	    print "indexes: ", join(", ",@{$mib->{'indexes'}}),"\n";
+	    print "indexes: ", join(", ",@{$mib->{'indexes'}}),"\n" if ($debug);
 	    $variables{$vroutine}{'indexes'} = $mib->{'indexes'};
 	    foreach $i (@{$mib->{'indexes'}}) {
 		$variables{$vroutine}{$i}{'isanindex'} = 1;
