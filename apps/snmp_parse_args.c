@@ -197,6 +197,7 @@ snmp_parse_args(argc, argv, session)
           session->version = SNMP_VERSION_2c;
         } else if (!strcasecmp(psz,"2p")) {
           session->version = SNMP_VERSION_2p;
+        } else {
           fprintf(stderr,"Invalid version specified after -v flag: %s\n", psz);
           usage();
           exit(1);
