@@ -4,9 +4,8 @@
  *  Jochen Kmietsch <jochen.kmietsch@gmx.de>
  *  Uses some ideas from xosview and top
  *  Some comments paraphrased from the SUN man pages 
- *  Currently only works correctly for single-CPU machines
- *  On MP machines it returns values for first CPU found
- *  Version 0.1 initial release Dec 1999 (snapshot 19991222215300)
+ *  Version 0.1 initial release (Dec 1999)
+ *  Version 0.2 added support for multiprocessor machines (Jan 2000)
  *
  */
 
@@ -33,6 +32,7 @@
 
 /* Includes end here */
 
+
 /* Global variables start here */
 
 /* From kstat.h: */
@@ -45,9 +45,63 @@
 extern kstat_ctl_t *kstat_fd;
 kstat_ctl_t *kctl;
 
+/* Holds number of CPUs this computer has. */
+static ulong num_cpu;
+
+/* Variables for getMisc, calloc in init function */
+static ulong *swapin;
+static ulong *swapout;
+static ulong *blocks_read;
+static ulong *blocks_write;
+static ulong *interrupts;
+static ulong *context_sw;
+
+/* Variables for getCPU, calloc in init function */
+static ulong *cpu_sum;
+static ulong (*cpu_state)[CPU_STATES];
+static ulong (*cpu_state_old)[CPU_STATES];
+/* Since MIB wants CPU_SYSTEM, see getCPU function */
+static float (*cpu_perc)[CPU_STATES+1];
+
 /* Global variables end here */
 
+
 /* Functions start here */
+
+/* countCPU: Returns number of CPUs, utility routine */
+ulong countCPU(kstat_ctl_t *kctl)
+{
+  /* From kstat.h: */
+  /* A "Named Kstat", see "man kstat" (Named Statistics) for description of structure */
+  kstat_named_t *n_cpus;
+  kstat_t *ksp_count;
+  
+  /* Look for a kstat by name */
+  ksp_count = kstat_lookup(kctl, "unix", 0, "system_misc"); 
+  
+  if (ksp_count == NULL)
+    {
+      snmp_log(LOG_ERR, "vmstat_solaris2: No data in countCPU ksp_count.\n");
+      return(-1);
+    }
+  
+  /* Allocates the memory needed for kstat_data_lookup */
+  kstat_read(kctl, ksp_count, NULL);
+  
+  /* kstat_data_lookup looks in the kstat specified by arg 1 for the */
+  /* string specified by arg 2.  Works only for named kstats. */
+  n_cpus = kstat_data_lookup(ksp_count, "ncpus");
+  
+  if (n_cpus == NULL)
+    {
+      snmp_log(LOG_ERR, "vmstat_solari2: No data in countCPU n_cpus.\n");
+      return(-1);
+    }
+  
+  /* Returns the value of the named kstat, an ulong in this case */
+  return(n_cpus->value.ul);
+} /* countCPU ends here */
+
 
 /* init_vmstat_solaris2 starts here */
 /* Init function for this module, from prototype */
@@ -87,10 +141,39 @@ void init_vmstat_solaris2(void)
   /* Re-use kstat control from kernel_sunos5 */
   if ((kctl = kstat_fd) == NULL)
     {
-      snmp_log(LOG_ERR,"vmstat_solaris2 (init): Could not open kstat control.\n");
+      snmp_log(LOG_ERR,"vmstat_solaris2 (init): Could not open shared kstat control.\n");
     }
-}
-/* init_vmstat_solaris2 ends here */
+  
+  /* Get number of CPUs, needed for dimensions of arrays that hold CPU data */
+  num_cpu = countCPU(kctl);
+  
+  /* For getMisc, calloc here at start of module since size is dependend on number of CPUs */
+  swapin = (ulong *) calloc(num_cpu, sizeof(swapin));
+  swapout = (ulong *) calloc(num_cpu, sizeof(swapout));
+  blocks_read = (ulong *) calloc(num_cpu, sizeof(blocks_read));
+  blocks_write = (ulong *) calloc(num_cpu, sizeof(blocks_write));
+  interrupts = (ulong *) calloc(num_cpu, sizeof(interrupts));
+  context_sw = (ulong *) calloc(num_cpu, sizeof(context_sw));
+  
+  /* For getCPU, dito */
+  cpu_sum = (ulong *) calloc(num_cpu, sizeof(cpu_sum));
+  cpu_state = (ulong (*)[CPU_STATES]) calloc(num_cpu, sizeof(*cpu_state));
+  cpu_state_old = (ulong (*)[CPU_STATES]) calloc(num_cpu, sizeof(*cpu_state_old));
+  /* Since MIB wants CPU_SYSTEM, see getCPU */
+  cpu_perc = (float (*)[CPU_STATES+1]) calloc(num_cpu, sizeof(*cpu_perc));
+  
+  /* Check whether we got all the memory we wanted, otherwise fail */
+  if ((swapin == NULL) || (swapout == NULL) || (blocks_read == NULL) ||
+      (blocks_write == NULL) || (interrupts == NULL) || (context_sw == NULL) ||
+      (cpu_sum == NULL) || (cpu_state == NULL) || (cpu_state_old == NULL) ||
+      (cpu_perc == NULL))
+    {
+      snmp_log(LOG_ERR,"vmstat_solaris2: (init) could not allocate memory.\n");
+      /* Is this ok ? */
+      exit(-1);
+    }
+  
+} /* init_vmstat_solaris2 ends here */
 
 
 /* Data collection function getMisc starts here */
@@ -98,27 +181,37 @@ void init_vmstat_solaris2(void)
 /* "what" is the data requested, see the vp switch statement */
 long getMisc(int what)
 {
+  
+  /* Variables start here */
+
   /* From sys/kstat.h (included from kstat.h): */
   /* Pointer to current kstat */
   kstat_t *ksp;
   
   /* Declared static so they don't die with the function */
   /* This way we can re-use them if they are new enough */
-  static ulong swapin;
-  static ulong swapout;
-  static ulong blocks_read;
-  static ulong blocks_write;
-  static ulong interrupts;
-  static ulong context_sw;
+  /* Some variables declared global, see "Global Variables" section */
+  static ulong swapin_avg;
+  static ulong swapout_avg;
+  static ulong blocks_read_avg;
+  static ulong blocks_write_avg;
+  static ulong interrupts_avg;
+  static ulong context_sw_avg;
   
   /* From time.h, get seconds since start of UNIX time... */
   time_t timestamp_new;
   static time_t timestamp_old_1;
-    
+  
   /* From sys/sysinfo.h: */
   /* Structure which can hold all the CPU info kstat provides */ 
   cpu_stat_t cs;
   
+  /* Counters */
+  int cpu_slot = 0;
+  int cpu_num = 0;
+  
+  /* Variables end here */
+
   /* Get time */
   time(&timestamp_new);
   
@@ -133,94 +226,158 @@ long getMisc(int what)
       /* Update timer */
       timestamp_old_1 = timestamp_new;
       
-      /* If ksp is NULL we don't have a CPU :) */
-      /* For MP machines: We hit an empty CPU board, trying next one... */
-      /* Right now instance is -1, so return the first one found */
-      /* kstat_lookup: look for a kstat by module, instance and name */
-      if ((ksp = kstat_lookup(kctl, "cpu_stat", -1, NULL)) == NULL)
-	{
-	  snmp_log(LOG_ERR, "vmstat_solaris2 (getMisc): kstat not found.");
-	}
-      
-      /* Read data from kstat into cs structure */
-      /* kc is the control structure, ksp the kstat we are reading */
-      /* and cs the buffer we are writing to. */
-      /* Memory allocation is done automagically by the kstat library. */
-      if (kstat_read(kctl, ksp, &cs) == -1)
-	{
-	  snmp_log(LOG_ERR, "vmstat_solaris2 (getMisc): failure to init cs structure.");
-	}
-      
-      /* Get kb/s swapped in */
-      /* cs returns pages, getpagesize size in bytes */
-      swapin = ((cs.cpu_vminfo.pgswapin * getpagesize()) / 1024) ;
-      /* Get kb/s swapped out */
-      swapout = ((cs.cpu_vminfo.pgswapout * getpagesize()) / 1024) ;
-      /* Get number of blocks written */
-      blocks_write = cs.cpu_sysinfo.bwrite;
-      /* Get number of blocks read */
-      blocks_read = cs.cpu_sysinfo.bread;
-      /* Get number of Interrupts (since boot) */
-      interrupts = cs.cpu_sysinfo.intr;
-      /* Get number of conext switches (since boot) */
-      context_sw = cs.cpu_sysinfo.pswitch;
+      /* Look thru all the cpu slots on the machine whether they holds a CPU */
+      /* and if so, get the data from that CPU */
+      /* Important: num_cpu might be 12.  Then cpu_num is from 0 to 11, not 1 to 12 ! */
+      for (cpu_slot=0;cpu_num<num_cpu;cpu_slot++)
+	{ 
+	  /* If ksp is NULL we don't have a CPU :) */
+	  /* For MP machines: We hit an empty CPU board, trying next one... */
+	  /* kstat_lookup: look for a kstat by module, instance and name */
+	  if ((ksp = kstat_lookup(kctl, "cpu_stat", cpu_slot, NULL)) != NULL)
+	    {
+	      /* Yeah, we found a CPU. */  
+	      /* Read data from kstat into cs structure */
+	      /* kc is the control structure, ksp the kstat we are reading */
+	      /* and cs the buffer we are writing to. */
+	      /* Memory allocation is done automagically by the kstat library. */
+	      if (kstat_read(kctl, ksp, &cs) == -1)
+		{
+		  snmp_log(LOG_ERR, "vmstat_solaris2 (getMisc:1): failure to init cs structure.\n");
+		  return(-1);
+		}
+	      
+	      /* Get pages swapped in */
+	      swapin[cpu_num] = cs.cpu_vminfo.pgswapin;
+	      /* Get pages swapped out */
+	      swapout[cpu_num] = cs.cpu_vminfo.pgswapout;
+	      /* Get number of blocks written */
+	      blocks_write[cpu_num] = cs.cpu_sysinfo.bwrite;
+	      /* Get number of blocks read */
+	      blocks_read[cpu_num] = cs.cpu_sysinfo.bread;
+	      /* Get number of Interrupts (since boot) */
+	      interrupts[cpu_num] = cs.cpu_sysinfo.intr;
+	      /* Get number of conext switches (since boot) */
+	      context_sw[cpu_num] = cs.cpu_sysinfo.pswitch;
+	      
+	      /* Counter for number of CPUs found. */
+	      /* cpu_slot might go from 0 to 15 (available CPU slots) while */
+	      /* cpu_num keeps track about actual number of CPUs read. */
+	      cpu_num++;
+	      
+	    } /* end else */
+	} /* end for */
       
       /* Trying not to destroy the probed object with the probe... */
       /* 1 sec delay between getting values from cs structure. */
       sleep(1);
       
-      /* Update cs structure with new kstat values after we are awake again. */
-      if (kstat_read(kctl, ksp, &cs) == -1)
-	{
-	  snmp_log(LOG_ERR, "vmstat_solaris2 (getMisc): failure to update cs structure.");
-	  return(NULL);
-	}
+      /* Look thru all the cpu slots on the machine whether it holds a CPU */
+      /* Important: num_cpu might be 12.  Then cpu_num is from 0 to 11, not 1 to 12 ! */
+      /* This is the same loop like above before the sleep(1).  Could be improved to */
+      /* cache the CPU slots that hold a CPU or similar */
       
-      /* Get new samples after waiting for counters to increments */
-      /* thru system activity. */
-      /* Get new number of pages swapped in, convert to kB and calculate difference */
-      swapin = ((cs.cpu_vminfo.pgswapin * getpagesize()) / 1024) - swapin ;
-      /* Get new number of pages swapped out, convert to kB and calculate difference */
-      swapout = ((cs.cpu_vminfo.pgswapin * getpagesize()) / 1024) - swapout ;
-      /* Get new number of blocks written and calculate difference */
-      blocks_write = cs.cpu_sysinfo.bwrite - blocks_write;
-      /* Get new number of blocks read and calculate difference */
-      blocks_read = cs.cpu_sysinfo.bread - blocks_read;
-      /* Get new number of interrupts and calculate difference */
-      interrupts = cs.cpu_sysinfo.intr - interrupts;
-      /* Get new number of context switches and calculate difference */
-      context_sw = cs.cpu_sysinfo.pswitch - context_sw;
+      /* We have to start over again */
+      cpu_num = 0;
+      
+      for (cpu_slot=0;cpu_num<num_cpu;cpu_slot++)
+	{ 
+	  if ((ksp = kstat_lookup(kctl, "cpu_stat", cpu_slot, NULL)) != NULL)
+	    {
+	      /* Yeah, we found a CPU. */
+	      /* Update cs structure with new kstat values after we are awake again. */
+	      if (kstat_read(kctl, ksp, &cs) == -1)
+		{
+		  snmp_log(LOG_ERR, "vmstat_solaris2 (getMisc:2): failure to update cs structure.\n");
+		  return(-1);
+		}
+	      
+	      /* Get new samples after waiting for counters to increments */
+	      /* thru system activity. */
+	      /* Get new number of pages swapped in and calculate difference */
+	      swapin[cpu_num] = (cs.cpu_vminfo.pgswapin - swapin[cpu_num]);
+	      /* Get new number of pages swapped out and calculate difference */
+	      swapout[cpu_num] = (cs.cpu_vminfo.pgswapout - swapout[cpu_num]);
+	      /* Get new number of blocks written and calculate difference */
+	      blocks_write[cpu_num] = cs.cpu_sysinfo.bwrite - blocks_write[cpu_num];
+	      /* Get new number of blocks read and calculate difference */
+	      blocks_read[cpu_num] = cs.cpu_sysinfo.bread - blocks_read[cpu_num];
+	      /* Get new number of interrupts and calculate difference */
+	      interrupts[cpu_num] = cs.cpu_sysinfo.intr - interrupts[cpu_num];
+	      /* Get new number of context switches and calculate difference */
+	      context_sw[cpu_num] = cs.cpu_sysinfo.pswitch - context_sw[cpu_num];
+	      
+	      /* Increment CPUs found count */
+	      cpu_num++;
+	      
+	    } /* end else */
+	} /* end for */
+      
+      /* Calculate averages for all CPUs and return single value */
+      /* Since these are static variables we need to initialize them properly */
+      swapin_avg = 0;
+      swapout_avg = 0;
+      blocks_write_avg = 0;
+      blocks_read_avg =0;
+      interrupts_avg = 0;
+      context_sw_avg = 0;
+      
+      /* First sum up all values */
+      for (cpu_num=0;cpu_num<num_cpu;cpu_num++)
+	{
+	  swapin_avg += swapin[cpu_num];
+	  swapout_avg += swapout[cpu_num];
+	  blocks_write_avg += blocks_write[cpu_num];
+	  blocks_read_avg += blocks_read[cpu_num];
+	  interrupts_avg += interrupts[cpu_num];
+	  context_sw_avg +=context_sw[cpu_num];
+	}
+
+      /* swapin and swapout are in pages, MIB wants kB/s, we sleep(1) so we just need to get kB */
+      /* getpagesize() returns pagesize in bytes */
+      swapin_avg = ((swapin_avg * getpagesize()) / 1024);
+      swapout_avg = ((swapout_avg * getpagesize()) / 1024);
+
+      /* Then divide by number of CPUs, discarding fractions */
+      swapin_avg /= num_cpu;
+      swapout_avg /= num_cpu;
+      blocks_write_avg /= num_cpu;
+      blocks_read_avg /= num_cpu;
+      interrupts_avg /= num_cpu;
+      context_sw_avg /= num_cpu;
       
     } /* end if (timestap_new > (timestamp_old_1 + 1)) */
   
-
   /* Return the requested variable, casting to long */
   switch (what)
     {
     case SWAPIN:
-      return((long) swapin);
+      return((long) swapin_avg);
     case SWAPOUT:
-      return((long) swapout);
+      return((long) swapout_avg);
     case IOSENT:
-      return((long) blocks_write);
+      return((long) blocks_write_avg);
     case IORECEIVE:
-      return((long) blocks_read);
+      return((long) blocks_read_avg);
     case SYSINTERRUPTS:
-      return((long) interrupts);
+      return((long) interrupts_avg);
     case SYSCONTEXT:
-      return((long) context_sw);  
+      return((long) context_sw_avg);
     default:
-      snmp_log(LOG_ERR,"vmstat_solaris2 (getMisc): No data found.");
+      snmp_log(LOG_ERR,"vmstat_solaris2 (getMisc): No data found.\n");
       return(-1);
     } /* end switch */
 
 } /* end function getMisc */
 
+
 /* getCPU: get percentages for CPU utilisation */
 /* state: CPU_IDLE, CPU_USER, CPU_KERNEL + CPU_WAIT = CPU_SYSTEM -> 0, 1, 4 */
-
 long getCPU(int state)
 {
+  
+  /* Variables start here */
+  
   /* From sys/kstat.h (included from kstat.h): */
   /* Pointer to current kstat */
   kstat_t *ksp;
@@ -228,11 +385,10 @@ long getCPU(int state)
   /* As always, we need s.th. to count on, aehm, by */
   int i=0;
   
-  ulong cpu_sum = 0;
-  ulong cpu_state[CPU_STATES];
-  ulong cpu_state_old[CPU_STATES];
-  /* Since MIB wants CPU_SYSTEM, see above */
-  static float cpu_perc[CPU_STATES +1];
+  /* Some variables declared global, see "Global Variables" section */
+  /* This array holds the averaged percentages for all CPU on this machine.  Thus it's declared */
+  /* static so we can reuse it if it's new enough. */
+  static float cpu_perc_avg[CPU_STATES+1];
 
   /* From time.h, get seconds since start of UNIX time... */
   time_t timestamp_new;
@@ -241,10 +397,16 @@ long getCPU(int state)
   /* From sys/sysinfo.h: */
   /* Structure which can hold all the CPU info kstat provides */
   cpu_stat_t cs;
-
+  
+  /* Counters */
+  int cpu_slot = 0;
+  int cpu_num = 0;
+  
+  /* Variables end here */
+  
   /* Get time */
   time(&timestamp_new);
-
+  
   /* If we have just gotten the data, return the values from last run (skip if) */
   /* This happens on a snmpwalk request.  No need to read the kstat again */
   /* if we just did it less than a second ago */
@@ -256,68 +418,129 @@ long getCPU(int state)
       /* Update timer */
       timestamp_old_2 = timestamp_new;
       
-      /* If ksp is NULL we don't have a CPU :) */
-      /* For MP machines: We hit an empty CPU board, trying next one... */
-      /* Right now instance is -1 so we return values for first CPU found */
-      
-      if ((ksp = kstat_lookup(kctl, "cpu_stat", -1, NULL)) == NULL)
-	{
-	  snmp_log(LOG_ERR, "vmstat_solaris2 (getCPU): kstat not found.");
-	  return(0);
-	}
-      
-      /* Yeah, we found a CPU. */
-      /* Read data from kstat into cs structure */
-      /* kc is the control structure, ksp the kstat we are reading */
-      /* and cs the buffer we are writing to. */
-      /* Memory allocation is done automagically by the kstat library. */
-      
-      if (kstat_read(kctl, ksp, &cs) == -1)
-	{
-	  snmp_log(LOG_ERR, "vmstat_solaris2 (getCPU): error getting cs.");
-	  return(0);
-	}
-      
-      /* CPU_STATES defined in sys/sysinfo.h */
-      
-      for (i=0 ; i < CPU_STATES ; i++)
-	{
-	  cpu_state_old[i] = cs.cpu_sysinfo.cpu[i];
-	}
+      /* Look thru all the cpu slots on the machine whether they holds a CPU */
+      /* and if so, get the data from that CPU */
+      /* Important: num_cpu might be 12.  Then cpu_num is from 0 to 11, not 1 to 12 ! */
+      for (cpu_slot=0;cpu_num<num_cpu;cpu_slot++)
+	{ 
+	  /* If ksp is NULL we don't have a CPU :) */
+	  /* For MP machines: We hit an empty CPU board, trying next one... */
+	  if ((ksp = kstat_lookup(kctl, "cpu_stat", cpu_slot, NULL)) != NULL)
+	    {
+	      /* Yeah, we found a CPU. */
+	      /* Read data from kstat into cs structure */
+	      /* kc is the control structure, ksp the kstat we are reading */
+	      /* and cs the buffer we are writing to. */
+	      /* Memory allocation is done automagically by the kstat library. */
+	      
+	      if (kstat_read(kctl, ksp, &cs) == -1)
+		{
+		  snmp_log(LOG_ERR, "vmstat_solaris2 (getCPU): error getting cs.\n");
+		  return(-1);
+		}
+	      
+	      /* CPU_STATES defined in sys/sysinfo.h */
+	      
+	      for (i=0 ; i < CPU_STATES ; i++)
+		{
+		  cpu_state_old[cpu_num][i] = cs.cpu_sysinfo.cpu[i];
+		}
+	      
+	      /* Counter for number of CPUs found. */
+	      /* cpu_slot might go from 0 to 15 (available CPU slots) while */
+	      /* cpu_num keeps track about actual number of CPUs read. */
+	      cpu_num++;
+	      
+	    } /* end else */
+	} /* end for */
       
       /* Trying not to destroy the probed object with the probe... */
       /* 1 sec delay between getting values from cs structure. */
       sleep(1);
+
+      /* Look thru all the cpu slots on the machine whether it holds a CPU */
+      /* Important: num_cpu might be 12.  Then cpu_num is from 0 to 11, not 1 to 12 ! */
+      /* This is the same loop like above before the sleep(1).  Could be improved to */
+      /* cache the CPU slots that hold a CPU or similar */ 
       
-      /* Update cs structure with new kstat values after we are awake again. */
-      kstat_read(kctl, ksp, &cs);
+      /* We have to start over again */
+      cpu_num = 0;
       
-      /* Get new samples after waiting for counters to increments */
-      /* thru system activity. */
-      /* Reset CPU activity counter */
-      cpu_sum = 0;
-      
-      /* Get new CPU data */
-      for (i=0 ; i < CPU_STATES ; i++)
-	{
-	  cpu_state[i] = cs.cpu_sysinfo.cpu[i] - cpu_state_old[i];
-	  cpu_sum += cpu_state[i];
-	}
-      
+
+      /* Look thru all the cpu slots on the machine whether they holds a CPU */
+      /* and if so, get the data from that CPU */
+      /* Important: num_cpu might be 12.  Then cpu_num is from 0 to 11, not 1 to 12 ! */
+      for (cpu_slot=0;cpu_num<num_cpu;cpu_slot++)
+	{  
+
+       	  /* If ksp is NULL we don't have a CPU :) */
+	  /* For MP machines: We hit an empty CPU board, trying next one... */
+	  if ((ksp = kstat_lookup(kctl, "cpu_stat", cpu_slot, NULL)) != NULL)
+	    {
+	      /* Yeah, we found a CPU. */
+	      /* Read data from kstat into cs structure */
+	      /* kc is the control structure, ksp the kstat we are reading */
+	      /* and cs the buffer we are writing to. */
+	      /* Memory allocation is done automagically by the kstat library. */
+	      
+	      /* Update cs structure with new kstat values after we are awake again. */
+	      
+	      if (kstat_read(kctl, ksp, &cs) == -1)
+		{
+		  snmp_log(LOG_ERR, "vmstat_solaris2 (getCPU): error getting cs.\n");
+		  return(-1);
+		}
+	       
+	      /* CPU_STATES defined in sys/sysinfo.h */
+	      /* Get new samples after waiting for counters to increments */
+	      /* thru system activity. */
+	      /* Reset CPU activity counter */
+	      cpu_sum[cpu_num] = 0;
+	      
+	      
+	      /* Get new CPU data */
+	      for (i=0 ; i < CPU_STATES ; i++)
+		{
+		  cpu_state[cpu_num][i] = cs.cpu_sysinfo.cpu[i] - cpu_state_old[cpu_num][i];
+		  cpu_sum[cpu_num] += cpu_state[cpu_num][i];
+		}
+	      
+	      /* Calculate percentage values for CPU utilisation */
+	      for (i=0 ; i < CPU_STATES ; i++)
+		{
+		  /* Cast from ulong to float */
+		  cpu_perc[cpu_num][i]= (((float) cpu_state[cpu_num][i] / cpu_sum[cpu_num]) * 100);
+		}
+	      
+	      /* MIB wants CPU_SYSTEM which is CPU_KERNEL + CPU_WAIT */
+	      cpu_perc[cpu_num][CPU_SYSTEM] = cpu_perc[cpu_num][CPU_KERNEL] + cpu_perc[cpu_num][CPU_WAIT];
+	      
+	      /* Increment CPUs found count */
+	      cpu_num++;
+	      
+	    } /* end else */
+	} /* end for */
+
+      /* Calculate avarages here FIXME */
+      /* First sum up all values */
       /* Calculate percentage values for CPU utilisation */
       for (i=0 ; i < CPU_STATES ; i++)
 	{
-	  /* Cast from ulong to float */
-	  cpu_perc[i]= (((float) cpu_state[i] / cpu_sum) * 100);
-	}
+	  /* Reset counter */
+	  cpu_perc_avg[i] = 0;
+	  for (cpu_num=0;cpu_num<num_cpu;cpu_num++)
+	    {
+	      cpu_perc_avg[i] += cpu_perc[cpu_num][i];
+	    } /* end for */
+	  cpu_perc_avg[i] /= (float) num_cpu;
+	} /* end for */
       
-      /* MIB wants CPU_SYSTEM which is CPU_KERNEL + CPU_WAIT */
-      cpu_perc[CPU_SYSTEM] = cpu_perc[CPU_KERNEL] + cpu_perc[CPU_WAIT];
-
+      cpu_perc_avg[CPU_SYSTEM] = cpu_perc_avg[CPU_KERNEL] + cpu_perc_avg[CPU_WAIT];
+      
     } /* end if (timestamp_new > (timestamp_old_2 + 1)) */
   
   /* Returns the requested percentage value, dropping fractions b/c casting to long */
-  return((long) cpu_perc[state]);
+  return((long) cpu_perc_avg[state]);
   
 } /* end function getCPU */
 
@@ -340,10 +563,9 @@ unsigned char *var_extensible_vmstat(struct variable *vp,
   /* right variable is requested */
   if (header_generic(vp,name,length,exact,var_len, write_method) != MATCH_SUCCEEDED)
     {
-      snmp_log(LOG_ERR,"vmstat_solaris2 (var_extensible_vmstat): Header check failed.\n");
       return(NULL);
-    }     
-  
+    }
+
   /* The function that actually returns s.th. */
   switch (vp->magic) {
   case MIBINDEX:
