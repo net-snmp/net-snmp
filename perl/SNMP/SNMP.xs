@@ -2720,7 +2720,8 @@ snmp_new_v3_session(version, peer, retries, timeout, sec_name, sec_level, sec_en
            }
         end:
            RETVAL = ss;
-	   free (session.contextEngineID);
+	   if (session.contextEngineIDLen > 0)
+	      free (session.contextEngineID);
 	}
         OUTPUT:
         RETVAL
