@@ -134,6 +134,13 @@ typedef int (Netsnmp_Node_Handler) (netsnmp_mib_handler *handler,
     netsnmp_agent_request_info *reqinfo,
     netsnmp_request_info *requests);
 
+    typedef struct netsnmp_handler_args_s {
+        netsnmp_mib_handler *handler;
+        netsnmp_handler_registration *reginfo;
+        netsnmp_agent_request_info *reqinfo;
+        netsnmp_request_info *requests;
+    } netsnmp_handler_args;
+
     typedef struct netsnmp_delegated_cache_s {
         int             transaction_id;
         netsnmp_mib_handler *handler;
