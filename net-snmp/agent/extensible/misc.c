@@ -3,9 +3,14 @@
 #include <unistd.h>
 #include <sys/fcntl.h>
 #include "wes.h"
+#include "mibincl.h"
 
 char *find_field();
 char *skip_white();
+
+#ifdef CACHETIME
+static long cachetime;
+#endif
 
 extern int numprocs, numextens;
 
@@ -121,18 +126,18 @@ int exec_command(ex)
 int get_exec_output(ex)
   struct extensible *ex;
 {
-  int fd[2],i, cnt;
+  int fd[2],i, cnt, fpid;
   FILE *ret;
   FILE *tmpout;
   char ctmp[STRMAX], *cptr1, *cptr2, argvs[STRMAX], **argv, **aptr;
 #ifdef CACHETIME
   char cache[MAXCACHESIZE];
   long cachebytes;
-  static long curtime, cachetime;
+  static long curtime;
   static struct extensible excompare;
   static char lastcmd[STRMAX];
   int cfd;
-  int lastresult, fpid;
+  int lastresult;
 #endif
 
 #ifdef CACHETIME
@@ -223,6 +228,32 @@ int get_exec_output(ex)
 #endif
 }
 
+clear_cache(action, var_val, var_val_type, var_val_len, statP, name, name_len)
+   int      action;
+   u_char   *var_val;
+   u_char   var_val_type;
+   int      var_val_len;
+   u_char   *statP;
+   oid      *name;
+   int      name_len;
+{
+  
+  struct myproc *proc;
+  int tmp=0, tmplen=1000;
+
+  if (var_val_type != INTEGER) {
+    printf("Wrong type != int\n");
+    return SNMP_ERR_WRONGTYPE;
+  }
+  asn_parse_int(var_val,&tmplen,&var_val_type,&tmp,sizeof(int));
+  if (tmp == 1 && action == COMMIT) {
+#ifdef CACHETIME
+    cachetime = 0;                      /* reset the cache next read */
+#endif 
+  } 
+  return SNMP_ERR_NOERROR;
+}
+
 int get_ps_output()
 {
   int fd;
@@ -233,3 +264,4 @@ int get_ps_output()
   fd = get_exec_output(&ex);
   return(fd);
 } 
+
