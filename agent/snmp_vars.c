@@ -286,8 +286,8 @@ search_subtree_vars(struct subtree *tp,
     register int	x;
     u_char		*access = NULL;
     int			result;
-    oid 		*suffix;
-    size_t		suffixlen;
+    oid 		*suffix = NULL;
+    size_t		suffixlen = 0;
 #if MIB_CLIENTS_ARE_EVIL
     oid			save[MAX_OID_LEN];
     size_t		savelen = 0;
@@ -299,8 +299,10 @@ search_subtree_vars(struct subtree *tp,
 	    }
 
 	    result = compare_tree(name, *namelen, tp->start, tp->start_len);
-	    suffixlen = *namelen - tp->namelen;
-	    suffix = name + tp->namelen;
+	    if (*namelen >= tp->namelen) {
+	      suffixlen = *namelen - tp->namelen;
+	      suffix = name + tp->namelen;
+	    }
 
 	    /* the following is part of the setup for the compatability
 	       structure below that has been moved out of the main loop.
@@ -344,13 +346,6 @@ search_subtree_vars(struct subtree *tp,
 		    DEBUGMSGOID(("snmp_vars", cvp->name, cvp->namelen));
 		    DEBUGMSG(("snmp_vars"," ...\n"));
 
-		    if (snmp_oid_compare(name, *namelen,
-		                          tp->start, tp->start_len) == 0 && 
-			!exact && (tp->flags & FULLY_QUALIFIED_INSTANCE)) {
-			DEBUGMSGTL(("snmp_vars", "aieee!\n"));
-			return NULL;
-		    }
-
 		gaga:
 		    access = (*(vp->findVar))(cvp, name, namelen, exact,
 					      len, write_method);
@@ -366,7 +361,7 @@ search_subtree_vars(struct subtree *tp,
 			 *  we'll simply discard it.
 			 */
 		    if (access && snmp_oid_compare(name, *namelen,
-						   tp->end, tp->end_len) > 0) {
+ 						   tp->end, tp->end_len) >=0) {
 			memcpy(name, tp->end, tp->end_len);
 			access = 0;
 		    }
@@ -475,7 +470,7 @@ getStatPtr(
     while (search_return == NULL && tp != NULL) {
 	DEBUGMSGTL(("snmp_vars", "Trying tree: "));
 	DEBUGMSGOID(("snmp_vars", tp->name, tp->namelen));
-	DEBUGMSG(("snmp_vars", "(start "));
+	DEBUGMSG(("snmp_vars", " (start "));
 	DEBUGMSGOID(("snmp_vars", tp->start, tp->start_len));
 	DEBUGMSG(("snmp_vars",") ...\n"));
 
