@@ -84,14 +84,14 @@ int main __P((int, char **));
 #define NULLPROTOX	((struct protox *) 0)
 struct protox {
 	u_char	pr_wanted;		/* 1 if wanted, 0 otherwise */
-	void	(*pr_cblocks) __P((void));	/* control blocks printing routine */
+	void	(*pr_cblocks) __P((char *));	/* control blocks printing routine */
 	void	(*pr_stats) __P((void));	/* statistics printing routine */
 	char	*pr_name;		/* well-known name */
 } protox[] = {
-	{ 1,	protopr,    tcp_stats,	"tcp" },
-	{ 1,	0,	    udp_stats,	"udp" },
-	{ 1,	0,	    ip_stats,	"ip" },
-	{ 1,	0,	    icmp_stats,	"icmp" },
+	{ 0,	protopr,    tcp_stats,	"tcp" },
+	{ 0,	protopr,    udp_stats,	"udp" },
+	{ 0,	0,	    ip_stats,	"ip" },
+	{ 0,	0,	    icmp_stats,	"icmp" },
 	{ 0,	0,	    0,		0 }
 };
 
@@ -110,9 +110,9 @@ int print_errors = 0;
 void
 usage __P((void))
 {
-    fprintf(stderr, "Usage: snmpnetstat [-v 1 | -v 2c] [-q] [-D] hostname community [-ainrs] [-p proto] [-I interface] [interval]      or:\n");
-    fprintf(stderr, "Usage: snmpnetstat [-v 2p] [-q] [-D] hostname noAuth [-ainrs] [-p proto] [-I interface] [interval]       or:\n");
-    fprintf(stderr, "Usage: snmpnetstat [-v 2p] [-q] [-D] hostname srcParty dstParty context [-ainrs] [-p proto] [-I interface] [interval]\n");
+    fprintf(stderr, "Usage: snmpnetstat [-v 1 | -v 2c] [-q] [-D] hostname community [-ainrs] [-P proto] [-I interface] [interval]      or:\n");
+    fprintf(stderr, "Usage: snmpnetstat [-v 2p] [-q] [-D] hostname noAuth [-ainrs] [-P proto] [-I interface] [interval]       or:\n");
+    fprintf(stderr, "Usage: snmpnetstat [-v 2p] [-q] [-D] hostname srcParty dstParty context [-ainrs] [-P proto] [-I interface] [interval]\n");
 }
 
 int
@@ -121,8 +121,9 @@ main(argc, argv)
 	char *argv[];
 {
     char *hostname = NULL;
-    register struct protoent *p;
-    register struct protox *tp = NULL;	/* for printing cblocks & stats */
+    struct protoent *p;
+    struct protox *tp = NULL;	/* for printing cblocks & stats */
+    int allprotos = 1;
     char *community = NULL;
     struct snmp_session session;
     char ctmp[128];
@@ -165,7 +166,11 @@ main(argc, argv)
 		snmp_set_do_debugging(1);
 		break;
 	      case 'p':
-		dest_port = atoi(argv[++arg]);
+		if (++arg == argc) {
+		    usage();
+		    exit(1);
+		}
+		dest_port = atoi(argv[arg]);
 		break;
 	      case 'c':
 		clock_flag++;
@@ -175,6 +180,10 @@ main(argc, argv)
 	      case 'v':
 		if (argv[arg][2] != 0) community = argv[arg]+2;
 		else community = argv[++arg];
+		if (arg == argc) {
+		    usage();
+		    exit(1);
+		}
 		if (!strcmp(community,"1"))
 		    version = SNMP_VERSION_1;
 		else if (!strcmp(community,"2c"))
@@ -213,18 +222,26 @@ main(argc, argv)
 		break;
 
 	      case 'P':
-		arg++;
+		if (++arg == argc) {
+		    usage();
+		    exit(1);
+		}
 		if ((tp = name2protox(argv [arg])) == NULLPROTOX) {
 		  fprintf(stderr, "%s: unknown or uninstrumented protocol\n",
 			  argv [arg]);
 		  exit(1);
 		}
+		allprotos = 0;
+		tp->pr_wanted = 1;
 		break;
 
 	      case 'I':
 		iflag++;
 		if (*(interface = argv[arg] + 2) == 0) {
-		  arg++;
+		  if (++arg == argc) {
+		      usage();
+		      exit(1);
+		  }
 		  if ((interface = argv[arg]) == 0)
 		    break;
 		}
@@ -408,14 +425,6 @@ main(argc, argv)
     setprotoent(1);
     setservent(1);
 
-    if (tp) {
-	if (tp->pr_stats)
-	    (*tp->pr_stats)();
-	else {
-	    printf("%s: no stats routine\n", tp->pr_name);
-	    exit(1);
-	}
-    }
     if (iflag) {
 	intpr(interval);
     }
@@ -429,21 +438,21 @@ main(argc, argv)
 	    routepr();
     }
     
-    if (tp || iflag || rflag || oflag)
+    if (iflag || rflag || oflag)
 	exit(0);
 
     while ((p = getprotoent())) {
 	for (tp = protox; tp->pr_name; tp++)
 	    if (strcmp(tp->pr_name, p->p_name) == 0)
 		break;
-	if (tp->pr_name == 0 || tp->pr_wanted == 0)
+	if (tp->pr_name == 0 || (tp->pr_wanted == 0 && allprotos == 0))
 	    continue;
 	if (sflag) {
 	    if (tp->pr_stats)
 		(*tp->pr_stats)();
 	} else
 	    if (tp->pr_cblocks)
-		(*tp->pr_cblocks)();
+		(*tp->pr_cblocks)(tp->pr_name);
     }
     endprotoent();
     endservent();

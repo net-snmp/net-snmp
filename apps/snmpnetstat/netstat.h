@@ -10,7 +10,7 @@ struct variable_list *getvarbyname __P((struct snmp_session *, oid *, int));
 
 void intpr __P((int));
 void intpro __P((int));
-void protopr __P((void));
+void protopr __P((char *));
 void routepr __P((void));
 void ip_stats __P((void));
 void icmp_stats __P((void));

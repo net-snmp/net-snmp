@@ -1,6 +1,20 @@
 This file contains major changes in released revisions.  Please read
 the ChangeLog file for a more detailed listing of changes/bug fixes.
 
+*3.5.2*
+    - very small last minute bug fixes for win32 and freebsd mostly.
+
+*3.5.1*
+
+ Fixes:
+    - Many bug fixes submitted by users and the ucd-snmp-coders.
+    - v2party support in the agent has been fixed.
+    - The UCD-SNMP-MIB is SMICng compliant and should work under HP OV better.
+    - Most sections of the mibII tree are 64bit clean.
+
+ Copyright:
+    - Simplification.
+
 *3.5*
 
  New:

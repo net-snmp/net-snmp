@@ -168,16 +168,29 @@ struct tcpconn_entry {
     struct tcpconn_entry *next;
 };
 
+struct udp_entry {
+    oid	    instance[5];
+    struct in_addr  localAddress;
+    int	    locAddrSet;
+    u_short localPort;
+    int	    locPortSet;
+    struct udp_entry *next;
+};
+
 #define TCPCONN_STATE	1
 #define TCPCONN_LOCADDR	2
 #define TCPCONN_LOCPORT	3
 #define TCPCONN_REMADDR	4
 #define TCPCONN_REMPORT	5
 
-
-
 static oid oid_tcpconntable[] = {1, 3, 6, 1, 2, 1, 6, 13, 1};
-#define ENTRY 9
+#define TCP_ENTRY 9
+
+#define UDP_LOCADDR 	1
+#define UDP_LOCPORT	2
+
+static oid oid_udptable[] = {1, 3, 6, 1, 2, 1, 7, 5, 1};
+#define UDP_ENTRY 9
 
 char *tcpstates[] = {
     "",		    "CLOSED",	    "LISTEN",   "SYNSENT",
@@ -191,22 +204,25 @@ char *tcpstates[] = {
  * protocol (currently only TCP).  For TCP, also give state of connection.
  */
 void
-protopr __P((void))
+protopr (name)
+    char *name;
 {
-    struct tcpconn_entry *tcpconn = NULL, *tp, *newp;
+    struct tcpconn_entry *tcpconn = NULL, *tcplast = NULL, *tp, *newtp;
+    struct udp_entry *udpconn = NULL, *udplast = NULL, *up, *newup;
     struct snmp_pdu *request, *response;
     struct variable_list *vp;
     oid *instance;
     int first, status;
 
     request = snmp_pdu_create(SNMP_MSG_GETNEXT);
-
     snmp_add_null_var(request, oid_tcpconntable, sizeof(oid_tcpconntable)/sizeof(oid));
 
-    while(1){
+    if (strcmp(name, "tcp") == 0) status = STAT_SUCCESS;
+    else status = STAT_TIMEOUT;
+    while (status == STAT_SUCCESS) {
 	status = snmp_synch_response(Session, request, &response);
 	if (status != STAT_SUCCESS || response->errstat != SNMP_ERR_NOERROR){
-	    fprintf(stderr, "SNMP request failed\n");
+	    snmp_perror("SNMP request failed");
 	    break;
 	}
 	vp = response->variables;
@@ -224,57 +240,47 @@ protopr __P((void))
 		    break;
 	}
 	if (tp == NULL){
-	    newp = (struct tcpconn_entry *)malloc(sizeof(struct tcpconn_entry));
-	    if (tcpconn == NULL){
-		tcpconn = newp;
-	    } else {
-		for(tp = tcpconn; tp->next != NULL; tp = tp->next)
-		    ;
-		tp->next = newp;
-	    }
-	    tp = newp;
+	    tp = (struct tcpconn_entry *)malloc(sizeof(struct tcpconn_entry));
+	    if (tcplast != NULL) tcplast->next = tp;
+	    tcplast = tp;
+	    if (tcpconn == NULL) tcpconn = tp;
 	    memset(tp, 0, sizeof(*tp));
-	    tp->next = NULL;
 	    memmove(tp->instance, instance, sizeof(tp->instance));
 	}
 
-	if (vp->name[ENTRY] == TCPCONN_STATE){
+	if (vp->name[TCP_ENTRY] == TCPCONN_STATE){
 	    tp->state = *vp->val.integer;
 	    tp->stateSet = 1;
-
 	}
 
-	if (vp->name[ENTRY] == TCPCONN_LOCADDR){
+	if (vp->name[TCP_ENTRY] == TCPCONN_LOCADDR){
             memmove(&tp->localAddress, vp->val.string, sizeof(u_long));
 	    tp->locAddrSet = 1;
-
 	}
 
-	if (vp->name[ENTRY] == TCPCONN_LOCPORT){
+	if (vp->name[TCP_ENTRY] == TCPCONN_LOCPORT){
 	    tp->localPort = *vp->val.integer;
 	    tp->locPortSet = 1;
-
 	}
 
-	if (vp->name[ENTRY] == TCPCONN_REMADDR){
+	if (vp->name[TCP_ENTRY] == TCPCONN_REMADDR){
             memmove(&tp->remoteAddress, vp->val.string, sizeof(u_long));
 	    tp->remAddrSet = 1;
-
 	}
 
-	if (vp->name[ENTRY] == TCPCONN_REMPORT){
+	if (vp->name[TCP_ENTRY] == TCPCONN_REMPORT){
 	    tp->remotePort = *vp->val.integer;
 	    tp->remPortSet = 1;
-
 	}
 	snmp_free_pdu(response);
 	response = NULL;
     }
     if (response) snmp_free_pdu(response);
+    response = NULL;
 
-    for(first = 1, tp = tcpconn, newp = NULL; tp != NULL; tp = tp->next){
-	if (newp) free(newp);
-	newp = tp;
+    for(first = 1, tp = tcpconn, newtp = NULL; tp != NULL; tp = tp->next) {
+	if (newtp) free(newtp);
+	newtp = tp;
 	if (!(tp->stateSet && tp->locAddrSet
 	    && tp->locPortSet && tp->remAddrSet && tp->remPortSet)){
 		printf("incomplete entry\n");
@@ -283,16 +289,15 @@ protopr __P((void))
 	if (!aflag && tp->state == MIB_TCPCONNSTATE_LISTEN)
 	    continue;
 	if (first){
-	    printf("Active Internet Connections");
+	    printf("Active Internet (%s) Connections", name);
 	    if (aflag)
 		printf(" (including servers)");
 	    putchar('\n');
-	    printf("%-5.5s %-6.6s %-6.6s  %-22.22s %-22.22s %s\n",
-		    "Proto", "Recv-Q", "Send-Q",
-		    "Local Address", "Foreign Address", "(state)");
+	    printf("%-5.5s %-28.28s %-28.28s %s\n",
+		    "Proto", "Local Address", "Foreign Address", "(state)");
 	    first = 0;
 	}
-	printf("%-5.5s %6d %6d ", "tcp", 0, 0);
+	printf("%-5.5s ", "tcp");
 	inetprint(&tp->localAddress, tp->localPort, "tcp");
 	inetprint(&tp->remoteAddress, tp->remotePort, "tcp");
 	if (tp->state < 1 || tp->state > TCP_NSTATES)
@@ -301,7 +306,76 @@ protopr __P((void))
 	    printf(" %s", tcpstates[tp->state]);
 	putchar('\n');
     }
-    if(newp) free(newp);
+    if(newtp) free(newtp);
+
+    request = snmp_pdu_create(SNMP_MSG_GETNEXT);
+    snmp_add_null_var(request, oid_udptable, sizeof(oid_udptable)/sizeof(oid));
+
+    if (strcmp (name, "udp") == 0) status = STAT_SUCCESS;
+    else status = STAT_TIMEOUT;
+    while (status == STAT_SUCCESS) {
+	status = snmp_synch_response(Session, request, &response);
+	if (status != STAT_SUCCESS || response->errstat != SNMP_ERR_NOERROR){
+	    fprintf(stderr, "SNMP request failed\n");
+	    break;
+	}
+	vp = response->variables;
+	if (vp->name_length != 15 ||
+            memcmp(vp->name, oid_udptable, sizeof(oid_udptable))){
+		break;
+	}
+	
+	request = snmp_pdu_create(SNMP_MSG_GETNEXT);
+	snmp_add_null_var(request, vp->name, vp->name_length);
+
+	instance = vp->name + 10;
+	for(up = udpconn; up != NULL; up = up->next){
+	    if (!memcmp(instance, up->instance, sizeof(up->instance)))
+		    break;
+	}
+	if (up == NULL){
+	    up = (struct udp_entry *)malloc(sizeof(struct udp_entry));
+	    if (udplast != NULL) udplast->next = up;
+	    udplast = up;
+	    if (udpconn == NULL) udpconn = up;
+	    memset(up, 0, sizeof(*up));
+	    up->next = NULL;
+	    memmove(up->instance, instance, sizeof(up->instance));
+	}
+
+	if (vp->name[UDP_ENTRY] == UDP_LOCADDR){
+            memmove(&up->localAddress, vp->val.string, sizeof(u_long));
+	    up->locAddrSet = 1;
+	}
+
+	if (vp->name[UDP_ENTRY] == UDP_LOCPORT){
+	    up->localPort = *vp->val.integer;
+	    up->locPortSet = 1;
+	}
+	snmp_free_pdu(response);
+	response = NULL;
+    }
+    if (response) snmp_free_pdu(response);
+
+    for(first = 1, up = udpconn, newup = NULL; up != NULL; up = up->next){
+	if (newup) free(newup);
+	newup = up;
+	if (!(up->locAddrSet && up->locPortSet)){
+		printf("incomplete entry\n");
+		continue;
+	}
+	if (first){
+	    printf("Active Internet (%s) Connections", name);
+	    putchar('\n');
+	    printf("%-5.5s %-28.28s\n",
+		    "Proto", "Local Address");
+	    first = 0;
+	}
+	printf("%-5.5s ", "udp");
+	inetprint(&up->localAddress, up->localPort, "udp");
+	putchar('\n');
+    }
+    if(newup) free(newup);
 
 }
 
@@ -482,7 +556,7 @@ inetprint(in, port, proto)
 	char line[80], *cp;
 	int width;
 
-	sprintf(line, "%.*s.", 16, inetname(*in));
+	sprintf(line, "%.*s.", 22, inetname(*in));
 	cp = (char *) strchr(line, '\0');
 	if (!nflag && port)
 		sp = getservbyport(htons(port), proto);
@@ -490,7 +564,7 @@ inetprint(in, port, proto)
 		sprintf(cp, "%.8s", sp ? sp->s_name : "*");
 	else
 		sprintf(cp, "%d", port);
-	width = 22;
+	width = 28;
 	printf(" %-*.*s", width, width, line);
 }
 

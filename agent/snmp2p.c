@@ -76,9 +76,7 @@ SOFTWARE.
 #include "mib.h"
 #include "snmpd.h"
 
-#include "snmpd.h"
-
-extern int open_port __P(( u_short ));
+static int agent_party_init __P((in_addr_t, u_short, char *));
 
 /*
  * In: My ip address, View subtree
@@ -88,7 +86,7 @@ extern int open_port __P(( u_short ));
  * Out: returns 0 if OK, 1 if conflict with a pre-installed
  * party/context/acl/view, -1 if an error occurred.
  */
-int
+static int
 agent_party_init(myaddr, dest_port, view)
     in_addr_t myaddr;
     u_short dest_port;
@@ -389,11 +387,8 @@ init_snmp2p( dest_port )
     }
 }
 
-extern int (*sd_handlers[])__P((int));
-extern int snmp_read_packet __P((int));
-
 void
-open_ports_snmp2p()
+open_ports_snmp2p __P((void))
 {
     struct partyEntry *pp;
     in_addr_t myaddr;

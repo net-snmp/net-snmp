@@ -94,7 +94,7 @@ static void sprint_float __P((char *, struct variable_list *, struct enum_list *
 static void sprint_double __P((char *, struct variable_list *, struct enum_list *, char *, char *));
 #endif
 
-static int quick_print = 0;
+int quick_print = 0;
 static int full_objid = 0;
 static int suffix_only = 0;
 
@@ -931,8 +931,8 @@ unsigned char SECRETS_MIB_text[] = ".iso.org.dod.internet.snmpSecrets";
 extern struct tree *tree_head;
 struct tree *Mib;             /* Backwards compatibility */
 
-char Standard_Prefix[] = ".1.3.6.1.2.1.";
-char Prefix[128];
+static char Standard_Prefix[] = ".1.3.6.1.2.1.";
+static char *Prefix;
 
 
 struct tree *get_tree_head __P((void))
@@ -1048,6 +1048,7 @@ init_mib __P((void))
 	    read_module(entry);
 	    entry = strtok( NULL, ENV_SEPARATOR);
 	}
+	adopt_orphans();
     }
 
     path[0] = 0;
@@ -1080,6 +1081,7 @@ init_mib __P((void))
     if (!prefix)
         prefix = Standard_Prefix;
     if (prefix[0] == '.') prefix++;    /* get past leading dot. */
+    Prefix = malloc(strlen(prefix)+2);
     strcpy(Prefix, prefix);
     if (Prefix[strlen(Prefix) - 1] != '.')
         strcat(Prefix, ".");  /* add a trailing dot in case user didn't */ 
@@ -1312,24 +1314,24 @@ sprint_objid(buf, objid, objidlen)
     }
     else if (!full_objid) {
 	cp = tempbuf;
-	if (strlen(tempbuf) > strlen(RFC1213_MIB_text)
+	if (strlen(tempbuf) > strlen(Prefix)
+	    && !memcmp(tempbuf+1, Prefix, strlen(Prefix)-1))
+            cp += strlen(Prefix) + 1;
+	else if (strlen(tempbuf) > strlen(RFC1213_MIB_text)
 	    && !memcmp(tempbuf, RFC1213_MIB_text, strlen(RFC1213_MIB_text)))
 	    cp += sizeof(RFC1213_MIB_text);
-	if (strlen(tempbuf) > strlen(EXPERIMENTAL_MIB_text)
+	else if (strlen(tempbuf) > strlen(EXPERIMENTAL_MIB_text)
 	    && !memcmp(tempbuf, EXPERIMENTAL_MIB_text, strlen(EXPERIMENTAL_MIB_text)))
             cp += sizeof(EXPERIMENTAL_MIB_text);
-	if (strlen(tempbuf) > strlen(PRIVATE_MIB_text)
+	else if (strlen(tempbuf) > strlen(PRIVATE_MIB_text)
 	    && !memcmp(tempbuf, PRIVATE_MIB_text, strlen(PRIVATE_MIB_text)))
             cp += sizeof(PRIVATE_MIB_text);
-	if (strlen(tempbuf) > strlen(PARTY_MIB_text)
+	else if (strlen(tempbuf) > strlen(PARTY_MIB_text)
 	    && !memcmp(tempbuf, PARTY_MIB_text, strlen(PARTY_MIB_text)))
             cp += sizeof(PARTY_MIB_text);
-	if (strlen(tempbuf) > strlen(SECRETS_MIB_text)
+	else if (strlen(tempbuf) > strlen(SECRETS_MIB_text)
 	    && !memcmp(tempbuf, SECRETS_MIB_text, strlen(SECRETS_MIB_text)))
             cp += sizeof(SECRETS_MIB_text);
-	if (strlen(tempbuf) > strlen(Prefix)
-	    && !memcmp(tempbuf, Prefix, strlen(Prefix)))
-            cp += strlen(Prefix) + 1;
     }
     else cp = tempbuf;
     strcpy(buf, cp);

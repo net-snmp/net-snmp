@@ -45,19 +45,14 @@ all refer to the same variable name.  Likewise:
 .PP
 All refer to the same variable name.
 .PP
-The description of the variables in the MIB is given in a file named
-.I "mib.txt"
-in the current directory or in a file named in the environment variable
-.I "MIBFILE" or in
-.I "/etc/mib.txt".
-These files are searched in the above order.  The files are in the ASN.1 notation and use the
-OBJECT TYPE macro defined in RFC 1065.  Most of the file describing the RFC 1066 MIB is pulled
-out of RFC 1066 without change.
+The description of the variables in the MIB is given in the set of mib
+files defined by the MIBS environmental variable (or the default list
+defined at compilation time) and the mib files in the
+DATADIR/snmp/mibs directory (or the MIBDIRS environmental variable).
 .SH "SEE ALSO"
 RFC 1065, RFC 1066, RFC 1067, ISO IS 8824(ASN.1)
 .SH BUGS
-The parser of the
-.I "mib.txt"
-file is not expected to handle bizarre (although correct) interpretations of the ASN.1 notation.
+The parser of the mib files file is not expected to handle bizarre
+(although correct) interpretations of the ASN.1 notation.
 
 

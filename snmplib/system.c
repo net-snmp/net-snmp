@@ -158,8 +158,7 @@ opendir(char *filename)
     p->start = (char*)malloc(idx * sizeof(char));
     /* New(1304, p->start, idx, char);*/
     if(p->start == NULL) {
-	fprintf(stderr,"opendir: malloc failed!\n");
-	exit(1);
+	return NULL;
     }
     strcpy(p->start, FindData.cFileName);
 /*  if(downcase)
@@ -181,8 +180,7 @@ opendir(char *filename)
 			idx+len+1 * sizeof(char));
 	/* Renew(p->start, idx+len+1, char);*/
 	if(p->start == NULL) {
-	    fprintf(stderr,"opendir: malloc failed!\n");
-		exit(1);
+	    return NULL;
 	}
 	strcpy(&p->start[idx], FindData.cFileName);
 /*	if (downcase) 

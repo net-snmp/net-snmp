@@ -9,3 +9,5 @@
 #define INP_PREV_SYMBOL inp_list.le_prev
 #undef TCP_TTL_SYMBOL
 #define TCP_TTL_SYMBOL "ip_defttl"
+
+#define UTMP_FILE _PATH_UTMP

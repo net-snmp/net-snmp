@@ -26,10 +26,31 @@
  * 
  **********************************************************************/
 
-#include "config.h"
+#include <config.h>
 
+#if HAVE_STDLIB_H
+#include <stdlib.h>
+#endif
+#if HAVE_UNISTD_H
+#include <unistd.h>
+#endif
+#if HAVE_STRING_H
+#include <string.h>
+#else
+#include <strings.h>
+#endif
+#include <sys/types.h>
+#if HAVE_NETINET_IN_H
+#include <netinet/in.h>
+#endif
+#include <stdio.h>
+#include <ctype.h>
 #if TIME_WITH_SYS_TIME
-# include <sys/time.h>
+# ifdef WIN32
+#  include <sys/timeb.h>
+# else
+#  include <sys/time.h>
+# endif
 # include <time.h>
 #else
 # if HAVE_SYS_TIME_H
@@ -38,32 +59,17 @@
 #  include <time.h>
 # endif
 #endif
-
-#if HAVE_STRING_H
-# include <string.h>
-#else /* HAVE_STRINGS_Hs */
-# include <string.h>
-#endif /* HAVE_STRINGS_H */
-
-#if HAVE_MALLOC_H
-# include <malloc.h>
-#endif /* HAVE_MALLOC_H */
-
-#if HAVE_STDLIB_H
-# include <stdlib.h>
-#endif /* HAVE_STDLIB_H */
-
-#if HAVE_UNISTD_H
-# include <unistd.h>
-#endif /* HAVE_UNISTD_H */
-
 #if HAVE_SYS_SELECT_H
-# include <sys/select.h>
-#endif /* HAVE_SYS_SELECT_H */
-#include <stdio.h>
-#include <sys/types.h>
-#include <netinet/in.h>
-#include <ctype.h>
+#include <sys/select.h>
+#endif
+#if HAVE_WINSOCK_H
+#include <winsock.h>
+#else
+#include <netdb.h>
+#endif
+#if HAVE_ARPA_INET_H
+#include <arpa/inet.h>
+#endif
 
 #include "asn1.h"
 #include "snmp_api.h"
@@ -71,8 +77,8 @@
 #include "snmp_client.h"
 #include "mib.h"
 #include "snmp.h"
-#include "snmp_parse_args.h"
 #include "system.h"
+#include "snmp_parse_args.h"
 
 #define MAX_ARGS 256
     
@@ -97,7 +103,7 @@ struct varInfo {
 
 int main __P((int, char **));
 int wait_for_peak_start __P((int period, int peak));
-void log __P((char *file, char *message));
+void print_log __P((char *file, char *message));
 void sprint_descriptor __P((char *buffer, struct varInfo *vip));
 void processFileArgs __P((char *fileName));
 void wait_for_period __P((int period));
@@ -151,7 +157,7 @@ int peak;
   return target;
 }
 
-void log(file, message)
+void print_log(file, message)
 char *file;
 char *message;
 {
@@ -569,7 +575,7 @@ char **argv;
 	  if (print){
 	    if (fileout){
 	      sprintf(filename, "%s-%s", gateway, vip->descriptor);
-	      log(filename, outstr + 1);
+	      print_log(filename, outstr + 1);
 	    } else {
 	      if (tableForm) printf("%s", outstr);
 	      else printf("%s\n", outstr + 1);
@@ -632,5 +638,5 @@ char **argv;
   }
   snmp_close(ss);
   SOCK_CLEANUP;
-  exit(0);
+  return(0);
 }
