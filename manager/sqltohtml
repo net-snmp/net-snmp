@@ -70,7 +70,26 @@ if (!defined($group)) {
 					my $h = shift;
 					return if ($key ne "groupname");
 					return addtoken($q,"group=$h");
-				    }
+				    },
+		     '-beginhook', 
+		     sub { 
+			 my $q = $query->self_url;
+			 my($junk, $data) = @_;
+			 if (!defined($data)) {
+			     print "<td></td>";
+			     return;
+			 }
+			 my ($cur, $row);
+			 $cur = getcursor("select host from hostgroups where groupname = '$data->{groupname}'");
+			 while (  $row = $cur->fetchrow_hashref ) {
+			     if (checkhost($data->{'groupname'}, 
+					   $row->{'host'})) {
+				 print "<td><a href=\"" . addtoken($q,"group=$data->{groupname}&summarizegroup=1") . "\"><img border=0 src=$redimage></a></td>\n";
+				 return;
+			     }
+			 }
+			 print "<td><img src=$greenimage></td>\n";
+		     }
 		     );
 	$dbh->disconnect();
 	Exit(0);
@@ -159,7 +178,7 @@ if (!defined($host)) {
 			 print "<td></td>";
 			 return;
 		     }
-		     if (checkhost($data->{'host'})) {
+		     if (checkhost($group, $data->{'host'})) {
 			 print "<td><a href=\"" . addtoken($q,"group=$group&summarizehost=1&host=$data->{host}") . "\"><img border=0 src=$redimage></a></td>\n";
 		     } else {
 			 print "<td><img src=$greenimage></td>\n";
@@ -186,6 +205,10 @@ sub addtoken {
     return "$url?$token";
 }
 
+#
+# summarizeerrors(CLAUSE):
+#   summarize the list of errors in a given CLAUSE
+#
 sub summarizeerrors {
     my $clause = shift;
     print "<table $tableparms><tr><td>host</td><td>table</td><td>description</td></tr>\n";
@@ -228,6 +251,7 @@ sub mykeysort {
 
 # if anything in a host is red, return 1, else 0
 sub checkhost {
+    my $group = shift;
     my $host = shift;
     my ($tblh);
 
