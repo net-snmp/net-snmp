@@ -5,14 +5,23 @@ TARG=	snmpd
 LIBS=	../lib/libsnmp.a
 LDFLAGS=
 OSFLAGS=
-CFLAGS=-g -I../snmplib ${INCLUDES} -DDEBUG ${OSFLAGS}
-CC = gcc
+
+# HPUX compilers (and most others)
+CFLAGS= -g -I../snmplib ${INCLUDES} -DDEBUG ${OSFLAGS}
+CC = cc
+
+# gcc compilers
+#CFLAGS=-g -I../snmplib ${INCLUDES} -DDEBUG ${OSFLAGS}
+#CC = gcc -Wall
+
 DIRS=extensible
 EXTENSIBLEOBJS=extensible/misc.o extensible/read_config.o extensible/extensible.o extensible/hpmibs.o extensible/versioninfo.o\
         extensible/proc.o extensible/exec.o
-all: 
-	cd extensible; make all ; cd ..
-	$(MAKE) $(TARG)
+
+all: subdirs snmpd
+
+subdirs:
+	cd extensible; make all 
 
 snmpd:	snmpd.o kernel.o ${LIBS} snmp_agent.o snmp_vars.o snmp_var_route.o party_vars.o context_vars.o acl_vars.o view_vars.o view_parse.o alarm.o event.o route_write.o ${EXTENSIBLEOBJS}
 	${CC} -o $@ snmpd.o kernel.o snmp_agent.o snmp_vars.o snmp_var_route.o party_vars.o context_vars.o acl_vars.o view_vars.o view_parse.o alarm.o event.o route_write.o   ${EXTENSIBLEOBJS} ${LIBS}  ${LDFLAGS}
@@ -22,6 +31,7 @@ sabersnmpd:	snmpd.c kernel.o snmp_agent.c snmp_vars.o snmp_var_route.o party_var
 
 clean:
 	rm -f *.o ${TARG}
+	cd extensible; make clean
 
 install:
 	cp ${TARG} ../bin
