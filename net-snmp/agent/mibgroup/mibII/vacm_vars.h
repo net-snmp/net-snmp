@@ -24,6 +24,7 @@ void vacm_parse_view (const char *, char *);
 void vacm_parse_simple (const char *, char *);
 
 SNMPCallback vacm_in_view_callback;
+SNMPCallback vacm_warn_if_not_configured;
 
 int vacm_in_view (netsnmp_pdu *, oid *, size_t);
 
