@@ -841,6 +841,11 @@ snmp_shutdown(const char *type)
     shutdown_mib();
 #endif /* DISABLE_MIB_LOADING */
     unregister_all_config_handlers();
+    netsnmp_container_free_list();
+    clear_sec_mod();
+    clear_snmp_enum();
+    netsnmp_clear_tdomain_list();
+    clear_callback();
     netsnmp_ds_shutdown();
 }
 

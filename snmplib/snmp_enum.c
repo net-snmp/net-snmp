@@ -350,6 +350,7 @@ clear_snmp_enum(void)
 {
     struct snmp_enum_list_str *sptr = sliststorage, *next = NULL;
     struct snmp_enum_list *list = NULL, *nextlist = NULL;
+    int i;
 
     while (sptr != NULL) {
 	next = sptr->next;
@@ -366,6 +367,13 @@ clear_snmp_enum(void)
     }
     sliststorage = NULL;
 
+    if (snmp_enum_lists) {
+        for (i = 0; i < SE_MAX_IDS; i++) {
+            if (snmp_enum_lists[i])
+                SNMP_FREE(snmp_enum_lists[i]);
+        }
+        SNMP_FREE(snmp_enum_lists);
+    }
 }
 
 void
