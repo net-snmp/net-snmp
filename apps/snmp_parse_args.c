@@ -409,6 +409,16 @@ snmp_parse_args(int argc,
   /* make master key from pass phrases */
   if (Apsz) {
       session->securityAuthKeyLen = USM_AUTH_KU_LEN;
+      if (session->securityAuthProto == NULL) {
+          /* get .conf set default */
+          session->securityAuthProto =
+              get_default_authtype(&session->securityAuthProtoLen);
+      }
+      if (session->securityAuthProto == NULL) {
+          /* assume MD5 */
+          session->securityAuthProto = usmHMACMD5AuthProtocol;
+          session->securityAuthProtoLen = USM_AUTH_PROTO_MD5_LEN;
+      }
       if (generate_Ku(session->securityAuthProto,
                       session->securityAuthProtoLen,
                       (u_char *)Apsz, strlen(Apsz),
@@ -421,6 +431,16 @@ snmp_parse_args(int argc,
   }
   if (Xpsz) {
       session->securityPrivKeyLen = USM_PRIV_KU_LEN;
+      if (session->securityPrivProto == NULL) {
+          /* get .conf set default */
+          session->securityPrivProto =
+              get_default_privtype(&session->securityPrivProtoLen);
+      }
+      if (session->securityPrivProto == NULL) {
+          /* assume DES */
+          session->securityPrivProto = usmDESPrivProtocol;
+          session->securityPrivProtoLen = USM_PRIV_PROTO_DES_LEN;
+      }
       if (generate_Ku(session->securityAuthProto,
                       session->securityAuthProtoLen,
                       (u_char *)Xpsz, strlen(Xpsz),
