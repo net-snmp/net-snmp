@@ -606,6 +606,10 @@ unsigned char *var_extensible_loadave(vp, name, length, exact, var_len, write_me
       *var_len = strlen(errmsg);
       return((u_char *) (errmsg));
   }
+#ifdef HAVE_GETLOADAVG
+  if (getloadavg(avenrun, sizeof(avenrun) / sizeof(avenrun[0])) == -1)
+    return(0);
+#else
 #if defined(ultrix) || defined(sun) || defined(__alpha)
   if (KNLookup(NL_AVENRUN,(int *) favenrun, sizeof(favenrun)) == NULL)
     return(0);
@@ -614,7 +618,8 @@ unsigned char *var_extensible_loadave(vp, name, length, exact, var_len, write_me
 #else
   if (KNLookup(NL_AVENRUN,(int *) avenrun, sizeof(double)*3) == NULL)
     return(0);
-#endif
+#endif /* !HAVE_GETLOADAVG */
+#endif /* HAVE_GETLOADAVG */
   switch (vp->magic) {
     case LOADAVE:
       sprintf(errmsg,"%.2f",avenrun[newname[*length-1]-1]);
@@ -652,7 +657,7 @@ setPerrorstatus(to)
   char *to;
 {
   char buf[STRMAX];
-#ifndef netbsd1
+#if !defined(netbsd1) && !defined(freebsd2)
   extern char *sys_errlist[];
 #endif
   extern int errno;
@@ -882,7 +887,7 @@ init_extensible() {
   }
   for(ret = 0; nl[ret].n_name != NULL; ret++) {
     if (nl[ret].n_type == 0) {
-      DEBUGP1("nlist err:  %s not found\n",nl[ret].n_name)
+      DEBUGP1("nlist err:  %s not found\n", nl[ret].n_name)
     }
   }
 
