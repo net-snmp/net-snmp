@@ -288,6 +288,11 @@ extErrFix OBJECT-TYPE
 		snmp operations."
 	::= { extEntry 102 }
 	
+--
+-- Memory usage/watch reporting.
+--   Not supported on all systems!
+--   See agent/mibgroup/ucd_snmp.h to see if its loaded for your architecture.
+--
 memory OBJECT IDENTIFIER ::= { ucdavis 4 }
 
 memIndex OBJECT-TYPE
