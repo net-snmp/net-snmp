@@ -176,7 +176,11 @@ int read_config(filename, procp, numps, pprelocs, numrelocs, pppassthrus,
 	      while ((i = getmntent (mntfp, &mnttab)) == 0)
 		if (strcmp (disk[*numdisks].path, mnttab.mnt_mountp) == 0)
 		  break;
-		else printf ("%s != %s\n", disk[*numdisks].path, mnttab.mnt_mountp);
+		else {
+#ifdef DODEBUG
+                  printf ("%s != %s\n", disk[*numdisks].path, mnttab.mnt_mountp);
+#endif
+                }
 	      if (i == 0) {
 		copy_word (mnttab.mnt_special, disk[*numdisks].device);
 		*numdisks += 1;
