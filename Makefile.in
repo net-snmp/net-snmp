@@ -291,7 +291,7 @@ warningcheck:
 # always exit 1, since I can't figure out how to invert grep rc
 commentcheck:
 	@echo "Checking for C++ style comments..."
-	@grep -n -E "([^:]|^)//" `find . -path './win32' -prune -o -name \*.\[ch\]`
+	@grep -n -E "([^:)]|^)//" `find . -path './win32' -prune -o -name \*.\[ch\]`
 	@exit 1
 
 # always exit 1, since I can't figure out how to invert grep rc
