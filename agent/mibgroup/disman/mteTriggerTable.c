@@ -2087,10 +2087,11 @@ mte_discontinuity_occurred(struct mteTriggerTable_data *item)
   }
 
   if (item->mteTriggerDeltaDiscontinuityIDLen == 0 ||
-      (item->mteTriggerDeltaDiscontinuityIDLen == 2 &&
-       item->mteTriggerDeltaDiscontinuityID[0] == 0 && 
-       item->mteTriggerDeltaDiscontinuityID[1] == 0)) {
-    DEBUGMSGTL(("mte_disco", "discoID is either zero-length or 0.0\n"));
+      (snmp_oid_compare(item->mteTriggerDeltaDiscontinuityID,
+			item->mteTriggerDeltaDiscontinuityIDLen,
+			sysUpTimeInstance,
+			sizeof(sysUpTimeInstance)/sizeof(oid)) == 0)) {
+    DEBUGMSGTL(("mte_disco", "discoID either zero-length or sysUpTimeInstance\n"));
   } else {
     snmp_add_null_var(pdu, item->mteTriggerDeltaDiscontinuityID,
 		      item->mteTriggerDeltaDiscontinuityIDLen);
