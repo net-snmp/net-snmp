@@ -19,12 +19,12 @@
 .\" ARISING OUT OF OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS
 .\" SOFTWARE.
 .\" ******************************************************************/
-.TH SNMPTRAPD 8 "05 Feb 2000"
+.TH SNMPTRAPD 8 "15 May 2000"
 .UC 4
 .SH NAME
 snmptrapd - Receive and log snmp trap messages.
 .SH SYNOPSIS
-snmptrapd [-h] [-P] [-s] [-p port] [-d] [-e] [-D tokens] [-l [d0-7]] [-f] [-H] [-a] [-O oidopts] [-C] [-c confFile]
+snmptrapd [-h] [-P] [-s] [-p port] [-d] [-e] [-D tokens] [-l [d0-7]] [-f] [-H] [-a] [-O oidopts] [-C] [-c confFile] [-F FORMAT]
 .SH DESCRIPTION
 Snmptrapd
 is an SNMP application that receives and logs snmp trap messages
@@ -69,8 +69,128 @@ Set OID printing options (see snmpcmd(1))
 Don't read the default set of configuration files.
 .IP "-c confFile"
 Force the reading of confFile as a configuration file.
+.IP "-F FORMAT"
+When logging to standard output, use the format in the string FORMAT.
+.PP
+FORMAT is a printf-like string. 
+.I Snmptrapd 
+interprets the following command sequences:
+.TP
+%%
+a literal %
+.TP
+%t
+decimal number of seconds since the operating system's epoch
+.TP
+%y
+current year
+.TP
+%m
+current (numeric) month
+.TP
+%l
+current day of month
+.TP
+%h
+current hour
+.TP
+%j
+current minute
+.TP
+%k
+current second
+.TP
+%T
+up-time in seconds (in decimal)
+.TP
+%Y
+the year field from the up-time
+.TP
+%M
+the numeric month field from the up-time
+.TP
+%L
+the day of month field from the up-time
+.TP
+%H
+the hour field from the up-time
+.TP
+%J
+the minute field from the up-time
+.TP
+%K
+the seconds field from the up-time
+.TP
+%A
+agent's hostname if available, otherwise IP address
+.TP
+%a
+agent's IP address
+.TP
+%B
+PDU's hostname if available, otherwise IP address
+.TP
+%b
+PDU's IP address
+.TP
+%N
+Enterprise string
+.TP
+%w
+Trap type (numeric, in decimal)
+.TP
+%W
+Trap description
+.TP
+%q
+Trap sub-type (numeric, in decimal)
+.TP
+%v
+list of trap's variables
+.PP
+In addition to these values, you may also specify an optional field
+width and precision, just as in printf, and a flag value. The
+following flags are legal:
+.TP
+-
+left justify
+.TP
+0
+use leading zeros
+.TP
+#
+use alternate form
+.PP
+The "use alternate form" flag changes the behavior of some format
+flags. Normally, the fields that display time information base it
+on the local time, but this flag tells them to use GMT instead.
+Also, the variable list is normally a tab-separated list, but this
+flag changes it to a comma-separated one.
+.PP
+Examples:
+.PP
+To get a message like "14:03 TRAP3.1 from humpty.ucd.edu" you 
+could use something like this:
+.PP
+.RS
+.NF
+snmptrapd -P -F "%02.2h:%02.2j TRAP%w.%q from %A\en"
+.FI
+.RE
+.PP
+If you want the same thing but in GMT rather than local time, use
+.PP
+.RS
+.NF
+snmptrapd -P -F "%#02.2h:%#02.2j TRAP%w.%q from %A\en"
+.FI
+.RE
+.PP
 .SH EXTENSIBILITY AND CONFIGURATION
 See the snmpdtrapd.conf(5) manual page.
 .PP
 .SH "SEE ALSO"
 syslog(8), variables(5)
+
+
+
