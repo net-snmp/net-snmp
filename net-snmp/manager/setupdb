@@ -32,8 +32,8 @@ if ($delete) {
 
 # here we go
 
-$dbh->do("create database snmp");
-$dbh->do("use snmp");
+$dbh->do("create database $dbname");
+$dbh->do("use $dbname");
 $dbh->do("create table hosts (id integer auto_increment primary key, 
                         name varchar(16), 
                         community varchar(32))");
@@ -69,6 +69,8 @@ $dbh->do("create table errorexpressions (id integer auto_increment primary key,
                                    tablename varchar(64), 
                                    expression varchar(255),
                                    returnfield varchar(64))");
+
+# insert the standard ucd-snmp expressions 
 $dbh->do("insert into errorexpressions(tablename, expression, returnfield)
                 values('prEntry', 'prErrorFlag > 0', 'prErrMessage')");
 $dbh->do("insert into errorexpressions(tablename, expression, returnfield)
