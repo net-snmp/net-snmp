@@ -33,8 +33,8 @@ else
       echo @CFLAGS@ @DEVFLAGS@ @CPPFLAGS@ -I. -I@includedir@
       ;;
     --agent-libs)
-      # use this one == --netsnmp-agent-libs + --external-libs
-      echo @LDFLAGS@ $NSC_BASE_AGENT_LIBS @AGENTLIBS@
+      # use this one == --netsnmp-agent-libs + --external-agent-libs
+      echo @LDFLAGS@ $NSC_BASE_AGENT_LIBS @AGENTLIBS@ @WRAPLIBS@
       ;;
     --libs)
       # use this one == --netsnmp-libs + --external-libs
@@ -44,7 +44,7 @@ else
       echo @LDFLAGS@ @LIBS@
       ;;
     --external-agent-libs)
-      echo @LDFLAGS@ @AGENTLIBS@
+      echo @LDFLAGS@ @AGENTLIBS@ @WRAPLIBS@
       ;;
     --netsnmp-libs)
       echo -L@libdir@ -lnetsnmp
