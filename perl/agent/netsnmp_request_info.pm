@@ -1,8 +1,6 @@
 package NetSNMP::agent::netsnmp_request_info;
 
-require 5.005_62;
 use strict;
-use warnings;
 use Carp;
 
 require Exporter;
