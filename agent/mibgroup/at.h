@@ -25,7 +25,7 @@ struct variable4 at_variables[] = {
     {ATNETADDRESS, IPADDRESS, RONLY, var_atEntry, 1, {3}}
 };
 
-    config_load_mib({MIB.3.1.1}, 9, at_variables)
+    config_load_mib(MIB.3.1.1, 9, at_variables)
 
 #endif
 #endif /* _MIBGROUP_AT_H */

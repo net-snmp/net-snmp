@@ -21,7 +21,7 @@ struct variable2 extensible_error_variables[] = {
     {ERRORMSG, STRING, RONLY, var_extensible_errors, 1, {ERRORMSG}}
 };
 
-config_load_mib({EXTENSIBLEMIB.ERRORMIBNUM}, EXTENSIBLENUM+1, extensible_error_variables)
+config_load_mib(EXTENSIBLEMIB.ERRORMIBNUM, EXTENSIBLENUM+1, extensible_error_variables)
 
 #endif
 #endif /* _MIBGROUP_ERRORMIB_H */

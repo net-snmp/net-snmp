@@ -67,7 +67,7 @@ struct variable2 icmp_variables[] = {
     {ICMPOUTADDRMASKREPS, COUNTER, RONLY, var_icmp, 1, {26}}
 };
 
-config_load_mib({MIB.5}, 7, icmp_variables)
+config_load_mib(MIB.5, 7, icmp_variables)
 #endif
 
 #endif /* _MIBGROUP_ICMP_H */
