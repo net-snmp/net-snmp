@@ -34,6 +34,28 @@
 #include "../../snmplib/system.h"
 #include "vacm.h"
 #include "vacm_vars.h"
+#include "../../mib_module_config.h"
+#ifdef USING_SYSORTABLE_MODULE
+#if TIME_WITH_SYS_TIME
+# include <sys/time.h>
+# include <time.h>
+#else
+# if HAVE_SYS_TIME_H
+#  include <sys/time.h>
+# else
+#  include <time.h>
+# endif
+#endif
+#include "sysORTable.h"
+#endif
+
+void
+init_vacm_vars() {
+#ifdef USING_SYSORTABLE_MODULE
+  oid reg[] = {1,3,6,1,6,3,13};
+  register_sysORTable(reg,7,"View-based Access Control Model for SNMP.");
+#endif
+}
 
 static struct vacm_securityEntry *securityFirst, *securityLast;
 
