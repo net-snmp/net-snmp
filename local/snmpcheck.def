@@ -17,11 +17,13 @@ $snmppath="/usr/local/etc";
 $eraseline="                                                                           \r";
 $fixit=-1;  # this should be 0 not -1, but is necissary till getc(STDIN) works
 
-while ($_ = $ARGV[0], /^-/) {
-    shift;
-    /^-a/ && ($andlog = 1);
-    /^-n/ && ($fixit = -1);
-    /^-y/ && ($fixit = 1);
+if ($#ARGV != -1) {
+    while ($_ = $ARGV[0], /^-/) {
+	shift;
+	/^-a/ && ($andlog = 1);
+	/^-n/ && ($fixit = -1);
+	/^-y/ && ($fixit = 1);
+    }
 }
 
 if ($andlog || $#ARGV == -1) {
@@ -51,7 +53,9 @@ foreach $host ( @ARGV ) {
 		printf(" / Fixing...\b\b\b\b\b\b\b\b\b");
 		system("snmpset $host $mibcheck$mibfix.$mibloc integer 1 > /dev/null 2>&1");
 		system("snmpset $host $mibclearcache integer 1 > /dev/null 2>&1");
-		sleep(1);
+		printf("Sleeping\b\b\b\b\b\b\b\b\b");
+		sleep(2);
+		printf("Checking\b\b\b\b\b\b\b\b\b");
 		if (($succ = &check_mib($mibcheck,0)) != 0) {
 		    printf("*failed*  \n");
 		}
