@@ -166,9 +166,7 @@ void init_hr_storage (void)
     mib[1] = HW_PAGESIZE;
     len = sizeof(pagesize);
     if (sysctl(mib, 2, &pagesize, &len, NULL, 0) == -1) perror("sysctl: pagesize");
-    printf ("physmem = %d, pagesize = %d\n", physmem, pagesize);
     physmem /= pagesize;
-    printf ("physmem = %d, pagesize = %d\n", physmem, pagesize);
 #else	/* USE_SYSCTL */
     auto_nlist(PHYSMEM_SYMBOL, (char *)&physmem, sizeof (physmem));
 #ifdef PGSHIFT
