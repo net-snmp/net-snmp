@@ -138,10 +138,9 @@ the `configure' script.  `configure' automatically checks for the
 source code in the directory that `configure' is in and in `..'.
 
    If you have to use a `make' that does not supports the `VPATH'
-variable, you have to compile the package for one architecture at a time
-in the source code directory.  After you have installed the package for
-one architecture, use `make distclean' before reconfiguring for another
-architecture.
+variable, there is a `maketarget' script that will generate a symlink'ed
+shadow-directory for the object files. Do a `sh maketarget', then `cd' into
+targets/`config.guess` and do the configuration and installation.
 
 Installation Names
 ==================
