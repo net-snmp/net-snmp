@@ -165,7 +165,7 @@ void init_syslog(void);
 
 void update_config (int a);
 
-char *
+const char *
 trap_description(int trap)
 {
     switch(trap){
@@ -377,7 +377,7 @@ int snmp_input(int op,
 	       void *magic)
 {
     struct variable_list *vars;
-    char buf[64], oid_buf [SPRINT_MAX_LEN];
+    char buf[64], oid_buf [SPRINT_MAX_LEN], *cp;
     struct snmp_pdu *reply;
     struct tm *tm;
     time_t timer;
@@ -410,9 +410,11 @@ int snmp_input(int op,
 		    if (trapOid[trapOidLen-1] != 0) trapOid[trapOidLen++] = 0;
 		    trapOid[trapOidLen++] = pdu->specific_type;
 		    sprint_objid(oid_buf, trapOid, trapOidLen);
+		    cp = strrchr(oid_buf, '.');
+		    if (cp) cp++;
+		    else cp = oid_buf;
 		    printf("\t%s Trap (%s) Uptime: %s\n",
-			   trap_description(pdu->trap_type),
-			   strrchr(oid_buf, '.')+1,
+			   trap_description(pdu->trap_type), cp, 
 			   uptime_string(pdu->time, buf));
 		}
 		else
@@ -451,10 +453,12 @@ int snmp_input(int op,
 		    if (trapOid[trapOidLen-1] != 0) trapOid[trapOidLen++] = 0;
 		    trapOid[trapOidLen++] = pdu->specific_type;
 		    sprint_objid(oid_buf, trapOid, trapOidLen);
-
+		    cp = strrchr(oid_buf, '.');
+		    if (cp) cp++;
+		    else cp = oid_buf;
 		    syslog(LOG_WARNING, "%s: %s Trap (%s) Uptime: %s%s",
 		       inet_ntoa(pdu->agent_addr.sin_addr),
-		       trap_description(pdu->trap_type), strrchr(oid_buf, '.')+1,
+		       trap_description(pdu->trap_type), cp,
 		       uptime_string(pdu->time, buf), varbuf);
 		} else {
 		    syslog(LOG_WARNING, "%s: %s Trap (%ld) Uptime: %s%s",

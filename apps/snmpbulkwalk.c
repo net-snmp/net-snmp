@@ -112,7 +112,7 @@ int main(int argc, char  *argv[])
       /* specified on the command line */
       rootlen = MAX_OID_LEN;
       if (snmp_parse_oid(argv[arg], root, &rootlen) == NULL) {
-        fprintf(stderr, "Invalid object identifier: %s\n", argv[arg]);
+        snmp_perror(argv[arg]);
         exit(1);
       }
     } else {

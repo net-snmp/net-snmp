@@ -638,7 +638,7 @@ snmp_parse_args(int argc,
       if (!pp){
         session->srcPartyLen = MAX_OID_LEN;
         if (!read_objid(argv[arg], session->srcParty, &(session->srcPartyLen))){
-          fprintf(stderr,"Invalid source party: %s.\n", argv[arg]);
+          snmp_perror(argv[arg]);
           session->srcPartyLen = 0;
           usage();
           exit(1);
@@ -665,7 +665,7 @@ snmp_parse_args(int argc,
       }
       if (!pp){
         if (!read_objid(argv[arg], session->dstParty, &(session->dstPartyLen))){
-          fprintf(stderr,"Invalid destination party: %s.\n", argv[arg]);
+          snmp_perror(argv[arg]);
           session->dstPartyLen = 0;
           usage();
           exit(1);
@@ -693,7 +693,7 @@ snmp_parse_args(int argc,
       }
       if (!cxp){
         if (!read_objid(argv[arg], session->context, &(session->contextLen))){
-          fprintf(stderr,"Invalid context: %s.\n", argv[arg]);
+          snmp_perror(argv[arg]);
           session->contextLen = 0;
           usage();
           exit(1);
