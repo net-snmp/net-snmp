@@ -20,16 +20,6 @@ extern          "C" {
 #include <net-snmp/data_access/ipaddress.h>
 
     /*
-     * other required module components 
-     */
-    /* *INDENT-OFF*  */
-config_require(if-mib/data_access/interface);
-config_require(ip-mib/data_access/ipaddress);
-config_require(ip-mib/ipAddressTable/ipAddressTable_interface);
-config_require(ip-mib/ipAddressTable/ipAddressTable_data_access);
-    /* *INDENT-ON*  */
-
-    /*
      * OID, column number and enum definions for  
      */
 #include "ipAddressTable_constants.h"
