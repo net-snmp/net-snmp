@@ -693,22 +693,22 @@ main(argc, argv)
       exit(0);
     init_snmp();
     init_mib();
-    sprintf(miscfile,"%s/party.conf",SNMPLIBPATH);
+    sprintf(miscfile,"%s/party.conf",SNMPSHAREPATH);
     if (read_party_database(miscfile) > 0){
 	fprintf(stderr, "Couldn't read party database from %s\n",miscfile);
 	exit(0);
     }
-    sprintf(miscfile,"%s/context.conf",SNMPLIBPATH);
+    sprintf(miscfile,"%s/context.conf",SNMPSHAREPATH);
     if (read_context_database(miscfile) > 0){
 	fprintf(stderr, "Couldn't read context database from %s\n",miscfile);
 	exit(0);
     }
-    sprintf(miscfile,"%s/acl.conf",SNMPLIBPATH);
+    sprintf(miscfile,"%s/acl.conf",SNMPSHAREPATH);
     if (read_acl_database(miscfile) > 0){
 	fprintf(stderr, "Couldn't read acl database from %s\n",miscfile);
 	exit(0);
     }
-    sprintf(miscfile,"%s/view.conf",SNMPLIBPATH);
+    sprintf(miscfile,"%s/view.conf",SNMPSHAREPATH);
     if (read_view_database(miscfile) > 0){
 	fprintf(stderr, "Couldn't read view database from %s\n",miscfile);
 	exit(0);

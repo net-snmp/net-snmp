@@ -291,17 +291,17 @@ snmp_parse_args(argc, argv, session)
                     session->context, &(session->contextLen));
       arg++;
     } else {
-      sprintf(ctmp,"%s/party.conf",SNMPLIBPATH);
+      sprintf(ctmp,"%s/party.conf",SNMPSHAREPATH);
       if (read_party_database(ctmp) != 0){
 	snmp_perror(argv[0]);
         exit(1);
       }
-      sprintf(ctmp,"%s/context.conf",SNMPLIBPATH);
+      sprintf(ctmp,"%s/context.conf",SNMPSHAREPATH);
       if (read_context_database(ctmp) != 0){
 	snmp_perror(argv[0]);
         exit(1);
       }
-      sprintf(ctmp,"%s/acl.conf",SNMPLIBPATH);
+      sprintf(ctmp,"%s/acl.conf",SNMPSHAREPATH);
       if (read_acl_database(ctmp) != 0){
 	snmp_perror(argv[0]);
         exit(1);

@@ -129,35 +129,34 @@ int a;
   char configfile[300];
   char *envconfpath;
   char *cptr1, *cptr2;
+  char defaultPath[1024];
 
   free_config();
 
   if (!dontReadConfigFiles) {  /* don't read if -C present on command line */
     /* read the config files */
-    sprintf(configfile,"%s/snmpd.conf",SNMPLIBPATH);
-    read_config (configfile);
-    sprintf(configfile,"%s/snmpd.local.conf",SNMPLIBPATH);
-    read_config (configfile);
-
-    if ((envconfpath = getenv("SNMPCONFPATH"))) {
-      envconfpath = strdup(envconfpath);  /* prevent actually writing in env */
-      cptr1 = cptr2 = envconfpath;
-      i = 1;
-      while (i && *cptr2 != 0) {
-        while(*cptr1 != 0 && *cptr1 != ':')
-          cptr1++;
-        if (*cptr1 == 0)
-          i = 0;
-        else
-          *cptr1 = 0;
-        sprintf(configfile,"%s/snmpd.conf",cptr2);
-        read_config (configfile);
-        sprintf(configfile,"%s/snmpd.local.conf",cptr2);
-        read_config (configfile);
-        cptr2 = ++cptr1;
-      }
-      free(envconfpath);
+    if ((envconfpath = getenv("SNMPCONFPATH")) == NULL) {
+      sprintf(defaultPath,"%s:%s\n",SNMPSHAREPATH,SNMPLIBPATH);
+      envconfpath = defaultPath;
     }
+    
+    envconfpath = strdup(envconfpath);  /* prevent actually writing in env */
+    cptr1 = cptr2 = envconfpath;
+    i = 1;
+    while (i && *cptr2 != 0) {
+      while(*cptr1 != 0 && *cptr1 != ':')
+        cptr1++;
+      if (*cptr1 == 0)
+        i = 0;
+      else
+        *cptr1 = 0;
+      sprintf(configfile,"%s/snmpd.conf",cptr2);
+      read_config (configfile);
+      sprintf(configfile,"%s/snmpd.local.conf",cptr2);
+      read_config (configfile);
+      cptr2 = ++cptr1;
+    }
+    free(envconfpath);
   }
   
   /* read all optional config files */
