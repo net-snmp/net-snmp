@@ -92,7 +92,7 @@ snmp_realloc(u_char **buf, size_t *buf_len)
     new_buf_len = *buf_len + 8192;
   }
     
-  DEBUGMSGTL(("snmp_realloc", "*buf %p, *buf_len %d", *buf, *buf_len));
+  DEBUGMSGTL(("snmp_realloc", "buf %08p, len %08x", *buf, *buf_len));
 
   if (*buf == NULL) {
     new_buf = (u_char *)malloc(new_buf_len);
@@ -100,7 +100,7 @@ snmp_realloc(u_char **buf, size_t *buf_len)
     new_buf = (u_char *)realloc(*buf, new_buf_len);
   }
 
-  DEBUGMSG(("snmp_realloc", " new_buf %p, new_buf_len %d\n", new_buf,
+  DEBUGMSG(("snmp_realloc", " new_buf %08p, new_len %08x\n", new_buf,
 	    new_buf_len));
 
   if (new_buf != NULL) {
