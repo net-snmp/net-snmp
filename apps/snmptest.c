@@ -180,6 +180,7 @@ int main(int argc, char *argv[])
 	if (command == SNMP_MSG_TRAP2){
 	    /* No response needed */
 	    if (!snmp_send(ss, pdu)){
+                snmp_free_pdu(pdu);
                 snmp_sess_perror("snmptest", ss);
 	    }
 	} else {

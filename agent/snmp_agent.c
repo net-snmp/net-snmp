@@ -353,7 +353,8 @@ handle_snmp_packet(int operation, struct snmp_session *session, int reqid,
             asp->pdu->errstat = SNMP_ERR_AUTHORIZATIONERROR;
             asp->pdu->command = SNMP_MSG_RESPONSE;
             snmp_increment_statistic(STAT_SNMPOUTPKTS);
-            snmp_send( asp->session, asp->pdu );
+            if (! snmp_send( asp->session, asp->pdu ))
+	        snmp_free_pdu(asp->pdu);
 	    asp->pdu = NULL;
 	    free_agent_snmp_session(asp);
             return 1;
@@ -626,7 +627,8 @@ handle_snmp_packet(int operation, struct snmp_session *session, int reqid,
 	asp->pdu->command  = SNMP_MSG_RESPONSE;
 	asp->pdu->errstat  = status;
 	asp->pdu->errindex = asp->index;
-	snmp_send( asp->session, asp->pdu );
+	if (! snmp_send( asp->session, asp->pdu ))
+	    snmp_free_pdu(asp->pdu);
 	snmp_increment_statistic(STAT_SNMPOUTPKTS);
 	snmp_increment_statistic(STAT_SNMPOUTGETRESPONSES);
 	asp->pdu = NULL;
