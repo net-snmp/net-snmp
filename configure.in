@@ -138,7 +138,7 @@ AC_DEFINE(USE_INTERNAL_MD5))
 
 AC_ARG_WITH(opaque-special-types,
 [  --without-opaque-special-types  Don't use special opaque encodings.
-                                  SNMP normally can not handle
+                                  SNMP normally cannot handle
                                   floating numbers, nor large 64 bit
                                   integers well.  By default, the
                                   ucd-snmp package compiles in
@@ -273,17 +273,17 @@ Miscellaneous:
   --with-defaults          Use defaults for prompted values.],
     defaults="yes",defaults="no")
 
-dnl Only define if specifically chosen as --without (ie, default to true). 
+dnl Only define if specifically chosen as --without (i.e., default to true). 
 if test "x$with_root_access" = "xno"; then
   AC_DEFINE(NO_ROOT_ACCESS)
 fi
 
-dnl Define unless specifically suppressed (ie, option defaults to false). 
+dnl Define unless specifically suppressed (i.e., option defaults to false). 
 if test "x$with_dummy_values" != "xyes"; then
   AC_DEFINE(NO_DUMMY_VALUES)
 fi
 
-dnl Only define if specifically chosen as --without (ie, default to true). 
+dnl Only define if specifically chosen as --without (i.e., default to true). 
 if test "x$with_opaque_special_types" != "xno"; then
   AC_DEFINE(OPAQUE_SPECIAL_TYPES)
 fi
@@ -814,7 +814,7 @@ AC_SUBST(default_mibs_install)
 
 AC_MSG_RESULT(.)
 
-AC_MSG_CHECKING(if directories neeed to be created)
+AC_MSG_CHECKING(if directories need to be created)
 for i in $module_directories; do
   $srcdir/mkinstalldirs $i
 done
@@ -1798,14 +1798,14 @@ cat << EOF
 
 	 ************** Configuration Section **************
 
-	You are about to be prompted by a series of questions.  Answer
+	You are about to be prompted with a series of questions.  Answer
 them carefully, as they determine how the snmp agent and related
 applications are to function.
 
 	After the configure script finishes, you can browse the newly
 created config.h file for further - less important - parameters to
-modify.  Be careful if you re-run configure though since config.h will
-be over written.
+modify.  Be careful if you re-run configure though, since config.h will
+be overwritten.
 
 -Press return to continue-
 EOF
@@ -1834,8 +1834,8 @@ AC_PROMPT_USER(SYS_CONTACT,[
 
 	Describes who should be contacted about the host the agent is
 running on.  This information is available in the MIB-II tree.  This
-Can Also Be Over-Ridden Using The \"syscontact\" Syntax In The Agent'S
-Configuration Files.
+can also be over-ridden using the \"syscontact\" syntax in the agent's
+configuration files.
 
 System Contact Information],$ME@$LOC,1)
 
@@ -1844,7 +1844,7 @@ AC_PROMPT_USER(SYS_LOC,[
 *** System Location:
 
 	Describes the location of the system.  This information is
-available in the MIB-II tree.  This Can also be over-ridden using the
+available in the MIB-II tree.  this can also be over-ridden using the
 \"syslocation\" syntax in the agent's configuration files.
 
 System Location],Unknown,1)

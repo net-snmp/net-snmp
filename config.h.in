@@ -547,6 +547,9 @@
 /* Define if you have the <osreldate.h> header file.  */
 #undef HAVE_OSRELDATE_H
 
+/* Define if you have the <pkginfo.h> header file.  */
+#undef HAVE_PKGINFO_H
+
 /* Define if you have the <pkglocs.h> header file.  */
 #undef HAVE_PKGLOCS_H
 
@@ -1115,6 +1118,9 @@
 /* define if you have librpm and libdb */
 #undef HAVE_LIBDB
 #undef HAVE_LIBRPM
+
+/* define if you have pkginfo */
+#undef HAVE_PKGINFO
 
 /* define if you have gethostbyname */
 #undef HAVE_GETHOSTBYNAME
