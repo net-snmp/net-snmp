@@ -93,6 +93,7 @@ int main(int argc, char *argv[])
 {
     struct snmp_session session, *ss;
     struct snmp_pdu *pdu = NULL, *response, *copy = NULL;
+    struct sockaddr_in *respIp;
     struct variable_list *vars, *vp;
     int	ret;
     int	    status, count;
@@ -210,7 +211,8 @@ int main(int argc, char *argv[])
 			printf("Received SNMPv2 Trap Request ");
 			break;
 		    }
-		    printf("from %s\n", inet_ntoa(response->address.sin_addr));
+		    respIp = (struct sockaddr_in *)&(response->address);
+		    printf("from %s\n", inet_ntoa(respIp->sin_addr));
 		    printf("requestid 0x%lX errstat 0x%lX errindex 0x%lX\n",
 			   response->reqid, response->errstat,
 			   response->errindex);

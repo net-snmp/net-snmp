@@ -298,6 +298,7 @@ void do_external(char *cmd,
 		 struct snmp_pdu *pdu)
 {
   struct variable_list tmpvar, *vars;
+  struct sockaddr_in *pduIp = (struct sockaddr_in *)&(pdu->address);
   static oid trapoids[10] = {1,3,6,1,6,3,1,1,5};
   static oid snmpsysuptime[8] = {1,3,6,1,2,1,1,3};
   static oid snmptrapoid[10] = {1,3,6,1,6,3,1,1,4,1};
@@ -328,8 +329,8 @@ void do_external(char *cmd,
     } else if (pid > 0) {
       file = fdopen(fd[1],"w");
       fprintf(file,"%s\n%s\n",
-              host ? host->h_name : inet_ntoa(pdu->address.sin_addr),
-              inet_ntoa(pdu->address.sin_addr));
+              host ? host->h_name : inet_ntoa(pduIp->sin_addr),
+              inet_ntoa(pduIp->sin_addr));
       if (pdu->command == SNMP_MSG_TRAP){
         /* convert a v1 trap to a v2 variable binding list:
            The uptime and trapOID go first in the list. */
@@ -378,6 +379,8 @@ int snmp_input(int op,
 	       void *magic)
 {
     struct variable_list *vars;
+    struct sockaddr_in *pduIp   = (struct sockaddr_in *)&(pdu->address);
+    struct sockaddr_in *agentIp = (struct sockaddr_in *)&(pdu->agent_addr);
     char buf[64], oid_buf [SPRINT_MAX_LEN], *cp;
     struct snmp_pdu *reply;
     struct tm *tm;
@@ -393,16 +396,16 @@ int snmp_input(int op,
                   
     if (op == RECEIVED_MESSAGE){
 	if (pdu->command == SNMP_MSG_TRAP){
-	    host = gethostbyaddr ((char *)&pdu->agent_addr.sin_addr,
-				  sizeof (pdu->agent_addr.sin_addr), AF_INET);
+	    host = gethostbyaddr ((char *)&agentIp->sin_addr,
+				  sizeof (agentIp->sin_addr), AF_INET);
 	    if (Print && (pdu->trap_type != SNMP_TRAP_AUTHFAIL || dropauth == 0)) {
 		time (&timer);
 		tm = localtime (&timer);
                 printf("%.4d-%.2d-%.2d %.2d:%.2d:%.2d %s [%s] %s:\n",
 		       tm->tm_year+1900, tm->tm_mon+1, tm->tm_mday,
 		       tm->tm_hour, tm->tm_min, tm->tm_sec,
-                       host ? host->h_name : inet_ntoa(pdu->agent_addr.sin_addr),
-                       inet_ntoa(pdu->agent_addr.sin_addr),
+                       host ? host->h_name : inet_ntoa(agentIp->sin_addr),
+                       inet_ntoa(agentIp->sin_addr),
  		       sprint_objid (oid_buf, pdu->enterprise, pdu->enterprise_length));
 		if (pdu->trap_type == SNMP_TRAP_ENTERPRISESPECIFIC) {
 		    oid trapOid[MAX_OID_LEN];
@@ -458,12 +461,12 @@ int snmp_input(int op,
 		    if (cp) cp++;
 		    else cp = oid_buf;
 		    syslog(LOG_WARNING, "%s: %s Trap (%s) Uptime: %s%s",
-		       inet_ntoa(pdu->agent_addr.sin_addr),
+		       inet_ntoa(agentIp->sin_addr),
 		       trap_description(pdu->trap_type), cp,
 		       uptime_string(pdu->time, buf), varbuf);
 		} else {
 		    syslog(LOG_WARNING, "%s: %s Trap (%ld) Uptime: %s%s",
-		       inet_ntoa(pdu->agent_addr.sin_addr),
+		       inet_ntoa(agentIp->sin_addr),
 		       trap_description(pdu->trap_type), pdu->specific_type,
 		       uptime_string(pdu->time, buf), varbuf);
 		}
@@ -474,16 +477,16 @@ int snmp_input(int op,
               do_external(Command, host, pdu);
 	} else if (pdu->command == SNMP_MSG_TRAP2
 		   || pdu->command == SNMP_MSG_INFORM){
-	    host = gethostbyaddr ((char *)&pdu->address.sin_addr,
-				  sizeof (pdu->address.sin_addr), AF_INET);
+	    host = gethostbyaddr ((char *)&pduIp->sin_addr,
+				  sizeof (pduIp->sin_addr), AF_INET);
 	    if (Print) {
 		time (&timer);
 		tm = localtime (&timer);
                 printf("%.4d-%.2d-%.2d %.2d:%.2d:%.2d %s [%s]:\n",
 		       tm->tm_year+1900, tm->tm_mon+1, tm->tm_mday,
 		       tm->tm_hour, tm->tm_min, tm->tm_sec,
-                       host ? host->h_name : inet_ntoa(pdu->address.sin_addr),
-                       inet_ntoa(pdu->address.sin_addr));
+                       host ? host->h_name : inet_ntoa(pduIp->sin_addr),
+                       inet_ntoa(pduIp->sin_addr));
 		for (vars = pdu->variables; vars; vars = vars->next_variable) {
 		    printf("\t");
 		    print_variable(vars->name, vars->name_length, vars);

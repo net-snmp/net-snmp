@@ -127,6 +127,7 @@ void vacm_parse_security (char *token,
     char *cp;
     struct vacm_securityEntry *sp, se;
     int maskLength, maskBit;
+    struct sockaddr_in *srcIp, *srcMask;
     char null[] = "";
 
     memset (&se, 0 , sizeof se);
@@ -145,28 +146,30 @@ void vacm_parse_security (char *token,
 	config_perror("missing COMMUNITY parameter");
 	return;
     }
+    srcIp   = (struct sockaddr_in*)&(se.sourceIp);
+    srcMask = (struct sockaddr_in*)&(se.sourceMask);
     cp = strchr(source, '/');
     if (cp == NULL) cp = null;
     else *cp++ = 0;
     mask = cp;
     if (strcmp("default", source) == 0 || strcmp("0.0.0.0", source) == 0) {
-	memset(&se.sourceIp.sin_addr, 0, sizeof(struct in_addr));
+	memset(&(srcIp->sin_addr), 0, sizeof(struct in_addr));
 	mask = "0.0.0.0";
     }
-    else if ((se.sourceIp.sin_addr.s_addr = inet_addr (source)) == (unsigned) -1) {
+    else if ((srcIp->sin_addr.s_addr = inet_addr (source)) == (unsigned) -1) {
 	struct hostent *hp = gethostbyname(source);
 	if (hp != NULL) {
-	    memcpy(&se.sourceIp.sin_addr , hp->h_addr, 4);
+	    memcpy(&(srcIp->sin_addr), hp->h_addr, 4);
 	}
 	else {
 	    config_perror ("bad source address");
 	    return;
 	}
     }
-    if (*mask == 0) memset (&se.sourceMask.sin_addr, 0xff, sizeof(struct in_addr));
+    if (*mask == 0) memset (&(srcMask->sin_addr), 0xff, sizeof(struct in_addr));
     else {
 	if (strchr(mask, '.')) {
-	    if ((se.sourceMask.sin_addr.s_addr = inet_addr(mask)) == (unsigned)-1) {
+	    if ((srcMask->sin_addr.s_addr = inet_addr(mask)) == (unsigned)-1) {
 		config_perror("bad mask");
 		return;
 	    }
@@ -178,15 +181,15 @@ void vacm_parse_security (char *token,
 		return;
 	    }
 	    maskBit = 0x80000000L;
-	    se.sourceMask.sin_addr.s_addr = 0;
+	    srcMask->sin_addr.s_addr = 0;
 	    while (maskLength--) {
-		se.sourceMask.sin_addr.s_addr |= maskBit;
+		srcMask->sin_addr.s_addr |= maskBit;
 		maskBit >>= 1;
 	    }
-	    se.sourceMask.sin_addr.s_addr = htonl(se.sourceMask.sin_addr.s_addr);
+	    srcMask->sin_addr.s_addr = htonl(srcMask->sin_addr.s_addr);
 	}
     }
-    if ((se.sourceIp.sin_addr.s_addr & ~se.sourceMask.sin_addr.s_addr) != 0) {
+    if ((srcIp->sin_addr.s_addr & ~srcMask->sin_addr.s_addr) != 0) {
 	config_perror("source/mask mismatch");
 	return;
     }
@@ -436,11 +439,13 @@ int vacm_in_view (struct snmp_pdu *pdu,
     struct vacm_accessEntry *ap;
     struct vacm_groupEntry *gp;
     struct vacm_viewEntry *vp;
+    struct sockaddr_in *pduIp = (struct sockaddr_in*)&(pdu->address);
+    struct sockaddr_in *srcIp, *srcMask;
     char *vn;
     char *sn;
 
     if (pdu->version == SNMP_VERSION_1 || pdu->version == SNMP_VERSION_2c) {
-	DEBUGMSGTL(("mibII/vacm_vars", "vacm_in_view: ver=%d, source=%.8x, community=%s\n", pdu->version, pdu->address.sin_addr.s_addr, pdu->community));
+	DEBUGMSGTL(("mibII/vacm_vars", "vacm_in_view: ver=%d, source=%.8x, community=%s\n", pdu->version, pduIp->sin_addr.s_addr, pdu->community));
 
 	/* allow running without snmpd.conf */
 	if (sp == NULL) {
@@ -455,8 +460,10 @@ int vacm_in_view (struct snmp_pdu *pdu,
 	    }
 	}
 	while (sp) {
-	    if ((pdu->address.sin_addr.s_addr & sp->sourceMask.sin_addr.s_addr)
-		    == sp->sourceIp.sin_addr.s_addr
+	    srcIp   = (struct sockaddr_in *)&(sp->sourceIp);
+	    srcMask = (struct sockaddr_in *)&(sp->sourceMask);
+	    if ((pduIp->sin_addr.s_addr & srcMask->sin_addr.s_addr)
+		    == srcIp->sin_addr.s_addr
                 && strlen(sp->community) == pdu->community_len
 		&& !strncmp(sp->community, (char *)pdu->community, pdu->community_len))
 		break;
