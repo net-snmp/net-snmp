@@ -1,9 +1,26 @@
+TABLE OF CONTENTS
+=================
+
+  Table Of Contents
+  Quick Instructions
+* Ucd-Snmp Specific Information
+  Long (but you should read these) Instructions
+* Compilers and Options
+  Compiling For Multiple Architectures
+  Installation Names
+  Optional Features
+  Sharing Defaults
+  Operation Controls
+
+  * = required reading
+
 QUICK INSTRUCTIONS
 ==================
 
   1) Run ./configure
      (type "./configure --help" for a quick usage summary.)
      (--prefix=PATH will change the default /usr/local installation path.)
+     (see "Compilers and Options" on changing the complier to use)
 
   2) Optionally edit config.h
      (due to prompting done by the configure script, this is not
@@ -25,6 +42,15 @@ As of V3.0.3 the configuration files are now looked for in
 $(prefix)/lib/snmp, where ($prefix) is defined as the value passed to
 the --prefix argument of the configure script, or /usr/local if
 undefined.
+
+Optional features to pass to configure for ucd-snmp:
+
+  --enable-debugging             Outputs *lots* of extra debugging information.
+  --with-defaults                Use defaults for prompted values.
+  --without-root-access          The agent does not exit if it is
+                                   unable to open /dev/kmem.
+  --with-mib-modules="list"      Compile with additional mib modules.
+  --with-out-mib-modules="list"  Compile without these mib modules.
 
 LONG (but you should read these) INSTRUCTIONS
 =============================================
@@ -137,13 +163,6 @@ package recognizes.
 find the X include and library files automatically, but if it doesn't,
 you can use the `configure' options `--x-includes=DIR' and
 `--x-libraries=DIR' to specify their locations.
-
-Optional features for ucd-snmp:
-  --enable-debugging      Outputs extra debugging information.
-  --with-defaults         Use defaults for prompted values.
-  --without-root-access   The agent does not exit if it can not open /dev/kmem.
-  --with-mib-modules="list"      Compile with additional mib modules.
-  --with-out-mib-modules="list"  Compile without these mib modules.
 
 Specifying the System Type
 ==========================
