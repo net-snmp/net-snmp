@@ -95,8 +95,6 @@ static struct agent_snmp_session *agent_session_list = NULL;
 
 
 static void dump_var(oid *, size_t, int, void *, size_t);
-static int goodValue(u_char, size_t, u_char, size_t);
-static void setVariable(u_char *, u_char, size_t, u_char *, size_t);
 
 static void dump_var (
     oid *var_name,
@@ -527,7 +525,6 @@ handle_snmp_packet(int operation, struct snmp_session *session, int reqid,
 			case ASN_COUNTER64:
 				status = SNMP_ERR_NOSUCHNAME;
 				asp->pdu->errindex=i;
-				/* Need to reset variable list? */
 				break;
 		    }
 	    }
@@ -606,6 +603,38 @@ int
 handle_var_list(struct agent_snmp_session  *asp)
 {
     struct variable_list *varbind_ptr;
+    u_char  status;
+    int     count;
+
+    count = 0;
+    varbind_ptr = asp->start;
+    if ( !varbind_ptr ) {
+	return SNMP_ERR_NOERROR;
+    }
+
+    while (1) {
+	count++;
+
+	status = handle_one_var(asp, varbind_ptr);
+
+	if ( status != SNMP_ERR_NOERROR ) {
+	    asp->pdu->errstat  = status;
+	    asp->pdu->errindex = count;
+	    return status;
+	}
+
+	if ( varbind_ptr == asp->end )
+	     break;
+	varbind_ptr = varbind_ptr->next_variable;
+	if ( asp->mode == RESERVE1 )
+	    snmp_vars_inc++;
+   }
+   return SNMP_ERR_NOERROR;
+}
+
+int
+handle_one_var(struct agent_snmp_session  *asp, struct variable_list *varbind_ptr)
+{
     u_char  statType;
     u_char *statP;
     size_t  statLen;
@@ -614,17 +643,8 @@ handle_var_list(struct agent_snmp_session  *asp)
     WriteMethod *write_method;
     AddVarMethod *add_method;
     int	    noSuchObject = TRUE;
-    int     count, view;
+    int     view;
     
-    count = 0;
-    varbind_ptr = asp->start;
-    if ( !varbind_ptr ) {
-	return SNMP_ERR_NOERROR;
-    }
-
-    while (1) {
-    
-	count++;
 statp_loop:
 	if ( asp->rw == WRITE && varbind_ptr->data != NULL ) {
 		/*
@@ -681,16 +701,12 @@ statp_loop:
 	            statType = SNMP_ENDOFMIBVIEW;
 		}
 		if (asp->pdu->version == SNMP_VERSION_1) {
-		    asp->pdu->errstat = SNMP_ERR_NOSUCHNAME;
-		    asp->pdu->errindex = count;
 		    return SNMP_ERR_NOSUCHNAME;
 		}
 		else if (asp->rw == WRITE) {
-		    asp->pdu->errstat =
+		    return
 			( noSuchObject	? SNMP_ERR_NOTWRITABLE
 					: SNMP_ERR_NOCREATION ) ;
-		    asp->pdu->errindex = count;
-		    return asp->pdu->errstat;
 		}
 		else
 		    varbind_ptr->type = statType;
@@ -718,16 +734,13 @@ statp_loop:
 		 *   (i.e. writing to non-writeable objects)
 		 */
 	else if ( asp->rw == WRITE && !((acl & 2) && write_method)) {
+	    send_easy_trap(SNMP_TRAP_AUTHFAIL, 0);
 	    if (asp->pdu->version == SNMP_VERSION_1 ) {
-		statType = SNMP_ERR_NOSUCHNAME;
+		return SNMP_ERR_NOSUCHNAME;
 	    }
 	    else {
-		statType = SNMP_ERR_NOTWRITABLE;
+		return SNMP_ERR_NOTWRITABLE;
 	    }
-	    asp->pdu->errstat = statType;
-	    asp->pdu->errindex = count;
-	    send_easy_trap(SNMP_TRAP_AUTHFAIL, 0);
-	    return statType;
         }
 		
 	else {
@@ -750,8 +763,7 @@ statp_loop:
 				 */
 			saved = (struct saved_var_data *)malloc(sizeof(struct saved_var_data));
 			if ( saved == NULL ) {
-			    statType = SNMP_ERR_GENERR;
-			    goto write_error;
+			    return SNMP_ERR_GENERR;
 			}
 	    		saved->write_method = write_method;
 	    		saved->statP        = (u_char *)malloc(statLen);
@@ -765,18 +777,12 @@ statp_loop:
 				/*
 				 * Call the object's write method
 				 */
-		    statType = (*write_method)(asp->mode,
+		    return (*write_method)(asp->mode,
                                                varbind_ptr->val.string,
                                                varbind_ptr->type,
                                                varbind_ptr->val_len, statP,
                                                varbind_ptr->name,
                                                varbind_ptr->name_length);
-write_error:
-                    if (statType != SNMP_ERR_NOERROR) {
-                      asp->pdu->errstat = statType;
-                      asp->pdu->errindex = count;
-                      return statType;
-                    }
 	    }
 		/*
 		 * ... or save the results from assorted GET requests
@@ -786,13 +792,9 @@ write_error:
 		varbind_ptr->type = statType;
 	    }
 	}
+
+	return SNMP_ERR_NOERROR;
 	
-	if ( varbind_ptr == asp->end )
-	     return SNMP_ERR_NOERROR;
-	varbind_ptr = varbind_ptr->next_variable;
-	if ( asp->mode == RESERVE1 )
-	    snmp_vars_inc++;
-    }
 }
 
 
