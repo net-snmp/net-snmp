@@ -1003,21 +1003,25 @@ netsnmp_check_for_delegated_and_add(netsnmp_agent_session *asp)
 int
 netsnmp_remove_from_delegated(netsnmp_agent_session *asp)
 {
-    netsnmp_agent_session *next_asp, *curr, *prev_asp = NULL;
+    netsnmp_agent_session *curr, *prev = NULL;
     
-    for (curr = agent_delegated_list; curr; prev_asp = curr, curr = next_asp) {
-        next_asp = asp->next;   /* save in case we clean up asp */
+    for (curr = agent_delegated_list; curr; prev = curr, curr = curr->next) {
+        /*
+         * is this us?
+         */
         if (curr != asp)
             continue;
         
         /*
          * remove from queue 
          */
-        if (prev_asp != NULL)
-            prev_asp->next = asp->next;
+        if (prev != NULL)
+            prev->next = asp->next;
         else
             agent_delegated_list = asp->next;
-        
+
+        DEBUGMSGTL(("snmp_agent", "remove delegated session == %08p\n", asp));
+
         return 1;
     }
 
