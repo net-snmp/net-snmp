@@ -103,7 +103,9 @@ static int 	smux_auth_peer (oid *, size_t, char *, int);
 static int 	smux_build (u_char, u_long, oid *,
                             size_t *, u_char, u_char *, size_t, u_char *, size_t *);
 static 		int smux_list_add (smux_reg **, smux_reg *);
+static int	smux_pdu_process(int, u_char *, size_t);
 static 		int smux_send_rrsp (int, int);
+static		smux_reg *smux_find_match(smux_reg *, int, oid *, size_t, long);
 static 		smux_reg *smux_find_replacement (oid *, size_t);
 u_char 	*var_smux (struct variable *, oid *, size_t *, int, size_t *,
                            WriteMethod **write_method);
@@ -426,7 +428,7 @@ smux_accept(int sd)
 	struct sockaddr_in in_socket;
 	struct timeval tv;
 	int fail, fd, alen;
-	size_t len;
+	size_t length, len;
 
 	alen = sizeof(struct sockaddr_in);
 	/* this may be too high */
@@ -440,20 +442,22 @@ smux_accept(int sd)
 		snmp_log_perror("[smux_accept] accept failed");
 		return -1;
 	} else {
-	 snmp_log(LOG_ERR, "[smux_accept] accepted fd %d - errno %d\n", fd, errno);
+		snmp_log(LOG_ERR, "[smux_accept] accepted fd %d - errno %d\n", fd, errno);
 		if (npeers + 1 == SMUXMAXPEERS) {
 			DEBUGMSGTL (("smux","[smux_accept] denied peer on fd %d, limit reached", fd));
 			close(sd);
 			return -1;
 		}
+
 		/* now block for an OpenPDU */
-		if ((len = recv(fd, (char *)data, SMUXMAXPKTSIZE, 0)) <= 0) {
+		if ((length = recv(fd, (char *)data, SMUXMAXPKTSIZE, 0)) <= 0) {
 			DEBUGMSGTL (("smux","[smux_accept] peer on fd %d died or timed out\n", fd));
 			close(fd);
 			return -1;
 		}
 		/* try to authorize him */
 		ptr = data;
+		len = length;
 		if ((ptr = asn_parse_header(ptr, &len, &type)) == NULL) {
 			smux_send_close(fd, SMUXC_PACKETFORMAT);
 			close(fd);
@@ -482,6 +486,13 @@ smux_accept(int sd)
 #endif
 		npeers++;
 		DEBUGMSGTL (("smux","[smux_accept] fd %d\n", fd));
+
+	 	/* Process other PDUs already read, e.g. a registerRequest. */
+		len = length - (ptr - data);
+	 	if (smux_pdu_process(fd, ptr, len) < 0) {
+			/* Easy come, easy go.  Clean-up is already done. */
+			return -1;
+		}
 	}
 	return fd;
 }
@@ -489,9 +500,8 @@ smux_accept(int sd)
 int
 smux_process(int fd)
 {
-	int error;
-	size_t len, length;
-	u_char data[SMUXMAXPKTSIZE], *ptr, type;
+	size_t length;
+	u_char data[SMUXMAXPKTSIZE];
 
 	length = recv(fd, (char *)data, SMUXMAXPKTSIZE, 0);
 	if (length <= 0) {
@@ -503,20 +513,28 @@ smux_process(int fd)
 		return -1;
 	}
 
-	DEBUGMSGTL (("smux","[smux_process] Processing %d bytes\n", length));
+	return smux_pdu_process(fd, data, length);
+}
+
+static int
+smux_pdu_process(int fd, u_char *data, size_t length)
+{
+	int error;
+	size_t len;
+	u_char *ptr, type;
+
+	DEBUGMSGTL (("smux","[smux_pdu_process] Processing %d bytes\n", length));
 
 	error = 0;
-
 	ptr = data;
-	len = length;
-	while (ptr != NULL && ptr < data + length) {
-		len = length;
+	while (error == 0 && ptr != NULL && ptr < data + length) {
+		len = length - (ptr - data);
 		ptr = asn_parse_header(ptr, &len, &type);
-		DEBUGMSGTL (("smux","[smux_process] type is %d\n", (int) type));
+		DEBUGMSGTL (("smux","[smux_pdu_process] type is %d\n", (int) type));
 		switch (type) {
 		case SMUX_OPEN:
 			smux_send_close(fd, SMUXC_PROTOCOLERROR);
-			DEBUGMSGTL (("smux","[smux_process] peer on fd %d sent duplicate open?\n", fd));
+			DEBUGMSGTL (("smux","[smux_pdu_process] peer on fd %d sent duplicate open?\n", fd));
 			smux_peer_cleanup(fd);
 			error = -1;
 			break;
@@ -530,20 +548,17 @@ smux_process(int fd)
 			break;
 		case SMUX_RRSP:
 			error = -1;
-			ptr = NULL;
 			smux_send_close(fd, SMUXC_PROTOCOLERROR);
 			smux_peer_cleanup(fd);
-			DEBUGMSGTL (("smux","[smux_process] peer on fd %d sent RRSP!\n", fd));
+			DEBUGMSGTL (("smux","[smux_pdu_process] peer on fd %d sent RRSP!\n", fd));
 			break;
 		case SMUX_SOUT:
 			error = -1;
-			ptr = NULL;
 			smux_send_close(fd, SMUXC_PROTOCOLERROR);
 			smux_peer_cleanup(fd);
 			DEBUGMSGTL (("smux","This shouldn't have happened!\n"));
 			break;
 		case SMUX_TRAP:
-			/* just log it.. don't handle traps yet */
 			snmp_log(LOG_INFO, "Got trap from peer on fd %d\n", fd);
 			ptr = smux_trap_process(ptr, &len);
 			// watch out for close on top of this...should return correct end
@@ -553,12 +568,12 @@ smux_process(int fd)
 		default:
 			smux_send_close(fd, SMUXC_PACKETFORMAT);
 			smux_peer_cleanup(fd);
-            DEBUGMSGTL (("smux","[smux_process] Wrong type %d\n", (int)type));
+			DEBUGMSGTL (("smux","[smux_pdu_process] Wrong type %d\n", (int)type));
 			error = -1;
 			break;
 		}
 	}
-	return error; /* return value ignored */
+	return error;
 }
 
 static u_char *
@@ -712,7 +727,7 @@ smux_close_process(int fd, u_char *ptr, size_t *len)
 static u_char *
 smux_rreq_process(int sd, u_char *ptr, size_t *len)
 {
-	long priority;
+	long priority, rpriority;
 	long operation;
 	oid oid_name[MAX_OID_LEN];
 	size_t oid_name_len;
@@ -730,6 +745,7 @@ smux_rreq_process(int sd, u_char *ptr, size_t *len)
 	if ((ptr = asn_parse_int(ptr, len, &type, &priority, 
 	    sizeof(priority))) == NULL) {
 		DEBUGMSGTL (("smux","[smux_rreq_process] priority parse failed\n"));
+		smux_send_rrsp(sd, -1);
 		return NULL;
 	}
 	DEBUGMSGTL (("smux","[smux_rreq_process] priority %d\n", priority));
@@ -737,53 +753,56 @@ smux_rreq_process(int sd, u_char *ptr, size_t *len)
 	if ((ptr = asn_parse_int(ptr, len, &type, &operation, 
 	    sizeof(operation))) == NULL) {
 		DEBUGMSGTL (("smux","[smux_rreq_process] operation parse failed\n"));
+		smux_send_rrsp(sd, -1);
 		return NULL;
 	}
 	DEBUGMSGTL (("smux","[smux_rreq_process] operation %d\n", operation));
 
 	if(operation == SMUX_REGOP_DELETE) {
 		/* search the active list for this registration */
-		for (rptr = ActiveRegs; rptr; rptr = rptr->sr_next) {
-			if ((rptr->sr_fd == sd) && !(snmp_oid_compare(rptr->sr_name,
-			    rptr->sr_name_len, oid_name, oid_name_len)) &&
-			    (rptr->sr_priority == priority)) {
-				/* unregister the mib */
-				unregister_mib(rptr->sr_name, rptr->sr_name_len);
-				/* find a replacement */
-				if ((nrptr = smux_find_replacement(rptr->sr_name,
-				    rptr->sr_name_len)) == NULL) {
-					/* no replacement found */
-					smux_list_detach(&ActiveRegs, &nrptr);
-					free(nrptr);
-				} else {
-					/* found one */
-					smux_replace_active(rptr, nrptr);
-				}
-				return ptr;
+		rptr = smux_find_match(ActiveRegs, sd, oid_name, oid_name_len, priority);
+		if (rptr) {
+			rpriority = rptr->sr_priority;
+			/* unregister the mib */
+			unregister_mib(rptr->sr_name, rptr->sr_name_len);
+			/* find a replacement */
+			nrptr = smux_find_replacement(rptr->sr_name, rptr->sr_name_len);
+			if (nrptr) {
+				/* found one */
+				smux_replace_active(rptr, nrptr);
+			} else {
+				/* no replacement found */
+				smux_list_detach(&ActiveRegs, &rptr);
+				free(rptr);
 			}
+			smux_send_rrsp(sd, rpriority);
+			return ptr;
 		}
 		/* search the passive list for this registration */
-		for (rptr = PassiveRegs; rptr; rptr = rptr->sr_next) {
-			if ((rptr->sr_fd == sd) && !(snmp_oid_compare(rptr->sr_name,
-			    rptr->sr_name_len, oid_name, oid_name_len)) &&
-			    (rptr->sr_priority == priority)) {
-				smux_list_detach(&PassiveRegs, &nrptr);
-				free(nrptr);
-			}
+		rptr = smux_find_match(PassiveRegs, sd, oid_name, oid_name_len, priority);
+		if (rptr) {
+			rpriority = rptr->sr_priority;
+			smux_list_detach(&PassiveRegs, &rptr);
+			free(rptr);
+			smux_send_rrsp(sd, rpriority);
+			return ptr;
 		}
-		/* this peer cannot unregister the tree, it does not
-		 * belong to him.  XXX for now, ignore it.
+		/* This peer cannot unregister the tree, it does not
+		 * belong to him.  Send him an error.
 		 */
+		smux_send_rrsp(sd, -1);
 		return ptr;
 
 	} else if ((operation == SMUX_REGOP_REGISTER_RO) ||
 	    (operation == SMUX_REGOP_REGISTER_RW)) {
 		if (priority < -1) {
 			DEBUGMSGTL (("smux","[smux_rreq_process] peer fd %d invalid priority", sd, priority));
+			smux_send_rrsp(sd, -1);
 			return NULL;
 		}
 		if((nrptr = malloc(sizeof(smux_reg))) == NULL) {
                         snmp_log_perror("[smux_rreq_process] malloc");
+			smux_send_rrsp(sd, -1);
 			return NULL;
 		}
 		nrptr->sr_priority = priority;
@@ -848,13 +867,43 @@ smux_rreq_process(int sd, u_char *ptr, size_t *len)
 		    smux_variables, sizeof(struct variable2),
 		    1, nrptr->sr_name, nrptr->sr_name_len);
 done:
-		if (smux_send_rrsp(sd, nrptr->sr_priority) < 0) 
-			DEBUGMSGTL (("smux","[smux_rreq_process]  send failed\n"));
+		smux_send_rrsp(sd, nrptr->sr_priority);
 		return ptr;
 	} else {
 		DEBUGMSGTL (("smux","[smux_rreq_process] unknown operation\n"));
+		smux_send_rrsp(sd, -1);
 		return NULL;
 	}
+}
+
+/*
+ * Find the registration with a matching descriptor, OID and priority.  If
+ * the priority is -1 then find a registration with a matching descriptor,
+ * a matching OID, and the highest priority.
+ */
+static smux_reg *
+smux_find_match(smux_reg *regs, int sd, oid *oid_name, size_t oid_name_len, long priority)
+{
+	smux_reg *rptr, *bestrptr;
+
+	bestrptr = NULL;
+	for (rptr = regs; rptr; rptr = rptr->sr_next) {
+		if (rptr->sr_fd != sd)
+			continue;
+		if (snmp_oid_compare(rptr->sr_name, rptr->sr_name_len, oid_name, oid_name_len))
+			continue;
+		if (rptr->sr_priority == priority)
+			return rptr;
+		if (priority != -1)
+			continue;
+		if (bestrptr) {
+			if (bestrptr->sr_priority > rptr->sr_priority)
+				bestrptr = rptr;
+		} else {
+			bestrptr = rptr;
+		}
+	}
+	return bestrptr;
 }
 
 static void
@@ -1326,20 +1375,32 @@ smux_peer_cleanup(int sd)
 int 
 smux_send_rrsp(int sd, int pri)
 {
-	u_char outdata[6], *ptr;
-	int i, mask;
+	u_char outdata[2 + sizeof(int)];
+	u_char *ptr = outdata;
+	int intsize = sizeof(int);
+	u_int mask = ((u_int) 0xFF) << (8 * (sizeof(int) - 1));
+		/* e.g. mask is 0xFF000000 on a 32-bit machine */
+	int sent;
 
-	ptr = outdata;
-	/* "mask is 0xFF000000 on a big-endian machine" */
-	mask = 0xFF;
+	/*
+	 * This is kind of like calling asn_build_int(), but the
+	 * encoding will always be the size of an integer on this
+	 * machine, never shorter.
+	 */
+	*ptr++ = (u_char) SMUX_RRSP;
+	*ptr++ = (u_char) intsize;
 
-	*(ptr++) = (u_char) SMUX_RRSP;
-	*ptr = (u_char) 4;
+	/* Copy each byte, most significant first. */
+	while (intsize--) {
+		*ptr++ = (u_char) ((pri & mask) >> (8 * (sizeof(int) - 1)));
+		pri <<= 8;
+	}
 
-	for(i = 0; i < 4; i++, mask >>= 8)
-		*(++ptr) = (u_char)(pri & mask);
-
-	return (send(sd, (char *)outdata, 6, 0));
+	sent = send(sd, (char *)outdata, sizeof outdata, 0);
+	if (sent < 0) {
+		DEBUGMSGTL (("smux","[smux_send_rrsp] send failed\n"));
+	}
+	return (sent);
 }
 
 static u_char *
