@@ -48,7 +48,7 @@ struct snmpNotifyTable_data {
 
 void   init_snmpNotifyTable(void);
 FindVarMethod var_snmpNotifyTable;
-void parse_snmpNotifyTable(char *, char *);
+void parse_snmpNotifyTable(const char *, char *);
 
 
 WriteMethod write_snmpNotifyTag;
