@@ -59,7 +59,8 @@ ucdExperimental   OBJECT IDENTIFIER ::= { ucdavis 13 }
 --   systemStats    OBJECT IDENTIFIER ::= { ucdavis 11 }
 --   ipFwAcc        OBJECT IDENTIFIER ::= { ucdExperimental 1 } 
 --                  (defined in IPFWACC-MIB.txt)
---   fileTable      OBJECT IDENTIFIER ::= { ucdavis 14 }
+--   ucdDemoMIB     OBJECT IDENTIFIER ::= { ucdavis 14 }
+--   fileTable      OBJECT IDENTIFIER ::= { ucdavis 15 }
 --   version        OBJECT IDENTIFIER ::= { ucdavis 100 }
 --   snmperrs       OBJECT IDENTIFIER ::= { ucdavis 101 }
 --   mibRegistryTable    OBJECT IDENTIFIER ::= { ucdavis 102 }
@@ -930,7 +931,7 @@ fileTable	OBJECT-TYPE
 		STATUS		current
 		DESCRIPTION	"Table of monitored files"
 		INDEX		{ fileIndex }
-	::= { ucdavis 14 }
+	::= { ucdavis 15 }
 
 fileEntry	OBJECT-TYPE
 		SYNTAX		FileEntry
