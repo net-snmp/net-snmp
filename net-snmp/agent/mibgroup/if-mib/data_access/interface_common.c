@@ -9,6 +9,7 @@
 #include "if-mib/ifTable/ifTable_constants.h"
 
 #include <net-snmp/agent/net-snmp-agent-includes.h>
+#include <net-snmp/library/snmp_enum.h>
 #include "interface.h"
 
 /**---------------------------------------------------------------------*/
@@ -37,9 +38,14 @@ static void _free_interface_config(void);
  * These shouldn't be called by the general public, so they aren't in
  * the header file.
  */
+extern void netsnmp_arch_interface_init(void);
 extern int
-netsnmp_access_interface_container_arch_load(netsnmp_container* container,
-                                             u_int load_flags);
+netsnmp_arch_interface_container_load(netsnmp_container* container,
+                                      u_int load_flags);
+extern int
+netsnmp_arch_set_admin_status(netsnmp_interface_entry * entry,
+                              int ifAdminStatus);
+
 
 /**---------------------------------------------------------------------*/
 /*
@@ -55,7 +61,7 @@ netsnmp_access_interface_init(void)
                                   "name type speed");
 
 #ifndef NETSNMP_ACCESS_INTERFACE_NOARCH
-    netsnmp_access_interface_arch_init();
+    netsnmp_arch_interface_init();
 
     /*
      * load once to set up ifIndexes
@@ -127,7 +133,7 @@ netsnmp_access_interface_container_load(netsnmp_container* container, u_int load
         return NULL;
     }
 
-    rc =  netsnmp_access_interface_container_arch_load(container, load_flags);
+    rc =  netsnmp_arch_interface_container_load(container, load_flags);
     if (0 != rc) {
         netsnmp_access_interface_container_free(container,
                                                 NETSNMP_ACCESS_INTERFACE_FREE_NOFLAGS);
@@ -222,6 +228,15 @@ netsnmp_access_interface_index_find(const char *name)
         return 0;
 
     return index;
+}
+
+/**
+ * @retval NULL  index not found
+ */
+const char *
+netsnmp_access_interface_name_find(oid index)
+{
+    return se_find_label_in_slist("interfaces", index);
 }
 
 /**
