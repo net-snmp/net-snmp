@@ -3,6 +3,7 @@ snmpbulkwalk
 snmpget
 snmpgetnext
 snmpset
+snmpstatus
 snmptest
 snmptranslate
 snmptrap
