@@ -35,8 +35,12 @@ extern          "C" {
 
         NetsnmpCacheLoad *load_cache;
         NetsnmpCacheFree *free_cache;
-        void             *magic;	/* You never know when it might
-                                                     not come in useful .... */
+
+       /*
+        * void pointer for the user that created the cache.
+        * You never know when it might not come in useful ....
+        */
+        void             *magic;
 
         /*
 	 * For SNMP-management of the data caches
@@ -84,7 +88,7 @@ extern          "C" {
     void netsnmp_cache_timer_stop(netsnmp_cache *cache);
 
 /*
- * Flags affecting cache operation
+ * Flags affecting cache handler operation
  */
 #define NETSNMP_CACHE_DONT_INVALIDATE_ON_SET                0x0001
 #define NETSNMP_CACHE_DONT_FREE_BEFORE_LOAD                 0x0002
