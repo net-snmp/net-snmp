@@ -3,6 +3,9 @@ the ChangeLog file for a more detailed listing of changes/bug fixes.
 
 *3.6*
  New:
+    - All of the services for ucd-snmp have moved from the sites in
+      ece.ucdavis.edu to ucd-snmp.ucdavis.edu, including http, ftp,
+      and the mailing lists.
     - The configure --help output has been greatly improved for better
       readability and has been broken into sections.
     - The snmptrapd has been make extensible so you can call other
