@@ -606,7 +606,6 @@ var_hrstore(struct variable *vp,
 #endif
                 long_return = 0;
                 break;
-#endif              /* !linux && !solaris2 && !hpux10 && !hpux11 && ... */
             case HRS_TYPE_MBUF:
 #if HAVE_SYS_POOL_H
                 long_return = 0;
@@ -623,7 +622,7 @@ var_hrstore(struct variable *vp,
                 long_return = 0;
 #endif
                 break;
-#endif                          /* !linux && !solaris2 */
+#endif              /* !linux && !solaris2 && !hpux10 && !hpux11 && ... */
             default:
 #if NO_DUMMY_VALUES
                 return NULL;
