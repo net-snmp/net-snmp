@@ -42,6 +42,7 @@ TABLE OF CONTENTS
    Variables seem to disappear when I try to set them.  Why?
    I still can't change sysLocation, though the access settings allow it.  Why not?
    I get an error when trying to set a negative value - why?
+   I get an error when trying to get a string-indexed table value - why?
    How do I send traps and notifications?
    How do I handle traps and notifications?
    My traphandler script doesn't work when run like this - why not?
@@ -924,6 +925,17 @@ I get an error when trying to set a negative value - why?
   (This will also fail, since -1 isn't an acceptable value for this
   object, but it will be rejected by the agent, rather than confusing
   the snmpset command!)
+
+
+
+I get an error when trying to get a string-indexed table value - why?
+--------------------------------------------------------------------
+
+    This is probably due to the shell swallowing the quotes, before
+  they ever get to the SNMP command's OID parser.  Try escaping them:
+
+	snmpget .....   vacmSecurityModel.0.\"wes\"
+  or	snmpget .....  'vacmSecurityModel.0."wes"'
 
 
 
