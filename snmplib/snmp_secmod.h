@@ -66,6 +66,8 @@ typedef int (SecmodInitSess)(struct snmp_session *);
 typedef int (SecmodOutMsg)(struct snmp_secmod_outgoing_params *);
 typedef int (SecmodInMsg)(struct snmp_secmod_incoming_params *);
 typedef void (SecmodFreeState) (void *);
+typedef void (FreePdu) (struct snmp_pdu *);
+typedef void (FreeSession) (struct snmp_session *);
 
 /*
  * definition of a security module
@@ -78,7 +80,11 @@ struct snmp_secmod_def {
    SecmodOutMsg    *reverse_encode_out; /* encode packet back to front */
    SecmodOutMsg    *forward_encode_out; /* encode packet forward */
    SecmodInMsg     *decode_in;          /* decode & validate incoming */
+
+   /* clean up routines */
    SecmodFreeState *free_state_ref;     /* frees pdu->securityStateRef */
+   FreePdu         *free_pdu;           /* called during free_pdu() */
+   FreeSession     *free_session;       /* called during snmp_sess_close() */
 };
 
 
