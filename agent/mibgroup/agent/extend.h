@@ -1,6 +1,9 @@
 #ifndef NETSNMP_EXTEND_H
 #define NETSNMP_EXTEND_H
 
+config_require( util_funcs )
+config_require( utilities/execute )
+
 typedef struct netsnmp_extend_s {
     char    *token;
     char    *command;
