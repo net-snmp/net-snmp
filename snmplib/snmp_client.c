@@ -560,6 +560,14 @@ snmp_set_var_objid (struct variable_list *vp,
     return 0;
 }
 
+int
+snmp_set_var_typed_value(struct variable_list *newvar, u_char type,
+                         u_char *val_str, size_t val_len)
+{
+    newvar->type = type;
+    snmp_set_var_value(newvar, val_str, val_len);
+}
+
 /*
  * Add some value to SNMP variable.
  * If the value is large, additional memory is allocated.
@@ -594,6 +602,23 @@ snmp_set_var_value(struct variable_list *newvar,
     return 0;
 }
 
+void
+snmp_replace_var_types(struct variable_list *vbl, int old_type, int new_type) {
+    while(vbl) {
+        if (vbl->type == old_type) {
+            snmp_set_var_typed_value(vbl, new_type, NULL, 0);
+        }
+        vbl = vbl->next_variable;
+    }
+}
+
+void
+snmp_reset_var_types(struct variable_list *vbl, int new_type) {
+    while(vbl) {
+        snmp_set_var_typed_value(vbl, new_type, NULL, 0);
+        vbl = vbl->next_variable;
+    }
+}
 
 int
 snmp_synch_response_cb(struct snmp_session *ss,
