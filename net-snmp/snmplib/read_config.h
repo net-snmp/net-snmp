@@ -37,6 +37,15 @@ struct config_line {
    char                  *help;
 };
 
+struct read_config_memory {
+   char *line;
+   struct read_config_memory *next;
+};
+
+
+int snmp_config(char *); /* parse a simple line: token=values */
+void snmp_config_remember(char *); /* process later, during snmp_init() */
+void snmp_config_process_memories(void); /* run all memories through parser */
 void read_config (const char *, struct config_line *, int);
 void read_configs (void);
 void read_premib_configs (void);
@@ -80,6 +89,10 @@ void  read_app_config_store(const char *line);
 void  snmp_save_persistent(const char *type);
 void  snmp_clean_persistent(const char *type);
 struct config_line *read_config_get_handlers(const char *type);
+/* external memory list handlers */
+void snmp_config_remember_in_list(char *line, struct read_config_memory **mem);
+void snmp_config_process_memory_list(struct read_config_memory *mem, int);
+void snmp_config_remember_free_list(struct read_config_memory *mem);
 
 #ifdef __cplusplus
 }

@@ -63,6 +63,7 @@
 #include "keytools.h"
 
 #include "snmp_parse_args.h"
+#include "read_config.h"
 #include "snmp_logging.h"
 #include "version.h"
 #include "system.h"
@@ -149,7 +150,7 @@ snmp_parse_args(int argc,
 
   /* initialize session to default values */
   snmp_sess_init( session );
-  strcpy(Opts, "VhHm:M:O:I:P:D:dv:p:r:t:c:Z:e:E:n:u:l:x:X:a:A:T:");
+  strcpy(Opts, "Y:VhHm:M:O:I:P:D:dv:p:r:t:c:Z:e:E:n:u:l:x:X:a:A:T:");
 #ifndef DEPRECATED_CLI_OPTIONS
   strcat(Opts, "fsSqR");
 #endif
@@ -179,6 +180,10 @@ snmp_parse_args(int argc,
         read_config_print_usage("  ");
         return(-2);
 
+      case 'Y':
+        snmp_config_remember(optarg);
+        break;
+    
       case 'm':
         setenv("MIBS", optarg, 1);
         break;
