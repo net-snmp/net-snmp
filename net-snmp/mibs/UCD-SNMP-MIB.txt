@@ -8,7 +8,9 @@ IMPORTS
         enterprises, OBJECT-TYPE 				
 	    FROM SNMPv2-SMI
 	DisplayString 				
-	    FROM SNMPv2-TC;
+	    FROM SNMPv2-TC
+	Integer32
+            FROM SNMPv2-SMI;
 
 -- private	  OBJECT IDENTIFIER ::= { internet 4 }
 -- enterprises    OBJECT IDENTIFIER ::= { private 1 }
@@ -20,6 +22,8 @@ ucdavis          OBJECT IDENTIFIER ::= { enterprises 2021 }
 -- disk           OBJECT IDENTIFIER ::= { ucdavis 6 }
 -- load           OBJECT IDENTIFIER ::= { ucdavis 7 }
 -- version        OBJECT IDENTIFIER ::= { ucdavis 100 }
+-- snmperrs       OBJECT IDENTIFIER ::= { ucdavis 101 }
+-- mibRegistryTable    OBJECT IDENTIFIER ::= { ucdavis 102 }
 
 -- These are the returned values of the agent type.
 -- returned to:  .iso.org.dod.internet.mgmt.mib-2.system.sysObjectID.0 
@@ -693,4 +697,55 @@ snmperrErrMessage OBJECT-TYPE
 	::= { snmperrs 101 }
 
 END
+
+MRIndex ::= TEXTUAL-CONVENTION
+    DISPLAY-HINT "d"
+    STATUS       current
+    DESCRIPTION
+	"A unique value, greater than zero, for each OID registered in 
+	the agent's mibRegisteryTable"
+    SYNTAX Integer32
+
+mibRegistryTable OBJECT-TYPE
+    SYNTAX     SEQUENCE OF mibRegistryEntry
+    MAX-ACCESS not-accessible
+    STATUS     current
+    DESCRIPTION
+        "A table displaying all the oid's registered by mib modules in
+        the agent."
+    ::= { ucdavis  102 }
+
+mrEntry OBJECT-TYPE
+    SYNTAX     MREntry
+    MAX-ACCESS not-accessible
+    STATUS     current
+    DESCRIPTION
+        "An entry containing a registered mib oid."
+    INDEX      { ifIndex }
+    ::= { mibRegistryTable  1 }
+
+MREntry ::=
+    SEQUENCE {
+        mrIndex
+            MRIndex,
+	mrObjID
+            OBJECT IDENTIFIER
+    }	    
+
+mrIndex OBJECT-TYPE
+    SYNTAX     MRIndex
+    MAX-ACCESS read-only
+    STATUS     current
+    DESCRIPTION
+	"A unique value, greater than zero, for each OID registered in 
+	the agent's mibRegisteryTable"
+    ::= { mrEntry  1 }
+
+mrObjID OBJECT-TYPE
+    SYNTAX     OBJECT IDENTIFIER
+    MAX-ACCESS read-only
+    STATUS     current
+    DESCRIPTION
+	"The OID registered with the agent by a particular mib module."
+    ::= { mrEntry  2 }
 
