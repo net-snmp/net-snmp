@@ -19,7 +19,8 @@
 
 #include "ifTable_data_access.h"
 
-static void _check_ifentry_for_updates(netsnmp_ifentry *ifentry, netsnmp_container *container);
+static void _check_interface_entry_for_updates(netsnmp_interface_entry *ifentry,
+                                               netsnmp_container *container);
 
 
 /** @defgroup data_access data_access: Routines to access data
@@ -125,7 +126,8 @@ ifTable_container_init(netsnmp_container ** container_ptr_ptr,
     /*
      * don't release resources
      */
-    //cache->flags =& NETSNMP_CACHE_DONT_AUTO_RELEASE;
+    // is this right?
+    //cache->flags &= NETSNMP_CACHE_DONT_AUTO_RELEASE;
 }
 
 /**
@@ -160,23 +162,27 @@ int
 ifTable_cache_load(netsnmp_container * container)
 {
     netsnmp_container * ifcontainer =
-        netsnmp_dal_ifcontainer_load(NULL, NETSNMP_DAL_IF_INIT_NOFLAGS);
+        netsnmp_access_interface_container_load(NULL,
+                                                NETSNMP_ACCESS_INTERFACE_INIT_NOFLAGS);
   
-    DEBUGTRACE;
+    DEBUGMSGTL(("ifTable:access:cache_load","loading cache\n"));
   
     /*
      * we just got a fresh copy of interface data. compare it to
      * what we've already got, and make any adjustements...
      */
     CONTAINER_FOR_EACH(ifcontainer,
-                       (netsnmp_container_obj_func*)_check_ifentry_for_updates,
+                       (netsnmp_container_obj_func*)_check_interface_entry_for_updates,
                        container);
+
+    // xxx-rks: deal with inactive entries before 5.2
 
     /*
      * free the container. we've either claimed each ifentry, or released it,
      * so the dal function doesn't need to clear the container.
      */
-    netsnmp_dal_ifcontainer_free(ifcontainer, NETSNMP_DAL_IF_FREE_DONT_CLEAR );
+    netsnmp_access_interface_container_free(ifcontainer,
+                                               NETSNMP_ACCESS_INTERFACE_FREE_DONT_CLEAR );
 
     return MFD_SUCCESS;
 }
@@ -186,7 +192,7 @@ ifTable_cache_load(netsnmp_container * container)
  *
  */
 static void
-_check_ifentry_for_updates(netsnmp_ifentry *ifentry,
+_check_interface_entry_for_updates(netsnmp_interface_entry *ifentry,
                            netsnmp_container * container)
 {
     /*
@@ -195,6 +201,7 @@ _check_ifentry_for_updates(netsnmp_ifentry *ifentry,
      */
     ifTable_rowreq_ctx *rowreq_ctx = CONTAINER_FIND(container, ifentry);
     if(NULL == rowreq_ctx) {
+        DEBUGMSGTL(("ifTable:access","creating new entry\n"));
         /*
          * allocate an row context and set the index(es), then add it to
          * the container
@@ -212,11 +219,13 @@ _check_ifentry_for_updates(netsnmp_ifentry *ifentry,
                 ifTable_release_rowreq_ctx(rowreq_ctx);
             }
             else
-                netsnmp_dal_ifentry_free(ifentry);
+                netsnmp_access_interface_entry_free(ifentry);
         }
     }
     else {
         int updated = 0;
+
+        DEBUGMSGTL(("ifTable:access","updating existing entry\n"));
 
         /*
          * we already have an entry-> copy stats and check for updates.
@@ -264,7 +273,7 @@ _check_ifentry_for_updates(netsnmp_ifentry *ifentry,
         if(updated) {
             rowreq_ctx->data->if_lastchange = netsnmp_get_agent_uptime();
         }
-        netsnmp_dal_ifentry_free(ifentry);
+        netsnmp_access_interface_entry_free(ifentry);
     }
     
 } 
@@ -285,8 +294,7 @@ _check_ifentry_for_updates(netsnmp_ifentry *ifentry,
 void
 ifTable_cache_free(netsnmp_container * container)
 {
-    DEBUGTRACE;
-
+    DEBUGMSGTL(("ifTable:access:cache_free","freeing cache\n"));
 }
 
 /** @} */
