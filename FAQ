@@ -28,6 +28,8 @@ TABLE OF CONTENTS
    Can I use SNMPv1 requests with an SNMPv2 MIB (or vice versa)?
    Where can I find more information about network management?
    Is ucd-snmp thread safe?
+ COMPILING
+   On RedHat 8.0 or up I get "/usr/bin/ld: cannot find -lelf"?
  APPLICATIONS
    How do I add a MIB?
    How do I add a MIB to the tools?
@@ -559,7 +561,25 @@ Is ucd-snmp thread safe?
 
   The applications and the agent have not been designed for threaded use.
 
+COMPILING
+=========
 
+On RedHat 8.0 or up I get "/usr/bin/ld: cannot find -lelf"?
+----------------------------------------------------------
+
+  RedHat 8.0 and up doesn't come with libelf installed (properly) by
+  default.  In order to build Net-SNMP you'll need the elfutils-devel
+  rpm installed, which you currently don't have.
+
+  Alternatively, this could quickly fix the problem without requiring
+  the -devel rpm installed (as this is one of the things the -devel rpm
+  does when you install it):
+
+    cd /usr/lib ; ln -s libelf.so.1 libelf.so
+
+  Note that this will only affect you if you are trying to compile in
+  the host resources mib support, as it'll try to use the rpm libraries
+  which will in turn require that libelf.a or libelf.so be present.
 
 APPLICATIONS
 ============
