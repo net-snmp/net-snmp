@@ -14,8 +14,6 @@ struct variable2 simple_proxy_variables[] = {
 };
 
 static struct simple_proxy *proxies=NULL;
-const static char *public = "public";
-const static char *homestyle = "homestyle";
 
 oid testoid[] = { 1,3,6,1,4,1,2021,8888,1 };
 
@@ -150,14 +148,8 @@ u_char *var_simple_proxy(struct variable *vp,
 			 WriteMethod **write_method)
 {
 
-    oid newname[MAX_OID_LEN];
-    int i, j, rtest=0, fd, newlen, last;
-    static long long_ret;
     static char nullstr_ret[] = "";
-    static char buf[SNMP_MAXBUF], buf2[SNMP_MAXBUF];
     static oid  objid[MAX_OID_LEN];
-    struct extensible *passthru;
-    FILE *file;
     struct simple_proxy *sp;
     u_char *ret = NULL;
     struct snmp_pdu *pdu, *response;
