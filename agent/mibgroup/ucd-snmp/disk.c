@@ -333,7 +333,7 @@ unsigned char *var_extensible_disk(vp, name, length, exact, var_len, write_metho
   percent = vfs.f_bavail <= 0 ? 100 : (int) ((double) (vfs.f_blocks - vfs.f_bfree) /
 	    (double) (vfs.f_blocks - (vfs.f_bfree - vfs.f_bavail)) * 100.0 + 0.5);
   iserror = (disks[disknum].minimumspace >= 0 ? vfs.f_bavail < disks[disknum].minimumspace :
-	    percent <= disks[disknum].minpercent) ? 1 : 0;
+	    100-percent <= disks[disknum].minpercent) ? 1 : 0;
   switch (vp->magic) {
     case DISKTOTAL:
       long_ret = vfs.f_blocks;
@@ -399,7 +399,7 @@ unsigned char *var_extensible_disk(vp, name, length, exact, var_len, write_metho
   avail = availblks > used ? availblks - used : 0;
   percent = availblks == 0 ? 100 : (int) ((double) used / (double) totalblks * 100.0 + 0.5);
   iserror = (disks[disknum].minimumspace >= 0 ? avail * filesys.fs_fsize / 1024 <
-	    disks[disknum].minimumspace : percent <= disks[disknum].minpercent) ? 1 : 0;
+	    disks[disknum].minimumspace : 100-percent <= disks[disknum].minpercent) ? 1 : 0;
   switch (vp->magic) {
     case DISKTOTAL:
       long_ret = (totalblks * filesys.fs_fsize / 1024);
