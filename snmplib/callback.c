@@ -189,9 +189,16 @@ snmp_call_callbacks(int major, int minor, void *caller_arg)
     }
 
     if(++_lock > 1) {
+#ifdef NETSNMP_PARANOID_LEVEL_HIGH
+        /*
+         * Notes:
+         * - this gets hit the first time a trap is sent after a new trap
+         *   destination has been added (session init cb during send trap cb)
+         */
         snmp_log(LOG_WARNING,
                  "snmp_call_callbacks called while callbacks _locked\n");
         netsnmp_assert(1==_lock);
+#endif
     }
 
     DEBUGMSGTL(("callback", "START calling callbacks for maj=%d min=%d\n",
@@ -295,7 +302,13 @@ snmp_unregister_callback(int major, int minor, SNMPCallback * target,
     if(++_lock > 1) {
         snmp_log(LOG_WARNING,
                  "snmp_unregister_callback called while callbacks _locked\n");
-        /** netsnmp_assert(1==_lock); * xxx-rks: this gets hit at shutdown. */
+#ifdef NETSNMP_PARANOID_LEVEL_HIGH
+        /*
+         * Notes;
+         * - this gets hit at shutdown, during cleanup. No easy fix.
+         */
+        netsnmp_assert(1==_lock);
+#endif
     }
     while (scp != NULL) {
         if ((scp->sc_callback == target) &&
