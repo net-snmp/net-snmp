@@ -120,7 +120,7 @@ header_hrswrun(vp, name, length, exact, var_len, write_method)
 
     memcpy( (char *)newname,(char *)vp->name, (int)vp->namelen * sizeof(oid));
     newname[HRSWRUN_NAME_LENGTH] = 0;
-    result = compare(name, *length, newname, (int)vp->namelen + 1);
+    result = snmp_oid_compare(name, *length, newname, (int)vp->namelen + 1);
     if ((exact && (result != 0)) || (!exact && (result >= 0)))
         return(MATCH_FAILED);
     memcpy( (char *)name,(char *)newname, ((int)vp->namelen + 1) * sizeof(oid));
@@ -169,7 +169,7 @@ header_hrswrunEntry(vp, name, length, exact, var_len, write_method)
           sprint_objid (c_oid, newname, *length);
           DEBUGP ("%s", c_oid);
         }
-        result = compare(name, *length, newname, (int)vp->namelen + 1);
+        result = snmp_oid_compare(name, *length, newname, (int)vp->namelen + 1);
         if (exact && (result == 0)) {
 	    LowPid = pid;
 #ifndef linux

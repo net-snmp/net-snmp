@@ -52,7 +52,7 @@ unsigned char *var_hp(vp, name, length, exact, var_len, write_method)
 
   memcpy( (char *)newname,(char *)vp->name, (int)vp->namelen * sizeof(oid));
   newname[*length] = 0;
-  result = compare(name, *length, newname, (int)vp->namelen + 1);
+  result = snmp_oid_compare(name, *length, newname, (int)vp->namelen + 1);
   if ((exact && (result != 0)) || (!exact && (result >= 0)))
     return NULL;
   memcpy( (char *)name,(char *)newname, ((int)vp->namelen + 1) * sizeof(oid));

@@ -248,8 +248,8 @@ var_acl(vp, name, length, exact, var_len, write_method)
 	*np++ = ap->aclSubject;
 	*np = ap->aclResources;
 	newnamelen = 15;
-	if ((compare(newname, newnamelen, name, *length) > 0) &&
-	    (!lowap || compare(newname, newnamelen,
+	if ((snmp_oid_compare(newname, newnamelen, name, *length) > 0) &&
+	    (!lowap || snmp_oid_compare(newname, newnamelen,
 			       lowname, lownamelen) < 0)){
 	    /*
 	     * if new one is greater than input and closer to input than

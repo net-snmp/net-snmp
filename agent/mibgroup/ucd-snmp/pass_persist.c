@@ -415,7 +415,7 @@ int pass_persist_compare(a, b)
   struct extensible **ap, **bp;
   ap = (struct extensible **) a;
   bp = (struct extensible **) b;
-  return compare((*ap)->miboid,(*ap)->miblen,(*bp)->miboid,(*bp)->miblen);
+  return snmp_oid_compare((*ap)->miboid,(*ap)->miblen,(*bp)->miboid,(*bp)->miblen);
 }
 
 /*

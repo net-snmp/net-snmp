@@ -516,7 +516,7 @@ int snmp_input(op, session, reqid, pdu, magic)
 	    }
             for(vars = pdu->variables;
                 vars &&
-                compare(vars->name, vars->name_length, snmptrapoid2,
+                snmp_oid_compare(vars->name, vars->name_length, snmptrapoid2,
                          sizeof(snmptrapoid2)/sizeof(oid));
                 vars = vars->next_variable);
             if (vars && vars->type == ASN_OBJECT_ID) {

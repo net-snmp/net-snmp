@@ -94,7 +94,7 @@ header_dlmod(vp, name, length, exact, var_len, write_method)
 	fprintf(stderr, "dlmod newname: %s length %d\n", buf, vp->namelen+1);
 #endif
 
-	result = compare(name, *length, newname, (int) vp->namelen + 1);
+	result = snmp_oid_compare(name, *length, newname, (int) vp->namelen + 1);
 	if ((exact && (result != 0)) || (!exact && (result >= 0)))  {
 #if 1
 		fprintf(stderr, "dlmod: FAILED\n");
@@ -177,7 +177,7 @@ header_dlmodEntry(vp, name, length, exact, var_len, write_method)
 #endif
 		if (dlm) {
 			newname[11] = dlmod_index;
-			result = compare(name, *length, newname, (int) vp->namelen + 1);
+			result = snmp_oid_compare(name, *length, newname, (int) vp->namelen + 1);
 #if 1
 			fprintf(stderr, "dlmodEntry exact: %d\n", exact);
 			sprint_mib_oid(buf, name, *length);

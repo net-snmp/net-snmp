@@ -86,7 +86,7 @@ int tree_compare(a, b)
   ap = (struct subtree *) a;
   bp = (struct subtree *) b;
 
-  return compare(ap->name,ap->namelen,bp->name,bp->namelen);
+  return snmp_oid_compare(ap->name,ap->namelen,bp->name,bp->namelen);
 }
 
 int is_parent(name1, len1, name2)

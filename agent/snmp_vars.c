@@ -311,7 +311,7 @@ unregister_mib_tree(name, len, subtree)
   struct subtree *myptr = NULL;
   int ret;
 
-  if ((ret = compare(name, len, subtree->name, subtree->namelen)) == 0) {
+  if ((ret = snmp_oid_compare(name, len, subtree->name, subtree->namelen)) == 0) {
     /* found it */
     return subtree;
   }
@@ -548,7 +548,7 @@ search_subtree(sub_tp, name, namelen, type, len, acl, exact, write_method, pi,
 
     while ( tp != NULL ) {
 	compare_len = MIN( tp->namelen, *namelen );
-	if ( compare(tp->name, compare_len, name, compare_len) >= 0 )
+	if ( snmp_oid_compare(tp->name, compare_len, name, compare_len) >= 0 )
 	    break;
 	tp = tp->next;
     }
@@ -595,7 +595,7 @@ search_subtree(sub_tp, name, namelen, type, len, acl, exact, write_method, pi,
 			/* This answer is the best we'll get, so use it */
 	if ( this_return != NULL &&
 	     ( exact ||
-	       compare( this_name, this_namelen, tp->name, tp->namelen) < 0 )) {
+	       snmp_oid_compare( this_name, this_namelen, tp->name, tp->namelen) < 0 )) {
 		*namelen = this_namelen;
 		memcpy(name, this_name, *namelen * sizeof(oid));
 		*type = this_type;
@@ -619,7 +619,7 @@ search_subtree(sub_tp, name, namelen, type, len, acl, exact, write_method, pi,
 	    if ( exact || tp == NULL  ||
 			/* or 'this' answer is better than remaining children */
 		( this_return != NULL && child_return == NULL &&
-		  compare( tp->name, tp->namelen, this_name, this_namelen) > 0 ))
+		  snmp_oid_compare( tp->name, tp->namelen, this_name, this_namelen) > 0 ))
 			break;
 	}
 
@@ -649,7 +649,7 @@ search_subtree(sub_tp, name, namelen, type, len, acl, exact, write_method, pi,
 	}
 			/* else use the minimum of the two (non-NULL) answers */
 	else
-	if ( compare( this_name, this_namelen,
+	if ( snmp_oid_compare( this_name, this_namelen,
 		      child_name, child_namelen) > 0 ) {
 		*namelen = child_namelen;
 		memcpy(name, child_name, *namelen * sizeof(oid));
@@ -776,7 +776,7 @@ struct subtree *find_subtree_next(name, len, subtree)
   struct subtree *myptr = NULL;
   int ret;
 
-  if ((ret = compare(name, len, subtree->name, subtree->namelen)) == 0) {
+  if ((ret = snmp_oid_compare(name, len, subtree->name, subtree->namelen)) == 0) {
     if (subtree->children != NULL)
       return subtree->children;
     if (subtree->next != NULL)
@@ -807,7 +807,7 @@ struct subtree *find_subtree(name, len, subtree)
   struct subtree *myptr;
 
   for(myptr = subtree; myptr != NULL; myptr = myptr->next) {
-    if (compare(name, len, myptr->name, myptr->namelen) == 0)
+    if (snmp_oid_compare(name, len, myptr->name, myptr->namelen) == 0)
       return myptr;
   }
   return NULL;

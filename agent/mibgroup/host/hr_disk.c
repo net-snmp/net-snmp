@@ -187,7 +187,7 @@ header_hrdisk(vp, name, length, exact, var_len, write_method)
         if ( disk_idx == -1 )
 	    break;
 	newname[HRDISK_ENTRY_NAME_LENGTH] = disk_idx;
-        result = compare(name, *length, newname, (int)vp->namelen + 1);
+        result = snmp_oid_compare(name, *length, newname, (int)vp->namelen + 1);
         if (exact && (result == 0)) {
 	    LowIndex = disk_idx;
 	    Save_HR_Disk_Specific();

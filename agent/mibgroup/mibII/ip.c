@@ -153,7 +153,7 @@ header_ip(vp, name, length, exact, var_len, write_method)
 
     memcpy( (char *)newname,(char *)vp->name, (int)vp->namelen * sizeof(oid));
     newname[IP_NAME_LENGTH] = 0;
-    result = compare(name, *length, newname, (int)vp->namelen + 1);
+    result = snmp_oid_compare(name, *length, newname, (int)vp->namelen + 1);
     if ((exact && (result != 0)) || (!exact && (result >= 0)))
         return(MATCH_FAILED);
     memcpy( (char *)name,(char *)newname, ((int)vp->namelen + 1) * sizeof(oid));
@@ -590,7 +590,7 @@ var_ipAddrEntry(vp, name, length, exact, var_len, write_method)
 	*op++ = *cp++;
 	*op++ = *cp++;
 	if (exact){
-	    if (compare(current, 14, name, *length) == 0){
+	    if (snmp_oid_compare(current, 14, name, *length) == 0){
 		memcpy( (char *)lowest,(char *)current, 14 * sizeof(oid));
 		lowinterface = interface;
 #if defined(linux) || defined(sunV3)
@@ -601,8 +601,8 @@ var_ipAddrEntry(vp, name, length, exact, var_len, write_method)
 		break;	/* no need to search further */
 	    }
 	} else {
-	    if ((compare(current, 14, name, *length) > 0) &&
-		 (!lowinterface || (compare(current, 14, lowest, 14) < 0))){
+	    if ((snmp_oid_compare(current, 14, name, *length) > 0) &&
+		 (!lowinterface || (snmp_oid_compare(current, 14, lowest, 14) < 0))){
 		/*
 		 * if new one is greater than input and closer to input than
 		 * previous lowest, save this one as the "next" one.
@@ -853,17 +853,17 @@ var_ipAddrEntry(vp, name, length, exact, var_len, write_method)
 	break;
       COPY_IPADDR(cp, (u_char *)&entry.ipAdEntAddr, op, current + IP_ADDRINDEX_OFF);
       if (exact){
-	if (compare(current, IP_ADDRNAME_LENGTH, name, *length) == 0){
+	if (snmp_oid_compare(current, IP_ADDRNAME_LENGTH, name, *length) == 0){
 	  memcpy( (char *)lowest,(char *)current, IP_ADDRNAME_LENGTH * sizeof(oid));
 	  Lowentry = entry;
 	  Found++;
 	  break;	/* no need to search further */
 	}
       } else {
-	if ((compare(current, IP_ADDRNAME_LENGTH, name, *length) > 0) 
+	if ((snmp_oid_compare(current, IP_ADDRNAME_LENGTH, name, *length) > 0) 
 	    && (((NextAddr == (u_long)-1))
-		|| (compare(current, IP_ADDRNAME_LENGTH, lowest, IP_ADDRNAME_LENGTH) < 0)
-		|| (compare(name, *length, lowest, IP_ADDRNAME_LENGTH) == 0))){
+		|| (snmp_oid_compare(current, IP_ADDRNAME_LENGTH, lowest, IP_ADDRNAME_LENGTH) < 0)
+		|| (snmp_oid_compare(name, *length, lowest, IP_ADDRNAME_LENGTH) == 0))){
 	  /*
 	   * if new one is greater than input and closer to input than
 	   * previous lowest, and is not equal to it, save this one as the "next" one.
@@ -980,7 +980,7 @@ header_ip(vp, name, length, exact, var_len, write_method)
 
     bcopy((char *)vp->name, (char *)newname, (int)vp->namelen * sizeof(oid));
     newname[IP_NAME_LENGTH] = 0;
-    result = compare(name, *length, newname, (int)vp->namelen + 1);
+    result = snmp_oid_compare(name, *length, newname, (int)vp->namelen + 1);
     if ((exact && (result != 0)) || (!exact && (result >= 0)))
         return(MATCH_FAILED);
     bcopy((char *)newname, (char *)name, ((int)vp->namelen + 1) * sizeof(oid));
@@ -1275,15 +1275,15 @@ var_ipAddrEntry(vp, name, length, exact, var_len, write_method)
 	for (i = 0; i < nifs; i++) {
 		memcpy(current + 10, &ifs[i].addr, 4);
 		if (exact) {
-			if (compare(current, 14, name, *length) == 0) {
+			if (snmp_oid_compare(current, 14, name, *length) == 0) {
 				memcpy(lowest, current, 14 * sizeof(oid));
 				lowinterface = i;
 				break;	/* no need to search further */
 			}
 		} else {
-			if ((compare(current, 14, name, *length) > 0) &&
+			if ((snmp_oid_compare(current, 14, name, *length) > 0) &&
 			    (lowinterface < 0 
-			     || (compare(current, 14, lowest, 14) < 0))) {
+			     || (snmp_oid_compare(current, 14, lowest, 14) < 0))) {
 				/*
 				 * if new one is greater than input
 				 * and closer to input than previous

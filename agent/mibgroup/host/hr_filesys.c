@@ -131,7 +131,7 @@ header_hrfilesys(vp, name, length, exact, var_len, write_method)
         if ( fsys_idx == -1 )
 	    break;
 	newname[HRFSYS_ENTRY_NAME_LENGTH] = fsys_idx;
-        result = compare(name, *length, newname, (int)vp->namelen + 1);
+        result = snmp_oid_compare(name, *length, newname, (int)vp->namelen + 1);
         if (exact && (result == 0)) {
 	    LowIndex = fsys_idx;
             break;

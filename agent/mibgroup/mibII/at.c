@@ -172,7 +172,7 @@ var_atEntry(vp, name, length, exact, var_len, write_method)
 	*op++ = *cp++;
 
 	if (exact){
-	    if (compare(current, oid_length, name, *length) == 0){
+	    if (snmp_oid_compare(current, oid_length, name, *length) == 0){
 		memcpy( (char *)lowest,(char *)current, oid_length * sizeof(oid));
 		LowAddr = Addr;
 #ifdef ARP_SCAN_FOUR_ARGUMENTS
@@ -183,8 +183,8 @@ var_atEntry(vp, name, length, exact, var_len, write_method)
 		break;	/* no need to search further */
 	    }
 	} else {
-	    if ((compare(current, oid_length, name, *length) > 0) &&
-		 ((LowAddr == -1) || (compare(current, oid_length, lowest, oid_length) < 0))){
+	    if ((snmp_oid_compare(current, oid_length, name, *length) > 0) &&
+		 ((LowAddr == -1) || (snmp_oid_compare(current, oid_length, lowest, oid_length) < 0))){
 		/*
 		 * if new one is greater than input and closer to input than
 		 * previous lowest, save this one as the "next" one.
@@ -301,7 +301,7 @@ var_atEntry(struct variable *vp, oid *name, int *length, int exact,
 	current[AT_IFINDEX_OFF+1] = 1;
         COPY_IPADDR(cp,(u_char *)&entry.ipNetToMediaNetAddress, op, current+AT_IPADDR_OFF);  
 	if (exact){
-	    if (compare(current, AT_NAME_LENGTH, name, *length) == 0){
+	    if (snmp_oid_compare(current, AT_NAME_LENGTH, name, *length) == 0){
 		memcpy( (char *)lowest,(char *)current, AT_NAME_LENGTH * sizeof(oid));
 		Lowentry = entry;
 		Found++;
@@ -309,11 +309,11 @@ var_atEntry(struct variable *vp, oid *name, int *length, int exact,
 	    }
 	} else {
 	  if (Lowentry.ipNetToMediaNetAddress == entry.ipNetToMediaNetAddress) break;
-	  if (compare(current, AT_NAME_LENGTH, name, *length) > 0
+	  if (snmp_oid_compare(current, AT_NAME_LENGTH, name, *length) > 0
 	      && (NextAddr.ipAddr == (u_long)-1
-		  || compare(current, AT_NAME_LENGTH, lowest, AT_NAME_LENGTH) < 0)) {
+		  || snmp_oid_compare(current, AT_NAME_LENGTH, lowest, AT_NAME_LENGTH) < 0)) {
 /*
-		  || (compare(name, AT_NAME_LENGTH, lowest, AT_NAME_LENGTH) == 0))){
+		  || (snmp_oid_compare(name, AT_NAME_LENGTH, lowest, AT_NAME_LENGTH) == 0))){
 */
 		/*
 		 * if new one is greater than input and closer to input than
