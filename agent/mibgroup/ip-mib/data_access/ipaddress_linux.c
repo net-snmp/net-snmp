@@ -44,8 +44,13 @@ netsnmp_access_ipaddress_container_arch_load(netsnmp_container *container)
 #if defined (INET6)
     idx_offset = rc;
 
+    /*
+     * load ipv6, ignoring errors if file not found
+     */
     rc = _load_v6(container, idx_offset);
-    if(rc < 0) {
+    if (-2 == rc)
+        rc = 0;
+    else if(rc < 0) {
         u_int flags = NETSNMP_ACCESS_IPADDRESS_FREE_KEEP_CONTAINER;
         netsnmp_access_ipaddress_container_free(container, flags);
     }
@@ -71,14 +76,24 @@ _load_v6(netsnmp_container *container, int idx_offset)
     u_char          *buf;
     int             if_index, pfx_len, scope, flags, rc = 0, in_len, out_len;
     netsnmp_ipaddress_entry *entry;
+    static int      log_open_err = 1;
     
     netsnmp_assert(NULL != container);
 
 #define PROCFILE "/proc/net/if_inet6"
     if (!(in = fopen(PROCFILE, "r"))) {
-        snmp_log(LOG_ERR,"could not open " PROCFILE "\n");
+        if (1 == log_open_err) {
+            snmp_log(LOG_ERR,"could not open " PROCFILE "\n");
+            log_open_err = 0;
+        }
         return -2;
     }
+    /*
+     * if we hadn't been able to open file and turned of err logging,
+     * turn it back on now that we opened the file.
+     */
+    if (0 == log_open_err)
+        log_open_err = 1;
 
     /*
      * address index prefix_len scope status if_name
