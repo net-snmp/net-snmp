@@ -17,41 +17,13 @@ NSB_SKIP_TEST=0
 NSB_SKIP_INSTALL=0
 NSB_DIST_TRANSPORTS="UDP TCP Unix"
 NSB_EXTRA_TRANSPORTS="Callback"
-NSB_DIST_MODULES="host disman/event-mib"
+NSB_DIST_MODULES="host disman/event-mib smux"
 NSB_EXTRA_MODULES="examples examples/example testhandler smux Rmon"
 NSB_VIEW=cat
 NSB_PERL=
 #NSB_PERL=--enable-embedded-perl
 NSB_FLOW=
 DATE=`date +%y%m%d_%H%M`
-
-if [ -z $NSB_MAKE ];then
-   echo "Searching for GNU make (set NSB_MAKE to skip this step)"
-   for p in `echo $PATH | tr ':' ' '`
-   do
-      #echo $p
-      if [ -x $p/make ];then
-         dummy=`$p/make --version 2>&1 | grep GNU`
-         if [ $? -eq 0 ];then
-	    echo "using $p/make ($dummy)"
-            NSB_MAKE=$p/make
-            break
-         fi
-      fi
-      if [ -x $p/gmake ];then
-         dummy=`$p/gmake --version 2>&1 | grep GNU`
-         if [ $? -eq 0 ];then
-	    echo "using $p/gmake ($dummy)"
-            NSB_MAKE=$p/gmake
-            break
-         fi
-      fi
-   done
-   if [ -z $NSB_MAKE ];then
-      echo "ERROR: GNU make not found. Set NSB_MAKE to your make executable."
-      exit
-   fi
-fi
 
 #----------------------------------------------------------------------
 #
@@ -60,8 +32,8 @@ fi
 
 nsb-abort()
 {
+   echo
    echo "ABORTING: $@" >&2
-#   echo "last step: $NSB_FLOW" >&2
    exit 255
 }
 
@@ -134,6 +106,8 @@ nsb-config-dist()
       --disable-developer \
       --with-sys-contact='System Administrator' --disable-privacy \
       --with-defaults --with-mib-modules="$NSB_FINAL_MODULES"
+   # I'd like to add ' | tee nsb-config.$DATE' to save output, but then
+   # I'd lose the rc from configure, which I need... sigh
    ngc_rc=$?
    if [ $ngc_rc -ne 0 ];then
       nsb-abort "Error during configure dist (rc=$ngc_rc)"
@@ -199,6 +173,8 @@ nsb-config-all()
       "--with-mib-modules=$NSB_FINAL_MODULES" \
       "--with-transports=$NSB_DIST_TRANSPORTS $NSB_EXTRA_TRANSPORTS" \
       $NSB_PERL --enable-shared --with-libwrap
+   # I'd like to add ' | tee nsb-config.$DATE' to save output, but then
+   # I'd lose the rc from configure, which I need... sigh
    ngc_rc=$?
    if [ $ngc_rc -ne 0 ];then
       nsb-abort "Error during configure all (rc=$ngc_rc)"
@@ -252,10 +228,40 @@ nsb-make()
    shift 1
    parms=$@
 
+   if [ -z $NSB_MAKE ];then
+      #nsb-info "Searching for GNU make (set NSB_MAKE to skip this step)"
+      for p in `echo $PATH | tr ':' ' '`
+      do
+         #echo $p
+         if [ -x $p/make ];then
+            dummy=`$p/make --version 2>&1 | grep GNU`
+            if [ $? -eq 0 ];then
+	       #nsb-info "using $p/make ($dummy)"
+               NSB_MAKE=$p/make
+               break
+            fi
+         fi
+         if [ -x $p/gmake ];then
+            dummy=`$p/gmake --version 2>&1 | grep GNU`
+            if [ $? -eq 0 ];then
+	       #nsb-info "using $p/gmake ($dummy)"
+               NSB_MAKE=$p/gmake
+               break
+            fi
+         fi
+      done
+      if [ -z $NSB_MAKE ];then
+         nsb-abort "GNU make not found. Set NSB_MAKE to your make executable."
+      fi
+   fi
+
    nsb_make_OUTPUT=nsb-make-$target.$DATE
    nsb-info "Making $target... (log is $nsb_make_OUTPUT)"
-   #$NSB_MAKE touchit 2>&1 | tee $nsb_make_OUTPUT
-   $NSB_MAKE start-flag $target $parms end-flag 2>&1 | tee -a $nsb_make_OUTPUT
+   #
+   if [ "x$target" = "xall" ]; then
+      $NSB_MAKE NOAUTODEPS=y touchit 2>&1 | tee $nsb_make_OUTPUT
+   fi
+   $NSB_MAKE NOAUTODEPS=y start-flag $target $parms end-flag 2>&1 | tee -a $nsb_make_OUTPUT
    # checking $? would only get us the rc from tee, which is useless
 
    nsb-info "Checking for errors..."
@@ -315,7 +321,7 @@ nsb-build()
         nsb-info "rm -fR nsb-* $dest_dir 2>&1 > /dev/null"
         rm -fR nsb-* $dest_dir 2>&1 > /dev/null
         if [ -f Makefile ]; then
-            $NSB_MAKE distclean
+            nsb-make NOAUTODEPS=y distclean
             nsb_build_rc=$?
             if [ $nsb_build_rc -ne 0 ]; then
                 nsb-abort "Error during make distclean (rc=$nsb_build_rc)"
@@ -327,9 +333,9 @@ nsb-build()
    if [ $NSB_SKIP_CONFIG -ne 1 ]; then
       nsb-info "Configuring... (log is nsb-config.$DATE)"
       if [ $nsb_config_all -eq 0 ]; then
-          nsb-config-dist $src_dir | tee nsb-config.$DATE
+          nsb-config-dist $src_dir
       else
-          nsb-config-all $src_dir | tee nsb-config.$DATE
+          nsb-config-all $src_dir
       fi
       nsb-prompt "press enter to continue"
    fi
