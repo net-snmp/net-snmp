@@ -214,47 +214,8 @@ struct snmp_pdu *
 snmp_clone_pdu2(struct snmp_pdu *pdu,
 		int command)
 {
-    struct variable_list *var, *newvar;
-    struct snmp_pdu *newpdu;
-
-    /* clone the pdu */
-    newpdu = (struct snmp_pdu *)malloc(sizeof(struct snmp_pdu));
-    if (newpdu == NULL) return NULL;
-    memmove(newpdu, pdu, sizeof(struct snmp_pdu));
-    newpdu->variables = NULL;
-    newpdu->command = command;
-    newpdu->reqid = pdu->reqid;
-    newpdu->errstat = SNMP_DEFAULT_ERRSTAT;
-    newpdu->errindex = SNMP_DEFAULT_ERRINDEX;
-    var = pdu->variables;
-
-    newpdu->variables = newvar = (struct variable_list *)malloc(sizeof(struct variable_list));
-    memmove(newvar, var, sizeof(struct variable_list));
-    if (var->name != NULL){
-	newvar->name = (oid *)malloc(var->name_length * sizeof(oid));
-	memmove(newvar->name, var->name, var->name_length * sizeof(oid));
-    }
-    if (var->val.string != NULL){
-	newvar->val.string = (u_char *)malloc(var->val_len);
-	memmove(newvar->val.string, var->val.string, var->val_len);
-    }
-    newvar->next_variable = NULL;
-
-    while(var->next_variable){
-	var = var->next_variable;
-	newvar->next_variable = (struct variable_list *)malloc(sizeof(struct variable_list));
-	newvar = newvar->next_variable;
-	memmove(newvar, var, sizeof(struct variable_list));
-	if (var->name != NULL){
-	    newvar->name = (oid *)malloc(var->name_length * sizeof(oid));
-	    memmove(newvar->name, var->name, var->name_length * sizeof(oid));
-	}
-	if (var->val.string != NULL){
-	    newvar->val.string = (u_char *)malloc(var->val_len);
-	    memmove(newvar->val.string, var->val.string, var->val_len);
-	}
-	newvar->next_variable = 0;
-    }
+    struct snmp_pdu *newpdu = snmp_clone_pdu(pdu);
+    if (newpdu) newpdu->command = command;
     return newpdu;
 }
 
@@ -618,7 +579,12 @@ int main(int argc, char *argv[])
 #endif
 
     /* register our configuration handlers now so -H properly displays them */
-    register_config_handler("snmptrapd","traphandle",snmptrapd_traphandle,NULL,"oid|\"default\" program [args ...] ");
+    register_config_handler("snmptrapd", "traphandle",
+			    snmptrapd_traphandle, NULL,
+			    "oid|\"default\" program [args ...] ");
+    register_config_handler("snmptrapd", "createUser",
+			    usm_parse_create_usmUser, NULL,
+			    "username (MD5|SHA) passphrase [DES passphrase]");
 
 #ifdef WIN32
     setvbuf (stdout, NULL, _IONBF, BUFSIZ);
