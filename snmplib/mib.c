@@ -2160,9 +2160,9 @@ _add_strings_to_oid(struct tree *tp, char *cp,
 	objid[ *objidlen ] = subid;
 	(*objidlen)++;
 
+	cp = cp2;
 	if (!tp2) break;
 	tp = tp2;
-	cp = cp2;
     }
 
     if (tp && !tp->child_list) {
