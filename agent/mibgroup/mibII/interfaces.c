@@ -1571,6 +1571,10 @@ Interface_Scan_Init (void)
 	  case ARPHRD_HIPPI:
 	      nnew->if_type = 47; break;
 #endif
+#ifdef ARPHRD_ATM
+	  case ARPHRD_ATM:
+	      nnew->if_type = 37; break;
+#endif
           /* XXX: more if_arp.h:ARPHDR_xxx to IANAifType mappings... */
 	  }
 #endif
