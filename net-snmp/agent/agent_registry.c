@@ -346,7 +346,8 @@ register_mib_context(const char *moduleName,
   subtree->range_subid = range_subid;
   subtree->range_ubound = range_ubound;
   subtree->session = ss;
-  subtree->flags = (u_char)flags;  /* used to identify instance oids */
+  subtree->flags = (u_char)flags;  /*  used to identify instance oids  */
+  subtree->flags |= SUBTREE_ATTACHED;
   res = load_subtree(subtree);
 
 	/*
@@ -381,10 +382,11 @@ register_mib_context(const char *moduleName,
 	  memcpy(sub2->variables, var, numvars * varsize);
 	}
 	
-	sub2->name[range_subid-1] = i;
-	sub2->start[range_subid-1] = i;
-	sub2->end[  range_subid-1] = i;		/* XXX - ???? */
+	sub2->name[range_subid - 1] = i;
+	sub2->start[range_subid - 1] = i;
+	sub2->end[range_subid - 1] = i;		/* XXX - ???? */
 	res = load_subtree(sub2);
+	sub2->flags |= SUBTREE_ATTACHED;
 	if (res != MIB_REGISTERED_OK) {
 	    unregister_mib_context( mibloc, mibloclen, priority,
 				  range_subid, range_ubound, context);
@@ -407,42 +409,75 @@ register_mib_context(const char *moduleName,
   /*  Should this really be called if the registration hasn't actually 
       succeeded?  */
 
-  snmp_call_callbacks(SNMP_CALLBACK_APPLICATION, SNMPD_CALLBACK_REGISTER_OID,
-                      &reg_parms);
+  snmp_call_callbacks(SNMP_CALLBACK_APPLICATION,
+		      SNMPD_CALLBACK_REGISTER_OID, &reg_parms);
 
   return res;
 }
 
-/* reattach a particular subtree */
-void
-register_mib_reattach_subtree(struct subtree *it) {
-  struct register_parameters reg_parms;
+/*  Reattach a particular node.  */
 
-  if (it->namelen > 1) {
+static void
+register_mib_reattach_node(struct subtree *s)
+{
+  if ((s != NULL) && (s->namelen > 1) && !(s->flags & SUBTREE_ATTACHED)) {
+      struct register_parameters reg_parms;
       /* only do registrations that are not the top level nodes */
       /* XXX: do this better */
-      reg_parms.name = it->name;
-      reg_parms.namelen = it->namelen;
-      reg_parms.priority = it->priority;
-      reg_parms.range_subid  = it->range_subid;
-      reg_parms.range_ubound = it->range_ubound;
-      reg_parms.timeout = it->timeout;
-      reg_parms.flags = it->flags;
-      snmp_call_callbacks(SNMP_CALLBACK_APPLICATION, SNMPD_CALLBACK_REGISTER_OID,
-                          &reg_parms);
+      reg_parms.name = s->name;
+      reg_parms.namelen = s->namelen;
+      reg_parms.priority = s->priority;
+      reg_parms.range_subid  = s->range_subid;
+      reg_parms.range_ubound = s->range_ubound;
+      reg_parms.timeout = s->timeout;
+      reg_parms.flags = s->flags;
+      snmp_call_callbacks(SNMP_CALLBACK_APPLICATION,
+			  SNMPD_CALLBACK_REGISTER_OID, &reg_parms);
+      s->flags |= SUBTREE_ATTACHED;
   }
-  
-  if (it->children)
-      register_mib_reattach_subtree(it->children);
-  if (it->next)
-      register_mib_reattach_subtree(it->next);
 }
 
-/* call callbacks to reattach ourselves */
+/*  Call callbacks to reattach all our nodes.  */
+
 void
-register_mib_reattach(void) {
-    register_mib_reattach_subtree(subtrees);
+register_mib_reattach(void)
+{
+  struct subtree *s, *t;
+
+  for (s = subtrees; s != NULL; s = s->next) {
+    register_mib_reattach_node(s);
+    for (t = s->children; t != NULL; t = t->children) {
+      register_mib_reattach_node(t);
+    }
+  }
 }
+
+/*  Mark a node as detached.  */
+
+static void
+register_mib_detach_node(struct subtree *s)
+{
+  if (s != NULL) {
+    s->flags = s->flags & ~SUBTREE_ATTACHED;
+  }
+}
+
+/*  Mark all our registered OIDs as detached.  This is only really
+    useful for subagent protocols, when a connection is lost or
+    something.  */
+
+void
+register_mib_detach(void)
+{
+  struct subtree *s, *t;
+  for (s = subtrees; s != NULL; s = s->next) {
+    register_mib_detach_node(s);
+    for (t = s->children; t != NULL; t = t->children) {
+      register_mib_detach_node(t);
+    }
+  }
+}
+
 
 int
 register_mib_range(const char *moduleName,
@@ -488,6 +523,23 @@ register_mib(const char *moduleName,
 
 
 int 
+unregister_mib_table_row(oid *mibloc, size_t mibloclen,
+			 int priority, int var_subid, oid range_ubound,
+			 const char *context)
+{
+  oid range_lbound = mibloc[var_subid - 1];
+
+  while (mibloc[var_subid - 1] <= range_ubound) {
+    unregister_mib_context(mibloc, mibloclen, priority,
+			   var_subid, range_ubound, context);
+    mibloc[var_subid - 1]++;
+  }
+  mibloc[var_subid - 1] = range_lbound;
+
+  return 0;
+}
+
+int 
 register_mib_table_row(const char *moduleName,
                        struct variable *var,
                        size_t varsize,
@@ -517,6 +569,7 @@ register_mib_table_row(const char *moduleName,
                              var_subid, numvars, context);
       return MIB_REGISTRATION_FAILED;
     }
+    memset(subtree, 0, sizeof(struct subtree));
 
     /* 
      * fill in subtree
@@ -548,6 +601,7 @@ register_mib_table_row(const char *moduleName,
     subtree->timeout  = timeout;
     subtree->session = ss;
     subtree->flags = (u_char)flags;
+    subtree->flags |= SUBTREE_ATTACHED;
 
     /*  Since we're not really making use of this in the normal way:  */
 
@@ -575,7 +629,8 @@ register_mib_table_row(const char *moduleName,
   reg_parms.range_subid  = var_subid;
   reg_parms.range_ubound = (mibloc[var_subid-1] + numvars - 1);
   reg_parms.timeout = timeout;
-  rc = snmp_call_callbacks(SNMP_CALLBACK_APPLICATION, 1, &reg_parms);
+  rc = snmp_call_callbacks(SNMP_CALLBACK_APPLICATION,
+			   SNMPD_CALLBACK_REGISTER_OID, &reg_parms);
   return rc;
 }
 
@@ -861,16 +916,19 @@ struct subtree *find_subtree_next(oid *name,
   struct subtree *myptr = NULL;
 
   myptr = find_subtree_previous(name, len, subtree);
-  if ( myptr != NULL ) {
-     myptr = myptr->next;
-     while ( myptr && (myptr->variables == NULL || myptr->variables_len == 0) )
-         myptr = myptr->next;
-     return myptr;
+
+  if (myptr != NULL) {
+    myptr = myptr->next;
+    while (myptr && (myptr->variables == NULL || myptr->variables_len == 0)) {
+      myptr = myptr->next;
+    }
+    return myptr;
+  } else if (subtree &&
+	 snmp_oid_compare(name, len, subtree->start, subtree->start_len) < 0) {
+    return subtree;
+  } else {
+    return NULL;
   }
-  else if (subtree && snmp_oid_compare(name, len, subtree->start, subtree->start_len) < 0)
-     return subtree;
-  else
-     return NULL;
 }
 
 struct subtree *find_subtree(oid *name,
@@ -946,8 +1004,7 @@ void dump_registry( void )
     for( myptr = subtrees ; myptr != NULL; myptr = myptr->next) {
 	sprint_objid(start_oid, myptr->start, myptr->start_len);
 	sprint_objid(end_oid, myptr->end, myptr->end_len);
-	printf("%s%c %s - %s %c\n",
-	       (myptr->flags & FULLY_QUALIFIED_INSTANCE)?"[FQI] ":"",
+	printf("%02x %c %s - %s %c\n", myptr->flags,
 	       ( myptr->variables ? ' ' : '(' ),
 	       start_oid, end_oid,
 	       ( myptr->variables ? ' ' : ')' ));
