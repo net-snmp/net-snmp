@@ -563,22 +563,14 @@ init_master_agent(int dest_port)
                         sess,
                        *session=&sess;
 
-    /* initialize v2party support */
-    init_snmp2p(dest_port);
-
     /* set up a fake session for incoming requests that opens a port
      * that we listen to. */
+
+    snmp_sess_init(session);
     
-    memset(session, 0, sizeof(struct snmp_session));
     session->version = SNMP_DEFAULT_VERSION;
     session->peername = SNMP_DEFAULT_PEERNAME;
     session->community_len = SNMP_DEFAULT_COMMUNITY_LEN;
-    session->retries = SNMP_DEFAULT_RETRIES;
-    session->timeout = SNMP_DEFAULT_TIMEOUT;
-     
-    session->srcPartyLen = 0;
-    session->dstPartyLen = 0;
-    session->contextLen = 0;
      
     session->local_port = dest_port;
     session->callback = handle_snmp_packet;
@@ -586,6 +578,9 @@ init_master_agent(int dest_port)
     session = snmp_open( session );
     set_pre_parse( session, snmp_check_packet );
     set_post_parse( session, snmp_check_parse );
+
+    /* initialize v2party support */
+    init_snmp2p(dest_port);
 }
 
 struct snmp_session *agentx_session;
