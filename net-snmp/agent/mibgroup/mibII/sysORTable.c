@@ -168,7 +168,7 @@ void unregister_sysORTable(oid *oidin,
 
   while(*ptr != NULL) {
     if ( snmp_oid_compare( oidin, oidlen, (*ptr)->OR_oid, (*ptr)->OR_oidlen) == 0 ) {
-      if ( prev = NULL )
+      if ( prev == NULL )
         table      = (*ptr)->next;
       else 
         prev->next = (*ptr)->next;
