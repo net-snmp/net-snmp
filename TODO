@@ -1,11 +1,6 @@
 TODO list for the ucd-snmp-coders:
 
-  SNMPv2c support.
-  Implement the host resources mib as a module.
-  make agent/mibgroup/read_config.c create a new macro to allow new
-    modules to request callbacks to functions for snmpd.conf lines and
-    move to required code rather than a module.
-  Merge similar apps/* code into one file linked by all apps.
+  better SNMPv2c support in all apps and the agent.
   Continue to add and improve manual pages/documentation.
   More snmpset'able variables.
   Should be able to set the fix script line in the .conf files per type.
@@ -22,7 +17,6 @@ TODO list for the ucd-snmp-coders:
   Make read_objid and sprint_objid agree on which shorthands they accept.
   numeric to symbolic trap OID conversion.
   snmpset should check against MIB size if possible?
-  Better and more Consistant error messages returned by apps.
 
 Other Ideas:
   Make the mib parser figure out which of the above files it needs to
