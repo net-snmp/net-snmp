@@ -67,6 +67,7 @@
 #include "transform_oids.h"
 #include "snmpv3.h"
 #include "default_store.h"
+#include "getopt.h"
 
 int main (int, char **);
 
