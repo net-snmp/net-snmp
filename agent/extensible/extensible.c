@@ -982,7 +982,7 @@ init_extensible() {
   extmp.type = EXECPROC;
   extmp.next = NULL;
   exec_command(&extmp);
-  strcpy(version_descr,extmp.output);
+  strncpy(version_descr,extmp.output, 128);
   version_descr[strlen(version_descr)-1] = NULL; /* chomp new line */
 
   sprintf(extmp.command,"%s -n",UNAMEPROG);
@@ -990,7 +990,7 @@ init_extensible() {
   extmp.type = EXECPROC;
   extmp.next = NULL;
   exec_command(&extmp);
-  strcpy(sysName,extmp.output);
+  strncpy(sysName,extmp.output, 128);
   sysName[strlen(sysName)-1] = NULL; /* chomp new line */
 
   signal(SIGHUP,update_config);
