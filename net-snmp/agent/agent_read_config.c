@@ -78,6 +78,9 @@
 #include <dmalloc.h>
 #endif
 
+#include <pwd.h>
+#include <grp.h>
+
 #include "mibincl.h"
 #include "snmpusm.h"
 
@@ -98,6 +101,32 @@
 char dontReadConfigFiles;
 char *optconfigfile;
 
+void snmpd_set_agent_user(const char *token, char *cptr)
+{
+struct passwd *info;
+ 
+    if (cptr[0] == '#')
+        ds_set_int(DS_APPLICATION_ID, DS_AGENT_USERID, atoi(&cptr[1]));
+
+    if ((info = getpwnam(cptr)) != NULL) {
+        ds_set_int(DS_APPLICATION_ID, DS_AGENT_USERID, info->pw_uid);
+    }
+}
+
+
+void snmpd_set_agent_group(const char *token, char *cptr)
+{
+struct group *info;
+
+    if (cptr[0] == '#')
+        ds_set_int(DS_APPLICATION_ID, DS_AGENT_GROUPID, atoi(&cptr[1]));
+
+    if ((info = getgrnam(cptr)) != NULL) {
+        ds_set_int(DS_APPLICATION_ID, DS_AGENT_GROUPID, info->gr_gid);
+    }
+}
+
+
 void snmpd_set_agent_address(const char *token, char *cptr)
 {
     char buf[SPRINT_MAX_LEN];
@@ -116,6 +145,7 @@ void snmpd_set_agent_address(const char *token, char *cptr)
     ds_set_string(DS_APPLICATION_ID, DS_AGENT_PORTS, strdup(buf));
 
 }
+
 void init_agent_read_config (const char *app)
 {
   if ( app != NULL )
@@ -143,6 +173,12 @@ void init_agent_read_config (const char *app)
                           snmpd_parse_config_trapcommunity,
                           snmpd_free_trapcommunity,
                           "community-string");
+  register_app_config_handler("agentuser",
+                          snmpd_set_agent_user, NULL,
+                          "userid");
+  register_app_config_handler("agentgroup",
+                          snmpd_set_agent_group, NULL,
+                          "groupid");
   register_app_config_handler("agentaddress",
                           snmpd_set_agent_address, NULL,
                           "SNMP bind address");

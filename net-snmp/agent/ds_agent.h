@@ -14,5 +14,7 @@
 
 /* integers */
 #define DS_AGENT_FLAGS    0       /* session.flags */
+#define DS_AGENT_USERID   1
+#define DS_AGENT_GROUPID  2
 
 #endif
