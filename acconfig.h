@@ -135,6 +135,10 @@
    type struct fs_data. [Ultrix] */
 #undef STAT_STATFS_FS_DATA
 
+/* Define if the TCP timer constants in <netinet/tcp_timer.h>
+   depend on the integer variable `hz'.  [FreeBSD 4.x] */
+#undef TCPTV_NEEDS_HZ
+
 @BOTTOM@
 
 /* define if you are using linux and /proc/net/dev has the compressed
