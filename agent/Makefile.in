@@ -9,7 +9,7 @@ USELIBS		= ../snmplib/libsnmp.$(SHLIB_EXTENSION)$(SHLIB_VERSION)
 LOCAL_LIBS	= -L../snmplib -L.
 LIBS		= $(CC_RUNTIME_ARG) -lsnmp @WRAPLIBS@ @LIBS@
 AGENT_LIBS	= $(CC_RUNTIME_ARG) -lucdagent -lucdmibs -lsnmp @WRAPLIBS@ @LIBS@
-CPPFLAGS	= -I.. -I$(srcdir)/.. -I$(srcdir)/../snmplib		\
+CPPFLAGS	= -I.. -I$(srcdir)/.. -I$(srcdir)/../snmplib $(SHLIB_CFLAGS)\
 		  -I$(srcdir) -I. -I$(srcdir)/mibgroup -Imibgroup @CPPFLAGS@
 
 CC		= @CC@ $(CPPFLAGS)
