@@ -58,6 +58,7 @@ TABLE OF CONTENTS
    I'm using the Perl SNMP module, and get something about "bad free"?
    I can't load any of the mib files, and they seem to be missing
        the first two characters of the filename.  What's happening?
+   I'm trying to configure in an extra module and it's not found?
    How do I compile with 'gcc' instead of 'cc'?
    But gcc doesn't compile it successfully on my new Solaris system. Why not?
    My Linux system can't find the include file "nlist.h" when compiling
@@ -159,10 +160,15 @@ What happens if mine isn't listed?
 	let us know so that we can update the list above.
 	If it doesn't work, let us know and we'll try to help.
   If the agent almost compiles, but certain files in the
-	agents/mibgroup directory fail, you can try omitting those
-	modules by re-running configure with the flag
+	agents/mibgroup director structure fail, you can try omitting
+	those modules by re-running configure with the flag
 		--with-out-mib-modules="list"
 	You'll then need to re-compile.
+
+	Note that with release 3.5, the structure of the mibgroup directory
+	has changed, and this may affect how you specify this list.
+	(See the "extra config" question under 'PROBLEMS' below).
+
   Either way, try it and let us know how you get on (see below for how).
 	
 
@@ -463,7 +469,7 @@ How can I stop other people getting at my agent?
 
   As far as changing things on the agent is concerned, there is very
   little that can actually be altered (see the answer to "I can't set
-  any variables" under Problems, below).
+  any variables" under PROBLEMS, below).
   The easiest way to control access to this is simply to change the
   default second community string, as described in that answer.
 
@@ -913,6 +919,25 @@ the first two characters of the filename.  What's happening?
 
 
 
+I'm trying to configure in an extra module and it's not found - what's changed?
+------------------------------------------------------------------------------
+
+  Starting with release 3.5, the 'agent/mibgroup' directory has been
+  re-arranged (again).  The major MIB modules are now separate subdirectories
+  containing the relevant sub-module implementation files.  This change has
+  had a knock-on effect on how modules should be specified to the configure
+  command.
+    Including or excluding a full MIB module is done precisely as before,
+  e.g.
+		-with-mib-modules="host"
+
+  However, including or excluding individual module elements now needs to
+  specify the subdirectory (i.e. the enclosing module) as well
+  e.g.
+		-with-out-mib-modules="host/hr_system"
+
+
+
 How do I compile with 'gcc' instead of 'cc'?
 -------------------------------------------
 
@@ -1097,7 +1122,7 @@ The system uptime (sysUpTime) returned is wrong!
   Note that even if the full Host Resources is not supported on
   your system, it's worth trying configuring using
 
-		'--with-mib-modules=hr_system'
+		'--with-mib-modules=host/hr_system'
 
   and recompiling.  This particular group is reasonably likely to
   work, even if some of the other more system-specific groups don't.
