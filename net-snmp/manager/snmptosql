@@ -40,6 +40,7 @@ while ($#ARGV > -1) {
     $verbose = 1 if (/-v/);
     $delete = 1 if (/-d/);
     $doit = 0 if (/-n/);
+    $tableexpr = shift if (/-t/);
     if (/-m/) {
 	# load some mibs
 	# SNMP::loadModules(shift);
@@ -112,17 +113,14 @@ nexthost: while (  $hostrow = $cursor->fetchrow_hashref ) {
 	or print( "\tnot ok: $DBI::errstr\n" );
 
     while (  $tablelist = $tblh->fetchrow_hashref ) {
+	next if (defined($tableexpr) && $tablelist->{'tablename'} !~ /$tableexpr/);
 	print STDERR "starting table $tablelist->{'tablename'}\n" if ($verbose);
 	my $mib = $SNMP::MIB{SNMP::translateObj($tablelist->{'tablename'})};
 	if (!$mib) {
 	    warn "mib node $tablelist->{'tablename'} doesn't exist";
 	    next;
 	}
-	my $children = $$mib{'children'};
-	if ($#{$children} == -1) {
-	    warn "children of $mib->{label} don't exist\n";
-	    next;
-	}
+	my $children = get_children($mib);
 
 	# create the table in our database if it doesn't exist.
 	setuptable($dbh, $tablelist->{tablename}, $delete);
@@ -255,11 +253,7 @@ sub setuptable {
     my ($dbh, $mibnode, $delete, $suffix) = @_;
 
     my $mib = $SNMP::MIB{SNMP::translateObj($mibnode)};
-    my $children = $$mib{'children'};
-    if (ref($children) ne "ARRAY") {
-	warn "$mib has no chlidren";
-	return;
-    }
+    my $children = get_children($mib);
     my ($cmd, $j);
 
     if ($delete) {
@@ -276,9 +270,9 @@ sub setuptable {
     print STDERR " creating table for $mibnode ($mib->{label}$suffix)\n" if ($verbose);
     
     $cmd = "create table $mib->{label}$suffix (id integer auto_increment primary key, host varchar(64), oidindex varchar(254)";
-    foreach $j (@$children) {
+    foreach $j (sort { $a->{'subID'} <=> $b->{'subID'} } @$children) {
 	if (!defined($conversions{$j->{type}})) {
-	    print STDERR "no conversion for ". $j->{type} . "!\n";
+	    print STDERR "no conversion for $j->{label} = ". $j->{type} . "!\n";
 	    return;
 	}
 	$cmd .= ", $j->{label} $conversions{$j->{type}}";
@@ -434,4 +428,23 @@ sub getgroupsforhost {
 	push @retgroups,$group->{'groupname'};
     }
     @retgroups;
+}
+
+sub get_children {
+    my $mib = shift;
+    my $children = $$mib{'children'};
+    if (ref($children) ne "ARRAY") {
+	warn "$mib has no chlidren";
+	return;
+    }
+
+    if ($#{$children} == 0 && $mib->{'label'} =~ /Table$/) {
+	# is a table, use entry?
+	$children = $children->[0]{'children'};
+	if (ref($children) ne "ARRAY") {
+	    warn "$mib has no chlidren";
+	    return;
+	}
+    }
+    return $children;
 }
