@@ -3942,8 +3942,8 @@ _sess_read(void *sessp,
     struct snmp_pdu *pdu;
     struct request_list *rp, *orp = NULL;
     int ret;
-    int addrlen;
-    int fromlength;
+    size_t addrlen;
+    size_t fromlength;
 
     sp = slp->session; isp = slp->internal;
     if (!sp || !isp) {
