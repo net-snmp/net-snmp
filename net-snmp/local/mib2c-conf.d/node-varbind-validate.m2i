@@ -36,7 +36,7 @@ netsnmp_assert(rc == SNMP_ERR_NOERROR); /* paranoia */
 ## Check type
 ##----------------------------------------------------------------------
 ## if not generated code or is OCTET_STR, length checks are up to user
-@   if ($m2c_node_needlength == 1) || (x$m2c_nvv_sizeof" eq "x")@
+@   if ($m2c_node_needlength == 1) || ("x$m2c_nvv_sizeof" eq "x")@
     rc = netsnmp_check_vb_type( var, $node.type );
 @   else@
     rc = netsnmp_check_vb_type_and_size( var, $node.type,
