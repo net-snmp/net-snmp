@@ -195,11 +195,12 @@ struct snmp_pdu *SavedPdu = NULL;
 struct internal_variable_list *SavedVars = NULL;
 
 static int snmp_dump_packet = 0;
-void snmp_set_dump_packet(int val)
+void snmp_set_dump_packet(val)
+    int val;
 {
     snmp_dump_packet = val;
 }
-int snmp_get_dump_packet(void)
+int snmp_get_dump_packet()
 {
     return snmp_dump_packet;
 }

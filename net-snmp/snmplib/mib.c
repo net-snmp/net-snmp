@@ -77,11 +77,12 @@ static int lc_cmp ();
 char *sprint_objid();
 
 static int quick_print = 0;
-void snmp_set_quick_print(int val)
+void snmp_set_quick_print(val)
+    int val;
 {
     quick_print = val;
 }
-int snmp_get_quick_print(void)
+int snmp_get_quick_print()
 {
     return quick_print;
 }
