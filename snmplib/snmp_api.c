@@ -245,7 +245,8 @@ static const char *api_errors[-SNMPERR_MAX+1] = {
     "Bad sub-id in object identifier",	   /* SNMPERR_BAD_SUBID */
     "Object identifier too long",	   /* SNMPERR_LONG_OID */
     "Bad value name",			   /* SNMPERR_BAD_NAME */
-    "Value out of range"		   /* SNMPERR_VALUE */
+    "Value out of range",		   /* SNMPERR_VALUE */
+    "Unknown Object Identifier",	   /* SNMPERR_UNKNOWN_OBJID */
 };
 
 static const char * usmSecLevelName[] =

@@ -327,8 +327,9 @@ extern void snmp_set_detail (const char *);
 #define SNMPERR_LONG_OID		(-55)
 #define SNMPERR_BAD_NAME		(-56)
 #define SNMPERR_VALUE			(-57)
+#define SNMPERR_UNKNOWN_OBJID		(-58)
 
-#define SNMPERR_MAX			(-57)
+#define SNMPERR_MAX			(-58)
 
 #define non_repeaters	errstat
 #define max_repetitions errindex
