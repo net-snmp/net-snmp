@@ -52,7 +52,7 @@ print_description, fprint_description - mib_api functions
 .br
 .BI "int snprint_value(char *" buf ", size_t " "len" ", const oid *" objid ", size_t " objidlen ", struct variable_list *" variable );
 .br
-.BI "int sprint_realloc_value(u_char **" buf ", size_t *" buf_len ", size_t *" out_len ", const oid *" objid ", size_t " objidlen ", struct variable_list *" variable );
+.BI "int sprint_realloc_value(u_char **" buf ", size_t *" buf_len ", size_t *" out_len ", int " allow_realloc ", const oid *" objid ", size_t " objidlen ", struct variable_list *" variable );
 .PP
 .BI "void print_objid(const oid *" objid ", size_t " objidlen );
 .br
@@ -60,7 +60,7 @@ print_description, fprint_description - mib_api functions
 .br
 .BI "int snprint_objid(char *" buf ", size_t " "len" ", const oid *" objid ", size_t " objidlen );
 .br
-.BI "int sprint_realloc_objid(u_char **" buf ", size_t *" buf_len ", size_t *" out_len ", const oid *" objid ", size_t " objidlen );
+.BI "int sprint_realloc_objid(u_char **" buf ", size_t *" buf_len ", size_t *" out_len ", int "allow_realloc ", const oid *" objid ", size_t " objidlen );
 .PP
 .BI "void print_description(const oid *" objid ", size_t " objidlen );
 .br
@@ -282,10 +282,6 @@ and
 .br
 take an object identifier (without an accompanying variable instance)
 and print out the textual representation.
-.br
-Note that identifiers lying within the mib-2, experimental or private
-subtrees are listed from this point onwards, rather than with the full
-object identifier.
 .PP
 .B print_description
 and
