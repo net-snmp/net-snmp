@@ -6,6 +6,7 @@ int fixProcError();
 
 struct myproc *get_proc_instance();
 struct myproc *procwatch;
+static struct extensible fixproc;
 int numprocs=0;
 
 unsigned char *var_wes_proc(vp, name, length, exact, var_len, write_method)
@@ -82,7 +83,7 @@ unsigned char *var_wes_proc(vp, name, length, exact, var_len, write_method)
         return((u_char *) errmsg);
       case ERRORFIX:
         *write_method = fixProcError;
-        long_return = 0;
+        long_return = fixproc.result;
         return ((u_char *) &long_return);
     }
     return NULL;
@@ -102,7 +103,6 @@ fixProcError(action, var_val, var_val_type, var_val_len, statP, name, name_len)
   
   struct myproc *proc;
   int tmp=0, tmplen=1000;
-  struct extensible ex;
 
   if (proc = get_proc_instance(procwatch,name[8])) {
     if (var_val_type != INTEGER) {
@@ -111,8 +111,8 @@ fixProcError(action, var_val, var_val_type, var_val_len, statP, name, name_len)
     }
     asn_parse_int(var_val,&tmplen,&var_val_type,&tmp,sizeof(int));
     if (tmp == 1 && action == COMMIT) {
-      sprintf(ex.command,PROCFIXCMD,proc->name);
-      exec_command(&ex);
+      sprintf(fixproc.command,PROCFIXCMD,proc->name);
+      exec_command(&fixproc);
     } 
     return SNMP_ERR_NOERROR;
   }
