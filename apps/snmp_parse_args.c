@@ -97,7 +97,7 @@ snmp_parse_args_descriptions(FILE *outf)
   fprintf(outf, "  -V\t\tdisplay version number.\n");
   fprintf(outf, "  -v 1|2c|3\tspecifies snmp version to use.\n");
   fprintf(outf, "  Version 1 or 2c specific\n");
-  fprintf(outf, "  -C <c>\tset the community name (v1 or v2c)\n");
+  fprintf(outf, "  -c <c>\tset the community name (v1 or v2c)\n");
   fprintf(outf, "  Version 3 specific\n");
   fprintf(outf, "  -Z <B> <T>\tset the destination engine boots/time for v3 requests.\n");
   fprintf(outf, "  -e <E>\tsecurity engine ID (e.g., 800000020109840301).\n");
@@ -117,7 +117,7 @@ snmp_parse_args_descriptions(FILE *outf)
   fprintf(outf, "  -r <R>\tset the number of retries to R.\n");
   fprintf(outf, "  Debugging\n");
   fprintf(outf, "  -d\t\tdump input/output packets.\n");
-  fprintf(outf, "  -D[TOKEN,...]\t\tturn on debugging output, optionally by the list of TOKENs.\n");
+  fprintf(outf, "  -D[TOKEN,...]\tturn on debugging output, optionally by the list of TOKENs.\n");
   fprintf(outf, "  General options\n");
   fprintf(outf, "  -m <MIBS>\tuse MIBS list instead of the default mib list.\n");
   fprintf(outf, "  -M <MIBDIRS>\tuse MIBDIRS as the location to look for mibs.\n");
@@ -147,7 +147,7 @@ snmp_parse_args(int argc,
 
   /* initialize session to default values */
   snmp_sess_init( session );
-  strcpy(Opts, "VhHm:M:fsSqO:P:D:dRv:p:r:t:C:Z:e:E:n:u:l:x:X:a:A:");
+  strcpy(Opts, "VhHm:M:fsSqO:P:D:dRv:p:r:t:c:Z:e:E:n:u:l:x:X:a:A:");
   if (localOpts) strcat(Opts, localOpts);
 
   /* get the options */
@@ -277,7 +277,7 @@ snmp_parse_args(int argc,
           }
           break;
 
-      case 'C':
+      case 'c':
 	Cpsz = optarg;
 	break;
 
