@@ -428,11 +428,11 @@ var_atEntry(struct variable *vp,
 
 #ifndef solaris2
 
+static int arptab_size, arptab_current;
 #if CAN_USE_SYSCTL
 static char *lim, *rtnext;
 static char *at = 0;
 #else
-static int arptab_size, arptab_current;
 #ifdef STRUCT_ARPHD_HAS_AT_NEXT
 static struct arphd *at=0;
 static struct arptab *at_ptr, at_entry;
