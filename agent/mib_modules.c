@@ -35,8 +35,14 @@
 #include "mibgroup/struct.h"
 #include "mib_modules.h"
 #include "mibgroup/mib_module_includes.h"
+#ifdef USING_AGENTX_SUBAGENT_MODULE
+#include "mibgroup/agentx/subagent.h"
+#endif
 
 void
 init_mib_modules(void) {
+#ifdef USING_AGENTX_SUBAGENT_MODULE
+  pre_init_subagent();
+#endif
   #include "mibgroup/mib_module_inits.h"
 }
