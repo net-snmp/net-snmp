@@ -1519,7 +1519,7 @@ AC_CHECK_LIB(dl, dlopen)
 AC_CHECK_FUNCS(dlopen)
 
 AC_CHECK_FUNCS(kvm_openfiles nlist knlist kvm_getprocs)
-echo "$with_mib_modules" | grep "ucd-snmp/diskio" >/dev/null
+echo " $module_list " | grep " ucd-snmp/diskio " >/dev/null
 # whether we need -ldevstat for diskio MIB
 if test $? -eq 0 ; then
 	AC_CHECK_FUNC(getdevs, AC_DEFINE(HAVE_GETDEVS),
@@ -1527,6 +1527,19 @@ if test $? -eq 0 ; then
 		LIBS="${LIBS} -ldevstat"))
 fi
 
+# LM-SENSORS-MIB support
+echo " $module_list " | grep " ucd-snmp/lmSensors " > /dev/null
+if test $? -eq 0 ; then
+        AC_MSG_CHECKING([for sensors support])
+        case $target_os in
+        *)
+            AC_CHECK_HEADER(sensors/sensors.h,,
+                [AC_MSG_ERROR([asked to use lm_sensors but I couldn't find sensors/sensors.h])])
+            AC_CHECK_LIB(sensors, sensors_get_detected_chips, LIBS="${LIBS} -lsensors",
+                [AC_MSG_ERROR([asked to use lm_sensors but I couldn't find -lsensors])])
+            ;;
+        esac
+fi
 
 #
 # Install the various perl modules
