@@ -616,6 +616,7 @@
 
 /* Not-to-be-compiled macros for use by configure only */
 #define config_require(x)
+#define config_exclude(x)
 #define config_arch_require(x,y)
 #define config_parse_dot_conf(w,x,y,z)
 #define config_add_mib(x)
@@ -691,5 +692,14 @@
 
 /* define if agentx transport is to use domain sockets only */
 #undef AGENTX_DOM_SOCK_ONLY
+
+#ifdef __cplusplus
+#define NETSNMP_CPP_WRAP_START extern          "C" {
+#define NETSNMP_CPP_WRAP_END                   };
+#else
+#define NETSNMP_CPP_WRAP_START
+#define NETSNMP_CPP_WRAP_END
+#endif
+
 
 #endif /* NET_SNMP_CONFIG_H */
