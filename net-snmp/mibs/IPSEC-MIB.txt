@@ -1,4 +1,4 @@
-IPSEC-MIB DEFINITIONS :: BEGIN
+IPSEC-MIB DEFINITIONS ::= BEGIN
 
    IMPORTS
        MODULE-IDENTITY, OBJECT-TYPE, Counter32, Gauge32, Counter64,
@@ -30,13 +30,13 @@ IPSEC-MIB DEFINITIONS :: BEGIN
        REVISION      "????"
        DESCRIPTION
                "Initial revision."
---          :: { mib-2 ?? }
-	    :: { experimental 75 }
+--          ::= { mib-2 ?? }
+	    ::= { experimental 75 }
 
 
-   ipsecMIBObjects OBJECT IDENTIFIER :: { ipsecMIB 1 }
+   ipsecMIBObjects OBJECT IDENTIFIER ::= { ipsecMIB 1 }
 
-   ipsec      OBJECT IDENTIFIER :: { ipsecMIBObjects 1 }
+   ipsec      OBJECT IDENTIFIER ::= { ipsecMIBObjects 1 }
 
 
 
@@ -54,7 +54,7 @@ ipsecIkeSaTable OBJECT-TYPE
     DESCRIPTION
             "The (conceptual) table containing information on
              IPSec's IKE SAs."
-    :: { ipsec 1 }
+    ::= { ipsec 1 }
 
 ipsecIkeSaEntry OBJECT-TYPE
     SYNTAX     IpsecIkeSaEntry
@@ -64,9 +64,9 @@ ipsecIkeSaEntry OBJECT-TYPE
             "An entry (conceptual row) containing the information
              on a particular IKE SA."
     INDEX      { ipsecIkeSaIndex }
-    :: { ipsecIkeSaTable 1 }
+    ::= { ipsecIkeSaTable 1 }
 
-IpsecIkeSaEntry :: SEQUENCE {
+IpsecIkeSaEntry ::= SEQUENCE {
    ipsecIkeSaIndex                  Integer32,
 
 -- security algorithm information
@@ -136,7 +136,7 @@ ipsecIkeSaIndex OBJECT-TYPE
              Further, the value for tunnel interfaces that are
              marked as permanent must remain constand across all
              re-initializations of the network management system."
-    :: { ipsecIkeSaEntry 1 }
+    ::= { ipsecIkeSaEntry 1 }
 
 ipsecIkeSaEncAlg OBJECT-TYPE
     SYNTAX      INTEGER
@@ -150,7 +150,7 @@ ipsecIkeSaEncAlg OBJECT-TYPE
              Specific values are used as described in the ISAKMP
              Class Values of Encryption Algorithms from Appendix A
              of [IKE]."
-    :: { ipsecIkeSaEntry 2 }
+    ::= { ipsecIkeSaEntry 2 }
 
 ipsecIkeSaEncLeyLength OBJECT-TYPE
     SYNTAX      Integer32
@@ -161,7 +161,7 @@ ipsecIkeSaEncLeyLength OBJECT-TYPE
              algorithm specified in the ipsecIkeSaEncAlg object,
              or 0 if the key length is implicit in the specified
              algorithm or there is no encryption specified."
-    :: { ipsecIkeSaEntry 3 }
+    ::= { ipsecIkeSaEntry 3 }
 
 ipsecIkeSaHashAlg OBJECT-TYPE
     SYNTAX      Integer32
@@ -175,7 +175,7 @@ ipsecIkeSaHashAlg OBJECT-TYPE
              Specific values are used as described in the ISAKMP
              Class Values of Hash Algorithms from Appendix A
              of [IKE]."
-    :: { ipsecIkeSaEntry 4 }
+    ::= { ipsecIkeSaEntry 4 }
 
 ipsecIkeSaDifHelGroupDesc OBJECT-TYPE
     SYNTAX      Integer32
@@ -188,7 +188,7 @@ ipsecIkeSaDifHelGroupDesc OBJECT-TYPE
              Specific values are used as described in the ISAKMP
              Class Values of Group Description from Appendix A
              of [IKE]."
-    :: { ipsecIkeSaEntry 5 }
+    ::= { ipsecIkeSaEntry 5 }
 
 ipsecIkeSaDifHelGroupType OBJECT-TYPE
     SYNTAX      Integer32
@@ -200,7 +200,7 @@ ipsecIkeSaDifHelGroupType OBJECT-TYPE
 
              Specific values are used as described in the ISAKMP
              Class Values of Group Type from Appendix A of [IKE]."
-    :: { ipsecIkeSaEntry 6 }
+    ::= { ipsecIkeSaEntry 6 }
 
 ipsecIkeSaDifHelFieldSize OBJECT-TYPE
     SYNTAX      Integer32
@@ -208,7 +208,7 @@ ipsecIkeSaDifHelFieldSize OBJECT-TYPE
     STATUS      current
     DESCRIPTION
             "The field size, in bits, of a Diffie-Hellman group."
-    :: { ipsecIkeSaEntry 7 }
+    ::= { ipsecIkeSaEntry 7 }
 
 ipsecIkeSaPRF OBJECT-TYPE
     SYNTAX      Integer32
@@ -220,7 +220,7 @@ ipsecIkeSaPRF OBJECT-TYPE
 
              Specific values are used as described in the ISAKMP
              Class Values of PRF from Appendix A of [IKE]."
-    :: { ipsecIkeSaEntry 8 }
+    ::= { ipsecIkeSaEntry 8 }
 
 ipsecIkeSaPFS OBJECT-TYPE
     SYNTAX      TruthValue
@@ -229,7 +229,7 @@ ipsecIkeSaPFS OBJECT-TYPE
     DESCRIPTION
             "A value that indicates that perfect forward secrecy is
              used for all protocol SAs created by this IKE SA."
-    :: { ipsecIkeSaEntry 9 }
+    ::= { ipsecIkeSaEntry 9 }
 
 ipsecIkeSaPeerIpAddress OBJECT-TYPE
     SYNTAX      IpAddress
@@ -238,7 +238,7 @@ ipsecIkeSaPeerIpAddress OBJECT-TYPE
     DESCRIPTION
             "The IP address of the peer that this SA was negotiated
             with, or 0 if unknown."
-    :: { ipsecIkeSaEntry 10 }
+    ::= { ipsecIkeSaEntry 10 }
 
 ipsecIkeSaAuthMethod OBJECT-TYPE
     SYNTAX      Integer32
@@ -254,7 +254,7 @@ ipsecIkeSaAuthMethod OBJECT-TYPE
              Specific values are used as described in the ISAKMP
              Class Values of Authentication Method from Appendix A
              of [IKE]."
-    :: { ipsecIkeSaEntry 11 }
+    ::= { ipsecIkeSaEntry 11 }
 
 ipsecIkeSaPeerIdType OBJECT-TYPE
     SYNTAX      Integer32
@@ -265,10 +265,10 @@ ipsecIkeSaPeerIdType OBJECT-TYPE
 
              Specific values are used as described in
              Section 4.6.2.1 of [IPDOI]."
-    :: { ipsecIkeSaEntry 12 }
+    ::= { ipsecIkeSaEntry 12 }
 
 ipsecIkeSaPeerId OBJECT-TYPE
-    SYNTAX      OCTET STRING (SIZE (0..511)),
+    SYNTAX      OCTET STRING (SIZE (0..511))
     MAX-ACCESS  read-only
     STATUS      current
     DESCRIPTION
@@ -276,7 +276,7 @@ ipsecIkeSaPeerId OBJECT-TYPE
 
              The length may require truncation under some
              conditions."
-    :: { ipsecIkeSaEntry 13 }
+    ::= { ipsecIkeSaEntry 13 }
 
 ipsecIkeSaType OBJECT-TYPE
     SYNTAX      INTEGER { transient(1), permanent(2) }
@@ -289,22 +289,22 @@ ipsecIkeSaType OBJECT-TYPE
              the SAs needed for it cannot be established. A
              permanent link will shows its status in the
              ipsecIkeSaStatus object."
-    :: { ipsecIkeSaEntry 14 }
+    ::= { ipsecIkeSaEntry 14 }
 
 ipsecIkeSaStatus OBJECT-TYPE
     SYNTAX      INTEGER
-                { never_tried(0), link_up(1), link_down(2) }
+                { never-tried(0), link-up(1), link-down(2) }
     MAX-ACCESS  read-only
     STATUS      current
     DESCRIPTION
             "The status of the virtual tunnel represented by this
              row, if the tunnel is configured as permanent.
 
-             never_tried means that no attempt to set-up the link
-             has been done. link_up means that the link is up and
-             operating normally. link_down means that the link was
+             never-tried means that no attempt to set-up the link
+             has been done. link-up means that the link is up and
+             operating normally. link-down means that the link was
              up, but has gone down."
-    :: { ipsecIkeSaEntry 15 }
+    ::= { ipsecIkeSaEntry 15 }
 
 ipsecIkeSaTimeStart OBJECT-TYPE
     SYNTAX      DateAndTime
@@ -316,7 +316,7 @@ ipsecIkeSaTimeStart OBJECT-TYPE
 
              It is not the date and time that the virtual tunnel
              was set up."
-    :: { ipsecIkeSaEntry 16 }
+    ::= { ipsecIkeSaEntry 16 }
 
 ipsecIkeSaTimeLimit OBJECT-TYPE
     SYNTAX      Counter32
@@ -326,7 +326,7 @@ ipsecIkeSaTimeLimit OBJECT-TYPE
             "The maximum lifetime in seconds of the current SA
              supporting the virtual tunnel, or 0 if there is
              no time constraint on its expiration."
-    :: { ipsecIkeSaEntry 17 }
+    ::= { ipsecIkeSaEntry 17 }
 
 ipsecIkeSaTrafficLimit OBJECT-TYPE
     SYNTAX      Counter32
@@ -337,7 +337,7 @@ ipsecIkeSaTrafficLimit OBJECT-TYPE
              current SA supporting the virtual tunnel is allowd
              to support, or 0 if there is no traffic constraint
              on its expiration."
-    :: { ipsecIkeSaEntry 18 }
+    ::= { ipsecIkeSaEntry 18 }
 
 ipsecIkeSaInboundTraffic OBJECT-TYPE
     SYNTAX      Counter64
@@ -346,7 +346,7 @@ ipsecIkeSaInboundTraffic OBJECT-TYPE
     DESCRIPTION
             "The amount traffic measured in bytes handled in the
              current SA in the inbound direction."
-    :: { ipsecIkeSaEntry 19 }
+    ::= { ipsecIkeSaEntry 19 }
 
 ipsecIkeSaOutboundTraffic OBJECT-TYPE
     SYNTAX      Counter64
@@ -355,7 +355,7 @@ ipsecIkeSaOutboundTraffic OBJECT-TYPE
     DESCRIPTION
             "The amount traffic measured in bytes handled in the
              current SA in the outbound direction."
-    :: { ipsecIkeSaEntry 20 }
+    ::= { ipsecIkeSaEntry 20 }
 
 ipsecIkeSaTotalSaNum OBJECT-TYPE
     SYNTAX      Counter32
@@ -364,7 +364,7 @@ ipsecIkeSaTotalSaNum OBJECT-TYPE
     DESCRIPTION
             "The total number of SAs, including the current SA,
              that have been set up to support this virtual tunnel."
-    :: { ipsecIkeSaEntry 21 }
+    ::= { ipsecIkeSaEntry 21 }
 
 ipsecIkeSaTotalTime OBJECT-TYPE
     SYNTAX      Counter32
@@ -375,8 +375,8 @@ ipsecIkeSaTotalTime OBJECT-TYPE
              has been up.
 
              If this is a permanent virtual tunnel, it is reset to
-             zero when the tunnel goes to the link_up state."
-    :: { ipsecIkeSaEntry 22 }
+             zero when the tunnel goes to the link-up state."
+    ::= { ipsecIkeSaEntry 22 }
 
 ipsecIkeSaTotalInboundTraffic OBJECT-TYPE
     SYNTAX      Counter64
@@ -390,8 +390,8 @@ ipsecIkeSaTotalInboundTraffic OBJECT-TYPE
              virtual tunnel.
 
              If this is a permanent virtual tunnel, it is not reset
-             to zero when the tunnel goes to the link_up state."
-    :: { ipsecIkeSaEntry 23 }
+             to zero when the tunnel goes to the link-up state."
+    ::= { ipsecIkeSaEntry 23 }
 
 ipsecIkeSaTotalOutboundTraffic OBJECT-TYPE
     SYNTAX      Counter64
@@ -405,8 +405,8 @@ ipsecIkeSaTotalOutboundTraffic OBJECT-TYPE
              virtual tunnel.
 
              If this is a permanent virtual tunnel, it is not reset
-             to zero when the tunnel goes to the link_up state."
-    :: { ipsecIkeSaEntry 24 }
+             to zero when the tunnel goes to the link-up state."
+    ::= { ipsecIkeSaEntry 24 }
 
 ipsecIkeSaDecryptErrors OBJECT-TYPE
     SYNTAX      Counter32
@@ -421,8 +421,8 @@ ipsecIkeSaDecryptErrors OBJECT-TYPE
              this tunnel.
 
              If this is a permanent virtual tunnel, it is not reset
-             to zero when the tunnel goes to the link_up state."
-    :: { ipsecIkeSaEntry 25 }
+             to zero when the tunnel goes to the link-up state."
+    ::= { ipsecIkeSaEntry 25 }
 
 ipsecIkeSaHashErrors OBJECT-TYPE
     SYNTAX      Counter32
@@ -437,8 +437,8 @@ ipsecIkeSaHashErrors OBJECT-TYPE
              this tunnel.
 
              If this is a permanent virtual tunnel, it is not reset
-             to zero when the tunnel goes to the link_up state."
-    :: { ipsecIkeSaEntry 26 }
+             to zero when the tunnel goes to the link-up state."
+    ::= { ipsecIkeSaEntry 26 }
 
 
 ipsecIkeSaIpsecInboundTraffic OBJECT-TYPE
@@ -451,8 +451,8 @@ ipsecIkeSaIpsecInboundTraffic OBJECT-TYPE
              supporting this tunnel.
 
              If this is a permanent virtual tunnel, it is not reset
-             to zero when the tunnel goes to the link_up state."
-    :: { ipsecIkeSaEntry 27 }
+             to zero when the tunnel goes to the link-up state."
+    ::= { ipsecIkeSaEntry 27 }
 
 ipsecIkeSaIpsecOutboundTraffic OBJECT-TYPE
     SYNTAX      Counter64
@@ -464,8 +464,8 @@ ipsecIkeSaIpsecOutboundTraffic OBJECT-TYPE
              supporting this tunnel.
 
              If this is a permanent virtual tunnel, it is not reset
-             to zero when the tunnel goes to the link_up state."
-    :: { ipsecIkeSaEntry 28 }
+             to zero when the tunnel goes to the link-up state."
+    ::= { ipsecIkeSaEntry 28 }
 
 ipsecIkeSaIpsecDecryptErrors OBJECT-TYPE
     SYNTAX      Counter32
@@ -476,8 +476,8 @@ ipsecIkeSaIpsecDecryptErrors OBJECT-TYPE
              protocol SAs due to decryption errors.
 
              If this is a permanent virtual tunnel, it is not reset
-             to zero when the tunnel goes to the link_up state."
-    :: { ipsecIkeSaEntry 29 }
+             to zero when the tunnel goes to the link-up state."
+    ::= { ipsecIkeSaEntry 29 }
 
 ipsecIkeSaIpsecAuthErrors OBJECT-TYPE
     SYNTAX      Counter32
@@ -489,8 +489,9 @@ ipsecIkeSaIpsecAuthErrors OBJECT-TYPE
              includes hash failures in IPSec SAs using ESP and AH.
 
              If this is a permanent virtual tunnel, it is not reset
-             to zero when the tunnel goes to the link_up state."
-    :: { ipsecIkeSaEntry 30 }
+             to zero when the tunnel goes to the link-up state."
+    ::= { ipsecIkeSaEntry 30 }
+
 ipsecIkeSaIpsecReplayErrors OBJECT-TYPE
     SYNTAX      Counter32
     MAX-ACCESS  read-only
@@ -500,9 +501,9 @@ ipsecIkeSaIpsecReplayErrors OBJECT-TYPE
              protocol SAs due to replay errors.
 
              If this is a permanent virtual tunnel, it is not reset
-             to zero when the tunnel goes to the link_up state."
---  :: { ipsecIkeSaEntry 30 }
-    :: { ipsecIkeSaEntry 31 }
+             to zero when the tunnel goes to the link-up state."
+--  ::= { ipsecIkeSaEntry 30 }
+    ::= { ipsecIkeSaEntry 31 }
 
 
 -- the IPSec Tunnel MIB-Group
@@ -518,7 +519,7 @@ ipsecTunnelIfTable OBJECT-TYPE
     DESCRIPTION
             "The (conceptual) table containing information on IPSec
              SA-based tunnels."
-    :: { ipsec 2 }
+    ::= { ipsec 2 }
 
 ipsecTunnelIfEntry OBJECT-TYPE
     SYNTAX     IpsecTunnelIfEntry
@@ -528,9 +529,9 @@ ipsecTunnelIfEntry OBJECT-TYPE
             "An entry (conceptual row) containing the information
              on a particular configured tunnel."
     INDEX      { ipsecTunnelIfIndex }
-    :: { ipsecTunnelIfTable 1 }
+    ::= { ipsecTunnelIfTable 1 }
 
-IpsecTunnelIfEntry :: SEQUENCE {
+IpsecTunnelIfEntry ::= SEQUENCE {
    ipsecTunnelIfIndex      Integer32,
    ipsecTunnelIkeSa        Integer32, -- if not static
    ipsecTunnelType         INTEGER, -- static, transient, permanent
@@ -585,7 +586,7 @@ ipsecTunnelIfIndex OBJECT-TYPE
              Further, the value for tunnel interfaces that are
              marked as permanent must remain constant across all
              re-initializations of the network management system."
-    :: { ipsecTunnelIfEntry 1 }
+    ::= { ipsecTunnelIfEntry 1 }
 
 ipsecTunnelIkeSa OBJECT-TYPE
     SYNTAX      Integer32 (0..2147483647)
@@ -595,7 +596,7 @@ ipsecTunnelIkeSa OBJECT-TYPE
             "The value of the index into the IKE SA tunnel table
              that created this tunnel (ipsecIkeSaIndex), or 0 if
              the tunnel is created by a static IPSec SA."
-    :: { ipsecTunnelIfEntry 2 }
+    ::= { ipsecTunnelIfEntry 2 }
 
 ipsecTunnelType OBJECT-TYPE
     SYNTAX      INTEGER { static(0), transient(1), permanent(2) }
@@ -609,7 +610,7 @@ ipsecTunnelType OBJECT-TYPE
              static IPSec SA that was setup by configuration, and
              not by using a key exchange protocol. In this case,
              the value of ipsecTunnelIkeSa must be 0."
-    :: { ipsecTunnelIfEntry 3 }
+    ::= { ipsecTunnelIfEntry 3 }
 
 ipsecTunnelIfLocalAddressOrStart OBJECT-TYPE
     SYNTAX     IpAddress
@@ -619,7 +620,7 @@ ipsecTunnelIfLocalAddressOrStart OBJECT-TYPE
             "The address of or the start address (if an address
              range) of the local endpoint of the tunnel, or 0.0.0.0
              if unknown or transport mode."
-    :: { ipsecTunnelIfTable 4 }
+    ::= { ipsecTunnelIfTable 4 }
 
 ipsecTunnelIfLocalAddressMaskOrEnd OBJECT-TYPE
     SYNTAX     IpAddress
@@ -629,7 +630,7 @@ ipsecTunnelIfLocalAddressMaskOrEnd OBJECT-TYPE
             "The mask of or the end address (if an address
              range) of the local endpoint of the tunnel, or 0.0.0.0
              if unknown or transport mode."
-    :: { ipsecTunnelIfTable 5 }
+    ::= { ipsecTunnelIfTable 5 }
 
 ipsecTunnelIfRemoteAddressOrStart OBJECT-TYPE
     SYNTAX     IpAddress
@@ -639,7 +640,7 @@ ipsecTunnelIfRemoteAddressOrStart OBJECT-TYPE
             "The address of or the start address (if an address
              range) of the remote endpoint of the tunnel,
              or 0.0.0.0 if unknown or transport mode."
-    :: { ipsecTunnelIfTable 6 }
+    ::= { ipsecTunnelIfTable 6 }
 
 ipsecTunnelIfRemoteAddressMaskOrEnd OBJECT-TYPE
     SYNTAX     IpAddress
@@ -649,7 +650,7 @@ ipsecTunnelIfRemoteAddressMaskOrEnd OBJECT-TYPE
             "The mask of or the end address (if an address
              range) of the remote endpoint of the tunnel,
              or 0.0.0.0 if unknown or transport mode."
-    :: { ipsecTunnelIfTable 7 }
+    ::= { ipsecTunnelIfTable 7 }
 
 ipsecTunnelIfProtocol OBJECT-TYPE
     SYNTAX     Integer32
@@ -658,7 +659,7 @@ ipsecTunnelIfProtocol OBJECT-TYPE
     DESCRIPTION
             "The number of the protocol that this tunnel carries,
              or 0 if it carries any protocol."
-    :: { ipsecTunnelIfTable 8 }
+    ::= { ipsecTunnelIfTable 8 }
 
 ipsecTunnelIfLocalPort OBJECT-TYPE
     SYNTAX     Integer32
@@ -667,7 +668,7 @@ ipsecTunnelIfLocalPort OBJECT-TYPE
     DESCRIPTION
             "The number of the local port that this tunnel carries,
              or 0 if it carries any port number."
-    :: { ipsecTunnelIfTable 9 }
+    ::= { ipsecTunnelIfTable 9 }
 
 ipsecTunnelIfRemotePort OBJECT-TYPE
     SYNTAX     Integer32
@@ -676,7 +677,7 @@ ipsecTunnelIfRemotePort OBJECT-TYPE
     DESCRIPTION
             "The number of the remote port that this tunnel
              carries, or 0 if it carries any port number."
-    :: { ipsecTunnelIfTable 10 }
+    ::= { ipsecTunnelIfTable 10 }
 
 ipsecTunnelMode OBJECT-TYPE
     SYNTAX     INTEGER { transport(1), tunnel(2) }
@@ -684,7 +685,7 @@ ipsecTunnelMode OBJECT-TYPE
     STATUS     current
     DESCRIPTION
             "The type of encapulation used by this tunnel."
-    :: { ipsecTunnelIfTable 11 }
+    ::= { ipsecTunnelIfTable 11 }
 
 ipsecTunnelEspEncAlg OBJECT-TYPE
     SYNTAX      INTEGER
@@ -698,7 +699,7 @@ ipsecTunnelEspEncAlg OBJECT-TYPE
 
              Specific values are taken from section 4.4.4
              of [IPDOI]."
-    :: { ipsecTunnelIfTable 12 }
+    ::= { ipsecTunnelIfTable 12 }
 
 ipsecTunnelEspEncLeyLength OBJECT-TYPE
     SYNTAX      Integer32
@@ -710,7 +711,7 @@ ipsecTunnelEspEncLeyLength OBJECT-TYPE
              object, or 0 if the key length is implicit in the
              specified algorithm or there is no encryption
              specified."
-    :: { ipsecTunnelIfTable 13 }
+    ::= { ipsecTunnelIfTable 13 }
 
 ipsecTunnelEspAuthAlg OBJECT-TYPE
     SYNTAX      Integer32
@@ -724,7 +725,7 @@ ipsecTunnelEspAuthAlg OBJECT-TYPE
 
              Specific values are taken from the Authentication
              Algorithm attribute values of Section 4.5 of [IPDOI]."
-    :: { ipsecTunnelIfTable 14 }
+    ::= { ipsecTunnelIfTable 14 }
 
 ipsecTunnelAhAuthAlg OBJECT-TYPE
     SYNTAX      Integer32
@@ -736,7 +737,7 @@ ipsecTunnelAhAuthAlg OBJECT-TYPE
              or 0 if AH is not used.
 
              Specific values are taken from Section 4.4.3 of [IPDOI]."
-    :: { ipsecTunnelIfTable 15 }
+    ::= { ipsecTunnelIfTable 15 }
 
 ipsecTunnelCompAlg OBJECT-TYPE
     SYNTAX      Integer32
@@ -749,7 +750,7 @@ ipsecTunnelCompAlg OBJECT-TYPE
 
              Specific values are taken from Section 4.4.5
              of [IPDOI]."
-    :: { ipsecTunnelIfTable 16 }
+    ::= { ipsecTunnelIfTable 16 }
 
 ipsecTunnelCurrentSaNum OBJECT-TYPE
     SYNTAX      Gauge32
@@ -758,7 +759,7 @@ ipsecTunnelCurrentSaNum OBJECT-TYPE
     DESCRIPTION
             "The number of current SAs set up to support this
              virtual tunnel."
-    :: { ipsecTunnelIfTable 17 }
+    ::= { ipsecTunnelIfTable 17 }
 
 ipsecTunnelTotalSaNum OBJECT-TYPE
     SYNTAX      Counter32
@@ -767,7 +768,7 @@ ipsecTunnelTotalSaNum OBJECT-TYPE
     DESCRIPTION
             "The total number of SAs, including all current SAs,
              that have been set up to support this virtual tunnel."
-    :: { ipsecTunnelIfTable 18 }
+    ::= { ipsecTunnelIfTable 18 }
 
 ipsecTunnelTotalTimeUp OBJECT-TYPE
     SYNTAX      Counter32
@@ -780,7 +781,7 @@ ipsecTunnelTotalTimeUp OBJECT-TYPE
              If this is a permanent virtual tunnel, it is reset to
              zero when the number of current SAs
              (ipsecTunnelCurrentSaNum) changes from 0 to 1."
-    :: { ipsecTunnelIfTable 19 }
+    ::= { ipsecTunnelIfTable 19 }
 
 ipsecTunnelTotalInboundTraffic OBJECT-TYPE
     SYNTAX      Counter64
@@ -796,7 +797,7 @@ ipsecTunnelTotalInboundTraffic OBJECT-TYPE
              If this is a permanent virtual tunnel, it is not reset
              to zero when the number of current SAs
              (ipsecTunnelCurrentSaNum) changes from 0 to 1."
-    :: { ipsecTunnelIfTable 20 }
+    ::= { ipsecTunnelIfTable 20 }
 
 ipsecTunnelTotalOutboundTraffic OBJECT-TYPE
     SYNTAX      Counter64
@@ -812,7 +813,7 @@ ipsecTunnelTotalOutboundTraffic OBJECT-TYPE
              If this is a permanent virtual tunnel, it is not reset
              to zero when the number of current SAs
              (ipsecTunnelCurrentSaNum) changes from 0 to 1."
-    :: { ipsecTunnelIfTable 21 }
+    ::= { ipsecTunnelIfTable 21 }
 
 ipsecTunnelDecryptErrors OBJECT-TYPE
     SYNTAX      Counter32
@@ -825,7 +826,7 @@ ipsecTunnelDecryptErrors OBJECT-TYPE
              If this is a permanent virtual tunnel, it is not reset
              to zero when the number of current SAs
              (ipsecTunnelCurrentSaNum) changes from 0 to 1."
-    :: { ipsecTunnelIfTable 22 }
+    ::= { ipsecTunnelIfTable 22 }
 
 ipsecTunnelAuthErrors OBJECT-TYPE
     SYNTAX      Counter32
@@ -840,8 +841,8 @@ ipsecTunnelAuthErrors OBJECT-TYPE
              If this is a permanent virtual tunnel, it is not reset
              to zero when the number of current SAs
              (ipsecTunnelCurrentSaNum) changes from 0 to 1."
---  :: { ipsecTunnelIfTable 30 }
-    :: { ipsecTunnelIfTable 23 }
+--  ::= { ipsecTunnelIfTable 30 }
+    ::= { ipsecTunnelIfTable 23 }
 
 ipsecTunnelReplayErrors OBJECT-TYPE
     SYNTAX      Counter32
@@ -856,8 +857,8 @@ ipsecTunnelReplayErrors OBJECT-TYPE
              If this is a permanent virtual tunnel, it is not reset
              to zero when the number of current SAs
              (ipsecTunnelCurrentSaNum) changes from 0 to 1."
---  :: { ipsecTunnelIfTable 30 }
-    :: { ipsecTunnelIfTable 24 }
+--  ::= { ipsecTunnelIfTable 30 }
+    ::= { ipsecTunnelIfTable 24 }
 
 
 -- the IPSec SA MIB-Group
@@ -873,7 +874,7 @@ ipsecSaTable OBJECT-TYPE
     DESCRIPTION
             "The (conceptual) table containing information on
              IPSec SAs."
-    :: { ipsec 3 }
+    ::= { ipsec 3 }
 
 ipsecSaEntry OBJECT-TYPE
     SYNTAX     IpsecSaEntry
@@ -883,9 +884,9 @@ ipsecSaEntry OBJECT-TYPE
             "An entry (conceptual row) containing the information
              on a particular IPSec SA."
     INDEX      { ipsecSaIndex }
-    :: { ipsecSaTable 1 }
+    ::= { ipsecSaTable 1 }
 
-IpsecSaEntry :: SEQUENCE {
+IpsecSaEntry ::= SEQUENCE {
    ipsecSaIndex        Integer32,
    ipsecSaTunnel       Integer32,  -- index from ipsecTunnelIfTable
 
@@ -914,7 +915,7 @@ ipsecSaIndex OBJECT-TYPE
             "A unique value, greater than zero, for each IPSec SA.
              It is recommended that values are assigned
              contiguously starting from 1."
-    :: { ipsecSaEntry 1 }
+    ::= { ipsecSaEntry 1 }
 
 ipsecSaTunnel OBJECT-TYPE
     SYNTAX      Integer32 (1..2147483647)
@@ -923,7 +924,7 @@ ipsecSaTunnel OBJECT-TYPE
     DESCRIPTION
             "The value of the index into the IPSec SA tunnel table
              that this SA supports (ipsecTunnelIfIndex)."
-    :: { ipsecSaEntry 2 }
+    ::= { ipsecSaEntry 2 }
 
 ipsecSaCreationTime OBJECT-TYPE
     SYNTAX      DateAndTime
@@ -931,7 +932,7 @@ ipsecSaCreationTime OBJECT-TYPE
     STATUS      current
     DESCRIPTION
             "The date and time that the current SA was set up."
-    :: { ipsecSaEntry 3 }
+    ::= { ipsecSaEntry 3 }
 
 ipsecSaTimeLimit OBJECT-TYPE
     SYNTAX      Counter32
@@ -940,7 +941,7 @@ ipsecSaTimeLimit OBJECT-TYPE
     DESCRIPTION
             "The maximum lifetime in seconds of the SA,
              or 0 if there is no time constraint on its expiration."
-    :: { ipsecSaEntry 4 }
+    ::= { ipsecSaEntry 4 }
 
 ipsecSaTrafficLimit OBJECT-TYPE
     SYNTAX      Counter32
@@ -951,7 +952,7 @@ ipsecSaTrafficLimit OBJECT-TYPE
              SA is allowed to support,
              or 0 if there is no traffic constraint on its
              expiration."
-    :: { ipsecSaEntry 5 }
+    ::= { ipsecSaEntry 5 }
 
 ipsecSaInboundTraffic OBJECT-TYPE
     SYNTAX      Counter64
@@ -960,7 +961,7 @@ ipsecSaInboundTraffic OBJECT-TYPE
     DESCRIPTION
             "The amount traffic measured in bytes handled in the
              SA in the inbound direction."
-    :: { ipsecSaEntry 6 }
+    ::= { ipsecSaEntry 6 }
 
 ipsecSaOutboundTraffic OBJECT-TYPE
     SYNTAX      Counter64
@@ -969,7 +970,7 @@ ipsecSaOutboundTraffic OBJECT-TYPE
     DESCRIPTION
             "The amount traffic measured in bytes handled in the
              SA in the outbound direction."
-    :: { ipsecSaEntry 7 }
+    ::= { ipsecSaEntry 7 }
 
 ipsecSaDecryptErrors OBJECT-TYPE
     SYNTAX      Counter32
@@ -978,7 +979,7 @@ ipsecSaDecryptErrors OBJECT-TYPE
     DESCRIPTION
             "The number of inbound packets discarded by the SA
              due to decryption errors."
-    :: { ipsecSaEntry 8 }
+    ::= { ipsecSaEntry 8 }
 
 ipsecSaAuthErrors OBJECT-TYPE
     SYNTAX      Counter32
@@ -988,7 +989,7 @@ ipsecSaAuthErrors OBJECT-TYPE
             "The number of inbound packets discarded by the SA
              due to authentication errors. This includes
              hash failures in both ESP and AH."
-    :: { ipsecSaEntry 9 }
+    ::= { ipsecSaEntry 9 }
 
 ipsecSaReplayErrors OBJECT-TYPE
     SYNTAX      Counter32
@@ -998,6 +999,6 @@ ipsecSaReplayErrors OBJECT-TYPE
             "The number of inbound packets discarded by the SA
              due to replay errors. This includes replay failures
              both ESP and AH."
-    :: { ipsecSaEntry 10 }
+    ::= { ipsecSaEntry 10 }
 
 END
