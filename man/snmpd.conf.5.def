@@ -473,11 +473,15 @@ traps.  The default value is disabled(2).  Ordinarily the corresponding
 object (snmpEnableAuthenTraps.0) is read-write, but setting its value
 via this token makes the object read-only, and attempts to set the
 value of the object will result in a notWritable error response.
-.IP "override OID TYPE VALUE"
+.IP "override [-rw] OID TYPE VALUE"
 This directive allows you to override a particular OID with a
-different value (and possibly a different type of value).
-.\" The -rw flag will allow snmp SETs to modify it's value as well.
-An example:
+different value (and possibly a different type of value).  The -rw
+flag will allow snmp SETs to modify it's value as well. (note that if
+you're overriding original functionality, that functionality will be
+entirely lost.  Thus SETS will do nothing more than modify the
+internal overridden value and will not perform any of the original
+functionality intended to be provided by the MIB object.  It's an
+emulation only.)  An example:
 .IP
 override sysDescr.0 octet_str "my own sysDescr"
 .IP
@@ -491,13 +495,12 @@ value and later the numbering within the ifTable changes it's index
 ordering you'll end up with problems and your modified value won't
 appear in the right place in the table.
 .IP
-Valid TYPEs are: integer, uinteger, octet_str, bit_str, object_id,
-counter, gauge, null.  Note that setting an object to "null"
-effectively delete's it as being accessible.  No VALUE needs to be
-given if the object type is null.
+Valid TYPEs are: integer, uinteger, octet_str, object_id, counter,
+null (for gauge's, use "uinteger"; for bit strings, use "octet_str").
+Note that setting an object to "null" effectively delete's it as being
+accessible.  No VALUE needs to be given if the object type is null.
 .IP
-More types should be available in the future, as well as writable
-object support.
+More types should be available in the future.
 .SH "SETTING UP TRAP AND/OR INFORM DESTINATIONS"
 .IP "trapcommunity STRING"
 This defines the default community string to be used when sending traps.
