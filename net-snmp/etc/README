@@ -1,0 +1,6 @@
+If you want to communicate with secure SNMP packets, you will need to
+set up SNMP security parameters for your system.  If so, copy these
+files into your /etc directory and edit them according to the
+instructions at the beginning of each file.  Unfortunately, knowledge
+of SNMP Security is a great help here.  This will get better in the
+future -- automated tools should do this work.

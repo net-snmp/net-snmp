@@ -1,0 +1,33 @@
+
+TARG = bin/snmpget bin/snmpgetnext bin/snmpstatus bin/snmpwalk bin/snmptest bin/snmptrap bin/snmptrapd bin/snmpnetstat bin/snmpmon bin/snmpd
+
+all:	makeall
+
+install:    apps/snmpget apps/snmpgetnext apps/snmpstatus apps/snmpwalk apps/snmptest apps/snmptrap apps/snmptrapd apps/snmpnetstat/snmpnetstat apps/snmpmon apps/snmpd
+	cp apps/snmpwalk bin/snmpwalk
+	cp apps/snmpbulkwalk bin/snmpwalk
+	cp apps/snmptest bin/snmptest
+	cp apps/snmptranslate bin/snmptranslate
+	cp apps/snmpget bin/snmpget
+	cp apps/snmptrapd bin/snmptrapd
+	cp apps/snmpnetstat/snmpnetstat bin/snmpnetstat
+#	cp snmptcl/wish bin/wish
+	cp snmptcl/snmpgraph bin/snmpgraph
+
+apps/snmpget apps/snmpgetnext apps/snmpstatus apps/snmpwalk apps/snmptest apps/snmptrap apps/snmptrapd apps/snmpnetstat/snmpnetstat apps/snmpmon apps/snmpd: makeall
+
+makeall:
+	cd snmplib; make all install
+	cd apps; make
+	cd apps/snmpnetstat; make
+	cd agent; make all
+
+
+clean:
+	cd snmplib; make clean
+	cd apps; make clean
+	cd apps/snmpnetstat; make clean
+	cd agent; make clean
+	cd snmptcl; make clean
+
+
