@@ -1211,7 +1211,11 @@ handle_snmp_packet(int op, struct snmp_session *session, int reqid,
 	if ( asp->pdu ) {
 	    asp->pdu->command  = SNMP_MSG_RESPONSE;
 	    asp->pdu->errstat  = status;
-	    asp->pdu->errindex = asp->index;
+	    if (status == SNMP_ERR_NOERROR) {
+		asp->pdu->errindex = 0;
+	    } else {
+		asp->pdu->errindex = asp->index;
+	    }
 	    if (!snmp_send(asp->session, asp->pdu)) {
 	        snmp_free_pdu(asp->pdu);
 	    }
@@ -1313,7 +1317,6 @@ handle_var_list(struct agent_snmp_session  *asp)
 	    snmp_vars_inc++;
    }
 
-   asp->index = 0;
    return SNMP_ERR_NOERROR;
 }
 
