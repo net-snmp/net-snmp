@@ -165,7 +165,7 @@ int exec_command(struct extensible *ex)
   int fd;
   FILE *file;
   
-  if ((fd = get_exec_output(ex))) {
+  if ((fd = get_exec_output(ex)) != -1) {
     file = fdopen(fd,"r");
     if (fgets(ex->output,sizeof(ex->output),file) == NULL) {
       ex->output[0] = 0;
@@ -223,7 +223,7 @@ int get_exec_output(struct extensible *ex)
 #ifdef EXCACHETIME
         cachetime = 0;
 #endif
-        return 0;
+        return -1;
       }
     if ((ex->pid = fork()) == 0) 
       {
@@ -231,7 +231,7 @@ int get_exec_output(struct extensible *ex)
         if (dup(fd[1]) != 1)
           {
             setPerrorstatus("dup");
-            return 0;
+            return -1;
           }
 
         /* write standard output and standard error to pipe. */
@@ -261,7 +261,7 @@ int get_exec_output(struct extensible *ex)
         *(cptr2+1) = 0;
         argv = (char **) malloc((cnt+2) * sizeof(char *));
         if (argv == NULL)
-          return 0; /* memory alloc error */
+          return -1; /* memory alloc error */
         aptr = argv;
         *(aptr++) = argvs;
         for (cptr2 = argvs, i=1; i != cnt; cptr2++)
@@ -285,7 +285,7 @@ int get_exec_output(struct extensible *ex)
 #ifdef EXCACHETIME
           cachetime = 0;
 #endif
-          return 0;
+          return -1;
         }
 #ifdef EXCACHETIME
         unlink(cachefile);
@@ -293,7 +293,7 @@ int get_exec_output(struct extensible *ex)
         if ((cfd = open(cachefile,O_WRONLY|O_TRUNC|O_CREAT,0644)) < 0) {
           setPerrorstatus(cachefile);
           cachetime = 0;
-          return 0;
+          return -1;
         }
         fcntl(fd[0],F_SETFL,O_NONBLOCK);  /* don't block on reads */
 #ifdef HAVE_USLEEP
@@ -324,7 +324,7 @@ int get_exec_output(struct extensible *ex)
         if (ex->pid > 0 && waitpid(ex->pid,&ex->result,0) < 0) {
           setPerrorstatus("waitpid()");
           cachetime = 0;
-          return 0;
+          return -1;
         }
         ex->pid = 0;
         ex->result = WEXITSTATUS(ex->result);
@@ -340,13 +340,13 @@ int get_exec_output(struct extensible *ex)
   }
   if ((cfd = open(cachefile,O_RDONLY)) < 0) {
     setPerrorstatus(cachefile);
-    return 0;
+    return -1;
   }
   return(cfd);
 #endif
 
 #else /* !HAVE_EXECV */
-  return 0;
+  return -1;
 #endif
 }
 
