@@ -80,6 +80,7 @@ SOFTWARE.
 #include "mib.h"
 #include "snmp.h"
 #include "system.h"
+#include "version.h"
 
 #ifndef BSD4_3
 #define BSD4_2
@@ -340,7 +341,7 @@ int snmp_input(op, session, reqid, pdu, magic)
 
 void usage __P((void))
 {
-    fprintf(stderr,"Usage: snmptrapd [-v 1] [-q] [-P #] [-p] [-s] [-e] [-d]\n");
+    fprintf(stderr,"Usage: snmptrapd [-v 1] [-V] [-q] [-P #] [-p] [-s] [-e] [-d]\n");
 }
 
 
@@ -371,6 +372,10 @@ main(argc, argv)
     for(arg = 1; arg < argc; arg++){
 	if (argv[arg][0] == '-'){
 	    switch(argv[arg][1]){
+		case 'V':
+                  fprintf(stderr,"UCD-snmp version: %s\n", VersionInfo);
+                  exit(0);
+                  break;
 	        case 'c':
 		    /* config file name */
 		    if (++arg >= argc) {
