@@ -17,6 +17,7 @@
 
 static netsnmp_cache  *cache_head = NULL;
 static int             cache_outstanding_valid = 0;
+static int             _cache_load( netsnmp_cache *cache );
 
 #define CACHE_RELEASE_FREQUENCY 60      /* Check for expired caches every 60s */
 
@@ -48,6 +49,9 @@ void            release_cached_resources(unsigned int regNo,
  *  not be called with the cache expires. The expired flag will be set, but
  *  the valid flag will not be cleared. It is assumed that the load_cache
  *  routine will properly deal with being called with a valid cache.
+ *
+ *  If NETSNMP_CACHE_PRELOAD is set when a the cache handler is created,
+ *  the cache load routine will be called immediately.
  *
  *  If NETSNMP_CACHE_DONT_AUTO_RELEASE is set, the periodic callback that
  *  checks for expired caches will skip the cache. The cache will only be
@@ -138,6 +142,13 @@ netsnmp_cache_handler_get(netsnmp_cache* cache)
     if (ret) {
         ret->flags |= MIB_HANDLER_AUTO_NEXT;
         ret->myvoid = (void *) cache;
+
+        if((cache->flags & NETSNMP_CACHE_PRELOAD) && ! cache->valid) {
+            /*
+             * load cache, ignore rc (failed load doesn't affect registration)
+             */
+            (void)_cache_load(cache);
+        }
     }
     return ret;
 }
@@ -245,6 +256,8 @@ netsnmp_cache_helper_handler(netsnmp_mib_handler * handler,
     DEBUGMSGOID(("helper:cache_handler", reginfo->rootoid,
                  reginfo->rootoid_len));
 
+    netsnmp_assert(handler->flags & MIB_HANDLER_AUTO_NEXT);
+
     cache = (netsnmp_cache *) handler->myvoid;
     if (netsnmp_ds_get_boolean(NETSNMP_DS_APPLICATION_ID,
                                NETSNMP_DS_AGENT_NO_CACHING) ||
@@ -262,46 +275,15 @@ netsnmp_cache_helper_handler(netsnmp_mib_handler * handler,
         /*
          * only touch cache once per pdu request
          */
-        if(netsnmp_is_cache_valid(reqinfo))
-        return SNMP_ERR_NOERROR;
+        if(netsnmp_cache_is_valid(reqinfo))
+            return SNMP_ERR_NOERROR;
 
         /*
          * call the load hook, and update the cache timestamp.
          */
-        if (!cache->valid || netsnmp_cache_check_expired(cache)) {
-            /*
-             * If we've got a valid cache, then release it before reloading
-             */
-            if (cache->valid && cache->free_cache &&
-                ! (cache->flags & NETSNMP_CACHE_DONT_FREE_EXPIRED)) {
-                cache->free_cache(cache, cache->magic);
-                cache->valid = 0;
-            }
-            ret = cache->load_cache(cache, cache->magic);
-            if (ret < 0) {
-                DEBUGMSG(("helper:cache_handler", " load failed (%d)\n",
-                          ret));
-                cache->valid = 0;
-                return SNMP_ERR_NOERROR;
-            }
-            cache->valid = 1;
-
-            /*
-             * If we didn't previously have any valid caches outstanding,
-             *   then schedule a pass of the auto-release routine.
-             */
-            if (!cache_outstanding_valid) {
-                snmp_alarm_register(CACHE_RELEASE_FREQUENCY,
-                                    0, release_cached_resources, NULL);
-                cache_outstanding_valid = 1;
-            }
-            if (cache->timestamp)
-                atime_setMarker(cache->timestamp);
-            else
-                cache->timestamp = atime_newMarker();
-            DEBUGMSG(("helper:cache_handler", " loaded (%d)\n",
-                      cache->timeout));
-        } else {
+        if (!cache->valid || netsnmp_cache_check_expired(cache))
+            ret = _cache_load( cache );
+        else {
             DEBUGMSG(("helper:cache_handler", " cached (%d)\n",
                       cache->timeout));
         }
@@ -337,6 +319,55 @@ netsnmp_cache_helper_handler(netsnmp_mib_handler * handler,
     return SNMP_ERR_NOERROR;
 }
 
+static void
+_cache_free( netsnmp_cache *cache )
+{
+    if ((NULL != cache->free_cache) && 
+        ! (cache->flags & NETSNMP_CACHE_DONT_FREE_EXPIRED)) {
+        cache->free_cache(cache, cache->magic);
+        cache->valid = 0;
+    }
+}
+
+static int
+_cache_load( netsnmp_cache *cache )
+{
+    int ret;
+
+    /*
+     * If we've got a valid cache, then release it before reloading
+     */
+    if (cache->valid )
+        _cache_free(cache);
+
+    ret = cache->load_cache(cache, cache->magic);
+    if (ret < 0) {
+        DEBUGMSG(("helper:cache_handler", " load failed (%d)\n",
+                  ret));
+        cache->valid = 0;
+        return ret;
+    }
+    cache->valid = 1;
+    
+    /*
+     * If we didn't previously have any valid caches outstanding,
+     *   then schedule a pass of the auto-release routine.
+     */
+    if (!cache_outstanding_valid) {
+        snmp_alarm_register(CACHE_RELEASE_FREQUENCY,
+                            0, release_cached_resources, NULL);
+        cache_outstanding_valid = 1;
+    }
+    if (cache->timestamp)
+        atime_setMarker(cache->timestamp);
+    else
+        cache->timestamp = atime_newMarker();
+    DEBUGMSG(("helper:cache_handler", " loaded (%d)\n",
+              cache->timeout));
+
+    return ret;
+}
+
 
 
 /** run regularly to automatically release cached resources.
@@ -354,8 +385,11 @@ release_cached_resources(unsigned int regNo, void *clientargs)
     cache_outstanding_valid = 0;
     DEBUGMSGTL(("helper:cache_handler", "running auto-release\n"));
     for (cache = cache_head; cache; cache = cache->next) {
+        DEBUGMSGTL(("helper:cache_handler"," checking %p (flags 0x%x)\n",
+                     cache, cache->flags));
         if (cache->valid &&
             ! (cache->flags & NETSNMP_CACHE_DONT_AUTO_RELEASE)) {
+            DEBUGMSGTL(("helper:cache_handler","  releasing %p\n", cache));
             /*
              * Check to see if this cache has timed out.
              * If so, release the cached resources.
@@ -363,11 +397,7 @@ release_cached_resources(unsigned int regNo, void *clientargs)
              *   least one active cache.
              */
             if (netsnmp_cache_check_expired(cache)) {
-                if ( (NULL != cache->free_cache) &&
-                     ! (cache->flags & NETSNMP_CACHE_DONT_FREE_EXPIRED)) {
-                    cache->free_cache(cache, cache->magic);
-                    cache->valid = 0;
-                }
+                _cache_free(cache);
             } else {
                 cache_outstanding_valid = 1;
             }
