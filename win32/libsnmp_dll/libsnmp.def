@@ -206,12 +206,14 @@ EXPORTS
 	usm_cloneFrom_user
 	usm_create_user
 	usm_remove_user
+	usm_set_user_password
 	read_premib_configs
 	register_mib_handlers
 	init_snmpv3
 	snmpv3_local_snmpEngineTime
 	snmpv3_local_snmpEngineBoots
 	snmpv3_get_engineID
+	snmpv3_generate_engineID
 	usm_set_reportErrorOnUnknownID
 	get_default_authtype
 	get_default_privtype

@@ -2,6 +2,25 @@
 
 #include <config.h>
 
+#if TIME_WITH_SYS_TIME
+# ifdef WIN32
+#  include <sys/timeb.h>
+# else
+#  include <sys/time.h>
+# endif
+# include <time.h>
+#else
+# if HAVE_SYS_TIME_H
+#  include <sys/time.h>
+# else
+#  include <time.h>
+# endif
+#endif
+
+#if HAVE_WINSOCK_H
+#include <winsock.h>
+#endif
+
 #include "mibincl.h"
 #include "snmpv3.h"
 #include "snmpusm.h"
@@ -126,7 +145,7 @@ write_ucdDemoResetKeys(
   static unsigned char string[1500];
   static oid objid[MAX_OID_LEN];
   static struct counter64 c64;
-  int size, bigsize=1000;
+  int bigsize=1000;
   unsigned char *engineID;
   int engineIDLen;
   int i;
