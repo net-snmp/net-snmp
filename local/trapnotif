@@ -57,13 +57,6 @@ log_error()
 
   if [ `egrep "$HOST[ 	]*$PROC" $CURLOGFILE | wc -l` = 0 ]; then
     lockfile $CURLOGLOCKFILE
-    #    if [ $status ]
-      #      then
-      #      /bin/cat << ++ | /usr/lib/sendmail hardaker
-      #Unable to lock the $CURLOGLOCKFILE
-      #++
-      #      exit 1
-      #    fi
     cp $CURLOGFILE $TMPFILE
     echo "$HOST@$PROC@$ERROR@(`date +'%m/%d %H:%M'`)" | awk -F @ '{ printf("%-8.8s %-12.12s %-42.42s %-13.13s\n",$1,$2,$3,$4);}' >> $TMPFILE
     sort $TMPFILE > $CURLOGFILE
@@ -122,25 +115,6 @@ if [ $TYPE = "down" -o $TYPE = "up" ]; then
   exit 0
 fi
 
-if [ $TYPE = "swaperr" ]; then
-
-  # swap problem
-  PROC="swap"
-  ERROR="$HOST is low on swap"
-  log_error
-  exit 0
-  
-fi
-if [ $TYPE = "swapnorm" ]; then
-
-  # swap problem
-
-  PROC="swap"
-  ERROR="$HOST swap is ok"
-  unlog_error
-  exit 0
-fi
-
 # More Variable declairations for ece-snmpd events
 
 MIBLOC=`echo $4 | sed 's/\.[^.]*$//'`
@@ -159,6 +133,9 @@ if [ $TYPE = "err" ];   then
   # The problem is an error
   
   ERROR=`/1/OV/bin/snmpget -t 5 -r 3 $FULLHOST $MIBERR | sed 's/^.*: *//'`
+  if [ "$ERROR" = "" ]; then
+    ERROR="Sorry, Error MSG disappeared."
+  fi
   log_error
   
 else
