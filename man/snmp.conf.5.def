@@ -130,6 +130,9 @@ Equivalent to
 .IP "printHexText (1|yes|true|0|no|false)"
 Equivalent to
 .BR -OT .
+.IP "hexOutputLength integer"
+Specifies where to break up the output of hexadecimal strings.  
+Set to 0 to disable line breaks.  Defaults to 16.
 .IP "suffixPrinting (0|1|2)"
 If the value is 1, its equivalent to
 .B -Os
