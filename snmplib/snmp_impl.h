@@ -63,34 +63,6 @@ SOFTWARE.
 #define FALSE	0
 #endif
 
-struct packet_info {
-    u_char 	pdutype;
-    snmp_ipaddr	source;
-    int		version;
-    int		mp_model;
-    int		sec_model;
-    int		sec_level;
-
-    /* community based authentication */
-    u_char	community[COMMUNITY_MAX_LEN];
-    int		community_len;
-
-    /* snmp security based authentication */
-    oid	        srcParty[MAX_OID_LEN];
-    oid		dstParty[MAX_OID_LEN];
-    oid		context[MAX_OID_LEN];
-    int		srcPartyLength;
-    int		dstPartyLength;
-    int		contextLength;
-    struct partyEntry *srcp, *dstp;
-    struct contextEntry *cxp;
-
-   /* SNMPv3 parameters */
-    u_char      *securityName;
-
-    u_char	*packet_end;
-};
-
 #define READ	    1
 #define WRITE	    0
 
@@ -179,10 +151,8 @@ extern int snmp_errno;
 u_char	*snmp_comstr_parse (u_char *, size_t *, u_char *, size_t *, int *);
 u_char	*snmp_comstr_build (u_char *, size_t *, u_char *, size_t *, int *, size_t);
 
-u_char	*snmp_party_parse (u_char *, size_t *, struct packet_info *,
-			   oid *, size_t *, oid *, size_t *, oid *, size_t *, int);
-u_char	*snmp_party_build (u_char *, size_t *, struct packet_info *, size_t,
-                                 oid *, size_t, oid *, size_t, oid *, size_t, size_t *, int);
+u_char	*snmp_party_parse (u_char *, size_t *, struct snmp_pdu *, int);
+u_char	*snmp_party_build (u_char *, size_t *, struct snmp_pdu *, size_t, size_t *, int);
 
 int has_access (u_char, int, int, int);
 #ifdef __cplusplus

@@ -1620,7 +1620,6 @@ snmp_build(struct snmp_session *session,
 {
     u_char *h0, *h0e = 0, *h1;
     u_char  *cp;
-    struct  packet_info pkt, *pi = &pkt;
     size_t length;
 #ifdef USE_V2PARTY_PROTOCOL
     size_t packet_length;
@@ -1671,13 +1670,9 @@ snmp_build(struct snmp_session *session,
 
     case SNMP_VERSION_2p:
 #ifdef USE_V2PARTY_PROTOCOL
-        pi->version = session->version;
-        pi->srcp = NULL;
-        pi->dstp = NULL;
-        cp = snmp_party_build(packet, out_length, pi, 0,
-                              pdu->srcParty, pdu->srcPartyLen,
-                              pdu->dstParty, pdu->dstPartyLen,
-                              pdu->context, pdu->contextLen,
+        pdu->srcp = NULL;
+        pdu->dstp = NULL;
+        cp = snmp_party_build(packet, out_length, pdu, 0,
                               0, FIRST_PASS);
         if (cp == NULL)
             return -1;
@@ -1706,10 +1701,7 @@ snmp_build(struct snmp_session *session,
 #ifdef USE_V2PARTY_PROTOCOL
         /* add potentially encryption and digest calculation */
 /*?? cleanup length parameters in call */
-        snmp_party_build(packet, &length, pi, cp - h1,
-                         pdu->srcParty, pdu->srcPartyLen,
-                         pdu->dstParty, pdu->dstPartyLen,
-                         pdu->context, pdu->contextLen,
+        snmp_party_build(packet, &length, pdu, cp - h1,
                          &packet_length, LAST_PASS);
 	/* encryption might bump length of packet */
 	cp = packet + packet_length;
@@ -2196,7 +2188,6 @@ snmp_parse(struct snmp_session *session,
 	   size_t length)
 {
     u_char  type = 0;
-    struct packet_info pkt, *pi = &pkt;
     u_char community[COMMUNITY_MAX_LEN];
     size_t community_length = COMMUNITY_MAX_LEN;
     int result = -1;
@@ -2266,12 +2257,8 @@ snmp_parse(struct snmp_session *session,
 	pdu->securityModel = SNMP_SEC_MODEL_SNMPv2p;
 
 	/* authenticates message and returns length if valid */
-	data = snmp_party_parse(data, &length, pi,
-			        pdu->srcParty, &pdu->srcPartyLen,
-			        pdu->dstParty, &pdu->dstPartyLen,
-				pdu->context, &pdu->contextLen,
+	data = snmp_party_parse(data, &length, pdu,
 				FIRST_PASS | LAST_PASS);
-	pdu->version = pi->version;
 
 	result = snmp_pdu_parse(pdu, data, &length);
         break;

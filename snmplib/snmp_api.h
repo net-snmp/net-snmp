@@ -67,12 +67,15 @@ struct snmp_pdu {
     size_t  securityNameLen;  /* Length of securityName. */
     int	    securityModel;
     int	    securityLevel;  /* noAuthNoPriv, authNoPriv, authPriv */
+    int	    msgParseModel;
     oid	    *srcParty;
     size_t  srcPartyLen;
     oid	    *dstParty;
     size_t  dstPartyLen;
     oid	    *context;
     size_t  contextLen;
+    struct partyEntry *srcp, *dstp;
+    struct contextEntry *cxp;
 
     u_char  *community;	/* community for outgoing requests. */
     size_t  community_len;  /* Length of community name. */
