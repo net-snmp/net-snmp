@@ -163,10 +163,12 @@ struct variable4 ip_variables[] = {
     {IPROUTEMASK, ASN_IPADDRESS, RONLY, var_ipRouteEntry, 3, {21, 1, 11}},
     {IPROUTEMETRIC5, ASN_INTEGER, RONLY, var_ipRouteEntry, 3, {21, 1, 12}},
     {IPROUTEINFO, ASN_OBJECT_ID, RONLY, var_ipRouteEntry, 3, {21, 1, 13}},
+#ifdef USING_MIBII_AT_MODULE
     {IPMEDIAIFINDEX, ASN_INTEGER, RONLY, var_atEntry, 3, {22, 1, 1}},
     {IPMEDIAPHYSADDRESS, ASN_OCTET_STR, RONLY, var_atEntry, 3, {22, 1, 2}},
     {IPMEDIANETADDRESS, ASN_IPADDRESS, RONLY, var_atEntry, 3, {22, 1, 3}},
     {IPMEDIATYPE, ASN_INTEGER, RONLY, var_atEntry, 3, {22, 1, 4}},
+#endif
     {IPROUTEDISCARDS, ASN_COUNTER, RONLY, var_ip, 1, {23 }}
 };
 
