@@ -609,7 +609,11 @@ sc_encrypt_quit:
 	memset(my_iv, 0, sizeof(my_iv));
 	memset(pad_block, 0, sizeof(pad_block));
 	memset(key_struct, 0, sizeof(key_struct));
+#if (OPENSSL_VERSION_NUMBER < 0x0090700fL)
+	memset(key_sch, 0, sizeof(key_sch));
+#else
 	memset(&key_sch, 0, sizeof(key_sch));
+#endif
 	return rval;
 
 }  /* end sc_encrypt() */
@@ -722,7 +726,11 @@ sc_decrypt(	oid    *privtype,	size_t privtypelen,
 
 /* exit cond */
 sc_decrypt_quit:
+#if (OPENSSL_VERSION_NUMBER < 0x0090700fL)
+	memset(key_sch, 0, sizeof(key_sch));
+#else
 	memset(&key_sch, 0, sizeof(key_sch));
+#endif
 	memset(key_struct, 0, sizeof(key_struct));
 	memset(my_iv, 0, sizeof(my_iv));
 	return rval;
