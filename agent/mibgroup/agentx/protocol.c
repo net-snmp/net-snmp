@@ -862,8 +862,7 @@ _agentx_realloc_build(u_char **buf, size_t *buf_len, size_t *out_len,
     break;
 
   case AGENTX_MSG_CLEANUPSET:
-/*    pdu->flags &= ~(UCD_MSG_FLAG_EXPECT_RESPONSE); */
-      /* XXXWWWWWWWW: do the above but turn delegation off. */
+    pdu->flags &= ~(UCD_MSG_FLAG_EXPECT_RESPONSE);
     break;
 	    
   case AGENTX_MSG_ADD_AGENT_CAPS:
