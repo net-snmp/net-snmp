@@ -221,7 +221,7 @@ int
 unregister_sysORTable_sess(oid * oidin,
                            size_t oidlen, netsnmp_session * ss)
 {
-    struct sysORTable **ptr = &table, *prev = NULL;
+    struct sysORTable **ptr = &table, *next, *prev = NULL;
     int             found = SYS_ORTABLE_NO_SUCH_REGISTRATION;
     struct register_sysOR_parameters reg_sysOR_parms;
 
@@ -230,6 +230,7 @@ unregister_sysORTable_sess(oid * oidin,
     DEBUGMSG(("mibII/sysORTable", "\n"));
 
     while (*ptr != NULL) {
+        next = (*ptr)->next;
         if (snmp_oid_compare
             (oidin, oidlen, (*ptr)->OR_oid, (*ptr)->OR_oidlen) == 0) {
             if ((*ptr)->OR_sess != ss)
@@ -246,9 +247,10 @@ unregister_sysORTable_sess(oid * oidin,
             gettimeofday(&(sysOR_lastchange), NULL);
             found = SYS_ORTABLE_UNREGISTERED_OK;
             break;
+        } else {
+            prev = *ptr;
         }
-        prev = *ptr;
-        ptr = &((*ptr)->next);
+        ptr  = &next;
     }
 
     reg_sysOR_parms.name = oidin;
