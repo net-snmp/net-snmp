@@ -14,7 +14,7 @@ SKIPIFNOT USING_MIBII_SYSTEM_MIB_MODULE
 # standard V3 configuration for initial user
 . ./Sv3config
 # config the proxy
-CONFIGAGENT proxy -t 2 -r 1 -v 2c -c testcommunity $SNMP_TRANSPORT_SPEC:$SNMP_TEST_DEST7676 system
+CONFIGAGENT proxy -t 2 -r 1 -v 2c -c testcommunity $SNMP_TRANSPORT_SPEC:${SNMP_TEST_DEST}7676 system
 
 # Start the agent without initializing the system mib.
 ORIG_AGENT_FLAGS="$AGENT_FLAGS"
