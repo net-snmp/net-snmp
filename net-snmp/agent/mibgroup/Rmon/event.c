@@ -23,6 +23,9 @@
  * for the ucd-snmp snmpd agent.
  * *
  * * $Log$
+ * * Revision 5.1  2002/04/26 21:33:28  hardaker
+ * * fix OID_LENGTH definitions
+ * *
  * * Revision 5.0  2002/04/20 07:30:00  hardaker
  * * cvs file version number change
  * *
@@ -582,10 +585,6 @@ create_explanaition(CRTL_ENTRY_T * evptr, u_char is_rising,
     strcat(descr, expl);
     return descr;
 }
-
-#define OID_LENGTH(x)  (sizeof(x)/sizeof(x[0]))
-
-#include <net-snmp/snmp_client.h>
 
 extern void     send_enterprise_trap_vars(int, int, oid *, int,
                                           netsnmp_variable_list *);
