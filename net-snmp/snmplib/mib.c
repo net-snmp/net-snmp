@@ -1677,8 +1677,9 @@ fprint_value(FILE *f,
  */
 char *
 dump_oid_to_string(oid *objid,
-	   size_t objidlen,
-	   char *buf)
+                   size_t objidlen,
+                   char *buf,
+                   char quotechar)
 {
   if (buf)
   { int ii, alen;
@@ -1691,11 +1692,11 @@ dump_oid_to_string(oid *objid,
         if ((tst > 254) || (!isprint(tst)))
             tst = (oid)'.';
           
-        if (alen == 0) *cp++ = '"';
+        if (alen == 0) *cp++ = quotechar;
         *cp++ = (char)tst;
         alen++;
     }
-    if (alen) *cp++ = '"';
+    if (alen) *cp++ = quotechar;
     *cp = '\0';
     buf = cp;
   }
@@ -1744,14 +1745,21 @@ _get_symbol(oid *objid,
         }
 	switch(tp->type) {
 	case TYPE_OCTETSTR:
-	    numids = (size_t)*objid;
-	    if ( (1+numids) > objidlen)
-		goto finish_it;
-	    buf = dump_oid_to_string(objid + 1, numids, buf);
+	    if (in_dices->isimplied) {
+                numids = objidlen;
+                if (numids > objidlen)
+                    goto finish_it;
+                buf = dump_oid_to_string(objid, numids, buf, '\'');
+            } else {
+                numids = (size_t)*objid+1;
+                if (numids > objidlen)
+                    goto finish_it;
+                buf = dump_oid_to_string(objid+1, numids-1, buf, '"');
+            }
+            objid += (numids);
+            objidlen -= (numids);
 	    *buf++ = '.';
 	    *buf = '\0';
-	    objid += (1+numids);
-	    objidlen -= (1+numids);
 	    break;
 	case TYPE_INTEGER:
 	    sprintf(buf, "%lu.", *objid++);
@@ -1760,12 +1768,19 @@ _get_symbol(oid *objid,
 	    objidlen--;
 	    break;
 	case TYPE_OBJID:
-	    numids = (size_t)*objid;
-	    if ( (1+numids) > objidlen)
+	    if (in_dices->isimplied) {
+                numids = objidlen=1;
+            } else {
+                numids = (size_t)*objid+1;
+            }
+	    if ( numids > objidlen)
 		goto finish_it;
-	    _get_symbol(objid + 1, numids, NULL, buf, NULL, NULL);
-	    objid += (1+numids);
-	    objidlen -= (1+numids);
+	    _get_symbol(objid, numids, NULL, buf, NULL, NULL);
+	    objid += (numids);
+	    objidlen -= (numids);
+            buf += strlen(buf);
+	    *buf++ = '.';
+	    *buf = '\0';
 	    break;
 	default:
 	    goto finish_it;
@@ -1974,6 +1989,8 @@ print_tree_node(FILE *f,
 	    while (ip) {
 		if (first) first = 0;
 		else fprintf(f, ", ");
+                if (ip->isimplied)
+                    fprintf(f, "IMPLIED ");
 		fprintf(f, "%s", ip->ilabel);
 		ip = ip->next;
 	    }
