@@ -54,7 +54,9 @@ DIR *opendir (const char *filename);
 struct direct *readdir (DIR *dirp);
 int closedir (DIR *dirp);
 
+#ifndef HAVE_GETTIMEOFDAY
 int gettimeofday (struct timeval *, struct timezone *tz);
+#endif
 #ifndef HAVE_STRCASECMP
 int strcasecmp(const char *s1, const char *s2);
 #endif
