@@ -322,6 +322,9 @@ int
 ifDescr_get(ifTable_rowreq_ctx * rowreq_ctx, char **ifDescr_val_ptr_ptr,
             size_t *ifDescr_val_ptr_len_ptr)
 {
+    char *tmp_descr;
+    u_char tmp_len;
+
    /** we should have a non-NULL pointer and enough storage */
     netsnmp_assert((NULL != ifDescr_val_ptr_ptr)
                    && (NULL != *ifDescr_val_ptr_ptr));
@@ -330,7 +333,15 @@ ifDescr_get(ifTable_rowreq_ctx * rowreq_ctx, char **ifDescr_val_ptr_ptr,
     netsnmp_assert(NULL != rowreq_ctx);
 
     /*
-     * TODO:
+     * if ifDescr is NULL, use the ifName
+     */
+    if (NULL == rowreq_ctx->data.ifDescr)
+        tmp_descr = rowreq_ctx->data.ifName;
+    else 
+        tmp_descr = rowreq_ctx->data.ifDescr;
+    tmp_len = strlen(tmp_descr);
+
+    /*
      * set (* ifDescr_val_ptr_ptr ) and (* ifDescr_val_ptr_len_ptr ) from rowreq_ctx->data.
      */
     /*
@@ -341,20 +352,20 @@ ifDescr_get(ifTable_rowreq_ctx * rowreq_ctx, char **ifDescr_val_ptr_ptr,
      * make sure there is enough space for data
      */
     if ((NULL == (*ifDescr_val_ptr_ptr))
-        || ((*ifDescr_val_ptr_len_ptr) < strlen(rowreq_ctx->data.ifDescr))) {
+        || ((*ifDescr_val_ptr_len_ptr) < tmp_len)) {
         /*
          * allocate space for data
          */
         (*ifDescr_val_ptr_ptr) =
-            malloc(strlen(rowreq_ctx->data.ifDescr) *
+            malloc(tmp_len *
                    sizeof((*ifDescr_val_ptr_ptr)[0]));
         if (NULL == (*ifDescr_val_ptr_ptr)) {
             snmp_log(LOG_ERR, "could not allocate memory\n");
             return MFD_ERROR;
         }
     }
-    (*ifDescr_val_ptr_len_ptr) = strlen(rowreq_ctx->data.ifDescr);
-    memcpy((*ifDescr_val_ptr_ptr), rowreq_ctx->data.ifDescr,
+    (*ifDescr_val_ptr_len_ptr) = tmp_len;
+    memcpy((*ifDescr_val_ptr_ptr), tmp_descr,
            (*ifDescr_val_ptr_len_ptr) * sizeof((*ifDescr_val_ptr_ptr)[0]));
 
     return MFD_SUCCESS;
@@ -602,6 +613,19 @@ ifPhysAddress_get(ifTable_rowreq_ctx * rowreq_ctx,
     netsnmp_assert(NULL != ifPhysAddress_val_ptr_len_ptr);
 
     netsnmp_assert(NULL != rowreq_ctx);
+
+    if ((rowreq_ctx->data.ifPhysAddress[0] == 0) &&
+        (rowreq_ctx->data.ifPhysAddress[1] == 0) &&
+        (rowreq_ctx->data.ifPhysAddress[2] == 0) &&
+        (rowreq_ctx->data.ifPhysAddress[3] == 0) &&
+        (rowreq_ctx->data.ifPhysAddress[4] == 0) &&
+        (rowreq_ctx->data.ifPhysAddress[5] == 0)) {
+        /*
+         * all 0s = empty string
+         */
+        (*ifPhysAddress_val_ptr_len_ptr) = 0;
+        return MFD_SUCCESS;
+    }
 
     /*
      * TODO:
