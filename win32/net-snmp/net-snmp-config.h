@@ -61,7 +61,7 @@ extern "C" {
 /* PERSISTENT_DIRECTORY: If defined, the library is capabile of saving
    persisant information to this directory in the form of configuration
    lines: PERSISTENT_DIRECTORY/NAME.persistent.conf */
-#define PERSISTENT_DIRECTORY INSTALL_BASE ## "/persist"
+#define PERSISTENT_DIRECTORY INSTALL_BASE ## "/snmp/persist"
 
 /* PERSISTENT_MASK: the umask permissions to set up persistent files with */
 /* Win32 has no umask ...  #define PERSISTENT_MASK 077 */
@@ -92,8 +92,8 @@ extern "C" {
 
 #define SNMPDLMODPATH INSTALL_BASE ## "/lib/dlmod"
 #define SNMPLIBPATH INSTALL_BASE ## "/lib"
-#define SNMPSHAREPATH INSTALL_BASE ## "/share"
-#define SNMPCONFPATH INSTALL_BASE ## "/conf"
+#define SNMPSHAREPATH INSTALL_BASE ## "/share/snmp"
+#define SNMPCONFPATH INSTALL_BASE
 
 /* LOGFILE:  If defined it closes stdout/err/in and opens this in out/err's
    place.  (stdin is closed so that sh scripts won't wait for it) */
