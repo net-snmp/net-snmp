@@ -242,7 +242,7 @@ Init_HR_Print(void)
 #elif HAVE_CGETNEXT
     {
         char           *buf = NULL, *ptr;
-        while (cgetnext(&buf, caps)) {
+        while (cgetnext(&buf, caps) > 0) {
             if ((ptr = strchr(buf, ':')))
                 *ptr = 0;
             if ((ptr = strchr(buf, '|')))
@@ -267,7 +267,7 @@ Init_HR_Print(void)
                 HRP_name = tmp;
             }
             HRP_name[HRP_nbrnames++] = strdup(ptr);
-#if HAVE_CGETNEXT
+#if !defined(HAVE_PRINTCAP) && defined(HAVE_CGETNEXT)
             if (buf)
                 free(buf);
 #endif
