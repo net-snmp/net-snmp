@@ -80,6 +80,9 @@
 #if HAVE_INET_MIB2_H
 #include <inet/mib2.h>
 #endif
+#ifdef HAVE_STDINT_H
+#include <stdint.h>
+#endif
 #if HAVE_DMALLOC_H
 #include <dmalloc.h>
 #endif
