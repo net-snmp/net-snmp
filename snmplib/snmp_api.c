@@ -1351,17 +1351,25 @@ snmp_select_info(numfds, fdset, timeout, block)
      */
     gettimeofday(&now, (struct timezone *)0);
     Now = now;
-    earliest.tv_sec--;	/* adjust time to make arithmetic easier */
-    earliest.tv_usec += 1000000L;
-    earliest.tv_sec -= now.tv_sec;
-    earliest.tv_usec -= now.tv_usec;
-    while (earliest.tv_usec >= 1000000L){
-	earliest.tv_usec -= 1000000L;
-	earliest.tv_sec += 1;
+
+    if (earliest.tv_sec < now.tv_sec) {
+       earliest.tv_sec  = 0;
+       earliest.tv_usec = 100;
     }
-    if (earliest.tv_sec < 0){
-	earliest.tv_sec = 0;
-	earliest.tv_usec = 0;
+    else if (earliest.tv_sec == now.tv_sec) {
+       earliest.tv_sec  = 0;
+       earliest.tv_usec = (earliest.tv_usec - now.tv_usec);
+       if (earliest.tv_usec < 0) {
+          earliest.tv_usec = 100;
+       }
+    }
+    else {
+       earliest.tv_sec  = (earliest.tv_sec  - now.tv_sec);
+       earliest.tv_usec = (earliest.tv_usec - now.tv_usec);
+       if (earliest.tv_usec < 0) {
+          earliest.tv_sec --;
+          earliest.tv_usec = (1000000L + earliest.tv_usec);
+       }
     }
 
     /* if it was blocking before or our delta time is less, reset timeout */
