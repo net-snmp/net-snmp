@@ -23,10 +23,10 @@ SOFTWARE.
  * snmp_api.h - API for access to snmp.
  */
 
-typedef struct sockaddr_in  snmp_ipaddr;
-
 struct variable_list;
 struct timeval;
+
+typedef struct sockaddr_in  snmp_ipaddr;
 
 struct snmp_pdu {
     int	    version;
