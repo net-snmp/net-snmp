@@ -2694,7 +2694,7 @@ if test "X\${CDPATH+set}" = Xset; then CDPATH=:; export CDPATH; fi
 SHELL=$lt_SHELL
 
 # Whether or not to build shared libraries.
-build_libtool_libs=$enable_shared
+build_libtool_libs=$enable_shared_default
 
 # Whether or not to build static libraries.
 build_old_libs=$enable_static

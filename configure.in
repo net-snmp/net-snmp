@@ -322,10 +322,14 @@ if test "x$developer" != "xno" -a -f $srcdir/remove-files; then
   developer="yes"
 fi
 
+enable_shared_default=yes
+if test "x$enable_shared" = "xno"; then
+  enable_shared_default=no
+  AC_DISABLE_SHARED
+fi
 dnl disable --enable-shared by default in cvs/developer cases.
-enable_shared=yes
 if test "x$developer" = "xyes"; then
-  enable_shared=no
+  enable_shared_default=no
   AC_DISABLE_SHARED
 fi
 
