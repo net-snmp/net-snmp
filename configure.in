@@ -936,6 +936,9 @@ AC_CHECK_STRUCT_FOR([
 ],swdevt,sw_nblksenabled)
 
 AC_CHECK_STRUCT_FOR([
+#ifdef HAVE_SYS_STAT_H
+#include <sys/stat.h>
+#endif
 #if HAVE_SYS_STATFS_H
 #include <sys/statfs.h>
 #endif
