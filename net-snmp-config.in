@@ -29,17 +29,17 @@ else
       ;;
     --agent-libs)
       # use this one == --netsnmp-agent-libs + --external-libs
-      echo -L@libdir@ -lnetsnmpagent -lnetsnmphelpers -lnetsnmpmibs -lnetsnmp @AGENTLIBS@
+      echo @LDFLAGS@ -lnetsnmpagent -lnetsnmphelpers -lnetsnmpmibs -lnetsnmp @AGENTLIBS@
       ;;
     --libs)
       # use this one == --netsnmp-libs + --external-libs
-      echo -L@libdir@ -lnetsnmp @LIBS@
+      echo @LDFLAGS@ -lnetsnmp @LIBS@
       ;;
     --external-libs)
-      echo @LIBS@
+      echo @LDFLAGS@ @LIBS@
       ;;
     --external-agent-libs)
-      echo @AGENTLIBS@
+      echo @LDFLAGS@ @AGENTLIBS@
       ;;
     --netsnmp-libs)
       echo -L@libdir@ -lnetsnmp
