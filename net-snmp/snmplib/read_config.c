@@ -945,7 +945,7 @@ char *read_config_read_octet_string(char *readfrom, u_char **str, size_t *len) {
       readfrom = copy_word(readfrom, buf);
 
       *len = strlen(buf);
-      if (*len > 0 && ((cptr = (u_char *) malloc(*len + 1)) == NULL))
+      if ((cptr = (u_char *) malloc(*len + 1)) == NULL)
         return NULL;
       *str = cptr;
       if (cptr) {
