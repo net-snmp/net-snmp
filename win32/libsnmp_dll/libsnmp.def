@@ -354,6 +354,15 @@ EXPORTS
 	usmHMACSHA1AuthProtocol
 	usmNoPrivProtocol
 	usmDESPrivProtocol
+	snprintf_bitstring
+	snprintf_value
+	snprintf_objid
+	snmp_synch_reset
+	netsnmp_ds_get_void
+	netsnmp_ds_set_void
+	netsnmp_ds_shutdown
+	netsnmp_sprint_realloc_objid_tree
+	module_name
 	Mib                     DATA
 	tree_head               DATA
 	snmp_errno              DATA
