@@ -25,7 +25,7 @@ usage() {
     cat << BLIK
 
 Usage: `basename $0` [-a] [-S SLEEPTIME] [-h] [-i] [-v] [-V] [-s]
-       [-T TESTNUMS] [-D bindir] [-S seconds]"
+       [-T TESTNUMS] [-D bindir] [-S seconds] [-P <udp|tcp|udp6|tcp6|unix>]"
 
   -a        run all tests.
   -T NUMS   run particular tests (command separated list of numbers)
@@ -37,6 +37,7 @@ Usage: `basename $0` [-a] [-S SLEEPTIME] [-h] [-i] [-v] [-V] [-s]
   -A FLAGS  Extra flags to pass to the agent.
   -s        Don't erase the runtime data directory for successful tests
   -x        Turn on SH output debugging for tests.
+  -P TRANS  Specify on which transport domain to run the tests.Default is udp.
 
 BLIK
     exit 0
@@ -83,6 +84,19 @@ while [ -n "$1" ]; do
 	    shift
 	    SNMP_UPDIR="$1"
 	    ;;
+	-P)
+		shift
+		SNMP_TRANSPORT_SPEC="$1"
+		export SNMP_TRANSPORT_SPEC
+		if [ "x$SNMP_TRANSPORT_SPEC" = "xunix" ];then
+			SNMP_SNMPD_PORT="/var/tmp/unixsnmpd"
+			SNMP_SNMPTRAPD_PORT="/var/tmp/unixsnmptrapd"
+			SNMP_TEST_DEST=""
+			export SNMP_SNMPD_PORT
+			export SNMP_SNMPTRAPD_PORT
+			export SNMP_TEST_DEST
+		fi
+		;;
 	-T)
 	    shift
 	    test_nums=`echo $1 | sed 's/,/ /g'`
