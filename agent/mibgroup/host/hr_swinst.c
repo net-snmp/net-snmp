@@ -354,8 +354,10 @@ var_hrswinst(struct variable *vp,
 	    ret = NULL;
 	    break;
     }
+#ifdef HAVE_LIBRPM
     if (h)
 	headerFree(h);
+#endif
     return ret;
 }
 
