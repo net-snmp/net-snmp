@@ -106,8 +106,7 @@ date_n_time ( time_t *when, size_t  *length)
 }
 
 
-time_t ctime_to_timet( string )
-    char *string;
+time_t ctime_to_timet( char* string )
 {
     struct tm tm;
 

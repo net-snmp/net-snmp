@@ -652,7 +652,7 @@ int vacm_in_view (struct snmp_pdu *pdu,
 	if (snmp_get_do_debugging()) {
             char *buf;
             if (pdu->community) {
-                buf = malloc(1+ pdu->community_len);
+                buf = (char *)malloc(1+ pdu->community_len);
                 memcpy(buf, pdu->community, pdu->community_len);
                 buf[pdu->community_len] = '\0';
             } else {

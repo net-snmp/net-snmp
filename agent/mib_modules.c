@@ -88,7 +88,7 @@ add_to_init_list(const char *module_list) {
 
     cp = strtok(cp, ", :");
     while(cp) {
-        newitem = calloc(1, sizeof (*initlist));
+        newitem = (struct module_init_list *)calloc(1, sizeof (*initlist));
         newitem->module_name = strdup(cp);
         newitem->next = *list;
         *list = newitem;

@@ -4,6 +4,9 @@
 #if HAVE_WINSOCK_H
 #include <winsock.h>
 #endif
+#if HAVE_STRING_H
+#include <string.h>
+#endif
 
 #include "mibincl.h"
 #include "proxy.h"
@@ -71,7 +74,7 @@ proxy_parse_config(const char *token, char *line) {
         return;
     }
 
-    newp = calloc(1, sizeof(struct simple_proxy));
+    newp = (simple_proxy *) calloc(1, sizeof(struct simple_proxy));
 
     newp->sess = ss;
     DEBUGMSGTL(("proxy_init","name = %s\n",args[arg]));
@@ -113,7 +116,7 @@ proxy_parse_config(const char *token, char *line) {
     /* replace current link with us */
     *listpp = newp;
 
-    memdup((void *) &newp->variables, (void *) simple_proxy_variables,
+    memdup((u_char **) &newp->variables, (u_char *) simple_proxy_variables,
            sizeof(*simple_proxy_variables));
 
     /* register our node */

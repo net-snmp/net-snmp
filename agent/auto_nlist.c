@@ -1,6 +1,11 @@
 #include <config.h>
 
 #ifdef CAN_USE_NLIST
+#if HAVE_STRING_H
+#include <string.h>
+#else
+#include <strings.h>
+#endif
 
 #if HAVE_STDLIB_H
 #include <stdlib.h>

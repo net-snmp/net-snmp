@@ -102,7 +102,7 @@ open_agentx_session(struct snmp_session *session, struct snmp_pdu *pdu)
     sp->securityAuthProto =
 	snmp_duplicate_objid(pdu->variables->name, pdu->variables->name_length);
     sp->securityAuthProtoLen = pdu->variables->name_length;
-    sp->securityName = strdup( pdu->variables->val.string );
+    sp->securityName = strdup((char *) pdu->variables->val.string );
     gettimeofday(&now, NULL);
     sp->engineTime = calculate_time_diff( &now, &starttime );
 
@@ -176,7 +176,7 @@ register_agentx_list(struct snmp_session *session, struct snmp_pdu *pdu)
 			 sizeof(agentx_varlist[0]), 1,
 			 pdu->variables->name, pdu->variables->name_length,
 			 pdu->priority, pdu->range_subid, ubound, sp,
-			 pdu->community, pdu->time,
+			 (char *)pdu->community, pdu->time,
 			 pdu->flags&AGENTX_MSG_FLAG_INSTANCE_REGISTER)) {
 
 	case MIB_REGISTERED_OK:
@@ -208,7 +208,7 @@ unregister_agentx_list(struct snmp_session *session, struct snmp_pdu *pdu)
     switch (unregister_mib_context(pdu->variables->name,
     		       pdu->variables->name_length,
 		       pdu->priority, pdu->range_subid, ubound,
-		       pdu->community)) {
+		       (char *)pdu->community)) {
 	case MIB_UNREGISTERED_OK:
 				return AGENTX_ERR_NOERROR;
 	case MIB_NO_SUCH_REGISTRATION:

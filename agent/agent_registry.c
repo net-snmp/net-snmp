@@ -915,7 +915,7 @@ void (* external_signal_handler[NUM_EXTERNAL_SIGS])(int);
  *       below for every single that might be handled by register_signal().
  */
 
-void agent_SIGCHLD_handler(int sig)
+RETSIGTYPE agent_SIGCHLD_handler(int sig)
 {
   external_signal_scheduled[SIGCHLD]++;
 #ifndef HAVE_SIGACTION
@@ -923,7 +923,7 @@ void agent_SIGCHLD_handler(int sig)
    * a signal handler is reset once it gets called. Ensure that it
    * remains active.
    */
-  signal(SIGCHLD, (void *)agent_SIGCHLD_handler);
+  signal(SIGCHLD, agent_SIGCHLD_handler);
 #endif
 }
 

@@ -966,7 +966,7 @@ var_ifEntry(struct variable *vp,
 	 */
     hp_ifEntry.ifIndex = interface;
     hp_nmparms.objid  = ID_ifEntry;
-    hp_nmparms.buffer = &hp_ifEntry;
+    hp_nmparms.buffer = (char *)&hp_ifEntry;
     hp_nmparms.len    = &hp_len;
     if ((hp_fd=open("/dev/netman", O_RDONLY)) != -1 ) {
       if (ioctl(hp_fd, NMIOGET, &hp_nmparms) != -1 ) {
