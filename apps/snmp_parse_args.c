@@ -235,7 +235,7 @@ snmp_parse_args(int argc,
 
       case 'D':
         debug_register_tokens(optarg);
-        snmp_set_do_debugging(!snmp_get_do_debugging());
+        snmp_set_do_debugging(1);
         break;
 
       case 'd':
