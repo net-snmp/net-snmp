@@ -180,17 +180,6 @@ struct timeval  Now;
 
 void            trapd_update_config(void);
 
-
-netsnmp_pdu *
-snmp_clone_pdu2(netsnmp_pdu *pdu, int command)
-{
-    netsnmp_pdu *newpdu = snmp_clone_pdu(pdu);
-    if (newpdu) {
-        newpdu->command = command;
-    }
-    return newpdu;
-}
-
 static oid      risingAlarm[] = { 1, 3, 6, 1, 6, 3, 2, 1, 1, 3, 1 };
 static oid      fallingAlarm[] = { 1, 3, 6, 1, 6, 3, 2, 1, 1, 3, 2 };
 static oid      unavailableAlarm[] = { 1, 3, 6, 1, 6, 3, 2, 1, 1, 3, 3 };
