@@ -887,7 +887,7 @@ snmptrapd_close_sessions(netsnmp_session * sess_list)
 int
 main(int argc, char *argv[])
 {
-    char            options[128] = "ac:CdD::efF:hHl:m:M:no:PqsSvO:-:";
+    char            options[128] = "ac:CdD::efF:hHl:m:M:no:PqsS:vO:-:";
     netsnmp_session *sess_list = NULL, *ss = NULL;
     netsnmp_transport *transport = NULL;
     int             arg, i = 0;
