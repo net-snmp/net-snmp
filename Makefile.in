@@ -201,7 +201,7 @@ tar:
 	agent/mibgroup/versiontag $(VERSION) tar
 
 commentcheck:
-	grep // `find . -name \*.\[ch\]` | grep -v http
+	grep // `find . -name \*.\[ch\]` | grep -v http | grep -v /win32/
 
 dist: version tag tar
 
