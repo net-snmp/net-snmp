@@ -58,6 +58,13 @@ int
 snmp_register_callback(int major, int minor, SNMPCallback * new_callback,
                        void *arg)
 {
+    return netsnmp_register_callback( major, minor, new_callback, arg, 0);
+}
+
+int
+netsnmp_register_callback(int major, int minor, SNMPCallback * new_callback,
+                          void *arg, int priority)
+{
     struct snmp_gen_callback *newscp = NULL, *scp = NULL;
     struct snmp_gen_callback **prevNext = &(thecallbacks[major][minor]);
 
@@ -68,19 +75,24 @@ snmp_register_callback(int major, int minor, SNMPCallback * new_callback,
     if ((newscp = SNMP_MALLOC_STRUCT(snmp_gen_callback)) == NULL) {
         return SNMPERR_GENERR;
     } else {
+        newscp->priority = priority;
         newscp->sc_client_arg = arg;
         newscp->sc_callback = new_callback;
         newscp->next = NULL;
 
         for (scp = thecallbacks[major][minor]; scp != NULL;
              scp = scp->next) {
+            if (newscp->priority < scp->priority) {
+                newscp->next = scp;
+                break;
+            }
             prevNext = &(scp->next);
         }
 
         *prevNext = newscp;
 
-        DEBUGMSGTL(("callback", "registered (%d,%d) at %p\n", major, minor,
-                    newscp));
+        DEBUGMSGTL(("callback", "registered (%d,%d) at %p with priority %d\n",
+                    major, minor, newscp, priority));
         return SNMPERR_SUCCESS;
     }
 }
