@@ -366,9 +366,8 @@ AC_ARG_WITH(out_transports,
 # Catch common mistakes in transport options
 #
 AC_ARG_WITH(transport,,    AC_MSG_ERROR([ Invalid option. Use --with-transports instead ])     )
-AC_ARG_WITH(out_transport,,AC_MSG_ERROR([ Invalid option. Use --with-out-transports instead ]) )
-AC_ARG_WITH(modules,, AC_MSG_ERROR([ Invalid option. Use --with-mib-modules instead ]) )
-AC_ARG_WITH(out-modules,, AC_MSG_ERROR([ Invalid option. Use --with-out-mib-modules instead ]) )
+AC_ARG_WITH(out-transport,,AC_MSG_ERROR([ Invalid option. Use --with-out-transports instead ]) )
+
 #
 # security modules
 #
@@ -498,8 +497,13 @@ AC_ARG_WITH(enterprise-notification-oid,
 #
 # Catch common mistakes in configure options
 #
-AC_ARG_WITH(mib_module,,    AC_MSG_ERROR([ Invalid option. Use --with-mib-modules instead ])     )
-AC_ARG_WITH(out_mib_module,,AC_MSG_ERROR([ Invalid option. Use --with-out-mib-modules instead ]) )
+AC_ARG_WITH(mib-module,,    AC_MSG_ERROR([ Invalid option1. Use --with-mib-modules instead ])     )
+AC_ARG_WITH(module,, AC_MSG_ERROR([ Invalid option3. Use --with-mib-modules instead ]) )
+AC_ARG_WITH(modules,, AC_MSG_ERROR([ Invalid option4. Use --with-mib-modules instead ]) )
+
+AC_ARG_WITH(out-mib-module,,AC_MSG_ERROR([ Invalid option5. Use --with-out-mib-modules instead ]) )
+AC_ARG_WITH(out-modules,, AC_MSG_ERROR([ Invalid option7. Use --with-out-mib-modules instead ]) )
+AC_ARG_WITH(out-module,, AC_MSG_ERROR([ Invalid option8. Use --with-out-mib-modules instead ]) )
 
 #
 # Perl specific
@@ -524,6 +528,9 @@ AC_ARG_ENABLE(embedded-perl,
   --enable-embedded-perl          Embed perl in the SNMP agent.
                                   [forces --with-perl-modules as well.]],
     embed_perl="yes", embed_perl="no")
+
+# Common perl mistakes
+AC_ARG_ENABLE(perl-modules,, AC_MSG_ERROR([ Invalid option. Use --with-perl-modules instead ]) )
 
 #
 # otherwise prompted information
