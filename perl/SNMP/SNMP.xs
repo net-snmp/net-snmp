@@ -15,7 +15,9 @@
 #include <sys/types.h>
 #include <arpa/inet.h>
 #include <errno.h>
-#include <signal.h>
+#ifndef MSVC_PERL
+	#include <signal.h>
+#endif
 #include <stdio.h>
 #include <ctype.h>
 #ifdef I_SYS_TIME
@@ -23,7 +25,9 @@
 #endif
 #include <netdb.h>
 #include <stdlib.h>
-#include <unistd.h>
+#ifndef MSVC_PERL
+	#include <unistd.h>
+#endif
 /* XXX This is a problem if regex.h is not on the system. */
 #include <regex.h>
 
