@@ -612,6 +612,22 @@ u_int snmp_get_statistic(int which);
 void  snmp_init_statistics(void);
 int create_user_from_session(struct snmp_session *session);
 
+/*  New re-allocating reverse encoding functions.  */
+#ifdef USE_REVERSE_ASNENCODING
+
+int
+snmpv3_packet_realloc_rbuild(u_char **pkt, size_t *pkt_len, size_t *offset,
+			     struct snmp_session *session,
+			     struct snmp_pdu *pdu,
+			     u_char *pdu_data, size_t pdu_data_len);
+
+int
+snmp_pdu_realloc_rbuild(u_char **pkt, size_t *pkt_len, size_t *offset, 
+			struct snmp_pdu *pdu);
+#endif
+
+
+
 /*  Extended open; fpre_parse has changed.  */
 
 struct snmp_session *snmp_open_ex (struct snmp_session *,
