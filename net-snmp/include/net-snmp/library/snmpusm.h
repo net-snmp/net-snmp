@@ -17,7 +17,9 @@ extern          "C" {
      * General.
      */
 #define USM_MAX_ID_LENGTH		1024    /* In bytes. */
-#define USM_MAX_SALT_LENGTH		64      /* In BITS. */
+#define USM_MAX_SALT_LENGTH		128     /* In BITS. */
+#define USM_DES_SALT_LENGTH		64      /* In BITS. */
+#define USM_AES_SALT_LENGTH		128     /* In BITS. */
 #define USM_MAX_KEYEDHASH_LENGTH	128     /* In BITS. */
 
 #define USM_TIME_WINDOW			150
