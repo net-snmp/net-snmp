@@ -18,7 +18,8 @@ extern          "C" {
  */
 #include <net-snmp/library/asn1.h>
 #include <net-snmp/data_access/interface.h>
-#include <mibgroup/if-mib/ifTable/ifTable.h>
+
+#include "if-mib/ifTable/ifTable.h"
 
     /*
      * other required module components 
