@@ -1294,7 +1294,7 @@ snmp_close(struct snmp_session *session)
 
     { /*MTCRITICAL_RESOURCE*/
 	snmp_res_lock(MT_LIBRARY_ID, MT_LIB_SESSION);
-    if (Sessions->session == session){	/* If first entry */
+    if (Sessions && Sessions->session == session){	/* If first entry */
 	slp = Sessions;
 	Sessions = slp->next;
     } else {
