@@ -263,6 +263,7 @@ sub oidlength {
 #
 # Mib components, $var must first expand to a mib node name:
 #
+#   $var.uc            -- all upper case version of $var
 #   $var.objectID      -- dotted full OID
 #   $var.commaoid      -- comma separated OID for array init
 #   $var.subid         -- last number component of oid
@@ -326,12 +327,14 @@ sub process_vars {
 
 # process various types of statements
 #
+# THESE ARE PROCESSED BY ../mib2c.extract.pl.  
 # which include:
 #   @open FILE@
 #     writes generated output to FILE
 #   @push@
-#     save the current outputs, then clear outputs. Use with @open@ and
-#     @pop@ to write to a new file without interfering with current outputs.
+#     save the current outputs, then clear outputs. Use with @open@
+#     and @pop@ to write to a new file without interfering with current
+#     outputs.
 #   @pop@
 #     pop up the process() stack one level. Use after a @push@ to return to
 #     the previous set of open files.
@@ -375,6 +378,9 @@ sub process_vars {
 #   @perleval STUFF@
 #     evaluates STUFF directly in perl.  Note that all mib2c variables
 #     interpereted within .conf files are in $vars{NAME}.
+#   @startperl@
+#   @endperl@
+#     treats everything between these tags as perl code, and evaluates it.
 #   @next@
 #     restart foreach; should only be used inside a conditional.
 #     skips out of current conditional, then continues to skip to
@@ -383,9 +389,9 @@ sub process_vars {
 #     evaluates expression, and if expression is true processes
 #     contained part until appropriate @end@ is reached.
 #   @define NAME@
-#    ... [stuff] ...
 #   @enddefine@
-#     Memorizes "stuff" for later calling as NAME.
+#     Memorizes "stuff" between the define and enddefine tags for
+#     later calling as NAME by @calldefine NAME@.
 #   @calldefine NAME@
 #     Executes stuff previously memorized as NAME.
 #
