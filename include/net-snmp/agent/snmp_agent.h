@@ -236,6 +236,8 @@ extern          "C" {
     int             netsnmp_request_set_error(netsnmp_request_info *request,
                                               int error_value);
     int             netsnmp_check_requests_error(netsnmp_request_info *reqs);
+    int             netsnmp_check_all_requests_error(netsnmp_agent_session *asp,
+                                                     int look_for_specific);
     int
         netsnmp_set_all_requests_error(netsnmp_agent_request_info *reqinfo,
                                        netsnmp_request_info *requests,
