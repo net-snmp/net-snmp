@@ -11,6 +11,11 @@
 #if HAVE_UNISTD_H
 #include <unistd.h>
 #endif
+#if HAVE_STRING_H
+#include <string.h>
+#else
+#include <strings.h>
+#endif
 #if HAVE_MALLOC_H
 #include <malloc.h>
 #endif
@@ -607,23 +612,41 @@ sh_count_procs(char *procname)
 #else
 int sh_count_procs(char *procname)
 {
-  char line[STRMAX], *cptr;
+  char line[STRMAX], *cptr, *cp;
   int ret=0, fd;
   FILE *file;
 #ifndef EXCACHETIME
 #endif
   struct extensible ex;
+  int slow = strstr (PSCMD, "ax") != NULL;
   
   if ((fd = get_ps_output(&ex)) > 0) {
     if ((file = fdopen(fd,"r")) == NULL) {
       setPerrorstatus("fdopen");
+      close(fd);
       return (-1);
     }
     while(fgets(line,sizeof(line),file) != NULL)
       {
-        if ((cptr = find_field(line,LASTFIELD)) == NULL)
-          continue;
-        copy_word(cptr,line);
+	if (slow) {
+	  cptr = find_field(line, 5);
+	  cp = strrchr(cptr, '/');
+	  if (cp) cptr = cp+1;
+	  else if (*cptr == '-') cptr++;
+	  else if (*cptr == '[') {
+	    cptr++;
+	    cp = strchr(cptr, ']');
+	    if (cp) *cp = 0;
+	  }
+	  copy_word(cptr, line);
+	  cp = line+strlen(line)-1;
+	  if (*cp == ':') *cp = 0;
+	}
+	else {
+          if ((cptr = find_field(line,LASTFIELD)) == NULL)
+            continue;
+          copy_word(cptr,line);
+	}
         if (!strcmp(line,procname)) ret++;
       }
     if (ftell(file) < 2) {
@@ -633,7 +656,6 @@ int sh_count_procs(char *procname)
       ret = -1;
     }
     fclose(file);
-    close(fd);
     wait_on_exec(&ex);
     ex.pid = 0;
   } else {
