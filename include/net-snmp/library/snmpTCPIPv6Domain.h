@@ -4,7 +4,7 @@
 #include <net-snmp/library/snmp_transport.h>
 #include <net-snmp/library/asn1.h>
 
-extern oid      netsnmp_ucdSnmpTCPIPv6Domain[]; /* = { UCDAVIS_MIB, 251, 5 }; */
+extern oid      netsnmp_TCPIPv6Domain[]; /* = { ENTERPRISE_MIB, 3, 3, 5 }; */
 
 netsnmp_transport *netsnmp_tcp6_transport(struct sockaddr_in6 *addr,
                                           int local);
