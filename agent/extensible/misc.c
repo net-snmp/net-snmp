@@ -148,7 +148,7 @@ int shell_command(ex)
   ex->result = WEXITSTATUS(ex->result);
   shellout = fopen("/tmp/shoutput","r");
   if (fgets(ex->output,STRMAX,shellout) == NULL) {
-    ex->output[0] = NULL;
+    ex->output[0] = 0;
   }
   fclose(shellout);
   unlink("/tmp/shoutput");
@@ -168,7 +168,7 @@ int exec_command(ex)
     
     file = fdopen(fd,"r");
     if (fgets(ex->output,STRMAX,file) == NULL) {
-      ex->output[0] = NULL;
+      ex->output[0] = 0;
     }
     fclose(file);
     close(fd);
@@ -179,7 +179,7 @@ int exec_command(ex)
     ex->pid = 0;
 #endif
   } else {
-    ex->output[0] = NULL;
+    ex->output[0] = 0;
     ex->result = 0;
   }
   return(ex->result);
@@ -218,7 +218,7 @@ int get_exec_output(ex)
 #ifdef EXCACHETIME
         cachetime = 0;
 #endif
-        return NULL;
+        return 0;
       }
     if ((ex->pid = fork()) == 0) 
       {
@@ -226,31 +226,31 @@ int get_exec_output(ex)
         if (dup(fd[1]) != 1)
           {
             setPerrorstatus("dup");
-            return NULL;
+            return 0;
           }
         close(fd[1]);
         close(fd[0]);
-        for(cnt=1,cptr1 = ex->command, cptr2 = argvs; *cptr1 != NULL;
-                                                      cptr2++, cptr1++) {
+        for(cnt=1,cptr1 = ex->command, cptr2 = argvs; *cptr1 != 0;
+            cptr2++, cptr1++) {
           *cptr2 = *cptr1;
           if (*cptr1 == ' ') {
-            *(cptr2++) = NULL;
+            *(cptr2++) = 0;
             cptr1 = skip_white(cptr1);
             *cptr2 = *cptr1;
-            if (*cptr1 != NULL) cnt++;
+            if (*cptr1 != 0) cnt++;
           }
         }
-        *cptr2 = NULL;
-        *(cptr2+1) = NULL;
+        *cptr2 = 0;
+        *(cptr2+1) = 0;
         argv = (char **) malloc((cnt+2) * sizeof(char *));
         aptr = argv;
         *(aptr++) = argvs;
         for (cptr2 = argvs, i=1; i != cnt; cptr2++)
-          if (*cptr2 == NULL) {
+          if (*cptr2 == 0) {
             *(aptr++) = cptr2 + 1;
             i++;
           }
-        while (*cptr2 != NULL) cptr2++;
+        while (*cptr2 != 0) cptr2++;
         *(aptr++) = NULL;
         copy_word(ex->command,ctmp);
         execv(ctmp,argv);
@@ -266,14 +266,14 @@ int get_exec_output(ex)
 #ifdef EXCACHETIME
           cachetime = 0;
 #endif
-          return (NULL);
+          return 0;
         }
 #ifdef EXCACHETIME
         unlink(CACHEFILE);
         if ((cfd = open(CACHEFILE,O_WRONLY|O_TRUNC|O_CREAT,0644)) < 0) {
           setPerrorstatus("open");
           cachetime = 0;
-          return(NULL);
+          return 0;
         }
         fcntl(fd[0],F_SETFL,O_NONBLOCK);  /* don't block on reads */
         for (readcount = 0; readcount <= MAXREADCOUNT &&
@@ -294,7 +294,7 @@ int get_exec_output(ex)
         if (ex->pid > 0 && waitpid(ex->pid,&ex->result,0) < 0) {
           setPerrorstatus("waitpid()");
           cachetime = 0;
-          return (NULL);
+          return 0;
         }
         ex->pid = 0;
         ex->result = WEXITSTATUS(ex->result);
@@ -310,7 +310,7 @@ int get_exec_output(ex)
   }
   if ((cfd = open(CACHEFILE,O_RDONLY)) < 0) {
     setPerrorstatus("open");
-    return(NULL);
+    return 0;
   }
   return(cfd);
 #endif
@@ -436,7 +436,7 @@ int sprint_mib_oid(buf,name,len)
   int i;
   for(i=0; i < len; i++) {
     sprintf(buf,".%d",name[i]);
-    while(*buf != NULL)
+    while (*buf != 0)
       buf++;
   }
 }

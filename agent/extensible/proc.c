@@ -69,7 +69,7 @@ unsigned char *var_extensible_proc(vp, name, length, exact, var_len, write_metho
       case ERRORMSG:
         long_ret = sh_count_procs(proc->name);
         if (long_ret < 0) {
-          errmsg[0] = NULL;   /* catch out of mem errors return 0 count */
+          errmsg[0] = 0;   /* catch out of mem errors return 0 count */
         } else if (proc->min && long_ret < proc->min) {
           sprintf(errmsg,"Too few %s running (# = %d)",
                   proc->name, long_ret);
@@ -82,7 +82,7 @@ unsigned char *var_extensible_proc(vp, name, length, exact, var_len, write_metho
           sprintf(errmsg,"No %s process running.", proc->name);
         }
         else {
-          errmsg[0] = NULL;
+          errmsg[0] = 0;
         }
         *var_len = strlen(errmsg);
         return((u_char *) errmsg);
