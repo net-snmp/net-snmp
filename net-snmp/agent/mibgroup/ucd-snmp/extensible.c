@@ -117,6 +117,7 @@ int             strncasecmp(const char *s1, const char *s2, size_t n);
 
 #include "struct.h"
 #include "extensible.h"
+#include "utilities/execute.h"
 #include "util_funcs.h"
 
 extern struct myproc *procwatch;        /* moved to proc.c */
@@ -353,6 +354,7 @@ var_extensible_shell(struct variable * vp,
 
     static struct extensible *exten = 0;
     static long     long_ret;
+    int len;
 
     if (header_simple_table
         (vp, name, length, exact, var_len, write_method, numextens))
@@ -370,17 +372,25 @@ var_extensible_shell(struct variable * vp,
             *var_len = strlen(exten->command);
             return ((u_char *) (exten->command));
         case ERRORFLAG:        /* return code from the process */
-            if (exten->type == EXECPROC)
-                exec_command(exten);
-            else
-                shell_command(exten);
+            len = sizeof(exten->output);
+            if (exten->type == EXECPROC) {
+                exten->result = run_exec_command( exten->command, NULL,
+                                                  exten->output, &len);
+	    } else {
+                exten->result = run_shell_command(exten->command, NULL,
+                                                  exten->output, &len);
+	    }
             long_ret = exten->result;
             return ((u_char *) (&long_ret));
         case ERRORMSG:         /* first line of text returned from the process */
-            if (exten->type == EXECPROC)
-                exec_command(exten);
-            else
-                shell_command(exten);
+            len = sizeof(exten->output);
+            if (exten->type == EXECPROC) {
+                exten->result = run_exec_command( exten->command, NULL,
+                                                  exten->output, &len);
+	    } else {
+                exten->result = run_shell_command(exten->command, NULL,
+                                                  exten->output, &len);
+	    }
             *var_len = strlen(exten->output);
             if (exten->output[*var_len - 1] == '\n')
                 exten->output[--(*var_len)] = '\0';
@@ -459,9 +469,8 @@ var_extensible_relocatable(struct variable *vp,
                            size_t * var_len, WriteMethod ** write_method)
 {
 
-    int             fd;
     int             i;
-    FILE           *file;
+    int             len;
     struct extensible *exten = 0;
     static long     long_ret;
     static char     errmsg[STRMAX];
@@ -508,37 +517,25 @@ var_extensible_relocatable(struct variable *vp,
         *var_len = strlen(exten->command);
         return ((u_char *) (exten->command));
     case ERRORFLAG:            /* return code from the process */
+        len = sizeof(exten->output);
         if (exten->type == EXECPROC)
-            exec_command(exten);
-        else
-            shell_command(exten);
+            exten->result = run_exec_command( exten->command, NULL,
+                                              exten->output, &len);
+	else
+            exten->result = run_shell_command(exten->command, NULL,
+                                              exten->output, &len);
         long_ret = exten->result;
         return ((u_char *) (&long_ret));
     case ERRORMSG:             /* first line of text returned from the process */
-        if (exten->type == EXECPROC) {
-            if ((fd = get_exec_output(exten)) != -1) {
-                file = fdopen(fd, "r");
-                for (i = 0; i != (int) name[*length - 1]; i++) {
-                    if (fgets(errmsg, sizeof(errmsg), file) == NULL) {
-                        *var_len = 0;
-                        fclose(file);
-                        wait_on_exec(exten);
-                        return (NULL);
-                    }
-                }
-                fclose(file);
-                wait_on_exec(exten);
-            } else
-                errmsg[0] = 0;
-        } else {
-            if (*length > 1) {
-                *var_len = 0;
-                return (NULL);
-            }
-            shell_command(exten);
-            strncpy(errmsg, exten->output, sizeof(errmsg));
-            errmsg[ sizeof(errmsg)-1 ] = 0;
-        }
+        len = sizeof(exten->output);
+        if (exten->type == EXECPROC)
+            exten->result = run_exec_command( exten->command, NULL,
+                                              exten->output, &len);
+	else
+            exten->result = run_shell_command(exten->command, NULL,
+                                              exten->output, &len);
+        strncpy(errmsg, exten->output, sizeof(errmsg));
+        errmsg[ sizeof(errmsg)-1 ] = 0;
         *var_len = strlen(errmsg);
         if (errmsg[*var_len - 1] == '\n')
             errmsg[--(*var_len)] = '\0';
