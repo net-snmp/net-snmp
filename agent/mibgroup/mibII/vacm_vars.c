@@ -454,6 +454,10 @@ void vacm_parse_simple(const char *token, char *confline) {
 
   if (strcmp(token,"rwcommunity") == 0 || strcmp(token,"rwuser") == 0)
     rw = viewname;
+#ifdef SNMP_TRANSPORT_UDPIPV6_DOMAIN
+  if (strcmp(token,"rwcommunity6") == 0 )
+    rw = viewname;
+#endif
 
   if (strcmp(token,"rwcommunity") == 0 || strcmp(token,"rocommunity") == 0) {
     /* com2sec mapping */
@@ -471,6 +475,24 @@ void vacm_parse_simple(const char *token, char *confline) {
     sprintf(line,"anonymousGroupName%03d v2c %s", num, secname);
     DEBUGMSGTL((token,"passing: %s %s\n", "group", line));
     vacm_parse_group("group",line);
+#ifdef SNMP_TRANSPORT_UDPIPV6_DOMAIN
+  } else if (strcmp(token,"rwcommunity6") == 0 || strcmp(token,"rocommunity6") == 0) {
+    /* com2sec6 mapping */
+    /* com2sec6 anonymousSecNameNUM    ADDRESS  COMMUNITY */
+    sprintf(secname, "anonymousSecName%03d", num);
+    sprintf(line,"%s %s %s", secname, addressname, community);
+    DEBUGMSGTL((token,"passing: %s %s\n", "com2sec6", line));
+    netsnmp_udp_parse_security("com2sec6",line);
+
+    /* sec->group mapping */
+    /* group   anonymousGroupNameNUM  any      anonymousSecNameNUM */
+    sprintf(line,"anonymousGroupName%03d v1 %s", num, secname);
+    DEBUGMSGTL((token,"passing: %s %s\n", "group", line));
+    vacm_parse_group("group",line);
+    sprintf(line,"anonymousGroupName%03d v2c %s", num, secname);
+    DEBUGMSGTL((token,"passing: %s %s\n", "group", line));
+    vacm_parse_group("group",line);
+#endif
   } else {
     strcpy(secname, community);
 
@@ -480,7 +502,6 @@ void vacm_parse_simple(const char *token, char *confline) {
     DEBUGMSGTL((token,"passing: %s %s\n", "group", line));
     vacm_parse_group("group",line);
   }
-
 
   /* view definition */
   /* view    anonymousViewNUM       included OID */
@@ -588,6 +609,29 @@ int vacm_in_view (netsnmp_pdu *pdu,
               /*  There are no com2sec entries.  */
 	      sn = NULL;
 	  }
+#ifdef SNMP_TRANSPORT_UDPIPV6_DOMAIN 
+	} else if (pdu->tDomain == ucdSnmpUDPIPv6Domain
+#ifdef SNMP_TRANSPORT_TCPIPV6_DOMAIN 
+		   || pdu->tDomain == netsnmp_ucdSnmpTCPIPv6Domain
+#endif
+		   ) {
+	  if (!netsnmp_udp6_getSecName(pdu->transport_data,
+				   pdu->transport_data_length,
+				   (char *)pdu->community, pdu->community_len, &sn) &&
+              !vacm_is_configured()) {
+	    /*  There are no com2sec entries.  */
+	    DEBUGMSGTL(("mibII/vacm_vars",
+			"vacm_in_view: accepted with no com2sec entries\n"));
+	    switch (pdu->command) {
+	    case SNMP_MSG_GET:
+	    case SNMP_MSG_GETNEXT:
+	    case SNMP_MSG_GETBULK:
+	      return 0;
+	    default:
+	      return 1;
+	    }
+	  }
+#endif
 	} else {
 	  /*  Map other <community, transport-address> pairs to security names
 	      here.  For now just let non-IPv4 transport always succeed.
