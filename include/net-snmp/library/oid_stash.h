@@ -20,9 +20,9 @@ extern          "C" {
         struct netsnmp_oid_stash_node_s *prev_sibling;
         /*
          * struct netsnmp_oid_stash_node_s *parent; 
- *//*
- * XXX? 
- */
+         *
+         * XXX? 
+         */
 
         void           *thedata;
     } netsnmp_oid_stash_node;
