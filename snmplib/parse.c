@@ -202,7 +202,7 @@ struct tok {
 };
 
 
-struct tok tokens[] = {
+static struct tok tokens[] = {
     { "obsolete", sizeof ("obsolete")-1, OBSOLETE },
     { "Opaque", sizeof ("Opaque")-1, KW_OPAQUE },
     { "optional", sizeof ("optional")-1, KW_OPTIONAL },
@@ -275,8 +275,8 @@ struct tok tokens[] = {
     { NULL }
 };
 
-struct module_compatability *module_map_head;
-struct module_compatability module_map[] = {
+static struct module_compatability *module_map_head;
+static struct module_compatability module_map[] = {
 	{ "RFC1065-SMI",	"RFC1155-SMI",	NULL,	0},
 	{ "RFC1066-MIB",	"RFC1156-MIB",	NULL,	0},
 	         	/* 'mib' -> 'mib-2' */
