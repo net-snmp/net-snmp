@@ -38,69 +38,111 @@
      */
     typedef struct ifTable_data_s {
 
-        /** ifDescr(2)/DisplayString/ASN_OCTET_STR/char(char)//L/A/w/e/R/d/h */
+        /*
+         * ifDescr(2)/DisplayString/ASN_OCTET_STR/char(char)//L/A/w/e/R/d/H
+         */
         char            ifDescr[255];
         size_t          ifDescr_len;    /* # of char elements, not bytes */
 
-        /** ifType(3)/INTEGER/ASN_INTEGER/long(u_long)//l/A/w/E/r/d/h */
+        /*
+         * ifType(3)/IANAifType/ASN_INTEGER/long(u_long)//l/A/w/E/r/d/h
+         */
         u_long          ifType;
 
-        /** ifMtu(4)/INTEGER/ASN_INTEGER/long(long)//l/A/w/e/r/d/h */
+        /*
+         * ifMtu(4)/INTEGER32/ASN_INTEGER/long(long)//l/A/w/e/r/d/h
+         */
         long            ifMtu;
 
-        /** ifSpeed(5)/GAUGE/ASN_GAUGE/u_long(u_long)//l/A/w/e/r/d/h */
+        /*
+         * ifSpeed(5)/GAUGE/ASN_GAUGE/u_long(u_long)//l/A/w/e/r/d/h
+         */
         u_long          ifSpeed;
 
-        /** ifPhysAddress(6)/PhysAddress/ASN_OCTET_STR/char(char)//L/A/w/e/r/d/h */
+        /*
+         * ifPhysAddress(6)/PhysAddress/ASN_OCTET_STR/char(char)//L/A/w/e/r/d/H
+         */
         char            ifPhysAddress[65535];
         size_t          ifPhysAddress_len;      /* # of char elements, not bytes */
 
-        /** ifAdminStatus(7)/INTEGER/ASN_INTEGER/long(u_long)//l/A/W/E/r/d/h */
+        /*
+         * ifAdminStatus(7)/INTEGER/ASN_INTEGER/long(u_long)//l/A/W/E/r/d/h
+         */
         u_long          ifAdminStatus;
 
-        /** ifOperStatus(8)/INTEGER/ASN_INTEGER/long(u_long)//l/A/w/E/r/d/h */
+        /*
+         * ifOperStatus(8)/INTEGER/ASN_INTEGER/long(u_long)//l/A/w/E/r/d/h
+         */
         u_long          ifOperStatus;
 
-        /** ifLastChange(9)/TICKS/ASN_TIMETICKS/u_long(u_long)//l/A/w/e/r/d/h */
+        /*
+         * ifLastChange(9)/TICKS/ASN_TIMETICKS/u_long(u_long)//l/A/w/e/r/d/h
+         */
         u_long          ifLastChange;
 
-        /** ifInOctets(10)/COUNTER/ASN_COUNTER/u_long(u_long)//l/A/w/e/r/d/h */
+        /*
+         * ifInOctets(10)/COUNTER/ASN_COUNTER/u_long(u_long)//l/A/w/e/r/d/h
+         */
         u_long          ifInOctets;
 
-        /** ifInUcastPkts(11)/COUNTER/ASN_COUNTER/u_long(u_long)//l/A/w/e/r/d/h */
+        /*
+         * ifInUcastPkts(11)/COUNTER/ASN_COUNTER/u_long(u_long)//l/A/w/e/r/d/h
+         */
         u_long          ifInUcastPkts;
 
-        /** ifInNUcastPkts(12)/COUNTER/ASN_COUNTER/u_long(u_long)//l/A/w/e/r/d/h */
+        /*
+         * ifInNUcastPkts(12)/COUNTER/ASN_COUNTER/u_long(u_long)//l/A/w/e/r/d/h
+         */
         u_long          ifInNUcastPkts;
 
-        /** ifInDiscards(13)/COUNTER/ASN_COUNTER/u_long(u_long)//l/A/w/e/r/d/h */
+        /*
+         * ifInDiscards(13)/COUNTER/ASN_COUNTER/u_long(u_long)//l/A/w/e/r/d/h
+         */
         u_long          ifInDiscards;
 
-        /** ifInErrors(14)/COUNTER/ASN_COUNTER/u_long(u_long)//l/A/w/e/r/d/h */
+        /*
+         * ifInErrors(14)/COUNTER/ASN_COUNTER/u_long(u_long)//l/A/w/e/r/d/h
+         */
         u_long          ifInErrors;
 
-        /** ifInUnknownProtos(15)/COUNTER/ASN_COUNTER/u_long(u_long)//l/A/w/e/r/d/h */
+        /*
+         * ifInUnknownProtos(15)/COUNTER/ASN_COUNTER/u_long(u_long)//l/A/w/e/r/d/h
+         */
         u_long          ifInUnknownProtos;
 
-        /** ifOutOctets(16)/COUNTER/ASN_COUNTER/u_long(u_long)//l/A/w/e/r/d/h */
+        /*
+         * ifOutOctets(16)/COUNTER/ASN_COUNTER/u_long(u_long)//l/A/w/e/r/d/h
+         */
         u_long          ifOutOctets;
 
-        /** ifOutUcastPkts(17)/COUNTER/ASN_COUNTER/u_long(u_long)//l/A/w/e/r/d/h */
+        /*
+         * ifOutUcastPkts(17)/COUNTER/ASN_COUNTER/u_long(u_long)//l/A/w/e/r/d/h
+         */
         u_long          ifOutUcastPkts;
 
-        /** ifOutNUcastPkts(18)/COUNTER/ASN_COUNTER/u_long(u_long)//l/A/w/e/r/d/h */
+        /*
+         * ifOutNUcastPkts(18)/COUNTER/ASN_COUNTER/u_long(u_long)//l/A/w/e/r/d/h
+         */
         u_long          ifOutNUcastPkts;
 
-        /** ifOutDiscards(19)/COUNTER/ASN_COUNTER/u_long(u_long)//l/A/w/e/r/d/h */
+        /*
+         * ifOutDiscards(19)/COUNTER/ASN_COUNTER/u_long(u_long)//l/A/w/e/r/d/h
+         */
         u_long          ifOutDiscards;
 
-        /** ifOutErrors(20)/COUNTER/ASN_COUNTER/u_long(u_long)//l/A/w/e/r/d/h */
+        /*
+         * ifOutErrors(20)/COUNTER/ASN_COUNTER/u_long(u_long)//l/A/w/e/r/d/h
+         */
         u_long          ifOutErrors;
 
-        /** ifOutQLen(21)/GAUGE/ASN_GAUGE/u_long(u_long)//l/A/w/e/r/d/h */
+        /*
+         * ifOutQLen(21)/GAUGE/ASN_GAUGE/u_long(u_long)//l/A/w/e/r/d/h
+         */
         u_long          ifOutQLen;
 
-        /** ifSpecific(22)/OBJECTID/ASN_OBJECT_ID/oid(oid)//L/A/w/e/r/d/h */
+        /*
+         * ifSpecific(22)/OBJECTID/ASN_OBJECT_ID/oid(oid)//L/A/w/e/r/d/h
+         */
         oid             ifSpecific[128];
         size_t          ifSpecific_len; /* # of oid elements, not bytes */
 
@@ -127,7 +169,9 @@
      */
     typedef struct ifTable_mib_index_s {
 
-        /** ifIndex(1)/INTEGER/ASN_INTEGER/long(long)//l/A/w/e/r/d/h */
+        /*
+         * ifIndex(1)/InterfaceIndex/ASN_INTEGER/long(long)//l/A/w/e/R/d/H
+         */
         long            ifIndex;
 
 
@@ -162,7 +206,8 @@
         ifTable_mib_index tbl_idx;
 
         ifTable_data    data;
-        ifTable_undo_data undo;
+        ifTable_undo_data *undo;
+        unsigned int    set_flags;
 
     /** implementor's context pointer provided during registration */
         ifTable_registration_ptr ifTable_reg;
@@ -206,7 +251,7 @@
 Version $Revision$
 <!-- Created: Fri Oct 24 10:41:49 EDT 2003 -->
 <!-- hhmts start -->
-Last modified: Thu Apr 22 22:30:10 EDT 2004
+Last modified: Mon Jun 21 18:39:16 EDT 2004
 <!-- hhmts end -->
 <!--#include virtual="/sfbutton.html" -->
   </body>
