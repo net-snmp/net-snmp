@@ -661,8 +661,8 @@ free_node(struct node *np)
 {
     if (np->tc_index == -1) {
         free_enums(np->enums);
+        free_ranges(np->ranges);
     }
-    free_ranges(np->ranges);
     free_indexes(np->indexes);
     if (np->description)
         free(np->description);
@@ -3020,8 +3020,10 @@ parseQuoteString(FILE *fp,
     int too_long = 0;
     char *token_start = token;
 
-    ch = getc(fp);
-    while(ch != EOF) {
+    maxtlen--;  /* allow room for string terminator in buffer */
+
+    for (ch = getc(fp); ch != EOF; ch = getc(fp)) {
+        if (ch == '\r') continue;
         if (ch == '\n') {
             Line++;
         }
@@ -3044,7 +3046,6 @@ parseQuoteString(FILE *fp,
         if (++count < maxtlen)
             *token++ = ch;
         else too_long = 1;
-        ch = getc(fp);
     }
 
     return 0;

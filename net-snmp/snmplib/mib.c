@@ -1639,6 +1639,14 @@ print_tree_node(FILE *f,
 	case 0:			cp = NULL; break;
 	default:		sprintf(str,"type_%d", tp->type); cp = str;
 	}
+#ifdef SNMP_TESTING_CODE
+	if (!cp && (tp->ranges || tp->enums)) { /* ranges without type ? */
+	    sprintf(str,"?0 with %s %s ?",
+	    tp->ranges ? "Range" : "",
+	    tp->enums ? "Enum" : "");
+	    cp = str;
+	}
+#endif /* SNMP_TESTING_CODE */
 	if (cp) fprintf(f, "SYNTAX\t%s", cp);
 	if (tp->ranges) {
 	    struct range_list *rp = tp->ranges;
@@ -1688,6 +1696,13 @@ print_tree_node(FILE *f,
 	case 0:				cp = NULL; break;
 	default:			sprintf(str,"status_%d", tp->status); cp = str;
 	}
+#ifdef SNMP_TESTING_CODE
+	if (!cp && (tp->indexes)) { /* index without status ? */
+	    sprintf(str,"?0 with %s ?",
+	    tp->indexes ? "Index" : "");
+	    cp = str;
+	}
+#endif /* SNMP_TESTING_CODE */
 	if (cp) fprintf(f, "STATUS\t%s\n", cp);
 	if (tp->indexes) {
             struct index_list *ip = tp->indexes;
