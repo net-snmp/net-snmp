@@ -150,6 +150,11 @@ uptimeString(u_long timeticks,
 {
     int	centisecs, seconds, minutes, hours, days;
 
+    if (ds_get_boolean(DS_LIBRARY_ID, DS_LIB_NUMERIC_TIMETICKS)) {
+        sprintf(buf,"%ld",timeticks);
+        return buf;
+    }
+
     centisecs = timeticks % 100;
     timeticks /= 100;
     days = timeticks / (60 * 60 * 24);
@@ -487,6 +492,10 @@ sprint_timeticks(char *buf,
 	buf += strlen(buf);
 	sprint_by_type(buf, var, NULL, NULL, NULL);
 	return;
+    }
+    if (ds_get_boolean(DS_LIBRARY_ID, DS_LIB_NUMERIC_TIMETICKS)) {
+        sprintf(buf,"%lu", *(u_long *)(var->val.integer));
+        return;
     }
     if (!ds_get_boolean(DS_LIBRARY_ID, DS_LIB_QUICK_PRINT)){
 	sprintf(buf, "Timeticks: (%lu) ", *(u_long *)(var->val.integer));
@@ -1002,6 +1011,9 @@ snmp_out_toggle_options(char *options)
         case 'f':
             ds_toggle_boolean(DS_LIBRARY_ID, DS_LIB_PRINT_FULL_OID);
 	    break;
+        case 't':
+            ds_toggle_boolean(DS_LIBRARY_ID, DS_LIB_NUMERIC_TIMETICKS);
+	    break;
         case 's':
 	    snmp_set_suffix_only(1);
 	    break;
@@ -1025,6 +1037,7 @@ void snmp_out_toggle_options_usage(const char *lead, FILE *outf)
   fprintf(outf, "%s    f: Print full oids on output.\n", lead);
   fprintf(outf, "%s    s: Print only last symbolic element of oid.\n", lead);
   fprintf(outf, "%s    S: Print MIB module-id plus last element.\n", lead);
+  fprintf(outf, "%s    t: Print timeticks unparsed as numeric integers.\n", lead);
 }
 
 char *
@@ -1087,7 +1100,9 @@ register_mib_handlers (void)
                        DS_LIBRARY_ID, DS_LIB_DONT_BREAKDOWN_OIDS);
     ds_register_config(ASN_BOOLEAN, "snmp","quickPrinting",
                        DS_LIBRARY_ID, DS_LIB_QUICK_PRINT);
-    ds_register_config(ASN_INTEGER, "snmp","suffixPrinting",
+    ds_register_premib(ASN_BOOLEAN, "snmp","numericTimeticks",
+                       DS_LIBRARY_ID, DS_LIB_NUMERIC_TIMETICKS);
+    ds_register_premib(ASN_INTEGER, "snmp","suffixPrinting",
                        DS_LIBRARY_ID, DS_LIB_PRINT_SUFFIX_ONLY);
     
     /* setup the default parser configurations, as specified by configure */

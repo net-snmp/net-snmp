@@ -205,18 +205,19 @@ debugmsg_hex(const char *token, u_char *thedata, size_t len) {
 
 void
 debugmsg_hextli(const char *token, u_char *thedata, size_t len) {
-  char buf[SPRINT_MAX_LEN];
-  int incr; 
+  char buf[SPRINT_MAX_LEN], token2[SPRINT_MAX_LEN];
+  int incr;
+  sprintf(token2, "dumpx_%s", token);
 
   /*XX tracing lines removed from this function DEBUGTRACE; */
-  DEBUGIF(token) {
+  DEBUGIF(token2) {
     for(incr = 16; len > 0; len -= incr, thedata += incr) {
       if ((int)len < incr) incr = len;
       /*XXnext two lines were DEBUGPRINTINDENT(token);*/
-      debugmsgtoken(token, "%s", debug_indent());
-      debugmsg(token, "%s", debug_indent());
+      sprintf(buf, "dumpx%s", token);
+      debugmsg(buf, "%s: %s", token2, debug_indent());
       sprint_hexstring(buf, thedata, incr);
-      debugmsg(token, buf);
+      debugmsg(token2, buf);
     }
   }
 }
