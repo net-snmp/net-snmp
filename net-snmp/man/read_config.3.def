@@ -3,7 +3,7 @@
 .SH NAME
 register_config_handler, register_premib_handler
 unregister_config_handler, register_mib_handlers, read_configs,
-read_premib_configs, config_perror, config_pwarn
+read_premib_configs, config_perror, config_pwarn - read_config functions
 .SH SYNOPSIS
 .B #include <read_config.h>
 .PP
