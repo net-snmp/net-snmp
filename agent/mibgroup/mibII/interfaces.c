@@ -225,6 +225,7 @@ if_type_from_name( const char *pcch)
     static match_if lmatch_if[] = {
       { 24, "lo" },
       {  6, "eth" },
+      {  9, "tr" },
       { 23, "ppp" },
       { 28, "sl" },
       {  0, 0 }  /* end of list */
@@ -1309,7 +1310,8 @@ Interface_Scan_Init (void)
 	else {
 	  nnew->if_type = if_type_from_name(nnew->if_name);
 	  nnew->if_speed = nnew->if_type == 6 ? 10000000 : 
-	    nnew->if_type == 24 ? 10000000 : 0;
+	    nnew->if_type == 24 ? 10000000 :
+	    nnew->if_type ==  9 ?  4000000 : 0;
 	}
 
       } /* while (fgets ... */
