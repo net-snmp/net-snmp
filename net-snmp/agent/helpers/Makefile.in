@@ -85,8 +85,8 @@ installdirs:
 	@$(SHELL) $(top_srcdir)/mkinstalldirs $(snmplibdir) $(includedir) $(includedir)/agent
 
 clean:
-	rm -f ${LOBJS} ${OBJS}
-	rm -rf .libs */.libs
+	rm -f ${LOBJS} ${OBJS} ${LIBTARG}
+	rm -rf .libs
 
 depend: 
 	makedepend $(CPPFLAGS) -o.lo $(SRCS)
