@@ -183,6 +183,7 @@ register_agentx_list(struct snmp_session *session, struct snmp_pdu *pdu)
     oid ubound = 0;
     u_long flags = 0;
     handler_registration *reg;
+    int rc = 0;
     
     DEBUGMSGTL(("agentx/master","in register_agentx_list\n"));
     
@@ -190,7 +191,7 @@ register_agentx_list(struct snmp_session *session, struct snmp_pdu *pdu)
     if ( sp == NULL )
         return AGENTX_ERR_NOT_OPEN;
 
-    sprintf(buf, "AgentX subagent %ld, session %08x, subsession %08x",
+    sprintf(buf, "AgentX subagent %ld, session %8p, subsession %8p",
 	    sp->sessid, session, sp);
     		 /*
 		* TODO: registration timeout
@@ -221,13 +222,20 @@ register_agentx_list(struct snmp_session *session, struct snmp_pdu *pdu)
 
     case MIB_DUPLICATE_REGISTRATION:
 	DEBUGMSGTL(("agentx/master", "duplicate registration\n"));
-	return AGENTX_ERR_DUPLICATE_REGISTRATION;
+	rc = AGENTX_ERR_DUPLICATE_REGISTRATION;
+	break;
 
     case MIB_REGISTRATION_FAILED:
     default:
+	rc = AGENTX_ERR_REQUEST_DENIED;
 	DEBUGMSGTL(("agentx/master", "failed registration\n"));
-	return AGENTX_ERR_REQUEST_DENIED;
     }
+    /*  snmp_handler_free();  */
+    SNMP_FREE(reg->handler->handler_name);
+    SNMP_FREE(reg->handler);
+    SNMP_FREE(reg->rootoid);
+    SNMP_FREE(reg);
+    return rc;
 }
 
 int
