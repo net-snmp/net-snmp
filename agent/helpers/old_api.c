@@ -341,8 +341,9 @@ old_api_helper(mib_handler               *handler,
                                                 requests->requestvb->name_length);
                 set_current_agent_session(oldasp);
 
-                if (requests->status != SNMP_ERR_NOERROR)
+                if (status != SNMP_ERR_NOERROR) {
                     set_request_error(reqinfo, requests, status);
+		}
 
                 /* clean up is done by the automatic freeing of the
                    cache stored in the request. */
