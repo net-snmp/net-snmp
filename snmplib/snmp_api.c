@@ -6404,9 +6404,6 @@ snmp_add_var(netsnmp_pdu *pdu,
             break;
         }
     }
-#else
-    check = 0;
-    do_hint = 0;
 #endif /* DISABLE_MIB_LOADING */
 
     switch (type) {
