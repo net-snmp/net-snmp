@@ -1068,6 +1068,7 @@ receive(void)
         /*
          * default to sleeping for a really long time
          */
+        tvp = &timeout;
         tvp->tv_sec = LONG_MAX;
         tvp->tv_usec = 0;
 
