@@ -11,9 +11,8 @@ IMPORTS
 
     InterfaceIndexOrZero                      FROM IF-MIB;
 
-
 hostResourcesMibModule MODULE-IDENTITY
-    LAST-UPDATED "9910202200Z"    -- 20 October, 1999
+    LAST-UPDATED "200003060000Z"    -- 6 March 2000
     ORGANIZATION "IETF Host Resources MIB Working Group"
     CONTACT-INFO
         "Steve Waldbusser
@@ -21,38 +20,39 @@ hostResourcesMibModule MODULE-IDENTITY
                 1213 Innsbruck Dr.
                 Sunnyvale, CA 94089
                 USA
-        Phone: 650-318-1251
-        Fax:   650-318-1633
-        Email: waldbusser@ins.com
+        Phone:  650-318-1251
+        Fax:    650-318-1633
+        Email:  waldbusser@lucent.com
 
-        In addition, the Host Resources MIB mailing list is dedicated to
-        discussion of this MIB. To join the mailing list, send a request
-        message to hostmib-request@andrew.cmu.edu. The mailing list
+        In addition, the Host Resources MIB mailing list is
+        dedicated to discussion of this MIB. To join the
+        mailing list, send a request message to
+        hostmib-request@andrew.cmu.edu. The mailing list
         address is hostmib@andrew.cmu.edu."
+
     DESCRIPTION
-        "This MIB is for use in managing host systems. The
-        term `host' is construed to mean any computer that
-        communicates with other similar computers attached to
-        the internet and that is directly used by one or more
-        human beings. Although this MIB does not necessarily
-        apply to devices whose primary function is
-        communications services (e.g., terminal servers,
-        routers, bridges, monitoring equipment), such
-        relevance is not explicitly precluded.  This MIB
-        instruments attributes common to all internet hosts
-        including, for example, both personal computers and
-        systems that run variants of Unix."
-    REVISION "9910202200Z"    -- 20 October, 1999
+        "This MIB is for use in managing host systems. The term
+        `host' is construed to mean any computer that communicates
+        with other similar computers attached to the internet and
+        that is directly used by one or more human beings. Although
+        this MIB does not necessarily apply to devices whose primary
+        function is communications services (e.g., terminal servers,
+        routers, bridges, monitoring equipment), such relevance is
+        not explicitly precluded.  This MIB instruments attributes
+        common to all internet hosts including, for example, both
+        personal computers and systems that run variants of Unix."
+
+    REVISION "200003060000Z"        -- 6 March 2000
     DESCRIPTION
         "Clarifications and bug fixes based on implementation
-        experience. This revision was also reformatted in the
-        SMIv2 format. The revisions made were:
+        experience.  This revision was also reformatted in the SMIv2
+        format. The revisions made were:
 
         New RFC document standards:
-            Added Copyright notice, updated introduction to SNMP
-            Framework, updated references section, added reference to
-            RFC 2119, and added a meaningful Security Considerations
-            section.
+           Added Copyright notice, updated introduction to SNMP
+           Framework, updated references section, added reference to
+           RFC 2119, and added a meaningful Security Considerations
+           section.
 
         New IANA considerations section for registration of new types
 
@@ -73,8 +73,8 @@ hostResourcesMibModule MODULE-IDENTITY
         hrPrinterStatus.
 
         Clarified that size of objects of type
-        InternationalDisplayString is number of octets, not number of
-        encoded symbols.
+        InternationalDisplayString is number of octets, not number
+        of encoded symbols.
 
         Clarified the use of the following objects based on
         implementation experience:
@@ -89,8 +89,10 @@ hostResourcesMibModule MODULE-IDENTITY
         Used new AUGMENTS clause for hrSWRunPerfTable.
 
         Added Internationalization Considerations section.
-	This revision published as RFCXXXX."
-    REVISION "9309011200Z"    -- 1 Sep, 1993
+
+        This revision published as RFC2790."
+
+    REVISION "9910202200Z"    -- 20 October, 1999
     DESCRIPTION
         "The original version of this MIB, published as
         RFC1514."
@@ -207,10 +209,10 @@ hrSystemInitialLoadParameters OBJECT-TYPE
         requesting the initial operating system configuration
         from that device.
 
-        Note that writing to this object just changes the
-        configuration that will be used the next time the
-        operating system is loaded and does not actually cause
-        the reload to occur."
+     Note that writing to this object just changes the
+     configuration that will be used the next time the
+     operating system is loaded and does not actually cause
+     the reload to occur."
     ::= { hrSystem 4 }
 
 hrSystemNumUsers OBJECT-TYPE
@@ -1226,7 +1228,7 @@ hrSWRunPerfEntry OBJECT-TYPE
 HrSWRunPerfEntry ::= SEQUENCE {
         hrSWRunPerfCPU          Integer32,
         hrSWRunPerfMem          KBytes
-}
+    }
 
 hrSWRunPerfCPU OBJECT-TYPE
     SYNTAX     Integer32 (0..2147483647)
@@ -1325,7 +1327,7 @@ HrSWInstalledEntry ::= SEQUENCE {
         hrSWInstalledID          ProductID,
         hrSWInstalledType        INTEGER,
         hrSWInstalledDate        DateAndTime
-}
+    }
 
 hrSWInstalledIndex OBJECT-TYPE
     SYNTAX     Integer32 (1..2147483647)
@@ -1395,7 +1397,8 @@ hrMIBCompliance MODULE-COMPLIANCE
     DESCRIPTION
         "The requirements for conformance to the Host Resources MIB."
     MODULE -- this module
-      MANDATORY-GROUPS { hrSystemGroup, hrStorageGroup, hrDeviceGroup }
+      MANDATORY-GROUPS { hrSystemGroup, hrStorageGroup,
+                         hrDeviceGroup }
 
       OBJECT hrSystemDate
           MIN-ACCESS read-only
@@ -1520,6 +1523,7 @@ hrMIBCompliance MODULE-COMPLIANCE
 
     hrSWInstalledGroup OBJECT-GROUP
         OBJECTS {
+            hrSWInstalledLastChange,
             hrSWInstalledLastUpdateTime,
             hrSWInstalledIndex, hrSWInstalledName,
             hrSWInstalledID, hrSWInstalledType,
