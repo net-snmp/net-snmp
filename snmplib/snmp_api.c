@@ -1029,8 +1029,7 @@ _sess_open(struct snmp_session *in_session)
     in_session->s_snmp_errno = 0;
     in_session->s_errno = 0;
 
-    if (Reqid == 0)
-      _init_snmp();
+    _init_snmp();
 
     if ((slp = snmp_sess_copy( in_session )) == NULL )
         return( NULL );
@@ -5292,9 +5291,7 @@ cmu_snmp_parse (struct snmp_session *session,
 {
     u_char *bufp = NULL;
 
-    if (Reqid == 0) {
-	snmp_sess_init(session); /* gimme a break! */
-    }
+    snmp_sess_init(session); /* gimme a break! */
 
     switch(pdu->version) {
     case SNMP_VERSION_1:
