@@ -892,8 +892,13 @@ What traps are sent by the agent?
     This is done with the snmpd.conf entry 'authtrapenable 1'.
   (Note that the two 'trap' entries above are also still required).
 
-    There is currently no easy way to extend the agent to send other
-  traps or notifications.
+    The agent can be extended to send other traps and notifications using
+  various utility routines, described in 'snmp_trap_api(3)'.  These will
+  send the requested trap or notification to the configured sinks, as above.
+    Note that the procedure for triggering such traps is left up to the module
+  writer.  There is an example of one such mechanism in the example MIB module. 
+  There is no easy way to trigger traps based on external conditions without
+  some regular probing of the agent.
     
 
 
