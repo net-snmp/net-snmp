@@ -189,10 +189,6 @@ SOURCE=..\..\agent\mibgroup\examples\ucdDemoPublic.c
 # PROP Default_Filter ""
 # Begin Source File
 
-SOURCE="..\..\agent\mibgroup\ucd-snmp\disk.c"
-# End Source File
-# Begin Source File
-
 SOURCE="..\..\agent\mibgroup\ucd-snmp\dlmod.c"
 # End Source File
 # Begin Source File
