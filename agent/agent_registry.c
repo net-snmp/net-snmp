@@ -666,7 +666,6 @@ netsnmp_register_mib(const char *moduleName,
         reg_parms.range_ubound = range_ubound;
         reg_parms.timeout = timeout;
         reg_parms.flags = (u_char) flags;
-        reg_parms.contextName = context;
 
         /*
          * Should this really be called if the registration hasn't actually 
@@ -706,8 +705,6 @@ register_mib_reattach_node(netsnmp_subtree *s)
         reg_parms.range_ubound = s->range_ubound;
         reg_parms.timeout = s->timeout;
         reg_parms.flags = s->flags;
-        if ((NULL != s->reginfo) && (NULL != s->reginfo->contextName))
-            reg_parms.contextName = s->reginfo->contextName;
         snmp_call_callbacks(SNMP_CALLBACK_APPLICATION,
                             SNMPD_CALLBACK_REGISTER_OID, &reg_parms);
         s->flags |= SUBTREE_ATTACHED;
@@ -972,7 +969,6 @@ unregister_mib_context(oid * name, size_t len, int priority,
     reg_parms.range_subid = range_subid;
     reg_parms.range_ubound = range_ubound;
     reg_parms.flags = 0x00;     /*  this is okay I think  */
-    reg_parms.contextName = context;
     snmp_call_callbacks(SNMP_CALLBACK_APPLICATION,
                         SNMPD_CALLBACK_UNREGISTER_OID, &reg_parms);
 
@@ -1047,7 +1043,6 @@ netsnmp_unregister_mib_table_row(oid * name, size_t len, int priority,
     reg_parms.range_subid = var_subid;
     reg_parms.range_ubound = range_ubound;
     reg_parms.flags = 0x00;     /*  this is okay I think  */
-    reg_parms.contextName = context;
     snmp_call_callbacks(SNMP_CALLBACK_APPLICATION,
                         SNMPD_CALLBACK_UNREGISTER_OID, &reg_parms);
 
@@ -1107,9 +1102,6 @@ unregister_mibs_by_session(netsnmp_session * ss)
                     rp.range_ubound = child->range_ubound;
                     rp.timeout = child->timeout;
                     rp.flags = child->flags;
-                    if ((NULL != child->reginfo) &&
-                        (NULL != child->reginfo->contextName))
-                        rp.contextName = child->reginfo->contextName;
 
                     if (child->reginfo != NULL) {
                         /*
