@@ -324,9 +324,10 @@ header_complex_free_entry(struct header_complex_index *theentry,
 void
 header_complex_free_all(struct header_complex_index *thestuff,
                          HeaderComplexCleaner *cleaner) {
-  struct header_complex_index *hciptr;  
+  struct header_complex_index *hciptr, *hciptrn;  
 
-  for(hciptr = thestuff; hciptr != NULL; hciptr = hciptr->next) {
+  for(hciptr = thestuff; hciptr != NULL; hciptr = hciptrn) {
+    hciptrn = hciptr->next; /* need to extract this before deleting it */
     header_complex_free_entry(hciptr, cleaner);
   }
 }
