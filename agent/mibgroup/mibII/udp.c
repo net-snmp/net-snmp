@@ -390,12 +390,12 @@ udp_load(netsnmp_cache *cache, void *vmagic)
     p.buffer = (void *)&udpstat;
     ulen = sizeof(UDP_STAT_STRUCTURE);
     p.len = &ulen;
-    ret_value = get_mib_info(fd, &p);
+    ret = get_mib_info(fd, &p);
     close_mib(fd);
 
     DEBUGMSGTL(("mibII/udpScalar", "%s UDP object %d (hpux11)\n",
                (ret < 0 ? "Failed to load" : "Loaded"),  magic));
-    return (ret_value);         /* 0: ok, < 0: error */
+    return (ret);         /* 0: ok, < 0: error */
 }
 #else                           /* hpux11 */
 #ifdef linux
