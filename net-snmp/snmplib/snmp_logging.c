@@ -220,7 +220,10 @@ snmp_vlog (int priority, const char *format, va_list ap)
   length=vsprintf(buffer, format, ap);
 #endif
 
-  if ((length == 0) || (length == -1)) {
+  if (length == 0) 
+    return(0);		/* Empty string */
+
+  if (length == -1) {
     snmp_log_string(LOG_ERR, "Could not format log-string\n");
     return(-1);
   }
