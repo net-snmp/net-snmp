@@ -410,6 +410,8 @@ netsnmp_table_iterator_helper_handler(netsnmp_mib_handler *handler,
         if (reqinfo->mode == MODE_GETNEXT || reqinfo->mode == MODE_GETBULK) {   /* XXX */
             snmp_set_var_objid(requests->requestvb, results->name,
                                results->name_length);
+            snmp_free_varbind(table_info->indexes);
+            table_info->indexes = snmp_clone_varbind(results);
             reqinfo->mode = MODE_GET;
         }
         if (reqinfo->mode == MODE_GET || reqinfo->mode == MODE_GETNEXT || reqinfo->mode == MODE_GETBULK ||      /* XXX */

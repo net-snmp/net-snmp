@@ -681,6 +681,9 @@ netsnmp_check_getnext_reply(netsnmp_request_info *request,
              */
             if (!*outvar)
                 *outvar = snmp_clone_varbind(newvar);
+	    else
+                snmp_set_var_typed_value(*outvar, newvar->type,
+				newvar->val.string, newvar->val_len);
             snmp_set_var_objid(*outvar, myname, myname_len);
 
             return 1;
