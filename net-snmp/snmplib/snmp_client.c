@@ -98,9 +98,6 @@ typedef long    fd_mask;
 #define FD_ZERO(p)	memset((p), 0, sizeof(*(p)))
 #endif
 
-#define PARTY_MIB_BASE	 ".1.3.6.1.6.3.3.1.3.127.0.0.1.1"
-#define CONTEXT_MIB_BASE ".1.3.6.1.6.3.3.1.4.127.0.0.1.1"
-
 /*
  * Prototype definitions 
  */
@@ -139,8 +136,7 @@ snmp_pdu_create(int command)
 netsnmp_variable_list *
 snmp_add_null_var(netsnmp_pdu *pdu, oid * name, size_t name_length)
 {
-    return snmp_pdu_add_variable(pdu, name, name_length, ASN_NULL, NULL,
-                                 0);
+    return snmp_pdu_add_variable(pdu, name, name_length, ASN_NULL, NULL, 0);
 }
 
 
