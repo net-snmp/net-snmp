@@ -6,6 +6,7 @@ V3.1
     AC_FUNC_MEMCMP
   Solaris port (finish working out bugs...)
   Manual pages/Documentation
+  Memory leak find/removal in CMU code.
 
 V3.2
   Pass off extensibles
