@@ -387,22 +387,38 @@ table_helper_handler(mib_handler * handler,
         }                       /** for loop */
 
         DEBUGIF("helper:table") {
-            unsigned int    count;
-            char            buf[SPRINT_MAX_LEN];
-	    if (!cleaned_up) {
-	      DEBUGMSGTL(("helper:table", "  column: %d, indexes: %d",
-			  tbl_req_info->colnum,
-			  tbl_req_info->number_indexes));
-	      for (vb = tbl_req_info->indexes, count = 0;
-		   vb && count < tbl_info->number_indexes;
-		   count++, vb = vb->next_variable) {
-                sprint_by_type(buf, vb, 0, 0, 0);
-                DEBUGMSG(("helper:table",
-			  "    index: type=%d, value=%s", vb->type,
-			  buf));
+	  if (!cleaned_up) {
+	    unsigned int    count;
+	    u_char *buf = NULL;
+	    size_t buf_len = 0, out_len = 0;
+	    DEBUGMSGTL(("helper:table", "  column: %d, indexes: %d",
+			tbl_req_info->colnum, tbl_req_info->number_indexes));
+	    for (vb = tbl_req_info->indexes, count = 0;
+		 vb && count < tbl_info->number_indexes;
+		 count++, vb = vb->next_variable) {
+	      out_len = 0;
+	      if (sprint_realloc_by_type(&buf, &buf_len, &out_len, 1,
+					 vb, 0, 0, 0)) {
+		DEBUGMSG(("helper:table",
+			  "   index: type=%d(%02x), value=%s",
+			  vb->type, vb->type, buf));
+	      } else {
+		if (buf != NULL) {
+		  DEBUGMSG(("helper:table",
+			    "   index: type=%d(%02x), value=%s [TRUNCATED]",
+			    vb->type, vb->type, buf));
+		} else {
+		  DEBUGMSG(("helper:table",
+			    "   index: type=%d(%02x), value=[NIL] [TRUNCATED]",
+			    vb->type, vb->type));
+		}
 	      }
-	      DEBUGMSG(("helper:table","\n"));
 	    }
+	    if (buf != NULL) {
+	      free(buf);
+	    }
+	    DEBUGMSG(("helper:table", "\n"));
+	  }
         }
 
 

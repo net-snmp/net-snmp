@@ -112,51 +112,50 @@ usage (void)
 void
 setup_oid(oid *it, size_t *len, u_char *id, size_t idlen, const char *user)
 {
-  int i;
-  char c_oid[SPRINT_MAX_LEN];
-
-  int itIndex = 12;
+  int i, itIndex = 12;
 
   *len = itIndex + 1 + idlen + 1 + strlen(user);
 
   it[itIndex++] = idlen;
-  for(i=0; i < (int)idlen; i++)
+  for (i = 0; i < (int)idlen; i++) {
     it[itIndex++] = id[i];
+  }
 
   it[itIndex++] = strlen(user);
-  for(i=0; i < (int)strlen(user); i++)
+  for (i = 0; i < (int)strlen(user); i++) {
     it[itIndex++] = user[i];
+  }
 
-  sprint_objid(c_oid, it, *len);
-  /* fprintf(stdout, "setup_oid : %s\n", c_oid); */
+  /*  fprintf(stdout, "setup_oid: ");  */
+  /*  fprint_objid(stdout, it, *len);  */
+  /*  fprintf(stdout, "\n");  */
 }
 
 static void optProc(int argc, char *const *argv, int opt)
 {
     switch (opt) {
-        case 'C':
-            while (*optarg) {
-                switch (*optarg++) {
-                    case 'o':
-                        authKeyChange   = ownAuthKeyOid;
-                        privKeyChange   = ownPrivKeyOid;
-                        break;
+    case 'C':
+	while (*optarg) {
+	    switch (*optarg++) {
+	    case 'o':
+		authKeyChange = ownAuthKeyOid;
+		privKeyChange = ownPrivKeyOid;
+		break;
 
-                    case 'a':
-                        doauthkey = 1;
-                        break;
+	    case 'a':
+		doauthkey = 1;
+		break;
+		
+	    case 'x':
+		doprivkey = 1;
+		break;
 
-                    case 'x':
-                        doprivkey = 1;
-                        break;
-
-                    default:
-                        fprintf(stderr,
-                                "Unknown flag passed to -C: %c\n", optarg[-1]);
-                        exit(1);
-                }
-            }
-            break;
+	    default:
+		fprintf(stderr,	"Unknown flag passed to -C: %c\n", optarg[-1]);
+		exit(1);
+	    }
+	}
+	break;
     }
 }
 
