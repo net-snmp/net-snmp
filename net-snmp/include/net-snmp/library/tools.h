@@ -50,7 +50,11 @@ extern          "C" {
 
 /** @def SNMP_FREE(s)
     Frees a pointer only if it is !NULL and sets its value to NULL */
-#define SNMP_FREE(s)		if (s) { free((void *)s); s=NULL; }
+#define SNMP_FREE(s)    do { if (s) { free((void *)s); s=NULL; } } while(0)
+
+/** @def SNMP_SWIPE_MEM(n, s)
+    Frees pointer n only if it is !NULL, sets n to s and sets s to NULL */
+#define SNMP_SWIPE_MEM(n,s) do { if (n) free((void *)n); n = s; s=NULL; } while(0)
 
     /*
      * XXX Not optimal everywhere. 
@@ -58,10 +62,14 @@ extern          "C" {
 /** @def SNMP_MALLOC_STRUCT(s)
     Mallocs memory of sizeof(struct s), zeros it and returns a pointer to it. */
 #define SNMP_MALLOC_STRUCT(s)   (struct s *) calloc(1, sizeof(struct s))
+
 /** @def SNMP_MALLOC_TYPEDEF(t)
     Mallocs memory of sizeof(t), zeros it and returns a pointer to it. */
 #define SNMP_MALLOC_TYPEDEF(td)  (td *) calloc(1, sizeof(td))
-#define SNMP_ZERO(s,l)		if (s) memset(s, 0, l);
+
+/** @def SNMP_ZERO(s,l)
+    Zeros l bytes of memory starting at s. */
+#define SNMP_ZERO(s,l)	do { if (s) memset(s, 0, l); } while(0)
 
 
 #define TOUPPER(c)	(c >= 'a' && c <= 'z' ? c - ('a' - 'A') : c)
