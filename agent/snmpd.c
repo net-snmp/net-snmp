@@ -545,6 +545,11 @@ main(int argc, char *argv[])
                                       DS_AGENT_NO_ROOT_ACCESS);
 		    break;
 
+		case 'U':
+                    ds_toggle_boolean(DS_APPLICATION_ID,
+                                      DS_AGENT_LEAVE_PIDFILE);
+		    break;
+
                 case 'P':
                   if (++arg == argc)
                     usage(argv[0]);
@@ -797,7 +802,8 @@ main(int argc, char *argv[])
 	SnmpTrapNodeDown();
 	DEBUGMSGTL(("snmpd", "Bye...\n"));
 	snmp_shutdown("snmpd");
-        if (pid_file != NULL) {
+	if (!ds_get_boolean(DS_APPLICATION_ID, DS_AGENT_LEAVE_PIDFILE) &&
+            (pid_file != NULL)) {
             unlink(pid_file);
         }
 #ifdef WIN32
