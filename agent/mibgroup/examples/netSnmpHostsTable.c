@@ -122,13 +122,12 @@ netSnmpHostsTable_handler(netsnmp_mib_handler *handler,
     oid            *suffix;
     size_t          suffix_len;
 
-    /** column and row index encoded portion */
-    suffix = requests->requestvb->name + reginfo->rootoid_len + 1;
-    suffix_len = requests->requestvb->name_length -
-        (reginfo->rootoid_len + 1);
-
     for (request = requests; request; request = request->next) {
+        /* column and row index encoded portion */
         var = request->requestvb;
+        suffix     = var->name + reginfo->rootoid_len + 1;
+        suffix_len = var->name_length - (reginfo->rootoid_len + 1);
+
         if (request->processed != 0)
             continue;
 
