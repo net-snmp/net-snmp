@@ -230,8 +230,14 @@ void asynchronous(void)
     FD_ZERO(&fdset);
     snmp_select_info(&fds, &fdset, &timeout, &block);
     fds = select(fds, &fdset, NULL, NULL, block ? NULL : &timeout);
-    if (fds) snmp_read(&fdset);
-    else snmp_timeout();
+    if (fds < 0) {
+        perror("select failed");
+        exit(1);
+    }
+    if (fds)
+        snmp_read(&fdset);
+    else
+        snmp_timeout();
   }
 
   /* cleanup */
