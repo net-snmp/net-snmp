@@ -31,6 +31,7 @@
 
 /* doesn't work yet, but shouldn't be serialized (for efficiency) */
 #undef NOT_SERIALIZED
+#define TABLE_ITERATOR_LAST_CONTEXT "ti_last_c"
 
 /** returns a mib_handler object for the table_iterator helper */
 mib_handler *
@@ -119,6 +120,14 @@ table_iterator_helper_handler(
             return SNMP_ERR_NOERROR;
 #endif
         }
+
+        if (reqinfo->mode != MODE_GET &&
+            reqinfo->mode != MODE_GETNEXT &&
+            reqinfo->mode != MODE_GETBULK && /* XXX */
+            reqinfo->mode != MODE_SET_RESERVE1) {
+            goto skip_processing;
+        }
+            
 
         if (table_info->colnum > tbl_info->max_column) {
             requests->processed = 1;
@@ -216,7 +225,8 @@ table_iterator_helper_handler(
 
                 break;
 
-            default: /* GET, SET, all the same...  exact search */
+            case MODE_GET:
+            case MODE_SET_RESERVE1:
                 /* loop through all data till exact results are found */
     
                 while(index_search) {
@@ -251,16 +261,23 @@ table_iterator_helper_handler(
                                                      index_search,
                                                      iinfo);
                 }
+                break;
+
+            default:
+                /* the rest of the set states have been dealt with already */
+                goto got_results;
         }
         
         /* XXX: free index_search? */
-        if (callback_loop_context && iinfo->free_loop_context)
+        if (callback_loop_context && iinfo->free_loop_context) {
+            callback_loop_context = NULL;
             (iinfo->free_loop_context)(callback_loop_context,
                                        iinfo);
+        }
 
-      got_results: /* not milk */
+          got_results: /* not milk */
         
-        if (!results) {
+        if (!results && !MODE_IS_SET(reqinfo->mode)) {
             /* no results found. */
             /* XXX: check for at least one entry at the very top */
 #ifdef NOT_SERIALIZED
@@ -275,19 +292,33 @@ table_iterator_helper_handler(
 #endif
         }
         
+          skip_processing:
         /* OK, here results should be a pointer to the data that we
            actually need to GET */
-        snmp_set_var_objid(requests->requestvb, results->name,
-                           results->name_length);
-        snmp_free_var(results);
-        
         oldmode = reqinfo->mode;
-        if (oldmode == MODE_GETNEXT)
+        if (reqinfo->mode == MODE_GETNEXT ||
+            reqinfo->mode == MODE_GETBULK) { /* XXX */
+            snmp_set_var_objid(requests->requestvb, results->name,
+                               results->name_length);
             reqinfo->mode = MODE_GET;
-
-        request_add_list_data(requests, create_data_list(TABLE_ITERATOR_NAME, callback_data_keep, NULL));
+        }
+        if (reqinfo->mode == MODE_GET ||
+            reqinfo->mode == MODE_GETNEXT ||
+            reqinfo->mode == MODE_GETBULK || /* XXX */
+            reqinfo->mode == MODE_SET_RESERVE1) {
+            /* first (or only) pass stuff */
+            /* let set requsets use previously constructed data */
+            snmp_free_var(results);
+            if (callback_data_keep)
+                request_add_list_data(requests, create_data_list(TABLE_ITERATOR_NAME, callback_data_keep, NULL));
+            request_add_list_data(requests, create_data_list(TABLE_ITERATOR_LAST_CONTEXT, callback_loop_context, NULL));
+        }
+        
+        DEBUGMSGTL(("table_iterator", "doing mode: %s\n",
+                    se_find_label_in_slist("agent_mode", oldmode)));
         ret = call_next_handler(handler, reginfo, reqinfo, requests);
-        if (oldmode == MODE_GETNEXT) {
+        if (oldmode == MODE_GETNEXT ||
+            oldmode == MODE_GETBULK) { /* XXX */
             if (requests->requestvb->type == ASN_NULL) {
                 /* get next skipped this value for this column, we
                    need to keep searching forward */
@@ -296,22 +327,43 @@ table_iterator_helper_handler(
             reqinfo->mode = oldmode;
         }
 
-        if (callback_data_keep && iinfo->free_data_context)
-            (iinfo->free_data_context)(callback_data_keep,
-                                       iinfo);
-        if (free_this_index_search)
-            snmp_free_varbind(free_this_index_search);
+        callback_data_context =
+            request_get_list_data(requests, TABLE_ITERATOR_NAME);
+        callback_loop_context =
+            request_get_list_data(requests, TABLE_ITERATOR_LAST_CONTEXT);
+
+        if (reqinfo->mode == MODE_GET ||
+            reqinfo->mode == MODE_GETNEXT ||
+            reqinfo->mode == MODE_GETBULK || /* XXX */
+            reqinfo->mode == MODE_SET_FREE ||
+            reqinfo->mode == MODE_SET_UNDO ||
+            reqinfo->mode == MODE_SET_COMMIT) {
+            if (callback_data_keep && iinfo->free_data_context)
+                (iinfo->free_data_context)(callback_data_keep,
+                                           iinfo);
+            if (free_this_index_search)
+                snmp_free_varbind(free_this_index_search);
 #ifdef NOT_SERIALIZED
-        if (callback_loop_context && iinfo->free_loop_context_at_end)
-            (iinfo->free_loop_context_at_end)(callback_loop_context, iinfo);
+            if (callback_loop_context && iinfo->free_loop_context_at_end)
+                (iinfo->free_loop_context_at_end)(callback_loop_context, iinfo);
+#endif
+        }
+#ifdef NOT_SERIALIZED
         return ret;
 #else
         requests = requests->next;
 #endif
         }
 #ifdef NOT_SERIALIZED
-    if (callback_loop_context && iinfo->free_loop_context_at_end)
-        (iinfo->free_loop_context_at_end)(callback_loop_context, iinfo);
+    if (reqinfo->mode == MODE_GET ||
+        reqinfo->mode == MODE_GETNEXT ||
+        reqinfo->mode == MODE_GETBULK || /* XXX */
+        reqinfo->mode == MODE_SET_FREE ||
+        reqinfo->mode == MODE_SET_UNDO ||
+        reqinfo->mode == MODE_SET_COMMIT) {
+        if (callback_loop_context && iinfo->free_loop_context_at_end)
+            (iinfo->free_loop_context_at_end)(callback_loop_context, iinfo);
+    }
 #endif
     return SNMP_ERR_NOERROR;
 }
