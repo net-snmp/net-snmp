@@ -38,6 +38,11 @@ WHETHER IN AN ACTION OF CONTRACT, NEGLIGENCE OR OTHER TORTIOUS ACTION,
 ARISING OUT OF OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS
 SOFTWARE.
 ******************************************************************/
+/*
+ * Copyright © 2003 Sun Microsystems, Inc. All rights reserved.
+ * Use is subject to license terms specified in the COPYING file
+ * distributed with the Net-SNMP package.
+ */
 #include <net-snmp/net-snmp-config.h>
 
 #include <stdio.h>
@@ -4539,6 +4544,8 @@ add_mibdir(const char *dirname)
     char            tmpstr[300];
     int             count = 0;
 #if !(defined(WIN32) || defined(cygwin))
+    char space;
+    char newline;
     struct stat     dir_stat, idx_stat;
     char            tmpstr1[300];
 #endif
@@ -4551,8 +4558,23 @@ add_mibdir(const char *dirname)
         if (dir_stat.st_mtime < idx_stat.st_mtime) {
             DEBUGMSGTL(("parse-mibs", "The index is good\n"));
             if ((ip = fopen(token, "r")) != NULL) {
-                while (fscanf(ip, "%s %[^\n]\n", token, tmpstr) == 2) {
-                    snprintf(tmpstr1, sizeof(tmpstr1), "%s/%s", dirname, tmpstr);
+                while (fscanf(ip, "%127s%c%299s%c", token, &space, tmpstr,
+		    &newline) == 4) {
+
+		    /*
+		     * If an overflow of the token or tmpstr buffers has been
+		     * found log a message and break out of the while loop,
+		     * thus the rest of the file tokens will be ignored.
+		     */
+		    if (space != ' ' || newline != '\n') {
+			snmp_log(LOG_ERR,
+			    "add_mibdir: strings scanned in from %s/%s " \
+			    "are too large.  count = %d\n ", dirname,
+			    ".index", count);
+			    break;
+		    }
+		   
+		    snprintf(tmpstr1, sizeof(tmpstr1), "%s/%s", dirname, tmpstr);
                     tmpstr1[ sizeof(tmpstr1)-1 ] = 0;
                     new_module(token, tmpstr1);
                     count++;
