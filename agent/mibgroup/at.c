@@ -467,6 +467,9 @@ u_long *IPAddr;
 char *PhysAddr;
 u_long *ifType;
 {
+#ifndef CAN_USE_SYSCTL
+  return 0; /* we need someone with an irix box to fix this section */
+#else
 #if !defined(ARP_SCAN_FOUR_ARGUMENTS) || defined(hpux)
 	register struct arptab *atab;
 
@@ -523,5 +526,6 @@ u_long *ifType;
 	}
 #endif /* !defined(ARP_SCAN_FOUR_ARGUMENTS) || defined(hpux) */
 	return(0);	    /* "EOF" */
+#endif /* !CAN_USE_SYSCTL */
 }
 #endif /* solaris2 */
