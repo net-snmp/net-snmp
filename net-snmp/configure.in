@@ -635,6 +635,46 @@ AC_ARG_ENABLE(embedded-perl,
 # Common perl mistakes
 AC_ARG_ENABLE(perl-modules,, AC_MSG_ERROR([ Invalid option. Use --with-perl-modules instead ]) )
 
+AC_ARG_WITH(server-send-buf,
+[
+Network Buffers:
+  --with-server-send-buf[=ARG]    Use ARG for the default UDP send buffer instead
+                                  of the OS buffer for server sockets that are
+                                  created (snmpd, snmptrapd).  
+                                  This default can be overridden in the runtime 
+                                  configuration files.
+                                  The ARG should be the size in bytes],[
+   if test "$withval" = yes; then
+    AC_MSG_ERROR([ Please provide a positive number for the server send buffer ])
+   fi
+   AC_DEFINE_UNQUOTED(DEFAULT_SERVER_SEND_BUF, $withval)],
+   AC_MSG_RESULT([using OS default send buffer size for server sockets]) )
+
+AC_ARG_WITH(server-recv-buf,
+[  --with-server-recv-buf[=ARG]    Similar as previous option, but for receive buffer],[
+  if test "$withval" = yes; then
+    AC_MSG_ERROR([ Please provide a positive number for the server recv buffer ])
+  fi
+  AC_DEFINE_UNQUOTED(DEFAULT_SERVER_RECV_BUF, $withval)],
+  AC_MSG_RESULT([using OS default recv buffer size for server sockets]) )
+
+AC_ARG_WITH(client-send-buf,
+[  --with-client-send-buf[=ARG]    Similar as previous options, but for the
+                                  receive buffer of client sockets],[
+  if test "$withval" = yes; then
+    AC_MSG_ERROR([ Please provide a positive number for the client send buffer ])
+  fi
+  AC_DEFINE_UNQUOTED(DEFAULT_CLIENT_SEND_BUF, $withval)],
+  AC_MSG_RESULT([using OS default send buffer size for client sockets]) )
+
+AC_ARG_WITH(client-recv-buf,
+[  --with-client-recv-buf[=ARG]    Similar as previous options, but for the send buffer],[
+  if test "$withval" = yes; then
+    AC_MSG_ERROR([ Please provide a positive number for the client recv buffer ])
+  fi
+  AC_DEFINE_UNQUOTED(DEFAULT_CLIENT_RECV_BUF, $withval)],
+  AC_MSG_RESULT([using OS default recv buffer size for client sockets]) )
+
 #
 # otherwise prompted information
 #
