@@ -65,9 +65,6 @@ Requires: net-snmp = %{version}, perl
 %description perlmods
 Net-SNMP provides a number of perl modules useful when using the SNMP
 protocol.  Both client and agent support modules are provided.
-%if %{embedded_perl}
-Embedded perl support has also been enabled within the agent.
-%endif
 %endif
 
 %prep
