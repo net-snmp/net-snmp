@@ -17,7 +17,8 @@
 #include "sys/proc.h"
 #endif
 #include <utmp.h>
-#ifdef linux
+
+#if defined(LINUX) && __GNU_LIBRARY__ < 6
 #include "linux/tasks.h"
 #endif
 
