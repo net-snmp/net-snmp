@@ -102,6 +102,9 @@ IPADDRESS
 BITS
 .PD
 .RE
+which are handled in the same way as the
+.B snmpset
+command.
 .PP
 For example:
 .PP
@@ -117,4 +120,4 @@ addition to the
 .B -Ci
 option described above.
 .SH SEE ALSO
-snmpcmd(1), variables(5).
+snmpcmd(1), snmpset(1), variables(5).
