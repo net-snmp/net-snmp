@@ -61,6 +61,7 @@ nsb-get-config()
    $ngc_src/configure --with-sys-location=Unknown \
       --with-sys-contact='System Administrator' --disable-privacy \
       --with-defaults --with-mib-modules='host disman/event-mib'
+   return $?
 }
 
 nsb-config-all()
@@ -71,17 +72,35 @@ nsb-config-all()
    fi
    ngc_src=$1
    shift 1
-   echo $ngc_src/configure  --with-sys-location=Unknown \
-      --with-sys-contact='System Administrator' \
-      '--with-mib-modules=host examples examples/example testhandler smux Rmon disman/event-mib' \
-      '--with-transports=UDPIPv6 TCPIPv6 IPX' \
-       --enable-embedded-perl --enable-shared
 
-   $ngc_src/configure  --with-sys-location=Unknown \
-      --with-sys-contact='System Administrator' \
-      '--with-mib-modules=host examples examples/example testhandler smux Rmon disman/event-mib' \
-      '--with-transports=UDPIPv6 TCPIPv6 IPX' \
-       --enable-embedded-perl --enable-shared
+   case `uname -s` in
+
+   Linux)
+      echo $ngc_src/configure  --with-defaults \
+         '--with-mib-modules=host examples examples/example testhandler smux Rmon disman/event-mib' \
+         '--with-transports=UDPIPv6 TCPIPv6 IPX' \
+          --enable-embedded-perl --enable-shared
+      $ngc_src/configure  --with-defaults \
+         '--with-mib-modules=host examples examples/example testhandler smux Rmon disman/event-mib' \
+         '--with-transports=UDPIPv6 TCPIPv6 IPX' \
+          --enable-embedded-perl --enable-shared
+      ngc_rc=$?
+      ;;
+
+   *)
+      echo $ngc_src/configure  --with-defaults \
+         '--with-mib-modules=host examples examples/example testhandler smux Rmon disman/event-mib' \
+         '--with-transports=UDPIPv6 TCPIPv6 IPX' \
+          --enable-embedded-perl --enable-shared
+      $ngc_src/configure  --with-defaults \
+         '--with-mib-modules=host examples examples/example testhandler smux Rmon disman/event-mib' \
+         '--with-transports=UDPIPv6 TCPIPv6 IPX' \
+          --enable-embedded-perl --enable-shared
+      ngc_rc=$?
+      ;;
+   esac
+
+   return $ngc_rc
 
 }
 
@@ -205,6 +224,10 @@ nsb-build()
           nsb-get-config $src_dir | tee nsb-config.$DATE
       else
           nsb-config-all $src_dir | tee nsb-config.$DATE
+      fi
+      nsb_config_rc=$?
+      if [ $nsb_config_rc -ne 0 ]; then
+         return $nsb_config_rc
       fi
       nsb-prompt "press enter to continue"
    fi
