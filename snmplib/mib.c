@@ -999,6 +999,14 @@ handle_mibs_conf(const char *token,
 {
     char *ctmp;
 
+    if (strcmp(line,"\"\"") == 0) {
+        ctmp = strdup("");
+        if (confmibs)
+            free(confmibs);
+        confmibs = ctmp;
+        DEBUGMSGTL(("read_config:initmib", "using mibs: \"\"\n"));
+        return;
+    }
     if (confmibs) {
         ctmp = (char *)malloc(strlen(confmibs) + strlen(line) + 1);
         if (*line == '+')
