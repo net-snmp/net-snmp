@@ -161,6 +161,15 @@ To enable AgentX support in the SNMP master agent, put the following
 line in your snmpd.conf file:
 .IP "master agentx"
 See README.agentx for further details.
+.IP "AgentXSocket addr"
+This defines the address the master agent listens at.
+The default is /var/agentx/master. Another possibility is localhost:705
+.IP "AgentXTimeout addr"
+Defines the timeout period for an AgentX request.
+Default is 1 second.
+.IP "AgentXRetries addr"
+Defines the number of retries for an AgentX request.
+Default is 5 retries.
 .P
 You can also put the following in your subagent.conf file (where
 "subagent" is the name you used in your init_snmp("subagent") api call:
