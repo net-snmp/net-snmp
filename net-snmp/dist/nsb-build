@@ -40,11 +40,6 @@ fi
 ########################################################################
 ########################################################################
 
-VERSION=$1
-SRCD=$HOME/src/net-snmp-$VERSION
-BUILDD=$HOME/build
-INSTALLD=$HOME/build/`nsb-sysname`/usr/local
-
 #      x)  x=$OPTARG ;;
 while getopts b:cdi:mps:t opt
 do
@@ -75,6 +70,18 @@ if [ $NSB_CLEAN -eq 1 ]; then
       usage
    fi
 fi
+
+VERSION=$1
+if [ -z "$SRCD" ]; then
+   SRCD=$HOME/src/net-snmp-$VERSION
+fi
+if [ -z "$BUILDD" ]; then
+   BUILDD=$HOME/build
+fi
+if [ -z "$INSTALLD" ]; then
+   INSTALLD=$HOME/build/`nsb-sysname`/usr/local
+fi
+
 
 ########################################################################
 ########################################################################
