@@ -5,7 +5,7 @@
 
 TARG		= snmpget snmpgetnext snmpset snmpusm			\
 			snmpwalk snmpbulkwalk snmptable			\
-			snmptrap					\
+			snmptrap snmpbulkget				\
 			snmptranslate snmpstatus snmpdelta snmptest	\
 			encode_keychange
 
@@ -35,6 +35,9 @@ snmpwalk:    snmpwalk.o $(PARSEOBJS) $(USELIBS)
 
 snmpbulkwalk:    snmpbulkwalk.o $(PARSEOBJS) $(USELIBS)
 	${CC} -o $@ snmpbulkwalk.o $(PARSEOBJS) $(LOCAL_LIBS) ${LDFLAGS} ${LIBS} 
+
+snmpbulkget:    snmpbulkget.o $(PARSEOBJS) $(USELIBS)
+	${CC} -o $@ snmpbulkget.o $(PARSEOBJS) $(LOCAL_LIBS) ${LDFLAGS} ${LIBS} 
 
 snmptranslate:    snmptranslate.o $(USELIBS)
 	${CC} -o $@ snmptranslate.o $(LOCAL_LIBS) ${LDFLAGS} ${LIBS} 
