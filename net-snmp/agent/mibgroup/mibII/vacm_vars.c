@@ -292,7 +292,25 @@ void vacm_free_view __P((void))
     vacm_destroyAllViewEntries();
 }
 
-int vacm_in_view (pi, name, namelen)
+
+
+/*******************************************************************-o-******
+ * vacm_in_view
+ *
+ * Parameters:
+ *	*pi
+ *	*name
+ *	 namelen
+ *      
+ * Returns:
+ *	1	On success.
+ *	0	Otherwise.
+ *
+ * Debug output listed as follows:
+ *	<securityName> <groupName> <viewName> <viewType>
+ */
+int
+vacm_in_view (pi, name, namelen)
     struct packet_info *pi;
     oid *name;
     int namelen;
@@ -328,18 +346,24 @@ int vacm_in_view (pi, name, namelen)
 	}
 	if (sp == NULL) return 0;
 	sn = sp->securityName;
-    }
-    else {
+    } else if (pi->sec_model == SNMP_SEC_MODEL_USM) {
+      DEBUGP ("vacm_in_view: ver=%d, model=%d, secName=%s\n",
+              pi->version, pi->sec_model, pi->securityName);
+      sn = pi->securityName;
+    } else {
 	sn = NULL;
     }
 
     if (sn == NULL) return 0;
-    DEBUGP ("vacm_in_view: securityName == %s\n", sn);
+    DEBUGP ("vacm_in_view: sn=%s", sn);
+
     gp = vacm_getGroupEntry(pi->sec_model, sn);
-    if (gp == NULL) return 0;
-    DEBUGP ("vacm_in_view: groupName == %s\n", gp->groupName);
+    if (gp == NULL) { DEBUGP("\n"); return 0; }
+    DEBUGP (", gn=%s", gp->groupName);
+
     ap = vacm_getAccessEntry(gp->groupName, "", pi->sec_model, pi->sec_level);
-    if (ap == NULL) return 0;
+    if (ap == NULL) { DEBUGP("\n"); return 0; }
+
     switch (pi->pdutype) {
     case SNMP_MSG_GET:
     case SNMP_MSG_GETNEXT:
@@ -358,13 +382,19 @@ int vacm_in_view (pi, name, namelen)
 	fprintf(stderr,"bad msg type in vacm_in_view: %d\n", pi->pdutype);
 	vn = ap->readView;
     }
-    DEBUGP ("vacm_in_view: viewName == %s\n", vn);
+
+    DEBUGP (", vn=%s", vn);
+
     vp = vacm_getViewEntry (vn, name, namelen);
-    if (vp == NULL) return 0;
-    DEBUGP("vacm_in_view: viewType == %d\n", vp->viewType);
+    if (vp == NULL) { DEBUGP("\n"); return 0; }
+    DEBUGP(", vt=%d\n", vp->viewType);
+
     if (vp->viewType == SNMP_VIEW_EXCLUDED) return 0;
+
     return 1;
-}
+
+}  /* end vacm_in_view() */
+
 
 u_char *var_vacm_sec2group(vp, name, length, exact, var_len, write_method)
     struct variable *vp;

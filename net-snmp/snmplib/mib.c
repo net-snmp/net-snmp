@@ -9,13 +9,13 @@
 
                       All Rights Reserved
 
-Permission to use, copy, modify, and distribute this software and its 
-documentation for any purpose and without fee is hereby granted, 
+Permission to use, copy, modify, and distribute this software and its
+documentation for any purpose and without fee is hereby granted,
 provided that the above copyright notice appear in all copies and that
-both that copyright notice and this permission notice appear in 
+both that copyright notice and this permission notice appear in
 supporting documentation, and that the name of CMU not be
 used in advertising or publicity pertaining to distribution of the
-software without specific, written prior permission.  
+software without specific, written prior permission.
 
 CMU DISCLAIMS ALL WARRANTIES WITH REGARD TO THIS SOFTWARE, INCLUDING
 ALL IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS, IN NO EVENT SHALL
@@ -71,11 +71,12 @@ SOFTWARE.
 #include "parse.h"
 #include "int64.h"
 #include "system.h"
+#include "read_config.h"
 
 static void sprint_by_type __P((char *, struct variable_list *, struct enum_list *, char *, char *));
 static int parse_subtree __P((struct tree *, char *, oid *, int *));
 static char *uptimeString __P((u_long, char *));
-static void sprint_hexstring __P((char *, u_char *, int));
+void sprint_hexstring __P((char *, u_char *, int));
 static void sprint_asciistring __P((char *, u_char *, int));
 static void sprint_octet_string __P((char *, struct variable_list *, struct enum_list *, char *, char *));
 static void sprint_opaque __P((char *, struct variable_list *, struct enum_list *, char *, char *));
@@ -94,7 +95,7 @@ static void sprint_nsapaddress __P((char *, struct variable_list *, struct enum_
 static void sprint_counter64 __P((char *, struct variable_list *, struct enum_list *, char *, char *));
 static void sprint_unknowntype __P((char *, struct variable_list *, struct enum_list *, char *, char *));
 static void sprint_badtype __P((char *, struct variable_list *, struct enum_list *, char *, char *));
-  
+
 #ifdef OPAQUE_SPECIAL_TYPES
 static void sprint_float __P((char *, struct variable_list *, struct enum_list *, char *, char *));
 static void sprint_double __P((char *, struct variable_list *, struct enum_list *, char *, char *));
@@ -121,7 +122,7 @@ typedef struct _PrefixList {
  * Period is added where needed.  See use of Prefix in this module.
  */
 PrefixList mib_prefixes[] = {
-	{ &Standard_Prefix[0] }, // placeholder for Prefix data
+	{ &Standard_Prefix[0] }, /* placeholder for Prefix data */
 	{ ".iso.org.dod.internet.mgmt.mib-2" },
 	{ ".iso.org.dod.internet.experimental" },
 	{ ".iso.org.dod.internet.private" },
@@ -203,7 +204,10 @@ uptimeString(timeticks, buf)
     return buf;
 }
 
-static void sprint_hexstring(buf, cp, len)
+
+
+void
+sprint_hexstring(buf, cp, len)
     char *buf;
     u_char  *cp;
     int	    len;
@@ -223,6 +227,8 @@ static void sprint_hexstring(buf, cp, len)
     }
     *buf = '\0';
 }
+
+
 
 static void sprint_asciistring(buf, cp, len)
     char *buf;
@@ -455,7 +461,7 @@ sprint_opaque(buf, var, enums, hint, units)
       case ASN_OPAQUE_I64:
         sprint_counter64(buf, var, enums, hint, units);
         break;
-        
+
       case ASN_OPAQUE_FLOAT:
         sprint_float(buf, var, enums, hint, units);
         break;
@@ -691,7 +697,7 @@ sprint_networkaddress(buf, var, enums, hint, units)
 	sprintf(buf, "Network Address: ");
 	buf += strlen(buf);
     }
-    cp = var->val.string;    
+    cp = var->val.string;
     len = var->val_len;
     for(x = 0; x < len; x++){
 	sprintf(buf, "%02X", *cp++);
@@ -792,7 +798,7 @@ sprint_bitstring(buf, var, enums, hint, units)
 		}
 	    }
 	}
-	cp ++;	    
+	cp ++;
     }
 }
 
@@ -839,7 +845,6 @@ sprint_counter64(buf, var, enums, hint, units)
 	sprint_by_type(buf, var, NULL, NULL, NULL);
 	return;
     }
-/* XXX */
     if (!quick_print){
 #ifdef OPAQUE_SPECIAL_TYPES
       if (var->type != ASN_COUNTER64) {
@@ -1016,7 +1021,7 @@ void
 init_mib __P((void))
 {
     char *prefix;
-    char  *env_var, *entry, path[300];
+    char  *env_var, *entry;
     PrefixListPtr pp = &mib_prefixes[0];
 
     if (Mib) return;
@@ -1028,27 +1033,28 @@ init_mib __P((void))
 
     env_var = getenv("MIBDIRS");
     if ( env_var == NULL ) {
-      if (confmibdir != NULL) {
-        if (*confmibdir == '+')
-          sprintf(path, "%s%c%s", DEFAULT_MIBDIRS, ENV_SEPARATOR_CHAR,
-                  confmibdir+1);
-        else
-          strcpy(path, confmibdir);
-      } else
-        strcpy(path, DEFAULT_MIBDIRS);
-    } else if ( *env_var == '+' ) {
-      sprintf(path, "%s%c%s", DEFAULT_MIBDIRS, ENV_SEPARATOR_CHAR, env_var+1);
+      if (confmibdir != NULL)
+        env_var = strdup(confmibdir);
+      else
+        env_var = strdup(DEFAULT_MIBDIRS);
     } else {
-      strcpy(path, env_var);
+      env_var = strdup(env_var);
+    }
+    if (*env_var == '+') {
+      entry = (char *)malloc(strlen(DEFAULT_MIBDIRS)+strlen(env_var)+2);
+      sprintf(entry, "%s%c%s", DEFAULT_MIBDIRS, ENV_SEPARATOR_CHAR, env_var+1);
+      free(env_var);
+      env_var = entry;
     }
 
-    DEBUGP("Looking in %s for mibs...\n",path);
+    DEBUGP("Looking in %s for mibs...\n",env_var);
 
-    entry = strtok( path, ENV_SEPARATOR );
+    entry = strtok( env_var, ENV_SEPARATOR );
     while ( entry ) {
         add_mibdir(entry);
         entry = strtok( NULL, ENV_SEPARATOR);
     }
+    free(env_var);
 
     init_mib_internals();
 
@@ -1056,52 +1062,51 @@ init_mib __P((void))
 
     env_var = getenv("MIBS");
     if ( env_var == NULL ) {
-      if (confmibs != NULL) {
-        if (*confmibs == '+')
-          sprintf(path, "%s%c%s", DEFAULT_MIBS, ENV_SEPARATOR_CHAR,
-                  confmibs+1);
-        else
-          strcpy(path, confmibs);
-      } else
-        strcpy(path, DEFAULT_MIBS);
+      if (confmibs != NULL)
+        env_var = strdup(confmibs);
+      else
+        env_var = strdup(DEFAULT_MIBS);
     } else {
-      if ( *env_var == '+' ) {
-        sprintf(path, "%s%c%s",DEFAULT_MIBS, ENV_SEPARATOR_CHAR, env_var+1);
-      } else {
-        strcpy(path, env_var);
-      }
+      env_var = strdup(env_var);
     }
-    DEBUGP("Looking for mibs... %s\n",path);
-    if (strcmp (path, "ALL") == 0) {
+    if (*env_var == '+') {
+      entry = (char *)malloc(strlen(DEFAULT_MIBS)+strlen(env_var)+2);
+      sprintf(entry, "%s%c%s", DEFAULT_MIBS, ENV_SEPARATOR_CHAR, env_var+1);
+      free(env_var);
+      env_var = entry;
+    }
+
+    DEBUGP("Looking for mibs... %s\n",env_var);
+    if (strcmp (env_var, "ALL") == 0) {
 	read_all_mibs();
     } else {
-	entry = strtok( path, ENV_SEPARATOR );
+	entry = strtok( env_var, ENV_SEPARATOR );
 	while ( entry ) {
 	    read_module(entry);
 	    entry = strtok( NULL, ENV_SEPARATOR);
 	}
 	adopt_orphans();
     }
+    free(env_var);
 
-    path[0] = 0;
     env_var = getenv("MIBFILES");
     if ( env_var == NULL ) {
-      env_var = getenv("MIBFILE");  /* backwards compatibility */
-      if ( env_var == NULL ) {
 #ifdef DEFAULT_MIBFILES
-        strcpy(path, DEFAULT_MIBFILES);
-      } else if ( *path == '+') {
-        sprintf(path, "%s%c%s",DEFAULT_MIBFILES, ENV_SEPARATOR_CHAR, env_var);
-#endif
+      if (*env_var == '+') {
+        entry = (char *)malloc(strlen(DEFAULT_MIBFILES)+strlen(env_var)+2);
+        sprintf(entry, "%s%c%s", DEFAULT_MIBFILES, ENV_SEPARATOR_CHAR,
+                env_var+1);
+        env_var = entry;
       } else {
-        strcpy(path, env_var);
+        env_var = strdup(DEFAULT_MIBFILES);
       }
+#endif
     } else {
-      strcpy(path, env_var);
+      env_var = strdup(env_var);
     }
-    
-    if ( path[0] != 0 ) {
-      entry = strtok( path, ENV_SEPARATOR );
+
+    if ( env_var != 0 ) {
+      entry = strtok( env_var, ENV_SEPARATOR );
       while ( entry ) {
         read_mib(entry);
         entry = strtok( NULL, ENV_SEPARATOR);
@@ -1550,7 +1555,7 @@ found:
 	*buf = '\0';
 	return_tree = get_symbol(objid + 1, objidlen - 1, subtree->child_list,
 				 buf);
-    } 
+    }
     if (return_tree != NULL)
 	return return_tree;
     else
@@ -1703,7 +1708,7 @@ get_module_node(name, module, objid, objidlen)
 	    }
 
 					/* Is it numeric ? */
-	    if ( isdigit( *cp ) ) 
+	    if ( isdigit( *cp ) )
 		subid=(atoi(cp));
 	    else
 		subid = -1;
@@ -1731,7 +1736,7 @@ get_module_node(name, module, objid, objidlen)
 	    }
 	    cp = cp2;
 	}
-		
+
 	return 1;
     } else {
 	return 0;

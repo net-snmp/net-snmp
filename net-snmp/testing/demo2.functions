@@ -1,0 +1,360 @@
+# 
+# demo2.functions
+#
+# Functions to used by the demo2 script.
+#
+# All global variables defined originally in calling environment.
+#
+# XXX  Locals vs. globals?
+#
+
+PREANSWER=
+ISECHO_C=		# See ECHO_N() below.
+PSARGS=-auwwx		# FIX
+
+engineidoid=
+
+
+#------------------------------------ -o- 
+#
+SETDEBUGGING() {	# 0 | 1
+  echo ""
+  echo "  Setting agent debugging to $1..."
+  echo ""
+
+  DOIT $snmpset versionDoDebugging.0 i $1
+}
+
+
+
+#------------------------------------ -o- 
+#
+PRINTCOMMAND() {	# <cmdline_string>
+  echo ""
+  echo "% $*"
+  echo ""
+}
+
+
+
+#------------------------------------ -o- 
+#
+DOIT() {		# <command_and_args_to_run>
+  PRINTCOMMAND "$*"
+
+  if test "x$autodoit" != "x1"; then
+    GETRETORSLEEP
+  fi
+
+  if test $runcommands = 1
+  then
+    PRINTCOMMAND "$*"					>>$APPLOG
+    $* 2>&1 | sed 's/^/     /' | tee $tmpfile		>>$APPLOG
+  fi
+}
+
+
+
+#------------------------------------ -o- 
+#
+LOOKFOR() { 		# <pattern_to_match> [<pattern2_to_match> ...]
+  local lookfor=$1
+  shift
+
+  DOIT $@
+
+  lookresults=`egrep "$lookfor" $tmpfile`
+}
+
+
+
+#------------------------------------ -o- 
+#
+OKORFAIL() {		# <pattern_to_match> [<pattern2_to_match> ...]
+  testcounter=`expr $testcounter + 1`
+  
+  echo
+  echo "===  TEST BEGIN #$testcounter"
+
+  LOOKFOR $@
+
+  if test "x$lookresults" = "x"; then
+    echo "===  TEST END #$testcounter -- FAILED"
+
+  else
+    echo "===  TEST END #$testcounter -- PASSED"
+    echo
+    echo
+    succeeds=`expr $succeeds + 1`
+  fi
+
+  sync		# XXX  Better to use fflush() or equivalent in agent.
+
+  echo ""
+  if test "x$autotest" != "x1"; then
+    GETRETORSLEEP
+  fi
+}
+
+
+
+#------------------------------------ -o- 
+#
+REPORT() {
+  echo ""
+  echo "TEST RESULTS: $succeeds/$testcounter Tests Passed."
+  echo ""
+}
+
+
+
+#------------------------------------ -o- 
+#
+GETRETORSLEEP() {	# [x]
+  if test $dosleep = 1 -o "x$1" != "x"; then
+    sleep 1
+
+  else
+    echo 
+    ECHO_N 'Hit <ENTER> to continue...  '
+    read ret
+    echo
+  fi
+}
+
+
+
+#------------------------------------ -o- 
+#
+STARTAGENT() {	
+  if test $handleagent = 1; then
+
+    echo ""
+    echo "   Starting the agent..."
+    snmpd $PORTFLAG -f $LOGGINGFLAG -P /tmp/snmpd.pid 2>&1 |
+			sed 's/^/       agent:/' >>$AGENTLOG  &
+
+    sleep 3 			# give the agent time to start up
+
+  else
+    echo ""
+    echo "!!"
+    echo "!! You need to start the agent on $host now."
+    echo "!!"
+
+    GETRETORSLEEP x
+  fi
+}
+
+
+
+#------------------------------------ -o- 
+#
+# FIX  Still not Solaris smart.  awk after PSARGS may be wrong...
+#
+STOPAGENT() {
+  local pids= i
+
+  if test $handleagent = 1; then
+    echo "   Stopping the agent..."
+
+    pids="`ps $PSARGS | egrep -w snmpd | awk '{ print $2 }'`"
+
+    for i in "`cat /tmp/snmpd.pid` $pids" ; do
+    	kill $i		2>/dev/null	>/dev/null
+    done
+
+
+    #
+    # Wait and check again for truculent daemons...
+    #
+    sleep 3
+    pids="`ps $PSARGS | egrep -w snmpd | awk '{ print $2 }'`"
+
+    [ -n "$pids" ] && {
+	echo
+	echo "   Trying again (-9) to stop background processes..."
+	for i in "`cat /tmp/snmpd.pid` $pids" ; do
+	    kill -9 $i		2>/dev/null	>/dev/null
+	done
+    }
+
+
+  else
+    echo "!!"
+    echo "!! You need to start the agent on $host now."
+    echo "!!"
+
+    GETRETORSLEEP x
+  fi
+}
+
+
+
+#------------------------------------ -o- 
+#
+COMMENT() {	# <string(s)>
+  echo "  $*"
+}
+
+
+
+#------------------------------------ -o- 
+#
+TITLE() {	# <string1> [<string2> ...]
+  local	line
+
+  echo ""
+  echo ""
+  echo "=========                                                       -o-"
+  echo "=="
+
+  for line
+  do
+    echo "==  $line"
+  done
+
+  echo "=="
+  echo ""
+  if test "x$autoread" != "x1"; then
+    GETRETORSLEEP
+  fi
+}
+
+
+
+#------------------------------------ -o- 
+#
+GETENGINEIDOID() {
+    string=`$snmpwalk snmpEngineID | sed 's/.*Hex: //'`
+    engineidoid=`perl -e 'print (($#ARGV+1) . "." . join(".",map(hex,@ARGV)));' $string`
+    engineidstr=`echo $string | sed 's/ //g'`
+}
+
+
+
+#------------------------------------ -o- 
+#
+GETBOOTSANDTIME() {
+    boots=`$snmpget snmpEngineBoots.0 | awk '{print $NF}'`
+     time=`$snmpget snmpEngineTime.0  | awk '{print $NF}'`
+}
+
+
+
+#------------------------------------ -o- 
+#
+MAKEUSEROID() {		# <user>
+  user="$*"
+
+  useroid=`perl -e '$a = shift; print length($a) . "." . join(".",unpack("c*",$a));' $user`
+
+  eval ${user}oid=$engineidoid.$useroid
+}
+
+
+
+#------------------------------------ -o- 
+#
+CREATEUSER() {		# <user> <user_security_name>
+			#   [<priv_transform_oid>] [<auth_transform_oid>]
+  user=$1 
+
+  MAKEUSEROID $user
+
+  fulluser=$engineidoid.$useroid
+
+  OKORFAIL "usmUserStatus.$fulluser.*createAndGo" $snmpset usmUserStatus.$fulluser i 4
+
+  $snmpset usmUserCloneFrom.$fulluser o $usmUserSecurityName.$2
+
+  if test "x$3" != "x"; then
+    DOIT $snmpset usmUserPrivProtocol.$fulluser o $3
+  fi
+  if test "x$4" != "x"; then
+    DOIT $snmpset usmUserAuthProtocol.$fulluser o $4
+  fi
+
+  OKORFAIL "usmUserStatus.$fulluser.*active" $snmpget usmUserStatus.$engineidoid.$useroid
+}
+
+
+
+#------------------------------------ -o- 
+#
+ECHO_N() {       # "<string>"
+        [ -n "$ISECHO_C" ] && {
+                echo "$1""\c"
+                true
+        }
+	[ -z "$ISECHO_C" ] && {
+                echo -n "$1"
+        }
+}
+
+
+
+#------------------------------------ -o- 
+#
+# Returns:
+#	0	For favored choice,
+#	1	Otherwise.
+#
+# PREANSWER is taken as the answer to the question from the outside
+# environment.  It is NOT reset after use.
+#
+YESNO() {	# <favored={Y,N}> <question_string>
+	local WHATTOASK
+	local FAVOR
+	local Y N LITTLE BIG
+	local line answer
+
+	export PREANSWER
+
+	if [ -z "$2" ]; then
+		echo 'yesno (usage error): favored question_string'
+		exit 2
+	fi
+
+	WHATTOASK="$2"
+
+	FAVOR=$1
+	if [ "$FAVOR" = "Y" ]; then
+		Y=Y N=n LITTLE=n BIG=N
+	else
+		Y=y N=N LITTLE=y BIG=Y
+	fi
+
+	ECHO_N "$WHATTOASK  ($Y/$N) "
+	read line			# wait for some input anyways
+	[ -n "$PREANSWER" ] && line=$PREANSWER
+	line="${line}x"
+	answer="`expr "$line" : '\(.\).*'`x"
+	if [ "$answer" = xx -o \
+		\( "$answer" != "${LITTLE}x" -a "$answer" != "${BIG}x" \) ]
+	then
+
+		return 0
+	else
+		return 1
+	fi
+}
+
+
+
+#------------------------------------ -o- 
+#
+STARTXTERM() {		# "<title>" "<command_and_arguments>"
+	local	xterm_title="$1" cmd="$2"
+
+	[ -z "$xterm_title" -o -z "$cmd" ] && return 1
+
+	xterm $XTERMARGS -geometry $XTGEOSHAPE		\
+		-T "$xterm_title" -name "$xterm_title" 	\
+		-e $cmd		&
+
+	return 0
+}
+
+
+

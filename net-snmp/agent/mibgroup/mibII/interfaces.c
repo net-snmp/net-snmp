@@ -531,9 +531,6 @@ void	init_interfaces( )
 {
 }
 
-#define MATCH_FAILED	-1
-#define MATCH_SUCCEEDED	0
-
 #ifdef linux
 typedef struct _conf_if_list {
     char *name;
@@ -1618,9 +1615,6 @@ u_char	*var_ifEntry __P((struct variable *, oid *, int *, int,
 			  int *, 
 			  int (**write) __P((int, u_char *, u_char, int, 
 					     u_char *, oid *, int)) ));
-
-#define MATCH_FAILED	-1
-#define MATCH_SUCCEEDED	0
 
 static	char *physaddrbuf;
 static	int nphysaddrs;
