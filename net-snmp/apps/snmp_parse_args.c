@@ -64,6 +64,7 @@
 #include "version.h"
 #include "system.h"
 #include "parse.h"
+#include "read_config.h"
 
 int random_access = 0;
 
