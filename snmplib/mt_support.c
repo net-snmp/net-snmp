@@ -9,6 +9,7 @@
  */
 
 #include <config.h>
+#include <errno.h>
 #include "mt_support.h"
 
 #ifdef __cplusplus
@@ -18,88 +19,118 @@ extern "C" {
 #ifdef _REENTRANT
 
 static
-mutex_type s_res[MT_MAXIMUM];  /* locking structures */
+mutex_type s_res[MT_MAX_IDS][MT_LIB_MAXIMUM];  /* locking structures */
 
-static mutex_type * _mt_res(int mt_val)
+static mutex_type * _mt_res(int groupID, int resourceID)
 {
-    if (mt_val < 1) return 0;
-    if (mt_val >= MT_MAXIMUM) return 0;
-    return (&s_res[mt_val]);
+    if (groupID < 1) return 0;
+    if (groupID >= MT_MAX_IDS) return 0;
+    if (resourceID < 1) return 0;
+    if (resourceID >= MT_LIB_MAXIMUM) return 0;
+    return (&s_res[groupID][resourceID]);
 }
 
-void snmp_res_init(void)
+static
+int snmp_res_init_mutex(mutex_type * mutex)
 {    
-    int ii = MT_MAXIMUM;
-    mutex_type *mutex;
-
-  for (ii = 0; ii < MT_MAXIMUM; ii++)
-  {
-    mutex = _mt_res(ii);
-    if (!mutex) continue;
-    
-#ifdef hpux10
-    pthread_mutex_init(mutex,pthread_mutexattr_default);
-#elif HAVE_PTHREAD_H
-    pthread_mutex_init(mutex, 0);
-#elif defined(solaris2)
-    mutex_init(mutex,USYNC_THREAD,NULL);
+    int rc = 0;
+#if HAVE_PTHREAD_H
+    rc = pthread_mutex_init(mutex, MT_MUTEX_INIT_DEFAULT);
+#elif HAVE_SYNCH_H
+    rc = mutex_init(mutex,USYNC_THREAD,NULL);
 #elif defined(WIN32)
     InitializeCriticalSection(mutex);
 #endif
 
-  }
+    return rc;
 }
 
-void snmp_res_destroy_mutex(int ii)
+int snmp_res_init(void)
 {    
-    mutex_type *mutex = _mt_res(ii);
-    if (!mutex) return;
+    int ii, jj;
+    int rc = 0;
+    mutex_type *mutex;
 
-#if defined(hpux10) || defined(hpux11)
-    pthread_mutex_destroy(mutex);
-#elif HAVE_PTHREAD_H
-    pthread_mutex_destroy(mutex);
-#elif defined(solaris2)
-    mutex_destroy(mutex);
+  for (jj = 0; (0 == rc) && (jj < MT_MAX_IDS); jj++)
+  for (ii = 0; (0 == rc) && (ii < MT_LIB_MAXIMUM); ii++)
+  {
+    mutex = _mt_res(jj, ii);
+    if (!mutex) continue;
+    rc = snmp_res_init_mutex( mutex );
+  }
+
+    return rc;
+}
+
+int snmp_res_destroy_mutex(int groupID, int resourceID)
+{    
+    int rc = 0;
+    mutex_type *mutex = _mt_res(groupID, resourceID);
+    if (!mutex) return EFAULT;
+
+#if HAVE_PTHREAD_H
+    rc = pthread_mutex_destroy(mutex);
+#elif HAVE_SYNCH_H
+    rc = mutex_destroy(mutex);
 #elif defined(WIN32)
     DeleteCriticalSection(mutex);
 #endif
+
+    return rc;
 }
     
-void snmp_res_lock(int ii)
+int snmp_res_lock(int groupID, int resourceID)
 {
-    mutex_type *mutex = _mt_res(ii);
-    if (!mutex) return;
+    int rc = 0;
+    mutex_type *mutex = _mt_res(groupID, resourceID);
+    if (!mutex) return EFAULT;
 
-#if defined(hpux10) || defined(hpux11)
-    pthread_mutex_lock(mutex);
-#elif HAVE_PTHREAD_H
-    pthread_mutex_lock(mutex);
-#elif defined(solaris2)
-    mutex_lock(mutex);
+#if HAVE_PTHREAD_H
+    rc = pthread_mutex_lock(mutex);
+#elif HAVE_SYNCH_H
+    rc = mutex_lock(mutex);
 #elif defined(WIN32)
     EnterCriticalSection(mutex);
 #endif
+
+    return rc;
 }
 
-void snmp_res_unlock(int ii)
+int snmp_res_unlock(int groupID, int resourceID)
 {
-    mutex_type *mutex = _mt_res(ii);
-    if (!mutex) return;
+    int rc = 0;
+    mutex_type *mutex = _mt_res(groupID, resourceID);
+    if (!mutex) return EFAULT;
 
-#if defined(hpux10) || defined(hpux11)
-    pthread_mutex_unlock(mutex);
-#elif HAVE_PTHREAD_H
-    pthread_mutex_unlock(mutex);
-#elif defined(solaris2)
-    mutex_unlock(mutex);
+#if HAVE_PTHREAD_H
+    rc = pthread_mutex_unlock(mutex);
+#elif HAVE_SYNCH_H
+    rc = mutex_unlock(mutex);
 #elif defined(WIN32)
     LeaveCriticalSection(mutex);
 #endif
+
+    return rc;
 }
 
 
-#endif /* _REENTRANT */
+#else  /* !_REENTRANT */
+
+#ifdef WIN32
+
+/* Provide "do nothing" targets for Release (.DLL) builds. */
+#undef snmp_res_init
+#undef snmp_res_lock
+#undef snmp_res_unlock
+#undef snmp_res_destroy_mutex
+
+int snmp_res_init(void) { return 0; }
+int snmp_res_lock(int groupID, int resourceID) { return 0; }
+int snmp_res_unlock(int groupID, int resourceID) { return 0; }
+int snmp_res_destroy_mutex(int groupID, int resourceID) { return 0; }
+#endif /* !WIN32 */
+
+#endif /* !_REENTRANT */
 
 
 #ifdef __cplusplus

@@ -3,6 +3,7 @@
  *
  * Update: 1998-07-17 <jhy@gsu.edu>
  * Added print_oid_report* functions.
+ *
  */
 /**********************************************************************
 	Copyright 1988, 1989, 1991, 1992 by Carnegie Mellon University
@@ -1022,7 +1023,7 @@ init_mib (void)
     char  *env_var, *entry;
     PrefixListPtr pp = &mib_prefixes[0];
     
-    if (Mib) return;
+    if (tree_head) return;  /* was: if (Mib) */
     
     /* Initialise the MIB directory/ies */
 
@@ -1990,7 +1991,7 @@ print_parent_label(FILE *f,
  * Warning: this methods recurses and calls methods that recurse.
  */
 
-void
+static void
 print_subtree_oid_report(FILE *f,
                          struct tree *tree,
                          int count)
