@@ -114,6 +114,27 @@ if not specified, the associated entry in the
 EXTENSIBLEDOTMIB.DISKMIBNUM.1.ERRORFLAG MIB table will be set to (1) and
 a descriptive error message will be returned to queries of
 EXTENSIBLEDOTMIB.DISKMIBNUM.1.ERRORMSG.
+.IP "includeAllDisks MINPERCENT%"
+.IP
+Adds  all  the  disks  that can be found on the system using the
+setmntent(3) and getmntent(3), or fopen(3) and getmntent(3),  or
+setfsent(3)  and  getfsent(3) system calls. If none of the above
+system calls are available then it adds the root partition  "/",
+(which  is  assumed to exist on any UNIX based system) using the
+statfs(2) system call.
+.IP
+There can only be one 'includeAllDisks' directive in the config-
+uration  file.  It  can  be  used in conjunction with the 'disk'
+directive. They may be used in any order. The  'disk'  directive
+overrides  the  disk  usage  specified  by the 'includeAllDisks'
+directive, no matter in which order they are  specified  in  the
+configuration file.
+.IP
+The 'includeAllDisks' directive only includes the disks that are
+mounted when the snmpd daemon  is  started.  It  cannot  include
+disks  that are dynamically loadable, such as with automount. So
+the preferred way is to mount all the disks that will ever  need
+to be monitored before starting the snmpd daemon.
 .IP "load MAX1"
 .IP "load MAX1 MAX5"
 .IP "load MAX1 MAX5 MAX15"
