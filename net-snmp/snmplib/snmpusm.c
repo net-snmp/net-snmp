@@ -2244,6 +2244,9 @@ usm_remove_user_from_list(struct usmUser *user,
 struct usmUser *
 usm_free_user(struct usmUser *user)
 {
+  if (user == NULL)
+    return NULL;
+
   SNMP_FREE(user->engineID);
   SNMP_FREE(user->name);
   SNMP_FREE(user->secName);
