@@ -293,7 +293,8 @@ snmp_reset_var_buffers(netsnmp_variable_list * var)
 {
     while (var) {
         if (var->name != var->name_loc) {
-            free(var->name);
+            if(NULL != var->name)
+                free(var->name);
             var->name = var->name_loc;
             var->name_length = 0;
         }
@@ -934,14 +935,14 @@ const char     *error_string[19] = {
     "wrongLength (The set value has an illegal length from what the agent expects)",
     "wrongEncoding",
     "wrongValue (The set value is illegal or unsupported in some way)",
-    "noCreation (that table does not support row creation)",
+    "noCreation (That table does not support row creation or that object can not ever be created)",
     "inconsistentValue (The set value is illegal or unsupported in some way)",
     "resourceUnavailable (This is likely a out-of-memory failure within the agent)",
     "commitFailed",
     "undoFailed",
     "authorizationError (access denied to that object)",
-    "notWritable (that object does not support modification)",
-    "inconsistentName"
+    "notWritable (That object does not support modification)",
+    "inconsistentName (That object can not currently be created)"
 };
 
 const char     *
