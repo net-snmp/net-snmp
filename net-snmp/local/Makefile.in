@@ -47,7 +47,7 @@ fixproc.made: fixproc
 	fi
 	$(PERLPROG) -i -p -e 's@^#!.*/perl@#!$(PERLPROG)@' fixproc
 
-rsnmp.made: fixproc
+rsnmp.made: rsnmp
 	touch rsnmp.made
 	@if test ! -f rsnmp; then\
 	  cp ${srcdir}/rsnmp .; \
