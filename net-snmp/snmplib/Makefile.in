@@ -159,6 +159,8 @@ parse:  mib.o parse.c
 #
 # dependencies
 #
-ifeq ($(AUTO_DEPEND),y)
-include $(SOURCES:.c=.d)
-endif
+# This construct is not universally recognised by all versions of make
+#
+#ifeq ($(AUTO_DEPEND),y)
+#include $(SOURCES:.c=.d)
+#endif
