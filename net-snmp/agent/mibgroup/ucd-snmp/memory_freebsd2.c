@@ -105,11 +105,11 @@ void memory_free_config (void)
   minimumswap = DEFAULTMINIMUMSWAP;
 }
 
-#if 0
+#ifndef freebsd3
 /* Executes swapinfo and parses last line */
 /* This is just way too ugly ;) */
 
-void getSwap(void)
+void swapmode(void)
 {
   struct extensible ext;
   int fd;
