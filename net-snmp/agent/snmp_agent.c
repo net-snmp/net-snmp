@@ -1425,6 +1425,12 @@ check_delayed_request(struct agent_snmp_session  *asp) {
     switch(asp->mode) {
         case SNMP_MSG_GETNEXT:
             handle_getnext_loop(asp);
+            if (check_for_delegated(asp) &&
+                check_transaction_id(asp->pdu->transid) != SNMPERR_SUCCESS) {
+                /* add to delegated request chain */
+                asp->next = agent_delegated_list;
+                agent_delegated_list = asp;
+            }
             break;
 
         case SNMP_MSG_GETBULK:
