@@ -52,10 +52,13 @@ real_init_master(void)
     netsnmp_session sess, *session;
     char *agentx_sockets;
     char *cp1, *cp2;
+
+#ifdef SNMP_TRANSPORT_UNIX_DOMAIN
     int agentx_dir_perm;
     int agentx_sock_perm;
     int agentx_sock_user;
     int agentx_sock_group;
+#endif
 
     if (netsnmp_ds_get_boolean(NETSNMP_DS_APPLICATION_ID, NETSNMP_DS_AGENT_ROLE) != MASTER_AGENT)
         return;
