@@ -392,12 +392,6 @@ parse_simple_monitor(const char *token, char *line)
     while (cp && *cp == '-') {
         cp = copy_nword(cp, buf, sizeof(buf));
         switch (buf[1]) {
-       case 't':
-           /*
-            * Threshold toggle
-            */
-           StorageNew->mteTriggerTest[0] = MTETRIGGERTEST_THRESHOLD;
-           break;
         case 'r':
             if (cp) {
                 cp = copy_nword(cp, buf, sizeof(buf));
@@ -504,23 +498,6 @@ parse_simple_monitor(const char *token, char *line)
     StorageNew->mteTriggerValueID = snmp_duplicate_objid(obuf, obufLen);
     StorageNew->mteTriggerValueIDLen = obufLen;
 
-    if (StorageNew->mteTriggerTest[0] == MTETRIGGERTEST_THRESHOLD) {
-       /*
-        * it's a threshold
-        * grab 'low' and 'high' params
-        */
-        if (!cp) {
-            config_perror("no lower threshold value specified");
-       }
-       cp = copy_nword(cp, buf, sizeof(buf));
-       StorageNew->mteTriggerThresholdFalling = strtol(buf, NULL, 0);
-
-        if (!cp) {
-            config_perror("no upper threshold value specified");
-       }
-       cp = copy_nword(cp, buf, sizeof(buf));
-       StorageNew->mteTriggerThresholdRising = strtol(buf, NULL, 0);
-    } else {
         /*
          * if nothing beyond here, it's an existence test 
          */
@@ -554,7 +531,7 @@ parse_simple_monitor(const char *token, char *line)
 
         cp = copy_nword(cp, buf, sizeof(buf));
         StorageNew->mteTriggerBooleanValue = strtol(buf, NULL, 0);
-    }
+
     mteTriggerTable_add(StorageNew);
     mte_enable_trigger(StorageNew);
 
