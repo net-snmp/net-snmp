@@ -22,8 +22,6 @@
 /*
  * xxx-rks: when you have some spare time:
  *
- * a) add get-next access
- * 
  * b) basically, everything currently creates one node per sub-oid,
  *    which is less than optimal. add code to create nodes with the
  *    longest possible OID per node, and split nodes when necessary
@@ -31,6 +29,8 @@
  *
  * c) If you are feeling really ambitious, also merge split nodes if
  *    possible on a delete.
+ *
+ * xxx-wes: uh, right, like I *ever* have that much time.
  *
  */
 
@@ -108,6 +108,7 @@ netsnmp_oid_stash_add_data(netsnmp_oid_stash_node **root,
             tmpp = curnode->children[lookup[i] % curnode->children_size] =
                 netsnmp_oid_stash_create_node();
             tmpp->value = lookup[i];
+            tmpp->parent = curnode;
         } else {
             for (loopp = tmpp; loopp; loopp = loopp->next_sibling) {
                 if (loopp->value == lookup[i])
@@ -122,6 +123,7 @@ netsnmp_oid_stash_add_data(netsnmp_oid_stash_node **root,
                 loopp = netsnmp_oid_stash_create_node();
                 loopp->value = lookup[i];
                 loopp->next_sibling = tmpp;
+                loopp->parent = curnode;
                 tmpp->prev_sibling = loopp;
                 curnode->children[lookup[i] % curnode->children_size] =
                     loopp;
@@ -179,8 +181,8 @@ netsnmp_oid_stash_get_node(netsnmp_oid_stash_node *root,
     return tmpp;
 }
 
-
 /** returns the next node associated with a given OID. INCOMPLETE.
+    This is equivelent to a GETNEXT operation.
  * @internal
  * @param root the top of the stash tree
  * @param lookup the oid to look up a node for.
@@ -191,15 +193,17 @@ netsnmp_oid_stash_getnext_node(netsnmp_oid_stash_node *root,
                                oid * lookup, size_t lookup_len)
 {
     netsnmp_oid_stash_node *curnode, *tmpp, *loopp;
-    unsigned int    i;
+    unsigned int    i, j, bigger_than = 0, do_bigger = 0;
 
     if (!root)
         return NULL;
     tmpp = NULL;
+
+    /* get closest matching node */
     for (curnode = root, i = 0; i < lookup_len; i++) {
         tmpp = curnode->children[lookup[i] % curnode->children_size];
         if (!tmpp) {
-            return NULL;
+            break;
         } else {
             for (loopp = tmpp; loopp; loopp = loopp->next_sibling) {
                 if (loopp->value == lookup[i])
@@ -208,12 +212,62 @@ netsnmp_oid_stash_getnext_node(netsnmp_oid_stash_node *root,
             if (loopp) {
                 tmpp = loopp;
             } else {
-                return NULL;
+                break;
             }
         }
         curnode = tmpp;
     }
-    return tmpp;
+
+    /* find the *next* node lexographically greater */
+    if (!curnode)
+        return NULL; /* ack! */
+
+    if (i+1 < lookup_len) {
+        bigger_than = lookup[i+1];
+        do_bigger = 1;
+    }
+
+    do {
+        /* check the children first */
+        tmpp = NULL;
+        /* next child must be (next) greater than our next search node */
+        /* XXX: should start this loop at best_nums[i]%... and wrap */
+        for(j = 0; j < curnode->children_size; j++) {
+            for (loopp = curnode->children[j];
+                 loopp; loopp = loopp->next_sibling) {
+                if ((!do_bigger || loopp->value > bigger_than) &&
+                    (!tmpp || tmpp->value > loopp->value)) {
+                    tmpp = loopp;
+                    /* XXX: can do better and include min_nums[i] */
+                    if (tmpp->value <= curnode->children_size-1) {
+                        /* best we can do. */
+                        goto done_this_loop;
+                    }
+                }
+            }
+        }
+
+      done_this_loop:
+        if (tmpp && tmpp->thedata)
+            /* found a node with data.  Go with it. */
+            return tmpp;
+
+        if (tmpp) {
+            /* found a child node without data, maybe find a grandchild? */
+            do_bigger = 0;
+            curnode = tmpp;
+        } else {
+            /* no respectable children (the bums), we'll have to go up.
+               But to do so, they must be better than our current best_num + 1.
+            */
+            do_bigger = 1;
+            bigger_than = curnode->value;
+            curnode = curnode->parent;
+        }
+    } while (curnode);
+
+    /* fell off the top */
+    return NULL;
 }
 
 /** returns a data pointer associated with a given OID.
@@ -328,7 +382,8 @@ oid_stash_dump(netsnmp_oid_stash_node *root, char *prefix)
     for (i = 0; i < root->children_size; i++) {
         if (root->children[i]) {
             for (tmpp = root->children[i]; tmpp; tmpp = tmpp->next_sibling) {
-                printf("%s%ld@%d:\n", prefix, tmpp->value, i);
+                printf("%s%ld@%d: %s\n", prefix, tmpp->value, i,
+                       (tmpp->thedata) ? "DATA" : "");
                 oid_stash_dump(tmpp, myprefix);
             }
         }

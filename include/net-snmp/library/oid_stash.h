@@ -27,11 +27,7 @@ extern          "C" {
         size_t          children_size;
         struct netsnmp_oid_stash_node_s *next_sibling;  /* cache too small links */
         struct netsnmp_oid_stash_node_s *prev_sibling;
-        /*
-         * struct netsnmp_oid_stash_node_s *parent; 
-         *
-         * XXX? 
-         */
+        struct netsnmp_oid_stash_node_s *parent; 
 
         void           *thedata;
     } netsnmp_oid_stash_node;
@@ -55,6 +51,9 @@ extern          "C" {
     void           *netsnmp_oid_stash_get_data(netsnmp_oid_stash_node
                                                *root, oid * lookup,
                                                size_t lookup_len);
+    netsnmp_oid_stash_node *
+    netsnmp_oid_stash_getnext_node(netsnmp_oid_stash_node *root,
+                                   oid * lookup, size_t lookup_len);
 
     netsnmp_oid_stash_node *netsnmp_oid_stash_create_sized_node(size_t
                                                                 mysize);
