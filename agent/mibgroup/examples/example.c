@@ -295,6 +295,7 @@ var_example(struct variable *vp,
      * needs to return a pointer to the appropriate value (using 'long_ret').
      * Otherwise, 'var_len' and/or 'write_method' should be set suitably.
      */
+  DEBUGMSGTL(("example","var_example entered\n"));
   if (header_generic(vp, name, length, exact, var_len, write_method) == MATCH_FAILED)
     return NULL;
 
@@ -513,6 +514,7 @@ write_exampletrap(int	action,
 {
     long intval;
 
+    DEBUGMSGTL(("example","write_exampletrap entered: action=%d\n",action));
     switch ( action ) {
 	case RESERVE1:
 			/*
@@ -564,7 +566,10 @@ write_exampletrap(int	action,
 			 *  (In fact, they can fail, but they return no
 			 *   indication of this, which is the next best thing!)
 			 */
+            DEBUGMSGTL(("example","write_exampletrap sending the trap\n",
+                        action));
 	    send_easy_trap( SNMP_TRAP_ENTERPRISESPECIFIC, 3 );
+            DEBUGMSGTL(("example","write_exampletrap trap sent\n",action));
 	    break;
 
     }
@@ -607,12 +612,11 @@ write_exampletrap2(int	action,
     /* these variales will be used when we send the trap */
     oid objid_snmptrap[] = { 1,3,6,1,6,3,1,1,4,1,0}; /* snmpTrapIOD.0 */
     oid demo_trap[] = { 1,3,6,1,4,1,2021,13,990}; /*demo-trap */
-    oid sysLocationOID[] = { 1,3,6,1,2,1,1,6}; /*sysLocation */
-    /* we get the sysLocation from the system_mib.c file */
-    extern char *sysLocation;
+    oid example_string_oid[] = { 1,3,6,1,4,1,2021,254,1,0 };
     static struct variable_list var_trap;
     static struct variable_list var_obj;
     
+    DEBUGMSGTL(("example","write_exampletrap2 entered: action=%d\n",action));
     switch ( action ) {
 	case RESERVE1:
 			/*
@@ -679,12 +683,15 @@ write_exampletrap2(int	action,
 
 
             var_obj.next_variable = NULL; /* No more variables after this one */
-            var_obj.name = sysLocationOID;
-            var_obj.name_length = sizeof(sysLocationOID)/sizeof(oid); /* number of sub-ids */
+            var_obj.name = example_string_oid;
+            var_obj.name_length = sizeof(example_string_oid)/sizeof(oid); /* number of sub-ids */
             var_obj.type = ASN_OCTET_STR; /* type of variable */
-            var_obj.val.string = sysLocation; /* value */
-            var_obj.val_len = strlen(sysLocation);
+            var_obj.val.string = example_str; /* value */
+            var_obj.val_len = strlen(example_str);
+            DEBUGMSGTL(("example","write_exampletrap2 sending the v2 trap\n",
+                        action));
             send_v2trap(&var_trap);
+            DEBUGMSGTL(("example","write_exampletrap2 v2 trap sent\n",action));
 
 	    break;
 
