@@ -89,7 +89,7 @@ netsnmp_mfd_register_table(netsnmp_mfd_registration *mfdr, const char *name,
     netsnmp_handler_registration *reginfo;
     u_long mfd_modes = 0;
         
-    DEBUGMSGT(("mfd",">%s\n",__FUNCTION__));
+    DEBUGMSGT(("mfd",">%s\n","netsnmp_mfd_register_table"));
 
     if (!mfdr) {
         snmp_log(LOG_ERR, "table_mfd registration with no callbacks\n" );
@@ -390,7 +390,7 @@ _mfd_data_lookup(netsnmp_mib_handler *handler,
     netsnmp_table_request_info *tblreq_info;
     netsnmp_index index;
     
-    DEBUGMSGT(("mfd",">%s\n",__FUNCTION__));
+    DEBUGMSGT(("mfd",">%s\n","_mfd_data_lookup"));
 
     /** mull test in previous function */
     netsnmp_assert(handler && handler->myvoid);
@@ -421,7 +421,7 @@ _mfd_data_find(netsnmp_mib_handler *handler,
     netsnmp_mfd_registration *mfdr;
     netsnmp_table_request_info *tblreq_info;
     
-    DEBUGMSGT(("mfd",">%s\n",__FUNCTION__));
+    DEBUGMSGT(("mfd",">%s\n","_mfd_data_find"));
 
     /** mull test in previous function */
     netsnmp_assert(handler && handler->myvoid);
@@ -449,7 +449,7 @@ _mfd_group(netsnmp_handler_registration *reginfo, netsnmp_index *row,
     netsnmp_table_request_info *tblreq_info;
     netsnmp_request_group *rgroup;
     
-    DEBUGMSGT(("mfd",">%s\n",__FUNCTION__));
+    DEBUGMSGT(("mfd",">%s\n","_mfd_group"));
 
     if(NULL == row)
         return NULL;

@@ -37,6 +37,9 @@
  */
 #include <net-snmp/net-snmp-config.h>
 
+#if HAVE_IO_H
+#include <io.h>
+#endif
 #include <stdio.h>
 #include <errno.h>
 #if HAVE_STRING_H
@@ -160,6 +163,9 @@ typedef long    fd_mask;
 #include <windows.h>
 #include <tchar.h>
 #include <net-snmp/library/winservice.h>
+
+#define WIN32SERVICE
+
 #endif
 
 /*
@@ -176,7 +182,7 @@ int             running = 1;
 int             reconfig = 0;
 int             Facility = LOG_DAEMON;
 
-#ifdef WIN32
+#ifdef WIN32SERVICE
 /*
  * SNMP Agent Status 
  */
@@ -205,7 +211,7 @@ int             snmp_input(int, netsnmp_session *, int, netsnmp_pdu *,
 static void     usage(char *);
 static void     SnmpTrapNodeDown(void);
 static int      receive(void);
-#ifdef WIN32
+#ifdef WIN32SERVICE
 void            StopSnmpAgent(void);
 int             SnmpDaemonMain(int argc, TCHAR * argv[]);
 int __cdecl     _tmain(int argc, TCHAR * argv[]);
@@ -254,7 +260,7 @@ int             main(int, char **);
 static void
 usage(char *prog)
 {
-#ifdef WIN32
+#ifdef WIN32SERVICE
     printf("\nUsage:  %s [-register] [OPTIONS] [LISTENING ADDRESSES]",
            prog);
     printf("\n        %s -unregister", prog);
@@ -288,7 +294,7 @@ usage(char *prog)
     printf("  -q\t\t\tprint information in a more parsable format\n");
     printf("  -r\t\t\tdo not exit if files only accessible to root\n"
 	   "\t\t\t  cannot be opened\n");
-#ifdef WIN32
+#ifdef WIN32SERVICE
     printf("  -register\t\tregister as a Windows service\n");
     printf("  \t\t\t  (followed by the startup parameter list)\n");
     printf("  \t\t\t  Note that not all parameters are relevant when running as a service\n");
@@ -297,7 +303,7 @@ usage(char *prog)
     printf("  -u UID\t\tchange to this uid (numeric or textual) after\n"
 	   "\t\t\t  opening transport endpoints\n");
 #endif
-#ifdef WIN32
+#ifdef WIN32SERVICE
     printf("  -unregister\t\tunregister as a Windows service\n");
 #endif
     printf("  -v, --version\t\tdisplay version information\n");
@@ -332,11 +338,11 @@ version(void)
 RETSIGTYPE
 SnmpdShutDown(int a)
 {
-#ifdef WIN32
+#ifdef WIN32SERVICE
     extern netsnmp_session *main_session;
 #endif
     running = 0;
-#ifdef WIN32
+#ifdef WIN32SERVICE
     /*
      * In case of windows, select() in receive() function will not return 
      * on signal. Thats why following function is called, which closes the 
@@ -425,7 +431,7 @@ setup_log(int restart, int dont_zero, int stderr_log, int syslog_log,
  * Also successfully EXITs with zero for some options.
  */
 int
-#ifdef WIN32
+#ifdef WIN32SERVICE
 SnmpDaemonMain(int argc, TCHAR * argv[])
 #else
 main(int argc, char *argv[])
@@ -952,7 +958,7 @@ main(int argc, char *argv[])
      * We're up, log our version number.  
      */
     snmp_log(LOG_INFO, "NET-SNMP version %s\n", netsnmp_get_version());
-#ifdef WIN32
+#ifdef WIN32SERVICE
     agent_status = AGENT_RUNNING;
 #endif
     netsnmp_addrcache_initialise();
@@ -980,7 +986,7 @@ main(int argc, char *argv[])
 	(pid_file != NULL)) {
         unlink(pid_file);
     }
-#ifdef WIN32
+#ifdef WIN32SERVICE
     agent_status = AGENT_STOPPED;
 #endif
 
@@ -1282,7 +1288,7 @@ snmp_input(int op,
 /*
  * Windows Service Related functions 
  */
-#ifdef WIN32
+#ifdef WIN32SERVICE
 /************************************************************
 * main function for Windows
 * Parse command line arguments for startup options,
@@ -1294,14 +1300,17 @@ int
     __cdecl
 _tmain(int argc, TCHAR * argv[])
 {
-
     /*
      * Define Service Name and Description, which appears in windows SCM 
      */
     LPCTSTR         lpszServiceName = g_szAppName;      /* Service Registry Name */
-    LPCTSTR         lpszServiceDisplayName = _T("Net SNMP Agent Daemon");       /* Display Name */
+    LPCTSTR         lpszServiceDisplayName = _T("Net-SNMP Agent");       /* Display Name */
     LPCTSTR         lpszServiceDescription =
-        _T("SNMP agent for windows from Net-SNMP");
+#ifdef IFDESCR
+        _T("SNMPv2c / SNMPv3 command responder from Net-SNMP. Supports MIB objects for IP,ICMP,TCP,UDP, and network interface sub-layers.");
+#else
+        _T("SNMPv2c / SNMPv3 command responder from Net-SNMP");
+#endif
     InputParams     InputOptions;
 
 
@@ -1370,4 +1379,4 @@ StopSnmpAgent(void)
     }
 }
 
-#endif/*WIN32*/
+#endif/*WIN32SERVICE*/

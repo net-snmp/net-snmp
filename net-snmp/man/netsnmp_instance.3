@@ -1,5 +1,121 @@
-.TH "instance: process individual MIB instances easily." 3 "13 Nov 2003" "net-snmp" \" -*- nroff -*-
+.TH "instance: process individual MIB instances easily." 3 "17 Feb 2004" "net-snmp" \" -*- nroff -*-
 .ad l
 .nh
 .SH NAME
 instance: process individual MIB instances easily. \- 
+.SS "Functions"
+
+.in +1c
+.ti -1c
+.RI "\fBnetsnmp_mib_handler\fP * \fBnetsnmp_get_instance_handler\fP (void)"
+.br
+.RI "\fICreates an instance helper handler, calls netsnmp_create_handler, which then could be registered, using \fBnetsnmp_register_handler()\fP.\fP"
+.ti -1c
+.RI "int \fBnetsnmp_register_instance\fP (\fBnetsnmp_handler_registration\fP *reginfo)"
+.br
+.RI "\fIThis function registers an instance helper handler, which is a way of registering an exact OID such that GENEXT requests are handled entirely by the helper.\fP"
+.ti -1c
+.RI "int \fBnetsnmp_register_read_only_instance\fP (\fBnetsnmp_handler_registration\fP *reginfo)"
+.br
+.RI "\fIThis function injects a 'read only' handler into the handler chain prior to serializing/registering the handler.\fP"
+.ti -1c
+.RI "int \fBnetsnmp_register_int_instance\fP (const char *name, oid *reg_oid, size_t reg_oid_len, int *it, Netsnmp_Node_Handler *subhandler)"
+.br
+.RI "\fIThis function registers an int helper handler to a specified OID.\fP"
+.in -1c
+.SH "FUNCTION DOCUMENTATION"
+.PP 
+.SS "\fBnetsnmp_mib_handler\fP* netsnmp_get_instance_handler (void)"
+.PP
+Creates an instance helper handler, calls netsnmp_create_handler, which then could be registered, using \fBnetsnmp_register_handler()\fP.
+.PP
+\fBParameters: \fP
+.in +1c
+.TP
+\fB\fIvoid\fP\fP
+\fBReturns: \fP
+.in +1c
+Returns a pointer to a netsnmp_mib_handler struct which contains the handler's name and the access method 
+.PP
+Definition at line 46 of file instance.c.
+.PP
+References netsnmp_create_handler().
+.PP
+Referenced by netsnmp_register_instance(), netsnmp_register_read_only_instance(), netsnmp_register_read_only_scalar(), and netsnmp_register_scalar().
+.SS "int netsnmp_register_instance (\fBnetsnmp_handler_registration\fP * reginfo)"
+.PP
+This function registers an instance helper handler, which is a way of registering an exact OID such that GENEXT requests are handled entirely by the helper.
+.PP
+First need to inject it into the calling chain of the  handler defined by the netsnmp_handler_registration struct, reginfo.  The new handler is injected at the top of the list and will be the new handler to be called first. This function also injects a serialize  handler before actually calling netsnmp_register_handle, registering  reginfo.
+.PP
+\fBParameters: \fP
+.in +1c
+.TP
+\fB\fIreginfo\fP\fP
+a handler registration structure which could get created using netsnmp_create_handler_registration. Used to register an instance helper handler.
+.PP
+\fBReturns: \fP
+.in +1c
+ MIB_REGISTERED_OK is returned if the registration was a success. Failures are MIB_REGISTRATION_FAILED and MIB_DUPLICATE_REGISTRATION. 
+.PP
+\fBExamples: \fP
+.in +1c
+\fBdelayed_instance.c\fP.
+.PP
+Definition at line 71 of file instance.c.
+.PP
+References netsnmp_get_instance_handler(), netsnmp_inject_handler(), and netsnmp_register_serialize().
+.PP
+Referenced by netsnmp_register_int_instance().
+.SS "int netsnmp_register_int_instance (const char * name, oid * reg_oid, size_t reg_oid_len, int * it, Netsnmp_Node_Handler * subhandler)"
+.PP
+This function registers an int helper handler to a specified OID.
+.PP
+\fBParameters: \fP
+.in +1c
+.TP
+\fB\fIname\fP\fP
+the name used for registration pruposes.
+.TP
+\fB\fIreg_oid\fP\fP
+the OID where you want to register your integer at
+.TP
+\fB\fIreg_oid_len\fP\fP
+the length of the OID
+.TP
+\fB\fIit\fP\fP
+the integer value to be registered during initialization
+.TP
+\fB\fIsubhandler\fP\fP
+a handler to do whatever you want to do, otherwise use NULL to use the default int handler.
+.PP
+\fBReturns: \fP
+.in +1c
+ MIB_REGISTERED_OK is returned if the registration was a success. Failures are MIB_REGISTRATION_FAILED and MIB_DUPLICATE_REGISTRATION. 
+.PP
+\fBExamples: \fP
+.in +1c
+\fBscalar_int.c\fP.
+.PP
+Definition at line 252 of file instance.c.
+.PP
+References netsnmp_register_instance().
+.SS "int netsnmp_register_read_only_instance (\fBnetsnmp_handler_registration\fP * reginfo)"
+.PP
+This function injects a 'read only' handler into the handler chain prior to serializing/registering the handler.
+.PP
+The only purpose of this 'read only' handler is to return an appropriate error for any requests passed to it in a SET mode. Inserting it into your handler chain will ensure you're never asked to perform a SET request so you can ignore those error conditions.
+.PP
+\fBParameters: \fP
+.in +1c
+.TP
+\fB\fIreginfo\fP\fP
+a handler registration structure which could get created using netsnmp_create_handler_registration. Used to register a read only instance helper handler.
+.PP
+\fBReturns: \fP
+.in +1c
+ MIB_REGISTERED_OK is returned if the registration was a success. Failures are MIB_REGISTRATION_FAILED and MIB_DUPLICATE_REGISTRATION. 
+.PP
+Definition at line 96 of file instance.c.
+.PP
+References netsnmp_get_instance_handler(), netsnmp_get_read_only_handler(), netsnmp_inject_handler(), and netsnmp_register_serialize().

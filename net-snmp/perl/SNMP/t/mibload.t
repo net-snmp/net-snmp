@@ -19,9 +19,27 @@ $SNMP::verbose = 0;
 
 my $mib_file = 't/mib.txt';
 my $junk_mib_file = 'mib.txt';
-my $mibfile1 = "$mibdir/TCP-MIB.txt";
-my @mibdir = ("$mibdir");
-my $mibfile2 = "$mibdir/IPV6-TCP-MIB.txt";
+
+my $mibfile1;
+my @mibdir;
+my $mibfile2;
+
+if ($^O =~ /win32/i) {
+  $mibdir =~ s"/"\\"g;
+  $mibfile1 = "$mibdir\\TCP-MIB.txt";
+  @mibdir = ("$mibdir");
+  $mibfile2 = "$mibdir\\IPV6-TCP-MIB.txt";
+}
+else {
+  $mibfile1 = "$mibdir/TCP-MIB.txt";
+  @mibdir = ("$mibdir");
+  $mibfile2 = "$mibdir/IPV6-TCP-MIB.txt";
+}
+
+if ($^O =~ /win32/i) {
+  $mibdir =~ s"/"\\"g;
+}
+
 
 ######################################################################
 # See if we can find a mib to use, return of 0 means the file wasn't
@@ -65,4 +83,5 @@ $res = $SNMP::MIB{ipv6TcpConnState}{moduleID};
 ok($res =~ /^IPV6-TCP-MIB/);
 #################################################
 
+snmptest_cleanup();
 

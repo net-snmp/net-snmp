@@ -20,8 +20,12 @@ sub InitMakeParams {
 		  'PREREQ_PM'           => {},
 		  );
 
+    if ($ENV{'OSTYPE'} eq 'msys') {
+      $Params{'DEFINE'} = "-DMINGW_PERL";
+    }
+                  
     my ($snmp_lib, $snmp_llib, $sep);
-    if ($Config{'osname'} eq 'MSWin32') {
+    if (($Config{'osname'} eq 'MSWin32' && $ENV{'OSTYPE'} ne 'msys')) {
       $opts = NetSNMPGetOpts();	
       $snmp_lib = 'netsnmp.lib';
       $snmp_link_lib = 'netsnmp';
@@ -29,7 +33,7 @@ sub InitMakeParams {
 
       $Params{'DEFINE'} = "-DMSVC_PERL";
       
-      if ($opts->{'insource'}) {
+      if (lc($opts->{'insource'}) eq "true") {
 	$Params{'LIBS'} = "-L$basedir\\win32\\lib\\ -l$snmp_link_lib";
       }
       else {
@@ -42,6 +46,8 @@ sub InitMakeParams {
 	  $LibDir = find_files(["$snmp_lib"],\@LibDirs);
 	  if ($LibDir ne '') {
 	    $noLibDir = 0;
+            # Put quotes around LibDir to allow spaces in paths
+            $LibDir = '"' . $LibDir . '"';
 	  }
 	  else
 	  {
@@ -63,7 +69,7 @@ sub InitMakeParams {
 	$Params{'CCFLAGS'} = `$opts->{'nsconfig'} --cflags`;
 	chomp($Params{'CCFLAGS'});
 	$Params{'CCFLAGS'} .= " " . $Config{'ccflags'};
-	if ($opts->{'insource'} eq "true") {
+	if (lc($opts->{'insource'}) eq "true") {
 	    $Params{'LIBS'} = "-L../../snmplib/.libs -L../../snmplib/ " . $Params{'LIBS'};
 	    $Params{'CCFLAGS'} = "-I../../include " . $Params{'CCFLAGS'};
 #	} else {
@@ -85,7 +91,7 @@ sub NetSNMPGetOpts {
     $rootpath = "../" if (!$rootpath);
     $rootpath .= '/' if ($rootpath !~ /\/$/);
     
-    if ($Config{'osname'} eq 'MSWin32') {
+    if (($Config{'osname'} eq 'MSWin32' && $ENV{'OSTYPE'} ne 'msys')) {
       if ($ENV{'NET-SNMP-IN-SOURCE'})
       {
 	$ret{'insource'} = $ENV{'NET-SNMP-IN-SOURCE'};
@@ -123,7 +129,7 @@ sub NetSNMPGetOpts {
 	GetOptions("NET-SNMP-CONFIG=s" => \$ret{'nsconfig'},
 	           "NET-SNMP-IN-SOURCE=s" => \$ret{'insource'});
 
-	if ($ret{'insource'} eq "true" && $ret{'nsconfig'} eq "") {
+	if (lc($ret{'insource'}) eq "true" && $ret{'nsconfig'} eq "") {
 	    $ret{'nsconfig'}="sh ROOTPATH../net-snmp-config";
 	} elsif ($ret{'nsconfig'} eq "") {
 	    $ret{'nsconfig'}="net-snmp-config";
@@ -139,5 +145,19 @@ sub NetSNMPGetOpts {
     $ret{'rootpath'} = $rootpath;
 
     \%ret;
+}
+
+sub find_files {
+    my($f,$d) = @_;
+    my ($dir,$found,$file);
+    for $dir (@$d){
+	$found = 0;
+	for $file (@$f) {
+	    $found++ if -f "$dir/$file";
+	}
+	if ($found == @$f) {
+	    return $dir;
+	}
+    }
 }
 

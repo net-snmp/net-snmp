@@ -13,12 +13,6 @@ extern          "C" {
 
 #define TABLE_MFD_NAME "table_mfd"
 
-    /*
-     * forward declares
-     */
-    struct netsnmp_mfd_registration_s;
-    struct netsnmp_request_group;
-
     /* Legend: (test) [optional] <required>
      *
      * OLD              NEW

@@ -44,13 +44,22 @@ static time_t   cache_time = 0;
 #ifdef solaris2
 #include <kstat.h>
 
-#define MAX_DISKS 20
+#define MAX_DISKS 128
 
 static kstat_ctl_t *kc;
 static kstat_t *ksp;
 static kstat_io_t kio;
 static int      cache_disknr = -1;
 #endif                          /* solaris2 */
+
+#if defined(aix4) || defined(aix5)
+/*
+ * handle disk statistics via libperfstat
+ */
+#include <libperfstat.h>
+static perfstat_disk_t *ps_disk;	/* storage for all disk values */
+static int ps_numdisks;			/* number of disks in system, may change while running */
+#endif
 
 #if defined(bsdi3) || defined(bsdi4)
 #include <string.h>
@@ -164,6 +173,14 @@ init_diskio(void)
      * Get the I/O Kit communication handle.
      */
     IOMasterPort(bootstrap_port, &masterPort);
+#endif
+
+#if defined(aix4) || defined(aix5)
+    /*
+     * initialize values to gather information on first request
+     */
+    ps_numdisks = 0;
+    ps_disk = NULL;
 #endif
 }
 
@@ -837,3 +854,92 @@ var_diskio(struct variable * vp,
 #endif                          /* darwin */
 
 
+#if defined(aix4) || defined(aix5)
+/*
+ * collect statistics for all disks
+ */
+int
+collect_disks(void)
+{
+    time_t          now;
+    int             i;
+    perfstat_id_t   first;
+
+    /* cache valid? if yes, just return */
+    now = time(NULL);
+    if (ps_disk != NULL && cache_time + CACHE_TIMEOUT > now) {
+        return 0;
+    }
+
+    /* get number of disks we have */
+    i = perfstat_disk(NULL, NULL, sizeof(perfstat_disk_t), 0);
+    if(i <= 0) return 1;
+
+    /* if number of disks differs or structures are uninitialized, init them */
+    if(i != ps_numdisks || ps_disk == NULL) {
+        if(ps_disk != NULL) free(ps_disk);
+        ps_numdisks = i;
+        ps_disk = malloc(sizeof(perfstat_disk_t) * ps_numdisks);
+        if(ps_disk == NULL) return 1;
+    }
+
+    /* gather statistics about all disks we have */
+    strcpy(first.name, "");
+    i = perfstat_disk(&first, ps_disk, sizeof(perfstat_disk_t), ps_numdisks);
+    if(i != ps_numdisks) return 1;
+
+    cache_time = now;
+    return 0;
+}
+
+
+u_char         *
+var_diskio(struct variable * vp,
+           oid * name,
+           size_t * length,
+           int exact, size_t * var_len, WriteMethod ** write_method)
+{
+    static long     long_ret;
+    unsigned int    indx;
+
+    /* get disk statistics */
+    if (collect_disks())
+        return NULL;
+
+    if (header_simple_table
+        (vp, name, length, exact, var_len, write_method, ps_numdisks))
+        return NULL;
+
+    indx = (unsigned int) (name[*length - 1] - 1);
+    if (indx >= ps_numdisks)
+        return NULL;
+
+    /* deliver requested data on requested disk */
+    switch (vp->magic) {
+    case DISKIO_INDEX:
+        long_ret = (long) indx;
+        return (u_char *) & long_ret;
+    case DISKIO_DEVICE:
+        *var_len = strlen(ps_disk[indx].name);
+        return (u_char *) ps_disk[indx].name;
+    case DISKIO_NREAD:
+        long_ret = (signed long) ps_disk[indx].rblks * ps_disk[indx].bsize;
+        return (u_char *) & long_ret;
+    case DISKIO_NWRITTEN:
+        long_ret = (signed long) ps_disk[indx].wblks * ps_disk[indx].bsize;
+        return (u_char *) & long_ret;
+    case DISKIO_READS:
+        long_ret = (signed long) ps_disk[indx].xfers;
+        return (u_char *) & long_ret;
+    case DISKIO_WRITES:
+        long_ret = (signed long) 0;	/* AIX has just one value for read/write transfers */
+        return (u_char *) & long_ret;
+
+    default:
+        ERROR_MSG("diskio.c: don't know how to handle this request.");
+    }
+
+    /* return NULL in case of error */
+    return NULL;
+}
+#endif                          /* aix 4/5 */

@@ -1,4 +1,4 @@
-.TH "old_api: Calls mib module code written in the old style of code." 3 "13 Nov 2003" "net-snmp" \" -*- nroff -*-
+.TH "old_api: Calls mib module code written in the old style of code." 3 "17 Feb 2004" "net-snmp" \" -*- nroff -*-
 .ad l
 .nh
 .SH NAME
@@ -8,7 +8,7 @@ More...
 
 .in +1c
 .ti -1c
-.RI "netsnmp_mib_handler * \fBget_old_api_handler\fP (void)"
+.RI "\fBnetsnmp_mib_handler\fP * \fBget_old_api_handler\fP (void)"
 .br
 .RI "\fIreturns a old_api handler that should be the final calling handler.\fP"
 .ti -1c
@@ -20,7 +20,7 @@ More...
 .br
 .RI "\fIregisters a row within a mib table\fP"
 .ti -1c
-.RI "int \fBnetsnmp_old_api_helper\fP (netsnmp_mib_handler *handler, netsnmp_handler_registration *reginfo, netsnmp_agent_request_info *reqinfo, netsnmp_request_info *requests)"
+.RI "int \fBnetsnmp_old_api_helper\fP (\fBnetsnmp_mib_handler\fP *handler, \fBnetsnmp_handler_registration\fP *reginfo, netsnmp_agent_request_info *reqinfo, netsnmp_request_info *requests)"
 .br
 .RI "\fIimplements the old_api handler\fP"
 .in -1c
@@ -31,7 +31,7 @@ This is a backwards compatilibity module that allows code written in the old API
 Use it by calling \fBnetsnmp_register_old_api()\fP. 
 .SH "FUNCTION DOCUMENTATION"
 .PP 
-.SS "netsnmp_mib_handler* get_old_api_handler (void)"
+.SS "\fBnetsnmp_mib_handler\fP* get_old_api_handler (void)"
 .PP
 returns a old_api handler that should be the final calling handler.
 .PP
@@ -42,13 +42,13 @@ Definition at line 40 of file old_api.c.
 References netsnmp_create_handler(), and netsnmp_old_api_helper().
 .PP
 Referenced by netsnmp_register_mib_table_row(), and netsnmp_register_old_api().
-.SS "int netsnmp_old_api_helper (netsnmp_mib_handler * handler, netsnmp_handler_registration * reginfo, netsnmp_agent_request_info * reqinfo, netsnmp_request_info * requests)"
+.SS "int netsnmp_old_api_helper (\fBnetsnmp_mib_handler\fP * handler, \fBnetsnmp_handler_registration\fP * reginfo, netsnmp_agent_request_info * reqinfo, netsnmp_request_info * requests)"
 .PP
 implements the old_api handler
 .PP
 Definition at line 224 of file old_api.c.
 .PP
-References netsnmp_oid_equals(), netsnmp_request_add_list_data(), netsnmp_request_get_list_data(), and SNMP_MALLOC_TYPEDEF.
+References netsnmp_agent_request_info_s::asp, netsnmp_handler_registration_s::handlerName, netsnmp_agent_request_info_s::mode, variable_list::name, variable_list::name_length, netsnmp_oid_equals(), netsnmp_request_add_list_data(), netsnmp_request_get_list_data(), netsnmp_set_request_error(), netsnmp_request_info_s::next, netsnmp_request_info_s::requestvb, netsnmp_handler_registration_s::rootoid, netsnmp_handler_registration_s::rootoid_len, SNMP_MALLOC_TYPEDEF, snmp_set_var_typed_value(), variable_list::type, variable_list::val, and variable_list::val_len.
 .PP
 Referenced by get_old_api_handler().
 .SS "int netsnmp_register_mib_table_row (const char * moduleName, struct variable * var, size_t varsize, size_t numvars, oid * mibloc, size_t mibloclen, int priority, int var_subid, netsnmp_session * ss, const char * context, int timeout, int flags)"
@@ -57,7 +57,7 @@ registers a row within a mib table
 .PP
 Definition at line 110 of file old_api.c.
 .PP
-References get_old_api_handler(), netsnmp_handler_registration_free(), netsnmp_register_handler_nocallback(), and SNMP_MALLOC_TYPEDEF.
+References get_old_api_handler(), netsnmp_handler_registration_free(), netsnmp_register_handler_nocallback(), snmp_call_callbacks(), and SNMP_MALLOC_TYPEDEF.
 .SS "int netsnmp_register_old_api (const char * moduleName, struct variable * var, size_t varsize, size_t numvars, oid * mibloc, size_t mibloclen, int priority, int range_subid, oid range_ubound, netsnmp_session * ss, const char * context, int timeout, int flags)"
 .PP
 Registers an old API set into the mib tree.

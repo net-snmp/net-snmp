@@ -42,7 +42,7 @@ sub NetSNMPGetOpts {
 	GetOptions("NET-SNMP-CONFIG=s" => \$ret{'nsconfig'},
 	           "NET-SNMP-IN-SOURCE=s" => \$ret{'insource'});
 
-	if ($ret{'insource'} eq "true" && $ret{'nsconfig'} eq "") {
+	if (lc($ret{'insource'}) eq "true" && $ret{'nsconfig'} eq "") {
 	    $ret{'nsconfig'}="sh ROOTPATH../net-snmp-config";
 	} elsif ($ret{'nsconfig'} eq "") {
 	    $ret{'nsconfig'}="net-snmp-config";
@@ -58,5 +58,19 @@ sub NetSNMPGetOpts {
     $ret{'rootpath'} = $rootpath;
 
     \%ret;
+}
+
+sub find_files {
+    my($f,$d) = @_;
+    my ($dir,$found,$file);
+    for $dir (@$d){
+	$found = 0;
+	for $file (@$f) {
+	    $found++ if -f "$dir/$file";
+	}
+	if ($found == @$f) {
+	    return $dir;
+	}
+    }
 }
 

@@ -17,11 +17,10 @@ typedef struct handler_cb_data_s {
    SV *perl_cb;
 } handler_cb_data;
 
-#define NETSNMP_NAMEBUF_LEN 128
 typedef struct netsnmp_oid_s {
     unsigned int        *name;
     unsigned int         len;
-    unsigned int         namebuf[ NETSNMP_NAMEBUF_LEN ];
+    unsigned int         namebuf[ MAX_OID_LEN ];
 } netsnmp_oid;
 
 static int have_done_agent = 0;
@@ -359,7 +358,7 @@ nsahr_getRootOID(me)
         int i;
         netsnmp_oid *o;
         netsnmp_handler_registration *reginfo;
-        SV *optr, *arg, *rarg;
+        SV *arg, *rarg;
     PPCODE:
     {
         dSP;
@@ -398,7 +397,7 @@ getOID(me)
         int i;
         netsnmp_oid *o;
         netsnmp_request_info *request;
-        SV *optr, *arg, *rarg;
+        SV *arg, *rarg;
     PPCODE:
     {
         dSP;
@@ -565,7 +564,7 @@ nari_setValue(me, type, value)
 	      if ((SvTYPE(value) == SVt_IV) || (SvTYPE(value) == SVt_PVMG)) {
 		  /* Good - got a real one (or a blessed object that we hope will turn out OK) */
 		  ltmp = SvIV(value);
-		  snmp_set_var_typed_value(request->requestvb, type,
+		  snmp_set_var_typed_value(request->requestvb, (u_char)type,
 					   (u_char *) &ltmp, sizeof(ltmp));
 		  RETVAL = 1;
 		  break;
@@ -580,7 +579,7 @@ nari_setValue(me, type, value)
 			break;
 		  }
 
-		  snmp_set_var_typed_value(request->requestvb, type,
+		  snmp_set_var_typed_value(request->requestvb, (u_char)type,
 					   (u_char *) &ltmp, sizeof(ltmp));
 		  RETVAL = 1;
 		  break;
@@ -601,7 +600,7 @@ nari_setValue(me, type, value)
 	      if ((SvTYPE(value) == SVt_IV) || (SvTYPE(value) == SVt_PVMG)) {
 		  /* Good - got a real one (or a blessed scalar which we have to hope will turn out OK) */
 		  utmp = SvIV(value);
-                  snmp_set_var_typed_value(request->requestvb, type,
+                  snmp_set_var_typed_value(request->requestvb, (u_char)type,
                                        (u_char *) &utmp, sizeof(utmp));
 		  RETVAL = 1;
 		  break;
@@ -616,7 +615,7 @@ nari_setValue(me, type, value)
 			break;
 		  }
 
-                  snmp_set_var_typed_value(request->requestvb, type,
+                  snmp_set_var_typed_value(request->requestvb, (u_char)type,
                                        (u_char *) &utmp, sizeof(utmp));
 		  RETVAL = 1;
 		  break;
@@ -641,7 +640,7 @@ nari_setValue(me, type, value)
 	      /* Find length of string (strlen will *not* do, as these are binary strings) */
 	      stringptr = SvPV(value, stringlen);
 
-              snmp_set_var_typed_value(request->requestvb, type,
+              snmp_set_var_typed_value(request->requestvb, (u_char)type,
                                        (u_char *) stringptr,
                                        stringlen);
               RETVAL = 1;
@@ -678,7 +677,7 @@ nari_setValue(me, type, value)
 			break;
 	      }
 
-              snmp_set_var_typed_value(request->requestvb, type,
+              snmp_set_var_typed_value(request->requestvb, (u_char)type,
                                    stringptr, stringlen);
               RETVAL = 1;
               break;
@@ -706,7 +705,7 @@ nari_setValue(me, type, value)
 		  /* fprintf(stderr, "setValue returning OID length %d\n", myoid_len); */
 
                   request = (netsnmp_request_info *) SvIV(SvRV(me));
-                  snmp_set_var_typed_value(request->requestvb, type,
+                  snmp_set_var_typed_value(request->requestvb, (u_char)type,
                                            (u_char *) myoid, (myoid_len * sizeof(myoid[0])) );
               }
 
@@ -786,3 +785,4 @@ narqi_setMode(me, newvalue)
         
 
 MODULE = NetSNMP::agent		PACKAGE = NetSNMP::agent		
+

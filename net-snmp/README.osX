@@ -1,0 +1,40 @@
+README.osX
+$Id$
+
+This is what I had to do to get it to work for me. Your mileage may vary.
+
+1) Edit configure. Around line 9840, change
+
+   MODULECPP="$CPP -I${srcdir}/include -I${srcdir}/agent/mibgroup"
+
+to
+
+   MODULECPP="cpp $CPPFLAGS -I${srcdir}/include -I${srcdir}/agent/mibgroup"
+
+2) run configure like so:
+
+   ./configure --with-out-mib-modules="ucd-snmp/diskio mibII/tcpTable mibII/udpTable"
+
+3) After configure finished, edit the top level Makefile. Around line 142, change
+
+  $(CPP) $(srcdir)/sedscript.in | egrep '^s[/#]' | sed 's/REMOVEME//g;s# */#/#g;s/ *#/#/g;s#/ *#/#g;s/# g/#g/;' > sedscript
+
+to
+
+  cpp $(srcdir)/sedscript.in | egrep '^s[/#]' | sed 's/REMOVEME//g;s# */#/#g;s/ *#/#/g;s#/ *#/#g;s/# g/#g/;' > sedscript
+
+4) edit agent/mibgroup/mibII/tcp.c. Around line 343, change
+
+        ret_value = TCP_Count_Connections();
+to
+
+        ret_value = 0;
+
+5) run make and make install as per the usual directions.
+
+
+I get an error about nlist not finding icmpstat, but the agent runs and
+returns data.
+
+If this doesn't work for you, or you have fixes for any of the above tables,
+please post to <net-snmp-coders@lists.sourceforge.net>. Thanks!

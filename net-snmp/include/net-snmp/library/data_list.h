@@ -5,6 +5,21 @@
  *
  * External definitions for functions and variables in netsnmp_data_list.c.
  */
+/* Portions of this file are subject to the following copyright(s).  See
+ * the Net-SNMP's COPYING file for more details and other copyrights
+ * that may apply:
+ */
+/*
+ * Portions of this file are copyrighted by:
+ * Copyright © 2003 Sun Microsystems, Inc. All rights reserved.
+ * Use is subject to license terms specified in the COPYING file
+ * distributed with the Net-SNMP package.
+ */
+/*
+ * @file netsnmp_data_list.h
+ * @addtogroup agent
+ * @addtogroup library
+ */
 
 #ifndef DATA_LIST_H
 #define DATA_LIST_H
@@ -20,11 +35,16 @@ extern          "C" {
     typedef int     (Netsnmp_Save_List_Data) (char *buf, size_t buf_len, void *);
     typedef void *  (Netsnmp_Read_List_Data) (char *buf, size_t buf_len);
 
+/** @struct netsnmp_data_list_s
+ * used to iterate through lists of data
+ */
     typedef struct netsnmp_data_list_s {
         struct netsnmp_data_list_s *next;
         char           *name;
-        void           *data;   /* The pointer to the data passed on. */
-        Netsnmp_Free_List_Data *free_func;      /* must know how to free netsnmp_data_list->data */
+       /** The pointer to the data passed on. */
+        void           *data;
+       /** must know how to free netsnmp_data_list->data */
+        Netsnmp_Free_List_Data *free_func;
     } netsnmp_data_list;
 
     typedef struct netsnmp_data_list_saveinfo_s {
@@ -75,3 +95,4 @@ extern          "C" {
 }
 #endif
 #endif
+/** @} */

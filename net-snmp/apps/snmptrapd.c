@@ -778,6 +778,7 @@ main(int argc, char *argv[])
      */
     if (agentx_subagent) {
 #ifdef USING_AGENTX_SUBAGENT_MODULE
+	void  init_subagent(void);
         init_subagent();
 #endif
         init_notification_log();

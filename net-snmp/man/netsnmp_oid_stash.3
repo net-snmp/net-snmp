@@ -1,4 +1,4 @@
-.TH "Store and retrieve data referenced by an OID." 3 "13 Nov 2003" "net-snmp" \" -*- nroff -*-
+.TH "Store and retrieve data referenced by an OID." 3 "17 Feb 2004" "net-snmp" \" -*- nroff -*-
 .ad l
 .nh
 .SH NAME
@@ -207,6 +207,8 @@ must be a pointer to a OID array of length MAX_OID_LEN.
 must be 0 for the top level call. 
 .PP
 Definition at line 332 of file oid_stash.c.
+.PP
+References read_config_store().
 .PP
 Referenced by netsnmp_oid_stash_store_all().
 .SS "int netsnmp_oid_stash_store_all (int majorID, int minorID, void * serverarg, void * clientarg)"

@@ -28,7 +28,7 @@ sub NetSNMPGetOpts {
     $rootpath = "../" if (!$rootpath);
     $rootpath .= '/' if ($rootpath !~ /\/$/);
     
-    if ($Config{'osname'} eq 'MSWin32') {
+    if (($Config{'osname'} eq 'MSWin32' && $ENV{'OSTYPE'} ne 'msys')) {
       if ($ENV{'NET-SNMP-IN-SOURCE'})
       {
 	$ret{'insource'} = $ENV{'NET-SNMP-IN-SOURCE'};
@@ -59,7 +59,7 @@ sub NetSNMPGetOpts {
 	GetOptions("NET-SNMP-CONFIG=s" => \$ret{'nsconfig'},
 	           "NET-SNMP-IN-SOURCE=s" => \$ret{'insource'});
 
-	if ($ret{'insource'} eq "true" && $ret{'nsconfig'} eq "") {
+	if (lc($ret{'insource'}) eq "true" && $ret{'nsconfig'} eq "") {
 	    $ret{'nsconfig'}="sh ROOTPATH../net-snmp-config";
 	} elsif ($ret{'nsconfig'} eq "") {
 	    $ret{'nsconfig'}="net-snmp-config";

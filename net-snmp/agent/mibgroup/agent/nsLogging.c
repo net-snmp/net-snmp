@@ -80,8 +80,7 @@ get_first_logging_entry(void **loop_context, void **data_context,
                       netsnmp_variable_list *index,
                       netsnmp_iterator_info *data)
 {
-    extern netsnmp_log_handler  *logh_head;
-
+	netsnmp_log_handler  *logh_head = get_logh_head();
     if ( !logh_head )
         return NULL;
 

@@ -20,3 +20,11 @@
 #undef PROC_SYMBOL
 #undef TOTAL_MEMORY_SYMBOL
 #undef MBSTAT_SYMBOL
+
+/*
+ * solaris cc doesn't like our use of inline. Until we figure out why,
+ * turn of inline.
+ */
+#ifndef __GNUC__
+#  define NETSNMP_NO_INLINE 1
+#endif

@@ -16,8 +16,9 @@ INSTALLHEADERS=version.h
 INCLUDESUBDIR=system
 INCLUDESUBDIRHEADERS= aix.h bsd.h bsdi3.h bsdi4.h bsdi.h cygwin.h darwin.h \
 	dynix.h freebsd2.h freebsd3.h freebsd4.h freebsd.h generic.h hpux.h \
-	irix.h linux.h mips.h netbsd.h openbsd.h osf5.h solaris2.6.h solaris2.7.h \
-	solaris2.8.h solaris2.9.h solaris.h sunos.h svr5.h sysv.h ultrix4.h
+	irix.h linux.h mingw32.h mips.h netbsd.h openbsd.h osf5.h \
+	solaris2.6.h solaris2.7.h solaris2.8.h solaris2.9.h solaris.h \
+	sunos.h svr5.h sysv.h ultrix4.h
 INCLUDESUBDIR2=machine
 INCLUDESUBDIRHEADERS2=generic.h
 INSTALLBUILTHEADERS=include/net-snmp/net-snmp-config.h
@@ -180,6 +181,7 @@ configclean: makefileclean
 		net-snmp-config net-snmp-config-x configure-summary
 	rm -f mibs/.index
 	rm -f include/net-snmp/agent/mib_module_config.h		\
+		include/net-snmp/library/snmpv3-security-includes.h \
 		snmplib/snmpsm_init.h                   \
 		agent/mibgroup/mib_module_includes.h 	\
 		agent/mibgroup/mib_module_inits.h 	\

@@ -218,7 +218,7 @@ tcpTable_handler(netsnmp_mib_handler          *handler,
 #endif
                 break;
             case TCPCONNLOCALPORT:
-                port = ntohs(entry->TCPTABLE_LOCALPORT);
+                port = ntohs((u_short)entry->TCPTABLE_LOCALPORT);
 	        snmp_set_var_typed_value(requestvb, ASN_INTEGER,
                                  (u_char *)&port, sizeof(port));
                 break;
@@ -234,7 +234,7 @@ tcpTable_handler(netsnmp_mib_handler          *handler,
 #endif
                 break;
             case TCPCONNREMOTEPORT:
-                port = ntohs(entry->TCPTABLE_REMOTEPORT);
+                port = ntohs((u_short)entry->TCPTABLE_REMOTEPORT);
 	        snmp_set_var_typed_value(requestvb, ASN_INTEGER,
                                  (u_char *)&port, sizeof(port));
                 break;
@@ -317,7 +317,7 @@ tcpTable_next_entry( void **loop_context,
     snmp_set_var_value(idx, (u_char *)&tcp_head[i].TCPTABLE_LOCALADDRESS,
                                 sizeof(tcp_head[i].TCPTABLE_LOCALADDRESS));
 
-    port = ntohs(tcp_head[i].TCPTABLE_LOCALPORT);
+    port = ntohs((u_short)tcp_head[i].TCPTABLE_LOCALPORT);
     idx = idx->next_variable;
     snmp_set_var_value(idx, (u_char*)&port, sizeof(port));
 
@@ -325,7 +325,7 @@ tcpTable_next_entry( void **loop_context,
     snmp_set_var_value(idx, (u_char *)&tcp_head[i].TCPTABLE_REMOTEADDRESS,
                                 sizeof(tcp_head[i].TCPTABLE_REMOTEADDRESS));
 
-    port = ntohs(tcp_head[i].TCPTABLE_REMOTEPORT);
+    port = ntohs((u_short)tcp_head[i].TCPTABLE_REMOTEPORT);
     idx = idx->next_variable;
     snmp_set_var_value(idx, (u_char*)&port, sizeof(port));
 
@@ -342,8 +342,15 @@ tcpTable_next_entry( void **loop_context,
 void
 tcpTable_free(netsnmp_cache *cache, void *magic)
 {
-    if (tcp_head)
+#ifdef WIN32
+    if (tcp_head) {
+		/* the allocated structure is a count followed by table entries */
+		free((char *)(tcp_head) - sizeof(DWORD));
+	}
+#else
+	if (tcp_head)
         free(tcp_head);
+#endif
     tcp_head  = NULL;
     tcp_size  = 0;
     tcp_estab = 0;
@@ -622,7 +629,6 @@ tcpTable_load(netsnmp_cache *cache, void *vmagic)
     PMIB_TCPTABLE pTcpTable = NULL;
     DWORD         dwActualSize = 0;
     DWORD         status = NO_ERROR;
-    int           i;
 
     /*
      * query for the buffer size needed 
@@ -638,23 +644,28 @@ tcpTable_load(netsnmp_cache *cache, void *vmagic)
         }
     }
 
-    /*
-     * Count the number of established connections
-     * Probably not actually necessary for Windows
-     */
-    for (i = 0; i < tcp_size; i++) {
-        if (tcp_head[i].dwState == 5 /* established */ ||
-            tcp_head[i].dwState == 8 /*  closeWait  */ )
-            tcp_estab++;
-    }
-
     if (status == NO_ERROR) {
+        int           i;
+
         DEBUGMSGTL(("mibII/tcpTable", "Loaded TCP Table\n"));
-        tcp_size = pTcpTable->dwNumEntries;
+        tcp_size = pTcpTable->dwNumEntries -1;  /* entries are counted starting with 0 */
         tcp_head = pTcpTable->table;
+
+	/*
+	 * Count the number of established connections
+	 * Probably not actually necessary for Windows
+	 */
+	for (i = 0; i < tcp_size; i++) {
+		if (tcp_head[i].dwState == 5 /* established */ ||
+			tcp_head[i].dwState == 8 /*  closeWait  */ )
+			tcp_estab++;
+	}
         return 0;
     }
+
     DEBUGMSGTL(("mibII/tcpTable", "Failed to load TCP Table (win32)\n"));
+	if (pTcpTable)
+		free(pTcpTable);
     return -1;
 }
 #else                           /* WIN32 */
