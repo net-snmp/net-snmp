@@ -224,6 +224,9 @@
 /* Define if you have the setenv function.  */
 #undef HAVE_SETENV
 
+/* Define if you have the vsnprintf function.  */
+#undef HAVE_VSNPRINTF
+
 /* Define if you have the setlocale function.  */
 #undef HAVE_SETLOCALE
 
