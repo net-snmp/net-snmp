@@ -10,33 +10,45 @@
     <p><em>NOTE: this tutorial is based on the code for the upcoming release
         5.2 (currently in the main CVS line). If you generate code from a
         release prior to 5.2, your results may vary.</em>
+    </p>
+    <p>
+      One of the questions that comes up on our mailing lists a lot
+      is: <i>I just ran <a href="/man/mib2c.html">mib2c</a> on my
+      MIB. What do I do now?</i>.  This tutorial, and the MIB for
+      Dummies code approach, is designed to make your life as easy as
+      possible.  In this tutorial we'll walk you through the entire
+      process of creating C code starting from only a MIB definition.
+      This should answer this question for you, assuming you're
+      willing to use the MIB for Dummies approach to coding.
     </p><p>
-      One of the questions that comes up on our mailing lists a lot is:
-      <i>I just ran mib2c on my MIB. What do I do now?</i>. The work that needs
-      to be done varies by the mib2c configuration file used to generate the
-      template code. Some, like the <b>iterator</b> configuration file, simply
-      generate a framework for locating data, but leave all the data processing
-      details to the user. Others, like the <b>array iterator</b>, also
-      generate code to handle some of the details. All of the, however, require
-      a good bit of knowledge about SNMP.
+    </p><p>
+      One of the output code styles that mib2c supports is a style
+      called <i>"MIB for Dummies"</i>.  This configuration file is
+      called <i>"mib2c.mfd.conf"</i> and is what you would pass to the
+      -c argument of mib2c to get it to produce the style of code this
+      tutorial is going to discuss.  It will generate mib-module code
+      which is designed to plug into an agent when developing Net-SNMP
+      agent extensions.
     </p><p>
       One of the primary motivations for writing the MIBs for Dummies
-      configuration file was to reduce the amount of SNMP knowledge needed to
-      implement a MIB. When using the MFD configuration file, mib2c will
-      generate <i>glue</i> code that hides some of the SNMP (or Net-SNMP)
-      specific details for implementing a module, and allows the rest of the
-      template code to use simple C data structures that you are probably more
-      familiar with. Most of the template functions are short and simple, with
-      a clearly defined purpose.
+      configuration file was to reduce the amount of SNMP knowledge
+      needed to implement a MIB. When using the MFD configuration file
+      (mib2c.mfd.conf), mib2c will generate <i>glue</i> code that
+      hides as much of the SNMP (or Net-SNMP) specific details for
+      implementing a module, and allows the rest of the template code
+      to use simple C data structures that you are probably more
+      familiar with. Most of the template functions are short and
+      simple, with a clearly defined purpose.
     </p><p>
-      Another motivation was to separate the method used to locate the data
-      for a request from the methods that manipulate the data. The data lookup
-      for MFD modules uses the <var>netsnmp_container</var> interface. Data
-      ordering can be tricky in SNMP, since the lexicographical ordering
-      required by SNMP specification isn't always intuitive, and the index
-      specified in the MIB you have to implement might
-      not match the order in which your data is currently stored. But the
-      MFD configuration file can help you out with this problem too.
+      Another motivation was to separate the method used to locate the
+      data for an incoming request to the SNMP agent from the methods
+      that manipulate the data. The data lookup for MFD modules uses
+      the <var>netsnmp_container</var> interface. Data ordering can be
+      tricky in SNMP, since the lexicographical ordering required by
+      SNMP specification isn't always intuitive, and the index
+      specified in the MIB you have to implement might not match the
+      order in which your data is currently stored. But the MFD
+      configuration file can help you out with this problem too.
     </p>
     <h2>A Quick Overview</h2>
     <p>
@@ -96,10 +108,10 @@
       broken down into several steps.
     </p>
     <ul>
-      <li>Generating the template code
+      <li>Generating the template code by running mib2c appropriately
       <li>Implementing a <var>netsnmp_container</var> for data access
-      <li>Implementing <b>GET</b> requests functions
-      <li>Implementing <b>SET</b> requests functions
+      <li>Implementing <b>GET</b> request functions
+      <li>Implementing <b>SET</b> request functions
     </ul>
     </p>
     <h3>Basic Tables</h3>
@@ -108,7 +120,8 @@
       MIB tables and data stores.
     </p>
     <ul>
-      <li><a href="if-mib/index.html">IF-MIB Tables</a>
+      <li><a href="if-mib/index.html">IF-MIB Tables</a> (A description
+      of the IF-MIB can be found <a href="http://www.net-snmp.org/mibs/ifMIB.html">here</a>)
         <ul>
           <li><a href="if-mib/ifTable/index.html">ifTable</a>: A simple
             table with a single integer index which gets it's data from
@@ -140,7 +153,7 @@
 Version $Revision$
 <!-- Created: Fri Oct 24 10:41:49 EDT 2003 -->
 <!-- hhmts start -->
-Last modified: Thu Apr 22 22:57:41 EDT 2004
+Last modified: Fri Apr 30 14:34:36 PDT 2004
 <!-- hhmts end -->
 <!--#include virtual="/sfbutton.html" -->
   </body>
