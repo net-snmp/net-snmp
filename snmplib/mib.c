@@ -1719,7 +1719,7 @@ get_node(char *name,
 		 *  requested name is of the form
 		 *	"module:subidentifier"
 		 */
-	module = malloc(cp-name+1);
+	module = (char *)malloc(cp-name+1);
 	memcpy(module,name,cp-name);
 	module[cp-name] = 0;
 	cp++;		/* cp now point to the subidentifier */
