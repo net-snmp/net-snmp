@@ -81,7 +81,7 @@ DLL_IMPORT extern struct tree *Mib;
 
 #define TYPE_UNKNOWN 0
 #define MAX_TYPE_NAME_LEN 16
-#define STR_BUF_SIZE 1024
+#define STR_BUF_SIZE (MAX_TYPE_NAME_LEN * MAX_OID_LEN)
 #define ENG_ID_BUF_SIZE 32
 
 #define SYS_UPTIME_OID_LEN 9
@@ -153,8 +153,8 @@ typedef struct bulktbl {
    oid	req_oid[MAX_OID_LEN];	/* The OID originally requested.    */
    oid	last_oid[MAX_OID_LEN];	/* Last-seen OID under this branch. */
    AV	*vars;			/* Array of Varbinds for this OID.  */
-   char	req_len;		/* Length of requested OID.         */
-   char	last_len;		/* Length of last-seen OID.         */
+   int	req_len;		/* Length of requested OID.         */
+   int	last_len;		/* Length of last-seen OID.         */
    char norepeat;		/* Is this a non-repeater OID?      */
    char	complete;		/* Non-zero if this tree complete.  */
    char	ignore;			/* Ignore this OID, not requested.  */

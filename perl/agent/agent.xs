@@ -17,11 +17,10 @@ typedef struct handler_cb_data_s {
    SV *perl_cb;
 } handler_cb_data;
 
-#define NETSNMP_NAMEBUF_LEN 128
 typedef struct netsnmp_oid_s {
     unsigned int        *name;
     unsigned int         len;
-    unsigned int         namebuf[ NETSNMP_NAMEBUF_LEN ];
+    unsigned int         namebuf[ MAX_OID_LEN ];
 } netsnmp_oid;
 
 static int have_done_agent = 0;
