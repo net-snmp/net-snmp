@@ -256,7 +256,7 @@ tarclean:
 	fi
 
 commentcheck:
-	grep -n // `find $(srcdir) -name \*.\[ch\]` | egrep -v "(ftp|http|/win32/)"
+	grep -n // `find $(srcdir)/ -name \*.\[ch\]` | egrep -v "(ftp|http|/win32/)"
 
 dist: version tag tar
 
