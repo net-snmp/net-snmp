@@ -1,5 +1,6 @@
 ########################################################################
 ## Defaults
+## $Id$
 ########################################################################
 @if "$m2c_node_name" ne "$node"@
 @  eval $m2c_node_name = $node@
@@ -59,12 +60,18 @@
 @  else@
 @    if $m2c_node_needlength == 1@
 @      eval $m2c_node_lh = "(* ${node}_ptr_ptr)"@
-@      eval $m2c_node_srh = "${node}_ptr"@
 @    else@
 @      eval $m2c_node_lh = "(* ${node}_ptr)"@
-@      eval $m2c_node_srh = "${node}"@
 @    end@
 @    eval $m2c_node_lhs = "(* ${node}_len_ptr)"@
-@    eval $m2c_node_srhs = "${node}_len"@
 @  end@
+########################################################################
+##
+########################################################################
+@  if $m2c_node_needlength == 1@
+@    eval $m2c_node_srh = "${node}_ptr"@
+@  else@
+@    eval $m2c_node_srh = "${node}"@
+@  end@
+@  eval $m2c_node_srhs = "${node}_len"@
 @end@
