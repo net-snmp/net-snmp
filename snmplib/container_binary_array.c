@@ -512,7 +512,7 @@ netsnmp_container_get_binary_array_noalloc(netsnmp_container *c)
         
     c->get_size = _ba_size;
     c->init = NULL;
-    c->free = _ba_free;
+    c->cfree = _ba_free;
     c->insert = _ba_insert;
     c->remove = _ba_remove;
     c->find = _ba_find;

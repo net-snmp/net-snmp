@@ -215,13 +215,13 @@ int CONTAINER_FREE(netsnmp_container *x)
         while(tmp->next)
             tmp = tmp->next;
         while(tmp) {
-            rc = tmp->free(tmp);
+            rc = tmp->cfree(tmp);
             if (rc)
                 snmp_log(LOG_ERR,"error on subcontainer free (%d)", rc);
             tmp = tmp->prev;
         }
     }
-    return x->free(x);
+    return x->cfree(x);
 }
 #endif
 
@@ -231,7 +231,7 @@ int CONTAINER_FREE(netsnmp_container *x)
 void
 netsnmp_init_container(netsnmp_container         *c,
                        netsnmp_container_rc      *init,
-                       netsnmp_container_rc      *free,
+                       netsnmp_container_rc      *cfree,
                        netsnmp_container_size    *size,
                        netsnmp_container_compare *cmp,
                        netsnmp_container_op      *ins,
@@ -242,7 +242,7 @@ netsnmp_init_container(netsnmp_container         *c,
         return;
 
     c->init = init;
-    c->free = free;
+    c->cfree = cfree;
     c->get_size = size;
     c->compare = cmp;
     c->insert = ins;
