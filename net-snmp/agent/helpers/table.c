@@ -710,7 +710,7 @@ netsnmp_closest_column(unsigned int current,
 {
     unsigned int    closest = 0;
     char            done = 0;
-    char            idx;
+    int             idx;
 
     if (valid_columns == NULL)
         return 0;
@@ -738,10 +738,10 @@ netsnmp_closest_column(unsigned int current,
             }
 
             if (current >
-                valid_columns->details.list[valid_columns->list_count])
+                valid_columns->details.list[(int)valid_columns->list_count])
                 continue;       /* not in list range. */
 
-            for (idx = 0; idx < valid_columns->list_count; ++idx) {
+            for (idx = 0; idx < (int)valid_columns->list_count; ++idx) {
                 if (current == valid_columns->details.list[idx]) {
                     closest = current;
                     done = 1;   /* can not get any closer! */
