@@ -228,6 +228,7 @@ __libraries_init()
     
         snmp_set_quick_print(1);
         ds_set_boolean(DS_LIBRARY_ID, DS_LIB_DONT_BREAKDOWN_OIDS, 1);
+        ds_set_int(DS_LIBRARY_ID, DS_LIB_PRINT_SUFFIX_ONLY, 1);
 
         SOCK_STARTUP;
     
@@ -1161,7 +1162,10 @@ void *cb_data;
   SV *tmp_sv;
   int type;
   char tmp_type_str[MAX_TYPE_NAME_LEN];
-  char str_buf[STR_BUF_SIZE];
+  char str_buf[STR_BUF_SIZE], *str_bufp = str_buf;
+  size_t str_buf_len = sizeof(str_buf);
+  size_t out_len = 0;
+  int buf_over = 0;
   char *label;
   char *iid;
   char *cp;
@@ -1257,8 +1261,12 @@ void *cb_data;
          sv_bless(varbind_ref, gv_stashpv("SNMP::Varbind",0));
          av_push(varlist, varbind_ref);
          *str_buf = '.';
-         tp = get_tree(vars->name,vars->name_length,
-                       get_tree_head());
+         *(str_buf+1) = '\0';
+         out_len = 0;
+         tp = netsnmp_sprint_realloc_objid_tree(&str_bufp, &str_buf_len,
+                                                &out_len, 0, &buf_over,
+                                                vars->name,vars->name_length);
+         str_buf[sizeof(str_buf)-1] = '\0';
          if (__is_leaf(tp)) {
             type = tp->type;
          } else {
@@ -1814,7 +1822,10 @@ _bulkwalk_recv_pdu(walk_context *context, netsnmp_pdu *pdu)
    netsnmp_variable_list *vars;
    struct tree	*tp;
    char		type_str[MAX_TYPE_NAME_LEN];
-   char		str_buf[STR_BUF_SIZE];
+   char		str_buf[STR_BUF_SIZE], *str_bufp = str_buf;
+   size_t str_buf_len = sizeof(str_buf);
+   size_t out_len = 0;
+   int buf_over = 0;
    char		*label;
    char		*iid;
    bulktbl	*expect = NULL;
@@ -2068,7 +2079,12 @@ _bulkwalk_recv_pdu(walk_context *context, netsnmp_pdu *pdu)
       }
 
       *str_buf = '.';
-      tp = get_tree(vars->name,vars->name_length, get_tree_head());
+      *(str_buf+1) = '\0';
+      out_len = 0;
+      tp = netsnmp_sprint_realloc_objid_tree(&str_bufp, &str_buf_len,
+                                             &out_len, 0, &buf_over,
+                                             vars->name,vars->name_length);
+      str_buf[sizeof(str_buf)-1] = '\0';
 
       getlabel_flag = context->getlabel_f;
 
@@ -2454,8 +2470,14 @@ snmp_sys_uptime()
 	OUTPUT:
 	RETVAL
 
+void
+init_snmp()
+    CODE:
+        __libraries_init();
+
+
 SnmpSession *
-snmp_new_session(version, community, peer, port, lport, retries, timeout)
+snmp_new_session(version, community, peer, lport, retries, timeout)
         char *	version
         char *	community
         char *	peer
@@ -2486,7 +2508,6 @@ snmp_new_session(version, community, peer, port, lport, retries, timeout)
            session.community_len = strlen((char *)community);
            session.community = (u_char *)community;
 	   session.peername = peer;
-	   session.remote_port = port;
 	   session.local_port = lport;
            session.retries = retries; /* 5 */
            session.timeout = timeout; /* 1000000L */
@@ -2504,10 +2525,9 @@ snmp_new_session(version, community, peer, port, lport, retries, timeout)
         RETVAL
 
 SnmpSession *
-snmp_new_v3_session(version, peer, port, retries, timeout, sec_name, sec_level, sec_eng_id, context_eng_id, context, auth_proto, auth_pass, priv_proto, priv_pass, eng_boots, eng_time)
+snmp_new_v3_session(version, peer, retries, timeout, sec_name, sec_level, sec_eng_id, context_eng_id, context, auth_proto, auth_pass, priv_proto, priv_pass, eng_boots, eng_time)
         int	version
         char *	peer
-        int	port
         int	retries
         int	timeout
         char *  sec_name
@@ -2540,7 +2560,6 @@ snmp_new_v3_session(version, peer, port, retries, timeout, sec_name, sec_level, 
 	   }
 
 	   session.peername = strdup(peer);
-	   session.remote_port = port;
            session.retries = retries; /* 5 */
            session.timeout = timeout; /* 1000000L */
            session.authenticator = NULL;
@@ -2624,12 +2643,11 @@ snmp_new_v3_session(version, peer, port, retries, timeout, sec_name, sec_level, 
 
 
 SnmpSession *
-snmp_update_session(sess_ref, version, community, peer, port, lport, retries, timeout)
+snmp_update_session(sess_ref, version, community, peer, lport, retries, timeout)
         SV *	sess_ref
         char *	version
         char *	community
         char *	peer
-        int	port
         int	lport
         int	retries
         int	timeout
@@ -2659,7 +2677,6 @@ snmp_update_session(sess_ref, version, community, peer, port, lport, retries, ti
            ss->community_len = strlen((char *)community);
            ss->community = (u_char *)strdup(community);
 	   ss->peername = strdup(peer);
-	   ss->remote_port = port;
 	   ss->local_port = lport;
            ss->retries = retries; /* 5 */
            ss->timeout = timeout; /* 1000000L */
@@ -3145,7 +3162,10 @@ snmp_getnext(sess_ref, varlist_ref, perl_callback)
            SV **err_num_svp;
            SV **err_ind_svp;
            int status;
-	   char str_buf[STR_BUF_SIZE];
+	   char str_buf[STR_BUF_SIZE], *str_bufp = str_buf;
+           size_t str_buf_len = sizeof(str_buf);
+           size_t out_len = 0;
+           int buf_over = 0;
            char *label;
            char *iid;
            int getlabel_flag = NO_FLAGS;
@@ -3256,8 +3276,13 @@ snmp_getnext(sess_ref, varlist_ref, perl_callback)
                     varbind = (AV*) SvRV(*varbind_ref);
 
                     *str_buf = '.';
-                    tp = get_tree(vars->name,vars->name_length,
-                                  get_tree_head());
+                    *(str_buf+1) = '\0';
+                    out_len = 0;
+                    tp = netsnmp_sprint_realloc_objid_tree(&str_bufp, &str_buf_len,
+                                                           &out_len, 0, &buf_over,
+                                                           vars->name,vars->name_length);
+                    str_buf[sizeof(str_buf)-1] = '\0';
+
                     if (__is_leaf(tp)) {
                        type = tp->type;
                     } else {
@@ -3332,7 +3357,10 @@ snmp_getbulk(sess_ref, nonrepeaters, maxrepetitions, varlist_ref, perl_callback)
            SV **err_num_svp;
            SV **err_ind_svp;
            int status;
-	   char str_buf[STR_BUF_SIZE];
+	   char str_buf[STR_BUF_SIZE], *str_bufp = str_buf;
+           size_t str_buf_len = sizeof(str_buf);
+           size_t out_len = 0;
+           int buf_over = 0;
            char *label;
            char *iid;
            int getlabel_flag = NO_FLAGS;
@@ -3450,8 +3478,12 @@ snmp_getbulk(sess_ref, nonrepeaters, maxrepetitions, varlist_ref, perl_callback)
 
                     varbind = (AV*) newAV();
                     *str_buf = '.';
-                    tp = get_tree(vars->name,vars->name_length,
-                                    get_tree_head());
+                    *(str_buf+1) = '\0';
+                    out_len = 0;
+                    tp = netsnmp_sprint_realloc_objid_tree(&str_bufp, &str_buf_len,
+                                                           &out_len, 0, &buf_over,
+                                                           vars->name,vars->name_length);
+                    str_buf[sizeof(str_buf)-1] = '\0';
                     if (__is_leaf(tp)) {
                        type = tp->type;
                     } else {

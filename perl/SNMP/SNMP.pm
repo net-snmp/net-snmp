@@ -368,6 +368,8 @@ sub new {
    my $this = {};
    my ($name, $aliases, $host_type, $len, $thisaddr);
 
+   SNMP::init_snmp();
+
    %$this = @_;
 
    $this->{ErrorStr} = ''; # if methods return undef check for expln.
@@ -375,9 +377,6 @@ sub new {
 
    # v1 or v2, defaults to v1
    $this->{Version} ||= 1;
-
-   # allow override of remote SNMP port
-   $this->{RemotePort} ||= 161;
 
    # allow override of local SNMP port
    $this->{LocalPort} ||= 0;
@@ -396,26 +395,16 @@ sub new {
    # flag to enable fixing pdu and retrying with a NoSuch error
    $this->{RetryNoSuch} ||= 0;
 
-   # convert to dotted ip addr if needed
-   if ($this->{DestHost} =~ /\d+\.\d+\.\d+\.\d+/) {
-     $this->{DestAddr} = $this->{DestHost};
-   } else {
-     if (($name, $aliases, $host_type, $len, $thisaddr) =
-	 gethostbyname($this->{DestHost})) {
-	 $this->{DestAddr} = join('.', unpack("C4", $thisaddr));
-     } else {
-	 warn("unable to resolve destination address($this->{DestHost}!")
-	     if $SNMP::verbose;
-	 return undef;
-     }
+   # backwards compatibility.  Make host = host:port
+   if ($this->{RemotePort} && $this->{DestHost} !~ /:/) {
+       $this->{DestHost} = $this->{DestHost} . ":" . $this->{RemotePort};
    }
 
    if ($this->{Version} eq '1' or $this->{Version} eq '2'
        or $this->{Version} eq '2c') {
        $this->{SessPtr} = SNMP::_new_session($this->{Version},
 					     $this->{Community},
-					     $this->{DestAddr},
-					     $this->{RemotePort},
+					     $this->{DestHost},
 					     $this->{LocalPort},
 					     $this->{Retries},
 					     $this->{Timeout},
@@ -436,8 +425,7 @@ sub new {
        $this->{EngineTime} = 0 if not defined $this->{EngineTime};
 
        $this->{SessPtr} = SNMP::_new_v3_session($this->{Version},
-						$this->{DestAddr},
-						$this->{RemotePort},
+						$this->{DestHost},
 						$this->{Retries},
 						$this->{Timeout},
 						$this->{SecName},
@@ -485,22 +473,6 @@ sub update {
 
    @$this{keys %new_fields} = values %new_fields;
 
-   # convert to dotted ip addr if needed
-   if (exists $new_fields{DestHost}) {
-      if ($this->{DestHost} =~ /\d+\.\d+\.\d+\.\d+/) {
-        $this->{DestAddr} = $this->{DestHost};
-      } else {
-        if (($name, $aliases, $host_type, $len, $thisaddr) =
-           gethostbyname($this->{DestHost})) {
-           $this->{DestAddr} = join('.', unpack("C4", $thisaddr));
-        } else {
-           warn("unable to resolve destination address($this->{DestHost}!")
-              if $SNMP::verbose;
-           return undef;
-        }
-      }
-   }
-
    $this->{UseLongNames} ||= $SNMP::use_long_names;
    $this->{UseSprintValue} ||= $SNMP::use_sprint_value;
    $this->{UseEnums} ||= $SNMP::use_enums;
@@ -511,7 +483,7 @@ sub update {
 
    SNMP::_update_session($this->{Version},
 		 $this->{Community},
-		 $this->{DestAddr},
+		 $this->{DestHost},
 		 $this->{RemotePort},
 		 $this->{LocalPort},
 		 $this->{Retries},
