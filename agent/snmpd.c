@@ -95,6 +95,9 @@ SOFTWARE.
 #if HAVE_LIMITS_H
 #include <limits.h>
 #endif
+#if HAVE_PWD_H
+#include <pwd.h>
+#endif
 
 #ifndef PATH_MAX
 # ifdef _POSIX_PATH_MAX
@@ -487,7 +490,24 @@ main(int argc, char *argv[])
 #if HAVE_UNISTD_H
                 case 'u':
                   if (++arg == argc) usage(argv[0]);
-                  ds_set_int(DS_APPLICATION_ID, DS_AGENT_USERID,atoi(argv[arg]));
+		  { char *ecp;
+		    int uid;
+		    uid = strtoul(argv[arg], &ecp, 10);
+		    if (*ecp) {
+#if HAVE_GETPWNAM && HAVE_PWD_H
+		      struct passwd *info;
+		      info = getpwnam(argv[arg]);
+		      if (info) uid = info->pw_uid;
+		      else {
+#endif
+			fprintf(stderr, "Bad user id: %s\n", argv[arg]);
+			exit(1);
+#if HAVE_GETPWNAM && HAVE_PWD_H
+		      }
+#endif
+		    }
+		  ds_set_int(DS_APPLICATION_ID, DS_AGENT_USERID, uid);
+		}
                   break;
                 case 'g':
                   if (++arg == argc) usage(argv[0]);
