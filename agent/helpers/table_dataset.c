@@ -523,6 +523,7 @@ netsnmp_table_data_set_helper_handler(netsnmp_mib_handler *handler,
             if (data && data->writable == 0) {
                 netsnmp_set_request_error(reqinfo, request,
                                           SNMP_ERR_NOTWRITABLE);
+                continue;
             }
             if (datatable->rowstatus_column == table_info->colnum) {
                 switch (*(request->requestvb->val.integer)) {
