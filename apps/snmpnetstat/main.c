@@ -94,9 +94,9 @@ struct snmp_session *Session;
 int snmp_dump_packet = 0;
 int print_errors = 0;
 usage(){
-    fprintf(stderr, "Usage: snmpnetstat -v 1 hostname community [ -ainrs ] [-p proto] [-I interface] [ interval ]      or:\n");
-    fprintf(stderr, "Usage: snmpnetstat [-v 2 ] hostname noAuth [ -ainrs ] [-p proto] [-I interface] [ interval ]      or:\n");
-    fprintf(stderr, "Usage: snmpnetstat [-v 2 ] hostname srcParty dstParty context [ -ainrs ] [-p proto] [-I interface] [ interval ]\n");
+    fprintf(stderr, "Usage: snmpnetstat -v 1 [-q] hostname community [-ainrs] [-p proto] [-I interface] [interval]      or:\n");
+    fprintf(stderr, "Usage: snmpnetstat [-v 2] [-q] hostname noAuth [-ainrs] [-p proto] [-I interface] [interval]       or:\n");
+    fprintf(stderr, "Usage: snmpnetstat [-v 2] [-q] hostname srcParty dstParty context [-ainrs] [-p proto] [-I interface] [interval]\n");
 }
 
 main(argc, argv)
@@ -104,11 +104,11 @@ main(argc, argv)
 	char *argv[];
 {
     char *cp, *name;
-    char *hostname;
+    char *hostname = NULL;
     register struct protoent *p;
     register struct protox *tp;	/* for printing cblocks & stats */
     struct protox *name2protox();	/* for -p */
-    char *community;
+    char *community = NULL;
     struct snmp_session session;
     
     int port_flag = 0;
@@ -127,15 +127,18 @@ main(argc, argv)
     
     init_mib();
     /*
-     * Usage: snmpnetstatwalk -v 1 hostname community ...      or:
-     * Usage: snmpnetstat [-v 2 ] hostname noAuth     ...      or:
-     * Usage: snmpnetstat [-v 2 ] hostname srcParty dstParty context ...
+     * Usage: snmpnetstatwalk -v 1 [-q] hostname community ...      or:
+     * Usage: snmpnetstat [-v 2 ] [-q] hostname noAuth     ...      or:
+     * Usage: snmpnetstat [-v 2 ] [-q] hostname srcParty dstParty context ...
      */
     for(arg = 1; arg < argc; arg++){
 	if (argv[arg][0] == '-'){
 	    switch(argv[arg][1]){
 	      case 'd':
 		snmp_dump_packet++;
+		break;
+	      case 'q':
+		quick_print++;
 		break;
 	      case 'p':
 		port_flag++;
@@ -236,7 +239,11 @@ main(argc, argv)
 		for(pp = party_scanNext(); pp; pp = party_scanNext()){
 		    if (!strcasecmp(pp->partyName, argv[arg])){
 			srclen = pp->partyIdentityLen;
+#ifdef SVR4
+			memmove(src, pp->partyIdentity, srclen * sizeof(oid));
+#else
 			bcopy(pp->partyIdentity, src, srclen * sizeof(oid));
+#endif
 			break;
 		    }
 		}
@@ -256,7 +263,11 @@ main(argc, argv)
 	    for(pp = party_scanNext(); pp; pp = party_scanNext()){
 		if (!strcasecmp(pp->partyName, argv[arg])){
 		    dstlen = pp->partyIdentityLen;
+#ifdef SVR4
+		    memmove(dst, pp->partyIdentity, dstlen * sizeof(oid));
+#else
 		    bcopy(pp->partyIdentity, dst, dstlen * sizeof(oid));
+#endif
 		    break;
 		}
 	    }
@@ -274,8 +285,13 @@ main(argc, argv)
 	    for(cxp = context_scanNext(); cxp; cxp = context_scanNext()){
 		if (!strcasecmp(cxp->contextName, argv[arg])){
 		    contextlen = cxp->contextIdentityLen;
+#ifdef SVR4
+		    memmove(context, cxp->contextIdentity,
+			  contextlen * sizeof(oid));
+#else
 		    bcopy(cxp->contextIdentity, context,
 			  contextlen * sizeof(oid));
+#endif
 		    break;
 		}
 	    }
@@ -287,8 +303,8 @@ main(argc, argv)
 		    exit(1);
 		}
 	    }
-	} else if (isdigit(argv[0][0])) {
-            interval = atoi(argv[0]);
+	} else if (isdigit(argv[arg][0])) {
+            interval = atoi(argv[arg]);
             if (interval <= 0){
 		usage();
 		exit(1);
@@ -315,8 +331,13 @@ main(argc, argv)
 		fprintf(stderr, "unknown host: %s\n", hostname);
 		exit(1);
 	    } else {
+#ifdef SVR4
+		memmove((char *)&destAddr, (char *)hp->h_addr,
+		      hp->h_length);
+#else
 		bcopy((char *)hp->h_addr, (char *)&destAddr,
 		      hp->h_length);
+#endif
 	    }
 	}
 	srclen = dstlen = contextlen = MAX_NAME_LEN;
@@ -340,7 +361,11 @@ main(argc, argv)
     }
     
     
+#ifdef SVR4
+    memset((char *)&session, NULL, sizeof(struct snmp_session));
+#else
     bzero((char *)&session, sizeof(struct snmp_session));
+#endif
     session.peername = hostname;
     if (port_flag)
         session.remote_port = dest_port;

@@ -45,9 +45,9 @@ oid objid_mib[] = {1, 3, 6, 1, 2, 1};
 int	snmp_dump_packet = 0;
 
 usage(){
-    fprintf(stderr, "Usage: snmpwalk -v 1 hostname community [objectID]      or:\n");
-    fprintf(stderr, "Usage: snmpwalk [-v 2 ] hostname noAuth [objectID]      or:\n");
-    fprintf(stderr, "Usage: snmpwalk [-v 2 ] hostname srcParty dstParty context [objectID]\n");
+    fprintf(stderr, "Usage: snmpwalk -v 1 [-q] hostname community [objectID]      or:\n");
+    fprintf(stderr, "Usage: snmpwalk [-v 2] [-q] hostname noAuth [objectID]       or:\n");
+    fprintf(stderr, "Usage: snmpwalk [-v 2] [-q] hostname srcParty dstParty context [objectID]\n");
 }
 
 main(argc, argv)
@@ -81,15 +81,18 @@ main(argc, argv)
 
     init_mib();
     /*
-     * Usage: snmpwalk -v 1 hostname community [objectID]      or:
-     * Usage: snmpwalk [-v 2 ] hostname noAuth [objectID]      or:
-     * Usage: snmpwalk [-v 2 ] hostname srcParty dstParty context [objectID]
+     * Usage: snmpwalk -v 1 [-q] hostname community [objectID]      or:
+     * Usage: snmpwalk [-v 2] [-q] hostname noAuth [objectID]       or:
+     * Usage: snmpwalk [-v 2] [-q] hostname srcParty dstParty context [objectID]
      */
     for(arg = 1; arg < argc; arg++){
 	if (argv[arg][0] == '-'){
 	    switch(argv[arg][1]){
 		case 'd':
 		    snmp_dump_packet++;
+		    break;
+		case 'q':
+		    quick_print++;
 		    break;
 		case 'p':
 		    port_flag++;
@@ -142,7 +145,11 @@ main(argc, argv)
 		for(pp = party_scanNext(); pp; pp = party_scanNext()){
 		    if (!strcasecmp(pp->partyName, argv[arg])){
 			srclen = pp->partyIdentityLen;
+#ifdef SVR4
+			memmove(src, pp->partyIdentity, srclen * sizeof(oid));
+#else
 			bcopy(pp->partyIdentity, src, srclen * sizeof(oid));
+#endif
 			break;
 		    }
 		}
@@ -162,7 +169,11 @@ main(argc, argv)
 	    for(pp = party_scanNext(); pp; pp = party_scanNext()){
 		if (!strcasecmp(pp->partyName, argv[arg])){
 		    dstlen = pp->partyIdentityLen;
+#ifdef SVR4
+		    memmove(dst, pp->partyIdentity, dstlen * sizeof(oid));
+#else
 		    bcopy(pp->partyIdentity, dst, dstlen * sizeof(oid));
+#endif
 		    break;
 		}
 	    }
@@ -180,8 +191,13 @@ main(argc, argv)
 	    for(cxp = context_scanNext(); cxp; cxp = context_scanNext()){
 		if (!strcasecmp(cxp->contextName, argv[arg])){
 		    contextlen = cxp->contextIdentityLen;
+#ifdef SVR4
+		    memmove(context, cxp->contextIdentity,
+			  contextlen * sizeof(oid));
+#else
 		    bcopy(cxp->contextIdentity, context,
 			  contextlen * sizeof(oid));
+#endif
 		    break;
 		}
 	    }
@@ -204,7 +220,11 @@ main(argc, argv)
     }
 
     if (gotroot == 0){
+#ifdef SVR4
+	memmove((char *)root, (char *)objid_mib, sizeof(objid_mib));
+#else
 	bcopy((char *)objid_mib, (char *)root, sizeof(objid_mib));
+#endif
 	rootlen = sizeof(objid_mib) / sizeof(oid);
 	gotroot = 1;
     }
@@ -224,8 +244,13 @@ main(argc, argv)
 		fprintf(stderr, "unknown host: %s\n", hostname);
 		exit(1);
 	    } else {
+#ifdef SVR4
+		memmove((char *)&destAddr, (char *)hp->h_addr,
+		      hp->h_length);
+#else
 		bcopy((char *)hp->h_addr, (char *)&destAddr,
 		      hp->h_length);
+#endif
 	    }
 	}
 	srclen = dstlen = contextlen = MAX_NAME_LEN;
@@ -248,7 +273,11 @@ main(argc, argv)
 	}
     }
 
+#ifdef SVR4
+    memset((char *)&session, NULL, sizeof(struct snmp_session));
+#else
     bzero((char *)&session, sizeof(struct snmp_session));
+#endif
     session.peername = hostname;
     if (port_flag)
 	session.remote_port = dest_port;
@@ -276,7 +305,11 @@ main(argc, argv)
     }
 
 
+#ifdef SVR4
+    memmove((char *)name, (char *)root, rootlen * sizeof(oid));
+#else
     bcopy((char *)root, (char *)name, rootlen * sizeof(oid));
+#endif
     name_length = rootlen;
 
     running = 1;
@@ -292,14 +325,23 @@ main(argc, argv)
 		for(vars = response->variables; vars;
 		    vars = vars->next_variable){
 		    if (vars->name_length < rootlen
+#ifdef SVR4
+			|| memcmp(root, vars->name, rootlen * sizeof(oid)))
+#else
 			|| bcmp(root, vars->name, rootlen * sizeof(oid)))
+#endif
 			continue;	/* not part of this subtree */
 		    print_variable(vars->name, vars->name_length, vars);
 		    if (vars->type != SNMP_ENDOFMIBVIEW
 			&& vars->type != SNMP_NOSUCHOBJECT /* for robustness */
 			&& vars->type != SNMP_NOSUCHINSTANCE){
+#ifdef SVR4
+			memmove((char *)name, (char *)vars->name,
+			      vars->name_length * sizeof(oid));
+#else
 			bcopy((char *)vars->name, (char *)name,
 			      vars->name_length * sizeof(oid));
+#endif
 			name_length = vars->name_length;
 			running = 1; /* restart so we can get next variable */
 		    }
@@ -355,7 +397,11 @@ find_params(srcParty, dstParty, context, ipaddress, entity, time, security)
 
     party_scanInit();
     for(pp = party_scanNext(); pp; pp = party_scanNext()){
+#ifdef SVR4
+	if (pp->partyTDomain == 1 && !memcmp(pp->partyTAddress, &ipaddress, 4)){
+#else
 	if (pp->partyTDomain == 1 && !bcmp(pp->partyTAddress, &ipaddress, 4)){
+#endif
 	    if (security == 0 || *security == '\0' || !strcmp(security, "*")){
 		goodParties[numParties++] = pp;
 	    } else if (!strcmp(security, "auth")

@@ -26,6 +26,7 @@ view_getEntry(viewIndex, viewSubtree, viewSubtreeLen)
     return NULL;
 }
 
+int
 view_scanInit()
 {
   ScanPtr = List;
