@@ -129,12 +129,12 @@ mib.o: ../config.h ../mib_module_config.h
 mib.o:   ../s/linux.h
 mib.o: ../s/sysv.h ../s/generic.h ../m/generic.h 
 mib.o:   asn1.h snmp_api.h mib.h
-mib.o: snmp.h snmp_impl.h parse.h int64.h system.h
+mib.o: snmp.h snmp_impl.h parse.h int64.h system.h read_config.h
 parse.o: ../config.h ../mib_module_config.h 
 parse.o:   ../s/linux.h
 parse.o: ../s/sysv.h ../s/generic.h ../m/generic.h 
 parse.o:   system.h
-parse.o: parse.h asn1.h snmp_api.h mib.h
+parse.o: parse.h asn1.h mib.h snmp_api.h
 party.o: ../config.h ../mib_module_config.h 
 party.o:   ../s/linux.h
 party.o: ../s/sysv.h ../s/generic.h ../m/generic.h 
@@ -144,6 +144,11 @@ party_parse.o:   ../s/linux.h
 party_parse.o: ../s/sysv.h ../s/generic.h ../m/generic.h
 party_parse.o:  asn1.h mib.h party.h system.h
 party_parse.o: snmp_api.h snmp_impl.h snmp.h
+read_config.o: ../config.h ../mib_module_config.h 
+read_config.o:   ../s/linux.h
+read_config.o: ../s/sysv.h ../s/generic.h ../m/generic.h 
+read_config.o:  asn1.h mib.h parse.h system.h
+read_config.o: snmp_api.h read_config.h
 snmp.o: ../config.h ../mib_module_config.h 
 snmp.o:   ../s/linux.h
 snmp.o: ../s/sysv.h ../s/generic.h ../m/generic.h 
@@ -152,8 +157,9 @@ snmp.o: snmp_api.h snmp_impl.h mib.h
 snmp_api.o: ../config.h ../mib_module_config.h 
 snmp_api.o:   ../s/linux.h
 snmp_api.o: ../s/sysv.h ../s/generic.h ../m/generic.h 
-snmp_api.o:  asn1.h snmp.h snmp_api.h snmp_impl.h
-snmp_api.o: party.h context.h system.h
+snmp_api.o:   asn1.h snmp.h
+snmp_api.o: snmp_api.h snmp_impl.h party.h mib.h context.h system.h int64.h
+snmp_api.o: read_config.h
 snmp_auth.o: ../config.h ../mib_module_config.h 
 snmp_auth.o:   ../s/linux.h
 snmp_auth.o: ../s/sysv.h ../s/generic.h ../m/generic.h 
