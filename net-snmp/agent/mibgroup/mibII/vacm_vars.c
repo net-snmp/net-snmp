@@ -283,11 +283,11 @@ void vacm_parse_group (const char *token,
     else if (strcasecmp(model, "v2c") == 0) imodel = SNMP_SEC_MODEL_SNMPv2c;
     else if (strcasecmp(model, "usm") == 0) imodel = SNMP_SEC_MODEL_USM;
     else if (strcasecmp(model, "any") == 0) {
-	config_perror("bad security model (v1, v2c, usm) - installing anyway");
+	config_perror("bad security model \"any\" should be: v1, v2c or usm - installing anyway");
 	imodel = SNMP_SEC_MODEL_ANY;
     }
     else {
-	config_perror("bad security model (v1, v2c, usm)");
+	config_perror("bad security model, should be: v1, v2c or usm");
 	return;
     }
     if (strlen(security)+1 > sizeof(gp->groupName)) {
@@ -375,11 +375,11 @@ void vacm_parse_access (const char *token, char *param)
     if (strcmp(prefix,"exact") == 0) iprefix = 1;
     else if (strcmp(prefix,"prefix") == 0) iprefix = 2;
     else if (strcmp(prefix,"0") == 0) {
-	config_perror("bad prefix match parameter (exact, prefix) - installing anyway");
+	config_perror("bad prefix match parameter \"0\", should be: exact or prefix - installing anyway");
 	iprefix = 1;
     }
     else {
-	config_perror("bad prefix match parameter (exact, prefix)");
+	config_perror("bad prefix match parameter, should be: exact or prefix");
 	return;
     }
     if (strlen(readView)+1 > sizeof(ap->readView)) {
