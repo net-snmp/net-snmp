@@ -82,6 +82,12 @@ Allow underline characters in mibs (illegal).
 The minimum warning level of the warnings printed by the mib parser.
 .IP "dumpPacket      (1|yes|true|0|no|false)"
 Weather the commands should dump packets by default.
+.IP "logTimestamp      (1|yes|true|0|no|false)"
+Weather the commands should log timestamps with their error/message
+logging or not.  Note that output will not look as pretty with
+timestamps if the source code that is doing the logging does
+incremental logging of messages that are not line buffered before
+being passed to the logging routines.
 .SH "SEE ALSO"
 snmp_config(5), read_config(3), snmpcmd(1).
 .\" Local Variables:
