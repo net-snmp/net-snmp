@@ -304,54 +304,54 @@ static struct module_import	root_imports[NUMBER_OF_ROOT_NODES];
 static int current_module = 0;
 static int     max_module = 0;
 
-static void do_subtree __P((struct tree *, struct node **));
-static int get_token __P((FILE *, char *,int));
+static void do_subtree __UCD_P((struct tree *, struct node **));
+static int get_token __UCD_P((FILE *, char *,int));
 static char last = ' ';
-static void unget_token __P((int));
-static int parseQuoteString __P((FILE *, char *, int));
-static int tossObjectIdentifier __P((FILE *));
-       void init_mib_internals __P((void));	/* called from 'mib.c' */
-static int  name_hash __P((char *));
-static void init_node_hash __P((struct node *));
-static void print_error __P((char *, char *, int));
-static void *Malloc __P((unsigned));
-static char *Strdup __P((char *));
-static void Malloc_stats __P((FILE *));
-static void free_tree __P((struct tree *));
-static void free_node __P((struct node *));
+static void unget_token __UCD_P((int));
+static int parseQuoteString __UCD_P((FILE *, char *, int));
+static int tossObjectIdentifier __UCD_P((FILE *));
+       void init_mib_internals __UCD_P((void));	/* called from 'mib.c' */
+static int  name_hash __UCD_P((char *));
+static void init_node_hash __UCD_P((struct node *));
+static void print_error __UCD_P((char *, char *, int));
+static void *Malloc __UCD_P((unsigned));
+static char *Strdup __UCD_P((char *));
+static void Malloc_stats __UCD_P((FILE *));
+static void free_tree __UCD_P((struct tree *));
+static void free_node __UCD_P((struct node *));
 #ifdef TEST
-static void print_nodes __P((FILE *, struct node *));
+static void print_nodes __UCD_P((FILE *, struct node *));
 #endif
-static void build_translation_table __P((void));
-static void init_tree_roots __P((void));
-static void merge_anon_children __P((struct tree *, struct tree *));
-static int getoid __P((FILE *, struct subid *, int));
-static struct node *parse_objectid __P((FILE *, char *));
-static int get_tc __P((char *, int, struct enum_list **, char **));
-static int get_tc_index __P((char *, int));
-static struct enum_list *parse_enumlist __P((FILE *));
-static struct node *parse_asntype __P((FILE *, char *, int *, char *));
-static struct node *parse_objecttype __P((FILE *, char *));
-static struct node *parse_objectgroup __P((FILE *, char *));
-static struct node *parse_notificationDefinition __P((FILE *, char *));
-static struct node *parse_trapDefinition __P((FILE *, char *));
-static struct node *parse_compliance __P((FILE *, char *));
-static struct node *parse_moduleIdentity __P((FILE *, char *));
-static        void  parse_imports __P((FILE *));
-static struct node *parse __P((FILE *, struct node *));
-struct tree *find_node __P((char *, struct tree*)); /* backwards compatability */
-static int read_module_internal __P((char *));
-static void read_module_replacements __P((char *));
-static void read_import_replacements __P((char *, char *));
+static void build_translation_table __UCD_P((void));
+static void init_tree_roots __UCD_P((void));
+static void merge_anon_children __UCD_P((struct tree *, struct tree *));
+static int getoid __UCD_P((FILE *, struct subid *, int));
+static struct node *parse_objectid __UCD_P((FILE *, char *));
+static int get_tc __UCD_P((char *, int, struct enum_list **, char **));
+static int get_tc_index __UCD_P((char *, int));
+static struct enum_list *parse_enumlist __UCD_P((FILE *));
+static struct node *parse_asntype __UCD_P((FILE *, char *, int *, char *));
+static struct node *parse_objecttype __UCD_P((FILE *, char *));
+static struct node *parse_objectgroup __UCD_P((FILE *, char *));
+static struct node *parse_notificationDefinition __UCD_P((FILE *, char *));
+static struct node *parse_trapDefinition __UCD_P((FILE *, char *));
+static struct node *parse_compliance __UCD_P((FILE *, char *));
+static struct node *parse_moduleIdentity __UCD_P((FILE *, char *));
+static        void  parse_imports __UCD_P((FILE *));
+static struct node *parse __UCD_P((FILE *, struct node *));
+struct tree *find_node __UCD_P((char *, struct tree*)); /* backwards compatability */
+static int read_module_internal __UCD_P((char *));
+static void read_module_replacements __UCD_P((char *));
+static void read_import_replacements __UCD_P((char *, char *));
 
-       int  which_module __P((char *));		/* used by 'mib.c' */
-struct tree *find_tree_node __P((char *, int));	/* used by mib.c */
-static char *module_name __P((int));
-static void  new_module  __P((char *, char *));
+       int  which_module __UCD_P((char *));		/* used by 'mib.c' */
+struct tree *find_tree_node __UCD_P((char *, int));	/* used by mib.c */
+static char *module_name __UCD_P((int));
+static void  new_module  __UCD_P((char *, char *));
 
-extern void  set_function __P((struct tree *));	/* from 'mib.c' */
-extern void init_mib __P((void));	/* from mib.c */
-static int read_module_internal __P((char *));
+extern void  set_function __UCD_P((struct tree *));	/* from 'mib.c' */
+extern void init_mib __UCD_P((void));	/* from mib.c */
+static int read_module_internal __UCD_P((char *));
 
 static int
 name_hash( name )
@@ -366,7 +366,7 @@ name_hash( name )
 }
     
 void
-init_mib_internals __P((void))
+init_mib_internals __UCD_P((void))
 {
     register struct tok *tp;
     register int        b, i;

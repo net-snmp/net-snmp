@@ -358,7 +358,7 @@ int checkmib(vp,name,length,exact,var_len,write_method,newname,max)
     register int	*length;
     int			exact;
     int			*var_len;
-    int			(**write_method)__P((int, u_char *, u_char, int, u_char *, oid *, int));
+    int			(**write_method)__UCD_P((int, u_char *, u_char, int, u_char *, oid *, int));
     oid                 *newname;
     int                 max;
 {

@@ -100,11 +100,11 @@ int	length_ipInReceives = sizeof(objid_ipInReceives)/sizeof(oid);
 oid	objid_ipOutRequests[] = {1, 3, 6, 1, 2, 1, 4, 10, 0};
 int	length_ipOutRequests = sizeof(objid_ipOutRequests)/sizeof(oid);
 
-void main __P((int, char **));
-char *uptime_string __P((u_long, char *));
+void main __UCD_P((int, char **));
+char *uptime_string __UCD_P((u_long, char *));
 
 void
-usage __P((void))
+usage __UCD_P((void))
 {
   fprintf(stderr,"Usage:\n  snmpstatus ");
   snmp_parse_args_usage(stderr);

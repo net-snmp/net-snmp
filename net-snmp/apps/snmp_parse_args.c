@@ -57,7 +57,7 @@
 #include "version.h"
 #include "system.h"
 
-void usage __P((void));
+void usage __UCD_P((void));
 
 void
 snmp_parse_args_usage(outf)

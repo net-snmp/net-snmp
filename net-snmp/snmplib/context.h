@@ -62,10 +62,10 @@ struct contextEntry {
     struct timeval tv;
 };
 
-void context_destroyEntry __P((oid *,int));
+void context_destroyEntry __UCD_P((oid *,int));
 
 struct contextEntry *
-context_getEntry __P((oid *contextID, int contextIDLen));
+context_getEntry __UCD_P((oid *contextID, int contextIDLen));
 /*
  * Returns a pointer to the contextEntry with the
  * same identity as contextID.
@@ -73,7 +73,7 @@ context_getEntry __P((oid *contextID, int contextIDLen));
  */
 
 void
-context_scanInit __P((void));
+context_scanInit __UCD_P((void));
 /*
  * Initialized the scan routines so that they will begin at the
  * beginning of the list of contextEntries.
@@ -82,7 +82,7 @@ context_scanInit __P((void));
 
 
 struct contextEntry *
-context_scanNext __P((void));
+context_scanNext __UCD_P((void));
 /*
  * Returns a pointer to the next contextEntry.
  * These entries are returned in no particular order,
@@ -93,13 +93,13 @@ context_scanNext __P((void));
  */
 
 struct contextEntry *
-context_createEntry __P((oid *contextID, int contextIDLen));
+context_createEntry __UCD_P((oid *contextID, int contextIDLen));
 /*
  * Creates a contextEntry with the given index
  * and returns a pointer to it.
  * The status of this entry is created as invalid.
  */
 
-int read_context_database __P((char *));
+int read_context_database __UCD_P((char *));
 
 #endif

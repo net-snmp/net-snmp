@@ -51,13 +51,13 @@ acl_getEntry(target, subject, resources)
 }
 
 void
-acl_scanInit __P((void))
+acl_scanInit __UCD_P((void))
 {
   ScanPtr = List;
 }
 
 struct aclEntry *
-acl_scanNext __P((void))
+acl_scanNext __UCD_P((void))
 {
     struct aclEntry *returnval;
 

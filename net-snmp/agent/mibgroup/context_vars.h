@@ -5,8 +5,8 @@
 #ifndef _MIBGROUP_CONTEXT_VARS_H
 #define _MIBGROUP_CONTEXT_VARS_H
 
-extern u_char *var_context __P((struct variable *, oid *, int *, int, int *, int (**write) __P((int, u_char *, u_char, int, u_char *, oid *, int)) ));
-extern int write_context __P((int, u_char *, u_char, int, u_char *, oid *, int));
+extern u_char *var_context __UCD_P((struct variable *, oid *, int *, int, int *, int (**write) __UCD_P((int, u_char *, u_char, int, u_char *, oid *, int)) ));
+extern int write_context __UCD_P((int, u_char *, u_char, int, u_char *, oid *, int));
 
 #include "context.h"
 

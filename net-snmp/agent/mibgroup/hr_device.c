@@ -21,7 +21,7 @@
 	 *
 	 *********************/
 
-int Get_Next_Device __P((void));
+int Get_Next_Device __UCD_P((void));
 
 PFV init_device[ HRDEV_TYPE_MAX ];
 PFI next_device[ HRDEV_TYPE_MAX ];

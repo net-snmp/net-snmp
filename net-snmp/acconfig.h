@@ -391,13 +391,13 @@
 #endif
 #endif
 
-#if !(defined( __P) || defined(netbsd1) || defined(freebsd2))
+#ifndef __UCD_P
 #ifdef __STDC__
-#define __P(params) params
+#define __UCD_P(params) params
 #else
-#define __P(params) ()
+#define __UCD_P(params) ()
 #endif /* __STDC__ */
-#endif /* __P */
+#endif /* __UCD_P */
 
 #ifdef WIN32
 #define ENV_SEPARATOR ";"

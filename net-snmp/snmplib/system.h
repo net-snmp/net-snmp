@@ -44,14 +44,14 @@ typedef struct _dir_struc
 	struct direct dirstr;	// Directory structure to return
 } DIR;
 
-DIR *opendir __P((char *filename));
-struct direct *readdir __P((DIR *dirp));
-int closedir __P((DIR *dirp));
+DIR *opendir __UCD_P((char *filename));
+struct direct *readdir __UCD_P((DIR *dirp));
+int closedir __UCD_P((DIR *dirp));
 
-int gettimeofday __P((struct timeval *, struct timezone *tz));
+int gettimeofday __UCD_P((struct timeval *, struct timezone *tz));
 
-char * winsock_startup __P((void));
-void winsock_cleanup __P((void));
+char * winsock_startup __UCD_P((void));
+void winsock_cleanup __UCD_P((void));
 
 #define SOCK_STARTUP winsock_startup()
 #define SOCK_CLEANUP winsock_cleanup()
@@ -60,9 +60,9 @@ void winsock_cleanup __P((void));
 #define SOCK_CLEANUP
 #endif
 
-in_addr_t get_myaddr __P((void));
-long get_uptime __P((void));
+in_addr_t get_myaddr __UCD_P((void));
+long get_uptime __UCD_P((void));
 
 #ifndef HAVE_STRDUP
-char *strdup __P((char *));
+char *strdup __UCD_P((char *));
 #endif

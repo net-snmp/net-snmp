@@ -16,7 +16,7 @@
 /* include our .h file */
 #include "example.h"
 
-int header_example __P((struct variable *,oid *, int *, int, int *, int (**write) __P((int, u_char *, u_char, int, u_char *,oid *,int)) ));
+int header_example __UCD_P((struct variable *,oid *, int *, int, int *, int (**write) __UCD_P((int, u_char *, u_char, int, u_char *,oid *,int)) ));
 
 	/*********************
 	 *
@@ -94,7 +94,7 @@ header_example(vp, name, length, exact, var_len, write_method)
 
     /* write_method: OUT - pointer to function to set this variable,
                            otherwise 0 */
-    int     (**write_method) __P((int, u_char *,u_char, int, u_char *, oid *, int));
+    int     (**write_method) __UCD_P((int, u_char *,u_char, int, u_char *, oid *, int));
 
 {
 
@@ -156,7 +156,7 @@ var_example(vp, name, length, exact, var_len, write_method)
     int     *length;
     int     exact;
     int     *var_len;
-    int     (**write_method) __P((int, u_char *, u_char, int, u_char *, oid *, int));
+    int     (**write_method) __UCD_P((int, u_char *, u_char, int, u_char *, oid *, int));
 {
   /* define any variables we might return as static! */
   static long long_ret;

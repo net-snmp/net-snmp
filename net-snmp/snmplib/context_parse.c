@@ -53,7 +53,7 @@
 #define VIEW_STATE	2
 #define PROXY_STATE  	3
 
-static void error_exit __P((char *, int, char *));
+static void error_exit __UCD_P((char *, int, char *));
 
 static void error_exit(str, linenumber, filename)
     char *str;

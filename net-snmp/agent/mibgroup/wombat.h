@@ -9,8 +9,8 @@ extern void	init_wombat();
 extern u_char	*var_wombat();
 
 /* config file parsing routines */
-extern void wombat_free_config __P((void));
-extern void wombat_parse_config __P((char *, char *));
+extern void wombat_free_config __UCD_P((void));
+extern void wombat_parse_config __UCD_P((char *, char *));
 
 config_parse_dot_conf("wombat", wombat_parse_config, wombat_free_config);
 /*

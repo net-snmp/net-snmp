@@ -79,13 +79,13 @@ char copyright[] =
 
 #include "netstat.h"
 
-int main __P((int, char **));
+int main __UCD_P((int, char **));
 
 #define NULLPROTOX	((struct protox *) 0)
 struct protox {
 	u_char	pr_wanted;		/* 1 if wanted, 0 otherwise */
-	void	(*pr_cblocks) __P((void));	/* control blocks printing routine */
-	void	(*pr_stats) __P((void));	/* statistics printing routine */
+	void	(*pr_cblocks) __UCD_P((void));	/* control blocks printing routine */
+	void	(*pr_stats) __UCD_P((void));	/* statistics printing routine */
 	char	*pr_name;		/* well-known name */
 } protox[] = {
 	{ 1,	protopr,    tcp_stats,	"tcp" },
@@ -108,7 +108,7 @@ struct snmp_session *Session;
 int print_errors = 0;
 
 void
-usage __P((void))
+usage __UCD_P((void))
 {
     fprintf(stderr, "Usage: snmpnetstat -v 1 [-q] hostname community [-ainrs] [-p proto] [-I interface] [interval]      or:\n");
     fprintf(stderr, "Usage: snmpnetstat [-v 2] [-q] hostname noAuth [-ainrs] [-p proto] [-I interface] [interval]       or:\n");
