@@ -521,9 +521,8 @@ init_snmpv3(const char *type) {
 
   /* handle engineID setup before everything else which may depend on it */
   register_premib_handler(type,"engineID", engineID_conf, NULL, "string");
-  register_premib_handler(type,"oldEngineID", oldengineID_conf, NULL,
-                          "len hexEngineId");
-  register_config_handler(type,"engineBoots", engineBoots_conf, NULL, "num");
+  register_premib_handler(type,"oldEngineID", oldengineID_conf, NULL, NULL);
+  register_config_handler(type,"engineBoots", engineBoots_conf, NULL, NULL);
 
   /* default store config entries */
   ds_register_config(ASN_OCTET_STR, "snmp", "defSecurityName", DS_LIBRARY_ID,

@@ -682,8 +682,7 @@ int main(int argc, char *argv[])
 			    usm_parse_create_usmUser, NULL,
 			    "username (MD5|SHA) passphrase [DES passphrase]");
     register_config_handler("snmptrapd", "usmUser",
-                            usm_parse_config_usmUser, NULL,
-                            "internal use only");
+                            usm_parse_config_usmUser, NULL, NULL);
 
   /* we need to be called back later */
   snmp_register_callback(SNMP_CALLBACK_LIBRARY, SNMP_CALLBACK_STORE_DATA,
