@@ -221,37 +221,60 @@ NetSNMP::agent - Perl extension for the net-snmp agent.
 
 =head1 DESCRIPTION
 
-This module implements a snmp agent and/or can be embedded within the
-net-snmp agent.
+This module implements an API set to make a SNMP agent act as a snmp
+agent, a snmp subagent (using the AgentX subagent protocol) and/or
+embedded perl-APIs directly within the traditional net-snmp agent demon.
 
-The agent may be registered as a sub-agent, or an embedded agent.
+Also see the tutorial about the genaral Net-SNMP C API, which this
+module implements in a perl-way, and a perl specific tutorial at:
+
+  http://www.net-snmp.org/tutorial-5/toolkit/
 
 =head1 EXAMPLES
 
 =head2 Sub-agent example
 
     	use NetSNMP::agent (':all');
+
+        my $value = "hello world";
 	sub myhandler {
 	    my ($handler, $registration_info, $request_info, $requests) = @_;
 	    my $request;
 
 	    for($request = $requests; $request; $request = $request->next()) {
 		my $oid = $request->getOID();
-		if ($request_info->getMode() == MODE_SET_ACTION) {
-		    # ...
-		    $request->setError($request_info, SNMP_ERR_NOTWRITABLE);
+		if ($request_info->getMode() == MODE_GET) {
+		    # ... generally, you would calculate value from oid
+		    if ($oid == new NetSNMP::OID(".1.3.6.1.4.1.8072.9999.9999.7375.1.0")) {
+			$request->setValue(ASN_OCTET_STR, $value);
+		    }
+		} elsif ($request_info->getMode() == MODE_GETNEXT) {
+		    # ... generally, you would calculate value from oid
+		    if ($oid < new NetSNMP::OID(".1.3.6.1.4.1.8072.9999.9999.7375.1.0")) {
+			$request->setOID(".1.3.6.1.4.1.8072.9999.9999.7375.1.0");
+			$request->setValue(ASN_OCTET_STR, $value);
+		    }
+		} elsif ($request_info->getMode() == MODE_SET_RESERVE1) {
+		    if ($oid != new NetSNMP::OID(".1.3.6.1.4.1.8072.9999.9999.7375.1.0")) {  # do error checking here
+			$request->setError($request_info, SNMP_ERR_NOSUCHNAME);
+		    }
+		} elsif ($request_info->getMode() == MODE_SET_ACTION) {
+		    # ... (or use the value)
+		    $value = $request->getValue();
 		}
 	    }
 
 	}
 
 	my $agent = new NetSNMP::agent(
+				# makes the agent read a my_agent_name.conf file
     				'Name' => "my_agent_name",
     				'AgentX' => 1
     				);
 	}
 
-    	$agent->register("my_agent_name", ".1.3.6.1.2.1", \&myhandler);
+    	$agent->register("my_agent_name", ".1.3.6.1.4.1.8072.9999.9999.7375",
+                         \&myhandler);
 
 	my $running = 1;
 	while($running) {
@@ -262,6 +285,9 @@ The agent may be registered as a sub-agent, or an embedded agent.
 
 
 =head2 Embedded agent example
+
+        # place this in a .pl file, and then in your snmpd.conf file put:
+        #    perl do '/path/to/file.pl';
 
 	use NetSNMP::agent;
 	my $agent;
@@ -275,7 +301,8 @@ The agent may be registered as a sub-agent, or an embedded agent.
     				'Name' => 'my_agent_name'
     				);
 
-    	$agent->register("my_agent_name", ".1.3.6.1.2.1", \&myhandler);
+    	$agent->register("my_agent_name", ".1.3.6.1.4.1.8072.9999.9999.7375",
+                         \&myhandler);
 
 	$agent->main_loop();
 
@@ -288,8 +315,11 @@ The agent may be registered as a sub-agent, or an embedded agent.
     Possible options are:
 
     	Name	- Name of the agent (optional, defaults to "perl")
+                  (The snmp library will read a NAME.conf snmp
+                  configuration file based on this argument.)
     	AgentX	- Make us a sub-agent (0 = false, 1 = true)
-    	Ports	- Ports this agent will listen on (FIXME: example? format?)
+                  (The Net-SNMP master agent must be running first)
+    	Ports	- Ports this agent will listen on (EG: "udp:161,tcp:161")
 
     Example:
 
@@ -301,12 +331,12 @@ The agent may be registered as a sub-agent, or an embedded agent.
 
 =head1 METHODS
 
-    register ( )
+    register (NAME, OID, \&handler_routine )
     	Registers the callback handler with given OID.
 
     	$agent->register();
 
-	FIXME: how are errors returned?
+	A return code of 0 indicates no error.
 
     agent_check_and_process ( BLOCKING )
     	Run one iteration of the main loop.
@@ -319,104 +349,11 @@ The agent may be registered as a sub-agent, or an embedded agent.
     	Runs the agent in a loop. Does not return.
 
     shutdown ()
-	Shuts down the sub-agent.
+	Nicely shuts down the agent or sub-agent.
 
 	$agent->shutdown();
 
-    next ()
-    	Returns the next request or undef if there is no next request.
-
-    	$request = $request->next();
-
-    getMode ()
-    	Returns the mode of the request. See the MODES section for list of valid modes.
-
-	$mode = $request->getMode();
-
-    getOID ()
-	Returns the oid of the request.
-
-	$oid = $request->getOID();
-
-    getRootOID ()
-    	FIXME ???
-
-    	$root_oid = $request->getRootOID();
-
-    getOIDptr ()
-    	FIXME ???
-
-    	$oid_ptr = $request->getOIDptr();
-
-    getDelegated ()
-	FIXME ???
-
-	$delegated = $request->getDelegated();
-
-    getValue ()
-	Returns the value of the request. Used for example when setting values.
-
-    	$value = $request->getValue();
-
-    	FIXME: how to get the type of the value? Is it even available?
-
-    getProcessed ()
-    	FIXME ???
-
-    	$processed = $request->getProcessed();
-
-    getStatus ()
-	FIXME ???
-
-	$status = $request->getStatus();
-
-    getRepeat ()
-	FIXME ???
-
-    	$repeat = $request->getRepeat();
-
-    setOid ( OID )
-	Set the oid for request. Used for example when walking through list of OIDs.
-
-	$request->setOID($next_oid);
-
-    setProcessed ( PROCESSED )
-	FIXME ???
-
-	PROCESSED - 0 = false, 1 = true
-
-	$request->setProcessed(1);
-
-    setDelegated ( DELEGATED )
-    	FIXME ???
-
-    	DELEGATED - 0 = false, 1 = true
-
-    	$request->setDelegated(1);
-
-    setValue ( TYPE, DATA )
-	Sets the data to be returned to the daemon.
-
-    	Returns 1 on success, 0 on error.
-
-    	TYPE - Type of the data. See NetSNMP::ASN for valid types.
-    	DATA - The data to return.
-
-	$ret = $request->setValue(ASN_OCTET_STR, "test");
-
-    setRepeat ( REPEAT )
-	FIXME ???
-
-	REPEAT -  repeat count FIXME
-
-	$request->setRepeat(5);
-
-    setError ( REQUEST_INFO, ERROR_CODE )
-	Sets the given error code for the request. See the ERROR CODES section for list of valid codes.
-
-    	$request->setError($request_info, SNMP_ERR_NOTWRITABLE);
-
-=head1 CALLBACKS
+=head1 HANDLER CALLBACKS
 
     handler ( HANDLER, REGISTRATION_INFO, REQUEST_INFO, REQUESTS )
 
@@ -430,10 +367,127 @@ The agent may be registered as a sub-agent, or an embedded agent.
     Example handler:
 
 	sub myhandler {
-	    my ($handler, $registration_info, $request_info, $requests) = @_;
+	    my ($handler, $reg_info, $request_info, $requests) = @_;
 	    # ...
 	}
 
+The handler subroutine will be called when a SNMP request received by
+the agent for anything below the registered OID.  The handler is
+passed 4 arguments: $handler, $registration_info, $request_info,
+$requests.  These match the arguments passed to the C version of the
+same API.  Note that they are not entirely complete objects but are
+functional "enough" at this point in time.
+
+=head2 $request_info object functions
+
+    getMode ()
+    	Returns the mode of the request. See the MODES section for
+    	list of valid modes.
+
+	$mode = $request->getMode();
+
+    getRootOID ()
+	Returns a NetSNMP::OID object that describes the registration
+	point that the handler is getting called for (in case you
+	register one handler function with multiple OIDs, which should
+	be rare anyway)
+
+    	$root_oid = $request->getRootOID();
+
+=head2 $request object functions
+
+    next ()
+    	Returns the next request in the list or undef if there is no
+    	next request.
+
+    	$request = $request->next();
+
+    getOID ()
+	Returns the oid of the request (a NetSNMP::OID class).
+
+	$oid = $request->getOID();
+
+    setOID (new NetSNMP::OID("someoid"))
+	Sets the OID of the request to a passed oid value.  This
+	should generally only be done during handling of GETNEXT
+	requests.
+
+	$request->setOID(new NetSNMP::OID("someoid"));
+
+    getValue ()
+	Returns the value of the request. Used for example when
+	setting values.
+
+    	$value = $request->getValue();
+
+    	FIXME: how to get the type of the value? Is it even available?
+               [Wes: no, not yet.]
+
+    setValue ( TYPE, DATA )
+	Sets the data to be returned to the daemon.
+
+    	Returns 1 on success, 0 on error.
+
+    	TYPE - Type of the data. See NetSNMP::ASN for valid types.
+    	DATA - The data to return.
+
+	$ret = $request->setValue(ASN_OCTET_STR, "test");
+
+    setError ( REQUEST_INFO, ERROR_CODE )
+	Sets the given error code for the request. See the ERROR CODES
+	section for list of valid codes.
+
+    	$request->setError($request_info, SNMP_ERR_NOTWRITABLE);
+
+    getProcessed ()
+    	The processed flag indicates that a request does not need to
+    	be dealt with because someone else (a higher handler) has
+    	dealt with it already.
+
+    	$processed = $request->getProcessed();
+
+    setProcessed ( PROCESSED )
+	Sets the processed flag flag in the request.  You generally
+	should not have to set this yourself.
+
+	PROCESSED - 0 = false, 1 = true
+
+	$request->setProcessed(1);
+
+    getDelegated ()
+	If you can handle a request in the background or at a future
+	time (EG, you're waiting on a file handle, or network traffic,
+	or ...), the delegated flag can be set in the request.  When
+	the request is processed in the future the flag should be set
+	back to 0 so the agent will know that it can wrap up the
+	original request and send it back to the manager.  This has
+	not been tested within perl, but it hopefully should work.
+
+	$delegated = $request->getDelegated();
+
+    setDelegated ( DELEGATED )
+    	Sets the delegated flag.
+
+    	DELEGATED - 0 = false, 1 = true
+
+    	$request->setDelegated(1);
+
+    getRepeat ()
+	The repeat flag indicates that a getbulk operation is being
+	handled and this indicates how many answers need to be
+	returned.  Generally, if you didn't register to directly
+	handle getbulk support yourself, you won't need to deal with
+	this value.
+
+    	$repeat = $request->getRepeat();
+
+    setRepeat ( REPEAT )
+	Sets the repeat count (decrement after answering requests if
+	you handle getbulk requests yourself)
+
+	REPEAT -  repeat count FIXME
+
+	$request->setRepeat(5);
 
 =head1 MODES
 
@@ -474,9 +528,12 @@ The agent may be registered as a sub-agent, or an embedded agent.
 Please mail the net-snmp-users@lists.sourceforge.net mailing list for
 help, questions or comments about this module.
 
-Module written by Wes Hardaker <hardaker@users.sourceforge.net>
+Module written by:
+   Wes Hardaker  <hardaker@users.sourceforge.net>
 
-Documentation written by Toni Willberg <toniw@iki.fi>
+Documentation written by:
+   Toni Willberg <toniw@iki.fi>
+   Wes Hardaker  <hardaker@users.sourceforge.net>
 
 =head1 SEE ALSO
 
