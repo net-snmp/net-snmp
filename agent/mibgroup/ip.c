@@ -45,13 +45,13 @@
 #include <nlist.h>
 #endif
 
-#ifdef hpux
+#ifdef MIB_IPCOUNTER_SYMBOL
 #undef OBJID
 #include <sys/mib.h>
 #include <netinet/mib_kern.h>
 #undef  OBJID
 #define OBJID                   ASN_OBJECT_ID
-#endif /* hpux */
+#endif /* MIB_IPCOUNTER_SYMBOL */
 
 /* #include "../common_header.h" */
 
@@ -65,38 +65,6 @@
 	 *   and internal forward declarations
 	 *
 	 *********************/
-
-#ifndef linux
-static struct nlist ip_nl[] = {
-#define N_IPSTAT	0
-#define N_IPFORWARDING	1
-#define N_TCP_TTL	2
-#define N_HP_IPMIB	3
-#if !defined(hpux) && !defined(solaris2) && !defined(__sgi)
-	{ "_ipstat"},
-#ifdef sun
-	{ "_ip_forwarding" },
-#else
-	{ "_ipforwarding" },
-#endif
-	{ "_tcp_ttl"},
-#else  /* hpux or solaris or __sgi */
-	{ "ipstat"},  
-	{ "ipforwarding" },
-#ifndef hpux
-#ifdef __sgi
-	{ "tcp_ttl"},
-#else /* not __sgi */
- 	{ "tcpDefaultTTL"},
-#endif /* not __sgi */
-#else
-	{ "ipDefaultTTL"},
-	{ "MIB_ipcounter" },
-#endif
-#endif
-        { 0 },
-};
-#endif
 
 #ifdef linux
 static void linux_read_ip_stat __P((struct ip_mib *));
@@ -114,8 +82,12 @@ extern void init_routes __P((void));
 
 void init_ip()
 {
-#ifndef linux
-    init_nlist( ip_nl );
+  /* for speed optimization, we call this now to do the lookup */
+  auto_nlist("ipstat",0,0);
+  auto_nlist(IP_FORWARDING_SYMBOL,0,0);
+  auto_nlist(TCP_TTL_SYMBOL,0,0);
+#ifdef MIB_IPCOUNTER_SYMBOL
+  auto_nlist(MIB_IPCOUNTER_SYMBOL,0,0);
 #endif
 }
 
@@ -178,7 +150,7 @@ var_ip(vp, name, length, exact, var_len, write_method)
     int     (**write_method) __P((int, u_char *, u_char, int, u_char *, oid *, int));
 {
     static struct ipstat ipstat;
-#ifdef hpux
+#ifdef MIB_IP_COUNTER_SYMBOL
     static	counter MIB_ipcounter[MIB_ipMAXCTR+1];
 #endif
     int i;
@@ -189,16 +161,16 @@ var_ip(vp, name, length, exact, var_len, write_method)
     /*
      *	Get the IP statistics from the kernel...
      */
-    KNLookup(ip_nl, N_IPSTAT, (char *)&ipstat, sizeof (ipstat));
-#ifdef hpux
-    KNLookup(ip_nl, N_HP_IPMIB, (char *)&MIB_ipcounter,
-	(MIB_ipMAXCTR+1)*sizeof (counter));
+    auto_nlist(IPSTAT_SYMBOL, (char *)&ipstat, sizeof (ipstat));
+#ifdef MIB_IP_COUNTER_SYMBOL
+    auto_nlist(MIB_IPCOUNTER_SYMBOL, (char *)&MIB_ipcounter,
+               (MIB_ipMAXCTR+1)*sizeof (counter));
 #endif
 
     switch (vp->magic){
 	case IPFORWARDING:
 #ifndef sparc	  
-	    KNLookup(ip_nl,  N_IPFORWARDING, (char *) &i, sizeof(i));
+            auto_nlist(IP_FORWARDING_SYMBOL,(char *) &i, sizeof(i));
 	    fflush(stderr);
 	    if (i) {
 		long_return = 1;		/* GATEWAY */
@@ -214,9 +186,9 @@ var_ip(vp, name, length, exact, var_len, write_method)
 	    /*
 	     *	Allow for a kernel w/o TCP.
 	     */
-	    if (ip_nl[N_TCP_TTL].n_value) {
-		KNLookup(ip_nl,  N_TCP_TTL, (char *) &long_return, sizeof(long_return));
-	    } else long_return = 60;	    /* XXX */
+	    if (!auto_nlist(TCP_TTL_SYMBOL, (char *) &long_return,
+                            sizeof(long_return)))
+              long_return = 60;	    /* XXX */
 	    return (u_char *) &long_return;
 	case IPINRECEIVES:
 	    return (u_char *) &ipstat.ips_total;
@@ -232,14 +204,14 @@ var_ip(vp, name, length, exact, var_len, write_method)
 	    return (u_char *) &ipstat.ips_forward;
 
 	case IPINUNKNOWNPROTOS:
-#ifdef hpux
+#ifdef MIB_IP_COUNTER_SYMBOL
 	    long_return = MIB_ipcounter[7];
 #else
 	    long_return = 0;
 #endif
 	    return (u_char *) &long_return;
 	case IPINDISCARDS:
-#ifdef hpux
+#ifdef MIB_IP_COUNTER_SYMBOL
 	    long_return = MIB_ipcounter[8];
 #else
 	    long_return = 0;
@@ -254,14 +226,14 @@ var_ip(vp, name, length, exact, var_len, write_method)
 	    return (u_char *) &long_return;
 
 	case IPOUTREQUESTS:
-#ifdef hpux
+#ifdef MIB_IP_COUNTER_SYMBOL
 	    long_return = MIB_ipcounter[10];
 #else
 	    long_return = 0;
 #endif
 	    return (u_char *) &long_return;
 	case IPOUTDISCARDS:
-#ifdef hpux
+#ifdef MIB_IP_COUNTER_SYMBOL
 	    long_return = MIB_ipcounter[11];
 #else
 	    long_return = 0;
@@ -277,7 +249,7 @@ var_ip(vp, name, length, exact, var_len, write_method)
 	    return (u_char *) &ipstat.ips_fragments;
 
 	case IPREASMOKS:
-#ifdef hpux
+#ifdef MIB_IP_COUNTER_SYMBOL
 	    long_return = MIB_ipcounter[15];
 #else
 	    long_return = ipstat.ips_fragments;		/* XXX */
@@ -293,21 +265,21 @@ var_ip(vp, name, length, exact, var_len, write_method)
 	    return (u_char *) &long_return;
 
 	case IPFRAGOKS:
-#ifdef hpux
+#ifdef MIB_IP_COUNTER_SYMBOL
 	    long_return = MIB_ipcounter[17];
 #else
 	    long_return = 0;
 #endif
 	    return (u_char *) &long_return;
 	case IPFRAGFAILS:
-#ifdef hpux
+#ifdef MIB_IP_COUNTER_SYMBOL
 	    long_return = MIB_ipcounter[18];
 #else
 	    long_return = 0;
 #endif
 	    return (u_char *) &long_return;
 	case IPFRAGCREATES:
-#ifdef hpux
+#ifdef MIB_IP_COUNTER_SYMBOL
 	    long_return = MIB_ipcounter[19];
 #else
 	    long_return = 0;
@@ -371,7 +343,7 @@ var_ip(vp, name, length, exact, var_len, write_method)
 	  }
 #else /* not (HAVE_SYS_SYSCTL_H && CTL_NET) */
 #ifndef sparc	  
-	    KNLookup(ip_nl,  N_IPFORWARDING, (char *) &i, sizeof(i));
+            auto_nlist(IP_FORWARDING_SYMBOL,(char *) &i, sizeof(i));
 	    fflush(stderr);
 	    if (i) {
 		long_return = 1;		/* GATEWAY */
@@ -388,9 +360,9 @@ var_ip(vp, name, length, exact, var_len, write_method)
 	    /*
 	     *	Allow for a kernel w/o TCP.
 	     */
-	    if (ip_nl[N_TCP_TTL].n_value) {
-		KNLookup(ip_nl,  N_TCP_TTL, (char *) &long_return, sizeof(long_return));
-	    } else long_return = 60;	    /* XXX */
+	    if (!auto_nlist(TCP_TTL_SYMBOL,(char *) &long_return,
+                            sizeof(long_return)))
+              long_return = 60;	    /* XXX */
 	    return (u_char *) &long_return;
 	case IPINRECEIVES:
 	    return (u_char *) &ipstat.ips_total;

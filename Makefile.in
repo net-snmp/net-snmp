@@ -88,3 +88,6 @@ config.status: configure
 
 EXAMPLE.conf: sedscript EXAMPLE.conf.def
 	$(SED) -f sedscript $(srcdir)/EXAMPLE.conf.def > EXAMPLE.conf
+
+TAGS:
+	find $(srcdir) -name '*.[ch]' -print | etags -
