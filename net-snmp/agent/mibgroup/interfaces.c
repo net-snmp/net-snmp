@@ -6,6 +6,9 @@
 #include "mib_module_config.h"
 
 #include <config.h>
+#if STDC_HEADERS
+#include <stdlib.h>
+#endif
 #include <sys/types.h>
 #include <sys/socket.h>
 
@@ -82,6 +85,7 @@
 #include "interfaces.h"
 #include "struct.h"
 #include "util_funcs.h"
+#include "snmp_api.h"
 
 #ifdef HAVE_SYS_SYSCTL_H
 # ifdef CTL_NET
