@@ -415,63 +415,6 @@ ifXTable_release_data(ifXTable_data * data)
     free(data);
 }
 
-/*
- *********************************************************************
- * @internal
- * allocate resources for a ifXTable_rowreq_ctx
- */
-ifXTable_rowreq_ctx *
-ifXTable_allocate_rowreq_ctx(void *user_init_ctx)
-{
-    ifXTable_rowreq_ctx *rowreq_ctx =
-        SNMP_MALLOC_TYPEDEF(ifXTable_rowreq_ctx);
-
-    DEBUGMSGTL(("internal:ifXTable_allocate_rowreq_ctx", "called\n"));
-
-    if (NULL == rowreq_ctx) {
-        snmp_log(LOG_ERR, "Couldn't allocate memory for a "
-                 "ifXTable_rowreq_ctx.\n");
-    }
-
-    rowreq_ctx->oid_idx.oids = rowreq_ctx->oid_tmp;
-
-    rowreq_ctx->ifXTable_data_list = NULL;
-    rowreq_ctx->ifXTable_reg = ifXTable_if_ctx.user_ctx;
-
-    if (SNMPERR_SUCCESS !=
-        ifXTable_rowreq_ctx_init(rowreq_ctx, user_init_ctx)) {
-        ifXTable_release_rowreq_ctx(rowreq_ctx);
-        rowreq_ctx = NULL;
-    }
-
-    return rowreq_ctx;
-}
-
-/*
- * @internal
- * release resources for a ifXTable_rowreq_ctx
- */
-void
-ifXTable_release_rowreq_ctx(ifXTable_rowreq_ctx * rowreq_ctx)
-{
-    DEBUGMSGTL(("internal:ifXTable_release_rowreq_ctx", "called\n"));
-
-    netsnmp_assert(NULL != rowreq_ctx);
-
-    ifXTable_rowreq_ctx_cleanup(rowreq_ctx);
-
-    if (rowreq_ctx->undo)
-        ifXTable_release_data(rowreq_ctx->undo);
-
-    /*
-     * free index oid pointer
-     */
-    if (rowreq_ctx->oid_idx.oids != rowreq_ctx->oid_tmp)
-        free(rowreq_ctx->oid_idx.oids);
-
-    SNMP_FREE(rowreq_ctx);
-}
-
 /**
  * @internal
  * wrapper
