@@ -24,7 +24,7 @@ _load_ipv4(netsnmp_container* container, u_long *index )
     DEBUGMSGTL(("access:route:container",
                 "route_container_arch_load ipv4\n"));
 
-    assert(NULL != container);
+    netsnmp_assert(NULL != container);
 
     /*
      * fetch routes from the proc file-system:
@@ -151,7 +151,7 @@ _load_ipv6(netsnmp_container* container, u_long *index )
     DEBUGMSGTL(("access:route:container",
                 "route_container_arch_load ipv6\n"));
 
-    assert(NULL != container);
+    netsnmp_assert(NULL != container);
 
     return 0;
 }
