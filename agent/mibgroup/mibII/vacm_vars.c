@@ -614,9 +614,17 @@ int
 vacm_warn_if_not_configured(int majorID, int minorID, void *serverarg,
                             void *clientarg)
 {
+    const char * name = netsnmp_ds_get_string(NETSNMP_DS_LIBRARY_ID, 
+                                        NETSNMP_DS_LIB_APPTYPE);
+    if (NULL==name)
+        name = "snmpd";
+    
     if (!vacm_is_configured()) {
         snmp_log(LOG_WARNING,
-                 "Warning: no access control information configured.\n  It's unlikely this agent can serve any useful purpose in this state.\n  Run \"snmpconf -g basic_setup\" to help you configure this agent.\n");
+                 "Warning: no access control information configured.\n  It's "
+                 "unlikely this agent can serve any useful purpose in this "
+                 "state.\n  Run \"snmpconf -g basic_setup\" to help you "
+                 "configure the %s.conf file for this agent.\n", name );
     }
     return SNMP_ERR_NOERROR;
 }
