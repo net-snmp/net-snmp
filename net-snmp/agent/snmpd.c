@@ -435,9 +435,8 @@ main(int argc, char *argv[])
                   usage(argv[0]);
                   break;
                 case 'H':
-                  init_snmpv3("snmpd");
+                  init_agent("snmpd");   /* register our .conf handlers */
                   init_mib_modules();
-                  init_agent("snmpd");            /* register our .conf handlers */
                   init_snmp("snmpd");
                   fprintf(stderr, "Configuration directives understood:\n");
                   read_config_print_usage("  ");
