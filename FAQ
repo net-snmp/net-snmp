@@ -13,6 +13,7 @@ TABLE OF CONTENTS
    Where can I get it?
    What documentation is available?
    Are there binaries available?
+   Where can I get the perl SNMP package?
    What operating systems does it run on?
    What happens if mine isn't listed?
    How do I find out about new releases?
@@ -22,6 +23,7 @@ TABLE OF CONTENTS
    What are all these different SNMPv2's anyway?
    Which versions of SNMP are supported in this package?
    Where can I find more information?
+   Is ucd-snmp year 2000 safe?
  AGENT
    What MIBs are supported?
    How do I add a MIB?
@@ -126,6 +128,17 @@ Are there binaries available?
 
   - There are binaries for some systems available in the binaries
     directory on the ftp site.
+
+Where can I get the perl SNMP package?
+-------------------------------------
+
+  Joe Marot's excellent perl SNMP module, which requires the ucd-snmp
+  library, can be found at any Comprehensive Perl Archive Network
+  (CPAN) site mirror in modules/by-module/SNMP.  To find the CPAN site
+  nearest you, please see http://www.cpan.org/SITES.html.
+
+  Consult the README file in the SNMP perl module distribution to find 
+  out what version of the ucd-snmp library it needs to be linked against.
 
 What operating systems does it run on?
 -------------------------------------
@@ -326,6 +339,15 @@ Where can I find more information?
   or via either of the two Web sites above.
 
 
+Is ucd-snmp year 2000 safe?
+--------------------------
+
+  The ucd-snmp toolset stores all of its dates in the standard posix
+  fashion supported by most operating systems: as seconds since the
+  year 1970 began.  Information stored this way is year 2000 safe, but
+  is not year 2036 safe on 32 bit machines.
+
+  So:  yes, as long as your operating system is as well.
 
 AGENT
 =====
@@ -1017,7 +1039,7 @@ I'm using the Perl SNMP module, and get something about "bad free"?
   UCD SNMP tools.  In general, if you experience any problem like this,
   try checking to see if there's a newer release first.
     In particular, the recent changes in the way MIB files are parsed
-  requires Perl SNMP-1.6 or later.
+  requires Perl SNMP-1.8 or later.
 
 
 
