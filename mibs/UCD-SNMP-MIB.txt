@@ -70,6 +70,7 @@ ucdavis MODULE-IDENTITY
 --   systemStats      OBJECT IDENTIFIER ::= { ucdavis  11 }
 --   ucdDemoMIB       OBJECT IDENTIFIER ::= { ucdavis  14 } - UCD-DEMO-MIB
 --   fileTable        OBJECT IDENTIFIER ::= { ucdavis  15 }
+--   logmatch         OBJECT IDENTIFIER ::= { ucdavis  15 }
 --   version          OBJECT IDENTIFIER ::= { ucdavis 100 }
 --   snmperrs         OBJECT IDENTIFIER ::= { ucdavis 101 }
 --   mibRegistryTable OBJECT IDENTIFIER ::= { ucdavis 102 }
@@ -1210,5 +1211,169 @@ fileErrorMsg OBJECT-TYPE
     DESCRIPTION
 	"Filesize error message"
     ::= { fileEntry 101 }
+
+logMatch OBJECT IDENTIFIER ::= { ucdavis 16 }
+
+logMatchMaxEntries OBJECT-TYPE
+	SYNTAX Integer32
+	MAX-ACCESS read-only
+	STATUS current
+	DESCRIPTION
+		"The maximum number of logmatch entries
+		this snmpd daemon can support."
+	::= { logMatch 1 }
+
+logMatchTable OBJECT-TYPE
+	SYNTAX SEQUENCE OF LogMatchEntry
+	MAX-ACCESS not-accessible
+	STATUS current
+	DESCRIPTION
+		"Table of monitored files."
+	::= { logMatch 2 }
+
+logMatchEntry OBJECT-TYPE
+	SYNTAX LogMatchEntry
+	MAX-ACCESS not-accessible
+	STATUS current
+	DESCRIPTION
+		"Entry of file"
+	INDEX { logMatchIndex }
+	::= { logMatchTable 1 }
+
+LogMatchEntry ::=
+	SEQUENCE { 
+		logMatchIndex
+			Integer32,
+		logMatchName
+			DisplayString,
+		logMatchFilename
+			DisplayString,
+		logMatchRegEx
+			DisplayString,
+		logMatchGlobalCounter
+			Counter32,
+		logMatchGlobalCount
+			Integer32,
+		logMatchCurrentCounter
+			Counter32,
+		logMatchCurrentCount
+			Integer32,
+		logMatchCounter
+			Counter32,
+		logMatchCount
+			Integer32,
+		logMatchCycle
+			Integer32,
+		logMatchErrorFlag
+			TruthValue,
+		logMatchRegExCompilation
+			DisplayString
+	 }
+
+logMatchIndex OBJECT-TYPE
+	SYNTAX Integer32 (1..2147483647)
+	MAX-ACCESS read-only
+	STATUS current
+	DESCRIPTION
+		"Index of logmatch"
+	::= { logMatchEntry 1 }
+
+logMatchName OBJECT-TYPE
+	SYNTAX DisplayString
+	MAX-ACCESS read-only
+	STATUS current
+	DESCRIPTION
+		"logmatch instance name"
+	::= { logMatchEntry 2 }
+
+logMatchFilename OBJECT-TYPE
+	SYNTAX DisplayString
+	MAX-ACCESS read-only
+	STATUS current
+	DESCRIPTION
+		"filename to be logmatched"
+	::= { logMatchEntry 3 }
+
+logMatchRegEx OBJECT-TYPE
+	SYNTAX DisplayString
+	MAX-ACCESS read-only
+	STATUS current
+	DESCRIPTION
+		"regular expression"
+	::= { logMatchEntry 4 }
+
+logMatchGlobalCounter OBJECT-TYPE
+	SYNTAX Counter32
+	MAX-ACCESS read-only
+	STATUS current
+	DESCRIPTION
+		"global count of matches"
+	::= { logMatchEntry 5 }
+
+logMatchGlobalCount OBJECT-TYPE
+	SYNTAX Integer32
+	MAX-ACCESS read-only
+	STATUS current
+	DESCRIPTION
+		"Description."
+	::= { logMatchEntry 6 }
+
+logMatchCurrentCounter OBJECT-TYPE
+	SYNTAX Counter32
+	MAX-ACCESS read-only
+	STATUS current
+	DESCRIPTION
+		"Regex match counter. This counter will
+		be reset with each logfile rotation."
+	::= { logMatchEntry 7 }
+
+logMatchCurrentCount OBJECT-TYPE
+	SYNTAX Integer32
+	MAX-ACCESS read-only
+	STATUS current
+	DESCRIPTION
+		"Description."
+	::= { logMatchEntry 8 }
+
+logMatchCounter OBJECT-TYPE
+	SYNTAX Counter32
+	MAX-ACCESS read-only
+	STATUS current
+	DESCRIPTION
+		"Regex match counter. This counter will
+		be reset with each read"
+	::= { logMatchEntry 9 }
+
+logMatchCount OBJECT-TYPE
+	SYNTAX Integer32
+	MAX-ACCESS read-only
+	STATUS current
+	DESCRIPTION
+		"Description."
+	::= { logMatchEntry 10 }
+
+logMatchCycle OBJECT-TYPE
+	SYNTAX Integer32
+	MAX-ACCESS read-only
+	STATUS current
+	DESCRIPTION
+		"time between updates (if not queried) in seconds"
+	::= { logMatchEntry 11 }
+
+logMatchErrorFlag OBJECT-TYPE
+	SYNTAX TruthValue
+	MAX-ACCESS read-only
+	STATUS current
+	DESCRIPTION
+		"errorflag: is this line configured correctly?"
+	::= { logMatchEntry 100 }
+
+logMatchRegExCompilation OBJECT-TYPE
+	SYNTAX DisplayString
+	MAX-ACCESS read-only
+	STATUS current
+	DESCRIPTION
+		"message of regex precompilation"
+	::= { logMatchEntry 101 }
 
 END
