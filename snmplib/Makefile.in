@@ -8,7 +8,7 @@ VPATH = @srcdir@
 prefix=@prefix@
 exec_prefix=@exec_prefix@
 libdir=@libdir@
-includedir=@includedir@
+includedir=@includedir@/ucd-snmp
 
 TARG=	libsnmp.a
 CSRCS=	snmp_client.c mib.c parse.c snmp_api.c snmp.c snmp_auth.c asn1.c md5.c party.c context.c acl.c view.c party_parse.c context_parse.c acl_parse.c system.c
