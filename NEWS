@@ -1,6 +1,16 @@
 This file contains major changes in released revisions.  Please read
 the ChangeLog file for a more detailed listing of changes/bug fixes.
 
+*3.5.1*
+
+ Copyright:
+    - Simplification.
+
+ Fixes:
+    - many bug fixes submitted by users and the ucd-snmp-coders.
+    - v2party support in the agent has been fixed.
+    - the UCD-SNMP-MIB is smicng compliant and should work with HP OV as well.
+
 *3.5*
 
  New:
