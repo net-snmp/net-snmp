@@ -3,6 +3,7 @@
  *
  */
 
+#include "mib_module_config.h"
 #include "../common_header.h"
 #include "ip.h"
 #include "interfaces.h"

@@ -3,6 +3,7 @@
  *
  */
 
+#include "mib_module_config.h"
 #include "../common_header.h"
 #ifdef HAVE_OSRELDATE_H
 #include <osreldate.h>
