@@ -80,7 +80,7 @@ char	       *snmp_tcp6_fmtaddr	(snmp_transport *t,
 int		snmp_tcp6_recv	(snmp_transport *t, void *buf, int size,
 				 void **opaque, int *olength) 
 {
-  int rc = 0;
+  int rc = -1;
 
   if (t != NULL && t->sock >= 0) {
     rc = recv(t->sock, buf, size, 0);
@@ -234,7 +234,7 @@ snmp_transport		*snmp_tcp6_transport	(struct sockaddr_in6 *addr,
   t->domain = ucdSnmpTCPIPv6Domain;
   t->domain_length = sizeof(ucdSnmpTCPIPv6Domain)/sizeof(oid);
 
-  t->sock = socket(PF_INET6, SOCK_DGRAM, 0);
+  t->sock = socket(PF_INET6, SOCK_STREAM, 0);
   if (t->sock < 0) {
     snmp_transport_free(t);
     return NULL;
@@ -312,6 +312,8 @@ snmp_transport		*snmp_tcp6_transport	(struct sockaddr_in6 *addr,
 	So this can block.  */
 
     rc = connect(t->sock, (struct sockaddr *)addr,sizeof(struct sockaddr_in6));
+
+    DEBUGMSGTL(("snmp_tcp6", "connect returns %d\n", rc));
 
     if (rc < 0) {
       snmp_tcp6_close(t);
