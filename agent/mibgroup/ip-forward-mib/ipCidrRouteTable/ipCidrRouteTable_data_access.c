@@ -162,7 +162,7 @@ _snarf_route_entry(netsnmp_route_entry *route_entry,
     else {
         if(rowreq_ctx) {
             snmp_log(LOG_ERR, "error setting index while loading "
-                     "ifTable cache.\n");
+                     "ipCidrRoute cache.\n");
             ipCidrRouteTable_release_rowreq_ctx(rowreq_ctx);
         }
         else
