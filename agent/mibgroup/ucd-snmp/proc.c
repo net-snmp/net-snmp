@@ -93,8 +93,8 @@ void proc_parse_config(word,cptr)
       (*procp)->max = 0;
       (*procp)->min = 0;
     }
-  DEBUGP ("Read:  %s (%d) (%d)\n",
-           (*procp)->name, (*procp)->max, (*procp)->min);
+  DEBUGMSGTL(("ucd-snmp/proc", "Read:  %s (%d) (%d)\n",
+              (*procp)->name, (*procp)->max, (*procp)->min));
 }
 
 /* The routine that handles everything */

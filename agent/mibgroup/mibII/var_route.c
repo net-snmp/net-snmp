@@ -812,7 +812,7 @@ struct radix_node *pt;
 #endif
   
   if (!klookup((unsigned long)pt , (char *) &node , sizeof (struct radix_node))) {
-    DEBUGP("Fail\n");
+    DEBUGMSGTL(("mibII/var_route", "Fail\n"));
     return;
   }
   if (node.rn_b >= 0) {

@@ -198,7 +198,7 @@ unsigned char *var_extensible_pass_persist(vp, name, length, exact, var_len, wri
       else
         sprintf(persistpassthru->command,"getnext\n%s\n",buf);
 
-      DEBUGP("persistpass-sending:\n%s",persistpassthru->command);
+      DEBUGMSGTL(("ucd-snmp/pass_persist", "persistpass-sending:\n%s",persistpassthru->command));
       if( ! write_persist_pipe( i, persistpassthru->command ) ) {
         *var_len = 0;
         /* close_persist_pipes is called in write_persist_pipe */
@@ -383,7 +383,7 @@ setPassPersist(action, var_val, var_val_type, var_val_len, statP, name, name_len
         return SNMP_ERR_NOTWRITABLE;
       }
 
-      DEBUGP("persistpass-writing:  %s\n",persistpassthru->command);
+      DEBUGMSGTL(("ucd-snmp/pass_persist", "persistpass-writing:  %s\n",persistpassthru->command));
       if( ! write_persist_pipe( i, persistpassthru->command ) ) {
         close_persist_pipe(i);
         return SNMP_ERR_NOTWRITABLE;
@@ -404,7 +404,7 @@ setPassPersist(action, var_val, var_val_type, var_val_len, statP, name, name_len
   }
   if (snmp_get_do_debugging()) {
     sprint_mib_oid(buf2,name,name_len);
-    DEBUGP("persistpass-notfound:  %s\n",buf2);
+    DEBUGMSGTL(("ucd-snmp/pass_persist", "persistpass-notfound:  %s\n",buf2));
   }
   return SNMP_ERR_NOSUCHNAME;
 }
@@ -474,7 +474,7 @@ static int open_persist_pipe(index, command)
 {
   static int recurse = 0;  /* used to allow one level of recursion */
 
-  DEBUGP("open_persist_pipe(%d,'%s')\n",index, command);
+  DEBUGMSGTL(("ucd-snmp/pass_persist", "open_persist_pipe(%d,'%s')\n",index, command));
   /* Open if it's not already open */
   if( persist_pipes[index].pid == -1 ) {
     int fdIn, fdOut, pid;
@@ -482,7 +482,7 @@ static int open_persist_pipe(index, command)
 
     /* Did we fail? */
     if( pid == -1 ) {
-      DEBUGP("open_persist_pipe: pid == -1\n");
+      DEBUGMSGTL(("ucd-snmp/pass_persist", "open_persist_pipe: pid == -1\n"));
       recurse = 0;
       return 0;
     }
@@ -503,7 +503,7 @@ static int open_persist_pipe(index, command)
     char buf[STRMAX];
     /* Should catch SIGPIPE around this call! */
     if( ! write_persist_pipe( index, "PING\n" ) ) {
-      DEBUGP("open_persist_pipe: Error writing PING\n");
+      DEBUGMSGTL(("ucd-snmp/pass_persist", "open_persist_pipe: Error writing PING\n"));
       close_persist_pipe(index);
 
       /* Recurse one time if we get a SIGPIPE */
@@ -515,13 +515,13 @@ static int open_persist_pipe(index, command)
       return 0;
     }
     if (fgets(buf,STRMAX-1,persist_pipes[index].fIn) == NULL) {
-      DEBUGP("open_persist_pipe: Error reading for PONG\n");
+      DEBUGMSGTL(("ucd-snmp/pass_persist", "open_persist_pipe: Error reading for PONG\n"));
       close_persist_pipe(index);
       recurse = 0;
       return 0;
     }
     if ( strncmp( buf, "PONG", 4 ) ) {
-      DEBUGP("open_persist_pipe: PONG not received!\n");
+      DEBUGMSGTL(("ucd-snmp/pass_persist", "open_persist_pipe: PONG not received!\n"));
       close_persist_pipe(index);
       recurse = 0;
       return 0;
@@ -559,7 +559,8 @@ static int write_persist_pipe( index, data )
   sigemptyset(&sa.sa_mask);
   sa.sa_flags = 0;
   if( sigaction( SIGPIPE, &sa, &osa ) ) {
-    DEBUGP("write_persist_pipe: sigaction failed: %d", errno);
+    DEBUGMSGTL(("ucd-snmp/pass_persist",
+                "write_persist_pipe: sigaction failed: %d", errno));
   }
 
   /* Do the write */
@@ -571,7 +572,9 @@ static int write_persist_pipe( index, data )
 
   if( wret < 0 ) {
     if( werrno != EINTR ) {
-      DEBUGP("write_persist_pipe: write returned unknown error %d", errno);
+      DEBUGMSGTL(("ucd-snmp/pass_persist",
+                  "write_persist_pipe: write returned unknown error %d\n",
+                  errno));
     }
     close_persist_pipe(index);
     return 0;

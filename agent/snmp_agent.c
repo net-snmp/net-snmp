@@ -565,10 +565,11 @@ parse_var_op_list(data, length, out_data, out_length, index, pi, action)
 	if (statP == NULL && pi->pdutype != SNMP_MSG_SET) {
 	    if (verbose) fprintf (stdout, "    >> noSuchName\n");
 	    else {
-		char buf [256];
+		char buf [1024];
 		sprint_objid(buf, var_name, var_name_len);
-		DEBUGP("%s(%s) --  OID Doesn't exist or access is denied\n",
-                       exact ? "GET" : "GETNEXT", buf);
+		DEBUGMSGTL(("snmp_agent",
+                            "%s(%s) --  OID Doesn't exist or access is denied\n",
+                            exact ? "GET" : "GETNEXT", buf));
 	    }
 	    return SNMP_ERR_NOSUCHNAME; 
 	}

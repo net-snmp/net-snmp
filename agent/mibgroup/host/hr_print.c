@@ -64,7 +64,7 @@ header_hrprint(vp, name, length, exact, var_len, write_method)
 
     if (snmp_get_do_debugging()) {
       sprint_objid (c_oid, name, *length);
-      DEBUGP("var_hrprint: %s %d\n", c_oid, exact);
+      DEBUGMSGTL(("host/hr_print", "var_hrprint: %s %d\n", c_oid, exact));
     }
 
     memcpy( (char *)newname,(char *)vp->name, (int)vp->namelen * sizeof(oid));
@@ -93,7 +93,7 @@ header_hrprint(vp, name, length, exact, var_len, write_method)
     }
 
     if ( LowIndex == -1 ) {
-        DEBUGP ("... index out of range\n");
+        DEBUGMSGTL(("host/hr_print", "... index out of range\n"));
         return(MATCH_FAILED);
     }
 
@@ -104,7 +104,7 @@ header_hrprint(vp, name, length, exact, var_len, write_method)
 
     if (snmp_get_do_debugging()) {
       sprint_objid (c_oid, name, *length);
-      DEBUGP ("... get print stats %s\n", c_oid);
+      DEBUGMSGTL(("host/hr_print", "... get print stats %s\n", c_oid));
     }
     return LowIndex;
 }

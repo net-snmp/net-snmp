@@ -45,7 +45,7 @@ header_registry(vp, name, length, exact, var_len, write_method)
     
     if (snmp_get_do_debugging()) {
       sprint_objid (c_oid, name, *length);
-      DEBUGP ("var_registry: %s\n", c_oid);
+      DEBUGMSGTL(("ucd-snmp/registry", "var_registry: %s\n", c_oid));
     }
     if (*length < REGISTRY_NAME_LENGTH ||
         snmp_oid_compare(name, *length, vp->name, vp->namelen) < 1)

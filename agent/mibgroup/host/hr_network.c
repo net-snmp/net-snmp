@@ -71,7 +71,7 @@ header_hrnet(vp, name, length, exact, var_len, write_method)
 
     if (snmp_get_do_debugging()) {
       sprint_objid (c_oid, name, *length);
-      DEBUGP("var_hrnet: %s %d\n", c_oid, exact);
+      DEBUGMSGTL(("host/hr_network", "var_hrnet: %s %d\n", c_oid, exact));
     }
 
     memcpy( (char *)newname,(char *)vp->name, (int)vp->namelen * sizeof(oid));
@@ -98,7 +98,7 @@ header_hrnet(vp, name, length, exact, var_len, write_method)
     }
 
     if ( LowIndex == -1 ) {
-        DEBUGP("... index out of range\n");
+        DEBUGMSGTL(("host/hr_network", "... index out of range\n"));
         return(MATCH_FAILED);
     }
 
@@ -110,7 +110,7 @@ header_hrnet(vp, name, length, exact, var_len, write_method)
 
     if (snmp_get_do_debugging()) {
       sprint_objid (c_oid, name, *length);
-      DEBUGP("... get net stats %s\n", c_oid);
+      DEBUGMSGTL(("host/hr_network", "... get net stats %s\n", c_oid));
     }
     return LowIndex;
 }

@@ -516,13 +516,13 @@ header_generic(vp, name, length, exact, var_len, write_method)
 
     if (snmp_get_do_debugging()) {
       sprint_objid (c_oid, name, *length);
-      DEBUGP ("header_generic: %s exact=%d\n", c_oid, exact);
+      DEBUGMSGTL(("util_funcs", "header_generic: %s exact=%d\n", c_oid, exact));
     }
 
     memcpy((char *)newname, (char *)vp->name, (int)vp->namelen * sizeof(oid));
     newname[vp->namelen] = 0;
     result = snmp_oid_compare(name, *length, newname, (int)vp->namelen + 1);
-    DEBUGP("  result: %d\n", result);
+    DEBUGMSGTL(("util_funcs", "  result: %d\n", result));
     if ((exact && (result != 0)) || (!exact && (result >= 0)))
         return(MATCH_FAILED);
     memcpy( (char *)name,(char *)newname, ((int)vp->namelen + 1) * sizeof(oid));

@@ -264,35 +264,35 @@ int getswap(rettype)
   if (auto_nlist(SWDEVT_SYMBOL,(char *) swdevt, sizeof(struct swdevt)*nswapdev)
       == 0)
     return(0);
-  DEBUGP("%d fs swap devices: \n", nswapfs);
+  DEBUGMSGTL(("ucd-snmp/memory", "%d fs swap devices: \n", nswapfs));
   for (i=0; i < nswapdev; i++) {
-    DEBUGP("swdevt[%d]: %d\n",i, swdevt[i].sw_enable);
+    DEBUGMSGTL(("ucd-snmp/memory", "swdevt[%d]: %d\n",i, swdevt[i].sw_enable));
     if (swdevt[i].sw_enable) {
 #ifdef STRUCT_SWDEVT_HAS_SW_NBLKSENABLED
-      DEBUGP("  swdevt.sw_nblksenabled:     %d\n", swdevt[i].sw_nblksenabled);
+      DEBUGMSGTL(("ucd-snmp/memory", "  swdevt.sw_nblksenabled:     %d\n", swdevt[i].sw_nblksenabled));
       spacetotal += swdevt[i].sw_nblksenabled;
 #else
-      DEBUGP("  swdevt.sw_nblks:     %d\n", swdevt[i].sw_nblks);
+      DEBUGMSGTL(("ucd-snmp/memory", "  swdevt.sw_nblks:     %d\n", swdevt[i].sw_nblks));
       spacetotal += swdevt[i].sw_nblks;
 #endif
       spaceleft += (swdevt[i].sw_nfpgs * 4);
-      DEBUGP("  swdevt.sw_nfpgs:     %d\n", swdevt[i].sw_nfpgs);
+      DEBUGMSGTL(("ucd-snmp/memory", "  swdevt.sw_nfpgs:     %d\n", swdevt[i].sw_nfpgs));
     }
   }
   if (auto_nlist(FSWDEVT_SYMBOL,(char *) fswdevt, sizeof(struct fswdevt)*nswapfs)
       == 0)
     return(0);
-  DEBUGP("%d fs swap devices: \n", nswapfs);
+  DEBUGMSGTL(("ucd-snmp/memory", "%d fs swap devices: \n", nswapfs));
   for (i=0; i < nswapfs; i++) {
-    DEBUGP("fswdevt[%d]: %d\n",i, fswdevt[i].fsw_enable);
+    DEBUGMSGTL(("ucd-snmp/memory", "fswdevt[%d]: %d\n",i, fswdevt[i].fsw_enable));
     if (fswdevt[i].fsw_enable) {
       spacetotal += (fswdevt[i].fsw_limit * 2048);  /* 2048=bytes per page? */
       spaceleft += (fswdevt[i].fsw_limit * 2048 -
                     ((fswdevt[i].fsw_allocated - fswdevt[i].fsw_min) * 37));
-      DEBUGP("  fswdevt[i].fsw_limit:     %d\n", fswdevt[i].fsw_limit);
-      DEBUGP("  fswdevt[i].fsw_allocated: %d\n", fswdevt[i].fsw_allocated);
-      DEBUGP("  fswdevt[i].fsw_min:       %d\n", fswdevt[i].fsw_min);
-      DEBUGP("  fswdevt[i].fsw_reserve:   %d\n", fswdevt[i].fsw_reserve);
+      DEBUGMSGTL(("ucd-snmp/memory", "  fswdevt[i].fsw_limit:     %d\n", fswdevt[i].fsw_limit));
+      DEBUGMSGTL(("ucd-snmp/memory", "  fswdevt[i].fsw_allocated: %d\n", fswdevt[i].fsw_allocated));
+      DEBUGMSGTL(("ucd-snmp/memory", "  fswdevt[i].fsw_min:       %d\n", fswdevt[i].fsw_min));
+      DEBUGMSGTL(("ucd-snmp/memory", "  fswdevt[i].fsw_reserve:   %d\n", fswdevt[i].fsw_reserve));
       /* 37 = calculated value I know it makes no sense, nor is it accurate */
     }
   }

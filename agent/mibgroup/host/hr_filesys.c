@@ -119,7 +119,7 @@ header_hrfilesys(vp, name, length, exact, var_len, write_method)
 
     if (snmp_get_do_debugging()) {
       sprint_objid (c_oid, name, *length);
-      DEBUGP("var_hrfilesys: %s %d\n", c_oid, exact);
+      DEBUGMSGTL(("host/hr_filesys", "var_hrfilesys: %s %d\n", c_oid, exact));
     }
     
     memcpy( (char *)newname,(char *)vp->name, (int)vp->namelen * sizeof(oid));
@@ -146,7 +146,7 @@ header_hrfilesys(vp, name, length, exact, var_len, write_method)
     }
 
     if ( LowIndex == -1 ) {
-        DEBUGP("... index out of range\n");
+        DEBUGMSGTL(("host/hr_filesys", "... index out of range\n"));
         return(MATCH_FAILED);
     }
 
@@ -157,7 +157,7 @@ header_hrfilesys(vp, name, length, exact, var_len, write_method)
 
     if (snmp_get_do_debugging()) {
       sprint_objid (c_oid, name, *length);
-      DEBUGP("... get filesys stats %s\n", c_oid);
+      DEBUGMSGTL(("host/hr_filesys", "... get filesys stats %s\n", c_oid));
     }
     return LowIndex;
 }

@@ -115,7 +115,7 @@ header_hrswrun(vp, name, length, exact, var_len, write_method)
 
     if (snmp_get_do_debugging()) {
       sprint_objid (c_oid, name, *length);
-      DEBUGP ("var_hrswrun: %s %d\n", c_oid, exact);
+      DEBUGMSGTL(("host/hr_swrun", "var_hrswrun: %s %d\n", c_oid, exact));
     }
 
     memcpy( (char *)newname,(char *)vp->name, (int)vp->namelen * sizeof(oid));
@@ -148,7 +148,7 @@ header_hrswrunEntry(vp, name, length, exact, var_len, write_method)
 
     if (snmp_get_do_debugging()) {
       sprint_objid (c_oid, name, *length);
-      DEBUGP ("var_hrswrunEntry: %s %d\n", c_oid, exact);
+      DEBUGMSGTL(("host/hr_swrun", "var_hrswrunEntry: %s %d\n", c_oid, exact));
     }
 
     memcpy( (char *)newname,(char *)vp->name, (int)vp->namelen * sizeof(oid));
@@ -160,14 +160,15 @@ header_hrswrunEntry(vp, name, length, exact, var_len, write_method)
     for ( ;; ) {
         pid = Get_Next_HR_SWRun();
 #ifndef linux
-        DEBUGP ("(index %d (entry #%d) ....", pid, current_proc_entry);
+        DEBUGMSG(("host/hr_swrun",
+                  "(index %d (entry #%d) ....", pid, current_proc_entry));
 #endif
         if ( pid == -1 )
 	    break;
 	newname[HRSWRUN_ENTRY_NAME_LENGTH] = pid;
         if (snmp_get_do_debugging()) {
           sprint_objid (c_oid, newname, *length);
-          DEBUGP ("%s", c_oid);
+          DEBUGMSG(("host/hr_swrun", "%s", c_oid));
         }
         result = snmp_oid_compare(name, *length, newname, (int)vp->namelen + 1);
         if (exact && (result == 0)) {
@@ -175,7 +176,7 @@ header_hrswrunEntry(vp, name, length, exact, var_len, write_method)
 #ifndef linux
 	    LowProcIndex = current_proc_entry-1;
 #endif
-DEBUGP (" saved\n");
+DEBUGMSGTL(("host/hr_swrun", " saved\n"));
 	    /* Save process status information */
             break;
 	}
@@ -186,13 +187,13 @@ DEBUGP (" saved\n");
 	    LowProcIndex = current_proc_entry-1;
 #endif
 	    /* Save process status information */
-DEBUGP (" saved");
+DEBUGMSG(("host/hr_swrun", " saved"));
 	}
-DEBUGP ("\n");
+DEBUGMSG(("host/hr_swrun", "\n"));
     }
 
     if ( LowPid == -1 ) {
-        DEBUGP ("... index out of range\n");
+        DEBUGMSGTL(("host/hr_swrun", "... index out of range\n"));
         return(MATCH_FAILED);
     }
 
@@ -203,7 +204,7 @@ DEBUGP ("\n");
     *var_len = sizeof(long);	/* default to 'long' results */
 
     sprint_objid (c_oid, name, *length);
-    DEBUGP ("... get process stats %s\n", c_oid);
+    DEBUGMSGTL(("host/hr_swrun", "... get process stats %s\n", c_oid));
     return LowPid;
 }
 

@@ -75,7 +75,7 @@ header_hrsys(vp, name, length, exact, var_len, write_method)
 
     if (snmp_get_do_debugging()) {
       sprint_objid (c_oid, name, *length);
-      DEBUGP ("var_hrsys: %s %d\n", c_oid, exact);
+      DEBUGMSGTL(("host/hr_system", "var_hrsys: %s %d\n", c_oid, exact));
     }
 
     memcpy( (char *)newname,(char *)vp->name, (int)vp->namelen * sizeof(oid));

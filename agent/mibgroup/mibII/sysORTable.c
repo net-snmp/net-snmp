@@ -69,13 +69,13 @@ var_sysORTable(vp, name, length, exact, var_len, write_method)
 
   for(i = 1, ptr=table; ptr != NULL && i < name[*length-1];
       ptr = ptr->next, i++) {
-    DEBUGP("sysORTable -- %d != %d\n",i,name[*length-1]);
+    DEBUGMSGTL(("mibII/sysORTable", "sysORTable -- %d != %d\n",i,name[*length-1]));
   }
   if (ptr == NULL) {
-    DEBUGP("sysORTable -- no match: %d\n",i);
+    DEBUGMSGTL(("mibII/sysORTable", "sysORTable -- no match: %d\n",i));
     return NULL;
   }
-  DEBUGP("sysORTable -- match: %d\n",i);
+  DEBUGMSGTL(("mibII/sysORTable", "sysORTable -- match: %d\n",i));
   
   switch (vp->magic){
     case SYSORTABLEINDEX:
@@ -122,7 +122,7 @@ void register_sysORTable(oidin, oidlen, descr)
 
   if (snmp_get_do_debugging()) {
     sprint_objid (c_oid, oidin, oidlen);
-    DEBUGP("sysORTable registering: %s\n",c_oid);
+    DEBUGMSGTL(("mibII/sysORTable", "sysORTable registering: %s\n",c_oid));
   }
 
   while(*ptr != NULL)
