@@ -779,6 +779,7 @@ dnl Do transport module processing.
 dnl
 AC_MSG_CHECKING(for and configuring transport modules to use)
 transport_src_list=""
+transport_hdr_list=""
 transport_def_list=""
 transport_result_list=""
 transport_add_list=""
@@ -828,10 +829,15 @@ for i in $new_transport_list; do
       fi
     fi
     transport_src="snmp"$i"Domain.c"
+    transport_hdr="snmp"$i"Domain.h"
     rel_transport_src="snmplib/"$transport_src
+    rel_transport_hdr="snmplib/"$transport_hdr
     if test -f "$srcdir/$rel_transport_src"; then
       transport_result_list="$transport_result_list $i"
       transport_src_list="$transport_src $transport_src_list"
+      if test -f "$srcdir/$rel_transport_hdr"; then
+        transport_hdr_list="$transport_hdr $transport_hdr_list"
+      fi
       transport_def=`echo $i | sed 'y/abcdefghijklmnopqrstuvwxyz/ABCDEFGHIJKLMNOPQRSTUVWXYZ/'`
       transport_def_list="SNMP_TRANSPORT_"$transport_def"_DOMAIN $transport_def_list"
     else
@@ -842,6 +848,7 @@ for i in $new_transport_list; do
 done
 transport_obj_list=`echo " $transport_src_list " | sed 's/\.c/\.o/g'`
 transport_lobj_list=`echo " $transport_src_list " | sed 's/\.c/\.lo/g'`
+AC_SUBST(transport_hdr_list)
 AC_SUBST(transport_src_list)
 AC_SUBST(transport_obj_list)
 AC_SUBST(transport_lobj_list)

@@ -36,6 +36,8 @@ INSTALLHEADERS=\
 	tools.h \
 	transform_oids.h \
 	ucd-snmp-includes.h \
+	snmp_transport.h \
+	@transport_hdr_list@ \
 	@security_hdr_list@
 
 CSRCS=	snmp_client.c mib.c parse.c snmp_api.c snmp.c 		\
