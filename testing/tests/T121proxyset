@@ -14,7 +14,7 @@ SKIPIFNOT USING_MIBII_SYSTEM_MIB_MODULE
 # standard V3 configuration for initial user
 . ./Sv3config
 # config the proxy
-CONFIGAGENT proxy -p 7676 -t 2 -r 1 -v 2c -c testcommunity localhost system
+CONFIGAGENT proxy -t 2 -r 1 -v 2c -c testcommunity udp:localhost:7676 system
 
 # Start the agent without initializing the system mib.
 ORIG_AGENT_FLAGS="$AGENT_FLAGS"
@@ -22,7 +22,7 @@ AGENT_FLAGS="$ORIG_AGENT_FLAGS -I -system_mib -Dproxy"
 STARTAGENT
 
 # test to see that the current agent doesn't support the system mib
-#CAPTURE "snmpget -On -t 3 $SNMP_FLAGS -v 3 -a MD5 -A initial_test_pass_auth -l anp -u initial -n xxx localhost .1.3.6.1.2.1.1.3.0"
+#CAPTURE "snmpget -On -t 3 $SNMP_FLAGS -v 3 -a MD5 -A initial_test_pass_auth -l anp -u initial -n xxx udp:localhost:$SNMP_SNMPD_PORT .1.3.6.1.2.1.1.3.0"
 
 #CHECK ".1.3.6.1.2.1.1.3.0 = No Such Object"
 
@@ -37,27 +37,27 @@ STARTAGENT
   echo "rwcommunity testcommunity" >> $SNMP_CONFIG_FILE
   echo "psyscontact testcontact" >> $SNMP_CONFIG_FILE
   AGENT_FLAGS="$ORIG_AGENT_FLAGS -Dmib_init"
-  ORIG_SNMP_FLAGS=$SNMP_FLAGS
-  SNMP_FLAGS="-d -p 7676"
+  ORIG_SNMP_SNMPD_PORT=$SNMP_SNMPD_PORT
+  SNMP_SNMPD_PORT="7676"
   STARTAGENT
-  SNMP_FLAGS=$ORIG_SNMP_FLAGS
+  SNMP_SNMPD_PORT=$ORIG_SNMP_SNMPD_PORT
 
   # test to see that the agent now supports the system mib
-  CAPTURE "snmpget -On $SNMP_FLAGS -t 5 -v 3 -a MD5 -A initial_test_pass_auth -l anp -u initial -n xxx localhost sysContact.0"
+  CAPTURE "snmpget -On $SNMP_FLAGS -t 5 -v 3 -a MD5 -A initial_test_pass_auth -l anp -u initial -n xxx udp:localhost:$SNMP_SNMPD_PORT sysContact.0"
 
   CHECK ".1.3.6.1.2.1.1.4.0 = testcontact"
 
   if test "$snmp_last_test_result" = 1; then
 
     # test to see that the agent now supports the system mib
-    CAPTURE "snmpset -On $SNMP_FLAGS -t 5 -v 3 -a MD5 -A initial_test_pass_auth -l anp -u initial -n xxx localhost sysContact.0 s newtestcontact"
+    CAPTURE "snmpset -On $SNMP_FLAGS -t 5 -v 3 -a MD5 -A initial_test_pass_auth -l anp -u initial -n xxx udp:localhost:$SNMP_SNMPD_PORT sysContact.0 s newtestcontact"
 
     CHECK ".1.3.6.1.2.1.1.4.0 = newtestcontact"
 
     if test "$snmp_last_test_result" = 1; then
 
 	# test to see that the agent now supports the system mib
-	CAPTURE "snmpget -On $SNMP_FLAGS -t 5 -v 3 -a MD5 -A initial_test_pass_auth -l anp -u initial -n xxx localhost sysContact.0"
+	CAPTURE "snmpget -On $SNMP_FLAGS -t 5 -v 3 -a MD5 -A initial_test_pass_auth -l anp -u initial -n xxx udp:localhost:$SNMP_SNMPD_PORT sysContact.0"
 	
 	CHECK ".1.3.6.1.2.1.1.4.0 = newtestcontact"
     fi
