@@ -1139,7 +1139,7 @@ init_mib (void)
     if (homepath) {
       while(cp_home = strstr(env_var, "$HOME")) {
         new_mibdirs = (char *) malloc(strlen(env_var) - strlen("$HOME") +
-                                      strlen(homepath));
+                                      strlen(homepath)+1);
         *cp_home = 0; /* null out the spot where we stop copying */
         sprintf(new_mibdirs, "%s%s%s", env_var, homepath,
                 cp_home + strlen("$HOME"));
@@ -1334,6 +1334,10 @@ int read_objid(const char *input,
     struct tree *root = tree_head;
     char buf[SPRINT_MAX_LEN];
     int ret;
+
+    if (strchr(input, ':')) {
+	return get_node(input, output, out_len);
+    }
 
     if (*input == '.')
 	input++;

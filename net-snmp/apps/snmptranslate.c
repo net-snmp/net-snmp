@@ -249,7 +249,7 @@ int main(int argc, char *argv[])
     if (!current_name) exit (0);
 
     name_length = MAX_OID_LEN;
-    if (random_access || strchr(current_name, ':')){
+    if (random_access){
 	if (!get_node(current_name, name, &name_length)){
 	    fprintf(stderr, "Unknown object identifier: %s\n", current_name);
 	    exit(2);
