@@ -1,3 +1,5 @@
+	       README file for net-snmp Version: 5.0
+
 DISCLAIMER
 
   The Authors assume no responsibility for damage or loss of system
@@ -296,6 +298,8 @@ THANKS
     Craig Setera <seterajunk@charter.net>
     Katsuhisa ABE <abekatsu@users.sourceforge.net>
     Axel Kittenberger <Axel.Kittenberger@maxxio.com>
+    Johannes Schmidt-Fischer <jsf@InterFace-AG.com>
+    Jeffrey Watson <nostaw@users.sourceforge.net>
 
   We've probably forgotten people on this list.  Let us know if you've
   contributed code and we've left you out.
