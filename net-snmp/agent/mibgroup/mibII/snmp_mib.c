@@ -67,7 +67,9 @@ struct variable2 snmp_variables[] = {
     {SNMPOUTSETREQUESTS, ASN_COUNTER, RONLY, var_snmp, 1, {27}},
     {SNMPOUTGETRESPONSES, ASN_COUNTER, RONLY, var_snmp, 1, {28}},
     {SNMPOUTTRAPS, ASN_COUNTER, RONLY, var_snmp, 1, {29}},
-    {SNMPENABLEAUTHENTRAPS, ASN_INTEGER, RWRITE, var_snmp, 1, {30}}
+    {SNMPENABLEAUTHENTRAPS, ASN_INTEGER, RWRITE, var_snmp, 1, {30}},
+    {SNMPSILENTDROPS, ASN_COUNTER, RONLY, var_snmp, 1, {31}},
+    {SNMPPROXYDROPS, ASN_COUNTER, RONLY, var_snmp, 1, {32}}
 };
 
 /* Define the OID pointer to the top of the mib tree that we're
@@ -118,14 +120,14 @@ var_snmp(struct variable *vp,
     return NULL;
 
     /* this is where we do the value assignments for the mib results. */
-  if ( (vp->magic >= 1)
-       && (vp->magic <= (STAT_SNMP_STATS_END - STAT_SNMP_STATS_START + 1)) ) {
-    long_ret = snmp_get_statistic(vp->magic + STAT_SNMP_STATS_START - 1);
-    return (unsigned char *) &long_ret;
-  } else if (vp->magic == SNMPENABLEAUTHENTRAPS) {
+  if (vp->magic == SNMPENABLEAUTHENTRAPS) {
     *write_method = write_snmp;
     long_return = snmp_enableauthentraps;
     return (u_char *) &long_return;
+  } else if ( (vp->magic >= 1)
+       && (vp->magic <= (STAT_SNMP_STATS_END - STAT_SNMP_STATS_START + 1)) ) {
+    long_ret = snmp_get_statistic(vp->magic + STAT_SNMP_STATS_START - 1);
+    return (unsigned char *) &long_ret;
   }
   return NULL;
 }
