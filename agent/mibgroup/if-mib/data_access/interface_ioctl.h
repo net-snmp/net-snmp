@@ -13,11 +13,23 @@ extern          "C" {
 /**---------------------------------------------------------------------*/
 /**/
 
-int netsnmp_access_interface_ioctl_physaddr_get(int fd,
-                                                netsnmp_interface_entry *ifentry);
+int
+netsnmp_access_interface_ioctl_physaddr_get(int fd,
+                                            netsnmp_interface_entry *ifentry);
 
-int netsnmp_access_interface_ioctl_flags_get(int fd,
-                                             netsnmp_interface_entry *ifentry);
+int
+netsnmp_access_interface_ioctl_flags_get(int fd,
+                                         netsnmp_interface_entry *ifentry);
+
+int
+netsnmp_access_interface_ioctl_flags_set(int fd,
+                                         netsnmp_interface_entry *ifentry,
+                                         unsigned int flags,
+                                         int and_complement);
+
+int
+netsnmp_access_interface_ioctl_mtu_get(int fd,
+                                       netsnmp_interface_entry *ifentry);
 
 /**---------------------------------------------------------------------*/
 
