@@ -1017,7 +1017,7 @@ path to the snmpconf Perl script.  For example:
 
 You can now run snmpconf using the standard command line such as:
 
-  snmpconf -I
+  snmpconf -i
 
 ***************************************************************************
 *
