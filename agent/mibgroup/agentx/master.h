@@ -1,6 +1,8 @@
 #ifndef _AGENTX_MASTER_H
 #define _AGENTX_MASTER_H
 
+config_belongs_in(agent_module)
+
 config_require(agentx/protocol)
 config_require(agentx/client)
 config_require(agentx/master_admin)

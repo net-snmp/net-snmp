@@ -8,6 +8,7 @@
 #include <net-snmp/library/vacm.h>
 
 config_require(util_funcs)
+config_belongs_in(agent_module)
 
      void            init_vacm_conf(void);
      void            vacm_free_group(void);

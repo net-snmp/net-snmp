@@ -1,6 +1,8 @@
 #ifndef __AGENTX_CONFIG_H__
 #define __AGENTX_CONFIG_H__
 
+config_belongs_in(agent_module)
+
 #ifdef __cplusplus
 extern          "C" {
 #endif
