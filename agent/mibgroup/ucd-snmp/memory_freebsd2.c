@@ -55,9 +55,9 @@
 long minimumswap;
 
 /* Swap info */
-long swapTotal;
-long swapUsed;
-long swapFree;
+quad_t swapTotal;
+quad_t swapUsed;
+quad_t swapFree;
 
 void init_memory_freebsd2(void) 
 {
@@ -105,6 +105,7 @@ void memory_free_config (void)
   minimumswap = DEFAULTMINIMUMSWAP;
 }
 
+#if 0
 /* Executes swapinfo and parses last line */
 /* This is just way too ugly ;) */
 
@@ -125,21 +126,17 @@ void getSwap(void)
       fclose(file);
       wait_on_exec(&ext);
 
-      sscanf(ext.output, "%*s%*d%ld%ld", &swapUsed, &swapFree);
+      sscanf(ext.output, "%*s%*d%qd%qd", &swapUsed, &swapFree);
 
       swapTotal = swapUsed + swapFree;
   }
 }
-
+#else
 /*
  * swapmode is based on a program called swapinfo written
  * by Kevin Lahey <kml@rokkaku.atl.ga.us>.
- *
- * BUT I CAN'T MAKE IT WORK!!!!!
- *
  */
 
-#include <sys/rlist.h>
 #include <sys/conf.h>
 
 #define NSWDEV_SYMBOL     "nswdev"
@@ -151,12 +148,12 @@ void swapmode(void)
 {
     char *header;
     int hlen, nswdev, dmmax;
-    int i, div;
+    int i, idiv, n;
     struct swdevt *sw;
     long blocksize;
-    struct rlist head;
     struct rlist *swaplist;
     static kvm_t *kd = NULL;
+    struct kvm_swap kswap[16];
 
     if (kd == NULL)
 	kd = kvm_openfiles(NULL, NULL, NULL, O_RDONLY, NULL);
@@ -170,37 +167,38 @@ void swapmode(void)
 
     auto_nlist(SWDEVT_SYMBOL, (char *)sw, nswdev * sizeof(*sw));
 
+    n = kvm_getswapinfo(
+        kd,
+        kswap,
+        sizeof(kswap)/sizeof(kswap[0]),
+        0
+    );
+
+    swapUsed = swapTotal = swapFree = 0;
     /* Count up free swap space. */
-    swapFree = 0;
-    while (swaplist) 
-    {
-	kvm_read(kd, (u_long)swaplist, &head, sizeof(head));
-
-	swapFree += head.rl_end - head.rl_start + 1;
-
-	swaplist = head.rl_next;
-    }
+    for (i = 0; i < n; ++i)
+        swapFree += kswap[i].ksw_total - kswap[i].ksw_used;
 
     /* Count up total swap space */
-    swapTotal = 0;
-    for (i = 0; i < nswdev; i++) 
-	if ((sw[i].sw_flags & SW_FREED)) 
-	    swapTotal += sw[i].sw_nblks - dmmax;
+    for (i = 0; i < n; i++) 
+	    swapTotal += kswap[i].ksw_total;
     
     /* Calculate used swap space */
     swapUsed = swapTotal - swapFree;
 
     /* Convert to kb */
     header = getbsize(&hlen, &blocksize);
-    div = blocksize / 512;
+    idiv = blocksize / 512;
 
-    swapTotal /= div;
-    swapUsed /= div;
-    swapFree /= div;
+    if (idiv > 0) {
+        swapTotal /= idiv;
+        swapUsed /= idiv;
+        swapFree /= idiv;
+    }
 
     free(sw); 
 }
-
+#endif
 
 
 /*
@@ -244,8 +242,8 @@ unsigned char *var_extensible_mem(struct variable *vp,
     sysctl(total_mib, 2, &total, &total_size, NULL, 0);
 
     /* Swap info */
-    /* swapmode(); Should be used if I ever get it to work */
-    getSwap();
+    swapmode();
+    /* getSwap(); */
 
     /* Physical memory */
     sysctl(phys_mem_mib, 2, &phys_mem, &phys_mem_size, NULL, 0);
@@ -313,7 +311,7 @@ unsigned char *var_extensible_mem(struct variable *vp,
 	return((u_char *) (&long_ret));
     case ERRORMSG:
 	if (swapFree < minimumswap)
-	    sprintf(errmsg,"Running out of swap space (%ld)", swapFree);
+	    sprintf(errmsg,"Running out of swap space (%qd)", swapFree);
 	else
 	    errmsg[0] = 0;
 	*var_len = strlen(errmsg);
