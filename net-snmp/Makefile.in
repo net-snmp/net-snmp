@@ -119,7 +119,7 @@ $(srcdir)/configure: configure.in aclocal.m4
 #
 $(srcdir)/config.h.in: stamp-h.in
 $(srcdir)/stamp-h.in: configure.in acconfig.h
-	cd ${srcdir} && $(AUTOHEADER)
+	cd ${srcdir} && LC_COLLATE=C $(AUTOHEADER)
 	echo timestamp > ${srcdir}/stamp-h.in
 
 config.h: stamp-h

@@ -1,4 +1,4 @@
-		      ucd-snmp Version: 4.2
+		      ucd-snmp Version: 4.2.1.pre1
 DISCLAIMER
 
   The Authors, the University of California, and the University of
@@ -118,10 +118,10 @@ MAILING LISTS
 
     The following mailing lists have been created for your use:
 
-      net-snmp-announce@lists.sourcerforge.net  -- For announcements
-      net-snmp-users@lists.sourcerforge.net     -- For usage discussions
-      net-snmp-coders@lists.sourcerforge.net    -- For development discussions
-      net-snmp-cvs@lists.sourcerforge.net       -- For cvs update announcements
+      net-snmp-announce@lists.sourceforge.net  -- For announcements
+      net-snmp-users@lists.sourceforge.net     -- For usage discussions
+      net-snmp-coders@lists.sourceforge.net    -- For development discussions
+      net-snmp-cvs@lists.sourceforge.net       -- For cvs update announcements
 
     To subscribe to these lists, please see:
   

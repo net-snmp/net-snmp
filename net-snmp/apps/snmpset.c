@@ -118,6 +118,8 @@ int main(int argc, char *argv[])
     int status;
     int exitval = 0;
 
+    putenv(strdup("POSIXLY_CORRECT=1"));
+
     /* get the common command line arguments */
     switch (arg = snmp_parse_args(argc, argv, &session, NULL, NULL)) {
     case -2:
