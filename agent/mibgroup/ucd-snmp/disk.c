@@ -368,7 +368,7 @@ u_char *var_extensible_disk(struct variable *vp,
       long_ret = disks[disknum].minpercent;
       return((u_char *) (&long_ret));
   }
-#if defined(HAVE_SYS_STATVFS_H) || defined(HAVE_STATFS)
+#if defined(HAVE_STATVFS) || defined(HAVE_STATFS)
 #ifdef STAT_STATFS_FS_DATA
   if (statvfs (disks[disknum].path, &fsd) == -1) {
 #else
