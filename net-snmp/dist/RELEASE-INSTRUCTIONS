@@ -216,7 +216,10 @@ RELEASING:
           $ cvs2cl -r -f ChangeLog.add -F V4-2-patches --no-ancestors \
              --no-hide-branch-additions --no-wrap -S
 
-          [xxx-rks: I have to remove --no-ancestors to get this to work for me]
+          [if you get errors from --no-hide-branch-additions or
+           --no-ancestors, make you you have a recent version of cvs2cl.
+           Latest as of 1/2005 is 2.58. Available at
+                http://www.red-bean.com/cvs2cl/cvs2cl.pl
 
        b) Fixup the changelog
 
