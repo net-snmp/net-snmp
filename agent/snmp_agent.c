@@ -1333,6 +1333,7 @@ netsnmp_wrap_up_request(netsnmp_agent_session *asp, int status)
         asp->pdu->errstat = asp->status;
         asp->pdu->errindex = asp->index;
         if (!snmp_send(asp->session, asp->pdu)) {
+            snmp_perror("send response");
             snmp_free_pdu(asp->pdu);
             asp->pdu = NULL;
         }
