@@ -23,7 +23,7 @@ TABLE OF CONTENTS
 * Code Update Announcements
 * Mailing Lists
   Agent Extensibility
-  Example Agent Configuration and Usage 
+  Example Agent Configuration and Usage
   Configuration
   Submitting Bug Reports
   Closing
@@ -67,13 +67,13 @@ WEB PAGE
   Make sure you check out the logo there, which is created using
   postcards submitted from various locations that make use of the
   ucd-snmp package.
-  
+
 INSTALLATION
 
   See the INSTALL file distributed with this package.
 
 COPYING AND COPYRIGHTS
-  
+
   See the COPYING file distributed with this package.
 
 FREQUENTLY ASKED QUESTIONS
@@ -108,10 +108,10 @@ MAILING LISTS
   The lists:
 
     The following mailing lists have been created for your use:
-  
+
       ucd-snmp-announce@ucd-snmp.ucdavis.edu  -- For announcements
          Subscribe to ucd-snmp-announce-request@ucd-snmp.ucdavis.edu
-         
+
       ucd-snmp@ucd-snmp.ucdavis.edu           -- For usage discussions
          Subscribe to ucd-snmp-request@ucd-snmp.ucdavis.edu
 
@@ -129,7 +129,7 @@ MAILING LISTS
     ucd-snmp@ucd-snmp.ucdavis.edu list.
 
   Subscribing:
-    
+
     To (un)subscribe any of the above lists, mail a note to the same
     address with -request appended to the list name with a subject
     line of "subscribe" or "unsubscribe".
@@ -206,7 +206,7 @@ CLOSING
 
   We love patches.  Send some to us!  But before you do, please see
   the 'PORTING' file for information on helping us out with the
-  process of integrating your patches (regardless of weather its a new 
+  process of integrating your patches (regardless of weather its a new
   feature implementation or a new port).
 
   Also, We're interested if anyone actually uses/likes/hates/whatever
@@ -230,7 +230,7 @@ THANKS
 
     Dan A. Dickey <ddickey@transition.com>
     Dave Shield <D.T.Shield@csc.liv.ac.uk>
-    Giovanni S. Marzot <gmarzot@baynetworks.com>
+    Giovanni S. Marzot <gmarzot@nortelnetworks.com>
     Niels Baggesen <recnba@mediator.uni-c.dk>
     Simon Leinen <simon@limmat.switch.ch>
     David T. Perkins <dperkins@dsperkins.com>
