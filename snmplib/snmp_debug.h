@@ -24,6 +24,9 @@ void debugmsg(va_alist);
 void debugmsgtoken(va_alist);
 #endif
 void debugmsg_oid(const char *token, oid *theoid, size_t len);
+void debugmsg_hex(const char *token, u_char *thedata, size_t len);
+void debug_indent_add(int amount);
+char *debug_indent(void);
 
 /* Use these macros instead of the functions above to allow them to be
    re-defined at compile time to NOP for speed optimization.
@@ -74,8 +77,8 @@ To print multiple pieces to a single line in one call, use:
 */
 
 #ifndef SNMP_NO_DEBUGGING  /* make sure we're wanted */
-#define DEBUGMSG(x)    debugmsg x;
-#define DEBUGMSGT(x)   debugmsgtoken x; debugmsg x;
+#define DEBUGMSG(x)    debugmsg x
+#define DEBUGMSGT(x)   debugmsgtoken x; debugmsg x
 #ifdef  HAVE_CPP_UNDERBAR_FUNCTION_DEFINED
 #define DEBUGTRACE     DEBUGMSGT(("trace","%s(): %s, %d\n",__FUNCTION__,\
                                  __FILE__,__LINE__));
@@ -83,10 +86,27 @@ To print multiple pieces to a single line in one call, use:
 #define DEBUGTRACE     DEBUGMSGT(("trace"," %s, %d\n", __FILE__,__LINE__));
 #endif
 
-#define DEBUGMSGL(x)   DEBUGTRACE; debugmsg x;
-#define DEBUGMSGTL(x)  DEBUGTRACE; debugmsgtoken x; debugmsg x;
-#define DEBUGL(x)      DEBUGTRACE; debugmsg x;
-#define DEBUGMSGOID(x)    debugmsg_oid x;
+#define DEBUGMSGL(x)       DEBUGTRACE; debugmsg x
+#define DEBUGMSGTL(x)      DEBUGTRACE; debugmsgtoken x; debugmsg x
+#define DEBUGL(x)          DEBUGTRACE; debugmsg x
+#define DEBUGMSGOID(x)     debugmsg_oid x
+#define DEBUGMSGHEX(x)     debugmsg_hex x
+#define DEBUGIF(x)         if (debug_is_token_registered(x) == SNMPERR_SUCCESS)
+#define DEBUGINDENT()      debug_indent()
+#define DEBUGINDENTMORE()  debug_indent_add(2)
+#define DEBUGINDENTLESS()  debug_indent_add(-2)
+#define DEBUGPRINTINDENT(token) DEBUGMSGTL((token, "%s", DEBUGINDENT()))
+
+#define DEBUGDUMPHEADER(token,x) \
+        DEBUGPRINTINDENT(token); \
+        DEBUGMSG((token,x)); \
+        DEBUGINDENTMORE()
+
+#define DEBUGDUMPSETUP(token, buf, len) \
+        DEBUGPRINTINDENT(token); \
+        DEBUGMSGHEX((token, buf, len)); \
+        DEBUGMSG   ((token, "\n")); \
+        DEBUGPRINTINDENT(token)
 
 #else /* SNMP_NO_DEBUGGING := enable streamlining of the code */
 
@@ -97,6 +117,10 @@ To print multiple pieces to a single line in one call, use:
 #define DEBUGMSGTL(x)
 #define DEBUGL(x)
 #define DEBUGMSGOID(x)
+#define DEBUGMSGHEX(x)
+#define DEBUGIF(x)        if(0)
+#define DEBUGDUMP(t, b, l, p)
+#define DEBUGINDENT()
 
 #endif
 

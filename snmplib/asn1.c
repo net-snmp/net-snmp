@@ -54,6 +54,7 @@ SOFTWARE.
 
 
 #include "asn1.h"
+#include "snmp_debug.h"
 
 #ifndef NULL
 #define NULL	0
@@ -128,7 +129,7 @@ asn_dparse_int(u_char *data,
 /*
  * ASN.1 integer ::= 0x02 asnlength byte {byte}*
  */
-    register u_char *bufp = data;
+    register u_char *bufp = data, *tbuf;
     u_long	    asn_length;
     register long   value = 0;
     int i;
@@ -137,8 +138,6 @@ asn_dparse_int(u_char *data,
 	ERROR_MSG("not long");
 	return NULL;
     }
-    if ( action == DUMP_PACKET )
-	printf("ASN Integer\t %.2x", *bufp);
     *type = *bufp++;
     bufp = asn_dparse_length(bufp, &asn_length, action);
     if (bufp == NULL){
@@ -157,17 +156,12 @@ asn_dparse_int(u_char *data,
     if (*bufp & 0x80)
 	value = -1; /* integer is negative */
 
-    if ( action == DUMP_PACKET ) {
-        printf("\t");
-	for ( i = 0 ; i < (int)asn_length ; i++ )
-	     printf(" %.2x", *(bufp+i));
-    }
+    DEBUGDUMPSETUP("dump_recv", data, bufp - data + asn_length);
 
     while(asn_length--)
 	value = (value << 8) | *bufp++;
 
-    if ( action == DUMP_PACKET )
-	printf("\t = %ld\n", value);
+    DEBUGMSG(("dump_recv", "  ASN Integer:\t%ld (%.2x)\n", value, value));
 
     *intp = value;
     return bufp;
@@ -211,8 +205,6 @@ asn_dparse_unsigned_int(u_char *data,
 	ERROR_MSG("not long");
 	return NULL;
     }
-    if ( action == DUMP_PACKET )
-	printf("ASN UInteger\t %.2x", *bufp);
     *type = *bufp++;
     bufp = asn_dparse_length(bufp, &asn_length, action);
     if (bufp == NULL){
@@ -232,17 +224,12 @@ asn_dparse_unsigned_int(u_char *data,
     if (*bufp & 0x80)
 	value = ~value; /* integer is negative */
 
-    if ( action == DUMP_PACKET ) {
-	printf("\t");
-	for ( i = 0 ; i < (int)asn_length ; i++ )
-	     printf(" %.2x", *(bufp+i));
-    }
+    DEBUGDUMPSETUP("dump_recv", data, bufp - data + asn_length);
 
     while(asn_length--)
 	value = (value << 8) | *bufp++;
 
-    if ( action == DUMP_PACKET )
-	printf("\t = %ld\n", value);
+    DEBUGMSG(("dump_recv", "  ASN UInteger:\t%ld (%.2x)\n", value, value));
 
     *intp = value;
     return bufp;
@@ -422,8 +409,6 @@ asn_dparse_string(u_char *data,
     u_long  asn_length;
     int i;
 
-    if ( action == DUMP_PACKET )
-	printf("ASN String\t %.2x", *bufp);
     *type = *bufp++;
     bufp = asn_dparse_length(bufp, &asn_length, action);
     if (bufp == NULL)
@@ -437,20 +422,13 @@ asn_dparse_string(u_char *data,
 	return NULL;
     }
 
-    if ( action == DUMP_PACKET ) {
-	if ( asn_length != 0 )
-	    printf("\t");
-	for ( i = 0 ; i < (int)asn_length ; i++ )
-	     printf(" %.2x", *(bufp+i));
-	printf("\t = %c", '"');
-	for ( i = 0 ; i < (int)asn_length ; i++ )
-	     printf(" %c", *(bufp+i));
-	printf("%c\n", '"');
-    }
+    DEBUGDUMPSETUP("dump_recv", data, bufp - data + asn_length);
 
     memmove(string, bufp, asn_length);
     *strlength = (int)asn_length;
     *datalength -= (int)asn_length + (bufp - data);
+
+    DEBUGMSG(("dump_recv", "  ASN String:\t%s\n", string));
     return bufp + asn_length;
 }
 
@@ -532,8 +510,8 @@ asn_dparse_header(u_char	*data,
 	ERROR_MSG("can't process ID >= 30");
 	return NULL;
     }
-    if ( action == DUMP_PACKET )
-	printf("ASN Header\t %.2x", *bufp);
+    DEBUGDUMPSETUP("dump_recv", data, 1);
+    DEBUGMSG(("dump_recv", "  ASN Header: 0x%.2x\n", *bufp));
     *type = *bufp;
     bufp = asn_dparse_length(bufp + 1, &asn_length, action);
     if (bufp == NULL)
@@ -547,8 +525,10 @@ asn_dparse_header(u_char	*data,
 
     if ((*type == ASN_OPAQUE) &&
         (*bufp == ASN_OPAQUE_TAG1)) {
-      if ( action == DUMP_PACKET )
-	printf("\tOpaque %.2x %.2x\n", *bufp, *(bufp+1));
+      DEBUGINDENTMORE();
+      DEBUGDUMPSETUP("dump_recv", data, 1);
+      DEBUGMSG(("dump_recv", "Opaque:\t%.2x\n", *bufp));
+      DEBUGINDENTLESS();
 
       /* check if 64-but counter */
       switch(*(bufp+1)) {
@@ -675,9 +655,6 @@ asn_dparse_length(u_char  *data,
     register u_char lengthbyte = *data;
     int i;
 
-    if ( action == DUMP_PACKET )
-	printf(" %.2x", *data);
-
     if (lengthbyte & ASN_LONG_LEN){
 	lengthbyte &= ~ASN_LONG_LEN;	/* turn MSb off */
 	if (lengthbyte == 0){
@@ -690,22 +667,18 @@ asn_dparse_length(u_char  *data,
 	}
 	*length = 0;  /* protect against short lengths */
 
-    if ( action == DUMP_PACKET ) {
-	printf("\t");
-	for ( i = 0 ; i < lengthbyte ; i++ )
-	     printf(" %.2x", *(data+1+i));
-    }
-
 	memmove(length, data + 1, lengthbyte);
 	*length = ntohl(*length);
 	*length >>= (8 * ((sizeof(u_long)) - lengthbyte));
 
-        if ( action == DUMP_PACKET )
-	    printf("\t = Length %ld\n", *length);
+        DEBUGDUMPSETUP("dump_recv", data, lengthbyte+1);
+        DEBUGMSG(("dump_recv", "  ASN Length: %ld (0x%.2x)\n", *length, *length));
 
 	return data + lengthbyte + 1;
     } else { /* short asnlength */
 	*length = (long)lengthbyte;
+        DEBUGDUMPSETUP("dump_recv", data, 1);
+        DEBUGMSG(("dump_recv", "  ASN Length: %ld (0x%.2x)\n", *length, *length));
 	return data + 1;
     }
 }
@@ -792,8 +765,6 @@ asn_dparse_objid(u_char *data,
     u_long	    asn_length;
     int i;
 
-    if ( action == DUMP_PACKET )
-	printf("ASN Object ID\t %.2x", *bufp);
     *type = *bufp++;
     bufp = asn_dparse_length(bufp, &asn_length, action);
     if (bufp == NULL)
@@ -804,19 +775,14 @@ asn_dparse_objid(u_char *data,
     }
     *datalength -= (int)asn_length + (bufp - data);
 
+    DEBUGDUMPSETUP("dump_recv", data, bufp - data + asn_length);
+
     /* Handle invalid object identifier encodings of the form 06 00 robustly */
     if (asn_length == 0)
 	objid[0] = objid[1] = 0;
 
     length = asn_length;
     (*objidlength)--;	/* account for expansion of first byte */
-
-    if ( action == DUMP_PACKET ) {
-	printf("\t");
-	for ( i = 0 ; i < (int)asn_length ; i++ )
-	     printf(" %.2x", *(bufp+i));
-	printf("\n");
-    }
 
     while (length > 0 && (*objidlength)-- > 0){
 	subidentifier = 0;
@@ -860,6 +826,10 @@ asn_dparse_objid(u_char *data,
     }
 
     *objidlength = (int)(oidp - objid);
+
+    DEBUGMSG(("dump_recv", "  ASN ObjID: "));
+    DEBUGMSGOID(("dump_recv", objid, *objidlength));
+    DEBUGMSG(("dump_recv", "\n"));
     return bufp;
 }
 
@@ -1014,8 +984,6 @@ asn_dparse_null(u_char *data,
     register u_char   *bufp = data;
     u_long	    asn_length;
 
-    if ( action == DUMP_PACKET )
-	printf("ASN NULL\t %.2x", *bufp);
     *type = *bufp++;
     bufp = asn_dparse_length(bufp, &asn_length, action);
     if (bufp == NULL)
@@ -1025,6 +993,10 @@ asn_dparse_null(u_char *data,
 	return NULL;
     }
     *datalength -= (bufp - data);
+
+    DEBUGDUMPSETUP("dump_recv", data, bufp - data);
+    DEBUGMSG(("dump_recv", "  ASN NULL\n"));
+
     return bufp + asn_length;
 }
 
@@ -1090,7 +1062,7 @@ asn_dparse_bitstring(u_char *data,
     int i;
 
     if ( action == DUMP_PACKET )
-	printf("ASN Bitstring\t %.2x", *bufp);
+	printf("  ASN Bitstring\t %.2x", *bufp);
     *type = *bufp++;
     bufp = asn_dparse_length(bufp, &asn_length, action);
     if (bufp == NULL)
@@ -1209,7 +1181,7 @@ asn_dparse_unsigned_int64(u_char *data,
 	return NULL;
     }
     if ( action == DUMP_PACKET )
-	printf("ASN UInt64\t %.2x", *bufp);
+	printf("  ASN UInt64\t %.2x", *bufp);
     *type = *bufp++;
     bufp = asn_dparse_length(bufp, &asn_length, action);
     if (bufp == NULL){
@@ -1423,7 +1395,7 @@ asn_dparse_signed_int64(u_char *data,
     return NULL;
   }
     if ( action == DUMP_PACKET )
-	printf("ASN Int64\t %.2x", *bufp);
+	printf("  ASN Int64\t %.2x", *bufp);
   *type = *bufp++;
   bufp = asn_dparse_length(bufp, &asn_length, action);
   if (bufp == NULL){
@@ -1599,7 +1571,7 @@ asn_dparse_float(u_char *data,
 	return NULL;
     }
     if ( action == DUMP_PACKET )
-	printf("ASN Float\t %.2x", *bufp);
+	printf("  ASN Float\t %.2x", *bufp);
     *type = *bufp++;
     bufp = asn_dparse_length(bufp, &asn_length, action);
     if (bufp == NULL){
@@ -1746,7 +1718,7 @@ asn_dparse_double(u_char *data,
 	return NULL;
     }
     if ( action == DUMP_PACKET )
-	printf("ASN Double\t %.2x", *bufp);
+	printf("  ASN Double\t %.2x", *bufp);
     *type = *bufp++;
     bufp = asn_dparse_length(bufp, &asn_length, action);
     if (bufp == NULL){
