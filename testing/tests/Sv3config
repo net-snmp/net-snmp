@@ -1,0 +1,8 @@
+#!/bin/sh
+
+# requires special handling because of the '*'
+echo 'userSetAuthPass initial * initial_test_pass' >> $SNMP_CONFIG_FILE
+CONFIGAGENT group   testinitialgroup  usm     initial
+CONFIGAGENT view    all     included .1 80
+CONFIGAGENT 'access  testinitialgroup  "" any noauth 0 all none none'
+

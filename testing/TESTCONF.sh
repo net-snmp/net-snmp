@@ -23,7 +23,7 @@ fi
 
 # Set up the path to the programs we want to use.
 if [ "x$SNMP_PATH" != "xyes" ]; then
-    PATH=../agent:../apps:$PATH
+    PATH=../../agent:../../apps:../agent:../apps:$PATH
     export PATH
     SNMP_PATH=yes
     export SNMP_PATH
@@ -41,8 +41,12 @@ if [ "x$SNMP_TMPDIR" = "x" -a "x$SNMP_HEADERONLY" != "xyes" ]; then
     mkdir $SNMP_TMPDIR
 fi
 
+if [ "x$SNMP_SAVE_TMPDIR" = "x" ]; then
+    SNMP_SAVE_TMPDIR="no"
+    export SNMP_VERBOSE
+fi
+
 SNMP_TESTDIR="tests"
-SNMP_SAVE_TMPDIR="no"
 SNMP_PERSISTENT_FILE="$SNMP_TMPDIR/persistent-store.conf"
 SNMP_CONFIG_FILE="$SNMP_TMPDIR/snmpd.conf"
 SNMP_SNMPD_PID_FILE="$SNMP_TMPDIR/snmpd.pid"
