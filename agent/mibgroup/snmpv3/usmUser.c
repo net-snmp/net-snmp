@@ -747,8 +747,7 @@ write_usmUserAuthKeyChange(
         return SNMP_ERR_GENERR;
     }
     DEBUGMSGTL(("usmUser","%s: ... succeeded\n", fname));
-    SNMP_FREE(uptr->authKey);
-    memdup(&uptr->authKey, buf, buflen);
+    memdup((void *)&uptr->authKey, buf, buflen);
     uptr->authKeyLen = buflen;
   }
 
@@ -866,8 +865,7 @@ write_usmUserPrivKeyChange(
         return SNMP_ERR_GENERR;
     }
     DEBUGMSGTL(("usmUser","%s: ... succeeded\n", fname));
-    SNMP_FREE(uptr->privKey);
-    memdup(&uptr->privKey, buf, buflen);
+    memdup((void *)&uptr->privKey, buf, buflen);
     uptr->privKeyLen = buflen;
   }
 
@@ -1065,7 +1063,6 @@ write_usmUserStatus(
       free(engineID);
 
       /* copy in the name and secname */
-      uptr->name = (char *) malloc(strlen(newName));
       if ((uptr->name = strdup(newName)) == NULL) {
         free(newName);
         usm_free_user(uptr);

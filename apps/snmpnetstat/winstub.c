@@ -61,14 +61,16 @@ static void pre_env(void)
 #endif
 
 	cproot = ROOT_BASE;
-	h_fn = (char *)malloc(3+strlen(cp)+strlen(cproot)+strlen(HOST_FN));
-	sprintf(h_fn, "%s%s%s", cp, cproot, HOST_FN);
-	s_fn = (char *)malloc(3+strlen(cp)+strlen(cproot)+strlen(SERV_FN));
-	sprintf(s_fn, "%s%s%s", cp, cproot, SERV_FN);
 	p_fn = (char *)malloc(3+strlen(cp)+strlen(cproot)+strlen(PROT_FN));
-	sprintf(p_fn, "%s%s%s", cp, cproot, PROT_FN);
+	if (p_fn) sprintf(p_fn, "%s%s%s", cp, cproot, PROT_FN);
+#ifdef notused
+	h_fn = (char *)malloc(3+strlen(cp)+strlen(cproot)+strlen(HOST_FN));
+	if (h_fn) sprintf(h_fn, "%s%s%s", cp, cproot, HOST_FN);
+	s_fn = (char *)malloc(3+strlen(cp)+strlen(cproot)+strlen(SERV_FN));
+	if (s_fn) sprintf(s_fn, "%s%s%s", cp, cproot, SERV_FN);
 	n_fn = (char *)malloc(3+strlen(cp)+strlen(cproot)+strlen(NETW_FN));
-	sprintf(n_fn, "%s%s%s", cp, cproot, NETW_FN);
+	if (n_fn) sprintf(n_fn, "%s%s%s", cp, cproot, NETW_FN);
+#endif
 }
 
 /* sets can open. ends must close. */

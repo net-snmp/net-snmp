@@ -171,18 +171,22 @@ long getTotalSwap(void)
 
   num = swapctl(SC_GETNSWP, 0);
   s = malloc(num * sizeof(swapent_t) + sizeof(struct swaptable));
-  strtab = (char *) malloc((num + 1) * MAXSTRSIZE);
-  for (i = 0; i < (num + 1); i++) {
-    s->swt_ent[i].ste_path = strtab + (i * MAXSTRSIZE);
+  if (s) {
+      strtab = (char *) malloc((num + 1) * MAXSTRSIZE);
+      if (strtab) {
+          for (i = 0; i < (num + 1); i++) {
+            s->swt_ent[i].ste_path = strtab + (i * MAXSTRSIZE);
+          }
+          s->swt_n = num + 1;
+          n = swapctl(SC_LIST, s);
+      
+          for (i = 0; i < n; i++)
+            total_mem += s->swt_ent[i].ste_pages;
+      
+          free (strtab);
+      }
+      free (s);
   }
-  s->swt_n = num + 1;
-  n = swapctl(SC_LIST, s);
-
-  for (i = 0; i < n; i++)
-    total_mem += s->swt_ent[i].ste_pages;
-
-  free (s);
-  free (strtab);
 
   return (total_mem);
 }

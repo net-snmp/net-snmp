@@ -106,6 +106,8 @@ void pass_parse_config(const char *token, char* cptr)
   while(*ppass != NULL)
     ppass = &((*ppass)->next);
   (*ppass) = (struct extensible *) malloc(sizeof(struct extensible));
+  if (*ppass == NULL)
+    return;
   (*ppass)->type = PASSTHRU;
 
   (*ppass)->miblen = parse_miboid(cptr,(*ppass)->miboid);
@@ -132,6 +134,9 @@ void pass_parse_config(const char *token, char* cptr)
   if (numpassthrus > 0) {
     etmp = (struct extensible **)
       malloc(((sizeof(struct extensible *)) * numpassthrus));
+    if (etmp == NULL)
+      return;
+
     for(i=0,ptmp = (struct extensible *) passthrus;
         i < numpassthrus && ptmp != 0;
         i++, ptmp = ptmp->next)

@@ -125,19 +125,25 @@ malloc_random(size_t *size)
  *      SNMPERR_GENERR	On failure.
  */
 int
-memdup(u_char **to, const u_char *from, size_t size)
+memdup(void **to, const void *from, size_t size)
 {
+  u_char *cp;
+
   if (to == NULL)
     return SNMPERR_GENERR;
+
+  if (*to) free(*to);
+
   if (from == NULL) {
     *to = NULL;
     return SNMPERR_SUCCESS;
   }
-  if ((*to = (u_char *)malloc(size)) == NULL)
+  if ((*to = malloc(size+1)) == NULL)
     return SNMPERR_GENERR;
   memcpy(*to, from, size);
+  cp = (char *)*to;
+  cp[size] = '\0'; 
   return SNMPERR_SUCCESS;
-
 }  /* end memdup() */
 
 

@@ -243,6 +243,10 @@ void vacm_parse_security (const char *token,
     strcpy(se.securityName, name);
     strcpy(se.community, community);
     sp = (struct vacm_securityEntry *)malloc (sizeof *sp);
+    if (sp == NULL) {
+    	config_perror("memory error");
+	return;
+    }
     *sp = se;
     if (securityFirst != NULL) {
 	securityLast->next = sp;

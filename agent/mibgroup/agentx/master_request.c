@@ -120,16 +120,24 @@ handle_agentx_response( int operation,
 	    }
 	    if (retry_vlist == NULL ) {
 		retry_vlist = (struct ax_variable_list *)
-				malloc( sizeof( struct ax_variable_list));
-		memset( retry_vlist, 0, sizeof( struct ax_variable_list));
+				calloc( 1, sizeof( struct ax_variable_list));
+		if (retry_vlist == NULL)
+		    break;
 
 		vb_retry = (struct variable_list *)
-				malloc( sizeof( struct variable_list));
+				calloc( 1, sizeof( struct variable_list));
+		if (vb_retry == NULL) {
+		    free(retry_vlist);
+		    break;
+		}
+
 		vbp2 = vb_retry;
 	    }
 	    else {
 		vbp2->next_variable = (struct variable_list *)
-				malloc( sizeof( struct variable_list));
+				calloc( 1, sizeof( struct variable_list));
+		if (vbp2->next_variable == NULL)
+		    break;
 		vbp2 = vbp2->next_variable;
 	    }
 	    j = retry_vlist->num_vars;
@@ -210,8 +218,8 @@ get_agentx_request(struct agent_snmp_session *asp,
 		/*
 		 * No existing request found, so create a new one
 		 */
-    req   = (struct request_list     *)malloc(sizeof(struct request_list));
-    vlist = (struct ax_variable_list *)malloc(sizeof(struct ax_variable_list));
+    req   = (struct request_list     *)calloc( 1, sizeof(struct request_list));
+    vlist = (struct ax_variable_list *)calloc( 1, sizeof(struct ax_variable_list));
     pdu   = snmp_pdu_create( 0 );
     if ( req == NULL || pdu == NULL || vlist == NULL ) {
 	free( pdu );
@@ -219,8 +227,6 @@ get_agentx_request(struct agent_snmp_session *asp,
 	free( req );
 	return NULL;
     }
-    memset( req,   0, sizeof( struct request_list ));
-    memset( vlist, 0, sizeof( struct ax_variable_list ));
 
 		/*
 		 * Initialise the structures:

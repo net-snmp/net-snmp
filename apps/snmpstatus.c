@@ -76,6 +76,7 @@ SOFTWARE.
 #include "mib.h"
 #include "snmp.h"
 #include "system.h"
+#include "tools.h"
 #include "snmp_parse_args.h"
 
 oid	objid_sysDescr[] = {1, 3, 6, 1, 2, 1, 1, 1, 0};
@@ -152,9 +153,7 @@ retry:
         for(vars = response->variables; vars; vars = vars->next_variable){
           if (vars->name_length == length_sysDescr &&
               !memcmp(objid_sysDescr, vars->name, sizeof(objid_sysDescr))){
-            sysdescr = (char*)malloc(vars->val_len+1);
-            memcpy(sysdescr, vars->val.string, vars->val_len);
-            sysdescr[vars->val_len] = '\0';
+            memdup((void *)sysdescr, vars->val.string, vars->val_len);
           }
           if (vars->name_length == length_sysUpTime &&
               !memcmp(objid_sysUpTime, vars->name, sizeof(objid_sysUpTime))){

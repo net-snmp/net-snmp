@@ -518,6 +518,7 @@ Interface_Scan_Init (void)
 	  if ((if_list = malloc (size)) == 0)
 	    {
 	      snmp_log(LOG_ERR,"out of memory allocating route table\n");
+	      return;
 	    }
 	  if_list_size = size;
 	}
@@ -1360,9 +1361,9 @@ Interface_Scan_Init (void)
 	    sscanf (stats, scan_line_to_use, &rec_pkt, &rec_err, &snd_pkt, &snd_err, &coll) != 5))
 	  continue;
 	
-	nnew = (struct ifnet *) malloc (sizeof (struct ifnet));	    
-	memset ( nnew, 0, sizeof (struct ifnet));
-	
+	nnew = (struct ifnet *) calloc (1, sizeof (struct ifnet));	    
+	if (nnew == NULL)  break; /* alloc error */
+
 	/* chain in: */
 	*ifnetaddr_ptr = nnew;
 	ifnetaddr_ptr = &nnew->if_next;

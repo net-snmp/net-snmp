@@ -282,6 +282,8 @@ get_ifname(char *name, int ifIndex)
 	return;
     }
     ip = (struct iflist *)malloc(sizeof(struct iflist));
+    if (ip == NULL)
+        return;
     ip->next = Iflist;
     Iflist = ip;
     ip->index = ifIndex;

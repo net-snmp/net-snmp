@@ -27,6 +27,8 @@ header_complex_generate_varoid(struct variable_list *var) {
       case ASN_TIMETICKS:
         var->name_length = 1;
         var->name = (oid *) malloc(sizeof(oid));
+        if (var->name == NULL)
+            return SNMPERR_GENERR;
         var->name[0] = *(var->val.integer);
         break;
 
@@ -34,6 +36,8 @@ header_complex_generate_varoid(struct variable_list *var) {
       case ASN_OCTET_STR:
         var->name_length = var->val_len+1;
         var->name = (oid *) malloc(sizeof(oid) * var->val_len + 1);
+        if (var->name == NULL)
+            return SNMPERR_GENERR;
         var->name[0] = var->val_len;
         for(i=0; i < var->val_len; i++)
           var->name[i+1] = var->val.string[i];
@@ -45,9 +49,9 @@ header_complex_generate_varoid(struct variable_list *var) {
         return SNMPERR_GENERR;
     }
   }
-  if (var->name_length > 128) {
+  if (var->name_length > MAX_OID_LEN) {
     DEBUGMSGTL(("header_complex_generate_varoid",
-                "Something terribly wrong, namelen = %s\n", var->name_length));
+                "Something terribly wrong, namelen = %d\n", var->name_length));
     return SNMPERR_GENERR;
   }
 
@@ -61,13 +65,25 @@ header_complex_generate_varoid(struct variable_list *var) {
 
    returns 1 if an error is encountered, or 0 if successful.
 */
+static int _header_complex_parse_oid(oid *oidIndex, size_t oidLen,
+                         struct variable_list *data);
 int
 header_complex_parse_oid(oid *oidIndex, size_t oidLen,
-                         struct variable_list *data) {
+                         struct variable_list *data)
+{
+    int rc;
+    memset(data, 0, sizeof(*data));
+    rc = _header_complex_parse_oid(oidIndex, oidLen, data);
+    if (rc == SNMPERR_GENERR)
+        snmp_free_varbind(data);
+    return (rc);
+}
+
+static int _header_complex_parse_oid(oid *oidIndex, size_t oidLen,
+                         struct variable_list *data)
+{
   struct variable_list *var = data;
   int i, itmp;
-
-  /* XXX: need to demalloc on errors. */
   
   while(var && oidLen > 0) {
     switch(var->type) {
@@ -76,6 +92,9 @@ header_complex_parse_oid(oid *oidIndex, size_t oidLen,
       case ASN_GAUGE:
       case ASN_TIMETICKS:
         var->val.integer = (long *) calloc(1,sizeof(long));
+        if (var->val.string == NULL)
+            return SNMPERR_GENERR;
+
         *var->val.integer = (long) *oidIndex++;
         var->val_len = sizeof(long);
         oidLen--;
@@ -96,6 +115,8 @@ header_complex_parse_oid(oid *oidIndex, size_t oidLen,
         /* malloc by size+1 to allow a null to be appended. */
         var->val_len = itmp;
         var->val.string = (u_char *) calloc(1,itmp+1);
+        if (var->val.string == NULL)
+            return SNMPERR_GENERR;
 
         for(i = 0; i < itmp; i++)
           var->val.string[i] = (u_char) *oidIndex++;
