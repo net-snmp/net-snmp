@@ -955,6 +955,9 @@ netsnmp_check_for_delegated(netsnmp_agent_session *asp)
     int             i;
     netsnmp_request_info *request;
 
+    if (NULL == asp->treecache)
+        return 0;
+    
     for (i = 0; i <= asp->treecache_num; i++) {
         for (request = asp->treecache[i].requests_begin; request;
              request = request->next) {
