@@ -91,10 +91,10 @@ extern struct mntent *HRFS_entry;
 	 *  Initialisation & common implementation functions
 	 *
 	 *********************/
-int Get_Next_HR_Store __P((void));
-void  Init_HR_Store __P((void));
+int Get_Next_HR_Store __UCD_P((void));
+void  Init_HR_Store __UCD_P((void));
 
-int linux_mem __P((int, int));
+int linux_mem __UCD_P((int, int));
 
 void	init_hr_storeage( )
 {
@@ -433,7 +433,7 @@ static int FS_storage;
 static int HRS_index;
 
 void
-Init_HR_Store __P((void))
+Init_HR_Store __UCD_P((void))
 {
    HRS_index = -1;
    Init_HR_FileSys();

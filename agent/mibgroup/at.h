@@ -8,8 +8,8 @@
 
 config_arch_require(solaris2, kernel_sunos5)
 
-extern void	init_at __P((void));
-extern u_char	*var_atEntry __P((struct variable *, oid *, int *, int, int *, int (**write) __P((int, u_char *, u_char, int, u_char *, oid *, int)) ));
+extern void	init_at __UCD_P((void));
+extern u_char	*var_atEntry __UCD_P((struct variable *, oid *, int *, int, int *, int (**write) __UCD_P((int, u_char *, u_char, int, u_char *, oid *, int)) ));
 
 
 #define ATIFINDEX	0

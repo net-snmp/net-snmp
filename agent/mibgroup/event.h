@@ -6,14 +6,14 @@
 struct variable;
 struct timeval;
 
-extern int eventFreeSpace __P((void));
-extern int eventNotifyFreeSpace __P((void));
-extern u_char *var_eventnextindex __P((struct variable*, oid *, int *,int, int *, int (**write) __P((int, u_char *, u_char, int, u_char *, oid *, int)) ));
-extern u_char *var_eventtab __P((struct variable*, oid *, int *,int, int *, int (**write) __P((int, u_char *, u_char, int, u_char *, oid *, int)) ));
-extern u_char *var_eventnotifyvars __P((struct variable*, oid *, int *,int, int *, int (**write) __P((int, u_char *, u_char, int, u_char *, oid *, int)) ));
-extern u_char *var_eventnotifytab __P((struct variable*, oid *, int *,int, int *, int (**write) __P((int, u_char *, u_char, int, u_char *, oid *, int)) ));
-extern void eventGenerate __P((int, int, void *));
-extern void eventTimer __P((struct timeval *));
+extern int eventFreeSpace __UCD_P((void));
+extern int eventNotifyFreeSpace __UCD_P((void));
+extern u_char *var_eventnextindex __UCD_P((struct variable*, oid *, int *,int, int *, int (**write) __UCD_P((int, u_char *, u_char, int, u_char *, oid *, int)) ));
+extern u_char *var_eventtab __UCD_P((struct variable*, oid *, int *,int, int *, int (**write) __UCD_P((int, u_char *, u_char, int, u_char *, oid *, int)) ));
+extern u_char *var_eventnotifyvars __UCD_P((struct variable*, oid *, int *,int, int *, int (**write) __UCD_P((int, u_char *, u_char, int, u_char *, oid *, int)) ));
+extern u_char *var_eventnotifytab __UCD_P((struct variable*, oid *, int *,int, int *, int (**write) __UCD_P((int, u_char *, u_char, int, u_char *, oid *, int)) ));
+extern void eventGenerate __UCD_P((int, int, void *));
+extern void eventTimer __UCD_P((struct timeval *));
 
 #define MAX_COMMUNITY_LEN 128
 

@@ -37,14 +37,14 @@ static struct nlist udp_nl[] = {
 };
 #endif
 
-static int header_udp __P((struct variable *, oid *, int *, int, int *, int (**write) __P((int, u_char *, u_char, int, u_char *, oid *, int)) ));
+static int header_udp __UCD_P((struct variable *, oid *, int *, int, int *, int (**write) __UCD_P((int, u_char *, u_char, int, u_char *, oid *, int)) ));
 
 #ifndef solaris2
-static void UDP_Scan_Init __P((void));
-static int UDP_Scan_Next __P((struct inpcb *));
+static void UDP_Scan_Init __UCD_P((void));
+static int UDP_Scan_Next __UCD_P((struct inpcb *));
 #endif
 #ifdef linux
-static void linux_read_udp_stat __P((struct udp_mib *));
+static void linux_read_udp_stat __UCD_P((struct udp_mib *));
 #endif
 
 	/*********************
@@ -72,7 +72,7 @@ header_udp(vp, name, length, exact, var_len, write_method)
     int     *length;	    /* IN/OUT - length of input and output oid's */
     int     exact;	    /* IN - TRUE if an exact match was requested. */
     int     *var_len;	    /* OUT - length of variable or 0 if function returned. */
-    int     (**write_method) __P((int, u_char *, u_char, int, u_char *, oid *, int));
+    int     (**write_method) __UCD_P((int, u_char *, u_char, int, u_char *, oid *, int));
 {
 #define UDP_NAME_LENGTH	8
     oid newname[MAX_NAME_LEN];
@@ -114,7 +114,7 @@ var_udp(vp, name, length, exact, var_len, write_method)
     int     *length;
     int     exact;
     int     *var_len;
-    int     (**write_method) __P((int, u_char *, u_char, int, u_char *, oid *, int));
+    int     (**write_method) __UCD_P((int, u_char *, u_char, int, u_char *, oid *, int));
 {
 #ifdef linux
     static struct udp_mib udpstat;
@@ -196,7 +196,7 @@ var_udp(vp, name, length, exact, var_len, write_method)
     int     *length;
     int     exact;
     int     *var_len;
-    int     (**write_method) __P((int, u_char *, u_char, int, u_char *, oid *, int));
+    int     (**write_method) __UCD_P((int, u_char *, u_char, int, u_char *, oid *, int));
 {
     static struct udpstat udpstat;
     static	counter MIB_udpcounter[MIB_udpMAXCTR+1];
@@ -247,7 +247,7 @@ var_udpEntry(vp, name, length, exact, var_len, write_method)
     int     *length;
     int     exact;
     int     *var_len;
-    int     (**write_method) __P((int, u_char *, u_char, int, u_char *, oid *, int));
+    int     (**write_method) __UCD_P((int, u_char *, u_char, int, u_char *, oid *, int));
 {
     int i;
     oid newname[MAX_NAME_LEN], lowest[MAX_NAME_LEN], *op;
@@ -318,7 +318,7 @@ var_udp(vp, name, length, exact, var_len, write_method)
     int     *length;
     int     exact;
     int     *var_len;
-    int     (**write_method) __P((int, u_char *, u_char, int, u_char *, oid *, int));
+    int     (**write_method) __UCD_P((int, u_char *, u_char, int, u_char *, oid *, int));
 {
     mib2_udp_t udpstat;
     mib2_ip_t ipstat;
@@ -363,7 +363,7 @@ var_udpEntry(vp, name, length, exact, var_len, write_method)
     int     *length;
     int     exact;
     int     *var_len;
-    int     (**write_method) __P((int, u_char *, u_char, int, u_char *, oid *, int));
+    int     (**write_method) __UCD_P((int, u_char *, u_char, int, u_char *, oid *, int));
 {
     return NULL;
 }

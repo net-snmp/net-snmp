@@ -81,11 +81,11 @@ SOFTWARE.
 #include "system.h"
 #include "snmp_parse_args.h"
 
-void main __P((int, char **));
+void main __UCD_P((int, char **));
 int failures;
 
 void
-usage __P((void))
+usage __UCD_P((void))
 {
   fprintf(stderr,"Usage:\n  snmpget ");
   snmp_parse_args_usage(stderr);
