@@ -54,20 +54,46 @@ typedef struct sockaddr  snmp_ipaddr;		/* was struct sockaddr_in */
 #define USM_PRIV_KU_LEN     32
 
 struct snmp_pdu {
-    int	    version;
 
-    snmp_ipaddr  address;	/* Address of peer or trap destination */
-    u_char  *contextEngineID;	/* context snmpEngineID */
-    size_t  contextEngineIDLen;  /* Length of contextEngineID */
-    char    *contextName;	/* authoritative contextName */
-    size_t  contextNameLen;  /* Length of contextName */
-    u_char  *securityEngineID;	/* authoritative snmpEngineID for security */
-    size_t  securityEngineIDLen;  /* Length of securityEngineID */
-    char    *securityName;	/* on behalf of this principal */
-    size_t  securityNameLen;  /* Length of securityName. */
+	/*
+	 * Protocol-version independent fields
+	 */
+    int	    version;
+    int	    command;	/* Type of this PDU */
+    long    reqid;	/* Request id - note: not incremented on retries */
+    long    msgid;      /* Message id for V3 messages 
+                         * note: incremented for each retry */
+    long    errstat;	/* Error status (non_repeaters in GetBulk) */
+    long    errindex;	/* Error index (max_repetitions in GetBulk) */
+    u_long  time;	/* Uptime */
+    u_long  flags;
+
     int	    securityModel;
     int	    securityLevel;  /* noAuthNoPriv, authNoPriv, authPriv */
     int	    msgParseModel;
+
+    snmp_ipaddr  address;	/* Address of peer or trap destination */
+
+    struct variable_list *variables;
+
+
+	/*
+	 * SNMPv1 & SNMPv2c fields
+	 */
+    u_char  *community;		/* community for outgoing requests. */
+    size_t  community_len;	/* Length of community name. */
+
+	/*
+	 * Trap information
+	 */
+    oid	    *enterprise;	/* System OID */
+    size_t  enterprise_length;
+    long    trap_type;		/* trap type */
+    long    specific_type;	/* specific type */
+
+	/*
+	 * SNMPv2party fields
+	 */
     oid	    *srcParty;
     size_t  srcPartyLen;
     oid	    *dstParty;
@@ -76,37 +102,66 @@ struct snmp_pdu {
     size_t  contextLen;
     struct partyEntry *srcp, *dstp;
     struct contextEntry *cxp;
-
-    u_char  *community;	/* community for outgoing requests. */
-    size_t  community_len;  /* Length of community name. */
-
-    int	    command;	/* Type of this PDU */
-
-    long  reqid;	/* Request id - note: not incremented on retries */
-    long  msgid;        /* Message id for V3 messages 
-                         * note: incremented for each retry */
-    long  errstat;	/* Error status (non_repeaters in GetBulk) */
-    long  errindex;	/* Error index (max_repetitions in GetBulk) */
-
-    /* Trap information */
-    oid	    *enterprise;/* System OID */
-    size_t  enterprise_length;
-    long    trap_type;	/* trap type */
-    long    specific_type;  /* specific type */
-    u_long  time;	/* Uptime */
-    u_char  flags;
-    void * securityStateRef;
-
-    struct variable_list *variables;
     oid srcPartyBuf[MAX_OID_LEN];
     oid dstPartyBuf[MAX_OID_LEN];
     oid contextBuf[MAX_OID_LEN];
-    /* XXX do community later */
+
+	/*
+	 * SNMPv3 fields
+	 */
+    u_char  *contextEngineID;	/* context snmpEngineID */
+    size_t  contextEngineIDLen; /* Length of contextEngineID */
+    char    *contextName;	/* authoritative contextName */
+    size_t  contextNameLen;	/* Length of contextName */
+    u_char  *securityEngineID;	/* authoritative snmpEngineID for security */
+    size_t  securityEngineIDLen;/* Length of securityEngineID */
+    char    *securityName;	/* on behalf of this principal */
+    size_t  securityNameLen;	/* Length of securityName. */
+
+    void * securityStateRef;
 };
 
 struct snmp_session {
+	/*
+	 * Protocol-version independent fields
+	 */
+    int	    version;
+    int	    retries;	/* Number of retries before timeout. */
+    long    timeout;    /* Number of uS until first timeout, then exponential backoff */
+    u_long  flags;
+
+    char    *peername;	/* Domain name or dotted IP address of default peer */
+    u_short remote_port;/* UDP port number of peer. */
+    u_short local_port; /* My UDP port number, 0 for default, picked randomly */
+    /* Authentication function or NULL if null authentication is used */
+    u_char    *(*authenticator) (u_char *, size_t *, u_char *, size_t);
+    int	    (*callback) (int, struct snmp_session *, int, struct snmp_pdu *, void *);
+   	/* Function to interpret incoming data */
+    /* Pointer to data that the callback function may consider important */
+    void    *callback_magic;
+
+    int     s_errno;        /* copy of system errno */
+    int     s_snmp_errno;   /* copy of library errno */
+
+	/*
+	 * SNMPv1 & SNMPv2c fields
+	 */
     u_char  *community;	        /* community for outgoing requests. */
     size_t  community_len;      /* Length of community name. */
+
+	/*
+	 * SNMPv2party fields
+	 */
+    oid	    *srcParty;
+    size_t  srcPartyLen;
+    oid	    *dstParty;
+    size_t  dstPartyLen;
+    oid	    *context;
+    size_t  contextLen;
+
+	/*
+	 * SNMPv3 fields
+	 */
     u_char  *contextEngineID;	/* authoritative snmpEngineID */
     size_t  contextEngineIDLen; /* Length of contextEngineID */
     u_int   engineBoots;        /* initial engineBoots for remote engine */
@@ -127,28 +182,7 @@ struct snmp_session {
     size_t  securityPrivKeyLen; /* Length of Ku for priv protocol */
     int	    securityModel;
     int	    securityLevel;  /* noAuthNoPriv, authNoPriv, authPriv */
-    int	    retries;	/* Number of retries before timeout. */
-    long    timeout;    /* Number of uS until first timeout, then exponential backoff */
-    char    *peername;	/* Domain name or dotted IP address of default peer */
-    u_short remote_port;/* UDP port number of peer. */
-    u_short local_port; /* My UDP port number, 0 for default, picked randomly */
-    /* Authentication function or NULL if null authentication is used */
-    u_char    *(*authenticator) (u_char *, size_t *, u_char *, size_t);
-    int	    (*callback) (int, struct snmp_session *, int, struct snmp_pdu *, void *);
-   	/* Function to interpret incoming data */
-    /* Pointer to data that the callback function may consider important */
-    void    *callback_magic;
-    int	    version;
-    u_char  flags;
-    oid	    *srcParty;
-    size_t  srcPartyLen;
-    oid	    *dstParty;
-    size_t  dstPartyLen;
-    oid	    *context;
-    size_t  contextLen;
     struct synch_state * snmp_synch_state;
-    int     s_errno;        /* copy of system errno */
-    int     s_snmp_errno;   /* copy of library errno */
 };
 
 typedef int (*snmp_callback) (int, struct snmp_session *, int, struct snmp_pdu *, void *);
