@@ -59,6 +59,7 @@
  *
  * If there a no other checks you need to do, simply return MFD_SUCCESS.
  *
+@  if $mfd_code_verbose == 1@
 @    if ("$node.decl" eq "long") || ("$node.decl" eq "u_long")@
  * For example, an object with the syntax INTEGER(0..500) will
  * have already been checked for a value between 0 and 500. But
@@ -79,6 +80,7 @@
  * "ABBY" to "ANNIE" should return MFD_NOT_VALID_NOW.
 @    end@
  *
+@  end@
  */
 int
 ${node}_check_value( ${context}_rowreq_ctx *rowreq_ctx, $m2c_node_param_val)
@@ -92,13 +94,11 @@ ${node}_check_value( ${context}_rowreq_ctx *rowreq_ctx, $m2c_node_param_val)
 @end@
 
     /*
-     * TODO:
-     * check that new value ($m2c_node_param_val_name) is legal
+     * TODO:441:o: |-> Check for valid $node value.
      */
 
-    /* if everything looks ok, return 0 */
-    return MFD_SUCCESS;
-}
+    return MFD_SUCCESS; /* $node value not illegal */
+} /* ${node}_check_value */
 
 ##----------------------------------------------------------------------
 /**
@@ -131,6 +131,9 @@ ${node}_undo_setup( ${context}_rowreq_ctx *rowreq_ctx)
     /** should never get a NULL pointer */
     netsnmp_assert(NULL != rowreq_ctx);
 
+    /*
+     * TODO:455:o: |-> Setup $node undo.
+     */
 @   eval $m2c_ctx_lh = "${m2c_undo_item}${node}"@
 @   eval $m2c_ctx_lhs = "${m2c_undo_item}${node}_len"@
 @   eval $m2c_ctx_rh = "${m2c_data_item}${node}"@
@@ -139,7 +142,7 @@ ${node}_undo_setup( ${context}_rowreq_ctx *rowreq_ctx)
 @end@
 
     return MFD_SUCCESS;
-}
+} /* ${node}_undo_setup */
 
 ##----------------------------------------------------------------------
 /**
@@ -182,7 +185,7 @@ ${node}_set( ${context}_rowreq_ctx *rowreq_ctx, $m2c_node_param_val )
 @    end@ # ! enums & bits
 @end@ # no syntax include
     return MFD_SUCCESS;
-}
+} /* ${node}_set */
 
 ##----------------------------------------------------------------------
 /**
@@ -206,6 +209,9 @@ ${node}_undo( ${context}_rowreq_ctx *rowreq_ctx)
 
     netsnmp_assert(NULL != rowreq_ctx);
 
+    /*
+     * TODO:456:o: |-> Clean up $node undo.
+     */
 @   eval $m2c_ctx_rh = "${m2c_undo_item}${node}"@
 @   eval $m2c_ctx_rhs = "${m2c_undo_item}${node}_len"@
 @   eval $m2c_ctx_lh = "${m2c_data_item}${node}"@
@@ -214,7 +220,7 @@ ${node}_undo( ${context}_rowreq_ctx *rowreq_ctx)
 @end@ # no syntax include
     
     return MFD_SUCCESS;
-}
+} /* ${node}_undo */
 
 ##
 ########################################################################
