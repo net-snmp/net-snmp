@@ -19,11 +19,11 @@ snmp_version=v2c
 
 STARTAGENT
 
-CAPTURE "snmpget -On $SNMP_FLAGS -c testcommunity1 -v 2c udp:localhost:$SNMP_SNMPD_PORT .1.3.6.1.2.1.1.1.0" 
+CAPTURE "snmpget -On $SNMP_FLAGS -c testcommunity1 -v 2c $SNMP_TRANSPORT_SPEC:$SNMP_TEST_DEST$SNMP_SNMPD_PORT .1.3.6.1.2.1.1.1.0" 
 
 CHECKORDIE ".1.3.6.1.2.1.1.1.0 = STRING:"
 
-CAPTURE "snmpget -On $SNMP_FLAGS -c testcommunity2 -v 2c udp:localhost:$SNMP_SNMPD_PORT .1.3.6.1.2.1.1.3.0"
+CAPTURE "snmpget -On $SNMP_FLAGS -c testcommunity2 -v 2c $SNMP_TRANSPORT_SPEC:$SNMP_TEST_DEST$SNMP_SNMPD_PORT .1.3.6.1.2.1.1.3.0"
 
 CHECK ".1.3.6.1.2.1.1.3.0 = Timeticks: "
 
