@@ -271,7 +271,7 @@ initialize_table_$context(void)
      * if you'd like to pass in a pointer to some data for this
      * table, allocate or set it up here.
      */
-@    if $m2c_context_reg eq "netsnmp_data_list *"@
+@    if "$m2c_context_reg" eq "netsnmp_data_list *"@
     /*
      * a netsnmp_data_list is a simple way to store void pointers. A simple
      * string token is used to add, find or remove pointers.
