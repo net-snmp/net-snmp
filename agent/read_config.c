@@ -111,7 +111,7 @@ void read_config(filename)
             }
             if (i < sizeof(config_handlers)) {
               sprintf(tmpbuf,"Unknown token: %s.", word);
-              config_perror(tmpbuf);
+              config_pwarn(tmpbuf);
             }
           }
 	}
