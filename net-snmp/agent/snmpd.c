@@ -883,18 +883,18 @@ main(int argc, char *argv[])
     printf("\n");
     fflush(stdout);
 
- #if HAVE_UNISTD_H
+#if HAVE_UNISTD_H
     if (gid) {
-/*      snmp_log(LOG_DEBUG, "Changing gid to %d.\n", gid); */
+      DEBUGMSGTL(("snmpd", "Changing gid to %d.\n", gid));
       if (setgid(gid)==-1) {
-          log_perror("setgid failed: ");
+          snmp_perror("setgid failed: ");
           exit(1);
       }
     }
     if (uid) {
-/*      snmp_log(LOG_DEBUG, "Changing uid to %d.\n", uid); */
+      DEBUGMSGTL(("snmpd", "Changing uid to %d.\n", uid));
       if(setuid(uid)==-1) {
-          log_perror("setuid failed: ");
+          snmp_perror("setuid failed: ");
           exit(1);
       }
     }
