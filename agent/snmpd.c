@@ -614,7 +614,7 @@ receive(void)
 			now,     *nvp = &now;
     int count, block;
 #ifdef	USING_SMUX_MODULE
-	int i, j, sd;
+    int i, sd;
 #endif	/* USING_SMUX_MODULE */
 
 

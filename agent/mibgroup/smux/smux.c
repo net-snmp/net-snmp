@@ -290,7 +290,6 @@ var_smux_write(
 	size_t len, var_len, datalen, name_length;
 	long reqid, errsts, erridx;
 	u_char var_type, *dataptr;
-	long lval;
 
 	DEBUGMSGTL (("smux","[var_smux_write] entering var_smux_write\n"));
 
@@ -1353,8 +1352,8 @@ static u_char *
 smux_trap_process(u_char *rsp, size_t *len)
 {
 	oid sa_enterpriseoid[MAX_OID_LEN], var_name[MAX_OID_LEN];
-	size_t oid_name_len, datalen, var_name_len, var_val_len, aloksize, maxlen;
-	int result, sa_enterpriseoid_len;
+	size_t datalen, var_name_len, var_val_len, maxlen;
+	int sa_enterpriseoid_len;
 	u_char vartype, *ptr, *var_val;
 
 	long trap, specific;
@@ -1413,7 +1412,6 @@ smux_trap_process(u_char *rsp, size_t *len)
 				return NULL;
 	}
 
-
 	/* parse out the overall sequence */
 	ptr = asn_parse_header(ptr, len, &vartype);
 	if (ptr == NULL || vartype != (ASN_SEQUENCE | ASN_CONSTRUCTOR)) {
@@ -1434,7 +1432,7 @@ smux_trap_process(u_char *rsp, size_t *len)
 
 		maxlen = SMUXMAXPKTSIZE;
 		switch((short)vartype){
-			case ASN_INTEGER:
+		    case ASN_INTEGER:
 				var_val_len = sizeof(long);
 				asn_parse_int(var_val, &maxlen, &vartype,
 					      (long *)&smux_long, var_val_len);
@@ -1485,11 +1483,11 @@ smux_trap_process(u_char *rsp, size_t *len)
 						smux_objid, &var_val_len);
 				var_val = (u_char *)smux_objid;
 				break;
-	        case SNMP_NOSUCHOBJECT:
-	        case SNMP_NOSUCHINSTANCE:
-            case SNMP_ENDOFMIBVIEW:
+		    case SNMP_NOSUCHOBJECT:
+		    case SNMP_NOSUCHINSTANCE:
+		    case SNMP_ENDOFMIBVIEW:
 		    case ASN_NULL:
-	    		var_val = NULL;
+	    			var_val = NULL;
 				break;
 		    case ASN_BIT_STR:
 			/* XXX */
@@ -1504,7 +1502,7 @@ smux_trap_process(u_char *rsp, size_t *len)
 				 snmp_log(LOG_ERR, "bad type returned (%x)\n", vartype);
 				var_val = NULL;
 				break;
-			}
+		}
 
 		snmptrap_tmp = (struct variable_list *)malloc(sizeof(struct variable_list));
 		if (snmptrap_tmp == NULL)
@@ -1539,4 +1537,3 @@ smux_trap_process(u_char *rsp, size_t *len)
 	return ptr;
 
 }
-

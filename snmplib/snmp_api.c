@@ -683,7 +683,6 @@ _sess_copy( struct snmp_session *in_session)
     struct snmp_session *session;
     char *cp;
     u_char *ucp;
-    oid *op;
     size_t i;
 
     in_session->s_snmp_errno = 0;
