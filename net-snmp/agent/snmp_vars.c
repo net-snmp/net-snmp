@@ -283,12 +283,12 @@ search_subtree_vars(struct subtree *tp,
 		return NULL;
 
 	    result = compare_tree(name, *namelen, tp->start, tp->start_len);
-	    suffixlen = *namelen - tp->start_len;
-	    suffix = name + tp->start_len;
+	    suffixlen = *namelen - tp->namelen;
+	    suffix = name + tp->namelen;
 	    /* the following is part of the setup for the compatability
 	       structure below that has been moved out of the main loop.
 	     */
-	    memcpy(cvp->name, tp->start, tp->start_len * sizeof(oid));
+	    memcpy(cvp->name, tp->name, tp->namelen * sizeof(oid));
 
 	    *noSuchObject = TRUE;	/* In case of null variables_len */
 	    for(x = 0, vp = tp->variables; x < tp->variables_len;
@@ -309,9 +309,9 @@ search_subtree_vars(struct subtree *tp,
 		       compatability with var_* functions written previously.
 		     */
                   if (vp->namelen)
-                    memcpy((cvp->name + tp->start_len),
+                    memcpy((cvp->name + tp->namelen),
 			  vp->name, vp->namelen * sizeof(oid));
-		    cvp->namelen = tp->start_len + vp->namelen;
+		    cvp->namelen = tp->namelen + vp->namelen;
 		    cvp->type = vp->type;
 		    cvp->magic = vp->magic;
 		    cvp->acl = vp->acl;
