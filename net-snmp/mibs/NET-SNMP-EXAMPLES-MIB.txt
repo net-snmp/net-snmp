@@ -136,5 +136,16 @@ nsIETFWGChair2 OBJECT-TYPE
 --  Example Notifications
 --
 
+netSnmpExampleNotification OBJECT-TYPE
+    SYNTAX      SnmpAdminString
+    MAX-ACCESS  accessible-for-notify
+    STATUS      current
+    DESCRIPTION
+        "This is a boring example that is used in the
+         agent/mibgroup/examples/notification.c to send out a
+         notification every 30 seconds.  The actual notification means
+         nothing other than 30 seconds has elapsed since the last time
+         one was sent."
+::= { netSnmpExampleNotifications 1 }
 
 END
