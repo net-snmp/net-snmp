@@ -167,8 +167,6 @@ ifXTable_post_request(ifXTable_registration_ptr user_context)
  * OID: .1.3.6.1.2.1.31.1.1, length: 9
  */
 
-
-
 /**
  * set mib index(es)
  *
@@ -271,7 +269,7 @@ The textual name of the interface.  The value of this
  * This data type requires a length.  (Max 255)
  */
 /**
- * Extract the current value of the ifName data->
+ * Extract the current value of the ifName data.
  *
  * Set a value using the data context for the row.
  *
@@ -367,7 +365,7 @@ The number of packets, delivered by this sub-layer to a
  * The net-snmp type is ASN_COUNTER. The C type decl is u_long (u_long)
  */
 /**
- * Extract the current value of the ifInMulticastPkts data->
+ * Extract the current value of the ifInMulticastPkts data.
  *
  * Set a value using the data context for the row.
  *
@@ -427,7 +425,7 @@ The number of packets, delivered by this sub-layer to a
  * The net-snmp type is ASN_COUNTER. The C type decl is u_long (u_long)
  */
 /**
- * Extract the current value of the ifInBroadcastPkts data->
+ * Extract the current value of the ifInBroadcastPkts data.
  *
  * Set a value using the data context for the row.
  *
@@ -489,7 +487,7 @@ The total number of packets that higher-level protocols
  * The net-snmp type is ASN_COUNTER. The C type decl is u_long (u_long)
  */
 /**
- * Extract the current value of the ifOutMulticastPkts data->
+ * Extract the current value of the ifOutMulticastPkts data.
  *
  * Set a value using the data context for the row.
  *
@@ -551,7 +549,7 @@ The total number of packets that higher-level protocols
  * The net-snmp type is ASN_COUNTER. The C type decl is u_long (u_long)
  */
 /**
- * Extract the current value of the ifOutBroadcastPkts data->
+ * Extract the current value of the ifOutBroadcastPkts data.
  *
  * Set a value using the data context for the row.
  *
@@ -611,7 +609,7 @@ The total number of octets received on the interface,
  * The net-snmp type is ASN_COUNTER64. The C type decl is U64 (U64)
  */
 /**
- * Extract the current value of the ifHCInOctets data->
+ * Extract the current value of the ifHCInOctets data.
  *
  * Set a value using the data context for the row.
  *
@@ -668,7 +666,7 @@ The number of packets, delivered by this sub-layer to a
  * The net-snmp type is ASN_COUNTER64. The C type decl is U64 (U64)
  */
 /**
- * Extract the current value of the ifHCInUcastPkts data->
+ * Extract the current value of the ifHCInUcastPkts data.
  *
  * Set a value using the data context for the row.
  *
@@ -727,7 +725,7 @@ The number of packets, delivered by this sub-layer to a
  * The net-snmp type is ASN_COUNTER64. The C type decl is U64 (U64)
  */
 /**
- * Extract the current value of the ifHCInMulticastPkts data->
+ * Extract the current value of the ifHCInMulticastPkts data.
  *
  * Set a value using the data context for the row.
  *
@@ -786,7 +784,7 @@ The number of packets, delivered by this sub-layer to a
  * The net-snmp type is ASN_COUNTER64. The C type decl is U64 (U64)
  */
 /**
- * Extract the current value of the ifHCInBroadcastPkts data->
+ * Extract the current value of the ifHCInBroadcastPkts data.
  *
  * Set a value using the data context for the row.
  *
@@ -844,7 +842,7 @@ The total number of octets transmitted out of the
  * The net-snmp type is ASN_COUNTER64. The C type decl is U64 (U64)
  */
 /**
- * Extract the current value of the ifHCOutOctets data->
+ * Extract the current value of the ifHCOutOctets data.
  *
  * Set a value using the data context for the row.
  *
@@ -902,7 +900,7 @@ The total number of packets that higher-level protocols
  * The net-snmp type is ASN_COUNTER64. The C type decl is U64 (U64)
  */
 /**
- * Extract the current value of the ifHCOutUcastPkts data->
+ * Extract the current value of the ifHCOutUcastPkts data.
  *
  * Set a value using the data context for the row.
  *
@@ -963,7 +961,7 @@ The total number of packets that higher-level protocols
  * The net-snmp type is ASN_COUNTER64. The C type decl is U64 (U64)
  */
 /**
- * Extract the current value of the ifHCOutMulticastPkts data->
+ * Extract the current value of the ifHCOutMulticastPkts data.
  *
  * Set a value using the data context for the row.
  *
@@ -1023,7 +1021,7 @@ The total number of packets that higher-level protocols
  * The net-snmp type is ASN_COUNTER64. The C type decl is U64 (U64)
  */
 /**
- * Extract the current value of the ifHCOutBroadcastPkts data->
+ * Extract the current value of the ifHCOutBroadcastPkts data.
  *
  * Set a value using the data context for the row.
  *
@@ -1080,58 +1078,6 @@ Indicates whether linkUp/linkDown traps should be generated
  * It's syntax is INTEGER (based on perltype INTEGER)
  * The net-snmp type is ASN_INTEGER. The C type decl is long (u_long)
  */
-/**
- * map a value from it's original native format the the MIB format.
- *
- * @retval MFD_SUCCESS         : success
- * @retval MFD_ERROR           : Any other error
- *
- * @note parameters follow the memset convention (dest, src).
- *
- * @note generation and use of this function can be turned off by re-running
- * mib2c after adding the following line to the file
- * default-node-ifLinkUpDownTrapEnable.m2d :
- *   @eval $m2c_node_skip_mapping = 1@
- *
- * @remark
- *  If the values for your data type don't exactly match the
- *  possible values defined by the mib, you should map them here.
- *  Otherwise, just do a direct copy.
- */
-int
-ifLinkUpDownTrapEnable_map(u_long * mib_ifLinkUpDownTrapEnable_val_ptr,
-                           u_long raw_ifLinkUpDownTrapEnable_val)
-{
-    netsnmp_assert(NULL != mib_ifLinkUpDownTrapEnable_val_ptr);
-
-    DEBUGMSGTL(("verbose:ifLinkUpDownTrapEnable_map", "called\n"));
-
-    /*
-     * TODO:
-     * value mapping
-     */
-    /** TODO: update INTERNAL_* macros defined in the header */
-    switch (raw_ifLinkUpDownTrapEnable_val) {
-    case INTERNAL_IFLINKUPDOWNTRAPENABLE_ENABLED:
-        *mib_ifLinkUpDownTrapEnable_val_ptr =
-            IFLINKUPDOWNTRAPENABLE_ENABLED;
-        break;
-
-    case INTERNAL_IFLINKUPDOWNTRAPENABLE_DISABLED:
-        *mib_ifLinkUpDownTrapEnable_val_ptr =
-            IFLINKUPDOWNTRAPENABLE_DISABLED;
-        break;
-
-    default:
-        snmp_log(LOG_ERR,
-                 "couldn't map value %d for ifLinkUpDownTrapEnable\n",
-                 raw_ifLinkUpDownTrapEnable_val);
-        return MFD_ERROR;
-    }
-
-    return MFD_SUCCESS;
-}
-
 /**
  * Extract the current value of the ifLinkUpDownTrapEnable data->
  *
@@ -1194,7 +1140,7 @@ An estimate of the interface's current bandwidth in units
  * The net-snmp type is ASN_GAUGE. The C type decl is u_long (u_long)
  */
 /**
- * Extract the current value of the ifHighSpeed data->
+ * Extract the current value of the ifHighSpeed data.
  *
  * Set a value using the data context for the row.
  *
@@ -1257,55 +1203,6 @@ This object has a value of false(2) if this interface only
  * The net-snmp type is ASN_INTEGER. The C type decl is long (u_long)
  */
 /**
- * map a value from it's original native format the the MIB format.
- *
- * @retval MFD_SUCCESS         : success
- * @retval MFD_ERROR           : Any other error
- *
- * @note parameters follow the memset convention (dest, src).
- *
- * @note generation and use of this function can be turned off by re-running
- * mib2c after adding the following line to the file
- * default-node-ifPromiscuousMode.m2d :
- *   @eval $m2c_node_skip_mapping = 1@
- *
- * @remark
- *  If the values for your data type don't exactly match the
- *  possible values defined by the mib, you should map them here.
- *  Otherwise, just do a direct copy.
- */
-int
-ifPromiscuousMode_map(u_long * mib_ifPromiscuousMode_val_ptr,
-                      u_long raw_ifPromiscuousMode_val)
-{
-    netsnmp_assert(NULL != mib_ifPromiscuousMode_val_ptr);
-
-    DEBUGMSGTL(("verbose:ifPromiscuousMode_map", "called\n"));
-
-    /*
-     * TODO:
-     * value mapping
-     */
-    /** TODO: update INTERNAL_* macros defined in the header */
-    switch (raw_ifPromiscuousMode_val) {
-    case INTERNAL_IFPROMISCUOUSMODE_TRUE:
-        *mib_ifPromiscuousMode_val_ptr = TRUTHVALUE_TRUE;
-        break;
-
-    default:
-        snmp_log(LOG_ERR, "couldn't map value %d for ifPromiscuousMode",
-                 "(assuming FALSE)\n", raw_ifPromiscuousMode_val);
-       /** fall through */
-
-    case INTERNAL_IFPROMISCUOUSMODE_FALSE:
-        *mib_ifPromiscuousMode_val_ptr = TRUTHVALUE_FALSE;
-        break;
-    }
-
-    return MFD_SUCCESS;
-}
-
-/**
  * Extract the current value of the ifPromiscuousMode data.
  *
  * Set a value using the data context for the row.
@@ -1361,55 +1258,6 @@ This object has the value 'true(1)' if the interface
  * It's syntax is TruthValue (based on perltype INTEGER)
  * The net-snmp type is ASN_INTEGER. The C type decl is long (u_long)
  */
-/**
- * map a value from it's original native format the the MIB format.
- *
- * @retval MFD_SUCCESS         : success
- * @retval MFD_ERROR           : Any other error
- *
- * @note parameters follow the memset convention (dest, src).
- *
- * @note generation and use of this function can be turned off by re-running
- * mib2c after adding the following line to the file
- * default-node-ifConnectorPresent.m2d :
- *   @eval $m2c_node_skip_mapping = 1@
- *
- * @remark
- *  If the values for your data type don't exactly match the
- *  possible values defined by the mib, you should map them here.
- *  Otherwise, just do a direct copy.
- */
-int
-ifConnectorPresent_map(u_long * mib_ifConnectorPresent_val_ptr,
-                       u_long raw_ifConnectorPresent_val)
-{
-    netsnmp_assert(NULL != mib_ifConnectorPresent_val_ptr);
-
-    DEBUGMSGTL(("verbose:ifConnectorPresent_map", "called\n"));
-
-    /*
-     * TODO:
-     * value mapping
-     */
-    /** TODO: update INTERNAL_* macros defined in the header */
-    switch (raw_ifConnectorPresent_val) {
-    case INTERNAL_IFCONNECTORPRESENT_TRUE:
-        *mib_ifConnectorPresent_val_ptr = TRUTHVALUE_TRUE;
-        break;
-
-    case INTERNAL_IFCONNECTORPRESENT_FALSE:
-        *mib_ifConnectorPresent_val_ptr = TRUTHVALUE_FALSE;
-        break;
-
-    default:
-        snmp_log(LOG_ERR, "couldn't map value %d for ifConnectorPresent\n",
-                 raw_ifConnectorPresent_val);
-        return MFD_ERROR;
-    }
-
-    return MFD_SUCCESS;
-}
-
 /**
  * Extract the current value of the ifConnectorPresent data.
  *
@@ -1491,7 +1339,7 @@ This object is an 'alias' name for the interface as
  * This data type requires a length.  (Max 64)
  */
 /**
- * Extract the current value of the ifAlias data->
+ * Extract the current value of the ifAlias data.
  *
  * Set a value using the data context for the row.
  *
@@ -1586,7 +1434,7 @@ The value of sysUpTime on the most recent occasion at which
  * The net-snmp type is ASN_TIMETICKS. The C type decl is u_long (u_long)
  */
 /**
- * Extract the current value of the ifCounterDiscontinuityTime data->
+ * Extract the current value of the ifCounterDiscontinuityTime data.
  *
  * Set a value using the data context for the row.
  *
@@ -1882,31 +1730,6 @@ ifXTable_undo_commit(ifXTable_rowreq_ctx * rowreq_ctx)
 
     return rc;
 }
-
-/*---------------------------------------------------------------------
- * IF-MIB::ifEntry.ifIndex
- * ifIndex is subid 1 of ifEntry.
- * It's status is Current, and it's access level is ReadOnly.
- * OID: .1.3.6.1.2.1.2.2.1.1
- * Description:
-A unique value, greater than zero, for each interface.  It
-            is recommended that values are assigned contiguously
-            starting from 1.  The value for each interface sub-layer
-            must remain constant at least from one re-initialization of
-            the entity's network management system to the next re-
-            initialization.
- *
- * Attributes:
- *   accessible 1     isscalar 0     enums  0      hasdefval 0
- *   readable   1     iscolumn 1     ranges 1      hashint   1
- *   settable   0
- *   hint: d
- *
- * Ranges:  1 - 2147483647;
- *
- * It's syntax is InterfaceIndex (based on perltype INTEGER32)
- * The net-snmp type is ASN_INTEGER. The C type decl is long (long)
- */
 
 /*---------------------------------------------------------------------
  * IF-MIB::ifXEntry.ifLinkUpDownTrapEnable
@@ -2526,6 +2349,13 @@ ifAlias_set(ifXTable_rowreq_ctx * rowreq_ctx, char *ifAlias_val_ptr,
     netsnmp_assert(NULL != rowreq_ctx);
     netsnmp_assert(NULL != ifAlias_val_ptr);
 
+    /*
+     * TODO:
+     * reverse value mapping
+     *
+     * If the values for your data type don't exactly match the
+     * possible values defined by the mib, you should map them here.
+     */
     /*
      * TODO:
      * set ifAlias value in rowreq_ctx->data.
