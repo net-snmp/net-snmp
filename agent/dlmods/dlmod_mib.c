@@ -178,7 +178,7 @@ header_dlmodEntry(struct variable *vp,
 #define DLMODENTRY_NAME_LENGTH	11
 	oid	newname[MAX_OID_LEN];
 	int	result;
-	struct dlmod   *dlm;
+	struct dlmod   *dlm = 0;
 	int dlmod_index;
 	char buf[1024];
 
@@ -230,7 +230,7 @@ header_dlmodEntry(struct variable *vp,
     fprintf(stderr, "dlmodEntry return dlm: %x\n", (int) dlm);
 #endif
 	return dlm;
-};
+}
 
 unsigned char  *
 var_dlmodEntry(struct variable *vp,
