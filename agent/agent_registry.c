@@ -790,7 +790,7 @@ register_mib(const char *moduleName,
 }
 
 void
-netsnmp_subtree_unload(netsnmp_subtree *sub, netsnmp_subtree *prev)
+netsnmp_subtree_unload(netsnmp_subtree *sub, netsnmp_subtree *prev, const char *context)
 {
     netsnmp_subtree *ptr;
 
@@ -821,12 +821,21 @@ netsnmp_subtree_unload(netsnmp_subtree *sub, netsnmp_subtree *prev)
             ptr->next = sub->next;
         for (ptr = sub->next; ptr; ptr = ptr->children)
             ptr->prev = sub->prev;
+
+	if (sub->prev == NULL) {
+	    netsnmp_subtree_replace_first(sub->next, context);
+	}
+
         return;
     } else {
         for (ptr = sub->prev; ptr; ptr = ptr->children)
             ptr->next = sub->children;
         for (ptr = sub->next; ptr; ptr = ptr->children)
             ptr->prev = sub->children;
+
+	if (sub->prev == NULL) {
+	    netsnmp_subtree_replace_first(sub->children, context);
+	}
         return;
     }
 }
@@ -864,7 +873,7 @@ unregister_mib_context(oid * name, size_t len, int priority,
         return MIB_NO_SUCH_REGISTRATION;
     }
 
-    netsnmp_subtree_unload(child, prev);
+    netsnmp_subtree_unload(child, prev, context);
     myptr = child;              /* remember this for later */
 
     /*
@@ -883,7 +892,7 @@ unregister_mib_context(oid * name, size_t len, int priority,
             if ((netsnmp_oid_equals(child->name_a, child->namelen,
 				  name, len) == 0) &&
 		(child->priority == priority)) {
-                netsnmp_subtree_unload(child, prev);
+                netsnmp_subtree_unload(child, prev, context);
                 netsnmp_subtree_free(child);
                 break;
             }
@@ -943,7 +952,7 @@ netsnmp_unregister_mib_table_row(oid * name, size_t len, int priority,
             continue;
         }
 
-        netsnmp_subtree_unload(child, prev);
+        netsnmp_subtree_unload(child, prev, context);
         myptr = child;          /* remember this for later */
 
         for (list = myptr->next; list != NULL; list = list->next) {
@@ -953,7 +962,7 @@ netsnmp_unregister_mib_table_row(oid * name, size_t len, int priority,
                 if (netsnmp_oid_equals(child->name_a, child->namelen, 
 				      name, len) == 0 &&
                     (child->priority == priority)) {
-                    netsnmp_subtree_unload(child, prev);
+                    netsnmp_subtree_unload(child, prev, context);
                     netsnmp_subtree_free(child);
                     break;
                 }
@@ -1040,7 +1049,7 @@ unregister_mibs_by_session(netsnmp_session * ss)
 			child->reginfo = NULL;
                     }
 
-                    netsnmp_subtree_unload(child, prev);
+                    netsnmp_subtree_unload(child, prev, contextptr->context_name);
                     netsnmp_subtree_free(child);
 
                     snmp_call_callbacks(SNMP_CALLBACK_APPLICATION,
