@@ -24,6 +24,7 @@
 #  include <sys/time.h>
 # else
 #  include <time.h>
+# endif
 #endif
 
 #if HAVE_NETINET_IN_H
