@@ -13,7 +13,7 @@
 mib2c -- produces template code from mib definitions
 .SH SYNOPSIS
 .B mib2c
-[-h] -c CONFIGFILE [-f OUTNAME] [-i][q][-S VAR=VAL] MIBNODE
+[-h] -c CONFIGFILE [-I PATH] [-f OUTNAME] [-i][q][-S VAR=VAL] MIBNODE
 .SH DESCRIPTION
 The mib2c tool is designed to take a portion of the MIB tree (as defined
 by a MIB file) and generate the template C code necessary to implement
@@ -152,6 +152,11 @@ column containing enums:
 	GENERATING CODE FOR THE 4.X LINE OF CODE (THE OLDER API)
 
 	mib2c -c mib2c.old-api.conf MIBNODE
+.TP
+.BI -I PATH
+Search for configuration files in PATH.  Multiple paths can be
+specified using multiple -I switches or by using one with a comma
+separated list of paths in it.
 .TP
 .BI -f " OUTNAME"
 Places the output code into OUTNAME.c and OUTNAME.h. Normally, mib2c
