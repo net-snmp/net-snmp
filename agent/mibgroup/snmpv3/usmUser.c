@@ -182,11 +182,22 @@ usm_parse_oid(oid *oidIndex, size_t oidLen,
   }
   *nameLen = nameL;
   
-  for(i = 0; i < engineIDL; i++)
+  for(i = 0; i < engineIDL; i++) {
+    if (oidIndex[i+1] > 255) {
+      goto UPO_parse_error;
+    }
     engineID[0][i] = oidIndex[i+1];
+  }
 
-  for(i = 0; i < nameL; i++)
+  for(i = 0; i < nameL; i++) {
+    if (oidIndex[i+2+engineIDL] > 255) {
+      UPO_parse_error:
+      free(engineID);
+      free(name);
+      return 1;
+    }
     name[0][i] = oidIndex[i+2+engineIDL];
+  }
   name[0][nameL] = 0;
 
   return 0;
