@@ -124,7 +124,7 @@ netsnmp_access_route_entry_free(netsnmp_route_entry * entry)
         return;
 
 #ifdef USING_IP_FORWARD_MIB_INETCIDRROUTETABLE_INETCIDRROUTETABLE_MODULE
-    if (NULL != entry->rt_policy)
+    if ((NULL != entry->rt_policy) && !(entry->flags & NETSNMP_ROUTE_ENTRY_POLICY_STATIC))
         free(entry->rt_policy);
 #endif
 #ifdef USING_IP_FORWARD_MIB_IPCIDRROUTETABLE_IPCIDRROUTETABLE_MODULE
