@@ -2699,6 +2699,11 @@ snmp_new_v3_session(version, peer, retries, timeout, sec_name, sec_level, sec_en
                    snmp_duplicate_objid(usmHMACSHA1AuthProtocol,
                                         USM_AUTH_PROTO_SHA_LEN);
               session.securityAuthProtoLen = USM_AUTH_PROTO_SHA_LEN;
+           } else if (!strcmp(auth_proto, "DEFAULT")) {
+               const oid *theoid =
+                   get_default_authtype(&session.securityAuthProtoLen);
+               session.securityAuthProto = 
+                   snmp_duplicate_objid(theoid, session.securityAuthProtoLen);
            } else {
               if (verbose)
                  warn("error:snmp_new_v3_session:Unsupported authentication protocol(%s)\n", auth_proto);
@@ -2726,6 +2731,11 @@ snmp_new_v3_session(version, peer, retries, timeout, sec_name, sec_level, sec_en
                   snmp_duplicate_objid(usmAESPrivProtocol,
                                        USM_PRIV_PROTO_AES_LEN);
               session.securityPrivProtoLen = USM_PRIV_PROTO_AES_LEN;
+           } else if (!strcmp(priv_proto, "DEFAULT")) {
+               const oid *theoid =
+                   get_default_privtype(&session.securityPrivProtoLen);
+               session.securityPrivProto = 
+                   snmp_duplicate_objid(theoid, session.securityPrivProtoLen);
            } else {
               if (verbose)
                  warn("error:snmp_new_v3_session:Unsupported privacy protocol(%s)\n", priv_proto);

@@ -452,13 +452,13 @@ sub new {
        $this->{Context} ||= 
 	   NetSNMP::default_store::netsnmp_ds_get_string(NetSNMP::default_store::NETSNMP_DS_LIBRARY_ID(), 
 		         NetSNMP::default_store::NETSNMP_DS_LIB_CONTEXT()) || '';
-       $this->{AuthProto} ||= 'MD5'; # defaults XXX
+       $this->{AuthProto} ||= 'DEFAULT'; # defaults to the library's default
        $this->{AuthPass} ||=
        NetSNMP::default_store::netsnmp_ds_get_string(NetSNMP::default_store::NETSNMP_DS_LIBRARY_ID(), 
 		     NetSNMP::default_store::NETSNMP_DS_LIB_AUTHPASSPHRASE()) ||
        NetSNMP::default_store::netsnmp_ds_get_string(NetSNMP::default_store::NETSNMP_DS_LIBRARY_ID(), 
 		     NetSNMP::default_store::NETSNMP_DS_LIB_PASSPHRASE()) || '';
-       $this->{PrivProto} ||= 'DES';  # defaults XXX
+       $this->{PrivProto} ||= 'DEFAULT';  # defaults to hte library's default
        $this->{PrivPass} ||=
        NetSNMP::default_store::netsnmp_ds_get_string(NetSNMP::default_store::NETSNMP_DS_LIBRARY_ID(), 
 		     NetSNMP::default_store::NETSNMP_DS_LIB_PRIVPASSPHRASE()) ||
