@@ -65,6 +65,9 @@ netsnmp_row_merge_helper_handler(netsnmp_mib_handler *handler,
     int i, j, ret, tail, count = 0;
 
     /*
+     * xxx-rks - for sets, should store this info in agent request info, so it
+     *           doesn't need to be done for every mode.
+     *
      * XXX - Need some mechanism for specifying the length of the table OID
      *  i.e. where to start looking for shared indexes
      *  N.B: The first subidentifier after the table OID will typically vary,
@@ -84,6 +87,17 @@ netsnmp_row_merge_helper_handler(netsnmp_mib_handler *handler,
     for (request = requests; request; request = request->next) 
 	count++;
 
+    /*
+     * Optimization: skip all this if there is just one request
+     */
+    if(count == 1) {
+        DEBUGMSGTL(("helper:row_merge", "  only one varbind\n"));
+        return netsnmp_call_next_handler(handler, reginfo, reqinfo, requests);
+    }
+
+    /*
+     * allocate memory for saved structure
+     */
     saved_requests = (netsnmp_request_info**)calloc(count+1, sizeof(netsnmp_request_info*));
     saved_status   =                  (char*)calloc(count,   sizeof(char));
 
