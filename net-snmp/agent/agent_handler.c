@@ -133,12 +133,12 @@ netsnmp_register_handler(netsnmp_handler_registration *reginfo)
     }
 
     DEBUGIF("handler::register") {
-        DEBUGMSGTL(("handler::register", "Registering "));
+        DEBUGMSGTL(("handler::register", "Registering %s (", reginfo->handlerName));
         for (handler = reginfo->handler; handler; handler = handler->next) {
             DEBUGMSG(("handler::register", "::%s", handler->handler_name));
         }
 
-        DEBUGMSG(("handler::register", " at "));
+        DEBUGMSG(("handler::register", ") at "));
         if (reginfo->rootoid && reginfo->range_subid) {
             DEBUGMSGOIDRANGE(("handler::register", reginfo->rootoid,
                               reginfo->rootoid_len, reginfo->range_subid,
@@ -167,7 +167,7 @@ netsnmp_register_handler(netsnmp_handler_registration *reginfo)
                                netsnmp_get_bulk_to_next_handler());
     }
 
-    return netsnmp_register_mib(reginfo->handler->handler_name,
+    return netsnmp_register_mib(reginfo->handlerName,
                                 NULL, 0, 0,
                                 reginfo->rootoid, reginfo->rootoid_len,
                                 reginfo->priority,
