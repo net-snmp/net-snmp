@@ -52,7 +52,15 @@ EXEEXT		= @EXEEXT@
 # Misc Compiling Stuff
 CC	        = @CC@
 # version number is prefixed by a 0 for a better shared library version number
-LIB_LD_CMD      = $(LIBTOOL) --mode=link $(CC) $(CFLAGS) -rpath $(libdir) -release 0.$(VERSION) -o
+#
+# ok, use libtool proper versioning:
+LIBCURRENT  = 5
+LIBREVISION = 0
+LIBAGE      = 0
+# generally, LIBCURRENT should stay the same unless major changes occur.
+# Increment REVISION every release.  
+# Increment AGE if new stuff is available.
+LIB_LD_CMD      = $(LIBTOOL) --mode=link $(CC) $(CFLAGS) -rpath $(libdir) -version-info $(LIBCURRENT):$(LIBREVISION):$(LIBAGE) -o
 LIB_EXTENSION   = la
 LIB_VERSION     =
 LIB_LDCONFIG_CMD = $(LIBTOOL) --mode=finish $(libdir)
