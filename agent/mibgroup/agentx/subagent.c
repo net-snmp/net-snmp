@@ -533,17 +533,18 @@ agentx_sysOR_callback(int majorID, int minorID, void *serverarg,
 
 
 static int
-subagent_shutdown(int majorID, int minorID, void *serverarg,
-                  void *clientarg)
+subagent_shutdown(int majorID, int minorID, void *serverarg, void *clientarg)
 {
-    netsnmp_session *thesession = (netsnmp_session *) clientarg;
+    netsnmp_session *thesession = (netsnmp_session *)clientarg;
     DEBUGMSGTL(("agentx/subagent", "shutting down session....\n"));
     if (thesession == NULL) {
-        DEBUGMSGTL(("agentx/subagent", "Empty session to shutdown\n"));
-        return 0;
+	DEBUGMSGTL(("agentx/subagent", "Empty session to shutdown\n"));
+	main_session = NULL;
+	return 0;
     }
     agentx_close_session(thesession, AGENTX_CLOSE_SHUTDOWN);
     snmp_close(thesession);
+    main_session = NULL;
     DEBUGMSGTL(("agentx/subagent", "shut down finished.\n"));
     return 1;
 }
