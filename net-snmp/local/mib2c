@@ -54,7 +54,7 @@ $currentlevel = -1;
 @def_search_dirs = (".");
 @search_dirs = ();
 if($ENV{MIB2C_DIR}) {
-  push @def_search_dirs, $ENV{MIB2C_DIR};
+   push @def_search_dirs, split(/:/, $ENV{MIB2C_DIR});
 }
 push @def_search_dirs, "/usr/local/share/snmp/";
 
