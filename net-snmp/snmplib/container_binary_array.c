@@ -165,7 +165,7 @@ netsnmp_binary_array_initialize(void)
     t->max_size = 0;
     t->count = 0;
     t->dirty = 0;
-    t->data_size = 4;
+    t->data_size = sizeof(void*);
     t->data = NULL;
 
     return t;
