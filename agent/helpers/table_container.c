@@ -407,8 +407,12 @@ _data_lookup(netsnmp_handler_registration *reginfo,
     if (NULL != row)
         netsnmp_request_add_list_data(request,
                                       netsnmp_create_data_list
-                                      (TABLE_CONTAINER_NAME,
+                                      (TABLE_CONTAINER_ROW,
                                        row, NULL));
+    netsnmp_request_add_list_data(request,
+                                      netsnmp_create_data_list
+                                      (TABLE_CONTAINER_TABLE,
+                                       tad->table, NULL));
 }
 
 /**********************************************************************
@@ -509,4 +513,13 @@ _container_table_handler(netsnmp_mib_handler *handler,
 
     return rc;
 }
+
+/** retrieve the container used by the table_container helper */
+netsnmp_container*
+netsnmp_container_table_extract(netsnmp_request_info *request)
+{
+    return (netsnmp_container *)
+         netsnmp_request_get_list_data(request, TABLE_CONTAINER_TABLE);
+}
+
 #endif /** DOXYGEN_SHOULD_SKIP_THIS */
