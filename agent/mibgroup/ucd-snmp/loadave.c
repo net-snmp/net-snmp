@@ -149,7 +149,7 @@ void init_loadave(void)
   oid loadave_variables_oid[] = { EXTENSIBLEMIB,LOADAVEMIBNUM,1 };
 
   /* register ourselves with the agent to handle our mib tree */
-  REGISTER_MIB("ucd-snmp/loadave", extensible_loadave_variables, variable2, \
+  REGISTER_MIB("ucd-snmp/loadave", extensible_loadave_variables, variable2,
                loadave_variables_oid);
 
   snmpd_register_config_handler("load", loadave_parse_config,

@@ -150,7 +150,7 @@ void init_extensible(void)
   oid extensible_variables_oid[] = { EXTENSIBLEMIB,SHELLMIBNUM,1 };
 
   /* register ourselves with the agent to handle our mib tree */
-  REGISTER_MIB("ucd-snmp/extensible", extensible_extensible_variables, variable2, \
+  REGISTER_MIB("ucd-snmp/extensible", extensible_extensible_variables, variable2,
                extensible_variables_oid);
 
   snmpd_register_config_handler("exec", extensible_parse_config,

@@ -20,6 +20,9 @@
 #include <errno.h>
 #if HAVE_SYSLOG_H
 #include <syslog.h>
+#ifndef LOG_CONS	/* Interesting Ultrix feature */
+#include <sys/syslog.h>
+#endif
 #endif
 #if TIME_WITH_SYS_TIME
 # ifdef WIN32
@@ -193,7 +196,7 @@ snmp_log_string (int priority, const char *string)
   if (do_filelogging || do_stderrlogging) {
 
     if (ds_get_boolean(DS_LIBRARY_ID, DS_LIB_LOG_TIMESTAMP) && newline) {
-      sprintf_stamp(NULL, (char *)&sbuf);
+      sprintf_stamp(NULL, sbuf);
     } else {
       strcpy(sbuf, "");
     }

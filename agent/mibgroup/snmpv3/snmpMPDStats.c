@@ -27,7 +27,7 @@ void init_snmpMPDStats(void) {
   register_sysORTable(reg,10,"The MIB for Message Processing and Dispatching.");
 #endif
 
-  REGISTER_MIB("snmpv3/snmpMPDStats", snmpMPDStats_variables, variable2, \
+  REGISTER_MIB("snmpv3/snmpMPDStats", snmpMPDStats_variables, variable2,
 			snmpMPDStats_variables_oid);
 }
 

@@ -34,7 +34,7 @@ void init_snmpEngine (void) {
   register_sysORTable(reg,10,"The SNMP Management Architecture MIB.");
 #endif
 
-  REGISTER_MIB("snmpv3/snmpEngine", snmpEngine_variables, variable2, \
+  REGISTER_MIB("snmpv3/snmpEngine", snmpEngine_variables, variable2,
 		 snmpEngine_variables_oid);
 
 /* place any initialization routines needed here */

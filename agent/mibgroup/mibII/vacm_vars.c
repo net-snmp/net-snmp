@@ -111,7 +111,7 @@ init_vacm_vars (void)
                          store_vacm, NULL);
 
   /* register ourselves with the agent to handle our mib tree */
-  REGISTER_MIB("mibII/vacm:sec2group", vacm_sec2group, variable2, \
+  REGISTER_MIB("mibII/vacm:sec2group", vacm_sec2group, variable2,
                vacm_sec2group_oid);
   REGISTER_MIB("mibII/vacm:access", vacm_access, variable2, vacm_access_oid);
   REGISTER_MIB("mibII/vacm:view", vacm_view, variable4, vacm_view_oid);

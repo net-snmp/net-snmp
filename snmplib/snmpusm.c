@@ -3110,6 +3110,7 @@ usm_set_user_password(struct usmUser *user, const char *token, char *line)
   size_t	 *keyLen;
   u_char	  userKey[SNMP_MAXBUF_SMALL];
   size_t	  userKeyLen = SNMP_MAXBUF_SMALL;
+  u_char	 *userKeyP = userKey;
   int		  type, ret;
 
   /*
@@ -3162,7 +3163,7 @@ usm_set_user_password(struct usmUser *user, const char *token, char *line)
       return;
     }
   } else if (type == 1) {
-    cp = read_config_read_octet_string(cp, (u_char **) &userKey, &userKeyLen);
+    cp = read_config_read_octet_string(cp, &userKeyP, &userKeyLen);
     
     if (cp == NULL) {
       config_perror("invalid user key");

@@ -84,7 +84,6 @@
  */
 #define MAX_PERSISTENT_BACKUPS 10
 
-
 /* Define if on AIX 3.
    System headers sometimes define this.
    We just want to avoid a redefinition error message.  */
@@ -378,11 +377,11 @@
 /* Define if you have the <inet/mib2.h> header file.  */
 #undef HAVE_INET_MIB2_H
 
-/* Define if you have the <io.h> header file.  */
-#undef HAVE_IO_H
-
 /* Define if you have the <ioctls.h> header file.  */
 #undef HAVE_IOCTLS_H
+
+/* Define if you have the <io.h> header file.  */
+#undef HAVE_IO_H
 
 /* Define if you have the <kstat.h> header file.  */
 #undef HAVE_KSTAT_H
@@ -420,11 +419,11 @@
 /* Define if you have the <ndir.h> header file.  */
 #undef HAVE_NDIR_H
 
-/* Define if you have the <net/if.h> header file.  */
-#undef HAVE_NET_IF_H
-
 /* Define if you have the <net/if_dl.h> header file.  */
 #undef HAVE_NET_IF_DL_H
+
+/* Define if you have the <net/if.h> header file.  */
+#undef HAVE_NET_IF_H
 
 /* Define if you have the <net/if_mib.h> header file.  */
 #undef HAVE_NET_IF_MIB_H
@@ -450,38 +449,35 @@
 /* Define if you have the <netinet/in.h> header file.  */
 #undef HAVE_NETINET_IN_H
 
-/* Define if you have the <netinet/in_pcb.h> header file.  */
-#undef HAVE_NETINET_IN_PCB_H
-
 /* Define if you have the <netinet/in_systm.h> header file.  */
 #undef HAVE_NETINET_IN_SYSTM_H
 
 /* Define if you have the <netinet/in_var.h> header file.  */
 #undef HAVE_NETINET_IN_VAR_H
 
-/* Define if you have the <netinet/ip.h> header file.  */
-#undef HAVE_NETINET_IP_H
-
 /* Define if you have the <netinet/ip6.h> header file.  */
 #undef HAVE_NETINET_IP6_H
+
+/* Define if you have the <netinet/ip.h> header file.  */
+#undef HAVE_NETINET_IP_H
 
 /* Define if you have the <netinet/ip_var.h> header file.  */
 #undef HAVE_NETINET_IP_VAR_H
 
+/* Define if you have the <netinet/tcp_fsm.h> header file.  */
+#undef HAVE_NETINET_TCP_FSM_H
+
 /* Define if you have the <netinet/tcp.h> header file.  */
 #undef HAVE_NETINET_TCP_H
 
-/* Define if you have the <netinet/tcp_fsm.h> header file.  */
-#undef HAVE_NETINET_TCP_FSM_H
+/* Define if you have the <netinet/tcpip.h> header file.  */
+#undef HAVE_NETINET_TCPIP_H
 
 /* Define if you have the <netinet/tcp_timer.h> header file.  */
 #undef HAVE_NETINET_TCP_TIMER_H
 
 /* Define if you have the <netinet/tcp_var.h> header file.  */
 #undef HAVE_NETINET_TCP_VAR_H
-
-/* Define if you have the <netinet/tcpip.h> header file.  */
-#undef HAVE_NETINET_TCPIP_H
 
 /* Define if you have the <netinet/udp.h> header file.  */
 #undef HAVE_NETINET_UDP_H
@@ -501,11 +497,11 @@
 /* Define if you have the <netinet6/nd6.h> header file.  */
 #undef HAVE_NETINET6_ND6_H
 
-/* Define if you have the <netinet6/tcp6.h> header file.  */
-#undef HAVE_NETINET6_TCP6_H
-
 /* Define if you have the <netinet6/tcp6_fsm.h> header file.  */
 #undef HAVE_NETINET6_TCP6_FSM_H
+
+/* Define if you have the <netinet6/tcp6.h> header file.  */
+#undef HAVE_NETINET6_TCP6_H
 
 /* Define if you have the <netinet6/tcp6_timer.h> header file.  */
 #undef HAVE_NETINET6_TCP6_TIMER_H
@@ -633,11 +629,11 @@
 /* Define if you have the <sys/sockio.h> header file.  */
 #undef HAVE_SYS_SOCKIO_H
 
-/* Define if you have the <sys/stat.h> header file.  */
-#undef HAVE_SYS_STAT_H
-
 /* Define if you have the <sys/statfs.h> header file.  */
 #undef HAVE_SYS_STATFS_H
+
+/* Define if you have the <sys/stat.h> header file.  */
+#undef HAVE_SYS_STAT_H
 
 /* Define if you have the <sys/statvfs.h> header file.  */
 #undef HAVE_SYS_STATVFS_H
@@ -755,6 +751,9 @@
 
 /* Define if you have the z library (-lz).  */
 #undef HAVE_LIBZ
+
+/* define if you have <netinet/in_pcb.h> */
+#undef HAVE_NETINET_IN_PCB_H
 
 /* define if you are using linux and /proc/net/dev has the compressed
    field, which exists in linux kernels 2.2 and greater. */

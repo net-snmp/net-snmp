@@ -77,7 +77,6 @@ SOFTWARE.
 #include "snmp_impl.h"
 #include "system.h"
 #include "snmp_parse_args.h"
-#include "getopt.h"
 
 oid objid_mib[] = {1, 3, 6, 1, 2, 1};
 int max_repetitions = 100;
