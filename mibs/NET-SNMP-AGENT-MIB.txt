@@ -1,42 +1,58 @@
 NET-SNMP-AGENT-MIB DEFINITIONS ::= BEGIN
 
 --
--- defines control and monitoring structures for the net-snmp agent.
+-- Defines control and monitoring structures for the Net-SNMP agent.
 --
 
 IMPORTS
-    OBJECT-TYPE, NOTIFICATION-TYPE, MODULE-IDENTITY,
-    Integer32, Opaque, enterprises
+    netSnmpObjects, netSnmpModuleIDs FROM NET-SNMP-MIB
+
+    OBJECT-TYPE, NOTIFICATION-TYPE, MODULE-IDENTITY, Integer32
         FROM SNMPv2-SMI
 
-    TEXTUAL-CONVENTION, DisplayString, TruthValue
-	FROM SNMPv2-TC;
+    DisplayString FROM SNMPv2-TC;
 
-netSnmpAgentMib MODULE-IDENTITY
-    LAST-UPDATED "200101170000Z"
+
+netSnmpAgentMIB MODULE-IDENTITY
+    LAST-UPDATED "200202090000Z"
     ORGANIZATION "www.net-snmp.org"
     CONTACT-INFO    
-	 "Defines control and monitoring structures for the net-snmp agent.
-
-         postal:    Wes Hardaker
+	 "postal:    Wes Hardaker
                     P.O. Box 382
                     Davis CA  95617
 
          email:     net-snmp-coders@lists.sourceforge.net"
     DESCRIPTION
-	"Defines control and monitoring structures for the net-snmp agent."
-    REVISION	 "200111030000Z"
+	 "Defines control and monitoring structures for the Net-SNMP agent.
+    REVISION     "200202090000Z"
     DESCRIPTION
 	"First revision."
-    ::= { enterprises 8072 999 1 }
+    ::= { netSnmpModuleIDs 2}
+
+
+nsVersion              OBJECT IDENTIFIER ::= {netSnmpObjects 1}
+nsMibRegistry          OBJECT IDENTIFIER ::= {netSnmpObjects 2}
+nsExtensions           OBJECT IDENTIFIER ::= {netSnmpObjects 3}
+nsDLMod                OBJECT IDENTIFIER ::= {netSnmpObjects 4}
+nsCache                OBJECT IDENTIFIER ::= {netSnmpObjects 5}
+nsErrorHistory         OBJECT IDENTIFIER ::= {netSnmpObjects 6}
+nsConfiguration        OBJECT IDENTIFIER ::= {netSnmpObjects 7}
+nsTransactions         OBJECT IDENTIFIER ::= {netSnmpObjects 8}
+
+
+--
+--  Monitoring outstanding "transactions"
+--    (i.e. requests sent to AgentX subagents, or proxied agents)
+--
 
 nsTransactionTable OBJECT-TYPE
     SYNTAX      SEQUENCE OF NsTransactionEntry
     MAX-ACCESS  not-accessible
     STATUS      current
     DESCRIPTION
-	"lists currently outstanding transactions in the net-snmp agent."
-    ::= { netSnmpAgentMib 1 }
+	"Lists currently outstanding transactions in the net-snmp agent.
+	 This includes requests to AgentX subagents, or proxied SNMP agents."
+    ::= { nsTransactions 1 }
 
 nsTransactionEntry OBJECT-TYPE
     SYNTAX      NsTransactionEntry
