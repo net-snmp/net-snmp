@@ -524,6 +524,13 @@ netsnmp_register_mib(const char *moduleName,
       free_subtree(subtree);
   }
 
+  /* mark the MIB as detached, if there's no master agent present as of now */
+  if (ds_get_boolean(DS_APPLICATION_ID, DS_AGENT_ROLE) != MASTER_AGENT) {
+	  extern struct snmp_session *main_session;
+  	if (main_session == NULL)
+		register_mib_detach_node(subtree);
+  }
+
   if (perform_callback) {
       reg_parms.name = mibloc;
       reg_parms.namelen = mibloclen;
