@@ -35,7 +35,7 @@ $m2c_node_get_comments
  * @retval MFD_ERROR           : Any other error
 @if $m2c_node_needlength == 1@
 *
- * @note If you need more $m2c_node_param_ref_lname bytes of memory,
+ * @note If you need more than (*$m2c_node_param_ref_lname) bytes of memory,
  *       allocate it using malloc() and update $m2c_node_param_ref_name.
  *       <b>DO NOT</b> free the previous pointer.
  *       The MFD helper will release the memory you allocate.
