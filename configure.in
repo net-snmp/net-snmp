@@ -679,8 +679,8 @@ AC_MSG_CHECKING(for and configuring mib modules to use)
 mibdir="agent/mibgroup"
 module_list=""
 module_list_code=""
-new_with_mib_modules=`echo $with_mib_modules | sed 's/,/ /;'`
-new_with_out_mib_modules=`echo $with_out_mib_modules | sed 's/,/ /;'`
+new_with_mib_modules=`echo $with_mib_modules | sed 's/,/ /g;'`
+new_with_out_mib_modules=`echo $with_out_mib_modules | sed 's/,/ /g;'`
 new_module_list="mibII ucd_snmp snmpv3mibs $new_with_mib_modules"
 
 if test "x$enable_ipv6" = "xyes"; then
