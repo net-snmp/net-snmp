@@ -304,6 +304,18 @@ pass .EXTENSIBLEDOTMIB.60 /bin/sh PREFIX/local/passtest
 # local.60.4 = IpAddress: 127.0.0.1
 # local.60.5 = 42
 # local.60.6 = Gauge: 42
+#
+# % snmpget localhost public .EXTENSIBLEDOTMIB.60.5
+# local.60.5 = 42
+#
+# % snmpset localhost private .EXTENSIBLEDOTMIB.60.1 s "New string"
+# local.60.1 = "New string"
+#
+# Note:  For snmpset requests you must use the 'private' community
+#        name, or else community number 2 as defined in the snmpd.conf
+#        file like the following line:
+#
+# community 2 new-private
 
 # For specific usage information, see the man/snmpd.conf.5 manual page
 # as well as the local/passtest script used in the above example.
