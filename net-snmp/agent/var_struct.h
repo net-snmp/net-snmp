@@ -10,7 +10,7 @@
  * 1.2.0
  */
 
-#define UCD_REGISTRY_OID_MAX_LEN	32
+#define UCD_REGISTRY_OID_MAX_LEN	128
 
 struct subtree {
     oid			name[UCD_REGISTRY_OID_MAX_LEN];

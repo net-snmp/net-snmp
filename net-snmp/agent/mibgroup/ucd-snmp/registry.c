@@ -14,6 +14,9 @@
 #if HAVE_WINSOCK_H
 #include <winsock.h>
 #endif
+#if HAVE_STRING_H
+#include <string.h>
+#endif
 
 #include "mibincl.h"
 #include "registry.h"

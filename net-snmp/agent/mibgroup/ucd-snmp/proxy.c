@@ -1,5 +1,13 @@
 #include <config.h>
 
+#include <sys/types.h>
+#if HAVE_WINSOCK_H
+#include <winsock.h>
+#endif
+#if HAVE_STRING_H
+#include <string.h>
+#endif
+
 #include "mibincl.h"
 #include "proxy.h"
 #include "snmp_api.h"
@@ -66,7 +74,7 @@ proxy_parse_config(const char *token, char *line) {
         return;
     }
 
-    newp = calloc(1, sizeof(struct simple_proxy));
+    newp = (struct simple_proxy *) calloc(1, sizeof(struct simple_proxy));
 
     newp->sess = ss;
     DEBUGMSGTL(("proxy_init","name = %s\n",args[arg]));
@@ -108,7 +116,7 @@ proxy_parse_config(const char *token, char *line) {
     /* replace current link with us */
     *listpp = newp;
 
-    memdup((void *) &newp->variables, (void *) simple_proxy_variables,
+    memdup((u_char **) &newp->variables, (u_char *) simple_proxy_variables,
            sizeof(*simple_proxy_variables));
 
     /* register our node */
@@ -148,7 +156,8 @@ u_char *var_simple_proxy(struct variable *vp,
 			 WriteMethod **write_method)
 {
 
-    static char nullstr_ret[] = "";
+    static u_char *ret_str = NULL;
+    static int ret_str_len = 0;
     static oid  objid[MAX_OID_LEN];
     struct simple_proxy *sp;
     u_char *ret = NULL;
@@ -194,7 +203,7 @@ u_char *var_simple_proxy(struct variable *vp,
                     }
                     /* suffix appended? */
                     DEBUGMSGTL(("proxy_var","length=%d, base_len=%d, name_len=%d\n", ourlength, sp->base_len, sp->name_len));
-                    if (ourlength > sp->name_len)
+                    if (ourlength > (int)sp->name_len)
                         memcpy(&(sp->base[sp->base_len]), &(ourname[sp->name_len]),
                                sizeof(oid)*(ourlength - sp->name_len));
                     ourlength = ourlength - sp->name_len + sp->base_len;
@@ -263,14 +272,16 @@ u_char *var_simple_proxy(struct variable *vp,
                     }
 
                     /* copy the value */
-                    if ((var->type == ASN_OCTET_STR || var->type == ASN_BIT_STR)
-                        && var->val.integer == 0) {
-                        ret = nullstr_ret;
-                    } else {
-                        memdup(&ret, (void *) var->val.integer, var->val_len);
+		    if (!ret_str || ret_str_len < (int)var->val_len) {
+			ret_str_len = var->val_len;
+			if (!ret_str_len) ret_str_len = 1;
+			if (ret_str) free(ret_str);
+			ret_str = (u_char *)malloc(ret_str_len);
                     }
+		    memcpy(ret_str, var->val.string, var->val_len);
                     *var_len = var->val_len;
                     vp->type = var->type;
+		    ret = ret_str;
 
                     DEBUGIF("proxy_var") {
                         char buf[SPRINT_MAX_LEN];
