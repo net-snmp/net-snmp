@@ -959,29 +959,42 @@ dnl check for tcp wrapper support
 _cppflags="${CPPFLAGS}"
 _ldflags="${LDFLAGS}"
 
-use_wrap="false"
 AC_ARG_WITH(libwrap,
-[  --with-libwrap[=LIBPATH] Compile in libwrap (tcp_wrappers) support.],
-    if test -d "$withval"; then
-        WRAPLIBS="-L$withval -lwrap"
-        AC_DEFINE(USE_LIBWRAP)
-        use_wrap="true"
-    elif test "x$withval" = "xyes"; then
-        WRAPLIBS="-lwrap"
-        AC_DEFINE(USE_LIBWRAP)
-        use_wrap="true"
-    fi
-)
+[  --with-libwrap[=LIBPATH] Compile in libwrap (tcp_wrappers) support.],[
+  if test "$with_libwrap" != "no" -a "$with_libwrap" != "yes"; then
+    CPPFLAGS="${CPPFLAGS} -I$with_libwrap/include"
+    LDFLAGS="${LDFLAGS} -L$with_libwrap/lib"
+  fi
 
-if test "x$use_wrap" = "xtrue"; then
-    dnl Linux RedHat 6.1 won't link libwrap without libnsl
-    AC_CHECK_LIB(nsl, yp_get_default_domain)
-    AC_CHECK_HEADER(tcpd.h,
-      AC_CHECK_LIB(wrap, main,
-	    AC_DEFINE(USE_LIBWRAP) WRAPLIBS="-lwrap",
-	    CPPFLAGS=${_cppflags} LDFLAGS=${_ldflags}),
-	CPPFLAGS=${_cppflags} LDFLAGS=${_ldflags})
-fi
+  _libs=${LIBS}
+  AC_CHECK_HEADER(tcpd.h,
+      LIBS="$LIBS -lwrap"
+      AC_MSG_CHECKING(for TCP wrappers library -lwrap)
+      AC_TRY_LINK([#include <tcpd.h>
+int allow_severity = 0;
+int deny_severity  = 0;
+],[hosts_access()],
+	  AC_MSG_RESULT(yes)
+	  AC_DEFINE(USE_LIBWRAP)
+	  test "$with_libwrap" != no && WRAPLIBS="-L$with_libwrap/lib"
+	  WRAPLIBS="$WRAPLIBS -lwrap",
+	  AC_MSG_RESULT(no)
+	  dnl Linux RedHat 6.1 won't link libwrap without libnsl
+	  AC_CHECK_FUNC(yp_get_default_domain, ,
+	      AC_CHECK_LIB(nsl, yp_get_default_domain))
+	  AC_MSG_CHECKING(for TCP wrappers library -lwrap linked with -lnsl)
+	  AC_TRY_LINK([#include <tcpd.h>
+int allow_severity = 0;
+int deny_severity  = 0;
+],[hosts_access()],
+	      AC_MSG_RESULT(yes)
+	      test "$with_libwrap" != no && WRAPLIBS="-L$with_libwrap/lib"
+	      WRAPLIBS="$WRAPLIBS -lwrap", AC_MSG_RESULT(no)),
+	  CPPFLAGS=${_cppflags}),
+      CPPFLAGS=${_cppflags})
+  LDFLAGS=${_ldflags}
+  LIBS=${_libs}
+])
 
 dnl zlib is required for newer versions of rpm
 _cppflags="${CPPFLAGS}"
