@@ -398,7 +398,10 @@ get_agentx_request(struct agent_snmp_session *asp,
     pdu->version     = AGENTX_VERSION_1;
     pdu->reqid       = snmp_get_next_transid();
     pdu->transid     = asp->pdu->transid;
-    pdu->sessid      = ax_session->sessid;
+    pdu->sessid      = ax_session->subsession->sessid;
+    if (ax_session->subsession->flags & AGENTX_MSG_FLAG_NETWORK_BYTE_ORDER) {
+        pdu->flags |= AGENTX_MSG_FLAG_NETWORK_BYTE_ORDER;
+    }
     switch (asp->pdu->command ) {
 	case SNMP_MSG_GET:
                 DEBUGMSGTL(("agentx/master","-> get\n"));

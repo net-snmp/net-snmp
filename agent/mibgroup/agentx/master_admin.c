@@ -108,6 +108,8 @@ open_agentx_session(struct snmp_session *session, struct snmp_pdu *pdu)
 
     sp->subsession = session;			/* link back to head */
     sp->flags     |= SNMP_FLAGS_SUBSESSION;
+    sp->flags     &= ~AGENTX_FLAGS_NETWORK_BYTE_ORDER;
+    sp->flags     |= (pdu->flags & AGENTX_FLAGS_NETWORK_BYTE_ORDER);
     sp->next       = session->subsession;
     session->subsession = sp;
     DEBUGMSGTL(("agentx:open_agentx_session","opened %p = %d\n", sp, sp->sessid));
