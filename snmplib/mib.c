@@ -84,17 +84,19 @@ SOFTWARE.
 #include <net-snmp/tools.h>
 #include <net-snmp/snmp_client.h>
 
-static struct tree * _sprint_objid(char *buf, oid *objid, size_t objidlen);
+static struct tree * _sprint_objid(char *buf,const oid *objid,size_t objidlen);
 
 static struct tree * _sprint_realloc_objid(u_char **buf, size_t *buf_len,
 					   size_t *out_len, int allow_realloc, 
 					   int *buf_overflow,
-					   oid *objid, size_t objidlen);
+					   const oid *objid, size_t objidlen);
 
 static char *uptimeString (u_long, char *);
-static struct tree *_get_symbol(oid *objid, size_t objidlen, struct tree *subtree,
-    			char *buf, struct index_list *in_dices, char **end_of_known);
-static struct tree *_get_realloc_symbol(oid *objid, size_t objidlen,
+static struct tree *_get_symbol(const oid *objid, size_t objidlen, 
+				struct tree *subtree, char *buf, 
+				struct index_list *in_dices, 
+				char **end_of_known);
+static struct tree *_get_realloc_symbol(const oid *objid, size_t objidlen,
 					struct tree *subtree,
 					u_char **buf, size_t *buf_len,
 					size_t *out_len, int allow_realloc,
@@ -106,7 +108,7 @@ static void print_tree_node (FILE *, struct tree *, int);
 static void handle_mibdirs_conf(const char *token, char *line);
 static void handle_mibs_conf(const char *token, char *line);
 static void handle_mibfile_conf(const char *token, char *line);
-static char *dump_oid_to_string(oid *objid, size_t objidlen,
+static char *dump_oid_to_string(const oid *objid, size_t objidlen,
                    char *buf, char quotechar);
 
 
@@ -2693,8 +2695,8 @@ int read_objid(const char *input,
 
 static struct tree *
 _sprint_objid(char *buf,
-	     oid *objid,
-	     size_t objidlen)	/* number of subidentifiers */
+	      const oid *objid,
+	      size_t objidlen)	/* number of subidentifiers */
 {
     char    tempbuf[SPRINT_MAX_LEN], *cp;
     struct tree    *subtree = tree_head;
@@ -2760,7 +2762,7 @@ _sprint_objid(char *buf,
 static struct tree *
 _sprint_realloc_objid(u_char **buf, size_t *buf_len,
 		      size_t *out_len, int allow_realloc, int *buf_overflow,
-		      oid *objid, size_t objidlen)
+		      const oid *objid, size_t objidlen)
 {
   u_char *tbuf = NULL, *cp = NULL;
   size_t tbuf_len = 256, tout_len = 0;
@@ -2856,7 +2858,7 @@ _sprint_realloc_objid(u_char **buf, size_t *buf_len,
 int
 sprint_realloc_objid(u_char **buf, size_t *buf_len,
 		     size_t *out_len, int allow_realloc, 
-		     oid *objid, size_t objidlen)
+		     const oid *objid, size_t objidlen)
 {
   int buf_overflow = 0;
 
@@ -2905,7 +2907,7 @@ fprint_objid(FILE *f,
 
 void
 sprint_variable(char *buf,
-		oid *objid,
+		const oid *objid,
 		size_t objidlen,
 		struct variable_list *variable)
 {
@@ -2942,7 +2944,7 @@ sprint_variable(char *buf,
 int
 sprint_realloc_variable(u_char **buf, size_t *buf_len,
 			size_t *out_len, int allow_realloc,
-			oid *objid, size_t objidlen,
+			const oid *objid, size_t objidlen,
 			struct variable_list *variable)
 {
     struct tree *subtree = tree_head;
@@ -2996,7 +2998,7 @@ sprint_realloc_variable(u_char **buf, size_t *buf_len,
 }
 
 void
-print_variable(oid *objid,
+print_variable(const oid *objid,
 	       size_t objidlen,
 	       struct variable_list *variable)
 {
@@ -3005,7 +3007,7 @@ print_variable(oid *objid,
 
 void
 fprint_variable(FILE *f,
-		oid *objid,
+		const oid *objid,
 		size_t objidlen,
 		struct variable_list *variable)
 {
@@ -3125,7 +3127,7 @@ fprint_value(FILE *f,
  * If successful, "buf" points past the appended string.
  */
 static char *
-dump_oid_to_string(oid *objid,
+dump_oid_to_string(const oid *objid,
                    size_t objidlen,
                    char *buf,
                    char quotechar)
@@ -3436,7 +3438,7 @@ int parse_one_oid_index(oid **oidStart, size_t *oidLen,
 }
 
 int
-dump_realloc_oid_to_string(oid *objid, size_t objidlen,
+dump_realloc_oid_to_string(const oid *objid, size_t objidlen,
 			   u_char **buf, size_t *buf_len, size_t *out_len,
 			   int allow_realloc, char quotechar)
 {
@@ -3504,12 +3506,12 @@ dump_realloc_oid_to_string(oid *objid, size_t objidlen,
 }
 
 static struct tree *
-_get_symbol(oid *objid,
-	   size_t objidlen,
-	   struct tree *subtree,
-	   char *buf,
-	   struct index_list *in_dices,
-           char **end_of_known)
+_get_symbol(const oid *objid,
+	    size_t objidlen,
+	    struct tree *subtree,
+	    char *buf,
+	    struct index_list *in_dices,
+	    char **end_of_known)
 {
     struct tree    *return_tree = NULL;
     int extended_index = ds_get_boolean(DS_LIBRARY_ID, DS_LIB_EXTENDED_INDEX);
@@ -3712,7 +3714,7 @@ finish_it:
 }
 
 static struct tree *
-_get_realloc_symbol(oid *objid, size_t objidlen,
+_get_realloc_symbol(const oid *objid, size_t objidlen,
 		    struct tree *subtree,
 		    u_char **buf, size_t *buf_len, size_t *out_len,
 		    int allow_realloc, int *buf_overflow,

@@ -277,18 +277,18 @@ int read_objid (const char *, oid *, size_t *);
 void register_mib_handlers (void);
 void init_mib (void);
 void shutdown_mib (void);
-void print_variable (oid *, size_t, struct variable_list *);
-void fprint_variable (FILE *, oid *, size_t, struct variable_list *);
-void sprint_variable (char *, oid *, size_t, struct variable_list *);
+void print_variable (const oid *, size_t, struct variable_list *);
+void fprint_variable (FILE *, const oid *, size_t, struct variable_list *);
+void sprint_variable (char *, const oid *, size_t, struct variable_list *);
 
 int sprint_realloc_variable(u_char **buf, size_t *buf_len,
 			    size_t *out_len, int allow_realloc,
-			    oid *objid, size_t objidlen,
+			    const oid *objid, size_t objidlen,
 			    struct variable_list *variable);
 
 int sprint_realloc_objid   (u_char **buf, size_t *buf_len,
 			    size_t *out_len, int allow_realloc, 
-			    oid *objid, size_t objidlen);
+			    const oid *objid, size_t objidlen);
 
 int
 sprint_realloc_by_type(u_char **buf, size_t *buf_len, size_t *out_len,
