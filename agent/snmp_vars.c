@@ -325,6 +325,7 @@ search_subtree_vars(struct subtree *tp,
 		    /* builds an old (long) style variable structure to retain
 		       compatability with var_* functions written previously.
 		     */
+		  
 		    if (vp->namelen > 0) {
 			memcpy((cvp->name + tp->namelen), vp->name,
 			       vp->namelen * sizeof(oid));
@@ -342,6 +343,14 @@ search_subtree_vars(struct subtree *tp,
 		    DEBUGMSGTL(("snmp_vars", "Trying variable: "));
 		    DEBUGMSGOID(("snmp_vars", cvp->name, cvp->namelen));
 		    DEBUGMSG(("snmp_vars"," ...\n"));
+
+		    if (snmp_oid_compare(name, *namelen,
+					 tp->start, tp->start_len) < 0) {
+			DEBUGMSGTL(("snmp_vars", "aieee!\n"));
+			/*  This probably arises for subagents.  */
+			memcpy(name, tp->start, tp->start_len*sizeof(oid));
+			*namelen = tp->start_len;
+		    }
 
 		gaga:
 		    access = (*(vp->findVar))(cvp, name, namelen, exact,
@@ -464,36 +473,35 @@ getStatPtr(
 
     tp = find_subtree(name, *namelen, NULL);
 
-    if ((tp != NULL) && (tp->flags & FULLY_QUALIFIED_INSTANCE) && (!exact)) {
-	/*  There is no point in trying to do a getNext operation at this
-	    node, because it covers exactly one instance.  Therfore, find the
-	    next node.  This arises in AgentX row registrations (only).  */
-	DEBUGMSGTL(("snmp_vars", "fully-qualified instance && !exact\n"));
-	tp = find_subtree_next(name, *namelen, tp);
-    }
-    
     while (search_return == NULL && tp != NULL) {
 	DEBUGMSGTL(("snmp_vars", "Trying tree: "));
 	DEBUGMSGOID(("snmp_vars", tp->name, tp->namelen));
-	DEBUGMSG(("snmp_vars"," ...\n"));
-	search_return = search_subtree_vars( tp, name, namelen, &result_type,
-                                        len, &result_acl, exact, write_method,
-                                        pdu, noSuchObject);
-	if ( search_return != NULL || exact )
+	DEBUGMSG(("snmp_vars", "(start "));
+	DEBUGMSGOID(("snmp_vars", tp->start, tp->start_len));
+	DEBUGMSG(("snmp_vars",") ...\n"));
+
+	search_return = search_subtree_vars(tp, name, namelen, &result_type,
+		    len, &result_acl, exact, write_method, pdu, noSuchObject);
+
+	if (search_return != NULL || exact) {
 	    break;
+	}
 	tp = tp->next;
     }
-    if ( tp == NULL ) {
-	if (!search_return && !exact){
+
+    if (tp == NULL) {
+	if (!search_return && !exact) {
 	    memcpy(name, save, savelen * sizeof(oid));
 	    *namelen = savelen;
 	}
-	if (found)
+	if (found) {
 	    *noSuchObject = FALSE;
-	else
+	} else {
 	    *noSuchObject = TRUE;
+	}
         return NULL;
     }
+
     *type = result_type;
     *acl =  result_acl;
     return search_return;
