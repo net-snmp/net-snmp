@@ -736,4 +736,6 @@
 /* define if agentx transport is to use domain sockets only */
 #undef AGENTX_DOM_SOCK_ONLY
 
+#undef HEIMDAL
+
 #endif /* NET_SNMP_CONFIG_H */
