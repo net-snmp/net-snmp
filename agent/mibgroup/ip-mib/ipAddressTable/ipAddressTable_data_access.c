@@ -39,7 +39,7 @@
  **********************************************************************/
 /*
  * ipAddressTable is subid 34 of ip.
- * It's status is Current.
+ * Its status is Current.
  * OID: .1.3.6.1.2.1.4.34, length: 8
  */
 
