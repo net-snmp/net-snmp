@@ -97,13 +97,14 @@ snmp_transport	       *snmp_transport_copy	(snmp_transport *t)
     n->data_length = 0;
   }
 
-  n->f_accept  = t->f_accept;
-  n->f_recv    = t->f_recv;
-  n->f_send    = t->f_send;
-  n->f_close   = t->f_close;
-  n->f_fmtaddr = t->f_fmtaddr;
-  n->sock      = t->sock;
-  n->flags     = t->flags;
+  n->msgMaxSize  = t->msgMaxSize;
+  n->f_accept    = t->f_accept;
+  n->f_recv      = t->f_recv;
+  n->f_send      = t->f_send;
+  n->f_close     = t->f_close;
+  n->f_fmtaddr   = t->f_fmtaddr;
+  n->sock        = t->sock;
+  n->flags       = t->flags;
 
   return n;
 }

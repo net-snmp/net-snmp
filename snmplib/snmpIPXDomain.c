@@ -206,11 +206,15 @@ snmp_transport		*snmp_ipx_transport	(struct sockaddr_ipx *addr,
     t->data_length = sizeof(struct sockaddr_ipx);
   }
 
-  t->f_recv    = snmp_ipx_recv;
-  t->f_send    = snmp_ipx_send;
-  t->f_close   = snmp_ipx_close;
-  t->f_accept  = NULL;
-  t->f_fmtaddr = snmp_ipx_fmtaddr;
+  /*  Maximum size of an IPX PDU is 576 bytes including a 30-byte header.
+      Ridiculous!  */
+
+  t->msgMaxSize  = 576 - 30;
+  t->f_recv      = snmp_ipx_recv;
+  t->f_send      = snmp_ipx_send;
+  t->f_close     = snmp_ipx_close;
+  t->f_accept    = NULL;
+  t->f_fmtaddr   = snmp_ipx_fmtaddr;
 
   return t;
 }
