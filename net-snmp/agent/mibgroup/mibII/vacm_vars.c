@@ -443,7 +443,7 @@ void vacm_parse_simple(char *token, char *confline) {
   char theoid[SPRINT_MAX_LEN];
   char viewname[SPRINT_MAX_LEN];
   char addressname[SPRINT_MAX_LEN];
-  char *rw = "none";
+  const char *rw = "none";
   char *cp;
   static int num = 0;
 
