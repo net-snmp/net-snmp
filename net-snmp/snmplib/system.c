@@ -1049,3 +1049,42 @@ mkdirhier(const char *pathname, mode_t mode, int skiplast)
     free(ourcopy);
     return SNMPERR_SUCCESS;
 }
+
+/*
+ * If not running a Linux kernel, return -1.
+ * If ospname matches, and the release matches up through the prefix,
+ *  return 0.
+ * If the release is ordered higher, return 1.
+ * Be aware that "ordered higher" is not a guarantee of correctness.
+ *
+ * This function is called to differentiate actions
+ * that are not appropriate for current (2.6) kernels.
+ */
+int
+netsnmp_os_prematch(const char *ospmname,
+                    const char *ospmrelprefix)
+{
+#ifndef linux
+  return -1;
+
+#else
+#include <sys/utsname.h>
+  struct utsname utsbuf;
+  if ( 0 != uname(&utsbuf))
+    return -1;
+
+#if DEBUG
+  /* show the four elements that the kernel can be sure of */
+
+  printf("sysname '%s',\nrelease '%s',\nversion '%s',\nmachine '%s'\n",
+      utsbuf.sysname, utsbuf.release, utsbuf.version, utsbuf.machine);
+#endif
+
+  if (0 != strcasecmp(utsbuf.sysname, ospmname)) return -1;
+
+  /* Required to match only the leading characters */
+  return strncasecmp(utsbuf.release, ospmrelprefix, strlen(ospmrelprefix));
+  
+#endif /* linux */
+}
+
