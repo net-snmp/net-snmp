@@ -7346,7 +7346,7 @@ if { (eval echo configure:7343: \"$ac_link\") 1>&5; (eval $ac_link) 2>&5; } && t
 #define USE_LIBWRAP 1
 EOF
 
-	    test "$with_libwrap" != no && WRAPLIBS="-L$with_libwrap/lib"
+	    test "$with_libwrap" != no -a "$with_libwrap" != yes && WRAPLIBS="-L$with_libwrap/lib"
 	    WRAPLIBS="$WRAPLIBS -lwrap"
 else
   echo "configure: failed program was:" >&5
@@ -7466,7 +7466,7 @@ EOF
 if { (eval echo configure:7467: \"$ac_link\") 1>&5; (eval $ac_link) 2>&5; } && test -s conftest${ac_exeext}; then
   rm -rf conftest*
   echo "$ac_t""yes" 1>&6
-		test "$with_libwrap" != no && WRAPLIBS="-L$with_libwrap/lib"
+		test "$with_libwrap" != no -a "$with_libwrap" != yes && WRAPLIBS="-L$with_libwrap/lib"
 		WRAPLIBS="$WRAPLIBS -lwrap"
 else
   echo "configure: failed program was:" >&5
