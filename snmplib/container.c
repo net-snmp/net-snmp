@@ -114,7 +114,7 @@ netsnmp_container_get(const char *type)
 }
 
 int
-netsnmp_container_get_noalloc(const char *type, void *mem)
+netsnmp_container_get_noalloc(const char *type, netsnmp_container *mem)
 {
     netsnmp_factory *f = netsnmp_container_get_factory(type);
     if (f)
@@ -136,7 +136,7 @@ netsnmp_container_find(const char *type)
 }
 
 int
-netsnmp_container_find_noalloc(const char *type, void *mem)
+netsnmp_container_find_noalloc(const char *type, netsnmp_container *mem)
 {
     netsnmp_factory *f = netsnmp_container_find_factory(type);
     if (f)
