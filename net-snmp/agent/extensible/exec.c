@@ -143,10 +143,10 @@ unsigned char *var_extensible_relocatable(vp, name, length, exact, var_len, writ
   for(i=1; i<= numrelocs; i++) {
     exten = get_exten_instance(relocs,i);
     if (exten->miblen == vp->namelen-1){
-      memcpy(myvp.name,exten->miboid,exten->miblen*sizeof(int));
+      memcpy(myvp.name,exten->miboid,exten->miblen*sizeof(oid));
       myvp.namelen = exten->miblen;
       *length = vp->namelen;
-      memcpy(tname,vp->name,vp->namelen*sizeof(int));
+      memcpy(tname,vp->name,vp->namelen*sizeof(oid));
       if (checkmib(&myvp,tname,length,-1,var_len,write_method,newname,
                    -1))
         break;
@@ -240,8 +240,8 @@ struct subtree *find_extensible(tp,tname,tnamelen,exact)
   for(i=1; i<= numrelocs; i++) {
     exten = get_exten_instance(relocs,i);
     if (exten->miblen != 0){
-      memcpy(myvp.name,exten->miboid,exten->miblen*sizeof(int));
-      memcpy(name,tname,tnamelen*sizeof(int));
+      memcpy(myvp.name,exten->miboid,exten->miblen*sizeof(oid));
+      memcpy(name,tname,tnamelen*sizeof(oid));
       myvp.name[exten->miblen] = name[exten->miblen];
       myvp.namelen = exten->miblen+1;
       tmp = exten->miblen+1;
@@ -252,7 +252,7 @@ struct subtree *find_extensible(tp,tname,tnamelen,exact)
   }
   if (i > numrelocs || exten == NULL)
     return(tp);
-  memcpy(mysubtree[0].name,exten->miboid,exten->miblen*sizeof(int));
+  memcpy(mysubtree[0].name,exten->miboid,exten->miblen*sizeof(oid));
   mysubtree[0].namelen = exten->miblen;
   mysubtree[0].variables = (struct variable *)extensible_relocatable_variables;
   mysubtree[0].variables_len =

@@ -11,7 +11,7 @@ struct extensible
    int result;
    char output[STRMAX];
    struct extensible *next;
-   int miboid[MIBMAX];
+   unsigned long miboid[MIBMAX];
    int miblen;
    int pid;
 };
