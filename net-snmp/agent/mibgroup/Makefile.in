@@ -70,7 +70,7 @@ mibII/sysORTable.o: ../../snmplib/snmp.h ../../snmplib/mib.h
 mibII/sysORTable.o: ../../snmplib/snmp_debug.h ../../snmplib/read_config.h
 mibII/sysORTable.o: ../../snmplib/tools.h ../../snmplib/system.h
 mibII/sysORTable.o: mibII/sysORTable.h struct.h util_funcs.h struct.h
-mibII/sysORTable.o: ../snmpd.h ./../../snmplib/agentx.h
+mibII/sysORTable.o: ../snmpd.h 
 mibII/at.o: ../../mib_module_config.h ../../config.h ../../s/hpux.h
 mibII/at.o: ../../s/sysv.h ../../s/generic.h ../../m/generic.h
 mibII/at.o:  
