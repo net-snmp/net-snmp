@@ -1476,13 +1476,14 @@ unsigned int getIfSpeed(int fd, struct ifreq ifr){
 			retspeed = media_speeds[max_capability - 5];
 		else
 			DEBUGMSGTL(("mibII/interfaces", "No common media type was autonegotiated!\n"));
+	}else if(lkpar & 0x00A0){
+		retspeed = (lkpar & 0x0080) ? 100000000 : 10000000;
 	}
 	return retspeed;
 #else /*!linux*/			   
 	return retspeed;
 #endif 
 }
-
 
 void
 Interface_Scan_Init(void)
