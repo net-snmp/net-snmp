@@ -3,17 +3,19 @@
 #  Quick hack at UCD bug-report script
 #
 
-#bug_reports_to=ucd-snmp-coders@ece.ucdavis.edu
-bug_reports_to=Wesley.Hardaker@sphys.unil.ch
+bug_reports_to=ucd-snmp-coders@ece.ucdavis.edu
 
 # changed automagically
-VersionInfo="3.1.3.pre1";
+VersionInfo="3.1.3.test1";
 
 #
 #   Check how to do echo without a new line
 #	-n or \c
 #
 msg_file=/tmp/ucd-bug.$$
+# remove files on signal
+trap "rm -f rm ${msg_file} ${msg_file}.2; exit 1" 1 2 15
+
 echo -n "test\c" > $msg_file
 
 if grep c $msg_file>/dev/null
