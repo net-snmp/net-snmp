@@ -10,7 +10,7 @@ extern FindVarMethod var_wombat;
 
 /* config file parsing routines */
 extern void wombat_free_config (void);
-extern void wombat_parse_config (char *, char *);
+extern void wombat_parse_config (const char *, char *);
 
 config_parse_dot_conf("wombat", wombat_parse_config, wombat_free_config, "help string")
 /*
