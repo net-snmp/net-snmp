@@ -6,6 +6,8 @@
 #ifndef _MIBGROUP_IP_H
 #define _MIBGROUP_IP_H
 
+config_require(interfaces)
+
 extern void	init_ip __P((void));
 extern u_char	*var_ip __P((struct variable*, oid *, int *, int, int *, int (**write) __P((int, u_char *, u_char, int, u_char *, oid *, int)) ));
 extern int header_ip __P((struct variable*, oid *, int *, int, int *, int (**write) __P((int, u_char *, u_char, int, u_char *, oid *, int)) ));

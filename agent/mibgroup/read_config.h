@@ -5,7 +5,7 @@
 #ifndef _MIBGROUP_READ_CONFIG_H
 #define _MIBGROUP_READ_CONFIG_H
 
-config_require(util_funcs)
+config_require(util_funcs extensible)
 
 void init_read_config __P((void));
 int read_config __P((char *, struct myproc **, int *, struct extensible **, int *, struct extensible**, int *, struct extensible **, int *, int *, struct diskpart *, int *, double *));

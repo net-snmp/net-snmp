@@ -8,6 +8,7 @@
 #include "../common_header.h"
 #include "system.h"
 #include "util_funcs.h"
+#include "../../snmplib/system.h"
 
 
 	/*********************

@@ -78,6 +78,8 @@
 
 #include "mibincl.h"
 #include "disk.h"
+#include "util_funcs.h"
+#include "errormib.h"
 
 int numdisks;
 struct diskpart disks[MAXDISKS];

@@ -4,9 +4,10 @@
 #ifndef _MIBGROUP_LOADAVE_H
 #define _MIBGROUP_LOADAVE_H
 
-config_require(read_config)
+config_require(read_config util_funcs)
 
-extern u_char	*var_extensible_loadave();
+void	init_loadave __P((void));
+unsigned char *var_extensible_loadave __P((struct variable *, oid *, int *, int, int *, int (**write) __P((int, u_char *, u_char, int, u_char *, oid *, int)) ));
 
 #include "mibdefs.h"
 

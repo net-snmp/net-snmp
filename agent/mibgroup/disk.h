@@ -7,6 +7,8 @@
 
 config_require(util_funcs read_config errormib)
 
+unsigned char *var_extensible_disk __P((struct variable *, oid *, int *, int, int *, int (**write) __P((int, u_char *, u_char, int, u_char *, oid *, int)) ));
+
 #include "mibdefs.h"
 
 #define DISKDEVICE 3
