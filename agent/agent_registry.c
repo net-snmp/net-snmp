@@ -31,6 +31,7 @@
 #include "snmpd.h"
 #include "mibgroup/struct.h"
 
+#define DEFAULT_MIB_PRIORITY		16
 #define UCD_REG_FLAG_SPLIT_REGISTRATION 0x1
 
 struct subtree *subtrees;
@@ -221,12 +222,13 @@ load_subtree (struct subtree *new_subtree)
 }
 
 int
-register_mib(const char *moduleName,
+register_mib_priority(const char *moduleName,
 	     struct variable *var,
 	     size_t varsize,
 	     size_t numvars,
 	     oid *mibloc,
-	     size_t mibloclen)
+	     size_t mibloclen,
+	     u_char priority)
 {
   struct subtree *subtree;
   char c_oid[SPRINT_MAX_LEN];
@@ -249,6 +251,7 @@ register_mib(const char *moduleName,
   memcpy(subtree->variables, var, numvars*varsize);
   subtree->variables_len = numvars;
   subtree->variables_width = varsize;
+  subtree->priority = priority;
   res = load_subtree(subtree);
 
   reg_parms.name = mibloc;
@@ -257,6 +260,18 @@ register_mib(const char *moduleName,
                       &reg_parms);
 
   return res;
+}
+
+int
+register_mib(const char *moduleName,
+	     struct variable *var,
+	     size_t varsize,
+	     size_t numvars,
+	     oid *mibloc,
+	     size_t mibloclen)
+{
+  return register_mib_priority( moduleName, var, varsize, numvars,
+				mibloc, mibloclen, DEFAULT_MIB_PRIORITY );
 }
 
 
