@@ -334,7 +334,7 @@ search_subtree_vars(struct subtree *tp,
 			*acl = cvp->acl;
                     /* check for permission to view this part of the OID tree */
 		    if ((access != NULL || (*write_method != NULL && exact)) &&
-                        !in_a_view(name, namelen, pdu, cvp->type)) {
+                        in_a_view(name, namelen, pdu, cvp->type)) {
                         access = NULL;
 			*write_method = NULL;
 		    } else if (exact){
