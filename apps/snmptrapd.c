@@ -935,7 +935,7 @@ main(int argc, char *argv[])
                             "oid|\"default\" program [args ...] ");
     register_config_handler("snmptrapd", "createUser",
                             usm_parse_create_usmUser, NULL,
-                            "username (MD5|SHA) passphrase [DES passphrase]");
+                            "username (MD5|SHA) passphrase [DES [passphrase]]");
     register_config_handler("snmptrapd", "usmUser",
                             usm_parse_config_usmUser, NULL, NULL);
     register_config_handler("snmptrapd", "format1",
