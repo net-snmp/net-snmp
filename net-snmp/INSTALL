@@ -33,6 +33,10 @@ QUICK INSTRUCTIONS
   5) umask 022   # <-- zero-two-two
   6) make install
 
+  7) configure the agent
+     (either using 'snmpconf' or by crafting an snmpd.conf file manually.
+      The file 'EXAMPLE.conf' may be a suitable starting point)
+
 Note: By default, everything will be installed in /usr/local.
       (see below for more instructions)
 
