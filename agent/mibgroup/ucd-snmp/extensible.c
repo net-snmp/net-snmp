@@ -369,7 +369,7 @@ fixExecError(int action,
       return SNMP_ERR_WRONGTYPE;
     }
     asn_parse_int(var_val,&tmplen,&var_val_type,&tmp,sizeof(int));
-    if (tmp == 1 && action == COMMIT && exten->fixcmd[0] != NULL) {
+    if ((tmp == 1) && (action == COMMIT) && (exten->fixcmd[0] != 0)) {
       sprintf(ex.command, exten->fixcmd);
       if ((fd = get_exec_output(&ex))) {
         file = fdopen(fd,"r");
