@@ -291,6 +291,91 @@ int sprint_realloc_double	(u_char **buf, size_t *buf_len,
 				 const char *, const char *);
 #endif
 
+
+int snprint_by_type	(char *buf, size_t buf_len,
+			 netsnmp_variable_list *var,
+			 struct enum_list *enums,
+			 const char *hint, const char *units);
+
+int snprint_hexstring	(char *buf, size_t buf_len,
+			 const u_char *, size_t);
+
+int snprint_asciistring	(char *buf, size_t buf_len,
+			 const u_char *cp, size_t len);
+
+int snprint_octet_string (char *buf, size_t buf_len,
+			   netsnmp_variable_list *, struct enum_list *,
+			   const char *, const char *);
+
+int snprint_opaque	(char *buf, size_t buf_len,
+			 netsnmp_variable_list *, struct enum_list *,
+			 const char *, const char *);
+
+int snprint_object_identifier(char *buf, size_t buf_len,
+			       netsnmp_variable_list *, struct enum_list *,
+			       const char *, const char *);
+
+int snprint_timeticks	(char *buf, size_t buf_len,
+			 netsnmp_variable_list *, struct enum_list *,
+			 const char *, const char *);
+
+int snprint_hinted_integer(char *buf, size_t buf_len,
+			    long, const char *,const char *);
+
+int snprint_integer	(char *buf, size_t buf_len,
+			 netsnmp_variable_list *, struct enum_list *,
+			 const char *, const char *);
+
+int snprint_uinteger	(char *buf, size_t buf_len,
+			 netsnmp_variable_list *, struct enum_list *,
+			 const char *, const char *);
+
+int snprint_gauge	(char *buf, size_t buf_len,
+			 netsnmp_variable_list *, struct enum_list *,
+			 const char *, const char *);
+
+int snprint_counter	(char *buf, size_t buf_len,
+			 netsnmp_variable_list *, struct enum_list *,
+			 const char *, const char *);
+
+int snprint_networkaddress(char *buf, size_t buf_len,
+			    netsnmp_variable_list *, struct enum_list *,
+			    const char *, const char *);
+
+int snprint_ipaddress	(char *buf, size_t buf_len,
+			 netsnmp_variable_list *, struct enum_list *,
+			 const char *, const char *);
+
+int snprint_null 	(char *buf, size_t buf_len,
+			 netsnmp_variable_list *, struct enum_list *,
+			 const char *, const char *);
+
+int snprint_bitstring	(char *buf, size_t buf_len,
+			 netsnmp_variable_list *, struct enum_list *,
+			 const char *, const char *);
+
+int snprint_nsapaddress	(char *buf, size_t buf_len,
+			 netsnmp_variable_list *, struct enum_list *,
+			 const char *, const char *);
+
+int snprint_counter64	(char *buf, size_t buf_len,
+			 netsnmp_variable_list *, struct enum_list *,
+			 const char *, const char *);
+
+int snprint_badtype	(char *buf, size_t buf_len,
+			 netsnmp_variable_list *, struct enum_list *,
+			 const char *, const char *);
+
+#ifdef OPAQUE_SPECIAL_TYPES
+int snprint_float	(char *buf, size_t buf_len,
+			 netsnmp_variable_list *, struct enum_list *,
+			 const char *, const char *);
+
+int snprint_double	(char *buf, size_t buf_len,
+			 netsnmp_variable_list *, struct enum_list *,
+			 const char *, const char *);
+#endif
+
 void print_oid_report (FILE *);
 void print_oid_report_enable_labeledoid (void);
 void print_oid_report_enable_oid (void);

@@ -99,8 +99,6 @@ static void print_tree_node (FILE *, struct tree *, int);
 static void handle_mibdirs_conf(const char *token, char *line);
 static void handle_mibs_conf(const char *token, char *line);
 static void handle_mibfile_conf(const char *token, char *line);
-static char *dump_oid_to_string(const oid *objid, size_t objidlen,
-                   char *buf, char quotechar);
 
 
 /* helper functions for get_module_node */
@@ -2234,50 +2232,6 @@ fprint_value(FILE *f,
 }
 
 
-/*
- * Append a quoted printable string to buffer "buf"
- * that represents a range of sub-identifiers "objid".
- *
- * Display '.' for all non-printable sub-identifiers.
- * If successful, "buf" points past the appended string.
- */
-static char *
-dump_oid_to_string(const oid *objid,
-                   size_t objidlen,
-                   char *buf,
-                   char quotechar)
-{
-  if (buf)
-  { int ii, alen;
-    char *scp;
-    char *cp = buf + (strlen(buf));
-    scp = cp;
-    for (ii= 0, alen = 0; ii < (int)objidlen; ii++)
-    {
-        oid tst = objid[ii];
-        if ((tst > 254) || (!isprint(tst)))
-            tst = (oid)'.';
-
-        if (alen == 0) {
-	    if (ds_get_boolean(DS_LIBRARY_ID,DS_LIB_ESCAPE_QUOTES))
-		*cp++ = '\\';
-	    *cp++ = quotechar;
-	}
-        *cp++ = (char)tst;
-        alen++;
-    }
-    if (alen) {
-	if (ds_get_boolean(DS_LIBRARY_ID,DS_LIB_ESCAPE_QUOTES))
-	    *cp++ = '\\';
-	*cp++ = quotechar;
-    }
-    *cp = '\0';
-    buf = cp;
-  }
-
-  return buf;
-}
-
 /* takes the value in VAR and turns it into an OID segment in VAR->NAME */
 /* returns SNMPERR_SUCCESS or SNMPERR_GENERR */
 int
@@ -3932,4 +3886,255 @@ netsnmp_str2oid( const char * S, oid * O, int L )
   return 0;
 }
 
+int snprint_by_type	(char *buf, size_t buf_len,
+			 netsnmp_variable_list *var,
+			 struct enum_list *enums,
+			 const char *hint, const char *units)
+{
+    size_t out_len = 0;
+    if (sprint_realloc_by_type((u_char **)&buf, &buf_len, &out_len, 1,
+	    var, enums, hint, units))
+	return (int)out_len;
+    else
+	return -1;
+}
+
+int snprint_hexstring	(char *buf, size_t buf_len,
+			 const u_char *cp, size_t len)
+{
+    size_t out_len = 0;
+    if (sprint_realloc_hexstring((u_char **)&buf, &buf_len, &out_len, 1,
+	    cp, len))
+	return (int)out_len;
+    else
+	return -1;
+}
+
+int snprint_asciistring	(char *buf, size_t buf_len,
+			 const u_char *cp, size_t len)
+{
+    size_t out_len = 0;
+    if (sprint_realloc_asciistring((u_char **)&buf, &buf_len, &out_len, 1,
+	    cp, len))
+	return (int)out_len;
+    else
+	return -1;
+}
+
+int snprint_octet_string (char *buf, size_t buf_len,
+			   netsnmp_variable_list *var, struct enum_list *enums,
+			   const char *hint, const char *units)
+{
+    size_t out_len = 0;
+    if (sprint_realloc_octet_string((u_char **)&buf, &buf_len, &out_len, 1,
+	    var, enums, hint, units))
+	return (int)out_len;
+    else
+	return -1;
+}
+
+int snprint_opaque	(char *buf, size_t buf_len,
+			 netsnmp_variable_list *var, struct enum_list *enums,
+			 const char *hint, const char *units)
+{
+    size_t out_len = 0;
+    if (sprint_realloc_opaque((u_char **)&buf, &buf_len, &out_len, 1,
+	    var, enums, hint, units))
+	return (int)out_len;
+    else
+	return -1;
+}
+
+int snprint_object_identifier(char *buf, size_t buf_len,
+			     netsnmp_variable_list *var, struct enum_list *enums,
+			     const char *hint, const char *units)
+{
+    size_t out_len = 0;
+    if (sprint_realloc_object_identifier((u_char **)&buf, &buf_len, &out_len, 1,
+	    var, enums, hint, units))
+	return (int)out_len;
+    else
+	return -1;
+}
+
+int snprint_timeticks	(char *buf, size_t buf_len,
+			 netsnmp_variable_list *var, struct enum_list *enums,
+			 const char *hint, const char *units)
+{
+    size_t out_len = 0;
+    if (sprint_realloc_timeticks((u_char **)&buf, &buf_len, &out_len, 1,
+	    var, enums, hint, units))
+	return (int)out_len;
+    else
+	return -1;
+}
+
+int snprint_hinted_integer(char *buf, size_t buf_len,
+			   long val, const char *hint, const char *units)
+{
+    size_t out_len = 0;
+    if (sprint_realloc_hinted_integer((u_char **)&buf, &buf_len, &out_len, 1,
+	    val, 'd', hint, units))
+	return (int)out_len;
+    else
+	return -1;
+}
+
+int snprint_integer	(char *buf, size_t buf_len,
+			 netsnmp_variable_list *var, struct enum_list *enums,
+			 const char *hint, const char *units)
+{
+    size_t out_len = 0;
+    if (sprint_realloc_integer((u_char **)&buf, &buf_len, &out_len, 1,
+	    var, enums, hint, units))
+	return (int)out_len;
+    else
+	return -1;
+}
+
+int snprint_uinteger	(char *buf, size_t buf_len,
+			 netsnmp_variable_list *var, struct enum_list *enums,
+			 const char *hint, const char *units)
+{
+    size_t out_len = 0;
+    if (sprint_realloc_uinteger((u_char **)&buf, &buf_len, &out_len, 1,
+	    var, enums, hint, units))
+	return (int)out_len;
+    else
+	return -1;
+}
+
+int snprint_gauge	(char *buf, size_t buf_len,
+			 netsnmp_variable_list *var, struct enum_list *enums,
+			 const char *hint, const char *units)
+{
+    size_t out_len = 0;
+    if (sprint_realloc_gauge((u_char **)&buf, &buf_len, &out_len, 1,
+	    var, enums, hint, units))
+	return (int)out_len;
+    else
+	return -1;
+}
+
+int snprint_counter	(char *buf, size_t buf_len,
+			 netsnmp_variable_list *var, struct enum_list *enums,
+			 const char *hint, const char *units)
+{
+    size_t out_len = 0;
+    if (sprint_realloc_counter((u_char **)&buf, &buf_len, &out_len, 1,
+	    var, enums, hint, units))
+	return (int)out_len;
+    else
+	return -1;
+}
+
+int snprint_networkaddress(char *buf, size_t buf_len,
+			   netsnmp_variable_list *var, struct enum_list *enums,
+			   const char *hint, const char *units)
+{
+    size_t out_len = 0;
+    if (sprint_realloc_networkaddress((u_char **)&buf, &buf_len, &out_len, 1,
+	    var, enums, hint, units))
+	return (int)out_len;
+    else
+	return -1;
+}
+
+int snprint_ipaddress	(char *buf, size_t buf_len,
+			 netsnmp_variable_list *var, struct enum_list *enums,
+			 const char *hint, const char *units)
+{
+    size_t out_len = 0;
+    if (sprint_realloc_ipaddress((u_char **)&buf, &buf_len, &out_len, 1,
+	    var, enums, hint, units))
+	return (int)out_len;
+    else
+	return -1;
+}
+
+int snprint_null 	(char *buf, size_t buf_len,
+			 netsnmp_variable_list *var, struct enum_list *enums,
+			 const char *hint, const char *units)
+{
+    size_t out_len = 0;
+    if (sprint_realloc_null((u_char **)&buf, &buf_len, &out_len, 1,
+	    var, enums, hint, units))
+	return (int)out_len;
+    else
+	return -1;
+}
+
+int snprint_bitstring	(char *buf, size_t buf_len,
+			 netsnmp_variable_list *var, struct enum_list *enums,
+			 const char *hint, const char *units)
+{
+    size_t out_len = 0;
+    if (sprint_realloc_bitstring((u_char **)&buf, &buf_len, &out_len, 1,
+	    var, enums, hint, units))
+	return (int)out_len;
+    else
+	return -1;
+}
+
+int snprint_nsapaddress	(char *buf, size_t buf_len,
+			 netsnmp_variable_list *var, struct enum_list *enums,
+			 const char *hint, const char *units)
+{
+    size_t out_len = 0;
+    if (sprint_realloc_nsapaddress((u_char **)&buf, &buf_len, &out_len, 1,
+	    var, enums, hint, units))
+	return (int)out_len;
+    else
+	return -1;
+}
+
+int snprint_counter64	(char *buf, size_t buf_len,
+			 netsnmp_variable_list *var, struct enum_list *enums,
+			 const char *hint, const char *units)
+{
+    size_t out_len = 0;
+    if (sprint_realloc_counter64((u_char **)&buf, &buf_len, &out_len, 1,
+	    var, enums, hint, units))
+	return (int)out_len;
+    else
+	return -1;
+}
+
+int snprint_badtype	(char *buf, size_t buf_len,
+			 netsnmp_variable_list *var, struct enum_list *enums,
+			 const char *hint, const char *units)
+{
+    size_t out_len = 0;
+    if (sprint_realloc_badtype((u_char **)&buf, &buf_len, &out_len, 1,
+	    var, enums, hint, units))
+	return (int)out_len;
+    else
+	return -1;
+}
+
+#ifdef OPAQUE_SPECIAL_TYPES
+int snprint_float	(char *buf, size_t buf_len,
+			 netsnmp_variable_list *var, struct enum_list *enums,
+			 const char *hint, const char *units)
+{
+    size_t out_len = 0;
+    if (sprint_realloc_float((u_char **)&buf, &buf_len, &out_len, 1,
+	    var, enums, hint, units))
+	return (int)out_len;
+    else
+	return -1;
+}
+
+int snprint_double	(char *buf, size_t buf_len,
+			 netsnmp_variable_list *var, struct enum_list *enums,
+			 const char *hint, const char *units)
+{
+    size_t out_len = 0;
+    if (sprint_realloc_double((u_char **)&buf, &buf_len, &out_len, 1,
+	    var, enums, hint, units))
+	return (int)out_len;
+    else
+	return -1;
+}
+#endif
 
