@@ -180,9 +180,9 @@ int
 Get_Next_HR_Network()
 {
 #if defined(linux) || defined(sunV3)
-    if (Interface_Scan_Next( &HRN_index, &HRN_name, &HRN_ifnet))
+    if (Interface_Scan_Next( &HRN_index, HRN_name, &HRN_ifnet))
 #else
-    if (Interface_Scan_Next( &HRN_index, &HRN_name, &HRN_ifnet, &HRN_ifaddr))
+    if (Interface_Scan_Next( &HRN_index, HRN_name, &HRN_ifnet, &HRN_ifaddr))
 #endif
         return ( HRDEV_NETWORK << HRDEV_TYPE_SHIFT ) + HRN_index;
     else
