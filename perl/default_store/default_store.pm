@@ -180,15 +180,14 @@ NetSNMP::default_store - Perl extension for blah blah blah
 =head1 SYNOPSIS
 
   use NetSNMP::default_store;
-  blah blah blah
+  $port = ds_get_int(DS_LIBRARY_ID, DS_LIB_DEFAULT_PORT);
+  ds_set_int(DS_LIBRARY_ID, DS_LIB_DEFAULT_PORT, 161);
 
 =head1 DESCRIPTION
 
-Stub documentation for NetSNMP::default_store, created by h2xs. It looks like the
-author of the extension was negligent enough to leave the stub
-unedited.
-
-Blah blah blah.
+This module is a wrapper around the net-snmp default store routines.
+See the net-snmp default_store manual page for details on what the
+various functions do and the values that can be set/retrieved.
 
 =head2 EXPORT
 
@@ -260,13 +259,12 @@ None by default.
   void ds_shutdown(void)
   int ds_toggle_boolean(int storeid, int which)
 
-
 =head1 AUTHOR
 
-A. U. Thor, a.u.thor@a.galaxy.far.far.away
+Wes Hardaker, hardaker@users.sourceforge.net
 
 =head1 SEE ALSO
 
-perl(1).
+perl(1), default_store(3).
 
 =cut
