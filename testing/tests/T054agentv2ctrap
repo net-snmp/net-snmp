@@ -12,8 +12,7 @@ SKIPIFNOT USING_EXAMPLES_EXAMPLE_MODULE
 
 # standard V1 configuration: testcomunnity
 . ./Sv3config
-REAL_TRAPD_PORT=`echo $SNMP_SNMPTRAPD_PORT | awk '{print $2}'`
-CONFIGAGENT trap2sink localhost public $REAL_TRAPD_PORT
+CONFIGAGENT trap2sink localhost public $SNMP_SNMPTRAPD_PORT
 
 STARTTRAPD
 

@@ -17,8 +17,7 @@ STARTTRAPD
 # standard V3 configuration for initial user
 . ./Sv3config
 # configure the trap receiver.
-REAL_TRAPD_PORT=`echo $SNMP_SNMPTRAPD_PORT | awk '{print $2}'`
-CONFIGAGENT trapsink localhost public $REAL_TRAPD_PORT
+CONFIGAGENT trapsink localhost public $SNMP_SNMPTRAPD_PORT
 
 # Start the agent without initializing the example mib.
 ORIG_AGENT_FLAGS="$AGENT_FLAGS -x $SNMP_TMPDIR/agentx_socket"
