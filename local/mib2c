@@ -259,9 +259,10 @@ sub read_config() {
 		delete($variables{$type}{$1});
 	    } elsif (/copy:\s*(.*)/) {
 		my $item;
-		chomp($1);
-		foreach $item (keys(%{$variables{$1}})) {
-		    $variables{$type}{$item} = $variables{$1}{$item};
+		my $arg = $1;
+		chomp($arg);
+		foreach $item (keys(%{$variables{$arg}})) {
+		    $variables{$type}{$item} = $variables{$arg}{$item};
 		}
 	    } else {
 		if (/\s*([^:]*):(\s*.*)/) {
