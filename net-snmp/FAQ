@@ -151,7 +151,10 @@ Where can I get the perl SNMP package?
 -------------------------------------
 
   Joe Marzot's excellent perl SNMP module, which requires the ucd-snmp
-  library, can be found at any Comprehensive Perl Archive Network
+  library, is now included in the ucd-snmp source release.  It's
+  located in the perl/SNMP subdirectory of the ucd-snmp source tree.
+
+  It can also be found at any Comprehensive Perl Archive Network
   (CPAN) site mirror in modules/by-module/SNMP.  To find the CPAN site
   nearest you, please see http://www.cpan.org/SITES.html.
 
