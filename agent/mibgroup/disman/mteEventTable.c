@@ -6,9 +6,10 @@
 #include <net-snmp/net-snmp-config.h>
 #include <net-snmp/net-snmp-includes.h>
 #include <net-snmp/agent/net-snmp-agent-includes.h>
+#include "mteTriggerTable.h"
 #include "mteEventTable.h"
 #include "mteEventNotificationTable.h"
-#include "mteTriggerTable.h"
+#include "mteObjectsTable.h"
 
 netsnmp_table_data_set *table_set = NULL;
 

@@ -19,7 +19,6 @@ initialize_table_mteEventNotificationTable(void)
         { 1, 3, 6, 1, 2, 1, 88, 1, 4, 3 };
     size_t          mteEventNotificationTable_oid_len =
         OID_LENGTH(mteEventNotificationTable_oid);
-    netsnmp_table_data_set *table_set;
 
     /*
      * create the table structure itself 

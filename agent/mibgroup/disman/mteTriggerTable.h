@@ -136,7 +136,7 @@ config_require(header_complex)
          long            pdu_securityLevel;
          void           *pdu_transport;
          size_t          pdu_transportLen;
-         oid            *pdu_tDomain;
+         const oid      *pdu_tDomain;
          size_t          pdu_tDomainLen;
          u_char         *pdu_community;
          size_t          pdu_community_len;
