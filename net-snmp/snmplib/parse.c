@@ -713,18 +713,9 @@ print_ascii_dump_tree(FILE *f,
 {
     struct tree *tp;
 
-/*    fprintf(f, "Children of %s(%ld):\n", tree->label, tree->subid); */
     count++;
     for(tp = tree->child_list; tp; tp = tp->next_peer){
-/*        fprintf(f, "%s(%ld) type=%d",
-                tp->label, tp->subid, tp->type); */
-          fprintf(f, "%s ::= { %s %ld }\n", tp->label, tree->label, tp->subid);
-/*
-        if (tp->tc_index != -1) fprintf(f, " tc=%d", tp->tc_index);
-        if (tp->hint) fprintf(f, " hint=%s", tp->hint);
-        if (tp->units) fprintf(f, " units=%s", tp->units);
-	fprintf(f, "\n");
-        */
+          fprintf(f, "%s OBJECT IDENTIFIER ::= { %s %ld }\n", tp->label, tree->label, tp->subid);
     }
     for(tp = tree->child_list; tp; tp = tp->next_peer){
         if (tp->child_list)
@@ -3014,11 +3005,12 @@ add_mibdir(const char *dirname)
     char tmpstr1[300];
     int count = 0;
     struct stat dir_stat, idx_stat;
+    const char *oldFile = File;
 
     DEBUGMSGTL(("parse-mibs", "Scanning directory %s\n", dirname));
+#ifndef WIN32
     sprintf(token, "%s/%s", dirname, ".index");
-    if ((stat(token, &idx_stat) == 0) &&
-	(stat(dirname, &dir_stat) == 0)) {
+    if (stat(token, &idx_stat) == 0 && stat(dirname, &dir_stat) == 0) {
 	if (dir_stat.st_mtime < idx_stat.st_mtime) {
 	    DEBUGMSGTL(("parse-mibs", "The index is good\n"));
 	    if ((ip = fopen(token, "r")) != NULL) {
@@ -3035,6 +3027,7 @@ add_mibdir(const char *dirname)
 	else DEBUGMSGTL(("parse-mibs", "Index outdated\n"));
     }
     else DEBUGMSGTL(("parse-mibs", "No index\n"));
+#endif
 
     if ((dir = opendir(dirname))) {
 	sprintf(tmpstr, "%s/.index", dirname);
@@ -3063,6 +3056,7 @@ add_mibdir(const char *dirname)
                 }
             }
         }
+	File = oldFile;
         closedir(dir);
 	if (ip) fclose(ip);
         return(count);
