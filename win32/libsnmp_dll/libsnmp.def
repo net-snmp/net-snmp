@@ -343,7 +343,7 @@ EXPORTS
 	snmp_parse_args
 	snmp_parse_args_descriptions
 	snmp_parse_args_usage
-	netsnmp_callback_open
+;	netsnmp_callback_open
 	netsnmp_udp_agent_config_tokens_register
 	netsnmp_udp_parse_security
 	netsnmp_udp_getSecName
@@ -363,7 +363,7 @@ EXPORTS
 ;	snprintf_objid
 	snmp_synch_reset
 	snmp_log_options
-	netsnmp_clear_callback_list
+;	netsnmp_clear_callback_list
 	netsnmp_clear_tdomain_list
 	clear_sec_mod
 	clear_snmp_enum
