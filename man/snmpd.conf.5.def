@@ -342,7 +342,10 @@ speed, this directive can supply additional information.
 TYPE is a type value as given in the IANAifType-MIB.
 .IP "authtrapenable NUMBER"
 Setting authtrapenable to 1 enables generation of authentication failure
-traps. The default value is 2 (disable).
+traps.  The default value is disabled(2).  Ordinarily the corresponding
+object (snmpEnableAuthenTraps.0) is read-write, but setting its value
+via this token makes the object read-only, and attempts to set the
+value of the object will result in a notWritable error response.
 .IP "trapcommunity STRING"
 This defines the default community string to be used when sending traps.
 Note that this command must be used prior to any of the following three
