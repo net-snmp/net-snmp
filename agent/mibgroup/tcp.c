@@ -90,7 +90,7 @@ header_tcp(vp, name, length, exact, var_len, write_method)
     *write_method = 0;
     *var_len = sizeof(long);	/* default to 'long' results */
     return(MATCH_SUCCEEDED);
-};
+}
 
 	/*********************
 	 *
@@ -223,7 +223,7 @@ var_tcp(vp, name, length, exact, var_len, write_method)
 	    case TCPOUTRSTS:
 		long_return = tcpstat.tcps_sndctrl - tcpstat.tcps_closed;
 		return (u_char *) &long_return;
-#endif linux
+#endif /* linux */
 	    default:
 		ERROR("");
 	}

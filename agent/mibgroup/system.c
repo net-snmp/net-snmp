@@ -3,9 +3,17 @@
  *
  */
 
-#include <ctype.h>
-
 #include "../common_header.h"
+
+#include <ctype.h>
+#if HAVE_UTSNAME_H
+#include <utsname.h>
+#else
+#if HAVE_SYS_UTSNAME_H
+#include <sys/utsname.h>
+#endif
+#endif
+
 #include "system.h"
 #include "util_funcs.h"
 #include "../../snmplib/system.h"
@@ -41,6 +49,13 @@ void init_system()
 {
   struct extensible extmp;
 
+#ifdef HAVE_UNAME
+  struct utsname utsname;
+
+  uname(&utsname);
+  sprintf(version_descr, "%s %s %s %s %s", utsname.sysname, utsname.nodename,
+          utsname.release, utsname.version, utsname.machine);
+#else
   /* set default values of system stuff */
   sprintf(extmp.command,"%s -a",UNAMEPROG);
   /* setup defaults */
@@ -49,7 +64,14 @@ void init_system()
   exec_command(&extmp);
   strncpy(version_descr,extmp.output, 128);
   version_descr[strlen(version_descr)-1] = 0; /* chomp new line */
+#endif
 
+#ifdef HAVE_GETHOSTNAME
+  gethostname(sysName,128);
+#else
+#ifdef HAVE_UNAME
+  strncpy(sysName,utsname.nodename,128);
+#else
   sprintf(extmp.command,"%s -n",UNAMEPROG);
   /* setup defaults */
   extmp.type = EXECPROC;
@@ -57,6 +79,8 @@ void init_system()
   exec_command(&extmp);
   strncpy(sysName,extmp.output, 128);
   sysName[strlen(sysName)-1] = 0; /* chomp new line */
+#endif /* HAVE_UNAME */
+#endif /* HAVE_GETHOSTNAME */
 }
 
 #define MATCH_FAILED	1
@@ -92,7 +116,7 @@ header_system(vp, name, length, exact, var_len, write_method)
     *write_method = 0;
     *var_len = sizeof(long);	/* default to 'long' results */
     return(MATCH_SUCCEEDED);
-};
+}
 
 	/*********************
 	 *
