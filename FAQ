@@ -294,7 +294,8 @@ How do I add a MIB?
   regard any file held there as defining a MIB module or modules to be
   included.  If the agent to be queried supports a particular MIB module,
   then by placing the relevant file in this directory, all the tools
-  will be able to take advantage of this new information.
+  will be able to take advantage of this new information.  (But see
+  the first question under PROBLEMS below).
 
   The UCD agent, however, does not use these MIB text files at all, and
   will work quite happily without them.  (Actually it needs to find the
