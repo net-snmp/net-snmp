@@ -101,7 +101,10 @@ nsb-config-dist()
    $ngc_src/configure --with-sys-location=Unknown \
       --with-sys-contact='System Administrator' --disable-privacy \
       --with-defaults --with-mib-modules="$NSB_FINAL_MODULES"
-   return $?
+   ngc_rc=$?
+   if [ $ngc_rc -ne 0 ];then
+      nsb-abort "Error during configure dist (rc=$ngc_rc)"
+   fi
 }
 
 nsb-config-all()
@@ -159,8 +162,9 @@ nsb-config-all()
       "--with-transports=$NSB_DIST_TRANSPORTS $NSB_EXTRA_TRANSPORTS" \
       $NSB_PERL --enable-shared
    ngc_rc=$?
-
-   return $ngc_rc
+   if [ $ngc_rc -ne 0 ];then
+      nsb-abort "Error during configure all (rc=$ngc_rc)"
+   fi
 }
 
 nsb-sysname()
@@ -214,26 +218,23 @@ nsb-make()
    nsb-info "Making $target... (log is $nsb_make_OUTPUT)"
    #make touchit 2>&1 | tee $nsb_make_OUTPUT
    make start-flag $target $parms end-flag 2>&1 | tee -a $nsb_make_OUTPUT
-   nsb_make_rc=$?
+   # checking $? would only get us the rc from tee, which is useless
 
    nsb-info "Checking for errors..."
    egrep "[Ee]rror|FAIL|[Ww]arn|No |exists|\*\*\*" $nsb_make_OUTPUT \
          > nsb-make-$target-allerrs.$DATE
-   egrep -v "^/usr" nsb-make-$target-allerrs.$DATE \
-         > nsb-make-$target-nerrs.$DATE
-   egrep -v "[Ww]arn" nsb-make-$target-nerrs.$DATE \
+   # allow for a few exceptions
+   egrep -v "[Ww]arn|error(mib|\.3)" nsb-make-$target-allerrs.$DATE \
          > nsb-make-$target-errs.$DATE
-   nsb_make_rc=$?
    if [ -s nsb-make-$target-errs.$DATE ]; then
       nsb-prompt "press enter to view errors"
       cat nsb-make-$target-errs.$DATE >&2
+      nsb-abort "Error(s) during make $target"
    fi
 
    if [ -f build-in-progress-flag ];then
      nsb-abort "make $target incomplete"
    fi
-
-   return $nsb_make_rc
 }
 
 nsb-build()
@@ -290,10 +291,6 @@ nsb-build()
       else
           nsb-config-all $src_dir | tee nsb-config.$DATE
       fi
-      nsb_config_rc=$?
-      if [ $nsb_config_rc -ne 0 ]; then
-         nsb-abort "Error during configure (rc=$nsb_config_rc)"
-      fi
       nsb-prompt "press enter to continue"
    fi
 
@@ -301,10 +298,6 @@ nsb-build()
       nsb-info "Skipping 'make all'"
    else
       nsb-make all
-      nsb_build_rc=$?
-      if [ $nsb_build_rc -eq 0 ]; then
-         nsb-abort "Error during make all (rc=$nsb_build_rc)"
-      fi
    fi
 
    if [ $NSB_SKIP_TEST -eq 1 ]; then
@@ -312,10 +305,6 @@ nsb-build()
    else
       nsb-prompt "No errors found, press enter to run tests"
       nsb-make test
-      nsb_build_rc=$?
-      if [ $nsb_build_rc -eq 0 ]; then
-         nsb-abort "Error during make test (rc=$nsb_build_rc)"
-      fi
    fi
 
    if [ $NSB_SKIP_INSTALL -eq 1 ]; then
@@ -323,11 +312,7 @@ nsb-build()
    else
       nsb-prompt "No errors found, press enter to install"
       nsb-make install prefix=$dest_dir exec_prefix=$dest_dir
-      nsb_build_rc=$?
-      if [ $nsb_build_rc -eq 0 ]; then
-         nsb-abort "Error during make install (rc=$nsb_build_rc)"
-      fi
    fi
 
-   return $nsb_build_rc
+   return 0
 }
