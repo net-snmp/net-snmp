@@ -81,10 +81,6 @@
 #include <inet/mib2.h>
 #endif
 
-#if HAVE_DMALLOC_H
-#include <dmalloc.h>
-#endif
-
 #include "tools.h"
 #ifdef solaris2
 #include "kernel_sunos5.h"
@@ -118,6 +114,10 @@
 
 #ifdef CAN_USE_SYSCTL
 #include <sys/sysctl.h>
+#endif
+
+#if HAVE_DMALLOC_H
+#include <dmalloc.h>
 #endif
 
 #ifndef MIB_STATS_CACHE_TIMEOUT
@@ -161,7 +161,7 @@ void init_udp(void)
 
   /* register ourselves with the agent to handle our mib tree */
   REGISTER_MIB("mibII/udp", udp_variables, variable8, udp_variables_oid);
-  REGISTER_SYSOR_ENTRY( udp_module_oid,
+  REGISTER_SYSOR_ENTRY( udp_module_oid, \
 		"The MIB module for managing UDP implementations");
 
 #ifdef UDPSTAT_SYMBOL

@@ -54,8 +54,8 @@ install:    all installdirs
 	for i in $(INSTALLDIRS) ; do	\
         ( cd $$i ; $(MAKE) install ) ;	\
 	done
+	@$(INSTALL) $(INSTALLHEADERS) $(includedir)
 	@for i in $(INSTALLHEADERS) ; do \
-		$(INSTALL) $$i $(includedir) ; \
 		echo "install:  installed $$i in $(includedir)";\
 	done
 
@@ -93,13 +93,15 @@ clean:
 
 distclean: clean configclean
 
-configclean:
-	rm -f config.cache config.status config.log config.h
+makefileclean:
 	rm -f Makefile snmplib/Makefile				\
 		agent/Makefile agent/mibgroup/Makefile		\
 		apps/Makefile  apps/snmpnetstat/Makefile	\
 		man/Makefile mibs/Makefile ov/Makefile		\
 		local/Makefile testing/Makefile
+
+configclean: makefileclean
+	rm -f config.cache config.status config.log config.h
 	rm -f mibs/.index
 	rm -f mib_module_config.h ucd-snmp-config.h 	\
 		agent/mibgroup/mib_module_includes.h 	\

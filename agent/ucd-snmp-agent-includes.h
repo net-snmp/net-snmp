@@ -8,6 +8,7 @@
 #include <ucd-snmp/snmp_agent.h>
 #include <ucd-snmp/snmp_vars.h>
 #include <ucd-snmp/ds_agent.h>
+#include <ucd-snmp/agent_handler.h>
 #include <ucd-snmp/var_struct.h>
 #include <ucd-snmp/agent_read_config.h>
 
