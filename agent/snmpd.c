@@ -929,7 +929,8 @@ receive(void)
                 numfds = external_exceptfd[i] + 1;
         }
 
-        count = select(numfds, &readfds, &writefds, &exceptfds, tvp);
+    reselect:
+	count = select(numfds, &readfds, &writefds, &exceptfds, tvp);
         DEBUGMSGTL(("snmpd/select", "returned, count = %d\n", count));
 
         if (count > 0) {
@@ -994,7 +995,7 @@ receive(void)
                 break;
             case -1:
                 if (errno == EINTR) {
-                    continue;
+		    goto reselect;
                 } else {
                     snmp_log_perror("select");
                 }
