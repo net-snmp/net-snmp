@@ -298,7 +298,7 @@ extern void snmp_set_detail (const char *);
 #define SNMP_FLAGS_STRIKE1         0x01
 
 #define CLEAR_SNMP_STRIKE_FLAGS(x) \
-	x &= !(SNMP_FLAGS_STRIKE2|SNMP_FLAGS_STRIKE1)
+	x &= ~(SNMP_FLAGS_STRIKE2|SNMP_FLAGS_STRIKE1)
 
 	/*
 	 * returns '1' if the session is to be regarded as dead,
