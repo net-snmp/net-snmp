@@ -9,9 +9,12 @@
 ########################################################################
 ##
     /*
-     * TODO: get actual address type from ${context}_ctx.
+     * TODO:
+     * get actual address type from ${context}_ctx.
      */
     int  addressType = -1;
+
+    return MFD_SKIP; /* TODO: remove this once you've set data */
 
     switch (addressType) {
     case INETADDRESSTYPE_UNKNOWN:
