@@ -54,6 +54,24 @@ agentx_parse_agentx_socket(const char *token, char *cptr)
 }
 
 void
+agentx_parse_agentx_timeout(const char *token, char *cptr)
+{
+    int x = atoi(cptr);
+    DEBUGMSGTL(("agentx/config/timeout", "%s\n", cptr));
+    netsnmp_ds_set_int(NETSNMP_DS_APPLICATION_ID,
+                       NETSNMP_DS_AGENT_AGENTX_TIMEOUT, x * ONE_SEC);
+}
+
+void
+agentx_parse_agentx_retries(const char *token, char *cptr)
+{
+    int x = atoi(cptr);
+    DEBUGMSGTL(("agentx/config/retries", "%s\n", cptr));
+    netsnmp_ds_set_int(NETSNMP_DS_APPLICATION_ID,
+                       NETSNMP_DS_AGENT_AGENTX_RETRIES, x);
+}
+
+void
 init_agentx_config(void)
 {
     /*
@@ -72,4 +90,10 @@ init_agentx_config(void)
     snmpd_register_config_handler("agentxsocket",
                                   agentx_parse_agentx_socket, NULL,
                                   "AgentX bind address");
+    snmpd_register_config_handler("agentxRetries",
+                                  agentx_parse_agentx_retries, NULL,
+                                  "AgentX Retries");
+    snmpd_register_config_handler("agentxTimeout",
+                                  agentx_parse_agentx_timeout, NULL,
+                                  "AgentX Timeout (seconds)");
 }
