@@ -1456,6 +1456,7 @@ while test "x$new_module_list" != "x"; do
       #---------------------
       # process modules header, checking for config_ pseudo-macros
       #
+      module_type=mib_module
       if test -f $srcdir/$mibdir/$i.h; then
         module_type=`$MODULECPP $srcdir/$mibdir/$i.h | grep config_belongs_in | sed 's@.*config_belongs_in(\([^)]*\)).*@\1@'`
       fi
