@@ -13,10 +13,10 @@ HEADER SNMPv1 getnext of system.sysUpTime
 
 STARTAGENT
 
-CAPTURE "snmpgetnext $SNMP_FLAGS -v 1 localhost testcommunity system.sysUpTime"
+CAPTURE "snmpgetnext -On $SNMP_FLAGS -v 1 localhost testcommunity .1.3.6.1.2.1.1.3"
 
 STOPAGENT
 
-CHECK "system.sysUpTime.0 = Timeticks:"
+CHECK ".1.3.6.1.2.1.1.3.0 = Timeticks:"
 
 FINISHED
