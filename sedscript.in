@@ -1,7 +1,7 @@
 #include <config.h>
 #include <agent/extensible/mibdefs.h>
 
-s#PREMOVEME#PREFIX#g
+s#PREMOVEMEREFIX#PREFIX#g
 
 s/EREMOVEMEXTENSIBLEDOTMIB/EXTENSIBLEDOTMIB/g
 
