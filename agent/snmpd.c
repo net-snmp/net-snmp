@@ -1082,14 +1082,36 @@ snmp_check_parse( struct snmp_session *session,
 {
     if ( result == 0 ) {
         if ( verbose) {
-             char buf [256];
-	     struct variable_list *var_ptr;
+            char buf [256];
+	    struct variable_list *var_ptr;
+	    
+	    switch (pdu->command) {
+	    case SNMP_MSG_GET:
+	    	snmp_log(LOG_DEBUG, "  GET message\n"); break;
+	    case SNMP_MSG_GETNEXT:
+	    	snmp_log(LOG_DEBUG, "  GETNEXT message\n"); break;
+	    case SNMP_MSG_RESPONSE:
+	    	snmp_log(LOG_DEBUG, "  RESPONSE message\n"); break;
+	    case SNMP_MSG_SET:
+	    	snmp_log(LOG_DEBUG, "  SET message\n"); break;
+	    case SNMP_MSG_TRAP:
+	    	snmp_log(LOG_DEBUG, "  TRAP message\n"); break;
+	    case SNMP_MSG_GETBULK:
+	    	snmp_log(LOG_DEBUG, "  GETBULK message, non-rep=%d, max_rep=%d\n",
+			pdu->errstat, pdu->errindex); break;
+	    case SNMP_MSG_INFORM:
+	    	snmp_log(LOG_DEBUG, "  INFORM message\n"); break;
+	    case SNMP_MSG_TRAP2:
+	    	snmp_log(LOG_DEBUG, "  TRAP2 message\n"); break;
+	    case SNMP_MSG_REPORT:
+	    	snmp_log(LOG_DEBUG, "  REPORT message\n"); break;
+	    }
 	     
-	     for ( var_ptr = pdu->variables ;
-	           var_ptr != NULL ; var_ptr=var_ptr->next_variable ) {
-                    sprint_objid (buf, var_ptr->name, var_ptr->name_length);
-                    snmp_log(LOG_DEBUG, "    -- %s\n", buf);
-	     }
+	    for ( var_ptr = pdu->variables ;
+	        var_ptr != NULL ; var_ptr=var_ptr->next_variable ) {
+                sprint_objid (buf, var_ptr->name, var_ptr->name_length);
+                snmp_log(LOG_DEBUG, "    -- %s\n", buf);
+	    }
 	}
     	return 1;
     }
