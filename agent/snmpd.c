@@ -851,14 +851,14 @@ main(int argc, char *argv[])
     if (gid) {
       DEBUGMSGTL(("snmpd", "Changing gid to %d.\n", gid));
       if (setgid(gid)==-1) {
-          snmp_log_perror("setgid failed: ");
+          snmp_log_perror("setgid failed");
           exit(1);
       }
     }
     if (uid) {
       DEBUGMSGTL(("snmpd", "Changing uid to %d.\n", uid));
       if(setuid(uid)==-1) {
-          snmp_log_perror("setuid failed: ");
+          snmp_log_perror("setuid failed");
           exit(1);
       }
     }
@@ -929,6 +929,7 @@ receive(void)
     while (running) {
 	if (reconfig) {
 	    reconfig = 0;
+	    snmp_log(LOG_INFO, "Reconfiguring daemon\n");
 	    update_config();
 	}
 	tvp =  &timeout;
