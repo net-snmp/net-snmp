@@ -1758,6 +1758,16 @@ DEBUGP(va_alist)
 }
 
 void
+DEBUGPOID(theoid, len)
+  oid *theoid;
+  int len;
+{
+  char c_oid[MAX_NAME_LEN];
+  sprint_objid(c_oid,theoid,len);
+  DEBUGP(c_oid);
+}
+
+void
 snmp_set_do_debugging(val)
   int val;
 {
