@@ -526,6 +526,7 @@ DskEntry ::= SEQUENCE {
    dskAvail  Integer32,
    dskUsed  Integer32,
    dskPercent  Integer32,
+   dskPercentNode  Integer32,
    dskErrorFlag  Integer32,
    dskErrorMsg  DisplayString
 }
