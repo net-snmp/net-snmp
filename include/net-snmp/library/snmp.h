@@ -223,6 +223,11 @@ SOFTWARE.
 
 #define MAX_SNMP_ERR	18
 
+#define SNMP_VALIDATE_ERR(x)  ( (x > MAX_SNMP_ERR) ? \
+                                   SNMP_ERR_GENERR : \
+                                   (x < SNMP_ERR_NOERROR) ? \
+                                      SNMP_ERR_GENERR : \
+                                      x )
 
     /*
      * values of the generic-trap field in trap PDUs 
