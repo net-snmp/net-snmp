@@ -587,6 +587,9 @@ Init_HR_SWRun (void)
 	current_proc_entry = nproc+1;
 	return;
     }
+    pstat_getproc( proc_table, sizeof( struct pst_status ),
+			nproc, 0 );
+
 #elif defined(solaris2)
     auto_nlist(NPROC_SYMBOL, (char *)&nproc, sizeof(int));
     bytes = nproc*sizeof(int);
@@ -594,20 +597,6 @@ Init_HR_SWRun (void)
 	current_proc_entry = nproc+1;
 	return;
     }
-#elif HAVE_KVM_GETPROCS
-#else
-    auto_nlist(NPROC_SYMBOL, (char *)&nproc, sizeof(int));
-    bytes = nproc*sizeof(struct proc);
-    if ((proc_table=(struct proc *) realloc(proc_table, bytes)) == NULL ) {
-	current_proc_entry = nproc+1;
-	return;
-    }
-#endif
-
-#if defined(hpux10)
-    pstat_getproc( proc_table, sizeof( struct pst_status ),
-			nproc, 0 );
-#elif defined(solaris2)
     {
 	DIR *f;
 	struct dirent *dp;
@@ -627,9 +616,34 @@ Init_HR_SWRun (void)
 	proc_table = kvm_getprocs(kd, KERN_PROC_ALL, 0, &nproc);
     }
 #else
+
+    current_proc_entry = 1;
+    nproc = 0;
+
+    if (auto_nlist(NPROC_SYMBOL, (char *)&nproc, sizeof(int)) == 0) {
+        perror("Init_HR_SWRun-auto_nlist NPROC");
+        return;
+    }
+    bytes = nproc*sizeof(struct proc);
+
+    if (proc_table) free((char *)proc_table);
+    if ((proc_table=(struct proc *) malloc(bytes)) == NULL ) {
+        nproc = 0;
+        perror("Init_HR_SWRun-malloc");
+        return;
+    }
+
     {   int proc_table_base;
-        auto_nlist(PROC_SYMBOL, (char *)&proc_table_base, sizeof(proc_table_base));
-        klookup( proc_table_base, (char *)proc_table, bytes);
+        if (auto_nlist(PROC_SYMBOL, (char *)&proc_table_base, sizeof(proc_table_base)) == 0) {
+            nproc = 0;
+            perror("Init_HR_SWRun-auto_nlist PROC");
+            return;
+        }
+        if (klookup( proc_table_base, (char *)proc_table, bytes) == 0) {
+            nproc = 0;
+            perror("Init_HR_SWRun-klookup");
+            return;
+        }
     }
 #endif
     current_proc_entry = 0;
