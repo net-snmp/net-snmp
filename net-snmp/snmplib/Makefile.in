@@ -48,7 +48,7 @@ snmp_auth.o: ./snmp_impl.h
 snmp_auth.o: ./party.h
 snmp_auth.o: ./context.h
 snmp_auth.o: ./md5.h
-snmp_client.o: ./asn1.h
+snmp_client.o: ./asn1.h ../config.h
 snmp_client.o: ./snmp.h
 snmp_client.o: ./snmp_impl.h
 snmp_client.o: ./snmp_api.h
