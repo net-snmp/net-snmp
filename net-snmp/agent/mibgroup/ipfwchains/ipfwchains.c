@@ -102,6 +102,37 @@ static char *service_to_string(__u16, __u16);
 	 *
 	 *********************/
 
+struct variable4 ipfwchains_variables[] = {
+    { IPFWCCHAININDEX,		ASN_INTEGER, 	RONLY, var_ipfwchains, 3, {1, 1, 1}},
+    { IPFWCCHAINLABEL,       	ASN_OCTET_STR, 	RONLY, var_ipfwchains, 3, {1, 1, 2}},
+    { IPFWCPOLICY,          	ASN_OCTET_STR,  RONLY, var_ipfwchains, 3, {1, 1, 3}},
+    { IPFWCREFCNT,          	ASN_INTEGER,  	RONLY, var_ipfwchains, 3, {1, 1, 4}},
+    { IPFWCPKTS,          	ASN_OCTET_STR,  RONLY, var_ipfwchains, 3, {1, 1, 5}},
+    { IPFWCBYTES,          	ASN_OCTET_STR,  RONLY, var_ipfwchains, 3, {1, 1, 6}},
+    { IPFWRRULEINDEX,          	ASN_INTEGER,  	RONLY, var_ipfwrules,  3, {2, 1, 1}},
+    { IPFWRCHAIN,             	ASN_OCTET_STR,  RONLY, var_ipfwrules,  3, {2, 1, 2}},
+    { IPFWRPKTS,                ASN_OCTET_STR,  RONLY, var_ipfwrules,  3, {2, 1, 3}},
+    { IPFWRBYTES,               ASN_OCTET_STR,  RONLY, var_ipfwrules,  3, {2, 1, 4}},
+    { IPFWRTARGET,              ASN_OCTET_STR,  RONLY, var_ipfwrules,  3, {2, 1, 5}},
+    { IPFWRPROT,               	ASN_OCTET_STR,  RONLY, var_ipfwrules,  3, {2, 1, 6}},
+    { IPFWRSOURCE,              ASN_OCTET_STR,  RONLY, var_ipfwrules,  3, {2, 1, 7}},
+    { IPFWRDESTINATION,    	ASN_OCTET_STR,  RONLY, var_ipfwrules,  3, {2, 1, 8}},
+    { IPFWRPORTS,               ASN_OCTET_STR,  RONLY, var_ipfwrules,  3, {2, 1, 9}},
+    { IPFWROPT,         	ASN_OCTET_STR,  RONLY, var_ipfwrules,  3, {2, 1, 10}},
+    { IPFWRIFNAME,              ASN_OCTET_STR,  RONLY, var_ipfwrules,  3, {2, 1, 11}},
+    { IPFWRTOSA,               	ASN_OCTET_STR,  RONLY, var_ipfwrules,  3, {2, 1, 12}},
+    { IPFWRTOSX,               	ASN_OCTET_STR,  RONLY, var_ipfwrules,  3, {2, 1, 13}},
+    { IPFWRMARK,              	ASN_OCTET_STR,  RONLY, var_ipfwrules,  3, {2, 1, 14}},
+    { IPFWROUTSIZE,             ASN_OCTET_STR,  RONLY, var_ipfwrules,  3, {2, 1, 15}}
+};
+
+oid ipfwchains_variables_oid[] = { 1,3,6,1,4,1,2021,13,3 };
+
+void init_ipfwchains( void )
+{
+    REGISTER_MIB( "ipfwchains/ipfwchains", ipfwchains_variables, variable4,
+			ipfwchains_variables_oid);
+}
 
 	/*********************
 	 *
@@ -112,9 +143,9 @@ static char *service_to_string(__u16, __u16);
 u_char * var_ipfwchains(
     struct variable *vp,
     oid     *name,
-    int     *length,
+    size_t  *length,
     int     exact,
-    int     *var_len,
+    size_t  *var_len,
     WriteMethod **write_method)
 {
     static char string_value[256];
@@ -195,9 +226,9 @@ u_char * var_ipfwchains(
 u_char * var_ipfwrules(
     struct variable *vp,
     oid     *name,
-    int     *length,
+    size_t  *length,
     int     exact,
-    int     *var_len,
+    size_t  *var_len,
     WriteMethod **write_method)
 {
     static char string_value[256];

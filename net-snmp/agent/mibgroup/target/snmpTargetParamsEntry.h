@@ -58,33 +58,6 @@ WriteMethod write_snmpTargetParamsStorageType;
 WriteMethod write_snmpTargetParamsRowStatus;
 
 
-/* Only load this structure when this .h file is called in the snmp_vars.c 
-   file in tha agent subdirectory of the source tree */
-
-#ifdef IN_SNMP_VARS_C
-
-/* this variable defines function callbacks and type return information 
-   for the snmpTargetParamsEntry mib */
-
-struct variable2 snmpTargetParamsEntry_variables[] = {
-  { SNMPTARGETPARAMSMPMODEL,       ASN_INTEGER,   RWRITE, 
-    var_snmpTargetParamsEntry, 1, { SNMPTARGETPARAMSMPMODELCOLUMN } },
-  { SNMPTARGETPARAMSSECURITYMODEL, ASN_INTEGER,   RWRITE, 
-    var_snmpTargetParamsEntry, 1, { SNMPTARGETPARAMSSECURITYMODELCOLUMN } },
-  { SNMPTARGETPARAMSSECURITYNAME,  ASN_OCTET_STR, RWRITE, 
-    var_snmpTargetParamsEntry, 1, { SNMPTARGETPARAMSSECURITYNAMECOLUMN } },
-  { SNMPTARGETPARAMSSECURITYLEVEL, ASN_INTEGER,   RWRITE, 
-    var_snmpTargetParamsEntry, 1, { SNMPTARGETPARAMSSECURITYLEVELCOLUMN } },
-  { SNMPTARGETPARAMSSTORAGETYPE,   ASN_INTEGER,   RWRITE, 
-    var_snmpTargetParamsEntry, 1, { SNMPTARGETPARAMSSTORAGETYPECOLUMN } },
-  { SNMPTARGETPARAMSROWSTATUS,     ASN_INTEGER,   RWRITE, 
-    var_snmpTargetParamsEntry, 1, { SNMPTARGETPARAMSROWSTATUSCOLUMN } }
-};
-
-/* now load this mib into the agents mib table */
-config_load_mib(1.3.6.1.6.3.12.1.3.1, 10, snmpTargetParamsEntry_variables)
-
-#endif /* IN_SNMP_VARS_C */
 #endif /* _MIBGROUP_SNMPTARGETPARAMSENTRY_H */
 
 
