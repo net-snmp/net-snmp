@@ -48,7 +48,7 @@ typedef struct netsnmp_request_info_s {
    struct subtree *subtree;
 } netsnmp_request_info;
 
-typedef struct _netsnmp_set_info {
+typedef struct netsnmp_set_info_s {
    int   action;
    void *stateRef;
 
@@ -90,6 +90,12 @@ typedef struct netsnmp_agent_request_info_s {
    /* ... */
 } netsnmp_agent_request_info;
 
+typedef struct netsnmp_cachemap_s {
+   int globalid;
+   int cacheid;
+   struct netsnmp_cachemap_s *next;
+} netsnmp_cachemap;
+
 typedef struct netsnmp_agent_session_s {
     int		mode;
     netsnmp_session  *session;
@@ -110,6 +116,7 @@ typedef struct netsnmp_agent_session_s {
    netsnmp_variable_list **bulkcache;
    int treecache_len; /* length of cache array */
    int treecache_num; /* number of current cache entries */
+   netsnmp_cachemap *cache_store;
    int vbcount;
 } netsnmp_agent_session;
 

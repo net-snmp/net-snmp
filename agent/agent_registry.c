@@ -405,20 +405,20 @@ load_subtree( struct subtree *new_sub, const char *context_name )
 
 int
 netsnmp_register_mib(const char *moduleName,
-	     struct variable *var,
-	     size_t varsize,
-	     size_t numvars,
-	     oid *mibloc,
-	     size_t mibloclen,
-	     int priority,
-	     int range_subid,
-	     oid range_ubound,
-	     netsnmp_session *ss,
-	     const char *context,
-	     int timeout,
-	     int flags,
-             netsnmp_handler_registration *reginfo,
-	     int perform_callback)
+                     struct variable *var,
+                     size_t varsize,
+                     size_t numvars,
+                     oid *mibloc,
+                     size_t mibloclen,
+                     int priority,
+                     int range_subid,
+                     oid range_ubound,
+                     netsnmp_session *ss,
+                     const char *context,
+                     int timeout,
+                     int flags,
+                     netsnmp_handler_registration *reginfo,
+                     int perform_callback)
 {
   struct subtree *subtree, *sub2;
   int res, i;
@@ -463,6 +463,7 @@ netsnmp_register_mib(const char *moduleName,
   subtree->reginfo = reginfo;
   subtree->flags = (u_char)flags;  /*  used to identify instance oids  */
   subtree->flags |= SUBTREE_ATTACHED;
+  subtree->global_cacheid = reginfo->global_cacheid;
   res = load_subtree(subtree, context);
 
 	/*
