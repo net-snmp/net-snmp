@@ -404,10 +404,12 @@ setPass(int action,
         case ASN_OCTET_STR:
           itmp = sizeof(buf2);
           memcpy(buf2, var_val, var_val_len);
-          if (bin2asc(buf2, var_val_len) == (int)var_val_len)
-              sprintf(buf,"string %s",buf2);
+          if (var_val_len == 0)
+              sprintf(buf,"string \"\"");
+          else if (bin2asc(buf2, var_val_len) == (int)var_val_len)
+              sprintf(buf,"string \"%s\"",buf2);
           else
-              sprintf(buf,"octet %s",buf2);
+              sprintf(buf,"octet \"%s\"",buf2);
           break;
         case ASN_OBJECT_ID:
           sprint_mib_oid(buf2, (oid *)var_val, var_val_len);
