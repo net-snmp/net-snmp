@@ -133,7 +133,7 @@ int getNextSessID(void);
 void dump_sess_list(void);
 int init_master_agent(void);
 int agent_check_and_process(int block);
-void netsnmp_check_outstanding_agent_requests(int status);
+void netsnmp_check_outstanding_agent_requests(void);
 int netsnmp_set_mode_request_error(int mode, netsnmp_request_info *request,
                       int error_value);
 int netsnmp_set_request_error(netsnmp_agent_request_info *reqinfo, netsnmp_request_info *request,

@@ -930,7 +930,7 @@ receive(void)
         /* run requested alarms */
         run_alarms();
         
-        netsnmp_check_outstanding_agent_requests(SNMP_ERR_NOERROR);
+        netsnmp_check_outstanding_agent_requests();
 
     }  /* endwhile */
 
