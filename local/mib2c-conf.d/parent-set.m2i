@@ -9,38 +9,12 @@
 ########################################################################
 ##
 /*
- * ${context}_allocate_data
- *
- * Purpose: create new data data.
- *
- */
-${context}_data *
-${context}_allocate_data_context(  )
-{
-    /*
-     * allocate memory for the context
-     */
-$example_start
-    ${context}_data *rtn = SNMP_MALLOC_STRUCT(${context}_data);
-$example_end
-
-    if(NULL == rtn) {
-        snmp_log(LOG_ERR,
-                 "unable to malloc memory for new data context for the "
-                 "${table} table.\n");
-    }
-
-    return rtn;
-}
-
-/*
  * ${context}_create_context
  *
  * Purpose: create new data context, if specified index is valid.
- *
  */
 int
-${context}_create_data_context( ${context}_ctx *ctx )
+${context}_create_context( ${context}_ctx *ctx )
 {
     int rc;
 
@@ -55,7 +29,7 @@ ${context}_create_data_context( ${context}_ctx *ctx )
 $example_start
     /** TODO: no row creation for you till you update this code */
     if(1) {
-        snmp_log(LOG_WARN,"invalid index for a new row in the "
+        snmp_log(LOG_WARNING,"invalid index for a new row in the "
                  "${table} table.\n");
         /*
          * TODO: determine failure type.
@@ -73,6 +47,7 @@ $example_start
     }
 $example_end
 
+@if $m2c_data_allocate == 1@
     /*
      * allocate memory for the data context
      */
@@ -82,43 +57,7 @@ $example_end
         return SNMP_ERR_RESOURCEUNAVAILABLE;
     }
 
-    return SNMP_ERR_NOERROR;
-}
-
-/*
- * ${context}_create_undo
- *
- * Create an 
- */
-int
-${context}_create_undo_context( ${context}_ctx *ctx )
-{
-    int rc;
-
-    /** we should have a non-NULL pointer */
-    netsnmp_assert( NULL != ctx );
-
-    /*
-     * allocate context
-     */
-$example_start
-    ctx->undo = ${context}_allocate_data();
-    if(NULL == ctx->data) {
-        /** msg already logged */
-        return SNMP_ERR_RESOURCEUNAVAILABLE;
-    }
-$example_end
-
-    /*
-     * copy the data
-     */
-@    foreach $node nonindex@
-@        include m2c_setup_node.m2i@
-@        eval $m2c_ctx_lh = "ctx->undo"@
-@        eval $m2c_ctx_rh = "ctx->data"@
-@        include generic-ctx-copy.m2i@
-@    end@ # foreach nonindex
-
+@end@
     return SNMP_ERR_NOERROR;
 }
 
