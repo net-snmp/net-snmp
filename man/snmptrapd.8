@@ -181,17 +181,17 @@ To get a message like "14:03 TRAP3.1 from humpty.ucd.edu" you
 could use something like this:
 .PP
 .RS
-.NF
+.nf
 snmptrapd -P -F "%02.2h:%02.2j TRAP%w.%q from %A\en"
-.FI
+.fi
 .RE
 .PP
 If you want the same thing but in GMT rather than local time, use
 .PP
 .RS
-.NF
+.nf
 snmptrapd -P -F "%#02.2h:%#02.2j TRAP%w.%q from %A\en"
-.FI
+.fi
 .RE
 .PP
 .SH EXTENSIBILITY AND CONFIGURATION
