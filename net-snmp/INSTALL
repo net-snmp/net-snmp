@@ -65,6 +65,7 @@ Optional features to pass to configure for ucd-snmp:
                                     (Default:  none.  uses IDs above instead.)
   --with-mib-modules="list"       Compile with additional mib modules.
   --with-out-mib-modules="list"   Compile without these mib modules.
+  --with-libwrap[=LIBPATH]        Compile in libwrap (tcp_wrappers) support.
 
 Default mib modules compiled into the agent (which can be removed):
 
@@ -75,6 +76,7 @@ Default mib modules compiled into the agent (which can be removed):
 Optional mib modules to include:
 
   host:                           host resources mib support.
+                                    (alpha level code for linux, hpux, solaris)
   smux_gated:                     smux modules to talk with gated.
 
 Optional modules for C coders to look at and/or include as extension examples:
