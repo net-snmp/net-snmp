@@ -56,7 +56,9 @@ respectively) or set the localized authentication and encryption keys
 hand using these flags, or by the use of keys generated from passwords
 using the -A and -X flags discussed below.  For further details on
 SNMPv3 and it's usage of keying information, see the Net-SNMP tutorial
-web site ( http://www.Net-SNMP.org/tutorial-5/commands/ ).
+web site ( http://www.Net-SNMP.org/tutorial-5/commands/ ).  See the
+snmp.conf manual page on the defAuthMasterKey and related tokens for
+more information as well.
 .TP
 .BI -a " authProtocol"
 Set the authentication protocol (MD5|SHA) used for authenticated SNMPv3

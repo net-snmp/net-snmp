@@ -74,6 +74,24 @@ The SNMPv3 USM privacy type to use.  Currently, DES is the only
 possible value.
 .IP "defSecurityLevel noAuthNoPriv|authNoPriv|authPriv"
 The SNMPv3 default security level to use.
+.IP "defAuthMasterKey 0xHEXSTRING"
+.IP "defPrivMasterKey 0xHEXSTRING"
+.IP "defAuthLocalizedKey 0xHEXSTRING"
+.IP "defPrivLocalizedKey 0xHEXSTRING"
+Defines the SNMPv3 keys to be used for SNMPv3 secure communications.
+SNMPv3 keys are frequently derived from a passphrase, as discussed in
+the defPassphrase section above, however for improved security a
+truely random key can be generated and used instead (which would
+normally has better entropy than a password unless your password is
+amazingly long).  But to do this, you need to specify the hexadecimal
+keys directly to be used for authentication and encryption.  These
+tokens let you do just that.  They are equivalent to the short-form
+command line arguments -3m, -3M, -3k, and -3K.  Localized keys are
+master keys which have been converted to a unique key which is only
+suitable for on particular SNMP engine (agent).  The length of the key
+needs to be appropriate for the authentication or encryption type
+being used (auth keys: MD5=16 bytes, SHA1=20 bytes, DES=16 bytes (8
+bytes of which is used as an IV and not a key), and AES=16 bytes).
 .IP "showMibErrors (1|yes|true|0|no|false)"
 Whether or not to display textual MIB parsing errors when commands are
 run.
