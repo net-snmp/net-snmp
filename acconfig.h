@@ -206,6 +206,9 @@ sure to end it in -1.*/
 #ifdef DODEBUG
 #define DEBUGP(x) fprintf(stderr,x);
 #define DEBUGP1(x,y) fprintf(stderr,x,y);
+#else
+#define DEBUGP(x)
+#define DEBUGP1(x,y)
 #endif
 
 #ifndef DONT_INC_STRUCTS
