@@ -152,7 +152,7 @@ int a;
       etmp[i] = ptmp;
     qsort(etmp, numpassthrus, sizeof(struct extensible *),
 #ifdef __STDC__
-         (int (*)(const void *, const void *))pass_compare
+         (int (*)(const void *, const void *)) pass_compare
 #else
 	  pass_compare
 #endif
@@ -306,7 +306,13 @@ void setup_tree __P((void))
 #ifdef USING_PASS_MODULE
         + numpassthrus
 #endif
-        , sizeof(struct subtree),tree_compare);
+        , sizeof(struct subtree),
+#ifdef __STDC__
+        tree_compare
+#else
+        (int (*)(const void *, const void *)) tree_compare
+#endif
+    );
 
 }
 
