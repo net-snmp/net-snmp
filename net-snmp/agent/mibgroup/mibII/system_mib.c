@@ -109,11 +109,11 @@ void init_system_mib(void)
 {
 
 #ifdef HAVE_UNAME
-  struct utsname utsname;
+  struct utsname utsName;
 
-  uname(&utsname);
-  sprintf(version_descr, "%s %s %s %s %s", utsname.sysname, utsname.nodename,
-          utsname.release, utsname.version, utsname.machine);
+  uname(&utsName);
+  sprintf(version_descr, "%s %s %s %s %s", utsName.sysname, utsName.nodename,
+          utsName.release, utsName.version, utsName.machine);
 #else
   struct extensible extmp;
 
@@ -131,7 +131,7 @@ void init_system_mib(void)
   gethostname(sysName,128);
 #else
 #ifdef HAVE_UNAME
-  strncpy(sysName,utsname.nodename,128);
+  strncpy(sysName,utsName.nodename,128);
 #else
   sprintf(extmp.command,"%s -n",UNAMEPROG);
   /* setup defaults */
