@@ -20,16 +20,6 @@ extern          "C" {
 #include <net-snmp/data_access/interface.h>
 
     /*
-     * other required module components 
-     */
-    /* *INDENT-OFF*  */
-    config_require(if-mib/data_access/interface);
-    config_require(if-mib/ifTable/ifTable_interface);
-    config_require(if-mib/ifTable/ifTable_data_access);
-    config_exclude(mibII/interfaces);
-    /* *INDENT-ON*  */
-
-    /*
      * OID, column number and enum definions for  
      */
 #include "ifTable_constants.h"
@@ -345,6 +335,7 @@ extern          "C" {
          * add any other useful data
          *       (e.g. flags for when a column has been set)
          */
+       char known_missing;
 
         /*
          * storage for future expansion

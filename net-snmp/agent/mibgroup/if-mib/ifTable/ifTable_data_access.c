@@ -207,15 +207,25 @@ static void
 _check_interface_entry_for_updates(ifTable_rowreq_ctx *rowreq_ctx,
                                    netsnmp_container * ifcontainer)
 {
+    char oper_changed = 0;
+
     /*
      * check for matching entry. We can do this directly, since
      * both containers use the same index.
      */
     netsnmp_interface_entry *ifentry = CONTAINER_FIND(ifcontainer, rowreq_ctx);
     if(NULL == ifentry) {
-        if(IFOPERSTATUS_UNKNOWN != rowreq_ctx->data.ifOperStatus) {
-            rowreq_ctx->data.ifLastChange = netsnmp_get_agent_uptime();
-            rowreq_ctx->data.ifOperStatus = IFOPERSTATUS_UNKNOWN;
+        /*
+         * if this is the first time we detected that this interface is
+         * missing, set admin/oper status down, and set last change.
+         */
+        if (! rowreq_ctx->known_missing) {
+            DEBUGMSGTL(("ifTable:access","updating missing entry\n"));
+            rowreq_ctx->known_missing = 1;
+            rowreq_ctx->data.ifAdminStatus = IFADMINSTATUS_DOWN;
+            if (rowreq_ctx->data.ifOperStatus != IFOPERSTATUS_DOWN)
+                oper_changed = 1;
+            rowreq_ctx->data.ifOperStatus = IFOPERSTATUS_DOWN;
         }
     }
     else {
@@ -225,11 +235,23 @@ _check_interface_entry_for_updates(ifTable_rowreq_ctx *rowreq_ctx,
                               ifentry->if_name) == 0);
         
         /*
+         * if the interface was missing, but came back, clear the
+         * missing flag and set the discontinuity time. (if an os keeps
+         * persistent counters, tough cookies. We'll cross that 
+         * bridge if we come to it).
+         */
+        if (rowreq_ctx->known_missing) {
+            rowreq_ctx->known_missing = 0;
+            rowreq_ctx->data.ifCounterDiscontinuityTime =
+                netsnmp_get_agent_uptime();
+        }
+
+        /*
          * Check for changes, then update
          */
         if((! (ifentry->flags & NETSNMP_INTERFACE_FLAGS_HAS_LASTCHANGE)) &&
            (rowreq_ctx->data.ifOperStatus != ifentry->if_oper_status))
-            rowreq_ctx->data.ifLastChange = netsnmp_get_agent_uptime();
+            oper_changed = 1;
         netsnmp_access_interface_entry_copy(rowreq_ctx->data.ifentry, ifentry);
         
         /*
@@ -238,7 +260,13 @@ _check_interface_entry_for_updates(ifTable_rowreq_ctx *rowreq_ctx,
         CONTAINER_REMOVE(ifcontainer,ifentry);
         netsnmp_access_interface_entry_free(ifentry);
     }
-    
+
+    /*
+     * if ifOperStatus changed, update ifLastChange
+     */
+    if (oper_changed)
+        rowreq_ctx->data.ifLastChange = netsnmp_get_agent_uptime();
+
 }
 
 static void
