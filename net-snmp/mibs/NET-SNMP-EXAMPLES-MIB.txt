@@ -13,7 +13,7 @@ IMPORTS
 ;
 
 netSnmpExamples MODULE-IDENTITY
-    LAST-UPDATED "200202060000Z"
+    LAST-UPDATED "200406150000Z"
     ORGANIZATION "www.net-snmp.org"
     CONTACT-INFO    
 	 "postal:   Wes Hardaker
@@ -23,6 +23,9 @@ netSnmpExamples MODULE-IDENTITY
           email:    net-snmp-coders@lists.sourceforge.net"
     DESCRIPTION
 	"Example MIB objects for agent module example implementations"
+    REVISION     "200406150000Z"
+    DESCRIPTION
+	"Corrected notification example definitions"
     REVISION     "200202060000Z"
     DESCRIPTION
 	"First draft"
@@ -34,6 +37,10 @@ netSnmpExamples MODULE-IDENTITY
 netSnmpExampleScalars       OBJECT IDENTIFIER ::= { netSnmpExamples 1 }
 netSnmpExampleTables        OBJECT IDENTIFIER ::= { netSnmpExamples 2 }
 netSnmpExampleNotifications OBJECT IDENTIFIER ::= { netSnmpExamples 3 }
+netSnmpExampleNotificationPrefix  OBJECT IDENTIFIER
+                                  ::= { netSnmpExampleNotifications 0 }
+netSnmpExampleNotificationObjects OBJECT IDENTIFIER
+                                  ::= { netSnmpExampleNotifications 2 }
 -- netSnmpTutorial          OBJECT IDENTIFIER ::= { netSnmpExamples 4 }
 
 --
@@ -212,16 +219,51 @@ netSnmpHostRowStatus OBJECT-TYPE
 --  Example Notifications
 --
 
-netSnmpExampleNotification OBJECT-TYPE
+netSnmpExampleHeartbeatRate OBJECT-TYPE
+    SYNTAX      Integer32
+    MAX-ACCESS  accessible-for-notify
+    STATUS      current
+    DESCRIPTION
+        "A simple integer object, to act as a payload for the
+         netSnmpExampleHeartbeatNotification.  The value has
+         no real meaning, but is nominally the interval (in
+         seconds) between successive heartbeat notifications."
+::= { netSnmpExampleNotificationObjects 1 }
+
+netSnmpExampleHeartbeatName OBJECT-TYPE
     SYNTAX      SnmpAdminString
     MAX-ACCESS  accessible-for-notify
     STATUS      current
     DESCRIPTION
-        "This is a boring example that is used in the
-         agent/mibgroup/examples/notification.c to send out a
-         notification every 30 seconds.  The actual notification means
-         nothing other than 30 seconds has elapsed since the last time
-         one was sent."
+        "A simple string object, to act as an optional payload
+         for the netSnmpExampleHeartbeatNotification.  This varbind
+         is not part of the notification definition, so is optional
+         and need not be included in the notification payload. 
+         The value has no real meaning, but the romantically inclined
+         may take it to be the object of the sender's affection,
+         and hence the cause of the heart beating faster."
+::= { netSnmpExampleNotificationObjects 2 }
+
+netSnmpExampleHeartbeatNotification NOTIFICATION-TYPE
+    OBJECTS     { netSnmpExampleHeartbeatRate }
+    STATUS      current
+    DESCRIPTION
+        "An example notification, used to illustrate the
+         definition and generation of trap and inform PDUs
+         (including the use of both standard and additional
+         varbinds in the notification payload).
+         This notification will typically be sent every
+	 30 seconds, using the code found in the example module
+             agent/mibgroup/examples/notification.c"
+::= { netSnmpExampleNotificationPrefix 1 }
+    
+netSnmpExampleNotification OBJECT-TYPE
+    SYNTAX      SnmpAdminString
+    MAX-ACCESS  accessible-for-notify
+    STATUS      obsolete
+    DESCRIPTION
+        "This object was improperly defined for its original purpose,
+         and should no longer be used."
 ::= { netSnmpExampleNotifications 1 }
 
 END
