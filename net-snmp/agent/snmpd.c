@@ -519,7 +519,7 @@ main(argc, argv)
     int	arg,i;
     int ret;
     u_short dest_port = 161;
-    int dont_fork = 0;
+    int dont_fork = 0, dont_zero_log = 0;
     char logfile[300];
     char *cptr, **argvptr;
 
@@ -575,6 +575,9 @@ main(argc, argv)
                 case 'L':
                     logfile[0] = 0;
                     break;
+                case 'A':
+                    dont_zero_log = 1;
+                    break;
                 case 'h':
                     usage(argv[0]);
                     break;
@@ -622,7 +625,8 @@ main(argc, argv)
     /* open the logfile if necessary */
     if (logfile[0]) {
       close(1);
-      open(logfile,O_WRONLY|O_CREAT|O_TRUNC,0644);
+      open(logfile,O_WRONLY|O_CREAT| ((dont_zero_log) ? O_APPEND : O_TRUNC),
+           0644);
       close(2);
       dup(1);
       close(0);
