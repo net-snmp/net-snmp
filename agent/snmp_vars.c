@@ -148,8 +148,6 @@ init_snmp __P((void))
   init_kmem("/dev/kmem"); 
 
 #include "mibgroup/mib_module_inits.h"
-
-  init_extensible();
 }
 
 int KNLookup(nl, nl_which, buf, s)
@@ -248,15 +246,12 @@ Export int trapObjUnavailAlarmOidLen = sizeof(trapObjUnavailAlarmOidLen)/sizeof(
 
 
 
-#include "extensible/mibdefs.h"
-#include "extensible/snmp_vars.h"
 #include "mibgroup/snmpv2_vars.h"
 struct subtree *subtrees;   /* this is now malloced in
-                                      extensible/extensible.c */
+                                      mibgroup/extensible.c */
 
 struct subtree subtrees_old[] = {
 #include "mibgroup/mib_module_loads.h"
-#include "mibgroup/extensible_subtrees.h"
 #include "mibgroup/snmpv2_subtrees.h"
 };
 
