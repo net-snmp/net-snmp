@@ -109,7 +109,7 @@ get_target_sessions(char *taglist, TargetFilterFunction *filterfunct,
                                     (int) targaddrs->tAddress[2],
                                     (int) targaddrs->tAddress[3]);
                             memset(&thissess,0,sizeof(thissess));
-                            thissess.peername = strdup(smbuf);
+                            thissess.peername = smbuf;
                             DEBUGMSGTL(("target_sessions","  to: %s:%d (%d*256+%d)\n",
                                         smbuf,
                                         (((unsigned int)
@@ -135,14 +135,12 @@ get_target_sessions(char *taglist, TargetFilterFunction *filterfunct,
                             }
                             thissess.version = param->mpModel;
                             if (param->mpModel == SNMP_VERSION_3) {
-                                thissess.securityName =
-                                    strdup(param->secName);
+                                thissess.securityName = param->secName;
                                 thissess.securityNameLen =
                                     strlen(thissess.securityName);
                                 thissess.securityLevel = param->secLevel;
                             } else {
-                                thissess.community =
-                                    (u_char *)strdup(param->secName);
+                                thissess.community = param->secName;
                                 thissess.community_len =
                                     strlen((char *)thissess.community);
                             }

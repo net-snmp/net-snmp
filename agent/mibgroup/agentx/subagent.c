@@ -443,9 +443,9 @@ subagent_pre_init( void )
     sess.timeout = SNMP_DEFAULT_TIMEOUT;
     sess.flags  |= SNMP_FLAGS_STREAM_SOCKET;
     if ( ds_get_string(DS_APPLICATION_ID, DS_AGENT_X_SOCKET) )
-	sess.peername = strdup(ds_get_string(DS_APPLICATION_ID, DS_AGENT_X_SOCKET));
+	sess.peername = ds_get_string(DS_APPLICATION_ID, DS_AGENT_X_SOCKET);
     else
-	sess.peername = strdup(AGENTX_SOCKET);
+	sess.peername = AGENTX_SOCKET;
  
     sess.local_port  = 0;		/* client */
     sess.remote_port = AGENTX_PORT;	/* default port */
