@@ -1,6 +1,25 @@
 This file contains major changes in released revisions.  Please read
 the ChangeLog file for a more detailed listing of changes/bug fixes.
 
+*5.2.1*
+ Fixes:
+   - configure --disable-snmpv2c now works
+   - fix make test tests for rfc1213
+
+   agent:
+     - fix 64bit counter wrap detection in experimental ifTable/ifXTable
+     - bug 1034008: memory leak using SET for table_dataset
+     - patch 1052460: fix agent deadlock on exec
+     - patch 1055036: if-mib init order fix
+     - patch 1057057: ipSystemStatsTable index fix, add ipv6
+     - bug 1055781: get-next fails to step into interfaces group correctly
+     - bug 1056760: agent ignores ifspeed, type settings in snmpd.conf
+
+   MFD:
+     - Misc updates to MFD templates
+     - add auto-handling of cache update for row insert/delete
+
+
 *5.2*
  New:
     For the security parnoid (like Wes):
