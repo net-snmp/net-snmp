@@ -35,7 +35,7 @@ AC_ARG_WITH(libwrap,
 [  --with-libwrap[=LIBPATH]        Compile in libwrap (tcp_wrappers) support.],
     if test "x$withval" != "x" -a -d "$withval"; then
         LIBS="-L$withval -lwrap $LIBS"
-    elif test "x$withval" eq "xyes"; then
+    elif test "x$withval" = "xyes"; then
 	LIBS="-lwrap $LIBS"
     else
         LIBS="$withval $LIBS"
