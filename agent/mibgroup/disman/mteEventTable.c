@@ -84,9 +84,9 @@ init_mteEventTable(void)
      */
     initialize_table_mteEventTable();
 
-    snmpd_register_config_handler("trapEvent", parse_trapevent,
+    snmpd_register_config_handler("notificationEvent", parse_notificationEvent,
                                   NULL,
-                                  "trapEvent NAME TRAP_OID [[-w] EXTRA_OID ...]");
+                                  "notificationEvent NAME TRAP_OID [[-w] EXTRA_OID ...]");
 
     snmpd_register_config_handler("linkUpDownNotifications",
                                   parse_linkUpDownNotifications,
@@ -116,8 +116,8 @@ mteEventTable_handler(netsnmp_mib_handler *handler,
 void
 parse_linkUpDownNotifications(const char *token, char *line) {
     if (strncmp(line, "y", 1) == 0) {
-        parse_trapevent("trapEvent", "linkUpTrap   	 linkUp     ifIndex ifAdminStatus ifOperStatus");
-        parse_trapevent("trapEvent", "linkDownTrap 	 linkDown   ifIndex ifAdminStatus ifOperStatus");
+        parse_notificationEvent("notificationEvent", "linkUpTrap   	 linkUp     ifIndex ifAdminStatus ifOperStatus");
+        parse_notificationEvent("notificationEvent", "linkDownTrap 	 linkDown   ifIndex ifAdminStatus ifOperStatus");
 
         parse_simple_monitor("monitor", "-r 60 -e linkUpTrap \"Generate linkUp\" ifOperStatus != 2");
         parse_simple_monitor("monitor", "-r 60 -e linkDownTrap \"Generate linkDown\" ifOperStatus == 2");
@@ -125,7 +125,7 @@ parse_linkUpDownNotifications(const char *token, char *line) {
 }
 
 void
-parse_trapevent(const char *token, char *line) {
+parse_notificationEvent(const char *token, char *line) {
     char            name_buf[64];
     char            oid_name_buf[SPRINT_MAX_LEN];
     oid             oid_buf[MAX_OID_LEN];
