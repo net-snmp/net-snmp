@@ -64,7 +64,7 @@ array_qsort(void **data, int first, int last, netsnmp_container_compare *f)
             ++i;
             --j;
         }
-        else if (i == j)
+        else if (i == j) {
             ++i;
             --j;
             break;
