@@ -266,7 +266,7 @@ subagent_shutdown(int majorID, int minorID, void *serverarg, void *clientarg) {
 }
 
 void
-pre_init_subagent( void )
+subagent_pre_init( void )
 {
     struct snmp_session
                         sess,
@@ -289,7 +289,7 @@ pre_init_subagent( void )
     agentx_session = snmp_open( &sess );
 
     if ( agentx_session == NULL ) {
-	snmp_sess_perror("pre_init_subagent", &sess);
+	snmp_sess_perror("subagent_pre_init", &sess);
 	exit(1);
     }
 
