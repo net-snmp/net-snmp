@@ -280,6 +280,7 @@ static const char *api_errors[-SNMPERR_MAX+1] = {
     "Missing variables in PDU",		   /* SNMPERR_NO_VARS */
     "Bad variable type",		   /* SNMPERR_VAR_TYPE */
     "Out of memory (malloc failure)",	   /* SNMPERR_MALLOC */
+    "Kerberos related error",	           /* SNMPERR_KRB5 */
 };
 
 static const char * secLevelName[] =
