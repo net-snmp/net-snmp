@@ -488,6 +488,7 @@ var_hrswrun(struct variable *vp,
                 /* maybe be empty (even argv[0] is missing) */
                 string[0] = '\0';
                 *var_len = 0;
+                fclose(fp);
                 return string;
             }
             
