@@ -104,6 +104,9 @@ usage(void)
     fprintf(stderr,
             "  -I INOPTS\t\tToggle various defaults controlling input parsing:\n");
     snmp_in_toggle_options_usage("\t\t\t  ", stderr);
+    fprintf(stderr,
+            "  -L LOGOPTS\t\tToggle various defaults controlling logging:\n");
+    snmp_log_options_usage("\t\t\t  ", stderr);
     exit(1);
 }
 
@@ -122,7 +125,7 @@ main(int argc, char *argv[])
     /*
      * usage: snmptranslate name
      */
-    while ((arg = getopt(argc, argv, "Vhm:M:w:D:P:T:O:I:")) != EOF) {
+    while ((arg = getopt(argc, argv, "Vhm:M:w:D:P:T:O:I:L:")) != EOF) {
         switch (arg) {
         case 'h':
             usage();
@@ -217,6 +220,11 @@ main(int argc, char *argv[])
                     exit(1);
                     break;
                 }
+            }
+            break;
+        case 'L':
+            if (snmp_log_options(optarg, argc, argv) < 0) {
+                return (-1);
             }
             break;
         default:
