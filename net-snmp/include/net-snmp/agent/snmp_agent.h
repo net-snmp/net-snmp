@@ -47,7 +47,11 @@ extern          "C" {
         int             inclusive;
         int             status;
         int             index; /* index in original pdu */
-        int             repeat; /* get-bulk */
+ 
+       /* get-bulk */
+        int             repeat;
+        int             orig_repeat;
+        netsnmp_variable_list *requestvb_start;
 
         struct netsnmp_request_info_s *next;
         struct netsnmp_request_info_s *prev;

@@ -1780,7 +1780,7 @@ netsnmp_add_varbind_to_cache(netsnmp_agent_session *asp, int vbcount,
          * add the given request to the list of requests they need
          * to handle results for 
          */
-        request->requestvb = varbind_ptr;
+        request->requestvb = request->requestvb_start = varbind_ptr;
     }
     return request;
 }
@@ -1795,10 +1795,11 @@ int
 check_acm(netsnmp_agent_session *asp, u_char type)
 {
     int             view;
-    int             i;
+    int             i, j, k;
     netsnmp_request_info *request;
     int             ret = 0;
-    netsnmp_variable_list *vb;
+    netsnmp_variable_list *vb, *vb2, *vbc;
+    int             earliest = 0;
 
     for (i = 0; i <= asp->treecache_num; i++) {
         for (request = asp->treecache[i].requests_begin;
@@ -1806,18 +1807,48 @@ check_acm(netsnmp_agent_session *asp, u_char type)
             /*
              * for each request, run it through in_a_view() 
              */
-            vb = request->requestvb;
-            if (vb->type == ASN_NULL)   /* not yet processed */
-                continue;
-            view =
-                in_a_view(vb->name, &vb->name_length, asp->pdu, vb->type);
+            earliest = 0;
+            for(j = request->repeat, vb = request->requestvb_start;
+                vb && j > -1;
+                j--, vb = vb->next_variable) {
+                if (vb->type != ASN_NULL &&
+                    vb->type != ASN_PRIV_RETRY) { /* not yet processed */
+                    view =
+                        in_a_view(vb->name, &vb->name_length,
+                                  asp->pdu, vb->type);
 
-            /*
-             * if a ACM error occurs, mark it as type passed in 
-             */
-            if (view != VACM_SUCCESS) {
-                ret++;
-                snmp_set_var_typed_value(vb, type, NULL, 0);
+                    /*
+                     * if a ACM error occurs, mark it as type passed in 
+                     */
+                    if (view != VACM_SUCCESS) {
+                        ret++;
+                        if (request->repeat < request->orig_repeat) {
+                            /* basically this means a GETBULK */
+                            request->repeat++;
+                            if (!earliest) {
+                                request->requestvb = vb;
+                                earliest = 1;
+                            }
+
+                            /* ugh.  if a whole now exists, we need to
+                               move the contents up the chain and fill
+                               in at the end else we won't end up
+                               lexographically sorted properly */
+                            if (j > -1 && vb->next_variable &&
+                                vb->next_variable->type != ASN_NULL &&
+                                vb->next_variable->type != ASN_PRIV_RETRY) {
+                                for(k = j, vbc = vb, vb2 = vb->next_variable;
+                                    k > -2 && vbc && vb2;
+                                    k--, vbc = vb2, vb2 = vb2->next_variable) {
+                                    /* clone next into the current */
+                                    snmp_clone_var(vb2, vbc);
+                                    vbc->next_variable = vb2;
+                                }
+                            }
+                        }
+                        snmp_set_var_typed_value(vb, type, NULL, 0);
+                    }
+                }
             }
         }
     }
@@ -1979,7 +2010,7 @@ netsnmp_create_subtree_cache(netsnmp_agent_session *asp)
             request = netsnmp_add_varbind_to_cache(asp, vbcount, varbind_ptr,
 						   tp);
             if (request && asp->pdu->command == SNMP_MSG_GETBULK) {
-                request->repeat = bulkrep;
+                request->repeat = request->orig_repeat = bulkrep;
             }
         }
 
