@@ -193,9 +193,9 @@ void init_hr_storage (void)
 #elif defined(PAGE_SIZE)
     pagesize = PAGE_SIZE;
 #else
-  #ifndef linux
+#  ifndef linux
     pagesize = PAGESIZE;
-  #endif
+#  endif
 #endif
 #endif	/* USE_SYSCTL */
 #ifdef TOTAL_MEMORY_SYMBOL
