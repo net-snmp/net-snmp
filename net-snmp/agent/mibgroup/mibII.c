@@ -19,7 +19,7 @@
 void
 init_mibII __P((void)) {
 #ifdef USING_SYSORTABLE_MODULE
-  oid reg[] = {1,3,6,1,6,3,1};
+  static oid reg[] = {1,3,6,1,6,3,1};
   register_sysORTable(reg,7,"The Mib module for SNMPv2 entities.");
 #endif
 }

@@ -19,7 +19,7 @@
 void
 init_v2party __P((void)) {
 #ifdef USING_SYSORTABLE_MODULE
-  oid reg[] = {1,3,6,1,6,3,2};
+  static oid reg[] = {1,3,6,1,6,3,2};
   register_sysORTable(reg,7,"The Manager-to-Manager MIB module.");
 #endif
 }
