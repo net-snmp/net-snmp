@@ -169,7 +169,7 @@ init_agentx_config(void)
                                   "AgentX bind address");
     snmpd_register_config_handler("agentxperms",
                                   agentx_parse_agentx_perms, NULL,
-                                  "AgentX socket permissions");
+                                  "AgentX socket permissions: socket_perms [directory_perms] [username|userid] [groupname|groupid]");
     snmpd_register_config_handler("agentxRetries",
                                   agentx_parse_agentx_retries, NULL,
                                   "AgentX Retries");
