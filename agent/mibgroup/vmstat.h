@@ -35,11 +35,14 @@ struct variable2 extensible_vmstat_variables[] = {
   {CPUUSER, ASN_INTEGER, RONLY, var_extensible_vmstat, 1, {CPUUSER}},
   {CPUSYSTEM, ASN_INTEGER, RONLY, var_extensible_vmstat, 1, {CPUSYSTEM}},
   {CPUIDLE, ASN_INTEGER, RONLY, var_extensible_vmstat, 1, {CPUIDLE}},
+/* Future use: */
+/*
   {ERRORFLAG, ASN_INTEGER, RONLY, var_extensible_vmstat, 1, {ERRORFLAG }},
   {ERRORMSG, ASN_OCTET_STR, RONLY, var_extensible_vmstat, 1, {ERRORMSG }}
+*/
 };
 
-config_load_mib(EXTENSIBLEMIB.8, EXTENSIBLENUM+1, extensible_vmstat_variables)
+config_load_mib(EXTENSIBLEMIB.11, EXTENSIBLENUM+1, extensible_vmstat_variables)
 
 #endif
 #endif /* _MIBGROUP_VMSTAT_H */

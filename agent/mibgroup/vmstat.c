@@ -205,7 +205,7 @@ unsigned char *var_extensible_vmstat(vp, name, length, exact, var_len, write_met
       long_ret = 1;
       return((u_char *) (&long_ret));
     case ERRORNAME:    /* dummy name */
-      sprintf(errmsg,"vmstat");
+      sprintf(errmsg,"systemStats");
       *var_len = strlen(errmsg);
       return((u_char *) (errmsg));
     case SWAPIN:
@@ -253,10 +253,13 @@ unsigned char *var_extensible_vmstat(vp, name, length, exact, var_len, write_met
       long_ret = vmstat(cpuidle);
 #endif
       return((u_char *) (&long_ret));
+/* reserved for future use */
+/*
     case ERRORFLAG:
       return((u_char *) (&long_ret));
     case ERRORMSG:
       return((u_char *) (&long_ret));
+*/
   }
   return NULL;
 }
