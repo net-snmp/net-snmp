@@ -1727,7 +1727,8 @@ snmpv3_build(struct snmp_session	*session,
 	}
 	pdu->contextNameLen = session->contextNameLen;
       }
-      pdu->securityModel = session->securityModel;
+      if (pdu->securityModel == SNMP_DEFAULT_SECMODEL)
+          pdu->securityModel = session->securityModel;
       if (pdu->securityNameLen == 0 && pdu->securityName == 0) {
 	if (session->securityNameLen == 0){
 	  session->s_snmp_errno = SNMPERR_BAD_SEC_NAME;
