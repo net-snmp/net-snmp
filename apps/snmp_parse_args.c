@@ -149,7 +149,7 @@ snmp_parse_args(int argc,
 
   /* initialize session to default values */
   snmp_sess_init( session );
-  strcpy(Opts, "VhHm:M:fsSqO:P:D:dRv:p:r:t:c:Z:e:E:n:u:l:x:X:a:A:");
+  strcpy(Opts, "VhHm:M:fsSqO:P:D:dRv:p:r:t:c:Z:e:E:n:u:l:x:X:a:A:T:");
   if (localOpts) strcat(Opts, localOpts);
 
   /* get the options */
