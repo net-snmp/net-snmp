@@ -99,6 +99,11 @@ int	 get_enginetime (u_char *engineID, u_int  engineID_len,
 			     u_int *engine_boot, u_int *engine_time,
 			     u_int authenticated);
 
+int	 get_enginetime_ex (u_char *engineID, u_int  engineID_len,
+			    u_int *engine_boot, u_int *engine_time,
+			    u_int *last_engine_time,
+			    u_int authenticated);
+
 int	 set_enginetime (u_char *engineID, u_int engineID_len,
 			     u_int   engine_boot, u_int engine_time,
 			     u_int authenticated);

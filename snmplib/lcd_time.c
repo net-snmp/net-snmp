@@ -158,6 +158,102 @@ get_enginetime_quit:
 
 }  /* end get_enginetime() */
 
+/*******************************************************************-o-******
+ * get_enginetime
+ *
+ * Parameters:
+ *	*engineID
+ *	 engineID_len
+ *	*engineboot
+ *	*engine_time
+ *      
+ * Returns:
+ *	SNMPERR_SUCCESS		Success -- when a record for engineID is found.
+ *	SNMPERR_GENERR		Otherwise.
+ *
+ *
+ * Lookup engineID and return the recorded values for the
+ * <engine_time, engineboot> tuple adjusted to reflect the estimated time
+ * at the engine in question.
+ *
+ * Special case: if engineID is NULL or if engineID_len is 0 then
+ * the time tuple is returned immediately as zero.
+ *
+ * XXX	What if timediff wraps?  >shrug<
+ * XXX  Then: you need to increment the boots value.  Now.  Detecting
+ *            this is another matter.
+ */
+int
+get_enginetime_ex(	u_char	*engineID,	
+		u_int	 engineID_len,
+		u_int	*engineboot,
+		u_int	*engine_time,
+		u_int	*last_engine_time,
+		u_int   authenticated)
+{
+	int		rval	 = SNMPERR_SUCCESS;
+	time_t		timediff = 0;
+	Enginetime	e	 = NULL;
+
+
+
+	/*
+	 * Sanity check.
+	 */
+	if ( !engine_time || !engineboot || !last_engine_time) {
+		QUITFUN(SNMPERR_GENERR, get_enginetime_ex_quit);
+	}
+
+
+	/*
+	 * Compute estimated current engine_time tuple at engineID if
+	 * a record is cached for it.
+	 */
+	*last_engine_time = *engine_time = *engineboot = 0;
+
+	if ( !engineID || (engineID_len<=0) ) {
+		QUITFUN(SNMPERR_GENERR, get_enginetime_ex_quit);
+	}
+
+	if ( !(e = search_enginetime_list(engineID, engineID_len)) ) {
+		QUITFUN(SNMPERR_GENERR, get_enginetime_ex_quit);
+	}
+
+#ifdef LCD_TIME_SYNC_OPT
+        if (!authenticated || e->authenticatedFlag) {
+#endif	
+	*last_engine_time = *engine_time = e->engineTime;
+	*engineboot = e->engineBoot;
+
+	timediff = time(NULL) - e->lastReceivedEngineTime;
+#ifdef LCD_TIME_SYNC_OPT	
+        }
+#endif	
+
+	if ( timediff > (int)(ENGINETIME_MAX - *engine_time) ) {
+		*engine_time = (timediff - (ENGINETIME_MAX - *engine_time));
+
+		/* FIX -- move this check up... should not change anything
+		 * if engineboot is already locked.  ???
+		 */
+		if (*engineboot < ENGINEBOOT_MAX) {
+			*engineboot += 1;
+		}
+
+	} else {
+		*engine_time += timediff;
+	}
+
+        DEBUGMSGTL(("lcd_get_enginetime_ex", "engineID "));
+        DEBUGMSGHEX(("lcd_get_enginetime_ex", engineID, engineID_len));
+        DEBUGMSG(("lcd_get_enginetime_ex", ": boots=%d, time=%d\n", *engineboot,
+                  *engine_time));
+
+get_enginetime_ex_quit:
+	return rval;
+
+}  /* end get_enginetime_ex() */
+
 
 
 
