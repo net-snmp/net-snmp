@@ -42,6 +42,7 @@
 #include "agent_registry.h"
 #include "agent_trap.h"
 #include "mibII/sysORTable.h"
+#include "snmp_debug.h"
 
 extern struct variable2 agentx_varlist[];
 extern struct timeval   starttime;
@@ -129,6 +130,8 @@ register_agentx_list(struct snmp_session *session, struct snmp_pdu *pdu)
     struct subtree *sub;
     char buf[32];
     oid ubound = 0;
+
+    DEBUGMSGTL(("agentx:register","in register_agentx_list\n"));
     
     sp = find_agentx_session( session, pdu->sessid );
     if ( sp == NULL )
@@ -147,11 +150,17 @@ register_agentx_list(struct snmp_session *session, struct snmp_pdu *pdu)
 			 pdu->priority, pdu->range_subid, ubound, sp)) {
 
 	case MIB_REGISTERED_OK:
+				DEBUGMSGTL(("agentx:register",
+                                            "registered ok\n"));
 				return AGENTX_ERR_NOERROR;
 	case MIB_DUPLICATE_REGISTRATION:
+				DEBUGMSGTL(("agentx:register",
+                                            "duplicate registration\n"));
 				return AGENTX_ERR_DUPLICATE_REGISTRATION;
 	case MIB_REGISTRATION_FAILED:
 	default:
+				DEBUGMSGTL(("agentx:register",
+                                            "failed registration\n"));
 				return AGENTX_ERR_REQUEST_DENIED;
     }
 }
