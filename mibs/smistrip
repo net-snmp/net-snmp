@@ -20,6 +20,7 @@
 #
 
 AWK=awk
+# AWK=/usr/bin/nawk	# Solaris
 GETOPTS=getopts
 VERSION=0.2-cvs
 
@@ -45,7 +46,7 @@ do_usage () {
 
 
 do_strip () {
-    cat $1 | $AWK -vtest="$test" -vdir="$dir" -vsingle="$single" -vsuffix="$suffix" '
+    cat $1 | $AWK -v test="$test" -v dir="$dir" -v single="$single" -v suffix="$suffix" '
 
     # start of module
     /^[ \t]*[A-Za-z0-9-]* *DEFINITIONS */ {
@@ -61,7 +62,7 @@ do_strip () {
 	next
     }
 
-    /^[ \t]*(::=|DESCRIPTION|SYNTAX|(MAX-|MIN-|)ACCESS|STATUS|REFERENCE|INDEX|AUGMENTS|DEFVAL|UNITS|DISPLAY|")/ {
+    /^[ \t]*(::=|DESCRIPTION|SYNTAX|MAX-ACCESS|MIN-ACCESS|ACCESS|STATUS|REFERENCE|INDEX|AUGMENTS|DEFVAL|UNITS|DISPLAY|")/ {
 	if (collect)
 	    if (line[n-1] == "") n--
     }
@@ -144,7 +145,6 @@ while $GETOPTS Vhnm:d:x: c ; do
 done
 
 shift `expr $OPTIND - 1`
-
 
 if [ $# -eq 0 ] ; then
     do_strip -
