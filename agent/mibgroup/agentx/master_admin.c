@@ -215,6 +215,10 @@ register_agentx_list(netsnmp_session * session, netsnmp_pdu *pdu)
 
     reg->handler->myvoid = session;
     reg->global_cacheid = cacheid;
+    /*
+     * register mib. Note that for failure cases, the registration info
+     * (reg) will be freed, and thus is no longer a valid pointer.
+     */
     switch (netsnmp_register_mib(buf, NULL, 0, 1,
                                  pdu->variables->name,
                                  pdu->variables->name_length,
@@ -236,7 +240,6 @@ register_agentx_list(netsnmp_session * session, netsnmp_pdu *pdu)
         rc = AGENTX_ERR_REQUEST_DENIED;
         DEBUGMSGTL(("agentx/master", "failed registration\n"));
     }
-    netsnmp_handler_registration_free(reg);
     return rc;
 }
 
