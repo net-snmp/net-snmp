@@ -125,7 +125,7 @@ print DOTC "
 #include \"mibincl.h\"
 #include \"$outputName.h\"
 
-void init_$outputName __P((void)) {
+void init_$outputName(void) {
 /* place any initialization routines needed here */
 }
 
@@ -136,7 +136,7 @@ var_$outputName(vp, name, length, exact, var_len, write_method)
     int     *length;
     int     exact;
     int     *var_len;
-    int     (**write_method) __P((int, unsigned char *,unsigned char, int, unsigned char *,oid*, int));
+    int     (**write_method) (int, unsigned char *,unsigned char, int, unsigned char *,oid*, int);
 {
 
 $varInits
@@ -173,8 +173,8 @@ $writeInfo";
 print DOTH "
 /* function definitions */
 
-extern void   init_$outputName __P((void));
-extern unsigned char *var_$outputName __P((struct variable *, oid *, int *, int, int *, int (**write) __P((int, unsigned char *, unsigned char, int, unsigned char *, oid *, int)) ));
+extern void   init_$outputName(void);
+extern unsigned char *var_$outputName(struct variable *, oid *, int *, int, int *, int (**write) (int, unsigned char *, unsigned char, int, unsigned char *, oid *, int));
 $functionInfo
 
 /* Only load this structure when this .h file is called in the snmp_vars.c 
@@ -278,15 +278,15 @@ write_$name(action, var_val, var_val_type, var_val_len, statP, name, name_len)
 $varInits
   int size, bigsize=1000;
 
-  if (var_val_type != $typeToASN{$type}){
-      fprintf(stderr, \"write to $name not $typeToASN{$type}\\n\");
+  if (var_val_type != $typeToASN{$type}) {
+      DEBUGP(\"write to $name not $typeToASN{$type}\\n\");
       return SNMP_ERR_WRONGTYPE;
   }
-  if (var_val_len > sizeof($typeToVar{$type})){
-      fprintf(stderr,\"write to $name: bad length\\n\");
+  if (var_val_len > sizeof($typeToVar{$type})) {
+      DEBUGP(\"write to $name: bad length\\n\");
       return SNMP_ERR_WRONGLENGTH;
   }
-  if (action == COMMIT){
+  if (action == COMMIT) {
       size = sizeof($typeToVar{$type});
       asn_parse_$typeToParser{$type}(var_val, &bigsize, &var_val_type, $typeToPtr{$type}, size);
       /* Here, the variable has been stored in $typeToVar{$type} for
@@ -295,5 +295,5 @@ $varInits
   }
   return SNMP_ERR_NOERROR;
 }\n\n";
-    $functionInfo .= "int write_$name __P((int, u_char *,u_char, int, u_char *,oid*, int));\n";
+    $functionInfo .= "int write_$name(int, u_char *,u_char, int, u_char *,oid*, int);\n";
 }

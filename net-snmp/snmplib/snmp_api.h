@@ -42,6 +42,14 @@ struct snmp_pdu {
     int	    version;
 
     snmp_ipaddr  address;	/* Address of peer */
+    u_char  *contextEngineID;	/* authoritative snmpEngineID */
+    int	    contextEngineIDLen;  /* Length of contextEngineID */
+    u_char  *contextName;	/* authoritative contextName */
+    int	    contextNameLen;  /* Length of contextName */
+    u_char  *securityName;	/* on behalf of this principal */
+    int	    securityNameLen;  /* Length of securityName. */
+    int	    securityModel; 
+    int	    securityLevel;  /* noAuthNoPriv, authNoPriv, authPriv */
     oid	    *srcParty;
     int	    srcPartyLen;
     oid	    *dstParty;
@@ -66,12 +74,22 @@ struct snmp_pdu {
     long    specific_type;  /* specific type */
     u_long  time;	/* Uptime */
 
+    void * secStateRef;
+
     struct variable_list *variables;
 };
 
 struct snmp_session {
     u_char  *community;	/* community for outgoing requests. */
     int	    community_len;  /* Length of community name. */
+    u_char  *contextEngineID;	/* authoritative snmpEngineID */
+    int	    contextEngineIDLen;  /* Length of contextEngineID */
+    u_char  *contextName;	/* authoritative contextName */
+    int	    contextNameLen;  /* Length of contextName */
+    u_char  *securityName;	/* on behalf of this principal */
+    int	    securityNameLen;  /* Length of securityName. */
+    int	    securityModel; 
+    int	    securityLevel;  /* noAuthNoPriv, authNoPriv, authPriv */
     int	    retries;	/* Number of retries before timeout. */
     long    timeout;    /* Number of uS until first timeout, then exponential backoff */
     char    *peername;	/* Domain name or dotted IP address of default peer */
@@ -112,39 +130,57 @@ typedef int (*snmp_callback) __P((int, struct snmp_session *, int, struct snmp_p
 #define SNMP_DEFAULT_ENTERPRISE_LENGTH	0
 #define SNMP_DEFAULT_TIME	    0
 #define SNMP_DEFAULT_VERSION	    -1
+#define SNMP_MAX_MSG_SIZE           1200 /* this is provisional */
+#define SNMP_MAX_ENG_SIZE     256
+#define SNMP_MAX_SEC_NAME_SIZE     256
+#define SNMP_MAX_SEC_NAME_SIZE     256
+#define SNMP_MAX_CONTEXT_SIZE     256
+#define SNMP_SEC_PARAM_BUF_SIZE     256
 
 extern char *snmp_api_errstring __P((int));
 extern void snmp_perror __P((char *));
 extern void snmp_set_detail __P((char *));
 #define SNMP_DETAIL_SIZE        512
 
-/* Error return values */
-#define SNMPERR_GENERR		(-1)
-#define SNMPERR_BAD_LOCPORT	(-2)
-#define SNMPERR_BAD_ADDRESS	(-3)
-#define SNMPERR_BAD_SESSION	(-4)
-#define SNMPERR_TOO_LONG	(-5)
-#define SNMPERR_NO_SOCKET	(-6)
-#define SNMPERR_V2_IN_V1	(-7)
-#define SNMPERR_V1_IN_V2	(-8)
-#define SNMPERR_BAD_REPEATERS	(-9)
-#define SNMPERR_BAD_REPETITIONS	(-10)
-#define SNMPERR_BAD_ASN1_BUILD	(-11)
-#define SNMPERR_BAD_SENDTO	(-12)
-#define SNMPERR_BAD_PARSE	(-13)
-#define SNMPERR_BAD_VERSION	(-14)
-#define SNMPERR_BAD_SRC_PARTY	(-15)
-#define SNMPERR_BAD_DST_PARTY	(-16)
-#define SNMPERR_BAD_CONTEXT	(-17)
-#define SNMPERR_BAD_COMMUNITY	(-18)
-#define SNMPERR_NOAUTH_DESPRIV	(-19)
-#define SNMPERR_BAD_ACL		(-20)
-#define SNMPERR_BAD_PARTY	(-21)
-#define SNMPERR_ABORT		(-22)
-#define SNMPERR_UNKNOWN_PDU	(-23)
-#define SNMPERR_TIMEOUT 	(-24)
-#define SNMPERR_BAD_RECVFROM 	(-25)
-#define SNMPERR_MAX		(-25)
+/* 
+ * Error return values.
+ *
+ * XXX	These should be merged with SNMP_ERR_* defines and confined
+ *	to values < 0.  ???
+ */
+#define SNMPERR_SUCCESS			(0)  /* XXX  Non-PDU "success" code. */
+#define SNMPERR_GENERR			(-1)
+#define SNMPERR_BAD_LOCPORT		(-2)
+#define SNMPERR_BAD_ADDRESS		(-3)
+#define SNMPERR_BAD_SESSION		(-4)
+#define SNMPERR_TOO_LONG		(-5)
+#define SNMPERR_NO_SOCKET		(-6)
+#define SNMPERR_V2_IN_V1		(-7)
+#define SNMPERR_V1_IN_V2		(-8)
+#define SNMPERR_BAD_REPEATERS		(-9)
+#define SNMPERR_BAD_REPETITIONS		(-10)
+#define SNMPERR_BAD_ASN1_BUILD		(-11)
+#define SNMPERR_BAD_SENDTO		(-12)
+#define SNMPERR_BAD_PARSE		(-13)
+#define SNMPERR_BAD_VERSION		(-14)
+#define SNMPERR_BAD_SRC_PARTY		(-15)
+#define SNMPERR_BAD_DST_PARTY		(-16)
+#define SNMPERR_BAD_CONTEXT		(-17)
+#define SNMPERR_BAD_COMMUNITY		(-18)
+#define SNMPERR_NOAUTH_DESPRIV		(-19)
+#define SNMPERR_BAD_ACL			(-20)
+#define SNMPERR_BAD_PARTY		(-21)
+#define SNMPERR_ABORT			(-22)
+#define SNMPERR_UNKNOWN_PDU		(-23)
+#define SNMPERR_TIMEOUT 		(-24)
+#define SNMPERR_BAD_RECVFROM 		(-25)
+#define SNMPERR_BAD_ENG_ID 		(-26)
+#define SNMPERR_BAD_SEC_NAME 		(-27)
+#define SNMPERR_BAD_SEC_LEVEL 		(-28)
+#define SNMPERR_SC_GENERAL_FAILURE	(-29)	
+#define SNMPERR_SC_NOT_CONFIGURED	(-30)
+
+#define SNMPERR_MAX			(-30)
 
 #define non_repeaters	errstat
 #define max_repetitions errindex
@@ -250,6 +286,7 @@ void snmp_read __P((fd_set *));
 void snmp_free_pdu __P((struct snmp_pdu *));
 
 void snmp_free_var __P((struct variable_list *));
+void snmp_free_varbind(struct variable_list *var);
 
 /*
  * int snmp_select_info(numfds, fdset, timeout, block)
@@ -337,11 +374,19 @@ int snmp_get_errno __P((void));
 void snmp_set_do_debugging __P((int));
 int snmp_get_do_debugging __P((void));
 int compare __P((oid *, int, oid *, int));
-void init_snmp __P((void));
+void init_snmp __P((char *));
+u_char * snmp_pdu_build __P((struct snmp_pdu *, u_char *, int *));
+int snmpv3_parse(struct snmp_pdu *, u_char *, int *, u_char  **);
+int snmpv3_packet_build(struct snmp_pdu *pdu, u_char *packet, int *out_length, u_char *pdu_data, int pdu_data_len);
 void snmp_pdu_add_variable __P((struct snmp_pdu *, oid *, int, u_char, u_char *, int));
 int hex_to_binary __P((u_char *, u_char *));
 int ascii_to_binary __P((u_char *, u_char *));
 int snmp_add_var __P((struct snmp_pdu *, oid*, int, char, char *));
+oid  *snmp_duplicate_objid(oid *objToCopy, int);
+u_int snmp_increment_statistic(int which);
+u_int snmp_get_statistic(int which);
+void  snmp_init_statistics(void);
+  
 #ifdef __STDC__
 void DEBUGP __P((const char *, ...));
 #else
@@ -422,3 +467,25 @@ void   snmp_sess_error      __P((void *, int *, int *, char **));
  
 #endif /* SNMP_API_H */
 
+/* generic statistic counters */
+
+/* snmpv3 statistics */
+
+/* mpd stats */
+#define   STAT_SNMPUNKNOWNSECURITYMODELS     0
+#define   STAT_SNMPINVALIDMSGS               1
+#define   STAT_SNMPUNKNOWNPDUHANDLERS        2
+#define   STAT_MPD_STATS_START               STAT_SNMPUNKNOWNSECURITYMODELS
+#define   STAT_MPD_STATS_END                 STAT_SNMPUNKNOWNPDUHANDLERS
+
+/* usm stats */
+#define   STAT_USMSTATSUNSUPPORTEDSECLEVELS  3
+#define   STAT_USMSTATSNOTINTIMEWINDOWS      4
+#define   STAT_USMSTATSUNKNOWNUSERNAMES      5
+#define   STAT_USMSTATSUNKNOWNENGINEIDS      6
+#define   STAT_USMSTATSWRONGDIGESTS          7
+#define   STAT_USMSTATSDECRYPTIONERRORS      8
+#define   STAT_USM_STATS_START               STAT_USMSTATSUNSUPPORTEDSECLEVELS
+#define   STAT_USM_STATS_END                 STAT_USMSTATSDECRYPTIONERRORS
+
+#define MAX_STATS                            8

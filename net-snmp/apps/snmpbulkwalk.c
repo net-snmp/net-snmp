@@ -110,7 +110,7 @@ main(argc, argv)
     int  reps = 1000;
 
     /* get the common command line arguments */
-    arg = snmp_parse_args(argc, argv, &session);
+    arg = snmp_parse_args(argc, argv, &session,"snmpbulkwalk");
 
     /* get the initial object and subtree */
     if (arg < argc) {

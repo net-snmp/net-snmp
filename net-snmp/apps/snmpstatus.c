@@ -154,7 +154,7 @@ main(argc, argv)
     int count;
 
     /* get the common command line arguments */
-    snmp_parse_args(argc, argv, &session);
+    snmp_parse_args(argc, argv, &session, "snmpstatus");
 
     SOCK_STARTUP;
 

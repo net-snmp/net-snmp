@@ -93,6 +93,9 @@ typedef long    fd_mask;
 #include "snmp.h"
 #include "mib.h"
 #include "m2m.h"
+#include "snmpv3.h"
+#include "snmp_vars.h"
+#include "mibgroup/snmpv3/usmUser.h"
 
 #ifdef USING_V2PARTY_ALARM_MODULE
 #include "mibgroup/v2party/alarm.h"
@@ -109,6 +112,8 @@ typedef long    fd_mask;
 #include "var_struct.h"
 #include "mibgroup/struct.h"
 #include "mibgroup/util_funcs.h"
+
+#include "agent_read_config.h"
 
 #ifdef USE_LIBWRAP
 #include <syslog.h>
@@ -471,33 +476,33 @@ char *prog;
   exit(1);
 }
 
-static int agentBoots=0;
 
-void
-agentBoots_conf(word, cptr)
-  char *word;
-  char *cptr;
-{
-  agentBoots = atoi(cptr)+1;
-  DEBUGP("agentBoots: %d\n",agentBoots);
-}
 
 RETSIGTYPE
 SnmpdShutDown(a)
   int a;
 {
-  char line[512];
-  /* We've received a sigTERM.  Shutdown by calling mib-module
-     functions and sending out a shutdown trap. */
-  fprintf(stderr, "Received TERM or STOP signal...  shutting down...\n");
+	/*
+	 * We've received a sigTERM.  Shutdown by calling mib-module
+	 * functions and sending out a shutdown trap.
+	 */
+	fprintf(stderr, "Received TERM or INT signal...  shutting down...\n");
+
+	snmp_clean_persistent("snmpd");
+	shutdown_snmpv3("snmpd");
+
 #include "mib_module_shutdown.h"
-  sprintf(line, "agentBoots %d", agentBoots);
-  snmpd_store_config(line);
-  DEBUGP("sending shutdown trap\n");
-  SnmpTrapNodeDown(a);
-  DEBUGP("Bye...\n");
-  exit(1);
-}
+
+	DEBUGP("sending shutdown trap\n");
+	SnmpTrapNodeDown(a);
+
+
+	DEBUGP("Bye...\n");
+	exit(1);
+
+}  /* end SnmpdShutDown() */
+
+
 
 static RETSIGTYPE
 SnmpTrapNodeDown(a)
@@ -511,163 +516,210 @@ static int sdlist[NUM_SOCKETS], sdlen = 0;
 static int portlist[NUM_SOCKETS];
 int (*sd_handlers[NUM_SOCKETS])__P((int));
 
+
+
 int
 main(argc, argv)
     int	    argc;
     char    *argv[];
 {
-    int	arg,i;
-    int ret;
-    u_short dest_port = 161;
-    int dont_fork = 0;
-    char logfile[300];
-    char *cptr, **argvptr;
+	int             arg, i;
+	int             ret;
+	u_short         dest_port = 161;
+	int             dont_fork = 0;
+	char            logfile[300], file[512];
+	char           *cptr, **argvptr;
 
-    logfile[0] = 0;
-    optconfigfile = NULL;
-    dontReadConfigFiles = 0;
-    
+	logfile[0]		= 0;
+	optconfigfile		= NULL;
+	dontReadConfigFiles	= 0;
+
 #ifdef LOGFILE
-    strcpy(logfile,LOGFILE);
+	strcpy(logfile, LOGFILE);
 #endif
 
-    /*
-     * usage: snmpd
-     */
-    for(arg = 1; arg < argc; arg++){
-	if (argv[arg][0] == '-'){
-	    switch(argv[arg][1]){
-                case 'c':
-		    if (++arg == argc) usage(argv[0]);
-                    optconfigfile = strdup(argv[arg]);
-                    break;
-                case 'C':
-                    dontReadConfigFiles = 1;
-                    break;
-		case 'd':
-		    snmp_dump_packet++;
-		    verbose = 1;
-		    break;
-		case 'q':
-		    snmp_set_quick_print(1);
-		    break;
-		case 'D':
-		    snmp_set_do_debugging(1);
-		    break;
-                case 'p':
-		    if (++arg == argc) usage(argv[0]);
-                    dest_port = atoi(argv[arg]);
-		    if (dest_port <= 0) usage(argv[0]);
-                    break;
-		case 'a':
-		    log_addresses++;
-		    break;
-		case 'V':
-		    verbose = 1;
-		    break;
-		case 'f':
-		    dont_fork = 1;
-		    break;
-                case 'l':
-		    if (++arg == argc) usage(argv[0]);
-                    strcpy(logfile,argv[arg]);
-                    break;
-                case 'L':
-                    logfile[0] = 0;
-                    break;
-                case 'h':
-                    usage(argv[0]);
-                    break;
-                case 'v':
-                    printf("\nUCD-snmp version:  %s\n",VersionInfo);
-                    printf("Author:            Wes Hardaker\n");
-                    printf("Email:             ucd-snmp-coders@ece.ucdavis.edu\n\n");
-                    exit (0);
-                case '-':
-                  switch(argv[arg][2]){
-                    case 'v': 
-                      printf("\nUCD-snmp version:  %s\n",VersionInfo);
-                      printf("Author:            Wes Hardaker\n");
-                      printf("Email:             ucd-snmp-coders@ece.ucdavis.edu\n\n");
-                      exit (0);
-                    case 'h':
-                      usage(argv[0]);
-                      exit(0);
-                  }
-		default:
-		    printf("invalid option: %s\n", argv[arg]);
-                    usage(argv[0]);
-		    break;
-	    }
-	    continue;
+
+	/*
+	 * usage: snmpd
+	 */
+	for (arg = 1; arg < argc; arg++)
+	{
+		if (argv[arg][0] == '-') {
+			switch (argv[arg][1]) {
+			case 'c':
+				if (++arg == argc)
+					usage(argv[0]);
+				optconfigfile = strdup(argv[arg]);
+				break;
+			case 'C':
+				dontReadConfigFiles = 1;
+				break;
+			case 'd':
+				snmp_dump_packet++;
+				verbose = 1;
+				break;
+			case 'q':
+				snmp_set_quick_print(1);
+				break;
+			case 'D':
+				snmp_set_do_debugging(1);
+				break;
+			case 'p':
+				if (++arg == argc)
+					usage(argv[0]);
+				dest_port = atoi(argv[arg]);
+				if (dest_port <= 0)
+					usage(argv[0]);
+				break;
+			case 'a':
+				log_addresses++;
+				break;
+			case 'V':
+				verbose = 1;
+				break;
+			case 'f':
+				dont_fork = 1;
+				break;
+			case 'l':
+				if (++arg == argc)
+					usage(argv[0]);
+				strcpy(logfile, argv[arg]);
+				break;
+			case 'L':
+				logfile[0] = 0;
+				break;
+			case 'h':
+				usage(argv[0]);
+				break;
+			case 'v':
+				printf(
+    "\n"
+    "UCD-snmp version:  %s\n"
+    "Author:            Wes Hardaker\n"
+    "Email:             ucd-snmp-coders@ece.ucdavis.edu\n\n",
+							VersionInfo);
+				exit(0);
+			case '-':
+				switch (argv[arg][2]) {
+				case 'v':
+	    				printf(
+    "\n"
+    "UCD-snmp version:  %s\n"
+    "Author:            Wes Hardaker\n"
+    "Email:             ucd-snmp-coders@ece.ucdavis.edu\n\n",
+							VersionInfo);
+					exit(0);
+				case 'h':
+					usage(argv[0]);
+					exit(0);
+				}
+			default:
+				printf("invalid option: %s\n", argv[arg]);
+				usage(argv[0]);
+				break;
+			}
+			continue;
+		}
+	}  /* end-for */
+
+
+	/* 
+	 * Initialize a argv set to the current for restarting the agent.
+	 */
+	argvrestartp = (char **) malloc((argc + 2) * sizeof(char *));
+	argvptr = argvrestartp;
+	for (i = 0, ret = 1; i < argc; i++) {
+		ret += strlen(argv[i]) + 1;
 	}
-    }
-    /* initialize a argv set to the current for restarting the agent */
-    argvrestartp = (char **) malloc((argc+2) * sizeof (char *));
-    argvptr = argvrestartp;
-    for(i=0, ret = 1; i < argc; i++) {
-      ret += strlen(argv[i])+1;
-    }
-    argvrestart = (char *) malloc((ret));
-    argvrestartname = (char *) malloc(strlen(argv[0])+1);
-    strcpy(argvrestartname,argv[0]);
-    for(cptr = argvrestart,i = 0; i < argc; i++) {
-      strcpy(cptr,argv[i]);
-      *(argvptr++) = cptr;
-      cptr += strlen(argv[i]) + 1;
-    }
-    *cptr = 0;
-    *argvptr = NULL;
+	argvrestart = (char *) malloc((ret));
+	argvrestartname = (char *) malloc(strlen(argv[0]) + 1);
+	strcpy(argvrestartname, argv[0]);
+	for (cptr = argvrestart, i = 0; i < argc; i++) {
+		strcpy(cptr, argv[i]);
+		*(argvptr++) = cptr;
+		cptr += strlen(argv[i]) + 1;
+	}
+	*cptr = 0;
+	*argvptr = NULL;
 
-    /* open the logfile if necessary */
-    if (logfile[0]) {
-      close(1);
-      open(logfile,O_WRONLY|O_CREAT|O_TRUNC,0644);
-      close(2);
-      dup(1);
-      close(0);
-    }
+
+	/* 
+	 * Open the logfile if necessary.
+	 */
+	if (logfile[0]) {
+		close(1);
+		open(logfile, O_WRONLY | O_CREAT | O_TRUNC, 0644);
+		close(2);
+		dup(1);
+		close(0);
+	}
 #ifdef USE_LIBWRAP
-    openlog("snmpd", LOG_CONS, LOG_AUTH|LOG_INFO);
+	openlog("snmpd", LOG_CONS, LOG_AUTH | LOG_INFO);
 #endif
-    setvbuf (stdout, NULL, _IOLBF, BUFSIZ);
-    printf ("%s UCD-SNMP version %s\n", sprintf_stamp (NULL), VersionInfo);
-    if (!dont_fork && fork() != 0)   /* detach from shell */
-      exit(0);
-    init_agent();            /* register our .conf handlers */
-    register_mib_handlers(); /* snmplib .conf handlers */
-    read_premib_configs();   /* read pre-mib-reading .conf handlers */
-    init_mib();              /* initialize the mib structures */
-    update_config(0);        /* read in config files and register HUP */
-#ifdef PERSISTENTFILE
-    /* read in the persistent information cache */
-    read_config_with_type(PERSISTENTFILE, "snmpd");
-    unlink(PERSISTENTFILE);  /* nuke it now that we've read it */
+	setvbuf(stdout, NULL, _IOLBF, BUFSIZ);
+	printf("%s UCD-SNMP version %s\n", sprintf_stamp(NULL), VersionInfo);
+
+
+	/* 
+	 * Initialize the world.  Detach from the shell.
+	 */
+	if (!dont_fork && fork() != 0) {
+		exit(0);
+	}
+
+	init_snmpv3("snmpd");	/* register the v3 handlers */
+	init_agent();		/* register our .conf handlers */
+	register_mib_handlers();/* snmplib .conf handlers */
+	read_premib_configs();	/* read pre-mib-reading .conf handlers */
+	init_mib();		/* initialize the mib structures */
+	update_config(0);	/* read in config files and register HUP */
+
+
+	/* Read in the persistent information cache.
+	 */
+#ifdef PERSISTENTDIR
+	sprintf(file, "%s/snmpd.persistent.conf", PERSISTENTDIR);
+	read_config_with_type(file, "snmpd");
 #endif
-    init_snmp2p( dest_port );
-    
-    printf("Opening port(s): "); 
-    fflush(stdout);
-    if (( ret = open_port( dest_port )) > 0 )
-        sd_handlers[ret-1] = snmp_read_packet;   /* Save pointer to function */
-    open_ports_snmp2p( );
-    printf("\n");
-    fflush(stdout);
 
-    /* get current time (ie, the time the agent started) */
-    gettimeofday(&starttime, NULL);
-    starttime.tv_sec--;
-    starttime.tv_usec += 1000000L;
+	/* Open ports.
+	 */
+	init_snmp2p(dest_port);
+	printf("Opening port(s): ");
+	fflush(stdout);
+	if ((ret = open_port(dest_port)) > 0) {
+		/* Save pointer to function.
+		 */
+		sd_handlers[ret - 1] = snmp_read_packet;	
+	}
+	open_ports_snmp2p();
+	printf("\n");
+	fflush(stdout);
 
-    /* send coldstart trap via snmptrap(1) if possible */
-    send_easy_trap (0, 0);
-    signal(SIGTERM, SnmpdShutDown);
-    signal(SIGINT, SnmpdShutDown);
 
-    memset(addrCache, 0, sizeof(addrCache));
-    receive(sdlist, sdlen);
-    return 0;
-}
+	/* Get current time (ie, the time the agent started).
+	 */
+	gettimeofday(&starttime, NULL);
+	starttime.tv_sec--;
+	starttime.tv_usec += 1000000L;
+
+
+	/* Send coldstart trap via snmptrap(1) if possible.
+	 */
+	send_easy_trap(0, 0);
+	signal(SIGTERM, SnmpdShutDown);
+	signal(SIGINT, SnmpdShutDown);
+
+	memset(addrCache, 0, sizeof(addrCache));
+	receive(sdlist, sdlen);
+
+
+	return 0;
+
+}  /* end main() -- snmpd */
+
+
+
 
 int
 open_port ( dest_port )

@@ -110,7 +110,7 @@ main(argc, argv)
      * Usage: snmptest [-v 2] [-q] hostname srcParty dstParty context [objectID]
      */
 
-    snmp_parse_args(argc, argv, &session);
+    snmp_parse_args(argc, argv, &session, "snmptest");
 
     snmp_synch_setup(&session);
     ss = snmp_open(&session);

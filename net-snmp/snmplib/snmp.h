@@ -122,7 +122,7 @@ SOFTWARE.
 /* Error codes (the value of the field error-status in PDUs) */
 
 /* in SNMPv1, SNMPsec, SNMPv2p, SNMPv2c, SNMPv2u, SNMPv2*, and SNMPv3 PDUs */
-#define SNMP_ERR_NOERROR                (0)
+#define SNMP_ERR_NOERROR                (0)	/* XXX  Used only for PDUs? */
 #define SNMP_ERR_TOOBIG	                (1)
 #define SNMP_ERR_NOSUCHNAME             (2)
 #define SNMP_ERR_BADVALUE               (3)
@@ -190,6 +190,10 @@ SOFTWARE.
 #define SNMP_SEC_LEVEL_NOAUTH		1
 #define SNMP_SEC_LEVEL_AUTHNOPRIV	2
 #define SNMP_SEC_LEVEL_AUTHPRIV		3
+
+#define SNMP_MSG_FLAG_AUTH_BIT          0x01
+#define SNMP_MSG_FLAG_PRIV_BIT          0x02
+#define SNMP_MSG_FLAG_RPRT_BIT          0x04
 
 /* view status */
 #define SNMP_VIEW_INCLUDED		1
