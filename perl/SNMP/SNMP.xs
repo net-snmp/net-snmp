@@ -2431,10 +2431,14 @@ int arg;
 	    goto not_there;
 #endif
 	if (strEQ(name, "SNMP_DEFAULT_VERSION"))
+#ifdef DEFAULT_SNMP_VERSION
+	    return DEFAULT_SNMP_VERSION;
+#else
 #ifdef SNMP_DEFAULT_VERSION
 	    return SNMP_DEFAULT_VERSION;
 #else
 	    goto not_there;
+#endif
 #endif
 	break;
     case 'T':

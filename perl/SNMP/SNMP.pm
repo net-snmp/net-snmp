@@ -386,7 +386,8 @@ sub new {
    $this->{Version} ||= 
      NetSNMP::default_store::netsnmp_ds_get_int(NetSNMP::default_store::NETSNMP_DS_LIBRARY_ID, 
 				      NetSNMP::default_store::NETSNMP_DS_LIB_SNMPVERSION) ||
-					SNMP::SNMP_DEFAULT_VERSION;
+					SNMP::SNMP_DEFAULT_VERSION();
+   print $this->{Version},"\n";
    if ($this->{Version} eq 128) {
        # special handling of the bogus v1 definition.
        $this->{Version} = 1;
