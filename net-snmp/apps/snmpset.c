@@ -68,7 +68,7 @@ SOFTWARE.
 #include "view.h"
 #include "acl.h"
 
-extern int  errno;
+int failures = 0;
 
 int main __P((int, char **));
 void snmp_add_var __P((struct snmp_pdu *, oid*, int, char, char *));
@@ -104,8 +104,7 @@ main(argc, argv)
     int name_length;
     int status;
     int version = 2;
-    int port_flag = 0;
-    int dest_port = 0;
+    int dest_port = SNMP_PORT;
     u_long      srcclock = 0, dstclock = 0;
     int clock_flag = 0;
     oid src[MAX_NAME_LEN], dst[MAX_NAME_LEN], context[MAX_NAME_LEN];
@@ -130,7 +129,6 @@ main(argc, argv)
 		    snmp_set_quick_print(1);
 		    break;
                 case 'p':
-                    port_flag++;
                     dest_port = atoi(argv[++arg]);
                     break;
                 case 't':
@@ -154,6 +152,8 @@ main(argc, argv)
                     break;
 		default:
 		    printf("invalid option: -%c\n", argv[arg][1]);
+		    usage();
+		    exit(1);
 		    break;
 	    }
 	    continue;
@@ -167,19 +167,19 @@ main(argc, argv)
 	    if (read_party_database(ctmp) != 0){
 		fprintf(stderr,
 			"Couldn't read party database from %s\n",ctmp);
-		exit(0);
+		exit(1);
 	    }
             sprintf(ctmp,"%s/context.conf",SNMPLIBPATH);
 	    if (read_context_database(ctmp) != 0){
 		fprintf(stderr,
 			"Couldn't read context database from %s\n",ctmp);
-		exit(0);
+		exit(1);
 	    }
             sprintf(ctmp,"%s/acl.conf",SNMPLIBPATH);
 	    if (read_acl_database(ctmp) != 0){
 		fprintf(stderr,
 			"Couldn't read access control database from %s\n",ctmp);
-		exit(0);
+		exit(1);
 	    }
             if (!strcasecmp(argv[arg], "noauth")){
                 trivialSNMPv2 = TRUE;
@@ -304,8 +304,10 @@ main(argc, argv)
 
     memset(&session, 0, sizeof(struct snmp_session));
     session.peername = hostname;
-    if (port_flag)
-        session.remote_port = dest_port;
+    session.remote_port = dest_port;
+    session.retries = retransmission;
+    session.timeout = timeout;
+    session.authenticator = NULL;
 
     if (version == 1){
         session.version = SNMP_VERSION_1;
@@ -320,15 +322,12 @@ main(argc, argv)
         session.context = context;
         session.contextLen = contextlen;
     }
-    session.retries = retransmission;
-    session.timeout = timeout;
 
-    session.authenticator = NULL;
     snmp_synch_setup(&session);
     ss = snmp_open(&session);
     if (ss == NULL){
 	printf("Couldn't open snmp\n");
-	exit(-1);
+	exit(1);
     }
 
     pdu = snmp_pdu_create(SET_REQ_MSG);
@@ -337,10 +336,14 @@ main(argc, argv)
 	name_length = MAX_NAME_LEN;
 	if (!read_objid(names[count], name, &name_length)){
 	    printf("Invalid object identifier: %s\n", names[count]);
+	    failures++;
 	}
-	
-	snmp_add_var(pdu, name, name_length, types[count], values[count]);
+	else
+	    snmp_add_var(pdu, name, name_length, types[count], values[count]);
     }
+
+    if (failures)
+	exit(1);
 
 retry:
     status = snmp_synch_response(ss, pdu, &response);
@@ -426,8 +429,13 @@ snmp_add_var(pdu, name, name_length, type, value)
 	    } else if (type == 'x'){
 		vars->val_len = hex_to_binary((u_char *)value, buf);
 	    }
+	    if (vars->val_len < 0) {
+		fprintf (stderr, "Bad value: %s\n", value);
+		failures++;
+		vars->val_len = 0;
+	    }
 	    vars->val.string = (u_char *)malloc(vars->val_len);
-          memmove(vars->val.string, buf, vars->val_len);
+            memmove(vars->val.string, buf, vars->val_len);
 	    break;
 	case 'n':
 	    vars->type = NULLOBJ;
@@ -440,7 +448,7 @@ snmp_add_var(pdu, name, name_length, type, value)
 	    read_objid(value, (oid *)buf, &vars->val_len);
 	    vars->val_len *= sizeof(oid);
 	    vars->val.objid = (oid *)malloc(vars->val_len);
-          memmove(vars->val.objid, buf, vars->val_len);
+            memmove(vars->val.objid, buf, vars->val_len);
 	    break;
 	case 't':
 	    vars->type = TIMETICKS;
@@ -456,7 +464,7 @@ snmp_add_var(pdu, name, name_length, type, value)
 	    break;
 	default:
 	    printf("Internal error in type switching\n");
-	    exit(-1);
+	    exit(1);
     }
 }
 

@@ -41,7 +41,6 @@ PERFORMANCE OF THIS SOFTWARE.
 # include <sys/vfs.h>
 # include <unistd.h>
 # include <ctype.h>
-# define sunV3
 # include <stdlib.h>
 # include <pwd.h>
 # include <sys/time.h>

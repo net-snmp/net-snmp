@@ -166,7 +166,7 @@ unsigned char *var_extensible_loadave(vp, name, length, exact, var_len, write_me
   }
 #else
   if (KNLookup(NL_AVENRUN,(char *) avenrun, sizeof(double)*3) == 0)
-    return(0);
+    return NULL;
 #endif /* !linux */
 #endif /* !HAVE_GETLOADAVG */
 #endif /* HAVE_GETLOADAVG */

@@ -43,13 +43,12 @@ int snmp_outsetrequests = 0;
 int snmp_outgetresponses = 0;
 int snmp_outtraps = 0;
 
-/* agents startup time stamp: */
-static unsigned long uptime_stamp;
 
 int snmp_enableauthentraps = 2;		/* default: 2 == disabled */
 char *snmp_trapsink;
 char *snmp_trapcommunity;
 
+static int header_snmp __P((struct variable *, oid *, int *, int, int *, int (**write) __P((int, u_char *, u_char, int, u_char *, oid *, int)) ));
 
 	/*********************
 	 *
@@ -61,7 +60,7 @@ char *snmp_trapcommunity;
 #define MATCH_FAILED	1
 #define MATCH_SUCCEEDED	0
 
-int
+static int
 header_snmp(vp, name, length, exact, var_len, write_method)
     register struct variable *vp;    /* IN - pointer to variable entry that points here */
     oid     *name;	    /* IN/OUT - input name requested, output name found */

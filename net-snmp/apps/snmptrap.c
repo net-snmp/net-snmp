@@ -25,14 +25,17 @@ SOFTWARE.
 ******************************************************************/
 #include <config.h>
 
+#include <ctype.h>
+#ifdef HAVE_STDLIB_H
+#include <stdlib.h>
+#endif
+#ifdef HAVE_UNISTD_H
+#include <unistd.h>
+#endif
 #ifdef HAVE_STRINGS_H
 #include <strings.h>
 #else
 #include <string.h>
-#endif
-#include <ctype.h>
-#ifdef HAVE_STDLIB_H
-#include <stdlib.h>
 #endif
 #include <sys/types.h>
 #if HAVE_NETINET_IN_H

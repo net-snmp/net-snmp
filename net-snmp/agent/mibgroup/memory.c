@@ -271,7 +271,7 @@ unsigned char *var_extensible_mem(vp, name, length, exact, var_len, write_method
 #else
       /* long_ret = pagetok((int) total.t_rm); */
       if(KNLookup(NL_PHYSMEM,(int *) &result,sizeof(result)) == NULL)
-        return(0);
+        return NULL;
       long_ret = result*1000;
 #endif
       return((u_char *) (&long_ret));
@@ -310,9 +310,10 @@ unsigned char *var_extensible_mem(vp, name, length, exact, var_len, write_method
       if ((long_ret > minimumswap)?0:1)
         sprintf(errmsg,"Running out of swap space (%d)",getswap(SWAPGETLEFT));
       else
-        errmsg[0] = NULL;
+        errmsg[0] = 0;
       *var_len = strlen(errmsg);
       return((u_char *) (errmsg));
   }
+  return NULL;
 }
 

@@ -8,7 +8,6 @@
 config_require(ip)
 
 void init_var_route __P((void));
-static void Route_Scan_Reload __P((void));
 void string_append_int __P((char *, int));
 #ifdef RTENTRY_4_4
 void load_rtentries __P((struct radix_node *));

@@ -1,54 +1,6 @@
 : maketarget
 DIRS=`find . -name targets -prune -o -type d ! -name . -print | sed s/..//`
-TARGET=${1-`uname -s`-`uname -m`-`uname -r`}
-echo Target directory: $TARGET
-echo Sub directories: $DIRS
-[ -d targets ] || mkdir targets
-cd targets
-if [ -d $TARGET ]
-then
-  /bin/echo Target already exists. Do you want to rebuild it\? '[y]' \\c
-  read ans
-  case $ans in
-  "" | y* | Y* )
-    echo OK - expect some warning messages ...
-    ;;
-  n* | N* )
-    exit 0
-    ;;
-  *)
-    echo Bummer.....
-    exit 1
-    ;;
-  esac
-fi
-echo Creating target directory: $TARGET
-[ -d $TARGET ] || mkdir $TARGET
-cd $TARGET
-for f in ../../* ; do [ -d $f ] || ln -s $f . ; done
-mkdir $DIRS
-for f in $DIRS
-do
-  case $f in
-  */*/*)
-    echo Too deep nesting...
-    exit 1
-    ;;
-  */*)
-    cd $f
-    for f in ../../../../$f/* ; do [ -d $f ] || ln -s $f . ; done
-    cd ../..
-    ;;
-  *)
-    cd $f
-    for f in ../../../$f/* ; do [ -d $f ] || ln -s $f . ; done
-    cd ..
-    ;;
-  esac
-done
-: maketarget
-DIRS=`find . -name targets -prune -o -type d ! -name . -print | sed s/..//`
-TARGET=${1-`uname -s`-`uname -m`-`uname -r`}
+TARGET=${1-`./config.guess`}
 echo Target directory: $TARGET
 echo Sub directories: $DIRS
 [ -d targets ] || mkdir targets

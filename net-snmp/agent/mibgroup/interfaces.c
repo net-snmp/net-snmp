@@ -34,12 +34,14 @@ int header_interfaces __P((struct variable *, oid *, int *, int, int *, int (**w
 int header_ifEntry __P((struct variable *, oid *, int *, int, int *, int (**write) __P((int, u_char *, u_char,int, u_char *, oid *, int)) ));
 extern u_char	*var_ifEntry __P((struct variable *, oid *, int *, int, int *, int (**write) __P((int, u_char *, u_char,int, u_char *, oid *, int)) ));
 
+#ifndef solaris2
 #if defined(sunV3) || defined(linux)
 static int Interface_Scan_By_Index __P((int, char *, struct ifnet *));
 #else
 static int Interface_Scan_By_Index __P((int, char *, struct ifnet *, struct in_ifaddr *));
 #endif
 static int Interface_Get_Ether_By_Index __P((int, u_char *));
+#endif
 
 	/*********************
 	 *
@@ -200,7 +202,7 @@ var_ifEntry(vp, name, length, exact, var_len, write_method)
 {
     static struct ifnet ifnet;
     register int interface;
-#ifndef sunV3
+#if !(defined(linux) || defined(sunV3))
     static struct in_ifaddr in_ifaddr;
 #endif /* sunV3 */
     static char Name[16];
@@ -213,7 +215,7 @@ var_ifEntry(vp, name, length, exact, var_len, write_method)
     if ( interface == MATCH_FAILED )
 	return NULL;
 
-#ifdef sunV3
+#if defined(linux) || defined(sunV3)
     Interface_Scan_By_Index(interface, Name, &ifnet);   
 #else 
     Interface_Scan_By_Index(interface, Name, &ifnet, &in_ifaddr);
@@ -681,7 +683,7 @@ var_ifEntry(vp, name, length, exact, var_len, write_method)
 
 #ifndef solaris2
 
-#ifndef sunV3
+#if !(defined(linux) || defined(sunV3))
 static struct in_ifaddr savein_ifaddr;
 #endif
 static struct ifnet *ifnetaddr, saveifnet, *saveifnetaddr;
@@ -982,7 +984,7 @@ struct in_ifaddr *Retin_ifaddr;
 
 
 
-#ifdef sunV3
+#if defined(linux) || defined(sunV3)
 
 static int Interface_Scan_By_Index(Index, Name, Retifnet)
 int Index;
@@ -1027,10 +1029,10 @@ int Interface_Scan_Get_Count __P((void))
 
 	if (!Interface_Count) {
 	    Interface_Scan_Init();
-#ifdef sunV3
-	    while (Interface_Scan_Next((short *)0, (char *)0, (struct ifnet *)0) != 0) {
+#if defined(linux) || defined(sunV3)
+	    while (Interface_Scan_Next(NULL, NULL, NULL) != 0) {
 #else
-	    while (Interface_Scan_Next((short *)0, (char *)0, (struct ifnet *)0, (struct in_ifaddr *)0) != 0) {
+	    while (Interface_Scan_Next(NULL, NULL, NULL, NULL) != 0) {
 #endif
 		Interface_Count++;
 	    }
@@ -1056,10 +1058,10 @@ u_char *EtherAddr;
 
 	    Interface_Scan_Init();
 
-#ifdef sunV3
-	    while (Interface_Scan_Next((short *)&i, (char *)0, (struct ifnet *)0) != 0) {
+#if defined(linux) || defined(sunV3)
+	    while (Interface_Scan_Next((short *)&i, NULL, NULL) != 0) {
 #else
-	    while (Interface_Scan_Next((short *)&i, (char *)0, (struct ifnet *)0, (struct in_ifaddr *)0) != 0) {
+	    while (Interface_Scan_Next((short *)&i, NULL, NULL, NULL) != 0) {
 #endif
 		if (i == Index) break;
 	    }

@@ -187,6 +187,8 @@ void snmp_read __P((fd_set *));
  */
 void snmp_free_pdu __P((struct snmp_pdu *));
 
+void snmp_free_var __P((struct variable_list *));
+
 /*
  * int snmp_select_info(numfds, fdset, timeout, block)
  * int *numfds;

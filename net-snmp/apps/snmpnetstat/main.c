@@ -100,9 +100,6 @@ int	sflag;
 int	interval;
 char	*interface;
 
-int debug = 0;
-
-
 struct snmp_session *Session;
 int print_errors = 0;
 
@@ -137,6 +134,9 @@ main(argc, argv)
     struct hostent *hp;
     in_addr_t destAddr;
     int arg;
+#ifdef _DEBUG_MALLOC_INC
+    unsigned long histid1, histid2, orig_size, current_size;
+#endif
     
     init_mib();
     /*
@@ -198,7 +198,7 @@ main(argc, argv)
                         if ((tp = name2protox(argv [arg])) == NULLPROTOX) {
                                 fprintf(stderr, "%s: unknown or uninstrumented protocol\n",
                                         argv [arg]);
-                                exit(10);
+                                exit(1);
                         }
                         break;
 
@@ -225,17 +225,17 @@ main(argc, argv)
 	    if (read_party_database("/etc/party.conf") > 0){
 		fprintf(stderr,
 			"Couldn't read party database from /etc/party.conf\n");
-		exit(0);
+		exit(1);
 	    }
 	    if (read_context_database("/etc/context.conf") > 0){
 		fprintf(stderr,
 			"Couldn't read context database from /etc/context.conf\n");
-		exit(0);
+		exit(1);
 	    }
 	    if (read_acl_database("/etc/acl.conf") > 0){
 		fprintf(stderr,
 			"Couldn't read access control database from /etc/acl.conf\n");
-		exit(0);
+		exit(1);
 	    }
 	    
 	    if (!strcasecmp(argv[arg], "noauth")){
@@ -372,17 +372,12 @@ main(argc, argv)
     Session = snmp_open(&session);
     if (Session == NULL){
 	printf("Couldn't open snmp\n");
-	exit(-1);
+	exit(1);
     }
-    if (tp) {
-	if (tp->pr_stats)
-	    (*tp->pr_stats)();
-	else
-	    printf("%s: no stats routine\n", tp->pr_name);
-	exit(0);
-    }
-    
-    
+
+#ifdef _DEBUG_MALLOC_INC
+    orig_size = malloc_inuse(&histid1);
+#endif
     
     /*
      * Keep file descriptors open to avoid overhead
@@ -390,26 +385,34 @@ main(argc, argv)
      */
     sethostent(1);
     setnetent(1);
+    setprotoent(1);
+    setservent(1);
+
+    if (tp) {
+	if (tp->pr_stats)
+	    (*tp->pr_stats)();
+	else {
+	    printf("%s: no stats routine\n", tp->pr_name);
+	    exit(1);
+	}
+    }
     if (iflag) {
 	intpr(interval);
-	exit(0);
     }
     if (oflag) {
 	intpro(interval);
-	exit(0);
     }
     if (rflag) {
 	if (sflag)
 	    rt_stats();
 	else
 	    routepr();
-	exit(0);
     }
     
-    setprotoent(1);
-    setservent(1);
+    if (tp || iflag || rflag || oflag)
+	exit(0);
+
     while ((p = getprotoent())) {
-	
 	for (tp = protox; tp->pr_name; tp++)
 	    if (strcmp(tp->pr_name, p->p_name) == 0)
 		break;
@@ -423,6 +426,17 @@ main(argc, argv)
 		(*tp->pr_cblocks)();
     }
     endprotoent();
+    endservent();
+    endnetent();
+    endhostent();
+
+    snmp_close(Session);
+
+#ifdef _DEBUG_MALLOC_INC
+    current_size = malloc_inuse(&histid2);
+    if (current_size != orig_size) malloc_list(2, histid1, histid2);
+#endif
+
     exit(0);
 }
 

@@ -120,24 +120,18 @@ PERFORMANCE OF THIS SOFTWARE.
 #include "../snmp_vars.h"
 #include "ip.h"
 #include "../kernel.h"
+#include "interfaces.h"
 
 #ifndef  MIN
 #define  MIN(a,b)                     (((a) < (b)) ? (a) : (b))
 #endif
 
-#if __STDC__
-void Interface_Scan_Init(void);
-#if defined(sunV3) || defined(linux)
-int Interface_Scan_Next(short *Index, char *Name, struct ifnet *Retifnet);
-#else
-int Interface_Scan_Next(short *Index, char *Name, struct ifnet *Retifnet,
-			struct in_ifaddr *Retin_ifaddr);
-#endif
-#endif
 
+#ifndef solaris2
+static void Route_Scan_Reload __P((void));
 static RTENTRY **rthead=0;
 static int rtsize=0, rtallocate=0;
-
+#endif
 
 #if !(defined(linux) || defined(solaris2))
 static struct nlist nl_var_route[] = {
@@ -537,7 +531,9 @@ int		(**write_method) __P((int, u_char *, u_char, int, u_char *, oid *, int));
 
 #endif /* solaris2 - var_IProute */
 
+#ifndef solaris2
 static int qsort_compare __P((RTENTRY **, RTENTRY **));
+#endif
 
 #if defined(RTENTRY_4_4) || defined(RTENTRY_RT_NEXT)
 
@@ -944,6 +940,7 @@ static void Route_Scan_Reload __P((void))
 #endif
 
 
+#ifndef solaris2
 /*
  *	Create a host table
  */
@@ -970,3 +967,4 @@ RTENTRY **r1, **r2;
 	if (dst1 > dst2) return(1);
 	return(-1);
 }
+#endif /* solaris2 */

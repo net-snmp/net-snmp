@@ -49,8 +49,6 @@ int header_system __P((struct variable *,oid *, int *, int, int *, int (**write)
 
 void init_system()
 {
-  struct extensible extmp;
-
 #ifdef HAVE_UNAME
   struct utsname utsname;
 
@@ -58,6 +56,8 @@ void init_system()
   sprintf(version_descr, "%s %s %s %s %s", utsname.sysname, utsname.nodename,
           utsname.release, utsname.version, utsname.machine);
 #else
+  struct extensible extmp;
+
   /* set default values of system stuff */
   sprintf(extmp.command,"%s -a",UNAMEPROG);
   /* setup defaults */

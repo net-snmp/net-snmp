@@ -32,6 +32,7 @@ static void
 linux_read_icmp_stat __P((struct icmp_mib *));
 #endif
 
+static int header_icmp __P((struct variable *, oid *, int *, int, int *, int (**write) __P((int, u_char *, u_char, int, u_char*, oid *, int)) ));
 
 	/*********************
 	 *
@@ -50,7 +51,7 @@ void	init_icmp( )
 #define MATCH_FAILED	1
 #define MATCH_SUCCEEDED	0
 
-int
+static int
 header_icmp(vp, name, length, exact, var_len, write_method)
     register struct variable *vp;    /* IN - pointer to variable entry that points here */
     oid     *name;	    /* IN/OUT - input name requested, output name found */

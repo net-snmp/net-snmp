@@ -34,9 +34,9 @@ SOFTWARE.
 #include <config.h>
 
 #if STDC_HEADERS
-#include <string.h>
 #include <stdlib.h>
 #include <unistd.h>
+#include <string.h>
 #endif
 
 #include <stdio.h>
@@ -207,7 +207,7 @@ protopr __P((void))
 	}
 	vp = response->variables;
 	if (vp->name_length != 20 ||
-          memcmp(vp->name, oid_tcpconntable, sizeof(oid_tcpconntable))){
+            memcmp(vp->name, oid_tcpconntable, sizeof(oid_tcpconntable))){
 		break;
 	}
 	
@@ -216,7 +216,7 @@ protopr __P((void))
 
 	instance = vp->name + 10;
 	for(tp = tcpconn; tp != NULL; tp = tp->next){
-          if (!memcmp(instance, tp->instance, sizeof(tp->instance)))
+	    if (!memcmp(instance, tp->instance, sizeof(tp->instance)))
 		    break;
 	}
 	if (tp == NULL){
@@ -229,9 +229,9 @@ protopr __P((void))
 		tp->next = newp;
 	    }
 	    tp = newp;
-          memset(tp, 0, sizeof(*tp));
+	    memset(tp, 0, sizeof(*tp));
 	    tp->next = NULL;
-          memmove(tp->instance, instance, sizeof(tp->instance));
+	    memmove(tp->instance, instance, sizeof(tp->instance));
 	}
 
 	if (vp->name[ENTRY] == TCPCONN_STATE){
@@ -241,7 +241,7 @@ protopr __P((void))
 	}
 
 	if (vp->name[ENTRY] == TCPCONN_LOCADDR){
-          memmove(&tp->localAddress, vp->val.string, sizeof(u_long));
+            memmove(&tp->localAddress, vp->val.string, sizeof(u_long));
 	    tp->locAddrSet = 1;
 
 	}
@@ -253,7 +253,7 @@ protopr __P((void))
 	}
 
 	if (vp->name[ENTRY] == TCPCONN_REMADDR){
-          memmove(&tp->remoteAddress, vp->val.string, sizeof(u_long));
+            memmove(&tp->remoteAddress, vp->val.string, sizeof(u_long));
 	    tp->remAddrSet = 1;
 
 	}
@@ -263,17 +263,21 @@ protopr __P((void))
 	    tp->remPortSet = 1;
 
 	}
-
+	snmp_free_pdu(response);
+	response = NULL;
     }
+    if (response) snmp_free_pdu(response);
 
-    for(first = 1, tp = tcpconn; tp != NULL; tp = tp->next){
+    for(first = 1, tp = tcpconn, newp = NULL; tp != NULL; tp = tp->next){
+	if (newp) free(newp);
+	newp = tp;
 	if (!(tp->stateSet && tp->locAddrSet
 	    && tp->locPortSet && tp->remAddrSet && tp->remPortSet)){
 		printf("incomplete entry\n");
 		continue;
 	}
 	if (!aflag && tp->state == MIB_TCPCONNSTATE_LISTEN)
-		    continue;
+	    continue;
 	if (first){
 	    printf("Active Internet Connections");
 	    if (aflag)
@@ -293,6 +297,7 @@ protopr __P((void))
 	    printf(" %s", tcpstates[tp->state]);
 	putchar('\n');
     }
+    if(newp) free(newp);
 
 }
 
@@ -321,6 +326,7 @@ udp_stats __P((void))
 	    putchar('\t');
 	    printf(sp->description, *var->val.integer, plural((int)*var->val.integer));
 	    putchar('\n');
+	    snmp_free_var(var);
 	}
 	sp++;
     }
@@ -351,6 +357,7 @@ tcp_stats __P((void))
 	    putchar('\t');
 	    printf(sp->description, *var->val.integer, plural((int)*var->val.integer));
 	    putchar('\n');
+	    snmp_free_var(var);
 	}
 	sp++;
     }
@@ -381,6 +388,7 @@ ip_stats __P((void))
 	    putchar('\t');
 	    printf(sp->description, *var->val.integer, plural((int)*var->val.integer));
 	    putchar('\n');
+	    snmp_free_var(var);
 	}
 	sp++;
     }
@@ -412,6 +420,7 @@ icmp_stats __P((void))
 	    putchar('\t');
 	    printf(sp->description, *var->val.integer, plural((int)*var->val.integer));
 	    putchar('\n');
+	    snmp_free_var(var);
 	}
 	sp++;
     }
@@ -431,6 +440,7 @@ icmp_stats __P((void))
 	    printf(sp->description, *var->val.integer, plural((int)*var->val.integer));
 	    putchar('\n');
 	}
+	if (var) snmp_free_var(var);
 	sp++;
     }
 
@@ -449,6 +459,7 @@ icmp_stats __P((void))
 	    printf(sp->description, *var->val.integer, plural((int)*var->val.integer));
 	    putchar('\n');
 	}
+	if (var) snmp_free_var(var);
 	sp++;
     }
 }
