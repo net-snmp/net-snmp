@@ -550,7 +550,7 @@ netsnmp_insert_table_row(netsnmp_request_info *request,
     oid      base_oid[] = {0, 0};	/* Make sure index OIDs are legal! */
     oid      this_oid[MAX_OID_LEN];
     oid      that_oid[MAX_OID_LEN];
-    int      this_oid_len, that_oid_len;
+    size_t   this_oid_len, that_oid_len;
 
     if (!request)
         return;
