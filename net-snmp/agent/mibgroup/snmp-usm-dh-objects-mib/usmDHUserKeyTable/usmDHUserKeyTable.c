@@ -47,7 +47,6 @@ init_usmDHUserKeyTable(void)
      */
     if (should_init("usmDHUserKeyTable")) {
         initialize_table_usmDHUserKeyTable();
-        init_dh_params();
     }
 }
 

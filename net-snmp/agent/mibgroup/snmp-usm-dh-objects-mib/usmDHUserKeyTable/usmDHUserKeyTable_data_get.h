@@ -19,8 +19,6 @@
 extern          "C" {
 #endif
 
-    void init_dh_params(void);
-    
     /*
      *********************************************************************
      * GET function declarations
