@@ -3,7 +3,12 @@
 #include <signal.h>
 #include <ctype.h>
 
-#include "common_header.h"
+#include <sys/time.h>
+#include "m2m.h"
+#include "mibincl.h"
+
+/* #include "common_header.h" */
+
 #include "read_config.h"
 #include "mib_module_includes.h"
 #include "mib_module_config.h"
