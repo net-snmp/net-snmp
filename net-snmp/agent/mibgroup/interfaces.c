@@ -62,7 +62,7 @@ header_interfaces(vp, name, length, exact, var_len, write_method)
     oid newname[MAX_NAME_LEN];
     int result;
 #ifdef DODEBUG
-    char c_oid[MAX_NAME_LENGTH];
+    char c_oid[1024];
 
     sprint_objid (c_oid, name, *length);
     printf ("var_interfaces: %s %d\n", c_oid, exact);
@@ -97,7 +97,7 @@ header_ifEntry(vp, name, length, exact, var_len, write_method)
     register int	interface;
     int result, count;
 #ifdef DODEBUG
-    char c_oid[MAX_NAME_LENGTH];
+    char c_oid[1024];
 
     sprint_objid (c_oid, name, *length);
     printf ("var_ifEntry: %s %d\n", c_oid, exact);
@@ -560,7 +560,6 @@ var_ifEntry(vp, name, length, exact, var_len, write_method)
     int                 exact;
     int                 *var_len;
     int                 (**write_method)();
-variable, otherwise 0 */
 {
     register char       *cp;
     register int        interface;
