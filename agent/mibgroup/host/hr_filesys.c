@@ -85,6 +85,15 @@ struct mnttab  *HRFS_entry = &HRFS_entry_struct;
 #define	HRFS_type	mnt_fstype
 #define	HRFS_statfs	statvfs
 
+#elif defined(HAVE_STATVFS) && defined(__NetBSD__)
+
+static struct statvfs	*fsstats = NULL;
+struct statvfs		*HRFS_entry;
+static int		fscount;
+#define HRFS_mount	f_mntonname
+#define	HRFS_name	f_mntfromname
+#define HRFS_statfs	statvfs
+#define	HRFS_type	f_fstypename
 #elif defined(HAVE_GETFSSTAT)
 static struct statfs *fsstats = 0;
 static int      fscount;
@@ -447,7 +456,9 @@ var_hrfilesys(struct variable *vp,
         return (u_char *) fsys_type_id;
 
     case HRFSYS_ACCESS:
-#if HAVE_GETFSSTAT
+#if defined(HAVE_STATVFS) && defined(__NetBSD__)
+	long_return = HRFS_entry->f_flag & MNT_RDONLY ? 2 : 1;
+#elif defined(HAVE_GETFSSTAT)
         long_return = HRFS_entry->f_flags & MNT_RDONLY ? 2 : 1;
 #elif defined(cygwin)
         long_return = 1;
