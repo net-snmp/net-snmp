@@ -11,19 +11,8 @@
  * Niels Baggesen (Niels.Baggesen@uni-c.dk), 1999.
  */
 
-#include <stdio.h>
-#include <stdlib.h>
-#include <string.h>
-#include <sys/types.h>
-#include <netinet/in.h>
-#include <sys/time.h>
-#include <sys/select.h>
-
-#include <ucd-snmp/asn1.h>
-#include <ucd-snmp/snmp.h>
-#include <ucd-snmp/snmp_api.h>
-#include <ucd-snmp/snmp_client.h>
-#include <ucd-snmp/mib.h>
+#include <ucd-snmp/ucd-snmp-config.h>
+#include <ucd-snmp/ucd-snmp-includes.h>
 
 /*
  * a list of hosts to query
@@ -60,7 +49,7 @@ void initialize (void)
 {
   struct oid *op = oids;
   
-  init_snmp(NULL);
+  init_snmp("asynchapp");
 
   /* parse the oids */
   while (op->Name) {
