@@ -149,7 +149,7 @@ asn_check_packet (u_char *pkt, size_t len) {
 
   if (*(pkt+1) & 0x80) {
     /* long length */
-    if (len < (*(pkt+1) & ~0x80)+2)
+    if ((int)len < (int)(*(pkt+1) & ~0x80)+2)
       return 0;    /* still to short, incomplete length */
     asn_parse_length(pkt+1, &asn_length);
     return (asn_length + 2 + (*(pkt+1) & ~0x80));
