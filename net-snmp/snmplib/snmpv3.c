@@ -1063,19 +1063,30 @@ engineID_conf(const char *word, char *cptr)
 void
 version_conf(const char *word, char *cptr)
 {
+    int valid = 0;
+#ifndef DISABLE_SNMPV1
     if ((strcmp(cptr,  "1") == 0) ||
         (strcmp(cptr, "v1") == 0)) {
         netsnmp_ds_set_int(NETSNMP_DS_LIBRARY_ID, NETSNMP_DS_LIB_SNMPVERSION, 
 			   NETSNMP_DS_SNMP_VERSION_1);       /* bogus value */
-    } else if ((strcasecmp(cptr,  "2c") == 0) ||
+        valid = 1;
+    }
+#endif
+#ifndef DISABLE_SNMPV2C
+    if ((strcasecmp(cptr,  "2c") == 0) ||
                (strcasecmp(cptr, "v2c") == 0)) {
         netsnmp_ds_set_int(NETSNMP_DS_LIBRARY_ID, NETSNMP_DS_LIB_SNMPVERSION, 
 			   NETSNMP_DS_SNMP_VERSION_2c);
-    } else if ((strcasecmp(cptr,  "3" ) == 0) ||
+        valid = 1;
+    }
+#endif
+    if ((strcasecmp(cptr,  "3" ) == 0) ||
                (strcasecmp(cptr, "v3" ) == 0)) {
         netsnmp_ds_set_int(NETSNMP_DS_LIBRARY_ID, NETSNMP_DS_LIB_SNMPVERSION, 
 			   NETSNMP_DS_SNMP_VERSION_3);
-    } else {
+        valid = 1;
+    }
+    if (!valid) {
         config_perror("Unknown version specification");
         return;
     }

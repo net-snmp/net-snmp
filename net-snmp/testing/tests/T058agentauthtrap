@@ -4,6 +4,8 @@
 
 HEADER authentication failure traps are sent by snmpd
 
+SKIPIF DISABLE_SNMPV2C
+
 #
 # Begin test
 #

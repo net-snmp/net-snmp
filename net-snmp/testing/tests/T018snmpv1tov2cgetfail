@@ -4,6 +4,9 @@
 
 HEADER for failure of SNMPv1 get against SNMPv2c agent
 
+SKIPIF DISABLE_SNMPV2C
+SKIPIF DISABLE_SNMPV1
+
 #
 # Begin test
 #

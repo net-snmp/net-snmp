@@ -4,6 +4,8 @@
 
 HEADER SNMPv1 support
 
+SKIPIF DISABLE_SNMPV1
+
 #
 # Begin test
 #

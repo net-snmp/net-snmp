@@ -4,6 +4,8 @@
 
 HEADER SNMPv2 vacm acceptance support
 
+SKIPIF DISABLE_SNMPV2C
+
 #
 # Begin test
 #

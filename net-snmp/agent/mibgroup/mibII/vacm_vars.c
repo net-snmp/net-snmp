@@ -137,6 +137,7 @@ init_vacm_vars(void)
                                   "name context model level prefx read write notify");
     snmpd_register_config_handler("view", vacm_parse_view, vacm_free_view,
                                   "name type subtree [mask]");
+#if !defined(DISABLE_SNMPV1) || !defined(DISABLE_SNMPV2C)
     snmpd_register_config_handler("rwcommunity", vacm_parse_simple, NULL,
                                   "community [default|hostname|network/bits [oid]]");
     snmpd_register_config_handler("rocommunity", vacm_parse_simple, NULL,
@@ -147,6 +148,7 @@ init_vacm_vars(void)
     snmpd_register_config_handler("rocommunity6", vacm_parse_simple, NULL,
                                   "community [default|hostname|network/bits [oid]]");
 #endif
+#endif /* support for community based SNMP */
     snmpd_register_config_handler("rwuser", vacm_parse_simple, NULL,
                                   "user [noauth|auth|priv [oid]]");
     snmpd_register_config_handler("rouser", vacm_parse_simple, NULL,
@@ -461,7 +463,9 @@ vacm_parse_simple(const char *token, char *confline)
     char            community[COMMUNITY_MAX_LEN];
     char            theoid[SPRINT_MAX_LEN];
     char            viewname[SPRINT_MAX_LEN];
+#if !defined(DISABLE_SNMPV1) || !defined(DISABLE_SNMPV2C)
     char            addressname[SPRINT_MAX_LEN];
+#endif
     const char     *rw = "none";
     char            model[SPRINT_MAX_LEN];
     char           *cp;
@@ -506,6 +510,7 @@ vacm_parse_simple(const char *token, char *confline)
         else
             strcpy(authtype, "auth");
         DEBUGMSGTL((token, "setting auth type: \"%s\"\n", authtype));
+#if !defined(DISABLE_SNMPV1) || !defined(DISABLE_SNMPV2C)
     } else {
         /*
          * source address 
@@ -519,6 +524,7 @@ vacm_parse_simple(const char *token, char *confline)
          * authtype has to be noauth 
          */
         strcpy(authtype, "noauth");
+#endif /* support for community based SNMP */
     }
 
     /*
@@ -530,8 +536,14 @@ vacm_parse_simple(const char *token, char *confline)
         strcpy(theoid, ".1");
     }
 
-    if (strcmp(token, "rwcommunity") == 0 || strcmp(token, "rwuser") == 0)
+    if (
+#if !defined(DISABLE_SNMPV1) || !defined(DISABLE_SNMPV2C)
+        strcmp(token, "rwcommunity") == 0 ||
+#endif /* support for community based SNMP */
+        strcmp(token, "rwuser") == 0)
         rw = viewname;
+
+#if !defined(DISABLE_SNMPV1) || !defined(DISABLE_SNMPV2C)
 #ifdef SNMP_TRANSPORT_UDPIPV6_DOMAIN
     if (strcmp(token, "rwcommunity6") == 0)
         rw = viewname;
@@ -608,7 +620,9 @@ vacm_parse_simple(const char *token, char *confline)
         DEBUGMSGTL((token, "passing: %s %s\n", "group", line));
         vacm_parse_group("group", line);
 #endif
-    } else {
+    } else
+#endif /* support for community based SNMP */
+    {
         strncpy(secname, community, sizeof(secname));
         secname[ sizeof(secname)-1 ] = 0;
 
@@ -727,6 +741,7 @@ vacm_in_view(netsnmp_pdu *pdu, oid * name, size_t namelen,
 #define CONTEXTNAMEINDEXLEN 32
     char            contextNameIndex[CONTEXTNAMEINDEXLEN + 1];
 
+#if !defined(DISABLE_SNMPV1) || !defined(DISABLE_SNMPV2C)
     if (pdu->version == SNMP_VERSION_1 || pdu->version == SNMP_VERSION_2c) {
         if (snmp_get_do_debugging()) {
             char           *buf;
@@ -814,7 +829,9 @@ vacm_in_view(netsnmp_pdu *pdu, oid * name, size_t namelen,
             sn = NULL;
         }
 
-    } else if (find_sec_mod(pdu->securityModel)) {
+    } else
+#endif /* support for community based SNMP */
+      if (find_sec_mod(pdu->securityModel)) {
         /*
          * any legal defined v3 security model 
          */
@@ -827,7 +844,9 @@ vacm_in_view(netsnmp_pdu *pdu, oid * name, size_t namelen,
     }
 
     if (sn == NULL) {
+#if !defined(DISABLE_SNMPV1) || !defined(DISABLE_SNMPV2C)
         snmp_increment_statistic(STAT_SNMPINBADCOMMUNITYNAMES);
+#endif
         DEBUGMSGTL(("mibII/vacm_vars",
                     "vacm_in_view: No security name found\n"));
         return 1;
@@ -914,10 +933,12 @@ vacm_in_view(netsnmp_pdu *pdu, oid * name, size_t namelen,
     DEBUGMSG(("mibII/vacm_vars", ", vt=%d\n", vp->viewType));
 
     if (vp->viewType == SNMP_VIEW_EXCLUDED) {
+#if !defined(DISABLE_SNMPV1) || !defined(DISABLE_SNMPV2C)
         if (pdu->version == SNMP_VERSION_1
             || pdu->version == SNMP_VERSION_2c) {
             snmp_increment_statistic(STAT_SNMPINBADCOMMUNITYUSES);
         }
+#endif
         return 5;
     }
 

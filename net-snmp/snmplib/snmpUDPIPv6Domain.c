@@ -891,6 +891,7 @@ masked_address_are_equal(int af, struct sockaddr_storage *from,
     }
 }
 
+#if !defined(DISABLE_SNMPV1) || !defined(DISABLE_SNMPV2C)
 /*
  * The following functions provide the "com2sec6" configuration token
  * functionality for compatibility.  
@@ -1151,17 +1152,21 @@ netsnmp_udp6_com2Sec6List_free(void)
     com2Sec6List = com2Sec6ListLast = NULL;
 }
 
+#endif /* support for community based SNMP */
 
 void
 netsnmp_udp6_agent_config_tokens_register(void)
 {
+#if !defined(DISABLE_SNMPV1) || !defined(DISABLE_SNMPV2C)
     register_app_config_handler("com2sec6", netsnmp_udp6_parse_security,
                                 netsnmp_udp6_com2Sec6List_free,
                                 "name IPv6-network-address[/netmask] community");
+#endif /* support for community based SNMP */
 }
 
 
 
+#if !defined(DISABLE_SNMPV1) || !defined(DISABLE_SNMPV2C)
 /*
  * Return 0 if there are no com2sec entries, or return 1 if there ARE com2sec 
  * entries.  On return, if a com2sec entry matched the passed parameters,
@@ -1242,6 +1247,7 @@ netsnmp_udp6_getSecName(void *opaque, int olength,
     }
     return 1;
 }
+#endif /* support for community based SNMP */
 
 netsnmp_transport *
 netsnmp_udp6_create_tstring(const char *string, int local)

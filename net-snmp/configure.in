@@ -124,11 +124,25 @@ AC_MSG_CHECKING([what to build and install])
 AC_MSG_RESULT([$MAINSUBS])
 
 AC_ARG_ENABLE(mib-loading,
-[  --disable-mib-loading            Do not include code that parses and 
-                                   manipulates the mib files.])
+[  --disable-mib-loading           Do not include code that parses and 
+                                  manipulates the mib files.])
 if test "x$enable_mib_loading" = "xno"; then
   AC_DEFINE([DISABLE_MIB_LOADING], 1, 
             [Define if mib loading and parsing code should not be included])
+fi
+
+AC_ARG_ENABLE(snmpv1,
+[  --disable-snmpv1                Do not include code that implements SNMPv1.])
+if test "x$enable_snmpv1" = "xno"; then
+  AC_DEFINE([DISABLE_SNMPV1], 1, 
+            [Define if SNMPv1 code should not be included])
+fi
+
+AC_ARG_ENABLE(snmpv2c,
+[  --disable-snmpv2c               Do not include code that implements SNMPv2c.])
+if test "x$enable_snmpv1" = "xno"; then
+  AC_DEFINE([DISABLE_SNMPV2C], 1, 
+            [Define if SNMPv2c code should not be included])
 fi
 
 AC_ARG_ENABLE(ipv6,

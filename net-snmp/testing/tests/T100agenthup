@@ -4,6 +4,8 @@
 
 HEADER that the agent responds properly to a kill -HUP
 
+SKIPIF DISABLE_SNMPV2C
+
 SKIPIFNOT HAVE_SIGNAL
 
 #
