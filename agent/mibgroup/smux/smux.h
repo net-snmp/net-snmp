@@ -2,6 +2,7 @@
  * Smux module authored by Rohit Dube.
  * Rewritten by Nick Amato <naamato@merit.net>.
  */
+config_belongs_in(agent_module)
 
 #define SMUXPORT 199
 
