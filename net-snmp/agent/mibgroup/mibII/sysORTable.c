@@ -186,7 +186,7 @@ int register_sysORTable_sess(oid *oidin,
 
   reg_sysOR_parms.name    = oidin;
   reg_sysOR_parms.namelen = oidlen;
-  reg_sysOR_parms.descr   = (char *)descr;
+  reg_sysOR_parms.descr   = descr;
   snmp_call_callbacks(SNMP_CALLBACK_APPLICATION, SNMPD_CALLBACK_REG_SYSOR,
                                        &reg_sysOR_parms);
 
@@ -251,7 +251,7 @@ int unregister_sysORTable(oid *oidin,
     return unregister_sysORTable_sess( oidin, oidlen, NULL );
 }
 
-int unregister_sysORTable_by_session(struct snmp_session *ss)
+void unregister_sysORTable_by_session(struct snmp_session *ss)
 {
   struct sysORTable *ptr=table, *prev=NULL, *next;
 
