@@ -37,6 +37,7 @@
 #include "snmp_vars.h"
 #include "var_struct.h"
 #include "agent_registry.h"
+#include "agent_trap.h"
 #include "mibII/sysORTable.h"
 
 extern struct variable2 agentx_varlist[];
