@@ -14,7 +14,9 @@ the ChangeLog file for a more detailed listing of changes/bug fixes.
     - Per-process/per-exec-script based fix scripts implemented.
       (see snmpd.conf(5) for details)
     - many more config file options supported.
-      (run any command with -H and see appropriate manual pages)
+      (run any command with -H and see appropriate .conf manual pages)
+    - The start of a "make test" suite.
+    - other things we've forgotten.
     - many other things we've forgotten.
 
  API Changes:
