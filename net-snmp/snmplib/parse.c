@@ -335,6 +335,7 @@ static struct module_import	root_imports[NUMBER_OF_ROOT_NODES];
 
 static int current_module = 0;
 static int     max_module = 0;
+static char *last_err_module = 0; /* no repeats on "Cannot find module..." */
 
 static void tree_from_node(struct tree *tp, struct node *np);
 static void do_subtree (struct tree *, struct node **);
@@ -570,6 +571,15 @@ print_error(const char *string,
                 Line, File);
     else
         snmp_log(LOG_ERR, "%s: At line %d in %s\n", string, Line, File);
+}
+
+static void
+print_module_not_found(const char *cp)
+{
+    if (!last_err_module || strcmp(cp, last_err_module))
+        print_error("Cannot find module", cp, CONTINUE);
+    if (last_err_module) free(last_err_module);
+    last_err_module = strdup(cp);
 }
 
 static struct node *
@@ -2394,7 +2404,7 @@ parse_imports(FILE *fp)
 	/*
 	 * Shouldn't get this far
 	 */
-    print_error("Cannot find module", module_name(current_module,modbuf), CONTINUE);
+    print_module_not_found(module_name(current_module,modbuf));
     return;
 }
 
@@ -2494,7 +2504,7 @@ read_module_replacements(const char *name)
 	}
     }
     if (!ds_get_boolean(DS_LIBRARY_ID, DS_LIB_MIB_ERRORS))
-	print_error("Cannot find module", name, CONTINUE);
+	print_module_not_found(name);
 
 }
 
@@ -2800,6 +2810,8 @@ parse(FILE *fp,
     struct node *np, *nnp;
 
     DEBUGMSGTL(("parse-file", "Parsing file:  %s...\n", File));
+
+    if (last_err_module) free(last_err_module); last_err_module = 0;
 
     np = root;
     if (np != NULL) {

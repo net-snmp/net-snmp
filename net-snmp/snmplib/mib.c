@@ -1918,13 +1918,16 @@ print_tree_node(FILE *f,
 {
     const char *cp;
     char str[MAXTOKEN];
-    int i;
+    int i, prevmod;
     if (tp) {
 	module_name(tp->modid, str);
 	fprintf(f, "  -- FROM\t%s", str);
-	for (i = 1; i < tp->number_modules; i++) {
-	    module_name(tp->module_list[i], str);
-	    fprintf(f, ", %s", str);
+	for (i = 1, prevmod = tp->modid; i < tp->number_modules; i++) {
+	    if (prevmod != tp->module_list[i]) {
+	      module_name(tp->module_list[i], str);
+	      fprintf(f, ", %s", str);
+	    }
+	    prevmod = tp->module_list[i];
 	}
 	fprintf(f, "\n");
 	if (tp->tc_index != -1) {
