@@ -9,6 +9,10 @@
 #include <net-snmp/net-snmp-includes.h>
 #include <net-snmp/agent/net-snmp-agent-includes.h>
 
+#ifndef sv_undef
+#define sv_undef PL_sv_undef
+#endif
+
 typedef struct handler_cb_data_s {
    SV *perl_cb;
 } handler_cb_data;
@@ -338,8 +342,45 @@ nsahr_register(me)
     OUTPUT:
 	RETVAL
 
-MODULE = NetSNMP::agent  PACKAGE = netsnmp_request_infoPtr PREFIX = nari_
+MODULE = NetSNMP::agent  PACKAGE = NetSNMP::agent::netsnmp_request_infoPtr PREFIX = nari_
 
+void
+getOID(me)
+    SV *me;
+    PREINIT:
+        int i;
+        netsnmp_oid *o;
+        netsnmp_request_info *request;
+        SV *optr, *arg, *rarg;
+    PPCODE:
+    {
+        dSP;
+        PUSHMARK(SP);
+        request = (netsnmp_request_info *) SvIV(SvRV(me));
+
+        o = SNMP_MALLOC_TYPEDEF(netsnmp_oid);
+        o->name = o->namebuf;
+        o->len = request->requestvb->name_length;
+        memcpy(o->name, request->requestvb->name,
+               request->requestvb->name_length * sizeof(oid));
+
+        rarg = newSViv((int) 0);
+        arg = newSVrv(rarg, "netsnmp_oidPtr");
+        sv_setiv(arg, (int) o);
+
+        XPUSHs(rarg);
+
+        PUTBACK;
+        i = call_pv("NetSNMP::OID::newwithptr", G_SCALAR);
+        SPAGAIN;
+        if (i != 1) {
+            fprintf(stderr, "unhandled OID error.\n");
+            /* ack XXX */
+        }
+        ST(0) = POPs;
+        XSRETURN(1);
+    }
+        
 netsnmp_oid *
 nari_getOIDptr(me)
         SV *me;
@@ -536,18 +577,25 @@ nari_setOID(me, value)
         }
 
 
-netsnmp_request_info *
+SV *
 nari_next(me)
         SV *me;
     PREINIT:
         netsnmp_request_info *request;
+        SV *arg, *rarg;
     CODE:
-        request = (netsnmp_request_info *) SvIV(SvRV(me));
-        if (request)
-            request = request->next;
-        RETVAL = request;
-    OUTPUT:
-        RETVAL
+        {
+            request = (netsnmp_request_info *) SvIV(SvRV(me));
+            if (request && request->next) {
+                request = request->next;
+                rarg = newSViv(0);
+                arg = newSVrv(rarg, "NetSNMP::agent::netsnmp_request_infoPtr");
+                sv_setiv(arg, (int) request);
+                ST(0) = rarg;
+            } else {
+                ST(0) = &sv_undef;
+            }
+        }
 
 MODULE = NetSNMP::agent  PACKAGE = NetSNMP::agent::netsnmp_agent_request_info PREFIX = narqi_
 
