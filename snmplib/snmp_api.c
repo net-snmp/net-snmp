@@ -5090,9 +5090,9 @@ _sess_read(void *sessp, fd_set * fdset)
     netsnmp_session *sp = slp ? slp->session : NULL;
     struct snmp_internal_session *isp = slp ? slp->internal : NULL;
     netsnmp_transport *transport = slp ? slp->transport : NULL;
-    size_t          length = 0, pdulen = 0, rxbuf_len = 65536;
+    size_t          pdulen = 0, rxbuf_len = 65536;
     u_char         *rxbuf = NULL;
-    int             olength = 0, rc = 0;
+    int             length = 0, olength = 0, rc = 0;
     void           *opaque = NULL;
 
     if (!sp || !isp || !transport) {
