@@ -34,7 +34,9 @@
 #include "callback.h"
 #include "snmp_alarm.h"
 #include "default_store.h"
+#include "snmp_debug.h"
 #include "tools.h"
+#include "ds_agent.h"
 
 #include "mibgroup/struct.h"
 #include "mib_modules.h"
@@ -42,6 +44,69 @@
 #ifdef USING_AGENTX_SUBAGENT_MODULE
 #include "mibgroup/agentx/subagent.h"
 #endif
+
+struct module_init_list *initlist = NULL;
+struct module_init_list *noinitlist = NULL;
+
+
+void
+add_to_init_list(const char *module_list) {
+    struct module_init_list *newitem, **list;
+    char *cp;
+    char *buf;
+
+    cp = buf = strdup(module_list);
+    if (*cp == '-' || *cp == '!') {
+        cp++;
+        list = &noinitlist;
+    } else {
+        list = &initlist;
+    }
+
+    cp = strtok(cp, ", :");
+    while(cp) {
+        newitem = calloc(1, sizeof (*initlist));
+        newitem->module_name = strdup(cp);
+        newitem->next = *list;
+        *list = newitem;
+        cp = strtok(NULL, ", :");
+    }
+}
+
+int
+should_init(const char *module_name) {
+    struct module_init_list *listp;
+    
+    /* a definitive list takes priority */
+    if (initlist) {
+        listp = initlist;
+        while (listp) {
+            if (strcmp(listp->module_name, module_name) == 0) {
+                DEBUGMSGTL(("mib_init","initializing: %s\n",module_name));
+                return DO_INITIALIZE;
+            }
+            listp = listp->next;
+        }
+        DEBUGMSGTL(("mib_init","skipping:     %s\n",module_name));
+        return DONT_INITIALIZE;
+    }
+
+    /* initialize it only if not on the bad list (bad module, no bone) */
+    if (noinitlist) {
+        listp = noinitlist;
+        while (listp) {
+            if (strcmp(listp->module_name, module_name) == 0) {
+                DEBUGMSGTL(("mib_init","skipping:     %s\n",module_name));
+                return DONT_INITIALIZE;
+            }
+            listp = listp->next;
+        }
+    }
+    DEBUGMSGTL(("mib_init","initializing: %s\n",module_name));
+    
+    /* initialize it */
+    return DO_INITIALIZE;
+}
 
 void
 init_mib_modules(void) {
