@@ -40,7 +40,7 @@ extern          "C" {
 #define IFXTABLE_MAX_COL		COLUMN_IFCOUNTERDISCONTINUITYTIME
 
     /*
-     * change flags for writable columns 
+     * change flags for writable columns
      */
 #define FLAG_IFLINKUPDOWNTRAPENABLE       (0x1 << 0)
 #define FLAG_IFPROMISCUOUSMODE       (0x1 << 1)
@@ -85,12 +85,6 @@ extern          "C" {
 
 #endif                          /* IFLINKUPDOWNTRAPENABLE_ENUMS */
 
-    /*
-     * TODO:
-     * value mapping (see notes at top of file)
-     */
-#define INTERNAL_IFLINKUPDOWNTRAPENABLE_ENABLED  1
-#define INTERNAL_IFLINKUPDOWNTRAPENABLE_DISABLED  0
 
 /*************************************************************
  * constants for enums for the MIB node
@@ -108,12 +102,6 @@ extern          "C" {
 
 #endif                          /* TRUTHVALUE_ENUMS */
 
-    /*
-     * TODO:
-     * value mapping (see notes at top of file)
-     */
-#define INTERNAL_IFPROMISCUOUSMODE_TRUE  1
-#define INTERNAL_IFPROMISCUOUSMODE_FALSE  0
 
 /*************************************************************
  * constants for enums for the MIB node
@@ -131,17 +119,10 @@ extern          "C" {
 
 #endif                          /* TRUTHVALUE_ENUMS */
 
-    /*
-     * TODO:
-     * value mapping (see notes at top of file)
-     */
-#define INTERNAL_IFCONNECTORPRESENT_TRUE  1
-#define INTERNAL_IFCONNECTORPRESENT_FALSE  0
 
 
 
 #ifdef __cplusplus
 }
 #endif
-
 #endif                          /* IFXTABLE_OIDS_H */

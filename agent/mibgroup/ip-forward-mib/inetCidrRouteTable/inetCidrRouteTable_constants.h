@@ -38,7 +38,7 @@ extern          "C" {
 #define INETCIDRROUTETABLE_MAX_COL		COLUMN_INETCIDRROUTESTATUS
 
     /*
-     * change flags for writable columns 
+     * change flags for writable columns
      */
 #define FLAG_INETCIDRROUTEIFINDEX       (0x1 << 0)
 #define FLAG_INETCIDRROUTETYPE       (0x1 << 1)
@@ -51,6 +51,13 @@ extern          "C" {
 #define FLAG_INETCIDRROUTESTATUS       (0x1 << 8)
 
 #define FLAG_MAX_INETCIDRROUTETABLE 9
+
+    /*
+     * TODO:405:r: Review INETCIDRROUTETABLE_REQUIRED_COLS macro.
+     * OR together all the required rows for row creation.
+     * default is writable cols w/out defaults.
+     */
+#define INETCIDRROUTETABLE_REQUIRED_COLS (FLAG_INETCIDRROUTEIFINDEX | FLAG_INETCIDRROUTETYPE | FLAG_INETCIDRROUTESTATUS)
 
 
     /*
@@ -93,16 +100,6 @@ extern          "C" {
 
 #endif                          /* INETADDRESSTYPE_ENUMS */
 
-    /*
-     * TODO:
-     * value mapping (see notes at top of file)
-     */
-#define INTERNAL_INETCIDRROUTEDESTTYPE_UNKNOWN  0
-#define INTERNAL_INETCIDRROUTEDESTTYPE_IPV4  1
-#define INTERNAL_INETCIDRROUTEDESTTYPE_IPV6  2
-#define INTERNAL_INETCIDRROUTEDESTTYPE_IPV4Z  3
-#define INTERNAL_INETCIDRROUTEDESTTYPE_IPV6Z  4
-#define INTERNAL_INETCIDRROUTEDESTTYPE_DNS  16
 
 /*************************************************************
  * constants for enums for the MIB node
@@ -124,16 +121,6 @@ extern          "C" {
 
 #endif                          /* INETADDRESSTYPE_ENUMS */
 
-    /*
-     * TODO:
-     * value mapping (see notes at top of file)
-     */
-#define INTERNAL_INETCIDRROUTENEXTHOPTYPE_UNKNOWN  0
-#define INTERNAL_INETCIDRROUTENEXTHOPTYPE_IPV4  1
-#define INTERNAL_INETCIDRROUTENEXTHOPTYPE_IPV6  2
-#define INTERNAL_INETCIDRROUTENEXTHOPTYPE_IPV4Z  3
-#define INTERNAL_INETCIDRROUTENEXTHOPTYPE_IPV6Z  4
-#define INTERNAL_INETCIDRROUTENEXTHOPTYPE_DNS  16
 
 /*************************************************************
  * constants for enums for the MIB node
@@ -154,15 +141,6 @@ extern          "C" {
 
 #endif                          /* INETCIDRROUTETYPE_ENUMS */
 
-    /*
-     * TODO:
-     * value mapping (see notes at top of file)
-     */
-#define INTERNAL_INETCIDRROUTETYPE_OTHER  1
-#define INTERNAL_INETCIDRROUTETYPE_REJECT  2
-#define INTERNAL_INETCIDRROUTETYPE_LOCAL  3
-#define INTERNAL_INETCIDRROUTETYPE_REMOTE  4
-#define INTERNAL_INETCIDRROUTETYPE_BLACKHOLE  5
 
 /*************************************************************
  * constants for enums for the MIB node
@@ -195,27 +173,6 @@ extern          "C" {
 
 #endif                          /* IANAIPROUTEPROTOCOL_ENUMS */
 
-    /*
-     * TODO:
-     * value mapping (see notes at top of file)
-     */
-#define INTERNAL_INETCIDRROUTEPROTO_OTHER  1
-#define INTERNAL_INETCIDRROUTEPROTO_LOCAL  2
-#define INTERNAL_INETCIDRROUTEPROTO_NETMGMT  3
-#define INTERNAL_INETCIDRROUTEPROTO_ICMP  4
-#define INTERNAL_INETCIDRROUTEPROTO_EGP  5
-#define INTERNAL_INETCIDRROUTEPROTO_GGP  6
-#define INTERNAL_INETCIDRROUTEPROTO_HELLO  7
-#define INTERNAL_INETCIDRROUTEPROTO_RIP  8
-#define INTERNAL_INETCIDRROUTEPROTO_ISIS  9
-#define INTERNAL_INETCIDRROUTEPROTO_ESIS  10
-#define INTERNAL_INETCIDRROUTEPROTO_CISCOIGRP  11
-#define INTERNAL_INETCIDRROUTEPROTO_BBNSPFIGP  12
-#define INTERNAL_INETCIDRROUTEPROTO_OSPF  13
-#define INTERNAL_INETCIDRROUTEPROTO_BGP  14
-#define INTERNAL_INETCIDRROUTEPROTO_IDPR  15
-#define INTERNAL_INETCIDRROUTEPROTO_CISCOEIGRP  16
-#define INTERNAL_INETCIDRROUTEPROTO_DVMRP  17
 
 /*************************************************************
  * constants for enums for the MIB node
@@ -237,21 +194,10 @@ extern          "C" {
 
 #endif                          /* ROWSTATUS_ENUMS */
 
-    /*
-     * TODO:
-     * value mapping (see notes at top of file)
-     */
-#define INTERNAL_INETCIDRROUTESTATUS_ACTIVE  1
-#define INTERNAL_INETCIDRROUTESTATUS_NOTINSERVICE  2
-#define INTERNAL_INETCIDRROUTESTATUS_NOTREADY  3
-#define INTERNAL_INETCIDRROUTESTATUS_CREATEANDGO  4
-#define INTERNAL_INETCIDRROUTESTATUS_CREATEANDWAIT  5
-#define INTERNAL_INETCIDRROUTESTATUS_DESTROY  6
 
 
 
 #ifdef __cplusplus
 }
 #endif
-
 #endif                          /* INETCIDRROUTETABLE_OIDS_H */

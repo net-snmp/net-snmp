@@ -29,13 +29,20 @@ extern          "C" {
 #define INETNETTOMEDIATABLE_MAX_COL		COLUMN_INETNETTOMEDIAROWSTATUS
 
     /*
-     * change flags for writable columns 
+     * change flags for writable columns
      */
 #define FLAG_INETNETTOMEDIAPHYSADDRESS       (0x1 << 0)
 #define FLAG_INETNETTOMEDIATYPE       (0x1 << 1)
 #define FLAG_INETNETTOMEDIAROWSTATUS       (0x1 << 2)
 
 #define FLAG_MAX_INETNETTOMEDIATABLE 3
+
+    /*
+     * TODO:405:r: Review INETNETTOMEDIATABLE_REQUIRED_COLS macro.
+     * OR together all the required rows for row creation.
+     * default is writable cols w/out defaults.
+     */
+#define INETNETTOMEDIATABLE_REQUIRED_COLS (FLAG_INETNETTOMEDIAPHYSADDRESS | FLAG_INETNETTOMEDIAROWSTATUS)
 
 
     /*
@@ -78,16 +85,6 @@ extern          "C" {
 
 #endif                          /* INETADDRESSTYPE_ENUMS */
 
-    /*
-     * TODO:
-     * value mapping (see notes at top of file)
-     */
-#define INTERNAL_INETNETTOMEDIANETADDRESSTYPE_UNKNOWN  0
-#define INTERNAL_INETNETTOMEDIANETADDRESSTYPE_IPV4  1
-#define INTERNAL_INETNETTOMEDIANETADDRESSTYPE_IPV6  2
-#define INTERNAL_INETNETTOMEDIANETADDRESSTYPE_IPV4Z  3
-#define INTERNAL_INETNETTOMEDIANETADDRESSTYPE_IPV6Z  4
-#define INTERNAL_INETNETTOMEDIANETADDRESSTYPE_DNS  16
 
 /*************************************************************
  * constants for enums for the MIB node
@@ -108,15 +105,6 @@ extern          "C" {
 
 #endif                          /* INETNETTOMEDIATYPE_ENUMS */
 
-    /*
-     * TODO:
-     * value mapping (see notes at top of file)
-     */
-#define INTERNAL_INETNETTOMEDIATYPE_OTHER  1
-#define INTERNAL_INETNETTOMEDIATYPE_INVALID  2
-#define INTERNAL_INETNETTOMEDIATYPE_DYNAMIC  3
-#define INTERNAL_INETNETTOMEDIATYPE_STATIC  4
-#define INTERNAL_INETNETTOMEDIATYPE_LOCAL  5
 
 /*************************************************************
  * constants for enums for the MIB node
@@ -139,17 +127,6 @@ extern          "C" {
 
 #endif                          /* INETNETTOMEDIASTATE_ENUMS */
 
-    /*
-     * TODO:
-     * value mapping (see notes at top of file)
-     */
-#define INTERNAL_INETNETTOMEDIASTATE_REACHABLE  1
-#define INTERNAL_INETNETTOMEDIASTATE_STALE  2
-#define INTERNAL_INETNETTOMEDIASTATE_DELAY  3
-#define INTERNAL_INETNETTOMEDIASTATE_PROBE  4
-#define INTERNAL_INETNETTOMEDIASTATE_INVALID  5
-#define INTERNAL_INETNETTOMEDIASTATE_UNKNOWN  6
-#define INTERNAL_INETNETTOMEDIASTATE_INCOMPLETE  7
 
 /*************************************************************
  * constants for enums for the MIB node
@@ -171,21 +148,10 @@ extern          "C" {
 
 #endif                          /* ROWSTATUS_ENUMS */
 
-    /*
-     * TODO:
-     * value mapping (see notes at top of file)
-     */
-#define INTERNAL_INETNETTOMEDIAROWSTATUS_ACTIVE  1
-#define INTERNAL_INETNETTOMEDIAROWSTATUS_NOTINSERVICE  2
-#define INTERNAL_INETNETTOMEDIAROWSTATUS_NOTREADY  3
-#define INTERNAL_INETNETTOMEDIAROWSTATUS_CREATEANDGO  4
-#define INTERNAL_INETNETTOMEDIAROWSTATUS_CREATEANDWAIT  5
-#define INTERNAL_INETNETTOMEDIAROWSTATUS_DESTROY  6
 
 
 
 #ifdef __cplusplus
 }
 #endif
-
 #endif                          /* INETNETTOMEDIATABLE_OIDS_H */
