@@ -12,7 +12,7 @@ Install steps:
   1) download, and install the modified AnyData perl modules from:
      http://www.net-snmp.org/AnyData-wes/AnyData-0.05.tar.gz
      http://www.net-snmp.org/AnyData-wes/DBD-AnyData-0.05.wes.tar.gz
-     http://www.net-snmp.org/AnyData-wes/SQL-Statement-1.002.tar.gz
+     http://www.net-snmp.org/AnyData-wes/SQL-Statement-1.004.tar.gz
 
      Extract each of the above tar balls and in the resulting
      directories run:
