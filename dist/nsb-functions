@@ -15,7 +15,12 @@ NSB_SKIP_CONFIG=0
 NSB_SKIP_BUILD=0
 NSB_SKIP_TEST=0
 NSB_SKIP_INSTALL=0
+NSB_DIST_TRANSPORTS="UDPIPv6 TCPIPv6"
+NSB_DIST_MODULES="host disman/event-mib"
+NSB_EXTRA_MODULES="examples examples/example testhandler smux Rmon"
 NSB_VIEW=cat
+NSB_PERL=
+#NSB_PERL=--enable-embedded-perl
 DATE=`date +%y%m%d_%H%M`
 
 #----------------------------------------------------------------------
@@ -57,10 +62,10 @@ nsb-get-config()
    ngc_src=$1
    echo $ngc_src/configure --with-sys-location=Unknown \
       --with-sys-contact='System Administrator' --disable-privacy \
-      --with-defaults --with-mib-modules='host disman/event-mib'
+      --with-defaults --with-mib-modules='$NSB_DIST_MODULES'
    $ngc_src/configure --with-sys-location=Unknown \
       --with-sys-contact='System Administrator' --disable-privacy \
-      --with-defaults --with-mib-modules='host disman/event-mib'
+      --with-defaults --with-mib-modules='$NSB_DIST_MODULES'
    return $?
 }
 
@@ -73,32 +78,31 @@ nsb-config-all()
    ngc_src=$1
    shift 1
 
+   #
+   # System specific additions
+   #
    case `uname -s` in
 
    Linux)
-      echo $ngc_src/configure  --with-defaults \
-         '--with-mib-modules=host examples examples/example testhandler smux Rmon disman/event-mib' \
-         '--with-transports=UDPIPv6 TCPIPv6 IPX' \
-          --enable-embedded-perl --enable-shared
-      $ngc_src/configure  --with-defaults \
-         '--with-mib-modules=host examples examples/example testhandler smux Rmon disman/event-mib' \
-         '--with-transports=UDPIPv6 TCPIPv6 IPX' \
-          --enable-embedded-perl --enable-shared
-      ngc_rc=$?
+      NSB_DIST_TRANSPORTS="$NSB_DIST_TRANSPORTS IPX"
       ;;
 
    *)
-      echo $ngc_src/configure  --with-defaults \
-         '--with-mib-modules=host examples examples/example testhandler smux Rmon disman/event-mib' \
-         '--with-transports=UDPIPv6 TCPIPv6' \
-          --enable-embedded-perl --enable-shared
-      $ngc_src/configure  --with-defaults \
-         '--with-mib-modules=host examples examples/example testhandler smux Rmon disman/event-mib' \
-         '--with-transports=UDPIPv6 TCPIPv6' \
-          --enable-embedded-perl --enable-shared
-      ngc_rc=$?
       ;;
    esac
+
+   #
+   # configure
+   #
+   echo $ngc_src/configure  --with-defaults \
+      "--with-mib-modules=$NSB_DIST_MODULES $NSB_EXTRA_MODULES" \
+      "--with-transports=$NSB_DIST_TRANSPORTS" \
+       $NSB_PERL --enable-shared
+   $ngc_src/configure  --with-defaults \
+      "--with-mib-modules=$NSB_DIST_MODULES $NSB_EXTRA_MODULES" \
+      "--with-transports=$NSB_DIST_TRANSPORTS" \
+      $NSB_PERL --enable-shared
+   ngc_rc=$?
 
    return $ngc_rc
 
