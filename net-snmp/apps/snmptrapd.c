@@ -423,6 +423,7 @@ pre_parse(netsnmp_session * session, netsnmp_transport *transport,
 
         if (hosts_ctl("snmptrapd", STRING_UNKNOWN, 
 		      sbuf, STRING_UNKNOWN) == 0) {
+            DEBUGMSGTL(("snmptrapd:libwrap", "%s rejected", addr_string));
             SNMP_FREE(addr_string);
             return 0;
         }
@@ -431,6 +432,7 @@ pre_parse(netsnmp_session * session, netsnmp_transport *transport,
     } else {
         if (hosts_ctl("snmptrapd", STRING_UNKNOWN,
                       STRING_UNKNOWN, STRING_UNKNOWN) == 0) {
+            DEBUGMSGTL(("snmptrapd:libwrap", "[unknown] rejected"));
             return 0;
         }
     }
