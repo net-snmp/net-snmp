@@ -112,7 +112,8 @@ static int __is_numeric_oid _((char*));
 static int __is_leaf _((struct tree*));
 static int __translate_appl_type _((char*));
 static int __translate_asn_type _((int));
-static int __sprint_value _((char *, struct variable_list*, struct tree *,
+static int __snprint_value _((char *, size_t,
+                              struct variable_list*, struct tree *,
                              int, int));
 static int __sprint_num_objid _((char *, oid *, int));
 static int __scan_num_objid _((char *, oid *, int *));
@@ -413,8 +414,9 @@ int type;
 #define USE_ENUMS 1
 #define USE_SPRINT_VALUE 2
 static int
-__sprint_value (buf, var, tp, type, flag)
+__snprint_value (buf, buf_len, var, tp, type, flag)
 char * buf;
+size_t buf_len;
 struct variable_list * var;
 struct tree * tp;
 int type;
@@ -427,7 +429,7 @@ int flag;
 
    buf[0] = '\0';
    if (flag == USE_SPRINT_VALUE) {
-	sprint_value(buf, var->name, var->name_length, var);
+	snprint_value(buf, buf_len, var->name, var->name_length, var);
 	len = strlen(buf);
    } else {
      switch (var->type) {
@@ -498,7 +500,7 @@ int flag;
 
         case ASN_NSAP:
         default:
-           warn("sprint_value: asn type not handled %d\n",var->type);
+           warn("snprint_value: asn type not handled %d\n",var->type);
      }
    }
    return(len);
@@ -1257,7 +1259,8 @@ void *cb_data;
          __get_type_str(type, tmp_type_str);
          tmp_sv = newSVpv(tmp_type_str, strlen(tmp_type_str));
          av_store(varbind, VARBIND_TYPE_F, tmp_sv);
-         len = __sprint_value(str_buf, vars, tp, type, sprintval_flag);
+         len = __snprint_value(str_buf, sizeof(str_buf),
+                              vars, tp, type, sprintval_flag);
          tmp_sv = newSVpv((char*)str_buf, len);
          av_store(varbind, VARBIND_VAL_F, tmp_sv);
       } /* for */
@@ -2072,7 +2075,8 @@ _bulkwalk_recv_pdu(walk_context *context, struct snmp_pdu *pdu)
       __get_type_str(type, type_str);
       av_store(varbind, VARBIND_TYPE_F, newSVpv(type_str, strlen(type_str)));
 
-      len=__sprint_value(str_buf, vars, tp, type, context->sprintval_f);
+      len=__snprint_value(str_buf, sizeof(str_buf),
+                         vars, tp, type, context->sprintval_f);
       av_store(varbind, VARBIND_VAL_F, newSVpv((char*)str_buf, len));
 
       str_buf[len] = '\0';
@@ -3085,7 +3089,8 @@ snmp_get(sess_ref, retry_nosuch, varlist_ref, perl_callback)
                        __get_type_str(type, tmp_type_str);
                        tmp_sv = newSVpv(tmp_type_str,strlen(tmp_type_str));
                        av_store(varbind, VARBIND_TYPE_F, tmp_sv);
-                       len=__sprint_value(str_buf,vars,tp,type,sprintval_flag);
+                       len=__snprint_value(str_buf,sizeof(str_buf),
+                                          vars,tp,type,sprintval_flag);
                        tmp_sv=newSVpv((char*)str_buf, len);
                        av_store(varbind, VARBIND_VAL_F, tmp_sv);
 		       if (sv_timestamp)
@@ -3264,7 +3269,8 @@ snmp_getnext(sess_ref, varlist_ref, perl_callback)
                     __get_type_str(type, tmp_type_str);
                     tmp_sv = newSVpv(tmp_type_str, strlen(tmp_type_str));
                     av_store(varbind, VARBIND_TYPE_F, tmp_sv);
-                    len=__sprint_value(str_buf,vars,tp,type,sprintval_flag);
+                    len=__snprint_value(str_buf,sizeof(str_buf),
+                                       vars,tp,type,sprintval_flag);
                     tmp_sv = newSVpv((char*)str_buf, len);
                     av_store(varbind, VARBIND_VAL_F, tmp_sv);
 		    if (sv_timestamp)
@@ -3463,7 +3469,8 @@ snmp_getbulk(sess_ref, nonrepeaters, maxrepetitions, varlist_ref, perl_callback)
 		    av_store(varbind, VARBIND_TYPE_F, newSVpv(tmp_type_str,
 				     strlen(tmp_type_str)));
 
-                    len=__sprint_value(str_buf,vars,tp,type,sprintval_flag);
+                    len=__snprint_value(str_buf,sizeof(str_buf),
+                                       vars,tp,type,sprintval_flag);
                     tmp_sv = newSVpv((char*)str_buf, len);
 		    av_store(varbind, VARBIND_VAL_F, tmp_sv);
 		    if (sv_timestamp)

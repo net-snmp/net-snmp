@@ -86,7 +86,7 @@ $use_long_names = 0; # non-zero to prefer longer mib textual identifiers rather
                    # than just leaf indentifiers (see translateObj)
                    # may also be set on a per session basis(see UseLongNames)
 $use_sprint_value = 0; # non-zero to enable formatting of response values
-                   # using the snmp libraries "sprint_value"
+                   # using the snmp libraries "snprint_value"
                    # may also be set on a per session basis(see UseSprintValue)
                    # note: returned values not suitable for 'set' operations
 $use_enums = 0; # non-zero to return integers as enums and allow sets
@@ -1213,7 +1213,7 @@ convention (e.g., system.sysDescr vs just sysDescr)
 defaults to the value of SNMP::use_sprint_value at time
 of session creation. set to non-zero to have return values
 for 'get' and 'getnext' methods formatted with the libraries
-sprint_value function. This will result in certain data types
+snprint_value function. This will result in certain data types
 being returned in non-canonical format Note: values returned
 with this option set may not be appropriate for 'set' operations
 (see discussion of value formats in <vars> description section)
@@ -1623,7 +1623,7 @@ basis (UseLongNames)
 =item $SNMP::use_sprint_value
 
 default '0', set to non-zero to enable formatting of
-response values using the snmp libraries sprint_value
+response values using the snmp libraries snprint_value
 function. can also be set on a per session basis (see
 UseSprintValue) Note: returned values may not be
 suitable for 'set' operations
