@@ -59,7 +59,7 @@ snmptest$(EXEEXT):    snmptest.$(OSUFFIX) $(USELIBS)
 	$(LINK) -o $@ snmptest.$(OSUFFIX) $(LOCAL_LIBS) ${LDFLAGS} ${LIBS} 
 
 snmptrapd$(EXEEXT):    snmptrapd.$(OSUFFIX) snmptrapd_handlers.$(OSUFFIX) snmptrapd_log.$(OSUFFIX) $(USELIBS)
-	$(LINK) -o $@ snmptrapd.$(OSUFFIX) snmptrapd_handlers.$(OSUFFIX) snmptrapd_log.$(OSUFFIX) $(LOCAL_LIBS) ${LDFLAGS} ${LIBS} 
+	$(LINK) -o $@ snmptrapd.$(OSUFFIX) snmptrapd_handlers.$(OSUFFIX) snmptrapd_log.$(OSUFFIX) $(LOCAL_LIBS) ${LDFLAGS} ${LIBS} @WRAPLIBS@
 
 snmptrap$(EXEEXT):    snmptrap.$(OSUFFIX) $(USELIBS)
 	$(LINK) -o $@ snmptrap.$(OSUFFIX) $(LOCAL_LIBS) ${LDFLAGS} ${LIBS} 

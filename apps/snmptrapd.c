@@ -89,7 +89,6 @@ SOFTWARE.
 #endif
 #include <signal.h>
 #include <errno.h>
-
 #include <getopt.h>
 
 #include "asn1.h"
@@ -112,6 +111,13 @@ SOFTWARE.
 #include "transform_oids.h"
 #include "snmpv3.h"
 #include "default_store.h"
+
+#if USE_LIBWRAP
+#include <tcpd.h>
+
+int allow_severity	 = LOG_INFO;
+int deny_severity	 = LOG_WARNING;
+#endif
 
 #define DS_APP_NUMERIC_IP  1
 
@@ -702,6 +708,23 @@ RETSIGTYPE hup_handler(int sig)
 }
 #endif
 
+static
+int pre_parse(struct snmp_session *session, snmp_ipaddr from)
+{
+#if USE_LIBWRAP
+  struct sockaddr_in *fromIp = (struct sockaddr_in *)&from;
+  const char *addr_string = inet_ntoa(fromIp->sin_addr);
+
+  if (addr_string == NULL) {
+    addr_string = STRING_UNKNOWN;
+  }
+  if (hosts_ctl("snmptrapd", STRING_UNKNOWN, addr_string, STRING_UNKNOWN)==0) {
+    return 0;
+  }
+#endif /*  USE_LIBWRAP  */
+  return 1;
+}
+
 int main(int argc, char *argv[])
 {
     struct snmp_session sess, *session = &sess, *ss;
@@ -978,7 +1001,7 @@ int main(int argc, char *argv[])
     }
 
     SOCK_STARTUP;
-    ss = snmp_open( session );
+    ss = snmp_open_ex(session, pre_parse, NULL, NULL, NULL, NULL);
     if (ss == NULL) {
         snmp_sess_perror("snmptrapd", session);
         if (Syslog) {
