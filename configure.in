@@ -1099,7 +1099,7 @@ AC_CHECK_HEADERS(pkginfo.h,
     AC_CHECK_LIB(adm, pkginfo, AC_DEFINE(HAVE_PKGINFO)
     LIBS="${LIBS} -ladm"))
 dnl WIN32
-AC_CHECK_HEADERS(winsock.h, "DLLIBS=${DLLIBS} -lhlpapi")
+AC_CHECK_HEADERS(winsock.h, "DLLIBS=${DLLIBS} -liphlpapi")
 AC_CHECK_HEADERS(io.h)
 dnl SCO
 AC_CHECK_HEADERS(sys/stream.h)

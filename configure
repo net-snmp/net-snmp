@@ -9441,7 +9441,7 @@ if eval "test \"`echo '$ac_cv_header_'$ac_safe`\" = yes"; then
   cat >> confdefs.h <<EOF
 #define $ac_tr_hdr 1
 EOF
- "DLLIBS=${DLLIBS} -lhlpapi"
+ "DLLIBS=${DLLIBS} -liphlpapi"
 else
   echo "$ac_t""no" 1>&6
 fi
