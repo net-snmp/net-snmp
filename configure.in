@@ -771,7 +771,8 @@ while test "x$new_module_list" != "x"; do
       if test -f $srcdir/$mibdir/$i.c; then
         module_list_code="$module_list_code $i"
         mnm=`echo $i | sed 's/.*\///;s/\.c$//;'`
-	if grep init_$mnm $srcdir/$mibdir/$i.c > /dev/null; then
+        temp_init=`grep init_$mnm $srcdir/$mibdir/$i.c | grep -v _init_$mnm`
+	if test "x$temp_init" != "x"; then
 	    echo "  if (should_init(\"$mnm\")) init_$mnm();" >> $mibdir/mib_module_inits.h
 	fi
 	if grep shutdown_`basename $i` $srcdir/$mibdir/$i.c > /dev/null; then
