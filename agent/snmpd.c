@@ -626,7 +626,9 @@ main(int argc, char *argv[])
 #endif
     /*  Initialize the world.  Detach from the shell.  Create initial user.  */
 #if HAVE_FORK
-    if (!dont_fork && fork() != 0) {
+    if (!dont_fork && fork() != 0 &&
+        !ds_get_boolean(DS_APPLICATION_ID, DS_AGENT_QUIT_IMMEDIATELY)
+) {
       exit(0);
     }
 #endif
@@ -717,7 +719,8 @@ main(int argc, char *argv[])
 
     /*  Forever monitor the dest_port for incoming PDUs.  */
     DEBUGMSGTL(("snmpd/main", "We're up.  Starting to process data.\n"));
-    receive();
+    if (!ds_get_boolean(DS_APPLICATION_ID, DS_AGENT_QUIT_IMMEDIATELY))
+        receive();
 #include "mib_module_shutdown.h"
 #ifdef WIN32
     agent_status = AGENT_STOPPED;

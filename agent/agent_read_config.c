@@ -177,7 +177,9 @@ void init_agent_read_config (const char *app)
 {
   if ( app != NULL )
       ds_set_string(DS_LIBRARY_ID, DS_LIB_APPTYPE, app);
-
+  else
+      app = ds_get_string(DS_LIBRARY_ID, DS_LIB_APPTYPE);
+  
   register_app_config_handler("authtrapenable",
                           snmpd_parse_config_authtrap, NULL,
                           "1 | 2\t\t(1 = enable, 2 = disable)");
@@ -218,6 +220,8 @@ void init_agent_read_config (const char *app)
                               config_parse_table_set, NULL, "tableoid");
   register_app_config_handler("add_row",
                               config_parse_add_row, NULL, "indexes... values...");
+  ds_register_config(ASN_BOOLEAN, app, "quit",
+                     DS_APPLICATION_ID, DS_AGENT_QUIT_IMMEDIATELY);
   init_handler_conf();
   
 #include "mib_module_dot_conf.h"
