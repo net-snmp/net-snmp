@@ -29,7 +29,7 @@ snmpcmd
 .br
 [-v (1 | 2c | 3) ]
 .br
-[-R] [-O <OIDOPTS> ]
+[-O <OUTOPTS> ] [-I <INOPTS> ]
 .br
 [-P <PARSEROPTS> ]
 .br
@@ -85,7 +85,9 @@ requests random access to the MIB symbol table. See RANDOM ACCESS MIB below.
 .IP "-P wWecduR"
 specifies MIB parsing options. See MIB PARSING OPTIONS below.
 .IP "-O nebqfsS"
-specifies OID options. See OID OPTIONS below.
+specifies output printing options. See OUTPUT OPTIONS below.
+.IP "-I Rb"
+specifies input parsing options. See INPUT OPTIONS below.
 .IP "-m mibs"
 specifies a colon separated list of MIB modules to load for this application.
 The special name ALL is used to specify all modules in all directories.
@@ -210,10 +212,9 @@ Replace MIB objects using the last read MIB file.
 WARNING: Setting this option may result in an incorrect hierarchy.
 Can be also set with the configuration token "mibReplaceWithLatest".
 .PP
-.SH "OID OPTIONS"
-The OID names can be presented in various ways, together with any
-values returned from the agent. The following will demonstrate
-how the options influence the printed values.
+.SH "OUTPUT OPTIONS"
+Output display can be controlled by passing various parameters to the
+-O flag.  The following examples should demonstrate this.
 .PP
 The default output looks as follows:
 .br
@@ -259,7 +260,35 @@ they are broken into the displayable pieces and shown to you.  For
 example the oid vacmSecurityModel.0.3.119.101.115 is nicely broken
 down by default and the string hidden in the oid is shown to you as
 vacmSecurityModel.0."wes".
-The -Ob option diables this feature.
+The -Ob option diables this feature and displays it as
+vacmSecurityModel.0.3.119.101.115 again.
+.PP
+Note that most of these options can be turned on or off by default by
+tuning the snmp.conf file.  See the snmp.conf(5) manual page for
+details.
+.SH "INPUT OPTIONS"
+The -I flag specifies various options that control how your input to
+the program is parsed.
+.IP -IR
+The -IR flag specifies random access lookup, so that if the entire OID 
+path is not specified, it will search for a node in the mib tree with
+your name.  Normally, you'd have to specify the vacmSecurityModel oid
+above as
+.iso.org.dod.internet.snmpV2.snmpModules.snmpVacmMIB.vacmMIBObjects.vacmSecurityToGroupTable.vacmSecurityToGroupEntry.vacmSecurityModel.0."wes", 
+but the use of the -IR flag allows you to shorten that to just
+vacmSecurityModel.0."wes".
+.IP -Ib
+The -Ib flag indicates that the expression you gave it is actually a
+regular expression that should be used to search for the best match
+possible in the mib tree.  This would allow you to specify the node
+vacmSecurityModel MIB node as something as generic as
+vacmsecuritymodel (since case insensitive searches are done) or
+vacm.*model.  Note that multiple matches are obviously possible (.*
+matches everything), and the best result is currently calculated as
+the one that matches the closest to the beginning of the node name and
+the highest in the tree.  A current side effect of this option is that 
+you can't specify indexes or multiple nodes, since the '.' is treated
+as part of the regular expression.
 .SH "ENVIRONMENT VARIABLES"
 .IP PREFIX
 The standard prefix for object identifiers. Defaults to .iso.org.dod.internet.mgmt.mib-2
