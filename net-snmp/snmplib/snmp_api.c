@@ -773,6 +773,9 @@ _sess_copy( struct snmp_session *in_session)
     if (session->securityLevel <= 0)
       session->securityLevel = ds_get_int(DS_LIBRARY_ID, DS_LIB_SECLEVEL);
 
+    if (session->securityLevel == 0)
+      session->securityLevel = SNMP_SEC_LEVEL_NOAUTH;
+
     if (in_session->securityAuthProtoLen > 0) {
       session->securityAuthProto = 
 	(oid*)malloc(in_session->securityAuthProtoLen * sizeof(oid));
@@ -857,6 +860,10 @@ _sess_copy( struct snmp_session *in_session)
 	snmp_sess_close(slp);
 	return(NULL);
       }
+      session->contextName = cp;
+      session->contextNameLen = strlen(cp);
+    } else {
+      cp = strdup(SNMP_DEFAULT_CONTEXT);
       session->contextName = cp;
       session->contextNameLen = strlen(cp);
     }
