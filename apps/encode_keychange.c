@@ -59,6 +59,7 @@
  * Globals, &c...
  */
 char *local_progname;
+char *local_passphrase_filename;
 
 #define NL	"\n"
 
@@ -69,7 +70,7 @@ char *local_progname;
 #define PASSPHRASE_DIR		".snmp"
 	/* Rooted at $HOME.
 	 */
-#define PASSPHRASE_FILE		PASSPHRASE_DIR ## "/passphrase.ek"
+#define PASSPHRASE_FILE		"passphrase.ek"
 	/* 
 	 * Format: two lines containing old and new passphrases, nothing more.
 	 * 	
@@ -138,6 +139,10 @@ main(int argc, char **argv)
 	int       arg = 1;
 
  	local_progname = argv[0];
+	local_passphrase_filename = malloc(sizeof(PASSPHRASE_DIR) +
+					   sizeof(PASSPHRASE_FILE) + 4);
+	sprintf(local_passphrase_filename, "%s/%s",
+					   PASSPHRASE_DIR, PASSPHRASE_FILE);
 
 
  
@@ -389,7 +394,7 @@ usage_to_file(FILE *ofp)
     otherwise it is created to contain \"text\".  If nothing is given,\n\
     <engineID> is constructed from the first IP address for the local host.\n\
 		"
-		NL, (s = getenv("HOME"))?s:"$HOME", PASSPHRASE_FILE);
+		NL, (s = getenv("HOME"))?s:"$HOME", local_passphrase_filename);
 
 
 /* FIX -- make this possible?
@@ -431,9 +436,9 @@ void usage(void)
  *
  *	+ Always prompt if 'forcepassphrase' is set.
  *	+ Use given arguments if they are defined.
- *	+ Otherwise read file format from PASSWORD_FILE.
+ *	+ Otherwise read file format from PASSPHRASE_FILE.
  *		Sanity check existence and permissions of the path.
- *		ASSUME for now that PASSWORD_FILE is rooted only at $HOME.
+ *		ASSUME for now that PASSPHRASE_FILE is rooted only at $HOME.
  *	+ Otherwise prompt user for passphrase(s).
  *		Echo input if 'visible' is set.
  *		Turning off 'promptindicator' makes piping in input cleaner.
@@ -491,7 +496,7 @@ get_user_passphrases(void)
 	}
 
 							/* Test file. */
-	sprintf(path, "%s/%s", s, PASSPHRASE_FILE);
+	sprintf(path, "%s/%s", s, local_passphrase_filename);
 	if ( stat(path, &statbuf) < 0 ) {
 		fprintf(stderr, "Cannot access file \"%s\".\n", path);
 		QUITFUN(rval = SNMPERR_GENERR, get_user_passphrases_quit);
