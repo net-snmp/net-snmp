@@ -168,9 +168,9 @@ void snmpd_set_agent_address(const char *token, char *cptr)
 
     if (ptr)
 	/* append to the older specification string */
-	snprintf(buf,sizeof(buf),"%s,%s", ptr, cptr);
+	snprintf(buf, sizeof(buf), "%s,%s", ptr, cptr);
     else
-	strncpy(buf,sizeof(buf),cptr);
+	strncpy(buf, cptr, sizeof(buf));
     buf[sizeof(buf)-1] = '\0';
 
     DEBUGMSGTL(("snmpd_ports","port spec: %s\n", buf));
