@@ -726,14 +726,14 @@ register_default_handlers(void)
 	              NETSNMP_DS_LIBRARY_ID, NETSNMP_DS_LIB_16BIT_IDS);
     netsnmp_ds_register_config(ASN_OCTET_STR, "snmp", "clientaddr",
                       NETSNMP_DS_LIBRARY_ID, NETSNMP_DS_LIB_CLIENT_ADDR);
-    netsnmp_ds_register_config(ASN_INTEGER, "snmp", "udpServerSendBuf",
-		      NETSNMP_DS_LIBRARY_ID, NETSNMP_DS_LIB_UDP_SERVERSENDBUF);
-    netsnmp_ds_register_config(ASN_INTEGER, "snmp", "udpServerRecvBuf",
-		      NETSNMP_DS_LIBRARY_ID, NETSNMP_DS_LIB_UDP_SERVERRECVBUF);
-    netsnmp_ds_register_config(ASN_INTEGER, "snmp", "udpClientSendBuf",
-		      NETSNMP_DS_LIBRARY_ID, NETSNMP_DS_LIB_UDP_CLIENTSENDBUF);
-    netsnmp_ds_register_config(ASN_INTEGER, "snmp", "udpClientRecvBuf",
-		      NETSNMP_DS_LIBRARY_ID, NETSNMP_DS_LIB_UDP_CLIENTRECVBUF);
+    netsnmp_ds_register_config(ASN_INTEGER, "snmp", "serverSendBuf",
+		      NETSNMP_DS_LIBRARY_ID, NETSNMP_DS_LIB_SERVERSENDBUF);
+    netsnmp_ds_register_config(ASN_INTEGER, "snmp", "serverRecvBuf",
+		      NETSNMP_DS_LIBRARY_ID, NETSNMP_DS_LIB_SERVERRECVBUF);
+    netsnmp_ds_register_config(ASN_INTEGER, "snmp", "clientSendBuf",
+		      NETSNMP_DS_LIBRARY_ID, NETSNMP_DS_LIB_CLIENTSENDBUF);
+    netsnmp_ds_register_config(ASN_INTEGER, "snmp", "clientRecvBuf",
+		      NETSNMP_DS_LIBRARY_ID, NETSNMP_DS_LIB_CLIENTRECVBUF);
 }
 
 void
