@@ -1,6 +1,5 @@
 ;       @(#)snmp.def    1.0 10/26/97 (gmarzot@baynetworks.com)
 ;       Single session API mods by M. Slifcak, Internet Security Systems, Inc.
-;   USE_V2PARTY_PROTOCOL must be defined in config.h
 
 DESCRIPTION     'UCD SNMP Library'
 ;CODE            SHARED READ EXECUTE
