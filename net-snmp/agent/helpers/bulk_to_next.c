@@ -31,6 +31,8 @@ netsnmp_get_bulk_to_next_handler(void) {
     return netsnmp_create_handler("bulk_to_next", netsnmp_bulk_to_next_helper);
 }
 
+/** takes answered requests and decrements the repeat count and
+ *  updates the requests to the next to-do varbind in the list */
 void
 bulk_to_next_fix_requests(netsnmp_request_info              *requests) 
 {
