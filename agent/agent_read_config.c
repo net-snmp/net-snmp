@@ -110,13 +110,13 @@ void init_agent_read_config (const char *app)
   if ( ds_get_boolean(DS_APPLICATION_ID, DS_AGENT_ROLE) == MASTER_AGENT ) {
       register_app_config_handler("trapsink",
                           snmpd_parse_config_trapsink, snmpd_free_trapsinks,
-                          "host [community]");
+                          "host [community] [port]");
       register_app_config_handler("trap2sink",
                           snmpd_parse_config_trap2sink, NULL,
-                          "host [community]");
+                          "host [community] [port]");
       register_app_config_handler("informsink",
                           snmpd_parse_config_informsink, NULL,
-                          "host [community]");
+                          "host [community] [port]");
   }
   register_app_config_handler("trapcommunity",
                           snmpd_parse_config_trapcommunity,
