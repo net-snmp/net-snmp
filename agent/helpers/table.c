@@ -164,7 +164,21 @@ table_helper_handler(netsnmp_mib_handler *handler,
         }
     }
 
-
+    if ( MODE_IS_SET(reqinfo->mode) &&
+         (reqinfo->mode != MODE_SET_RESERVE1)) {
+        /*
+         * for later set modes, we can skip all the index parsing,
+         * and we always need to let child handlers have a chance
+         * to clean up.
+         */
+        need_processing = 1;
+    }
+    else {
+        /*
+         * for RESERVE1 and GETS, only continue if we have at least
+         * one valid request.
+         */
+           
     /*
      * loop through requests
      */
@@ -503,7 +517,7 @@ table_helper_handler(netsnmp_mib_handler *handler,
         ++need_processing;
 
     }                           /* for each request */
-
+    }
 
     /*
      * * call our child access function 
