@@ -481,12 +481,6 @@ handle_snmp_packet(int operation, struct snmp_session *session, int reqid,
 	agent_session_list = asp;
     }
     else {
-	if ( status == SNMP_ERR_NOERROR ) {
-	    snmp_increment_statistic_by(
-		(asp->pdu->command == SNMP_MSG_SET ?
-			STAT_SNMPINTOTALSETVARS : STAT_SNMPINTOTALREQVARS ),
-	    	count_varbinds( asp->pdu ));
-	}
 		/*
 		 * May need to "dumb down" a SET error status for a
 		 *  v1 query.  See RFC2576 - section 4.3
@@ -514,6 +508,34 @@ handle_snmp_packet(int operation, struct snmp_session *session, int reqid,
 			status = SNMP_ERR_BADVALUE;
 			break;
 	    }
+	}
+		/*
+		 * Similarly we may need to "dumb down" v2 exception
+		 *  types to throw an error for a v1 query.
+		 *  See RFC2576 - section 4.1.2.3
+		 */
+	if (( asp->pdu->command != SNMP_MSG_SET ) &&
+	    ( asp->pdu->version == SNMP_VERSION_1 )) {
+		for ( var_ptr = asp->pdu->variables, i=0 ;
+			var_ptr != NULL ;
+			var_ptr = var_ptr->next_variable, i++ ) {
+		    switch ( var_ptr->type ) {
+			case SNMP_NOSUCHOBJECT:
+			case SNMP_NOSUCHINSTANCE:
+			case SNMP_ENDOFMIBVIEW:
+			case ASN_COUNTER64:
+				status = SNMP_ERR_NOSUCHNAME;
+				asp->pdu->errindex=i;
+				/* Need to reset variable list? */
+				break;
+		    }
+		}
+	}
+	if ( status == SNMP_ERR_NOERROR ) {
+	    snmp_increment_statistic_by(
+		(asp->pdu->command == SNMP_MSG_SET ?
+			STAT_SNMPINTOTALSETVARS : STAT_SNMPINTOTALREQVARS ),
+	    	count_varbinds( asp->pdu ));
 	}
 	asp->pdu->command = SNMP_MSG_RESPONSE;
 	asp->pdu->errstat = status;
