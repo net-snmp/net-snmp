@@ -121,7 +121,7 @@ extern          "C" {
      * If you KNOW that your indexes will never exceed a certain
      * length, update this macro to that length.
      */
-#define MAX_ipCidrRouteTable_IDX_LEN     4
+#define MAX_ipCidrRouteTable_IDX_LEN     13
 
 
     /*
