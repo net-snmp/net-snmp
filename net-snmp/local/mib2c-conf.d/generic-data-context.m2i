@@ -22,7 +22,7 @@ typedef struct ${context}_data_s {
     
 @    foreach $node nonindex@
 @        include m2c_setup_node.m2i@
-        /** $node.syntax = $node.perltype = $node.type */
+        /** $m2c_node_summary */
 @        if $m2c_node_needlength == 0@
    $m2c_decl   $node;
 @        else@
