@@ -200,11 +200,12 @@ register_agentx_list(netsnmp_session *session, netsnmp_pdu *pdu)
                                       HANDLER_CAN_RWRITE |
                                       HANDLER_CAN_GETBULK); /* fake it */
     reg->handler->myvoid = session;
-    switch (register_mib_context2(buf, NULL, 0, 1,
-			 pdu->variables->name, pdu->variables->name_length,
-			 pdu->priority, pdu->range_subid, ubound, sp,
-			 (char *)pdu->community, pdu->time,
-			 flags, reg, 1)) {
+    switch (netsnmp_register_mib(buf, NULL, 0, 1,
+                                 pdu->variables->name,
+                                 pdu->variables->name_length,
+                                 pdu->priority, pdu->range_subid, ubound, sp,
+                                 (char *)pdu->community, pdu->time,
+                                 flags, reg, 1)) {
 
     case MIB_REGISTERED_OK:
 	DEBUGMSGTL(("agentx/master", "registered ok\n"));

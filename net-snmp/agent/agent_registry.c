@@ -404,7 +404,7 @@ load_subtree( struct subtree *new_sub, const char *context_name )
 }
 
 int
-register_mib_context2(const char *moduleName,
+netsnmp_register_mib(const char *moduleName,
 	     struct variable *var,
 	     size_t varsize,
 	     size_t numvars,
