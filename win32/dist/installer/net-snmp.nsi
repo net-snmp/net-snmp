@@ -2,7 +2,9 @@
 
 ; HM NIS Edit Wizard helper defines
 !define PRODUCT_NAME "Net-SNMP"
-!define PRODUCT_VERSION "5.1.1"
+!define PRODUCT_MAJ_VERSION "5"
+!define PRODUCT_MIN_VERSION "1"
+!define PRODUCT_REVISION "1"
 !define PRODUCT_WEB_SITE "http://www.net-snmp.com"
 !define PRODUCT_DIR_REGKEY "Software\Microsoft\Windows\CurrentVersion\App Paths\encode_keychange.exe"
 !define PRODUCT_UNINST_KEY "Software\Microsoft\Windows\CurrentVersion\Uninstall\${PRODUCT_NAME}"
@@ -21,6 +23,7 @@
 !define MUI_ABORTWARNING
 !define MUI_ICON "${NSISDIR}\Contrib\Graphics\Icons\modern-install.ico"
 !define MUI_UNICON "${NSISDIR}\Contrib\Graphics\Icons\modern-uninstall.ico"
+!define MUI_HEADERIMAGE_BITMAP "net-snmp-header1.bmp"
 !define MUI_HEADERIMAGE_UNBITMAP "net-snmp-header1.bmp"
 ; Welcome page
 !insertmacro MUI_PAGE_WELCOME
@@ -53,9 +56,8 @@ var ICONS_GROUP
 
 ; MUI end ------
 
-Name "${PRODUCT_NAME} ${PRODUCT_VERSION}"
-OutFile "net-snmp5-1-1.exe"
-;InstallDir "$PROGRAMFILES\net-snmp"
+Name "${PRODUCT_NAME} ${PRODUCT_MAJ_VERSION}.${PRODUCT_MIN_VERSION}.${PRODUCT_REVISION}"
+OutFile "net-snmp-${PRODUCT_MAJ_VERSION}.${PRODUCT_MIN_VERSION}.${PRODUCT_REVISION}-2.win32.exe"
 InstallDir "C:\usr"
 InstallDirRegKey HKLM "${PRODUCT_DIR_REGKEY}" ""
 ShowInstDetails show
@@ -184,9 +186,9 @@ Section "Agent" SEC02
   File "share\snmp\snmpconf-data\snmpd-data\system"
   File "share\snmp\snmpconf-data\snmpd-data\trapsinks"
   SetOutPath "$INSTDIR\"
-  File "registerservice.bat"
-  File "unregisterservice.bat"
-  Call CreateServiceBats
+  File "registeragent.bat"
+  File "unregisteragent.bat"
+  Call CreateAgentBats
 SectionEnd
 
 Section "snmptrapd" SEC03
@@ -198,7 +200,7 @@ Section "snmptrapd" SEC03
   File "share\snmp\snmpconf-data\snmptrapd-data\traphandle"
 SectionEnd
 
-Section "Perl Modules" SEC04
+Section "Copy Perl Modules" SEC04
   SetOutPath "$INSTDIR\perl\x86"
   File "perl\x86\Net-SNMP.tar.gz"
   SetOutPath "$INSTDIR\perl"
@@ -212,8 +214,9 @@ Section -AdditionalIcons
   CreateShortCut "$SMPROGRAMS\$ICONS_GROUP\Uninstall.lnk" "$INSTDIR\uninst.exe"
   CreateShortCut "$SMPROGRAMS\$ICONS_GROUP\Net-SNMP Help.lnk" "$INSTDIR\docs\Net-SNMP.chm"
   CreateDirectory "$SMPROGRAMS\$ICONS_GROUP\Service"
-  CreateShortCut "$SMPROGRAMS\$ICONS_GROUP\Service\Register Service.lnk" "$INSTDIR\registerservice.bat"
-  CreateShortCut "$SMPROGRAMS\$ICONS_GROUP\Service\Unregister Service.lnk" "$INSTDIR\unregisterservice.bat"
+  CreateShortCut "$SMPROGRAMS\$ICONS_GROUP\Service\Register Agent Service.lnk" "$INSTDIR\registeragent.bat"
+  CreateShortCut "$SMPROGRAMS\$ICONS_GROUP\Service\Unregister Agent Service.lnk" "$INSTDIR\unregisteragent.bat"
+  CreateShortCut "$SMPROGRAMS\$ICONS_GROUP\README.lnk" "$INSTDIR\README.txt"
 SectionEnd
 
 Section -Post
@@ -222,7 +225,7 @@ Section -Post
   WriteRegStr ${PRODUCT_UNINST_ROOT_KEY} "${PRODUCT_UNINST_KEY}" "DisplayName" "$(^Name)"
   WriteRegStr ${PRODUCT_UNINST_ROOT_KEY} "${PRODUCT_UNINST_KEY}" "UninstallString" "$INSTDIR\uninst.exe"
   WriteRegStr ${PRODUCT_UNINST_ROOT_KEY} "${PRODUCT_UNINST_KEY}" "DisplayIcon" "$INSTDIR\bin\encode_keychange.exe"
-  WriteRegStr ${PRODUCT_UNINST_ROOT_KEY} "${PRODUCT_UNINST_KEY}" "DisplayVersion" "${PRODUCT_VERSION}"
+  WriteRegStr ${PRODUCT_UNINST_ROOT_KEY} "${PRODUCT_UNINST_KEY}" "DisplayVersion" "${PRODUCT_MAJ_VERSION}.${PRODUCT_MIN_VERSION}.${PRODUCT_REVISION}"
   WriteRegStr ${PRODUCT_UNINST_ROOT_KEY} "${PRODUCT_UNINST_KEY}" "${PRODUCT_STARTMENU_REGVAL}" "$ICONS_GROUP"
   WriteRegStr ${PRODUCT_UNINST_ROOT_KEY} "${PRODUCT_UNINST_KEY}" "URLInfoAbout" "${PRODUCT_WEB_SITE}"
 SectionEnd
@@ -232,7 +235,7 @@ SectionEnd
   !insertmacro MUI_DESCRIPTION_TEXT ${SEC01} "A few SNMP applications (snmpwalk, snmpget, etc...), documentation, and MIBs"
   !insertmacro MUI_DESCRIPTION_TEXT ${SEC02} "The snmpd agent"
   !insertmacro MUI_DESCRIPTION_TEXT ${SEC03} "snmptrad daemon"
-  !insertmacro MUI_DESCRIPTION_TEXT ${SEC04} "Requires Active Perl: http://www.activestate.com"
+  !insertmacro MUI_DESCRIPTION_TEXT ${SEC04} "See Start Here - Installation in the Net-SNMP Help file for instructions on installing the Perl PPD package"
 !insertmacro MUI_FUNCTION_DESCRIPTION_END
 
 Function CreateSnmpConf
@@ -268,15 +271,15 @@ Function CreateSnmpConf
   Call WriteEnvStr
 FunctionEnd
 
-Function CreateServiceBats
+Function CreateAgentBats
   SetOutPath "$INSTDIR\"
   ClearErrors
-  FileOpen $0 "registerservice.bat" "w"
+  FileOpen $0 "registeragent.bat" "w"
   IfErrors cleanup
   FileWrite $0 "$\"$INSTDIR\bin\snmpd.exe$\" -register$\r$\n"
 
   ClearErrors
-  FileOpen $1 "unregisterservice.bat" "w"
+  FileOpen $1 "unregisteragent.bat" "w"
   IfErrors cleanup
   FileWrite $1 "$\"$INSTDIR\bin\snmpd.exe$\" -unregister$\r$\n"
 
@@ -441,12 +444,13 @@ Section Uninstall
   Delete "$INSTDIR\share\snmp\mibs\.index"
   Delete "$INSTDIR\share\snmp\snmpd.conf"
   Delete "$INSTDIR\etc\snmp\snmp.conf"
-  Delete "$INSTDIR\registerservice.bat"
-  Delete "$INSTDIR\unregisterservice.bat"
+  Delete "$INSTDIR\registeragent.bat"
+  Delete "$INSTDIR\unregisteragent.bat"
   Delete "$SMPROGRAMS\$ICONS_GROUP\Net-SNMP Help.lnk"
   Delete "$SMPROGRAMS\$ICONS_GROUP\Uninstall.lnk"
-  Delete "$SMPROGRAMS\$ICONS_GROUP\Service\Register Service.lnk"
-  Delete "$SMPROGRAMS\$ICONS_GROUP\Service\Unregister Service.lnk"
+  Delete "$SMPROGRAMS\$ICONS_GROUP\README.lnk"
+  Delete "$SMPROGRAMS\$ICONS_GROUP\Service\Register Agent Service.lnk"
+  Delete "$SMPROGRAMS\$ICONS_GROUP\Service\Unregister Agent Service.lnk"
 
   RMDir "$SMPROGRAMS\$ICONS_GROUP\Service"
   RMDir "$SMPROGRAMS\$ICONS_GROUP"
