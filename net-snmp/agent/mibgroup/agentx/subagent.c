@@ -31,6 +31,9 @@
 #include "snmp_api.h"
 #include "snmp_impl.h"
 #include "snmp_client.h"
+#include "snmp_alarm.h"
+#include "snmp_logging.h"
+#include "default_store.h"
 #include "snmp.h"
 
 #include "snmp_vars.h"
@@ -52,6 +55,9 @@
 #endif
 #include "system.h"
 
+#include "subagent.h"
+
+static SNMPCallback subagent_register_ping_alarm;
 
 struct agent_set_info {
     int			  transID;
@@ -411,23 +417,27 @@ subagent_register_for_traps(int majorID, int minorID, void *serverarg, void *cli
   return 1;
 }
 
-/* returns non-zero on error */
+/* open a session to the master agent */
 int
-subagent_pre_init( void )
-{
+subagent_open_master_session(void) {
     struct snmp_session sess;
 
-    DEBUGMSGTL(("agentx/subagent","initializing....\n"));
-    if ( ds_get_boolean(DS_APPLICATION_ID, DS_AGENT_ROLE) != SUB_AGENT )
-	return 0;
+    DEBUGMSGTL(("agentx/subagent","opening session....\n"));
 
+    if (main_session) {
+        snmp_log(LOG_WARNING,
+                 "AgentX session to master agent attempted to be re-opened.");
+        return -1;
+    }
+    
     snmp_sess_init( &sess );
     sess.version = AGENTX_VERSION_1;
     sess.retries = SNMP_DEFAULT_RETRIES;
     sess.timeout = SNMP_DEFAULT_TIMEOUT;
     sess.flags  |= SNMP_FLAGS_STREAM_SOCKET;
     if ( ds_get_string(DS_APPLICATION_ID, DS_AGENT_X_SOCKET) )
-	sess.peername = strdup(ds_get_string(DS_APPLICATION_ID, DS_AGENT_X_SOCKET));
+	sess.peername =
+            strdup(ds_get_string(DS_APPLICATION_ID, DS_AGENT_X_SOCKET));
     else
 	sess.peername = strdup(AGENTX_SOCKET);
  
@@ -436,7 +446,7 @@ subagent_pre_init( void )
     sess.callback = handle_agentx_packet;
     sess.authenticator = NULL;
     main_session = snmp_open_ex( &sess, 0, agentx_parse, 0, agentx_build,
-                                   agentx_check_packet );
+                                 agentx_check_packet );
 
     if ( main_session == NULL ) {
       /* diagnose snmp_open errors with the input struct snmp_session pointer */
@@ -446,9 +456,13 @@ subagent_pre_init( void )
 
     if ( agentx_open_session( main_session ) < 0 ) {
 	snmp_close( main_session );
+        main_session = NULL;
 	return -1;
     }
 
+    snmp_register_callback(SNMP_CALLBACK_LIBRARY,
+                           SNMP_CALLBACK_POST_READ_CONFIG,
+                           subagent_register_ping_alarm, main_session);
 
     snmp_register_callback(SNMP_CALLBACK_LIBRARY, SNMP_CALLBACK_POST_PREMIB_READ_CONFIG,
                            subagent_register_for_traps, main_session);
@@ -468,10 +482,152 @@ subagent_pre_init( void )
                            SNMPD_CALLBACK_UNREG_SYSOR,
                            agentx_sysOR_callback, main_session);
 #endif
+
+    DEBUGMSGTL(("agentx/subagent","opening session....  DONE (%x)\n",
+                main_session));
+
+    return 0;
+}
+
+void
+agentx_unregister_callbacks(struct snmp_session *ss) {
+    /* unregister all the callbacks associated with this session */
+    snmp_unregister_callback(SNMP_CALLBACK_LIBRARY,
+                             SNMP_CALLBACK_POST_READ_CONFIG,
+                             subagent_register_ping_alarm, ss, 1);
+
+    snmp_unregister_callback(SNMP_CALLBACK_LIBRARY,
+                             SNMP_CALLBACK_POST_PREMIB_READ_CONFIG,
+                             subagent_register_for_traps, ss, 1);
+    snmp_unregister_callback(SNMP_CALLBACK_LIBRARY, SNMP_CALLBACK_SHUTDOWN,
+                           subagent_shutdown, ss, 1);
+    snmp_unregister_callback(SNMP_CALLBACK_APPLICATION,
+                           SNMPD_CALLBACK_REGISTER_OID,
+                           agentx_registration_callback, ss, 1);
+    snmp_unregister_callback(SNMP_CALLBACK_APPLICATION,
+                           SNMPD_CALLBACK_UNREGISTER_OID,
+                           agentx_registration_callback, ss, 1);
+#ifdef USING_MIBII_SYSORTABLE_MODULE
+    snmp_unregister_callback(SNMP_CALLBACK_APPLICATION,
+                           SNMPD_CALLBACK_REG_SYSOR,
+                           agentx_sysOR_callback, ss, 1);
+    snmp_unregister_callback(SNMP_CALLBACK_APPLICATION,
+                           SNMPD_CALLBACK_UNREG_SYSOR,
+                           agentx_sysOR_callback, ss, 1);
+#endif
+    
+}
+
+/* returns non-zero on error */
+int
+subagent_pre_init( void )
+{
+    DEBUGMSGTL(("agentx/subagent","initializing....\n"));
+    if ( ds_get_boolean(DS_APPLICATION_ID, DS_AGENT_ROLE) != SUB_AGENT )
+	return 0;
+
+    if (subagent_open_master_session() != 0)
+        return -1;
+
+    /* set up callbacks to initiate master agent pings for this session */
+    ds_register_config(ASN_INTEGER,
+                       ds_get_string(DS_LIBRARY_ID, DS_LIB_APPTYPE),
+                       "agentxPingInterval",
+                       DS_APPLICATION_ID, DS_AGENT_AGENTX_PING_INTERVAL);
+
     DEBUGMSGTL(("agentx/subagent","initializing....  DONE\n"));
     
     return 0;
 }
 
 
+/* alarm registration function to open a session to the master agent.
+   this should get called via an alarm registration to re-open a dead
+   or never properly opened session.  clientarg should be an int to
+   the alarm registration number so we can un-register ourselves. */
+void
+agentx_reopen_session(unsigned int clientreg, void *clientarg) {
+    if (subagent_open_master_session() == 0) {
+        /* successful.  delete the alarm handle if one exists */
+        if (clientreg)
+            snmp_alarm_unregister(clientreg);
+
+        /* reregister all our nodes */
+        register_mib_reattach();
+
+        /* register a ping alarm (if need be) */
+        subagent_register_ping_alarm(0, 0, 0, main_session);
+    } else {
+        if (!clientreg)
+            /* register a reattach alarm for later */
+            subagent_register_ping_alarm(0, 0, 0, main_session);
+    }
+}
+
+/* If a valid session is passed in (through clientarg), register a
+   ping handler to ping it frequently, else register an attempt to try
+   and open it again later. */
+static int
+subagent_register_ping_alarm(int majorID, int minorID,
+                             void *serverarg, void *clientarg) {
+
+    struct snmp_session *ss = (struct snmp_session *) clientarg;
+    int ping_interval = 
+        ds_get_int(DS_APPLICATION_ID, DS_AGENT_AGENTX_PING_INTERVAL);
+
+    if (!ping_interval) /* don't do anything if not setup properly */
+        return 0;
+
+    /* register a ping alarm, if desired */
+    if (ss) {
+        DEBUGMSGTL(("agentx/subagent",
+                    "registering agentx socket/ping checker....\n"));
+        if (ss->securityModel == 0) {
+
+            DEBUGMSGTL(("agentx/subagent",
+                        "registering ping alarm every %d seconds\n",
+                        ping_interval));
+            /* we re-use the securityModel parameter for an alarm stash,
+               since agentx doesn't need it */
+            ss->securityModel = snmp_alarm_register(ping_interval, SA_REPEAT,
+                                                    agentx_check_session, ss);
+        }
+    } else {
+        /* attempt to open it later instead */
+        DEBUGMSGTL(("agentx/subagent",
+                    "subagent not properly attached, postponing registration till later....\n"));
+        snmp_alarm_register(ping_interval, SA_REPEAT,
+                            agentx_reopen_session, NULL);
+    }
+    return 0;
+}
+
+/* check a session validity for connectivity to the master agent.  If
+   not functioning, close and start attempts to reopen the session */
+void
+agentx_check_session(unsigned int clientreg, void *clientarg) {
+    struct snmp_session *ss = (struct snmp_session *) clientarg;
+    if (!ss) {
+        if (clientreg)
+            snmp_alarm_unregister (clientreg);
+        return;
+    }
+    DEBUGMSGTL(("agentx/subagent","checking status of our session (%x)\n",
+                ss));
+    
+    if (!agentx_send_ping(ss)) {
+        snmp_log(LOG_WARNING, "AgentX master agent failed to respond to ping.  Attempting to re-register.\n");
+        /* master agent disappeared?  Try and re-register */
+        /* close first, just to be sure */
+        agentx_unregister_callbacks(ss);
+        agentx_close_session(ss, AGENTX_CLOSE_TIMEOUT);
+        snmp_alarm_unregister(clientreg); /* delete ping alarm timer */
+	snmp_close( main_session );
+        
+        main_session = NULL;
+        agentx_reopen_session(0, NULL);
+    } else {
+        DEBUGMSGTL(("agentx/subagent","status ok, master responded to ping\n"));
+    }
+}
 

@@ -33,6 +33,8 @@ struct subtree {
     struct subtree      *next;		/* List of 'sibling' subtrees */
     struct subtree      *prev;		/* Make siblings a doubly-linked list */
     struct subtree      *children;	/* List of 'child' subtrees */
+    int     range_subid;
+    oid     range_ubound;
 };
 
 /*

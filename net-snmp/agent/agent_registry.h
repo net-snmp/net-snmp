@@ -52,6 +52,7 @@ struct subtree *free_subtree (struct subtree *);
 int compare_tree (const oid *, size_t, const oid *, size_t);
 int in_a_view(oid *, size_t *, struct snmp_pdu *, int);
 int check_access(struct snmp_pdu *pdu);
+void register_mib_reattach(void);
 
 /* REGISTER_MIB(): This macro simply loads register_mib with less pain:
 

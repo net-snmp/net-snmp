@@ -41,11 +41,14 @@
 #include "snmp_api.h"
 #include "snmp_impl.h"
 #include "snmp_client.h"
+#include "snmp_alarm.h"
+#include "default_store.h"
 #include "snmp.h"
 #include "snmp_debug.h"
 #include "snmp_vars.h"
 #include "agent_registry.h"
 #include "agent_index.h"
+#include "ds_agent.h"
 
 #include "agentx/protocol.h"
 #include "agentx/client.h"
@@ -145,6 +148,7 @@ agentx_open_session( struct snmp_session *ss )
 
     ss->sessid = response->sessid;
     snmp_free_pdu(response);
+
     DEBUGMSGTL(("agentx/subagent","open \n"));
     return 1;
 }
@@ -168,6 +172,7 @@ agentx_close_session( struct snmp_session *ss, int why )
     (void) agentx_synch_response(ss, pdu, &response);
     snmp_free_pdu(response);
     DEBUGMSGTL(("agentx/subagent","closed\n"));
+
     return 1;
 }
 

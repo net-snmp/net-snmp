@@ -34,6 +34,7 @@
 #include "snmp_impl.h"
 #include "snmp_client.h"
 #include "snmp_debug.h"
+#include "snmp_alarm.h"
 #include "snmp.h"
 #include "ds_agent.h"
 #include "default_store.h"

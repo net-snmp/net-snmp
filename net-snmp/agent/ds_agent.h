@@ -16,5 +16,6 @@
 #define DS_AGENT_FLAGS    0       /* session.flags */
 #define DS_AGENT_USERID   1
 #define DS_AGENT_GROUPID  2
+#define DS_AGENT_AGENTX_PING_INTERVAL  3  /* ping master every SECONDS */
 
 #endif
