@@ -5715,7 +5715,7 @@ static int parse_hints_parse(struct parse_hints *ph, const char **v_in_out)
 		v = nv;
 		for (i = 0; i < ph->length; i++) {
 		    int shift = 8 * (ph->length - 1 - i);
-		    if (!parse_hints_add_result_octet(ph, (number >> shift) & 0xFF)) {
+		    if (!parse_hints_add_result_octet(ph, (u_char)(number >> shift) )) {
 			return 0; /* failed */
 		    }
 		}
