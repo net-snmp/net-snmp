@@ -96,6 +96,12 @@ opened.
 .B -s
 Use syslog for logging.
 .TP
+.BR -S " d|0-7"
+Specifies the syslog facility to use when logging to syslog.  'd' means
+.B LOG_DAEMON
+and 0 through 7 mean 
+.BR LOG_LOCAL0 " through " LOG_LOCAL7 ".  " LOG_DAEMON " is the default."
+.TP
 .B -u \fIUID
 Change to the user ID
 .I UID

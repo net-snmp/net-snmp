@@ -165,6 +165,7 @@ typedef long    fd_mask;
 int             snmp_dump_packet;
 int             running = 1;
 int             reconfig = 0;
+int             Facility = LOG_DAEMON;
 
 #ifdef WIN32
 /*
@@ -202,6 +203,44 @@ int __cdecl     _tmain(int argc, TCHAR * argv[]);
 #else
 int             main(int, char **);
 #endif
+
+/*
+ * These definitions handle 4.2 systems without additional syslog facilities.
+ */
+#ifndef LOG_CONS
+#define LOG_CONS	0       /* Don't bother if not defined... */
+#endif
+#ifndef LOG_PID
+#define LOG_PID		0       /* Don't bother if not defined... */
+#endif
+#ifndef LOG_LOCAL0
+#define LOG_LOCAL0	0
+#endif
+#ifndef LOG_LOCAL1
+#define LOG_LOCAL1	0
+#endif
+#ifndef LOG_LOCAL2
+#define LOG_LOCAL2	0
+#endif
+#ifndef LOG_LOCAL3
+#define LOG_LOCAL3	0
+#endif
+#ifndef LOG_LOCAL4
+#define LOG_LOCAL4	0
+#endif
+#ifndef LOG_LOCAL5
+#define LOG_LOCAL5	0
+#endif
+#ifndef LOG_LOCAL6
+#define LOG_LOCAL6	0
+#endif
+#ifndef LOG_LOCAL7
+#define LOG_LOCAL7	0
+#endif
+#ifndef LOG_DAEMON
+#define LOG_DAEMON	0
+#endif
+
 
 static void
 usage(char *prog)
@@ -250,6 +289,8 @@ usage(char *prog)
     printf
         ("  \t\t\t  Note that not all parameters are relevant when running as a service\n");
 #endif
+    printf("  -s\t\t\tlog warnings/messages to syslog\n");
+    printf("  -S d|i|0-7\t\tset syslog facility to LOG_DAEMON (d), LOG_INFO (i)\n\t\t\t  or LOG_LOCAL[0-7] (default LOG_DAEMON)\n");
     printf("  -s\t\t\tlog warnings/messages to syslog\n");
 #if HAVE_UNISTD_H
     printf
@@ -354,7 +395,7 @@ setup_log(int restart, int dont_zero, int stderr_log, int syslog_log,
     }
 
     if (syslog_log_s) {
-	snmp_enable_syslog();
+	snmp_enable_syslog_ident("snmpd", Facility);
     }
 }
 
@@ -381,7 +422,7 @@ SnmpDaemonMain(int argc, TCHAR * argv[])
 main(int argc, char *argv[])
 #endif
 {
-    char            options[128] = "aAc:CdD::fhHI:l:LP:qrsUvV-:";
+    char            options[128] = "aAc:CdD::fhHI:l:LP:qrsS:UvV-:";
     int             arg, i, ret;
     int             dont_fork = 0;
     int             dont_zero_log = 0;
@@ -553,6 +594,52 @@ main(int argc, char *argv[])
 
         case 's':
             syslog_log = 1;
+            break;
+
+        case 'S':
+            if (optarg != NULL) {
+                switch (*optarg) {
+                case 'd':
+                case 'D':
+                    Facility = LOG_DAEMON;
+                    break;
+                case 'i':
+                case 'I':
+                    Facility = LOG_INFO;
+                    break;
+                case '0':
+                    Facility = LOG_LOCAL0;
+                    break;
+                case '1':
+                    Facility = LOG_LOCAL1;
+                    break;
+                case '2':
+                    Facility = LOG_LOCAL2;
+                    break;
+                case '3':
+                    Facility = LOG_LOCAL3;
+                    break;
+                case '4':
+                    Facility = LOG_LOCAL4;
+                    break;
+                case '5':
+                    Facility = LOG_LOCAL5;
+                    break;
+                case '6':
+                    Facility = LOG_LOCAL6;
+                    break;
+                case '7':
+                    Facility = LOG_LOCAL7;
+                    break;
+                default:
+                    fprintf(stderr, "invalid syslog facility: -S%c\n",
+                            *optarg);
+                    usage(argv[0]);
+                }
+            } else {
+                fprintf(stderr, "no syslog facility specified\n");
+                usage(argv[0]);
+            }
             break;
 
         case 'U':
