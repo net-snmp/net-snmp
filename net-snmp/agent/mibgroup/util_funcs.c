@@ -118,17 +118,23 @@ int exec_command(ex)
     }
     fclose(file);
     close(fd);
+    wait_on_exec(ex);
+  } else {
+    ex->output[0] = 0;
+    ex->result = 0;
+  }
+  return(ex->result);
+}
+
+void wait_on_exec(ex)
+  struct extensible *ex;
+{
 #ifndef EXCACHETIME
     if (ex->pid && waitpid(ex->pid,&ex->result,0) < 0) {
       setPerrorstatus("waitpid");
     }
     ex->pid = 0;
 #endif
-  } else {
-    ex->output[0] = 0;
-    ex->result = 0;
-  }
-  return(ex->result);
 }
 
 #define MAXARGS 30

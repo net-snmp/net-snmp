@@ -177,6 +177,7 @@ unsigned char *var_extensible_pass(vp, name, length, exact, var_len, write_metho
           *var_len = 0;
           fclose(file);
           close(fd);
+          wait_on_exec(passthru);
           return(NULL);
         }
         newlen = parse_miboid(buf,newname);
@@ -193,10 +194,12 @@ unsigned char *var_extensible_pass(vp, name, length, exact, var_len, write_metho
           *var_len = 0;
           fclose(file);
           close(fd);
+          wait_on_exec(passthru);
           return(NULL);
         }
         fclose(file);
         close(fd);
+        wait_on_exec(passthru);
         /* buf contains the return type, and buf2 contains the data */
         if (!strncasecmp(buf,"string",6)) {
           buf2[strlen(buf2)-1] = 0;  /* zap the linefeed */
