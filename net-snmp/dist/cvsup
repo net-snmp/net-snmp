@@ -52,7 +52,7 @@ fi
 if [ ! -w $DIR/CVS ]; then
 	WO=1
 	echo "Making $DIR writable"
-	chmod -R u+w $DIR/* $DIR/.*
+	chmod -R u+w $DIR
 fi
 
 echo "Updating directory $DIR with $TAG $REP..."
@@ -62,6 +62,6 @@ $COMMAND
 
 if [ $WO -eq 1 ]; then
 	echo "Making $DIR read-only"
-	chmod -R a+w $DIR/* $DIR/.*
+	chmod -R a-w $DIR
 fi
 
