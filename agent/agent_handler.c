@@ -112,6 +112,8 @@ netsnmp_create_handler_registration(const char *name,
         the_reg->modes = HANDLER_CAN_DEFAULT;
 
     the_reg->handler = netsnmp_create_handler(name, handler_access_method);
+    if (name)
+        the_reg->handlerName = strdup(name);
     memdup((u_char **) & the_reg->rootoid, (const u_char *) reg_oid,
            reg_oid_len * sizeof(oid));
     the_reg->rootoid_len = reg_oid_len;
@@ -240,7 +242,7 @@ netsnmp_call_handlers(netsnmp_handler_registration *reginfo,
     int             status;
 
     if (reginfo == NULL || reqinfo == NULL || requests == NULL) {
-        snmp_log(LOG_ERR, "netsnmp_call_handlers() called illegally");
+        snmp_log(LOG_ERR, "netsnmp_call_handlers() called illegally\n");
         return SNMP_ERR_GENERR;
     }
 
@@ -305,7 +307,7 @@ netsnmp_call_handler(netsnmp_mib_handler *next_handler,
 
     if (next_handler == NULL || reginfo == NULL || reqinfo == NULL ||
         requests == NULL) {
-        snmp_log(LOG_ERR, "netsnmp_call_next_handler() called illegally");
+        snmp_log(LOG_ERR, "netsnmp_call_handler() called illegally\n");
         return SNMP_ERR_GENERR;
     }
 
@@ -338,7 +340,7 @@ netsnmp_call_next_handler(netsnmp_mib_handler *current,
 
     if (current == NULL || reginfo == NULL || reqinfo == NULL ||
         requests == NULL) {
-        snmp_log(LOG_ERR, "netsnmp_call_next_handler() called illegally");
+        snmp_log(LOG_ERR, "netsnmp_call_next_handler() called illegally\n");
         return SNMP_ERR_GENERR;
     }
 
@@ -662,7 +664,7 @@ netsnmp_inject_handler_into_subtree(struct subtree *tp, const char *name,
             netsnmp_inject_handler(tptr->reginfo, clone_handler(handler));
         } else {
             for (mh = tptr->reginfo->handler; mh; mh = mh->next) {
-                if (strcmp(mh->handler_name, name) == 0) {
+                if (mh->handler_name && strcmp(mh->handler_name, name) == 0) {
                     DEBUGMSGTL(("injectHandler",
                                 "injecting handler into %s\n",
                                 tptr->label));
