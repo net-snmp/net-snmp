@@ -123,6 +123,7 @@ int main(int argc, char *argv[])
     /*
      * usage: snmptranslate name
      */
+    init_snmp("snmpapp");
     while ((arg = getopt(argc, argv, "Vhm:M:w:D:P:T:O:I:")) != EOF){
 	switch(arg) {
 	case 'h':
@@ -220,7 +221,6 @@ int main(int argc, char *argv[])
     if (optind < argc)
 	current_name = argv[optind];
     
-    init_snmp("snmpapp");
     if (current_name == NULL) {
         switch (print) {
 	default:
