@@ -30,6 +30,7 @@ ALL : "..\bin\$(OUTDIR)\$(PROGNAME).exe" "$(INTDIR)"
 CLEAN :
 	-@erase "$(INTDIR)\if.obj"
 	-@erase "$(INTDIR)\inet.obj"
+	-@erase "$(INTDIR)\inet6.obj"
 	-@erase "$(INTDIR)\main.obj"
 	-@erase "$(INTDIR)\route.obj"
 	-@erase "$(INTDIR)\vc??.idb"
@@ -86,6 +87,7 @@ LINK32_FLAGS=$(OPENSSL) netsnmp.lib advapi32.lib ws2_32.lib kernel32.lib user32.
 LINK32_OBJS= \
 	"$(INTDIR)\if.obj" \
 	"$(INTDIR)\inet.obj" \
+	"$(INTDIR)\inet6.obj" \
 	"$(INTDIR)\main.obj" \
 	"$(INTDIR)\route.obj" \
 	"$(INTDIR)\winstub.obj"
@@ -111,6 +113,8 @@ CLEAN :
 	-@erase "$(INTDIR)\if.sbr"
 	-@erase "$(INTDIR)\inet.obj"
 	-@erase "$(INTDIR)\inet.sbr"
+	-@erase "$(INTDIR)\inet6.obj"
+	-@erase "$(INTDIR)\inet6.sbr"
 	-@erase "$(INTDIR)\main.obj"
 	-@erase "$(INTDIR)\main.sbr"
 	-@erase "$(INTDIR)\route.obj"
@@ -169,6 +173,7 @@ BSC32_FLAGS=/nologo /o"$(INTDIR)\$(PROGNAME).bsc"
 BSC32_SBRS= \
 	"$(INTDIR)\if.sbr" \
 	"$(INTDIR)\inet.sbr" \
+	"$(INTDIR)\inet6.sbr" \
 	"$(INTDIR)\main.sbr" \
 	"$(INTDIR)\route.sbr" \
 	"$(INTDIR)\winstub.sbr"
@@ -183,6 +188,7 @@ LINK32_FLAGS=$(OPENSSL) netsnmp.lib advapi32.lib ws2_32.lib kernel32.lib user32.
 LINK32_OBJS= \
 	"$(INTDIR)\if.obj" \
 	"$(INTDIR)\inet.obj" \
+	"$(INTDIR)\inet6.obj" \
 	"$(INTDIR)\main.obj" \
 	"$(INTDIR)\route.obj" \
 	"$(INTDIR)\winstub.obj"
@@ -242,6 +248,24 @@ SOURCE=..\..\apps\$(PROGNAME)\inet.c
 
 
 "$(INTDIR)\inet.obj"	"$(INTDIR)\inet.sbr" : $(SOURCE) "$(INTDIR)"
+	$(CPP) $(CPP_PROJ) $(SOURCE)
+
+
+!ENDIF 
+
+SOURCE=..\..\apps\$(PROGNAME)\inet6.c
+
+!IF  "$(CFG)" == "release"
+
+
+"$(INTDIR)\inet6.obj" : $(SOURCE) "$(INTDIR)"
+	$(CPP) $(CPP_PROJ) $(SOURCE)
+
+
+!ELSEIF  "$(CFG)" == "debug"
+
+
+"$(INTDIR)\inet6.obj"	"$(INTDIR)\inet6.sbr" : $(SOURCE) "$(INTDIR)"
 	$(CPP) $(CPP_PROJ) $(SOURCE)
 
 
