@@ -184,6 +184,9 @@
 /* Define if mib loading and parsing code should not be included */
 #undef DISABLE_MIB_LOADING
 
+/* Define if SNMP SET support should be disabled */
+#undef DISABLE_SET_SUPPORT
+
 /* Define if SNMPv1 code should not be included */
 #undef DISABLE_SNMPV1
 
