@@ -962,20 +962,38 @@ void
 handle_mibdirs_conf(char *token,
 		    char *line)
 {
-  if (confmibdir)
-    free(confmibdir);
-  confmibdir=strdup(line);
-  DEBUGMSGTL(("read_config:initmib", "using mibdir path: %s\n", line));
+    char *ctmp;
+
+    if (confmibdir) {
+        ctmp = malloc(strlen(confmibdir) + strlen(line) + 1);
+        if (*line == '+')
+            line++;
+        sprintf(ctmp,"%s:%s",confmibdir,line);
+        free(confmibdir);
+        confmibdir = ctmp;
+    } else {
+        confmibdir=strdup(line);
+    }
+    DEBUGMSGTL(("read_config:initmib", "using mibdirs: %s\n", confmibdir));
 }
 
 void
 handle_mibs_conf(char *token,
 		 char *line)
 {
-  if (confmibs)
-    free(confmibs);
-  confmibs=strdup(line);
-  DEBUGMSGTL(("read_config:initmib", "using mibs: %s\n", line));
+    char *ctmp;
+
+    if (confmibs) {
+        ctmp = malloc(strlen(confmibs) + strlen(line) + 1);
+        if (*line == '+')
+            line++;
+        sprintf(ctmp,"%s:%s",confmibs,line);
+        free(confmibs);
+        confmibs = ctmp;
+    } else {
+        confmibs=strdup(line);
+    }
+    DEBUGMSGTL(("read_config:initmib", "using mibs: %s\n", confmibs));
 }
 
 void
