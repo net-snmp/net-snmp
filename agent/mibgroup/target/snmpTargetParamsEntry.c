@@ -844,7 +844,7 @@ write_snmpTargetParamsSecModel(int action,
                         "write to snmpTargetParamsSecModel: secModel out of range\n"));
             return SNMP_ERR_WRONGVALUE;
         }
-        if (find_sec_mod(long_ret) == NULL) {
+        if (find_sec_mod(long_ret) == NULL && long_ret >= 3) {
             DEBUGMSGTL(("snmpTargetParamsEntry",
                         "write to snmpTargetParamsSecModel: secModel %d unsupported\n",
                         long_ret));
