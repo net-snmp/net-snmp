@@ -59,9 +59,6 @@ static unsigned int usmUserSpinLock=0;
 int
 store_usmUser(int majorID, int minorID, void *serverarg, void *clientarg)
 {
-  REGISTER_MIB("snmpv3/usmUser", usmUser_variables, variable4, \
-				 usmUser_variables_oid);
-
   /* save the user base */
   usm_save_users("usmUser", "snmpd");
   return SNMPERR_SUCCESS;
@@ -78,6 +75,8 @@ init_usmUser(void)
   snmp_register_callback(SNMP_CALLBACK_LIBRARY, SNMP_CALLBACK_STORE_DATA,
                          store_usmUser, NULL);
   
+  REGISTER_MIB("snmpv3/usmUser", usmUser_variables, variable4, \
+				 usmUser_variables_oid);
 }
 
 /*******************************************************************-o-******
