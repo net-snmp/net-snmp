@@ -283,7 +283,7 @@ char* typestr;
 	    return(TYPE_UINTEGER); /* historic - should not show up */
                                    /* but it does?                  */
 	if (!strncasecmp(typestr, "NOTIF", 3))
-		return(TYPE_NOTIF);
+		return(TYPE_NOTIFTYPE);
         return(TYPE_UNKNOWN);
 }
 
@@ -537,7 +537,7 @@ char * str;
                 strcpy(str, "UINTEGER"); /* historic - should not show up */
                                           /* but it does?                  */
                 break;
-	case TYPE_NOTIF:
+	case TYPE_NOTIFTYPE:
 		strcpy(str, "NOTIF");
 		break;
 	case TYPE_OTHER: /* not sure if this is a valid leaf type?? */
