@@ -7,14 +7,6 @@
  * the Net-SNMP's COPYING file for more details and other copyrights
  * that may apply:
  */
-/* Portions of this file are subject to the following copyright(s).  See
- * the Net-SNMP's COPYING file for more details and other copyrights
- * that may apply:
- */
-/* Portions of this file are subject to the following copyrights.  See
- * the Net-SNMP's COPYING file for more details and other copyrights
- * that may apply:
- */
 /***********************************************************
 	Copyright 1988, 1989 by Carnegie Mellon University
 
@@ -933,7 +925,7 @@ init_agent_snmp_session(netsnmp_session * session, netsnmp_pdu *pdu)
         return NULL;
     }
 
-    DEBUGMSGTL(("snmp_agent","agent_sesion %08p created\n", asp));
+    DEBUGMSGTL(("snmp_agent","agent_session %08p created\n", asp));
     asp->session = session;
     asp->pdu = snmp_clone_pdu(pdu);
     asp->orig_pdu = snmp_clone_pdu(pdu);
@@ -956,7 +948,7 @@ free_agent_snmp_session(netsnmp_agent_session *asp)
     if (!asp)
         return;
 
-    DEBUGMSGTL(("snmp_agent","agent_sesion %08p released\n", asp));
+    DEBUGMSGTL(("snmp_agent","agent_session %08p released\n", asp));
 
     netsnmp_remove_from_delegated(asp);
     
@@ -2145,7 +2137,7 @@ netsnmp_check_outstanding_agent_requests(void)
     /*
      * deal with delegated requests
      */
-    for (asp = agent_delegated_list; asp; prev_asp = asp, asp = next_asp) {
+    for (asp = agent_delegated_list; asp; asp = next_asp) {
         next_asp = asp->next;   /* save in case we clean up asp */
         if (!netsnmp_check_for_delegated(asp)) {
 
@@ -2166,6 +2158,20 @@ netsnmp_check_outstanding_agent_requests(void)
              * continue processing or finish up 
              */
             check_delayed_request(asp);
+
+            /*
+             * if head was removed, don't drop it if it
+             * was it re-queued
+             */
+            if ((prev_asp == NULL) && (agent_delegated_list == asp)) {
+                prev_asp = asp;
+            }
+        } else {
+
+            /*
+             * asp is still on the queue
+             */
+            prev_asp = asp;
         }
     }
 
