@@ -35,6 +35,9 @@ Netsnmp_Node_Handler  netsnmp_watcher_helper_handler;
 netsnmp_mib_handler  *netsnmp_get_watched_timestamp_handler(void);
 Netsnmp_Node_Handler  netsnmp_watched_timestamp_handler;
 
+netsnmp_mib_handler  *netsnmp_get_watched_spinlock_handler(void);
+Netsnmp_Node_Handler  netsnmp_watched_spinlock_handler;
+
 #ifdef __cplusplus
 };
 #endif

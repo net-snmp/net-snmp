@@ -244,3 +244,83 @@ netsnmp_watched_timestamp_handler(netsnmp_mib_handler *handler,
                                          requests);
     return SNMP_ERR_NOERROR;
 }
+
+    /***************************
+     *
+     * Another specialised form of the above,
+     *   implementing a 'TestAndIncr' spinlock
+     *
+     ***************************/
+
+netsnmp_mib_handler *
+netsnmp_get_watched_spinlock_handler(void)
+{
+    return netsnmp_create_handler("watcher",
+                                  netsnmp_watched_spinlock_handler);
+}
+
+int
+netsnmp_register_watched_spinlock(netsnmp_handler_registration *reginfo,
+                                   int *spinlock)
+{
+    netsnmp_mib_handler  *whandler;
+    netsnmp_watcher_info *winfo;
+
+    whandler         = netsnmp_get_watched_spinlock_handler();
+    whandler->myvoid = (void *)spinlock;
+    winfo            = netsnmp_create_watcher_info((void *)spinlock,
+		           sizeof(int), ASN_INTEGER, WATCHER_FIXED_SIZE);
+    netsnmp_inject_handler(reginfo, whandler);
+    return netsnmp_register_watched_scalar(reginfo, winfo);
+}
+
+
+int
+netsnmp_watched_spinlock_handler(netsnmp_mib_handler *handler,
+                               netsnmp_handler_registration *reginfo,
+                               netsnmp_agent_request_info *reqinfo,
+                               netsnmp_request_info *requests)
+{
+    int     *spinlock = (int *) handler->myvoid;
+    netsnmp_request_info *request;
+    int      cmp;
+
+    DEBUGMSGTL(("helper:watcher:spinlock",
+                               "Got request:  %d\n", reqinfo->mode));
+    cmp = snmp_oid_compare(requests->requestvb->name,
+                           requests->requestvb->name_length,
+                           reginfo->rootoid, reginfo->rootoid_len);
+
+    DEBUGMSGTL(( "helper:watcher:spinlock", "  oid:", cmp));
+    DEBUGMSGOID(("helper:watcher:spinlock", requests->requestvb->name,
+                                   requests->requestvb->name_length));
+    DEBUGMSG((   "helper:watcher:spinlock", "\n"));
+
+
+
+    switch (reqinfo->mode) {
+        /*
+         * Ensure the assigned value matches the current one
+         */
+    case MODE_SET_RESERVE1:
+        for (request=requests; request; request=request->next) {
+            if (*request->requestvb->val.integer != *spinlock) {
+                netsnmp_set_request_error(reqinfo, requests, SNMP_ERR_WRONGVALUE);
+                return SNMP_ERR_WRONGVALUE;
+
+            }
+        }
+        break;
+
+        /*
+         * Everything else worked, so increment the spinlock
+         */
+    case MODE_SET_COMMIT:
+	(*spinlock)++;
+	break;
+    }
+    if (handler->next && handler->next->access_method)
+        return netsnmp_call_next_handler(handler, reginfo, reqinfo,
+                                         requests);
+    return SNMP_ERR_NOERROR;
+}
