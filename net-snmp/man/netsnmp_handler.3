@@ -1,4 +1,4 @@
-.TH "Agent handler API" 3 "14 Dec 2002" "net-snmp" \" -*- nroff -*-
+.TH "Agent handler API" 3 "9 Jan 2003" "net-snmp" \" -*- nroff -*-
 .ad l
 .nh
 .SH NAME
@@ -24,6 +24,13 @@ More...
 .ti -1c
 .RI "\fBinstance: process scalars and other instances easily.\fP"
 .br
+.ti -1c
+.RI "\fBmode_end_call: at the end of a series of requests, call another handler hook.\fP"
+.br
+.RI "\fIHandlers that want to loop through a series of requests and then receive a callback at the end of a particular MODE can use this helper to make this possible.\fP"
+.PP
+.in +1c
+
 .ti -1c
 .RI "\fBmultiplexer: splits mode requests into calls to different handlers.\fP"
 .br
@@ -52,6 +59,13 @@ More...
 .RI "\fBserialize: Calls sub handlers one request at a time.\fP"
 .br
 .RI "\fIThis functionally passes in one request at a time into lower handlers rather than a whole bunch of requests at once.\fP"
+.PP
+.in +1c
+
+.ti -1c
+.RI "\fBset_data: helps storing and retriving of data during set transactions\fP"
+.br
+.RI "\fIThe set_data helper.\fP"
 .PP
 .in +1c
 
