@@ -373,12 +373,14 @@ Get_Next_HR_Disk (void)
 			 * This has a *major* impact on run
 			 *   times (by a factor of 10!)
 			 */
+#if 0
 	    if (( HRD_history[ iindex ] != 0 ) &&
 		(( now - HRD_history[ iindex ]) < 60 ))
 	    {
 			HRD_index++;
 			continue;
 	    }
+#endif
 
 		/* Construct the device name in "string" */
 	    sprintf(string, disk_device_strings[ HRD_type_index ], 
