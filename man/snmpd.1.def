@@ -71,6 +71,12 @@ Logss all output from the agent (including stdout/stderr) to
 .I logfile.
 Defaults to a compiled option.
 .TP
+.B -g groupid
+Change to this gid after opening port.
+.TP
+.B -u uid
+Change to this uid after opening port.
+.TP
 .B -L
 Don't open a log file; use stdout/stderr instead.
 .TP

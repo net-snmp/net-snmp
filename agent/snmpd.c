@@ -467,11 +467,11 @@ main(int argc, char *argv[])
 #if HAVE_UNISTD_H
                 case 'u':
                   if (++arg == argc) usage(argv[0]);
-                  uid = atoi(argv[arg]);
+                  ds_set_int(DS_APPLICATION_ID, DS_AGENT_USERID,atoi(argv[arg]));
                   break;
                 case 'g':
                   if (++arg == argc) usage(argv[0]);
-                  gid = atoi(argv[arg]);
+                  ds_set_int(DS_APPLICATION_ID, DS_AGENT_GROUPID, atoi(argv[arg]));
                   break;
 #endif
                 case 'h':
@@ -611,7 +611,7 @@ main(int argc, char *argv[])
     send_easy_trap (0, 0);
         
 #if HAVE_UNISTD_H
-	if (gid) {
+	if ((gid = ds_get_int(DS_APPLICATION_ID, DS_AGENT_GROUPID)) != 0) {
 		DEBUGMSGTL(("snmpd", "Changing gid to %d.\n", gid));
 		if (setgid(gid)==-1) {
 			snmp_log_perror("setgid failed");
@@ -619,7 +619,7 @@ main(int argc, char *argv[])
 			    exit(1);
 		}
 	}
-	if (uid) {
+	if ((uid = ds_get_int(DS_APPLICATION_ID, DS_AGENT_USERID)) != 0) {
 		DEBUGMSGTL(("snmpd", "Changing uid to %d.\n", uid));
 		if(setuid(uid)==-1) {
 			snmp_log_perror("setuid failed");

@@ -297,6 +297,22 @@ associated with the localhost address.  Note that the
 flag changes the default transport mapping to use (in the
 above example, the default transport mapping is 
 .I udp.
+.IP agentgroup groupid
+Change to this gid after opening port. The groupid may refer to a group
+by name or a number if the group number starts with '#'. For example,
+specifying
+.I agentgroup snmp
+will cause the agent to run as the snmp group or
+.I agentgroup #10
+will cause the agent to run as the group with groupid 10.
+.IP agentuser uid
+Change to this uid after opening port. The userid may refer to a user
+by name or a number if the user number starts with '#'. For example,
+specifying
+.I agentuser snmp
+will cause the agent to run as the snmp user or
+.I agentuser #10
+will cause the agent to run as the user with userid 10.
 .IP "interface NAME TYPE SPEED"
 For interfaces where the agent fails to guess correctly on the type and
 speed, this directive can supply additional information.
