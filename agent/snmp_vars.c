@@ -1819,7 +1819,7 @@ var_atEntry(vp, name, length, exact, var_len, write_method)
     oid			    current[16];
     static char		    PhysAddr[6], LowPhysAddr[6];
     u_long		    Addr, LowAddr;
-#if defined(freebsd2) || defined(netbsd1)
+#if defined(freebsd2) || defined(netbsd1) || defined(hpux)
     u_short		    ifIndex, lowIfIndex;
 #endif
 
@@ -1829,7 +1829,7 @@ var_atEntry(vp, name, length, exact, var_len, write_method)
     LowAddr = -1;      /* Don't have one yet */
     ARP_Scan_Init();
     for (;;) {
-#if defined(freebsd2) || defined(netbsd1)
+#if defined(freebsd2) || defined(netbsd1) || defined(hpux)
 	if (ARP_Scan_Next(&Addr, PhysAddr, &ifIndex) == 0)
 	    break;
 	current[10] = ifIndex;
@@ -1851,7 +1851,7 @@ var_atEntry(vp, name, length, exact, var_len, write_method)
 	    if (compare(current, 16, name, *length) == 0){
 		bcopy((char *)current, (char *)lowest, 16 * sizeof(oid));
 		LowAddr = Addr;
-#if defined(freebsd2) || defined(netbsd1)
+#if defined(freebsd2) || defined(netbsd1) || defined(hpux)
 		lowIfIndex = ifIndex;
 #endif
 		bcopy(PhysAddr, LowPhysAddr, sizeof(PhysAddr));
@@ -1866,7 +1866,7 @@ var_atEntry(vp, name, length, exact, var_len, write_method)
 		 */
 		bcopy((char *)current, (char *)lowest, 16 * sizeof(oid));
 		LowAddr = Addr;
-#if defined(freebsd2) || defined(netbsd1)
+#if defined(freebsd2) || defined(netbsd1) || defined(hpux)
 		lowIfIndex = ifIndex;
 #endif
 		bcopy(PhysAddr, LowPhysAddr, sizeof(PhysAddr));
@@ -1882,7 +1882,7 @@ var_atEntry(vp, name, length, exact, var_len, write_method)
     switch(vp->magic){
 	case ATIFINDEX:
 	    *var_len = sizeof long_return;
-#if defined(freebsd2) || defined(netbsd1)
+#if defined(freebsd2) || defined(netbsd1) || defined(hpux)
 	    long_return = lowIfIndex;
 #else
 	    long_return = 1; /* XXX */
@@ -3295,7 +3295,13 @@ static char *lim, *rtnext;
 static char *at = 0;
 #else
 static int arptab_size, arptab_current;
+#ifdef STRUCT_ARPHD_HAS_AT_NEXT
+static struct arphd *at=0;
+static struct arptab *at_ptr, at_entry;
+static struct arpcom  at_com;
+#else
 static struct arptab *at=0;
+#endif
 #endif /* freebsd2 */
 
 static void ARP_Scan_Init()
@@ -3304,10 +3310,19 @@ static void ARP_Scan_Init()
 
 	if (!at) {
 	    KNLookup( N_ARPTAB_SIZE, (char *)&arptab_size, sizeof arptab_size);
+#ifdef STRUCT_ARPHD_HAS_AT_NEXT
+          at = (struct arphd  *) malloc(arptab_size * sizeof(struct arphd));
+#else
 	    at = (struct arptab *) malloc(arptab_size * sizeof(struct arptab));
+#endif
 	}
 
+#ifdef STRUCT_ARPHD_HAS_AT_NEXT
+      KNLookup( N_ARPTAB, (char *)at, arptab_size * sizeof(struct arphd));
+      at_ptr = at[0].at_next;
+#else
 	KNLookup( N_ARPTAB, (char *)at, arptab_size * sizeof(struct arptab));
+#endif
 	arptab_current = 0;
 #else
 #if defined(freebsd2) || defined(netbsd1)
@@ -3335,7 +3350,7 @@ static void ARP_Scan_Init()
 #endif
 }
 
-#if defined(freebsd2) || defined(netbsd1)
+#if defined(freebsd2) || defined(netbsd1) || defined(hpux)
 static int ARP_Scan_Next(IPAddr, PhysAddr, ifIndex)
 u_short *ifIndex;
 #else
@@ -3348,10 +3363,30 @@ char *PhysAddr;
 	register struct arptab *atab;
 
 	while (arptab_current < arptab_size) {
+#ifdef STRUCT_ARPHD_HAS_AT_NEXT
+              /* The arp table is an array of linked lists of arptab entries.
+                 Unused slots have pointers back to the array entry itself */
+
+              if ( at_ptr == (nl[N_ARPTAB].n_value +
+                              arptab_current*sizeof(struct arphd))) {
+                      /* Usused */
+                  arptab_current++;
+                  at_ptr = at[arptab_current].at_next;
+                  continue;
+              }
+
+              klookup( at_ptr, (char *)&at_entry, sizeof(struct arptab));
+              klookup( at_entry.at_ac, (char *)&at_com, sizeof(struct arpcom));
+
+              at_ptr = at_entry.at_next;
+              atab = &at_entry;
+              *ifIndex = at_com.ac_if.if_index;       /* not strictly ARPHD */
+#else
 		atab = &at[arptab_current++];
+#endif
 		if (!(atab->at_flags & ATF_COM)) continue;
 		*IPAddr = atab->at_iaddr.s_addr;
-#if defined (sunV3) || defined(sparc)
+#if defined (sunV3) || defined(sparc) || defined(hpux)
 		bcopy((char *) &atab->at_enaddr, PhysAddr, sizeof(atab->at_enaddr));
 #endif
 #if defined(mips) || defined(ibm032) 

@@ -318,10 +318,22 @@ AC_CHECK_IFNET_FOR(if_obytes)
 AC_CHECK_IFNET_FOR(if_ibytes)
 
 AC_CHECK_STRUCT_FOR([
-#if HAVE_NETINET_UDP_VAR.H
+#if HAVE_NETINET_UDP_VAR_H
 #include <netinet/udp_var.h>
 #endif
 ],udpstat,udps_discard)
+
+AC_CHECK_STRUCT_FOR([
+#include<sys/types.h>
+#include<sys/socket.h>
+#include<net/if.h>
+#if HAVE_NETINET_IN_H
+#include<netinet/in.h>
+#endif
+#if HAVE_NETINET_IF_ETHER_H
+#include<netinet/if_ether.h>
+#endif
+],arphd,at_next)
 
 AC_CACHE_CHECK(if you have run configure before, ac_cv_have_warned,
 [
