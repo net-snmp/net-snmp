@@ -203,6 +203,11 @@ sub process_vars {
 #     repeat iterate over code until @end@ setting $VAR to all known
 #     indexes within a given table.  Obviously this must be called
 #     within a foreach-table clause.
+#   @foreach $VAR notifications@
+#     repeat iterate over code until @end@ setting $VAR to all known notifications
+#   @foreach $VAR varbinds@
+#     repeat iterate over code until @end@ setting $VAR to all known varbinds
+#     Obviously this must be called within a foreach-notifications clause.
 #   @foreach $LABEL, $VALUE enum@
 #     repeat iterate over code until @end@ setting $LABEL and $VALUE
 #     to the label and values from the enum list.
@@ -301,6 +306,44 @@ sub process {
 		process();
 		$vars{$var} = $oldvar;
 		$currentscalar = $oldscalar;
+	      }
+	    }
+	} elsif (/\@\s*foreach\s+\$([^\@]+)\s+notifications*\s*\@/) {
+	    my $var = $1;
+	    my $startpos = $fh->tell();
+	    my $notify;
+	    my @thekeys = keys(%notifications);
+	    if ($#thekeys == -1) {
+	      skippart();
+	    } else {
+	      foreach $notify (@thekeys) {
+		$fh->seek($startpos, 0); # go to top of section.
+		my $oldvar = $vars{$var};
+		$vars{$var} = $notify;
+		my $oldnotify = $currentnotify;
+		$currentnotify = $notify;
+		process();
+		$vars{$var} = $oldvar;
+		$currentnotify = $oldnotify;
+	      }
+	    }
+	  } elsif (/\@\s*foreach\s+\$([^\@]+)\s+varbinds\s*\@/) {
+	    my $var = $1;
+	    my $startpos = $fh->tell();
+	    my $varbind;
+	    if ($#{$notifyvars{$currentnotify}} == -1) {
+	      skippart();
+	    } else {
+	      foreach $varbind (@{$notifyvars{$currentnotify}}) {
+		#		print "looping on $var for $varbind\n";
+		$fh->seek($startpos, 0); # go to top of section.
+		my $oldvar = $vars{$var};
+		$vars{$var} = $varbind;
+		my $oldvarbind = $currentvarbind;
+		$currentvarbind = $varbind;
+		process();
+		$vars{$var} = $oldvar;
+		$currentvarbind = $oldvarbind;
 	      }
 	    }
 	  } elsif (/\@\s*foreach\s+\$([^\@]+)\s+tables*\s*\@/) {
@@ -410,7 +453,15 @@ sub setup_data {
 	my $children = $mib->{children};
 	if ($#children == -1 && $mib->{type}) {
 	    # scalar
-	    $scalars{$mib->{label}} = 1;
+	    if ($mib->{type} eq "NOTIF" ||
+	        $mib->{type} eq "TRAP") {
+	        my $notifyname = $mib->{label};
+                my @varlist = ();
+	        $notifications{$notifyname} = 1;
+                $notifyvars{$notifyname} = $mib->{varbinds};
+	    } else {
+	        $scalars{$mib->{label}} = 1;
+	    }
 	} else {
 	    my $i;
 	    for($i = 0; $i <= $#$children; $i++) {
