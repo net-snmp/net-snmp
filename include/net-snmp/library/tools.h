@@ -138,6 +138,7 @@ int snmp_hex_to_binary	   (u_char **buf, size_t *buf_len, size_t *out_len,
 			    int allow_realloc, const char *hex);
 int snmp_strcat		   (u_char **buf, size_t *buf_len, size_t *out_len,
 			    int allow_realloc, const u_char *s);
+char *netsnmp_strdup_and_null(u_char *from, size_t from_len) ;
 
 void	dump_chunk (const char *debugtoken, const char *title, const u_char *buf, int size);
 char   *dump_snmpEngineID (const u_char *buf, size_t *buflen);
