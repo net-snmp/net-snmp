@@ -10,7 +10,7 @@ extern          "C" {
      * 
      * - prototypes for snmp debugging routines.
      * - easy to use macros to wrap around the functions.  This also provides
-     * the ability to reove debugging code easily from the applications at
+     * the ability to remove debugging code easily from the applications at
      * compile time.
      */
 
@@ -54,11 +54,11 @@ extern          "C" {
      * the output in question should be printed.  See the snmpcmd.1 manual page
      * on the -D flag to turn on/off output for a given token on the command line.
      * 
-     * DEBUGMSG((token, format, ...)):      equivelent to printf(format, ...)
+     * DEBUGMSG((token, format, ...)):      equivalent to printf(format, ...)
      * (if "token" debugging output
      * is requested by the user)
      * 
-     * DEBUGMSGT((token, format, ...)):     equivelent to DEBUGMSG, but prints
+     * DEBUGMSGT((token, format, ...)):     equivalent to DEBUGMSG, but prints
      * "token: " at the beginning of the
      * line for you.
      * 
@@ -66,7 +66,7 @@ extern          "C" {
      * tracing output displayed when the
      * "trace" debugging token is selected.
      * 
-     * DEBUGMSGL((token, format, ...)):     equivelent to DEBUGMSG, but includes
+     * DEBUGMSGL((token, format, ...)):     equivalent to DEBUGMSG, but includes
      * DEBUGTRACE debugging line just before
      * yours.
      * 
@@ -234,7 +234,6 @@ extern          "C" {
     void            snmp_debug_init(void);
     void            snmp_set_do_debugging(int);
     int             snmp_get_do_debugging(void);
-    int             debug_is_token_registered(const char *token);
 
 /*
  * internal:
