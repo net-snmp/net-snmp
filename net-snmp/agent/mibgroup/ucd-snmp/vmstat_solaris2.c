@@ -193,7 +193,7 @@ static int      take_snapshot(struct cpu_stat_snapshot *css);
  * this module and registers it with the agent 
  */
 
-static FindVarMethod var_extensible_vmstat;
+FindVarMethod var_extensible_vmstat;
 
 void
 init_vmstat_solaris2(void)
@@ -738,7 +738,7 @@ update_stats(unsigned int registrationNumber, void *clientarg)
 /*
  * The guts of the module, this routine gets called to service a request 
  */
-static unsigned char *
+unsigned char *
 var_extensible_vmstat(struct variable *vp,
                       oid * name,
                       size_t * length,
