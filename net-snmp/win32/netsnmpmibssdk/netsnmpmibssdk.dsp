@@ -221,6 +221,10 @@ SOURCE=..\..\agent\mibgroup\agent\nsTransactionTable.c
 # PROP Default_Filter ""
 # Begin Source File
 
+SOURCE=..\..\agent\mibgroup\utilities\execute.c
+# End Source File
+# Begin Source File
+
 SOURCE=..\..\agent\mibgroup\utilities\override.c
 # End Source File
 # End Group

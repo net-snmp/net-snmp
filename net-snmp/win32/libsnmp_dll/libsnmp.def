@@ -267,6 +267,7 @@ EXPORTS
 	vacm_scanAccessNext
 	vacm_scanViewInit
 	vacm_scanViewNext
+	vacm_checkSubtree
 	snmp_synch_response_cb
 	snmp_clone_varbind
 	snmp_free_varbind
@@ -327,6 +328,8 @@ EXPORTS
 	netsnmp_oid_stash_get_data
 	netsnmp_oid_find_prefix
 	netsnmp_container_init_list
+	netsnmp_container_null_init
+	netsnmp_container_ssll_init
 	netsnmp_strdup_and_null
 	build_oid
 	build_oid_noalloc
@@ -345,6 +348,7 @@ EXPORTS
 	netsnmp_udp_parse_security
 	netsnmp_udp_getSecName
 	find_sec_mod
+	strlcpy
 	NetSnmpVersionInfo
 	getopt
 	optarg
@@ -354,10 +358,18 @@ EXPORTS
 	usmHMACSHA1AuthProtocol
 	usmNoPrivProtocol
 	usmDESPrivProtocol
-	snprintf_bitstring
-	snprintf_value
-	snprintf_objid
+;	snprintf_bitstring
+;	snprintf_value
+;	snprintf_objid
 	snmp_synch_reset
+	snmp_log_options
+	netsnmp_clear_callback_list
+	netsnmp_clear_tdomain_list
+	netsnmp_clear_container
+	clear_sec_mod
+	clear_snmp_enum
+	clear_callback
+	clear_user_list
 	netsnmp_ds_get_void
 	netsnmp_ds_set_void
 	netsnmp_ds_shutdown

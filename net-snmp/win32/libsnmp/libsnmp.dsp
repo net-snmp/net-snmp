@@ -109,6 +109,14 @@ SOURCE=..\..\snmplib\container_binary_array.c
 # End Source File
 # Begin Source File
 
+SOURCE=..\..\snmplib\container_list_ssll.c
+# End Source File
+# Begin Source File
+
+SOURCE=..\..\snmplib\container_null.c
+# End Source File
+# Begin Source File
+
 SOURCE=..\..\snmplib\data_list.c
 # End Source File
 # Begin Source File
@@ -230,6 +238,10 @@ SOURCE=..\..\snmplib\snmpusm.c
 # Begin Source File
 
 SOURCE=..\..\snmplib\snmpv3.c
+# End Source File
+# Begin Source File
+
+SOURCE=..\..\snmplib\strlcpy.c
 # End Source File
 # Begin Source File
 

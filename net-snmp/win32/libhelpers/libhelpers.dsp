@@ -93,6 +93,10 @@ SOURCE=..\..\agent\helpers\bulk_to_next.c
 # End Source File
 # Begin Source File
 
+SOURCE=..\..\agent\helpers\cache_handler.c
+# End Source File
+# Begin Source File
+
 SOURCE=..\..\agent\helpers\debug_handler.c
 # End Source File
 # Begin Source File
@@ -117,6 +121,18 @@ SOURCE=..\..\agent\helpers\read_only.c
 # End Source File
 # Begin Source File
 
+SOURCE=..\..\agent\helpers\row_merge.c
+# End Source File
+# Begin Source File
+
+SOURCE=..\..\agent\helpers\scalar.c
+# End Source File
+# Begin Source File
+
+SOURCE=..\..\agent\helpers\scalar_group.c
+# End Source File
+# Begin Source File
+
 SOURCE=..\..\agent\helpers\serialize.c
 # End Source File
 # Begin Source File
@@ -138,6 +154,10 @@ SOURCE=..\..\agent\helpers\table_dataset.c
 # Begin Source File
 
 SOURCE=..\..\agent\helpers\table_iterator.c
+# End Source File
+# Begin Source File
+
+SOURCE=..\..\agent\helpers\watcher.c
 # End Source File
 # End Group
 # Begin Group "Header Files"
