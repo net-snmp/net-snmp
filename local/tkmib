@@ -10,6 +10,14 @@ $community = 'public';
 $port = '161';
 $OID = '.1.3.6.1';
 
+while($#ARGV > -1 && $ARGV[0] =~ /^-/) {
+    $_ = shift;
+    $port = shift if (/-p/);
+    $findoid = shift if (/-o/);
+}
+$host = shift if ($#ARGV > -1);
+$community = shift if ($#ARGV > -1);
+
 $graphtime=5;
 $graphdelta=1;
 @graphcolors=qw(blue red green yellow purple);
@@ -37,7 +45,8 @@ $FileMenuBut = $MenuFrame->Menubutton(-text => "File",
       [
 #       [Button => "Save Output", -command => [\&saveOutput]],
        [Button => "Quit",        -command => [\&exit]]
-       ])->pack(-side => 'left');
+       ]);
+$FileMenuBut->pack(-side => 'left');
 
 $MibMenuBut = $MenuFrame->Menubutton(-text => "Mib",
 				      -menuitems =>
@@ -52,7 +61,8 @@ $MibMenuBut = $MenuFrame->Menubutton(-text => "Mib",
 			  entryBox("Load a Module", 
 				   "Enter a SNMP MIB module name to load:",
 				   \$var, \&loadIt);}]
-       ])->pack(-side => 'left');
+       ]);
+$MibMenuBut->pack(-side => 'left');
 
 $OptMenuBut = $MenuFrame->Menubutton(-text => "Options",
 				     -menuitems =>
@@ -131,9 +141,44 @@ $status->pack(-side => 'left', -fill => 'x');
 foreach $i (qw(.1 .1.3 .1.3.6 .1.3.6.1)) {
     addMibOID($i);
 }
-showChildren("1.3.6.1");
+showChildren("$OID");
+if (defined($findoid)) {
+    findANode($findoid);
+}
 
 MainLoop();
+
+sub printit {
+    while($a = shift) {
+	print ": $a\n";
+    }
+}
+
+sub insertresult {
+    my $oid = shift;
+    my $val = shift;
+    $output->insert('end', $oid, "oid:$oid");
+    $output->tagBind("oid:$oid", '<1>', [sub{shift; 
+					     my $oid = shift;
+					     findANode($oid);
+					     my $tag = SNMP::translateObj($oid);
+					     showInfo($tag);},$oid]);
+    $output->insert('end', " = ");
+    $output->insert('end', $val, "value:$val");
+    $output->insert('end', "\n");
+}
+
+sub insertvar {
+    my $var = shift;
+    my $name;
+    if ($var->tag !~ /[a-z]/) {
+	$name = SNMP::translateObj($var->tag);
+    } else {
+	$name = "$var->[$SNMP::Varbind::tag_f].$var->[$SNMP::Varbind::iid_f]";
+    }
+
+    insertresult($name,"$var->[$SNMP::Varbind::val_f]");
+}
 
 sub snmpsetup {
     my $oid = $OID;
@@ -180,7 +225,7 @@ sub snmpget {
     if ($sess->{ErrorStr}) {
 	$status->configure(-text => $sess->{ErrorStr});
     } else {
-	$output->insert('end',"$var->[$SNMP::Varbind::tag_f].$var->[$SNMP::Varbind::iid_f] = $var->[$SNMP::Varbind::val_f]\n");
+	insertvar($var);
 	$status->configure(-text => "");
     }
 }
@@ -189,13 +234,11 @@ sub snmpgetnext {
     (my $oid, my $sess, my $var) = snmpsetup();
     $status->configure(-text => "get next:  $host $community $oid");
     $top->update();
-#    print "var: " . $var->tag . "\n";
     my $val = $sess->getnext($var);
-#    print "var: " . $var->tag . "\n";
     if ($sess->{ErrorStr}) {
 	$status->configure(-text => $sess->{ErrorStr});
     } else {
-	$output->insert('end',"$var->[$SNMP::Varbind::tag_f].$var->[$SNMP::Varbind::iid_f] = $var->[$SNMP::Varbind::val_f]\n");
+	insertvar($var);
 	$status->configure(-text => "");
     }
 }
@@ -208,8 +251,8 @@ sub snmpwalk {
 	my $val = $sess->getnext($var);
 	last if (!defined($var->tag) ||
 		 $sess->{ErrorStr} ||
-	         SNMP::translateObj($var->tag) !~ /^\.$oid/);
-	$output->insert('end',"$var->[$SNMP::Varbind::tag_f].$var->[$SNMP::Varbind::iid_f] = $var->[$SNMP::Varbind::val_f]\n");
+	         SNMP::translateObj($var->tag) !~ /^$oid/);
+	insertvar($var);
 	$top->update();
     }
     if ($sess->{ErrorStr}) {
@@ -230,9 +273,9 @@ sub snmptable {
 	my $val = $sess->getnext($var);
 	last if (!defined($var->tag) ||
 		 $sess->{ErrorStr} ||
-	         SNMP::translateObj($var->tag) !~ /^\.$oid/);
+	         SNMP::translateObj($var->tag) !~ /^$oid/);
 	$newoid = "$var->[$SNMP::Varbind::tag_f].$var->[$SNMP::Varbind::iid_f]";
-	$output->insert('end',"$var->[$SNMP::Varbind::tag_f].$var->[$SNMP::Varbind::iid_f] = $var->[$SNMP::Varbind::val_f]\n");
+	insertvar($var);
 	$top->update();
 	$newoid =~ /([^\.]+)\.([0-9\.]+)$/;
 	if (!grep(/$1/,@tags)) {
@@ -283,14 +326,13 @@ sub updateGraph() {
 	my $val = $graphsess->getnext($var);
 	last if ($graphsess->{ErrorStr} ||
 		 !defined($var->tag) ||
-	         SNMP::translateObj($var->tag) !~ /^\.$oid/);
+	         SNMP::translateObj($var->tag) !~ /^$oid/);
 	my $newoid = SNMP::translateObj("$var->[$SNMP::Varbind::tag_f].$var->[$SNMP::Varbind::iid_f]");
 	$top->update();
 	$newoid =~ /$oid\.([0-9\.]+)$/;
 	if (defined($1)) {
 	    if (!grep(/$1/,@graphvars)) {
 		push @graphvars,$1;
-		print "index:  $1\n";
 	    }
 	    if ($graphdelta) {
 		if ($gcount > 0) {
@@ -320,6 +362,8 @@ sub updateGraph() {
 	    }
 	    $output->createLine(@a, -fill => $graphcolors[$i%$#graphcolors]);
 	}
+	$output->create('text',5, $h-3, -text => "$max");
+	$output->create('text',5, 3, -text => "$min");
     }
     $gcount++;
     $status->configure(-text => "sleeping for $graphtime seconds");
@@ -339,13 +383,27 @@ sub addMibOID {
 }
 
 sub showInfo {
-    $OID = shift;
-    my $oid = $OID;
-    $mibOID->configure(-textvariable => \$OID);
-    $mibOID->update();
+    my $full = shift;
+    $full = ".$full" if ($full !~ /^\./);
+    my $oid = $full;
+    my $tag = $oid;
+
+    if ($tag =~ /^[.0-9]+$/) {
+	# strip off index in case there is one
+	$tag = SNMP::translateObj("$oid");
+    } else {
+	$full = SNMP::translateObj("$oid");
+    }
+
+    $tag =~ s/[.0-9]+$//;
+    $oid = SNMP::translateObj($tag);
+	
     if (!defined($last) || "$last" ne $oid) {
 	updateInfo($oid);
     }
+    $OID = $full;
+    $mibOID->configure(-textvariable => \$OID);
+    $mibOID->update();
     $last = $oid;
 }
 	
@@ -353,18 +411,23 @@ sub showAllChildren {
     my $id = shift;
     $id =~ s/^\.//;
     my @pieces = split(/\./,$id);
-    my $i;
-#    showChildren("1");
+    my ($i, $lastvalid);
     for($i = 0; $i <= $#pieces; $i++) {
 	my $a = join(".", @pieces[0..$i]);
-	if (!($hlist->infoChildren($a))) {
+	if ($hlist->infoExists($a) && !($hlist->infoChildren($a))) {
 	    showChildren(join(".", $a));
 	}
+	if ($hlist->infoExists($a)) {
+	    $lastvalid = $a;
+	} else {
+	    last;
+	}
     }
-    $hlist->see($id);
+    $hlist->see($lastvalid);
     $hlist->selectionClear($hlist->selectionGet);
-    $hlist->selectionSet($id);
+    $hlist->selectionSet($lastvalid);
 }
+
 sub showChildren {
     $OID = shift;
     $OID =~ s/^\.//;
@@ -398,7 +461,11 @@ sub showChildren {
 sub updateInfo {
     $OID = shift;
     my $oid = $OID;
-    my $mib = $SNMP::MIB{".$oid"};
+    my $mib = $SNMP::MIB{"$oid"};
+    if (!defined($mib->{'description'}) || $mib->{'description'} eq "") {
+	$oid =~ s/[.0-9]+$//;
+	$mib = $SNMP::MIB{"$oid"};
+    }
     if (defined($mib)) {
 	$mibOID->configure(-text => $mib->{'objectID'});
 	$mibTextOID->configure(-text => 
@@ -412,6 +479,13 @@ sub updateInfo {
 	}
 	for($i=0; $i<= $#displayInfo;$i++) {
 	    $dpyInfo[$i] = $mib->{$displayInfo[$i]};
+	    if (ref($dpyInfo[$i]) eq HASH) {
+		my %hash = %{$dpyInfo[$i]};
+		$dpyInfo[$i] = "";
+		foreach $j (sort { $hash{$a} <=> $hash{$b} } keys(%hash)) {
+		    $dpyInfo[$i] .= "$j = $hash{$j},";
+		}
+	    }
 	}
     }
 }
