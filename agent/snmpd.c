@@ -751,7 +751,7 @@ main(int argc, char *argv[])
         DEBUGMSGTL(("snmpd/main", "Changing gid to %d.\n", gid));
         if (setgid(gid) == -1
 #ifdef HAVE_SETGROUPS
-            || setgroups(1, &gid) == -1
+            || setgroups(1, (gid_t *)&gid) == -1
 #endif
             ) {
             snmp_log_perror("setgid failed");
