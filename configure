@@ -118,6 +118,7 @@ ac_help="$ac_help
     mibII:                 support for the mib-II tree.
     snmpv3:                support for the snmpv3 mib modules.
     ucd_snmp:              ucd-snmp specific extensions.
+    agentx:                (see below)
     notification:          mibs supporting specification of trap destinations.
 
   Optional mib modules that can be built into the agent include:
@@ -127,7 +128,6 @@ ac_help="$ac_help
     misc/ipfwacc:          accounting rules IP firewall information (linux).
     ipfwchains/ipfwchains: firewall chains under ipfw for linux.
                            (Download separately from the ucd-snmp ftp site.)
-    ucd-snmp/dlmod:        Dynamically loadable MIB modules.
     ucd-snmp/diskio:       Table of io-devices and how much data they have
                            read/written.  (only tested on Solaris)
     target:                Support for the SNMP WGs TARGET-MIB.
@@ -3146,7 +3146,7 @@ module_list=""
 module_list_code=""
 new_with_mib_modules=`echo $with_mib_modules | sed 's/,/ /g;'`
 new_with_out_mib_modules=`echo $with_out_mib_modules | sed 's/,/ /g;'`
-new_module_list="mibII ucd_snmp snmpv3mibs notification $new_with_mib_modules"
+new_module_list="mibII ucd_snmp snmpv3mibs notification agentx $new_with_mib_modules"
 default_mibs=IP-MIB:IF-MIB:TCP-MIB:UDP-MIB:SNMPv2-MIB:RFC1213-MIB
 
 if test "x$mini_agent" = "xyes"; then
