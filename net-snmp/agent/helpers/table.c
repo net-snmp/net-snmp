@@ -383,17 +383,6 @@ table_helper_handler(mib_handler * handler,
             }
         }                       /** for loop */
 
-
-        /*
-         * do we have sufficent index info to continue?
-         */
-
-        if ((reqinfo->mode != MODE_GETNEXT) &&
-            ((tbl_req_info->number_indexes != tbl_info->number_indexes) ||
-             (tmp_len != -1))) {
-            table_helper_cleanup(reqinfo, request, SNMP_ERR_NOSUCHNAME);
-        }
-
         DEBUGIF("helper:table") {
             int             count;
             char            buf[SPRINT_MAX_LEN];
@@ -409,6 +398,17 @@ table_helper_handler(mib_handler * handler,
                             buf));
             }
             DEBUGMSG(("helper:table","\n"));
+        }
+
+
+        /*
+         * do we have sufficent index info to continue?
+         */
+
+        if ((reqinfo->mode != MODE_GETNEXT) &&
+            ((tbl_req_info->number_indexes != tbl_info->number_indexes) ||
+             (tmp_len != -1))) {
+            table_helper_cleanup(reqinfo, request, SNMP_ERR_NOSUCHNAME);
         }
 
         ++need_processing;
