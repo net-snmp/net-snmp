@@ -204,6 +204,99 @@ u_char	*asn_rbuild_float (u_char *, size_t *, u_char, float *,
                               size_t);
 u_char	*asn_rbuild_double (u_char *, size_t *, u_char, double *,
                                size_t);
+
+/*  Re-allocator function for below.  */
+
+int asn_realloc				(u_char **, size_t *);
+
+/*  Re-allocating reverse ASN.1 encoder functions.  Synopsis:
+
+    u_char *buf = (u_char*)malloc(100);
+    size_t buf_len = 100, offset = 0;
+    long data = 12345;
+
+    if (asn_realloc_rbuild_int(&buf, &buf_len, &offset,
+                               &data, sizeof(long)) == 0) {
+       error;
+    }
+
+    NOTE WELL: after calling one of these functions, buf might have moved,
+               buf_len might have grown and offset will have increased by the
+               size of the encoded data.  You should **NEVER** do soemthing
+	       like this:
+
+    u_char *buf = (u_char *)malloc(100), *ptr;
+    size_t buf_len = 100, offset = 0;
+    long data1 = 1234, data2 = 5678;
+    int rc = 0;
+    
+    rc  = asn_realloc_rbuild_int(&buf, &buf_len, &offset,
+                                 &data1, sizeof(long));
+    ptr = buf[buf_len - offset];   // points at encoding of data1
+    if (rc == 0) {
+       error;
+    }
+    rc  = asn_realloc_rbuild_int(&buf, &buf_len, &offset,
+                                 &data2, sizeof(long));
+    make use of ptr here;
+
+
+    ptr is **INVALID** at this point.  In general, you should store the offset 
+    value and compute pointers when you need them:
+
+
+
+    u_char *buf = (u_char *)malloc(100), *ptr;
+    size_t buf_len = 100, offset = 0, ptr_offset;
+    long data1 = 1234, data2 = 5678;
+    int rc = 0;
+    
+    rc  = asn_realloc_rbuild_int(&buf, &buf_len, &offset,
+                                 &data1, sizeof(long));
+    ptr_offset = offset;
+    if (rc == 0) {
+       error;
+    }
+    rc  = asn_realloc_rbuild_int(&buf, &buf_len, &offset,
+                                 &data2, sizeof(long));
+    ptr = buf + buf_len - ptr_offset
+    make use of ptr here;
+
+
+
+    Here, you can see that ptr will be a valid pointer even if the block of
+    memory has been moved, as it may well have been.  Plenty of examples of
+    usage all over asn1.c, snmp_api.c, snmpusm.c.
+
+*/
+
+
+int asn_realloc_rbuild_int		(u_char **, size_t *, size_t *, u_char,
+					 long *, size_t);
+int asn_realloc_rbuild_string		(u_char **, size_t *, size_t *, u_char,
+					 const u_char *, size_t);
+int asn_realloc_rbuild_unsigned_int	(u_char **, size_t *, size_t *, u_char,
+					 u_long *, size_t);
+int asn_realloc_rbuild_header		(u_char **, size_t *, size_t *, u_char,
+					 size_t);
+int asn_realloc_rbuild_sequence		(u_char **, size_t *, size_t *, u_char,
+					 size_t);
+int asn_realloc_rbuild_length		(u_char **, size_t *, size_t *,
+					 size_t);
+int asn_realloc_rbuild_objid		(u_char **, size_t *, size_t *, u_char,
+					 const oid *, size_t);
+int asn_realloc_rbuild_null		(u_char **, size_t *, size_t *,
+					 u_char);
+int asn_realloc_rbuild_bitstring	(u_char **, size_t *, size_t *, u_char,
+					 u_char *, size_t);
+int asn_realloc_rbuild_unsigned_int64	(u_char **, size_t *, size_t *, u_char,
+					 struct counter64 *, size_t);
+int asn_realloc_rbuild_signed_int64	(u_char **, size_t *, size_t *, u_char,
+					 struct counter64 *, size_t);
+int asn_realloc_rbuild_float		(u_char **, size_t *, size_t *, u_char,
+					 float *, size_t);
+int asn_realloc_rbuild_double		(u_char **, size_t *, size_t *, u_char,
+					 double *, size_t);
 #endif
 
 #ifdef __cplusplus
