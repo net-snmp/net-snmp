@@ -485,6 +485,17 @@ netsnmp_table_data_set_helper_handler(netsnmp_mib_handler *handler,
                         }
                     }
                     table_info->colnum++;
+                    row = datatable->table->first_row;
+                    /*
+                     * ???
+                     *
+                     * We probably need to 'rewind' the
+                     * request->parent_data list entry to
+                     * refer back to the first row as well.
+                     * 
+                     * How can this best be done?
+                     * ???
+                     */
                 }
             }
           done:
