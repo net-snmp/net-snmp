@@ -54,8 +54,10 @@ linux_read_mibII_stats ( void )
     }
 
     if (linux_mibII_stats_cache_marker &&
-	(!atime_ready( linux_mibII_stats_cache_marker, LINUX_STATS_CACHE_TIMEOUT*1000 )))
+	(!atime_ready( linux_mibII_stats_cache_marker, LINUX_STATS_CACHE_TIMEOUT*1000 ))) {
+	fclose( in );
 	return 0;
+    }
 
     if (linux_mibII_stats_cache_marker )
 	atime_setMarker( linux_mibII_stats_cache_marker );
