@@ -42,7 +42,7 @@ be overridden by the
 .B MIBFILES
 environment variable.
 .IP "defaultPort port"
-The default port number that all SNMP applications and demons should use.
+The default port number that all SNMP applications and daemons should use.
 .IP "defVersion (v1|v2c|v3)"
 The default SNMP version to use.
 .IP "defCommunity string"
