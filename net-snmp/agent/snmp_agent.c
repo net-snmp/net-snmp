@@ -1160,16 +1160,6 @@ add_varbind_to_cache(struct agent_snmp_session  *asp, int vbcount,
 	DEBUGMSGOID(("snmp_agent", tp->end, tp->end_len));
 	DEBUGMSG(("snmp_agent", ", \n"));
 
-        /* for non-SET modes, set the type to NULL */
-	if (!MODE_IS_SET(asp->pdu->command)) {
-	    if (varbind_ptr->type == ASN_PRIV_INCL_RANGE) {
-		DEBUGMSGTL(("snmp_agent", "varbind %d is inclusive\n",
-			    request->index));
-		request->inclusive = 1;
-	    }
-            varbind_ptr->type = ASN_NULL;
-	}
-
         /* malloc the request structure */
         request = &(asp->requests[vbcount-1]);
         request->index = vbcount;
@@ -1179,6 +1169,16 @@ add_varbind_to_cache(struct agent_snmp_session  *asp, int vbcount,
         request->subtree = tp;
         if (request->parent_data) {
             free_request_data_sets(request);
+	}
+
+        /* for non-SET modes, set the type to NULL */
+	if (!MODE_IS_SET(asp->pdu->command)) {
+	    if (varbind_ptr->type == ASN_PRIV_INCL_RANGE) {
+		DEBUGMSGTL(("snmp_agent", "varbind %d is inclusive\n",
+			    request->index));
+		request->inclusive = 1;
+	    }
+            varbind_ptr->type = ASN_NULL;
 	}
 
         /* place them in a cache */
