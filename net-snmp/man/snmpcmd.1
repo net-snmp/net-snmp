@@ -84,7 +84,7 @@ or 3 (RFC 2571-2574)
 The default is -v 1
 .IP "-P wWecduR"
 specifies MIB parsing options. See MIB PARSING OPTIONS below.
-.IP "-O nEebqfsSv"
+.IP "-O nEebqfsSvX"
 specifies output printing options. See OUTPUT OPTIONS below.
 .IP "-I Rb"
 specifies input parsing options. See INPUT OPTIONS below.
@@ -256,6 +256,19 @@ vacmSecurityModel.0.3.119.101.115 again.
 This modifies the index strings to include a \\ to escape the quotes,
 to allow them to be reused in shell commands, such as
 vacmSecurityModel.0.\\"wes\\"
+.IP -OX
+This modifies the output of index oids, to look more "program like".
+If you take an entry from the IPV6-MIB::ipv6RouteTable, it is indexed with
+an IPv6 address and two integers, and if you are used to IPv6 addresses
+you will know that decimal oids are not the preferred notation. Compare
+.br
+$ snmpgetnext -OS host IPV6-MIB:ipv6RouteTable
+.br
+IPV6-MIB::ipv6RouteIfIndex.63.254.1.0.255.0.0.0.0.0.0.0.0.0.0.0.64.1 = 2
+.br
+$ snmpgetnext -OSX host IPV6-MIB:ipv6RouteTable
+.br
+IPV6-MIB::ipv6RouteIfIndex[3ffe:100:ff00:0:0:0:0:0][64][1] = 2
 .IP -Ov
 Output only the variable name, not the OID:
 .br
