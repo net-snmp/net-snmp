@@ -303,6 +303,7 @@ sure to end it in -1.*/
 #define OSF3ID    4
 #define ULTRIXID  5
 #define HPUX10ID  6
+#define NETBSD1ID 7
 #define UNKNOWNID 255
 
 #ifdef hpux9
@@ -322,6 +323,9 @@ sure to end it in -1.*/
 #endif
 #ifdef ultrix4
 #define OSTYPE ULTRIXID
+#endif
+#ifdef netbsd1
+#define OSTYPE NETBSD1ID
 #endif
 /* unknown */
 #ifndef OSTYPE
