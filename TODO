@@ -15,7 +15,6 @@ TODO list for the ucd-snmp-coders:
     (draft-ietf-ifmib-mib-05.txt) and implement what can be
     implemented.
   Make read_objid and sprint_objid agree on which shorthands they accept.
-  numeric to symbolic trap OID conversion.
   snmpset should check against MIB size if possible?
 
 Other Ideas:
