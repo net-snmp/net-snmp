@@ -38,6 +38,7 @@ init_callbacks(void) {
      init_snmp() and then want the app to register a callback before
      init_snmp() is called in the first place.  -- Wes */
   /* memset(thecallbacks, 0, sizeof(thecallbacks)); */
+  DEBUGMSGTL(("callback","initialized\n"));
 }
 
 int
