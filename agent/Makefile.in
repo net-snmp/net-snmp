@@ -68,30 +68,29 @@ read_config.o: @module_list_h@
 
 # DO NOT DELETE THIS LINE -- make depend depends on it.
 
-agent_read_config.o: ../config.h ../mib_module_config.h
-agent_read_config.o:  ../s/linux.h ../s/sysv.h
-agent_read_config.o: ../s/generic.h ../m/generic.h 
+agent_read_config.o: ../config.h ../mib_module_config.h ../s/linux.h
+agent_read_config.o: ../s/sysv.h ../s/generic.h ../m/generic.h
 agent_read_config.o:   m2m.h
 agent_read_config.o: ./mibgroup/mibincl.h 
 agent_read_config.o:  ./../snmplib/asn1.h
 agent_read_config.o: ./../snmplib/snmp_api.h ./../snmplib/snmp_impl.h
 agent_read_config.o: ./snmp_vars.h ./var_struct.h ./../snmplib/snmp.h
-agent_read_config.o: ./../snmplib/mib.h mibgroup/struct.h
-agent_read_config.o: ./../snmplib/read_config.h agent_read_config.h
-agent_read_config.o: ./mibgroup/mib_module_includes.h mibgroup/mibII.h
-agent_read_config.o: mibgroup/ucd_snmp.h mibgroup/v2party.h mibgroup/host.h
-agent_read_config.o: mibgroup/ucd_attackHist.h mibgroup/ucd_zoneWatch.h
-agent_read_config.o: mibgroup/mibII/system_mib.h mibgroup/mibII/sysORTable.h
-agent_read_config.o: mibgroup/mibII/at.h mibgroup/mibII/interfaces.h
-agent_read_config.o: mibgroup/mibII/snmp_mib.h mibgroup/mibII/tcp.h
-agent_read_config.o: mibgroup/mibII/icmp.h mibgroup/mibII/ip.h
-agent_read_config.o: mibgroup/mibII/var_route.h mibgroup/mibII/route_write.h
-agent_read_config.o: mibgroup/mibII/at.h mibgroup/mibII/udp.h
-agent_read_config.o: mibgroup/mibII/vacm_vars.h mibgroup/ucd-snmp/memory.h
-agent_read_config.o: ./mibgroup/mibdefs.h mibgroup/ucd-snmp/vmstat.h
-agent_read_config.o: mibgroup/ucd-snmp/proc.h mibgroup/ucd-snmp/versioninfo.h
-agent_read_config.o: mibgroup/ucd-snmp/pass.h mibgroup/ucd-snmp/disk.h
-agent_read_config.o: mibgroup/ucd-snmp/loadave.h
+agent_read_config.o: ./../snmplib/mib.h ./../snmplib/snmp_debug.h
+agent_read_config.o: mibgroup/struct.h ./../snmplib/read_config.h
+agent_read_config.o: agent_read_config.h ./mibgroup/mib_module_includes.h
+agent_read_config.o: mibgroup/mibII.h mibgroup/ucd_snmp.h mibgroup/v2party.h
+agent_read_config.o: mibgroup/host.h mibgroup/ucd_attackHist.h
+agent_read_config.o: mibgroup/ucd_zoneWatch.h mibgroup/mibII/system_mib.h
+agent_read_config.o: mibgroup/mibII/sysORTable.h mibgroup/mibII/at.h
+agent_read_config.o: mibgroup/mibII/interfaces.h mibgroup/mibII/snmp_mib.h
+agent_read_config.o: mibgroup/mibII/tcp.h mibgroup/mibII/icmp.h
+agent_read_config.o: mibgroup/mibII/ip.h mibgroup/mibII/var_route.h
+agent_read_config.o: mibgroup/mibII/route_write.h mibgroup/mibII/at.h
+agent_read_config.o: mibgroup/mibII/udp.h mibgroup/mibII/vacm_vars.h
+agent_read_config.o: mibgroup/ucd-snmp/memory.h ./mibgroup/mibdefs.h
+agent_read_config.o: mibgroup/ucd-snmp/vmstat.h mibgroup/ucd-snmp/proc.h
+agent_read_config.o: mibgroup/ucd-snmp/versioninfo.h mibgroup/ucd-snmp/pass.h
+agent_read_config.o: mibgroup/ucd-snmp/disk.h mibgroup/ucd-snmp/loadave.h
 agent_read_config.o: mibgroup/ucd-snmp/extensible.h
 agent_read_config.o: mibgroup/ucd-snmp/errormib.h
 agent_read_config.o: mibgroup/ucd-snmp/registry.h mibgroup/ucd-snmp/file.h
@@ -109,26 +108,23 @@ agent_read_config.o: mibgroup/host/hr_swrun.h mibgroup/host/hr_swinst.h
 agent_read_config.o: mibgroup/host/hr_utils.h mibgroup/util_funcs.h
 agent_read_config.o: mibgroup/struct.h mibgroup/mibII/var_route.h
 agent_read_config.o: mibgroup/mibII/route_write.h ./snmp_agent.h ./snmpd.h
-agent_read_config.o: ./../snmplib/system.h mibgroup/mib_module_dot_conf.h
-auto_nlist.o: ../config.h ../mib_module_config.h 
-auto_nlist.o:   ../s/linux.h
-auto_nlist.o: ../s/sysv.h ../s/generic.h ../m/generic.h
+agent_read_config.o: ../snmplib/system.h ../snmplib/snmp_debug.h
+agent_read_config.o: mibgroup/mib_module_dot_conf.h
+auto_nlist.o: ../config.h ../mib_module_config.h ../s/linux.h ../s/sysv.h
+auto_nlist.o: ../s/generic.h ../m/generic.h
 history.o: ./../snmplib/asn1.h history.h
-kernel.o: ../config.h ../mib_module_config.h 
-kernel.o:   ../s/linux.h
-kernel.o: ../s/sysv.h ../s/generic.h ../m/generic.h
-snmp2p.o: ../config.h ../mib_module_config.h 
-snmp2p.o:   ../s/linux.h
-snmp2p.o: ../s/sysv.h ../s/generic.h ../m/generic.h 
+kernel.o: ../config.h ../mib_module_config.h ../s/linux.h ../s/sysv.h
+kernel.o: ../s/generic.h ../m/generic.h
+snmp2p.o: ../config.h ../mib_module_config.h ../s/linux.h ../s/sysv.h
+snmp2p.o: ../s/generic.h ../m/generic.h 
 snmp2p.o:   ./../snmplib/asn1.h
 snmp2p.o: ./../snmplib/snmp_api.h ./../snmplib/snmp_impl.h
 snmp2p.o: ./../snmplib/system.h ./../snmplib/snmp.h m2m.h
 snmp2p.o: ./../snmplib/party.h mibgroup/v2party/alarm.h
 snmp2p.o: mibgroup/v2party/event.h ./../snmplib/view.h ./../snmplib/context.h
 snmp2p.o: ./../snmplib/acl.h ./../snmplib/mib.h snmpd.h
-snmp_agent.o: ../config.h ../mib_module_config.h 
-snmp_agent.o:   ../s/linux.h
-snmp_agent.o: ../s/sysv.h ../s/generic.h ../m/generic.h
+snmp_agent.o: ../config.h ../mib_module_config.h ../s/linux.h ../s/sysv.h
+snmp_agent.o: ../s/generic.h ../m/generic.h 
 snmp_agent.o: ./../snmplib/asn1.h ./../snmplib/snmp_api.h
 snmp_agent.o: ./../snmplib/snmp_impl.h 
 snmp_agent.o:  ./../snmplib/snmp.h ./../snmplib/acl.h
@@ -136,21 +132,20 @@ snmp_agent.o: ./../snmplib/party.h ./../snmplib/context.h ./../snmplib/mib.h
 snmp_agent.o: snmp_vars.h mibgroup/mibII/snmp_mib.h snmpd.h mibgroup/struct.h
 snmp_agent.o: mibgroup/util_funcs.h mibgroup/struct.h snmp_agent.h
 snmp_agent.o: var_struct.h ./../snmplib/read_config.h
-snmp_agent.o: mibgroup/mibII/vacm_vars.h
-snmp_vars.o: ../config.h ../mib_module_config.h 
-snmp_vars.o:   ../s/linux.h
-snmp_vars.o: ../s/sysv.h ../s/generic.h ../m/generic.h 
+snmp_agent.o: ./../snmplib/snmp_debug.h mibgroup/mibII/vacm_vars.h
+snmp_vars.o: ../config.h ../mib_module_config.h ../s/linux.h ../s/sysv.h
+snmp_vars.o: ../s/generic.h ../m/generic.h 
 snmp_vars.o: ./mibgroup/mibincl.h ./../snmplib/asn1.h ./../snmplib/snmp_api.h
 snmp_vars.o: ./../snmplib/snmp_impl.h ./snmp_vars.h ./var_struct.h
-snmp_vars.o: ./../snmplib/snmp.h ./../snmplib/mib.h m2m.h snmp_vars_m2m.h
-snmp_vars.o: ../snmplib/system.h kernel.h mibgroup/struct.h
-snmp_vars.o: mibgroup/mib_module_includes.h mibgroup/mibII.h
-snmp_vars.o: mibgroup/ucd_snmp.h mibgroup/v2party.h mibgroup/host.h
-snmp_vars.o: mibgroup/ucd_attackHist.h mibgroup/ucd_zoneWatch.h
-snmp_vars.o: mibgroup/mibII/system_mib.h mibgroup/mibII/sysORTable.h
-snmp_vars.o: mibgroup/mibII/at.h mibgroup/mibII/interfaces.h
-snmp_vars.o: mibgroup/mibII/snmp_mib.h mibgroup/mibII/tcp.h
-snmp_vars.o: mibgroup/mibII/icmp.h mibgroup/mibII/ip.h
+snmp_vars.o: ./../snmplib/snmp.h ./../snmplib/mib.h ./../snmplib/snmp_debug.h
+snmp_vars.o: m2m.h snmp_vars_m2m.h ../snmplib/system.h kernel.h
+snmp_vars.o: mibgroup/struct.h mibgroup/mib_module_includes.h
+snmp_vars.o: mibgroup/mibII.h mibgroup/ucd_snmp.h mibgroup/v2party.h
+snmp_vars.o: mibgroup/host.h mibgroup/ucd_attackHist.h
+snmp_vars.o: mibgroup/ucd_zoneWatch.h mibgroup/mibII/system_mib.h
+snmp_vars.o: mibgroup/mibII/sysORTable.h mibgroup/mibII/at.h
+snmp_vars.o: mibgroup/mibII/interfaces.h mibgroup/mibII/snmp_mib.h
+snmp_vars.o: mibgroup/mibII/tcp.h mibgroup/mibII/icmp.h mibgroup/mibII/ip.h
 snmp_vars.o: mibgroup/mibII/var_route.h mibgroup/mibII/route_write.h
 snmp_vars.o: mibgroup/mibII/at.h mibgroup/mibII/udp.h
 snmp_vars.o: mibgroup/mibII/vacm_vars.h mibgroup/ucd-snmp/memory.h
@@ -175,17 +170,15 @@ snmp_vars.o: mibgroup/util_funcs.h mibgroup/struct.h
 snmp_vars.o: mibgroup/mibII/var_route.h mibgroup/mibII/route_write.h
 snmp_vars.o: ./../snmplib/read_config.h agent_read_config.h snmpd.h
 snmp_vars.o: mibgroup/mib_module_inits.h mibgroup/mib_module_loads.h
-snmpd.o: ../config.h ../mib_module_config.h 
-snmpd.o:   ../s/linux.h
-snmpd.o: ../s/sysv.h ../s/generic.h ../m/generic.h 
+snmpd.o: ../config.h ../mib_module_config.h ../s/linux.h ../s/sysv.h
+snmpd.o: ../s/generic.h ../m/generic.h 
 snmpd.o: ./../snmplib/asn1.h ./../snmplib/snmp_api.h ./../snmplib/snmp_impl.h
 snmpd.o: ./../snmplib/system.h ./../snmplib/read_config.h ./../snmplib/snmp.h
 snmpd.o: ./../snmplib/mib.h m2m.h mibgroup/v2party/alarm.h
 snmpd.o: mibgroup/v2party/event.h mibgroup/mibII/snmp_mib.h
 snmpd.o: ./../snmplib/snmp_client.h snmpd.h var_struct.h mibgroup/struct.h
-snmpd.o: mibgroup/util_funcs.h mibgroup/struct.h ../version.h
-snmpd.o: ./mibgroup/mib_module_shutdown.h
-view_parse.o: ../config.h ../mib_module_config.h 
-view_parse.o:   ../s/linux.h
-view_parse.o: ../s/sysv.h ../s/generic.h ../m/generic.h 
+snmpd.o: mibgroup/util_funcs.h mibgroup/struct.h ./../snmplib/snmp_debug.h
+snmpd.o: ../version.h ./mibgroup/mib_module_shutdown.h
+view_parse.o: ../config.h ../mib_module_config.h ../s/linux.h ../s/sysv.h
+view_parse.o: ../s/generic.h ../m/generic.h 
 view_parse.o: ./../snmplib/asn1.h ./../snmplib/mib.h ./../snmplib/view.h
