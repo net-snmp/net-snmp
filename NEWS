@@ -1,6 +1,13 @@
 This file contains major changes in released revisions.  Please read
 the ChangeLog file for a more detailed listing of changes/bug fixes.
 
+*4.0.1*
+ New:
+    - defVersion in snmp.conf supported.
+ Fixes:
+    - An option was accidentally turned on by default that shouldn't have been.
+    - misc minor fixes.
+
 *4.0*
  New:
     - SNMPv3 protocol support!!!
