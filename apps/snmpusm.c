@@ -249,7 +249,7 @@ main(int argc, char *argv[])
     pdu = snmp_pdu_create(SNMP_MSG_SET);
 
     if (arg >= argc) {
-        fprintf(stderr, "Please specify a opreation to perform.\n");
+        fprintf(stderr, "Please specify a operation to perform.\n");
         usage();
         exit(1);
     }
