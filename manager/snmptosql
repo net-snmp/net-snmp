@@ -76,6 +76,7 @@ while (  $hostrow = $cursor->fetchrow_hashref ) {
 	} else {
 	    $dbh->do("select * from $tablelist->{tablename}")
 		or setuptable($tablelist->{tablename});
+	    $dbh->do("delete from $tablelist->{tablename} where ( host = '$host' )");
 	}
 	
 	$var = 
