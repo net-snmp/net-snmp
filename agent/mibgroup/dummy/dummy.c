@@ -81,7 +81,6 @@ void init_dummy(void)
   /* register ourselves with the agent to handle our mib tree */
   REGISTER_MIB("dummy", dummy_variables, variable2, dummy_variables_oid);
 
-#endif
 }
 
 /* function which scans a given snmpd.conf line for information */
@@ -110,8 +109,6 @@ void dummy_free_config (void) {
    exact         IN     - TRUE if an exact match was requested. 
    var_len       OUT     - length of variable or 0 if function returned.
    write_method  OUT     - pointer to function to set variable, otherwise 0
-*/
-   
 */
 int
 header_dummy(struct variable *vp,

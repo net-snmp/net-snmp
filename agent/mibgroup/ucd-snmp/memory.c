@@ -342,7 +342,7 @@ int getswap(int rettype)
 #else
   strcpy(ex.command,"/usr/sbin/swapinfo -r");
 #endif
-  if (fd = get_exec_output(&ex)) {
+  if ((fd = get_exec_output(&ex))) {
     file = fdopen(fd,"r");
     for (i=1;i <= 2 && fgets(ex.output,STRMAX,file) != NULL; i++);
     if (fgets(ex.output,STRMAX,file) != NULL) {

@@ -538,8 +538,8 @@ int checkmib(struct variable *vp, oid *name, int *length,
   /* checkmib used to be header_simple_table, with reveresed boolean
      return output.  header_simple_table() was created to match
      header_generic(). */
-  return !header_simple_table(vp, name, length, exact, *var_len,
-                              write_method, max);
+  return (!header_simple_table(vp, name, length, exact, var_len,
+                              write_method, max));
 }
 
 char *find_field(char *ptr,
