@@ -25,9 +25,7 @@ ipv6UdpMIB MODULE-IDENTITY
 
 -- objects specific to UDP for IPv6
 
--- udp      OBJECT IDENTIFIER ::= { mib-2 7 }
-
-udp      OBJECT IDENTIFIER ::= { ipv6UdpMIB 1 }
+udp      OBJECT IDENTIFIER ::= { mib-2 7 }
 
 -- the UDP over IPv6 Listener table
 
