@@ -22,49 +22,62 @@ IMPORTS
         FROM SNMPv2-CONF;
 
 snmpProxyMIB MODULE-IDENTITY
-    LAST-UPDATED "9808040000Z"
+    LAST-UPDATED "200210140000Z"
     ORGANIZATION "IETF SNMPv3 Working Group"
     CONTACT-INFO
         "WG-email:   snmpv3@lists.tislabs.com
          Subscribe:  majordomo@lists.tislabs.com
                      In message body:  subscribe snmpv3
 
-         Chair:      Russ Mundy
-                     Trusted Information Systems
-         Postal:     3060 Washington Rd
-                     Glenwood MD 21738
+         Co-Chair:   Russ Mundy
+                     Network Associates Laboratories
+         Postal:     15204 Omega Drive, Suite 300
+                     Rockville, MD 20850-4601
                      USA
          EMail:      mundy@tislabs.com
-         Phone:      +1-301-854-6889
+         Phone:      +1 301-947-7107
+
+         Co-Chair:   David Harrington
+                     Enterasys Networks
+         Postal:     35 Industrial Way
+                     P. O. Box 5004
+                     Rochester, New Hampshire 03866-5005
+                     USA
+         EMail:      dbh@enterasys.com
+         Phone:      +1 603-337-2614
 
          Co-editor:  David B. Levi
-                     SNMP Research, Inc.
-         Postal:     3001 Kimberlin Heights Road
-                     Knoxville, TN 37920-9716
-         EMail:      levi@snmp.com
-         Phone:      +1 423 573 1434
+                     Nortel Networks
+         Postal:     3505 Kesterwood Drive
+                     Knoxville, Tennessee 37918
+         EMail:      dlevi@nortelnetworks.com
+         Phone:      +1 865 686 0432
 
          Co-editor:  Paul Meyer
                      Secure Computing Corporation
          Postal:     2675 Long Lake Road
-                     Roseville, MN 55113
+                     Roseville, Minnesota 55113
          EMail:      paul_meyer@securecomputing.com
          Phone:      +1 651 628 1592
 
          Co-editor:  Bob Stewart
-                     Cisco Systems, Inc.
-         Postal:     170 West Tasman Drive
-                     San Jose, CA 95134-1706
-         EMail:      bstewart@cisco.com
-         Phone:      +1 603 654 2686"
+                     Retired"
     DESCRIPTION
         "This MIB module defines MIB objects which provide
          mechanisms to remotely configure the parameters
-         used by a proxy forwarding application."
-    REVISION    "9808040000Z"
+         used by a proxy forwarding application.
+
+         Copyright (C) The Internet Society (2002). This
+         version of this MIB module is part of RFC 3413;
+         see the RFC itself for full legal notices.
+        "
+    REVISION    "200210140000Z"             -- 14 October 2002
     DESCRIPTION "Clarifications, published as
-                 RFC2573."
-    REVISION    "9707140000Z"
+                 RFC 3413."
+    REVISION    "199808040000Z"             -- 4 August 1998
+    DESCRIPTION "Clarifications, published as
+                 RFC 2573."
+    REVISION    "199707140000Z"             -- 14 July 1997
     DESCRIPTION "The initial revision, published as RFC2273."
     ::= { snmpModules 14 }
 
@@ -72,6 +85,7 @@ snmpProxyObjects        OBJECT IDENTIFIER ::= { snmpProxyMIB 1 }
 snmpProxyConformance    OBJECT IDENTIFIER ::= { snmpProxyMIB 3 }
 
 --
+
 --
 -- The snmpProxyObjects group
 --
@@ -202,7 +216,9 @@ snmpProxyStorageType OBJECT-TYPE
     MAX-ACCESS  read-create
     STATUS      current
     DESCRIPTION
-        "The storage type of this conceptual row."
+        "The storage type of this conceptual row.
+         Conceptual rows having the value 'permanent' need not
+         allow write-access to any columnar objects in the row."
     DEFVAL { nonVolatile }
     ::= { snmpProxyEntry 8 }
 
@@ -214,6 +230,7 @@ snmpProxyRowStatus OBJECT-TYPE
         "The status of this conceptual row.
 
          To create a row in this table, a manager must
+
          set this object to either createAndGo(4) or
          createAndWait(5).
 

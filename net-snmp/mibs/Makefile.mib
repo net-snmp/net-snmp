@@ -34,19 +34,19 @@ clean:
 	rm $(MIBS)
 
 SNMP-FRAMEWORK-MIB.txt:	$(MIBDEPS)
-	./mibfetch $(RFCHOST) $(RFCDIR) 2571
+	./mibfetch $(RFCHOST) $(RFCDIR) 3411
 
 SNMP-MPD-MIB.txt:	$(MIBDEPS)
-	./mibfetch $(RFCHOST) $(RFCDIR) 2572 SNMP-MPD-MIB
+	./mibfetch $(RFCHOST) $(RFCDIR) 3412 SNMP-MPD-MIB
 
 SNMP-TARGET-MIB.txt SNMP-NOTIFICATION-MIB.txt SNMP-PROXY-MIB.txt:	$(MIBDEPS)
-	./mibfetch $(RFCHOST) $(RFCDIR) 2573
+	./mibfetch $(RFCHOST) $(RFCDIR) 3413
 
 SNMP-USER-BASED-SM-MIB.txt:	$(MIBDEPS)
-	./mibfetch $(RFCHOST) $(RFCDIR) 2574 SNMP-USER-BASED-SM-MIB
+	./mibfetch $(RFCHOST) $(RFCDIR) 3414 SNMP-USER-BASED-SM-MIB
 
 SNMP-VIEW-BASED-ACM-MIB.txt:	$(MIBDEPS)
-	./mibfetch $(RFCHOST) $(RFCDIR) 2575
+	./mibfetch $(RFCHOST) $(RFCDIR) 3415
 
 SNMP-COMMUNITY-MIB.txt:	$(MIBDEPS)
 	./mibfetch $(RFCHOST) $(RFCDIR) 2576
@@ -61,10 +61,10 @@ SNMPv2-CONF.txt:	$(MIBDEPS)
 	./mibfetch $(RFCHOST) $(RFCDIR) 2580
 
 SNMPv2-TM.txt:	$(MIBDEPS)
-	./mibfetch $(RFCHOST) $(RFCDIR) 1906
+	./mibfetch $(RFCHOST) $(RFCDIR) 3417
 
 SNMPv2-MIB.txt:	$(MIBDEPS)
-	./mibfetch $(RFCHOST) $(RFCDIR) 1907
+	./mibfetch $(RFCHOST) $(RFCDIR) 3418
 
 AGENTX-MIB.txt:	$(MIBDEPS)
 	./mibfetch $(RFCHOST) $(RFCDIR) 2742
