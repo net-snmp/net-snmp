@@ -54,6 +54,8 @@ SOFTWARE.
 #include "alarm.h"
 #include "system.h"
 
+u_char	*getStatPtr();
+
 static struct alarmEntry *alarmTab = NULL;
 static long alarmNextIndex = 1;
 
