@@ -65,7 +65,7 @@ INCLUDESUBDIRHEADERS=README \
 	@security_hdr_list@
 
 INSTALLBUILTSUBDIRHEADERS=../include/net-snmp/library/snmpv3-security-includes.h
-INSTALTBUILTSUBDIR=library
+INSTALLBUILTSUBDIR=library
 
 
 INSTALLUCDHEADERS= asn1.h \
