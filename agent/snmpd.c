@@ -190,7 +190,6 @@ static int create_v1_trap_session (char *sink,
     struct trap_sink *new_sink =
       (struct trap_sink *) malloc (sizeof (*new_sink));
 
-    if (!snmp_trapcommunity) snmp_trapcommunity = strdup("public");
     memset (&new_sink->ses, 0, sizeof (struct snmp_session));
     new_sink->ses.peername = strdup(sink);
     new_sink->ses.version = SNMP_VERSION_1;
@@ -223,7 +222,6 @@ static int create_v2_trap_session (char *sink,
     struct trap_sink *new_sink =
       (struct trap_sink *) malloc (sizeof (*new_sink));
 
-    if (!snmp_trapcommunity) snmp_trapcommunity = strdup("public");
     memset (&new_sink->ses, 0, sizeof (struct snmp_session));
     new_sink->ses.peername = strdup(sink);
     new_sink->ses.version = SNMP_VERSION_2c;
@@ -926,6 +924,7 @@ void snmpd_parse_config_trapsink(char *token,
 {
     char tmpbuf[1024];
   
+    if (!snmp_trapcommunity) snmp_trapcommunity = strdup("public");
     if (create_v1_trap_session(cptr, snmp_trapcommunity) == 0) {
 	sprintf(tmpbuf,"cannot create trapsink: %s", cptr);
 	config_perror(tmpbuf);
@@ -937,6 +936,7 @@ void snmpd_parse_config_trap2sink(char *token,
 {
     char tmpbuf[1024];
   
+    if (!snmp_trapcommunity) snmp_trapcommunity = strdup("public");
     if (create_v2_trap_session(cptr, snmp_trapcommunity) == 0) {
 	sprintf(tmpbuf,"cannot create trap2sink: %s", cptr);
 	config_perror(tmpbuf);
