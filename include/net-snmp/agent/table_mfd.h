@@ -5,7 +5,7 @@
 #ifndef _TABLE_MFD_HANDLER_H_
 #define _TABLE_MFD_HANDLER_H_
 
-#include <net-snmp/agent/request_group.h>
+#include <net-snmp/agent/table_array.h>
 
 #ifdef __cplusplus
 extern          "C" {
