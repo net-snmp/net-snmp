@@ -156,7 +156,7 @@ void init_loadave(void)
                                 loadave_free_config, "max1 [max5] [max15]");
 }
 
-void loadave_parse_config(char *token, char* cptr)
+void loadave_parse_config(const char *token, char* cptr)
 {
   int i;
   

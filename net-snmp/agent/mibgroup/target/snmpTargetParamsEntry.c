@@ -411,7 +411,7 @@ int snmpTargetParams_addRowStatus(
     
 
 void snmpd_parse_config_targetParams(
-     char *token, char *char_ptr)
+     const char *token, char *char_ptr)
 {
   char *cptr = char_ptr, buff[1024];
   struct targetParamTable_struct *newEntry;

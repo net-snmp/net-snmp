@@ -137,7 +137,7 @@ ds_get_string(int storeid, int which) {
 }
 
 void
-ds_handle_config(char *token, char *line) {
+ds_handle_config(const char *token, char *line) {
   struct ds_read_config *drsp;
   int itmp;
 

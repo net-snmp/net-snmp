@@ -95,7 +95,7 @@ void init_memory_freebsd2(void)
 }
 
 
-void memory_parse_config(char *token, char *cptr)
+void memory_parse_config(const char *token, char *cptr)
 {
   minimumswap = atoi(cptr);
 }

@@ -91,11 +91,11 @@ DEBUGPOID(oid *theoid,
   DEBUGP(c_oid);
 }
 
-void debug_config_register_tokens(char *configtoken, char *tokens) {
+void debug_config_register_tokens(const char *configtoken, char *tokens) {
   debug_register_tokens(tokens);
 }
 
-void debug_config_turn_on_debugging(char *configtoken, char *line) {
+void debug_config_turn_on_debugging(const char *configtoken, char *line) {
   snmp_set_do_debugging(atoi(line));
 }
 

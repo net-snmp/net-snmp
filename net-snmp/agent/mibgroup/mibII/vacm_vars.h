@@ -14,11 +14,11 @@ void vacm_free_security (void);
 void vacm_free_group (void);
 void vacm_free_access (void);
 void vacm_free_view (void);
-void vacm_parse_security (char *, char *);
-void vacm_parse_group (char *, char *);
-void vacm_parse_access (char *, char *);
-void vacm_parse_view (char *, char *);
-void vacm_parse_simple (char *, char *);
+void vacm_parse_security (const char *, char *);
+void vacm_parse_group (const char *, char *);
+void vacm_parse_access (const char *, char *);
+void vacm_parse_view (const char *, char *);
+void vacm_parse_simple (const char *, char *);
 
 SNMPCallback vacm_in_view_callback;
 

@@ -130,7 +130,7 @@ void update_config(void)
 
 void
 snmpd_register_config_handler(const char *token,
-			      void (*parser) (char *, char *),
+			      void (*parser) (const char *, char *),
 			      void (*releaser) (void),
 			      const char *help)
 {

@@ -140,7 +140,7 @@ static struct vacm_securityEntry *securityFirst =0, *securityLast =0;
 #define EXAMPLE_NETWORK		"NETWORK"
 #define EXAMPLE_COMMUNITY	"COMMUNITY"
 
-void vacm_parse_security (char *token, 
+void vacm_parse_security (const char *token, 
 			  char *param)
 {
     char *name, *source, *community;
@@ -244,7 +244,7 @@ void vacm_free_security (void)
     }
 }
 
-void vacm_parse_group (char *token, 
+void vacm_parse_group (const char *token, 
 		       char *param)
 {
     char *group, *model, *security;
@@ -288,7 +288,7 @@ void vacm_free_group (void)
     vacm_destroyAllGroupEntries();
 }
 
-void vacm_parse_access (char *token, char *param)
+void vacm_parse_access (const char *token, char *param)
 {
     char *name, *context, *model, *level, *prefix, *readView, *writeView, *notify;
     int imodel, ilevel;
@@ -368,7 +368,7 @@ void vacm_free_access (void)
     vacm_destroyAllAccessEntries();
 }
 
-void vacm_parse_view (char *token, 
+void vacm_parse_view (const char *token, 
 		      char *param)
 {
     char *name, *type, *subtree, *mask;
@@ -442,7 +442,7 @@ void vacm_free_view (void)
     vacm_destroyAllViewEntries();
 }
 
-void vacm_parse_simple(char *token, char *confline) {
+void vacm_parse_simple(const char *token, char *confline) {
   char line[SPRINT_MAX_LEN];
   char community[COMMUNITY_MAX_LEN];
   char theoid[SPRINT_MAX_LEN];

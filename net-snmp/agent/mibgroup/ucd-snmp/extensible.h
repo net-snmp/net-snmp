@@ -17,8 +17,8 @@ struct subtree *find_extensible (struct subtree *, oid *, size_t, int);
 
 /* config file parsing routines */
 void extensible_free_config (void);
-void extensible_parse_config (char *, char *);
-void execfix_parse_config (char *, char *);
+void extensible_parse_config (const char *, char *);
+void execfix_parse_config (const char *, char *);
 
 #include "mibdefs.h"
 

@@ -11,7 +11,7 @@ void init_file(void);
 
 /* config file parsing routines */
 void file_free_config (void);
-void file_parse_config (char *, char *);
+void file_parse_config (const char *, char *);
 extern FindVarMethod var_file_table;
 
 struct filestat

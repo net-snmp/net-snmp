@@ -14,7 +14,7 @@ int pass_compare (const void *, const void *);
 
 /* config file parsing routines */
 void pass_free_config (void);
-void pass_parse_config (char *, char *);
+void pass_parse_config (const char *, char *);
 
 #include "mibdefs.h"
 

@@ -9,7 +9,7 @@ void init_agent_read_config (void);
 void update_config (void);
 struct subtree;
 void snmpd_register_config_handler (const char *,
-                                    void (*parser)(char *, char *),
+                                    void (*parser)(const char *, char *),
                                     void (*releaser) (void),
                                     const char *);
 void snmpd_unregister_config_handler (const char *);
