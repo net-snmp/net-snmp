@@ -8,7 +8,7 @@
 ## set single options
 @eval $mfd_data_get_processing_type_save = "$m2c_processing_type"@
 @if "$mfd_processing_types" =~ /h/@
-@eval $m2c_processing_types = 'h'@
+@eval $m2c_processing_type = 'h'@
 @if $m2c_create_fewer_files != 1@
 @   open ${name}_data_get.h@
 @   eval $hack = "Id"@
