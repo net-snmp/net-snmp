@@ -126,8 +126,8 @@ struct addrCache {
     } status;
 };
 
+static void _addrcache_age_cb(unsigned int regNo, void *clientargs);
 static struct addrCache addrCache[SNMP_ADDRCACHE_SIZE];
-int             lastAddrAge = 0;
 int             log_addresses = 0;
 
 
@@ -257,6 +257,8 @@ save_set_cache(netsnmp_agent_session *asp)
     /*
      * Save the important information 
      */
+    DEBUGMSGTL(("verbose:asp", "asp %p reqinfo %p saved in cache\n",
+                asp, asp->reqinfo));
     ptr->transID = asp->pdu->transid;
     ptr->sess = asp->session;
     ptr->treecache = asp->treecache;
@@ -313,7 +315,12 @@ get_set_cache(netsnmp_agent_session *asp)
              * yyy-rks: investigate when/why sometimes they match,
              * sometimes they don't.
              */
+            DEBUGMSGTL(("verbose:asp", "asp %p reqinfo %p restored from cache\n",
+                        asp, asp->reqinfo));
             if(asp->requests->agent_req_info != asp->reqinfo) {
+                DEBUGMSGTL(("verbose:asp",
+                            "  reqinfo %p doesn't match cached reqinfo %p\n",
+                            asp->reqinfo, asp->requests->agent_req_info));
                 netsnmp_request_info *tmp = asp->requests;
                 for(; tmp; tmp = tmp->next)
                     tmp->agent_req_info = asp->reqinfo;
@@ -561,7 +568,6 @@ agent_check_and_process(int block)
 }
 
 
-
 /*
  * Set up the address cache.  
  */
@@ -574,20 +580,22 @@ netsnmp_addrcache_initialise(void)
         addrCache[i].addr = NULL;
         addrCache[i].status = SNMP_ADDRCACHE_UNUSED;
     }
-}
 
+    /*
+     * age cache every 5 minutes
+     */
+    snmp_alarm_register(300, SA_REPEAT, _addrcache_age_cb, NULL);
+}
 
 
 /*
  * Age the entries in the address cache.  
  */
-
 void
 netsnmp_addrcache_age(void)
 {
     int             i = 0;
 
-    lastAddrAge = 0;
     for (i = 0; i < SNMP_ADDRCACHE_SIZE; i++) {
         if (addrCache[i].status == SNMP_ADDRCACHE_OLD) {
             addrCache[i].status = SNMP_ADDRCACHE_UNUSED;
@@ -600,6 +608,11 @@ netsnmp_addrcache_age(void)
             addrCache[i].status = SNMP_ADDRCACHE_OLD;
         }
     }
+}
+
+static void _addrcache_age_cb(unsigned int regNo, void *clientargs)
+{
+    netsnmp_addrcache_age();
 }
 
 /*******************************************************************-o-******
@@ -1126,6 +1139,8 @@ init_agent_snmp_session(netsnmp_session * session, netsnmp_pdu *pdu)
     asp->treecache_num = -1;
     asp->treecache_len = 0;
     asp->reqinfo = SNMP_MALLOC_TYPEDEF(netsnmp_agent_request_info);
+    DEBUGMSGTL(("verbose:asp", "asp %p reqinfo %p created\n",
+                asp, asp->reqinfo));
 
     return asp;
 }
@@ -1140,6 +1155,8 @@ free_agent_snmp_session(netsnmp_agent_session *asp)
 
     netsnmp_remove_from_delegated(asp);
     
+    DEBUGMSGTL(("verbose:asp", "asp %p reqinfo %p freed\n",
+                asp, asp->reqinfo));
     if (asp->orig_pdu)
         snmp_free_pdu(asp->orig_pdu);
     if (asp->pdu)
@@ -1761,6 +1778,8 @@ netsnmp_add_varbind_to_cache(netsnmp_agent_session *asp, int vbcount,
          * for non-SET modes, set the type to NULL 
          */
         if (!MODE_IS_SET(asp->pdu->command)) {
+        DEBUGMSGTL(("verbose:asp", "asp %p reqinfo %p assigned to request\n",
+                    asp, asp->reqinfo));
             if (varbind_ptr->type == ASN_PRIV_INCL_RANGE) {
                 DEBUGMSGTL(("snmp_agent", "varbind %d is inclusive\n",
                             request->index));
@@ -2202,7 +2221,12 @@ netsnmp_check_requests_status(netsnmp_agent_session *asp,
      * find any errors marked in the requests 
      */
     while (requests) {
-        netsnmp_assert(requests->agent_req_info == asp->reqinfo);/* DEBUG */
+        if(requests->agent_req_info == asp->reqinfo) {
+            DEBUGMSGTL(("verbose:asp",
+                        "**reqinfo %p doesn't match cached reqinfo %p\n",
+                        asp->reqinfo, asp->requests->agent_req_info));
+            netsnmp_assert(requests->agent_req_info == asp->reqinfo);/* DEBUG */
+        }
         if (requests->status != SNMP_ERR_NOERROR &&
             (!look_for_specific || requests->status == look_for_specific)
             && (look_for_specific || asp->index == 0
