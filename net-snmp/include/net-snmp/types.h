@@ -6,6 +6,9 @@
      */
 
 #include <stdio.h>
+
+#include <net-snmp/net-snmp-config.h>
+
                         /*
                          * For 'timeval' 
                          */
@@ -66,11 +69,17 @@ typedef u_int in_addr_t;
      *  to allow application writers to adopt the new header file names.
      */
 
+
 #include <net-snmp/definitions.h>
 #include <net-snmp/library/snmp_api.h>
 /*
  * #include <net-snmp/library/libsnmp.h> 
  */
+
+    typedef struct netsnmp_index_s {
+       int          len;
+       oid         *oids;
+    } netsnmp_index;
 
 
     typedef struct netsnmp_void_array_s {
