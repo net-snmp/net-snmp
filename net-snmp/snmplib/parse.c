@@ -1916,8 +1916,9 @@ parse_imports(fp)
 		 */
     for ( mp=module_head ; mp ; mp=mp->next )
 	if ( mp->modid == current_module) {
-            if ( import_count > 0)
-              mp->imports = Malloc(import_count*sizeof(struct module_import));
+            if ( import_count == 0)
+              return;
+            mp->imports = Malloc(import_count*sizeof(struct module_import));
 	    for ( i=0 ; i<import_count ; ++i ) {
 		mp->imports[i].label = import_list[i].label;
 		mp->imports[i].modid = import_list[i].modid;
