@@ -589,7 +589,7 @@ handle_var_list(struct agent_snmp_session  *asp)
     struct saved_var_data *saved;
     WriteMethod *write_method;
     AddVarMethod *add_method;
-    int	    noSuchObject;
+    int	    noSuchObject = TRUE;
     int     count, view;
     
     count = 0;
