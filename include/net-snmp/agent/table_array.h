@@ -32,44 +32,58 @@ extern          "C" {
      * group_item is to allow us to keep a list of requests without
      * disrupting the actual netsnmp_request_info list.
      */
-    typedef struct netsnmp_array_group_item_s {
+    typedef struct netsnmp_request_group_item_s {
         netsnmp_request_info *ri;
         netsnmp_table_request_info *tri;
-        struct netsnmp_array_group_item_s *next;
-    } netsnmp_array_group_item;
+        struct netsnmp_request_group_item_s *next;
+    } netsnmp_request_group_item;
 
     /*
      * structure to keep a list of requests for each unique index
      */
-    typedef struct netsnmp_array_group_s {
-        netsnmp_oid_array_header index;
+    typedef struct netsnmp_request_group_s {
+       /*
+        * index for this row. points to someone else's memory, so
+        * don't free it!
+        */
+        netsnmp_index               index;
 
-        oid_array       table;
+       /*
+        * container in which rows belong
+        */
+        netsnmp_container           *table;
 
-        netsnmp_oid_array_header *new_row;
-        netsnmp_oid_array_header *old_row;
+       /*
+        * actual old and new rows
+        */
+        netsnmp_index               *new_row;
+        netsnmp_index               *old_row;
 
-        netsnmp_array_group_item *list;
+       /*
+        * requests for this row
+        */
+        netsnmp_request_group_item  *list;
 
-        int             status;
+        int                          status;
 
-        void           *myvoid;
-    } netsnmp_array_group;
+        void                        *rg_void;
+
+    } netsnmp_request_group;
 
     typedef int     (Netsnmp_User_Row_Operation_c) (const void *lhs,
                                                     const void *rhs);
     typedef int     (Netsnmp_User_Row_Operation) (void *lhs, void *rhs);
     typedef int     (Netsnmp_User_Get_Processor) (netsnmp_request_info *,
-                                                  netsnmp_oid_array_header
+                                                  netsnmp_index
                                                   *,
                                                   netsnmp_table_request_info
                                                   *);
-    typedef netsnmp_oid_array_header
-        *(UserRowMethod) (netsnmp_oid_array_header *);
-    typedef int     (Netsnmp_User_Row_Action) (netsnmp_oid_array_header *,
-                                               netsnmp_oid_array_header *,
-                                               netsnmp_array_group *);
-    typedef void    (Netsnmp_User_Group_Method) (netsnmp_array_group *);
+    typedef netsnmp_index
+        *(UserRowMethod) (netsnmp_index *);
+    typedef int     (Netsnmp_User_Row_Action) (netsnmp_index *,
+                                               netsnmp_index *,
+                                               netsnmp_request_group *);
+    typedef void    (Netsnmp_User_Group_Method) (netsnmp_request_group *);
 
     /*
      * structure for array callbacks
@@ -100,7 +114,7 @@ extern          "C" {
         Netsnmp_User_Group_Method *set_undo;
 
        /** not callbacks, but this is a useful place for them... */
-       netsnmp_container* idx2;
+       netsnmp_container* container;
        char can_set;
 
     } netsnmp_table_array_callbacks;
@@ -111,25 +125,26 @@ extern          "C" {
                                      netsnmp_table_registration_info
                                      *tabreq,
                                      netsnmp_table_array_callbacks *cb,
+                                     netsnmp_container *container,
                                      int group_rows);
 
     oid_array      *netsnmp_extract_array_context(netsnmp_request_info *);
 
     Netsnmp_Node_Handler netsnmp_table_array_helper_handler;
 
-    const netsnmp_oid_array_header
+    const netsnmp_index
         *netsnmp_table_array_get_by_index(netsnmp_handler_registration
                                           *reginfo,
-                                          netsnmp_oid_array_header *hdr);
+                                          netsnmp_index *hdr);
 
-    const netsnmp_oid_array_header
+    const netsnmp_index
         **netsnmp_table_array_get_subset(netsnmp_handler_registration
                                          *reginfo,
-                                         netsnmp_oid_array_header *hdr,
+                                         netsnmp_index *hdr,
                                          int *len);
-    netsnmp_oid_array_header *
+    netsnmp_index *
     netsnmp_table_array_remove_row(netsnmp_handler_registration *reginfo,
-                                   netsnmp_oid_array_header *hdr);
+                                   netsnmp_index *hdr);
 
 
 #ifdef __cplusplus
