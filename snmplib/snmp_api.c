@@ -1930,87 +1930,92 @@ snmp_add_var(pdu, name, name_length, type, value)
     int tint;
     double dtmp;
     float ftmp;
+    long ltmp;
     struct counter64 c64tmp;
-    
+
     switch(type){
-    case 'i':
-      snmp_pdu_add_variable(pdu, name, name_length, ASN_INTEGER, value,
-                            sizeof(long));
-      break;
+      case 'i':
+        ltmp = atol(value);
+        snmp_pdu_add_variable(pdu, name, name_length, ASN_INTEGER,
+                              (u_char *) &ltmp, sizeof(ltmp));
+        break;
       
-    case 'u':
-      snmp_pdu_add_variable(pdu, name, name_length, ASN_UNSIGNED, value,
-                            sizeof(long));
-      break;
+      case 'u':
+        sscanf(value, "%lu", &ltmp);
+        snmp_pdu_add_variable(pdu, name, name_length, ASN_UNSIGNED, 
+                              (u_char *) &ltmp, sizeof(ltmp));
+        break;
 
-    case 't':
-      snmp_pdu_add_variable(pdu, name, name_length, ASN_TIMETICKS, value,
-                            sizeof(long));
-      break;
+      case 't':
+        sscanf(value, "%lu", &ltmp);
+        snmp_pdu_add_variable(pdu, name, name_length, ASN_TIMETICKS, 
+                              (u_char *) &ltmp, sizeof(long));
+        break;
 
-    case 'a':
-      snmp_pdu_add_variable(pdu, name, name_length, ASN_IPADDRESS, value,
-                            sizeof(long));
-      break;
+      case 'a':
+        ltmp = inet_addr(value);
+        snmp_pdu_add_variable(pdu, name, name_length, ASN_IPADDRESS, 
+                              (u_char *) &ltmp, sizeof(long));
+        break;
 
-    case 'o':
-      read_objid(value, (oid *)buf, &tint);
-      snmp_pdu_add_variable(pdu, name, name_length, ASN_OBJECT_ID, buf,
-                            sizeof(oid)*tint);
-      break;
+      case 'o':
+        read_objid(value, (oid *)buf, &tint);
+        snmp_pdu_add_variable(pdu, name, name_length, ASN_OBJECT_ID, buf,
+                              sizeof(oid)*tint);
+        break;
 
-    case 's':
-    case 'x':
-    case 'd':
-      if (type == 'd'){
-        tint = ascii_to_binary((u_char *)value, buf);
-      } else if (type == 's'){
-        strcpy(buf, value);
-        tint = strlen(buf);
-      } else if (type == 'x'){
-        tint = hex_to_binary((u_char *)value, buf);
-      }
-      if (tint < 0) {
-        sprintf(buf, "Bad value: %s\n", value);
-        snmp_set_detail(buf);
-        return 1;
-      }
-      snmp_pdu_add_variable(pdu, name, name_length, ASN_OCTET_STR, buf, tint);
-      break;
+      case 's':
+      case 'x':
+      case 'd':
+        if (type == 'd'){
+          tint = ascii_to_binary((u_char *)value, buf);
+        } else if (type == 's'){
+          strcpy(buf, value);
+          tint = strlen(buf);
+        } else if (type == 'x'){
+          tint = hex_to_binary((u_char *)value, buf);
+        }
+        if (tint < 0) {
+          sprintf(buf, "Bad value: %s\n", value);
+          snmp_set_detail(buf);
+          return 1;
+        }
+        snmp_pdu_add_variable(pdu, name, name_length, ASN_OCTET_STR, buf, tint);
+        break;
 
-    case 'n':
-      snmp_pdu_add_variable(pdu, name, name_length, ASN_NULL, 0, 0);
-      break;
+      case 'n':
+        snmp_pdu_add_variable(pdu, name, name_length, ASN_NULL, 0, 0);
+        break;
 
 #ifdef OPAQUE_SPECIAL_TYPES
-    case 'U':
-      read64(&c64tmp, value);
-      snmp_pdu_add_variable(pdu, name, name_length, ASN_OPAQUE_U64,
-                            (u_char *) &c64tmp, sizeof(c64tmp));
-      break;
+      case 'U':
+        read64(&c64tmp, value);
+        snmp_pdu_add_variable(pdu, name, name_length, ASN_OPAQUE_U64,
+                              (u_char *) &c64tmp, sizeof(c64tmp));
+        break;
 
-    case 'I':
-      read64(&c64tmp, value);
-      snmp_pdu_add_variable(pdu, name, name_length, ASN_OPAQUE_I64, 
-                            (u_char *) &c64tmp, sizeof(c64tmp));
-      break;
+      case 'I':
+        read64(&c64tmp, value);
+        snmp_pdu_add_variable(pdu, name, name_length, ASN_OPAQUE_I64, 
+                              (u_char *) &c64tmp, sizeof(c64tmp));
+        break;
       
-    case 'F':
-      ftmp = atof(value);
-      snmp_pdu_add_variable(pdu, name, name_length, ASN_OPAQUE_FLOAT, 
-                            (u_char *) &ftmp, sizeof(ftmp));
-      break;
+      case 'F':
+        ftmp = atof(value);
+        snmp_pdu_add_variable(pdu, name, name_length, ASN_OPAQUE_FLOAT, 
+                              (u_char *) &ftmp, sizeof(ftmp));
+        break;
       
-    case 'D':
-      dtmp = atof(value);
-      snmp_pdu_add_variable(pdu, name, name_length, ASN_OPAQUE_DOUBLE, 
-                            (u_char *) &dtmp, sizeof(dtmp));
-      break;
+      case 'D':
+        dtmp = atof(value);
+        snmp_pdu_add_variable(pdu, name, name_length, ASN_OPAQUE_DOUBLE, 
+                              (u_char *) &dtmp, sizeof(dtmp));
+        break;
 #endif /* OPAQUE_SPECIAL_TYPES */
       
-    default:
-      snmp_set_detail("Internal error in type switching\n");
-      return 1;
+      default:
+        snmp_set_detail("Internal error in type switching\n");
+        return 1;
     }
     return 0;
 }
