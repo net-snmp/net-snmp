@@ -42,7 +42,7 @@ u_char	*var_example __P((struct variable *, oid *, int *, int, int *, int (**wri
 /* only load this structure when this .h file is called in the
    snmp_vars.c file in the agent subdirectory of the source tree */
 
-#ifdef IN_SNMP_VARS_C
+#if defined(IN_SNMP_VARS_C) || defined(USING_DLMOD_MODULE)
 
 /* Define a 'variable' structure that is a representation of our mib. */
 
