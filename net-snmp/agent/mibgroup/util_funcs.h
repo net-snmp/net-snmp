@@ -28,9 +28,22 @@ int parse_miboid (const char *, oid *);
 void string_append_int (char *, int);
 void wait_on_exec (struct extensible *);
 
+#define     satosin(x)      ((struct sockaddr_in *) &(x))
+#define     SOCKADDR(x)     (satosin(x)->sin_addr.s_addr)
+#ifndef MIB_STATS_CACHE_TIMEOUT
+#define MIB_STATS_CACHE_TIMEOUT 5
+#endif
+
+typedef void * mib_table_t;
+typedef int(RELOAD)( mib_table_t );
+typedef int(COMPARE)(const void*, const void* );
+mib_table_t Initialise_Table( int, int, RELOAD, COMPARE);
+int  Search_Table( mib_table_t, void*, int);
+int  Add_Entry( mib_table_t, void*);
+void *Retrieve_Table_Data( mib_table_t, int*);
+
 int marker_uptime( marker_t pm );
 int marker_tticks( marker_t pm );
 int timeval_uptime( struct timeval *tv );
 int timeval_tticks( struct timeval *tv );
-
 #endif /* _MIBGROUP_UTIL_FUNCS_H */
