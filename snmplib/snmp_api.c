@@ -3975,9 +3975,14 @@ _sess_read(void *sessp,
     struct snmp_pdu *pdu;
     struct request_list *rp, *orp = NULL;
     int ret;
+#ifdef HAVE_SOCKLEN_T
     socklen_t addrlen;
     socklen_t fromlength;
-
+#else
+    size_t addrlen;
+    size_t fromlength;
+#endif
+    
     sp = slp->session; isp = slp->internal;
     if (!sp || !isp) {
       DEBUGMSGTL(("sess_read","read fail: closing...\n"));

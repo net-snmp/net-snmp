@@ -1156,6 +1156,7 @@ dnl Checks for typedefs, structures, and compiler characteristics.
 AC_TYPE_OFF_T
 AC_TYPE_PID_T
 AC_HEADER_TIME
+AC_CHECK_TYPE(socklen_t, AC_DEFINE(HAVE_SOCKLEN_T))
 
 dnl AIX keeps in_addr_t in /usr/include/netinet/in.h
 AC_MSG_CHECKING(for in_addr_t)
