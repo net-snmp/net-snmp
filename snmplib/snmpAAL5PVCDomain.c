@@ -262,7 +262,7 @@ snmp_transport		*snmp_aal5pvc_transport	(struct sockaddr_atmpvc *addr,
 
 
 
-snmp_transport	*snmp_aal5pvc_create		(const char *string, int local)
+snmp_transport	*snmp_aal5pvc_create_tstring	(const char *string, int local)
 {
   struct sockaddr_atmpvc addr;
   
@@ -291,14 +291,34 @@ snmp_transport	*snmp_aal5pvc_create		(const char *string, int local)
 
 
 
+snmp_transport	*snmp_aal5pvc_create_ostring	(const u_char *o, size_t o_len,
+						 int local)
+{
+  struct sockaddr_atmpvc addr;
+
+  if (o_len == 8) {
+    addr.sap_family = AF_ATMPVC;
+    addr.sap_addr.itf = (o[0] <<  8) + (o[1] <<  0);
+    addr.sap_addr.vpi = (o[2] <<  8) + (o[3] <<  0);
+    addr.sap_addr.vci = (o[4] << 24) + (o[5] << 16) + (o[6] <<  8) + (o[7] << 0);
+    return snmp_aal5pvc_transport(&addr, local);
+  }
+
+  return NULL;
+}
+
+
+
 void		snmp_aal5pvc_ctor		(void)
 {
   aal5pvcDomain.name        = ucdSnmpAAL5PVCDomain;
   aal5pvcDomain.name_length = sizeof(ucdSnmpAAL5PVCDomain)/sizeof(oid);
-  aal5pvcDomain.f_create    = snmp_aal5pvc_create;
   aal5pvcDomain.prefix      = calloc(3, sizeof(char *));
   aal5pvcDomain.prefix[0]   = "aal5pvc";
   aal5pvcDomain.prefix[1]   = "pvc";
+
+  aal5pvcDomain.f_create_from_tstring = snmp_aal5pvc_create_tstring;
+  aal5pvcDomain.f_create_from_ostring = snmp_aal5pvc_create_ostring;
 
   snmp_tdomain_register(&aal5pvcDomain);
 }
