@@ -549,7 +549,7 @@ getKstatString(const char *statname, const char *varname,
             switch (d->data_type) {
             case KSTAT_DATA_CHAR:
                 value[value_len-1] = '\0';
-                strncpy(value, value_len-1, d->value.c); 
+                strncpy(value, d->value.c, value_len-1); 
                 DEBUGMSGTL(("kernel_sunos5", "value: %s\n", d->value.c));
                 break;
             default:
