@@ -315,6 +315,15 @@ CREATING BINARY DISTRIBUTIONS
   6) upload and release, like you did for the source code but with a
      different package name for binaries (5.0.3 binaries).
 
+  7) RPMS:
+     $ cd dist
+     $ make VERSION=5.0.8 RELEASE=1 WITH_PERL=1
+     
+     This should put multiple binary rpm files in:
+       dist/rpm/RPMS/i386/
+     And one source RPM in:
+       dist/rpm/SRPMS/
+
 ***************************************************************************
 CLEANING UP
 
