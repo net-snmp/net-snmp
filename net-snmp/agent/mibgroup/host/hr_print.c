@@ -11,6 +11,7 @@
 #endif
 #include "host_res.h"
 #include "hr_print.h"
+#include "struct.h"
 
 #define HRPRINT_MONOTONICALLY_INCREASING
 
@@ -29,6 +30,7 @@ int printer_status(int);
 int printer_detail_status(int);
 int printer_errors(int);
 int header_hrprint (struct variable *,oid *, size_t *, int, size_t *, WriteMethod **);
+FILE * run_lpstat(void);
 
 
 	/*********************
@@ -205,7 +207,7 @@ Init_HR_Print (void)
     }
   
 #if HAVE_LPSTAT
-    if ((p = popen(LPSTAT_PATH " -v", "r")) != NULL) {
+    if ((p = run_lpstat()) != NULL) {
 	char buf[BUFSIZ], ptr[BUFSIZ];
 	while (fgets(buf, sizeof buf, p)) {
 	    sscanf(buf, "%*s %*s %[^:]", ptr);
@@ -301,3 +303,25 @@ int printer_errors(int idx)
 {
     return 0;
 }
+
+#ifdef        HAVE_LPSTAT
+/*
+ * Run the lpstat command. If compiled with EXCACHE support, this
+ * will actually cache the output for a while which helps a lot
+ * with snmpbulkwalk (in fact, it keeps the client from exiting
+ * due to timeouts).
+ */
+FILE *
+run_lpstat(void)
+{
+    struct extensible	ex;
+    int			fd;
+
+    memset(&ex, 0, sizeof(ex));
+    strcpy(ex.command, LPSTAT_PATH " -v");
+    if ((fd = get_exec_output(&ex)) < 0)
+    	return NULL;
+
+    return fdopen(fd, "r");
+}
+#endif

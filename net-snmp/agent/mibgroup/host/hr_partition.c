@@ -130,7 +130,7 @@ header_hrpartition(struct variable *vp,
 
 	while ( HRD_index < LowDiskIndex ) {
             Init_HR_Partition();	/* moves to next disk */
-	    if ( HRD_index == -1 );
+	    if ( HRD_index == -1 )
 		return(MATCH_FAILED);
 	}
     }

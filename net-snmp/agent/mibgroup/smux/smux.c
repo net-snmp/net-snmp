@@ -89,6 +89,7 @@ struct sockaddr_in smux_sa;
 struct counter64 smux_counter64;
 oid smux_objid[MAX_OID_LEN];
 u_char smux_str[SMUXMAXSTRLEN];
+int smux_listen_sd;
 
 static struct timeval smux_rcv_timeout;
 static u_long smux_reqid;
@@ -124,7 +125,7 @@ static int nauths, npeers = 0;
 
 struct variable2 smux_variables[] = {
   /* bogus entry, as in pass.c */
-  {MIBINDEX, ASN_PRIV_DELEGATED, RWRITE, var_smux, 0, {MIBINDEX}},
+  {MIBINDEX, ASN_INTEGER, RWRITE, var_smux, 0, {MIBINDEX}},
 };
 
 
@@ -1578,7 +1579,7 @@ smux_trap_process(u_char *rsp, size_t *len)
 	}
 
 	/* parse the variable bindings */
-	do {
+	while (ptr && *len) {
 
 		/* get the objid and the asn1 coded value */
 		var_name_len = MAX_OID_LEN;
@@ -1682,7 +1683,7 @@ smux_trap_process(u_char *rsp, size_t *len)
 		snmptrap_ptr->type = vartype;
 		snmptrap_ptr->next_variable = NULL;
 
-	} while ((ptr!=NULL)&&(*len));
+	}
 
 	/* send the traps */
 	send_enterprise_trap_vars(trap, specific, (oid *)&sa_enterpriseoid, sa_enterpriseoid_len, snmptrap_head);

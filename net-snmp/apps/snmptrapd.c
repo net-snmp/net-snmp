@@ -667,7 +667,7 @@ static void free_trap2_fmt(void)
 
 void usage(void)
 {
-    fprintf(stderr,"Usage: snmptrapd [-h|-H|-V] [-D] [-p #] [-P] [-s] [-f] [-l [d0-7]] [-e] [-d] [-n] [-a] [-m <MIBS>] [-M <MIBDIRS]\n");
+    fprintf(stderr,"Usage: snmptrapd [-h|-H|-V] [-D] [-p #] [-P] [-o file] [-s] [-f] [-l [d0-7]] [-e] [-d] [-n] [-a] [-m <MIBS>] [-M <MIBDIRS]\n");
     fprintf(stderr,"UCD-snmp version: %s\n", VersionInfo);
     fprintf(stderr, "\n\
   -h        Print this help message and exit\n\
@@ -678,6 +678,8 @@ void usage(void)
   -p <port> Local port to listen from\n\
   -P        Print to standard error\n\
   -F \"...\" Use custom format for logging to standard error\n\
+  -T TCP|UDP Listen to traffic on the TCP or UDP transport.\n\
+  -o file   Print to the specified file\n\
   -u PIDFILE create PIDFILE with process id\n\
   -e        Print Event # (rising/falling alarm], etc.\n\
   -s        Log syslog\n\
@@ -761,7 +763,7 @@ int main(int argc, char *argv[])
     /*
      * usage: snmptrapd [-D] [-u PIDFILE] [-p #] [-P] [-s] [-l [d0-7]] [-d] [-e] [-a]
      */
-    while ((arg = getopt(argc, argv, "VdnqRD:p:m:M:Po:O:esSafl:Hu:c:CF:T:")) != EOF){
+    while ((arg = getopt(argc, argv, "VdnqD:p:m:M:Po:O:esSafl:Hu:c:CF:T:")) != EOF){
 	switch(arg) {
 	case 'V':
             fprintf(stderr,"UCD-snmp version: %s\n", VersionInfo);
@@ -771,6 +773,7 @@ int main(int argc, char *argv[])
 	    snmp_set_dump_packet(1);
 	    break;
 	case 'q':
+	    fprintf(stderr, "Warning: -q option is deprecated - use -Oq\n");
 	    snmp_set_quick_print(1);
 	    break;
 	case 'D':
@@ -823,6 +826,7 @@ int main(int argc, char *argv[])
 	    Syslog++;
 	    break;
 	case 'S':
+	    fprintf(stderr, "Warning: -S option is deprecated - use -OS\n");
 	    snmp_set_suffix_only(2);
 	    break;
 	case 'a':

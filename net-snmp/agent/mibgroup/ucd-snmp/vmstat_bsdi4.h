@@ -7,6 +7,6 @@
 
 #include "mibdefs.h"
 
-void init_vmstat_netbsd1(void);
+void init_vmstat_bsdi4(void);
 
 #endif /* _MIBGROUP_VMSTAT_BSDI4_H */

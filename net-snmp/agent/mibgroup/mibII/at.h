@@ -29,7 +29,7 @@ extern FindVarMethod var_atEntry;
 # define ATF_COM	0x02
 #endif /*  ATF_COM */
 
-#ifdef linux
+#if defined(linux) || defined(irix6)
 /*
  * arp struct to pass flags, hw-addr and ip-addr in bsd manner:
  */

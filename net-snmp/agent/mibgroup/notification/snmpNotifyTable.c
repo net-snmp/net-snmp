@@ -712,11 +712,6 @@ write_snmpNotifyRowStatus(int      action,
             if (set_value == RS_ACTIVE || set_value == RS_NOTINSERVICE)
               return SNMP_ERR_INCONSISTENTVALUE;
     
-
-            /* destroying a non-existent row is actually legal */
-            if (set_value == RS_DESTROY) {
-              return SNMP_ERR_NOERROR;
-            }
           } else {
             /* row exists.  Check for a valid state change */
             if (set_value == RS_CREATEANDGO || set_value == RS_CREATEANDWAIT) {
@@ -732,7 +727,8 @@ write_snmpNotifyRowStatus(int      action,
 
         case RESERVE2:
           /* memory reseveration, final preparation... */
-          if (StorageTmp == NULL) {
+          if (StorageTmp == NULL &&
+              (set_value == RS_CREATEANDGO || set_value == RS_CREATEANDWAIT)) {
             /* creation */
             vars = NULL;
 
@@ -786,7 +782,9 @@ write_snmpNotifyRowStatus(int      action,
              the UNDO case */
              
 
-             if (StorageTmp == NULL) {
+             if (StorageTmp == NULL&&
+                 (set_value == RS_CREATEANDGO ||
+                  set_value == RS_CREATEANDWAIT)) {
                /* row creation, so add it */
                if (StorageNew != NULL)
                  snmpNotifyTable_add(StorageNew);
@@ -797,12 +795,14 @@ write_snmpNotifyRowStatus(int      action,
                StorageTmp->snmpNotifyRowStatus = *((long *) var_val);
              } else {
                /* destroy...  extract it for now */
-               hciptr =
-                 header_complex_find_entry(snmpNotifyTableStorage,
-                                           StorageTmp);
-               StorageDel = (struct snmpNotifyTable_data *)
-                 header_complex_extract_entry((struct header_complex_index **)&snmpNotifyTableStorage,
-                                              hciptr);
+                 if (StorageTmp) {
+                     hciptr =
+                         header_complex_find_entry(snmpNotifyTableStorage,
+                                                   StorageTmp);
+                     StorageDel = (struct snmpNotifyTable_data *)
+                         header_complex_extract_entry((struct header_complex_index **)&snmpNotifyTableStorage,
+                                                      hciptr);
+                 }
              }
           break;
 
@@ -811,11 +811,13 @@ write_snmpNotifyRowStatus(int      action,
 
         case UNDO:
              /* Back out any changes made in the ACTION case */
-             if (StorageTmp == NULL) {
+             if (StorageTmp == NULL &&
+                 (set_value == RS_CREATEANDGO ||
+                  set_value == RS_CREATEANDWAIT)) {
                /* row creation, so remove it again */
                hciptr =
                  header_complex_find_entry(snmpNotifyTableStorage,
-                                           StorageTmp);
+                                           StorageNew);
                StorageDel = (struct snmpNotifyTable_data *)
                  header_complex_extract_entry((struct header_complex_index **)&snmpNotifyTableStorage,
                                               hciptr);
@@ -823,7 +825,7 @@ write_snmpNotifyRowStatus(int      action,
              } else if (StorageDel != NULL) {
                /* row deletion, so add it again */
                snmpNotifyTable_add(StorageDel);
-             } else {
+             } else if (set_value != RS_DESTROY) {
                StorageTmp->snmpNotifyRowStatus = old_value;
              }
           break;
