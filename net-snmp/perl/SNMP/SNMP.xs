@@ -5183,6 +5183,10 @@ snmp_mib_node_FETCH(tp_ref, key)
                  __get_type_str(tp->type, str_buf);
                  sv_setpv(ST(0), str_buf);
                  break;
+	      case 'T': /* textual convention description */
+                  if (strncmp("TCDescription", key, strlen(key))) break;
+                  sv_setpv(ST(0), get_tc_description(tp->tc_index));
+                  break;
 	      case 'u': /* units */
                  if (strncmp("units", key, strlen(key))) break;
                  sv_setpv(ST(0),tp->units);
