@@ -1139,7 +1139,7 @@ _sess_open(struct snmp_session *in_session)
                 strcpy( isp->me.sa_data, UNIX_SOCKET_BASE_NAME );
                 strcat( isp->me.sa_data, "XXXXXX" );
 #ifdef HAVE_MKSTEMP
-                mkstemp( isp->me.sa_data );
+                close(mkstemp( isp->me.sa_data ));
 #else
                 mktemp( isp->me.sa_data );
 #endif
