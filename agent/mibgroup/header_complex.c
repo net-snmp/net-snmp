@@ -105,11 +105,16 @@ header_complex(struct header_complex_index *datalist,
   int len, i, result;
   
   /* set up some nice defaults for the user */
-  *write_method = NULL;
-  *var_len = sizeof (long);
+  if (write_method)
+    *write_method = NULL;
+  if (var_len)
+    *var_len = sizeof (long);
 
   for(nptr = datalist; nptr != NULL && found == NULL; nptr = nptr->next) {
-    header_complex_generate_oid(indexOid, &len, vp->name, vp->namelen, nptr);
+    if (vp)
+      header_complex_generate_oid(indexOid, &len, vp->name, vp->namelen, nptr);
+    else
+      header_complex_generate_oid(indexOid, &len, NULL, 0, nptr);
 
     result = snmp_oid_compare(name, *length, indexOid, len);
     DEBUGMSGTL(("header_complex", "Checking: "));
@@ -131,7 +136,8 @@ header_complex(struct header_complex_index *datalist,
     }
   }
   if (found) {
-    header_complex_generate_oid(name, length, vp->name, vp->namelen, found);
+    if (vp)
+      header_complex_generate_oid(name, length, vp->name, vp->namelen, found);
     return found->data;
   }
     
