@@ -567,8 +567,8 @@ smux_pdu_process(int fd, u_char *data, size_t length)
 		case SMUX_TRAP:
 			snmp_log(LOG_INFO, "Got trap from peer on fd %d\n", fd);
 			ptr = smux_trap_process(ptr, &len);
-			// watch out for close on top of this...should return correct end
-			// debug this...
+			/* watch out for close on top of this...should return correct end */
+			/* debug this... */
 			ptr = NULL;
 			break;
 		default:
