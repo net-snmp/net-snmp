@@ -576,6 +576,7 @@ register_mib_table_row(const char *moduleName,
 {
   struct subtree *subtree;
   struct register_parameters reg_parms;
+  oid ubound = 0;
   int rc, x;
   u_char *v;
 
@@ -599,6 +600,9 @@ register_mib_table_row(const char *moduleName,
     if (vr->namelen > 0) {
       memcpy(&subtree->name[var_subid - vr->namelen], vr->name, 
 	     vr->namelen*sizeof(oid));
+      if (vr->name[vr->namelen - 1] > ubound) {
+	ubound = vr->name[vr->namelen - 1];
+      }
     } else {
       subtree->name[var_subid - 1] += x;
     }
@@ -671,7 +675,7 @@ register_mib_table_row(const char *moduleName,
   reg_parms.priority = priority;
   reg_parms.flags = (u_char)flags;
   reg_parms.range_subid  = var_subid;
-  reg_parms.range_ubound = (mibloc[var_subid-1] + numvars - 1);
+  reg_parms.range_ubound = ubound;
   reg_parms.timeout = timeout;
   rc = snmp_call_callbacks(SNMP_CALLBACK_APPLICATION,
 			   SNMPD_CALLBACK_REGISTER_OID, &reg_parms);
