@@ -192,14 +192,14 @@ exit 1;
 $outputName = $mibnode->{'label'} if (!defined($outputName));
 $vars{'name'} = $outputName;
 $vars{'oid'} = $oid;
-$vars{'example_start'} =
-"    /***************************************************/\n" .
-"    /***             START EXAMPLE CODE              ***/\n" .
-"    /***---------------------------------------------***/";
-$vars{'example_end'} =
-"    /***---------------------------------------------***/\n" .
-"    /***              END  EXAMPLE CODE              ***/\n" .
-"    /***************************************************/";
+$vars{'example_start'} = "    /*\n" .
+"    ***************************************************\n" .
+"    ***             START EXAMPLE CODE              ***\n" .
+"    ***---------------------------------------------***/";
+$vars{'example_end'} = "    /*\n" .
+"    ***---------------------------------------------***\n" .
+"    ***              END  EXAMPLE CODE              ***\n" .
+"    ***************************************************/";
 
 # loop through mib nodes, remembering stuff.
 setup_data($mibnode);
@@ -303,6 +303,7 @@ sub process_vars {
     my $it = shift;
 
     # mib substitutions ($var.type -> $mibnode->{'type'})
+   if ( $it =~ /\$(\w+)\.(\w+)/ ) {
     $it =~ s/\$(\w+)\.(uc)/uc($vars{$1})/eg; # make something uppercase
     $it =~ s/\$(\w+)\.(commaoid)/tocommas($SNMP::MIB{$vars{$1}}{objectID})/eg;
     $it =~ s/\$(\w+)\.(oidlength)/oidlength($SNMP::MIB{$vars{$1}}{objectID})/eg;
@@ -333,6 +334,7 @@ sub process_vars {
     if ( $it =~ /\$(\w+)\.(\w+)/ ) {
       warn "Possible unknown variable attribute \$$1.$2 at $currentfile:$currentline\n";
     }
+  }
     # normal variable substitions
     $it =~ s/\$\{(\w+)\}/$vars{$1}/g;
     $it =~ s/\$(\w+)/$vars{$1}/g;
@@ -913,13 +915,14 @@ sub process {
 	} elsif (/\@\s*foreach\s+\$([^\@,]+)\s*,*\s+\$([^\@]+)\s+(enums*)\s*\@/) {
 	    my ($varvar, $varval, $type) = ($1, $2, $3);
 	    my $stash = do_tell();
-	    my $enum;
+	    my $enum, $enum2;
 
 	    my @keys = sort { $SNMP::MIB{$currentvar}{'enums'}{$a} <=>
 				  $SNMP::MIB{$currentvar}{'enums'}{$b} } (keys(%{$SNMP::MIB{$currentvar}{'enums'}}));
 	    if ($#keys > -1) {
 		foreach $enum (@keys) {
-		    $return = do_a_loop($stash, \$vars{$varvar}, $enum,
+                  ($enum2 = $enum) =~ s/-/_/g;
+		    $return = do_a_loop($stash, \$vars{$varvar}, $enum2,
 					\$vars{$varval},
 					$SNMP::MIB{$currentvar}{'enums'}{$enum});
 		}
