@@ -544,13 +544,14 @@ _init_snmp (void)
 #ifdef  HAVE_GETSERVBYNAME
     struct servent *servp;
 #endif
+    static char have_done_init = 0;
     
     struct timeval tv;
     long tmpReqid, tmpMsgid;
     u_short s_port = SNMP_PORT;
 
-    if (Reqid) return;
-    Reqid = 1; /* quick set to avoid multiple inits */
+    if (have_done_init) return;
+    have_done_init = 1;
 
     snmp_res_init();	/* initialize the mt locking structures */
     init_mib_internals();
