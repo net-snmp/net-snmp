@@ -12,13 +12,13 @@
 #endif
 
 #include "mibincl.h"
-#ifdef USING_SYSORTABLE_MODULE
-#include "sysORTable.h"
+#ifdef USING_MIBII_SYSORTABLE_MODULE
+#include "mibII/sysORTable.h"
 #endif
 
 void
 init_v2party __P((void)) {
-#ifdef USING_SYSORTABLE_MODULE
+#ifdef USING_MIBII_SYSORTABLE_MODULE
   static oid reg[] = {1,3,6,1,6,3,2};
   register_sysORTable(reg,7,"The Manager-to-Manager MIB module.");
 #endif

@@ -26,7 +26,7 @@ config_parse_dot_conf("syscontact",system_parse_config_syscon, NULL);
 #define SYSORLASTCHANGE		8
 
 
-#include "../var_struct.h"
+#include <var_struct.h>
 
 
 #ifdef IN_SNMP_VARS_C

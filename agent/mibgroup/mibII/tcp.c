@@ -73,8 +73,8 @@
 #else
 #include "kernel.h"
 #endif
-#include "mibincl.h"
-#include "../../snmplib/system.h"
+#include "../mibincl.h"
+#include "../../../snmplib/system.h"
 #if HAVE_SYS_SYSCTL_H
 #include <sys/sysctl.h>
 #endif

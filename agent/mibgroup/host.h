@@ -3,19 +3,19 @@
  *	calls the per-group interfaces from 'hr_*.h'
  */
 
-	config_require(hr_system)
-	config_require(hr_storage)
-	config_require(hr_device)
-	config_require(hr_other)
-	config_require(hr_proc)
-	config_require(hr_network)
-	config_require(hr_print)
-	config_require(hr_disk)
-	config_require(hr_partition)
-	config_require(hr_filesys)
-	config_require(hr_swrun)
-	config_require(hr_swinst)
-	config_require(hr_utils)
+	config_require(host/hr_system)
+	config_require(host/hr_storage)
+	config_require(host/hr_device)
+	config_require(host/hr_other)
+	config_require(host/hr_proc)
+	config_require(host/hr_network)
+	config_require(host/hr_print)
+	config_require(host/hr_disk)
+	config_require(host/hr_partition)
+	config_require(host/hr_filesys)
+	config_require(host/hr_swrun)
+	config_require(host/hr_swinst)
+	config_require(host/hr_utils)
 
 /* add the host resources mib to the default mibs to load */
         config_add_mib(HOST-RESOURCES-MIB) 

@@ -7,7 +7,7 @@
 
 
 #include "host_res.h"
-#include "interfaces.h"
+#include "mibII/interfaces.h"
 #include "hr_network.h"
 
 

@@ -91,7 +91,7 @@
 #include "kernel_sunos5.h"
 #endif
 
-#include "mibincl.h"
+#include "../mibincl.h"
 
 #ifdef hpux
 #include <sys/mib.h>
@@ -111,7 +111,7 @@
 
 /* #include "../common_header.h" */
 
-#include "../../snmplib/system.h"
+#include "../../../snmplib/system.h"
 
 #ifdef HAVE_OSRELDATE_H
 #include <osreldate.h>
@@ -123,8 +123,8 @@
 #include <sys/sysctl.h>
 #endif
 #include "interfaces.h"
-#include "struct.h"
-#include "util_funcs.h"
+#include "../struct.h"
+#include "../util_funcs.h"
 #include "auto_nlist.h"
 
 static int Interface_Scan_Get_Count __P((void));

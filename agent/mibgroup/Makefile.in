@@ -1,5 +1,5 @@
 
-CPPFLAGS=@CPPFLAGS@ -I../.. -I$(srcdir)/../.. -I$(srcdir)/../../snmplib \
+CPPFLAGS=@CPPFLAGS@ -I. -I../.. -I$(srcdir)/../.. -I$(srcdir)/../../snmplib \
 	-I$(srcdir)/.. -I..
 CC = @CC@ $(CPPFLAGS)
 
@@ -12,7 +12,7 @@ TAGS: $(SRCS)
 	etags *.c *.h
 
 clean:
-	rm -f *.o
+	rm -f ${OBJS}
 
 depend: 
 	makedepend $(CPPFLAGS) $(srcdir)/*.c

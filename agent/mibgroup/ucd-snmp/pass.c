@@ -34,7 +34,7 @@
 #include "extensible.h"
 #include "util_funcs.h"
 #include "read_config.h"
-#include "../../snmplib/system.h"
+#include "../../../snmplib/system.h"
 
 struct extensible *passthrus=NULL;
 int numpassthrus=0;
