@@ -119,15 +119,6 @@ void update_config(void)
 {
   free_config();
   read_configs();
-  
-  /* read all optional config files */
-  /* last is -c from command line */
-  /* always read this one even if -C is present (ie both -c and -C) */
-  if (optconfigfile != NULL) {
-    read_config_with_type (optconfigfile, ds_get_string(DS_LIBRARY_ID, DS_LIB_APPTYPE));
-  }
-  snmp_call_callbacks(SNMP_CALLBACK_LIBRARY, SNMP_CALLBACK_POST_READ_CONFIG,
-                      NULL);
 }
 
 
