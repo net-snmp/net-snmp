@@ -183,7 +183,7 @@ static int receive(void);
 
 static void usage(char *prog)
 {
-        printf("\nUsage:  %s [OPTIONS] [ADDRESSES]", prog);
+        printf("\nUsage:  %s [OPTIONS] [LISTENING ADDRESSES]", prog);
 	printf("\n");
 	printf("\n\tVersion:  %s\n", netsnmp_get_version());
 	printf("\tWeb:      http://www.net-snmp.org/\n");
