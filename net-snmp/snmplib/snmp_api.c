@@ -5069,14 +5069,8 @@ snmp_read(fd_set * fdset)
 
 /*
  * Same as snmp_read, but works just one session. 
- */
-/*
  * returns 0 if success, -1 if fail 
- */
-/*
  * MTR: can't lock here and at snmp_read 
- */
-/*
  * Beware recursive send maybe inside snmp_read callback function. 
  */
 int
@@ -5448,14 +5442,8 @@ snmp_select_info(int *numfds,
                  fd_set * fdset, struct timeval *timeout, int *block)
     /*
      * input:  set to 1 if input timeout value is undefined  
-     */
-    /*
      * set to 0 if input timeout value is defined    
-     */
-    /*
      * output: set to 1 if output timeout value is undefined 
-     */
-    /*
      * set to 0 if output rimeout vlaue id defined   
      */
 {
