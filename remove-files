@@ -8,7 +8,6 @@ fi
 cd $DIR
 
 touch stamp-h.in stamp-h configure
-rm -f local/*.conf
 rm -f remove-files
 rm -f makedepend.in
 rm -f agent/mibgroup/versiontag
