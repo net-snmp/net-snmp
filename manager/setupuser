@@ -10,8 +10,6 @@ sub usage {
     exit 0;
 }
 
-@tables = qw(prEntry extEntry dskEntry  laEntry fileEntry snmperrs memory);
-
 while ($#ARGV > -1 && $ARGV[0] =~ /^-/) {
     $_ = shift @ARGV;
     usage if (/-h/);
