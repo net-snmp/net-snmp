@@ -55,7 +55,7 @@ struct variable4 lmSensors_variables[] = {
     {LMTEMPSENSORSDEVICE, ASN_OCTET_STR, RONLY, var_lmSensorsTable, 3,
      {2, 1, 2}},
 #define   LMTEMPSENSORSVALUE    5
-    {LMTEMPSENSORSVALUE, ASN_INTEGER, RONLY, var_lmSensorsTable, 3,
+    {LMTEMPSENSORSVALUE, ASN_GAUGE, RONLY, var_lmSensorsTable, 3,
      {2, 1, 3}},
 #define   LMFANSENSORSINDEX     8
     {LMFANSENSORSINDEX, ASN_INTEGER, RONLY, var_lmSensorsTable, 3,
@@ -73,7 +73,7 @@ struct variable4 lmSensors_variables[] = {
     {LMVOLTSENSORSDEVICE, ASN_OCTET_STR, RONLY, var_lmSensorsTable, 3,
      {4, 1, 2}},
 #define   LMVOLTSENSORSVALUE    15
-    {LMVOLTSENSORSVALUE, ASN_INTEGER, RONLY, var_lmSensorsTable, 3,
+    {LMVOLTSENSORSVALUE, ASN_GAUGE, RONLY, var_lmSensorsTable, 3,
      {4, 1, 3}},
 #define   LMMISCSENSORSINDEX    18
     {LMMISCSENSORSINDEX, ASN_INTEGER, RONLY, var_lmSensorsTable, 3,
@@ -82,7 +82,7 @@ struct variable4 lmSensors_variables[] = {
     {LMMISCSENSORSDEVICE, ASN_OCTET_STR, RONLY, var_lmSensorsTable, 3,
      {5, 1, 2}},
 #define   LMMISCSENSORSVALUE    20
-    {LMMISCSENSORSVALUE, ASN_INTEGER, RONLY, var_lmSensorsTable, 3,
+    {LMMISCSENSORSVALUE, ASN_GAUGE, RONLY, var_lmSensorsTable, 3,
      {5, 1, 3}},
 };
 
