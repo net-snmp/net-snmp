@@ -1,7 +1,7 @@
 /* logging.c - generic logging for snmp-agent
  * Contributed by Ragnar Kjørstad, ucd@ragnark.vestdata.no 1999-06-26 */
 
-#include "config.h"
+#include <net-snmp/net-snmp-config.h>
 #include <stdio.h>
 #if HAVE_MALLOC_H
 #include <malloc.h>

@@ -34,7 +34,7 @@
 # define SNMP_NO_DEBUGGING 1 /* keeps lint from complaining about the DEBUGMSG* macros */
 #endif
 
-#include <config.h>
+#include <net-snmp/net-snmp-config.h>
 
 #include "mibincl.h"
 #include "mta_sendmail.h"

@@ -22,7 +22,7 @@ SOFTWARE.
 /*
  * snmp_api.c - API for access to snmp.
  */
-#include <config.h>
+#include <net-snmp/net-snmp-config.h>
 
 #include <stdio.h>
 #include <ctype.h>

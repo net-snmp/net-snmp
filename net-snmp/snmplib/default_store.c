@@ -1,6 +1,6 @@
 /* default_store.h: storage space for defaults */
 
-#include <config.h>
+#include <net-snmp/net-snmp-config.h>
 #include <sys/types.h>
 #if HAVE_STDLIB_H
 #include <stdlib.h>

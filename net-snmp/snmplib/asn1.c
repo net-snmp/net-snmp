@@ -28,7 +28,7 @@ WHETHER IN AN ACTION OF CONTRACT, NEGLIGENCE OR OTHER TORTIOUS ACTION,
 ARISING OUT OF OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS
 SOFTWARE.
 ******************************************************************/
-#include <config.h>
+#include <net-snmp/net-snmp-config.h>
 
 #ifdef KINETICS
 #include "gw.h"

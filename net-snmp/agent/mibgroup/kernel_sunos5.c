@@ -11,7 +11,7 @@
  *
  */
 
-#include <config.h>
+#include <net-snmp/net-snmp-config.h>
 #ifdef solaris2
 /*-
  * Includes of standard ANSI C header files 

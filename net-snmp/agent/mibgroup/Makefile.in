@@ -1,6 +1,6 @@
 top_builddir=../..
 
-CPPFLAGS=-I. -I../.. -I$(srcdir) -I$(srcdir)/../.. \
+CPPFLAGS=-I. -I../../include -I../.. -I$(srcdir) -I$(srcdir)/../.. \
 	-I$(srcdir)/../../snmplib -I$(srcdir)/.. -I.. @CPPFLAGS@ $(LIB_CFLAGS)
 
 # Need a special .c -> .o definition here to make sure we place the
@@ -63,7 +63,7 @@ agentx/subagent.lo: agentx/subagent.h ../ds_agent.h mibII/sysORTable.h
 agentx/subagent.lo: ../snmp_agent.h ../snmpd.h ../snmp_vars.h
 agentx/subagent.lo: ../var_struct.h
 header_complex.lo: ../agent_handler.h ../agent_read_config.h
-header_complex.lo: ../agent_registry.h ../agent_trap.h ../../config.h
+header_complex.lo: ../agent_registry.h ../agent_trap.h ../../include/net-snmp/net-snmp-config.h
 header_complex.lo: header_complex.h ../../m/generic.h mibincl.h
 header_complex.lo: ../../mib_module_config.h ../../s/generic.h ../../s/linux.h
 header_complex.lo: ../snmp_agent.h ../../snmplib/asn1.h
@@ -316,7 +316,7 @@ ucd-snmp/vmstat.lo: mibdefs.h mibincl.h ../snmp_agent.h ../snmp_vars.h struct.h
 ucd-snmp/vmstat.lo: ucd-snmp/vmstat.h 
 ucd-snmp/vmstat.lo: util_funcs.h ../var_struct.h
 util_funcs.lo: ../agent_handler.h ../agent_read_config.h ../agent_registry.h
-util_funcs.lo: ../agent_trap.h ../../config.h ../../m/generic.h mibdefs.h
+util_funcs.lo: ../agent_trap.h ../../include/net-snmp/net-snmp-config.h ../../m/generic.h mibdefs.h
 util_funcs.lo: mibincl.h ../../mib_module_config.h ../../s/generic.h
 util_funcs.lo: ../../s/linux.h ../snmp_agent.h ../../snmplib/asn1.h
 util_funcs.lo: ../../snmplib/callback.h ../../snmplib/data_list.h

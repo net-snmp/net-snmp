@@ -1,7 +1,7 @@
 /* agent_trap.c: define trap generation routines for mib modules, etc,
    to use */
 
-#include <config.h>
+#include <net-snmp/net-snmp-config.h>
 
 #if HAVE_UNISTD_H
 #include <unistd.h>

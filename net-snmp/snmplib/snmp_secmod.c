@@ -1,6 +1,6 @@
 /* security service wrapper to support pluggable security models */
 
-#include <config.h>
+#include <net-snmp/net-snmp-config.h>
 #include <stdio.h>
 #include <ctype.h>
 #if HAVE_STDLIB_H

@@ -1,7 +1,7 @@
 /*
  *  AgentX sub-agent
  */
-#include "config.h"
+#include <net-snmp/net-snmp-config.h>
 
 #include <sys/types.h>
 #ifdef HAVE_STDLIB_H

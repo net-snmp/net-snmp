@@ -17,7 +17,7 @@ LOCAL_LIBS	=
 LIBS		= ../snmplib/libsnmp.$(LIB_EXTENSION)$(LIB_VERSION) @AGENTLIBS@
 #OUR_AGENT_LIBS	= $(CC_RUNTIME_ARG) -lucdagent -lucdmibs -lsnmp @WRAPLIBS@ $(LIBS) @DLLIBS@
 OUR_AGENT_LIBS	= $(LIBTARG) $(HELPERLIB) @WRAPLIBS@ $(LIBS) @DLLIBS@
-CPPFLAGS	= -I.. -I$(srcdir)/.. -I$(srcdir)/../snmplib \
+CPPFLAGS	= -I../include -I.. -I$(srcdir)/.. -I$(srcdir)/../snmplib \
 		  -I$(srcdir) -I. -I$(srcdir)/mibgroup -Imibgroup @CPPFLAGS@
 
 #
@@ -123,7 +123,7 @@ read_config.lo: @module_list_h@
 
 
 agent_handler.lo: agent_handler.h agent_read_config.h agent_registry.h
-agent_handler.lo: agent_trap.h ../config.h ../m/generic.h mibgroup/mibincl.h
+agent_handler.lo: agent_trap.h ../include/net-snmp/net-snmp-config.h ../m/generic.h mibgroup/mibincl.h
 agent_handler.lo: ../mib_module_config.h ../s/generic.h ../s/linux.h
 agent_handler.lo: snmp_agent.h ../snmplib/asn1.h ../snmplib/callback.h
 agent_handler.lo: ../snmplib/data_list.h ../snmplib/mib.h
@@ -135,7 +135,7 @@ agent_handler.lo: ../snmplib/snmp_logging.h ../snmplib/tools.h snmp_vars.h
 agent_handler.lo: ../s/sysv.h  
 agent_handler.lo: var_struct.h
 agent_index.lo: agent_callbacks.h agent_handler.h agent_index.h
-agent_index.lo: agent_read_config.h agent_registry.h agent_trap.h ../config.h
+agent_index.lo: agent_read_config.h agent_registry.h agent_trap.h ../include/net-snmp/net-snmp-config.h
 agent_index.lo: ds_agent.h helpers/table.h helpers/table_iterator.h
 agent_index.lo: ../m/generic.h mibgroup/agent_mibs.h
 agent_index.lo: mibgroup/agent/nsTransactionTable.h
@@ -183,7 +183,7 @@ agent_index.lo: ../snmplib/snmpusm.h ../snmplib/tools.h ../snmplib/vacm.h
 agent_index.lo: snmp_vars.h ../s/sysv.h 
 agent_index.lo: var_struct.h
 agent_read_config.lo: agent_callbacks.h agent_handler.h agent_read_config.h
-agent_read_config.lo: agent_registry.h agent_trap.h ../config.h ds_agent.h
+agent_read_config.lo: agent_registry.h agent_trap.h ../include/net-snmp/net-snmp-config.h ds_agent.h
 agent_read_config.lo: helpers/table_data.h helpers/table_dataset.h
 agent_read_config.lo: helpers/table.h helpers/table_iterator.h ../m/generic.h
 agent_read_config.lo: mibgroup/agent_mibs.h mibgroup/agent/nsTransactionTable.h
@@ -235,7 +235,7 @@ agent_read_config.lo: ../snmplib/tools.h ../snmplib/vacm.h snmp_vars.h
 agent_read_config.lo: ../s/sysv.h 
 agent_read_config.lo: var_struct.h
 agent_registry.lo: agent_callbacks.h agent_handler.h agent_read_config.h
-agent_registry.lo: agent_registry.h agent_trap.h ../config.h ds_agent.h
+agent_registry.lo: agent_registry.h agent_trap.h ../include/net-snmp/net-snmp-config.h ds_agent.h
 agent_registry.lo: helpers/null.h helpers/old_api.h helpers/table.h
 agent_registry.lo: helpers/table_iterator.h ../m/generic.h
 agent_registry.lo: mibgroup/agent_mibs.h mibgroup/agent/nsTransactionTable.h
@@ -282,7 +282,7 @@ agent_registry.lo: ../snmplib/snmp_logging.h ../snmplib/snmp_secmod.h
 agent_registry.lo: ../snmplib/snmpusm.h ../snmplib/tools.h ../snmplib/vacm.h
 agent_registry.lo: snmp_vars.h ../s/sysv.h 
 agent_registry.lo: var_struct.h
-agent_trap.lo: agent_callbacks.h agent_trap.h ../config.h ../m/generic.h
+agent_trap.lo: agent_callbacks.h agent_trap.h ../include/net-snmp/net-snmp-config.h ../m/generic.h
 agent_trap.lo: ../mib_module_config.h ../s/generic.h ../s/linux.h
 agent_trap.lo: ../snmplib/asn1.h ../snmplib/callback.h ../snmplib/getopt.h
 agent_trap.lo: ../snmplib/read_config.h ../snmplib/snmp_api.h
@@ -291,11 +291,11 @@ agent_trap.lo: ../snmplib/snmp.h ../snmplib/snmp_impl.h
 agent_trap.lo: ../snmplib/snmp_logging.h ../snmplib/snmp_parse_args.h
 agent_trap.lo: ../snmplib/snmp_transport.h ../snmplib/system.h
 agent_trap.lo: ../snmplib/tools.h ../s/sysv.h 
-auto_nlist.lo: ../config.h ../m/generic.h ../s/generic.h ../s/linux.h
+auto_nlist.lo: ../include/net-snmp/net-snmp-config.h ../m/generic.h ../s/generic.h ../s/linux.h
 auto_nlist.lo: ../s/sysv.h
-kernel.lo: ../config.h ../m/generic.h ../s/generic.h ../s/linux.h ../s/sysv.h
+kernel.lo: ../include/net-snmp/net-snmp-config.h ../m/generic.h ../s/generic.h ../s/linux.h ../s/sysv.h
 mib_modules.lo: agent_handler.h agent_read_config.h agent_registry.h
-mib_modules.lo: ../config.h ds_agent.h helpers/table.h helpers/table_iterator.h
+mib_modules.lo: ../include/net-snmp/net-snmp-config.h ds_agent.h helpers/table.h helpers/table_iterator.h
 mib_modules.lo: m2m.h ../m/generic.h mibgroup/agent_mibs.h
 mib_modules.lo: mibgroup/agent/nsTransactionTable.h
 mib_modules.lo: mibgroup/agentx/agentx_config.h mibgroup/agentx/client.h
@@ -340,7 +340,7 @@ mib_modules.lo: ../snmplib/snmp_impl.h ../snmplib/snmp_secmod.h
 mib_modules.lo: ../snmplib/snmpusm.h ../snmplib/snmpv3.h ../snmplib/system.h
 mib_modules.lo: ../snmplib/tools.h ../snmplib/vacm.h snmp_vars.h ../s/sysv.h
 snmp_agent.lo: agent_handler.h agent_read_config.h agent_registry.h
-snmp_agent.lo: agent_trap.h ../config.h ds_agent.h ../m/generic.h
+snmp_agent.lo: agent_trap.h ../include/net-snmp/net-snmp-config.h ds_agent.h ../m/generic.h
 snmp_agent.lo: mibgroup/agentx/master.h mibgroup/agentx/protocol.h
 snmp_agent.lo: mibgroup/mibincl.h mibgroup/struct.h mibgroup/util_funcs.h
 snmp_agent.lo: ../mib_module_config.h ../s/generic.h ../s/linux.h snmp_agent.h
@@ -355,7 +355,7 @@ snmp_agent.lo: ../snmplib/system.h ../snmplib/tools.h ../snmplib/vacm.h
 snmp_agent.lo: snmp_vars.h ../s/sysv.h 
 snmp_agent.lo: var_struct.h
 snmpd.lo: agent_handler.h agent_read_config.h agent_registry.h agent_trap.h
-snmpd.lo: ../config.h ds_agent.h helpers/table.h helpers/table_iterator.h m2m.h
+snmpd.lo: ../include/net-snmp/net-snmp-config.h ds_agent.h helpers/table.h helpers/table_iterator.h m2m.h
 snmpd.lo: ../m/generic.h mibgroup/agent_mibs.h
 snmpd.lo: mibgroup/agent/nsTransactionTable.h mibgroup/agentx/agentx_config.h
 snmpd.lo: mibgroup/agentx/client.h mibgroup/agentx.h
@@ -401,7 +401,7 @@ snmpd.lo: ../snmplib/snmpusm.h ../snmplib/snmpv3.h ../snmplib/system.h
 snmpd.lo: ../snmplib/tools.h ../snmplib/vacm.h snmp_vars.h ../s/sysv.h
 snmpd.lo: var_struct.h ../version.h
 snmp_vars.lo: agent_handler.h agent_read_config.h agent_registry.h agent_trap.h
-snmp_vars.lo: ../config.h ds_agent.h helpers/all_helpers.h
+snmp_vars.lo: ../include/net-snmp/net-snmp-config.h ds_agent.h helpers/all_helpers.h
 snmp_vars.lo: helpers/debug_handler.h helpers/instance.h helpers/multiplexer.h
 snmp_vars.lo: helpers/null.h helpers/old_api.h helpers/read_only.h
 snmp_vars.lo: helpers/serialize.h helpers/table_data.h helpers/table_dataset.h

@@ -31,7 +31,7 @@ SOFTWARE.
  * is provided ``as is'' without express or implied warranty.
  */
 
-#include <config.h>
+#include <net-snmp/net-snmp-config.h>
 
 #ifndef lint
 char copyright[] =

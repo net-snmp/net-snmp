@@ -1,6 +1,6 @@
 /* ucdDemoPublic.c */
 
-#include <config.h>
+#include <net-snmp/net-snmp-config.h>
 
 #if TIME_WITH_SYS_TIME
 # ifdef WIN32

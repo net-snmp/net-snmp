@@ -1,6 +1,6 @@
 /* callback.c: A generic callback mechanism */
 
-#include <config.h>
+#include <net-snmp/net-snmp-config.h>
 #include <sys/types.h>
 #include <stdio.h>
 #if HAVE_STDLIB_H

@@ -1,7 +1,7 @@
 
 /* usmStats.c: implements the usmStats portion of the SNMP-USER-BASED-SM-MIB */
 
-#include <config.h>
+#include <net-snmp/net-snmp-config.h>
 
 #if HAVE_WINSOCK_H
 #include <winsock.h>

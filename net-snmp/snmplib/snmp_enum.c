@@ -1,4 +1,4 @@
-#include <config.h>
+#include <net-snmp/net-snmp-config.h>
 
 #ifdef HAVE_STDLIB_H
 #include <stdlib.h>

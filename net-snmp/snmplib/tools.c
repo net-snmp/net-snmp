@@ -2,7 +2,7 @@
  * tools.c
  */
 
-#include <config.h>
+#include <net-snmp/net-snmp-config.h>
 
 #include <ctype.h>
 #include <stdio.h>

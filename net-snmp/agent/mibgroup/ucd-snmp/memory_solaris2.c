@@ -1,4 +1,4 @@
-#include <config.h>                   /* local SNMP configuration details*/
+#include <net-snmp/net-snmp-config.h>                   /* local SNMP configuration details*/
 #if HAVE_STRING_H
 #include <string.h>
 #endif

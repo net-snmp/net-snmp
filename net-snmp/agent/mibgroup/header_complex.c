@@ -1,6 +1,6 @@
 /* header complex:  More complex storage and data sorting for mib modules */
 
-#include <config.h>
+#include <net-snmp/net-snmp-config.h>
 
 #include <sys/types.h>
 #if HAVE_WINSOCK_H

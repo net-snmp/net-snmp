@@ -38,7 +38,7 @@ WHETHER IN AN ACTION OF CONTRACT, NEGLIGENCE OR OTHER TORTIOUS ACTION,
 ARISING OUT OF OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS
 SOFTWARE.
 ******************************************************************/
-#include <config.h>
+#include <net-snmp/net-snmp-config.h>
 #include <snmp_logging.h>
 #include <stdio.h>
 #if HAVE_STDLIB_H

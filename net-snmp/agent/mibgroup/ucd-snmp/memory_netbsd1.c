@@ -2,7 +2,7 @@
  * memory_netbsd1.c
  */
 
-#include <config.h>
+#include <net-snmp/net-snmp-config.h>
 
 /* Ripped from /usr/scr/usr.bin/vmstat/vmstat.c (covering all bases) */
 #include <sys/param.h>

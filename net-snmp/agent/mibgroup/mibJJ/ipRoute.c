@@ -34,7 +34,7 @@ PERFORMANCE OF THIS SOFTWARE.
  * (simon@switch.ch) 1997
  */
 
-#include <config.h>
+#include <net-snmp/net-snmp-config.h>
 #include "mibincl.h"
 #define GATEWAY			/* MultiNet is always configured this way! */
 #include <stdio.h>

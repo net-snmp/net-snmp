@@ -1,6 +1,6 @@
 /* HP specific stuff that OpenView recognizes */
 
-#include <config.h>
+#include <net-snmp/net-snmp-config.h>
 
 #include <signal.h>
 #if HAVE_MACHINE_PARAM_H

@@ -1,7 +1,7 @@
 /* snmp_alarm.c: generic library based alarm timers for various parts
    of an application */
 
-#include <config.h>
+#include <net-snmp/net-snmp-config.h>
 #if HAVE_UNISTD_H
 #include <unistd.h>
 #endif
