@@ -685,6 +685,10 @@ int
 snmp_set_var_value(netsnmp_variable_list * newvar,
                    const u_char * val_str, size_t val_len)
 {
+    /*
+     * xxx-rks: why the unconditional free? why not use existing
+     * memory, if val_len < newvar->val_len ?
+     */
     if (newvar->val.string && newvar->val.string != newvar->buf) {
         free(newvar->val.string);
     }
