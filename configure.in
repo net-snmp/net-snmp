@@ -905,6 +905,7 @@ fi
 # Do transport module processing.
 #
 AC_MSG_CHECKING([for and configuring transport modules to use])
+transport_callback_disabled=""
 transport_src_list=""
 transport_hdr_list=""
 transport_def_list=""
@@ -938,6 +939,9 @@ for i in $new_transport_list; do
     if test "x$i" = "xUDP"; then
       echo
       AC_MSG_ERROR(It is not possible to compile without UDP/IP support.)
+    elif test "x$i" = "xCallback"; then
+      echo
+      transport_callback_disabled="yes"
     fi
   else
     if test "x$i" = "xAAL5PVC"; then
@@ -1084,6 +1088,13 @@ done
 #
 # Do hairy agent module processing.
 #
+if test "x$transport_callback_disabled" = "xyes"; then
+        changequote([, ])
+        AC_MSG_WARN(Disabling Callback transport will disable AgentX support.)
+        AC_MSG_WARN(Disabling Callback transport will disable disman/mteTriggerTable support.)
+        changequote(, )
+        new_with_out_mib_modules="agentx disman/mteTriggerTable $new_with_out_mib_modules"
+fi
 AC_MSG_CHECKING([for and configuring mib modules to use])
 changequote(, )
 

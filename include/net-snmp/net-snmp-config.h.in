@@ -1340,6 +1340,10 @@
     available.  */
 #undef SNMP_TRANSPORT_TCPIPV6_DOMAIN
 
+/*  This is defined if support for the callback transport domain is
+    available.  */
+#undef SNMP_TRANSPORT_CALLBACK_DOMAIN
+
 /* define this if the USM security module is available */
 #undef SNMP_SECMOD_USM
 

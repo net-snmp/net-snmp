@@ -1,6 +1,9 @@
 #ifndef _SNMPCALLBACKDOMAIN_H
 #define _SNMPCALLBACKDOMAIN_H
 
+#ifdef SNMP_TRANSPORT_CALLBACK_DOMAIN
+
+
 #ifdef __cplusplus
 extern          "C" {
 #endif
@@ -53,4 +56,6 @@ netsnmp_session *netsnmp_callback_open(int attach_to,
 #ifdef __cplusplus
 }
 #endif
+#endif /* SNMP_TRANSPORT_CALLBACK_DOMAIN */
+
 #endif/*_SNMPCALLBACKDOMAIN_H*/

@@ -258,7 +258,7 @@ init_agent(const char *app)
     auto_nlist_print_tree(-2, 0);
 #endif
 
-#ifndef WIN32
+#ifdef SNMP_TRANSPORT_CALLBACK_DOMAIN
 	/*
 	 * the pipe call creates fds that select chokes on, so
 	 * disable callbacks on WIN32 until a fix can be found
