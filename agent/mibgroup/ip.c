@@ -55,11 +55,17 @@
 #if HAVE_INET_MIB2_H
 #include <inet/mib2.h>
 #endif
+#include <net/route.h>
+#ifdef HAVE_SYSLOG_H
+#include <syslog.h>
+#endif
+
 #ifdef solaris2
 #include "kernel_sunos5.h"
 #else
 #include "kernel.h"
 #endif
+
 #include "../../snmplib/system.h"
 
 #include "mibincl.h"
