@@ -112,7 +112,7 @@ load_subtree( struct subtree *new_sub )
     struct subtree *prev, *next;
 
     if ( new_sub == NULL )
-	return 1;
+	return MIB_REGISTERED_OK;	/* Degenerate case */
 
 		/*
 		 * Find the subtree that contains the start of 
@@ -163,7 +163,7 @@ load_subtree( struct subtree *new_sub )
 		 *  (including anything that may follow the overlap)
 		 */
 	if ( new2 )
-	    load_subtree( new2 );
+	    return load_subtree( new2 );
     }
 
     else {
@@ -175,6 +175,8 @@ load_subtree( struct subtree *new_sub )
 	if ( snmp_oid_compare( new_sub->start, new_sub->start_len, 
 			       tree1->start,   tree1->start_len) != 0 )
 	    tree1 = split_subtree( tree1, new_sub->start, new_sub->start_len);
+	    if ( tree1 == NULL )
+		return MIB_REGISTRATION_FAILED;
 
 	/*  Now consider the end of this existing subtree:
 	 *	If it matches the new subtree precisely,
@@ -210,6 +212,9 @@ load_subtree( struct subtree *new_sub )
 				prev = next;
 				next = next->children;
 			}
+			if ( next &&	next->namelen  == new_sub->namelen &&
+					next->priority == new_sub->priority )
+			   return MIB_DUPLICATE_REGISTRATION;
 
 			if ( prev ) {
 			    new_sub->children = next;
@@ -237,8 +242,10 @@ load_subtree( struct subtree *new_sub )
 		case  1:	/* New subtree contains the existing one */
 	    		new2 = split_subtree( new_sub,
 					tree1->end, tree1->end_len);
-			load_subtree( new_sub );
-			load_subtree( new2 );
+			res = load_subtree( new_sub );
+			if ( res != MIB_REGISTERED_OK )
+			    return res;
+			return load_subtree( new2 );
 
 	 }
 
@@ -254,7 +261,7 @@ register_mib_priority(const char *moduleName,
 	     size_t numvars,
 	     oid *mibloc,
 	     size_t mibloclen,
-	     u_char priority)
+	     int priority)
 {
   struct subtree *subtree;
   char c_oid[SPRINT_MAX_LEN];
@@ -289,6 +296,7 @@ register_mib_priority(const char *moduleName,
 
   reg_parms.name = mibloc;
   reg_parms.namelen = mibloclen;
+  reg_parms.priority = priority;
   snmp_call_callbacks(SNMP_CALLBACK_APPLICATION, SNMPD_CALLBACK_REGISTER_OID,
                       &reg_parms);
 
@@ -308,76 +316,94 @@ register_mib(const char *moduleName,
 }
 
 
-int
-unload_subtree( oid *name, size_t len, struct subtree *previous)
+void
+unload_subtree( struct subtree *sub, struct subtree *prev)
 {
-  struct subtree *list, *list_prev = NULL;      /* loop through children */
-  struct subtree *prev, *prev_next;             /* loop through previous children */
-#define LABELSIZE 256
-  char label[LABELSIZE];
+    struct subtree *ptr;
 
-  list = previous->next;
-
-  if ( snmp_oid_compare( list->name, list->namelen, name, len) != 0 )
-        return -1;
-  strcpy( label, list->label );         /* or save registration ID */
- 
-  while (1) {
-    prev = previous;
-
-    while ( list != NULL ) {
-        if (!strcmp( list->label, label))
-            break;                      /* or check registration ID */
-
-        list_prev = list;
-        list = list->children;
+    if ( prev != NULL ) {	/* non-leading entries are easy */
+	prev->children = sub->children;
+	return;
     }
-    if ( list == NULL )
-        break;                          /* break from infinite loop */
+			/* otherwise, we need to amend our neighbours as well */
 
-                        /* Identifier the successor to use instead of 'list' */
-    if ( list->children ) {
-        prev_next = list->children;
-        list->children->next = list->next;
+    if ( sub->children == NULL) {	/* just remove this node completely */
+	for (ptr = sub->prev ; ptr ; ptr=ptr->children )
+	    ptr->next = sub->next;
+	for (ptr = sub->next ; ptr ; ptr=ptr->children )
+	    ptr->prev = sub->prev;
+	return;
     }
-    else
-        prev_next = list->next;
-
-    while (prev != NULL) {              /* Unlink 'list' from preceding entries */
-        if ( prev->next == list )
-            prev->next = prev_next;
-        prev = prev->children;
+    else {
+	for (ptr = sub->prev ; ptr ; ptr=ptr->children )
+	    ptr->next = sub->children;
+	for (ptr = sub->next ; ptr ; ptr=ptr->children )
+	    ptr->prev = sub->children;
+	return;
     }
+}
 
-    if (list_prev)
-        list_prev->children = list->children;
-    list->children = NULL;
-    list = free_subtree( list );        /* returns list->next */
-    previous = previous->next;
+int
+unregister_mib_priority( oid *name, size_t len, int priority)
+{
+  struct subtree *list, *myptr;
+  struct subtree *prev, *child;             /* loop through children */
+
+  list = find_subtree( name, len, subtrees );
+  if ( list == NULL )
+	return MIB_NO_SUCH_REGISTRATION;
+
+  for ( child=list, prev=NULL;  child != NULL;
+			 	prev=child, child=child->children ) {
+      if (( snmp_oid_compare( child->name, child->namelen, name, len) == 0 )
+	  && ( child->priority == priority ))
+		break;	/* found it */
   }
-  return 0;
+  if ( child == NULL )
+	return MIB_NO_SUCH_REGISTRATION;
+
+  unload_subtree( child, prev );
+  myptr = child;	/* remember this for later */
+
+		/*
+		 *  Now handle any occurances in the following subtrees,
+		 *	as a result of splitting this range.  Due to the
+		 *	nature of the way such splits work, the first
+		 * 	subtree 'slice' that doesn't refer to the given
+		 *	name marks the end of the original region.
+		 */
+
+  for ( list = myptr->next ; list != NULL ; list=list->next ) {
+  	for ( child=list, prev=NULL;  child != NULL;
+			 	      prev=child, child=child->children ) {
+	    if (( snmp_oid_compare( child->name, child->namelen,
+							name, len) == 0 )
+		&& ( child->priority == priority )) {
+
+		    unload_subtree( child, prev );
+		    free_subtree( child );
+		    break;
+	    }
+	}
+	if ( child == NULL )	/* Didn't find the given name */
+	    break;
+  }
+  free_subtree( myptr );
+  
+  reg_parms.name = name;
+  reg_parms.namelen = len;
+  reg_parms.priority = priority;
+  snmp_call_callbacks(SNMP_CALLBACK_APPLICATION, SNMPD_CALLBACK_UNREGISTER_OID,
+                      &reg_parms);
+
+  return MIB_UNREGISTERED_OK;
 }
 
 int
 unregister_mib(oid *name,
 	       size_t len)
 {
-  struct subtree *my_ptr;
-  int res;
-  struct register_parameters reg_parms;
-
-  my_ptr = find_subtree( name, len, subtrees );
-  if ( my_ptr == NULL )
-     return -1;
-
-  res = unload_subtree(name, len, subtrees);
-
-  reg_parms.name = name;
-  reg_parms.namelen = len;
-  snmp_call_callbacks(SNMP_CALLBACK_APPLICATION, SNMPD_CALLBACK_UNREGISTER_OID,
-                      &reg_parms);
-
-  return res;
+  return unregister_mib_priority( name, len, DEFAULT_MIB_PRIORITY );
 }
 
 
