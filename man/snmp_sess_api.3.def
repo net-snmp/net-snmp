@@ -19,7 +19,7 @@
 .\" ARISING OUT OF OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS
 .\" SOFTWARE.
 .\" ******************************************************************/
-.TH SNMP_SESS_API 3 "21 Oct 1999" VVERSIONINFO "Net-SNMP"
+.TH SNMP_SESS_API 3 "07 Mar 2002" VVERSIONINFO "Net-SNMP"
 .UC 5
 .SH NAME
 snmp_sess_init, snmp_sess_open, snmp_sess_session,
@@ -27,173 +27,171 @@ snmp_sess_send, snmp_sess_async_send,
 snmp_sess_select_info, snmp_sess_read,
 snmp_sess_timeout, snmp_sess_close, snmp_sess_error - session functions
 .SH SYNOPSIS
-#include <net-snmp/session_api.h>
+.B #include <net-snmp/session_api.h>
 .PP
-void snmp_sess_init ( struct snmp_session * );
+.BI "void snmp_sess_init(struct snmp_session *" session ");"
 .PP
-void * snmp_sess_open ( struct snmp_session * );
+.BI "void *snmp_sess_open(struct snmp_session *" session ");"
 .PP
-struct snmp_session * snmp_sess_session ( void * );
+.BI "struct snmp_session *snmp_sess_session(void *" handle ");"
 .PP
-int snmp_sess_send ( void * opaque,
-.RS
-struct snmp_pdu *pdu );
-.RE
+.BI "int snmp_sess_send(void *" handle ", struct snmp_pdu *" pdu ");"
 .PP
-int snmp_sess_async_send ( void * opaque,
-.RS
-struct snmp_pdu *pdu,
-.RE
-.RS
-snmp_callback callback, void * callbackData );
-.RE
+.BI "int snmp_sess_async_send(void *" handle ","
+.br
+.BI "                         struct snmp_pdu *" pdu ", "
+.br
+.BI "                         snmp_callback " callback ", "
+.br
+.BI "                         void *" callbackData ");"
 .PP
-int snmp_sess_select_info ( void * opaque,
-.RS
-int *numfds, fd_set *fdset,
-.RE
-.RS
-struct timeval *timeout, int *block );
-.RE
+.BI "int snmp_sess_select_info(void *" handle ","
+.br
+.BI "                          int *" numfds ", fd_set *" fdset ", "
+.br
+.BI "                          struct timeval *" timeout ", "
+.br
+.BI "                          int *" block ");"
 .PP
-void snmp_sess_read ( void * opaque, fd_set *fdset );
-.RE
+.BI "void snmp_sess_read(void *" handle ", fd_set *" fdset ");"
 .PP
-void snmp_sess_timeout ( void * opaque );
+.BI "void snmp_sess_timeout(void *" handle ");"
 .PP
-int snmp_sess_close ( void * opaque );
+.BI "int snmp_sess_close(void *" handle ");"
 .PP
-void snmp_sess_error ( void * opaque,
-.RS
-int *pcliberr,
-int *psnmperr,
-char **pperrstring );
-.RE
-.PP
+.BI "void snmp_sess_error(void *" handle ", int *" pcliberr ", "
+.br
+.BI "                    int *" psnmperr ", char **" pperrstring ");"
 .SH DESCRIPTION
 These functions define a subset of the API that can be used
 to manage single SNMP sessions in a multi-threaded application.
 Except for
-.I snmp_sess_session,
+.BR snmp_sess_session() ,
 these functions are single session versions of the traditional
 SNMP library API.
 .PP
-Note that these functions use an
-.I Opaque
-pointer to identify a single session in lieu of a
+Note that these functions use an opaque pointer
+.RI ( handle
+in the above prototypes) to identify a single session in lieu of a
 .I session
-pointer.
+pointer (as in the traditional API).
 .PP
-.I Snmp_sess_init
+.B snmp_sess_init()
 prepares a struct snmp_session that sources transport characteristics
 and common information that will be used for a set of SNMP transactions.
 After this structure is passed to
-.I snmp_open
-to create an SNMP session, the structure is not used.
+.B snmp_sess_open()
+to create an SNMP session, the structure is no longer used.  Instead
+the opaque pointer returned by
+.B snmp_sess_open()
+is used to refer to that session henceforth.
 .PP
 SNMP sessions that are created with
-.I snmp_sess_open
-are not affected by and should not be used with
-.I snmp_select_info,
-.I snmp_read,
-.I snmp_timeout,
-nor
-.I snmp_close.
-Use the other functions described here with similar capabilities.
+.B snmp_sess_open()
+are not affected by, and SHOULD NOT BE USED WITH,
+.BR snmp_select_info() ", " snmp_read() ", " snmp_timeout() " nor"
+.BR snmp_close() .
+Rather the equivalent single session functions described here should
+be used.
 .PP
-.I Snmp_sess_init
+.B snmp_sess_init()
 and
-.I snmp_sess_open
+.B snmp_sess_open()
 each take as input a pointer to a struct snmp_session object.
 This structure contains information for a set of transactions that
 will share similar transport characteristics.
-.I Snmp_sess_session
+.B snmp_sess_session()
 takes the opaque session handle and returns a pointer to
 its associated struct snmp_session.
 .PP
-.I Snmp_sess_send
+.B snmp_sess_send()
 and
-.I snmp_sess_async_send
-each take as input an additional pointer to a struct snmp_pdu object.
-This structure contains information that describes a transaction
-that will be performed over an open session.
+.B snmp_sess_async_send()
+each take a
+.I pdu
+parameter, which points to a struct snmp_pdu object containing
+information that describes a transaction that will be performed over
+an open session.
 .PP
 Consult snmp_api.h for the definitions of these structures.
 .PP
-.I Snmp_sess_select_info, snmp_sess_read,
-and
-.I snmp_sess_timeout
+.BR snmp_sess_select_info() ", " snmp_sess_read() " and " snmp_sess_timeout()
 provide an interface for the use of the
-.IR select(2)
-system call so that SNMP transactions for a single session can occur asynchronously.
+.BR select (2)
+system call so that SNMP transactions for a single session can occur
+asynchronously.
 .PP
-.I Snmp_sess_select_info
-is given the information that would have been passed to
-.I select
-in the absence of SNMP.  For example, this might include window update information.
-This information is modified so that SNMP will get the service it requires from the
-call to
-.I select.
+.B snmp_sess_select_info()
+is passed the information that would have been passed to
+.BR select (2)
+in the absence of SNMP.  For example, this might include file
+descriptors associated with the main loop of a graphical
+application. This information is modified so that SNMP will get the
+service it requires from the call to
+.BR select (2).
 In this case,
-.I numfds, fdset,
-and
-.I timeout
+.IR numfds ", " fdset " and " timeout
 correspond to the
-.I nfds, readfds,
-and
-.I timeout
+.IR nfds ", " readfds " and " timeout
 arguments to
-.I select,
-respectively.  The only exception is that timeout must always point to an allocated (but perhaps uninitialized)
-.I struct timeval.
+.BR select (2)
+respectively.  The only exception is that timeout must ALWAYS point to
+an allocated (but perhaps uninitialized)
+.I struct timeval
+(it cannot be NULL as for
+.BR select (2)).
 If
 .I timeout
 would have been passed as NULL,
 .I block
-is set to true, and
+is instead set to true, and
 .I timeout
 is treated as undefined.  This same rule applies upon return from
-.I snmp_select_info.
+.BR snmp_select_info() .
 .PP
 After calling
-.I snmp_sess_select_info, select
-is called with the returned data.  When select returns,
-.I snmp_sess_read
-is called with the
+.B snmp_sess_select_info() ,
+.BR select (2)
+should be called with the returned data.  When it returns,
+.B snmp_sess_read()
+should then be called with the
 .I fd_set
 returned from
-.I select.
-This will read any input from this session's SNMP socket.
-If
-.I select
-times out,
-.I snmp_sess_timeout
-should be called to see if the timeout was intended for SNMP.
+.BR select (2).
+This will read any input from this session's SNMP socket.  If
+.BR select (2)
+times out (that is, it returns zero),
+.B snmp_sess_timeout()
+should be called to see if a timeout has occurred on the SNMP
+session.
 .SH DIAGNOSTICS
 .PP
 Error return status from 
-.I snmp_sess_open
-is indicated by return of a null pointer.
+.B snmp_sess_open()
+is indicated by return of a NULL pointer.
 Error return status from 
-.I snmp_sess_close
+.B snmp_sess_close()
 and
-.I snmp_sess_send
-is indicated by return of 0.  A successful status will return a 1.
+.B snmp_sess_send()
+is indicated by a return value of 0.  A successful status will return
+1.
 .PP
 Further information can be obtained by using
-.I snmp_sess_error
-to see what type of error has occurred.
-This function returns the SNMP "snmp_errno" variable,
-the value of the system "errno" variable,
-and a string interpretation of both variables.
-The string must be freed after use by the caller.
+.B snmp_sess_error()
+to see what type of error has occurred.  This function returns the
+SNMP
+.I snmp_errno
+variable, the value of the system
+.I errno
+variable, and a string interpretation of both variables.  The string
+must be freed after use by the caller.
 .PP
 For errors returned by
-.I snmp_sess_open,
+.BR snmp_sess_open() ,
 use the corresponding function
-.I snmp_error
+.B snmp_error()
 instead of
-.I snmp_sess_error.
+.BR snmp_sess_error() .
 .PP
 Consult snmp_api.h for the complete set of SNMP library
 error values.
@@ -229,4 +227,4 @@ The specified session was not open.
 .RE
 .PP
 .SH "SEE ALSO"
-select(2), snmp_api(3), snmp_api.h
+.BR select "(2), " snmp_api "(3), " snmp_api.h
