@@ -4949,9 +4949,10 @@ snmp_mib_node_FETCH(tp_ref, key)
                  } else {
                      tptmp = tp;
                  }
-                 for(ip=tptmp->indexes; ip != NULL; ip = ip->next) {
-                    av_push(index_av,newSVpv((ip->ilabel),strlen(ip->ilabel)));
-                 }
+                 if (tptmp)
+                     for(ip=tptmp->indexes; ip != NULL; ip = ip->next) {
+                         av_push(index_av,newSVpv((ip->ilabel),strlen(ip->ilabel)));
+                     }
                 sv_setsv(ST(0), newRV((SV*)index_av));
                 break;
 	      case 'l': /* label */
