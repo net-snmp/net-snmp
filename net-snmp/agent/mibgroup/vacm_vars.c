@@ -131,6 +131,11 @@ void vacm_parse_security (word, param)
 
 void vacm_free_security __P((void))
 {
+    struct vacm_securityEntry *sp;
+    while ((sp = securityFirst)) {
+	securityFirst = sp->next;
+	free(sp);
+    }
 }
 
 void vacm_parse_group (word, param)
@@ -174,6 +179,7 @@ void vacm_parse_group (word, param)
 
 void vacm_free_group __P((void))
 {
+    vacm_destroyAllGroupEntries();
 }
 
 void vacm_parse_access (word, param)
@@ -222,6 +228,7 @@ void vacm_parse_access (word, param)
 
 void vacm_free_access __P((void))
 {
+    vacm_destroyAllAccessEntries();
 }
 
 void vacm_parse_view (word, param)
@@ -282,6 +289,7 @@ void vacm_parse_view (word, param)
 
 void vacm_free_view __P((void))
 {
+    vacm_destroyAllViewEntries();
 }
 
 int vacm_in_view (pi, name, namelen)

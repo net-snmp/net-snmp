@@ -11,6 +11,9 @@
 #else
 #include <strings.h>
 #endif
+#if HAVE_UNISTD_H
+#include <unistd.h>
+#endif
 
 #include "host_res.h"
 #include "hr_partition.h"
@@ -190,7 +193,7 @@ var_hrpartition(vp, name, length, exact, var_len, write_method)
 	    *var_len = strlen(HRP_savedName);
 	    return (u_char *)&HRP_savedName;
 	case HRPART_ID:			/* Use the device number */
-	    sprintf(string, "0x%x", stat_buf.st_rdev) ;
+	    sprintf(string, "0x%x", (int)stat_buf.st_rdev) ;
 	    *var_len = strlen(string);
 	    return (u_char *) string;
 	case HRPART_SIZE:
