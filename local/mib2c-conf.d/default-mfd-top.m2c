@@ -4,52 +4,38 @@
 ##
 ########################################################################
 ## mark boundarys
-@if "x$user_m2c_mark_boundary" eq "x"@
+@if "x$m2c_mark_boundary" eq "x"@
 @   eval $m2c_mark_boundary = 0@
-@else@
-@   eval $m2c_mark_boundary = $user_m2c_mark_boundary@
 @end@
 ##
-@if "x$user_mfd_readme_verbose" eq "x"@
+@if "x$mfd_readme_verbose" eq "x"@
 @   eval $mfd_readme_verbose = 1@
-@else@
-@   eval $mfd_readme_verbose = $user_mfd_readme_verbose@
 @end@
-@if "x$user_m2c_create_fewer_files" eq "x"@
+@if "x$m2c_create_fewer_files" eq "x"@
 @   eval $m2c_create_fewer_files = 0@
-@else@
-@   eval $m2c_create_fewer_files = $user_m2c_create_fewer_files@
 @end@
 @if "x$mfd_processing_types" eq "x"@
 @   eval $mfd_processing_types = "#"@
 @end@
-@if "x$user_m2c_code_verbose" eq "x"@
+@if "x$m2c_code_verbose" eq "x"@
 @   eval $m2c_code_verbose = 0@
-@else@
-@   eval $m2c_code_verbose = $user_m2c_code_verbose@
 @end@
 ########################################################################
 ## enum constants upper or lower case? (NODE_NAME vs node_name)
-@if "x$user_m2c_const_lc" eq "x"@
+@if "x$m2c_const_lc" eq "x"@
 @   eval $m2c_const_lc = 0@
-@else@
-@   eval $m2c_const_lc = $user_m2c_const_lc@
 @end@
 ##
 ########################################################################
 ## prefix for all enums  (NODE_NAME vs XYZ_NODE_NAME)
-@if "x$user_m2c_const_pfx" eq "x"@
+@if "x$m2c_const_pfx" eq "x"@
 @   eval $m2c_const_pfx = ""@        # or "XYZ_"
-@else@
-@   eval $m2c_const_pfx = "$user_m2c_const_pfx"@
 @end@
 ##
 ########################################################################
 ## use temporary values in get routines, or direct pointers?
-@if "x$user_m2c_get_use_temp" eq "x"@
+@if "x$m2c_get_use_temp" eq "x"@
 @   eval $m2c_get_use_temp = 0@
-@else@
-@   eval $m2c_get_use_temp = $user_m2c_get_use_temp@
 @end@
 ##
 ########################################################################
@@ -60,20 +46,14 @@
 ########################################################################
 ########################################################################
 ## allow for different style enums (#define vs const)
-@if "x$user_m2c_const_dcl" eq "x"@
+@if "x$m2c_const_dcl" eq "x"@
 @   eval $m2c_const_dcl = "#define"@ # or "const int"
-@else@
-@   eval $m2c_const_dcl = "$user_m2c_const_dcl"@
 @end@
-@if "x$user_m2c_const_del" eq "x"@
+@if "m2c_const_del" eq "x"@
 @   eval $m2c_const_del = ""@        # or "="
-@else@
-@   eval $m2c_const_del = "$user_m2c_const_del"@
 @end@
-@if "x$user_m2c_const_sfx" eq "x"@
+@if "x$m2c_const_sfx" eq "x"@
 @   eval $m2c_const_sfx = ""@        # or ";"
-@else@
-@   eval $m2c_const_sfx = "$user_m2c_const_sfx"@
 @end@
 ##
 ## set defaults for mfd
@@ -100,6 +80,11 @@
 @  eval $mfd_default_data_allocate = 0@
 @else@
 @  eval $mfd_default_data_allocate = $user_mfd_default_data_allocate@
+@end@
+@if "x$user_mfd_default_undo_embed" eq "x" @
+@  eval $mfd_default_undo_embed = 0@
+@else@
+@  eval $mfd_default_undo_embed = $user_mfd_default_undo_embed@
 @end@
 ##
 @if "x$user_mfd_default_data_init" eq "x" @
