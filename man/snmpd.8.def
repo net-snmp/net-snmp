@@ -25,8 +25,14 @@ Read
 as a configuration file.
 .TP
 .B -C
-Do not read any configuration files except the one optionally specified by the 
+Do not read any configuration files except the ones optionally specified by the 
 .B -c 
+option.
+Note that this behaviour also covers the persistent configuration files.
+This may result in dynamically-assigned values being reset following an
+agent restart, unless the relevant persistent config files are
+explicitly loaded using the
+.B -c
 option.
 .TP
 .B -d
