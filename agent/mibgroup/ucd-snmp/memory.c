@@ -259,28 +259,41 @@ int getswap(rettype)
   FILE *file;
   struct extensible ex;
   int i, fd;
+  char *cp;
   
   if (auto_nlist(SWDEVT_SYMBOL,(int *) swdevt, sizeof(struct swdevt)*nswapdev)
       == 0)
     return(0);
+  DEBUGP("%d fs swap devices: \n", nswapfs);
   for (i=0; i < nswapdev; i++) {
+    DEBUGP("swdevt[%d]: %d\n",i, swdevt[i].sw_enable);
     if (swdevt[i].sw_enable) {
 #ifdef STRUCT_SWDEVT_HAS_SW_NBLKSENABLED
+      DEBUGP("  swdevt.sw_nblksenabled:     %d\n", swdevt[i].sw_nblksenabled);
       spacetotal += swdevt[i].sw_nblksenabled;
 #else
+      DEBUGP("  swdevt.sw_nblks:     %d\n", swdevt[i].nblks);
       spacetotal += swdevt[i].sw_nblks;
 #endif
       spaceleft += (swdevt[i].sw_nfpgs * 4);
+      DEBUGP("  swdevt.sw_nfpgs:     %d\n", swdevt[i].sw_nfpgs);
     }
   }
   if (auto_nlist(FSWDEVT_SYMBOL,(int *) fswdevt, sizeof(struct fswdevt)*nswapfs)
       == 0)
     return(0);
+  DEBUGP("%d fs swap devices: \n", nswapfs);
   for (i=0; i < nswapfs; i++) {
+    DEBUGP("fswdevt[%d]: %d\n",i, fswdevt[i].fsw_enable);
     if (fswdevt[i].fsw_enable) {
       spacetotal += (fswdevt[i].fsw_limit * 2048);  /* 2048=bytes per page? */
       spaceleft += (fswdevt[i].fsw_limit * 2048 -
                     ((fswdevt[i].fsw_allocated - fswdevt[i].fsw_min) * 37));
+      DEBUGP("  fswdevt[i].fsw_limit:     %d\n", fswdevt[i].fsw_limit);
+      DEBUGP("  fswdevt[i].fsw_allocated: %d\n", fswdevt[i].fsw_allocated);
+      DEBUGP("  fswdevt[i].fsw_min:       %d\n", fswdevt[i].fsw_min);
+      DEBUGP("  fswdevt[i].fsw_reserve:   %d\n", fswdevt[i].fsw_reserve);
+      DEBUGP("  fswdevt[i].fsw_bsize:     %d\n", fswdevt[i].fsw_bsize);
       /* 37 = calculated value I know it makes no sense, nor is it accurate */
     }
   }
@@ -296,7 +309,12 @@ int getswap(rettype)
     file = fdopen(fd,"r");
     for (i=1;i <= 2 && fgets(ex.output,STRMAX,file) != NULL; i++);
     if (fgets(ex.output,STRMAX,file) != NULL) {
-      spaceleft -= atoi(&ex.output[14]);
+      cp = skip_white(ex.output);  /* not there should be any */
+      cp = skip_not_white(cp);     /* skip over "reserve" */
+      cp = skip_white(cp);
+      cp = skip_not_white(cp);     /* avail swap, a '-' in most cases */
+      cp = skip_white(cp);
+      spaceleft -= atoi(cp);       /* reserved swap */
     }
     fclose(file);
     close(fd);
