@@ -10,7 +10,7 @@ use AutoLoader;
 use NetSNMP::default_store (':all');
 use NetSNMP::agent::default_store (':all');
 use NetSNMP::OID (':all');
-use NetSNMP::agent::netsnmp_request_info;
+use NetSNMP::agent::netsnmp_request_infoPtr;
 
 use vars qw(@ISA %EXPORT_TAGS @EXPORT_OK @EXPORT $VERSION $AUTOLOAD);
 
