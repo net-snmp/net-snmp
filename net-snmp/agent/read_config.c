@@ -52,8 +52,8 @@ static struct subtree* insert_in_children_list __P((struct subtree *, struct sub
 struct config_line config_handlers[] = {
 #include "mibgroup/mib_module_dot_conf.h"
   {"authtrapenable", snmpd_parse_config_authtrap, NULL},
-  {"trapsink", snmpd_parse_config_trapsink, NULL},
-  {"trapcommunity", snmpd_parse_config_trapcommunity, NULL}
+  {"trapsink", snmpd_parse_config_trapsink, snmpd_free_trapsinks},
+  {"trapcommunity", snmpd_parse_config_trapcommunity, snmpd_free_trapcommunity}
 };
 
 void init_read_config __P((void))
