@@ -1,4 +1,4 @@
-.TH "table_iterator: The table iterator helper is designed to simplify the task of writing a table handler for the net-snmp agent when the data being accessed is not in an oid sorted form and must be accessed externally." 3 "28 Oct 2003" "net-snmp" \" -*- nroff -*-
+.TH "table_iterator: The table iterator helper is designed to simplify the task of writing a table handler for the net-snmp agent when the data being accessed is not in an oid sorted form and must be accessed externally." 3 "13 Nov 2003" "net-snmp" \" -*- nroff -*-
 .ad l
 .nh
 .SH NAME
@@ -19,31 +19,9 @@ More...
 .RI "struct \fBti_cache_info_s\fP"
 .br
 .in -1c
-.SS "Defines"
-
-.in +1c
-.ti -1c
-.RI "#define \fBTI_REQUEST_CACHE\fP   'ti_cache'"
-.br
-.ti -1c
-.RI "#define \fBTABLE_ITERATOR_NAME\fP   'table_iterator'"
-.br
-.in -1c
 .SS "Typedefs"
 
 .in +1c
-.ti -1c
-.RI "typedef ti_cache_info_s \fBti_cache_info\fP"
-.br
-.ti -1c
-.RI "typedef netsnmp_variable_list * \fBNetsnmp_First_Data_Point\fP (void **loop_context, void **data_context, netsnmp_variable_list *, struct \fBnetsnmp_iterator_info_s\fP *)"
-.br
-.ti -1c
-.RI "typedef netsnmp_variable_list * \fBNetsnmp_Next_Data_Point\fP (void **loop_context, void **data_context, netsnmp_variable_list *, struct \fBnetsnmp_iterator_info_s\fP *)"
-.br
-.ti -1c
-.RI "typedef void * \fBNetsnmp_Make_Data_Context\fP (void *loop_context, struct \fBnetsnmp_iterator_info_s\fP *)"
-.br
 .ti -1c
 .RI "typedef \fBnetsnmp_iterator_info_s\fP \fBnetsnmp_iterator_info\fP"
 .br
@@ -55,29 +33,19 @@ More...
 .ti -1c
 .RI "netsnmp_mib_handler * \fBnetsnmp_get_table_iterator_handler\fP (\fBnetsnmp_iterator_info\fP *iinfo)"
 .br
-.RI "\fIreturns a netsnmp_mib_handler object for the table_iterator helper.\fP"
+.RI "\fIreturns a netsnmp_mib_handler object for the table_iterator helper\fP"
 .ti -1c
 .RI "int \fBnetsnmp_register_table_iterator\fP (netsnmp_handler_registration *reginfo, \fBnetsnmp_iterator_info\fP *iinfo)"
 .br
-.RI "\fIregisters a table after attaching it to a table_iterator helper.\fP"
+.RI "\fIregisters a table after attaching it to a table_iterator helper\fP"
 .ti -1c
-.RI "void * \fBnetsnmp_extract_iterator_context\fP (netsnmp_request_info *request)"
+.RI "NETSNMP_INLINE void * \fBnetsnmp_extract_iterator_context\fP (netsnmp_request_info *request)"
 .br
-.RI "\fIextracts the table_iterator specific data from a request.\fP"
+.RI "\fIextracts the table_iterator specific data from a request\fP"
 .ti -1c
 .RI "int \fBnetsnmp_table_iterator_helper_handler\fP (netsnmp_mib_handler *handler, netsnmp_handler_registration *reginfo, netsnmp_agent_request_info *reqinfo, netsnmp_request_info *requests)"
 .br
-.RI "\fIimplements the table_iterator helper.\fP"
-.ti -1c
-.RI "typedef \fBvoid\fP (Netsnmp_Free_Loop_Context)(void *"
-.br
-.in -1c
-.SS "Variables"
-
-.in +1c
-.ti -1c
-.RI "Netsnmp_Node_Handler \fBnetsnmp_table_iterator_helper_handler\fP"
-.br
+.RI "\fIimplements the table_iterator helper\fP"
 .in -1c
 .SH "DETAILED DESCRIPTION"
 .PP 
@@ -109,27 +77,35 @@ Typedefs the \fBnetsnmp_iterator_info_s\fP struct into netsnmp_iterator_info.
 .PP
 .SH "FUNCTION DOCUMENTATION"
 .PP 
-.SS "void* netsnmp_extract_iterator_context (netsnmp_request_info * request)\fC [inline]\fP"
+.SS "NETSNMP_INLINE void* netsnmp_extract_iterator_context (netsnmp_request_info * request)"
 .PP
-extracts the table_iterator specific data from a request.
+extracts the table_iterator specific data from a request
 .PP
 Definition at line 129 of file table_iterator.c.
+.PP
+References netsnmp_request_get_list_data().
 .SS "netsnmp_mib_handler* netsnmp_get_table_iterator_handler (\fBnetsnmp_iterator_info\fP * iinfo)"
 .PP
-returns a netsnmp_mib_handler object for the table_iterator helper.
+returns a netsnmp_mib_handler object for the table_iterator helper
 .PP
 Definition at line 100 of file table_iterator.c.
+.PP
+References netsnmp_create_handler(), and netsnmp_table_iterator_helper_handler().
+.PP
+Referenced by netsnmp_register_table_iterator().
 .SS "int netsnmp_register_table_iterator (netsnmp_handler_registration * reginfo, \fBnetsnmp_iterator_info\fP * iinfo)"
 .PP
-registers a table after attaching it to a table_iterator helper.
+registers a table after attaching it to a table_iterator helper
 .PP
 Definition at line 116 of file table_iterator.c.
 .PP
-References netsnmp_iterator_info_s::table_reginfo.
+References netsnmp_get_table_iterator_handler(), netsnmp_inject_handler(), netsnmp_register_table(), and netsnmp_iterator_info_s::table_reginfo.
 .SS "int netsnmp_table_iterator_helper_handler (netsnmp_mib_handler * handler, netsnmp_handler_registration * reginfo, netsnmp_agent_request_info * reqinfo, netsnmp_request_info * requests)"
 .PP
-implements the table_iterator helper.
+implements the table_iterator helper
 .PP
 Definition at line 208 of file table_iterator.c.
 .PP
-References netsnmp_iterator_info_s::flags, netsnmp_iterator_info_s::free_data_context, netsnmp_iterator_info_s::free_loop_context, netsnmp_iterator_info_s::free_loop_context_at_end, netsnmp_iterator_info_s::get_first_data_point, netsnmp_iterator_info_s::get_next_data_point, and netsnmp_iterator_info_s::table_reginfo.
+References netsnmp_iterator_info_s::flags, netsnmp_iterator_info_s::free_data_context, netsnmp_iterator_info_s::free_loop_context, netsnmp_iterator_info_s::free_loop_context_at_end, netsnmp_iterator_info_s::get_first_data_point, netsnmp_iterator_info_s::get_next_data_point, netsnmp_call_next_handler(), netsnmp_extract_stash_cache(), netsnmp_extract_table_info(), netsnmp_find_table_registration_info(), netsnmp_free_request_data_sets(), netsnmp_get_list_node(), netsnmp_oid_stash_add_data(), netsnmp_request_add_list_data(), netsnmp_request_get_list_data(), SNMP_FREE, SNMP_MALLOC_TYPEDEF, snmp_oid_compare(), and netsnmp_iterator_info_s::table_reginfo.
+.PP
+Referenced by netsnmp_get_table_iterator_handler().
