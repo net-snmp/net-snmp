@@ -50,11 +50,11 @@ extern          "C" {
      *                    |                \|/           |  |
      * UNDO             (err?)  Y >-------[undo]-------->+  |
      *                    |                              |  |
-     *            [reversible_commit]                    |  |
+     *                 [commit]                          |  |
      * +++                |                              | \|/
-     *                  (err?)  Y >--[reverse_commit]    |  |
+     *                  (err?)  Y >--[undo_commit]       |  |
      *                    |              |               |  |
-     * COMMIT        <final_commit>      |               |  |
+     * COMMIT   <irreversible_commit>    |               |  |
      *                    |              |               |  |
      *                  (err?)  Y >--[log msg]           |  |
      *                    |              |               |  |
@@ -68,74 +68,106 @@ extern          "C" {
      *               [post_request]
      */
 
-    /*
+    /*******************************************************************
      * typedef
      */
-    typedef struct netsnmp_mfd_registration_s netsnmp_mfd_registration;
-
-    typedef int (Netsnmp_MFD_Organize_Op)(netsnmp_mfd_registration *reg,
+    struct mfd_pdu_context_s; /** fwd decl */
+    typedef int (Netsnmp_MFD_Organize_Op)(struct mfd_pdu_context_s *reg,
+                                          netsnmp_data_list *list,
                                           u_long id);
-    typedef int (Netsnmp_MFD_Request_Op)(netsnmp_mfd_registration *reg,
+    typedef int (Netsnmp_MFD_Request_Op)(struct mfd_pdu_context_s  *reg,
                                          netsnmp_request_info *requests,
                                          void *requests_parent);
 
-    /*
+    /*******************************************************************
      * structures 
      */
-    typedef struct netsnmp_mfd_callbacks_set_min_s {
-       Netsnmp_MFD_Request_Op *     data_lookup;
-       Netsnmp_MFD_Request_Op *     get_values;
-       Netsnmp_MFD_Request_Op *     object_syntax_checks;
-       Netsnmp_MFD_Request_Op *     set_values;
-       Netsnmp_MFD_Request_Op *     final_commit;
-    } netsnmp_mfd_callbacks_set_min;
 
-    typedef struct netsnmp_mfd_callbacks_set_extra_s {
-       Netsnmp_MFD_Organize_Op *    pre_request;
-       Netsnmp_MFD_Request_Op *     row_creation;
-       Netsnmp_MFD_Request_Op *     undo_setup;
-       Netsnmp_MFD_Request_Op *     undo_sets;
-       Netsnmp_MFD_Request_Op *     undo_cleanup;
-       Netsnmp_MFD_Request_Op *     consistency_checks;
-       Netsnmp_MFD_Request_Op *     undoable_commit;
-       Netsnmp_MFD_Request_Op *     undo_commit;
-       Netsnmp_MFD_Organize_Op *    post_request;
-    } netsnmp_mfd_callbacks_set_extra;
+    /**
+     * data structure for lower handler use
+     */
+    typedef struct mfd_pdu_context_s {
 
-    struct netsnmp_mfd_registration_s {
+       /*
+        * pointer to registration
+        */
+       void *                        *mfd_user_ctx;
+
+       /*
+        * request mode
+        */
+       int                            next_mode_ok;
+       int                            request_mode;
+
+       /*
+        * data pointer for this request (row or object)
+        */
+       void                          *mfd_data;
+
+       /*
+        * storage for future expansion
+        */
+       netsnmp_data_list             *mfd_data_list;
+
+    } mfd_pdu_context;
+
+    /**
+     * @internal
+     * Mibs For Dummies registration structure
+     */
+    typedef struct netsnmp_mfd_registration_s {
 
        netsnmp_table_registration_info *table_info;
        netsnmp_container               *container;
 
-       u_long mfd_flags;
+       u_long                           mfd_flags;
 
-       netsnmp_mfd_callbacks_set_min   cbsm;
-       netsnmp_mfd_callbacks_set_extra cbse;
-
-       void * mfd_user_ctx;
-
-    };
-
-    int netsnmp_mfd_register_table( netsnmp_handler_registration *reginfo,
-                                    netsnmp_table_registration_info *tabreg,
-                                    netsnmp_container *container,
-                                    netsnmp_mfd_registration *mfdr);
-
-#define MFD_GROUP_GET                        0x01
-#define MFD_DONT_GROUP_SET                   0x02
-
-#if 0
-    /*
-     * mfd request group
-     */
-    typedef struct netsnmp_mfd_request_group_s {
        /*
+        * pointer supplied by the user during registration.
         */
-       netsnmp_request_group rg;
+       void                           *mfd_user_ctx;
 
-    } netsnmp_mfd_request_group;
-#endif /* 0 */
+       /*
+        * INTERNAL callbacks
+        */
+       Netsnmp_MFD_Organize_Op *    pre_request;
+       Netsnmp_MFD_Request_Op *     object_lookup;
+       Netsnmp_MFD_Request_Op *     get_values;
+       Netsnmp_MFD_Request_Op *     object_syntax_checks;
+       Netsnmp_MFD_Request_Op *     row_creation;
+       Netsnmp_MFD_Request_Op *     undo_setup;
+       Netsnmp_MFD_Request_Op *     set_values;
+       Netsnmp_MFD_Request_Op *     consistency_checks;
+       Netsnmp_MFD_Request_Op *     commit;
+       Netsnmp_MFD_Request_Op *     undo_sets;
+       Netsnmp_MFD_Request_Op *     undo_cleanup;
+       Netsnmp_MFD_Request_Op *     undo_commit;
+       Netsnmp_MFD_Request_Op *     irreversible_commit;
+       Netsnmp_MFD_Organize_Op *    post_request;
 
+       /*
+        * extra data storage, just in case
+        */
+       netsnmp_data_list             *mfd_reg_data;
+
+    } netsnmp_mfd_registration;
+
+    /*******************************************************************
+     * registration routine
+     */
+    int netsnmp_mfd_register_table(netsnmp_mfd_registration *mfdr,
+                                   const char *name,
+                                   Netsnmp_Node_Handler * handler,
+                                   oid * reg_oid, size_t reg_oid_len,
+                                   int modes);
+
+#define MFD_SUCCESS              SNMP_ERR_NOERROR
+#define MFD_SKIP                 SNMP_NOSUCHINSTANCE
+#define MFD_ERROR                SNMP_ERR_GENERR
+#define MFD_RESOURCE_UNAVAILABLE SNMP_ERR_RESOURCEUNAVAILABLE
+#define MFD_INCONSISTENT_VALUE   SNMP_ERR_INCONSISTENTVALUE
+#define MFD_BAD_VALUE            SNMP_ERR_BADVALUE
+#define MFD_END_OF_DATA          SNMP_ENDOFMIBVIEW
 
 #ifdef __cplusplus
 };
