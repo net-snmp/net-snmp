@@ -22,7 +22,7 @@ LDFLAGS= @LDFLAGS@
 OSFLAGS=
 
 CFLAGS=@CFLAGS@
-CPPFLAGS=@CPPFLAGS@ -I.. -I../snmplib
+CPPFLAGS=@CPPFLAGS@ -I.. -I$(srcdir)/.. -I$(srcdir)/../snmplib
 
 CCHACK = @CC@
 CC = @CC@ $(CPPFLAGS)
