@@ -39,7 +39,7 @@
 #include <net-snmp/library/snmpUDPIPv6Domain.h>
 #include <net-snmp/library/snmpTCPIPv6Domain.h>
 
-static oid netsnmp_ucdSnmpTCPIPv6Domain[9] = { UCDAVIS_MIB, 251, 5 };
+oid netsnmp_ucdSnmpTCPIPv6Domain[9] = { UCDAVIS_MIB, 251, 5 };
 static netsnmp_tdomain tcp6Domain;
 
 /*  Return a string representing the address in data, or else the "far end"
