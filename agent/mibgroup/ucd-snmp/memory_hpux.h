@@ -7,6 +7,6 @@
 
 #include "mibdefs.h"
 
-void init_memory_hpux(void);
+void            init_memory_hpux(void);
 
-#endif /* _MIBGROUP_MEMORY_HPUX_H */
+#endif                          /* _MIBGROUP_MEMORY_HPUX_H */
