@@ -24,8 +24,8 @@ INSTALLDIRS = $(SUBDIRS)
 
 all:	mib.txt ucd-snmp.txt sedscript EXAMPLE.conf subdirs
 
-sedscript: sedscript.in config.h agent/extensible/mibdefs.h
-	$(CPP) -DPREFIX=$(prefix) $(srcdir)/sedscript.in | sed 's/REMOVEME//g;s# /#/#g;s/ #/#/g;' > sedscript
+sedscript: sedscript.in config.h agent/mibgroup/mibdefs.h
+	$(CPP) -DPREFIX=$(prefix) $(srcdir)/sedscript.in | sed 's/REMOVEME//g;s# /#/#g;s/ #/#/g;' | egrep '^s/' > sedscript
 
 subdirs:
 	for i in $(SUBDIRS) ; do \
@@ -62,7 +62,8 @@ distclean: clean configclean
 
 configclean:
 	rm -f config.cache config.status config.log
-	rm -f snmplib/Makefile Makefile agent/Makefile apps/Makefile apps/snmpnetstat/Makefile agent/extensible/Makefile local/Makefile
+	rm -f snmplib/Makefile Makefile agent/Makefile apps/Makefile apps/snmpnetstat/Makefile agent/mibgroup/Makefile local/Makefile
+	rm -f mib_module_config.h agent/mibgroup/mib_module_includes.h agent/mibgroup/mib_module_inits.h agent/mibgroup/mib_module_loads.h
 
 configure: configure.in aclocal.m4
 	cd ${srcdir} && autoconf
