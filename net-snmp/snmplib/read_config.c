@@ -1543,6 +1543,7 @@ read_config_read_octet_string(char *readfrom, u_char ** str, size_t * len)
     char           *cptr1;
     u_int           tmp;
     int             i;
+    size_t          ilen;
 
     if (readfrom == NULL || str == NULL)
         return NULL;
@@ -1554,28 +1555,31 @@ read_config_read_octet_string(char *readfrom, u_char ** str, size_t * len)
         readfrom += 2;
         cptr1 = skip_not_white(readfrom);
         if (cptr1)
-            *len = (cptr1 - readfrom);
+            ilen = (cptr1 - readfrom);
         else
-            *len = strlen(readfrom);
+            ilen = strlen(readfrom);
 
-        if (*len % 2) {
+        if (ilen % 2) {
             DEBUGMSGTL(("read_config_read_octet_string",
                         "invalid hex string: wrong length"));
             return NULL;
         }
-        *len = *len / 2;
+        ilen = ilen / 2;
 
         /*
          * malloc data space if needed (+1 for good measure) 
          */
         if (*str == NULL) {
-            if ((cptr = (u_char *) malloc(*len + 1)) == NULL) {
+            if ((cptr = (u_char *) malloc(ilen + 1)) == NULL) {
                 return NULL;
             }
             *str = cptr;
         } else {
+            if (ilen >= *len)
+                ilen = *len-1;
             cptr = *str;
         }
+        *len = ilen;
 
         /*
          * copy validated data 
