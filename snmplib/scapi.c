@@ -641,7 +641,7 @@ sc_encrypt_quit:
 #else
 #	if USE_INTERNAL_MD5
 	{
-		DEBUGPMSGTL(("scapi","Encrypt function not defined.\n"));
+		DEBUGMSGTL(("scapi","Encrypt function not defined.\n"));
 		return SNMPERR_SC_GENERAL_FAILURE;
 	}
 
@@ -766,7 +766,7 @@ sc_decrypt_quit:
 #else
 #	if USE_INTERNAL_MD5
 	{
-		DEBUGPMSGTL(("scapi","Decryption function not defined.\n"));
+		DEBUGMSGTL(("scapi","Decryption function not defined.\n"));
 		return SNMPERR_SC_GENERAL_FAILURE;
 	}
 

@@ -53,6 +53,7 @@
 #include "scapi.h"
 #include "tools.h"
 #include "lcd_time.h"
+#include "snmp_debug.h"
 
 #include "transform_oids.h"
 
