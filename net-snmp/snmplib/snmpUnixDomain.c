@@ -41,7 +41,7 @@
                       + strlen ((ptr)->sun_path))
 #endif
 
-const oid netsnmp_ucdSnmpUnixDomain[9] = { UCDAVIS_MIB, 251, 2 };
+static oid netsnmp_ucdSnmpUnixDomain[9] = { UCDAVIS_MIB, 251, 2 };
 static netsnmp_tdomain unixDomain;
 
 

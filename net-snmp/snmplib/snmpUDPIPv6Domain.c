@@ -36,7 +36,7 @@
 #include <net-snmp/library/snmp_transport.h>
 #include <net-snmp/library/snmpUDPIPv6Domain.h>
 
-const oid ucdSnmpUDPIPv6Domain[9] = { UCDAVIS_MIB, 251, 4 };
+static oid ucdSnmpUDPIPv6Domain[9] = { UCDAVIS_MIB, 251, 4 };
 static netsnmp_tdomain udp6Domain;
 
 /*  Return a string representing the address in data, or else the "far end"
