@@ -86,6 +86,10 @@ SOURCE=..\..\agent\agent_read_config.c
 # End Source File
 # Begin Source File
 
+SOURCE=..\..\agent\agent_index.c
+# End Source File
+# Begin Source File
+
 SOURCE=..\..\agent\agent_registry.c
 # End Source File
 # Begin Source File

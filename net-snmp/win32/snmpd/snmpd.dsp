@@ -83,6 +83,14 @@ LINK32=link.exe
 # Name "snmpd - Win32 Debug"
 # Begin Source File
 
+SOURCE=..\..\snmplib\getopt.c
+# End Source File
+# Begin Source File
+
+SOURCE=..\..\snmplib\snmp_parse_args.c
+# End Source File
+# Begin Source File
+
 SOURCE=..\..\agent\auto_nlist.c
 # End Source File
 # Begin Source File

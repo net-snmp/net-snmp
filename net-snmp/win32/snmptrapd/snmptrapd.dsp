@@ -94,5 +94,9 @@ SOURCE=..\..\apps\snmptrapd.c
 
 SOURCE=..\..\apps\snmptrapd_handlers.c
 # End Source File
+# Begin Source File
+
+SOURCE=..\..\apps\snmptrapd_log.c
+# End Source File
 # End Target
 # End Project
