@@ -202,7 +202,7 @@ static int _debug_level = 0;
 #define	DBPRT(severity, otherargs)					\
 	do {								\
 	    if (_debug_level && severity <= _debug_level) {		\
-		(void)PerlIO_printf(PerlIO_stderr(), otherargs);		\
+		(void)PerlIO_fprintf(PerlIO_stderr(), otherargs);		\
 	    }								\
 	} while (/*CONSTCOND*/0)
 
@@ -1845,8 +1845,8 @@ _bulkwalk_recv_pdu(walk_context *context, netsnmp_pdu *pdu)
    SV **err_num_svp = hv_fetch((HV*)SvRV(context->sess_ref), "ErrorNum", 8, 1);
    SV **err_ind_svp = hv_fetch((HV*)SvRV(context->sess_ref), "ErrorInd", 8, 1);
 
-   DBPRT(3, (DBOUT "bulkwalk: sess_ref = 0x%p, sess_ptr_sv = 0x%p, ss = 0x%p\n",
-					    context->sess_ref, sess_ptr_sv, ss));
+   DBPRT(3, (DBOUT "bulkwalk: sess_ref = 0x%p, sess_ptr_sv = 0x%p\n",
+             context->sess_ref, sess_ptr_sv));
 
    /* Set up for numeric OID's, if necessary.  Save the old values
    ** so that they can be restored when we finish -- these are
@@ -2761,9 +2761,9 @@ snmp_read_mib(mib_file, force=0)
            if (verbose) warn("reading MIB: %s [%s:%s]\n", mib_file, DEFAULT_MIBDIRS, DEFAULT_MIBS);
            /* if (Mib == NULL) init_mib_internals();*/
            if (strcmp("ALL",mib_file))
-              Mib = read_mib(mib_file);
+              read_mib(mib_file);
            else
-             Mib = read_all_mibs();
+             read_all_mibs();
            if (Mib) {
               if (verbose) warn("done\n");
            } else {
@@ -2784,9 +2784,9 @@ snmp_read_module(module)
         int verbose = SvIV(perl_get_sv("SNMP::verbose", 0x01 | 0x04));
 
         if (!strcmp(module,"ALL")) {
-           Mib = read_all_mibs();
+           read_all_mibs();
         } else {
-           Mib = read_module(module);
+           read_module(module);
         }
         if (Mib) {
            if (verbose) warn("Read %s\n", module);
