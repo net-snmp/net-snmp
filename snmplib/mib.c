@@ -756,7 +756,7 @@ main(argc, argv)
     }
 }
 
-#endif testing
+#endif /* testing */
 
 
 static struct tree *
