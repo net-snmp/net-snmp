@@ -1,0 +1,56 @@
+.\* /***********************************************************
+.\" 	Copyright 1989 by Carnegie Mellon University
+.\" 
+.\"                       All Rights Reserved
+.\" 
+.\" Permission to use, copy, modify, and distribute this software and its 
+.\" documentation for any purpose and without fee is hereby granted, 
+.\" provided that the above copyright notice appear in all copies and that
+.\" both that copyright notice and this permission notice appear in 
+.\" supporting documentation, and that the name of CMU not be
+.\" used in advertising or publicity pertaining to distribution of the
+.\" software without specific, written prior permission.  
+.\" 
+.\" CMU DISCLAIMS ALL WARRANTIES WITH REGARD TO THIS SOFTWARE, INCLUDING
+.\" ALL IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS, IN NO EVENT SHALL
+.\" CMU BE LIABLE FOR ANY SPECIAL, INDIRECT OR CONSEQUENTIAL DAMAGES OR
+.\" ANY DAMAGES WHATSOEVER RESULTING FROM LOSS OF USE, DATA OR PROFITS,
+.\" WHETHER IN AN ACTION OF CONTRACT, NEGLIGENCE OR OTHER TORTIOUS ACTION,
+.\" ARISING OUT OF OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS
+.\" SOFTWARE.
+.\" ******************************************************************/
+.TH SNMPTRAPD 8 "16 July 1994"
+.UC 4
+.SH NAME
+snmptrapd - Receive and log snmp trap messages.
+.SH SYNOPSIS
+snmptrapd [ -p ]
+.SH DESCRIPTION
+Snmptrapd
+is an SNMP application that receives and logs snmp trap messages
+sent to the SNMP-TRAP port (162) on the local machine.
+.PP
+If the
+.B -p
+option is given,
+.I snmptrapd
+will print it's messages to the standard output.  Otherwise it will use
+.IR syslog (8)
+to log messages.  These syslog messages are sent with the level of LOG_WARNING, and
+are if available (usually on 4.3 systems) are sent to the LOG_LOCAL0 facility.
+.PP
+The log messages are of the form:
+.br
+.I Sep 17 22:39:52 suffern snmptrapd: 128.2.13.41:
+.I Cold Start Trap (0) Uptime:
+.I 8 days, 0:35:46
+.PP
+.I Snmptrapd
+must be run as root so that UDP port 162 can be opened.
+.PP
+Adding a "-d" to the argument list will cause the application to dump input and output packets.
+.PP
+Adding a "-q" to the argument list will cause the application to use a quicker, less verbose output form.
+.PP
+.SH "SEE ALSO"
+syslog(8), variables(5), RFC 1155, RFC 1156, RFC 1157, SNMP Security Internet Drafts
