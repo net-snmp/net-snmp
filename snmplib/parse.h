@@ -31,7 +31,7 @@ SOFTWARE.
 
 #define MAXLABEL        64      /* maximum characters in a label */
 #define MAXTOKEN        128     /* maximum characters in a token */
-#define MAXQUOTESTR     4096    /* maximum characters in a quoted string */
+#define MAXQUOTESTR     8192    /* maximum characters in a quoted string */
 
 struct variable_list;
 
@@ -209,6 +209,7 @@ char *snmp_mib_toggle_options(char *options);
 void snmp_mib_toggle_options_usage(const char *lead, FILE *outf);
 void print_mib(FILE *);
 void print_mib_tree(FILE *, struct tree *);
+int  snmp_get_token(FILE *fp, char *token, int maxtlen);
 
 #ifdef __cplusplus
 }
