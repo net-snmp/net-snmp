@@ -391,4 +391,11 @@ EXPORTS
 	get_logh_head
 	dbg_tokens				DATA
 	debug_num_tokens		DATA
+	create_winpipe_transport
+	get_temp_file_pattern
+	netsnmp_strdup
+	netsnmp_calloc
+	netsnmp_malloc
+	netsnmp_realloc
+	netsnmp_free
 

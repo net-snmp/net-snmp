@@ -310,9 +310,6 @@ extern "C" {
 /* Define if you have the strchr function.  */
 #define HAVE_STRCHR 1
 
-/* use win32 strdup */
-#define strdup _strdup
-
 /* Define if you have the strtol function.  */
 #define HAVE_STRTOL 1
 
@@ -1005,6 +1002,65 @@ typedef unsigned short mode_t;
 #   undef  NETSNMP_STATIC_INLINE
 #   define NETSNMP_STATIC_INLINE static
 #endif
+
+#ifdef WIN32
+
+/* define NETSNMP_NO_DLL if building non-DLL netsnmp */
+#define NETSNMP_NO_DLL 1
+
+  #ifndef NETSNMP_NO_DLL
+    #ifndef NETSNMP_DLL
+
+      #if defined(_MSC_VER)
+        #define NETSNMP_IMPORT __declspec(dllimport)
+      #endif
+    #else
+      #if defined(_MSC_VER)
+        #define NETSNMP_IMPORT __declspec(dllexport)
+      #endif
+
+    #endif   /* NETSNMP_DLL */
+  #endif     /* ! NETSNMP_NO_DLL */
+
+/*
+ * DLL decoration, if used at all, must be consistent.
+ * This is why NETSNMP_IMPORT is really an export decoration
+ * when it is encountered in a header file that is included
+ * during the compilation of a library source file.
+ * NETSNMP_DLL is set by the MSVC libsnmp_dll project
+ *  in order to signal that the library sources are being compiled.
+ * NETSNMP_NO_DLL ignores the preceding, and renders
+ *  the NETSNMP_IMPORT definitions harmless.
+ */
+
+#endif       /* WIN32 */
+
+#ifndef NETSNMP_IMPORT
+#  define NETSNMP_IMPORT extern
+#endif
+
+
+/* wrap alloc functions to use DLL's memory heap */
+/* This is not done in tools.c, where these wrappers are defined */
+
+#ifdef WIN32
+
+  #ifndef NETSNMP_NO_DLL
+    #ifndef NETSNMP_TOOLS_C
+      #define strdup    netsnmp_strdup
+      #define calloc    netsnmp_calloc
+      #define malloc    netsnmp_malloc
+      #define realloc   netsnmp_realloc
+      #define free      netsnmp_free
+    #endif
+  #endif
+
+  /* XXX next definition may be needed only for MSVC */
+  #ifndef strdup
+    #define strdup _strdup
+  #endif
+
+#endif /* WIN32 */
 
 #ifdef __cplusplus
 }
