@@ -571,6 +571,11 @@ main(int argc, char *argv[])
     }
 #endif
 
+    /*  Honor selection of standard error output.  */
+    if (!stderr_log) {
+      snmp_disable_stderrlog();
+    }
+
     SOCK_STARTUP;
     init_agent("snmpd");		/* do what we need to do first. */
     init_mib_modules();
@@ -628,10 +633,6 @@ main(int argc, char *argv[])
 	}
 #endif
 #endif
-
-	/* honor selection of standard error output */
-	if (!stderr_log)
-		snmp_disable_stderrlog();
 
 	/* we're up, log our version number */
 	snmp_log(LOG_INFO, "UCD-SNMP version %s\n", VersionInfo);
