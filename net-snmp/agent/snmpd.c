@@ -1014,6 +1014,7 @@ receive(void)
                      */
                     if(running && ! reconfig)
                         goto reselect;
+                    continue;
                 } else {
                     snmp_log_perror("select");
                 }
