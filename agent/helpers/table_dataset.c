@@ -97,6 +97,7 @@ netsnmp_get_table_data_set_handler(netsnmp_table_data_set *data_set)
         netsnmp_create_handler(TABLE_DATA_SET_NAME,
                                netsnmp_table_data_set_helper_handler);
     if (ret) {
+        ret->flags |= MIB_HANDLER_AUTO_NEXT;
         ret->myvoid = (void *) data_set;
     }
     return ret;
@@ -735,8 +736,7 @@ netsnmp_table_data_set_helper_handler(netsnmp_mib_handler *handler,
         }
     }
 
-    if (handler->next && handler->next->access_method)
-        netsnmp_call_next_handler(handler, reginfo, reqinfo, requests);
+    /* next handler called automatically - 'AUTO_NEXT' */
     return SNMP_ERR_NOERROR;
 }
 
