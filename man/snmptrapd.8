@@ -50,6 +50,7 @@ Log the messages to syslog(8).  These syslog messages are sent with
 the level of LOG_WARNING, and to the LOG_LOCAL0 facility (by
 default).  The demon will also fork away from its caller when
 the syslog facilities are used.
+This is the default unless the '-P' flag is used.
 .IP "-l [d0-7]"
 Specifies the syslog facility to use, demon or local[0-7].
 .IP "-a"
