@@ -26,7 +26,7 @@
 #ifdef hpux
 #define EXCACHETIME 30
 #define CACHEFILE "/tmp/.snmp-exec-cache"
-#define MAXCACHESIZE 1600    /* (200*80)   /* roughly 200 lines max */
+#define MAXCACHESIZE (200*80)   /* roughly 200 lines max */
 #endif
 
 unsigned char *var_wes_proc();
