@@ -91,7 +91,6 @@ typedef long    fd_mask;
 #include "system.h"
 #include "read_config.h"
 #include "snmp.h"
-#include "agentx.h"
 #include "mib.h"
 #include "m2m.h"
 #include "snmp_vars.h"
@@ -572,6 +571,9 @@ init_master_agent(int dest_port)
                         sess,
                        *session=&sess;
 
+    if ( agent_role != MASTER_AGENT )
+	return;
+
     /* set up a fake session for incoming requests that opens a port
      * that we listen to. */
 
@@ -589,34 +591,6 @@ init_master_agent(int dest_port)
     set_post_parse( session, snmp_check_parse );
 }
 
-struct snmp_session *agentx_session;
-void
-init_sub_agent(int dest_port)
-{
-    struct snmp_session
-                        sess,
-                       *session=&sess;
-
-    memset(session, 0, sizeof(struct snmp_session));
-    session->version = AGENTX_VERSION_1;
-    session->peername = AGENTX_SOCKET;
-    session->retries = SNMP_DEFAULT_RETRIES;
-    session->timeout = SNMP_DEFAULT_TIMEOUT;
-    session->flags  |= SNMP_FLAGS_STREAM_SOCKET;
-     
-    session->local_port = 0;	/* client */
-    session->callback = handle_agentx_packet;
-    session->authenticator = NULL;
-    agentx_session = snmp_open( session );
-    set_parse( agentx_session, agentx_parse );
-    set_build( agentx_session, agentx_build );
-
-    if ( agentx_open_session( agentx_session ) < 0 ) {
-	snmp_close( agentx_session );
-	free( agentx_session );
-	exit(1);
-    }
-}
 
 /*******************************************************************-o-******
  * main
@@ -830,10 +804,7 @@ main(int argc, char *argv[])
       fclose(PID);
     }
 
-    if ( agent_role == MASTER_AGENT )
-	init_master_agent( dest_port );
-    else
-	init_sub_agent( dest_port );
+    init_master_agent( dest_port );
 
     usm_set_reportErrorOnUnknownID(1);
     init_agent();		/* register our .conf handlers */

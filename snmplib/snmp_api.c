@@ -108,8 +108,6 @@ SOFTWARE.
 #include "snmp_alarm.h"
 #include "default_store.h"
 
-#include "agentx.h"
-
 static void init_snmp_session (void);
 #include "transform_oids.h"
 

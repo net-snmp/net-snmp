@@ -33,6 +33,11 @@
 #include "mibgroup/struct.h"
 #include "mibgroup/mib_module_includes.h"
 
+#ifdef USING_AGENTX_SUBAGENT_MODULE
+#include "agentx/subagent.h"
+#endif
+
+
 #define UCD_REG_FLAG_SPLIT_REGISTRATION 0x1
 
 struct subtree *subtrees;
@@ -252,8 +257,10 @@ register_mib(const char *moduleName,
   subtree->variables_width = varsize;
   res = load_subtree(subtree);
 
+#ifdef USING_AGENTX_SUBAGENT_MODULE
   if ( agent_role == SUB_AGENT )
     agentx_register( agentx_session, mibloc, mibloclen );
+#endif
 
   return res;
 }
@@ -321,8 +328,10 @@ unregister_mib(oid *name,
      return -1;
 
   res = unload_subtree(name, len, subtrees);
+#ifdef USING_AGENTX_SUBAGENT_MODULE
   if ( agent_role == SUB_AGENT )
     agentx_unregister( agentx_session, name, len );
+#endif
 
   return res;
 }

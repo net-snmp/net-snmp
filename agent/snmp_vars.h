@@ -78,6 +78,7 @@ void sort_tree (void);
 struct subtree *find_subtree (oid *, size_t, struct subtree *);
 struct subtree *find_subtree_next (oid *, size_t, struct subtree *);
 struct subtree *find_subtree_previous (oid *, size_t, struct subtree *);
+struct snmp_session *get_session_for_oid( oid *, size_t);
 int register_mib (const char *, struct variable *, size_t , size_t , oid *, size_t);
 int unregister_mib (oid *, size_t);
 struct subtree *free_subtree (struct subtree *);
