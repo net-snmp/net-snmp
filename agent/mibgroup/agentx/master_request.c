@@ -440,15 +440,19 @@ agentx_add_request( struct agent_snmp_session *asp,
     vbp->index = asp->index;	/* Remember the variable index */
     ax_vlist->num_vars++;
     
+    sub = find_subtree_previous( vbp->name, vbp->name_length, NULL );
     if ( asp->exact )
         snmp_pdu_add_variable( request->pdu,
 			   vbp->name, vbp->name_length, vbp->type,
 			   (u_char*)(vbp->val.string), vbp->val_len);
     else {
-	sub = find_subtree_previous( vbp->name, vbp->name_length, NULL );
         snmp_pdu_add_variable( request->pdu,
 			   vbp->name, vbp->name_length, ASN_PRIV_EXCL_RANGE,
 			   (u_char*)sub->end, sub->end_len*sizeof(oid));
+    }
+    if ( sub->timeout > request->pdu->time ) {
+	request->pdu->time = sub->timeout;
+	request->pdu->flags |= UCD_MSG_FLAG_PDU_TIMEOUT;
     }
 
     return AGENTX_ERR_NOERROR;

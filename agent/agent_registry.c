@@ -369,6 +369,7 @@ register_mib_context(const char *moduleName,
   reg_parms.priority = priority;
   reg_parms.range_subid  = range_subid;
   reg_parms.range_ubound = range_ubound;
+  reg_parms.timeout = timeout;
   snmp_call_callbacks(SNMP_CALLBACK_APPLICATION, SNMPD_CALLBACK_REGISTER_OID,
                       &reg_parms);
 

@@ -174,7 +174,7 @@ agentx_close_session( struct snmp_session *ss, int why )
 
 int
 agentx_register( struct snmp_session *ss, oid start[], size_t startlen,
-		 int priority, int range_subid, oid range_ubound)
+		 int priority, int range_subid, oid range_ubound, int timeout)
 {
     struct snmp_pdu *pdu, *response;
 
@@ -187,7 +187,7 @@ agentx_register( struct snmp_session *ss, oid start[], size_t startlen,
     pdu = snmp_pdu_create(AGENTX_MSG_REGISTER);
     if ( pdu == NULL )
 	return 0;
-    pdu->time = 0;
+    pdu->time = timeout;
     pdu->priority = priority;
     pdu->sessid = ss->sessid;
     pdu->range_subid = range_subid;
