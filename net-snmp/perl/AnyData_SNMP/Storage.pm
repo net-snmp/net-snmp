@@ -86,6 +86,7 @@ sub get_col_names {
     $parser->{col_names} = \@cols;
     $self->{col_types} = \@types;
     $self->{col_names} = \@cols;
+    map { $self->{col_uc_map}{uc($_)} = $_ } @cols;
     return \@cols;
 }
 
@@ -172,8 +173,8 @@ sub make_session {
 
 sub file2str {
     DEBUG("calling AnyData::Storage::SNMP file2str\n");
-    my ($self, $parser, $cols) = @_;
-    my @retcols;
+    my ($self, $parser, $uccols) = @_;
+    my ($cols, @retcols);
     DEBUG("file2str\n",Dumper(\@_),"\n");
     if (!$self->{lastnode}) {
 #	my @vbstuff = @{$parser->{'col_names'}};
@@ -181,6 +182,7 @@ sub file2str {
 #	map { $_ = [ $_ ] } @vbstuff;
 #	$self->{lastnode} = new SNMP::VarList(@vbstuff);
 #	splice (@$cols,0,1+$#AnyData::Storage::SNMP::basecols);
+	map { push @$cols,$self->{col_uc_map}{$_} } @$uccols;
 	if ($#$cols == -1) {
 	    $cols = $self->{'col_names'};
 	    # remove base columns
@@ -257,7 +259,7 @@ sub push_row {
 	DEBUG("set cols: ", Dumper(\@origvars));
     } else {
 	# only update the columns in question.  (mode probably UPDATE)
-	@origvars = @$cols;
+	map { push @origvars, $self->{col_uc_map}{$_} } @$cols;
     }
 
     my @vars;
