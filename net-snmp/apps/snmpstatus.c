@@ -150,7 +150,6 @@ main(argc, argv)
     char *sysdescr = NULL;
     u_long uptime = 0;
     int status;
-    u_long uptime = 0;
     int ipin = 0, ipout = 0, ipackets = 0, opackets = 0;
     int good_var;
     int down_interfaces = 0;
