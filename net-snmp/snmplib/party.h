@@ -104,6 +104,7 @@ party_getEntry(/* oid *partyID, int partyIDLen */);
  * Returns NULL if that entry does not exist.
  */
 
+int
 party_scanInit();
 /*
  * Initialized the scan routines so that they will begin at the

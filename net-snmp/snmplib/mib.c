@@ -31,6 +31,7 @@ SOFTWARE.
 #include "parse.h"
 
 static void sprint_by_type();
+int quick_print = 0;
 
 static char *
 uptimeString(timeticks, buf)
@@ -49,12 +50,16 @@ uptimeString(timeticks, buf)
     minutes = timeticks / 60;
     seconds = timeticks % 60;
 
-    if (days == 0){
-	sprintf(buf, "%d:%02d:%02d", hours, minutes, seconds);
-    } else if (days == 1) {
-	sprintf(buf, "%d day, %d:%02d:%02d", days, hours, minutes, seconds);
-    } else {
-	sprintf(buf, "%d days, %d:%02d:%02d", days, hours, minutes, seconds);
+    if (quick_print)
+	sprintf(buf, "%d:%d:%02d:%02d", days, hours, minutes, seconds);
+    else {
+	if (days == 0){
+	    sprintf(buf, "%d:%02d:%02d", hours, minutes, seconds);
+	} else if (days == 1) {
+	    sprintf(buf, "%d day, %d:%02d:%02d", days,hours,minutes,seconds);
+	} else {
+	    sprintf(buf, "%d days, %d:%02d:%02d", days,hours,minutes,seconds);
+	}
     }
     return buf;
 }
@@ -184,10 +189,20 @@ sprint_octet_string(buf, var, enums)
 	*buf++ = '"';
 	*buf = '\0';
     }
-    if (hex || var->val_len <= 4){
-	sprintf(buf, " Hex: ");
-	buf += strlen(buf);
+    if (hex || ((var->val_len <= 4) && !quick_print)){
+	if (quick_print){
+	    *buf++ = '"';
+	    *buf = '\0';
+	} else {
+	    sprintf(buf, " Hex: ");
+	    buf += strlen(buf);
+	}
 	sprint_hexstring(buf, var->val.string, var->val_len);
+	if (quick_print){
+	    buf += strlen(buf);
+	    *buf++ = '"';
+	    *buf = '\0';
+	}
     }
 }
 
@@ -204,8 +219,10 @@ sprint_opaque(buf, var, enums)
 	sprint_by_type(buf, var, (struct enum_list *)NULL);
 	return;
     }
-    sprintf(buf, "OPAQUE: ");
-    buf += strlen(buf);
+    if (!quick_print){
+	sprintf(buf, "OPAQUE: ");
+	buf += strlen(buf);
+    }
     sprint_hexstring(buf, var->val.string, var->val_len);
 }
 
@@ -221,8 +238,10 @@ sprint_object_identifier(buf, var, enums)
 	sprint_by_type(buf, var, (struct enum_list *)NULL);
 	return;
     }
-    sprintf(buf, "OID: ");
-    buf += strlen(buf);
+    if (!quick_print){
+	sprintf(buf, "OID: ");
+	buf += strlen(buf);
+    }
     sprint_objid(buf, (oid *)(var->val.objid), var->val_len / sizeof(oid));
 }
 
@@ -240,7 +259,11 @@ sprint_timeticks(buf, var, enums)
 	sprint_by_type(buf, var, (struct enum_list *)NULL);
 	return;
     }
-    sprintf(buf, "Timeticks: (%d) %s", *(u_long *)(var->val.integer), uptimeString(*(u_long *)(var->val.integer), timebuf));
+    if (!quick_print){
+	sprintf(buf, "Timeticks: (%d) ", *(u_long *)(var->val.integer));
+	buf += strlen(buf);
+    }
+    sprintf(buf, "%s", uptimeString(*(u_long *)(var->val.integer), timebuf));
 }
 
 static void
@@ -264,6 +287,8 @@ sprint_integer(buf, var, enums)
 	}
     if (enum_string == NULL)
 	sprintf(buf, "%d", *var->val.integer);
+    else if (quick_print)
+	sprintf(buf, "%s", enum_string);
     else
 	sprintf(buf, "%s(%d)", enum_string, *var->val.integer);
 }
@@ -289,6 +314,8 @@ sprint_uinteger(buf, var, enums)
 	}
     if (enum_string == NULL)
 	sprintf(buf, "%d", *var->val.integer);
+    else if (quick_print)
+	sprintf(buf, "%s", enum_string);
     else
 	sprintf(buf, "%s(%d)", enum_string, *var->val.integer);
 }
@@ -305,7 +332,10 @@ sprint_gauge(buf, var, enums)
 	sprint_by_type(buf, var, (struct enum_list *)NULL);
 	return;
     }
-    sprintf(buf, "Gauge: %lu", *var->val.integer);
+    if (quick_print)
+	sprintf(buf, "%lu", *var->val.integer);
+    else
+	sprintf(buf, "Gauge: %lu", *var->val.integer);
 }
 
 static void
@@ -332,8 +362,10 @@ sprint_networkaddress(buf, var, enums)
     int x, len;
     u_char *cp;
 
-    sprintf(buf, "Network Address: ");
-    buf += strlen(buf);
+    if (!quick_print){
+	sprintf(buf, "Network Address: ");
+	buf += strlen(buf);
+    }
     cp = var->val.string;    
     len = var->val_len;
     for(x = 0; x < len; x++){
@@ -359,7 +391,10 @@ sprint_ipaddress(buf, var, enums)
 	return;
     }
     ip = var->val.string;
-    sprintf(buf, "IpAddress: %d.%d.%d.%d",ip[0], ip[1], ip[2], ip[3]);
+    if (quick_print)
+	sprintf(buf, "%d.%d.%d.%d",ip[0], ip[1], ip[2], ip[3]);
+    else
+	sprintf(buf, "IpAddress: %d.%d.%d.%d",ip[0], ip[1], ip[2], ip[3]);
 }
 
 static void
@@ -374,7 +409,10 @@ sprint_unsigned_short(buf, var, enums)
 	sprint_by_type(buf, var, (struct enum_list *)NULL);
 	return;
     }
-    sprintf(buf, "INT: %lu", *var->val.integer);
+    if (quick_print)
+	sprintf(buf, "%lu", *var->val.integer);
+    else
+	sprintf(buf, "INT: %lu", *var->val.integer);
 }
 
 static void
@@ -408,26 +446,37 @@ sprint_bitstring(buf, var, enums)
 	sprint_by_type(buf, var, (struct enum_list *)NULL);
 	return;
     }
-    sprintf(buf, "BIT_STRING: ");
-    buf += strlen(buf);
+    if (quick_print){
+	*buf++ = '"';
+	*buf = '\0';
+    } else {
+	sprintf(buf, "BIT_STRING: ");
+	buf += strlen(buf);
+    }
     sprint_hexstring(buf, var->val.bitstring, var->val_len);
     buf += strlen(buf);
 
-    cp = var->val.bitstring + 1;
-    for(len = 0; len < var->val_len - 1; len++){
-	for(bit = 0; bit < 8; bit++){
-	    if (*cp & (0x80 >> bit)){
-		enum_string = NULL;
-		for (; enums; enums = enums->next)
-		    if (enums->value == (len * 8) + bit){
-			enum_string = enums->label;
-			break;
-		    }
-		if (enum_string == NULL)
-		    sprintf(buf, "%d ", (len * 8) + bit);
-		else
-		    sprintf(buf, "%s(%d) ", enum_string, (len * 8) + bit);
-		buf += strlen(buf);
+    if (quick_print){
+	buf += strlen(buf);
+	*buf++ = '"';
+	*buf = '\0';
+    } else {
+	cp = var->val.bitstring + 1;
+	for(len = 0; len < var->val_len - 1; len++){
+	    for(bit = 0; bit < 8; bit++){
+		if (*cp & (0x80 >> bit)){
+		    enum_string = NULL;
+		    for (; enums; enums = enums->next)
+			if (enums->value == (len * 8) + bit){
+			    enum_string = enums->label;
+			    break;
+			}
+		    if (enum_string == NULL)
+			sprintf(buf, "%d ", (len * 8) + bit);
+		    else
+			sprintf(buf, "%s(%d) ", enum_string, (len * 8) + bit);
+		    buf += strlen(buf);
+		}
 	    }
 	}
 	cp ++;	    
@@ -446,8 +495,10 @@ sprint_nsapaddress(buf, var, enums)
 	sprint_by_type(buf, var, (struct enum_list *)NULL);
 	return;
     }
-    sprintf(buf, "NsapAddress: ");
-    buf += strlen(buf);
+    if (!quick_print){
+	sprintf(buf, "NsapAddress: ");
+	buf += strlen(buf);
+    }
     sprint_hexstring(buf, var->val.string, var->val_len);
 }
 
@@ -466,9 +517,10 @@ sprint_counter64(buf, var, enums)
 	return;
     }
 /* XXX */
-    sprintf(buf, "Counter64: ");
-    buf += strlen(buf);
-    
+    if (!quick_print){
+	sprintf(buf, "Counter64: ");
+	buf += strlen(buf);
+    }
     sprint_hexstring(buf, &var->val.counter64->high,
 		     sizeof(var->val.counter64->high));
     buf += strlen(buf);
@@ -564,6 +616,8 @@ init_mib()
     if (!Mib)
 	Mib = read_mib("mib.txt");
     if (!Mib)
+	Mib = read_mib("/usr/local/lib/mib.txt");
+    if (!Mib)
 	Mib = read_mib("/etc/mib.txt");
     if (!Mib){
 	fprintf(stderr, "Couldn't find mib file\n");
@@ -643,6 +697,7 @@ set_functions(subtree)
 
 #ifdef testing
 int snmp_dump_packet = 0;
+int quick_print = 0;
 
 main(argc, argv)
      int argc;
@@ -873,28 +928,53 @@ sprint_objid(buf, objid, objidlen)
     } else {
 	cp = tempbuf;
 	if ((strlen(tempbuf) > strlen((char *)RFC1213_MIB_text))
+#ifdef SVR4
+	    && !memcmp(tempbuf, (char *)RFC1213_MIB_text,
+		     strlen((char *)RFC1213_MIB_text))){
+#else
 	    && !bcmp(tempbuf, (char *)RFC1213_MIB_text,
 		     strlen((char *)RFC1213_MIB_text))){
+#endif
 	    cp += sizeof(RFC1213_MIB_text);
 	}
 	if ((strlen(tempbuf) > strlen((char *)EXPERIMENTAL_MIB_text))
+#ifdef SVR4
+	    && !memcmp(tempbuf, (char *) EXPERIMENTAL_MIB_text,
+		     strlen((char *)EXPERIMENTAL_MIB_text))){
+#else
 	    && !bcmp(tempbuf, (char *) EXPERIMENTAL_MIB_text,
 		     strlen((char *)EXPERIMENTAL_MIB_text))){
+#endif
             cp += sizeof(EXPERIMENTAL_MIB_text);
 	}
 	if ((strlen(tempbuf) > strlen((char *)PRIVATE_MIB_text))
+#ifdef SVR4
+	    && !memcmp(tempbuf, (char *) PRIVATE_MIB_text,
+		     strlen((char *)PRIVATE_MIB_text))){
+#else
 	    && !bcmp(tempbuf, (char *) PRIVATE_MIB_text,
 		     strlen((char *)PRIVATE_MIB_text))){
+#endif
             cp += sizeof(PRIVATE_MIB_text);
 	}
 	if ((strlen(tempbuf) > strlen((char *)PARTY_MIB_text))
+#ifdef SVR4
+	    && !memcmp(tempbuf, (char *) PARTY_MIB_text,
+		     strlen((char *)PARTY_MIB_text))){
+#else
 	    && !bcmp(tempbuf, (char *) PARTY_MIB_text,
 		     strlen((char *)PARTY_MIB_text))){
+#endif
             cp += sizeof(PARTY_MIB_text);
 	}
 	if ((strlen(tempbuf) > strlen((char *)SECRETS_MIB_text))
+#ifdef SVR4
+	    && !memcmp(tempbuf, (char *) SECRETS_MIB_text,
+		     strlen((char *)SECRETS_MIB_text))){
+#else
 	    && !bcmp(tempbuf, (char *) SECRETS_MIB_text,
 		     strlen((char *)SECRETS_MIB_text))){
+#endif
             cp += sizeof(SECRETS_MIB_text);
 	}
     }
@@ -935,7 +1015,10 @@ sprint_variable(buf, objid, objidlen, variable)
 
     sprint_objid(buf, objid, objidlen);
     buf += strlen(buf);
-    strcat(buf, " = ");
+    if (quick_print)
+	strcat(buf, " ");
+    else
+	strcat(buf, " = ");
     buf += strlen(buf);
 
     if (variable->type == SNMP_NOSUCHOBJECT)
@@ -1154,7 +1237,11 @@ get_node(name, objid, objidlen)
 	if (newname + 64 - op > *objidlen)
 	    return 0;
 	*objidlen = newname + 64 - op;
+#ifdef SVR4
+	memmove(objid, op, (newname + 64 - op) * sizeof(oid));
+#else
 	bcopy(op, objid, (newname + 64 - op) * sizeof(oid));
+#endif
 	return 1;
     } else {
 	return 0;

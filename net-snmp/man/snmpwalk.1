@@ -19,27 +19,37 @@
 .\" ARISING OUT OF OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS
 .\" SOFTWARE.
 .\" ******************************************************************/
-.TH SNMPWALK 1 "1 June 1992"
+.TH SNMPWALK 1 "13 July 1994"
 .UC 4
 .SH NAME
 snmpwalk - communicates with a network entity using SNMP GET Next Requests.
 .SH SYNOPSIS
-snmpwalk host sourceParty destinationParty [variable-name]
+snmpwalk -v 1 hostname community [objectID]
+.PP
+snmpwalk [-v 2] hostname noAuth [objectID]
+.PP
+snmpwalk\ [-v\ 2] hostname srcParty dstParty [objectID]
 .SH DESCRIPTION
 Snmpwalk is an SNMP application that uses GET NEXT Requests to query for a tree
 of information about a network entity.
 .PP
 The
-.I host
+.I hostname
 specification may be either a host name or an internet address
-specified in "dot notation"
+specified in "dot notation".
 .PP
-The
-.I sourceParty
+The version 1
+.I community
+specifies the community name for the transaction with the remote system.
+.PP
+The version 2
+.I srcParty
 and
-.I destinationParty
+.I dstParty
 specify the party names for the transaction with the remote system, in the
-same format as /etc/party.conf.
+same format as /etc/party.conf.  To forgo authentication, use the
+.B noAuth
+keyword instead of specifying party names.
 .PP
 A variable may also be given on the
 command line.  This variable specifies which portion of the object identifier
@@ -48,25 +58,31 @@ below the given variable are queried and their values presented to the user.
 Each variable name is given in the format specified in
 .IR variables (5).
 .PP
-If the "variable-name" argument is not present, snmpwalk will search MIB-2.
+If the "objectID" argument is not present, snmpwalk will search MIB-2.
 .PP
 For example
 .PP
-.I snmpwalk zeus.andrew.cmu.edu zeusMS zeusAgent system
+.I snmpwalk zeus zeusMS zeusAgent system
 .PP
-will retrieve the variables sysDescr.0 and sysObjectID.0 and sysUpTime.0:
+will retrieve all of the variables under system:
 .PP
-.I Name: system.sysDescr.0
+.I system.sysDescr.0 =
+"SunOS zeus.net.cmu.edu 4.1.3_U1 1 sun4m"
 .br
-.I OCTET STRING- (ascii):	Unix 4.3BSD
-.PP
-.I Name: system.sysObjectID.0
+.I system.sysObjectID.0 = OID: enterprises.hp.nm.hpsystem.10.1.1
 .br
-.I OBJECT IDENTIFIER:  .iso.org.dod.internet.private.enterprises.CMU.sysID.CMU-Unix
-.PP
-.I Name: system.sysUpTime.0
+.I system.sysUpTime.0 = Timeticks: (155274552) 17 days, 23:19:05
 .br
-.I Timeticks: (2291082) 6:21:50
+.I system.sysContact.0 =
+""
+.br
+.I system.sysName.0 =
+"zeus.net.cmu.edu"
+.br
+.I system.sysLocation.0 =
+""
+.br
+.I system.sysServices.0 = 72
 .PP
 If the network entity has an error processing the request packet, an error
 packet will be returned and a message will be shown, helping to pinpoint why
@@ -78,6 +94,8 @@ will be displayed:
 .I End of MIB.
 .PP
 Adding a "-d" to the argument list will cause the application to dump input and output packets.
+.PP
+Adding a "-q" to the argument list will cause the application to use a quicker, less verbose output form.
 .PP
 .SH "SEE ALSO"
 variables(5), RFC 1155, RFC 1156, RFC 1157, SNMP Security Internet Drafts

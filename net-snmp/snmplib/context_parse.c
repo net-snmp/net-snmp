@@ -132,12 +132,20 @@ read_context_database(filename)
 		cxp->contextLocal = 2; /* FALSE */
 	    }
 	    cxp->contextViewIndex = view;
+#ifdef SVR4
+	    memmove(cxp->contextLocalEntity, entity, entityLen);
+#else
 	    bcopy(entity, cxp->contextLocalEntity, entityLen);
+#endif
 	    cxp->contextLocalEntityLen = entityLen;
 	    cxp->contextLocalTime = time;
 	    cxp->contextDstPartyIndex = dstParty;
 	    cxp->contextSrcPartyIndex = srcParty;
+#ifdef SVR4
+	    memmove(cxp->contextProxyContext, proxyId, proxyIdLen * sizeof(oid));
+#else
 	    bcopy(proxyId, cxp->contextProxyContext, proxyIdLen * sizeof(oid));
+#endif
 	    cxp->contextProxyContextLen = proxyIdLen;
 	    cxp->contextStorageType = 2;
 	    cxp->contextStatus = rp->contextStatus = CONTEXTACTIVE;

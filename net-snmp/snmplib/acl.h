@@ -55,6 +55,7 @@ acl_getEntry(/* int target, int subject, int resources */);
  * Returns NULL if that entry does not exist.
  */
 
+int
 acl_scanInit();
 /*
  * Initialized the scan routines so that they will begin at the

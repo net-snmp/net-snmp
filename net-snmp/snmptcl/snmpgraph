@@ -1,4 +1,4 @@
-#!/usr/local/bin/wish -f
+#!wish -f
 #
 # Monitors an SNMP variable
 # 

@@ -4,3 +4,5 @@ snmptest
 snmptranslate
 snmptrapd
 snmpwalk
+snmpset
+snmpgetnext

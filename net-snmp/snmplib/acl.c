@@ -24,6 +24,7 @@ acl_getEntry(target, subject, resources)
     return NULL;
 }
 
+int
 acl_scanInit()
 {
   ScanPtr = List;
@@ -47,13 +48,21 @@ acl_createEntry(target, subject, resources)
     struct aclEntry *ap;
 
     ap = (struct aclEntry *)malloc(sizeof(struct aclEntry));
+#ifdef SVR4
+    memset((char *)ap, NULL, sizeof(struct aclEntry));
+#else
     bzero((char *)ap, sizeof(struct aclEntry));
+#endif
 
     ap->aclTarget = target;
     ap->aclSubject = subject;
     ap->aclResources = resources;
     ap->reserved = (struct aclEntry *)malloc(sizeof(struct aclEntry));
+#ifdef SVR4
+    memset((char *)ap->reserved, NULL, sizeof(struct aclEntry));
+#else
     bzero((char *)ap->reserved, sizeof(struct aclEntry));
+#endif
 
     ap->next = List;
     List = ap;
