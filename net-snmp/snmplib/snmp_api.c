@@ -1382,7 +1382,7 @@ snmpv3_build(struct snmp_session	*session,
 	case SNMP_MSG_RESPONSE:
 	case SNMP_MSG_TRAP2:
 	case SNMP_MSG_REPORT:
-	    pdu->flags &= (~SNMP_MSG_FLAG_EXPECT_RESPONSE);
+	    pdu->flags &= (~UCD_MSG_FLAG_EXPECT_RESPONSE);
 	    /* Fallthrough */
 	case SNMP_MSG_GET:
 	case SNMP_MSG_GETNEXT:
@@ -1767,7 +1767,7 @@ snmp_build(struct snmp_session *session,
 
     switch (pdu->command) {
 	case SNMP_MSG_RESPONSE:
-	    pdu->flags &= (~SNMP_MSG_FLAG_EXPECT_RESPONSE);
+	    pdu->flags &= (~UCD_MSG_FLAG_EXPECT_RESPONSE);
 		/* Fallthrough */
 	case SNMP_MSG_GET:
 	case SNMP_MSG_GETNEXT:
@@ -1782,7 +1782,7 @@ snmp_build(struct snmp_session *session,
 	    break;
 
 	case SNMP_MSG_TRAP2:
-	    pdu->flags &= (~SNMP_MSG_FLAG_EXPECT_RESPONSE);
+	    pdu->flags &= (~UCD_MSG_FLAG_EXPECT_RESPONSE);
 		/* Fallthrough */
 	case SNMP_MSG_INFORM:
             /* not supported in SNMPv1 and SNMPsec */
@@ -1829,7 +1829,7 @@ snmp_build(struct snmp_session *session,
 	    if (pdu->time == SNMP_DEFAULT_TIME)
 	        pdu->time = DEFAULT_TIME;
             /* don't expect a response */
-	    pdu->flags &= (~SNMP_MSG_FLAG_EXPECT_RESPONSE);
+	    pdu->flags &= (~UCD_MSG_FLAG_EXPECT_RESPONSE);
 	    break;
 
 	case SNMP_MSG_REPORT:		/* SNMPv3 only */
@@ -2615,7 +2615,7 @@ snmp_pdu_parse(struct snmp_pdu *pdu, u_char  *data, size_t *length) {
   if (data == NULL)
     return -1;
   pdu->command = msg_type;
-  pdu->flags &= (~SNMP_MSG_FLAG_RESPONSE_PDU);
+  pdu->flags &= (~UCD_MSG_FLAG_RESPONSE_PDU);
 
   /* get the fields in the PDU preceeding the variable-bindings sequence */
   switch (pdu->command) {
@@ -2658,7 +2658,7 @@ snmp_pdu_parse(struct snmp_pdu *pdu, u_char  *data, size_t *length) {
 
 	case SNMP_MSG_RESPONSE:
 	case SNMP_MSG_REPORT:
-		pdu->flags |= SNMP_MSG_FLAG_RESPONSE_PDU;
+		pdu->flags |= UCD_MSG_FLAG_RESPONSE_PDU;
 		/* fallthrough */
 
 	default:
@@ -2963,7 +2963,7 @@ snmp_sess_async_send(void *sessp,
     session->s_snmp_errno = 0;
     session->s_errno = 0;
 
-    pdu->flags |= SNMP_MSG_FLAG_EXPECT_RESPONSE;
+    pdu->flags |= UCD_MSG_FLAG_EXPECT_RESPONSE;
 
     /* check/setup the version */
     if (pdu->version == SNMP_DEFAULT_VERSION) {
@@ -3023,7 +3023,7 @@ snmp_sess_async_send(void *sessp,
     }
 
     /* check if should get a response */
-    if (pdu->flags & SNMP_MSG_FLAG_EXPECT_RESPONSE) {
+    if (pdu->flags & UCD_MSG_FLAG_EXPECT_RESPONSE) {
         gettimeofday(&tv, (struct timezone *)0);
 
 	/* set up to expect a response */
@@ -3245,7 +3245,7 @@ snmp_sess_read(void *sessp,
 	return;
     }
 
-    if (pdu->flags & SNMP_MSG_FLAG_RESPONSE_PDU) {
+    if (pdu->flags & UCD_MSG_FLAG_RESPONSE_PDU) {
 	/* call USM to free any securityStateRef supplied with the message */
 	if (pdu->securityStateRef) {
 	  usm_free_usmStateReference(pdu->securityStateRef);
