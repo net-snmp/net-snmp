@@ -679,7 +679,9 @@ AC_MSG_CHECKING(for and configuring mib modules to use)
 mibdir="agent/mibgroup"
 module_list=""
 module_list_code=""
-new_module_list="mibII ucd_snmp snmpv3mibs $with_mib_modules"
+new_with_mib_modules=`echo $with_mib_modules | sed 's/,/ /;'`
+new_with_out_mib_modules=`echo $with_out_mib_modules | sed 's/,/ /;'`
+new_module_list="mibII ucd_snmp snmpv3mibs $new_with_mib_modules"
 
 if test "x$enable_ipv6" = "xyes"; then
 	new_module_list="$new_module_list mibII/ipv6"
@@ -704,7 +706,7 @@ default_mibs=IP-MIB:IF-MIB:TCP-MIB:UDP-MIB:SNMPv2-MIB:RFC1213-MIB
 
 for i in $test_modules
  do
-  if echo " $with_out_mib_modules " | grep " $i " > /dev/null; then
+  if echo " $new_with_out_mib_modules " | grep " $i " > /dev/null; then
     :
   else
     new_module_list="$new_module_list $i"
@@ -717,7 +719,7 @@ AC_MSG_CHECKING(for and configuring mib modules pieces to use)
 while test "x$new_module_list" != "x"; do
   for i in $new_module_list
     do
-    if echo " $with_out_mib_modules " | grep " $i " > /dev/null; then
+    if echo " $new_with_out_mib_modules " | grep " $i " > /dev/null; then
       :
     else
       if test -f $srcdir/$mibdir/$i.h; then
@@ -738,7 +740,7 @@ while test "x$new_module_list" != "x"; do
 	    do
 	    if test ! -f $srcdir/$mibdir/$j.h; then
 	      AC_MSG_ERROR(mib module "$i" requires module "$j" but $j.h or $j.c could not be found in $srcdir/$mibdir)
-	    elif echo " $with_out_mib_modules " | grep " $j " > /dev/null; then
+	    elif echo " $new_with_out_mib_modules " | grep " $j " > /dev/null; then
 	      AC_MSG_WARN(mib module "$i" requires module "$j" but you told me to compile without it)
 	    elif echo " $module_list $new_list_two $new_module_list " | grep " $j " > /dev/null; then
 	      :
