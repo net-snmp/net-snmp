@@ -96,7 +96,8 @@ extern          "C" {
 #define MODE_GETNEXT          SNMP_MSG_GETNEXT
 #define MODE_GETBULK          SNMP_MSG_GETBULK
 #define MODE_GET_STASH        SNMP_MSG_INTERNAL_GET_STASH
-#define MODE_IS_GET(x)        (x == SNMP_MSG_GET || x == SNMP_MSG_GETNEXT || x == SNMP_MSG_GETBULK || x == SNMP_MSG_INTERNAL_GET_STASH)
+#define MODE_IS_GET(x)        ((x >= 128) && (x != -1))
+    /* #define MODE_IS_GET(x)        ((x == SNMP_MSG_GET) || (x == SNMP_MSG_GETNEXT) || (x == SNMP_MSG_GETBULK) || (x == SNMP_MSG_INTERNAL_GET_STASH)) */
 
 #define MODE_SET_BEGIN        SNMP_MSG_INTERNAL_SET_BEGIN
 #define MODE_SET_RESERVE1     SNMP_MSG_INTERNAL_SET_RESERVE1
@@ -105,10 +106,29 @@ extern          "C" {
 #define MODE_SET_COMMIT       SNMP_MSG_INTERNAL_SET_COMMIT
 #define MODE_SET_FREE         SNMP_MSG_INTERNAL_SET_FREE
 #define MODE_SET_UNDO         SNMP_MSG_INTERNAL_SET_UNDO
-#define MODE_IS_SET(x)         (!MODE_IS_GET(x))
+#define MODE_IS_SET(x)         ((x < 128) || (x == -1))
+    /* #define MODE_IS_SET(x)         (!MODE_IS_GET(x)) */
+
+#define MODE_BSTEP_PRE_REQUEST   SNMP_MSG_INTERNAL_PRE_REQUEST
+#define MODE_BSTEP_POST_REQUEST  SNMP_MSG_INTERNAL_POST_REQUEST
+
+#define MODE_BSTEP_OBJECT_LOOKUP       SNMP_MSG_INTERNAL_OBJECT_LOOKUP
+#define MODE_BSTEP_CHECK_VALUE         SNMP_MSG_INTERNAL_CHECK_VALUE
+#define MODE_BSTEP_ROW_CREATE          SNMP_MSG_INTERNAL_ROW_CREATE
+#define MODE_BSTEP_UNDO_SETUP          SNMP_MSG_INTERNAL_UNDO_SETUP
+#define MODE_BSTEP_SET_VALUE           SNMP_MSG_INTERNAL_SET_VALUE
+#define MODE_BSTEP_CHECK_CONSISTENCY   SNMP_MSG_INTERNAL_CHECK_CONSISTENCY
+#define MODE_BSTEP_UNDO_SET            SNMP_MSG_INTERNAL_UNDO_SET
+#define MODE_BSTEP_COMMIT              SNMP_MSG_INTERNAL_COMMIT
+#define MODE_BSTEP_UNDO_COMMIT         SNMP_MSG_INTERNAL_UNDO_COMMIT
+#define MODE_BSTEP_IRREVERSIBLE_COMMIT SNMP_MSG_INTERNAL_IRREVERSIBLE_COMMIT
+#define MODE_BSTEP_UNDO_CLEANUP        SNMP_MSG_INTERNAL_UNDO_CLEANUP
+
 
     typedef struct netsnmp_agent_request_info_s {
         int             mode;
+        int             next_mode_ok;
+        int             next_mode_fail;
 /*        netsnmp_pdu    *pdu;    */ /* pdu contains authinfo, eg */
         struct netsnmp_agent_session_s *asp;    /* may not be needed */
         /*
