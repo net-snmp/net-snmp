@@ -68,11 +68,16 @@
 #if HAVE_SYS_SOCKETVAR_H
 #include <sys/socketvar.h>
 #endif
-#if HAVE_NETINET_IN_PCB_H
-#include <netinet/in_pcb.h>
-#endif
 #if HAVE_NETINET_IP_VAR_H
 #include <netinet/ip_var.h>
+#endif
+#ifdef INET6
+#if HAVE_NETINET6_IP6_VAR_H
+#include <netinet6/ip6_var.h>
+#endif
+#endif
+#ifdef HAVE_NETINET_IN_PCB_H
+#include <netinet/in_pcb.h>
 #endif
 #include <netinet/udp.h>
 #if HAVE_NETINET_UDP_VAR_H
