@@ -40,10 +40,12 @@
  */
 @if $m2c_node_needlength == 1@
     if ($m2c_node_lhs < ${m2c_data_item}${node}_len) {
-       $m2c_node_lh = malloc(${m2c_data_item}${node}_len);
+       $m2c_node_lh = malloc(${m2c_data_item}${node}_len
+                             * sizeof(${m2c_node_lh}[0]));
     }
     $m2c_node_lhs = ${m2c_data_item}${node}_len;
-    memcpy( $m2c_node_lh, ${m2c_data_item}$node, $m2c_node_lhs );
+    memcpy( $m2c_node_lh, ${m2c_data_item}$node,
+            $m2c_node_lhs * sizeof(${m2c_node_lh}[0]) );
 @else@
     $m2c_node_lh = ${m2c_data_item}$node;
 @end@ # length
