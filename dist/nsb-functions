@@ -10,14 +10,14 @@
 NSB_BUILD_DIR=${NSB_BUILD_DIR:=""}
 NSB_SRC_DIR=${NSB_SRC_DIR:=""}
 NSB_INSTALL_DIR=${NSB_INSTALL_DIR:=""}
-NSB_QUIET=0
-NSB_PROMPT=0
-NSB_CLEAN=1
-NSB_CONFIG_ALL=0
-NSB_SKIP_CONFIG=0
-NSB_SKIP_BUILD=0
-NSB_SKIP_TEST=0
-NSB_SKIP_INSTALL=0
+NSB_QUIET=${NSB_QUIET:=0}
+NSB_PROMPT=${NSB_PROMPT:=0}
+NSB_CLEAN=${NSB_CLEAN:=1}
+NSB_CONFIG_ALL=${NSB_CONFIG_ALL:=0}
+NSB_SKIP_CONFIG=${NSB_SKIP_CONFIG:=0}
+NSB_SKIP_BUILD=${NSB_SKIP_BUILD:=0}
+NSB_SKIP_TEST=${NSB_SKIP_TEST:=0}
+NSB_SKIP_INSTALL=${NSB_SKIP_INSTALL:=0}
 NSB_DIST_TRANSPORTS="UDP TCP Unix"
 NSB_EXTRA_TRANSPORTS="Callback UDPIPv6 TCPIPv6 IPX"
 NSB_DIST_MODULES="host disman/event-mib smux"
@@ -27,7 +27,7 @@ NSB_VIEW=cat
 NSB_PERL=
 #NSB_PERL=--enable-embedded-perl
 NSB_FLOW=
-DATE=`date +%y%m%d_%H%M`
+NSB_DATE=${NSB_DATE:=`date +%y%m%d_%H%M`}
 
 #----------------------------------------------------------------------
 #
@@ -110,7 +110,7 @@ nsb-config-dist()
       --disable-developer $NSB_EXTRA_CONFIG \
       --with-sys-contact='System Administrator' \
       --with-defaults --with-mib-modules="$NSB_FINAL_MODULES"
-   # I'd like to add ' | tee nsb-config.$DATE' to save output, but then
+   # I'd like to add ' | tee nsb-config.$NSB_DATE' to save output, but then
    # I'd lose the rc from configure, which I need... sigh
    ngc_rc=$?
    if [ $ngc_rc -ne 0 ];then
@@ -177,7 +177,7 @@ nsb-config-all()
       "--with-mib-modules=$NSB_FINAL_MODULES" \
       "--with-transports=$NSB_DIST_TRANSPORTS $NSB_EXTRA_TRANSPORTS" \
       $NSB_PERL --enable-shared --with-libwrap
-   # I'd like to add ' | tee nsb-config.$DATE' to save output, but then
+   # I'd like to add ' | tee nsb-config.$NSB_DATE' to save output, but then
    # I'd lose the rc from configure, which I need... sigh
    ngc_rc=$?
    if [ $ngc_rc -ne 0 ];then
@@ -232,7 +232,7 @@ nsb-upload()
    target=$2
    dir=$PWD
    cd $build_dir
-   /usr/bin/scp config.log configure-summary nsb-make-all.* \
+   /usr/bin/scp config.log configure-summary nsb-make-all.*$NSB_DATE \
                  $target
    cd $dir
 }
@@ -271,7 +271,7 @@ nsb-make()
       fi
    fi
 
-   nsb_make_OUTPUT=nsb-make-$target.$DATE
+   nsb_make_OUTPUT=nsb-make-$target.$NSB_DATE
    nsb-info "Making $target... (log is $nsb_make_OUTPUT)"
    #
    if [ "x$target" = "xall" ]; then
@@ -282,14 +282,14 @@ nsb-make()
 
    nsb-info "Checking for errors..."
    egrep "[Ee]rror|FAIL|[Ww]arn|No |exists|\*\*\*" $nsb_make_OUTPUT \
-         > nsb-make-$target-allerrs.$DATE
+         > nsb-make-$target-allerrs.$NSB_DATE
    # allow for a few exceptions
-   egrep -v "[Ww]arn|error(mib|\.3)" nsb-make-$target-allerrs.$DATE \
-         > nsb-make-$target-errs.$DATE
-   if [ -s nsb-make-$target-errs.$DATE ]; then
+   egrep -v "[Ww]arn|error(mib|\.3)" nsb-make-$target-allerrs.$NSB_DATE \
+         > nsb-make-$target-errs.$NSB_DATE
+   if [ -s nsb-make-$target-errs.$NSB_DATE ]; then
       nsb-prompt "press enter to view errors"
-      grep ':' $nsb_make_OUTPUT >&2
-#      cat nsb-make-$target-allerrs.$DATE >&2
+      grep ':' $nsb_make_OUTPUT > nsb-make-$target-errs2.$NSB_DATE
+      cat nsb-make-$target-errs2.$NSB_DATE >&2
       nsb-abort "Error(s) during make $target"
    fi
 
@@ -326,7 +326,7 @@ nsb-build()
    shift 5
 
    nsb-flow build in $build_dir
-
+   nsb-flow `uname -a`
 
    if [ ! -d $src_dir ]; then
       nsb-abort "$src_dir does not exist!"
@@ -364,7 +364,7 @@ nsb-build()
    fi
 
    if [ $NSB_SKIP_CONFIG -ne 1 ]; then
-      nsb-info "Configuring... (log is nsb-config.$DATE)"
+      nsb-info "Configuring... (log is nsb-config.$NSB_DATE)"
       if [ $nsb_config_all -eq 0 ]; then
           nsb-config-dist $src_dir
       else
