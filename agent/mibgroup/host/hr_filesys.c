@@ -372,7 +372,7 @@ var_hrfilesys(struct variable *vp,
 #endif
 #ifdef MNTTYPE_UFS
         else if (!strcmp(mnt_type, MNTTYPE_UFS))
-#if defined(BerkelyFS) && !defined(MNTTYPE_HFS)
+#if (defined(BerkelyFS) && !defined(MNTTYPE_HFS)) || defined(solaris2)
             fsys_type_id[fsys_type_len - 1] = 3;
 #else                           /* SysV */
             fsys_type_id[fsys_type_len - 1] = 4;        /* or 3? XXX */
@@ -401,6 +401,10 @@ var_hrfilesys(struct variable *vp,
 #else                           /* ISO 9660 */
             fsys_type_id[fsys_type_len - 1] = 12;
 #endif
+#endif
+#ifdef MNTTYPE_HSFS
+        else if (!strcmp(mnt_type, MNTTYPE_HSFS))
+            fsys_type_id[fsys_type_len - 1] = 13;
 #endif
 #ifdef MNTTYPE_ISO9660
         else if (!strcmp(mnt_type, MNTTYPE_ISO9660))
@@ -520,10 +524,14 @@ const char     *HRFS_ignores[] = {
 #ifdef MNTTYPE_PROC
     MNTTYPE_PROC,
 #endif
+#ifdef MNTTYPE_PROCFS
+    MNTTYPE_PROCFS,
+#endif
 #ifdef MNTTYPE_AUTOFS
     MNTTYPE_AUTOFS,
-#endif
+#else
     "autofs",
+#endif
 #ifdef linux
     "devpts",
     "devfs",
@@ -532,6 +540,8 @@ const char     *HRFS_ignores[] = {
     "shm",
 #endif
 #ifdef solaris2
+    "mntfs",
+    "proc",
     "fd",
 #endif
     0
