@@ -632,7 +632,7 @@ AC_CHECK_FUNCS(getloadavg)
 AC_CHECK_FUNCS(kvm_openfiles nlist)
 dnl BSDi2 functions differ
 AC_CHECK_FUNCS(statvfs statfs)
-
+AC_CHECK_FUNCS(getdtablesize)
 #
 AC_MSG_CHECKING([for SIOCGIFADDR in sys/ioctl.h])
 AC_CACHE_VAL(cv_sys_ioctl_h_has_SIOCGIFADDR,
