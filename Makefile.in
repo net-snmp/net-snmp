@@ -93,12 +93,16 @@ OTHERCLEANTARGETS="EXAMPLE.conf sedscript perlclean"
 #
 # perl specific build rules
 #
-perlmodules:
+perlmakefiles:
 	@for i in $(PERLMODULES); do \
 	   dir=`pwd`; \
 	   if test ! -f perl/$$i/Makefile; then \
 		(cd perl/$$i ; perl Makefile.PL -NET-SNMP-IN-SOURCE=true -NET-SNMP-CONFIG="sh $$dir/net-snmp-config" INST_LIB=../blib/lib INST_ARCHLIB=../blib/arch) ; \
 	   fi ; \
+	done
+
+perlmodules: perlmakefiles
+	@for i in $(PERLMODULES); do \
 	   (cd perl/$$i ; $(MAKE)) ; \
            if test $$? != 0 ; then \
               exit 1 ; \
@@ -123,10 +127,9 @@ perltest:
 
 perlclean:
 	@for i in $(PERLMODULES); do \
-	   ( cd perl/$$i ; $(MAKE) clean ) ; \
-           if test $$? != 0 ; then \
-              exit 1 ; \
-           fi  \
+	   if test -f perl/$$i/Makefile; then \
+	      ( cd perl/$$i ; $(MAKE) clean ) ; \
+           fi ; \
 	done
 
 #
