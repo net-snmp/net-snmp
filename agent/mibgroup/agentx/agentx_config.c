@@ -64,6 +64,8 @@ agentx_parse_agentx_perms(const char *token, char *cptr)
     char *socket_perm, *dir_perm, *socket_user, *socket_group;
     int uid = -1;
     int gid = -1;
+    int s_perm = -1;
+    int d_perm = -1;
 #if HAVE_GETPWNAM && HAVE_PWD_H
     struct passwd *pwd;
 #endif
@@ -77,14 +79,20 @@ agentx_parse_agentx_perms(const char *token, char *cptr)
     socket_user = strtok(NULL, " \t");
     socket_group = strtok(NULL, " \t");
 
-    if (socket_perm)
+    if (socket_perm) {
+        s_perm = strtol(socket_perm, NULL, 8);
         netsnmp_ds_set_int(NETSNMP_DS_APPLICATION_ID,
-                           NETSNMP_DS_AGENT_X_SOCK_PERM,
-                           strtol(socket_perm, NULL, 8));
-    if (dir_perm)
+                           NETSNMP_DS_AGENT_X_SOCK_PERM, s_perm);
+        DEBUGMSGTL(("agentx/config", "socket permissions: %o (%d)\n",
+                    s_perm, s_perm));
+    }
+    if (dir_perm) {
+        d_perm = strtol(dir_perm, NULL, 8);
         netsnmp_ds_set_int(NETSNMP_DS_APPLICATION_ID,
-                           NETSNMP_DS_AGENT_X_DIR_PERM,
-                           strtol(dir_perm, NULL, 8));
+                           NETSNMP_DS_AGENT_X_DIR_PERM, d_perm);
+        DEBUGMSGTL(("agentx/config", "directory permissions: %o (%d)\n",
+                    d_perm, d_perm));
+    }
 
     /*
      * Try to handle numeric UIDs or user names for the socket owner
@@ -103,6 +111,8 @@ agentx_parse_agentx_perms(const char *token, char *cptr)
         if ( uid != 0 )
             netsnmp_ds_set_int(NETSNMP_DS_APPLICATION_ID,
                                NETSNMP_DS_AGENT_X_SOCK_USER, uid);
+        DEBUGMSGTL(("agentx/config", "socket owner: %s (%d)\n",
+                    socket_user, uid));
     }
 
     /*
@@ -122,12 +132,9 @@ agentx_parse_agentx_perms(const char *token, char *cptr)
         if ( gid != 0 )
             netsnmp_ds_set_int(NETSNMP_DS_APPLICATION_ID,
                                NETSNMP_DS_AGENT_X_SOCK_GROUP, gid);
+        DEBUGMSGTL(("agentx/config", "socket group: %s (%d)\n",
+                    socket_group, gid));
     }
-
-    DEBUGMSGTL(("agentx/config", "port permissions: %o (%d), %o (%d), %s (%d), %s (%d)\n",
-			atoi(socket_perm), atoi(socket_perm),
-			atoi(dir_perm), atoi(dir_perm),
-                        socket_user, uid, socket_group, gid));
 }
 
 void
@@ -169,7 +176,7 @@ init_agentx_config(void)
                                   "AgentX bind address");
     snmpd_register_config_handler("agentxperms",
                                   agentx_parse_agentx_perms, NULL,
-                                  "AgentX socket permissions: socket_perms [directory_perms] [username|userid] [groupname|groupid]");
+                                  "AgentX socket permissions: socket_perms [directory_perms [username|userid [groupname|groupid]]]");
     snmpd_register_config_handler("agentxRetries",
                                   agentx_parse_agentx_retries, NULL,
                                   "AgentX Retries");
