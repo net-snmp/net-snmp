@@ -84,10 +84,6 @@
 
 #undef SNMPLIBPATH
 
-/* SNMPPATH contains (more) important files */
-
-#undef SNMPPATH
-
 /* LOGFILE:  If defined it closes stdout/err/in and opens this in out/err's
    place.  (stdin is closed so that sh scripts won't wait for it) */
 
