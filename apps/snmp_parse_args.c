@@ -179,18 +179,22 @@ snmp_parse_args(int argc,
         break;
 
       case 'f':
+	fprintf(stderr, "Warning: -f option is deprecated - use -Of\n");
 	snmp_set_full_objid(1);
 	break;
 
       case 's':
+	fprintf(stderr, "Warning: -s option is deprecated - use -Os\n");
 	snmp_set_suffix_only(1);
 	break;
 
       case 'S':
+	fprintf(stderr, "Warning: -S option is deprecated - use -OS\n");
 	snmp_set_suffix_only(2);
 	break;
 
       case 'q':
+	fprintf(stderr, "Warning: -q option is deprecated - use -Oq\n");
 	snmp_set_quick_print(1);
 	break;
 
@@ -222,7 +226,8 @@ snmp_parse_args(int argc,
         break;
 
       case 'R':
-        random_access = 1;
+	fprintf(stderr, "Warning: -R option is deprecated - use -OR\n");
+        snmp_set_random_access(1);
         break;
 
 
@@ -458,7 +463,7 @@ oid
 		size_t *rootlen)
 {
   size_t savlen = *rootlen;
-  if (random_access || strchr(argv, ':')) {
+  if (snmp_get_random_access() || strchr(argv, ':')) {
     if (get_node(argv,root,rootlen)) {
       return root;
     }

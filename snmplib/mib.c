@@ -979,25 +979,28 @@ snmp_oid_toggle_options(char *options)
     while(*options) {
         switch(*options++) {
         case 'n':
-            ds_set_boolean(DS_LIBRARY_ID, DS_LIB_PRINT_NUMERIC_OIDS, 1);
+            ds_toggle_boolean(DS_LIBRARY_ID, DS_LIB_PRINT_NUMERIC_OIDS);
             break;
         case 'e':
-            ds_set_boolean(DS_LIBRARY_ID, DS_LIB_PRINT_NUMERIC_ENUM, 1);
+            ds_toggle_boolean(DS_LIBRARY_ID, DS_LIB_PRINT_NUMERIC_ENUM);
             break;
         case 'b':
-            ds_set_boolean(DS_LIBRARY_ID, DS_LIB_DONT_BREAKDOWN_OIDS, 1);
+            ds_toggle_boolean(DS_LIBRARY_ID, DS_LIB_DONT_BREAKDOWN_OIDS);
             break;
 	case 'q':
-	    ds_set_boolean(DS_LIBRARY_ID, DS_LIB_QUICK_PRINT, 1);
+	    ds_toggle_boolean(DS_LIBRARY_ID, DS_LIB_QUICK_PRINT);
 	    break;
         case 'f':
-	    snmp_set_full_objid(1);
+            ds_toggle_boolean(DS_LIBRARY_ID, DS_LIB_PRINT_FULL_OID);
 	    break;
         case 's':
 	    snmp_set_suffix_only(1);
 	    break;
         case 'S':
 	    snmp_set_suffix_only(2);
+	    break;
+	case 'R':
+	    ds_toggle_boolean(DS_LIBRARY_ID, DS_LIB_RANDOM_ACCESS);
 	    break;
         default:
 	    return options-1;
@@ -1016,6 +1019,7 @@ void snmp_oid_toggle_options_usage(const char *lead, FILE *outf)
   fprintf(outf, "%s    f: Print full oids on output.\n", lead);
   fprintf(outf, "%s    s: Print only last symbolic element of oid.\n", lead);
   fprintf(outf, "%s    S: Print MIB module-id plus last element.\n", lead);
+  fprintf(outf, "%s    R: Do random access to oid labels.\n", lead);
 }
 
 void
@@ -1827,7 +1831,7 @@ fprint_description(FILE *f,
 {
     struct tree *tp = get_tree(objid, objidlen, tree_head);
     struct tree *subtree = tree_head;
-    fprintf(f, "%s ::= OBJECT-TYPE\n", tp->label);
+    fprintf(f, "%s OBJECT-TYPE\n", tp->label);
     print_tree_node(f, tp);
     fprintf(f, "::= {");
     while (objidlen > 1) {
