@@ -380,7 +380,7 @@ AC_PROMPT_USER(SYS_LOC,[
 available in the MIB-II tree.  This Can Also Be Over-Ridden Using The
 \"syslocation\" Syntax In The Agent'S Configuration Files.
 
-System Location],UCDavis Electrical Engineering Departement,1)
+System Location],Unknown,1)
 
 if test -d /var/log; then
   defaultlog="/var/log/snmpd.log"
