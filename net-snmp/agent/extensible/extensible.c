@@ -339,7 +339,7 @@ unsigned char *var_extensible_disk(vp, name, length, exact, var_len, write_metho
 
   oid newname[30];
   int count, result,i, rtest=0, disknum=0;
-  int totalblks, free, used, avail, availblks;
+  double totalblks, free, used, avail, availblks;
   register int interface;
   struct myproc *proc;
   static long long_ret;
@@ -441,7 +441,7 @@ unsigned char *var_extensible_disk(vp, name, length, exact, var_len, write_metho
       long_ret = used * filesys.fs_fsize/1024;
       return((u_char *) (&long_ret));
     case DISKPERCENT:
-      long_ret = (int) (availblks == 0 ? 0 :
+      long_ret = (double) (availblks == 0 ? 0 :
                         ((double) used / (double) availblks) * 100);
       return ((u_char *) (&long_ret));
     case ERRORFLAG:
