@@ -63,7 +63,7 @@
 #include <net-snmp/library/scapi.h>
 #include <net-snmp/library/keytools.h>
 
-#include <net-snmp/library/version.h>
+#include <net-snmp/version.h>
 #include <net-snmp/library/parse.h>
 #include <net-snmp/library/snmpv3.h>
 
