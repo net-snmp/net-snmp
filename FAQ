@@ -110,6 +110,7 @@ TABLE OF CONTENTS
    How about "Can't open /dev/kmem"?
    The agent is complaining about 'snmpd.conf'.  Where is this?
    The system uptime (sysUpTime) returned is wrong!
+   How can I reduce the memory footprint?
  CODING
    How do I compile with 'cc' instead of 'gcc'?
    But gcc doesn't compile it successfully on my new Solaris system. Why not?
@@ -2403,6 +2404,41 @@ The system uptime (sysUpTime) returned is wrong!
 
   and recompiling.  This particular group is reasonably likely to
   work, even if some of the other more system-specific groups don't.
+
+
+
+How can I reduce the memory footprint?
+--------------------------------------
+
+  In order to reduce the memory footprint for instance to
+  embed the snmpd into a device the following configure options
+  could be used.
+
+  '--disable-debugging'
+     This turns off all compilation of debugging info.
+
+  '--enable-mini-agent' '--with-out-mib-modules=examples/ucdDemoPublic'
+     This creates an agent the minimum amount of MIB modules
+     compiled in.
+     NOTE: If you need more MIB modules add then with the option
+     '--with-mib-modules=...' you add of course extra memory footprint.
+
+  '--with-transports=UDP'
+     This option specifies the transports domain you need.
+     For a simple agent UDP should be sufficient.
+
+   '--without-kmem-usage'
+     This can be used in order not to include the code that
+     operates on the /dev/kmem. This option cannot be used when
+     you do want a MIB module compiled in that depends on it.
+
+   '--with-mibdirs=' and '--with-mibs='
+     These options specify not loading the MIB modules for the
+     agent. It reduces the memory footprint only during
+     runtime.
+     On top of this one could even attempt to exclude the complete
+     MIB loading functionality, but there is currently no
+     configure option for this.
 
 
 
