@@ -25,12 +25,12 @@
 #include <winsock.h>
 #endif
 
+#include <net-snmp/net-snmp-includes.h>
+#include <net-snmp/agent/net-snmp-agent-includes.h>
+
 #if HAVE_DMALLOC_H
 #include <dmalloc.h>
 #endif
-
-#include <net-snmp/net-snmp-includes.h>
-#include <net-snmp/agent/net-snmp-agent-includes.h>
 
 #include "struct.h"
 #include "util_funcs.h"
