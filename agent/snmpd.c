@@ -610,13 +610,13 @@ main(int argc, char *argv[])
 receive(void)
 {
     int numfds;
-    fd_set fdset;
+    fd_set readfds, writefds, exceptfds;
     struct timeval	timeout, *tvp = &timeout;
     struct timeval	sched,   *svp = &sched,
 			now,     *nvp = &now;
-    int count, block;
+    int count, block, i;
 #ifdef	USING_SMUX_MODULE
-    int i, sd;
+    int sd;
 #endif	/* USING_SMUX_MODULE */
 
 
@@ -638,42 +638,91 @@ receive(void)
      */
     while (running) {
         if (reconfig) {
-          reconfig = 0;
-          snmp_log(LOG_INFO, "Reconfiguring daemon\n");
-          update_config();
+	    reconfig = 0;
+	    snmp_log(LOG_INFO, "Reconfiguring daemon\n");
+	    update_config();
         }
 	tvp =  &timeout;
 	tvp->tv_sec = 0;
 	tvp->tv_usec = TIMETICK;
 
 	numfds = 0;
-	FD_ZERO(&fdset);
+	FD_ZERO(&readfds);
+	FD_ZERO(&writefds);
+	FD_ZERO(&exceptfds);
         block = 0;
-        snmp_select_info(&numfds, &fdset, tvp, &block);
+        snmp_select_info(&numfds, &readfds, tvp, &block);
         if (block == 1)
             tvp = NULL; /* block without timeout */
 
 #ifdef	USING_SMUX_MODULE
-		if (smux_listen_sd >= 0) {
-			FD_SET(smux_listen_sd, &fdset);
-			numfds = smux_listen_sd >= numfds ? smux_listen_sd + 1 : numfds;
-			for (i = 0; i < sdlen; i++) {
-				FD_SET(sdlist[i], &fdset);
-				numfds = sdlist[i] >= numfds ? sdlist[i] + 1 : numfds;
-			}
-		}
+	if (smux_listen_sd >= 0) {
+	    FD_SET(smux_listen_sd, &readfds);
+	    numfds = smux_listen_sd >= numfds ? smux_listen_sd + 1 : numfds;
+	    for (i = 0; i < sdlen; i++) {
+		FD_SET(sdlist[i], &readfds);
+		numfds = sdlist[i] >= numfds ? sdlist[i] + 1 : numfds;
+	    }
+	}
 #endif	/* USING_SMUX_MODULE */
 
-	count = select(numfds, &fdset, 0, 0, tvp);
+	for (i = 0; i < external_readfdlen; i++) {
+	    FD_SET(external_readfd[i], &readfds);
+	    if (external_readfd[i] >= numfds)
+		numfds = external_readfd[i] + 1;
+	}
+	for (i = 0; i < external_writefdlen; i++) {
+	    FD_SET(external_writefd[i], &writefds);
+	    if (external_writefd[i] >= numfds)
+		numfds = external_writefd[i] + 1;
+	}
+	for (i = 0; i < external_exceptfdlen; i++) {
+	    FD_SET(external_exceptfd[i], &exceptfds);
+	    if (external_exceptfd[i] >= numfds)
+		numfds = external_exceptfd[i] + 1;
+	}
 
-	if (count > 0){
-	    snmp_read(&fdset);
-	} else switch(count){
+	for (i = 0; i < NUM_EXTERNAL_SIGS; i++) {
+	    if (external_signal_scheduled[i]) {
+		external_signal_scheduled[i] = 0;
+		external_signal_handler[i](i);
+	    }
+	}
+	
+	count = select(numfds, &readfds, &writefds, &exceptfds, tvp);
+
+	if (count > 0) {
+
+	    snmp_read(&readfds);
+
+	    for (i = 0; count && (i < external_readfdlen); i++) {
+		if (FD_ISSET(external_readfd[i], &readfds)) {
+		    external_readfdfunc[i](external_readfd[i]);
+		    FD_CLR(external_readfd[i], &readfds);
+		    count--;
+		}
+	    }
+	    for (i = 0; count && (i < external_writefdlen); i++) {
+		if (FD_ISSET(external_writefd[i], &writefds)) {
+		    external_writefdfunc[i](external_writefd[i]);
+		    FD_CLR(external_writefd[i], &writefds);
+		    count--;
+		}
+	    }
+	    for (i = 0; count && (i < external_exceptfdlen); i++) {
+		if (FD_ISSET(external_exceptfd[i], &exceptfds)) {
+		    external_exceptfdfunc[i](external_exceptfd[i]);
+		    FD_CLR(external_exceptfd[i], &exceptfds);
+		    count--;
+		}
+	    }
+	    
+	} else switch (count) {
 	    case 0:
                 snmp_timeout();
                 break;
 	    case -1:
-		if (errno == EINTR){
+		if (errno == EINTR) {
 		    continue;
 		} else {
                     snmp_log_perror("select");
@@ -688,7 +737,7 @@ receive(void)
 		/* handle the SMUX sd's */
 		if (smux_listen_sd >= 0) {
 			for (i = 0; i < sdlen; i++) {
-				if (FD_ISSET(sdlist[i], &fdset)) {
+				if (FD_ISSET(sdlist[i], &readfds)) {
 					if (smux_process(sdlist[i]) < 0) {
 						for (; i < (sdlen - 1); i++) {
 							sdlist[i] = sdlist[i+1];
@@ -698,7 +747,7 @@ receive(void)
 				}
 			}
 			/* new connection */
-			if (FD_ISSET(smux_listen_sd, &fdset)) {
+			if (FD_ISSET(smux_listen_sd, &readfds)) {
 				if ((sd = smux_accept(smux_listen_sd)) >= 0) {
 					sdlist[sdlen++] = sd;
 				}
@@ -910,4 +959,4 @@ snmp_input(int op,
     }
     return 1;
 
-}  /* end snmp_input() */
+} /* end snmp_input() */
