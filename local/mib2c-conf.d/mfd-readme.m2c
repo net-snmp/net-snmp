@@ -248,13 +248,13 @@ ${context} README
     m2c_context_reg (currently '$m2c_context_reg')
     --------------------------------------------------------
     This variable contains the structure name to typedef for the
-    ${context}_registration_ptr.
+    ${context}_registration.
 
     During initilization, you will provide a pointer to a structure of
     this type. This pointer is used as a parameter to many functions so
     that you have access to your registration data. The default is a
     netsnmp_data_list pointer, which will allow you to keep multiple
-    pointers tagges by a text name. If you have a new or existing structure
+    pointers tagged by a text name. If you have a new or existing structure
     you would rather use, you can redefine this variable.
     
 
