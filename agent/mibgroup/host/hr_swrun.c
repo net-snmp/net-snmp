@@ -50,6 +50,8 @@
 #ifdef cygwin
 #include <windows.h>
 #include <sys/cygwin.h>
+#include <tlhelp32.h>
+#include <psapi.h>
 #endif
 
 #if _SLASH_PROC_METHOD_
@@ -64,6 +66,7 @@
 
 #include <stdio.h>
 
+#include "snmp_logging.h"
 #include "host_res.h"
 #include "hr_swrun.h"
 #include "auto_nlist.h"
@@ -134,17 +137,158 @@ struct variable4 hrswrunperf_variables[] = {
 oid hrswrun_variables_oid[]     = { 1,3,6,1,2,1,25,4 };
 oid hrswrunperf_variables_oid[] = { 1,3,6,1,2,1,25,5 };
 
+#ifdef cygwin
+
+/*
+ * a lot of this is "stolen" from cygwin ps.cc
+ */
+
+typedef BOOL (WINAPI *ENUMPROCESSMODULES) (
+    HANDLE hProcess,
+    HMODULE *lphModule,
+    DWORD cb,
+    LPDWORD lpcbNeeded);
+
+typedef DWORD (WINAPI *GETMODULEFILENAME) (
+    HANDLE hProcess,
+    HMODULE hModule,
+    LPTSTR lpstrFIleName,
+    DWORD nSize);
+
+typedef DWORD (WINAPI *GETPROCESSMEMORYINFO) (
+    HANDLE hProcess,
+    PPROCESS_MEMORY_COUNTERS pmc,
+    DWORD nSize);
+
+typedef HANDLE (WINAPI *CREATESNAPSHOT) (
+    DWORD dwFlags,
+    DWORD th32ProcessID);
+
+typedef BOOL (WINAPI *PROCESSWALK) (
+    HANDLE hSnapshot,
+    LPPROCESSENTRY32 lppe);
+
+ENUMPROCESSMODULES myEnumProcessModules;
+GETMODULEFILENAME myGetModuleFileNameEx;
+CREATESNAPSHOT myCreateToolhelp32Snapshot;
+PROCESSWALK myProcess32First;
+PROCESSWALK myProcess32Next;
+GETPROCESSMEMORYINFO myGetProcessMemoryInfo = NULL;
+cygwin_getinfo_types query = CW_GETPINFO;
+
+static BOOL WINAPI dummyprocessmodules(
+    HANDLE hProcess,
+    HMODULE *lphModule,
+    DWORD cb,
+    LPDWORD lpcbNeeded)
+{
+    lphModule[0] = (HMODULE) *lpcbNeeded;
+    *lpcbNeeded = 1;
+    return 1;
+}
+
+static DWORD WINAPI GetModuleFileNameEx95(
+    HANDLE hProcess,
+    HMODULE hModule,
+    LPTSTR lpstrFileName,
+    DWORD n)
+{
+    HANDLE h;
+    DWORD pid = (DWORD) hModule;
+    PROCESSENTRY32 proc;
+
+    h = myCreateToolhelp32Snapshot(TH32CS_SNAPPROCESS, 0);
+    if (!h) return 0;
+    proc.dwSize = sizeof(proc);
+    if (myProcess32First(h, &proc))
+      do
+        if (proc.th32ProcessID == pid) {
+	    CloseHandle(h);
+	    strcpy(lpstrFileName, proc.szExeFile);
+	    return 1;
+	}
+      while (myProcess32Next(h, &proc));
+    CloseHandle(h);
+    return 0;
+}
+
+#define FACTOR (0x19db1ded53ea710LL)
+#define NSPERSEC 10000000LL
+#define NSPERMSEC 10000LL
+
+static time_t __stdcall
+to_time_t(PFILETIME ptr)
+{
+    long rem;
+    long long x = ((long long)ptr->dwHighDateTime << 32) + ((unsigned)ptr->dwLowDateTime);
+    x -= FACTOR;
+    rem = x % NSPERSEC;
+    rem += NSPERSEC/2;
+    x /= NSPERSEC;
+    x += rem/NSPERSEC;
+    return x;
+}
+
+static long to_msec(PFILETIME ptr)
+{
+    long long x = ((long long)ptr->dwHighDateTime << 32) + (unsigned)ptr->dwLowDateTime;
+    x /= NSPERMSEC;
+    return x;
+}
+
+#endif /* cygwin */
+
 
 void init_hr_swrun(void)
 {
+#ifdef cygwin
+    OSVERSIONINFO ver;
+    HMODULE h;
+
+    memset(&ver, 0, sizeof ver);
+    ver.dwOSVersionInfoSize = sizeof ver;
+    GetVersionEx(&ver);
+
+    if (ver.dwPlatformId == VER_PLATFORM_WIN32_NT) {
+	h = LoadLibrary("psapi.dll");
+	if (h) {
+	    myEnumProcessModules = (ENUMPROCESSMODULES) GetProcAddress(h, "EnumProcessModules");
+	    myGetModuleFileNameEx = (GETMODULEFILENAME) GetProcAddress(h, "GetModuleFileNameExA");
+	    myGetProcessMemoryInfo = (GETPROCESSMEMORYINFO) GetProcAddress(h, "GetProcessMemoryInfo");
+	    if (myEnumProcessModules && myGetModuleFileNameEx)
+		query = CW_GETPINFO_FULL;
+	    else
+		snmp_log(LOG_ERR, "hr_swrun failed NT init\n");
+	}
+	else
+	    snmp_log(LOG_ERR, "hr_swrun failed to load psapi.dll\n");
+    }
+    else {
+	h = GetModuleHandle("KERNEL32.DLL");
+	myCreateToolhelp32Snapshot = (CREATESNAPSHOT) GetProcAddress(h, "CreateToolhelp32Snapshot");
+	myProcess32First = (PROCESSWALK) GetProcAddress(h, "Process32First");
+	myProcess32Next = (PROCESSWALK) GetProcAddress(h, "Process32Next");
+	myEnumProcessModules = dummyprocessmodules;
+	myGetModuleFileNameEx = GetModuleFileNameEx95;
+	if (myCreateToolhelp32Snapshot && myProcess32First && myProcess32Next)
+#if 0
+	    /* This doesn't work after all on Win98 SE */
+	    query = CW_GETPINFO_FULL;
+#else
+	    query = CW_GETPINFO;
+#endif
+	else
+	    snmp_log(LOG_ERR, "hr_swrun failed non-NT init\n");
+    }
+#endif /* cygwin */
 #ifdef PROC_SYMBOL
-  auto_nlist( PROC_SYMBOL,0,0 );
+    auto_nlist( PROC_SYMBOL,0,0 );
 #endif
 #ifdef NPROC_SYMBOL
-  auto_nlist( NPROC_SYMBOL,0,0 );
+    auto_nlist( NPROC_SYMBOL,0,0 );
 #endif
 
-  proc_table = 0;
+    proc_table = 0;
 
     REGISTER_MIB("host/hr_swrun", hrswrun_variables, variable4, hrswrun_variables_oid);
     REGISTER_MIB("host/hr_swrun", hrswrunperf_variables, variable4, hrswrunperf_variables_oid);
@@ -250,6 +394,7 @@ header_hrswrunEntry(struct variable *vp,
 	}
 	DEBUGMSG(("host/hr_swrun", "\n"));
     }
+    End_HR_SWRun();
 
     if ( LowPid == -1 ) {
         DEBUGMSGTL(("host/hr_swrun", "... index out of range\n"));
@@ -397,10 +542,32 @@ var_hrswrun(struct variable *vp,
 		cp = strrchr(string, '/');
 		if (cp) strcpy(string, cp+1);
 	    }
-	    else {
-		/* get code from ps to get windows process path */
-		string[0] = 0;
+	    else if (query == CW_GETPINFO_FULL) {
+		DWORD n = lowproc.dwProcessId & 0xffff;
+		HANDLE h = OpenProcess(PROCESS_QUERY_INFORMATION | PROCESS_VM_READ,
+				       FALSE, n);
+
+		if (h) {
+		    HMODULE hm[1000];
+		    if (!myEnumProcessModules(h, hm, sizeof hm, &n)) {
+			snmp_log(LOG_DEBUG, "no module handle for %lu\n", n);
+			n = 0;
+		    }
+		    if (n && myGetModuleFileNameEx(h, hm[0], string, sizeof string)) {
+			cp = strrchr(string, '\\');
+			if (cp) strcpy(string, cp+1);
+		    }
+		    else
+			strcpy(string, "*** unknown");
+		    CloseHandle(h);
+		}
+		else {
+		    snmp_log(LOG_INFO, "no process handle for %lu\n", n);
+		    strcpy(string, "** unknown");
+		}
 	    }
+	    else
+		strcpy(string, "* unknown");
 	    cp = strchr(string, '\0') - 4;
 	    if (cp > string && strcasecmp(cp, ".exe") == 0)
 		*cp = '\0';
@@ -469,10 +636,23 @@ var_hrswrun(struct variable *vp,
 		strcpy(string, "<defunct>");
 	    else if (lowproc.ppid)
 		cygwin_conv_to_posix_path(lowproc.progname, string);
-	    else {
-		/* get code from ps to get windows process path! */
-	    	string[0] = 0;
+	    else if (query == CW_GETPINFO_FULL) {
+		DWORD n = lowproc.dwProcessId & 0xFFFF;
+		HANDLE h = OpenProcess(PROCESS_QUERY_INFORMATION | PROCESS_VM_READ,
+				       FALSE, n);
+		if (h) {
+		    HMODULE hm[1000];
+		    if (!myEnumProcessModules(h, hm, sizeof hm, &n))
+			n = 0;
+		    if (!n || !myGetModuleFileNameEx(h, hm[0], string, sizeof string))
+			strcpy(string, "*** unknown");
+		    CloseHandle(h);
+		}
+		else
+		    strcpy(string, "** unknown");
 	    }
+	    else
+		strcpy(string, "* unknown");
 #else
 #if NO_DUMMY_VALUES
 	    return NULL;
@@ -699,10 +879,26 @@ var_hrswrun(struct variable *vp,
 #elif defined(sunos4)
 	    long_return = proc_table[LowProcIndex].p_time;
 #elif defined(cygwin)
-	    long_return = lowproc.rusage_self.ru_utime.tv_sec*100 +
-			  lowproc.rusage_self.ru_utime.tv_usec/10000 +
-	    		  lowproc.rusage_self.ru_stime.tv_sec*100 +
-			  lowproc.rusage_self.ru_stime.tv_usec/10000;
+	    {
+		DWORD n = lowproc.dwProcessId;
+		HANDLE h = OpenProcess(PROCESS_QUERY_INFORMATION | PROCESS_VM_READ,
+				       FALSE, n);
+		FILETIME ct, et, kt, ut;
+
+		if (h) {
+		    if (GetProcessTimes(h, &ct, &et, &kt, &ut))
+			long_return = (to_msec(&kt) + to_msec(&ut))/10;
+		    else {
+		        snmp_log(LOG_INFO, "no process times for %lu (%lu)\n", lowproc.pid, n);
+			long_return = 0;
+		    }
+		    CloseHandle(h);
+		}
+		else {
+		    snmp_log(LOG_INFO, "no process handle for %lu (%lu)\n", lowproc.pid, n);
+		    long_return = 0;
+		}
+	    }
 #else
 	    long_return = proc_table[LowProcIndex].p_utime.tv_sec*100 +
 			  proc_table[LowProcIndex].p_utime.tv_usec/10000 +
@@ -741,14 +937,26 @@ var_hrswrun(struct variable *vp,
 	    long_return = atoi( cp ) * (getpagesize()/1024);		/* rss */
             fclose(fp);
 #elif defined(cygwin)
-	    DEBUGMSGTL(("snmpd",
-"runPerfMem %d: %ld %ld %ld %ld %ld\n", lowproc.pid,
-lowproc.rusage_self.ru_maxrss,
-lowproc.rusage_self.ru_ixrss,
-lowproc.rusage_self.ru_idrss,
-lowproc.rusage_self.ru_isrss,
-lowproc.rusage_self.ru_nswap));
-	    long_return = lowproc.rusage_self.ru_idrss; /* ??? */
+	    {
+		DWORD n = lowproc.dwProcessId;
+		HANDLE h = OpenProcess(PROCESS_QUERY_INFORMATION | PROCESS_VM_READ,
+				       FALSE, n);
+		PROCESS_MEMORY_COUNTERS pmc;
+
+		if (h) {
+		    if (myGetProcessMemoryInfo && myGetProcessMemoryInfo(h, &pmc, sizeof pmc))
+			long_return = pmc.WorkingSetSize / 1024;
+		    else {
+		        snmp_log(LOG_INFO, "no process times for %lu (%lu)\n", lowproc.pid, n);
+			long_return = 0;
+		    }
+		    CloseHandle(h);
+		}
+		else {
+		    snmp_log(LOG_INFO, "no process handle for %lu (%lu)\n", lowproc.pid, n);
+		    long_return = 0;
+		}
+	    }
 #else
 #if NO_DUMMY_VALUES
 	    return NULL;
@@ -806,7 +1014,7 @@ End_HR_SWRun (void)
 
 #elif defined(cygwin)
 
-static int curpid;
+static pid_t curpid;
 
 void
 Init_HR_SWRun(void)
@@ -818,8 +1026,12 @@ Init_HR_SWRun(void)
 int
 Get_Next_HR_SWRun(void)
 {
-    curproc = (struct external_pinfo *) cygwin_internal(CW_GETPINFO_FULL, curpid|CW_NEXTPID);
-    curpid = curproc ? curproc->pid : -1;
+    curproc = (struct external_pinfo *) cygwin_internal(query, curpid|CW_NEXTPID);
+    if (curproc)
+	curpid = curproc->pid;
+    else {
+	curpid = -1;
+    }
     return curpid;
 }
 
@@ -948,7 +1160,6 @@ Get_Next_HR_SWRun (void)
 #endif
 
     }
-    End_HR_SWRun();
     return -1;
 }
 
@@ -961,7 +1172,7 @@ End_HR_SWRun (void)
 
 int count_processes (void)
 {
-#if !(defined(linux) || defined(cygwin) || defined(hpux10) || defined(solaris2) || HAVE_KVM_GETPROCS)
+#if !(defined(linux) || defined(cygwin)) || defined(hpux10) || defined(solaris2) || HAVE_KVM_GETPROCS
     int i;
 #endif
     int total=0;
