@@ -85,6 +85,7 @@ SOFTWARE.
 #include "asn1.h"
 #include "mib.h"
 #include "snmp_api.h"
+#include "snmp_debug.h"
 
 /*
  * This is one element of an object identifier with either an integer

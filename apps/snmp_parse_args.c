@@ -65,6 +65,7 @@
 #include "system.h"
 #include "parse.h"
 #include "read_config.h"
+#include "snmp_debug.h"
 
 int random_access = 0;
 

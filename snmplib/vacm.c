@@ -46,7 +46,7 @@
 #include "snmp.h"
 #include "snmp_api.h"
 #include "vacm.h"
-
+#include "snmp_debug.h"
 
 static struct vacm_viewEntry *viewList = NULL, *viewScanPtr = NULL;
 static struct vacm_accessEntry *accessList = NULL, *accessScanPtr = NULL;

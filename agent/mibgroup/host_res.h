@@ -16,6 +16,7 @@
 #include "var_struct.h"
 #include "snmp_vars.h"
 #include "../../snmplib/system.h"
+#include "snmp_debug.h"
 
 #if defined(IFNET_NEEDS_KERNEL) && !defined(_KERNEL)
 #define _KERNEL 1

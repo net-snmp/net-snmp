@@ -40,6 +40,7 @@
 #include "acl.h"
 #include "system.h"
 #include "read_config.h"
+#include "snmp_debug.h"
 
 struct traphandle {
    char *exec;

@@ -10,6 +10,7 @@
 #include "../var_struct.h"
 #include "../../snmplib/snmp.h"
 #include "../../snmplib/mib.h"
+#include "../../snmplib/snmp_debug.h"
 #define u_char unsigned char
 #define u_short unsigned short
 
