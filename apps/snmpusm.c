@@ -74,14 +74,20 @@ int             main(int, char **);
 #define CMD_DELETE         3
 #define CMD_CLONEFROM_NAME "cloneFrom"
 #define CMD_CLONEFROM      4
+#define CMD_ACTIVATE_NAME  "activate"
+#define CMD_ACTIVATE       5
+#define CMD_DEACTIVATE_NAME "deactivate"
+#define CMD_DEACTIVATE     6
 
-#define CMD_NUM    4
+#define CMD_NUM    6
 
 static const char *successNotes[CMD_NUM] = {
     "SNMPv3 Key(s) successfully changed.",
     "User successfully created.",
     "User successfully deleted.",
-    "User successfully cloned."
+    "User successfully cloned.",
+    "User successfully activated.",
+    "User successfully deactivated."
 };
 
 #define                   USM_OID_LEN    12
@@ -109,12 +115,13 @@ usage(void)
     fprintf(stderr, " COMMAND\n\n");
     snmp_parse_args_descriptions(stderr);
     fprintf(stderr, "\nsnmpusm commands:\n");
-    fprintf(stderr, "  create    USER [CLONEFROM-USER]\n");
-    fprintf(stderr, "  delete    USER\n");
-    fprintf(stderr, "  cloneFrom USER CLONEFROM-USER\n");
+    fprintf(stderr, "  create     USER [CLONEFROM-USER]\n");
+    fprintf(stderr, "  delete     USER\n");
+    fprintf(stderr, "  cloneFrom  USER CLONEFROM-USER\n");
+    fprintf(stderr, "  activate   USER\n");
+    fprintf(stderr, "  deactivate USER\n");
     fprintf(stderr,
-            "  [-Co] [-Ca] [-Cx] passwd OLD-PASSPHRASE NEW-PASSPHRASE\n");
-    fprintf(stderr, "\t\t-Co\t\tUse the ownKeyChange objects.\n");
+            "  [-Ca] [-Cx] passwd OLD-PASSPHRASE NEW-PASSPHRASE [USER]\n");
     fprintf(stderr, "\t\t-Cx\t\tChange the privacy key.\n");
     fprintf(stderr, "\t\t-Ca\t\tChange the authentication key.\n");
 }
@@ -158,11 +165,6 @@ optProc(int argc, char *const *argv, int opt)
     case 'C':
         while (*optarg) {
             switch (*optarg++) {
-            case 'o':
-                authKeyChange = ownAuthKeyOid;
-                privKeyChange = ownPrivKeyOid;
-                break;
-
             case 'a':
                 doauthkey = 1;
                 break;
@@ -272,9 +274,12 @@ main(int argc, char *argv[])
          * XXX:  Uses the auth type of the calling user, a MD5 user can't
          *       change a SHA user's key.
          */
+        char *passwd_user;
+
         command = CMD_PASSWD;
         oldpass = argv[++arg];
         newpass = argv[++arg];
+        passwd_user = argv[++arg];
 
         if (doprivkey == 0 && doauthkey == 0)
             doprivkey = doauthkey = 1;
@@ -291,6 +296,19 @@ main(int argc, char *argv[])
                     "Old passphrase must be greater than %d characters in length.\n",
                     USM_LENGTH_P_MIN);
             exit(1);
+        }
+
+        /* 
+         * Change the user supplied on command line.
+         */
+        if ((passwd_user != NULL) && (strlen(passwd_user) > 0)) {
+            session.securityName = passwd_user;
+        } else {
+            /*
+             * Use own key object if no user was supplied.
+             */
+            authKeyChange = ownAuthKeyOid;
+            privKeyChange = ownPrivKeyOid;
         }
 
         /*
@@ -518,6 +536,42 @@ main(int argc, char *argv[])
         setup_oid(usmUserStatus, &name_length,
                   ss->contextEngineID, ss->contextEngineIDLen, argv[arg]);
         longvar = RS_DESTROY;
+        snmp_pdu_add_variable(pdu, usmUserStatus, name_length,
+                              ASN_INTEGER, (u_char *) & longvar,
+                              sizeof(longvar));
+    } else if (strcmp(argv[arg], CMD_ACTIVATE_NAME) == 0) {
+        /*
+         * activate:  activate a user
+         *
+         * activate USER
+         */
+        if (++arg >= argc) {
+            fprintf(stderr, "You must specify the user name to activate\n");
+            exit(1);
+        }
+
+        command = CMD_ACTIVATE;
+        setup_oid(usmUserStatus, &name_length,
+                  ss->contextEngineID, ss->contextEngineIDLen, argv[arg]);
+        longvar = RS_ACTIVE;
+        snmp_pdu_add_variable(pdu, usmUserStatus, name_length,
+                              ASN_INTEGER, (u_char *) & longvar,
+                              sizeof(longvar));
+    } else if (strcmp(argv[arg], CMD_DEACTIVATE_NAME) == 0) {
+        /*
+         * deactivate:  deactivate a user
+         *
+         * deactivate USER
+         */
+        if (++arg >= argc) {
+            fprintf(stderr, "You must specify the user name to deactivate\n");
+            exit(1);
+        }
+
+        command = CMD_DEACTIVATE;
+        setup_oid(usmUserStatus, &name_length,
+                  ss->contextEngineID, ss->contextEngineIDLen, argv[arg]);
+        longvar = RS_NOTINSERVICE;
         snmp_pdu_add_variable(pdu, usmUserStatus, name_length,
                               ASN_INTEGER, (u_char *) & longvar,
                               sizeof(longvar));
