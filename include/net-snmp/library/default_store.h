@@ -115,6 +115,10 @@ extern          "C" {
 #define NETSNMP_DS_LIB_OIDPREFIX         13
 #define NETSNMP_DS_LIB_CLIENT_ADDR       14
 #define NETSNMP_DS_LIB_TEMP_FILE_PATTERN 15
+#define NETSNMP_DS_LIB_AUTHMASTERKEY     16
+#define NETSNMP_DS_LIB_PRIVMASTERKEY     17
+#define NETSNMP_DS_LIB_AUTHLOCALIZEDKEY  18
+#define NETSNMP_DS_LIB_PRIVLOCALIZEDKEY  19
 
     /*
      * end storage definitions 
