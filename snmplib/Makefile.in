@@ -121,7 +121,7 @@ OBJS=	snmp_client.o mib.o parse.o snmp_api.o snmp.o 		\
 	snprintf.o strtol.o strtoul.o				\
 	snmp_transport.o @transport_obj_list@                   \
 	snmp_secmod.o @security_obj_list@ snmp_version.o	\
-	cmu_compat.lo ucd_compat.lo
+	cmu_compat.o ucd_compat.o
 
 LOBJS=	snmp_client.lo mib.lo parse.lo snmp_api.lo snmp.lo 	\
 	snmp_auth.lo asn1.lo md5.lo snmp_parse_args.lo		\
