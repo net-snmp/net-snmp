@@ -57,7 +57,7 @@ SOFTWARE.
 struct packet_info {
     u_char 	pdutype;
     snmp_ipaddr	source;
-    long	version;
+    int 	version;
     int		mp_model;
     int		sec_model;
     int		sec_level;
