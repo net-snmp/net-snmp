@@ -610,7 +610,23 @@ netsnmp_register_mib(const char *moduleName,
     DEBUGMSGTL(("register_mib", "registering \"%s\" at ", moduleName));
     DEBUGMSGOIDRANGE(("register_mib", mibloc, mibloclen, range_subid,
                       range_ubound));
-    DEBUGMSG(("register_mib", "\n"));
+    DEBUGMSG(("register_mib", " with context \"%s\"\n", context));
+
+    /*
+     * verify that the passed context is equal to the context
+     * in the reginfo.
+     * (which begs the question, why do we have both? It appears that the
+     *  reginfo item didn't appear til 5.2)
+     */
+    if( ((NULL == context) && (NULL != reginfo->contextName)) ||
+        ((NULL != context) && (NULL == reginfo->contextName)) ||
+        ( ((NULL != context) && (NULL != reginfo->contextName)) &&
+          (0 != strcmp(context, reginfo->contextName))) ) {
+        snmp_log(LOG_WARNING,"context passed during registration does not "
+                 "equal the reginfo contextName! ('%s' != '%s')\n",
+                 context, reginfo->contextName);
+        netsnmp_assert("register context" == "reginfo->contextName");
+    }
 
     /*  Create the new subtree node being registered.  */
 
