@@ -463,6 +463,11 @@
 /* define if you have getservbyname */
 #undef HAVE_GETSERVBYNAME
 
+/* printing system */
+#undef HAVE_LPSTAT
+#undef LPSTAT_PATH
+#undef HAVE_PRINTCAP
+
 /* Not-to-be-compiled macros for use by configure only */
 #define config_require(x)
 #define config_arch_require(x,y)

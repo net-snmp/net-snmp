@@ -200,6 +200,9 @@
 /* Define if you have the bcopy function.  */
 #undef HAVE_BCOPY
 
+/* Define if you have the cgetnext function.  */
+#undef HAVE_CGETNEXT
+
 /* Define if you have the execv function.  */
 #undef HAVE_EXECV
 
@@ -1055,6 +1058,11 @@
 
 /* define if you have getservbyname */
 #undef HAVE_GETSERVBYNAME
+
+/* printing system */
+#undef HAVE_LPSTAT
+#undef LPSTAT_PATH
+#undef HAVE_PRINTCAP
 
 /* Not-to-be-compiled macros for use by configure only */
 #define config_require(x)
