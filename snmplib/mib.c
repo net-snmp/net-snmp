@@ -5718,7 +5718,7 @@ static int parse_hints_parse(struct parse_hints *ph, const char **v_in_out)
 		v = nv;
 		for (i = 0; i < ph->length; i++) {
 		    int shift = 8 * (ph->length - 1 - i);
-		    if (!parse_hints_add_result_octet(ph, (number >> shift) & 0xFF)) {
+		    if (!parse_hints_add_result_octet(ph, (u_char)(number >> shift) )) {
 			return 0; /* failed */
 		    }
 		}
@@ -6010,14 +6010,14 @@ netsnmp_oid2chars(char *C, int L, const oid * O)
     char           *c = C;
     const oid      *o = &O[1];
 
-    if (L < *O)
+    if (L < (int)*O)
         return 1;
 
     L = *O; /** length */
     for (; L; --L, ++o, ++c) {
         if (*o > 0xFF)
             return 1;
-        *c = *o;
+        *c = (char)*o;
     }
     return 0;
 }
@@ -6037,7 +6037,7 @@ netsnmp_oid2str(char *S, int L, oid * O)
 {
     int            rc;
 
-    if (L <= *O)
+    if (L <= (int)*O)
         return 1;
 
     rc = netsnmp_oid2chars(S, L, O);

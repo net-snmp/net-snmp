@@ -607,7 +607,7 @@ dump_snmpEngineID(const u_char * estring, size_t * estring_len)
         break;
      /*NOTREACHED*/ case 5:    /* Octets. */
 
-        snprint_hexstring(s, (SNMP_MAXBUF - (s-buf),
+        snprint_hexstring(s, (SNMP_MAXBUF - (s-buf)),
                           esp, remaining_len);
         s = strchr(buf, '\0');
         s -= 1;
@@ -625,7 +625,7 @@ dump_snmpEngineID(const u_char * estring, size_t * estring_len)
         if (!gotviolation) {
             s += sprintf(s, "??? ");
         }
-        snprint_hexstring(s, (SNMP_MAXBUF - (s-buf),
+        snprint_hexstring(s, (SNMP_MAXBUF - (s-buf)),
                           esp, remaining_len);
         s = strchr(buf, '\0');
         s -= 1;
@@ -643,7 +643,7 @@ dump_snmpEngineID(const u_char * estring, size_t * estring_len)
     if (remaining_len > 0) {
         s += sprintf(s, " (??? ");
 
-        snprint_hexstring(s, (SNMP_MAXBUF - (s-buf),
+        snprint_hexstring(s, (SNMP_MAXBUF - (s-buf)),
                           esp, remaining_len);
         s = strchr(buf, '\0');
         s -= 1;

@@ -1078,7 +1078,7 @@ netsnmp_table_set_add_indexes(va_alist)
 #endif
 
     while ((type = va_arg(debugargs, int)) != 0) {
-        netsnmp_table_dataset_add_index(tset, type);
+        netsnmp_table_dataset_add_index(tset, (u_char)type);
     }
 
     va_end(debugargs);

@@ -6153,7 +6153,7 @@ netsnmp_oid_find_prefix(const oid * in_name1, size_t len1,
         return -1;
 
     min_size = SNMP_MIN(len1, len2);
-    for(i = 0; i < min_size; i++) {
+    for(i = 0; i < (int)min_size; i++) {
         if (in_name1[i] != in_name2[i])
             return i + 1;
     }
@@ -6679,7 +6679,7 @@ snmp_add_var(netsnmp_pdu *pdu,
             if (ix >= (int) tint) {
                 tint = ix + 1;
             }
-            if (ix >= buf_len && !snmp_realloc(&buf, &buf_len)) {
+            if (ix >= (int)buf_len && !snmp_realloc(&buf, &buf_len)) {
                 result = SNMPERR_MALLOC;
                 break;
             }

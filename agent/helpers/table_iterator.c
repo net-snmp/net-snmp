@@ -479,7 +479,7 @@ netsnmp_table_iterator_helper_handler(netsnmp_mib_handler *handler,
 
                         table_info->indexes = index_search;
                         for(i = table_reg_info->min_column;
-                            i <= table_reg_info->max_column; i++) {
+                            i <= (int)table_reg_info->max_column; i++) {
                             myname[reginfo->rootoid_len + 1] = i;
                             table_info->colnum = i;
                             vb = reqtmp->requestvb =

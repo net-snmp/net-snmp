@@ -537,7 +537,10 @@ winsock_startup(void)
     int             i;
     static char     errmsg[100];
 
-    VersionRequested = MAKEWORD(1, 1);
+	/* winsock 1: use MAKEWORD(1,1) */
+	/* winsock 2: use MAKEWORD(2,2) */
+
+    VersionRequested = MAKEWORD(1,1);
     i = WSAStartup(VersionRequested, &stWSAData);
     if (i != 0) {
         if (i == WSAVERNOTSUPPORTED)

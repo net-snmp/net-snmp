@@ -3,6 +3,9 @@
  */
 
 #include <net-snmp/net-snmp-config.h>
+#if HAVE_IO_H
+#include <io.h>
+#endif
 
 #include <stdio.h>
 #include <sys/types.h>
@@ -103,7 +106,7 @@ real_init_master(void)
                                                  NETSNMP_DS_AGENT_X_DIR_PERM);
             if (agentx_dir_perm == 0)
                 agentx_dir_perm = AGENT_DIRECTORY_MODE;
-            if (mkdirhier(sess.peername, agentx_dir_perm, 1)) {
+            if (mkdirhier(sess.peername, (mode_t)agentx_dir_perm, 1)) {
                 snmp_log(LOG_ERR,
                          "Failed to create the directory for the agentX socket: %s\n",
                          sess.peername);
@@ -174,7 +177,6 @@ real_init_master(void)
         chown(sess.peername, agentx_sock_user, agentx_sock_group);
     }
 #endif
-
         /*
          * If we've processed the last (or only) socket, then we're done.
          */

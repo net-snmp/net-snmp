@@ -287,7 +287,7 @@ netsnmp_binary_array_remove(netsnmp_container *c, const void *key, void **save)
      * if entry was last item, just decrement count
      */
     --t->count;
-    if (index != t->count) {
+    if (index != (int)t->count) {
         /*
          * otherwise, shift array down
          */

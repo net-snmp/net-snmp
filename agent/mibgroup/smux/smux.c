@@ -440,7 +440,7 @@ var_smux_write(int action,
             packet_len = len;
             ptr = asn_parse_header(buf, &packet_len, &type);
             packet_len += (ptr - buf);
-            if (len > packet_len) {
+            if (len > (ssize_t)packet_len) {
                 /*
                  * set length to receive only the first packet 
                  */

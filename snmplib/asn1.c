@@ -1397,7 +1397,7 @@ asn_build_bitstring(u_char * data,
      */
     static const char *errpre = "build bitstring";
     if (_asn_bitstring_check
-        (errpre, strlength, ((string) ? *string : (u_char) 0)))
+        (errpre, strlength, (u_char)((string) ? *string :  0)))
         return NULL;
 
     data = asn_build_header(data, datalength, type, strlength);
