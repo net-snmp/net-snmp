@@ -147,6 +147,7 @@ PERFORMANCE OF THIS SOFTWARE.
 #include "mibgroup/struct.h"
 #include "snmpd.h"
 #include "net-snmp/agent/all_helpers.h"
+#include "agent_module_includes.h"
 #include "mib_module_includes.h"
 #include "net-snmp/library/container.h"
 
@@ -335,6 +336,8 @@ init_agent(const char *app)
 #ifdef NETSNMP_EMBEDDED_PERL
     init_perl();
 #endif
+
+#  include "agent_module_inits.h"
 
     return r;
 }                               /* end init_agent() */
