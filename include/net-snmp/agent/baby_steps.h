@@ -16,12 +16,12 @@ extern          "C" {
 #define BABY_STEP_NONE                  0
 #define BABY_STEP_PRE_REQUEST           (0x1 <<  1)
 #define BABY_STEP_OBJECT_LOOKUP         (0x1 <<  2)
-#define BABY_STEP_CHECK_OBJECT          (0x1 <<  3)
+#define BABY_STEP_CHECK_VALUE           (0x1 <<  3)
 #define BABY_STEP_ROW_CREATE            (0x1 <<  4)
 #define BABY_STEP_UNDO_SETUP            (0x1 <<  5)
-#define BABY_STEP_SET_VALUES            (0x1 <<  6)
+#define BABY_STEP_SET_VALUE             (0x1 <<  6)
 #define BABY_STEP_CHECK_CONSISTENCY     (0x1 <<  7)
-#define BABY_STEP_UNDO_SETS             (0x1 <<  8)
+#define BABY_STEP_UNDO_SET              (0x1 <<  8)
 #define BABY_STEP_COMMIT                (0x1 <<  9)
 #define BABY_STEP_UNDO_COMMIT           (0x1 << 10)
 #define BABY_STEP_IRREVERSIBLE_COMMIT   (0x1 << 11)
@@ -30,12 +30,22 @@ extern          "C" {
 
 #define BABY_STEP_ALL                   (0xffffffff)
 
-/** @name access_multiplexer
+
+#define BABY_STEP_CHECK_VALUES          BABY_STEP_CHECK_VALUE
+#define BABY_STEP_SET_VALUES            BABY_STEP_SET_VALUE
+#define BABY_STEP_UNDO_SETS             BABY_STEP_UNDO_SET
+
+/** @name baby_steps
  *
  * This helper expands the original net-snmp set modes into the newer, finer
  * grained modes.
  *
  *  @{ */
+
+    typedef struct netsnmp_baby_steps_modes_s {
+       u_int       registered;
+       u_int       completed;
+    } netsnmp_baby_steps_modes;
 
 void                 netsnmp_baby_steps_init(void);
 
