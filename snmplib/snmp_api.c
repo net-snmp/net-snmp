@@ -3423,13 +3423,32 @@ snmp_pdu_add_variable(struct snmp_pdu *pdu,
 		      u_char *value,
 		      int len)
 {
+  return snmp_varlist_add_variable(&pdu->variables, name, name_length, type,
+                                   value, len);
+}
+
+/*
+ * Add a variable with the requested name to the end of the list of
+ * variables for this pdu.
+ */
+struct variable_list *
+snmp_varlist_add_variable(struct variable_list **varlist,
+		      oid *name,
+		      int name_length,
+		      u_char type,
+		      u_char *value,
+		      int len)
+{
     struct variable_list *vars;
 
-    if (pdu->variables == NULL){
-      pdu->variables = vars =
+    if (varlist == NULL)
+      return NULL;
+    
+    if (*varlist == NULL){
+      *varlist = vars =
             (struct variable_list *)malloc(sizeof(struct variable_list));
     } else {
-      for(vars = pdu->variables;
+      for(vars = *varlist;
             vars->next_variable;
             vars = vars->next_variable)
         ;
@@ -3440,8 +3459,10 @@ snmp_pdu_add_variable(struct snmp_pdu *pdu,
     }
 
     vars->next_variable = NULL;
-    vars->name = (oid *)malloc(name_length * sizeof(oid));
-    memmove(vars->name, name, name_length * sizeof(oid));
+    if (name != NULL) {
+      vars->name = (oid *)malloc(name_length * sizeof(oid));
+      memmove(vars->name, name, name_length * sizeof(oid));
+    }
     vars->name_length = name_length;
 
     vars->type = type;
