@@ -3736,12 +3736,13 @@ adopt_orphans(void)
         adopted = 0;
         for (i = 0; i < NHASHSIZE; i++)
             if (nbuckets[i]) {
-                for (np = nbuckets[i]; np != NULL; np = np->next)
+                for (np = nbuckets[i]; np != NULL; np = np->next) {
                     tp = find_tree_node(np->parent, -1);
-                if (tp) {
-                    do_subtree(tp, &np);
-                    adopted = 1;
-                }
+		    if (tp) {
+			do_subtree(tp, &np);
+			adopted = 1;
+		    }
+		}
             }
     }
 

@@ -3526,6 +3526,8 @@ _get_realloc_symbol(const oid * objid, size_t objidlen,
 
     for (; subtree; subtree = subtree->next_peer) {
         if (*objid == subtree->subid) {
+	    while (subtree->next_peer && subtree->next_peer->subid == *objid)
+		subtree = subtree->next_peer;
             if (subtree->indexes) {
                 in_dices = subtree->indexes;
             } else if (subtree->augments) {
@@ -3914,6 +3916,8 @@ get_tree(const oid * objid, size_t objidlen, struct tree *subtree)
     return NULL;
 
   found:
+    while (subtree->next_peer && subtree->next_peer->subid == *objid)
+	subtree = subtree->next_peer;
     if (objidlen > 1)
         return_tree =
             get_tree(objid + 1, objidlen - 1, subtree->child_list);
@@ -3987,6 +3991,8 @@ fprint_description(FILE * f, oid * objid, size_t objidlen,
     while (objidlen > 1) {
         for (; subtree; subtree = subtree->next_peer) {
             if (*objid == subtree->subid) {
+		while (subtree->next_peer && subtree->next_peer->subid == *objid)
+		    subtree = subtree->next_peer;
                 if (strncmp(subtree->label, ANON, ANON_LEN))
                     sprintf(buf, " %s(%lu)", subtree->label,
                             subtree->subid);
@@ -4002,13 +4008,10 @@ fprint_description(FILE * f, oid * objid, size_t objidlen,
                 break;
             }
         }
-        if (subtree == 0)
-            break;
         objid++;
         objidlen--;
-        subtree = subtree->child_list;
-        if (subtree == 0)
-            break;
+        if (subtree)
+	    subtree = subtree->child_list;
     }
     fprintf(f, " %lu }\n", *objid);
 }
@@ -4402,6 +4405,8 @@ _add_strings_to_oid(struct tree *tp, char *cp,
         }
         if (*objidlen >= maxlen)
             goto bad_id;
+	while (tp2 && tp2->next_peer && tp2->next_peer->subid == subid)
+	    tp2 = tp2->next_peer;
         objid[*objidlen] = subid;
         (*objidlen)++;
 
@@ -4584,6 +4589,40 @@ _add_strings_to_oid(struct tree *tp, char *cp,
             in_dices = NULL;
             cp2 = cp;
             break;
+	case TYPE_NETADDR:
+	    fcp = cp;
+	    cp2 = strchr(cp, '.');
+	    if (cp2)
+		*cp2++ = 0;
+	    subid = strtoul(cp, &ecp, 0);
+	    if (*ecp)
+		goto bad_id;
+	    if (*objidlen + 1 >= maxlen)
+		goto bad_id;
+	    objid[*objidlen] = subid;
+	    (*objidlen)++;
+	    cp = cp2;
+	    if (subid == 1) {
+		for (len = 0; len < 4; len++) {
+		    fcp = cp;
+		    cp2 = strchr(cp, '.');
+		    if (cp2)
+			*cp2++ = 0;
+		    subid = strtoul(cp, &ecp, 0);
+		    if (*ecp)
+			goto bad_id;
+		    if (*objidlen + 1 >= maxlen)
+			goto bad_id;
+		    if (subid > 255)
+			goto bad_id;
+		    objid[*objidlen++] = subid;
+		    cp = cp2;
+		}
+	    }
+	    else {
+		in_dices = NULL;
+	    }
+	    break;
         default:
             snmp_log(LOG_ERR, "Unexpected index type: %d %s %s\n",
                      tp->type, in_dices->ilabel, cp);
