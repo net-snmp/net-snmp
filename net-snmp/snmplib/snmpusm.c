@@ -86,7 +86,7 @@ oid             usmNoPrivProtocol[10] = { 1, 3, 6, 1, 6, 3, 10, 1, 2, 1 };
 #ifndef DISABLE_DES
 oid             usmDESPrivProtocol[10] = { 1, 3, 6, 1, 6, 3, 10, 1, 2, 2 };
 #endif
-oid             usmAESPrivProtocol[10] = { 1, 3, 6, 1, 4, 1, 8072, 876,876,128 };
+oid             usmAESPrivProtocol[10] = { 1, 3, 6, 1, 6, 3, 10, 1, 2, 4 };
 /* backwards compat */
 oid             *usmAES128PrivProtocol = usmAESPrivProtocol;
 
