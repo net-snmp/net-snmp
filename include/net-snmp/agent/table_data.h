@@ -17,6 +17,8 @@ extern          "C" {
      */
 
 #define TABLE_DATA_NAME "table_data"
+#define TABLE_DATA_ROW  "table_data"
+#define TABLE_DATA_TABLE "table_data_table"
 
     typedef struct netsnmp_table_row_s {
         netsnmp_variable_list *indexes; /* stored permanently if store_indexes = 1 */
@@ -73,7 +75,8 @@ extern          "C" {
                                               netsnmp_table_registration_info
                                               *table_info);
 
-    netsnmp_table_row *netsnmp_extract_table_row(netsnmp_request_info *);
+    netsnmp_table_row  *netsnmp_extract_table_row(netsnmp_request_info *);
+    netsnmp_table_data *netsnmp_extract_table(    netsnmp_request_info *);
     void           *netsnmp_extract_table_row_data(netsnmp_request_info *);
     void netsnmp_insert_table_row(netsnmp_request_info *, netsnmp_table_row *);
     netsnmp_table_data *netsnmp_create_table_data(const char *name);
