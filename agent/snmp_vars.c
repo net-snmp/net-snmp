@@ -1047,11 +1047,7 @@ char sysContact[128] = SYS_CONTACT;
 char sysName[128] = SYS_NAME;
 char sysLocation[128] = SYS_LOC;
 
-#ifdef hpux
-oid version_id[] = {1, 3, 6, 1, 4, 1, 11, 2, 3, 2, 5};
-#else
-oid version_id[] = {1, 3, 6, 1, 4, 1, 3, 1, 1};
-#endif
+oid version_id[] = {EXTENSIBLEMIB,AGENTID};
 
 u_long
 sysUpTime(){
