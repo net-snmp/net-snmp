@@ -3,6 +3,7 @@ require 5;
 use Config;
 use Getopt::Long;
 my %MakeParams = ();
+my $opts;
 
 # See lib/ExtUtils/MakeMaker.pm for details of how to influence
 # the contents of the Makefile that is written.
@@ -14,7 +15,6 @@ WriteMakefile(%MakeParams);
 GetTestInfo();
 
 sub InitMakeParams {
-    my $opts;
     my %Params = (
 		  NAME         => 'SNMP',
 		  dist         => { SUFFIX => "gz", COMPRESS => "gzip -9f"},
@@ -105,43 +105,38 @@ sub GetTestInfo {
     my $snmpd_path1 = "${prefix}${sep}sbin";
     my $snmpd_path2 = "${sep}usr${sep}sbin";
     my $snmpd_path3 = "${sep}usr${sep}bin";
-    open(H, ">$info_file") || die "Error: could not open file '$info_file'($!)";
-    if($^O =~ /win32/i) {
-#you are using WIN 32
-	my $mibdir = "${prefix}${sep}share${sep}snmp${sep}mibs";
-	print <<WIN32
-==================================================================
-You are using Windows 32. The testing of Perl/SNMP API here would
-require you to start an snmpd agent and a trap receiver using the
-config file provided ( t\\snmptest.conf) manually.The
-test scripts will not do this(as in unix testing). So, please
-run those agents and enter the following information.If the data
-about host, agent_port and trap_port are already present in your
-snmptest.cmd file, make test will use those data for testing.
-=================================================================
-WIN32
-;
+    my $win32_snmpd_path = $ENV{'NET-SNMP-PATH'} . $sep . "bin";
 
-	$host = prompt("Please enter the host IP address/host name: ", "localhost");
-	print H "HOST => $host\n";
-	$agent_port = prompt("Please enter the agent port number: ", 161);
-	print H "AGENT_PORT => $agent_port\n";
-	$trap_port = prompt("Please enter the trap port number: ", 162);
-	print H "TRAP_PORT => $trap_port\n";
-	$mibdir = prompt("Please enter the MIB directory: ", "/usr/mibs");
-	print H "MIBDIR => $mibdir\n";
-    } else {
-# you are using UNIX
-	my ($mibdir, $snmpd, $snmptrapd);
-	if ($opts->{'insource'} eq "true") {
-	    $mibdir = "../../mibs";
-	    $snmpd = "../../agent/snmpd";
-	    $snmptrapd = "../../apps/snmptrapd";
-	} else {
-	    $mibdir = "${prefix}${sep}share${sep}snmp${sep}mibs";
-	    $snmpd = find_files(["snmpd"], [$snmpd_path1, $snmpd_path2]);
-	    $snmptrapd = find_files(["snmptrapd"], [$snmpd_path1, $snmpd_path2]);
-	}
+    open(H, ">$info_file") || die "Error: could not open file '$info_file'($!)";
+
+    my ($mibdir, $snmpd, $snmptrapd);
+
+        # Windows
+        if ($Config{'osname'} eq 'MSWin32') {
+          if (lc ($opts->{'insource'}) eq "true") {
+            $mibdir = "../../mibs";
+            $snmpd = "../../win32/bin";
+            $snmptrapd = "../../win32/bin";
+          } else {
+            $mibdir = $ENV{'NET-SNMP-PATH'} . $sep . "mibs";
+            $snmpd = find_files(["snmpd.exe"], [$win32_snmpd_path]);
+            $snmptrapd = find_files(["snmptrapd.exe"], [$win32_snmpd_path]);
+          }
+        }
+
+        # Unix
+        else {
+          if (lc($opts->{'insource'}) eq "true") {
+            $mibdir = "../../mibs";
+            $snmpd = "../../agent/snmpd";
+            $snmptrapd = "../../apps/snmptrapd";
+          } else {
+            $mibdir = "${prefix}${sep}share${sep}snmp${sep}mibs";
+            $snmpd = find_files(["snmpd"], [$snmpd_path1, $snmpd_path2]);
+            $snmptrapd = find_files(["snmptrapd"], [$snmpd_path1, $snmpd_path2]);
+          }
+        }
+
 	$mibdir = find_files(["NET-SNMP-MIB.txt"],[$mibdir]);
 
 	$mibdir ||= prompt("Unable to locate the MIBs, Please enter the path: ",
@@ -152,8 +147,14 @@ WIN32
 	    prompt("Unable to locate \"snmptrapd\". Please enter the path: ",
 		   $snmpd_path1);
 
-        $snmpd =~ s/($sep)?(snmpd)?$/${sep}snmpd/;
-        $snmptrapd =~ s/($sep)?(snmptrapd)?$/${sep}snmptrapd/;
+        if ($Config{'osname'} eq 'MSWin32') {
+          $snmpd = $snmpd . $sep . "snmpd.exe";
+          $snmptrapd = $snmptrapd . $sep . "snmptrapd.exe";
+        }
+        else {
+          $snmpd =~ s/($sep)?(snmpd)?$/${sep}snmpd/;
+          $snmptrapd =~ s/($sep)?(snmptrapd)?$/${sep}snmptrapd/;
+        }
 
 	print H "SNMPD => $snmpd\n";
 	print H "SNMPTRAPD => $snmptrapd\n";
@@ -176,7 +177,6 @@ WIN32
 		warn("Error: $snmptrapd does not exist or is unreadable. 'make test' will not work.\n");
 	    }
 	}
-    }
 # end of else
     close H;
 }
