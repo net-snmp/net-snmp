@@ -885,18 +885,13 @@ vacm_in_view(netsnmp_pdu *pdu, oid * name, size_t namelen,
     }
     DEBUGMSG(("mibII/vacm_vars", ", vn=%s", vn));
 
-    vp = vacm_getViewEntry(vn, name, namelen,
-                           (check_subtree) ? VACM_MODE_CHECK_SUBTREE :
-                           VACM_MODE_FIND);
     if (check_subtree) {
-        if (!vp) {
-            return VACM_SUBTREE_UNKNOWN;
-        }
-        if (vp->viewType == SNMP_VIEW_EXCLUDED) {
-            return VACM_NOTINVIEW;
-        }
-        return VACM_SUCCESS;
+        DEBUGMSG(("mibII/vacm_vars", "\n"));
+        return vacm_checkSubtree(vn, name, namelen);
     }
+
+    vp = vacm_getViewEntry(vn, name, namelen, VACM_MODE_FIND);
+
     if (vp == NULL) {
         DEBUGMSG(("mibII/vacm_vars", "\n"));
         return 4;
