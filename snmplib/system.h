@@ -85,6 +85,10 @@ void winsock_cleanup (void);
 
 #endif /* WIN32 */
 
+#ifdef HAVE_NETINET_IN_H
+#include <netinet/in.h>		/* For definition of 'in_addr_t' */
+#endif
+
 in_addr_t get_myaddr (void);
 long get_uptime (void);
 
