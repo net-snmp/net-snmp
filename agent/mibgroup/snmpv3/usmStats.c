@@ -19,6 +19,17 @@
 #include "../mibII/sysORTable.h"
 #include "usmStats.h"
 
+struct variable2 usmStats_variables[] = {
+  { USMSTATSUNSUPPORTEDSECLEVELS, ASN_COUNTER, RONLY, var_usmStats, 1, { 1 } },
+  { USMSTATSNOTINTIMEWINDOWS,     ASN_COUNTER, RONLY, var_usmStats, 1, { 2 } },
+  { USMSTATSUNKNOWNUSERNAMES,     ASN_COUNTER, RONLY, var_usmStats, 1, { 3 } },
+  { USMSTATSUNKNOWNENGINEIDS,     ASN_COUNTER, RONLY, var_usmStats, 1, { 4 } },
+  { USMSTATSWRONGDIGESTS,         ASN_COUNTER, RONLY, var_usmStats, 1, { 5 } },
+  { USMSTATSDECRYPTIONERRORS,     ASN_COUNTER, RONLY, var_usmStats, 1, { 6 } },
+};
+
+/* now load this mib into the agents mib table */
+oid usmStats_variables_oid[] = {1,3,6,1,6,3,15,1,1};
 
 
 void init_usmStats (void) {
@@ -26,6 +37,9 @@ void init_usmStats (void) {
   static oid reg[] = {1,3,6,1,6,3,15,2,1,1};
   register_sysORTable(reg,10,"The management information definitions for the SNMP User-based Security Model.");
 #endif
+
+  REGISTER_MIB("snmpv3/usmStats", usmStats_variables, variable2, \
+				 usmStats_variables_oid );
 }
 
 u_char *
