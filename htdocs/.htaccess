@@ -1,10 +1,6 @@
 Options +Includes
 AddType text/html .shtml
 AddHandler server-parsed .shtml
-AuthName "Net-SNMP"
-AuthType Basic
-AuthUserFile /etc/httpd/passwords.net-snmp
-require valid-user
 XBitHack on
 ErrorDocument 404 /error404.html
 <Files *.epl>
