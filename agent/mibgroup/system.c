@@ -14,12 +14,6 @@
 	 *
 	 *********************/
 
-
-static struct nlist system_nl[] = {
-	/* No kernel information needed */
-        { 0 },
-};
-
 char version_descr[128] = VERS_DESC;
 char sysContact[128] = SYS_CONTACT;
 char sysName[128] = SYS_NAME;
