@@ -1,6 +1,7 @@
 top_builddir=../..
 
-CPPFLAGS=-I. -I../../include -I../.. -I$(srcdir) -I$(srcdir)/../.. \
+CPPFLAGS=-I../../include -I$(top_srcdir)/include \
+	-I. -I../.. -I$(srcdir) -I$(srcdir)/../.. \
 	-I$(srcdir)/../../snmplib -I$(srcdir)/.. -I.. @CPPFLAGS@ $(LIB_CFLAGS)
 
 # Need a special .c -> .o definition here to make sure we place the

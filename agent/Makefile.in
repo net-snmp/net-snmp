@@ -6,29 +6,30 @@ top_builddir	= ..
 
 TARG		= snmpd
 LIBTARG		= \
-		libucdagent.$(LIB_EXTENSION)$(LIB_VERSION) \
-		libucdmibs.$(LIB_EXTENSION)$(LIB_VERSION)
-CLEANTARG	= libucdagent.a libucdmibs.a
+		libnetsnmpagent.$(LIB_EXTENSION)$(LIB_VERSION) \
+		libnetsnmpmibs.$(LIB_EXTENSION)$(LIB_VERSION)
+CLEANTARG	= libnetsnmpagent.a libnetsnmpmibs.a
 USELIBS		= ../snmplib/libsnmp.$(LIB_EXTENSION)$(LIB_VERSION)
-HELPERLIB	= helpers/libhelpers.$(LIB_EXTENSION)$(LIB_VERSION)
+HELPERLIB	= helpers/libnetsnmphelpers.$(LIB_EXTENSION)$(LIB_VERSION)
 #LOCAL_LIBS	= -L../snmplib -L.
 LOCAL_LIBS	= 
 #LIBS		= $(CC_RUNTIME_ARG) -lsnmp @WRAPLIBS@ @LIBS@
 LIBS		= ../snmplib/libsnmp.$(LIB_EXTENSION)$(LIB_VERSION) @AGENTLIBS@
 #OUR_AGENT_LIBS	= $(CC_RUNTIME_ARG) -lucdagent -lucdmibs -lsnmp @WRAPLIBS@ $(LIBS) @DLLIBS@
 OUR_AGENT_LIBS	= $(LIBTARG) $(HELPERLIB) @WRAPLIBS@ $(LIBS) @DLLIBS@
-CPPFLAGS	= -I../include -I.. -I$(srcdir)/.. -I$(srcdir)/../snmplib \
+CPPFLAGS	= -I../include -I$(top_srcdir)/include \
+		  -I.. -I$(srcdir)/.. -I$(srcdir)/../snmplib \
 		  -I$(srcdir) -I. -I$(srcdir)/mibgroup -Imibgroup @CPPFLAGS@
 
 #
 # Objects
 #
 
-# libucdmib objects.
+# libnetsnmpmib objects.
 LMIBOBJS		= @mibgroup_list_lo@ mib_modules.lo auto_nlist.lo
 MIBOBJS		= @mibgroup_list_o@ mib_modules.o auto_nlist.o
 
-# libucdagent objects
+# libnetsnmpagent objects
 LIBAGENTOBJS=snmp_agent.o snmp_vars.o agent_read_config.o agent_registry.o \
 	agent_index.o agent_trap.o kernel.o  agent_handler.o
 LLIBAGENTOBJS=snmp_agent.lo snmp_vars.lo agent_read_config.lo agent_registry.lo\
@@ -47,7 +48,7 @@ INSTALLHEADERS=agent_read_config.h agent_registry.h agent_index.h agent_trap.h \
 	agent_handler.h
 INSTALLDIRS=helpers
 
-all: subdirs snmpd$(EXEEXT) libucdagent.$(LIB_EXTENSION)$(LIB_VERSION)
+all: subdirs snmpd$(EXEEXT) libnetsnmpagent.$(LIB_EXTENSION)$(LIB_VERSION)
 
 
 subdirs:
@@ -70,13 +71,13 @@ snmpd$(EXEEXT):	${LAGENTOBJS} $(USELIBS) $(HELPERLIB) $(LIBTARG)
 	$(LINK) $(CFLAGS) -o $@ ${LAGENTOBJS} $(LOCAL_LIBS) ${LDFLAGS} ${OUR_AGENT_LIBS}
 
 
-libucdagent.$(LIB_EXTENSION)$(LIB_VERSION):    ${LLIBAGENTOBJS} libucdmibs.$(LIB_EXTENSION)$(LIB_VERSION)
-	$(LIB_LD_CMD) libucdagent.$(LIB_EXTENSION)$(LIB_VERSION) ${LLIBAGENTOBJS}  $(LIB_LD_LIBS)
-	$(RANLIB) libucdagent.$(LIB_EXTENSION)$(LIB_VERSION)
+libnetsnmpagent.$(LIB_EXTENSION)$(LIB_VERSION):    ${LLIBAGENTOBJS} libnetsnmpmibs.$(LIB_EXTENSION)$(LIB_VERSION)
+	$(LIB_LD_CMD) libnetsnmpagent.$(LIB_EXTENSION)$(LIB_VERSION) ${LLIBAGENTOBJS}  $(LIB_LD_LIBS)
+	$(RANLIB) libnetsnmpagent.$(LIB_EXTENSION)$(LIB_VERSION)
 
-libucdmibs.$(LIB_EXTENSION)$(LIB_VERSION):    ${LMIBOBJS}
-	$(LIB_LD_CMD) libucdmibs.$(LIB_EXTENSION)$(LIB_VERSION) ${LMIBOBJS}  $(LIB_LD_LIBS)
-	$(RANLIB) libucdmibs.$(LIB_EXTENSION)$(LIB_VERSION)
+libnetsnmpmibs.$(LIB_EXTENSION)$(LIB_VERSION):    ${LMIBOBJS}
+	$(LIB_LD_CMD) libnetsnmpmibs.$(LIB_EXTENSION)$(LIB_VERSION) ${LMIBOBJS}  $(LIB_LD_LIBS)
+	$(RANLIB) libnetsnmpmibs.$(LIB_EXTENSION)$(LIB_VERSION)
 
 clean:
 	rm -f core *.o *.lo *.exe ${TARG} ${LIBTARG} ${CLEANTARG}
