@@ -115,7 +115,7 @@ int sh_count_procs(procname)
         copy_word(cptr,line);
         if (!strcmp(line,procname)) ret++;
       }
-#ifdef ERRORMIBNUM
+#ifdef USEERRORMIB
     if (ftell(file) < 2) {
       seterrorstatus("process list unreasonable short (mem?)",2);
       ret = -1;

@@ -10,7 +10,7 @@ struct myproc *procwatch;
 static struct extensible fixproc;
 int numprocs=0;
 
-#ifdef PROCMIBNUM
+#ifdef USEPROCMIB
 unsigned char *var_extensible_proc(vp, name, length, exact, var_len, write_method)
     register struct variable *vp;
 /* IN - pointer to variable entry that points here */

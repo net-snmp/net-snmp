@@ -72,22 +72,32 @@ sure to end it in -1.*/
 #define VERS_DESC   "unknown"             /* overridden at run time */
 #define SYS_NAME    "unknown"             /* overridden at run time */
 
-/* comment out to turn off functionality for any of these: */
-/* (See README for details) */
+/* comment out the second define to turn off functionality for any of
+   these: (See README for details) */
 
 #define PROCMIBNUM 1              /*   proc PROCESSNAME [MAX] [MIN] */
+#define USEPROCMIB
+
 #define SHELLMIBNUM 3             /*   exec/shell NAME COMMAND      */
-#ifdef hpux
+#define USESHELLMIB
+
 #define MEMMIBNUM 4               /*   swap MIN                     */
+#ifdef hpux
+#define USEMEMMIB
 #endif
+
 #define DISKMIBNUM 6              /*   disk DISK MINSIZE            */
+#define USEDISKMIB
+
 #define LOADAVEMIBNUM 7           /*   load 1 5 15                  */
+#define USELOADAVEMIB
 
-#define VERSIONMIBNUM 100  /* which version are you using?
-                              This mibloc will tell you */
+#define VERSIONMIBNUM 100  /* which version are you using? */
+#define USEVERSIONMIB      /* This mibloc will tell you */
 
-#define ERRORMIBNUM 101     /* Reports errors the agent runs into
-                               (typically its "can't fork, no mem" problems) */
+#define ERRORMIBNUM 101     /* Reports errors the agent runs into */
+#define USEERRORMIB         /* (typically its "can't fork, no mem" problems) */
+
 #define ERRORTIMELENGTH 600 /* how long to wait (seconds) for error querys
                                before reseting the error trap.*/
 
