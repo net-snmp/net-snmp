@@ -152,16 +152,27 @@ files to build static versions of the applications.
 Both VC++ 6.0 and 7.0 have been tested.  Building with earlier Microsoft
 compiler versions has been dropped and is no longer supported.
 
-A manually generated net-snmp-config.h file has been provided for use with
-the win32 build since the basic win32 environment does not support autoconf.
+Since the MSVC build environment does not use "configure" nor "make" to
+generate the various pathnames that the programs require, several header
+files and an install script are provided.
 
-Note: the compiled in MIB path is /usr/mibs which may be changed by
-editing win32/net-snmp/net-snmp-config.h.  Note that the install
-instructions below should be adjusted when changes are made to paths.
+The install script "win32\install-net-snmp.bat" should be run after a
+build is successful.  It copies the programs, MIB files, and development
+components to an install directory named in the INSTALL_BASE variable.
 
-Note: All paths must use forward slashes, even if drive letters are used.  
-For example: c:/Program Files/net-snmp/mibs.  If a drive letter is not 
-specified, the current drive letter is assumed.
+The INSTALL_BASE variable must match the INSTALL_BASE compile constant
+defined in "win32\net-snmp\net-snmp-config.h", using these rules:
+
+1. All paths in install-net-snmp.bat use the "\" DOS pathname delimiter.
+
+   For example: set INSTALL_BASE="c:\Program Files\Net-SNMP".  
+
+
+2. All paths in net-snmp-config.h use the "/" UNIX pathname delimiter.
+   If a drive letter is not specified, the current drive letter is assumed.
+
+   For example: #define INSTALL_BASE "c:/Program Files/Net-SNMP".  
+
 
 To build the libraries and applications, open the workspace file
 "win32\win32.dsw" from VC++.
@@ -226,14 +237,26 @@ library debug option is set to 'Program Database' or "/Zi".
 Building
 --------
 
-1. Open win32.dsw if you do not have the Platform SDK installed, 
-   otherwise open win32sdk.dsw
-2. Click "Build->Batch Build..."  
-3. Set Release and/or Debug in 'Project configurations' to suit.
-4. Click "Build".
-5. When building is done, View the Output window, clip and
+Because snmptrapd builds only using win32.dsw, and since the library
+projects are exactly the same from the workspaces' point of view,
+start by building from the win32.dsw workspace.
+
+1. Open win32.dsw.  Click "Build->Batch Build..."  
+2. Set Release and/or Debug in 'Project configurations' to suit.
+3. Click "ReBuild All".
+4. When building is done, View the Output window, clip and
    save to a text file if there is some information to share.
-6. Click "File->Close Workspace".
+5. Click "File->Close Workspace".
+
+
+Skip the next five steps if you did not install the Platform SDK.
+
+6. Open win32sdk.dsw.  Click "Build->Batch Build..."
+7. Set Release and/or Debug in 'Project configurations' to suit.
+8. Set netsnmpmibssdk, snmpdsdk, then Click "Build".
+9. When building is done, View the Output window, clip and
+   save to a text file if there is some information to share.
+10.Click "File->Close Workspace".
 
 
 ***************************************************************************
@@ -283,37 +306,17 @@ libeay32.lib
 *
 ***************************************************************************
 
-There is a basic installation, which installs the programs and MIB files only.
-The development installation includes library files and header files for
-other sources to compile against the Net-SNMP library, but the programs
-do not require library files nor include header files to function correctly.
+After the build is successful, open a command prompt window.
+Cd to the base directory where this file README.win32 is located.
 
+You may edit "install-net-snmp.bat" _before_ you invoke it,
+in order to not install the linking libraries, or the header files.
 
-Create these subdirectories on the root directory of the
-volume you wish to hold the UC-Davis SNMP applications :
+Run win32\install-net-snmp.bat to install the programs on this computer.
 
-  usr, usr\bin, usr\mibs, usr\lib, usr\include\ucd-snmp
-
-Copy mibs\*.txt to usr\mibs
-Copy win32\bin\*.* to usr\bin
-Copy win32\lib\*.* to usr\lib
-Copy include\ucd-snmp\*.* to usr\include\ucd-snmp  (recursively)
-Copy include\net-snmp\*.* to usr\include\net-snmp  (recursively)
-Copy snmplib\*.h to usr\include\ucd-snmp
-Copy win32\net-snmp\*.*   to usr\include\net-snmp  (recursively)
-Copy win32\config.h to usr\include\ucd-snmp\ucd-snmp-config.h
-
-Change usr\include\net-snmp\net-snmp-config.h and remove the typedef
-definition for mode_t (if there is one).
-
-if using OpenSSL
-Copy libeay32.dll to usr\bin
-If using OpenSSL for development
-Copy libeay32.lib to usr\lib
-
-If you do not want to install the debug versions, type :
-del \usr\bin\*_d.exe
-del \usr\bin\*_d.dll
+Some users may have better results compiling other packages that use
+the installed header files by removing the "mode_t" definition from
+net-snmp-config.h file under the INSTALL_BASE file hierarchy.
 
 
 Installing is complete.  You may want to create a compressed
