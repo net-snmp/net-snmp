@@ -258,7 +258,7 @@ sub addtoken {
 #
 sub summarizeerrors {
     my $clause = shift;
-    print "<table $tableparms><tr><td>host</td><td>table</td><td>description</td></tr>\n";
+    print "<table $tableparms><tr><td><b>Host</b></td><td><b>Table</b></td><td><b>Description</b></td></tr>\n";
     my $cursor = 
 	getcursor("SELECT * FROM hosttables $clause");
 
