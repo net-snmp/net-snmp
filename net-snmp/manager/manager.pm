@@ -344,7 +344,7 @@ if (defined(param('setupgroupsubmit')) &&
 # user preferences
 #===========================================================================
 if (defined(param('userprefs'))) {
-    setupuserpreferences($dbh, $user, $group);
+    setupuserpreferences($dbh, $remuser, $group);
     return Exit($dbh, $group);
 }
 
@@ -353,7 +353,7 @@ if (defined(param('userprefs'))) {
 #===========================================================================
 if (defined(param('setupuserprefssubmit')) && 
     isadmin($dbh, $remuser, $group)) {
-    setupusersubmit($dbh, $group);
+    setupusersubmit($dbh, $remuser, $group);
     delete_all();
     param(-name => 'group', -value => $group);
     print "<a href=\"" . self_url() . "\">Entries submitted</a>";
@@ -833,6 +833,7 @@ sub displayconfigarray {
 	    or die "\nnot ok: $DBI::errstr\n";
     }
 
+    print "check: $config{'-check'}<br>\n";
     print "<table $ucdsnmp::manager::tableparms>\n";
     print "<tr><td></td>";
     my ($i, $j);
@@ -849,6 +850,7 @@ sub displayconfigarray {
 	    my $nj = $j;
 	    $nj = $j->[0] if ($config{'-arrayrefs'} || $config{'-arrayref2'});
 	    my $checked = "checked" if (defined($cmd) && $cmd->execute($ni,$nj) ne "0E0");
+	    print "check: $ni, $nj: $checked<br>\n";
 	    print "<td><input type=checkbox $checked value=y name=" . $config{prefix} . $ni . $nj . "></td>\n";
 	}
 	print "</tr>\n";
@@ -979,7 +981,7 @@ sub Exit {
     $tq =~ s/\?.*//;
     print "<hr>\n";
     print "<a href=\"$tq\">[TOP]</a>\n";
-    print "<a href=\"$tq?userprefs=1?group=$group\">[options]</a>\n";
+    print "<a href=\"$tq?userprefs=1&group=$group\">[display options]</a>\n";
     if (defined($group)) {
 	print "<a href=\"$tq?group=$group\">[group: $group]</a>\n";
 	print "<a href=\"$tq?group=$group&summarizegroup=1\">[summarize errors]</a>\n";
@@ -1006,7 +1008,7 @@ sub setupuserpreferences {
     foreach my $i (@$tables) {
 	my $sth = $dbh->prepare("select * from ${$i}[0] where 1 = 0");
 	$sth->execute();
-	displayconfigarray([${$i}[0]], $sth->{NAME},
+	displayconfigarray($dbh, [${$i}[0]], $sth->{NAME},
 			   -check, "select * from userprefs where (tablename = ? and columnname = ? and user = '$user' and groupname = '$group' and displayit = 'N')");
     print "<br>\n";
     }
