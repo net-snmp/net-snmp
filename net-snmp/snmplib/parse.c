@@ -2501,7 +2501,6 @@ parse(FILE *fp,
         default:
             print_error(token, "is a reserved word", type);
             break;         /* see if we can parse the rest of the file */
-            return NULL;
         }
         strcpy(name, token);
         type = get_token(fp, token, MAXTOKEN);
