@@ -337,15 +337,15 @@ static void output_temp_bfr (char * bfr,
       *    options  - what options to use when appending string
       */
 {
-  unsigned long temp_len;           /* length of temporary buffer */
-  unsigned long temp_to_write;      /* # of chars to write from temp bfr */
-  unsigned long char_to_write;      /* # of other chars to write */
+  int temp_len;           /* length of temporary buffer */
+  int temp_to_write;      /* # of chars to write from temp bfr */
+  int char_to_write;      /* # of other chars to write */
 
   /* 
    * Figure out how many characters are in the temporary buffer now,
    * and how many of them we'll write.
    */
-  temp_len = (unsigned long) strlen (temp_bfr);
+  temp_len = (int) strlen (temp_bfr);
   temp_to_write = temp_len;
   if (temp_to_write > options->precision)
     temp_to_write = options->precision;
@@ -401,8 +401,8 @@ static void handle_time_fmt (char * bfr,
   struct tm *   parsed_time;        /* parsed version of current time */
   char          safe_bfr[30];       /* temporary string-building buffer */
   char          fmt_cmd = options->cmd; /* the format command to use */
-  unsigned long offset = 0;         /* offset into string to display */
-  unsigned long year_len;           /* length of year string */
+  int           offset = 0;         /* offset into string to display */
+  int           year_len;           /* length of year string */
 
   /* get the time field to output */
   if (is_up_time_cmd (fmt_cmd))
