@@ -49,6 +49,9 @@ typedef struct netsnmp_mib_handler_s {
         void           *myvoid; 
         /** for agent_handler's internal use */
         int             flags;
+
+        /** if you add more members, you probably also want to update */
+        /** _clone_handler in snmp_agent.c. */
 	
         int             (*access_method) (struct netsnmp_mib_handler_s *,
                                           struct
