@@ -818,7 +818,7 @@ snmp_synch_response_cb(netsnmp_session * ss,
                 if (errno == EINTR) {
                     continue;
                 } else {
-                    snmp_errno = SNMPERR_GENERR;
+                    snmp_errno = SNMPERR_GENERR;    /*MTCRITICAL_RESOURCE */
                     /*
                      * CAUTION! if another thread closed the socket(s)
                      * waited on here, the session structure was freed.
@@ -897,7 +897,7 @@ snmp_sess_synch_response(void *sessp,
                 if (errno == EINTR) {
                     continue;
                 } else {
-                    snmp_errno = SNMPERR_GENERR;
+                    snmp_errno = SNMPERR_GENERR;    /*MTCRITICAL_RESOURCE */
                     /*
                      * CAUTION! if another thread closed the socket(s)
                      * waited on here, the session structure was freed.
