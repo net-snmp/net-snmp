@@ -1972,6 +1972,10 @@ asn_realloc(u_char **pkt, size_t *pkt_len)
   u_char *new_pkt = NULL;
   size_t new_pkt_len;
 
+  if (pkt == NULL) {
+    return 0;
+  }
+
   /*  The current re-allocation algorithm is to increase the buffer size by
       whichever is the greater of 256 bytes or the current buffer size, up to
       a maximum increase of 8192 bytes.  */
@@ -1985,13 +1989,19 @@ asn_realloc(u_char **pkt, size_t *pkt_len)
   }
 
   DEBUGMSGTL(("asn_realloc", "pkt %08p, len %08x ", *pkt, *pkt_len));
-  new_pkt = realloc(*pkt, new_pkt_len);
+  if (*pkt == NULL) {
+    new_pkt = (u_char *)malloc(new_pkt_len);
+  } else {
+    new_pkt = (u_char *)realloc(*pkt, new_pkt_len);
+  }
   if (new_pkt != NULL) {
     DEBUGMSG(("asn_realloc", "new_pkt %08p, new_pkt_len %08x\n",
 	      new_pkt, new_pkt_len));
-    DEBUGMSGTL(("asn_realloc", "memmove(%08p, %08p, %08x)\n",
-		new_pkt + (new_pkt_len - *pkt_len), new_pkt, *pkt_len));
-    memmove(new_pkt + (new_pkt_len - *pkt_len), new_pkt, *pkt_len);
+    if (*pkt != NULL) {
+      DEBUGMSGTL(("asn_realloc", "memmove(%08p, %08p, %08x)\n",
+		  new_pkt + (new_pkt_len - *pkt_len), new_pkt, *pkt_len));
+      memmove(new_pkt + (new_pkt_len - *pkt_len), new_pkt, *pkt_len);
+    }
     *pkt = new_pkt;
     *pkt_len = new_pkt_len;
     return 1;
@@ -2002,51 +2012,10 @@ asn_realloc(u_char **pkt, size_t *pkt_len)
 }
 
 #ifdef USE_REVERSE_ASNENCODING
-u_char	*
-asn_rbuild_int (u_char *data,
-                size_t *datalength,
-                u_char type,
-                long *intp,
-                size_t intsize)
-{
-    static const char *errpre = "build int";
-    register long integer;
-    u_char *initdatap = data;
-    int testvalue = (*intp < 0) ? -1 : 0;
-    
-    if (intsize != sizeof (long)){
-	_asn_size_err(errpre, intsize, sizeof(long));
-	return NULL;
-    }
-    integer = *intp;
-
-    if (((*datalength)--) < 1) return NULL;
-    *data-- = (u_char)integer;
-    integer >>= 8;
-    while (integer != testvalue) {
-        if (((*datalength)--) < 1) return NULL;
-        *data-- = (u_char)integer;
-        integer >>= 8;
-    }
-    if ((*(data+1) & 0x80) != (testvalue & 0x80)) {
-        /* make sure left most bit is representational of the rest of
-           the bits that aren't encoded */
-        if (((*datalength)--) < 1) return NULL;
-        *data-- = testvalue & 0xff;
-    }
-
-    intsize = initdatap-data;
-    data = asn_rbuild_header(data, datalength, type, intsize);
-    if (_asn_build_header_check(errpre, data+1, *datalength, intsize))
-	return NULL;
-
-    DEBUGDUMPSETUP("send", data+1, intsize);
-    DEBUGMSG(("dumpv_send", "  Integer:\t%ld (0x%.2X)\n", *intp, *intp));
-    return data;
-}
 
 int
-asn_realloc_rbuild_length (u_char **pkt, size_t *pkt_len, size_t *offset,
+asn_realloc_rbuild_length (u_char **pkt, size_t *pkt_len,
+			   size_t *offset, int r,
 			   size_t length)
 {
   static const char *errpre = "build length";
@@ -2055,7 +2024,7 @@ asn_realloc_rbuild_length (u_char **pkt, size_t *pkt_len, size_t *offset,
   size_t start_offset = *offset;
 
   if (length <= 0x7f) {
-    if (((*pkt_len - *offset) < 1) && !asn_realloc(pkt, pkt_len)) {
+    if (((*pkt_len - *offset) < 1) && !(r && asn_realloc(pkt, pkt_len))) {
       sprintf(ebuf, "%s: bad length < 1 :%d, %d", errpre, *pkt_len - *offset,
 	      length);
       ERROR_MSG(ebuf);
@@ -2064,7 +2033,7 @@ asn_realloc_rbuild_length (u_char **pkt, size_t *pkt_len, size_t *offset,
     *(*pkt + *pkt_len - (++*offset)) = length;
   } else {
     while(length > 0xff) {
-      if (((*pkt_len - *offset) < 1) && !asn_realloc(pkt, pkt_len)) {
+      if (((*pkt_len - *offset) < 1) && !(r && asn_realloc(pkt, pkt_len))) {
 	sprintf(ebuf, "%s: bad length < 1 :%d, %d", errpre, *pkt_len - *offset,
 		length);
 	ERROR_MSG(ebuf);
@@ -2075,7 +2044,7 @@ asn_realloc_rbuild_length (u_char **pkt, size_t *pkt_len, size_t *offset,
     }
     
     while ((*pkt_len - *offset) < 2) {
-      if (!asn_realloc(pkt, pkt_len)) {
+      if (!(r && asn_realloc(pkt, pkt_len))) {
 	sprintf(ebuf, "%s: bad length < 1 :%d, %d", errpre, *pkt_len - *offset,
 		length);
 	ERROR_MSG(ebuf);
@@ -2092,13 +2061,15 @@ asn_realloc_rbuild_length (u_char **pkt, size_t *pkt_len, size_t *offset,
 }
 
 int
-asn_realloc_rbuild_header(u_char **pkt, size_t *pkt_len, size_t *offset,
-			  u_char type, size_t length)
+asn_realloc_rbuild_header(u_char **pkt, size_t *pkt_len,
+			  size_t *offset, int r,
+			  u_char type,
+			  size_t length)
 {
   char ebuf[128];
     
-  if (asn_realloc_rbuild_length(pkt, pkt_len, offset, length)) {
-    if (((*pkt_len - *offset) < 1) && !asn_realloc(pkt, pkt_len)) {
+  if (asn_realloc_rbuild_length(pkt, pkt_len, offset, r, length)) {
+    if (((*pkt_len - *offset) < 1) && !(r && asn_realloc(pkt, pkt_len))) {
       sprintf(ebuf, "bad header length < 1 :%d, %d", *pkt_len - *offset,
 	      length);
       ERROR_MSG(ebuf);
@@ -2111,8 +2082,10 @@ asn_realloc_rbuild_header(u_char **pkt, size_t *pkt_len, size_t *offset,
 }
 
 int
-asn_realloc_rbuild_int (u_char **pkt, size_t *pkt_len, size_t *offset,
-			u_char type, long *intp, size_t intsize)
+asn_realloc_rbuild_int (u_char **pkt, size_t *pkt_len,
+			size_t *offset, int r,
+			u_char type,
+			long *intp, size_t intsize)
 {
   static const char *errpre = "build int";
   register long integer = *intp;
@@ -2124,14 +2097,14 @@ asn_realloc_rbuild_int (u_char **pkt, size_t *pkt_len, size_t *offset,
     return 0;
   }
 
-  if (((*pkt_len - *offset) < 1) && !asn_realloc(pkt, pkt_len)) {
+  if (((*pkt_len - *offset) < 1) && !(r && asn_realloc(pkt, pkt_len))) {
     return 0; 
   }
   *(*pkt + *pkt_len - (++*offset)) = (u_char)integer;
   integer >>= 8;
 
   while (integer != testvalue) {
-    if (((*pkt_len - *offset) < 1) && !asn_realloc(pkt, pkt_len)) {
+    if (((*pkt_len - *offset) < 1) && !(r && asn_realloc(pkt, pkt_len))) {
       return 0; 
     }
     *(*pkt + *pkt_len - (++*offset)) = (u_char)integer;
@@ -2141,18 +2114,20 @@ asn_realloc_rbuild_int (u_char **pkt, size_t *pkt_len, size_t *offset,
   if ((*(*pkt + *pkt_len - *offset) & 0x80) != (testvalue & 0x80)) {
     /*  Make sure left most bit is representational of the rest of the bits
 	that aren't encoded.  */
-    if (((*pkt_len - *offset) < 1) && !asn_realloc(pkt, pkt_len)) {
+    if (((*pkt_len - *offset) < 1) && !(r && asn_realloc(pkt, pkt_len))) {
       return 0; 
     }
     *(*pkt + *pkt_len - (*++offset)) = testvalue & 0xff;
   }
 
-  intsize = *offset - start_offset;
-  if (asn_realloc_rbuild_header(pkt, pkt_len, offset, type, intsize)) {
-    if (_asn_realloc_build_header_check(errpre, pkt, pkt_len, intsize)) {
+  if (asn_realloc_rbuild_header(pkt, pkt_len, offset, r, type,
+				(*offset - start_offset))) {
+    if (_asn_realloc_build_header_check(errpre, pkt, pkt_len, 
+					(*offset - start_offset))) {
       return 0;
     } else {
-      DEBUGDUMPSETUP("send", (*pkt + *pkt_len - *offset), intsize);
+      DEBUGDUMPSETUP("send", (*pkt + *pkt_len - *offset),
+		     (*offset - start_offset));
       DEBUGMSG(("dumpv_send", "  Integer:\t%ld (0x%.2X)\n", *intp, *intp));
       return 1;
     }
@@ -2161,49 +2136,17 @@ asn_realloc_rbuild_int (u_char **pkt, size_t *pkt_len, size_t *offset,
   return 0;
 }
 
-u_char	*
-asn_rbuild_string (u_char *data,
-                   size_t *datalength,
-                   u_char	type,
-                   const u_char *string,
-                   size_t strlength)
-{
-    static const char *errpre = "build string";
-    u_char *initdatap = data;
-
-    if (strlength > *datalength)
-        return NULL;
-    data -= strlength;
-    memcpy(data+1, string, strlength);
-    *datalength -= strlength;
-    
-    data = asn_rbuild_header(data, datalength, type, strlength);
-    if (_asn_build_header_check(errpre, data+1, *datalength, strlength))
-	return NULL;
-
-    DEBUGDUMPSETUP("send", data+1, initdatap - data);
-    DEBUGIF("dumpv_send") {
-        if (strlength == 0) {
-            DEBUGMSG(("dumpv_send", "  String: [NULL]\n"));
-        } else {
-            char *buf = (char *)malloc(2*strlength);
-            sprint_asciistring(buf, string, strlength);
-            DEBUGMSG(("dumpv_send", "  String:\t%s\n", buf));
-            free (buf);
-        }
-    }
-    return data;
-}
-
 int
-asn_realloc_rbuild_string (u_char **pkt, size_t *pkt_len, size_t *offset,
-			   u_char type, const u_char *string, size_t strlength)
+asn_realloc_rbuild_string (u_char **pkt, size_t *pkt_len,
+			   size_t *offset, int r,
+			   u_char type,
+			   const u_char *string, size_t strlength)
 {
   static const char *errpre = "build string";
   size_t start_offset = *offset;
 
   while ((*pkt_len - *offset) < strlength) {
-    if (!asn_realloc(pkt, pkt_len)) {
+    if (!(r && asn_realloc(pkt, pkt_len))) {
       return 0;
     }
   }
@@ -2211,7 +2154,7 @@ asn_realloc_rbuild_string (u_char **pkt, size_t *pkt_len, size_t *offset,
   *offset += strlength;
   memcpy(*pkt + *pkt_len - *offset, string, strlength);
 
-  if (asn_realloc_rbuild_header(pkt, pkt_len, offset, type, strlength)) {
+  if (asn_realloc_rbuild_header(pkt, pkt_len, offset, r, type, strlength)) {
     if (_asn_realloc_build_header_check(errpre, pkt, pkt_len, strlength)) {
       return 0;
     } else {
@@ -2234,8 +2177,10 @@ asn_realloc_rbuild_string (u_char **pkt, size_t *pkt_len, size_t *offset,
 }
 
 int
-asn_realloc_rbuild_unsigned_int (u_char **pkt, size_t *pkt_len, size_t *offset,
-				 u_char type, u_long *intp, size_t intsize)
+asn_realloc_rbuild_unsigned_int (u_char **pkt, size_t *pkt_len,
+				 size_t *offset, int r,
+				 u_char type,
+				 u_long *intp, size_t intsize)
 {
   static const char *errpre = "build uint";
   register u_long integer = *intp;
@@ -2246,14 +2191,14 @@ asn_realloc_rbuild_unsigned_int (u_char **pkt, size_t *pkt_len, size_t *offset,
     return 0;
   }
 
-  if (((*pkt_len - *offset) < 1) && !asn_realloc(pkt, pkt_len)) {
+  if (((*pkt_len - *offset) < 1) && !(r && asn_realloc(pkt, pkt_len))) {
     return 0; 
   }
   *(*pkt + *pkt_len - (++*offset)) = (u_char)integer;
   integer >>= 8;
 
   while (integer != 0) {
-    if (((*pkt_len - *offset) < 1) && !asn_realloc(pkt, pkt_len)) {
+    if (((*pkt_len - *offset) < 1) && !(r && asn_realloc(pkt, pkt_len))) {
       return 0; 
     }
     *(*pkt + *pkt_len - (++*offset)) = (u_char)integer;
@@ -2263,18 +2208,20 @@ asn_realloc_rbuild_unsigned_int (u_char **pkt, size_t *pkt_len, size_t *offset,
   if ((*(*pkt + *pkt_len - *offset) & 0x80) != (0 & 0x80)) {
     /*  Make sure left most bit is representational of the rest of the bits
 	that aren't encoded.  */
-    if (((*pkt_len - *offset) < 1) && !asn_realloc(pkt, pkt_len)) {
+    if (((*pkt_len - *offset) < 1) && !(r && asn_realloc(pkt, pkt_len))) {
       return 0; 
     }
     *(*pkt + *pkt_len - (*++offset)) = 0;
   }
 
-  intsize = *offset - start_offset;
-  if (asn_realloc_rbuild_header(pkt, pkt_len, offset, type, intsize)) {
-    if (_asn_realloc_build_header_check(errpre, pkt, pkt_len, intsize)) {
+  if (asn_realloc_rbuild_header(pkt, pkt_len, offset, r, type, 
+				(*offset - start_offset))) {
+    if (_asn_realloc_build_header_check(errpre, pkt, pkt_len,
+					(*offset - start_offset))) {
       return 0;
     } else {
-      DEBUGDUMPSETUP("send", (*pkt + *pkt_len - *offset), intsize);
+      DEBUGDUMPSETUP("send", (*pkt + *pkt_len - *offset),
+		     (*offset - start_offset));
       DEBUGMSG(("dumpv_send", "  UInteger:\t%lu (0x%.2X)\n", *intp, *intp));
       return 1;
     }
@@ -2283,131 +2230,20 @@ asn_realloc_rbuild_unsigned_int (u_char **pkt, size_t *pkt_len, size_t *offset,
   return 0;
 }
 
-u_char	*
-asn_rbuild_unsigned_int (u_char *data,
-		       size_t *datalength,
-		       u_char type,
-		       u_long *intp,
-		       size_t intsize)
+int
+asn_realloc_rbuild_sequence (u_char **pkt, size_t *pkt_len,
+			     size_t *offset, int r,
+			     u_char type,
+			     size_t length)
 {
-    static const char *errpre = "build uint";
-    register u_long integer;
-    u_char *initdatap = data;
-    
-    if (intsize != sizeof (long)){
-	_asn_size_err(errpre, intsize, sizeof(long));
-	return NULL;
-    }
-    integer = *intp;
-
-    if (((*datalength)--) < 1) return NULL;
-    *data-- = (u_char)integer;
-    integer >>= 8;
-    while (integer != 0) {
-        if (((*datalength)--) < 1) return NULL;
-        *data-- = (u_char)integer;
-        integer >>= 8;
-    }
-    if ((*(data+1) & 0x80) != (0 & 0x80)) {
-        /* make sure left most bit is representational of the rest of
-           the bits that aren't encoded */
-        if (((*datalength)--) < 1) return NULL;
-        *data-- = 0;
-    }
-
-    intsize = initdatap-data;
-    data = asn_rbuild_header(data, datalength, type, intsize);
-    if (_asn_build_header_check(errpre, data+1, *datalength, intsize))
-	return NULL;
-
-    DEBUGDUMPSETUP("send", data+1, intsize);
-    DEBUGMSG(("dumpv_send", "  UInteger:\t%ld (0x%.2X)\n", *intp, *intp));
-    return data;
-}
-
-u_char	*
-asn_rbuild_header (u_char *data,
-                   size_t *datalength,
-                   u_char type,
-                   size_t length)
-{
-    char ebuf[128];
-    
-    data = asn_rbuild_length(data, datalength, length);
-    if (*datalength < 1){
-	sprintf(ebuf, "bad header length < 1 :%d, %d", *datalength, length);
-	ERROR_MSG(ebuf);
-	return NULL;
-    }
-    *data-- = type;
-    (*datalength)--;
-    return data;
-}
-u_char	*
-asn_rbuild_sequence (u_char *data,
-                     size_t *datalength,
-                     u_char type,
-                     size_t length)
-{
-    return asn_rbuild_header(data, datalength, type, length);
+  return asn_realloc_rbuild_header(pkt, pkt_len, offset, r, type, length);
 }
 
 int
-asn_realloc_rbuild_sequence (u_char **pkt, size_t *pkt_len, size_t *offset,
-			     u_char type, size_t length)
-{
-  return asn_realloc_rbuild_header(pkt, pkt_len, offset, type, length);
-}
-
-u_char	*
-asn_rbuild_length (u_char *data,
-		 size_t *datalength,
-		 size_t length)
-{
-    static const char *errpre = "build length";
-    char ebuf[128];
-    int tmp_int;
-    
-    u_char    *start_data = data;
-
-    if (length <= 0x7f) {
-        if ((*datalength)-- == 0) {
-	    sprintf(ebuf, "%s: bad length < 1 :%d, %d",errpre,*datalength,length);
-	    ERROR_MSG(ebuf);
-            return NULL;
-        }
-        *data-- = length;
-    } else {
-        while(length > 0xff) {
-            if ((*datalength)-- == 0) {
-                sprintf(ebuf, "%s: bad length < 1 :%d, %d",errpre,*datalength,length);
-                ERROR_MSG(ebuf);
-                return NULL;
-            }
-            *data-- = length & 0xff;
-            length >>= 8;
-        }
-        if (*datalength <= 1) {
-            sprintf(ebuf, "%s: bad length < 1 :%d, %d",errpre,*datalength,length);
-            ERROR_MSG(ebuf);
-            return NULL;
-        }
-        *data-- = length & 0xff;
-        tmp_int = (start_data - data);
-        *data-- = tmp_int | 0x80;
-        *datalength -= 2;
-    }
-    return data;
-}
-
-int
-asn_realloc_rbuild_objid (u_char **pkt, size_t *pkt_len, size_t *offset,
-			  u_char type, const oid *objid, size_t objidlength)
-			  //u_char *data,
-			  //size_t *datalength,
-			  //u_char type,
-			  //oid *objid,
-			  //size_t objidlength)
+asn_realloc_rbuild_objid (u_char **pkt, size_t *pkt_len,
+			  size_t *offset, int r,
+			  u_char type,
+			  const oid *objid, size_t objidlength)
 {
 /*
  * ASN.1 objid ::= 0x06 asnlength subidentifier {subidentifier}*
@@ -2425,7 +2261,7 @@ asn_realloc_rbuild_objid (u_char **pkt, size_t *pkt_len, size_t *offset,
   if (objidlength == 0) {
     /*  There are not, so make OID have two with value of zero.  */
     while ((*pkt_len - *offset) < 2) {
-      if (!asn_realloc(pkt, pkt_len)) {
+      if (!(r && asn_realloc(pkt, pkt_len))) {
 	return 0;
       }
     }
@@ -2434,7 +2270,7 @@ asn_realloc_rbuild_objid (u_char **pkt, size_t *pkt_len, size_t *offset,
   *(*pkt + *pkt_len - (++*offset)) = 0;
   } else if (objidlength == 1) {
     /*  Encode the first value.  */
-    if (((*pkt_len - *offset) < 1) && !asn_realloc(pkt, pkt_len)) {
+    if (((*pkt_len - *offset) < 1) && !(r && asn_realloc(pkt, pkt_len))) {
       return 0; 
     }
     *(*pkt + *pkt_len - (++*offset)) = (u_char)objid[0];
@@ -2442,14 +2278,14 @@ asn_realloc_rbuild_objid (u_char **pkt, size_t *pkt_len, size_t *offset,
     for(i = objidlength; i > 2; i--) {
       tmpint = objid[i-1];
 
-      if (((*pkt_len - *offset) < 1) && !asn_realloc(pkt, pkt_len)) {
+      if (((*pkt_len - *offset) < 1) && !(r && asn_realloc(pkt, pkt_len))) {
 	return 0; 
       }
       *(*pkt + *pkt_len - (++*offset)) = tmpint & 0x7f;
       tmpint >>= 7;
 
       while (tmpint > 0) {
-	if (((*pkt_len - *offset) < 1) && !asn_realloc(pkt, pkt_len)) {
+	if (((*pkt_len - *offset) < 1) && !(r && asn_realloc(pkt, pkt_len))) {
 	  return 0; 
 	}
 	*(*pkt + *pkt_len - (++*offset)) = ((tmpint & 0x7f) | 0x80);
@@ -2462,18 +2298,21 @@ asn_realloc_rbuild_objid (u_char **pkt, size_t *pkt_len, size_t *offset,
       ERROR_MSG("build objid: bad second subidentifier");
       return 0;
     }
-    if (((*pkt_len - *offset) < 1) && !asn_realloc(pkt, pkt_len)) {
+    if (((*pkt_len - *offset) < 1) && !(r && asn_realloc(pkt, pkt_len))) {
       return 0; 
     }
     *(*pkt + *pkt_len - (++*offset)) = (u_char)((op[0] * 40) + op[1]);
   }
     
   tmpint = *offset - start_offset;
-  if (asn_realloc_rbuild_header(pkt, pkt_len, offset, type, tmpint)) {
-    if (_asn_realloc_build_header_check(errpre, pkt, pkt_len, tmpint)) {
+  if (asn_realloc_rbuild_header(pkt, pkt_len, offset, r, type,
+				(*offset - start_offset))) {
+    if (_asn_realloc_build_header_check(errpre, pkt, pkt_len,
+					(*offset - start_offset))) {
       return 0;
     } else {
-      DEBUGDUMPSETUP("send",  (*pkt + *pkt_len - *offset), tmpint);
+      DEBUGDUMPSETUP("send",  (*pkt + *pkt_len - *offset),
+		     (*offset - start_offset));
       DEBUGMSG(("dumpv_send", "  ObjID: "));
       DEBUGMSGOID(("dumpv_send", objid, objidlength));
       DEBUGMSG(("dumpv_send", "\n"));
@@ -2484,93 +2323,9 @@ asn_realloc_rbuild_objid (u_char **pkt, size_t *pkt_len, size_t *offset,
   return 0;
 }
 
-
-u_char	*
-asn_rbuild_objid (u_char *data,
-		size_t *datalength,
-		u_char type,
-		oid *objid,
-		size_t objidlength)
-{
-/*
- * ASN.1 objid ::= 0x06 asnlength subidentifier {subidentifier}*
- * subidentifier ::= {leadingbyte}* lastbyte
- * leadingbyte ::= 1 7bitvalue
- * lastbyte ::= 0 7bitvalue
- */
-    register oid *op = objid;
-    register int i;
-    register unsigned int tmpint;
-    u_char *initdatap = data;
-    const char *errpre = "build objid";
-
-    /* check if there are at least 2 sub-identifiers */
-    if (objidlength == 0) {
-        /* there are not, so make OID have two with value of zero */
-        if (*datalength < 2) {
-            return NULL;
-        }
-        *data-- = 0;
-        *data-- = 0;
-        *datalength -= 2;
-    } else if (objidlength == 1) {
-        /* encode the first value */
-        if ((*datalength)-- < 1) return NULL;
-        *data-- = (u_char)objid[0];
-    } else {
-        for(i = objidlength; i > 2; i--) {
-            tmpint = objid[i-1];
-            if ((*datalength)-- < 1) return NULL;
-            *data-- = tmpint & 0x7f;
-            tmpint >>= 7;
-
-            while (tmpint > 0) {
-                if ((*datalength)-- < 1) return NULL;
-                *data-- = ((tmpint & 0x7f) | 0x80);
-                tmpint >>= 7;
-            }
-        }
-
-        /* combine the first two values */
-	if ( op[1] > 40 ) {
-	    ERROR_MSG("build objid: bad second subidentifier");
-	    return NULL;
-	}
-        if ((*datalength)-- < 1) return NULL;
-	*data-- = (u_char)((op[0] * 40) + op[1]);
-    }
-    
-    tmpint = initdatap-data;
-    data = asn_rbuild_header(data, datalength, type, tmpint);
-    if (_asn_build_header_check(errpre, data+1, *datalength, tmpint))
-	return NULL;
-
-    /* return the length and data ptr */
-    DEBUGDUMPSETUP("send", data+1, tmpint);
-    DEBUGMSG(("dumpv_send", "  ObjID: "));
-    DEBUGMSGOID(("dumpv_send", objid, objidlength));
-    DEBUGMSG(("dumpv_send", "\n"));
-    return data;
-}
-
-u_char	*asn_rbuild_null (u_char *data,
-                          size_t *datalength,
-                          u_char type)
-{
-/*
- * ASN.1 null ::= 0x05 0x00
- */
-    u_char *initdatap = data;
-    
-    data = asn_rbuild_header(data, datalength, type, 0);
-    DEBUGDUMPSETUP("send", data+1, initdatap - data);
-    DEBUGMSG(("dumpv_send", "  NULL\n"));
-    return data;
-}
-
-
 int
-asn_realloc_rbuild_null(u_char **pkt, size_t *pkt_len, size_t *offset,
+asn_realloc_rbuild_null(u_char **pkt, size_t *pkt_len,
+			size_t *offset, int r,
 			u_char type)
 {
 /*
@@ -2578,7 +2333,7 @@ asn_realloc_rbuild_null(u_char **pkt, size_t *pkt_len, size_t *offset,
  */
   size_t start_offset = *offset;
     
-  if (asn_realloc_rbuild_header(pkt, pkt_len, offset, type, 0)) {
+  if (asn_realloc_rbuild_header(pkt, pkt_len, offset, r, type, 0)) {
     DEBUGDUMPSETUP("send", (*pkt+*pkt_len-*offset), (*offset-start_offset));
     DEBUGMSG(("dumpv_send", "  NULL\n"));
     return 1;
@@ -2587,657 +2342,11 @@ asn_realloc_rbuild_null(u_char **pkt, size_t *pkt_len, size_t *offset,
   }
 }
 
-
-u_char	*asn_rbuild_unsigned_int64 (u_char *data,
-			 size_t *datalength,
-			 u_char type,
-			 struct counter64 *cp,
-			 size_t countersize)
-{
-/*
- * ASN.1 integer ::= 0x02 asnlength byte {byte}*
- */
-
-    register u_long low, high;
-    size_t intsize;
-    u_char *initdatap = data;
-    int count;
-    
-  if (countersize != sizeof(struct counter64)){
-    _asn_size_err("build uint64", countersize, sizeof(struct counter64));
-    return NULL;
-  }
-
-  low = cp->low;
-  high = cp->high;
-  
-  /* encode the low 4 bytes first */
-  if (((*datalength)--) < 1) return NULL;
-  *data-- = (u_char)low;
-  low >>= 8;
-  count = 1;
-  while (low != 0) {
-      count++;
-      if (((*datalength)--) < 1) return NULL;
-      *data-- = (u_char)low;
-      low >>= 8;
-  }
-
-  /* then the high byte if present */
-  if (high) {
-      /* do the rest of the low byte */
-      for(; count < 4; count++) {
-          if (((*datalength)--) < 1) return NULL;
-          *data-- = 0;
-      }
-
-      /* do high byte */
-      if (((*datalength)--) < 1) return NULL;
-      *data-- = (u_char)high;
-      high >>= 8;
-      while (high != 0) {
-          if (((*datalength)--) < 1) return NULL;
-          *data-- = (u_char)high;
-          high >>= 8;
-      }
-  }
-
-  if ((*(data+1) & 0x80) != (0 & 0x80)) {
-      /* make sure left most bit is representational of the rest of
-         the bits that aren't encoded */
-      if (((*datalength)--) < 1) return NULL;
-      *data-- = 0;
-  }
-  
-  intsize = initdatap-data;
-
-#ifdef OPAQUE_SPECIAL_TYPES
-  /* encode a Counter64 as an opaque (it also works in SNMPv1) */
-  /* turn into Opaque holding special tagged value */
-  if (type == ASN_OPAQUE_COUNTER64) {
-      if (*datalength < 5) return NULL;
-      *datalength -= 3;
-      *data-- = (u_char)intsize;
-
-      *data-- = ASN_OPAQUE_COUNTER64;
-      *data-- = ASN_OPAQUE_TAG1;
-      
-      /* put the tag and length for the Opaque wrapper */
-      data = asn_rbuild_header(data, datalength, ASN_OPAQUE, intsize+3);
-      if (_asn_build_header_check("build counter u64", data+1, *datalength, intsize+3))
-          return NULL;
-
-  } else if (type == ASN_OPAQUE_U64) {
-      /* Encode the Unsigned int64 in an opaque */
-      /* turn into Opaque holding special tagged value */
-
-      if (*datalength < 5) return NULL;
-      *datalength -= 3;
-      *data-- = (u_char)intsize;
-
-      *data-- = ASN_OPAQUE_U64;
-      *data-- = ASN_OPAQUE_TAG1;
-      
-      /* put the tag and length for the Opaque wrapper */
-      data = asn_rbuild_header(data, datalength, ASN_OPAQUE, intsize+3);
-      if (_asn_build_header_check("build opaque u64", data+1, *datalength, intsize+3))
-          return NULL;
-    } else {
-#endif /* OPAQUE_SPECIAL_TYPES */
-
-    data = asn_rbuild_header(data, datalength, type, intsize);
-    if (_asn_build_header_check("build uint64", data+1, *datalength, intsize))
-	return NULL;
-#ifdef OPAQUE_SPECIAL_TYPES
-    }
-#endif /* OPAQUE_SPECIAL_TYPES */
-
-  DEBUGDUMPSETUP("send", data+1, intsize);
-  DEBUGMSG(("dumpv_send", "  U64:\t%ld %ld\n", cp->high, cp->low));
-  return data;
-}
-
 int
-asn_realloc_rbuild_unsigned_int64(u_char **pkt, size_t *pkt_len,size_t *offset,
-				  u_char type, struct counter64 *cp,
-				  size_t countersize) 
-{	
-/*
- * ASN.1 integer ::= 0x02 asnlength byte {byte}*
- */
-  register u_long low = cp->low, high = cp->high;
-  size_t intsize, start_offset = *offset;
-  int count;
-    
-  if (countersize != sizeof(struct counter64)) {
-    _asn_size_err("build uint64", countersize, sizeof(struct counter64));
-    return 0;
-  }
-
-  /*  Encode the low 4 bytes first.  */
-  if (((*pkt_len - *offset) < 1) && !asn_realloc(pkt, pkt_len)) {
-    return 0; 
-  }
-  *(*pkt + *pkt_len - (++*offset)) = (u_char)low;
-  low >>= 8;
-  count = 1;
-
-  while (low != 0) {
-    count++;
-    if (((*pkt_len - *offset) < 1) && !asn_realloc(pkt, pkt_len)) {
-      return 0; 
-    }
-    *(*pkt + *pkt_len - (++*offset)) = (u_char)low;
-    low >>= 8;
-  }
-
-  /*  Then the high byte if present.  */
-  if (high) {
-    /*  Do the rest of the low byte.  */
-    for(; count < 4; count++) {
-      if (((*pkt_len - *offset) < 1) && !asn_realloc(pkt, pkt_len)) {
-	return 0; 
-      }
-      *(*pkt + *pkt_len - (++*offset)) = 0;
-    }
-
-    /*  Do high byte.  */
-    if (((*pkt_len - *offset) < 1) && !asn_realloc(pkt, pkt_len)) {
-      return 0; 
-    }
-    *(*pkt + *pkt_len - (++*offset)) = (u_char)high;
-    high >>= 8;
-
-    while (high != 0) {
-      if (((*pkt_len - *offset) < 1) && !asn_realloc(pkt, pkt_len)) {
-	return 0; 
-      }
-      *(*pkt + *pkt_len - (++*offset)) = (u_char)high;
-      high >>= 8;
-    }
-  }
-
-  if ((*(*pkt + *pkt_len - *offset) & 0x80) != (0 & 0x80)) {
-    /*  Make sure left most bit is representational of the rest of the bits
-	that aren't encoded.  */
-    if (((*pkt_len - *offset) < 1) && !asn_realloc(pkt, pkt_len)) {
-      return 0; 
-    }
-    *(*pkt + *pkt_len - (*++offset)) = 0;
-  }
-  
-  intsize = *offset - start_offset;
-
-#ifdef OPAQUE_SPECIAL_TYPES
-  /*  Encode a Counter64 as an opaque (it also works in SNMPv1).  */
-  if (type == ASN_OPAQUE_COUNTER64) {
-    while ((*pkt_len - *offset) < 5) {
-      if (!asn_realloc(pkt, pkt_len)) {
-	return 0;
-      }
-    }
-
-    *(*pkt + *pkt_len - (++*offset)) = (u_char)intsize;
-    *(*pkt + *pkt_len - (++*offset)) = ASN_OPAQUE_COUNTER64;
-    *(*pkt + *pkt_len - (++*offset)) = ASN_OPAQUE_TAG1;
-    
-    /*  Put the tag and length for the Opaque wrapper.  */
-    if (asn_realloc_rbuild_header(pkt, pkt_len, offset,ASN_OPAQUE, intsize+3)){
-      if (_asn_realloc_build_header_check("build counter u64", pkt, pkt_len,
-					  intsize + 3)) {
-	return 0;
-      }
-    } else {
-      return 0;
-    }
-  } else if (type == ASN_OPAQUE_U64) {
-      /*  Encode the Unsigned int64 in an opaque.  */
-    while ((*pkt_len - *offset) < 5) {
-      if (!asn_realloc(pkt, pkt_len)) {
-	return 0;
-      }
-    }
-
-    *(*pkt + *pkt_len - (++*offset)) = (u_char)intsize;
-    *(*pkt + *pkt_len - (++*offset)) = ASN_OPAQUE_U64;
-    *(*pkt + *pkt_len - (++*offset)) = ASN_OPAQUE_TAG1;
-    
-    /*  Put the tag and length for the Opaque wrapper.  */
-    if (asn_realloc_rbuild_header(pkt, pkt_len, offset,ASN_OPAQUE, intsize+3)){
-      if (_asn_realloc_build_header_check("build counter u64", pkt, pkt_len,
-					  intsize + 3)) {
-	return 0;
-      }
-    } else {
-      return 0;
-    }
-  } else {
-
-#endif /* OPAQUE_SPECIAL_TYPES */
-    if (asn_realloc_rbuild_header(pkt, pkt_len, offset, type, intsize)) {
-      if (_asn_realloc_build_header_check("build uint64", pkt, pkt_len,
-					  intsize)) {
-	return 0;
-      }
-    } else {
-      return 0;
-    }
-#ifdef OPAQUE_SPECIAL_TYPES
-  }
-#endif /* OPAQUE_SPECIAL_TYPES */
-
-  DEBUGDUMPSETUP("send", (*pkt + *pkt_len - *offset), intsize);
-  DEBUGMSG(("dumpv_send", "  U64:\t%lu %lu\n", cp->high, cp->low));
-  return 1;
-}
-
-#ifdef OPAQUE_SPECIAL_TYPES
-u_char	*asn_rbuild_signed_int64 (u_char *data,
-                                  size_t *datalength,
-                                  u_char type,
-                                  struct counter64 *cp,
-                                  size_t countersize)
-{
-/*
- * ASN.1 integer ::= 0x02 asnlength byte {byte}*
- */
-
-    register u_long low, high;
-    size_t intsize;
-    u_char *initdatap = data;
-    int count;
-    int testvalue;
-    
-  if (countersize != sizeof(struct counter64)){
-    _asn_size_err("build uint64", countersize, sizeof(struct counter64));
-    return NULL;
-  }
-
-  low = cp->low;
-  high = cp->high;
-
-  testvalue = (high & 0x80000000) ? -1 : 0;
-  
-  /* encode the low 4 bytes first */
-  if (((*datalength)--) < 1) return NULL;
-  *data-- = (u_char)low;
-  low >>= 8;
-  count = 1;
-  while ((int)low != testvalue) {
-      count++;
-      if (((*datalength)--) < 1) return NULL;
-      *data-- = (u_char)low;
-      low >>= 8;
-  }
-
-  /* then the high byte if present */
-  if (high) {
-      /* do the rest of the low byte */
-      for(; count < 4; count++) {
-          if (((*datalength)--) < 1) return NULL;
-          *data-- = (testvalue == 0) ? 0 : 0xff;
-      }
-
-      /* do high byte */
-      if (((*datalength)--) < 1) return NULL;
-      *data-- = (u_char)high;
-      high >>= 8;
-      while ((int)high != testvalue) {
-          if (((*datalength)--) < 1) return NULL;
-          *data-- = (u_char)high;
-          high >>= 8;
-      }
-  }
-
-  if ((*(data+1) & 0x80) != (0 & 0x80)) {
-      /* make sure left most bit is representational of the rest of
-         the bits that aren't encoded */
-      if (((*datalength)--) < 1) return NULL;
-      *data-- = (testvalue == 0) ? 0 : 0xff;
-  }
-  
-  intsize = initdatap-data;
-
-  if (*datalength < 5) return NULL;
-  *datalength -= 3;
-  *data-- = (u_char)intsize;
-  *data-- = ASN_OPAQUE_I64;
-  *data-- = ASN_OPAQUE_TAG1;
-      
-  /* put the tag and length for the Opaque wrapper */
-  data = asn_rbuild_header(data, datalength, ASN_OPAQUE, intsize+3);
-  if (_asn_build_header_check("build counter u64", data+1, *datalength, intsize+3))
-      return NULL;
-
-  DEBUGDUMPSETUP("send", data+1, intsize);
-  DEBUGMSG(("dumpv_send", "  UInt64:\t%ld %ld\n", cp->high, cp->low)); /* WWW */
-  return data;
-}
-#endif /* OPAQUE_SPECIAL_TYPES */
-
-
-#ifdef OPAQUE_SPECIAL_TYPES
-int
-asn_realloc_rbuild_signed_int64(u_char **pkt, size_t *pkt_len, size_t *offset,
-				u_char type, struct counter64 *cp,
-				size_t countersize)
-{
-/*
- * ASN.1 integer ::= 0x02 asnlength byte {byte}*
- */
-  register u_long low = cp->low, high = cp->high;
-  size_t intsize, start_offset = *offset;
-  int count, testvalue = (high & 0x80000000) ? -1 : 0;
-    
-  if (countersize != sizeof(struct counter64)) {
-    _asn_size_err("build uint64", countersize, sizeof(struct counter64));
-    return 0;
-  }
-
-  /*  Encode the low 4 bytes first.  */
-  if (((*pkt_len - *offset) < 1) && !asn_realloc(pkt, pkt_len)) {
-    return 0; 
-  }
-  *(*pkt + *pkt_len - (++*offset)) = (u_char)low;
-  low >>= 8;
-  count = 1;
-
-  while ((int)low != testvalue) {
-    count++;
-    if (((*pkt_len - *offset) < 1) && !asn_realloc(pkt, pkt_len)) {
-      return 0; 
-    }
-    *(*pkt + *pkt_len - (++*offset)) = (u_char)low;
-    low >>= 8;
-  }
-
-  /*  Then the high byte if present.  */
-  if (high) {
-    /*  Do the rest of the low byte.  */
-    for(; count < 4; count++) {
-      if (((*pkt_len - *offset) < 1) && !asn_realloc(pkt, pkt_len)) {
-	return 0; 
-      }
-      *(*pkt + *pkt_len - (++*offset)) = (testvalue == 0) ? 0 : 0xff;
-    }
-
-    /*  Do high byte.  */
-    if (((*pkt_len - *offset) < 1) && !asn_realloc(pkt, pkt_len)) {
-      return 0; 
-    }
-    *(*pkt + *pkt_len - (++*offset)) = (u_char)high;
-    high >>= 8;
-
-    while ((int)high != testvalue) {
-      if (((*pkt_len - *offset) < 1) && !asn_realloc(pkt, pkt_len)) {
-	return 0; 
-      }
-      *(*pkt + *pkt_len - (++*offset)) = (u_char)high;
-      high >>= 8;
-    }
-  }
-
-  if ((*(*pkt + *pkt_len - *offset) & 0x80) != (0 & 0x80)) {
-    /*  Make sure left most bit is representational of the rest of the bits
-	that aren't encoded.  */
-    if (((*pkt_len - *offset) < 1) && !asn_realloc(pkt, pkt_len)) {
-      return 0; 
-    }
-    *(*pkt + *pkt_len - (*++offset)) = (testvalue == 0) ? 0 : 0xff;
-  }
-
-  intsize = *offset - start_offset;
-
-  while ((*pkt_len - *offset) < 5) {
-    if (!asn_realloc(pkt, pkt_len)) {
-      return 0;
-    }
-  }
-
-  *(*pkt + *pkt_len - (++*offset)) = (u_char)intsize;
-  *(*pkt + *pkt_len - (++*offset)) = ASN_OPAQUE_I64;
-  *(*pkt + *pkt_len - (++*offset)) = ASN_OPAQUE_TAG1;
-    
-  /*  Put the tag and length for the Opaque wrapper.  */
-  if (asn_realloc_rbuild_header(pkt, pkt_len, offset, ASN_OPAQUE, intsize+3)) {
-    if (_asn_realloc_build_header_check("build counter u64", pkt, pkt_len,
-					intsize + 3)) {
-      return 0;
-    }
-  } else {
-    return 0;
-  }
-
-  DEBUGDUMPSETUP("send", (*pkt + *pkt_len - *offset), intsize);
-  DEBUGMSG(("dumpv_send", "  UInt64:\t%lu %lu\n", cp->high, cp->low));
-  return 1;
-}
-
-u_char *
-asn_rbuild_float(u_char *data,
-                 size_t *datalength,
-                 u_char type,
-                 float *floatp,
-                 size_t floatsize)
-{
-    u_char *initdatap = data;
-    union {
-        float  floatVal;
-        int    intVal;
-	u_char c[sizeof(float)];
-    } fu;
-
-    /* floatsize better not be larger than realistic */
-    if (floatsize != sizeof(float) ||
-        *datalength < (floatsize + 3) ||
-        floatsize > 122)
-        return NULL;
-
-    /* correct for endian differences */
-    fu.floatVal = *floatp;
-    fu.intVal = htonl(fu.intVal);	
-    *datalength -= floatsize + 3;
-    data -= floatsize;
-    memcpy(data+1, &fu.c[0], floatsize);
-
-    /* put the special tag and length (3 bytes) */
-    *data-- = (u_char)floatsize;
-    *data-- = ASN_OPAQUE_FLOAT;
-    *data-- = ASN_OPAQUE_TAG1;
-
-    /* put the tag and length for the Opaque wrapper */
-    data = asn_rbuild_header(data, datalength, ASN_OPAQUE, floatsize+3);
-    if (_asn_build_header_check("build float", data, *datalength, (floatsize+3)))
-	return NULL;
-
-    DEBUGDUMPSETUP("send", data+1, initdatap - data);
-    DEBUGMSG(("dumpv_send", "Opaque Float:\t%f\n", *floatp));
-    return data;
-}
-
-int
-asn_realloc_rbuild_float(u_char **pkt, size_t *pkt_len, size_t *offset,
-			  u_char type, float *floatp, size_t floatsize)
-{
-  size_t start_offset = *offset;
-  union {
-    float  floatVal;
-    int    intVal;
-    u_char c[sizeof(float)];
-  } fu;
-
-  /*  Floatsize better not be larger than realistic.  */
-  if (floatsize != sizeof(float) || floatsize > 122) {
-    return 0;
-  }
-
-  while ((*pkt_len - *offset) < floatsize + 3) {
-    if (!asn_realloc(pkt, pkt_len)) {
-      return 0;
-    }
-  }
-
-  /*  Correct for endian differences and copy value.  */
-  fu.floatVal = *floatp;
-  fu.intVal = htonl(fu.intVal);	
-  *offset += floatsize + 3;
-  memcpy(*pkt + *pkt_len - *offset, &(fu.c[0]), floatsize);
-
-  /*  Put the special tag and length (3 bytes).  */
-  *(*pkt + *pkt_len - (++*offset)) = (u_char)floatsize;
-  *(*pkt + *pkt_len - (++*offset)) = ASN_OPAQUE_FLOAT;
-  *(*pkt + *pkt_len - (++*offset)) = ASN_OPAQUE_TAG1;
-
-  /*  Put the tag and length for the Opaque wrapper.  */
-  if (asn_realloc_rbuild_header(pkt, pkt_len, offset, ASN_OPAQUE,floatsize+3)){
-    if (_asn_realloc_build_header_check("build float", pkt, pkt_len,
-					floatsize + 3)) {
-      return 0;
-    } else {
-      DEBUGDUMPSETUP("send", (*pkt+*pkt_len - *offset), *offset-start_offset);
-      DEBUGMSG(("dumpv_send", "Opaque Float:\t%f\n", *floatp));
-      return 1;
-    }
-  }
-  
-  return 0;
-}
-
-u_char *
-asn_rbuild_double(u_char *data,
-                 size_t *datalength,
-                 u_char type,
-                 double *doublep,
-                 size_t doublesize)
-{
-    u_char *initdatap = data;
-    long  tmp;
-    union {
-        double doubleVal;
-	int    intVal[2];
-	u_char c[sizeof(double)];
-    } fu;
-
-    /* doublesize better not be larger than realistic */
-    if (doublesize != sizeof(double) ||
-        *datalength < (doublesize + 3) ||
-        doublesize > 122)
-        return NULL;
-
-    /* correct for endian differences */
-    fu.doubleVal = *doublep;
-    tmp = htonl(fu.intVal[0]);
-    fu.intVal[0] = htonl(fu.intVal[1]);	
-    fu.intVal[1] = tmp;
-
-    *datalength -= doublesize + 3;
-    data -= doublesize;
-    memcpy(data+1, &fu.c[0], doublesize);
-
-    /* put the special tag and length (3 bytes) */
-    *data-- = (u_char)doublesize;
-    *data-- = ASN_OPAQUE_DOUBLE;
-    *data-- = ASN_OPAQUE_TAG1;
-
-    /* put the tag and length for the Opaque wrapper */
-    data = asn_rbuild_header(data, datalength, ASN_OPAQUE, doublesize+3);
-    if (_asn_build_header_check("build double", data, *datalength, (doublesize+3)))
-	return NULL;
-
-    DEBUGDUMPSETUP("send", data+1, initdatap - data);
-    DEBUGMSG(("dumpv_send", "  Opaque Double:\t%f\n", *doublep));
-    return data;
-}
-
-int
-asn_realloc_rbuild_double(u_char **pkt, size_t *pkt_len, size_t *offset,
-			  u_char type, double *doublep, size_t doublesize)
-{
-  size_t start_offset = *offset;
-  long  tmp;
-  union {
-    double doubleVal;
-    int    intVal[2];
-    u_char c[sizeof(double)];
-  } fu;
-
-  /*  Doublesize better not be larger than realistic.  */
-  if (doublesize != sizeof(double) || doublesize > 122) {
-    return 0;
-  }
-
-  while ((*pkt_len - *offset) < doublesize + 3) {
-    if (!asn_realloc(pkt, pkt_len)) {
-      return 0;
-    }
-  }
-
-  /*  Correct for endian differences and copy value.  */
-  fu.doubleVal = *doublep;
-  tmp = htonl(fu.intVal[0]);
-  fu.intVal[0] = htonl(fu.intVal[1]);	
-  fu.intVal[1] = tmp;
-  *offset += doublesize + 3;
-  memcpy(*pkt + *pkt_len - *offset, &(fu.c[0]), doublesize);
-
-  /*  Put the special tag and length (3 bytes).  */
-  *(*pkt + *pkt_len - (++*offset)) = (u_char)doublesize;
-  *(*pkt + *pkt_len - (++*offset)) = ASN_OPAQUE_DOUBLE;
-  *(*pkt + *pkt_len - (++*offset)) = ASN_OPAQUE_TAG1;
-
-  /*  Put the tag and length for the Opaque wrapper.  */
-  if (asn_realloc_rbuild_header(pkt, pkt_len, offset,ASN_OPAQUE,doublesize+3)){
-    if (_asn_realloc_build_header_check("build float", pkt, pkt_len,
-					doublesize + 3)) {
-      return 0;
-    } else {
-      DEBUGDUMPSETUP("send", (*pkt+*pkt_len - *offset), *offset-start_offset);
-      DEBUGMSG(("dumpv_send", "  Opaque Double:\t%f\n", *doublep));
-      return 1;
-    }
-  }
-
-  return 0;
-}
-
-#endif /* OPAQUE_SPECIAL_TYPES */
-
-u_char *
-asn_rbuild_bitstring(u_char *data,
-		    size_t *datalength,
-		    u_char type,
-		    u_char *string,
-		    size_t strlength)
-{
-/*
- * ASN.1 bit string ::= 0x03 asnlength unused {byte}*
- */
-    static const char *errpre = "build bitstring";
-    u_char *initdatap = data;
-
-    if (strlength > *datalength)
-        return NULL;
-    data -= strlength;
-    memcpy(data+1, string, strlength);
-    *datalength -= strlength;
-    
-    data = asn_rbuild_header(data, datalength, type, strlength);
-    if (_asn_build_header_check(errpre, data+1, *datalength, strlength))
-	return NULL;
-
-    DEBUGDUMPSETUP("send", data+1, initdatap - data);
-    DEBUGIF("dumpv_send") {
-      char *buf = (char *)malloc(2*strlength);
-      sprint_asciistring(buf, string, strlength);
-      DEBUGMSG(("dumpv_send", "  Bitstring:\t%s\n", buf));
-      free (buf);
-    }
-    return data;
-}
-
-int
-asn_realloc_rbuild_bitstring(u_char **pkt, size_t *pkt_len, size_t *offset,
-			     u_char type, u_char *string, size_t strlength)
+asn_realloc_rbuild_bitstring(u_char **pkt, size_t *pkt_len,
+			     size_t *offset, int r,
+			     u_char type,
+			     u_char *string, size_t strlength)
 {
 /*
  * ASN.1 bit string ::= 0x03 asnlength unused {byte}*
@@ -3246,7 +2355,7 @@ asn_realloc_rbuild_bitstring(u_char **pkt, size_t *pkt_len, size_t *offset,
   size_t start_offset = *offset;
 
   while ((*pkt_len - *offset) < strlength) {
-    if (!asn_realloc(pkt, pkt_len)) {
+    if (!(r && asn_realloc(pkt, pkt_len))) {
       return 0;
     }
   }
@@ -3254,7 +2363,7 @@ asn_realloc_rbuild_bitstring(u_char **pkt, size_t *pkt_len, size_t *offset,
   *offset += strlength;
   memcpy(*pkt + *pkt_len - *offset, string, strlength);
     
-  if (asn_realloc_rbuild_header(pkt, pkt_len, offset, type, strlength)) {
+  if (asn_realloc_rbuild_header(pkt, pkt_len, offset, r, type, strlength)) {
     if (_asn_realloc_build_header_check(errpre, pkt, pkt_len, strlength)) {
       return 0;
     } else {
@@ -3275,5 +2384,348 @@ asn_realloc_rbuild_bitstring(u_char **pkt, size_t *pkt_len, size_t *offset,
 
   return 0;
 }
+
+int
+asn_realloc_rbuild_unsigned_int64(u_char **pkt, size_t *pkt_len,
+				  size_t *offset, int r,
+				  u_char type,
+				  struct counter64 *cp, size_t countersize) 
+{	
+/*
+ * ASN.1 integer ::= 0x02 asnlength byte {byte}*
+ */
+  register u_long low = cp->low, high = cp->high;
+  size_t intsize, start_offset = *offset;
+  int count;
+    
+  if (countersize != sizeof(struct counter64)) {
+    _asn_size_err("build uint64", countersize, sizeof(struct counter64));
+    return 0;
+  }
+
+  /*  Encode the low 4 bytes first.  */
+  if (((*pkt_len - *offset) < 1) && !(r && asn_realloc(pkt, pkt_len))) {
+    return 0; 
+  }
+  *(*pkt + *pkt_len - (++*offset)) = (u_char)low;
+  low >>= 8;
+  count = 1;
+
+  while (low != 0) {
+    count++;
+    if (((*pkt_len - *offset) < 1) && !(r && asn_realloc(pkt, pkt_len))) {
+      return 0; 
+    }
+    *(*pkt + *pkt_len - (++*offset)) = (u_char)low;
+    low >>= 8;
+  }
+
+  /*  Then the high byte if present.  */
+  if (high) {
+    /*  Do the rest of the low byte.  */
+    for(; count < 4; count++) {
+      if (((*pkt_len - *offset) < 1) && !(r && asn_realloc(pkt, pkt_len))) {
+	return 0; 
+      }
+      *(*pkt + *pkt_len - (++*offset)) = 0;
+    }
+
+    /*  Do high byte.  */
+    if (((*pkt_len - *offset) < 1) && !(r && asn_realloc(pkt, pkt_len))) {
+      return 0; 
+    }
+    *(*pkt + *pkt_len - (++*offset)) = (u_char)high;
+    high >>= 8;
+
+    while (high != 0) {
+      if (((*pkt_len - *offset) < 1) && !(r && asn_realloc(pkt, pkt_len))) {
+	return 0; 
+      }
+      *(*pkt + *pkt_len - (++*offset)) = (u_char)high;
+      high >>= 8;
+    }
+  }
+
+  if ((*(*pkt + *pkt_len - *offset) & 0x80) != (0 & 0x80)) {
+    /*  Make sure left most bit is representational of the rest of the bits
+	that aren't encoded.  */
+    if (((*pkt_len - *offset) < 1) && !(r && asn_realloc(pkt, pkt_len))) {
+      return 0; 
+    }
+    *(*pkt + *pkt_len - (*++offset)) = 0;
+  }
+  
+  intsize = *offset - start_offset;
+
+#ifdef OPAQUE_SPECIAL_TYPES
+  /*  Encode a Counter64 as an opaque (it also works in SNMPv1).  */
+  if (type == ASN_OPAQUE_COUNTER64) {
+    while ((*pkt_len - *offset) < 5) {
+      if (!(r && asn_realloc(pkt, pkt_len))) {
+	return 0;
+      }
+    }
+
+    *(*pkt + *pkt_len - (++*offset)) = (u_char)intsize;
+    *(*pkt + *pkt_len - (++*offset)) = ASN_OPAQUE_COUNTER64;
+    *(*pkt + *pkt_len - (++*offset)) = ASN_OPAQUE_TAG1;
+    
+    /*  Put the tag and length for the Opaque wrapper.  */
+    if (asn_realloc_rbuild_header(pkt, pkt_len, offset, r,
+				  ASN_OPAQUE, intsize+3)) {
+      if (_asn_realloc_build_header_check("build counter u64", pkt, pkt_len,
+					  intsize + 3)) {
+	return 0;
+      }
+    } else {
+      return 0;
+    }
+  } else if (type == ASN_OPAQUE_U64) {
+      /*  Encode the Unsigned int64 in an opaque.  */
+    while ((*pkt_len - *offset) < 5) {
+      if (!(r && asn_realloc(pkt, pkt_len))) {
+	return 0;
+      }
+    }
+
+    *(*pkt + *pkt_len - (++*offset)) = (u_char)intsize;
+    *(*pkt + *pkt_len - (++*offset)) = ASN_OPAQUE_U64;
+    *(*pkt + *pkt_len - (++*offset)) = ASN_OPAQUE_TAG1;
+    
+    /*  Put the tag and length for the Opaque wrapper.  */
+    if (asn_realloc_rbuild_header(pkt, pkt_len, offset, r,
+				  ASN_OPAQUE, intsize+3)) {
+      if (_asn_realloc_build_header_check("build counter u64", pkt, pkt_len,
+					  intsize + 3)) {
+	return 0;
+      }
+    } else {
+      return 0;
+    }
+  } else {
+
+#endif /* OPAQUE_SPECIAL_TYPES */
+    if (asn_realloc_rbuild_header(pkt, pkt_len, offset, r, type, intsize)) {
+      if (_asn_realloc_build_header_check("build uint64", pkt, pkt_len,
+					  intsize)) {
+	return 0;
+      }
+    } else {
+      return 0;
+    }
+#ifdef OPAQUE_SPECIAL_TYPES
+  }
+#endif /* OPAQUE_SPECIAL_TYPES */
+
+  DEBUGDUMPSETUP("send", (*pkt + *pkt_len - *offset), intsize);
+  DEBUGMSG(("dumpv_send", "  U64:\t%lu %lu\n", cp->high, cp->low));
+  return 1;
+}
+
+#ifdef OPAQUE_SPECIAL_TYPES
+int
+asn_realloc_rbuild_signed_int64(u_char **pkt, size_t *pkt_len,
+				size_t *offset, int r,
+				u_char type,
+				struct counter64 *cp, size_t countersize)
+{
+/*
+ * ASN.1 integer ::= 0x02 asnlength byte {byte}*
+ */
+  register u_long low = cp->low, high = cp->high;
+  size_t intsize, start_offset = *offset;
+  int count, testvalue = (high & 0x80000000) ? -1 : 0;
+    
+  if (countersize != sizeof(struct counter64)) {
+    _asn_size_err("build uint64", countersize, sizeof(struct counter64));
+    return 0;
+  }
+
+  /*  Encode the low 4 bytes first.  */
+  if (((*pkt_len - *offset) < 1) && !(r && asn_realloc(pkt, pkt_len))) {
+    return 0; 
+  }
+  *(*pkt + *pkt_len - (++*offset)) = (u_char)low;
+  low >>= 8;
+  count = 1;
+
+  while ((int)low != testvalue) {
+    count++;
+    if (((*pkt_len - *offset) < 1) && !(r && asn_realloc(pkt, pkt_len))) {
+      return 0; 
+    }
+    *(*pkt + *pkt_len - (++*offset)) = (u_char)low;
+    low >>= 8;
+  }
+
+  /*  Then the high byte if present.  */
+  if (high) {
+    /*  Do the rest of the low byte.  */
+    for(; count < 4; count++) {
+      if (((*pkt_len - *offset) < 1) && !(r && asn_realloc(pkt, pkt_len))) {
+	return 0; 
+      }
+      *(*pkt + *pkt_len - (++*offset)) = (testvalue == 0) ? 0 : 0xff;
+    }
+
+    /*  Do high byte.  */
+    if (((*pkt_len - *offset) < 1) && !(r && asn_realloc(pkt, pkt_len))) {
+      return 0; 
+    }
+    *(*pkt + *pkt_len - (++*offset)) = (u_char)high;
+    high >>= 8;
+
+    while ((int)high != testvalue) {
+      if (((*pkt_len - *offset) < 1) && !(r && asn_realloc(pkt, pkt_len))) {
+	return 0; 
+      }
+      *(*pkt + *pkt_len - (++*offset)) = (u_char)high;
+      high >>= 8;
+    }
+  }
+
+  if ((*(*pkt + *pkt_len - *offset) & 0x80) != (0 & 0x80)) {
+    /*  Make sure left most bit is representational of the rest of the bits
+	that aren't encoded.  */
+    if (((*pkt_len - *offset) < 1) && !(r && asn_realloc(pkt, pkt_len))) {
+      return 0; 
+    }
+    *(*pkt + *pkt_len - (*++offset)) = (testvalue == 0) ? 0 : 0xff;
+  }
+
+  intsize = *offset - start_offset;
+
+  while ((*pkt_len - *offset) < 5) {
+    if (!(r && asn_realloc(pkt, pkt_len))) {
+      return 0;
+    }
+  }
+
+  *(*pkt + *pkt_len - (++*offset)) = (u_char)intsize;
+  *(*pkt + *pkt_len - (++*offset)) = ASN_OPAQUE_I64;
+  *(*pkt + *pkt_len - (++*offset)) = ASN_OPAQUE_TAG1;
+    
+  /*  Put the tag and length for the Opaque wrapper.  */
+  if (asn_realloc_rbuild_header(pkt, pkt_len, offset, r,
+				ASN_OPAQUE, intsize+3)) {
+    if (_asn_realloc_build_header_check("build counter u64", pkt, pkt_len,
+					intsize + 3)) {
+      return 0;
+    }
+  } else {
+    return 0;
+  }
+
+  DEBUGDUMPSETUP("send", (*pkt + *pkt_len - *offset), intsize);
+  DEBUGMSG(("dumpv_send", "  UInt64:\t%lu %lu\n", cp->high, cp->low));
+  return 1;
+}
+
+int
+asn_realloc_rbuild_float(u_char **pkt, size_t *pkt_len,
+			 size_t *offset, int r,
+			 u_char type,
+			 float *floatp, size_t floatsize)
+{
+  size_t start_offset = *offset;
+  union {
+    float  floatVal;
+    int    intVal;
+    u_char c[sizeof(float)];
+  } fu;
+
+  /*  Floatsize better not be larger than realistic.  */
+  if (floatsize != sizeof(float) || floatsize > 122) {
+    return 0;
+  }
+
+  while ((*pkt_len - *offset) < floatsize + 3) {
+    if (!(r && asn_realloc(pkt, pkt_len))) {
+      return 0;
+    }
+  }
+
+  /*  Correct for endian differences and copy value.  */
+  fu.floatVal = *floatp;
+  fu.intVal = htonl(fu.intVal);	
+  *offset += floatsize + 3;
+  memcpy(*pkt + *pkt_len - *offset, &(fu.c[0]), floatsize);
+
+  /*  Put the special tag and length (3 bytes).  */
+  *(*pkt + *pkt_len - (++*offset)) = (u_char)floatsize;
+  *(*pkt + *pkt_len - (++*offset)) = ASN_OPAQUE_FLOAT;
+  *(*pkt + *pkt_len - (++*offset)) = ASN_OPAQUE_TAG1;
+
+  /*  Put the tag and length for the Opaque wrapper.  */
+  if (asn_realloc_rbuild_header(pkt, pkt_len, offset, r,
+				ASN_OPAQUE,floatsize+3)) {
+    if (_asn_realloc_build_header_check("build float", pkt, pkt_len,
+					floatsize + 3)) {
+      return 0;
+    } else {
+      DEBUGDUMPSETUP("send", (*pkt+*pkt_len - *offset), *offset-start_offset);
+      DEBUGMSG(("dumpv_send", "Opaque Float:\t%f\n", *floatp));
+      return 1;
+    }
+  }
+  
+  return 0;
+}
+
+int
+asn_realloc_rbuild_double(u_char **pkt, size_t *pkt_len,
+			  size_t *offset, int r,
+			  u_char type,
+			  double *doublep, size_t doublesize)
+{
+  size_t start_offset = *offset;
+  long  tmp;
+  union {
+    double doubleVal;
+    int    intVal[2];
+    u_char c[sizeof(double)];
+  } fu;
+
+  /*  Doublesize better not be larger than realistic.  */
+  if (doublesize != sizeof(double) || doublesize > 122) {
+    return 0;
+  }
+
+  while ((*pkt_len - *offset) < doublesize + 3) {
+    if (!(r && asn_realloc(pkt, pkt_len))) {
+      return 0;
+    }
+  }
+
+  /*  Correct for endian differences and copy value.  */
+  fu.doubleVal = *doublep;
+  tmp = htonl(fu.intVal[0]);
+  fu.intVal[0] = htonl(fu.intVal[1]);	
+  fu.intVal[1] = tmp;
+  *offset += doublesize + 3;
+  memcpy(*pkt + *pkt_len - *offset, &(fu.c[0]), doublesize);
+
+  /*  Put the special tag and length (3 bytes).  */
+  *(*pkt + *pkt_len - (++*offset)) = (u_char)doublesize;
+  *(*pkt + *pkt_len - (++*offset)) = ASN_OPAQUE_DOUBLE;
+  *(*pkt + *pkt_len - (++*offset)) = ASN_OPAQUE_TAG1;
+
+  /*  Put the tag and length for the Opaque wrapper.  */
+  if (asn_realloc_rbuild_header(pkt, pkt_len, offset, r,
+				ASN_OPAQUE, doublesize+3)) {
+    if (_asn_realloc_build_header_check("build float", pkt, pkt_len,
+					doublesize + 3)) {
+      return 0;
+    } else {
+      DEBUGDUMPSETUP("send", (*pkt+*pkt_len - *offset), *offset-start_offset);
+      DEBUGMSG(("dumpv_send", "  Opaque Double:\t%f\n", *doublep));
+      return 1;
+    }
+  }
+
+  return 0;
+}
+
+#endif /* OPAQUE_SPECIAL_TYPES */
 #endif /*  USE_REVERSE_ASNENCODING  */
 
