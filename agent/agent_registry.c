@@ -335,6 +335,8 @@ register_mib_context(const char *moduleName,
   }
   subtree->priority = priority;
   subtree->timeout  = timeout;
+  subtree->range_subid = range_subid;
+  subtree->range_ubound = range_subid;
   subtree->session = ss;
   res = load_subtree(subtree);
 
@@ -374,6 +376,36 @@ register_mib_context(const char *moduleName,
                       &reg_parms);
 
   return res;
+}
+
+/* reattach a particular subtree */
+void
+register_mib_reattach_subtree(struct subtree *it) {
+  struct register_parameters reg_parms;
+
+  if (it->namelen > 1) {
+      /* only do registrations that are not the top level nodes */
+      /* XXX: do this better */
+      reg_parms.name = it->name;
+      reg_parms.namelen = it->namelen;
+      reg_parms.priority = it->priority;
+      reg_parms.range_subid  = it->range_subid;
+      reg_parms.range_ubound = it->range_ubound;
+      reg_parms.timeout = it->timeout;
+      snmp_call_callbacks(SNMP_CALLBACK_APPLICATION, SNMPD_CALLBACK_REGISTER_OID,
+                          &reg_parms);
+  }
+  
+  if (it->children)
+      register_mib_reattach_subtree(it->children);
+  if (it->next)
+      register_mib_reattach_subtree(it->next);
+}
+
+/* call callbacks to reattach ourselves */
+void
+register_mib_reattach(void) {
+    register_mib_reattach_subtree(subtrees);
 }
 
 int
