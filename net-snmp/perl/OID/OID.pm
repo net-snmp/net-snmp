@@ -11,10 +11,10 @@ sub compare($$);
 
 use overload
     '<=>' => \&compare,
+    'cmp' => \&oidstrcmp,
     '""' => \&quote_oid,
     '+' => \&add,
 ;
-   
 
 use SNMP;
 
@@ -125,6 +125,11 @@ sub snmp_oid_compare($$) {
 sub compare($$) {
     my ($v1, $v2) = @_;
     snmp_oid_compare($v1, $v2);
+}
+
+sub oidstrcmp {
+    my ($v1, $v2) = @_;
+    $v1->{'oidptr'}->to_string cmp $v2->{'oidptr'}->to_string;
 }
 
 sub to_array($) {
