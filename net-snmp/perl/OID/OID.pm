@@ -92,6 +92,10 @@ our $VERSION = '0.01';
 sub new {
     my $type = shift;
     my $arg = shift;
+    if (!$arg) {
+	$arg = $type;
+	$type = "NetSNMP::OID";
+    }
     SNMP::init_snmp("perl");
     my $ptr = NetSNMP::OID::newptr($arg);
     return newwithptr($type, $ptr);
@@ -99,8 +103,12 @@ sub new {
 
 sub newwithptr {
     my $type = shift;
-    my $self = {};
     my $ptr = shift;
+    my $self = {};
+    if (!$ptr) {
+	$ptr = $type;
+	$type = "NetSNMP::OID";
+    }
     SNMP::init_snmp("perl");
     $self->{'oidptr'} = $ptr;
     bless($self, $type);
