@@ -226,6 +226,9 @@ Section "Net-SNMP Trap Service" SEC03
   File "share\snmp\snmpconf-data\snmptrapd-data\formatting"
   File "share\snmp\snmpconf-data\snmptrapd-data\snmpconf-config"
   File "share\snmp\snmpconf-data\snmptrapd-data\traphandle"
+  File "share\snmp\snmpconf-data\snmptrapd-data\authentication"
+  File "share\snmp\snmpconf-data\snmptrapd-data\logging"
+  File "share\snmp\snmpconf-data\snmptrapd-data\runtime"
 SectionEnd
 
 Section "Perl SNMP Modules" SEC04
