@@ -501,7 +501,7 @@ sprint_realloc_octet_string(u_char **buf, size_t *buf_len, size_t *out_len,
 
   hex = 0;
   for(cp = var->val.string, x = 0; x < (int)var->val_len; x++, cp++) {
-    if (!(isprint(*cp) || isspace(*cp))) {
+    if (!(isprint(*cp))) {
       hex = 1;
     }
   }
