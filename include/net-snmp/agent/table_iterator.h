@@ -115,6 +115,8 @@ extern          "C" {
 
     void           *netsnmp_extract_iterator_context(netsnmp_request_info
                                                      *);
+    void            netsnmp_insert_iterator_context(netsnmp_request_info
+                                                     *, void *);
 
     Netsnmp_Node_Handler netsnmp_table_iterator_helper_handler;
 
