@@ -279,7 +279,7 @@ nsModuleTable_handler(netsnmp_mib_handler *handler,
                                                         & tree->reginfo->
                                                         modes) << 3);
 		/*  yuck  */
-                snmp_set_var_typed_value(var, ASN_BIT_STR, modes, 1);
+                snmp_set_var_typed_value(var, ASN_OCTET_STR, modes, 1);
                 break;
 
             case COLUMN_NSMODULETIMEOUT:
