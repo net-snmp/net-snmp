@@ -224,8 +224,8 @@ netsnmp_mfd_helper_handler(netsnmp_mib_handler *handler,
          * get the row and save it in the first request
          */
         row = _mfd_data_lookup(handler, reginfo, requests);
-        netsnmp_add_list_data2(&requests->parent_data, "table_mfd_row", row,
-                               (Netsnmp_Free_List_Data*)mfdr->container->release );
+        netsnmp_data_list_add_data(&requests->parent_data, "table_mfd_row", row,
+                                   (Netsnmp_Free_List_Data*)mfdr->container->release );
         
         break;
 
