@@ -20,6 +20,9 @@
 
 /*
  * $Log$
+ * Revision 1.4  2002/03/21 17:22:58  hardaker
+ * change // coments to /* */ comments (bad bad bad)
+ *
  * Revision 1.3  2002/02/08 15:45:09  dts12
  * Use the new 'net-snmp-includes' single-include header files,
  * in place of the (uninstalled) 'mibincl.h'.
@@ -181,7 +184,7 @@ u_char *var_etherStats2Entry (struct variable *vp, oid *name, size_t *length,
   if (! hdr)
     return NULL;
 
-  *var_len = sizeof(long); // default
+  *var_len = sizeof(long); /* default */
 
   switch (vp->magic) {
     case IDetherStatsDroppedFrames:
@@ -193,7 +196,7 @@ u_char *var_etherStats2Entry (struct variable *vp, oid *name, size_t *length,
     default:
       ag_trace ("%s: unknown vp->magic=%d", table_ptr->name, (int) vp->magic);
       ERROR_MSG("");
-  }; // of switch by 'vp->magic' 
+  }; /* of switch by 'vp->magic'  */
   
   return NULL;
 }
@@ -281,9 +284,9 @@ write_etherStatsEntry (int action, u_char *var_val, u_char var_val_type,
         default:
           ag_trace ("%s:unknown leaf_id=%d\n", table_ptr->name, (int) leaf_id);
           return SNMP_ERR_NOSUCHNAME;
-      } // of switch by 'leaf_id'
+      } /* of switch by 'leaf_id' */
       break;
-  } // of switch by 'action'
+  } /* of switch by 'action' */
 
   prev_action = action;
   return SNMP_ERR_NOERROR;
@@ -383,7 +386,7 @@ u_char *var_etherStatsEntry (struct variable *vp, oid *name, size_t *length,
       return (u_char *)&long_return;
     default:
       ERROR_MSG("");
-  }; // of switch by 'vp->magic' 
+  }; /* of switch by 'vp->magic'  */
   
   return NULL;
 }
