@@ -18,7 +18,7 @@ TABLE OF CONTENTS
    How do I find out about new releases?
    How can I find out what other people are doing?
    How do I submit a patch or bug report?
-   What's the difference between SNMPv1 and SNMPv2?
+   What's the difference between SNMPv1, SNMPv2 and SNMPv3?
    What are all these different SNMPv2's anyway?
    Which versions of SNMP are supported in this package?
    Where can I find more information?
@@ -30,6 +30,7 @@ TABLE OF CONTENTS
    How do I add functionality?
    What traps are sent by the agent?
    When I run the agent it runs and then quits without staying around. Why?
+   How can I stop other people getting at my agent?
  TECHNICAL
    How do I write C code to integrate with the agent?
    What ASN.1 parser is used?
@@ -38,23 +39,31 @@ TABLE OF CONTENTS
  PROBLEMS
    How come ever since version 3.2 my mib files are no longer read?
    What's this about a "party database", when I try to send a query?
+   What's this about "too many imported symbols"?
+   What about "Did not find removed in module SNMPv2-SMI" and similar?
    Why can't I see values in the UCDavis 'extensible' tree?
    Why can't I see values in the <INSERT ENTERPRISE HERE> tree?
    I've done that, and I still can't see the values. Why not?
    I've done that, and I'm *still* not getting anything back. Why not?
    I've done that, but I'm *still* getting "sub-identifier not found:" Grrr!
+   I'm not receiving any traps with 'snmptrapd'?
+   I'm sending traps using 'snmptrap', but they're not being received?
    The agent is complaining about 'snmpd.conf'.  Where is this?
    What does "klread:  bad address" mean?
    What does "nlist err:  wombat not found" (or similar) mean?
    How about "Can't open /dev/kmem"?
    Or "sendto: permission denied" ?
+   I'm not seeing all the interfaces on my Solaris box
    I'm using the Perl SNMP module, and get something about "bad free"?
    I can't load any of the mib files, and they seem to be missing
        the first two characters of the filename.  What's happening?
    How do I compile with 'gcc' instead of 'cc'?
    But gcc doesn't compile it successfully on my new Solaris system. Why not?
+   My Linux system can't find the include file "nlist.h" when compiling
    I cannot set any variables in the MIB.
    Sometimes I seem to get the wrong answers.  Why?
+   The system uptime (sysUpTime) returned is wrong!
+   The Host Resources information is wrong (and/or doesn't even compile)!
 
 
 GENERAL
@@ -73,7 +82,9 @@ What is it?
 	* a version of the unix 'netstat' command using SNMP
 
     This package is originally based on the Carnegie Mellon University
-    SNMP implementation (version 2.1.2.1)
+    SNMP implementation (version 2.1.2.1), but has developed significantly
+    since then.
+
 
 
 Where can I get it?
@@ -82,6 +93,7 @@ Where can I get it?
   - ftp://ftp.ece.ucdavis.edu/pub/snmp/ucd-snmp.tar.gz
   - ftp://sunsite.cnlab-switch.ch/mirror/ucd-snmp/ucd-snmp.tar.gz
   - ftp://ftp.win.or.jp/pub/network/snmp/ucd-snmp/ucd-snmp.tar.gz
+
 
 
 What documentation is available?
@@ -98,6 +110,8 @@ What documentation is available?
         as well as mailing list acrchives:
         http://www.ece.ucdavis.edu/ucd-snmp
 
+
+
 Are there binaries available?
 ----------------------------
 
@@ -106,6 +120,7 @@ Are there binaries available?
 	The distribution ought to compile cleanly and run
 	on a range of systems (see the next answer).
 	See the file INSTALL for more details.
+
 
 
 What operating systems does it run on?
@@ -124,6 +139,7 @@ What operating systems does it run on?
 	* Linux 2.1, 2.0, 1.3 on all? systems
         * AIX 4.1.5, 3.2.5 on all? systems
         * OpenBSD ? on all? systems
+        * Irix 5.1
 
   The applications (though not necessarily the agent) run on the
   following systems:
@@ -131,6 +147,7 @@ What operating systems does it run on?
         * Irix 6.2
         * Windows95
         * Windows NT
+
 
 
 What happens if mine isn't listed?
@@ -148,6 +165,7 @@ What happens if mine isn't listed?
   Either way, try it and let us know how you get on (see below for how).
 	
 
+
 How do I find out about new releases?
 ------------------------------------
 
@@ -162,6 +180,7 @@ How do I find out about new releases?
   the most reliable way to keep in touch with the status of this package.
 
 
+
 How can I find out what other people are doing?
 ----------------------------------------------
 
@@ -173,6 +192,8 @@ How can I find out what other people are doing?
 
   To find out what the coders are doing, and to help them out, please
   read the PORTING file enclosed with the package.
+
+
 
 How do I submit a patch or bug report?
 -------------------------------------
@@ -205,7 +226,8 @@ How do I submit a patch or bug report?
 	Oh, and congratulations!
 
 
-What's the difference between SNMPv1 and SNMPv2?
+
+What's the difference between SNMPv1, SNMPv2 and SNMPv3?
 -----------------------------------------------
 What are all these different SNMPv2's anyway?
 --------------------------------------------
@@ -244,13 +266,13 @@ What are all these different SNMPv2's anyway?
 			} These are both super-sets of SNMPv2c
 
 			
-	SNMP-NG		A recent attempt to reach agreement between
+	SNMP-NG		An attempt to reach agreement between
 			the proponents of usec and v2star.
 
-	SNMPv3		The formal successor to SNMP-NG, currently being
-			active developed, and aiming to produce Proposed
-			Standards for the next generation of core SNMP
-			functions in the very near future.
+  The formal successor to the SNMP-NG work has been termed SNMPv3.
+  This has now been effectively finalised, and been put forward for
+  approval as Proposed Standards.  This is described in RFCs 2271-2275.
+
 
 
 Which versions of SNMP are supported in this package?
@@ -263,10 +285,11 @@ Which versions of SNMP are supported in this package?
   and all the tools take a command-line option to determine which
   version to use.
 
-    Support for SNMPv3 has begun, but is moving slowly at the moment.
-  The SNMPv3 view-based access control model has been implemented, but
-  not much else.  This is likely (I hope) to change in the near
-  future.
+    It is the declared intention of this group to support SNMPv3, and
+  work on this has now begun.  Currently the agent supports the SNMPv3
+  view-based access control model (RFC 2275).
+    Support for the remaining aspects of SNMPv3 is expected to follow.
+
 
 
 Where can I find more information?
@@ -312,7 +335,7 @@ What MIBs are supported?
 	- SNMPv2 Manager-to-Manager MIB (RFC 1451 - now 'historic')
 	- SMUX implementation (RFC 1227) for communicating with 'gated'
 		(plus routing protocols BGP, OPSF & RIP2 - RFCs 1657, 1724 & 1850)
-	- Host Resources (RFC 1514) skeleton implementation
+	- Host Resources (RFC 1514) initial implementation
 
 
 
@@ -332,6 +355,8 @@ How do I add a MIB to the tools?
   numeric and textual forms for queries and responses.  They will
   operate quite happily without any MIB files at all, as long as
   you are prepared to work with numeric OIDs throughout.
+    The one exception to that is 'snmptable', which does require
+  the relevant MIB file to be loaded.
 
   The tools look in a predefined directory (usually PREFIX/share/snmp/mibs)
   and regard any file held there as defining a MIB module or modules.
@@ -405,6 +430,7 @@ What traps are sent by the agent?
   traps when it receives SNMPv1 requests using a community name that is
   not recognised.
     This is done with the snmpd.conf entry 'authtrapenable 1'.
+  (Note that the two 'trap' entries above are also still required).
     
 
 
@@ -429,6 +455,28 @@ When I run the agent it runs and then quits without staying around. Why?
 
 
 
+How can I stop other people getting at my agent?
+-----------------------------------------------
+
+  First question - are you concerned with read access or write access?
+
+  As far as changing things on the agent is concerned, there is very
+  little that can actually be altered (see the answer to "I can't set
+  any variables" under Problems, below).
+  The easiest way to control access to this is simply to change the
+  default second community string, as described in that answer.
+
+  For more general access control, there are a number of options.
+	- Change *both* default communities
+	- Block access to port 161 from outside your organisation
+		(using filters on network routers)
+	- Configure TCP wrapper support ("--with-libwrap")
+		This uses the TCP 'libwrap' library (available separately)
+		to allow/deny access via /etc/hosts.{allow,deny}
+	- Use SNMPv3 view-access-control
+
+
+
 TECHNICAL
 =========
 
@@ -447,9 +495,9 @@ How do I write C code to integrate with the agent?
   to add a new group. 
   Contact the list 'ucd-snmp-coders@ece.ucdavis.edu' for further advice.
 
-  It is hoped to implement some form of proxy mechanism (such as the
-  agentx protocols) once the specification for these have settled, and
-  someone gets around to writing the necessary code.
+  Work is underway (or at least being discussed!) for implementing
+  proxy/multi-agent support using the AgentX (and SMUX) mechanisms.
+
 
 
 What ASN.1 parser is used?
@@ -463,6 +511,7 @@ What ASN.1 parser is used?
   and the parser is usually bundled into the library 'libsnmp.a'
 
 
+
 How does the agent fetch the value of a variable from the system?
 ----------------------------------------------------------------
 
@@ -473,6 +522,7 @@ How does the agent fetch the value of a variable from the system?
   (it would be hard to think of a less clean interface!), via ioctl()
   calls or similar system routines and these mechanisms are usually used
   in preference.
+
 
 
 What is the Official Slogan of the ucd-snmp-coders list?
@@ -488,6 +538,13 @@ PROBLEMS
 
 Why aren't my mib files read in any more?
 -----------------------------------------
+
+  There are a number of possible reasons for this.
+  In summary:	a particular MIB file isn't being read in
+		none of the MIB files are found
+		there's an error in the MIB file
+
+  To expand on these in turn:
 
   As from version 3.2, the parser has been re-written.  One effect of
   this is that only a specified set of MIB modules are read in by
@@ -515,12 +572,27 @@ Why aren't my mib files read in any more?
   value "ALL", then the tools will load in every module present in
   the module directory (or directories).
 
+
     The location where the tools look for MIB module files is compiled
   into the tools. This can also be set using the environmental
   variable 'MIBDIRS', being a (colon-seperated) list of directories
   containing MIB files. 
 
-  See the 'mib_api(3)' man page for more details.
+  Note that from version 3.3 onwards, the default location has changed
+  (from /usr/local/lib/snmp/mibs to /usr/local/share/snmp/mibs).
+  This is in line with current standards regarding file system structure.
+
+
+  As from version 3.4, the parser is somewhat more strict about the
+  syntax of MIB files.  This may result in it rejecting previously
+  acceptable (though erroneous) MIB files.
+    Such problems ought to be reported by the application.  If things
+  seem to be failing silently, try running the command 'snmptranslate -W'
+  which will complain about anything anomalous.
+
+
+  See the 'mib_api(3)' man page for more details of MIB parsing.
+
 
 
 I'm getting answers, but they're all numbers. Why?
@@ -535,7 +607,9 @@ I'm getting answers, but they're all numbers. Why?
   the environmental variables MIBS or MIBFILES to read in the relevant
   module files.
     This does assume you have these files installed properly.  There's not
-  a great deal we can do if you haven't.
+  a great deal we can do if you haven't.   Note that the default location
+  for these files has changed recently (see the previous question).
+
 
 
 What's this about a "party database", when I try to send a query?
@@ -548,7 +622,40 @@ What's this about a "party database", when I try to send a query?
 
     In either case, it is possible to specify the use of SNMPv1
   instead, by giving the application the option "-v 1".
- 
+
+
+
+What's this about "too many imported symbols"?
+---------------------------------------------
+
+  Any MIB file starts with an (optional) list of identifiers that
+  it "imports" from other files.  The parser implements this using
+  a fixed size buffer to hold the import information.
+    There are two circumstances in which this can result in the
+  error message shown above.
+
+    Firstly, if the MIB file refers to an unususally large number
+  of external identifiers.  Handling this case requires a (trivial)
+  patch to the parsing code.  Contact the coders list for advice.
+     (This is extremely rare - the only example that
+      we've come across is the Cabletron Trap MIB).
+
+    Much more common is a syntax error in the IMPORTS clause of the
+  MIB file in question.  In particular, check that this ends in a
+  semicolon, before going on to the main definition section.
+  
+
+
+What about "Did not find removed in module SNMPv2-SMI" and similar?
+------------------------------------------------------------------
+
+  This means that you're using the most recent applications without
+  having installed the MIB files that come with them.  Remember to
+  run "make install".
+    (Alternatively you can just copy the MIB file 'SNMPv2-TC.txt'
+  from the current release into the active MIB file location).
+
+
 
 Why can't I see values in the UCDavis 'extensible' tree?
 -------------------------------------------------------
@@ -556,7 +663,18 @@ Why can't I see values in the UCDavis 'extensible' tree?
   The extensible tree is designed to report things you ask it to report
   on.  If you don't declare anything in the snmpd.conf file for it to
   monitor, it will not report anything.  See the snmpd.conf manual page
-  and the EXAMPLE.conf file for details no configuring the agent.
+  and the EXAMPLE.conf file for details on configuring the agent.
+
+  As from version 3.4, the structure of the UCDavis MIB has been changed
+  slightly, to bring it into conformance with MIB structure standards.
+  This particularly affects the tables within this MIB.
+    Make sure you have "make install"ed the MIB files that come with
+  this release, and check any applications that may request these values.
+  It's likely that the SNMP queries being sent will need amending.
+
+  Also see the answer to the next few questions.
+
+
 
 Why can't I see values in the <INSERT ENTERPRISE HERE> tree?
 -----------------------------------------------------------
@@ -578,6 +696,7 @@ Why can't I see values in the <INSERT ENTERPRISE HERE> tree?
 
   Note the initial dot - this is important!
 
+
   Alternatively, you can define the environmental variable PREFIX,
   to specify where to start looking for ( non-fully specified) objects.
   This can be done by the command
@@ -593,17 +712,19 @@ Why can't I see values in the <INSERT ENTERPRISE HERE> tree?
 	snmpwalk -v 1 localhost public processes
 
 
+
 I've done that, and I still can't see the values. Why not?
 ---------------------------------------------------------
 
     Another possibility is that there is a clash of names
   somewhere within the MIB tree.  Try running the command
-  'snmptranslate -x zzz' which will inform you of any duplicates,
+  'snmptranslate -w zzz' which will inform you of any duplicates,
   or other similar problem.
 
     This should be less of a problem with the new parser, which
   now handles duplicate identifier names, though inconsistent
   case in labels for the same node still confuse the poor darling.
+
 
 
 I've done that, and I'm *still* not getting anything back. Why not?
@@ -618,6 +739,7 @@ I've done that, and I'm *still* not getting anything back. Why not?
   (software with bugs in - shock horror!)
     Try doing an 'snmpwalk' starting somewhere above the offending bit
   of the MIB tree, and seeing how far it gets.
+
 
 
 I've done that, but I'm *still* getting "sub-identifier not found:" Grrr!
@@ -642,6 +764,19 @@ I've done that, but I'm *still* getting "sub-identifier not found:" Grrr!
   names at least), but this is not yet available.
 
 
+
+I'm not receiving any traps with 'snmptrapd'?
+I'm sending traps using 'snmptrap', but they're not being received?
+------------------------------------------------------------------
+
+  There was a problem with release 3.3, such that both these applications
+  used port 161 for traps (rather than the correct port 162).
+  This has now been fixed in release 3.4.
+    Both these applications (as with all others in the suite) can specify
+  a particular port to use, via the '-p' command line option.
+
+
+
 The agent is complaining about 'snmpd.conf'.  Where is this?
 -----------------------------------------------------------
 
@@ -650,6 +785,7 @@ The agent is complaining about 'snmpd.conf'.  Where is this?
     To get started, you can either just create this as an empty file,
   or try copying the EXAMPLE.conf file which will use some of the UCD
   extensions.  See the snmpd.conf(5) manual page for further details.
+
 
 
 What does "klread:  bad address" mean?
@@ -664,6 +800,7 @@ What does "klread:  bad address" mean?
 		for that architecture.  Try and identify which
 		OID is generating the error, and contact the
 		list 'ucd-snmp-coders@ece.ucdavis.edu'
+
 
 
 What does "nlist err:  wombat not found" (or similar) mean?
@@ -681,6 +818,7 @@ What does "nlist err:  wombat not found" (or similar) mean?
   messages will disappear.
 
 
+
 How about "Can't open /dev/kmem"?
 --------------------------------
 
@@ -690,6 +828,7 @@ How about "Can't open /dev/kmem"?
   about the running system.
     Check that the agent was started by root, and is running with UID 0
   (or suitable GID if appropriate)
+
  
 
 Or "sendto: permission denied"?
@@ -700,6 +839,22 @@ Or "sendto: permission denied"?
   most recent version of the UCD snmp tools.
 
 
+
+I'm not seeing all the interfaces on my Solaris box
+---------------------------------------------------
+
+  There's a fixed-sized buffer in the Solaris-specific interface handling
+  code.   While this is sufficient for most cases, systems with a large
+  number of interfaces may experience problems.
+    Prior to version 3.4, this limit was met with 30 or so interfaces,
+  and extra interfaces simply failed silently.  From version 3.4, this
+  limit has been raised by a factor of 10 (which ought to be enough for
+  any sensible configuration!), and reports if there are problems.
+    If you have a ridiculous number of interfaces you need to support,
+  contact the coders list for the (trivial) patch.
+
+
+  
 I'm using the Perl SNMP module, and get something about "bad free"?
 ------------------------------------------------------------------
 
@@ -708,6 +863,7 @@ I'm using the Perl SNMP module, and get something about "bad free"?
   try checking to see if there's a newer release first.
     In particular, the recent changes in the way MIB files are parsed
   requires Perl SNMP-1.6 or later.
+
 
 
 I can't load any of the mib files, and they seem to be missing
@@ -720,11 +876,13 @@ the first two characters of the filename.  What's happening?
   '/usr/ucb' is not in your PATH (or at least comes at the end).
 
 
+
 How do I compile with 'gcc' instead of 'cc'?
 -------------------------------------------
 
   Set the environmental variable 'CC' to have the value 'gcc' before
   running the configure script.
+
 
 
 But gcc doesn't compile it successfully on my new Solaris system. Why not?
@@ -743,6 +901,17 @@ But gcc doesn't compile it successfully on my new Solaris system. Why not?
 --- 191,192 ----
           s/__STDC__ - 0 == 0/!defined (__STRICT_ANSI__)/g
 +         s/__STDC__ - 0 == 1/defined (__STRICT_ANSI__)/g
+
+
+
+My Linux system can't find the include file "nlist.h" when compiling
+--------------------------------------------------------------------
+
+  The Linux implementation uses a different mechanism to retrieve the
+  necessary information, and doesn't need this header file at all.
+  Just delete that bit of code.
+    This has been fixed in version 3.4
+
 
 
 I cannot set any variables in the MIB.
@@ -764,6 +933,7 @@ I cannot set any variables in the MIB.
   to set variables.
   
 
+
 Sometimes I seem to get the wrong answers.  Why?
 -----------------------------------------------
 
@@ -778,7 +948,7 @@ Sometimes I seem to get the wrong answers.  Why?
 	interface.ifInNUCastPkts	0
 	interface.ifInDiscards		0
 	interface.ifInUnknownProtos	0
-	interface.ifOutNUCastPkts	0
+	Interface.ifOutNUCastPkts	0
 	interface.ifSpecific		Null OID
 
 	ip.ipInUnknownProtos		0
@@ -832,3 +1002,49 @@ Sometimes I seem to get the wrong answers.  Why?
 	*  Solaris, Linux & HP-UX provide correct statistics throughout
 		(though Solaris may need a kernel patch to
 		 support interface octet counts).
+
+  
+
+The system uptime (sysUpTime) returned is wrong!
+-----------------------------------------------
+
+  Oh no it's not.
+  The defined meaning of 'sysUpTime' is
+	"the time ... since the *network management*
+	 portion of the system was re-initialized."
+
+  In other words, when the snmp agent was started, not when the
+  system itself last booted.  This latter information is available
+  in the Host Resources MIB as "host.hrSystem.hrSystemUpTime"
+  Note that even if the full Host Resources is not supported on
+  your system, it's worth trying configuring using
+
+		'--with-mib-modules=hr_system'
+
+  and recompiling.  This particular group is reasonably likely to
+  work, even if some of the other more system-specific groups don't.
+	(see the next question)
+
+
+
+The Host Resources information is wrong (and/or doesn't even compile)!
+---------------------------------------------------------------------
+
+  Very likely.
+
+  This is still a very new implementation, and has only really been
+  tried on a limited number of systems.  While every attempt is made
+  to provide information in as general way as possible, the Host
+  Resources is extremely system-specific, by its very nature.
+
+     The current list of systems that have a relatively complete
+  implementation of this MIB is:
+
+	- HP-UX 9 & 10
+	- Solaris 2.5
+	- RedHat Linux 5
+
+  Though the hrDevice table in particular is somewhat sparse, even on these.
+  If your system is not listed here, and you would like to help implement
+  it, contact the coders list, and make a friend for life!
+
