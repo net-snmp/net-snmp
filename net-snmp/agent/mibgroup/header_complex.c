@@ -16,7 +16,6 @@
 
 int
 header_complex_generate_varoid(struct variable_list *var) {
-
   int i;
   
   if (var->name == NULL) {
@@ -125,10 +124,10 @@ header_complex_generate_oid(oid *name, /* out */
                             size_t *length, /* out */
                             oid *prefix,
                             size_t prefix_len,
-                            struct header_complex_index *data) {
+                            struct variable_list *data) {
 
-  struct variable_list *var = NULL;
   oid *oidptr;
+  struct variable_list *var;
   
   if (prefix) {
     memcpy(name, prefix, prefix_len * sizeof(oid));
@@ -139,7 +138,7 @@ header_complex_generate_oid(oid *name, /* out */
     *length = 0;
   }
     
-  for(var = data->vars; var != NULL; var = var->next_variable) {
+  for(var = data; var != NULL; var = var->next_variable) {
     header_complex_generate_varoid(var);
     memcpy(oidptr, var->name, sizeof(oid) * var->name_length);
     oidptr = oidptr + var->name_length;
@@ -173,11 +172,10 @@ header_complex(struct header_complex_index *datalist,
     *var_len = sizeof (long);
 
   for(nptr = datalist; nptr != NULL && found == NULL; nptr = nptr->next) {
-    if (vp)
-      header_complex_generate_oid(indexOid, &len, vp->name, vp->namelen, nptr);
-    else
-      header_complex_generate_oid(indexOid, &len, NULL, 0, nptr);
-
+    memcpy(indexOid, vp->name, vp->namelen * sizeof(oid));
+    memcpy(indexOid + vp->namelen, nptr->name,
+           nptr->namelen * sizeof(oid));
+    len = vp->namelen + nptr->namelen;
     result = snmp_oid_compare(name, *length, indexOid, len);
     DEBUGMSGTL(("header_complex", "Checking: "));
     DEBUGMSGOID(("header_complex", indexOid, len));
@@ -198,49 +196,35 @@ header_complex(struct header_complex_index *datalist,
     }
   }
   if (found) {
-    if (vp)
-      header_complex_generate_oid(name, length, vp->name, vp->namelen, found);
-    return found->data;
+      memcpy(name, vp->name, vp->namelen * sizeof(oid));
+      memcpy(name + vp->namelen, found->name,
+             found->namelen * sizeof(oid));
+      *length = vp->namelen + found->namelen;
+      return found->data;
   }
     
   return NULL;
-}
-
-int
-header_complex_var_compare(struct variable_list *varl,
-                           struct variable_list *varr) {
-  int ret;
-
-  for(; varl != NULL && varr != NULL;
-      varl = varl->next_variable, varr = varr->next_variable) {
-    header_complex_generate_varoid(varl);
-    header_complex_generate_varoid(varr);
-    ret = snmp_oid_compare(varl->name, varl->name_length,
-                           varr->name, varr->name_length);
-    if (ret != 0)
-      return ret;
-  }
-  if (varr != NULL)
-    return -1;
-  if (varl != NULL)
-    return 1;
-  return 0;
 }
 
 struct header_complex_index *
 header_complex_add_data(struct header_complex_index **thedata,
                         struct variable_list *var, void *data) {
   struct header_complex_index *hciptrn, *hciptrp, *ourself;
+  oid newoid[MAX_OID_LEN];
+  size_t newoid_len;
+  struct variable_list *vp, *vp2;
 
   if (thedata == NULL || var == NULL || data == NULL)
     return NULL;
   
-  header_complex_generate_varoid(var);
+  header_complex_generate_oid(newoid, &newoid_len, NULL, 0, var);
 
   for(hciptrn = *thedata, hciptrp = NULL;
       hciptrn != NULL;
       hciptrp = hciptrn, hciptrn = hciptrn->next)
-    if (header_complex_var_compare(hciptrn->vars, var) > 0)
+      /* XXX: check for == and error (overlapping table entries) */
+    if (snmp_oid_compare(hciptrn->name, hciptrn->namelen, newoid, newoid_len)
+        > 0)
       break;
   
   /* nptr should now point to the spot that we need to add ourselves
@@ -248,8 +232,7 @@ header_complex_add_data(struct header_complex_index **thedata,
 
   /* create ourselves */
   ourself = (struct header_complex_index *)
-    malloc(sizeof(struct header_complex_index));
-  memset(ourself, 0, sizeof(struct header_complex_index));
+      SNMP_MALLOC_STRUCT(header_complex_index);
 
   /* change our pointers */
   ourself->prev = hciptrp;
@@ -262,7 +245,11 @@ header_complex_add_data(struct header_complex_index **thedata,
     ourself->prev->next = ourself;
 
   ourself->data = data;
-  ourself->vars = var;
+  ourself->name = snmp_duplicate_objid(newoid, newoid_len);
+  ourself->namelen = newoid_len;
+
+  /* free the variable list, but not the enclosed data!  it's not ours! */
+  snmp_free_varbind(var);
 
   /* rewind to the head of the list and return it (since the new head
      could be us, we need to notify the above routine who the head now is. */
@@ -304,8 +291,8 @@ header_complex_extract_entry(struct header_complex_index **thetop,
   if (hciptrn)
     hciptrn->prev = hciptrp;
 
-  if (thespot->vars)
-    snmp_free_varbind(thespot->vars);
+  if (thespot->name)
+      free(thespot->name);
 
   free(thespot);
   return retdata;
@@ -342,6 +329,8 @@ header_complex_find_entry(struct header_complex_index *thestuff,
   return hciptr;
 }
 
+#ifdef TESTING
+
 void
 header_complex_dump(struct header_complex_index *thestuff) {
   struct header_complex_index *hciptr;
@@ -350,13 +339,11 @@ header_complex_dump(struct header_complex_index *thestuff) {
   
   for(hciptr = thestuff; hciptr != NULL; hciptr = hciptr->next) {
     DEBUGMSGTL(("header_complex_dump", "var:  "));
-    header_complex_generate_oid(oidsave, &len, NULL, 0, hciptr);
+    header_complex_generate_oid(oidsave, &len, NULL, 0, hciptr->);
     DEBUGMSGOID(("header_complex_dump", oidsave, len));
     DEBUGMSG(("header_complex_dump", "\n"));
   }
 }
-
-#ifdef TESTING
 
 main() {
   oid oidsave[MAX_OID_LEN];
