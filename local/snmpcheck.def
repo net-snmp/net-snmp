@@ -1,4 +1,4 @@
-#!/usr/local/bin/perl5 
+#!/usr/local/bin/perl5  -w
 
 use strict 'refs';
 
@@ -16,7 +16,7 @@ $errlog="/net/tyfon/1/OV/log/ece-log";
 $andlog=0;
 $snmppath="/usr/local/etc";
 $eraseline="                                                                           \r";
-$fixit=-1;  # this should be 0 not -1, but is necissary till getc(STDIN) works
+$fixit=0;  # this should be 0 not -1, but is necissary till getc(STDIN) works
 
 $display = $ENV{'DISPLAY'};
 
@@ -82,47 +82,93 @@ sub new{
     my $self = new Mib ($hostId,$mib);
     $self->{'MibLocation'} = shift;
     $tmp = shift;
-    $self->{'Frame'} = Frame::new($tmp);
-    main::tkpack($self->{'Frame'});
+    $self->{'Frame'} = $tmp->Frame();
+    $self->{'Frame'}->pack();
     $_ = `$::snmppath/snmpget -v 1 $self->{'Host'} public $self->{'Mib'}$::mibident.$self->{'MibLocation'}`;
     ($self->{'ErrName'}) = /\"([^\"]*)\"/;
     $_ = `$::snmppath/snmpget -v 1 $self->{'Host'} public $self->{'Mib'}$::miberrmsg.$self->{'MibLocation'}`;
     ($self->{'ErrMsg'}) = /\"([^\"]*)\"/;
     if ($::display) {
-	$self->{'Desc'} = Label::new($self->{'Frame'},
-				     "-text" => sprintf("%-12.12s %-42.42s",$self->{'ErrName'},$self->{'ErrMsg'}));
-	$self->{'FixButton'} = Button::new($self->{'Frame'},"-text" => "Fix",
-					   "-slave" => $self,"-method"=>\&fix);
-	$self->{'TmpButton'} = Button::new($self->{'Frame'},"-text" => "Del",
-					   "-slave" => $self,"-method"=>\&deleteme);
-      main::tkpack($self->{'Desc'},$self->{'FixButton'},$self->{'TmpButton'},
-		     "-fill" => "x","-expand" => 1,"-side"=>"left");
+	$self->{'Desc'} = 
+	    $self->{'Frame'}->Button(-text => sprintf("%-12.12s %-42.42s",
+						     $self->{'ErrName'},
+						     $self->{'ErrMsg'}),
+				     -font => "6x13",
+				     -highlightcolor => "#ffffff",
+				     -highlightthickness => 0,
+				     -borderwidth => 0,
+				     -relief => "flat",
+				     -activeforeground => 'red',
+				     -activebackground => '#C9C9C9',
+				     -command => [\&selectme,$self]);
+	$self->{'Desc'}->pack(-fill => "x",-expand => 1,-side=>"left"); # 
     }
     bless $self;
     return $self;
 }
 
+sub selectme {
+    my $self = shift;
+    if ($self->{'Selected'} == 1) {
+      main::deselectitem($self);
+	$self->{'Selected'} = 0;
+    } else {
+      main::selectitem($self);
+	$self->{'Desc'}->configure(-foreground => "red");
+	$self->{'Selected'} = 1;
+    }
+}
+
+sub deselectme {
+    my $self = shift;
+    $self->{'Desc'}->configure(-foreground => "black");
+    $self->{'Selected'} = 0;
+}
+
 sub check {
     my $self = shift;
+  main::setstatus("Checking $self->{'Host'} -- $self->{'ErrName'}");
     $_ = `$::snmppath/snmpget -v 1 $self->{'Host'} public $self->{'Mib'}$::miberrflag.$self->{'MibLocation'}`;
     ($result) = /= ([0-9]+)/;
+    if ($result == 0) {
+	$self->deleteme();
+    }
+  main::setstatus("idle");
     return $result;
 }
 
 sub fix {
 # Don't fix and/or unable to
+    my $self = shift;
+  main::setmsg("Don't know how to fix $self->{'ErrName'}");
+}
+
+sub rsh {
+    my $self = shift;
+    if ($::display) {
+	system "xterm -e rsh $self->{'HostId'}->{'Name'} -l root &";
+    }
 }
 
 sub deleteme {
     my $self = shift;
-    $self->{'HostId'}->deleteProb($self);
+    my $host = $self->{'HostId'};
+    $host->deleteProb($self);
 }
 
 sub deleteself {
     my $self = shift;
     if ($::display) {
-      main::tkpack("forget",$self->{'Frame'},$self{'FixButton'},$self{'TmpButton'},$self{'Desc'});
+	Tk->pack("forget",$self->{'Frame'});
+	Tk->pack("forget",$self->{'Desc'});
+	if ($self->{'Seleceted'}) {
+	  main::deselectitem($self);
+	}
     }
+}
+
+sub canfix {
+    return 0;
 }
 
 package FixProblem;
@@ -137,18 +183,15 @@ sub new {
     my $frame = shift;
     my $self = new Problem ($hostId,$mib,$mibloc,$frame);
     $_ = $mib;
-    ($mymib) = /\.([0-9]+)$/;
-    if (grep(/$mymib/,@::fixitlist) && $::fixit >= 0) {
-	bless $self;		# Make it a FixProblem or else return Problem
+    ($mymib) = /(\.[0-9]+)$/;
+    if (grep(/$mymib/,@::fixitlist) && ($::fixit >= 0)) {
+	bless $self;		# Make it a FixProblem if fixable
     }
-    if ($::display) {
-      main::tkpack("forget",$self->{'FixButton'});
-	$self->{'FixButton'} = Button::new($self->{'Frame'},"-text" => "Fix",
-					   "-slave" => $self,"-method"=>\&fix);
-	main::tkpack($self->{'FixButton'},
-		     "-fill" => "x","-expand" => 1,"-side"=>"left");
-    }
-    return $self;
+    return $self;               # else just return a Problem
+}
+
+sub canfix {
+    return 1;
 }
 
 sub fix {
@@ -161,8 +204,8 @@ sub fix {
     else {
 	printf(" / Fixing...\b\b\b\b\b\b\b\b\b");
     }
-    system("snmpset -v 1 $self->{'Host'} public $self->{'Mib'}$::mibfix.$self->{'MibLocation'} integer 1 > /dev/null 2>&1");
-    system("snmpset -v 1 $self->{'Host'} public $::mibclearcache integer 1 > /dev/null 2>&1");
+    system("$::snmppath/snmpset -v 1 $self->{'Host'} public $self->{'Mib'}$::mibfix.$self->{'MibLocation'} integer 1 > /dev/null 2>&1");
+    system("$::snmppath/snmpset -v 1 $self->{'Host'} public $::mibclearcache integer 1 > /dev/null 2>&1");
     if ($::display) {
 	main::setstatus("Sleeping");
     }
@@ -185,7 +228,7 @@ sub fix {
     }
     else {
 	if ($::display) {
-	    $self->{'HostId'}->deleteProb($self);
+#	    $self->{'HostId'}->deleteProb($self);
 	    main::setmsg("Fixed $self->{'ErrName'} on $self->{'Host'}");
 	} 
 	else {
@@ -209,17 +252,23 @@ sub new {
     $self->{'Problems'} = [];
     bless $self;
     if ($::display) {
-	$self->{'MainFrame'} = Frame::new($::HostFrame,"-relief" => "sunken",
-					  "-borderwidth" => 2);
-	$self->{'ProbFrame'} = Frame::new($self->{'MainFrame'});
-	$self->{'hostlabel'} = Button::new($self->{'MainFrame'},
-					   "-text" => sprintf("%-9.9s",
-							     $self->{'Name'}),
-					   "-slave"=>$self,"-method"=>\&check);
-	main::tkpack($self->{'hostlabel'},$self->{'ProbFrame'},
-		     "-side" => "left","-ipadx" => 2,"-padx" => 2,"-pady" =>2);
-	main::tkpack($self->{'MainFrame'},"-padx" => 2,"-pady" =>2, 
-		     "-fill" => "x", "-expand" => 1);
+	$self->{'MainFrame'} = $::HostFrame->Frame(-relief => "sunken",
+					  -borderwidth => 2);
+	$self->{'ProbFrame'} = $self->{'MainFrame'}->Frame();
+	$self->{'hostlabel'} = 
+	    $self->{'MainFrame'}->Button(-text => sprintf("%-9.9s",
+							    $self->{'Name'}),
+					 -highlightthickness=>0,
+					 -command =>[\&selectme,$self],
+					 -activeforeground => 'red',
+					 -activebackground => '#C9C9C9',
+					 -relief => "flat");
+	$self->{'hostlabel'}->pack(-side=>"left",-ipadx=>2,
+				   -padx=> 2,-pady =>2);
+	$self->{'ProbFrame'}->pack(-side=>"left",-ipadx=>2,
+				   -padx=> 2,-pady =>2);
+	$self->{'MainFrame'}->pack(-padx => 2,-pady =>2, 
+				   -fill => "x", -expand => 1);
     } 
     my $i = 0;
     foreach $mibx ( @::miblist ) {
@@ -230,9 +279,40 @@ sub new {
     return $self;
 }
 
+sub rsh {
+    my $self = shift;
+    if ($::display) {
+	system "xterm -e rsh $self->{'Name'} -l root &";
+    }
+}
+
+sub selectme {
+    my $self = shift;
+    if ($self->{'Selected'} == 1) {
+      main::deselectitem($self);
+	$self->{'Selected'} = 0;
+    } else {
+      main::selectitem($self);
+	$self->{'hostlabel'}->configure(-foreground => "red");
+	$self->{'Selected'} = 1;
+    }
+}
+
+sub deselectme {
+    my $self = shift;
+    $self->{'hostlabel'}->configure(-foreground => "black");
+    $self->{'Selected'} = 0;
+}
+
+sub canfix {
+    return 0;
+}
+
 sub check {
     my $self = shift;
+    $self->{'noDelete'} = 1;
     $self->deleteProbs();
+    $self->{'noDelete'} = 0;
     foreach $i (@{$self->{'Mibs'}}) {
 	if (ref($i) ne Mib) {
 	    print "$i is a ref($i) not a Mib\n";
@@ -243,20 +323,30 @@ sub check {
 	}
     }
   main::setstatus("Idle");
+    if ($#{$self->{'Problems'}} == -1) {
+	$self->deleteme();
+    }
+}
+
+sub deleteme {
+    my $self = shift;
+    $self->deleteProbs();
+    Tk->pack("forget",$self->{'hostlabel'});
+    Tk->pack("forget",$self->{'ProbFrame'});
+    Tk->pack("forget",$self->{'MainFrame'});
+    if ($self->{'Seleceted'}) {
+      main::deselectitem($self);
+    }
 }
 
 sub deleteProbs {
     my $self = shift;
     foreach $i (@{$self->{'Problems'}}) {
-	if (ref($i) ne Problem) {
+	if (ref($i) ne Problem && ref($i) ne FixProblem) {
 	    print "i:  $i is a ", ref($i), "\n";
 	    next;
 	}
-	if (ref($i) ne ARRAY) {
-	    $self->deleteProb($i);
-	} else {
-	    print $#i, "\n";
-	}
+	$self->deleteProb($i);
     }
 }
 
@@ -264,12 +354,16 @@ sub deleteProb {
     my $self = shift;
     my $child = shift;
     for ($k = 0; $k <= $#{$self->{'Problems'}}; $k++) {
-	if (ref($self->{'Problems'}->[$k]) eq Problem) {
+	if (ref($self->{'Problems'}->[$k]) eq Problem ||
+	    ref($self->{'Problems'}->[$k]) eq FixProblem ) {
 	    if ($self->{'Problems'}->[$k]->{'Mib'} eq $child->{'Mib'} && 
 	    $self->{'Problems'}->[$k]->{'MibLocation'} eq
 	    $child->{'MibLocation'}) {
 		splice(@{$self->{'Problems'}},$k,1);
 		$child->deleteself();
+		if ($#{$self->{'Problems'}} == -1 && !$self->{'noDelete'}) {
+		    $self->deleteme();
+		}
 		last;
 	    }
 	} else {
@@ -317,40 +411,74 @@ if ($andlog || $#ARGV == -1) {
 
 if ($display) {
     use Tk;
-    $top = tkinit;
-    $HostFrame = Frame::new($top);
-    $MenuFrame = Frame::new($top,"-relief" => "raised","-borderwidth" => 2);
-    $statusBar = Frame::new($top,"-relief" => "raised","-borderwidth" => 2);
-    $status = Label::new($statusBar,"-text" => "initializing","-anchor" =>"e");
-    $statusl = Label::new($statusBar,"-text" => "Status:  ", "-anchor" => "w");
-    $msgBar = Frame::new($top,"-relief" => "raised","-borderwidth" => 2);
-    $msg = Label::new($msgBar,"-text" => "","-anchor" =>"e");
-    $msgl = Label::new($msgBar,"-text" => "Note:  ", "-anchor" => "w");
+#    $tk_strictMotif = 1;
+    $top = MainWindow->new();
+    Tk->option('add','*highlightthickness','0');        #wish this worked
+    Tk->option('add','*highlightbackground','#C9C9C9');
+    Tk->option('add','*background','#C9C9C9');
+    Tk->option('add','*font','6x13');
+    $HostFrame = $top->Frame();
+    $MenuFrame = $top->Frame(-relief => "raised",-borderwidth => 2);
+    $statusBar = $top->Frame(-relief => "raised",-borderwidth => 2);
+    $status = $statusBar->Label(-text => "initializing",-anchor =>"e");
+    $statusl = $statusBar->Label(-text => "Status:  ", -anchor => "w");
+    $msgBar = $top->Frame(-relief => "raised",-borderwidth => 2);
+    $msg = $msgBar->Label(-text => "",-anchor =>"e");
+    $msgl = $msgBar->Label(-text => "Note:  ", -anchor => "w");
     
-    $botFrame = Frame::new($top);
-    $QuitBut = Button::new($botFrame,"-text" => "Quit", "-method" => \&quit);
+    $botFrame = $top->Frame();
     $entryhost = "";
-    $NewHost = Entry::new($botFrame,"-textvariable" => $entryhost,"-width"=>20,
-			  "-relief" => "sunken");
-    tkbind($NewHost,"<Return>",sub { newHost($entryhost)});
-    $BotLabel = Label::new($botFrame,"-text" => "Check New Host:  ",
-			    "-anchor" => "e");
-    tkpack($statusl, $status, "-fill" => "x", "-expand" => 1, "-side" =>"left");
-    tkpack($msgl, $msg, "-fill" => "x", "-expand" => 1, "-side" => "left");
-    tkpack($statusBar, $msgBar, "-fill" => "x", "-expand" => 1);
-    tkpack($HostFrame,$botFrame,$MenuFrame,"-fill" => "x","-expand" => 1);
-    tkpack($QuitBut,"-side" => "left","-padx" => 4,"-pady" => 2,"-ipadx" => 2,
-	   "-ipady" => 2);
-    tkpack($BotLabel,"-fill" => "x","-expand" => 1,"-side"=>"left");
-    tkpack($NewHost,"-side"=>"right");
-    update;
+    $NewHost = $botFrame->Entry(-textvariable => \$entryhost,-width=>20,
+				-highlightthickness=>0,
+				-relief => "sunken");
+    $NewHost->bind("<Return>",sub {newHost("$entryhost"); 
+				   $NewHost->delete(0,length($entryhost));});
+    $BotLabel = $botFrame->Label(-text => "Check New Host:  ",
+			    -anchor => "e");
+    $statusl->pack(-fill => "x", -expand => 1, -side =>"left");
+    $status->pack(-fill => "x", -expand => 1, -side =>"left");
+    $msgl->pack(-fill => "x", -expand => 1, -side => "left");
+    $msg->pack(-fill => "x", -expand => 1, -side => "left");
+    $statusBar->pack(-fill => "x", -expand => 1);
+    $msgBar->pack(-fill => "x", -expand => 1);
+    $HostFrame->pack(-fill => "x",-expand => 1);
+    $botFrame->pack(-fill => "x",-expand => 1);
+    $MenuFrame->pack(-fill => "x",-expand => 1);
+    $QuitBut = $botFrame->Button(-text => "Quit", -command => [\&quit],
+				 -highlightthickness=>0);
+    $QuitBut->pack(-side => "left",
+		   -padx => 4,-pady => 2,
+		   -ipadx => 2, -ipady => 2);
+
+    $FixBut = $botFrame->Button(-text => "Fix",-command=>[sub{print "hi\n"}],
+				-highlightthickness=>0,
+				-state => "disabled");
+    $FixBut->pack(-side => "left",-padx => 4,-pady => 2,-ipadx => 2,
+		   -ipady => 2);
+    $RshBut = $botFrame->Button(-text => "Rsh",-command=>[sub{print "hi\n"}],
+				-highlightthickness=>0,
+				-state => "disabled");
+    $RshBut->pack(-side => "left",-padx => 4,-pady => 2,-ipadx => 2,
+		   -ipady => 2);
+    $DelBut = $botFrame->Button(-text => "Del", -highlightthickness=>0,
+				 -state => "disabled");
+    $DelBut->pack(-side => "left",-padx => 4,-pady => 2,-ipadx => 2,
+		   -ipady => 2);
+    $ChkBut = $botFrame->Button(-text => "Chk", -highlightthickness=>0,
+				 -state => "disabled");
+    $ChkBut->pack(-side => "left",-padx => 4,-pady => 2,-ipadx => 2,
+		   -ipady => 2);
+    $BotLabel->pack(-fill => "x",-expand => 1,-side=>"left");
+    $NewHost->pack(-side=>"right");
+    Tk->update();
     foreach $host ( @ARGV ) {
 	$chost[$#chost+1] = new Host ($host);
-	update;
+	Tk->update();
 	$chost[$#chost]->check;
     }
-    $status->configure("-text" => "Idle");
-    tkmainloop;
+    $status->configure(-text => "Idle");
+    $selected = 0;
+    MainLoop;
 }
 else {
     select(STDOUT);
@@ -365,23 +493,49 @@ else {
 sub newHost {
     my $name = shift;
     push(@chost,Host::new("",$name));
-    update;
+    Tk->update();
     $chost[$#chost]->check;
 }
 
 sub setstatus {
     my $arg = shift;
     if ($display) {
-	$status->configure("-text" => $arg);
-	update;
+	$status->configure(-text => $arg);
+	Tk->update();
     }
 }
 
 sub setmsg {
     my $arg = shift;
     if ($display) {
-	$msg->configure("-text" => $arg);
-	update;
+	$msg->configure(-text => $arg);
+	Tk->update();
+    }
+}
+
+sub deselectitem {
+    $obj = shift;
+    $obj->deselectme();
+    $FixBut->configure(-state => "disabled");
+    $RshBut->configure(-state => "disabled");
+    $DelBut->configure(-state => "disabled");
+    $ChkBut->configure(-state => "disabled");
+    $selected = 0;
+}
+
+sub selectitem {
+    if ($selected) {
+	$selected->deselectme();
+    }
+    $selected = shift;
+    $DelBut->configure(-state => "normal", -command => ['deleteme',$selected]);
+    $ChkBut->configure(-state => "normal", -command => ['check',$selected]);
+    $RshBut->configure(-state => "normal", -command => ['rsh',$selected]);
+    if ($selected->canfix()) {
+	$FixBut->configure(-state => "normal", 
+			   -command => ['fix',$selected]);
+    } else {
+	$FixBut->configure(-state => "disabled");
     }
 }
 
