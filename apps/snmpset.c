@@ -76,6 +76,7 @@ SOFTWARE.
 #include "snmp.h"
 #include "system.h"
 #include "snmp_parse_args.h"
+#include "int64.h"
 
 int failures = 0;
 
