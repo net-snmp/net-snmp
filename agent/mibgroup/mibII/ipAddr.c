@@ -282,7 +282,7 @@ var_ipAddrEntry(struct variable *vp,
     }
 
 #if defined(linux)
-    free(ifc.ifc_buf);
+    SNMP_FREE(ifc.ifc_buf);
 #endif
 
     if (!lowinterface)
@@ -495,21 +495,21 @@ Address_Scan_Init(void)
     /* get info about all interfaces */
 
     ifc.ifc_len = 0;
-    ifc.ifc_buf = NULL;
+    SNMP_FREE(ifc.ifc_buf);
     ifr_counter = 0;
 
     do
     {
+	if ((fd = socket(AF_INET, SOCK_DGRAM, 0)) < 0)
+	{
+	    DEBUGMSGTL(("snmpd", "socket open failure in Address_Scan_Init\n"));
+	    return;
+	}
 	num_interfaces += 16;
 
 	ifc.ifc_len = sizeof(struct ifreq) * num_interfaces;
 	ifc.ifc_buf = (char*) realloc(ifc.ifc_buf, ifc.ifc_len);
 	
-	if ((fd = socket(AF_INET, SOCK_DGRAM, 0)) < 0)
-	{
-	    DEBUGMSGTL(("snmpd", "socket open failure in Address_Scan_Init\n"));
-	    return;
-	} else {
 	    if (ioctl(fd, SIOCGIFCONF, &ifc) < 0)
 	    {
 		ifr=NULL;
@@ -517,7 +517,6 @@ Address_Scan_Init(void)
 	   	return;
 	    }
 	    close(fd);
-	}
     }
     while (ifc.ifc_len >= (sizeof(struct ifreq) * num_interfaces));
     
