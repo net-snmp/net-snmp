@@ -52,7 +52,7 @@
 #include <dmalloc.h>
 #endif
 
-#ifdef WIN32
+#if HAVE_WINSOCK_H
 #include <winsock.h>
 #endif
 
@@ -187,7 +187,7 @@ snmp_log_string (int priority, const char *string)
 
 #if HAVE_SYSLOG_H
   if (do_syslogging) {
-    syslog(priority, string);
+    syslog(priority, "%s", string);
   }
 #endif
 

@@ -277,8 +277,10 @@ load_subtree( struct subtree *new_sub )
 	    		new2 = split_subtree( new_sub,
 					tree1->end, tree1->end_len);
 			res = load_subtree( new_sub );
-			if ( res != MIB_REGISTERED_OK )
+			if ( res != MIB_REGISTERED_OK ) {
+			    free_subtree(new2);
 			    return res;
+			}
 			return load_subtree( new2 );
 
 	 }
@@ -361,8 +363,10 @@ register_mib_context(const char *moduleName,
 	    return MIB_REGISTRATION_FAILED;
 	}
     }
+  } else if (res == MIB_DUPLICATE_REGISTRATION ||
+	     res == MIB_REGISTRATION_FAILED) {
+      free_subtree(subtree);
   }
-
 
   reg_parms.name = mibloc;
   reg_parms.namelen = mibloclen;
@@ -370,6 +374,10 @@ register_mib_context(const char *moduleName,
   reg_parms.range_subid  = range_subid;
   reg_parms.range_ubound = range_ubound;
   reg_parms.timeout = timeout;
+
+  /*  Should this really be called if the registration hasn't actually 
+      succeeded?  */
+
   snmp_call_callbacks(SNMP_CALLBACK_APPLICATION, SNMPD_CALLBACK_REGISTER_OID,
                       &reg_parms);
 

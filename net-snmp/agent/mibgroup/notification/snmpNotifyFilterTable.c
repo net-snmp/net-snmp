@@ -4,6 +4,11 @@
 
 /* This should always be included first before anything else */
 #include <config.h>
+
+#include <sys/types.h>
+#if HAVE_WINSOCK_H
+#include <winsock.h>
+#endif
 #if HAVE_STDLIB_H
 #include <stdlib.h>
 #endif

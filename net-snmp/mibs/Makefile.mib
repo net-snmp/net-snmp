@@ -1,4 +1,4 @@
-RFCHOST =	ftp.nordu.net
+RFCHOST =	ftp.nordu.net	# ftp.ietf.org
 RFCDIR =	rfc
 
 IANAHOST =	ftp.iana.org
@@ -25,6 +25,8 @@ MIBS =	SNMPv2-TC.txt SNMPv2-TM.txt SNMPv2-SMI.txt SNMPv2-MIB.txt \
 MIBDEPS = Makefile.mib mibfetch smistrip
 
 all:	$(MIBS)
+
+allmibs:	ianamibs rfcmibs
 
 clean:
 	rm $(MIBS)
@@ -139,3 +141,21 @@ RFC1155-SMI.txt:	$(MIBDEPS)
 
 RFC1213-MIB.txt:	$(MIBDEPS)
 	./mibfetch $(RFCHOST) $(RFCDIR) 1213
+
+ianamibs:	ianalist
+	cat ianalist | while read file mibs; \
+		do \
+		  if [ "$$file" != "#" ]; \
+		  then \
+		    ./mibfetch $(IANAHOST) $(IANADIR) $$file $$mibs; \
+		  fi; \
+		done
+
+rfcmibs:	rfclist
+	cat rfclist | while read rfc mibs; \
+		do \
+		  if [ "$$rfc" != "#" ]; \
+		  then \
+		    ./mibfetch $(RFCHOST) $(RFCDIR) $$rfc $$mibs; \
+		  fi; \
+		done

@@ -345,11 +345,7 @@ var_ip(struct variable *vp,
 #endif
 #endif
 	case IPREASMTIMEOUT:
-#if STRUCT_IPSTAT_HAS_IPS_FRAGTIMEOUT
-				long_return = ipstat.ips_fragtimeout;
-#else
 				long_return = IPFRAGTTL;
-#endif
 			        return (u_char *) &long_return;
 	case IPREASMREQDS:	long_return = ipstat.ips_fragments;
 			        return (u_char *) &long_return;

@@ -1749,7 +1749,7 @@ returns hash ref {tag => num, ...}
 
 =item ranges
 
-returns array ref [[low1, high1], [low2, high2], ...]
+returns array ref of hash ref [{low => num, high => num}, ...]
 
 =item description
 

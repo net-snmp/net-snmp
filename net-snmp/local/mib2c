@@ -40,11 +40,11 @@ sub usage {
 
 while($#ARGV >= 0) {
     $_ = shift;
-    $configfile = shift if (/-c/);
-    $debug = 1 if (/-d/);
-    $nostats = 1 if (/-s/);
-    usage && exit(1) if (/-h/);
-    $outputName = shift if (/-f/);
+    $configfile = shift if (/^-c/);
+    $debug = 1 if (/^-d/);
+    $nostats = 1 if (/^-s/);
+    usage && exit(1) if (/^-h/);
+    $outputName = shift if (/^-f/);
     $oid = $_ if (/^[^-]/);
 }
  

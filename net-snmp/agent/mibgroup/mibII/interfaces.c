@@ -627,10 +627,10 @@ var_ifEntry(struct variable *vp,
     /* XXX */
     return NULL;
   case IFADMINSTATUS:
-    long_return = if_msg.ifm_flags & IFF_RUNNING ? 1 : 2;
+    long_return = if_msg.ifm_flags & IFF_UP ? 1 : 2;
     return (u_char *) &long_return;
   case IFOPERSTATUS:
-    long_return = if_msg.ifm_flags & IFF_UP ? 1 : 2;
+    long_return = if_msg.ifm_flags & IFF_RUNNING ? 1 : 2;
     return (u_char *) &long_return;
     /* ifLastChange */
   case IFINOCTETS:
@@ -801,10 +801,10 @@ var_ifEntry(struct variable *vp,
 		*var_len = 0;
 	    return(u_char *) return_buf;
 	case IFADMINSTATUS:
-	    long_return = ifnet.if_flags & IFF_RUNNING ? 1 : 2;
+	    long_return = ifnet.if_flags & IFF_UP ? 1 : 2;
 	    return (u_char *) &long_return;
 	case IFOPERSTATUS:
-	    long_return = ifnet.if_flags & IFF_UP ? 1 : 2;
+	    long_return = ifnet.if_flags & IFF_RUNNING ? 1 : 2;
 	    return (u_char *) &long_return;
 	case IFLASTCHANGE:
 #if defined(STRUCT_IFNET_HAS_IF_LASTCHANGE_TV_SEC) && !(defined(freebsd2) && __FreeBSD_version < 199607)
@@ -1014,10 +1014,10 @@ var_ifEntry(struct variable *vp,
 		    *var_len = 0;
 		return(u_char *) return_buf;
 	case IFADMINSTATUS:
-	    long_return = ifnet.if_flags & IFF_RUNNING ? 1 : 2;
+	    long_return = ifnet.if_flags & IFF_UP ? 1 : 2;
 	    return (u_char *) &long_return;
 	case IFOPERSTATUS:
-	    long_return = ifnet.if_flags & IFF_UP ? 1 : 2;
+	    long_return = ifnet.if_flags & IFF_RUNNING ? 1 : 2;
 	    return (u_char *) &long_return;
 	case IFLASTCHANGE:
 	  if ( hp_fd != -1 )
@@ -1288,21 +1288,41 @@ Interface_Scan_Init (void)
       
     while (fgets (line, sizeof(line), devin))
       {
-	struct ifnet *nnew;
-	char *stats, *ifstart = line;
+        struct ifnet *nnew;
+        char *stats, *ifstart = line;
 
-	while (*ifstart == ' ') ifstart++;
-	if ((stats = strrchr(ifstart, ':')) == NULL)  /* /proc/net/dev bug */
-            continue;
-	*stats++ = 0;
-	strcpy(ifname_buf, ifstart);
-	while (*stats == ' ') stats++;
+        if ( line[strlen(line)-1] == '\n' )
+                line[strlen(line)-1]='\0';
 
-	if ((scan_line_to_use == scan_line_2_2 &&
-	    sscanf (stats, scan_line_to_use, &rec_oct, &rec_pkt, &rec_err, &snd_oct, &snd_pkt, &snd_err, &coll) != 7) ||
-	    (scan_line_to_use == scan_line_2_0 && 
-	    sscanf (stats, scan_line_to_use, &rec_pkt, &rec_err, &snd_pkt, &snd_err, &coll) != 5))
-	  continue;
+        while (*ifstart == ' ') ifstart++;
+
+        if ( (stats = strrchr(ifstart, ':')) == NULL ) {
+                snmp_log(LOG_ERR,"/proc/net/dev data format error, line
+==|%s|",line);
+                continue;
+        }
+        if ( (scan_line_to_use == scan_line_2_2) &&
+                ( (stats-line) < 6 ) ) {
+                snmp_log(LOG_ERR,"/proc/net/dev data format error, line
+==|%s|",line);
+        }
+
+        *stats++ = 0;
+        strcpy(ifname_buf, ifstart);
+        while (*stats == ' ') stats++;
+
+        if ((scan_line_to_use == scan_line_2_2 &&
+            sscanf (stats, scan_line_to_use, &rec_oct, &rec_pkt, &rec_err,
+&snd_oct, &snd_pkt, &snd_err, &coll) != 7) ||
+            (scan_line_to_use == scan_line_2_0 &&
+            sscanf (stats, scan_line_to_use, &rec_pkt, &rec_err, &snd_pkt,
+&snd_err, &coll) != 5)) {
+          if ( (scan_line_to_use == scan_line_2_2) &&
+                !strstr(line,"No statistics available") )
+                snmp_log(LOG_ERR,"/proc/net/dev data format error, line
+==|%s|",line);
+          continue;
+        }
 	
 	nnew = (struct ifnet *) calloc (1, sizeof (struct ifnet));	    
 	if (nnew == NULL)  break; /* alloc error */
@@ -1975,10 +1995,10 @@ var_ifEntry(struct variable *vp,
 			return cp;
 	}
 	case IFADMINSTATUS:
-		long_return = ifmd.ifmd_flags & IFF_RUNNING ? 1 : 2;
+		long_return = ifmd.ifmd_flags & IFF_UP ? 1 : 2;
 		return (u_char *) &long_return;
 	case IFOPERSTATUS:
-		long_return = ifmd.ifmd_flags & IFF_UP ? 1 : 2;
+		long_return = ifmd.ifmd_flags & IFF_RUNNING ? 1 : 2;
 		return (u_char *) &long_return;
 	case IFLASTCHANGE:
 		if (ifmd.ifmd_data.ifi_lastchange.tv_sec == 0 &&
