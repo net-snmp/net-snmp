@@ -14,12 +14,14 @@
 #include "ip-mib/ipAddressTable/ipAddressTable_constants.h"
 
 #include <errno.h>
+#include <net/if.h>
 #include <sys/ioctl.h>
 
 static int _get_interface_count(int sd, struct ifconf * ifc);
 static void _print_flags(short flags);
 
 /**
+ * load ipv4 address via ioctl
  */
 int
 _netsnmp_access_ipaddress_container_ioctl_load_v4(netsnmp_container *container,
@@ -102,8 +104,14 @@ _netsnmp_access_ipaddress_container_ioctl_load_v4(netsnmp_container *container,
          * there is an iotcl to get an ifindex, but I'm not sure that
          * it has the correct characteristics required to be the actual
          * ifIndex for the mib, so we'll use the netsnmp interface method
-         * (which is based on the interface name).
+         * (which is based on the interface name). But first we need to
+         * truncate any alias info.
          */
+        {
+            char *ptr = strchr(ifrp->ifr_name, ':');
+            if (NULL != ptr)
+                *ptr = 0;
+        }
         entry->if_index = netsnmp_access_interface_index_find(ifrp->ifr_name);
 #else
         /*
@@ -151,6 +159,9 @@ _netsnmp_access_ipaddress_container_ioctl_load_v4(netsnmp_container *container,
             DEBUGMSGT_NC(("access:ipaddress:container",
                           " if %d: addr len %d, index 0x%x\n",
                           i, entry->ia_address_len, entry->if_index));
+            if (4 == entry->ia_address_len)
+                DEBUGMSGT_NC(("access:ipaddress:container", " address %p\n",
+                              *((void**)entry->ia_address)));
             DEBUGMSGT_NC(("access:ipaddress:container", "flags 0x%x\n",
                           entry->ia_flags));
             _print_flags(entry->ia_flags);
@@ -176,6 +187,49 @@ _netsnmp_access_ipaddress_container_ioctl_load_v4(netsnmp_container *container,
         return rc;
 
     return idx_offset;
+}
+
+
+/**
+ *
+ * @retval  0 : no error
+ * @retval -1 : bad parameter
+ * @retval -2 : couldn't create socket
+ * @retval -3 : ioctl failed
+ */
+int
+_netsnmp_access_ipaddress_ioctl_set_v4(const char *name, u_long addr)
+{
+    struct ifreq                   ifrq;
+    struct sockaddr_in            *sin;
+    int                            rc, fd = -1;
+
+    if (NULL == name)
+        return -1;
+
+    fd = socket(AF_INET, SOCK_DGRAM, 0);
+    if(fd < 0) {
+        snmp_log(LOG_ERR,"couldn't create socket\n");
+        return -2;
+    }
+
+    memset(&ifrq, 0, sizeof(ifrq));
+
+    strncpy(ifrq.ifr_name, name, sizeof(ifrq.ifr_name));
+    ifrq.ifr_name[ sizeof(ifrq.ifr_name)-1 ] = 0;
+
+    sin = (struct sockaddr_in*)&ifrq.ifr_addr;
+    sin->sin_family = AF_INET;
+    sin->sin_addr.s_addr = addr;
+
+    rc = ioctl(fd, SIOCSIFADDR, &ifrq);
+    if(rc < 0) {
+        snmp_log(LOG_ERR,"error setting address\n");
+        close(fd);
+        return -3;
+    }
+
+    return 0;
 }
 
 /**
