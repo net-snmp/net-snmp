@@ -398,7 +398,3 @@
 #define __P(params) ()
 #endif /* __STDC__ */
 #endif /* __P */
-
-#ifndef HAVE_STRDUP
-char *strdup __P((char *));
-#endif

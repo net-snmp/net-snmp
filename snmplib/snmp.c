@@ -227,20 +227,3 @@ snmp_build_var_op(data, var_name, var_name_len, var_val_type, var_val_len,
 		       (u_char)(ASN_SEQUENCE | ASN_CONSTRUCTOR), dummyLen);
     return data;
 }
-
-
-#ifndef HAVE_STRDUP
-char *
-strdup(src)
-    char *src;
-{
-    int len;
-    char *dst;
-
-    len = strlen(src) + 1;
-    if ((dst = (char *)malloc(len)) == NULL)
-	return(NULL);
-    strcpy(dst, src);
-    return(dst);
-}
-#endif
