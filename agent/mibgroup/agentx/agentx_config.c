@@ -156,6 +156,24 @@ agentx_parse_agentx_retries(const char *token, char *cptr)
 }
 
 void
+agentx_register_config_handler(const char *token,
+                              void (*parser) (const char *, char *),
+                              void (*releaser) (void), const char *help)
+{
+    DEBUGMSGTL(("agentx_register_app_config_handler",
+                "registering .conf token for \"%s\"\n", token));
+    register_app_config_handler(token, parser, releaser, help);
+    register_config_handler("agentx", token, parser, releaser, help);
+}
+
+void
+agentx_unregister_config_handler(const char *token)
+{
+    unregister_app_config_handler(token);
+    unregister_config_handler("agentx", token);
+}
+
+void
 init_agentx_config(void)
 {
     /*
@@ -171,16 +189,16 @@ init_agentx_config(void)
                                       agentx_parse_master, NULL,
                                       "specify 'agentx' for AgentX support");
 #endif                          /* USING_AGENTX_MASTER_MODULE */
-    snmpd_register_config_handler("agentxsocket",
+    agentx_register_config_handler("agentxsocket",
                                   agentx_parse_agentx_socket, NULL,
                                   "AgentX bind address");
-    snmpd_register_config_handler("agentxperms",
+    agentx_register_config_handler("agentxperms",
                                   agentx_parse_agentx_perms, NULL,
                                   "AgentX socket permissions: socket_perms [directory_perms [username|userid [groupname|groupid]]]");
-    snmpd_register_config_handler("agentxRetries",
+    agentx_register_config_handler("agentxRetries",
                                   agentx_parse_agentx_retries, NULL,
                                   "AgentX Retries");
-    snmpd_register_config_handler("agentxTimeout",
+    agentx_register_config_handler("agentxTimeout",
                                   agentx_parse_agentx_timeout, NULL,
                                   "AgentX Timeout (seconds)");
 }
