@@ -1,4 +1,4 @@
-.TH "The Net-SNMP library" 3 "2 Sep 2004" "net-snmp" \" -*- nroff -*-
+.TH "The Net-SNMP library" 3 "15 Oct 2004" "net-snmp" \" -*- nroff -*-
 .ad l
 .nh
 .SH NAME
@@ -491,7 +491,7 @@ Returns non-zero on failure and zero on success.
 \fBinit_snmp\fP 
 .RE
 .PP
-Definition at line 264 of file snmp_vars.c.
+Definition at line 269 of file snmp_vars.c.
 .PP
 References netsnmp_ds_set_boolean(), netsnmp_init_helpers(), and snmp_log().
 .SS "void init_snmp (const char * type)"
@@ -511,7 +511,7 @@ void
 \fBinit_agent\fP 
 .RE
 .PP
-Definition at line 771 of file snmp_api.c.
+Definition at line 779 of file snmp_api.c.
 .PP
 References init_mib().
 .SS "int netsnmp_oid_equals (const oid * in_name1, size_t len1, const oid * in_name2, size_t len2)"
@@ -534,7 +534,7 @@ Compares 2 OIDs to determine if they are exactly equal. This should be faster th
 0 if they are equal, 1 if they are not. 
 .RE
 .PP
-Definition at line 6249 of file snmp_api.c.
+Definition at line 6213 of file snmp_api.c.
 .PP
 Referenced by netsnmp_cache_find_by_oid(), netsnmp_old_api_helper(), and unregister_mib_context().
 .SS "int netsnmp_oid_find_prefix (const oid * in_name1, size_t len1, const oid * in_name2, size_t len2)"
@@ -555,7 +555,7 @@ Given two OIDs, determine the common prefix to them both. \fBParameters:\fP
 length of largest common index of commonality. 1 = first, 0 if none * or -1 on error. 
 .RE
 .PP
-Definition at line 6305 of file snmp_api.c.
+Definition at line 6269 of file snmp_api.c.
 .PP
 References SNMP_MIN.
 .PP
@@ -580,7 +580,7 @@ Identical to netsnmp_oid_equals, except only the length up to len1 is compared. 
 0 if one is a common prefix of the other. 
 .RE
 .PP
-Definition at line 6285 of file snmp_api.c.
+Definition at line 6249 of file snmp_api.c.
 .SS "int snmp_oid_compare (const oid * in_name1, size_t len1, const oid * in_name2, size_t len2)"
 .PP
 lexicographical compare two object identifiers. Caution: this method is called often by command responder applications (ie, agent).
@@ -590,7 +590,7 @@ lexicographical compare two object identifiers. Caution: this method is called o
 -1 if name1 < name2, 0 if name1 = name2, 1 if name1 > name2 
 .RE
 .PP
-Definition at line 6181 of file snmp_api.c.
+Definition at line 6145 of file snmp_api.c.
 .PP
 Referenced by check_getnext_results(), netsnmp_check_getnext_reply(), netsnmp_insert_iterator_context(), netsnmp_insert_table_row(), netsnmp_row_merge_helper_handler(), netsnmp_table_data_add_row(), netsnmp_table_data_get_from_oid(), netsnmp_table_data_helper_handler(), netsnmp_table_iterator_helper_handler(), snmp_oidtree_compare(), and table_helper_handler().
 .SS "int snmp_oidtree_compare (const oid * in_name1, size_t len1, const oid * in_name2, size_t len2)"
@@ -611,7 +611,7 @@ Compares 2 OIDs to determine if they are equal up until the shortest length. \fB
 0 if they are equal, 1 if in_name1 is > in_name2, or -1 if <. 
 .RE
 .PP
-Definition at line 6230 of file snmp_api.c.
+Definition at line 6194 of file snmp_api.c.
 .PP
 References snmp_oid_compare().
 .SS "void snmp_shutdown (const char * type)"
@@ -626,6 +626,6 @@ Shuts down the application, saving any needed persistent storage, and appropriat
 void 
 .RE
 .PP
-Definition at line 839 of file snmp_api.c.
+Definition at line 847 of file snmp_api.c.
 .PP
 References shutdown_mib(), snmp_alarm_unregister_all(), and snmp_call_callbacks().
