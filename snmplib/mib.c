@@ -1328,7 +1328,10 @@ shutdown_mib (void)
     }
     tree_head = NULL;
     Mib = NULL;
-    free(Prefix); Prefix = NULL;
+    if (Prefix != NULL && Prefix != &Standard_Prefix[0])
+	free(Prefix);
+    if (Prefix)
+	Prefix = NULL;
 }
 
 void
