@@ -36,6 +36,9 @@ SOFTWARE.
 #  include <time.h>
 # endif
 #endif
+#if HAVE_SYS_SELECT_H
+#include <sys/select.h>
+#endif
 #if HAVE_NETINET_IN_H
 #include <netinet/in.h>
 #endif
@@ -78,7 +81,7 @@ rmonGetValue(srcParty, srcPartyLen, dstParty, dstPartyLen,
     u_char type;
     int len;
     u_short acl;
-    int (*writeFunc)();
+    int (*writeFunc) __P((int, u_char *, u_char, int, u_char *, oid *, int));
     u_char *var;
     struct packet_info pinfo, *pi = &pinfo;
     int noSuchObject;

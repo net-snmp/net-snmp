@@ -50,6 +50,9 @@ SOFTWARE.
 #  include <time.h>
 # endif
 #endif
+#if HAVE_SYS_SELECT_H
+#include <sys/select.h>
+#endif
 #include <stdio.h>
 #include <ctype.h>
 #include <netdb.h>

@@ -37,7 +37,9 @@ SOFTWARE.
 #include <string.h>
 #endif
 #include <sys/types.h>
-
+#if HAVE_SYS_SELECT_H
+#include <sys/select.h>
+#endif
 #if HAVE_NETINET_IN_H
 #include <netinet/in.h>
 #endif

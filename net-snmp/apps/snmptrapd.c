@@ -55,6 +55,9 @@ SOFTWARE.
 #  include <time.h>
 # endif
 #endif
+#if HAVE_SYS_SELECT_H
+#include <sys/select.h>
+#endif
 #include <sys/param.h>
 #include <errno.h>
 #if HAVE_SYSLOG_H

@@ -55,6 +55,9 @@ SOFTWARE.
 #  include <time.h>
 # endif
 #endif
+#if HAVE_SYS_SELECT_H
+#include <sys/select.h>
+#endif
 #include <sys/socket.h>
 #include <net/if.h>
 #if HAVE_SYS_IOCTL_H

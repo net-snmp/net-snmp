@@ -54,6 +54,9 @@ SOFTWARE.
 #  include <time.h>
 # endif
 #endif
+#if HAVE_SYS_SELECT_H
+#include <sys/select.h>
+#endif
 #include <netdb.h>
 #include <stdio.h>
 #include <sys/socket.h>
