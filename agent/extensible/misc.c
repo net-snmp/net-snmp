@@ -1,6 +1,8 @@
 #include <stdio.h>
 #include <sys/wait.h>
-#include "struct.h"
+#include <unistd.h>
+#include <sys/fcntl.h>
+#include "wes.h"
 
 char *find_field();
 char *skip_white();
@@ -75,7 +77,6 @@ int sh_count_procs(procname)
     }
   fclose(file);
   close(fd);
-  while(wait3(&status,WNOHANG,0) > 0);
   return(ret);
 }
 
@@ -116,8 +117,6 @@ int exec_command(ex)
   }
   fclose(file);
   close(fd);
-  while(wait3(&ex->result,0,0) > 0);
-  ex->result = WEXITSTATUS(ex->result);
   return(ex->result);
 }
 
@@ -130,84 +129,101 @@ int get_exec_output(ex)
   FILE *ret;
   FILE *tmpout;
   char ctmp[STRMAX], *cptr1, *cptr2, argvs[STRMAX], **argv, **aptr;
-  
-  if (pipe(fd)) 
-    {
-      perror("pipe");
-    }
-  if (fork() == 0) 
-    {
-      close(1);
-      if (dup(fd[1]) != 1)
-	{
-	  perror("dup");
-	}
-      close(fd[1]);
-      close(fd[0]);
-      for(cnt=1,cptr1 = ex->command, cptr2 = argvs; *cptr1 != NULL;
-                                                    cptr2++, cptr1++) {
-        *cptr2 = *cptr1;
-        if (*cptr1 == ' ') {
-          *(cptr2++) = NULL;
-          cptr1 = skip_white(cptr1);
-          *cptr2 = *cptr1;
-          if (*cptr1 != NULL) cnt++;
-        }
+#ifdef CACHETIME
+  char cache[MAXCACHESIZE];
+  long cachebytes;
+  static long curtime, cachetime;
+  static struct extensible excompare;
+  static char lastcmd[STRMAX];
+  int cfd;
+  int lastresult;
+#endif
+
+#ifdef CACHETIME
+  curtime = time();
+  if (curtime > (cachetime + CACHETIME) ||
+      strcmp(ex->command, lastcmd) != 0) {
+    strcpy(lastcmd,ex->command);
+    cachetime = curtime;
+#endif
+    if (pipe(fd)) 
+      {
+        perror("pipe");
       }
-      *cptr2 = NULL;
-      *(cptr2+1) = NULL;
-      argv = (char **) malloc((cnt+2) * sizeof(char *));
-      aptr = argv;
-      *(aptr++) = argvs;
-      for (cptr2 = argvs, i=1; i != cnt; cptr2++)
-        if (*cptr2 == NULL) {
-          *(aptr++) = cptr2 + 1;
-          i++;
+    if (fork() == 0) 
+      {
+        close(1);
+        if (dup(fd[1]) != 1)
+          {
+            perror("dup");
+          }
+        close(fd[1]);
+        close(fd[0]);
+        for(cnt=1,cptr1 = ex->command, cptr2 = argvs; *cptr1 != NULL;
+                                                      cptr2++, cptr1++) {
+          *cptr2 = *cptr1;
+          if (*cptr1 == ' ') {
+            *(cptr2++) = NULL;
+            cptr1 = skip_white(cptr1);
+            *cptr2 = *cptr1;
+            if (*cptr1 != NULL) cnt++;
+          }
         }
-      while (*cptr2 != NULL) cptr2++;
-      *(aptr++) = NULL;
-      copy_word(ex->command,ctmp);
-      execv(ctmp,argv);
-      perror("execv");
-      exit(1);
-    }
-  else
-    {
-      close(fd[1]);
+        *cptr2 = NULL;
+        *(cptr2+1) = NULL;
+        argv = (char **) malloc((cnt+2) * sizeof(char *));
+        aptr = argv;
+        *(aptr++) = argvs;
+        for (cptr2 = argvs, i=1; i != cnt; cptr2++)
+          if (*cptr2 == NULL) {
+            *(aptr++) = cptr2 + 1;
+            i++;
+          }
+        while (*cptr2 != NULL) cptr2++;
+        *(aptr++) = NULL;
+        copy_word(ex->command,ctmp);
+        execv(ctmp,argv);
+        perror("execv");
+        exit(1);
+      }
+    else
+      {
+        close(fd[1]);
 /*      ret = fdopen(fd[0],"r"); */
-      return(fd[0]);
-    }
+#ifdef CACHETIME
+        if ((cfd = open(CACHEFILE,O_WRONLY|O_CREAT,0644)) < 0) {
+          perror("open");
+          return(NULL);
+        }
+        cachebytes = read(fd[0],(void *) cache, MAXCACHESIZE);
+        write(cfd,(void *) cache, cachebytes);
+        close(cfd);
+        close(fd[0]);
+        /* wait for the child to finish */
+        while(wait3(&ex->result,0,0) > 0);
+        ex->result = WEXITSTATUS(ex->result);
+        lastresult = ex->result;
+#else
+        return(fd[0]);
+#endif
+      }
+#ifdef CACHETIME
+  }
+  if ((cfd = open(CACHEFILE,O_RDONLY)) < 0) {
+    perror("open");
+    return(NULL);
+  }
+  return(cfd);
+#endif
 }
 
 int get_ps_output()
 {
-  int fd[2];
+  int fd;
   FILE *ret;
-  
-  if (pipe(fd)) 
-    {
-      perror("pipe");
-    }
-  if (fork() == 0) 
-    {
-      close(1);
-      if (dup(fd[1]) != 1)
-	{
-	  perror("dup");
-	}
-      close(fd[1]);
-      close(fd[0]);
-#ifdef hpux
-      execl("/bin/ps","ps","-e",NULL);
-#else
-      execl("/bin/ps","ps","-xac",NULL);
-#endif
-      perror("execl");
-      exit(1);
-    }
-  else
-    {
-      close(fd[1]);
-      return(fd[0]);
-    }
+  struct extensible ex;
+
+  strcpy(ex.command,PSCMD);
+  fd = get_exec_output(&ex);
+  return(fd);
 } 
