@@ -723,7 +723,7 @@ snmp_parse(session, pdu, data, length)
 	version = pi->version;
     } else {
         ERROR("unknown auth header type");
-        return NULL;
+        return 0;
     }
     pdu->version = version;
 
