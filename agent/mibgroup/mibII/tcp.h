@@ -50,6 +50,7 @@ config_arch_require(solaris2, kernel_sunos5)
 extern int TCP_Count_Connections (void);
 #endif
 extern  void TCP_Scan_Init (void);
+struct inpcb;
 extern  int TCP_Scan_Next (int *, struct inpcb *);
 #endif
 
