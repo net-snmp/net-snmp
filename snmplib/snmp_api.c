@@ -629,8 +629,8 @@ init_snmp(const char *type)
 #endif
 
   snmp_debug_init(); /* should be done first, to turn on debugging ASAP */
-  if ( type != NULL )
   init_callbacks();
+  if ( type != NULL )
   init_snmp_logging();
   snmp_init_statistics();
   register_mib_handlers();
@@ -5025,8 +5025,7 @@ snmp_add_var(struct snmp_pdu *pdu,
 	    int ix, bit;
 	    ltmp = strtoul(cp, &ecp, 0);
 	    if (*ecp != 0) {
-              ep = tp ? tp->enums : NULL;
-	      struct enum_list *ep = tp ? tp->enums : NULL;
+	      ep = tp ? tp->enums : NULL;
 	      while (ep)
 		if (strcmp(ep->label, cp)) ep = ep->next;
 		else break;
