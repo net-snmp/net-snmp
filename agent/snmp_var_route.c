@@ -131,8 +131,8 @@ struct sockaddr_in klgetsatmp;
 struct sockaddr_in *
 klgetsa(struct sockaddr_in *dst)
 {
-    klookup(dst, &klgetstamp, sizeof klgetsatmp);
-    return(&ksgetsatmp);    
+    klookup(dst, &klgetsatmp, sizeof klgetsatmp);
+    return(&klgetsatmp);    
 }
 #endif
 
