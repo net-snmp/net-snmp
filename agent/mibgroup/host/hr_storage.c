@@ -468,16 +468,23 @@ var_hrstore(struct variable *vp,
             return NULL;
     } else {
 
-        store_idx =
-            header_hrstoreEntry(vp, name, length, exact, var_len,
-                                write_method);
-        if (store_idx == MATCH_FAILED)
-            return NULL;
+	do {
+	    store_idx =
+		header_hrstoreEntry(vp, name, length, exact, var_len,
+				    write_method);
+	    if (store_idx == MATCH_FAILED)
+		return NULL;
 
-        if (store_idx > HRS_TYPE_FIXED_MAX) {
-            if (HRFS_statfs(HRFS_entry->HRFS_mount, &stat_buf) < 0)
-                return NULL;
-        }
+	    if (store_idx > HRS_TYPE_FIXED_MAX) {
+		if (HRFS_statfs(HRFS_entry->HRFS_mount, &stat_buf) < 0)
+		    snmp_log_perror(HRFS_entry->HRFS_mount);
+		else
+		    break;
+	    }
+	    else
+		break;
+	    
+        } while (1);
 #if !defined(linux) && !defined(solaris2)
         else
             switch (store_idx) {
