@@ -38,6 +38,8 @@ SMUX was implemented by Rohit Dube. He had oodles of help from
 ucd-snmp-coders (Dave, Niels, Wes, Simon, Felix, Leonti) and 
 gated-people (Acee, Feiyi, Larry, Sue). [If I missed somebody, sorry in 
 advance and do let me know].
+Later, Nick Amato re-wrote the entire SMUX package, so the code today
+is mostly his.
 
 [8] How do I find out more about SMUX?
 Read the RFC, the code and get in touch with ucd-snmp-coders@ece.ucdavis.edu
