@@ -4363,16 +4363,6 @@ snmp_translate_obj(var,mode,use_long,auto_init,best_guess)
            int status = FAILURE;
            int verbose = SvIV(perl_get_sv("SNMP::verbose", 0x01 | 0x04));
 
-           if (Mib == NULL && auto_init) {
-              if (verbose) warn("snmp_translate_obj:initializing MIB\n");
-                 init_mib();
-              if (Mib) {
-                 if (verbose) warn("snmp_translate_obj:done\n");
-              } else {
-                 if (verbose) warn("snmp_translate_obj:failed\n");
-              }
-           }
-
            str_buf[0] = '\0';
   	   switch (mode) {
               case SNMP_XLATE_MODE_TAG2OID:
