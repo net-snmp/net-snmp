@@ -6,6 +6,8 @@
 #include <config.h>
 #if HAVE_STRING_H
 #include <string.h>
+#else
+#include <strings.h>
 #endif
 #if HAVE_STDLIB_H
 #include <stdlib.h>
@@ -32,7 +34,9 @@
 #if HAVE_NETINET_IN_H
 #include <netinet/in.h>
 #endif
+#if HAVE_NET_IF_H
 #include <net/if.h>
+#endif
 #if HAVE_NET_IF_VAR_H
 #include <net/if_var.h>
 #endif
@@ -65,6 +69,9 @@
 #include "kernel_sunos5.h"
 #endif
 
+#if HAVE_WINSOCK_H
+#include <winsock.h>
+#endif
 #if HAVE_DMALLOC_H
 #include <dmalloc.h>
 #endif
@@ -89,12 +96,14 @@
 	 *********************/
 
 
+#ifndef WIN32
 #ifndef solaris2
 static void ARP_Scan_Init (void);
 #ifdef ARP_SCAN_FOUR_ARGUMENTS
 static int ARP_Scan_Next (u_long *, char *, u_long *, u_short *);
 #else
 static int ARP_Scan_Next (u_long *, char *, u_long *);
+#endif
 #endif
 #endif
 
@@ -124,6 +133,7 @@ void init_at(void)
 }
 
 
+#ifndef WIN32
 #ifndef solaris2
 
 /*
@@ -162,7 +172,7 @@ var_atEntry(struct variable *vp,
     oid			    lowest[16];
     oid			    current[16];
     static char		    PhysAddr[6], LowPhysAddr[6];
-    u_long		    Addr, LowAddr;
+    u_long		    Addr, LowAddr, foundone;
 #ifdef ARP_SCAN_FOUR_ARGUMENTS
     u_short		    ifIndex, lowIfIndex = 0;
 #endif/* ARP_SCAN_FOUR_ARGUMENTS */
@@ -180,7 +190,8 @@ var_atEntry(struct variable *vp,
 	oid_length = 15;
     }
 
-    LowAddr = -1;      /* Don't have one yet */
+    LowAddr = 0;      /* Don't have one yet */
+    foundone = 0;
     ARP_Scan_Init();
     for (;;) {
 #ifdef ARP_SCAN_FOUR_ARGUMENTS
@@ -218,6 +229,7 @@ var_atEntry(struct variable *vp,
 	    if (snmp_oid_compare(current, oid_length, name, *length) == 0){
 		memcpy( (char *)lowest,(char *)current, oid_length * sizeof(oid));
 		LowAddr = Addr;
+                foundone = 1;
 #ifdef ARP_SCAN_FOUR_ARGUMENTS
 		lowIfIndex = ifIndex;
 #endif /*  ARP_SCAN_FOUR_ARGUMENTS */
@@ -227,13 +239,14 @@ var_atEntry(struct variable *vp,
 	    }
 	} else {
 	    if ((snmp_oid_compare(current, oid_length, name, *length) > 0) &&
-		 ((LowAddr == -1) || (snmp_oid_compare(current, oid_length, lowest, oid_length) < 0))){
+		 ((foundone == 0) || (snmp_oid_compare(current, oid_length, lowest, oid_length) < 0))){
 		/*
 		 * if new one is greater than input and closer to input than
 		 * previous lowest, save this one as the "next" one.
 		 */
 		memcpy( (char *)lowest,(char *)current, oid_length * sizeof(oid));
 		LowAddr = Addr;
+                foundone = 1;
 #ifdef ARP_SCAN_FOUR_ARGUMENTS
 		lowIfIndex = ifIndex;
 #endif /*  ARP_SCAN_FOUR_ARGUMENTS */
@@ -242,7 +255,7 @@ var_atEntry(struct variable *vp,
 	    }
 	}
     }
-    if (LowAddr == -1)
+    if (foundone == 0)
 	return(NULL);
 
     memcpy( (char *)name,(char *)lowest, oid_length * sizeof(oid));
@@ -415,11 +428,11 @@ var_atEntry(struct variable *vp,
 
 #ifndef solaris2
 
+static int arptab_size, arptab_current;
 #if CAN_USE_SYSCTL
 static char *lim, *rtnext;
 static char *at = 0;
 #else
-static int arptab_size, arptab_current;
 #ifdef STRUCT_ARPHD_HAS_AT_NEXT
 static struct arphd *at=0;
 static struct arptab *at_ptr, at_entry;
@@ -606,3 +619,123 @@ static int ARP_Scan_Next(u_long *IPAddr, char *PhysAddr, u_long *ifType)
 #endif /* !CAN_USE_SYSCTL */
 }
 #endif /* solaris2 */
+#else /* WIN32 */
+#include <iphlpapi.h>
+u_char *
+var_atEntry(struct variable *vp,
+            oid *name,
+            size_t *length,
+            int exact,
+            size_t *var_len,
+            WriteMethod **write_method)
+{
+    /*
+     * Address Translation table object identifier is of form:
+     * 1.3.6.1.2.1.3.1.1.1.interface.1.A.B.C.D,  where A.B.C.D is IP address.
+     * Interface is at offset 10,
+     * IPADDR starts at offset 12.
+     *
+     * IP Net to Media table object identifier is of form:
+     * 1.3.6.1.2.1.4.22.1.1.1.interface.A.B.C.D,  where A.B.C.D is IP address.
+     * Interface is at offset 10,
+     * IPADDR starts at offset 11.
+     */
+    u_char                    *cp;
+    oid                            *op;
+    oid                            lowest[16];
+    oid                            current[16];
+    int         oid_length;
+    int         lowState = -1; /* Don't have one yet */
+    PMIB_IPNETTABLE pIpNetTable = NULL;
+    DWORD status = NO_ERROR;
+    DWORD dwActualSize = 0;
+    UINT i;
+
+    /* fill in object part of name for current (less sizeof instance part) */
+    memcpy((char *)current, (char *)vp->name, (int)vp->namelen * sizeof(oid));
+
+    if (current[6] == 3 ) {        /* AT group oid */
+       oid_length = 16;
+    }
+    else {                        /* IP NetToMedia group oid */
+       oid_length = 15;
+    }
+    
+    status = GetIpNetTable(pIpNetTable, &dwActualSize, TRUE);
+    if (status == ERROR_INSUFFICIENT_BUFFER)
+    {
+        pIpNetTable = (PMIB_IPNETTABLE) malloc(dwActualSize);
+        if(pIpNetTable != NULL){  
+            /* Get the sorted IpNet Table */
+            status = GetIpNetTable(pIpNetTable, &dwActualSize, TRUE);
+        }
+    }
+    if (current[6] == 3 ) {        /* AT group oid */
+        current[11] = 1;
+        op = current + 12;
+    }
+    else {                        /* IP NetToMedia group oid */
+        op = current + 11;
+    }
+
+    if(status == NO_ERROR)
+    {
+        for (i = 0; i < pIpNetTable->dwNumEntries; ++i)
+        {
+            current[10] =  pIpNetTable->table[i].dwIndex;
+            
+            cp = (u_char *)&pIpNetTable->table[i].dwAddr;
+            *op++ = *cp++;
+            *op++ = *cp++;
+            *op++ = *cp++;
+            *op++ = *cp++;
+
+            if (exact){
+                if (snmp_oid_compare(current, oid_length, name, *length) == 0){
+                    memcpy( (char *)lowest,(char *)current, oid_length * sizeof(oid));
+                    lowState = 0;
+                    break;        /* no need to search further */
+                }
+            } else {
+                if (snmp_oid_compare(current, oid_length, name, *length) > 0){
+                    memcpy( (char *)lowest,(char *)current, oid_length * sizeof(oid));
+                    lowState = 0;
+                    break; /* As the table is sorted, no need to search further */
+                }
+            }
+        }
+    }
+    if (lowState < 0){
+        free(pIpNetTable);
+        return(NULL);
+    }
+    memcpy( (char *)name,(char *)lowest, oid_length * sizeof(oid));
+    *length = oid_length;
+    *write_method = 0;
+    switch(vp->magic){
+        case IPMEDIAIFINDEX:                        /* also ATIFINDEX */
+            *var_len = sizeof long_return;
+            long_return = pIpNetTable->table[i].dwIndex;
+            free(pIpNetTable);
+            return (u_char *)&long_return;
+        case IPMEDIAPHYSADDRESS:                /* also ATPHYSADDRESS */
+            *var_len = pIpNetTable->table[i].dwPhysAddrLen;
+            memcpy(return_buf, pIpNetTable->table[i].bPhysAddr, *var_len);
+            free(pIpNetTable);
+            return (u_char *)return_buf;
+        case IPMEDIANETADDRESS:                        /* also ATNETADDRESS */
+            *var_len = sizeof long_return;
+            long_return = pIpNetTable->table[i].dwAddr;
+            free(pIpNetTable);
+            return (u_char *)&long_return;
+        case IPMEDIATYPE:
+            *var_len = sizeof long_return;
+            long_return = pIpNetTable->table[i].dwType;
+            free(pIpNetTable);
+            return (u_char *)&long_return;
+        default:
+            DEBUGMSGTL(("snmpd", "unknown sub-id %d in var_atEntry\n", vp->magic));
+   }
+   return NULL;
+}
+#endif

@@ -92,9 +92,9 @@ oid  egp_xxx_oid[] =		{ SNMPV2_TRAPS_PREFIX, 99 };	/* ??? */
 oid  snmptrap_oid[] 	      =	{ SNMPV2_TRAP_OBJS_PREFIX, 1, 0 };
 oid  snmptrapenterprise_oid[] =	{ SNMPV2_TRAP_OBJS_PREFIX, 3, 0 };
 oid  sysuptime_oid[] 	      =	{ SNMP_OID_MIB2,1,3,0 };
-int  snmptrap_oid_len 	      =	OID_LENGTH(snmptrap_oid);
-int  snmptrapenterprise_oid_len = OID_LENGTH(snmptrapenterprise_oid);
-int  sysuptime_oid_len 	      =	OID_LENGTH(sysuptime_oid);
+size_t  snmptrap_oid_len 	      =	OID_LENGTH(snmptrap_oid);
+size_t  snmptrapenterprise_oid_len = OID_LENGTH(snmptrapenterprise_oid);
+size_t  sysuptime_oid_len 	      =	OID_LENGTH(sysuptime_oid);
 
 
 #define SNMP_AUTHENTICATED_TRAPS_ENABLED	1
@@ -698,12 +698,16 @@ snmpd_parse_config_trapsess(const char *word, char *cptr) {
     }
 
     arg = snmp_parse_args(argn, argv, &session, "C:", trapOptProc);
+#ifdef XXX_BROKEN /* parse_args doesn't clone memory like it should */
     do { free(argv[--argn]); } while (argn > 0);
+#endif
 
+    if (session.remote_port == SNMP_DEFAULT_REMPORT)
+        session.remote_port = SNMP_TRAP_PORT;
     ss = snmp_open (&session);
 
     if (!ss) {
-        config_perror("snmpd: failed to parse this line");
+        config_perror("snmpd: failed to parse this line or the remote trap receiver is down.  Pausible cause:");
         snmp_sess_perror("snmpd: snmpd_parse_config_trapsess()", &session);
         return;
     }

@@ -21,7 +21,11 @@
 #include <sys/param.h>
 #include "sys/proc.h"
 #endif
+#if HAVE_UTMPX_H
+#include <utmpx.h>
+#else
 #include <utmp.h>
+#endif
 
 #if defined(LINUX) && __GNU_LIBRARY__ < 6
 #include "linux/tasks.h"
@@ -35,7 +39,7 @@
 #define UTMP_FILE _PATH_UTMP
 #endif
 
-#ifdef UTMP_FILE
+#if defined(UTMP_FILE) && !HAVE_UTMPX_H
 void setutent (void);
 void endutent (void);
 struct utmp *getutent (void);
@@ -242,7 +246,14 @@ static int get_load_dev(void)
 static int count_users(void)
 {
      int total=0;
+#if HAVE_UTMPX_H
+#define setutent setutxent
+#define getutent getutxent
+#define entutent entutxent
+     struct utmpx *utmp_p;
+#else
      struct utmp *utmp_p;
+#endif
 
      setutent();
      while ( (utmp_p = getutent()) != NULL ) {
@@ -255,7 +266,7 @@ static int count_users(void)
      return total;
 }
 
-#ifdef UTMP_FILE
+#if defined(UTMP_FILE) && !HAVE_UTMPX_H
 
 static FILE *utmp_file;
 static struct utmp utmp_rec;

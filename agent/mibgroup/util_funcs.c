@@ -67,6 +67,9 @@
 #if HAVE_WINSOCK_H
 #include <winsock.h>
 #endif
+#if HAVE_NETINET_IN_H
+#include <netinet/in.h>
+#endif
 #if HAVE_BASETSD_H
 #include <basetsd.h>
 #define ssize_t SSIZE_T
@@ -77,7 +80,7 @@
 #include "mibincl.h"
 #include "struct.h"
 #include "util_funcs.h"
-#include "../../snmplib/system.h"
+#include "system.h"
 #if HAVE_LIMITS_H
 #include "limits.h"
 #endif
@@ -101,13 +104,40 @@ Exit(int var)
   exit(var);
 }
 
+static const char *
+make_tempfile(void)
+{
+  static char	name[32];
+  int		fd = -1;
+
+  strcpy(name, "/tmp/snmpdXXXXXX");
+#ifdef HAVE_MKSTEMP
+  fd = mkstemp(name);
+#else
+  if (mktemp(name))
+    fd = open(name, O_CREAT|O_EXCL|O_WRONLY);
+#endif
+  if (fd >= 0) {
+    close(fd);
+    return name;
+  }
+  return NULL;
+}
+
 int shell_command(struct extensible *ex)
 {
 #if HAVE_SYSTEM
-  const char *ofname = "/tmp/shoutput";
+  const char *ofname;
   char shellline[STRMAX];
   FILE *shellout;
   
+  ofname = make_tempfile();
+  if (ofname == NULL) {
+    ex->output[0] = 0;
+    ex->result = 127;
+    return ex->result;
+  }
+
   sprintf(shellline,"%s > %s",ex->command, ofname);
   ex->result = system(shellline);
   ex->result = WEXITSTATUS(ex->result);
@@ -213,14 +243,17 @@ int get_exec_output(struct extensible *ex)
         close(0);
         (void) open("/dev/null", O_RDWR);
 
-        for(cnt=1,cptr1 = ex->command, cptr2 = argvs; *cptr1 != 0;
+        for(cnt=1,cptr1 = ex->command, cptr2 = argvs; cptr1 && *cptr1 != 0;
             cptr2++, cptr1++) {
           *cptr2 = *cptr1;
           if (*cptr1 == ' ') {
             *(cptr2++) = 0;
-            cptr1 = skip_white(cptr1);
-            *cptr2 = *cptr1;
-            if (*cptr1 != 0) cnt++;
+            if ((cptr1 = skip_white(cptr1)) == NULL)
+                break;
+            if (cptr1) {
+                *cptr2 = *cptr1;
+                if (*cptr1 != 0) cnt++;
+            }
           }
         }
         *cptr2 = 0;
@@ -257,7 +290,7 @@ int get_exec_output(struct extensible *ex)
         unlink(cachefile);
 	/* XXX  Use SNMP_FILEMODE_CLOSED instead of 644? */
         if ((cfd = open(cachefile,O_WRONLY|O_TRUNC|O_CREAT,0644)) < 0) {
-          setPerrorstatus("open");
+          setPerrorstatus(cachefile);
           cachetime = 0;
           return 0;
         }
@@ -305,7 +338,7 @@ int get_exec_output(struct extensible *ex)
       ex->result = lastresult;
   }
   if ((cfd = open(cachefile,O_RDONLY)) < 0) {
-    setPerrorstatus("open");
+    setPerrorstatus(cachefile);
     return 0;
   }
   return(cfd);
@@ -336,13 +369,13 @@ int get_exec_pipes(char *cmd,
       close(0);
       if (dup(fd[0][0]) != 0)
         {
-          setPerrorstatus("dup");
+          setPerrorstatus("dup 0");
           return 0;
         }
       close(1);
       if (dup(fd[1][1]) != 1)
         {
-          setPerrorstatus("dup");
+          setPerrorstatus("dup 1");
           return 0;
         }
 
@@ -357,7 +390,8 @@ int get_exec_pipes(char *cmd,
         *cptr2 = *cptr1;
         if (*cptr1 == ' ') {
           *(cptr2++) = 0;
-          cptr1 = skip_white(cptr1);
+          if ((cptr1 = skip_white(cptr1)) == NULL)
+              break;
           *cptr2 = *cptr1;
           if (*cptr1 != 0) cnt++;
         }
@@ -378,7 +412,7 @@ int get_exec_pipes(char *cmd,
       *(aptr++) = NULL;
       copy_nword(cmd, ctmp, sizeof(ctmp));
       execv(ctmp,argv);
-      perror("execv");
+      perror(ctmp);
       exit(1);
     }
   else
@@ -436,7 +470,7 @@ RETSIGTYPE restart_doit(int a)
   /* do the exec */
 #if HAVE_EXECV
   execv(argvrestartname,argvrestartp);
-  setPerrorstatus("execv");
+  setPerrorstatus(argvrestartname);
 #endif
 }
 

@@ -322,19 +322,20 @@ getstats(void)
 
   now = time(NULL);
   if (cache_time + CACHE_TIMEOUT > now) {
-    return 1;
+    return 0;
   }
-  stat=NULL;
-  if (stat==NULL){free(stat);}
-  stat=(struct statinfo*)malloc(sizeof(struct statinfo));
-  stat->dinfo=(struct devinfo*)malloc(sizeof(struct devinfo));
-  bzero(stat->dinfo, sizeof(struct devinfo));
+  if (stat == NULL) {
+    stat = (struct statinfo*)malloc(sizeof(struct statinfo));
+    stat->dinfo = (struct devinfo*)malloc(sizeof(struct devinfo));
+  }
+  memset(stat->dinfo, 0, sizeof(struct devinfo));
 
-  if ((getdevs(stat))==-1){
+  if ((getdevs(stat)) == -1){
 	fprintf (stderr,"Can't get devices:%s\n", devstat_errbuf);
   	return 1;
   }
   ndisk=stat->dinfo->numdevs;
+  cache_time = now;
   return 0;
 }
 
@@ -390,4 +391,3 @@ var_diskio(struct variable * vp,
   return NULL;
 }
 #endif /* freebsd4 */
-

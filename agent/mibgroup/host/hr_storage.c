@@ -25,6 +25,9 @@
 #endif
 #if HAVE_SYS_VM_H
 #include <sys/vm.h>
+#if (!defined(KERNEL) || defined(MACH_USER_API)) && defined(HAVE_SYS_VMMETER_H) /*OS X does not #include <sys/vmmeter.h> if (defined(KERNEL) && !defined(MACH_USER_API))*/
+#include <sys/vmmeter.h>
+#endif
 #else
 #if HAVE_VM_VM_H
 #include <vm/vm.h>

@@ -1,7 +1,7 @@
       Frequently Asked Questions (FAQ) for the UCD/Net SNMP package
       =============================================================
 		       FAQ Author: Dave Shield
-		        ucd-snmp Version: 4.2.1
+		        ucd-snmp Version: 4.2.2
 		ucd-snmp Project Author: Wes Hardaker
 		Email: net-snmp-coders@lists.sourceforge.net
 
@@ -139,22 +139,24 @@ What is it?
 Where can I get it?
 ------------------
 
-WWW:
   Download:
-    - http://www.net-snmp.org/download
+    - http://www.net-snmp.org/download/
+    - ftp://ftp.net-snmp.org/pub/sourceforge/net-snmp/ucd-snmp.tar.gz
   Web page:
     - http://www.net-snmp.org/
   Sourceforge Project page:
-    - http://www.net-snmp.org/project
+    - http://www.net-snmp.org/project/
+  Mirrors:
+    - Bulgaria:  http://rtfm.uni-svishtov.bg/net-snmp/
+    - Japan:     ftp://ftp.ayamura.org/pub/net-snmp/
 
-FTP:
-  - ftp://ftp.net-snmp.org/pub/sourceforge/net-snmp/ucd-snmp.tar.gz
-  - ftp://ucd-snmp.ucdavis.edu/ucd-snmp.tar.gz
-  - ftp://sunsite.cnlab-switch.ch:/mirror/ucd-snmp/ucd-snmp.tar.gz
-  - ftp://ftp.win.ne.jp/pub/network/snmp/ucd-snmp/ucd-snmp.tar.gz
-  - ftp://ftp.chg.ru/pub/networking/management/snmp/ucd-snmp/ucd-snmp.tar.gz
-  - ftp://mirror.aarnet.edu.au/pub/ucd-snmp/ucd-snmp.tar.gz
-  - ftp://archive.logicnet.ro/mirrors/ucd-snmp.ucdavis.edu/
+  Mirrors of the older ucd-snmp.ucdavis.edu site:
+    - ftp://ucd-snmp.ucdavis.edu/ucd-snmp.tar.gz
+    - ftp://sunsite.cnlab-switch.ch:/mirror/ucd-snmp/ucd-snmp.tar.gz
+    - ftp://ftp.win.ne.jp/pub/network/snmp/ucd-snmp/ucd-snmp.tar.gz
+    - ftp://ftp.chg.ru/pub/networking/management/snmp/ucd-snmp/ucd-snmp.tar.gz
+    - ftp://mirror.aarnet.edu.au/pub/ucd-snmp/ucd-snmp.tar.gz
+    - ftp://archive.logicnet.ro/mirrors/ucd-snmp.ucdavis.edu/
 
 
 What documentation is available?
@@ -820,8 +822,8 @@ How do I send traps and notifications?
   The following examples generate the generic trap 'coldStart' and a
   (dummy) enterprise specific trap '99' respectively:
 
-	snmptrap -v 1 localhost public "" "" 0 0  ""
-	snmptrap -v 1 localhost public "" "" 6 99 ""
+	snmptrap -v 1 -c public localhost "" "" 0 0  ""
+	snmptrap -v 1 -c public localhost "" "" 6 99 ""
   
   The empty parameters "" will use suitable defaults for the relevant 
   values (enterprise OID, address of sender and current sysuptime).
@@ -829,15 +831,15 @@ How do I send traps and notifications?
     An SNMPv2 or SNMPv3 notification (either trap or inform) takes
   the OID of the trap to send:
 
-	snmptrap -v 2c localhost public "" UCD-SNMP-MIB::ucdStart
-	snmptrap -v 2c localhost public "" .1.3.6.1.4.1.2021.251.1
+	snmptrap -v 2c -c public localhost "" UCD-SNMP-MIB::ucdStart
+	snmptrap -v 2c -c public localhost "" .1.3.6.1.4.1.2021.251.1
 
   (These two are equivalent ways of specifying the same trap).
 
   Any of these commands can be followed by one or more varbinds,
   using the same (OID/type/value) syntax as for 'snmpset':
 
-	snmptrap -v 2c localhost public "" ucdStart sysContact.0 s "Dave"
+	snmptrap -v 2c -c public localhost "" ucdStart sysContact.0 s "Dave"
 
   Generating traps from within the agent is covered in the AGENT and
   CODING sections.
@@ -1472,13 +1474,20 @@ What's the difference between AgentX, SMUX and proxied SNMP?
   within another application.
     See the file 'README.agentx' for details.
 
-  Note that support for the SMUX and AgentX extension mechanisms are
-  not configured in by default.  You will need to run configure with
-  the option
+  Note that support for SMUX is not configured in by default.  You will
+  need to run configure with the option
 
-		--with-mib-modules=agentx,smux
+		--with-mib-modules=smux
 
-  (or whichever of these you wish to support).
+  Starting from release 4.2.1, AgentX support is now included by default,
+  but needs to be explicitly activated in the master agent.  Do this by
+  adding the line
+
+		master agentx
+
+  to the snmpd.conf file before starting the agent.  Note that AgentX
+  support is still experimental, and should not be used on production
+  systems.  See README.agentx for details.
 
 
 

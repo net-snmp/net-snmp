@@ -23,7 +23,11 @@
 #include <sys/sysctl.h>
 #include <sys/vmmeter.h>
  
+#if HAVE_SYS_VMPARAM_H
+#include <sys/vmparam.h>
+#else
 #include <vm/vm_param.h>
+#endif
  
 #include <time.h>
 #include <nlist.h>
@@ -46,6 +50,7 @@
 #include "auto_nlist.h"
 
 #include "memory.h"
+#include "memory_freebsd2.h"
 
 /* nlist symbols */
 #define SUM_SYMBOL      "cnt"
@@ -63,6 +68,8 @@ long minimumswap;
 quad_t swapTotal;
 quad_t swapUsed;
 quad_t swapFree;
+
+static FindVarMethod var_extensible_mem;
 
 void init_memory_freebsd2(void) 
 {
@@ -210,7 +217,7 @@ void swapmode(void)
   
 */
 
-unsigned char *var_extensible_mem(struct variable *vp,
+static unsigned char *var_extensible_mem(struct variable *vp,
 				  oid *name,
 				  size_t *length,
 				  int exact,
@@ -308,7 +315,11 @@ unsigned char *var_extensible_mem(struct variable *vp,
 #endif
 #ifndef openbsd2
     case MEMCACHED:
+#ifdef darwin
+	long_ret = ptok(mem.v_lookups);
+#else
 	long_ret = ptok(mem.v_cache_count);
+#endif
 	return((u_char *) (&long_ret));
 #endif
     case ERRORFLAG:
