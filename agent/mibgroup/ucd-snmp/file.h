@@ -13,7 +13,6 @@ void file_parse_config __P((char *, char *));
 config_parse_dot_conf("file", file_parse_config, file_free_config);
 
 #include "mibdefs.h"
-#include "../humlan.h"
 
 struct filestat
 {
@@ -22,7 +21,7 @@ struct filestat
     int max;
 };
 
-#define FILE_ERROR_MSG  "%s: size exceeds %d (%d)"
+#define FILE_ERROR_MSG  "%s: size exceeds %dkb (= %dkb)"
 
 #define FILE_INDEX      1
 #define FILE_NAME       2
