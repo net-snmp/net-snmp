@@ -62,6 +62,11 @@ int ${context}_index_to_oid(netsnmp_index *oid_idx,
 int ${context}_index_from_oid(netsnmp_index *oid_idx,
                               ${context}_mib_index *mib_idx);
 
+/*
+ * access to certain internals. use with caution!
+ */
+void ${context}_valid_columns_set(netsnmp_column_info *vc);
+
 @end@ # for each
 @eval $m2c_save = "$name"@
 @eval $name = "${name}_INTERFACE"@
@@ -321,6 +326,12 @@ _${context}_initialize_interface(${context}_registration_ptr reg_ptr,  u_long fl
      * register table
      */
     netsnmp_register_table(reginfo, tbl_info);
+}
+
+void
+${context}_valid_columns_set(netsnmp_column_info *vc)
+{
+    ifTable_if_ctx.tbl_info.valid_columns = vc;
 }
 
 @include generic-table-indexes-to-oid.m2i@
