@@ -99,7 +99,9 @@ PERFORMANCE OF THIS SOFTWARE.
 #define rt_hash rt_pad1
 #endif
 #ifndef STRUCT_RTENTRY_HAS_RT_REFCNT
+#ifndef hpux10
 #define rt_refcnt rt_pad2
+#endif
 #endif
 #ifndef STRUCT_RTENTRY_HAS_RT_USE
 #define rt_use rt_pad3
