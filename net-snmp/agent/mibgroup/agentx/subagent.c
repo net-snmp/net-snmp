@@ -406,6 +406,7 @@ handle_subagent_set_response(int op, struct snmp_session *session, int reqid,
 
     DEBUGMSGTL(("agentx/subagent",
                 "handling agentx subagent set response....\n"));
+    pdu = snmp_clone_pdu(pdu);
 
     asi = (struct agent_set_info *) magic;
     retsess = asi->sess;
@@ -415,7 +416,9 @@ handle_subagent_set_response(int op, struct snmp_session *session, int reqid,
         pdu->command == SNMP_MSG_INTERNAL_SET_UNDO ||
         pdu->command == SNMP_MSG_INTERNAL_SET_COMMIT)
         free_set_vars(retsess, pdu);
-    
+    if (pdu->command != SNMP_MSG_INTERNAL_SET_RESERVE1)
+        pdu->variables = NULL; /* the variables were added by us */
+
     pdu->command = AGENTX_MSG_RESPONSE;
     pdu->version = retsess->version;
     
