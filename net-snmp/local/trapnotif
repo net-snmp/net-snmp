@@ -34,6 +34,9 @@ if [ $HOSTEXIT = 0 ]; then
   exit 0
 fi
 
+# Log event
+echo "`date`\t$1|$2|$3|$4" >> /1/OV/log/trapnotif.log
+
 # function declairations
 
 total_log()
@@ -151,9 +154,6 @@ else
   
 fi
 
-# Log event
-
-echo "`date`\t$1|$2|$3|$4" >> /1/OV/log/trapnotif.log
 
 #
 # Generate a mail message to 'prog'
