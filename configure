@@ -55,7 +55,7 @@ ac_help="$ac_help
                                   (in a legal way)"
 ac_help="$ac_help
   --with-mibdirs=\"dir1:dir2:\"     Default directories to look for mibs.
-                                    (Default: DATADIR/snmp/mibs)"
+                                    (Default: $HOME/.snmp/mibs:DATADIR/snmp/mibs)"
 ac_help="$ac_help
   --with-mibs=\"item1:item2:\"      Default mib IDs to read.
                                     (The default list is \"IP-MIB:IF-MIB:
@@ -1946,7 +1946,7 @@ EOF
 
 if test "x$DEFAULT_MIBDIRS" = "x"; then
   cat >> confdefs.h <<EOF
-#define DEFAULT_MIBDIRS "$SNMPSHAREPATH/mibs"
+#define DEFAULT_MIBDIRS "\$HOME/.snmp/mibs:$SNMPSHAREPATH/mibs"
 EOF
 
 fi
