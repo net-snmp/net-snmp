@@ -89,8 +89,18 @@ request the application to dump all SNMP packets send and received
 request debugging output.  The optional comma separated TOKENs list
 specifies what type of debugging information you which to view.  Only
 debugging information about those TOKEN types will be shown to you.
+Only the beginning of the token needs to match.  In other words,
+specifying 
+.B -DmibII
+will print debugging output for debugging symbols
+.I mibII
+as well as 
+.I mibII/system.
+.IP
 The special keyword "all" will display all debugging
 output. Specifying no TOKENs is the same as specifying "all".
+.IP
+The special keyword "trace" will display source code tracing output.
 .IP "-r retries"
 specifies the number of retries to be used in the requests. The default
 is 5
