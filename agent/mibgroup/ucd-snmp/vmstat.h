@@ -22,5 +22,9 @@ extern FindVarMethod var_extensible_vmstat;
 #define CPUSYSTEM 10
 #define CPUIDLE 11
 #define CPUERROR 16
+#define CPURAWUSER 50
+#define CPURAWNICE 51
+#define CPURAWSYSTEM 52
+#define CPURAWIDLE 53
 
 #endif /* _MIBGROUP_VMSTAT_H */

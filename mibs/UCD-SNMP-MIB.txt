@@ -984,6 +984,38 @@ ssCpuIdle OBJECT-TYPE
 	"percentages of idle CPU time."
     ::= { systemStats 11 }
 
+ssCpuRawUser OBJECT-TYPE
+    SYNTAX      Integer32
+    MAX-ACCESS  read-only
+    STATUS      current
+    DESCRIPTION
+        "user CPU time."
+    ::= { systemStats 50 }
+
+ssCpuRawNice OBJECT-TYPE
+    SYNTAX      Integer32
+    MAX-ACCESS  read-only
+    STATUS      current
+    DESCRIPTION
+        "nice CPU time."
+    ::= { systemStats 51 }
+
+ssCpuRawSystem OBJECT-TYPE
+    SYNTAX      Integer32
+    MAX-ACCESS  read-only
+    STATUS      current
+    DESCRIPTION
+        "system CPU time."
+    ::= { systemStats 52 }
+
+ssCpuRawIdle OBJECT-TYPE
+    SYNTAX      Integer32
+    MAX-ACCESS  read-only
+    STATUS      current
+    DESCRIPTION
+        "idle CPU time."
+    ::= { systemStats 53 }
+
 -- possibly used in the future:
 --
 -- ssErrorFlag OBJECT-TYPE
