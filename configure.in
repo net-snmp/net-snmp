@@ -87,10 +87,13 @@ AC_ARG_ENABLE(agent,
 if test "x$enable_agent" != "xno"; then
    MAINSUBS="$MAINSUBS agent"
    TRAPLIBS='$(TRAPDWITHAGENT)'
+   USETRAPLIBS='$(USEAGENTLIBS)'
 else
    TRAPLIBS='$(TRAPDWITHOUTAGENT)'
+   USETRAPLIBS='$(USELIBS)'
 fi
 AC_SUBST(TRAPLIBS)
+AC_SUBST(USETRAPLIBS)
 
 AC_ARG_ENABLE(applications,
 [  --disable-applications          Do not build the apps (snmpget, ...).])
