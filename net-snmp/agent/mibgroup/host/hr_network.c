@@ -38,16 +38,16 @@ int header_hrnet __P((struct variable *,oid *, int *, int, int *, int (**write) 
 
 void	init_hr_network( )
 {
-    init_device[ HRDEV_NETWORK ] = &Init_HR_Network;	
-    next_device[ HRDEV_NETWORK ] = &Get_Next_HR_Network;
-    save_device[ HRDEV_NETWORK ] = &Save_HR_Network_Info;	
+    init_device[ HRDEV_NETWORK ] = Init_HR_Network;	
+    next_device[ HRDEV_NETWORK ] = Get_Next_HR_Network;
+    save_device[ HRDEV_NETWORK ] = Save_HR_Network_Info;	
 #ifdef HRN_MONOTONICALLY_INCREASING
     dev_idx_inc[ HRDEV_NETWORK ] = 1;
 #endif
 
-    device_descr[ HRDEV_NETWORK ] = &describe_networkIF;
-    device_status[ HRDEV_NETWORK ] = &network_status;
-    device_errors[ HRDEV_NETWORK ] = &network_errors;
+    device_descr[ HRDEV_NETWORK ] = describe_networkIF;
+    device_status[ HRDEV_NETWORK ] = network_status;
+    device_errors[ HRDEV_NETWORK ] = network_errors;
 }
 
 #define MATCH_FAILED	-1
@@ -160,7 +160,6 @@ var_hrnet(vp, name, length, exact, var_len, write_method)
 static short		HRN_index;
 static char		HRN_name[16];
 static struct ifnet	HRN_ifnet;
-static struct in_ifaddr	HRN_ifaddr;	/* Not used */
 
 static char		HRN_savedName[16];
 static u_short		HRN_savedFlags;;
@@ -179,7 +178,7 @@ int
 Get_Next_HR_Network __P((void))
 {
 #ifndef solaris2
-    if (Interface_Scan_Next( &HRN_index, HRN_name, &HRN_ifnet, &HRN_ifaddr))
+    if (Interface_Scan_Next( &HRN_index, HRN_name, &HRN_ifnet, NULL))
         return ( HRDEV_NETWORK << HRDEV_TYPE_SHIFT ) + HRN_index;
     else
 #endif

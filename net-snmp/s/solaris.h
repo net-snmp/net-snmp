@@ -1,4 +1,4 @@
-#include "generic.h"
+#include "sysv.h"
 
 #undef bsdlike
 #undef IP_FORWARDING_SYMBOL

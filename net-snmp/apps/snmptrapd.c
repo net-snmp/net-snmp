@@ -737,9 +737,6 @@ main(argc, argv)
     ss = snmp_open(&session);
     if (ss == NULL){
         snmp_perror("snmptrapd");
-	if (Print) {
-	    fprintf(stderr,"couldn't open snmp - %s\n",strerror(errno));
-	}
         if (Syslog) {
 	    syslog(LOG_ERR,"couldn't open snmp - %m");
 	}

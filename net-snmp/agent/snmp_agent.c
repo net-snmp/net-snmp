@@ -56,7 +56,7 @@ SOFTWARE.
 #include "context.h"
 #include "mib.h"
 #include "snmp_vars.h"
-#if USING_MIBII_SNMP_MODULE
+#if USING_MIBII_SNMP_MIB_MODULE
 #include "mibgroup/snmp_mib.h"
 #endif
 #include "snmpd.h"
@@ -148,7 +148,7 @@ snmp_agent_parse(data, length, out_data, out_length, sourceip)
 				  pi->context, &pi->contextLength,
 				  FIRST_PASS);
     } else {
-#ifdef USING_MIBII_SNMP_MODULE       
+#ifdef USING_MIBII_SNMP_MIB_MODULE       
         snmp_inbadversions++;
 #endif
         ERROR_MSG("unknown auth header type");
@@ -157,7 +157,7 @@ snmp_agent_parse(data, length, out_data, out_length, sourceip)
 
     if (data == NULL){
 	ERROR_MSG("bad authentication");
-#ifdef USING_MIBII_SNMP_MODULE       
+#ifdef USING_MIBII_SNMP_MIB_MODULE       
 	snmp_inasnparseerrors++;
 #endif
 	return 0;
@@ -171,38 +171,38 @@ snmp_agent_parse(data, length, out_data, out_length, sourceip)
 
     switch (pi->pdutype) {
     case SNMP_MSG_GET:
-#ifdef USING_MIBII_SNMP_MODULE       
+#ifdef USING_MIBII_SNMP_MIB_MODULE       
 	snmp_ingetrequests++;
 #endif
 	break;
     case SNMP_MSG_GETBULK:
-#ifdef USING_MIBII_SNMP_MODULE       
+#ifdef USING_MIBII_SNMP_MIB_MODULE       
 	snmp_ingetrequests++;
 #endif
 	break;
     case SNMP_MSG_GETNEXT:
-#ifdef USING_MIBII_SNMP_MODULE       
+#ifdef USING_MIBII_SNMP_MIB_MODULE       
 	snmp_ingetnexts++;
 #endif
 	break;
     case SNMP_MSG_SET:
-#ifdef USING_MIBII_SNMP_MODULE       
+#ifdef USING_MIBII_SNMP_MIB_MODULE       
 	snmp_insetrequests++;
 #endif
 	break;
     case SNMP_MSG_RESPONSE:
-#ifdef USING_MIBII_SNMP_MODULE       
+#ifdef USING_MIBII_SNMP_MIB_MODULE       
         snmp_ingetresponses++;
 #endif
 	return 0;
     case SNMP_MSG_TRAP:
     case SNMP_MSG_TRAP2:
-#ifdef USING_MIBII_SNMP_MODULE       
+#ifdef USING_MIBII_SNMP_MIB_MODULE       
         snmp_intraps++;
 #endif
 	return 0;
     default:
-#ifdef USING_MIBII_SNMP_MODULE       
+#ifdef USING_MIBII_SNMP_MIB_MODULE       
         snmp_inasnparseerrors++;
 #endif
 	return 0;
@@ -276,7 +276,7 @@ snmp_agent_parse(data, length, out_data, out_length, sourceip)
     data = asn_parse_int(data, &length, &type, &reqid, sizeof(reqid));
     if (data == NULL){
 	ERROR_MSG("bad parse of reqid");
-#ifdef USING_MIBII_SNMP_MODULE       
+#ifdef USING_MIBII_SNMP_MIB_MODULE       
 	snmp_inasnparseerrors++;
 #endif
 	return 0;
@@ -284,7 +284,7 @@ snmp_agent_parse(data, length, out_data, out_length, sourceip)
     data = asn_parse_int(data, &length, &type, &errstat, sizeof(errstat));
     if (data == NULL){
 	ERROR_MSG("bad parse of errstat");
-#ifdef USING_MIBII_SNMP_MODULE       
+#ifdef USING_MIBII_SNMP_MIB_MODULE       
 	snmp_inasnparseerrors++;
 #endif
 	return 0;
@@ -292,7 +292,7 @@ snmp_agent_parse(data, length, out_data, out_length, sourceip)
     data = asn_parse_int(data, &length, &type, &errindex, sizeof(errindex));
     if (data == NULL){
 	ERROR_MSG("bad parse of errindex");
-#ifdef USING_MIBII_SNMP_MODULE       
+#ifdef USING_MIBII_SNMP_MIB_MODULE       
 	snmp_inasnparseerrors++;
 #endif
 	return 0;
@@ -377,7 +377,7 @@ snmp_agent_parse(data, length, out_data, out_length, sourceip)
               if (errstat == SNMP_ERR_NOERROR) {
                 if (create_identical(startData, out_auth, startLength, 0L, 0L, pi)){
 		  *out_length = pi->packet_end - out_auth;
-#ifdef USING_MIBII_SNMP_MODULE       
+#ifdef USING_MIBII_SNMP_MIB_MODULE       
 		  snmp_outgetresponses++;
 		  snmp_intotalsetvars += snmp_vars_inc;
 #endif
@@ -424,13 +424,13 @@ snmp_agent_parse(data, length, out_data, out_length, sourceip)
 	       to be fixed. */
 	    if (pi->version == SNMP_VERSION_2p)
 		pi->packet_end = out_auth + packet_len;
-#ifdef USING_MIBII_SNMP_MODULE       
+#ifdef USING_MIBII_SNMP_MIB_MODULE       
 	    snmp_intotalreqvars += snmp_vars_inc;
 	    snmp_outgetresponses++;
 #endif
 	    break;
 	case SNMP_ERR_TOOBIG:
-#ifdef USING_MIBII_SNMP_MODULE       
+#ifdef USING_MIBII_SNMP_MIB_MODULE       
 	    snmp_intoobigs++;
 #endif
 	    if (pi->version == SNMP_VERSION_2p){
@@ -452,22 +452,22 @@ snmp_agent_parse(data, length, out_data, out_length, sourceip)
 	case SNMP_ERR_NOTWRITABLE:
 	    goto reterr;
 	case SNMP_ERR_NOSUCHNAME:
-#ifdef USING_MIBII_SNMP_MODULE       
+#ifdef USING_MIBII_SNMP_MIB_MODULE       
 	    snmp_outnosuchnames++;
 #endif
 	    goto reterr;
 	case SNMP_ERR_BADVALUE:
-#ifdef USING_MIBII_SNMP_MODULE       
+#ifdef USING_MIBII_SNMP_MIB_MODULE       
 	    snmp_inbadvalues++;
 #endif
 	    goto reterr;
 	case SNMP_ERR_READONLY:
-#ifdef USING_MIBII_SNMP_MODULE       
+#ifdef USING_MIBII_SNMP_MIB_MODULE       
 	    snmp_inreadonlys++;
 #endif
 	    goto reterr;
 	case SNMP_ERR_GENERR:
-#ifdef USING_MIBII_SNMP_MODULE       
+#ifdef USING_MIBII_SNMP_MIB_MODULE       
 	    snmp_ingenerrs++;
 #endif
 reterr:
@@ -574,7 +574,8 @@ parse_var_op_list(data, length, out_data, out_length, index, pi, action)
 
 	/* Effectively, check if this variable is read-only or read-write
 	   (in the MIB sense). */
-	if (!vacm_in_view(pi, var_name, var_name_len)) {
+	if ((pi->pdutype == SNMP_MSG_SET && !(acl & 2))
+	      || !vacm_in_view(pi, var_name, var_name_len)) {
 	    if (pi->version == SNMP_VERSION_1 || pi->pdutype != SNMP_MSG_SET) {
 		if (verbose) fprintf (stdout, "    >> noSuchName (read-only)\n");
 		ERROR_MSG("read-only? (ignoring)");
@@ -996,7 +997,7 @@ create_identical(snmp_in, snmp_out, snmp_length, errstat, errindex, pi)
     if (pi->version == SNMP_VERSION_1 || pi->version == SNMP_VERSION_2c){
 	data = snmp_comstr_build(snmp_out, (int *)&dummy,
 			       pi->community, &pi->community_len,
-			       (int *)&pi->version, messagelen);
+			       &pi->version, messagelen);
     } else if (pi->version == SNMP_VERSION_2p){
 	data = snmp_party_build(snmp_out, (int *)&dummy, pi, messagelen,
 				  pi->dstParty, pi->dstPartyLength,

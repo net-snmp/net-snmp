@@ -24,6 +24,9 @@
 #ifdef HAVE_SYS_PARAM_H
 #include <sys/param.h>
 #endif
+#ifdef HAVE_SYS_MOUNT_H
+#include <sys/mount.h>
+#endif
 
 #include <ctype.h>
 #if STDC_HEADERS
@@ -52,6 +55,19 @@ struct mnttab *HRFS_entry = &HRFS_entry_struct;
 #define	HRFS_mount	mnt_mountp
 #define	HRFS_type	mnt_fstype
 #define	HRFS_statfs	statvfs
+
+#elif defined(HAVE_GETFSSTAT)
+static struct statfs *fsstats;
+static int fscount;
+struct statfs *HRFS_entry;
+#define HRFS_statfs	statfs
+#ifdef MFSNAMELEN
+#define HRFS_type	f_fstypename
+#else
+#define HRFS_type	f_type
+#endif
+#define HRFS_mount	f_mntonname
+#define HRFS_name	f_mntfromname
 
 #else
 
@@ -184,7 +200,15 @@ var_hrfilesys(vp, name, length, exact, var_len, write_method)
 	    *var_len = strlen(string);
 	    return (u_char *) string;
 	case HRFSYS_RMOUNT:
+#if HAVE_GETFSSTAT
+#if defined(MFSNAMELEN)
+	    if (!strcmp( HRFS_entry->HRFS_type, MOUNT_NFS))
+#else
+	    if (HRFS_entry->HRFS_type == MOUNT_NFS)
+#endif
+#else
 	    if (!strcmp( HRFS_entry->HRFS_type, MNTTYPE_NFS))
+#endif
 	        sprintf(string, HRFS_entry->HRFS_name);
 	    else
 		string[0] = '\0';
@@ -196,6 +220,28 @@ var_hrfilesys(vp, name, length, exact, var_len, write_method)
 			 * Not sufficient to identity the file
 			 *   type precisely, but it's a start.
 			 */
+#if HAVE_GETFSSTAT && !defined(MFSNAMELEN)
+	    switch (HRFS_entry->HRFS_type) {
+	    case MOUNT_UFS: fsys_type_id[fsys_type_len-1] = 3; break;
+	    case MOUNT_NFS: fsys_type_id[fsys_type_len-1] = 14; break;
+	    case MOUNT_MFS: fsys_type_id[fsys_type_len-1] = 8; break;
+	    case MOUNT_MSDOS: fsys_type_id[fsys_type_len-1] = 5; break;
+	    case MOUNT_LFS: fsys_type_id[fsys_type_len-1] = 1; break;
+	    case MOUNT_LOFS: fsys_type_id[fsys_type_len-1] = 1; break;
+	    case MOUNT_FDESC: fsys_type_id[fsys_type_len-1] = 1; break;
+	    case MOUNT_PORTAL: fsys_type_id[fsys_type_len-1] = 1; break;
+	    case MOUNT_NULL: fsys_type_id[fsys_type_len-1] = 1; break;
+	    case MOUNT_UMAP: fsys_type_id[fsys_type_len-1] = 1; break;
+	    case MOUNT_KERNFS: fsys_type_id[fsys_type_len-1] = 1; break;
+	    case MOUNT_PROCFS: fsys_type_id[fsys_type_len-1] = 1; break;
+	    case MOUNT_AFS: fsys_type_id[fsys_type_len-1] = 16; break;
+	    case MOUNT_CD9660: fsys_type_id[fsys_type_len-1] = 12; break;
+	    case MOUNT_UNION: fsys_type_id[fsys_type_len-1] = 1; break;
+	    case MOUNT_DEVFS: fsys_type_id[fsys_type_len-1] = 1; break;
+	    case MOUNT_EXT2FS: fsys_type_id[fsys_type_len-1] = 1; break;
+	    case MOUNT_TFS: fsys_type_id[fsys_type_len-1] = 15; break;
+	    }
+#else
 	    mnt_type = HRFS_entry->HRFS_type;
 	    if ( mnt_type == NULL )
 			fsys_type_id[fsys_type_len-1] = 2;	/* unknown */
@@ -245,15 +291,20 @@ var_hrfilesys(vp, name, length, exact, var_len, write_method)
 #endif
 	    else
 			fsys_type_id[fsys_type_len-1] = 1;	/* Other */
+#endif /* HAVE_GETFSSTAT */
 
             *var_len = sizeof(fsys_type_id);
-	    return (u_char *)&fsys_type_id;
+	    return (u_char *)fsys_type_id;
 
 	case HRFSYS_ACCESS:
+#if HAVE_GETFSSTAT
+	    long_return = HRFS_entry->f_flags & MNT_RDONLY ? 2 : 1;
+#else
 	    if ( hasmntopt( HRFS_entry, "ro" ) != NULL )
 	        long_return = 2;	/* Read Only */
 	    else
 	        long_return = 1;	/* Read-Write */
+#endif
 	    return (u_char *)&long_return;
 	case HRFSYS_BOOT:
           if (
@@ -285,15 +336,24 @@ var_hrfilesys(vp, name, length, exact, var_len, write_method)
 	 *********************/
 
 static int HRFS_index;
+#ifndef HAVE_GETFSSTAT
 static FILE *fp;
+#endif
 
 void
 Init_HR_FileSys __P((void))
 {
+#if HAVE_GETFSSTAT
+    fscount = getfsstat(NULL, 0, MNT_NOWAIT);
+    fsstats = malloc(fscount*sizeof(*fsstats));
+    HRFS_index = getfsstat(fsstats, fscount*sizeof(*fsstats), MNT_NOWAIT);
+    HRFS_index = 0;
+#else
    HRFS_index = 1;
    if ( fp != NULL )
 	fclose(fp);
    fp = fopen( ETC_MNTTAB, "r");
+#endif
 }
 
 char *HRFS_ignores[] = {
@@ -313,6 +373,11 @@ char *HRFS_ignores[] = {
 int
 Get_Next_HR_FileSys __P((void))
 {
+#if HAVE_GETFSSTAT
+    if (HRFS_index >= fscount) return -1;
+    HRFS_entry = fsstats+HRFS_index;
+    return HRFS_index++;
+#else
     char **cpp;
 		/*
 		 * XXX - According to RFC 1514, hrFSIndex must
@@ -347,20 +412,26 @@ Get_Next_HR_FileSys __P((void))
     HRFS_entry = getmntent( fp );
     if ( HRFS_entry == NULL )
 	return -1;
-#endif
+#endif /* solaris2 */
 
     for ( cpp = HRFS_ignores ; *cpp != NULL ; ++cpp )
 	if ( !strcmp( HRFS_entry->HRFS_type, *cpp ))
 	    return Get_Next_HR_FileSys();
 
     return HRFS_index++;
+#endif /* HAVE_GETFSSTAT */
 }
 
 void
 End_HR_FileSys __P((void))
 {
-   if ( fp != NULL )
+#ifdef HAVE_GETFSSTAT
+    free(fsstats);
+    fsstats = NULL;
+#else
+    if ( fp != NULL )
 	fclose(fp);
+#endif
 }
 
 

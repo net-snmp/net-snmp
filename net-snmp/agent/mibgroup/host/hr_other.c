@@ -23,13 +23,13 @@ char *describe_coproc __P((int));
 
 void	init_hr_other  __P((void))
 {
-    init_device[ HRDEV_PROC ] = &Init_HR_CPU;	
-    next_device[ HRDEV_PROC ] = &Get_Next_HR_CPU;
-    device_descr[ HRDEV_PROC ] = &describe_cpu;
+    init_device[ HRDEV_PROC ] = Init_HR_CPU;	
+    next_device[ HRDEV_PROC ] = Get_Next_HR_CPU;
+    device_descr[ HRDEV_PROC ] = describe_cpu;
 
-    init_device[ HRDEV_COPROC ] = &Init_HR_CoProc;	
-    next_device[ HRDEV_COPROC ] = &Get_Next_HR_CoProc;
-    device_descr[ HRDEV_COPROC ] = &describe_coproc;
+    init_device[ HRDEV_COPROC ] = Init_HR_CoProc;	
+    next_device[ HRDEV_COPROC ] = Get_Next_HR_CoProc;
+    device_descr[ HRDEV_COPROC ] = describe_coproc;
 }
 
 

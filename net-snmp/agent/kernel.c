@@ -35,7 +35,7 @@
 
 
 #if HAVE_KVM_H
-kvm_t *kd;
+static kvm_t *kd;
 
 void
 init_kmem(file)
@@ -59,7 +59,7 @@ init_kmem(file)
  *  It seeks to the location  off  in kmem
  *  It does a read into  target  of  siz  bytes.
  *
- *  Return NULL on failure and 1 on sucess.
+ *  Return 0 on failure and 1 on sucess.
  *
  */
 
@@ -157,7 +157,7 @@ klread(buf, buflen)
  *  It seeks to the location  off  in kmem
  *  It does a read into  target  of  siz  bytes.
  *
- *  Return NULL on failure and 1 on sucess.
+ *  Return 0 on failure and 1 on sucess.
  *
  */
 
@@ -174,7 +174,7 @@ klookup(off, target, siz)
     fprintf (stderr, "klookup(%lx, %p, %d): ", off, target, siz);
     perror("klseek");
 #ifdef EXIT_ON_BAD_KLREAD
-    exit(-1);
+    exit(1);
 #endif
     return (0);
   }
@@ -183,7 +183,7 @@ klookup(off, target, siz)
     perror("klread");
     ERROR_MSG("klread");
 #ifdef EXIT_ON_BAD_KLREAD
-    exit(-1);
+    exit(1);
 #endif
     return(0);
   }

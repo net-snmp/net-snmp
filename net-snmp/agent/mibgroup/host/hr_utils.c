@@ -36,9 +36,6 @@
 #endif
 
 
-extern long timezone;
-extern int  daylight;
-
 u_char *
 date_n_time ( when, length )
     time_t *when;
@@ -80,14 +77,18 @@ date_n_time ( when, length )
 	/*
 	 * Timezone offset
 	 */
+#ifndef SYSV
+#define timezone tm_p->tm_gmtoff
+#endif
     if ( timezone < 0 )
 	string[8] = '-';
     else
 	string[8] = '+';
-    string[9] = timezone/(60*60);
-    string[10] = timezone/60 - string[9]*60;
+    string[9] = abs(timezone)/3600;
+    string[10] = (abs(timezone) - string[9]*3600)/60;
     *length = 11;
 
+#ifdef SYSV
 	/*
 	 * Daylight saving time
 	 */
@@ -101,6 +102,7 @@ date_n_time ( when, length )
 	if ( string[9]==0 )
 	   string[8]='+';
     }
+#endif
 		
     return string;
 }
@@ -139,10 +141,12 @@ time_t ctime_to_timet( string )
 		 *  Cope with timezone and DST
 		 */
 
+#ifdef SYSV
 	if ( daylight )
 	    tm.tm_isdst = 1;
 
 	tm.tm_sec -= timezone;
+#endif
 	
     return( mktime( &tm ));
 }

@@ -191,7 +191,7 @@ var_hrpartition(vp, name, length, exact, var_len, write_method)
 	    return (u_char *)&long_return;
 	case HRPART_LABEL:
 	    *var_len = strlen(HRP_savedName);
-	    return (u_char *)&HRP_savedName;
+	    return (u_char *)HRP_savedName;
 	case HRPART_ID:			/* Use the device number */
 	    sprintf(string, "0x%x", (int)stat_buf.st_rdev) ;
 	    *var_len = strlen(string);

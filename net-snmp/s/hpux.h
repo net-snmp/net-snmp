@@ -1,4 +1,4 @@
-#include "generic.h"
+#include "sysv.h"
 
 #undef TCP_TTL_SYMBOL
 #define TCP_TTL_SYMBOL "ipDefaultTTL"

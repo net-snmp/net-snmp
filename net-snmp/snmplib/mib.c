@@ -66,7 +66,7 @@ SOFTWARE.
 #include "int64.h"
 
 static void sprint_by_type __P((char *, struct variable_list *, struct enum_list *, char *, char *));
-static parse_subtree __P((struct tree *, char *, oid *, int *));
+static int parse_subtree __P((struct tree *, char *, oid *, int *));
 static char *uptimeString __P((u_long, char *));
 static void sprint_hexstring __P((char *, u_char *, int));
 static void sprint_asciistring __P((char *, u_char *, int));
@@ -132,8 +132,9 @@ uptimeString(timeticks, buf)
     register u_long timeticks;
     char *buf;
 {
-    int	seconds, minutes, hours, days;
+    int	centisecs, seconds, minutes, hours, days;
 
+    centisecs = timeticks % 100;
     timeticks /= 100;
     days = timeticks / (60 * 60 * 24);
     timeticks %= (60 * 60 * 24);
@@ -145,14 +146,18 @@ uptimeString(timeticks, buf)
     seconds = timeticks % 60;
 
     if (quick_print)
-	sprintf(buf, "%d:%d:%02d:%02d", days, hours, minutes, seconds);
+	sprintf(buf, "%d:%d:%02d:%02d.%02d",
+		days, hours, minutes, seconds, centisecs);
     else {
 	if (days == 0){
-	    sprintf(buf, "%d:%02d:%02d", hours, minutes, seconds);
+	    sprintf(buf, "%d:%02d:%02d.%02d",
+		hours, minutes, seconds, centisecs);
 	} else if (days == 1) {
-	    sprintf(buf, "%d day, %d:%02d:%02d", days,hours,minutes,seconds);
+	    sprintf(buf, "%d day, %d:%02d:%02d.%02d",
+		days, hours, minutes, seconds, centisecs);
 	} else {
-	    sprintf(buf, "%d days, %d:%02d:%02d", days,hours,minutes,seconds);
+	    sprintf(buf, "%d days, %d:%02d:%02d.%02d",
+		days, hours, minutes, seconds, centisecs);
 	}
     }
     return buf;
@@ -1018,7 +1023,7 @@ init_mib __P((void))
         strcat(Prefix, ".");  /* add a trailing dot in case user didn't */ 
 
     if (getenv("SUFFIX"))
-	suffix_only = TRUE;
+	suffix_only = 1;
 
     Mib = tree_head;          /* Backwards compatibility */
 }
@@ -1216,7 +1221,7 @@ sprint_objid(buf, objid, objidlen)
     struct tree    *subtree = tree_head;
 
     *tempbuf = '.';	/* this is a fully qualified name */
-    get_symbol(objid, objidlen, subtree, tempbuf + 1);
+    subtree = get_symbol(objid, objidlen, subtree, tempbuf + 1);
     if (suffix_only){
 	for(cp = tempbuf; *cp; cp++)
 	    ;
@@ -1231,6 +1236,17 @@ sprint_objid(buf, objid, objidlen)
 	    cp--;
 	}
 	cp++;
+	if (suffix_only == 2 && cp > tempbuf) {
+	    char *mod = module_name(subtree->modid);
+	    int len = strlen(mod);
+	    if (len >= cp-tempbuf) {
+		memmove(tempbuf+len+1, cp, strlen(cp)+1);
+		cp = tempbuf+len+1;
+	    }
+	    cp -= len+1;
+	    memcpy(cp, mod, len);
+	    cp[len] = ':';
+	}
     }
     else if (!full_objid) {
 	cp = tempbuf;

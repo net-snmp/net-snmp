@@ -34,9 +34,9 @@ int header_hrprint __P((struct variable *,oid *, int *, int, int *, int (**write
 
 void	init_hr_print( )
 {
-    init_device[ HRDEV_PRINTER ] = &Init_HR_Print;	
-    next_device[ HRDEV_PRINTER ] = &Get_Next_HR_Print;
-/*  save_device[ HRDEV_PRINTER ] = &Save_HR_Print;	*/
+    init_device[ HRDEV_PRINTER ] = Init_HR_Print;	
+    next_device[ HRDEV_PRINTER ] = Get_Next_HR_Print;
+/*  save_device[ HRDEV_PRINTER ] = Save_HR_Print;	*/
 #ifdef HRPRINT_MONOTONICALLY_INCREASING
     dev_idx_inc[ HRDEV_DISK ] = 1;
 #endif
