@@ -64,9 +64,10 @@ extern	char *routename(), *netname();
 extern	struct snmp_session *Session;
 extern	struct variable_list *getvarbyname();
 
-oid oid_ifname[] = {1, 3, 6, 1, 2, 1, 2, 2, 1, 2, 1};
-static oid oid_ifinucastpkts[] = {1, 3, 6, 1, 2, 1, 2, 2, 1, 11, 1};
-static oid oid_cfg_nnets[] = {1, 3, 6, 1, 2, 1, 2, 1, 0};
+oid oid_ifname[] =		{1, 3, 6, 1, 2, 1, 2, 2, 1, 2, 1};
+static oid oid_ifinucastpkts[] ={1, 3, 6, 1, 2, 1, 2, 2, 1,11, 1};
+static oid oid_cfg_nnets[] =	{1, 3, 6, 1, 2, 1, 2, 1, 0};
+static oid oid_ipadentaddr[] =	{1, 3, 6, 1, 2, 1, 4,20, 1, 1, 0, 0, 0, 0};
 
 #define IFNAME		2
 #define IFMTU		4
@@ -77,6 +78,11 @@ static oid oid_cfg_nnets[] = {1, 3, 6, 1, 2, 1, 2, 1, 0};
 #define OUTUCASTPKTS	17
 #define OUTNUCASTPKTS	18
 #define OUTERRORS	20
+#define OUTQLEN		21
+
+#define IPADDR		1
+#define	IFINDEX		2
+#define IPNETMASK	3
 
 /*
  * Print a description of the network interfaces.
@@ -87,99 +93,139 @@ intpr(interval)
 	oid varname[MAX_NAME_LEN], *instance, *ifentry;
 	int varname_len;
 	int ifnum, cfg_nnets;
+        oid curifip [4];
 	struct variable_list *var;
+        struct snmp_pdu *request, *response;
+        int status;
 	char name[128];
+        int ifindex;
 	int mtu;
-	int ipkts, ierrs, opkts, oerrs, operstatus, collisions;
-
+	int ipkts, ierrs, opkts, oerrs, operstatus, collisions, outqueue;
+        u_long netmask;
+        struct in_addr ifip, ifroute;
+        
 	if (interval) {
 		sidewaysintpr((unsigned)interval);
 		return;
 	}
-	printf("%-11.11s %-5.5s %-11.11s %-15.15s %8.8s %5.5s %8.8s %5.5s %5.5s",
+        printf("%-7.7s %-4.4s %-15.15s %-15.15s %8.8s %5.5s %8.8s %5.5s %5.5s",
 		"Name", "Mtu", "Network", "Address", "Ipkts", "Ierrs",
-		"Opkts", "Oerrs", "Colls");
+		"Opkts", "Oerrs", "Queue");
 	putchar('\n');
 	var = getvarbyname(Session, oid_cfg_nnets, sizeof(oid_cfg_nnets) / sizeof(oid));
 	if (var)
 	    cfg_nnets = *var->val.integer;
 	else
 	    return;
-#ifdef SVR4
-	memmove((char *)varname, (char *)oid_ifname, sizeof(oid_ifname));
-#else
-	bcopy((char *)oid_ifname, (char *)varname, sizeof(oid_ifname));
-#endif
-	varname_len = sizeof(oid_ifname) / sizeof(oid);
-	ifentry = varname + 9;
-	instance = varname + 10;
+	memset (&curifip, 0, sizeof (curifip));
 	for (ifnum = 1; ifnum <= cfg_nnets; ifnum++) {
 		register char *cp;
 
 		*name = mtu = 0;
-		ipkts = ierrs = opkts = oerrs = operstatus = collisions = 0;
-		*instance = ifnum;
-		*ifentry = IFNAME;
-		var = getvarbyname(Session, varname, varname_len);
-		if (var){
-#ifdef SVR4
-		    memmove(name, (char *)var->val.string, var->val_len);
-#else
-		    bcopy((char *)var->val.string, name, var->val_len);
-#endif
-		    name[var->val_len] = 0;
-		}
-		*ifentry = IFMTU;
-		var = getvarbyname(Session, varname, varname_len);
-		if (var)
-		    mtu = *var->val.integer;
-		*ifentry = IFOPERSTATUS;
-		var = getvarbyname(Session, varname, varname_len);
-		if (var)
-		    operstatus = *var->val.integer;
-		*ifentry = INUCASTPKTS;
-		var = getvarbyname(Session, varname, varname_len);
-		if (var)
-		    ipkts = *var->val.integer;
-		*ifentry = INNUCASTPKTS;
-		var = getvarbyname(Session, varname, varname_len);
-		if (var)
-		    ipkts += *var->val.integer;
-		*ifentry = INERRORS;
-		var = getvarbyname(Session, varname, varname_len);
-		if (var)
-		    ierrs = *var->val.integer;
-		*ifentry = OUTUCASTPKTS;
-		var = getvarbyname(Session, varname, varname_len);
-		if (var)
-		    opkts = *var->val.integer;
-		*ifentry = OUTNUCASTPKTS;
-		var = getvarbyname(Session, varname, varname_len);
-		if (var)
-		    opkts += *var->val.integer;
-		*ifentry = OUTERRORS;
-		var = getvarbyname(Session, varname, varname_len);
-		if (var)
-		    oerrs = *var->val.integer;
+		ipkts = ierrs = opkts = oerrs = operstatus = outqueue = 0;
 
-		name[15] = '\0';
-		if (interface != 0 &&
-		    strcmp(name, interface) != 0)
+		request = snmp_pdu_create (GETNEXT_REQ_MSG);
+		memmove (varname, oid_ipadentaddr, sizeof (oid_ipadentaddr));
+		varname_len = sizeof (oid_ipadentaddr) / sizeof (oid);
+		instance = varname + 9;
+		memmove (varname + 10, curifip, sizeof (curifip));
+		*instance = IFINDEX;
+		snmp_add_null_var (request, varname, varname_len);
+		*instance = IPADDR;
+		snmp_add_null_var (request, varname, varname_len);
+		*instance = IPNETMASK;
+		snmp_add_null_var (request, varname, varname_len);
+
+		status = snmp_synch_response (Session, request, &response);
+		if (status != STAT_SUCCESS || response->errstat != SNMP_ERR_NOERROR) {
+		    fprintf (stderr, "SNMP request failed");
+		    break;
+		}
+		for (var = response->variables; var; var = var->next_variable) {
+		    switch (var->name [9]) {
+		    case IFINDEX:
+			ifindex = *var->val.integer; break;
+		    case IPADDR:
+			memmove (curifip, var->name+10, sizeof (curifip));
+			memmove (&ifip, var->val.string, sizeof (u_long));
+			break;
+		    case IPNETMASK:
+			memmove (&netmask, var->val.string, sizeof (u_long));
+		    }
+		}
+		ifroute.s_addr = ifip.s_addr & netmask;
+		memmove (varname, oid_ifname, sizeof(oid_ifname));
+		varname_len = sizeof(oid_ifname) / sizeof(oid);
+		ifentry = varname + 9;
+		instance = varname + 10;
+		request = snmp_pdu_create (GET_REQ_MSG);
+		*instance = ifindex;
+		*ifentry = IFNAME;
+		snmp_add_null_var (request, varname, varname_len);
+		*ifentry = IFMTU;
+		snmp_add_null_var (request, varname, varname_len);
+		*ifentry = IFOPERSTATUS;
+		snmp_add_null_var (request, varname, varname_len);
+		*ifentry = INUCASTPKTS;
+		snmp_add_null_var (request, varname, varname_len);
+		*ifentry = INNUCASTPKTS;
+		snmp_add_null_var (request, varname, varname_len);
+		*ifentry = INERRORS;
+		snmp_add_null_var (request, varname, varname_len);
+		*ifentry = OUTUCASTPKTS;
+		snmp_add_null_var (request, varname, varname_len);
+		*ifentry = OUTNUCASTPKTS;
+		snmp_add_null_var (request, varname, varname_len);
+		*ifentry = OUTERRORS;
+		snmp_add_null_var (request, varname, varname_len);
+		*ifentry = OUTQLEN;
+		snmp_add_null_var (request, varname, varname_len);
+
+		status = snmp_synch_response (Session, request, &response);
+		if (status != STAT_SUCCESS || response->errstat != SNMP_ERR_NOERROR) {
+		    fprintf (stderr, "SNMP request failed");
+		    break;
+		}
+		request = NULL;
+		for (var = response->variables; var; var = var->next_variable) {
+		    switch (var->name [9]) {
+		    case OUTQLEN:
+			outqueue = *var->val.integer; break;
+		    case OUTERRORS:
+			oerrs = *var->val.integer; break;
+		    case INERRORS:
+			ierrs = *var->val.integer; break;
+		    case IFMTU:
+			mtu = *var->val.integer; break;
+		    case INUCASTPKTS:
+			ipkts += *var->val.integer; break;
+		    case INNUCASTPKTS:
+			ipkts += *var->val.integer; break;
+		    case OUTUCASTPKTS:
+			opkts += *var->val.integer; break;
+		    case OUTNUCASTPKTS:
+			opkts += *var->val.integer; break;
+		    case IFNAME:
+			memmove (name, var->val.string, var->val_len);
+			name [var->val_len] = 0;
+			break;
+		    case IFOPERSTATUS:
+			operstatus = *var->val.integer; break;
+		    }
+		}
+
+		name[7] = '\0';
+		if (interface != NULL && strcmp(name, interface) != 0)
 			continue;
-#ifdef SVR4
 		cp = strchr(name, '\0');
-#else
-		cp = (char *) index(name, '\0');
-#endif
 		if (operstatus != MIB_IFSTATUS_UP)
 			*cp++ = '*';
 		*cp = '\0';
-		printf("%-11.11s %-5d ", name, mtu);
-		printf("%-11.11s ", "none");
-		printf("%-15.15s ", "none");
+		printf("%-7.7s %-4d ", name, mtu);
+		printf("%-15.15s ", netname (ifroute, 0));
+		printf("%-15.15s ", routename (ifip));
 		printf("%8d %5d %8d %5d %5d",
-		    ipkts, ierrs,
-		    opkts, oerrs, collisions);
+		    ipkts, ierrs, opkts, oerrs, outqueue);
 		putchar('\n');
 	}
 }
@@ -224,11 +270,7 @@ sidewaysintpr(interval)
 	    cfg_nnets = *var->val.integer;
 	else
 	    return;
-#ifdef SVR4
-	memmove((char *)varname, (char *)oid_ifname, sizeof(oid_ifname));
-#else
-	bcopy((char *)oid_ifname, (char *)varname, sizeof(oid_ifname));
-#endif
+	memmove(varname, oid_ifname, sizeof(oid_ifname));
 	varname_len = sizeof(oid_ifname) / sizeof(oid);
 	for (ifnum = 1, ip = iftot; ifnum <= cfg_nnets; ifnum++) {
 		char *cp;
@@ -237,20 +279,12 @@ sidewaysintpr(interval)
 		varname[10] = ifnum;
 		var = getvarbyname(Session, varname, varname_len);
 		if (var){
-#ifdef SVR4
-		    memmove(ip->ift_name + 1, (char *)var->val.string, var->val_len);
-#else
-		    bcopy((char *)var->val.string, ip->ift_name + 1, var->val_len);
-#endif
+		    memmove(ip->ift_name + 1, var->val.string, var->val_len);
 		}
 		if (interface && strcmp(ip->ift_name + 1, interface) == 0)
 			interesting = ip;
 		ip->ift_name[15] = '\0';
-#ifdef SVR4
 		cp = strchr(ip->ift_name, '\0');
-#else
-		cp = (char *) index(ip->ift_name, '\0');
-#endif
 		sprintf(cp, ")");
 		ip++;
 		if (ip >= iftot + MAXIF - 2)
@@ -258,7 +292,11 @@ sidewaysintpr(interval)
 	}
 	lastif = ip;
 
+#if SVR4
+	(void)sigset(SIGALRM, catchalarm);
+#else
 	(void)signal(SIGALRM, catchalarm);
+#endif
 	signalled = NO;
 	(void)alarm(interval);
 banner:
@@ -287,20 +325,12 @@ loop:
 	sum->ift_op = 0;
 	sum->ift_oe = 0;
 	sum->ift_co = 0;
-#ifdef SVR4
-	memmove((char *)varname, (char *)oid_ifinucastpkts, sizeof(oid_ifinucastpkts));
-#else
-	bcopy((char *)oid_ifinucastpkts, (char *)varname, sizeof(oid_ifinucastpkts));
-#endif
+	memmove(varname, oid_ifinucastpkts, sizeof(oid_ifinucastpkts));
 	varname_len = sizeof(oid_ifinucastpkts) / sizeof(oid);
 	ifentry = varname + 9;
 	instance = varname + 10;
 	for (ifnum = 1, ip = iftot; ifnum <= cfg_nnets && ip < lastif; ip++, ifnum++) {
-#ifdef SVR4
-		memset((char *)now, NULL, sizeof(*now));
-#else
-		bzero((char *)now, sizeof(*now));
-#endif
+		memset(now, 0, sizeof(*now));
 		*instance = ifnum;
 		*ifentry = INUCASTPKTS;
 		var = getvarbyname(Session, varname, varname_len);
