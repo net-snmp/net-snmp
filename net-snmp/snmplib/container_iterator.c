@@ -93,7 +93,7 @@ _iterator_get(iterator_info *ii, const void *key)
     
     rc = ii->get_first(ii->user_ctx, &loop_ctx, &tmp);
     if(SNMP_ERR_NOERROR != rc) {
-        if(SNMPERR_NO_VARS != rc)
+        if(SNMP_ENDOFMIBVIEW != rc)
             snmp_log(LOG_ERR, "bad rc %d from get_next\n", rc);
     }
     else {
@@ -231,7 +231,7 @@ _iterator_get_next(iterator_info *ii, const void *key)
                     if(ii->get_data)
                         ii->save_pos(ii->user_ctx, &loop_ctx, &best_ctx, 1);
                 }
-                else if(SNMPERR_NO_VARS == rc)
+                else if(SNMP_ENDOFMIBVIEW == rc)
                     rc = SNMPERR_GENERR; /* not found */
                 break;
             }
@@ -242,7 +242,7 @@ _iterator_get_next(iterator_info *ii, const void *key)
     /*
      * no vars is ok, except as noted above (IGN-A)
      */
-    if(SNMPERR_NO_VARS == rc)
+    if(SNMP_ENDOFMIBVIEW == rc)
         rc = SNMP_ERR_NOERROR;
             
     /*
@@ -258,7 +258,7 @@ _iterator_get_next(iterator_info *ii, const void *key)
             }
         }
     }
-    else if(SNMPERR_NO_VARS != rc) {
+    else if(SNMP_ENDOFMIBVIEW != rc) {
         snmp_log(LOG_ERR, "bad rc %d from get_next\n", rc);
         best_val.val = NULL;
     }
