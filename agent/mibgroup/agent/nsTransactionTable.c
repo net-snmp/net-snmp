@@ -98,7 +98,8 @@ struct variable_list *
 nsTransactionTable_get_first_data_point(void **my_loop_context,
                                         void **my_data_context,
                                         struct variable_list
-                                        *put_index_data)
+                                        *put_index_data,
+                                        void *myvoid)
 {
 
     struct variable_list *vptr;
@@ -128,7 +129,8 @@ struct variable_list *
 nsTransactionTable_get_next_data_point(void **my_loop_context,
                                        void **my_data_context,
                                        struct variable_list
-                                       *put_index_data)
+                                       *put_index_data,
+                                       void *myvoid)
 {
 
     struct variable_list *vptr;

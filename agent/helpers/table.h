@@ -39,15 +39,6 @@ typedef struct column_info_t {
 
 } column_info;
 
-typedef struct variable_list * (FirstDataPoint)(void **loop_context,
-                                                void **data_context,
-                                                struct variable_list *);
-typedef struct variable_list * (NextDataPoint)(void **loop_context,
-                                               void **data_context,
-                                               struct variable_list *);
-typedef void (FreeLoopContext)(void *);
-typedef void (FreeDataContext)(void *);
-
 typedef struct _table_registration_info {
    struct variable_list *indexes; /* list of varbinds with only 'type' set */
    unsigned int number_indexes;   /* calculated automatically */
