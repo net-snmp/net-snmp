@@ -8,14 +8,21 @@
 #include "utilities/execute.h"
 #include "struct.h"
 
+oid  ns_extend_oid[]    = { 1, 3, 6, 1, 4, 1, 8072, 1, 3, 2 };
 oid  extend_count_oid[] = { 1, 3, 6, 1, 4, 1, 8072, 1, 3, 2, 1 };
 oid  extend_config_oid[] = { 1, 3, 6, 1, 4, 1, 8072, 1, 3, 2, 2 };
 oid  extend_out1_oid[]  = { 1, 3, 6, 1, 4, 1, 8072, 1, 3, 2, 3 };
 oid  extend_out2_oid[]  = { 1, 3, 6, 1, 4, 1, 8072, 1, 3, 2, 4 };
 
-netsnmp_table_data                *dinfo;
-long number_of_entries = 0;
-netsnmp_extend *ehead  = NULL;
+typedef struct extend_registration_block_s {
+    netsnmp_table_data *dinfo;
+    oid                *root_oid;
+    size_t              oid_len;
+    int                 num_entries;
+    netsnmp_extend     *ehead;
+    struct extend_registration_block_s *next;
+} extend_registration_block;
+extend_registration_block *ereg_head = NULL;
 
         /*************************
          *
@@ -23,13 +30,47 @@ netsnmp_extend *ehead  = NULL;
          *
          *************************/
 
-void init_extend( void )
+extend_registration_block *
+_find_extension_block( oid *name, size_t name_len )
 {
+    extend_registration_block         *eptr;
+    size_t len;
+    for ( eptr=ereg_head; eptr; eptr=eptr->next ) {
+        len = SNMP_MIN(name_len, eptr->oid_len);
+        if (!snmp_oid_compare( name, len, eptr->root_oid, eptr->oid_len))
+            return eptr;
+    }
+    return NULL;
+}
+
+extend_registration_block *
+_register_extend( oid *base, size_t len )
+{
+    extend_registration_block         *eptr;
+    oid oid_buf[MAX_OID_LEN];
+
+    netsnmp_table_data                *dinfo;
     netsnmp_table_registration_info   *tinfo;
     netsnmp_watcher_info              *winfo;
     netsnmp_handler_registration      *reg;
 
-    dinfo = netsnmp_create_table_data( "nsExtendTable" );
+    for ( eptr=ereg_head; eptr; eptr=eptr->next ) {
+        if (!snmp_oid_compare( base, len, eptr->root_oid, eptr->oid_len))
+            return eptr;
+    }
+    if (!eptr) {
+        eptr = SNMP_MALLOC_TYPEDEF( extend_registration_block );
+        eptr->root_oid = snmp_duplicate_objid( base, len );
+        eptr->oid_len  = len;
+        eptr->num_entries = 0;
+        eptr->ehead       = NULL;
+        eptr->dinfo       = netsnmp_create_table_data( "nsExtendTable" );
+        eptr->next        = ereg_head;
+        ereg_head         = eptr;
+    }
+
+    dinfo = eptr->dinfo;
+    memcpy( oid_buf, base, len*sizeof(oid) );
 
         /*
          * Register the configuration table
@@ -38,10 +79,10 @@ void init_extend( void )
     netsnmp_table_helper_add_indexes( tinfo, ASN_OCTET_STR, 0 );
     tinfo->min_column = COLUMN_EXTCFG_FIRST_COLUMN;
     tinfo->max_column = COLUMN_EXTCFG_LAST_COLUMN;
+    oid_buf[len] = 2;
     reg   = netsnmp_create_handler_registration(
                 "nsExtendConfigTable", handle_nsExtendConfigTable, 
-                extend_config_oid, OID_LENGTH(extend_config_oid),
-                HANDLER_CAN_RWRITE);
+                oid_buf, len+1, HANDLER_CAN_RWRITE);
     netsnmp_register_table_data( reg, dinfo, tinfo );
 
         /*
@@ -54,10 +95,10 @@ void init_extend( void )
     netsnmp_table_helper_add_indexes( tinfo, ASN_OCTET_STR, 0 );
     tinfo->min_column = COLUMN_EXTOUT1_FIRST_COLUMN;
     tinfo->max_column = COLUMN_EXTOUT1_LAST_COLUMN;
+    oid_buf[len] = 3;
     reg   = netsnmp_create_handler_registration(
                 "nsExtendOut1Table", handle_nsExtendOutput1Table, 
-                extend_out1_oid,  OID_LENGTH(extend_out1_oid),
-                HANDLER_CAN_RONLY);
+                oid_buf, len+1, HANDLER_CAN_RONLY);
     netsnmp_register_table_data( reg, dinfo, tinfo );
 
         /*
@@ -72,24 +113,29 @@ void init_extend( void )
     netsnmp_table_helper_add_indexes( tinfo, ASN_OCTET_STR, ASN_INTEGER, 0 );
     tinfo->min_column = COLUMN_EXTOUT2_FIRST_COLUMN;
     tinfo->max_column = COLUMN_EXTOUT2_LAST_COLUMN;
+    oid_buf[len] = 4;
     reg   = netsnmp_create_handler_registration(
                 "nsExtendOut2Table", handle_nsExtendOutput2Table, 
-                extend_out2_oid,  OID_LENGTH(extend_out2_oid),
-                HANDLER_CAN_RONLY);
+                oid_buf, len+1, HANDLER_CAN_RONLY);
     netsnmp_register_table( reg, tinfo );
 
         /*
          * Register a watched scalar to keep track of the number of entries
          */
+    oid_buf[len] = 1;
     reg   = netsnmp_create_handler_registration(
                 "nsExtendNumEntries", NULL, 
-                extend_count_oid, OID_LENGTH(extend_count_oid),
-                HANDLER_CAN_RONLY);
+                oid_buf, len+1, HANDLER_CAN_RONLY);
     winfo = netsnmp_create_watcher_info(
-                &number_of_entries, sizeof(number_of_entries),
+                &(eptr->num_entries), sizeof(eptr->num_entries),
                 ASN_INTEGER, WATCHER_FIXED_SIZE);
     netsnmp_register_watched_scalar( reg, winfo );
 
+    return eptr;
+}
+
+void init_extend( void )
+{
     snmpd_register_config_handler("exec2", extend_parse_config, NULL, NULL);
     snmpd_register_config_handler("sh2",   extend_parse_config, NULL, NULL);
     snmpd_register_config_handler("execFix2", extend_parse_config, NULL, NULL);
@@ -199,11 +245,12 @@ _free_extension( netsnmp_extend *extension )
 }
 
 netsnmp_extend *
-_new_extension( char *exec_name,  int  exec_flags )
+_new_extension( char *exec_name, int exec_flags, extend_registration_block *ereg )
 {
     netsnmp_extend     *extension;
     netsnmp_table_row  *row;
     netsnmp_extend     *eptr1, *eptr2; 
+    netsnmp_table_data *dinfo = ereg->dinfo;
 
     if (!exec_name)
         return NULL;
@@ -229,7 +276,7 @@ _new_extension( char *exec_name,  int  exec_flags )
                                  exec_name, strlen(exec_name));
     netsnmp_table_data_add_row( dinfo, row);
 
-    number_of_entries++;
+    ereg->num_entries++;
         /*
          *  Now add this structure to a private linked list.
          *  We don't need this for the main tables - the
@@ -263,9 +310,20 @@ extend_parse_config(const char *token, char *cptr)
     netsnmp_extend *extension;
     char exec_name[STRMAX];
     char exec_command[STRMAX];
+    oid  oid_buf[MAX_OID_LEN];
+    size_t oid_len;
+    extend_registration_block *eptr;
     int  flags;
 
     cptr = copy_nword(cptr, exec_name,    sizeof(exec_name));
+    if ( *exec_name == '.' ) {
+        oid_len = MAX_OID_LEN;
+        read_objid( exec_name, oid_buf, &oid_len );
+        cptr = copy_nword(cptr, exec_name,    sizeof(exec_name));
+    } else {
+        memcpy( oid_buf, ns_extend_oid, sizeof(ns_extend_oid));
+        oid_len = OID_LENGTH(ns_extend_oid);
+    }
     cptr = copy_nword(cptr, exec_command, sizeof(exec_command));
     /* XXX - check 'exec_command' exists & is executable */
     flags = (NS_EXTEND_FLAGS_ACTIVE | NS_EXTEND_FLAGS_CONFIG);
@@ -276,7 +334,9 @@ extend_parse_config(const char *token, char *cptr)
         flags |= NS_EXTEND_FLAGS_WRITEABLE;
         /* XXX - Check for shell... */
     }
-    extension = _new_extension( exec_name, flags );
+
+    eptr      = _register_extend( oid_buf, oid_len );
+    extension = _new_extension( exec_name, flags, eptr );
     if (extension) {
         extension->command  = strdup( exec_command );
         if (cptr)
@@ -301,6 +361,7 @@ handle_nsExtendConfigTable(netsnmp_mib_handler          *handler,
     netsnmp_request_info       *request;
     netsnmp_table_request_info *table_info;
     netsnmp_extend             *extension;
+    extend_registration_block  *eptr;
     int  i;
 
     for ( request=requests; request; request=request->next ) {
@@ -551,7 +612,10 @@ handle_nsExtendConfigTable(netsnmp_mib_handler          *handler,
                                                   SNMP_ERR_INCONSISTENTVALUE);
                         return SNMP_ERR_INCONSISTENTVALUE;
                     }
-                    extension = _new_extension( table_info->indexes->val.string, 0);
+                    eptr = _find_extension_block( request->requestvb->name,
+                                                  request->requestvb->name_length );
+                    extension = _new_extension( table_info->indexes->val.string,
+                                                0, eptr );
                     if (!extension) {  /* failed */
                         netsnmp_set_request_error(reqinfo, request,
                                                   SNMP_ERR_RESOURCEUNAVAILABLE);
