@@ -248,6 +248,7 @@ EXPORTS
 	snmp_set_random_access
 	snmp_set_suffix_only
 	usm_store_users
+	vacm_is_configured
 	Mib                     DATA
 	tree_head               DATA
 	snmp_errno              DATA

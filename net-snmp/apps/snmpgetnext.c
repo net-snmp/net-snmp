@@ -69,6 +69,8 @@ SOFTWARE.
 #include <arpa/inet.h>
 #endif
 
+#include <getopt.h>
+
 #include "asn1.h"
 #include "snmp_api.h"
 #include "snmp_impl.h"
