@@ -285,7 +285,6 @@ dlmod_free_config (void)
 	free(dtmp2);
     }
     dlmods = NULL;
-    dlmod_next_index = 1;
 }
 
 
