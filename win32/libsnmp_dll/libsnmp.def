@@ -58,8 +58,8 @@ EXPORTS
 	read_mib
 	read_all_mibs
 	add_mibdir
-	mib_warnings
-	save_mib_descriptions
+	snmp_set_mib_warnings
+	snmp_set_save_descriptions
 	add_module_replacement
 	print_subtree
 	print_ascii_dump_tree
