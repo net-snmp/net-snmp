@@ -329,7 +329,7 @@ netsnmp_table_iterator_helper_handler(netsnmp_mib_handler *handler,
     ti_cache_info  *ti_info = NULL;
     int             request_count = 0;
     netsnmp_oid_stash_node **cinfo = NULL;
-    netsnmp_variable_list *old_indexes, *vb;
+    netsnmp_variable_list *old_indexes = NULL, *vb;
     netsnmp_table_registration_info *table_reg_info = NULL;
     int i;
     netsnmp_data_list    *ldata;

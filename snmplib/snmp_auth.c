@@ -89,6 +89,7 @@ SOFTWARE.
  * Globals.
  */
 
+#if !defined(DISABLE_SNMPV1) || !defined(DISABLE_SNMPV2C)
 /*******************************************************************-o-******
  * snmp_comstr_parse
  *
@@ -238,3 +239,4 @@ snmp_comstr_build(u_char * data,
     return data;
 
 }                               /* end snmp_comstr_build() */
+#endif /* support for community based SNMP */

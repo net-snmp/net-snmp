@@ -108,11 +108,17 @@ send_notifications(int major, int minor, void *serverarg, void *clientarg)
          */
 
         for (sptr = sess; sptr; sptr = sptr->next) {
+#ifndef DISABLE_SNMPV1
             if (sptr->version == SNMP_VERSION_1 &&
                 minor == SNMPD_CALLBACK_SEND_TRAP1) {
                 send_trap_to_sess(sptr, template_pdu);
-            } else if (sptr->version != SNMP_VERSION_1 &&
-                       minor == SNMPD_CALLBACK_SEND_TRAP2) {
+            } else
+#endif
+            if ((sptr->version == SNMP_VERSION_3
+#ifndef DISABLE_SNMPV2C
+                 || sptr->version == SNMP_VERSION_2c
+#endif
+                ) && minor == SNMPD_CALLBACK_SEND_TRAP2) {
                 if (nptr->snmpNotifyType == SNMPNOTIFYTYPE_INFORM) {
                     template_pdu->command = SNMP_MSG_INFORM;
                 } else {
@@ -198,7 +204,9 @@ notifyTable_register_notifications(int major, int minor,
         memcpy((void *) pptr->secName, (void *) ss->securityName,
                ss->securityNameLen);
         pptr->secName[ss->securityNameLen] = 0;
-    } else {
+    }
+#if !defined(DISABLE_SNMPV1) || !defined(DISABLE_SNMPV2C)
+       else {
         pptr->secModel = ss->version == SNMP_VERSION_1 ?
             SNMP_SEC_MODEL_SNMPv1 : SNMP_SEC_MODEL_SNMPv2c;
         pptr->secLevel = SNMP_SEC_LEVEL_NOAUTH;
@@ -210,6 +218,7 @@ notifyTable_register_notifications(int major, int minor,
             pptr->secName[ss->community_len] = 0;
         }
     }
+#endif
     pptr->storageType = ST_READONLY;
     pptr->rowStatus = RS_ACTIVE;
     snmpTargetParamTable_add(pptr);

@@ -88,8 +88,10 @@ snmp_parse_args_descriptions(FILE * outf)
             "  -H\t\t\tdisplay configuration file directives understood\n");
     fprintf(outf, "  -v 1|2c|3\t\tspecifies SNMP version to use\n");
     fprintf(outf, "  -V, --version\t\tdisplay package version number\n");
+#if !defined(DISABLE_SNMPV1) || !defined(DISABLE_SNMPV2C)
     fprintf(outf, "SNMP Version 1 or 2c specific\n");
     fprintf(outf, "  -c COMMUNITY\t\tset the community string\n");
+#endif /* support for community based SNMP */
     fprintf(outf, "SNMP Version 3 specific\n");
     fprintf(outf,
             "  -a PROTOCOL\t\tset authentication protocol (MD5|SHA)\n");
@@ -297,11 +299,17 @@ snmp_parse_args(int argc, char **argv, netsnmp_session *session,
             break;
 
         case 'v':
+#ifndef DISABLE_SNMPV1
             if (!strcmp(optarg, "1")) {
                 session->version = SNMP_VERSION_1;
-            } else if (!strcasecmp(optarg, "2c")) {
+            }
+#endif
+#ifndef DISABLE_SNMPV2C
+            if (!strcasecmp(optarg, "2c")) {
                 session->version = SNMP_VERSION_2c;
-            } else if (!strcasecmp(optarg, "3")) {
+            }
+#endif
+            if (!strcasecmp(optarg, "3")) {
                 session->version = SNMP_VERSION_3;
             } else {
                 fprintf(stderr,
@@ -569,21 +577,34 @@ snmp_parse_args(int argc, char **argv, netsnmp_session *session,
          */
         if (!session->version) {
             switch (DEFAULT_SNMP_VERSION) {
+#ifndef DISABLE_SNMPV1
             case 1:
                 session->version = SNMP_VERSION_1;
                 break;
+#endif
 
+#ifndef DISABLE_SNMPV2C
             case 2:
                 session->version = SNMP_VERSION_2c;
                 break;
+#endif
 
             case 3:
                 session->version = SNMP_VERSION_3;
                 break;
+
+            default:
+                snmp_log(LOG_ERR, "Can't determine a valid SNMP version for the session\n");
+                return(-2);
             }
         } else {
+#ifndef DISABLE_SNMPV1
             if (session->version == NETSNMP_DS_SNMP_VERSION_1)  /* bogus value.  version 1 actually = 0 */
                 session->version = SNMP_VERSION_1;
+#else
+            snmp_log(LOG_ERR, "Can't determine a valid SNMP version for the session\n");
+            return(-2);
+#endif
         }
     }
 
@@ -661,6 +682,7 @@ snmp_parse_args(int argc, char **argv, netsnmp_session *session,
     }
     session->peername = argv[optind++]; /* hostname */
 
+#if !defined(DISABLE_SNMPV1) || !defined(DISABLE_SNMPV2C)
     /*
      * If v1 or v2c, check community has been set, either by a -c option above,
      * or via a default token somewhere.  
@@ -679,6 +701,7 @@ snmp_parse_args(int argc, char **argv, netsnmp_session *session,
         session->community = (unsigned char *)Cpsz;
         session->community_len = strlen(Cpsz);
     }
+#endif /* support for community based SNMP */
 
     return optind;
 }

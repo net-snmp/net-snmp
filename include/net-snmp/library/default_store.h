@@ -91,8 +91,12 @@ extern          "C" {
     /*
      * special meanings for the default SNMP version slot (NETSNMP_DS_LIB_SNMPVERSION) 
      */
+#ifndef DISABLE_SNMPV1
 #define NETSNMP_DS_SNMP_VERSION_1    128        /* bogus */
+#endif
+#ifndef DISABLE_SNMPV2C
 #define NETSNMP_DS_SNMP_VERSION_2c   1  /* real */
+#endif
 #define NETSNMP_DS_SNMP_VERSION_3    3  /* real */
 
 

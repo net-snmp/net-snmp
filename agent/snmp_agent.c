@@ -1382,6 +1382,7 @@ netsnmp_wrap_up_request(netsnmp_agent_session *asp, int status)
          * May need to "dumb down" a SET error status for a
          * v1 query.  See RFC2576 - section 4.3
          */
+#ifndef DISABLE_SNMPV1
         if ((asp->pdu->command == SNMP_MSG_SET) &&
             (asp->pdu->version == SNMP_VERSION_1)) {
             switch (asp->status) {
@@ -1430,6 +1431,7 @@ netsnmp_wrap_up_request(netsnmp_agent_session *asp, int status)
                 }
             }
         }
+#endif /* snmpv1 support */
     } /** if asp->pdu */
 
     /*
@@ -1631,6 +1633,7 @@ handle_snmp_packet(int op, netsnmp_session * session, int reqid,
              * access control setup is incorrect 
              */
             send_easy_trap(SNMP_TRAP_AUTHFAIL, 0);
+#if !defined(DISABLE_SNMPV1) || !defined(DISABLE_SNMPV2C)
             if (asp->pdu->version != SNMP_VERSION_1
                 && asp->pdu->version != SNMP_VERSION_2c) {
                 asp->pdu->errstat = SNMP_ERR_AUTHORIZATIONERROR;
@@ -1642,12 +1645,15 @@ handle_snmp_packet(int op, netsnmp_session * session, int reqid,
                 netsnmp_remove_and_free_agent_snmp_session(asp);
                 return 1;
             } else {
+#endif /* support for community based SNMP */
                 /*
                  * drop the request 
                  */
                 netsnmp_remove_and_free_agent_snmp_session(asp);
                 return 0;
+#if !defined(DISABLE_SNMPV1) || !defined(DISABLE_SNMPV2C)
             }
+#endif /* support for community based SNMP */
         }
     }
 

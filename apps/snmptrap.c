@@ -149,15 +149,17 @@ main(int argc, char *argv[])
 {
     netsnmp_session session, *ss;
     netsnmp_pdu    *pdu, *response;
-    in_addr_t      *pdu_in_addr_t;
     oid             name[MAX_OID_LEN];
     size_t          name_length;
     int             arg;
     int             status;
-    char           *trap = NULL, *specific = NULL, *description =
-        NULL, *agent = NULL;
+    char           *trap = NULL;
     char           *prognam;
     int             exitval = 0;
+#ifndef DISABLE_SNMPV1
+    char           *specific = NULL, *description = NULL, *agent = NULL;
+    in_addr_t      *pdu_in_addr_t;
+#endif
 
     prognam = strrchr(argv[0], '/');
     if (prognam)
@@ -247,6 +249,7 @@ main(int argc, char *argv[])
         exit(1);
     }
 
+#ifndef DISABLE_SNMPV1
     if (session.version == SNMP_VERSION_1) {
         if (inform) {
             fprintf(stderr, "Cannot send INFORM as SNMPv1 PDU\n");
@@ -317,7 +320,9 @@ main(int argc, char *argv[])
             pdu->time = get_uptime();
         else
             pdu->time = atol(description);
-    } else {
+    } else
+#endif
+    {
         long            sysuptime;
         char            csysuptime[20];
 

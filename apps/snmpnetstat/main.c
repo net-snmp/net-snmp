@@ -215,11 +215,16 @@ main(int argc, char *argv[])
 
         case 'v':
             argp = optarg;
+            version = -1;
+#ifndef DISABLE_SNMPV1
             if (!strcasecmp(argp, "1"))
                 version = SNMP_VERSION_1;
-            else if (!strcasecmp(argp, "2c"))
+#endif
+#ifndef DISABLE_SNMPV2C
+            if (!strcasecmp(argp, "2c"))
                 version = SNMP_VERSION_2c;
-            else {
+#endif
+            if (version == -1) {
                 fprintf(stderr, "Invalid version: %s\n", argp);
                 usage();
                 exit(1);
@@ -279,19 +284,25 @@ main(int argc, char *argv[])
 		                     NETSNMP_DS_LIB_SNMPVERSION);
         if (!version) {
             switch (DEFAULT_SNMP_VERSION) {
+#ifndef DISABLE_SNMPV1
             case 1:
                 version = SNMP_VERSION_1;
                 break;
+#endif
+#ifndef DISABLE_SNMPV2C
             case 2:
                 version = SNMP_VERSION_2c;
                 break;
+#endif
             case 3:
                 version = SNMP_VERSION_3;
                 break;
             }
+#ifndef DISABLE_SNMPV1
         } else if (version == NETSNMP_DS_SNMP_VERSION_1) {
                           /* Bogus value. version1 = 0 */
             version = SNMP_VERSION_1;
+#endif
         }
     }
     if (optind < argc) {
@@ -322,7 +333,8 @@ main(int argc, char *argv[])
     snmp_sess_init(&session);
     session.peername = hostname;
     session.timeout = timeout;
-    if (version == SNMP_VERSION_1 || version == SNMP_VERSION_2c) {
+#if !defined(DISABLE_SNMPV1) || !defined(DISABLE_SNMPV2C)
+    if (version != SNMP_VERSION_3) {
         if (!community) {
             fprintf(stderr, "Missing community name.\n");
             exit(1);
@@ -331,6 +343,7 @@ main(int argc, char *argv[])
         session.community = (u_char *) community;
         session.community_len = strlen(community);
     }
+#endif
 
     SOCK_STARTUP;
 

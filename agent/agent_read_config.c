@@ -216,6 +216,7 @@ init_agent_read_config(const char *app)
 
     if (netsnmp_ds_get_boolean(NETSNMP_DS_APPLICATION_ID, 
 			       NETSNMP_DS_AGENT_ROLE) == MASTER_AGENT) {
+#if !defined(DISABLE_SNMPV1) || !defined(DISABLE_SNMPV2C)
         register_app_config_handler("trapsink",
                                     snmpd_parse_config_trapsink,
                                     snmpd_free_trapsinks,
@@ -226,14 +227,17 @@ init_agent_read_config(const char *app)
         register_app_config_handler("informsink",
                                     snmpd_parse_config_informsink, NULL,
                                     "host [community] [port]");
+#endif /* support for community based SNMP */
         register_app_config_handler("trapsess",
                                     snmpd_parse_config_trapsess, NULL,
                                     "[snmpcmdargs] host");
     }
+#if !defined(DISABLE_SNMPV1) || !defined(DISABLE_SNMPV2C)
     register_app_config_handler("trapcommunity",
                                 snmpd_parse_config_trapcommunity,
                                 snmpd_free_trapcommunity,
                                 "community-string");
+#endif /* support for community based SNMP */
 #ifdef HAVE_UNISTD_H
     register_app_config_handler("agentuser",
                                 snmpd_set_agent_user, NULL, "userid");

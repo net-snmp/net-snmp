@@ -172,6 +172,12 @@
 /* Define if mib loading and parsing code should not be included */
 #undef DISABLE_MIB_LOADING
 
+/* Define if SNMPv1 code should not be included */
+#undef DISABLE_SNMPV1
+
+/* Define if SNMPv2c code should not be included */
+#undef DISABLE_SNMPV2C
+
 /* Define to 1 if you have the `AES_cfb128_encrypt' function. */
 #undef HAVE_AES_CFB128_ENCRYPT
 
@@ -1387,7 +1393,7 @@
 #define config_parse_dot_conf(w,x,y,z)
 #define config_add_mib(x)
   
-#if defined (WIN32) || defined (mingw32) || defined (cygwin)
+#ifdef WIN32
 #define ENV_SEPARATOR ";"
 #define ENV_SEPARATOR_CHAR ';'
 #else
@@ -1466,5 +1472,6 @@
 #define NETSNMP_CPP_WRAP_START
 #define NETSNMP_CPP_WRAP_END
 #endif
+
 
 #endif /* NET_SNMP_CONFIG_H */

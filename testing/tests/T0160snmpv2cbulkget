@@ -4,6 +4,8 @@
 
 HEADER SNMPv2 bulkget of system components
 
+SKIPIF DISABLE_SNMPV2C
+
 #
 # Begin test
 #

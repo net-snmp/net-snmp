@@ -4,6 +4,8 @@
 
 HEADER SNMPv2c traps received and sent by tools
 
+SKIPIF DISABLE_SNMPV2C
+
 #
 # Begin test
 #

@@ -1015,8 +1015,10 @@ Optional Features:
   --disable-manuals               Do not install the manuals.
   --disable-scripts               Do not install the scripts (mib2c, ...).
   --disable-mibs                  Do not install the mib files.
-  --disable-mib-loading            Do not include code that parses and
-                                   manipulates the mib files.
+  --disable-mib-loading           Do not include code that parses and
+                                  manipulates the mib files.
+  --disable-snmpv1                Do not include code that implements SNMPv1.
+  --disable-snmpv2c               Do not include code that implements SNMPv2c.
   --enable-ipv6                   Generate IPv6 ready version.
   --enable-local-smux             Restrict SMUX connections to localhost (by default).
   --enable-debugging              Outputs extra debugging information at all
@@ -1826,6 +1828,32 @@ if test "x$enable_mib_loading" = "xno"; then
 
 cat >>confdefs.h <<\_ACEOF
 #define DISABLE_MIB_LOADING 1
+_ACEOF
+
+fi
+
+# Check whether --enable-snmpv1 or --disable-snmpv1 was given.
+if test "${enable_snmpv1+set}" = set; then
+  enableval="$enable_snmpv1"
+
+fi;
+if test "x$enable_snmpv1" = "xno"; then
+
+cat >>confdefs.h <<\_ACEOF
+#define DISABLE_SNMPV1 1
+_ACEOF
+
+fi
+
+# Check whether --enable-snmpv2c or --disable-snmpv2c was given.
+if test "${enable_snmpv2c+set}" = set; then
+  enableval="$enable_snmpv2c"
+
+fi;
+if test "x$enable_snmpv1" = "xno"; then
+
+cat >>confdefs.h <<\_ACEOF
+#define DISABLE_SNMPV2C 1
 _ACEOF
 
 fi
@@ -5176,7 +5204,7 @@ test "x$enable_libtool_lock" != xno && enable_libtool_lock=yes
 case $host in
 *-*-irix6*)
   # Find out which ABI we are using.
-  echo '#line 5179 "configure"' > conftest.$ac_ext
+  echo '#line 5207 "configure"' > conftest.$ac_ext
   if { (eval echo "$as_me:$LINENO: \"$ac_compile\"") >&5
   (eval $ac_compile) 2>&5
   ac_status=$?
@@ -5719,7 +5747,7 @@ chmod -w .
 save_CFLAGS="$CFLAGS"
 CFLAGS="$CFLAGS -o out/conftest2.$ac_objext"
 compiler_c_o=no
-if { (eval echo configure:5722: \"$ac_compile\") 1>&5; (eval $ac_compile) 2>out/conftest.err; } && test -s out/conftest2.$ac_objext; then
+if { (eval echo configure:5750: \"$ac_compile\") 1>&5; (eval $ac_compile) 2>out/conftest.err; } && test -s out/conftest2.$ac_objext; then
   # The compiler can only warn and ignore the option if not recognized
   # So say no if there are warnings
   if test -s out/conftest.err; then
@@ -7589,7 +7617,7 @@ else
     lt_dlunknown=0; lt_dlno_uscore=1; lt_dlneed_uscore=2
   lt_status=$lt_dlunknown
   cat > conftest.$ac_ext <<EOF
-#line 7592 "configure"
+#line 7620 "configure"
 #include "confdefs.h"
 
 #if HAVE_DLFCN_H
@@ -7687,7 +7715,7 @@ else
     lt_dlunknown=0; lt_dlno_uscore=1; lt_dlneed_uscore=2
   lt_status=$lt_dlunknown
   cat > conftest.$ac_ext <<EOF
-#line 7690 "configure"
+#line 7718 "configure"
 #include "confdefs.h"
 
 #if HAVE_DLFCN_H
