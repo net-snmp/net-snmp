@@ -5,6 +5,9 @@
 
 #include <config.h>
 
+#if HAVE_SYS_PARAM_H
+#include <sys/param.h>
+#endif
 #include <sys/stat.h>
 #if TIME_WITH_SYS_TIME
 # include <sys/time.h>
