@@ -1,0 +1,168 @@
+
+#
+# standard target definitions.  Set appropriate variables to make use of them.
+#
+# note: the strange use of the "it" variable is for shell parsing when
+# there is no targets to install for that rule.
+#
+
+# the standard items to build: libraries, bins, and sbins
+STANDARDTARGETS=$(INSTALLLIBS) $(INSTALLBINPROGS) $(INSTALLSBINPROGS)
+
+standardall: subdirs $(STANDARDTARGETS)
+
+subdirs:
+	@if test "$(SUBDIRS)" != ""; then \
+		it="$(SUBDIRS)" ; \
+		for i in $$it ; do       \
+			echo "making all in `pwd`/$$i"; \
+	                ( cd $$i ; $(MAKE)) ;   \
+	        done \
+	fi
+
+install: installheaders installlibs installprogs installsubdirs $(OTHERINSTALL)
+
+installprogs: installbin installsbin
+
+installheaders:
+	@if test "$(INSTALLHEADERS)" != "" ; then \
+		echo creating directory $(includedir) ; \
+		it="$(INSTALLHEADERS)" ; \
+		$(SHELL) $(top_srcdir)/mkinstalldirs $(includedir) ; \
+	        for i in $$it ; do \
+			$(INSTALL) $(top_srcdir)/include/net-snmp/$$i $(includedir) ; \
+	                echo "installing $$i in $(includedir)" ; \
+	        done \
+	fi
+	@if test "$(INCLUDESUBDIRHEADERS)" != "" ; then \
+		echo creating directory $(includedir)/$(INCLUDESUBDIR) ; \
+		it="$(INCLUDESUBDIRHEADERS)" ; \
+		$(SHELL) $(top_srcdir)/mkinstalldirs $(includedir)/$(INCLUDESUBDIR) ; \
+	        for i in $$it ; do \
+			$(INSTALL) $(top_srcdir)/include/net-snmp/$(INCLUDESUBDIR)/$$i $(includedir)/$(INCLUDESUBDIR) ; \
+	                echo "installing $$i in $(includedir)/$(INCLUDESUBDIR)" ; \
+	        done \
+	fi
+	@if test "$(INSTALLUCDHEADERS)" != "" ; then \
+		echo creating directory $(ucdincludedir) ; \
+		it="$(INSTALLUCDHEADERS)" ; \
+		$(SHELL) $(top_srcdir)/mkinstalldirs $(ucdincludedir) ; \
+	        for i in $$it ; do \
+			$(INSTALL) $(top_srcdir)/include/ucd-snmp/$$i $(ucdincludedir) ; \
+	                echo "installing $$i in $(ucdincludedir)" ; \
+	        done \
+	fi
+
+installlibs: $(INSTALLLIBS)
+	@if test "$(INSTALLLIBS)" != ""; then \
+		it="$(INSTALLLIBS)" ; \
+		$(SHELL) $(top_srcdir)/mkinstalldirs $(libdir) ; \
+                $(INSTALL) $(INSTALLLIBS) $(libdir) ;              \
+	        for i in $$it ; do    \
+	                echo "installing $$i in $(libdir)"; \
+	                $(RANLIB) $(libdir)/$$i ; \
+	        done ; \
+		$(LIB_LDCONFIG_CMD) ; \
+	fi
+
+installbin: $(INSTALLBINPROGS)
+	@if test "$(INSTALLBINPROGS)" != ""; then \
+		$(SHELL) $(top_srcdir)/mkinstalldirs $(bindir) ; \
+		it="$(INSTALLBINPROGS)" ; \
+	        $(INSTALL) $(INSTALLBINPROGS) $(bindir) ;              \
+	        for i in $$it ; do   \
+	                echo "installing $$i in $(bindir)"; \
+	        done \
+	fi
+
+installsbin: $(INSTALLSBINPROGS)
+	@if test "$(INSTALLSBINPROGS)" != ""; then \
+		it="$(INSTALLSBINPROGS)" ; \
+		$(SHELL) $(top_srcdir)/mkinstalldirs $(sbindir) ; \
+	        $(INSTALL) $(INSTALLSBINPROGS) $(sbindir) ;              \
+	        for i in $$it ; do   \
+	                echo "installing $$i in $(sbindir)"; \
+	        done \
+	fi
+
+installsubdirs:
+	@if test "$(SUBDIRS)" != ""; then \
+		it="$(SUBDIRS)" ; \
+		for i in $$it ; do       \
+			echo "making install in `pwd`/$$i"; \
+	                ( cd $$i ; $(MAKE) install) ;   \
+	        done \
+	fi
+
+#
+# cleaning targets
+#
+clean: cleansubdirs
+	rm -f core ${OBJS} ${LOBJS} $(STANDARDTARGETS) $(OTHERCLEANTARGETS)
+	rm -rf .libs
+
+cleansubdirs:
+	@if test "$(SUBDIRS)" != ""; then \
+		it="$(SUBDIRS)" ; \
+		for i in $$it ; do       \
+			echo "making clean in `pwd`/$$i"; \
+	                ( cd $$i ; $(MAKE) clean) ;   \
+	        done \
+	fi
+
+lint:
+	lint -nhx $(CSRCS)
+
+#
+# wacky dependency building.
+#
+depend: dependdirs
+	@if test -f Makefile.depend ; then \
+		makedepend $(CPPFLAGS) -o.lo $(srcdir)/*.c ; \
+	fi
+
+
+nosysdepend: nosysdependdirs
+	@if test -f Makefile.depend ; then \
+		makedepend $(CPPFLAGS) -o.lo $(srcdir)/*.c ; \
+		perl -n -i.bak $(top_srcdir)/makenosysdepend.pl Makefile ; \
+	fi
+
+distdepend: nosysdepend distdependdirs
+	@if test -f Makefile.depend ; then \
+		perl $(top_srcdir)/makefileindepend.pl ; \
+	fi
+
+dependdirs:
+	@if test "$(SUBDIRS)" != ""; then \
+		it="$(SUBDIRS)" ; \
+		for i in $$it ; do       \
+			echo "making depend in `pwd`/$$i"; \
+	                ( cd $$i ; $(MAKE) depend) ;   \
+	        done \
+	fi
+
+nosysdependdirs:
+	@if test "$(SUBDIRS)" != ""; then \
+		it="$(SUBDIRS)" ; \
+		for i in $$it ; do       \
+			echo "making nosysdepend in `pwd`/$$i"; \
+	                ( cd $$i ; $(MAKE) nosysdepend) ;   \
+	        done \
+	fi
+
+distdependdirs:
+	@if test "$(SUBDIRS)" != ""; then \
+		it="$(SUBDIRS)" ; \
+		for i in $$it ; do       \
+			echo "making distdepend in `pwd`/$$i"; \
+	                ( cd $$i ; $(MAKE) distdepend) ;   \
+	        done \
+	fi
+
+# These aren't real targets, let gnu's make know that.
+.PHONY: clean cleansubdirs lint \
+	install installprogs installheaders installlibs \
+	installbin installsbin installsubdirs \
+	all subdirs standardall \
+	depend nosysdepend distdepend dependdirs nosysdependdirs distdependdirs

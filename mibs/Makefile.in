@@ -4,6 +4,11 @@
 
 top_builddir=..
 
+#
+# Stuff here
+#
+OTHERINSTALL=mibsinstall
+
 V1MIBS	= RFC1155-SMI.txt RFC1213-MIB.txt RFC-1215.txt
 
 V2MIBS = SNMPv2-CONF.txt SNMPv2-SMI.txt SNMPv2-TC.txt SNMPv2-TM.txt \
@@ -36,9 +41,9 @@ MIBS	= $(V1MIBS) $(V2MIBS) $(V3MIBS) $(RFCMIBS) \
 	$(AGENTMIBS) $(IANAMIBS) \
 	$(UCDMIBS)
 
-all:
+all: standardall
 
-install: installdirs
+mibsinstall: installdirs
 	@$(INSTALL) $(MIBS) $(mibdir)
 	@for i in $(MIBS) ; do echo "install: installed $$i in $(mibdir)" ; done
 

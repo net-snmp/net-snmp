@@ -4,30 +4,56 @@
 
 top_builddir	= ..
 
-TARG		= snmpd
-LIBTARG		= \
-		libnetsnmpagent.$(LIB_EXTENSION)$(LIB_VERSION) \
+#
+# what to install
+#
+SUBDIRS=helpers mibgroup
+
+INSTALLSBINPROGS= snmpd$(EXEEXT)
+INSTALLLIBS	= libnetsnmpagent.$(LIB_EXTENSION)$(LIB_VERSION) \
 		libnetsnmpmibs.$(LIB_EXTENSION)$(LIB_VERSION)
-CLEANTARG	= libnetsnmpagent.a libnetsnmpmibs.a
-USELIBS		= ../snmplib/libsnmp.$(LIB_EXTENSION)$(LIB_VERSION)
+
+INCLUDESUBDIR=agent
+INCLUDESUBDIRHEADERS=agent_read_config.h \
+	agent_registry.h \
+	agent_index.h \
+	agent_trap.h \
+	auto_nlist.h \
+	ds_agent.h \
+	snmp_agent.h \
+	snmp_vars.h \
+	var_struct.h \
+	agent_handler.h \
+	net-snmp-agent-includes.h \
+	agent_callbacks.h
+
+# XXX: need to install these  They're really UCD specific, however.
+BROKEINSTALL= \
+	mib_modules.h \
+	mibgroup/struct.h \
+	mibgroup/util_funcs.h \
+	mibgroup/mibincl.h \
+	mibgroup/header_complex.h
+
+#
+# how to build it info
+#
+USELIBS		= ../snmplib/libnetsnmp.$(LIB_EXTENSION)$(LIB_VERSION)
 HELPERLIB	= helpers/libnetsnmphelpers.$(LIB_EXTENSION)$(LIB_VERSION)
-#LOCAL_LIBS	= -L../snmplib -L.
 LOCAL_LIBS	= 
-#LIBS		= $(CC_RUNTIME_ARG) -lsnmp @WRAPLIBS@ @LIBS@
-LIBS		= ../snmplib/libsnmp.$(LIB_EXTENSION)$(LIB_VERSION) @AGENTLIBS@
-#OUR_AGENT_LIBS	= $(CC_RUNTIME_ARG) -lucdagent -lucdmibs -lsnmp @WRAPLIBS@ $(LIBS) @DLLIBS@
-OUR_AGENT_LIBS	= $(LIBTARG) $(HELPERLIB) @WRAPLIBS@ $(LIBS) @DLLIBS@
+LIBS		= ../snmplib/libnetsnmp.$(LIB_EXTENSION)$(LIB_VERSION) \
+		  @AGENTLIBS@
+OUR_AGENT_LIBS	= $(INSTALLLIBS) $(HELPERLIB) @WRAPLIBS@ $(LIBS) @DLLIBS@
 CPPFLAGS	= -I../include -I$(top_srcdir)/include \
 		  -I.. -I$(srcdir)/.. -I$(srcdir)/../snmplib \
 		  -I$(srcdir) -I. -I$(srcdir)/mibgroup -Imibgroup @CPPFLAGS@
-
 
 #
 # Objects
 #
 
 # libnetsnmpmib objects.
-LMIBOBJS		= @mibgroup_list_lo@ mib_modules.lo auto_nlist.lo
+LMIBOBJS	= @mibgroup_list_lo@ mib_modules.lo auto_nlist.lo
 MIBOBJS		= @mibgroup_list_o@ mib_modules.o auto_nlist.o
 
 # libnetsnmpagent objects
@@ -42,33 +68,11 @@ LLIBAGENTOBJS=snmp_agent.lo snmp_vars.lo agent_read_config.lo agent_registry.lo\
 AGENTOBJS=snmpd.o
 LAGENTOBJS=snmpd.lo
 
-INSTALLHEADERS=$(top_srcdir)/include/net-snmp/agent/agent_read_config.h \
-	$(top_srcdir)/include/net-snmp/agent/agent_registry.h \
-	$(top_srcdir)/include/net-snmp/agent/agent_index.h \
-	$(top_srcdir)/include/net-snmp/agent/agent_trap.h \
-	$(top_srcdir)/include/net-snmp/agent/auto_nlist.h \
-	$(top_srcdir)/include/net-snmp/agent/ds_agent.h \
-	$(top_srcdir)/include/net-snmp/agent/snmp_agent.h \
-	$(top_srcdir)/include/net-snmp/agent/snmp_vars.h \
-	$(top_srcdir)/include/net-snmp/agent/var_struct.h \
-	$(top_srcdir)/include/net-snmp/agent/agent_handler.h \
-	$(top_srcdir)/include/net-snmp/agent/net-snmp-agent-includes.h \
-	$(top_srcdir)/include/net-snmp/agent/agent_callbacks.h \
-	$(top_srcdir)/include/net-snmp/agent/mib_modules.h \
-	mibgroup/struct.h \
-	mibgroup/util_funcs.h \
-	mibgroup/mibincl.h \
-	mibgroup/header_complex.h
+all: standardall
 
-INSTALLDIRS=helpers
-
-all: subdirs snmpd$(EXEEXT) libnetsnmpagent.$(LIB_EXTENSION)$(LIB_VERSION)
-
-
-subdirs:
-	cd helpers; $(MAKE)
-	cd mibgroup; $(MAKE)
-
+#
+# build stuff targets
+#
 getkstat: getkstat.o
 	$(CC) $(CFLAGS) -o $@ $? $(LOCAL_LIBS) $(LIBS)
 
@@ -93,46 +97,5 @@ libnetsnmpmibs.$(LIB_EXTENSION)$(LIB_VERSION):    ${LMIBOBJS}
 	$(LIB_LD_CMD) libnetsnmpmibs.$(LIB_EXTENSION)$(LIB_VERSION) ${LMIBOBJS}  $(LIB_LD_LIBS)
 	$(RANLIB) libnetsnmpmibs.$(LIB_EXTENSION)$(LIB_VERSION)
 
-clean:
-	rm -f core *.o *.lo *.exe ${TARG} ${LIBTARG} ${CLEANTARG}
-	rm -rf .libs
-	cd mibgroup; $(MAKE) clean
-	cd helpers; $(MAKE) clean
-
-
-install:  installdirs
-	@$(INSTALL) $(INSTALLHEADERS) $(includedir)/agent
-	@for i in $(INSTALLHEADERS) ; do echo "install:  installed $$i in $(includedir)" ; done
-	@$(INSTALL) $(LIBTARG) $(libdir)
-	@for i in $(LIBTARG) ; do $(RANLIB) $(libdir)/$$i ; echo "install:  installed $$i in $(libdir)" ; done
-	$(LIB_LDCONFIG_CMD)
-	@$(INSTALL) $(TARG) $(sbindir) ; echo "install:  installed $(TARG) in $(sbindir) "
-	@for i in $(INSTALLDIRS) ; do	\
-            ( cd $$i ; $(MAKE) install ) ;	\
-	done
-
-installdirs:
-	@$(SHELL) $(srcdir)/../mkinstalldirs $(sbindir) $(snmplibdir) $(includedir)/agent $(libdir)
-	@-$(SHELL) $(srcdir)/../mkinstalldirs $(persistentdir)
-
-
-dependlocal: 
-	makedepend $(CPPFLAGS) -o.lo $(srcdir)/*.c
-
-depend: dependlocal
-	cd mibgroup; $(MAKE) depend; cd ..
-
-nosysdepend:
-	cd mibgroup; $(MAKE) nosysdepend; cd ..
-	makedepend $(CPPFLAGS) -o.lo *.c
-	perl -n -i.bak $(top_srcdir)/makenosysdepend.pl Makefile
-
-makefileindepend: nosysdepend
-	cd mibgroup; $(MAKE) makefileindepend; cd ..
-	perl $(top_srcdir)/makefileindepend.pl
-
 snmp_vars.lo: @module_list_h@
 read_config.lo: @module_list_h@
-
-# DO NOT DELETE THIS LINE -- make depend depends on it.
-

@@ -1,4 +1,17 @@
+#
+# Makefile for the man page directory
+#
 top_builddir=..
+
+#
+# install stuff
+#
+
+OTHERINSTALL=maninstall
+
+#
+# local stuff
+#
 
 MAN1 = snmpcmd.1 snmpget.1 snmpset.1 snmpwalk.1 snmpbulkwalk.1 snmpbulkget.1 \
 	snmpgetnext.1 snmptest.1 snmpnetstat.1 snmptranslate.1 snmpstatus.1 \
@@ -28,8 +41,9 @@ MAN8 = snmptrapd.8
 MANALL = $(MAN1) $(MAN1G) $(MAN3) $(MAN3G) $(MAN5) $(MAN5G) $(MAN8)
 
 TARGETS = $(MAN5G) $(MAN1G) $(MAN3G)
+OTHERCLEANTARGETS=$(TARGETS) default_store.3.h
 
-all: $(TARGETS)
+all: $(TARGETS) standardall
 
 snmpd.conf.5: snmpd.conf.5.def ../sedscript
 	$(SED) -f ../sedscript < $(srcdir)/snmpd.conf.5.def > snmpd.conf.5
@@ -55,7 +69,7 @@ default_store.3.h: $(srcdir)/../include/net-snmp/default_store.h
 default_store.3: $(srcdir)/default_store.3.top default_store.3.h $(srcdir)/default_store.3.bot
 	cat $(srcdir)/default_store.3.top default_store.3.h $(srcdir)/default_store.3.bot > default_store.3
 
-install:  installdirs $(MAN1) $(MAN1G) $(MAN3) $(MAN5) $(MAN5G) $(MAN8)
+maninstall:  installdirs $(MAN1) $(MAN1G) $(MAN3) $(MAN5) $(MAN5G) $(MAN8)
 	@$(INSTALL) $(MAN1) $(man1dir)
 	@for i in $(MAN1) ; do echo "install:  installed $$i in $(man1dir)" ; done
 	@$(INSTALL) $(MAN1G) $(man1dir)
@@ -71,12 +85,12 @@ install:  installdirs $(MAN1) $(MAN1G) $(MAN3) $(MAN5) $(MAN5G) $(MAN8)
 	@$(INSTALL) $(MAN8) $(man8dir)
 	@for i in $(MAN8) ; do echo "install:  installed $$i in $(man8dir)" ; done
 
-html: $(MANALL)
-	for i in $(MANALL); do base=`echo $$i | sed 's/.[0-9]$$//;'` ; echo "<HTML><BODY bgcolor=\"#ffffff\" background=\"../ucd-snmp-bg3.gif\"><PRE>" > $$base.html; nroff -man $$i | man2html -bare -title "$$base manual page" >> $$base.html; done
-
 installdirs:
 	@$(SHELL) $(srcdir)/../mkinstalldirs $(man1dir) $(man3dir) $(man5dir) $(man8dir)
 
-clean:
-	rm -f $(TARGETS)
-	rm -f default_store.3.h
+
+#
+# internal administrative
+#
+html: $(MANALL)
+	for i in $(MANALL); do base=`echo $$i | sed 's/.[0-9]$$//;'` ; echo "<HTML><BODY bgcolor=\"#ffffff\" background=\"../ucd-snmp-bg3.gif\"><PRE>" > $$base.html; nroff -man $$i | man2html -bare -title "$$base manual page" >> $$base.html; done

@@ -63,7 +63,7 @@
 #include <net-snmp/agent/agent_callbacks.h>
 #include <net-snmp/agent/agent_trap.h>
 #include <net-snmp/snmp_debug.h>
-#include "mib_module_config.h"
+#include <net-snmp/agent/mib_module_config.h>
 #ifdef USING_MIBII_SYSORTABLE_MODULE
 #include "mibII/sysORTable.h"
 #endif

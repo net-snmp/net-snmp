@@ -26,7 +26,7 @@
 # endif
 #endif
 
-#include "mib_module_config.h"
+#include <net-snmp/agent/mib_module_config.h>
 
 #include <net-snmp/asn1.h>
 #include <net-snmp/snmp_api.h>
