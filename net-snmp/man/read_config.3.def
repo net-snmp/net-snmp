@@ -55,9 +55,9 @@ configuration file flow is broken into the following phases:
 .PP
 registration of handlers.
 .PP
-reading of the configuration files for pre-mib parsing requirements.
+reading of the configuration files for pre-MIB parsing requirements.
 .PP
-reading of the textual mib files.
+reading of the textual MIB files.
 .PP
 reading of the configuration files for configuration directives.
 .PP
@@ -127,18 +127,18 @@ The
 function works identically to the 
 .B register_config_handler()
 function but is intended for config file tokens that need to be read
-in before the textual mibs are read in, probably because they will be
-used to configure the mib parser.  It is rarely the case that anything 
-but the snmp library itself should need to use this function.
+in before the textual MIBs are read in, probably because they will be
+used to configure the MIB parser.  It is rarely the case that anything 
+but the SNMP library itself should need to use this function.
 .IP snmpd_register_config_handler()
 This function performs exactly the same job as the
 .B register_config_handler()
 function, but doesn't require the file type argument (which is filled
-in by the snmpd agent).  It is intended that mib modules written for
+in by the snmpd agent).  It is intended that MIB modules written for
 the agent use this function instead of the 
 .B register_config_handler()
 function directly to allow the agent to have more control over which
-files the mib modules will read (which should be the 
+files the MIB modules will read (which should be the 
 .I snmpd.conf
 files).
 .IP unregister_config_handler()
@@ -182,7 +182,7 @@ function call should be called after registrations to appropriately
 register parser configuration tokens, parse the configuration file
 tokens registered with
 .B register_premib_handler(),
-read in the textual mib files using
+read in the textual MIB files using
 .B init_mib(),
 and finally parse the configuration file tokens registered with 
 .B register_config_handler().  
@@ -193,11 +193,11 @@ function is used, none of the following functions need to be called by
 the application:
 .PP
 .IP register_mib_handlers()
-The snmp library's routine to register it's configuration file
+The SNMP library's routine to register it's configuration file
 handlers.
 .IP read_premib_configs()
 The routine that parses the configuration files for tokens registered
-to be dealt with before the textual mibs are read in.  See 
+to be dealt with before the textual MIBs are read in.  See 
 .B read_configs()
 below.
 .IP read_configs()
