@@ -8,6 +8,7 @@ top_builddir=..
 # Stuff here
 #
 OTHERINSTALL=mibsinstall
+OTHERUNINSTALL=mibsuninstall
 
 
 V1MIBS	= RFC1155-SMI.txt RFC1213-MIB.txt RFC-1215.txt
@@ -54,6 +55,12 @@ mibsinstall: installdirs
 	@for i in $(MIBS) ; do \
 		$(INSTALL_DATA) $(srcdir)/$$i $(mibdir) ; \
 		echo "install: installed $$i in $(mibdir)" ; \
+	done
+
+mibsuninstall: installdirs
+	@for i in $(MIBS) ; do \
+		rm -f $(mibdir)/$$i ; \
+		echo "removed $$i from $(mibdir)" ; \
 	done
 
 installdirs:

@@ -56,6 +56,7 @@ LOBJS = *.lo
 all: standardall
 
 OTHERINSTALL=snmpinforminstall
+OTHERUNINSTALL=snmpinformuninstall
 
 #
 # build rules
@@ -122,3 +123,6 @@ libnetsnmptrapd.$(LIB_EXTENSION)$(LIB_VERSION): $(LLIBTRAPD_OBJS)
 snmpinforminstall:
 	rm -f $(bindir)/snmpinform$(EXEEXT)
 	$(LN_S) snmptrap$(EXEEXT) $(bindir)/snmpinform$(EXEEXT)
+
+snmpinformuninstall:
+	rm -f $(bindir)/snmpinform$(EXEEXT)
