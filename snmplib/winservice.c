@@ -4,6 +4,8 @@
  *
  */
 
+#ifdef WIN32
+
 #include <windows.h>
 #include <tchar.h>
 
@@ -46,8 +48,8 @@ static SERVICE_STATUS_HANDLE hServiceStatus = 0L;
      * Service Table Entry 
      */
 SERVICE_TABLE_ENTRY ServiceTableEntry[] = {
-  NULL, ServiceMain,		/* Service Main function */
-  NULL, NULL
+  {NULL, ServiceMain},		/* Service Main function */
+  {NULL, NULL}
 };
 
     /*
@@ -65,7 +67,7 @@ static INT (*ServiceEntryPoint) (INT Argc, LPTSTR Argv[]) = 0L;
      * To hold Stop Function address, to be called when STOP request
      * received from the SCM
      */
-static VOID (*StopFunction) () = 0L;
+static VOID (*StopFunction) (VOID) = 0L;
 
     /*
      * To register as Windows Service with SCM(Service Control Manager)
@@ -308,7 +310,7 @@ UnregisterService (LPCSTR lpszServiceName)
   TCHAR szRegAppLogKey[] =
     "SYSTEM\\CurrentControlSet\\Services\\EventLog\\Application\\";
   TCHAR szRegKey[512];
-  HKEY hKey = NULL;		/* Key to registry entry */
+/*  HKEY hKey = NULL;		?* Key to registry entry */
   __try
   {
     /*
@@ -494,7 +496,7 @@ DisplayError (LPCTSTR pszTitle)
 static BOOL
 UpdateServiceStatus (DWORD dwStatus, DWORD dwErrorCode, DWORD dwWaitHint)
 {
-  BOOL fReturn = FALSE;
+/*  BOOL fReturn = FALSE; ?* not used*/
   DWORD static dwCheckpoint = 1;
   DWORD dwControls = SERVICE_ACCEPT_STOP | SERVICE_ACCEPT_PAUSE_CONTINUE;
   if (g_fRunningAsService == FALSE)
@@ -907,7 +909,7 @@ ThreadFunction (LPVOID lpParam)
      * STOP command
      */
 VOID
-RegisterStopFunction (void (*StopFunc) ())
+RegisterStopFunction (VOID (*StopFunc) (VOID))
 {
   StopFunction = StopFunc;
 }
@@ -954,3 +956,6 @@ ProcessServiceContinue (VOID)
 	}
     }
 }
+
+#endif /* WIN32 */
+
