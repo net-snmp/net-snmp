@@ -503,7 +503,7 @@ void send_easy_trap (int trap,
   
 static void usage(char *prog)
 {
-  printf("\nUsage:  %s [-h] [-v] [-f] [-a] [-d] [-q] [-D] [-p NUM] [-L] [-l LOGFILE]",prog);
+  printf("\nUsage:  %s [-h] [-v] [-f] [-a] [-d] [-V] [-P PIDFILE] [-q] [-D] [-p NUM] [-L] [-l LOGFILE]",prog);
 #if HAVE_UNISTD_H
   printf(" [-u uid] [-g gid]");
 #endif
@@ -517,6 +517,8 @@ static void usage(char *prog)
   printf("-f\t\tDon't fork from the shell.\n");
   printf("-a\t\tLog addresses.\n");
   printf("-d\t\tDump sent and received UDP SNMP packets\n");
+  printf("-V\t\tVerbose display\n");
+  printf("-P PIDFILE\tUse PIDFILE to store process id\n");
   printf("-q\t\tPrint information in a more parsable format (quick-print)\n");
   printf("-D\t\tTurn on debugging output\n");
   printf("-p NUM\t\tRun on port NUM instead of the default:  161\n");
