@@ -113,7 +113,7 @@ ifTable_rowreq_ctx_init(ifTable_rowreq_ctx * rowreq_ctx,
      */
     if (NULL == user_init_ctx)
         rowreq_ctx->data.ifentry =
-            netsnmp_access_interface_entry_create(NULL);
+            netsnmp_access_interface_entry_create(NULL,0);
     else
         rowreq_ctx->data.ifentry =
             (netsnmp_interface_entry *) user_init_ctx;
@@ -1773,7 +1773,7 @@ ifTable_undo_setup(ifTable_rowreq_ctx * rowreq_ctx)
      */
     rowreq_ctx->undo->ifentry =
         netsnmp_access_interface_entry_create(rowreq_ctx->data.ifentry->
-                                              name);
+                                              name, rowreq_ctx->data.ifentry->index);
     if (NULL == rowreq_ctx->undo->ifentry)
         rc = MFD_ERROR;
     else
