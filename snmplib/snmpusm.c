@@ -1443,7 +1443,7 @@ usm_check_and_update_timeliness(
 	/*
 	 * This is a local reference.
 	 */
-	if ( secEngineIDLen == myIDLength
+	if ( (int)secEngineIDLen == myIDLength
 		&& memcmp (secEngineID, myID, myIDLength) == 0 )
 	{
 		u_int time_difference = myTime > time_uint ?
