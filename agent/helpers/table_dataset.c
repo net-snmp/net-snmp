@@ -335,9 +335,13 @@ netsnmp_table_row *
 netsnmp_table_data_set_clone_row(netsnmp_table_row *row)
 {
     netsnmp_table_data_set_storage *data, **newrowdata;
-    netsnmp_table_row *newrow = netsnmp_table_data_clone_row(row);
+    netsnmp_table_row *newrow;
 
-    if (!row || !newrow)
+    if (!row)
+        return NULL;
+
+    newrow = netsnmp_table_data_clone_row(row);
+    if (!newrow)
         return NULL;
 
     data = (netsnmp_table_data_set_storage *) row->data;
@@ -349,14 +353,18 @@ netsnmp_table_data_set_clone_row(netsnmp_table_row *row)
 
             memdup((u_char **) newrowdata, (u_char *) data,
                    sizeof(netsnmp_table_data_set_storage));
-            if (!*newrowdata)
+            if (!*newrowdata) {
+                netsnmp_table_dataset_delete_row(newrow);
                 return NULL;
+            }
 
             if (data->data.voidp) {
                 memdup((u_char **) & ((*newrowdata)->data.voidp),
                        (u_char *) data->data.voidp, data->data_len);
-                if (!(*newrowdata)->data.voidp)
+                if (!(*newrowdata)->data.voidp) {
+                    netsnmp_table_dataset_delete_row(newrow);
                     return NULL;
+                }
             }
         }
     }
@@ -794,7 +802,7 @@ netsnmp_config_parse_table_set(const char *token, char *line)
         (NULL == (tp = get_tree(table_name, table_name_length,
                                 get_tree_head())))) {
         config_pwarn
-            ("can't instatiate table %s since I can't find mib information about it\n");
+            ("can't instatiate table since I can't find mib information about it\n");
         return;
     }
 
@@ -814,7 +822,7 @@ netsnmp_config_parse_table_set(const char *token, char *line)
             (NULL ==
              (indexnode = get_tree(name, name_length, get_tree_head())))) {
             config_pwarn
-                ("can't instatiate table %s since I don't know anything about one index\n");
+                ("can't instatiate table since I don't know anything about one index\n");
             return;             /* xxx mem leak */
         }
 
