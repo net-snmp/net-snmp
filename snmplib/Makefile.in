@@ -50,6 +50,7 @@ INCLUDESUBDIRHEADERS=README \
 	system.h \
 	tools.h \
 	transform_oids.h \
+	winservice.h \
 	snmp_transport.h \
 	@transport_hdr_list@ \
 	@security_hdr_list@

@@ -144,6 +144,15 @@ typedef long    fd_mask;
 #include "mib_module_includes.h"
 
 /*
+ * Include winservice.h to support Windows Service
+ */
+#ifdef WIN32
+#include <windows.h>
+#include <tchar.h>
+#include <net-snmp/library/winservice.h>
+#endif
+
+/*
  * Globals.
  */
 #ifdef USE_LIBWRAP
@@ -160,6 +169,13 @@ int 		snmp_dump_packet;
 int             running          = 1;
 int		reconfig	 = 0;
 
+#ifdef WIN32
+/* SNMP Agent Status */
+#define AGENT_RUNNING 1
+#define AGENT_STOPPED 0
+int agent_status = AGENT_STOPPED;
+LPTSTR g_szAppName = _T("Net-Snmp Agent");   /* Application Name */
+#endif
 
 extern char **argvrestartp;
 extern char  *argvrestart;
@@ -177,13 +193,24 @@ static int sdlist[NUM_SOCKETS], sdlen = 0;
 int snmp_read_packet (int);
 int snmp_input (int, struct snmp_session *, int, struct snmp_pdu *, void *);
 static void usage (char *);
-int main (int, char **);
 static void SnmpTrapNodeDown (void);
 static int receive(void);
+#ifdef WIN32
+void StopSnmpAgent(void);
+int SnmpDaemonMain(int argc, TCHAR *argv[]);
+int __cdecl _tmain(int argc, TCHAR *argv[]);
+#else
+int main (int, char **);
+#endif
 
 static void usage(char *prog)
 {
+#ifdef WIN32
+        printf("\nUsage:  %s [-register] [OPTIONS] [LISTENING ADDRESSES]", prog);
+        printf("\n        %s -unregister", prog);
+#else
         printf("\nUsage:  %s [OPTIONS] [LISTENING ADDRESSES]", prog);
+#endif
 	printf("\n");
 	printf("\n\tVersion:  %s\n", netsnmp_get_version());
 	printf("\tWeb:      http://www.net-snmp.org/\n");
@@ -212,9 +239,17 @@ static void usage(char *prog)
 	printf("  -P FILE\t\tstore process id in FILE\n");
 	printf("  -q\t\t\tprint information in a more parsable format\n");
 	printf("  -r\t\t\tdo not exit if files only accessible to root\n\t\t\t  cannot be opened\n");
+#ifdef WIN32
+	printf("  -register\t\tregister as a Windows service\n");
+	printf("  \t\t\t  (followed by the startup parameter list)\n");
+	printf("  \t\t\t  Note that not all parameters are relevant when running as a service\n");
+#endif
 	printf("  -s\t\t\tlog warnings/messages to syslog\n");
 #if HAVE_UNISTD_H
 	printf("  -u UID\t\tchange to this uid (numeric or textual) after\n\t\t\t  opening transport endpoints\n");
+#endif
+#ifdef WIN32
+	printf("  -unregister\t\tunregister as a Windows service\n");
 #endif
 	printf("  -v, --version\t\tdisplay version information\n");
 	printf("  -V\t\t\tverbose display\n");
@@ -242,6 +277,14 @@ version(void)
 SnmpdShutDown(int a)
 {
 	running = 0;
+#ifdef WIN32
+	/*
+	 * In case of windows, select() in receive() function will not return 
+	 * on signal. Thats why following function is called, which closes the 
+	 * socket descriptors and causes the select() to return
+	 */
+	snmp_close_sessions();
+#endif
 }
 
 #ifdef SIGHUP
@@ -272,7 +315,8 @@ SnmpTrapNodeDown(void)
 }
 
 /*******************************************************************-o-******
- * main
+ * main - Non Windows
+ * SnmpDeamonMain - Windows to support windows serivce
  *
  * Parameters:
  *	 argc
@@ -287,7 +331,11 @@ SnmpTrapNodeDown(void)
  * Also successfully EXITs with zero for some options.
  */
 int
+#ifdef WIN32
+SnmpDaemonMain(int argc, TCHAR *argv[])
+#else
 main(int argc, char *argv[])
+#endif
 {
     char options[128] = "aAc:CdD::fhHI:l:LP:qrsV";
     int  arg, i, ret;
@@ -661,12 +709,18 @@ main(int argc, char *argv[])
 
     /*  We're up, log our version number.  */
     snmp_log(LOG_INFO, "NET-SNMP version %s\n", netsnmp_get_version());
+#ifdef WIN32
+    agent_status = AGENT_RUNNING;
+#endif
     snmp_addrcache_initialise();
 
     /*  Forever monitor the dest_port for incoming PDUs.  */
     DEBUGMSGTL(("snmpd/main", "We're up.  Starting to process data.\n"));
     receive();
 #include "mib_module_shutdown.h"
+#ifdef WIN32
+    agent_status = AGENT_STOPPED;
+#endif
     DEBUGMSGTL(("snmpd/main", "sending shutdown trap\n"));
     SnmpTrapNodeDown();
     DEBUGMSGTL(("snmpd/main", "Bye...\n"));
@@ -925,3 +979,79 @@ snmp_input(int op,
     return 1;
 
 } /* end snmp_input() */
+
+
+
+/* Windows Service Related functions */
+#ifdef WIN32
+/************************************************************
+* main function for Windows
+* Parse command line arguments for startup options,
+* to start as service or console mode application in windows.
+* Invokes appropriate startup funcitons depending on the 
+* parameters passesd
+*************************************************************/
+int
+__cdecl _tmain(int argc, TCHAR *argv[])
+{
+
+	/* Define Service Name and Description, which appears in windows SCM */
+	LPCTSTR lpszServiceName = g_szAppName; /* Service Registry Name */
+	LPCTSTR lpszServiceDisplayName = _T("Net SNMP Agent Daemon"); /* Display Name */
+	LPCTSTR lpszServiceDescription = _T("SNMP agent for windows from Net-SNMP");
+	InputParams InputOptions;
+
+
+	int nRunType = RUN_AS_CONSOLE;
+	nRunType = ParseCmdLineForServiceOption(argc,argv);
+
+	switch(nRunType)
+	{
+		case REGISTER_SERVICE:
+			/* Register As service */
+			InputOptions.Argc = argc;
+			InputOptions.Argv = argv;
+			RegisterService(lpszServiceName,
+							lpszServiceDisplayName,
+							lpszServiceDescription,
+							&InputOptions);
+			exit(0);
+			break;
+		case UN_REGISTER_SERVICE:
+			/* Unregister service */
+			UnregisterService(lpszServiceName);
+			exit(0);
+			break;
+		case RUN_AS_SERVICE:
+			/* Run as service */
+			/* Register Stop Function */
+			RegisterStopFunction(StopSnmpAgent);
+			return RunAsService(SnmpDaemonMain);
+			break;
+		default:
+			/* Run Net-Snmpd in console mode */
+			/* Invoke SnmpDeamonMain with input arguments */
+			return SnmpDaemonMain(argc,argv);
+			break;
+	}
+}
+
+/*
+ * To stop Snmp Agent deamon 
+ * This portion is still not working
+ */
+void StopSnmpAgent(void)
+{
+	/* Shut Down Agent */
+	SnmpdShutDown(1);
+
+	/* Wait till agent is completely stopped */
+
+	while(agent_status != AGENT_STOPPED)
+	{
+		Sleep(100);
+	}
+}
+
+#endif   /* if WIN32 */
+
