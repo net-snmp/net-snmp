@@ -1,12 +1,10 @@
 This file contains major changes in released revisions.  Please read
 the ChangeLog file for a more detailed listing of changes/bug fixes.
 
-*5.0.pre2 (beta release)*
- NOTE WELL: this release is an beta release.  Please let us know
- immediately about any bugs you find so we can fix them before the
- real 5.0 releas.
- 
+*5.0.pre3 (release candidate)*
+
  New:
+
     - Much of the agent internals were completely rewritten and sports
       a new module API to make your life easier.  See the
       agent/mibgroup/testhandler.c file for example code that makes
@@ -39,6 +37,20 @@ the ChangeLog file for a more detailed listing of changes/bug fixes.
     - A "net-snmp-config" script will get installed which can report
       how the various tools were built (which libraries they were
       linked against, etc).
+    - Much of the code is getting documented with "doxygen" style
+      documentation.  Run "make docs" if you have doxygen installed.
+    - some RMON support is available.
+      (See agent/mibgroup/Rmon/README for details.)
+    - The source tree has been reorganized and all the exported header
+      files are now in the include subdirectory.  You can now point to
+      the includes easily without having to run "make install" first.
+    - the agent now requires a configuration file to access any information.
+
+ Perl:
+    
+    - The SNMP perl module now calls init_snmp() like real net-snmp
+      applications, which means it will read snmp.conf configuration
+      files, etc.
     - new perl specific configure options --with-perl-modules &
       --enable-embedded-perl.  See ./configure --help for details.
     - The beginnings of some new Perl modules (alpha level quality)
@@ -51,10 +63,26 @@ the ChangeLog file for a more detailed listing of changes/bug fixes.
         See the perl/AnyData_SNMP/INSTALL file for details.
     - Beginning (alpha level quality) support for embedding perl
       subroutines directly within the net-snmp agent.
-    - Much of the code is getting documented with "doxygen" style
-      documentation.  Run "make docs" if you have doxygen installed.
-    - RMON support is available.  See agent/mibgroup/Rmon/README for details.
 
+UCD-SNMP NEWS:
+
+*4.2.4*
+ New:
+    - badCommunityNames and badCommunityUses Counters supported.
+    - tcp_wrappers support for snmptrapd.
+
+ Bug fixes:
+    - A security issue involving the snmpnetstat command accepting
+      illegal data from a faked snmp server.
+    - RPM library support fixes.
+    - shared libraries built by default.
+    - many bug fixes for conformance of target, notification, and vacm tables
+    - many other fixes.
+
+ Ports:
+    - HPUX 11
+    - Dynix/PTX 4.4
+    - The snmpd demon can properly run as a windows service
 
 *4.2.3*
  New:
