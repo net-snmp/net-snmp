@@ -9,6 +9,8 @@
 #include <net-snmp/agent/net-snmp-agent-includes.h>
 #include <net-snmp/data_access/ipaddress.h>
 
+#include "ip-mib/ipAddressTable/ipAddressTable_constants.h"
+
 /**---------------------------------------------------------------------*/
 /*
  * local static prototypes
@@ -139,6 +141,13 @@ netsnmp_access_ipaddress_entry_create(void)
     entry->oid_index.len = 1;
     entry->oid_index.oids = &entry->ns_ia_index;
 
+    /*
+     * set up defaults
+     */
+    entry->ia_type = IPADDRESSTYPE_UNICAST;
+    entry->ia_status = IPADDRESSSTATUSTC_PREFERRED;
+    entry->ia_storagetype = STORAGETYPE_VOLATILE;
+
     return entry;
 }
 
@@ -205,6 +214,11 @@ netsnmp_access_ipaddress_entry_update(netsnmp_ipaddress_entry *lhs,
     if (lhs->if_index != rhs->if_index) {
         ++changed;
         lhs->if_index = rhs->if_index;
+    }
+
+    if (lhs->ia_storagetype != rhs->ia_storagetype) {
+        ++changed;
+        lhs->ia_storagetype = rhs->ia_storagetype;
     }
 
     if (lhs->ia_flags != rhs->ia_flags) {
