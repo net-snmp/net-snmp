@@ -171,7 +171,7 @@ int main(int argc, char *argv[])
     struct snmp_session session;
     int dest_port = SNMP_PORT;
     int timeout = SNMP_DEFAULT_TIMEOUT;
-    int version = SNMP_VERSION_1;
+    int version = SNMP_DEFAULT_VERSION;
     int arg;
 
     init_mib();
@@ -179,9 +179,8 @@ int main(int argc, char *argv[])
      * Usage: snmpnetstatwalk -v 1 [-q] hostname community ...      or:
      * Usage: snmpnetstat [-v 2 ] [-q] hostname noAuth     ...
      */
-    for(arg = 1; arg < argc; arg++){
-	if (argv[arg][0] == '-'){
-	    switch(argv[arg][1]){
+    while ((arg = getopt(argc, argv, "VhdqD:p:t:c:v:aionrsP:I:")) != EOF) {
+	    switch(arg){
               case 'V':
                 fprintf(stderr,"UCD-snmp version: %s\n", VersionInfo);
                 exit(0);
@@ -200,47 +199,27 @@ int main(int argc, char *argv[])
 		break;
 
 	      case 'D':
-                debug_register_tokens(&argv[arg][2]);
+                debug_register_tokens(optarg);
 		snmp_set_do_debugging(1);
 		break;
 	      case 'p':
-		if (argv[arg][2] != 0) dest_port = atoi(argv[arg]+2);
-		else if (++arg == argc) {
-		    usage();
-		    exit(1);
-		}
-		else dest_port = atoi(argv[arg]);
+		dest_port = atoi(optarg);
 		break;
 
 	      case 't':
-		if (argv[arg][2] != 0) timeout = atoi(argv[arg]+2);
-		else if (++arg == argc) {
-		    usage();
-		    exit(1);
-		}
-		else timeout = atoi(argv[arg]);
+		timeout = atoi(optarg);
 		timeout *= 1000000;
 		break;
 
 	      case 'c':
-		if (argv[arg][2] != 0) community = argv[arg]+2;
-		else if (++arg == argc) {
-		    usage();
-		    exit(1);
-		}
-		else community = argv[arg];
+		community = optarg;
 		break;
 
 	      case 'v':
-		if (argv[arg][2] != 0) argp = argv[arg]+2;
-		else if (++arg == argc) {
-		    usage();
-		    exit(1);
-		}
-		else argp = argv[arg];
-		if (!strcmp(argp,"1"))
+		argp = optarg;
+		if (!strcasecmp(argp,"1"))
 		    version = SNMP_VERSION_1;
-		else if (!strcmp(argp,"2c"))
+		else if (!strcasecmp(argp,"2c"))
 		    version = SNMP_VERSION_2c;
 		else {
 		    fprintf(stderr, "Invalid version: %s\n", argp);
@@ -274,13 +253,9 @@ int main(int argc, char *argv[])
 		break;
 
 	      case 'P':
-		if (++arg == argc) {
-		    usage();
-		    exit(1);
-		}
-		if ((tp = name2protox(argv [arg])) == NULLPROTOX) {
+		if ((tp = name2protox(optarg)) == NULLPROTOX) {
 		  fprintf(stderr, "%s: unknown or uninstrumented protocol\n",
-			  argv [arg]);
+			  optarg);
 		  exit(1);
 		}
 		allprotos = 0;
@@ -289,43 +264,43 @@ int main(int argc, char *argv[])
 
 	      case 'I':
 		iflag++;
-		if (*(intrface = argv[arg] + 2) == 0) {
-		  if (++arg == argc) {
-		      usage();
-		      exit(1);
-		  }
-		  if ((intrface = argv[arg]) == 0)
-		    break;
-		}
+		intrface = optarg;
 		break;
 
 	      default:
-		printf("invalid option: -%c\n", argv[arg][1]);
+		exit(1);
 		break;
 	    }
 	    continue;
 	}
-	if (hostname == NULL){
-	    hostname = argv[arg];
-	} else if ((version == SNMP_VERSION_1 || version == SNMP_VERSION_2c)
-                   && community == NULL){
-	    community = argv[arg]; 
-	} else if (isdigit(argv[arg][0])) {
-            interval = atoi(argv[arg]);
-            if (interval <= 0){
-		usage();
-		exit(1);
-	    }
-	    iflag++;
-	} else {
+
+    if (hostname == NULL && optind < argc){
+	hostname = argv[optind++];
+    }
+    if ((version == SNMP_VERSION_1 || version == SNMP_VERSION_2c)
+	       && community == NULL && optind < argc){
+	community = argv[optind++]; 
+	fprintf(stderr, "Warning: positional community parameter is deprecated. Use -c\n");
+    }
+    if (optind < argc && isdigit(argv[optind][0])) {
+	interval = atoi(argv[optind++]);
+	if (interval <= 0){
 	    usage();
 	    exit(1);
 	}
+	iflag++;
+    }
+    if (optind < argc) {
+	usage();
+	exit(1);
     }
     
-    if (!hostname ||
-	((version == SNMP_VERSION_1 || version == SNMP_VERSION_2c) && !community)) {
-	usage();
+    init_snmp("snmpapp");
+    if (version == SNMP_DEFAULT_VERSION) {
+      version = ds_get_int(DS_LIBRARY_ID, DS_LIB_SNMPVERSION);
+    }
+    if (!hostname) {
+	fprintf(stderr, "Missing host name.\n");
 	exit(1);
     }
 
@@ -334,6 +309,10 @@ int main(int argc, char *argv[])
     session.remote_port = dest_port;
     session.timeout = timeout;
     if (version == SNMP_VERSION_1 || version == SNMP_VERSION_2c){
+	if (!community && !(community = ds_get_string(DS_LIBRARY_ID, DS_LIB_COMMUNITY))) {
+	    fprintf(stderr, "Missing community name.\n");
+	    exit(1);
+	}
         session.version = version;
         session.community = (u_char *)community;
         session.community_len = strlen((char *)community);
