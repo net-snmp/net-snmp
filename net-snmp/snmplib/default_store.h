@@ -30,11 +30,16 @@ extern "C" {
 #define DS_LIB_PRINT_NUMERIC_OIDS  9  /* print only numeric enum values */
 #define DS_LIB_DONT_BREAKDOWN_OIDS 10 /* dont print oid indexes specially */
 #define DS_LIB_ALARM_DONT_USE_SIG  11 /* don't use the alarm() signal */
+#define DS_LIB_PRINT_FULL_OID      12 /* print fully qualified oids */
+#define DS_LIB_QUICK_PRINT         13 /* print very brief output for parsing */
 
 /* library integers */
 #define DS_LIB_MIB_WARNINGS  0
 #define DS_LIB_SECLEVEL      1
 #define DS_LIB_SNMPVERSION   2
+#define DS_LIB_DEFAULT_PORT  3
+#define DS_LIB_PRINT_SUFFIX_ONLY 4 /* print out only a single oid node  == 1.
+                                      like #1 but supply mib module too == 2. */
 
 /* library strings */
 #define DS_LIB_SECNAME         0
