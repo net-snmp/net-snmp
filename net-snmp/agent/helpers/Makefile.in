@@ -10,6 +10,7 @@ INCLUDESUBDIRHEADERS=all_helpers.h \
 	cache_handler.h \
 	instance.h \
 	scalar.h \
+	scalar_group.h \
 	watcher.h \
         multiplexer.h \
 	bulk_to_next.h \
@@ -43,6 +44,7 @@ OBJS =  all_helpers.o \
 	bulk_to_next.o \
 	instance.o \
 	scalar.o \
+	scalar_group.o \
 	watcher.o \
 	null.o \
 	debug_handler.o \
@@ -63,6 +65,7 @@ LOBJS = all_helpers.lo \
 	bulk_to_next.lo \
 	instance.lo \
 	scalar.lo \
+	scalar_group.lo \
 	watcher.lo \
 	null.lo \
 	debug_handler.lo \
@@ -77,11 +80,13 @@ LOBJS = all_helpers.lo \
 	mode_end_call.lo
 
 SRCS =  all_helpers.c \
+	cache_handler.c \
 	multiplexer.c \
 	read_only.c \
 	bulk_to_next.c \
 	instance.c \
 	scalar.c \
+	scalar_group.c \
 	watcher.c \
 	null.c \
 	debug_handler.c \
