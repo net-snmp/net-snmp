@@ -8,10 +8,20 @@
     <!-- ========================================================= -->
     <h1>Running mib2c: Generating the template code</h1>
     <p>
-      The first step is to generate the code. Create a new directory somewhere
-      for the code, and run mib2c.
+      The first step is to generate the code. First, create a new directory
+      for the code. For this tutorial, e will assume you have a directory
+      named <code>ifTable</code>. You have two options to generate the
+      code. One is <i>mib2c</i>, and the other is <i>mib2c-update</i>.
+      If you are simply walking through the the tutorial as a learning
+      experience, run <i>mib2c</i> directly. If you are just using the
+      tutorial as a guide for generating your own code, I recommend
+      using the <i>mib2c-update</i> script, so you can take advantage
+      enhancements or bug-fixes in future releases. See the
+      <a href="../../mib2c/mib2c-update.html">mib2c-update page</a> for
+      more details.
+    </p><p>
+      For the tutorial, we will use <i>mib2c</i> directly.
     </p>
-    <p>
     <table><tr><td width=20></td><td><code>&nbsp</code></td><td bgcolor=CCCCCC>
             <code><pre>$ <font color=blue>mib2c -c mib2c.mfd.conf ifTable</font>
 writing to ifTable.h
@@ -117,7 +127,7 @@ running indent on ifTable_data_set.h
 Version $Revision$
 <!-- Created: Fri Oct 24 10:41:49 EDT 2003 -->
 <!-- hhmts start -->
-Last modified: Mon Jun 21 18:36:14 EDT 2004
+Last modified: Thu Sep  2 13:55:05 EDT 2004
 <!-- hhmts end -->
 <!--#include virtual="/sfbutton.html" -->
   </body>
