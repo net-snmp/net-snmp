@@ -1873,30 +1873,21 @@ parse_objecttype(FILE *fp,
         case UINTEGER32:
         case COUNTER:
         case GAUGE:
-            if (nexttype == LEFTBRACKET) {
-                /* if there is an enumeration list, parse it */
-                np->enums = parse_enumlist(fp, &np->enums);
-                nexttype = get_token(fp, nexttoken, MAXTOKEN);
-            } else if (nexttype == LEFTPAREN){
-		np->ranges = parse_ranges(fp, &np->ranges);
-                nexttype = get_token(fp, nexttoken, MAXTOKEN);
-            }
-            break;
         case BITSTRING:
+        case LABEL:
             if (nexttype == LEFTBRACKET) {
                 /* if there is an enumeration list, parse it */
                 np->enums = parse_enumlist(fp, &np->enums);
                 nexttype = get_token(fp, nexttoken, MAXTOKEN);
             } else if (nexttype == LEFTPAREN){
-                /* ignore the "constrained integer" for now */
+                /* if there is a range list, parse it */
 		np->ranges = parse_ranges(fp, &np->ranges);
-		nexttype = get_token (fp, nexttoken, MAXTOKEN);
+                nexttype = get_token(fp, nexttoken, MAXTOKEN);
             }
             break;
-        case LABEL:
         case OCTETSTR:
         case KW_OPAQUE:
-            /* ignore the "constrained octet string" for now */
+            /* parse any SIZE specification */
             if (nexttype == LEFTPAREN) {
                 nexttype = get_token(fp, nexttoken, MAXTOKEN);
                 if (nexttype == SIZE) {
@@ -1911,7 +1902,7 @@ parse_objecttype(FILE *fp,
                         }
                     }
                 }
-                print_error("Bad syntax", token, type);
+                print_error("Bad SIZE syntax", token, type);
                 free_node(np);
                 return NULL;
             }
@@ -2858,8 +2849,21 @@ parse(FILE *fp,
         case ENDOFFILE:
             continue;
         default:
-            print_error(token, "is a reserved word", type);
-            break;         /* see if we can parse the rest of the file */
+	    strcpy(name, token);
+	    type = get_token(fp, token, MAXTOKEN);
+	    nnp = NULL;
+	    if (type == MACRO) {
+		nnp = parse_macro(fp, name);
+		if (nnp == NULL){
+		    print_error("Bad parse of MACRO", NULL, type);
+		    /*return NULL;*/
+		}
+		free_node(nnp); /* IGNORE */
+		nnp = NULL;
+	    }
+	    else
+		print_error(name, "is a reserved word", lasttype);
+            continue;         /* see if we can parse the rest of the file */
         }
         strcpy(name, token);
         type = get_token(fp, token, MAXTOKEN);
