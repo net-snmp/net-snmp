@@ -1337,18 +1337,6 @@ reassign_requests(struct agent_snmp_session  *asp) {
                                       asp->requests[i].requestvb,
                                       asp->requests[i].subtree))
                 return SNMP_ERR_GENERR;
-        } else if (asp->reqinfo->mode == MODE_GETBULK &&
-                   asp->requests[i].repeat > 0) {
-            asp->requests[i].repeat--;
-            snmp_set_var_objid(asp->requests[i].requestvb->next_variable,
-                               asp->requests[i].requestvb->name,
-                               asp->requests[i].requestvb->name_length);
-            asp->requests[i].requestvb =
-                asp->requests[i].requestvb->next_variable;
-            if (!add_varbind_to_cache(asp, asp->requests[i].index,
-                                      asp->requests[i].requestvb,
-                                      asp->requests[i].subtree))
-                return SNMP_ERR_GENERR;
         }
     }
 

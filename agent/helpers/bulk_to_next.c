@@ -40,13 +40,28 @@ bulk_to_next_helper(
     request_info              *requests) {
 
     int ret;
-    
+    request_info              *request;
+
     switch(reqinfo->mode) {
         
         case MODE_GETBULK:
             reqinfo->mode = MODE_GETNEXT;
             ret = call_next_handler(handler, reginfo, reqinfo, requests);
             reqinfo->mode = MODE_GETBULK;
+
+            /* update the varbinds for the next request series */
+            for(request = requests; request; request = request->next) {
+                if (request->repeat && request->requestvb->type != ASN_NULL &&
+                    request->requestvb->type != ASN_PRIV_RETRY) {
+                    request->repeat--;
+                    snmp_set_var_objid(request->requestvb->next_variable,
+                                       request->requestvb->name,
+                                       request->requestvb->name_length);
+                    request->requestvb =
+                        request->requestvb->next_variable;
+                    request->requestvb->type = ASN_PRIV_RETRY;
+                }
+            }
             return ret;
             
         default:
