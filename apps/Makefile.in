@@ -1,0 +1,41 @@
+#
+# Makefile for snmpget, snmpwalk, snmpbulkwalk, snmptest, snmptranslate,
+# snmptrapd, snmptable
+#
+TARG=	snmpwalk snmpbulkwalk snmptest snmptranslate snmpget snmptrapd
+LIBS=	../lib/libsnmp.a
+CFLAGS=-g -I../snmplib ${INCLUDES} -DDEBUG
+
+all: $(TARG)
+
+snmpwalk:    snmpwalk.o ${LIBS}
+	${CC} -o $@ snmpwalk.o ${LIBS}
+
+snmpbulkwalk:    snmpbulkwalk.o ${LIBS}
+	${CC} -o $@ snmpbulkwalk.o ${LIBS}
+
+snmptranslate:    snmptranslate.o ${LIBS}
+	${CC} -o $@ snmptranslate.o ${LIBS}
+
+snmpget:    snmpget.o ${LIBS}
+	${CC} -o $@ snmpget.o ${LIBS}
+
+snmptest:    snmptest.o ${LIBS}
+	${CC} -o $@ snmptest.o ${LIBS}
+
+snmptrapd:    snmptrapd.o ${LIBS}
+	${CC} -o $@ snmptrapd.o ${LIBS}
+
+clean:
+	rm -f *.o ${TARG}
+
+install:
+	cp ${TARG} ../bin
+
+snmpbulkwalk.o:	../snmplib/party.h
+snmpget.o:	../snmplib/party.h
+snmptest.o:	../snmplib/party.h
+snmptranslate.o:	../snmplib/party.h
+snmpwalk.o:	../snmplib/party.h
+snmptest.o:	../snmplib/party.h
+snmptable.o:    ../snmplib/party.h

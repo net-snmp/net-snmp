@@ -1,0 +1,62 @@
+#
+# Makefile for snmplib
+#
+TARG=	libsnmp.a
+CSRCS=	snmp_client.c mib.c parse.c snmp_api.c snmp.c snmp_auth.c asn1.c md5.c party.c context.c acl.c view.c party_parse.c context_parse.c acl_parse.c system.c
+OBJS=	snmp_client.o mib.o parse.o snmp_api.o snmp.o snmp_auth.o asn1.o md5.o party.o context.o acl.o view.o party_parse.o context_parse.o acl_parse.o system.o
+CFLAGS=-g -DDEBUG
+CC = cc
+
+all: $(TARG)
+
+libsnmp.a:    ${OBJS}
+	ar r libsnmp.a ${OBJS}
+	ranlib libsnmp.a
+
+install:	../lib/libsnmp.a
+
+../lib/libsnmp.a:	libsnmp.a
+	cp libsnmp.a ../lib
+	ranlib ../lib/libsnmp.a
+
+
+lint:
+	lint -nhx $(CSRCS)
+
+clean:
+	rm -f ${OBJS} ${TARG}
+	rm -f ../lib/${TARG}
+
+asn1.o: ./asn1.h
+mib.o: ./asn1.h
+mib.o: ./snmp_impl.h
+mib.o: ./snmp_api.h
+mib.o: ./parse.h
+parse.o: ./parse.h
+snmp.o: ./asn1.h
+snmp.o: ./snmp.h
+snmp.o: ./snmp_impl.h
+snmp.o: ./mib.h
+snmp_api.o: ./asn1.h
+snmp_api.o: ./snmp.h
+snmp_api.o: ./snmp_impl.h
+snmp_api.o: ./snmp_api.h
+snmp_auth.o: ./asn1.h
+snmp_auth.o: ./snmp.h
+snmp_auth.o: ./snmp_impl.h
+snmp_auth.o: ./party.h
+snmp_auth.o: ./context.h
+snmp_auth.o: ./md5.h
+snmp_client.o: ./asn1.h
+snmp_client.o: ./snmp.h
+snmp_client.o: ./snmp_impl.h
+snmp_client.o: ./snmp_api.h
+snmp_client.o: ./snmp_client.h
+md5.o: ./md5.h
+party.o: ./party.h ./asn1.h
+acl.o: ./acl.h ./asn1.h
+view.o: ./view.h ./asn1.h
+party_parse.o: ./asn1.h ./party.h
+context_parse.o: ./asn1.h ./context.h
+acl_parse.o: ./asn1.h ./acl.h
+system.o: ./system.h

@@ -1,0 +1,267 @@
+#!wish -f
+#
+# Monitors an SNMP variable
+# 
+option add *Background lightsteelblue
+option add *Button.Background red
+
+option add *XYGraph.foreground navyblue
+option add *XYGraph.Geometry 300x300
+option add *XYGraph.font *New*Century*Bold*R*14*
+option add *XYGraph.legendBackground lightblue
+option add *XYGraph.relief sunken
+option add *XYGraph.borderWidth 4
+
+set pause 0
+set index 0
+set samples 0
+set interval 1
+set delta 1
+
+set x {}
+set data {}
+set zoomed 0
+
+set trivial 0
+
+proc usage {} {
+     puts stderr {Usage: snmpgraph -v 1 hostname community interval objectID      or:}
+     puts stderr {Usage: snmpgraph [-v 2 ] hostname noAuth interval objectID      or:}
+     puts stderr {Usage: snmpgraph [-v 2 ] hostname srcParty dstParty context interval objectID}
+}
+
+if {$argc<5} {
+    usage
+    exit 1
+} else {
+    set interval [lindex $argv [expr $argc-2]]
+    set variable [lindex $argv [expr $argc-1]]
+    set authinfo [lrange $argv 1 [expr $argc-3]]
+    if { [lindex $authinfo 0] == "-v" } {
+	set hostname [lindex $authinfo 2]
+    } {
+	set hostname [lindex $authinfo 0]
+    }
+}
+
+
+wm title . "SNMP Graph ($hostname)"
+wm maxsize . 900 900
+
+frame .top
+
+xygraph .top.graph -title $hostname \
+    -xlabel "Seconds" -ylabel "# Per Second" -legendposition @-5,30 \
+    -xmin 0 -xmax [expr $interval*20]
+
+proc get.coords { w sx sy xVar yVar } {
+  # w   widget
+  # sx  screen x position
+  # sy  screen y position
+
+  scan [$w locate $sx $sy ] "%s %s" x y
+  scan [$w limits ] "%s %s %s %s" xmin xmax ymin ymax
+  if { $x > $xmax } { set x $xmax }
+  if { $x < $xmin } { set x $xmin }
+  if { $y > $ymax } { set y $ymax }
+  if { $y < $ymin } { set y $ymin }
+  global $xVar $yVar
+  set $xVar $x
+  set $yVar $y
+}
+
+proc swap { var1 var2 } {
+  global $var1 $var2
+  set hold [set $var1]
+  set $var1 [set $var2]
+  set $var2 $hold
+}
+
+proc get.anchor { w sx sy } {
+  # w   widget
+  # sx  screen x position
+  # sy  screen y position
+
+  global x1 y1 x2 y2
+  set x2 "" ; set y2 ""
+  get.coords $w $sx $sy x1 y1
+  bind $w <B1-Motion> { scan.xy %W %x %y }
+  bind $w <ButtonRelease-1> { zoom.xy %W %x %y }
+}
+
+proc box { w x1 y1 x2 y2 } {
+  $w newtag t1 $x1 $y1 \
+        -text [format "(%.4g, %.4g)" $x1 $y1] \
+        -fg red -bg grey \
+        -font *new*century*140*
+  $w newtag t2 $x2 $y2 \
+        -text [format "(%.4g, %.4g)" $x2 $y2] \
+        -fg red -bg grey \
+        -font *new*century*140*
+  $w insert outline \
+        -xydata { $x1 $y1 $x1 $y2 $x1 $y1 $x2 $y1 $x2 $y1 $x2 $y2
+                 $x1 $y2 $x2 $y2 } \
+        -symbol dotted -color red -label {} -showretrace true
+}
+
+proc scan.xy { w sx sy } {
+  # w   widget
+  # sx  screen x position
+  # sy  screen y position
+
+  global x1 y1 x2 y2
+  get.coords $w $sx $sy x2 y2
+  if { $x1 > $x2 } {
+     box $w $x2 $y2 $x1 $y1
+     if { $y1 > $y2 } {
+       $w config -cursor { bottom_left_corner red black }
+     } else {
+       $w config -cursor { top_left_corner red black }
+     }
+  } else {
+     box $w $x1 $y1 $x2 $y2
+     if { $y1 > $y2 } {
+       $w config -cursor { bottom_right_corner red black }
+     } else {
+       $w config -cursor { top_right_corner red black }
+     }
+  }
+}
+proc zoom.xy { w sx sy } {
+  # w   widget
+  # sx  screen x position
+  # sy  screen y position
+
+  global x1 y1 x2 y2
+  # Go back to original bindings
+  bind $w <ButtonPress-1> { get.anchor %W %x %y }
+  catch "$w untag t1" msg
+  catch "$w untag t2" msg
+  bind $w <B1-Motion> {}
+  if { $x2 == "" } then {
+     catch "$w delete outline" msg
+     $w config -xmin {} -ymin {} -xmax {} -ymax {}
+     return
+  }
+  if { $x1 > $x2 } {
+     $w config -xmin $x2 -xmax $x1
+  } else {
+     if { $x1 < $x2 } {
+        $w config -xmin $x1 -xmax $x2
+     }
+  }
+  if { $y1 > $y2 } {
+     $w config -ymin $y2 -ymax $y1
+  } else {
+     if { $y1 < $y2 } {
+        $w config -ymin $y1 -ymax $y2
+     }
+  }
+  $w config -cursor crosshair
+  global zoomed
+  set zoomed 1
+}
+
+bind .top.graph <ButtonPress-1> {
+  get.anchor %W %x %y ; %W config -cursor {crosshair red black}
+}
+
+bind .top.graph <ButtonPress-2> {
+  catch "%W delete outline" msg
+  %W config -xmin {} -ymin {} -xmax {} -ymax {}
+  global zoomed
+  set zoomed 0
+}
+bind .top.graph <ButtonPress-3> {
+  %W config -legendposition @%x,%y
+}
+
+set data1 1
+
+snmp open snmppoll [lindex $authinfo 0] [lindex $authinfo 1] [lindex $authinfo 2] [lindex $authinfo 3] [lindex $authinfo 4] [lindex $authinfo 5]
+
+set ret [snmppoll get $variable]
+if { [lindex [lindex $ret 0] 0] == "Timeout" } {
+    puts stdout "$hostname not responding."
+    exit
+}
+set odata1 [lindex [lindex $ret 0] 0]
+set pretty [snmppoll prettyoid]
+if { [lindex [lindex $ret 0] 1] == "gauge"} {
+    set delta 0
+    .top.graph configure -ylabel "Current Value"
+}
+
+checkbutton .top.pause -variable pause -text Pause -width 10 -height 1
+checkbutton .top.data1 -variable data1 -text $pretty -width 10 -height 1 -command {
+    if !$data1 {
+	.top.graph delete $pretty
+    } else {
+	.top.graph insert $pretty -xdata $x -ydata $data -symbol solid \
+	    -color blue
+    }
+
+}
+
+pack append .top .top.graph {bot fill}
+pack append .top .top.pause { left expand fillx }
+pack append .top .top.data1 { left expand fillx }
+pack append . .top {expand fill}
+
+bind all <Control-c> {exit }
+bind all p {
+	.top.graph postscript snmpgraph.ps
+}
+
+after [expr $interval*1000]
+
+for {} {1} {} {
+    set ret [snmppoll get $variable]
+
+    if { [lindex [lindex $ret 0] 0] == "Timeout" } {
+	incr index $interval
+	after [expr $interval*1000]
+	continue
+    }
+
+    set cdata1 [lindex [lindex $ret 0] 0]
+
+    if {$delta == 1} {
+        if { $cdata1 < $odata1 } {
+            # should really do this with sysUptime
+            set odata1 $cdata1
+            incr index $interval
+            after [expr $interval*1000]
+            continue
+        }
+        lappend data [expr ($cdata1-$odata1)/$interval]
+    } {
+        lappend data $cdata1
+    }
+    lappend x $index
+    incr index $interval
+
+    incr samples
+
+    if { $samples  > 200 } {
+	set x [lrange $x 1 200]
+	set data [lrange $data 1 200]
+	if { !$pause && !$zoomed } {
+	    .top.graph configure -xmin [lindex $x 0] -xmax $index
+	}
+    } else {
+	if { !$pause && !$zoomed && $index > [expr $interval*20] } {
+	    .top.graph configure -xmax ""
+	}
+    }
+
+    if { !$pause } {
+	if $data1 {
+	    .top.graph insert $pretty -xdata $x -ydata $data -symbol solid \
+		-color blue
+	}
+    }
+    set odata1 $cdata1
+
+    after [expr $interval*1000]
+}

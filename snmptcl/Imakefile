@@ -1,0 +1,41 @@
+/* Imakefile for hypertext and graph widgets */
+
+CDEBUGFLAGS=-Bstatic -g
+#CC=	/usr/lang/cc 
+#CC =   gcc -Wall -fwritable-strings
+
+TCLINC=-I/afs/andrew/netdev/src/cmu/snmp/snmp-apps/src/tcl/tcl
+TKINC=-I/afs/andrew/netdev/src/cmu/snmp/snmp-apps/src/tcl
+
+INCLUDES=-I. $(TCLINC) $(TKINC)  -I../snmplib -I/usr/5include
+LOCAL_LIBRARIES=$(TKLIB) $(TCLLIB) $(XLIB) $(SNMPLIB)
+EXTRA_LOAD_FLAGS= -lm 
+
+/**/# Indicate the correct paths for each of the following libraries
+/**/#
+/**/# XLIB          Your X11 (R4 or R5) library.
+/**/# TCLLIB        Tcl Version 6.x library.
+/**/# TKLIB         Tk Version 2.x library.
+/**/#
+TCLLIB=-L/afs/andrew/netdev/src/cmu/snmp/snmp-apps/lib -ltcl
+TKLIB=-L/afs/andrew/netdev/src/cmu/snmp/snmp-apps/lib -ltk
+SNMPLIB=-L/afs/andrew/netdev/src/cmu/snmp/snmp-apps/ifip/lib -lsnmp -ldes
+
+/**/#
+/**/# Define the following:
+/**/#
+/**/# -DNO_EXP10    if your C math library doesn't have exp10.
+/**/# -DNO_RINT	    if your C math library doesn't have rint
+/**/# -DNO_ALLOCA   if your C library doesn't have alloca or a 
+/**/#                 /usr/include/alloca.h
+/**/#
+#ifdef SYSV
+DEFINES=-DNO_EXP10 -DNO_RINT -DNO_INF -DNO_CURSES
+#else
+DEFINES=
+#endif
+
+SRCS=	wish.c tcl_snmp.c graph.c htext2.c
+OBJS=	wish.o tcl_snmp.o graph.o htext2.o
+
+ComplexProgramTarget(wish)

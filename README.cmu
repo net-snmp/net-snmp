@@ -1,0 +1,24 @@
+This code has been tested on a sparcstation (SUNOS4.1.1).  It may not
+run on other Unix systems (but then again it may).  When porting to a
+new processor architecture,  read the first page of snmplib/md5.c and
+define LOWBYTEFIRST according to the instruction.
+
+Run "make all install".
+
+edit etc/acl.conf, etc/party.conf, etc/view.conf and /etc/context.conf
+to create parties for your site.  Then copy these files to /etc on the
+each system that will be running either applications or agents.
+
+setenv MIBFILE $root/mib.txt
+Where $root is the root directory of the SMP distribution.
+
+The applications are in $root/bin and the documentation is in $root/man.
+
+"setenv SUFFIX" changes the output format of many of the apps in a helpful
+manner.  Try it.
+
+
+SNMP TCL
+
+  If you want to use and/or compile SNMP TCL, read the README file in
+the snmptcl directory.

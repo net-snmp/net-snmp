@@ -1,0 +1,15 @@
+This documentation has not been updated for version 2 of the release.
+The command line format has changed significantly.  My suggestion is
+that you read the man pages for the old version to learn of the
+operation of the program, and then run the program without parameters
+to get a usage summary to see the new command line arguments.  Most
+commands take a form similar to:
+
+    Usage: snmpwalk -v 1 hostname community [objectID]      or:
+    Usage: snmpwalk [-v 2 ] hostname noAuth [objectID]      or:
+    Usage: snmpwalk [-v 2 ] hostname srcParty dstParty context [objectID]
+
+You will most likely want either:
+snmpwalk -v 1 hostname public ...   or:
+snmpwalk hostname noAuth ...
+
