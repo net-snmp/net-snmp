@@ -13,9 +13,10 @@
 #define NETSNMP_IF_FLAGS_HAS_DISCONTINUITY	0x200
 
 typedef struct netsnmp_ifentry_s {
-    struct netsnmp_ifentry_s *prev, *next;
+    netsnmp_index oid_index;
+
     int     flags;
-    int     index;
+    oid     index;
 
     /*
      *  "Static" information
@@ -63,8 +64,6 @@ typedef struct netsnmp_ifentry_s {
 
 void  init_ifTable( void );
 
-extern Netsnmp_First_Data_Point ifTable_first_entry;
-extern Netsnmp_Next_Data_Point  ifTable_next_entry;
 extern NetsnmpCacheLoad         ifTable_load;
 extern NetsnmpCacheFree         ifTable_free;
 extern Netsnmp_Node_Handler     ifTable_handler;

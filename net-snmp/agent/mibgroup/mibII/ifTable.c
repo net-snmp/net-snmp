@@ -9,20 +9,33 @@
 #include <net-snmp/net-snmp-includes.h>
 #include <net-snmp/agent/net-snmp-agent-includes.h>
 #include <net-snmp/agent/auto_nlist.h>
+#include <net-snmp/agent/table_container.h>
+#include <net-snmp/agent/cache_handler.h>
 
 #include "ifTable.h"
 #include "ifTable_columns.h"
 #include "ifXTable_columns.h"
 
-        /*
-         * Head of linked list, or root of table 
-         */
-netsnmp_ifentry *if_head = NULL;
-int             if_size = 0;
 
+/*
+ * prototypes for architecture specific routines
+ */
+void            ifTable_free(netsnmp_cache * cache, void *magic);
+int             ifTable_ifentry_info_init(netsnmp_ifentry * entry);
 unsigned long long get_ifspeed(netsnmp_ifentry * entry);
 int             get_iftype(netsnmp_ifentry * entry);
-int             ifTable_info(netsnmp_ifentry * entry);
+
+static int      ifTable_ifentry_compare_name(const void *lhs,
+                                             const void *rhs);
+
+/*
+ * local statics, or useful utility routines?
+ */
+netsnmp_ifentry *ifTable_ifentry_get_by_index(netsnmp_cache * cache,
+                                              int index);
+netsnmp_ifentry *ifTable_ifentry_get_by_name(netsnmp_cache * cache,
+                                             char *name, int create);
+
 
         /*
          *
@@ -43,10 +56,27 @@ void
 init_ifTable(void)
 {
     netsnmp_table_registration_info *table_info;
-    netsnmp_iterator_info *iinfo;
     netsnmp_handler_registration *reginfo;
+    netsnmp_container *container1, *container2;
+    netsnmp_cache  *cache;
 
     DEBUGMSGTL(("mibII/ifTable", "Initialising Interface Table\n"));
+
+    /*
+     * create the containers. one indexed by ifIndex, the other
+     * indexed by ifName.
+     */
+    container1 = netsnmp_container_find("ifTable:table_container");
+    if (NULL == container1)
+        return;
+    container2 =
+        netsnmp_container_find("ifTable_by_name:ifTable:table_container");
+    if (NULL == container2)
+        return;
+    container2->compare = ifTable_ifentry_compare_name;
+    netsnmp_container_add_index(container1, container2);
+
+
     /*
      * Create the table data structure, and define the indexing....
      */
@@ -60,39 +90,26 @@ init_ifTable(void)
 
 
     /*
-     * .... and iteration information ....
-     */
-    iinfo = SNMP_MALLOC_TYPEDEF(netsnmp_iterator_info);
-    if (!iinfo) {
-        return;
-    }
-    iinfo->get_first_data_point = ifTable_first_entry;
-    iinfo->get_next_data_point = ifTable_next_entry;
-    iinfo->table_reginfo = table_info;
-#ifdef DO_WE_SORT_THIS
-    iinfo->flags |= NETSNMP_ITERATOR_FLAG_SORTED;
-#endif                          /* WIN32 || solaris2 */
-
-
-    /*
      * .... and register the table with the agent.
      */
     reginfo = netsnmp_create_handler_registration("ifTable",
                                                   ifTable_handler,
                                                   ifTable_oid,
                                                   OID_LENGTH(ifTable_oid),
-                                                  HANDLER_CAN_RONLY),
-        netsnmp_register_table_iterator(reginfo, iinfo);
+                                                  HANDLER_CAN_RONLY);
+    netsnmp_container_table_register(reginfo, table_info, container1,
+                                     TABLE_CONTAINER_KEY_NETSNMP_INDEX);
 
     /*
      * .... with a local cache
      *    (except for Solaris, which uses a different approach)
      */
-    netsnmp_inject_handler(reginfo,
-                           netsnmp_get_cache_handler
-                           (IF_STATS_CACHE_TIMEOUT, ifTable_load,
-                            ifTable_free, ifTable_oid,
-                            OID_LENGTH(ifTable_oid)));
+    cache = netsnmp_cache_create(IF_STATS_CACHE_TIMEOUT,
+                                 ifTable_load, ifTable_free,
+                                 ifTable_oid, OID_LENGTH(ifTable_oid));
+    cache->magic = container1;
+    netsnmp_inject_handler(reginfo, netsnmp_cache_handler_get(cache));
+
 #define ENTENDED_IF_TABLE
 #ifdef ENTENDED_IF_TABLE
     /*
@@ -107,85 +124,45 @@ init_ifTable(void)
     netsnmp_table_helper_add_indexes(table_info, ASN_INTEGER, 0);
     table_info->min_column = COLUMN_IFNAME;
     table_info->max_column = COLUMN_IFCOUNTERDISCONTINUITYTIME;
-    iinfo = SNMP_MALLOC_TYPEDEF(netsnmp_iterator_info);
-    if (!iinfo) {
-        return;
-    }
-    /*
-     * Note that we re-use the same iteration hook routines
-     * This is sufficient to link the two tables together
-     */
-    iinfo->get_first_data_point = ifTable_first_entry;
-    iinfo->get_next_data_point = ifTable_next_entry;
-    iinfo->table_reginfo = table_info;
-#ifdef DO_WE_SORT_THIS
-    iinfo->flags |= NETSNMP_ITERATOR_FLAG_SORTED;
-#endif                          /* WIN32 || solaris2 */
 
     reginfo = netsnmp_create_handler_registration("ifXTable",
                                                   ifXTable_handler,
                                                   ifXTable_oid,
                                                   OID_LENGTH(ifXTable_oid),
                                                   HANDLER_CAN_RONLY),
-        netsnmp_register_table_iterator(reginfo, iinfo);
-    netsnmp_inject_handler(reginfo,
-                           netsnmp_get_cache_handler
-                           (IF_STATS_CACHE_TIMEOUT, ifTable_load,
-                            ifTable_free, ifXTable_oid,
-                            OID_LENGTH(ifXTable_oid)));
+    netsnmp_container_table_register(reginfo, table_info, container1,
+                                     TABLE_CONTAINER_KEY_NETSNMP_INDEX);
+    netsnmp_inject_handler(reginfo, netsnmp_cache_handler_get(cache));
 #endif                          /* ENTENDED_IF_TABLE */
 }
 
-
-        /*
-         *  Iteration hook routines are common to both tables
-         */
-
-netsnmp_variable_list *
-ifTable_first_entry(void **loop_context,
-                    void **data_context,
-                    netsnmp_variable_list * index,
-                    netsnmp_iterator_info * data)
+NETSNMP_STATIC_INLINE netsnmp_ifentry *
+ifTable_ifentry_extract(netsnmp_request_info * request)
 {
-    if (if_size == 0)
-        return NULL;
-
-    /*
-     * Point to the first entry, and use the
-     * 'next_entry' hook to retrieve this row
-     */
-    *loop_context = (void *) if_head;
-    return ifTable_next_entry(loop_context, data_context, index, data);
+    return (netsnmp_ifentry *)
+        netsnmp_container_table_extract_context(request);
 }
 
-netsnmp_variable_list *
-ifTable_next_entry(void **loop_context,
-                   void **data_context,
-                   netsnmp_variable_list * index,
-                   netsnmp_iterator_info * data)
+static int
+ifTable_ifentry_compare_name(const void *lhs, const void *rhs)
 {
-    netsnmp_ifentry *entry = (netsnmp_ifentry *) * loop_context;
-    netsnmp_variable_list *idx;
+    return strcmp(((const netsnmp_ifentry *) lhs)->if_name,
+                  ((const netsnmp_ifentry *) rhs)->if_name);
+}
 
-    while (entry && !(entry->flags & NETSNMP_IF_FLAGS_ACTIVE))
-        entry = entry->next;
-    if (!entry)
-        return NULL;
+static void
+ifTable_ifentry_release(netsnmp_ifentry * entry, void *context)
+{
+    if (NULL == entry)
+        return;
 
-    /*
-     * Set up the indexing for the specified row...
-     */
-    idx = index;
-    snmp_set_var_value(idx, (u_char *) & (entry->index),
-                       sizeof(entry->index));
+    if (NULL != entry->if_name)
+        free(entry->if_name);
 
-    /*
-     * ... return the data structure for this row,
-     * and update the loop context ready for the next one.
-     */
-    *data_context = (void *) entry;
-    *loop_context = (void *) entry->next;
-    return index;
+    if (NULL != entry->if_descr)
+        free(entry->if_descr);
+
+    free(entry);
 }
 
         /*
@@ -196,12 +173,23 @@ ifTable_next_entry(void **loop_context,
 void
 ifTable_free(netsnmp_cache * cache, void *magic)
 {
-    netsnmp_ifentry *p;
-    for (p = if_head; p; p = p->next) {
-        p->flags &= ~NETSNMP_IF_FLAGS_ACTIVE;
-    }
+    netsnmp_container *container;
 
-    if_size = 0;
+    if ((NULL == cache) || (NULL == cache->magic)) {
+        snmp_log(LOG_ERR, "invalid cache for ifTable\n");
+        return;
+    }
+    DEBUGMSGTL(("ifTable/cache", "ifTable_free %p/%p\n",
+                cache, cache->magic));
+
+    container = (netsnmp_container *) cache->magic;
+
+    /*
+     * free all items. inefficient, but easy.
+     */
+    CONTAINER_CLEAR(container, ifTable_ifentry_release, NULL);
+
+
 }
 
         /************
@@ -234,9 +222,7 @@ ifTable_handler(netsnmp_mib_handler * handler,
                          requestvb->name_length));
             DEBUGMSG(("mibII/ifTable", "\n"));
 
-            entry =
-                (netsnmp_ifentry *)
-                netsnmp_extract_iterator_context(request);
+            entry = ifTable_ifentry_extract(request);
             if (!entry)
                 continue;
             table_info = netsnmp_extract_table_info(request);
@@ -444,9 +430,7 @@ ifXTable_handler(netsnmp_mib_handler * handler,
                          requestvb->name_length));
             DEBUGMSG(("mibII/ifTable", "\n"));
 
-            entry =
-                (netsnmp_ifentry *)
-                netsnmp_extract_iterator_context(request);
+            entry = ifTable_ifentry_extract(request);
             if (!entry)
                 continue;
             table_info = netsnmp_extract_table_info(request);
@@ -635,26 +619,38 @@ ifXTable_handler(netsnmp_mib_handler * handler,
          *  and/or create the entry for a given interface
          */
 netsnmp_ifentry *
-ifTable_get_entry_by_name(char *name, int create)
+ifTable_ifentry_get_by_name(netsnmp_cache * cache, char *name, int create)
 {
+    netsnmp_ifentry tmp;
     netsnmp_ifentry *entry;
-    netsnmp_ifentry *entry_prev = NULL;
-    int             index;
+    netsnmp_container *container, *container_by_name;
 
-    for (entry = if_head; entry; entry = entry->next) {
-        if (!strcmp(name, entry->if_name)) {
-            DEBUGMSGTL(("mibII/ifTable", "Found entry for %s (%d)\n",
-                        name, entry->index));
-            entry->flags &= NETSNMP_IF_FLAGS_ACTIVE;
-            if_size++;
-            break;
-        }
-        entry_prev = entry;
+    if ((NULL == cache) || (NULL == cache->magic)) {
+        snmp_log(LOG_ERR, "invalid cache for ifTable\n");
+        return NULL;
     }
-    if (!entry && create) {
+
+    container = (netsnmp_container *) cache->magic;
+    container_by_name = container->next;
+    if (NULL == container_by_name) {
+        snmp_log(LOG_ERR,
+                 "invalid cache for ifTable_ifentry_get_by_name\n");
+        return NULL;
+    }
+
+    tmp.if_name = name;
+    entry = CONTAINER_FIND(container_by_name, &tmp);
+    if ((NULL == entry) && (create)) {
         entry = SNMP_MALLOC_TYPEDEF(netsnmp_ifentry);
-        memset(entry, 0, sizeof(netsnmp_ifentry));
         entry->if_name = strdup(name);
+
+        /*
+         * XXX - initialise the "static" information
+         *  a) Using the configure overrides
+         *  b) Via (architecture-specific) utility routines
+         */
+        ifTable_ifentry_info_init(entry);
+
         /*
          * If we've met this interface before, use the same index.
          * Otherwise find an unused index value and use that.
@@ -665,34 +661,41 @@ ifTable_get_entry_by_name(char *name, int create)
             if (entry->index == SE_DNE)
                 entry->index = 1;       /* Completely new list! */
             se_add_pair_to_slist("interfaces", strdup(name), entry->index);
-            entry->next = if_head;
-            if_head = entry;    /* XXX - or sorted? */
         }
+
+        /*
+         * inserting in container will also handle container_by_name 
+         */
+        CONTAINER_INSERT(container, entry);
+
         DEBUGMSGTL(("mibII/ifTable", "Creating entry for %s (%d)\n",
                     name, entry->index));
-        /*
-         * XXX - initialise the "static" information
-         *  a) Using the configure overrides
-         *  b) Via (architecture-specific) utility routines
-         */
-        ifTable_info(entry);
-        entry->flags &= NETSNMP_IF_FLAGS_ACTIVE;
-        if_size++;
     }
+    if (entry)
+        entry->flags &= NETSNMP_IF_FLAGS_ACTIVE;
+
     return entry;
 
 }
 
 netsnmp_ifentry *
-ifTable_get_entry_by_index(int index)
+ifTable_ifentry_get_by_index(netsnmp_cache * cache, int index)
 {
-    netsnmp_ifentry *entry;
+    netsnmp_index   tmp;
+    netsnmp_container *container;
 
-    for (entry = if_head; entry; entry = entry->next) {
-        if (index == entry->index)
-            break;
+    if ((NULL == cache) || (NULL == cache->magic)) {
+        snmp_log(LOG_ERR,
+                 "invalid cache for ifTable_ifentry_get_by_index\n");
+        return NULL;
     }
-    return entry;
+
+    container = (netsnmp_container *) cache->magic;
+
+    tmp.len = 1;
+    tmp.oids = (oid *) & index;
+
+    return (netsnmp_ifentry *) CONTAINER_FIND(container, &tmp);
 }
 
         /*
@@ -703,10 +706,11 @@ ifTable_get_entry_by_index(int index)
          * ifTable_load identifies the list of interfaces that
          *     are currently present, and retrieves the dynamic
          *     information for them (mostly statistic counters).
-         * ifTable_info sets up the static information for a
+         * ifTable_info_init sets up the static information for a
          *     given interface, and this will typically be
          *     retained even after the interface disappears.
          */
+
 
 
 #ifdef linux
@@ -723,10 +727,14 @@ get_iftype(netsnmp_ifentry * entry)
 }
 
 int
-ifTable_info(netsnmp_ifentry * entry)
+ifTable_ifentry_info_init(netsnmp_ifentry * entry)
 {
     if (!entry)
         return -1;
+
+    entry->oid_index.len = 1;
+    entry->oid_index.oids = (oid *) & entry->index;
+
     if (!entry->if_speed)
         entry->if_speed = get_ifspeed(entry);
     if (!entry->if_type)
@@ -750,8 +758,19 @@ ifTable_load(netsnmp_cache * cache, void *vmagic)
     unsigned long long int rec_pkt, rec_oct, rec_err, rec_drop;
     unsigned long long int snd_pkt, snd_oct, snd_err, snd_drop, coll;
     netsnmp_ifentry *entry;
+    netsnmp_container *container;
 
-    ifTable_free(cache, NULL);
+    if ((NULL == cache) || (NULL == cache->magic)) {
+        snmp_log(LOG_ERR, "invalid cache for ifTable_load\n");
+        return -1;
+    }
+    DEBUGMSGTL(("ifTable/cache", "ifTable_load %p/%p\n",
+                cache, cache->magic));
+
+    container = (netsnmp_container *) cache->magic;
+
+    if (cache->valid)
+        ifTable_free(cache, NULL);
 
     if (!(devin = fopen("/proc/net/dev", "r"))) {
         DEBUGMSGTL(("mibII/ifTable",
@@ -764,10 +783,17 @@ ifTable_load(netsnmp_cache * cache, void *vmagic)
      * Read the first two lines of the file, containing the header
      * This indicates which version of the kernel we're working with,
      * and hence which statistics are actually available.
+     *    xxx - couldn't this result be cached at startup? can the format
+     *          change without a reboot??
      *
      * Wes originally suggested parsing the field names in this header
      * to detect the position of individual fields directly,
      * but I suspect this is probably more trouble than it's worth.
+     *
+     * Robert suggests that once we have the table index, we could store the
+     * raw data and save the parsing for later. Wouldn't save much work during
+     * a walk, but if there are lots of interfaces and only a few are being
+     * polled, it would save some parsing...
      */
     fgets(line, sizeof(line), devin);
     fgets(line, sizeof(line), devin);
@@ -808,7 +834,7 @@ ifTable_load(netsnmp_cache * cache, void *vmagic)
                      "/proc/net/dev data format error, line ==|%s|", line);
         }
         *stats = 0;
-        entry = ifTable_get_entry_by_name(ifstart, 1);
+        entry = ifTable_ifentry_get_by_name(cache, ifstart, 1);
         *stats++ = ':';
         while (*stats == ' ')
             stats++;
