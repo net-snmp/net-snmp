@@ -67,7 +67,12 @@
     memcpy( $m2c_ctx_lh, $m2c_ctx_rh,
             $m2c_ctx_lhs * sizeof(${m2c_ctx_lh}[0]) );
 @else@
+@   if $node.decl =~ /U64/i@ #              ASN_COUNTER64
+    ${m2c_ctx_lh}.high = ${m2c_ctx_rh}.high;
+    ${m2c_ctx_lh}.low = ${m2c_ctx_rh}.low;
+@   else@
     $m2c_ctx_lh = $m2c_ctx_rh;
+@   end@
 @end@ # length
 ##
 ########################################################################
