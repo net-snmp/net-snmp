@@ -169,12 +169,12 @@ snmp_enable_syslog(void)
 }
 
 void
-snmp_enable_syslog_ident(char *ident)
+snmp_enable_syslog_ident(const char *ident)
 {
 	snmp_disable_syslog();
 	if (ident == NULL)
 		/* This default should probably be net-snmp at some point */
-		ident = strdup(DEFAULT_LOG_ID);
+		ident = DEFAULT_LOG_ID;
 #if HAVE_SYSLOG_H
 	openlog(ident, LOG_CONS|LOG_PID, LOG_DAEMON);
 	do_syslogging=1;
