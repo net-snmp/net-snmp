@@ -211,7 +211,7 @@ if test "x$with_root_access" = "xno"; then
 fi
 
 dnl Define unless specifically suppressed (ie, option defaults to false). 
-if test "x$with_dummy_values" != "xno"; then
+if test "x$with_dummy_values" = "xno"; then
   AC_DEFINE(NO_DUMMY_VALUES)
 fi
 

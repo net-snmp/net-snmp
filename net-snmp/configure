@@ -915,7 +915,7 @@ EOF
 
 fi
 
-if test "x$with_dummy_values" != "xno"; then
+if test "x$with_dummy_values" = "xno"; then
   cat >> confdefs.h <<\EOF
 #define NO_DUMMY_VALUES 1
 EOF
