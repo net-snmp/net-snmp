@@ -398,7 +398,7 @@ var_hrstore(struct variable *vp,
     switch (vp->magic){
 	case HRSTORE_MEMSIZE:
 #ifndef linux
-	    long_return = physmem * pagesize;
+	    long_return = physmem * (pagesize / 1024);
 #else
 	    stat("/proc/kcore", &kc_buf);
 	    long_return = kc_buf.st_size/1024;	/* 4K too large ? */
