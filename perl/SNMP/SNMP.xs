@@ -151,7 +151,7 @@ static SV* __push_cb_args _((SV * sv, SV * esv));
 static int __call_callback _((SV * sv, int flags));
 static char* __av_elem_pv _((AV * av, I32 key, char *dflt));
 static u_int compute_match _((const char *, const char *));
-struct tree * find_best_tree_node _((const char *, struct tree *, u_int *));
+static struct tree * find_best_tree_node _((const char *, struct tree *, u_int *));
 
 #define USE_NUMERIC_OIDS 0x08
 #define NON_LEAF_NAME 0x04
@@ -329,6 +329,10 @@ char* typestr;
 
 	if (!strncasecmp(typestr,"INTEGER",3))
             return(TYPE_INTEGER);
+	if (!strncasecmp(typestr,"INTEGER32",3))
+            return(TYPE_INTEGER32);
+	if (!strncasecmp(typestr,"UNSIGNED32",3))
+            return(TYPE_UNSIGNED32);
 	if (!strcasecmp(typestr,"COUNTER")) /* check all in case counter64 */
             return(TYPE_COUNTER);
 	if (!strncasecmp(typestr,"GAUGE",3))
@@ -576,6 +580,12 @@ char * str;
 	case TYPE_INTEGER:
        		strcpy(str, "INTEGER");
 	        break;
+	case TYPE_INTEGER32:
+       		strcpy(str, "INTEGER32");
+	        break;
+	case TYPE_UNSIGNED32:
+       		strcpy(str, "UNSIGNED32");
+	        break;
 	case TYPE_NETADDR:
        		strcpy(str, "NETADDR");
 	        break;
@@ -774,7 +784,7 @@ const char *key;
    return MAX_BAD;
 }
 
-struct tree *
+static struct tree *
 find_best_tree_node(const char *pattrn, struct tree *tree_top, u_int *match)
 {
    struct tree *tp, *best_so_far = NULL, *retptr;
