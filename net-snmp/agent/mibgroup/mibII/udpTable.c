@@ -326,7 +326,6 @@ static void UDP_Scan_Init(void)
 #else /*  !defined(CAN_USE_SYSCTL) || !defined(UDPCTL_PCBLIST) */
     {
 	size_t len;
-	int cc;
 	int sname[] = { CTL_NET, PF_INET, IPPROTO_UDP, UDPCTL_PCBLIST };
 
 	if (udpcb_buf) {

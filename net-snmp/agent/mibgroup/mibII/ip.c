@@ -457,13 +457,13 @@ read_ip_stat( IP_STAT_STRUCTURE *ipstat, int magic )
 	len = sizeof i;
 	sname[3] = IPCTL_FORWARDING;
 	if (sysctl(sname, 4, &i, &len, 0, 0) < 0)
-	    forward -1;
+	    forward = -1;
 	else
 	    forward = (i ? 1	/* GATEWAY */
 			 : 2	/* HOST    */  );
 #else
 	if (!auto_nlist(IP_FORWARDING_SYMBOL, (char *) &ret_value, sizeof(ret_value)))
-	    forward -1;
+	    forward = -1;
 	else
 	    forward = (ret_value ? 1	/* GATEWAY */
 			         : 2	/* HOST    */  );

@@ -166,10 +166,8 @@ extern struct timeval starttime;
 
 static int Interface_Scan_Get_Count (void);
 
-#ifdef linux
 static void parse_interface_config(const char *, char *);
 static void free_interface_config(void);
-#endif
 
 struct variable4 interfaces_variables[] = {
     {IFNUMBER, ASN_INTEGER, RONLY, var_interfaces, 1, {1}},
@@ -210,10 +208,8 @@ void init_interfaces(void)
   REGISTER_SYSOR_ENTRY(interfaces_module_oid,
 	"The MIB module to describe generic objects for network interface sub-layers");
   
-#ifdef linux
   snmpd_register_config_handler("interface", parse_interface_config,
     				free_interface_config, "name type speed");
-#endif
 
 #ifndef USE_SYSCTL_IFLIST
 #if HAVE_NET_IF_MIB_H
@@ -256,6 +252,83 @@ if_type_from_name( const char *pcch)
     }
     return (1); /* in case search fails */
 }
+
+
+typedef struct _conf_if_list {
+    char *name;
+    int type;
+    u_long speed;
+    struct _conf_if_list *next;
+} conf_if_list;
+
+static conf_if_list *conf_list;
+static struct ifnet *ifnetaddr_list;
+
+static void parse_interface_config(const char *token, char *cptr)
+{
+    conf_if_list *if_ptr, *if_new;
+    char *name, *type, *speed, *ecp;
+
+    name = strtok(cptr, " \t");
+    if (!name) {
+	config_perror("Missing NAME parameter");
+	return;
+    }
+    type = strtok(NULL, " \t");
+    if (!type) {
+	config_perror("Missing TYPE parameter");
+	return;
+    }
+    speed = strtok(NULL, " \t");
+    if (!speed) {
+	config_perror("Missing SPEED parameter");
+	return;
+    }
+    if_ptr = conf_list;
+    while (if_ptr)
+	if (strcmp(if_ptr->name, name)) if_ptr = if_ptr->next;
+	else break;
+    if (if_ptr)
+	config_pwarn("Duplicate interface specification");
+    if_new = (conf_if_list *)malloc(sizeof(conf_if_list));
+    if (!if_new) {
+	config_perror("Out of memory");
+	return;
+    }
+    if_new->speed = strtoul(speed, &ecp, 0);
+    if (*ecp) {
+	config_perror("Bad SPEED value");
+	free(if_new);
+	return;
+    }
+    if_new->type = strtol(type, &ecp, 0);
+    if (*ecp || if_new->type < 0) {
+	config_perror("Bad TYPE");
+	free(if_new);
+	return;
+    }
+    if_new->name = strdup(name);
+    if (!if_new->name) {
+	config_perror("Out of memory");
+	free(if_new);
+	return;
+    }
+    if_new->next = conf_list;
+    conf_list = if_new;
+}
+
+static void free_interface_config(void)
+{
+    conf_if_list *if_ptr = conf_list, *if_next;
+    while (if_ptr) {
+	if_next = if_ptr->next;
+	free(if_ptr->name);
+	free(if_ptr);
+	if_ptr = if_next;
+    }
+    conf_list = NULL;
+}
+
 
 
 /*
@@ -641,95 +714,6 @@ static int Interface_Scan_By_Index (int, char *, struct ifnet *, struct in_ifadd
 static int Interface_Get_Ether_By_Index (int, u_char *);
 #endif
 
-	/*********************
-	 *
-	 *  Initialisation & common implementation functions
-	 *
-	 *********************/
-
-
-
-
-
-#ifdef linux
-typedef struct _conf_if_list {
-    char *name;
-    int type;
-    u_long speed;
-    struct _conf_if_list *next;
-} conf_if_list;
-
-static conf_if_list *if_list;
-static struct ifnet *ifnetaddr_list;
-
-static void parse_interface_config(const char *token, char *cptr)
-{
-    conf_if_list *if_ptr, *if_new;
-    char *name, *type, *speed, *ecp;
-
-    name = strtok(cptr, " \t");
-    if (!name) {
-	config_perror("Missing NAME parameter");
-	return;
-    }
-    type = strtok(NULL, " \t");
-    if (!type) {
-	config_perror("Missing TYPE parameter");
-	return;
-    }
-    speed = strtok(NULL, " \t");
-    if (!speed) {
-	config_perror("Missing SPEED parameter");
-	return;
-    }
-    if_ptr = if_list;
-    while (if_ptr)
-	if (strcmp(if_ptr->name, name)) if_ptr = if_ptr->next;
-	else break;
-    if (if_ptr)
-	config_pwarn("Duplicate interface specification");
-    if_new = (conf_if_list *)malloc(sizeof(conf_if_list));
-    if (!if_new) {
-	config_perror("Out of memory");
-	return;
-    }
-    if_new->speed = strtoul(speed, &ecp, 0);
-    if (*ecp) {
-	config_perror("Bad SPEED value");
-	free(if_new);
-	return;
-    }
-    if_new->type = strtol(type, &ecp, 0);
-    if (*ecp || if_new->type < 0) {
-	config_perror("Bad TYPE");
-	free(if_new);
-	return;
-    }
-    if_new->name = strdup(name);
-    if (!if_new->name) {
-	config_perror("Out of memory");
-	free(if_new);
-	return;
-    }
-    if_new->next = if_list;
-    if_list = if_new;
-}
-
-static void free_interface_config(void)
-{
-    conf_if_list *if_ptr = if_list, *if_next;
-    while (if_ptr) {
-	if_next = if_ptr->next;
-	free(if_ptr->name);
-	free(if_ptr);
-	if_ptr = if_next;
-    }
-    if_list = NULL;
-}
-
-#endif /* linux */
-
-
 
 
 	/*********************
@@ -751,10 +735,11 @@ var_ifEntry(struct variable *vp,
 	    WriteMethod **write_method)
 {
     static struct ifnet ifnet;
-    register int interface;
+    int interface;
     static struct in_ifaddr in_ifaddr;
     static char Name[16];
-    register char *cp;
+    char *cp;
+    conf_if_list *if_ptr = conf_list;
 #if STRUCT_IFNET_HAS_IF_LASTCHANGE_TV_SEC
     struct timeval now;
 #endif
@@ -764,6 +749,7 @@ var_ifEntry(struct variable *vp,
 	return NULL;
 
     Interface_Scan_By_Index(interface, Name, &ifnet, &in_ifaddr);
+    while (if_ptr && strcmp(Name, if_ptr->name)) if_ptr = if_ptr->next;
 
     switch (vp->magic){
 	case IFINDEX:
@@ -777,7 +763,8 @@ var_ifEntry(struct variable *vp,
 #if STRUCT_IFNET_HAS_IF_TYPE
 	    long_return = ifnet.if_type;
 #else
-	    long_return = 1;	/* OTHER */
+	    if (if_ptr) long_return = if_ptr->type;
+	    else long_return = 1;	/* OTHER */
 #endif
 	    return (u_char *) &long_return;
 	case IFMTU: {
@@ -790,7 +777,8 @@ var_ifEntry(struct variable *vp,
 #elif STRUCT_IFNET_HAS_IF_SPEED
 	    long_return = ifnet.if_speed;
 #elif STRUCT_IFNET_HAS_IF_TYPE && defined(IFT_ETHER)
-	    if((long_return == 0) || (long_return == 1)) {
+	    if (if_ptr) long_return = if_ptr->speed;
+	    else {
 		if(ifnet.if_type == IFT_ETHER) long_return=10000000;
 		if(ifnet.if_type == IFT_P10) long_return=10000000;
 		if(ifnet.if_type == IFT_P80) long_return=80000000;
@@ -1414,7 +1402,7 @@ Interface_Scan_Init (void)
 	nnew->if_mtu = 0;
 #endif
 
-	for (if_ptr = if_list; if_ptr; if_ptr = if_ptr->next)
+	for (if_ptr = conf_list; if_ptr; if_ptr = if_ptr->next)
 	    if (! strcmp (if_ptr->name, ifname))
 	      break;
 

@@ -141,7 +141,9 @@ var_ipAddrEntry(struct variable *vp,
     oid			    current[14], *op;
     u_char		    *cp;
     int			    lowinterface=0;
+#ifndef freebsd2
     short                   interface;
+#endif
     static struct in_ifaddr in_ifaddr;
 #if !defined(linux) && !defined(sunV3)
     static struct in_ifaddr lowin_ifaddr;
