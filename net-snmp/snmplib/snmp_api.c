@@ -3782,6 +3782,9 @@ snmp_varlist_add_variable(struct variable_list **varlist,
         break;
 
       case ASN_NULL:
+      case SNMP_NOSUCHOBJECT:
+      case SNMP_NOSUCHINSTANCE:
+      case SNMP_ENDOFMIBVIEW:
         vars->val_len = 0;
         vars->val.string = NULL;
         break;
