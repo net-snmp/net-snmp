@@ -16,6 +16,14 @@
 #include <net-snmp/agent/serialize.h>
 #include <net-snmp/agent/read_only.h>
 #include <net-snmp/agent/bulk_to_next.h>
+
+#else
+
+void  netsnmp_init_debug_helper(void);
+void  netsnmp_init_serialize(void);
+void  netsnmp_init_read_only_helper(void);
+void  netsnmp_init_bulk_to_next_helper(void);
+
 #endif
 
 /** call the initialization sequence for all handlers with init_ routines. */
