@@ -141,8 +141,8 @@
 #   endif
 #  endif
 # endif
-#endif
 #endif /* defined(freebsd3) */
+#endif /* HAVE_SYS_SYSCTL_H */
 
 /* #include "../common_header.h" */
 
