@@ -97,11 +97,14 @@ configclean:
 	rm -f Makefile snmplib/Makefile				\
 		agent/Makefile agent/mibgroup/Makefile		\
 		apps/Makefile  apps/snmpnetstat/Makefile	\
+		man/Makefile mibs/Makefile ov/Makefile		\
 		local/Makefile testing/Makefile
-	rm -r agent/dlmods/Makefile
-	rm -f mib_module_config.h			\
+	rm -f agent/dlmods/Makefile
+	rm -f mibs/.index
+	rm -f mib_module_config.h ucd-snmp-config.h 	\
 		agent/mibgroup/mib_module_includes.h 	\
 		agent/mibgroup/mib_module_inits.h 	\
+		agent/mibgroup/mib_module_shutdown.h 	\
 		agent/mibgroup/mib_module_dot_conf.h
 	rm -f *.core
 
