@@ -281,10 +281,10 @@ convert_v2_to_v1(netsnmp_variable_list * vars, netsnmp_pdu *template_pdu)
     int             len;
 
     for (v = vars; v; v = v->next_variable) {
-        if (snmp_oid_compare(v->name, v->name_length,
+        if (netsnmp_oid_equals(v->name, v->name_length,
                              snmptrap_oid, OID_LENGTH(snmptrap_oid)) == 0)
             trap_v = v;
-        if (snmp_oid_compare(v->name, v->name_length,
+        if (netsnmp_oid_equals(v->name, v->name_length,
                              snmptrapenterprise_oid,
                              OID_LENGTH(snmptrapenterprise_oid)) == 0)
             ent_v = v;
@@ -297,7 +297,7 @@ convert_v2_to_v1(netsnmp_variable_list * vars, netsnmp_pdu *template_pdu)
      * Is this a 'standard' trap?
      *  Or at least, does it have the correct prefix?
      */
-    if (snmp_oid_compare(trap_v->val.objid, OID_LENGTH(trap_prefix),
+    if (netsnmp_oid_equals(trap_v->val.objid, OID_LENGTH(trap_prefix),
                          trap_prefix, OID_LENGTH(trap_prefix)) == 0) {
         template_pdu->trap_type =
             trap_v->val.objid[OID_LENGTH(trap_prefix)] - 1;
@@ -409,11 +409,11 @@ send_enterprise_trap_vars(int trap,
                                  *  Check to see whether the variables provided
                                  *    are sufficient for SNMPv2 notifications
                                  */
-        if (vars && snmp_oid_compare(vars->name, vars->name_length,
+        if (vars && netsnmp_oid_equals(vars->name, vars->name_length,
                                      sysuptime_oid,
                                      OID_LENGTH(sysuptime_oid)) == 0)
             v2_vars = vars;
-        else if (vars && snmp_oid_compare(vars->name, vars->name_length,
+        else if (vars && netsnmp_oid_equals(vars->name, vars->name_length,
                                           snmptrap_oid,
                                           OID_LENGTH(snmptrap_oid)) == 0)
             uptime_var.next_variable = vars;

@@ -167,7 +167,7 @@ netsnmp_tdomain_support(const oid * in_oid,
     netsnmp_tdomain *d = NULL;
 
     for (d = domain_list; d != NULL; d = d->next) {
-        if (snmp_oid_compare(in_oid, in_len, d->name, d->name_length) == 0) {
+        if (netsnmp_oid_equals(in_oid, in_len, d->name, d->name_length) == 0) {
             if (out_oid != NULL && out_len != NULL) {
                 *out_oid = d->name;
                 *out_len = d->name_length;
@@ -236,8 +236,8 @@ netsnmp_tdomain_register(netsnmp_tdomain *n)
 
     if (n != NULL) {
         for (d = domain_list; d != NULL; d = d->next) {
-            if (snmp_oid_compare(n->name, n->name_length,
-                                 d->name, d->name_length) == 0) {
+            if (netsnmp_oid_equals(n->name, n->name_length,
+                                d->name, d->name_length) == 0) {
                 /*
                  * Already registered.  
                  */
@@ -262,8 +262,8 @@ netsnmp_tdomain_unregister(netsnmp_tdomain *n)
 
     if (n != NULL) {
         for (d = domain_list; d != NULL; d = d->next) {
-            if (snmp_oid_compare(n->name, n->name_length,
-                                 d->name, d->name_length) == 0) {
+            if (netsnmp_oid_equals(n->name, n->name_length,
+                                d->name, d->name_length) == 0) {
                 *prevNext = n->next;
                 return 1;
             }
@@ -385,7 +385,7 @@ netsnmp_tdomain_transport_oid(const oid * dom,
 
     for (d = domain_list; d != NULL; d = d->next) {
         for (i = 0; d->prefix[i] != NULL; i++) {
-            if (snmp_oid_compare(dom, dom_len, d->name, d->name_length) ==
+            if (netsnmp_oid_equals(dom, dom_len, d->name, d->name_length) ==
                 0) {
                 return d->f_create_from_ostring(o, o_len, local);
             }

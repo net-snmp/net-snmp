@@ -2717,7 +2717,7 @@ usm_check_secLevel(int level, struct usmUser *user)
                  sizeof(usmNoPrivProtocol) / sizeof(oid)));
     DEBUGMSG(("comparex", "\n"));
     if (level == SNMP_SEC_LEVEL_AUTHPRIV
-        && (snmp_oid_compare(user->privProtocol, user->privProtocolLen,
+        && (netsnmp_oid_equals(user->privProtocol, user->privProtocolLen,
                              usmNoPrivProtocol,
                              sizeof(usmNoPrivProtocol) / sizeof(oid)) ==
             0)) {
@@ -2732,7 +2732,7 @@ usm_check_secLevel(int level, struct usmUser *user)
     if ((level == SNMP_SEC_LEVEL_AUTHPRIV
          || level == SNMP_SEC_LEVEL_AUTHNOPRIV)
         &&
-        (snmp_oid_compare
+        (netsnmp_oid_equals
          (user->authProtocol, user->authProtocolLen, usmNoAuthProtocol,
           sizeof(usmNoAuthProtocol) / sizeof(oid)) == 0)) {
         DEBUGMSGTL(("usm", "Level: %d\n", level));
@@ -2778,7 +2778,7 @@ usm_check_secLevel_vs_protocols(int level,
 
     if (level == SNMP_SEC_LEVEL_AUTHPRIV
         &&
-        (snmp_oid_compare
+        (netsnmp_oid_equals
          (privProtocol, privProtocolLen, usmNoPrivProtocol,
           sizeof(usmNoPrivProtocol) / sizeof(oid)) == 0)) {
         DEBUGMSGTL(("usm", "Level: %d\n", level));
@@ -2792,7 +2792,7 @@ usm_check_secLevel_vs_protocols(int level,
     if ((level == SNMP_SEC_LEVEL_AUTHPRIV
          || level == SNMP_SEC_LEVEL_AUTHNOPRIV)
         &&
-        (snmp_oid_compare
+        (netsnmp_oid_equals
          (authProtocol, authProtocolLen, usmNoAuthProtocol,
           sizeof(usmNoAuthProtocol) / sizeof(oid)) == 0)) {
         DEBUGMSGTL(("usm", "Level: %d\n", level));

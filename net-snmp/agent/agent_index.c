@@ -686,7 +686,7 @@ count_indexes(oid * name, size_t namelen, int include_unallocated)
     unsigned long   n = 0;
 
     for (i = snmp_index_head; i != NULL; i = i->next_oid) {
-        if (snmp_oid_compare(name, namelen,
+        if (netsnmp_oid_equals(name, namelen,
                              i->varbind->name,
                              i->varbind->name_length) == 0) {
             for (j = i; j != NULL; j = j->next_idx) {
