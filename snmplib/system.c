@@ -985,6 +985,7 @@ mkdirhier(const char *pathname, mode_t mode, int skiplast)
     char           *ourcopy = strdup(pathname);
     char           *entry;
     char            buf[SNMP_MAXPATH];
+    char           *st;
 
 #if defined (WIN32) || defined (cygwin)
     /* convert backslash to forward slash */
@@ -993,7 +994,7 @@ mkdirhier(const char *pathname, mode_t mode, int skiplast)
             *entry = '/';
 #endif
 
-    entry = strtok(ourcopy, "/");
+    entry = strtok_r(ourcopy, "/", &st);
 
     buf[0] = '\0';
 
@@ -1005,7 +1006,7 @@ mkdirhier(const char *pathname, mode_t mode, int skiplast)
     if ((entry) && (':' == entry[1]) &&
         (('\0' == entry[2]) || ('/' == entry[2]))) {
         strcat(buf, entry);
-        entry = strtok(NULL, "/");
+        entry = strtok_r(NULL, "/", &st);
     }
 #endif
 
@@ -1015,7 +1016,7 @@ mkdirhier(const char *pathname, mode_t mode, int skiplast)
     while (entry) {
         strcat(buf, "/");
         strcat(buf, entry);
-        entry = strtok(NULL, "/");
+        entry = strtok_r(NULL, "/", &st);
         if (entry == NULL && skiplast)
             break;
         if (stat(buf, &sbuf) < 0) {

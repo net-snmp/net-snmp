@@ -133,10 +133,11 @@ vacm_parse_group(const char *token, char *param)
     char           *group, *model, *security;
     int             imodel;
     struct vacm_groupEntry *gp = NULL;
+    char           *st;
 
-    group = strtok(param, " \t\n");
-    model = strtok(NULL, " \t\n");
-    security = strtok(NULL, " \t\n");
+    group = strtok_r(param, " \t\n", &st);
+    model = strtok_r(NULL, " \t\n", &st);
+    security = strtok_r(NULL, " \t\n", &st);
 
     if (group == NULL || *group == 0) {
         config_perror("missing GROUP parameter");
@@ -196,43 +197,44 @@ vacm_parse_access(const char *token, char *param)
         *writeView, *notify;
     int             imodel, ilevel, iprefix;
     struct vacm_accessEntry *ap;
+    char   *st;
 
-    name = strtok(param, " \t\n");
+    name = strtok_r(param, " \t\n", &st);
     if (!name) {
         config_perror("missing NAME parameter");
         return;
     }
-    context = strtok(NULL, " \t\n");
+    context = strtok_r(NULL, " \t\n", &st);
     if (!context) {
         config_perror("missing CONTEXT parameter");
         return;
     }
-    model = strtok(NULL, " \t\n");
+    model = strtok_r(NULL, " \t\n", &st);
     if (!model) {
         config_perror("missing MODEL parameter");
         return;
     }
-    level = strtok(NULL, " \t\n");
+    level = strtok_r(NULL, " \t\n", &st);
     if (!level) {
         config_perror("missing LEVEL parameter");
         return;
     }
-    prefix = strtok(NULL, " \t\n");
+    prefix = strtok_r(NULL, " \t\n", &st);
     if (!prefix) {
         config_perror("missing PREFIX parameter");
         return;
     }
-    readView = strtok(NULL, " \t\n");
+    readView = strtok_r(NULL, " \t\n", &st);
     if (!readView) {
         config_perror("missing readView parameter");
         return;
     }
-    writeView = strtok(NULL, " \t\n");
+    writeView = strtok_r(NULL, " \t\n", &st);
     if (!writeView) {
         config_perror("missing writeView parameter");
         return;
     }
-    notify = strtok(NULL, " \t\n");
+    notify = strtok_r(NULL, " \t\n", &st);
     if (!notify) {
         config_perror("missing notifyView parameter");
         return;
@@ -326,23 +328,24 @@ vacm_parse_view(const char *token, char *param)
     size_t          suboid_len = 0;
     u_char          viewMask[sizeof(vp->viewMask)];
     int             i;
+    char            *st;
 
-    name = strtok(param, " \t\n");
+    name = strtok_r(param, " \t\n", &st);
     if (!name) {
         config_perror("missing NAME parameter");
         return;
     }
-    type = strtok(NULL, " \n\t");
+    type = strtok_r(NULL, " \n\t", &st);
     if (!type) {
         config_perror("missing TYPE parameter");
         return;
     }
-    subtree = strtok(NULL, " \t\n");
+    subtree = strtok_r(NULL, " \t\n", &st);
     if (!subtree) {
         config_perror("missing SUBTREE parameter");
         return;
     }
-    mask = strtok(NULL, "\0");
+    mask = strtok_r(NULL, "\0", &st);
 
     if (strcmp(type, "included") == 0)
         inclexcl = SNMP_VIEW_INCLUDED;
@@ -363,7 +366,7 @@ vacm_parse_view(const char *token, char *param)
     if (mask) {
         int             val;
         i = 0;
-        for (mask = strtok(mask, " .:"); mask; mask = strtok(NULL, " .:")) {
+        for (mask = strtok_r(mask, " .:", &st); mask; mask = strtok_r(NULL, " .:", &st)) {
             if (i >= sizeof(viewMask)) {
                 config_perror("MASK too long");
                 return;

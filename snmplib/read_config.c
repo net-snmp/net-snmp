@@ -202,6 +202,7 @@ register_config_handler(const char *type_param,
     struct config_line **ltmp, *ltmp2;
     const char     *type = type_param;
     char           *cptr, buf[STRINGMAX];
+    char           *st;
 
     if (type == NULL) {
         type = netsnmp_ds_get_string(NETSNMP_DS_LIBRARY_ID, 
@@ -216,10 +217,10 @@ register_config_handler(const char *type_param,
         strncpy(buf, type, STRINGMAX);
         buf[STRINGMAX - 1] = '\0';
         ltmp2 = NULL;
-        cptr = strtok(buf, ":");
+        cptr = strtok_r(buf, ":", &st);
         while (cptr) {
             ltmp2 = register_config_handler(cptr, token, parser, releaser, help);
-            cptr  = strtok(NULL, ":");
+            cptr  = strtok_r(NULL, ":", &st);
         }
         return ltmp2;
     }
@@ -303,6 +304,7 @@ unregister_config_handler(const char *type_param, const char *token)
     struct config_line **ltmp, *ltmp2;
     const char     *type = type_param;
     char           *cptr, buf[STRINGMAX];
+    char           *st;
 
     if (type == NULL) {
         type = netsnmp_ds_get_string(NETSNMP_DS_LIBRARY_ID, 
@@ -316,10 +318,10 @@ unregister_config_handler(const char *type_param, const char *token)
     if (cptr) {
         strncpy(buf, type, STRINGMAX);
         buf[STRINGMAX - 1] = '\0';
-        cptr = strtok(buf, ":");
+        cptr = strtok_r(buf, ":", &st);
         while (cptr) {
             unregister_config_handler(cptr, token);
-            cptr  = strtok(NULL, ":");
+            cptr  = strtok_r(NULL, ":", &st);
         }
         return;
     }
@@ -510,6 +512,7 @@ snmp_config_when(char *line, int when)
     char           *cptr, buf[STRINGMAX], tmpbuf[STRINGMAX];
     struct config_line *lptr = NULL;
     struct config_files *ctmp = config_files;
+    char           *st;
 
     if (line == NULL) {
         config_perror("snmp_config() called with a null string.");
@@ -518,7 +521,7 @@ snmp_config_when(char *line, int when)
 
     strncpy(buf, line, STRINGMAX);
     buf[STRINGMAX - 1] = '\0';
-    cptr = strtok(buf, SNMP_CONFIG_DELIMETERS);
+    cptr = strtok_r(buf, SNMP_CONFIG_DELIMETERS, &st);
     if (cptr && cptr[0] == '[') {
         if (cptr[strlen(cptr) - 1] != ']') {
             snprintf(tmpbuf, sizeof(tmpbuf),
@@ -538,7 +541,7 @@ snmp_config_when(char *line, int when)
             config_perror(tmpbuf);
             return SNMPERR_GENERR;
         }
-        cptr = strtok(NULL, SNMP_CONFIG_DELIMETERS);
+        cptr = strtok_r(NULL, SNMP_CONFIG_DELIMETERS, &st);
         lptr = read_config_find_handler(lptr, cptr);
     } else {
         /*
@@ -556,7 +559,7 @@ snmp_config_when(char *line, int when)
     }
 
     /*
-     * use the original string instead since strtok messed up the original 
+     * use the original string instead since strtok_r messed up the original 
      */
     line = skip_white(line + (cptr - buf) + strlen(cptr) + 1);
 
@@ -795,11 +798,11 @@ free_config(void)
 void
 read_configs(void)
 {
-
     char *optional_config = netsnmp_ds_get_string(NETSNMP_DS_LIBRARY_ID, 
 					       NETSNMP_DS_LIB_OPTIONALCONFIG);
     char *type = netsnmp_ds_get_string(NETSNMP_DS_LIBRARY_ID, 
 				       NETSNMP_DS_LIB_APPTYPE);
+    char *st;
 
     DEBUGMSGTL(("read_config", "reading normal configuration tokens\n"));
 
@@ -813,8 +816,8 @@ read_configs(void)
      */
     if (optional_config && type) {
       char           *newp, *cp;
-      newp = strdup(optional_config);      /* strtok messes it up */
-      cp = strtok(newp, ",");
+      newp = strdup(optional_config);      /* strtok_r messes it up */
+      cp = strtok_r(newp, ",", &st);
       while (cp) {
         struct stat     statbuf;
         if (stat(cp, &statbuf)) {
@@ -828,7 +831,7 @@ read_configs(void)
                         cp));
             read_config_with_type(cp, type);
         }
-        cp = strtok(NULL, ",");
+        cp = strtok_r(NULL, ",", &st);
       }
       free(newp);
     }

@@ -110,12 +110,13 @@ void
 debug_register_tokens(char *tokens)
 {
     char           *newp, *cp;
+    char           *st;
 
     if (tokens == 0 || *tokens == 0)
         return;
 
-    newp = strdup(tokens);      /* strtok messes it up */
-    cp = strtok(newp, DEBUG_TOKEN_DELIMITER);
+    newp = strdup(tokens);      /* strtok_r messes it up */
+    cp = strtok_r(newp, DEBUG_TOKEN_DELIMITER, &st);
     while (cp) {
         if (strlen(cp) < MAX_DEBUG_TOKEN_LEN) {
             if (strcasecmp(cp, DEBUG_ALWAYS_TOKEN) == 0) {
@@ -129,7 +130,7 @@ debug_register_tokens(char *tokens)
         } else {
             snmp_log(LOG_NOTICE, "Debug token %s over length", cp);
         }
-        cp = strtok(NULL, DEBUG_TOKEN_DELIMITER);
+        cp = strtok_r(NULL, DEBUG_TOKEN_DELIMITER, &st);
     }
     free(newp);
 }
