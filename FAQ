@@ -93,6 +93,10 @@ What is it?
 Where can I get it?
 ------------------
 
+WWW:
+        http://www.ece.ucdavis.edu/ucd-snmp
+
+FTP:
   - ftp://ftp.ece.ucdavis.edu/pub/snmp/ucd-snmp.tar.gz
   - ftp://sunsite.cnlab-switch.ch/mirror/ucd-snmp/ucd-snmp.tar.gz
   - ftp://ftp.win.or.jp/pub/network/snmp/ucd-snmp/ucd-snmp.tar.gz
