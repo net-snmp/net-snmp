@@ -2512,7 +2512,7 @@ err:
 
 
 int
-snmp_informV3(sess_ref,uptime,trap_oid,varlist_ref)
+snmp_inform(sess_ref,uptime,trap_oid,varlist_ref)
         SV *	sess_ref
         char *	uptime
         char *	trap_oid
@@ -2569,7 +2569,7 @@ snmp_informV3(sess_ref,uptime,trap_oid,varlist_ref)
 				uptime, strlen(uptime), TYPE_TIMETICKS);
 
               if(res == FAILURE) {
-                if(verbose) warn("error:inform v3: adding sysUpTime varbind");
+                if(verbose) warn("error:inform: adding sysUpTime varbind");
 		goto err;
               }
 
@@ -2577,7 +2577,7 @@ snmp_informV3(sess_ref,uptime,trap_oid,varlist_ref)
 				trap_oid ,strlen(trap_oid) ,TYPE_OBJID);
 
               if(res == FAILURE) {
-                if(verbose) warn("error:inform v3: adding snmpTrapOID varbind");
+                if(verbose) warn("error:inform: adding snmpTrapOID varbind");
 		goto err;
               }
 
@@ -2595,7 +2595,7 @@ snmp_informV3(sess_ref,uptime,trap_oid,varlist_ref)
 
                     if (oid_arr_len == 0) {
                        if (verbose)
-                        warn("error:inform v3: unable to determine oid for object");
+                        warn("error:inform: unable to determine oid for object");
                        goto err;
                     }
 
@@ -2604,7 +2604,7 @@ snmp_informV3(sess_ref,uptime,trap_oid,varlist_ref)
                                  __av_elem_pv(varbind, VARBIND_TYPE_F, NULL));
                       if (type == TYPE_UNKNOWN) {
                          if (verbose)
-                            warn("error:inform v3: no type found for object");
+                            warn("error:inform: no type found for object");
                          goto err;
                       }
                     }
@@ -2629,7 +2629,7 @@ snmp_informV3(sess_ref,uptime,trap_oid,varlist_ref)
                                   type);
 
                     if(res == FAILURE) {
-                        if(verbose) warn("error:inform v3: adding varbind");
+                        if(verbose) warn("error:inform: adding varbind");
                         goto err;
                     }
 
