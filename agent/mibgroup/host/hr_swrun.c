@@ -396,7 +396,9 @@ var_hrswrun(struct variable *vp,
 #elif HAVE_KVM_GETPROCS
 	    string[0] = 0;
 	    argv = kvm_getargv(kd, proc_table+LowProcIndex, sizeof(string));
+	    if (argv) argv++;
 	    while (argv && *argv) {
+		if (string[0] != 0) strcat(string, " ");
 		strcat(string, *argv);
 		argv++;
 	    }
