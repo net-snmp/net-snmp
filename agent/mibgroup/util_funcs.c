@@ -101,13 +101,40 @@ Exit(int var)
   exit(var);
 }
 
+static const char *
+make_tempfile(void)
+{
+  static char	name[32];
+  int		fd = -1;
+
+  strcpy(name, "/tmp/snmpdXXXXXX");
+#ifdef HAVE_MKSTEMP
+  fd = mkstemp(name);
+#else
+  if (mktemp(name))
+    fd = open(name, O_CREAT|O_EXCL|O_WRONLY);
+#endif
+  if (fd >= 0) {
+    close(fd);
+    return name;
+  }
+  return NULL;
+}
+
 int shell_command(struct extensible *ex)
 {
 #if HAVE_SYSTEM
-  const char *ofname = "/tmp/shoutput";
+  const char *ofname;
   char shellline[STRMAX];
   FILE *shellout;
   
+  ofname = make_tempfile();
+  if (ofname == NULL) {
+    ex->output[0] = 0;
+    ex->result = 127;
+    return ex->result;
+  }
+
   sprintf(shellline,"%s > %s",ex->command, ofname);
   ex->result = system(shellline);
   ex->result = WEXITSTATUS(ex->result);
