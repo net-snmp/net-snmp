@@ -85,7 +85,7 @@ do
     last=$filebase
     filebase=`echo $filebase | sed 's/[-._][^-._]*$//'`
     if test "x$filebase" = "x$last"; then
-	filebase=`echo $filebase | sed 's/[0-9]+$//'`
+	filebase=`echo $filebase | sed 's/[0-9]*$//'`
     fi
 done
 
