@@ -508,6 +508,9 @@
 /* define this if the KSM (kerberos based snmp) security module is available */
 #undef SNMP_SECMOD_KSM
 
+/* define this if we're using the new MIT crypto API */
+#undef MIT_NEW_CRYPTO
+
 /* Not-to-be-compiled macros for use by configure only */
 #define config_require(x)
 #define config_arch_require(x,y)

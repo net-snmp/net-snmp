@@ -63,16 +63,17 @@
 #include "callback.h"
 #include "default_store.h"
 #include "snmp_secmod.h"
-#include "snmp_logging.h"
 #include "snmpksm.h"
 
 static krb5_context kcontext = NULL;
 static int ksm_session_init(struct snmp_session *);
 static void ksm_free_state_ref(void *);
 static int ksm_free_pdu(struct snmp_pdu *);
+static int ksm_clone_pdu(struct snmp_pdu *, struct snmp_pdu *);
 
 static int ksm_insert_cache(long, krb5_auth_context, u_char *, size_t);
-static void ksm_delete_cache(long);
+static void ksm_decrement_ref_count(long);
+static void ksm_increment_ref_count(long);
 static struct ksm_cache_entry *ksm_get_cache(long);
 
 #define HASHSIZE	64
@@ -92,6 +93,7 @@ struct ksm_secStateRef {
 
 struct ksm_cache_entry {
     long msgid;
+    int refcount;
     krb5_auth_context auth_context;
     u_char *secName;
     size_t secNameLen;
@@ -120,8 +122,9 @@ init_ksm(void)
 	retval = krb5_init_context(&kcontext);
 
 	if (retval) {
-	    snmp_log(LOG_ERR, "KSM: krb5_init_context failed: %s\n",
-		     error_message(retval));
+	    DEBUGMSGTL(("ksm", "krb5_init_context failed (%s), not "
+			"registering KSM\n", error_message(retval)));
+	    return;
 	}
     }
 
@@ -129,11 +132,19 @@ init_ksm(void)
 	ksm_hash_table[i] = NULL;
 
     def = SNMP_MALLOC_STRUCT(snmp_secmod_def);
+
+    if (!def) {
+	DEBUGMSGTL(("ksm", "Unable to malloc snmp_secmod struct, not "
+		    "registering KSM\n"));
+	return;
+    }
+
     def->encode_reverse = ksm_rgenerate_out_msg;
     def->decode = ksm_process_in_msg;
     def->session_open = ksm_session_init;
     def->pdu_free_state_ref = ksm_free_state_ref;
     def->pdu_free = ksm_free_pdu;
+    def->pdu_clone = ksm_clone_pdu;
 
     register_sec_mod(2066432, "ksm", def);
 }
@@ -163,6 +174,7 @@ ksm_insert_cache(long msgid, krb5_auth_context auth_context, u_char *secName,
 
     entry->msgid = msgid;
     entry->auth_context = auth_context;
+    entry->refcount = 1;
 
     retval = memdup(&entry->secName, secName, secNameLen);
 
@@ -197,7 +209,7 @@ ksm_get_cache(long msgid)
 }
 
 static void
-ksm_delete_cache(long msgid)
+ksm_decrement_ref_count(long msgid)
 {
     struct ksm_cache_entry *entry, *entry1;
     int bucket;
@@ -206,24 +218,53 @@ ksm_delete_cache(long msgid)
 
     if (ksm_hash_table[bucket] && ksm_hash_table[bucket]->msgid == msgid) {
 	entry = ksm_hash_table[bucket];
-	krb5_auth_con_free(kcontext, entry->auth_context);
-	free(entry->secName);
-	ksm_hash_table[bucket] = entry->next;
-	free(entry);
+
+	/*
+	 * If the reference count is zero, then free it
+	 */
+	
+	if (--entry->refcount <= 0) {
+	    DEBUGMSGTL(("ksm", "Freeing entry for msgid %ld\n", msgid));
+	    krb5_auth_con_free(kcontext, entry->auth_context);
+	    free(entry->secName);
+	    ksm_hash_table[bucket] = entry->next;
+	    free(entry);
+	}
+
 	return;
+
     } else if (ksm_hash_table[bucket])
 	for (entry1 = ksm_hash_table[bucket], entry = entry1->next;
 	     entry != NULL; entry1 = entry, entry = entry->next)
 	    if (entry->msgid == msgid) {
-		krb5_auth_con_free(kcontext, entry->auth_context);
-		free(entry->secName);
-		entry1->next = entry->next;
-		free(entry);
+
+		if (--entry->refcount <= 0) {
+		    DEBUGMSGTL(("ksm", "Freeing entry for msgid %ld\n", msgid));
+		    krb5_auth_con_free(kcontext, entry->auth_context);
+		    free(entry->secName);
+		    entry1->next = entry->next;
+		    free(entry);
+		}
+
 		return;
 	    }
 
-    DEBUGMSGTL(("ksm", "KSM: Unable to delete cache entry for msgid %ld.\n",
+    DEBUGMSGTL(("ksm", "KSM: Unable to decrement cache entry for msgid %ld.\n",
 		msgid));
+}
+
+static void
+ksm_increment_ref_count(long msgid)
+{
+    struct ksm_cache_entry *entry = ksm_get_cache(msgid);
+
+    if (! entry) {
+	DEBUGMSGTL(("ksm", "Unable to find cache entry for msgid %ld "
+		    "for increment\n", msgid));
+	return;
+    }
+
+    entry->refcount++;
 }
 
 /*
@@ -258,16 +299,31 @@ ksm_free_state_ref(void *ptr)
 }
 
 /*
- * This is called when the PDU is freed; this will delete entries from our
- * request cache.
+ * This is called when the PDU is freed; this will decrement reference counts
+ * for entries in our state cache.
  */
 
 static int
 ksm_free_pdu(struct snmp_pdu *pdu)
 {
-    ksm_delete_cache(pdu->msgid);
+    ksm_decrement_ref_count(pdu->msgid);
 
-    DEBUGMSGTL(("ksm", "KSM: Freeing cache entry for PDU msgid %ld\n",
+    DEBUGMSGTL(("ksm", "Decrementing cache entry for PDU msgid %ld\n",
+		pdu->msgid));
+
+    return SNMPERR_SUCCESS;
+}
+
+/*
+ * This is called when a PDU is cloned (to increase reference counts)
+ */
+
+static int
+ksm_clone_pdu(struct snmp_pdu *pdu, struct snmp_pdu *pdu2)
+{
+    ksm_increment_ref_count(pdu->msgid);
+
+    DEBUGMSGTL(("ksm", "Incrementing cache entry for PDU msgid %ld\n",
 		pdu->msgid));
 
     return SNMPERR_SUCCESS;
@@ -297,11 +353,17 @@ ksm_rgenerate_out_msg (struct snmp_secmod_outgoing_params *parms)
     krb5_error_code	retcode;
     krb5_ccache		cc = NULL;
     int			retval = SNMPERR_SUCCESS;
-    krb5_data		outdata;
+    krb5_data		outdata, ivector;
     krb5_keyblock	*subkey = NULL;
+#ifdef MIT_NEW_CRYPTO
+    krb5_data		input;
+    krb5_enc_data	output;
+#else /* MIT_NEW_CRYPTO */
     krb5_encrypt_block	eblock;
+#endif /* MIT_NEW_CRYPTO */
+    size_t		blocksize, encrypted_length;
     unsigned char	*encrypted_data = NULL;
-    int			encrypted_length, zero = 0, i;
+    int			zero = 0, i;
     u_char		*seqBegin, *cksum_pointer, *endp = *parms->wholeMsg;
     krb5_cksumtype	cksumtype = CKSUMTYPE_RSA_MD5_DES;
     krb5_checksum	pdu_checksum;
@@ -313,6 +375,8 @@ ksm_rgenerate_out_msg (struct snmp_secmod_outgoing_params *parms)
 
     outdata.length = 0;
     outdata.data = NULL;
+    ivector.length = 0;
+    ivector.data = NULL;
     pdu_checksum.contents = NULL;
 
     if (! ksm_state) {
@@ -417,11 +481,30 @@ ksm_rgenerate_out_msg (struct snmp_secmod_outgoing_params *parms)
 	    goto error;
 	}
 
+	/*
+	 * Note that here we need to handle different things between the
+	 * old and new crypto APIs.  First, we need to get the final encrypted
+	 * length of the PDU.
+	 */
+
+#ifdef MIT_NEW_CRYPTO
+	retcode = krb5_c_encrypt_length(kcontext, subkey->enctype, 
+					parms->scopedPduLen, &encrypted_length);
+	
+	if (retcode) {
+	    DEBUGMSGTL(("ksm", "Encryption length calculation failed: %s\n",
+			error_message(retcode)));
+	    snmp_set_detail(error_message(retcode));
+	    retval = SNMPERR_KRB5;
+	    goto error;
+	}
+#else /* MIT_NEW_CRYPTO */
+	
 	krb5_use_enctype(kcontext, &eblock, subkey->enctype);
 	retcode = krb5_process_key(kcontext, &eblock, subkey);
 
 	if (retcode) {
-	    DEBUGMSGTL(("ksm", "KSM: krb5_process_key failed: %s\n",
+	    DEBUGMSGTL(("ksm", "krb5_process_key failed: %s\n",
 			error_message(retcode)));
 	    snmp_set_detail(error_message(retcode));
 	    retval = SNMPERR_KRB5;
@@ -430,22 +513,80 @@ ksm_rgenerate_out_msg (struct snmp_secmod_outgoing_params *parms)
 
 	encrypted_length = krb5_encrypt_size(parms->scopedPduLen,
 					     eblock.crypto_entry);
+#endif /* MIT_NEW_CRYPTO */
+
 	encrypted_data = malloc(encrypted_length);
 
 	if (! encrypted_data) {
 	    DEBUGMSGTL(("ksm", "KSM: Unable to malloc %d bytes for encrypt "
 			"buffer: %s\n", parms->scopedPduLen, strerror(errno)));
 	    retval = SNMPERR_MALLOC;
+#ifndef MIT_NEW_CRYPTO
 	    krb5_finish_key(kcontext, &eblock);
+#endif /* ! MIT_NEW_CRYPTO */
 
 	    goto error;
 	}
 
+	/*
+	 * We need to set up a blank initialization vector for the encryption.
+	 * Use a block of all zero's (which is dependent on the block size
+	 * of the encryption method).
+	 */
+
+#ifdef MIT_NEW_CRYPTO
+
+	retcode = krb5_c_block_size(kcontext, subkey->enctype, &blocksize);
+
+	if (retcode) {
+	    DEBUGMSGTL(("ksm", "Unable to determine crypto block size: %s\n",
+			error_message(retcode)));
+	    snmp_set_detail(error_message(retcode));
+	    retval = SNMPERR_KRB5;
+	    goto error;
+	}
+
+#else /* MIT_NEW_CRYPTO */
+
+	blocksize = krb5_enctype_array[subkey->enctype]->system->block_length;
+
+#endif /* MIT_NEW_CRYPTO */
+
+	ivector.data = malloc(blocksize);
+
+	if (!ivector.data) {
+	    DEBUGMSGTL(("ksm", "Unable to allocate %d bytes for ivector\n",
+			blocksize));
+	    retval = SNMPERR_MALLOC;
+	    goto error;
+	}
+
+	ivector.length = blocksize;
+	memset(ivector.data, 0, blocksize);
+
+	/*
+	 * Finally!  Do the encryption!
+	 */
+
+#ifdef MIT_NEW_CRYPTO
+
+	input.data = (char *) parms->scopedPdu;
+	input.length = parms->scopedPduLen;
+	output.ciphertext.data = (char *) encrypted_data;
+	output.ciphertext.length = encrypted_length;
+
+	retcode = krb5_c_encrypt(kcontext, subkey, KSM_KEY_USAGE_ENCRYPTION,
+				 &ivector, &input, &output);
+
+#else /* MIT_NEW_CRYPTO */
+
 	retcode = krb5_encrypt(kcontext, (krb5_pointer) parms->scopedPdu,
 			       (krb5_pointer) encrypted_data,
-			       parms->scopedPduLen, &eblock, 0);
+			       parms->scopedPduLen, &eblock, ivector.data);
 
 	krb5_finish_key(kcontext, &eblock);
+
+#endif /* MIT_NEW_CRYPTO */
 
 	if (retcode) {
 	    DEBUGMSGTL(("ksm", "KSM: krb5_encrypt failed: %s\n",
@@ -527,8 +668,41 @@ ksm_rgenerate_out_msg (struct snmp_secmod_outgoing_params *parms)
     if (ksm_state)
 	cksumtype = ksm_state->cksumtype;
 
+    if (!is_keyed_cksum(cksumtype)) {
+	DEBUGMSGTL(("ksm", "Checksum type %d is not a keyed checksum\n",
+		    cksumtype));
+	snmp_set_detail("Checksum is not a keyed checksum");
+	retval = SNMPERR_KRB5;
+	goto error;
+    }
+
+    if (!is_coll_proof_cksum(cksumtype)) {
+	DEBUGMSGTL(("ksm", "Checksum type %d is not a collision-proof "
+		    "checksum\n", cksumtype));
+	snmp_set_detail("Checksum is not a collision-proof checksum");
+	retval = SNMPERR_KRB5;
+	goto error;
+    }
+
+#ifdef MIT_NEW_CRYPTO
+    retcode = krb5_c_checksum_length(kcontext, cksumtype, &blocksize);
+
+    if (retcode) {
+	DEBUGMSGTL(("ksm", "Unable to determine checksum length: %s\n",
+		    error_message(retcode)));
+	snmp_set_detail(error_message(retcode));
+	retval = SNMPERR_KRB5;
+	goto error;
+    }
+
+    pdu_checksum.length = blocksize;
+
+#else /* MIT_NEW_CRYPTO */
+
     pdu_checksum.length = krb5_checksum_size(kcontext, cksumtype);
     pdu_checksum.checksum_type = cksumtype;
+
+#endif /* MIT_NEW_CRYPTO */
 
     /*
      * Note that here, we're just leaving blank space for the checksum;
@@ -636,18 +810,31 @@ ksm_rgenerate_out_msg (struct snmp_secmod_outgoing_params *parms)
 	else retcode = krb5_auth_con_getlocalsubkey(kcontext, auth_context,
 						    &subkey);
 	if (retcode) {
-	    snmp_log(LOG_ERR, "KSM: krb5_auth_con_getlocalsubkey failed: %s\n",
-	    error_message(retcode));
+	    DEBUGMSGTL(("ksm", "krb5_auth_con_getlocalsubkey failed: %s\n",
+			error_message(retcode)));
 	    snmp_set_detail(error_message(retcode));
 	    retval = SNMPERR_KRB5;
 	    goto error;
 	}
     }
 
+#ifdef MIT_NEW_CRYPTO
+
+    input.data = (char *) (wholeMsg + 1);
+    input.length = endp - wholeMsg,
+
+    retcode = krb5_c_make_checksum(kcontext, cksumtype, subkey,
+				   KSM_KEY_USAGE_CHECKSUM, &input,
+				   &pdu_checksum);
+
+#else /* MIT_NEW_CRYPTO */
+
     retcode = krb5_calculate_checksum(kcontext, cksumtype, wholeMsg + 1,
 				      endp - wholeMsg,
 				      (krb5_pointer) subkey->contents,
 				      subkey->length, &pdu_checksum);
+
+#endif /* MIT_NEW_CRYPTO */
 
     if (retcode) {
 	DEBUGMSGTL(("ksm", "Calculate checksum failed: %s\n",
@@ -689,7 +876,14 @@ ksm_rgenerate_out_msg (struct snmp_secmod_outgoing_params *parms)
 error:
 
     if (pdu_checksum.contents)
+#ifdef MIT_NEW_CRYPTO
+	krb5_free_checksum_contents(kcontext, &pdu_checksum);
+#else /* MIT_NEW_CRYPTO */
 	free(pdu_checksum.contents);
+#endif /* MIT_NEW_CRYPTO */
+
+    if (ivector.data)
+	free(ivector.data);
 
     if (subkey)
 	krb5_free_keyblock(kcontext, subkey);
@@ -732,25 +926,33 @@ ksm_process_in_msg(struct snmp_secmod_incoming_params *parms)
     krb5_auth_context	auth_context = NULL;
     krb5_error_code	retcode;
     krb5_checksum	checksum;
-    krb5_data		ap_req;
+    krb5_data		ap_req, ivector;
     krb5_flags		flags;
     krb5_keyblock	*subkey = NULL;
+#ifdef MIT_NEW_CRYPTO
+    krb5_data		input, output;
+    krb5_boolean	valid;
+    krb5_enc_data	in_crypt;
+#else /* MIT_NEW_CRYPTO */
     krb5_encrypt_block	eblock;
+#endif /* MIT_NEW_CRYPTO */
     krb5_ticket		*ticket = NULL;
     int			retval = SNMPERR_SUCCESS, response = 0;
     size_t		length = parms->wholeMsgLen - (u_int)(parms->secParams -
 						       parms->wholeMsg);
     u_char		*current = parms->secParams, type;
-    size_t		cksumlength;
+    size_t		cksumlength, blocksize;
     long		hint;
     char		*cname;
     struct ksm_secStateRef *ksm_state;
     struct ksm_cache_entry *entry;
 
-    DEBUGMSGTL(("ksm", "KSM Processing has begun\n"));
+    DEBUGMSGTL(("ksm", "Processing has begun\n"));
 
     checksum.contents = NULL;
     ap_req.data = NULL;
+    ivector.length = 0;
+    ivector.data = NULL;
 
     /*
      * First, parse the security parameters (because we need the subkey inside
@@ -761,7 +963,7 @@ ksm_process_in_msg(struct snmp_secmod_incoming_params *parms)
 				      (ASN_UNIVERSAL | ASN_PRIMITIVE |
 				       ASN_OCTET_STR), "ksm first octet")) ==
 								NULL) {
-	DEBUGMSGTL(("ksm", "KSM initial security paramter parsing failed\n"));
+	DEBUGMSGTL(("ksm", "Initial security paramter parsing failed\n"));
 
 	retval = SNMPERR_ASN_PARSE_ERR;
 	goto error;
@@ -770,7 +972,7 @@ ksm_process_in_msg(struct snmp_secmod_incoming_params *parms)
     if ((current = asn_parse_sequence(current, &length, &type,
 				      (ASN_SEQUENCE | ASN_CONSTRUCTOR),
 				      "ksm sequence")) == NULL) {
-	DEBUGMSGTL(("ksm", "KSM security parameter sequence parsing failed\n"));
+	DEBUGMSGTL(("ksm", "Security parameter sequence parsing failed\n"));
 
 	retval = SNMPERR_ASN_PARSE_ERR;
 	goto error;
@@ -778,7 +980,7 @@ ksm_process_in_msg(struct snmp_secmod_incoming_params *parms)
 
     if ((current = asn_parse_int(current, &length, &type, &temp,
 				 sizeof(temp))) == NULL) {
-	DEBUGMSGTL(("ksm", "KSM security parameter checksum type parsing"
+	DEBUGMSGTL(("ksm", "Security parameter checksum type parsing"
 		    "failed\n"));
 
 	retval = SNMPERR_ASN_PARSE_ERR;
@@ -788,10 +990,26 @@ ksm_process_in_msg(struct snmp_secmod_incoming_params *parms)
     cksumtype = temp;
 
     if (!valid_cksumtype(cksumtype)) {
-	DEBUGMSGTL(("ksm", "KSM Invalid checksum type (%d)\n", cksumtype));
+	DEBUGMSGTL(("ksm", "Invalid checksum type (%d)\n", cksumtype));
 
 	retval = SNMPERR_KRB5;
 	snmp_set_detail("Invalid checksum type");
+	goto error;
+    }
+
+    if (!is_keyed_cksum(cksumtype)) {
+	DEBUGMSGTL(("ksm", "Checksum type %d is not a keyed checksum\n",
+		    cksumtype));
+	snmp_set_detail("Checksum is not a keyed checksum");
+	retval = SNMPERR_KRB5;
+	goto error;
+    }
+
+    if (!is_coll_proof_cksum(cksumtype)) {
+	DEBUGMSGTL(("ksm", "Checksum type %d is not a collision-proof "
+		    "checksum\n", cksumtype));
+	snmp_set_detail("Checksum is not a collision-proof checksum");
+	retval = SNMPERR_KRB5;
 	goto error;
     }
 
@@ -803,7 +1021,7 @@ ksm_process_in_msg(struct snmp_secmod_incoming_params *parms)
 				      (ASN_UNIVERSAL | ASN_PRIMITIVE |
 				       ASN_OCTET_STR), "ksm checksum")) ==
 								NULL) {
-	DEBUGMSGTL(("ksm", "KSM security parameter checksum parsing failed\n"));
+	DEBUGMSGTL(("ksm", "Security parameter checksum parsing failed\n"));
 
 	retval = SNMPERR_ASN_PARSE_ERR;
 	goto error;
@@ -811,7 +1029,7 @@ ksm_process_in_msg(struct snmp_secmod_incoming_params *parms)
 
     checksum.contents = malloc(cksumlength);
     if (!checksum.contents) {
-	DEBUGMSGTL(("ksm", "KSM unable to malloc %d bytes for checksum.\n",
+	DEBUGMSGTL(("ksm", "Unable to malloc %d bytes for checksum.\n",
 		    cksumlength));
         retval = SNMPERR_MALLOC;
 	goto error;
@@ -820,6 +1038,7 @@ ksm_process_in_msg(struct snmp_secmod_incoming_params *parms)
     memcpy(checksum.contents, current, cksumlength);
 
     checksum.length = cksumlength;
+    checksum.checksum_type = cksumtype;
 
     /*
      * Zero out the checksum so the validation works correctly
@@ -962,22 +1181,33 @@ ksm_process_in_msg(struct snmp_secmod_incoming_params *parms)
 	retcode = krb5_auth_con_getlocalsubkey(kcontext, auth_context, &subkey);
 
 	if (retcode) {
-	    snmp_log(LOG_ERR, "KSM: Unable to retrieve local subkey: %s\n",
-		     error_message(retcode));
+	    DEBUGMSGTL(("ksm", "Unable to retrieve local subkey: %s\n",
+			error_message(retcode)));
 	    retval = SNMPERR_KRB5;
+	    snmp_set_detail("Unable to retrieve local subkey");
 	    goto error;
 	}
 
     } else {
-	snmp_log(LOG_ERR, "Unknown Kerberos ticket type\n");
+	DEBUGMSGTL(("ksm", "Unknown Kerberos message type (%02x)\n",
+		    ap_req.data[0]));
 	retval = SNMPERR_KRB5;
+	snmp_set_detail("Unknown Kerberos message type");
 	goto error;
     }
 
+#ifdef MIT_NEW_CRYPTO
+    input.data = parms->wholeMsg;
+    input.length = parms->wholeMsgLen;
+
+    retcode = krb5_c_verify_checksum(kcontext, subkey, KSM_KEY_USAGE_CHECKSUM,
+				     &input, &checksum, &valid);
+#else /* MIT_NEW_CRYPTO */
     retcode = krb5_verify_checksum(kcontext, cksumtype, &checksum,
 				   parms->wholeMsg, parms->wholeMsgLen,
 				   (krb5_pointer) subkey->contents,
 				   subkey->length);
+#endif /* MIT_NEW_CRYPTO */
 
     if (retcode) {
 	DEBUGMSGTL(("ksm", "KSM checksum verification failed: %s\n",
@@ -986,6 +1216,21 @@ ksm_process_in_msg(struct snmp_secmod_incoming_params *parms)
 	snmp_set_detail(error_message(retcode));
 	goto error;
     }
+
+    /*
+     * Don't ask me why they didn't simply return an error, but we have
+     * to check to see if "valid" is false.
+     */
+
+#ifdef MIT_NEW_CRYPTO
+    if (! valid) {
+	DEBUGMSGTL(("ksm", "Computed checksum did not match supplied "
+		    "checksum!\n"));
+	retval = SNMPERR_KRB5;
+	snmp_set_detail("Computed checksum did not match supplied checksum");
+	goto error;
+    }
+#endif /* MIT_NEW_CRYPTO */
 
     /*
      * Handle an encrypted PDU.  Note that it's an OCTET_STRING of the
@@ -1012,6 +1257,44 @@ ksm_process_in_msg(struct snmp_secmod_incoming_params *parms)
 
 	DEBUGMSGTL(("ksm", "KSM starting sPDU decode\n"));
 
+	/*
+	 * We need to set up a blank initialization vector for the decryption.
+	 * Use a block of all zero's (which is dependent on the block size
+	 * of the encryption method).
+	 */
+
+#ifdef MIT_NEW_CRYPTO
+
+	retcode = krb5_c_block_size(kcontext, subkey->enctype, &blocksize);
+
+	if (retcode) {
+	    DEBUGMSGTL(("ksm", "Unable to determine crypto block size: %s\n",
+			error_message(retcode)));
+	    snmp_set_detail(error_message(retcode));
+	    retval = SNMPERR_KRB5;
+	    goto error;
+	}
+
+#else /* MIT_NEW_CRYPTO */
+
+	blocksize = krb5_enctype_array[subkey->enctype]->system->block_length;
+
+#endif /* MIT_NEW_CRYPTO */
+
+	ivector.data = malloc(blocksize);
+
+	if (!ivector.data) {
+	    DEBUGMSGTL(("ksm", "Unable to allocate %d bytes for ivector\n",
+			blocksize));
+	    retval = SNMPERR_MALLOC;
+	    goto error;
+	}
+
+	ivector.length = blocksize;
+	memset(ivector.data, 0, blocksize);
+
+#ifndef MIT_NEW_CRYPTO
+
 	krb5_use_enctype(kcontext, &eblock, subkey->enctype);
 
 	retcode = krb5_process_key(kcontext, &eblock, subkey);
@@ -1024,21 +1307,40 @@ ksm_process_in_msg(struct snmp_secmod_incoming_params *parms)
 	    goto error;
 	}
 
+#endif /* !MIT_NEW_CRYPTO */
+
 	if (length > *parms->scopedPduLen) {
 	    DEBUGMSGTL(("ksm", "KSM not enough room - have %d bytes to "
 		       "decrypt but only %d bytes available\n", length,
 		       *parms->scopedPduLen));
 	    retval = SNMPERR_TOO_LONG;
+#ifndef MIT_NEW_CRYPTO
+	    krb5_finish_key(kcontext, &eblock);
+#endif /* ! MIT_NEW_CRYPTO */
 	    goto error;
 	}
 
+#ifdef MIT_NEW_CRYPTO
+	in_crypt.ciphertext.data = current;
+	in_crypt.ciphertext.length = length;
+	in_crypt.enctype = subkey->enctype;
+	output.data = *parms->scopedPdu;
+	output.length = *parms->scopedPduLen;
+
+	retcode = krb5_c_decrypt(kcontext, subkey, KSM_KEY_USAGE_ENCRYPTION,
+				 &ivector, &in_crypt, &output);
+#else /* MIT_NEW_CRYPTO */
+
 	retcode = krb5_decrypt(kcontext, (krb5_pointer) current,
-			       *parms->scopedPdu, length, &eblock, NULL);
+			       *parms->scopedPdu, length, &eblock,
+			       ivector.data);
 
 	krb5_finish_key(kcontext, &eblock);
 
+#endif /* MIT_NEW_CRYPTO */
+
 	if (retcode) {
-	    DEBUGMSGTL(("ksm", "KSM decryption failed: %s\n",
+	    DEBUGMSGTL(("ksm", "Decryption failed: %s\n",
 		       error_message(retcode)));
 	    snmp_set_detail(error_message(retcode));
 	    retval = SNMPERR_KRB5;
@@ -1130,7 +1432,7 @@ ksm_process_in_msg(struct snmp_secmod_incoming_params *parms)
      * Just in case
      */
 
-    parms->secEngineID = "";
+    parms->secEngineID = (u_char *) "";
     *parms->secEngineIDLen = 0;
 
     auth_context = NULL;	/* So we don't try to free it on success */
@@ -1145,6 +1447,9 @@ error:
 
     if (checksum.contents)
 	free(checksum.contents);
+
+    if (ivector.data)
+	free(ivector.data);
 
     if (ticket)
 	krb5_free_ticket(kcontext, ticket);
