@@ -1292,7 +1292,7 @@ lookup_cache_find(const char *context, oid *name, size_t name_len,
 static inline void
 invalidate_lookup_cache(const char *context) {
     lookup_cache_context *cptr;
-    if ((cptr = get_context_lookup_cache(context)) == NULL) {
+    if ((cptr = get_context_lookup_cache(context)) != NULL) {
         cptr->thecachecount = 0;
         cptr->currentpos = 0;
     }
