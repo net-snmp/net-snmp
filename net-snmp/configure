@@ -1571,7 +1571,7 @@ while test "x$new_module_list" != "x"; do
 	      { echo "configure: error: mib module "$i" requires module "$j" but $j.h or $j.c could not be found in $srcdir/$mibdir" 1>&2; exit 1; }
 	    fi
 	    if echo " $with_out_mib_modules " | grep " $j " > /dev/null; then
-	      { echo "configure: error: mib module "$i" requires module "$j" but you told me to compile without it" 1>&2; exit 1; }
+	      echo "configure: warning: mib module "$i" requires module "$j" but you told me to compile without it" 1>&2
 	    fi
 	    if echo " $module_list $new_list_two $new_module_list " | grep " $j " > /dev/null; then
 	      :
