@@ -73,20 +73,20 @@ depend:
 
 # DO NOT DELETE THIS LINE -- make depend depends on it.
 
-if.o: ../../config.h ../../agent/extensible/struct.h 
+if.o: ../../config.h ../../agent/mibgroup/struct.h 
 if.o:  main.h ../../snmplib/asn1.h
 if.o: ../../snmplib/snmp.h ../../snmplib/snmp_impl.h ../../snmplib/snmp_api.h
 if.o: ../../snmplib/snmp_client.h ../../snmplib/mib.h
-inet.o: ../../config.h ../../agent/extensible/struct.h 
+inet.o: ../../config.h ../../agent/mibgroup/struct.h 
 inet.o:  main.h ../../snmplib/asn1.h ../../snmplib/snmp.h
 inet.o: ../../snmplib/snmp_impl.h ../../snmplib/snmp_api.h
 inet.o: ../../snmplib/snmp_client.h ../../snmplib/mib.h
-main.o: ../../config.h ../../agent/extensible/struct.h
+main.o: ../../config.h ../../agent/mibgroup/struct.h
 main.o:  ../../snmplib/asn1.h
 main.o: ../../snmplib/snmp.h ../../snmplib/snmp_api.h
 main.o: ../../snmplib/snmp_impl.h ../../snmplib/party.h
 main.o: ../../snmplib/context.h ../../snmplib/view.h ../../snmplib/acl.h
-route.o: ../../config.h ../../agent/extensible/struct.h 
+route.o: ../../config.h ../../agent/mibgroup/struct.h 
 route.o:   main.h
 route.o: ../../snmplib/asn1.h ../../snmplib/snmp.h ../../snmplib/snmp_impl.h
 route.o: ../../snmplib/snmp_api.h ../../snmplib/snmp_client.h
