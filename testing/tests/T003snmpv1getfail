@@ -17,7 +17,7 @@ HEADER for failure of SNMPv1 get with wrong community
 
 STARTAGENT
 
-CAPTURE "snmpget $SNMP_SNMPD_PORT -v 1 localhost notavalidcommunity system.sysUpTime.0"
+CAPTURE "snmpget $SNMP_FLAGS -v 1 localhost notavalidcommunity system.sysUpTime.0"
 
 STOPAGENT
 

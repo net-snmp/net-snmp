@@ -51,7 +51,14 @@ SNMP_PERSISTENT_FILE="$SNMP_TMPDIR/persistent-store.conf"
 SNMP_CONFIG_FILE="$SNMP_TMPDIR/snmpd.conf"
 SNMP_SNMPD_PID_FILE="$SNMP_TMPDIR/snmpd.pid"
 SNMP_SNMPD_LOG_FILE="$SNMP_TMPDIR/snmpd.log"
-SNMP_SNMPD_PORT="-d -p 8765"
+SNMP_SNMPD_PORT="-p 8765"
+
+if [ "x$SNMP_FLAGS" = "x" ]; then
+    SNMP_FLAGS="-d"
+    export SNMP_VERBOSE
+fi
+
+SNMP_FLAGS="$SNMP_FLAGS $SNMP_SNMPD_PORT"
 
 # Make sure the agent doesn't parse any config file but what we give it.  
 # this is mainly to protect against a broken agent that doesn't

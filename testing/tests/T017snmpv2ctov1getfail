@@ -17,7 +17,7 @@ HEADER for failure of SNMPv2c get against SNMPv1 agent
 
 STARTAGENT
 
-CAPTURE "snmpget $SNMP_SNMPD_PORT -v 2c localhost notavalidcommunity system.sysUpTime.0"
+CAPTURE "snmpget $SNMP_FLAGS -v 2c localhost notavalidcommunity system.sysUpTime.0"
 
 STOPAGENT
 
