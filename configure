@@ -239,7 +239,7 @@ ac_help="$ac_help
 Miscellaneous:
   --with-defaults          Use defaults for prompted values."
 ac_help="$ac_help
---ucd-snmp-compatibility        Install ucd-snmp look-alike headers and libs."
+--enable-ucd-snmp-compatibility  Install ucd-snmp look-alike headers and libs."
 ac_help="$ac_help
   --enable-shared[=PKGS]  build shared libraries [default=no]"
 ac_help="$ac_help
