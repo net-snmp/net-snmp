@@ -1528,6 +1528,12 @@ if test $? -eq 0 ; then
 		LIBS="${LIBS} -ldevstat"))
 fi
 
+# LM-SENSORS-MIB support
+echo " $with_mib_modules " | grep " ucd-snmp/lmSensors " > /dev/null
+if test $? -eq 0 ; then
+        AC_CHECK_HEADER(sensors/sensors.h)
+        AC_CHECK_LIB(sensors, sensors_get_detected_chips)
+fi
 
 #
 # Install the various perl modules
