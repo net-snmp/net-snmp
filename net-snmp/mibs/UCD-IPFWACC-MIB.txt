@@ -37,7 +37,7 @@ ucdIpFwAccMIB MODULE-IDENTITY
     REVISION	 "9912160000Z"
     DESCRIPTION
 	"SMIv2 version converted from an older MIB definition."
-    ::= { ucdExperimental 3 }
+    ::= { ucdExperimental 1 }
 
 ipFwAccTable OBJECT-TYPE
     SYNTAX	SEQUENCE OF IpFwAccEntry
@@ -45,7 +45,7 @@ ipFwAccTable OBJECT-TYPE
     STATUS	current
     DESCRIPTION
 	"A table with the accounting rules of the IP firewall"
-    ::= { ucdExperimental 1 }
+    ::= { ucdIpFwAccMIB 1 }
 
 ipFwAccEntry OBJECT-TYPE
     SYNTAX	IpFwAccEntry
