@@ -199,7 +199,7 @@ u_char *var_simple_proxy(struct variable *vp,
                         snmp_log(LOG_ERR, "proxy oid request length is too long\n");
                         return NULL;
                     }
-                    // suffix appended?
+                    /* suffix appended? */
                     DEBUGMSGTL(("proxy_var","length=%d, base_len=%d, name_len=%d\n", ourlength, sp->base_len, sp->name_len));
                     if (ourlength > sp->name_len)
                         memcpy(&(sp->base[sp->base_len]), &(ourname[sp->name_len]),
