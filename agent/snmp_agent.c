@@ -1166,12 +1166,15 @@ add_varbind_to_cache(struct agent_snmp_session  *asp, int vbcount,
             if (asp->treecache_num >= asp->treecache_len) {
                 /* exapand cache array */
                 /* WWW: non-linear expansion needed (with cap) */
-                asp->treecache_len = (asp->treecache_len + 16);
+#define CACHE_GROW_SIZE 16
+                asp->treecache_len = (asp->treecache_len + CACHE_GROW_SIZE);
                 asp->treecache = realloc(asp->treecache,
                                          sizeof(tree_cache) *
                                          asp->treecache_len);
                 if (asp->treecache == NULL)
                     return NULL;
+                memset(&(asp->treecache[cacheid+1]), 0x00,
+                       sizeof(tree_cache) * (CACHE_GROW_SIZE - 1));
             }
             asp->treecache[cacheid].subtree = tp;
             asp->treecache[cacheid].requests_begin = request;
