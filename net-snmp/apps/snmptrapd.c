@@ -207,7 +207,7 @@ int Facility = LOG_DAEMON;
 int             trapd_status = SNMPTRAPD_STOPPED;
 LPTSTR          app_name = _T("Net-SNMP Trap Handler");     /* Application Name */
 #else
-char           *app_name = "snmptrapd";
+const char     *app_name = "snmptrapd";
 #endif
 
 struct timeval  Now;
