@@ -349,7 +349,7 @@ search_subtree_vars(struct subtree *tp,
 			 */
 		    if ( access && snmp_oid_compare(name, *namelen,
 						    tp->end, tp->end_len) > 0) {
-			memcpy(name, tp->end, tp->end_len);
+			memcpy(name, tp->end, tp->end_len * sizeof(oid));
 			access = 0;
 		    }
 #if MIB_CLIENTS_ARE_EVIL
