@@ -20,6 +20,7 @@
 #include "snmpNotifyTable.h"
 #include "snmp-tc.h"
 #include "target/target.h"
+#include "agent_callbacks.h"
 
 void store_snmpNotifyTable(void);
 
@@ -84,6 +85,38 @@ register_trap_sessions(void) {
     }
 }
 
+void
+send_notifications(int major, int minor, void *serverarg, void *clientarg) {
+    struct header_complex_index *hptr;
+    struct snmpNotifyTable_data *nptr;
+    struct snmp_session *sess, *sptr;
+    struct snmp_pdu *template_pdu = (struct snmp_pdu *) serverarg;
+    
+    DEBUGMSGTL(("send_notifications","starting: pdu=%x, vars=%x\n",
+                template_pdu, template_pdu->variables));
+
+    for(hptr = snmpNotifyTableStorage; hptr; hptr = hptr->next) {
+        nptr = (struct snmpNotifyTable_data *) hptr->data;
+        if (nptr->snmpNotifyRowStatus != RS_ACTIVE)
+            continue;
+        if (!nptr->snmpNotifyTag)
+            continue;
+
+        sess = get_target_sessions(nptr->snmpNotifyTag);
+        for(sptr=sess; sptr; sptr = sptr->next) {
+            if (sptr->version == SNMP_VERSION_1 &&
+                minor == SNMPD_CALLBACK_SEND_TRAP1) {
+                send_trap_to_sess(sptr, template_pdu);
+            } else if (sptr->version != SNMP_VERSION_1 &&
+                       minor == SNMPD_CALLBACK_SEND_TRAP2) {
+                template_pdu->command =
+                    (nptr->snmpNotifyType == SNMPNOTIFYTYPE_INFORM) ?
+                    SNMP_MSG_INFORM : SNMP_MSG_TRAP2;
+                send_trap_to_sess(sptr, template_pdu);
+            }
+        }
+    }
+}
 
 /*
  * init_snmpNotifyTable():
@@ -109,9 +142,13 @@ void init_snmpNotifyTable(void) {
                          store_snmpNotifyTable, NULL);
 
   /* we need to be called back later to register our traps with the master */
-  snmp_register_callback(SNMP_CALLBACK_LIBRARY, SNMP_CALLBACK_POST_READ_CONFIG,
-                         register_trap_sessions, NULL);
+/*  snmp_register_callback(SNMP_CALLBACK_LIBRARY, SNMP_CALLBACK_POST_READ_CONFIG,
+    register_trap_sessions, NULL); */
 
+  snmp_register_callback(SNMP_CALLBACK_APPLICATION, SNMPD_CALLBACK_SEND_TRAP1,
+                         send_notifications, NULL);
+  snmp_register_callback(SNMP_CALLBACK_APPLICATION, SNMPD_CALLBACK_SEND_TRAP2,
+                         send_notifications, NULL);
 
   /* place any other initialization junk you need here */
 

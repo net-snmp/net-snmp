@@ -14,6 +14,8 @@ void snmpd_parse_config_trapsess(const char *, char *);
 void snmpd_free_trapsinks (void);
 void snmpd_parse_config_trapcommunity (const char *, char *);
 void snmpd_free_trapcommunity (void);
+void send_trap_to_sess(struct snmp_session *sess,
+                       struct snmp_pdu *template_pdu);
 
 int create_trap_session (char *, u_short, char *, int, int);
 int add_trap_session( struct snmp_session *, int, int);

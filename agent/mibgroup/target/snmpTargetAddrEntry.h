@@ -43,7 +43,7 @@ struct targetAddrTable_struct {
   char  *name;
   oid    tDomain[MAX_OID_LEN];
   int    tDomainLen;
-  char  *tAddress;
+  unsigned char  *tAddress;
   size_t tAddressLen;
   int    timeout;
   int    retryCount;
@@ -53,6 +53,8 @@ struct targetAddrTable_struct {
   int    storageType;
   int    rowStatus;
   struct targetAddrTable_struct *next;
+  struct snmp_session *sess; /* a snmp session to the target host */
+  time_t sessionCreationTime;
 };
 
 /* function definitions */
