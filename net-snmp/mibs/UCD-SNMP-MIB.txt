@@ -37,7 +37,9 @@ IMPORTS
         enterprises
 	    FROM RFC1155-SMI
         OBJECT-TYPE
-	    FROM RFC1212;
+	    FROM RFC1212
+	DisplayString
+	    FROM RFC1213-MIB;
 
 -- numerical definitions:
 ucdavis           OBJECT IDENTIFIER ::= { enterprises 2021 }
@@ -89,8 +91,6 @@ bsdi              OBJECT IDENTIFIER ::= { ucdSnmpAgent 11 }
 openbsd           OBJECT IDENTIFIER ::= { ucdSnmpAgent 12 }
 unknown           OBJECT IDENTIFIER ::= { ucdSnmpAgent 255 }
 
-DisplayString ::= OCTET STRING
-
 PrIndex ::= INTEGER
 
 procTable OBJECT-TYPE
@@ -112,7 +112,7 @@ prEntry OBJECT-TYPE
     STATUS mandatory
     DESCRIPTION
         "An entry containing a process and its statistics."
-    INDEX      { PrIndex }
+    INDEX      { prIndex }
     ::= { procTable  1 }
 
 
@@ -128,7 +128,7 @@ PrEntry ::= SEQUENCE {
 }
 
 prIndex OBJECT-TYPE
-	SYNTAX PRIndex
+	SYNTAX PrIndex
 	ACCESS read-only
 	STATUS mandatory
 	DESCRIPTION
@@ -570,12 +570,12 @@ laEntry OBJECT-TYPE
     ::= { loadTable  1 }
 
 LaEntry ::= SEQUENCE {
-   loadaveIndex  LoadIndex,
-   loadaveNames  DisplayString,
-   loadaveLoad   DisplayString,
-   loadaveConfig DisplayString,
-   loadaveErrorFlag  INTEGER,
-   loadaveErrMessage  DisplayString
+   laIndex  LoadIndex,
+   laNames  DisplayString,
+   laLoad   DisplayString,
+   laConfig DisplayString,
+   laErrorFlag  INTEGER,
+   laErrMessage  DisplayString
 }
 
 laIndex OBJECT-TYPE
@@ -742,7 +742,7 @@ snmperrErrMessage OBJECT-TYPE
 		"An error message describing the problem (if one exists)."
 	::= { snmperrs 101 }
 
-MRIndex ::= OBJECT IDENTIFIER
+MrIndex ::= OBJECT IDENTIFIER
 
 mibRegistryTable OBJECT-TYPE
     SYNTAX SEQUENCE OF MrEntry
@@ -755,7 +755,7 @@ mibRegistryTable OBJECT-TYPE
     ::= { ucdavis  102 }
 
 mrEntry OBJECT-TYPE
-    SYNTAX     MREntry
+    SYNTAX     MrEntry
     ACCESS not-accessible
     STATUS     mandatory
     DESCRIPTION
@@ -766,13 +766,13 @@ mrEntry OBJECT-TYPE
 MrEntry ::=
     SEQUENCE {
         mrIndex
-            MRIndex,
+            MrIndex,
 	mrModuleName
             DisplayString
     }	    
 
 mrIndex OBJECT-TYPE
-    SYNTAX     MRIndex
+    SYNTAX     MrIndex
     ACCESS read-only
     STATUS     mandatory
     DESCRIPTION
@@ -895,5 +895,15 @@ ssCpuIdle OBJECT-TYPE
 --           "Error message describing the errorflag condition"
 --      ::= { systemStats 101 } 
 
+ucdTraps OBJECT IDENTIFIER ::= { ucdavis 251 }
+
+ucdStart TRAP-TYPE
+	ENTERPRISE ucdTraps
+	::= 1
+
+ucdShutdown TRAP-TYPE
+	ENTERPRISE ucdTraps
+	DESCRIPTION "This trap is sent when the agent terminates"
+	::= 2
 
 END
