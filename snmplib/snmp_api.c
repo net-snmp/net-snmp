@@ -370,11 +370,11 @@ snmp_set_detail(const char *detail_string)
 const char *
 snmp_api_errstring(int snmp_errnumber)
 {
-    const char *msg;
+    const char *msg = "";
     static char msg_buf [256];
     if (snmp_errnumber >= SNMPERR_MAX && snmp_errnumber <= SNMPERR_GENERR){
         msg = api_errors[-snmp_errnumber];
-    } else {
+    } else if (snmp_errnumber != SNMPERR_SUCCESS) {
         msg = "Unknown Error";
     }
     if (snmp_detail_f) {
@@ -1057,13 +1057,16 @@ _sess_open(struct snmp_session *in_session)
 
 	switch (status) {
 	case STAT_SUCCESS:
+	  in_session->s_snmp_errno = SNMPERR_INVALID_MSG; /* XX?? */
 	  DEBUGMSGTL(("snmp_sess_open",
                       "error: expected Report as response to probe: %s (%d)\n",
                       snmp_errstring(response->errstat), response->errstat));
 	  break;
 	case STAT_ERROR: /* this is what we expected -> Report == STAT_ERROR */
+	  in_session->s_snmp_errno = SNMPERR_UNKNOWN_ENG_ID;
 	  break; 
 	case STAT_TIMEOUT:
+	  in_session->s_snmp_errno = SNMPERR_TIMEOUT;
 	default:
 	  DEBUGMSGTL(("snmp_sess_open",
                       "unable to connect with remote engine: %s (%d)\n",
@@ -1076,6 +1079,7 @@ _sess_open(struct snmp_session *in_session)
 	  snmp_sess_close(slp);
 	  return NULL;
 	}
+	in_session->s_snmp_errno = SNMPERR_SUCCESS;
 	if (snmp_get_do_debugging()) {
           DEBUGMSGTL(("snmp_sess_open", "  probe found engineID:  "));
 	  for(i = 0; i < slp->session->securityEngineIDLen; i++)
@@ -1089,8 +1093,12 @@ _sess_open(struct snmp_session *in_session)
 	set_enginetime(session->securityEngineID, session->securityEngineIDLen,
 		       session->engineBoots, session->engineTime, TRUE);
       }
-      if (create_user_from_session(slp->session) != SNMPERR_SUCCESS)
+      if (create_user_from_session(slp->session) != SNMPERR_SUCCESS) {
+	  in_session->s_snmp_errno = SNMPERR_UNKNOWN_USER_NAME; /* XX?? */
 	DEBUGMSGTL(("snmp_api","snmp_sess_open(): failed(2) to create a new user from session\n"));
+	  snmp_sess_close(slp);
+	  return NULL;
+      }
     }
 
 
@@ -1310,9 +1318,15 @@ snmp_close(struct snmp_session *session)
 int
 snmp_close_sessions( void )
 {
-    while ( Sessions )
-        if ( snmp_close( Sessions->session ) == 0 )
-            return 0;
+    struct session_list *slp;
+
+    snmp_res_lock(MT_LIBRARY_ID, MT_LIB_SESSION);
+    while ( Sessions ) {
+        slp = Sessions;
+        Sessions = Sessions->next;
+        snmp_sess_close((void *)slp);
+    }
+    snmp_res_unlock(MT_LIBRARY_ID, MT_LIB_SESSION);
     return 1;
 }
 
@@ -1399,7 +1413,7 @@ snmpv3_verify_msg(struct request_list *rp, struct snmp_pdu *pdu)
  * occur, -1 is returned.  If all goes well, 0 is returned.
  */
 static int
-_snmpv3_build(struct snmp_session	*session,
+snmpv3_build(struct snmp_session	*session,
              struct snmp_pdu	        *pdu,
              u_char	        	*packet,
              size_t			*out_length)
@@ -1505,33 +1519,18 @@ _snmpv3_build(struct snmp_session	*session,
                   usmSecLevelName[pdu->securityLevel]));
 
   ret = snmpv3_packet_build(pdu, packet, out_length, NULL, 0);
-  if (0 != ret) {
-      session->s_snmp_errno = SNMPERR_BAD_ASN1_BUILD;
+  if (-1 != ret) {
+      session->s_snmp_errno = ret;
   }
 
   return ret;
 
 }  /* end snmpv3_build() */
 
-static int
-snmpv3_build(struct snmp_session	*pss,
-             struct snmp_pdu	        *pdu,
-             u_char	        	*packet,
-             size_t			*out_length)
-{
-    int rc;
-    rc = _snmpv3_build(pss,pdu,packet,out_length);
-    if (rc) {
-        if ( !pss->s_snmp_errno)
-            pss->s_snmp_errno = snmp_errno;  /* snmpv3_packet_build rc */
-        SET_SNMP_ERROR(pss->s_snmp_errno);
-    }
-    return rc;
-}
 
 
 
-u_char *
+static u_char *
 snmpv3_header_build(struct snmp_pdu *pdu, u_char *packet,
                     size_t *out_length, size_t length, u_char **msg_hdr_e)
 
@@ -1618,7 +1617,7 @@ snmpv3_header_build(struct snmp_pdu *pdu, u_char *packet,
 
 
 
-u_char *
+static u_char *
 snmpv3_scopedPDU_header_build(struct snmp_pdu *pdu,
                               u_char *packet, size_t *out_length,
                               u_char **spdu_e)
@@ -1652,7 +1651,7 @@ snmpv3_scopedPDU_header_build(struct snmp_pdu *pdu,
 }  /* end snmpv3_scopedPDU_header_build() */
 
 
-/* returns 0 if success, -1 if fail */
+/* returns 0 if success, -1 if fail, not 0 if USM build failure */
 int
 snmpv3_packet_build(struct snmp_pdu *pdu, u_char *packet, size_t *out_length,
 		    u_char *pdu_data, size_t pdu_data_len)
@@ -1723,10 +1722,8 @@ snmpv3_packet_build(struct snmp_pdu *pdu, u_char *packet, size_t *out_length,
 			pdu->securityStateRef,
 			sec_params,		&sec_params_len,
                         &cp,			out_length);
-    if (result != 0)
-      return -1;
 
-    return 0;
+    return result;
 
 }  /* end snmpv3_packet_build() */
 
@@ -1960,6 +1957,8 @@ _snmp_build(struct snmp_session *session,
 
     h1 = cp;
     cp = snmp_pdu_build(pdu, cp, out_length);
+    if (cp == NULL)
+	return -1;
 
     /* insert the actual length of the message sequence */
     switch (pdu->version) {
@@ -1975,6 +1974,7 @@ _snmp_build(struct snmp_session *session,
     case SNMP_VERSION_2u:
     case SNMP_VERSION_2star:
     default:
+	session->s_snmp_errno = SNMPERR_BAD_VERSION;
 	return -1;
     }
     *out_length = cp - packet;
@@ -1993,10 +1993,12 @@ snmp_build(struct snmp_session *pss,
         if ( !pss->s_snmp_errno)
             pss->s_snmp_errno = SNMPERR_BAD_ASN1_BUILD;
         SET_SNMP_ERROR(pss->s_snmp_errno);
+        rc = -1;
     }
     return rc;
 }
 
+/* on error, returns NULL (likely an encoding problem). */
 u_char *
 snmp_pdu_build (struct snmp_pdu *pdu, u_char *cp, size_t *out_length)
 {
@@ -2290,7 +2292,7 @@ snmpv3_parse(
   DEBUGINDENTLESS();
 
   if (ret_val != USM_ERR_NO_ERROR) {
-    snmpv3_scopedPDU_parse(pdu, cp, &pdu_buf_len);
+    snmpv3_scopedPDU_parse(pdu, cp, &pdu_buf_len); /* DO ignore return code */
     DEBUGINDENTLESS();
     return ret_val;
   }
@@ -2470,8 +2472,9 @@ snmpv3_get_report_type(struct snmp_pdu *pdu)
 
 /*
  * Parses the packet received on the input session, and places the data into
- * the input pdu.  length is the length of the input packet.  If any errors
- * are encountered, -1 is returned.  Otherwise, a 0 is returned.
+ * the input pdu.  length is the length of the input packet.
+ * If any errors are encountered, -1 or USM error is returned.
+ * Otherwise, a 0 is returned.
  */
 static int
 _snmp_parse(struct snmp_session *session,
@@ -2507,9 +2510,13 @@ _snmp_parse(struct snmp_session *session,
         DEBUGINDENTLESS();
 	if (data == NULL)
 	    return -1;
+
         if (pdu->version != session->version &&
 	    session->version != SNMP_DEFAULT_VERSION)
+	{
+            session->s_snmp_errno = SNMPERR_BAD_VERSION;
             return -1;
+	}
 
 	/* maybe get the community string. */
 	pdu->securityLevel = SNMP_SEC_LEVEL_NOAUTH;
@@ -2528,21 +2535,22 @@ _snmp_parse(struct snmp_session *session,
 					  community,
                                           community_length);
 	    if (data == NULL)
+	    {
+		session->s_snmp_errno = SNMPERR_AUTHENTICATION_FAILURE;
 		return -1;
+	    }
 	}
 	result = snmp_pdu_parse(pdu, data, &length);
         break;
 
     case SNMP_VERSION_3:
       result = snmpv3_parse(pdu, data, &length, NULL);
-      if (!result) {
-	DEBUGMSGTL(("snmp_parse",
-                   "Parsed SNMPv3 message (secName:%s, secLevel:%s).\n",
-                   pdu->securityName, usmSecLevelName[pdu->securityLevel]));
-      } else {
-	DEBUGMSGTL(("snmp_parse",
-                    "Error parsing SNMPv3 message (secName:%s, secLevel:%s).\n",
-                    pdu->securityName, usmSecLevelName[pdu->securityLevel]));
+      DEBUGMSGTL(("snmp_parse",
+                   "Parsed SNMPv3 message (secName:%s, secLevel:%s): %s\n",
+                   pdu->securityName, usmSecLevelName[pdu->securityLevel],
+                   snmp_api_errstring(result)));
+
+      if (result) {
 	/* handle reportable errors */
 	switch (result) {
 	case USM_ERR_UNKNOWN_ENGINE_ID:
@@ -2564,6 +2572,7 @@ _snmp_parse(struct snmp_session *session,
 	  }
 	  break;
 	default:
+	  session->s_snmp_errno = result;
 	  break;
 	}
       }
@@ -2571,6 +2580,7 @@ _snmp_parse(struct snmp_session *session,
     case SNMPERR_BAD_VERSION:
       ERROR_MSG("error parsing snmp message version");
       snmp_increment_statistic(STAT_SNMPINASNPARSEERRS);
+      session->s_snmp_errno = SNMPERR_BAD_VERSION;
       break;
     case SNMP_VERSION_sec:
     case SNMP_VERSION_2u:
@@ -2579,13 +2589,11 @@ _snmp_parse(struct snmp_session *session,
     default:
         ERROR_MSG("unsupported snmp message version");
 	snmp_increment_statistic(STAT_SNMPINBADVERSIONS);
+	session->s_snmp_errno = SNMPERR_BAD_VERSION;
         break;
     }
 
-    if (result == 0) {
-      return 0;
-    } 
-    return -1;
+    return result;
 }
 
 static int
@@ -3458,7 +3466,7 @@ snmp_sess_select_info(void *sessp,
 		      int *block)
 {
     struct session_list *slptest = (struct session_list *)sessp;
-    struct session_list *slp, *next, *prev=NULL;
+    struct session_list *slp, *next=NULL, *prev=NULL;
     struct snmp_internal_session *isp;
     struct request_list *rp;
     struct timeval now, earliest;
@@ -3470,16 +3478,18 @@ snmp_sess_select_info(void *sessp,
      * and if it is the earliest timeout to expire, mark it as lowest.
      * If a single session is specified, do just for that session.
      */
-    if (slptest) slp = slptest; else slp = Sessions;
+    if (sessp) slp = slptest; else slp = Sessions;
     for(; slp; slp = next){
 	isp = slp->internal;
 	if (isp->sd == -1) {
+	    if (sessp == NULL) {
 		/* This session was marked for deletion */
 	    if ( prev == NULL )
 		Sessions = slp->next;
 	    else
 		prev->next = slp->next;
 	    next = slp->next;
+	    }
 	    snmp_sess_close( slp );
 	    continue;
 	}
@@ -3781,10 +3791,10 @@ snmp_varlist_add_variable(struct variable_list **varlist,
         memmove(vars->val.string, value, vars->val_len);
         break;
 
-      case ASN_NULL:
       case SNMP_NOSUCHOBJECT:
       case SNMP_NOSUCHINSTANCE:
       case SNMP_ENDOFMIBVIEW:
+      case ASN_NULL:
         vars->val_len = 0;
         vars->val.string = NULL;
         break;
