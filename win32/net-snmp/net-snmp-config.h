@@ -74,6 +74,10 @@ extern "C" {
 /* Define if you have <sys/wait.h> that is POSIX.1 compatible.  */
 #undef HAVE_SYS_WAIT_H
 
+/* Define as `__inline' if that's what the C compiler calls it, or to nothing
+   if it is not supported. */
+#define inline __inline
+
 /* Define to `long' if <sys/types.h> doesn't define.  */
 #undef off_t
 
@@ -946,8 +950,13 @@ typedef unsigned short mode_t;
  *    static NETSNMP_INLINE function(int parm) { return parm -1; } // WRONG!
  *
  */
-#define NETSNMP_INLINE __inline
-#define NETSNMP_STATIC_INLINE static NETSNMP_INLINE
+/*
+ * Win32 needs extern for inline function declarations in headers.
+ * See MS tech note Q123768:
+ *   http://support.microsoft.com/default.aspx?scid=kb;EN-US;123768
+ */
+#define NETSNMP_INLINE extern inline
+#define NETSNMP_STATIC_INLINE static inline
 
 /*
  * For win32, don't define inline for the DLL verison of the library,
