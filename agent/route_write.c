@@ -59,11 +59,7 @@ u_short  flags;
     struct sockaddr_in     dst;
     struct sockaddr_in     gateway;
     int                    s;
-#ifdef __alpha
-    struct ortentry  route;
-#else
-    struct rtentry  route;
-#endif
+    RTENTRY  route;
     int  ret;
 
     s = socket(AF_INET, SOCK_RAW, 0);
@@ -86,7 +82,9 @@ u_short  flags;
     bcopy((char*) &gateway, (char *) &route.rt_gateway, sizeof(struct  sockaddr_in));
 
     route.rt_flags = flags;
+#ifndef RTENTRY_4_4
     route.rt_hash  = iff;
+#endif
     return (ioctl(s, SIOCADDRT , (caddr_t)&route));
 
 }
@@ -104,11 +102,7 @@ u_short  flags;
     struct sockaddr_in     dst;
     struct sockaddr_in     gateway;
     int                    s;
-#ifdef __alpha
-    struct ortentry  route;
-#else
-    struct rtentry  route;
-#endif
+    RTENTRY  route;
     int  ret;
 
     s = socket(AF_INET, SOCK_RAW, 0);
@@ -131,7 +125,9 @@ u_short  flags;
     bcopy((char*) &gateway, (char *) &route.rt_gateway, sizeof(struct  sockaddr_in));
 
     route.rt_flags = flags;
+#ifndef RTENTRY_4_4
     route.rt_hash  = iff;
+#endif
 
     return (ioctl(s, SIOCDELRT , (caddr_t)&route));
 

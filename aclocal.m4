@@ -17,13 +17,12 @@ dnl changequote([, ])
 AC_DEFUN(AC_PROMPT_USER,
 [
 MSG_CHECK=`echo "$2" | tail -1`
-AC_MSG_CHECKING($MSG_CHECK)
-AC_CACHE_VAL(ac_cv_user_prompt_$1,
-echo ""
+AC_CACHE_CHECK($MSG_CHECK, ac_cv_user_prompt_$1,
+[echo ""
 AC_PROMPT_USER_NO_DEFINE($1,[$2],$3)
 eval ac_cv_user_prompt_$1=\$$1
 echo $ac_n "setting $MSG_CHECK to...  $ac_c"
-) dnl
+])
 if test "$ac_cv_user_prompt_$1" != "none"; then
   if test "$4" != ""; then
     AC_DEFINE_UNQUOTED($1,"$ac_cv_user_prompt_$1")
@@ -31,6 +30,4 @@ if test "$ac_cv_user_prompt_$1" != "none"; then
     AC_DEFINE_UNQUOTED($1,$ac_cv_user_prompt_$1)
   fi
 fi
-AC_MSG_RESULT($ac_cv_user_prompt_$1)
-]
-) dnl
+]) dnl

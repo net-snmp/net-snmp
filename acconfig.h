@@ -52,6 +52,9 @@
 /* define rtentry to ortentry on SYSV machines (alphas) */
 #define RTENTRY rtentry;
 
+/* Use BSD 4.4 routing table entries? */
+#undef RTENTRY_4_4
+
 /* Command to generate ps output, the final column must be the process
    name withOUT arguments */
 
@@ -82,7 +85,7 @@ sure to end it in -1.*/
 #define USESHELLMIB
 
 #define MEMMIBNUM 4               /*   swap MIN                     */
-#ifdef hpux
+#ifdef hpux9
 #define USEMEMMIB
 #endif
 
@@ -105,15 +108,19 @@ sure to end it in -1.*/
    value returned by a query to sysObjectID is
    EXTENSIBLEMIB.AGENTID.???, where ??? is defined below by OSTYPE */
 
-#define HPUXID    1
+#define HPUX9ID   1
 #define SUNOS4ID  2 
 #define SOLARISID 3
 #define OSF3ID    4
 #define ULTRIXID  5
+#define HPUX10ID  6
 #define UNKNOWNID 255
 
 #ifdef hpux9
-#define OSTYPE HPUXID
+#define OSTYPE HPUX9ID
+#endif
+#ifdef hpux10
+#define OSTYPE HPUX10ID
 #endif
 #ifdef sunos4
 #define OSTYPE SUNOS4ID
@@ -183,6 +190,15 @@ sure to end it in -1.*/
 /* define to exit the agent on a bad kernel read */
 
 #define LASTFIELD -1      /* internal define */
+
+/* debugging stuff */
+
+#define DODEBUG
+
+#ifdef DODEBUG
+#define DEBUGP(x) fprintf(stderr,x);
+#define DEBUGP1(x,y) fprintf(stderr,x,y);
+#endif
 
 #ifndef DONT_INC_STRUCTS
 #include "agent/extensible/struct.h"
