@@ -2337,7 +2337,8 @@ read_module_internal (char *name)
 	    return MODULE_LOADED_OK;
 	}
 
-    fprintf(stderr, "Module %s not found\n", name);
+    if (mib_warnings)
+      fprintf(stderr, "Module %s not found\n", name);
     return MODULE_NOT_FOUND;
 }
 
