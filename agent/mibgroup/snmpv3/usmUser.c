@@ -24,7 +24,6 @@
 #include "util_funcs.h"
 #include "keytools.h"
 #include "tools.h"
-#include "callback.h"
 #include "scapi.h"
 
 #include "usmUser.h"
@@ -54,20 +53,6 @@ oid usmUser_variables_oid[] = {1,3,6,1,6,3,15,1,2};
 
 static unsigned int usmUserSpinLock=0;
 
-int
-store_usmUser(int majorID, int minorID, void *serverarg, void *clientarg)
-{
-  /* save the user base */
-  usm_save_users("usmUser", "snmpd");
-  return SNMPERR_SUCCESS;
-}
-
-
-    
-   
-      
-  
-
 void
 init_usmUser(void)
 {
@@ -80,7 +65,7 @@ init_usmUser(void)
 
   /* we need to be called back later */
   snmp_register_callback(SNMP_CALLBACK_LIBRARY, SNMP_CALLBACK_STORE_DATA,
-                         store_usmUser, NULL);
+                         usm_store_users, NULL);
   
   REGISTER_MIB("snmpv3/usmUser", usmUser_variables, variable4, \
 				 usmUser_variables_oid);

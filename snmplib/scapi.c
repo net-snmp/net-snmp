@@ -41,11 +41,11 @@
 #include "asn1.h"
 #include "tools.h"
 #include "snmp_api.h"
+#include "callback.h"
 #include "snmpusm.h"
 #include "keytools.h"
 #include "snmp_debug.h"
 #include "scapi.h"
-#include "callback.h"
 #include "snmp_impl.h"
 #include "system.h"
 
