@@ -37,6 +37,9 @@
 @    else@
 @       eval $m2c_de_pfx = "${m2c_const_pfx}$node"@
 @    end@
+@    if $m2c_const_lc == 0@
+@       eval $m2c_de_pfx = uc($m2c_de_pfx)@
+@    end@
 @    if "$node.perltype" eq "BITS"@
 @       eval $m2c_enum_mask="${m2c_de_pfx}_MASK"@
 @       if $m2c_const_lc == 0@
@@ -95,7 +98,7 @@
 @  end@
 ##
 ##
-@  eval $m2c_node_param_val_name = "${node}"@
+@  eval $m2c_node_param_val_name = "${node}_val"@
 @  eval $m2c_node_param_val_lname = "${m2c_node_param_val_name}_len"@
 @  eval $m2c_node_param_ref_name = "${m2c_node_param_val_name}_ptr"@
 @  if $m2c_node_needlength == 1@
