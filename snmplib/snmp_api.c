@@ -108,6 +108,7 @@ SOFTWARE.
 #include "lcd_time.h"
 #include "callback.h"
 #include "snmp_alarm.h"
+#include "default_store.h"
 
 static void init_snmp_session (void);
 #include "transform_oids.h"
@@ -258,8 +259,6 @@ static unsigned short default_s_port = 0;	/* default SNMP service port */
 int snmp_errno = 0;
 char *snmp_detail = NULL;
 
-static int snmp_dump_packet = 0;
-
 /*
  * Prototypes.
  */
@@ -305,12 +304,12 @@ snmp_get_next_msgid (void)
 void
 snmp_set_dump_packet(int val)
 {
-    snmp_dump_packet = val;
+    ds_set_boolean(DS_LIBRARY_ID, DS_LIB_DUMP_PACKET, val);
 }
 
 int snmp_get_dump_packet (void)
 {
-    return snmp_dump_packet;
+    return ds_get_boolean(DS_LIBRARY_ID, DS_LIB_DUMP_PACKET);
 }
 
 int snmp_get_errno (void)
@@ -457,6 +456,11 @@ snmp_sess_init(struct snmp_session *session)
 }
 
 
+void
+register_default_handlers(void) {
+  ds_register_config(ASN_BOOLEAN, "snmp","dumpPacket",
+                     DS_LIBRARY_ID, DS_LIB_DUMP_PACKET);
+}
 
 
 /*******************************************************************-o-******
@@ -487,6 +491,7 @@ init_snmp(const char *type)
   init_callbacks();
   snmp_init_statistics();
   register_mib_handlers();
+  register_default_handlers();
   init_snmpv3(type);
   init_snmp_alarm();
 
@@ -628,7 +633,7 @@ snmp_sess_copy( struct snmp_session *in_session)
     session->community = ucp;	/* replace pointer with pointer to new data */
 
     if (session->securityLevel <= 0)
-      session->securityLevel = get_default_secLevel();
+      session->securityLevel = ds_get_int(DS_LIBRARY_ID, DS_LIB_SECLEVEL);
 
     if (session->securityAuthProtoLen > 0) {
       ucp = (u_char*)malloc(session->securityAuthProtoLen * sizeof(oid));
@@ -718,7 +723,7 @@ snmp_sess_copy( struct snmp_session *in_session)
 	snmp_sess_close(slp);
 	return(NULL);
       }
-    } else if ((cp = get_default_context()) != NULL) {
+    } else if ((cp = ds_get_string(DS_LIBRARY_ID, DS_LIB_CONTEXT)) != NULL) {
       cp = strdup(cp);
       if (cp == NULL) {
 	snmp_errno = SNMPERR_GENERR;
@@ -738,7 +743,7 @@ snmp_sess_copy( struct snmp_session *in_session)
 	snmp_sess_close(slp);
 	return(NULL);
       }
-    } else if ((cp = get_default_secName()) != NULL) {
+    } else if ((cp = ds_get_string(DS_LIBRARY_ID, DS_LIB_SECNAME)) != NULL) {
       cp = strdup(cp);
       if (cp == NULL) {
 	snmp_errno = SNMPERR_GENERR;
@@ -754,11 +759,12 @@ snmp_sess_copy( struct snmp_session *in_session)
       session->securityAuthKeyLen = in_session->securityAuthKeyLen;
       memcpy(session->securityAuthKey, in_session->securityAuthKey,
              session->securityAuthKeyLen);
-    } else if (get_default_authpass()) {
+    } else if (ds_get_string(DS_LIBRARY_ID, DS_LIB_AUTHPASSPHRASE)) {
       session->securityAuthKeyLen = USM_AUTH_KU_LEN;
       if (generate_Ku(session->securityAuthProto,
                       session->securityAuthProtoLen,
-                      (u_char *)get_default_authpass(), strlen(get_default_authpass()),
+                      (u_char *)ds_get_string(DS_LIBRARY_ID, DS_LIB_AUTHPASSPHRASE),
+                      strlen(ds_get_string(DS_LIBRARY_ID, DS_LIB_AUTHPASSPHRASE)),
                       session->securityAuthKey,
                       &session->securityAuthKeyLen) != SNMPERR_SUCCESS) {
         snmp_set_detail("Error generating Ku from authentication pass phrase.");
@@ -773,11 +779,12 @@ snmp_sess_copy( struct snmp_session *in_session)
       session->securityPrivKeyLen = in_session->securityPrivKeyLen;
       memcpy(session->securityPrivKey, in_session->securityPrivKey,
              session->securityPrivKeyLen);
-    } else if (get_default_privpass()) {
+    } else if (ds_get_string(DS_LIBRARY_ID, DS_LIB_PRIVPASSPHRASE)) {
       session->securityPrivKeyLen = USM_PRIV_KU_LEN;
       if (generate_Ku(session->securityAuthProto,
                       session->securityAuthProtoLen,
-                      (u_char *)get_default_privpass(), strlen(get_default_privpass()),
+                      (u_char *)ds_get_string(DS_LIBRARY_ID, DS_LIB_PRIVPASSPHRASE),
+                      strlen(ds_get_string(DS_LIBRARY_ID, DS_LIB_PRIVPASSPHRASE)),
                       session->securityPrivKey,
                       &session->securityPrivKeyLen) != SNMPERR_SUCCESS) {
         snmp_set_detail("Error generating Ku from privacy pass phrase.");
@@ -3021,7 +3028,7 @@ snmp_sess_async_send(void *sessp,
     if (result < 0){
 	return 0;
     }
-    if (snmp_dump_packet){
+    if (ds_get_boolean(DS_LIBRARY_ID, DS_LIB_DUMP_PACKET)){
 	printf("\nSending %u bytes to %s:%hu\n", length,
 	       inet_ntoa(pduIp->sin_addr), ntohs(pduIp->sin_port));
 	xdump(packet, length, "");
@@ -3234,7 +3241,7 @@ snmp_sess_read(void *sessp,
                   isp->me.sa_family = AF_UNSPEC;
         return;
     }
-    if (snmp_dump_packet){
+    if (ds_get_boolean(DS_LIBRARY_ID, DS_LIB_DUMP_PACKET)){
 	printf("\nReceived %d bytes from %s:%hu\n", length,
 	       inet_ntoa(fromIp->sin_addr), ntohs(fromIp->sin_port));
 	xdump(packet, length, "");
@@ -3519,7 +3526,7 @@ snmp_resend_request(struct session_list *slp, struct request_list *rp,
     return -1;
   }
   pduIp = (struct sockaddr_in *)&(rp->pdu->address);
-  if (snmp_dump_packet){
+  if (ds_get_boolean(DS_LIBRARY_ID, DS_LIB_DUMP_PACKET)){
     printf("\nResending %d bytes to %s:%hu\n", length,
 	   inet_ntoa(pduIp->sin_addr), ntohs(pduIp->sin_port));
     xdump(packet, length, "");
