@@ -3,7 +3,20 @@ the gcc compiler from Cygwin.  As developers build with
 other Win32 environments, their notes will be included here.
 
 ----
-Status as of 1-Feb-2000 for Win32 platforms
+Status as of 1-Jul-2000 for Win32 platforms
+
+  -  the client applications work
+  -  the core framework of the agent works
+  -  the 'system' and 'snmp' mibgroups work
+  -  no other elements of the standard agent distribution work
+  -  extending the agent to support enterprise-specific MIBs works
+  -  running the agent on a non-standard port works
+  -  running the UCD agent instead of the MS supplied one "works"
+          (at the loss of most of the functionality)
+  -  running the UCD agent as a "subagent" of the MS one does not work
+          (i.e. using the SNMP.dll interface)
+  -  running the UCD agent as a subagent of an AgentX master "works"
+          (bearing in mind this support is alpha-code)
 
 All applications build with MSVC++ and Cygwin.
 
