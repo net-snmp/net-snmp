@@ -49,7 +49,7 @@ BSC32=bscmake.exe
 # ADD BSC32 /nologo
 LIB32=link.exe -lib
 # ADD BASE LIB32 /nologo
-# ADD LIB32 /nologo /out:"../lib/ucdagent.lib"
+# ADD LIB32 /nologo /out:"../lib/netsnmpagent.lib"
 
 !ELSEIF  "$(CFG)" == "libagent - Win32 Debug"
 
@@ -72,7 +72,7 @@ BSC32=bscmake.exe
 # ADD BSC32 /nologo
 LIB32=link.exe -lib
 # ADD BASE LIB32 /nologo
-# ADD LIB32 /nologo /out:"../lib/ucdagent_d.lib"
+# ADD LIB32 /nologo /out:"../lib/netsnmpagent_d.lib"
 
 !ENDIF 
 
@@ -80,6 +80,10 @@ LIB32=link.exe -lib
 
 # Name "libagent - Win32 Release"
 # Name "libagent - Win32 Debug"
+# Begin Source File
+
+SOURCE=..\..\agent\agent_handler.c
+# End Source File
 # Begin Source File
 
 SOURCE=..\..\agent\agent_index.c
