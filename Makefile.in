@@ -99,3 +99,20 @@ EXAMPLE.conf: sedscript EXAMPLE.conf.def
 
 TAGS:
 	find $(srcdir) -name '*.[ch]' -print | etags -
+
+version:
+	@if test "x$(VERSION)" = "x"; then \
+	  echo "you need to supply a VERSION string."; \
+	  exit 2; \
+	fi
+	agent/mibgroup/versiontag $(VERSION) reverse
+
+tag:
+	agent/mibgroup/versiontag $(VERSION) tag
+
+tar:
+	agent/mibgroup/versiontag $(VERSION) tar
+
+dist: version tag tar
+
+
