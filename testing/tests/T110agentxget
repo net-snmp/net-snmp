@@ -15,7 +15,7 @@ SKIPIFNOT USING_MIBII_SYSTEM_MIB_MODULE
 . ./Sv3config
 
 # Start the agent without initializing the system mib.
-ORIG_AGENT_FLAGS="$AGENT_FLAGS"
+ORIG_AGENT_FLAGS="$AGENT_FLAGS -x $SNMP_TMPDIR/agentx_socket"
 AGENT_FLAGS="$ORIG_AGENT_FLAGS -I -system_mib"
 STARTAGENT
 
@@ -33,10 +33,7 @@ if test "$snmp_last_test_result" = 1; then
   SNMP_SNMPD_LOG_FILE=$SNMP_SNMPD_LOG_FILE.num2
   AGENT_FLAGS="$ORIG_AGENT_FLAGS -X -I system_mib"
   SNMP_CONFIG_FILE="$SNMP_TMPDIR/bogus.conf"
-  ORIG_SNMP_FLAGS=$SNMP_FLAGS
-  SNMP_FLAGS=""
   STARTAGENT
-  SNMP_FLAGS=$ORIG_SNMP_FLAGS
 
   # test to see that the agent now supports setting the system mib
   CAPTURE "snmpget $SNMP_FLAGS -t 3 -v 3 -a MD5 -A initial_test_pass_auth -l anp -u initial -n xxx localhost system.sysUpTime.0"
