@@ -15,7 +15,7 @@
  **********************************************************************
  **********************************************************************/
 /*
- * $context is subid $context.subid of $context.parent.
+ * $context.module::$context is subid $context.subid of $context.parent.
  * Its status is $context.status.
  * OID: $context.objectID, length: $context.oidlength
 */
