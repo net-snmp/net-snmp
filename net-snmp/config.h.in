@@ -83,6 +83,12 @@
    byte first (like Motorola and SPARC, unlike Intel and VAX).  */
 #undef WORDS_BIGENDIAN
 
+/* define the system type include file here */
+#define SYSTEM_INCLUDE_FILE "s/generic.h"
+
+/* define the machine (cpu) type include file here */
+#define MACHINE_INCLUDE_FILE "m/generic.h"
+
 #undef SNMPLIBPATH
 
 /* LOGFILE:  If defined it closes stdout/err/in and opens this in out/err's
@@ -832,3 +838,6 @@
 #define ENV_SEPARATOR_CHAR ':'
 #define _CRTIMP
 #endif
+
+#include SYSTEM_INCLUDE_FILE
+#include MACHINE_INCLUDE_FILE
