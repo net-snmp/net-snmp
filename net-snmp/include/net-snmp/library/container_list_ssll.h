@@ -14,6 +14,7 @@ extern "C" {
 #endif
 
     netsnmp_container *netsnmp_container_get_sorted_singly_linked_list(void);
+    netsnmp_container *netsnmp_container_get_singly_linked_list(int fifo);
 
     void netsnmp_container_ssll_init(void);
 
