@@ -2440,11 +2440,13 @@ _add_strings_to_oid(struct tree *tp, char *cp,
 	    break;
 	case TYPE_OBJID:
 	    in_dices = NULL;
+		cp2 = cp;
 	    break;
 	default:
 	    snmp_log(LOG_ERR, "Unexpected index type: %d %s %s\n",
 	    	     tp->type, in_dices->ilabel, cp);
 	    in_dices = NULL;
+		cp2 = cp;
 	    break;
 	}
 	cp = cp2;
