@@ -965,6 +965,7 @@ _sess_open(struct snmp_session *in_session)
     struct snmp_pdu *pdu, *response;
     int status;
     size_t i, addr_size;
+    char *cp = NULL;
 
     in_session->s_snmp_errno = 0;
     in_session->s_errno = 0;
@@ -993,9 +994,30 @@ _sess_open(struct snmp_session *in_session)
             isp->addr.sa_family = AF_INET;
             isp_addr = (struct sockaddr_in *)&(isp->addr);
             if (session->peername != SNMP_DEFAULT_PEERNAME){
-                if ((int)(addr = inet_addr(session->peername)) != -1){
+
+			/* Try and extract an appended port number */
+		cp = strchr( session->peername, ':' );
+		if ( cp ) {
+		    *cp = '\0';
+		    cp++;
+		    session->remote_port = atoi( cp );
+		    if ( session->local_port )	/* i.e. server */
+			session->local_port = session->remote_port;
+		}
+
+			/* Interpret the peername as an IP port ... */
+		cp = strchr( session->peername, '.' );
+		if ( !cp && (( i = atoi( session->peername )) != 0 )) {
+		    session->remote_port = i;
+		    if ( session->local_port )	/* i.e. server */
+			session->local_port = session->remote_port;
+		}
+
+			/* ... failing that, as an IP address ... */
+                else if ((int)(addr = inet_addr(session->peername)) != -1){
                     memmove(&isp_addr->sin_addr, &addr, sizeof(isp_addr->sin_addr));
                 } else {
+			/* .... failing that, as a hostname */
 #ifdef HAVE_GETHOSTBYNAME
                     hp = gethostbyname(session->peername);
                     if (hp == NULL){
