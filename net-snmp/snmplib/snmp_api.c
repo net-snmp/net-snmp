@@ -2814,6 +2814,7 @@ snmp_pdu_parse(struct snmp_pdu *pdu, u_char  *data, size_t *length) {
     vp->val.string = NULL;
     vp->name_length = MAX_OID_LEN;
     vp->name = 0;
+    vp->data = 0;
     DEBUGDUMPHEADER("dump_recv", "VarBind:\n");
     data = snmp_parse_var_op(data, objid, &vp->name_length, &vp->type,
 			     &vp->val_len, &var_val, length);
@@ -3241,6 +3242,8 @@ snmp_free_var(struct variable_list *var)
         SNMP_FREE(var->name);
     if (var->val.string != var->buf)
         SNMP_FREE(var->val.string);
+    if (var->data)
+	SNMP_FREE(var->data);
 
     free((char *)var);
 }

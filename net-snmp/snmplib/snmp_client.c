@@ -196,6 +196,7 @@ snmp_clone_var(struct variable_list *var, struct variable_list *newvar)
 
     memmove(newvar, var, sizeof(struct variable_list));
     newvar->next_variable = 0; newvar->name = 0; newvar->val.string = 0;
+    newvar->data = 0;
 
     /*
      * Clone the object identifier and the value.
