@@ -167,6 +167,7 @@ netsnmp_create_handler_registration(const char *name,
         the_reg->modes = HANDLER_CAN_DEFAULT;
 
     the_reg->handler = netsnmp_create_handler(name, handler_access_method);
+    the_reg->priority = DEFAULT_MIB_PRIORITY;
     if (name)
         the_reg->handlerName = strdup(name);
     memdup((u_char **) & the_reg->rootoid, (const u_char *) reg_oid,
@@ -228,6 +229,16 @@ netsnmp_register_handler(netsnmp_handler_registration *reginfo)
                                 reginfo->range_ubound, NULL,
                                 reginfo->contextName, reginfo->timeout, 0,
                                 reginfo, 1);
+}
+
+/** unregister a handler, as defined by the netsnmp_handler_registration pointer. */
+int
+netsnmp_unregister_handler(netsnmp_handler_registration *reginfo)
+{
+    return unregister_mib_context(reginfo->rootoid, reginfo->rootoid_len,
+                                  reginfo->priority,
+                                  reginfo->range_subid, reginfo->range_ubound,
+                                  reginfo->contextName);
 }
 
 /** register a handler, as defined by the netsnmp_handler_registration pointer. */
