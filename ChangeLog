@@ -1,5 +1,725 @@
 -------------------------------------------------------------------------------
 
+Changes: V5.0.2 -> V5.0.3
+
+2002-08-02 23:41  hardaker
+
+   * agent/mibgroup/agent/.cvsignore:
+
+   add .libs
+   
+2002-08-02 23:40  hardaker
+
+   * agent/mibgroup/Rmon/.cvsignore:
+
+   ignore file
+   
+2002-08-02 23:39  hardaker
+
+   * agent/Makefile.depend, agent/helpers/Makefile.depend,
+   agent/mibgroup/Makefile.depend, apps/Makefile.depend,
+   apps/snmpnetstat/Makefile.depend, snmplib/Makefile.depend
+:
+
+   make depend
+   
+2002-08-02 23:37  hardaker
+
+   * include/net-snmp/net-snmp-config.h.in:
+
+   forgotten to check in test for perl_ev changes
+   
+2002-08-02 23:35  hardaker
+
+   * perl/SNMP/SNMP.pm:
+
+   remove debugging print (opps)
+   
+2002-08-02 23:35  hardaker
+
+   * perl/SNMP/: SNMP.pm, SNMP.xs:
+
+   fix default version usage.
+   
+2002-08-02 23:34  hardaker
+
+   * snmplib/snmpUDPIPv6Domain.c:
+
+   Patch #572394 from Katsuhisa ABE:
+     - support link local addresses
+     - bind to ipv6 only if IPV6_V6ONLY is defined.
+   
+2002-08-02 23:31  hardaker
+
+   * snmplib/snmp_parse_args.c:
+
+   fix configure specified default versioning
+   
+2002-08-02 22:58  hardaker
+
+   * configure, configure.in:
+
+   Patch #572394: add ipv6 transports when --enable-ipv6 defined.  Thanks to Katsuhisa ABE.
+   
+2002-08-02 14:59  hardaker
+
+   * NEWS:
+
+   update for 5.0.3
+   
+2002-08-02 14:55  hardaker
+
+   * man/snmp_agent_api.3.def:
+
+   update
+   
+2002-08-02 14:39  hardaker
+
+   * dist/RELEASE-INSTRUCTIONS:
+
+   more docs.
+   
+2002-08-02 14:29  hardaker
+
+   * man/: netsnmp_agent.3, netsnmp_bulk_to_next.3,
+   netsnmp_debug.3, netsnmp_handler.3, netsnmp_instance.3
+, netsnmp_multiplexer.3, netsnmp_old_api.3,
+   netsnmp_read_only.3, netsnmp_scalar.3,
+   netsnmp_serialize.3, netsnmp_table.3,
+   netsnmp_table_array.3, netsnmp_table_data.3,
+   netsnmp_table_dataset.3, netsnmp_table_iterator.3,
+   netsnmp_todo.3, netsnmp_watcher.3, Makefile.in:
+
+   doxygen update.
+   
+2002-08-02 14:26  hardaker
+
+   * dist/RELEASE-INSTRUCTIONS:
+
+   update for yet more stuff.
+   
+2002-08-02 14:26  hardaker
+
+   * remove-files:
+
+   remove a few more dist related files.
+   
+2002-08-02 14:23  hardaker
+
+   * snmplib/snmp_api.c:
+
+   error message change to remove DES specific error msg.
+   
+2002-08-02 14:23  hardaker
+
+   * perl/agent/typemap:
+
+   spacing fixes.
+   
+2002-08-02 14:22  hardaker
+
+   * perl/agent/: Makefile.PL, agent.xs:
+
+   renamed file.
+   
+2002-08-02 14:22  hardaker
+
+   * perl/agent/: netsnmp_request_info.pm,
+   netsnmp_request_infoPtr.pm:
+
+   renamed file
+   
+2002-08-02 14:20  hardaker
+
+   * perl/AnyData_SNMP/netsh:
+
+   Add a "evalvars" directive to do simply replacements.
+   
+2002-08-02 14:16  hardaker
+
+   * agent/mibgroup/versiontag:
+
+   use CVSUSER variable when doing stuff instead of my hard-coded name.
+   
+2002-08-02 14:14  hardaker
+
+   * Makefile.top:
+
+   update libtool version for 5.0.3
+   
+2002-08-02 14:13  hardaker
+
+   * Makefile.in:
+
+   change checkcomment tag to exclude win32 files.
+   
+2002-08-02 14:13  hardaker
+
+   * ChangeLog:
+
+   update changelog build notes at the bottom of the file.
+   
+2002-08-02 14:01  hardaker
+
+   * dist/RELEASE-INSTRUCTIONS:
+
+   created a how-to file for making releases
+   
+2002-08-02 14:01  hardaker
+
+   * dist/changelogfix:
+
+   changelog fix-up script
+   
+2002-08-02 10:21  rstory
+
+   * dist/nsb-functions:
+
+   translate '/' in system name to '_' (for cygwin)
+   
+2002-08-02 09:56  rstory
+
+   * dist/README.build-scripts:
+
+   fix section cvs get command example
+   
+2002-08-02 09:06  dts12
+
+   * include/net-snmp/system/hpux.h:
+
+   Suppress 'inline' when not using GCC. Suggested by Johannes Schmidt-Fischer
+   
+2002-08-02 08:59  rstory
+
+   * dist/README.build-scripts:
+
+   fix section on skipping make test; add -p flag to examples
+   
+2002-08-02 08:52  rstory
+
+   * dist/README.build-scripts:
+
+   describe use of nsb-package script. Testers and comments appreciated...
+   
+2002-08-02 08:33  rstory
+
+   * dist/nsb-platform:
+
+   output platform info
+   
+2002-08-02 08:18  rstory
+
+   * dist/nsb-build:
+
+   renamed to nsb-package
+   
+2002-08-02 08:18  rstory
+
+   * dist/nsb-package:
+
+   renamed nsb-build to avoid confusion with script function
+   
+2002-08-02 08:15  hardaker
+
+   * dist/nsb-functions:
+
+   Change location name to Unknown
+   
+2002-08-02 08:08  hardaker
+
+   * perl/: ASN/ASN.pm, agent/agent.pm,
+   agent/netsnmp_request_info.pm:
+
+   more old perl fixes
+   
+2002-08-02 08:04  hardaker
+
+   * perl/: OID/OID.pm, agent/default_store/default_store.pm
+:
+
+   more old perl fixes
+   
+2002-08-02 08:00  hardaker
+
+   * perl/default_store/default_store.pm:
+
+   more old perl fixes
+   
+2002-08-02 07:48  rstory
+
+   * dist/nsb-functions:
+
+   fix return code
+   
+2002-08-02 07:48  rstory
+
+   * dist/nsb-build:
+
+   don't pull first arg til after getopts/shift; move set of default opts
+   
+2002-08-02 07:37  rstory
+
+   * dist/nsb-functions:
+
+   add option to skip build or test steps; add -f option to prompt to override
+   no prompt flag (useful for errors); new nsb-make method; check rc of
+   make clean
+   
+2002-08-02 07:36  rstory
+
+   * dist/nsb-build:
+
+   add option to skip build or test steps; tweak usage
+   
+2002-08-02 07:10  rstory
+
+   * dist/nsb-build:
+
+   fix typo; remove extra trailing slash in dir
+   
+2002-08-02 06:33  rstory
+
+   * dist/nsb-build:
+
+   check more places to source nsb-functions; fix for cmd line build path
+   
+2002-08-02 06:28  rstory
+
+   * dist/nsb-functions:
+
+   just show errors after build, not warnings
+   
+2002-08-01 17:04  hardaker
+
+   * perl/OID/OID.xs:
+
+   revert to non-ansi prototypes for older perl with older compilers on
+   older systems.  Not that I'm grumpy, of course.
+   
+2002-08-01 16:25  hardaker
+
+   * configure.in, agent/snmp_perl.c:
+
+   check for older and new embedded perl call functions
+   
+2002-08-01 14:07  rstory
+
+   * dist/nsb-functions:
+
+   don't symlink to src from build; update nsb-get-config
+   
+2002-08-01 14:06  rstory
+
+   * dist/nsb-build:
+
+   fix for cmd line build dir
+   
+2002-08-01 12:58  rstory
+
+   * dist/nsb-functions:
+
+   fix config install path; remove platform specific from nsb-build
+   
+2002-08-01 12:56  rstory
+
+   * dist/nsb-build:
+
+   remove hard coded info
+   
+2002-08-01 12:22  rstory
+
+   * dist/nsb-functions:
+
+   add option to skip prompts; remove previous installs; tweak err pattern
+   
+2002-08-01 12:14  jbpn
+
+   * man/snmp_alarm.3.def:
+
+     - use netsnmp_ds_set_boolean() instead of ds_set_boolean()
+   
+2002-08-01 12:12  jbpn
+
+   * man/snmp_agent_api.3.def:
+
+     - change code sample to use netsnmp_ds_set_boolean()
+     - update references to libraries (which were still talking about
+       libucdagent et al.) -- PLEASE REVIEW BEFORE 5.0.3
+   
+2002-08-01 12:07  rstory
+
+   * dist/nsb-functions:
+
+   lots of fixes to previouse untested scripts
+   
+2002-08-01 12:04  rstory
+
+   * dist/nsb-build:
+
+   script to build releases... still some hardcoding while testing, but its
+   getting there...
+   
+2002-08-01 11:51  rstory
+
+   * dist/: cvsshow, cvsup:
+
+   utility scripts
+   
+2002-08-01 09:30  dts12
+
+   * agent/helpers/: scalar.c, scalar2.c:
+
+   Go with the "scalar as super-handler of instance" implementation.
+   Scalar1.c is probably redundent, but we can remove this later.
+   (Yup - I'm a coward....)
+   
+2002-08-01 01:11  dts12
+
+   * README.win32:
+
+   Minor typos, plus emphasise the need for the IpHlpAPI library.
+   
+2002-07-30 08:26  dts12
+
+   * local/snmpconf.dir/snmp-data/output:
+
+   Recognise '0' as a valid setting for suffixPrinting, and update the
+   prompts to match the v5 output formats defaults. See Bug #567451
+   
+2002-07-30 07:59  dts12
+
+   * apps/snmptable.c:
+
+   First attempt at tackling Bug #574434
+   Recognise that default output format is equivalent to -OS.
+   Snmptable still crashes with -Of or -Ou, but at least the
+   default invocation works.
+   
+2002-07-30 05:41  dts12
+
+   * win32/libsnmp_dll/libsnmp.def:
+
+   Export newly-defined public names, and re-export some routines that
+   have changed name.  This should now compile under Visual C++ again.
+   
+2002-07-30 02:27  dts12
+
+   * agent/helpers/table_dataset.c:
+
+   Don't remove a Row-Status auto-deleted row until the last minute,
+   in case other (lower) handlers try to access it.
+   
+2002-07-30 01:38  dts12
+
+   * FAQ (V4-2-patches.1), FAQ:
+
+   Mention the need to escape quotes when querying string-indexed tables.
+   
+2002-07-29 23:56  rstory
+
+   * include/net-snmp/agent/table_array.h:
+
+   update register function name
+   
+2002-07-29 23:55  rstory
+
+   * local/mib2c.array-user.conf:
+
+   autogen example code for index checking in extract_index; update register
+   function name; use container in *_get_by_idx()
+   
+2002-07-29 16:23  rstory
+
+   * local/mib2c.array-user.conf:
+
+   update for new struct name; add example code as comments instead of var_XXX
+   and such; in a few important places add code which will allow a newly
+   generated module to be compiled if -DTABLE_CONTAINER_TODO is specified;
+   probably a few other tweaks I forgot
+   
+2002-07-29 03:06  dts12
+
+   * agent/helpers/: table_array.c, table.c, table_data.c
+, table_dataset.c, table_iterator.c:
+
+   Protect against deferencing NULL pointers.
+   (Most of these Should Never Happen but You Can't Be Too Careful!)
+   
+2002-07-29 03:03  jbpn
+
+   * agent/mibgroup/kernel_sunos5.c:
+
+     - detect `dmfe' ethernet cards as found on Netra X1 machines.
+       Thanks to John Olson for verifying this fix.
+   
+       Also note that `indent' has ----ed the formatting of this file
+       beyond legibility in several places.  I don't think we want to
+       do *that* again.
+   
+2002-07-29 02:40  dts12
+
+   * agent/helpers/table_dataset.c:
+
+   Fuller validation of RowStatus values wrt row creation/existing rows.
+   
+2002-07-29 01:25  dts12
+
+   * win32/: libsnmp/libsnmp.dsp, libsnmp_dll/libsnmp_dll.dsp
+, netsnmpmibs/netsnmpmibs.dsp:
+
+   Take account of recent changes in library files.
+   'Release' applications still don't link properly, but at least
+   the libraries compile, and the 'Debug' side seems to work.
+   
+2002-07-29 01:23  dts12
+
+   * include/net-snmp/system/aix.h:
+
+   Tweak inline handling for AIX - suggested by Andy Hood.
+   
+2002-07-26 10:52  rstory
+
+   * snmplib/Makefile.in:
+
+   remove autodependencies until portable solution can be found
+   
+2002-07-26 08:41  dts12
+
+   * win32/: mib_module_config.h, mib_module_includes.h,
+   mib_module_inits.h:
+
+   Remove mention of the (obsolete) ucd-snmp/registry module.
+   
+2002-07-26 07:32  dts12
+
+   * win32/net-snmp/net-snmp-config.h:
+
+   Protect the Win32 version of the config file, so that the other header
+   files recognise that it has indeed been included.
+   
+2002-07-26 07:24  dts12
+
+   * FAQ (V4-2-patches.0), FAQ:
+
+   A bit more detail on mib2c, plus the non-writeability of sys{Location,Contact}
+   
+2002-07-26 05:22  dts12
+
+   * FAQ (V4-2-patches.9), FAQ:
+
+   Another entry about invalid use of mib2c.
+   
+2002-07-26 05:16  dts12
+
+   * snmplib/Makefile.in:
+
+   Suppress the "non-standard" conditional construct,
+   since it's not recognised by some versions of 'make'.
+   
+2002-07-25 05:00  dts12
+
+   * agent/helpers/Makefile.in:
+
+   Add the 'scalar' and 'watcher' helpers to the helper library.
+   
+2002-07-25 03:28  dts12
+
+   * agent/helpers/watcher.c, include/net-snmp/agent/watcher.h
+:
+
+   Support for watching a sysUpTime marker.
+   
+2002-07-25 03:24  dts12
+
+   * agent/helpers/table_dataset.c,
+   include/net-snmp/agent/table_dataset.h:
+
+   New routine for retrieving a column value directly from a request structure.
+   
+2002-07-24 13:17  rstory
+
+   * snmplib/default_store.c:
+
+   check for setting same value in ds_set_string, since it frees the old
+   value before duping the new one
+   
+2002-07-24 11:58  rstory
+
+   * dist/snmpd-init.d:
+
+   first stab at init.d startup script for snmpd
+   
+2002-07-24 06:48  dts12
+
+   * agent/helpers/table_dataset.c:
+
+   When running off the end of one column, and moving on to the next
+   (in a GetNext), we need to start again with the first row.
+   This is probably the intention of the conditional block at the start
+   of this loop, but I can't see how this test could ever possibly match.
+   
+   Note that there is also a reference to the row data accessible via
+   the 'request->parent_data' data list.   This will also need to be
+   rewound.  Suggestions as to how best to do so gratefully received.
+   
+2002-07-24 06:39  dts12
+
+   * agent/helpers/table_dataset.c:
+
+   Use SNMPv2-style exceptions rather than the uninformative SNMPv1
+   'noSuchName' error for missing table objects.
+   
+2002-07-24 06:37  dts12
+
+   * agent/helpers/table_data.c:
+
+   Protect against the possibility of failing to extract a row structure.
+   
+2002-07-24 06:35  dts12
+
+   * agent/helpers/table_data.c:
+
+   Use SNMPv2-style exceptions rather than the uninformative SNMPv1
+   'noSuchName' error for missing table objects.
+   
+2002-07-24 06:32  dts12
+
+   * agent/helpers/table.c:
+
+   Use SNMPv2-style exceptions rather than the uninformative SNMPv1
+   'noSuchName' error for invalid table objects.
+   
+2002-07-23 14:59  rstory
+
+   * include/net-snmp/library/snmp_assert.h:
+
+   missing comment terminator.:-(
+   
+2002-07-23 12:02  rstory
+
+   * agent/object_monitor.c, agent/snmp_agent.c,
+   agent/helpers/table.c, agent/helpers/table_array.c,
+   snmplib/container_binary_array.c:
+
+   use new netsnmp_assert instead of assert
+   
+2002-07-23 12:00  rstory
+
+   * include/net-snmp/library/snmp_assert.h, snmplib/Makefile.in
+:
+
+   add new netsnmp_assert, which defaults to logging a message
+   
+2002-07-23 07:43  dts12
+
+   * man/: mib_api.3 (V4-2-patches.3), mib_api.3.def:
+
+   Fix the descriptions of the 'sprint_realloc' calls, to include the 'allow_realloc' parameter.
+   
+2002-07-22 10:58  rstory
+
+   * dist/: net-snmp.spec, nsb-functions:
+
+   new (almost empty) spec file; start creating functions for automated builds
+   
+2002-07-22 01:46  dts12
+
+   * agent/helpers/watcher.c, include/net-snmp/agent/watcher.h
+:
+
+   A more generalised form of the 'ns_register_{type}_instance' routines,
+   implemented as a separate helper module, and useable with both the
+   instance and scalar helpers.
+     This also supports arbitrary ASN types (including strings and OIDs).
+   
+2002-07-22 01:43  dts12
+
+   * agent/helpers/scalar1.c, agent/helpers/scalar2.c,
+   include/net-snmp/agent/scalar.h:
+
+   Agent helper module for support of scalar objects.
+   Very similar to the "instance" helper, except that this deals with
+   invalid instance subidentifiers as well (reporting noSuchInstance
+   rather that noSuchObject).
+   
+   There are two parallel implementations as the moment:
+     - scalar1 is essentially an enhanced copy of the instance helper,
+       but is completely independent of it.
+     - scalar2 sits above the instance helper, and uses that to do most
+       of the real processing.
+   Scalar1 is probably slightly more efficient, while scalar2 feels more
+   in keeping with the general ethos of the handler mechanism.
+   We probably need to decide which to adopt, and junk the other.
+   
+2002-07-19 14:24  rstory
+
+   * agent/mibgroup/agentx/master.c:
+
+   use net agentx retires/timeout ds values
+   
+2002-07-19 14:22  rstory
+
+   * agent/mibgroup/agentx/agentx_config.c:
+
+   register parser for agentxTimeout and agentxRetries tokens
+   
+2002-07-19 14:15  rstory
+
+   * agent/mibgroup/Makefile.depend:
+
+   remove refs to non-existent nstAgent* files
+   
+2002-07-19 14:14  rstory
+
+   * agent/snmpd.c:
+
+   move ONE_SEC to definitions.h; add AGENTX_TIMEOUT and AGENTX_RETRIES defaults
+   
+2002-07-19 14:10  rstory
+
+   * include/net-snmp/agent/ds_agent.h:
+
+   add AGENTX_TIMEOUT and AGENTX_RETRIES
+   
+2002-07-19 14:10  rstory
+
+   * include/net-snmp/definitions.h:
+
+   move definition of ONE_SEC here from snmpd.c
+   
+2002-07-19 11:23  rstory
+
+   * snmplib/container.c:
+
+   pass local obj, not random unitialized pointer.:-(
+   
+2002-07-19 04:04  dts12
+
+   * include/net-snmp/library/tools.h:
+
+   Handle systems where MAXPATHLEN isn't defined.
+   
+2002-07-19 03:31  dts12
+
+   * agent/mibgroup/host/hr_filesys.c:
+
+   Use the "system-independent" SNMP_MAXPATH length definition instead of MAXPATHLEN
+   
+2002-07-18 22:00  rstory
+
+   * agent/Makefile.depend:
+
+   remove refs to nonexistent mibgroup/nstAgentModuleObject.h
+   
+2002-07-18 19:44  hardaker
+
+   * FAQ, README, sedscript.in, perl/SNMP/SNMP.pm
+, snmplib/snmp_version.c:
+
+   - (snmplib/snmp_version.c sedscript.in): version tag ( 5.0.2 )
+   
+-------------------------------------------------------------------------------
+
 Changes: V5.0.1 -> V5.0.2
 
 2002-07-18 19:41  hardaker
