@@ -41,6 +41,7 @@ PERFORMANCE OF THIS SOFTWARE.
 #define GATEWAY			/* MultiNet is always configured this way! */
 #include <stdio.h>
 #include <sys/types.h>
+#include <sys/param.h>
 #include <sys/socket.h>
 #if TIME_WITH_SYS_TIME
 # include <sys/time.h>
@@ -117,10 +118,10 @@ PERFORMANCE OF THIS SOFTWARE.
 #endif
 #endif
 
-#if STDC_HEADERS
-#if HAVE_STRINGS_H
+#if HAVE_STRING_H
+#include <string.h>
+#else
 #include <strings.h>
-#endif
 #endif
 #if HAVE_STDLIB_H
 #include <stdlib.h>
@@ -135,6 +136,9 @@ PERFORMANCE OF THIS SOFTWARE.
 #include <net/if_dl.h>
 #endif
 
+#if HAVE_NLIST_H
+#include <nlist.h>
+#endif
 #include "auto_nlist.h"
 #if solaris2
 #include "kernel_sunos5.h"
@@ -361,89 +365,6 @@ var_ipRouteEntry(vp, name, length, exact, var_len, write_method)
   }
   return NULL;
 }
-
-/*
-  get_address()
-
-  Traverse the address structures after a routing socket message and
-  extract a specific one.
-
-  Some of this is peculiar to IRIX 6.2, which doesn't have sa_len in
-  the sockaddr structure yet.  With sa_len, skipping an address entry
-  would be much easier.
- */
-#include <sys/un.h>
-
-const struct sockaddr *
-get_address (const void * _ap, int addresses, int wanted)
-{
-  const struct sockaddr *ap = (struct sockaddr *) _ap;
-  int index;
-  int bitmask;
-
-  for (index = 0, bitmask = 1;
-       index < RTAX_MAX;
-       ++index, bitmask <<= 1)
-    {
-      if (bitmask == wanted)
-	{
-	  if (bitmask & addresses)
-	    {
-	      return ap;
-	    }
-	  else
-	    {
-	      return 0;
-	    }
-	}
-      else if (bitmask & addresses)
-	{
-	  unsigned length = 1;
-	  switch (ap->sa_family)
-	    {
-	    case AF_UNIX:
-	      length = sizeof (struct sockaddr_un);
-	      break;
-	    case AF_LINK:
-#ifdef _MAX_SA_LEN
-	      length = _MAX_SA_LEN;
-#else
-	      length = sizeof (struct sockaddr_dl);
-#endif
-	      break;
-	    case AF_INET:
-	    default:
-	      length = sizeof (struct sockaddr_in);
-	      break;
-	    }
-	  while (length % sizeof (long) != 0)
-	    ++length;
-	  ap = (struct sockaddr *) ((char *) ap + length);
-	}
-    }
-  return 0;
-}
-
-/*
-  get_in_address()
-
-  Convenience function for the special case of get_address where an
-  AF_INET address is desired, and we're only interested in the in_addr
-  part.
- */
-const struct in_addr *
-get_in_address (const void * ap, int addresses, int wanted)
-{
-  struct sockaddr_in * a;
-
-  a = (struct sockaddr_in *) get_address (ap, addresses, wanted);
-  if (a->sin_family != AF_INET)
-    {
-      ERROR_MSG("AF_INET sockaddr expected");
-    }
-  return &a->sin_addr;
-}
-
 
 #else /* not USE_SYSCTL_ROUTE_DUMP */
 
@@ -1250,7 +1171,7 @@ static void Route_Scan_Reload __P((void))
 	    rt->rt_use = use, rt->rt_metric = metric;
 
 	    Interface_Scan_Init();
-	    while (Interface_Scan_Next((short *)&rt->rt_unit, temp, NULL) != 0)
+	    while (Interface_Scan_Next((short *)&rt->rt_unit, temp, NULL, NULL) != 0)
 		if (strcmp(name, temp) == 0) break;
 
 	    /*
@@ -1329,6 +1250,7 @@ RTENTRY **r1, **r2;
 #include <time.h>
 
 #include <sys/types.h>
+#include <sys/param.h>
 #include <sys/queue.h>
 #include <sys/socket.h>
 #include <sys/sysctl.h>
@@ -1340,14 +1262,15 @@ RTENTRY **r1, **r2;
 #define CACHE_TIME (120)	    /* Seconds */
 
 #include "asn1.h"
-#include "snmp_impl.h"
 #include "snmp_api.h"
+#include "snmp_impl.h"
 #include "mib.h"
 #include "snmp.h"
 #include "../snmp_vars.h"
 #include "ip.h"
 #include "../kernel.h"
 #include "interfaces.h"
+#include "struct.h"
 #include "util_funcs.h"
 
 static TAILQ_HEAD(, snmprt) rthead;
@@ -1526,7 +1449,7 @@ var_ipRouteEntry(vp, name, length, exact, var_len, write_method)
 
 	if (Save_Valid) {
 		register int temp = name[9]; /* Fix up 'lowest' found entry */
-		bcopy((char *) Current, (char *) name, 14 * sizeof(oid));
+		memcpy(name, Current, 14 * sizeof(oid));
 		name[9] = temp;
 		*length = 14;
 		rt = savert;
@@ -1534,8 +1457,7 @@ var_ipRouteEntry(vp, name, length, exact, var_len, write_method)
 		/* fill in object part of name for current
 		   (less sizeof instance part) */
 
-		bcopy((char *)vp->name, (char *)Current, 
-		      (int)(vp->namelen) * sizeof(oid));
+		memcpy(Current, vp->name, (int)(vp->namelen) * sizeof(oid));
 
 		suck_krt(0);
 
@@ -1554,7 +1476,7 @@ var_ipRouteEntry(vp, name, length, exact, var_len, write_method)
 		/*
 		 *  Save in the 'cache'
 		 */
-		bcopy((char *) name, (char *) saveName, *length * sizeof(oid));
+		memcpy(saveName, name, *length * sizeof(oid));
 		saveName[9] = 0;
 		saveNameLen = *length;
 		saveExact = exact;
@@ -1563,7 +1485,7 @@ var_ipRouteEntry(vp, name, length, exact, var_len, write_method)
 		/*
 		 *  Return the name
 		 */
-		bcopy((char *) Current, (char *) name, 14 * sizeof(oid));
+		memcpy(name, Current, 14 * sizeof(oid));
 		*length = 14;
 	}
 
@@ -1636,3 +1558,87 @@ init_var_route(void)
 }
 
 #endif /* CAN_USE_SYSCTL */
+
+#if defined(HAVE_SYS_SYSCTL_H) && !defined(linux)
+/*
+  get_address()
+
+  Traverse the address structures after a routing socket message and
+  extract a specific one.
+
+  Some of this is peculiar to IRIX 6.2, which doesn't have sa_len in
+  the sockaddr structure yet.  With sa_len, skipping an address entry
+  would be much easier.
+ */
+#include <sys/un.h>
+
+const struct sockaddr *
+get_address (const void * _ap, int addresses, int wanted)
+{
+  const struct sockaddr *ap = (struct sockaddr *) _ap;
+  int index;
+  int bitmask;
+
+  for (index = 0, bitmask = 1;
+       index < RTAX_MAX;
+       ++index, bitmask <<= 1)
+    {
+      if (bitmask == wanted)
+	{
+	  if (bitmask & addresses)
+	    {
+	      return ap;
+	    }
+	  else
+	    {
+	      return 0;
+	    }
+	}
+      else if (bitmask & addresses)
+	{
+	  unsigned length = 1;
+	  switch (ap->sa_family)
+	    {
+	    case AF_UNIX:
+	      length = sizeof (struct sockaddr_un);
+	      break;
+	    case AF_LINK:
+#ifdef _MAX_SA_LEN
+	      length = _MAX_SA_LEN;
+#else
+	      length = sizeof (struct sockaddr_dl);
+#endif
+	      break;
+	    case AF_INET:
+	    default:
+	      length = sizeof (struct sockaddr_in);
+	      break;
+	    }
+	  while (length % sizeof (long) != 0)
+	    ++length;
+	  ap = (struct sockaddr *) ((char *) ap + length);
+	}
+    }
+  return 0;
+}
+
+/*
+  get_in_address()
+
+  Convenience function for the special case of get_address where an
+  AF_INET address is desired, and we're only interested in the in_addr
+  part.
+ */
+const struct in_addr *
+get_in_address (const void * ap, int addresses, int wanted)
+{
+  struct sockaddr_in * a;
+
+  a = (struct sockaddr_in *) get_address (ap, addresses, wanted);
+  if (a->sin_family != AF_INET)
+    {
+      ERROR_MSG("AF_INET sockaddr expected");
+    }
+  return &a->sin_addr;
+}
+#endif /* HAVE_SYS_SYSCTL_H */

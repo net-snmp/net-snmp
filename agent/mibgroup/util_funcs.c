@@ -47,12 +47,10 @@
 #endif
 #include <errno.h>
 #include <signal.h>
-#if HAVE_STRINGS_H
-#include <strings.h>
-#else
-#if STDC_HEADERS
+#if HAVE_STRING_H
 #include <string.h>
-#endif
+#else
+#include <strings.h>
 #endif
 #include <ctype.h>
 

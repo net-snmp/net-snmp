@@ -29,19 +29,19 @@ SOFTWARE.
 #ifdef HAVE_STDLIB_H
 #include <stdlib.h>
 #endif
-#ifdef HAVE_UNISTD_H
+#if HAVE_UNISTD_H
 #include <unistd.h>
 #endif
-#ifdef HAVE_STRINGS_H
-#include <strings.h>
-#else
+#if HAVE_STRING_H
 #include <string.h>
+#else
+#include <strings.h>
 #endif
 #include <sys/types.h>
 #if HAVE_NETINET_IN_H
 # include <netinet/in.h>
 #endif
-#ifdef HAVE_ARPA_INET_H
+#if HAVE_ARPA_INET_H
 #include <arpa/inet.h>
 #endif
 #if TIME_WITH_SYS_TIME

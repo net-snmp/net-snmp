@@ -24,16 +24,16 @@
 
 #include <config.h>
 
-#if HAVE_STRINGS_H
-#include <strings.h>
-#else
+#if HAVE_STRING_H
 #include <string.h>
+#else
+#include <strings.h>
 #endif
 
 #include <stdio.h>
 #include <sys/types.h>
 #include <sys/socket.h>
-#ifdef HAVE_STDLIB_H
+#if HAVE_STDLIB_H
 #include <stdlib.h>
 #endif
 #if HAVE_NETINET_IN_H
@@ -53,7 +53,7 @@
 #if HAVE_SYS_SELECT_H
 #include <sys/select.h>
 #endif
-#ifdef HAVE_MALLOC_H
+#if HAVE_MALLOC_H
 #include <malloc.h>
 #endif
 #include <asn1.h>
