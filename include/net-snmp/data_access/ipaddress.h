@@ -15,7 +15,7 @@ extern          "C" {
  * structure definitions
  */
 #if defined( INET6 )
-#   define NETSNMP_ACCESS_IPADDRESS_BUF_SIZE 16
+#   define NETSNMP_ACCESS_IPADDRESS_BUF_SIZE 16   /* xxx-rks: 20, for ip6z? */
 #else
 #   define NETSNMP_ACCESS_IPADDRESS_BUF_SIZE 4
 #endif
@@ -31,6 +31,11 @@ typedef struct netsnmp_ipaddress_s {
    oid           ns_ia_index; /* arbitrary index */
 
    int       flags; /* for net-snmp use */
+
+   /*
+    * mib related data (considered for
+    *  netsnmp_access_ipaddress_entry_update)
+    */
 
    u_char    ia_address[NETSNMP_ACCESS_IPADDRESS_BUF_SIZE];
 
@@ -58,7 +63,7 @@ typedef struct netsnmp_ipaddress_s {
  */
 netsnmp_container * netsnmp_access_ipaddress_container_init(u_int init_flags);
 #define NETSNMP_ACCESS_IPADDRESS_INIT_NOFLAGS               0x0000
-//#define NETSNMP_ACCESS_IPADDRESS_INIT_ADDL_IDX_BY_NAME      0x0001
+#define NETSNMP_ACCESS_IPADDRESS_INIT_ADDL_IDX_BY_ADDR      0x0001
 
 /*
  * ifcontainer load and free
@@ -83,6 +88,13 @@ netsnmp_ipaddress_entry *
 netsnmp_access_ipaddress_entry_create(void);
 
 void netsnmp_access_ipaddress_entry_free(netsnmp_ipaddress_entry * entry);
+
+/*
+ * update/compare
+ */
+int
+netsnmp_access_ipaddress_entry_update(netsnmp_ipaddress_entry *old, 
+                                      netsnmp_ipaddress_entry *new);
 
 /*
  * find entry in container
