@@ -175,7 +175,7 @@ netsnmp_register_read_only_counter32_instance(const char *name,
     netsnmp_handler_registration *myreg;
 
     myreg = get_reg(name, "counter32_handler", reg_oid, reg_oid_len, it,
-                    HANDLER_CAN_RWRITE, netsnmp_instance_counter32_handler,
+                    HANDLER_CAN_RONLY, netsnmp_instance_counter32_handler,
                     subhandler, NULL);
     return netsnmp_register_read_only_instance(myreg);
 }
@@ -281,7 +281,7 @@ netsnmp_register_read_only_counter32_instance_context(const char *name,
     netsnmp_handler_registration *myreg;
 
     myreg = get_reg(name, "counter32_handler", reg_oid, reg_oid_len, it,
-                    HANDLER_CAN_RWRITE, netsnmp_instance_counter32_handler,
+                    HANDLER_CAN_RONLY, netsnmp_instance_counter32_handler,
                     subhandler, contextName);
     return netsnmp_register_read_only_instance(myreg);
 }
@@ -316,6 +316,22 @@ netsnmp_register_long_instance_context(const char *name,
                     HANDLER_CAN_RWRITE, netsnmp_instance_long_handler,
                     subhandler, contextName);
     return netsnmp_register_instance(myreg);
+}
+
+int
+netsnmp_register_int_instance_context(const char *name,
+                                      oid * reg_oid,
+                                      size_t reg_oid_len,
+                                      int *it,
+                                      Netsnmp_Node_Handler * subhandler,
+                                      const char *contextName)
+{
+    netsnmp_handler_registration *myreg;
+
+    myreg = get_reg(name, "int_handler", reg_oid, reg_oid_len, it,
+                    HANDLER_CAN_RWRITE, netsnmp_instance_int_handler,
+                    subhandler, contextName);
+    return netsnmp_register_read_only_instance(myreg);
 }
 
 int

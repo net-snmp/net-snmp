@@ -1,4 +1,4 @@
-.TH "Maintain a registry of MIB subtrees, together with related information regarding mibmodule, sessions, etc" 3 "24 Nov 2004" "net-snmp" \" -*- nroff -*-
+.TH "Maintain a registry of MIB subtrees, together with related information regarding mibmodule, sessions, etc" 3 "24 Jan 2005" "net-snmp" \" -*- nroff -*-
 .ad l
 .nh
 .SH NAME
@@ -314,7 +314,7 @@ checks to see if everything within a given subtree is either: in view, not in vi
 0 if entire subtree is accessible, 5 if not and 7 if portions are both. 1 on error (illegal pdu version). 
 .RE
 .PP
-Definition at line 1236 of file agent_registry.c.
+Definition at line 1249 of file agent_registry.c.
 .PP
 References snmp_pdu::flags, snmp_call_callbacks(), and snmp_pdu::version.
 .PP
@@ -326,7 +326,7 @@ retrieves the current value of the lookup cache size \fBReturns:\fP
 the current lookup cache size 
 .RE
 .PP
-Definition at line 1309 of file agent_registry.c.
+Definition at line 1322 of file agent_registry.c.
 .PP
 Referenced by unregister_mib_context().
 .SS "void netsnmp_set_lookup_cache_size (int newsize)"
@@ -336,7 +336,7 @@ set the lookup cache size for optimized agent registration performance. \fBParam
 \fInewsize\fP set to the maximum size of a cache for a given context. Set to 0 to completely disable caching, or to -1 to set to the default cache size (8), or to a number of your chosing. The rough guide is that it should be equal to the maximum number of simultanious managers you expect to talk to the agent (M) times 80% (or so, he says randomly) the average number (N) of varbinds you expect to receive in a given request for a manager. ie, M times N. Bigger does NOT necessarily mean better. Certainly 16 should be an upper limit. 32 is the hard coded limit. 
 .RE
 .PP
-Definition at line 1296 of file agent_registry.c.
+Definition at line 1309 of file agent_registry.c.
 .PP
 References netsnmp_set_lookup_cache_size().
 .PP
@@ -364,7 +364,7 @@ Unregisters an OID that has an associated context name value. Typically used whe
 .RS 4
 .RE
 .PP
-Definition at line 916 of file agent_registry.c.
+Definition at line 921 of file agent_registry.c.
 .PP
 References netsnmp_get_lookup_cache_size(), netsnmp_oid_equals(), netsnmp_set_lookup_cache_size(), and snmp_call_callbacks().
 .PP

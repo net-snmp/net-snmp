@@ -1,4 +1,4 @@
-.TH "row_merge: Calls sub handlers with request for one row at a time." 3 "24 Nov 2004" "net-snmp" \" -*- nroff -*-
+.TH "row_merge: Calls sub handlers with request for one row at a time." 3 "24 Jan 2005" "net-snmp" \" -*- nroff -*-
 .ad l
 .nh
 .SH NAME
@@ -52,7 +52,7 @@ References netsnmp_mib_handler_s::myvoid, netsnmp_create_handler(), and netsnmp_
 Referenced by netsnmp_init_row_merge(), and netsnmp_register_row_merge().
 .SS "void netsnmp_init_row_merge (void)"
 .PP
-initializes the row_merge helper which then registers a row_merge handler as a run-time injectable handler for configuration file use. Definition at line 200 of file row_merge.c.
+initializes the row_merge helper which then registers a row_merge handler as a run-time injectable handler for configuration file use. Definition at line 197 of file row_merge.c.
 .PP
 References netsnmp_get_row_merge_handler(), and netsnmp_register_handler_by_name().
 .SS "int netsnmp_register_row_merge (\fBnetsnmp_handler_registration\fP * reginfo)"

@@ -1,4 +1,4 @@
-.TH "instance: process individual MIB instances easily." 3 "24 Nov 2004" "net-snmp" \" -*- nroff -*-
+.TH "instance: process individual MIB instances easily." 3 "24 Jan 2005" "net-snmp" \" -*- nroff -*-
 .ad l
 .nh
 .SH NAME
@@ -53,6 +53,9 @@ instance: process individual MIB instances easily. \-
 .br
 .ti -1c
 .RI "int \fBnetsnmp_register_long_instance_context\fP (const char *name, oid *reg_oid, size_t reg_oid_len, long *it, Netsnmp_Node_Handler *subhandler, const char *contextName)"
+.br
+.ti -1c
+.RI "int \fBnetsnmp_register_int_instance_context\fP (const char *name, oid *reg_oid, size_t reg_oid_len, int *it, Netsnmp_Node_Handler *subhandler, const char *contextName)"
 .br
 .ti -1c
 .RI "int \fBnetsnmp_register_read_only_int_instance_context\fP (const char *name, oid *reg_oid, size_t reg_oid_len, int *it, Netsnmp_Node_Handler *subhandler, const char *contextName)"
@@ -149,7 +152,7 @@ MIB_REGISTERED_OK is returned if the registration was a success. Failures are MI
 .in +1c
 \fBscalar_int.c\fP.
 .PP
-Definition at line 372 of file instance.c.
+Definition at line 388 of file instance.c.
 .PP
 References netsnmp_handler_registration, and netsnmp_register_instance().
 .SS "int netsnmp_register_read_only_instance (\fBnetsnmp_handler_registration\fP * reginfo)"

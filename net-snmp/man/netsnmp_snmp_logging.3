@@ -1,4 +1,4 @@
-.TH "generic logging for net-snmp" 3 "24 Nov 2004" "net-snmp" \" -*- nroff -*-
+.TH "generic logging for net-snmp" 3 "24 Jan 2005" "net-snmp" \" -*- nroff -*-
 .ad l
 .nh
 .SH NAME
@@ -167,7 +167,7 @@ generic logging for net-snmp \-
 
 .in +1c
 .ti -1c
-.RI "netsnmp_log_handler * \fBlogh_head\fP"
+.RI "netsnmp_log_handler * \fBlogh_head\fP = NULL"
 .br
 .ti -1c
 .RI "netsnmp_log_handler * \fBlogh_priorities\fP [LOG_DEBUG+1]"
@@ -215,7 +215,7 @@ Returns 0 on success, -1 when the code could not format the log- string, -2 when
 \fBsnmp_log\fP 
 .RE
 .PP
-Definition at line 465 of file snmp_logging.c.
+Definition at line 472 of file snmp_logging.c.
 .SS "int snmp_log (va_alist)"
 .PP
 This snmp logging function allows variable argument list given the specified format and priority. Calls the snmp_vlog function. The default logfile this function writes to is /var/log/snmpd.log.
@@ -231,6 +231,6 @@ snmp_vlog
 .in +1c
 \fBdelayed_instance.c\fP.
 .PP
-Definition at line 1139 of file snmp_logging.c.
+Definition at line 1146 of file snmp_logging.c.
 .PP
 Referenced by _request_set_error(), agent_check_and_process(), init_agent(), netsnmp_baby_steps_handler_get(), netsnmp_cache_create(), netsnmp_cache_helper_handler(), netsnmp_cache_timer_start(), netsnmp_cache_timer_stop(), netsnmp_call_handler(), netsnmp_call_next_handler(), netsnmp_call_next_handler_one_request(), netsnmp_container_table_handler_get(), netsnmp_data_list_add_data(), netsnmp_data_list_add_node(), netsnmp_get_multiplexer_handler(), netsnmp_get_table_data_handler(), netsnmp_get_table_data_set_handler(), netsnmp_get_table_handler(), netsnmp_inject_handler_before(), netsnmp_mark_row_column_writable(), netsnmp_multiplexer_helper_handler(), netsnmp_read_data_callback(), netsnmp_register_handler(), netsnmp_register_handler_nocallback(), netsnmp_register_save_list(), netsnmp_request_set_error_all(), netsnmp_save_all_data_callback(), netsnmp_set_row_column(), netsnmp_table_container_register(), netsnmp_table_data_add_row(), netsnmp_table_data_set_helper_handler(), netsnmp_table_iterator_helper_handler(), netsnmp_table_set_add_default_row(), read_config_store(), snmp_call_callbacks(), snmp_unregister_callback(), and table_helper_handler().

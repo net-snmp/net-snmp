@@ -622,7 +622,7 @@ vacm_warn_if_not_configured(int majorID, int minorID, void *serverarg,
     if (NULL==name)
         name = "snmpd";
     
-    if (!vacm_is_configured()) {
+    if (!vacm_is_configured() && !strcmp( name, "snmpd" )) {
         snmp_log(LOG_WARNING,
                  "Warning: no access control information configured.\n  It's "
                  "unlikely this agent can serve any useful purpose in this "

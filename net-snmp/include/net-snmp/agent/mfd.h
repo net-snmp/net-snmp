@@ -75,6 +75,7 @@
  */
 #define MFD_ROW_CREATED                0x80000000 /* newly created row */
 #define MFD_ROW_DATA_FROM_USER         0x40000000 /* we didn't allocate data */
+#define MFD_ROW_DELETED                0x20000000 /* deleted row */
 
 
 #endif                          /* NETSNMP_MFD_H */

@@ -42,6 +42,7 @@
 #include <net-snmp/library/container.h>
 
 #include "ifXTable_interface.h"
+#include "if-mib/ifTable/ifTable_interface.h"
 
 /**********************************************************************
  **********************************************************************
@@ -112,6 +113,12 @@ _ifXTable_initialize_interface(ifXTable_registration_ptr reg_ptr,
     DEBUGMSGTL(("internal:ifXTable:_ifXTable_initialize_interface",
                 "called\n"));
 
+    /*
+     * make sure the ifTable container has been initialized, since
+     * we use its container, and we can't guarantee that it has
+     * already been initialized.
+     */
+    (void)if_mib_container_init();
 
     /*************************************************
      *
@@ -145,10 +152,8 @@ _ifXTable_initialize_interface(ifXTable_registration_ptr reg_ptr,
      * set up the container
      */
     _ifXTable_container_init(&ifXTable_if_ctx);
-    if (NULL == ifXTable_if_ctx.container) {
-        snmp_log(LOG_ERR, "could not initialize container for ifXTable\n");
-        return;
-    }
+    if (NULL == ifXTable_if_ctx.container)
+        return; /* msg already logged */
 
     /*
      * access_multiplexer: REQUIRED wrapper for get request handling

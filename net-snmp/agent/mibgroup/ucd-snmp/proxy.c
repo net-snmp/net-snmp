@@ -259,6 +259,7 @@ proxy_fill_in_session(netsnmp_mib_handler *handler,
         return 0;
     }
 
+#if !defined(DISABLE_SNMPV1) || !defined(DISABLE_SNMPV2C)
     if (session->version == SNMP_VERSION_1 ||
         session->version == SNMP_VERSION_2c) {
 
@@ -284,6 +285,7 @@ proxy_fill_in_session(netsnmp_mib_handler *handler,
                     session->community_len);
         }
     }
+#endif
 
     return 1;
 }
