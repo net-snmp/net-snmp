@@ -3308,7 +3308,7 @@ parse_one_oid_index(oid ** oidStart, size_t * oidLen,
                                 "illegal oid in index: %d\n", oidIndex[0]));
                         return SNMPERR_GENERR;  /* sub-identifier too large */
                     }
-                    uitmp += oidIndex[i] << (8*(3-i));
+                    uitmp = uitmp + (oidIndex[i] << (8*(3-i)));
                 }
             if (4 > (int) (*oidLen)) {
                 oidIndex += *oidLen;
