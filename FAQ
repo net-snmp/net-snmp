@@ -729,15 +729,15 @@ Requests always seem to timeout, and don't give me anything back.  Why?
 	- is there an SNMP agent running on it?
 		(Run 'ps -ef | grep snmp' or 'netstat -an | grep 161')
 	- are the requests arriving, or being blocked (e.g. by a firewall)?
-		(Restart the agent using 'snmpd -f -L -d'
+		(Restart the agent using 'snmpd -f -Le -d'
 		 and see if it shows the incoming packet dumps)
 	- is the agent simply taking a long time to respond?
-		(The 'snmpd -f -L -d' command should show a series of
+		(The 'snmpd -f -Le -d' command should show a series of
  		 incoming PDUs, followed eventually by the outgoing PDUs.
 		 Try the request again with a long timeout value,
 		 e.g. 'snmpcmd -t 120 ....')
 	- does the agent's control settings allow this request?
-		(The 'snmpd -f -L -d' command will show a series of
+		(The 'snmpd -f -Le -d' command will show a series of
  		 incoming PDUs with *no* corresponding outgoing PDUs)
 
   Note that if the agent is not configured to allow access for a
@@ -1682,14 +1682,24 @@ What MIBs are supported?
   The following MIBs are supported (at least in part and on some systems):
 
 	- MIB-2  General network statistics (RFC 1213)
-	- UCD agent extensions
-		(processes, disks, memory, load average,
-		 shell commands, error handling)
 	- Host Resources (RFC 1514 and 2790)
-	- SNMPv3 MIBS (RFCs 2571-6)
+	- SNMPv3 MIBS (RFCs 2571-5, 3411-3418)
+		(including USM, VACM, Target
+		 and Notification MIBs)
+	- DisMan EVENT-MIB
+	- MTA-MIB (sendmail)
+	- private agent extensions
+		(monitor specified processes and disks,
+		 memory, CPU, load average, plus extend
+		 the agent using shell commands)
 
-  The SNMPv2 Party and Manager-to-Manager MIBs (RFCs 1447 & 1451) have been
-  withdrawn.
+  The Host Resources MIB, the Event MIB and the MTA MIB are not
+  included by default, and need to be explicitly requested when
+  the suite is first configured and built.
+
+  There are a few other MIB implementations distributed as part of the
+  source tarball, but these are basically unsupported and most of the
+  core developers have little or no experience with using them.
 
 
 
@@ -2129,12 +2139,28 @@ When I run the agent it runs and then quits without staying around. Why?
   On the other hand, if 'ps' shows that the agent is not running, then
   this is an error, and probably show that something went wrong in
   starting the agent up.  Check the agent log file for any error messages,
-  or run it with '-f -L' and see what it reports.
+  or run it with '-f -Le' and see what it reports.
 
   One known example of this is the 'ucd-snmp' RPM distributed by RedHat.
   This agent crashes if there is a 'disk' configuration entry in the
   snmpd.conf file.  It is not currently known what causes this, as this
   setting works correctly if the agent is compiled from source.
+
+  Another possible cause might be an existing agent (or some other process)
+  that's already listening on the SNMP port.  Trying to start a second
+  agent will fail with an error about "opening the specified endpoint".
+
+  If you're starting the agent as a non-root user, then this may also
+  fail with the very same error.  By default, the agent (and trap handler)
+  will attempt to listen on the standard SNMP port 161 (or 162 for the
+  trap handler).  These are defined as "privileged ports", and processes
+  will need to be running as root in order to open them.
+
+  One way to tackle this is to start the agent as root, but use the -u
+  option to switch to run as another user once the port has been opened.
+  Alternatively, you can specify a different port to use instead.
+  Anything greater than 1024 is available to non-root users.  In this case,
+  you'll also need to specify the same port when issuing client commands.
 
 
 
@@ -2183,7 +2209,7 @@ How can I stop other people getting at my agent?
 	- Blocking access to port 161 from outside your organisation
 		(using filters on network routers)
 	- Using kernel-level network filtering on the system itself
-                (such as IPTables)
+		(such as IPTables)
 	- Configuring TCP wrapper support ("--with-libwrap")
 		This uses the TCP 'libwrap' library (available separately)
 		to allow/deny access via /etc/hosts.{allow,deny}
