@@ -1341,8 +1341,7 @@ snmp_async_send(session, pdu, callback, cb_data)
 
     /* check if should get a response */
     if (expect_response != 0) {
-/*      gettimeofday(&tv, (struct timezone *)0); */
-        tv = Now;
+        gettimeofday(&tv, (struct timezone *)0);
 
 	/* set up to expect a response */
 	rp = (struct request_list *)malloc(sizeof(struct request_list));
