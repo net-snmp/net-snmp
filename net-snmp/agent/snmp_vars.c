@@ -383,10 +383,7 @@ in_a_view(oid		  *name,      /* IN - name of var, OUT - name matched */
 #endif
   case SNMP_VERSION_2p:
 #ifdef USING_V2PARTY_VIEW_VARS_MODULE
-#ifdef notused
-XX "push" problem to PDU, no longer using packet info
-    in_view(name, *namelen, pi->cxp->contextViewIndex);
-#endif
+    return in_view(name, *namelen, 0 /* XXX: pi->cxp->contextViewIndex */);
 #else
     return 1;
 #endif

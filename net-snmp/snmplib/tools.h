@@ -109,7 +109,7 @@ int     memdup (u_char **to, u_char *from, u_int size);
 u_int	binary_to_hex (char *input, u_long len, char **output);
 int	hex_to_binary2 (char *input, u_long len, char **output);
 
-void	dump_chunk (char *title, char *buf, int size);
+void	dump_chunk (char *debugtoken, char *title, char *buf, int size);
 char   *dump_snmpEngineID (u_char *buf, u_int *buflen);
 
 #endif /* _TOOLS_H */

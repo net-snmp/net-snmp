@@ -99,7 +99,6 @@ SOFTWARE.
 #include "tools.h"
 #include "keytools.h"
 #include "lcd_time.h"
-#include "debug.h"
 
 static void init_snmp_session (void);
 #include "transform_oids.h"
@@ -905,34 +904,37 @@ snmp_sess_open(struct snmp_session *in_session)
     if (session->version == SNMP_VERSION_3) {
       if (session->securityEngineIDLen == 0) {
 	snmpv3_build_probe_pdu(&pdu);
-	DEBUGP("probing for engineID...\n");
+	DEBUGMSGTL(("snmp_api","probing for engineID...\n"));
 	status = snmp_sess_synch_response(slp, pdu, &response);
 
 	if ((response == NULL) && (status == STAT_SUCCESS)) status = STAT_ERROR;
 
 	switch (status) {
 	case STAT_SUCCESS:
-	  DEBUGP("error: expected Report as response to probe: %s (%d)\n",
-		 snmp_errstring(response->errstat), response->errstat);
+	  DEBUGMSGTL(("snmp_sess_open",
+                      "error: expected Report as response to probe: %s (%d)\n",
+                      snmp_errstring(response->errstat), response->errstat));
 	  break;
 	case STAT_ERROR: /* this is what we expected -> Report == STAT_ERROR */
 	  break; 
 	case STAT_TIMEOUT:
 	default:
-	  DEBUGP("unable to connect with remote engine: %s (%d)\n",
-		 snmp_api_errstring(snmp_get_errno()),
-		 snmp_get_errno());
+	  DEBUGMSGTL(("snmp_sess_open",
+                      "unable to connect with remote engine: %s (%d)\n",
+                      snmp_api_errstring(snmp_get_errno()),
+                      snmp_get_errno()));
 	  break;
 	}
 	if (slp->session->securityEngineIDLen == 0) {
-	  DEBUGP("unable to determine remote engine ID\n");
+	  DEBUGMSGTL(("snmp_api","unable to determine remote engine ID\n"));
 	  return NULL;
 	}
 	if (snmp_get_do_debugging()) {
-	  DEBUGP("  probe found engineID:  ");
+          DEBUGMSGTL(("snmp_sess_open", "  probe found engineID:  "));
 	  for(i = 0; i < slp->session->securityEngineIDLen; i++)
-	    DEBUGP("%02x", slp->session->securityEngineID[i]);
-	  DEBUGP("\n");
+	    DEBUGMSG(("snmp_sess_open", "%02x",
+                      slp->session->securityEngineID[i]));
+	  DEBUGMSG(("snmp_sess_open","\n"));
 	}
       }
       /* if boot/time supplied set it for this engineID */
@@ -941,7 +943,7 @@ snmp_sess_open(struct snmp_session *in_session)
 		       session->engineBoots, session->engineTime, TRUE);
       }
       if (create_user_from_session(slp->session) != SNMPERR_SUCCESS)
-	DEBUGP("snmp_sess_open(): failed(2) to create a new user from session\n");
+	DEBUGMSGTL(("snmp_api","snmp_sess_open(): failed(2) to create a new user from session\n"));
     }
 
 
@@ -966,7 +968,6 @@ create_user_from_session(struct snmp_session *session)
 {
   struct usmUser *user;
 
-EM(-1);
 
   /* now that we have the engineID, create an entry in the USM list
      for this user using the information in the session */
@@ -975,7 +976,7 @@ EM(-1);
                                 session->securityName,
                                 usm_get_userList(), 0);
   if (user == NULL) {
-    DEBUGP("Building user %s...\n",session->securityName);
+    DEBUGMSGTL(("snmp_api","Building user %s...\n",session->securityName));
     /* user doesn't exist so we create and add it */
     user = (struct usmUser *) SNMP_MALLOC(sizeof(struct usmUser));
     if (user == NULL)
@@ -1290,19 +1291,7 @@ snmpv3_header_build(struct snmp_pdu *pdu, register u_char *packet,
     register u_char 		*cp;
     u_char			 msg_flags;
     long			 max_size, sec_model;
-#ifdef notdef
-    struct variable_list	*vp;
-    u_char			 pdu_buf[SNMP_MAX_MSG_SIZE];
-    u_char			 msg_buf[SNMP_MAX_MSG_SIZE];
-    u_char			 sec_param_buf[SNMP_SEC_PARAM_BUF_SIZE];
-    int				 pdu_buf_len, msg_buf_len, sec_param_buf_len;
-    u_char			*scopedPdu, *pb, *pb0e;
-#else
     u_char			*pb, *pb0e;
-#endif
-
-EM(-1);
-
 
     /* Save current location and build SEQUENCE tag and length placeholder
      * for SNMP message sequence (actual length inserted later)
@@ -1385,17 +1374,9 @@ snmpv3_scopedPDU_header_build(struct snmp_pdu *pdu,
                               register u_char **spdu_e)
 
 {
-#ifdef notdef
-  u_char	 msg_buf[SNMP_MAX_MSG_SIZE];
-  u_char	 spdu_buf[SNMP_MAX_MSG_SIZE];
-  int		 spdu_buf_len, msg_buf_len, init_length;
-  u_char	*scopedPdu, *pb, *pb0e;
-#else
   int		 init_length;
   u_char	*scopedPdu, *pb;
-#endif
 
-EM(-1);
 
   init_length = *out_length;
 
@@ -1432,7 +1413,6 @@ snmpv3_packet_build(struct snmp_pdu *pdu, u_char *packet, int *out_length,
     int		 spdu_buf_len, spdu_len;
     u_char	*cp;
 
-EM(-1);
 
     snmp_errno  = SNMPERR_BAD_ASN1_BUILD;
     global_data = packet;
@@ -1810,7 +1790,6 @@ snmpv3_parse(pdu, data, length, after_header)
   int		 asn_len, msg_len, ret;
   int		 ret_val;
 
-EM(-1);
 
   msg_data =  data;
   msg_len  = *length;
@@ -2120,12 +2099,7 @@ snmp_parse(struct snmp_session *session,
     struct packet_info pkt, *pi = &pkt;
     u_char community[COMMUNITY_MAX_LEN];
     int community_length = COMMUNITY_MAX_LEN;
-#ifdef notused
-    struct internal_variable_list *vp = NULL;
-    oid objid[MAX_OID_LEN];
-    char err[256];
-#endif
-    int result = 0;
+    int result;
 
     snmp_errno = SNMPERR_BAD_PARSE;
     session->s_snmp_errno = SNMPERR_BAD_PARSE;
@@ -2138,7 +2112,7 @@ snmp_parse(struct snmp_session *session,
     switch (pdu->version) {
     case SNMP_VERSION_1:
     case SNMP_VERSION_2c:
-        DEBUGP("Parsing SNMPv%d message...\n", (1 + pdu->version));
+        DEBUGMSGTL(("snmp_api","Parsing SNMPv%d message...\n", (1 + pdu->version)));
 
 	/* authenticates message and returns length if valid */
 	data = snmp_comstr_parse(data, &length,
@@ -2179,7 +2153,7 @@ snmp_parse(struct snmp_session *session,
         if (type != (ASN_CONTEXT | ASN_CONSTRUCTOR | 1))
 	    return -1;
 
-        DEBUGP("Parsing SNMPv2p message...\n");
+        DEBUGMSGTL(("snmp_api","Parsing SNMPv2p message...\n"));
         /* authenticate the message and possibly decrypt it */
 	pdu->srcParty = (oid*)malloc(MAX_OID_LEN * sizeof(oid));
 	pdu->dstParty = (oid*)malloc(MAX_OID_LEN * sizeof(oid));
@@ -2206,11 +2180,13 @@ snmp_parse(struct snmp_session *session,
     case SNMP_VERSION_3:
       result = snmpv3_parse(pdu, data, &length, NULL);
       if (!result) {
-	DEBUGP("Parsed SNMPv3 message (secName:%s, secLevel:%s).\n",
-	       pdu->securityName, usmSecLevelName[pdu->securityLevel]);
+	DEBUGMSGTL(("snmp_parse",
+                   "Parsed SNMPv3 message (secName:%s, secLevel:%s).\n",
+                   pdu->securityName, usmSecLevelName[pdu->securityLevel]));
       } else {
-	DEBUGP("Error parsing SNMPv3 message (secName:%s, secLevel:%s).\n",
-	       pdu->securityName, usmSecLevelName[pdu->securityLevel]);
+	DEBUGMSGTL(("snmp_parse",
+                    "Error parsing SNMPv3 message (secName:%s, secLevel:%s).\n",
+                    pdu->securityName, usmSecLevelName[pdu->securityLevel]));
 	/* handle reportable errors */
 	switch (result) {
 	case USM_ERR_UNKNOWN_ENGINE_ID:
@@ -2507,7 +2483,8 @@ snmpv3_scopedPDU_parse(pdu, cp, length)
   if (pdu->securityEngineIDLen != pdu->contextEngineIDLen ||
       memcmp(pdu->securityEngineID, pdu->contextEngineID,
 	     pdu->securityEngineIDLen) != 0) {
-    DEBUGP("inconsistent engineID information in message");
+    DEBUGMSGTL(("scopedPDU_parse",
+                "inconsistent engineID information in message\n"));
   }
 
   /* parse contextName from scopedPdu
@@ -2798,7 +2775,7 @@ snmp_sess_async_send(void *sessp,
 		    session->contextLen * sizeof(oid));
 	    pdu->contextLen = session->contextLen;
 	}
-        DEBUGP("Building SNMPv2p message...\n");
+        DEBUGMSGTL(("snmp_api","Building SNMPv2p message...\n"));
         break;
 #endif /* USE_V2PARTY_PROTOCOL */
     case SNMP_VERSION_3:
@@ -2865,11 +2842,12 @@ snmp_sess_async_send(void *sessp,
 	}
 	pdu->securityLevel = session->securityLevel;
       }
-      DEBUGP("Building SNMPv3 message (secName:\"%s\", secLevel:%s)...\n",
-	     ((session->securityName) ? session->securityName :
-	      ((pdu->securityName) ? pdu->securityName : 
-                (unsigned char *)"ERROR: undefined")),
-	     usmSecLevelName[pdu->securityLevel]);
+      DEBUGMSGTL(("snmp_build",
+                  "Building SNMPv3 message (secName:\"%s\", secLevel:%s)...\n",
+                  ((session->securityName) ? session->securityName :
+                   ((pdu->securityName) ? pdu->securityName : 
+                    (unsigned char *)"ERROR: undefined")),
+                  usmSecLevelName[pdu->securityLevel]));
       break;
 
     case SNMP_VERSION_sec:
@@ -3234,7 +3212,7 @@ snmp_sess_select_info(void *sessp,
 	    requests++;
 	    for(rp = isp->requests; rp; rp = rp->next_request){
 		if ((!timerisset(&earliest)
-		    || timercmp(&rp->expire, &earliest, <)))
+		    || (timercmp(&rp->expire, &earliest, <))))
 		    earliest = rp->expire;
 	    }
 	}
@@ -3274,7 +3252,7 @@ snmp_sess_select_info(void *sessp,
     }
 
     /* if it was blocking before or our delta time is less, reset timeout */
-    if ((*block || timercmp(&earliest, timeout, <))){
+    if ((*block || (timercmp(&earliest, timeout, <)))){
 	*timeout = earliest;
 	*block = 0;
     }
@@ -3374,7 +3352,7 @@ snmp_sess_timeout(void *sessp)
     	free((char *)freeme);
     	freeme = NULL;
         }
-        if (timercmp(&rp->expire, &now, <)){
+        if ((timercmp(&rp->expire, &now, <))){
     	/* this timer has expired */
     	if (rp->retries >= sp->retries){
     	    callback = (rp->callback ? rp->callback : sp->callback);

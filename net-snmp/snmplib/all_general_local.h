@@ -4,7 +4,6 @@
  * General snmplib/ local include's.
  */
 #include "asn1.h"
-#include "debug.h"
 #include "int64.h"
 #include "keytools.h"
 #include "lcd_time.h"   
@@ -21,6 +20,7 @@
 #include "snmpusm.h"
 #include "system.h"
 #include "tools.h"
+#include "snmp_debug.h"
 
 #ifdef USE_INTERNAL_MD5
 #	include "md5.h"
