@@ -37,7 +37,7 @@ _ioctl_get(int fd, int which, struct ifreq *ifrq,
     /*
      * sanity checks
      */
-    if((NULL == ifentry) || (NULL == ifentry->if_name)) {
+    if((NULL == ifentry) || (NULL == ifentry->name)) {
         snmp_log(LOG_ERR, "invalid ifentry\n");
         return -1;
     }
@@ -53,7 +53,7 @@ _ioctl_get(int fd, int which, struct ifreq *ifrq,
         }
     }
 
-    strncpy(ifrq->ifr_name, ifentry->if_name, sizeof(ifrq->ifr_name));
+    strncpy(ifrq->ifr_name, ifentry->name, sizeof(ifrq->ifr_name));
     ifrq->ifr_name[ sizeof(ifrq->ifr_name)-1 ] = 0;
     rc = ioctl(fd, which, ifrq);
     if (rc < 0) {
@@ -89,14 +89,14 @@ netsnmp_access_interface_ioctl_physaddr_get(int fd,
 
     DEBUGMSGTL(("access:interface:ioctl", "physaddr_get\n"));
 
-    if((NULL != ifentry->if_paddr) &&
-       (ifentry->if_paddr_len != IFHWADDRLEN)) {
-        SNMP_FREE(ifentry->if_paddr);
+    if((NULL != ifentry->paddr) &&
+       (ifentry->paddr_len != IFHWADDRLEN)) {
+        SNMP_FREE(ifentry->paddr);
     }
-    if(NULL == ifentry->if_paddr) 
-        ifentry->if_paddr = malloc(IFHWADDRLEN);
+    if(NULL == ifentry->paddr) 
+        ifentry->paddr = malloc(IFHWADDRLEN);
 
-    if(NULL == ifentry->if_paddr) {
+    if(NULL == ifentry->paddr) {
             rc = -4;
     } else {
 
@@ -109,14 +109,14 @@ netsnmp_access_interface_ioctl_physaddr_get(int fd,
          * for every ioctl, as the rest seem to work ok...
          */
         memset(ifrq.ifr_hwaddr.sa_data, (0), IFHWADDRLEN);
-        ifentry->if_paddr_len = IFHWADDRLEN;
+        ifentry->paddr_len = IFHWADDRLEN;
         rc = _ioctl_get(fd, SIOCGIFHWADDR, &ifrq, ifentry);
         if (rc < 0) {
-            memset(ifentry->if_paddr, (0), IFHWADDRLEN);
+            memset(ifentry->paddr, (0), IFHWADDRLEN);
             rc = -3; /* msg already logged */
         }
         else {
-            memcpy(ifentry->if_paddr, ifrq.ifr_hwaddr.sa_data, IFHWADDRLEN);
+            memcpy(ifentry->paddr, ifrq.ifr_hwaddr.sa_data, IFHWADDRLEN);
 
             /*
              * does this just work on linux? I hope not!
@@ -125,7 +125,7 @@ netsnmp_access_interface_ioctl_physaddr_get(int fd,
 #ifdef ARPHRD_LOOPBACK
             switch (ifrq.ifr_hwaddr.sa_family) {
             case ARPHRD_ETHER:
-                ifentry->if_type = 6;
+                ifentry->type = 6;
                 break;
             case ARPHRD_TUNNEL:
             case ARPHRD_TUNNEL6:
@@ -133,37 +133,37 @@ netsnmp_access_interface_ioctl_physaddr_get(int fd,
             case ARPHRD_IPGRE:
 #endif
             case ARPHRD_SIT:
-                ifentry->if_type = 131;
+                ifentry->type = 131;
                 break;          /* tunnel */
             case ARPHRD_SLIP:
             case ARPHRD_CSLIP:
             case ARPHRD_SLIP6:
             case ARPHRD_CSLIP6:
-                ifentry->if_type = 28;
+                ifentry->type = 28;
                 break;          /* slip */
             case ARPHRD_PPP:
-                ifentry->if_type = 23;
+                ifentry->type = 23;
                 break;          /* ppp */
             case ARPHRD_LOOPBACK:
-                ifentry->if_type = 24;
+                ifentry->type = 24;
                 break;          /* softwareLoopback */
             case ARPHRD_FDDI:
-                ifentry->if_type = 15;
+                ifentry->type = 15;
                 break;
             case ARPHRD_ARCNET:
-                ifentry->if_type = 35;
+                ifentry->type = 35;
                 break;
             case ARPHRD_LOCALTLK:
-                ifentry->if_type = 42;
+                ifentry->type = 42;
                 break;
 #ifdef ARPHRD_HIPPI
             case ARPHRD_HIPPI:
-                ifentry->if_type = 47;
+                ifentry->type = 47;
                 break;
 #endif
 #ifdef ARPHRD_ATM
             case ARPHRD_ATM:
-                ifentry->if_type = 37;
+                ifentry->type = 37;
                 break;
 #endif
                 /*
@@ -202,27 +202,27 @@ netsnmp_access_interface_ioctl_flags_get(int fd,
 
     rc = _ioctl_get(fd, SIOCGIFFLAGS, &ifrq, ifentry);
     if (rc < 0) {
-        ifentry->flags &= ~NETSNMP_INTERFACE_FLAGS_HAS_IF_FLAGS;
+        ifentry->ns_flags &= ~NETSNMP_INTERFACE_FLAGS_HAS_IF_FLAGS;
         return rc; /* msg already logged */
     }
     else {
-        ifentry->flags |= NETSNMP_INTERFACE_FLAGS_HAS_IF_FLAGS;
-        ifentry->if_flags = ifrq.ifr_flags;
+        ifentry->ns_flags |= NETSNMP_INTERFACE_FLAGS_HAS_IF_FLAGS;
+        ifentry->os_flags = ifrq.ifr_flags;
 
         /*
          * ifOperStatus description:
          *   If ifAdminStatus is down(2) then ifOperStatus should be down(2).
          */
-        if(ifentry->if_flags & IFF_UP) {
-            ifentry->if_admin_status = IFADMINSTATUS_UP;
-            if(ifentry->if_flags & IFF_RUNNING)
-                ifentry->if_oper_status = IFOPERSTATUS_UP;
+        if(ifentry->os_flags & IFF_UP) {
+            ifentry->admin_status = IFADMINSTATUS_UP;
+            if(ifentry->os_flags & IFF_RUNNING)
+                ifentry->oper_status = IFOPERSTATUS_UP;
             else
-                ifentry->if_oper_status = IFOPERSTATUS_DOWN;
+                ifentry->oper_status = IFOPERSTATUS_DOWN;
         }
         else {
-            ifentry->if_admin_status = IFADMINSTATUS_DOWN;
-            ifentry->if_oper_status = IFOPERSTATUS_DOWN;
+            ifentry->admin_status = IFADMINSTATUS_DOWN;
+            ifentry->oper_status = IFOPERSTATUS_DOWN;
         }
     }
     
@@ -254,7 +254,7 @@ netsnmp_access_interface_ioctl_flags_set(int fd,
     /*
      * sanity checks
      */
-    if((NULL == ifentry) || (NULL == ifentry->if_name)) {
+    if((NULL == ifentry) || (NULL == ifentry->name)) {
         snmp_log(LOG_ERR, "invalid ifentry\n");
         return -1;
     }
@@ -270,7 +270,7 @@ netsnmp_access_interface_ioctl_flags_set(int fd,
         }
     }
 
-    strncpy(ifrq.ifr_name, ifentry->if_name, sizeof(ifrq.ifr_name));
+    strncpy(ifrq.ifr_name, ifentry->name, sizeof(ifrq.ifr_name));
     ifrq.ifr_name[ sizeof(ifrq.ifr_name)-1 ] = 0;
     rc = ioctl(fd, SIOCGIFFLAGS, &ifrq);
     if(rc < 0) {
@@ -286,14 +286,14 @@ netsnmp_access_interface_ioctl_flags_set(int fd,
     if(rc < 0) {
         close(fd);
         snmp_log(LOG_ERR,"error setting flags\n");
-        ifentry->if_flags = 0;
+        ifentry->os_flags = 0;
         return -4;
     }
 
     if(ourfd >= 0)
         close(ourfd);
 
-    ifentry->if_flags = ifrq.ifr_flags;
+    ifentry->os_flags = ifrq.ifr_flags;
 
     return 0;
 }
@@ -322,11 +322,11 @@ netsnmp_access_interface_ioctl_mtu_get(int fd,
 
     rc = _ioctl_get(fd, SIOCGIFMTU, &ifrq, ifentry);
     if (rc < 0) {
-        ifentry->if_mtu = 0;
+        ifentry->mtu = 0;
         return rc; /* msg already logged */
     }
     else {
-        ifentry->if_mtu = ifrq.ifr_mtu;
+        ifentry->mtu = ifrq.ifr_mtu;
     }
 
     return rc;

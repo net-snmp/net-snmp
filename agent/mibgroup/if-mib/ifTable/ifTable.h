@@ -67,40 +67,40 @@ extern          "C" {
         /*
          * ifDescr(2)/DisplayString/ASN_OCTET_STR/char(char)//L/A/w/e/R/d/H
          */
-#define ifDescr ifentry->if_descr
+#define ifDescr ifentry->descr
 //        char            ifDescr[255];
 //        size_t          ifDescr_len;    /* # of char elements, not bytes */
 
         /*
          * ifType(3)/IANAifType/ASN_INTEGER/long(u_long)//l/A/w/E/r/d/h
          */
-#define ifType ifentry->if_type
+#define ifType ifentry->type
 
         /*
          * ifMtu(4)/INTEGER32/ASN_INTEGER/long(long)//l/A/w/e/r/d/h
          */
-#define ifMtu ifentry->if_mtu
+#define ifMtu ifentry->mtu
 
         /*
          * ifSpeed(5)/GAUGE/ASN_GAUGE/u_long(u_long)//l/A/w/e/r/d/h
          */
-#define ifSpeed ifentry->if_speed
+#define ifSpeed ifentry->speed
 
         /*
          * ifPhysAddress(6)/PhysAddress/ASN_OCTET_STR/char(char)//L/A/w/e/r/d/H
          */
-#define ifPhysAddress ifentry->if_paddr
-#define ifPhysAddress_len ifentry->if_paddr_len /* # of char elements, not bytes */
+#define ifPhysAddress ifentry->paddr
+#define ifPhysAddress_len ifentry->paddr_len /* # of char elements, not bytes */
 
         /*
          * ifAdminStatus(7)/INTEGER/ASN_INTEGER/long(u_long)//l/A/W/E/r/d/h
          */
-#define ifAdminStatus ifentry->if_admin_status
+#define ifAdminStatus ifentry->admin_status
 
         /*
          * ifOperStatus(8)/INTEGER/ASN_INTEGER/long(u_long)//l/A/w/E/r/d/h
          */
-#define ifOperStatus ifentry->if_oper_status
+#define ifOperStatus ifentry->oper_status
 
         /*
          * ifLastChange(9)/TICKS/ASN_TIMETICKS/u_long(u_long)//l/A/w/e/r/d/h
@@ -183,7 +183,7 @@ extern          "C" {
         /*
          * ifName(1)/DisplayString/ASN_OCTET_STR/char(char)//L/A/w/e/R/d/H
          */
-#define ifName ifentry->if_name
+#define ifName ifentry->name
 
         /*
          * ifInMulticastPkts(2)/COUNTER/ASN_COUNTER/u_long(u_long)//l/A/w/e/r/d/h

@@ -67,9 +67,6 @@ netsnmp_access_interface_container_arch_load(netsnmp_container* container,
         return -1;
     }
 
-    // xxx-rks: need to augment this with ioctl processing, as
-    // /proc/net/dev lists interfaces which are down...
-
     if (!(devin = fopen("/proc/net/dev", "r"))) {
         DEBUGMSGTL(("access:interface",
                     "Failed to load Interface Table (linux1)\n"));
@@ -174,22 +171,22 @@ netsnmp_access_interface_container_arch_load(netsnmp_container* container,
                                 &snd_oct, &snd_pkt, &snd_err, &snd_drop,
                                 &coll);
             if (scan_count == scan_expected) {
-                entry->flags |= NETSNMP_INTERFACE_FLAGS_HAS_BYTES;
-                entry->flags |= NETSNMP_INTERFACE_FLAGS_HAS_DROPS;
+                entry->ns_flags |= NETSNMP_INTERFACE_FLAGS_HAS_BYTES;
+                entry->ns_flags |= NETSNMP_INTERFACE_FLAGS_HAS_DROPS;
                 /*
                  *  2.4 kernel includes a single multicast (input) counter?
                  */
-                entry->flags |= NETSNMP_INTERFACE_FLAGS_HAS_MCAST_PKTS;
-                entry->flags |= NETSNMP_INTERFACE_FLAGS_HAS_HIGH_SPEED;
-                entry->flags |= NETSNMP_INTERFACE_FLAGS_HAS_HIGH_BYTES;
-                entry->flags |= NETSNMP_INTERFACE_FLAGS_HAS_HIGH_PACKETS;
+                entry->ns_flags |= NETSNMP_INTERFACE_FLAGS_HAS_MCAST_PKTS;
+                entry->ns_flags |= NETSNMP_INTERFACE_FLAGS_HAS_HIGH_SPEED;
+                entry->ns_flags |= NETSNMP_INTERFACE_FLAGS_HAS_HIGH_BYTES;
+                entry->ns_flags |= NETSNMP_INTERFACE_FLAGS_HAS_HIGH_PACKETS;
             }
         } else {
             scan_count = sscanf(stats, scan_line_to_use,
                                 &rec_pkt, &rec_err,
                                 &snd_pkt, &snd_err, &coll);
             if (scan_count == scan_expected) {
-                entry->flags &= ~NETSNMP_INTERFACE_FLAGS_HAS_MCAST_PKTS;
+                entry->ns_flags &= ~NETSNMP_INTERFACE_FLAGS_HAS_MCAST_PKTS;
                 rec_oct = rec_drop = 0;
                 snd_oct = snd_drop = 0;
             }
@@ -201,12 +198,12 @@ netsnmp_access_interface_container_arch_load(netsnmp_container* container,
             netsnmp_access_interface_entry_free(entry);
             continue;
         }
-        entry->flags |= NETSNMP_INTERFACE_FLAGS_ACTIVE;
+        entry->ns_flags |= NETSNMP_INTERFACE_FLAGS_ACTIVE;
 
         /*
          * linux previous to 1.3.~13 may miss transmitted loopback pkts: 
          */
-        if (!strcmp(entry->if_name, "lo") && rec_pkt > 0 && !snd_pkt)
+        if (!strcmp(entry->name, "lo") && rec_pkt > 0 && !snd_pkt)
             snd_pkt = rec_pkt;
 
         /*
@@ -245,9 +242,9 @@ netsnmp_access_interface_container_arch_load(netsnmp_container* container,
 
         /*
          * physaddr should have set type. make some guesses (based
-         * on if_name) if not.
+         * on name) if not.
          */
-        if(0 == entry->if_type) {
+        if(0 == entry->type) {
             typedef struct _match_if {
                int             mi_type;
                const char     *mi_name;
@@ -268,19 +265,19 @@ netsnmp_access_interface_container_arch_load(netsnmp_container* container,
             
             for (ii = 0, pm = lmatch_if; pm->mi_name; pm++) {
                 len = strlen(pm->mi_name);
-                if (0 == strncmp(entry->if_name, pm->mi_name, len)) {
-                    entry->if_type = pm->mi_type;
+                if (0 == strncmp(entry->name, pm->mi_name, len)) {
+                    entry->type = pm->mi_type;
                     break;
                 }
             }
             if(NULL == pm->mi_name)
-                entry->if_type = IANAIFTYPE_OTHER;
+                entry->type = IANAIFTYPE_OTHER;
         }
 
-        if (entry->if_type == IANAIFTYPE_ETHERNETCSMACD)
-            entry->if_speed =
+        if (entry->type == IANAIFTYPE_ETHERNETCSMACD)
+            entry->speed =
                 netsnmp_access_interface_linux_get_if_speed(fd,
-                                                            entry->if_name);
+                                                            entry->name);
         else
             netsnmp_access_interface_entry_guess_speed(entry);
 
@@ -292,13 +289,13 @@ netsnmp_access_interface_container_arch_load(netsnmp_container* container,
          * Zero speed means link problem.
          * -i'm not sure this is always true...
          */
-        if(entry->if_speed == 0 && entry->if_flags & IFF_UP){
-            entry->if_flags &= ~IFF_RUNNING;
+        if(entry->speed == 0 && entry->os_flags & IFF_UP){
+            entry->os_flags &= ~IFF_RUNNING;
         }
-        if(entry->if_flags & IFF_RUNNING)
-            entry->if_oper_status = IFOPERSTATUS_UP;
+        if(entry->os_flags & IFF_RUNNING)
+            entry->oper_status = IFOPERSTATUS_UP;
         else
-            entry->if_oper_status = IFOPERSTATUS_UNKNOWN;
+            entry->oper_status = IFOPERSTATUS_UNKNOWN;
 
         
 

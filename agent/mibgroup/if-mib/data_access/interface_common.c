@@ -205,7 +205,7 @@ netsnmp_access_interface_entry_get_by_name(netsnmp_container *container,
         return NULL;
     }
 
-    tmp.if_name = name;
+    tmp.name = name;
     return CONTAINER_FIND(container->next, &tmp);
 }
 
@@ -236,22 +236,22 @@ netsnmp_access_interface_entry_create(const char *name)
         return NULL;
 
     if(NULL != name)
-        entry->if_name = strdup(name);
+        entry->name = strdup(name);
 
     _access_interface_entry_set_index(entry, name);
 
     /*
-     * until we can get actual description, leave if_descr NULL.
+     * until we can get actual description, leave descr NULL.
      * The end user can decide what to do with it.
      */
-    // entry->if_descr = strdup("unknown");
+    // entry->descr = strdup("unknown");
 
-    // xxx-rks: if_alias? supposed to be persistent
+    // xxx-rks: alias? supposed to be persistent
 
     /*
      * make some assumptions
      */
-    entry->if_connector_present = 1;
+    entry->connector_present = 1;
 
     entry->oid_index.len = 1;
     entry->oid_index.oids = (oid *) & entry->index;
@@ -277,14 +277,14 @@ netsnmp_access_interface_entry_free(netsnmp_interface_entry * entry)
     if (NULL != entry->old_stats)
         free(entry->old_stats);
 
-    if (NULL != entry->if_name)
-        free(entry->if_name);
+    if (NULL != entry->name)
+        free(entry->name);
 
-    if (NULL != entry->if_descr)
-        free(entry->if_descr);
+    if (NULL != entry->descr)
+        free(entry->descr);
 
-    if (NULL != entry->if_paddr)
-        free(entry->if_paddr);
+    if (NULL != entry->paddr)
+        free(entry->paddr);
 
     free(entry);
 }
@@ -311,7 +311,7 @@ netsnmp_access_interface_entry_set_admin_status(netsnmp_interface_entry * entry,
 
     rc = netsnmp_arch_set_admin_status(entry, ifAdminStatus);
     if (0 == rc) /* success */
-        entry->if_admin_status = ifAdminStatus;
+        entry->admin_status = ifAdminStatus;
 
     return rc;
 }
@@ -326,8 +326,8 @@ netsnmp_access_interface_entry_set_admin_status(netsnmp_interface_entry * entry,
 static int
 _access_interface_entry_compare_name(const void *lhs, const void *rhs)
 {
-    return strcmp(((const netsnmp_interface_entry *) lhs)->if_name,
-                  ((const netsnmp_interface_entry *) rhs)->if_name);
+    return strcmp(((const netsnmp_interface_entry *) lhs)->name,
+                  ((const netsnmp_interface_entry *) rhs)->name);
 }
 
 /**
@@ -374,8 +374,8 @@ netsnmp_access_interface_entry_update_stats(netsnmp_interface_entry * prev_vals,
      * sanity checks
      */
     if ((NULL == prev_vals) || (NULL == new_vals) ||
-        (NULL == prev_vals->if_name) || (NULL == new_vals->if_name) ||
-        (0 != strncmp(prev_vals->if_name, new_vals->if_name, strlen(prev_vals->if_name))))
+        (NULL == prev_vals->name) || (NULL == new_vals->name) ||
+        (0 != strncmp(prev_vals->name, new_vals->name, strlen(prev_vals->name))))
         return -1;
 
     /*
@@ -460,8 +460,8 @@ netsnmp_access_interface_entry_copy(netsnmp_interface_entry * lhs,
     DEBUGMSGTL(("access:interface", "copy\n"));
     
     if ((NULL == lhs) || (NULL == rhs) ||
-        (NULL == lhs->if_name) || (NULL == rhs->if_name) ||
-        (0 != strncmp(lhs->if_name, rhs->if_name, strlen(rhs->if_name))))
+        (NULL == lhs->name) || (NULL == rhs->name) ||
+        (0 != strncmp(lhs->name, rhs->name, strlen(rhs->name))))
         return -1;
 
     /*
@@ -472,42 +472,42 @@ netsnmp_access_interface_entry_copy(netsnmp_interface_entry * lhs,
     /*
      * update data
      */
-    lhs->flags = rhs->flags;
-    if((NULL != lhs->if_descr) && (NULL != rhs->if_descr) &&
-       (0 == strcmp(lhs->if_descr, rhs->if_descr)))
+    lhs->ns_flags = rhs->ns_flags;
+    if((NULL != lhs->descr) && (NULL != rhs->descr) &&
+       (0 == strcmp(lhs->descr, rhs->descr)))
         ;
     else {
-        if (NULL != lhs->if_descr)
-            SNMP_FREE(lhs->if_descr);
-        if (rhs->if_descr) {
-            lhs->if_descr = strdup(rhs->if_descr);
-            if(NULL == lhs->if_descr)
+        if (NULL != lhs->descr)
+            SNMP_FREE(lhs->descr);
+        if (rhs->descr) {
+            lhs->descr = strdup(rhs->descr);
+            if(NULL == lhs->descr)
                 return -2;
         }
     }
-    lhs->if_type = rhs->if_type;
-    lhs->if_speed = rhs->if_speed;
-    lhs->if_speed_high = rhs->if_speed_high;
-    lhs->if_mtu = rhs->if_mtu;
-    lhs->if_discontinuity = rhs->if_discontinuity;
-    lhs->if_oper_status = rhs->if_oper_status;
-    lhs->if_promiscuous = rhs->if_promiscuous;
-    lhs->if_connector_present = rhs->if_connector_present;
-    lhs->if_flags = rhs->if_flags;
-    if(lhs->if_paddr_len == rhs->if_paddr_len) {
-        if(rhs->if_paddr_len)
-            memcpy(lhs->if_paddr,rhs->if_paddr,rhs->if_paddr_len);
+    lhs->type = rhs->type;
+    lhs->speed = rhs->speed;
+    lhs->speed_high = rhs->speed_high;
+    lhs->mtu = rhs->mtu;
+    lhs->discontinuity = rhs->discontinuity;
+    lhs->oper_status = rhs->oper_status;
+    lhs->promiscuous = rhs->promiscuous;
+    lhs->connector_present = rhs->connector_present;
+    lhs->os_flags = rhs->os_flags;
+    if(lhs->paddr_len == rhs->paddr_len) {
+        if(rhs->paddr_len)
+            memcpy(lhs->paddr,rhs->paddr,rhs->paddr_len);
     } else {
-        if (NULL != lhs->if_paddr)
-            SNMP_FREE(lhs->if_paddr);
-        if (rhs->if_paddr) {
-            lhs->if_paddr = malloc(rhs->if_paddr_len);
-            if(NULL == lhs->if_paddr)
+        if (NULL != lhs->paddr)
+            SNMP_FREE(lhs->paddr);
+        if (rhs->paddr) {
+            lhs->paddr = malloc(rhs->paddr_len);
+            if(NULL == lhs->paddr)
                 return -2;
-            memcpy(lhs->if_paddr,rhs->if_paddr,rhs->if_paddr_len);
+            memcpy(lhs->paddr,rhs->paddr,rhs->paddr_len);
         }
     }
-    lhs->if_paddr_len = rhs->if_paddr_len;
+    lhs->paddr_len = rhs->paddr_len;
     
     return 0;
 }
@@ -515,14 +515,14 @@ netsnmp_access_interface_entry_copy(netsnmp_interface_entry * lhs,
 void
 netsnmp_access_interface_entry_guess_speed(netsnmp_interface_entry *entry)
 {
-    if (entry->if_type == IANAIFTYPE_ETHERNETCSMACD)
-        entry->if_speed = 10000000;
-    else if (entry->if_type == IANAIFTYPE_SOFTWARELOOPBACK)
-        entry->if_speed = 10000000;
-    else if (entry->if_type == IANAIFTYPE_ISO88025TOKENRING)
-        entry->if_speed = 4000000;
+    if (entry->type == IANAIFTYPE_ETHERNETCSMACD)
+        entry->speed = 10000000;
+    else if (entry->type == IANAIFTYPE_SOFTWARELOOPBACK)
+        entry->speed = 10000000;
+    else if (entry->type == IANAIFTYPE_ISO88025TOKENRING)
+        entry->speed = 4000000;
     else
-        entry->if_speed = 0;
+        entry->speed = 0;
 }
 
 netsnmp_conf_if_list *
@@ -551,14 +551,14 @@ netsnmp_access_interface_entry_overrides(netsnmp_interface_entry *entry)
     /*
      * enforce mib size limit
      */
-    if(entry->if_descr && (strlen(entry->if_descr) > 255))
-        entry->if_descr[255] = 0;
+    if(entry->descr && (strlen(entry->descr) > 255))
+        entry->descr[255] = 0;
 
     if_ptr =
-        netsnmp_access_interface_entry_overrides_get(entry->if_name);
+        netsnmp_access_interface_entry_overrides_get(entry->name);
     if (if_ptr) {
-        entry->if_type = if_ptr->type;
-        entry->if_speed = if_ptr->speed;
+        entry->type = if_ptr->type;
+        entry->speed = if_ptr->speed;
     }
 }
 
