@@ -106,13 +106,16 @@ nsb-config-dist()
    if [ ! -d $ngc_src ]; then
       nsb-abort "$ngc_src does not exist!"
    fi
+   if [ ! -d $ngc_src/agent/mibgroup ]; then
+      nsb-abort "agent/mibgroup directory in $ngc_src does not exist!"
+   fi
 
    #
    # some modules might be release specific, so make sure they
    # exist before we send them off to configure
    #
    NSB_FINAL_MODULES=
-   for ncd_x in $CHECK
+   for ncd_x in $NSB_DIST_MODULES
    do
 	if [ -a $ngc_src/agent/mibgroup/$ncd_x.h ]; then
 		NSB_FINAL_MODULES="$NSB_FINAL_MODULES $ncd_x"
@@ -144,6 +147,9 @@ nsb-config-all()
    ngc_src=$1
    if [ ! -d $ngc_src ]; then
       nsb-abort "$ngc_src does not exist!"
+   fi
+   if [ ! -d $ngc_src/agent/mibgroup ]; then
+      nsb-abort "agent/mibgroup directory in $ngc_src does not exist!"
    fi
 
    #
