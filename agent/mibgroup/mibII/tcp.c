@@ -860,6 +860,7 @@ Again:	/*
 
 		if((klookup((unsigned long)next, (char *)&inpcb, sizeof (inpcb)) == 0)) {
 		    perror("TCP_Count_Connections - inpcb");
+		    break;
 		}
 #if !(defined(freebsd2) || defined(netbsd1) || defined(openbsd2))
 		if (inpcb.INP_PREV_SYMBOL != prev) {	    /* ??? */
