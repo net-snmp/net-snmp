@@ -1,0 +1,57 @@
+CC=gcc
+
+NETSNMPCONFIG=net-snmp-config
+
+
+# uncomment this if you have GNU make
+NETSNMPCFLAGS := $(shell $(NETSNMPCONFIG) --base-cflags)
+NETSNMPLIBS := $(shell $(NETSNMPCONFIG) --agent-libs)
+#NETSNMPCFLAGS=`$(NETSNMPCONFIG) --base-cflags`
+#NETSNMPLIBS=`$(NETSNMPCONFIG) --agent-libs`
+
+LIBS=$(NETSNMPLIBS)
+
+
+STRICT_FLAGS = -Wall -Wstrict-prototypes
+CFLAGS=-I. $(NETSNMPCFLAGS) $(STRICT_FLAGS)
+
+USER_SRCS = \
+	ifTable_data_get.c \
+	ifTable_data_set.c \
+	ifTable_data_access.c
+
+SRCS = $(USER_SRCS) \
+	ifTable.c \
+	ifTable_subagent.c \
+	ifTable_interface.c
+
+USER_OBJS =  \
+	ifTable_data_get.o \
+	ifTable_data_set.o \
+	ifTable_data_access.o 
+
+OBJS =  $(USER_OBJS) \
+	ifTable.o \
+	ifTable_subagent.o \
+	ifTable_interface.o
+
+TARGETS=ifTable
+
+.SUFFIXES:
+.SUFFIXES: .c .o .deps
+
+
+all: $(TARGETS)
+
+user: $(USER_OBJS)
+
+$(TARGETS): $(LIB_DEPS)
+
+ifTable: $(OBJS) ifTable_Makefile
+	$(CC) -o ifTable $(OBJS) $(LIBS)
+
+clean:
+	rm -f $(OBJS) $(TARGETS)
+
+
+
