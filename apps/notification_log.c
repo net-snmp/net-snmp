@@ -18,6 +18,8 @@
 #include "snmptrapd_log.h"
 #include "notification_log.h"
 
+#define SNMPTRAPD_CONTEXT "snmptrapd"
+
 extern u_long   num_received;
 u_long          num_deleted = 0;
 
@@ -112,6 +114,7 @@ initialize_table_nlmLogVariableTable(void)
     size_t          nlmLogVariableTable_oid_len =
         OID_LENGTH(nlmLogVariableTable_oid);
     netsnmp_table_data_set *table_set;
+    netsnmp_handler_registration *reginfo;
 
     /*
      * create the table structure itself 
@@ -257,12 +260,14 @@ initialize_table_nlmLogVariableTable(void)
      * note: if you don't need a subhandler to deal with any aspects of
      * the request, change nlmLogVariableTable_handler to "NULL" 
      */
-    netsnmp_register_table_data_set(netsnmp_create_handler_registration
-                                    ("nlmLogVariableTable",
-                                     nlmLogVariableTable_handler,
-                                     nlmLogVariableTable_oid,
-                                     nlmLogVariableTable_oid_len,
-                                     HANDLER_CAN_RWRITE), table_set, NULL);
+    reginfo =
+        netsnmp_create_handler_registration ("nlmLogVariableTable",
+                                             nlmLogVariableTable_handler,
+                                             nlmLogVariableTable_oid,
+                                             nlmLogVariableTable_oid_len,
+                                             HANDLER_CAN_RWRITE);
+    reginfo->contextName = strdup(SNMPTRAPD_CONTEXT);
+    netsnmp_register_table_data_set(reginfo, table_set, NULL);
 }
 
 /** Initialize the nlmLogTable table by defining it's contents and how it's structured */
@@ -271,6 +276,7 @@ initialize_table_nlmLogTable(void)
 {
     static oid      nlmLogTable_oid[] = { 1, 3, 6, 1, 2, 1, 92, 1, 3, 1 };
     size_t          nlmLogTable_oid_len = OID_LENGTH(nlmLogTable_oid);
+    netsnmp_handler_registration *reginfo;
 
     /*
      * create the table structure itself 
@@ -369,11 +375,13 @@ initialize_table_nlmLogTable(void)
      * note: if you don't need a subhandler to deal with any aspects of
      * the request, change nlmLogTable_handler to "NULL" 
      */
-    netsnmp_register_table_data_set(netsnmp_create_handler_registration
-                                    ("nlmLogTable", nlmLogTable_handler,
-                                     nlmLogTable_oid, nlmLogTable_oid_len,
-                                     HANDLER_CAN_RWRITE), nlmLogTable,
-                                    NULL);
+    reginfo =
+        netsnmp_create_handler_registration("nlmLogTable", nlmLogTable_handler,
+                                            nlmLogTable_oid,
+                                            nlmLogTable_oid_len,
+                                            HANDLER_CAN_RWRITE);
+    reginfo->contextName = strdup(SNMPTRAPD_CONTEXT);
+    netsnmp_register_table_data_set(reginfo, nlmLogTable, NULL);
 
     /*
      * hmm...  5 minutes seems like a reasonable time to check for out
@@ -414,37 +422,39 @@ init_notification_log(void)
      * static variables 
      */
 #ifdef USING_AGENTX_SUBAGENT_MODULE
-    netsnmp_register_read_only_counter32_instance
+    netsnmp_register_read_only_counter32_instance_context
         ("nlmStatsGlobalNotificationsLogged",
          my_nlmStatsGlobalNotificationsLogged_oid,
          OID_LENGTH(my_nlmStatsGlobalNotificationsLogged_oid),
-         &num_received, NULL);
+         &num_received, NULL, SNMPTRAPD_CONTEXT);
 
-    netsnmp_register_read_only_counter32_instance
+    netsnmp_register_read_only_counter32_instance_context
         ("nlmStatsGlobalNotificationsBumped",
          my_nlmStatsGlobalNotificationsBumped_oid,
          OID_LENGTH(my_nlmStatsGlobalNotificationsBumped_oid),
-         &num_deleted, NULL);
+         &num_deleted, NULL, SNMPTRAPD_CONTEXT);
 
-    netsnmp_register_ulong_instance("nlmConfigGlobalEntryLimit",
-                                    my_nlmConfigGlobalEntryLimit_oid,
-                                    OID_LENGTH
-                                    (my_nlmConfigGlobalEntryLimit_oid),
-                                    &max_logged,
-                                    notification_log_config_handler);
+    netsnmp_register_ulong_instance_context("nlmConfigGlobalEntryLimit",
+                                            my_nlmConfigGlobalEntryLimit_oid,
+                                            OID_LENGTH
+                                            (my_nlmConfigGlobalEntryLimit_oid),
+                                            &max_logged,
+                                            notification_log_config_handler,
+                                            SNMPTRAPD_CONTEXT);
 
-    netsnmp_register_ulong_instance("nlmConfigGlobalAgeOut",
-                                    my_nlmConfigGlobalAgeOut_oid,
-                                    OID_LENGTH
-                                    (my_nlmConfigGlobalAgeOut_oid),
-                                    &max_age,
-                                    notification_log_config_handler);
+    netsnmp_register_ulong_instance_context("nlmConfigGlobalAgeOut",
+                                            my_nlmConfigGlobalAgeOut_oid,
+                                            OID_LENGTH
+                                            (my_nlmConfigGlobalAgeOut_oid),
+                                            &max_age,
+                                            notification_log_config_handler,
+                                            SNMPTRAPD_CONTEXT);
 
     /*
      * tables 
      */
-    initialize_table_nlmLogTable();
     initialize_table_nlmLogVariableTable();
+    initialize_table_nlmLogTable();
 
     /*
      * disable flag 
