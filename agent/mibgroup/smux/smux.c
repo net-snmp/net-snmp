@@ -125,7 +125,7 @@ static int nauths, npeers = 0;
 
 struct variable2 smux_variables[] = {
   /* bogus entry, as in pass.c */
-  {MIBINDEX, ASN_PRIV_DELEGATED, RWRITE, var_smux, 0, {MIBINDEX}},
+  {MIBINDEX, ASN_INTEGER, RWRITE, var_smux, 0, {MIBINDEX}},
 };
 
 
