@@ -23,7 +23,7 @@ SOFTWARE.
  * snmp_api.h - API for access to snmp.
  */
 
-typedef struct sockaddr_in  ipaddr;
+typedef struct sockaddr_in  snmp_ipaddr;
 
 struct variable_list;
 struct timeval;
@@ -31,7 +31,7 @@ struct timeval;
 struct snmp_pdu {
     int	    version;
 
-    ipaddr  address;	/* Address of peer */
+    snmp_ipaddr  address;	/* Address of peer */
     oid	    *srcParty;
     int	    srcPartyLen;
     oid	    *dstParty;
@@ -51,7 +51,7 @@ struct snmp_pdu {
     /* Trap information */
     oid	    *enterprise;/* System OID */
     int	    enterprise_length;
-    ipaddr  agent_addr;	/* address of object generating trap */
+    snmp_ipaddr  agent_addr;	/* address of object generating trap */
     long    trap_type;	/* trap type */
     long    specific_type;  /* specific type */
     u_long  time;	/* Uptime */
