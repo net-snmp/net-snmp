@@ -240,14 +240,16 @@ int get_exec_output(struct extensible *ex)
         close(0);
         (void) open("/dev/null", O_RDWR);
 
-        for(cnt=1,cptr1 = ex->command, cptr2 = argvs; *cptr1 != 0;
+        for(cnt=1,cptr1 = ex->command, cptr2 = argvs; cptr1 && *cptr1 != 0;
             cptr2++, cptr1++) {
           *cptr2 = *cptr1;
           if (*cptr1 == ' ') {
             *(cptr2++) = 0;
             cptr1 = skip_white(cptr1);
-            *cptr2 = *cptr1;
-            if (*cptr1 != 0) cnt++;
+            if (cptr1) {
+                *cptr2 = *cptr1;
+                if (*cptr1 != 0) cnt++;
+            }
           }
         }
         *cptr2 = 0;
