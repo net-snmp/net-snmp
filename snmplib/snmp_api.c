@@ -555,7 +555,7 @@ snmp_sess_open(struct snmp_session *in_session)
     oid *op;
     int sd;
     in_addr_t addr;
-    struct sockaddr_in	me;
+    struct sockaddr_in	me, *isp_addr;
     struct hostent *hp;
     struct snmp_pdu *pdu, *response;
     int status;
@@ -865,9 +865,10 @@ snmp_sess_open(struct snmp_session *in_session)
 #endif /* SO_BSDCOMPAT */
 
     isp->sd = sd;
+    isp_addr = (struct sockaddr_in *)&(isp->addr);
     if (session->peername != SNMP_DEFAULT_PEERNAME){
 	if ((int)(addr = inet_addr(session->peername)) != -1){
-	    memmove(&isp->addr.sin_addr, &addr, sizeof(isp->addr.sin_addr));
+	    memmove(&isp_addr->sin_addr, &addr, sizeof(isp_addr->sin_addr));
 	} else {
 	    hp = gethostbyname(session->peername);
 	    if (hp == NULL){
@@ -878,17 +879,17 @@ snmp_sess_open(struct snmp_session *in_session)
 		snmp_sess_close(slp);
 		return 0;
 	    } else {
-		memmove(&isp->addr.sin_addr, hp->h_addr, hp->h_length);
+		memmove(&isp_addr->sin_addr, hp->h_addr, hp->h_length);
 	    }
 	}
-	isp->addr.sin_family = AF_INET;
+	isp_addr->sin_family = AF_INET;
 	if (session->remote_port == SNMP_DEFAULT_REMPORT){
-	    isp->addr.sin_port = default_s_port;
+	    isp_addr->sin_port = default_s_port;
 	} else {
-	    isp->addr.sin_port = htons(session->remote_port);
+	    isp_addr->sin_port = htons(session->remote_port);
 	}
     } else {
-	isp->addr.sin_addr.s_addr = SNMP_DEFAULT_ADDRESS;
+	isp_addr->sin_addr.s_addr = SNMP_DEFAULT_ADDRESS;
     }
 
     memset(&me, '\0', sizeof(me));
@@ -1634,6 +1635,7 @@ snmp_pdu_build (struct snmp_pdu *pdu, u_char *cp, size_t *out_length)
 {
   u_char *h1, *h1e, *h2, *h2e;
   struct variable_list *vp;
+  struct sockaddr_in *pduIp = (struct sockaddr_in *)&(pdu->agent_addr);
   size_t length;
 
   length = *out_length;
@@ -1682,8 +1684,8 @@ snmp_pdu_build (struct snmp_pdu *pdu, u_char *cp, size_t *out_length)
         /* agent-addr */
     cp = asn_build_string(cp, out_length,
 			  (u_char)(ASN_IPADDRESS | ASN_PRIMITIVE),
-			  (u_char *)&pdu->agent_addr.sin_addr.s_addr,
-			  sizeof(pdu->agent_addr.sin_addr.s_addr));
+			  (u_char *)&pduIp->sin_addr.s_addr,
+			  sizeof(pduIp->sin_addr.s_addr));
     if (cp == NULL)
       return NULL;
 
@@ -2232,6 +2234,7 @@ snmp_pdu_parse(struct snmp_pdu *pdu, u_char  *data, size_t *length) {
   size_t   len;
   size_t   four;
   struct variable_list *vp = NULL;
+  struct sockaddr_in *pduIp = (struct sockaddr_in *)&(pdu->agent_addr);
   oid objid[MAX_OID_LEN];
   char err[256];
 
@@ -2285,7 +2288,7 @@ snmp_pdu_parse(struct snmp_pdu *pdu, u_char  *data, size_t *length) {
     /* agent-addr */
     four = 4;
     data = asn_parse_string(data, length, &type,
-			    (u_char *)&pdu->agent_addr.sin_addr.s_addr,
+			    (u_char *)&pduIp->sin_addr.s_addr,
 			    &four);
     if (data == NULL)
       return -1;
@@ -2573,6 +2576,8 @@ snmp_sess_async_send(void *sessp,
     u_char  packet[PACKET_LENGTH];
     size_t length = PACKET_LENGTH;
     struct request_list *rp;
+    struct sockaddr_in *isp_addr;
+    struct sockaddr_in *pduIp = (struct sockaddr_in *)&(pdu->address);
     struct timeval tv;
     int expect_response = 1;
 
@@ -2674,9 +2679,10 @@ snmp_sess_async_send(void *sessp,
         return 0;
     }
 
-    if (pdu->address.sin_addr.s_addr == SNMP_DEFAULT_ADDRESS){
-	if (isp->addr.sin_addr.s_addr != SNMP_DEFAULT_ADDRESS){
-	    memmove(&pdu->address, &isp->addr, sizeof(pdu->address));
+    if (pduIp->sin_addr.s_addr == SNMP_DEFAULT_ADDRESS){
+	isp_addr = (struct sockaddr_in *)&(isp->addr);
+	if (isp_addr->sin_addr.s_addr != SNMP_DEFAULT_ADDRESS){
+	    memmove(&pdu->address, isp_addr, sizeof(*pduIp));
 	} else {
 	    snmp_errno = SNMPERR_BAD_ADDRESS;
 	    session->s_snmp_errno = SNMPERR_BAD_ADDRESS;
@@ -2843,14 +2849,14 @@ snmp_sess_async_send(void *sessp,
     }
     if (snmp_dump_packet){
 	printf("\nSending %u bytes to %s:%hu\n", length,
-	       inet_ntoa(pdu->address.sin_addr), ntohs(pdu->address.sin_port));
+	       inet_ntoa(pduIp->sin_addr), ntohs(pduIp->sin_port));
 	xdump(packet, length, "");
         printf("\n");
     }
 
     /* send the message */
     if (sendto(isp->sd, (char *)packet, length, 0,
-	       (struct sockaddr *)&pdu->address, sizeof(pdu->address)) < 0){
+	       &pdu->address, sizeof(pdu->address)) < 0){
 	snmp_errno = SNMPERR_BAD_SENDTO;
 	session->s_snmp_errno = SNMPERR_BAD_SENDTO;
 	session->s_errno = errno;
@@ -2971,7 +2977,8 @@ snmp_sess_read(void *sessp,
     struct snmp_session *sp;
     struct snmp_internal_session *isp;
     u_char packet[PACKET_LENGTH];
-    struct sockaddr_in	from;
+    struct sockaddr    from;
+    struct sockaddr_in *fromIp = (struct sockaddr_in *)&from;
     size_t length;
     int  fromlength;
     struct snmp_pdu *pdu;
@@ -2990,7 +2997,7 @@ snmp_sess_read(void *sessp,
     magic = sp->callback_magic;
     fromlength = sizeof from;
     length = recvfrom(isp->sd, (char *)packet, PACKET_LENGTH, 0,
-		      (struct sockaddr *)&from, &fromlength);
+		      &from, &fromlength);
     if (length == -1) {
 	snmp_errno = SNMPERR_BAD_RECVFROM;
 	sp->s_snmp_errno = SNMPERR_BAD_RECVFROM;
@@ -3000,7 +3007,7 @@ snmp_sess_read(void *sessp,
     }
     if (snmp_dump_packet){
 	printf("\nReceived %d bytes from %s:%hu\n", length,
-	       inet_ntoa(from.sin_addr), ntohs(from.sin_port));
+	       inet_ntoa(fromIp->sin_addr), ntohs(fromIp->sin_port));
 	xdump(packet, length, "");
         printf("\n");
         if ( isp->hook_pre ) {
@@ -3257,6 +3264,7 @@ snmp_resend_request(struct session_list *slp, struct request_list *rp,
   struct timeval tv;
   struct snmp_session *sp;
   struct snmp_internal_session *isp;
+  struct sockaddr_in *pduIp;
   struct timeval now;
 
   sp = slp->session; isp = slp->internal;
@@ -3271,15 +3279,16 @@ snmp_resend_request(struct session_list *slp, struct request_list *rp,
     /* this should never happen */
     return -1;
   }
+  pduIp = (struct sockaddr_in *)&(rp->pdu->address);
   if (snmp_dump_packet){
     printf("\nResending %d bytes to %s:%hu\n", length,
-	   inet_ntoa(rp->pdu->address.sin_addr), ntohs(rp->pdu->address.sin_port));
+	   inet_ntoa(pduIp->sin_addr), ntohs(pduIp->sin_port));
     xdump(packet, length, "");
     printf("\n");
   }
 
   if (sendto(isp->sd, (char *)packet, length, 0,
-	     (struct sockaddr *)&rp->pdu->address,
+	     &rp->pdu->address,
 	     sizeof(rp->pdu->address)) < 0){
     snmp_errno = SNMPERR_BAD_SENDTO;
     sp->s_snmp_errno = SNMPERR_BAD_SENDTO;
