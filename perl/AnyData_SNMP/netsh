@@ -458,6 +458,12 @@ sub netsh {
 			    print "    <$sth->{NAME}[$xx]>$row->[$xx]</$sth->{NAME}[$xx]>\n";
 			}
 			print "  </row>\n";
+		    } elsif ($opts{'d'} eq 'xmlshort') {
+			print "  <row ";
+			for(my $xx = 0; $xx < $#{$sth->{NAME}}; $xx++) {
+			    print " $sth->{NAME}[$xx]=\"$row->[$xx]\"";
+			}
+			print "/>\n";
 		    } else {
 			print join($opts{'d'},@$row),"\n";
 		    }
