@@ -252,6 +252,18 @@ AC_ARG_WITH(mibfiles,
                                     (Default:  none.  uses IDs above instead.)],
     AC_DEFINE_UNQUOTED(DEFAULT_MIBFILES,"$with_mibfiles"))
 
+askedpkcs=no
+AC_ARG_WITH(pkcs,
+[  --with-pkcs=PATH             Look for pkcs11 in PATH/lib.],
+    if test "x$withval" = "xyes"; then
+      askedpkcs=yes
+    elif test "x$withval" = "xno"; then
+      askedpkcs=no
+    elif test -d "$withval"; then
+      AC_ADD_SEARCH_PATH($withval)
+      askedpkcs=yes
+    fi,
+)
 
 AC_ARG_ENABLE(testing-code,
 [  --enable-testing-code           Enables some code sections that should 
@@ -1464,13 +1476,19 @@ AC_CHECK_LIB(mld, nlist)
 
 # Check for security related functions
 if test "x$tryopenssl" != "xno"; then
-    if test "x$tryrsaref" != "xno"; then
+    if test "x$askedopenssl" != "xyes" -a "x$askedpkcs" = "xyes"; then
+      AC_CHECK_LIB(pkcs11, C_Initialize)
+    else 
+      if test "x$tryrsaref" != "xno"; then
          AC_CHECK_LIB(rsaref, RSAPrivateDecrypt)
          AC_CHECK_LIB(RSAglue, RSA_PKCS1_RSAref)
-    fi
+      fi
 
-    AC_CHECK_LIB(crypto, EVP_md5)
-    AC_CHECK_FUNCS(AES_cfb128_encrypt)
+      AC_CHECK_LIB(crypto, EVP_md5)
+      AC_CHECK_FUNCS(AES_cfb128_encrypt)
+    fi
+elif test "x$askedpkcs" = "xyes"; then
+    AC_CHECK_LIB(pkcs11, C_Initialize)
 fi
 
 # Check for libraries that the agent needs
@@ -1772,6 +1790,7 @@ fi
 
 # OpenSSL
 AC_CHECK_HEADERS(openssl/hmac.h openssl/evp.h openssl/aes.h openssl/des.h)
+AC_CHECK_HEADERS(security/cryptoki.h)
 
 # Printing
 AC_PATH_PROG([LPSTAT_PATH],lpstat)
@@ -1785,37 +1804,60 @@ if test -r /etc/printcap; then
 fi
 
 AC_MSG_CHECKING([for authentication support])
-if test "x$ac_cv_lib_crypto_EVP_md5" != "xyes" -o "x$ac_cv_header_openssl_hmac_h" != "xyes" -o "x$ac_cv_header_openssl_hmac_h" != "xyes"; then
-# if OpenSSL is not found, default to using internal md5 support.
-    AC_DEFINE(USE_INTERNAL_MD5)
-    authmodes="MD5"
-    encrmodes=""
-    AC_MSG_RESULT(Internal MD5 Support)
-    if test "x$askedopenssl" = "xyes"; then
-	AC_MSG_ERROR(Asked to use OpenSSL but I couldn't find it.)
+useopenssl=no
+usepkcs=no
+if test "x$ac_cv_lib_pkcs11_C_Initialize" != "xyes" -o "x$ac_cv_header_security_cryptoki_h" != "xyes"; then
+    if test "x$askedpkcs" = "xyes"; then
+       AC_MSG_ERROR(Asked to use PKCS11 but I couldn't find it.)
     fi
 else
-    if test "x$tryopenssl" = "xno"; then
-        authmodes="MD5"
-        encrmodes=""
-	AC_DEFINE(USE_INTERNAL_MD5)
-	AC_MSG_RESULT(Internal MD5 Support)
-    else
-        authmodes="MD5 SHA1"
-        if test "x$enable_privacy" != "xno" ; then
-	    if test $ac_cv_header_openssl_aes_h = "yes" ; then
-	        encrmodes="DES AES128 AES192 AES256"
-	    else
-	        encrmodes="DES"
-	    fi
-        else
-	    encrmodes="[disabled]"
-        fi
-	AC_DEFINE(USE_OPENSSL)
-	AC_MSG_RESULT(OpenSSL Support)
+    if test "x$askedpkcs" = "xyes"; then
+        usepkcs=yes
     fi
 fi
 
+if test "x$ac_cv_lib_crypto_EVP_md5" != "xyes" -o "x$ac_cv_header_openssl_hmac_h" != "xyes" -o "x$ac_cv_header_openssl_hmac_h" != "xyes"; then
+    if test "x$askedopenssl" = "xyes"; then
+        AC_MSG_ERROR(Asked to use OpenSSL but I couldn't find it.)
+    fi
+else
+    if test "x$askedopenssl" = "xyes"; then
+        useopenssl=yes
+    elif test "x$tryopenssl" = "xyes"; then
+        if test "x$usepkcs" != "xyes"; then
+            useopenssl=yes
+        fi
+    fi
+fi
+
+if test "x$useopenssl" != "xno" ; then
+    authmodes="MD5 SHA1"
+    if test "x$enable_privacy" != "xno" ; then
+        if test "x$ac_cv_header_openssl_aes_h" = "yes" ; then
+            encrmodes="DES AES128 AES192 AES256"
+	else
+	    encrmodes="DES"
+	fi
+    else
+        encrmodes="[disabled]"
+    fi
+    AC_DEFINE(USE_OPENSSL)
+    AC_MSG_RESULT(OpenSSL Support)
+elif test "x$usepkcs" != "xno" ; then
+    authmodes="MD5 SHA1"
+    if test "x$enable_privacy" != "xno" ; then
+        encrmodes="DES"
+    else
+        encrmodes="[disabled]"
+    fi
+    AC_DEFINE(USE_PKCS)
+    AC_MSG_RESULT(PKCS11 Support)
+else
+    authmodes="MD5"
+    encrmodes=""
+    AC_DEFINE(USE_INTERNAL_MD5)
+    AC_MSG_RESULT(Internal MD5 Support)
+fi
 AC_MSG_CACHE_ADD(Authentication support:     $authmodes)
 AC_MSG_CACHE_ADD(Encryption support:         $encrmodes)
 
