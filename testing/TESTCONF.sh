@@ -111,7 +111,7 @@ if [ "x$SNMP_SNMPD_PORT" = "x" ]; then
 fi
 
 if [ "x$SNMP_SNMPTRAPD_PORT" = "x" ]; then
-    (( SNMP_SNMPTRAPD_PORT = $BASE_PORT - 1 ))
+    SNMP_SNMPTRAPD_PORT=`expr $BASE_PORT - 1`
 fi
 export SNMP_FLAGS SNMP_SNMPD_PORT SNMP_SNMPTRAPD_PORT
 
