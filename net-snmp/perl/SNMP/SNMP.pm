@@ -2182,7 +2182,13 @@ feedback.
  Wayne Marquette
  Scott Schumate
  Michael Slifcak
+ Srivathsan Srinivasagopalan
+ Bill Fenner
+ Jef Peeraer
+ Daniel Hagerty
+ Karl "Rat" Schilke and Electric Lightwave, Inc.
  Perl5 Porters
+ Alex Burger
 
 Apologies to any/all who's patch/feature/request was not mentioned or
 included - most likely it was lost when paying work intruded on my
