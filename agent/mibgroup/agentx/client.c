@@ -50,7 +50,7 @@
 #include "agentx/client.h"
 
 static oid null_oid[] = {0, 0};
-extern struct timevale starttime;
+extern struct timeval starttime;
 
 	/*
 	 * AgentX handling utility routines
