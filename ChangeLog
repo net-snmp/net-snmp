@@ -2,6 +2,259 @@
 
 Changes: V4.2.1 -> V4.2.2
 	
+2001-10-08 10:47  hardaker
+
+   * agent/mibgroup/notification/: snmpNotifyFilterProfileTable.c,
+   snmpNotifyFilterTable.c, snmpNotifyTable.c:
+
+   Apply patches suggested in bug #469082 to fix illegal row creations
+   when rowstatus is set to destroy.
+   
+2001-10-06 07:49  hardaker
+
+   * FAQ:
+
+   minor tweaks to the download list.
+   
+2001-10-06 07:42  hardaker
+
+   * README:
+
+   Add David Lawrence's text about contributing patches.
+   
+2001-10-05 18:09  hardaker
+
+   * FAQ, README, sedscript.in, version.h:
+
+   - (version.h sedscript.in): version tag ( 4.2.2.pre6 )
+   
+2001-10-05 18:01  hardaker
+
+   * acconfig.h, config.h.in, configure, configure.in,
+   snmplib/mt_support.c, snmplib/mt_support.h:
+
+   Change _REENTRANT define to NS_REENTRANT to not conflict with BSD/OS 4.3.
+   
+2001-10-05 17:39  hardaker
+
+   * agent/mibgroup/mibII/at.h, agent/mibgroup/mibII/icmp.c,
+   agent/mibgroup/mibII/interfaces.c, s/irix.h:
+
+   irix specific fixes mentioned in bug #405454
+   
+2001-10-05 17:22  hardaker
+
+   * agent/mibgroup/mibII/var_route.c:
+
+   fix #440808 possibly overwriting a oid buffer.
+   
+2001-10-05 16:59  hardaker
+
+   * local/mib2c.vartypes.conf:
+
+   fix unsigned32 return variable usage
+   
+2001-10-05 16:51  hardaker
+
+   * agent/mibgroup/mibII/at.c:
+
+   move arptab_current and arptab_size definitions up out of ifdef mess.
+   
+2001-10-05 16:47  hardaker
+
+   * agent/mibgroup/notification/: snmpNotifyFilterProfileTable.c,
+   snmpNotifyFilterTable.c, snmpNotifyTable.c:
+
+   don't create rowstatus entries with 'destroy' as initial value.
+   
+2001-10-05 16:36  hardaker
+
+   * agent/mibgroup/notification/: snmpNotifyFilterProfileTable.c,
+   snmpNotifyFilterTable.c, snmpNotifyTable.c:
+
+   fixed UNDO clauses.
+   
+2001-10-05 08:50  hardaker
+
+   * agent/mibgroup/ucd-snmp/dlmod.c, snmplib/snmp_api.c:
+
+   Patch from Harrie for picky compilers.
+   
+2001-10-05 08:49  hardaker
+
+   * agent/agent_trap.c:
+
+   better error description for trapsess
+   
+2001-10-05 08:49  hardaker
+
+   * FAQ:
+
+   Added mirror sites.
+   
+2001-10-05 07:10  hardaker
+
+   * mibs/: SMUX-MIB.txt, UCD-SNMP-MIB.txt:
+
+   MIB problems pointed out by Marek Malowidziki
+   
+2001-10-04 17:09  hardaker
+
+   * snmplib/snmp_auth.c:
+
+   Don't write a null past the end of the community string buffer.
+   
+2001-10-04 07:14  hardaker
+
+   * README, local/snmpconf.dir/snmpd.conf/extending,
+   man/snmpd.conf.5.def:
+
+   Patch from T. J. Mather: Documentation of the pass_persist snmpd.conf token.
+   
+2001-10-04 07:14  hardaker
+
+   * local/pass_persisttest:
+
+   Patch from T. J. Mather: An example (perl) pass_persist script.
+   
+2001-10-04 02:21  jbpn
+
+   * agent/snmpd.c:
+
+     - disable stderr logging (if requested) before calling init_mib_modules().
+       This should fix the problem noted by Nigel Metheringham in bug #418857
+       whereby the AgentX master module prints a message to stderr which causes
+       a SIGPIPE when the agent is started as a daemon.
+   
+       Also noted with extensive analysis by Ted Rule in bug #467551.
+   
+2001-10-03 11:22  hardaker
+
+   * FAQ, README, sedscript.in, version.h:
+
+   - (version.h sedscript.in): version tag ( 4.2.2.pre5 )
+   
+2001-10-03 11:16  hardaker
+
+   * apps/snmptrapd.c, apps/snmptrapd_log.c, snmplib/mib.c,
+   snmplib/tools.c:
+
+   proper const casting in front of Markku's casting patch.
+   
+2001-10-03 11:10  hardaker
+
+   * apps/snmptrapd.c, apps/snmptrapd_log.c, snmplib/asn1.c,
+   snmplib/mib.c, snmplib/tools.c:
+
+   Patch: proper casts for picky compilers from Markku Laukkanen.
+   
+2001-10-03 09:22  hardaker
+
+   * snmplib/snmp_api.c:
+
+   don't rbuild beyond the end of a buffer (needed buffer + length "- 1").
+   
+2001-10-03 05:38  jbpn
+
+   * snmplib/keytools.c:
+
+     - change expression at l. 415 from:
+   
+           *kcstring++ = *kcstring ^ *newkey++;
+   
+       which has undefined behaviour to:
+   
+           *kcstring++ ^= *newkey++;
+   
+       which is okay (since *kcstring is only evaluated once).  Similarly
+       at l. 530.  The previous constructs cause warnings with GCC3 and
+       some other compilers.  Thanks to Niel Markwick who noted this in
+       bug #465969.
+   
+2001-10-02 18:01  hardaker
+
+   * agent/agent_trap.c:
+
+   Change oid lengths to size_t from int (segfaults on an alpha/linux).
+   
+2001-10-02 17:46  hardaker
+
+   * agent/mibgroup/ucd-snmp/memory_solaris2.c:
+
+   Add prototype for getTotalSwap().
+   
+2001-10-02 17:15  hardaker
+
+   * agent/mibgroup/target/: snmpTargetAddrEntry.c,
+   snmpTargetParamsEntry.c:
+
+   return NOT_WRITABLE instead of READONLY as pointed out by
+   arajesh@india.adventnet.com.
+   
+2001-10-02 17:03  hardaker
+
+   * win32/config.h:
+
+   Patch from Marc Moeller to define snprintf as _snprintf
+   
+2001-10-02 17:02  hardaker
+
+   * agent/mibgroup/host/hr_print.c:
+
+   Patch from Marc Moeller to check for HAVE_LPSTAT before calling it.
+   
+2001-10-02 17:00  hardaker
+
+   * README:
+
+   add Ron.
+   
+2001-10-02 17:00  hardaker
+
+   * snmplib/system.c:
+
+   get_uptime() implementation for windows from Ron Mevissen.
+   
+2001-10-01 17:38  hardaker
+
+   * FAQ, README, sedscript.in, version.h:
+
+   - (version.h sedscript.in): version tag ( 4.2.2.pre4 )
+   
+2001-10-01 17:38  hardaker
+
+   * agent/Makefile.in, agent/mibgroup/Makefile.in, apps/Makefile.in,
+   apps/snmpnetstat/Makefile.in, snmplib/Makefile.in,
+   testing/Makefile.in:
+
+   make makefileindepend
+   
+2001-10-01 17:37  hardaker
+
+   * makefileindepend.pl:
+
+   translate .o -> .lo by hand.
+   
+2001-10-01 17:07  hardaker
+
+   * agent/mibgroup/host/: hr_disk.c, hr_print.c:
+
+   Applied patch #465545 to fix delays in host resources mib when looking
+   at devices and printers.
+   
+2001-10-01 16:45  hardaker
+
+   * ChangeLog, NEWS:
+
+   New stuff in 4.2.2
+   
+2001-10-01 16:39  hardaker
+
+   * apps/snmpwalk.c, man/snmpwalk.1:
+
+   make snmpwalk default to detecting illegal OID increases.  -Cc turns
+   it off instead of on.
+   
 2001-10-01 10:36  hardaker
 
    * COPYING:
