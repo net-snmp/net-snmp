@@ -365,7 +365,9 @@ header_hrswrunEntry(struct variable *vp,
 		 */
     Init_HR_SWRun();
     for ( ;; ) {
+#ifdef dynix
         DEBUGMSGTL(("host/hr_swrun::header_hrswrunEntry", "nextproc == %d\n", nextproc));
+#endif
         pid = Get_Next_HR_SWRun();
 #if !defined(linux)
 #if !defined(dynix)
