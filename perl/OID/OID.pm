@@ -87,7 +87,7 @@ our @EXPORT = qw(
 	snmp_oid_compare
         compare
 );
-our $VERSION = '0.01';
+our $VERSION = '0.1';
 
 sub new {
     my $type = shift;
