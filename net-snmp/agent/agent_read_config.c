@@ -89,6 +89,7 @@
 #endif
 
 #include "mibincl.h"
+#include "snmp_secmod.h"
 #include "snmpusm.h"
 
 #include "mibgroup/struct.h"

@@ -45,6 +45,7 @@
 #include "asn1.h"
 #include "snmp_api.h"
 #include "callback.h"
+#include "snmp_secmod.h"
 #include "snmpusm.h"
 #include "lcd_time.h"
 #include "snmp_debug.h"

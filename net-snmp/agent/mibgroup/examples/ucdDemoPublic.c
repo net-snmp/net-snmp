@@ -23,6 +23,8 @@
 
 #include "mibincl.h"
 #include "snmpv3.h"
+#include "snmp_secmod.h"
+#include "snmpusm.h"
 #include "snmpusm.h"
 #include "agent_read_config.h"
 #include "util_funcs.h"

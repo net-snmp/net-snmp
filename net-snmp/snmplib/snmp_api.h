@@ -181,6 +181,9 @@ struct snmp_session {
     size_t  securityPrivKeyLen; /* Length of Ku for priv protocol */
     int	    securityModel;
     int	    securityLevel;  /* noAuthNoPriv, authNoPriv, authPriv */
+
+    /* security module specific */
+    void    *securityInfo;
 };
 
 /*
@@ -219,6 +222,7 @@ struct request_list {
 #define SNMP_DEFAULT_ENTERPRISE_LENGTH	0
 #define SNMP_DEFAULT_TIME	    0
 #define SNMP_DEFAULT_VERSION	    -1
+#define SNMP_DEFAULT_SECMODEL	    -1
 #define SNMP_DEFAULT_CONTEXT        ""
 #define SNMP_DEFAULT_AUTH_PROTO     usmHMACMD5AuthProtocol
 #define SNMP_DEFAULT_AUTH_PROTOLEN  USM_LENGTH_OID_TRANSFORM

@@ -24,6 +24,7 @@ extern "C" {
 #define USM_MD5_AND_SHA_AUTH_LEN        12              /* bytes */
 #define USM_MAX_AUTHSIZE                USM_MD5_AND_SHA_AUTH_LEN
 
+#define USM_SEC_MODEL_NUMBER            3
 
 /*
  * Structures.
@@ -153,6 +154,9 @@ int	usm_check_and_update_timeliness (
 		u_int   time_uint,
 		int    *error);
 
+SecmodOutMsg usm_secmod_generate_out_msg;
+SecmodOutMsg usm_secmod_generate_out_msg;
+SecmodInMsg usm_secmod_process_in_msg;
 int usm_generate_out_msg (int, u_char *, size_t, int, int, u_char *, size_t,
 			      char *,  size_t, int, u_char *, size_t, void *,
 			      u_char *, size_t *, u_char **, size_t *);

@@ -16,6 +16,7 @@
 #endif
 
 #include "mibincl.h"
+#include "snmp_secmod.h"
 #include "snmpusm.h"
 #include "snmpv3.h"
 #include "snmp-tc.h"
