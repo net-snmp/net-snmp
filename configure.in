@@ -115,7 +115,7 @@ dnl
 dnl Do hairy agent module processing.
 dnl
 changequote(, )
-AC_MSG_CHECKING(for mib modules to use)
+AC_MSG_CHECKING(for and configuring mib modules to use)
 
 mibdir="agent/mibgroup"
 module_list=""
@@ -557,6 +557,12 @@ AC_CHECK_STRUCT_FOR([
 #include<netinet/if_ether.h>
 #endif
 ],arphd,at_next)
+
+AC_CHECK_STRUCT_FOR([
+#if HAVE_SYS_CONF_H
+#include <sys/conf.h>
+#endif
+],swdevt,sw_nblksenabled)
 
 dnl attempt to figure out if sysctl is usable
 

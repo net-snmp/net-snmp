@@ -253,7 +253,11 @@ int getswap(rettype)
     return(0);
   for (i=0; i < nswapdev; i++) {
     if (swdevt[i].sw_enable) {
+#undef STRUCT_SWDEVT_HAS_SW_NBLKSENABLED
+      spacetotal += swdevt[i].sw_nblksenabled;
+#else
       spacetotal += swdevt[i].sw_nblks;
+#endif
       spaceleft += (swdevt[i].sw_nfpgs * 4);
     }
   }
