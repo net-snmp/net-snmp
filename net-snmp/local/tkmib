@@ -129,11 +129,6 @@ $session_opts{'Community'} = shift if ($#ARGV > -1);
 $SNMP::save_descriptions=1;
 $SNMP::use_long_names=1;
 $SNMP::use_enums=1;
-if (test_version(1,5,0,0)) {
-#  print "reading\n";
-  SNMP::read_configs();
-}
-SNMP::initMib();
 $SNMP::verbose = 1;
 my $tmpbd = 1;
 
@@ -720,7 +715,7 @@ sub showChildren {
 	}
     } else {
 	$oid = ".$oid";
-	my $mib = $SNMP::MIB{format_oid($oid,'numeric')};
+	my $mib = $SNMP::MIB{format_oid($oid,'full')};
 	if (defined($mib)) {
 	    my $children = $$mib{'children'}; 
 	    if (ref($children) eq "ARRAY") {
