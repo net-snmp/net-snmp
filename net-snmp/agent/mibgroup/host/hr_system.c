@@ -147,7 +147,7 @@ var_hrsys(struct variable *vp,
     FILE       *fp;
 #endif
 #if (defined(NPROC_SYMBOL) && !defined(NR_TASKS)) || defined(bsdi2)
-    int		nproc;
+    int		nproc = 0;
 #endif
 #ifdef bsdi2
     static int maxproc_mib[] = { CTL_KERN, KERN_MAXPROC };
