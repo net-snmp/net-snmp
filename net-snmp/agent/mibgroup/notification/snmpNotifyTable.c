@@ -17,12 +17,10 @@
 #else
 #include <strings.h>
 #endif
-#if HAVE_NETDB_H
-#include <netdb.h>
-#endif
 
 /* minimal include directives */
 #include "mibincl.h"
+#include "snmp_transport.h"
 #include "header_complex.h"
 #include "snmpNotifyTable.h"
 #include "snmp-tc.h"
@@ -116,27 +114,17 @@ notifyTable_register_notifications(int major, int minor,
     struct targetAddrTable_struct *ptr;
     struct targetParamTable_struct *pptr;
     struct snmpNotifyTable_data *nptr;
-    int i;
+    int confirm, i;
     char buf[SNMP_MAXBUF_SMALL];
-    oid udpdomain[] = { 1,3,6,1,6,1,1 };
-    int udpdomainlen = sizeof(udpdomain)/sizeof(oid);
-#ifdef HAVE_GETHOSTBYNAME
-    struct hostent *hp;
-#endif
-
-    struct agent_add_trap_args *args =
-        (struct agent_add_trap_args *) serverarg;
+    snmp_transport *t = NULL;
+    struct agent_add_trap_args *args = (struct agent_add_trap_args *)serverarg;
     struct snmp_session *ss;
-    int confirm;
 
-    if (!args)
+    if (!args || !(args->ss)) {
         return (0);
-
-    ss = args->ss;
-    if (!ss)
-        return (0);
-
+    }
     confirm = args->confirm;
+    ss = args->ss;
 
     /* XXX: START move target creation to target code */
     for(i=0; i < MAX_ENTRIES; i++) {
@@ -155,25 +143,12 @@ notifyTable_register_notifications(int major, int minor,
     /* address */
     ptr = snmpTargetAddrTable_create();
     ptr->name = strdup(buf);
-    memcpy(ptr->tDomain, udpdomain, udpdomainlen*sizeof(oid));
-    ptr->tDomainLen = udpdomainlen;
+    t = snmp_sess_transport(snmp_sess_pointer(ss));
+    memcpy(ptr->tDomain, t->domain, t->domain_length*sizeof(oid));
+    ptr->tDomainLen = t->domain_length;
+    ptr->tAddressLen = t->remote_length;
+    ptr->tAddress = t->remote;
 
-#ifdef HAVE_GETHOSTBYNAME
-    hp = gethostbyname(ss->peername);
-    if (hp != NULL){
-        /* XXX: fix for other domain types */
-        ptr->tAddressLen = hp->h_length + 2;
-        ptr->tAddress = malloc(ptr->tAddressLen);
-        memmove(ptr->tAddress, hp->h_addr, hp->h_length);
-        ptr->tAddress[hp->h_length] = (ss->remote_port & 0xff00) >> 8;
-        ptr->tAddress[hp->h_length+1] = (ss->remote_port & 0xff);
-    } else {
-#endif /* HAVE_GETHOSTBYNAME */
-        ptr->tAddressLen = 6;
-        ptr->tAddress = (u_char *)calloc(1, ptr->tAddressLen);
-#ifdef HAVE_GETHOSTBYNAME
-    }
-#endif /* HAVE_GETHOSTBYNAME */
     ptr->timeout = ss->timeout/1000;
     ptr->retryCount = ss->retries;
     ptr->tagList = strdup(ptr->name);
