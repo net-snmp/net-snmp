@@ -210,17 +210,47 @@
 /* Define if you have the <net/if_types.h> header file.  */
 #undef HAVE_NET_IF_TYPES_H
 
+/* Define if you have the <netinet/icmp_var.h> header file.  */
+#undef HAVE_NETINET_ICMP_VAR_H
+
+/* Define if you have the <netinet/if_ether.h> header file.  */
+#undef HAVE_NETINET_IF_ETHER_H
+
 /* Define if you have the <netinet/in.h> header file.  */
 #undef HAVE_NETINET_IN_H
 
+/* Define if you have the <netinet/in_pcb.h> header file.  */
+#undef HAVE_NETINET_IN_PCB_H
+
+/* Define if you have the <netinet/in_var.h> header file.  */
+#undef HAVE_NETINET_IN_VAR_H
+
+/* Define if you have the <netinet/ip_var.h> header file.  */
+#undef HAVE_NETINET_IP_VAR_H
+
+/* Define if you have the <netinet/tcp_fsm.h> header file.  */
+#undef HAVE_NETINET_TCP_FSM_H
+
+/* Define if you have the <netinet/tcp_timer.h> header file.  */
+#undef HAVE_NETINET_TCP_TIMER_H
+
+/* Define if you have the <netinet/tcp_var.h> header file.  */
+#undef HAVE_NETINET_TCP_VAR_H
+
 /* Define if you have the <netinet/tcpip.h> header file.  */
 #undef HAVE_NETINET_TCPIP_H
+
+/* Define if you have the <netinet/udp_var.h> header file.  */
+#undef HAVE_NETINET_UDP_VAR_H
 
 /* Define if you have the <stdlib.h> header file.  */
 #undef HAVE_STDLIB_H
 
 /* Define if you have the <strings.h> header file.  */
 #undef HAVE_STRINGS_H
+
+/* Define if you have the <sys/conf.h> header file.  */
+#undef HAVE_SYS_CONF_H
 
 /* Define if you have the <sys/dir.h> header file.  */
 #undef HAVE_SYS_DIR_H
@@ -254,6 +284,9 @@
 
 /* Define if you have the <sys/proc.h> header file.  */
 #undef HAVE_SYS_PROC_H
+
+/* Define if you have the <sys/protosw.h> header file.  */
+#undef HAVE_SYS_PROTOSW_H
 
 /* Define if you have the <sys/select.h> header file.  */
 #undef HAVE_SYS_SELECT_H
