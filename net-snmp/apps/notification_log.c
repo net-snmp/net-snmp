@@ -1,8 +1,6 @@
 #include <config.h>
 
-#ifdef HAVE_SYS_TYPES_H
 #include <sys/types.h>
-#endif
 #if HAVE_NETINET_IN_H
 #include <netinet/in.h>
 #endif
@@ -365,7 +363,7 @@ log_notification(struct hostent *host, struct snmp_pdu *pdu,
         if (addr) {
             char buf[sizeof(in_addr_t) + sizeof(addr->sin_port)];
             in_addr_t locaddr = htonl(addr->sin_addr.s_addr);
-            in_port_t portnum = htons(addr->sin_port);
+            u_short portnum = htons(addr->sin_port);
             memcpy(buf, &locaddr, sizeof(in_addr_t));
             memcpy(buf + sizeof(in_addr_t), &portnum,
                    sizeof(addr->sin_port));
