@@ -29,6 +29,9 @@
 #if HAVE_NETINET_IN_H
 #include <netinet/in.h>
 #endif
+#if HAVE_STRING_H
+#include <string.h>
+#endif
 
 #if TIME_WITH_SYS_TIME
 # ifdef WIN32
