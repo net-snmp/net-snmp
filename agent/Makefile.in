@@ -97,8 +97,8 @@ LLIBAGENTOBJS=snmp_agent.lo snmp_vars.lo agent_read_config.lo \
 	agent_handler.lo @agentgroup_list_lo@ @OTHERAGENTLIBLOBJS@
 
 # The agent objects.
-AGENTOBJS=snmpd.o
-LAGENTOBJS=snmpd.lo
+AGENTOBJS=snmpd.o @other_agentobjs@
+LAGENTOBJS=snmpd.lo @other_lagentobjs@
 
 #
 # Define OBJS and LOBJS for clean target (just this directory)
