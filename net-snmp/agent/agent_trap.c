@@ -194,7 +194,7 @@ void send_enterprise_trap_vars (int trap,
     struct variable_list *v2_vars, *last_var=NULL;
     struct snmp_pdu	*template_pdu, *pdu;
     struct timeval	 now;
-    int uptime;
+    long uptime;
     struct sockaddr_in *pduIp;
     struct trap_sink *sink;
     
