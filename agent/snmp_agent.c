@@ -1940,6 +1940,13 @@ netsnmp_reassign_requests(netsnmp_agent_session *asp)
     }
 
     for (i = 0; i < asp->vbcount; i++) {
+        if (asp->requests[i].requestvb == NULL) {
+            /*
+             * Occurs when there's a mixture of still active
+             *   and "endOfMibView" repetitions
+             */
+            continue;
+        }
         if (asp->requests[i].requestvb->type == ASN_NULL) {
             if (!netsnmp_add_varbind_to_cache(asp, asp->requests[i].index,
                                               asp->requests[i].requestvb,
