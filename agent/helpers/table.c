@@ -183,9 +183,14 @@ table_helper_handler(netsnmp_mib_handler *handler,
         /*
          * for later set modes, we can skip all the index parsing,
          * and we always need to let child handlers have a chance
-         * to clean up.
+         * to clean up, if they were called in the first place (i.e. have
+         * a valid table info pointer).
          */
-        need_processing = 1;
+        if(NULL == netsnmp_extract_table_info(requests)) {
+            DEBUGMSGTL(("table:helper","no table info for set - skipping\n"));
+        }
+        else
+            need_processing = 1;
     }
     else {
         /*
