@@ -57,8 +57,7 @@ int	snmp_access();
 
 struct pbuf *definitelyGetBuf();
 
-#define NUM_COMMUNITIES	5
-char	*communities[NUM_COMMUNITIES] = {
+char	communities[NUM_COMMUNITIES][COMMUNITY_MAX_LEN] = {
     "public", 
     "private",
     "regional",

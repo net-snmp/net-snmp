@@ -8,6 +8,9 @@
 #include <fstab.h>
 #endif
 #include <math.h>
+#include <snmp.h>
+#include <asn1.h>
+#include <snmp_impl.h>
 
 #define ofile stderr
 #define debug 0
@@ -15,6 +18,9 @@
 char *skip_white();
 char *skip_not_white();
 void copy_word();
+
+/* communities from agent/snmp_agent.c */
+extern char communities[NUM_COMMUNITIES][COMMUNITY_MAX_LEN];
 
 int read_config(filename, procp, numps, pprelocs, numrelocs, ppexten,
                 numexs,minimumswap,disk, numdisks,maxload)
@@ -182,6 +188,25 @@ int read_config(filename, procp, numps, pprelocs, numrelocs, ppexten,
                 *maxload++ = maxload[i-1];
               cptr = skip_not_white(cptr);
               cptr = skip_white(cptr);
+            }
+          }
+          else if (!strncmp(word,"community",9)) {
+            i = atoi(cptr);
+            if (i < NUM_COMMUNITIES) {
+              cptr = skip_not_white(cptr);
+              cptr = skip_white(cptr);
+              if (*cptr != NULL) {
+                if (strlen(cptr) < COMMUNITY_MAX_LEN) {
+                  copy_word(cptr,communities[i-1]);
+                } else {
+                  fprintf(stderr,"snmpd.conf:  comminity %s too long\n",cptr);
+                }
+              } else {
+                fprintf(stderr,"snmpd.conf:  no community name found\n");
+              }
+            } else {
+              fprintf(stderr,"snmpd: community number invalid:  %d\n",i);
+              fprintf(stderr,"       must be > 0 and < %d\n",NUM_COMMUNITIES+1);
             }
           }
           else {
