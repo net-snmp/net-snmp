@@ -238,7 +238,7 @@ void print_log(char *file, char *message)
 void sprint_descriptor(char *buffer,
 		       struct varInfo *vip)
 {
-  char buf[SPRINT_MAX_LEN], *cp;
+  char buf[SPRINT_MAX_LEN] = { 0 }, *cp;
 
   sprint_objid(buf, vip->info_oid, vip->oidlen);
   for(cp = buf; *cp; cp++)
@@ -262,7 +262,7 @@ void sprint_descriptor(char *buffer,
 void processFileArgs(char *fileName)
 {
   FILE *fp;
-  char buf[260], *cp;
+  char buf[260] = { 0 }, *cp;
   int blank, linenumber = 0;
 
   fp = fopen(fileName, "r");
@@ -362,11 +362,11 @@ int main(int argc, char *argv[])
   time_t this_time;
   time_t delta_time;
   int sum; /* what the heck is this for, its never used? */
-  char filename[128];
+  char filename[128] = { 0 };
   struct timeval tv;
   struct tm tm;
-  char timestring[64], valueStr[64], maxStr[64], peakStr[64];
-  char outstr[256];
+  char timestring[64] = { 0 }, valueStr[64] = { 0 }, maxStr[64] = { 0 };
+  char outstr[256] = { 0 }, peakStr[64] = { 0 };
   int status;
   int begin, end, last_end;
   int print = 1;
@@ -527,11 +527,12 @@ int main(int argc, char *argv[])
           }
 
 	  if (tableForm) {
-	    if (count == begin) sprintf(outstr, "%s", timestring+1);
-	    else outstr[0] = 0;
-	  }
-	  else
+	    if (count == begin) {
+	      sprintf(outstr, "%s", timestring+1);
+	    }
+	  } else {
 	    sprintf(outstr, "%s %s", timestring, vip->descriptor);
+	  }
 
 	  if (deltat || tableForm){
             if (vip->type == ASN_COUNTER64) {
