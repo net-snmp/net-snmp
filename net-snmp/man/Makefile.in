@@ -4,11 +4,20 @@
 top_builddir=..
 
 #
+#  Yes - I know these header files have nothing to do with the MIBs, but we need a
+#    couple of spare 'INCLUDESUBDIR' definitions to get these files installed properly.
+#  We can tidy this up and do it cleanly later.
+#
+
+INCLUDESUBDIR=machine
+INCLUDESUBDIRHEADERS=generic.h
+
+
+#
 # install stuff
 #
 
 OTHERINSTALL=maninstall
-
 #
 # local stuff
 #
