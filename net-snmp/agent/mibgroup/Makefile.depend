@@ -1,143 +1,259 @@
 # DO NOT DELETE THIS LINE -- make depend depends on it.
 
-
-./header_complex.o: header_complex.c header_complex.h /usr/include/alloca.h
-./header_complex.o: /usr/include/asm/socket.h /usr/include/asm/sockios.h
-./header_complex.o: /usr/include/bits/byteswap.h /usr/include/bits/endian.h
-./header_complex.o: /usr/include/bits/in.h /usr/include/bits/local_lim.h
-./header_complex.o: /usr/include/bits/posix1_lim.h
-./header_complex.o: /usr/include/bits/posix2_lim.h
-./header_complex.o: /usr/include/bits/pthreadtypes.h /usr/include/bits/sched.h
-./header_complex.o: /usr/include/bits/select.h /usr/include/bits/sigset.h
-./header_complex.o: /usr/include/bits/sockaddr.h /usr/include/bits/socket.h
-./header_complex.o: /usr/include/bits/stdio_lim.h /usr/include/bits/time.h
-./header_complex.o: /usr/include/bits/types.h /usr/include/bits/uio.h
-./header_complex.o: /usr/include/bits/waitflags.h
-./header_complex.o: /usr/include/bits/waitstatus.h /usr/include/bits/wchar.h
-./header_complex.o: /usr/include/bits/wordsize.h /usr/include/bits/xopen_lim.h
-./header_complex.o: /usr/include/endian.h /usr/include/features.h
-./header_complex.o: /usr/include/_G_config.h /usr/include/gconv.h
-./header_complex.o: /usr/include/gnu/stubs.h /usr/include/libio.h
-./header_complex.o: /usr/include/limits.h /usr/include/linux/limits.h
-./header_complex.o: /usr/include/netinet/in.h /usr/include/stdint.h
-./header_complex.o: /usr/include/stdio.h /usr/include/stdlib.h
-./header_complex.o: /usr/include/string.h /usr/include/sys/cdefs.h
-./header_complex.o: /usr/include/syslog.h /usr/include/sys/select.h
-./header_complex.o: /usr/include/sys/socket.h /usr/include/sys/syslog.h
-./header_complex.o: /usr/include/sys/sysmacros.h /usr/include/sys/time.h
-./header_complex.o: /usr/include/sys/types.h /usr/include/sys/uio.h
-./header_complex.o: /usr/include/sys/un.h /usr/include/time.h
-./header_complex.o: /usr/include/wchar.h /usr/include/xlocale.h
-./header_complex.o: /usr/lib/gcc-lib/i386-redhat-linux/2.96/include/limits.h
-./header_complex.o: /usr/lib/gcc-lib/i386-redhat-linux/2.96/include/stdarg.h
-./header_complex.o: /usr/lib/gcc-lib/i386-redhat-linux/2.96/include/stddef.h
-./header_complex.o: /usr/lib/gcc-lib/i386-redhat-linux/2.96/include/syslimits.h
-./kernel_sunos5.o: kernel_sunos5.c
-./testdelayed.o: testdelayed.c testdelayed.h /usr/include/alloca.h
-./testdelayed.o: /usr/include/asm/socket.h /usr/include/asm/sockios.h
-./testdelayed.o: /usr/include/bits/byteswap.h /usr/include/bits/confname.h
-./testdelayed.o: /usr/include/bits/endian.h /usr/include/bits/environments.h
-./testdelayed.o: /usr/include/bits/in.h /usr/include/bits/local_lim.h
-./testdelayed.o: /usr/include/bits/posix1_lim.h /usr/include/bits/posix2_lim.h
-./testdelayed.o: /usr/include/bits/posix_opt.h
-./testdelayed.o: /usr/include/bits/pthreadtypes.h /usr/include/bits/sched.h
-./testdelayed.o: /usr/include/bits/select.h /usr/include/bits/sigset.h
-./testdelayed.o: /usr/include/bits/sockaddr.h /usr/include/bits/socket.h
-./testdelayed.o: /usr/include/bits/stdio_lim.h /usr/include/bits/time.h
-./testdelayed.o: /usr/include/bits/types.h /usr/include/bits/uio.h
-./testdelayed.o: /usr/include/bits/waitflags.h /usr/include/bits/waitstatus.h
-./testdelayed.o: /usr/include/bits/wchar.h /usr/include/bits/wordsize.h
-./testdelayed.o: /usr/include/bits/xopen_lim.h /usr/include/endian.h
-./testdelayed.o: /usr/include/features.h /usr/include/_G_config.h
-./testdelayed.o: /usr/include/gconv.h /usr/include/getopt.h
-./testdelayed.o: /usr/include/gnu/stubs.h /usr/include/libio.h
-./testdelayed.o: /usr/include/limits.h /usr/include/linux/limits.h
-./testdelayed.o: /usr/include/netinet/in.h /usr/include/stdint.h
-./testdelayed.o: /usr/include/stdio.h /usr/include/stdlib.h
-./testdelayed.o: /usr/include/string.h /usr/include/sys/cdefs.h
-./testdelayed.o: /usr/include/syslog.h /usr/include/sys/select.h
-./testdelayed.o: /usr/include/sys/socket.h /usr/include/sys/syslog.h
-./testdelayed.o: /usr/include/sys/sysmacros.h /usr/include/sys/time.h
-./testdelayed.o: /usr/include/sys/types.h /usr/include/sys/uio.h
-./testdelayed.o: /usr/include/sys/un.h /usr/include/time.h
-./testdelayed.o: /usr/include/unistd.h /usr/include/wchar.h
-./testdelayed.o: /usr/include/xlocale.h
-./testdelayed.o: /usr/lib/gcc-lib/i386-redhat-linux/2.96/include/limits.h
-./testdelayed.o: /usr/lib/gcc-lib/i386-redhat-linux/2.96/include/stdarg.h
-./testdelayed.o: /usr/lib/gcc-lib/i386-redhat-linux/2.96/include/stddef.h
-./testdelayed.o: /usr/lib/gcc-lib/i386-redhat-linux/2.96/include/syslimits.h
-./testhandler.o: testhandler.c testhandler.h /usr/include/alloca.h
-./testhandler.o: /usr/include/asm/socket.h /usr/include/asm/sockios.h
-./testhandler.o: /usr/include/bits/byteswap.h /usr/include/bits/endian.h
-./testhandler.o: /usr/include/bits/in.h /usr/include/bits/local_lim.h
-./testhandler.o: /usr/include/bits/posix1_lim.h /usr/include/bits/posix2_lim.h
-./testhandler.o: /usr/include/bits/pthreadtypes.h /usr/include/bits/sched.h
-./testhandler.o: /usr/include/bits/select.h /usr/include/bits/sigset.h
-./testhandler.o: /usr/include/bits/sockaddr.h /usr/include/bits/socket.h
-./testhandler.o: /usr/include/bits/stdio_lim.h /usr/include/bits/time.h
-./testhandler.o: /usr/include/bits/types.h /usr/include/bits/uio.h
-./testhandler.o: /usr/include/bits/waitflags.h /usr/include/bits/waitstatus.h
-./testhandler.o: /usr/include/bits/wchar.h /usr/include/bits/wordsize.h
-./testhandler.o: /usr/include/bits/xopen_lim.h /usr/include/endian.h
-./testhandler.o: /usr/include/features.h /usr/include/_G_config.h
-./testhandler.o: /usr/include/gconv.h /usr/include/gnu/stubs.h
-./testhandler.o: /usr/include/libio.h /usr/include/limits.h
-./testhandler.o: /usr/include/linux/limits.h /usr/include/netinet/in.h
-./testhandler.o: /usr/include/stdint.h /usr/include/stdio.h
-./testhandler.o: /usr/include/stdlib.h /usr/include/string.h
-./testhandler.o: /usr/include/sys/cdefs.h /usr/include/syslog.h
-./testhandler.o: /usr/include/sys/select.h /usr/include/sys/socket.h
-./testhandler.o: /usr/include/sys/syslog.h /usr/include/sys/sysmacros.h
-./testhandler.o: /usr/include/sys/time.h /usr/include/sys/types.h
-./testhandler.o: /usr/include/sys/uio.h /usr/include/sys/un.h
-./testhandler.o: /usr/include/time.h /usr/include/wchar.h
-./testhandler.o: /usr/include/xlocale.h
-./testhandler.o: /usr/lib/gcc-lib/i386-redhat-linux/2.96/include/limits.h
-./testhandler.o: /usr/lib/gcc-lib/i386-redhat-linux/2.96/include/stdarg.h
-./testhandler.o: /usr/lib/gcc-lib/i386-redhat-linux/2.96/include/stddef.h
-./testhandler.o: /usr/lib/gcc-lib/i386-redhat-linux/2.96/include/syslimits.h
-./util_funcs.o: mibdefs.h struct.h ucd-snmp/errormib.h /usr/include/alloca.h
-./util_funcs.o: /usr/include/asm/errno.h /usr/include/asm/sigcontext.h
-./util_funcs.o: /usr/include/asm/socket.h /usr/include/asm/sockios.h
-./util_funcs.o: /usr/include/bits/byteswap.h /usr/include/bits/confname.h
-./util_funcs.o: /usr/include/bits/endian.h /usr/include/bits/environments.h
-./util_funcs.o: /usr/include/bits/errno.h /usr/include/bits/fcntl.h
-./util_funcs.o: /usr/include/bits/in.h /usr/include/bits/local_lim.h
-./util_funcs.o: /usr/include/bits/posix1_lim.h /usr/include/bits/posix2_lim.h
-./util_funcs.o: /usr/include/bits/posix_opt.h /usr/include/bits/pthreadtypes.h
-./util_funcs.o: /usr/include/bits/resource.h /usr/include/bits/sched.h
-./util_funcs.o: /usr/include/bits/select.h /usr/include/bits/sigaction.h
-./util_funcs.o: /usr/include/bits/sigcontext.h /usr/include/bits/siginfo.h
-./util_funcs.o: /usr/include/bits/signum.h /usr/include/bits/sigset.h
-./util_funcs.o: /usr/include/bits/sigstack.h /usr/include/bits/sigthread.h
-./util_funcs.o: /usr/include/bits/sockaddr.h /usr/include/bits/socket.h
-./util_funcs.o: /usr/include/bits/stat.h /usr/include/bits/stdio_lim.h
-./util_funcs.o: /usr/include/bits/time.h /usr/include/bits/types.h
-./util_funcs.o: /usr/include/bits/uio.h /usr/include/bits/waitflags.h
-./util_funcs.o: /usr/include/bits/waitstatus.h /usr/include/bits/wchar.h
-./util_funcs.o: /usr/include/bits/wordsize.h /usr/include/bits/xopen_lim.h
-./util_funcs.o: /usr/include/ctype.h /usr/include/endian.h
-./util_funcs.o: /usr/include/errno.h /usr/include/fcntl.h
-./util_funcs.o: /usr/include/features.h /usr/include/_G_config.h
-./util_funcs.o: /usr/include/gconv.h /usr/include/getopt.h
-./util_funcs.o: /usr/include/gnu/stubs.h /usr/include/libio.h
-./util_funcs.o: /usr/include/limits.h /usr/include/linux/errno.h
-./util_funcs.o: /usr/include/linux/limits.h /usr/include/malloc.h
-./util_funcs.o: /usr/include/netinet/in.h /usr/include/signal.h
-./util_funcs.o: /usr/include/stdint.h /usr/include/stdio.h
-./util_funcs.o: /usr/include/stdlib.h /usr/include/string.h
-./util_funcs.o: /usr/include/sys/cdefs.h /usr/include/syslog.h
-./util_funcs.o: /usr/include/sys/resource.h /usr/include/sys/select.h
-./util_funcs.o: /usr/include/sys/socket.h /usr/include/sys/stat.h
-./util_funcs.o: /usr/include/sys/syslog.h /usr/include/sys/sysmacros.h
-./util_funcs.o: /usr/include/sys/time.h /usr/include/sys/types.h
-./util_funcs.o: /usr/include/sys/ucontext.h /usr/include/sys/uio.h
-./util_funcs.o: /usr/include/sys/un.h /usr/include/sys/wait.h
-./util_funcs.o: /usr/include/time.h /usr/include/ucontext.h
-./util_funcs.o: /usr/include/unistd.h /usr/include/wchar.h
-./util_funcs.o: /usr/include/xlocale.h
-./util_funcs.o: /usr/lib/gcc-lib/i386-redhat-linux/2.96/include/limits.h
-./util_funcs.o: /usr/lib/gcc-lib/i386-redhat-linux/2.96/include/stdarg.h
-./util_funcs.o: /usr/lib/gcc-lib/i386-redhat-linux/2.96/include/stddef.h
-./util_funcs.o: /usr/lib/gcc-lib/i386-redhat-linux/2.96/include/syslimits.h
-./util_funcs.o: util_funcs.c util_funcs.h
+./header_complex.lo: ../../include/net-snmp/net-snmp-config.h
+./header_complex.lo: ../../include/net-snmp/system/linux.h
+./header_complex.lo: ../../include/net-snmp/system/sysv.h
+./header_complex.lo: ../../include/net-snmp/system/generic.h
+./header_complex.lo: ../../include/net-snmp/machine/generic.h
+./header_complex.lo: ../../include/net-snmp/net-snmp-includes.h
+./header_complex.lo: ../../include/net-snmp/definitions.h
+./header_complex.lo: ../../include/net-snmp/types.h
+./header_complex.lo: ../../include/net-snmp/library/snmp_api.h
+./header_complex.lo: ../../include/net-snmp/library/asn1.h
+./header_complex.lo: ../../include/net-snmp/library/snmp_impl.h
+./header_complex.lo: ../../include/net-snmp/library/snmp.h
+./header_complex.lo: ../../include/net-snmp/library/snmp-tc.h
+./header_complex.lo: ../../include/net-snmp/utilities.h
+./header_complex.lo: ../../include/net-snmp/library/snmp_client.h
+./header_complex.lo: ../../include/net-snmp/library/getopt.h
+./header_complex.lo: ../../include/net-snmp/library/system.h
+./header_complex.lo: ../../include/net-snmp/library/tools.h
+./header_complex.lo: ../../include/net-snmp/library/int64.h
+./header_complex.lo: ../../include/net-snmp/library/mt_support.h
+./header_complex.lo: ../../include/net-snmp/library/snmp_locking.h
+./header_complex.lo: ../../include/net-snmp/library/snmp_alarm.h
+./header_complex.lo: ../../include/net-snmp/library/data_list.h
+./header_complex.lo: ../../include/net-snmp/library/oid_stash.h
+./header_complex.lo: ../../include/net-snmp/version.h
+./header_complex.lo: ../../include/net-snmp/session_api.h
+./header_complex.lo: ../../include/net-snmp/library/callback.h
+./header_complex.lo: ../../include/net-snmp/library/snmp_transport.h
+./header_complex.lo: ../../include/net-snmp/library/snmpCallbackDomain.h
+./header_complex.lo: ../../include/net-snmp/library/snmpUnixDomain.h
+./header_complex.lo: ../../include/net-snmp/library/snmpUDPDomain.h
+./header_complex.lo: ../../include/net-snmp/library/snmpTCPDomain.h
+./header_complex.lo: ../../include/net-snmp/library/snmpUDPIPv6Domain.h
+./header_complex.lo: ../../include/net-snmp/library/snmpTCPIPv6Domain.h
+./header_complex.lo: ../../include/net-snmp/library/snmpIPXDomain.h
+./header_complex.lo: ../../include/net-snmp/library/ucd_compat.h
+./header_complex.lo: ../../include/net-snmp/pdu_api.h
+./header_complex.lo: ../../include/net-snmp/mib_api.h
+./header_complex.lo: ../../include/net-snmp/library/mib.h
+./header_complex.lo: ../../include/net-snmp/library/parse.h
+./header_complex.lo: ../../include/net-snmp/library/oid_array.h
+./header_complex.lo: ../../include/net-snmp/varbind_api.h
+./header_complex.lo: ../../include/net-snmp/config_api.h
+./header_complex.lo: ../../include/net-snmp/library/read_config.h
+./header_complex.lo: ../../include/net-snmp/library/default_store.h
+./header_complex.lo: ../../include/net-snmp/library/snmp_parse_args.h
+./header_complex.lo: ../../include/net-snmp/library/snmp_enum.h
+./header_complex.lo: ../../include/net-snmp/library/vacm.h
+./header_complex.lo: ../../include/net-snmp/output_api.h
+./header_complex.lo: ../../include/net-snmp/library/snmp_debug.h
+./header_complex.lo: ../../include/net-snmp/library/snmp_logging.h
+./header_complex.lo: ../../include/net-snmp/snmpv3_api.h
+./header_complex.lo: ../../include/net-snmp/library/snmpv3.h
+./header_complex.lo: ../../include/net-snmp/library/transform_oids.h
+./header_complex.lo: ../../include/net-snmp/library/keytools.h
+./header_complex.lo: ../../include/net-snmp/library/scapi.h
+./header_complex.lo: ../../include/net-snmp/library/lcd_time.h
+./header_complex.lo: ../../include/net-snmp/library/snmp_secmod.h
+./header_complex.lo: ../../include/net-snmp/library/snmpv3-security-includes.h
+./header_complex.lo: ../../include/net-snmp/library/snmpusm.h
+./header_complex.lo: ../../include/net-snmp/agent/net-snmp-agent-includes.h
+./header_complex.lo: ../../include/net-snmp/agent/snmp_agent.h
+./header_complex.lo: ../../include/net-snmp/agent/snmp_vars.h
+./header_complex.lo: ../../include/net-snmp/agent/agent_registry.h
+./header_complex.lo: ../../include/net-snmp/agent/ds_agent.h
+./header_complex.lo: ../../include/net-snmp/agent/agent_handler.h
+./header_complex.lo: ../../include/net-snmp/agent/var_struct.h
+./header_complex.lo: ../../include/net-snmp/agent/agent_read_config.h
+./header_complex.lo: ../../include/net-snmp/agent/agent_trap.h
+./header_complex.lo: ../../include/net-snmp/agent/all_helpers.h
+./header_complex.lo: ../../include/net-snmp/agent/instance.h
+./header_complex.lo: ../../include/net-snmp/agent/multiplexer.h
+./header_complex.lo: ../../include/net-snmp/agent/null.h
+./header_complex.lo: ../../include/net-snmp/agent/debug_handler.h
+./header_complex.lo: ../../include/net-snmp/agent/old_api.h
+./header_complex.lo: ../../include/net-snmp/agent/read_only.h
+./header_complex.lo: ../../include/net-snmp/agent/serialize.h
+./header_complex.lo: ../../include/net-snmp/agent/bulk_to_next.h
+./header_complex.lo: ../../include/net-snmp/agent/table.h
+./header_complex.lo: ../../include/net-snmp/agent/table_data.h
+./header_complex.lo: ../../include/net-snmp/agent/table_dataset.h
+./header_complex.lo: ../../include/net-snmp/agent/table_iterator.h
+./header_complex.lo: ../../include/net-snmp/agent/mib_module_config.h
+./header_complex.lo: header_complex.h
+./kernel_sunos5.lo: ../../include/net-snmp/net-snmp-config.h
+./kernel_sunos5.lo: ../../include/net-snmp/system/linux.h
+./kernel_sunos5.lo: ../../include/net-snmp/system/sysv.h
+./kernel_sunos5.lo: ../../include/net-snmp/system/generic.h
+./kernel_sunos5.lo: ../../include/net-snmp/machine/generic.h
+./testhandler.lo: ../../include/net-snmp/net-snmp-config.h
+./testhandler.lo: ../../include/net-snmp/system/linux.h
+./testhandler.lo: ../../include/net-snmp/system/sysv.h
+./testhandler.lo: ../../include/net-snmp/system/generic.h
+./testhandler.lo: ../../include/net-snmp/machine/generic.h
+./testhandler.lo: ../../include/net-snmp/net-snmp-includes.h
+./testhandler.lo: ../../include/net-snmp/definitions.h
+./testhandler.lo: ../../include/net-snmp/types.h
+./testhandler.lo: ../../include/net-snmp/library/snmp_api.h
+./testhandler.lo: ../../include/net-snmp/library/asn1.h
+./testhandler.lo: ../../include/net-snmp/library/snmp_impl.h
+./testhandler.lo: ../../include/net-snmp/library/snmp.h
+./testhandler.lo: ../../include/net-snmp/library/snmp-tc.h
+./testhandler.lo: ../../include/net-snmp/utilities.h
+./testhandler.lo: ../../include/net-snmp/library/snmp_client.h
+./testhandler.lo: ../../include/net-snmp/library/getopt.h
+./testhandler.lo: ../../include/net-snmp/library/system.h
+./testhandler.lo: ../../include/net-snmp/library/tools.h
+./testhandler.lo: ../../include/net-snmp/library/int64.h
+./testhandler.lo: ../../include/net-snmp/library/mt_support.h
+./testhandler.lo: ../../include/net-snmp/library/snmp_locking.h
+./testhandler.lo: ../../include/net-snmp/library/snmp_alarm.h
+./testhandler.lo: ../../include/net-snmp/library/data_list.h
+./testhandler.lo: ../../include/net-snmp/library/oid_stash.h
+./testhandler.lo: ../../include/net-snmp/version.h
+./testhandler.lo: ../../include/net-snmp/session_api.h
+./testhandler.lo: ../../include/net-snmp/library/callback.h
+./testhandler.lo: ../../include/net-snmp/library/snmp_transport.h
+./testhandler.lo: ../../include/net-snmp/library/snmpCallbackDomain.h
+./testhandler.lo: ../../include/net-snmp/library/snmpUnixDomain.h
+./testhandler.lo: ../../include/net-snmp/library/snmpUDPDomain.h
+./testhandler.lo: ../../include/net-snmp/library/snmpTCPDomain.h
+./testhandler.lo: ../../include/net-snmp/library/snmpUDPIPv6Domain.h
+./testhandler.lo: ../../include/net-snmp/library/snmpTCPIPv6Domain.h
+./testhandler.lo: ../../include/net-snmp/library/snmpIPXDomain.h
+./testhandler.lo: ../../include/net-snmp/library/ucd_compat.h
+./testhandler.lo: ../../include/net-snmp/pdu_api.h
+./testhandler.lo: ../../include/net-snmp/mib_api.h
+./testhandler.lo: ../../include/net-snmp/library/mib.h
+./testhandler.lo: ../../include/net-snmp/library/parse.h
+./testhandler.lo: ../../include/net-snmp/library/oid_array.h
+./testhandler.lo: ../../include/net-snmp/varbind_api.h
+./testhandler.lo: ../../include/net-snmp/config_api.h
+./testhandler.lo: ../../include/net-snmp/library/read_config.h
+./testhandler.lo: ../../include/net-snmp/library/default_store.h
+./testhandler.lo: ../../include/net-snmp/library/snmp_parse_args.h
+./testhandler.lo: ../../include/net-snmp/library/snmp_enum.h
+./testhandler.lo: ../../include/net-snmp/library/vacm.h
+./testhandler.lo: ../../include/net-snmp/output_api.h
+./testhandler.lo: ../../include/net-snmp/library/snmp_debug.h
+./testhandler.lo: ../../include/net-snmp/library/snmp_logging.h
+./testhandler.lo: ../../include/net-snmp/snmpv3_api.h
+./testhandler.lo: ../../include/net-snmp/library/snmpv3.h
+./testhandler.lo: ../../include/net-snmp/library/transform_oids.h
+./testhandler.lo: ../../include/net-snmp/library/keytools.h
+./testhandler.lo: ../../include/net-snmp/library/scapi.h
+./testhandler.lo: ../../include/net-snmp/library/lcd_time.h
+./testhandler.lo: ../../include/net-snmp/library/snmp_secmod.h
+./testhandler.lo: ../../include/net-snmp/library/snmpv3-security-includes.h
+./testhandler.lo: ../../include/net-snmp/library/snmpusm.h
+./testhandler.lo: ../../include/net-snmp/agent/net-snmp-agent-includes.h
+./testhandler.lo: ../../include/net-snmp/agent/snmp_agent.h
+./testhandler.lo: ../../include/net-snmp/agent/snmp_vars.h
+./testhandler.lo: ../../include/net-snmp/agent/agent_registry.h
+./testhandler.lo: ../../include/net-snmp/agent/ds_agent.h
+./testhandler.lo: ../../include/net-snmp/agent/agent_handler.h
+./testhandler.lo: ../../include/net-snmp/agent/var_struct.h
+./testhandler.lo: ../../include/net-snmp/agent/agent_read_config.h
+./testhandler.lo: ../../include/net-snmp/agent/agent_trap.h
+./testhandler.lo: ../../include/net-snmp/agent/all_helpers.h
+./testhandler.lo: ../../include/net-snmp/agent/instance.h
+./testhandler.lo: ../../include/net-snmp/agent/multiplexer.h
+./testhandler.lo: ../../include/net-snmp/agent/null.h
+./testhandler.lo: ../../include/net-snmp/agent/debug_handler.h
+./testhandler.lo: ../../include/net-snmp/agent/old_api.h
+./testhandler.lo: ../../include/net-snmp/agent/read_only.h
+./testhandler.lo: ../../include/net-snmp/agent/serialize.h
+./testhandler.lo: ../../include/net-snmp/agent/bulk_to_next.h
+./testhandler.lo: ../../include/net-snmp/agent/table.h
+./testhandler.lo: ../../include/net-snmp/agent/table_data.h
+./testhandler.lo: ../../include/net-snmp/agent/table_dataset.h
+./testhandler.lo: ../../include/net-snmp/agent/table_iterator.h
+./testhandler.lo: ../../include/net-snmp/agent/mib_module_config.h
+./testhandler.lo: testhandler.h
+./util_funcs.lo: ../../include/net-snmp/net-snmp-config.h
+./util_funcs.lo: ../../include/net-snmp/system/linux.h
+./util_funcs.lo: ../../include/net-snmp/system/sysv.h
+./util_funcs.lo: ../../include/net-snmp/system/generic.h
+./util_funcs.lo: ../../include/net-snmp/machine/generic.h
+./util_funcs.lo: ../../include/net-snmp/net-snmp-includes.h
+./util_funcs.lo: ../../include/net-snmp/definitions.h
+./util_funcs.lo: ../../include/net-snmp/types.h
+./util_funcs.lo: ../../include/net-snmp/library/snmp_api.h
+./util_funcs.lo: ../../include/net-snmp/library/asn1.h
+./util_funcs.lo: ../../include/net-snmp/library/snmp_impl.h
+./util_funcs.lo: ../../include/net-snmp/library/snmp.h
+./util_funcs.lo: ../../include/net-snmp/library/snmp-tc.h
+./util_funcs.lo: ../../include/net-snmp/utilities.h
+./util_funcs.lo: ../../include/net-snmp/library/snmp_client.h
+./util_funcs.lo: ../../include/net-snmp/library/getopt.h
+./util_funcs.lo: ../../include/net-snmp/library/system.h
+./util_funcs.lo: ../../include/net-snmp/library/tools.h
+./util_funcs.lo: ../../include/net-snmp/library/int64.h
+./util_funcs.lo: ../../include/net-snmp/library/mt_support.h
+./util_funcs.lo: ../../include/net-snmp/library/snmp_locking.h
+./util_funcs.lo: ../../include/net-snmp/library/snmp_alarm.h
+./util_funcs.lo: ../../include/net-snmp/library/data_list.h
+./util_funcs.lo: ../../include/net-snmp/library/oid_stash.h
+./util_funcs.lo: ../../include/net-snmp/version.h
+./util_funcs.lo: ../../include/net-snmp/session_api.h
+./util_funcs.lo: ../../include/net-snmp/library/callback.h
+./util_funcs.lo: ../../include/net-snmp/library/snmp_transport.h
+./util_funcs.lo: ../../include/net-snmp/library/snmpCallbackDomain.h
+./util_funcs.lo: ../../include/net-snmp/library/snmpUnixDomain.h
+./util_funcs.lo: ../../include/net-snmp/library/snmpUDPDomain.h
+./util_funcs.lo: ../../include/net-snmp/library/snmpTCPDomain.h
+./util_funcs.lo: ../../include/net-snmp/library/snmpUDPIPv6Domain.h
+./util_funcs.lo: ../../include/net-snmp/library/snmpTCPIPv6Domain.h
+./util_funcs.lo: ../../include/net-snmp/library/snmpIPXDomain.h
+./util_funcs.lo: ../../include/net-snmp/library/ucd_compat.h
+./util_funcs.lo: ../../include/net-snmp/pdu_api.h
+./util_funcs.lo: ../../include/net-snmp/mib_api.h
+./util_funcs.lo: ../../include/net-snmp/library/mib.h
+./util_funcs.lo: ../../include/net-snmp/library/parse.h
+./util_funcs.lo: ../../include/net-snmp/library/oid_array.h
+./util_funcs.lo: ../../include/net-snmp/varbind_api.h
+./util_funcs.lo: ../../include/net-snmp/config_api.h
+./util_funcs.lo: ../../include/net-snmp/library/read_config.h
+./util_funcs.lo: ../../include/net-snmp/library/default_store.h
+./util_funcs.lo: ../../include/net-snmp/library/snmp_parse_args.h
+./util_funcs.lo: ../../include/net-snmp/library/snmp_enum.h
+./util_funcs.lo: ../../include/net-snmp/library/vacm.h
+./util_funcs.lo: ../../include/net-snmp/output_api.h
+./util_funcs.lo: ../../include/net-snmp/library/snmp_debug.h
+./util_funcs.lo: ../../include/net-snmp/library/snmp_logging.h
+./util_funcs.lo: ../../include/net-snmp/snmpv3_api.h
+./util_funcs.lo: ../../include/net-snmp/library/snmpv3.h
+./util_funcs.lo: ../../include/net-snmp/library/transform_oids.h
+./util_funcs.lo: ../../include/net-snmp/library/keytools.h
+./util_funcs.lo: ../../include/net-snmp/library/scapi.h
+./util_funcs.lo: ../../include/net-snmp/library/lcd_time.h
+./util_funcs.lo: ../../include/net-snmp/library/snmp_secmod.h
+./util_funcs.lo: ../../include/net-snmp/library/snmpv3-security-includes.h
+./util_funcs.lo: ../../include/net-snmp/library/snmpusm.h
+./util_funcs.lo: ../../include/net-snmp/agent/net-snmp-agent-includes.h
+./util_funcs.lo: ../../include/net-snmp/agent/snmp_agent.h
+./util_funcs.lo: ../../include/net-snmp/agent/snmp_vars.h
+./util_funcs.lo: ../../include/net-snmp/agent/agent_registry.h
+./util_funcs.lo: ../../include/net-snmp/agent/ds_agent.h
+./util_funcs.lo: ../../include/net-snmp/agent/agent_handler.h
+./util_funcs.lo: ../../include/net-snmp/agent/var_struct.h
+./util_funcs.lo: ../../include/net-snmp/agent/agent_read_config.h
+./util_funcs.lo: ../../include/net-snmp/agent/agent_trap.h
+./util_funcs.lo: ../../include/net-snmp/agent/all_helpers.h
+./util_funcs.lo: ../../include/net-snmp/agent/instance.h
+./util_funcs.lo: ../../include/net-snmp/agent/multiplexer.h
+./util_funcs.lo: ../../include/net-snmp/agent/null.h
+./util_funcs.lo: ../../include/net-snmp/agent/debug_handler.h
+./util_funcs.lo: ../../include/net-snmp/agent/old_api.h
+./util_funcs.lo: ../../include/net-snmp/agent/read_only.h
+./util_funcs.lo: ../../include/net-snmp/agent/serialize.h
+./util_funcs.lo: ../../include/net-snmp/agent/bulk_to_next.h
+./util_funcs.lo: ../../include/net-snmp/agent/table.h
+./util_funcs.lo: ../../include/net-snmp/agent/table_data.h
+./util_funcs.lo: ../../include/net-snmp/agent/table_dataset.h
+./util_funcs.lo: ../../include/net-snmp/agent/table_iterator.h
+./util_funcs.lo: ../../include/net-snmp/agent/mib_module_config.h struct.h
+./util_funcs.lo: util_funcs.h ucd-snmp/errormib.h mibdefs.h
