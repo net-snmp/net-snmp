@@ -179,7 +179,7 @@ netsnmp_binary_array_release(netsnmp_container *c)
 	SNMP_FREE(t->data);
     }
     SNMP_FREE(t);
-
+    SNMP_FREE(c);
 }
 
 size_t
@@ -485,7 +485,7 @@ static void
 _ba_for_each(netsnmp_container *container, netsnmp_container_obj_func *f,
              void *context)
 {
-    netsnmp_binary_array_for_each(container, f, context, 0);
+    netsnmp_binary_array_for_each(container, f, context, 1);
 }
 
 static netsnmp_void_array *
@@ -561,6 +561,13 @@ netsnmp_container_get_binary_array_factory(void)
                                  netsnmp_container_get_binary_array_noalloc };
     
     return &f;
+}
+
+void
+netsnmp_container_binary_array_init(void)
+{
+    netsnmp_continer_register("binary_array",
+                              netsnmp_container_get_binary_array_factory());
 }
 
 #ifdef NOT_YET
