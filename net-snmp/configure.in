@@ -399,7 +399,7 @@ AC_ARG_WITH(enterprise-notification-oid,
 [
   --with-enterprise-notification-oid The OID used for the root of
 				     enterprise specific notifications.
-                                     (default .1.6.3.1.4.1.2021 = "enterprise.ucdavis")],[
+                                     (default .1.3.6.1.4.1.2021 = "enterprise.ucdavis")],[
   if test "$withval" = yes; then
     AC_MSG_ERROR([ Please provide a base OID value ]);
   fi
