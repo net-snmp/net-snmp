@@ -181,11 +181,7 @@ netsnmp_unix_accept(netsnmp_transport *t)
 {
     struct sockaddr *farend = NULL;
     int             newsock = -1;
-#ifdef HAVE_SOCKLEN_T
     socklen_t       farendlen = sizeof(struct sockaddr_un);
-#else   /* HAVE_SOCKLEN_T */
-    size_t          farendlen = sizeof(struct sockaddr_un);
-#endif
 
     farend = (struct sockaddr *) malloc(farendlen);
 

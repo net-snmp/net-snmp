@@ -1546,7 +1546,27 @@ dnl Checks for typedefs, structures, and compiler characteristics.
 AC_TYPE_OFF_T
 AC_TYPE_PID_T
 AC_HEADER_TIME
-AC_CHECK_TYPE(socklen_t, AC_DEFINE(HAVE_SOCKLEN_T))
+
+dnl this should use AC_CHECK_TYPE, but it's broken at least in 2.13-14
+dnl so we do it by hand.
+AC_MSG_CHECKING(for socklen_t)
+AC_CACHE_VAL(ac_cv_type_$1,
+[AC_EGREP_CPP(dnl
+changequote(<<,>>)dnl
+<<socklen_t[^a-zA-Z_0-9]>>dnl
+changequote([,]), [#include <sys/types.h>
+#if STDC_HEADERS
+#include <stdlib.h>
+#include <stddef.h>
+#endif
+#ifdef HAVE_SYS_SOCKET_H
+#include <sys/socket.h>
+#endif], ac_cv_type_socklen_t=yes, ac_cv_type_socklen_t=no)])dnl
+
+AC_MSG_RESULT($ac_cv_type_socklen_t)
+if test $ac_cv_type_socklen_t = no; then
+  AC_DEFINE(socklen_t, u_int)
+fi
 
 dnl AIX keeps in_addr_t in /usr/include/netinet/in.h
 AC_MSG_CHECKING(for in_addr_t)
