@@ -65,46 +65,41 @@ int show_all_matched_objects (FILE *, const char *, oid *, size_t *, int, int);
 void usage(void)
 {
   fprintf(stderr,
-	  "usage: snmptranslate [options] [<objectID>]\n\n");
-  fprintf(stderr, "  -h\t\tPrint this help message.\n");
+	  "USAGE: snmptranslate [OPTIONS] OID [OID]...\n\n");
+  fprintf(stderr, "  Version:  %s\n", netsnmp_get_version());
+  fprintf(stderr, "  Web:      http://www.net-snmp.org/\n");
+  fprintf(stderr, "  Email:    net-snmp-coders@lists.sourceforge.net\n\nOPTIONS:\n");
+  
+  fprintf(stderr, "  -h\t\t\tdisplay this help message\n");
+  fprintf(stderr, "  -V\t\t\tdisplay package version number\n");
+  fprintf(stderr, "  -m MIB[:...]\t\tload given list of MIBs (ALL loads everything)\n");
+  fprintf(stderr, "  -M DIR[:...]\t\tlook in given list of directories for MIBs\n");
+  fprintf(stderr, "  -D TOKEN[,...]\tturn on debugging output for the specified TOKENs\n\t\t\t   (ALL gives extremely verbose debugging output)\n");
+  fprintf(stderr, "  -w WIDTH\t\tset width of tree and detail output\n");
   fprintf(stderr,
-          "  -V\t\tPrint snmptranslate version then exit.\n");
+          "  -T TRANSOPTS\t\tSet various options controlling report produced:\n");
   fprintf(stderr,
-          "  -m <MIBS>\tuse MIBS list instead of the default mib list.\n");
+          "\t\t\t  B:  print all matching objects for a regex search\n");
   fprintf(stderr,
-	  "  -D <TOKEN[,TOKEN,...]>\n\t\tEnable snmplib debugging messages.");
+          "\t\t\t  d:  print full details of the given OID\n");
   fprintf(stderr,
-	  " See snmpcmd(1) man page \n\t\tfor more information.\n" );
+          "\t\t\t  p:  print tree format symbol table\n");
   fprintf(stderr,
-          "  -M <MIBDIRS>\tuse MIBDIRS as the location to look for mibs.\n");
+          "\t\t\t  a:  print ASCII format symbol table\n");
   fprintf(stderr,
-	  "  -w <width>\twidth of tree and detail print output\n");
+          "\t\t\t  l:  enable labeled OID report\n");
   fprintf(stderr,
-          "  -T <TRANSOPTS> Print one or more MIB symbol reports.\n");
+          "\t\t\t  o:  enable OID report\n");
   fprintf(stderr,
-          "  \t\tTRANSOPTS values:\n");
+          "\t\t\t  s:  enable dotted symbolic report\n");
   fprintf(stderr,
-          "  \t\t    B: Print all matching objects for a regex search.\n");
-  fprintf(stderr,
-          "  \t\t    d: Print full details of the given OID.\n");
-  fprintf(stderr,
-          "  \t\t    p: Print tree format symbol table.\n");
-  fprintf(stderr,
-          "  \t\t    a: Print ascii format symbol table.\n");
-  fprintf(stderr,
-          "  \t\t    l: Enable labeled OID report.\n");
-  fprintf(stderr,
-          "  \t\t    o: Enable OID report.\n");
-  fprintf(stderr,
-          "  \t\t    s: Enable dotted symbolic report.\n");
-  fprintf(stderr,
-          "  \t\t    t: Enable alternately formatted symbolic suffix report.\n");
-  fprintf(stderr, "  -P <MIBOPTS>\tToggle various defaults controlling mib parsing:\n");
-  snmp_mib_toggle_options_usage("\t\t", stderr);
-  fprintf(stderr, "  -O <OUTOPTS>\tToggle various defaults controlling output display:\n");
-  snmp_out_toggle_options_usage("\t\t", stderr);
-  fprintf(stderr, "  -I <INOPTS>\tToggle various defaults controlling input parsing:\n");
-  snmp_in_toggle_options_usage("\t\t", stderr);
+          "\t\t\t  t:  enable alternate format symbolic suffix report\n");
+  fprintf(stderr, "  -P MIBOPTS\t\tToggle various defaults controlling mib parsing:\n");
+  snmp_mib_toggle_options_usage("\t\t\t  ", stderr);
+  fprintf(stderr, "  -O OUTOPTS\t\tToggle various defaults controlling output display:\n");
+  snmp_out_toggle_options_usage("\t\t\t  ", stderr);
+  fprintf(stderr, "  -I INOPTS\t\tToggle various defaults controlling input parsing:\n");
+  snmp_in_toggle_options_usage("\t\t\t  ", stderr);
   exit(1);
 }
 

@@ -114,12 +114,12 @@ static void optProc(int argc, char *const *argv, int opt)
 
 void usage(void)
 {
-  fprintf(stderr,"Usage: snmpstatus [-Cf]");
+  fprintf(stderr, "USAGE: snmpstatus ");
   snmp_parse_args_usage(stderr);
-  fprintf(stderr,"\n\n");
+  fprintf(stderr, "\n\n");
   snmp_parse_args_descriptions(stderr);
-  fprintf(stderr, "snmpstatus specific options\n");
-  fprintf(stderr, "  -Cf\t\tDon't fix errors and retry the request.\n");
+  fprintf(stderr, "  -C APPOPTS\t\tSet various application specific behaviours:\n");
+  fprintf(stderr, "\t\t\t  f:  do not fix errors and retry the request\n");
 }
 
 

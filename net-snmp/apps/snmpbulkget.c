@@ -84,14 +84,13 @@ int names;
 void
 usage (void)
 {
-  fprintf(stderr,"Usage: snmpbulkget ");
+  fprintf(stderr, "USAGE: snmpbulkget ");
   snmp_parse_args_usage(stderr);
-  fprintf(stderr," [<objectID>]\n\n");
+  fprintf(stderr, " OID [OID]...\n\n");
   snmp_parse_args_descriptions(stderr);
-  fprintf(stderr, "  -C <APPOPTS>  Set various application specific behaviours:\n");
-  fprintf(stderr, "\t\t  APPOPTS values:\n");
-  fprintf(stderr,"\t\t      n<NUM>:  set non-repeaters to <NUM>\n");
-  fprintf(stderr,"\t\t      r<NUM>:  set max-repeaters to <NUM>\n");
+  fprintf(stderr, "  -C APPOPTS\t\tSet various application specific behaviours:\n");
+  fprintf(stderr, "\t\t\t  n<NUM>:  set non-repeaters to <NUM>\n");
+  fprintf(stderr, "\t\t\t  r<NUM>:  set max-repeaters to <NUM>\n");
 }
 
 static
