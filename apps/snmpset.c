@@ -80,6 +80,9 @@ usage(void)
     snmp_parse_args_usage(stderr);
     fprintf(stderr, " OID TYPE VALUE [OID TYPE VALUE]...\n\n");
     snmp_parse_args_descriptions(stderr);
+    fprintf(stderr,
+            "  -C APPOPTS\t\tSet various application specific behaviours:\n");
+    fprintf(stderr, "\t\t\t  q:  don't print results on success\n");
     fprintf(stderr, "\n  TYPE: one of i, u, t, a, o, s, x, d, b, n\n");
     fprintf(stderr,
             "\ti: INTEGER, u: unsigned INTEGER, t: TIMETICKS, a: IPADDRESS\n");
@@ -90,6 +93,29 @@ usage(void)
             "\tU: unsigned int64, I: signed int64, F: float, D: double\n");
 #endif                          /* OPAQUE_SPECIAL_TYPES */
 
+}
+
+static int quiet = 0;
+
+static
+    void
+optProc(int argc, char *const *argv, int opt)
+{
+    switch (opt) {
+    case 'C':
+        while (*optarg) {
+            switch (*optarg++) {
+            case 'q':
+                quiet = 1;
+                break;
+
+            default:
+                fprintf(stderr, "Unknown flag passed to -C: %c\n",
+                        optarg[-1]);
+                exit(1);
+            }
+        }
+    }
 }
 
 int
@@ -116,7 +142,7 @@ main(int argc, char *argv[])
     /*
      * get the common command line arguments 
      */
-    switch (arg = snmp_parse_args(argc, argv, &session, NULL, NULL)) {
+    switch (arg = snmp_parse_args(argc, argv, &session, "C:", optProc)) {
     case -2:
         exit(0);
     case -1:
@@ -217,9 +243,11 @@ main(int argc, char *argv[])
     status = snmp_synch_response(ss, pdu, &response);
     if (status == STAT_SUCCESS) {
         if (response->errstat == SNMP_ERR_NOERROR) {
-            for (vars = response->variables; vars;
-                 vars = vars->next_variable)
-                print_variable(vars->name, vars->name_length, vars);
+            if (!quiet) {
+                for (vars = response->variables; vars;
+                     vars = vars->next_variable)
+                    print_variable(vars->name, vars->name_length, vars);
+            }
         } else {
             fprintf(stderr, "Error in packet.\nReason: %s\n",
                     snmp_errstring(response->errstat));
