@@ -525,7 +525,7 @@ int snmp_input(int op,
 		reply->errindex = 0;
 		reply->address = pdu->address;
 		if (!snmp_send(session, reply)){
-                    snmp_perror("snmptrapd: Couldn't respond to inform pdu");
+                    snmp_sess_perror("snmptrapd: Couldn't respond to inform pdu", session);
 		}
 	    }
 	}
@@ -791,7 +791,7 @@ int main(int argc, char *argv[])
 
     ss = snmp_open( session );
     if (ss == NULL){
-        snmp_perror("snmptrapd");
+        snmp_sess_perror("snmptrapd", ss);
         if (Syslog) {
 	    syslog(LOG_ERR,"couldn't open snmp - %m");
 	}

@@ -228,7 +228,7 @@ int main(int argc, char *argv[])
                 break;
               case 'T':
               {
-                char *tPtr;
+                char *tPtr=NULL;
                 print = 3;
                 if (argv[arg][2] != 0)
                     tPtr = &argv[arg][2];

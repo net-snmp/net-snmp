@@ -113,7 +113,7 @@ int main(int argc, char *argv[])
     /* open an SNMP session */
     ss = snmp_open(&session);
     if (ss == NULL){
-      snmp_perror("snmpgetnext");
+      snmp_sess_perror("snmpgetnext", ss);
       SOCK_CLEANUP;
       exit(1);
     }
@@ -124,7 +124,7 @@ int main(int argc, char *argv[])
     for(count = 0; count < current_name; count++){
       name_length = MAX_OID_LEN;
       if (snmp_parse_oid(names[count], name, &name_length) == NULL) {
-        snmp_perror(names[count]);
+        snmp_sess_perror(names[count], ss);
         failures++;
       } else
         snmp_add_null_var(pdu, name, name_length);
@@ -165,7 +165,7 @@ retry:
     } else if (status == STAT_TIMEOUT){
       fprintf(stderr, "Timeout: No Response from %s.\n", session.peername);
     } else {    /* status == STAT_ERROR */
-      snmp_perror("snmpgetnext");
+      snmp_sess_perror("snmpgetnext", ss);
     }
 
     if (response)

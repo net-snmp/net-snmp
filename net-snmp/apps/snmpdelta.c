@@ -286,7 +286,7 @@ int main(int argc, char *argv[])
 
   int	count, current_name = 0;
   struct varInfo varinfo[128], *vip;
-  u_int value;
+  u_int value=0;
   struct counter64 c64value;
   float printvalue;
   int period = 1;
@@ -386,7 +386,7 @@ int main(int argc, char *argv[])
   SOCK_STARTUP;
   ss = snmp_open(&session);
   if (ss == NULL){
-    snmp_perror("snmpdelta");
+    snmp_sess_perror("snmpdelta", ss);
     SOCK_CLEANUP;
     exit(1);
   }
@@ -400,7 +400,7 @@ int main(int argc, char *argv[])
       vip->oidlen = MAX_OID_LEN;
       vip->info_oid = (oid *)malloc(sizeof(oid) * vip->oidlen);
       if (snmp_parse_oid(vip->name, vip->info_oid, &vip->oidlen) == NULL) {
-	snmp_perror(vip->name);
+	snmp_sess_perror(vip->name, ss);
 	SOCK_CLEANUP;
 	exit(1);
       }
@@ -637,7 +637,7 @@ int main(int argc, char *argv[])
       response = 0;
       break;
     } else {    /* status == STAT_ERROR */
-      snmp_perror("snmpdelta");
+      snmp_sess_perror("snmpdelta", ss);
       response = 0;
       break;
     }

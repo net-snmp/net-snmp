@@ -112,7 +112,7 @@ int main(int argc, char *argv[])
 
     ss = snmp_open(&session);
     if (ss == NULL){
-        snmp_perror("snmptest");
+        snmp_sess_perror("snmptest", ss);
         SOCK_CLEANUP;
 	exit(1);
     }
@@ -176,7 +176,7 @@ int main(int argc, char *argv[])
 	if (command == SNMP_MSG_TRAP2){
 	    /* No response needed */
 	    if (!snmp_send(ss, pdu)){
-                snmp_perror("snmptest");
+                snmp_sess_perror("snmptest", ss);
 	    }
 	} else {
 	    status = snmp_synch_response(ss, pdu, &response);
@@ -240,7 +240,7 @@ int main(int argc, char *argv[])
 	    } else if (status == STAT_TIMEOUT){
 		printf("Timeout: No Response from %s\n", session.peername);
 	    } else {    /* status == STAT_ERROR */
-              snmp_perror("snmptest");
+              snmp_sess_perror("snmptest", ss);
 	    }
 
 	    if (response)
