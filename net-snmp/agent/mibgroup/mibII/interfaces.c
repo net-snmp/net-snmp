@@ -317,13 +317,6 @@ if_type_from_name(const char *pcch)
 #endif
 
 
-typedef struct _conf_if_list {
-    char           *name;
-    int             type;
-    u_long          speed;
-    struct _conf_if_list *next;
-} conf_if_list;
-
 static conf_if_list *conf_list;
 #ifdef linux
 static struct ifnet *ifnetaddr_list;
