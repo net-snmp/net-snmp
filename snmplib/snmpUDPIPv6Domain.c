@@ -394,11 +394,35 @@ snmp_transport	*snmp_udp6_create_tstring       (const char *string, int local)
 }
 
 
+/*  See:
+
+    http://www.ietf.org/internet-drafts/draft-ietf-ops-taddress-mib-01.txt
+
+    (or newer equivalent) for details of the TC which we are using for
+    the mapping here.  */
+
+snmp_transport	*snmp_udp6_create_ostring	(const u_char *o, size_t o_len,
+						 int local)
+{
+  struct sockaddr_in6 addr;
+
+  if (o_len == 18) {
+    memset((u_char *)&addr, 0, sizeof(struct sockaddr_in6));
+    addr.sin6_family = AF_INET6;
+    memcpy((u_char *)&(addr.sin6_addr.s6_addr), o, 16);
+    addr.sin6_port = (o[16] << 8) + o[17];
+    return snmp_udp6_transport(&addr, local);
+  }
+  return NULL;
+}
+
+
 void		snmp_udp6_ctor			(void)
 {
   udp6Domain.name        = ucdSnmpUDPIPv6Domain;
   udp6Domain.name_length = sizeof(ucdSnmpUDPIPv6Domain)/sizeof(oid);
   udp6Domain.f_create_from_tstring = snmp_udp6_create_tstring;
+  udp6Domain.f_create_from_ostring = snmp_udp6_create_ostring;
   udp6Domain.prefix	 = calloc(5, sizeof(char *));
   udp6Domain.prefix[0] 	 = "udp6";
   udp6Domain.prefix[1] 	 = "ipv6";
