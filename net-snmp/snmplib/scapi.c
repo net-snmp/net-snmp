@@ -332,8 +332,8 @@ sc_hash(const oid * hashtype, size_t hashtypelen, u_char * buf,
 {
 #ifdef USE_OPENSSL
     int             rval = SNMPERR_SUCCESS;
-    EVP_MD         *hash(void);
-    HMAC_CTX       *c = NULL;
+    const EVP_MD         *hashfn;
+    EVP_MD_CTX     ctx, *cptr;
 #endif
 
     DEBUGTRACE;
@@ -347,20 +347,48 @@ sc_hash(const oid * hashtype, size_t hashtypelen, u_char * buf,
     /*
      * Determine transform type.
      */
-    c = malloc(sizeof(HMAC_CTX));
-    if (c == NULL)
-        return (SNMPERR_GENERR);
-
     if (ISTRANSFORM(hashtype, HMACMD5Auth)) {
-        EVP_DigestInit(&c->md_ctx, (const EVP_MD *) EVP_md5());
+        hashfn = (const EVP_MD *) EVP_md5();
     } else if (ISTRANSFORM(hashtype, HMACSHA1Auth)) {
-        EVP_DigestInit(&c->md_ctx, (const EVP_MD *) EVP_sha1());
+        hashfn = (const EVP_MD *) EVP_sha1();
     } else {
         return (SNMPERR_GENERR);
     }
-    EVP_DigestUpdate(&c->md_ctx, buf, buf_len);
-    EVP_DigestFinal(&(c->md_ctx), MAC, MAC_len);
-    free(c);
+
+/** initialize the pointer */
+    memset(&ctx, 0, sizeof(ctx));
+    cptr = &ctx;
+#if defined(OLD_DES)
+    EVP_DigestInit(cptr, hashfn);
+#else /* !OLD_DES */
+    /* this is needed if the runtime library is different than the compiled
+       library since the openssl versions are very different. */
+    if (SSLeay() < 0x907000) {
+        /* the old version of the struct was bigger and thus more
+           memory is needed. should be 152, but we use 256 for safety. */
+        cptr = malloc(256);
+        EVP_DigestInit(cptr, hashfn);
+    } else {
+        EVP_MD_CTX_init(cptr);
+        EVP_DigestInit(cptr, hashfn);
+    }
+#endif
+
+/** pass the data */
+    EVP_DigestUpdate(cptr, buf, buf_len);
+
+/** do the final pass */
+#if defined(OLD_DES)
+    EVP_DigestFinal(cptr, MAC, MAC_len);
+#else /* !OLD_DES */
+    if (SSLeay() < 0x907000) {
+        EVP_DigestFinal(cptr, MAC, MAC_len);
+        free(cptr);
+    } else {
+        EVP_DigestFinal_ex(cptr, MAC, MAC_len);
+        EVP_MD_CTX_cleanup(cptr);
+    }
+#endif
     return (rval);
 #else                           /* USE_INTERNAL_MD5 */
 

@@ -1,3 +1,12 @@
+/* Portions of this file are subject to the following copyrights.  See
+ * the Net-SNMP's COPYING file for more details and other copyrights
+ * that may apply:
+ */
+/*
+ * Copyright © 2003 Sun Microsystems, Inc. All rights reserved.
+ * Use is subject to license terms specified in the COPYING file
+ * distributed with the Net-SNMP package.
+ */
 #include <net-snmp/net-snmp-config.h>
 
 #include <sys/types.h>
@@ -81,11 +90,23 @@ file_free_config(void)
 void
 file_parse_config(const char *token, char *cptr)
 {
+    char space;
+	
     if (fileCount < MAXFILE) {
         fileTable[fileCount].max = -1;
 
-        sscanf(cptr, "%s %d",
-               fileTable[fileCount].name, &fileTable[fileCount].max);
+        sscanf(cptr, "%255s%c%d",
+               fileTable[fileCount].name, &space, &fileTable[fileCount].max);
+	/*
+	 * Log an error then return if the string scanned in was larger then
+	 * it should have been.
+	 */
+	if (space != ' ') {
+		snmp_log(LOG_ERR, "file_parse_config: file name scanned " \
+		    "in from line %s is too large.  fileCount = %d\n", cptr,
+		    fileCount);
+		return;
+	}
 
         fileCount++;
     }
@@ -152,8 +173,8 @@ var_file_table(struct variable *vp,
 
     case FILE_MSG:
         if (file->max >= 0 && file->size > file->max)
-            sprintf(error, FILE_ERROR_MSG, file->name, file->max,
-                    file->size);
+            snprintf(error, sizeof(error), FILE_ERROR_MSG, file->name,
+		file->max, file->size);
         else
             strcpy(error, "");
 

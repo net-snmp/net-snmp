@@ -234,6 +234,10 @@ init_vmstat_solaris2(void)
          {IORAWSENT}},
         {IORAWRECEIVE, ASN_COUNTER, RONLY, var_extensible_vmstat, 1,
          {IORAWRECEIVE}},
+        {SYSRAWINTERRUPTS, ASN_COUNTER, RONLY, var_extensible_vmstat, 1,
+         {SYSRAWINTERRUPTS}},
+        {SYSRAWCONTEXT, ASN_COUNTER, RONLY, var_extensible_vmstat, 1,
+         {SYSRAWCONTEXT}},
         /*
          * Future use: 
          */
@@ -474,15 +478,11 @@ take_snapshot(struct cpu_stat_snapshot *css)
 }                               /* take_snapshot ends here */
 
 /*
- * This gets called every POLL_INTERVAL seconds to update the snapshots.  It takes a new snapshot and 
- */
-/*
- * drops the oldest one.  This way we move the time window so we always take the values over 
- */
-/*
- * POLL_INTERVAL * POLL_VALUES seconds and update the data used every POLL_INTERVAL seconds 
- */
-/*
+ * This gets called every POLL_INTERVAL seconds to update the snapshots.
+ * It takes a new snapshot and drops the oldest one.  This way we move
+ * the time window so we always take the values over 
+ * POLL_INTERVAL * POLL_VALUES seconds and update the data used every
+ * POLL_INTERVAL seconds 
  * The alarm timer is in the init function of this module (snmp_alarm_register) 
  */
 /*
@@ -854,6 +854,12 @@ var_extensible_vmstat(struct variable *vp,
         return ((u_char *) (&long_ret));
     case IORAWRECEIVE:
         long_ret = (long) (raw_values.css_blocks_read);
+        return ((u_char *) (&long_ret));
+    case SYSRAWINTERRUPTS:
+        long_ret = (long) (raw_values.css_interrupts);
+        return ((u_char *) (&long_ret));
+    case SYSRAWCONTEXT:
+        long_ret = (long) (raw_values.css_context_sw);
         return ((u_char *) (&long_ret));
 
         /*

@@ -881,9 +881,14 @@ typedef unsigned short mode_t;
 #define USE_REVERSE_ASNENCODING       1
 #define DEFAULT_ASNENCODING_DIRECTION 1 /* 1 = reverse, 0 = forwards */
 
+#ifndef NETSNMP_INLINE
+#   define NETSNMP_NO_INLINE
+#   define NETSNMP_INLINE
+#endif
+
 #ifdef __cplusplus
 }
 #endif
 
-#define inline
+
 #endif /* NET_SNMP_CONFIG_H */

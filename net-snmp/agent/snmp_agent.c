@@ -208,6 +208,7 @@ typedef struct agent_set_cache_s {
     int             treecache_len;
     int             treecache_num;
 
+    int             vbcount;
     netsnmp_request_info *requests;
     netsnmp_data_list *agent_data;
 
@@ -241,6 +242,7 @@ save_set_cache(netsnmp_agent_session *asp)
     ptr->treecache_num = asp->treecache_num;
     ptr->agent_data = asp->reqinfo->agent_data;
     ptr->requests = asp->requests;
+    ptr->vbcount = asp->vbcount;
 
     /*
      * make the agent forget about what we've saved 
@@ -275,6 +277,7 @@ get_set_cache(netsnmp_agent_session *asp)
             asp->treecache_len = ptr->treecache_len;
             asp->treecache_num = ptr->treecache_num;
             asp->requests = ptr->requests;
+            asp->vbcount = ptr->vbcount;
             if (!asp->reqinfo) {
                 asp->reqinfo =
                     SNMP_MALLOC_TYPEDEF(netsnmp_agent_request_info);
@@ -912,11 +915,6 @@ init_agent_snmp_session(netsnmp_session * session, netsnmp_pdu *pdu)
     asp->oldmode = 0;
     asp->treecache_num = -1;
     asp->treecache_len = 0;
-    asp->vbcount = count_varbinds(asp->pdu->variables);
-    if(asp->vbcount) /* efence doesn't like 0 size allocs */
-        asp->requests =
-            (netsnmp_request_info *) calloc(asp->vbcount,
-                                            sizeof(netsnmp_request_info));
 
     return asp;
 }
@@ -1153,9 +1151,6 @@ netsnmp_wrap_up_request(netsnmp_agent_session *asp, int status)
             case SNMP_MSG_INTERNAL_SET_RESERVE1:
             case SNMP_MSG_INTERNAL_SET_RESERVE2:
             case SNMP_MSG_INTERNAL_SET_ACTION:
-            case SNMP_MSG_INTERNAL_SET_COMMIT:
-            case SNMP_MSG_INTERNAL_SET_FREE:
-            case SNMP_MSG_INTERNAL_SET_UNDO:
                 save_set_cache(asp);
                 break;
         }
@@ -1508,6 +1503,8 @@ netsnmp_add_varbind_to_cache(netsnmp_agent_session *asp, int vbcount,
                     netsnmp_acm_check_subtree(asp->pdu,
                                               tp->start_a, prefix_len);
             }
+            else
+                break;
         }
     }
     if (tp == NULL) {
@@ -1645,7 +1642,7 @@ netsnmp_add_varbind_to_cache(netsnmp_agent_session *asp, int vbcount,
          * add the given request to the list of requests they need
          * to handle results for 
          */
-        request->requestvb = varbind_ptr;
+        request->requestvb = request->requestvb_start = varbind_ptr;
     }
     return request;
 }
@@ -1660,10 +1657,11 @@ int
 check_acm(netsnmp_agent_session *asp, u_char type)
 {
     int             view;
-    int             i;
+    int             i, j, k;
     netsnmp_request_info *request;
     int             ret = 0;
-    netsnmp_variable_list *vb;
+    netsnmp_variable_list *vb, *vb2, *vbc;
+    int             earliest = 0;
 
     for (i = 0; i <= asp->treecache_num; i++) {
         for (request = asp->treecache[i].requests_begin;
@@ -1671,18 +1669,48 @@ check_acm(netsnmp_agent_session *asp, u_char type)
             /*
              * for each request, run it through in_a_view() 
              */
-            vb = request->requestvb;
-            if (vb->type == ASN_NULL)   /* not yet processed */
-                continue;
-            view =
-                in_a_view(vb->name, &vb->name_length, asp->pdu, vb->type);
+            earliest = 0;
+            for(j = request->repeat, vb = request->requestvb_start;
+                vb && j > -1;
+                j--, vb = vb->next_variable) {
+                if (vb->type != ASN_NULL &&
+                    vb->type != ASN_PRIV_RETRY) { /* not yet processed */
+                    view =
+                        in_a_view(vb->name, &vb->name_length,
+                                  asp->pdu, vb->type);
 
-            /*
-             * if a ACM error occurs, mark it as type passed in 
-             */
-            if (view != VACM_SUCCESS) {
-                ret++;
-                snmp_set_var_typed_value(vb, type, NULL, 0);
+                    /*
+                     * if a ACM error occurs, mark it as type passed in 
+                     */
+                    if (view != VACM_SUCCESS) {
+                        ret++;
+                        if (request->repeat < request->orig_repeat) {
+                            /* basically this means a GETBULK */
+                            request->repeat++;
+                            if (!earliest) {
+                                request->requestvb = vb;
+                                earliest = 1;
+                            }
+
+                            /* ugh.  if a whole now exists, we need to
+                               move the contents up the chain and fill
+                               in at the end else we won't end up
+                               lexographically sorted properly */
+                            if (j > -1 && vb->next_variable &&
+                                vb->next_variable->type != ASN_NULL &&
+                                vb->next_variable->type != ASN_PRIV_RETRY) {
+                                for(k = j, vbc = vb, vb2 = vb->next_variable;
+                                    k > -2 && vbc && vb2;
+                                    k--, vbc = vb2, vb2 = vb2->next_variable) {
+                                    /* clone next into the current */
+                                    snmp_clone_var(vb2, vbc);
+                                    vbc->next_variable = vb2;
+                                }
+                            }
+                        }
+                        snmp_set_var_typed_value(vb, type, NULL, 0);
+                    }
+                }
             }
         }
     }
@@ -1844,10 +1872,8 @@ netsnmp_create_subtree_cache(netsnmp_agent_session *asp)
             request = netsnmp_add_varbind_to_cache(asp, vbcount, varbind_ptr,
 						   tp);
             if (request && asp->pdu->command == SNMP_MSG_GETBULK) {
-                request->repeat = bulkrep;
+                request->repeat = request->orig_repeat = bulkrep;
             }
-            if (!request)
-                return SNMP_ERR_GENERR;
         }
 
         prevNext = &(varbind_ptr->next_variable);
@@ -1894,8 +1920,8 @@ netsnmp_reassign_requests(netsnmp_agent_session *asp)
                                               asp->requests[i].subtree->next)) {
                 if (old_treecache != NULL) {
                     free(old_treecache);
+                    old_treecache = NULL;
                 }
-                return SNMP_ERR_GENERR;
             }
         } else if (asp->requests[i].requestvb->type == ASN_PRIV_RETRY) {
             /*
@@ -1907,8 +1933,8 @@ netsnmp_reassign_requests(netsnmp_agent_session *asp)
                                               asp->requests[i].subtree)) {
                 if (old_treecache != NULL) {
                     free(old_treecache);
+                    old_treecache = NULL;
                 }
-                return SNMP_ERR_GENERR;
             }
         }
     }
@@ -2635,6 +2661,10 @@ handle_pdu(netsnmp_agent_session *asp)
     case SNMP_MSG_INTERNAL_SET_BEGIN:
     case SNMP_MSG_INTERNAL_SET_RESERVE1:
     default:
+        asp->vbcount = count_varbinds(asp->pdu->variables);
+        if (asp->vbcount) /* efence doesn't like 0 size allocs */
+            asp->requests = (netsnmp_request_info *)
+                calloc(asp->vbcount, sizeof(netsnmp_request_info));
         /*
          * collect varbinds 
          */
@@ -2890,7 +2920,7 @@ netsnmp_get_agent_uptime(void)
 
 
 
-inline void
+NETSNMP_INLINE void
 netsnmp_agent_add_list_data(netsnmp_agent_request_info *ari,
                             netsnmp_data_list *node)
 {
@@ -2903,7 +2933,7 @@ netsnmp_agent_add_list_data(netsnmp_agent_request_info *ari,
     }
 }
 
-inline void    *
+NETSNMP_INLINE void    *
 netsnmp_agent_get_list_data(netsnmp_agent_request_info *ari,
                             const char *name)
 {
@@ -2913,7 +2943,7 @@ netsnmp_agent_get_list_data(netsnmp_agent_request_info *ari,
     return NULL;
 }
 
-inline void
+NETSNMP_INLINE void
 netsnmp_free_agent_data_set(netsnmp_agent_request_info *ari)
 {
     if (ari) {
@@ -2921,7 +2951,7 @@ netsnmp_free_agent_data_set(netsnmp_agent_request_info *ari)
     }
 }
 
-inline void
+NETSNMP_INLINE void
 netsnmp_free_agent_data_sets(netsnmp_agent_request_info *ari)
 {
     if (ari) {
@@ -2929,7 +2959,7 @@ netsnmp_free_agent_data_sets(netsnmp_agent_request_info *ari)
     }
 }
 
-inline void
+NETSNMP_INLINE void
 netsnmp_free_agent_request_info(netsnmp_agent_request_info *ari)
 {
     if (ari) {

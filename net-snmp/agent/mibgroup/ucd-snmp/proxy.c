@@ -308,22 +308,38 @@ proxy_got_response(int operation, netsnmp_session * sess, int reqid,
     size_t          myname_len = MAX_OID_LEN;
 
     cache = netsnmp_handler_check_cache(cache);
+
+    if (!cache) {
+        DEBUGMSGTL(("proxy", "a proxy request was no longer valid.\n"));
+        return SNMP_ERR_NOERROR;
+    }
+
     requests = cache->requests;
 
 
     sp = (struct simple_proxy *) cache->localinfo;
 
-    if (!cache || !sp) {
+    if (!sp) {
         DEBUGMSGTL(("proxy", "a proxy request was no longer valid.\n"));
         return SNMP_ERR_NOERROR;
     }
 
-
-    if (operation == NETSNMP_CALLBACK_OP_RECEIVED_MESSAGE) {
+    switch (operation) {
+    case NETSNMP_CALLBACK_OP_TIMED_OUT:
         /*
          * WWWXXX: don't leave requests delayed if operation is
          * something like TIMEOUT 
          */
+        DEBUGMSGTL(("proxy", "got timed out... requests = %08p\n", requests));
+
+        netsnmp_handler_mark_requests_as_delegated(requests,
+						   REQUEST_IS_NOT_DELEGATED);
+        netsnmp_set_request_error(cache->reqinfo, requests, /* XXXWWW: should be index = 0 */
+				  SNMP_ERR_GENERR);
+        netsnmp_free_delegated_cache(cache);
+        return 0;
+
+    case NETSNMP_CALLBACK_OP_RECEIVED_MESSAGE:
         vars = pdu->variables;
 
         /*
@@ -409,14 +425,21 @@ proxy_got_response(int operation, netsnmp_session * sess, int reqid,
                                       SNMP_ERR_GENERR);
         }
 
+        /* fix bulk_to_next operations */
+        if (cache->reqinfo->mode == MODE_GETBULK)
+            netsnmp_bulk_to_next_fix_requests(requests);
+        
         /*
          * free the response 
          */
         if (pdu && 0)
             snmp_free_pdu(pdu);
-    } else {
+	break;
+
+    default:
         DEBUGMSGTL(("proxy", "no response received: op = %d\n",
                     operation));
+	break;
     }
 
     netsnmp_free_delegated_cache(cache);

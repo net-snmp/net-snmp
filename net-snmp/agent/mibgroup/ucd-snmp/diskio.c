@@ -53,6 +53,16 @@ static int      cache_disknr = -1;
 #include <devstat.h>
 #endif                          /* freebsd */
 
+#if defined (darwin)
+#include <CoreFoundation/CoreFoundation.h>
+#include <IOKit/IOKitLib.h>
+#include <IOKit/storage/IOBlockStorageDriver.h>
+#include <IOKit/storage/IOMedia.h>
+#include <IOKit/IOBSD.h>
+
+static mach_port_t masterPort;		/* to communicate with I/O Kit	*/
+#endif                          /* darwin */
+
 static char     type[20];
 void            diskio_parse_config(const char *, char *);
 FILE           *file;
@@ -131,6 +141,13 @@ init_diskio(void)
 
     if (kc == NULL)
         snmp_log(LOG_ERR, "diskio: Couln't open kstat\n");
+#endif
+
+#ifdef darwin
+    /*
+     * Get the I/O Kit communication handle.
+     */
+    IOMasterPort(bootstrap_port, &masterPort);
 #endif
 }
 
@@ -431,3 +448,231 @@ var_diskio(struct variable * vp,
     return NULL;
 }
 #endif                          /* freebsd4 */
+
+#if defined(darwin)
+
+#define MAXDRIVES	16	/* most drives we will record */
+#define MAXDRIVENAME	31	/* largest drive name we allow */
+
+#define kIDXBytesRead		0	/* used as index into the stats array in a drivestats struct */
+#define kIDXBytesWritten	1
+#define kIDXNumReads		2
+#define kIDXNumWrites		3
+#define kIDXLast		3
+
+struct drivestats {
+    char name[MAXDRIVENAME + 1];
+    long bsd_unit_number;
+    long stats[kIDXLast+1];
+};
+
+static struct drivestats drivestat[MAXDRIVES];
+
+static mach_port_t masterPort;		/* to communicate with I/O Kit	*/
+
+static int num_drives;			/* number of drives detected	*/
+
+static int
+collect_drive_stats(io_registry_entry_t driver, long *stats)
+{
+    CFNumberRef     number;
+    CFDictionaryRef properties;
+    CFDictionaryRef statistics;
+    long            value;
+    kern_return_t   status;
+    int             i;
+
+
+    /*
+     * If the drive goes away, we may not get any properties
+     * for it.  So take some defaults. Nb: use memset ??
+     */
+    for (i = 0; i < kIDXLast; i++) {
+	stats[i] = 0;
+    }
+
+    /* retrieve the properties */
+    status = IORegistryEntryCreateCFProperties(driver, (CFMutableDictionaryRef *)&properties,
+					       kCFAllocatorDefault, kNilOptions);
+    if (status != KERN_SUCCESS) {
+	snmp_log(LOG_ERR, "diskio: device has no properties\n");
+/*	fprintf(stderr, "device has no properties\n"); */
+	return (1);
+    }
+
+    /* retrieve statistics from properties */
+    statistics = (CFDictionaryRef)CFDictionaryGetValue(properties,
+						       CFSTR(kIOBlockStorageDriverStatisticsKey));
+    if (statistics) {
+
+	/* Now hand me the crystals. */
+	if ((number = (CFNumberRef)CFDictionaryGetValue(statistics,
+						 CFSTR(kIOBlockStorageDriverStatisticsBytesReadKey)))) {
+	    CFNumberGetValue(number, kCFNumberSInt32Type, &value);
+	    stats[kIDXBytesRead] = value;
+	}
+
+	if ((number = (CFNumberRef)CFDictionaryGetValue(statistics,
+						 CFSTR(kIOBlockStorageDriverStatisticsBytesWrittenKey)))) {
+	    CFNumberGetValue(number, kCFNumberSInt32Type, &value);
+	    stats[kIDXBytesWritten] = value;
+	}
+
+	if ((number = (CFNumberRef)CFDictionaryGetValue(statistics,
+						 CFSTR(kIOBlockStorageDriverStatisticsReadsKey)))) {
+	    CFNumberGetValue(number, kCFNumberSInt32Type, &value);
+	    stats[kIDXNumReads] = value;
+	}
+	if ((number = (CFNumberRef)CFDictionaryGetValue(statistics,
+						 CFSTR(kIOBlockStorageDriverStatisticsWritesKey)))) {
+	    CFNumberGetValue(number, kCFNumberSInt32Type, &value);
+	    stats[kIDXNumWrites] = value;
+	}
+    }
+    /* we're done with the properties, release them */
+    CFRelease(properties);
+    return (0);
+}
+
+/*
+ * Check whether an IORegistryEntry refers to a valid
+ * I/O device, and if so, collect the information.
+ */
+static int
+handle_drive(io_registry_entry_t drive, struct drivestats * dstat)
+{
+    io_registry_entry_t parent;
+    CFDictionaryRef     properties;
+    CFStringRef         name;
+    CFNumberRef         number;
+    kern_return_t       status;
+
+    /* get drive's parent */
+    status = IORegistryEntryGetParentEntry(drive, kIOServicePlane, &parent);
+    if (status != KERN_SUCCESS) {
+	snmp_log(LOG_ERR, "diskio: device has no parent\n");
+/*	fprintf(stderr, "device has no parent\n"); */
+	return(1);
+    }
+
+    if (IOObjectConformsTo(parent, "IOBlockStorageDriver")) {
+
+	/* get drive properties */
+	status = IORegistryEntryCreateCFProperties(drive, (CFMutableDictionaryRef *)&properties,
+					    kCFAllocatorDefault, kNilOptions);
+	if (status != KERN_SUCCESS) {
+	    snmp_log(LOG_ERR, "diskio: device has no properties\n");
+/*	    fprintf(stderr, "device has no properties\n"); */
+	    return(1);
+	}
+
+	/* get BSD name and unitnumber from properties */
+	name = (CFStringRef)CFDictionaryGetValue(properties,
+					  CFSTR(kIOBSDNameKey));
+	number = (CFNumberRef)CFDictionaryGetValue(properties,
+					    CFSTR(kIOBSDUnitKey));
+
+	/* Collect stats and if succesful store them with the name and unitnumber */
+	if (!collect_drive_stats(parent, dstat->stats)) {
+
+	    CFStringGetCString(name, dstat->name, MAXDRIVENAME, CFStringGetSystemEncoding());
+	    CFNumberGetValue(number, kCFNumberSInt32Type, &dstat->bsd_unit_number);
+	    num_drives++;
+	}
+
+	/* clean up, return success */
+	CFRelease(properties);
+	return(0);
+    }
+
+    /* failed, don't keep parent */
+    IOObjectRelease(parent);
+    return(1);
+}
+
+static int
+getstats(void)
+{
+    time_t                 now;
+    io_iterator_t          drivelist;
+    io_registry_entry_t    drive;
+    CFMutableDictionaryRef match;
+    kern_return_t          status;
+
+    now = time(NULL);	/* register current time and check wether cache can be used */
+    if (cache_time + CACHE_TIMEOUT > now) {
+        return 0;
+    }
+
+    /*  Retrieve a list of drives. */
+    match = IOServiceMatching("IOMedia");
+    CFDictionaryAddValue(match, CFSTR(kIOMediaWholeKey), kCFBooleanTrue);
+    status = IOServiceGetMatchingServices(masterPort, match, &drivelist);
+    if (status != KERN_SUCCESS) {
+	snmp_log(LOG_ERR, "diskio: couldn't match whole IOMedia devices\n");
+/*	fprintf(stderr,"Couldn't match whole IOMedia devices\n"); */
+	return(1);
+    }
+
+    num_drives = 0;  /* NB: Incremented by handle_drive */
+    while ((drive = IOIteratorNext(drivelist)) && (num_drives < MAXDRIVES)) {
+	handle_drive(drive, &drivestat[num_drives]);
+	IOObjectRelease(drive);
+    }
+    IOObjectRelease(drivelist);
+
+    cache_time = now;
+    return (0);
+}
+
+u_char         *
+var_diskio(struct variable * vp,
+           oid * name,
+           size_t * length,
+           int exact, size_t * var_len, WriteMethod ** write_method)
+{
+    static long     long_ret;
+    unsigned int    indx;
+
+    if (getstats() == 1) {
+        return NULL;
+    }
+
+
+    if (header_simple_table
+        (vp, name, length, exact, var_len, write_method, num_drives)) {
+        return NULL;
+    }
+
+    indx = (unsigned int) (name[*length - 1] - 1);
+
+    if (indx >= num_drives)
+        return NULL;
+
+    switch (vp->magic) {
+	case DISKIO_INDEX:
+	    long_ret = (long) drivestat[indx].bsd_unit_number;
+	    return (u_char *) & long_ret;
+	case DISKIO_DEVICE:
+	    *var_len = strlen(drivestat[indx].name);
+	    return (u_char *) drivestat[indx].name;
+	case DISKIO_NREAD:
+	    long_ret = (signed long) drivestat[indx].stats[kIDXBytesRead];
+	    return (u_char *) & long_ret;
+	case DISKIO_NWRITTEN:
+	    long_ret = (signed long) drivestat[indx].stats[kIDXBytesWritten];
+	    return (u_char *) & long_ret;
+	case DISKIO_READS:
+	    long_ret = (signed long) drivestat[indx].stats[kIDXNumReads];
+	    return (u_char *) & long_ret;
+	case DISKIO_WRITES:
+	    long_ret = (signed long) drivestat[indx].stats[kIDXNumWrites];
+	    return (u_char *) & long_ret;
+
+	default:
+	    ERROR_MSG("diskio.c: don't know how to handle this request.");
+    }
+    return NULL;
+}
+#endif                          /* darwin */
+

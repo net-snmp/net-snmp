@@ -15,7 +15,9 @@
 #include <sys/types.h>
 #include <arpa/inet.h>
 #include <errno.h>
-#include <signal.h>
+#ifndef MSVC_PERL
+	#include <signal.h>
+#endif
 #include <stdio.h>
 #include <ctype.h>
 #ifdef I_SYS_TIME
@@ -23,7 +25,9 @@
 #endif
 #include <netdb.h>
 #include <stdlib.h>
-#include <unistd.h>
+#ifndef MSVC_PERL
+	#include <unistd.h>
+#endif
 /* XXX This is a problem if regex.h is not on the system. */
 #include <regex.h>
 
@@ -4685,7 +4689,7 @@ snmp_mib_node_FETCH(tp_ref, key)
            if (tp)
 	   switch (c) {
 	      case 'a': /* access */
-                 if (strncmp("access", key, strlen(key))) break;
+                  if (strncmp("access", key, strlen(key)) == 0) {
                  switch	(tp->access) {
                    case MIB_ACCESS_READONLY:
                      sv_setpv(ST(0),"ReadOnly");
@@ -4708,6 +4712,9 @@ snmp_mib_node_FETCH(tp_ref, key)
                    default:
                      break;
                  }
+                  } else if (strncmp("augments", key, strlen(key)) == 0) {
+                      sv_setpv(ST(0),tp->augments);
+                  }
                  break;
   	      case 'c': /* children */
                  if (strncmp("children", key, strlen(key))) break;

@@ -1,4 +1,4 @@
-	       README file for net-snmp Version: 5.0.7.pre2
+	       README file for net-snmp Version: 5.0.9
 
 DISCLAIMER
 
@@ -297,6 +297,10 @@ THANKS
     Jeffrey Watson <nostaw@users.sourceforge.net>
     Bruce Shaw <Bruce.Shaw@gov.ab.ca>
     Stefan Radman <sradman@users.sourceforge.net>
+    Stephen J. Friedl <sjfriedl@users.sourceforge.net>
+    Alex Burger <alex_b@users.sourceforge.net>
+    Andrew Findlay <andrew.findlay@skills-1st.co.uk>
+    Bob Rowlands <robert.rowlands@sun.com>
 
   We've probably forgotten people on this list.  Let us know if you've
   contributed code and we've left you out.

@@ -114,6 +114,16 @@ struct mntent  *HRFS_entry;
 #define	HRFS_type	mnt_type
 #define	HRFS_statfs	statfs
 
+#ifdef linux
+#define MNTTYPE_CD9660	"iso9660"
+#define MNTTYPE_EXT2FS	"ext2"
+#define MNTTYPE_EXT3FS	"ext3"
+#define MNTTYPE_SMBFS	"smbfs"
+#define MNTTYPE_MSDOS	"msdos"
+#define MNTTYPE_FAT32	"vfat"
+#define MNTTYPE_NTFS	"ntfs"
+#endif	/* linux */
+
 #endif
 
 #define	FULL_DUMP	0
@@ -380,6 +390,10 @@ var_hrfilesys(struct variable *vp,
         else if (!strcmp(mnt_type, MNTTYPE_MSDOS))
             fsys_type_id[fsys_type_len - 1] = 5;
 #endif
+#ifdef MNTTYPE_FAT32
+        else if (!strcmp(mnt_type, MNTTYPE_FAT32))
+            fsys_type_id[fsys_type_len - 1] = 22;
+#endif
 #ifdef MNTTYPE_CDFS
         else if (!strcmp(mnt_type, MNTTYPE_CDFS))
 #ifdef RockRidge
@@ -391,6 +405,14 @@ var_hrfilesys(struct variable *vp,
 #ifdef MNTTYPE_ISO9660
         else if (!strcmp(mnt_type, MNTTYPE_ISO9660))
             fsys_type_id[fsys_type_len - 1] = 12;
+#endif
+#ifdef MNTTYPE_CD9660
+        else if (!strcmp(mnt_type, MNTTYPE_CD9660))
+            fsys_type_id[fsys_type_len - 1] = 12;
+#endif
+#ifdef MNTTYPE_SMBFS
+        else if (!strcmp(mnt_type, MNTTYPE_SMBFS))
+            fsys_type_id[fsys_type_len - 1] = 1;
 #endif
 #ifdef MNTTYPE_NFS
         else if (!strcmp(mnt_type, MNTTYPE_NFS))
@@ -406,6 +428,10 @@ var_hrfilesys(struct variable *vp,
 #endif
 #ifdef MNTTYPE_EXT2FS
         else if (!strcmp(mnt_type, MNTTYPE_EXT2FS))
+            fsys_type_id[fsys_type_len - 1] = 23;
+#endif
+#ifdef MNTTYPE_EXT3FS
+        else if (!strcmp(mnt_type, MNTTYPE_EXT3FS))
             fsys_type_id[fsys_type_len - 1] = 23;
 #endif
 #ifdef MNTTYPE_NTFS
@@ -500,6 +526,9 @@ const char     *HRFS_ignores[] = {
     "autofs",
 #ifdef linux
     "devpts",
+    "devfs",
+    "usbdevfs",
+    "tmpfs",
     "shm",
 #endif
 #ifdef solaris2
@@ -563,9 +592,9 @@ Get_Next_HR_FileSys(void)
 
 /*
  * this function checks whether the current file system (info can be found
- * in HRFS_entry) is a NFS file system
+ * in HRFS_entry) is a Network file system
  * HRFS_entry must be valid prior to calling this function
- * returns 1 if NFS file system, 0 otherwise
+ * returns 1 if Network file system, 0 otherwise
  */
 int
 Check_HR_FileSys_NFS (void)
@@ -586,6 +615,9 @@ Check_HR_FileSys_NFS (void)
 #if defined(MNTTYPE_NFS3)
 	    !strcmp( HRFS_entry->HRFS_type, MNTTYPE_NFS3) ||
 #endif
+#if defined(MNTTYPE_SMBFS)
+	    !strcmp( HRFS_entry->HRFS_type, MNTTYPE_SMBFS) ||
+#endif
 #if defined(MNTTYPE_LOFS)
 	    !strcmp( HRFS_entry->HRFS_type, MNTTYPE_LOFS) ||
 #endif
@@ -596,9 +628,9 @@ Check_HR_FileSys_NFS (void)
 	     */
 	    !strcmp( HRFS_entry->HRFS_type, "mvfs")))
 #endif /* HAVE_GETFSSTAT */
-	return 1;	/* NFS file system */
+	return 1;	/* Network file system */
 
-    return 0;		/* no NFS file system */
+    return 0;		/* no Network file system */
 }
 
 void

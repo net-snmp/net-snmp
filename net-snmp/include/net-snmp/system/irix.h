@@ -43,7 +43,3 @@ extern const char *inet_ntoa();
 
 #define STREAM_NEEDS_KERNEL_ISLANDS
 
-#ifndef __GNUC__
-#undef inline
-#define inline
-#endif

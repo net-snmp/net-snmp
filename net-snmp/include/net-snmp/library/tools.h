@@ -44,7 +44,7 @@ extern          "C" {
 
 
 
-#define SNMP_FREE(s)		if (s) { free((void *)s); s=NULL; }
+#define SNMP_FREE(s)		do { if (s) { free((void *)s); s=NULL; } } while(0)
 
     /*
      * XXX Not optimal everywhere. 

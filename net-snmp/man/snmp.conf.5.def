@@ -1,7 +1,7 @@
 .TH SNMP.CONF 5 "11 Dec 2002" VVERSIONINFO "Net-SNMP"
 .UC 4
 .SH NAME
-DATADIR/snmp/snmp.conf - configuration file for the Net-SNMP applications.
+SYSCONFDIR/snmp/snmp.conf - configuration file for the Net-SNMP applications.
 .br
 ~/.snmp/snmp.conf - personal configuration file.
 .SH DESCRIPTION
@@ -46,7 +46,7 @@ The directory where snmpd and snmptrapd stores their persistent data
 files.
 .IP "defaultPort port"
 The default port number that all SNMP applications and daemons should use.
-.IP "defVersion (v1|v2c|v3)"
+.IP "defVersion (1|2c|3)"
 The default SNMP version to use.
 .IP "defCommunity string"
 The default SNMPv1 and SNMPv2c community string to use.

@@ -37,11 +37,12 @@ UCDPERSISTENT_DIRECTORY=@UCDPERSISTENT_DIRECTORY@
 #
 # yes, order matters here.  default_store must occur before anything else
 PERLMODULES=default_store SNMP ASN OID agent
+PERLARGS=@PERLARGS@
 
 #
 # targets
 #
-all:    sedscript EXAMPLE.conf standardall net-snmp-config-x @PERLTARGS@ 
+all:    sedscript EXAMPLE.conf standardall @PERLTARGS@ 
 
 start-flag:
 	@touch build-in-progress-flag
@@ -53,23 +54,31 @@ end-flag:
 # local build rules
 #
 sedscript: sedscript.in include/net-snmp/net-snmp-config.h $(srcdir)/agent/mibgroup/mibdefs.h
-	$(CPP) -DPREFIX=$(prefix) -DLIBDIR=$(libdir) -DDATADIR=$(datadir) $(srcdir)/sedscript.in | egrep '^s[/#]' | sed 's/REMOVEME//g;s# */#/#g;s/ *#/#/g;s#/ *#/#g;s/# g/#g/;' > sedscript
+	$(CPP) $(srcdir)/sedscript.in | egrep '^s[/#]' | sed 's/REMOVEME//g;s# */#/#g;s/ *#/#/g;s#/ *#/#g;s/# g/#g/;' > sedscript
+	echo 's#DATADIR#$(datadir)#g' >> sedscript
+	echo 's#LIBDIR#$(libdir)#g' >> sedscript
+	echo 's#BINDIR#$(bindir)#g' >> sedscript
+	echo 's#PERSISTENT_DIRECTORY#$(PERSISTENT_DIRECTORY)#g' >> sedscript
+	echo 's#SYSCONFDIR#$(sysconfdir)#g' >> sedscript
 
 EXAMPLE.conf: sedscript EXAMPLE.conf.def
 	$(SED) -f sedscript $(srcdir)/EXAMPLE.conf.def > EXAMPLE.conf
 
 docs: docsdir mancp
 
-docsdir: doxygen.conf
+docsdir: docsdox docsmunge
+
+docsdox: doxygen.conf
 	srcdir=$(srcdir) doxygen $(srcdir)/doxygen.conf
+
+docsmunge:
+	find docs/html -name \*.html -exec perl -p -i -e 's/Generated on/<!--#include virtual=\"\/sfbutton.html\" --><br>Generated on\n/; s/<body/<body bgcolor=white/' {} \;
+
 
 mancp:
 	@for i in docs/man/man3/* ; do \
 	     cp $$i man/netsnmp_`basename $$i` ; \
 	done
-
-net-snmp-config-x:
-	chmod a+x net-snmp-config
 
 #
 # extra install rules
@@ -106,31 +115,31 @@ perlmodules: perlmakefiles
 	@(cd perl ; $(MAKE)) ; \
         if test $$? != 0 ; then \
            exit 1 ; \
-        fi  \
+        fi
 
 perlmakefiles:
 	@if test ! -f perl/Makefile; then \
 	  (dir=`pwd`; \
 	   cd perl ; \
-	   perl Makefile.PL -NET-SNMP-IN-SOURCE=true -NET-SNMP-CONFIG="sh $$dir/net-snmp-config") ; \
-        fi ; \
+	   perl Makefile.PL -NET-SNMP-IN-SOURCE=true -NET-SNMP-CONFIG="sh $$dir/net-snmp-config") $(PERLARGS) ; \
+        fi
 
 perlinstall:
 	@(cd perl ; $(MAKE) install) ; \
         if test $$? != 0 ; then \
            exit 1 ; \
-        fi  \
+        fi
 
 perltest:
 	@(cd perl ; $(MAKE) test) ; \
 	if test $$? != 0 ; then \
 	   exit 1 ; \
-	fi  \
+	fi
 
 perlclean:
 	@if test -f perl/Makefile; then \
 	   ( cd perl ; $(MAKE) clean ) ; \
-	fi ; \
+	fi
 
 #
 # make distclean completely removes all traces of building including
@@ -168,25 +177,45 @@ touchit:
 	touch stamp-h stamp-h.in
 
 Makefile: Makefile.in config.status Makefile.rules Makefile.top
-	CONFIG_HEADERS= ./config.status
+	@if test "x$(NOAUTODEPS)" = "x"; then \
+	    ./config.status; \
+	else \
+	    echo "WARNING: not running config.status"; \
+	fi
 
 $(srcdir)/include/net-snmp/net-snmp-config.h.in: stamp-h.in
 $(srcdir)/stamp-h.in: configure.in acconfig.h
-	cd ${srcdir} && LC_COLLATE=C $(AUTOHEADER)
-	echo timestamp > ${srcdir}/stamp-h.in
+	@if test "x$(NOAUTODEPS)" = "x" -a "x$(AUTOHEADER)" != "x:"; then \
+	    cd ${srcdir} && LC_COLLATE=C $(AUTOHEADER); \
+	    echo timestamp > ${srcdir}/stamp-h.in; \
+	else \
+	    echo "WARNING: not running autoheader"; \
+	fi
 
 include/net-snmp/net-snmp-config.h: stamp-h
 stamp-h: include/net-snmp/net-snmp-config.h.in config.status
-	CONFIG_FILES= ./config.status
-	echo timestamp > stamp-h
+	@if test "x$(NOAUTODEPS)" = "x"; then \
+	    ./config.status; \
+	    echo timestamp > stamp-h; \
+	else \
+	    echo "WARNING: not running config.status"; \
+	fi
 
 $(srcdir)/configure: configure.in aclocal.m4
-	cd ${srcdir} && $(AUTOCONF)
-	echo "Please run configure now."
-	sh -c exit 2
+	@if test "x$(NOAUTODEPS)" = "x" -a "x$(AUTOCONF)" != "x:"; then \
+	    cd ${srcdir} && $(AUTOCONF); \
+	    echo "Please run configure now."; \
+	    sh -c exit 2; \
+	else \
+	    echo "WARNING: not running autoconf"; \
+	fi
 
 config.status: configure
-	./config.status --recheck
+	@if test "x$(NOAUTODEPS)" = "x"; then \
+	    ./config.status --recheck; \
+	else \
+	    echo "WARNING: not running config.status --recheck"; \
+	fi
 
 #
 # Emacs TAGS file
@@ -224,12 +253,12 @@ tarclean:
 	fi
 
 commentcheck:
-	grep -n // `find $(srcdir) -name \*.\[ch\]` | grep -v http | grep -v /win32/
+	grep -n // `find $(srcdir)/ -name \*.\[ch\]` | egrep -v "(ftp|http|/win32/)"
 
 dist: version tag tar
 
 FAQ.html:
 	local/FAQ2HTML FAQ
 
-.PHONY: docs docsdir mancp testdirs test TAGS net-snmp-config-x
+.PHONY: docs docsdir mancp testdirs test TAGS
 # note: tags and docs are phony to force rebulding

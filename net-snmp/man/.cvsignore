@@ -17,6 +17,7 @@ snmpbulkwalk.1
 snmpcmd.1
 snmpconf.1
 snmpd.1
+snmpd.8
 snmpd.conf.5
 snmpget.1
 snmpgetnext.1

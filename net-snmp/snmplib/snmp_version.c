@@ -1,6 +1,6 @@
 #include <net-snmp/version.h>
 
-const char     *NetSnmpVersionInfo = "5.0.7.pre2";
+const char     *NetSnmpVersionInfo = "5.0.9";
 
 const char     *
 netsnmp_get_version()

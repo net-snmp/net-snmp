@@ -26,7 +26,7 @@ extern          "C" {
     } netsnmp_data_list;
 
 
-    inline netsnmp_data_list *netsnmp_create_data_list(const char *,
+    NETSNMP_INLINE netsnmp_data_list *netsnmp_create_data_list(const char *,
                                                        void *,
                                                        Netsnmp_Free_List_Data
                                                        *);
@@ -38,7 +38,7 @@ extern          "C" {
     void            netsnmp_free_all_list_data(netsnmp_data_list *head);        /* multiple */
     int             netsnmp_remove_list_node(netsnmp_data_list **realhead,
                                              const char *name);
-    inline void    *netsnmp_get_list_node(netsnmp_data_list *head,
+    NETSNMP_INLINE void    *netsnmp_get_list_node(netsnmp_data_list *head,
                                           const char *name);
 
 

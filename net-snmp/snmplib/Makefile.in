@@ -1,3 +1,12 @@
+# Portions of this file are subject to the following copyright.  See
+# the Net-SNMP's COPYING file for more details and other copyrights
+# that may apply:
+#
+# Copyright © 2003 Sun Microsystems, Inc. All rights reserved.
+# Use is subject to license terms specified in the COPYING file
+# distributed with the Net-SNMP package.
+#
+
 #
 # Makefile for snmplib
 #
@@ -114,7 +123,7 @@ CSRCS=	snmp_client.c mib.c parse.c snmp_api.c snmp.c 		\
 	scapi.c callback.c default_store.c snmp_alarm.c		\
 	data_list.c oid_stash.c 				\
 	mt_support.c snmp_enum.c snmp-tc.c 			\
-	snprintf.c strtol.c strtoul.c				\
+	snprintf.c strlcpy.c strtol.c strtoul.c			\
 	snmp_transport.c                                        \
 	@transport_src_list@ \
 	snmp_secmod.c snmp_version.c                            \

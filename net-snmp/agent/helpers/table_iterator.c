@@ -12,6 +12,17 @@
  *  and SET related modes instead.
  */
 
+/* Portions of this file are subject to the following copyright(s).  See
+ * the Net-SNMP's COPYING file for more details and other copyrights
+ * that may apply:
+ */
+/*
+ * Portions of this file are copyrighted by:
+ * Copyright © 2003 Sun Microsystems, Inc. All rights reserved.
+ * Use is subject to license terms specified in the COPYING file
+ * distributed with the Net-SNMP package.
+ */
+
 #include <net-snmp/net-snmp-config.h>
 
 #if HAVE_STRING_H
@@ -70,7 +81,7 @@ netsnmp_register_table_iterator(netsnmp_handler_registration *reginfo,
 }
 
 /** extracts the table_iterator specific data from a request */
-inline void    *
+NETSNMP_INLINE void    *
 netsnmp_extract_iterator_context(netsnmp_request_info *request)
 {
     return netsnmp_request_get_list_data(request, TABLE_ITERATOR_NAME);
@@ -90,7 +101,7 @@ netsnmp_table_iterator_helper_handler(netsnmp_mib_handler *handler,
     size_t          coloid_len;
     int             ret;
     static oid      myname[MAX_OID_LEN];
-    static int      myname_len;
+    size_t	    myname_len;
     int             oldmode;
     netsnmp_iterator_info *iinfo;
 
@@ -269,7 +280,8 @@ netsnmp_table_iterator_helper_handler(netsnmp_mib_handler *handler,
                      */
                     table_info->colnum++;
                     coloid[reginfo->rootoid_len + 1] = table_info->colnum;
-		    snmp_free_varbind(free_this_index_search);
+                    if (free_this_index_search != NULL)
+                        snmp_free_varbind(free_this_index_search);
                     index_search = snmp_clone_varbind(table_info->indexes);
 		    free_this_index_search = index_search;
 
@@ -447,13 +459,28 @@ netsnmp_table_iterator_helper_handler(netsnmp_mib_handler *handler,
             reqinfo->mode = oldmode;
         }
 
-        callback_data_context =
+        callback_data_keep =
             netsnmp_request_get_list_data(requests, TABLE_ITERATOR_NAME);
         callback_loop_context =
             netsnmp_request_get_list_data(requests,
                                           TABLE_ITERATOR_LAST_CONTEXT);
 
-        if (reqinfo->mode == MODE_GET || reqinfo->mode == MODE_GETNEXT || reqinfo->mode == MODE_GETBULK ||      /* XXX */
+        /* 
+         * This has to be done to prevent a memory leak. Notice that on
+         * SET_RESERVE1 we're assigning something to
+         * 'free_this_index_search' at the beginning of this handler (right
+         * above the line that says 'below our minimum column?'), 
+         * but we're not given a chance to free it below with the other 
+         * SET modes, hence our doing it here. 
+         */
+        if (reqinfo->mode == MODE_SET_RESERVE1) {
+            if (free_this_index_search) {
+                snmp_free_varbind(free_this_index_search);
+                free_this_index_search = NULL;
+            }
+        }
+        if (reqinfo->mode == MODE_GET || reqinfo->mode == MODE_GETNEXT ||
+            reqinfo->mode == MODE_GETBULK ||      /* XXX */
             reqinfo->mode == MODE_SET_FREE ||
             reqinfo->mode == MODE_SET_UNDO ||
             reqinfo->mode == MODE_SET_COMMIT) {
@@ -462,8 +489,10 @@ netsnmp_table_iterator_helper_handler(netsnmp_mib_handler *handler,
                 callback_data_keep = NULL;
             }
 
-            if (free_this_index_search)
+            if (free_this_index_search) {
                 snmp_free_varbind(free_this_index_search);
+                free_this_index_search = NULL;
+            }
 #ifndef NOT_SERIALIZED
             if (callback_loop_context && iinfo->free_loop_context_at_end) {
                 (iinfo->free_loop_context_at_end) (callback_loop_context,

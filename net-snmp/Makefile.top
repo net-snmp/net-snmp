@@ -33,12 +33,11 @@ persistentdir	= @PERSISTENT_DIRECTORY@
 # Programs
 #
 INSTALL		= $(LIBTOOL) --mode=install @INSTALL@
+INSTALL_DATA    = @INSTALL_DATA@
 SED		= @SED@
 LN_S		= @LN_S@
-#AUTOCONF	= @AUTOCONF@
-#AUTOHEADER	= @AUTOHEADER@
-AUTOCONF	= autoconf
-AUTOHEADER	= autoheader
+AUTOCONF	= @AUTOCONF@
+AUTOHEADER	= @AUTOHEADER@
 
 #
 # Compiler arguments
@@ -55,7 +54,7 @@ CC	        = @CC@
 #
 # ok, use libtool proper versioning:
 LIBCURRENT  = 5
-LIBREVISION = 7
+LIBREVISION = 9
 LIBAGE      = 0
 # generally, LIBCURRENT should stay the same unless major changes occur.
 # Increment REVISION every release.  

@@ -139,6 +139,10 @@ init_vmstat(void)
          {CPURAWSYSTEM}},
         {CPURAWIDLE, ASN_COUNTER, RONLY, var_extensible_vmstat, 1,
          {CPURAWIDLE}},
+        {SYSRAWINTERRUPTS, ASN_COUNTER, RONLY, var_extensible_vmstat, 1,
+         {SYSRAWINTERRUPTS}},
+        {SYSRAWCONTEXT, ASN_COUNTER, RONLY, var_extensible_vmstat, 1,
+         {SYSRAWCONTEXT}},
         /*
          * Future use: 
          */
@@ -168,9 +172,9 @@ init_vmstat(void)
 
 void
 getstat(unsigned long *cuse, unsigned long *cice, unsigned long *csys,
-        unsigned long *cide, unsigned *pin, unsigned *pout,
-        unsigned *swpin, unsigned *swpout, unsigned *itot, unsigned *i1,
-        unsigned *ct)
+        unsigned long *cide, unsigned long *pin, unsigned long *pout,
+        unsigned long *swpin, unsigned long *swpout, unsigned long *itot,
+	unsigned long *i1, unsigned long *ct)
 {
     int             statfd;
     int             first = 1;
@@ -203,7 +207,7 @@ getstat(unsigned long *cuse, unsigned long *cice, unsigned long *csys,
         }
         b = strstr(buff, "page ");
         if (b)
-            sscanf(b, "page %u %u", pin, pout);
+            sscanf(b, "page %lu %lu", pin, pout);
         else {
             if (first)
                 snmp_log(LOG_ERR, "No page line in /proc/stat\n");
@@ -211,7 +215,7 @@ getstat(unsigned long *cuse, unsigned long *cice, unsigned long *csys,
         }
         b = strstr(buff, "swap ");
         if (b)
-            sscanf(b, "swap %u %u", swpin, swpout);
+            sscanf(b, "swap %lu %lu", swpin, swpout);
         else {
             if (first)
                 snmp_log(LOG_ERR, "No swap line in /proc/stat\n");
@@ -219,7 +223,7 @@ getstat(unsigned long *cuse, unsigned long *cice, unsigned long *csys,
         }
         b = strstr(buff, "intr ");
         if (b)
-            sscanf(b, "intr %u %u", itot, i1);
+            sscanf(b, "intr %lu %lu", itot, i1);
         else {
             if (first)
                 snmp_log(LOG_ERR, "No intr line in /proc/stat\n");
@@ -227,7 +231,7 @@ getstat(unsigned long *cuse, unsigned long *cice, unsigned long *csys,
         }
         b = strstr(buff, "ctxt ");
         if (b)
-            sscanf(b, "ctxt %u", ct);
+            sscanf(b, "ctxt %lu", ct);
         else {
             if (first)
                 snmp_log(LOG_ERR, "No ctxt line in /proc/stat\n");
@@ -244,45 +248,41 @@ enum vmstat_index { swapin = 0, swapout,
     sysinterrupts, syscontext,
     cpuuser, cpusystem, cpuidle,
     cpurawuser, cpurawnice,
-    cpurawsystem, cpurawidle
+    cpurawsystem, cpurawidle,
+    sysrawinterrupts, sysrawcontext
 };
 
 unsigned
 vmstat(int iindex)
 {
-    unsigned long   cpu_use[2], cpu_nic[2], cpu_sys[2], cpu_idl[2];
+    unsigned long   cpu_use, cpu_nic, cpu_sys, cpu_idl;
     double          duse, dsys, didl, ddiv, divo2;
-    double          druse, drnic, drsys, dridl;
-    unsigned int    pgpgin[2], pgpgout[2], pswpin[2], pswpout[2];
-    unsigned int    inter[2], ticks[2], ctxt[2];
+    unsigned long   pgpgin, pgpgout, pswpin, pswpout;
+    unsigned long   inter, ticks, ctxt;
     unsigned int    hz;
 
-    getstat(cpu_use, cpu_nic, cpu_sys, cpu_idl,
-            pgpgin, pgpgout, pswpin, pswpout, inter, ticks, ctxt);
-    duse = *(cpu_use) + *(cpu_nic);
-    dsys = *(cpu_sys);
-    didl = (*(cpu_idl));
+    getstat(&cpu_use, &cpu_nic, &cpu_sys, &cpu_idl,
+            &pgpgin, &pgpgout, &pswpin, &pswpout, &inter, &ticks, &ctxt);
+    duse = cpu_use + cpu_nic;
+    dsys = cpu_sys;
+    didl = cpu_idl;
     ddiv = (duse + dsys + didl);
     hz = sysconf(_SC_CLK_TCK);  /* get ticks/s from system */
     divo2 = ddiv / 2;
-    druse = *(cpu_use);
-    drnic = *(cpu_nic);
-    drsys = *(cpu_sys);
-    dridl = (*(cpu_idl));
 
     switch (iindex) {
     case swapin:
-        return (*(pswpin) * 4 * hz + divo2) / ddiv;
+        return (pswpin * 4 * hz + divo2) / ddiv;
     case swapout:
-        return (*(pswpout) * 4 * hz + divo2) / ddiv;
+        return (pswpout * 4 * hz + divo2) / ddiv;
     case iosent:
-        return (*(pgpgin) * hz + divo2) / ddiv;
+        return (pgpgin * hz + divo2) / ddiv;
     case ioreceive:
-        return (*(pgpgout) * hz + divo2) / ddiv;
+        return (pgpgout * hz + divo2) / ddiv;
     case sysinterrupts:
-        return (*(inter) * hz + divo2) / ddiv;
+        return (inter * hz + divo2) / ddiv;
     case syscontext:
-        return (*(ctxt) * hz + divo2) / ddiv;
+        return (ctxt * hz + divo2) / ddiv;
     case cpuuser:
         return (100 * duse / ddiv);
     case cpusystem:
@@ -290,13 +290,17 @@ vmstat(int iindex)
     case cpuidle:
         return (100 * didl / ddiv);
     case cpurawuser:
-        return druse;
+        return cpu_use;
     case cpurawnice:
-        return drnic;
+        return cpu_nic;
     case cpurawsystem:
-        return drsys;
+        return cpu_sys;
     case cpurawidle:
-        return dridl;
+        return cpu_idl;
+    case sysrawinterrupts:
+        return inter;
+    case sysrawcontext:
+        return ctxt;
     default:
         return -1;
     }
@@ -391,6 +395,16 @@ var_extensible_vmstat(struct variable *vp,
     case CPURAWIDLE:
 #ifdef linux
         long_ret = vmstat(cpurawidle);
+#endif
+        return ((u_char *) (&long_ret));
+    case SYSRAWINTERRUPTS:
+#ifdef linux
+        long_ret = vmstat(sysrawinterrupts);
+#endif
+        return ((u_char *) (&long_ret));
+    case SYSRAWCONTEXT:
+#ifdef linux
+        long_ret = vmstat(sysrawcontext);
 #endif
         return ((u_char *) (&long_ret));
         /*

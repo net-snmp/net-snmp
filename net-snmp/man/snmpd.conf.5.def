@@ -1,7 +1,7 @@
-.TH SNMPD.CONF 5 "08 Feb 2002" VVERSIONINFO "Net-SNMP"
+.TH SNMPD.CONF 5 "28 Feb 2003" VVERSIONINFO "Net-SNMP"
 .UC 4
 .SH NAME
-DATADIR/snmp/snmpd.conf - configuration file for the Net-SNMP SNMP agent.
+SYSCONFDIR/snmp/snmpd.conf - configuration file for the Net-SNMP SNMP agent.
 .SH DESCRIPTION
 .B snmpd.conf
 is the configuration file which defines how the Net-SNMP SNMP agent
@@ -140,6 +140,22 @@ To enable AgentX support in the SNMP master agent, put the following
 line in your snmpd.conf file:
 .IP "master agentx"
 See README.agentx for further details.
+.IP "AgentXSocket addr"
+This defines the address the master agent listens at.
+The default is /var/agentx/master. Another possibility is localhost:705
+.IP "AgentXTimeout addr"
+Defines the timeout period for an AgentX request.
+Default is 1 second.
+.IP "AgentXRetries addr"
+Defines the number of retries for an AgentX request.
+Default is 5 retries.
+.P
+You can also put the following in your subagent.conf file (where
+"subagent" is the name you used in your init_snmp("subagent") api call:
+.IP "agentPingInterval NUM"
+This makes the subagent try and reconnect every NUM seconds to the
+master if it ever becomes (or starts) disconnected.
+>>>>>>> 5.4.2.3
 .SH SMUX SUB-AGENTS
 To enable and SMUX based sub-agent, such as
 .IR gated ,
@@ -345,7 +361,7 @@ listening addresses instead of the default behaviour, which is to
 listen on UDP port 161 on all IPv4 interfaces.  See the section 
 .B LISTENING ADDRESSES
 in the
-.I snmpd(1)
+.I snmpd(8)
 manual page for more information about the format of listening
 addresses.  For example, specifying
 .I "agentaddress 161,tcp:161,localhost:9161"
@@ -834,9 +850,9 @@ An snmpset of integer(1) to UCD-SNMP-MIB::versionUpdateConfig.0
 .IP 2.
 A "kill -HUP" signal sent to the snmpd agent process.
 .SH "FILES"
-DATADIR/snmp/snmpd.conf
+SYSCONFDIR/snmp/snmpd.conf
 .SH "SEE ALSO"
-snmpconf(1), snmpusm(1), snmp.conf(5), snmp_config(5), snmpd(1), EXAMPLE.conf, read_config(3).
+snmpconf(1), snmpusm(1), snmp.conf(5), snmp_config(5), snmpd(8), EXAMPLE.conf, read_config(3).
 .\" Local Variables:
 .\"  mode: nroff
 .\" End:

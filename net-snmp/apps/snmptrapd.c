@@ -226,53 +226,67 @@ static oid      unavailableAlarm[] = { 1, 3, 6, 1, 6, 3, 2, 1, 1, 3, 3 };
 void
 event_input(netsnmp_variable_list * vp)
 {
-    int             eventid;
+    int             eventid = 0;
     oid             variable[MAX_OID_LEN];
-    int             variablelen;
-    u_long          destip;
-    int             sampletype;
-    int             value;
-    int             threshold;
+    int             variablelen = 0;
+    u_long          destip = 0;
+    int             sampletype = 0;
+    int             value = 0;
+    int             threshold = 0;
+    int             i;
+    int             nvars = 0;
 
-    oid            *op;
+    netsnmp_variable_list	*vp2 = vp;
+    
+    oid            *op = NULL;
 
-    vp = vp->next_variable;     /* skip sysUptime */
-    if (vp->val_len != sizeof(risingAlarm) ||
-	!memcmp(vp->val.objid, risingAlarm, sizeof(risingAlarm)))
-        eventid = 1;
-    else if (vp->val_len != sizeof(risingAlarm) ||
-	     !memcmp(vp->val.objid, fallingAlarm, sizeof(fallingAlarm)))
-        eventid = 2;
-    else if (vp->val_len != sizeof(risingAlarm) ||
-	    !memcmp(vp->val.objid, unavailableAlarm, sizeof(unavailableAlarm)))
-        eventid = 3;
-    else {
-        fprintf(stderr, "unknown event\n");
-        eventid = 0;
+    /* Make sure there are 5 variables.  Otherwise, don't bother */
+    for (i=1; i <= 5; i++) {
+      vp2 = vp2->next_variable;
+      if (!vp2) {
+	nvars = -1;
+	break;
+      }
     }
-
-    vp = vp->next_variable;
-    memmove(variable, vp->val.objid, vp->val_len * sizeof(oid));
-    variablelen = vp->val_len;
-    op = vp->name + 22;
-    destip = 0;
-    destip |= (*op++) << 24;
-    destip |= (*op++) << 16;
-    destip |= (*op++) << 8;
-    destip |= *op++;
-
-    vp = vp->next_variable;
-    sampletype = *vp->val.integer;
-
-    vp = vp->next_variable;
-    value = *vp->val.integer;
-
-    vp = vp->next_variable;
-    threshold = *vp->val.integer;
-
+    
+    if (nvars != -1)
+    {
+      vp = vp->next_variable;     /* skip sysUptime */
+      if (vp->val_len != sizeof(risingAlarm) ||
+	  !memcmp(vp->val.objid, risingAlarm, sizeof(risingAlarm)))
+	eventid = 1;
+      else if (vp->val_len != sizeof(risingAlarm) ||
+	  !memcmp(vp->val.objid, fallingAlarm, sizeof(fallingAlarm)))
+	eventid = 2;
+      else if (vp->val_len != sizeof(risingAlarm) ||
+	  !memcmp(vp->val.objid, unavailableAlarm, sizeof(unavailableAlarm)))
+	eventid = 3;
+      else {
+	fprintf(stderr, "unknown event\n");
+	eventid = 0;
+      }
+      
+      vp = vp->next_variable;
+      memmove(variable, vp->val.objid, vp->val_len * sizeof(oid));
+      variablelen = vp->val_len;
+      op = vp->name + 22;
+      destip = 0;
+      destip |= (*op++) << 24;
+      destip |= (*op++) << 16;
+      destip |= (*op++) << 8;
+      destip |= *op++;
+      
+      vp = vp->next_variable;
+      sampletype = *vp->val.integer;
+      
+      vp = vp->next_variable;
+      value = *vp->val.integer;
+      
+      vp = vp->next_variable;
+      threshold = *vp->val.integer;
+    }
     printf("%d: 0x%02lX %d %d %d\n", eventid, destip, sampletype, value,
-           threshold);
-
+	threshold);
 }
 
 void
@@ -887,7 +901,7 @@ snmptrapd_close_sessions(netsnmp_session * sess_list)
 int
 main(int argc, char *argv[])
 {
-    char            options[128] = "ac:CdD::efF:hHl:m:M:no:PqsSvO:-:";
+    char            options[128] = "ac:CdD::efF:hHl:m:M:no:PqsS:vO:-:";
     netsnmp_session *sess_list = NULL, *ss = NULL;
     netsnmp_transport *transport = NULL;
     int             arg, i = 0;
@@ -1269,7 +1283,7 @@ main(int argc, char *argv[])
 #if HAVE_GETPID
     if (pid_file != NULL) {
         if ((PID = fopen(pid_file, "w")) == NULL) {
-            snmp_log_perror("fopen");
+            snmp_log_perror(pid_file);
             exit(1);
         }
         fprintf(PID, "%d\n", (int) getpid());
@@ -1358,12 +1372,23 @@ main(int argc, char *argv[])
                 time_t          timer;
                 time(&timer);
                 tm = localtime(&timer);
-                printf
-                    ("%.4d-%.2d-%.2d %.2d:%.2d:%.2d NET-SNMP version %s Reconfigured.\n",
-                     tm->tm_year + 1900, tm->tm_mon + 1, tm->tm_mday,
-                     tm->tm_hour, tm->tm_min, tm->tm_sec,
-                     netsnmp_get_version());
+
+                /*
+                 * If we are logging to a file, receipt of SIGHUP also
+                 * indicates the the log file should be closed and re-opened.
+                 * This is useful for users that want to rotate logs in a more
+                 * predictable manner.
+                 */
+                if (logfile) {
+                    snmp_enable_filelog(logfile, 1);
+                }
+                snmp_log(LOG_INFO,"%.4d-%.2d-%.2d %.2d:%.2d:%.2d "
+                         "NET-SNMP version %s Reconfigured.\n",
+                         tm->tm_year + 1900, tm->tm_mon + 1, tm->tm_mday,
+                         tm->tm_hour, tm->tm_min, tm->tm_sec,
+                         netsnmp_get_version());
             }
+
             if (Syslog)
                 snmp_log(LOG_INFO, "Snmptrapd reconfiguring");
             trapd_update_config();

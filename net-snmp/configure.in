@@ -1,3 +1,13 @@
+dnl Portions of this file are subject to the following copyright.  See
+dnl the Net-SNMP's COPYING file for more details and other copyrights
+dnl that may apply:
+dnl
+dnl Copyright © 2003 Sun Microsystems, Inc. All rights reserved.
+dnl Use is subject to license terms specified in the COPYING file
+dnl distributed with the Net-SNMP package.
+dnl
+
+dnl
 dnl Process this file with autoconf to produce a configure script.
 dnl
 AC_INIT(agent/mibgroup/ucd-snmp/extensible.c)
@@ -79,7 +89,6 @@ fi
 AC_ARG_WITH(dmalloc,
 [  --with-dmalloc=PATH             Use dmalloc library (www.dmalloc.com)],
     if test "x$withval" = "xyes"; then
-      AC_ADD_SEARCH_PATH(/usr/local)
       LIBS="$LIBS -ldmalloc"
       AC_DEFINE(HAVE_DMALLOC_H)
     elif test -d "$withval"; then
@@ -267,7 +276,7 @@ AC_ARG_WITH(out_transports,
                 FreeBSD.
                 It is never compiled in by default.
     TCP         support for SNMP over TCP/IP.
-                This transport is compiled in by default, but may be ommitted.
+                This transport is compiled in by default, but may be omitted.
     Unix        support for SNMP over Unix domain protocols.
                 This transport is compiled in by default except on Win32
                 platforms, and may be omitted.
@@ -425,9 +434,17 @@ dnl
 AC_ARG_WITH(perl-modules,
 [
 Perl:
-  --with-perl-modules             Install the perl modules along with the rest
-                                  of the net-snmp toolkit.],
-    install_perl=yes)
+  --with-perl-modules[=ARGS]      Install the perl modules along with the rest
+                                  of the net-snmp toolkit.  If ARGS is
+                                  specified, they're passed to the
+                                  Makefile.PL script.],[
+    install_perl=yes
+    if test "$withval" = yes; then
+      PERLARGS=""
+    else
+      PERLARGS="$withval"
+    fi
+])
 
 AC_ARG_ENABLE(embedded-perl,
 [
@@ -626,9 +643,9 @@ if test "x$filebase" = "x$last"; then
     filebase="generic"
 fi
 ac_cv_MACHINE_INCLUDE_FILE="net-snmp/machine/$filebase.h"
-AC_MSG_RESULT($ac_cv_MACHINE_INCLUDE_FILE)
 
 changequote([, ])
+AC_MSG_RESULT($ac_cv_MACHINE_INCLUDE_FILE)
 AC_DEFINE_UNQUOTED(MACHINE_INCLUDE_FILE, "$ac_cv_MACHINE_INCLUDE_FILE")
 
 AC_PATH_PROG(CCPATH,$CC)
@@ -1049,8 +1066,8 @@ done
 dnl
 dnl Do hairy agent module processing.
 dnl
-changequote(, )
 AC_MSG_CHECKING(for and configuring mib modules to use)
+changequote(, )
 
 mibdir="agent/mibgroup"
 module_list=""
@@ -1097,12 +1114,14 @@ for i in $test_modules
   fi
 done
 
-AC_MSG_RESULT($new_module_list.)
 changequote([, ])
+AC_MSG_RESULT($new_module_list.)
 AC_MSG_CACHE_ADD(Agent MIB code:            $new_module_list)
-changequote(, )
 
 AC_MSG_CHECKING(for and configuring mib modules pieces to use)
+FD=AC_FD_MSG
+changequote(, )
+
 while test "x$new_module_list" != "x"; do
   for i in $new_module_list
     do
@@ -1126,9 +1145,13 @@ while test "x$new_module_list" != "x"; do
 	  for j in $new_list
 	    do
 	    if test ! -f $srcdir/$mibdir/$j.h; then
+              changequote([, ])
 	      AC_MSG_ERROR(mib module "$i" requires module "$j" but $j.h or $j.c could not be found in $srcdir/$mibdir)
+              changequote(, )
 	    elif echo " $new_with_out_mib_modules " | grep " $j " > /dev/null; then
+              changequote([, ])
 	      AC_MSG_WARN(mib module "$i" requires module "$j" but you told me to compile without it)
+              changequote(, )
 	    elif echo " $module_list $new_list_two $new_module_list " | grep " $j " > /dev/null; then
 	      :
 	    else
@@ -1153,7 +1176,9 @@ while test "x$new_module_list" != "x"; do
 	    done
 	fi
       else
+        changequote([, ])
 	AC_MSG_ERROR(module files $i.h or $i.c could not be found in $srcdir/$mibdir)
+        changequote(, )
       fi
       module_list="$module_list $i"
       echo '#include "'"mibgroup/$i.h"'"' >> $mibdir/mib_module_includes.h
@@ -1176,14 +1201,16 @@ while test "x$new_module_list" != "x"; do
 	fi
       fi
       if grep config_load_mib $srcdir/$mibdir/$i.h > /dev/null 2>&1; then
+        changequote([, ])
       	AC_MSG_WARN(mib module "$i" uses the "config_load_mib" directive, which is no longer supported.  It probably won't work.)
+        changequote(, )
       fi
       grep config_parse_dot_conf $srcdir/$mibdir/$i.h | sed 's@.*config_parse_dot_conf(\([^)]*\), *\([^),]*\), *\([^),]*\), *\([^),]*\)).*@register_config_handler("snmpd",\1, \2, \3, \4);@' >> $mibdir/mib_module_dot_conf.h
       sym="`echo ${i} | sed 's/[^a-zA-Z0-9_]/_/g' | tr 'abcdefghijklmnopqrstuvwxyz' 'ABCDEFGHIJKLMNOPQRSTUVWXYZ'`"
       echo "/* Define if compiling with the ${i} module files.  */" >> include/net-snmp/agent/mib_module_config.h
       echo "#define USING_${sym}_MODULE 1" >> include/net-snmp/agent/mib_module_config.h
       echo " " >> include/net-snmp/agent/mib_module_config.h
-      echo $ac_n " $i$ac_c" >&AC_FD_MSG
+      echo $ac_n " $i$ac_c" >&$FD
     fi
   done
   new_module_list="$new_list_two"
@@ -1361,12 +1388,12 @@ AC_ARG_WITH(libwrap,
 		     int allow_severity = 0;
 		     int deny_severity  = 0;
 		    ],[hosts_access((void *)0)],
-
+        [
 	    AC_MSG_RESULT(yes)
 	    AC_DEFINE(USE_LIBWRAP)
 	    test "$with_libwrap" != no -a "$with_libwrap" != yes && WRAPLIBS="-L$with_libwrap/lib"
-	    WRAPLIBS="$WRAPLIBS -lwrap",
-
+	    WRAPLIBS="$WRAPLIBS -lwrap"],
+        [
 	    AC_MSG_RESULT(no)
 	    dnl Linux RedHat 6.1 won't link libwrap without libnsl
 	    AC_CHECK_FUNC(yp_get_default_domain, ,
@@ -1384,7 +1411,8 @@ AC_ARG_WITH(libwrap,
 
 			AC_MSG_RESULT(no)
 			AC_MSG_ERROR(Asked to use libwrap but I couldn't find it.))
-	    CPPFLAGS=${_cppflags})
+        ])
+    CPPFLAGS=${_cppflags}
     LDFLAGS=${_ldflags}
     LIBS=${_libs}
   fi
@@ -1456,15 +1484,12 @@ AC_CHECK_LIB(dl, dlopen)
 AC_CHECK_FUNCS(dlopen)
 
 AC_CHECK_FUNCS(kvm_openfiles nlist knlist kvm_getprocs)
-AC_MSG_CHECKING(whether we need -ldevstat for diskio MIB)
 echo "$with_mib_modules" | grep "ucd-snmp/diskio" >/dev/null
+dnl whether we need -ldevstat for diskio MIB
 if test $? -eq 0 ; then
 	AC_CHECK_FUNC(getdevs, AC_DEFINE(HAVE_GETDEVS),
 		AC_CHECK_LIB(devstat, getdevs, AC_DEFINE(HAVE_GETDEVS)
 		LIBS="${LIBS} -ldevstat"))
-	AC_MSG_RESULT(yes)
-else
-	AC_MSG_RESULT(no)
 fi
 
 
@@ -1472,11 +1497,15 @@ dnl
 dnl Install the various perl modules
 dnl
 
-if test "x$install_perl" = "xyes" -o "x$embed_perl" = "xyes"; then
+if test "x$embed_perl" = "xyes" -a "x$install_perl" = "xno" ; then
+  install_perl="yes"
+fi
+if test "x$install_perl" != "x" -a "x$install_perl" != "xno"; then
     PERLTARGS="perlmodules"
     PERLINSTALLTARGS="perlinstall"
     AC_SUBST(PERLTARGS)
     AC_SUBST(PERLINSTALLTARGS)
+    AC_SUBST(PERLARGS)
     AC_MSG_CACHE_ADD(SNMP Perl modules:          enabled)
 fi
 
@@ -1620,11 +1649,15 @@ else
 	AC_MSG_RESULT(Internal MD5 Support)
     else
         authmodes="MD5 SHA1"
-	if test $ac_cv_header_openssl_aes_h = "yes" ; then
-	    encrmodes="DES AES128 AES192 AES256"
-	else
-	    encrmodes="DES"
-	fi
+        if test "x$enable_privacy" != "xno" ; then
+	    if test $ac_cv_header_openssl_aes_h = "yes" ; then
+	        encrmodes="DES AES128 AES192 AES256"
+	    else
+	        encrmodes="DES"
+	    fi
+        else
+	    encrmodes="[disabled]"
+        fi
 	AC_DEFINE(USE_OPENSSL)
 	AC_MSG_RESULT(OpenSSL Support)
     fi
@@ -1723,7 +1756,7 @@ AC_PROG_GCC_TRADITIONAL
 AC_FUNC_MEMCMP
 AC_TYPE_SIGNAL
 AC_FUNC_GETMNTENT
-AC_CHECK_FUNCS(setmntent gethostname uname gettimeofday select socket strtol strtoul)
+AC_CHECK_FUNCS(setmntent gethostname uname gettimeofday select socket strtol strtoul strlcpy)
 AC_CHECK_FUNCS(strchr strdup memcpy memmove index bcopy strcasestr regcomp)
 AC_CHECK_FUNCS(signal setsid sigset sigblock sighold strerror setenv vsnprintf snprintf)
 AC_CHECK_FUNCS(sigaction)
@@ -2531,6 +2564,8 @@ command line usage has changed as well.).
 the default version for the command tools (snmpget, ...) to use.  This
 can always be overridden at runtime using the -v flag to the tools, or
 by using the \"defVersion\" token in your snmp.conf file.
+   Providing the --with-default-snmp-version=\"x\" parameter to ./configure
+will avoid this prompt.
 
 Default version of SNMP to use],3,unquoted)
 
@@ -2547,6 +2582,8 @@ AC_PROMPT_USER(SYS_CONTACT,[
 running on.  This information is available in the MIB-II tree.  This
 can also be over-ridden using the \"syscontact\" syntax in the agent's
 configuration files.
+  Providing the --with-sys-contact=\"contact\" parameter to ./configure
+will avoid this prompt.
 
 System Contact Information],$ME@$LOC,quoted)
 
@@ -2557,6 +2594,8 @@ AC_PROMPT_USER(SYS_LOC,[
 	Describes the location of the system.  This information is
 available in the MIB-II tree.  this can also be over-ridden using the
 \"syslocation\" syntax in the agent's configuration files.
+  Providing the --with-sys-location=\"location\" parameter to ./configure
+will avoid this prompt.
 
 System Location],Unknown,quoted)
 
@@ -2574,6 +2613,8 @@ AC_PROMPT_USER(LOGFILE,[
 information & errors to.  If not defined (enter the keyword \"none\"
 at the prompt below) the agent will use stdout and stderr instead.
 (Note: This value can be over-ridden using command line options.)
+  Providing the --with-logfile=\"path\" parameter to ./configure
+will avoid this prompt.
 
 Location to write logfile],$defaultlog,quoted)
 
@@ -2597,6 +2638,8 @@ copy your files over to the new location (once only).  If you pick
 some other path than the default, you'll have to copy them yourself.
 There is nothing wrong with picking the old path ($ucddefaultstore) if
 you'd rather.
+  Providing the --with-persistent-directory=\"path\" parameter to
+./configure will avoid this prompt.
 
 Location to write persistent information],$defaultstore,quoted)
 
@@ -2617,6 +2660,8 @@ into your new net-snmp persistent file path?  This will functionally
 save all your ucd-snmp data and let it be used within the net-snmp
 tools.  This will only be done once when you run make install.  If you
 wish to do this, enter "yes" at the prompt.
+  Providing the --with-copy-persistent-files=\"no\" (or \"yes\")
+parameters to ./configure will avoid this prompt.
 
 Copy ucd-snmp data into the net-snmp data directory],"yes")
 ])
@@ -2641,7 +2686,10 @@ AC_OUTPUT([
  man/Makefile:Makefile.top:man/Makefile.in:Makefile.rules
  mibs/Makefile:Makefile.top:mibs/Makefile.in:Makefile.rules
  net-snmp-config:net-snmp-config.in
-], echo timestamp > stamp-h)
+], [
+ echo timestamp > stamp-h
+ chmod 755 net-snmp-config
+])
 
 AC_MSG_CACHE_DISPLAY()
 

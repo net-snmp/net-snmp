@@ -1,3 +1,12 @@
+/* Portions of this file are subject to the following copyrights.  See
+ * the Net-SNMP's COPYING file for more details and other copyrights
+ * that may apply:
+ */
+/*
+ * Copyright © 2003 Sun Microsystems, Inc. All rights reserved.
+ * Use is subject to license terms specified in the COPYING file
+ * distributed with the Net-SNMP package.
+ */
 #include <net-snmp/net-snmp-config.h>
 
 #include <sys/types.h>
@@ -72,8 +81,8 @@ init_logmatch(void)
      * Define the OID pointer to the top of the mib tree that we're
      * registering underneath 
      */
-    oid             logmatch_info_oid[] = { EXTENSIBLEMIB, 16, 1 };
-    oid             logmatch_variables_oid[] = { EXTENSIBLEMIB, 16, 2, 1 };
+    oid             logmatch_info_oid[] = { UCDAVIS_MIB, 16, 1 };
+    oid             logmatch_variables_oid[] = { UCDAVIS_MIB, 16, 2, 1 };
 
     /*
      * register ourselves with the agent to handle our mib tree 
@@ -135,6 +144,10 @@ logmatch_free_config(void)
 void
 logmatch_parse_config(const char *token, char *cptr)
 {
+
+    char space_name;
+    char space_path;
+
     if (logmatchCount < MAXLOGMATCH) {
         logmatchTable[logmatchCount].frequency = 30;
         logmatchTable[logmatchCount].thisIndex = logmatchCount;
@@ -176,12 +189,29 @@ logmatch_parse_config(const char *token, char *cptr)
          * ------------------------------------ 
          */
 
-        sscanf(cptr, "%s %s %d %255c\n",
+        sscanf(cptr, "%255s%c%255s%c %d %255c\n",
                logmatchTable[logmatchCount].name,
+	       &space_name,
                logmatchTable[logmatchCount].filename,
+	       &space_path,
                &(logmatchTable[logmatchCount].frequency),
                logmatchTable[logmatchCount].regEx);
 
+	/*
+	 * Log an error then return if any of the strings scanned in were
+	 * larger then they should have been.
+	 */
+	if (space_name != ' ') {
+		snmp_log(LOG_ERR, "logmatch_parse_config: the name scanned " \
+		 "in from line %s is too large. logmatchCount = %d\n",
+		 cptr, logmatchCount);
+		return;
+	} else if (space_path != ' ') {
+		snmp_log(LOG_ERR, "logmatch_parse_config: the file name " \
+		 "scanned in from line %s is too large. logmatchCount = %d\n",
+		    cptr, logmatchCount);
+		return;
+	}
 
         /*
          * ------------------------------------ 
@@ -278,9 +308,8 @@ updateLogmatch(int iindex)
      * ------------------------------------ 
      */
 
-    sprintf(perfilename, "%s/snmpd_logmatch_%s.pos", get_persistent_directory(),
-            logmatchTable[iindex].name);
-
+    snprintf(perfilename, sizeof(perfilename), "%s/snmpd_logmatch_%s.pos",
+	get_persistent_directory(), logmatchTable[iindex].name);
 
     if (logmatchTable[iindex].virgin) {
 

@@ -13,6 +13,9 @@
 #include <sys/param.h>
 #endif
 #if HAVE_UNISTD_H
+#ifdef irix6
+#define _STANDALONE 1
+#endif
 #include <unistd.h>
 #endif
 #if HAVE_SYS_SOCKET_H
@@ -495,13 +498,14 @@ Address_Scan_Init(void)
 	{
 	    DEBUGMSGTL(("snmpd", "socket open failure in Address_Scan_Init\n"));
 	    return;
-	}
-	
-	if (ioctl(fd, SIOCGIFCONF, &ifc) < 0)
-	{
-	    ifr=NULL;
+	} else {
+	    if (ioctl(fd, SIOCGIFCONF, &ifc) < 0)
+	    {
+		ifr=NULL;
+		close(fd);
+	   	return;
+	    }
 	    close(fd);
-	    return;
 	}
     }
     while (ifc.ifc_len >= (sizeof(struct ifreq) * num_interfaces));

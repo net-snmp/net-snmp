@@ -53,7 +53,7 @@ Recommended Procedure
 
 3) Run the package script. 
 
-   $ $HOME/src/net-snmp-cvs/dist/nsb-package -p -r \
+   $ $HOME/src/net-snmp-cvs/dist/nsb-package -r \
         -s $HOME/src/net-snmp-5.0.5 5.0.5
 
 4) Create tarball (assuming no errors; see next section if there are errors)
@@ -103,6 +103,6 @@ OTHER PROBLEMS
 
 * "gcc: snmp_version.lo: No such file or directory"
 
-   This is a good indication that you have previously build in your
+   This is a good indication that you have previously built in your
    source directory. 'make distclean' in your source directory, or
    check out a fresh new version from CVS.

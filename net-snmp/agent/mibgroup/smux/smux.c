@@ -1547,6 +1547,9 @@ smux_build(u_char type,
                                  (u_char) (ASN_UNIVERSAL | ASN_PRIMITIVE |
                                            ASN_INTEGER), &reqid,
                                  sizeof(reqid));
+    if (ptr == NULL) {
+        return -1;
+    }
 
     /*
      * build err stat 
@@ -1554,6 +1557,9 @@ smux_build(u_char type,
     ptr = asn_build_int(ptr, &len,
                         (u_char) (ASN_UNIVERSAL | ASN_PRIMITIVE |
                                   ASN_INTEGER), &errstat, sizeof(errstat));
+    if (ptr == NULL) {
+        return -1;
+    }
 
     /*
      * build err index 
@@ -1562,6 +1568,9 @@ smux_build(u_char type,
                         (u_char) (ASN_UNIVERSAL | ASN_PRIMITIVE |
                                   ASN_INTEGER), &errindex,
                         sizeof(errindex));
+    if (ptr == NULL) {
+        return -1;
+    }
 
     save2 = ptr;
     ptr += 4;
@@ -1577,6 +1586,9 @@ smux_build(u_char type,
      */
     ptr = snmp_build_var_op(ptr, objid, oidlen, val_type, val_len,
                             val, &len);
+    if (ptr == NULL) {
+        return -1;
+    }
 
     len = ptr - save1;
     asn_build_sequence(save1, &len, type, (ptr - save1 - 4));
@@ -1905,3 +1917,4 @@ smux_trap_process(u_char * rsp, size_t * len)
     return ptr;
 
 }
+

@@ -19,6 +19,10 @@ WHETHER IN AN ACTION OF CONTRACT, NEGLIGENCE OR OTHER TORTIOUS ACTION,
 ARISING OUT OF OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS
 SOFTWARE.
 ******************************************************************/
+
+/** @defgroup library The Net-SNMP library
+ *  @{
+ */
 /*
  * snmp_api.c - API for access to snmp.
  */
@@ -398,7 +402,10 @@ snmp_get_next_reqid(void)
         retVal = 2;
     Reqid = retVal;
     snmp_res_unlock(MT_LIBRARY_ID, MT_LIB_REQUESTID);
-    return retVal;
+    if (netsnmp_ds_get_boolean(NETSNMP_DS_LIBRARY_ID, NETSNMP_DS_LIB_16BIT_IDS))
+        return (retVal & 0x7fff);	/* mask to 15 bits */
+    else
+        return retVal;
 }
 
 long
@@ -411,7 +418,10 @@ snmp_get_next_msgid(void)
         retVal = 2;
     Msgid = retVal;
     snmp_res_unlock(MT_LIBRARY_ID, MT_LIB_MESSAGEID);
-    return retVal;
+    if (netsnmp_ds_get_boolean(NETSNMP_DS_LIBRARY_ID, NETSNMP_DS_LIB_16BIT_IDS))
+        return (retVal & 0x7fff);	/* mask to 15 bits */
+    else
+        return retVal;
 }
 
 long
@@ -424,7 +434,10 @@ snmp_get_next_sessid(void)
         retVal = 2;
     Sessid = retVal;
     snmp_res_unlock(MT_LIBRARY_ID, MT_LIB_SESSIONID);
-    return retVal;
+    if (netsnmp_ds_get_boolean(NETSNMP_DS_LIBRARY_ID, NETSNMP_DS_LIB_16BIT_IDS))
+        return (retVal & 0x7fff);	/* mask to 15 bits */
+    else
+        return retVal;
 }
 
 long
@@ -437,7 +450,10 @@ snmp_get_next_transid(void)
         retVal = 2;
     Transid = retVal;
     snmp_res_unlock(MT_LIBRARY_ID, MT_LIB_TRANSID);
-    return retVal;
+    if (netsnmp_ds_get_boolean(NETSNMP_DS_LIBRARY_ID, NETSNMP_DS_LIB_16BIT_IDS))
+        return (retVal & 0x7fff);	/* mask to 15 bits */
+    else
+        return retVal;
 }
 
 void
@@ -688,6 +704,8 @@ register_default_handlers(void)
 	              NETSNMP_DS_LIBRARY_ID, NETSNMP_DS_LIB_PERSISTENT_DIR);
     netsnmp_ds_register_config(ASN_BOOLEAN, "snmp", "noDisplayHint",
 	              NETSNMP_DS_LIBRARY_ID, NETSNMP_DS_LIB_NO_DISPLAY_HINT);
+    netsnmp_ds_register_config(ASN_BOOLEAN, "snmp", "16bitIDs",
+	              NETSNMP_DS_LIBRARY_ID, NETSNMP_DS_LIB_16BIT_IDS);
 }
 
 void
@@ -6102,7 +6120,7 @@ static int _check_range(struct tree *tp, long ltmp, int *resptr,
     int check = !netsnmp_ds_get_boolean(NETSNMP_DS_LIBRARY_ID,
 	                                NETSNMP_DS_LIB_DONT_CHECK_RANGE);
   
-    if (check && tp->ranges) {
+    if (check && tp && tp->ranges) {
 	struct range_list *rp = tp->ranges;
 	while (rp) {
 	    if (rp->low <= ltmp && ltmp <= rp->high) break;
@@ -6124,7 +6142,7 @@ static int _check_range(struct tree *tp, long ltmp, int *resptr,
  */
 netsnmp_variable_list *
 snmp_pdu_add_variable(netsnmp_pdu *pdu,
-                      oid * name,
+                      const oid * name,
                       size_t name_length,
                       u_char type, const u_char * value, size_t len)
 {
@@ -6138,7 +6156,7 @@ snmp_pdu_add_variable(netsnmp_pdu *pdu,
  */
 netsnmp_variable_list *
 snmp_varlist_add_variable(netsnmp_variable_list ** varlist,
-                          oid * name,
+                          const oid * name,
                           size_t name_length,
                           u_char type, const u_char * value, size_t len)
 {
@@ -6294,7 +6312,7 @@ snmp_varlist_add_variable(netsnmp_variable_list ** varlist,
  */
 int
 snmp_add_var(netsnmp_pdu *pdu,
-             oid * name, size_t name_length, char type, const char *value)
+             const oid * name, size_t name_length, char type, const char *value)
 {
     const char     *cp;
     char           *ecp, *vp;
@@ -6321,6 +6339,8 @@ snmp_add_var(netsnmp_pdu *pdu,
     if (!tp || !tp->type || tp->type > TYPE_SIMPLE_LAST) {
         check = 0;
     }
+    if (!(tp && tp->hint))
+	do_hint = 0;
 
     if (tp && type == '=') {
         /*
@@ -6386,7 +6406,7 @@ snmp_add_var(netsnmp_pdu *pdu,
             }
         }
 
-        if (!_check_range(tp, ltmp, &result, value))
+        if (check && !_check_range(tp, ltmp, &result, value))
             break;
         snmp_pdu_add_variable(pdu, name, name_length, ASN_INTEGER,
                               (u_char *) & ltmp, sizeof(ltmp));
@@ -6490,8 +6510,8 @@ snmp_add_var(netsnmp_pdu *pdu,
             result = SNMPERR_VALUE;
             goto type_error;
         }
-	if ('s' == type && do_hint && tp->hint && !parse_octet_hint(tp->hint, value, &hintptr, &itmp)) {
-            if (_check_range(tp, itmp, &result, "Value does not match DISPLAY-HINT")) {
+	if ('s' == type && do_hint && !parse_octet_hint(tp->hint, value, &hintptr, &itmp)) {
+            if (!check || _check_range(tp, itmp, &result, "Value does not match DISPLAY-HINT")) {
                 snmp_pdu_add_variable(pdu, name, name_length,
                                       ASN_OCTET_STR, hintptr, itmp);
             }
@@ -6518,7 +6538,7 @@ snmp_add_var(netsnmp_pdu *pdu,
             buf_ptr = value;
             value_len = strlen(value);
         }
-        if (!_check_range(tp, itmp, &result, "Bad string length"))
+        if (check && !_check_range(tp, value_len, &result, "Bad string length"))
             break;
         snmp_pdu_add_variable(pdu, name, name_length, ASN_OCTET_STR,
                               buf_ptr, value_len);

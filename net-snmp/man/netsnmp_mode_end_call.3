@@ -1,4 +1,4 @@
-.TH "mode_end_call: at the end of a series of requests, call another handler hook." 3 "9 Jan 2003" "net-snmp" \" -*- nroff -*-
+.TH "mode_end_call: at the end of a series of requests, call another handler hook." 3 "5 Sep 2003" "net-snmp" \" -*- nroff -*-
 .ad l
 .nh
 .SH NAME
@@ -12,12 +12,9 @@ More...
 .br
 .RI "\fIreturns a mode_end_call handler that can be injected into a given handler chain.\fP"
 .ti -1c
-.RI "netsnmp_mode_handler_list * \fBnetsnmp_mode_end_call_add_mode_callback\fP (netsnmp_mode_handler_list *endlist, int mode, Netsnmp_Node_Handler *callbackh)"
+.RI "netsnmp_mode_handler_list * \fBnetsnmp_mode_end_call_add_mode_callback\fP (netsnmp_mode_handler_list *endlist, int mode, netsnmp_mib_handler *callbackh)"
 .br
 .RI "\fIadds a mode specific callback to the callback list.\fP"
-.ti -1c
-.RI "int \fBnetsnmp_mode_end_call_helper\fP (netsnmp_mib_handler *handler, netsnmp_handler_registration *reginfo, netsnmp_agent_request_info *reqinfo, netsnmp_request_info *requests)"
-.br
 .in -1c
 .SH "DETAILED DESCRIPTION"
 .PP 
@@ -32,7 +29,7 @@ Multiple mode specific handlers can be registered and will be called in the orde
 .PP
 returns a mode_end_call handler that can be injected into a given handler chain.
 .PP
-Parameters: \fP
+\fBParameters: \fP
 .in +1c
 .TP
 \fB\fIendlist\fP\fP
@@ -43,11 +40,13 @@ The callback list for the handler to make use of.
 An injectable Net-SNMP handler. 
 .PP
 Definition at line 38 of file mode_end_call.c.
-.SS "netsnmp_mode_handler_list* netsnmp_mode_end_call_add_mode_callback (netsnmp_mode_handler_list * endlist, int mode, Netsnmp_Node_Handler * callbackh)"
+.PP
+References netsnmp_create_handler().
+.SS "netsnmp_mode_handler_list* netsnmp_mode_end_call_add_mode_callback (netsnmp_mode_handler_list * endlist, int mode, netsnmp_mib_handler * callbackh)"
 .PP
 adds a mode specific callback to the callback list.
 .PP
-Parameters: \fP
+\fBParameters: \fP
 .in +1c
 .TP
 \fB\fIendinfo\fP\fP
@@ -57,7 +56,7 @@ the information structure for the mode_end_call helper. Can be NULL to create a 
 the mode to be called upon. A mode of NETSNMP_MODE_END_ALL_MODES = all modes. 
 .TP
 \fB\fIcallbackh\fP\fP
-the callback handler function to call. 
+the netsnmp_mib_handler callback to call. 
 .PP
 \fBReturns: \fP
 .in +1c

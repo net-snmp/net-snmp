@@ -800,7 +800,7 @@ static void
 Save_HR_Disk_General(void)
 {
 #ifdef DIOC_DESCRIBE
-    strnncpy(HRD_savedModel, HRD_info.model_num, sizeof(HRD_savedModel)-1);
+    strncpy(HRD_savedModel, HRD_info.model_num, sizeof(HRD_savedModel)-1);
     HRD_savedModel[ sizeof(HRD_savedModel)-1 ] = 0;
 #endif
 #ifdef DKIOCINFO

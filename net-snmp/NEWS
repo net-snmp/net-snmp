@@ -1,7 +1,46 @@
 This file contains major changes in released revisions.  Please read
 the ChangeLog file for a more detailed listing of changes/bug fixes.
 
-*5.0.7 pre1*
+*5.0.9*
+
+ SECURITY:
+    - An existing user/community could get access to data in MIB
+      objects that were explicitly excluded from their view.
+
+ Fixes:
+    - Perl build environment should better under Windows
+    - Misc kerberos support fixes.
+    - Improvements on various manual pages.
+    - A annoying bug with SETs being passed to pass scripts was fixed.
+    - The often talked about VACM optimization improvement was fixed again.
+    - mib2c handles augmentation tables better now.
+    - Various 64 bit issues have been addressed.
+
+*5.0.8*
+ New:
+    - No new features will be added to the 5.0.x line.
+
+ Ports:
+    - Update libtool to version 1.4.3, for the benefit of Darwin
+    - diskio support for Darwin
+    - Updates for OpenBSD 3. 
+    - Updates to solaris README
+
+ Fixes:
+    - find libwrap w/nsl on RedHat
+    - fix for openssl 0.9.7
+    - Fix some AgentX memory leaks
+    - use macro for inline function prototypes
+    - Attempt to find unused port before running tests
+    - Use SNMP_SLEEP environment variable when running tests
+    - calculate a proper ifSpeed under linux when possible
+    - better daemonization of snmpd
+    - close and reopen snmptrapd log files on HUP
+    - support for 16 bit reuqest ids
+    - Recognize new 't' code in display hints
+    - misc other fixes
+
+*5.0.7*
  New:
     - VACM (access control) optimizations which will greatly benefit
       people who wish to exclude large portions of the MIB tree from
@@ -22,6 +61,7 @@ the ChangeLog file for a more detailed listing of changes/bug fixes.
     - A few memory leak fixes for the table_iterator agent API.
     - Processed flag cleared before each pass of a set request
     - Remove snmpd pid file on exit
+    - Restore default behaviour of building shared libraries
     - misc other fixes
 
 *5.0.6*

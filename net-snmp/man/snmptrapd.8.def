@@ -43,6 +43,7 @@ Ignore authenticationFailure traps.
 Read 
 .I FILE
 as a configuration file.
+.TP
 .B -C
 Do not read any configuration files except the one optionally specified by the 
 .B -c 
@@ -99,6 +100,9 @@ hostnames.
 .BI -o " FILE"
 Log formatted incoming traps to 
 .IR FILE .
+Upon receipt of a SIGHUP, the daemon will close and re-open
+the log file.  This feature is useful when rotating the log file with
+other utilities such as logrotate.
 .TP
 .B -P
 Print formatted incoming traps to stderr.
@@ -268,7 +272,7 @@ all IPv4 interfaces.  However, it is possible to modify this behaviour
 by specifying one or more listening addresses as arguments to
 .BR snmptrapd .
 See the
-.I snmpd(1)
+.I snmpd(8)
 manual page for more information about the format of listening
 addresses.
 .SH NOTIFICATION-LOG-MIB SUPPORT
@@ -286,4 +290,4 @@ See the
 .I snmptrapd.conf(5)
 manual page.
 .SH "SEE ALSO"
-snmpcmd(1), snmpd(1), printf(3), snmptrapd.conf(5), syslog(8), variables(5)
+snmpcmd(1), snmpd(8), printf(3), snmptrapd.conf(5), syslog(8), variables(5)

@@ -296,6 +296,10 @@ handle_agentx_packet(int operation, netsnmp_session * session, int reqid,
          */
         DEBUGMSGTL(("agentx/subagent", "  -> testset\n"));
         asi = save_set_vars(session, pdu);
+        if (asi == NULL) {
+            snmp_log(LOG_WARNING, "save_set_vars() failed\n");
+            return 1;
+        }
         asi->mode = pdu->command = SNMP_MSG_INTERNAL_SET_RESERVE1;
         mycallback = handle_subagent_set_response;
         retmagic = asi;
@@ -304,6 +308,16 @@ handle_agentx_packet(int operation, netsnmp_session * session, int reqid,
     case AGENTX_MSG_COMMITSET:
         DEBUGMSGTL(("agentx/subagent", "  -> commitset\n"));
         asi = restore_set_vars(session, pdu);
+        if (asi == NULL) {
+            snmp_log(LOG_WARNING, "restore_set_vars() failed\n");
+            return 1;
+        }
+        if (asi->mode != SNMP_MSG_INTERNAL_SET_RESERVE2) {
+            snmp_log(LOG_WARNING,
+                     "dropping bad AgentX request (wrong mode %d)\n",
+                     asi->mode);
+            return 1;
+        }
         asi->mode = pdu->command = SNMP_MSG_INTERNAL_SET_ACTION;
         mycallback = handle_subagent_set_response;
         retmagic = asi;
@@ -312,11 +326,20 @@ handle_agentx_packet(int operation, netsnmp_session * session, int reqid,
     case AGENTX_MSG_CLEANUPSET:
         DEBUGMSGTL(("agentx/subagent", "  -> cleanupset\n"));
         asi = restore_set_vars(session, pdu);
+        if (asi == NULL) {
+            snmp_log(LOG_WARNING, "restore_set_vars() failed\n");
+            return 1;
+        }
         if (asi->mode == SNMP_MSG_INTERNAL_SET_RESERVE1 ||
             asi->mode == SNMP_MSG_INTERNAL_SET_RESERVE2) {
             asi->mode = pdu->command = SNMP_MSG_INTERNAL_SET_FREE;
-        } else {
+        } else if (asi->mode == SNMP_MSG_INTERNAL_SET_ACTION) {
             asi->mode = pdu->command = SNMP_MSG_INTERNAL_SET_COMMIT;
+        } else {
+            snmp_log(LOG_WARNING,
+                     "dropping bad AgentX request (wrong mode %d)\n",
+                     asi->mode);
+            return 1;
         }
         mycallback = handle_subagent_set_response;
         retmagic = asi;
@@ -325,6 +348,10 @@ handle_agentx_packet(int operation, netsnmp_session * session, int reqid,
     case AGENTX_MSG_UNDOSET:
         DEBUGMSGTL(("agentx/subagent", "  -> undoset\n"));
         asi = restore_set_vars(session, pdu);
+        if (asi == NULL) {
+            snmp_log(LOG_WARNING, "restore_set_vars() failed\n");
+            return 1;
+        }
         asi->mode = pdu->command = SNMP_MSG_INTERNAL_SET_UNDO;
         mycallback = handle_subagent_set_response;
         retmagic = asi;

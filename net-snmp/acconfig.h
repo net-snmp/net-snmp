@@ -303,7 +303,7 @@
 /* (typically its "can't fork, no mem" problems) */
 #define ERRORMIBNUM 101
 
-/* The sub id of EXENSIBLEMIB returned to queries of
+/* The sub id of EXTENSIBLEMIB returned to queries of
    .iso.org.dod.internet.mgmt.mib-2.system.sysObjectID.0 */
 #define AGENTID 250
 
@@ -613,5 +613,10 @@
 #endif
 
 #undef INET6
+
+#ifndef NETSNMP_INLINE
+#   define NETSNMP_NO_INLINE
+#   define NETSNMP_INLINE
+#endif
 
 #endif /* NET_SNMP_CONFIG_H */

@@ -363,6 +363,164 @@ vacm_getViewEntry(const char *viewName,
     return vpret;
 }
 
+/*******************************************************************o-o******
+ * vacm_checkSubtree
+ *
+ * Check to see if everything within a subtree is in view, not in view,
+ * or possibly both.
+ *
+ * Parameters:
+ *   *viewName           - Name of view to check
+ *   *viewSubtree        - OID of subtree
+ *    viewSubtreeLen     - length of subtree OID
+ *      
+ * Returns:
+ *   VACM_SUCCESS          The OID is included in the view.
+ *   VACM_NOTINVIEW        If no entry in the view list includes the
+ *                         provided OID, or the OID is explicitly excluded
+ *                         from the view. 
+ *   VACM_SUBTREE_UNKNOWN  The entire subtree has both allowed and disallowed
+ *                         portions.
+ */
+int
+vacm_checkSubtree(const char *viewName,
+                  oid * viewSubtree, size_t viewSubtreeLen)
+{
+    struct vacm_viewEntry *vp, *vpShorter = NULL, *vpLonger = NULL;
+    char            view[VACMSTRINGLEN];
+    int             found, glen;
+    int count=0;
+
+    glen = (int) strlen(viewName);
+    if (glen < 0 || glen >= VACM_MAX_STRING)
+        return VACM_NOTINVIEW;
+    view[0] = glen;
+    strcpy(view + 1, viewName);
+    for (vp = viewList; vp; vp = vp->next) {
+        if (!memcmp(view, vp->viewName, glen + 1)) {
+            /*
+             * If the subtree defined in the view is shorter than or equal
+             * to the subtree we are comparing, then it might envelop the
+             * subtree we are comparing against.
+             */
+            if (viewSubtreeLen >= (vp->viewSubtreeLen - 1)) {
+                int             mask = 0x80, maskpos = 0;
+                int             oidpos;
+                found = 1;
+
+                /*
+                 * check the mask
+                 */
+                for (oidpos = 0;
+                     found && oidpos < (int) vp->viewSubtreeLen - 1;
+                     oidpos++) {
+                    if ((vp->viewMask[maskpos] & mask) != 0) {
+                        if (viewSubtree[oidpos] !=
+                            vp->viewSubtree[oidpos + 1])
+                            found = 0;
+                    }
+                    if (mask == 1) {
+                        mask = 0x80;
+                        maskpos++;
+                    } else
+                        mask >>= 1;
+                }
+
+                if (found) {
+                    /*
+                     * match successful, keep this node if it's longer than
+                     * the previous or (equal and lexicographically greater
+                     * than the previous). 
+                     */
+    
+                    if (vpShorter == NULL
+                        || vp->viewSubtreeLen > vpShorter->viewSubtreeLen
+                        || (vp->viewSubtreeLen == vpShorter->viewSubtreeLen
+                           && snmp_oid_compare(vp->viewSubtree + 1,
+                                               vp->viewSubtreeLen - 1,
+                                               vpShorter->viewSubtree + 1,
+                                               vpShorter->viewSubtreeLen - 1) >
+                                   0)) {
+                        vpShorter = vp;
+                    }
+                }
+            }
+            /*
+             * If the subtree defined in the view is longer than the
+             * subtree we are comparing, then it might ambiguate our
+             * response.
+             */
+            else {
+                int             mask = 0x80, maskpos = 0;
+                int             oidpos;
+                found = 1;
+
+                /*
+                 * check the mask up to the length of the provided subtree
+                 */
+                for (oidpos = 0;
+                     found && oidpos < (int) viewSubtreeLen;
+                     oidpos++) {
+                    if ((vp->viewMask[maskpos] & mask) != 0) {
+                        if (viewSubtree[oidpos] !=
+                            vp->viewSubtree[oidpos + 1])
+                            found = 0;
+                    }
+                    if (mask == 1) {
+                        mask = 0x80;
+                        maskpos++;
+                    } else
+                        mask >>= 1;
+                }
+
+                if (found) {
+                    /*
+                     * match successful.  If we already found a match
+                     * with a different view type, then parts of the subtree 
+                     * are included and others are excluded, so return UNKNOWN.
+                     */
+                    if (vpLonger != NULL
+                        && (vpLonger->viewType != vp->viewType)) {
+                        DEBUGMSGTL(("vacm:checkSubtree", ", %s\n", "unknown"));
+                        return VACM_SUBTREE_UNKNOWN;
+                    }
+                    else if (vpLonger == NULL) {
+                        vpLonger = vp;
+                    }
+                }
+            }
+        }
+    }
+
+    /*
+     * If we found a matching view subtree with a longer OID than the provided
+     * OID, check to see if its type is consistent with any matching view
+     * subtree we may have found with a shorter OID than the provided OID.
+     *
+     * The view type of the longer OID is inconsistent with the shorter OID in
+     * either of these two cases:
+     *  1) No matching shorter OID was found and the view type of the longer
+     *     OID is INCLUDE.
+     *  2) A matching shorter ID was found and its view type doesn't match
+     *     the view type of the longer OID.
+     */
+    if (vpLonger != NULL) {
+        if ((!vpShorter && vpLonger->viewType != SNMP_VIEW_EXCLUDED)
+            || (vpShorter && vpLonger->viewType != vpShorter->viewType)) {
+            DEBUGMSGTL(("vacm:checkSubtree", ", %s\n", "unknown"));
+            return VACM_SUBTREE_UNKNOWN;
+        }
+    }
+
+    if (vpShorter && vpShorter->viewType != SNMP_VIEW_EXCLUDED) {
+        DEBUGMSGTL(("vacm:checkSubtree", ", %s\n", "included"));
+        return VACM_SUCCESS;
+    }
+
+    DEBUGMSGTL(("vacm:checkSubtree", ", %s\n", "excluded"));
+    return VACM_NOTINVIEW;
+}
+
 void
 vacm_scanViewInit(void)
 {
