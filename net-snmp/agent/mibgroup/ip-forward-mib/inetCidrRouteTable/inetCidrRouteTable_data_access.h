@@ -35,7 +35,7 @@ extern          "C" {
      */
 
 
-    int            
+    int
         inetCidrRouteTable_init_data(inetCidrRouteTable_registration_ptr
                                      inetCidrRouteTable_reg);
 
@@ -55,7 +55,7 @@ extern          "C" {
     void            inetCidrRouteTable_cache_free(netsnmp_container *
                                                   container);
 
-    int            
+    int
         inetCidrRouteTable_row_prep(inetCidrRouteTable_rowreq_ctx *
                                     rowreq_ctx);
 
