@@ -85,12 +85,18 @@
 #if HAVE_INET_MIB2_H
 #include <inet/mib2.h>
 #endif
+
+#if HAVE_DMALLOC_H
+#include <dmalloc.h>
+#endif
+
 #ifdef solaris2
 #include "kernel_sunos5.h"
 #else
 #include "kernel.h"
 #endif
-#include "../../../snmplib/system.h"
+
+#include "system.h"
 #include "asn1.h"
 #include "snmp_debug.h"
 

@@ -44,6 +44,10 @@
 #include <inet/mib2.h>
 #endif
 
+#if HAVE_DMALLOC_H
+#include <dmalloc.h>
+#endif
+
 #include "mibincl.h"
 #include "snmpusm.h"
 
@@ -55,7 +59,7 @@
 #include "snmp_agent.h"
 #include "agent_trap.h"
 #include "snmpd.h"
-#include "../snmplib/system.h"
+#include "system.h"
 #include "snmp_debug.h"
 #include "mibgroup/mib_module_includes.h"
 

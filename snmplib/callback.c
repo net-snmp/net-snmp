@@ -14,6 +14,10 @@
 #include <strings.h>
 #endif
 
+#if HAVE_DMALLOC_H
+#include <dmalloc.h>
+#endif
+
 #include "tools.h"
 #include "callback.h"
 #include "asn1.h"

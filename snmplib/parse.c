@@ -77,6 +77,10 @@ SOFTWARE.
 #include <netinet/in.h>
 #endif
 
+#if HAVE_DMALLOC_H
+#include <dmalloc.h>
+#endif
+
 #include "system.h"
 #include "parse.h"
 #include "asn1.h"
@@ -3360,6 +3364,9 @@ static void print_mib_leaves(FILE *f, struct tree *tp)
     if (tp->enums)		typ = "EnumVal  ";
     fprintf(f, "%s-- %s %s %s(%ld)\n", leave_indent, acc, typ, tp->label, tp->subid);
     *ip = last_ipch;
+    if (tp->tc_index >= 0)
+      fprintf(f, "%s        Textual Convention: %s\n", leave_indent,
+	      tclist[tp->tc_index].descriptor);
     if (tp->enums) {
       struct enum_list *ep = tp->enums;
       fprintf(f, "%s        Values: ", leave_indent);

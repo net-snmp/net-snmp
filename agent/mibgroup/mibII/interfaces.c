@@ -106,6 +106,10 @@
 # endif
 #endif
 
+#if HAVE_DMALLOC_H
+#include <dmalloc.h>
+#endif
+
 #ifdef solaris2
 #include "kernel_sunos5.h"
 #else
@@ -137,7 +141,7 @@
 
 /* #include "../common_header.h" */
 
-#include "../../../snmplib/system.h"
+#include "system.h"
 #include "snmp_logging.h"
 
 #if HAVE_OSRELDATE_H

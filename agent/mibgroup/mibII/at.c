@@ -63,12 +63,15 @@
 #include "kernel_sunos5.h"
 #endif
 
+#if HAVE_DMALLOC_H
+#include <dmalloc.h>
+#endif
 
-#include "../mibincl.h"
+#include "mibincl.h"
 #include "at.h"
 #include "interfaces.h"
 #include "auto_nlist.h"
-#include "../../../snmplib/system.h"
+#include "system.h"
 
 #if defined(HAVE_SYS_SYSCTL_H) && !defined(CAN_USE_SYSCTL)
 # if defined(RTF_LLINFO) && !defined(irix6)

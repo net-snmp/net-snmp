@@ -63,6 +63,10 @@
 #include <varargs.h>
 #endif
 
+#if HAVE_DMALLOC_H
+#include <dmalloc.h>
+#endif
+
 #include "asn1.h"
 #include "mib.h"
 #include "parse.h"

@@ -117,6 +117,10 @@
 # endif
 #endif
 
+#if HAVE_DMALLOC_H
+#include <dmalloc.h>
+#endif
+
 #include "mibincl.h"
 #include "struct.h"
 #include "disk.h"
@@ -130,7 +134,7 @@
 #else
 #define setPerrorstatus(x) snmp_log_perror(x)
 #endif
-#include "../../../snmplib/system.h"
+#include "system.h"
 
 int numdisks;
 struct diskpart disks[MAXDISKS];

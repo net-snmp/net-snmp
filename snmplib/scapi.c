@@ -54,6 +54,7 @@
 #ifdef USE_OPENSSL
 #include <openssl/hmac.h>
 #include <openssl/evp.h>
+#include <openssl/rand.h>
 #endif
 
 #ifdef QUITFUN
@@ -209,10 +210,10 @@ sc_generate_keyed_hash(	oid	*authtype,	size_t authtypelen,
   int		 rval	 = SNMPERR_SUCCESS;
   int		 properlength;
 
-  u_int8_t	 buf[SNMP_MAXBUF_SMALL];
+  u_char	 buf[SNMP_MAXBUF_SMALL];
 #if  defined(USE_OPENSSL)
   int		 buf_len = sizeof(buf);
-  u_int8_t	*bufp = buf;
+  u_char	*bufp = buf;
 #endif
   
   DEBUGTRACE;
@@ -321,7 +322,7 @@ sc_hash(oid *hashtype, size_t hashtypelen, u_char *buf, size_t buf_len,
   int   rval       = SNMPERR_SUCCESS;
 
 #ifdef USE_OPENSSL 
-  EVP_MD *hash();
+  EVP_MD *hash(void);
   HMAC_CTX *c = NULL; 
 #endif
 
@@ -403,7 +404,7 @@ sc_check_keyed_hash(	oid	*authtype,	size_t authtypelen,
 	int		 rval	 = SNMPERR_SUCCESS;
 	size_t		 buf_len = SNMP_MAXBUF_SMALL;
 
-	u_int8_t	 buf[SNMP_MAXBUF_SMALL];
+	u_char		 buf[SNMP_MAXBUF_SMALL];
 
         DEBUGTRACE;
 

@@ -73,10 +73,14 @@ PERFORMANCE OF THIS SOFTWARE.
 #include <inet/mib2.h>
 #endif
 
+#if HAVE_DMALLOC_H
+#include <dmalloc.h>
+#endif
+
 #include "mibincl.h"
 #include "snmpv3.h"
 #include "snmpusm.h"
-#include "../snmplib/system.h"
+#include "system.h"
 #include "kernel.h"
 #include "snmp_vars.h"
 

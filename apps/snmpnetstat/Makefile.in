@@ -24,7 +24,7 @@ CPPFLAGS=-I../.. -I$(srcdir)/../.. -I$(srcdir)/../../snmplib @CPPFLAGS@
 CC = @CC@ $(CPPFLAGS)
 
 USELIBS=../../snmplib/libsnmp.$(SHLIB_EXTENSION)$(SHLIB_VERSION)
-LIBS=	 -L../../snmplib $(CC_RUNTIME_ARG) -lsnmp @LIBS@
+LIBS=	 $(USELIBS) $(CC_RUNTIME_ARG) @LIBS@
 
 all: $(TARG)
 

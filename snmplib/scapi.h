@@ -70,8 +70,8 @@ int     sc_hash(oid *hashtype, size_t hashtypelen, u_char *buf, size_t buf_len,
 int     sc_get_transform_type(oid *hashtype, u_int hashtype_len,
                               int (**hash_fn)(
                                 const int	  mode,	  void 	   **context,
-                                const u_int8_t	 *data,	  const int  data_len,
-                                u_int8_t	**digest, size_t    *digest_len));
+                                const u_char	 *data,	  const int  data_len,
+                                u_char		**digest, size_t    *digest_len));
   
 /*
  * SCAPI functions specific to KMT.

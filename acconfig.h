@@ -99,6 +99,9 @@
 /* Use libwrap to handle allow/deny hosts? */
 #undef USE_LIBWRAP
 
+/* Use dmalloc to do malloc debugging? */
+#undef HAVE_DMALLOC_H
+
 /* location of UNIX kernel */
 #define KERNEL_LOC "/vmunix"
 
