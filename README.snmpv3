@@ -56,7 +56,7 @@ CREATING A SECOND USER:
   The above should have created the user "wes" with the same password as
   the "myuser" user.  So then, you need to change his password using:
 
-    snmpusm -v 3 -u wes -l authNoPriv -a MD5 -A my_password localhost passwd -CO my_password -CN new_passphrase
+    snmpusm -v 3 -u wes -l authNoPriv -a MD5 -A my_password localhost passwd my_password new_passphrase
 
   See, wasn't that easy?  You can now create users.  Wheeee....
 
