@@ -64,7 +64,7 @@ PERFORMANCE OF THIS SOFTWARE.
 #define rt_dst rt_nodes->rn_key
 #endif
 #else
-#define rt_unit rt_hash		       /* Reuse this field for device # */
+#define rt_unit rt_refcnt	       /* Reuse this field for device # */
 #endif
 #include <nlist.h>
 #ifndef NULL
@@ -432,7 +432,7 @@ struct radix_node *pt;
       *cp = '\0';
       Interface_Scan_Init();
       rt.rt_unit = 0;
-      while (Interface_Scan_Next((int *)&rt.rt_unit, temp, 0, 0) != 0) {
+      while (Interface_Scan_Next((short *) &(rt.rt_unit), temp, 0, 0) != 0) {
         if (strcmp(name, temp) == 0) break;
       }
     }
@@ -533,7 +533,7 @@ static Route_Scan_Reload()
           *cp = '\0';
 
           Interface_Scan_Init();
-          while (Interface_Scan_Next((int *)&rt->rt_unit, temp, 0, 0) != 0) {
+          while (Interface_Scan_Next((short *)&rt->rt_unit, temp, 0, 0) != 0) {
             if (strcmp(name, temp) == 0) break;
           }
         }
@@ -634,7 +634,7 @@ static Route_Scan_Reload()
 			if (strcmp(name,"lo0") == 0) continue; 
 
 			Interface_Scan_Init();
-			while (Interface_Scan_Next((int *)&rt->rt_unit, temp, 0, 0) != 0) {
+			while (Interface_Scan_Next((short *)&rt->rt_unit, temp, 0, 0) != 0) {
 			    if (strcmp(name, temp) == 0) break;
 			}
 		    }
