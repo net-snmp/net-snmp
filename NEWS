@@ -1,6 +1,22 @@
 This file contains major changes in released revisions.  Please read
 the ChangeLog file for a more detailed listing of changes/bug fixes.
 
+*5.1.2*
+ New:
+   - Minor improvements to snmpdelta (error reporting)
+   - Minor improvements to snmpnetstat (IPv6 output)
+
+ Fixes:
+   - Misc 64bit processor fixes.
+   - Misc perl build and install fixes.
+
+ Ports:
+   - Linux 2.6 improvements
+   - Win32 Suport for TCP and UDP over IPv6 via Winsock version 2
+   - Win32 fixes in many places.
+   - Win32 service support for snmptrapd
+   - Win32 support for snmpconf
+
 *5.1.1*
  New:
    - test suite supports testing over other transports (tcp, udp6, unix, ...)
