@@ -272,6 +272,7 @@ main(int argc, char *argv[])
             size_t          units;
             unsigned long   hssize, hsused;
             char            descr[SPRINT_MAX_LEN];
+	    int             len;
 
             pdu = snmp_pdu_create(SNMP_MSG_GET);
 
@@ -291,8 +292,10 @@ main(int argc, char *argv[])
             }
 
             vlp2 = response->variables;
-            memcpy(descr, vlp2->val.string, vlp2->val_len);
-            descr[vlp2->val_len] = '\0';
+	    len = vlp2->val_len;
+	    if (len >= SPRINT_MAX_LEN) len = SPRINT_MAX_LEN-1;
+            memcpy(descr, vlp2->val.string, len);
+            descr[len] = '\0';
 
             vlp2 = vlp2->next_variable;
             units = vlp2->val.integer ? *(vlp2->val.integer) : 0;
