@@ -422,7 +422,7 @@ long get_uptime (void)
 {
 #if defined(bsdlike) && !defined(solaris2) && !defined(linux)
     struct timeval boottime, now, diff;
-#ifndef						CAN_USE_SYSCTL
+#ifndef	CAN_USE_SYSCTL
     int kmem;
     static struct nlist nl[] = {
 #if !defined(hpux)
@@ -445,8 +445,8 @@ long get_uptime (void)
     read(kmem, &boottime, sizeof(boottime));
     close(kmem);
 #else						/* CAN_USE_SYSCTL */
-    int                 mib[2];
-    size_t              len;
+    int	    mib[2];
+    size_t  len;
 
     mib[0] = CTL_KERN;
     mib[1] = KERN_BOOTTIME;
@@ -559,8 +559,8 @@ calculate_time_diff(struct timeval *now, struct timeval *then)
  */
 char *strcasestr(const char *haystack, const char *needle)
 {
-    register char *cp1=haystack, *cp2=needle;
-    char *cx;
+    const char *cp1=haystack, *cp2=needle;
+    const char *cx;
     int tstch1, tstch2;
 
     /* printf("looking for '%s' in '%s'\n", needle, haystack); */
@@ -571,7 +571,7 @@ char *strcasestr(const char *haystack, const char *needle)
                 /* printf("T'%c' ", *cp1); */
                 if (! *cp2) { /* found the needle */
                     /* printf("\nfound '%s' in '%s'\n", needle, cx); */
-                    return (cx);
+                    return (char *)cx;
                 }
                 if (! *cp1)
                     break;
@@ -589,8 +589,8 @@ char *strcasestr(const char *haystack, const char *needle)
         }
     /* printf("\n"); */
     if (cp1 && *cp1)
-        return (cp1);
+        return (char *)cp1;
 
-    return 0;
+    return NULL;
 }
 #endif

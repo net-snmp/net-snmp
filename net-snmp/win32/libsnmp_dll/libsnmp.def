@@ -42,10 +42,14 @@ EXPORTS
 	sprint_objid
 	fprint_objid
 	print_description
+	fprint_description
 	get_module_node
 	get_node
 	find_node
 	find_best_tree_node
+	get_wild_node
+	find_tree_node
+	clear_tree_flags
 	get_symbol
 	get_tree
 	read_module
@@ -139,8 +143,11 @@ EXPORTS
 	ds_register_premib
 	ds_set_boolean
 	ds_get_boolean
+	ds_toggle_boolean
 	ds_set_int
 	ds_get_int
+	ds_set_string
+	ds_get_string
 	snmp_pdu_add_variable
 	encode_keychange
 	generate_kul
@@ -158,6 +165,7 @@ EXPORTS
 	usm_free_user
 	usm_add_user
 	usm_create_initial_user
+	usm_parse_create_usmUser
 	read_premib_configs
 	register_mib_handlers
 	init_snmpv3
