@@ -1571,6 +1571,8 @@ else
 fi
 ])
 
+PSCMD="$PSPROG $ac_cv_ps_flags"
+AC_SUBST(PSCMD)
 AC_DEFINE_UNQUOTED(PSCMD, "$PSPROG $ac_cv_ps_flags")
 
 dnl Checks for byte order
