@@ -41,6 +41,8 @@ typedef struct request_info_s {
    int inclusive;
    int status;
    int index;
+   int repeat;
+   
    struct request_info_s         *next;
    struct request_info_s         *prev;
    struct subtree *subtree;
@@ -99,7 +101,7 @@ struct agent_snmp_session {
     int		exact;
     int		status;
     int		index;
-    int		inclusive;
+    int		oldmode;
     
     struct agent_snmp_session *next;
 
@@ -107,6 +109,7 @@ struct agent_snmp_session {
    agent_request_info *reqinfo;
    request_info *requests;
    tree_cache *treecache;
+   struct variable_list **bulkcache;
    int treecache_len; /* length of cache array */
    int treecache_num; /* number of current cache entries */
    int vbcount;

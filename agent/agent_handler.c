@@ -145,6 +145,11 @@ register_handler(handler_registration *reginfo) {
         reginfo->modes = HANDLER_CAN_DEFAULT;
     }
 
+    /* for handlers that can't GETBULK, force a conversion handler on them */
+    if (!(reginfo->modes & HANDLER_CAN_GETBULK)) {
+        inject_handler(reginfo, get_bulk_to_next_handler());
+    }
+
     return register_mib_context2(reginfo->handler->handler_name,
                          NULL, 0, 0,
                          reginfo->rootoid, reginfo->rootoid_len,
@@ -231,6 +236,7 @@ int call_handlers(handler_registration *reginfo,
     }
 
     switch(reqinfo->mode) {
+        case MODE_GETBULK:
         case MODE_GET:
         case MODE_GETNEXT:
             if (!(reginfo->modes & HANDLER_CAN_GETANDGETNEXT))
@@ -251,15 +257,6 @@ int call_handlers(handler_registration *reginfo,
             }
             break;
 
-        case MODE_GETBULK:
-            if (!(reginfo->modes & HANDLER_CAN_GETBULK))
-                return SNMP_ERR_NOERROR; /* XXXWWW: should never get
-                                            here after we force a
-                                            getbulk->getnext helper on
-                                            them during registration
-                                            process. */
-            break;
-            
         default:
             snmp_log(LOG_ERR, "unknown mode in call_handlers! bug!\n");
             return SNMP_ERR_GENERR;
