@@ -276,6 +276,7 @@ netsnmp_arch_interface_container_load(netsnmp_container* container,
             static match_if lmatch_if[] = {
                 {IANAIFTYPE_SOFTWARELOOPBACK, "lo"},
                 {IANAIFTYPE_ETHERNETCSMACD, "eth"},
+                {IANAIFTYPE_ETHERNETCSMACD, "vmnet"},
                 {IANAIFTYPE_ISO88025TOKENRING, "tr"},
                 {IANAIFTYPE_PPP, "ppp"},
                 {IANAIFTYPE_SLIP, "sl"},
