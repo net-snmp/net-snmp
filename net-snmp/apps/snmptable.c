@@ -171,6 +171,9 @@ static void optProc(int argc, char *const *argv, int opt)
           case 'i':
             show_index = 1;
             break;
+	  default:
+	    fprintf(stderr, "Bad option after -C: %c\n", optarg[-1]);
+	    usage();
           }
        }
        break;
@@ -200,6 +203,8 @@ void usage(void)
   fprintf(stdout,"  -Cf <F>\tprint an F delimited table\n");
   fprintf(stdout,"  -Cb\t\tbrief field names\n");
   fprintf(stdout,"  -Ci\t\tprint index value\n");
+  fprintf(stdout,"  -Ch\t\tprint only the column headers\n");
+  fprintf(stdout,"  -CH\t\tprint no column headers\n");
   exit(1);
 }
 
@@ -212,9 +217,9 @@ int main(int argc, char *argv[])
   snmp_set_quick_print(1);
 
   /* get the common command line arguments */
-  if ((snmp_parse_args(argc, argv, &session, "w:C:bi", optProc)) < 0) { 
-      usage();
-      exit(1);
+  if (snmp_parse_args(argc, argv, &session, "w:C:bi", optProc) < 0) {
+    usage();
+    exit(1);
   }
 
   /* get the initial object and subtree */
@@ -254,12 +259,12 @@ int main(int argc, char *argv[])
     exit(1);
   }
 
-  if (headers_only == 0) get_table_entries(ss);
+  if (!headers_only) get_table_entries(ss);
 
   snmp_close(ss);
   SOCK_CLEANUP;
 
-  if (entries) print_table();
+  if (entries || headers_only) print_table();
   else printf("%s: No entries\n", table_name);
 
   return 0;
@@ -272,12 +277,12 @@ void print_table (void)
   char string_buf[SPRINT_MAX_LEN];
   char *index_fmt = NULL;
 
-  if (!no_headers) printf("SNMP table: %s\n\n", table_name);
+  if (!no_headers && !headers_only) printf("SNMP table: %s\n\n", table_name);
 
   for (field = 0; field < fields; field++) {
     if (field_separator == NULL)
       sprintf(string_buf, "%%%ds", column[field].width+1);
-    else if (field == 0 && !show_index) sprintf(string_buf, "%%s");
+    else if (field == 0) sprintf(string_buf, "%%s");
     else sprintf(string_buf, "%s%%s", field_separator);
     column[field].fmt = strdup (string_buf);
   }
@@ -411,7 +416,7 @@ void get_table_entries( struct snmp_session *ss )
   int   status;
   int   i;
   int   col;
-  char  string_buf[SPRINT_MAX_LEN];
+  char  string_buf[SPRINT_MAX_LEN], *cp;
   char  *name_p = NULL;
   char  **dp;
   int end_of_table = 0;
@@ -505,6 +510,7 @@ void get_table_entries( struct snmp_session *ss )
 	  
 	  if (localdebug) printf("%s => taken\n", string_buf);
 	  sprint_value(string_buf, vars->name, vars->name_length, vars);
+	  for (cp = string_buf; *cp; cp++) if (*cp == '\n') *cp = ' ';
 	  dp[col] = strdup(string_buf);
 	  i = strlen(string_buf);
 	  if (i > column[col].width) column[col].width = i;
