@@ -897,7 +897,7 @@ extern "C" {
      * the pipe call creates fds that select chokes on, so
      * disable callbacks on WIN32 until a fix can be found
      */
-#undef SNMP_TRANSPORT_CALLBACK_DOMAIN
+#define SNMP_TRANSPORT_CALLBACK_DOMAIN 1
 
 /*  This is defined if support for the TCP/IP transport domain is
     available.  */

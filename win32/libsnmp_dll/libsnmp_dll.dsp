@@ -270,6 +270,10 @@ SOURCE=..\..\snmplib\ucd_compat.c
 
 SOURCE=..\..\snmplib\vacm.c
 # End Source File
+# Begin Source File
+
+SOURCE=..\..\snmplib\winpipe.c
+# End Source File
 # End Group
 # Begin Group "Header Files"
 
