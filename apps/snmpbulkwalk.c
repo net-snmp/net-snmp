@@ -160,11 +160,7 @@ main(argc, argv)
 		for(pp = party_scanNext(); pp; pp = party_scanNext()){
 		    if (!strcasecmp(pp->partyName, argv[arg])){
 			srclen = pp->partyIdentityLen;
-#ifdef SVR4
 			memmove(src, pp->partyIdentity, srclen * sizeof(oid));
-#else
-			bcopy(pp->partyIdentity, src, srclen * sizeof(oid));
-#endif
 			break;
 		    }
 		}
@@ -184,11 +180,7 @@ main(argc, argv)
 	    for(pp = party_scanNext(); pp; pp = party_scanNext()){
 		if (!strcasecmp(pp->partyName, argv[arg])){
 		    dstlen = pp->partyIdentityLen;
-#ifdef SVR4
 		    memmove(dst, pp->partyIdentity, dstlen * sizeof(oid));
-#else
-		    bcopy(pp->partyIdentity, dst, dstlen * sizeof(oid));
-#endif
 		    break;
 		}
 	    }
@@ -206,13 +198,8 @@ main(argc, argv)
             for(cxp = context_scanNext(); cxp; cxp = context_scanNext()){
                 if (!strcasecmp(cxp->contextName, argv[arg])){
                     contextlen = cxp->contextIdentityLen;
-#ifdef SVR4
                     memmove(context, cxp->contextIdentity,
                           contextlen * sizeof(oid));
-#else
-                    bcopy(cxp->contextIdentity, context,
-                          contextlen * sizeof(oid));
-#endif
                     break;
                 }
             }
@@ -235,11 +222,7 @@ main(argc, argv)
     }
 
     if (gotroot == 0){
-#ifdef SVR4
-	memmove((char *)root, (char *)objid_mib, sizeof(objid_mib));
-#else
-	bcopy((char *)objid_mib, (char *)root, sizeof(objid_mib));
-#endif
+      memmove(root, objid_mib, sizeof(objid_mib));
 	rootlen = sizeof(objid_mib) / sizeof(oid);
 	gotroot = 1;
     }
@@ -259,13 +242,7 @@ main(argc, argv)
 		fprintf(stderr, "unknown host: %s\n", hostname);
 		exit(1);
 	    } else {
-#ifdef SVR4
-		memmove((char *)&destAddr, (char *)hp->h_addr,
-		      hp->h_length);
-#else
-		bcopy((char *)hp->h_addr, (char *)&destAddr,
-		      hp->h_length);
-#endif
+              memmove(&destAddr, hp->h_addr, hp->h_length);
 	    }
 	}
 	srclen = dstlen = contextlen = MAX_NAME_LEN;
@@ -288,11 +265,7 @@ main(argc, argv)
 	}
     }
 
-#ifdef SVR4
-    memset((char *)&session, NULL, sizeof(struct snmp_session));
-#else
-    bzero((char *)&session, sizeof(struct snmp_session));
-#endif
+    memset(&session, 0, sizeof(struct snmp_session));
     session.peername = hostname;
     if (port_flag)
 	session.remote_port = dest_port;
@@ -320,11 +293,7 @@ main(argc, argv)
     }
 
 
-#ifdef SVR4
-    memmove((char *)name, (char *)root, rootlen * sizeof(oid));
-#else
-    bcopy((char *)root, (char *)name, rootlen * sizeof(oid));
-#endif
+    memmove(name, root, rootlen * sizeof(oid));
     name_length = rootlen;
 
     running = 1;
@@ -342,11 +311,7 @@ main(argc, argv)
 		for(vars = response->variables; vars;
 		    vars = vars->next_variable){
 		    if (vars->name_length < rootlen
-#ifdef SVR4
 			|| memcmp(root, vars->name, rootlen * sizeof(oid))){
-#else
-			|| bcmp(root, vars->name, rootlen * sizeof(oid))){
-#endif
 			running = 0;
 			continue;	/* not part of this subtree */
 		    }
@@ -357,13 +322,8 @@ main(argc, argv)
 			running = 0; /* restart so we can get next variable */
 		    }
 		    if (!vars->next_variable){ /* repeat on last variable */
-#ifdef SVR4
-			memmove((char *)name, (char *)vars->name,
+                      memmove(name, vars->name,
 			  vars->name_length * sizeof(oid));
-#else
-			bcopy((char *)vars->name, (char *)name,
-			  vars->name_length * sizeof(oid));
-#endif
 			name_length = vars->name_length;
 		    }
 		}

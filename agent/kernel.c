@@ -29,23 +29,23 @@ init_kmem(file)
 {
   kmem = open(file, O_RDONLY);
   if (kmem < 0){
-    fprintf(stderr, "cannot open %s",file);
-    perror(file);
+    fprintf(stderr, "cannot open %s: ",file);
+    perror(NULL);
     exit(1);
   }
   fcntl(kmem,F_SETFD,1);
   mem = open("/dev/mem",O_RDONLY);    
   if (mem < 0){
-    fprintf(stderr, "cannot open /dev/mem");
-    perror("/dev/mem");
+    fprintf(stderr, "cannot open /dev/mem: ");
+    perror(NULL);
     exit(1);
   }
   fcntl(mem,F_SETFD,1);
 #ifdef DMEM_LOC
   swap = open(DMEM_LOC,O_RDONLY);
   if (swap < 0){
-    fprintf(stderr, "cannot open %s\n",DMEM_LOC);
-    perror(DMEM_LOC);
+    fprintf(stderr, "cannot open %s: ",DMEM_LOC);
+    perror(NULL);
     exit(1);
   }
   fcntl(swap,F_SETFD,1);
