@@ -8,7 +8,7 @@
     <h1>UCD-SNMP Tutorial -- snmpget</h1>
     <p>
       <b>Note:</b>  Much of this tutorial requires <a
-	href="ftp://ucd-snmp.ucdavis.edu/ucd-snmp.tar.gz">ucd-snmp-4.2.2</a>!,
+	href="ftp://ftp.sourceforge.net/pub/sourceforge/n/ne/net-snmp/ucd-snmp.tar.gz">ucd-snmp-4.2.2</a>!,
 	so make sure you get it before running the commands found in
 	this tutorial.</b> 
       <p><b>Note:</b>  A new tutorial for net-snmp 5.0 and above <a
@@ -23,12 +23,12 @@
       an OID.  As a simple example:
 <pre>
 <ul>
-% <b>snmpget ucd-snmp.ucdavis.edu demopublic system.sysUpTime.0</b>
+% <b>snmpget test.net-snmp.org demopublic system.sysUpTime.0</b>
 system.sysUpTime.0 = Timeticks: (586731977) 67 days, 21:48:39.77
 </ul>
 </pre>
     <p>
-      In the above example, <i>ucd-snmp.ucdavis.edu</i> is the host name
+      In the above example, <i>test.net-snmp.org</i> is the host name
       we wanted to talk to, using the SNMP community string
       <i>demopublic</i> and we requested the value of the OID
       <i>system.sysUpTime.0</i>.
@@ -42,7 +42,7 @@ system.sysUpTime.0 = Timeticks: (586731977) 67 days, 21:48:39.77
       SNMPv2c version would have been the same:
 <pre>
 <ul>
-% <b>snmpget -v 2c ucd-snmp.ucdavis.edu demopublic system.sysUpTime.0</b>
+% <b>snmpget -v 2c test.net-snmp.org demopublic system.sysUpTime.0</b>
 system.sysUpTime.0 = Timeticks: (586752671) 67 days, 21:52:06.71
 </ul>
 </pre>
@@ -52,7 +52,7 @@ system.sysUpTime.0 = Timeticks: (586752671) 67 days, 21:52:06.71
       small portion of the oid if you would prefer:
 <pre>
 <ul>
-% <b>snmpget -v 2c ucd-snmp.ucdavis.edu demopublic sysUpTime.0</b>
+% <b>snmpget -v 2c test.net-snmp.org demopublic sysUpTime.0</b>
 system.sysUpTime.0 = Timeticks: (586752671) 67 days, 21:52:06.71
 </ul>
 </pre>
@@ -66,11 +66,11 @@ system.sysUpTime.0 = Timeticks: (586752671) 67 days, 21:52:06.71
       slightly between SNMPv1 and SNMPv2c:
 <pre>
 <ul>
-% <b>snmpget -v 1 ucd-snmp.ucdavis.edu demopublic sysUpTime</b>
+% <b>snmpget -v 1 test.net-snmp.org demopublic sysUpTime</b>
 Error in packet
 Reason: (noSuchName) There is no such variable name in this MIB.
 This name doesn't exist: system.sysUpTime
-% <b>snmpget -v 2c ucd-snmp.ucdavis.edu demopublic sysUpTime</b>
+% <b>snmpget -v 2c test.net-snmp.org demopublic sysUpTime</b>
 system.sysUpTime = No Such Instance currently exists
 </ul>
 </pre>
@@ -78,7 +78,7 @@ system.sysUpTime = No Such Instance currently exists
       Multiple variables can be retrieved in one transaction as well:
 <pre>
 <ul>
-% <b>snmpget -v 2c ucd-snmp.ucdavis.edu demopublic sysUpTime.0 ucdDemoUserList.0</b>
+% <b>snmpget -v 2c test.net-snmp.org demopublic sysUpTime.0 ucdDemoUserList.0</b>
 system.sysUpTime.0 = Timeticks: (586903243) 67 days, 22:17:12.43
 enterprises.ucdavis.ucdDemoMIB.ucdDemoMIBObjects.ucdDemoPublic.ucdDemoUserList.0 = " noAuthUser MD5User MD5DESUser SHAUser SHADESUser"
 </ul>
@@ -87,7 +87,7 @@ enterprises.ucdavis.ucdDemoMIB.ucdDemoMIBObjects.ucdDemoPublic.ucdDemoUserList.0
     <address><a href="mailto:Wes Hardaker <wjhardaker@ucdavis.edu>"></a></address>
 <!-- Created: Thu Nov  4 15:05:29 PST 1999 -->
 <!-- hhmts start -->
-Last modified: Mon Mar 25 08:39:39 PST 2002
+Last modified: Mon Aug  2 10:55:05 EDT 2004
 <!-- hhmts end -->
   </body>
 </html>
