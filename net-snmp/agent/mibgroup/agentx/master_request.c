@@ -76,9 +76,17 @@ handle_agentx_response( int operation,
     struct variable_list *vbp;
     struct agent_snmp_session *asp  =  ax_vlist->asp;
     int i;
+    struct ax_variable_list *retry_vlist;
+    struct variable_list    *vb_retry, *vbp2;
+    struct subtree          *retry_sub;
+    int j;
     char buf[SPRINT_MAX_LEN];
 
     asp->outstanding_requests = NULL;
+
+    retry_vlist = NULL;
+    vb_retry    = NULL;
+    vbp2        = NULL;
 
     DEBUGMSGTL(("agentx/master","handle_agentx_response() beginning...\n"));
     for ( i = 0, vbp = pdu->variables ;
@@ -94,12 +102,43 @@ handle_agentx_response( int operation,
 	    sprint_variable (buf, vbp->name, vbp->name_length, vbp);
 	    DEBUGMSGTL(("snmp_agent", "    >> %s\n", buf));
 	}
-#ifdef STILL_TO_CODE
-	if ( !asp->exact && (vbp->type == ENDOFMIB || !in_view())) {
-	    /* Add to "oustanding query" list */
+
+	if ( !asp->exact && (vbp->type == SNMP_ENDOFMIBVIEW ||
+			     !in_a_view( vbp->name, &vbp->name_length,
+                                         asp->pdu,  vbp->type ))) {
+	    /*
+	     *   Add unfulfilled requests to "retry" list
+	     */
+	    retry_sub = find_subtree_next( vbp->name, vbp->name_length, NULL );
+	    if ( retry_sub == NULL ) {
+	        snmp_clone_var( vbp, ax_vlist->variables[i] );
+			/* XXX - handle SNMPv1 */
+		ax_vlist->variables[i]->type = SNMP_ENDOFMIBVIEW;
+		continue;
+	    }
+	    if (retry_vlist == NULL ) {
+		retry_vlist = (struct ax_variable_list *)
+				malloc( sizeof( struct ax_variable_list));
+		memset( retry_vlist, 0, sizeof( struct ax_variable_list));
+
+		vb_retry = (struct variable_list *)
+				malloc( sizeof( struct variable_list));
+		vbp2 = vb_retry;
+	    }
+	    else {
+		vbp2->next_variable = (struct variable_list *)
+				malloc( sizeof( struct variable_list));
+		vbp2 = vbp2->next_variable;
+	    }
+	    j = retry_vlist->num_vars;
+	    retry_vlist->variables[ j ] = ax_vlist->variables[i];
+	    retry_vlist->num_vars++;
+	    memcpy(vbp->name, retry_sub->name, retry_sub->namelen * sizeof(oid));
+	    vbp->name_length = retry_sub->namelen;
+	    snmp_clone_var( vbp, vbp2 );
 	}
 	else
-#endif
+		/* Got an answer, so use it */
 	if ( pdu->errstat != AGENTX_ERR_NOERROR ) {
 	    asp->status = pdu->errstat;
 	}
@@ -109,18 +148,30 @@ handle_agentx_response( int operation,
     }
 
 
-#ifdef STILL_TO_CODE
-    if ( asp->outstanding_requests )
+    if ( retry_vlist ) {
 		/*
 		 * unfulfilled GETNEXT requests
 		 *
 		 * Need a new 'handle_getnext_request' routine
 		 *   (parameters to be determined)
 		 */
-	return handle_getnext_request(operation, session, reqid,
-					asp->pdu, (void*)asp);
+	asp->start = vb_retry;
+	asp->end   = vbp2;
+	j = handle_var_list( asp );
+	if ( j != SNMP_ERR_NOERROR )
+	    asp->status = j;
+	else for ( i = 0, vbp2 = vb_retry ;
+	           i < retry_vlist->num_vars ;
+	           i++ , vbp2=vbp2->next_variable ) {
+			/*
+			 * XXX - assumes success second time around
+			 *	Needs to handle deferrals / failures
+			 */
+	 		snmp_clone_var( vbp2, retry_vlist->variables[i] );
+	}
+	return j;
+    }
     else
-#endif
       DEBUGMSGTL(("agentx/master","handle_agentx_response() finishing...\n"));
 	return handle_snmp_packet(operation, session, reqid,
 					asp->pdu, (void*)asp);
@@ -267,7 +318,7 @@ agentx_add_request( struct agent_snmp_session *asp,
 			   vbp->name, vbp->name_length, vbp->type,
 			   (u_char*)&(vbp->val), vbp->val_len);
     else {
-	sub = find_subtree_next( vbp->name, vbp->name_length, NULL );
+	sub = find_subtree_previous( vbp->name, vbp->name_length, NULL );
         snmp_pdu_add_variable( request->pdu,
 			   vbp->name, vbp->name_length, ASN_PRIV_INCL_RANGE,
 			   (u_char*)sub->name, sub->namelen);
