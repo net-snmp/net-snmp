@@ -84,7 +84,7 @@ static oid usmDESPrivProtocol[]      = { 1,3,6,1,6,3,10,1,2,2 };
 void
 snmp_parse_args_usage(FILE *outf)
 {
-  fprintf(outf, "[-v 1|2c|3] [-h] [-H] [-d] [-q] [-R] [-D] [-m <MIBS>] [-M <MIDDIRS>] [-p <P>] [-t <T>] [-r <R>] ");
+  fprintf(outf, "[-v 1|2c|3] [-h] [-H] [-d] [-q] [-R] [-D] [-m <MIBS>] [-M <MIDDIRS>] [-p <P>] [-t <T>] [-r <R>] [-P <MIBOPTS>] [-O <OUTPUTOPTS>]");
   fprintf(outf, "[-T <B> <T>] [-e <E>] [-E <E>] [-n <N>] [-u <U>] [-l <L>] [-a <A>] [-A <P>] [-x <X>] [-X <P>] <hostname> {<community>}");
 }
 
@@ -96,9 +96,9 @@ snmp_parse_args_descriptions(FILE *outf)
   fprintf(outf, "  -H\t\tDisplay configuration file directives understood.\n");
   fprintf(outf, "  -V\t\tdisplay version number.\n");
   fprintf(outf, "  -d\t\tdump input/output packets.\n");
-  fprintf(outf, "  -q[FLAGS]\tquick print options:\n");
+  fprintf(outf, "  -q\tquick printing for easier parsing\n");
+  fprintf(outf, "  -O <FLAGS>\tOutput Style options:\n");
   fprintf(outf, "  \t\t  FLAGS values:\n");
-  fprintf(outf, "  \t\t    noFlags:\told style quick printing\n");
   fprintf(outf, "  \t\t    o:\t\tprint oids numerically\n");
   fprintf(outf, "  \t\t    e:\t\tprint enums numerically\n");
   fprintf(outf, "  \t\t    b:\t\tdont break oid indexes down\n");
@@ -156,32 +156,42 @@ snmp_parse_args(int argc,
         break;
 
       case 'q':
-          if (argv[arg][2] == 0)
-              snmp_set_quick_print(1);
+        snmp_set_quick_print(1);
+        break;
+
+      case 'O':
+        if (argv[arg][2] == 0) {
+          if (++arg < argc)
+            cp = argv[arg];
           else {
-              cp = &argv[arg][2];
-              while(*cp) {
-                  switch(*cp++) {
-                      case 'o':
-                          ds_set_boolean(DS_LIBRARY_ID,
-                                         DS_LIB_PRINT_NUMERIC_OIDS, 1);
-                          break;
-                      case 'e':
-                          ds_set_boolean(DS_LIBRARY_ID,
-                                         DS_LIB_PRINT_NUMERIC_ENUM, 1);
-                          break;
-                      case 'b':
-                          ds_set_boolean(DS_LIBRARY_ID,
-                                         DS_LIB_DONT_BREAKDOWN_OIDS, 1);
-                          break;
-                      default:
-                          fprintf(stderr,"unknown option after -q flag\n");
-                          usage();
-                          exit(1);
-                  }
-              }
+            fprintf(stderr,"Need FLAGS after -O flag.\n");
+            usage();
+            exit(1);
           }
-          break;
+        } else {
+          cp = &argv[arg][2];
+        }
+        while(*cp) {
+          switch(*cp++) {
+            case 'o':
+              ds_set_boolean(DS_LIBRARY_ID,
+                             DS_LIB_PRINT_NUMERIC_OIDS, 1);
+              break;
+            case 'e':
+              ds_set_boolean(DS_LIBRARY_ID,
+                             DS_LIB_PRINT_NUMERIC_ENUM, 1);
+              break;
+            case 'b':
+              ds_set_boolean(DS_LIBRARY_ID,
+                             DS_LIB_DONT_BREAKDOWN_OIDS, 1);
+              break;
+            default:
+              fprintf(stderr,"unknown option (%s) after -O flag\n", (cp-1));
+              usage();
+              exit(1);
+          }
+        }
+        break;
 
       case 'D':
         debug_register_tokens(&argv[arg][2]);
