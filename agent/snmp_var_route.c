@@ -724,8 +724,8 @@ static int qsort_compare(r1,r2)
 RTENTRY **r1, **r2;
 {
 #ifdef freebsd2
-	register u_long dst1 = ntohl(klgetsa((*r1)->rt_dst)->sin_addr.s_addr);
-	register u_long dst2 = ntohl(klgetsa((*r2)->rt_dst)->sin_addr.s_addr);
+	register u_long dst1 = ntohl(klgetsa((struct sockaddr_in *)(*r1)->rt_dst)->sin_addr.s_addr);
+	register u_long dst2 = ntohl(klgetsa((struct sockaddr_in *)(*r2)->rt_dst)->sin_addr.s_addr);
 #else
 	register u_long dst1 = ntohl(((struct sockaddr_in *) &((*r1)->rt_dst))->sin_addr.s_addr);
 	register u_long dst2 = ntohl(((struct sockaddr_in *) &((*r2)->rt_dst))->sin_addr.s_addr);
