@@ -88,9 +88,10 @@ init_mteEventTable(void)
                                   NULL,
                                   "trapEvent NAME TRAP_OID [[-w] EXTRA_OID ...]");
 
-    snmpd_register_config_handler("linkUpDownTraps", parse_linkUpDownTraps,
+    snmpd_register_config_handler("linkUpDownNotifications",
+                                  parse_linkUpDownNotifications,
                                   NULL,
-                                  "linkUpDownTraps (yes|no)");
+                                  "linkUpDownNotifications (yes|no)");
 }
 
 /** handles requests for the mteEventTable table, if anything else needs to be done */
@@ -113,7 +114,7 @@ mteEventTable_handler(netsnmp_mib_handler *handler,
 }
 
 void
-parse_linkUpDownTraps(const char *token, char *line) {
+parse_linkUpDownNotifications(const char *token, char *line) {
     if (strncmp(line, "y", 1) == 0) {
         parse_trapevent("trapEvent", "linkUpTrap   	 linkUp     ifIndex ifAdminStatus ifOperStatus");
         parse_trapevent("trapEvent", "linkDownTrap 	 linkDown   ifIndex ifAdminStatus ifOperStatus");
