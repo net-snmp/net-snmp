@@ -35,7 +35,7 @@ config_require(if-mib/data_access/interface_bsd);
  * couldn't determine the correct file!
  * require a bogus file to generate an error.
  */
-configure_require(if-mib/data_access/interface-unknown-arch);
+config_require(if-mib/data_access/interface-unknown-arch);
 #endif
 
 
