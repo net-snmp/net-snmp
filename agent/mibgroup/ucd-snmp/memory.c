@@ -309,7 +309,10 @@ getmem(unsigned long *memtotal, unsigned long *memfree, unsigned long *memshared
             sscanf(b, "MemShared: %lu", memshared);
         else {
             if(log_procerr)
+            {
+            if (0 == netsnmp_os_prematch("Linux","2.4"))
             snmp_log(LOG_ERR, "No MemShared line in /proc/meminfo\n");
+            }
             *memshared = 0;
         }
         b = strstr(buff, "Buffers: ");
