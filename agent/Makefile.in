@@ -21,7 +21,7 @@ install:
 
 party_vars.o: ../snmplib/party.h
 context_vars.o: ../snmplib/context.h
-snmp_vars.o: ../snmplib/party.h
+snmp_vars.o: ../snmplib/party.h wes/wes.c wes/wes.h
 alarm.c:  ../snmplib/party.h
 event.c:  ../snmplib/party.h
 snmpd.c:  ../snmplib/party.h
