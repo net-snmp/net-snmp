@@ -24,13 +24,13 @@ static mutex_type s_res[MT_MAX_IDS][MT_LIB_MAXIMUM];  /* locking structures */
 static mutex_type *
 _mt_res(int groupID, int resourceID)
 {
-    if (groupID < 1) {
+    if (groupID < 0) {
 	return 0;
     }
     if (groupID >= MT_MAX_IDS) {
 	return 0;
     }
-    if (resourceID < 1) {
+    if (resourceID < 0) {
 	return 0;
     }
     if (resourceID >= MT_LIB_MAXIMUM) {
