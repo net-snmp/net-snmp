@@ -13,6 +13,7 @@
 #endif
 
 #include "mibincl.h"
+#include "util_funcs.h"
 #include "registry.h"
 #include "../../../snmplib/system.h"
 
@@ -26,7 +27,7 @@
 extern int subtree_size;
 extern struct subtree *subtrees;
 
-#define MATCH_FAILED	-1
+
 
 void init_registry(void) 
 {

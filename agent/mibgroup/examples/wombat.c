@@ -12,6 +12,7 @@
 
 #include "auto_nlist.h"
 
+#include "util_funcs.h"
 #include "wombat.h"
 
 
@@ -109,8 +110,8 @@ void wombat_free_config (void)
 }
 
 
-#define MATCH_FAILED	1
-#define MATCH_SUCCEEDED	0
+
+
 
 /*
   header_wombat(...

@@ -4,8 +4,8 @@
  */
 
 #include <config.h>
-
 #include "host_res.h"
+#include "util_funcs.h"
 #include "hr_filesys.h"
 #include "hr_utils.h"
 
@@ -99,8 +99,8 @@ void	init_hr_filesys( )
 	/* No initialisation needed */
 }
 
-#define MATCH_FAILED	-1
-#define MATCH_SUCCEEDED	0
+
+
 
 /*
   header_hrfilesys(...

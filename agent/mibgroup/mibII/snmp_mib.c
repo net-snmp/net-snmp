@@ -10,6 +10,7 @@
 #endif
 
 #include "../mibincl.h"
+#include "util_funcs.h"
 #include "../../../snmplib/system.h"
 
 /* #include "../common_header.h" */
@@ -103,8 +104,8 @@ init_snmp_mib(void) {
   REGISTER_MIB("mibII/snmp", snmp_variables, variable2, snmp_variables_oid);
 }
 
-#define MATCH_FAILED	1
-#define MATCH_SUCCEEDED	0
+
+
 
 /*
   header_snmp(...

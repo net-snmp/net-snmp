@@ -110,6 +110,7 @@
 #include <sys/tcpipstats.h>
 #endif
 
+#include "util_funcs.h"
 #include "auto_nlist.h"
 
 #ifdef hpux
@@ -184,8 +185,8 @@ void	init_tcp( )
 
 }
 
-#define MATCH_FAILED	1
-#define MATCH_SUCCEEDED	0
+
+
 
 /*
   header_tcp(...

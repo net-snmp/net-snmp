@@ -32,8 +32,8 @@
 
 extern struct timeval starttime;
 
-#define MATCH_FAILED	1
-#define MATCH_SUCCEEDED	0
+
+
 
 struct timeval sysOR_lastchange;
 static struct sysORTable *table=NULL;

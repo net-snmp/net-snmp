@@ -5,13 +5,13 @@
  */
 
 #include <config.h>
-
 #if HAVE_STDLIB_H
 #include <stdlib.h>
 #endif
 #include <fcntl.h>
 
 #include "host_res.h"
+#include "util_funcs.h"
 #include "hr_swrun.h"
 #include "auto_nlist.h"
 
@@ -96,8 +96,8 @@ void init_hr_swrun(void)
 #endif
 }
 
-#define MATCH_FAILED	-1
-#define MATCH_SUCCEEDED	0
+
+
 
 /*
   header_hrswrun(...

@@ -4,8 +4,8 @@
  */
 
 #include <config.h>
-
 #include "host_res.h"
+#include "util_funcs.h"
 #include "hr_print.h"
 
 
@@ -44,8 +44,8 @@ void init_hr_print(void)
 /*  device_descr[ HRDEV_PRINTER ] = &describe_printer;	*/
 }
 
-#define MATCH_FAILED	-1
-#define MATCH_SUCCEEDED	0
+
+
 
 /*
   header_hrprint(...
