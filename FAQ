@@ -346,7 +346,7 @@ Is ucd-snmp year 2000 safe?
   The ucd-snmp toolset stores all of its dates in the standard posix
   fashion supported by most operating systems: as seconds since the
   year 1970 began.  Information stored this way is year 2000 safe, but
-  is not year 2036 safe on 32 bit machines.
+  is not year 2038 safe on 32 bit machines.
 
   So:  yes, as long as your operating system is as well.
 
