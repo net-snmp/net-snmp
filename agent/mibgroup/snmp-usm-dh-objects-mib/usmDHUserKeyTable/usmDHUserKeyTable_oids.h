@@ -39,5 +39,4 @@ extern          "C" {
 #ifdef __cplusplus
 }
 #endif
-
 #endif                          /* USMDHUSERKEYTABLE_OIDS_H */

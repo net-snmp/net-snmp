@@ -70,9 +70,9 @@ typedef struct usmDHUserKeyTable_interface_ctx_s {
 
 static usmDHUserKeyTable_interface_ctx usmDHUserKeyTable_if_ctx;
 
-static void    
-_usmDHUserKeyTable_container_init(usmDHUserKeyTable_interface_ctx *
-                                  if_ctx);
+static void
+                _usmDHUserKeyTable_container_init(usmDHUserKeyTable_interface_ctx *
+                                                  if_ctx);
 
 
 static Netsnmp_Node_Handler _mfd_usmDHUserKeyTable_pre_request;
@@ -90,8 +90,9 @@ static Netsnmp_Node_Handler _mfd_usmDHUserKeyTable_undo_commit;
 static Netsnmp_Node_Handler _mfd_usmDHUserKeyTable_check_dependencies;
 
 NETSNMP_STATIC_INLINE int
-_usmDHUserKeyTable_undo_column(usmDHUserKeyTable_rowreq_ctx * rowreq_ctx,
-                               netsnmp_variable_list * var, int column);
+                _usmDHUserKeyTable_undo_column(usmDHUserKeyTable_rowreq_ctx * rowreq_ctx,
+                                               netsnmp_variable_list * var,
+                                               int column);
 
 /**
  * @internal
@@ -866,7 +867,7 @@ _usmDHUserKeyTable_check_column(usmDHUserKeyTable_rowreq_ctx * rowreq_ctx,
         }
         break;
 
-    default:    /** We shouldn't get here */
+    default: /** We shouldn't get here */
         rc = SNMP_ERR_GENERR;
         snmp_log(LOG_ERR,
                  "unknown column %d in _usmDHUserKeyTable_check_column\n",
@@ -926,10 +927,8 @@ _mfd_usmDHUserKeyTable_check_objects(netsnmp_mib_handler *handler,
  * Check dependencies wrapper
  */
 static int
-_mfd_usmDHUserKeyTable_check_dependencies(netsnmp_mib_handler *handler,
-                                          netsnmp_handler_registration
-                                          *reginfo,
-                                          netsnmp_agent_request_info
+_mfd_usmDHUserKeyTable_check_dependencies(netsnmp_mib_handler *handler, netsnmp_handler_registration
+                                          *reginfo, netsnmp_agent_request_info
                                           *agtreq_info,
                                           netsnmp_request_info *requests)
 {
@@ -1409,10 +1408,8 @@ _mfd_usmDHUserKeyTable_undo_values(netsnmp_mib_handler *handler,
  * commit irreversible actions
  */
 int
-_mfd_usmDHUserKeyTable_irreversible_commit(netsnmp_mib_handler *handler,
-                                           netsnmp_handler_registration
-                                           *reginfo,
-                                           netsnmp_agent_request_info
+_mfd_usmDHUserKeyTable_irreversible_commit(netsnmp_mib_handler *handler, netsnmp_handler_registration
+                                           *reginfo, netsnmp_agent_request_info
                                            *agtreq_info,
                                            netsnmp_request_info *requests)
 {

@@ -51,13 +51,13 @@ extern          "C" {
     /*
      * PUBLIC interface initialization routine 
      */
-    void           
+    void
         _usmDHUserKeyTable_initialize_interface
         (usmDHUserKeyTable_registration_ptr user_ctx, u_long flags);
 
-    usmDHUserKeyTable_rowreq_ctx
-        *usmDHUserKeyTable_allocate_rowreq_ctx(usmDHUserKeyTable_data *);
-    void           
+        usmDHUserKeyTable_rowreq_ctx
+        * usmDHUserKeyTable_allocate_rowreq_ctx(usmDHUserKeyTable_data *);
+    void
         usmDHUserKeyTable_release_rowreq_ctx(usmDHUserKeyTable_rowreq_ctx *
                                              rowreq_ctx);
 
@@ -79,5 +79,4 @@ extern          "C" {
 #ifdef __cplusplus
 }
 #endif
-
 #endif                          /* USMDHUSERKEYTABLE_INTERFACE_H */

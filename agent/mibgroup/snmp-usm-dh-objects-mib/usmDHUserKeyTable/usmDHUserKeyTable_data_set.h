@@ -36,108 +36,93 @@ extern          "C" {
     int             usmDHUserKeyTable_usmUserName_check_index(usmDHUserKeyTable_rowreq_ctx * rowreq_ctx);       /* external */
 
 
-    int            
+    int
         usmDHUserKeyTable_undo_setup(usmDHUserKeyTable_rowreq_ctx *
                                      rowreq_ctx);
-    int            
+    int
         usmDHUserKeyTable_undo_cleanup(usmDHUserKeyTable_rowreq_ctx *
                                        rowreq_ctx);
     int             usmDHUserKeyTable_commit(usmDHUserKeyTable_rowreq_ctx *
                                              rowreq_ctx);
-    int usmDHUserKeyTable_irreversable_commit(usmDHUserKeyTable_rowreq_ctx *
-                                              rowreq_ctx);
-    int            
+    int
+        usmDHUserKeyTable_irreversable_commit(usmDHUserKeyTable_rowreq_ctx
+                                              * rowreq_ctx);
+    int
         usmDHUserKeyTable_undo_commit(usmDHUserKeyTable_rowreq_ctx *
                                       rowreq_ctx);
-    int            
+    int
         usmDHUserKeyTable_irreversible_commit(usmDHUserKeyTable_rowreq_ctx
                                               * rowreq_ctx);
 
 
-    int            
+    int
         usmDHUserAuthKeyChange_check_value(usmDHUserKeyTable_rowreq_ctx *
-                                           rowreq_ctx,
-                                           char
-                                           *usmDHUserAuthKeyChange_val_ptr,
-                                           size_t
+                                           rowreq_ctx, char
+                                           *usmDHUserAuthKeyChange_val_ptr, size_t
                                            usmDHUserAuthKeyChange_val_ptr_len);
-    int            
+    int
         usmDHUserAuthKeyChange_undo_setup(usmDHUserKeyTable_rowreq_ctx *
                                           rowreq_ctx);
     int             usmDHUserAuthKeyChange_set(usmDHUserKeyTable_rowreq_ctx
-                                               * rowreq_ctx,
-                                               char
-                                               *usmDHUserAuthKeyChange_val_ptr,
-                                               size_t
+                                               * rowreq_ctx, char
+                                               *usmDHUserAuthKeyChange_val_ptr, size_t
                                                usmDHUserAuthKeyChange_val_ptr_len);
-    int            
+    int
         usmDHUserAuthKeyChange_undo(usmDHUserKeyTable_rowreq_ctx *
                                     rowreq_ctx);
 
-    int            
+    int
         usmDHUserOwnAuthKeyChange_check_value(usmDHUserKeyTable_rowreq_ctx
-                                              * rowreq_ctx,
-                                              char
-                                              *usmDHUserOwnAuthKeyChange_val_ptr,
-                                              size_t
+                                              * rowreq_ctx, char
+                                              *usmDHUserOwnAuthKeyChange_val_ptr, size_t
                                               usmDHUserOwnAuthKeyChange_val_ptr_len);
-    int            
+    int
         usmDHUserOwnAuthKeyChange_undo_setup(usmDHUserKeyTable_rowreq_ctx *
                                              rowreq_ctx);
-    int            
+    int
         usmDHUserOwnAuthKeyChange_set(usmDHUserKeyTable_rowreq_ctx *
-                                      rowreq_ctx,
-                                      char
-                                      *usmDHUserOwnAuthKeyChange_val_ptr,
-                                      size_t
+                                      rowreq_ctx, char
+                                      *usmDHUserOwnAuthKeyChange_val_ptr, size_t
                                       usmDHUserOwnAuthKeyChange_val_ptr_len);
-    int            
+    int
         usmDHUserOwnAuthKeyChange_undo(usmDHUserKeyTable_rowreq_ctx *
                                        rowreq_ctx);
 
-    int            
+    int
         usmDHUserPrivKeyChange_check_value(usmDHUserKeyTable_rowreq_ctx *
-                                           rowreq_ctx,
-                                           char
-                                           *usmDHUserPrivKeyChange_val_ptr,
-                                           size_t
+                                           rowreq_ctx, char
+                                           *usmDHUserPrivKeyChange_val_ptr, size_t
                                            usmDHUserPrivKeyChange_val_ptr_len);
-    int            
+    int
         usmDHUserPrivKeyChange_undo_setup(usmDHUserKeyTable_rowreq_ctx *
                                           rowreq_ctx);
     int             usmDHUserPrivKeyChange_set(usmDHUserKeyTable_rowreq_ctx
-                                               * rowreq_ctx,
-                                               char
-                                               *usmDHUserPrivKeyChange_val_ptr,
-                                               size_t
+                                               * rowreq_ctx, char
+                                               *usmDHUserPrivKeyChange_val_ptr, size_t
                                                usmDHUserPrivKeyChange_val_ptr_len);
-    int            
+    int
         usmDHUserPrivKeyChange_undo(usmDHUserKeyTable_rowreq_ctx *
                                     rowreq_ctx);
 
-    int            
+    int
         usmDHUserOwnPrivKeyChange_check_value(usmDHUserKeyTable_rowreq_ctx
-                                              * rowreq_ctx,
-                                              char
-                                              *usmDHUserOwnPrivKeyChange_val_ptr,
-                                              size_t
+                                              * rowreq_ctx, char
+                                              *usmDHUserOwnPrivKeyChange_val_ptr, size_t
                                               usmDHUserOwnPrivKeyChange_val_ptr_len);
-    int            
+    int
         usmDHUserOwnPrivKeyChange_undo_setup(usmDHUserKeyTable_rowreq_ctx *
                                              rowreq_ctx);
-    int            
+    int
         usmDHUserOwnPrivKeyChange_set(usmDHUserKeyTable_rowreq_ctx *
-                                      rowreq_ctx,
-                                      char
-                                      *usmDHUserOwnPrivKeyChange_val_ptr,
-                                      size_t
+                                      rowreq_ctx, char
+                                      *usmDHUserOwnPrivKeyChange_val_ptr, size_t
                                       usmDHUserOwnPrivKeyChange_val_ptr_len);
-    int            
+    int
         usmDHUserOwnPrivKeyChange_undo(usmDHUserKeyTable_rowreq_ctx *
                                        rowreq_ctx);
 
 
-    int            
+    int
         usmDHUserKeyTable_check_dependencies(usmDHUserKeyTable_rowreq_ctx *
                                              ctx);
 
