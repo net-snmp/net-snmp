@@ -17,8 +17,12 @@
    netsnmp_assert( (NULL != ${node}_ptr_ptr) && (NULL != *${node}_ptr_ptr));
    netsnmp_assert( (NULL != ${node}_len_ptr) && ((* ${node}_len_ptr) >= 11));
 
-$example_start
-   /** TODO: set the data from your context pointer. */
+   /*
+    * TODO:
+    * get the date data from your context pointer.
+    */
+   return MFD_SKIP; /* TODO: remove this once you've set data */
+
    year = 0; /* 0..65536 */
    month = 0; /* 1..12 */
    day = 0; /* 1..31 */
@@ -32,7 +36,6 @@ $example_start
    utc_offset_direction = 0; /* -1, +1 */
    utc_offset_hours = -1; /* 0..13 */
    utc_offset_minutes = -1; /* 0..59 */
-$example_end
 
    /* call convenience function to set data */
    rc = netsnmp_dateandtime_set_buf_from_vars(*${node}_ptr_ptr, ${node}_len_ptr,
