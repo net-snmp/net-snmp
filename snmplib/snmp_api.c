@@ -603,8 +603,10 @@ init_snmp(const char *type)
 
 void
 snmp_store(const char *type) {
-  snmp_clean_persistent(type);
+  DEBUGMSGTL(("snmp_store","storing stuff...\n"));
+  snmp_save_persistent(type);
   snmp_call_callbacks(SNMP_CALLBACK_LIBRARY, SNMP_CALLBACK_STORE_DATA, NULL);
+  snmp_clean_persistent(type);
 }
 
 
@@ -3026,6 +3028,8 @@ _sess_async_send(void *sessp,
         session->s_snmp_errno = SNMPERR_NULL_PDU;
         return 0;
     }
+#if 0 /* NULL variables is actually allowed!  SNMPv3 engineID probes have no
+         variables in the PDU -- Wes */
     if (pdu->variables == NULL) {
 	switch (pdu->command) {
 	case SNMP_MSG_GET:
@@ -3042,6 +3046,7 @@ _sess_async_send(void *sessp,
 	    break;
         }
     }
+#endif
 
     pduIp = (struct sockaddr_in *)&(pdu->address);
     pdu->flags |= UCD_MSG_FLAG_EXPECT_RESPONSE;
