@@ -109,7 +109,7 @@ struct mteTriggerTable_data *StorageTmp = NULL;
 
     case MTETRIGGERDELTADISCONTINUITYID:
         *write_method = write_mteTriggerDeltaDiscontinuityID;
-        *var_len = StorageTmp->mteTriggerDeltaDiscontinuityIDLen;
+        *var_len = StorageTmp->mteTriggerDeltaDiscontinuityIDLen * sizeof(oid);
         return (u_char *) StorageTmp->mteTriggerDeltaDiscontinuityID;
 
     case MTETRIGGERDELTADISCONTINUITYIDWILDCARD:
