@@ -85,6 +85,9 @@
 #if HAVE_SYS_FIXPOINT_H
 #include <sys/fixpoint.h>
 #endif
+#if HAVE_SYS_LOADAVG_H
+#include <sys/loadavg.h>
+#endif
 #if HAVE_MALLOC_H
 #include <malloc.h>
 #endif
