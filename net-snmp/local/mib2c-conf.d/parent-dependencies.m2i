@@ -18,11 +18,11 @@
  * (see README-table-${table} if you don't have dependencies)
  */
 int
-${context}_check_dependencies(${context}_ctx *ctx)
+${context}_check_dependencies(${context}_rowreq_ctx *rowreq_ctx)
 {
     int rc = SNMP_ERR_NOERROR;
     
-    netsnmp_assert(NULL != ctx);
+    netsnmp_assert(NULL != rowreq_ctx);
 
     /*
      * TODO:

@@ -30,7 +30,7 @@
 @    include details-table.m2i@
 @    foreach $node nonindex@
 @        include m2c_setup_node.m2i@
-    int ${node}_get( ${context}_ctx *ctx, $m2c_node_param_ref );
+    int ${node}_get( ${context}_rowreq_ctx *rowreq_ctx, $m2c_node_param_ref );
 @    end@ nonindex
 @end@
 

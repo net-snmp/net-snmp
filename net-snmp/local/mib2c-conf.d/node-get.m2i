@@ -18,8 +18,8 @@
 $m2c_node_get_comments
 *
 @end@
- * @param ${context}_ctx
- *        Pointer to the users context. You should know how to
+ * @param ${context}_rowreq_ctx
+ *        Pointer to the row request context. You should know how to
  *        manipulate the value from this object.
  * @param ${node}
  *        Pointer to storage for a $node.decl variable
@@ -39,14 +39,14 @@ $m2c_node_get_comments
  *         MFD_ERROR           : Any other error
  */
 int
-${node}_get( ${context}_ctx *ctx, $m2c_node_param_ref )
+${node}_get( ${context}_rowreq_ctx *rowreq_ctx, $m2c_node_param_ref )
 {
 @ifconf syntax-$node.syntax-get.m2i@
 @    include syntax-$node.syntax-get.m2i@
 @else@
     /** syntax-$node.syntax-get.m2i not found, using generic */
 @    include generic-get-decl.m2i@
-    netsnmp_assert(NULL != ctx);
+    netsnmp_assert(NULL != rowreq_ctx);
 
 /*
  * TODO:

@@ -59,7 +59,7 @@ typedef struct ${table}_loop_context_s {
     FILE *filep;
     int locked; 
     char line[MAX_LINE_SIZE];
-    ${table}_ctx *ctx; /* temp context */
+    ${context}_rowreq_ctx *rowreq_ctx; /* temp context */
 @end@
 } ${table}_loop_context;
 $example_end
@@ -69,21 +69,21 @@ $example_end
  *
  * NOTE: DO NOT ADD ITEMS TO THIS STRUCTURE!
  */
-typedef struct ${table}_ref_loop_s {
-    ${table}_loop_context *itr_ctx;
-} ${table}_ref_loop;
+typedef struct ${context}_ref_loop_ctx_s {
+    ${table}_loop_context *loop_ctx;
+} ${context}_ref_loop_ctx;
 
-int ${table}_loop_get_first( $mfd_aue_param_decl, ${table}_ref_loop *loop_ref,
-                    ${table}_ref_ctx *ctx_ref);
-int ${table}_loop_get_next( $mfd_aue_param_decl, ${table}_ref_loop *loop_ref,
-                        ${table}_ref_ctx *ctx_ref);
-int ${table}_loop_get_data( $mfd_aue_param_decl, ${table}_ref_loop *loop_ref,
-                        ${table}_ref_ctx *ctx_ref);
+int ${table}_loop_get_first( $mfd_aue_param_decl, ${context}_ref_loop_ctx *loop_ctx_ref,
+                    ${context}_ref_rowreq_ctx *rowreq_ctx_ref);
+int ${table}_loop_get_next( $mfd_aue_param_decl, ${context}_ref_loop_ctx *loop_ctx_ref,
+                        ${context}_ref_rowreq_ctx *rowreq_ctx_ref);
+int ${table}_loop_get_data( $mfd_aue_param_decl, ${context}_ref_loop_ctx *loop_ctx_ref,
+                        ${context}_ref_rowreq_ctx *rowreq_ctx_ref);
 int ${table}_loop_save_position($mfd_aue_param_decl,
-                       ${table}_ref_loop *loop_ref,
-                       ${table}_ref_loop *loop_save, int reuse);
-int ${table}_loop_cleanup_context( $mfd_aue_param_decl, ${table}_ref_loop *ref);
-int ${table}_loop_init_context( $mfd_aue_param_decl, ${table}_ref_loop *ref);
+                       ${context}_ref_loop_ctx *loop_ctx_ref,
+                       ${context}_ref_loop_ctx *save_loop_ctx_ref, int reuse);
+int ${table}_loop_cleanup_context( $mfd_aue_param_decl, ${context}_ref_loop_ctx *ref);
+int ${table}_loop_init_context( $mfd_aue_param_decl, ${context}_ref_loop_ctx *ref);
 
 ##
 ########################################################################

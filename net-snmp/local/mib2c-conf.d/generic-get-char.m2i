@@ -17,15 +17,15 @@ $example_start
      * update or replace IS_SET_* values.
      *
      * These macros can be used if there is a simple, direct way to determine
-     * if this bit defined for the MIB object is set for the data in your ctx.
+     * if this bit defined for the MIB object is set for the data in your rowreq_ctx.
      * Return 1 if the bit should be set, or 0 if it should not be set.
      */
      $m2c_node_lh = 0;
 @    foreach $e $v enum@
 @        include m2c_setup_enum.m2i@
-#define IS_SET_${node}_$m2c_ename(${context}_ctx)        \
-    (${context}_ctx != NULL)
-    if (IS_SET_${node}_$m2c_ename(ctx)) {
+#define IS_SET_${node}_$m2c_ename(${context}_rowreq_ctx)        \
+    (${context}_rowreq_ctx != NULL)
+    if (IS_SET_${node}_$m2c_ename(rowreq_ctx)) {
         $m2c_node_lh |= $m2c_ename;
     }
 @    end@ # for each

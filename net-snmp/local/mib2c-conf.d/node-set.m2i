@@ -56,8 +56,8 @@
  *       types of checks should be done in the
  *       ${context}_check_dependencies() function.
  *
- * @param ${context}_ctx
- *        Pointer to the users context. You should know how to
+ * @param ${context}_rowreq_ctx
+ *        Pointer to the row request context. You should know how to
  *        manipulate the value from this object.
  * @param ${node}
  *        A $node.decl containing the new value.
@@ -70,10 +70,10 @@
  *         MFD_ERROR   : incoming value is NOT legal
  */
 int
-${node}_check_value( ${context}_ctx *ctx, $m2c_node_param_val)
+${node}_check_value( ${context}_rowreq_ctx *rowreq_ctx, $m2c_node_param_val)
 {
     /** should never get a NULL pointer */
-    netsnmp_assert(NULL != ctx);
+    netsnmp_assert(NULL != rowreq_ctx);
 @if $m2c_node_needlength == 1@
     netsnmp_assert(NULL != ${node}_ptr);
 @end@
@@ -101,14 +101,14 @@ ${node}_check_value( ${context}_ctx *ctx, $m2c_node_param_val)
  * memory for a string), you should do that setup in this function, so it
  * won't be done unless it is necessary.
  *
- * @param ctx
- *        Pointer to the table context (${context}_ctx)
+ * @param rowreq_ctx
+ *        Pointer to the table context (${context}_rowreq_ctx)
  *
  * @return MFD_SUCCESS : success
  *         MFD_ERROR   : error. set will fail.
  */
 int
-${node}_undo_setup( ${context}_ctx *ctx )
+${node}_undo_setup( ${context}_rowreq_ctx *rowreq_ctx)
 {
     DEBUGTRACE;
 
@@ -116,7 +116,7 @@ ${node}_undo_setup( ${context}_ctx *ctx )
 @    include syntax-$node.syntax-undo-setup.m2i@
 @else@
     /** should never get a NULL pointer */
-    netsnmp_assert(NULL != ctx);
+    netsnmp_assert(NULL != rowreq_ctx);
 
 @   eval $m2c_ctx_lh = "$m2c_undo_item"@
 @   eval $m2c_ctx_rh = "$m2c_data_item"@
@@ -134,7 +134,7 @@ ${node}_undo_setup( ${context}_ctx *ctx )
 $m2c_node_set_comments
 *
 @end@
- * @param ${context}_ctx
+ * @param ${context}_rowreq_ctx
  *        Pointer to the users context. You should know how to
  *        manipulate the value from this object.
  * @param ${node}
@@ -145,13 +145,13 @@ $m2c_node_set_comments
 @    end@
  */
 int
-${node}_set( ${context}_ctx *ctx, $m2c_node_param_val )
+${node}_set( ${context}_rowreq_ctx *rowreq_ctx, $m2c_node_param_val )
 {
 @ifconf syntax-$node.syntax-set.m2i@
 @    include syntax-$node.syntax-set.m2i@
 @else@
     /** should never get a NULL pointer */
-    netsnmp_assert(NULL != ctx);
+    netsnmp_assert(NULL != rowreq_ctx);
 @if $m2c_node_needlength == 1@
     netsnmp_assert(NULL != ${node}_ptr);
 @end@
@@ -175,7 +175,7 @@ ${node}_set( ${context}_ctx *ctx, $m2c_node_param_val )
 $m2c_node_undo_comments
 *
 @end@
- * @param ${context}_ctx
+ * @param ${context}_rowreq_ctx
  *        Pointer to the users context. You should know how to
  *        manipulate the value from this object.
 @if $m2c_node_needlength == 1@
@@ -184,13 +184,13 @@ $m2c_node_undo_comments
 @end@
  */
 int
-${node}_undo( ${context}_ctx *ctx )
+${node}_undo( ${context}_rowreq_ctx *rowreq_ctx)
 {
 @ifconf syntax-$node.syntax-undo.m2i@
 @    include syntax-$node.syntax-undo.m2i@
 @else@
     /** syntax-$node.syntax-undo.m2i not found */
-    netsnmp_assert(NULL != ctx);
+    netsnmp_assert(NULL != rowreq_ctx);
 
 @   eval $m2c_ctx_rh = "$m2c_undo_item"@
 @   eval $m2c_ctx_lh = "$m2c_data_item"@
