@@ -1004,14 +1004,18 @@ snmp_send(session, pdu)
      * Therefore this is a core leak.
      * !!!!!!!!!!!!!!!!!!!!!! MAJOR PROBLEM  !!!!!!!!!!!!!!!!!!!!!!!
      */
-    if (pdu->version == SNMP_DEFAULT_VERSION){
-	pdu->version = session->version;
-    }
-    if (pdu->version == SNMP_DEFAULT_VERSION){
+
+    if ((pdu->version == SNMP_DEFAULT_VERSION) && 
+	(session->version == SNMP_DEFAULT_VERSION))
+    {
 	fprintf(stderr, "No version specified\n");
 	snmp_errno = SNMPERR_BAD_ADDRESS;
 	return 0;
     }
+    else
+	if (pdu->version == SNMP_DEFAULT_VERSION)
+	    pdu->version = session->version;
+
     if (pdu->version == SNMP_VERSION_2){
 	if (pdu->srcPartyLen == 0){
 	    if (session->srcPartyLen == 0){
