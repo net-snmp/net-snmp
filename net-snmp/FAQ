@@ -1891,14 +1891,15 @@ How can I run AgentX with a different socket address?
   For the Net-SNMP master agent, this is done using the command-line
   option '-x'.  The command
 		"snmpd -x localhost:705 ...."
-  would start the agent listening on the TCP port 705.
+  would start the agent listening on the TCP port 705 for connections
+  from the local system.
 
   The main Net-SNMP agent can also be run in a "subagent" mode, and
   this uses the same command-line option to specify a different
   AgentX socket.  So
 		"snmpd -X -x localhost:705 ...."
   would start it as a subagent, and connect to the master agent
-  listening on TCP port 705.
+  listening on TCP port 705 on the same system.
 
   A subagent running embedded within some other application will
   typically not understand the same command-line options.  This
@@ -1907,7 +1908,7 @@ How can I run AgentX with a different socket address?
   "subagent program" tutorial (on the project web pages) could
   be made to connect to the same TCP port by adding the line
      netsnmp_ds_set_string(NETSNMP_DS_APPLICATION_ID,
-                           NETSNMP_DS_AGENT_X_SOCKET, "705");
+                           NETSNMP_DS_AGENT_X_SOCKET, "localhost:705");
   before the 'init_agent' call.
 
   However, see the mention of AgentX security (or the lack of it!)
