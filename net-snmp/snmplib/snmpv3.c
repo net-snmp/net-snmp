@@ -77,7 +77,7 @@
 #include "transform_oids.h"
 
 static u_long		 engineBoots	   = 1;
-static unsigned int	 engineIDType	   = ENGINEID_TYPE_IPV4;
+static unsigned int	 engineIDType	   = ENGINEID_TYPE_UCD_RND;
 static unsigned char	*engineID	   = NULL;
 static size_t		 engineIDLength	   = 0;
 static unsigned char	*engineIDNic	   = NULL;
@@ -206,6 +206,7 @@ setup_engineID(u_char **eidp, const char *text)
 {
   int		  enterpriseid	= htonl(ENTERPRISE_NUMBER),
 		  localsetup	= (eidp) ? 0 : 1;
+
 			/* Use local engineID if *eidp == NULL.  */
 #ifdef HAVE_GETHOSTNAME
   u_char	  buf[SNMP_MAXBUF_SMALL];
@@ -214,7 +215,11 @@ setup_engineID(u_char **eidp, const char *text)
   u_char     *bufp = NULL;
   size_t	  len;
   int	    localEngineIDType = engineIDType;
-
+  int tmpint;
+  time_t tmptime;
+  
+  engineIDIsSet = 1;
+  
 /* get the host name and save the information */
 #ifdef HAVE_GETHOSTNAME
   gethostname((char *)buf, sizeof(buf));
@@ -249,7 +254,7 @@ setup_engineID(u_char **eidp, const char *text)
    * appropriately.  */
   if ( NULL != text )
   {
-    localEngineIDType= ENGINEID_TYPE_TEXT;
+      engineIDType = localEngineIDType = ENGINEID_TYPE_TEXT;
   }
   /* Determine length of the engineID string. */
   len = 5;  /* always have 5 leading bytes */
@@ -269,8 +274,17 @@ setup_engineID(u_char **eidp, const char *text)
     case ENGINEID_TYPE_IPV6: /* IPv6 */
       len += 16; /* + 16 byte IPV6 address */
       break;
+    case ENGINEID_TYPE_UCD_RND: /* UCD specific encoding */
+        if (engineID) /* already setup, keep current value */
+            return engineIDLength;
+        if (oldEngineID) {
+            len = oldEngineIDLength;
+        } else {
+            len += sizeof(int) + sizeof(time_t);
+        }
+        break;
     default:
-      snmp_log(LOG_ERR, "Unknown EngineID type requested for setup.  Using IPv4.\n");
+      snmp_log(LOG_ERR, "Unknown EngineID type requested for setup (%d).  Using IPv4.\n", localEngineIDType);
       localEngineIDType=ENGINEID_TYPE_IPV4; /* make into IPV4 */
       len += 4;		/* + 4 byte IPv4 address */
       break;
@@ -293,6 +307,29 @@ setup_engineID(u_char **eidp, const char *text)
    */
   switch (localEngineIDType)
   {
+    case ENGINEID_TYPE_UCD_RND:
+      if (oldEngineID) {
+          /* keep our previous notion of the engineID */
+          memcpy(bufp, oldEngineID, oldEngineIDLength);
+      } else {
+          /*
+            Here we've desigend our own ENGINEID that is not based on
+            an address which may change and may even become conflicting
+            in the future like most of the default v3 engineID types
+            suffer from.
+
+            Ours is built from 2 fairly random elements: a random number and
+            the current time in seconds.  This method suffers from boxes
+            that may not have a correct clock setting and random number
+            seed at startup, but few OSes should have that problem.
+          */
+          bufp[4] = ENGINEID_TYPE_UCD_RND;
+          tmpint = random();
+          memcpy(bufp+5, &tmpint, sizeof(tmpint));
+          tmptime = time(NULL);
+          memcpy(bufp+5+sizeof(tmpint), &tmptime, sizeof(tmptime));
+      }
+      break;
     case ENGINEID_TYPE_TEXT:
       bufp[4] = ENGINEID_TYPE_TEXT;
       memcpy((char *)bufp+5, text, strlen(text));
@@ -545,36 +582,23 @@ engineBoots_conf(const char *word, char *cptr)
 void
 engineIDType_conf(const char *word, char *cptr)
 {
-  /* Make sure they haven't already specified the engineID via the
-   * configuration file */
-  if ( 0 == engineIDIsSet )
-  /* engineID has NOT been set via configuration file */
-  {
     engineIDType = atoi(cptr);
     /* verify valid type selected */
-      switch (engineIDType)
-      {
-	case ENGINEID_TYPE_IPV4: /* IPv4 */
-	case ENGINEID_TYPE_IPV6: /* IPv6 */
-	  /* IPV? is always good */
-	  break;
+    switch (engineIDType) {
+        case ENGINEID_TYPE_IPV4: /* IPv4 */
+        case ENGINEID_TYPE_IPV6: /* IPv6 */
+            /* IPV? is always good */
+            break;
 #if defined(IFHWADDRLEN) && defined(SIOCGIFHWADDR)
-	case ENGINEID_TYPE_MACADDR: /* MAC address */
-	  break;
+        case ENGINEID_TYPE_MACADDR: /* MAC address */
+            break;
 #endif
-	default:
-	/* unsupported one chosen */
-          config_perror("Unsupported enginedIDType, forcing IPv4");
-	  engineIDType=ENGINEID_TYPE_IPV4;
-      }
+        default:
+            /* unsupported one chosen */
+            config_perror("Unsupported enginedIDType, forcing IPv4");
+            engineIDType=ENGINEID_TYPE_IPV4;
+    }
     DEBUGMSGTL(("snmpv3","engineIDType: %d\n",engineIDType));
-    /* set the engine ID now */
-    setup_engineID(NULL,NULL);
-  }
-  else
-  {
-      config_perror("NOT setting engineIDType, engineID already set");
-  }
 }
 
 /*******************************************************************-o-******
@@ -606,7 +630,6 @@ engineIDNic_conf(const char *word, char *cptr)
     {
       strcpy((char *)engineIDNic,cptr);
       DEBUGMSGTL(("snmpv3","Initializing engineIDNic: %s\n", engineIDNic));
-      setup_engineID(NULL,NULL);
     }
     else
     {
@@ -633,7 +656,6 @@ void
 engineID_conf(const char *word, char *cptr)
 {
   setup_engineID(NULL, cptr);
-  engineIDIsSet=1;
   DEBUGMSGTL(("snmpv3","initialized engineID with: %s\n",cptr));
 }
 
@@ -680,25 +702,20 @@ void
 init_snmpv3(const char *type) {
   gettimeofday(&snmpv3starttime, NULL);
 
-  if (type == NULL)
-     type = "snmpapp";
-
-  if (type && !strcmp(type,"snmpapp")) {
-     setup_engineID(NULL,"__snmpapp__");
-  } else {
-     setup_engineID(NULL, NULL);
-  }
-
-  /* initialize submodules */
-  init_usm();
-
   /* we need to be called back later */
   snmp_register_callback(SNMP_CALLBACK_LIBRARY, SNMP_CALLBACK_POST_READ_CONFIG,
                          init_snmpv3_post_config, NULL);
+  snmp_register_callback(SNMP_CALLBACK_LIBRARY,
+                         SNMP_CALLBACK_POST_PREMIB_READ_CONFIG,
+                         init_snmpv3_post_premib_config, NULL);
   /* we need to be called back later */
   snmp_register_callback(SNMP_CALLBACK_LIBRARY, SNMP_CALLBACK_STORE_DATA,
                          snmpv3_store, (void *) strdup(type));
 
+  /* initialize submodules */
+  /*   NOTE: this must be after the callbacks are registered above,
+             since they need to be called before the USM callbacks. */
+  init_usm();
 
 #if		!defined(USE_INTERNAL_MD5)
   /* doesn't belong here at all */
@@ -781,6 +798,15 @@ init_snmpv3_post_config(int majorid, int minorid, void *serverarg,
 
   free(c_engineID);
   return SNMPERR_SUCCESS;
+}
+
+int
+init_snmpv3_post_premib_config(int majorid, int minorid, void *serverarg,
+                               void *clientarg) {
+    if (!engineIDIsSet)
+        setup_engineID(NULL, NULL);
+    
+    return SNMPERR_SUCCESS;
 }
 
 /*******************************************************************-o-******
