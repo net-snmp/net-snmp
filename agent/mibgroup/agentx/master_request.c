@@ -104,8 +104,8 @@ handle_agentx_response( int operation,
 	}
 
 	if ( !asp->exact && (vbp->type == SNMP_ENDOFMIBVIEW ||
-			     !in_a_view( vbp->name, &vbp->name_length,
-                                         asp->pdu,  vbp->type ))) {
+			     in_a_view( vbp->name, &vbp->name_length,
+                                        asp->pdu,  vbp->type ))) {
 	    /*
 	     *   Add unfulfilled requests to "retry" list
 	     */
