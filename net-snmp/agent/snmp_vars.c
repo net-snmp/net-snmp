@@ -25,6 +25,12 @@ USE, DATA OR PROFITS, WHETHER IN AN ACTION OF CONTRACT, NEGLIGENCE OR
 OTHER TORTIOUS ACTION, ARISING OUT OF OR IN CONNECTION WITH THE USE OR
 PERFORMANCE OF THIS SOFTWARE.
 ******************************************************************/
+/*
+ * additions, fixes and enhancements for Linux by Erik Schoenfelder
+ * (schoenfr@ibr.cs.tu-bs.de) 1994/1995.
+ * Linux additions taken from CMU to UCD stack by Jennifer Bray of Origin
+ * (jbray@origin-at.co.uk) 1997
+ */
 
 #include <config.h>
 
@@ -185,6 +191,9 @@ PERFORMANCE OF THIS SOFTWARE.
 
 #include "m2m.h"
 #include "snmp_vars_m2m.h"
+/* jab2 debug */
+#include "snmp_vars.linux.h"
+/* jab2 debug */
 #include "alarm.h"
 #include "event.h"
 #if solaris2
@@ -254,8 +263,12 @@ extern int klookup(unsigned long off, char *target, int siz);
 extern void string_append_int ();
 
 void Interface_Scan_Init(void);
+#ifdef sunV3
+int Interface_Scan_Next(short *Index, char *Name, struct ifnet *Retifnet);
+#else /* sunV3 */
 int Interface_Scan_Next(short *Index, char *Name, struct ifnet *Retifnet,
 			struct in_ifaddr *Retin_ifaddr);
+#endif /* sunV3 */
 int compare_tree(oid *name1, int len1, oid *name2, int len2);
 #else
 void Interface_Scan_Init();
@@ -1562,8 +1575,10 @@ var_system(vp, name, length, exact, var_len, write_method)
 	    ERROR("");
     }
     return NULL;
-}
+} /* end of var_atEntry */
 
+
+/* JAB2 SEARCHMARK */
 u_char *
 var_demo(vp, name, length, exact, var_len, write_method)
     register struct variable *vp;   /* IN - pointer to variable entry that points here */
@@ -1609,7 +1624,7 @@ var_demo(vp, name, length, exact, var_len, write_method)
 	    ERROR("");
     }
     return NULL;
-}
+} /* end of var_demo */
 
 int
 writeVersion(action, var_val, var_val_type, var_val_len, statP, name, name_len)
@@ -1647,7 +1662,7 @@ writeVersion(action, var_val, var_val_type, var_val_len, statP, name, name_len)
 	
     }
     return SNMP_ERR_NOERROR;
-}
+} /* end of writeVersion */
 
 
 int
@@ -1698,7 +1713,7 @@ writeSystem(action, var_val, var_val_type, var_val_len, statP, name, name_len)
 	}
     }
     return SNMP_ERR_NOERROR;
-}
+} /* end of writeSystem */
 
 
 #ifndef solaris2
@@ -1914,7 +1929,7 @@ var_ifEntry(vp, name, length, exact, var_len, write_method)
     return NULL;
 }
 
-#else
+#else /* solaris2 */
 
 static int
 IF_cmp(void *addr, void *ep)
@@ -2093,7 +2108,7 @@ var_atEntry(vp, name, length, exact, var_len, write_method)
     u_long		    Addr, LowAddr;
 #if defined(freebsd2) || defined(netbsd1) || defined(hpux) || defined(bsdi2)
     u_short		    ifIndex, lowIfIndex;
-#endif
+#endif/* (freebsd2) || defined(netbsd1) || defined(hpux) || defined(bsdi2) */
     u_long		    ifType, lowIfType;
 
     int                     oid_length;
@@ -2123,7 +2138,7 @@ var_atEntry(vp, name, length, exact, var_len, write_method)
 	else {			/* IP NetToMedia group oid */
 	    op = current + 11;
 	}
-#else
+#else /* (freebsd2) || defined(netbsd1) || defined(hpux) || defined(bsdi2) */
 	if (ARP_Scan_Next(&Addr, PhysAddr, &ifType) == 0)
 	    break;
 	current[10] = 1;
@@ -2135,7 +2150,7 @@ var_atEntry(vp, name, length, exact, var_len, write_method)
 	else {			/* IP NetToMedia group oid */
 	    op = current + 11;
 	}
-#endif
+#endif /* (freebsd2) || defined(netbsd1) || defined(hpux) || defined(bsdi2) */
 	cp = (u_char *)&Addr;
 	*op++ = *cp++;
 	*op++ = *cp++;
@@ -2148,7 +2163,7 @@ var_atEntry(vp, name, length, exact, var_len, write_method)
 		LowAddr = Addr;
 #if defined(freebsd2) || defined(netbsd1) || defined(hpux) || defined(bsdi2)
 		lowIfIndex = ifIndex;
-#endif
+#endif /*  defined(freebsd2) || defined(netbsd1) || defined(hpux) || defined(bsdi2) */
 		bcopy(PhysAddr, LowPhysAddr, sizeof(PhysAddr));
 		lowIfType = ifType;
 		break;	/* no need to search further */
@@ -2164,7 +2179,7 @@ var_atEntry(vp, name, length, exact, var_len, write_method)
 		LowAddr = Addr;
 #if defined(freebsd2) || defined(netbsd1) || defined(hpux) || defined(bsdi2)
 		lowIfIndex = ifIndex;
-#endif
+#endif /*  defined(freebsd2) || defined(netbsd1) || defined(hpux) || defined(bsdi2) */
 		bcopy(PhysAddr, LowPhysAddr, sizeof(PhysAddr));
 		lowIfType = ifType;
 	    }
@@ -2181,9 +2196,9 @@ var_atEntry(vp, name, length, exact, var_len, write_method)
 	    *var_len = sizeof long_return;
 #if defined(freebsd2) || defined(netbsd1) || defined(hpux) || defined(bsdi2)
 	    long_return = lowIfIndex;
-#else
+#else /* (freebsd2) || defined(netbsd1) || defined(hpux) || defined(bsdi2) */
 	    long_return = 1; /* XXX */
-#endif
+#endif /* (freebsd2) || defined(netbsd1) || defined(hpux) || defined(bsdi2) */
 	    return (u_char *)&long_return;
 	case IPMEDIAPHYSADDRESS:		/* also ATPHYSADDRESS */
 	    *var_len = sizeof(LowPhysAddr);
@@ -2218,7 +2233,7 @@ AT_Cmp(void *addr, void *ep)
 	  mp->ipNetToMediaNetAddress, ((if_ip_t *)addr)->ipAddr,
 	  ((if_ip_t*)addr)->ifIdx,Interface_Index_By_Name (mp->ipNetToMediaIfIndex.o_bytes, mp->ipNetToMediaIfIndex.o_length),
 	  mp->ipNetToMediaIfIndex.o_bytes);
-#endif
+#endif /*  DODEBUG */
   if (mp->ipNetToMediaNetAddress != ((if_ip_t *)addr)->ipAddr)
     ret = 1;
   else if (((if_ip_t*)addr)->ifIdx !=
@@ -2227,7 +2242,7 @@ AT_Cmp(void *addr, void *ep)
   else ret = 0;
 #ifdef DODEBUG
   printf ("......... AT_Cmp returns %d\n", ret);
-#endif
+#endif /*  DODEBUG */
   return ret;
 }
 
@@ -2255,14 +2270,14 @@ var_atEntry(struct variable *vp, oid *name, int *length, int exact,
     req_e	req_type;
 #ifdef DODEBUG
     char	c_oid[1024];
-#endif
+#endif /* DODEBUG */
 
     /* fill in object part of name for current (less sizeof instance part) */
 
 #ifdef DODEBUG
     sprint_objid (c_oid, vp->name, vp->namelen);
     printf ("var_atEntry: %s %d\n", c_oid, exact);
-#endif
+#endif /* DODEBUG */
     memset (&Lowentry, 0, sizeof (Lowentry));
     bcopy((char *)vp->name, (char *)current, (int)vp->namelen * sizeof(oid));
     if (*length == AT_NAME_LENGTH) /* Assume that the input name is the lowest */
@@ -2305,7 +2320,7 @@ var_atEntry(struct variable *vp, oid *name, int *length, int exact,
     }
 #ifdef DODEBUG
     printf ("... Found = %d\n", Found);
-#endif
+#endif /* DODEBUG */
     if (Found == 0)
       return(NULL);
     bcopy((char *)lowest, (char *)name, AT_NAME_LENGTH * sizeof(oid));
@@ -2331,7 +2346,41 @@ var_atEntry(struct variable *vp, oid *name, int *length, int exact,
    return NULL;
 }
 
-#endif /* solaris */
+#endif /* solaris2 */
+#ifdef linux
+/*
+ * lucky days. since 1.1.16 the ip statistics are avail by the proc
+ * file-system.
+ */
+
+static void
+linux_read_ip_stat (ipstat)
+struct ip_mib *ipstat;
+{
+  FILE *in = fopen ("/proc/net/snmp", "r");
+  char line [1024];
+
+  bzero ((char *) ipstat, sizeof (*ipstat));
+
+  if (! in)
+    return;
+
+  while (line == fgets (line, 1024, in))
+    {
+      if (19 == sscanf (line,   
+"Ip: %lu %lu %lu %lu %lu %lu %lu %lu %lu %lu %lu %lu %lu %lu %lu %lu %lu %lu %lu",
+     &ipstat->IpForwarding, &ipstat->IpDefaultTTL, &ipstat->IpInReceives, 
+     &ipstat->IpInHdrErrors, &ipstat->IpInAddrErrors, &ipstat->IpForwDatagrams, 
+     &ipstat->IpInUnknownProtos, &ipstat->IpInDiscards, &ipstat->IpInDelivers, 
+     &ipstat->IpOutRequests, &ipstat->IpOutDiscards, &ipstat->IpOutNoRoutes, 
+     &ipstat->IpReasmTimeout, &ipstat->IpReasmReqds, &ipstat->IpReasmOKs, 
+     &ipstat->IpReasmFails, &ipstat->IpFragOKs, &ipstat->IpFragFails, 
+     &ipstat->IpFragCreates))
+	break;
+    }
+  fclose (in);
+} /* end of linux_read_ip_stat */
+#endif /* linux */
 
 #ifndef solaris2
 u_char *
@@ -2343,7 +2392,11 @@ var_ip(vp, name, length, exact, var_len, write_method)
     int     *var_len;	    /* OUT - length of variable or 0 if function returned. */
     int     (**write_method)(); /* OUT - pointer to function to set variable, otherwise 0 */
 {
+#ifdef linux
+    static struct ip_mib ipstat;
+#else /* linux */
     static struct ipstat ipstat;
+#endif /* linux */
     oid newname[MAX_NAME_LEN];
     int result, i;
 
@@ -2360,7 +2413,7 @@ var_ip(vp, name, length, exact, var_len, write_method)
     /*
      *	Get the IP statistics from the kernel...
      */
-
+#ifndef linux
     KNLookup(N_IPSTAT, (char *)&ipstat, sizeof (ipstat));
 
     switch (vp->magic){
@@ -2373,9 +2426,9 @@ var_ip(vp, name, length, exact, var_len, write_method)
 	    } else {
 		long_return = 2;	    /* HOST    */
 	    }
-#else
+#else /* sparc */
 	    long_return = 0;
-#endif
+#endif /* sparc */
 
 	    return (u_char *) &long_return;
 	case IPDEFAULTTTL:
@@ -2455,6 +2508,40 @@ var_ip(vp, name, length, exact, var_len, write_method)
 	default:
 	    ERROR("");
     }
+
+#else /* linux */    
+
+    linux_read_ip_stat (&ipstat);
+
+    switch (vp->magic){
+	case IPFORWARDING: 
+		/* valid values are 1 == yup, 2 == nope:
+		 * a 0 is forbidden, so patch: */
+		if (! ipstat.IpForwarding)
+			ipstat.IpForwarding = 2;
+		return (u_char *) &ipstat.IpForwarding;
+	case IPDEFAULTTTL: return (u_char *) &ipstat.IpDefaultTTL;
+	case IPINRECEIVES: return (u_char *) &ipstat.IpInReceives;
+	case IPINHDRERRORS: return (u_char *) &ipstat.IpInHdrErrors;
+	case IPINADDRERRORS: return (u_char *) &ipstat.IpInAddrErrors;
+	case IPFORWDATAGRAMS: return (u_char *) &ipstat.IpForwDatagrams;
+	case IPINUNKNOWNPROTOS: return (u_char *) &ipstat.IpInUnknownProtos;
+	case IPINDISCARDS: return (u_char *) &ipstat.IpInDiscards;
+	case IPINDELIVERS: return (u_char *) &ipstat.IpInDelivers;
+	case IPOUTREQUESTS: return (u_char *) &ipstat.IpOutRequests;
+	case IPOUTDISCARDS: return (u_char *) &ipstat.IpOutDiscards;
+	case IPOUTNOROUTES: return (u_char *) &ipstat.IpOutNoRoutes;
+	case IPREASMTIMEOUT: return (u_char *) &ipstat.IpReasmTimeout;
+	case IPREASMREQDS: return (u_char *) &ipstat.IpReasmReqds;
+	case IPREASMOKS: return (u_char *) &ipstat.IpReasmOKs;
+	case IPREASMFAILS: return (u_char *) &ipstat.IpReasmFails;
+	case IPFRAGOKS: return (u_char *) &ipstat.IpFragOKs;
+	case IPFRAGFAILS: return (u_char *) &ipstat.IpFragFails;
+	case IPFRAGCREATES: return (u_char *) &ipstat.IpFragCreates;
+	default:
+	    ERROR("");
+    }
+#endif /* linux */
     return NULL;
 }
 
@@ -2508,8 +2595,10 @@ var_ipAddrEntry(vp, name, length, exact, var_len, write_method)
 
 #endif
 
+#ifndef linux
       if ( ifnet.if_addrlist == 0 )
           continue;                   /* No address found for interface */
+#endif /* linux */
 
 	op = current + 10;
 	*op++ = *cp++;
@@ -2795,6 +2884,46 @@ var_ipAddrEntry(vp, name, length, exact, var_len, write_method)
 
 #endif /* solaris2 */
 
+#ifdef linux
+/*
+ * lucky days. since 1.1.16 the icmp statistics are avail by the proc
+ * file-system.
+ */
+
+static void
+linux_read_icmp_stat (icmpstat)
+struct icmp_mib *icmpstat;
+{
+  FILE *in = fopen ("/proc/net/snmp", "r");
+  char line [1024];
+
+  bzero ((char *) icmpstat, sizeof (*icmpstat));
+
+  if (! in)
+    return;
+
+  while (line == fgets (line, 1024, in))
+    {
+      if (26 == sscanf (line,
+"Icmp: %lu %lu %lu %lu %lu %lu %lu %lu %lu %lu %lu %lu %lu %lu %lu %lu %lu %lu %lu %lu %lu %lu %lu %lu %lu %lu\n",
+   &icmpstat->IcmpInMsgs, &icmpstat->IcmpInErrors, &icmpstat->IcmpInDestUnreachs, 
+   &icmpstat->IcmpInTimeExcds, &icmpstat->IcmpInParmProbs, &icmpstat->IcmpInSrcQuenchs,
+   &icmpstat->IcmpInRedirects, &icmpstat->IcmpInEchos, &icmpstat->IcmpInEchoReps, 
+   &icmpstat->IcmpInTimestamps, &icmpstat->IcmpInTimestampReps, &icmpstat->IcmpInAddrMasks,
+   &icmpstat->IcmpInAddrMaskReps, &icmpstat->IcmpOutMsgs, &icmpstat->IcmpOutErrors,
+   &icmpstat->IcmpOutDestUnreachs, &icmpstat->IcmpOutTimeExcds, 
+   &icmpstat->IcmpOutParmProbs, &icmpstat->IcmpOutSrcQuenchs, &icmpstat->IcmpOutRedirects,
+   &icmpstat->IcmpOutEchos, &icmpstat->IcmpOutEchoReps, &icmpstat->IcmpOutTimestamps, 
+   &icmpstat->IcmpOutTimestampReps, &icmpstat->IcmpOutAddrMasks,
+   &icmpstat->IcmpOutAddrMaskReps))
+	break;
+    }
+  fclose (in);
+}
+
+#endif /* linux */
+
+
 #ifndef solaris2
 
 u_char *
@@ -2807,7 +2936,11 @@ var_icmp(vp, name, length, exact, var_len, write_method)
     int     (**write_method)(); /* OUT - pointer to function to set variable, otherwise 0 */
 {
     register int i;
+#ifndef linux
     static struct icmpstat icmpstat;
+#else
+    static struct icmp_mib icmpstat;
+#endif
     oid newname[MAX_NAME_LEN];
     int result;
 
@@ -2825,7 +2958,7 @@ var_icmp(vp, name, length, exact, var_len, write_method)
     /*
      *        Get the ICMP statistics from the kernel...
      */
-
+#ifndef linux
     KNLookup( N_ICMPSTAT, (char *)&icmpstat, sizeof (icmpstat));
 
     switch (vp->magic){
@@ -2894,6 +3027,43 @@ var_icmp(vp, name, length, exact, var_len, write_method)
 	default:
 	    ERROR("");
     }
+#else /* linux */
+
+    linux_read_icmp_stat (&icmpstat);
+
+    switch (vp->magic){
+    case ICMPINMSGS: return (u_char *) &icmpstat.IcmpInMsgs;
+    case ICMPINERRORS: return (u_char *) &icmpstat.IcmpInErrors;
+    case ICMPINDESTUNREACHS: return (u_char *) &icmpstat.IcmpInDestUnreachs;
+    case ICMPINTIMEEXCDS: return (u_char *) &icmpstat.IcmpInTimeExcds;
+    case ICMPINPARMPROBS: return (u_char *) &icmpstat.IcmpInParmProbs;
+    case ICMPINSRCQUENCHS: return (u_char *) &icmpstat.IcmpInSrcQuenchs;
+    case ICMPINREDIRECTS: return (u_char *) &icmpstat.IcmpInRedirects;
+    case ICMPINECHOS: return (u_char *) &icmpstat.IcmpInEchos;
+    case ICMPINECHOREPS: return (u_char *) &icmpstat.IcmpInEchoReps;
+    case ICMPINTIMESTAMPS: return (u_char *) &icmpstat.IcmpInTimestamps;
+    case ICMPINTIMESTAMPREPS: return (u_char *) &icmpstat.IcmpInTimestampReps;
+    case ICMPINADDRMASKS: return (u_char *) &icmpstat.IcmpInAddrMasks;
+    case ICMPINADDRMASKREPS: return (u_char *) &icmpstat.IcmpInAddrMaskReps;
+    case ICMPOUTMSGS: return (u_char *) &icmpstat.IcmpOutMsgs;
+    case ICMPOUTERRORS: return (u_char *) &icmpstat.IcmpOutErrors;
+    case ICMPOUTDESTUNREACHS: return (u_char *) &icmpstat.IcmpOutDestUnreachs;
+    case ICMPOUTTIMEEXCDS: return (u_char *) &icmpstat.IcmpOutTimeExcds;
+    case ICMPOUTPARMPROBS: return (u_char *) &icmpstat.IcmpOutParmProbs;
+    case ICMPOUTSRCQUENCHS: return (u_char *) &icmpstat.IcmpOutSrcQuenchs;
+    case ICMPOUTREDIRECTS: return (u_char *) &icmpstat.IcmpOutRedirects;
+    case ICMPOUTECHOS: return (u_char *) &icmpstat.IcmpOutEchos;
+    case ICMPOUTECHOREPS: return (u_char *) &icmpstat.IcmpOutEchoReps;
+    case ICMPOUTTIMESTAMPS: return (u_char *) &icmpstat.IcmpOutTimestamps;
+    case ICMPOUTTIMESTAMPREPS: return (u_char *)&icmpstat.IcmpOutTimestampReps;
+    case ICMPOUTADDRMASKS: return (u_char *) &icmpstat.IcmpOutAddrMasks;
+    case ICMPOUTADDRMASKREPS: return (u_char *) &icmpstat.IcmpOutAddrMaskReps;
+
+    default:
+      ERROR("");
+    }
+#endif /* linux */
+
     return NULL;
 }
 
@@ -2910,7 +3080,11 @@ var_icmp(vp, name, length, exact, var_len, write_method)
 {
 #define ICMP_NAME_LENGTH	8
     register int i;
+#ifndef linux
     mib2_icmp_t icmpstat;
+#else /* linux */
+    static struct icmp_mib icmpstat;
+#endif /* linux */
     oid newname[MAX_NAME_LEN];
     int result;
     u_char *ret = (u_char *)&long_return;	/* Successful completion */
@@ -3036,12 +3210,16 @@ var_udp(vp, name, length, exact, var_len, write_method)
     int     (**write_method)(); /* OUT - pointer to function to set variable, otherwise 0 */
 {
     int i;
+#ifndef linux
     static struct udpstat udpstat;
+#else /* linux */
+    static struct udp_mib udpstat;
+#endif /* linux */
     oid newname[MAX_NAME_LEN], lowest[MAX_NAME_LEN], *op;
+    int result;
     u_char *cp;
     int LowState;
     static struct inpcb inpcb, Lowinpcb;
-    int result;
 
   if (vp->magic < UDPLOCALADDRESS) {
     bcopy((char *)vp->name, (char *)newname, (int)vp->namelen * sizeof(oid));
@@ -3083,12 +3261,17 @@ var_udp(vp, name, length, exact, var_len, write_method)
 #endif
 	    return (u_char *) &long_return;
 	case UDPINERRORS:
+#ifndef linux
 	    long_return = udpstat.udps_hdrops + udpstat.udps_badsum +
 #ifdef STRUCT_UDPSTAT_HAS_UDPS_DISCARD
                       + udpstat.udps_discard;
 #endif
 			  udpstat.udps_badlen;
 	    return (u_char *) &long_return;
+#else /* linux */
+      	    return (u_char *) &udpstat.UdpInErrors;
+#endif /* linux */
+
 	default:
 	    ERROR("");
     }
@@ -3213,6 +3396,39 @@ var_udp(vp, name, length, exact, var_len, write_method)
 }
 #endif /* solaris2 - udp */
 
+
+#ifdef linux
+/*
+ * lucky days. since 1.1.16 the tcp statistics are avail by the proc
+ * file-system.
+ */
+
+static void
+linux_read_tcp_stat (tcpstat)
+struct tcp_mib *tcpstat;
+{
+  FILE *in = fopen ("/proc/net/snmp", "r");
+  char line [1024];
+
+  bzero ((char *) tcpstat, sizeof (*tcpstat));
+
+  if (! in)
+    return;
+
+  while (line == fgets (line, 1024, in))
+    {
+      if (12 == sscanf (line, "Tcp: %lu %lu %lu %lu %lu %lu %lu %lu %lu %lu %lu %lu\n",
+	&tcpstat->TcpRtoAlgorithm, &tcpstat->TcpRtoMin, &tcpstat->TcpRtoMax, 
+	&tcpstat->TcpMaxConn, &tcpstat->TcpActiveOpens, &tcpstat->TcpPassiveOpens,
+	&tcpstat->TcpAttemptFails, &tcpstat->TcpEstabResets, &tcpstat->TcpCurrEstab, 
+	&tcpstat->TcpInSegs, &tcpstat->TcpOutSegs, &tcpstat->TcpRetransSegs))
+	break;
+    }
+  fclose (in);
+}
+
+#endif /* linux */
+
 #ifndef solaris2
 
 u_char *
@@ -3235,8 +3451,9 @@ var_tcp(vp, name, length, exact, var_len, write_method)
     /*
      *	Allow for a kernel w/o TCP
      */
-
+#ifndef linux
     if (nl[N_TCPSTAT].n_value == 0) return(NULL);
+#endif
 
     if ((vp->magic < TCPCONNSTATE) || (vp->magic >= TCPINERRS)) {
 
@@ -3256,21 +3473,45 @@ var_tcp(vp, name, length, exact, var_len, write_method)
 	 *  Get the TCP statistics from the kernel...
 	 */
 
+#ifndef linux
 	KNLookup( N_TCPSTAT, (char *)&tcpstat, sizeof (tcpstat));
-
+#else /* linux */
+	linux_read_tcp_stat (&tcpstat);
+#endif /* linux */
 	switch (vp->magic){
 	    case TCPRTOALGORITHM:
-		long_return = 4;	/* Van Jacobsen's algorithm */	/* XXX */
+#ifndef linux
+		long_return = 4;	/* Van Jacobsen's algorithm *//* XXX */
+#else
+                if (! tcpstat.TcpRtoAlgorithm) {
+		    /* 0 is illegal: assume `other' algorithm: */
+		    long_return = 1;
+		    return (u_char *) &long_return;
+                }
+                return (u_char *) &tcpstat.TcpRtoAlgorithm;
+#endif
 		return (u_char *) &long_return;
 	    case TCPRTOMIN:
+#ifndef linux
 		long_return = TCPTV_MIN / PR_SLOWHZ * 1000;
 		return (u_char *) &long_return;
+#else
+		return (u_char *) &tcpstat.TcpRtoMin;
+#endif
 	    case TCPRTOMAX:
+#ifndef linux
 		long_return = TCPTV_REXMTMAX / PR_SLOWHZ * 1000;
 		return (u_char *) &long_return;
+#else
+		return (u_char *) &tcpstat.TcpRtoMax;
+#endif
 	    case TCPMAXCONN:
+#ifndef linux
 		long_return = -1;
 		return (u_char *) &long_return;
+#else
+		return (u_char *) &tcpstat.TcpMaxConn;
+#endif
 	    case TCPACTIVEOPENS:
 		return (u_char *) &tcpstat.tcps_connattempt;
 	    case TCPPASSIVEOPENS:
@@ -3286,8 +3527,12 @@ var_tcp(vp, name, length, exact, var_len, write_method)
 		 *	counters tcpAttemptFails and tcpEstabResets.
 		 */
 	    case TCPCURRESTAB:
+#ifndef linux
 		long_return = TCP_Count_Connections();
 		return (u_char *) &long_return;
+#else
+		return (u_char *) &tcpstat.TcpCurrEstab;
+#endif
 	    case TCPINSEGS:
 		return (u_char *) &tcpstat.tcps_rcvtotal;
 	    case TCPOUTSEGS:
@@ -3300,6 +3545,7 @@ var_tcp(vp, name, length, exact, var_len, write_method)
 		return (u_char *) &long_return;
 	    case TCPRETRANSSEGS:
 		return (u_char *) &tcpstat.tcps_sndrexmitpack;
+#ifndef linux
 	    case TCPINERRS:
 		long_return = tcpstat.tcps_rcvbadsum + tcpstat.tcps_rcvbadoff 
 #ifdef STRUCT_TCPSTAT_HAS_TCPS_RCVMEMDROP
@@ -3310,6 +3556,7 @@ var_tcp(vp, name, length, exact, var_len, write_method)
 	    case TCPOUTRSTS:
 		long_return = tcpstat.tcps_sndctrl - tcpstat.tcps_closed;
 		return (u_char *) &long_return;
+#endif linux
 	    default:
 		ERROR("");
 	}
@@ -3581,6 +3828,7 @@ int     (**write_method)(); /* OUT - pointer to function to set variable, otherw
 #define inp_prev inp_list.le_prev
 #endif
 
+#ifndef linux
 /*
  *	Print INTERNET connections
  */
@@ -3602,15 +3850,15 @@ Again:	/*
 	inpcb = cb;
 #if !(defined(freebsd2) || defined(netbsd1))
 	prev = (struct inpcb *) nl[N_TCB].n_value;
-#endif
+#endif /*  !(defined(freebsd2) || defined(netbsd1)) */
 	/*
 	 *	Scan the control blocks
 	 */
 #if defined(freebsd2) || defined(netbsd1)
 	while ((inpcb.inp_next != NULL) && (inpcb.inp_next != (struct inpcb *) nl[N_TCB].n_value)) {
-#else
+#else /*  defined(freebsd2) || defined(netbsd1) */
 	while (inpcb.inp_next != (struct inpcb *) nl[N_TCB].n_value) {
-#endif
+#endif /*  defined(freebsd2) || defined(netbsd1) */
 		next = inpcb.inp_next;
 
 		if((klookup((unsigned long)next, (char *)&inpcb, sizeof (inpcb)) == 0)) {
@@ -3621,11 +3869,11 @@ Again:	/*
 			sleep(1);
 			goto Again;
 		}
-#endif
+#endif /*  !(defined(freebsd2) || defined(netbsd1)) */
 		if (inet_lnaof(inpcb.inp_laddr) == INADDR_ANY) {
 #if !(defined(freebsd2) || defined(netbsd1))
 			prev = next;
-#endif
+#endif /*  !(defined(freebsd2) || defined(netbsd1)) */
 			continue;
 		}
 		if(klookup((unsigned long)inpcb.inp_ppcb, (char *)&tcpcb, sizeof (tcpcb)) == 0) {
@@ -3638,11 +3886,11 @@ Again:	/*
 		    Established++;
 #if !(defined(freebsd2) || defined(netbsd1))
 		prev = next;
-#endif
+#endif /*  !(defined(freebsd2) || defined(netbsd1)) */
 	}
 	return(Established);
 }
-
+#endif
 static struct inpcb udp_inpcb, *udp_prev;
 static struct inpcb tcp_inpcb, *tcp_prev;
 
@@ -3671,7 +3919,7 @@ struct inpcb *RetInPcb;
 	next = udp_inpcb.inp_next;
 
 	klookup((unsigned long)next, (char *)&udp_inpcb, sizeof (udp_inpcb));
-#if !(defined(netbsd1) || defined(freebsd2))
+#if !(defined(netbsd1) || defined(freebsd2) || defined(linux))
 	if (udp_inpcb.inp_prev != udp_prev)	   /* ??? */
           return(-1); /* "FAILURE" */
 #endif
@@ -3695,6 +3943,7 @@ int *State;
 struct inpcb *RetInPcb;
 {
 	register struct inpcb *next;
+#ifndef linux
 	struct tcpcb tcpcb;
 
 #if defined(freebsd2) || defined(netbsd1)
@@ -3712,9 +3961,18 @@ struct inpcb *RetInPcb;
 #if !(defined(netbsd1) || defined(freebsd2))
 	if (tcp_inpcb.inp_prev != tcp_prev)	   /* ??? */
           return(-1); /* "FAILURE" */
-#endif
+#endif /*  !(defined(netbsd1) || defined(freebsd2)) */
 	klookup ( (int)tcp_inpcb.inp_ppcb, (char *)&tcpcb, sizeof (tcpcb));
 	*State = tcpcb.t_state;
+#else /* linux */
+	if (! tcp_prev)
+	  return 0;
+
+	tcp_inpcb = *tcp_prev;
+	*State = tcp_inpcb.inp_state;
+	next = tcp_inpcb.inp_next;
+#endif
+
 	*RetInPcb = tcp_inpcb;
 #if !(defined(netbsd1) || defined(freebsd2))
 	tcp_prev = next;

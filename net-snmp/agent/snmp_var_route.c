@@ -25,6 +25,12 @@ USE, DATA OR PROFITS, WHETHER IN AN ACTION OF CONTRACT, NEGLIGENCE OR
 OTHER TORTIOUS ACTION, ARISING OUT OF OR IN CONNECTION WITH THE USE OR
 PERFORMANCE OF THIS SOFTWARE.
 ******************************************************************/
+/*
+ * additions, fixes and enhancements for Linux by Erik Schoenfelder
+ * (schoenfr@ibr.cs.tu-bs.de) 1994/1995.
+ * Linux additions taken from CMU to UCD stack by Jennifer Bray of Origin
+ * (jbray@origin-at.co.uk) 1997
+ */
 
 #include <config.h>
 
@@ -209,8 +215,10 @@ var_ipRouteEntry(vp, name, length, exact, var_len, write_method)
     register struct variable *vp;   /* IN - pointer to variable entry that points here */
     register oid	*name;	    /* IN/OUT - input name requested, output name found */
     register int	*length;    /* IN/OUT - length of input and output strings */
+#ifndef linux
     int			exact;	    /* IN - TRUE if an exact match was requested. */
     int			*var_len;   /* OUT - length of variable or 0 if function returned. */
+#endif /* linux */
     int			(**write_method)(); /* OUT - pointer to function to set variable, otherwise 0 */
 {
     /*
@@ -228,7 +236,15 @@ var_ipRouteEntry(vp, name, length, exact, var_len, write_method)
 #endif
     struct ifnet     rt_ifnet;
     struct in_ifaddr rt_ifnetaddr;
-
+#ifdef linux
+    /** 
+     ** this optimisation fails, if there is only a single route avail.
+     ** it is a very special case, but better leave it out ...
+     **/
+    if (rtsize <= 1)
+      Save_Valid = 0;
+    else
+#endif
     /*
      *	OPTIMIZATION:
      *
@@ -349,16 +365,20 @@ var_ipRouteEntry(vp, name, length, exact, var_len, write_method)
 		/* XXX - Almost certainly not right
 		    but I don't have a suitable system to test this on */
 	    long_return = 0;
-#else
+#else /*  defined(freebsd2) || defined(netbsd1) || defined(bsdi2) */
 	    if ( ((struct sockaddr_in *) &rthead[RtIndex]->rt_dst)->sin_addr.s_addr == 0 )
 		long_return = 0;	/* Default route */
 	    else {
+#ifndef linux
 		klookup(rthead[RtIndex]->rt_ifp, &rt_ifnet, sizeof(rt_ifnet));
 		klookup(rt_ifnet.if_addrlist, &rt_ifnetaddr, sizeof(rt_ifnetaddr));
 
 		long_return = rt_ifnetaddr.ia_subnetmask;
+#else /* linux */
+                long_return =  (u_char *) rthead[RtIndex]->rt_genmask.sa_data;
+#endif /* linux */
 	    }
-#endif
+#endif /* defined(freebsd2) || defined(netbsd1) || defined(bsdi2) */
 	    return (u_char *)&long_return;
 	case IPROUTEINFO:
 	    *var_len = nullOidLen;
