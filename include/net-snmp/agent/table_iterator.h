@@ -96,6 +96,8 @@ extern          "C" {
        /** This can be used by client handlers to store any
            information they need */
         void           *myvoid;
+        int             flags;
+#define NETSNMP_ITERATOR_FLAG_SORTED	0x01
 
        /** A pointer to the netsnmp_table_registration_info object
            this iterator is registered along with. */
