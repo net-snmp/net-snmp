@@ -18,11 +18,15 @@ First, make sure you have read the snmp_config(5) manual page that
 describes how the ucd-snmp configuration files operate, where they
 are located and how they all work together.
 .SH DIRECTIVES
-.IP "traphandle OID PROGRAM [ARGS ...]"
+.IP "traphandle OID|default PROGRAM [ARGS ...]"
 The
 .I traphandle
 configuration directive configures the snmptrapd program to launch an
 external program any time it receives a trap matching the OID token.
+If the OID token is the word
+.I default
+then any trap not matching any other trap handler will call this
+default one instead.
 The program is fed details about the trap to its standard input, in the
 following format, one entry per line:
 .RS
