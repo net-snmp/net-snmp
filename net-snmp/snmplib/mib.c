@@ -1361,7 +1361,7 @@ void
 print_objid(oid *objid,
 	    int objidlen)	/* number of subidentifiers */
 {
-    char    buf[256];
+    char    buf[4096];
 
     sprint_objid(buf, objid, objidlen);
     printf("%s\n", buf);
@@ -1372,7 +1372,7 @@ fprint_objid(FILE *f,
 	     oid *objid,
 	     int objidlen)	/* number of subidentifiers */
 {
-    char    buf[256];
+    char    buf[4096];
 
     sprint_objid(buf, objid, objidlen);
     fprintf(f, "%s\n", buf);
