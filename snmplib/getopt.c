@@ -51,10 +51,10 @@ int	opterr = 1,		/* if error message should be printed */
 	optopt,			/* character checked for validity */
 	optreset;		/* reset getopt */
 char	*optarg;		/* argument associated with option */
+char	EMSG[] = "";
 
 #define	BADCH	(int)'?'
 #define	BADARG	(int)':'
-#define	EMSG	""
 
 /*
  * getopt --
