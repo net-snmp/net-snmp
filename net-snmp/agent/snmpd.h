@@ -16,4 +16,4 @@ void snmpd_parse_config_trapsink __P((char *, char *));
 void snmpd_free_trapsinks __P((void));
 void snmpd_parse_config_trapcommunity __P((char *, char *));
 void snmpd_free_trapcommunity __P((void));
-
+void agentBoots_conf __P((char *, char *));
