@@ -140,6 +140,7 @@ static char buf[300];
 	return 0;						\
     }								\
     buf[n] = '\0';						\
+    close(fd);                                                  \
 }
 
 #define MAX_ROW 3	/* these are a little liberal for flexibility */
