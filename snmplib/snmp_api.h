@@ -337,7 +337,7 @@ int snmp_get_full_objid (void);
 void snmp_set_suffix_only (int);
 int snmp_get_suffix_only (void);
 int snmp_get_errno (void);
-int snmp_oid_compare (oid *, int, oid *, int);
+int snmp_oid_compare (const oid *, int, const oid *, int);
 void init_snmp (void);
 void snmp_pdu_add_variable (struct snmp_pdu *, oid *, int, u_char, u_char *, int);
 int hex_to_binary (u_char *, u_char *);

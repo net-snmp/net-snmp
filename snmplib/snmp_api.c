@@ -2063,9 +2063,9 @@ snmp_sess_timeout(void *sessp)
 }
 
 int
-snmp_oid_compare(oid *name1, 
+snmp_oid_compare(const oid *name1, 
 		 int len1,
-		 oid *name2, 
+		 const oid *name2, 
 		 int len2)
 {
     register int len;
