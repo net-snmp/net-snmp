@@ -741,12 +741,13 @@ var_hrswrun(struct variable *vp,
 	    long_return = atoi( cp ) * (getpagesize()/1024);		/* rss */
             fclose(fp);
 #elif defined(cygwin)
-printf("%d: %d %d %d %d %d\n", lowproc.pid,
+	    DEBUGMSGTL(("snmpd",
+"runPerfMem %d: %ld %ld %ld %ld %ld\n", lowproc.pid,
 lowproc.rusage_self.ru_maxrss,
 lowproc.rusage_self.ru_ixrss,
 lowproc.rusage_self.ru_idrss,
 lowproc.rusage_self.ru_isrss,
-lowproc.rusage_self.ru_nswap);
+lowproc.rusage_self.ru_nswap));
 	    long_return = lowproc.rusage_self.ru_idrss; /* ??? */
 #else
 #if NO_DUMMY_VALUES
@@ -960,7 +961,7 @@ End_HR_SWRun (void)
 
 int count_processes (void)
 {
-#if !(defined(linux) || defined(hpux10) || defined(solaris2) || HAVE_KVM_GETPROCS)
+#if !(defined(linux) || defined(cygwin) || defined(hpux10) || defined(solaris2) || HAVE_KVM_GETPROCS)
     int i;
 #endif
     int total=0;
