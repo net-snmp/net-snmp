@@ -200,7 +200,7 @@ int get_exec_output(ex)
   static struct extensible excompare;
   static char lastcmd[STRMAX];
   int cfd;
-  int lastresult;
+  static int lastresult;
   int readcount;
 #endif
 
@@ -214,6 +214,9 @@ int get_exec_output(ex)
     if (pipe(fd)) 
       {
         setPerrorstatus("pipe");
+#ifdef EXCACHETIME
+        cachetime = 0;
+#endif
         return NULL;
       }
     if ((ex->pid = fork()) == 0) 
@@ -259,12 +262,16 @@ int get_exec_output(ex)
         if (ex->pid < 0) {
           close(fd[0]);
           setPerrorstatus("fork");
+#ifdef EXCACHETIME
+          cachetime = 0;
+#endif
           return (NULL);
         }
 #ifdef EXCACHETIME
         unlink(CACHEFILE);
         if ((cfd = open(CACHEFILE,O_WRONLY|O_TRUNC|O_CREAT,0644)) < 0) {
           setPerrorstatus("open");
+          cachetime = 0;
           return(NULL);
         }
         fcntl(fd[0],F_SETFL,O_NONBLOCK);  /* don't block on reads */
@@ -285,6 +292,7 @@ int get_exec_output(ex)
         /* wait for the child to finish */
         if (ex->pid > 0 && waitpid(ex->pid,&ex->result,0) < 0) {
           setPerrorstatus("waitpid()");
+          cachetime = 0;
           return (NULL);
         }
         ex->pid = 0;
