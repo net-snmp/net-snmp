@@ -1,6 +1,12 @@
 /*
  * util_funcs.c
  */
+/*
+ * Portions of this file are copyrighted by:
+ * Copyright Copyright 2003 Sun Microsystems, Inc. All rights reserved.
+ * Use is subject to license terms specified in the COPYING file
+ * distributed with the Net-SNMP package.
+ */
 
 #include <net-snmp/net-snmp-config.h>
 
@@ -209,7 +215,7 @@ get_exec_output(struct extensible *ex)
 #ifdef EXCACHETIME
     char            cachefile[STRMAX];
     char            cache[MAXCACHESIZE];
-    ssize_t         cachebytes;
+    size_t          cachebytes;
     long            curtime;
     static char     lastcmd[STRMAX];
     int             cfd;
