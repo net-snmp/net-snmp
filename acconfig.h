@@ -614,4 +614,9 @@
 
 #undef INET6
 
+#ifndef NETSNMP_INLINE
+#   define NETSNMP_NO_INLINE
+#   define NETSNMP_INLINE
+#endif
+
 #endif /* NET_SNMP_CONFIG_H */
