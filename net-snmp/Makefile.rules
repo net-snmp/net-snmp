@@ -29,8 +29,10 @@ installprogs: installbin installsbin
 # headers
 #
 # set INSTALLHEADERS to a list of things to install in each makefile.
+# set INSTALLBUILTHEADERS to a list of things to install from builddir
 # set INSTALLSUBDIRHEADERS and INSTALLSUBDIR to subdirectory headers
 # set INSTALLSUBDIRHEADERS2 and INSTALLSUBDIR2 to more subdirectory headers
+# set INSTALLBUILTSUBDIRHEADERS and INSTALLBUILTSUBDIR2 to a list from builddir
 #
 installheaders: installlocalheaders @installucdheaders@ installsubdirheaders
 
@@ -41,6 +43,15 @@ installlocalheaders:
 		$(SHELL) $(top_srcdir)/mkinstalldirs $(includedir) ; \
 	        for i in $$it ; do \
 			$(INSTALL) $(top_srcdir)/include/net-snmp/$$i $(includedir) ; \
+	                echo "installing $$i in $(includedir)" ; \
+	        done \
+	fi
+	@if test "$(INSTALLBUILTHEADERS)" != "" ; then \
+		echo creating directory $(includedir) ; \
+		it="$(INSTALLBUILTHEADERS)" ; \
+		$(SHELL) $(top_srcdir)/mkinstalldirs $(includedir) ; \
+	        for i in $$it ; do \
+			$(INSTALL) $$i $(includedir) ; \
 	                echo "installing $$i in $(includedir)" ; \
 	        done \
 	fi
@@ -60,6 +71,15 @@ installlocalheaders:
 	        for i in $$it ; do \
 			$(INSTALL) $(top_srcdir)/include/net-snmp/$(INCLUDESUBDIR2)/$$i $(includedir)/$(INCLUDESUBDIR2) ; \
 	                echo "installing $$i in $(includedir)/$(INCLUDESUBDIR2)" ; \
+	        done \
+	fi
+	@if test "$(INSTALLBUILTSUBDIRHEADERS)" != "" ; then \
+		echo creating directory $(includedir)/$(INCLUDEBUILTSUBDIR) ; \
+		it="$(INSTALLBUILTSUBDIRHEADERS)" ; \
+		$(SHELL) $(top_srcdir)/mkinstalldirs $(includedir)/$(INCLUDEBUILTSUBDIR) ; \
+	        for i in $$it ; do \
+			$(INSTALL) $$i $(includedir)/$(INCLUDEBUILTSUBDIR) ; \
+	                echo "installing $$i in $(includedir)/$(INCLUDEBUILTSUBDIR)" ; \
 	        done \
 	fi
 
