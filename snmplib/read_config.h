@@ -59,6 +59,7 @@ char *read_config_save_octet_string(char *saveto, u_char *str, int len);
 char *read_config_read_octet_string(char *readfrom, u_char **str, int *len);
 char *read_config_read_objid(char *readfrom, oid **objid, int *len);
 char *read_config_save_objid(char *saveto, oid *objid, int len);
+char *read_config_read_data(int type, char *readfrom, void *dataptr, int *len);
 void  read_config_store(char *type, char *line);
 void  snmp_clean_persistent(char *type);
 
