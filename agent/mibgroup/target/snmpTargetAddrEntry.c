@@ -265,7 +265,7 @@ void init_snmpTargetAddrEntry(void) {
 			variable2, snmpTargetAddrEntry_variables_oid);
 
   snmpd_register_config_handler("targetAddr", snmpd_parse_config_targetAddr,
-				0, "");
+				0, NULL);
 
   /* we need to be called back later */
   snmp_register_callback(SNMP_CALLBACK_LIBRARY, SNMP_CALLBACK_STORE_DATA,
