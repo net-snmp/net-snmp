@@ -2,15 +2,14 @@
 #define _GETOPT_H_ 1
 
 #ifdef __cplusplus
-extern "C" {
+extern          "C" {
 #endif
 
-extern int getopt(int, char *const *, const char *);
-extern char *optarg;
-extern int optind, opterr, optopt, optreset;
+    extern int      getopt(int, char *const *, const char *);
+    extern char    *optarg;
+    extern int      optind, opterr, optopt, optreset;
 
 #ifdef __cplusplus
 }
 #endif
-
 #endif

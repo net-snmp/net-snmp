@@ -1,8 +1,8 @@
 /*
- irix.h
-
- Date Created: Mon Feb 16 22:19:39 1998
- Author:       Simon Leinen  <simon@switch.ch>
+ * irix.h
+ * 
+ * Date Created: Mon Feb 16 22:19:39 1998
+ * Author:       Simon Leinen  <simon@switch.ch>
  */
 
 #include "generic.h"
@@ -18,14 +18,20 @@
 
 #define _KMEMUSER 1
 
-/* don't define _KERNEL before including sys/unistd.h */
+/*
+ * don't define _KERNEL before including sys/unistd.h 
+ */
 #define IFNET_NEEDS_KERNEL_LATE  1
 
-/* configure fails to detect these properly because they're broken headers */
+/*
+ * configure fails to detect these properly because they're broken headers 
+ */
 #define HAVE_NETINET_TCP_H 1
 #define HAVE_NETINET_IP_H 1
 
-/* don't use this on irix */
+/*
+ * don't use this on irix 
+ */
 #undef HAVE_ARPA_INET_H
 
 #define STREAM_NEEDS_KERNEL_ISLANDS

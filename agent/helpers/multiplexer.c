@@ -33,15 +33,19 @@
 /** returns a multiplixer handler given a netsnmp_mib_handler_methods structure of subhandlers.
  */
 netsnmp_mib_handler *
-netsnmp_get_multiplexer_handler(netsnmp_mib_handler_methods *req) {
+netsnmp_get_multiplexer_handler(netsnmp_mib_handler_methods *req)
+{
     netsnmp_mib_handler *ret = NULL;
-    
+
     if (!req) {
-        snmp_log(LOG_INFO, "netsnmp_get_multiplexer_handler(NULL) called\n");
+        snmp_log(LOG_INFO,
+                 "netsnmp_get_multiplexer_handler(NULL) called\n");
         return NULL;
     }
-    
-    ret = netsnmp_create_handler("multiplexer", netsnmp_multiplexer_helper_handler);
+
+    ret =
+        netsnmp_create_handler("multiplexer",
+                               netsnmp_multiplexer_helper_handler);
     if (ret) {
         ret->myvoid = (void *) req;
     }
@@ -50,14 +54,14 @@ netsnmp_get_multiplexer_handler(netsnmp_mib_handler_methods *req) {
 
 /** implements the multiplexer helper */
 int
-netsnmp_multiplexer_helper_handler(
-    netsnmp_mib_handler               *handler,
-    netsnmp_handler_registration      *reginfo,
-    netsnmp_agent_request_info        *reqinfo,
-    netsnmp_request_info              *requests) {
+netsnmp_multiplexer_helper_handler(netsnmp_mib_handler *handler,
+                                   netsnmp_handler_registration *reginfo,
+                                   netsnmp_agent_request_info *reqinfo,
+                                   netsnmp_request_info *requests)
+{
 
     netsnmp_mib_handler_methods *methods;
-    
+
     if (!handler->myvoid) {
         snmp_log(LOG_INFO, "improperly registered multiplexer found\n");
         return SNMP_ERR_GENERR;
@@ -65,51 +69,58 @@ netsnmp_multiplexer_helper_handler(
 
     methods = (netsnmp_mib_handler_methods *) handler->myvoid;
 
-    switch(reqinfo->mode) {
-        case MODE_GET:
+    switch (reqinfo->mode) {
+    case MODE_GET:
+        handler = methods->get_handler;
+        if (!handler) {
+            netsnmp_set_all_requests_error(reqinfo, requests,
+                                           SNMP_NOSUCHOBJECT);
+        }
+        break;
+
+    case MODE_GETNEXT:
+        handler = methods->getnext_handler;
+        if (!handler)           /* fallback to get handler */
             handler = methods->get_handler;
-            if (!handler) {
-                netsnmp_set_all_requests_error(reqinfo, requests, SNMP_NOSUCHOBJECT);
-            }
-            break;
+        break;
 
-        case MODE_GETNEXT:
+    case MODE_GETBULK:
+        /*
+         * XXX: this needs to do better getbulk -> getnext
+         * handling (probably via a separate helper) 
+         */
+        handler = methods->getbulk_handler;
+        if (!handler)           /* fallback to getnext handler */
             handler = methods->getnext_handler;
-            if (!handler) /* fallback to get handler */
-                handler = methods->get_handler;
-            break;
+        if (!handler)           /* fallback to getnext handler */
+            handler = methods->get_handler;
+        break;
 
-        case MODE_GETBULK:
-            /* XXX: this needs to do better getbulk -> getnext
-               handling (probably via a separate helper) */
-            handler = methods->getbulk_handler;
-            if (!handler) /* fallback to getnext handler */
-                handler = methods->getnext_handler;
-            if (!handler) /* fallback to getnext handler */
-                handler = methods->get_handler;
-            break;
+    case MODE_SET_RESERVE1:
+    case MODE_SET_RESERVE2:
+    case MODE_SET_ACTION:
+    case MODE_SET_COMMIT:
+    case MODE_SET_FREE:
+    case MODE_SET_UNDO:
+        handler = methods->set_handler;
+        if (!handler) {
+            netsnmp_set_all_requests_error(reqinfo, requests,
+                                           SNMP_ERR_NOTWRITABLE);
+            return SNMP_ERR_NOERROR;
+        }
+        break;
 
-        case MODE_SET_RESERVE1:
-        case MODE_SET_RESERVE2:
-        case MODE_SET_ACTION:
-        case MODE_SET_COMMIT:
-        case MODE_SET_FREE:
-        case MODE_SET_UNDO:
-            handler = methods->set_handler;
-            if (!handler) {
-                netsnmp_set_all_requests_error(reqinfo, requests, SNMP_ERR_NOTWRITABLE);
-                return SNMP_ERR_NOERROR;
-            }
-            break;
-            
-        /* XXX: process SETs specially, and possibly others */
-        default:
-            snmp_log(LOG_ERR, "unsupported mode for multiplexer: %d\n",
-                     reqinfo->mode);
-            return SNMP_ERR_GENERR;
+        /*
+         * XXX: process SETs specially, and possibly others 
+         */
+    default:
+        snmp_log(LOG_ERR, "unsupported mode for multiplexer: %d\n",
+                 reqinfo->mode);
+        return SNMP_ERR_GENERR;
     }
     if (!handler) {
-        snmp_log(LOG_ERR, "No handler enabled for mode %d in multiplexer\n",
+        snmp_log(LOG_ERR,
+                 "No handler enabled for mode %d in multiplexer\n",
                  reqinfo->mode);
         return SNMP_ERR_GENERR;
     }

@@ -66,345 +66,376 @@ SOFTWARE.
 #include <in.h>
 #endif
 
-#include <net-snmp/types.h>	
+#include <net-snmp/types.h>
 #include <net-snmp/output_api.h>
 
 #include <net-snmp/library/asn1.h>
-#include <net-snmp/library/snmp.h>	/* for "internal" definitions */
+#include <net-snmp/library/snmp.h>      /* for "internal" definitions */
 #include <net-snmp/library/snmp_api.h>
 #include <net-snmp/library/mib.h>
 
 void
-xdump(const u_char *cp,
-      size_t length,
-      const char *prefix)
+xdump(const u_char * cp, size_t length, const char *prefix)
 {
-    int col, count;
-    char *buffer;
+    int             col, count;
+    char           *buffer;
 
-    buffer=(char *)malloc(strlen(prefix)+80);
+    buffer = (char *) malloc(strlen(prefix) + 80);
     if (!buffer) {
-      snmp_log(LOG_NOTICE, "xdump: malloc failed. packet-dump skipped\n");
-      return;
+        snmp_log(LOG_NOTICE,
+                 "xdump: malloc failed. packet-dump skipped\n");
+        return;
     }
 
     count = 0;
-    while(count < (int)length){
-	strcpy(buffer, prefix);
-        sprintf (buffer+strlen(buffer), "%.4d: ", count);
+    while (count < (int) length) {
+        strcpy(buffer, prefix);
+        sprintf(buffer + strlen(buffer), "%.4d: ", count);
 
-	for(col = 0; ((count + col) < (int)length) && col < 16; col++){
-	    sprintf(buffer+strlen(buffer), "%02X ", cp[count + col]);
-            if (col % 4 == 3) strcat(buffer, " "); 
-	}
-        for(;col < 16;col++){   /* pad end of buffer with zeros */
+        for (col = 0; ((count + col) < (int) length) && col < 16; col++) {
+            sprintf(buffer + strlen(buffer), "%02X ", cp[count + col]);
+            if (col % 4 == 3)
+                strcat(buffer, " ");
+        }
+        for (; col < 16; col++) {       /* pad end of buffer with zeros */
             strcat(buffer, "   ");
-            if (col % 4 == 3) strcat(buffer, " ");
-	}
-	strcat(buffer, "  ");
-	for(col = 0; ((count + col) < (int)length) && col < 16; col++){
-            buffer[col+60]=isprint(cp[count+col])?cp[count+col]:'.';
-	}
-        buffer[col+60]='\n';
-        buffer[col+60+1]=0;
+            if (col % 4 == 3)
+                strcat(buffer, " ");
+        }
+        strcat(buffer, "  ");
+        for (col = 0; ((count + col) < (int) length) && col < 16; col++) {
+            buffer[col + 60] =
+                isprint(cp[count + col]) ? cp[count + col] : '.';
+        }
+        buffer[col + 60] = '\n';
+        buffer[col + 60 + 1] = 0;
         snmp_log(LOG_DEBUG, "%s", buffer);
-	count += col;
+        count += col;
     }
     snmp_log(LOG_DEBUG, "\n");
     free(buffer);
 
-}  /* end xdump() */
+}                               /* end xdump() */
 
-/* 
-   u_char * snmp_parse_var_op(
-   u_char *data              IN - pointer to the start of object
-   oid *var_name	     OUT - object id of variable 
-   int *var_name_len         IN/OUT - length of variable name 
-   u_char *var_val_type      OUT - type of variable (int or octet string) (one byte) 
-   int *var_val_len          OUT - length of variable 
-   u_char **var_val	     OUT - pointer to ASN1 encoded value of variable 
-   int *listlength          IN/OUT - number of valid bytes left in var_op_list 
-*/
+/*
+ * u_char * snmp_parse_var_op(
+ * u_char *data              IN - pointer to the start of object
+ * oid *var_name             OUT - object id of variable 
+ * int *var_name_len         IN/OUT - length of variable name 
+ * u_char *var_val_type      OUT - type of variable (int or octet string) (one byte) 
+ * int *var_val_len          OUT - length of variable 
+ * u_char **var_val          OUT - pointer to ASN1 encoded value of variable 
+ * int *listlength          IN/OUT - number of valid bytes left in var_op_list 
+ */
 
-u_char *
-snmp_parse_var_op(u_char *data,
-		  oid *var_name,
-		  size_t *var_name_len,
-		  u_char *var_val_type,
-		  size_t *var_val_len,
-		  u_char **var_val,
-		  size_t *listlength)
+u_char         *
+snmp_parse_var_op(u_char * data,
+                  oid * var_name,
+                  size_t * var_name_len,
+                  u_char * var_val_type,
+                  size_t * var_val_len,
+                  u_char ** var_val, size_t * listlength)
 {
-    u_char	    var_op_type;
-    size_t		    var_op_len = *listlength;
-    u_char	    *var_op_start = data;
+    u_char          var_op_type;
+    size_t          var_op_len = *listlength;
+    u_char         *var_op_start = data;
 
     data = asn_parse_sequence(data, &var_op_len, &var_op_type,
-			(ASN_SEQUENCE | ASN_CONSTRUCTOR), "var_op");
-    if (data == NULL){
-    	/* msg detail is set */
-	return NULL;
+                              (ASN_SEQUENCE | ASN_CONSTRUCTOR), "var_op");
+    if (data == NULL) {
+        /*
+         * msg detail is set 
+         */
+        return NULL;
     }
-    DEBUGDUMPHEADER("recv","Name");
-    data = asn_parse_objid(data, &var_op_len, &var_op_type, var_name, var_name_len);
+    DEBUGDUMPHEADER("recv", "Name");
+    data =
+        asn_parse_objid(data, &var_op_len, &var_op_type, var_name,
+                        var_name_len);
     DEBUGINDENTLESS();
-    if (data == NULL){
-	ERROR_MSG("No OID for variable");
-	return NULL;
+    if (data == NULL) {
+        ERROR_MSG("No OID for variable");
+        return NULL;
     }
-    if (var_op_type != (u_char)(ASN_UNIVERSAL | ASN_PRIMITIVE | ASN_OBJECT_ID))
-	return NULL;
-    *var_val = data;	/* save pointer to this object */
-    /* find out what type of object this is */
+    if (var_op_type !=
+        (u_char) (ASN_UNIVERSAL | ASN_PRIMITIVE | ASN_OBJECT_ID))
+        return NULL;
+    *var_val = data;            /* save pointer to this object */
+    /*
+     * find out what type of object this is 
+     */
     data = asn_parse_header(data, &var_op_len, var_val_type);
-    if (data == NULL){
-	ERROR_MSG("No header for value");
-	return NULL;
+    if (data == NULL) {
+        ERROR_MSG("No header for value");
+        return NULL;
     }
-    /* XXX no check for type! */
+    /*
+     * XXX no check for type! 
+     */
     *var_val_len = var_op_len;
     data += var_op_len;
-    *listlength -= (int)(data - var_op_start);
+    *listlength -= (int) (data - var_op_start);
     return data;
 }
 
 /*
-        u_char * snmp_build_var_op(
-	u_char *data	     IN - pointer to the beginning of the output buffer
-	oid *var_name        IN - object id of variable 
-	int *var_name_len    IN - length of object id 
-	u_char var_val_type  IN - type of variable 
-	int    var_val_len   IN - length of variable 
-	u_char *var_val      IN - value of variable 
-	int *listlength      IN/OUT - number of valid bytes left in
-				   output buffer 
-*/
+ * u_char * snmp_build_var_op(
+ * u_char *data      IN - pointer to the beginning of the output buffer
+ * oid *var_name        IN - object id of variable 
+ * int *var_name_len    IN - length of object id 
+ * u_char var_val_type  IN - type of variable 
+ * int    var_val_len   IN - length of variable 
+ * u_char *var_val      IN - value of variable 
+ * int *listlength      IN/OUT - number of valid bytes left in
+ * output buffer 
+ */
 
-u_char *
-snmp_build_var_op(u_char *data,
-		  oid *var_name,
-		  size_t *var_name_len,
-		  u_char var_val_type,
-		  size_t var_val_len,
-		  u_char *var_val,
-		  size_t *listlength)
+u_char         *
+snmp_build_var_op(u_char * data,
+                  oid * var_name,
+                  size_t * var_name_len,
+                  u_char var_val_type,
+                  size_t var_val_len,
+                  u_char * var_val, size_t * listlength)
 {
-    size_t     dummyLen, headerLen;
-    u_char    *dataPtr;
+    size_t          dummyLen, headerLen;
+    u_char         *dataPtr;
 
     dummyLen = *listlength;
     dataPtr = data;
 #if 0
     data = asn_build_sequence(data, &dummyLen,
-			      (u_char)(ASN_SEQUENCE | ASN_CONSTRUCTOR), 0);
-    if (data == NULL){
-	return NULL;
+                              (u_char) (ASN_SEQUENCE | ASN_CONSTRUCTOR),
+                              0);
+    if (data == NULL) {
+        return NULL;
     }
 #endif
     if (dummyLen < 4)
-	return NULL;
+        return NULL;
     data += 4;
-    dummyLen -=4;
+    dummyLen -= 4;
 
     headerLen = data - dataPtr;
     *listlength -= headerLen;
-    DEBUGDUMPHEADER("send","Name");
+    DEBUGDUMPHEADER("send", "Name");
     data = asn_build_objid(data, listlength,
-	    (u_char)(ASN_UNIVERSAL | ASN_PRIMITIVE | ASN_OBJECT_ID),
-	    var_name, *var_name_len);
+                           (u_char) (ASN_UNIVERSAL | ASN_PRIMITIVE |
+                                     ASN_OBJECT_ID), var_name,
+                           *var_name_len);
     DEBUGINDENTLESS();
-    if (data == NULL){
-	ERROR_MSG("Can't build OID for variable");
-	return NULL;
+    if (data == NULL) {
+        ERROR_MSG("Can't build OID for variable");
+        return NULL;
     }
-    DEBUGDUMPHEADER("send","Value");
-    switch(var_val_type){
-	case ASN_INTEGER:
-	    data = asn_build_int(data, listlength, var_val_type,
-		    (long *)var_val, var_val_len);
-	    break;
-	case ASN_GAUGE:
-	case ASN_COUNTER:
-	case ASN_TIMETICKS:
-	case ASN_UINTEGER:
-	    data = asn_build_unsigned_int(data, listlength, var_val_type,
-					  (u_long *)var_val, var_val_len);
-	    break;
+    DEBUGDUMPHEADER("send", "Value");
+    switch (var_val_type) {
+    case ASN_INTEGER:
+        data = asn_build_int(data, listlength, var_val_type,
+                             (long *) var_val, var_val_len);
+        break;
+    case ASN_GAUGE:
+    case ASN_COUNTER:
+    case ASN_TIMETICKS:
+    case ASN_UINTEGER:
+        data = asn_build_unsigned_int(data, listlength, var_val_type,
+                                      (u_long *) var_val, var_val_len);
+        break;
 #ifdef OPAQUE_SPECIAL_TYPES
-	case ASN_OPAQUE_COUNTER64:
-	case ASN_OPAQUE_U64:
+    case ASN_OPAQUE_COUNTER64:
+    case ASN_OPAQUE_U64:
 #endif
-	case ASN_COUNTER64:
-	    data = asn_build_unsigned_int64(data, listlength, var_val_type,
-					   (struct counter64 *)var_val,
-					    var_val_len);
-	    break;
-	case ASN_OCTET_STR:
-	case ASN_IPADDRESS:
-	case ASN_OPAQUE:
-        case ASN_NSAP:
-	    data = asn_build_string(data, listlength, var_val_type,
-		    var_val, var_val_len);
-	    break;
-	case ASN_OBJECT_ID:
-	    data = asn_build_objid(data, listlength, var_val_type,
-		    (oid *)var_val, var_val_len / sizeof(oid));
-	    break;
-	case ASN_NULL:
-	    data = asn_build_null(data, listlength, var_val_type);
-	    break;
-	case ASN_BIT_STR:
-	    data = asn_build_bitstring(data, listlength, var_val_type,
-		    var_val, var_val_len);
-	    break;
-	case SNMP_NOSUCHOBJECT:
-	case SNMP_NOSUCHINSTANCE:
-	case SNMP_ENDOFMIBVIEW:
-	    data = asn_build_null(data, listlength, var_val_type);
-	    break;
+    case ASN_COUNTER64:
+        data = asn_build_unsigned_int64(data, listlength, var_val_type,
+                                        (struct counter64 *) var_val,
+                                        var_val_len);
+        break;
+    case ASN_OCTET_STR:
+    case ASN_IPADDRESS:
+    case ASN_OPAQUE:
+    case ASN_NSAP:
+        data = asn_build_string(data, listlength, var_val_type,
+                                var_val, var_val_len);
+        break;
+    case ASN_OBJECT_ID:
+        data = asn_build_objid(data, listlength, var_val_type,
+                               (oid *) var_val, var_val_len / sizeof(oid));
+        break;
+    case ASN_NULL:
+        data = asn_build_null(data, listlength, var_val_type);
+        break;
+    case ASN_BIT_STR:
+        data = asn_build_bitstring(data, listlength, var_val_type,
+                                   var_val, var_val_len);
+        break;
+    case SNMP_NOSUCHOBJECT:
+    case SNMP_NOSUCHINSTANCE:
+    case SNMP_ENDOFMIBVIEW:
+        data = asn_build_null(data, listlength, var_val_type);
+        break;
 #ifdef OPAQUE_SPECIAL_TYPES
-      case ASN_OPAQUE_FLOAT:
+    case ASN_OPAQUE_FLOAT:
         data = asn_build_float(data, listlength, var_val_type,
                                (float *) var_val, var_val_len);
         break;
-      case ASN_OPAQUE_DOUBLE:
+    case ASN_OPAQUE_DOUBLE:
         data = asn_build_double(data, listlength, var_val_type,
-                               (double *) var_val, var_val_len);
+                                (double *) var_val, var_val_len);
         break;
-      case ASN_OPAQUE_I64:
+    case ASN_OPAQUE_I64:
         data = asn_build_signed_int64(data, listlength, var_val_type,
                                       (struct counter64 *) var_val,
                                       var_val_len);
         break;
-#endif /* OPAQUE_SPECIAL_TYPES */
-	default:
-	    ERROR_MSG("wrong type");
-	    return NULL;
+#endif                          /* OPAQUE_SPECIAL_TYPES */
+    default:
+        ERROR_MSG("wrong type");
+        return NULL;
     }
     DEBUGINDENTLESS();
-    if (data == NULL){
-	ERROR_MSG("Can't build value");
-	return NULL;
+    if (data == NULL) {
+        ERROR_MSG("Can't build value");
+        return NULL;
     }
     dummyLen = (data - dataPtr) - headerLen;
 
     asn_build_sequence(dataPtr, &dummyLen,
-		       (u_char)(ASN_SEQUENCE | ASN_CONSTRUCTOR), dummyLen);
+                       (u_char) (ASN_SEQUENCE | ASN_CONSTRUCTOR),
+                       dummyLen);
     return data;
 }
 
 #ifdef USE_REVERSE_ASNENCODING
 int
-snmp_realloc_rbuild_var_op(u_char **pkt, size_t *pkt_len,
-			   size_t *offset, int allow_realloc,
-			   const oid *var_name, size_t *var_name_len,
-			   u_char var_val_type,
-			   u_char *var_val, size_t var_val_len) 
+snmp_realloc_rbuild_var_op(u_char ** pkt, size_t * pkt_len,
+                           size_t * offset, int allow_realloc,
+                           const oid * var_name, size_t * var_name_len,
+                           u_char var_val_type,
+                           u_char * var_val, size_t var_val_len)
 {
-  size_t start_offset = *offset;
-  int rc = 0;
-    
-  /*  Encode the value.  */
-  DEBUGDUMPHEADER("send","Value");
+    size_t          start_offset = *offset;
+    int             rc = 0;
 
-  switch(var_val_type) {
-  case ASN_INTEGER:
-    rc = asn_realloc_rbuild_int(pkt, pkt_len, offset, allow_realloc,
-				var_val_type, (long *)var_val, var_val_len);
-    break;
+    /*
+     * Encode the value.  
+     */
+    DEBUGDUMPHEADER("send", "Value");
 
-  case ASN_GAUGE:
-  case ASN_COUNTER:
-  case ASN_TIMETICKS:
-  case ASN_UINTEGER:
-    rc = asn_realloc_rbuild_unsigned_int(pkt, pkt_len, offset, allow_realloc,
-				 var_val_type, (u_long *)var_val, var_val_len);
-    break;
+    switch (var_val_type) {
+    case ASN_INTEGER:
+        rc = asn_realloc_rbuild_int(pkt, pkt_len, offset, allow_realloc,
+                                    var_val_type, (long *) var_val,
+                                    var_val_len);
+        break;
+
+    case ASN_GAUGE:
+    case ASN_COUNTER:
+    case ASN_TIMETICKS:
+    case ASN_UINTEGER:
+        rc = asn_realloc_rbuild_unsigned_int(pkt, pkt_len, offset,
+                                             allow_realloc, var_val_type,
+                                             (u_long *) var_val,
+                                             var_val_len);
+        break;
 
 #ifdef OPAQUE_SPECIAL_TYPES
-  case ASN_OPAQUE_COUNTER64:
-  case ASN_OPAQUE_U64:
+    case ASN_OPAQUE_COUNTER64:
+    case ASN_OPAQUE_U64:
 #endif
-  case ASN_COUNTER64:
-    rc = asn_realloc_rbuild_unsigned_int64(pkt, pkt_len, offset, allow_realloc,
-		       var_val_type, (struct counter64 *)var_val, var_val_len);
-    break;
+    case ASN_COUNTER64:
+        rc = asn_realloc_rbuild_unsigned_int64(pkt, pkt_len, offset,
+                                               allow_realloc, var_val_type,
+                                               (struct counter64 *)
+                                               var_val, var_val_len);
+        break;
 
-  case ASN_OCTET_STR:
-  case ASN_IPADDRESS:
-  case ASN_OPAQUE:
-  case ASN_NSAP:
-    rc = asn_realloc_rbuild_string(pkt, pkt_len, offset, allow_realloc,
-				   var_val_type, var_val, var_val_len);
-    break;
+    case ASN_OCTET_STR:
+    case ASN_IPADDRESS:
+    case ASN_OPAQUE:
+    case ASN_NSAP:
+        rc = asn_realloc_rbuild_string(pkt, pkt_len, offset, allow_realloc,
+                                       var_val_type, var_val, var_val_len);
+        break;
 
-  case ASN_OBJECT_ID:
-    rc = asn_realloc_rbuild_objid(pkt, pkt_len, offset, allow_realloc,
-		      var_val_type, (oid *)var_val, var_val_len / sizeof(oid));
-    break;
+    case ASN_OBJECT_ID:
+        rc = asn_realloc_rbuild_objid(pkt, pkt_len, offset, allow_realloc,
+                                      var_val_type, (oid *) var_val,
+                                      var_val_len / sizeof(oid));
+        break;
 
-  case ASN_NULL:
-    rc = asn_realloc_rbuild_null(pkt, pkt_len, offset, allow_realloc,
-				 var_val_type);
-    break;
+    case ASN_NULL:
+        rc = asn_realloc_rbuild_null(pkt, pkt_len, offset, allow_realloc,
+                                     var_val_type);
+        break;
 
-  case ASN_BIT_STR:
-    rc = asn_realloc_rbuild_bitstring(pkt, pkt_len, offset, allow_realloc,
-				      var_val_type, var_val, var_val_len);
-    break;
+    case ASN_BIT_STR:
+        rc = asn_realloc_rbuild_bitstring(pkt, pkt_len, offset,
+                                          allow_realloc, var_val_type,
+                                          var_val, var_val_len);
+        break;
 
-  case SNMP_NOSUCHOBJECT:
-  case SNMP_NOSUCHINSTANCE:
-  case SNMP_ENDOFMIBVIEW:
-    rc = asn_realloc_rbuild_null(pkt, pkt_len, offset, allow_realloc,
-				 var_val_type);
-    break;
+    case SNMP_NOSUCHOBJECT:
+    case SNMP_NOSUCHINSTANCE:
+    case SNMP_ENDOFMIBVIEW:
+        rc = asn_realloc_rbuild_null(pkt, pkt_len, offset, allow_realloc,
+                                     var_val_type);
+        break;
 
 #ifdef OPAQUE_SPECIAL_TYPES
-  case ASN_OPAQUE_FLOAT:
-    rc = asn_realloc_rbuild_float(pkt, pkt_len, offset, allow_realloc,
-				  var_val_type, (float *)var_val, var_val_len);
-    break;
+    case ASN_OPAQUE_FLOAT:
+        rc = asn_realloc_rbuild_float(pkt, pkt_len, offset, allow_realloc,
+                                      var_val_type, (float *) var_val,
+                                      var_val_len);
+        break;
 
-  case ASN_OPAQUE_DOUBLE:
-    rc = asn_realloc_rbuild_double(pkt, pkt_len, offset, allow_realloc,
-				 var_val_type, (double *)var_val, var_val_len);
-    break;
+    case ASN_OPAQUE_DOUBLE:
+        rc = asn_realloc_rbuild_double(pkt, pkt_len, offset, allow_realloc,
+                                       var_val_type, (double *) var_val,
+                                       var_val_len);
+        break;
 
-  case ASN_OPAQUE_I64:
-    rc = asn_realloc_rbuild_signed_int64(pkt, pkt_len, offset, allow_realloc,
-		       var_val_type, (struct counter64 *)var_val, var_val_len);
-    break;
-#endif /* OPAQUE_SPECIAL_TYPES */
-  default:
-    ERROR_MSG("wrong type");
-    return 0;
-  }
-  DEBUGINDENTLESS();
+    case ASN_OPAQUE_I64:
+        rc = asn_realloc_rbuild_signed_int64(pkt, pkt_len, offset,
+                                             allow_realloc, var_val_type,
+                                             (struct counter64 *) var_val,
+                                             var_val_len);
+        break;
+#endif                          /* OPAQUE_SPECIAL_TYPES */
+    default:
+        ERROR_MSG("wrong type");
+        return 0;
+    }
+    DEBUGINDENTLESS();
 
-  if (rc == 0) {
-    ERROR_MSG("Can't build value");
-    return 0;
-  }
+    if (rc == 0) {
+        ERROR_MSG("Can't build value");
+        return 0;
+    }
 
-  /*  Build the OID.  */
+    /*
+     * Build the OID.  
+     */
 
-  DEBUGDUMPHEADER("send","Name");
-  rc = asn_realloc_rbuild_objid(pkt, pkt_len, offset, allow_realloc,
-		       (u_char)(ASN_UNIVERSAL | ASN_PRIMITIVE | ASN_OBJECT_ID),
-		       var_name, *var_name_len);
-  DEBUGINDENTLESS();
-  if (rc == 0) {
-    ERROR_MSG("Can't build OID for variable");
-    return 0;
-  }
+    DEBUGDUMPHEADER("send", "Name");
+    rc = asn_realloc_rbuild_objid(pkt, pkt_len, offset, allow_realloc,
+                                  (u_char) (ASN_UNIVERSAL | ASN_PRIMITIVE |
+                                            ASN_OBJECT_ID), var_name,
+                                  *var_name_len);
+    DEBUGINDENTLESS();
+    if (rc == 0) {
+        ERROR_MSG("Can't build OID for variable");
+        return 0;
+    }
 
-  /*  Build the sequence header.  */
+    /*
+     * Build the sequence header.  
+     */
 
-  rc = asn_realloc_rbuild_sequence(pkt, pkt_len, offset, allow_realloc,
-				   (u_char)(ASN_SEQUENCE | ASN_CONSTRUCTOR),
-				   *offset - start_offset);
-  return rc;
+    rc = asn_realloc_rbuild_sequence(pkt, pkt_len, offset, allow_realloc,
+                                     (u_char) (ASN_SEQUENCE |
+                                               ASN_CONSTRUCTOR),
+                                     *offset - start_offset);
+    return rc;
 }
 
-#endif /* USE_REVERSE_ASNENCODING */
+#endif                          /* USE_REVERSE_ASNENCODING */

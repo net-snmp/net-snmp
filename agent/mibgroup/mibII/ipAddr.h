@@ -7,6 +7,6 @@
 
 config_require(mibII/ip util_funcs)
 
-extern FindVarMethod var_ipAddrEntry;
+     extern FindVarMethod var_ipAddrEntry;
 
-#endif /* _MIBGROUP_IPADDR_H */
+#endif                          /* _MIBGROUP_IPADDR_H */

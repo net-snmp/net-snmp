@@ -8,18 +8,22 @@
 #endif
 
 
-netsnmp_transport		*netsnmp_ipx_transport	(struct sockaddr_ipx *addr,
-						 int local);
+netsnmp_transport *netsnmp_ipx_transport(struct sockaddr_ipx *addr,
+                                         int local);
 
-/*  Convert an textually formatted IPX address into a sockaddr_ipx
-    structure which is written to *addr.  Returns 1 if the conversion
-    was successful, or 0 if it failed.  */
+/*
+ * Convert an textually formatted IPX address into a sockaddr_ipx
+ * structure which is written to *addr.  Returns 1 if the conversion
+ * was successful, or 0 if it failed.  
+ */
 
-int			 netsnmp_sockaddr_ipx	(struct sockaddr_ipx *addr,
-						 const char *peername);
+int             netsnmp_sockaddr_ipx(struct sockaddr_ipx *addr,
+                                     const char *peername);
 
-/*  "Constructor" for transport domain object.  */
+/*
+ * "Constructor" for transport domain object.  
+ */
 
-void		netsnmp_ipx_ctor		(void);
+void            netsnmp_ipx_ctor(void);
 
 #endif/*_SNMPIPXDOMAIN_H*/

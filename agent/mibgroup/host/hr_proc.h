@@ -7,7 +7,7 @@
 
 config_require(ucd-snmp/loadave)
 
-extern void	init_hr_proc (void);
+extern void     init_hr_proc(void);
 extern FindVarMethod var_hrproc;
 
-#endif /* _MIBGROUP_HRPROC_H */
+#endif                          /* _MIBGROUP_HRPROC_H */

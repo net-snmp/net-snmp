@@ -6,30 +6,32 @@
 #define _MIBGROUP_INTERFACES_H
 
 config_require(util_funcs)
-config_arch_require(solaris2, kernel_sunos5)
-
+    config_arch_require(solaris2, kernel_sunos5)
 #ifdef hpux11
 #include <sys/mib.h>
 #else
-struct in_ifaddr;
-struct ifnet;
+     struct in_ifaddr;
+     struct ifnet;
 #endif
 
-int Interface_Scan_Get_Count(void);
-int Interface_Index_By_Name (char *, int);
-void Interface_Scan_Init (void);
+     int             Interface_Scan_Get_Count(void);
+     int             Interface_Index_By_Name(char *, int);
+     void            Interface_Scan_Init(void);
 #if defined(linux) || defined(sunV3)
-struct in_ifaddr { int dummy; };
+     struct in_ifaddr {
+         int             dummy;
+     };
 #endif
 #if defined(hpux11)
-int Interface_Scan_Next (short *, char *, nmapi_phystat *);
+     int             Interface_Scan_Next(short *, char *, nmapi_phystat *);
 #else
-int Interface_Scan_Next (short *, char *, struct ifnet *, struct in_ifaddr *);
+     int             Interface_Scan_Next(short *, char *, struct ifnet *,
+                                         struct in_ifaddr *);
 #endif
 
-void	init_interfaces (void);
-extern FindVarMethod var_interfaces;
-extern FindVarMethod var_ifEntry;
+     void            init_interfaces(void);
+     extern FindVarMethod var_interfaces;
+     extern FindVarMethod var_ifEntry;
 
 #define IFNUMBER        0
 #define IFINDEX         1
@@ -61,35 +63,37 @@ extern FindVarMethod var_ifEntry;
  * it will not work for other un*x'es...
  */
 
-struct ifnet {
-	char	*if_name;		/* name, e.g. ``en'' or ``lo'' */
-	char	*if_unit;		/* sub-unit for lower level driver */
-	short	if_mtu;			/* maximum transmission unit */
-	short	if_flags;		/* up/down, broadcast, etc. */
-	int	if_metric;		/* routing metric (external only) */
-	char    if_hwaddr [6];		/* ethernet address */
-	int	if_type;		/* interface type: 1=generic,
-					   28=slip, ether=6, loopback=24 */
-	u_long	if_speed;		/* interface speed: in bits/sec */
+     struct ifnet {
+         char           *if_name;       /* name, e.g. ``en'' or ``lo'' */
+         char           *if_unit;       /* sub-unit for lower level driver */
+         short           if_mtu;        /* maximum transmission unit */
+         short           if_flags;      /* up/down, broadcast, etc. */
+         int             if_metric;     /* routing metric (external only) */
+         char            if_hwaddr[6];  /* ethernet address */
+         int             if_type;       /* interface type: 1=generic,
+                                         * 28=slip, ether=6, loopback=24 */
+         u_long          if_speed;      /* interface speed: in bits/sec */
 
-	struct sockaddr if_addr;	/* interface's address */
-	struct sockaddr ifu_broadaddr;	/* broadcast address */
-	struct sockaddr ia_subnetmask; 	/* interface's mask */
+         struct sockaddr if_addr;       /* interface's address */
+         struct sockaddr ifu_broadaddr; /* broadcast address */
+         struct sockaddr ia_subnetmask; /* interface's mask */
 
-	struct	ifqueue {
-		int	ifq_len;
-		int	ifq_drops;
-	} if_snd;			/* output queue */
-	u_long	if_ibytes;		/* octets received on interface */
-	u_long	if_ipackets;		/* packets received on interface */
-	u_long	if_ierrors;		/* input errors on interface */
-        u_long  if_iqdrops;             /* input queue overruns */
-	u_long	if_obytes;		/* octets sent on interface */
-	u_long	if_opackets;		/* packets sent on interface */
-	u_long	if_oerrors;		/* output errors on interface */
-	u_long	if_collisions;		/* collisions on csma interfaces */
-/* end statistics */
-	struct	ifnet *if_next;
-};
+         struct ifqueue {
+             int             ifq_len;
+             int             ifq_drops;
+         } if_snd;              /* output queue */
+         u_long          if_ibytes;     /* octets received on interface */
+         u_long          if_ipackets;   /* packets received on interface */
+         u_long          if_ierrors;    /* input errors on interface */
+         u_long          if_iqdrops;    /* input queue overruns */
+         u_long          if_obytes;     /* octets sent on interface */
+         u_long          if_opackets;   /* packets sent on interface */
+         u_long          if_oerrors;    /* output errors on interface */
+         u_long          if_collisions; /* collisions on csma interfaces */
+         /*
+          * end statistics 
+          */
+         struct ifnet   *if_next;
+     };
 #endif
-#endif /* _MIBGROUP_INTERFACES_H */
+#endif                          /* _MIBGROUP_INTERFACES_H */

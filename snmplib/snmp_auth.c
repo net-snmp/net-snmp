@@ -75,7 +75,7 @@ SOFTWARE.
 #include <in.h>
 #endif
 
-#include <net-snmp/types.h>	
+#include <net-snmp/types.h>
 #include <net-snmp/output_api.h>
 #include <net-snmp/utilities.h>
 
@@ -106,48 +106,51 @@ SOFTWARE.
  * Parse the header of a community string-based message such as that found
  * in SNMPv1 and SNMPv2c.
  */
-u_char *
-snmp_comstr_parse(u_char *data,
-		  size_t *length,
-		  u_char *psid,
-		  size_t *slen,
-		  long *version)
+u_char         *
+snmp_comstr_parse(u_char * data,
+                  size_t * length,
+                  u_char * psid, size_t * slen, long *version)
 {
-    u_char   	type;
-    long	ver;
-    size_t origlen = *slen;
+    u_char          type;
+    long            ver;
+    size_t          origlen = *slen;
 
-    /* Message is an ASN.1 SEQUENCE.
+    /*
+     * Message is an ASN.1 SEQUENCE.
      */
     data = asn_parse_sequence(data, length, &type,
-                        (ASN_SEQUENCE | ASN_CONSTRUCTOR), "auth message");
-    if (data == NULL){
+                              (ASN_SEQUENCE | ASN_CONSTRUCTOR),
+                              "auth message");
+    if (data == NULL) {
         return NULL;
     }
 
-    /* First field is the version.
+    /*
+     * First field is the version.
      */
     DEBUGDUMPHEADER("recv", "SNMP version");
     data = asn_parse_int(data, length, &type, &ver, sizeof(ver));
     DEBUGINDENTLESS();
     *version = ver;
-    if (data == NULL){
+    if (data == NULL) {
         ERROR_MSG("bad parse of version");
         return NULL;
     }
 
-    /* second field is the community string for SNMPv1 & SNMPv2c */
+    /*
+     * second field is the community string for SNMPv1 & SNMPv2c 
+     */
     DEBUGDUMPHEADER("recv", "community string");
     data = asn_parse_string(data, length, &type, psid, slen);
     DEBUGINDENTLESS();
-    if (data == NULL){
+    if (data == NULL) {
         ERROR_MSG("bad parse of community");
         return NULL;
     }
-    psid[SNMP_MIN(*slen,origlen-1)] = '\0';
-    return (u_char *)data;
+    psid[SNMP_MIN(*slen, origlen - 1)] = '\0';
+    return (u_char *) data;
 
-}  /* end snmp_comstr_parse() */
+}                               /* end snmp_comstr_parse() */
 
 
 
@@ -177,56 +180,61 @@ snmp_comstr_parse(u_char *data,
  *		in a *int.  Grrr.)  Assign version to verfix and pass in
  *		that to asn_build_int instead which expects a long.  -- WH
  */
-u_char *
-snmp_comstr_build(	u_char	*data,
-			size_t	*length,
-			u_char	*psid,
-			size_t	*slen,
-			long	*version,
-			size_t	messagelen)
+u_char         *
+snmp_comstr_build(u_char * data,
+                  size_t * length,
+                  u_char * psid,
+                  size_t * slen, long *version, size_t messagelen)
 {
-    long	 verfix	 = *version;
-    u_char	*h1	 = data;
-    u_char	*h1e;
-    size_t	 hlength = *length;
+    long            verfix = *version;
+    u_char         *h1 = data;
+    u_char         *h1e;
+    size_t          hlength = *length;
 
 
-    /* Build the the message wrapper (note length will be inserted later).
+    /*
+     * Build the the message wrapper (note length will be inserted later).
      */
-    data = asn_build_sequence(data, length, (u_char)(ASN_SEQUENCE | ASN_CONSTRUCTOR), 0);
-    if (data == NULL){
+    data =
+        asn_build_sequence(data, length,
+                           (u_char) (ASN_SEQUENCE | ASN_CONSTRUCTOR), 0);
+    if (data == NULL) {
         return NULL;
     }
     h1e = data;
 
 
-    /* Store the version field.
+    /*
+     * Store the version field.
      */
     data = asn_build_int(data, length,
-            (u_char)(ASN_UNIVERSAL | ASN_PRIMITIVE | ASN_INTEGER),
-            &verfix, sizeof(verfix));
-    if (data == NULL){
+                         (u_char) (ASN_UNIVERSAL | ASN_PRIMITIVE |
+                                   ASN_INTEGER), &verfix, sizeof(verfix));
+    if (data == NULL) {
         return NULL;
     }
 
 
-    /* Store the community string.
+    /*
+     * Store the community string.
      */
     data = asn_build_string(data, length,
-            (u_char)(ASN_UNIVERSAL | ASN_PRIMITIVE | ASN_OCTET_STR),
-            psid, *(u_char *)slen);
-    if (data == NULL){
+                            (u_char) (ASN_UNIVERSAL | ASN_PRIMITIVE |
+                                      ASN_OCTET_STR), psid,
+                            *(u_char *) slen);
+    if (data == NULL) {
         return NULL;
     }
 
 
-    /* Insert length.
+    /*
+     * Insert length.
      */
-    asn_build_sequence(h1, &hlength, (u_char)(ASN_SEQUENCE | ASN_CONSTRUCTOR),
-                       data-h1e + messagelen);
+    asn_build_sequence(h1, &hlength,
+                       (u_char) (ASN_SEQUENCE | ASN_CONSTRUCTOR),
+                       data - h1e + messagelen);
 
 
     return data;
 
-}  /* end snmp_comstr_build() */
-
+}                               /* end snmp_comstr_build() */

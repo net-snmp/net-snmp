@@ -8,7 +8,7 @@
 config_arch_require(solaris2, kernel_sunos5)
 config_arch_require(linux, mibII/kernel_linux)
 
-extern void	init_icmp (void);
+extern void     init_icmp(void);
 extern FindVarMethod var_icmp;
 
 #define ICMPINMSGS	     0
@@ -38,4 +38,4 @@ extern FindVarMethod var_icmp;
 #define ICMPOUTADDRMASKS    24
 #define ICMPOUTADDRMASKREPS 25
 
-#endif /* _MIBGROUP_ICMP_H */
+#endif                          /* _MIBGROUP_ICMP_H */

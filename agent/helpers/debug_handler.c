@@ -41,20 +41,21 @@
  *  handler chain.
  */
 netsnmp_mib_handler *
-netsnmp_get_debug_handler(void) {
+netsnmp_get_debug_handler(void)
+{
     return netsnmp_create_handler("debug", netsnmp_debug_helper);
 }
 
 /** @internal debug print variables in a chain */
 void
-debug_print_requests(netsnmp_request_info              *requests) 
+debug_print_requests(netsnmp_request_info *requests)
 {
     netsnmp_request_info *request;
-    
+
     for (request = requests; request; request = request->next) {
         DEBUGMSGTL(("helper:debug", "      #%2d: ", request->index));
-	DEBUGMSGVAR(("helper:debug", request->requestvb));
-	DEBUGMSG(("helper:debug", "\n"));
+        DEBUGMSGVAR(("helper:debug", request->requestvb));
+        DEBUGMSG(("helper:debug", "\n"));
 
         if (request->processed)
             DEBUGMSGTL(("helper:debug", "        [processed]\n"));
@@ -66,7 +67,7 @@ debug_print_requests(netsnmp_request_info              *requests)
         if (request->parent_data) {
             netsnmp_data_list *lst;
             DEBUGMSGTL(("helper:debug", "        [parent data ="));
-            for(lst = request->parent_data; lst; lst = lst->next) {
+            for (lst = request->parent_data; lst; lst = lst->next) {
                 DEBUGMSG(("helper:debug", " %s", lst->name));
             }
             DEBUGMSG(("helper:debug", "]\n"));
@@ -77,15 +78,15 @@ debug_print_requests(netsnmp_request_info              *requests)
 
 /** @internal Implements the debug handler */
 int
-netsnmp_debug_helper(
-    netsnmp_mib_handler               *handler,
-    netsnmp_handler_registration      *reginfo,
-    netsnmp_agent_request_info        *reqinfo,
-    netsnmp_request_info              *requests) {
+netsnmp_debug_helper(netsnmp_mib_handler *handler,
+                     netsnmp_handler_registration *reginfo,
+                     netsnmp_agent_request_info *reqinfo,
+                     netsnmp_request_info *requests)
+{
 
-    netsnmp_mib_handler               *hptr;
-    int i, ret, count;
-    
+    netsnmp_mib_handler *hptr;
+    int             i, ret, count;
+
     DEBUGMSGTL(("helper:debug", "Entering Debugging Helper:\n"));
     DEBUGMSGTL(("helper:debug", "  Handler Registration Info:\n"));
     DEBUGMSGTL(("helper:debug", "    Name:        %s\n",
@@ -96,8 +97,9 @@ netsnmp_debug_helper(
     DEBUGMSGOID(("helper:debug", reginfo->rootoid, reginfo->rootoid_len));
     DEBUGMSG(("helper:debug", "\n"));
 
-    DEBUGMSGTL(("helper:debug", "    Modes:       0x%x = ", reginfo->modes));
-    for(count = 0, i = reginfo->modes; i ; i = i >> 1, count++) {
+    DEBUGMSGTL(("helper:debug", "    Modes:       0x%x = ",
+                reginfo->modes));
+    for (count = 0, i = reginfo->modes; i; i = i >> 1, count++) {
         if (i & 0x01) {
             DEBUGMSG(("helper:debug", "%s | ",
                       se_find_label_in_slist("handler_can_mode",
@@ -105,12 +107,13 @@ netsnmp_debug_helper(
         }
     }
     DEBUGMSG(("helper:debug", "\n"));
-            
-    DEBUGMSGTL(("helper:debug", "    Priority:    %d\n", reginfo->priority));
+
+    DEBUGMSGTL(("helper:debug", "    Priority:    %d\n",
+                reginfo->priority));
 
     DEBUGMSGTL(("helper:debug", "  Handler Calling Chain:\n"));
     DEBUGMSGTL(("helper:debug", "   "));
-    for(hptr = reginfo->handler; hptr; hptr = hptr->next) {
+    for (hptr = reginfo->handler; hptr; hptr = hptr->next) {
         DEBUGMSG(("helper:debug", " -> %s", hptr->handler_name));
         if (hptr->myvoid)
             DEBUGMSG(("helper:debug", " [myvoid = %x]", hptr->myvoid));
@@ -118,15 +121,15 @@ netsnmp_debug_helper(
     DEBUGMSG(("helper:debug", "\n"));
 
     DEBUGMSGTL(("helper:debug", "  Request information:\n"));
-    DEBUGMSGTL(("helper:debug", "    Mode:        %s (%d = 0x%x)\n", 
+    DEBUGMSGTL(("helper:debug", "    Mode:        %s (%d = 0x%x)\n",
                 se_find_label_in_slist("agent_mode", reqinfo->mode),
                 reqinfo->mode, reqinfo->mode));
     DEBUGMSGTL(("helper:debug", "    Request Variables:\n"));
     debug_print_requests(requests);
-        
+
     DEBUGMSGTL(("helper:debug", "  --- calling next handler --- \n"));
     ret = netsnmp_call_next_handler(handler, reginfo, reqinfo, requests);
-    
+
     DEBUGMSGTL(("helper:debug", "  Results:\n"));
     DEBUGMSGTL(("helper:debug", "    Returned code: %d\n", ret));
     DEBUGMSGTL(("helper:debug", "    Returned Variables:\n"));
@@ -141,7 +144,7 @@ netsnmp_debug_helper(
  *  use.
  */
 void
-netsnmp_init_debug_helper(void) 
+netsnmp_init_debug_helper(void)
 {
     netsnmp_register_handler_by_name("debug", netsnmp_get_debug_handler());
 }

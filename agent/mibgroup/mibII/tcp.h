@@ -10,7 +10,7 @@ config_require(mibII/tcpTable util_funcs)
 config_arch_require(solaris2, kernel_sunos5)
 config_arch_require(linux, mibII/kernel_linux)
 
-extern void	init_tcp (void);
+extern void     init_tcp(void);
 extern FindVarMethod var_tcp;
 
 
@@ -34,4 +34,4 @@ extern FindVarMethod var_tcp;
 #define TCPINERRS           18
 #define TCPOUTRSTS          19
 
-#endif /* _MIBGROUP_TCP_H */
+#endif                          /* _MIBGROUP_TCP_H */

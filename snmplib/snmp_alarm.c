@@ -1,5 +1,7 @@
-/* snmp_alarm.c: generic library based alarm timers for various parts
-   of an application */
+/*
+ * snmp_alarm.c: generic library based alarm timers for various parts
+ * of an application 
+ */
 
 #include <net-snmp/net-snmp-config.h>
 
@@ -37,7 +39,7 @@
 #include <dmalloc.h>
 #endif
 
-#include <net-snmp/types.h>	
+#include <net-snmp/types.h>
 #include <net-snmp/output_api.h>
 #include <net-snmp/config_api.h>
 #include <net-snmp/utilities.h>
@@ -47,105 +49,120 @@
 #include <net-snmp/library/snmp_alarm.h>
 
 static struct snmp_alarm *thealarms;
-static int start_alarms = 0;
+static int      start_alarms = 0;
 static unsigned int regnum = 1;
 
 int
 init_alarm_post_config(int majorid, int minorid, void *serverarg,
-                     void *clientarg) {
-  start_alarms = 1;
-  set_an_alarm();
-  return SNMPERR_SUCCESS;
+                       void *clientarg)
+{
+    start_alarms = 1;
+    set_an_alarm();
+    return SNMPERR_SUCCESS;
 }
 
 void
-init_snmp_alarm(void) {
-  start_alarms = 0;
-  snmp_register_callback(SNMP_CALLBACK_LIBRARY, SNMP_CALLBACK_POST_READ_CONFIG,
-                         init_alarm_post_config, NULL);
+init_snmp_alarm(void)
+{
+    start_alarms = 0;
+    snmp_register_callback(SNMP_CALLBACK_LIBRARY,
+                           SNMP_CALLBACK_POST_READ_CONFIG,
+                           init_alarm_post_config, NULL);
 }
 
 void
 sa_update_entry(struct snmp_alarm *a)
 {
-  if (a->t.tv_sec == 0 && a->t.tv_usec == 0) {
-    DEBUGMSGTL(("snmp_alarm", "update_entry: illegal interval specified\n"));
-    return;
-  }
-
-  if (a->t_last.tv_sec == 0 && a->t_last.tv_usec == 0) {
-    struct timeval t_now;
-    /*  Never been called yet, call time `t' from now.  */
-    gettimeofday(&t_now, NULL);
-
-    a->t_last.tv_sec  = t_now.tv_sec;
-    a->t_last.tv_usec = t_now.tv_usec;
-
-    a->t_next.tv_sec  = t_now.tv_sec  + a->t.tv_sec;
-    a->t_next.tv_usec = t_now.tv_usec + a->t.tv_usec;
-
-    while (a->t_next.tv_usec >= 1000000) {
-      a->t_next.tv_usec -= 1000000;
-      a->t_next.tv_sec  += 1;
+    if (a->t.tv_sec == 0 && a->t.tv_usec == 0) {
+        DEBUGMSGTL(("snmp_alarm",
+                    "update_entry: illegal interval specified\n"));
+        return;
     }
-  } else if (a->t_next.tv_sec == 0 && a->t_next.tv_usec == 0) {
-    /*  We've been called but not reset for the next call.  */
-    if (a->flags & SA_REPEAT) {
-      a->t_next.tv_sec  = a->t_last.tv_sec  + a->t.tv_sec;
-      a->t_next.tv_usec = a->t_last.tv_usec + a->t.tv_usec;
 
-      while (a->t_next.tv_usec >= 1000000) {
-	a->t_next.tv_usec -= 1000000;
-	a->t_next.tv_sec  += 1;
-      }
-    } else {
-      /*  Single time call, remove it.  */
-      snmp_alarm_unregister(a->clientreg);
+    if (a->t_last.tv_sec == 0 && a->t_last.tv_usec == 0) {
+        struct timeval  t_now;
+        /*
+         * Never been called yet, call time `t' from now.  
+         */
+        gettimeofday(&t_now, NULL);
+
+        a->t_last.tv_sec = t_now.tv_sec;
+        a->t_last.tv_usec = t_now.tv_usec;
+
+        a->t_next.tv_sec = t_now.tv_sec + a->t.tv_sec;
+        a->t_next.tv_usec = t_now.tv_usec + a->t.tv_usec;
+
+        while (a->t_next.tv_usec >= 1000000) {
+            a->t_next.tv_usec -= 1000000;
+            a->t_next.tv_sec += 1;
+        }
+    } else if (a->t_next.tv_sec == 0 && a->t_next.tv_usec == 0) {
+        /*
+         * We've been called but not reset for the next call.  
+         */
+        if (a->flags & SA_REPEAT) {
+            a->t_next.tv_sec = a->t_last.tv_sec + a->t.tv_sec;
+            a->t_next.tv_usec = a->t_last.tv_usec + a->t.tv_usec;
+
+            while (a->t_next.tv_usec >= 1000000) {
+                a->t_next.tv_usec -= 1000000;
+                a->t_next.tv_sec += 1;
+            }
+        } else {
+            /*
+             * Single time call, remove it.  
+             */
+            snmp_alarm_unregister(a->clientreg);
+        }
     }
-  }
 }
 
 
 
 void
-snmp_alarm_unregister(unsigned int clientreg) {
-  struct snmp_alarm *sa_ptr, **prevNext = &thealarms;
+snmp_alarm_unregister(unsigned int clientreg)
+{
+    struct snmp_alarm *sa_ptr, **prevNext = &thealarms;
 
-  for (sa_ptr = thealarms;
-       sa_ptr != NULL && sa_ptr->clientreg != clientreg;
-       sa_ptr = sa_ptr->next) {
-    prevNext = &(sa_ptr->next);
-  }
+    for (sa_ptr = thealarms;
+         sa_ptr != NULL && sa_ptr->clientreg != clientreg;
+         sa_ptr = sa_ptr->next) {
+        prevNext = &(sa_ptr->next);
+    }
 
-  if (sa_ptr != NULL) {
-    *prevNext = sa_ptr->next;
-    DEBUGMSGTL(("snmp_alarm", "unregistered alarm %d\n", sa_ptr->clientreg));
-    /* Note:  do not free the clientarg, its the clients responsibility */
-    free(sa_ptr);
-  } else {
-    DEBUGMSGTL(("snmp_alarm", "no alarm %d to unregister\n", clientreg));
-  }
+    if (sa_ptr != NULL) {
+        *prevNext = sa_ptr->next;
+        DEBUGMSGTL(("snmp_alarm", "unregistered alarm %d\n",
+                    sa_ptr->clientreg));
+        /*
+         * Note:  do not free the clientarg, its the clients responsibility 
+         */
+        free(sa_ptr);
+    } else {
+        DEBUGMSGTL(("snmp_alarm", "no alarm %d to unregister\n",
+                    clientreg));
+    }
 }
-  
+
 
 
 struct snmp_alarm *
 sa_find_next(void)
 {
-  struct snmp_alarm *a, *lowest = NULL;
+    struct snmp_alarm *a, *lowest = NULL;
 
-  for(a = thealarms; a != NULL; a = a->next) {
-    if (lowest == NULL) {
-      lowest = a;
-    } else if (a->t_next.tv_sec == lowest->t_next.tv_sec) {
-      if (a->t_next.tv_usec < lowest->t_next.tv_usec) {
-	lowest = a;
-      }
-    } else if (a->t_next.tv_sec <  lowest->t_next.tv_sec) {
-      lowest = a;
+    for (a = thealarms; a != NULL; a = a->next) {
+        if (lowest == NULL) {
+            lowest = a;
+        } else if (a->t_next.tv_sec == lowest->t_next.tv_sec) {
+            if (a->t_next.tv_usec < lowest->t_next.tv_usec) {
+                lowest = a;
+            }
+        } else if (a->t_next.tv_sec < lowest->t_next.tv_sec) {
+            lowest = a;
+        }
     }
-  }
-  return lowest;
+    return lowest;
 }
 
 
@@ -153,63 +170,68 @@ sa_find_next(void)
 struct snmp_alarm *
 sa_find_specific(unsigned int clientreg)
 {
-  struct snmp_alarm *sa_ptr;
-  for (sa_ptr = thealarms; sa_ptr != NULL; sa_ptr = sa_ptr->next) {
-    if (sa_ptr->clientreg == clientreg) {
-      return sa_ptr;
+    struct snmp_alarm *sa_ptr;
+    for (sa_ptr = thealarms; sa_ptr != NULL; sa_ptr = sa_ptr->next) {
+        if (sa_ptr->clientreg == clientreg) {
+            return sa_ptr;
+        }
     }
-  }
-  return NULL;
+    return NULL;
 }
 
 
 
 void
-run_alarms(void) {
-  int done = 0;
-  struct snmp_alarm *a = NULL;
-  unsigned int clientreg;
-  struct timeval t_now;
+run_alarms(void)
+{
+    int             done = 0;
+    struct snmp_alarm *a = NULL;
+    unsigned int    clientreg;
+    struct timeval  t_now;
 
-  /*  Loop through everything we have repeatedly looking for the next thing to
-      call until all events are finally in the future again.  */
+    /*
+     * Loop through everything we have repeatedly looking for the next thing to
+     * call until all events are finally in the future again.  
+     */
 
-  while (!done) {
-    if ((a = sa_find_next()) == NULL) {
-      return;
+    while (!done) {
+        if ((a = sa_find_next()) == NULL) {
+            return;
+        }
+
+        gettimeofday(&t_now, NULL);
+
+        if ((a->t_next.tv_sec < t_now.tv_sec) ||
+            ((a->t_next.tv_sec == t_now.tv_sec) &&
+             (a->t_next.tv_usec < t_now.tv_usec))) {
+            clientreg = a->clientreg;
+            DEBUGMSGTL(("snmp_alarm", "run alarm %d\n", clientreg));
+            (*(a->thecallback)) (clientreg, a->clientarg);
+            DEBUGMSGTL(("snmp_alarm", "alarm %d completed\n", clientreg));
+
+            if ((a = sa_find_specific(clientreg)) != NULL) {
+                a->t_last.tv_sec = t_now.tv_sec;
+                a->t_last.tv_usec = t_now.tv_usec;
+                a->t_next.tv_sec = 0;
+                a->t_next.tv_usec = 0;
+                sa_update_entry(a);
+            } else {
+                DEBUGMSGTL(("snmp_alarm", "alarm %d deleted itself\n",
+                            clientreg));
+            }
+        } else {
+            done = 1;
+        }
     }
-
-    gettimeofday(&t_now, NULL);
-
-    if ((a->t_next.tv_sec < t_now.tv_sec)  ||
-	((a->t_next.tv_sec == t_now.tv_sec) &&
-	 (a->t_next.tv_usec < t_now.tv_usec))) {
-      clientreg = a->clientreg;
-      DEBUGMSGTL(("snmp_alarm", "run alarm %d\n", clientreg));
-      (*(a->thecallback))(clientreg, a->clientarg);
-      DEBUGMSGTL(("snmp_alarm", "alarm %d completed\n", clientreg));
-
-      if ((a = sa_find_specific(clientreg)) != NULL) {
-	a->t_last.tv_sec  = t_now.tv_sec;
-	a->t_last.tv_usec = t_now.tv_usec;
-	a->t_next.tv_sec  = 0;
-	a->t_next.tv_usec = 0;
-	sa_update_entry(a);
-      } else {
-	DEBUGMSGTL(("snmp_alarm", "alarm %d deleted itself\n", clientreg));
-      }
-    } else {
-      done = 1;
-    }
-  }
 }
 
 
 
 RETSIGTYPE
-alarm_handler(int a) {
-  run_alarms();
-  set_an_alarm();
+alarm_handler(int a)
+{
+    run_alarms();
+    set_an_alarm();
 }
 
 
@@ -217,147 +239,162 @@ alarm_handler(int a) {
 int
 get_next_alarm_delay_time(struct timeval *delta)
 {
-  struct snmp_alarm *sa_ptr;
-  struct timeval t_diff, t_now;
+    struct snmp_alarm *sa_ptr;
+    struct timeval  t_diff, t_now;
 
-  sa_ptr = sa_find_next();
+    sa_ptr = sa_find_next();
 
-  if (sa_ptr) {
-    gettimeofday(&t_now, 0);
+    if (sa_ptr) {
+        gettimeofday(&t_now, 0);
 
-    if ((t_now.tv_sec > sa_ptr->t_next.tv_sec) ||
-	((t_now.tv_sec == sa_ptr->t_next.tv_sec) &&
-	 (t_now.tv_usec > sa_ptr->t_next.tv_usec))) {
-      /*  Time has already passed.  Return the smallest possible amount of
-	  time.  */
-      delta->tv_sec  = 0;
-      delta->tv_usec = 1;
-      return sa_ptr->clientreg;
-    } else {
-      /*  Time is still in the future.  */
-      t_diff.tv_sec  = sa_ptr->t_next.tv_sec  - t_now.tv_sec;
-      t_diff.tv_usec = sa_ptr->t_next.tv_usec - t_now.tv_usec;
-      
-      while (t_diff.tv_usec < 0) {
-	t_diff.tv_sec  -= 1;
-	t_diff.tv_usec += 1000000;
-      }
+        if ((t_now.tv_sec > sa_ptr->t_next.tv_sec) ||
+            ((t_now.tv_sec == sa_ptr->t_next.tv_sec) &&
+             (t_now.tv_usec > sa_ptr->t_next.tv_usec))) {
+            /*
+             * Time has already passed.  Return the smallest possible amount of
+             * time.  
+             */
+            delta->tv_sec = 0;
+            delta->tv_usec = 1;
+            return sa_ptr->clientreg;
+        } else {
+            /*
+             * Time is still in the future.  
+             */
+            t_diff.tv_sec = sa_ptr->t_next.tv_sec - t_now.tv_sec;
+            t_diff.tv_usec = sa_ptr->t_next.tv_usec - t_now.tv_usec;
 
-      delta->tv_sec  = t_diff.tv_sec;
-      delta->tv_usec = t_diff.tv_usec;
-      return sa_ptr->clientreg;
+            while (t_diff.tv_usec < 0) {
+                t_diff.tv_sec -= 1;
+                t_diff.tv_usec += 1000000;
+            }
+
+            delta->tv_sec = t_diff.tv_sec;
+            delta->tv_usec = t_diff.tv_usec;
+            return sa_ptr->clientreg;
+        }
     }
-  }
 
-  /*  Nothing Left.  */
-  return 0;
+    /*
+     * Nothing Left.  
+     */
+    return 0;
 }
 
 
 void
-set_an_alarm(void) {
-  struct timeval delta;
-  int nextalarm = get_next_alarm_delay_time(&delta);
-  
-  /*  We don't use signals if they asked us nicely not to.  It's expected
-     they'll check the next alarm time and do their own calling of
-     run_alarms().  */
+set_an_alarm(void)
+{
+    struct timeval  delta;
+    int             nextalarm = get_next_alarm_delay_time(&delta);
 
-  if (!ds_get_boolean(DS_LIBRARY_ID, DS_LIB_ALARM_DONT_USE_SIG) && nextalarm) {
+    /*
+     * We don't use signals if they asked us nicely not to.  It's expected
+     * they'll check the next alarm time and do their own calling of
+     * run_alarms().  
+     */
+
+    if (!ds_get_boolean(DS_LIBRARY_ID, DS_LIB_ALARM_DONT_USE_SIG)
+        && nextalarm) {
 #ifndef WIN32
 # ifdef   HAVE_SETITIMER
-    struct itimerval it;
+        struct itimerval it;
 
-    it.it_value.tv_sec     = delta.tv_sec;
-    it.it_value.tv_usec    = delta.tv_usec;
-    it.it_interval.tv_sec  = 0;
-    it.it_interval.tv_usec = 0;
+        it.it_value.tv_sec = delta.tv_sec;
+        it.it_value.tv_usec = delta.tv_usec;
+        it.it_interval.tv_sec = 0;
+        it.it_interval.tv_usec = 0;
 
-    signal(SIGALRM, alarm_handler);
-    setitimer(ITIMER_REAL, &it, NULL);
-    DEBUGMSGTL(("snmp_alarm", "schedule alarm %d in %d.%03d seconds\n",
-		nextalarm, delta.tv_sec, (delta.tv_usec / 1000)));
-# else /* HAVE_SETITIMER */
+        signal(SIGALRM, alarm_handler);
+        setitimer(ITIMER_REAL, &it, NULL);
+        DEBUGMSGTL(("snmp_alarm", "schedule alarm %d in %d.%03d seconds\n",
+                    nextalarm, delta.tv_sec, (delta.tv_usec / 1000)));
+# else                          /* HAVE_SETITIMER */
 #  ifdef    SIGALRM
-    signal(SIGALRM, alarm_handler);
-    alarm(delta.tv_sec);
-    DEBUGMSGTL(("snmp_alarm", "schedule alarm %d in roughly %d seconds\n",
-		nextalarm, delta.tv_sec));
-#  endif /* SIGALRM */
-# endif /* HAVE_SETITIMER */
-#endif /* WIN32 */
+        signal(SIGALRM, alarm_handler);
+        alarm(delta.tv_sec);
+        DEBUGMSGTL(("snmp_alarm",
+                    "schedule alarm %d in roughly %d seconds\n", nextalarm,
+                    delta.tv_sec));
+#  endif                        /* SIGALRM */
+# endif                         /* HAVE_SETITIMER */
+#endif                          /* WIN32 */
 
-  } else {
-    DEBUGMSGTL(("snmp_alarm", "no alarms found to schedule\n"));
-  }
+    } else {
+        DEBUGMSGTL(("snmp_alarm", "no alarms found to schedule\n"));
+    }
 }
 
 
 
 unsigned int
 snmp_alarm_register(unsigned int when, unsigned int flags,
-                    SNMPAlarmCallback *thecallback, void *clientarg) {
-  struct snmp_alarm **sa_pptr;
-  if (thealarms != NULL) {
-    for(sa_pptr = &thealarms; (*sa_pptr) != NULL;
-        sa_pptr = &((*sa_pptr)->next));
-  } else {
-    sa_pptr = &thealarms;
-  }
-
-  *sa_pptr = SNMP_MALLOC_STRUCT(snmp_alarm);
-  if (*sa_pptr == NULL)
-    return 0;
-  
-  (*sa_pptr)->t.tv_sec = when;
-  (*sa_pptr)->t.tv_usec = 0;
-  (*sa_pptr)->flags = flags;
-  (*sa_pptr)->clientarg = clientarg;
-  (*sa_pptr)->thecallback = thecallback;
-  (*sa_pptr)->clientreg = regnum++;
-  (*sa_pptr)->next = NULL;
-  sa_update_entry(*sa_pptr);
-
-  DEBUGMSGTL(("snmp_alarm", "registered alarm %d, t = %d.%03d, flags=0x%02x\n",
-              (*sa_pptr)->clientreg, (*sa_pptr)->t.tv_sec,
-	      ((*sa_pptr)->t.tv_usec / 1000), (*sa_pptr)->flags));
-
-  if (start_alarms)
-    set_an_alarm();
-  return (*sa_pptr)->clientreg;
-} 
-
-
-
-unsigned int	snmp_alarm_register_hr	(struct timeval t, unsigned int flags,
-					 SNMPAlarmCallback *cb, void *cd)
+                    SNMPAlarmCallback * thecallback, void *clientarg)
 {
-  struct snmp_alarm **s = NULL;
+    struct snmp_alarm **sa_pptr;
+    if (thealarms != NULL) {
+        for (sa_pptr = &thealarms; (*sa_pptr) != NULL;
+             sa_pptr = &((*sa_pptr)->next));
+    } else {
+        sa_pptr = &thealarms;
+    }
 
-  for (s = &(thealarms); *s != NULL; s = &((*s)->next));
+    *sa_pptr = SNMP_MALLOC_STRUCT(snmp_alarm);
+    if (*sa_pptr == NULL)
+        return 0;
 
-  *s = SNMP_MALLOC_STRUCT(snmp_alarm);
-  if (*s == NULL) {
-    return 0;
-  }
+    (*sa_pptr)->t.tv_sec = when;
+    (*sa_pptr)->t.tv_usec = 0;
+    (*sa_pptr)->flags = flags;
+    (*sa_pptr)->clientarg = clientarg;
+    (*sa_pptr)->thecallback = thecallback;
+    (*sa_pptr)->clientreg = regnum++;
+    (*sa_pptr)->next = NULL;
+    sa_update_entry(*sa_pptr);
 
-  (*s)->t.tv_sec    = t.tv_sec;
-  (*s)->t.tv_usec   = t.tv_usec;
-  (*s)->flags	    = flags;
-  (*s)->clientarg   = cd;
-  (*s)->thecallback = cb;
-  (*s)->clientreg   = regnum++;
-  (*s)->next	    = NULL;
+    DEBUGMSGTL(("snmp_alarm",
+                "registered alarm %d, t = %d.%03d, flags=0x%02x\n",
+                (*sa_pptr)->clientreg, (*sa_pptr)->t.tv_sec,
+                ((*sa_pptr)->t.tv_usec / 1000), (*sa_pptr)->flags));
 
-  sa_update_entry(*s);
+    if (start_alarms)
+        set_an_alarm();
+    return (*sa_pptr)->clientreg;
+}
 
-  DEBUGMSGTL(("snmp_alarm", "registered alarm %d, t = %d.%03d, flags=0x%02x\n",
-	      (*s)->clientreg, (*s)->t.tv_sec, ((*s)->t.tv_usec / 1000),
-	      (*s)->flags));
 
-  if (start_alarms) {
-    set_an_alarm();
-  }
 
-  return (*s)->clientreg;
+unsigned int
+snmp_alarm_register_hr(struct timeval t, unsigned int flags,
+                       SNMPAlarmCallback * cb, void *cd)
+{
+    struct snmp_alarm **s = NULL;
+
+    for (s = &(thealarms); *s != NULL; s = &((*s)->next));
+
+    *s = SNMP_MALLOC_STRUCT(snmp_alarm);
+    if (*s == NULL) {
+        return 0;
+    }
+
+    (*s)->t.tv_sec = t.tv_sec;
+    (*s)->t.tv_usec = t.tv_usec;
+    (*s)->flags = flags;
+    (*s)->clientarg = cd;
+    (*s)->thecallback = cb;
+    (*s)->clientreg = regnum++;
+    (*s)->next = NULL;
+
+    sa_update_entry(*s);
+
+    DEBUGMSGTL(("snmp_alarm",
+                "registered alarm %d, t = %d.%03d, flags=0x%02x\n",
+                (*s)->clientreg, (*s)->t.tv_sec, ((*s)->t.tv_usec / 1000),
+                (*s)->flags));
+
+    if (start_alarms) {
+        set_an_alarm();
+    }
+
+    return (*s)->clientreg;
 }

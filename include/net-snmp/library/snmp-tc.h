@@ -2,19 +2,25 @@
 #define SNMP_TC_H
 
 #ifdef __cplusplus
-extern "C" {
+extern          "C" {
 #endif
-/* snmp-tc.h: Provide some standard #defines for Textual Convention
-   related value information */
+    /*
+     * snmp-tc.h: Provide some standard #defines for Textual Convention
+     * related value information 
+     */
 
-u_char * date_n_time (time_t * , size_t * );
-time_t ctime_to_timet (char* );
+    u_char         *date_n_time(time_t *, size_t *);
+    time_t          ctime_to_timet(char *);
 
-/* TrueValue */
+    /*
+     * TrueValue 
+     */
 #define TV_TRUE 1
 #define TV_FALSE 2
 
-/* RowStatus */
+    /*
+     * RowStatus 
+     */
 #define RS_NONEXISTENT    0
 #define RS_ACTIVE	        1
 #define RS_NOTINSERVICE	        2
@@ -27,7 +33,9 @@ time_t ctime_to_timet (char* );
 #define RS_IS_ACTIVE( x ) ( x == RS_ACTIVE )
 #define RS_IS_NOT_ACTIVE( x ) ( ! RS_GOING_ACTIVE(x) )
 
-/* StorageType */
+    /*
+     * StorageType 
+     */
 #define ST_NONE 0
 #define ST_OTHER	1
 #define ST_VOLATILE	2
@@ -35,11 +43,11 @@ time_t ctime_to_timet (char* );
 #define ST_PERMANENT	4
 #define ST_READONLY	5
 
-char check_rowstatus_transition( int old_val, int new_val, int storage_type );
-char check_storage_transition( int old_val, int new_val );
+    char            check_rowstatus_transition(int old_val, int new_val,
+                                               int storage_type);
+    char            check_storage_transition(int old_val, int new_val);
 
 #ifdef __cplusplus
 }
 #endif
-
-#endif /* SNMP_TC_H */
+#endif                          /* SNMP_TC_H */

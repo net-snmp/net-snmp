@@ -20,6 +20,19 @@
 
 /*
  * $Log$
+ * Revision 1.2  2002/04/20 07:07:34  hardaker
+ * White space, oh glorious white space.
+ * How great our though?
+ * The code is fine.
+ * We agree on functionality easily.
+ * What really troubles us?
+ * Something we can't see.
+ * Something between the code.
+ * We bow down to your magnificence,
+ * For you are everywhere,
+ * Between everything.
+ * Pretty nothingness you are.
+ *
  * Revision 1.1  2001/05/09 19:36:13  slif
  * Include Alex Rozin's Rmon.
  *
@@ -34,5 +47,5 @@ config_require(Rmon/statistics)
 config_require(Rmon/alarm)
 config_require(Rmon/history)
 config_require(Rmon/event)
-config_add_mib(RMON-MIB) 
+config_add_mib(RMON-MIB)
 

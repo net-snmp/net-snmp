@@ -7,18 +7,19 @@
 
 #include "mibdefs.h"
 
-void init_file(void);
+void            init_file(void);
 
-/* config file parsing routines */
-void file_free_config (void);
-void file_parse_config (const char *, char *);
+/*
+ * config file parsing routines 
+ */
+void            file_free_config(void);
+void            file_parse_config(const char *, char *);
 extern FindVarMethod var_file_table;
 
-struct filestat
-{
-    char name[256];
-    int size;
-    int max;
+struct filestat {
+    char            name[256];
+    int             size;
+    int             max;
 };
 
 #define FILE_ERROR_MSG  "%s: size exceeds %dkb (= %dkb)"
@@ -30,4 +31,4 @@ struct filestat
 #define FILE_ERROR      100
 #define FILE_MSG        101
 
-#endif /* _MIBGROUP_FILE_H */
+#endif                          /* _MIBGROUP_FILE_H */

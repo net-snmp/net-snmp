@@ -9,67 +9,77 @@
 
 config_require(util_funcs)
 config_require(mibII/vacm_context)
-config_add_mib(SNMP-VIEW-BASED-ACM-MIB) 
+config_add_mib(SNMP-VIEW-BASED-ACM-MIB)
 config_add_mib(SNMP-COMMUNITY-MIB)
 
-void init_vacm_vars (void);
-void vacm_free_security (void);
-void vacm_free_group (void);
-void vacm_free_access (void);
-void vacm_free_view (void);
-void vacm_parse_security (const char *, char *);
-void vacm_parse_group (const char *, char *);
-void vacm_parse_access (const char *, char *);
-void vacm_parse_view (const char *, char *);
-void vacm_parse_simple (const char *, char *);
+     void            init_vacm_vars(void);
+     void            vacm_free_security(void);
+     void            vacm_free_group(void);
+     void            vacm_free_access(void);
+     void            vacm_free_view(void);
+     void            vacm_parse_security(const char *, char *);
+     void            vacm_parse_group(const char *, char *);
+     void            vacm_parse_access(const char *, char *);
+     void            vacm_parse_view(const char *, char *);
+     void            vacm_parse_simple(const char *, char *);
 
-SNMPCallback vacm_in_view_callback;
-SNMPCallback vacm_warn_if_not_configured;
+     SNMPCallback    vacm_in_view_callback;
+     SNMPCallback    vacm_warn_if_not_configured;
 
-int vacm_in_view (netsnmp_pdu *, oid *, size_t);
+     int             vacm_in_view(netsnmp_pdu *, oid *, size_t);
 
-extern FindVarMethod var_vacm_sec2group;
-extern FindVarMethod var_vacm_access;
-extern FindVarMethod var_vacm_view;
+     extern FindVarMethod var_vacm_sec2group;
+     extern FindVarMethod var_vacm_access;
+     extern FindVarMethod var_vacm_view;
 
-WriteMethod write_vacmGroupName;
-WriteMethod write_vacmSecurityToGroupStatus;
-WriteMethod write_vacmSecurityToGroupStorageType;
+     WriteMethod     write_vacmGroupName;
+     WriteMethod     write_vacmSecurityToGroupStatus;
+     WriteMethod     write_vacmSecurityToGroupStorageType;
 
-WriteMethod write_vacmAccessContextMatch;
-WriteMethod write_vacmAccessNotifyViewName;
-WriteMethod write_vacmAccessReadViewName;
-WriteMethod write_vacmAccessWriteViewName;
-WriteMethod write_vacmAccessStatus;
-WriteMethod write_vacmAccessStorageType;
+     WriteMethod     write_vacmAccessContextMatch;
+     WriteMethod     write_vacmAccessNotifyViewName;
+     WriteMethod     write_vacmAccessReadViewName;
+     WriteMethod     write_vacmAccessWriteViewName;
+     WriteMethod     write_vacmAccessStatus;
+     WriteMethod     write_vacmAccessStorageType;
 
-WriteMethod write_vacmViewSpinLock;
-WriteMethod write_vacmViewMask;
-WriteMethod write_vacmViewStatus;
-WriteMethod write_vacmViewStorageType;
-WriteMethod write_vacmViewType;
+     WriteMethod     write_vacmViewSpinLock;
+     WriteMethod     write_vacmViewMask;
+     WriteMethod     write_vacmViewStatus;
+     WriteMethod     write_vacmViewStorageType;
+     WriteMethod     write_vacmViewType;
 
 
-oid *access_generate_OID(oid *prefix, size_t prefixLen, struct vacm_accessEntry *aptr,
-                       size_t *length);
-struct vacm_accessEntry *access_parse_accessEntry(oid *name, size_t name_len);
-int access_parse_oid(oid *oidIndex, size_t oidLen,
-			  unsigned char **groupName, size_t *groupNameLen,
-              unsigned char **contextPrefix, size_t *contextPrefixLen,
-              int *model, int *level);
-                       
-oid *sec2group_generate_OID(oid *prefix, size_t prefixLen, struct vacm_groupEntry *geptr,
-                       size_t *length);
-int sec2group_parse_oid(oid *oidIndex, size_t oidLen,
-              int *model, unsigned char **name, size_t *nameLen);
-struct vacm_groupEntry *sec2group_parse_groupEntry(oid *name, size_t name_len);
+     oid            *access_generate_OID(oid * prefix, size_t prefixLen,
+                                         struct vacm_accessEntry *aptr,
+                                         size_t * length);
+     struct vacm_accessEntry *access_parse_accessEntry(oid * name,
+                                                       size_t name_len);
+     int             access_parse_oid(oid * oidIndex, size_t oidLen,
+                                      unsigned char **groupName,
+                                      size_t * groupNameLen,
+                                      unsigned char **contextPrefix,
+                                      size_t * contextPrefixLen,
+                                      int *model, int *level);
 
-oid *view_generate_OID(oid *prefix, size_t prefixLen, struct vacm_viewEntry *vptr,
-                       size_t *length);
-int view_parse_oid(oid *oidIndex, size_t oidLen,
-			  unsigned char **viewName, size_t *viewNameLen,
-              oid **subtree, size_t *subtreeLen);
-struct vacm_viewEntry *view_parse_viewEntry(oid *name, size_t name_len);
+     oid            *sec2group_generate_OID(oid * prefix, size_t prefixLen,
+                                            struct vacm_groupEntry *geptr,
+                                            size_t * length);
+     int             sec2group_parse_oid(oid * oidIndex, size_t oidLen,
+                                         int *model, unsigned char **name,
+                                         size_t * nameLen);
+     struct vacm_groupEntry *sec2group_parse_groupEntry(oid * name,
+                                                        size_t name_len);
+
+     oid            *view_generate_OID(oid * prefix, size_t prefixLen,
+                                       struct vacm_viewEntry *vptr,
+                                       size_t * length);
+     int             view_parse_oid(oid * oidIndex, size_t oidLen,
+                                    unsigned char **viewName,
+                                    size_t * viewNameLen, oid ** subtree,
+                                    size_t * subtreeLen);
+     struct vacm_viewEntry *view_parse_viewEntry(oid * name,
+                                                 size_t name_len);
 
 
 
@@ -94,4 +104,4 @@ struct vacm_viewEntry *view_parse_viewEntry(oid *name, size_t name_len);
 #define CM_EXACT 1
 #define CM_PREFIX 2
 
-#endif /* _MIBGROUP_VACM_H */
+#endif                          /* _MIBGROUP_VACM_H */

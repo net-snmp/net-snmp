@@ -34,11 +34,12 @@ initialize_table_nsTransactionTable(void)
      * HANDLER_CAN_RWRITE definition below to HANDLER_CAN_RONLY 
      */
     my_handler = netsnmp_create_handler_registration("nsTransactionTable",
-                                             nsTransactionTable_handler,
-                                             nsTransactionTable_oid,
-                                             sizeof(nsTransactionTable_oid)
-                                             / sizeof(oid),
-                                             HANDLER_CAN_RONLY);
+                                                     nsTransactionTable_handler,
+                                                     nsTransactionTable_oid,
+                                                     sizeof
+                                                     (nsTransactionTable_oid)
+                                                     / sizeof(oid),
+                                                     HANDLER_CAN_RONLY);
 
     if (!my_handler || !table_info || !iinfo)
         return;                 /* mallocs failed */
@@ -47,15 +48,13 @@ initialize_table_nsTransactionTable(void)
      * Setting up the table's definition
      */
     netsnmp_table_helper_add_index(table_info, ASN_INTEGER);    /* index:
-                                                         * nsTransactionID 
-                                                         */
+                                                                 * * nsTransactionID 
+                                                                 */
 
     table_info->min_column = 2;
     table_info->max_column = 2;
-    iinfo->get_first_data_point =
-        nsTransactionTable_get_first_data_point;
-    iinfo->get_next_data_point =
-        nsTransactionTable_get_next_data_point;
+    iinfo->get_first_data_point = nsTransactionTable_get_first_data_point;
+    iinfo->get_next_data_point = nsTransactionTable_get_next_data_point;
     iinfo->table_reginfo = table_info;
 
     /***************************************************
@@ -100,7 +99,7 @@ netsnmp_variable_list *
 nsTransactionTable_get_first_data_point(void **my_loop_context,
                                         void **my_data_context,
                                         netsnmp_variable_list
-                                        *put_index_data,
+                                        * put_index_data,
                                         netsnmp_iterator_info *iinfo)
 {
 
@@ -108,13 +107,14 @@ nsTransactionTable_get_first_data_point(void **my_loop_context,
 
     if (!agent_delegated_list)
         return NULL;
-    
+
     *my_loop_context = (void *) agent_delegated_list;
     *my_data_context = (void *) agent_delegated_list;
 
     vptr = put_index_data;
 
-    snmp_set_var_value(vptr,  (u_char *) &agent_delegated_list->pdu->transid,
+    snmp_set_var_value(vptr,
+                       (u_char *) & agent_delegated_list->pdu->transid,
                        sizeof(agent_delegated_list->pdu->transid));
     return put_index_data;
 }
@@ -131,7 +131,7 @@ netsnmp_variable_list *
 nsTransactionTable_get_next_data_point(void **my_loop_context,
                                        void **my_data_context,
                                        netsnmp_variable_list
-                                       *put_index_data,
+                                       * put_index_data,
                                        netsnmp_iterator_info *iinfo)
 {
 
@@ -143,13 +143,13 @@ nsTransactionTable_get_next_data_point(void **my_loop_context,
         return NULL;
 
     alist = alist->next;
-    
+
     *my_loop_context = (void *) alist;
     *my_data_context = (void *) alist;
 
     vptr = put_index_data;
 
-    snmp_set_var_value(vptr, (u_char *) &alist->pdu->transid,
+    snmp_set_var_value(vptr, (u_char *) & alist->pdu->transid,
                        sizeof(alist->pdu->transid));
     return put_index_data;
 }
@@ -157,16 +157,16 @@ nsTransactionTable_get_next_data_point(void **my_loop_context,
 /** handles requests for the nsTransactionTable table, if anything
    else needs to be done */
 int
-nsTransactionTable_handler(netsnmp_mib_handler * handler,
-                           netsnmp_handler_registration * reginfo,
-                           netsnmp_agent_request_info * reqinfo,
-                           netsnmp_request_info * requests)
+nsTransactionTable_handler(netsnmp_mib_handler *handler,
+                           netsnmp_handler_registration *reginfo,
+                           netsnmp_agent_request_info *reqinfo,
+                           netsnmp_request_info *requests)
 {
 
     netsnmp_table_request_info *table_info;
     netsnmp_variable_list *var;
     netsnmp_agent_session *asp;
-    
+
     while (requests) {
         var = requests->requestvb;
         if (requests->processed != 0)
@@ -185,9 +185,12 @@ nsTransactionTable_handler(netsnmp_mib_handler * handler,
          * return data for the columns of the nsTransactionTable table in
          * question 
          */
-        asp = ( netsnmp_agent_session *)netsnmp_extract_iterator_context(requests);
-        if ( asp == NULL) {
-            netsnmp_set_request_error(reqinfo, requests, SNMP_NOSUCHINSTANCE);
+        asp =
+            (netsnmp_agent_session *)
+            netsnmp_extract_iterator_context(requests);
+        if (asp == NULL) {
+            netsnmp_set_request_error(reqinfo, requests,
+                                      SNMP_NOSUCHINSTANCE);
         }
 
         /*
@@ -220,7 +223,7 @@ nsTransactionTable_handler(netsnmp_mib_handler * handler,
 
             case COLUMN_NSTRANSACTIONMODE:
                 snmp_set_var_typed_value(var, ASN_INTEGER,
-                                         (u_char *) &asp->mode,
+                                         (u_char *) & asp->mode,
                                          sizeof(asp->mode));
                 break;
 

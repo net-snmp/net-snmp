@@ -20,43 +20,41 @@
 #include "agentx/agentx_config.h"
 
 #ifdef USING_AGENTX_MASTER_MODULE
-void agentx_parse_master(const char *token, char *cptr)
+void
+agentx_parse_master(const char *token, char *cptr)
 {
-    int i = -1;
-    char buf[BUFSIZ];
+    int             i = -1;
+    char            buf[BUFSIZ];
 
-    if ( !strcmp( cptr, "agentx" ) ||
-         !strcmp( cptr, "all"    ) ||
-         !strcmp( cptr, "yes"    ) ||
-         !strcmp( cptr, "on"     )) {
-                i = 1;
-         snmp_log(LOG_INFO,
-                "Turning on AgentX master support.\n");
-         snmp_log(LOG_INFO,
-                "Note this is still experimental and shouldn't be used on critical systems.\n");
-    }
-    else if ( !strcmp( cptr, "no"  ) ||
-              !strcmp( cptr, "off" ))
-                i = 0;
+    if (!strcmp(cptr, "agentx") ||
+        !strcmp(cptr, "all") ||
+        !strcmp(cptr, "yes") || !strcmp(cptr, "on")) {
+        i = 1;
+        snmp_log(LOG_INFO, "Turning on AgentX master support.\n");
+        snmp_log(LOG_INFO,
+                 "Note this is still experimental and shouldn't be used on critical systems.\n");
+    } else if (!strcmp(cptr, "no") || !strcmp(cptr, "off"))
+        i = 0;
     else
-                i = atoi(cptr);
+        i = atoi(cptr);
 
     if (i < 0 || i > 1) {
         sprintf(buf, "master '%s' unrecognised", cptr);
-        config_perror( buf );
-    }
-    else
-        ds_set_boolean(DS_APPLICATION_ID, DS_AGENT_AGENTX_MASTER, i );
+        config_perror(buf);
+    } else
+        ds_set_boolean(DS_APPLICATION_ID, DS_AGENT_AGENTX_MASTER, i);
 }
-#endif /* USING_AGENTX_MASTER_MODULE */
+#endif                          /* USING_AGENTX_MASTER_MODULE */
 
-void agentx_parse_agentx_socket(const char *token, char *cptr)
+void
+agentx_parse_agentx_socket(const char *token, char *cptr)
 {
     DEBUGMSGTL(("agentx/config", "port spec: %s\n", cptr));
     ds_set_string(DS_APPLICATION_ID, DS_AGENT_X_SOCKET, cptr);
 }
 
-void init_agentx_config(void)
+void
+init_agentx_config(void)
 {
     /*
      * Don't set this up as part of the per-module initialisation.
@@ -66,14 +64,12 @@ void init_agentx_config(void)
      *   whether or not to run as an AgentX master.
      */
 #ifdef USING_AGENTX_MASTER_MODULE
-    if(ds_get_boolean(DS_APPLICATION_ID, DS_AGENT_ROLE) == MASTER_AGENT)
+    if (ds_get_boolean(DS_APPLICATION_ID, DS_AGENT_ROLE) == MASTER_AGENT)
         snmpd_register_config_handler("master",
                                       agentx_parse_master, NULL,
                                       "specify 'agentx' for AgentX support");
-#endif /* USING_AGENTX_MASTER_MODULE */
+#endif                          /* USING_AGENTX_MASTER_MODULE */
     snmpd_register_config_handler("agentxsocket",
-                        agentx_parse_agentx_socket, NULL,
-                        "AgentX bind address");
+                                  agentx_parse_agentx_socket, NULL,
+                                  "AgentX bind address");
 }
-
-

@@ -1,4 +1,6 @@
-/* wrapper for the disman event mib code files */
+/*
+ * wrapper for the disman event mib code files 
+ */
 config_require(disman/mteTriggerTable)
 config_require(disman/mteTriggerDeltaTable)
 config_require(disman/mteTriggerExistenceTable)

@@ -8,16 +8,16 @@
  *
  * Passphrase material may come from many sources.  The following are
  * checked in order (see get_user_passphrases()):
- *	- Prompt always if -f is given.
- *	- Commandline arguments.
- *	- PASSPHRASE_FILE.
- *	- Prompts on stdout.   Use -P to turn off prompt tags.
+ *      - Prompt always if -f is given.
+ *      - Commandline arguments.
+ *      - PASSPHRASE_FILE.
+ *      - Prompts on stdout.   Use -P to turn off prompt tags.
  *
  *
- * FIX	Better name?
- * FIX	Change encode_keychange() to take random bits?
- * FIX	QUITFUN not quite appropriate here...
- * FIX	This is slow...
+ * FIX  Better name?
+ * FIX  Change encode_keychange() to take random bits?
+ * FIX  QUITFUN not quite appropriate here...
+ * FIX  This is slow...
  */
 
 #include <net-snmp/net-snmp-config.h>
@@ -49,8 +49,8 @@
 /*
  * Globals, &c...
  */
-char *local_progname;
-char *local_passphrase_filename;
+char           *local_progname;
+char           *local_passphrase_filename;
 
 #define NL	"\n"
 
@@ -59,52 +59,52 @@ char *local_passphrase_filename;
 #define OPTIONLIST	"E:fhN:O:Pt:vVD"
 
 #define PASSPHRASE_DIR		".snmp"
-	/* Rooted at $HOME.
-	 */
+        /*
+         * Rooted at $HOME.
+         */
 #define PASSPHRASE_FILE		"passphrase.ek"
-	/* 
-	 * Format: two lines containing old and new passphrases, nothing more.
-	 * 	
-	 * XXX	Add creature comforts like: comments and 
-	 *	tokens identifying passphrases, separate directory check,
-	 *	check in current directory (?), traverse a path of
-	 *	directories (?)...
-	 * FIX	Better name?
-	 */
+        /*
+         * Format: two lines containing old and new passphrases, nothing more.
+         *      
+         * XXX  Add creature comforts like: comments and 
+         *      tokens identifying passphrases, separate directory check,
+         *      check in current directory (?), traverse a path of
+         *      directories (?)...
+         * FIX  Better name?
+         */
 
 
-int	forcepassphrase		= 0,	/* Always prompt for passphrases. */
-	promptindicator		= 1,	/* Output an indicator that input
-					 *   is requested.		  */
-	visible			= 0,	/* Echo passphrases to terminal.  */
-	verbose			= 0;	/* Output progress to stderr. 	  */
-size_t	engineid_len		= 0;
+int             forcepassphrase = 0,    /* Always prompt for passphrases. */
+                promptindicator = 1,    /* Output an indicator that input
+                                         *   is requested.                */
+                visible = 0,    /* Echo passphrases to terminal.  */
+                verbose = 0;    /* Output progress to stderr.     */
+size_t          engineid_len = 0;
 
-u_char	*engineid		= NULL;	/* Both input & final binary form.*/
-char	*newpass		= NULL,
-        *oldpass		= NULL;
+u_char         *engineid = NULL;        /* Both input & final binary form. */
+char           *newpass = NULL, *oldpass = NULL;
 
-char	*transform_type_input	= NULL;
+char           *transform_type_input = NULL;
 
-const oid *transform_type	= NULL;	/* Type of HMAC hash to use.	  */
+const oid      *transform_type = NULL;  /* Type of HMAC hash to use.      */
 
 
 
 /*
  * Prototypes.
  */
-void	usage_to_file(FILE *ofp);
-void	usage_synopsis(FILE *ofp);
-int     get_user_passphrases(void);
-int	snmp_ttyecho(const int fd, const int echo);
-char   *snmp_getpassphrase(const char *prompt, int fvisible);
+void            usage_to_file(FILE * ofp);
+void            usage_synopsis(FILE * ofp);
+int             get_user_passphrases(void);
+int             snmp_ttyecho(const int fd, const int echo);
+char           *snmp_getpassphrase(const char *prompt, int fvisible);
 
 #ifdef WIN32
 #define HAVE_GETPASS 1
-char *getpass( const char * prompt );
-int isatty(int);
-int _cputs(const char *);
-int _getch(void);
+char           *getpass(const char *prompt);
+int             isatty(int);
+int             _cputs(const char *);
+int             _getch(void);
 #endif
 
 /*******************************************************************-o-******
@@ -112,230 +112,245 @@ int _getch(void);
 int
 main(int argc, char **argv)
 {
-	int	  rval		= SNMPERR_SUCCESS;
-	size_t	  oldKu_len	= SNMP_MAXBUF_SMALL,
-		  newKu_len	= SNMP_MAXBUF_SMALL,
-		  oldkul_len	= SNMP_MAXBUF_SMALL,
-		  newkul_len	= SNMP_MAXBUF_SMALL,
-		  keychange_len	= SNMP_MAXBUF_SMALL;
+    int             rval = SNMPERR_SUCCESS;
+    size_t          oldKu_len = SNMP_MAXBUF_SMALL,
+        newKu_len = SNMP_MAXBUF_SMALL,
+        oldkul_len = SNMP_MAXBUF_SMALL,
+        newkul_len = SNMP_MAXBUF_SMALL, keychange_len = SNMP_MAXBUF_SMALL;
 
-	char      *s = NULL;
-	u_char	  oldKu[SNMP_MAXBUF_SMALL],
-		  newKu[SNMP_MAXBUF_SMALL],
-		  oldkul[SNMP_MAXBUF_SMALL],
-		  newkul[SNMP_MAXBUF_SMALL],
-		  keychange[SNMP_MAXBUF_SMALL];
+    char           *s = NULL;
+    u_char          oldKu[SNMP_MAXBUF_SMALL],
+        newKu[SNMP_MAXBUF_SMALL],
+        oldkul[SNMP_MAXBUF_SMALL],
+        newkul[SNMP_MAXBUF_SMALL], keychange[SNMP_MAXBUF_SMALL];
 
-	int       i;
-	int       arg = 1;
+    int             i;
+    int             arg = 1;
 
- 	local_progname = argv[0];
-	local_passphrase_filename = (char *)malloc(sizeof(PASSPHRASE_DIR) +
-					   sizeof(PASSPHRASE_FILE) + 4);
-	sprintf(local_passphrase_filename, "%s/%s",
-					   PASSPHRASE_DIR, PASSPHRASE_FILE);
-
-
- 
-	/*
-	 * Parse.
-	 */
-	for(; (arg < argc) && (argv[arg][0] == '-') ; arg++){
-		switch(argv[arg][1]){
-		case 'D':  snmp_set_do_debugging(1);	break;
-		case 'E':  engineid = (u_char *)argv[++arg];	break;
-		case 'f':  forcepassphrase = 1;		break;
-		case 'N':  newpass = argv[++arg];	break;
-		case 'O':  oldpass = argv[++arg];	break;
-		case 'P':  promptindicator = 0;		break;
-		case 't':  transform_type_input = argv[++arg];	break;
-		case 'v':  verbose = 1;			break;
-		case 'V':  visible = 1;			break;
-		case 'h':
-			rval = 0;
-		default:
-			usage_to_file(stdout);
-			exit(rval);
-		}
-	}
-
-	if ( !transform_type_input ) {
-		fprintf(stderr, "The -t option is mandatory.\n");
-		usage_synopsis(stdout);
-		exit(1000);
-	}
+    local_progname = argv[0];
+    local_passphrase_filename = (char *) malloc(sizeof(PASSPHRASE_DIR) +
+                                                sizeof(PASSPHRASE_FILE) +
+                                                4);
+    sprintf(local_passphrase_filename, "%s/%s", PASSPHRASE_DIR,
+            PASSPHRASE_FILE);
 
 
 
-	/*
-	 * Convert and error check transform_type.
-	 */
-	if ( !strcmp(transform_type_input, "md5") ) {
-		transform_type = usmHMACMD5AuthProtocol;
+    /*
+     * Parse.
+     */
+    for (; (arg < argc) && (argv[arg][0] == '-'); arg++) {
+        switch (argv[arg][1]) {
+        case 'D':
+            snmp_set_do_debugging(1);
+            break;
+        case 'E':
+            engineid = (u_char *) argv[++arg];
+            break;
+        case 'f':
+            forcepassphrase = 1;
+            break;
+        case 'N':
+            newpass = argv[++arg];
+            break;
+        case 'O':
+            oldpass = argv[++arg];
+            break;
+        case 'P':
+            promptindicator = 0;
+            break;
+        case 't':
+            transform_type_input = argv[++arg];
+            break;
+        case 'v':
+            verbose = 1;
+            break;
+        case 'V':
+            visible = 1;
+            break;
+        case 'h':
+            rval = 0;
+        default:
+            usage_to_file(stdout);
+            exit(rval);
+        }
+    }
 
-	} else if ( !strcmp(transform_type_input, "sha1") ) {
-		transform_type = usmHMACSHA1AuthProtocol;
-
-	} else {
-		fprintf(stderr,
-			"Unrecognized hash transform: \"%s\".\n",
-			transform_type_input);
-		usage_synopsis(stderr);
-		QUITFUN(rval = SNMPERR_GENERR, main_quit);
-	}
-
-	if (verbose) {
-		fprintf(stderr, "Hash:\t\t%s\n",
-			(transform_type == usmHMACMD5AuthProtocol)
-				? "usmHMACMD5AuthProtocol"
-				: "usmHMACSHA1AuthProtocol"
-			);
-	}
+    if (!transform_type_input) {
+        fprintf(stderr, "The -t option is mandatory.\n");
+        usage_synopsis(stdout);
+        exit(1000);
+    }
 
 
 
-	/* 
-	 * Build engineID.  Accept hex engineID as the bits
-	 * "in-and-of-themselves", otherwise create an engineID with the
-	 * given string as text.
-	 *
-	 * If no engineID is given, lookup the first IP address for the
-	 * localhost and use that (see setup_engineID()).
-	 */
-	if ( engineid && (tolower(*(engineid+1)) == 'x') ) {
-		engineid_len = hex_to_binary2(	engineid+2,
-						strlen((char *)engineid)-2,
-						(char **) &engineid);
-                DEBUGMSGTL(("encode_keychange","engineIDLen: %d\n", engineid_len));
-	} else {
-		engineid_len = setup_engineID(&engineid, (char *)engineid);
+    /*
+     * Convert and error check transform_type.
+     */
+    if (!strcmp(transform_type_input, "md5")) {
+        transform_type = usmHMACMD5AuthProtocol;
 
-	} 
+    } else if (!strcmp(transform_type_input, "sha1")) {
+        transform_type = usmHMACSHA1AuthProtocol;
+
+    } else {
+        fprintf(stderr,
+                "Unrecognized hash transform: \"%s\".\n",
+                transform_type_input);
+        usage_synopsis(stderr);
+        QUITFUN(rval = SNMPERR_GENERR, main_quit);
+    }
+
+    if (verbose) {
+        fprintf(stderr, "Hash:\t\t%s\n",
+                (transform_type == usmHMACMD5AuthProtocol)
+                ? "usmHMACMD5AuthProtocol" : "usmHMACSHA1AuthProtocol");
+    }
+
+
+
+    /*
+     * Build engineID.  Accept hex engineID as the bits
+     * "in-and-of-themselves", otherwise create an engineID with the
+     * given string as text.
+     *
+     * If no engineID is given, lookup the first IP address for the
+     * localhost and use that (see setup_engineID()).
+     */
+    if (engineid && (tolower(*(engineid + 1)) == 'x')) {
+        engineid_len = hex_to_binary2(engineid + 2,
+                                      strlen((char *) engineid) - 2,
+                                      (char **) &engineid);
+        DEBUGMSGTL(("encode_keychange", "engineIDLen: %d\n",
+                    engineid_len));
+    } else {
+        engineid_len = setup_engineID(&engineid, (char *) engineid);
+
+    }
 
 #ifdef SNMP_TESTING_CODE
-	if (verbose) {
-		fprintf(stderr, "EngineID:\t%s\n",
-			/* XXX = */ dump_snmpEngineID(engineid, &engineid_len));
-	}
+    if (verbose) {
+        fprintf(stderr, "EngineID:\t%s\n",
+                /*
+                 * XXX = 
+                 */ dump_snmpEngineID(engineid, &engineid_len));
+    }
 #endif
 
 
-	/*
-	 * Get passphrases from user.
-	 */
-	rval = get_user_passphrases();
-	QUITFUN(rval, main_quit);
+    /*
+     * Get passphrases from user.
+     */
+    rval = get_user_passphrases();
+    QUITFUN(rval, main_quit);
 
-	if ( strlen(oldpass) < USM_LENGTH_P_MIN ) {
-		fprintf(stderr, "Old passphrase must be greater than %d "
-				"characters in length.\n",
-				USM_LENGTH_P_MIN);
-		QUITFUN(rval = SNMPERR_GENERR, main_quit);
+    if (strlen(oldpass) < USM_LENGTH_P_MIN) {
+        fprintf(stderr, "Old passphrase must be greater than %d "
+                "characters in length.\n", USM_LENGTH_P_MIN);
+        QUITFUN(rval = SNMPERR_GENERR, main_quit);
 
-	} else if ( strlen(newpass) < USM_LENGTH_P_MIN ) {
-		fprintf(stderr, "New passphrase must be greater than %d "
-				"characters in length.\n",
-				USM_LENGTH_P_MIN);
-		QUITFUN(rval = SNMPERR_GENERR, main_quit);
-	}
+    } else if (strlen(newpass) < USM_LENGTH_P_MIN) {
+        fprintf(stderr, "New passphrase must be greater than %d "
+                "characters in length.\n", USM_LENGTH_P_MIN);
+        QUITFUN(rval = SNMPERR_GENERR, main_quit);
+    }
 
-	if (verbose) {
-		fprintf(stderr,
-			"Old passphrase:\t%s\nNew passphrase:\t%s\n",
-			oldpass, newpass);
-	}
+    if (verbose) {
+        fprintf(stderr,
+                "Old passphrase:\t%s\nNew passphrase:\t%s\n",
+                oldpass, newpass);
+    }
 
 
 
-	/* 
-	 * Compute Ku and Kul's from old and new passphrases, then
-	 * compute the keychange string & print it out.
-	 */
-	rval = sc_init();
-	QUITFUN(rval, main_quit);
+    /*
+     * Compute Ku and Kul's from old and new passphrases, then
+     * compute the keychange string & print it out.
+     */
+    rval = sc_init();
+    QUITFUN(rval, main_quit);
 
 
-	rval = generate_Ku(	transform_type, USM_LENGTH_OID_TRANSFORM,
-				(u_char *)oldpass, strlen(oldpass),
-				oldKu, &oldKu_len);
-	QUITFUN(rval, main_quit);
+    rval = generate_Ku(transform_type, USM_LENGTH_OID_TRANSFORM,
+                       (u_char *) oldpass, strlen(oldpass),
+                       oldKu, &oldKu_len);
+    QUITFUN(rval, main_quit);
 
 
-	rval = generate_Ku(	transform_type, USM_LENGTH_OID_TRANSFORM,
-				(u_char *)newpass, strlen(newpass),
-				newKu, &newKu_len);
-	QUITFUN(rval, main_quit);
+    rval = generate_Ku(transform_type, USM_LENGTH_OID_TRANSFORM,
+                       (u_char *) newpass, strlen(newpass),
+                       newKu, &newKu_len);
+    QUITFUN(rval, main_quit);
 
 
-        DEBUGMSGTL(("encode_keychange", "EID (%d): ", engineid_len));
-        for(i=0; i < (int)engineid_len; i++)
-          DEBUGMSGTL(("encode_keychange", "%02x",(int) (engineid[i])));
-        DEBUGMSGTL(("encode_keychange","\n"));
+    DEBUGMSGTL(("encode_keychange", "EID (%d): ", engineid_len));
+    for (i = 0; i < (int) engineid_len; i++)
+        DEBUGMSGTL(("encode_keychange", "%02x", (int) (engineid[i])));
+    DEBUGMSGTL(("encode_keychange", "\n"));
 
-        DEBUGMSGTL(("encode_keychange", "old Ku (%d) (from %s): ", oldKu_len, oldpass));
-        for(i=0; i < (int)oldKu_len; i++)
-          DEBUGMSGTL(("encode_keychange", "%02x",(int) (oldKu[i])));
-        DEBUGMSGTL(("encode_keychange","\n"));
+    DEBUGMSGTL(("encode_keychange", "old Ku (%d) (from %s): ", oldKu_len,
+                oldpass));
+    for (i = 0; i < (int) oldKu_len; i++)
+        DEBUGMSGTL(("encode_keychange", "%02x", (int) (oldKu[i])));
+    DEBUGMSGTL(("encode_keychange", "\n"));
 
-	rval = generate_kul(	transform_type, USM_LENGTH_OID_TRANSFORM,
-				engineid, engineid_len,
-				oldKu, oldKu_len,
-				oldkul, &oldkul_len);
-	QUITFUN(rval, main_quit);
-
-
-        DEBUGMSGTL(("encode_keychange", "generating old Kul (%d) (from Ku): ", oldkul_len));
-        for(i=0; i < (int)oldkul_len; i++)
-          DEBUGMSGTL(("encode_keychange", "%02x",(int) (oldkul[i])));
-        DEBUGMSGTL(("encode_keychange","\n"));
-
-	rval = generate_kul(	transform_type, USM_LENGTH_OID_TRANSFORM,
-				engineid, engineid_len,
-				newKu, newKu_len,
-				newkul, &newkul_len);
-	QUITFUN(rval, main_quit);
-        
-        DEBUGMSGTL(("encode_keychange", "generating new Kul (%d) (from Ku): ", oldkul_len));
-        for(i=0; i < (int)newkul_len; i++)
-          DEBUGMSGTL(("encode_keychange", "%02x",newkul[i]));
-        DEBUGMSGTL(("encode_keychange","\n"));
-
-	rval = encode_keychange(transform_type, USM_LENGTH_OID_TRANSFORM,
-				oldkul, oldkul_len,
-				newkul, newkul_len,
-				keychange, &keychange_len);
-	QUITFUN(rval, main_quit);
+    rval = generate_kul(transform_type, USM_LENGTH_OID_TRANSFORM,
+                        engineid, engineid_len,
+                        oldKu, oldKu_len, oldkul, &oldkul_len);
+    QUITFUN(rval, main_quit);
 
 
+    DEBUGMSGTL(("encode_keychange", "generating old Kul (%d) (from Ku): ",
+                oldkul_len));
+    for (i = 0; i < (int) oldkul_len; i++)
+        DEBUGMSGTL(("encode_keychange", "%02x", (int) (oldkul[i])));
+    DEBUGMSGTL(("encode_keychange", "\n"));
 
-	binary_to_hex(keychange, keychange_len, &s);
-	printf("%s%s\n",
-		(verbose) ? "KeyChange string:\t" : "", /* XXX stdout */
-		s);
+    rval = generate_kul(transform_type, USM_LENGTH_OID_TRANSFORM,
+                        engineid, engineid_len,
+                        newKu, newKu_len, newkul, &newkul_len);
+    QUITFUN(rval, main_quit);
+
+    DEBUGMSGTL(("encode_keychange", "generating new Kul (%d) (from Ku): ",
+                oldkul_len));
+    for (i = 0; i < (int) newkul_len; i++)
+        DEBUGMSGTL(("encode_keychange", "%02x", newkul[i]));
+    DEBUGMSGTL(("encode_keychange", "\n"));
+
+    rval = encode_keychange(transform_type, USM_LENGTH_OID_TRANSFORM,
+                            oldkul, oldkul_len,
+                            newkul, newkul_len, keychange, &keychange_len);
+    QUITFUN(rval, main_quit);
 
 
-	/*
-	 * Cleanup.
-	 */
-main_quit:
-	snmp_call_callbacks(SNMP_CALLBACK_LIBRARY, SNMP_CALLBACK_SHUTDOWN,
-                            NULL);
-        
 
-	SNMP_ZERO(oldpass,	strlen(oldpass));
-	SNMP_ZERO(newpass,	strlen(newpass));
+    binary_to_hex(keychange, keychange_len, &s);
+    printf("%s%s\n", (verbose) ? "KeyChange string:\t" : "",    /* XXX stdout */
+           s);
 
-	SNMP_ZERO(oldKu,	oldKu_len);
-	SNMP_ZERO(newKu,	newKu_len);
 
-	SNMP_ZERO(oldkul,	oldkul_len);
-	SNMP_ZERO(newkul,	newkul_len);
+    /*
+     * Cleanup.
+     */
+  main_quit:
+    snmp_call_callbacks(SNMP_CALLBACK_LIBRARY, SNMP_CALLBACK_SHUTDOWN,
+                        NULL);
 
-	SNMP_ZERO(s, strlen(s));
 
-	return rval;
+    SNMP_ZERO(oldpass, strlen(oldpass));
+    SNMP_ZERO(newpass, strlen(newpass));
 
-} /* end main() */
+    SNMP_ZERO(oldKu, oldKu_len);
+    SNMP_ZERO(newKu, newKu_len);
+
+    SNMP_ZERO(oldkul, oldkul_len);
+    SNMP_ZERO(newkul, newkul_len);
+
+    SNMP_ZERO(s, strlen(s));
+
+    return rval;
+
+}                               /* end main() */
 
 
 
@@ -343,9 +358,9 @@ main_quit:
 /*******************************************************************-o-******
  */
 void
-usage_synopsis(FILE *ofp)
+usage_synopsis(FILE * ofp)
 {
-	fprintf(ofp, USAGE "\n\
+    fprintf(ofp, USAGE "\n\
 \n\
     -E [0x]<engineID>		EngineID used for kul generation.\n\
     -f				Force passphrases to be read from stdin.\n\
@@ -356,20 +371,18 @@ usage_synopsis(FILE *ofp)
     -t md5 | sha1		HMAC hash transform type.\n\
     -v				Verbose.\n\
     -V				Visible.  Echo passphrases to terminal.\n\
-		"
-		NL, local_progname);
+		" NL, local_progname);
 
-}  /* end usage_synopsis() */
+}                               /* end usage_synopsis() */
 
 void
-usage_to_file(FILE *ofp)
+usage_to_file(FILE * ofp)
 {
-	char	*s;
+    char           *s;
 
-	usage_synopsis(ofp);
+    usage_synopsis(ofp);
 
-	fprintf(ofp,
-		"\n\
+    fprintf(ofp, "\n\
     Only -t is mandatory.  The transform is used to convert P=>Ku, convert\n\
     Ku=>Kul, and to hash the old Kul with the random bits.\n\
 \n\
@@ -384,31 +397,36 @@ usage_to_file(FILE *ofp)
     <engineID> is intepreted as a hex string when preceeded by \"0x\",\n\
     otherwise it is created to contain \"text\".  If nothing is given,\n\
     <engineID> is constructed from the first IP address for the local host.\n\
-		"
-		NL, (s = getenv("HOME"))?s:"$HOME", local_passphrase_filename);
+		" NL, (s = getenv("HOME")) ? s : "$HOME", local_passphrase_filename);
 
 
-/* FIX -- make this possible?
-    -r [0x]<random_bits>	Random bits used in KeyChange XOR.
+    /*
+     * FIX -- make this possible?
+     * -r [0x]<random_bits> Random bits used in KeyChange XOR.
+     * 
+     * <engineID> and <random_bits> are intepreted as hex strings when
+     * preceeded by \"0x\", otherwise <engineID> is created to contain \"text\"
+     * and <random_bits> are the same as the ascii input.
+     * 
+     * <random_bits> will be generated by SCAPI if not given.  If value is
+     * too long, it will be truncated; if too short, the remainder will be
+     * filled in with zeros.
+     */
 
-    <engineID> and <random_bits> are intepreted as hex strings when
-    preceeded by \"0x\", otherwise <engineID> is created to contain \"text\"
-    and <random_bits> are the same as the ascii input.
+}                               /* end usage() */
 
-    <random_bits> will be generated by SCAPI if not given.  If value is
-    too long, it will be truncated; if too short, the remainder will be
-    filled in with zeros.
+
+/*
+ * this defined for HPUX aCC because the aCC doesn't drop the 
+ */
+/*
+ * snmp_parse_args.c functionality if compile with -g, PKY 
  */
 
-}  /* end usage() */
-
-
-/* this defined for HPUX aCC because the aCC doesn't drop the */
-/* snmp_parse_args.c functionality if compile with -g, PKY */
-
-void usage(void)
+void
+usage(void)
 {
-    usage_to_file(stdout);    
+    usage_to_file(stdout);
 }
 
 
@@ -441,151 +459,159 @@ void usage(void)
 int
 get_user_passphrases(void)
 {
-	int		 rval = SNMPERR_SUCCESS;
-	size_t		 len;
+    int             rval = SNMPERR_SUCCESS;
+    size_t          len;
 
-	char		*obuf = NULL,
-			*nbuf = NULL;
-        
-	char		 path[SNMP_MAXBUF],
-			 buf[SNMP_MAXBUF],
-			*s    = NULL;
+    char           *obuf = NULL, *nbuf = NULL;
 
-	struct stat	 statbuf;
-	FILE		*fp;
+    char            path[SNMP_MAXBUF], buf[SNMP_MAXBUF], *s = NULL;
+
+    struct stat     statbuf;
+    FILE           *fp;
 
 
 
-	/*
-	 * Allow prompts to the user to override all other sources.
-	 * Nothing to do otherwise if oldpass and newpass are already defined.
-	 */
-	if ( forcepassphrase )		goto get_user_passphrases_prompt;
-	if ( oldpass && newpass )	goto get_user_passphrases_quit;
+    /*
+     * Allow prompts to the user to override all other sources.
+     * Nothing to do otherwise if oldpass and newpass are already defined.
+     */
+    if (forcepassphrase)
+        goto get_user_passphrases_prompt;
+    if (oldpass && newpass)
+        goto get_user_passphrases_quit;
 
 
 
-	/*
-	 * Read passphrases out of PASSPHRASE_FILE.  Sanity check the
-	 * path for existence and access first.  Refuse to read
-	 * if the permissions are wrong.
-	 */
-	s = getenv("HOME");
-	sprintf(path, "%s/%s", s, PASSPHRASE_DIR);
+    /*
+     * Read passphrases out of PASSPHRASE_FILE.  Sanity check the
+     * path for existence and access first.  Refuse to read
+     * if the permissions are wrong.
+     */
+    s = getenv("HOME");
+    sprintf(path, "%s/%s", s, PASSPHRASE_DIR);
 
-							/* Test directory. */
-	if ( stat(path, &statbuf) < 0 ) {
-		fprintf(stderr, "Cannot access directory \"%s\".\n", path);
-		QUITFUN(rval = SNMPERR_GENERR, get_user_passphrases_quit);
+    /*
+     * Test directory. 
+     */
+    if (stat(path, &statbuf) < 0) {
+        fprintf(stderr, "Cannot access directory \"%s\".\n", path);
+        QUITFUN(rval = SNMPERR_GENERR, get_user_passphrases_quit);
 #ifndef WIN32
-	} else if ( statbuf.st_mode & (S_IRWXG|S_IRWXO) ) {
-		fprintf(stderr,
-		    "Directory \"%s\" is accessible by group or world.\n",
-		    path);
-		QUITFUN(rval = SNMPERR_GENERR, get_user_passphrases_quit);
-#endif /* !WIN32 */
-	}
+    } else if (statbuf.st_mode & (S_IRWXG | S_IRWXO)) {
+        fprintf(stderr,
+                "Directory \"%s\" is accessible by group or world.\n",
+                path);
+        QUITFUN(rval = SNMPERR_GENERR, get_user_passphrases_quit);
+#endif                          /* !WIN32 */
+    }
 
-							/* Test file. */
-	sprintf(path, "%s/%s", s, local_passphrase_filename);
-	if ( stat(path, &statbuf) < 0 ) {
-		fprintf(stderr, "Cannot access file \"%s\".\n", path);
-		QUITFUN(rval = SNMPERR_GENERR, get_user_passphrases_quit);
+    /*
+     * Test file. 
+     */
+    sprintf(path, "%s/%s", s, local_passphrase_filename);
+    if (stat(path, &statbuf) < 0) {
+        fprintf(stderr, "Cannot access file \"%s\".\n", path);
+        QUITFUN(rval = SNMPERR_GENERR, get_user_passphrases_quit);
 #ifndef WIN32
-	} else if ( statbuf.st_mode & (S_IRWXG|S_IRWXO) ) {
-		fprintf(stderr,
-			"File \"%s\" is accessible by group or world.\n", path);
-		QUITFUN(rval = SNMPERR_GENERR, get_user_passphrases_quit);
-#endif /* !WIN32 */
-	}
+    } else if (statbuf.st_mode & (S_IRWXG | S_IRWXO)) {
+        fprintf(stderr,
+                "File \"%s\" is accessible by group or world.\n", path);
+        QUITFUN(rval = SNMPERR_GENERR, get_user_passphrases_quit);
+#endif                          /* !WIN32 */
+    }
 
-							/* Open the file. */
-	if ( (fp = fopen(path, "r")) == NULL ) {
-		fprintf(stderr, "Cannot open \"%s\".", path);
-		QUITFUN(rval = SNMPERR_GENERR, get_user_passphrases_quit);
-	}
+    /*
+     * Open the file. 
+     */
+    if ((fp = fopen(path, "r")) == NULL) {
+        fprintf(stderr, "Cannot open \"%s\".", path);
+        QUITFUN(rval = SNMPERR_GENERR, get_user_passphrases_quit);
+    }
 
-							/* Read 1st line. */
-	if ( !fgets(buf, sizeof(buf), fp) ) {		
-		if ( verbose ) {
-			fprintf(stderr, 
-				"Passphrase file \"%s\" is empty...\n", path);
-		}
-		goto get_user_passphrases_prompt;
+    /*
+     * Read 1st line. 
+     */
+    if (!fgets(buf, sizeof(buf), fp)) {
+        if (verbose) {
+            fprintf(stderr, "Passphrase file \"%s\" is empty...\n", path);
+        }
+        goto get_user_passphrases_prompt;
 
-	} else if ( !oldpass ) {
-		len = strlen(buf);
-		if ( buf[len-1] == '\n' )	buf[--len] = '\0';
-		oldpass = (char *)calloc(1,len+1);
-		memcpy(oldpass, buf, len+1);
-	}
-							/* Read 2nd line. */
-	if ( !fgets(buf, sizeof(buf), fp) ) {		
-		if ( verbose ) {
-			fprintf(stderr, 
-				"Only one line in file \"%s\"...\n", path);
-		}
+    } else if (!oldpass) {
+        len = strlen(buf);
+        if (buf[len - 1] == '\n')
+            buf[--len] = '\0';
+        oldpass = (char *) calloc(1, len + 1);
+        memcpy(oldpass, buf, len + 1);
+    }
+    /*
+     * Read 2nd line. 
+     */
+    if (!fgets(buf, sizeof(buf), fp)) {
+        if (verbose) {
+            fprintf(stderr, "Only one line in file \"%s\"...\n", path);
+        }
 
-	} else if ( !newpass ) {
-		len = strlen(buf);
-		if ( buf[len-1] == '\n' )	buf[--len] = '\0';
-		newpass = (char *)calloc(1,len+1);
-		memcpy(newpass, buf, len+1);
-	}
+    } else if (!newpass) {
+        len = strlen(buf);
+        if (buf[len - 1] == '\n')
+            buf[--len] = '\0';
+        newpass = (char *) calloc(1, len + 1);
+        memcpy(newpass, buf, len + 1);
+    }
 
-	if ( oldpass && newpass )	goto get_user_passphrases_quit;
-
-
-
-	/*
-	 * Prompt the user for passphrase entry.  Visible prompts
-	 * may be omitted, and invisible entry may turned off.
-	 */
-get_user_passphrases_prompt:
-	if ( forcepassphrase ) {
-		oldpass = newpass = NULL;
-	}
-
-	if ( ! oldpass ) {
-		oldpass = obuf
-			= snmp_getpassphrase(
-			    (promptindicator) ? "Old passphrase: " : "",
-			    visible);
-	}
-	if ( ! newpass ) {
-		newpass = nbuf
-			= snmp_getpassphrase(
-			    (promptindicator) ? "New passphrase: " : "",
-			    visible);
-	}
+    if (oldpass && newpass)
+        goto get_user_passphrases_quit;
 
 
 
-	/*
-	 * Check that both passphrases were defined.
-	 */
-	if ( oldpass && newpass ) {
-		goto get_user_passphrases_quit;
-	} else {
-		rval = SNMPERR_GENERR;
-	}
+    /*
+     * Prompt the user for passphrase entry.  Visible prompts
+     * may be omitted, and invisible entry may turned off.
+     */
+  get_user_passphrases_prompt:
+    if (forcepassphrase) {
+        oldpass = newpass = NULL;
+    }
+
+    if (!oldpass) {
+        oldpass = obuf
+            = snmp_getpassphrase((promptindicator) ? "Old passphrase: " :
+                                 "", visible);
+    }
+    if (!newpass) {
+        newpass = nbuf
+            = snmp_getpassphrase((promptindicator) ? "New passphrase: " :
+                                 "", visible);
+    }
 
 
-get_user_passphrases_quit:
-	SNMP_ZERO(buf, SNMP_MAXBUF);
 
-	if ( obuf != oldpass ) {
-		SNMP_ZERO(obuf, strlen(obuf));
-		SNMP_FREE(obuf);
-	}
-	if ( nbuf != newpass ) {
-		SNMP_ZERO(nbuf, strlen(nbuf));
-		SNMP_FREE(nbuf);
-	}
+    /*
+     * Check that both passphrases were defined.
+     */
+    if (oldpass && newpass) {
+        goto get_user_passphrases_quit;
+    } else {
+        rval = SNMPERR_GENERR;
+    }
 
-	return rval;
 
-}  /* end get_user_passphrases() */
+  get_user_passphrases_quit:
+    SNMP_ZERO(buf, SNMP_MAXBUF);
+
+    if (obuf != oldpass) {
+        SNMP_ZERO(obuf, strlen(obuf));
+        SNMP_FREE(obuf);
+    }
+    if (nbuf != newpass) {
+        SNMP_ZERO(nbuf, strlen(nbuf));
+        SNMP_FREE(nbuf);
+    }
+
+    return rval;
+
+}                               /* end get_user_passphrases() */
 
 /*******************************************************************-o-******
  * snmp_ttyecho
@@ -606,50 +632,50 @@ get_user_passphrases_quit:
 int
 snmp_ttyecho(const int fd, const int echo)
 {
-	struct termios tio;
-	int was_echo;
+    struct termios  tio;
+    int             was_echo;
 
 
-	if (!isatty(fd))
-		return (-1);
-	tcgetattr(fd, &tio);
-	was_echo = (tio.c_lflag & ECHO) != 0;
-	if (echo)
-		tio.c_lflag |= (ECHO | ECHONL);
-	else
-		tio.c_lflag &= ~(ECHO | ECHONL);
-	tcsetattr(fd, TCSANOW, &tio);
+    if (!isatty(fd))
+        return (-1);
+    tcgetattr(fd, &tio);
+    was_echo = (tio.c_lflag & ECHO) != 0;
+    if (echo)
+        tio.c_lflag |= (ECHO | ECHONL);
+    else
+        tio.c_lflag &= ~(ECHO | ECHONL);
+    tcsetattr(fd, TCSANOW, &tio);
 
-	return (was_echo);
+    return (was_echo);
 
-}  /* end snmp_ttyecho() */
+}                               /* end snmp_ttyecho() */
 
 #else
 #include <sgtty.h>
 int
 snmp_ttyecho(const int fd, const int echo)
 {
-	struct sgttyb ttyparams;
-	int was_echo;
+    struct sgttyb   ttyparams;
+    int             was_echo;
 
 
-	if (!isatty(fd))
-		was_echo = -1;
-	else {
-		ioctl(fd, TIOCGETP, &ttyparams);
-		was_echo = (ttyparams.sg_flags & ECHO) != 0;
-		if (echo)
-			ttyparams.sg_flags = ttyparams.sg_flags | ECHO;
-		else
-			ttyparams.sg_flags = ttyparams.sg_flags & ~ECHO;
-		ioctl(fd, TIOCSETP, &ttyparams);
-	}
+    if (!isatty(fd))
+        was_echo = -1;
+    else {
+        ioctl(fd, TIOCGETP, &ttyparams);
+        was_echo = (ttyparams.sg_flags & ECHO) != 0;
+        if (echo)
+            ttyparams.sg_flags = ttyparams.sg_flags | ECHO;
+        else
+            ttyparams.sg_flags = ttyparams.sg_flags & ~ECHO;
+        ioctl(fd, TIOCSETP, &ttyparams);
+    }
 
-	return (was_echo);
+    return (was_echo);
 
-}  /* end snmp_ttyecho() */
-#endif						/* HAVE_TCGETATTR */
-#endif						/* HAVE_GETPASS */
+}                               /* end snmp_ttyecho() */
+#endif                          /* HAVE_TCGETATTR */
+#endif                          /* HAVE_GETPASS */
 
 
 
@@ -672,82 +698,86 @@ snmp_ttyecho(const int fd, const int echo)
  *
  * FIX	Put HAVE_GETPASS in autoconf.
  */
-char *
+char           *
 snmp_getpassphrase(const char *prompt, int bvisible)
 {
-	int		 ti = 0;
-	size_t		 len;
+    int             ti = 0;
+    size_t          len;
 
-	char		*bufp = NULL;
-	static char	 buffer[SNMP_MAXBUF];
+    char           *bufp = NULL;
+    static char     buffer[SNMP_MAXBUF];
 
-	FILE		*ofp = stdout;
+    FILE           *ofp = stdout;
 
 
-	/*
-	 * Query stdin for a passphrase.
-	 */
+    /*
+     * Query stdin for a passphrase.
+     */
 #ifdef HAVE_GETPASS
-	if ( isatty(0) ) {
-		return getpass( (prompt) ? prompt : "" );
-	}
+    if (isatty(0)) {
+        return getpass((prompt) ? prompt : "");
+    }
 #endif
 
-	fputs( (prompt) ? prompt : "", ofp );
+    fputs((prompt) ? prompt : "", ofp);
 
-	if ( !bvisible ) {
-		ti = snmp_ttyecho(0, 0);
-	}
-	
-	fgets(buffer, sizeof(buffer), stdin);
+    if (!bvisible) {
+        ti = snmp_ttyecho(0, 0);
+    }
 
-	if ( !bvisible ) {
-		ti = snmp_ttyecho(0, ti);
-		fputs( "\n", ofp );
-	}
+    fgets(buffer, sizeof(buffer), stdin);
 
-
-	/*
-	 * Copy the input and zero out the read-in buffer.
-	 */
-	len = strlen(buffer);
-	if ( buffer[len-1] == '\n' )	buffer[--len] = '\0';
-
-	bufp = (char *)calloc(1,len+1);
-	memcpy(bufp, buffer, len+1);
-
-	SNMP_ZERO(buffer, SNMP_MAXBUF);
+    if (!bvisible) {
+        ti = snmp_ttyecho(0, ti);
+        fputs("\n", ofp);
+    }
 
 
-	return bufp;
+    /*
+     * Copy the input and zero out the read-in buffer.
+     */
+    len = strlen(buffer);
+    if (buffer[len - 1] == '\n')
+        buffer[--len] = '\0';
 
-}  /* end snmp_getpassphrase() */
+    bufp = (char *) calloc(1, len + 1);
+    memcpy(bufp, buffer, len + 1);
+
+    SNMP_ZERO(buffer, SNMP_MAXBUF);
+
+
+    return bufp;
+
+}                               /* end snmp_getpassphrase() */
 
 #ifdef WIN32
 
-int	snmp_ttyecho(const int fd, const int echo) { return 0; }
+int
+snmp_ttyecho(const int fd, const int echo)
+{
+    return 0;
+}
 
 /*
  * stops at the first newline, carrier return, or backspace.
  * WARNING! _getch does NOT read <Ctrl-C>
  */
-char *getpass( const char * prompt )
+char           *
+getpass(const char *prompt)
 {
-	static char pbuf[128];
-	int ch, lim;
+    static char     pbuf[128];
+    int             ch, lim;
 
-	_cputs(prompt);
-	for (ch=0, lim=0; ch != '\n' && lim < sizeof(pbuf); )
-	{
-		ch = _getch();  /* look ma, no echo ! */
-		if (ch == '\r' || ch == '\n' || ch == '\b')
-			break;
-		pbuf[lim++] = ch;
-	}
-	pbuf[lim] = '\0';
-	puts("\n");
+    _cputs(prompt);
+    for (ch = 0, lim = 0; ch != '\n' && lim < sizeof(pbuf);) {
+        ch = _getch();          /* look ma, no echo ! */
+        if (ch == '\r' || ch == '\n' || ch == '\b')
+            break;
+        pbuf[lim++] = ch;
+    }
+    pbuf[lim] = '\0';
+    puts("\n");
 
-	return pbuf;
+    return pbuf;
 }
-#endif /* WIN32 */
-
+#endif                          /* WIN32 */

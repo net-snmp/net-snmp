@@ -14,4 +14,4 @@
 #define SNMPD_CALLBACK_INDEX_START	 10
 #define SNMPD_CALLBACK_INDEX_STOP	 11
 
-#endif /* AGENT_CALLBACKS_H */
+#endif                          /* AGENT_CALLBACKS_H */

@@ -1,1 +1,1 @@
-void	init_hr_other (void);
+void            init_hr_other(void);

@@ -1,1 +1,3 @@
-/* chip specific definitions go here */
+/*
+ * chip specific definitions go here 
+ */

@@ -7,8 +7,8 @@
 
 #include "mibdefs.h"
 
-FindVarMethod var_extensible_vmstat;
-void init_vmstat(void);
+FindVarMethod   var_extensible_vmstat;
+void            init_vmstat(void);
 
 #define SWAPIN 3
 #define SWAPOUT 4
@@ -32,4 +32,4 @@ void init_vmstat(void);
 #define SYSRAWINTERRUPTS 59
 #define SYSRAWCONTEXT 60
 
-#endif /* _MIBGROUP_VMSTAT_H */
+#endif                          /* _MIBGROUP_VMSTAT_H */

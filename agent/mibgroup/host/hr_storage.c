@@ -26,7 +26,7 @@
 #ifndef dynix
 #if HAVE_SYS_VM_H
 #include <sys/vm.h>
-#if (!defined(KERNEL) || defined(MACH_USER_API)) && defined(HAVE_SYS_VMMETER_H) /*OS X does not #include <sys/vmmeter.h> if (defined(KERNEL) && !defined(MACH_USER_API))*/
+#if (!defined(KERNEL) || defined(MACH_USER_API)) && defined(HAVE_SYS_VMMETER_H) /*OS X does not #include <sys/vmmeter.h> if (defined(KERNEL) && !defined(MACH_USER_API)) */
 #include <sys/vmmeter.h>
 #endif
 #else
@@ -54,8 +54,8 @@
 #if HAVE_SYS_VMSYSTM_H
 #include <sys/vmsystm.h>
 #endif
-#endif /* vm/vm.h */
-#endif /* sys/vm.h */
+#endif                          /* vm/vm.h */
+#endif                          /* sys/vm.h */
 #if HAVE_SYS_POOL_H
 #if defined(MBPOOL_SYMBOL) && defined(MCLPOOL_SYMBOL)
 #define __POOL_EXPOSE
@@ -76,7 +76,7 @@
 #define USE_SYSCTL_VM
 #endif
 #endif
-#endif /* ifndef dynix */
+#endif                          /* ifndef dynix */
 
 #include "host_res.h"
 #include "hr_storage.h"
@@ -131,7 +131,7 @@
 
 #define HRSTORE_MONOTONICALLY_INCREASING
 
-	/*********************
+        /*********************
 	 *
 	 *  Kernel & interface information,
 	 *   and internal forward declarations
@@ -148,14 +148,14 @@ extern struct mnttab *HRFS_entry;
 #elif defined(HAVE_STATVFS)
 
 extern struct mntent *HRFS_entry;
-extern int fscount;
+extern int      fscount;
 #define HRFS_statfs	statvfs
 #define HRFS_mount	mnt_dir
 
 #elif defined(HAVE_GETFSSTAT)
 
 extern struct statfs *HRFS_entry;
-extern int fscount;
+extern int      fscount;
 #define HRFS_statfs	statfs
 #define HRFS_mount	f_mntonname
 
@@ -167,24 +167,26 @@ extern struct mntent *HRFS_entry;
 
 #endif
 
-static int physmem, pagesize;
+static int      physmem, pagesize;
 
-	/*********************
+        /*********************
 	 *
 	 *  Initialisation & common implementation functions
 	 *
 	 *********************/
-int Get_Next_HR_Store (void);
-void  Init_HR_Store (void);
-int header_hrstore (struct variable *,oid *, size_t *, int, size_t *, WriteMethod **);
-int header_hrstoreEntry (struct variable *,oid *, size_t *, int, size_t *, WriteMethod **);
+int             Get_Next_HR_Store(void);
+void            Init_HR_Store(void);
+int             header_hrstore(struct variable *, oid *, size_t *, int,
+                               size_t *, WriteMethod **);
+int             header_hrstoreEntry(struct variable *, oid *, size_t *,
+                                    int, size_t *, WriteMethod **);
 
 #ifdef linux
-int linux_mem (int, int);
+int             linux_mem(int, int);
 #endif
 
 #ifdef solaris2
-void sol_get_swapinfo (int *, int *);
+void            sol_get_swapinfo(int *, int *);
 #endif
 
 #define	HRSTORE_MEMSIZE		1
@@ -197,23 +199,24 @@ void sol_get_swapinfo (int *, int *);
 #define	HRSTORE_FAILS		8
 
 struct variable4 hrstore_variables[] = {
-    { HRSTORE_MEMSIZE,   ASN_INTEGER, RONLY, var_hrstore, 1, {2}},
-    { HRSTORE_INDEX,     ASN_INTEGER, RONLY, var_hrstore, 3, {3,1,1}},
-    { HRSTORE_TYPE,    ASN_OBJECT_ID, RONLY, var_hrstore, 3, {3,1,2}},
-    { HRSTORE_DESCR,   ASN_OCTET_STR, RONLY, var_hrstore, 3, {3,1,3}},
-    { HRSTORE_UNITS,     ASN_INTEGER, RONLY, var_hrstore, 3, {3,1,4}},
-    { HRSTORE_SIZE,      ASN_INTEGER, RONLY, var_hrstore, 3, {3,1,5}},
-    { HRSTORE_USED,      ASN_INTEGER, RONLY, var_hrstore, 3, {3,1,6}},
-    { HRSTORE_FAILS,     ASN_COUNTER, RONLY, var_hrstore, 3, {3,1,7}}
+    {HRSTORE_MEMSIZE, ASN_INTEGER, RONLY, var_hrstore, 1, {2}},
+    {HRSTORE_INDEX, ASN_INTEGER, RONLY, var_hrstore, 3, {3, 1, 1}},
+    {HRSTORE_TYPE, ASN_OBJECT_ID, RONLY, var_hrstore, 3, {3, 1, 2}},
+    {HRSTORE_DESCR, ASN_OCTET_STR, RONLY, var_hrstore, 3, {3, 1, 3}},
+    {HRSTORE_UNITS, ASN_INTEGER, RONLY, var_hrstore, 3, {3, 1, 4}},
+    {HRSTORE_SIZE, ASN_INTEGER, RONLY, var_hrstore, 3, {3, 1, 5}},
+    {HRSTORE_USED, ASN_INTEGER, RONLY, var_hrstore, 3, {3, 1, 6}},
+    {HRSTORE_FAILS, ASN_COUNTER, RONLY, var_hrstore, 3, {3, 1, 7}}
 };
-oid hrstore_variables_oid[] = { 1,3,6,1,2,1,25,2 };
+oid             hrstore_variables_oid[] = { 1, 3, 6, 1, 2, 1, 25, 2 };
 
 
-void init_hr_storage (void)
+void
+init_hr_storage(void)
 {
 #ifdef USE_SYSCTL
-    int mib [2];
-    size_t len;
+    int             mib[2];
+    size_t          len;
 #elif defined(hpux11)
     struct pst_static pst_buf;
 #endif
@@ -223,20 +226,20 @@ void init_hr_storage (void)
     mib[1] = HW_PHYSMEM;
     len = sizeof(physmem);
     if (sysctl(mib, 2, &physmem, &len, NULL, 0) == -1)
-    	snmp_log_perror("sysctl: physmem");
+        snmp_log_perror("sysctl: physmem");
     mib[1] = HW_PAGESIZE;
     len = sizeof(pagesize);
     if (sysctl(mib, 2, &pagesize, &len, NULL, 0) == -1)
-    	snmp_log_perror("sysctl: pagesize");
+        snmp_log_perror("sysctl: pagesize");
     physmem /= pagesize;
 #elif defined(hpux11)
     if (pstat_getstatic(&pst_buf, sizeof(struct pst_static), 1, 0) < 0) {
-	perror("pstat_getstatic");
+        perror("pstat_getstatic");
     } else {
-	physmem = pst_buf.physical_memory;
-	pagesize = pst_buf.page_size;
+        physmem = pst_buf.physical_memory;
+        pagesize = pst_buf.page_size;
     }
-#else	/* !USE_SYSCTL && !hpux11 */
+#else                           /* !USE_SYSCTL && !hpux11 */
 #ifdef HAVE_GETPAGESIZE
     pagesize = getpagesize();
 #elif defined(_SC_PAGESIZE)
@@ -248,9 +251,10 @@ void init_hr_storage (void)
 #elif defined(PAGE_SIZE)
     pagesize = PAGE_SIZE;
 #elif defined(linux)
-    { struct stat kc_buf;
-      stat("/proc/kcore", &kc_buf);
-      pagesize = kc_buf.st_size/1024;	/* 4K too large ? */
+    {
+        struct stat     kc_buf;
+        stat("/proc/kcore", &kc_buf);
+        pagesize = kc_buf.st_size / 1024;       /* 4K too large ? */
     }
 #else
     pagesize = PAGESIZE;
@@ -261,491 +265,514 @@ void init_hr_storage (void)
 #ifdef dynix
     physmem = sysconf(_SC_PHYSMEM);
 #else
-    auto_nlist(PHYSMEM_SYMBOL, (char *)&physmem, sizeof (physmem));
+    auto_nlist(PHYSMEM_SYMBOL, (char *) &physmem, sizeof(physmem));
 #endif
 #endif
-#endif	/* !USE_SYSCTL && !hpux11 */
+#endif                          /* !USE_SYSCTL && !hpux11 */
 #ifdef TOTAL_MEMORY_SYMBOL
-    auto_nlist(TOTAL_MEMORY_SYMBOL,0,0);
+    auto_nlist(TOTAL_MEMORY_SYMBOL, 0, 0);
 #endif
 #ifdef MBSTAT_SYMBOL
-    auto_nlist(MBSTAT_SYMBOL,0,0);
+    auto_nlist(MBSTAT_SYMBOL, 0, 0);
 #endif
 
-    REGISTER_MIB("host/hr_storage", hrstore_variables, variable4, hrstore_variables_oid);
+    REGISTER_MIB("host/hr_storage", hrstore_variables, variable4,
+                 hrstore_variables_oid);
 }
 
 /*
-  header_hrstore(...
-  Arguments:
-  vp	  IN      - pointer to variable entry that points here
-  name    IN/OUT  - IN/name requested, OUT/name found
-  length  IN/OUT  - length of IN/OUT oid's 
-  exact   IN      - TRUE if an exact match was requested
-  var_len OUT     - length of variable or 0 if function returned
-  write_method
-  
-*/
+ * header_hrstore(...
+ * Arguments:
+ * vp     IN      - pointer to variable entry that points here
+ * name    IN/OUT  - IN/name requested, OUT/name found
+ * length  IN/OUT  - length of IN/OUT oid's 
+ * exact   IN      - TRUE if an exact match was requested
+ * var_len OUT     - length of variable or 0 if function returned
+ * write_method
+ * 
+ */
 
 int
 header_hrstore(struct variable *vp,
-	       oid *name,
-	       size_t *length,
-	       int exact,
-	       size_t *var_len,
-	       WriteMethod **write_method)
+               oid * name,
+               size_t * length,
+               int exact, size_t * var_len, WriteMethod ** write_method)
 {
 #define HRSTORE_NAME_LENGTH	9
-    oid newname[MAX_OID_LEN];
-    int result;
+    oid             newname[MAX_OID_LEN];
+    int             result;
 
     DEBUGMSGTL(("host/hr_storage", "var_hrstore: "));
     DEBUGMSGOID(("host/hr_storage", name, *length));
-    DEBUGMSG(("host/hr_storage"," %d\n", exact));
+    DEBUGMSG(("host/hr_storage", " %d\n", exact));
 
-    memcpy( (char *)newname,(char *)vp->name, vp->namelen * sizeof(oid));
+    memcpy((char *) newname, (char *) vp->name, vp->namelen * sizeof(oid));
     newname[HRSTORE_NAME_LENGTH] = 0;
     result = snmp_oid_compare(name, *length, newname, vp->namelen + 1);
     if ((exact && (result != 0)) || (!exact && (result >= 0)))
-        return(MATCH_FAILED);
-    memcpy( (char *)name,(char *)newname, (vp->namelen + 1) * sizeof(oid));
+        return (MATCH_FAILED);
+    memcpy((char *) name, (char *) newname,
+           (vp->namelen + 1) * sizeof(oid));
     *length = vp->namelen + 1;
 
     *write_method = 0;
-    *var_len = sizeof(long);	/* default to 'long' results */
-    return(MATCH_SUCCEEDED);
+    *var_len = sizeof(long);    /* default to 'long' results */
+    return (MATCH_SUCCEEDED);
 }
 
 int
 header_hrstoreEntry(struct variable *vp,
-		    oid *name,
-		    size_t *length,
-		    int exact,
-		    size_t *var_len,
-		    WriteMethod **write_method)
+                    oid * name,
+                    size_t * length,
+                    int exact,
+                    size_t * var_len, WriteMethod ** write_method)
 {
 #define HRSTORE_ENTRY_NAME_LENGTH	11
-    oid newname[MAX_OID_LEN];
-    int storage_idx, LowIndex = -1;
-    int result;
+    oid             newname[MAX_OID_LEN];
+    int             storage_idx, LowIndex = -1;
+    int             result;
 
     DEBUGMSGTL(("host/hr_storage", "var_hrstoreEntry: "));
     DEBUGMSGOID(("host/hr_storage", name, *length));
-    DEBUGMSG(("host/hr_storage"," %d\n", exact));
+    DEBUGMSG(("host/hr_storage", " %d\n", exact));
 
-    memcpy( (char *)newname,(char *)vp->name, (int)vp->namelen * sizeof(oid));
-	/* Find "next" storage entry */
+    memcpy((char *) newname, (char *) vp->name,
+           (int) vp->namelen * sizeof(oid));
+    /*
+     * Find "next" storage entry 
+     */
 
     Init_HR_Store();
-    for ( ;; ) {
+    for (;;) {
         storage_idx = Get_Next_HR_Store();
         DEBUGMSG(("host/hr_storage", "(index %d ....", storage_idx));
-        if ( storage_idx == -1 )
-	    break;
-	newname[HRSTORE_ENTRY_NAME_LENGTH] = storage_idx;
-    DEBUGMSGOID(("host/hr_storage", newname, *length));
-    DEBUGMSG(("host/hr_storage","\n"));
+        if (storage_idx == -1)
+            break;
+        newname[HRSTORE_ENTRY_NAME_LENGTH] = storage_idx;
+        DEBUGMSGOID(("host/hr_storage", newname, *length));
+        DEBUGMSG(("host/hr_storage", "\n"));
         result = snmp_oid_compare(name, *length, newname, vp->namelen + 1);
         if (exact && (result == 0)) {
-	    LowIndex = storage_idx;
-	    /* Save storage status information */
+            LowIndex = storage_idx;
+            /*
+             * Save storage status information 
+             */
             break;
-	}
-	if ((!exact && (result < 0)) &&
-		( LowIndex == -1 || storage_idx < LowIndex )) {
-	    LowIndex = storage_idx;
-	    /* Save storage status information */
+        }
+        if ((!exact && (result < 0)) &&
+            (LowIndex == -1 || storage_idx < LowIndex)) {
+            LowIndex = storage_idx;
+            /*
+             * Save storage status information 
+             */
 #ifdef HRSTORE_MONOTONICALLY_INCREASING
             break;
 #endif
-	}
+        }
     }
 
-    if ( LowIndex == -1 ) {
+    if (LowIndex == -1) {
         DEBUGMSGTL(("host/hr_storage", "... index out of range\n"));
-        return(MATCH_FAILED);
+        return (MATCH_FAILED);
     }
 
-    memcpy( (char *)name,(char *)newname, ((int)vp->namelen + 1) * sizeof(oid));
+    memcpy((char *) name, (char *) newname,
+           ((int) vp->namelen + 1) * sizeof(oid));
     *length = vp->namelen + 1;
     *write_method = 0;
-    *var_len = sizeof(long);	/* default to 'long' results */
+    *var_len = sizeof(long);    /* default to 'long' results */
 
     DEBUGMSGTL(("host/hr_storage", "... get storage stats "));
     DEBUGMSGOID(("host/hr_storage", name, *length));
-    DEBUGMSG(("host/hr_storage","\n"));
+    DEBUGMSG(("host/hr_storage", "\n"));
     return LowIndex;
 }
 
-oid storage_type_id[] = { 1,3,6,1,2,1, 25, 2, 1, 1 };		/* hrStorageOther */
-int storage_type_len = sizeof(storage_type_id)/sizeof(storage_type_id[0]);
+oid             storage_type_id[] = { 1, 3, 6, 1, 2, 1, 25, 2, 1, 1 };  /* hrStorageOther */
+int             storage_type_len =
+    sizeof(storage_type_id) / sizeof(storage_type_id[0]);
 
-	/*********************
+        /*********************
 	 *
 	 *  System specific implementation functions
 	 *
 	 *********************/
 
 static const char *hrs_descr[] = {
-	NULL,
-	"Real Memory",		/* HRS_TYPE_MEM */
-	"Swap Space",		/* HRS_TYPE_SWAP */
-	"Memory Buffers"	/* HRS_TYPE_MBUF */
+    NULL,
+    "Real Memory",              /* HRS_TYPE_MEM */
+    "Swap Space",               /* HRS_TYPE_SWAP */
+    "Memory Buffers"            /* HRS_TYPE_MBUF */
 };
 
 
 
-u_char *
+u_char         *
 var_hrstore(struct variable *vp,
-	    oid *name,
-	    size_t *length,
-	    int exact,
-	    size_t *var_len,
-	    WriteMethod **write_method)
+            oid * name,
+            size_t * length,
+            int exact, size_t * var_len, WriteMethod ** write_method)
 {
-    int store_idx=0;
+    int             store_idx = 0;
 #if defined(solaris2)
-    int freemem;
-    int swap_total, swap_used;
+    int             freemem;
+    int             swap_total, swap_used;
 #elif !defined(linux)
 #if defined(TOTAL_MEMORY_SYMBOL) || defined(USE_SYSCTL_VM)
-    struct vmtotal memory_totals;
+    struct vmtotal  memory_totals;
 #endif
 #if HAVE_SYS_POOL_H
-    struct pool mbpool, mclpool;
-    int i;
+    struct pool     mbpool, mclpool;
+    int             i;
 #endif
 #ifdef MBSTAT_SYMBOL
-    struct mbstat  mbstat;
+    struct mbstat   mbstat;
 #endif
-#endif	/* !linux */
-    static char string[100];
+#endif                          /* !linux */
+    static char     string[100];
     struct HRFS_statfs stat_buf;
 
-    if ( vp->magic == HRSTORE_MEMSIZE ) {
-        if (header_hrstore(vp, name, length, exact, var_len, write_method) == MATCH_FAILED )
-	    return NULL;
-    }
-    else {
-        
-        store_idx = header_hrstoreEntry(vp, name, length, exact, var_len, write_method);
-        if ( store_idx == MATCH_FAILED )
-	    return NULL;
+    if (vp->magic == HRSTORE_MEMSIZE) {
+        if (header_hrstore(vp, name, length, exact, var_len, write_method)
+            == MATCH_FAILED)
+            return NULL;
+    } else {
 
-	if ( store_idx < HRS_TYPE_FS_MAX ) {
-	    if ( HRFS_statfs( HRFS_entry->HRFS_mount, &stat_buf) < 0 )
-		return NULL;
-	}
+        store_idx =
+            header_hrstoreEntry(vp, name, length, exact, var_len,
+                                write_method);
+        if (store_idx == MATCH_FAILED)
+            return NULL;
+
+        if (store_idx < HRS_TYPE_FS_MAX) {
+            if (HRFS_statfs(HRFS_entry->HRFS_mount, &stat_buf) < 0)
+                return NULL;
+        }
 #if !defined(linux) && !defined(solaris2)
-	else switch ( store_idx ) {
-		case HRS_TYPE_MEM:
-		case HRS_TYPE_SWAP:
+        else
+            switch (store_idx) {
+            case HRS_TYPE_MEM:
+            case HRS_TYPE_SWAP:
 #ifdef USE_SYSCTL_VM
-			{   int mib[2];
-			    size_t len = sizeof(memory_totals);
-			    mib[0] = CTL_VM;
-			    mib[1] = VM_METER;
-			    sysctl(mib, 2, &memory_totals, &len, NULL, 0);
-			}
+                {
+                    int             mib[2];
+                    size_t          len = sizeof(memory_totals);
+                    mib[0] = CTL_VM;
+                    mib[1] = VM_METER;
+                    sysctl(mib, 2, &memory_totals, &len, NULL, 0);
+                }
 #elif defined(TOTAL_MEMORY_SYMBOL)
-			auto_nlist(TOTAL_MEMORY_SYMBOL, (char *)&memory_totals, sizeof (struct vmtotal));
+                auto_nlist(TOTAL_MEMORY_SYMBOL, (char *) &memory_totals,
+                           sizeof(struct vmtotal));
 #endif
-			break;
-		case HRS_TYPE_MBUF:
+                break;
+            case HRS_TYPE_MBUF:
 #if HAVE_SYS_POOL_H
-			auto_nlist(MBPOOL_SYMBOL, (char *)&mbpool, sizeof(mbpool));
-			auto_nlist(MCLPOOL_SYMBOL, (char *)&mclpool, sizeof(mclpool));
+                auto_nlist(MBPOOL_SYMBOL, (char *) &mbpool,
+                           sizeof(mbpool));
+                auto_nlist(MCLPOOL_SYMBOL, (char *) &mclpool,
+                           sizeof(mclpool));
 #endif
 #ifdef MBSTAT_SYMBOL
-			auto_nlist(MBSTAT_SYMBOL, (char *)&mbstat, sizeof (mbstat));
+                auto_nlist(MBSTAT_SYMBOL, (char *) &mbstat,
+                           sizeof(mbstat));
 #endif
-			break;
-		default:
-			break;
-	}
-#endif	/* !linux && !solaris2 */
+                break;
+            default:
+                break;
+            }
+#endif                          /* !linux && !solaris2 */
     }
-        
 
 
-    switch (vp->magic){
-	case HRSTORE_MEMSIZE:
-	    long_return = physmem * (pagesize / 1024);
-	    return (u_char *)&long_return;
 
-	case HRSTORE_INDEX:
-	    long_return = store_idx;
-	    return (u_char *)&long_return;
-	case HRSTORE_TYPE:
-	    if ( store_idx < HRS_TYPE_FS_MAX )
-		storage_type_id[storage_type_len-1] = 4;	/* Assume fixed */
-	    else switch ( store_idx ) {
-		case HRS_TYPE_MEM:
-			storage_type_id[storage_type_len-1] = 2;	/* RAM */
-			break;
-		case HRS_TYPE_SWAP:
-			storage_type_id[storage_type_len-1] = 3;	/* Virtual Mem */
-			break;
-		case HRS_TYPE_MBUF:
-			storage_type_id[storage_type_len-1] = 1;	/* Other */
-			break;
-		default:
-			storage_type_id[storage_type_len-1] = 1;	/* Other */
-			break;
-	    }
-            *var_len = sizeof(storage_type_id);
-	    return (u_char *)storage_type_id;
-	case HRSTORE_DESCR:
-	    if (store_idx<HRS_TYPE_FS_MAX) {
-	        strcpy(string, HRFS_entry->HRFS_mount);
-	        *var_len = strlen(string);
-	        return (u_char *) string;
-	    }
-	    else {
-	        store_idx = store_idx-HRS_TYPE_FS_MAX;
-	        *var_len = strlen( hrs_descr[store_idx] );
-	        return (u_char *)hrs_descr[store_idx];
-	    }
-	case HRSTORE_UNITS:
-	    if ( store_idx < HRS_TYPE_FS_MAX )
+    switch (vp->magic) {
+    case HRSTORE_MEMSIZE:
+        long_return = physmem * (pagesize / 1024);
+        return (u_char *) & long_return;
+
+    case HRSTORE_INDEX:
+        long_return = store_idx;
+        return (u_char *) & long_return;
+    case HRSTORE_TYPE:
+        if (store_idx < HRS_TYPE_FS_MAX)
+            storage_type_id[storage_type_len - 1] = 4;  /* Assume fixed */
+        else
+            switch (store_idx) {
+            case HRS_TYPE_MEM:
+                storage_type_id[storage_type_len - 1] = 2;      /* RAM */
+                break;
+            case HRS_TYPE_SWAP:
+                storage_type_id[storage_type_len - 1] = 3;      /* Virtual Mem */
+                break;
+            case HRS_TYPE_MBUF:
+                storage_type_id[storage_type_len - 1] = 1;      /* Other */
+                break;
+            default:
+                storage_type_id[storage_type_len - 1] = 1;      /* Other */
+                break;
+            }
+        *var_len = sizeof(storage_type_id);
+        return (u_char *) storage_type_id;
+    case HRSTORE_DESCR:
+        if (store_idx < HRS_TYPE_FS_MAX) {
+            strcpy(string, HRFS_entry->HRFS_mount);
+            *var_len = strlen(string);
+            return (u_char *) string;
+        } else {
+            store_idx = store_idx - HRS_TYPE_FS_MAX;
+            *var_len = strlen(hrs_descr[store_idx]);
+            return (u_char *) hrs_descr[store_idx];
+        }
+    case HRSTORE_UNITS:
+        if (store_idx < HRS_TYPE_FS_MAX)
 #if STRUCT_STATVFS_HAS_F_FRSIZE
-		long_return = stat_buf.f_frsize;
+            long_return = stat_buf.f_frsize;
 #else
-		long_return = stat_buf.f_bsize;
+            long_return = stat_buf.f_bsize;
 #endif
-	    else switch ( store_idx ) {
-		case HRS_TYPE_MEM:
-		case HRS_TYPE_SWAP:
+        else
+            switch (store_idx) {
+            case HRS_TYPE_MEM:
+            case HRS_TYPE_SWAP:
 #if defined(USE_SYSCTL) || defined(solaris2)
-			long_return = pagesize;
+                long_return = pagesize;
 #elif defined(NBPG)
-			long_return = NBPG;
+                long_return = NBPG;
 #else
-			long_return = 1024;	/* Report in Kb */
+                long_return = 1024;     /* Report in Kb */
 #endif
-			break;
-		case HRS_TYPE_MBUF:
+                break;
+            case HRS_TYPE_MBUF:
 #ifdef MSIZE
-			long_return = MSIZE;
+                long_return = MSIZE;
 #else
-			long_return = 256;
+                long_return = 256;
 #endif
-			break;
-		default:
+                break;
+            default:
 #if NO_DUMMY_VALUES
-			return NULL;
+                return NULL;
 #endif
-			long_return = 1024;	/* As likely as any! */
-			break;
-	    }
-	    return (u_char *)&long_return;
-	case HRSTORE_SIZE:
-	    if ( store_idx < HRS_TYPE_FS_MAX )
-		long_return = stat_buf.f_blocks;
-	    else switch ( store_idx ) {
+                long_return = 1024;     /* As likely as any! */
+                break;
+            }
+        return (u_char *) & long_return;
+    case HRSTORE_SIZE:
+        if (store_idx < HRS_TYPE_FS_MAX)
+            long_return = stat_buf.f_blocks;
+        else
+            switch (store_idx) {
 #if defined(linux)
-		case HRS_TYPE_MEM:
-		case HRS_TYPE_SWAP:
-			long_return = linux_mem( store_idx, HRSTORE_SIZE);
-			break;
+            case HRS_TYPE_MEM:
+            case HRS_TYPE_SWAP:
+                long_return = linux_mem(store_idx, HRSTORE_SIZE);
+                break;
 #elif defined(solaris2)
-		case HRS_TYPE_MEM:
-			long_return = physmem;
-			break;
-		case HRS_TYPE_SWAP:
-			sol_get_swapinfo(&swap_total, &swap_used);
-			long_return = swap_total;
-			break;
-#else	/* !linux && !solaris2 */
+            case HRS_TYPE_MEM:
+                long_return = physmem;
+                break;
+            case HRS_TYPE_SWAP:
+                sol_get_swapinfo(&swap_total, &swap_used);
+                long_return = swap_total;
+                break;
+#else                           /* !linux && !solaris2 */
 #if defined(TOTAL_MEMORY_SYMBOL) || defined(USE_SYSCTL_VM)
-		case HRS_TYPE_MEM:
-			long_return = memory_totals.t_rm;
-			break;
-		case HRS_TYPE_SWAP:
-			long_return = memory_totals.t_vm;
-			break;
-#else	/* TOTAL_MEMORY_SYMBOL || USE_SYSCTL_VM */
-		case HRS_TYPE_MEM:
-			long_return = physmem;
-			break;
-		case HRS_TYPE_SWAP:
+            case HRS_TYPE_MEM:
+                long_return = memory_totals.t_rm;
+                break;
+            case HRS_TYPE_SWAP:
+                long_return = memory_totals.t_vm;
+                break;
+#else                           /* TOTAL_MEMORY_SYMBOL || USE_SYSCTL_VM */
+            case HRS_TYPE_MEM:
+                long_return = physmem;
+                break;
+            case HRS_TYPE_SWAP:
 #if NO_DUMMY_VALUES
-			return NULL;
+                return NULL;
 #endif
-			long_return = 0;
-			break;
-#endif	/* TOTAL_MEMORY_SYMBOL || USE_SYSCTL_VM */
-		case HRS_TYPE_MBUF:
+                long_return = 0;
+                break;
+#endif                          /* TOTAL_MEMORY_SYMBOL || USE_SYSCTL_VM */
+            case HRS_TYPE_MBUF:
 #if HAVE_SYS_POOL_H
-			long_return = 0;
-			for (i = 0; i < sizeof(mbstat.m_mtypes)/sizeof(mbstat.m_mtypes[0]); i++)
-			    long_return += mbstat.m_mtypes[i];
+                long_return = 0;
+                for (i = 0;
+                     i <
+                     sizeof(mbstat.m_mtypes) / sizeof(mbstat.m_mtypes[0]);
+                     i++)
+                    long_return += mbstat.m_mtypes[i];
 #elif defined(MBSTAT_SYMBOL)
-			long_return = mbstat.m_mbufs;
+                long_return = mbstat.m_mbufs;
 #elif defined(NO_DUMMY_VALUES)
-			return NULL;
+                return NULL;
 #else
-			long_return = 0;
+                long_return = 0;
 #endif
-			break;
-#endif	/* !linux && !solaris2 */
-		default:
+                break;
+#endif                          /* !linux && !solaris2 */
+            default:
 #if NO_DUMMY_VALUES
-			return NULL;
+                return NULL;
 #endif
-			long_return = 1024;
-			break;
-	    }
-	    return (u_char *)&long_return;
-	case HRSTORE_USED:
-	    if ( store_idx < HRS_TYPE_FS_MAX )
-		long_return = (stat_buf.f_blocks - stat_buf.f_bfree);
-	    else switch ( store_idx ) {
+                long_return = 1024;
+                break;
+            }
+        return (u_char *) & long_return;
+    case HRSTORE_USED:
+        if (store_idx < HRS_TYPE_FS_MAX)
+            long_return = (stat_buf.f_blocks - stat_buf.f_bfree);
+        else
+            switch (store_idx) {
 #if defined(linux)
-		case HRS_TYPE_MEM:
-		case HRS_TYPE_SWAP:
-			long_return = linux_mem( store_idx, HRSTORE_USED);
-			break;
+            case HRS_TYPE_MEM:
+            case HRS_TYPE_SWAP:
+                long_return = linux_mem(store_idx, HRSTORE_USED);
+                break;
 #elif defined(solaris2)
-		case HRS_TYPE_MEM:
-			getKstatInt("unix", "system_pages", "freemem",
-			    &freemem);
-			long_return = physmem - freemem;
-			break;
-		case HRS_TYPE_SWAP:
-			sol_get_swapinfo(&swap_total, &swap_used);
-			long_return = swap_used;
-			break;
-#else	/* !linux && !solaris2 */
+            case HRS_TYPE_MEM:
+                getKstatInt("unix", "system_pages", "freemem", &freemem);
+                long_return = physmem - freemem;
+                break;
+            case HRS_TYPE_SWAP:
+                sol_get_swapinfo(&swap_total, &swap_used);
+                long_return = swap_used;
+                break;
+#else                           /* !linux && !solaris2 */
 #if defined(TOTAL_MEMORY_SYMBOL) || defined(USE_SYSCTL_VM)
-		case HRS_TYPE_MEM:
-			long_return = memory_totals.t_arm;
-			break;
-		case HRS_TYPE_SWAP:
-			long_return = memory_totals.t_avm;
-			break;
-#endif	/* TOTAL_MEMORY_SYMBOL || USE_SYSCTL_VM */
-		case HRS_TYPE_MBUF:
+            case HRS_TYPE_MEM:
+                long_return = memory_totals.t_arm;
+                break;
+            case HRS_TYPE_SWAP:
+                long_return = memory_totals.t_avm;
+                break;
+#endif                          /* TOTAL_MEMORY_SYMBOL || USE_SYSCTL_VM */
+            case HRS_TYPE_MBUF:
 #if HAVE_SYS_POOL_H
-			long_return = (mbpool.pr_nget - mbpool.pr_nput)
-				    * mbpool.pr_size
-				+ (mclpool.pr_nget - mclpool.pr_nput)
-				    * mclpool.pr_size;
+                long_return = (mbpool.pr_nget - mbpool.pr_nput)
+                    * mbpool.pr_size + (mclpool.pr_nget - mclpool.pr_nput)
+                    * mclpool.pr_size;
 #elif defined(MBSTAT_SYMBOL)
-			long_return = mbstat.m_clusters - mbstat.m_clfree;	/* unlikely, but... */
+                long_return = mbstat.m_clusters - mbstat.m_clfree;      /* unlikely, but... */
 #elif defined(NO_DUMMY_VALUES)
-			return NULL;
+                return NULL;
 #else
-			long_return = 0;
+                long_return = 0;
 #endif
-			break;
-#endif	/* !linux && !solaris2 */
-		default:
+                break;
+#endif                          /* !linux && !solaris2 */
+            default:
 #if NO_DUMMY_VALUES
-			return NULL;
+                return NULL;
 #endif
-			long_return = 1024;
-			break;
-	    }
-	    return (u_char *)&long_return;
-	case HRSTORE_FAILS:
-	    if ( store_idx < HRS_TYPE_FS_MAX )
-		long_return = 0;
-	    else switch ( store_idx ) {
-		case HRS_TYPE_MEM:
-		case HRS_TYPE_SWAP:
+                long_return = 1024;
+                break;
+            }
+        return (u_char *) & long_return;
+    case HRSTORE_FAILS:
+        if (store_idx < HRS_TYPE_FS_MAX)
+            long_return = 0;
+        else
+            switch (store_idx) {
+            case HRS_TYPE_MEM:
+            case HRS_TYPE_SWAP:
 #if NO_DUMMY_VALUES
-			return NULL;
+                return NULL;
 #endif
-			long_return = 0;
-			break;
+                long_return = 0;
+                break;
 #if !defined(linux) && !defined(solaris2) && defined(MBSTAT_SYMBOL)
-		case HRS_TYPE_MBUF:
-			long_return = mbstat.m_drops;
-			break;
-#endif	/* !linux && !solaris2 && MBSTAT_SYMBOL */
-		default:
+            case HRS_TYPE_MBUF:
+                long_return = mbstat.m_drops;
+                break;
+#endif                          /* !linux && !solaris2 && MBSTAT_SYMBOL */
+            default:
 #if NO_DUMMY_VALUES
-			return NULL;
+                return NULL;
 #endif
-			long_return = 0;
-			break;
-	    }
-	    return (u_char *)&long_return;
-	default:
-	    DEBUGMSGTL(("snmpd", "unknown sub-id %d in var_hrstore\n", vp->magic));
+                long_return = 0;
+                break;
+            }
+        return (u_char *) & long_return;
+    default:
+        DEBUGMSGTL(("snmpd", "unknown sub-id %d in var_hrstore\n",
+                    vp->magic));
     }
     return NULL;
 }
 
 
-	/*********************
+        /*********************
 	 *
 	 *  Internal implementation functions
 	 *
 	 *********************/
 
-static int FS_storage;
-static int HRS_index;
+static int      FS_storage;
+static int      HRS_index;
 
 void
-Init_HR_Store (void)
+Init_HR_Store(void)
 {
-   HRS_index = -1;
-   Init_HR_FileSys();
-   FS_storage = 1;	/* Start with file-based storage */
+    HRS_index = -1;
+    Init_HR_FileSys();
+    FS_storage = 1;             /* Start with file-based storage */
 }
 
 int
 Get_Next_HR_Store(void)
 {
-		/* File-based storage */
+    /*
+     * File-based storage 
+     */
     long_return = -1;
-    if ( FS_storage == 1 ) {
-	HRS_index = Get_Next_HR_FileSys();
+    if (FS_storage == 1) {
+        HRS_index = Get_Next_HR_FileSys();
 
-        if ( HRS_index >= 0 ) 
+        if (HRS_index >= 0)
             return HRS_index;
-	FS_storage = 0;		/* End of filesystems */
-	HRS_index = HRS_TYPE_FS_MAX;
+        FS_storage = 0;         /* End of filesystems */
+        HRS_index = HRS_TYPE_FS_MAX;
     }
 
-		/* 'Other' storage types */
+    /*
+     * 'Other' storage types 
+     */
     ++HRS_index;
 #ifndef solaris2
-    if ( HRS_index < HRS_TYPE_MAX )
-	return HRS_index;
+    if (HRS_index < HRS_TYPE_MAX)
+        return HRS_index;
     else
 #else
-    if ( HRS_index < HRS_TYPE_MBUF )
-	return HRS_index;
+    if (HRS_index < HRS_TYPE_MBUF)
+        return HRS_index;
     else
 #endif
-	return -1;
+        return -1;
 }
 
 #ifdef linux
 int
-linux_mem(int mem_type, 
-	  int size_or_used)
+linux_mem(int mem_type, int size_or_used)
 {
-    FILE *fp;
-    char buf[100];
-    int size = -1, used = -1;
+    FILE           *fp;
+    char            buf[100];
+    int             size = -1, used = -1;
 
-    if ((fp = fopen( "/proc/meminfo", "r")) == NULL )
-	return -1;
+    if ((fp = fopen("/proc/meminfo", "r")) == NULL)
+        return -1;
 
-    while ( fgets( buf, sizeof(buf), fp ) != NULL ) {
-	if (( !strncmp( buf, "Mem:", 4 ) && mem_type == HRS_TYPE_MEM ) ||
-	    ( !strncmp( buf, "Swap:", 5 ) && mem_type == HRS_TYPE_SWAP )) {
-		sscanf( buf, "%*s %d %d", &size, &used );
-		break;
-	}
+    while (fgets(buf, sizeof(buf), fp) != NULL) {
+        if ((!strncmp(buf, "Mem:", 4) && mem_type == HRS_TYPE_MEM) ||
+            (!strncmp(buf, "Swap:", 5) && mem_type == HRS_TYPE_SWAP)) {
+            sscanf(buf, "%*s %d %d", &size, &used);
+            break;
+        }
     }
 
     fclose(fp);
-    return ( size_or_used == HRSTORE_SIZE ? size : used )/1024;
+    return (size_or_used == HRSTORE_SIZE ? size : used) / 1024;
 
 }
 #endif
@@ -757,11 +784,11 @@ sol_get_swapinfo(int *totalP, int *usedP)
     struct anoninfo ainfo;
 
     if (swapctl(SC_AINFO, &ainfo) < 0) {
-	*totalP = *usedP = 0;
-	return;
+        *totalP = *usedP = 0;
+        return;
     }
 
     *totalP = ainfo.ani_max;
     *usedP = ainfo.ani_resv;
 }
-#endif	/* solaris2 */
+#endif                          /* solaris2 */

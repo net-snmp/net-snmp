@@ -127,99 +127,111 @@
 #include "errormib.h"
 #include "util_funcs.h"
 
-static time_t errorstatustime=0;
-static int errorstatusprior=0;
-static char errorstring[STRMAX];
+static time_t   errorstatustime = 0;
+static int      errorstatusprior = 0;
+static char     errorstring[STRMAX];
 
 void
 setPerrorstatus(const char *to)
 {
-  char buf[STRMAX];
-  
-  sprintf(buf,"%s:  %s",to,strerror(errno));
-  snmp_log_perror(to);
-  seterrorstatus(buf,5);
+    char            buf[STRMAX];
+
+    sprintf(buf, "%s:  %s", to, strerror(errno));
+    snmp_log_perror(to);
+    seterrorstatus(buf, 5);
 }
 
 void
 seterrorstatus(const char *to, int prior)
 {
-  if (errorstatusprior <= prior ||
-      (ERRORTIMELENGTH < (time(NULL) - errorstatustime))) {
-    strcpy(errorstring,to);
-    errorstatusprior = prior;
-    errorstatustime = time(NULL);
-  }
+    if (errorstatusprior <= prior ||
+        (ERRORTIMELENGTH < (time(NULL) - errorstatustime))) {
+        strcpy(errorstring, to);
+        errorstatusprior = prior;
+        errorstatustime = time(NULL);
+    }
 }
 
-void init_errormib(void) 
+void
+init_errormib(void)
 {
 
-  /* define the structure we're going to ask the agent to register our
-     information at */
-  struct variable2 extensible_error_variables[] = {
-    {MIBINDEX, ASN_INTEGER, RONLY, var_extensible_errors, 1, {MIBINDEX}},
-    {ERRORNAME, ASN_OCTET_STR, RONLY, var_extensible_errors, 1, {ERRORNAME}},
-    {ERRORFLAG, ASN_INTEGER, RONLY, var_extensible_errors, 1, {ERRORFLAG}},
-    {ERRORMSG, ASN_OCTET_STR, RONLY, var_extensible_errors, 1, {ERRORMSG}}
-  };
+    /*
+     * define the structure we're going to ask the agent to register our
+     * information at 
+     */
+    struct variable2 extensible_error_variables[] = {
+        {MIBINDEX, ASN_INTEGER, RONLY, var_extensible_errors, 1,
+         {MIBINDEX}},
+        {ERRORNAME, ASN_OCTET_STR, RONLY, var_extensible_errors, 1,
+         {ERRORNAME}},
+        {ERRORFLAG, ASN_INTEGER, RONLY, var_extensible_errors, 1,
+         {ERRORFLAG}},
+        {ERRORMSG, ASN_OCTET_STR, RONLY, var_extensible_errors, 1,
+         {ERRORMSG}}
+    };
 
-  /* Define the OID pointer to the top of the mib tree that we're
-     registering underneath */
-  oid extensible_error_variables_oid[] = { UCDAVIS_MIB,ERRORMIBNUM };
+    /*
+     * Define the OID pointer to the top of the mib tree that we're
+     * registering underneath 
+     */
+    oid             extensible_error_variables_oid[] =
+        { UCDAVIS_MIB, ERRORMIBNUM };
 
-  /* register ourselves with the agent to handle our mib tree */
-  REGISTER_MIB("ucd-snmp/errormib", extensible_error_variables,
-               variable2, extensible_error_variables_oid);
+    /*
+     * register ourselves with the agent to handle our mib tree 
+     */
+    REGISTER_MIB("ucd-snmp/errormib", extensible_error_variables,
+                 variable2, extensible_error_variables_oid);
 }
 
 /*
-  var_extensible_errors(...
-  Arguments:
-  vp	  IN      - pointer to variable entry that points here
-  name    IN/OUT  - IN/name requested, OUT/name found
-  length  IN/OUT  - length of IN/OUT oid's 
-  exact   IN      - TRUE if an exact match was requested
-  var_len OUT     - length of variable or 0 if function returned
-  write_method
-  
-*/
-u_char *var_extensible_errors(struct variable *vp,
-				     oid *name,
-				     size_t *length,
-				     int exact,
-				     size_t *var_len,
-				     WriteMethod **write_method)
+ * var_extensible_errors(...
+ * Arguments:
+ * vp     IN      - pointer to variable entry that points here
+ * name    IN/OUT  - IN/name requested, OUT/name found
+ * length  IN/OUT  - length of IN/OUT oid's 
+ * exact   IN      - TRUE if an exact match was requested
+ * var_len OUT     - length of variable or 0 if function returned
+ * write_method
+ * 
+ */
+u_char         *
+var_extensible_errors(struct variable *vp,
+                      oid * name,
+                      size_t * length,
+                      int exact,
+                      size_t * var_len, WriteMethod ** write_method)
 {
 
-  static long long_ret;
-  static char errmsg[300];
+    static long     long_ret;
+    static char     errmsg[300];
 
 
-  if (header_generic(vp,name,length,exact,var_len,write_method))
-    return(NULL);
+    if (header_generic(vp, name, length, exact, var_len, write_method))
+        return (NULL);
 
-  errmsg[0] = 0;
-  
-  switch (vp->magic) {
+    errmsg[0] = 0;
+
+    switch (vp->magic) {
     case MIBINDEX:
-      long_ret = name[*length - 1];
-      return((u_char *) (&long_ret));
+        long_ret = name[*length - 1];
+        return ((u_char *) (&long_ret));
     case ERRORNAME:
-      strcpy(errmsg,"snmp");
-      *var_len = strlen(errmsg);
-      return((u_char *) errmsg);
+        strcpy(errmsg, "snmp");
+        *var_len = strlen(errmsg);
+        return ((u_char *) errmsg);
     case ERRORFLAG:
-      long_ret = (ERRORTIMELENGTH >= time(NULL)-errorstatustime) ? 1 : 0;
-      return((u_char *) (&long_ret));
+        long_ret =
+            (ERRORTIMELENGTH >= time(NULL) - errorstatustime) ? 1 : 0;
+        return ((u_char *) (&long_ret));
     case ERRORMSG:
-      if ((ERRORTIMELENGTH >= time(NULL)-errorstatustime) ? 1 : 0) 
-        strcpy(errmsg,errorstring);
-      else
-        errmsg[0] = 0;
-      *var_len = strlen(errmsg);
-      return((u_char *) errmsg);
-  }
-  return NULL;
+        if ((ERRORTIMELENGTH >= time(NULL) - errorstatustime) ? 1 : 0)
+            strcpy(errmsg, errorstring);
+        else
+            errmsg[0] = 0;
+        *var_len = strlen(errmsg);
+        return ((u_char *) errmsg);
+    }
+    return NULL;
 }
-

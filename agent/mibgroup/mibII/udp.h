@@ -10,7 +10,7 @@ config_require(mibII/udpTable util_funcs)
 config_arch_require(solaris2, kernel_sunos5)
 config_arch_require(linux, mibII/kernel_linux)
 
-extern void	init_udp (void);
+extern void     init_udp(void);
 extern FindVarMethod var_udp;
 
 
@@ -21,4 +21,4 @@ extern FindVarMethod var_udp;
 #define UDPLOCALADDRESS     4
 #define UDPLOCALPORT	    5
 
-#endif /* _MIBGROUP_UDP_H */
+#endif                          /* _MIBGROUP_UDP_H */

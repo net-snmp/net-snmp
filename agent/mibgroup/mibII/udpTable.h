@@ -8,6 +8,6 @@
 config_arch_require(solaris2, kernel_sunos5)
 config_require(mibII/ip util_funcs)
 
-extern FindVarMethod var_udpEntry;
+     extern FindVarMethod var_udpEntry;
 
-#endif /* _MIBGROUP_UDPTABLE_H */
+#endif                          /* _MIBGROUP_UDPTABLE_H */

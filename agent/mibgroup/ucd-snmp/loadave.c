@@ -127,58 +127,77 @@
 #include "util_funcs.h"
 #include "kernel.h"
 
-double maxload[3];
+double          maxload[3];
 
-void init_loadave(void)
+void
+init_loadave(void)
 {
 
-/* define the structure we're going to ask the agent to register our
-   information at */
-  struct variable2 extensible_loadave_variables[] = {
-    {MIBINDEX, ASN_INTEGER, RONLY, var_extensible_loadave, 1, {MIBINDEX}},
-    {ERRORNAME, ASN_OCTET_STR, RONLY, var_extensible_loadave, 1, {ERRORNAME}},
-    {LOADAVE, ASN_OCTET_STR, RONLY, var_extensible_loadave, 1, {LOADAVE}},
-    {LOADMAXVAL, ASN_OCTET_STR, RONLY, var_extensible_loadave, 1, {LOADMAXVAL}},
-    {LOADAVEINT, ASN_INTEGER, RONLY, var_extensible_loadave, 1, {LOADAVEINT}},
+    /*
+     * define the structure we're going to ask the agent to register our
+     * information at 
+     */
+    struct variable2 extensible_loadave_variables[] = {
+        {MIBINDEX, ASN_INTEGER, RONLY, var_extensible_loadave, 1,
+         {MIBINDEX}},
+        {ERRORNAME, ASN_OCTET_STR, RONLY, var_extensible_loadave, 1,
+         {ERRORNAME}},
+        {LOADAVE, ASN_OCTET_STR, RONLY, var_extensible_loadave, 1,
+         {LOADAVE}},
+        {LOADMAXVAL, ASN_OCTET_STR, RONLY, var_extensible_loadave, 1,
+         {LOADMAXVAL}},
+        {LOADAVEINT, ASN_INTEGER, RONLY, var_extensible_loadave, 1,
+         {LOADAVEINT}},
 #ifdef OPAQUE_SPECIAL_TYPES
-    {LOADAVEFLOAT, ASN_OPAQUE_FLOAT, RONLY, var_extensible_loadave, 1, {LOADAVEFLOAT}},
+        {LOADAVEFLOAT, ASN_OPAQUE_FLOAT, RONLY, var_extensible_loadave, 1,
+         {LOADAVEFLOAT}},
 #endif
-    {ERRORFLAG, ASN_INTEGER, RONLY, var_extensible_loadave, 1, {ERRORFLAG}},
-    {ERRORMSG, ASN_OCTET_STR, RONLY, var_extensible_loadave, 1, {ERRORMSG}}
-  };
+        {ERRORFLAG, ASN_INTEGER, RONLY, var_extensible_loadave, 1,
+         {ERRORFLAG}},
+        {ERRORMSG, ASN_OCTET_STR, RONLY, var_extensible_loadave, 1,
+         {ERRORMSG}}
+    };
 
-/* Define the OID pointer to the top of the mib tree that we're
-   registering underneath */
-  oid loadave_variables_oid[] = { UCDAVIS_MIB,LOADAVEMIBNUM,1 };
+    /*
+     * Define the OID pointer to the top of the mib tree that we're
+     * registering underneath 
+     */
+    oid             loadave_variables_oid[] =
+        { UCDAVIS_MIB, LOADAVEMIBNUM, 1 };
 
-  /* register ourselves with the agent to handle our mib tree */
-  REGISTER_MIB("ucd-snmp/loadave", extensible_loadave_variables, variable2,
-               loadave_variables_oid);
+    /*
+     * register ourselves with the agent to handle our mib tree 
+     */
+    REGISTER_MIB("ucd-snmp/loadave", extensible_loadave_variables,
+                 variable2, loadave_variables_oid);
 
-  snmpd_register_config_handler("load", loadave_parse_config,
-                                loadave_free_config, "max1 [max5] [max15]");
+    snmpd_register_config_handler("load", loadave_parse_config,
+                                  loadave_free_config,
+                                  "max1 [max5] [max15]");
 }
 
-void loadave_parse_config(const char *token, char* cptr)
+void
+loadave_parse_config(const char *token, char *cptr)
 {
-  int i;
-  
-  for(i=0;i<=2;i++) {
-    if (cptr != NULL)
-      maxload[i] = atof(cptr);
-    else
-      maxload[i] = maxload[i-1];
-    cptr = skip_not_white(cptr);
-    cptr = skip_white(cptr);
-  }
+    int             i;
+
+    for (i = 0; i <= 2; i++) {
+        if (cptr != NULL)
+            maxload[i] = atof(cptr);
+        else
+            maxload[i] = maxload[i - 1];
+        cptr = skip_not_white(cptr);
+        cptr = skip_white(cptr);
+    }
 }
 
-void loadave_free_config (void)
+void
+loadave_free_config(void)
 {
-  int i;
-  
-  for (i=0; i<=2;i++)
-    maxload[i] = DEFMAXLOADAVE;
+    int             i;
+
+    for (i = 0; i <= 2; i++)
+        maxload[i] = DEFMAXLOADAVE;
 }
 
 /*
@@ -186,140 +205,149 @@ void loadave_free_config (void)
  * Inputs: pointer to array of doubles, number of elements in array
  * Returns: 0=array has values, -1=error occurred.
  */
-int try_getloadavg(double *r_ave, size_t s_ave)
+int
+try_getloadavg(double *r_ave, size_t s_ave)
 {
-  double *pave = r_ave;
+    double         *pave = r_ave;
 #ifdef HAVE_SYS_FIXPOINT_H
-  fix favenrun[3];
+    fix             favenrun[3];
 #endif
 #if (defined(ultrix) || defined(sun) || defined(__alpha) || defined(dynix))
-  int i;
+    int             i;
 #if (defined(sun) || defined(__alpha) || defined(dynix))
-  long favenrun[3];
-  if (s_ave > 3) /* bounds check */
-    return (-1); 
+    long            favenrun[3];
+    if (s_ave > 3)              /* bounds check */
+        return (-1);
 #define FIX_TO_DBL(_IN) (((double) _IN)/((double) FSCALE))
 #endif
 #endif
 #ifdef aix4
-  int favenrun[3];
+    int             favenrun[3];
 #endif
 
 
 #ifdef HAVE_GETLOADAVG
-  if (getloadavg(pave, s_ave) == -1)
-    return(-1);
+    if (getloadavg(pave, s_ave) == -1)
+        return (-1);
 #elif defined(linux)
-  { FILE *in = fopen("/proc/loadavg", "r");
-    if (!in) {
-      snmp_log(LOG_ERR, "snmpd: cannot open /proc/loadavg\n");
-      return (-1);
+    {
+        FILE           *in = fopen("/proc/loadavg", "r");
+        if (!in) {
+            snmp_log(LOG_ERR, "snmpd: cannot open /proc/loadavg\n");
+            return (-1);
+        }
+        fscanf(in, "%lf %lf %lf", pave, (pave + 1), (pave + 2));
+        fclose(in);
     }
-    fscanf(in, "%lf %lf %lf", pave, (pave + 1), (pave + 2));
-    fclose(in);
-  }
 #elif (defined(ultrix) || defined(sun) || defined(__alpha) || defined(dynix))
-  if (auto_nlist(LOADAVE_SYMBOL,(char *) favenrun, sizeof(favenrun)) == 0)
-    return(-1);
-  for(i=0;i<s_ave;i++)
-    *(pave+i) = FIX_TO_DBL(favenrun[i]);
+    if (auto_nlist(LOADAVE_SYMBOL, (char *) favenrun, sizeof(favenrun)) ==
+        0)
+        return (-1);
+    for (i = 0; i < s_ave; i++)
+        *(pave + i) = FIX_TO_DBL(favenrun[i]);
 #elif !defined(cygwin)
 #ifdef CAN_USE_NLIST
 #if aix4
-  if (auto_nlist(LOADAVE_SYMBOL,(char *) favenrun, sizeof(favenrun)) == 0)
-    return -1;
-  r_ave[0] = favenrun[0]/65536.0;
-  r_ave[1] = favenrun[1]/65536.0;
-  r_ave[2] = favenrun[2]/65536.0;
-  return 0;
+    if (auto_nlist(LOADAVE_SYMBOL, (char *) favenrun, sizeof(favenrun)) ==
+        0)
+        return -1;
+    r_ave[0] = favenrun[0] / 65536.0;
+    r_ave[1] = favenrun[1] / 65536.0;
+    r_ave[2] = favenrun[2] / 65536.0;
+    return 0;
 #else
-  if (auto_nlist(LOADAVE_SYMBOL,(char *) pave, sizeof(double)*s_ave) == 0)
+    if (auto_nlist(LOADAVE_SYMBOL, (char *) pave, sizeof(double) * s_ave)
+        == 0)
 #endif
 #endif
-    return (-1);
+        return (-1);
 #endif
-/*
- * XXX
- *   To calculate this, we need to compare
- *   successive values of the kernel array
- *   '_cp_times', and calculate the resulting
- *   percentage changes.
- *     This calculation needs to be performed
- *   regularly - perhaps as a background process.
- *
- *   See the source to 'top' for full details.
- *
- * The linux SNMP HostRes implementation
- *   uses 'avenrun[0]*100' as an approximation.
- *   This is less than accurate, but has the
- *   advantage of being simple to implement!
- *
- * I'm also assuming a single processor
- */
-  return 0;
+    /*
+     * XXX
+     *   To calculate this, we need to compare
+     *   successive values of the kernel array
+     *   '_cp_times', and calculate the resulting
+     *   percentage changes.
+     *     This calculation needs to be performed
+     *   regularly - perhaps as a background process.
+     *
+     *   See the source to 'top' for full details.
+     *
+     * The linux SNMP HostRes implementation
+     *   uses 'avenrun[0]*100' as an approximation.
+     *   This is less than accurate, but has the
+     *   advantage of being simple to implement!
+     *
+     * I'm also assuming a single processor
+     */
+    return 0;
 }
-  
-u_char *var_extensible_loadave(struct variable *vp,
-				      oid *name,
-				      size_t *length,
-				      int exact,
-				      size_t *var_len,
-				      WriteMethod **write_method)
+
+u_char         *
+var_extensible_loadave(struct variable * vp,
+                       oid * name,
+                       size_t * length,
+                       int exact,
+                       size_t * var_len, WriteMethod ** write_method)
 {
 
-  static long long_ret;
-  static float float_ret;
-  static char errmsg[300];
-  double avenrun[3];
-  if (header_simple_table(vp,name,length,exact,var_len,write_method,3))
-    return(NULL);
-  switch (vp->magic) {
+    static long     long_ret;
+    static float    float_ret;
+    static char     errmsg[300];
+    double          avenrun[3];
+    if (header_simple_table
+        (vp, name, length, exact, var_len, write_method, 3))
+        return (NULL);
+    switch (vp->magic) {
     case MIBINDEX:
-      long_ret = name[*length-1];
-      return((u_char *) (&long_ret));
+        long_ret = name[*length - 1];
+        return ((u_char *) (&long_ret));
     case ERRORNAME:
-      sprintf(errmsg,"Load-%d",((name[*length-1] == 1) ? 1 :
-                                ((name[*length-1] == 2) ? 5 : 15)));
-      *var_len = strlen(errmsg);
-      return((u_char *) (errmsg));
-  }
-  if (try_getloadavg(&avenrun[0], sizeof(avenrun) / sizeof(avenrun[0])) == -1)
-    return(0);
-  switch (vp->magic) {
+        sprintf(errmsg, "Load-%d", ((name[*length - 1] == 1) ? 1 :
+                                    ((name[*length - 1] == 2) ? 5 : 15)));
+        *var_len = strlen(errmsg);
+        return ((u_char *) (errmsg));
+    }
+    if (try_getloadavg(&avenrun[0], sizeof(avenrun) / sizeof(avenrun[0]))
+        == -1)
+        return (0);
+    switch (vp->magic) {
     case LOADAVE:
-      
-      sprintf(errmsg,"%.2f",avenrun[name[*length-1]-1]); 
-      *var_len = strlen(errmsg);
-      return((u_char *) (errmsg));
+
+        sprintf(errmsg, "%.2f", avenrun[name[*length - 1] - 1]);
+        *var_len = strlen(errmsg);
+        return ((u_char *) (errmsg));
     case LOADMAXVAL:
-      sprintf(errmsg,"%.2f",maxload[name[*length-1]-1]);
-      *var_len = strlen(errmsg);
-      return((u_char *) (errmsg));
+        sprintf(errmsg, "%.2f", maxload[name[*length - 1] - 1]);
+        *var_len = strlen(errmsg);
+        return ((u_char *) (errmsg));
     case LOADAVEINT:
-      long_ret = (u_long) (avenrun[name[*length-1]-1]*100);
-      return((u_char *) (&long_ret));
+        long_ret = (u_long) (avenrun[name[*length - 1] - 1] * 100);
+        return ((u_char *) (&long_ret));
 #ifdef OPAQUE_SPECIAL_TYPES
     case LOADAVEFLOAT:
-      float_ret = (float)avenrun[name[*length-1]-1];
-      *var_len = sizeof(float_ret);
-      return((u_char *) (&float_ret));
+        float_ret = (float) avenrun[name[*length - 1] - 1];
+        *var_len = sizeof(float_ret);
+        return ((u_char *) (&float_ret));
 #endif
     case ERRORFLAG:
-      long_ret = (maxload[name[*length-1]-1] != 0 &&
-                  avenrun[name[*length-1]-1] >= maxload[name[*length-1]-1]) ? 1 : 0;
-      return((u_char *) (&long_ret));
+        long_ret = (maxload[name[*length - 1] - 1] != 0 &&
+                    avenrun[name[*length - 1] - 1] >=
+                    maxload[name[*length - 1] - 1]) ? 1 : 0;
+        return ((u_char *) (&long_ret));
     case ERRORMSG:
-      if (maxload[name[*length-1]-1] != 0 &&
-          avenrun[name[*length-1]-1] >= maxload[name[*length-1]-1]) {
-        sprintf(errmsg,"%d min Load Average too high (= %.2f)",
-                (name[*length-1] == 1)?1:((name[*length-1] == 2)?5:15),
-                avenrun[name[*length-1]-1]);
-      } else {
-        errmsg[0] = 0;
-      }
-      *var_len = strlen(errmsg);
-      return((u_char *) errmsg);
-  }
-  return NULL;
+        if (maxload[name[*length - 1] - 1] != 0 &&
+            avenrun[name[*length - 1] - 1] >=
+            maxload[name[*length - 1] - 1]) {
+            sprintf(errmsg, "%d min Load Average too high (= %.2f)",
+                    (name[*length - 1] ==
+                     1) ? 1 : ((name[*length - 1] == 2) ? 5 : 15),
+                    avenrun[name[*length - 1] - 1]);
+        } else {
+            errmsg[0] = 0;
+        }
+        *var_len = strlen(errmsg);
+        return ((u_char *) errmsg);
+    }
+    return NULL;
 }
-

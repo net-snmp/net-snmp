@@ -1,4 +1,6 @@
-/* wrapper to call all the mib module initialization functions */
+/*
+ * wrapper to call all the mib module initialization functions 
+ */
 
 #include <net-snmp/agent/mib_module_config.h>
 #include <net-snmp/net-snmp-config.h>
@@ -57,14 +59,15 @@ struct module_init_list *noinitlist = NULL;
 
 
 void
-add_to_init_list(const char *module_list) {
+add_to_init_list(const char *module_list)
+{
     struct module_init_list *newitem, **list;
-    char *cp;
+    char           *cp;
 
     if (module_list == NULL) {
-      return;
+        return;
     } else {
-      cp = (char *)module_list;
+        cp = (char *) module_list;
     }
 
     if (*cp == '-' || *cp == '!') {
@@ -75,8 +78,8 @@ add_to_init_list(const char *module_list) {
     }
 
     cp = strtok(cp, ", :");
-    while(cp) {
-        newitem = (struct module_init_list *)calloc(1, sizeof (*initlist));
+    while (cp) {
+        newitem = (struct module_init_list *) calloc(1, sizeof(*initlist));
         newitem->module_name = strdup(cp);
         newitem->next = *list;
         *list = newitem;
@@ -85,41 +88,51 @@ add_to_init_list(const char *module_list) {
 }
 
 int
-should_init(const char *module_name) {
+should_init(const char *module_name)
+{
     struct module_init_list *listp;
-    
-    /* a definitive list takes priority */
+
+    /*
+     * a definitive list takes priority 
+     */
     if (initlist) {
         listp = initlist;
         while (listp) {
             if (strcmp(listp->module_name, module_name) == 0) {
-                DEBUGMSGTL(("mib_init","initializing: %s\n",module_name));
+                DEBUGMSGTL(("mib_init", "initializing: %s\n",
+                            module_name));
                 return DO_INITIALIZE;
             }
             listp = listp->next;
         }
-        DEBUGMSGTL(("mib_init","skipping:     %s\n",module_name));
+        DEBUGMSGTL(("mib_init", "skipping:     %s\n", module_name));
         return DONT_INITIALIZE;
     }
 
-    /* initialize it only if not on the bad list (bad module, no bone) */
+    /*
+     * initialize it only if not on the bad list (bad module, no bone) 
+     */
     if (noinitlist) {
         listp = noinitlist;
         while (listp) {
             if (strcmp(listp->module_name, module_name) == 0) {
-                DEBUGMSGTL(("mib_init","skipping:     %s\n",module_name));
+                DEBUGMSGTL(("mib_init", "skipping:     %s\n",
+                            module_name));
                 return DONT_INITIALIZE;
             }
             listp = listp->next;
         }
     }
-    DEBUGMSGTL(("mib_init","initializing: %s\n",module_name));
-    
-    /* initialize it */
+    DEBUGMSGTL(("mib_init", "initializing: %s\n", module_name));
+
+    /*
+     * initialize it 
+     */
     return DO_INITIALIZE;
 }
 
 void
-init_mib_modules(void) {
+init_mib_modules(void)
+{
 #  include "mib_module_inits.h"
 }

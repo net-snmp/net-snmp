@@ -9,9 +9,9 @@
  */
 void            init_nsTransactionTable(void);
 void            initialize_table_nsTransactionTable(void);
-Netsnmp_Node_Handler     nsTransactionTable_handler;
-Netsnmp_First_Data_Point  nsTransactionTable_get_first_data_point;
-Netsnmp_Next_Data_Point   nsTransactionTable_get_next_data_point;
+Netsnmp_Node_Handler nsTransactionTable_handler;
+Netsnmp_First_Data_Point nsTransactionTable_get_first_data_point;
+Netsnmp_Next_Data_Point nsTransactionTable_get_next_data_point;
 
 /*
  * column number definitions for table nsTransactionTable 

@@ -6,18 +6,17 @@
 
 config_require(ucd-snmp/extensible util_funcs)
 
-void init_pass_persist(void);
+void            init_pass_persist(void);
 extern FindVarMethod var_extensible_pass_persist;
 extern WriteMethod setPassPersist;
 
-/* config file parsing routines */
-void pass_persist_free_config (void);
-void pass_persist_parse_config (const char *, char *);
-int pass_persist_compare (const void *, const void *);
+/*
+ * config file parsing routines 
+ */
+void            pass_persist_free_config(void);
+void            pass_persist_parse_config(const char *, char *);
+int             pass_persist_compare(const void *, const void *);
 
 #include "mibdefs.h"
 
-#endif /* _MIBGROUP_PASS_PERSIST_H */
-
-
-
+#endif                          /* _MIBGROUP_PASS_PERSIST_H */
