@@ -47,7 +47,7 @@
                       + strlen ((ptr)->sun_path))
 #endif
 
-oid netsnmp_UnixDomain[10] = { ENTERPRISE_MIB, 3, 3, 2 };
+oid netsnmp_UnixDomain[] = { TRANSPORT_DOMAIN_LOCAL };
 static netsnmp_tdomain unixDomain;
 
 
