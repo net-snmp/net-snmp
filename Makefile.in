@@ -96,14 +96,17 @@ distclean: clean configclean
 makefileclean:
 	rm -f Makefile snmplib/Makefile				\
 		agent/Makefile agent/mibgroup/Makefile		\
+		agent/helpers/Makefile				\
 		apps/Makefile  apps/snmpnetstat/Makefile	\
 		man/Makefile mibs/Makefile ov/Makefile		\
 		local/Makefile testing/Makefile
 
 configclean: makefileclean
-	rm -f config.cache config.status config.log include/net-snmp/net-snmp-config.h
+	rm -f config.cache config.status config.log \
+		libtool include/net-snmp/net-snmp-config.h
 	rm -f mibs/.index
 	rm -f mib_module_config.h 			\
+		snmplib/snmpsm_init.h                   \
 		agent/mibgroup/mib_module_includes.h 	\
 		agent/mibgroup/mib_module_inits.h 	\
 		agent/mibgroup/mib_module_shutdown.h 	\
