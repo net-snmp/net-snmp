@@ -262,12 +262,12 @@ fi
 dnl overflow problems with hpux's sh
 dnl taken from Perl's Configure script 
 
-echo $ac_n "Checking if I need to feed myself to ksh...  $ac_c" 1>&AC_FD_MSG
+AC_MSG_CHECKING(if I need to feed myself to ksh)
 if test -f /hp-ux -a -f /bin/ksh; then
   if (PATH=.; alias -x) >/dev/null 2>&1; then
-    echo "no"	1>&AC_FD_MSG
+    AC_MSG_RESULT(no)
   else
-    echo "yes"	1>&AC_FD_MSG
+    AC_MSG_RESULT(yes)
     if test "x$1" = "x"; then
       exec /bin/ksh $0
     else
@@ -275,7 +275,7 @@ if test -f /hp-ux -a -f /bin/ksh; then
     fi
   fi
 else
-  echo "no"	1>&AC_FD_MSG
+  AC_MSG_RESULT(no)
 fi
 
 dnl libtool stuff for shared/static libraries.
@@ -578,8 +578,7 @@ yes
 			enable_ipv6="yes"
 			AC_MSG_RESULT(["$v6type, $enable_ipv6, using libc"])
 		else
-			echo
-			echo "Fatal: no IPv6 library lib$v6lib.a found."
+			AC_MSG_ERROR(no IPv6 library lib$v6lib.a found.)
 			exit 1
 		fi
 	else
@@ -754,7 +753,7 @@ while test "x$new_module_list" != "x"; do
       echo "/* Define if compiling with the ${i} module files.  */" >> mib_module_config.h
       echo "#define USING_${sym}_MODULE 1" >> mib_module_config.h
       echo " " >> mib_module_config.h
-      echo $ac_n " $i$ac_c" 1>&AC_FD_MSG
+      echo $ac_n " $i$ac_c" >&AC_FD_MSG
     fi
   done
   new_module_list="$new_list_two"
@@ -1315,7 +1314,7 @@ fi
 
 dnl else ack.
 if test "x$ac_cv_RTENTRY_TYPE" = "x"; then
-  AC_MSG_WARN(Unknown)
+  AC_MSG_RESULT(Unknown)
   ac_cv_RTENTRY_TYPE="unknown"
 fi
 
