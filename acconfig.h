@@ -611,6 +611,9 @@
 /* on aix, if you have perfstat */
 #undef HAVE_PERFSTAT
 
+/* define if you have ssize_t */
+#undef HAVE_SSIZE_T
+
 /* Not-to-be-compiled macros for use by configure only */
 #define config_require(x)
 #define config_arch_require(x,y)
