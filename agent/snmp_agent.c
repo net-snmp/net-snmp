@@ -1036,19 +1036,6 @@ handle_snmp_packet(int op, struct snmp_session *session, int reqid,
     return 1;
 }
 
-	/*
-	 *  Private structure to save the results of a getStatPtr call.
-	 *  This data can then be used to avoid repeating this call on
-	 *  subsequent SET handling passes.
-	 */
-struct saved_var_data {
-    WriteMethod *write_method;
-    u_char	*statP;
-    u_char	statType;
-    size_t	statLen;
-    u_short	acl;
-};
-
 int
 add_varbind_to_cache(struct agent_snmp_session  *asp, int vbcount,
                      struct variable_list *varbind_ptr, struct subtree *tp) {
