@@ -190,44 +190,48 @@ ${table} README
   generation. You may override these variables by setting them in the
   file default-table-${context}.m2d, and then re-running mib2c.
 
-    m2c_table_settable
-    ------------------
+    m2c_table_settable (currently '$m2c_table_settable')
+    --------------------------------------------------------
     This variable determines whether or not code is generated to support
     MIB object which have an access of read-write or read-create. The
     default is set based on whether or not the table contains writable
-    objects, but can be over-ridden. The current value is '$m2c_table_settable'.
+    objects, but can be over-ridden.
 
     Syntax: @eval $@m2c_table_settable = 0@
 
 
-    m2c_table_dependencies
-    ----------------------
+    m2c_table_dependencies (currently '$m2c_table_dependencies')
+    --------------------------------------------------------
     This variable determines whether or not code is generated to support
     checking dependencies between columns, rows or tables. The default
     is set based on whether or not the table contains writable objects,
-    but can be over-ridden. The current value is '$m2c_table_dependencies'.
+    but can be over-ridden.
 
     Syntax: @eval $@m2c_table_dependencies = 0@
 
 
-    m2c_table_row_creation
-    ----------------------
+    m2c_table_row_creation (currently '$m2c_table_row_creation')
+    --------------------------------------------------------
     This variable determines whether or not code is generated to support
     checking creation of new rows via SNMP. The default is set based on
     whether or not the table contains read-create objects, but can be
-    over-ridden. The current value is '$m2c_table_row_creation'.
+    over-ridden.
 
     Syntax: @eval $@m2c_table_row_creation = 0@
 
 
-    m2c_context_reg
-    ---------------
+    m2c_context_reg (currently '$m2c_context_reg')
+    --------------------------------------------------------
     This variable contains the structure name to typedef for the
     ${table}_registration_ptr.
 
-    This typedef is used as a parameter to many functions. The default
-    is an empty string, which will result in a typedef of a void pointer.
-    The current value is '$m2c_context_reg'.
+    During initilization, you will provide a pointer to a structure of
+    this type. This pointer is used as a parameter to many functions so
+    that you have access to your registration data. The default is a
+    netsnmp_data_list pointer, which will allow you to keep multiple
+    pointers tagges by a text name. If you have a new or existing structure
+    you would rather use, you can redefine this variable.
+    
 
     To avoid regenerating code, you may also change this typedef directly
     in the ${table}.h header.
@@ -235,8 +239,8 @@ ${table} README
     Syntax: @eval $@m2c_context_reg = "struct my_registration_context@
 
 
-    m2c_data_context
-    ----------------
+    m2c_data_context (currently '$m2c_data_context')
+    --------------------------------------------------------
     This variable contains the structure name to typedef for the
     ${table}_data.
 
@@ -247,7 +251,7 @@ ${table} README
     undo structure types. This structure should contain all the data
     needed for all the columns in the table. The default is 'generated',
     which will cuase a new data strcuture to be generated with data members
-    for each column. The current value is '$m2c_data_context'.
+    for each column.
 
     To avoid regenerating code, you may also change this typedef directly
     in the ${table}.h header.
@@ -255,8 +259,8 @@ ${table} README
     Syntax: @eval $@m2c_data_context = "struct my_data_context"@
 
 
-    m2c_data_allocate
-    -----------------
+    m2c_data_allocate (currently '$m2c_data_allocate')
+    --------------------------------------------------------
     This variable determines whether or not the data context (see above)
     requires memory to be allocated. The default generated data structure
     does not. If you are using a custom data context which needs to
@@ -266,13 +270,11 @@ ${table} README
       ${context}_allocate_data
       ${context}_release_data
 
-    The current value is '$m2c_data_allocate'.
-
     Syntax: @eval $@m2c_data_allocate = 1@
 
 
-    m2c_data_init
-    -------------
+    m2c_data_init (currently '$m2c_data_init')
+    --------------------------------------------------------
     This variable determines whether or not the data context (see above)
     or any other items you have added to the table context requires
     initialization. The default generated data structure does not. If you
@@ -283,25 +285,32 @@ ${table} README
       ${context}_ctx_init
       ${context}_ctx_cleanup
 
-    The current value is '$m2c_data_init'.
-
     Syntax: @eval $m2c_data_init = 1@
 
 
-    m2c_table_access
-    ----------------
+    m2c_table_access (currently '$m2c_table_access')
+    ------------------------------------------------------------------
     This variable determines which data interface will be use to generate
     code for looking up data for a given index. The default is the
     'unsorted-external' access code, which handles the common case where
     the data for the table is kept external to the agent and is not sorted
-    by the MIB indexes. The current value is '$m2c_table_access'.
+    by the MIB indexes.
+
     Available options can be determined by checking for mib2c configuration
     files that begin with 'mfd-access-*'.
 
     Syntax: @eval $@m2c_table_access = "unsorted-external'@
 
+ 
+    m2c_include_examples (currently '$m2c_include_examples')
+    ------------------------------------------------------------------
+    This variable determines whether or not to generate example code. The
+    default is to generate example code.
 
-  Index(es) for the ${table} table
+    Syntax: @eval $@m2c_include_examples = 0@
+
+
+ Index(es) for the ${table} table
   ------------------------------------------------------------
   The index(es) for the ${table} table are:
 
