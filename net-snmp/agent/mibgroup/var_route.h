@@ -5,10 +5,9 @@
 #ifndef _MIBGROUP_VAR_ROUTE_H
 #define _MIBGROUP_VAR_ROUTE_H
 
-config_require(ip)
+config_require(ip util_funcs)
 
 void init_var_route __P((void));
-void string_append_int __P((char *, int));
 #ifdef RTENTRY_4_4
 void load_rtentries __P((struct radix_node *));
 #endif

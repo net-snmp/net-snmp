@@ -58,7 +58,11 @@
 
 #include "mibincl.h"
 #include "util_funcs.h"
+#ifdef USING_ERRORMIB_MODULE
 #include "errormib.h"
+#else
+#define setPerrorstatus(x) perror(x)
+#endif
 #include "read_config.h"
 
 #ifdef EXCACHETIME
@@ -280,30 +284,6 @@ clear_cache(action, var_val, var_val_type, var_val_len, statP, name, name_len)
   return SNMP_ERR_NOERROR;
 }
 
-int
-update_hook(action, var_val, var_val_type, var_val_len, statP, name, name_len)
-   int      action;
-   u_char   *var_val;
-   u_char   var_val_type;
-   int      var_val_len;
-   u_char   *statP;
-   oid      *name;
-   int      name_len;
-{
-  long tmp=0;
-  int tmplen=1000;
-
-  if (var_val_type != INTEGER) {
-    printf("Wrong type != int\n");
-    return SNMP_ERR_WRONGTYPE;
-  }
-  asn_parse_int(var_val,&tmplen,&var_val_type,&tmp,sizeof(int));
-  if (tmp == 1 && action == COMMIT) {
-    update_config(0);
-  } 
-  return SNMP_ERR_NOERROR;
-}
-
 extern char **argvrestartp, *argvrestartname;
 
 RETSIGTYPE restart_doit(a)
@@ -517,3 +497,21 @@ oid *oidout;
   oidout[i] = -1;
   return i;
 }
+
+void
+string_append_int (s, val)
+char *s;
+int val;
+{
+    char textVal[16];
+
+    if (val < 10) {
+	*s++ = '0' + val;
+	*s = '\0';
+	return;
+    }
+    sprintf (textVal, "%d", val);
+    strcpy(s, textVal);
+    return;
+}
+

@@ -15,7 +15,7 @@
 #include "versioninfo.h"
 #include "util_funcs.h"
 
-char *VersionInfo="3.3.pre2";
+#include "version.h"
 
 unsigned char *var_extensible_version(vp, name, length, exact, var_len, write_method)
     register struct variable *vp;
@@ -78,3 +78,28 @@ unsigned char *var_extensible_version(vp, name, length, exact, var_len, write_me
   }      
   return NULL;
 }
+
+int
+update_hook(action, var_val, var_val_type, var_val_len, statP, name, name_len)
+   int      action;
+   u_char   *var_val;
+   u_char   var_val_type;
+   int      var_val_len;
+   u_char   *statP;
+   oid      *name;
+   int      name_len;
+{
+  long tmp=0;
+  int tmplen=1000;
+
+  if (var_val_type != INTEGER) {
+    printf("Wrong type != int\n");
+    return SNMP_ERR_WRONGTYPE;
+  }
+  asn_parse_int(var_val,&tmplen,&var_val_type,&tmp,sizeof(int));
+  if (tmp == 1 && action == COMMIT) {
+    update_config(0);
+  } 
+  return SNMP_ERR_NOERROR;
+}
+

@@ -4,7 +4,11 @@
 #endif
 
 #include "mibincl.h"
+#ifdef USING_ERRORMIB_MODULE
 #include "proc.h"
+#else
+#define setPerrorstatus(x) perror(x)
+#endif
 #include "util_funcs.h"
 #include "errormib.h"
 

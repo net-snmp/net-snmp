@@ -1,3 +1,5 @@
+#ifndef IN_CONTEXT_H
+#define IN_CONTEXT_H
 /*
     contextIdentity         Context,
     contextIndex            INTEGER,
@@ -99,3 +101,5 @@ context_createEntry __P((oid *contextID, int contextIDLen));
  */
 
 int read_context_database __P((char *));
+
+#endif

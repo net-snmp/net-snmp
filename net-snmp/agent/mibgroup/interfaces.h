@@ -5,6 +5,8 @@
 #ifndef _MIBGROUP_INTERFACES_H
 #define _MIBGROUP_INTERFACES_H
 
+config_require(util_funcs)
+
 struct in_ifaddr;
 struct ifnet;
 
