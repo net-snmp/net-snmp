@@ -1000,6 +1000,15 @@ AC_CHECK_STRUCT_FOR([
 #include <sys/socket.h>
 #undef KERNEL
 #undef _KERNEL
+], sockaddr, sa_len, no)
+
+AC_CHECK_STRUCT_FOR([
+#include <sys/types.h>
+#define KERNEL
+#define _KERNEL
+#include <sys/socket.h>
+#undef KERNEL
+#undef _KERNEL
 #include <net/route.h>
 ], rtentry, rt_dst, no)
 
