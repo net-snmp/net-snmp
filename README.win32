@@ -334,8 +334,14 @@ volume you wish to hold the UC-Davis SNMP applications :
 Copy mibs\*.txt to usr\mibs
 Copy win32\bin\*.* to usr\bin
 Copy win32\lib\*.* to usr\lib
+Copy include\ucd-snmp\*.* to usr\include\ucd-snmp  (recursively)
+Copy include\net-snmp\*.* to usr\include\net-snmp  (recursively)
 Copy snmplib\*.h to usr\include\ucd-snmp
+Copy win32\net-snmp\*.*   to usr\include\net-snmp  (recursively)
 Copy win32\config.h to usr\include\ucd-snmp\ucd-snmp-config.h
+
+Change usr\include\net-snmp\net-snmp-config.h and remove the typedef
+definition for mode_t (if there is one).
 
 if using OpenSSL
 Copy libeay32.dll to usr\bin
