@@ -178,7 +178,7 @@ set_an_alarm(void) {
   /* we don't use signals if they asked us nicely not to.  It's
      expected they'll check the next alarm time and do their own
      calling of run_alarms(). */
-  if (ds_get_boolean(DS_LIBRARY_ID, DS_LIB_ALARM_DONT_USE_SIG) && nexttime) {
+  if (!ds_get_boolean(DS_LIBRARY_ID, DS_LIB_ALARM_DONT_USE_SIG) && nexttime) {
 #ifndef WIN32
 #ifdef SIGALRM
     alarm(nexttime);
