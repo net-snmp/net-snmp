@@ -126,6 +126,7 @@ unspecified, they default to a value of DEFMAXLOADAVE.
 Monitors file sizes and makes sure they don't grow beyond a certain
 size (in kilobytes).  MAXSIZE defaults to infinite if not specified,
 and only monitors the size without reporting errors about it.
+A maximum of 20 files can be monitored.
 .SS "Errors"
 .PP
 Any errors in obtaining the above information are reported via the
