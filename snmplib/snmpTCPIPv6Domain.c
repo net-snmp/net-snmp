@@ -69,6 +69,7 @@ extern const char *inet_ntop(int, const void*, char*, size_t);
 #include <net-snmp/config_api.h>
 
 #include <net-snmp/library/snmp_transport.h>
+#include <net-snmp/library/snmpUDPDomain.h>
 #include <net-snmp/library/snmpUDPIPv6Domain.h>
 #include <net-snmp/library/snmpTCPIPv6Domain.h>
 

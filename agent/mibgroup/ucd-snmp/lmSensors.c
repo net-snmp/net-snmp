@@ -302,9 +302,7 @@ var_lmSensorsTable(struct variable *vp,
 static int
 sensor_init(void)
 {
-#ifdef solaris2
-    clock_t         t = time(NULL);
-#else
+#ifndef solaris2
     int             res;
     char            filename[] = CONFIG_FILE_NAME;
     clock_t         t = clock();
@@ -761,7 +759,7 @@ _sensor_load(clock_t t)
     int temp;
     int other;
     int er_code;
-    char *fantypes[]={"CPU","PWR","AFB"};
+    const char *fantypes[]={"CPU","PWR","AFB"};
     kstat_ctl_t *kc;
     kstat_t *kp;
     envctrl_fan_t *fan_info;
@@ -830,7 +828,7 @@ if (kc == 0) {
 else{
     kp = kstat_lookup(kc, ENVCTRL_MODULE_NAME, 0, ENVCTRL_KSTAT_FANSTAT);
     if (kp == 0) {
-        DEBUGMSGTL(("ucd-snmp/lmSensors", "couldn't lookup fan kstat"));
+        DEBUGMSGTL(("ucd-snmp/lmSensors", "couldn't lookup fan kstat\n"));
         } /* endif lookup fans */
     else{
         if (kstat_read(kc, kp, 0) == -1) {
@@ -855,11 +853,11 @@ else{
 
     kp = kstat_lookup(kc, ENVCTRL_MODULE_NAME, 0, ENVCTRL_KSTAT_PSNAME);
     if (kp == 0) {
-        DEBUGMSGTL(("ucd-snmp/lmSensors", "couldn't lookup power supply kstat"));
+        DEBUGMSGTL(("ucd-snmp/lmSensors", "couldn't lookup power supply kstat\n"));
         } /* endif lookup power supply */
     else{
         if (kstat_read(kc, kp, 0) == -1) {
-            DEBUGMSGTL(("ucd-snmp/lmSensors", "couldn't read power supply kstat"));
+            DEBUGMSGTL(("ucd-snmp/lmSensors", "couldn't read power supply kstat\n"));
             } /* endif kstatread fan */
         else{
             typ = 2;
@@ -880,11 +878,11 @@ else{
 
     kp = kstat_lookup(kc, ENVCTRL_MODULE_NAME, 0, ENVCTRL_KSTAT_ENCL);
     if (kp == 0) {
-        DEBUGMSGTL(("ucd-snmp/lmSensors", "couldn't lookup enclosure kstat"));
+        DEBUGMSGTL(("ucd-snmp/lmSensors", "couldn't lookup enclosure kstat\n"));
         } /* endif lookup enclosure */
     else{
         if (kstat_read(kc, kp, 0) == -1) {
-            DEBUGMSGTL(("ucd-snmp/lmSensors", "couldn't read enclosure kstat"));
+            DEBUGMSGTL(("ucd-snmp/lmSensors", "couldn't read enclosure kstat\n"));
             } /* endif kstatread enclosure */
         else{
             enc_info = (envctrl_encl_t *) kp->ks_data; 
