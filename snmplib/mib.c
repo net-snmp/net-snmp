@@ -197,7 +197,7 @@ void sprint_hexstring(char *buf,
                       const u_char *cp,
                       size_t len)
 {
-    int buflen = SPRINT_MAX_LEN, outlen = 0;
+    size_t buflen = SPRINT_MAX_LEN, outlen = 0;
     sprint_realloc_hexstring((u_char **)&buf, &buflen, &outlen, 0, cp, len);
 }
 
@@ -284,7 +284,7 @@ void sprint_asciistring(char *buf,
 		        const u_char  *cp,
 		        size_t	    len)
 {
-    int buflen = SPRINT_MAX_LEN, outlen = 0;
+    size_t buflen = SPRINT_MAX_LEN, outlen = 0;
     sprint_realloc_asciistring((u_char **)&buf, &buflen, &outlen, 0, cp, len);
 }
 
@@ -347,7 +347,7 @@ sprint_octet_string(char *buf,
 		    const char *hint,
 		    const char *units)
 {
-    int buflen = SPRINT_MAX_LEN, outlen = 0;
+    size_t buflen = SPRINT_MAX_LEN, outlen = 0;
     sprint_realloc_octet_string((u_char **)&buf, &buflen, &outlen, 0,
 	    var, enums, hint, units);
 }
@@ -554,7 +554,7 @@ sprint_float(char *buf,
 	     const char *hint,
 	     const char *units)
 {
-    int buflen = SPRINT_MAX_LEN, outlen = 0;
+    size_t buflen = SPRINT_MAX_LEN, outlen = 0;
     sprint_realloc_float((u_char **)&buf, &buflen, &outlen, 0,
 	    var, enums, hint, units);
 }
@@ -609,7 +609,7 @@ sprint_double(char *buf,
 	      const char *hint,
 	      const char *units)
 {
-    int buflen = SPRINT_MAX_LEN, outlen = 0;
+    size_t buflen = SPRINT_MAX_LEN, outlen = 0;
     sprint_realloc_double((u_char **)&buf, &buflen, &outlen, 0,
 	var, enums, hint, units);
 }
@@ -665,7 +665,7 @@ sprint_opaque(char *buf,
 	      const char *hint,
 	      const char *units)
 {
-    int buflen = SPRINT_MAX_LEN, outlen = 0;
+    size_t buflen = SPRINT_MAX_LEN, outlen = 0;
     sprint_realloc_opaque((u_char **)&buf, &buflen, &outlen, 0,
 	var, enums, hint, units);
 }
@@ -824,7 +824,7 @@ sprint_object_identifier(char *buf,
 			 const char *hint,
 			 const char *units)
 {
-    int len = SPRINT_MAX_LEN, outlen = 0;
+    size_t len = SPRINT_MAX_LEN, outlen = 0;
     sprint_realloc_object_identifier((u_char **)&buf, &len, &outlen, 0,
 	    var, enums, hint, units);
 }
@@ -877,7 +877,7 @@ sprint_timeticks(char *buf,
 		 const char *hint,
 		 const char *units)
 {
-    int buflen = SPRINT_MAX_LEN, outlen = 0;
+    size_t buflen = SPRINT_MAX_LEN, outlen = 0;
     sprint_realloc_timeticks((u_char **)&buf, &buflen, &outlen, 0,
 	var, enums, hint, units);
 }
@@ -934,7 +934,7 @@ sprint_hinted_integer (char *buf,
 		       const char *hint,
 		       const char *units)
 {
-    int buflen = SPRINT_MAX_LEN, outlen = 0;
+    size_t buflen = SPRINT_MAX_LEN, outlen = 0;
     sprint_realloc_hinted_integer((u_char **)&buf, &buflen, &outlen, 0,
 	val, 'd', hint, units);
 }
@@ -996,7 +996,7 @@ sprint_integer(char *buf,
 	       const char *hint,
 	       const char *units)
 {
-    int buflen = SPRINT_MAX_LEN, outlen = 0;
+    size_t buflen = SPRINT_MAX_LEN, outlen = 0;
     sprint_realloc_integer((u_char **)&buf, &buflen, &outlen, 0,
 	var, enums, hint, units);
 }
@@ -1072,7 +1072,7 @@ sprint_uinteger(char *buf,
 		const char *hint,
 		const char *units)
 {
-    int buflen = SPRINT_MAX_LEN, outlen = 0;
+    size_t buflen = SPRINT_MAX_LEN, outlen = 0;
     sprint_realloc_uinteger((u_char **)&buf, &buflen, &outlen, 0,
 	var, enums, hint, units);
 }
@@ -1148,7 +1148,7 @@ sprint_gauge(char *buf,
 	     const char *hint,
 	     const char *units)
 {
-    int buflen = SPRINT_MAX_LEN, outlen = 0;
+    size_t buflen = SPRINT_MAX_LEN, outlen = 0;
     sprint_realloc_gauge((u_char **)&buf, &buflen, &outlen, 0,
 	var, enums, hint, units);
 }
@@ -1205,7 +1205,7 @@ sprint_counter(char *buf,
 	       const char *hint,
 	       const char *units)
 {
-    int buflen = SPRINT_MAX_LEN, outlen = 0;
+    size_t buflen = SPRINT_MAX_LEN, outlen = 0;
     sprint_realloc_counter((u_char **)&buf, &buflen, &outlen, 0,
 	var, enums, hint, units);
 }
@@ -1254,7 +1254,7 @@ sprint_networkaddress(char *buf,
 		      const char *hint,
 		      const char *units)
 {
-    int buflen = SPRINT_MAX_LEN, outlen = 0;
+    size_t buflen = SPRINT_MAX_LEN, outlen = 0;
     sprint_realloc_networkaddress((u_char **)&buf, &buflen, &outlen, 0,
 	var, enums, hint, units);
 }
@@ -1310,7 +1310,7 @@ sprint_ipaddress(char *buf,
 		 const char *hint,
 		 const char *units)
 {
-    int buflen = SPRINT_MAX_LEN, outlen = 0;
+    size_t buflen = SPRINT_MAX_LEN, outlen = 0;
     sprint_realloc_ipaddress((u_char **)&buf, &buflen, &outlen, 0,
 	var, enums, hint, units);
 }
@@ -1358,7 +1358,7 @@ sprint_null(char *buf,
 	    const char *hint,
 	    const char *units)
 {
-    int buflen = SPRINT_MAX_LEN, outlen = 0;
+    size_t buflen = SPRINT_MAX_LEN, outlen = 0;
     sprint_realloc_null((u_char **)&buf, &buflen, &outlen, 0,
 	var, enums, hint, units);
 }
@@ -1392,7 +1392,7 @@ sprint_bitstring(char *buf,
 		 const char *hint,
 		 const char *units)
 {
-    int buflen = SPRINT_MAX_LEN, outlen = 0;
+    size_t buflen = SPRINT_MAX_LEN, outlen = 0;
     sprint_realloc_bitstring((u_char **)&buf, &buflen, &outlen, 0,
 	var, enums, hint, units);
 }
@@ -1484,7 +1484,7 @@ sprint_nsapaddress(char *buf,
 		   const char *hint,
 		   const char *units)
 {
-    int buflen = SPRINT_MAX_LEN, outlen = 0;
+    size_t buflen = SPRINT_MAX_LEN, outlen = 0;
     sprint_realloc_nsapaddress((u_char **)&buf, &buflen, &outlen, 0,
 	var, enums, hint, units);
 }
@@ -1525,7 +1525,7 @@ sprint_counter64(char *buf,
 		 const char *hint,
 		 const char *units)
 {
-    int buflen = SPRINT_MAX_LEN, outlen = 0;
+    size_t buflen = SPRINT_MAX_LEN, outlen = 0;
     sprint_realloc_counter64((u_char **)&buf, &buflen, &outlen, 0,
 	var, enums, hint, units);
 }
@@ -1537,7 +1537,7 @@ sprint_unknowntype(char *buf,
 		   const char *hint,
 		   const char *units)
 {
-    int buflen = SPRINT_MAX_LEN, outlen = 0;
+    size_t buflen = SPRINT_MAX_LEN, outlen = 0;
     sprint_realloc_by_type((u_char **)&buf, &buflen, &outlen, 0,
 	var, enums, hint, units);
 }
@@ -1549,7 +1549,7 @@ sprint_badtype(char *buf,
 	       const char *hint,
 	       const char *units)
 {
-    int buflen = SPRINT_MAX_LEN, outlen = 0;
+    size_t buflen = SPRINT_MAX_LEN, outlen = 0;
     sprint_realloc_badtype((u_char **)&buf, &buflen, &outlen, 0,
 	var, enums, hint, units);
 }
@@ -1574,7 +1574,7 @@ sprint_by_type(char *buf,
 	       const char *hint,
 	       const char *units)
 {
-    int buflen = SPRINT_MAX_LEN, outlen = 0;
+    size_t buflen = SPRINT_MAX_LEN, outlen = 0;
     sprint_realloc_by_type((u_char **)&buf, &buflen, &outlen, 0,
 	var, enums, hint, units);
 }
@@ -2288,14 +2288,13 @@ sprint_realloc_objid(u_char **buf, size_t *buf_len,
   return !buf_overflow;
 }
 
-int
-snprint_objid(char *buf, size_t buf_len,
-	      const oid *objid, size_t objidlen)
+int snprint_objid(char *buf, size_t buf_len,
+		const oid *objid, size_t objidlen)
 {
   size_t out_len = 0;
 
-  if (sprint_realloc_objid((u_char **)&buf, &buf_len, &out_len, 0, 
-			   objid, objidlen)) {
+  if (sprint_realloc_objid((u_char **)&buf, &buf_len, &out_len, 0,
+	      		  objid, objidlen)) {
     return (int)out_len;
   } else {
     return -1;
@@ -2361,7 +2360,7 @@ sprint_variable(char *buf,
 		size_t objidlen,
 		struct variable_list *variable)
 {
-    int buflen = SPRINT_MAX_LEN, outlen = 0;
+    size_t buflen = SPRINT_MAX_LEN, outlen = 0;
     sprint_realloc_variable((u_char **)&buf, &buflen, &outlen, 0,
 	objid, objidlen, variable);
 }
@@ -2475,7 +2474,7 @@ sprint_value(char *buf,
 	     size_t objidlen,
 	     struct variable_list *variable)
 {
-    int buflen = SPRINT_MAX_LEN, outlen = 0;
+    size_t buflen = SPRINT_MAX_LEN, outlen = 0;
     sprint_realloc_variable((u_char **)&buf, &buflen, &outlen, 0,
 	objid, objidlen, variable);
 }
@@ -3881,3 +3880,256 @@ int mib_OidToTxt(oid *O, size_t OidLen, char *Buf, size_t BufLen)
 }
 
 #endif /* CMU_COMPATIBLE */
+
+int snprint_by_type	(char *buf, size_t buf_len,
+			 struct variable_list *var,
+			 struct enum_list *enums,
+			 const char *hint, const char *units)
+{
+    size_t out_len = 0;
+    if (sprint_realloc_by_type((u_char **)&buf, &buf_len, &out_len, 1,
+	    var, enums, hint, units))
+	return (int)out_len;
+    else
+	return -1;
+}
+
+int snprint_hexstring	(char *buf, size_t buf_len,
+			 const u_char *cp, size_t len)
+{
+    size_t out_len = 0;
+    if (sprint_realloc_hexstring((u_char **)&buf, &buf_len, &out_len, 1,
+	    cp, len))
+	return (int)out_len;
+    else
+	return -1;
+}
+
+int snprint_asciistring	(char *buf, size_t buf_len,
+			 const u_char *cp, size_t len)
+{
+    size_t out_len = 0;
+    if (sprint_realloc_asciistring((u_char **)&buf, &buf_len, &out_len, 1,
+	    cp, len))
+	return (int)out_len;
+    else
+	return -1;
+}
+
+int snprint_octet_string (char *buf, size_t buf_len,
+			   struct variable_list *var, struct enum_list *enums,
+			   const char *hint, const char *units)
+{
+    size_t out_len = 0;
+    if (sprint_realloc_octet_string((u_char **)&buf, &buf_len, &out_len, 1,
+	    var, enums, hint, units))
+	return (int)out_len;
+    else
+	return -1;
+}
+
+int snprint_opaque	(char *buf, size_t buf_len,
+			 struct variable_list *var, struct enum_list *enums,
+			 const char *hint, const char *units)
+{
+    size_t out_len = 0;
+    if (sprint_realloc_opaque((u_char **)&buf, &buf_len, &out_len, 1,
+	    var, enums, hint, units))
+	return (int)out_len;
+    else
+	return -1;
+}
+
+int snprint_object_identifier(char *buf, size_t buf_len,
+			     struct variable_list *var, struct enum_list *enums,
+			     const char *hint, const char *units)
+{
+    size_t out_len = 0;
+    if (sprint_realloc_object_identifier((u_char **)&buf, &buf_len, &out_len, 1,
+	    var, enums, hint, units))
+	return (int)out_len;
+    else
+	return -1;
+}
+
+int snprint_timeticks	(char *buf, size_t buf_len,
+			 struct variable_list *var, struct enum_list *enums,
+			 const char *hint, const char *units)
+{
+    size_t out_len = 0;
+    if (sprint_realloc_timeticks((u_char **)&buf, &buf_len, &out_len, 1,
+	    var, enums, hint, units))
+	return (int)out_len;
+    else
+	return -1;
+}
+
+int snprint_hinted_integer(char *buf, size_t buf_len,
+			   long val, const char *hint, const char *units)
+{
+    size_t out_len = 0;
+    if (sprint_realloc_hinted_integer((u_char **)&buf, &buf_len, &out_len, 1,
+	    val, 'd', hint, units))
+	return (int)out_len;
+    else
+	return -1;
+}
+
+int snprint_integer	(char *buf, size_t buf_len,
+			 struct variable_list *var, struct enum_list *enums,
+			 const char *hint, const char *units)
+{
+    size_t out_len = 0;
+    if (sprint_realloc_integer((u_char **)&buf, &buf_len, &out_len, 1,
+	    var, enums, hint, units))
+	return (int)out_len;
+    else
+	return -1;
+}
+
+int snprint_uinteger	(char *buf, size_t buf_len,
+			 struct variable_list *var, struct enum_list *enums,
+			 const char *hint, const char *units)
+{
+    size_t out_len = 0;
+    if (sprint_realloc_uinteger((u_char **)&buf, &buf_len, &out_len, 1,
+	    var, enums, hint, units))
+	return (int)out_len;
+    else
+	return -1;
+}
+
+int snprint_gauge	(char *buf, size_t buf_len,
+			 struct variable_list *var, struct enum_list *enums,
+			 const char *hint, const char *units)
+{
+    size_t out_len = 0;
+    if (sprint_realloc_gauge((u_char **)&buf, &buf_len, &out_len, 1,
+	    var, enums, hint, units))
+	return (int)out_len;
+    else
+	return -1;
+}
+
+int snprint_counter	(char *buf, size_t buf_len,
+			 struct variable_list *var, struct enum_list *enums,
+			 const char *hint, const char *units)
+{
+    size_t out_len = 0;
+    if (sprint_realloc_counter((u_char **)&buf, &buf_len, &out_len, 1,
+	    var, enums, hint, units))
+	return (int)out_len;
+    else
+	return -1;
+}
+
+int snprint_networkaddress(char *buf, size_t buf_len,
+			   struct variable_list *var, struct enum_list *enums,
+			   const char *hint, const char *units)
+{
+    size_t out_len = 0;
+    if (sprint_realloc_networkaddress((u_char **)&buf, &buf_len, &out_len, 1,
+	    var, enums, hint, units))
+	return (int)out_len;
+    else
+	return -1;
+}
+
+int snprint_ipaddress	(char *buf, size_t buf_len,
+			 struct variable_list *var, struct enum_list *enums,
+			 const char *hint, const char *units)
+{
+    size_t out_len = 0;
+    if (sprint_realloc_ipaddress((u_char **)&buf, &buf_len, &out_len, 1,
+	    var, enums, hint, units))
+	return (int)out_len;
+    else
+	return -1;
+}
+
+int snprint_null 	(char *buf, size_t buf_len,
+			 struct variable_list *var, struct enum_list *enums,
+			 const char *hint, const char *units)
+{
+    size_t out_len = 0;
+    if (sprint_realloc_null((u_char **)&buf, &buf_len, &out_len, 1,
+	    var, enums, hint, units))
+	return (int)out_len;
+    else
+	return -1;
+}
+
+int snprint_bitstring	(char *buf, size_t buf_len,
+			 struct variable_list *var, struct enum_list *enums,
+			 const char *hint, const char *units)
+{
+    size_t out_len = 0;
+    if (sprint_realloc_bitstring((u_char **)&buf, &buf_len, &out_len, 1,
+	    var, enums, hint, units))
+	return (int)out_len;
+    else
+	return -1;
+}
+
+int snprint_nsapaddress	(char *buf, size_t buf_len,
+			 struct variable_list *var, struct enum_list *enums,
+			 const char *hint, const char *units)
+{
+    size_t out_len = 0;
+    if (sprint_realloc_nsapaddress((u_char **)&buf, &buf_len, &out_len, 1,
+	    var, enums, hint, units))
+	return (int)out_len;
+    else
+	return -1;
+}
+
+int snprint_counter64	(char *buf, size_t buf_len,
+			 struct variable_list *var, struct enum_list *enums,
+			 const char *hint, const char *units)
+{
+    size_t out_len = 0;
+    if (sprint_realloc_counter64((u_char **)&buf, &buf_len, &out_len, 1,
+	    var, enums, hint, units))
+	return (int)out_len;
+    else
+	return -1;
+}
+
+int snprint_badtype	(char *buf, size_t buf_len,
+			 struct variable_list *var, struct enum_list *enums,
+			 const char *hint, const char *units)
+{
+    size_t out_len = 0;
+    if (sprint_realloc_badtype((u_char **)&buf, &buf_len, &out_len, 1,
+	    var, enums, hint, units))
+	return (int)out_len;
+    else
+	return -1;
+}
+
+#ifdef OPAQUE_SPECIAL_TYPES
+int snprint_float	(char *buf, size_t buf_len,
+			 struct variable_list *var, struct enum_list *enums,
+			 const char *hint, const char *units)
+{
+    size_t out_len = 0;
+    if (sprint_realloc_float((u_char **)&buf, &buf_len, &out_len, 1,
+	    var, enums, hint, units))
+	return (int)out_len;
+    else
+	return -1;
+}
+
+int snprint_double	(char *buf, size_t buf_len,
+			 struct variable_list *var, struct enum_list *enums,
+			 const char *hint, const char *units)
+{
+    size_t out_len = 0;
+    if (sprint_realloc_double((u_char **)&buf, &buf_len, &out_len, 1,
+	    var, enums, hint, units))
+	return (int)out_len;
+    else
+	return -1;
+}
+#endif
+

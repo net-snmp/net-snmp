@@ -277,7 +277,9 @@ void init_mib (void);
 void shutdown_mib (void);
 void print_variable (oid *, size_t, struct variable_list *);
 void fprint_variable (FILE *, oid *, size_t, struct variable_list *);
+#ifdef UNSAFE_FUNCTIONS
 void sprint_variable (char *, oid *, size_t, struct variable_list *);
+#endif	/* UNSAFE_FUNCTIONS */
 int snprint_variable		(char *buf, size_t buf_len,
 				 const oid *objid, size_t objidlen,
 				 struct variable_list *variable);
@@ -293,7 +295,9 @@ int sprint_realloc_objid   (u_char **buf, size_t *buf_len,
 
 void print_value (oid *, size_t, struct variable_list *);
 void fprint_value (FILE *, oid *, size_t, struct variable_list *);
+#ifdef UNSAFE_FUNCTIONS
 void sprint_value (char *, oid *, size_t, struct variable_list *);
+#endif	/* UNSAFE_FUNCTIONS */
 int snprint_value		(char *buf, size_t buf_len,
 				 const oid *objid, size_t objidlen,
 				 struct variable_list *variable);
@@ -304,7 +308,9 @@ sprint_realloc_value(u_char **buf, size_t *buf_len,
 		     struct variable_list *variable);
 void print_objid (oid *, size_t);
 void fprint_objid (FILE *, oid *, size_t);
+#ifdef UNSAFE_FUNCTIONS
 char *sprint_objid (char *, oid *, size_t);
+#endif	/* UNSAFE_FUNCTIONS */
 int snprint_objid		(char *buf, size_t buf_len,
 				 const oid *objid, size_t objidlen);
 void print_description (oid *, size_t, int);
@@ -318,6 +324,7 @@ struct tree *get_tree (const oid *, size_t, struct tree *);
 struct tree *get_tree_head (void);
 void  set_function (struct tree *);
 
+#ifdef UNSAFE_FUNCTIONS
 void sprint_hexstring (char *, const u_char *, size_t);
 void sprint_asciistring(char *buf, const u_char *cp, size_t len);
 
@@ -361,7 +368,53 @@ void sprint_float (char *, struct variable_list *, struct enum_list *,
                    const char *, const char *);
 void sprint_double (char *, struct variable_list *, struct enum_list *,
                     const char *, const char *);
-#endif
+#endif	/* OPAQUE_SPECIAL_TYPES */
+#endif	/* UNSAFE_FUNCTIONS */
+
+int snprint_hexstring (char *, size_t, const u_char *, size_t);
+int snprint_asciistring(char *, size_t, const u_char *, size_t);
+
+int snprint_by_type (char *, size_t, struct variable_list *, struct enum_list *,
+                     const char *, const char *);
+int snprint_octet_string (char *, size_t, struct variable_list *, struct enum_list *,
+                          const char *, const char *);
+int snprint_opaque (char *, size_t, struct variable_list *, struct enum_list *,
+                    const char *, const char *);
+int snprint_object_identifier (char *, size_t, struct variable_list *,
+                               struct enum_list *, const char *, const char *);
+int snprint_timeticks (char *, size_t, struct variable_list *, struct enum_list *,
+                       const char *, const char *);
+int snprint_hinted_integer (char *, size_t, long, const char *, const char *);
+int snprint_integer (char *, size_t, struct variable_list *, struct enum_list *,
+                     const char *, const char *);
+int snprint_uinteger (char *, size_t, struct variable_list *, struct enum_list *,
+                      const char *, const char *);
+int snprint_gauge (char *, size_t, struct variable_list *, struct enum_list *,
+                   const char *, const char *);
+int snprint_counter (char *, size_t, struct variable_list *, struct enum_list *,
+                     const char *, const char *);
+int snprint_networkaddress (char *, size_t, struct variable_list *,
+                            struct enum_list *, const char *, const char *);
+int snprint_ipaddress (char *, size_t, struct variable_list *, struct enum_list *,
+                       const char *, const char *);
+int snprint_null (char *, size_t, struct variable_list *, struct enum_list *,
+                  const char *, const char *);
+int snprint_bitstring (char *, size_t, struct variable_list *, struct enum_list *,
+                       const char *, const char *);
+int snprint_nsapaddress (char *, size_t, struct variable_list *, struct enum_list *,
+                         const char *, const char *);
+int snprint_counter64 (char *, size_t, struct variable_list *, struct enum_list *,
+                       const char *, const char *);
+int snprint_unknowntype (char *, size_t, struct variable_list *, struct enum_list *,
+                         const char *, const char *);
+int snprint_badtype (char *, size_t, struct variable_list *, struct enum_list *,
+                     const char *, const char *);
+#ifdef OPAQUE_SPECIAL_TYPES
+int snprint_float (char *, size_t, struct variable_list *, struct enum_list *,
+                   const char *, const char *);
+int snprint_double (char *, size_t, struct variable_list *, struct enum_list *,
+                    const char *, const char *);
+#endif	/* OPAQUE_SPECIAL_TYPES */
 
 int sprint_realloc_hexstring	(u_char **buf, size_t *buf_len,
 				 size_t *out_len, int allow_realloc,
