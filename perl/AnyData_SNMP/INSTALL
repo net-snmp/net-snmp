@@ -27,12 +27,12 @@ Install steps:
      run:
     perl Makefile.PL
     make
-    make install
+    make install   (as root)
 
   3) Then in this directory, run:
     perl Makefile.PL
     make
-    make install
+    make install   (as root)
 
 To use it:
   SQL like Shell script:
