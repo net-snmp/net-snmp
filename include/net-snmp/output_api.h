@@ -6,7 +6,6 @@
      *    (including error handling and debugging).
      */
 
-#include <net-snmp/net-snmp-config.h>
 #include <net-snmp/types.h>
 
     /*

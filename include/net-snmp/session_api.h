@@ -6,7 +6,6 @@
      *    including sending and receiving requests.
      */
 
-#include <net-snmp/net-snmp-config.h>
 #include <net-snmp/types.h>
 
     /*

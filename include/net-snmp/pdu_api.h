@@ -5,7 +5,6 @@
      *  Library API routines concerned with SNMP PDUs.
      */
 
-#include <net-snmp/net-snmp-config.h>
 #include <net-snmp/types.h>
 
     /*

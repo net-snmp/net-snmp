@@ -6,7 +6,6 @@
      *    of the behaviour of the library, agent and other applications.
      */
 
-#include <net-snmp/net-snmp-config.h>
 #include <net-snmp/types.h>
 
     /*

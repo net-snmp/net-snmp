@@ -5,8 +5,6 @@
      *  Defined constants, and other similar enumerations.
      */
 
-#include <net-snmp/net-snmp-config.h>
-
 #define MAX_OID_LEN	    128	/* max subid's in an oid */
 
 

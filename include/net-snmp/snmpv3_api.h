@@ -8,7 +8,6 @@
      *     but be invoked via version-independent API routines.
      */
 
-#include <net-snmp/net-snmp-config.h>
 #include <net-snmp/types.h>
 
     /*
