@@ -334,6 +334,12 @@ a notWritable error response.
 .IP "sysservices NUMBER"
 Sets the value of the system.sysServices.0 object.
 For a host, a good value is 72.
+.IP "sysdescr STRING"
+.IP "sysobjectid OID"
+Sets the system description or object ID for the agent.
+Although these values are not SNMP-writable, it is conceivable
+that a network administrator may wish to configure them to something
+other than the default values.
 .IP "agentaddress [<transport-specifier>:]<transport-address>[,...]"
 Makes the agent list on the specified comma-separated list of
 listening addresses instead of the default behaviour, which is to
