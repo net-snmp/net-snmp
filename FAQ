@@ -2548,7 +2548,13 @@ What about a failed dependency on 'libcrypto'?  Where can I get that?
 
     When compiling {UCD,Net}-SNMP from source, the configure script
   should detect that this library is not present, and use alternative
-  arrangements.
+  arrangements for MD5-based authentication.
+
+    If encryption (or SHA1-based authentication) is required, then
+  this typically requires compiling from source.  Under Linux, both
+  the 'openssl' and 'openssl-devel' RPMs should be installed, and the
+  'config.cache' file removed before running "configure --with-openssl"
+  and re-compiling.
 
 
 
