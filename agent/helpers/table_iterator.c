@@ -251,6 +251,7 @@ netsnmp_table_iterator_helper_handler(netsnmp_mib_handler *handler,
     case MODE_GET_STASH:
         cinfo = netsnmp_extract_stash_cache(reqinfo);
         table_reg_info = netsnmp_find_table_registration_info(reginfo);
+
         /* XXX: move this malloc to stash_cache handler? */
         reqtmp = SNMP_MALLOC_TYPEDEF(netsnmp_request_info);
         reqtmp->subtree = requests->subtree;
@@ -259,6 +260,9 @@ netsnmp_table_iterator_helper_handler(netsnmp_mib_handler *handler,
                                       netsnmp_create_data_list
                                       (TABLE_HANDLER_NAME,
                                        (void *) table_info, NULL));
+
+        /* remember the indexes that were originally parsed. */
+        old_indexes = table_info->indexes;
         break;
 
     case MODE_GETNEXT:
@@ -397,17 +401,11 @@ netsnmp_table_iterator_helper_handler(netsnmp_mib_handler *handler,
                             ldata->data = callback_data_context;
                         }
 
-                        /* XXX: optimize this.
-                           do replacement/memory at top and bottom */
-                        old_indexes = table_info->indexes;
                         table_info->indexes = index_search;
                         for(i = table_reg_info->min_column;
                             i <= table_reg_info->max_column; i++) {
                             myname[reginfo->rootoid_len + 1] = i;
                             table_info->colnum = i;
-                            /* XXX FIX NOW: make a new request instead
-                               of reusing the calling requests (bad
-                               bad) */
                             vb = reqtmp->requestvb =
                                 SNMP_MALLOC_TYPEDEF(netsnmp_variable_list);
                             vb->type = ASN_NULL;
@@ -423,8 +421,6 @@ netsnmp_table_iterator_helper_handler(netsnmp_mib_handler *handler,
                                 snmp_free_varbind(vb);
                             }
                         }
-                        /* XXX: ditto above */
-                        table_info->indexes = old_indexes;
                         reqinfo->mode = MODE_GET_STASH;
                         break;
 
@@ -563,6 +559,7 @@ netsnmp_table_iterator_helper_handler(netsnmp_mib_handler *handler,
     } else if (reqinfo->mode == MODE_GET_STASH) {
         netsnmp_free_request_data_sets(reqtmp);
         SNMP_FREE(reqtmp);
+        table_info->indexes = old_indexes;
     }
 
 
