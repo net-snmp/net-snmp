@@ -791,6 +791,12 @@ init_tree_roots()
 
 }
 
+#ifdef STRICT_MIB_PARSEING
+#define	label_compare	strcasecmp
+#else
+#define	label_compare	strcmp
+#endif
+
 
 struct tree *
 find_tree_node( name, modid )
@@ -802,7 +808,7 @@ find_tree_node( name, modid )
 
     headtp = tbuckets[NBUCKET(name_hash(name))];
     for ( tp = headtp ; tp ; tp=tp->next ) {
-        if ( !strcasecmp(tp->label, name) ) {
+        if ( !label_compare(tp->label, name) ) {
 
             if ( modid == -1 )	/* Any module */
                 return(tp);
@@ -860,7 +866,7 @@ merge_anon_children( tp1, tp2 )
                     tp2->child_list = previous;
                     break;
                 }
-		else if ( strcmp( child1->label, child2->label) != 0 ) {
+		else if ( !label_compare( child1->label, child2->label) ) {
 	            if (mib_warnings)
 		        fprintf (stderr, "Warning: %s.%ld is both %s and %s\n",
 			        tp2->label, child1->subid,
@@ -926,7 +932,7 @@ do_subtree(root, nodes)
      * move each into a separate list.
      */
     for(np = *headp; np; np = np->next){
-        if ( !strcmp(tp->label, np->parent)){
+        if ( !label_compare(tp->label, np->parent)){
             /* take this node out of the node list */
             if (oldnp == NULL){
                 *headp = np->next;  /* fix root of node list */
@@ -952,7 +958,7 @@ do_subtree(root, nodes)
             if (tp->subid == np->subid) break;
             else tp = tp->next_peer;
         if (tp) {
-	    if (strcmp (tp->label, np->label) == 0) {
+	    if (!label_compare (tp->label, np->label)) {
 		    /* Update list of modules */
                 int_p = (int *) xmalloc((tp->number_modules+1) * sizeof(int));
                 if (int_p == NULL) return;
@@ -1314,7 +1320,7 @@ get_tc(descriptor, modid, ep, hint)
              break;
     if ( mp )
          for ( i=0, mip=mp->imports ; i < mp->no_imports ; ++i, ++mip ) {
-             if ( !strcmp( mip->label, descriptor )) {
+             if ( !label_compare( mip->label, descriptor )) {
 				/* Found it - so amend the module ID */
                   modid = mip->modid;
                   break;
@@ -1325,7 +1331,7 @@ get_tc(descriptor, modid, ep, hint)
     for(i = 0, tcp = tclist; i < MAXTC; i++, tcp++){
         if (tcp->type == 0)
             break;
-        if (!strcmp(descriptor, tcp->descriptor) &&
+        if (!label_compare(descriptor, tcp->descriptor) &&
 		((modid == tcp->modid) || (modid==-1))){
             *ep = tcp->enums;
 	    *hint = tcp->hint;
@@ -1357,7 +1363,7 @@ get_tc_index(descriptor, modid)
              break;
     if ( mp )
          for ( i=0, mip=mp->imports ; i < mp->no_imports ; ++i, ++mip ) {
-             if ( !strcmp( mip->label, descriptor )) {
+             if ( !label_compare( mip->label, descriptor )) {
 				/* Found it - so amend the module ID */
                   modid = mip->modid;
                   break;
@@ -1368,7 +1374,7 @@ get_tc_index(descriptor, modid)
     for(i = 0; i < MAXTC; i++){
       if (tclist[i].type == 0)
           break;
-      if (!strcmp(descriptor, tclist[i].descriptor) &&
+      if (!label_compare(descriptor, tclist[i].descriptor) &&
 		((modid == tclist[i].modid) || (modid == -1))){
           return i;
       }
@@ -2181,7 +2187,7 @@ which_module(name)
     struct module *mp;
 
     for ( mp=module_head ; mp ; mp=mp->next )
-	if ( !strcasecmp(mp->name, name))
+	if ( !label_compare(mp->name, name))
 	    return(mp->modid);
 
     DEBUGP("Module %s not found\n", name);
@@ -2247,7 +2253,7 @@ read_module_replacements( name )
     struct module_compatability *mcp;
 
     for ( mcp=module_map_head ; mcp; mcp=mcp->next ) {
-      if ( !strcmp( mcp->old_module, name )) {
+      if ( !label_compare( mcp->old_module, name )) {
 	if (mib_warnings)
 	    fprintf (stderr, "Loading replacement module %s\n", mcp->new_module);
 	(void)read_module( mcp->new_module );
@@ -2266,12 +2272,12 @@ read_import_replacements( module_name, node_identifier )
 	 * Look for matches first
 	 */
     for ( mcp=module_map_head ; mcp; mcp=mcp->next ) {
-      if ( !strcmp( mcp->old_module, module_name )) {
+      if ( !label_compare( mcp->old_module, module_name )) {
 
 	if (	/* exact match */
 	  	  ( mcp->tag_len==0 &&
 		    (mcp->tag == NULL ||
-                     !strcmp( mcp->tag, node_identifier ))) ||
+                     !label_compare( mcp->tag, node_identifier ))) ||
 		/* prefix match */
 	          ( mcp->tag_len!=0 &&
 		    !strncmp( mcp->tag, node_identifier, mcp->tag_len ))
@@ -2310,7 +2316,7 @@ read_module_internal (name )
 	init_mib();
 
     for ( mp=module_head ; mp ; mp=mp->next )
-	if ( !strcasecmp(mp->name, name)) {
+	if ( !label_compare(mp->name, name)) {
 	    if ( mp->no_imports != -1 ) {
 		DEBUGP("Module %s already loaded\n", name);
 		return MODULE_ALREADY_LOADED;
@@ -2402,10 +2408,10 @@ new_module (name , file)
     struct module *mp;
 
     for ( mp=module_head ; mp ; mp=mp->next )
-	if ( !strcmp(mp->name, name)) {
+	if ( !label_compare(mp->name, name)) {
 	    DEBUGP("Module %s already noted\n", name);
 			/* Not the same file */
-	    if (strcmp(mp->file, file)) {
+	    if (label_compare(mp->file, file)) {
                 fprintf(stderr, "Warning: Module %s in both %s and %s\n",
 			name, mp->file, file);
 
@@ -2766,7 +2772,7 @@ get_token(fp, token, maxtlen)
 	if (too_long)
 	    print_error("Warning: token too long", token, CONTINUE);
 	for (tp = buckets[BUCKET(hash)]; tp; tp = tp->next) {
-	    if ((tp->hash == hash) && (strcmp(tp->name, token) == 0))
+	    if ((tp->hash == hash) && (!label_compare(tp->name, token)))
 		break;
 	}
 	if (tp) {
