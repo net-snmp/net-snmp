@@ -97,9 +97,6 @@ typedef long	fd_mask;
 #define PARTY_MIB_BASE	 ".1.3.6.1.6.3.3.1.3.127.0.0.1.1"
 #define CONTEXT_MIB_BASE ".1.3.6.1.6.3.3.1.4.127.0.0.1.1"
 
-int
-snmp_synch_input (int, struct snmp_session *, int, struct snmp_pdu *, void *);
-
 
 struct snmp_pdu *
 snmp_pdu_create(int command)
@@ -122,7 +119,7 @@ snmp_pdu_create(int command)
     }
     return pdu;
 
-}  /* end snmp_pdu_create() */
+}
 
 
 /*
@@ -134,7 +131,7 @@ struct variable_list* snmp_add_null_var(struct snmp_pdu * pdu,
 					size_t name_length)
 {
     return snmp_pdu_add_variable(pdu, name, name_length, ASN_NULL, NULL, 0);
-}  /* end snmp_add_null_var() */
+}
 
 
 
@@ -160,25 +157,21 @@ snmp_synch_input(int op,
 	  state->waiting = 1;
 	state->pdu = NULL;
 	state->status = STAT_ERROR;
-	snmp_errno = rpt_type;
 	session->s_snmp_errno = rpt_type;
       } else if (pdu->command == SNMP_MSG_RESPONSE) {
 	/* clone the pdu to return to snmp_synch_response */
 	state->pdu = snmp_clone_pdu(pdu);
 	state->status = STAT_SUCCESS;
-	snmp_errno = 0;  /* XX all OK when msg received ? */
-	session->s_snmp_errno = 0;
+	session->s_snmp_errno = SNMPERR_SUCCESS;
       }
     } else if (op == TIMED_OUT){
 	state->pdu		 = NULL;
 	state->status		 = STAT_TIMEOUT;
-	snmp_errno		 = SNMPERR_TIMEOUT;
 	session->s_snmp_errno	 = SNMPERR_TIMEOUT;
     }
 
     return 1;
-
-}  /* end snmp_synch_input() */
+}
 
 
 /*
@@ -438,9 +431,10 @@ snmp_set_var_value(struct variable_list *newvar,
 
 
 int
-snmp_synch_response(struct snmp_session *ss,
+snmp_synch_response_cb(struct snmp_session *ss,
 		    struct snmp_pdu *pdu,
-		    struct snmp_pdu **response)
+		    struct snmp_pdu **response,
+		    snmp_callback pcb)
 {
     struct synch_state lstate, *state;
     snmp_callback cbsav;
@@ -454,7 +448,7 @@ snmp_synch_response(struct snmp_session *ss,
     state = &lstate;
     cbsav = ss->callback;
     cbmagsav = ss->callback_magic;
-    ss->callback = snmp_synch_input;
+    ss->callback = pcb;
     ss->callback_magic = (void *)state;
 
     if ((state->reqid = snmp_send(ss, pdu)) == 0){
@@ -504,6 +498,14 @@ snmp_synch_response(struct snmp_session *ss,
     ss->callback = cbsav;
     ss->callback_magic = cbmagsav;
     return state->status;
+}
+
+int
+snmp_synch_response(struct snmp_session *ss,
+		    struct snmp_pdu *pdu,
+		    struct snmp_pdu **response)
+{
+    return snmp_synch_response_cb(ss,pdu,response,snmp_synch_input);
 }
 
 int

@@ -55,6 +55,7 @@ struct snmp_pdu *snmp_fix_pdu (struct snmp_pdu *, int);
 struct snmp_pdu *snmp_clone_pdu (struct snmp_pdu *);
 const char *snmp_errstring (int);
 int snmp_synch_response (struct snmp_session *, struct snmp_pdu *, struct snmp_pdu **);
+int snmp_synch_response_cb (struct snmp_session *, struct snmp_pdu *, struct snmp_pdu **, snmp_callback);
 
 int ms_party_init (in_addr_t, oid *, size_t *, oid *, size_t *, oid *, size_t *);
 

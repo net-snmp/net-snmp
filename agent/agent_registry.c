@@ -446,7 +446,6 @@ struct subtree *find_subtree_next(oid *name,
 				  struct subtree *subtree)
 {
   struct subtree *myptr = NULL;
-  int ret;
 
   myptr = find_subtree_previous(name, len, subtree);
   if ( myptr != NULL ) {

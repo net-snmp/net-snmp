@@ -305,10 +305,8 @@ writeSystem(int action,
 	    oid *name,
 	    size_t name_len)
 {
-    size_t bigsize = 1000;
     u_char *cp, *buf = NULL, *oldbuf = NULL;
     int count;
-    size_t size = var_val_len;
 
     switch((char)name[7]){
       case 1:
