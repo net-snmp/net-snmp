@@ -125,6 +125,8 @@ extern          "C" {
 #define NETSNMP_DS_LIB_AUTHLOCALIZEDKEY  18
 #define NETSNMP_DS_LIB_PRIVLOCALIZEDKEY  19
 #define NETSNMP_DS_LIB_APPTYPES          20
+#define NETSNMP_DS_LIB_KSM_KEYTAB        21
+#define NETSNMP_DS_LIB_KSM_SERVICE_NAME  22
 
     /*
      * end storage definitions 
