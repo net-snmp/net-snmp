@@ -74,10 +74,12 @@ int tree_compare(const struct subtree *ap, const struct subtree *bp)
 	 *    returning the new (second) subtree
 	 */
 struct subtree *
-split_subtree(struct subtree *current, oid name[], int name_len )
+split_subtree(struct subtree *current, oid name[], int name_len)
 {
+    struct variable *vp = NULL;
     struct subtree *new_sub, *ptr;
-    int i;
+    int i = 0, rc = 0, rc2 = 0;
+    size_t common_len = 0;
     char *cp;
 
     if ( snmp_oid_compare(name, name_len,
@@ -101,20 +103,34 @@ split_subtree(struct subtree *current, oid name[], int name_len )
     i = current->variables_len;
     current->variables_len = 0;
 
-    for ( ; i > 0 ; i-- ) {
+    for (vp = current->variables; i > 0; i--) {
 		/* Note that the variable "name" field omits
 		   the prefix common to the whole registration,
 		   hence the strange comparison here */
-	if ( snmp_oid_compare( new_sub->variables[0].name,
-			       new_sub->variables[0].namelen,
-			       name     + current->namelen, 
-			       name_len - current->namelen ) >= 0 )
+
+	rc = snmp_oid_compare(vp->name, vp->namelen,
+			      name     + current->namelen, 
+			      name_len - current->namelen);
+	
+	if (name_len - current->namelen > vp->namelen) {
+	    common_len = vp->namelen;
+	} else {
+	    common_len = name_len - current->namelen;
+	}
+
+	rc2 = snmp_oid_compare(vp->name, common_len,
+			       name + current->namelen, common_len);
+
+	if (rc >= 0)
 	    break;	/* All following variables belong to the second subtree */
 
 	current->variables_len++;
-	new_sub->variables_len--;
-	cp = (char *)new_sub->variables;
-	new_sub->variables = (struct variable *)(cp + new_sub->variables_width);
+	if (rc2 < 0) {
+	    new_sub->variables_len--;
+	    cp = (char *)new_sub->variables;
+	    new_sub->variables = (struct variable *)(cp + new_sub->variables_width);
+	}
+	vp = (struct variable *)((char *)vp + current->variables_width);
     }
 
 	/* Delegated trees should retain their variables regardless */
@@ -144,7 +160,7 @@ load_subtree( struct subtree *new_sub )
 {
     struct subtree *tree1, *tree2, *new2;
     struct subtree *prev, *next;
-    int res;
+    int res, rc = 0;
 
     if ( new_sub == NULL )
 	return MIB_REGISTERED_OK;	/* Degenerate case */
@@ -209,9 +225,10 @@ load_subtree( struct subtree *new_sub )
 	 */
 	if ( snmp_oid_compare( new_sub->start, new_sub->start_len, 
 			       tree1->start,   tree1->start_len) != 0 )
-	    tree1 = split_subtree( tree1, new_sub->start, new_sub->start_len);
-	    if ( tree1 == NULL )
-		return MIB_REGISTRATION_FAILED;
+	    tree1 = split_subtree(tree1, new_sub->start, new_sub->start_len);
+
+	if ( tree1 == NULL )
+	    return MIB_REGISTRATION_FAILED;
 
 	/*  Now consider the end of this existing subtree:
 	 *	If it matches the new subtree precisely,
@@ -222,13 +239,14 @@ load_subtree( struct subtree *new_sub )
 	 *	If the new subtree extends beyond this existing region,
 	 *	  split it, and recurse to merge the two parts.
 	 */
+	rc = snmp_oid_compare(new_sub->end, new_sub->end_len, 
+			      tree1->end, tree1->end_len);
 
-	 switch ( snmp_oid_compare( new_sub->end, new_sub->end_len, 
-				    tree1->end,   tree1->end_len))  {
+	 switch (rc)  {
 
 		case -1:	/* Existing subtree contains new one */
-			(void) split_subtree( tree1,
-					new_sub->end, new_sub->end_len);
+			(void) split_subtree(tree1,
+					     new_sub->end, new_sub->end_len);
 			/* Fall Through */
 
 		case  0:	/* The two trees match precisely */
@@ -559,7 +577,7 @@ register_mib_table_row(const char *moduleName,
   u_char *v;
 
   for(x = 0; x < numvars; x++) {
-
+    struct variable *vr = (struct variable *)((char *)var+(x*varsize));
     /* 
      * allocate a subtree for the mib registration
      */
@@ -575,19 +593,37 @@ register_mib_table_row(const char *moduleName,
      * fill in subtree
      */
     memcpy(subtree->name, mibloc, mibloclen*sizeof(oid));
-    subtree->name[var_subid - 1] += x;
+    if (vr->namelen > 0) {
+      memcpy(&subtree->name[var_subid - 1], vr->name, 
+	     vr->namelen*sizeof(oid));
+    } else {
+      subtree->name[var_subid - 1] += x;
+    }
     subtree->namelen = (u_char) mibloclen;
 
     memcpy(subtree->start, mibloc, mibloclen*sizeof(oid));
-    subtree->start[var_subid - 1] += x;
+    if (vr->namelen > 0) {
+      memcpy(&subtree->start[var_subid - 1], vr->name, 
+	     vr->namelen*sizeof(oid));
+    } else {
+      subtree->start[var_subid - 1] += x;
+    }
     subtree->start_len = (u_char) mibloclen;
 
     memcpy(subtree->end, mibloc, mibloclen*sizeof(oid));
-    subtree->end[var_subid - 1] += x;
+    if (vr->namelen > 0) {
+      memcpy(&subtree->end[var_subid - 1], vr->name, 
+	     vr->namelen*sizeof(oid));
+    } else {
+      subtree->end[var_subid - 1] += x;
+    }
     subtree->end[mibloclen - 1]++;
     subtree->end_len = (u_char) mibloclen;
-
+    
     memcpy(subtree->label, moduleName, strlen(moduleName)+1);
+
+    /* reset variable namelen */
+    vr->namelen = 0;
 
     if (var) {
       v = (u_char *)var + (x*varsize);
@@ -611,8 +647,13 @@ register_mib_table_row(const char *moduleName,
     /*
      * load the subtree
      */
+    DEBUGMSGTL(("register_mib", "load_subtree("));
+    DEBUGMSGOID(("register_mib", subtree->name, subtree->namelen));
+    DEBUGMSG(("register_mib", ")\n"));
     rc = load_subtree(subtree);
     if ((rc != MIB_REGISTERED_OK)) {
+      DEBUGMSGTL(("register_mib", "register_mib_table_row: load failed (%d)\n",
+		  rc));
       unregister_mib_context(mibloc, mibloclen, priority, 
                              var_subid, numvars, context);
       return rc;
@@ -668,6 +709,10 @@ unregister_mib_context( oid *name, size_t len, int priority,
   struct subtree *list, *myptr;
   struct subtree *prev, *child;             /* loop through children */
   struct register_parameters reg_parms;
+
+  DEBUGMSGTL(("register_mib", "unregistering "));
+  DEBUGMSGOID(("register_mib", name, len));
+  DEBUGMSG(("register_mib","\n"));
 
   list = find_subtree( name, len, subtrees );
   if ( list == NULL )
@@ -750,19 +795,22 @@ unregister_mibs_by_session (struct snmp_session *ss)
   struct subtree *list, *list2;
   struct subtree *child, *prev, *next_child;
 
-  for( list = subtrees; list != NULL; list = list2) {
-    list2 = list->next;
-    for ( child=list, prev=NULL;  child != NULL; child=next_child ) {
+  DEBUGMSGTL(("register_mib", "unregister_mibs_by_session(%08p)\n", ss));
 
+  for (list = subtrees; list != NULL; list = list2) {
+    list2 = list->next;
+
+    for (child=list, prev=NULL;  child != NULL; child=next_child) {
       next_child = child->children;
+
       if (( (ss->flags & SNMP_FLAGS_SUBSESSION) && child->session == ss ) ||
           (!(ss->flags & SNMP_FLAGS_SUBSESSION) && child->session &&
                                       child->session->subsession == ss )) {
-              unload_subtree( child, prev );
-              free_subtree( child );
-      }
-      else
+              unload_subtree(child, prev);
+              free_subtree(child);
+      } else {
           prev = child;
+      }
     }
   }
 }
@@ -997,24 +1045,60 @@ void setup_tree (void)
 extern void dump_idx_registry( void );
 void dump_registry( void )
 {
-    struct subtree *myptr, *myptr2;
-    char start_oid[SPRINT_MAX_LEN];
-    char end_oid[SPRINT_MAX_LEN];
+  struct variable *vp = NULL;
+  struct subtree *myptr, *myptr2;
+  u_char *s = NULL, *e = NULL, *v = NULL;
+  size_t sl = 256, el = 256, vl = 256, sl_o = 0, el_o = 0, vl_o = 0;
+  int i = 0;
 
-    for( myptr = subtrees ; myptr != NULL; myptr = myptr->next) {
-	sprint_objid(start_oid, myptr->start, myptr->start_len);
-	sprint_objid(end_oid, myptr->end, myptr->end_len);
-	printf("%02x %c %s - %s %c\n", myptr->flags,
-	       ( myptr->variables ? ' ' : '(' ),
-	       start_oid, end_oid,
-	       ( myptr->variables ? ' ' : ')' ));
-	for( myptr2 = myptr ; myptr2 != NULL; myptr2 = myptr2->children) {
-	    if ( myptr2->label && myptr2->label[0] )
-		printf("\t%s\n", myptr2->label);
+  if ((s = (u_char *)calloc(sl, 1)) != NULL &&
+      (e = (u_char *)calloc(sl, 1)) != NULL &&
+      (v = (u_char *)calloc(sl, 1)) != NULL) {
+
+    for(myptr = subtrees; myptr != NULL; myptr = myptr->next) {
+      sl_o = el_o = vl_o = 0;
+
+      if (!sprint_realloc_objid(&s, &sl, &sl_o, 1,
+				myptr->start, myptr->start_len)) {
+	break;
+      }
+      if (!sprint_realloc_objid(&e, &el, &el_o, 1,
+				myptr->end, myptr->end_len)) {
+	break;
+      }
+				  
+      if (myptr->variables) {
+	printf("%02x ( %s - %s ) [", myptr->flags, s, e);
+	for (i = 0, vp = myptr->variables; i < myptr->variables_len; i++) {
+	  vl_o = 0;
+	  if (!sprint_realloc_objid(&v, &vl, &vl_o, 1, vp->name, vp->namelen)){
+	    break;
+	  }
+	  printf("%s, ", v);
+	  vp = (struct variable *)((char *)vp + myptr->variables_width);
 	}
+	printf("]\n");
+      } else {
+	printf("%02x   %s - %s  \n", myptr->flags, s, e);
+      }
+      for( myptr2 = myptr ; myptr2 != NULL; myptr2 = myptr2->children) {
+	if ( myptr2->label && myptr2->label[0] )
+	  printf("\t%s\n", myptr2->label);
+      }
     }
+  }
 
-    dump_idx_registry();
+  if (s != NULL) {
+    free(s);
+  }
+  if (e != NULL) {
+    free(e);
+  }
+  if (v != NULL) {
+    free(v);
+  }
+
+  dump_idx_registry();
 }
 
 
