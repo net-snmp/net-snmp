@@ -727,7 +727,7 @@ main(argc, argv)
     
     myaddr = get_myaddr();
     /* XXX mib-2 subtree only??? */
-    if ((ret = agent_party_init(myaddr, dest_port, ".iso.org.dod.internet"))){
+    if ((ret = agent_party_init(myaddr, dest_port, ".1.3.6.1"))){
 	if (ret == 1){
 	    fprintf(stderr, "Conflict found with initial noAuth/noPriv parties... continuing\n");
 	} else if (ret == -1){
