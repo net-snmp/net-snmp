@@ -5,7 +5,7 @@
        TEXTUAL-CONVENTION          FROM SNMPv2-TC;
 
    ianaifType MODULE-IDENTITY
-       LAST-UPDATED "200004250000Z"  -- Apr 25, 2000
+       LAST-UPDATED "200009010000Z"  -- Sept 01, 2000
        ORGANIZATION "IANA"
        CONTACT-INFO "        Internet Assigned Numbers Authority
 
@@ -13,11 +13,26 @@
                              4676 Admiralty Way, Suite 330
                              Marina del Rey, CA 90292
 
-                     Tel:    +1 310 823 9358 x20
+                     Tel:    +1 310 823 9358
                      E-Mail: iana@iana.org"
        DESCRIPTION  "This MIB module defines the IANAifType Textual
                      Convention, and thus the enumerated values of
                      the ifType object defined in MIB-II's ifTable."
+
+       REVISION     "200009010000Z"  -- Sept 01, 2000
+       DESCRIPTION  "Registration of new IANAifTypes
+                     184, 185, and 186."			
+
+       REVISION     "200008240000Z"  -- Aug 24, 2000
+       DESCRIPTION  "Registration of new IANAifType 183." 
+
+       REVISION     "200008230000Z"  -- Aug 23, 2000
+       DESCRIPTION  "Registration of new IANAifTypes
+                     174-182."
+
+       REVISION     "200008220000Z"  -- Aug 22, 2000
+       DESCRIPTION  "Registration of new IANAifTypes 170,
+                     171, 172 and 173."
 
        REVISION     "200004250000Z"  -- Apr 25, 2000
        DESCRIPTION  "Registration of new IANAifTypes 168 and 169."       
@@ -230,15 +245,32 @@
 		   frForward (158),    -- Frame Forward Interface
 		   rfc1483 (159),	-- Multiprotocol over ATM AAL5
 		   usb (160),		-- USB Interface
-		   ieee8023adLag(161),  -- IEEE 802.3ad Link Aggregate
-                   bgppolicyaccounting(162), -- BGP Policy Accounting
+		   ieee8023adLag (161),  -- IEEE 802.3ad Link Aggregate
+                   bgppolicyaccounting (162), -- BGP Policy Accounting
                    frf16MfrBundle (163), -- FRF .16 Multilink Frame Relay 
                    h323Gatekeeper (164), -- H323 Gatekeeper
                    h323Proxy (165), -- H323 Voice and Video Proxy
                    mpls (166), -- MPLS                   
                    mfSigLink (167), -- Multi-frequency signaling link
                    hdsl2 (168), -- High Bit-Rate DSL - 2nd generation
-                   shdsl (169) -- Multirate HDSL2
+                   shdsl (169), -- Multirate HDSL2
+                   ds1FDL (170), -- Facility Data Link 4Kbps on a DS1
+                   pos (171), -- Packet over SONET/SDH Interface
+                   dvbAsiln (172), -- DVB-ASI Input
+                   dvbAsiOut (173), -- DVB-ASI Output 
+                   plc (174), -- Power Line Communtications
+                   nfas (175), -- Non Facility Associated Signaling
+                   tr008 (176), -- TR008
+                   gr303RDT (177), -- Remote Digital Terminal
+                   gr303IDT (178), -- Integrated Digital Terminal
+                   isup (179), -- ISUP
+                   propDocsWirelessMaclayer (180), -- prop/Maclayer
+                   propDocsWirelessDownstream (181), -- prop/Downstream
+                   propDocsWirelessUpstream (182), -- prop/Upstream
+                   hiperlan2 (183), -- HIPERLAN Type 2 Radio Interface
+                   propBWAp2Mp (184), -- PropBroadbandWirelessAccesspt2multipt
+                   sonetOverheadChannel (185), -- SONET Overhead Channel
+                   digitalWrapperOverheadChannel (186) -- Digital Wrapper
 }
 
    END
