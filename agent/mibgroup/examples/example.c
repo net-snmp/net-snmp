@@ -134,7 +134,7 @@ var_example(struct variable *vp,
   
   /* header_generic is a simple function for finding out if we're in
      the right place.  This only works on scalar objects.  Use
-     checkmib for simple tables, and write your own for anything
+     header_simple_table for simple tables, and write your own for anything
      else. */
   if (header_generic(vp, name, length, exact, var_len, write_method))
     return NULL;

@@ -79,7 +79,7 @@ var_sysORTable(struct variable *vp,
   struct sysORTable *ptr;
   static u_long long_return;
 
-  if (!checkmib(vp, name, length, exact, var_len, write_method, numEntries))
+  if (header_simple_table(vp, name, length, exact, var_len, write_method, numEntries))
     return NULL;
 
   for(i = 1, ptr=table; ptr != NULL && i < name[*length-1];

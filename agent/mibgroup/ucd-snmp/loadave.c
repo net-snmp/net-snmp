@@ -241,7 +241,7 @@ unsigned char *var_extensible_loadave(struct variable *vp,
   static char errmsg[300];
   double avenrun[3];
   
-  if (!checkmib(vp,name,length,exact,var_len,write_method,3))
+  if (header_simple_table(vp,name,length,exact,var_len,write_method,3))
     return(NULL);
 
   switch (vp->magic) {

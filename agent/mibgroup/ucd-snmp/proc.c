@@ -141,7 +141,7 @@ unsigned char *var_extensible_proc(struct variable *vp,
   static char errmsg[300];
 
 
-  if (!checkmib(vp,name,length,exact,var_len,write_method,numprocs))
+  if (header_simple_table(vp,name,length,exact,var_len,write_method,numprocs))
     return(NULL);
   
   if ((proc = get_proc_instance(procwatch,name[*length-1]))) {

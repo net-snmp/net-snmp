@@ -124,7 +124,7 @@ unsigned char *var_extensible_vmstat(struct variable *vp,
 
     long_ret = 0;  /* set to 0 as default */
 
-    if (!checkmib(vp,name,length,exact,var_len,write_method,1))
+    if (header_simple_table(vp,name,length,exact,var_len,write_method,1))
 	return(NULL);
 
     /* Update structures (only if time has passed) */

@@ -164,7 +164,7 @@ unsigned char * var_ipfwacc(struct variable *vp,
   *write_method = 0;           /* assume it isnt writable for the time being */
   *var_len = sizeof(ret_val);  /* assume an integer and change later if not */
 
-  if (!checkmib(vp,name,length,exact,var_len,write_method,readrule(0)))
+  if (header_simple_table(vp,name,length,exact,var_len,write_method,readrule(0)))
 	return (NULL);
 
   if (readrule(name[*length-1])){
