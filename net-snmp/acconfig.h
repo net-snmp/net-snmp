@@ -76,7 +76,7 @@ sure to end it in -1.*/
 
 #define ERRORMIBNUM 101     /* Reports errors the agent runs into
                                (typically its "can't fork, no mem" problems) */
-#define ERRORTIMELENGTH 600 /* how long to wait for error querys
+#define ERRORTIMELENGTH 600 /* how long to wait (seconds) for error querys
                                before reseting the error trap.*/
 
 /* Command to generate ps output, the final column must be the process
