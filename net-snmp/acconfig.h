@@ -60,6 +60,9 @@
 
 #define PSCMD "/bin/ps"
 
+/* debugging stuff */
+#undef DODEBUG
+
 @BOTTOM@
 
 
@@ -191,9 +194,7 @@ sure to end it in -1.*/
 
 #define LASTFIELD -1      /* internal define */
 
-/* debugging stuff */
-
-#define DODEBUG
+/* debugging macros */
 
 #ifdef DODEBUG
 #define DEBUGP(x) fprintf(stderr,x);
