@@ -86,11 +86,11 @@ SOFTWARE.
 #include <sys/wait.h>
 #endif
 #include <signal.h>
-
-#ifndef FD_SET
 #ifdef HAVE_SYS_PARAM_H
 #include <sys/param.h>
 #endif
+
+#ifndef FD_SET
 typedef long    fd_mask;
 #define NFDBITS (sizeof(fd_mask) * NBBY)        /* bits per mask */
 #define FD_SET(n, p)    ((p)->fds_bits[(n)/NFDBITS] |= (1 << ((n) % NFDBITS)))
