@@ -917,7 +917,7 @@ register_index(struct variable_list *varbind, int flags, struct snmp_session *ss
 		 *	We proceed by creating the new entry
 		 *	   (by copying the entry provided)
 		 */
-	new_index = (struct snmp_index *)malloc( sizeof( struct snmp_index ));
+	new_index = (struct snmp_index *)calloc( 1, sizeof( struct snmp_index ));
 	if (new_index == NULL)
 	    return NULL;
 	if (snmp_clone_var( varbind, &new_index->varbind ) != 0 ) {
@@ -937,6 +937,7 @@ register_index(struct variable_list *varbind, int flags, struct snmp_session *ss
 		 */
 	if ( flags & ALLOCATE_ANY_INDEX ) {
 	    if ( prev_idx_ptr ) {
+		    snmp_free_var(new_index->varbind);
 		if ( snmp_clone_var( &prev_idx_ptr->varbind, &new_index->varbind ) != 0 ) {
 		    free( new_index );
 		    return NULL;
@@ -1011,6 +1012,7 @@ register_index(struct variable_list *varbind, int flags, struct snmp_session *ss
 		    }
 		    break;
 		default:
+		    snmp_free_var(new_index->varbind);
 		    free( new_index );
 		    return NULL;	/* Index type not supported */
 	    }
@@ -1128,6 +1130,7 @@ unregister_index(struct variable_list *varbind, int remember, struct snmp_sessio
 		 *	between ANY_INDEX and NEW_INDEX
 		 */
     if ( remember ) {
+	snmp_free_var( idxptr2->varbind );
 	idxptr2->session = NULL;	/* Unused index */
 	return SNMP_ERR_NOERROR;
     }
@@ -1155,7 +1158,8 @@ unregister_index(struct variable_list *varbind, int remember, struct snmp_sessio
 	else
 	    snmp_index_head = idxptr2->next_oid;
     }
-    snmp_free_var( (struct variable_list *)idxptr2 );
+    snmp_free_var( idxptr2->varbind );
+    free( idxptr2 );
     return SNMP_ERR_NOERROR;
 }
 
