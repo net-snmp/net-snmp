@@ -97,7 +97,7 @@ void vacm_destroyViewEntry (const char *, oid *, size_t);
 void vacm_destroyAllViewEntries (void);
 
 struct vacm_viewEntry *
-vacm_getViewEntry (const char *, oid *, size_t);
+vacm_getViewEntry (const char *, oid *, size_t, int);
 /*
  * Returns a pointer to the viewEntry with the
  * same viewName and viewSubtree
