@@ -192,7 +192,7 @@ static void usage(char *prog)
 #endif
 	printf("\n");
 	printf("\n\tVersion:  %s\n",VersionInfo);
-	printf("\tAuthor:   Wes Hardaker\n");
+	printf("\tWeb:      http://www.net-snmp.org/\n");
 	printf("\tEmail:    net-snmp-coders@lists.sourceforge.net\n");
 	printf("\n-h\t\tThis usage message.\n");
 	printf("-H\t\tDisplay configuration file directives understood.\n");
@@ -475,15 +475,15 @@ main(int argc, char *argv[])
                   exit(0);
                 case 'v':
                   printf("\nUCD-snmp version:  %s\n",VersionInfo);
-                  printf("Author:            Wes Hardaker\n");
-                  printf("Email:             ucd-snmp-coders@ucd-snmp.ucdavis.edu\n\n");
+                  printf("Web:               http://www.net-snmp.org/\n");
+                  printf("Email:             net-snmp-coders@lists.sourceforge.net\n\n");
                   exit (0);
                 case '-':
                   switch(argv[arg][2]){
                     case 'v': 
                       printf("\nUCD-snmp version:  %s\n",VersionInfo);
-                      printf("Author:            Wes Hardaker\n");
-                      printf("Email:             ucd-snmp-coders@ucd-snmp.ucdavis.edu\n\n");
+                      printf("Web:               http://www.net-snmp.org/\n");
+                      printf("Email:             net-snmp-coders@lists.sourceforge.net\n\n");
                       exit (0);
                     case 'h':
                       usage(argv[0]);
