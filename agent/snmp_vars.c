@@ -204,9 +204,12 @@ u_char		return_buf[256]; /* nee 64 */
 
 struct timeval	starttime;
 
-void
+/* init_agent() returns non-zero on error */
+int
 init_agent (const char *app)
 {
+  int r = 0;
+
   /* get current time (ie, the time the agent started) */
   gettimeofday(&starttime, NULL);
   starttime.tv_sec--;
@@ -230,9 +233,10 @@ init_agent (const char *app)
   /* initialize agentx subagent if necessary. */
 #ifdef USING_AGENTX_SUBAGENT_MODULE
   if(ds_get_boolean(DS_APPLICATION_ID, DS_AGENT_ROLE) == SUB_AGENT)
-      subagent_pre_init();
+    r = subagent_pre_init();
 #endif
 
+  return r;
 }  /* end init_agent() */
 
 
