@@ -3148,7 +3148,14 @@ snmp_mib_node_FETCH(tp_ref, key)
 		 sv_setsv(ST(0), newRV((SV*)varbind_av));
 		 break;
 	      case 'd': /* description */
-                 if (strncmp("description", key, strlen(key))) break;
+                  if (strncmp("description", key, strlen(key))) {
+                      if(!(strncmp("defaultValue",key,strlen(key)))) {
+                          /* We're looking at defaultValue */
+                          sv_setpv(ST(0), tp->defaultValue);
+                          break;
+                      } /* end if */
+                  } /* end if */
+	          /* we must be looking at description */	
                  sv_setpv(ST(0),tp->description);
                  break;
               case 'i': /* indexes */
