@@ -219,7 +219,7 @@ Section "Net-SNMP Agent Service" SEC02
   NoService:
 SectionEnd
 
-Section "Net-SMNP Trap Service" SEC03
+Section "Net-SNMP Trap Service" SEC03
   SetOutPath "$INSTDIR\bin"
   File "bin\snmptrapd.exe"
   SetOutPath "$INSTDIR\share\snmp\snmpconf-data\snmptrapd-data"
