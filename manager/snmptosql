@@ -179,11 +179,14 @@ sub getoncall {
       @days = split(/,/,$row->{'days'});
       foreach $i (@days) {
 	  @two = split(/-/,$i);
-	  if ((defined($dayscon{$i}) && $dayscon{$i} == $now[6]) ||
+	  if ($row->{'days'} eq "*" ||
+	      (defined($dayscon{$i}) && $dayscon{$i} == $now[6]) ||
 	      (defined($dayscon{$two[0]}) && defined($dayscon{$two[1]}) &&
-	       (($dayscon{$two[0]} <= $now[6] && $dayscon{$two[1]} >= $now[6]) ||
+	       (($dayscon{$two[0]} <= $now[6] && 
+		 $dayscon{$two[1]} >= $now[6]) ||
 		(($dayscon{$two[0]} > $dayscon{$two[1]}) &&
-		 ($dayscon{$two[0]} <= $now[6] || $dayscon{$two[1]} >= $now[6]))))) {
+		 ($dayscon{$two[0]} <= $now[6] || 
+		  $dayscon{$two[1]} >= $now[6]))))) {
 	      # we hit a valid day range
 	      print "    hit it $row->{'email'} $now[6]\t($i)\t$row->{'days'}\n"
 		  if ($verbose);
