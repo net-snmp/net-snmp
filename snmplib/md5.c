@@ -45,6 +45,7 @@
 /* Compile-time includes 
 */
 #include <stdio.h>
+#include <sys/types.h>
 #include "md5.h"
 
 /* Compile-time declarations of MD5 ``magic constants''.
