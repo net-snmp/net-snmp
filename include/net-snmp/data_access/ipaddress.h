@@ -91,6 +91,13 @@ netsnmp_access_ipaddress_entry_create(void);
 void netsnmp_access_ipaddress_entry_free(netsnmp_ipaddress_entry * entry);
 
 /*
+ * copy
+ */
+int
+netsnmp_access_ipaddress_entry_copy(netsnmp_ipaddress_entry *old, 
+                                    netsnmp_ipaddress_entry *new);
+
+/*
  * update/compare
  */
 int
