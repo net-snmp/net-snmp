@@ -40,6 +40,8 @@ IMPORTS
 	    FROM RFC-1212
 	DisplayString
 	    FROM RFC1213-MIB
+	TruthValue
+	    FROM SNMPV2-TC
 	TRAP-TYPE
 	    FROM RFC-1215;
 
@@ -57,6 +59,7 @@ ucdExperimental   OBJECT IDENTIFIER ::= { ucdavis 13 }
 --   systemStats    OBJECT IDENTIFIER ::= { ucdavis 11 }
 --   ipFwAcc        OBJECT IDENTIFIER ::= { ucdExperimental 1 } 
 --                  (defined in IPFWACC-MIB.txt)
+--   fileTable      OBJECT IDENTIFIER ::= { ucdavis 14 }
 --   version        OBJECT IDENTIFIER ::= { ucdavis 100 }
 --   snmperrs       OBJECT IDENTIFIER ::= { ucdavis 101 }
 --   mibRegistryTable    OBJECT IDENTIFIER ::= { ucdavis 102 }
@@ -907,5 +910,77 @@ ucdShutdown TRAP-TYPE
 	ENTERPRISE ucdTraps
 	DESCRIPTION "This trap is sent when the agent terminates"
 	::= 2
+
+
+--
+-- File Table:  monitor a list of files to check for a maximum size.
+-- 
+
+fileTable	OBJECT-TYPE
+		SYNTAX		SEQUENCE OF FileEntry
+		MAX-ACCESS	not-accessible
+		STATUS		current
+		DESCRIPTION	"Table of monitored files"
+		INDEX		{ fileIndex }
+	::= { ucdavis 14 }
+
+fileEntry	OBJECT-TYPE
+		SYNTAX		FileEntry
+		MAX-ACCESS	not-accessible
+		STATUS		current
+		DESCRIPTION	"Entry of file"
+	::= { fileTable 1 }
+
+FileEntry ::=	SEQUENCE
+		{
+		fileIndex	INTEGER,
+		fileName	DisplayString,
+		fileSize	INTEGER,
+		fileMax		INTEGER,
+		fileError	TruthValue,
+		fileErrorMsg	DisplayString
+		}
+
+fileIndex	OBJECT-TYPE
+		SYNTAX		INTEGER
+		MAX-ACCESS	read-only
+		STATUS		current
+		DESCRIPTION	"Index of file"
+	::= { fileEntry 1 }
+
+fileName	OBJECT-TYPE
+		SYNTAX		DisplayString
+		MAX-ACCESS	read-only
+		STATUS		current
+		DESCRIPTION	"Filename"
+	::= { fileEntry 2 }
+
+fileSize	OBJECT-TYPE
+		SYNTAX		INTEGER
+		MAX-ACCESS	read-only
+		STATUS		current
+		DESCRIPTION	"Size of file (kb)"
+	::= { fileEntry 3 }
+
+fileMax	OBJECT-TYPE
+		SYNTAX		INTEGER
+		MAX-ACCESS	read-only
+		STATUS		current
+		DESCRIPTION	"Limit of filesize (kb)"
+	::= { fileEntry 4 }
+
+fileMax		OBJECT-TYPE
+		SYNTAX		TruthValue
+		MAX-ACCESS	read-only
+		STATUS		current
+		DESCRIPTION	"Limit exceeded flag"
+	::= { fileEntry 100 }
+
+fileErrorMsg	OBJECT-TYPE
+		SYNTAX		DisplayString
+		MAX-ACCESS	read-only
+		STATUS		current
+		DESCRIPTION	"Filesize error message"
+	::= { fileEntry 101 }
 
 END
