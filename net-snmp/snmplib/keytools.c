@@ -380,23 +380,18 @@ encode_keychange(	oid	*hashtype,	u_int  hashtype_len,
 	 */
 	nbytes = properlength;
 
-#ifdef SNMP_TESTING_CODE
-	if ( ISDF(RANDOMZEROS)) {
+#if defined(SNMP_TESTING_CODE) && defined(RANDOMZEROS)
 		memset(kcstring, 0, nbytes);
 		DEBUGMSG(("encode_keychange",
                           "** Using all zero bits for \"random\" delta of )"
                           "the keychange string! **\n"));
-
-	} else {
-#endif /* SNMP_TESTING_CODE */
+#else /* !SNMP_TESTING_CODE */
 		rval = sc_random(kcstring, &nbytes);
 		QUITFUN(rval, encode_keychange_quit);
 		if ((int)nbytes != properlength) {
 			QUITFUN(SNMPERR_GENERR, encode_keychange_quit);
 		}
-#ifdef SNMP_TESTING_CODE
-	}
-#endif /* SNMP_TESTING_CODE */
+#endif /* !SNMP_TESTING_CODE */
 
         tmpbuf = malloc(properlength*2);
         memcpy(tmpbuf, oldkey, properlength);
