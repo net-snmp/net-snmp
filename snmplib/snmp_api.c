@@ -4000,7 +4000,7 @@ _sess_read(void *sessp,
     u_char packet[PACKET_LENGTH], *packetptr = packet;
     snmp_ipaddr        from;
     struct sockaddr_in *fromIp = (struct sockaddr_in *)&from;
-    size_t length = 0;
+    int length = 0;
     struct snmp_pdu *pdu;
     struct request_list *rp, *orp = NULL;
     int ret = 0, handled = 0;
