@@ -12,3 +12,6 @@ rm -f remove-files
 rm -f makedepend.in
 rm -f agent/mibgroup/versiontag
 rm -f ISSUES
+rm -f makenosysdepend.pl
+rm -f makefileindepend.pl
+
