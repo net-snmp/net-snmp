@@ -113,8 +113,10 @@ usmUserStatus[MAX_OID_LEN] = {1, 3, 6, 1, 6, 3, 15, 1, 2, 2, 1, 13},
 usmDHUserAuthKeyChange[MAX_OID_LEN] = {1, 3, 6, 1, 3, 101, 1, 1, 2, 1, 1 },
 usmDHUserOwnAuthKeyChange[MAX_OID_LEN] = {1, 3, 6, 1, 3, 101, 1, 1, 2, 1, 2 },
 usmDHUserPrivKeyChange[MAX_OID_LEN] = {1, 3, 6, 1, 3, 101, 1, 1, 2, 1, 3 },
-usmDHUserOwnPrivKeyChange[MAX_OID_LEN] = {1, 3, 6, 1, 3, 101, 1, 1, 2, 1, 4 }
+usmDHUserOwnPrivKeyChange[MAX_OID_LEN] = {1, 3, 6, 1, 3, 101, 1, 1, 2, 1, 4 },
+usmDHParameters[] = { 1,3,6,1,3,101,1,1,1,0 }
 ;
+size_t usmDHParameters_len = OID_LENGTH(usmDHParameters);
 
 static
 oid            *authKeyChange = authKeyOid, *privKeyChange = privKeyOid;
@@ -174,7 +176,8 @@ setup_oid(oid * it, size_t * len, u_char * id, size_t idlen,
 }
 
 int
-get_USM_DH_key(netsnmp_variable_list *vars, size_t outkey_len,
+get_USM_DH_key(netsnmp_variable_list *vars, netsnmp_variable_list *dhvar,
+               size_t outkey_len,
                netsnmp_pdu *pdu, const char *keyname,
                oid *keyoid, size_t keyoid_len) {
     char *dhkeychange;
@@ -182,18 +185,16 @@ get_USM_DH_key(netsnmp_variable_list *vars, size_t outkey_len,
     BIGNUM *other_pub;
     u_char *key;
     size_t key_len;
+    unsigned char *cp;
             
     dhkeychange = malloc(2 * vars->val_len);
     memcpy(dhkeychange, vars->val.string, vars->val_len);
 
-    /* XXX: currently hard coded oakley group 2 */
-    dh = DH_new();
-    if (!dh)
-        return SNMPERR_GENERR;
-    
-    BN_hex2bn(&dh->g, "02");
-    BN_hex2bn(&dh->p, "ffffffffffffffffc90fdaa22168c234c4c6628b80dc1cd129024e088a67cc74020bbea63b139b22514a08798e3404ddef9519b3cd3a431b302b0a6df25f14374fe1356d6d51c245e485b576625e7ec6f44c42e9a637ed6b0bff5cb6f406b7edee386bfb5a899fa5ae9f24117c4b1fe649286651ece65381ffffffffffffffff");
-    if (!dh->g || !dh->p)
+    cp = dhvar->val.string;
+    dh = d2i_DHparams(NULL, (const unsigned char **) &cp,
+                      dhvar->val_len);
+
+    if (!dh || !dh->g || !dh->p)
         return SNMPERR_GENERR;
     DH_generate_key(dh);
     if (!dh->pub_key)
@@ -715,7 +716,7 @@ main(int argc, char *argv[])
 
         char *passwd_user;
         netsnmp_pdu *dhpdu, *dhresponse = NULL;
-        netsnmp_variable_list *vars;
+        netsnmp_variable_list *vars, *dhvar;
         
         command = CMD_CHANGEKEY;
         name_length = DH_USM_OID_LEN;
@@ -750,6 +751,11 @@ main(int argc, char *argv[])
 
         /* fetch the needed diffie helman parameters */
         dhpdu = snmp_pdu_create(SNMP_MSG_GET);
+
+        /* get the current DH parameters */
+        snmp_add_null_var(dhpdu, usmDHParameters, usmDHParameters_len);
+        
+        /* maybe the auth key public value */
         if (doauthkey) {
             setup_oid(dhauthKeyChange, &name_length,
                       ss->contextEngineID, ss->contextEngineIDLen,
@@ -757,6 +763,7 @@ main(int argc, char *argv[])
             snmp_add_null_var(dhpdu, dhauthKeyChange, name_length);
         }
             
+        /* maybe the priv key public value */
         if (doprivkey) {
             setup_oid(dhprivKeyChange, &name_length2,
                       ss->contextEngineID, ss->contextEngineIDLen,
@@ -782,11 +789,11 @@ main(int argc, char *argv[])
             goto begone;
         }
         
-        vars = dhresponse->variables;
-
+        dhvar = dhresponse->variables;
+        vars = dhvar->next_variable;
         /* complete the DH equation & print resulting keys */
         if (doauthkey) {
-            if (get_USM_DH_key(vars,
+            if (get_USM_DH_key(vars, dhvar,
                                sc_get_properlength(ss->securityAuthProto,
                                                    ss->securityAuthProtoLen),
                                pdu, "auth",
@@ -795,7 +802,7 @@ main(int argc, char *argv[])
             vars = vars->next_variable;
         }
         if (doprivkey) {
-            if (get_USM_DH_key(vars,
+            if (get_USM_DH_key(vars, dhvar,
                                sc_get_properlength(ss->securityAuthProto,
                                                    ss->securityAuthProtoLen),
                                pdu, "priv",
