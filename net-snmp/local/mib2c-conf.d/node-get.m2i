@@ -10,37 +10,41 @@
 ##
 @include m2c_setup_node.m2i@
 @eval $m2c_node_realloc = 2@ // malloc
-/*
- * ${node}_get
- *
+/**
  * Extract the current value of the $node data.
+ *
+ * Set a value using the data context for the row.
  *
 @if $m2c_node_get_comments ne ""@
 $m2c_node_get_comments
 *
 @end@
- * @param ${context}_rowreq_ctx
- *        Pointer to the row request context. You should know how to
- *        manipulate the value from this object.
- * @param ${node}
+ * @param rowreq_ctx
+ *        Pointer to the row request context.
+ * @param $m2c_node_param_ref_name
  *        Pointer to storage for a $node.decl variable
 @if $m2c_node_needlength == 1@
- * @param ${node}_len
+ * @param $m2c_node_param_ref_lname
  *        Pointer to a size_t. On entry, it will contain the size (in bytes)
  *        pointed to by $node.
  *        On exit, this value should contain the data size (in bytes).
- *        If you need more memory, allocate it using malloc(), update the
- *        the $node pointer.
- *        NOTE: DO NOT free the previous pointer.
- *        NOTE: The agent will release the memory you allocate.
- *              If you call this function yourself, you are responsible
- *              for checking if the pointer changed, and freeing the
- *              previous memory.
 @end@
  *
- * @return MFD_SUCCESS         : success
- *         MFD_SKIP            : skip this node (no value for now)
- *         MFD_ERROR           : Any other error
+ * @retval MFD_SUCCESS         : success
+ * @retval MFD_SKIP            : skip this node (no value for now)
+ * @retval MFD_ERROR           : Any other error
+@if $m2c_node_needlength == 1@
+*
+ * @note If you need more $m2c_node_param_ref_lname bytes of memory,
+ *       allocate it using malloc() and update $m2c_node_param_ref_name.
+ *       <b>DO NOT</b> free the previous pointer.
+ *       The MFD helper will release the memory you allocate.
+ *
+ * @remark If you call this function yourself, you are responsible
+ *         for checking if the pointer changed, and freeing any
+ *         previously allocated memory. (Not necessary if you pass
+ *         in a pointer to static memory, obviously.)
+@end@
  */
 int
 ${node}_get( ${context}_rowreq_ctx *rowreq_ctx, $m2c_node_param_ref )
@@ -48,7 +52,6 @@ ${node}_get( ${context}_rowreq_ctx *rowreq_ctx, $m2c_node_param_ref )
 @ifconf syntax-$node.syntax-get.m2i@
 @    include syntax-$node.syntax-get.m2i@
 @else@
-    /** syntax-$node.syntax-get.m2i not found, using generic */
 @    include generic-get-decl.m2i@
     netsnmp_assert(NULL != rowreq_ctx);
 
