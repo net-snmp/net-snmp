@@ -598,6 +598,7 @@ static Route_Scan_Reload()
 {
 #if defined(RTENTRY_4_4)
   struct radix_node_head head, *rt_table[AF_MAX+1];
+  int i;
 #else
   RTENTRY **routehash, mb;
   register RTENTRY *m;
@@ -635,17 +636,16 @@ static Route_Scan_Reload()
 #ifdef RTENTRY_4_4 
 /* rtentry is a BSD 4.4 compat */
 
-#if (!defined(AF_UNSPEC)) || defined(bsdi2)
+#if !defined(AF_UNSPEC)
 #define AF_UNSPEC AF_INET 
 #endif
 
   KNLookup(N_RTTABLES, (char *) rt_table, sizeof(rt_table));
-  if (rt_table[AF_UNSPEC]) {
-    if (klookup((unsigned long)rt_table[AF_UNSPEC], (char *) &head, sizeof(head))) {
+  for(i=0; i <= AF_MAX; i++) {
+    if(rt_table[i] == 0)
+      continue;
+    if (klookup((unsigned long)rt_table[i], (char *) &head, sizeof(head))) {
       load_rtentries(head.rnh_treetop);
-    }
-    else {
-      fprintf(stderr,"couldn't load routing tables from kernel\n");
     }
   }
         

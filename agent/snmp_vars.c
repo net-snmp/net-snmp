@@ -3656,11 +3656,7 @@ struct inpcb *RetInPcb;
 	return(1);	/* "OK" */
 }
 
-#ifdef bsdi2
-#define freebsd2
-#endif
-
-#if defined(freebsd2) || defined(netbsd1)
+#if CAN_USE_SYSCTL
 static char *lim, *rtnext;
 static char *at = 0;
 #else
@@ -3672,11 +3668,11 @@ static struct arpcom  at_com;
 #else
 static struct arptab *at=0;
 #endif
-#endif /* freebsd2 */
+#endif /* CAN_USE_SYSCTL */
 
 static void ARP_Scan_Init()
 {
-#if !defined (netbsd1) && !defined(freebsd2)
+#ifndef CAN_USE_SYSCTL
 
 	if (!at) {
 	    KNLookup( N_ARPTAB_SIZE, (char *)&arptab_size, sizeof arptab_size);
@@ -3695,7 +3691,6 @@ static void ARP_Scan_Init()
 #endif
 	arptab_current = 0;
 #else
-#if defined(freebsd2) || defined(netbsd1)
 	int mib[6];
 	size_t needed;
 
@@ -3716,11 +3711,10 @@ static void ARP_Scan_Init()
 		perror("actual retrieval of routing table");
 	lim = at + needed;
 	rtnext = at;
-#endif /* freebsd2 */
-#endif
+#endif /* CAN_USE_SYSCTL */
 }
 
-#if defined(freebsd2) || defined(netbsd1) || defined(hpux)
+#if defined(freebsd2) || defined(netbsd1) || defined(bsdi2) || defined(hpux)
 static int ARP_Scan_Next(IPAddr, PhysAddr, ifType, ifIndex)
 u_short *ifIndex;
 #else
@@ -3752,9 +3746,9 @@ u_long *ifType;
               at_ptr = at_entry.at_next;
               atab = &at_entry;
               *ifIndex = at_com.ac_if.if_index;       /* not strictly ARPHD */
-#else
+#else /* STRUCT_ARPHD_HAS_AT_NEXT */
 		atab = &at[arptab_current++];
-#endif
+#endif /* STRUCT_ARPHD_HAS_AT_NEXT */
 		if (!(atab->at_flags & ATF_COM)) continue;
 		*ifType = (atab->at_flags & ATF_PERM) ? 4 : 3 ;
 		*IPAddr = atab->at_iaddr.s_addr;
@@ -3766,8 +3760,7 @@ u_long *ifType;
 #endif
 	return(1);
 	}
-#endif
-#if defined(freebsd2) || defined(netbsd1) || defined(bsdi2)
+#else /* netbsd1, freebsd2, bsdi2 */
 	struct rt_msghdr *rtm;
 	struct sockaddr_inarp *sin;
 	struct sockaddr_dl *sdl;
@@ -3786,12 +3779,9 @@ u_long *ifType;
 			return(1);
 		}
 	}
-#endif /* freebsd2 */
+#endif /* netbsd1, freebsd2, bsdi2 */
 	return(0);	    /* "EOF" */
 }
-#ifdef bsdi2
-#undef freebsd2
-#endif
 
 #ifndef solaris2
 
