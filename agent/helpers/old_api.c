@@ -60,7 +60,7 @@ register_old_api(const char *moduleName,
                  int flags) {
     
     old_api_info *old_info = SNMP_MALLOC_TYPEDEF(old_api_info);
-    int i;
+    unsigned int i;
     
     old_info->var = var;
     old_info->varsize = varsize;
@@ -122,7 +122,7 @@ register_mib_table_row(const char *moduleName,
                        int timeout,
                        int flags)
 {
-    int i = 0, rc = 0;
+    unsigned int i = 0, rc = 0;
     oid ubound = 0;
 
     for (i = 0; i < numvars; i++) {

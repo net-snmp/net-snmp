@@ -459,14 +459,15 @@ var_snmpNotifyTable(struct variable *vp,
   return NULL;
 }
 
+static int is_delim(const char c) {
+	return (c == 0x020 || c == 0x09 || c == 0x0d || c == 0x0b);
+}
+
 int
 snmpTagValid(const char *tag, const size_t tagLen)
 {
     size_t i = 0;
 
-    static int is_delim(const char c) {
-	return (c == 0x020 || c == 0x09 || c == 0x0d || c == 0x0b);
-    }
 
     for (i = 0; i < tagLen; i++) {
 	if (is_delim(tag[i])) {
