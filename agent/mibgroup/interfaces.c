@@ -62,7 +62,9 @@
 
 #include "mibincl.h"
 
+#ifdef HAVE_NLIST_H
 #include <nlist.h>
+#endif
 
 #ifdef hpux
 #undef OBJID
@@ -472,7 +474,7 @@ struct in_ifaddr *Retin_ifaddr;
 	 *********************/
 
 
-#ifndef linux
+#ifndef linuxs
 static struct nlist interfaces_nl[] = {
 #define N_IFNET		0
 #define N_IN_IFADDR    	1

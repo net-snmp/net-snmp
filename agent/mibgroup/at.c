@@ -51,7 +51,9 @@
 
 
 #include "mibincl.h"
+#ifdef HAVE_NLIST_H
 #include <nlist.h>
+#endif
 
 /* #include "../common_header.h" */
 
@@ -112,7 +114,7 @@ static int ARP_Scan_Next __P((u_long *, char *, u_long *));
 
 void	init_at( )
 {
-#ifndef linux
+#ifndef DONT_USE_NLIST
     init_nlist( at_nl );
 #endif
 }
