@@ -356,7 +356,7 @@ read_configs (void)
   char *optional_config = ds_get_string(DS_LIBRARY_ID, DS_LIB_OPTIONALCONFIG);
   char *type = ds_get_string(DS_LIBRARY_ID, DS_LIB_APPTYPE);
 
-  if (ds_get_boolean(DS_LIBRARY_ID, DS_LIB_DONT_READ_CONFIGS))
+  if (!ds_get_boolean(DS_LIBRARY_ID, DS_LIB_DONT_READ_CONFIGS))
     read_config_files(NORMAL_CONFIG);
 
  /* do this even when the normal above wasn't done */
