@@ -30,7 +30,7 @@
 #include "snmpUDPIPv6Domain.h"
 #endif
 #ifdef SNMP_TRANSPORT_TCPIPV6_DOMAIN
-#include "snmpUDPIPv6Domain.h"
+#include "snmpTCPIPv6Domain.h"
 #endif
 #include "snmp_api.h"
 #include "snmp_debug.h"
