@@ -282,7 +282,7 @@ extErrFix OBJECT-TYPE
 		snmp operations."
 	::= { extEntry 102 }
 	
-memory ::= { ucdavis 4 }
+memory OBJECT IDENTIFIER ::= { ucdavis 4 }
 
 memIndex OBJECT-TYPE
      SYNTAX  INTEGER
@@ -631,7 +631,7 @@ laErrMessage OBJECT-TYPE
 		surpased watch-point value."
 	::= { laEntry 101 }
 
-version	::= { ucdavis 100 }
+version	OBJECT IDENTIFIER ::= { ucdavis 100 }
 
 versionIndex OBJECT-TYPE
      SYNTAX  INTEGER
@@ -706,7 +706,7 @@ versionDoDebugging OBJECT-TYPE
           to turn it off."
      ::= { version 20 } 
 
-snmperrs ::= { ucdavis 101 }
+snmperrs OBJECT IDENTIFIER ::= { ucdavis 101 }
 
 
 snmperrIndex OBJECT-TYPE
@@ -787,7 +787,7 @@ mrModuleName OBJECT-TYPE
 	"The module name that registered this OID."
     ::= { mrEntry  2 }
 
-systemStats ::= { ucdavis 11 }
+systemStats OBJECT IDENTIFIER ::= { ucdavis 11 }
 
 ssIndex OBJECT-TYPE
 	SYNTAX INTEGER
