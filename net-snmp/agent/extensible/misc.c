@@ -1,6 +1,12 @@
 #include <config.h>
 
 #include <stdio.h>
+#if HAVE_STDLIB_H
+#include <stdlib.h>
+#endif
+#if HAVE_MALLOC_H
+#include <malloc.h>
+#endif
 #include <sys/types.h>
 #ifdef __alpha
 #ifndef _BSD
@@ -44,8 +50,7 @@
 
 #include "mibincl.h"
 
-char *find_field();
-char *skip_white();
+#include "extproto.h"
 
 #ifdef EXCACHETIME
 static long cachetime;
@@ -53,17 +58,7 @@ static long cachetime;
 
 extern int numprocs, numextens;
 
-int random()
-{
-  return(rand());
-}
-
-void srandom (seed)
-  unsigned int seed;
-{
-  srand(seed);
-}
-
+void
 Exit(var)
   int var;
 {
@@ -202,11 +197,10 @@ int shell_command(ex)
 int exec_command(ex)
      struct extensible *ex;
 {
-  char line[STRMAX], *cptr;
-  int ret=0, fd,i;
+  int fd;
   FILE *file;
   
-  if (fd = get_exec_output(ex)) {
+  if ((fd = get_exec_output(ex))) {
     
     file = fdopen(fd,"r");
     if (fgets(ex->output,STRMAX,file) == NULL) {
@@ -232,15 +226,12 @@ int exec_command(ex)
 int get_exec_output(ex)
   struct extensible *ex;
 {
-  int fd[2],i, cnt, fpid;
-  FILE *ret;
-  FILE *tmpout;
+  int fd[2],i, cnt;
   char ctmp[STRMAX], *cptr1, *cptr2, argvs[STRMAX], **argv, **aptr;
 #ifdef EXCACHETIME
   char cache[MAXCACHESIZE];
   long cachebytes;
   long curtime;
-  static struct extensible excompare;
   static char lastcmd[STRMAX];
   int cfd;
   static int lastresult;
@@ -358,6 +349,7 @@ int get_exec_output(ex)
 #endif
 }
 
+int
 clear_cache(action, var_val, var_val_type, var_val_len, statP, name, name_len)
    int      action;
    u_char   *var_val;
@@ -368,7 +360,6 @@ clear_cache(action, var_val, var_val_type, var_val_len, statP, name, name_len)
    int      name_len;
 {
   
-  struct myproc *proc;
   int tmp=0, tmplen=1000;
 
   if (var_val_type != INTEGER) {
@@ -384,6 +375,7 @@ clear_cache(action, var_val, var_val_type, var_val_len, statP, name, name_len)
   return SNMP_ERR_NOERROR;
 }
 
+int
 update_hook(action, var_val, var_val_type, var_val_len, statP, name, name_len)
    int      action;
    u_char   *var_val;
@@ -393,8 +385,6 @@ update_hook(action, var_val, var_val_type, var_val_len, statP, name, name_len)
    oid      *name;
    int      name_len;
 {
-  
-  struct myproc *proc;
   int tmp=0, tmplen=1000;
 
   if (var_val_type != INTEGER) {
@@ -424,6 +414,7 @@ int a;
   setPerrorstatus("execv");
 }
 
+int
 restart_hook(action, var_val, var_val_type, var_val_len, statP, name, name_len)
    int      action;
    u_char   *var_val;
@@ -452,32 +443,33 @@ int get_ps_output(ex)
   struct extensible *ex;
 {
   int fd;
-  FILE *ret;
 
   strcpy(ex->command,PSCMD);
   fd = get_exec_output(ex);
   return(fd);
 } 
 
-int print_mib_oid(name,len)
+void
+print_mib_oid(name,len)
   oid name[];
   int len;
 {
   int i;
   DEBUGP("Mib:  ");
   for(i=0; i < len; i++) {
-    DEBUGP1(".%d",name[i]);
+    DEBUGP1(".%d",(int) name[i]);
   }
 }
 
-int sprint_mib_oid(buf,name,len)
+void
+sprint_mib_oid(buf,name,len)
   char *buf;
   oid name[];
   int len;
 {
   int i;
   for(i=0; i < len; i++) {
-    sprintf(buf,".%d",name[i]);
+    sprintf(buf,".%d",(int) name[i]);
     while (*buf != 0)
       buf++;
   }

@@ -1,7 +1,12 @@
 #include <config.h>
 
+#include <stdio.h>
+#if HAVE_UNISTD_H
+#include <unistd.h>
+#endif
 #include "mibincl.h"
 #include "mibdefs.h"
+#include "extproto.h"
 
 #define MAXMSGLINES 1000
 
@@ -30,16 +35,13 @@ unsigned char *var_extensible_shell(vp, name, length, exact, var_len, write_meth
 {
 
   oid newname[30];
-  int count, result,i, rtest=0;
-  register int interface;
-  static struct extensible *exten;
+  static struct extensible *exten = 0;
   static long long_ret;
-  char errmsg[300];
 
   if (!checkmib(vp,name,length,exact,var_len,write_method,newname,numextens))
     return(NULL);
 
-  if (exten = get_exten_instance(extens,newname[*length-1])) {
+  if ((exten = get_exten_instance(extens,newname[*length-1]))) {
     switch (vp->magic) {
       case MIBINDEX:
         long_ret = newname[*length-1];
@@ -76,6 +78,7 @@ unsigned char *var_extensible_shell(vp, name, length, exact, var_len, write_meth
 
 #endif
 
+int
 fixExecError(action, var_val, var_val_type, var_val_len, statP, name, name_len)
    int      action;
    u_char   *var_val;
@@ -91,7 +94,7 @@ fixExecError(action, var_val, var_val_type, var_val_len, statP, name, name_len)
   static struct extensible ex;
   FILE *file;
 
-  if (exten = get_exten_instance(extens,name[8])) {
+  if ((exten = get_exten_instance(extens,name[8]))) {
     if (var_val_type != INTEGER) {
       printf("Wrong type != int\n");
       return SNMP_ERR_WRONGTYPE;
@@ -100,7 +103,7 @@ fixExecError(action, var_val, var_val_type, var_val_len, statP, name, name_len)
 #ifdef EXECFIXCMD
     if (tmp == 1 && action == COMMIT) {
       sprintf(ex.command,EXECFIXCMD,exten->name);
-      if (fd = get_exec_output(&ex)) {
+      if ((fd = get_exec_output(&ex))) {
         file = fdopen(fd,"r");
         while (fgets(ex.output,STRMAX,file) != NULL);
         fclose(file);
@@ -130,10 +133,9 @@ unsigned char *var_extensible_relocatable(vp, name, length, exact, var_len, writ
 {
 
   oid newname[30];
-  int count, result,i, rtest=0, fd;
+  int i, fd;
   FILE *file;
-  register int interface;
-  struct extensible *exten;
+  struct extensible *exten = 0;
   static long long_ret;
   static char errmsg[STRMAX];
   struct variable myvp;
@@ -187,7 +189,7 @@ unsigned char *var_extensible_relocatable(vp, name, length, exact, var_len, writ
       return((u_char *) (&long_ret));
     case ERRORMSG:   /* first line of text returned from the process */
       if (exten->type == EXECPROC) {
-        if (fd = get_exec_output(exten)){
+        if ((fd = get_exec_output(exten))){
           file = fdopen(fd,"r");
           for (i=0;i != name[*length-1];i++) {
             if (fgets(errmsg,STRMAX,file) == NULL) {
@@ -236,9 +238,8 @@ struct subtree *find_extensible(tp,tname,tnamelen,exact)
   int tnamelen,exact;
 {
   int i,tmp;
-  struct extensible *exten;
+  struct extensible *exten = 0;
   struct variable myvp;
-  int var_len;
   oid newname[30], name[30];
   static struct subtree mysubtree[2];
 

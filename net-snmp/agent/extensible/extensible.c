@@ -1,5 +1,8 @@
 #include <config.h>
 
+#if HAVE_STDLIB_H
+#include <stdlib.h>
+#endif
 #if HAVE_UNISTD_H
 #include <unistd.h>
 #endif
@@ -62,16 +65,16 @@
 #if HAVE_SYS_FIXPOINT_H
 #include <sys/fixpoint.h>
 #endif
+#if HAVE_MALLOC_H
+#include <malloc.h>
+#endif
 #if STDC_HEADERS
 #include <string.h>
 #endif
 
 #include "mibincl.h"
 #include "mibdefs.h"
-
-RETSIGTYPE update_config();
-struct extensible *get_exten_instance();
-unsigned char *var_extensible_relocatable();
+#include "extproto.h"
 
 extern struct myproc *procwatch;         /* moved to proc.c */
 extern int numprocs;                     /* ditto */
@@ -84,7 +87,9 @@ extern int numpassthrus;                 /* ditto */
 
 int minimumswap;
 double maxload[3];
+#ifdef USEMEMMIB
 static int pageshift;           /* log base 2 of the pagesize */
+#endif
 #ifdef SECURITYEXCEPTIONS
   static int exceptions[] = SECURITYEXCEPTIONS;
 #endif
@@ -144,7 +149,7 @@ int checkmib(vp,name,length,exact,var_len,write_method,newname,max)
   vp->acl =
     ((int) vp->acl & 0x03) |           /* save right most two bits */
     ((int)vp->acl & (GLOBALSECURITY >> 1))      /* and with WRITE bits */
-/*    ((((int)(vp->acl & 0x5555) >> 1) & GLOBALSECURITY) << 1) /* ick */
+/*    ((((int)(vp->acl & 0x5555) >> 1) & GLOBALSECURITY) << 1) / * ick */
     | GLOBALSECURITY;                           /* include READ bits */
 #ifdef SECURITYEXCEPTIONS
   for(i=0; exceptions[i] != -1; i += 2)
@@ -394,10 +399,10 @@ unsigned char *var_extensible_disk(vp, name, length, exact, var_len, write_metho
 {
 
   oid newname[30];
-  int count, result,i, rtest=0, disknum=0;
+  int disknum=0;
+#if HAVE_FSTAB_H
   double totalblks, free, used, avail, availblks;
-  register int interface;
-  struct myproc *proc;
+#endif
   static long long_ret;
   static char errmsg[300];
 
@@ -458,7 +463,7 @@ unsigned char *var_extensible_disk(vp, name, length, exact, var_len, write_metho
     case ERRORMSG:
       if (vfs.f_bavail < disks[disknum].minimumspace) 
         sprintf(errmsg,"%s: under %d left (= %d)",disks[disknum].path,
-                disks[disknum].minimumspace, vfs.f_bavail);
+                disks[disknum].minimumspace, (int) vfs.f_bavail);
       else
         errmsg[0] = NULL;
       *var_len = strlen(errmsg);
@@ -515,6 +520,7 @@ unsigned char *var_extensible_disk(vp, name, length, exact, var_len, write_metho
   }
 #endif
 #endif
+  return ((u_char *) 0);
 }
 
 /*#endif*/
@@ -634,9 +640,7 @@ unsigned char *var_extensible_loadave(vp, name, length, exact, var_len, write_me
 {
 
   oid newname[30];
-  int count, result,i, rtest=0;
-  register int interface;
-  struct extensible *exten;
+  int i;
   static long long_ret;
   static char errmsg[300];
 #ifdef HAVE_SYS_FIXPOINT_H
@@ -647,7 +651,6 @@ unsigned char *var_extensible_loadave(vp, name, length, exact, var_len, write_me
 #define FIX_TO_DBL(_IN) (((double) _IN)/((double) FSCALE))
 #endif
   double avenrun[3];
-  oid loadave[3];
   
   if (!checkmib(vp,name,length,exact,var_len,write_method,newname,3))
     return(NULL);
@@ -701,6 +704,7 @@ unsigned char *var_extensible_loadave(vp, name, length, exact, var_len, write_me
       *var_len = strlen(errmsg);
       return((u_char *) errmsg);
   }
+  return ((u_char *) 0);
 }
 
 #endif
@@ -709,6 +713,7 @@ static time_t errorstatustime=0;
 static int errorstatusprior=0;
 static char errorstring[STRMAX];
 
+void
 setPerrorstatus(to)
   char *to;
 {
@@ -723,6 +728,7 @@ setPerrorstatus(to)
   seterrorstatus(buf,5);
 }
 
+void
 seterrorstatus(to,prior)
   char *to;
   int prior;
@@ -919,12 +925,15 @@ int a;
   signal(SIGHUP,update_config);
 }
 
+void
 init_extensible() {
   
   struct extensible extmp;
-  int ret,pagesize,i;
-  char configfile[300];
-
+  int ret;
+#ifdef USEMEMMIB
+  int pagesize;
+#endif
+  
   /* read the config files */
   update_config(0);
   
