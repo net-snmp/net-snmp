@@ -182,7 +182,7 @@ Netsnmp_Node_Handler table_helper_handler;
                                                 storage_name);
 
 #ifdef __cplusplus
-};
+}
 #endif
 
 #endif                          /* _TABLE_HANDLER_H_ */
