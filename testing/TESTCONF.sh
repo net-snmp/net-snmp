@@ -47,11 +47,12 @@ if [ "x$SNMP_SAVE_TMPDIR" = "x" ]; then
 fi
 
 SNMP_TESTDIR="tests"
-SNMP_PERSISTENT_FILE="$SNMP_TMPDIR/persistent-store.conf"
 SNMP_CONFIG_FILE="$SNMP_TMPDIR/snmpd.conf"
 SNMP_SNMPD_PID_FILE="$SNMP_TMPDIR/snmpd.pid"
 SNMP_SNMPD_LOG_FILE="$SNMP_TMPDIR/snmpd.log"
 SNMP_SNMPD_PORT="-p 8765"
+SNMP_PERSISTENT_FILE="$SNMP_TMPDIR/persistent-store.conf"
+export SNMP_PERSISTENT_FILE
 
 if [ "x$SNMP_FLAGS" = "x" ]; then
     SNMP_FLAGS="-d"
