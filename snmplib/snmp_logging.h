@@ -34,9 +34,6 @@ void snmp_disable_log(void);
 void snmp_enable_syslog(void);
 void snmp_enable_filelog(const char *logfilename, int dont_zero_log);
 void snmp_enable_stderrlog(void);
-void snmp_log_syslog(int priority, const char *string);
-void snmp_log_filelog(int priority, const char *string);
-void snmp_log_stderrlog(int priority, const char *string);
 
 int snmp_log(int priority, const char *format, ...);
 int snmp_vlog(int priority, const char *format, va_list ap);
