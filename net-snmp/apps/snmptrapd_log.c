@@ -175,7 +175,7 @@ typedef enum {
       *    Returns true if the character is a format command that outputs
       * some field that deals with the current time.
       *
-      * Input Paramters:
+      * Input Parameters:
       *    chr - character to check
       */
 
@@ -202,7 +202,7 @@ typedef enum {
       *    Returns true if the character outputs information about the
       * agent.
       *
-      * Input Paramters:
+      * Input Parameters:
       *    chr - the character to check
       */
 
@@ -213,7 +213,7 @@ typedef enum {
       *    Returns true if the character outputs information about the PDU's
       * host name or IP address.
       *
-      * Input Paramters:
+      * Input Parameters:
       *    chr - the character to check
       */
 
@@ -240,14 +240,25 @@ typedef enum {
       * Function:
       *    Returns true if the character is a format command.
       * 
-      * Input Paramters:
+      * Input Parameters:
+      *    chr - character to check
+      */
+
+#define is_numeric_cmd(chr) ((is_cur_time_cmd(chr)   \
+			      || is_up_time_cmd(chr) \
+			      || (chr) == CHR_TRAP_NUM) ? TRUE : FALSE)
+     /*
+      * Function:
+      *    Returns true if this is a numeric format command.
+      *
+      * Input Parameters:
       *    chr - character to check
       */
 
 #define reference(var) ((var) == (var))
 
      /*
-      * Functions:
+      * Function:
       *    Some compiler options will tell the compiler to be picky and
       * warn you if you pass a parameter to a function but don't use it.
       * This macro lets you reference a parameter so that the compiler won't
@@ -340,6 +351,7 @@ static void output_temp_bfr (char * bfr,
   int temp_len;           /* length of temporary buffer */
   int temp_to_write;      /* # of chars to write from temp bfr */
   int char_to_write;      /* # of other chars to write */
+  int zeroes_to_write;    /* fill to precision with zeroes for numbers */
 
   /* 
    * Figure out how many characters are in the temporary buffer now,
@@ -347,15 +359,17 @@ static void output_temp_bfr (char * bfr,
    */
   temp_len = (int) strlen (temp_bfr);
   temp_to_write = temp_len;
-  if (temp_to_write > options->precision)
+  if (temp_to_write > options->precision && options->precision != UNDEF_PRECISION)
     temp_to_write = options->precision;
 
   /* handle leading characters */
   if ((! options->left_justify) && (temp_to_write < options->width)) {
+    zeroes_to_write = options->precision - temp_to_write;
+    if (!is_numeric_cmd(options->cmd)) zeroes_to_write = 0;
     for (char_to_write = options->width - temp_to_write;
 	 char_to_write > 0;
 	 char_to_write--) {
-      if (options->leading_zeroes)
+      if (options->leading_zeroes || zeroes_to_write-- > 0)
 	str_append (bfr, tail, len, "0");
       else
 	str_append (bfr, tail, len, " ");
@@ -411,8 +425,35 @@ static void handle_time_fmt (char * bfr,
     time (&time_val);
 
   /* handle output in Unix time format */
-  if ((fmt_cmd == CHR_CUR_TIME) || (fmt_cmd == CHR_UP_TIME)) {
+  if (fmt_cmd == CHR_CUR_TIME)
     sprintf (safe_bfr, "%ld", (long) time_val);
+  else if ((fmt_cmd == CHR_UP_TIME) && !options->alt_format)
+    sprintf (safe_bfr, "%ld", (long) time_val);
+  else if (fmt_cmd == CHR_UP_TIME) {
+    int centisecs, seconds, minutes, hours, days;
+
+    centisecs = time_val % 100;
+    time_val /= 100;
+    days = time_val / (60 * 60 * 24);
+    time_val %= (60 * 60 * 24);
+
+    hours = time_val / (60 * 60);
+    time_val %= (60 * 60);
+
+    minutes = time_val / 60;
+    seconds = time_val % 60;
+
+    switch (days) {
+    case 0:
+      sprintf(safe_bfr, "%d:%02d:%02d.%02d", hours, minutes, seconds, centisecs);
+      break;
+    case 1:
+      sprintf(safe_bfr, "1 day, %d:%02d:%02d.%02d", hours, minutes, seconds, centisecs);
+      break;
+    default:
+      sprintf(safe_bfr, "%d days, %d:%02d:%02d.%02d",
+	      days, hours, minutes, seconds, centisecs);
+    }
   }
 
   /* handle other time fields */
