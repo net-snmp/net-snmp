@@ -537,6 +537,13 @@ static struct subtree root_subtrees[] = {
 
 void setup_tree (void)
 {
+#ifdef USING_AGENTX_SUBAGENT_MODULE
+  int role;
+
+  role = ds_get_boolean(DS_APPLICATION_ID, DS_AGENT_ROLE);
+  ds_set_boolean(DS_APPLICATION_ID, DS_AGENT_ROLE, MASTER_AGENT);
+#endif
+
   register_mib("", NULL, 0, 0,
 	root_subtrees[0].name,  root_subtrees[0].namelen);
   register_mib("", NULL, 0, 0,
@@ -548,6 +555,10 @@ void setup_tree (void)
 
   /* No longer necessary to sort the mib tree - this is inherent in
      the construction of the subtree structure */
+
+#ifdef USING_AGENTX_SUBAGENT_MODULE
+  ds_set_boolean(DS_APPLICATION_ID, DS_AGENT_ROLE, role);
+#endif
 }
 
 void dump_registry( void )
