@@ -1108,6 +1108,12 @@ ipAddressTable_undo_setup(ipAddressTable_rowreq_ctx * rowreq_ctx)
     rowreq_ctx->ipAddressLastChanged =
         rowreq_ctx->ipAddressLastChanged_undo;
 
+    /*
+     * just copy everything
+     */
+    rc = netsnmp_access_ipaddress_entry_copy(rowreq_ctx->undo,
+                                             rowreq_ctx->data);
+
     return rc;
 }                               /* ipAddressTable_undo_setup */
 
@@ -1205,8 +1211,6 @@ ipAddressTable_commit(ipAddressTable_rowreq_ctx * rowreq_ctx)
     rowreq_ctx->data->flags = save_flags;
 
     if (save_flags & FLAG_IPADDRESSROWSTATUS) {
-        save_flags &= ~FLAG_IPADDRESSROWSTATUS; /* clear */
-
         if (rowreq_ctx->rowreq_flags & MFD_ROW_CREATED) {
             netsnmp_assert(ROWSTATUS_CREATEANDGO ==
                            rowreq_ctx->ipAddressRowStatus);
@@ -1268,10 +1272,32 @@ ipAddressTable_undo_commit(ipAddressTable_rowreq_ctx * rowreq_ctx)
      * TODO:485:M: |-> Undo ipAddressTable commit.
      * check the column's flag in rowreq_ctx->column_set_flags to see
      * if it was set during commit, then undo it.
-     *
-     * eg: if (rowreq_ctx->column_set_flags & FLAG_) {}
      */
-#warning "ipAddressTable undo commit"
+    if (rowreq_ctx->column_set_flags & FLAG_IPADDRESSROWSTATUS) {
+        /*
+         * if we created an addr, delete it. if we deleted it,
+         * re-create it. If we changed it, change it back.
+         */
+        if (rowreq_ctx->rowreq_flags & MFD_ROW_CREATED) {
+            rowreq_ctx->undo->flags |= NETSNMP_ACCESS_IPADDRESS_DELETE;
+        } else if (ROWSTATUS_DESTROY == rowreq_ctx->ipAddressRowStatus) {
+            rowreq_ctx->undo->flags |= NETSNMP_ACCESS_IPADDRESS_CREATE;
+        } else
+            rowreq_ctx->undo->flags |= NETSNMP_ACCESS_IPADDRESS_CHANGE;
+    } else
+        rowreq_ctx->undo->flags |= NETSNMP_ACCESS_IPADDRESS_CHANGE;
+
+    /*
+     * do it
+     */
+    rc = netsnmp_access_ipaddress_entry_set(rowreq_ctx->undo);
+    if (rc) {
+        DEBUGMSGTL(("ipAddressTable",
+                    "bad rc %d from IP address data access\n", rc));
+        rc = MFD_ERROR;
+    }
+
+#warning "test ipAddressTable undo commit"
 
     return rc;
 }                               /* ipAddressTable_undo_commit */
@@ -1559,10 +1585,8 @@ ipAddressIfIndex_undo_setup(ipAddressTable_rowreq_ctx * rowreq_ctx)
      * TODO:455:o: |-> Setup ipAddressIfIndex undo.
      */
     /*
-     * copy ipAddressIfIndex data
-     * set rowreq_ctx->undo->ipAddressIfIndex from rowreq_ctx->data->ipAddressIfIndex
+     * handled in ipAddressTable_undo_setup
      */
-    rowreq_ctx->undo->if_index = rowreq_ctx->data->if_index;
 
     return MFD_SUCCESS;
 }                               /* ipAddressIfIndex_undo_setup */
@@ -1737,10 +1761,8 @@ ipAddressType_undo_setup(ipAddressTable_rowreq_ctx * rowreq_ctx)
      * TODO:455:o: |-> Setup ipAddressType undo.
      */
     /*
-     * copy ipAddressType data
-     * set rowreq_ctx->undo->ipAddressType from rowreq_ctx->data->ipAddressType
+     * handled in ipAddressTable_undo_setup
      */
-    rowreq_ctx->undo->ia_type = rowreq_ctx->data->ia_type;
 
     return MFD_SUCCESS;
 }                               /* ipAddressType_undo_setup */
@@ -1914,11 +1936,8 @@ ipAddressStatus_undo_setup(ipAddressTable_rowreq_ctx * rowreq_ctx)
      * TODO:455:o: |-> Setup ipAddressStatus undo.
      */
     /*
-     * copy ipAddressStatus data
-     * set rowreq_ctx->undo->ipAddressStatus from rowreq_ctx->data->ipAddressStatus
+     * handled in ipAddressTable_undo_setup
      */
-    rowreq_ctx->undo->ia_status = rowreq_ctx->data->ia_status;
-
 
     return MFD_SUCCESS;
 }                               /* ipAddressStatus_undo_setup */
@@ -2070,8 +2089,11 @@ ipAddressRowStatus_check_value(ipAddressTable_rowreq_ctx * rowreq_ctx,
 
     rc = check_rowstatus_transition(rowreq_ctx->ipAddressRowStatus,
                                     ipAddressRowStatus_val);
-    if (MFD_SUCCESS != rc)
+    if (MFD_SUCCESS != rc) {
+        DEBUGMSGTL(("ipAddressTable", "row status transition from %d to %d\n",
+                    rowreq_ctx->ipAddressRowStatus, ipAddressRowStatus_val));
         return rc;
+    }
 
     return MFD_SUCCESS;         /* ipAddressRowStatus value not illegal */
 }                               /* ipAddressRowStatus_check_value */
@@ -2108,10 +2130,8 @@ ipAddressRowStatus_undo_setup(ipAddressTable_rowreq_ctx * rowreq_ctx)
      * TODO:455:o: |-> Setup ipAddressRowStatus undo.
      */
     /*
-     * copy ipAddressRowStatus data
-     * set rowreq_ctx->undo->ipAddressRowStatus from rowreq_ctx->data->ipAddressRowStatus
+     * handled in ipAddressTable_undo_setup
      */
-    rowreq_ctx->ipAddressRowStatus_undo = rowreq_ctx->ipAddressRowStatus;
 
     return MFD_SUCCESS;
 }                               /* ipAddressRowStatus_undo_setup */
@@ -2308,10 +2328,8 @@ ipAddressStorageType_undo_setup(ipAddressTable_rowreq_ctx * rowreq_ctx)
      * TODO:455:o: |-> Setup ipAddressStorageType undo.
      */
     /*
-     * copy ipAddressStorageType data
-     * set rowreq_ctx->undo->ipAddressStorageType from rowreq_ctx->data->ipAddressStorageType
+     * handled in ipAddressTable_undo_setup
      */
-    rowreq_ctx->undo->ia_storagetype = rowreq_ctx->data->ia_storagetype;
 
     return MFD_SUCCESS;
 }                               /* ipAddressStorageType_undo_setup */
