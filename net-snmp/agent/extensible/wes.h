@@ -15,15 +15,29 @@
 #define SHELLINDEX 1
 #define SHELLNAMES 2
 #define SHELLCOMMAND 3
-#define SHELLRESULT 4
-#define SHELLOUTPUT 5
+#define SHELLRESULT 6
+#define SHELLOUTPUT 7
 
 #define MEMTOTALSWAP 1
 #define MEMUSEDSWAP 2
+#define MEMTOTALREAL 3
+#define MEMUSEDREAL 4
+#define MEMTOTALSWAPTXT 5
+#define MEMUSEDSWAPTXT 6
+#define MEMTOTALREALTXT 7
+#define MEMUSEDREALTXT 8
+#define MEMTOTALFREE 9
+
+#define HPCONF 1
+#define HPRECONFIG 2
+#define HPFLAG 3
+#define HPLOGMASK 4
+#define HPSTATUS 6
+#define HPTRAP 101
 
 unsigned char *var_wes_proc();
 unsigned char *var_wes_mem();
 
-#define DEFPROCFILE "/etc/snmp-ece.conf"
+#define DEFPROCFILE "/etc/ece-snmpd.conf"
 
 #include "struct.h"
