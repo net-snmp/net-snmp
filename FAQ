@@ -849,7 +849,7 @@ How do I add functionality?
   the desired functionality, but this has simply not been configured in
   to the running version.  This is done using the configure option
 		--with-mib-modules="list"
-  (where "list" is a space-separated list of modules to omit) then
+  (where "list" is a space-separated list of modules to include) then
   recompiling the agent.
   Note that some functionality concerned with monitoring and managing
   unix hosts is included in the UCD extension modules, which are located
