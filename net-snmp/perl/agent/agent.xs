@@ -322,10 +322,20 @@ nsahr_DESTROY(reginfo)
 	netsnmp_handler_registration_free(reginfo);
 
 int
-nsahr_register(reginfo)
-	netsnmp_handler_registration *reginfo
-    CODE:
-	RETVAL = netsnmp_register_handler(reginfo);
+nsahr_register(me)
+        SV *me;
+        PREINIT:
+        netsnmp_handler_registration *reginfo;
+        CODE:
+            {
+                reginfo = (netsnmp_handler_registration *) SvIV(SvRV(me));
+                netsnmp_set_tricky_debugging(1);
+                RETVAL = netsnmp_register_handler(reginfo);
+                if (!RETVAL) {
+                    /* the agent now has a "reference" to this reg pointer */
+                    SvREFCNT_inc(me);
+                }
+            }
     OUTPUT:
 	RETVAL
 
