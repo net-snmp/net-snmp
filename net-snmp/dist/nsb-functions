@@ -39,8 +39,16 @@ nsb-prompt()
 #
 nsb-get-config()
 {
-   ngc_dir=$1
-   src/configure --prefix=$ngc_dir --with-sys-location=Location \
+   if [ $# -ne 2 ]; then
+      echo "usage: $0 release src_dir dest_dir"
+      exit
+   fi
+   ngc_src=$1
+   ngc_inst=$2
+   echo $ngc_src/configure --prefix=$ngc_inst --with-sys-location=Location \
+      --with-sys-contact='System Administrator' --disable-privacy \
+      --with-defaults --with-mib-modules='host disman/event-mib'
+   $ngc_src/configure --prefix=$ngc_inst --with-sys-location=Location \
       --with-sys-contact='System Administrator' --disable-privacy \
       --with-defaults --with-mib-modules='host disman/event-mib'
 }
@@ -90,7 +98,6 @@ nsb-zip()
 
 nsb-build()
 {
-
    if [ $# -ne 4 ]; then
       echo "usage: $0 release src_dir build_directory dest_dir"
       exit
@@ -117,13 +124,6 @@ nsb-build()
    nsb-info "Changing directories to $build_dir"
    cd $build_dir
 
-   if [ -h src  ]; then
-      rm -f src
-   fi
-   if [ ! -h src  ]; then
-      ln -s $src_dir src
-   fi
-
    if [ $NSB_CLEAN -eq 1 ]; then
       nsb-info "Cleaning up..."
       rm -fR nsb-out-* `pwd`/usr/local 2>&1 > /dev/null
@@ -134,7 +134,7 @@ nsb-build()
 
    if [ $NSB_SKIP_CONFIG -ne 1 ]; then
       nsb-info "Configuring... (log is nsb-out-config.$DATE)"
-      nsb-get-config $dest_dir | tee nsb-out-config.$DATE
+      nsb-get-config $src_dir $dest_dir | tee nsb-out-config.$DATE
       nsb-prompt "press enter to continue"
    fi
 
