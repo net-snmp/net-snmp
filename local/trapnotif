@@ -1,6 +1,6 @@
 #!/bin/sh
 
-PATH=/usr/local/bin/:/usr/support/bin/:$PATH
+PATH=/usr/local/bin/:/usr/support/bin/:/1/OV/bin/:$PATH
 
 # testing
 #echo user: `whoami`
@@ -26,6 +26,7 @@ HOST=`echo $FULLHOST | sed 's/\.[^.]*\.ucdavis\.edu//'`
 HOSTEXIT=0
 case "$FULLHOST" in
   *.ece.ucdavis.edu)   HOSTEXIT=1 ;;
+  *.eecs.ucdavis.edu)   HOSTEXIT=1 ;;
   *.cipic.ucdavis.edu) HOSTEXIT=1 ;;
 esac
 
@@ -117,11 +118,12 @@ fi
 
 # More Variable declairations for ece-snmpd events
 
-MIBLOC=`echo $4 | sed 's/\.[^.]*$//'`
-ERRTABLENO=$3
+MIBERRFLAG="$4"
+MIBLOC=`echo $MIBERRFLAG | sed 's/\.[^.]*$//'`
+ERRTABLENO="$3"
 MIBPROC=$MIBLOC.2.$ERRTABLENO
-MIBERR=$MIBLOC.101.$ERRTABLENO
-PROC=`/1/OV/bin/snmpget -t 5 -r 3 $FULLHOST $MIBPROC | sed 's/^.*: *//'`
+MIBERRMSG=$MIBLOC.101.$ERRTABLENO
+PROC=`snmpget -t 5 -r 3 $FULLHOST $MIBPROC | sed 's/^.*: *//'`
 if [ $PROC = "" ]; then
   PROC="traperr"
 fi
@@ -132,11 +134,13 @@ if [ $TYPE = "err" ];   then
   
   # The problem is an error
   
-  ERROR=`/1/OV/bin/snmpget -t 5 -r 3 $FULLHOST $MIBERR | sed 's/^.*: *//'`
+  ERROR=`snmpget -t 5 -r 3 $FULLHOST $MIBERRFLAG | sed 's/^.*: *//'`
   if [ "$ERROR" = "" ]; then
-    ERROR="Sorry, Error MSG disappeared."
+    ERROR="Error MSG disappeared."
+    total_log
+  else
+    log_error
   fi
-  log_error
   
 else
 
