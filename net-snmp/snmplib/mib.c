@@ -1856,7 +1856,7 @@ get_module_node(const char *fname,
 
                                         /* Is it numeric ? */
             if ( isdigit( *cp ) )
-		subid=(atoi(cp));
+		subid=(strtol(cp,0,0));
 	    else
 		subid = -1;
 
