@@ -118,6 +118,7 @@ struct variable2 example_variables[] = {
     { EXAMPLECOUNTER,   ASN_COUNTER,   RONLY, var_example, 1, {5}},
     { EXAMPLEGAUGE,     ASN_GAUGE,     RONLY, var_example, 1, {6}},
     { EXAMPLETRIGGERTRAP, ASN_INTEGER, RWRITE, var_example, 1, {7}}
+    { EXAMPLETRIGGERTRAP2, ASN_INTEGER, RWRITE, var_example, 1, {7}}
   };
 
     /*
@@ -380,7 +381,17 @@ var_example(struct variable *vp,
       long_ret = 0;
       *write_method = write_exampletrap;
       return (u_char *) &long_ret;
-      
+
+      case EXAMPLETRIGGERTRAP2:
+		/*
+		 * This object is essentially "write-only".
+		 * It only exists to trigger the sending of a v2 trap.
+		 * Reading it will always return 0.
+		 */
+      long_ret = 0;
+      *write_method = write_exampletrap2;
+      return (u_char *) &long_ret;
+
     default:
 		/*
 		 *  This will only be triggered if there's a problem with
@@ -554,6 +565,127 @@ write_exampletrap(int	action,
 			 *   indication of this, which is the next best thing!)
 			 */
 	    send_easy_trap( SNMP_TRAP_ENTERPRISESPECIFIC, 3 );
+	    break;
+
+    }
+    return SNMP_ERR_NOERROR;
+}
+
+/* this documents how to send a SNMPv2 (and higher) trap via the
+   send_v2trap() API.
+
+   Coding SNMP-v2 Trap:
+
+   The SNMPv2-Trap PDU contains at least a pair of object names and
+   values: - sysUpTime.0 whose value is the time in hundredths of a
+   second since the netwok management portion of system was last
+   reinitialized.  - snmpTrapIOD.0 which is part of the trap group SNMPv2
+   MIB whose value is the object-id of the specific trap you have defined
+   in your own MIB.  Other variables can be added to caracterize the
+   trap.
+
+   The function send_v2trap adds automaticallys the two objects but the
+   value of snmpTrapIOD.0 is 0.0 by default. If you want to add your trap
+   name, you have to reconstruct this object and to add your own
+   variable.
+
+*/
+
+
+   
+int
+write_exampletrap2(int	action,
+		 u_char	*var_val,
+		 u_char	var_val_type,
+		 size_t	var_val_len,
+		 u_char	*statP,
+		 oid	*name,
+		 size_t	name_len)
+{
+    long intval;
+
+    /* these variales will be used when we send the trap */
+    oid objid_snmptrap[] = { 1,3,6,1,6,3,1,1,4,1,0}; /* snmpTrapIOD.0 */
+    oid demo_trap[] = { 1,3,6,1,4,1,2021,13,990}; /*demo-trap */
+    oid sysLocationOID[] = { 1,3,6,1,2,1,1,6}; /*sysLocation */
+    /* we get the sysLocation from the system_mib.c file */
+    extern char *sysLocation;
+    static struct variable_list var_trap;
+    static struct variable_list var_obj;
+    
+    switch ( action ) {
+	case RESERVE1:
+			/*
+			 *  The only acceptable value is the integer 1
+			 */
+	    if (var_val_type != ASN_INTEGER ) {
+		DEBUGMSGTL(("example", "%x not integer type", var_val_type));
+		return SNMP_ERR_WRONGTYPE;
+	    }
+	    if (var_val_len > sizeof(long)) {
+		DEBUGMSGTL(("example", "wrong length %x", var_val_len));
+		return SNMP_ERR_WRONGLENGTH;
+	    }
+
+	    intval = *((long *) var_val);
+	    if  ( intval != 1 ) {
+		DEBUGMSGTL(("example", "wrong value %x", intval));
+		return SNMP_ERR_WRONGVALUE;
+	    }
+	    break;
+
+	case RESERVE2:
+			/* No resources are required.... */
+	    break;
+
+	case FREE:
+			/* ... so no resources need be freed */
+	    break;
+
+	case ACTION:
+			/*
+			 *  Having triggered the sending of a trap,
+			 *   it would be impossible to revoke this,
+			 *   so we can't actually invoke the action here.
+			 */
+	    break;
+
+	case UNDO:
+			/*  We haven't done anything yet,
+				so there's nothing to undo */
+	    break;
+
+	case COMMIT:
+			/*
+			 *  Everything else worked, so it's now safe
+			 *   to trigger the trap.
+			 *  Note that this is *only* acceptable since
+			 *   the trap sending routines are "failsafe".
+			 *  (In fact, they can fail, but they return no
+			 *   indication of this, which is the next best thing!)
+			 */
+
+/* trap definition objects */
+
+            var_trap.next_variable = &var_obj; /* next variable */
+            var_trap.name = objid_snmptrap; /* snmpTrapIOD.0 */
+            var_trap.name_length = sizeof(objid_snmptrap)/sizeof(oid); /* number of sub-ids */
+            var_trap.type = ASN_OBJECT_ID;
+            var_trap.val.objid = demo_trap; /* demo-trap objid */
+            var_trap.val_len = sizeof(demo_trap); /* length in bytes (not number of subids!) */
+
+
+/* additional objects */
+
+
+            var_obj.next_variable = NULL; /* No more variables after this one */
+            var_obj.name = sysLocationOID;
+            var_obj.name_length = sizeof(sysLocationOID)/sizeof(oid); /* number of sub-ids */
+            var_obj.type = ASN_OCTET_STR; /* type of variable */
+            var_obj.val.string = sysLocation; /* value */
+            var_obj.val_len = strlen(sysLocation);
+            send_v2trap(&var_trap);
+
 	    break;
 
     }
