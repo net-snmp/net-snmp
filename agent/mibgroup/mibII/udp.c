@@ -545,7 +545,7 @@ udp_load(netsnmp_cache *cache, void *vmagic)
 
 
 void
-udp_free(void)
+udp_free(netsnmp_cache *cache)
 {
     memset(&udpstat, 0, sizeof(udpstat));
     udp_valid = 0;

@@ -327,7 +327,7 @@ udpTable_next_entry( void **loop_context,
 }
 
 void
-udpTable_free(void)
+udpTable_free(netsnmp_cache *cache)
 {
     UDPTABLE_ENTRY_TYPE	 *p;
     while (udp_head) {
@@ -404,7 +404,7 @@ udpTable_load(netsnmp_cache *cache, void *vmagic)
     FILE           *in;
     char            line[256];
 
-    udpTable_free();
+    udpTable_free(cache);
 
     if (!(in = fopen("/proc/net/udp", "r"))) {
         DEBUGMSGTL(("mibII/udpTable", "Failed to load UDP Table (linux1)\n"));

@@ -892,7 +892,7 @@ ip_load(netsnmp_cache *cache, void *vmagic)
 #endif                          /* WIN32 */
 
 void
-ip_free(void)
+ip_free(netsnmp_cache *cache)
 {
     memset(&ipstat, 0, sizeof(ipstat));
     ip_valid = 0;
