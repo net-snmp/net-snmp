@@ -177,27 +177,38 @@ var_icmp(vp, name, length, exact, var_len, write_method)
 			  icmpstat.icps_checksum + icmpstat.icps_badlen;
 	    return (u_char *)&long_return;
 	case ICMPINDESTUNREACHS:
-	    return (u_char *) &icmpstat.icps_inhist[ICMP_UNREACH];
+          long_return = icmpstat.icps_inhist[ICMP_UNREACH];
+          return (u_char *) &long_return;
 	case ICMPINTIMEEXCDS:
-	    return (u_char *) &icmpstat.icps_inhist[ICMP_TIMXCEED];
+          long_return = icmpstat.icps_inhist[ICMP_TIMXCEED];
+          return (u_char *) &long_return;
 	case ICMPINPARMPROBS:
-	    return (u_char *) &icmpstat.icps_inhist[ICMP_PARAMPROB];
+          long_return = icmpstat.icps_inhist[ICMP_PARAMPROB];
+          return (u_char *) &long_return;
 	case ICMPINSRCQUENCHS:
-	    return (u_char *) &icmpstat.icps_inhist[ICMP_SOURCEQUENCH];
+          long_return = icmpstat.icps_inhist[ICMP_SOURCEQUENCH];
+          return (u_char *) &long_return;
 	case ICMPINREDIRECTS:
-	    return (u_char *) &icmpstat.icps_inhist[ICMP_REDIRECT];
+          long_return = icmpstat.icps_inhist[ICMP_REDIRECT];
+          return (u_char *) &long_return;
 	case ICMPINECHOS:
-	    return (u_char *) &icmpstat.icps_inhist[ICMP_ECHO];
+          long_return = icmpstat.icps_inhist[ICMP_ECHO];
+          return (u_char *) &long_return;
 	case ICMPINECHOREPS:
-	    return (u_char *) &icmpstat.icps_inhist[ICMP_ECHOREPLY];
+          long_return = icmpstat.icps_inhist[ICMP_ECHOREPLY];
+          return (u_char *) &long_return;
 	case ICMPINTIMESTAMPS:
-	    return (u_char *) &icmpstat.icps_inhist[ICMP_TSTAMP];
+          long_return = icmpstat.icps_inhist[ICMP_TSTAMP];
+          return (u_char *) &long_return;
 	case ICMPINTIMESTAMPREPS:
-	    return (u_char *) &icmpstat.icps_inhist[ICMP_TSTAMPREPLY];
+          long_return = icmpstat.icps_inhist[ICMP_TSTAMPREPLY];
+          return (u_char *) &long_return;
 	case ICMPINADDRMASKS:
-	    return (u_char *) &icmpstat.icps_inhist[ICMP_MASKREQ];
+          long_return = icmpstat.icps_inhist[ICMP_MASKREQ];
+          return (u_char *) &long_return;
 	case ICMPINADDRMASKREPS:
-	    return (u_char *) &icmpstat.icps_inhist[ICMP_MASKREPLY];
+          long_return = icmpstat.icps_inhist[ICMP_MASKREPLY];
+          return (u_char *) &long_return;
 	case ICMPOUTMSGS:
 	    long_return = icmpstat.icps_oldshort + icmpstat.icps_oldicmp;
 	    for (i=0; i <= ICMP_MAXTYPE; i++)
@@ -207,27 +218,38 @@ var_icmp(vp, name, length, exact, var_len, write_method)
 	    long_return = icmpstat.icps_oldshort + icmpstat.icps_oldicmp;
 	    return (u_char *)&long_return;
 	case ICMPOUTDESTUNREACHS:
-	    return (u_char *) &icmpstat.icps_outhist[ICMP_UNREACH];
+          long_return = icmpstat.icps_outhist[ICMP_UNREACH];
+          return (u_char *) &long_return;
 	case ICMPOUTTIMEEXCDS:
-	    return (u_char *) &icmpstat.icps_outhist[ICMP_TIMXCEED];
+          long_return = icmpstat.icps_outhist[ICMP_TIMXCEED];
+          return (u_char *) &long_return;
 	case ICMPOUTPARMPROBS:
-	    return (u_char *) &icmpstat.icps_outhist[ICMP_PARAMPROB];
+          long_return = icmpstat.icps_outhist[ICMP_PARAMPROB];
+          return (u_char *) &long_return;
 	case ICMPOUTSRCQUENCHS:
-	    return (u_char *) &icmpstat.icps_outhist[ICMP_SOURCEQUENCH];
+          long_return = icmpstat.icps_outhist[ICMP_SOURCEQUENCH];
+          return (u_char *) &long_return;
 	case ICMPOUTREDIRECTS:
-	    return (u_char *) &icmpstat.icps_outhist[ICMP_REDIRECT];
+          long_return = icmpstat.icps_outhist[ICMP_REDIRECT];
+          return (u_char *) &long_return;
 	case ICMPOUTECHOS:
-	    return (u_char *) &icmpstat.icps_outhist[ICMP_ECHO];
+          long_return = icmpstat.icps_outhist[ICMP_ECHO];
+          return (u_char *) &long_return;
 	case ICMPOUTECHOREPS:
-	    return (u_char *) &icmpstat.icps_outhist[ICMP_ECHOREPLY];
+          long_return = icmpstat.icps_outhist[ICMP_ECHOREPLY];
+          return (u_char *) &long_return;
 	case ICMPOUTTIMESTAMPS:
-	    return (u_char *) &icmpstat.icps_outhist[ICMP_TSTAMP];
+          long_return = icmpstat.icps_outhist[ICMP_TSTAMP];
+          return (u_char *) &long_return;
 	case ICMPOUTTIMESTAMPREPS:
-	    return (u_char *) &icmpstat.icps_outhist[ICMP_TSTAMPREPLY];
+          long_return = icmpstat.icps_outhist[ICMP_TSTAMPREPLY];
+          return (u_char *) &long_return;
 	case ICMPOUTADDRMASKS:
-	    return (u_char *) &icmpstat.icps_outhist[ICMP_MASKREQ];
+          long_return = icmpstat.icps_outhist[ICMP_MASKREQ];
+          return (u_char *) &long_return;
 	case ICMPOUTADDRMASKREPS:
-	    return (u_char *) &icmpstat.icps_outhist[ICMP_MASKREPLY];
+          long_return = icmpstat.icps_outhist[ICMP_MASKREPLY];
+          return (u_char *) &long_return;
 	default:
 	    ERROR_MSG("");
     }
@@ -280,27 +302,38 @@ var_icmp(vp, name, length, exact, var_len, write_method)
 			  icmpstat.icps_checksum + icmpstat.icps_badlen;
 	    return (u_char *)&long_return;
 	case ICMPINDESTUNREACHS:
-	    return (u_char *) &icmpstat.icps_inhist[ICMP_UNREACH];
+          long_return = icmpstat.icps_inhist[ICMP_UNREACH];
+          return (u_char *) &long_return;
 	case ICMPINTIMEEXCDS:
-	    return (u_char *) &icmpstat.icps_inhist[ICMP_TIMXCEED];
+          long_return = icmpstat.icps_inhist[ICMP_TIMXCEED];
+          return (u_char *) &long_return;
 	case ICMPINPARMPROBS:
-	    return (u_char *) &icmpstat.icps_inhist[ICMP_PARAMPROB];
+          long_return = icmpstat.icps_inhist[ICMP_PARAMPROB];
+          return (u_char *) &long_return;
 	case ICMPINSRCQUENCHS:
-	    return (u_char *) &icmpstat.icps_inhist[ICMP_SOURCEQUENCH];
+          long_return = icmpstat.icps_inhist[ICMP_SOURCEQUENCH];
+          return (u_char *) &long_return;
 	case ICMPINREDIRECTS:
-	    return (u_char *) &icmpstat.icps_inhist[ICMP_REDIRECT];
+          long_return = icmpstat.icps_inhist[ICMP_REDIRECT];
+          return (u_char *) &long_return;
 	case ICMPINECHOS:
-	    return (u_char *) &icmpstat.icps_inhist[ICMP_ECHO];
+          long_return = icmpstat.icps_inhist[ICMP_ECHO];
+          return (u_char *) &long_return;
 	case ICMPINECHOREPS:
-	    return (u_char *) &icmpstat.icps_inhist[ICMP_ECHOREPLY];
+          long_return = icmpstat.icps_inhist[ICMP_ECHOREPLY];
+          return (u_char *) &long_return;
 	case ICMPINTIMESTAMPS:
-	    return (u_char *) &icmpstat.icps_inhist[ICMP_TSTAMP];
+          long_return = icmpstat.icps_inhist[ICMP_TSTAMP];
+          return (u_char *) &long_return;
 	case ICMPINTIMESTAMPREPS:
-	    return (u_char *) &icmpstat.icps_inhist[ICMP_TSTAMPREPLY];
+          long_return = icmpstat.icps_inhist[ICMP_TSTAMPREPLY];
+          return (u_char *) &long_return;
 	case ICMPINADDRMASKS:
-	    return (u_char *) &icmpstat.icps_inhist[ICMP_MASKREQ];
+          long_return = icmpstat.icps_inhist[ICMP_MASKREQ];
+          return (u_char *) &long_return;
 	case ICMPINADDRMASKREPS:
-	    return (u_char *) &icmpstat.icps_inhist[ICMP_MASKREPLY];
+          long_return = icmpstat.icps_inhist[ICMP_MASKREPLY];
+          return (u_char *) &long_return;
 	case ICMPOUTMSGS:
 	    long_return = icmpstat.icps_oldshort + icmpstat.icps_oldicmp;
 	    for (i=0; i <= ICMP_MAXTYPE; i++)
@@ -310,27 +343,38 @@ var_icmp(vp, name, length, exact, var_len, write_method)
 	    long_return = icmpstat.icps_oldshort + icmpstat.icps_oldicmp;
 	    return (u_char *)&long_return;
 	case ICMPOUTDESTUNREACHS:
-	    return (u_char *) &icmpstat.icps_outhist[ICMP_UNREACH];
+          long_return = icmpstat.icps_outhist[ICMP_UNREACH];
+          return (u_char *) &long_return;
 	case ICMPOUTTIMEEXCDS:
-	    return (u_char *) &icmpstat.icps_outhist[ICMP_TIMXCEED];
+          long_return = icmpstat.icps_outhist[ICMP_TIMXCEED];
+          return (u_char *) &long_return;
 	case ICMPOUTPARMPROBS:
-	    return (u_char *) &icmpstat.icps_outhist[ICMP_PARAMPROB];
+          long_return = icmpstat.icps_outhist[ICMP_PARAMPROB];
+          return (u_char *) &long_return;
 	case ICMPOUTSRCQUENCHS:
-	    return (u_char *) &icmpstat.icps_outhist[ICMP_SOURCEQUENCH];
+          long_return = icmpstat.icps_outhist[ICMP_SOURCEQUENCH];
+          return (u_char *) &long_return;
 	case ICMPOUTREDIRECTS:
-	    return (u_char *) &icmpstat.icps_outhist[ICMP_REDIRECT];
+          long_return = icmpstat.icps_outhist[ICMP_REDIRECT];
+          return (u_char *) &long_return;
 	case ICMPOUTECHOS:
-	    return (u_char *) &icmpstat.icps_outhist[ICMP_ECHO];
+          long_return = icmpstat.icps_outhist[ICMP_ECHO];
+          return (u_char *) &long_return;
 	case ICMPOUTECHOREPS:
-	    return (u_char *) &icmpstat.icps_outhist[ICMP_ECHOREPLY];
+          long_return = icmpstat.icps_outhist[ICMP_ECHOREPLY];
+          return (u_char *) &long_return;
 	case ICMPOUTTIMESTAMPS:
-	    return (u_char *) &icmpstat.icps_outhist[ICMP_TSTAMP];
+          long_return = icmpstat.icps_outhist[ICMP_TSTAMP];
+          return (u_char *) &long_return;
 	case ICMPOUTTIMESTAMPREPS:
-	    return (u_char *) &icmpstat.icps_outhist[ICMP_TSTAMPREPLY];
+          long_return = icmpstat.icps_outhist[ICMP_TSTAMPREPLY];
+          return (u_char *) &long_return;
 	case ICMPOUTADDRMASKS:
-	    return (u_char *) &icmpstat.icps_outhist[ICMP_MASKREQ];
+          long_return = icmpstat.icps_outhist[ICMP_MASKREQ];
+          return (u_char *) &long_return;
 	case ICMPOUTADDRMASKREPS:
-	    return (u_char *) &icmpstat.icps_outhist[ICMP_MASKREPLY];
+          long_return = icmpstat.icps_outhist[ICMP_MASKREPLY];
+          return (u_char *) &long_return;
 	default:
 	    ERROR_MSG("");
     }

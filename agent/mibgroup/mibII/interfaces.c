@@ -789,7 +789,8 @@ var_ifEntry(vp, name, length, exact, var_len, write_method)
 #endif
 	    return (u_char *) &long_return;
 	case IFINERRORS:
-	    return (u_char *) &ifnet.if_ierrors;
+	    long_return = (u_long) ifnet.if_ierrors;
+	    return (u_char *) &long_return;
 	case IFINUNKNOWNPROTOS:
 #if STRUCT_IFNET_HAS_IF_NOPROTO
 	    long_return = (u_long)  ifnet.if_noproto;
@@ -820,11 +821,14 @@ var_ifEntry(vp, name, length, exact, var_len, write_method)
 #endif
 	    return (u_char *) &long_return;
 	case IFOUTDISCARDS:
-	    return (u_char *) &ifnet.if_snd.ifq_drops;
+          long_return = ifnet.if_snd.ifq_drops;
+          return (u_char *) &long_return;
 	case IFOUTERRORS:
-	    return (u_char *) &ifnet.if_oerrors;
+          long_return = ifnet.if_oerrors;
+          return (u_char *) &long_return;
 	case IFOUTQLEN:
-	    return (u_char *) &ifnet.if_snd.ifq_len;
+          long_return = ifnet.if_snd.ifq_len;
+          return (u_char *) &long_return;
 	case IFSPECIFIC:
 	    *var_len = nullOidLen;
 	    return (u_char *) nullOid;

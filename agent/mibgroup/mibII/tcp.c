@@ -254,9 +254,11 @@ var_tcp(vp, name, length, exact, var_len, write_method)
 		return (u_char *) &tcpstat.TcpMaxConn;
 #endif
 	    case TCPACTIVEOPENS:
-		return (u_char *) &tcpstat.tcps_connattempt;
+                long_return = tcpstat.tcps_connattempt;
+		return (u_char *) &long_return;
 	    case TCPPASSIVEOPENS:
-		return (u_char *) &tcpstat.tcps_accepts;
+                long_return = tcpstat.tcps_accepts;
+		return (u_char *) &long_return;
 	    case TCPATTEMPTFAILS:
 #ifdef hpux
 		long_return = MIB_tcpcounter[7];
@@ -283,7 +285,8 @@ var_tcp(vp, name, length, exact, var_len, write_method)
 		return (u_char *) &tcpstat.TcpCurrEstab;
 #endif
 	    case TCPINSEGS:
-		return (u_char *) &tcpstat.tcps_rcvtotal;
+                long_return = tcpstat.tcps_rcvtotal;
+		return (u_char *) &long_return;
 	    case TCPOUTSEGS:
 		long_return = tcpstat.tcps_sndtotal
 			    - tcpstat.tcps_sndrexmitpack;
@@ -293,7 +296,8 @@ var_tcp(vp, name, length, exact, var_len, write_method)
 		 */
 		return (u_char *) &long_return;
 	    case TCPRETRANSSEGS:
-		return (u_char *) &tcpstat.tcps_sndrexmitpack;
+                long_return = tcpstat.tcps_sndrexmitpack;
+		return (u_char *) &long_return;
 #ifndef linux
 	    case TCPINERRS:
 		long_return = tcpstat.tcps_rcvbadsum + tcpstat.tcps_rcvbadoff 
@@ -401,9 +405,11 @@ var_tcp(vp, name, length, exact, var_len, write_method)
 		return (u_char *) &tcpstat.TcpMaxConn;
 #endif
 	    case TCPACTIVEOPENS:
-		return (u_char *) &tcpstat.tcps_connattempt;
+                long_return = tcpstat.tcps_connattempt;
+		return (u_char *) &long_return;
 	    case TCPPASSIVEOPENS:
-		return (u_char *) &tcpstat.tcps_accepts;
+                long_return = tcpstat.tcps_accepts;
+		return (u_char *) &long_return;
 	    case TCPATTEMPTFAILS:
 #ifdef hpux
 		long_return = MIB_tcpcounter[7];
@@ -425,12 +431,13 @@ var_tcp(vp, name, length, exact, var_len, write_method)
 	    case TCPCURRESTAB:
 #ifndef linux
 		long_return = TCP_Count_Connections();
-		return (u_char *) &long_return;
 #else
-		return (u_char *) &tcpstat.TcpCurrEstab;
+		long_return = tcpstat.TcpCurrEstab;
 #endif
+		return (u_char *) &long_return;
 	    case TCPINSEGS:
-		return (u_char *) &tcpstat.tcps_rcvtotal;
+                long_return = tcpstat.tcps_rcvtotal;
+		return (u_char *) &long_return;
 	    case TCPOUTSEGS:
 		long_return = tcpstat.tcps_sndtotal
 			    - tcpstat.tcps_sndrexmitpack;
@@ -440,7 +447,8 @@ var_tcp(vp, name, length, exact, var_len, write_method)
 		 */
 		return (u_char *) &long_return;
 	    case TCPRETRANSSEGS:
-		return (u_char *) &tcpstat.tcps_sndrexmitpack;
+                long_return = tcpstat.tcps_sndrexmitpack;
+		return (u_char *) &long_return;
 #ifndef linux
 	    case TCPINERRS:
 		long_return = tcpstat.tcps_rcvbadsum + tcpstat.tcps_rcvbadoff 
