@@ -42,7 +42,7 @@ static int cache_disknr=-1;
 #include <sys/diskstats.h>
 #endif /* bsdi */
 
-#if defined (freebsd4)
+#if defined (freebsd4) || defined(freebsd5)
 #include <sys/dkstat.h>
 #include <devstat.h>
 #endif /* freebsd */
@@ -306,7 +306,7 @@ var_diskio(struct variable * vp,
 }
 #endif /* bsdi */
 
-#if defined(freebsd4)
+#if defined(freebsd4) || defined(freebsd5)
 static int ndisk;
 static struct statinfo *stat;
 FILE *file;
