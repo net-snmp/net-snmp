@@ -65,7 +65,7 @@
 #include <net-snmp/snmp_parse_args.h>
 #include <net-snmp/read_config.h>
 #include <net-snmp/snmp_logging.h>
-#include "version.h"
+#include <net-snmp/version.h>
 #include <net-snmp/system.h>
 #include <net-snmp/parse.h>
 #include <net-snmp/read_config.h>
@@ -92,7 +92,7 @@ snmp_parse_args_usage(FILE *outf)
 void
 snmp_parse_args_descriptions(FILE *outf)
 {
-  fprintf(outf,"UCD-snmp version: %s\n", VersionInfo);
+  fprintf(outf,"NET-SNMP version: %s\n", netsnmp_get_version());
   fprintf(outf, "  -h\t\tthis help message.\n");
   fprintf(outf, "  -H\t\tDisplay configuration file directives understood.\n");
   fprintf(outf, "  -V\t\tdisplay version number.\n");
@@ -162,7 +162,7 @@ snmp_parse_args(int argc,
     DEBUGMSGTL(("snmp_parse_args","handling (#%d): %c\n", optind, arg));
     switch(arg){
       case 'V':
-        fprintf(stderr,"UCD-snmp version: %s\n", VersionInfo);
+        fprintf(stderr,"NET-SNMP version: %s\n", netsnmp_get_version());
         return(-2);
 
       case 'h':

@@ -162,7 +162,7 @@ typedef long    fd_mask;
 #include <net-snmp/snmp_logging.h>
 #include <net-snmp/snmp_transport.h>
 
-#include "version.h"
+#include <net-snmp/version.h>
 
 #include <net-snmp/agent/table.h>
 #include <net-snmp/agent/table_iterator.h>
@@ -210,7 +210,7 @@ static void usage(char *prog)
 {
         printf("\nUsage:  %s [OPTIONS] [ADDRESSES]", prog);
 	printf("\n");
-	printf("\n\tVersion:  %s\n",VersionInfo);
+	printf("\n\tVersion:  %s\n", netsnmp_get_version());
 	printf("\tWeb:      http://www.net-snmp.org/\n");
 	printf("\tEmail:    net-snmp-coders@lists.sourceforge.net\n");
 	printf("\n  -a\t\t\tlog addresses\n");
@@ -257,7 +257,7 @@ static void usage(char *prog)
 static void
 version(void)
 {
-    printf("\nUCD-snmp version:  %s\n",VersionInfo);
+    printf("\nNET-SNMP version:  %s\n",netsnmp_get_version());
     printf("Web:               http://www.net-snmp.org/\n");
     printf("Email:             net-snmp-coders@lists.sourceforge.net\n\n");
     exit(0);
@@ -685,7 +685,7 @@ main(int argc, char *argv[])
 #endif
 
     /*  We're up, log our version number.  */
-    snmp_log(LOG_INFO, "UCD-SNMP version %s\n", VersionInfo);
+    snmp_log(LOG_INFO, "NET-SNMP version %s\n", netsnmp_get_version());
     snmp_addrcache_initialise();
 
     /*  Forever monitor the dest_port for incoming PDUs.  */

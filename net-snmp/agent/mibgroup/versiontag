@@ -1,6 +1,6 @@
 #!/bin/sh
 
-QUOTEFILES="version.h"
+QUOTEFILES="snmplib/snmp_version.c"
 SEDFILES="sedscript.in"
 COLONFILES="README FAQ"
 PERLFILES="perl/SNMP/SNMP.pm"
