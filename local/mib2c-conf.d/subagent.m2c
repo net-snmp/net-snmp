@@ -162,6 +162,8 @@ main (int argc, char **argv) {
 
   /* at shutdown time */
   snmp_shutdown("$name");
+
+  exit(0);
 }
 
 ########################################################################
