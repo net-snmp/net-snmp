@@ -1,5 +1,559 @@
 -------------------------------------------------------------------------------
 
+Changes: V5.0.7 -> V5.0.8.pre1
+
+2003-03-05 20:00  rstory
+
+   * sedscript.in, perl/SNMP/SNMP.pm,
+   snmplib/snmp_version.c:
+
+   update version to 5.0.8.pre1
+   
+2003-03-05 19:04  rstory
+
+   * man/snmpd.conf.5.def:
+
+   back out docs for new functionality accidentally added when applying patch
+   
+2003-03-05 18:40  rstory
+
+   * agent/mibgroup/disman/mteTriggerTable.c:
+
+   back out new functionality accidentally added when applying patch
+   
+2003-03-05 18:20  rstory
+
+   * README.solaris:
+
+   updates from Bruce Shaw
+   
+2003-03-05 18:18  rstory
+
+   * man/.cvsignore:
+
+   add snmpd.8
+   
+2003-03-05 18:12  rstory
+
+   * man/: netsnmp_agent.3, netsnmp_handler.3,
+   netsnmp_library.3, netsnmp_mib_utilities.3,
+   netsnmp_table_data.3:
+
+   updates for 5.0.8
+   
+2003-03-05 18:04  rstory
+
+   * doxygen.conf:
+
+   update to 5.0.8
+   
+2003-03-05 17:58  rstory
+
+   * dist/README.build-scripts:
+
+   remove obsolete argument; fix typo
+   
+2003-03-05 17:58  rstory
+
+   * Makefile.in:
+
+   exclude ftp from comment check; use egrep
+   
+2003-03-05 17:55  rstory
+
+   * agent/mibgroup/ucd-snmp/diskio.c:
+
+   chg C++ style comment
+   
+2003-03-05 17:50  rstory
+
+   * testing/TESTCONF.sh:
+
+   argh! FreeBSD is driving me crazy!  set RANDOM=2 if RANDOM not defined; use test
+   
+2003-03-05 17:22  rstory
+
+   * testing/TESTCONF.sh:
+
+   simplify netstat args & tweak grep regex for multi platform compatability
+   
+2003-03-05 17:11  rstory
+
+   * testing/TESTCONF.sh:
+
+   check /bin and /usr/bin for netstat (probably a good job for configure)
+   
+2003-03-05 17:02  rstory
+
+   * testing/TESTCONF.sh:
+
+   missed one, re: (( )) -> expr
+   
+2003-03-05 16:58  rstory
+
+   * testing/TESTCONF.sh:
+
+   use more portable expr instead of  (( )) for arithmetic expressions
+   
+2003-03-05 16:16  rstory
+
+   * testing/TESTCONF.sh:
+
+   for systems with /bin/netstat, check that snmpd port is not in use. If it is,
+   try up to three random others before giving up.
+   
+2003-03-05 15:16  rstory
+
+   * dist/: nsb-functions, nsb-package:
+
+   don't prompt between steps by default
+   
+2003-03-05 15:11  rstory
+
+   * testing/RUNTESTS:
+
+   import SNMP_SLEEP time from environment, if available
+   
+2003-03-05 15:10  rstory
+
+   * win32/net-snmp/net-snmp-config.h:
+
+   don't redefine inline
+   
+2003-03-05 15:08  rstory
+
+   * Makefile.top:
+
+   version 5.0.8
+   
+2003-03-05 15:07  rstory
+
+   * .cvsignore:
+
+   ignore some files autoconf may create
+   
+2003-03-05 13:42  nba
+
+   * aclocal.m4, config.guess, config.sub
+, ltmain.sh, configure:
+
+   Update libtool to version 1.4.3, for the benefit of Darwin
+   
+2003-03-05 13:39  nba
+
+   * configure.in:
+
+   Dont force -I/usr/local/include for --with-dmalloc
+   
+2003-03-04 12:47  hardaker
+
+   * agent/mibgroup/agent/nsModuleTable.c:
+
+   wrong type returned for nsModuleModes as reported by Michael Kirkham
+   
+2003-03-03 15:03  nba
+
+   * man/snmpd.conf.5.def:
+
+   Mention the AgentXAddress, AgentsRetries and AgentXTimeout parameters
+   
+2003-03-03 14:25  nba
+
+   * agent/mibgroup/ucd_snmp.h:
+
+   Add support for OpenBSD 3. Sort some lines for easier reference.
+   
+2003-03-01 10:27  rstory
+
+   * agent/mibgroup/agentx/subagent.c:
+
+   agentx patch from Tommy Christensen: better error checking
+   
+2003-03-01 09:59  rstory
+
+   * agent/mibgroup/agentx/master.c:
+
+   agentx patch from Tommy Christensen: don't create delegated cache for CLEANUPSET
+   
+2003-02-28 23:46  hardaker
+
+   * perl/SNMP/Makefile.PL:
+
+   typo
+   
+2003-02-28 23:11  hardaker
+
+   * perl/SNMP/Makefile.PL:
+
+   Patch #597629 from Matt Selsky to fix man page installation
+   
+2003-02-28 13:18  nba
+
+   * agent/snmpd.c, apps/snmptrapd.c:
+
+   Better error message if we cannot create pid file
+   
+2003-02-28 13:17  nba
+
+   * agent/mibgroup/host/hr_filesys.c:
+
+   Use FS types with Linux
+   
+2003-02-27 00:59  rstory
+
+   * local/mib2c.array-user.conf:
+
+   sync w/main
+   
+2003-02-26 18:52  rstory
+
+   * Makefile.top:
+
+   sync w/main: put in missing INSTALL_DATA
+   
+2003-02-26 18:05  nba
+
+   * agent/mibgroup/ucd-snmp/vmstat_solaris2.c:
+
+   Implement sysRawInterrupts and sysRawContext for Solaris
+   
+2003-02-26 14:30  nba
+
+   * snmplib/mib.c:
+
+   Fix a C precedence botch-up, thanks to Fabrício Las Casas <Fabricio@atan.com.br>
+   
+2003-02-26 14:14  nba
+
+   * agent/mibgroup/ucd-snmp/vmstat.c:
+
+   Implement the ssRawInterrupts and ssRawContext counters in Linux
+   
+2003-02-26 14:13  nba
+
+   * apps/snmptrapd.c:
+
+   Fix the -S option
+   
+2003-02-25 14:38  rstory
+
+   * Makefile.in:
+
+   fix logic of test operation
+   
+2003-02-25 14:33  rstory
+
+   * Makefile.in, Makefile.top:
+
+   use AUTO(CONF|HEADER) from configure, instead of hardcoded; don't try and run
+   AUTO(CONF|HEADER) if not found
+   
+2003-02-25 14:11  rstory
+
+   * man/snmpd.8.def:
+
+   sync w/main branch: new file
+   
+2003-02-25 14:03  rstory
+
+   * apps/snmptrapd.c:
+
+   sync w/main branch (correctly, this time)
+   
+2003-02-25 13:49  rstory
+
+   * Makefile.in:
+
+   sync w/main branch: add NOAUTODEPS
+   
+2003-02-25 13:38  rstory
+
+   * dist/nsb-functions:
+
+   sync w/main branch: add smux to dist modules; move make test into nsb-make;
+   remove tee so rc is preserved; use new NOAUTODEPS
+   
+2003-02-25 13:29  rstory
+
+   * snmplib/snmpv3.c:
+
+   sync w/main branch:
+   Recognise "defVersion v3" as well as "defVersion 3" as documented
+   in the man pages (prior to Peter Breitenlohner's correction)
+   [We might as well support both styles....]
+   
+2003-02-25 13:20  rstory
+
+   * EXAMPLE.conf.def, sedscript.in,
+   man/Makefile.in, man/mib2c.1.def,
+   man/read_config.3.def, man/snmp.conf.5.def,
+   man/snmp_config.5.def, man/snmpcmd.1.def,
+   man/snmpconf.1.def, man/snmpd.1.def,
+   man/snmptrapd.conf.5.def, mibs/Makefile.in:
+
+   sync w/main branch: (I hope I got this right)
+   -Apply Peter Breitenlohner's documentation changes
+    (patches #692381,  692382 and  692388)
+   
+2003-02-25 13:16  rstory
+
+   * agent/mibgroup/mibII/interfaces.c:
+
+   sync w/main branch:
+   patch #657808: calculate a proper ifSpeed under linux when possible
+   and do more proper ifOperStatus state determination.
+   
+2003-02-25 13:15  rstory
+
+   * agent/helpers/table_data.c:
+
+   sync w/main branch:
+   - Irfan Sheriff pointed out a bug with getnext requests directly to a column.
+   - check entry node as suggested by Irfan Sheriff
+   
+2003-02-25 13:14  rstory
+
+   * snmplib/system.c:
+
+   sync w/main branch:
+   Remove last remaining use of 'nlist' under HP-UX 10 & 11.
+   As per patch #656773 from Johannes Schmidt-Fischer
+   
+2003-02-25 13:13  rstory
+
+   * agent/mibgroup/host/hr_disk.c:
+
+   sync w/main branch:
+   Checking the length of a string buffer once is sufficient.
+   Using 'strnncpy' [sic] to check this length twice is unnecessary...
+   
+2003-02-25 13:12  rstory
+
+   * Makefile.in:
+
+   sync w/main branch:
+   - Mess with output of doxygen to add sf logos, etc, to the bottom of the
+     generated html files.
+   - Apply Peter Breitenlohner's net-snmp-config patch (#692373)
+   
+2003-02-25 13:11  rstory
+
+   * agent/snmpd.c:
+
+   sync w/main branch:
+   Patch #655154 from Joel Rosdahl: more proper demonization:
+     - close stdin/stdout/stderr if appropriate.
+     - double fork.
+     - chdir /   [except under windows]
+   
+2003-02-25 13:10  rstory
+
+   * agent/mibgroup/ucd-snmp/diskio.c:
+
+   sync w/main branch:
+   Patch #662169 from Jan Willem Luiten: diskio support for Darwin
+   
+2003-02-25 13:10  rstory
+
+   * perl/SNMP/t/: bulkwalk.t, set.t:
+
+   sync w/main branch:
+   Fix tests for bulkwalk (duplicate header) and set (invalid OID constant)
+   
+2003-02-25 13:09  rstory
+
+   * agent/mibgroup/mibII/ipAddr.c:
+
+   sync w/main branch:
+   Accommodate a fussy IRIX environment, which is picky about <unistd.h>
+   See bug #667726
+   
+2003-02-25 13:04  rstory
+
+   * acconfig.h:
+
+   sync w/main branch:
+   Bruce Shaw pointed out a comment typo
+   
+2003-02-25 13:02  rstory
+
+   * perl/: ASN/Makefile.PL, OID/Makefile.PL,
+   SNMP/Makefile.PL, agent/Makefile.PL,
+   default_store/Makefile.PL:
+
+   sync w/main branch:
+   fix my declarations as pointed out by Andrew Page
+   
+2003-02-25 13:01  rstory
+
+   * snmplib/mib.c:
+
+   sync w/main branch:
+   An additional change to support 't' hints
+   
+2003-02-25 13:00  rstory
+
+   * man/snmptrapd.8.def:
+
+   sync w/main branch:
+   -document patch #674218: reopen log files on HUP.
+   -Apply Peter Breitenlohner's documentation changes
+    (patches #692381,  692382 and  692388)
+   
+2003-02-25 12:59  rstory
+
+   * man/snmpd.conf.5.def:
+
+   sync w/main branch:
+   -document monitor -t for threshold monitoring
+   -Apply Peter Breitenlohner's documentation changes
+    (patches #692381,  692382 and  692388)
+   
+2003-02-25 12:57  rstory
+
+   * agent/mibgroup/disman/mteTriggerTable.c:
+
+   sync w/main branch:
+   Patch from Christophe to support monitor -t for threshold monitoring
+   
+2003-02-25 12:55  rstory
+
+   * FAQ:
+
+   sync w/main branch:
+   Clarify the local-only access for non-standard port AgentX connections
+   
+2003-02-25 12:54  rstory
+
+   * apps/snmptrapd.c:
+
+   sync w/main branch:
+     -  close and re-open log file on receiving a HUP (patch 674218, submitted
+        by anonymous)
+   
+2003-02-25 12:52  rstory
+
+   * net-snmp-config.in:
+
+   sync w/main branch: Bruce Shaw pointed out a comment typo
+   
+2003-02-25 09:04  dts12
+
+   * man/snmpd.8.def:
+
+   Apply Peter Breitenlohner's configuration-related documentation and installation changes.
+   (patches #692372,  692377,  692379 and 692386)
+   
+2003-02-13 20:02  hardaker
+
+   * agent/mibgroup/mibII/var_route.c:
+
+   Patch #654329: double check lengths when copying
+   
+2003-02-12 09:01  hardaker
+
+   * agent/mibgroup/tunnel/tunnel.h:
+
+   update
+   
+2003-02-11 11:13  hardaker
+
+   * agent/mibgroup/ucd-snmp/: pass.c, pass_persist.c
+:
+
+   patch #667694 (anon) to add back newlines to pass code
+   
+2003-02-03 10:27  hardaker
+
+   * snmplib/snmp_api.c:
+
+   From Richard Laing: change value check of a string to use a proper length.
+   
+2003-01-24 10:47  hardaker
+
+   * agent/mibgroup/smux/smux.c:
+
+   patch #672021 from Joshua Giles: large set request fixes
+   
+2003-01-20 23:21  rstory
+
+   * snmplib/container_binary_array.c:
+
+   add missing brace
+   
+2003-01-20 23:13  rstory
+
+   * agent/mibgroup/versiontag:
+
+   add back (accidentally deleted) creation of gzipped tarball
+   
+2003-01-20 23:09  rstory
+
+   * snmplib/test_binary_array.c:
+
+   add string test case
+   
+2003-01-20 23:09  rstory
+
+   * snmplib/container_binary_array.c:
+
+   fix array_qsort; fix binary search; con't recurse on insert, del, etc since
+   the INSERT/DELETE macros already handle multiple indexes
+   
+2003-01-20 22:54  rstory
+
+   * include/net-snmp/library/default_store.h,
+   snmplib/snmp_api.c:
+
+   official patch [ 669707 ] 5.0.7: 16-Bit Request IDs
+   
+2003-01-20 22:52  rstory
+
+   * include/net-snmp/library/container.h,
+   snmplib/container.c:
+
+   fix typo in log message; add netsnmp_compare_mem
+   
+2003-01-20 22:51  rstory
+
+   * agent/mibgroup/versiontag:
+
+   create md5sums after creating gzipped tarball
+   
+2003-01-20 22:51  rstory
+
+   * Makefile.rules:
+
+   add another level of directories to make depend, per dts on coders
+   (thought this was in 5.0.7, but apparently not!)
+   
+2003-01-14 08:56  hardaker
+
+   * agent/snmpd.c, doxygen.conf, agent/agent_handler.c
+, dist/RELEASE-INSTRUCTIONS:
+
+   doxygen changes
+   
+2003-01-13 21:49  rstory
+
+   * man/: netsnmp_agent.3, netsnmp_handler.3:
+
+   update for 5.0.7
+   
+2003-01-13 20:30  rstory
+
+   * snmplib/mib.c:
+
+   recognize new 't' code in display hints
+   
+2003-01-13 20:07  rstory
+
+   * agent/helpers/table_iterator.c:
+
+   patch for memory leaks sent to coders by Jay Parlar
+   
+-------------------------------------------------------------------------------
+
 Changes: V5.0.6 -> V5.0.7
 
 2003-01-11 01:15  rstory
