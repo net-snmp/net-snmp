@@ -16,6 +16,7 @@ int agentx_register( struct snmp_session *, oid*, size_t, int, int, oid);
 int agentx_unregister( struct snmp_session *, oid*, size_t, int, int, oid);
 int agentx_add_agentcaps( struct snmp_session *, oid*, size_t, const char*);
 int agentx_remove_agentcaps( struct snmp_session *, oid*, size_t);
+int agentx_send_ping( struct snmp_session * );
 
 #define AGENTX_CLOSE_OTHER    1
 #define AGENTX_CLOSE_PARSE    2
