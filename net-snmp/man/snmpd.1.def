@@ -5,7 +5,7 @@
 .SH NAME
 snmpd - daemon to respond to SNMP request packets.
 .SH SYNOPSIS
-.B "snmpd [-v] [-a] [-V] [-d] [-q] [-D] [-p port] [-x agentx-socket] [-f] [-l logfile] [-L] [-c file] [-C] [-r]"
+.B "snmpd [-v] [-a] [-V] [-d] [-q] [-D] [-p [(udp|tcp):]port[@address][,...]] [-x agentx-socket] [-f] [-l logfile] [-L] [-c file] [-C] [-r]"
 .SH DESCRIPTION
 .B snmpd
 is a SNMP agent which binds to a port and awaits requests from
@@ -33,10 +33,23 @@ Print simpler output for easier automated parsing.
 .B -D
 Turn on debugging output
 .TP
-.B -p port
-Opens on 
-.I port
-instead of the default SNMP agent port, 161.
+.B -p [(udp|tcp):]port[@address][,...]
+Makes the agent list on the specified list of sockets instead of the
+default port, which is port 161.  Multiple ports can be separated by
+commas.  Transports can be specified by prepending the port number
+with the transport name ("udp" or "tcp") followed by a colon.
+Finally, to bind to a particular interface, you can specify the
+address you want it to bind with.
+.IP
+For example, specifying
+.I "-p 161,tcp:161,9161@localhost"
+will make the agent listen on: udp port 161 for any address, tcp port
+161 for any address, and udp port 9161 on only the interface
+associated with the localhost address.  Note that the 
+.I "-T"
+flag (below) changes the default transport mapping to use (in the
+above example, the default transport mapping is 
+.I udp.
 .TP
 .B -x agentx-socket
 Listens for AgentX connections on the specified socket
