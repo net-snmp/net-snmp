@@ -8,7 +8,7 @@ use CGI qw(:standard);
 use SNMP ();
 use DBI ();
 use lib ("/afs/dcas.ucdavis.edu/pkg/common/perl_modules");
-use displaytable ();
+use displaytable qw(displaytable displaygraph);
 
 # globals
 $ucdsnmp::manager::hostname = 'localhost';          # Host that serves the mSQL Database
@@ -69,7 +69,123 @@ if (my $group = param('groupstat')) {
     open(I,"/home/hardaker/src/snmp/manager/green.gif");
     while(read(I, $_, 4096)) { print; }
     close(I);
-    return Exit($dbh,  "");
+    return OK();
+}
+
+
+sub date_format {
+    my $time = shift;
+    my @out = localtime($time);
+    my $ret = $out[4] . "-" . $out[3] . "-" . $out[5] . " " . $out[2] . " " . $out[1];
+#    print STDERR "$time: $ret\n";
+    return $ret;
+}
+
+if ((param('displaygraph') || param('dograph')) && param('table')) {
+    my $host = param('host');
+    my $group = param('group');
+    if (!isuser($dbh, $remuser, $group)) {
+	$r->content_type("image/png");
+	$r->send_http_header();
+	print "Unauthorized access to that group ($group)\n";
+	return Exit($dbh, $group);
+    }    
+    my $table = param('table');
+    my @columns;
+
+    if (!param('dograph')) {
+	$r->content_type("text/html");
+	$r->send_http_header();
+	print "<body bgcolor=\"#ffffff\">\n";
+	print "<h1>Select indexes to graph</h1>\n";
+	print "<form>\n";
+	print "<table>\n";
+
+	my $handle = getcursor($dbh, "SELECT distinct(oidindex) FROM $table where host = '$host' order by oidindex");
+	my @cols;
+	while (  $row = $handle->fetchrow_hashref ) {
+	    print "<tr><td>$row->{oidindex}</td><td><input type=checkbox value=1 name=graph_" . displaytable::to_unique_key($row->{'oidindex'}) . "></td></tr>\n";
+	}
+	print "</table>\n";
+
+	print "<h1>Select Columns to graph</h1>\n";
+	print "<table>\n";
+	my $handle = getcursor($dbh, "SELECT * FROM $table limit 1");
+	my $row = $handle->fetchrow_hashref;
+	map { print "<tr><td>$_</td><td><input type=checkbox value=1 name=column_" . displaytable::to_unique_key($_) . "></td></tr>\n"; } keys(%$row);
+	print "</table>\n";
+
+	print "<br>Graph as a Rate: <input type=checkbox value=1 name=graph_as_rate><br>\n";
+
+	print "<input type=hidden name=table value=\"$table\">\n";
+	print "<input type=hidden name=host value=\"$host\">\n";
+	print "<input type=hidden name=dograph value=1>\n";
+	print "<input type=hidden name=group value=\"$group\">\n";
+	print "<input type=submit name=\"Make Graph\">\n";
+
+	print "</form>\n";
+
+	my $handle = getcursor($dbh, "SELECT distinct(oidindex) FROM $table where host = '$host' order by oidindex");
+	return Exit($dbh, $group);
+    }
+    if (param('graph_all_data')) {
+	$clause = "host = '$host'";
+    } else {
+	my $handle = getcursor($dbh, "SELECT distinct(oidindex) FROM $table where host = '$host'");
+	$clause = "where (";
+	while (  $row = $handle->fetchrow_hashref ) {
+#	    print STDERR "graph test: " . $row->{'oidindex'} . "=" . "graph_" . displaytable::to_unique_key($row->{'oidindex'}) . "=" . param("graph_" . displaytable::to_unique_key($row->{'oidindex'})) . "\n";
+	    if (param("graph_" . displaytable::to_unique_key($row->{'oidindex'}))) {
+		$clause .= " or oidindex = " . $row->{'oidindex'} . "";
+	    }
+	}
+
+	my $handle = getcursor($dbh, "SELECT * FROM $table limit 1");
+	my $row = $handle->fetchrow_hashref;
+	map { push @columns, $_ if (param('column_' . displaytable::to_unique_key($_))) } keys(%$row);
+
+	$clause .= ")";
+	$clause =~ s/\( or /\(/;
+	if ($clause =~ /\(\)/ || $#columns == -1) {
+	    $r->content_type("text/html");
+	    $r->send_http_header();
+	    print "<body bgcolor=\"#ffffff\">\n";
+	    print "<h1>No Data to Graph</h1>\n";
+	    return Exit($dbh, "$group");
+	}
+	$clause .= " and host = '$host'";
+    }
+
+#    print STDERR "graphing clause: $clause\n";
+
+    # all is ok, display the graph
+
+    $r->content_type("image/png");
+    $r->send_http_header();
+
+#    print STDERR "graphing clause: $clause, columns: ", join(", ",@columns), "\n";
+    my @args;
+    push (@args, '-rate', '60') if (param('graph_as_rate'));
+
+    displaygraph($dbh, $table,
+#		 '-xcol', "date_format(updated,'%m-%d-%y %h:%i')",
+		 '-xcol', "unix_timestamp(updated)",
+		 '-pngparms', [
+		     'x_labels_vertical', '1',
+		     'x_label_skip', 50,
+		     'title', $table,
+		     'y_label', 'Count/Min',
+#		     'y_min_value', 0,
+#		     'x_number_format', \&date_format,
+#		     'x_tick_number', 'auto',
+		 ],
+		 '-clauses', "$clause order by updated",
+		 @args,
+		 '-positive_only', 1,
+#		 '-clauses', 'where oidindex = 2 order by updated',
+		 '-columns', \@columns,
+		 '-indexes', ['oidindex']);
+    return OK();
 }
 
 $r->content_type("text/html");
@@ -290,6 +406,22 @@ if (param('setuphost')) {
 }
 
 #===========================================================================
+# display a huge table of history about something
+#===========================================================================
+if (param('displayhistory')) {
+    if (!isuser($dbh, $remuser, $group)) {
+        print "Unauthorized access to that group ($group)\n";
+        return Exit($dbh, $group);
+    }
+    displaytable($dbh, param('table'), 
+    '-clauses', "where (host = '$host')",
+    '-dolink', \&linktodisplayinfo,
+    '-dontdisplaycol', "select * from userprefs where user = '$remuser' and groupname = '$group' and tablename = ? and columnname = ? and displayit = 'N'"
+    );
+    return Exit($dbh, $group);
+}
+
+#===========================================================================
 # display inforamation about a host
 #  optionally add new collection tables
 #===========================================================================
@@ -455,9 +587,17 @@ sub showhost {
 	displaytable($dbh, $tablelist->{'tablename'}, 
 		     '-clauses', "where (host = '$host') order by oidindex",
 		     '-dontdisplaycol', "select * from userprefs where user = '$remuser' and groupname = '$group' and tablename = ? and columnname = ? and displayit = 'N'",
-		     '-sort', "mykeysort",
+		     '-sort', \&mykeysort,
 		     '-dolink', \&linktodisplayinfo,
 		     '-beginhook', \&printredgreen);
+	if ($tablelist->{'keephistory'}) {
+	    my $q = self_url();
+	    $q =~ s/\?.*//;
+	    print "history: ";
+	    print "<a href=\"" . addtoken($q, "displayhistory=1&host=$host&group=$group&table=$tablelist->{'tablename'}hist") . "\">[table]</a>\n";
+	    print "<a href=\"" . addtoken($q, "displaygraph=1&host=$host&group=$group&table=$tablelist->{'tablename'}hist") . "\">[graph]</a>\n";
+	    print "<br>\n";
+	}
     }
 }
 
