@@ -90,7 +90,7 @@ ${node}_check_value( ${context}_rowreq_ctx *rowreq_ctx, $m2c_node_param_val)
     /** should never get a NULL pointer */
     netsnmp_assert(NULL != rowreq_ctx);
 @if $m2c_node_needlength == 1@
-    netsnmp_assert(NULL != ${node}_ptr);
+    netsnmp_assert(NULL != ${node}_val_ptr);
 @end@
 
     /*
@@ -174,7 +174,7 @@ ${node}_set( ${context}_rowreq_ctx *rowreq_ctx, $m2c_node_param_val )
     /** should never get a NULL pointer */
     netsnmp_assert(NULL != rowreq_ctx);
 @if $m2c_node_needlength == 1@
-    netsnmp_assert(NULL != ${node}_ptr);
+    netsnmp_assert(NULL != ${node}_val_ptr);
 @end@
 
 @    if $m2c_node_skip_mapping != 1@
