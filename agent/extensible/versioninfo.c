@@ -14,7 +14,7 @@
 #include "mibdefs.h"
 #include "mibincl.h"
 
-char *VersionInfo="3.0.4";
+char *VersionInfo="3.0.5";
 
 int clear_cache();
 int update_hook();
