@@ -1160,9 +1160,16 @@ handle_snmp_packet(int op, struct snmp_session *session, int reqid,
 		case SNMP_ERR_NOTWRITABLE:
 		case SNMP_ERR_NOCREATION:
 		case SNMP_ERR_INCONSISTENTNAME:
-		case SNMP_ERR_AUTHORIZATIONERROR:
 			status = SNMP_ERR_NOSUCHNAME;
 			break;
+		case SNMP_ERR_AUTHORIZATIONERROR:
+		    /*  From RFC 2576, p. 24: "Whenever the SNMPv2
+			error-status value of authorizationError is translated
+			to an SNMPv1 error-status value of noSuchName, the
+			value of snmpInBadCommunityUses MUST be incremented."*/
+		    snmp_increment_statistic(STAT_SNMPINBADCOMMUNITYUSES);
+		    status = SNMP_ERR_NOSUCHNAME;
+		    break;
 		case SNMP_ERR_RESOURCEUNAVAILABLE:
 		case SNMP_ERR_COMMITFAILED:
 		case SNMP_ERR_UNDOFAILED:
