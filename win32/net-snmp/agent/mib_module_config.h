@@ -26,7 +26,7 @@
 #define USING_MIBII_MODULE 1
  
 /* CFG Define if compiling with the ucd_snmp module files.  */
-/* #undef USING_UCD_SNMP_MODULE */
+#define USING_UCD_SNMP_MODULE 1
  
 /* Define if compiling with the snmpv3mibs module files.  */
 #define USING_SNMPV3MIBS_MODULE 1
@@ -47,7 +47,7 @@
 #define USING_AGENT_MIBS_MODULE 1
  
 /* CFG Define if compiling with the agentx module files.  */
-/* #define USING_AGENTX_MODULE 1 */
+#define USING_AGENTX_MODULE 1
  
 /* Define if compiling with the agent_mibs module files.  */
 #define USING_AGENT_MIBS_MODULE 1
@@ -59,10 +59,10 @@
 /* #undef USING_HOST_MODULE */
  
 /* CFG Define if compiling with the Rmon module files.  */
-/* #undef USING_RMON_MODULE */
+#define USING_RMON_MODULE 1
 
 /* CFG Define if compiling with the disman/event-mib module files.  */
-/* #undef USING_DISMAN_EVENT_MIB_MODULE */
+#define USING_DISMAN_EVENT_MIB_MODULE 1
 
 /* CFG Define if compiling with the smux module files.  */
 /* #undef USING_SMUX_MODULE */
