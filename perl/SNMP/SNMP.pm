@@ -7,7 +7,7 @@
 #     modify it under the same terms as Perl itself.
 
 package SNMP;
-$VERSION = '5.0.7';   # current release version number
+$VERSION = '5.1.pre1';   # current release version number
 
 require Exporter;
 require DynaLoader;
@@ -678,7 +678,7 @@ sub gettable {
 
 	};
 
-	return(%result_hash);
+	return(\%result_hash);
 
 }
 
