@@ -18,8 +18,8 @@ top_builddir	= ..
 SUBDIRS=helpers mibgroup
 
 INSTALLSBINPROGS= snmpd$(EXEEXT)
-INSTALLLIBS	= libnetsnmpagent.$(LIB_EXTENSION)$(LIB_VERSION) \
-		libnetsnmpmibs.$(LIB_EXTENSION)$(LIB_VERSION)
+INSTALLLIBS	= libnetsnmpmibs.$(LIB_EXTENSION)$(LIB_VERSION) \
+		  libnetsnmpagent.$(LIB_EXTENSION)$(LIB_VERSION)
 
 INCLUDESUBDIR=agent
 INCLUDESUBDIRHEADERS=agent_read_config.h \
