@@ -219,7 +219,9 @@ snmptrapd_register_configs( void )
  *
  *-----------------------------*/
 
-netsnmp_trapd_handler *netsnmp_global_traphandlers   = NULL;
+netsnmp_trapd_handler *netsnmp_auth_global_traphandlers   = NULL;
+netsnmp_trapd_handler *netsnmp_pre_global_traphandlers    = NULL;
+netsnmp_trapd_handler *netsnmp_post_global_traphandlers   = NULL;
 netsnmp_trapd_handler *netsnmp_default_traphandlers  = NULL;
 netsnmp_trapd_handler *netsnmp_specific_traphandlers = NULL;
 
@@ -228,7 +230,7 @@ netsnmp_trapd_handler *netsnmp_specific_traphandlers = NULL;
  * to be applied to *all* incoming traps
  */
 netsnmp_trapd_handler *
-netsnmp_add_global_traphandler( Netsnmp_Trap_Handler handler) {
+netsnmp_add_global_traphandler(int list, Netsnmp_Trap_Handler handler) {
     netsnmp_trapd_handler *traph;
 
     if ( !handler )
@@ -239,12 +241,27 @@ netsnmp_add_global_traphandler( Netsnmp_Trap_Handler handler) {
         return NULL;
 
     /*
-     * Add this new handler to the front of the global list
+     * Add this new handler to the front of the appropriate global list
      *   (or should it go on the end?)
      */
     traph->handler = handler;
-    traph->nexth   = netsnmp_global_traphandlers;
-    netsnmp_global_traphandlers = traph;
+    switch (list) {
+    case NETSNMPTRAPD_AUTH_HANDLER:
+        traph->nexth   = netsnmp_auth_global_traphandlers;
+        netsnmp_auth_global_traphandlers = traph;
+        break;
+    case NETSNMPTRAPD_PRE_HANDLER:
+        traph->nexth   = netsnmp_pre_global_traphandlers;
+        netsnmp_pre_global_traphandlers = traph;
+        break;
+    case NETSNMPTRAPD_POST_HANDLER:
+        traph->nexth   = netsnmp_post_global_traphandlers;
+        netsnmp_post_global_traphandlers = traph;
+        break;
+    default:
+        free( traph );
+        return NULL;
+    }
     return traph;
 }
 
@@ -420,11 +437,11 @@ int   syslog_handler(  netsnmp_pdu           *pdu,
     DEBUGMSGTL(( "snmptrapd", "syslog_handler\n"));
 
     if (SyslogTrap)
-        return 0;
+        return NETSNMPTRAPD_HANDLER_OK;
 
     if ((rbuf = (u_char *) calloc(r_len, 1)) == NULL) {
         snmp_log(LOG_ERR, "couldn't display trap -- malloc failed\n");
-        return 1;
+        return NETSNMPTRAPD_HANDLER_FAIL;	/* Failed but keep going */
     }
 
     /*
@@ -436,7 +453,7 @@ int   syslog_handler(  netsnmp_pdu           *pdu,
             trunc = !realloc_format_trap(&rbuf, &r_len, &o_len, 1,
                                      handler->format, pdu, transport);
         } else {
-            return 0;    /* A 0-length format string means don't log */
+            return NETSNMPTRAPD_HANDLER_OK;    /* A 0-length format string means don't log */
         }
 
     /*
@@ -481,7 +498,7 @@ int   syslog_handler(  netsnmp_pdu           *pdu,
     }
     snmp_log(LOG_WARNING, "%s%s", rbuf, (trunc?" [TRUNCATED]\n":""));
     free(rbuf);
-    return 0;
+    return NETSNMPTRAPD_HANDLER_OK;
 }
 
 
@@ -506,11 +523,11 @@ int   print_handler(   netsnmp_pdu           *pdu,
      *  XXX - can we handle this via suitable handler entries instead?
      */
     if (pdu->trap_type == SNMP_TRAP_AUTHFAIL && dropauth)
-        return 0;
+        return NETSNMPTRAPD_HANDLER_OK;
 
     if ((rbuf = (u_char *) calloc(r_len, 1)) == NULL) {
         snmp_log(LOG_ERR, "couldn't display trap -- malloc failed\n");
-        return 1;
+        return NETSNMPTRAPD_HANDLER_FAIL;	/* Failed but keep going */
     }
 
     /*
@@ -522,7 +539,7 @@ int   print_handler(   netsnmp_pdu           *pdu,
             trunc = !realloc_format_trap(&rbuf, &r_len, &o_len, 1,
                                      handler->format, pdu, transport);
         } else {
-            return 0;    /* A 0-length format string means don't log */
+            return NETSNMPTRAPD_HANDLER_OK;    /* A 0-length format string means don't log */
         }
 
     /*
@@ -559,7 +576,7 @@ int   print_handler(   netsnmp_pdu           *pdu,
         }
     }
     snmp_log(LOG_INFO, "%s%s", rbuf, (trunc?" [TRUNCATED]\n":""));
-    return 0;
+    return NETSNMPTRAPD_HANDLER_OK;
 }
 
 
@@ -615,7 +632,7 @@ int   command_handler( netsnmp_pdu           *pdu,
 	 */
         do_external(handler->token, host, pdu, transport);
     }
-    return 0;
+    return NETSNMPTRAPD_HANDLER_OK;
 }
 
 
@@ -659,7 +676,7 @@ int   notification_handler(netsnmp_pdu           *pdu,
             }
         }
     log_notification(host, pdu, transport);
-    return 0;
+    return NETSNMPTRAPD_HANDLER_OK;
 }
 
 
@@ -676,7 +693,7 @@ int   event_handler( netsnmp_pdu           *pdu,
 {
     DEBUGMSGTL(( "snmptrapd", "event_handler\n"));
     event_input(pdu->variables);
-    return 0;
+    return NETSNMPTRAPD_HANDLER_OK;
 }
 
 
@@ -705,6 +722,6 @@ int   forward_handler( netsnmp_pdu           *pdu,
     }
     snmp_send( ss, pdu2 );
     snmp_close( ss );
-    return 0;
+    return NETSNMPTRAPD_HANDLER_OK;
 }
 
