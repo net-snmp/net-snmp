@@ -246,7 +246,7 @@ intpr(interval)
 			continue;
 		}
 		if (cur_if->operstatus != MIB_IFSTATUS_UP) {
-			cp = strchr(cur_if->name, '\0');
+			cp = (char *) strchr(cur_if->name, '\0');
 			*cp++ = '*';
 			*cp = '\0';
 		}
@@ -319,7 +319,7 @@ sidewaysintpr(interval)
 		if (interface && strcmp(ip->ift_name + 1, interface) == 0)
 			interesting = ip;
 		ip->ift_name[15] = '\0';
-		cp = strchr(ip->ift_name, '\0');
+		cp = (char *) strchr(ip->ift_name, '\0');
 		sprintf(cp, ")");
 		ip++;
 		if (ip >= iftot + MAXIF - 2)
