@@ -113,16 +113,14 @@ Creating the Perl package
     </IMPLEMENTATION>
 </SOFTPKG>
 
-10. Update the BUILD INFORMATION section of win32\dist\README.txt
-
-11. Create base directories:
+10. Create base directories:
 
     md "c:\usr\docs"
     md "c:\usr\perl"
     md "c:\usr\perl\x86"
     md "c:\usr\temp"
 
-12. Copy files:
+11. Copy files:
 
     cd (source dir)
     copy COPYING "c:\usr\docs"
@@ -131,6 +129,8 @@ Creating the Perl package
 
     copy perl\Net-SNMP.ppd "c:\usr\Perl"
     copy perl\Net-SNMP.tar.gz "c:\usr\Perl\x86"
+
+12. Update the BUILD INFORMATION section of c:\usr\README.txt
 
 
 Compiling HTMLHelp file

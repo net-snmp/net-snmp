@@ -1009,14 +1009,15 @@ Included is a Perl script called snmpconf which can be used to create
 configuration files.  Full documentation on using snmpconf is available from the
 Net-SNMP web site at the above link.
 
-To run snmpconf, you must specify the location of the snmpconf-data and conf 
-folders using the -c and -I switches.  For example, if you have installed 
-Net-SNMP in c:\Program Files\Net-SNMP, type (all on one line):
+To run snmpconf, first modify snmpconf.bat located in the bin folder where 
+Net-SNMP is installed.  Modify the set MYPERLPROGRAM= line to contain the full 
+path to the snmpconf Perl script.  For example:
 
-  perl "C:\Program Files\net-snmp\bin\snmpconf" 
-    -c "C:\Program Files\net-snmp\share\snmp\snmpconf-data" 
-    -I "C:\Program Files\net-snmp\etc\snmp"
+  set MYPERLPROGRAM=c:\Program Files\Net-SNMP\bin\snmpconf
 
+You can now run snmpconf using the standard command line such as:
+
+  snmpconf -I
 
 ***************************************************************************
 *
