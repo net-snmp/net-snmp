@@ -12,6 +12,7 @@
 #include <agent_handler.h>
 #include <agent_registry.h>
 #include <data_list.h>
+#include <snmp_enum.h>
 /***********************************************************************/
 /* New Handler based API */
 /***********************************************************************/
@@ -525,6 +526,26 @@ init_handler_conf(void)
     snmp_register_callback(SNMP_CALLBACK_LIBRARY,
                            SNMP_CALLBACK_POST_READ_CONFIG,
                            handler_mark_doneit, NULL);
+
+    se_add_pair_to_slist("agent_mode", strdup("GET"), MODE_GET);
+    se_add_pair_to_slist("agent_mode", strdup("GETNEXT"), MODE_GETNEXT);
+    se_add_pair_to_slist("agent_mode", strdup("GETBULK"), MODE_GETBULK);
+    se_add_pair_to_slist("agent_mode", strdup("SET_BEGIN"), MODE_SET_BEGIN);
+    se_add_pair_to_slist("agent_mode", strdup("SET_RESERVE1"),
+                         MODE_SET_RESERVE1);
+    se_add_pair_to_slist("agent_mode", strdup("SET_RESERVE2"),
+                         MODE_SET_RESERVE2);
+    se_add_pair_to_slist("agent_mode", strdup("SET_ACTION"), MODE_SET_ACTION);
+    se_add_pair_to_slist("agent_mode", strdup("SET_COMMIT"), MODE_SET_COMMIT);
+    se_add_pair_to_slist("agent_mode", strdup("SET_FREE"), MODE_SET_FREE);
+    se_add_pair_to_slist("agent_mode", strdup("SET_UNDO"), MODE_SET_UNDO);
+    
+    se_add_pair_to_slist("handler_can_mode", strdup("GET/GETNEXT"),
+                         HANDLER_CAN_GETANDGETNEXT);
+    se_add_pair_to_slist("handler_can_mode", strdup("SET"),
+                         HANDLER_CAN_SET);
+    se_add_pair_to_slist("handler_can_mode", strdup("GETBULK"),
+                         HANDLER_CAN_GETBULK);
 }
 
 /** @} */
