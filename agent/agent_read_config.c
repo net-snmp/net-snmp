@@ -200,8 +200,6 @@ snmpd_set_agent_address(const char *token, char *cptr)
 void
 init_agent_read_config(const char *app)
 {
-    char buf[BUFSIZ];
-
     if (app != NULL) {
         netsnmp_ds_set_string(NETSNMP_DS_LIBRARY_ID, 
 			      NETSNMP_DS_LIB_APPTYPE, app);
