@@ -784,10 +784,24 @@ main(int argc, char *argv[])
         init_notification_log();
     }
 
+#ifdef NETSNMP_EMBEDDED_PERL
+    init_perl();
+    {
+        /* set the default path to load */
+        char            init_file[SNMP_MAXBUF];
+        snprintf(init_file, sizeof(init_file) - 1,
+                 "%s/%s", SNMPSHAREPATH, "snmp_perl_trapd.pl");
+        netsnmp_ds_set_string(NETSNMP_DS_APPLICATION_ID,
+                              NETSNMP_DS_AGENT_PERL_INIT_FILE,
+                              init_file);
+    }
+#endif
+
     /*
-     * Initialize the world. Create initial user 
+     * Initialize the world.
      */
     init_snmp("snmptrapd");
+
     if (trap1_fmt_str_remember) {
         free_trap1_fmt();
         free_trap2_fmt();
