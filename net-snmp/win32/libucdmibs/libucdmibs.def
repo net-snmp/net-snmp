@@ -13,4 +13,5 @@ EXPORTS
 	argvrestart
 	argvrestartp
 	update_config
+	get_target_sessions
 

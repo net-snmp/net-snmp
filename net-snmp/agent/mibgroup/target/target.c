@@ -1,5 +1,8 @@
 #include <config.h>
 
+#if HAVE_WINSOCK_H
+#include <winsock.h>
+#endif
 #if HAVE_STRING_H
 #include <string.h>
 #else
@@ -139,9 +142,9 @@ get_target_sessions(char *taglist, TargetFilterFunction *filterfunct,
                                 thissess.securityLevel = param->secLevel;
                             } else {
                                 thissess.community =
-                                    strdup(param->secName);
+                                    (u_char *)strdup(param->secName);
                                 thissess.community_len =
-                                    strlen(thissess.community);
+                                    strlen((char *)thissess.community);
                             }
                             
                             targaddrs->sess = snmp_open(&thissess);

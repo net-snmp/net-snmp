@@ -27,6 +27,7 @@ config_add_mib(SNMPv2-TM)
 #define   SNMPTARGETADDRPARAMS       6
 #define   SNMPTARGETADDRSTORAGETYPE  7
 #define   SNMPTARGETADDRROWSTATUS    8
+#define	  SNMPTARGETSPINLOCK	     99
 
 #define   SNMPTARGETADDRTDOMAINCOLUMN      2
 #define   SNMPTARGETADDRTADDRESSCOLUMN     3
@@ -79,5 +80,7 @@ WriteMethod write_snmpTargetAddrParams;
 WriteMethod write_snmpTargetAddrStorageType;
 WriteMethod write_snmpTargetAddrRowStatus;
 
+FindVarMethod var_targetSpinLock;
+WriteMethod   write_targetSpinLock;
 
 #endif /* _MIBGROUP_SNMPTARGETADDRENTRY_H */
