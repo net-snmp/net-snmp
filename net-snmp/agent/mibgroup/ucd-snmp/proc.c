@@ -660,6 +660,7 @@ int sh_count_procs(char *procname)
       ret = -1;
     }
     fclose(file);
+    close(fd);
     wait_on_exec(&ex);
     ex.pid = 0;
   } else {
