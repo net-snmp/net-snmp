@@ -1,4 +1,3 @@
-/* config.h.in.  Generated automatically from configure.in by autoheader.  */
 /* config.h:  a general config file */
 
 /* don't change these values! */
@@ -7,21 +6,38 @@
 #define SNMPV2AUTH  0x8000       /* V2 Authenticated requests only */
 
 /* default list of mibs to load */
-#define DEFAULT_MIBS "IP-MIB;IF-MIB;TCP-MIB;UDP-MIB;SNMPv2-MIB;RFC1213-MIB;UCD-SNMP-MIB"
+#define DEFAULT_MIBS "IP-MIB;IF-MIB;TCP-MIB;UDP-MIB;SNMPv2-MIB;RFC1213-MIB"
 
-/* default location to look for mibs to load */
+/* default location to look for mibs to load using the above tokens
+   and/or those in the MIBS envrionment variable*/
+
 #define DEFAULT_MIBDIRS "\\USR\\MIBS"
 
-/* default location to look for mibs to load */
+/* default mib files to load, specified by path. */
+
 #undef DEFAULT_MIBFILES
 
 /* should we compile to use special opaque types: float, double,
    counter64, i64, ui64, union? */
 #define OPAQUE_SPECIAL_TYPES 1
 
-/* typedef for abreviated types */
-/* typedef unsigned char u_char; */
-/* typedef unsigned long u_long; */
+/* comment the next line if you are compiling with libsnmp.h 
+   and are not using the UC-Davis SNMP library. */
+#define UCD_SNMP_LIBRARY 1
+
+/* comment the next line if you do not want SNMPv2 party-based auth. */
+#define USE_V2PARTY_PROTOCOL 1
+
+/* should "--" comments in mibs be a comment till the end of the line
+   or also until another "--", the latter being the technically
+   correct. */
+#undef MIB_COMMENT_IS_EOL_TERMINATED
+
+/* debugging stuff */
+#undef SNMP_NO_DEBUGGING           /* if defined, we optimize the code
+                                      to exclude all debugging calls. */
+#define SNMP_ALWAYS_DEBUG 0        /* Always print debugging information and
+                                      ignore the -D flag passed to the cmds */
 
 /* Define if using alloca.c.  */
 #undef C_ALLOCA
@@ -65,7 +81,6 @@
 
 /* Define if you can safely include both <sys/time.h> and <time.h>.  */
 #define TIME_WITH_SYS_TIME 1
-#define SYS_TIME_NAME <sys/timeb.h>   /* change depending on name */
 
 /* Define if you have the gettimeofday function.  */
 #undef HAVE_GETTIMEOFDAY
@@ -88,15 +103,6 @@
    place.  (stdin is closed so that sh scripts won't wait for it) */
 
 #undef LOGFILE
-
-/* to hack in forced V2 security, I had to reserve the left byte of
-   the ACL Mib word for V2.  Do NOT define more than 5 V1 communities
-   else they will roll into these definitions (see snmp_vars.c:340) 
-   If GLOBALSECURITY is defined, it sets the default SNMP access type
-   for the extensible mibs to the setting type described. */
-
-#define GLOBALSECURITY SNMPV2AUTH    /* only authenticated snmpv2 requests
-                                        permited */
 
 /* default system contact */
 #undef SYS_CONTACT
@@ -126,9 +132,6 @@
 
 /* Where is the uname command */
 #define UNAMEPROG "/bin/uname"
-
-/* debugging stuff */
-#define DODEBUG 0
 
 /* If you don't have root access don't exit upon kmem errors */
 #undef NO_ROOT_ACCESS
@@ -512,11 +515,11 @@
    these: (See README for details) */
 
 /*   proc PROCESSNAME [MAX] [MIN] */
-#define PROCMIBNUM 1
+#define PROCMIBNUM 2
 #define USEPROCMIB
 
 /*   exec/shell NAME COMMAND      */
-#define SHELLMIBNUM 3
+#define SHELLMIBNUM 8
 #define USESHELLMIB
 
 /*   swap MIN                     */
@@ -526,13 +529,13 @@
 #endif
 
 /*   disk DISK MINSIZE            */
-#define DISKMIBNUM 6
+#define DISKMIBNUM 9
 #if (HAVE_FSTAB_H || HAVE_SYS_STATVFS_H)
 #define USEDISKMIB
 #endif
 
 /*   load 1 5 15                  */
-#define LOADAVEMIBNUM 7
+#define LOADAVEMIBNUM 10
 #define USELOADAVEMIB
 
 /*   pass MIBOID command */
@@ -562,8 +565,11 @@
 #define ULTRIXID 5
 #define HPUX10ID 6
 #define NETBSD1ID 7
-#define FREEBSD2ID 8
+#define FREEBSDID 8
 #define IRIXID 9
+#define LINUXID 10
+#define BSDIID 11
+#define OPENBSDID 12
 #define UNKNOWNID 255
 
 #ifdef hpux9
@@ -587,11 +593,20 @@
 #ifdef netbsd1
 #define OSTYPE NETBSD1ID
 #endif
-#ifdef freebsd2
-#define OSTYPE FREEBSD2ID
+#if defined(freebsd2) || defined(freebsd3)
+#define OSTYPE FREEBSDID
 #endif
 #if defined(irix6) || defined(irix5)
 #define OSTYPE IRIXID
+#endif
+#ifdef linux
+#define OSTYPE LINUXID
+#endif
+#if defined(bsdi2) || defined(bsdi3)
+#define OSTYPE BSDIID
+#endif
+#ifdef openbsd2
+#define OSTYPE OPENBSDID
 #endif
 /* unknown */
 #ifndef OSTYPE
@@ -742,12 +757,4 @@
 #define ENV_SEPARATOR ":"
 #define ENV_SEPARATOR_CHAR ':'
 #endif
-
-/* comment the next line if you are compiling with libsnmp.h 
-   and are not using the UC-Davis SNMP library. */
-#define UCD_SNMP_LIBRARY 1
-
-/* comment the next line if you do not want SNMPv2 party-based auth. */
-#define USE_V2PARTY_PROTOCOL 1
-
 
