@@ -117,16 +117,24 @@ typedef struct ${context}_rowreq_ctx_s {
 @         eval $mfd_tmp = "*"@
 @      end@ # embed
     ${context}_undo_data       $mfd_tmp undo;
-    unsigned int                set_flags;
+    unsigned int                column_set_flags; /* flags for set columns */
+
 @   end@ # settable
 
-    /** implementor's context pointer provided during registration */
+    /*
+     * flags per row. Currently, the first 8 bits are reserverd
+     * for the user. See mfd.h for other flags.
+     */
+    u_int                       rowreq_flags;
+
+    /*
+     * implementor's context pointer (provided during registration)
+     */
     ${context}_registration_ptr ${context}_reg;
 
     /*
-     * TODO:
+     * TODO: add any other useful data
      * add any other useful data
-     *       (e.g. flags for when a column has been set)
      */
     
     /*
@@ -276,7 +284,7 @@ initialize_table_$context(void)
      * a netsnmp_data_list is a simple way to store void pointers. A simple
      * string token is used to add, find or remove pointers.
      */
-    user_context = netsnmp_create_data_list("EXAMPLE", NULL, NULL);
+    user_context = netsnmp_create_data_list("$context", NULL, NULL);
 @    else@
     user_context = NULL;
 @   end@
