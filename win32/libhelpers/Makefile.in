@@ -31,6 +31,7 @@ CLEAN :
 	-@erase "$(INTDIR)\scalar_group.obj"
 	-@erase "$(INTDIR)\serialize.obj"
 	-@erase "$(INTDIR)\stash_cache.obj"
+	-@erase "$(INTDIR)\stash_to_next.obj"
 	-@erase "$(INTDIR)\table.obj"
 	-@erase "$(INTDIR)\table_array.obj"
 	-@erase "$(INTDIR)\table_container.obj"
@@ -105,6 +106,7 @@ LIB32_OBJS= \
 	"$(INTDIR)\scalar_group.obj" \
 	"$(INTDIR)\serialize.obj" \
 	"$(INTDIR)\stash_cache.obj" \
+	"$(INTDIR)\stash_to_next.obj" \
 	"$(INTDIR)\table.obj" \
 	"$(INTDIR)\table_array.obj" \
 	"$(INTDIR)\table_container.obj" \
@@ -140,6 +142,7 @@ CLEAN :
 	-@erase "$(INTDIR)\scalar_group.obj"
 	-@erase "$(INTDIR)\serialize.obj"
 	-@erase "$(INTDIR)\stash_cache.obj"
+	-@erase "$(INTDIR)\stash_to_next.obj"
 	-@erase "$(INTDIR)\table.obj"
 	-@erase "$(INTDIR)\table_array.obj"
 	-@erase "$(INTDIR)\table_container.obj"
@@ -215,6 +218,7 @@ LIB32_OBJS= \
 	"$(INTDIR)\scalar_group.obj" \
 	"$(INTDIR)\serialize.obj" \
 	"$(INTDIR)\stash_cache.obj" \
+	"$(INTDIR)\stash_to_next.obj" \
 	"$(INTDIR)\table.obj" \
 	"$(INTDIR)\table_array.obj" \
 	"$(INTDIR)\table_container.obj" \
@@ -334,6 +338,12 @@ SOURCE=..\..\agent\helpers\serialize.c
 SOURCE=..\..\agent\helpers\stash_cache.c
 
 "$(INTDIR)\stash_cache.obj" : $(SOURCE) "$(INTDIR)"
+	$(CPP) $(CPP_PROJ) $(SOURCE)
+
+
+SOURCE=..\..\agent\helpers\stash_to_next.c
+
+"$(INTDIR)\stash_to_next.obj" : $(SOURCE) "$(INTDIR)"
 	$(CPP) $(CPP_PROJ) $(SOURCE)
 
 
