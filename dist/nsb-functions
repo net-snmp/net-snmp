@@ -19,6 +19,7 @@ NSB_DIST_TRANSPORTS="UDP TCP Unix"
 NSB_EXTRA_TRANSPORTS="Callback UDPIPv6 TCPIPv6 IPX"
 NSB_DIST_MODULES="host disman/event-mib smux"
 NSB_EXTRA_MODULES="examples examples/example testhandler smux Rmon disman/event-mib"
+NSB_EXTRA_CONFIG=${NSB_EXTRA_CONFIG:=""}
 NSB_VIEW=cat
 NSB_PERL=
 #NSB_PERL=--enable-embedded-perl
@@ -99,12 +100,12 @@ nsb-config-dist()
    # inside of single quotes, so use double quotes
    #
    echo $ngc_src/configure --with-sys-location=Unknown \
-      --disable-developer \
-      --with-sys-contact='System Administrator' --disable-privacy \
+      --disable-developer $NSB_EXTRA_CONFIG \
+      --with-sys-contact='System Administrator' \
       --with-defaults --with-mib-modules="$NSB_FINAL_MODULES"
    $ngc_src/configure --with-sys-location=Unknown \
-      --disable-developer \
-      --with-sys-contact='System Administrator' --disable-privacy \
+      --disable-developer $NSB_EXTRA_CONFIG \
+      --with-sys-contact='System Administrator' \
       --with-defaults --with-mib-modules="$NSB_FINAL_MODULES"
    # I'd like to add ' | tee nsb-config.$DATE' to save output, but then
    # I'd lose the rc from configure, which I need... sigh
@@ -183,7 +184,7 @@ nsb-config-all()
 
 nsb-sysname()
 {
-   echo `uname -mrs | tr ' /' _`
+   echo `uname -mrs | tr ' /' '__'`
 }
 
 nsb-zip()
