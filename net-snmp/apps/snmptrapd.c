@@ -509,7 +509,7 @@ int snmp_input(int op,
 	    if (Print) {
 	        (void) format_trap (out_bfr, 
 				    SPRINT_MAX_LEN, 
-				    "%.4y-%.2m-%.2d %.2h:%.2n:%.2s %h [%i]:\n%v\n",
+				    "%.4y-%.2m-%.2l %.2h:%.2j:%.2k %B [%b]:\n%v\n",
 				    pdu);
                 snmp_log(LOG_INFO, out_bfr);
 	    }
@@ -517,7 +517,7 @@ int snmp_input(int op,
 	    	varbufidx=0;
 	    	varbuf[varbufidx]='\0';
 
-	    	for(vars = pdu->variables; vars; vars = vars->next_variable) {
+	    	for (vars = pdu->variables; vars; vars = vars->next_variable) {
 		    sprint_variable(varbuf+varbufidx, vars->name,
 				    vars->name_length, vars);
 		    /* Update the length of the string with the
