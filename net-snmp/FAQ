@@ -1,7 +1,7 @@
       Frequently Asked Questions (FAQ) for the UCD/Net-SNMP package
       =============================================================
 		       FAQ Author: Dave Shield
-		        net-snmp Version: 5.2.dev CVS branch
+	        net-snmp Version: 5.2.dev CVS branch
 	    net-snmp/ucd-snmp Project Leader: Wes Hardaker
 	     Email: net-snmp-coders@lists.sourceforge.net
 
@@ -27,7 +27,7 @@ TABLE OF CONTENTS
    Which versions of SNMP are supported in this package?
    Can I use SNMPv1 requests with an SNMPv2 MIB (or vice versa)?
    Where can I find more information about network management?
-   Is ucd-snmp thread safe?
+   Is Net-SNMP thread safe?
  APPLICATIONS
    How do I add a MIB?
    How do I add a MIB to the tools?
@@ -77,11 +77,13 @@ TABLE OF CONTENTS
    How do I replace MIB values with new ones?
    How can I get more information about these MIB file problems?
    What's this about "too many imported symbols"?
+   Do I actually need the MIB files?
  AGENT
    What MIBs are supported?
    What protocols are supported?
    How do I configure the agent?
    How do I add a MIB to the agent?
+   I've installed a new MIB file.  Why can't I query it?
    What's the difference between 'exec', 'sh' and 'pass'?
    What's the difference between AgentX, SMUX and proxied SNMP?
    What about 'dlmod' - what's that about?
@@ -93,7 +95,6 @@ TABLE OF CONTENTS
    What traps are sent by the agent?
    Where are these traps sent to?
    How can I send a particular trap to selected destinations?
-   Why does calling 'send_v2trap' generate an SNMPv1 trap (or vice versa)?
    When I run the agent it runs and then quits without staying around. Why?
    After a while the agent stops responding, and starts eating CPU time.  Why?
    How can I stop other people getting at my agent?
@@ -120,19 +121,19 @@ TABLE OF CONTENTS
    How about "Can't open /dev/kmem"?
    The agent is complaining about 'snmpd.conf'.  Where is this?
    The system uptime (sysUpTime) returned is wrong!
-   How can I reduce the memory footprint?
  COMPILING
    How do I compile with 'cc' instead of 'gcc'?
    But gcc doesn't compile it successfully on my new Solaris system. Why not?
    On RedHat 8.0 or up I get "/usr/bin/ld: cannot find -lelf". Why?
-   I'm getting an error "autoheader: not found" - what's wrong?
    What about a failed dependency on 'libcrypto'?  Where can I get that?
+   I'm getting an error "autoheader: not found" - what's wrong?
+   How can I reduce the memory footprint?
    Why is the project workspace empty under Visual C++?
    Why does 'make test' skip five tests?
    Why does 'make test' complain about a pid file?
  CODING
    How do I write C code to integrate with the agent?
-   How does the agent fetch the value of a variable from the system?
+   How does the agent fetch the value of a MIB variable from the system?
    Mib2c complains about a missing "mib reference" - what does this mean?
    Mib2c complains about not having a "valid OID" - what does this mean?
    Why doesn't Mib2c like the MIB file I'm giving it?
@@ -141,11 +142,18 @@ TABLE OF CONTENTS
    Which mib2c configuration file should I use?
    How can I have Mib2c generate code for both scalars and tables?
    Are there any examples, or documentation?
-   I've created a new module with 'mib2c' but it doesn't work.  Why not?
    Where should I put the files produced by 'mib2c'?
+   I've created a new module with 'mib2c' but it doesn't work.  Why not?
+   I've added my code to this template and it still doesn't work.  Why not?
    Mib2c only handles a single table in my MIB. How can I fix this?
+   Why does the iterator call my get_{first,next} routines so often?
    How can I support a large table, with more than 256 column objects?
    How can I get the agent to generate a trap (or inform)?
+   How can I get the agent to send an SNMPv1 (or SNMPv2c) trap?
+   How can I get the agent to include varbinds with an SNMPv1 trap?
+   How can I get the agent to send an SNMPv1 enterprise-specific trap?
+   How can I get the agent to send an SNMPv3 trap (or inform)?
+   Why does calling 'send_v2trap' generate an SNMPv1 trap (or vice versa)?
    What if I'm using an AgentX sub-agent instead?
    How can I register a MIB module in a different (SNMPv3) context?
  MISC
@@ -194,10 +202,6 @@ Where can I get it?
     - Japan:       ftp://ftp.ayamura.org/pub/net-snmp/      (may only work inside Japan)
     - Germany:     ftp://ftp.mpg.goe.ni.schule.de/pub/internet/net-snmp/  (unknown host)
     - Greece:      ftp://ftp.ntua.gr/pub/net/snmp/net-snmp/
-
-  The old ucd-snmp.ucdavis.edu web site and ftp server is now
-  offline and should not be accessed any longer.
-
 
 
 What documentation is available?
@@ -292,9 +296,9 @@ What operating systems does it run on?
 
   See the next question but one for the status of Windows support.
 
-  Certain systems (e.g. HP-UX 11, Irix?) fail to compile particular
-  portions of the agent.  These can usually be persuaded to compile
-  (at the loss of some functionality) by omitting the modules affected.
+  Certain systems fail to compile particular portions of the agent.
+  These can usually be persuaded to compile (at the loss of some
+  functionality) by omitting the modules affected.
   See the next question for more details.
 
   Also note that the presence of a particular configuration in this
@@ -345,8 +349,8 @@ Does it run on Windows?
   do not currently work under Windows.  Volunteers to assist in
   these missing modules are likely to welcomed with open arms :-)
 
-    Further details of Windows support (currently Visual C++ and
-  Cygnus cygwin32) is available in the file README.win32
+    Further details of Windows support (currently Visual C++, MinGW
+  and Cygnus cygwin32) is available in the file README.win32
 
 
 
@@ -434,14 +438,16 @@ How do I submit a patch or bug report?
   unsupported package.  It's Open Source, so if you need something
   fixing badly enough,  fundamentally it's up to you to do the work.
 
+
+
 Can I reuse the code in my commercial application?
 -------------------------------------------------
 
-The details of the COPYRIGHTs on the package can be found in the
-COPYING file.  You should have your lawyer read this file if you wish
-to use the code in your commercial application.  We will not summarize
-here what is in the file, as we're not lawyers and are unqualified to
-do so.
+  The details of the COPYRIGHTs on the package can be found in the COPYING
+  file.  You should have your lawyer read this file if you wish to use the
+  code in your commercial application.  We will not summarize here what is
+  in the file, as we're not lawyers and are unqualified to do so.
+
 
 
 What's the difference between SNMPv1, SNMPv2 and SNMPv3?
@@ -570,7 +576,7 @@ Where can I find more information about network management?
 
 
 
-Is ucd-snmp thread safe?
+Is Net-SNMP thread safe?
 -----------------------
 
   Strictly speaking, no.  However, it should be possible to use the
@@ -590,6 +596,9 @@ Is ucd-snmp thread safe?
 	responsibility of the main application.
 
   The applications and the agent have not been designed for threaded use.
+  It should be safe to use the agent library to embed a subagent within
+  a threaded application as long as *all* SNMP-related activity (including
+  generating traps, and parsing MIBs) is handled within a single thread.
 
 
 
@@ -669,10 +678,15 @@ Why can't I see anything from the agent?
   tools will typically reject the request without ever contacting the
   remote agent.
 
-    Alternatively, the tool may be happy with the request, but the agent
+  Alternatively, the tool may be happy with the request, but the agent
   does not return the corresponding value(s).  It may return an explicit
   error message instead, or the request may time out without any response
   being sent back at all.  The next few entries look at these in more detail.
+
+  A simple way to tell which is the case would be to run the command
+  with the command-line option '-d'.  If this displays a dump of the
+  packet, then the request is failing at the agent end.  If not, then
+  it's the client-side which is dropping the request.
 
 
 
@@ -736,13 +750,12 @@ Requests always seem to timeout, and don't give me anything back.  Why?
  		 incoming PDUs, followed eventually by the outgoing PDUs.
 		 Try the request again with a long timeout value,
 		 e.g. 'snmpcmd -t 120 ....')
-	- does the agent's control settings allow this request?
+	- do the agent's control settings allow this request?
 		(The 'snmpd -f -Le -d' command will show a series of
  		 incoming PDUs with *no* corresponding outgoing PDUs)
 
-  Note that if the agent is not configured to allow access for a
-  particular community, then the SNMP specification declares that no
-  error response should be sent at all.  The Net-SNMP tools will retry
+  If the agent is not configured to allow access for a particular community,
+  then no error response will be returned.  The Net-SNMP tools will retry
   the request a number of times, before reporting a timeout error.
 
     If the agent is configured to allow partial access for a given
@@ -759,12 +772,12 @@ Requests always seem to timeout, and don't give me anything back.  Why?
 I can see the system group, but nothing else.  Why?
 --------------------------------------------------
 
-  This is probably the same as the previous question - a problem with
-  the access configuration of the agent.  Many pre-configured systems
-  (such as most Linux distributions) will only allow access to the system
-  group by default, and need to be configured to enable more general access.
+  This is almost definitely due to the access configuration of the agent.
+  Many pre-configured systems (such as most Linux distributions) will only
+  allow access to the system group by default, and need to be configured
+  to enable more general access.
 
-    The easiest way to test this is to try a GETNEXT request, that ought
+    The easiest way to test this is to try a GETNEXT request that ought
   to return the entry of interest.
   e.g.
 	snmpgetnext -v1 -c public localhost ucdavis.version.versionTag
@@ -790,11 +803,11 @@ The agent worked for a while, then stopped responding.  Why?
   tools will retry a request when it times out, the list of outstanding
   requests can grow longer and longer.
 
-    To determine whether this is the cause or not, try leaving the
-  agent undisturbed for a while, and then probe it using a longer
-  timeout (e.g. '-t 120').  This should give the agent time to handle
-  each request first time round, and avoids overloading it with
-  duplicate requests.
+    To determine whether this is the cause, try leaving the agent
+  undisturbed for a while, and then probe it using a single 'snmpget'
+  or 'snmpgetnext' request, specifying a longer timeout (e.g. '-t 120').
+  This should give the agent time to handle the request first time round,
+  and avoids overloading it with duplicate requests.
 
   This is not a full solution, of course, but at least it should
   allow you to isolate the offending portion of the tree. The
@@ -819,7 +832,8 @@ Requesting an object fails with "Unknown Object Identifier"  Why?
 
 	snmpget -m ALL -v1 -c public localhost sysUpTime.0
 
-  (though if snmpwalk translates it OK, that's less likely to be the cause).
+  (though if snmpwalk displays the object by name, this is unlikely to
+  be the cause).
 
     Thirdly, earlier versions of the UCD software expected "full" paths
   for object names, either based at the root of the whole MIB tree
@@ -1170,10 +1184,10 @@ How do I use SNMPv3?
   If the AuthPassphrase and the PrivPassphrase are the same, then you
   can use the setting
 		defPassphrase	"Open the Door and see me"
-							instead
+  instead.
 
-  For how to configure the agent to respond to SNMPv3 requests, see
-  the AGENT section.
+  See the AGENT section for how to configure the agent to respond to
+  SNMPv3 requests.
  
 
 
@@ -1670,7 +1684,33 @@ What's this about "too many imported symbols"?
     Much more common is a syntax error in the IMPORTS clause of the
   MIB file in question.  In particular, check that this ends in a
   semicolon, before going on to the main definition section.
-  
+
+
+
+Do I actually need the MIB files?
+--------------------------------
+
+  Probably not.
+  The MIB files play two main roles - they are used to translate
+  between numeric OIDs and the corresponding textual names, and
+  they define the structure and syntax of the relevant MIB objects.
+
+    This second role is perhaps best thought of in terms of a design
+  document.  It's vital while developing an application (typically
+  the MIB module or handler within the agent), since it defines
+  what the application (MIB) must actually do.  But once the code
+  has been written, the design document becomes redundent.
+  The agent then has the same information hardcoded into it
+  (literally!), and no longer needs the MIB file.
+
+    The translation task is not strictly necessary - SNMP will
+  operate fine without any MIB files at all, as long as you're
+  happy to work with numeric OIDs throughout, and know which MIB
+  objects you're interested in.  But it's much easier to work with
+  the (hopefully) meaningful names, enumeration tags and the like,
+  and to view the description of a particular object.
+  This requires having the relevant MIB files installed and loaded.
+
 
 
 AGENT
@@ -1774,6 +1814,22 @@ How do I add functionality?
  
 
 
+I've installed a new MIB file.  Why can't I query it?
+----------------------------------------------------
+
+    Unfortunately, simply installing the MIB file isn't enough for
+  the agent to automatically provide the corresponding information.
+  This typically requires writing some code.
+    See the section CODING, and the on-line documentation.
+
+    It may sometimes be possible to achieve the same effect using
+  the various extension directives, but this typically still involves
+  providing a suitable script or command.   The agent isn't magic
+  and doesn't know how to locate the MIB information.  Somebody
+  has to tell it.
+
+
+
 What's the difference between 'exec', 'sh' and 'pass'?
 -----------------------------------------------------
 
@@ -1784,10 +1840,14 @@ What's the difference between 'exec', 'sh' and 'pass'?
   This means that quoted arguments will be recognised as such, and also
   allows redirection, and other similar shell interpretation.
 
-  Neither of these mechanisms require the command to have any knowledge
-  of the fact that they are being used in this manner.  Note that return
-  values are cached within the agent for 30 seconds, rather than invoking
-  the command for every request.
+  Neither of these mechanisms require the command to have any
+  knowledge of the fact that they are being used in this manner.
+  But the output is returned in a fixed format, and it is up to
+  the receiving application to interpret this appropriately.
+
+  Note that with the 4.2.x and 5.0.x lines, return values are cached
+  within the agent for 30 seconds, rather than invoking the command
+  for every request.  This does not hold for the 5.1.x agent.
 
 
     'pass' is a more general mechanism for extending the agent, and the
@@ -2095,28 +2155,6 @@ How can I send a particular trap to selected destinations?
   (The tables are present, but the information is not consulted)
   Documentation on how to use this facility will appear once the
   functionality is working properly.
-
-
-
-Why does calling 'send_v2trap' generate an SNMPv1 trap (or vice versa)?
-----------------------------------------------------------------------
-
-    The two versions of the trap API calls are concerned with how
-  the trap is represented when it is passed *in* to the API, not
-  the version of the trap PDU that will actually be generated by
-  the agent.  That is determined by the configuration token used
-  to set up the trap destination.
-
-    Remember that in general, all traps are sent to all destinations.
-  This means that a trap specified using the SNMPv1 trap syntax
-  needs to be converted to the SNMPv2 format before it can be sent
-  to an SNMPv2 (or SNMPv3) destination.  Similarly, a trap specified
-  using the SNMPv2 syntax needs to be converted to the SNMPv1 format
-  before it can be sent to an SNMPv1 sink.
-
-    Essentially, the API call to use depends on what you asking for,
-  which is not necessarily what the recipients will actually get!
-  See 'snmp_trap_api(3)' for a fuller explanation.
 
 
 
@@ -2609,14 +2647,16 @@ The speed/type of my network interfaces is wrong - how can I fix it?
 -------------------------------------------------------------------
 
     Some operating systems will provide a mechanism for determining
-  the speed and type of network interfaces, but many do not.  In this
-  case, the agent attempts to guess the most appropriate values, based
-  on the name of the interface.
+  the speed and type of network interfaces, but many do not.  In such
+  cases, the agent attempts to guess the most appropriate values,
+  usually based on the name of the interface.
+
     Version 4.2 allows you to override these guessed values, using the
   configuration directive 'interface', specifying the name, type and
   speed of a particular interface.  This is particularly useful for
   fast-ethernet, or dial-up interfaces, where the speed cannot be
   guessed from the name.
+
     See the snmpd.conf(5) man page for details.
   
 
@@ -2628,9 +2668,11 @@ The interface statistics for my subinterfaces are all zero - why?
   interfaces on a single physical interface, don't keep separate
   statistics for each of these.  They simply report the overall
   statistics for the physical interface itself.
+
     There's no easy way around this problem - the agent can only
   report such values as it can find out.  If the kernel doesn't
   keep track of these figures, the agent can't report them.
+
     Sorry!
 
 
@@ -2744,45 +2786,6 @@ The system uptime (sysUpTime) returned is wrong!
 
 
 
-How can I reduce the memory footprint?
---------------------------------------
-
-  In order to reduce the memory footprint (for instance, to
-  embed the snmpd into a device), the following configure options
-  could be used.
-
-  '--disable-debugging'
-     This turns off all compilation of debugging info.
-
-  '--enable-mini-agent' '--with-out-mib-modules=examples/ucdDemoPublic'
-     This creates an agent the minimum amount of MIB modules
-     compiled in.
-     NOTE: If you need more MIB modules add then with the option
-     '--with-mib-modules=...' you add of course extra memory footprint.
-
-  '--with-transports=UDP'
-     This option specifies the transports domain you need.
-     For a simple agent UDP should be sufficient.
-
-   '--without-kmem-usage'
-     This can be used in order not to include the code that
-     operates on the /dev/kmem. This option cannot be used when
-     you do want a MIB module compiled in that depends on it.
-
-   '--with-mibdirs=' and '--with-mibs='
-     These options specify not loading the MIB modules for the
-     agent. It reduces the memory footprint only during
-     runtime.
-
-  On top of this one could even attempt to exclude the complete
-  MIB loading functionality, but there is currently no
-  configure option for this.
-
-  Once the agent (snmpd) has been linked, you might also try running
-  'strip snmpd' to remove un-necessary debug/symbol information.
-
-
-
 COMPILING
 =========
 
@@ -2822,33 +2825,16 @@ But gcc doesn't compile it successfully on my new Solaris system. Why not?
 On RedHat 8.0 or up I get "/usr/bin/ld: cannot find -lelf"?
 ----------------------------------------------------------
 
-  RedHat 8.0 and up doesn't come with libelf installed (properly) by
-  default.  In order to build Net-SNMP you'll need the elfutils-devel
-  rpm installed, which you currently don't have.
+  A typical installation of RedHat 8.0 and up doesn't always include the
+  full set of 'libelf' library links.  In order to build Net-SNMP you may
+  need to install the 'elfutils-devel' RPM.
 
-  Alternatively, this could quickly fix the problem without requiring
-  the -devel rpm installed (as this is one of the things the -devel rpm
-  does when you install it):
+  A quick fix is to add the missing symbolic link, using:
 
-    cd /usr/lib ; ln -s libelf.so.1 libelf.so
+    ln -s libelf.so.1 /usr/lib/libelf.so
 
-  Note that this will only affect you if you are trying to compile in
-  the host resources mib support, as it'll try to use the rpm libraries
-  which will in turn require that libelf.a or libelf.so be present.
-
-
-
-I'm getting an error "autoheader: not found" - what's wrong?
------------------------------------------------------------
-
-    This usually appears when compiling the current development source
-  version, obtained via CVS.  Unfortunately, the timestamps on some of
-  the configure files are such that make assumes (mistakenly) that the
-  configure script needs to be re-generated.
-    A similar problem may arise relating to 'autoconf'.
-
-    In both cases, this can be corrected by running the command
-  "make -k touchit" before attempting to make the main package.
+  This is typically only needed when you've configured the agent to
+  include the Host Resources MIB support ('--with-mib-modules=host').
 
 
 
@@ -2869,6 +2855,62 @@ What about a failed dependency on 'libcrypto'?  Where can I get that?
   the 'openssl' and 'openssl-devel' RPMs should be installed, and the
   'config.cache' file removed before running "configure --with-openssl"
   and re-compiling.
+
+
+
+I'm getting an error "autoheader: not found" - what's wrong?
+-----------------------------------------------------------
+
+    This usually appears when compiling the current development source
+  version, obtained via CVS.  Unfortunately, the timestamps on some of
+  the configure files are such that make assumes (mistakenly) that the
+  configure script needs to be re-generated.
+    A similar problem may arise relating to 'autoconf'.
+
+    In both cases, this can be corrected by running the command
+  "make -k touchit" before attempting to make the main package.
+
+
+
+How can I reduce the memory footprint?
+--------------------------------------
+
+  In order to reduce the memory footprint (for instance, to
+  embed the snmpd into a device), the following configure options
+  could be used.
+
+  '--disable-debugging'
+     This turns off the compilation of all debugging statements.
+
+  '--enable-mini-agent' '--with-out-mib-modules=examples/ucdDemoPublic'
+     This creates an agent with just the essential MIB modules included.
+     NOTE: If you need additional MIB modules, then simply add them
+     using the option '--with-mib-modules=...' but this will of course
+     increase the memory footprint.
+
+  '--with-transports=UDP'
+     This option specifies the transport domains to include.
+     For a simple standalone agent, just UDP should be sufficient.
+     (Although the 'disman' and 'agentx' modules may require the
+      Callback, TCP and/or Unix transport domains as well).
+
+   '--without-kmem-usage'
+     This can be used in order to omit the code that operates on the
+     /dev/kmem interface. Clearly, this option cannot be used when
+     one of the configured MIB modules depends on it.
+
+   '--with-mibdirs=' and '--with-mibs='
+     These options tell the agent not to load any MIB modules. 
+     This doesn't affect the size of libraries or application
+     binaries, but will reduce the memory footprint during runtime.
+
+   '--disable-mib-loading'
+     This can be used in order to omit the code that loads and
+     parses the MIB files altogether.  This will reduce both the
+     runtime memory footprint, and the binary sizes.
+
+  Once the agent (snmpd) has been linked, you might also try running
+  'strip snmpd' to remove un-necessary debug/symbol information.
 
 
 
@@ -2948,16 +2990,29 @@ How do I write C code to integrate with the agent?
 
 
 
-How does the agent fetch the value of a variable from the system?
-----------------------------------------------------------------
+How does the agent fetch the value of a MIB variable from the system?
+--------------------------------------------------------------------
 
-  Much of the information is extracted from kernel memory - usually
-  by seeking to the appropriate location and reading the structures
-  directly.
+  This depends on the MIB variable (and the operating system).
+
+    Much of the 'mib-2' information is extracted from kernel memory - 
+  often by seeking to the appropriate location in the kernel itself and
+  reading the data structures directly.
+
     Some systems provide cleaner interfaces to such kernel information
   (it would be hard to think of a less clean interface!), via ioctl()
-  calls or similar system routines and these mechanisms are usually used
+  calls or similar system routines.  Such mechanisms are usually used
   in preference.
+
+    Some other MIBs may be implemented completely within the agent
+  itself, where the necessary information is already being held
+  internally.  This particularly holds for MIBs relating to the
+  operation of SNMP directly.  Other MIBs may involve communicating
+  with another running process, or using a variety of other sources.
+
+    There's no simple answer to this question, and obtaining the
+  necessary information is often the hardest part of implementing
+  a MIB.  Writing the code is straightforward by comparison!
 
 
 
@@ -2999,22 +3054,29 @@ Mib2c complains about not having a "valid OID" - what does this mean?
 Why doesn't Mib2c like the MIB file I'm giving it?
 -------------------------------------------------
 
-    This is the same problem as above.  Mib2c takes the name of a MIB
-  object, not the name of a file (or a MIB module).  Try using the
-  name of the MODULE-IDENTITY definition.
+    This is most likely the same problem as above.  Mib2c takes the
+  name of a MIB object, not the name of a file (or a MIB module).
+  Try using the name of the MODULE-IDENTITY definition.
+
+    Another possibility is that the MIB may contain syntax errors.
+  Try running it through 'snmptranslate' or a dedicated SMI
+  validation tool (such as 'smilint' or the on-line interface at
+  http://wwwsnmp.cs.utwente.nl/ietf/mibs/validate/)
 
 
 
 Mib2c ignores my MIB and generates a pair of 'mib-2' code files.  Why?
 ---------------------------------------------------------------------
 
-    This is the same problem as above -  giving mib2c the name of
-  the file containing the MIB, rather than an object within it.
+    This is usually a sign of the same problem as above - giving
+  mib2c the name of the file containing the MIB (or of the MIB
+  itself), rather than an object within it.
+
   Earlier versions of mib2c didn't detect this situation, and
   rather than report an error, it merrily constructed a template
   for a default starting point of the mib-2 node.
 
-  More recent versions issue the error mentioned above, instead.
+  More recent versions issue the error mentioned above instead.
 
 
 
@@ -3134,20 +3196,6 @@ Are there any examples, or documentation?
 
 
 
-I've created a new module with 'mib2c' but it doesn't work.  Why not?
---------------------------------------------------------------------
-
-    Remember that 'mib2c' generates a template for the MIB implementation.
-  It doesn't fill in all the details for you.  In particular, it cannot
-  know how to obtain the information needed to answer particular queries.
-  That's the job of the MIB module programmer (you!) -  See the previous
-  question for how to proceed.
-
-    Essentially mib2c handles the syntax of the MIB implementation,
-  leaving you to concentrate on the semantics.
-
-
-
 Where should I put the files produced by 'mib2c'?
 ------------------------------------------------
 
@@ -3168,6 +3216,59 @@ Where should I put the files produced by 'mib2c'?
   If this was saved as the file 'mymib.h', then the same configure
   line given above, would pull in all three modules.  See the
   current contents of 'agent/mibgroup' for examples of this.
+
+
+
+I've created a new module with 'mib2c' but it doesn't work.  Why not?
+--------------------------------------------------------------------
+
+    Remember that 'mib2c' generates a template for the MIB implementation.
+  It doesn't fill in all the details for you.  In particular, it cannot
+  know how to obtain the information needed to answer particular queries.
+  That's the job of the MIB module programmer (you!) -  See the previous
+  question for how to proceed.
+
+    Essentially mib2c handles the syntax of the MIB implementation,
+  leaving you to concentrate on the semantics.
+
+
+
+I've added my code to this template and it still doesn't work.  Why not?
+-----------------------------------------------------------------------
+
+    It's difficult to provide a definitive answer to that.  The
+  best we can do is suggest a checklist that might help pinpoint
+  the source of the problem.  Try looking at the following:
+
+    - Is the new module being compiled?
+        (Delete any .o files, and re-run 'make'
+         Are the .o files re-created?)
+
+    - Is it being included in the agent library?
+        (Run 'nm' on the library and look for the names
+         of the initialisation routine and variable handlers)
+
+    - Is the initialisation routine being run?
+        (Activate the debugging code that you put into
+         this routine.  You *do* include debugging code 
+         as a matter of course, don't you?)
+
+    - Has the module been registered with the agent?
+        (Try walking the NET-SNMP-MIB::nsModuleTable)
+        This will also check whether the agent accepts
+        requests for enterprise-specific OIDs.
+
+    - Is the module handler actually being called at all?
+        (Activate the debugging code that you put into this
+         handler, and do a single 'snmpget' or 'snmpgetnext'
+         for a suitable instance.  You *do* include debugging
+         code as a matter of course, don't you?)
+
+    - Is it returning success or an error?
+        (Activate the debugging code.... but you get the idea!)
+
+  That won't actually solve the problem, but at least you'll
+  have some idea where to look.
 
 
 
@@ -3192,6 +3293,33 @@ Mib2c only handles a single table in my MIB. How can I fix this?
 
 
 
+Why does the iterator call my get_{first,next} routines so often?
+-----------------------------------------------------------------------
+
+    The first thing to realise is that the 'get_first' and 'get_next'
+  hook routines are concerned with processing a single request, not
+  with walking the whole table.  A full "snmpwalk" command will typically
+  involve a series of individual 'GetNext' requests, and every one of
+  these will trigger a separate 'get_first/get_next/get_next/....' cycle.
+
+    It's usually more efficient to use 'snmptable' which will walk
+  each column in parallel (as well as displaying the results in a
+  more natural manner).
+
+    Secondly, the iterator helper was originally designed to handle
+  unsorted data, so will look at every row of the internal table for
+  each request.  If the data is actually held in the correct order,
+  then it's worth setting the NETSNMP_ITERATOR_FLAG_SORTED flag:
+      iinfo = SNMP_MALLOC_TYPEDEF(netsnmp_iterator_info);
+      iinfo->flags |= NETSNMP_ITERATOR_FLAG_SORTED;
+  This will help the situation somewhat.
+
+    But the iterator helper is inherently a relatively inefficient
+  mechanism, and it may be worth looking at one of the other helpers,
+  particularly if the data will be held within the agent itself.
+
+
+
 How can I support a large table, with more than 256 column objects?
 ------------------------------------------------------------------
 
@@ -3199,9 +3327,9 @@ How can I support a large table, with more than 256 column objects?
   API, which uses a "magic number" to distinguish between the various
   column objects implemented by a common variable handling routine.
   Since this field is defined as an unsigned character, it can only
-  take values 0-255.   So it would appear that the agent cannot
-  support tables (or scalar groups) with more than 256 objects,
-  since this would start to duplicate these magic numbers.
+  take values 0-255.   So at first sight, it would appear that the
+  agent cannot support tables (or scalar groups) with more than 256
+  objects, since this would start to duplicate these magic numbers.
 
     However, the agent doesn't actually care which routine implements
   a given object, and magic numbers only need to be unique within a
@@ -3267,7 +3395,102 @@ How can I get the agent to generate a trap (or inform)?
   provides this functionality in a flexible, standardised manner.
   See the 'snmpd.conf(5)' man page (under DISMAN-EVENT-MIB) for
   details (including the need for an 'agentSecName' setting).
+
+
+
+How can I get the agent to send an SNMPv1 (or SNMPv2c) trap?
+-----------------------------------------------------------
+
+    It doesn't make any difference whether you use the v1-style
+  API call 'send_easy_trap' or the v2-style 'send_v2trap' - what
+  matters is the directive(s) in the snmpd.conf file.
+
+    If this file contains 'trapsink', then the agent will send
+  an SNMPv1 trap.  If this file contains 'trap2sink', then the
+  agent will send an SNMPv2c trap.  And if this file contains
+  both, then the agent will send *two* copies of this trap.
+
+
+
+How can I get the agent to include varbinds with an SNMPv1 trap?
+---------------------------------------------------------------
+
+    There are two ways to do this.  You can either use the
+  'send_v2trap' call and give a varbind list, starting with
+  the v2-equivalent of the SNMPv1 trap, followed by the
+  additional varbinds.
+
+    Alternatively, you can use the API call 'send_trap_vars'
+  which takes the same generic/specific trap values as
+  'send_easy_trap', plus the list of additional varbinds.
+
+    In either case, you also need to have 'trapsink' in the
+  snmpd.conf file.  The resulting trap will be identical,
+  whichever approach is used.
+
+
+
+How can I get the agent to send an SNMPv1 enterprise-specific trap?
+------------------------------------------------------------------
+
+    There are two ways to do this.  You can either use the
+  'send_v2trap' call and give a varbind list, starting with
+  the v2-equivalent of the SNMPv1 trap, followed by the
+  additional varbinds.
+
+    Alternatively, you can use the (undocumented) API call
+  'send_enterprise_trap_vars' which takes the same parameters
+  as 'send_trap_vars', plus the enterprise OID to use (in the
+  usual name/length form).  See the code file 'agent_trap.c'
+
+    In either case, you also need to have 'trapsink' in the
+  snmpd.conf file.  The resulting trap will be identical,
+  whichever approach is used.
+
+
+
+How can I get the agent to send an SNMPv3 trap (or inform)?
+----------------------------------------------------------
+
+    It doesn't matter which API call you use to specify the
+  trap - 'send_easy_trap', 'send_v2trap' or one of the other
+  calls mentioned above.  Generating an SNMPv3 notification
+  (rather than a community-based one) is controlled by the
+  snmpd.conf file.
   
+    To send an SNMPv3 trap, this file should contain a
+  'snmpsess' directive, specifying the version, security
+  level, user name and passphrases (if applicable), as
+  well as the destination address.  This is basically
+  the same as the command line required for sending the
+  trap manually, using 'snmptrap'.
+
+    Note that (unlike 'snmptrap') this directive does *not*
+  read default settings from an 'snmp.conf' file, so these
+  must be specified explicitly in the 'snmpsess' line.
+
+
+
+Why does calling 'send_v2trap' generate an SNMPv1 trap (or vice versa)?
+----------------------------------------------------------------------
+
+    The two versions of the trap API calls are concerned with how
+  the trap is represented when it is passed *in* to the API, not
+  the version of the trap PDU that will actually be generated by
+  the agent.  That is determined by the configuration token used
+  to set up the trap destination.
+
+    Remember that in general, all traps are sent to all destinations.
+  This means that a trap specified using the SNMPv1 trap syntax
+  needs to be converted to the SNMPv2 format before it can be sent
+  to an SNMPv2 (or SNMPv3) destination.  Similarly, a trap specified
+  using the SNMPv2 syntax needs to be converted to the SNMPv1 format
+  before it can be sent to an SNMPv1 sink.
+
+    Essentially, the API call to use depends on what you asking for,
+  which is not necessarily what the recipients will actually get!
+  See 'snmp_trap_api(3)' for a fuller explanation.
+
 
 
 What if I'm using an AgentX sub-agent instead?
