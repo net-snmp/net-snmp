@@ -1200,7 +1200,6 @@ void *cb_data;
       av_push(traplist, newSViv(pdu->command));
 #endif
       av_push(traplist, newSViv(pdu->reqid));
-#if 0 /* XXX: John */
       if ((transport = snmp_sess_transport(snmp_sess_pointer(ss))) != NULL) {
 	cp = transport->f_fmtaddr(transport, pdu->transport_data,
 				  pdu->transport_data_length);
@@ -1210,7 +1209,6 @@ void *cb_data;
 	/*  This shouldn't ever happen; every session has a transport.  */
 	av_push(traplist, newSVpv("", 0));
       }
-#endif
       av_push(traplist, newSVpv((char*) pdu->community, pdu->community_len));
       /* FALLTHRU */
     case SNMP_MSG_RESPONSE:
@@ -3918,7 +3916,6 @@ snmp_trapV1(sess_ref,enterprise,agent,generic,specific,uptime,varlist_ref)
 		  if (verbose) warn("error:trap:invalid enterprise id: %s", enterprise);
                   goto err;
 	      }
-#if 0 /* XXX: John */
 	      /*  If agent is given then set the v1-TRAP specific
 		  agent-address field to that.  Otherwise set it to
 		  our address.  */
@@ -3932,7 +3929,6 @@ snmp_trapV1(sess_ref,enterprise,agent,generic,specific,uptime,varlist_ref)
               } else {
                  *((in_addr_t *)pdu->agent_addr) = get_myaddr();
               }
-#endif
               pdu->trap_type = generic;
               pdu->specific_type = specific;
               pdu->time = uptime;
