@@ -39,6 +39,8 @@ sub displaygraph {
     my $xtickevery = $config{'-xtickevery'} || 50;
     my ($thetable);
 
+#    print STDERR join(",",@_),"\n";
+
     return -1 if (!defined($dbh) || !defined($tablename) || 
 		  !defined ($config{'-columns'}) || 
 		  ref($config{'-columns'}) ne "ARRAY" ||
@@ -68,18 +70,41 @@ sub displaygraph {
 		    $data{$row->{$config{'-indexes'}[0]}}{$row->{$datecol}}{$j}=
 			$row->{$j} - 
 			    $lastval{$row->{$config{'-indexes'}[0]}}{$j}{'value'};
-		    if ($config{'-positive_only'} &&
-			$data{$row->{$config{'-indexes'}[0]}}{$row->{$datecol}}{$j} < 0) {
-			$data{$row->{$config{'-indexes'}[0]}}{$row->{$datecol}}{$j} = 0;
-		    }
+		    #
+		    # convert to a rate if desired.
+		    #
 		    if ($config{'-rate'}) {
-			$data{$row->{$config{'-indexes'}[0]}}{$row->{$datecol}}{$j} = $data{$row->{$config{'-indexes'}[0]}}{$row->{$datecol}}{$j}*$config{'-rate'}/($row->{$datecol} - $lastval{$row->{$config{'-indexes'}[0]}}{$j}{'index'});
+			if (($row->{$datecol} - $lastval{$row->{$config{'-indexes'}[0]}}{$j}{'index'})) {
+			    $data{$row->{$config{'-indexes'}[0]}}{$row->{$datecol}}{$j} = $data{$row->{$config{'-indexes'}[0]}}{$row->{$datecol}}{$j}*$config{'-rate'}/($row->{$datecol} - $lastval{$row->{$config{'-indexes'}[0]}}{$j}{'index'});
+			} else {
+			    $data{$row->{$config{'-indexes'}[0]}}{$row->{$datecol}}{$j} = -1;
+			}
 		    }
+
 		}
 		$lastval{$row->{$config{'-indexes'}[0]}}{$j}{'value'} = $row->{$j};
 		$lastval{$row->{$config{'-indexes'}[0]}}{$j}{'index'} = $row->{$datecol};
 	    } else {
 		$data{$row->{$config{'-indexes'}[0]}}{$row->{$datecol}}{$j} = $row->{$j};
+	    }
+
+	    #
+	    # limit the data to a vertical range.
+	    #
+	    if (defined($config{'-max'}) && 
+		$data{$row->{$config{'-indexes'}[0]}}{$row->{$datecol}}{$j} > 
+		$config{'-max'}) {
+		# set to max value
+		$data{$row->{$config{'-indexes'}[0]}}{$row->{$datecol}}{$j} = 
+		    $config{'-max'};
+	    }
+	    
+	    if (defined($config{'-min'}) && 
+		$data{$row->{$config{'-indexes'}[0]}}{$row->{$datecol}}{$j} < 
+		$config{'-min'}) {
+		# set to min value
+		$data{$row->{$config{'-indexes'}[0]}}{$row->{$datecol}}{$j} = 
+		    $config{'-min'};
 	    }
 	}
 	push @xdata,$row->{$datecol};
@@ -107,6 +132,8 @@ sub displaygraph {
     # create the graph itself
 	my $graph = new PNGgraph::lines($x, $y);
 	$graph->set('bgclr' => $bgcolor);
+#	print STDERR "columns: ", join(",",@{$config{'-columns'}}), "\n";
+	$graph->set_legend(@{$config{'-columns'}});
 	foreach my $i (qw(title x_label_skip x_labels_vertical x_tick_number x_number_format y_number_format x_min_value x_max_value y_min_value y_max_value)) {
 	    $graph->set("$i" => $config{"-$i"}) if ($config{"-$i"});
 	}
@@ -114,7 +141,7 @@ sub displaygraph {
 	    $graph->set(@{$config{'-pngparms'}});
 	}
 	print $graph->plot(\@pngdata);
-	return $#pngdata;
+	return $#{$pngdata[0]};
     }
     return -1;
 }
@@ -319,8 +346,12 @@ sub to_unique_key {
     my $ret = shift;
     $ret .= "_";
     my $data = shift;
-    foreach my $i (@_) {
-	$ret .= "_" . $data->{$i};
+    if (!defined($data)) {
+	$ret .= join("_",@_);
+    } else {
+	foreach my $i (@_) {
+	    $ret .= "_" . $data->{$i};
+	}
     }
     return toalpha($ret);
 }
