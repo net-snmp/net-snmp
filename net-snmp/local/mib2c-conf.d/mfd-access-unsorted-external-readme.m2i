@@ -1,5 +1,5 @@
-########################################################################
-## generic include for XXX. Don't use directly.
+#############################################################  -*- c -*-
+## generic include for XXX. Do not use directly.
 ##
 ## $Id$
 ########################################################################
@@ -147,7 +147,7 @@
 
       Array
       -----
-          /* instead of actually allocation memory, just use the pointer */
+          /* instead of actually allocating memory, just use the pointer */
           /* as an integer */
           (integer)(ref->itc) = 0;
 
@@ -277,7 +277,7 @@
     and allocated data in the table's users context (reg->mfd_user_ctx),
     it should be freed at this point.
 
-    The primary purpose of the init_loop_ctx call, is to release any memory
+    The primary purpose of the cleanup_loop_ctx call is to release any memory
     allocated for the loop context data. Here are some simple examples, based
     on the earlier example loop contexts.
 
