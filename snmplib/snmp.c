@@ -403,4 +403,115 @@ snmp_rbuild_var_op(u_char *data,
 
 }
 
+int
+snmp_realloc_rbuild_var_op(u_char **pkt, size_t *pkt_len, size_t *offset,
+			   const oid *var_name, size_t *var_name_len,
+			   u_char var_val_type,
+			   u_char *var_val, size_t var_val_len) 
+{
+  size_t start_offset = *offset;
+  int rc = 0;
+    
+  /*  Encode the value.  */
+  DEBUGDUMPHEADER("send","Value");
+
+  switch(var_val_type) {
+  case ASN_INTEGER:
+    rc = asn_realloc_rbuild_int(pkt, pkt_len, offset, var_val_type,
+				(long *)var_val, var_val_len);
+    break;
+
+  case ASN_GAUGE:
+  case ASN_COUNTER:
+  case ASN_TIMETICKS:
+  case ASN_UINTEGER:
+    rc = asn_realloc_rbuild_unsigned_int(pkt, pkt_len, offset, var_val_type,
+					 (u_long *)var_val, var_val_len);
+    break;
+
+#ifdef OPAQUE_SPECIAL_TYPES
+  case ASN_OPAQUE_COUNTER64:
+  case ASN_OPAQUE_U64:
+#endif
+  case ASN_COUNTER64:
+    rc = asn_realloc_rbuild_unsigned_int64(pkt, pkt_len, offset, var_val_type,
+				     (struct counter64 *)var_val, var_val_len);
+    break;
+
+  case ASN_OCTET_STR:
+  case ASN_IPADDRESS:
+  case ASN_OPAQUE:
+  case ASN_NSAP:
+    rc = asn_realloc_rbuild_string(pkt, pkt_len, offset, var_val_type,
+				   var_val, var_val_len);
+    break;
+
+  case ASN_OBJECT_ID:
+    rc = asn_realloc_rbuild_objid(pkt, pkt_len, offset, var_val_type,
+				  (oid *)var_val, var_val_len / sizeof(oid));
+    break;
+
+  case ASN_NULL:
+    rc = asn_realloc_rbuild_null(pkt, pkt_len, offset, var_val_type);
+    break;
+
+  case ASN_BIT_STR:
+    rc = asn_realloc_rbuild_bitstring(pkt, pkt_len, offset, var_val_type,
+				      var_val, var_val_len);
+    break;
+
+  case SNMP_NOSUCHOBJECT:
+  case SNMP_NOSUCHINSTANCE:
+  case SNMP_ENDOFMIBVIEW:
+    rc = asn_realloc_rbuild_null(pkt, pkt_len, offset, var_val_type);
+    break;
+
+#ifdef OPAQUE_SPECIAL_TYPES
+  case ASN_OPAQUE_FLOAT:
+    rc = asn_realloc_rbuild_float(pkt, pkt_len, offset, var_val_type,
+				  (float *)var_val, var_val_len);
+    break;
+
+  case ASN_OPAQUE_DOUBLE:
+    rc = asn_realloc_rbuild_double(pkt, pkt_len, offset, var_val_type,
+			   (double *)var_val, var_val_len);
+    break;
+
+  case ASN_OPAQUE_I64:
+    rc = asn_realloc_rbuild_signed_int64(pkt, pkt_len, offset, var_val_type,
+				     (struct counter64 *)var_val, var_val_len);
+    break;
+#endif /* OPAQUE_SPECIAL_TYPES */
+  default:
+    ERROR_MSG("wrong type");
+    return 0;
+  }
+  DEBUGINDENTLESS();
+
+  if (rc == 0) {
+    ERROR_MSG("Can't build value");
+    return 0;
+  }
+
+  /*  Build the OID.  */
+
+  DEBUGDUMPHEADER("send","Name");
+  rc = asn_realloc_rbuild_objid(pkt, pkt_len, offset,
+			      (u_char)
+			      (ASN_UNIVERSAL | ASN_PRIMITIVE | ASN_OBJECT_ID),
+			      var_name, *var_name_len);
+  DEBUGINDENTLESS();
+  if (rc == 0) {
+    ERROR_MSG("Can't build OID for variable");
+    return 0;
+  }
+
+  /*  Build the sequence header.  */
+
+  rc = asn_realloc_rbuild_sequence(pkt, pkt_len, offset,
+				   (u_char)(ASN_SEQUENCE | ASN_CONSTRUCTOR),
+				   *offset - start_offset);
+  return rc;
+}
+
 #endif /* USE_REVERSE_ASNENCODING */
