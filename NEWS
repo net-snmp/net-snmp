@@ -12,10 +12,11 @@ the ChangeLog file for a more detailed listing of changes/bug fixes.
           (This requires you have OpenSSL to support SHA1 and AES instead)
       - Diffie-Helman key negotianion (perfect-forward-secrecy - RFC2786)
           has been implemented in both the agent and "snmpusm".
+      - send and receive buffer sizes for UDP/TCP are configurable
 
     snmptrapd:
-      - Embedded perl support for trap handlers (much faster).
-          (configure --with-embedded-perl and run 'perldoc NetSNMP::TrapReceiver')
+      - Embedded perl support for trap handlers (much faster than traphandles).
+          (configure --with-embedded-perl ; see 'perldoc NetSNMP::TrapReceiver')
       - the snmptrapd usmUser table can be controlled through SNMP & AgentX
 	  (the snmptrapd registers MIBs under the "snmptrapd" SNMPv3 context)
 
